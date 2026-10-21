@@ -4,7 +4,7 @@ export { planungBericht, planungAssistent, planJahr, planWoche, planBudgetFaktor
 export type { PlanungStand, Jahresplan, PlanZiele, PlanKnoten, PlanungAktion, Quartalsforecast } from './planung';
 export { neuesSpiel, wocheAbspielen, vorschau, type VorschauWoche } from './engine';
 export { fuehreAus, type SpielerAktion, type Ergebnis } from './aktionen';
-export { organisationUebersicht, kapitalfluss, posteingang, cockpit, portfolio, hausDetail, warenwirtschaft, kreditversicherung, hqUebersicht, hqFuerGrafik, einkaufUebersicht, wgDetail, freigaben, eigenmarkenUebersicht, eigenmarkeVorschau } from './abfragen';
+export { organisationUebersicht, kapitalfluss, posteingang, cockpit, portfolio, formatCockpit, schliessungVorschau, hausDetail, warenwirtschaft, kreditversicherung, hqUebersicht, hqFuerGrafik, einkaufUebersicht, wgDetail, freigaben, eigenmarkenUebersicht, eigenmarkeVorschau } from './abfragen';
 export { vorstandUebersicht, vorstandProfil, kandidaten, angebotsChance, produkte, produktKatalog, trendbericht, produktVorschau } from './abfragen';
 export {
   ABTEILUNGEN, ABTEILUNG_NAME, HQ_PARAM, HQ_TYPEN, HQ_WIRKUNG, sollFte,

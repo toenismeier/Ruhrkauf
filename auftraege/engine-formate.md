@@ -1,6 +1,15 @@
 # Auftrag: Schwesterkette und Outlet als Formate in der Engine
 
-Branch `feat/engine-formate`. Erst nach Merge von `feat/grafik-schwesterkette`, `feat/grafik-outlet` und Phase 1 von `engine-massstab.md` starten. Engine, Brücke und Oberfläche.
+Branch `feat/engine-formate`. Engine, Brücke und Oberfläche.
+
+## Stand 21.10.2026 (Claude) – gilt vor allem Folgenden
+- **Startklar:** #7 Engine-Maßstab ist gemergt (560 Häuser, Volkskauf und FUNDUS als `nurDaten`). Grafik-Aufträge Schwester/Outlet sind gemergt.
+- **FUNDUS ist ein Off-Price-Markenladen nach TK-Maxx-Prinzip, kein Restpostenlager** (Ummo, E03/C01). Hauptquelle ist der Zukauf von Markenposten (rund 65 % des Wareneinsatzes); Konzern-Altware ist nur Beimischung (rund 35 %). Abschnitt 3 entsprechend lesen: Der Altware-Fluss ist ein Nebenkanal, nicht das Geschäftsmodell.
+- **GuV:** Beide Formate buchen in die Kostenstellen-GuV aus #7 (`h.kpi.guv`, Zeilen wie die Referenz in `nachbesserung-massstab.md` Abschnitt 17). Keine pauschalen Gutschriften.
+- **Abnahme-Bots:** Referenz ist Bot T (Turnaround ohne Schließung, ohne Insolvenz) und Bot D, nicht Bot C (Ummo, C05). Abschnitt 6 „Bot C überlebt 5 Jahre“ ersetzen durch: `npx tsx scripts/m7-wochenverlauf.ts` bleibt bestanden; Bot T darf Volkskauf-Häuser umflaggen und `altwareOutlet` steuern, nicht schließen. Ohne Eingriffe keine Insolvenz im ersten Jahr auf leicht und mittel.
+- **Konzern ohne Eingriffe** bleibt rund −4 % EBITDA-Quote (mittel) inklusive Zentrale; die Filialebene Hartwig bleibt bei der Referenz −1,2 %.
+- **Fingerabdruck:** Wenn sich Städte ändern (Volkskauf/FUNDUS werden echte Häuser), neue Fingerabdrücke nur mit Begründung; Claude erzeugt sie.
+- GPT kann nichts ausführen: Claude misst und prüft. Erwartete Wirkung je Änderung im Commit begründen.
 
 **Mengen:** Es gilt der Ruhrkauf-Maßstab aus `engine-massstab.md`: 86 Volkskauf-Häuser und 66 FUNDUS-Häuser. Sie liegen nach Phase 1 dort bereits als Daten in der Welt (`nurDaten: true`). Dieser Auftrag baut ihre Wirtschaft; die Kalibrierung auf die Umsatzziele erfolgt in Phase 3 von `engine-massstab.md`. Die Zahlen 24 und 20 weiter unten stammen aus den Grafik-Aufträgen und sind überholt.
 
@@ -55,7 +64,7 @@ Vorbild sind die Ruhrkauf-Verhältnisse: Spezialformate klein gegenüber dem Ker
 - Umsatz Schwesterkette rund 11 % des Hartwig-Warenhausumsatzes, EBITDA-Marge −3 % (±1,5 Punkte).
 - Umsatz Outlet rund 9 % des Hartwig-Warenhausumsatzes bei `altwareOutlet = 0,5`, EBITDA-Marge −1 % (±1,5 Punkte). Bei guter Steuerung (Quote 0,8, passende Sonderposten) bis +4 %.
 - Konzern-EBITDA-Quote der Ausgangslage bleibt rund −4 % (±0,5 Punkte), Q4 positiv.
-- Bot C überlebt 5 Jahre auf Seeds 1 bis 3. Bots in `scripts/bot.ts` um sinnvolles Verhalten erweitern: Bot C schließt die schwächsten Schwesterhäuser im Schutzschirm zuerst und setzt `altwareOutlet` auf 0,8. Ergebnisse aller Bots in `engine/README.md` neu eintragen.
+- Abnahme über `scripts/m7-wochenverlauf.ts` (Bot T, Bot D, Bot C nur Nebenprüfung, siehe Stand 21.10.). Bot T steuert `altwareOutlet` (0,8) und Zukauf, Bot D darf zusätzlich die schwächsten Volkskauf-Häuser schließen. Ergebnisse in `engine/README.md` eintragen.
 - `npx tsx scripts/schwierigkeit-vergleich.ts leicht,mittel,schwer 1,2,3 260`: Monotonie bleibt.
 
 ## 7. Abfragen und Oberfläche

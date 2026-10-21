@@ -1,5 +1,7 @@
 import { warenHaus } from './merchandise';
 import { GRUPPEN } from './daten';
+import { abfindungJeFte } from './prozesse';
+import { hqRechtFaktor } from './hq';
 // O01 Organisation: reine Datenprojektion für die Oberfläche.
 export { organisationUebersicht } from './organisation';
 export { marktbeobachtungUebersicht } from './marktbeobachtung';
@@ -185,7 +187,17 @@ export function cockpit(s: GameState): Cockpit {
 export interface PortfolioZeile {
   id: string;
   name: string;
+  stadt: string;
   format: Haus['format'];
+  /** Eigenständige Portfolio-Formate, Premium ist wirtschaftlich ein Warenhaus. */
+  formatKey: 'hartwig' | 'premium' | 'sport' | 'volkskauf' | 'fundus';
+  klasse: 'A' | 'B' | 'C' | 'Premium' | null;
+  steuerbar: boolean;
+  ampel: 'gruen' | 'gelb' | 'rot' | 'ohne';
+  ebitda: number;
+  marge: number;
+  substanz: number;
+  restlaufzeitMiete: number;
   region: Haus['region'];
   cluster: Haus['cluster'];
   lage: Haus['lage'];
@@ -211,14 +223,53 @@ export function portfolio(s: GameState): PortfolioZeile[] {
       const f = 1 + rausch * ((seed / 100) * 2 - 1);
       const umsatz = k?.umsatz ?? 0;
       const db = k ? k.db + Math.abs(umsatz) * (f - 1) * 0.5 : 0;
+      const formatKey: PortfolioZeile['formatKey'] = h.format === 'outlet' ? 'fundus' : h.format === 'schwester' ? 'volkskauf' : h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'hartwig';
+      const klasse: PortfolioZeile['klasse'] = h.hausklasse ?? (h.klasse === 'premium' ? 'Premium' : null);
+      const ampel: PortfolioZeile['ampel'] = h.nurDaten || !h.kpi || h.status !== 'offen' ? 'ohne' : db < 0 ? 'rot' : (umsatz > 0 && db / umsatz < 0.04 ? 'gelb' : 'gruen');
       return {
-        id: h.id, name: h.name, format: h.format, region: h.region, cluster: h.cluster, lage: h.lage, status: h.status, qm,
+        id: h.id, name: h.name, stadt: h.stadt, format: h.format,
+        formatKey, klasse,
+        steuerbar: !h.nurDaten && h.status === 'offen',
+        ampel,
+        ebitda: eur(db), marge: umsatz > 0 ? db / umsatz : 0,
+        substanz: h.substanz,
+        restlaufzeitMiete: Math.max(0, h.miete.bisWoche - s.woche),
+        region: h.region, cluster: h.cluster, lage: h.lage, status: h.status, qm,
         umsatz: eur(umsatz), db: eur(db),
         mietquote: umsatz > 0 ? (k?.miete ?? 0) / umsatz : 0,
         personalquote: umsatz > 0 ? (k?.personal ?? 0) / umsatz : 0,
         flaechenproduktivitaet: qm > 0 ? umsatz / qm : 0,
       };
     });
+}
+
+/** Verdichtete, ebenfalls aus der Engine stammende Formatzeilen für das Cockpit. */
+export function formatCockpit(s: GameState) {
+  const formen = [
+    ['hartwig', 'Hartwig'], ['premium', 'Hartwig Premium'], ['sport', 'Hartwig Sport'],
+    ['volkskauf', 'Volkskauf'], ['fundus', 'FUNDUS'],
+  ] as const;
+  const zeilen = portfolio(s);
+  return formen.map(([formatKey, name]) => {
+    const hs = zeilen.filter((h) => h.formatKey === formatKey);
+    return { formatKey, name, anzahl: hs.length, offen: hs.filter((h) => h.status === 'offen').length,
+      steuerbar: hs.filter((h) => h.steuerbar).length,
+      umsatz: eur(hs.reduce((sum, h) => sum + h.umsatz, 0)),
+      ebitda: eur(hs.reduce((sum, h) => sum + h.ebitda, 0)),
+    };
+  });
+}
+
+/** Unverbindliche Vorschau: Abfindungen und gedeckelte Restmiete, nicht die tatsächliche Schlussabrechnung. */
+export function schliessungVorschau(s: GameState, ids: string[]) {
+  const hs = [...new Set(ids)].map((id) => s.haeuser.find((h) => h.id === id))
+    .filter((h): h is Haus => !!h && !h.nurDaten && h.status === 'offen' && !h.standortgarantie);
+  const jeFte = abfindungJeFte(s) * hqRechtFaktor(s);
+  const sozialplan = eur(hs.reduce((sum, h) => sum + (h.personal.vollzeit + h.personal.teilzeit) * jeFte, 0));
+  const restmiete = eur(hs.reduce((sum, h) => sum + h.miete.mieteWoche * hqRechtFaktor(s) *
+    Math.max(0, Math.min(s.phase === 'insolvenz' ? 13 : h.miete.vermieter === 'eigentuemer' ? 26 : 52, h.miete.bisWoche - s.woche)), 0));
+  return { anzahl: hs.length, sozialplan, restmiete, gesamt: sozialplan + restmiete,
+    hinweis: 'Schätzung ohne Verhandlungs-, Transfer- und Rechtsabteilungseffekte; tatsächliche Kosten können abweichen.' };
 }
 
 export function hausDetail(s: GameState, id: string) {

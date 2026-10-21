@@ -5,7 +5,7 @@
       __defProp(target, name2, { get: all[name2], enumerable: true });
   };
 
-  // engine/src/index.ts
+  // ../engine/src/index.ts
   var src_exports = {};
   __export(src_exports, {
     ABTEILUNGEN: () => ABTEILUNGEN,
@@ -27,8 +27,10 @@
     ERFOLGE: () => ERFOLGE,
     ERFOLGE_AKTIV: () => ERFOLGE_AKTIV,
     FARBEN: () => FARBEN2,
+    FILIAL_PROGRAMME: () => FILIAL_PROGRAMME,
     FREQUENZ_WOCHEN: () => FREQUENZ_WOCHEN,
     GRUPPEN: () => GRUPPEN,
+    GUV_KOSTEN: () => GUV_KOSTEN,
     HQ_PARAM: () => HQ_PARAM,
     HQ_TYPEN: () => HQ_TYPEN,
     HQ_WIRKUNG: () => HQ_WIRKUNG,
@@ -36,6 +38,7 @@
     KANAELE: () => KANAELE,
     KANAL: () => KANAL,
     KONZERN_GESCHICHTE: () => KONZERN_GESCHICHTE,
+    MARKT_FTE: () => MARKT_FTE,
     MATERIALIEN: () => MATERIALIEN,
     MECHANIK_TEXT: () => MECHANIK_TEXT,
     MK: () => MK,
@@ -45,6 +48,7 @@
     PREMIUM_HAEUSER: () => PREMIUM_HAEUSER,
     PRODUKT_KATEGORIEN: () => PRODUKT_KATEGORIEN,
     PRODUKT_PARAM: () => PRODUKT_PARAM,
+    REFERENZ_FILIAL_GUV: () => REFERENZ_FILIAL_GUV,
     RESSORTS: () => RESSORTS,
     RESSORT_INFO: () => RESSORT_INFO,
     SCHWIERIGKEIT: () => SCHWIERIGKEIT,
@@ -85,6 +89,10 @@
     delegationsAufgaben: () => delegationsAufgaben,
     delegationsGrenze: () => delegationsGrenze,
     ebitdaJahr: () => ebitdaJahr,
+    ecommerceBruecke: () => ecommerceBruecke,
+    ecommerceCluster: () => ecommerceCluster,
+    ecommerceHaus: () => ecommerceHaus,
+    ecommerceUebersicht: () => ecommerceUebersicht,
     eigenmarkeVorschau: () => eigenmarkeVorschau,
     eigenmarkenUebersicht: () => eigenmarkenUebersicht,
     einkaufUebersicht: () => einkaufUebersicht,
@@ -99,6 +107,8 @@
     gehaltsforderung: () => gehaltsforderung,
     generationInCluster: () => generationInCluster,
     gruppenFuer: () => gruppenFuer,
+    guvAbschluss: () => guvAbschluss,
+    hatAbholstation: () => hatAbholstation,
     hausBeobachtung: () => hausBeobachtung,
     hausDetail: () => hausDetail,
     hausKandidaten: () => hausKandidaten,
@@ -127,8 +137,13 @@
     kapitalfluss: () => kapitalfluss,
     kreditversicherung: () => kreditversicherung,
     kundenkarte: () => kundenkarte,
+    leereFilialGuV: () => leereFilialGuV,
     marketingKosten: () => marketingKosten,
     marketingUebersicht: () => marketingUebersicht,
+    marktbeobachtungKostenWoche: () => marktbeobachtungKostenWoche,
+    marktbeobachtungStufe: () => marktbeobachtungStufe,
+    marktbeobachtungUebersicht: () => marktbeobachtungUebersicht,
+    marktbeobachtungWoche: () => marktbeobachtungWoche,
     mehrmarge: () => mehrmarge,
     neueVorlage: () => neueVorlage,
     neuesSpiel: () => neuesSpiel,
@@ -156,6 +171,7 @@
     regionalleitungQualitaet: () => regionalleitungQualitaet,
     registriereDelegation: () => registriereDelegation,
     reporting: () => reporting,
+    retourenQuote: () => retourenQuote,
     saisonId: () => saisonId,
     saisonName: () => saisonName,
     schwierigkeit: () => schwierigkeit,
@@ -197,8 +213,8 @@
     zeitungArchiv: () => zeitungArchiv
   });
 
-  // engine/src/daten.ts
-  var WH = [0.82, 0.72, 0.88, 0.92, 0.95, 0.88, 0.95, 0.85, 0.9, 1, 1.2, 1.75];
+  // ../engine/src/daten.ts
+  var WH = [1.06, 1.045, 1.03, 0.94, 0.95, 0.88, 0.95, 0.85, 0.9, 1, 1.2, 1.75];
   function mit(basis3, over) {
     return basis3.map((x, i) => over[i] !== void 0 ? over[i] : x);
   }
@@ -213,6 +229,8 @@
     { id: "spielwaren", name: "Spielwaren", format: "warenhaus", marge: 0.35, saisonAnteil: 0.3, vorlauf: 12, beratung: 0.3, kkElast: 0, alterElast: -0.3, qmUmsatz: 28, anteilFlaeche: 0.06, saison: mit(WH, { 10: 1.6, 11: 3, 0: 0.6, 1: 0.55 }) },
     { id: "food", name: "Feinkost", format: "warenhaus", marge: 0.3, saisonAnteil: 0.05, vorlauf: 1, beratung: 0.3, kkElast: 0.5, alterElast: 0.3, qmUmsatz: 55, anteilFlaeche: 0.07, saison: mit(WH, { 11: 1.5 }) },
     { id: "sport", name: "Sport", format: "warenhaus", marge: 0.38, saisonAnteil: 0.5, vorlauf: 12, beratung: 0.5, kkElast: 0.1, alterElast: -0.3, qmUmsatz: 22, anteilFlaeche: 0.1, saison: WH },
+    // Eigenes Schuhsortiment von FUNDUS (Phase 3: wirtschaftliche Simulation).
+    { id: "schuhe", name: "Schuhe", format: "outlet", marge: 0.43, saisonAnteil: 0.5, vorlauf: 10, beratung: 0.3, kkElast: 0.2, alterElast: 0, qmUmsatz: 38, anteilFlaeche: 0.14, saison: WH },
     { id: "sportschuhe", name: "Sportschuhe", format: "sport", marge: 0.4, saisonAnteil: 0.3, vorlauf: 10, beratung: 0.6, kkElast: 0.1, alterElast: -0.5, qmUmsatz: 70, anteilFlaeche: 0.22, saison: [0.9, 0.8, 1, 1.05, 1.05, 1, 1, 1.05, 1.1, 0.95, 1.05, 1.3] },
     { id: "sporttextil", name: "Sporttextil", format: "sport", marge: 0.45, saisonAnteil: 0.6, vorlauf: 12, beratung: 0.4, kkElast: 0.1, alterElast: -0.3, qmUmsatz: 40, anteilFlaeche: 0.28, saison: [0.95, 0.8, 0.95, 1, 1.05, 1.05, 1, 0.95, 1, 0.95, 1.05, 1.4] },
     { id: "outdoor", name: "Outdoor", format: "sport", marge: 0.45, saisonAnteil: 0.6, vorlauf: 14, beratung: 0.7, kkElast: 0.4, alterElast: 0.2, qmUmsatz: 40, anteilFlaeche: 0.2, saison: [1, 0.8, 0.9, 1, 1, 0.95, 0.95, 0.85, 1, 1.2, 1.3, 1.5] },
@@ -227,10 +245,10 @@
     })
   );
   var GRUPPEN_LISTE = ROH.map((g) => g.id);
-  var gruppenFuer = (f) => ROH.filter((g) => g.format === f).map((g) => g.id);
+  var gruppenFuer = (f) => f === "schwester" ? ROH.filter((g) => g.format === "warenhaus").map((g) => g.id) : f === "outlet" ? ["damen", "herren", "kinder", "schuhe", "accessoires", "wohnen", "beauty"] : ROH.filter((g) => g.format === f).map((g) => g.id);
   function saisonFaktor(g, woche2) {
     const s2 = GRUPPEN[g].saison;
-    const pos = woche2 % 52 / 52 * 12 - 0.5;
+    const pos = Math.max(0, woche2 % 52 / 52 * 12 - 0.5);
     const i = Math.floor(pos);
     const t = pos - i;
     const a = s2[(i + 12) % 12];
@@ -242,133 +260,232 @@
   var TREND_LAGE = { "1a": 0.02, b: 0.035, center: 0.01, rand: 0.015 };
   var MARKTMIETE = { "1a": 0.1, b: 0.075, center: 0.11, rand: 0.065 };
   var STAEDTE = [
-    ["Berlin", "Ost", "metropole", 0.97, 4, 3],
-    ["Hamburg", "Nord", "metropole", 1.1, 3, 2],
-    ["M\xFCnchen", "S\xFCd", "metropole", 1.3, 3, 3],
-    ["K\xF6ln", "West", "metropole", 1.05, 2, 2],
-    ["Frankfurt", "Mitte", "metropole", 1.15, 2, 2],
-    ["D\xFCsseldorf", "West", "metropole", 1.15, 2, 2],
-    ["Stuttgart", "S\xFCd", "metropole", 1.2, 2, 2],
-    ["Essen", "West", "grossstadt", 0.98, 2, 1],
-    ["Dortmund", "West", "grossstadt", 0.92, 2, 1],
-    ["Bremen", "Nord", "grossstadt", 0.98, 2, 1],
-    ["Leipzig", "Ost", "grossstadt", 0.88, 2, 1],
-    ["Dresden", "Ost", "grossstadt", 0.9, 2, 1],
-    ["Hannover", "Nord", "grossstadt", 1.02, 2, 1],
-    ["N\xFCrnberg", "S\xFCd", "grossstadt", 1.05, 2, 1],
-    ["Duisburg", "West", "grossstadt", 0.85, 1, 1],
-    ["Bochum", "West", "grossstadt", 0.92, 1, 1],
-    ["Wuppertal", "West", "grossstadt", 0.93, 1, 1],
-    ["Bielefeld", "West", "grossstadt", 0.98, 1, 1],
-    ["Bonn", "West", "grossstadt", 1.1, 1, 1],
-    ["M\xFCnster", "West", "grossstadt", 1.05, 1, 1],
-    ["Mannheim", "S\xFCd", "grossstadt", 1, 1, 1],
-    ["Karlsruhe", "S\xFCd", "grossstadt", 1.05, 1, 1],
-    ["Augsburg", "S\xFCd", "grossstadt", 1.02, 1, 1],
-    ["Wiesbaden", "Mitte", "grossstadt", 1.12, 1, 1],
-    ["M\xF6nchengladbach", "West", "grossstadt", 0.95, 1, 0],
-    ["Gelsenkirchen", "West", "grossstadt", 0.82, 1, 0],
-    ["Aachen", "West", "grossstadt", 0.97, 1, 1],
-    ["Braunschweig", "Nord", "grossstadt", 1, 1, 1],
-    ["Kiel", "Nord", "grossstadt", 0.95, 1, 1],
-    ["Chemnitz", "Ost", "grossstadt", 0.85, 1, 1],
-    ["Halle", "Ost", "grossstadt", 0.84, 1, 0],
-    ["Magdeburg", "Ost", "grossstadt", 0.85, 1, 1],
-    ["Freiburg", "S\xFCd", "grossstadt", 1.05, 1, 1],
-    ["Krefeld", "West", "grossstadt", 0.97, 1, 0],
-    ["Mainz", "Mitte", "grossstadt", 1.08, 1, 1],
-    ["L\xFCbeck", "Nord", "grossstadt", 0.95, 1, 1],
-    ["Erfurt", "Ost", "grossstadt", 0.88, 1, 1],
-    ["Oberhausen", "West", "grossstadt", 0.88, 1, 1],
-    ["Rostock", "Ost", "grossstadt", 0.86, 1, 1],
-    ["Kassel", "Mitte", "grossstadt", 0.93, 1, 1],
-    ["Hagen", "West", "grossstadt", 0.9, 1, 0],
-    ["Potsdam", "Ost", "grossstadt", 1, 1, 0],
-    ["Saarbr\xFCcken", "Mitte", "grossstadt", 0.93, 1, 1],
-    ["Hamm", "West", "grossstadt", 0.88, 1, 0],
-    ["Ludwigshafen", "Mitte", "grossstadt", 0.95, 1, 0],
-    ["Oldenburg", "Nord", "grossstadt", 0.98, 1, 0],
-    ["M\xFClheim", "West", "grossstadt", 1, 1, 0],
-    ["Osnabr\xFCck", "Nord", "grossstadt", 0.98, 1, 0],
-    ["Leverkusen", "West", "grossstadt", 1, 1, 0],
-    ["Darmstadt", "Mitte", "grossstadt", 1.1, 1, 0],
-    ["Heidelberg", "S\xFCd", "grossstadt", 1.08, 1, 0],
-    ["Solingen", "West", "grossstadt", 0.98, 1, 0],
-    ["Regensburg", "S\xFCd", "grossstadt", 1.1, 1, 0],
-    ["Paderborn", "West", "grossstadt", 0.95, 1, 0],
-    ["Ingolstadt", "S\xFCd", "grossstadt", 1.18, 1, 0],
-    ["W\xFCrzburg", "S\xFCd", "grossstadt", 1.02, 1, 0],
-    ["Ulm", "S\xFCd", "grossstadt", 1.1, 1, 0],
-    ["Wolfsburg", "Nord", "grossstadt", 1.12, 1, 0],
-    ["G\xF6ttingen", "Nord", "grossstadt", 0.93, 1, 0],
-    ["Pforzheim", "S\xFCd", "grossstadt", 1, 1, 0],
-    ["Offenbach", "Mitte", "grossstadt", 0.95, 1, 0],
-    ["Heilbronn", "S\xFCd", "grossstadt", 1.12, 1, 0],
-    ["Bremerhaven", "Nord", "grossstadt", 0.83, 1, 0],
-    ["Trier", "Mitte", "grossstadt", 0.95, 1, 0],
-    ["Koblenz", "Mitte", "grossstadt", 1, 1, 0],
-    ["Jena", "Ost", "grossstadt", 0.92, 1, 0],
-    ["Siegen", "West", "grossstadt", 1, 1, 0],
-    ["Hildesheim", "Nord", "grossstadt", 0.95, 1, 0],
-    ["Cottbus", "Ost", "grossstadt", 0.82, 1, 0],
-    ["G\xFCtersloh", "West", "mittelstadt", 1.05, 1, 0],
-    ["Recklinghausen", "West", "mittelstadt", 0.92, 1, 0],
-    ["Bottrop", "West", "mittelstadt", 0.9, 1, 0],
-    ["Reutlingen", "S\xFCd", "mittelstadt", 1.1, 1, 0],
-    ["Erlangen", "S\xFCd", "mittelstadt", 1.15, 1, 0],
-    ["F\xFCrth", "S\xFCd", "mittelstadt", 1, 1, 0],
-    ["Bamberg", "S\xFCd", "mittelstadt", 1, 1, 0],
-    ["Bayreuth", "S\xFCd", "mittelstadt", 0.98, 1, 0],
-    ["Landshut", "S\xFCd", "mittelstadt", 1.08, 1, 0],
-    ["Rosenheim", "S\xFCd", "mittelstadt", 1.1, 1, 0],
-    ["Kempten", "S\xFCd", "mittelstadt", 1.02, 1, 0],
-    ["Passau", "S\xFCd", "mittelstadt", 0.95, 1, 0],
-    ["Konstanz", "S\xFCd", "mittelstadt", 1.08, 1, 0],
-    ["Esslingen", "S\xFCd", "mittelstadt", 1.15, 1, 0],
-    ["Ludwigsburg", "S\xFCd", "mittelstadt", 1.15, 1, 0],
-    ["T\xFCbingen", "S\xFCd", "mittelstadt", 1.08, 1, 0],
-    ["Gie\xDFen", "Mitte", "mittelstadt", 0.92, 1, 0],
-    ["Marburg", "Mitte", "mittelstadt", 0.92, 1, 0],
-    ["Fulda", "Mitte", "mittelstadt", 0.98, 1, 0],
-    ["Hanau", "Mitte", "mittelstadt", 1, 1, 0],
-    ["Wetzlar", "Mitte", "mittelstadt", 0.95, 1, 0],
-    ["L\xFCneburg", "Nord", "mittelstadt", 1, 1, 0],
-    ["Celle", "Nord", "mittelstadt", 0.97, 1, 0],
-    ["Flensburg", "Nord", "mittelstadt", 0.9, 1, 0],
-    ["Neum\xFCnster", "Nord", "mittelstadt", 0.88, 1, 0],
-    ["Stralsund", "Ost", "mittelstadt", 0.83, 1, 0],
-    ["Schwerin", "Ost", "mittelstadt", 0.86, 1, 0],
-    ["Zwickau", "Ost", "mittelstadt", 0.82, 1, 0],
-    ["G\xF6rlitz", "Ost", "mittelstadt", 0.78, 1, 0],
-    ["Dessau", "Ost", "mittelstadt", 0.8, 1, 0],
-    ["Gera", "Ost", "mittelstadt", 0.8, 1, 0],
-    ["Weimar", "Ost", "mittelstadt", 0.88, 1, 0],
-    ["Neuss", "West", "mittelstadt", 1.05, 1, 0],
-    ["D\xFCren", "West", "mittelstadt", 0.92, 1, 0],
-    ["Wesel", "West", "mittelstadt", 0.95, 1, 0],
-    ["Iserlohn", "West", "mittelstadt", 0.95, 1, 0],
-    ["L\xFCdenscheid", "West", "mittelstadt", 0.97, 1, 0],
-    ["Witten", "West", "mittelstadt", 0.93, 1, 0],
-    ["Marl", "West", "mittelstadt", 0.88, 1, 0],
-    ["Moers", "West", "mittelstadt", 0.95, 1, 0],
-    ["Kaiserslautern", "Mitte", "mittelstadt", 0.9, 1, 0],
-    ["Worms", "Mitte", "mittelstadt", 0.93, 1, 0],
-    ["Speyer", "Mitte", "mittelstadt", 1, 1, 0],
-    ["Offenburg", "S\xFCd", "mittelstadt", 1.02, 1, 0],
-    ["L\xF6rrach", "S\xFCd", "mittelstadt", 1.02, 1, 0],
-    ["Ravensburg", "S\xFCd", "mittelstadt", 1.08, 1, 0],
-    ["Aschaffenburg", "S\xFCd", "mittelstadt", 1.02, 1, 0],
-    ["Schweinfurt", "S\xFCd", "mittelstadt", 0.97, 1, 0],
-    ["Hof", "S\xFCd", "mittelstadt", 0.85, 1, 0],
-    ["Amberg", "S\xFCd", "mittelstadt", 0.92, 1, 0],
-    ["Straubing", "S\xFCd", "mittelstadt", 0.95, 1, 0],
-    ["Neubrandenburg", "Ost", "mittelstadt", 0.8, 1, 0],
-    ["Frankfurt (Oder)", "Ost", "mittelstadt", 0.78, 1, 0],
-    ["Wilhelmshaven", "Nord", "mittelstadt", 0.84, 1, 0],
-    ["Emden", "Nord", "mittelstadt", 0.87, 1, 0],
-    ["Herford", "West", "mittelstadt", 0.97, 1, 0],
-    ["Detmold", "West", "mittelstadt", 0.97, 1, 0],
-    ["Minden", "West", "mittelstadt", 0.95, 1, 0]
+    ["Berlin", "Ost", "metropole", 0.97, { hartwig: 5, premium: 1, volkskauf: 0, sport: 2, fundus: 1 }],
+    ["Hamburg", "Nord", "metropole", 1.1, { hartwig: 5, premium: 1, volkskauf: 1, sport: 2, fundus: 0 }],
+    ["M\xFCnchen", "S\xFCd", "metropole", 1.3, { hartwig: 5, premium: 1, volkskauf: 1, sport: 2, fundus: 0 }],
+    ["K\xF6ln", "West", "metropole", 1.05, { hartwig: 5, premium: 0, volkskauf: 2, sport: 2, fundus: 0 }],
+    ["Frankfurt", "Mitte", "metropole", 1.15, { hartwig: 5, premium: 0, volkskauf: 1, sport: 2, fundus: 1 }],
+    ["D\xFCsseldorf", "West", "metropole", 1.15, { hartwig: 4, premium: 1, volkskauf: 2, sport: 2, fundus: 0 }],
+    ["Stuttgart", "S\xFCd", "metropole", 1.2, { hartwig: 5, premium: 0, volkskauf: 1, sport: 2, fundus: 1 }],
+    ["Essen", "West", "grossstadt", 0.98, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Dortmund", "West", "grossstadt", 0.92, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Bremen", "Nord", "grossstadt", 0.98, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Leipzig", "Ost", "grossstadt", 0.88, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Dresden", "Ost", "grossstadt", 0.9, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Hannover", "Nord", "grossstadt", 1.02, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["N\xFCrnberg", "S\xFCd", "grossstadt", 1.05, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Duisburg", "West", "grossstadt", 0.85, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Bochum", "West", "grossstadt", 0.92, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Wuppertal", "West", "grossstadt", 0.93, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Bielefeld", "West", "grossstadt", 0.98, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Bonn", "West", "grossstadt", 1.1, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["M\xFCnster", "West", "grossstadt", 1.05, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Mannheim", "S\xFCd", "grossstadt", 1, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 1 }],
+    ["Karlsruhe", "S\xFCd", "grossstadt", 1.05, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 1 }],
+    ["Augsburg", "S\xFCd", "grossstadt", 1.02, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 1 }],
+    ["Wiesbaden", "Mitte", "grossstadt", 1.12, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 1 }],
+    ["M\xF6nchengladbach", "West", "grossstadt", 0.95, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Gelsenkirchen", "West", "grossstadt", 0.82, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Aachen", "West", "grossstadt", 0.97, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 1 }],
+    ["Braunschweig", "Nord", "grossstadt", 1, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 1 }],
+    ["Kiel", "Nord", "grossstadt", 0.95, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 1 }],
+    ["Chemnitz", "Ost", "grossstadt", 0.85, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 0 }],
+    ["Halle", "Ost", "grossstadt", 0.84, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 1 }],
+    ["Magdeburg", "Ost", "grossstadt", 0.85, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 0 }],
+    ["Freiburg", "S\xFCd", "grossstadt", 1.05, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 0 }],
+    ["Krefeld", "West", "grossstadt", 0.97, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Mainz", "Mitte", "grossstadt", 1.08, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 0 }],
+    ["L\xFCbeck", "Nord", "grossstadt", 0.95, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 0 }],
+    ["Erfurt", "Ost", "grossstadt", 0.88, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 0 }],
+    ["Oberhausen", "West", "grossstadt", 0.88, { hartwig: 3, premium: 0, volkskauf: 1, sport: 1, fundus: 0 }],
+    ["Rostock", "Ost", "grossstadt", 0.86, { hartwig: 3, premium: 0, volkskauf: 0, sport: 1, fundus: 0 }],
+    ["Kassel", "Mitte", "grossstadt", 0.93, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Hagen", "West", "grossstadt", 0.9, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Potsdam", "Ost", "grossstadt", 1, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Saarbr\xFCcken", "Mitte", "grossstadt", 0.93, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Hamm", "West", "grossstadt", 0.88, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Ludwigshafen", "Mitte", "grossstadt", 0.95, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Oldenburg", "Nord", "grossstadt", 0.98, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["M\xFClheim", "West", "grossstadt", 1, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Osnabr\xFCck", "Nord", "grossstadt", 0.98, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Leverkusen", "West", "grossstadt", 1, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Darmstadt", "Mitte", "grossstadt", 1.1, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Heidelberg", "S\xFCd", "grossstadt", 1.08, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Solingen", "West", "grossstadt", 0.98, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Regensburg", "S\xFCd", "grossstadt", 1.1, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Paderborn", "West", "grossstadt", 0.95, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Ingolstadt", "S\xFCd", "grossstadt", 1.18, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["W\xFCrzburg", "S\xFCd", "grossstadt", 1.02, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Ulm", "S\xFCd", "grossstadt", 1.1, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Wolfsburg", "Nord", "grossstadt", 1.12, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["G\xF6ttingen", "Nord", "grossstadt", 0.93, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Pforzheim", "S\xFCd", "grossstadt", 1, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Offenbach", "Mitte", "grossstadt", 0.95, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Heilbronn", "S\xFCd", "grossstadt", 1.12, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Bremerhaven", "Nord", "grossstadt", 0.83, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Trier", "Mitte", "grossstadt", 0.95, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Koblenz", "Mitte", "grossstadt", 1, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Jena", "Ost", "grossstadt", 0.92, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Siegen", "West", "grossstadt", 1, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Hildesheim", "Nord", "grossstadt", 0.95, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Cottbus", "Ost", "mittelstadt", 0.82, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["G\xFCtersloh", "West", "grossstadt", 1.05, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Recklinghausen", "West", "grossstadt", 0.92, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Bottrop", "West", "grossstadt", 0.9, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Reutlingen", "S\xFCd", "grossstadt", 1.1, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Erlangen", "S\xFCd", "grossstadt", 1.15, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["F\xFCrth", "S\xFCd", "grossstadt", 1, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Bamberg", "S\xFCd", "mittelstadt", 1, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Bayreuth", "S\xFCd", "mittelstadt", 0.98, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Landshut", "S\xFCd", "mittelstadt", 1.08, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Rosenheim", "S\xFCd", "mittelstadt", 1.1, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Kempten", "S\xFCd", "mittelstadt", 1.02, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Passau", "S\xFCd", "mittelstadt", 0.95, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Konstanz", "S\xFCd", "mittelstadt", 1.08, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Esslingen", "S\xFCd", "mittelstadt", 1.15, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Ludwigsburg", "S\xFCd", "mittelstadt", 1.15, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["T\xFCbingen", "S\xFCd", "mittelstadt", 1.08, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Gie\xDFen", "Mitte", "mittelstadt", 0.92, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Marburg", "Mitte", "mittelstadt", 0.92, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Fulda", "Mitte", "mittelstadt", 0.98, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Hanau", "Mitte", "grossstadt", 1, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Wetzlar", "Mitte", "mittelstadt", 0.95, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["L\xFCneburg", "Nord", "mittelstadt", 1, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Celle", "Nord", "mittelstadt", 0.97, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Flensburg", "Nord", "mittelstadt", 0.9, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Neum\xFCnster", "Nord", "mittelstadt", 0.88, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Stralsund", "Ost", "mittelstadt", 0.83, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Schwerin", "Ost", "mittelstadt", 0.86, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Zwickau", "Ost", "mittelstadt", 0.82, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["G\xF6rlitz", "Ost", "mittelstadt", 0.78, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Dessau", "Ost", "mittelstadt", 0.8, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Gera", "Ost", "mittelstadt", 0.8, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Weimar", "Ost", "mittelstadt", 0.88, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Neuss", "West", "grossstadt", 1.05, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["D\xFCren", "West", "mittelstadt", 0.92, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Wesel", "West", "mittelstadt", 0.95, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Iserlohn", "West", "mittelstadt", 0.95, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["L\xFCdenscheid", "West", "mittelstadt", 0.97, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Witten", "West", "mittelstadt", 0.93, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Marl", "West", "mittelstadt", 0.88, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Moers", "West", "grossstadt", 0.95, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Kaiserslautern", "Mitte", "grossstadt", 0.9, { hartwig: 3, premium: 0, volkskauf: 0, sport: 0, fundus: 1 }],
+    ["Worms", "Mitte", "mittelstadt", 0.93, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Speyer", "Mitte", "mittelstadt", 1, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Offenburg", "S\xFCd", "mittelstadt", 1.02, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["L\xF6rrach", "S\xFCd", "mittelstadt", 1.02, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Ravensburg", "S\xFCd", "mittelstadt", 1.08, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Aschaffenburg", "S\xFCd", "mittelstadt", 1.02, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Schweinfurt", "S\xFCd", "mittelstadt", 0.97, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Hof", "S\xFCd", "mittelstadt", 0.85, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Amberg", "S\xFCd", "mittelstadt", 0.92, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Straubing", "S\xFCd", "mittelstadt", 0.95, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Neubrandenburg", "Ost", "mittelstadt", 0.8, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Frankfurt (Oder)", "Ost", "mittelstadt", 0.78, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Wilhelmshaven", "Nord", "mittelstadt", 0.84, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Emden", "Nord", "mittelstadt", 0.87, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Herford", "West", "mittelstadt", 0.97, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Detmold", "West", "mittelstadt", 0.97, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Minden", "West", "mittelstadt", 0.95, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Bocholt", "West", "mittelstadt", 0.95, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Ahaus", "West", "mittelstadt", 0.98, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Borken", "West", "mittelstadt", 0.96, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Dorsten", "West", "mittelstadt", 0.93, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Gladbeck", "West", "mittelstadt", 0.9, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Herten", "West", "mittelstadt", 0.9, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Castrop-Rauxel", "West", "mittelstadt", 0.9, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["L\xFCnen", "West", "mittelstadt", 0.92, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Bergkamen", "West", "mittelstadt", 0.92, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Unna", "West", "mittelstadt", 0.99, { hartwig: 1, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Schwerte", "West", "mittelstadt", 0.98, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Menden", "West", "mittelstadt", 0.96, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Arnsberg", "West", "mittelstadt", 0.98, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Soest", "West", "mittelstadt", 0.99, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Lippstadt", "West", "mittelstadt", 0.98, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Warendorf", "West", "mittelstadt", 1, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Ahlen", "West", "mittelstadt", 0.92, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Beckum", "West", "mittelstadt", 0.96, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Rheda-Wiedenbr\xFCck", "West", "mittelstadt", 1.03, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Oelde", "West", "mittelstadt", 1.02, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["B\xFCnde", "West", "mittelstadt", 0.98, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Bad Oeynhausen", "West", "mittelstadt", 0.98, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["L\xF6hne", "West", "mittelstadt", 0.97, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Bad Salzuflen", "West", "mittelstadt", 1, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Lemgo", "West", "mittelstadt", 0.97, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Euskirchen", "West", "mittelstadt", 0.97, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Br\xFChl", "West", "mittelstadt", 1.03, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["H\xFCrth", "West", "mittelstadt", 1.04, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Pulheim", "West", "mittelstadt", 1.06, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Frechen", "West", "mittelstadt", 1, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Bergheim", "West", "mittelstadt", 0.96, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Kerpen", "West", "mittelstadt", 0.99, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Troisdorf", "West", "mittelstadt", 0.98, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Sankt Augustin", "West", "mittelstadt", 1, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Hennef", "West", "mittelstadt", 1, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Siegburg", "West", "mittelstadt", 1.01, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Gummersbach", "West", "mittelstadt", 0.95, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Remscheid", "West", "grossstadt", 0.94, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Bergisch Gladbach", "West", "grossstadt", 1.05, { hartwig: 3, premium: 0, volkskauf: 1, sport: 0, fundus: 1 }],
+    ["Ratingen", "West", "mittelstadt", 1.08, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["R\xFCsselsheim", "Mitte", "mittelstadt", 0.99, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Bad Homburg", "Mitte", "mittelstadt", 1.25, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Oberursel", "Mitte", "mittelstadt", 1.2, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Hofheim", "Mitte", "mittelstadt", 1.15, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Maintal", "Mitte", "mittelstadt", 1.03, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Dreieich", "Mitte", "mittelstadt", 1.12, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Neu-Isenburg", "Mitte", "mittelstadt", 1.1, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Rodgau", "Mitte", "mittelstadt", 1.05, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Bad Vilbel", "Mitte", "mittelstadt", 1.12, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Bad Nauheim", "Mitte", "mittelstadt", 1.07, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Friedberg", "Mitte", "mittelstadt", 1.02, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Limburg", "Mitte", "mittelstadt", 0.99, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Bad Kreuznach", "Mitte", "mittelstadt", 0.95, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Bingen", "Mitte", "mittelstadt", 1, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Neustadt an der Weinstra\xDFe", "Mitte", "mittelstadt", 1.02, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Landau in der Pfalz", "Mitte", "mittelstadt", 1.03, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Villingen-Schwenningen", "S\xFCd", "mittelstadt", 1.02, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Singen", "S\xFCd", "mittelstadt", 1.03, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Friedrichshafen", "S\xFCd", "mittelstadt", 1.08, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Biberach an der Ri\xDF", "S\xFCd", "mittelstadt", 1.06, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Memmingen", "S\xFCd", "mittelstadt", 1.04, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Kaufbeuren", "S\xFCd", "mittelstadt", 1.01, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Kitzingen", "S\xFCd", "mittelstadt", 0.99, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Ansbach", "S\xFCd", "mittelstadt", 1.03, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Schwabach", "S\xFCd", "mittelstadt", 1.02, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Neumarkt in der Oberpfalz", "S\xFCd", "mittelstadt", 1.02, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Weiden in der Oberpfalz", "S\xFCd", "mittelstadt", 0.94, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Dachau", "S\xFCd", "mittelstadt", 1.15, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Freising", "S\xFCd", "mittelstadt", 1.12, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Erding", "S\xFCd", "mittelstadt", 1.12, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Germering", "S\xFCd", "mittelstadt", 1.15, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["F\xFCrstenfeldbruck", "S\xFCd", "mittelstadt", 1.15, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Norderstedt", "Nord", "mittelstadt", 1.1, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Pinneberg", "Nord", "mittelstadt", 1.05, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Elmshorn", "Nord", "mittelstadt", 1, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Itzehoe", "Nord", "mittelstadt", 0.96, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Stade", "Nord", "mittelstadt", 1.02, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Buxtehude", "Nord", "mittelstadt", 1.04, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Nienburg", "Nord", "mittelstadt", 0.97, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Hameln", "Nord", "mittelstadt", 0.95, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Garbsen", "Nord", "mittelstadt", 1.01, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Langenhagen", "Nord", "mittelstadt", 1.04, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Neustadt am R\xFCbenberge", "Nord", "mittelstadt", 0.99, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Plauen", "Ost", "mittelstadt", 0.82, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Bautzen", "Ost", "mittelstadt", 0.84, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Freiberg", "Ost", "mittelstadt", 0.85, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Pirna", "Ost", "mittelstadt", 0.87, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Riesa", "Ost", "mittelstadt", 0.81, { hartwig: 1, premium: 0, volkskauf: 0, sport: 0, fundus: 0 }],
+    ["Mei\xDFen", "Ost", "mittelstadt", 0.91, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Bernburg", "Ost", "mittelstadt", 0.84, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Bitterfeld-Wolfen", "Ost", "mittelstadt", 0.82, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Eberswalde", "Ost", "mittelstadt", 0.89, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }],
+    ["Oranienburg", "Ost", "mittelstadt", 0.93, { hartwig: 0, premium: 0, volkskauf: 1, sport: 0, fundus: 0 }]
+  ];
+  var PREMIUM_HAEUSER = [
+    { id: "P001", schluessel: "P001", rang: 1, name: "Palais Hartwig", stadt: "Berlin" },
+    { id: "P002", schluessel: "P002", rang: 1, name: "Hartwig am Hofgarten", stadt: "M\xFCnchen" },
+    { id: "P003", schluessel: "P003", rang: 2, name: "Alsterhaus Hartwig", stadt: "Hamburg" },
+    { id: "P004", schluessel: "P004", rang: 3, name: "Hartwig K\xF6nigsallee", stadt: "D\xFCsseldorf" }
   ];
   var STADT_REGIONEN = Object.freeze(Object.fromEntries(STAEDTE.map(([name2, region]) => [name2, region])));
   function stadtRegion(name2) {
@@ -451,14 +568,8 @@
     premium: { beauty: 1, accessoires: 1, damen: 0.6, food: 0.5 },
     leer_ehemals: {}
   };
-  var PREMIUM_HAEUSER = [
-    { id: "P001", name: "Palais Hartwig", stadt: "Berlin", rang: 1 },
-    { id: "P002", name: "Hartwig am Hofgarten", stadt: "M\xFCnchen", rang: 1 },
-    { id: "P003", name: "Alsterhaus Hartwig", stadt: "Hamburg", rang: 2 },
-    { id: "P004", name: "Hartwig K\xF6nigsallee", stadt: "D\xFCsseldorf", rang: 3 }
-  ];
 
-  // engine/src/util.ts
+  // ../engine/src/util.ts
   function zufall(h) {
     let t = h.rng = h.rng + 1831565813 >>> 0;
     t = Math.imul(t ^ t >>> 15, t | 1);
@@ -494,7 +605,7 @@
     return `${(x / 1e6).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Mio. \u20AC`;
   }
 
-  // engine/src/planung.ts
+  // ../engine/src/planung.ts
   var aktiv = (h) => h.status !== "geschlossen" && h.status !== "verkauft";
   var clusterVon = (h) => h.hauscluster || h.region;
   var organisation = (s2) => s2.organisation;
@@ -1052,7 +1163,7 @@
     };
   }
 
-  // engine/src/statistik.ts
+  // ../engine/src/statistik.ts
   var STATISTIK_AKTIV = true;
   var GRENZE_BYTES = 2e6;
   var HAUS_WOCHEN = 156;
@@ -1139,7 +1250,7 @@
     return ergebnis;
   }
 
-  // engine/src/eigenmarken.ts
+  // ../engine/src/eigenmarken.ts
   var BESCHAFFUNG = {
     fernost: { name: "Fernost", vorlauf: 22, mindestabnahme: 15e4, mehrmarge: 0.14, produzent: "Golden Thread" },
     nahost: { name: "Nahost und Osteuropa", vorlauf: 10, mindestabnahme: 6e4, mehrmarge: 0.105, produzent: "Adria Konfektion" },
@@ -1586,7 +1697,7 @@
     };
   }
 
-  // engine/src/standorte.ts
+  // ../engine/src/standorte.ts
   var KOORDINATEN = {
     Berlin: [52.52, 13.4],
     Hamburg: [53.55, 10],
@@ -1714,7 +1825,100 @@
     Emden: [53.37, 7.21],
     Herford: [52.11, 8.67],
     Detmold: [51.94, 8.88],
-    Minden: [52.29, 8.92]
+    Minden: [52.29, 8.92],
+    "Bocholt": [51.84, 6.62],
+    "Ahaus": [52.08, 7.01],
+    "Borken": [51.84, 6.86],
+    "Dorsten": [51.66, 6.97],
+    "Gladbeck": [51.57, 6.99],
+    "Herten": [51.59, 7.14],
+    "Castrop-Rauxel": [51.55, 7.31],
+    "L\xFCnen": [51.62, 7.52],
+    "Bergkamen": [51.62, 7.63],
+    "Unna": [51.53, 7.69],
+    "Schwerte": [51.44, 7.57],
+    "Menden": [51.44, 7.8],
+    "Arnsberg": [51.4, 8.06],
+    "Soest": [51.57, 8.11],
+    "Lippstadt": [51.67, 8.35],
+    "Warendorf": [51.95, 7.99],
+    "Ahlen": [51.76, 7.89],
+    "Beckum": [51.76, 8.04],
+    "Rheda-Wiedenbr\xFCck": [51.85, 8.3],
+    "Oelde": [51.83, 8.15],
+    "B\xFCnde": [52.2, 8.58],
+    "Bad Oeynhausen": [52.21, 8.8],
+    "L\xF6hne": [52.2, 8.71],
+    "Bad Salzuflen": [52.08, 8.75],
+    "Lemgo": [52.03, 8.9],
+    "Euskirchen": [50.66, 6.79],
+    "Br\xFChl": [50.83, 6.9],
+    "H\xFCrth": [50.87, 6.87],
+    "Pulheim": [51, 6.8],
+    "Frechen": [50.91, 6.81],
+    "Bergheim": [50.96, 6.64],
+    "Kerpen": [50.87, 6.7],
+    "Troisdorf": [50.82, 7.15],
+    "Sankt Augustin": [50.77, 7.19],
+    "Hennef": [50.78, 7.28],
+    "Siegburg": [50.8, 7.21],
+    "Gummersbach": [51.03, 7.57],
+    "Remscheid": [51.18, 7.19],
+    "Bergisch Gladbach": [50.99, 7.13],
+    "Ratingen": [51.3, 6.85],
+    "R\xFCsselsheim": [49.99, 8.42],
+    "Bad Homburg": [50.23, 8.61],
+    "Oberursel": [50.2, 8.58],
+    "Hofheim": [50.08, 8.45],
+    "Maintal": [50.15, 8.84],
+    "Dreieich": [50, 8.7],
+    "Neu-Isenburg": [50.06, 8.7],
+    "Rodgau": [50.02, 8.88],
+    "Bad Vilbel": [50.18, 8.74],
+    "Bad Nauheim": [50.37, 8.74],
+    "Friedberg": [50.34, 8.75],
+    "Limburg": [50.38, 8.06],
+    "Bad Kreuznach": [49.84, 7.86],
+    "Bingen": [49.97, 7.9],
+    "Neustadt an der Weinstra\xDFe": [49.35, 8.14],
+    "Landau in der Pfalz": [49.2, 8.12],
+    "Villingen-Schwenningen": [48.06, 8.46],
+    "Singen": [47.76, 8.84],
+    "Friedrichshafen": [47.65, 9.48],
+    "Biberach an der Ri\xDF": [48.09, 9.79],
+    "Memmingen": [47.99, 10.18],
+    "Kaufbeuren": [47.88, 10.62],
+    "Kitzingen": [49.73, 10.16],
+    "Ansbach": [49.3, 10.57],
+    "Schwabach": [49.33, 11.02],
+    "Neumarkt in der Oberpfalz": [49.28, 11.46],
+    "Weiden in der Oberpfalz": [49.67, 12.16],
+    "Dachau": [48.26, 11.43],
+    "Freising": [48.4, 11.75],
+    "Erding": [48.31, 11.91],
+    "Germering": [48.13, 11.37],
+    "F\xFCrstenfeldbruck": [48.18, 11.26],
+    "Norderstedt": [53.71, 10],
+    "Pinneberg": [53.66, 9.8],
+    "Elmshorn": [53.75, 9.65],
+    "Itzehoe": [53.92, 9.52],
+    "Stade": [53.6, 9.48],
+    "Buxtehude": [53.48, 9.7],
+    "Nienburg": [52.64, 9.21],
+    "Hameln": [52.1, 9.36],
+    "Garbsen": [52.42, 9.6],
+    "Langenhagen": [52.44, 9.74],
+    "Neustadt am R\xFCbenberge": [52.5, 9.46],
+    "Plauen": [50.5, 12.14],
+    "Bautzen": [51.18, 14.43],
+    "Freiberg": [50.91, 13.34],
+    "Pirna": [50.96, 13.94],
+    "Riesa": [51.31, 13.29],
+    "Mei\xDFen": [51.16, 13.47],
+    "Bernburg": [51.8, 11.74],
+    "Bitterfeld-Wolfen": [51.62, 12.33],
+    "Eberswalde": [52.83, 13.82],
+    "Oranienburg": [52.75, 13.24]
   };
   var KNOTEN = /* @__PURE__ */ new Set([
     "Berlin",
@@ -1781,7 +1985,7 @@
     return Math.sqrt(dx * dx + dy * dy) / 100;
   }
 
-  // engine/src/schwierigkeit.ts
+  // ../engine/src/schwierigkeit.ts
   var SCHWIERIGKEIT = {
     leicht: {
       name: "Leicht",
@@ -1792,6 +1996,7 @@
       lieferantenGeduld: 0.1,
       kvZiel: 4,
       ereignisse: 0.6,
+      kaufneigung: 1.035,
       versammlungSchwelle: -35e6
     },
     mittel: {
@@ -1803,6 +2008,7 @@
       lieferantenGeduld: 0,
       kvZiel: 0,
       ereignisse: 1,
+      kaufneigung: 1,
       versammlungSchwelle: -25e6
     },
     schwer: {
@@ -1814,13 +2020,14 @@
       lieferantenGeduld: -0.1,
       kvZiel: -4,
       ereignisse: 1.4,
+      kaufneigung: 0.945,
       versammlungSchwelle: -17e6
     }
   };
   var SCHWIERIGKEITEN = Object.keys(SCHWIERIGKEIT).map((id) => ({ id, name: SCHWIERIGKEIT[id].name, beschreibung: SCHWIERIGKEIT[id].beschreibung }));
   var schwierigkeit = (s2) => SCHWIERIGKEIT[s2.schwierigkeit ?? "mittel"];
 
-  // engine/src/stakeholder.ts
+  // ../engine/src/stakeholder.ts
   function freieLiquiditaet(s2) {
     return s2.cash + s2.kreditlinie;
   }
@@ -1864,14 +2071,20 @@
     const restZiel = (st2.kreditversicherer + 70 - (ueberfaellig ? 25 : 0) - (inso ? 15 : 0)) / 2;
     s2.restLieferantenVertrauen = annaehern(s2.restLieferantenVertrauen, restZiel, 0.05);
     if (s2.phase === "regulaer") {
-      const ziel = s2.kreditlinieBasis * clamp((st2.bank - 15) / 40, 0, 1.25);
+      const umsatzWoche = s2.historie.at(-1)?.umsatz ?? Object.values(s2.basisUmsatz).reduce((sum2, u) => sum2 + (u ?? 0), 0);
+      const kritisch = freieLiquiditaet(s2) < 2.5 * umsatzWoche && st2.bank >= 35;
+      const warenwert = s2.bestand.reduce((sum2, k) => sum2 + k.wert, 0);
+      const lieferantenSchulden = s2.verbindlichkeiten.filter((v) => v.art === "ware").reduce((sum2, v) => sum2 + v.wert, 0);
+      const beleihbar = Math.max(0, 0.55 * warenwert - 0.2 * lieferantenSchulden);
+      const zusatz = kritisch ? Math.min(0.5 * s2.kreditlinieBasis, Math.max(0, beleihbar - s2.kreditlinieBasis)) : 0;
+      const ziel = (s2.kreditlinieBasis + zusatz) * clamp((st2.bank - 15) / 40, 0, 1.25);
       const alt = s2.kreditlinie;
       s2.kreditlinie = Math.round(alt + (ziel - alt) * 0.25);
       if (alt - s2.kreditlinie > 5e6) melde(s2, "warnung", `Die Hausbank reduziert die Kreditlinie auf ${(s2.kreditlinie / 1e6).toFixed(0)} Mio. \u20AC.`);
     }
   }
 
-  // engine/src/ware.ts
+  // ../engine/src/ware.ts
   function bestandWert(s2, g) {
     let x = 0;
     for (const k of s2.bestand) if (!g || k.gruppe === g) x += k.wert;
@@ -1953,12 +2166,12 @@
     return gebucht;
   }
 
-  // engine/src/marketing.ts
+  // ../engine/src/marketing.ts
   var ALTERSGRUPPEN = ["jung", "mitte", "aelter", "senioren"];
   var ALTERSGRUPPE_TEXT = { jung: "unter 30", mitte: "30 bis 49", aelter: "50 bis 64", senioren: "65 plus" };
   var REGIONEN = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
   var KANAELE = [
-    { id: "prospekt", name: "Prospekt und Beilage", text: "Wochenprospekt als Beilage und Haushaltsverteilung, gr\xF6\xDFter Block, tr\xE4gt die Aktionen.", quote: 0.01297, e: 0.55, adstock: 0.35, reichweite: { jung: 0.18, mitte: 0.4, aelter: 0.62, senioren: 0.75 }, marke: 0.1, aktion: 0.5, regional: true },
+    { id: "prospekt", name: "Prospekt und Beilage", text: "Wochenprospekt als Beilage und Haushaltsverteilung, gr\xF6\xDFter Block, tr\xE4gt die Aktionen.", quote: 0.01317, e: 0.55, adstock: 0.35, reichweite: { jung: 0.18, mitte: 0.4, aelter: 0.62, senioren: 0.75 }, marke: 0.1, aktion: 0.5, regional: true },
     { id: "anzeigen", name: "Anzeigen", text: "Tageszeitung und Magazine.", quote: 162e-5, e: 0.45, adstock: 0.4, reichweite: { jung: 0.05, mitte: 0.18, aelter: 0.42, senioren: 0.6 }, marke: 0.2, aktion: 0.1, regional: true },
     { id: "plakat", name: "Plakat", text: "Gro\xDFfl\xE4chen und City-Light-Poster in den Innenst\xE4dten.", quote: 195e-5, e: 0.5, adstock: 0.75, reichweite: { jung: 0.5, mitte: 0.5, aelter: 0.45, senioren: 0.4 }, marke: 0.6, aktion: 0.1, regional: true },
     { id: "radio", name: "Radio", text: "Regionale Sender, Spots zu Aktionen.", quote: 13e-4, e: 0.5, adstock: 0.6, reichweite: { jung: 0.3, mitte: 0.55, aelter: 0.6, senioren: 0.5 }, marke: 0.4, aktion: 0.15, regional: true },
@@ -2851,7 +3064,7 @@
     return h.length ? h.reduce((a, b2) => a + b2.umsatz, 0) / h.length : 3084e6 / 52;
   }
   function offeneHaeuserIds(s2) {
-    return s2.haeuser.filter((h) => h.status === "offen");
+    return s2.haeuser.filter((h) => !h.nurDaten && h.status === "offen");
   }
   function scopeHaeuser(s2, sc) {
     return offeneHaeuserIds(s2).filter((h) => sc.typ === "alle" || sc.typ === "format" && sc.format === h.format || sc.typ === "region" && sc.region === h.region || sc.typ === "cluster" && sc.cluster === h.cluster || sc.typ === "haeuser" && sc.ids.includes(h.id));
@@ -3484,7 +3697,7 @@
     };
   }
 
-  // engine/src/wettbewerb.ts
+  // ../engine/src/wettbewerb.ts
   var WIRKUNGSFAKTOR = 0.035;
   var ARTEN = ["modehaus", "fastfashion", "premium", "offprice", "textildiscounter", "elektronik", "leer_ehemals"];
   var START_ANZAHL = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1] };
@@ -3576,11 +3789,11 @@
   }
   function anlegen(s2, stadt, art, lage, qm, seit, inHaus) {
     const name2 = neuerName(s2, art, stadt);
-    const kette = name2.endsWith(" " + stadt) ? name2.slice(0, -(stadt.length + 1)) : name2;
+    const kette2 = name2.endsWith(" " + stadt) ? name2.slice(0, -(stadt.length + 1)) : name2;
     const w = {
       id: "C" + String(++s2.wettbewerbNaechsteId).padStart(3, "0"),
       name: name2,
-      kette,
+      kette: kette2,
       art,
       stadt,
       lage,
@@ -3597,9 +3810,9 @@
     return w;
   }
   function initialisiereWettbewerb(s2) {
-    const staedte = [...new Set(s2.haeuser.map((h) => h.stadt))];
+    const staedte = [...new Set(aktive(s2).map((h) => h.stadt))];
     for (const stadt of staedte) {
-      const hs = s2.haeuser.filter((h) => h.stadt === stadt);
+      const hs = aktive(s2).filter((h) => h.stadt === stadt);
       const c = hs[0].cluster, [min, max] = START_ANZAHL[c], [qmMin, qmMax] = START_FLAECHE[c];
       const n = gz(s2, min, max);
       for (let i = 0; i < n; i++) {
@@ -3613,7 +3826,7 @@
         anlegen(s2, stadt, art, lage, qm, 0);
       }
     }
-    for (const h of s2.haeuser) {
+    for (const h of aktive(s2)) {
       h.wettbewerbGruppeStart = Object.fromEntries(gruppenFuer(h.format).map((g) => [g, h.wettbewerbStart]));
       h.wettbewerbOffpriceStart = h.wettbewerbStart;
       h.wettbewerbRohStart = roh(s2, h);
@@ -3622,8 +3835,11 @@
       h.wettbewerbRohOffpriceStart = roh(s2, h, "offprice");
     }
   }
+  function aktive(s2) {
+    return s2.haeuser.filter((h) => !h.nurDaten);
+  }
   function betroffeneHaeuser(s2, stadt) {
-    return s2.haeuser.filter((h) => h.stadt === stadt && (h.status === "offen" || h.status === "schliessung_verhandlung"));
+    return aktive(s2).filter((h) => h.stadt === stadt && (h.status === "offen" || h.status === "schliessung_verhandlung"));
   }
   function eroeffnungsArt(s2, stadt) {
     const hs = betroffeneHaeuser(s2, stadt);
@@ -3635,14 +3851,14 @@
     return [...kandidaten2].sort((a, b2) => score(b2) - score(a))[0];
   }
   function neuEroeffnet(s2, stadt, art, inHaus) {
-    const hs = s2.haeuser.filter((h2) => h2.stadt === stadt), c = hs[0].cluster;
+    const hs = aktive(s2).filter((h2) => h2.stadt === stadt), c = hs[0].cluster;
     const [qmMin, qmMax] = START_FLAECHE[c];
-    const qm = inHaus ? s2.haeuser.find((h2) => h2.id === inHaus)?.grundflaecheQm ?? qmMin : Math.round(z(s2, qmMin, qmMax) / 100) * 100;
+    const qm = inHaus ? aktive(s2).find((h2) => h2.id === inHaus)?.grundflaecheQm ?? qmMin : Math.round(z(s2, qmMin, qmMax) / 100) * 100;
     const wb = anlegen(s2, stadt, art, chance2(s2, 0.7) ? "1a" : "b", qm, s2.woche, inHaus);
     const h = betroffeneHaeuser(s2, stadt)[0];
     const gruppe2 = h ? gruppenFuer(h.format).sort((a, b2) => (WETTBEWERB_UEBERSCHNEIDUNG[art][b2] ?? 0) - (WETTBEWERB_UEBERSCHNEIDUNG[art][a] ?? 0))[0] : "damen";
-    const prozent3 = h ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h, gruppe2)) * 100) : 0;
-    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe2].name + ": rund " + prozent3 + " %.");
+    const prozent4 = h ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h, gruppe2)) * 100) : 0;
+    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe2].name + ": rund " + prozent4 + " %.", { stadt, modul: "wettbewerb" });
     if ((art === "modehaus" || art === "premium") && qm >= 2300) {
       neueEntscheidung(s2, {
         typ: "wettbewerb_eroeffnung",
@@ -3665,7 +3881,7 @@
     w.seit = s2.woche;
     w.bis = s2.woche + 6;
     w.preisdruck = 0.6;
-    melde(s2, "presse", w.name + " schlie\xDFt in " + w.stadt + ". Sechs Wochen R\xE4umungsverkauf; danach droht Leerstand.");
+    melde(s2, "presse", w.name + " schlie\xDFt in " + w.stadt + ". Sechs Wochen R\xE4umungsverkauf; danach droht Leerstand.", { stadt: w.stadt, modul: "wettbewerb" });
     const hs = betroffeneHaeuser(s2, w.stadt).filter((h) => h.format === "warenhaus");
     if (hs.length) {
       const angebot = neuesAngebot(s2, {
@@ -3681,7 +3897,7 @@
     }
   }
   function istStadtAktion(s2, stadt) {
-    return s2.marketing.aktionen.some((a) => a.status !== "abgesagt" && a.start === s2.woche && s2.haeuser.some((h) => h.stadt === stadt && (a.scope.typ === "alle" || a.scope.typ === "region" && a.scope.region === h.region || a.scope.typ === "cluster" && a.scope.cluster === h.cluster || a.scope.typ === "format" && a.scope.format === h.format || a.scope.typ === "haeuser" && a.scope.ids.includes(h.id))));
+    return s2.marketing.aktionen.some((a) => a.status !== "abgesagt" && a.start === s2.woche && aktive(s2).some((h) => h.stadt === stadt && (a.scope.typ === "alle" || a.scope.typ === "region" && a.scope.region === h.region || a.scope.typ === "cluster" && a.scope.cluster === h.cluster || a.scope.typ === "format" && a.scope.format === h.format || a.scope.typ === "haeuser" && a.scope.ids.includes(h.id))));
   }
   function stadtWachstum(s2, stadt) {
     const werte2 = s2.wettbewerbStadtUmsatz[stadt] ?? [];
@@ -3693,8 +3909,8 @@
   function wettbewerbWoche(s2) {
     if (s2.wettbewerbDeaktiviert) return;
     const w = s2.woche;
-    if (!s2.prognose) for (const stadt of new Set(s2.haeuser.map((h) => h.stadt))) {
-      const umsatz = s2.haeuser.filter((h) => h.stadt === stadt && h.kpi?.woche === w && h.status !== "geschlossen" && h.status !== "verkauft").reduce((a, h) => a + (h.kpi?.umsatz ?? 0), 0);
+    if (!s2.prognose) for (const stadt of new Set(aktive(s2).map((h) => h.stadt))) {
+      const umsatz = aktive(s2).filter((h) => h.stadt === stadt && h.kpi?.woche === w && h.status !== "geschlossen" && h.status !== "verkauft").reduce((a, h) => a + (h.kpi?.umsatz ?? 0), 0);
       const hist = s2.wettbewerbStadtUmsatz[stadt] ?? (s2.wettbewerbStadtUmsatz[stadt] = []);
       hist.push(umsatz);
       if (hist.length > 65) hist.shift();
@@ -3712,7 +3928,7 @@
         wb.bis = void 0;
         const hs = betroffeneHaeuser(s2, wb.stadt);
         for (const h of hs) h.transferBonus += 0.02 / hs.length;
-        melde(s2, "info", "Ehemaliger Standort " + wb.name + " in " + wb.stadt + " steht leer; Kunden wechseln zu Hartwig.");
+        melde(s2, "info", "Ehemaliger Standort " + wb.name + " in " + wb.stadt + " steht leer; Kunden wechseln zu Hartwig.", { stadt: wb.stadt, modul: "wettbewerb" });
       }
       if ((wb.aktionBis ?? 0) <= w) {
         wb.preisdruck = 0;
@@ -3723,26 +3939,26 @@
         wb.preisdruck = wb.konterDruck ?? 0.4;
         wb.aktionVon = w;
         wb.aktionBis = wb.konterBis;
-        melde(s2, "ereignis", wb.name + " kontert in " + wb.stadt + " eine Hartwig-Aktion mit " + Math.round(wb.preisdruck * 100) + " % zus\xE4tzlichem Preisdruck.");
+        melde(s2, "ereignis", wb.name + " kontert in " + wb.stadt + " eine Hartwig-Aktion mit " + Math.round(wb.preisdruck * 100) + " % zus\xE4tzlichem Preisdruck.", { stadt: wb.stadt, modul: "wettbewerb" });
         wb.konterVon = void 0;
         wb.konterBis = void 0;
         wb.konterDruck = void 0;
       }
     }
     if (!s2.prognose && !s2.wettbewerbEreignisseDeaktiviert) {
-      for (const h of s2.haeuser.filter((h2) => h2.status === "geschlossen" && !s2.wettbewerbGeseheneSchliessungen.includes(h2.id))) {
+      for (const h of aktive(s2).filter((h2) => h2.status === "geschlossen" && !s2.wettbewerbGeseheneSchliessungen.includes(h2.id))) {
         s2.wettbewerbGeseheneSchliessungen.push(h.id);
         h.wettbewerbSchliessungWoche = w;
         if (chance2(s2, 0.35)) s2.wettbewerbNachnutzungen.push({ haus: h.id, woche: w + gz(s2, 26, 78) });
       }
       for (const n of s2.wettbewerbNachnutzungen.filter((n2) => n2.woche <= w)) {
-        const h = s2.haeuser.find((x) => x.id === n.haus);
+        const h = aktive(s2).find((x) => x.id === n.haus);
         if (h && h.status === "geschlossen") neuEroeffnet(s2, h.stadt, wahl(s2, ["offprice", "textildiscounter", "elektronik"]), h.id);
       }
       s2.wettbewerbNachnutzungen = s2.wettbewerbNachnutzungen.filter((n) => n.woche > w);
-      const staedte = [...new Set(s2.haeuser.map((h) => h.stadt))];
+      const staedte = [...new Set(aktive(s2).map((h) => h.stadt))];
       for (const stadt of staedte) {
-        const hs = s2.haeuser.filter((h) => h.stadt === stadt);
+        const hs = aktive(s2).filter((h) => h.stadt === stadt);
         const gesamtkm = hs.reduce((a, h) => a + h.grundflaecheQm * Math.max(1, h.etagen.length), 0);
         const zu = hs.filter((h) => h.status === "geschlossen").reduce((a, h) => a + h.grundflaecheQm * Math.max(1, h.etagen.length), 0);
         const kuerzlich = hs.some((h) => h.wettbewerbSchliessungWoche !== void 0 && w - h.wettbewerbSchliessungWoche < 52);
@@ -3757,7 +3973,7 @@
             wb.status = "eroeffnung";
             wb.seit = w;
             wb.bis = w + 4;
-            melde(s2, "presse", wb.name + " verlegt seinen Standort innerhalb von " + stadt + " nach " + wb.lage + ".");
+            melde(s2, "presse", wb.name + " verlegt seinen Standort innerhalb von " + stadt + " nach " + wb.lage + ".", { stadt, modul: "wettbewerb" });
             continue;
           }
           if (hs[0].einzug.kaufkraft < 0.9) wb.staerke *= 0.998;
@@ -3784,7 +4000,7 @@
         }
       }
     }
-    for (const h of s2.haeuser) h.einzug.wettbewerb = wettbewerbAus(s2, h);
+    for (const h of aktive(s2)) h.einzug.wettbewerb = wettbewerbAus(s2, h);
   }
   function wettbewerbUebersicht(s2, stadt) {
     return s2.wettbewerber.filter((w) => !stadt || w.stadt === stadt).map((w) => ({
@@ -3801,7 +4017,7 @@
       inHartwigGebaeude: w.inHartwigGebaeude,
       rabatt: (w.aktionVon ?? Infinity) <= s2.woche && (w.aktionBis ?? -1) > s2.woche ? w.preisdruck : 0,
       wirkung: Object.fromEntries(Object.keys(WETTBEWERB_UEBERSCHNEIDUNG[w.art]).map((g) => {
-        const h = s2.haeuser.find((x) => x.stadt === w.stadt && gruppenFuer(x.format).includes(g));
+        const h = aktive(s2).find((x) => x.stadt === w.stadt && gruppenFuer(x.format).includes(g));
         const faktor2 = h ? 0.25 * WIRKUNGSFAKTOR * wertJeGruppe(w, g, s2) * lageFaktor(h, w) / (1 - 0.25 * h.wettbewerbStart) : 0;
         return [g, -Math.round(faktor2 * 1e4) / 100];
       }))
@@ -3824,7 +4040,7 @@
   function uebernehmeWettbewerber(s2, id, modus, mieteQmMonat = 11) {
     const wb = s2.wettbewerber.find((w) => w.id === id);
     if (!wb || wb.status === "geschlossen") return "Wettbewerber-Standort nicht verf\xFCgbar.";
-    const basis3 = s2.haeuser.find((h) => h.stadt === wb.stadt && h.format === "warenhaus" && h.status === "offen");
+    const basis3 = aktive(s2).find((h) => h.stadt === wb.stadt && h.format === "warenhaus" && h.status === "offen");
     if (!basis3) return "Kein offenes Hartwig-Warenhaus am Standort.";
     const qm = wb.grundflaecheQm;
     const kosten = eur(qm * (modus === "erweiterung" ? 250 : 200));
@@ -3883,14 +4099,14 @@
         w.aktionVon = s2.woche;
         w.aktionBis = s2.woche + 3;
         w.preisdruck = 0.3;
-        melde(s2, "ereignis", "Test: Rabattaktion von " + w.name + " in " + w.stadt + ".");
+        melde(s2, "ereignis", "Test: Rabattaktion von " + w.name + " in " + w.stadt + ".", { stadt: w.stadt, modul: "wettbewerb" });
         return true;
       case "konter":
         if (!w) return false;
         w.konterVon = s2.woche + 1;
         w.konterBis = s2.woche + 4;
         w.konterDruck = 0.45;
-        melde(s2, "ereignis", "Test: Konteraktion von " + w.name + " ab kommender Woche.");
+        melde(s2, "ereignis", "Test: Konteraktion von " + w.name + " ab kommender Woche.", { stadt: w.stadt, modul: "wettbewerb" });
         return true;
       case "standortwechsel":
         if (!w) return false;
@@ -3898,7 +4114,7 @@
         w.status = "eroeffnung";
         w.seit = s2.woche;
         w.bis = s2.woche + 4;
-        melde(s2, "presse", "Test: " + w.name + " verlegt den Standort in " + w.stadt + ".");
+        melde(s2, "presse", "Test: " + w.name + " verlegt den Standort in " + w.stadt + ".", { stadt: w.stadt, modul: "wettbewerb" });
         return true;
       case "nachnutzung": {
         const geschlossen = s2.haeuser.find((x) => x.status === "geschlossen");
@@ -3911,7 +4127,7 @@
     }
   }
 
-  // engine/src/premium.ts
+  // ../engine/src/premium.ts
   var PREMIUM_PROFIL = {
     P001: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.012, mietQuote: 0.057 },
     P002: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.016, mietQuote: 0.057 },
@@ -3985,6 +4201,13 @@
         h.premiumSchluessel = p2.id;
         h.name = p2.name;
         h.premiumImage ?? (h.premiumImage = 80);
+        const profil2 = premiumProfil(p2.id);
+        normierePremiumFlaechen(h, profil2);
+        for (const g of Object.keys(h.potenzial)) h.potenzial[g] = (h.potenzial[g] ?? 0) * profil2.produktivitaet;
+        h.lage = "1a";
+        h.miete.vermieter = "eigentuemer";
+        h.miete.vermieterName = "Hartwig Immobilien";
+        h.substanz = Math.max(78, h.substanz);
       }
       return;
     }
@@ -4030,9 +4253,6 @@
     const sum2 = regulaer.reduce((a, h) => a + grundumsatz(h), 0);
     const kompensation = Math.max(0.5, (ursprung - praemie) / Math.max(1, sum2));
     for (const h of regulaer) for (const g of Object.keys(h.potenzial)) h.potenzial[g] = (h.potenzial[g] ?? 0) * kompensation;
-  }
-  function premiumServiceQuote(h) {
-    return h.klasse === "premium" ? premiumProfil(h.premiumSchluessel)?.service ?? 0 : 0;
   }
   function premiumImageFaktor(h) {
     return h.klasse === "premium" ? clamp(0.65 + 0.35 * (h.premiumImage ?? 80) / 80, 0.65, 1.0875) : 1;
@@ -4138,7 +4358,531 @@
     return null;
   }
 
-  // engine/src/chronik.ts
+  // ../engine/src/filialguv.ts
+  var REFERENZ_FILIAL_GUV = [
+    { id: "umsatz", name: "Umsatz", ist: 100 },
+    { id: "wareneinsatz", name: "Wareneinsatz", ist: -58.8 },
+    { id: "bruttogewinn", name: "Bruttogewinn", ist: 41.2, vorjahr: 41.7, plan: 46.1 },
+    { id: "uebrigeErtraege", name: "\xDCbrige betriebliche Ertr\xE4ge", ist: 2.3 },
+    { id: "personal", name: "Personalaufwand", ist: -16, vorjahr: -15.6, plan: -15.6 },
+    { id: "fremdkraefte", name: "Fremdkr\xE4fte", ist: -0.7 },
+    { id: "miete", name: "Miete / Leasing", ist: -11.2 },
+    { id: "mietnebenkosten", name: "Mietnebenkosten", ist: -1.5 },
+    { id: "logistik", name: "Logistik", ist: -6.3 },
+    { id: "werbung", name: "Werbung", ist: -1.8 },
+    { id: "unterhalt", name: "Unterhalt", ist: -1.9 },
+    { id: "zahlungsverkehr", name: "Zahlungsverkehr", ist: -0.2 },
+    { id: "facilityManagement", name: "Facility Management", ist: -1.7 },
+    { id: "energie", name: "Energie", ist: -2.4 },
+    { id: "it", name: "IT", ist: -0.3 },
+    { id: "administration", name: "Administrative Kosten", ist: -0.2 },
+    { id: "uebrigeAufwendungen", name: "\xDCbrige betriebliche Aufwendungen", ist: -0.4 },
+    { id: "opex", name: "Total OPEX", ist: -42.4 },
+    { id: "ebitda", name: "EBITDA Filialebene", ist: -1.2 }
+  ];
+  var GUV_KOSTEN = [
+    "personal",
+    "fremdkraefte",
+    "miete",
+    "mietnebenkosten",
+    "logistik",
+    "werbung",
+    "unterhalt",
+    "zahlungsverkehr",
+    "facilityManagement",
+    "energie",
+    "it",
+    "administration",
+    "uebrigeAufwendungen"
+  ];
+  function leereFilialGuV() {
+    return {
+      umsatz: 0,
+      wareneinsatz: 0,
+      bruttogewinn: 0,
+      uebrigeErtraege: 0,
+      werbeflaechen: 0,
+      dienstleistungen: 0,
+      personal: 0,
+      fremdkraefte: 0,
+      miete: 0,
+      mietnebenkosten: 0,
+      logistik: 0,
+      werbung: 0,
+      unterhalt: 0,
+      zahlungsverkehr: 0,
+      facilityManagement: 0,
+      energie: 0,
+      it: 0,
+      administration: 0,
+      uebrigeAufwendungen: 0,
+      opex: 0,
+      ebitda: 0,
+      abschriften: 0
+    };
+  }
+  function guvAbschluss(g) {
+    g.opex = GUV_KOSTEN.reduce((x, p2) => x + g[p2], 0);
+    g.ebitda = g.bruttogewinn + g.uebrigeErtraege - g.opex;
+    return g;
+  }
+  function guvAddiere(ziel, quelle2) {
+    for (const key of Object.keys(ziel)) ziel[key] += quelle2[key];
+  }
+  var FILIAL_PROGRAMME = {
+    sortiment: { name: "Sortiments- und Preisarchitektur", position: "bruttogewinn", vorlauf: 10, ersparnis: 0.012, investitionsQuote: 5e-4, nebenwirkung: "H\xF6here Preise k\xF6nnen die St\xFCcknachfrage d\xE4mpfen." },
+    personal: { name: "Einsatzplanung und Produktivit\xE4t", position: "personal", vorlauf: 6, ersparnis: 0.09, investitionsQuote: 3e-4, nebenwirkung: "Engere Besetzung erh\xF6ht das Risiko von Wartezeiten." },
+    fremdkraefte: { name: "Fremdpersonal-Pooling", position: "fremdkraefte", vorlauf: 4, ersparnis: 0.2, investitionsQuote: 5e-5, nebenwirkung: "In Spitzenzeiten geringere flexible Reserve." },
+    miete: { name: "Mietportfolio nachverhandeln", position: "miete", vorlauf: 20, ersparnis: 0.12, investitionsQuote: 4e-4, nebenwirkung: "Verhandlungskosten und Vermieterrisiko; keine Filialschlie\xDFung." },
+    mietnebenkosten: { name: "Fl\xE4chennutzung und Nebenkosten pr\xFCfen", position: "mietnebenkosten", vorlauf: 12, ersparnis: 0.12, investitionsQuote: 15e-5, nebenwirkung: "Fl\xE4cheneinschr\xE4nkungen w\xE4hrend der Umstellung." },
+    logistik: { name: "Logistiknetz und Filialbelieferung b\xFCndeln", position: "logistik", vorlauf: 12, ersparnis: 0.18, investitionsQuote: 7e-4, nebenwirkung: "Weniger Lieferfenster und gr\xF6\xDFere Bestelllose." },
+    werbung: { name: "Werbewirkungssteuerung", position: "werbung", vorlauf: 5, ersparnis: 0.15, investitionsQuote: 1e-4, nebenwirkung: "Geringere Werbereichweite kann Frequenz kosten." },
+    unterhalt: { name: "Pr\xE4ventive Instandhaltungsplanung", position: "unterhalt", vorlauf: 12, ersparnis: 0.18, investitionsQuote: 3e-4, nebenwirkung: "Umbau- und Wartungsfenster st\xF6ren zeitweise den Betrieb." },
+    zahlungsverkehr: { name: "Payment-Mix optimieren", position: "zahlungsverkehr", vorlauf: 6, ersparnis: 0.22, investitionsQuote: 6e-5, nebenwirkung: "Umstellung der Kassenterminals und Zahlungsarten." },
+    facilityManagement: { name: "FM-Leistungsb\xFCndel neu vergeben", position: "facilityManagement", vorlauf: 10, ersparnis: 0.2, investitionsQuote: 12e-5, nebenwirkung: "Niedrigere Reinigungs- und Servicefrequenz." },
+    energie: { name: "LED, HLK und Energiesteuerung", position: "energie", vorlauf: 18, ersparnis: 0.28, investitionsQuote: 14e-4, nebenwirkung: "Investition und tempor\xE4re Abschaltung einzelner Anlagen." },
+    it: { name: "IT-Lizenzen und Endger\xE4te konsolidieren", position: "it", vorlauf: 10, ersparnis: 0.22, investitionsQuote: 13e-5, nebenwirkung: "Migration und Schulungsbedarf." },
+    administration: { name: "Filialadministration automatisieren", position: "administration", vorlauf: 8, ersparnis: 0.22, investitionsQuote: 13e-5, nebenwirkung: "Prozessumstellung und Anlaufaufwand." },
+    uebrigeAufwendungen: { name: "Filialverbrauch und Beschaffung b\xFCndeln", position: "uebrigeAufwendungen", vorlauf: 7, ersparnis: 0.2, investitionsQuote: 1e-4, nebenwirkung: "Striktere Ausgabenfreigaben vermindern Flexibilit\xE4t." }
+  };
+  function programmErsparnis(s2, id) {
+    const p2 = s2.filialProgramme?.[id];
+    return p2 && s2.woche >= p2.wirksamAb ? FILIAL_PROGRAMME[id].ersparnis : 0;
+  }
+  function programmNachfrageFaktor(s2) {
+    return (1 - (programmErsparnis(s2, "sortiment") ? 6e-3 : 0)) * (1 - (programmErsparnis(s2, "personal") ? 4e-3 : 0)) * (1 - (programmErsparnis(s2, "werbung") ? 6e-3 : 0));
+  }
+
+  // ../engine/src/ecommerce.ts
+  var ECOMMERCE_AKTIONEN = /* @__PURE__ */ new Set([
+    "onlineStrategie",
+    "onlineClickCollect",
+    "onlineVersandCluster",
+    "onlineAbholstation",
+    "onlineRetourenHaus",
+    "onlineFulfillment"
+  ]);
+  var START = { breite: 0.65, verfuegbar: 0.88, tage: 3, bon: 68, conversion: 0.025 };
+  var KOSTEN = { dienstleister: 6.2, eigen: 3.9, lagerFix: 28e3, retoure: 2.8, stunde: 19 };
+  var RUECKGABE = {
+    damen: 0.35,
+    herren: 0.23,
+    kinder: 0.28,
+    waesche: 0.16,
+    accessoires: 0.24,
+    beauty: 0.07,
+    food: 0.035,
+    wohnen: 0.12,
+    sport: 0.18,
+    spielwaren: 0.1,
+    sporttextil: 0.27,
+    sportschuhe: 0.27,
+    outdoor: 0.17
+  };
+  var retourenQuote = (g) => RUECKGABE[g] ?? 0.15;
+  var stamm = (s2) => {
+    const m = s2.marketing?.stand?.ist;
+    return {
+      online: m?.kanaele?.online?.quote ?? 1,
+      crm: m?.kanaele?.crm?.quote ?? 1,
+      app: m?.karte?.app?.budgetWoche ?? 1
+    };
+  };
+  function erzeugeEcommerce(s2) {
+    return {
+      sortimentsbreite: START.breite,
+      verfuegbarkeit: START.verfuegbar,
+      lieferTage: START.tage,
+      preisFaktor: 1,
+      clickCollect: false,
+      versandCluster: {},
+      abholstationen: {},
+      retourenHaus: {},
+      fulfillment: "dienstleister",
+      marketingStart: stamm(s2),
+      verlauf: []
+    };
+  }
+  function ecommerceStand(s2) {
+    return s2.ecommerce ?? (s2.ecommerce = erzeugeEcommerce(s2));
+  }
+  function ecommerceCluster(h) {
+    return h.hauscluster ?? h.region;
+  }
+  var startStation = (s2, h) => {
+    const x = h;
+    const e = ecommerceStand(s2);
+    if (Object.prototype.hasOwnProperty.call(e.abholstationen, h.id)) return e.abholstationen[h.id];
+    return !!x.abholstation || !!x.betrieb?.services?.abholstation || (Array.isArray(x.services) ? x.services.includes("abholstation") : !!x.services?.abholstation);
+  };
+  function hatAbholstation(s2, h) {
+    return startStation(s2, h);
+  }
+  function itGeneration(s2) {
+    const sys = s2.it?.systeme;
+    return sys?.ecommerce?.generation ?? sys?.ecommerce_plattform?.generation ?? 2;
+  }
+  function marketingFaktor(s2, e) {
+    const m = stamm(s2);
+    const bezug = (a, b2) => b2 > 0 ? clamp(a / b2, 0.5, 1.8) : 1;
+    return clamp(1 + 0.22 * (bezug(m.online, e.marketingStart.online) - 1) + 0.11 * (bezug(m.crm, e.marketingStart.crm) - 1) + 0.08 * (bezug(m.app, e.marketingStart.app) - 1), 0.7, 1.5);
+  }
+  function bereichsFaktor(s2) {
+    const org2 = s2.organisation;
+    const st2 = org2?.bereiche?.ecommerce;
+    return st2 ? clamp(1 + 0.7 * ((st2.person?.qualitaet ?? 0.35) - st2.basis), 0.75, 1.25) : 1;
+  }
+  function onlineFaktor(s2, e) {
+    const clusterAnteil = s2.haeuser.filter((h) => h.format === "warenhaus" && h.status === "offen" && e.versandCluster[ecommerceCluster(h)]).length / Math.max(1, s2.haeuser.filter((h) => h.format === "warenhaus" && h.status === "offen").length);
+    const platform = clamp(1 + (itGeneration(s2) - 2) * 0.075, 0.75, 1.2);
+    const digitalLeitung = clamp(vorstandWirkung(s2, "ecommerce"), 0.8, 1.25);
+    const verfuegbar2 = Math.min(1, e.verfuegbarkeit + 0.075 * clusterAnteil);
+    const preis = Math.pow(e.preisFaktor, -0.55);
+    return clamp(e.sortimentsbreite / START.breite * (verfuegbar2 / START.verfuegbar) * platform * digitalLeitung * bereichsFaktor(s2) * marketingFaktor(s2, e) * preis * Math.pow(START.tage / e.lieferTage, 0.22), 0.2, 2.4);
+  }
+  function hausWerte() {
+    return { abholungen: 0, zusaetzlicheKaeufe: 0, versand: 0, retouren: 0, instoreStunden: 0 };
+  }
+  function freieLogistikStunden(h) {
+    const plan2 = h.personaleinsatz?.plan?.gruppen.logistik;
+    return plan2 ? Math.max(0, plan2.plan - plan2.bedarf) : Infinity;
+  }
+  function kundenScore(h) {
+    const betreib = h;
+    return clamp(betreib.betrieb?.kundenScore || h.substanz, 0, 100);
+  }
+  function altwareAbbauen(s2, cluster, g, ek2) {
+    let rest = eur(Math.max(0, ek2)), gesamt = 0;
+    const kohorten = s2.bestand.filter((b2) => b2.gruppe === g && b2.alter >= (b2.art === "nos" ? 52 : 16) && (!b2.hauscluster || b2.hauscluster === cluster)).sort((a, b2) => b2.alter - a.alter);
+    for (const b2 of kohorten) {
+      if (rest <= 0) break;
+      const n = Math.min(rest, b2.wert);
+      b2.wert -= n;
+      rest -= n;
+      gesamt += n;
+    }
+    s2.bestand = s2.bestand.filter((b2) => b2.wert > 0);
+    return gesamt;
+  }
+  function ecommerceWoche(s2, k) {
+    if (s2.ecommerceDeaktiviert) return;
+    const e = ecommerceStand(s2);
+    if (e.projekt && s2.woche >= e.projekt.bis) {
+      e.fulfillment = e.projekt.modell;
+      melde(s2, "info", "hartwig.de: Eigenlager/Fulfillment-Projekt abgeschlossen. Modell: " + (e.fulfillment === "eigen" ? "eigenes Lager" : "Dienstleister") + ".", { modul: "ecommerce" });
+      delete e.projekt;
+    }
+    const cdo = s2.vorstand?.ressorts?.cdo;
+    const org2 = s2.organisation?.bereiche?.ecommerce;
+    const delegation = !!(cdo?.person && cdo.delegation.onlinesortiment) || !!org2?.delegiert;
+    if (!s2.prognose && s2.woche > 0 && s2.woche % 13 === 0 && delegation) {
+      const guete = 0.6 * (cdo?.person?.fachwissen ?? 50) / 100 + 0.4 * (org2?.person?.qualitaet ?? 0.5);
+      e.sortimentsbreite = clamp(Math.round((e.sortimentsbreite + (guete - 0.45) * 0.04) * 1e3) / 1e3, 0.2, 1);
+      e.verfuegbarkeit = clamp(Math.round((e.verfuegbarkeit + (guete - 0.5) * 0.02) * 1e3) / 1e3, 0.5, 1);
+      if (guete > 0.8 && e.lieferTage > 1) e.lieferTage -= 1;
+    }
+    const haeuser = s2.haeuser.filter((h) => h.format === "warenhaus" && h.status !== "geschlossen" && h.status !== "verkauft" && !!h.kpi);
+    const proGruppe = {};
+    const regioAnteil = {};
+    const clusterHaeuser = {};
+    let summe2 = 0;
+    for (const h of haeuser) {
+      const c = ecommerceCluster(h);
+      (clusterHaeuser[c] ?? (clusterHaeuser[c] = [])).push(h);
+      for (const [g, u] of Object.entries(h.kpi.umsatzJeGruppe)) {
+        const x = Math.max(0, u) * 0.08;
+        proGruppe[g] = (proGruppe[g] ?? 0) + x;
+        regioAnteil[h.region] = (regioAnteil[h.region] ?? 0) + x;
+        summe2 += x;
+      }
+    }
+    const faktor2 = onlineFaktor(s2, e);
+    const basis3 = eur(summe2);
+    const ziel = eur(summe2 * faktor2 * e.preisFaktor);
+    const differenz = ziel - basis3;
+    const quote = summe2 ? Object.entries(proGruppe).reduce((a, [g, v]) => a + (v ?? 0) * retourenQuote(g), 0) / summe2 : 0;
+    const kundenBon = START.bon * e.preisFaktor;
+    const bestellungen = Math.round(ziel / Math.max(1, kundenBon));
+    const abholer = e.clickCollect ? haeuser.filter((h) => hatAbholstation(s2, h)) : [];
+    const clickQuote = abholer.length && haeuser.length ? clamp(0.14 * abholer.length / haeuser.length, 0, 0.22) : 0;
+    const haus2 = {};
+    for (const h of haeuser) haus2[h.id] = hausWerte();
+    let kosten = 0, zusatz = 0, altware = 0;
+    const abholungen = Math.round(bestellungen * clickQuote);
+    if (abholer.length) {
+      const proHaus = Math.floor(abholungen / abholer.length);
+      let rest = abholungen - proHaus * abholer.length;
+      for (const h of abholer) {
+        const moeglich = Math.max(0, Math.floor(freieLogistikStunden(h) / 0.11));
+        const n = Math.min(proHaus + (rest-- > 0 ? 1 : 0), moeglich);
+        haus2[h.id].abholungen += n;
+        haus2[h.id].instoreStunden += n * 0.11;
+        const kauf = eur(n * 0.12 * 24);
+        haus2[h.id].zusaetzlicheKaeufe += kauf;
+        if (h.kpi) {
+          h.kpi.umsatz += kauf;
+          const marge = eur(kauf * 0.37);
+          h.kpi.rohertrag += marge;
+          h.kpi.db += marge;
+          h.kpi.umsatzJeGruppe.accessoires = (h.kpi.umsatzJeGruppe.accessoires ?? 0) + kauf;
+        }
+        zusatz += kauf;
+      }
+    }
+    for (const [c, aktiv5] of Object.entries(e.versandCluster)) {
+      if (!aktiv5 || !clusterHaeuser[c]?.length) continue;
+      const hs = clusterHaeuser[c];
+      const anteil3 = hs.reduce((a, h) => a + (h.kpi?.umsatz ?? 0), 0) / Math.max(1, haeuser.reduce((a, h) => a + (h.kpi?.umsatz ?? 0), 0));
+      const n = Math.round(bestellungen * 0.22 * anteil3);
+      const proHaus = Math.floor(n / hs.length);
+      let rest = n - proHaus * hs.length;
+      let versendet = 0;
+      for (const h of hs) {
+        const frei6 = Math.max(0, freieLogistikStunden(h) - haus2[h.id].instoreStunden);
+        const stueck = Math.min(proHaus + (rest-- > 0 ? 1 : 0), Math.floor(frei6 / 0.28));
+        haus2[h.id].versand += stueck;
+        haus2[h.id].instoreStunden += stueck * 0.28;
+        versendet += stueck;
+      }
+      if (differenz > 0 && summe2 > 0) {
+        for (const [g, v] of Object.entries(proGruppe)) {
+          const ek2 = differenz * 0.22 * anteil3 * (versendet / Math.max(1, n)) * ((v ?? 0) / summe2) * (1 - GRUPPEN[g].marge);
+          altware += altwareAbbauen(s2, c, g, ek2);
+        }
+      }
+    }
+    const hausRetouren = haeuser.filter((h) => e.retourenHaus[h.id] && hatAbholstation(s2, h));
+    const rueck = Math.round(bestellungen * quote);
+    if (hausRetouren.length) {
+      const imHaus = Math.round(rueck * 0.35);
+      const proHaus = Math.floor(imHaus / hausRetouren.length);
+      let rest = imHaus - proHaus * hausRetouren.length;
+      for (const h of hausRetouren) {
+        const frei6 = Math.max(0, freieLogistikStunden(h) - haus2[h.id].instoreStunden);
+        const n = Math.min(proHaus + (rest-- > 0 ? 1 : 0), Math.floor(frei6 / 0.16));
+        haus2[h.id].retouren += n;
+        haus2[h.id].instoreStunden += n * 0.16;
+      }
+      if (differenz > 0 && summe2 > 0) for (const [g, v] of Object.entries(proGruppe)) {
+        const ek2 = eur(differenz * 0.35 * ((v ?? 0) / summe2) * retourenQuote(g) * (1 - GRUPPEN[g].marge));
+        if (ek2 > 0) {
+          const cluster = ecommerceCluster(hausRetouren[0]);
+          const zielK = s2.bestand.find((b2) => b2.gruppe === g && b2.alter === 0 && b2.hauscluster === cluster);
+          if (zielK) zielK.wert += ek2;
+          else s2.bestand.push({
+            gruppe: g,
+            wert: ek2,
+            alter: 0,
+            saisonAnteil: GRUPPEN[g].saisonAnteil,
+            kostenFaktor: 1,
+            hauscluster: cluster
+          });
+        }
+      }
+    }
+    const stunden = Object.values(haus2).reduce((a, h) => a + h.instoreStunden, 0);
+    const extraPakete = differenz / Math.max(1, kundenBon);
+    const paketBasis = basis3 / START.bon;
+    const dezember = s2.woche % 52 >= 47 && s2.woche % 52 <= 51;
+    const paketPreis = e.fulfillment === "eigen" ? KOSTEN.eigen : KOSTEN.dienstleister * (dezember ? 1.25 : 1);
+    const baselinePreis = KOSTEN.dienstleister * (dezember ? 1.25 : 1);
+    kosten = eur(extraPakete * baselinePreis + (paketPreis - baselinePreis) * bestellungen + (e.fulfillment === "eigen" ? KOSTEN.lagerFix : 0) + stunden * KOSTEN.stunde + Math.max(0, extraPakete) * quote * KOSTEN.retoure);
+    const schwach = haeuser.length ? haeuser.reduce((a, h) => a + (100 - kundenScore(h)) / 100, 0) / haeuser.length : 0;
+    const kanni = eur(Math.max(0, differenz) * (0.17 + 0.23 * schwach));
+    if (kanni > 0 && summe2 > 0) {
+      let uebrig = kanni;
+      const regionen = Object.entries(regioAnteil);
+      for (let ri = 0; ri < regionen.length; ri++) {
+        const [region, onlineBasis] = regionen[ri];
+        const aktuell = ri === regionen.length - 1 ? uebrig : Math.min(uebrig, eur(kanni * onlineBasis / summe2));
+        uebrig -= aktuell;
+        const lokal3 = haeuser.filter((h) => h.region === region && h.kpi && h.kpi.umsatz > 0);
+        const gewichte2 = lokal3.map((h) => h.kpi.umsatz * (1 + (100 - kundenScore(h)) / 100));
+        const gewicht2 = gewichte2.reduce((a, v) => a + v, 0);
+        let restRegion = aktuell;
+        for (let i = 0; i < lokal3.length; i++) {
+          const h = lokal3[i], kpi = h.kpi;
+          const verlust = i === lokal3.length - 1 ? restRegion : Math.min(restRegion, eur(aktuell * gewichte2[i] / Math.max(1, gewicht2)));
+          restRegion -= verlust;
+          const vorher = kpi.umsatz;
+          kpi.umsatz -= verlust;
+          const satz = vorher > 0 ? verlust / vorher : 0;
+          let ertragsverlust = 0;
+          for (const [g, u] of Object.entries(kpi.umsatzJeGruppe)) {
+            const teil6 = eur((u ?? 0) * satz);
+            kpi.umsatzJeGruppe[g] = Math.max(0, (u ?? 0) - teil6);
+            ertragsverlust += teil6 * GRUPPEN[g].marge;
+          }
+          kpi.rohertrag -= eur(ertragsverlust);
+          kpi.db -= eur(ertragsverlust);
+        }
+      }
+    }
+    const netto = differenz + zusatz - kanni;
+    const mixMarge = summe2 > 0 ? Object.entries(proGruppe).reduce((a, [g, v]) => a + (v ?? 0) * GRUPPEN[g].marge, 0) / summe2 : 0.38;
+    let zusatzEk = eur(Math.max(0, differenz) * (1 - mixMarge) + zusatz * 0.63 - altware);
+    if (zusatzEk > 0) {
+      const kohorten = [...s2.bestand].sort((a, b2) => b2.alter - a.alter);
+      for (const kohorte of kohorten) {
+        if (zusatzEk <= 0) break;
+        const n = Math.min(kohorte.wert, zusatzEk);
+        kohorte.wert -= n;
+        zusatzEk -= n;
+      }
+      s2.bestand = s2.bestand.filter((x) => x.wert > 0);
+    }
+    k.umsatz += netto;
+    k.rohertrag += eur((differenz - kanni) * mixMarge + zusatz * 0.37);
+    k.logistik += kosten;
+    k.onlineUmsatz = ziel;
+    k.onlineKannibalisierung = kanni;
+    k.onlineEffekt = netto;
+    const letzte = {
+      woche: s2.woche,
+      umsatz: ziel,
+      basis: basis3,
+      stationaer: eur(k.umsatz - ziel),
+      anteil: k.umsatz > 0 ? ziel / k.umsatz : 0,
+      conversion: START.conversion * faktor2,
+      retourenquote: quote,
+      kostenJeBestellung: bestellungen > 0 ? Math.max(0, kosten + baselinePreis * bestellungen) / bestellungen : 0,
+      deckungsbeitrag: eur(ziel * mixMarge - (kosten + baselinePreis * bestellungen) - ziel / kundenBon * quote * KOSTEN.retoure),
+      clickCollectAnteil: bestellungen ? abholer.reduce((a, h) => a + haus2[h.id].abholungen, 0) / bestellungen : 0,
+      bestellungen,
+      retouren: rueck,
+      kannibalisierung: kanni,
+      onlineEffekt: netto,
+      kosten,
+      umsatzJeGruppe: Object.fromEntries(Object.entries(proGruppe).map(([g, v]) => [g, eur((v ?? 0) * ziel / Math.max(1, summe2))])),
+      haus: haus2
+    };
+    e.letzte = letzte;
+    if (!s2.prognose) {
+      e.verlauf.push(letzte);
+      if (e.verlauf.length > 104) e.verlauf.shift();
+    }
+  }
+  function ecommerceAktion(s2, a) {
+    const e = ecommerceStand(s2);
+    if (a.typ === "onlineStrategie") {
+      if (a.sortimentsbreite === void 0 && a.verfuegbarkeit === void 0 && a.lieferTage === void 0 && a.preisFaktor === void 0)
+        return { ok: false, text: "Keine \xC4nderung angegeben." };
+      if (a.sortimentsbreite !== void 0 && (a.sortimentsbreite < 0.2 || a.sortimentsbreite > 1) || a.verfuegbarkeit !== void 0 && (a.verfuegbarkeit < 0.5 || a.verfuegbarkeit > 1) || a.lieferTage !== void 0 && (!Number.isInteger(a.lieferTage) || a.lieferTage < 1 || a.lieferTage > 7) || a.preisFaktor !== void 0 && (a.preisFaktor < 0.75 || a.preisFaktor > 1.25))
+        return { ok: false, text: "Ung\xFCltige Online-Parameter." };
+      if (a.sortimentsbreite !== void 0) e.sortimentsbreite = a.sortimentsbreite;
+      if (a.verfuegbarkeit !== void 0) e.verfuegbarkeit = a.verfuegbarkeit;
+      if (a.lieferTage !== void 0) e.lieferTage = a.lieferTage;
+      if (a.preisFaktor !== void 0) e.preisFaktor = a.preisFaktor;
+      return { ok: true, text: "Online-Sortiment und Lieferversprechen angepasst." };
+    }
+    if (a.typ === "onlineClickCollect") {
+      e.clickCollect = a.an;
+      return { ok: true, text: "Click & Collect " + (a.an ? "aktiviert." : "deaktiviert.") };
+    }
+    if (a.typ === "onlineVersandCluster") {
+      if (!s2.haeuser.some((h) => ecommerceCluster(h) === a.cluster && h.format === "warenhaus" && h.status === "offen"))
+        return { ok: false, text: "Hauscluster nicht gefunden oder ohne offenes Hartwig-Haus." };
+      e.versandCluster[a.cluster] = a.an;
+      return { ok: true, text: "Versand aus dem Haus f\xFCr " + a.cluster + (a.an ? " aktiviert." : " deaktiviert.") };
+    }
+    if (a.typ === "onlineAbholstation" || a.typ === "onlineRetourenHaus") {
+      const h = s2.haeuser.find((h2) => h2.id === a.haus && h2.format === "warenhaus" && h2.status === "offen");
+      if (!h) return { ok: false, text: "Offenes Hartwig-Haus nicht gefunden." };
+      if (a.typ === "onlineAbholstation") {
+        if (a.an && !hatAbholstation(s2, h)) einmalKosten(s2, 22e3);
+        e.abholstationen[h.id] = a.an;
+      } else {
+        if (a.an && !hatAbholstation(s2, h)) return { ok: false, text: "F\xFCr Hausretouren ist eine Abholstation erforderlich." };
+        e.retourenHaus[h.id] = a.an;
+      }
+      return { ok: true, text: (a.typ === "onlineAbholstation" ? "Abholstation" : "Retourenannahme") + (a.an ? " aktiviert." : " deaktiviert.") };
+    }
+    if (a.typ === "onlineFulfillment") {
+      if (e.projekt) return { ok: false, text: "Ein Fulfillment-Projekt l\xE4uft bereits." };
+      if (e.fulfillment === a.modell) return { ok: false, text: "Dieses Fulfillment-Modell ist bereits aktiv." };
+      const investition = a.modell === "eigen" ? 48e5 : 32e4;
+      if (s2.cash + s2.kreditlinie < investition) return { ok: false, text: "Nicht gen\xFCgend Finanzierungsspielraum." };
+      e.projekt = { modell: a.modell, start: s2.woche, bis: s2.woche + (a.modell === "eigen" ? 16 : 8), investition };
+      einmalKosten(s2, investition);
+      melde(s2, "info", "Projekt Fulfillment gestartet. Geplante Fertigstellung KW " + (e.projekt.bis % 52 + 1) + ".", { modul: "ecommerce" });
+      return { ok: true, text: "Fulfillment-Projekt gestartet. Laufzeit " + (e.projekt.bis - s2.woche) + " Wochen." };
+    }
+    return { ok: false, text: "Unbekannte Online-Aktion." };
+  }
+  function ecommerceUebersicht(s2) {
+    const e = ecommerceStand(s2), c = e.letzte;
+    const cluster = [...new Set(s2.haeuser.filter((h) => h.format === "warenhaus" && h.status === "offen").map(ecommerceCluster))].sort((a, b2) => a.localeCompare(b2, "de")).map((id) => ({
+      id,
+      aktiv: !!e.versandCluster[id],
+      haeuser: s2.haeuser.filter((h) => ecommerceCluster(h) === id && h.format === "warenhaus" && h.status === "offen").length
+    }));
+    const haeuser = s2.haeuser.filter((h) => h.format === "warenhaus" && h.status === "offen").map((h) => ({
+      id: h.id,
+      name: h.name,
+      stadt: h.stadt,
+      cluster: ecommerceCluster(h),
+      station: hatAbholstation(s2, h),
+      retourenAn: !!e.retourenHaus[h.id],
+      ...c?.haus[h.id] ?? hausWerte()
+    }));
+    return {
+      ...c ?? {
+        umsatz: 0,
+        basis: 0,
+        stationaer: 0,
+        anteil: 0,
+        conversion: START.conversion,
+        retourenquote: 0,
+        kostenJeBestellung: 0,
+        deckungsbeitrag: 0,
+        clickCollectAnteil: 0,
+        bestellungen: 0,
+        retouren: 0,
+        kannibalisierung: 0,
+        onlineEffekt: 0,
+        kosten: 0,
+        umsatzJeGruppe: {},
+        haus: {}
+      },
+      sortimentsbreite: e.sortimentsbreite,
+      verfuegbarkeit: e.verfuegbarkeit,
+      lieferTage: e.lieferTage,
+      preisFaktor: e.preisFaktor,
+      clickCollect: e.clickCollect,
+      fulfillment: e.fulfillment,
+      projekt: e.projekt,
+      cluster,
+      haeuser,
+      verlauf: e.verlauf.map((v) => ({
+        woche: v.woche,
+        umsatz: v.umsatz,
+        anteil: v.anteil,
+        deckungsbeitrag: v.deckungsbeitrag,
+        kannibalisierung: v.kannibalisierung
+      }))
+    };
+  }
+  function ecommerceHaus(s2, id) {
+    const h = s2.haeuser.find((x) => x.id === id);
+    if (!h) return void 0;
+    return {
+      station: hatAbholstation(s2, h),
+      ...ecommerceStand(s2).letzte?.haus[id] ?? hausWerte(),
+      retourenAn: !!ecommerceStand(s2).retourenHaus[id],
+      versandAn: !!ecommerceStand(s2).versandCluster[ecommerceCluster(h)]
+    };
+  }
+  function ecommerceBruecke(s2, wochen = 1) {
+    const x = ecommerceStand(s2).verlauf.slice(-Math.max(1, Math.floor(wochen)));
+    return {
+      titel: "Online",
+      umsatzveraenderung: eur(x.reduce((a, v) => a + v.onlineEffekt, 0)),
+      kannibalisierung: eur(x.reduce((a, v) => a + v.kannibalisierung, 0)),
+      zusatzUmsatzOnline: eur(x.reduce((a, v) => a + v.umsatz - v.basis, 0))
+    };
+  }
+
+  // ../engine/src/chronik.ts
   var CHRONIK_AKTIV = true;
   var KONZERN_GESCHICHTE = [
     { jahr: 1886, titel: "Eine Tuchhandlung in Essen", text: "In einer kleinen Essener Ladenzeile beginnt die Familie Hartwig mit Tuchen, Kurzwaren und Ma\xDFstoffen. Ein rotes Schild \xFCber der T\xFCr wird zum Erkennungszeichen.", motiv: "Tuchballen und Schaufenster", familie: 1 },
@@ -4222,7 +4966,7 @@
     return { geschichte: KONZERN_GESCHICHTE, spiel: [...s2.chronik ?? []].reverse() };
   }
 
-  // engine/src/szenarien.ts
+  // ../engine/src/szenarien.ts
   var SZENARIEN_AKTIV = true;
   var SZENARIEN = [
     { id: "standard", name: "Die Sanierung", beschreibung: "Hartwig steckt in der Krise. Das bekannte Ausgangsszenario.", schwierigkeit: "Mittel", ziel: "260 Wochen \xFCberleben", bild: "sanierung", start: {} },
@@ -4394,9 +5138,12 @@
     if (ziel.gescheitert) melde(s2, "warnung", "Szenarioziel verfehlt: " + ziel.text);
   }
 
-  // engine/src/zeitung.ts
+  // ../engine/src/zeitung.ts
   var ZEITUNG_REITER = ["Top", "Handel", "Konzern", "Markt", "Politik"];
   var EREIGNISSE = [
+    // Q06: Die Fachabteilung liefert ausschließlich relevante, verdichtete Marktbewegungen.
+    ["markt_ueberblick", "Handel", "konkurrenz", "Wettbewerb: die Woche im \xDCberblick", "Drei wichtige Entwicklungen und ihre Wirkung auf Hartwig.", "Die Fachabteilung ordnet die lokalen Bewegungen nach ihrer wirtschaftlichen Bedeutung ein.", "Nicht jede Rabattaktion ver\xE4ndert die Wettbewerbslage des Konzerns.", /^Wochenüberblick Wettbewerb/i],
+    ["markt_einzel", "Handel", "konkurrenz", "Eine Marktbewegung verdient Aufmerksamkeit", "Der lokale Markt ver\xE4ndert sich sp\xFCrbar.", "Betroffene H\xE4user passen die Planung an die neue Wettbewerbslage an.", "Die mittelfristige Wirkung h\xE4ngt von Lage, Sortiment und Nachfrage ab.", /^Wettbewerbsbeobachtung:/i],
     ["konkurrenz_neu", "Handel", "konkurrenz", "Neue Konkurrenz in der Innenstadt", "Ein Anbieter investiert in Verkaufsfl\xE4che.", "Der lokale Handel stellt sich auf einen ver\xE4nderten Wettbewerb ein.", "Die kommenden Wochen d\xFCrften zeigen, wie stark sich die Kundschaft neu verteilt.", /wettbewerb.*(eröffn|neu)|konkurrenz.*(eröffn|neu)|konkurrent.*(eröffn|neu)/i],
     ["konkurrenz_zu", "Handel", "konkurrenz", "Wettbewerber gibt Standort auf", "Die Einkaufslandschaft ver\xE4ndert sich erneut.", "Ein frei werdendes Gesch\xE4ft ver\xE4ndert die Lage in der Innenstadt.", "Die Nachnutzung d\xFCrfte von Kaufkraft und Immobilienangebot abh\xE4ngen.", /wettbewerb.*schließ|konkurrenz.*schließ|konkurrent.*schließ|wettbewerb.*aufgegeben/i],
     ["konkurrenz_aktion", "Handel", "konkurrenz", "Preiskampf auf der Einkaufsstra\xDFe", "Aktionen erh\xF6hen den Druck auf den Handel.", "Preisnachl\xE4sse k\xF6nnen kurzfristig Frequenz anziehen.", "F\xFCr die langfristige Profitabilit\xE4t bleibt die Handelsspanne entscheidend.", /wettbewerb.*(aktion|rabatt)|konkurrenz.*(aktion|rabatt)|preiskampf/i],
@@ -4508,10 +5255,21 @@
     if (z2.ausgaben.some((a) => a.woche === w)) return;
     const r = { rng: (Math.imul(s2.seed >>> 0, 2654435761) ^ Math.imul(w + 1, 2246822507) ^ 2708792605) >>> 0 };
     const artikel = [];
-    const meldungen = s2.meldungen.filter((m) => m.woche === w && (m.typ === "presse" || m.typ === "insolvenz" || m.typ === "eigentuemer" || /wettbewerb|konkurrenz|gläubiger|betriebsrat|schließ|vorstand|streik|quartal/i.test(m.text)));
-    for (const m of meldungen.slice().sort((a, b2) => Number(b2.typ === "insolvenz" || /gläubigerversammlung|insolvenzplan/i.test(b2.text)) - Number(a.typ === "insolvenz" || /gläubigerversammlung|insolvenzplan/i.test(a.text))).slice(0, 4)) {
+    const meldungen = s2.meldungen.filter((m) => m.woche === w && !/rund\s+0(?:[.,]0+)?\s*%/i.test(m.text) && (m.typ === "presse" || m.typ === "insolvenz" || m.typ === "eigentuemer" || /wettbewerb|konkurrenz|gläubiger|betriebsrat|schließ|vorstand|streik|quartal/i.test(m.text)));
+    for (const m of meldungen.slice().sort((a, b2) => Number(b2.typ === "insolvenz" || /gläubigerversammlung|insolvenzplan/i.test(b2.text)) * 10 + Number(b2.text.startsWith("Wochen\xFCberblick Wettbewerb")) * 5 - (Number(a.typ === "insolvenz" || /gläubigerversammlung|insolvenzplan/i.test(a.text)) * 10 + Number(a.text.startsWith("Wochen\xFCberblick Wettbewerb")) * 5)).slice(0, 4)) {
       const v = EREIGNISSE.find((x) => x.muster.test(m.text));
-      artikel.push(ausVorlage2(v, w, m.text, artikel.length));
+      const klartext = m.text.replace(
+        /\((premium|modehaus|fastfashion|offprice|textildiscounter|elektronik)\)/gi,
+        (_, art) => ({
+          premium: "(Premium-Warenhaus)",
+          modehaus: "(Modehaus)",
+          fastfashion: "(Modekette)",
+          offprice: "(Off-Price-Anbieter)",
+          textildiscounter: "(Textildiscounter)",
+          elektronik: "(Elektronikmarkt)"
+        })[art.toLowerCase()] ?? ""
+      );
+      artikel.push(ausVorlage2(v, w, klartext, artikel.length));
     }
     if (z2.naechstesZitat && z2.naechstesZitat.abWoche <= w) {
       const vorlage2 = { id: "interview", reiter: "Konzern", bild: "haus", titel: "Hartwig-Vorstand im Gespr\xE4ch", unter: "Die Gesch\xE4ftsf\xFChrung bezieht Stellung.", kommentar: "Das Interview st\xF6\xDFt in der Branche auf Aufmerksamkeit.", perspektive: "Wie die angek\xFCndigten Ma\xDFnahmen greifen, wird sich in den n\xE4chsten Wochen zeigen." };
@@ -4521,7 +5279,8 @@
     const pflicht = w % 13 === 12 ? "quartalsblick" : w % 52 >= 45 ? "weihnachten" : w % 52 < 8 ? "winter" : w % 52 >= 22 && w % 52 <= 34 ? "sommer" : "";
     if (pflicht) artikel.push(ausVorlage2(HINTERGRUND.find((x) => x.id === pflicht), w, "", 60));
     const pool = HINTERGRUND.filter((x) => x.id !== pflicht);
-    while (artikel.length < 5 && pool.length) {
+    const zielArtikel = Math.min(5, Math.max(1, artikel.length + 1));
+    while (artikel.length < zielArtikel && pool.length) {
       const v = waehle(r, pool);
       pool.splice(pool.indexOf(v), 1);
       artikel.push(ausVorlage2(v, w, "", 100 + artikel.length));
@@ -4557,104 +5316,7 @@
     }
   }
 
-  // engine/src/spielende.ts
-  var faktor = { leicht: 0.8, mittel: 1, schwer: 1.3 };
-  var SPIELENDE_AKTIV = true;
-  var aktiv2 = (s2) => SPIELENDE_AKTIV && !s2.spielendeDeaktiviert;
-  function ebitdaJahr(s2) {
-    return eur(s2.historie.slice(-52).reduce((sum2, k) => sum2 + k.ebitda, 0));
-  }
-  function immobilienWert(s2) {
-    return eur(s2.haeuser.filter((h) => h.klasse === "premium" && h.status === "offen").reduce((sum2, h) => {
-      const rang = PREMIUM_HAEUSER.find((p2) => p2.id === h.premiumSchluessel)?.rang ?? 3;
-      const multiple = rang === 1 ? 18 : rang === 2 ? 15 : 11;
-      const operativ = Math.max(0, (h.kpi?.db ?? 0) * 52) * multiple;
-      return sum2 + Math.max(0, premiumMarktwert(h) - operativ);
-    }, 0));
-  }
-  function unternehmenswert(s2) {
-    return eur(Math.max(0, ebitdaJahr(s2)) * 6 + immobilienWert(s2));
-  }
-  function startwerte(s2) {
-    return {
-      haeuser: s2.spielendeStart?.haeuser ?? s2.haeuser.length,
-      fte: s2.spielendeStart?.fte ?? s2.historie[0]?.fte ?? s2.haeuser.reduce((sum2, h) => sum2 + h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen, 0)
-    };
-  }
-  function endwertung(s2) {
-    const start = startwerte(s2);
-    const offen = s2.haeuser.filter((h) => h.status === "offen").length;
-    const fte2 = Math.round(s2.haeuser.reduce((sum2, h) => sum2 + h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen, 0));
-    const geschlossen = s2.haeuser.filter((h) => h.status === "geschlossen" || h.status === "raeumung" || h.status === "schliessung_verhandlung").length;
-    const entlassen = Math.max(0, Math.round(start.fte - fte2));
-    const st2 = s2.stakeholder;
-    const stakeholder = (st2.bank + st2.kreditversicherer + st2.vermieter + st2.betriebsrat + st2.eigentuemer) / 5;
-    const teile2 = [
-      { id: "haeuser", name: "Gerettete H\xE4user", wert: offen, punkte: offen * 250 },
-      { id: "arbeitsplaetze", name: "Gerettete Arbeitspl\xE4tze (FTE)", wert: fte2, punkte: fte2 * 40 },
-      { id: "wert", name: "Unternehmenswert", wert: unternehmenswert(s2), punkte: Math.round(unternehmenswert(s2) / 1e5) },
-      { id: "image", name: "Image", wert: Math.round(st2.image), punkte: Math.round(st2.image * 200) },
-      { id: "stakeholder", name: "Stakeholder", wert: Math.round(stakeholder), punkte: Math.round(stakeholder * 150) },
-      { id: "schliessungen", name: "Schlie\xDFungen", wert: geschlossen, punkte: -geschlossen * 400 },
-      { id: "entlassungen", name: "Arbeitsplatzabbau (FTE)", wert: entlassen, punkte: -entlassen * 20 }
-    ];
-    const grundpunkte = teile2.reduce((sum2, x) => sum2 + x.punkte, 0);
-    const schwierigkeit2 = s2.schwierigkeit ?? "mittel";
-    const multiplikator = faktor[schwierigkeit2];
-    return { teile: teile2, grundpunkte, multiplikator, punkte: Math.max(0, Math.round(grundpunkte * multiplikator)), schwierigkeit: schwierigkeit2 };
-  }
-  function endKennzahlen(s2) {
-    const start = startwerte(s2);
-    return {
-      geretteteHaeuser: s2.haeuser.filter((h) => h.status === "offen").length,
-      startHaeuser: start.haeuser,
-      fte: Math.round(s2.haeuser.reduce((sum2, h) => sum2 + h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen, 0)),
-      startFte: Math.round(start.fte),
-      ebitda52: ebitdaJahr(s2),
-      unternehmenswert: unternehmenswert(s2),
-      umsatz52: eur(s2.historie.slice(-52).reduce((sum2, x) => sum2 + x.umsatz, 0)),
-      image: Math.round(s2.stakeholder.image)
-    };
-  }
-  function spielBeenden(s2, art, kaeufer) {
-    if (s2.prognose || s2.ende || !aktiv2(s2)) return;
-    s2.ende = { art, woche: s2.woche, kennzahlen: endKennzahlen(s2), wertung: endwertung(s2), ...kaeufer ? { kaeufer } : {} };
-  }
-  function spielendePruefen(s2) {
-    if (!aktiv2(s2) || s2.prognose || s2.ende) return;
-    if (s2.phase === "zerschlagen") {
-      spielBeenden(s2, "zerschlagen");
-      return;
-    }
-    if (!s2.spielendeFortgesetzt && s2.woche >= 260 && s2.phase === "regulaer" && !s2.insolvenz && s2.insolvenzenGesamt > 0 && s2.historie.length >= 52 && ebitdaJahr(s2) > 0) {
-      spielBeenden(s2, "saniert");
-    }
-  }
-  function konzernVerkaufAnbieten(s2) {
-    if (!aktiv2(s2) || s2.prognose || s2.ende || s2.phase !== "regulaer") return;
-    if (s2.woche < 156 || (s2.woche - 156) % 52 !== 0) return;
-    const id = "konzern-" + s2.woche;
-    if (s2.angebote.some((a) => a.id === id)) return;
-    const index2 = ((s2.seed + Math.floor((s2.woche - 156) / 52)) % KONZERN_KAEUFER.length + KONZERN_KAEUFER.length) % KONZERN_KAEUFER.length;
-    const k = KONZERN_KAEUFER[index2];
-    const kaufpreis = unternehmenswert(s2);
-    const an = {
-      id,
-      typ: "konzernVerkauf",
-      woche: s2.woche,
-      frist: s2.woche + 8,
-      titel: "\xDCbernahmeangebot f\xFCr den Hartwig-Konzern",
-      text: k.name + " (" + k.typ + ") bietet " + mio(kaufpreis) + ". Grundlage: sechsfaches EBITDA der letzten 52 Wochen plus Immobilienwert. Annahme beendet das Spiel.",
-      status: "offen",
-      kaufpreis,
-      konzernKaeuferTyp: k.typ,
-      konzernKaeuferName: k.name
-    };
-    s2.angebote.push(an);
-    melde(s2, "eigentuemer", "Ein \xDCbernahmeangebot f\xFCr den gesamten Konzern liegt vor.", { modul: "vorstand" });
-  }
-
-  // engine/src/it.ts
+  // ../engine/src/it.ts
   var IT_AKTIONEN = /* @__PURE__ */ new Set(["itProjekt", "itRolloutPlan", "itKasseAusbau"]);
   var SYSTEME = {
     kasse: { name: "Kassensoftware", start: 2, alter: 14, kosten: 78e3, bereiche: ["store_operations", "vertriebssteuerung", "flagship_management"] },
@@ -4993,7 +5655,7 @@
     };
   }
 
-  // engine/src/organisation.ts
+  // ../engine/src/organisation.ts
   var b = (id, name2, ressort, abteilung2, beschreibung) => ({ id, name: name2, ressort, abteilung: abteilung2, beschreibung });
   var BEREICHE = [
     b("konzerncontrolling", "Konzerncontrolling", "cfo", "controlling", "GuV, Bilanz und Liquidit\xE4t"),
@@ -5010,6 +5672,7 @@
     b("preis_reduzierung", "Preis- & Reduzierungsmanagement", "cpo", "einkauf", "Preise und Abschriften"),
     b("eigenmarken", "Eigenmarken", "cpo", "produkt", "Entwicklung und Pflege eigener Marken"),
     b("vertriebssteuerung", "Vertriebssteuerung", "cso", "controlling", "Steuerung der Regionen"),
+    b("marktbeobachtung", "Marktbeobachtung", "cso", "controlling", "Lokale Wettbewerbsanalyse, Relevanzfilter und Wochen\xFCberblick"),
     b("store_operations", "Store Operations", "cso", "verwaltung", "Standards im operativen Hausbetrieb"),
     b("flagship_management", "Flagship-Management", "cso", "vm", "Premiumh\xE4user und Flaggschiffe"),
     b("logistik", "Logistik", "coo", "logistik", "Lager und Warenverkehr"),
@@ -5158,9 +5821,9 @@
     return ergebnis;
   }
   function clusterName(gruppe2, vergeben) {
-    const zahl4 = /* @__PURE__ */ new Map();
-    for (const h of gruppe2) zahl4.set(h.stadt, (zahl4.get(h.stadt) ?? 0) + 1);
-    const staedte = [...zahl4.entries()].sort((a, b2) => b2[1] - a[1] || a[0].localeCompare(b2[0], "de")).map(([st2]) => st2);
+    const zahl5 = /* @__PURE__ */ new Map();
+    for (const h of gruppe2) zahl5.set(h.stadt, (zahl5.get(h.stadt) ?? 0) + 1);
+    const staedte = [...zahl5.entries()].sort((a, b2) => b2[1] - a[1] || a[0].localeCompare(b2[0], "de")).map(([st2]) => st2);
     for (let i = 1; i < staedte.length; i++) {
       const name2 = "Raum " + staedte[0] + " \xB7 " + staedte[i];
       if (!vergeben.includes("Raum " + staedte[0])) break;
@@ -5512,7 +6175,7 @@
         berichtetAn: berichtetAn(s2, b2.id),
         delegiert: istDelegiert(s2, b2.id),
         aufgaben: delegationsAufgaben(b2.id).map((d2) => ({ ...d2, an: istAufgabeDelegiert(s2, d2.id, b2.id), grenze: delegationsGrenze(s2, d2.id, b2.id) })),
-        hqStufe: s2.hq.abteilungen.find((a) => a.id === b2.abteilung)?.stufe ?? 0,
+        hqStufe: b2.id === "marktbeobachtung" ? s2.marktbeobachtung?.stufe ?? 0 : s2.hq.abteilungen.find((a) => a.id === b2.abteilung)?.stufe ?? 0,
         offen: s2.entscheidungen.filter((e) => e.typ === "organisation_vorlage" && e.daten.bereich === b2.id).length
       })),
       ressorts: Object.keys(RESSORT_INFO).filter((r) => r !== "cro").map((r) => ({
@@ -5541,7 +6204,250 @@
     };
   }
 
-  // engine/src/haus.ts
+  // ../engine/src/marktbeobachtung.ts
+  var MARKT_FTE = [0, 6, 12, 20];
+  var MARKT_KOSTEN_JE_FTE = 1750;
+  var FORMATE = {
+    premium: "Premium-Warenhaus",
+    modehaus: "Modehaus",
+    fastfashion: "Modekette",
+    offprice: "Off-Price-Anbieter",
+    textildiscounter: "Textildiscounter",
+    elektronik: "Elektronikmarkt",
+    leer_ehemals: "ehemalige Handelsfl\xE4che"
+  };
+  function marktbeobachtungStart(s2) {
+    s2.marktbeobachtung ?? (s2.marktbeobachtung = { stufe: 0, fte: 0, verlauf: [] });
+  }
+  function marktbeobachtungKostenWoche(s2) {
+    return (s2.marktbeobachtung?.fte ?? 0) * MARKT_KOSTEN_JE_FTE;
+  }
+  function marktbeobachtungStufe(s2, stufe2) {
+    if (!Number.isInteger(stufe2) || stufe2 < 0 || stufe2 > 3) return { ok: false, text: "Stufe muss zwischen 0 und 3 liegen." };
+    marktbeobachtungStart(s2);
+    const x = s2.marktbeobachtung;
+    const ziel = stufe2;
+    if (ziel === x.stufe) return { ok: true, text: "Die Marktbeobachtung ist bereits auf dieser Stufe." };
+    const neue = MARKT_FTE[ziel], alte = x.fte;
+    if (neue > alte) {
+      const kosten = (neue - alte) * 4e3;
+      if (s2.cash + s2.kreditlinie < kosten) return { ok: false, text: "Nicht gen\xFCgend Liquidit\xE4t f\xFCr die Einstellungskosten." };
+      s2.cash -= kosten;
+      s2.einmalkostenWoche += kosten;
+    }
+    x.stufe = ziel;
+    x.fte = neue;
+    return { ok: true, text: ziel === 0 ? "Marktbeobachtung aufgel\xF6st: nur noch bedeutende Einzelmeldungen." : `Marktbeobachtung auf Stufe ${ziel}: ${neue} FTE, ${marktbeobachtungKostenWoche(s2).toLocaleString("de-DE")} \u20AC pro Woche.` };
+  }
+  function entfernung2(stadtA, stadtB) {
+    if (stadtA === stadtB) return 0;
+    const a = KOORDINATEN[stadtA], b2 = KOORDINATEN[stadtB];
+    if (!a || !b2) return Infinity;
+    return Math.hypot((a[0] - b2[0]) * 111, (a[1] - b2[1]) * 111 * Math.cos((a[0] + b2[0]) * Math.PI / 360));
+  }
+  function kette(w) {
+    return w ? w.name + " (" + FORMATE[w.art] + ")" : "Ein Wettbewerber";
+  }
+  function eigenerUmsatz(h) {
+    return Math.max(0, h.kpi?.umsatz ?? h.grundflaecheQm * Math.max(1, h.etagen.length) * 55);
+  }
+  function formatiereProzent(p2) {
+    const n = Math.max(0.1, Math.round(p2 * 10) / 10);
+    return n.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
+  }
+  function bewerte(s2, m) {
+    const w = [...s2.wettbewerber].sort((a, b2) => b2.name.length - a.name.length).find((x) => m.text.includes(x.name));
+    const ort = m.bezug?.stadt ?? w?.stadt ?? [...new Set(s2.haeuser.map((h) => h.stadt))].find((x) => m.text.includes(x));
+    if (!ort || !w) return null;
+    const schliessung = /schließ|aufgegeb|Räumungsverkauf/i.test(m.text);
+    const preiskampf = /kontert|rabattaktion|Preisdruck|preisaktion/i.test(m.text);
+    const umzug = /verlegt|Standortwechsel/i.test(m.text);
+    const alle = s2.haeuser.filter((h) => h.status === "offen" || h.status === "schliessung_verhandlung");
+    const gesamtUmsatz = Math.max(1, alle.reduce((n, h) => n + eigenerUmsatz(h), 0));
+    let betrag = 0, umsatzBetroffen = 0, lokalerEffekt = 0;
+    for (const h of alle) {
+      const km = entfernung2(h.stadt, ort);
+      if (km > 30) continue;
+      const naehe = km === 0 ? 1 : 0.18 * (1 - km / 30);
+      const gruppen = gruppenFuer(h.format);
+      const ueberschneidung = gruppen.length ? gruppen.reduce((n, g) => n + (WETTBEWERB_UEBERSCHNEIDUNG[w.art][g] ?? 0), 0) / gruppen.length : 0;
+      const druck = preiskampf ? Math.max(0, w.preisdruck) / (1 + Math.max(0, w.preisdruck)) : 1;
+      const aenderung = 0.25 * 0.035 * w.staerke * ueberschneidung * naehe * druck * (umzug ? 0.5 : 1) / Math.max(0.75, 1 - 0.25 * h.wettbewerbStart);
+      if (aenderung <= 0) continue;
+      const umsatz = eigenerUmsatz(h);
+      betrag += umsatz * aenderung;
+      umsatzBetroffen += umsatz;
+      if (km === 0) lokalerEffekt = Math.max(lokalerEffekt, aenderung);
+    }
+    if (betrag < 100 || lokalerEffekt < 3e-4 || umsatzBetroffen <= 0) return null;
+    const umsatzAnteil = umsatzBetroffen / gesamtUmsatz;
+    const relevanz = betrag / gesamtUmsatz * 100 + 0.02 * Math.min(1, umsatzAnteil / 0.025);
+    const richtung2 = schliessung ? "Entlastung" : "Umsatzdruck";
+    const aktion = schliessung ? "gibt eine Fl\xE4che auf" : preiskampf ? "verst\xE4rkt die Rabattaktionen" : umzug ? "verlegt seine Verkaufsfl\xE4che" : "verst\xE4rkt seine Pr\xE4senz";
+    return {
+      quelle: m,
+      relevanz,
+      betrag: schliessung ? betrag : -betrag,
+      lokalerEffekt,
+      ort,
+      text: `${kette(w)} ${aktion} in ${ort}. ${richtung2} bei betroffenen Hartwig-H\xE4usern: ${formatiereProzent(lokalerEffekt * 100)}.`
+    };
+  }
+  function marktbeobachtungUebersicht(s2) {
+    const x = s2.marktbeobachtung ?? { stufe: 0, fte: 0, verlauf: [] };
+    const stelle2 = s2.organisation?.bereiche.marktbeobachtung;
+    const qualitaet3 = bereichsQualitaet(s2, "marktbeobachtung");
+    return {
+      stufe: x.stufe,
+      fte: x.fte,
+      kostenWoche: marktbeobachtungKostenWoche(s2),
+      leitung: stelle2?.person?.name ?? "unbesetzt",
+      qualitaet: qualitaet3,
+      erfasst: x.verlauf.at(-1)?.roh ?? 0,
+      gemeldet: (x.verlauf.at(-1)?.einzeln ?? 0) + (x.verlauf.at(-1)?.ueberblick ?? 0),
+      verlauf: x.verlauf.slice(-52)
+    };
+  }
+  function marktbeobachtungWoche(s2) {
+    if (s2.prognose) return;
+    marktbeobachtungStart(s2);
+    const x = s2.marktbeobachtung;
+    if (x.verlauf.some((v) => v.woche === s2.woche)) return;
+    const roh2 = s2.meldungen.filter((m) => m.woche === s2.woche && m.bezug?.modul === "wettbewerb");
+    const q2 = x.stufe ? clamp(bereichsQualitaet(s2, "marktbeobachtung"), 0.15, 1) : 0;
+    const erkennungsschwelle = x.stufe ? 6e-3 - 4e-3 * q2 : 0.014;
+    const erkannt = roh2.map((m) => bewerte(s2, m)).filter((v) => !!v && v.relevanz >= erkennungsschwelle).sort((a, b2) => b2.relevanz - a.relevanz || (a.quelle.id ?? "").localeCompare(b2.quelle.id ?? ""));
+    const schwelle = x.stufe ? 0.035 - 0.014 * q2 : 0.055;
+    const einzel = erkannt.filter((v) => v.relevanz >= schwelle).slice(0, x.stufe ? 1 : 4);
+    const ids = new Set(roh2);
+    s2.meldungen = s2.meldungen.filter((m) => !ids.has(m));
+    const nachricht = (text3, id, stadt) => {
+      s2.meldungen.push({ id, woche: s2.woche, typ: "presse", text: text3, bezug: { modul: "wettbewerb", ...stadt ? { stadt } : {} } });
+    };
+    if (x.stufe && erkannt.length) {
+      const top = erkannt.slice(0, 3);
+      const details = top.map((e, i) => `${i + 1}. ${e.text}`).join(" ");
+      const gesamt = erkannt.reduce((a, b2) => a + b2.betrag, 0);
+      const rundung = q2 >= 0.8 ? 100 : q2 >= 0.5 ? 500 : 2e3;
+      const wert = Math.round(Math.abs(gesamt) / rundung) * rundung;
+      const spannweite = q2 >= 0.7 ? "" : " (grobe Sch\xE4tzung)";
+      nachricht(`Wochen\xFCberblick Wettbewerb: ${erkannt.length} relevante Marktbewegungen. ${details} Gesch\xE4tzter Saldo f\xFCr Hartwig: ${gesamt >= 0 ? "+" : "\u2212"}${Math.max(rundung, wert).toLocaleString("de-DE")} \u20AC Wochenumsatz${spannweite}.`, `markt-${s2.woche}`);
+    }
+    for (const e of einzel) {
+      const ungenau = x.stufe === 0 || q2 < 0.45;
+      const text3 = ungenau ? e.text.replace(/:\s*[0-9,]+\s*%/, ": etwa " + formatiereProzent(e.lokalerEffekt * 100 * 0.7) + " bis " + formatiereProzent(e.lokalerEffekt * 100 * 1.3)) : e.text;
+      nachricht("Wettbewerbsbeobachtung: " + text3, `markt-${s2.woche}-${e.quelle.id ?? einzel.indexOf(e)}`, e.ort);
+    }
+    x.verlauf.push({
+      woche: s2.woche,
+      roh: roh2.length,
+      einzeln: einzel.length,
+      ueberblick: x.stufe && erkannt.length ? 1 : 0,
+      unterdrueckt: roh2.length - einzel.length
+    });
+    if (x.verlauf.length > 52) x.verlauf.splice(0, x.verlauf.length - 52);
+    if (s2.meldungen.length > 400) s2.meldungen.splice(0, s2.meldungen.length - 400);
+  }
+
+  // ../engine/src/spielende.ts
+  var faktor = { leicht: 0.8, mittel: 1, schwer: 1.3 };
+  var SPIELENDE_AKTIV = true;
+  var aktiv2 = (s2) => SPIELENDE_AKTIV && !s2.spielendeDeaktiviert;
+  function ebitdaJahr(s2) {
+    return eur(s2.historie.slice(-52).reduce((sum2, k) => sum2 + k.ebitda, 0));
+  }
+  function immobilienWert(s2) {
+    return eur(s2.haeuser.filter((h) => h.klasse === "premium" && h.status === "offen").reduce((sum2, h) => {
+      const rang = PREMIUM_HAEUSER.find((p2) => p2.id === h.premiumSchluessel)?.rang ?? 3;
+      const multiple = rang === 1 ? 18 : rang === 2 ? 15 : 11;
+      const operativ = Math.max(0, (h.kpi?.db ?? 0) * 52) * multiple;
+      return sum2 + Math.max(0, premiumMarktwert(h) - operativ);
+    }, 0));
+  }
+  function unternehmenswert(s2) {
+    return eur(Math.max(0, ebitdaJahr(s2)) * 6 + immobilienWert(s2));
+  }
+  function startwerte(s2) {
+    return {
+      haeuser: s2.spielendeStart?.haeuser ?? s2.haeuser.length,
+      fte: s2.spielendeStart?.fte ?? s2.historie[0]?.fte ?? s2.haeuser.reduce((sum2, h) => sum2 + h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen, 0)
+    };
+  }
+  function endwertung(s2) {
+    const start = startwerte(s2);
+    const offen = s2.haeuser.filter((h) => h.status === "offen").length;
+    const fte2 = Math.round(s2.haeuser.reduce((sum2, h) => sum2 + h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen, 0));
+    const geschlossen = s2.haeuser.filter((h) => h.status === "geschlossen" || h.status === "raeumung" || h.status === "schliessung_verhandlung").length;
+    const entlassen = Math.max(0, Math.round(start.fte - fte2));
+    const st2 = s2.stakeholder;
+    const stakeholder = (st2.bank + st2.kreditversicherer + st2.vermieter + st2.betriebsrat + st2.eigentuemer) / 5;
+    const teile2 = [
+      { id: "haeuser", name: "Gerettete H\xE4user", wert: offen, punkte: offen * 250 },
+      { id: "arbeitsplaetze", name: "Gerettete Arbeitspl\xE4tze (FTE)", wert: fte2, punkte: fte2 * 40 },
+      { id: "wert", name: "Unternehmenswert", wert: unternehmenswert(s2), punkte: Math.round(unternehmenswert(s2) / 1e5) },
+      { id: "image", name: "Image", wert: Math.round(st2.image), punkte: Math.round(st2.image * 200) },
+      { id: "stakeholder", name: "Stakeholder", wert: Math.round(stakeholder), punkte: Math.round(stakeholder * 150) },
+      { id: "schliessungen", name: "Schlie\xDFungen", wert: geschlossen, punkte: -geschlossen * 400 },
+      { id: "entlassungen", name: "Arbeitsplatzabbau (FTE)", wert: entlassen, punkte: -entlassen * 20 }
+    ];
+    const grundpunkte = teile2.reduce((sum2, x) => sum2 + x.punkte, 0);
+    const schwierigkeit2 = s2.schwierigkeit ?? "mittel";
+    const multiplikator = faktor[schwierigkeit2];
+    return { teile: teile2, grundpunkte, multiplikator, punkte: Math.max(0, Math.round(grundpunkte * multiplikator)), schwierigkeit: schwierigkeit2 };
+  }
+  function endKennzahlen(s2) {
+    const start = startwerte(s2);
+    return {
+      geretteteHaeuser: s2.haeuser.filter((h) => h.status === "offen").length,
+      startHaeuser: start.haeuser,
+      fte: Math.round(s2.haeuser.reduce((sum2, h) => sum2 + h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen, 0)),
+      startFte: Math.round(start.fte),
+      ebitda52: ebitdaJahr(s2),
+      unternehmenswert: unternehmenswert(s2),
+      umsatz52: eur(s2.historie.slice(-52).reduce((sum2, x) => sum2 + x.umsatz, 0)),
+      image: Math.round(s2.stakeholder.image)
+    };
+  }
+  function spielBeenden(s2, art, kaeufer) {
+    if (s2.prognose || s2.ende || !aktiv2(s2)) return;
+    s2.ende = { art, woche: s2.woche, kennzahlen: endKennzahlen(s2), wertung: endwertung(s2), ...kaeufer ? { kaeufer } : {} };
+  }
+  function spielendePruefen(s2) {
+    if (!aktiv2(s2) || s2.prognose || s2.ende) return;
+    if (s2.phase === "zerschlagen") {
+      spielBeenden(s2, "zerschlagen");
+      return;
+    }
+    if (!s2.spielendeFortgesetzt && s2.woche >= 260 && s2.phase === "regulaer" && // E22/E26: Sanierung gelingt auch außergerichtlich, eine Insolvenz ist keine Voraussetzung.
+    !s2.insolvenz && s2.historie.length >= 52 && ebitdaJahr(s2) > 0) {
+      spielBeenden(s2, "saniert");
+    }
+  }
+  function konzernVerkaufAnbieten(s2) {
+    if (!aktiv2(s2) || s2.prognose || s2.ende || s2.phase !== "regulaer") return;
+    if (s2.woche < 156 || (s2.woche - 156) % 52 !== 0) return;
+    const id = "konzern-" + s2.woche;
+    if (s2.angebote.some((a) => a.id === id)) return;
+    const index2 = ((s2.seed + Math.floor((s2.woche - 156) / 52)) % KONZERN_KAEUFER.length + KONZERN_KAEUFER.length) % KONZERN_KAEUFER.length;
+    const k = KONZERN_KAEUFER[index2];
+    const kaufpreis = unternehmenswert(s2);
+    const an = {
+      id,
+      typ: "konzernVerkauf",
+      woche: s2.woche,
+      frist: s2.woche + 8,
+      titel: "\xDCbernahmeangebot f\xFCr den Hartwig-Konzern",
+      text: k.name + " (" + k.typ + ") bietet " + mio(kaufpreis) + ". Grundlage: sechsfaches EBITDA der letzten 52 Wochen plus Immobilienwert. Annahme beendet das Spiel.",
+      status: "offen",
+      kaufpreis,
+      konzernKaeuferTyp: k.typ,
+      konzernKaeuferName: k.name
+    };
+    s2.angebote.push(an);
+    melde(s2, "eigentuemer", "Ein \xDCbernahmeangebot f\xFCr den gesamten Konzern liegt vor.", { modul: "vorstand" });
+  }
+
+  // ../engine/src/haus.ts
   var HAUS_AKTIONEN = /* @__PURE__ */ new Set([
     "hausLeitungErsetzen",
     "hausLeitungFoerdern",
@@ -6112,7 +7018,7 @@
     return s2.haeuser.filter(istOffen).map((h) => ({ id: h.id, name: h.name, score: hausKundenscore(s2, h) })).sort((a, b2) => b2.score - a.score || a.id.localeCompare(b2.id));
   }
 
-  // engine/src/umbau.ts
+  // ../engine/src/umbau.ts
   var UMBAU_STUFEN = {
     auffrischung: { name: "Auffrischung", qm: 60, min: 2, max: 2 },
     ladenbau: { name: "Ladenbau neu", qm: 250, min: 4, max: 6 },
@@ -6360,7 +7266,7 @@
     }));
   }
 
-  // engine/src/treiber.ts
+  // ../engine/src/treiber.ts
   var NULL = { frequenz: 1, kaufquote: 1, bon: 1 };
   var PREIS = {
     damen: 43,
@@ -6699,7 +7605,7 @@
     return { wochen, bruecke: umsatzbruecke(s2, { ebene: "konzern", vergleich: "vorjahr", wochen, format }), zeilen, gruppen, beobachtung };
   }
 
-  // engine/src/personaleinsatz.ts
+  // ../engine/src/personaleinsatz.ts
   var PERSONAL_GRUPPEN = ["logistik", "verkauf", "kasse", "verwaltung"];
   var PERSONAL_NAMEN = {
     logistik: "Instore-Logistik",
@@ -7137,7 +8043,7 @@
     }));
   }
 
-  // engine/src/testwerkzeuge.ts
+  // ../engine/src/testwerkzeuge.ts
   var TEST_EREIGNISSE = [
     { id: "angebot:untermiete", name: "Angebot: Untermiete" },
     { id: "angebot:paket", name: "Angebot: Mietpaket" },
@@ -7203,15 +8109,15 @@
     }
   }
 
-  // engine/src/aktionen.ts
+  // ../engine/src/aktionen.ts
   var ok4 = (text3) => ({ ok: true, text: text3 });
   var fehler4 = (text3) => ({ ok: false, text: text3 });
   function haus(s2, id) {
-    return s2.haeuser.find((h) => h.id === id);
+    return s2.haeuser.find((h) => h.id === id && !h.nurDaten);
   }
   function auswahl3(s2, ids) {
     if (ids === "alle") return offeneHaeuser(s2);
-    return ids.map((id) => haus(s2, id)).filter((h) => !!h && h.status === "offen");
+    return ids.map((id) => haus(s2, id)).filter((h) => !!h && !h.nurDaten && h.status === "offen");
   }
   var etageName = (e) => e === -1 ? "UG" : e === 0 ? "EG" : `${e}. OG`;
   function umbauParameter(von, nach) {
@@ -7262,12 +8168,30 @@
     if (ORGANISATION_AKTIONEN.has(a.typ)) return organisationAktion(s2, a);
     if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s2, a);
     if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s2, a, (x) => einmalKosten(s2, x));
+    if (ECOMMERCE_AKTIONEN.has(a.typ)) return ecommerceAktion(s2, a);
     if (PLANUNG_AKTIONEN.has(a.typ)) {
       const fehlerText2 = planungAktion(s2, a);
       return fehlerText2 ? fehler4(fehlerText2) : ok4("Planung aktualisiert.");
     }
     if (HAUS_AKTIONEN.has(a.typ)) return hausAktion(s2, a);
     switch (a.typ) {
+      case "filialProgramm": {
+        const p2 = FILIAL_PROGRAMME[a.programm];
+        if (!p2) return fehler4("Unbekanntes Filialprogramm.");
+        if (!s2.filialProgramme) s2.filialProgramme = {};
+        if (s2.filialProgramme[a.programm]) return fehler4("Das Programm l\xE4uft bereits.");
+        const basis3 = s2.historie.length ? s2.historie.slice(-13).reduce((x, k) => x + k.umsatz, 0) * 4 : Object.values(s2.basisUmsatz).reduce((x, u) => x + (u ?? 0), 0) * 52;
+        const investition = Math.round(basis3 * p2.investitionsQuote);
+        einmalKosten(s2, investition);
+        s2.filialProgramme[a.programm] = { start: w, wirksamAb: w + p2.vorlauf };
+        if (a.programm === "miete") s2.stakeholder.vermieter = clamp(s2.stakeholder.vermieter - 2, 0, 100);
+        return ok4(`${p2.name}: Investition ${mio(investition)}, Wirkung ab Woche ${w + p2.vorlauf + 1}. ${p2.nebenwirkung}`);
+      }
+      case "marktbeobachtungStufe": {
+        const ergebnis = marktbeobachtungStufe(s2, a.stufe);
+        if (ergebnis.ok) hqAktualisiere(s2);
+        return ergebnis;
+      }
       case "zeitungAktiv":
         zeitungEinstellen(s2, a.an);
         return ok4(a.an ? "Der Handelsbote ist aktiviert." : "Der Handelsbote ist deaktiviert.");
@@ -7736,7 +8660,7 @@
     return result;
   }
 
-  // engine/src/abfragen.ts
+  // ../engine/src/abfragen.ts
   function hausBezug(s2, ids = [], modul) {
     const hs = [...new Set(ids)].map((id) => s2.haeuser.find((h) => h.id === id)).filter((h) => !!h);
     return hs.length ? { stadt: hs[0].stadt, hausIds: hs.map((h) => h.id), ...modul ? { modul } : {} } : modul ? { modul } : void 0;
@@ -7808,7 +8732,7 @@
         woche: m.woche,
         typ: m.typ,
         text: m.text,
-        kategorie: konkurrenz2 ? "Konkurrenz" : m.bezug?.modul === "it" ? "IT" : meldungKategorie(m.typ, m.text),
+        kategorie: m.bezug?.modul === "wettbewerb" || konkurrenz2 ? "Konkurrenz" : m.bezug?.modul === "it" ? "IT" : meldungKategorie(m.typ, m.text),
         bezug: { ...bezug, ...m.bezug?.stadt ? { stadt: m.bezug.stadt } : {}, ...konkurrenz2 ? { stadt: konkurrenz2.stadt, wettbewerberId: konkurrenz2.id } : {} }
       };
     });
@@ -7911,7 +8835,7 @@
         umsatzQm: f.gruppe && h.kpi?.umsatzJeGruppe[f.gruppe] ? (h.kpi.umsatzJeGruppe[f.gruppe] ?? 0) / Math.max(1, h.flaechen.filter((x) => x.gruppe === f.gruppe).reduce((a, b2) => a + b2.qm, 0)) : 0
       }))
     }));
-    return { haus: h, etagen, waren: warenHaus(s2, h), wettbewerber: wettbewerbUebersicht(s2, h.stadt) };
+    return { haus: h, etagen, guv: h.kpi?.guv, programme: s2.filialProgramme ?? {}, waren: warenHaus(s2, h), wettbewerber: wettbewerbUebersicht(s2, h.stadt), ecommerce: ecommerceHaus(s2, id) };
   }
   function warenwirtschaft(s2) {
     return Object.keys(s2.basisUmsatz).map((g) => ({
@@ -7925,7 +8849,7 @@
     return { limit: eur(kvLimit(s2)), genutzt: eur(offeneWarenverbindlichkeiten(s2)) };
   }
 
-  // engine/src/vorstand.ts
+  // ../engine/src/vorstand.ts
   var RESSORTS = ["cfo", "coo", "cso", "cpo", "cmo", "chro", "cro", "cdo"];
   var RESSORT_INFO = {
     cfo: { kurz: "CFO", titel: "Finanzvorstand", zustaendig: "Finanzen, Controlling, Bank und Kreditversicherer", markt: 52e4, abteilungen: { controlling: 1, verwaltung: 1 } },
@@ -8780,7 +9704,7 @@
     });
   }
 
-  // engine/src/hq.ts
+  // ../engine/src/hq.ts
   var ARCHIV_QM = 90;
   var ARCHIV_AKTIV = true;
   var ABTEILUNGEN = ["controlling", "einkauf", "marketing", "personal", "immobilien", "logistik", "ecommerce", "recht", "vm", "verwaltung", "produkt"];
@@ -8921,7 +9845,7 @@
   var wochenMiete = (qm, qmMonat) => qm * qmMonat * 12 / 52;
   function hausGewicht(h) {
     const aktiv5 = h.status === "offen" || h.status === "schliessung_verhandlung" || h.status === "raeumung";
-    return aktiv5 ? h.format === "warenhaus" ? 1 : 0.3 : 0;
+    return aktiv5 && !h.nurDaten ? h.format === "warenhaus" ? 1 : 0.3 : 0;
   }
   function groessenFaktor(s2) {
     const jetzt = s2.haeuser.reduce((a, h) => a + (h.status === "offen" ? hausGewicht(h) : 0), 0);
@@ -9118,7 +10042,8 @@
     const vorstand = vorstandKostenWoche(s2);
     const entwicklung = produktKostenWoche(s2);
     const leitung2 = organisationLeitungKostenWoche(s2);
-    return { personal, sach, reise: reise2, miete, nebenkosten, strafen, vorstand, entwicklung, leitung: leitung2, gesamt: personal + sach + reise2 + miete + nebenkosten + strafen + vorstand + entwicklung + leitung2 };
+    const marktbeobachtung = marktbeobachtungKostenWoche(s2);
+    return { personal, sach, reise: reise2, miete, nebenkosten, strafen, vorstand, entwicklung, leitung: leitung2, marktbeobachtung, gesamt: personal + sach + reise2 + miete + nebenkosten + strafen + vorstand + entwicklung + leitung2 + marktbeobachtung };
   }
   function hqAktualisiere(s2) {
     const hq = s2.hq;
@@ -9127,7 +10052,7 @@
     for (const a of hq.abteilungen) hq.wirkung[a.id] = Math.min(3, wirksameStufe(s2, a, v) * vorstandWirkung(s2, a.id));
     const k = hqKosten(s2);
     s2.zentrale.kostenWoche = eur(k.gesamt);
-    s2.zentrale.fte = Math.round(hq.abteilungen.reduce((x, a) => x + a.fte, 0));
+    s2.zentrale.fte = Math.round(hq.abteilungen.reduce((x, a) => x + a.fte, 0) + (s2.marktbeobachtung?.fte ?? 0));
     const c = Math.round(hq.wirkung.controlling);
     s2.controllingStufe = c <= 0 ? 0 : c === 1 ? 1 : 2;
   }
@@ -9268,7 +10193,7 @@
     const hq = s2.hq;
     const r = hq;
     const staedte = /* @__PURE__ */ new Map();
-    for (const h of s2.haeuser) if (h.status === "offen" && !staedte.has(h.stadt)) staedte.set(h.stadt, h.cluster);
+    for (const h of s2.haeuser) if (h.status === "offen" && !h.nurDaten && !staedte.has(h.stadt)) staedte.set(h.stadt, h.cluster);
     const liste2 = [...staedte.keys()];
     if (!liste2.length) return;
     const anzahl = ganzZwischen(r, 2, 4);
@@ -9508,8 +10433,8 @@
     hqAktualisiere(s2);
     return ok5(alteStufe === st2 ? `${name2} ist bereits passend besetzt.` : `${name2} arbeitet ab sofort auf Stufe ${st2}.`);
   }
-  function zentraleKuerzen(s2, prozent3) {
-    const p2 = clamp(prozent3, 0, 0.3);
+  function zentraleKuerzen(s2, prozent4) {
+    const p2 = clamp(prozent4, 0, 0.3);
     let fte2 = 0;
     for (const a of s2.hq.abteilungen) {
       const weg = Math.round(a.fte * p2);
@@ -9579,7 +10504,7 @@
       kostenWoche: s2.zentrale.kostenWoche,
       kostenStart: s2.zentrale.kostenStart,
       standort: standort(s2, hq.sitz),
-      kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), leitung: eur(kosten.leitung), gesamt: eur(kosten.gesamt) },
+      kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), leitung: eur(kosten.leitung), marktbeobachtung: eur(kosten.marktbeobachtung), gesamt: eur(kosten.gesamt) },
       restmieteWoche: eur(hqRestmieteWoche(s2)),
       fte: s2.zentrale.fte,
       gebaeude: hq.gebaeude.map((g) => {
@@ -9682,7 +10607,7 @@
     return g && e ? { gebaeudeId: g.id, nr: e.nr } : void 0;
   }
 
-  // engine/src/produkte.ts
+  // ../engine/src/produkte.ts
   var ZUSATZ_ARTIKEL = {
     damen: ["A-Linien-Kleid", "Wickelkleid", "Tunikabluse", "Oversize-Bluse", "Bootcut-Jeans", "Culotte", "Plisseerock", "Bleistiftrock", "Feinstrickpullover", "Longcardigan", "Trenchcoat", "Boucl\xE9-Jacke"],
     herren: ["Slim-Fit-Hemd", "Regular-Fit-Hemd", "Oxford-Hemd", "Henley-Shirt", "Rundhalspullover", "Rollkragenpullover", "Cargo-Hose", "Anzughose", "Bermuda-Shorts", "Stricksakko", "Wollmantel", "Leinen-Sakko"],
@@ -9953,7 +10878,7 @@
     if (wunsch) return t.wgs.includes(wunsch) && ok6(wunsch) ? wunsch : void 0;
     return t.wgs.find((wg) => ok6(wg) && (m.wgAnteile[wg] ?? 0) > 0) ?? t.wgs.find(ok6);
   }
-  function bewerte(s2, m, e, team, trend, trendOhne = 0.4) {
+  function bewerte2(s2, m, e, team, trend, trendOhne = 0.4) {
     const t = TYP[e.typ];
     const g = trendGruppe(m);
     const mat2 = MATERIALIEN[e.material];
@@ -10073,7 +10998,7 @@
   function einfuehren(s2, p2, rauschen2) {
     const m = s2.eigenmarken.marken.find((x) => x.id === p2.marke);
     if (!m) return;
-    const teile2 = bewerte(s2, m, p2, p2.team, trendFuer(s2, saisonId(s2.woche)));
+    const teile2 = bewerte2(s2, m, p2, p2.team, trendFuer(s2, saisonId(s2.woche)));
     const r = s2.produkte;
     const noise = rauschen2 ? clamp(normal(r) * 0.25, -0.5, 0.5) : 0;
     p2.teile = teile2;
@@ -10082,7 +11007,7 @@
     p2.seit = s2.woche;
     p2.saison = saisonId(s2.woche);
   }
-  var START = {
+  var START2 = {
     em1: [
       ["Bluse", "beige", "Polyester", "damen.blusen", 0.15],
       ["Bluse", "flieder", "Viskose", "damen.blusen", 0.15],
@@ -10123,12 +11048,12 @@
     const pr2 = { liste: [], zaehler: 0, rng: s2.seed * 3266489917 + 32269 >>> 0, basisF: {}, basisM: {} };
     s2.produkte = pr2;
     for (const m of s2.eigenmarken.marken) {
-      for (const [typ, farbe3, material2, wg, budgetAnteil] of START[m.id] ?? []) {
+      for (const [typ, farbe3, material2, wg, budgetAnteil] of START2[m.id] ?? []) {
         const t = TYP[typ];
         const p2 = neuesProdukt(s2, m, { typ, farbe: farbe3, material: material2, preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * budgetAnteil / 12) }, wg, m.id === "em1" ? 0.35 : 0.5);
         p2.start = -300;
         p2.fertig = -288;
-        p2.teile = bewerte(s2, m, p2, p2.team, void 0, m.id === "em1" ? 0.1 : 0.4);
+        p2.teile = bewerte2(s2, m, p2, p2.team, void 0, m.id === "em1" ? 0.1 : 0.4);
         p2.sterne = sterneAus(scoreAus(p2.teile));
         p2.status = "sortiment";
         p2.seit = -260;
@@ -10188,7 +11113,7 @@
         const p2 = neuesProdukt(s2, m, { typ: t.typ, farbe: farbe3, material: t.materialien[0], preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * 0.4 / 12) }, wg, 0.4);
         p2.basis = true;
         p2.budgetWoche = 0;
-        p2.teile = bewerte(s2, m, p2, 0.4, void 0);
+        p2.teile = bewerte2(s2, m, p2, 0.4, void 0);
         p2.sterne = sterneAus(scoreAus(p2.teile));
         p2.status = "sortiment";
         p2.seit = s2.woche;
@@ -10324,7 +11249,7 @@
       if (!kand.length) continue;
       let e;
       if (gut) {
-        const bewertet = kand.flatMap((t) => [.../* @__PURE__ */ new Set([...trend.farben, ...FARB_BASIS[g].slice(0, 2)])].flatMap((farbe3) => t.materialien.map((material2) => ({ t, farbe: farbe3, material: material2 })))).map((x) => ({ ...x, sc: scoreAus(bewerte(s2, m, { typ: x.t.typ, farbe: x.farbe, material: x.material, preislage: m.preislage, qualitaet: m.qualitaet, dauer: 12, budgetWoche: 2e4 }, teamStaerke(s2), trendFuer(s2, saisonId(s2.woche + 12)))) })).sort((a, b3) => b3.sc - a.sc);
+        const bewertet = kand.flatMap((t) => [.../* @__PURE__ */ new Set([...trend.farben, ...FARB_BASIS[g].slice(0, 2)])].flatMap((farbe3) => t.materialien.map((material2) => ({ t, farbe: farbe3, material: material2 })))).map((x) => ({ ...x, sc: scoreAus(bewerte2(s2, m, { typ: x.t.typ, farbe: x.farbe, material: x.material, preislage: m.preislage, qualitaet: m.qualitaet, dauer: 12, budgetWoche: 2e4 }, teamStaerke(s2), trendFuer(s2, saisonId(s2.woche + 12)))) })).sort((a, b3) => b3.sc - a.sc);
         const b2 = bewertet[0];
         e = { marke: m.id, typ: b2.t.typ, farbe: b2.farbe, material: b2.material, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * b2.t.aufwand * 1.6 / 12 / 1e3) * 1e3 };
       } else {
@@ -10446,7 +11371,7 @@
     const leer3 = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig2, saisonEinfuehrung: saisonName(s2, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, hinweise: [] };
     if (!c.m || !c.t || !c.wg) return leer3;
     const team = teamStaerke(s2);
-    const teile2 = bewerte(s2, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche }, team, bekannt ? trendFuer(s2, sid) : void 0);
+    const teile2 = bewerte2(s2, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche }, team, bekannt ? trendFuer(s2, sid) : void 0);
     const st2 = sterneAus(scoreAus(teile2));
     const cpo = s2.vorstand?.ressorts.cpo.person;
     const spanne = halbe(0.5 + 1.5 * (1 - (cpo ? cpo.fachwissen / 100 : 0))) - 0.5 + (bekannt ? 0 : 0.5);
@@ -10482,7 +11407,7 @@
     };
   }
 
-  // engine/src/einkauf.ts
+  // ../engine/src/einkauf.ts
   var JACKE = { 0: 1.3, 1: 1.1, 5: 0.5, 6: 0.4, 7: 0.6, 8: 1.2, 9: 1.6, 10: 1.5 };
   var STRICK = { 9: 1.4, 10: 1.4, 11: 1.3, 0: 1.2, 5: 0.5, 6: 0.5 };
   var ROH2 = {
@@ -10665,8 +11590,8 @@
     },
     optimismus: [0.14, 0.07, 0.035, 0.015],
     // Mehrmenge der Saisondisposition nach Einkauf-Stufe 0..3 (Planoptimismus der Einkäufer)
-    abschriftK: 0.457,
-    // Kalibrierfaktor auf alle Abschriftsätze
+    abschriftK: 0.395,
+    // M7: realistische Abschriften auf Altware ohne überhöhte Dauerbelastung
     praesentation: 12,
     // Wochen Saisonbestand, ab denen das Sortiment voll verkauft (Größen, Farben, Fläche)
     saisonCover: 14,
@@ -10695,7 +11620,10 @@
     servicegrad: 0.95,
     vororderquote: 0.6,
     reduzierung: "normal",
-    modus: { nos: "auto", saison: "verfall" }
+    // Für die Grundversorgung gilt eine Freigabefrist mit automatischer Freigabe.
+    // Der Spieler kann vor Fristablauf weiterhin kürzen oder ablehnen und
+    // über wgFreigabeModus ausdrücklich auf 'verfall' umstellen.
+    modus: { nos: "auto", saison: "auto" }
   });
   var leererVerlauf = () => ({ w: [], u: [], r: [], e: [], b: [], a: [], f: [], n: [], eu: [], er: [], nd: [] });
   var rngHalter = (s2) => s2.einkauf;
@@ -10769,7 +11697,10 @@
     return 1 - 0.3 * Math.pow(Math.max(0, x), 1.3) - 0.2 * Math.pow(Math.max(0, -x), 1.3);
   }
   function erzeugeEinkauf(s2) {
-    const e = { grenze: EK_PARAM.grenze, wgs: {}, freigaben: [], rng: s2.seed * 2654435761 + 97 >>> 0, zaehler: 0, protokoll: [], eigenUmsatz: [], markenKpi: {}, emJeBereich: {}, emStart: {} };
+    const basisJahr = Object.values(s2.basisUmsatz).reduce((a, u) => a + (u ?? 0), 0) * 52;
+    const volumenFaktor = Math.max(1, basisJahr / 31e8);
+    const startGrenze = Math.round(EK_PARAM.grenze * volumenFaktor * 2 / 5e3) * 5e3;
+    const e = { grenze: startGrenze, wgs: {}, freigaben: [], rng: s2.seed * 2654435761 + 97 >>> 0, zaehler: 0, protokoll: [], eigenUmsatz: [], markenKpi: {}, emJeBereich: {}, emStart: {} };
     for (const d2 of WG_DEF) {
       e.wgs[d2.id] = {
         id: d2.id,
@@ -10796,6 +11727,7 @@
     const x = {};
     const poolSum = {};
     for (const h of s2.haeuser) {
+      if (h.nurDaten) continue;
       for (const [g, P2] of Object.entries(h.potenzial)) {
         const qm = h.flaechen.filter((f) => f.gruppe === g && f.konzept === "eigen").reduce((a, b3) => a + b3.qm, 0);
         if (qm <= 0) continue;
@@ -10905,7 +11837,7 @@
   function limitFuer(s2, st2, sid, nurLesen = false) {
     const key = String(sid);
     let l = st2.limits[key];
-    if (!l && nurLesen) l = { plan: 0, verbraucht: 0, stand: -1 };
+    if (nurLesen) l = l ? { ...l } : { plan: 0, verbraucht: 0, stand: -1 };
     else if (!l) {
       l = st2.limits[key] = { plan: 0, verbraucht: 0, stand: -1 };
       for (const k of Object.keys(st2.limits)) if (Number(k) < sid - 2) delete st2.limits[k];
@@ -11413,6 +12345,9 @@
   }
   function einkaufDispo(s2) {
     const w = s2.woche;
+    for (const d2 of aktiveWg(s2)) {
+      s2.einkauf.wgs[d2.id].basisVK = Math.max(0, (s2.basisUmsatz[d2.bereich] ?? 0) * d2.anteil);
+    }
     const pr2 = protokoll(s2);
     for (const v of vorschlaege(s2)) {
       let lief = v.lieferungen.filter((l) => l.wert > 0);
@@ -11850,7 +12785,7 @@
     }
     const sid = saisonId(s2.woche);
     const limits = [sid, sid + 1].map((x) => {
-      const L2 = limitFuer(s2, st2, x);
+      const L2 = limitFuer(s2, st2, x, true);
       const lw = limitWert(st2, L2);
       return { saison: x, name: saisonName(s2, x), limit: lw, verbraucht: eur(L2.verbraucht), frei: eur(lw - L2.verbraucht) };
     });
@@ -11880,7 +12815,7 @@
     };
   }
 
-  // engine/src/merchandise.ts
+  // ../engine/src/merchandise.ts
   var WARE_AKTIONEN = /* @__PURE__ */ new Set(["allokationQualitaet", "umlagerung", "reduzierungZentral", "reduzierungLokal", "merchandisePlan", "fundusAbfluss", "flaechenZuteilung", "warensicherung"]);
   var hausclusterId = (h) => h.hauscluster || h.region;
   function ersatzHauscluster(s2) {
@@ -12180,7 +13115,7 @@
     const plaene = WG_DEF.filter((d2) => !!s2.einkauf.wgs[d2.id]).map((d2) => {
       const st2 = s2.einkauf.wgs[d2.id];
       const sid = saisonId(s2.woche + 30);
-      const limit = limitFuer(s2, st2, sid);
+      const limit = limitFuer(s2, st2, sid, true);
       const plan2 = w?.plaene[`${d2.id}|${sid}`];
       return {
         wg: d2.id,
@@ -12382,12 +13317,90 @@
     return fehler6("Unbekannte Warenaktion.");
   }
 
-  // engine/src/welt.ts
+  // ../engine/src/massstab-alt.ts
+  var ALT_WARENHAUS_STAEDTE = ["Berlin", "Berlin", "Berlin", "Berlin", "Hamburg", "Hamburg", "Hamburg", "M\xFCnchen", "M\xFCnchen", "M\xFCnchen", "K\xF6ln", "K\xF6ln", "Frankfurt", "Frankfurt", "D\xFCsseldorf", "D\xFCsseldorf", "Stuttgart", "Stuttgart", "Essen", "Essen", "Dortmund", "Dortmund", "Bremen", "Bremen", "Leipzig", "Leipzig", "Dresden", "Dresden", "Hannover", "Hannover", "N\xFCrnberg", "N\xFCrnberg", "Duisburg", "Bochum", "Wuppertal", "Bielefeld", "Bonn", "M\xFCnster", "Mannheim", "Karlsruhe", "Augsburg", "Wiesbaden", "M\xF6nchengladbach", "Gelsenkirchen", "Aachen", "Braunschweig", "Kiel", "Chemnitz", "Halle", "Magdeburg", "Freiburg", "Krefeld", "Mainz", "L\xFCbeck", "Erfurt", "Oberhausen", "Rostock", "Kassel", "Hagen", "Potsdam", "Saarbr\xFCcken", "Hamm", "Ludwigshafen", "Oldenburg", "M\xFClheim", "Osnabr\xFCck", "Leverkusen", "Darmstadt", "Heidelberg", "Solingen", "Regensburg", "Paderborn", "Ingolstadt", "W\xFCrzburg", "Ulm", "Wolfsburg", "G\xF6ttingen", "Pforzheim", "Offenbach", "Heilbronn", "Bremerhaven", "Trier", "Koblenz", "Jena", "Siegen", "Hildesheim", "Cottbus", "G\xFCtersloh", "Recklinghausen", "Bottrop", "Reutlingen", "Erlangen", "F\xFCrth", "Bamberg", "Bayreuth", "Landshut", "Rosenheim", "Kempten", "Passau", "Konstanz", "Esslingen", "Ludwigsburg", "T\xFCbingen", "Gie\xDFen", "Marburg", "Fulda", "Hanau", "Wetzlar", "L\xFCneburg", "Celle", "Flensburg", "Neum\xFCnster", "Stralsund", "Schwerin", "Zwickau", "G\xF6rlitz", "Dessau", "Gera", "Weimar", "Neuss", "D\xFCren", "Wesel", "Iserlohn", "L\xFCdenscheid", "Witten", "Marl", "Moers", "Kaiserslautern", "Worms", "Speyer"];
+  var ALT_SPORT_STAEDTE = ["Berlin", "Berlin", "Berlin", "Hamburg", "Hamburg", "M\xFCnchen", "M\xFCnchen", "M\xFCnchen", "K\xF6ln", "K\xF6ln", "Frankfurt", "Frankfurt", "D\xFCsseldorf", "D\xFCsseldorf", "Stuttgart", "Stuttgart", "Essen", "Dortmund", "Bremen", "Leipzig", "Dresden", "Hannover", "N\xFCrnberg", "Duisburg", "Bochum", "Wuppertal", "Bielefeld", "Bonn", "M\xFCnster", "Mannheim", "Karlsruhe", "Augsburg", "Wiesbaden", "Aachen", "Braunschweig", "Kiel", "Chemnitz", "Magdeburg", "Freiburg", "Mainz", "L\xFCbeck", "Erfurt", "Oberhausen", "Rostock"];
+
+  // ../engine/src/welt.ts
+  var UMSATZZIELE_JAHR1 = {
+    A: 895e7 * (45 * 48) / (45 * 48 + 115 * 30 + 200 * 17),
+    B: 895e7 * (115 * 30) / (45 * 48 + 115 * 30 + 200 * 17),
+    C: 895e7 * (200 * 17) / (45 * 48 + 115 * 30 + 200 * 17),
+    premium: 82e7,
+    sport: 545e6
+  };
+  var PREMIUM_PERSONALQUOTE = 0.13;
+  var PREMIUM_MIETFAKTOR = 1.3;
+  function umsatzklasse(h) {
+    if (h.nurDaten) return void 0;
+    if (h.format === "sport") return "sport";
+    if (h.klasse === "premium") return "premium";
+    if (h.hausklasse) return h.hausklasse;
+    throw new Error(`Aktivem Haus ${h.id} fehlt die Hausklasse`);
+  }
+  function kalibriereStandortumsatz(haeuser) {
+    const basis3 = /* @__PURE__ */ new Map();
+    const summen = { A: 0, B: 0, C: 0, premium: 0, sport: 0 };
+    for (const haus2 of haeuser) {
+      const klasse = umsatzklasse(haus2);
+      if (!klasse) continue;
+      let x = 0;
+      for (const [g, p2] of Object.entries(haus2.potenzial)) {
+        const qm = haus2.flaechen.filter((f) => f.gruppe === g).reduce((a, f) => a + f.qm, 0);
+        x += p2 * (1 - Math.exp(-qm / (haus2.saettigungQm[g] ?? 1)));
+      }
+      basis3.set(haus2, x);
+      summen[klasse] += x;
+    }
+    for (const haus2 of haeuser) {
+      const klasse = umsatzklasse(haus2);
+      if (!klasse) continue;
+      const faktor2 = UMSATZZIELE_JAHR1[klasse] / (52 * Math.max(1, summen[klasse]));
+      const alt = basis3.get(haus2) ?? 0;
+      const qm = haus2.flaechen.filter((f) => f.konzept === "eigen").reduce((a, f) => a + f.qm, 0);
+      const bedarfAlt = qm / PARAM.qmJeFte + alt / PARAM.umsatzJeFte;
+      const bedarfNeu = qm / PARAM.qmJeFte + alt * faktor2 / PARAM.umsatzJeFte;
+      const personalFaktor = bedarfNeu / Math.max(1, bedarfAlt);
+      for (const g of Object.keys(haus2.potenzial)) haus2.potenzial[g] *= faktor2;
+      haus2.miete.mieteWoche = eur(haus2.miete.mieteWoche * faktor2);
+      haus2.personal.vollzeit *= personalFaktor;
+      haus2.personal.teilzeit *= personalFaktor;
+      haus2.personal.aushilfen *= personalFaktor;
+      const jahresBasis = alt * faktor2 * 52;
+      const realisierung = haus2.klasse === "premium" ? 1.06 : haus2.format === "sport" ? 0.95 : 1;
+      const wocheBasis = jahresBasis / 52 * 1.02 * realisierung;
+      const zielPersonal = wocheBasis * 0.16 * (haus2.klasse === "premium" ? 1.08 : haus2.format === "sport" ? 0.94 : 1);
+      const istPersonal = haus2.personal.vollzeit * PARAM.lohnVollzeit + haus2.personal.teilzeit * PARAM.lohnTeilzeit + haus2.personal.aushilfen * PARAM.lohnAushilfe;
+      const profil2 = haus2.klasse === "premium" ? premiumProfil(haus2.premiumSchluessel) : void 0;
+      const premiumPersonal = profil2 ? PREMIUM_PERSONALQUOTE / 0.16 / 1.08 * (1.55 / profil2.produktivitaet) : 1;
+      const besetzung = profil2 ? zielPersonal * premiumPersonal / Math.max(1, istPersonal) : Math.max(0.4, Math.min(1.4, zielPersonal / Math.max(1, istPersonal)));
+      haus2.personal.vollzeit *= besetzung;
+      haus2.personal.teilzeit *= besetzung;
+      haus2.personal.aushilfen *= besetzung;
+      haus2.miete.mieteWoche = eur(profil2 ? wocheBasis * profil2.mietQuote * PREMIUM_MIETFAKTOR : wocheBasis * 0.112 * (haus2.format === "sport" ? 0.96 : 1));
+      const werbeBasisQm = haus2.flaechen.filter((f) => f.konzept === "eigen" || f.konzept === "kommission" || f.konzept === "offprice").reduce((sum2, f) => sum2 + f.qm, 0);
+      const werbeflaecheQm = Math.round(werbeBasisQm * 0.075);
+      haus2.nebenvertrag = {
+        werbeflaecheQm,
+        werbeEuroJeQmWoche: wocheBasis * 875e-5 / Math.max(1, werbeflaecheQm),
+        dienstleistungEuroJeBon: 1.03,
+        durchschnittsBonEuro: 88
+      };
+      if (haus2.miete.netTyp !== "net") {
+        const qm2 = haus2.flaechen.filter((f) => f.konzept !== "untermiete").reduce((a, f) => a + f.qm, 0);
+        haus2.miete.nebenkostenQmWoche = wocheBasis * 0.019 / Math.max(1, qm2);
+      }
+    }
+  }
   var STANDARD_SZENARIO = {
-    warenhaeuser: 130,
-    sporthaeuser: 50,
-    startCash: 12e7,
-    kreditlinie: 9e7,
+    warenhaeuser: 360,
+    sporthaeuser: 44,
+    premiumhaeuser: 4,
+    schwesterhaeuser: 86,
+    outlethaeuser: 66,
+    // Liquidität analog zum 3,3-fachen Umsatz gegenüber dem alten 130er-Maßstab.
+    startCash: 4e8,
+    kreditlinie: 3e8,
     firma: "Hartwig & Brehm Warenhaus AG",
     sportName: "Hartwig Sport",
     startJahr: 2027
@@ -12397,23 +13410,36 @@
     // € je FTE und Woche inkl. Nebenkosten
     lohnTeilzeit: 990,
     lohnAushilfe: 600,
-    qmJeFte: 500,
-    umsatzJeFte: 8800,
+    // M7 Referenz: Produktivität zum Start dem Ziel 16 % Personalquote
+    // anpassen. Die früheren 430 qm / 6.300 € je FTE führten bei
+    // 16 % Lohnkosten zu Unterbesetzung und künstlich fehlendem Umsatz.
+    // Personalbedarf UND Anfangs-FTE werden mit derselben Norm ermittelt.
+    qmJeFte: 620,
+    umsatzJeFte: 9e3,
     sonstigeQuote: 0.016,
     sonstigeQm: 0.45,
-    logistikQuote: 0.025,
+    // Filial-GuV Referenz: Distribution/Transport/Filiallogistik 6,3 %.
+    logistikQuote: 0.063,
     nebenkostenQm: [1, 1.5],
-    zentraleQuote: 0.034,
-    marketingQuote: 0.025,
+    // Die Zentrale nutzt bei 408 aktiven Häusern Größenvorteile.
+    zentraleQuote: 0.03,
+    marketingQuote: 0.018,
+    // IST Werbung Filialebene 1,8 % statt historisch 2,5 %
     zinsSatz: 0.08,
     konzessionsQuote: 0.22,
     kommissionsMarge: 0.25,
     bestandsReichweite: 11,
-    kvLimitBasis: 38e7,
+    kvLimitBasis: 126e7,
     abfindungRegulaer: 28e3,
     abfindungInsolvenz: 7500
   };
-  function grossFuerCluster(h, c, f) {
+  function grossFuerCluster(h, c, f, hausklasse) {
+    if (hausklasse === "premium") return Math.round(zwischen(h, 18e3, 28e3) / 100) * 100;
+    if (hausklasse === "A") return Math.round(zwischen(h, 15e3, 25e3) / 100) * 100;
+    if (hausklasse === "B") return Math.round(zwischen(h, 8e3, 15e3) / 100) * 100;
+    if (hausklasse === "C") return Math.round(zwischen(h, 3500, 8e3) / 100) * 100;
+    if (f === "outlet") return Math.round(zwischen(h, 1800, 5e3) / 100) * 100;
+    if (f === "schwester") return Math.round(zwischen(h, 4e3, 1e4) / 100) * 100;
     if (f === "sport") return Math.round(zwischen(h, 1500, 5500) / 50) * 50;
     if (c === "metropole") return Math.round(zwischen(h, 14e3, 28e3) / 100) * 100;
     if (c === "grossstadt") return Math.round(zwischen(h, 8e3, 17e3) / 100) * 100;
@@ -12422,6 +13448,8 @@
   function lageFuer(h, c, f) {
     const r = zwischen(h, 0, 1);
     if (f === "sport") return r < 0.55 ? "1a" : r < 0.85 ? "center" : "b";
+    if (f === "outlet") return r < 0.7 ? "rand" : "b";
+    if (f === "schwester") return r < 0.65 ? "1a" : r < 0.9 ? "b" : "center";
     if (c === "metropole") return r < 0.75 ? "1a" : "center";
     if (c === "grossstadt") return r < 0.6 ? "1a" : r < 0.85 ? "b" : "center";
     return r < 0.4 ? "1a" : r < 0.8 ? "b" : r < 0.9 ? "center" : "rand";
@@ -12431,13 +13459,33 @@
     return Math.pow(kaufkraft, d2.kkElast) * Math.pow(alter, d2.alterElast) * (1 - 0.25 * wettbewerb);
   }
   function bauFlaechen(h, id, f, vkQm, etagen) {
+    if (f === "schwester") {
+      const gruppen2 = gruppenFuer(f);
+      const summeAnteile = gruppen2.reduce((sum3, g) => sum3 + GRUPPEN[g].anteilFlaeche, 0);
+      let verbleibend = vkQm;
+      return gruppen2.map((g, i) => {
+        const qm2 = i === gruppen2.length - 1 ? verbleibend : Math.max(1, Math.round(vkQm * GRUPPEN[g].anteilFlaeche / summeAnteile));
+        verbleibend -= qm2;
+        return { id: `${id}-f${i + 1}`, etage: etagen[i % etagen.length], qm: qm2, konzept: "eigen", gruppe: g };
+      });
+    }
+    if (f === "outlet") {
+      const sortimente = ["damen", "herren", "kinder", "schuhe", "accessoires", "wohnen", "beauty"];
+      return sortimente.map((gruppe2, i) => ({
+        id: `${id}-f${i + 1}`,
+        etage: etagen[i % etagen.length],
+        qm: Math.round(vkQm / sortimente.length),
+        konzept: "eigen",
+        gruppe: gruppe2
+      }));
+    }
     const gruppen = gruppenFuer(f);
     const roh2 = gruppen.map((g) => GRUPPEN[g].anteilFlaeche * zwischen(h, 0.75, 1.25));
     const sum2 = roh2.reduce((a, b2) => a + b2, 0);
     const qm = roh2.map((x) => x / sum2 * vkQm);
     const reihenfolgeWH = ["food", "beauty", "accessoires", "damen", "waesche", "herren", "kinder", "sport", "spielwaren", "wohnen"];
     const reihenfolgeSport = ["sportschuhe", "sporttextil", "outdoor", "teamsport", "rad", "wintersport"];
-    const reihenfolge = f === "warenhaus" ? reihenfolgeWH : reihenfolgeSport;
+    const reihenfolge = f === "sport" ? reihenfolgeSport : reihenfolgeWH;
     const etagenOrdnung = [...etagen.filter((e) => e >= 0).sort((a, b2) => a - b2), ...etagen.filter((e) => e < 0)];
     const proEtage = vkQm / etagen.length;
     const fl = [];
@@ -12492,12 +13540,14 @@
   function name(h) {
     return `${waehle(h, VORNAMEN)} ${waehle(h, NACHNAMEN)}`;
   }
-  function bauHaus(h, idx, stadt, region, cluster, kk, f, sz, nr) {
-    const id = `${f === "warenhaus" ? "W" : "S"}${String(idx).padStart(3, "0")}`;
-    const lage = lageFuer(h, cluster, f);
-    const vkQm = grossFuerCluster(h, cluster, f);
-    const nEtagen = f === "sport" ? ganzZwischen(h, 1, 3) : cluster === "metropole" ? ganzZwischen(h, 5, 7) : cluster === "grossstadt" ? ganzZwischen(h, 4, 6) : ganzZwischen(h, 3, 5);
-    const grundflaeche2 = Math.max(f === "sport" ? 600 : 1500, Math.round(vkQm / nEtagen / 100) * 100);
+  function bauHaus(h, idx, stadt, region, cluster, kk, f, sz, nr, option2 = {}) {
+    const id = `${{ warenhaus: "W", sport: "S", schwester: "K", outlet: "O" }[f]}${String(idx).padStart(3, "0")}`;
+    const nurDaten = f === "schwester" || f === "outlet";
+    const lage = option2.lage ?? option2.outletLage ?? lageFuer(h, cluster, f);
+    const vkQm = grossFuerCluster(h, cluster, f, option2.premiumSchluessel ? "premium" : option2.hausklasse);
+    const nEtagenZufall = f === "sport" || f === "outlet" ? ganzZwischen(h, 1, 3) : option2.hausklasse === "C" ? ganzZwischen(h, 3, 5) : cluster === "metropole" ? ganzZwischen(h, 5, 7) : cluster === "grossstadt" ? ganzZwischen(h, 4, 6) : ganzZwischen(h, 3, 5);
+    const nEtagen = f === "outlet" ? lage === "b" ? 2 + idx % 2 : idx % 2 === 0 ? 2 : 1 : nEtagenZufall;
+    const grundflaeche2 = Math.max(f === "sport" || f === "outlet" ? 600 : 1e3, Math.round(vkQm / nEtagen / 100) * 100);
     const hatUG = f === "warenhaus" && nEtagen >= 3 && chance(h, 0.7);
     const etagen = [];
     if (hatUG) etagen.push(-1);
@@ -12514,8 +13564,8 @@
     for (const g of gruppenFuer(f)) {
       const qmG = flaechen.filter((x) => x.gruppe === g).reduce((a, b2) => a + b2.qm, 0);
       if (qmG <= 0) continue;
-      const sQm = GRUPPEN[g].qmUmsatz * fit(g, einzug.kaufkraft, einzug.alter, einzug.wettbewerb) * LAGE_FAKTOR[lage] * CLUSTER_FAKTOR[cluster] * zwischen(h, 0.82, 1.15);
-      const satF = zwischen(h, 0.45, 1.1);
+      const sQm = GRUPPEN[g].qmUmsatz * fit(g, einzug.kaufkraft, einzug.alter, einzug.wettbewerb) * LAGE_FAKTOR[lage] * CLUSTER_FAKTOR[cluster] * (nurDaten ? 1 : zwischen(h, 0.82, 1.15));
+      const satF = nurDaten ? 0.75 : zwischen(h, 0.45, 1.1);
       const Q = qmG * satF;
       const sat = 1 - Math.exp(-qmG / Q);
       potenzial[g] = sQm * qmG / sat;
@@ -12532,14 +13582,17 @@
     if (netTyp === "net") mietQuote += 0.02;
     if (netTyp === "triple") mietQuote -= 0.012;
     const fteBedarf = vkQm / PARAM.qmJeFte + basisUmsatz / PARAM.umsatzJeFte;
-    const fteIst = fteBedarf * zwischen(h, 1, 1.22);
+    const fteIst = nurDaten ? 0 : fteBedarf * zwischen(h, 1, 1.22);
     const vz = fteIst * zwischen(h, 0.42, 0.58);
     const ah = fteIst * zwischen(h, 0.06, 0.14);
-    const substanz = Math.round(zwischen(h, 30, 90));
+    const substanzBasis = Math.round(zwischen(h, 30, 90));
+    const substanz = f === "outlet" ? clamp(substanzBasis, 40, 85) : substanzBasis;
     const zusatz = waehle(h, STANDORT_ZUSATZ[lage]);
+    const premiumName = PREMIUM_HAEUSER.find((p2) => p2.schluessel === option2.premiumSchluessel)?.name;
+    const formatName = f === "schwester" ? "Volkskauf" : f === "outlet" ? "FUNDUS" : f === "warenhaus" ? sz.firma.split(" ")[0] : sz.sportName;
     return {
       id,
-      name: `${f === "warenhaus" ? sz.firma.split(" ")[0] : sz.sportName} ${stadt}${nr > 1 ? " " + zusatz : lage === "1a" ? "" : " " + zusatz}`,
+      name: premiumName ?? (f === "outlet" ? `${formatName} ${stadt}${nr > 1 ? " " + zusatz : ""}` : `${formatName} ${stadt}${nr > 1 ? " " + zusatz : lage === "1a" ? "" : " " + zusatz}`),
       stadt,
       region,
       cluster,
@@ -12548,6 +13601,9 @@
       einzug,
       wettbewerbStart: einzug.wettbewerb,
       etagen,
+      ...option2.hausklasse ? { hausklasse: option2.hausklasse } : {},
+      ...option2.premiumSchluessel ? { klasse: "premium", premiumSchluessel: option2.premiumSchluessel } : {},
+      ...nurDaten ? { nurDaten: true } : {},
       grundflaecheQm: grundflaeche2,
       // O02 Umsatztreiber: alle drei Hebel starten neutral.
       treiber: { frequenz: 1, kaufquote: 1, bon: 1 },
@@ -12555,12 +13611,13 @@
       treiberVerlauf: [],
       baujahr: (() => {
         const r = zwischen(h, 0, 1);
-        return f === "sport" ? ganzZwischen(h, 1975, 2015) : r < 0.2 ? ganzZwischen(h, 1895, 1930) : r < 0.32 ? ganzZwischen(h, 1931, 1954) : ganzZwischen(h, 1955, 2008);
+        const basis3 = f === "sport" ? ganzZwischen(h, 1975, 2015) : r < 0.2 ? ganzZwischen(h, 1895, 1930) : r < 0.32 ? ganzZwischen(h, 1931, 1954) : ganzZwischen(h, 1955, 2008);
+        return f === "outlet" ? lage === "b" ? 1965 + basis3 % 21 : 1998 + basis3 % 19 : basis3;
       })(),
       fassade: ganzZwischen(h, 0, 7),
       flaechen,
       miete: {
-        mieteWoche: eur(basisUmsatz * 52 * mietQuote / 52),
+        mieteWoche: nurDaten ? 0 : eur(basisUmsatz * mietQuote),
         bisWoche: ganzZwischen(h, 26, 15 * 52),
         netTyp,
         vermieter: vermieterEig ? "eigentuemer" : "dritt",
@@ -12584,31 +13641,86 @@
   function neueWelt(seed, sz = STANDARD_SZENARIO) {
     const h = { rng: seed >>> 0 };
     const haeuser = [];
-    let wh = 0;
-    let sp = 0;
-    for (const [stadt, region, cluster, kk, nWh, nSp] of STAEDTE) {
-      for (let i = 1; i <= nWh && wh < sz.warenhaeuser; i++) {
-        haeuser.push(bauHaus(h, ++wh, stadt, region, cluster, kk, "warenhaus", sz, i));
-      }
-      for (let i = 1; i <= nSp && sp < sz.sporthaeuser; i++) {
-        haeuser.push(bauHaus(h, ++sp, stadt, region, cluster, kk, "sport", sz, i));
+    const stadtVon = new Map(STAEDTE.map((st2) => [st2[0], st2]));
+    const belegung = new Map(STAEDTE.map((st2) => [st2[0], { hartwig: 0, sport: 0 }]));
+    const regulare = [];
+    const sport = [];
+    const fuegeRegulaerEin = (stadt) => {
+      const b3 = belegung.get(stadt);
+      b3.hartwig++;
+      regulare.push({ stadt, nr: b3.hartwig });
+    };
+    for (const stadt of ALT_WARENHAUS_STAEDTE.slice(0, sz.warenhaeuser)) fuegeRegulaerEin(stadt);
+    const alteSport = ALT_SPORT_STAEDTE.slice(0, sz.sporthaeuser);
+    const sportHistorisch = /* @__PURE__ */ new Map();
+    for (const stadt of alteSport) sportHistorisch.set(stadt, (sportHistorisch.get(stadt) ?? 0) + 1);
+    for (const stadt of alteSport) {
+      const b3 = belegung.get(stadt);
+      const st2 = stadtVon.get(stadt);
+      const ziel = b3.sport < st2[4].sport ? stadt : STAEDTE.find(([ort, , , , menge2]) => belegung.get(ort).sport < menge2.sport && menge2.sport > (sportHistorisch.get(ort) ?? 0))?.[0];
+      if (!ziel) throw new Error("Kein Ersatzstandort f\xFCr bestehendes Sporthaus");
+      const bz = belegung.get(ziel);
+      bz.sport++;
+      sport.push({ stadt: ziel, nr: bz.sport });
+    }
+    for (const [stadt, , , , menge2] of STAEDTE) {
+      const b3 = belegung.get(stadt);
+      while (sport.length < sz.sporthaeuser && b3.sport < menge2.sport) {
+        b3.sport++;
+        sport.push({ stadt, nr: b3.sport });
       }
     }
-    let k = 0;
-    while (wh < sz.warenhaeuser || sp < sz.sporthaeuser) {
-      const [stadt, region, cluster, kk] = STAEDTE[k % STAEDTE.length];
-      if (wh < sz.warenhaeuser) haeuser.push(bauHaus(h, ++wh, stadt, region, cluster, kk, "warenhaus", sz, 2));
-      else haeuser.push(bauHaus(h, ++sp, stadt, region, cluster, kk, "sport", sz, 2));
-      k++;
+    if (sport.length !== sz.sporthaeuser) throw new Error("Sport-Standortnetz inkonsistent");
+    for (const [stadt, , , , menge2] of STAEDTE) {
+      const b3 = belegung.get(stadt);
+      while (regulare.length < sz.warenhaeuser && b3.hartwig < menge2.hartwig) fuegeRegulaerEin(stadt);
     }
-    if (!sz.premiumDeaktiviert) kennzeichnePremium(haeuser);
+    if (regulare.length !== sz.warenhaeuser) throw new Error("Hartwig-Standortnetz inkonsistent");
+    const top20 = new Set(STAEDTE.filter((st2) => st2[2] === "grossstadt").slice(0, 20).map((st2) => st2[0]));
+    const a = new Set(regulare.filter((r) => stadtVon.get(r.stadt)[2] === "metropole"));
+    for (const r of regulare) {
+      if (a.size >= 45) break;
+      if (top20.has(r.stadt)) a.add(r);
+    }
+    if (a.size !== 45) throw new Error("Nicht gen\xFCgend A-Standorte in den 20 gr\xF6\xDFten Gro\xDFst\xE4dten");
+    const b2 = new Set(regulare.filter((r) => !a.has(r) && stadtVon.get(r.stadt)[2] === "grossstadt").slice(0, 115));
+    if (b2.size !== 115) throw new Error("Nicht gen\xFCgend B-Standorte in Gro\xDFst\xE4dten");
+    for (const r of regulare) {
+      const [stadt, region, cluster, kk] = stadtVon.get(r.stadt);
+      const premiumInStadt = PREMIUM_HAEUSER.some((p3) => p3.stadt === stadt);
+      const lage = r.nr === 1 && !premiumInStadt ? "1a" : r.nr % 2 === 0 ? "b" : "center";
+      haeuser.push(bauHaus(h, haeuser.filter((x) => x.format === "warenhaus").length + 1, stadt, region, cluster, kk, "warenhaus", sz, r.nr, { hausklasse: a.has(r) ? "A" : b2.has(r) ? "B" : "C", lage }));
+    }
+    let p2 = 0;
+    for (const premium2 of PREMIUM_HAEUSER) {
+      if (sz.premiumDeaktiviert || p2 >= (sz.premiumhaeuser ?? 0)) break;
+      const [stadt, region, cluster, kk] = stadtVon.get(premium2.stadt);
+      haeuser.push(bauHaus(h, sz.warenhaeuser + ++p2, stadt, region, cluster, kk, "warenhaus", sz, 1, { premiumSchluessel: premium2.schluessel, lage: "1a" }));
+    }
+    let si = 0;
+    for (const r of sport) {
+      const [stadt, region, cluster, kk] = stadtVon.get(r.stadt);
+      haeuser.push(bauHaus(h, ++si, stadt, region, cluster, kk, "sport", sz, r.nr));
+    }
+    let ki = 0;
+    let oi = 0;
+    const fundusRng = { rng: (seed ^ 4027408109) >>> 0 };
+    for (const [stadt, region, cluster, kk, menge2] of STAEDTE) {
+      for (let i = 1; i <= menge2.volkskauf && ki < (sz.schwesterhaeuser ?? 0); i++)
+        haeuser.push(bauHaus(h, ++ki, stadt, region, cluster, kk, "schwester", sz, i));
+      for (let i = 1; i <= menge2.fundus && oi < (sz.outlethaeuser ?? 0); i++)
+        haeuser.push(bauHaus(fundusRng, ++oi, stadt, region, cluster, kk, "outlet", sz, i, { outletLage: oi <= 46 ? "rand" : "b" }));
+    }
+    if (!sz.premiumDeaktiviert && (sz.premiumhaeuser ?? 0) > 0) kennzeichnePremium(haeuser);
+    kalibriereStandortumsatz(haeuser);
     if (sz.szenarioRegeln?.fusionDoppelStaedte) {
       const staedte = [...new Set(haeuser.filter((x) => x.format === "warenhaus").map((x) => x.stadt))].slice(0, sz.szenarioRegeln.fusionDoppelStaedte);
+      let wh = haeuser.filter((x) => x.format === "warenhaus").length;
       for (const stadt of staedte) {
         const eintrag2 = STAEDTE.find((x) => x[0] === stadt);
         if (!eintrag2) continue;
         const [, region, cluster, kk] = eintrag2;
-        const alt = bauHaus(h, ++wh, stadt, region, cluster, kk, "warenhaus", sz, 2);
+        const alt = bauHaus(h, ++wh, stadt, region, cluster, kk, "warenhaus", sz, 2, { hausklasse: "C", lage: "b" });
         alt.name = "Volkskauf " + stadt;
         alt.fusionUrsprung = "volkskauf";
         haeuser.push(alt);
@@ -12617,8 +13729,9 @@
     const bestand = [];
     const basisUmsatz = {};
     for (const x of haeuser) {
+      if (x.nurDaten) continue;
       for (const [g, P2] of Object.entries(x.potenzial)) {
-        const qmG = x.flaechen.filter((f) => f.gruppe === g).reduce((a, b2) => a + b2.qm, 0);
+        const qmG = x.flaechen.filter((f) => f.gruppe === g).reduce((a2, b3) => a2 + b3.qm, 0);
         const ist = P2 * (1 - Math.exp(-qmG / x.saettigungQm[g]));
         basisUmsatz[g] = (basisUmsatz[g] ?? 0) + ist;
       }
@@ -12632,11 +13745,11 @@
       verteilung.forEach((v, i) => bestand.push({ gruppe: g, wert: eur(gesamt * v), alter: alter[i], saisonAnteil: d2.saisonAnteil, kostenFaktor: 1 }));
     }
     const beraterQualitaet = {};
-    for (const b2 of BERATER) for (const n of b2.haeuser) beraterQualitaet[n] = zwischen(h, 0.2, 0.95);
-    const umsatzWoche = Object.values(basisUmsatz).reduce((a, b2) => a + (b2 ?? 0), 0);
+    for (const b3 of BERATER) for (const n of b3.haeuser) beraterQualitaet[n] = zwischen(h, 0.2, 0.95);
+    const umsatzWoche = Object.values(basisUmsatz).reduce((a2, b3) => a2 + (b3 ?? 0), 0);
     const zentrale = eur(umsatzWoche * PARAM.zentraleQuote);
     const s2 = {
-      version: 1,
+      version: 2,
       seed,
       rng: h.rng,
       woche: 0,
@@ -12685,6 +13798,7 @@
       makro: { konjunktur: 1, schockStaerke: 0, phase: zwischen(h, 0, Math.PI * 2) },
       meldungen: [],
       historie: [],
+      filialProgramme: {},
       zaehler: 0,
       einmalkostenWoche: 0,
       einmalErloeseWoche: 0,
@@ -12696,9 +13810,9 @@
     };
     s2.hq = erzeugeHq(s2, zentrale);
     s2.vorstand = erzeugeVorstand(s2);
-    s2.hq.sachJeFte -= vorstandKostenWoche(s2) / s2.hq.abteilungen.reduce((a, x) => a + x.fte, 0);
+    s2.hq.sachJeFte -= vorstandKostenWoche(s2) / s2.hq.abteilungen.reduce((a2, x) => a2 + x.fte, 0);
     hqAktualisiere(s2);
-    s2.zentrale.fte = Math.round(s2.hq.abteilungen.reduce((a, x) => a + x.fte, 0));
+    s2.zentrale.fte = Math.round(s2.hq.abteilungen.reduce((a2, x) => a2 + x.fte, 0));
     neueHqAngebote(s2);
     initialeVerbindlichkeiten(s2);
     s2.einkauf = erzeugeEinkauf(s2);
@@ -12706,10 +13820,12 @@
     s2.produkte = erzeugeProdukte(s2);
     s2.marketing.stand = erzeugeMarketing(s2);
     initialisiereMarketing(s2);
+    s2.ecommerce = erzeugeEcommerce(s2);
     initialisiereWettbewerb(s2);
     chronikInitialisieren(s2);
     szenarioStart(s2, sz);
     bildeHauscluster(s2);
+    marktbeobachtungStart(s2);
     initialisiereIt(s2);
     initialisierePlanung(s2);
     initialisiereHausbetrieb(s2);
@@ -12732,13 +13848,14 @@
     }
   }
 
-  // engine/src/wirtschaft.ts
+  // ../engine/src/wirtschaft.ts
   function istAktiv(h) {
     return h.status === "offen" || h.status === "schliessung_verhandlung" || h.status === "raeumung";
   }
   function aktiveFlaeche(h, w) {
     return h.flaechen.filter((f) => (f.umbauBis === void 0 || f.umbauBis <= w) && !h.etagenBau?.[f.etage]?.gesperrt);
   }
+  var MASSSTAB_REALISIERUNG = 1.115;
   function lieferantenFaktor(s2, h, g) {
     let f = 1;
     for (const l of s2.lieferanten) {
@@ -12772,15 +13889,15 @@
     const streik = h.streikBis !== void 0 && h.streikBis > w ? 0.72 : 1;
     const rauschen2 = s2.prognose ? 1 : 1 + 0.025 * normal(s2);
     const zentrale = hqUmsatzFaktor(s2);
-    return makro * image * mkt * substanz * szenarioFrequenz(s2) * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * premiumImageFaktor(h) * hausclusterFaktor(s2, h) * itHausFaktor(s2, h) * hausBetriebsFaktor(s2, h) * umbauFrequenzFaktor(h);
+    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * MASSSTAB_REALISIERUNG * schwierigkeit(s2).kaufneigung * premiumImageFaktor(h) * programmNachfrageFaktor(s2) * szenarioFrequenz(s2) * hausclusterFaktor(s2, h) * itHausFaktor(s2, h) * hausBetriebsFaktor(s2, h) * umbauFrequenzFaktor(h);
   }
   function saettigung(qm, Q) {
     return Q > 0 ? 1 - Math.exp(-qm / Q) : 0;
   }
   function simuliereHaus(s2, h) {
     const w = s2.woche;
-    const roh2 = { haus: h, eigen: {}, kommission: {}, offprice: 0, konzessionUmsatz: 0, untermiete: 0, fteBedarf: 0, ohneAktion: 0, ohneAktionRohertrag: 0 };
-    if (!istAktiv(h)) return roh2;
+    const roh2 = { haus: h, eigen: {}, kommission: {}, offprice: 0, konzessionUmsatz: 0, untermiete: 0, fteBedarf: 0, fteIst: 0, ohneAktion: 0, ohneAktionRohertrag: 0 };
+    if (!istAktiv(h) || h.nurDaten) return roh2;
     const hf = hausFaktor(s2, h);
     const fl = aktiveFlaeche(h, w);
     const raeumung2 = h.status === "raeumung";
@@ -12821,10 +13938,12 @@
     summeBasis += offBasis;
     summeBedarf += offBasis;
     const p2 = h.personal;
-    const fteIst = p2.vollzeit + p2.teilzeit + p2.aushilfen;
+    const einsatz = personalEinsatz(h);
+    const fteIst = einsatz.fte;
+    roh2.fteIst = fteIst;
     roh2.fteBedarf = qmVerkauf / PARAM.qmJeFte * (h.klasse === "premium" ? 1.15 : 1) + summeBedarf / PARAM.umsatzJeFte;
     const besetzung = roh2.fteBedarf > 0 ? Math.pow(clamp(fteIst / roh2.fteBedarf / hqBesetzungsNorm(s2), 0, 1), 0.5) : 1;
-    const ahQuote = fteIst > 0 ? p2.aushilfen / fteIst : 0;
+    const ahQuote = fteIst > 0 ? einsatz.aushilfen / fteIst : 0;
     const basisJe = {};
     const tEJe = {};
     for (const g of alleGruppen) {
@@ -12857,22 +13976,51 @@
     }
     return wirkeTreiber(h, roh2);
   }
-  function lohnKosten(s2, h) {
+  function personalEinsatz(h) {
     const p2 = h.personal;
+    const referenz = p2.umsatzReferenzWoche;
+    const vorwoche = h.kpi?.umsatz;
+    const delta = referenz && referenz > 0 && vorwoche !== void 0 ? clamp(vorwoche / referenz - 1, -0.55, 0.35) : 0;
+    const vollzeit = p2.vollzeit;
+    const teilzeit = p2.teilzeit * (1 + delta * 0.6);
+    const aushilfen = p2.aushilfen * (1 + delta);
+    return { vollzeit, teilzeit, aushilfen, fte: vollzeit + teilzeit + aushilfen };
+  }
+  function lohnKosten(s2, h) {
+    const p2 = personalEinsatz(h);
     const tarifF = s2.tarif === "sanierung" ? 0.93 : s2.tarif === "ohne" ? 0.89 : 1;
-    const leitungDelta = h.betrieb && !s2.hausbetriebAbnahmeAus ? ((p2.filialleiter.gehalt ?? h.betrieb.leitungGehaltStart) - h.betrieb.leitungGehaltStart) / 52 : 0;
-    return (p2.vollzeit * PARAM.lohnVollzeit + p2.teilzeit * PARAM.lohnTeilzeit) * tarifF + p2.aushilfen * PARAM.lohnAushilfe + leitungDelta;
+    const leitungDelta = h.betrieb && !s2.hausbetriebAbnahmeAus ? ((h.personal.filialleiter.gehalt ?? h.betrieb.leitungGehaltStart) - h.betrieb.leitungGehaltStart) / 52 : 0;
+    return ((p2.vollzeit * PARAM.lohnVollzeit + p2.teilzeit * PARAM.lohnTeilzeit) * tarifF + p2.aushilfen * PARAM.lohnAushilfe) * (1 - programmErsparnis(s2, "personal")) + leitungDelta;
+  }
+  function nebenvertragsErtraege(h, umsatzAmPos, woche2) {
+    const v = h.nebenvertrag;
+    if (!v || !istAktiv(h) || h.nurDaten) return { werbeflaechen: 0, dienstleistungen: 0 };
+    const qmBespielt = aktiveFlaeche(h, woche2).filter((f) => f.konzept === "eigen" || f.konzept === "kommission" || f.konzept === "offprice").reduce((sum2, f) => sum2 + f.qm, 0);
+    const werbeflaechen = Math.min(v.werbeflaecheQm, qmBespielt * 0.075) * v.werbeEuroJeQmWoche;
+    const bons = Math.floor(Math.max(0, umsatzAmPos) / v.durchschnittsBonEuro);
+    return { werbeflaechen: eur(werbeflaechen), dienstleistungen: eur(bons * v.dienstleistungEuroJeBon) };
   }
   function hausKosten(s2, h, umsatzEigen, umsatzGesamt) {
-    const k = { personal: 0, miete: 0, nebenkosten: 0, sonstige: 0, logistik: 0, personalCash: 0 };
+    const k = {
+      personal: 0,
+      miete: 0,
+      nebenkosten: 0,
+      sonstige: 0,
+      logistik: 0,
+      personalCash: 0,
+      guv: leereFilialGuV()
+    };
     if (h.status === "verkauft") return k;
     if (h.status === "geschlossen") {
       if (h.restmieteBis !== void 0 && h.restmieteBis > s2.woche) k.miete = h.restmieteWoche ?? 0;
       return k;
     }
+    const guv = k.guv;
+    const form = h.klasse === "premium" ? 1.16 : h.format === "outlet" ? 0.77 : h.format === "sport" ? 0.93 : h.format === "schwester" ? 0.94 : 1;
     k.personal = lohnKosten(s2, h) + personalZusatzkosten(h);
     if (!s2.hausbetriebAbnahmeAus && s2.hausbetrieb?.staedte[h.stadt]?.sonntage.includes(s2.woche)) k.personal *= 1.18;
-    k.miete = h.miete.mieteWoche;
+    guv.personal = k.personal;
+    k.miete = guv.miete = h.miete.mieteWoche * (1 - programmErsparnis(s2, "miete"));
     let qmNk = 0;
     let qmBetrieb = 0;
     for (const f of h.flaechen) {
@@ -12880,9 +14028,25 @@
       qmNk += f.qm;
       qmBetrieb += f.konzept === "leer" ? f.qm * 0.25 : f.qm;
     }
-    k.nebenkosten = h.miete.netTyp === "net" ? 0 : qmNk * h.miete.nebenkostenQmWoche;
-    k.sonstige = hausBetriebskosten(s2, h, PARAM.sonstigeQuote * umsatzGesamt + PARAM.sonstigeQm * qmBetrieb + premiumServiceQuote(h) * umsatzGesamt) + personalFehlerkosten(h);
-    k.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s2);
+    guv.mietnebenkosten = k.nebenkosten = (h.miete.netTyp === "net" ? 0 : qmNk * h.miete.nebenkostenQmWoche) * (1 - programmErsparnis(s2, "mietnebenkosten"));
+    guv.logistik = k.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s2) * (1 - programmErsparnis(s2, "logistik")) * (h.format === "outlet" ? 0.9 : 1);
+    guv.fremdkraefte = umsatzGesamt * 7e-3 * form * (1 - programmErsparnis(s2, "fremdkraefte"));
+    guv.unterhalt = umsatzGesamt * 0.019 * form * (1 + Math.max(0, 55 - h.substanz) / 400) * (1 - programmErsparnis(s2, "unterhalt"));
+    guv.zahlungsverkehr = umsatzGesamt * 2e-3 * (1 - programmErsparnis(s2, "zahlungsverkehr"));
+    guv.facilityManagement = umsatzGesamt * 0.017 * form * (1 - programmErsparnis(s2, "facilityManagement"));
+    guv.energie = umsatzGesamt * 0.024 * form * (1 - programmErsparnis(s2, "energie"));
+    guv.it = umsatzGesamt * 3e-3 * (1 - programmErsparnis(s2, "it"));
+    guv.administration = umsatzGesamt * 2e-3 * (1 - programmErsparnis(s2, "administration"));
+    guv.uebrigeAufwendungen = umsatzGesamt * 4e-3 * (1 - programmErsparnis(s2, "uebrigeAufwendungen"));
+    {
+      const zeilen = ["fremdkraefte", "unterhalt", "zahlungsverkehr", "facilityManagement", "energie", "it", "administration", "uebrigeAufwendungen"];
+      const basis3 = zeilen.reduce((sum2, z2) => sum2 + guv[z2], 0);
+      const betrieb2 = hausBetriebskosten(s2, h, basis3);
+      const skala = basis3 > 0 ? betrieb2 / basis3 : 1;
+      for (const z2 of zeilen) guv[z2] *= skala;
+      guv.uebrigeAufwendungen += personalFehlerkosten(h);
+      k.sonstige = zeilen.reduce((sum2, z2) => sum2 + guv[z2], 0);
+    }
     return k;
   }
   function leereKpi(w) {
@@ -12895,7 +14059,7 @@
     return r;
   }
 
-  // engine/src/prozesse.ts
+  // ../engine/src/prozesse.ts
   var SCHLIESSUNGEN_WOCHE = /* @__PURE__ */ new WeakMap();
   var abfindungJeFte2 = (s2) => s2.phase === "insolvenz" ? PARAM.abfindungInsolvenz : PARAM.abfindungRegulaer;
   function einmalKosten(s2, betrag) {
@@ -12909,6 +14073,7 @@
     return (h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen) / Math.max(1, gesamtFte(s2));
   }
   function starteSchliessung(s2, h, opts = {}) {
+    if (h.nurDaten) return `${h.name} wird erst mit Aktivierung seines Formats steuerbar.`;
     if (h.status !== "offen") return `${h.name} ist nicht offen.`;
     if (h.standortgarantie) return `${h.name} steht unter Standortgarantie aus dem Sanierungstarifvertrag.`;
     const br = s2.stakeholder.betriebsrat;
@@ -12920,27 +14085,46 @@
     melde(s2, "presse", `${h.name} soll schlie\xDFen. Betriebsrat und Gesch\xE4ftsf\xFChrung verhandeln \xFCber Interessenausgleich und Sozialplan (ca. ${dauer} Wochen).`, { stadt: h.stadt, hausId: h.id });
     return null;
   }
+  function schliessungsFolgekosten(s2, h, bisSchliessung = 0) {
+    const schliessWoche = s2.woche + Math.max(0, bisSchliessung);
+    const fte2 = h.personal.vollzeit + h.personal.teilzeit;
+    const sozialplan = eur(fte2 * abfindungJeFte2(s2) * hqRechtFaktor(s2));
+    const untermiete = h.flaechen.reduce((a, f) => a + (f.konzept === "untermiete" && f.mieter ? f.mieter.mieteWoche : 0), 0);
+    const vertragWochen = s2.phase === "insolvenz" ? 13 : h.miete.vermieter === "eigentuemer" ? 26 : 52;
+    const restmieteWochen = Math.max(0, Math.min(vertragWochen, h.miete.bisWoche - schliessWoche));
+    const restmieteWoche = eur(Math.max(0, h.miete.mieteWoche - untermiete) * hqRechtFaktor(s2));
+    return {
+      sozialplan,
+      restmieteWoche,
+      restmieteWochen,
+      gesamt: sozialplan + restmieteWoche * restmieteWochen
+    };
+  }
   function schliesseEndgueltig(s2, h) {
     const w = s2.woche;
     const fte2 = h.personal.vollzeit + h.personal.teilzeit;
-    const sozialplan = fte2 * abfindungJeFte2(s2) * hqRechtFaktor(s2);
+    const { sozialplan, restmieteWoche, restmieteWochen } = schliessungsFolgekosten(s2, h);
     einmalKosten(s2, sozialplan);
-    const untermiete = h.flaechen.reduce((a, f) => a + (f.konzept === "untermiete" && f.mieter ? f.mieter.mieteWoche : 0), 0);
-    let wochen;
-    if (s2.phase === "insolvenz") wochen = 13;
-    else if (h.miete.vermieter === "eigentuemer") wochen = 26;
-    else wochen = 52;
-    wochen = Math.max(0, Math.min(wochen, h.miete.bisWoche - w));
-    h.restmieteWoche = eur(Math.max(0, h.miete.mieteWoche - untermiete) * hqRechtFaktor(s2));
-    h.restmieteBis = w + wochen;
+    h.restmieteWoche = restmieteWoche;
+    h.restmieteBis = w + restmieteWochen;
     h.status = "geschlossen";
     h.statusBis = void 0;
     h.personal.vollzeit = 0;
     h.personal.teilzeit = 0;
     h.personal.aushilfen = 0;
     h.flaechen = h.flaechen.map((f) => ({ ...f, konzept: "leer", gruppe: void 0, mieter: void 0, lieferantId: void 0, umbauBis: void 0, umbauZiel: void 0 }));
-    const nachbarn = s2.haeuser.filter((x) => x !== h && x.stadt === h.stadt && x.format === h.format && x.status === "offen");
-    for (const n of nachbarn) n.transferBonus += 0.1 / nachbarn.length;
+    const lokal3 = s2.haeuser.filter((x) => x !== h && !x.nurDaten && x.stadt === h.stadt && x.format === h.format && x.status === "offen");
+    const regional = s2.haeuser.filter((x) => x !== h && !x.nurDaten && x.region === h.region && x.format === h.format && x.status === "offen");
+    const nachbarn = lokal3.length ? lokal3 : regional;
+    const abgang = h.kpi?.umsatz ?? 0;
+    const umsatzNachbarn = nachbarn.reduce((a, x) => a + (x.kpi?.umsatz ?? 0), 0);
+    if (abgang > 0 && umsatzNachbarn > 0) {
+      for (const n of nachbarn) {
+        const basis3 = Math.max(1, n.kpi?.umsatz ?? 0);
+        const anteil3 = (n.kpi?.umsatz ?? 0) / umsatzNachbarn;
+        n.transferBonus += 0.3 * abgang * anteil3 / basis3;
+      }
+    }
     const st2 = s2.stakeholder;
     st2.betriebsrat = clamp(st2.betriebsrat - (s2.phase === "insolvenz" ? 15 : 30) * (fte2 / Math.max(1, gesamtFte(s2) + fte2)), 0, 100);
     const sw = SCHLIESSUNGEN_WOCHE.get(s2);
@@ -13022,7 +14206,9 @@
     s2.insolvenzenGesamt += 1;
     s2.zahlungsstockungSeit = void 0;
     s2.insolvenz = { seit: w, versammlung: w + 20, altVerbindlichkeiten: eur(alt), insolvenzgeldBis: w + 12, quote: 0.1, grund: grund2 };
-    s2.kreditlinie = 25e6;
+    const nettoUmsatzJahr = Object.values(s2.basisUmsatz).reduce((a, u) => a + (u ?? 0), 0) * 52;
+    const volumen = Math.max(1, nettoUmsatzJahr / 31e8);
+    s2.kreditlinie = eur(25e6 * volumen);
     const st2 = s2.stakeholder;
     st2.kreditversicherer = clamp(st2.kreditversicherer - 20, 0, 100);
     st2.bank = clamp(st2.bank - 15, 0, 100);
@@ -13050,7 +14236,9 @@
       planEbitda = 0;
       for (let i = 0; i < 52 && klon.phase === "regulaer"; i++) planEbitda += planWoche2(klon);
     }
-    const planBonus = planEbitda > 0 ? 15 : planEbitda > schwierigkeit(s2).versammlungSchwelle ? 5 : -10;
+    const konzernJahresumsatzStart = s2.zentrale.kostenStart / PARAM.zentraleQuote * 52;
+    const schwelle = schwierigkeit(s2).versammlungSchwelle * Math.max(1, konzernJahresumsatzStart / 33e8);
+    const planBonus = planEbitda > 0 ? 15 : planEbitda > schwelle ? 5 : -10;
     const quoteBonus = 60 * (ins.quote - 0.1);
     const zahlung = ins.quote * ins.altVerbindlichkeiten;
     const st2 = s2.stakeholder;
@@ -13104,7 +14292,8 @@
     const ist = s2.historie.filter((k) => k.woche >= q2.start && k.woche < q2.start + 13).reduce((a, b2) => a + b2.ebitda, 0);
     q2.ebitdaIst = eur(ist);
     const plan2 = q2.plan ?? q2.planStandard;
-    const tol = Math.max(2e6, 0.12 * Math.abs(plan2));
+    const volumen = Math.max(1, Object.values(s2.basisUmsatz).reduce((a, u) => a + (u ?? 0), 0) * 52 / 31e8);
+    const tol = Math.max(2e6 * volumen, 0.12 * Math.abs(plan2));
     const st2 = s2.stakeholder;
     const ambitioniert = plan2 >= q2.planStandard;
     if (ist >= plan2 - 0.25 * tol) {
@@ -13114,8 +14303,8 @@
       const vorjahr2 = s2.quartale.find((x) => x.nr === q2.nr - 4);
       const besser = vorjahr2 ? ist > vorjahr2.ebitdaIst : ist > q2.planStandard + 0.1 * Math.abs(q2.planStandard);
       if (!besser) txt += " Ohne sichtbare Verbesserung gegen\xFCber dem Vorjahr gibt es kein frisches Geld.";
-      if (s2.phase === "regulaer" && besser && (runwayWochen(s2) < 26 || s2.cash + s2.kreditlinie < 15e7)) {
-        const kapital = eur(12e6 * (st2.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
+      if (s2.phase === "regulaer" && besser && (runwayWochen(s2) < 26 || s2.cash + s2.kreditlinie < 15e7 * volumen)) {
+        const kapital = eur(12e6 * volumen * (st2.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
         s2.cash += kapital;
         s2.einmalErloeseWoche += kapital;
         s2.eigentuemer.kapitalZugefuehrt += kapital;
@@ -13146,9 +14335,9 @@
     return s2.haeuser.reduce((a, h) => a + (h.status === "geschlossen" ? 0 : lohnKosten(s2, h)), 0);
   }
 
-  // engine/src/ereignisse.ts
+  // ../engine/src/ereignisse.ts
   function offeneHaeuser(s2, format) {
-    return s2.haeuser.filter((h) => h.status === "offen" && (!format || h.format === format));
+    return s2.haeuser.filter((h) => !h.nurDaten && h.status === "offen" && (!format || h.format === format));
   }
   function neueEntscheidung(s2, e) {
     if (s2.prognose) return;
@@ -13730,7 +14919,7 @@
     }
   }
 
-  // engine/src/erfolge.ts
+  // ../engine/src/erfolge.ts
   var ERFOLGE_AKTIV = true;
   var d = (id, titel, gruppe2, stufe2, hinweis, ziel, wert, geheim = false) => ({ id, titel, gruppe: gruppe2, stufe: stufe2, hinweis, ziel, wert, ...geheim ? { geheim: true } : {} });
   var bool = (test) => (s2, k) => Number(test(s2, k));
@@ -13849,15 +15038,35 @@
     };
   }
 
-  // engine/src/engine.ts
+  // ../engine/src/engine.ts
   function neuesSpiel(seed = 1, szenario = STANDARD_SZENARIO) {
     return neueWelt(seed, { ...STANDARD_SZENARIO, ...szenario });
   }
   var beendet = (s2) => s2.phase === "zerschlagen";
+  function quartalsPlanSchnell(s2) {
+    const aktiv5 = s2.haeuser.filter((h) => !h.nurDaten && h.status !== "geschlossen");
+    const letzte = s2.historie.slice(-13);
+    const basisRoh = Object.entries(s2.basisUmsatz).reduce((sum2, [g, u]) => sum2 + u * GRUPPEN[g].marge, 0);
+    const basisUmsatz = Object.values(s2.basisUmsatz).reduce((sum2, u) => sum2 + (u ?? 0), 0);
+    const basisPersonal = aktiv5.reduce((sum2, h) => sum2 + h.personal.vollzeit * PARAM.lohnVollzeit + h.personal.teilzeit * PARAM.lohnTeilzeit + h.personal.aushilfen * PARAM.lohnAushilfe, 0);
+    const basisMiete = aktiv5.reduce((sum2, h) => sum2 + h.miete.mieteWoche, 0);
+    const basis3 = letzte.length ? letzte.reduce((sum2, k) => sum2 + k.ebitda, 0) / letzte.length : basisRoh - basisPersonal - basisMiete - s2.zentrale.kostenWoche - basisUmsatz * (PARAM.marketingQuote + PARAM.logistikQuote + PARAM.sonstigeQuote);
+    const vorigeStartwoche = letzte.length ? s2.woche - letzte.length : s2.woche;
+    let saisonDelta = 0;
+    for (const [g, u] of Object.entries(s2.basisUmsatz)) {
+      let alt = 0;
+      let neu = 0;
+      for (let i = 0; i < 13; i++) {
+        alt += saisonFaktor(g, vorigeStartwoche + i);
+        neu += saisonFaktor(g, s2.woche + i);
+      }
+      saisonDelta += u * GRUPPEN[g].marge * (neu - alt);
+    }
+    return eur(basis3 * 13 + saisonDelta);
+  }
   function quartalsStart(s2) {
     if (s2.prognose || s2.woche % 13 !== 0) return;
-    const p2 = vorschau(s2, 13);
-    s2.quartale.push({ nr: s2.quartale.length, start: s2.woche, planStandard: eur(p2.reduce((a, b2) => a + b2.ebitda, 0)), ebitdaIst: 0 });
+    s2.quartale.push({ nr: s2.quartale.length, start: s2.woche, planStandard: quartalsPlanSchnell(s2), ebitdaIst: 0 });
   }
   function wocheAbspielen(s2) {
     if (s2.phase === "zerschlagen" || s2.ende && !s2.spielendeFortgesetzt && !s2.prognose) throw new Error("Spiel beendet. Bitte ein neues Spiel beginnen oder zul\xE4ssig weiterspielen.");
@@ -13882,7 +15091,7 @@
     wareneingang(s2, lohn * 2);
     const warenVorkasse = s2.cash - vorWareneingang;
     wareWoche(s2);
-    const roh2 = s2.haeuser.map((h) => simuliereHaus(s2, h));
+    const roh2 = s2.haeuser.filter((h) => !h.nurDaten).map((h) => simuliereHaus(s2, h));
     wareBedarf(s2, roh2);
     const nachfrage = einkaufNachfrage(s2, roh2);
     const bedarf = {};
@@ -13899,11 +15108,13 @@
       if (bedarf[g] === void 0) s2.basisUmsatz[g] = 0.85 * (s2.basisUmsatz[g] ?? 0);
     }
     const { verfuegbar: verfuegbar2, einsatz } = einkaufVerbrauch(s2, nachfrage);
-    const offUmsatz = { warenhaus: 0, sport: 0 };
+    const offUmsatz = { warenhaus: 0, sport: 0, schwester: 0, outlet: 0 };
     for (const r of roh2) offUmsatz[r.haus.format] += r.offprice;
     const offEinsatz = {
       warenhaus: verbraucheAltwareWg(s2, "warenhaus", offUmsatz.warenhaus * 0.7),
-      sport: verbraucheAltwareWg(s2, "sport", offUmsatz.sport * 0.7)
+      sport: verbraucheAltwareWg(s2, "sport", offUmsatz.sport * 0.7),
+      schwester: { gebucht: 0, zukauf: 0 },
+      outlet: { gebucht: 0, zukauf: 0 }
     };
     const k = {
       woche: w,
@@ -13913,6 +15124,8 @@
       konzession: 0,
       untermiete: 0,
       wkz: 0,
+      werbeflaechen: 0,
+      dienstleistungen: 0,
       personal: 0,
       miete: 0,
       nebenkosten: 0,
@@ -13929,6 +15142,7 @@
       offeneHaeuser: 0,
       fte: 0
     };
+    const hausBuchungen = [];
     const umsatzEigenJe = {};
     let kommissionAuszahlung = 0;
     let restmieten = 0;
@@ -13940,7 +15154,7 @@
       let umsatzEigen = 0;
       for (const [g, v] of Object.entries(r.eigen)) {
         const f = verfuegbar2[g] ?? 1;
-        const u = v.umsatz * f * preisFaktorHaus(s2, h, g);
+        const u = v.umsatz * f * (1 + programmErsparnis(s2, "sortiment")) * preisFaktorHaus(s2, h, g);
         const anteil3 = (bruttoSumme[g] ?? 0) > 0 ? v.brutto / (bruttoSumme[g] ?? 1) : 0;
         const e = (einsatz[g] ?? 0) * anteil3;
         umsatzEigen += u;
@@ -13968,6 +15182,12 @@
       kpi.umsatz += gastro.umsatz;
       kpi.rohertrag += gastro.rohertrag;
       const kosten = hausKosten(s2, h, umsatzEigen, kpi.umsatz);
+      const neben = nebenvertragsErtraege(h, kpi.umsatz, w);
+      k.werbeflaechen += neben.werbeflaechen;
+      k.dienstleistungen += neben.dienstleistungen;
+      if (h.personal.umsatzReferenzWoche === void 0 && kpi.umsatz > 0 && h.status === "offen") {
+        h.personal.umsatzReferenzWoche = eur(kpi.umsatz);
+      }
       kosten.personal += gastro.personal;
       kosten.sonstige += gastro.sonstige;
       kpi.personal = kosten.personal;
@@ -13975,11 +15195,11 @@
       if (h.status === "geschlossen") restmieten += kosten.miete;
       kpi.nebenkosten = kosten.nebenkosten;
       kpi.sonstige = kosten.sonstige + kosten.logistik;
+      hausBuchungen.push({ haus: h, kpi, kosten, neben });
       kpi.db = kpi.rohertrag + kpi.konzessionserloes + kpi.untermiete - kpi.personal - kpi.miete - kpi.nebenkosten - kpi.sonstige;
       kpi.fteBedarf = r.fteBedarf;
-      kpi.fteIst = h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen;
+      kpi.fteIst = r.fteIst;
       if (h.status !== "geschlossen" && h.status !== "verkauft") h.kpi = rundeKpi(kpi);
-      statistikHaus(s2, h, rundeKpi(kpi));
       k.umsatz += kpi.umsatz;
       k.rohertrag += kpi.rohertrag;
       k.konzession += kpi.konzessionserloes;
@@ -14004,25 +15224,48 @@
     }
     const einsatzSumme = Object.values(einsatz).reduce((a, b2) => a + (b2 ?? 0), 0);
     k.wkz = k.wkz * hqWkzFaktor(s2) + einsatzSumme * hqEinkaufKonditionen(s2);
+    ecommerceWoche(s2, k);
     k.zentrale = s2.zentrale.kostenWoche;
     restmieten += hqRestmieteWoche(s2);
     const markenBudget = s2.eigenmarken.marken.reduce((x, m) => x + (istVerkaufsaktiv(m) || m.status === "aufbau" ? m.budgetWoche : 0), 0);
     const mk2 = marketingKosten(s2, k.umsatz);
-    k.marketing = mk2.netto + markenBudget;
+    k.marketing = (mk2.netto + markenBudget) * (1 - programmErsparnis(s2, "werbung"));
     k.beratung = s2.berater.filter((b2) => w >= b2.start && w < b2.ende).reduce((x, b2) => x + b2.wochenSatz, 0);
     k.abschriften = einkaufAltern(s2) + (s2.ware?.inventurAufwandWoche ?? 0);
     verdichteWare(s2);
     k.rohertrag -= k.abschriften;
+    const gesamtFilialGuV = leereFilialGuV();
+    for (const { haus: haus2, kpi, kosten, neben } of hausBuchungen) {
+      const anteil3 = k.umsatz > 0 ? kpi.umsatz / k.umsatz : 0;
+      const g = kosten.guv;
+      g.umsatz = kpi.umsatz;
+      g.abschriften = k.abschriften * anteil3;
+      g.bruttogewinn = kpi.rohertrag - g.abschriften;
+      g.wareneinsatz = g.umsatz - g.bruttogewinn;
+      g.werbeflaechen = neben.werbeflaechen;
+      g.dienstleistungen = neben.dienstleistungen;
+      g.uebrigeErtraege = kpi.konzessionserloes + kpi.untermiete + k.wkz * anteil3 + g.werbeflaechen + g.dienstleistungen;
+      g.werbung = k.marketing * anteil3;
+      for (const key of Object.keys(g)) g[key] = eur(g[key]);
+      g.wareneinsatz = g.umsatz - g.bruttogewinn;
+      guvAbschluss(g);
+      kpi.guv = g;
+      kpi.db = g.ebitda;
+      if (haus2.status !== "geschlossen" && haus2.status !== "verkauft") haus2.kpi = rundeKpi(kpi);
+      statistikHaus(s2, haus2, rundeKpi(kpi));
+      guvAddiere(gesamtFilialGuV, g);
+    }
+    k.filialGuV = gesamtFilialGuV;
     eigenmarkenWoche(s2, einkaufBuchen(s2, umsatzEigenJe));
     produkteBuchen(s2);
     s2.marketing.gewoehnung = Math.max(0, s2.marketing.gewoehnung * 0.99);
     personalCash += planungBonusWoche(s2, k);
-    k.ebitda = k.rohertrag + k.konzession + k.untermiete + k.wkz - k.personal - k.miete - k.nebenkosten - k.sonstige - k.logistik - k.zentrale - k.marketing - k.beratung;
+    k.ebitda = k.rohertrag + k.konzession + k.untermiete + k.wkz + k.werbeflaechen + k.dienstleistungen - k.personal - k.miete - k.nebenkosten - k.sonstige - k.logistik - k.zentrale - k.marketing - k.beratung;
     k.sondereffekte = s2.einmalErloeseWoche - s2.einmalkostenWoche - restmieten;
     marketingAbschluss(s2, k.umsatz, mk2);
     einkaufDispo(s2);
     const zinsen = Math.max(0, -s2.cash) * (PARAM.zinsSatz / 52);
-    const einzahlung = k.umsatz + k.konzession + k.untermiete + k.wkz;
+    const einzahlung = k.umsatz + k.konzession + k.untermiete + k.wkz + k.werbeflaechen + k.dienstleistungen;
     const pflicht = kommissionAuszahlung + personalCash + k.miete + restmieten + k.nebenkosten + k.sonstige + k.logistik + k.zentrale + k.marketing + k.beratung + zinsen + offEinsatz.warenhaus.zukauf + offEinsatz.sport.zukauf;
     s2.cash += eur(einzahlung - pflicht);
     if (insolvenzgeld && s2.insolvenz) s2.insolvenz.altVerbindlichkeiten += eur(k.personal);
@@ -14067,6 +15310,7 @@
     k.kreditFrei = eur(s2.cash + s2.kreditlinie);
     s2.einmalkostenWoche = 0;
     s2.einmalErloeseWoche = 0;
+    marktbeobachtungWoche(s2);
     zeitungWoche(s2);
     s2.woche += 1;
     chronikAktualisieren(s2, w);
@@ -14135,7 +15379,7 @@
     return out;
   }
 
-  // engine/scripts/bot.ts
+  // ../engine/scripts/bot.ts
   function einkaufStandard(s2) {
     if (!s2.einkauf.freigaben.length) return;
     let offen = 0;
@@ -14149,11 +15393,24 @@
     if (k > 0.02) for (const f of s2.einkauf.freigaben.filter((x) => x.typ === "vororder")) fuehreAus(s2, { typ: "freigabeKuerzen", id: f.id, prozent: k });
     fuehreAus(s2, { typ: "sammelfreigabe" });
   }
+  function aktivesPortfolio(s2) {
+    const ids = new Set(s2.haeuser.filter((h) => !h.nurDaten).map((h) => h.id));
+    return portfolio(s2).filter((x) => x.status === "offen" && ids.has(x.id));
+  }
+  var TIEF_SCHLIESSUNGSQUOTE = 50 / 180;
+  var REGULAER_SCHLIESSUNGSQUOTE = 35 / 180;
   function botTief(s2, log = false) {
-    if (s2.szenario?.id === "investor" || s2.szenario?.id === "aufbruch") {
-      botRegulaer(s2, log);
-    } else {
-      botTiefBasis(s2, log, true);
+    for (const e of s2.entscheidungen.filter((x) => x.typ === "interview")) fuehreAus(s2, { typ: "entscheiden", id: e.id, option: "sachlich" });
+    if (s2.szenario?.id === "investor" || s2.szenario?.id === "aufbruch") botRegulaer(s2, log);
+    else botTurnaround(s2, log);
+    const umsatzWoche = s2.historie.at(-1)?.umsatz ?? Object.values(s2.basisUmsatz).reduce((sum2, u) => sum2 + (u ?? 0), 0);
+    const ueberfaellig = s2.verbindlichkeiten.some((v) => v.ueberfaelligSeit !== void 0);
+    const notlage = s2.woche >= 3 && s2.phase === "regulaer" && s2.insolvenzenGesamt === 0 && runwayWochen(s2) < 8 && (freieLiquiditaet(s2) < 2 * umsatzWoche || ueberfaellig);
+    if (notlage) {
+      botTiefBasis(s2, log, true, einkaufStandard, s2.woche);
+    } else if (s2.phase === "insolvenz") {
+      const frisch = !!s2.insolvenz && s2.woche <= s2.insolvenz.seit + 1 && !s2.haeuser.some((h) => h.status === "schliessung_verhandlung" || h.status === "raeumung");
+      botTiefBasis(s2, log, true, einkaufStandard, frisch ? s2.woche : -1);
     }
     if (s2.szenario?.id === "lockdown") {
       for (const angebot of s2.angebote.filter((a) => a.typ === "staatshilfe" && a.status === "offen")) {
@@ -14171,7 +15428,7 @@
       if (haus2) fuehreAus(s2, { typ: "immobilieVerkaufen", haus: haus2.id });
     }
   }
-  function botTiefBasis(s2, log, zentralePauschal, einkauf = einkaufStandard) {
+  function botTiefBasis(s2, log, zentralePauschal, einkauf = einkaufStandard, antragWoche = 3) {
     const w = s2.woche;
     const tu2 = (a) => {
       const r = fuehreAus(s2, a);
@@ -14179,15 +15436,16 @@
       return r;
     };
     for (const e of s2.entscheidungen.filter((x) => x.typ === "interview")) tu2({ typ: "entscheiden", id: e.id, option: "sachlich" });
-    if (w === 3) {
+    if (w === antragWoche) {
       tu2({ typ: "orderLevel", gruppe: "alle", level: 0.88 });
       tu2({ typ: "marketingBudget", quote: 0.018 });
-      tu2({ typ: "insolvenzAntrag" });
+      if (s2.phase === "regulaer") tu2({ typ: "insolvenzAntrag" });
       if (zentralePauschal) tu2({ typ: "zentrale", prozent: 0.3 });
       const premiumIds = new Set(s2.haeuser.filter((h) => h.klasse === "premium").map((h) => h.id));
-      const p2 = portfolio(s2).filter((x) => x.status === "offen" && !premiumIds.has(x.id)).sort((a, b2) => a.db / Math.max(1, a.umsatz) - b2.db / Math.max(1, b2.umsatz));
-      for (const x of p2.slice(0, 50)) tu2({ typ: "schliessen", haus: x.id });
-      for (const x of p2.slice(50).filter((x2) => x2.mietquote > 0.12)) tu2({ typ: "mieteVerhandeln", haus: x.id, reduktion: 0.2 });
+      const p2 = aktivesPortfolio(s2).filter((x) => !premiumIds.has(x.id)).sort((a, b2) => a.db / Math.max(1, a.umsatz) - b2.db / Math.max(1, b2.umsatz));
+      const schliessungen = Math.round(p2.length * TIEF_SCHLIESSUNGSQUOTE);
+      for (const x of p2.slice(0, schliessungen)) tu2({ typ: "schliessen", haus: x.id });
+      for (const x of p2.slice(schliessungen).filter((x2) => x2.mietquote > 0.12)) tu2({ typ: "mieteVerhandeln", haus: x.id, reduktion: 0.2 });
       for (const h of s2.haeuser.filter((x) => x.status === "offen" && x.kpi)) {
         const ist = h.kpi.fteIst, bedarf = h.kpi.fteBedarf;
         if (ist > bedarf * 1.02) tu2({ typ: "personalabbau", haeuser: [h.id], prozent: Math.min(0.2, (ist - bedarf) / ist) });
@@ -14207,10 +15465,7 @@
     }
     einkauf(s2);
   }
-  function botRegulaer(s2, log = false) {
-    botRegulaerBasis(s2, log, 0.25);
-  }
-  function botRegulaerBasis(s2, log, zentralePauschal) {
+  function botTurnaround(s2, log = false) {
     const w = s2.woche;
     const tu2 = (a) => {
       const r = fuehreAus(s2, a);
@@ -14219,17 +15474,76 @@
     };
     if (w === 0) {
       tu2({ typ: "berater", beraterTyp: "sanierung" });
-      if (zentralePauschal > 0) tu2({ typ: "zentrale", prozent: zentralePauschal });
-      tu2({ typ: "orderLevel", gruppe: "alle", level: 0.85 });
+      tu2({ typ: "zentrale", prozent: 0.12 });
+      tu2({ typ: "marketingBudget", quote: 0.018 });
+      for (const programm of Object.keys(FILIAL_PROGRAMME)) {
+        tu2({ typ: "filialProgramm", programm });
+      }
+      tu2({ typ: "wgServicegrad", wg: "alle", ziel: 0.98 });
+      tu2({ typ: "wgLimit", wg: "alle", faktor: 1 });
+    }
+    if (w === 8) tu2({ typ: "aushilfen", haeuser: "alle", quote: 0.1 });
+    if (w % 13 === 0) {
+      const q2 = s2.quartale.at(-1);
+      if (q2) tu2({ typ: "plan", ebitda: q2.planStandard });
+    }
+    for (const a of s2.angebote.filter((x) => x.status === "offen")) {
+      if (a.typ === "untermiete" || a.typ === "paket") tu2({ typ: "angebotAnnehmen", angebot: a.id });
+    }
+    einkaufStandard(s2);
+  }
+  function schliessungsBudgetBotD(s2) {
+    const freieMittel = freieLiquiditaet(s2);
+    const wochenUmsatz = s2.historie.at(-1)?.umsatz ?? Object.values(s2.basisUmsatz).reduce((sum2, u) => sum2 + (u ?? 0), 0);
+    const faellig = s2.verbindlichkeiten.filter((v) => v.faellig <= s2.woche + 4).reduce((sum2, v) => sum2 + v.wert, 0);
+    const reserve = Math.max(2 * wochenUmsatz, 0.35 * faellig);
+    const bereitsGebunden = s2.haeuser.filter((h) => h.status === "schliessung_verhandlung" || h.status === "raeumung").reduce((sum2, h) => {
+      const bis = Math.max(0, (h.statusBis ?? s2.woche) - s2.woche) + (h.status === "schliessung_verhandlung" ? 6 : 0);
+      return sum2 + schliessungsFolgekosten(s2, h, bis).gesamt;
+    }, 0);
+    const budget = Math.max(0, (freieMittel - reserve) * 0.35 - bereitsGebunden);
+    return { freieMittel, reserve, bereitsGebunden, budget };
+  }
+  function botRegulaer(s2, log = false) {
+    botRegulaerBasis(s2, log, 0.25);
+  }
+  function botRegulaerBasis(s2, log, zentralePauschal) {
+    botTurnaround(s2, log);
+    const w = s2.woche;
+    const tu2 = (a) => {
+      const r = fuehreAus(s2, a);
+      if (log) console.log(`  W${w} ${r.ok ? "\u2713" : "\u2717"} ${r.text}`);
+      return r;
+    };
+    if (w === 0) {
+      tu2({ typ: "berater", beraterTyp: "sanierung" });
+      const wochenUmsatz = Object.values(s2.basisUmsatz).reduce((sum2, u) => sum2 + (u ?? 0), 0);
+      if (zentralePauschal > 0 && freieLiquiditaet(s2) >= 5 * wochenUmsatz)
+        tu2({ typ: "zentrale", prozent: zentralePauschal });
       tu2({ typ: "marketingBudget", quote: 0.018 });
     }
-    if (w === 4) {
-      const p2 = portfolio(s2).filter((x) => x.status === "offen").sort((a, b2) => a.db / Math.max(1, a.umsatz) - b2.db / Math.max(1, b2.umsatz));
-      for (const x of p2.slice(0, 35)) tu2({ typ: "schliessen", haus: x.id });
-      for (const x of p2.slice(35).filter((x2) => x2.mietquote > 0.12)) tu2({ typ: "mieteVerhandeln", haus: x.id, reduktion: 0.15 });
-      for (const h of s2.haeuser.filter((x) => x.status === "offen" && x.kpi)) {
-        const ist = h.kpi.fteIst, bedarf = h.kpi.fteBedarf;
-        if (ist > bedarf * 1.02) tu2({ typ: "personalabbau", haeuser: [h.id], prozent: Math.min(0.2, (ist - bedarf) / ist) });
+    if (w >= 4 && w < 104 && w % 4 === 0) {
+      const pool = s2.haeuser.filter((h) => !h.nurDaten && h.klasse !== "premium");
+      const ziel = Math.round(pool.length * REGULAER_SCHLIESSUNGSQUOTE);
+      const inArbeit = pool.filter((h) => h.status !== "offen").length;
+      const verlustIds = new Set(pool.filter((h) => (h.kpi?.guv?.ebitda ?? 0) < 0).map((h) => h.id));
+      const p2 = aktivesPortfolio(s2).filter((x) => verlustIds.has(x.id) && x.db < 0 && x.umsatz > 0).sort((a, b2) => a.db / a.umsatz - b2.db / b2.umsatz);
+      let budget = schliessungsBudgetBotD(s2).budget;
+      let beauftragt = 0;
+      for (const x of p2) {
+        if (inArbeit + beauftragt >= ziel || beauftragt >= 6) break;
+        const h = s2.haeuser.find((h2) => h2.id === x.id);
+        const dauer = Math.round(16 - 10 * s2.stakeholder.betriebsrat / 100) + 6;
+        const kosten = schliessungsFolgekosten(s2, h, dauer).gesamt;
+        if (kosten > budget) continue;
+        if (tu2({ typ: "schliessen", haus: x.id }).ok) {
+          budget -= kosten;
+          beauftragt++;
+        }
+      }
+      if (w === 4) {
+        for (const x of aktivesPortfolio(s2).filter((x2) => x2.mietquote > 0.12))
+          tu2({ typ: "mieteVerhandeln", haus: x.id, reduktion: 0.15 });
       }
     }
     if (w === 4) tu2({ typ: "aushilfen", haeuser: "alle", quote: 0.16 });
@@ -14251,7 +15565,7 @@
   if (false) {
     const s2 = neuesSpiel2(Number(process.argv[2] ?? 1), { schwierigkeit: process.argv.includes("--leicht") ? "leicht" : process.argv.includes("--schwer") ? "schwer" : "mittel" });
     const n = Number(process.argv[3] ?? 260);
-    const b2 = process.argv.includes("--ek-nos") ? botEinkaufNos : process.argv.includes("--ek-em") ? botEinkaufEigenmarken : process.argv.includes("--ek-kahlschlag-frueh") ? (x, l) => botEinkaufKahlschlag(x, l, 3) : process.argv.includes("--ek-kahlschlag") ? botEinkaufKahlschlag : process.argv.includes("--hq") ? botHq : process.argv.includes("--hq-ausbau") ? botHqAusbau : process.argv.includes("--hq-kahlschlag") ? botHqKahlschlag : process.argv.includes("--hq-keine") ? botHqKeine : process.argv.includes("--regulaer") ? botRegulaer : process.argv.includes("--tief") ? botTief : process.argv.includes("--schirm") ? botSchutzschirm : botWoche;
+    const b2 = process.argv.includes("--ek-nos") ? botEinkaufNos : process.argv.includes("--ek-em") ? botEinkaufEigenmarken : process.argv.includes("--ek-kahlschlag-frueh") ? (x, l) => botEinkaufKahlschlag(x, l, 3) : process.argv.includes("--ek-kahlschlag") ? botEinkaufKahlschlag : process.argv.includes("--hq") ? botHq : process.argv.includes("--hq-ausbau") ? botHqAusbau : process.argv.includes("--hq-kahlschlag") ? botHqKahlschlag : process.argv.includes("--hq-keine") ? botHqKeine : process.argv.includes("--regulaer") ? botRegulaer : process.argv.includes("--turnaround") ? botTurnaround : process.argv.includes("--tief") ? botTief : process.argv.includes("--schirm") ? botSchutzschirm : botWoche;
     for (let i = 0; i < n && s2.phase !== "zerschlagen"; i++) {
       b2(s2, process.argv.includes("-v"));
       const k = wocheAbspielen2(s2);
@@ -14261,7 +15575,7 @@
     for (const m of s2.meldungen.filter((m2) => ["insolvenz", "eigentuemer", "warnung"].includes(m2.typ)).slice(-12)) console.log(`  [W${m.woche} ${m.typ}] ${m.text}`);
   }
 
-  // render/node_modules/three/build/three.module.js
+  // node_modules/three/build/three.module.js
   var three_module_exports = {};
   __export(three_module_exports, {
     ACESFilmicToneMapping: () => ACESFilmicToneMapping,
@@ -44902,7 +46216,7 @@
     }
   }
 
-  // render/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
+  // node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
   function mergeGeometries(geometries, useGroups = false) {
     const isIndexed = geometries[0].index !== null;
     const attributesUsed = new Set(Object.keys(geometries[0].attributes));
@@ -45045,7 +46359,7 @@
     return result;
   }
 
-  // render/src/kit/basis.js
+  // src/kit/basis.js
   function mische(r, liste2) {
     const a = [...liste2];
     for (let i = a.length - 1; i > 0; i--) {
@@ -45460,7 +46774,7 @@
     return kam;
   }
 
-  // render/src/kit/stadthaeuser.js
+  // src/kit/stadthaeuser.js
   var wurzelSumme = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var STILE = ["gruenderzeit", "jugendstil", "backstein", "fachwerk", "fuenfziger", "siebziger", "neubau"];
   var RAHMEN = "#f6f3ec";
@@ -48111,7 +49425,7 @@
     return stadthaus(S, scene2, { ...p2, stil, geschosse: clamp3(g, 2, 7), vermeideFarbe: p2.nachbar?.farbe ?? p2.vermeideFarbe });
   }
 
-  // render/src/kit/gelaende.js
+  // src/kit/gelaende.js
   var wurzelSumme2 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var glatt = (t) => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
   function welle(seed, u) {
@@ -48241,7 +49555,7 @@
     }
   }
 
-  // render/src/kit/stadtrand.js
+  // src/kit/stadtrand.js
   var RING = 480;
   var RS = { breite: 17, gehweg: 3 };
   var ZONEN = { mittelstadt: [110, 220, 330], grossstadt: [150, 270, 380], metropole: [200, 330, 420] };
@@ -48824,7 +50138,7 @@
     return { x, z: z2, zoom: Math.min(zoom, Math.min(plan2.breite, plan2.tiefe) / 6.5) };
   }
 
-  // render/src/kit/outlet-standorte.js
+  // src/kit/outlet-standorte.js
   function outletImAussenring(plan2, standorte = []) {
     const gesucht = standorte.filter((s2) => s2.rolle === "outlet" && s2.lage === "rand");
     if (!gesucht.length) return [];
@@ -48869,7 +50183,7 @@
     return platziert;
   }
 
-  // render/src/kit/stadtplan.js
+  // src/kit/stadtplan.js
   var wurzelSumme3 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var klemm = (v, a, b2) => Math.max(a, Math.min(b2, v));
   var ganz = (r) => Math.floor(r() * 1e9);
@@ -51042,7 +52356,7 @@
     ganz
   };
 
-  // render/src/kit/zustaende.js
+  // src/kit/zustaende.js
   var wurzelSumme4 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var STATI = ["offen", "aktion", "untermiete", "offprice", "teilschliessung", "umbau", "raeumung", "geschlossen", "leer", "verfall", "neueroeffnung", "abriss"];
   var AKTIONEN = [
@@ -52443,7 +53757,7 @@
     }
   }
 
-  // render/src/kit/sporthelfer.js
+  // src/kit/sporthelfer.js
   var GLAS = "#4d6677";
   var GLAS_D = "#2f3d48";
   var GLAS_HELL = "#7d9fb2";
@@ -52683,7 +53997,7 @@
     if (c < u1) s2.q(c, u1, y0, y1, t0, t1, f);
   }
 
-  // render/src/kit/wettbewerber.js
+  // src/kit/wettbewerber.js
   var ARTEN2 = ["modehaus", "offprice", "textildiscounter", "elektronik", "premium", "fastfashion", "leer_ehemals"];
   var NAMEN = {
     // je Art sechs Namen; die ersten drei sind die Zufallsauswahl ohne Vorgabe, staedte.js rotiert durch alle sechs
@@ -53400,7 +54714,94 @@
     return Math.max(h1, H + 1.6);
   }
 
-  // render/src/kit/warenhaus.js
+  // src/kit/q02-qualitaet.js
+  function tramArme(k) {
+    const teile2 = [];
+    for (const [achse, minus, plus, mitte, quer2, halb] of [
+      ["z", "-z", "+z", k.z, k.x, k.bz / 2],
+      ["x", "-x", "+x", k.x, k.z, k.bx / 2]
+    ]) {
+      const a = !!k.arme?.[minus]?.tram, b2 = !!k.arme?.[plus]?.tram;
+      if (!a && !b2) continue;
+      if (a && b2) teile2.push({ achse, mitte: quer2, von: mitte - halb, bis: mitte + halb, ende: [] });
+      else teile2.push({ achse, mitte: quer2, von: a ? mitte - halb : mitte, bis: b2 ? mitte + halb : mitte, ende: [mitte] });
+    }
+    return teile2;
+  }
+  function dachPasst(dach3, x, z2, w, d2, rand = 0.7) {
+    return dach3 && !dach3.steil && w > 0 && d2 > 0 && x - w / 2 >= dach3.x0 + rand && x + w / 2 <= dach3.x1 - rand && z2 - d2 / 2 >= dach3.z0 + rand && z2 + d2 / 2 <= dach3.z1 - rand;
+  }
+
+  // src/kit/dach-qualitaet.js
+  var FARBEN4 = {
+    lueftung: "#c9cdd0",
+    aufzug: "#c9cdd0",
+    oberlicht: "#5f666e",
+    solar: "#3b4046",
+    dachgarten: "#c9cdd0"
+  };
+  function dachInstallationen(S, dach3, r, o = {}) {
+    if (!dach3 || dach3.steil) return [];
+    const width = dach3.x1 - dach3.x0, depth = dach3.z1 - dach3.z0;
+    if (width < 8 || depth < 8) return [];
+    const max = Math.min(5, o.max ?? 3, Math.max(1, Math.floor(width * depth / 220)));
+    const moeglich = ["lueftung", "aufzug", "oberlicht", "solar", "dachgarten"];
+    const erlaubte = [];
+    while (erlaubte.length < 3) {
+      const art = moeglich[Math.floor(r() * moeglich.length)];
+      if (!erlaubte.includes(art)) erlaubte.push(art);
+    }
+    const gebaut = [];
+    const schnitt = (x, z2, w, d2) => gebaut.some((q2) => Math.abs(q2.x - x) < (q2.w + w) / 2 + 0.6 && Math.abs(q2.z - z2) < (q2.d + d2) / 2 + 0.6);
+    const teile2 = {
+      lueftung: [3.8, 2.5, 1.15],
+      aufzug: [3.2, 3.4, 2.7],
+      oberlicht: [3.6, 2.5, 0.5],
+      solar: [4.6, 3, 0.5],
+      dachgarten: [5, 3.5, 0.7]
+    };
+    for (let n = 0; n < max; n++) {
+      const art = erlaubte[n % erlaubte.length];
+      const [bw, bd, h] = teile2[art];
+      if (width < bw + 2 || depth < bd + 2) continue;
+      let x, z2;
+      for (let versuch = 0; versuch < 12; versuch++) {
+        x = dach3.x0 + 1 + bw / 2 + r() * (width - bw - 2);
+        z2 = dach3.z0 + 1 + bd / 2 + r() * (depth - bd - 2);
+        if (dachPasst(dach3, x, z2, bw, bd, 0.9) && !schnitt(x, z2, bw, bd) && !o.reserviert?.(x, z2, Math.max(bw, bd) / 2)) break;
+        x = null;
+      }
+      if (x === null) continue;
+      const y = dach3.y, f = o.farbe ?? FARBEN4[art];
+      if (art === "lueftung") {
+        S.box(bw, h, bd, x, y + h / 2, z2, f);
+        for (const v of [-0.8, -0.35, 0.1, 0.55]) S.box(bw - 0.4, 0.06, 0.06, x, y + h / 2 + v * h / 2, z2 + bd / 2 + 0.02, "#5f666e");
+      } else if (art === "aufzug") {
+        S.box(bw, h, bd, x, y + h / 2, z2, f);
+        S.box(bw + 0.08, 0.12, bd + 0.08, x, y + h + 0.06, z2, "#5d646a");
+      } else if (art === "oberlicht") {
+        S.box(bw, 0.23, bd, x, y + 0.115, z2, "#5f666e");
+        S.box(bw - 0.4, 0.29, bd - 0.4, x, y + 0.38, z2, "#5f7787");
+      } else if (art === "solar") {
+        S.box(bw, 0.15, bd, x, y + 0.43, z2, "#3b4046");
+        for (const v of [-1, 1]) S.box(0.16, 0.4, bd - 0.4, x + v * (bw / 2 - 0.3), y + 0.2, z2, "#5f666e");
+        S.box(0.05, 0.04, bd - 0.18, x, y + 0.53, z2, "#5f7787");
+      } else {
+        S.box(bw, 0.17, bd, x, y + 0.085, z2, "#c9cdd0");
+        for (const v of [-1, 0, 1]) {
+          const xx = x + v * 1.3;
+          S.box(1.05, 0.43, 1.4, xx, y + 0.38, z2, "#8a6a4a");
+          S.box(0.8, 0.4, 1.1, xx, y + 0.74, z2, "#5a8f3c");
+        }
+      }
+      const daten = { art, x, z: z2, w: bw, d: bd, h, unten: y, dach: dach3 };
+      gebaut.push(daten);
+      o.protokoll?.push(daten);
+    }
+    return gebaut;
+  }
+
+  // src/kit/warenhaus.js
   var wurzelSumme5 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var ROT2 = "#d23c32";
   var EG2 = 5.5;
@@ -53894,44 +55295,20 @@
     }
   }
   function technik2(K3, x0, z0, x1, z1, y, o = {}) {
-    const S = K3.S, r = K3.r;
-    const fl = (x1 - x0) * (z1 - z0);
-    if (x1 - x0 < 6 || z1 - z0 < 6) return;
-    const anz3 = Math.min(o.max ?? 9, Math.max(2, Math.round(fl / 320)));
-    const belegt2 = [];
-    const f = o.farbe ?? "#c9c6bf";
-    for (let v = 0; v < anz3 * 5 && belegt2.length < anz3; v++) {
-      const typ = belegt2.length === 0 ? "lueftung" : waehle2(r, ["lueftung", "kuehler", "kuehler", "aufzug", "rohr", "kasten"]);
-      const [bw, bd, bh] = { lueftung: [zw(r, 7, 13), zw(r, 4, 7), zw(r, 2.6, 3.6)], kuehler: [zw(r, 4, 6), 2.2, 1.3], aufzug: [3.2, 3.2, 3.2], rohr: [zw(r, 6, 10), 0.8, 0.8], kasten: [zw(r, 2, 3.5), zw(r, 2, 3.5), zw(r, 1.4, 2.2)] }[typ];
-      if (bw > x1 - x0 - 2 || bd > z1 - z0 - 2) continue;
-      const cx = zw(r, x0 + bw / 2 + 1, x1 - bw / 2 - 1), cz = zw(r, z0 + bd / 2 + 1, z1 - bd / 2 - 1);
-      if (reserviert(K3, cx, cz, Math.max(bw, bd) / 2 + 0.5)) continue;
-      if (belegt2.some((b2) => Math.abs(b2[0] - cx) < (b2[2] + bw) / 2 + 0.8 && Math.abs(b2[1] - cz) < (b2[3] + bd) / 2 + 0.8)) continue;
-      belegt2.push([cx, cz, bw, bd]);
-      if (typ === "rohr") {
-        const g = new three_module_exports.CylinderGeometry(0.4, 0.4, bw, 8);
-        g.rotateZ(Math.PI / 2);
-        g.translate(cx, y + 0.9, cz);
-        S.add(g, "#d6d8da");
-        S.box(0.3, 0.6, 0.3, cx - bw / 3, y + 0.3, cz, "#9aa0a5");
-        S.box(0.3, 0.6, 0.3, cx + bw / 3, y + 0.3, cz, "#9aa0a5");
-        continue;
-      }
-      S.box(bw, bh, bd, cx, y + bh / 2, cz, typ === "aufzug" ? o.aufzug ?? f : f);
-      S.box(bw + 0.2, 0.15, bd + 0.2, cx, y + bh + 0.07, cz, heller(f, 0.05));
-      if (typ === "lueftung") {
-        for (let k = 0; k < 4; k++) {
-          const yy = y + 0.5 + k * (bh - 0.9) / 3;
-          S.box(bw * 0.8, 0.12, 0.08, cx, yy, cz + bd / 2 + 0.04, dunkler(f, 0.14));
-          S.box(0.08, 0.12, bd * 0.75, cx + bw / 2 + 0.04, yy, cz, dunkler(f, 0.14));
-        }
-      }
-      if (typ === "kuehler") for (let k = 0; k < Math.floor(bw / 1.8); k++) zyl3(S, cx - bw / 2 + 0.9 + k * 1.8, y + bh, cz, 0.7, 0.18, "#5d646a", 10);
+    const dach3 = { x0, z0, x1, z1, y, steil: false };
+    if (K3.dach && Math.abs(K3.dach.y - y) < 1.1) {
+      dach3.x0 = Math.max(x0, K3.dach.x0);
+      dach3.z0 = Math.max(z0, K3.dach.z0);
+      dach3.x1 = Math.min(x1, K3.dach.x1);
+      dach3.z1 = Math.min(z1, K3.dach.z1);
+      dach3.y = K3.dach.y;
     }
-    if (o.antenne !== false && r() < 0.6) {
-      zyl3(S, x0 + 2.5, y, z0 + 2.5, 0.08, 7, "#8a9096", 5);
-      S.box(1.6, 0.08, 0.08, x0 + 2.5, y + 6, z0 + 2.5, "#8a9096");
-    }
+    dachInstallationen(K3.S, dach3, K3.r, {
+      max: o.max,
+      farbe: o.farbe,
+      reserviert: (x, z2, rad2) => reserviert(K3, x, z2, rad2),
+      protokoll: K3.qualitaet?.daecher
+    });
   }
   function parkdeck(K3, x0, z0, x1, z1, y, mitSchild = true) {
     const S = K3.S, r = K3.r;
@@ -55580,7 +56957,7 @@
     return { hoehe, w: K3.w + M2, d: K3.d, familie: fam, teile: S.anzahl - start, status: Z2.status };
   }
 
-  // render/src/kit/sonderbauten.js
+  // src/kit/sonderbauten.js
   var wurzelSumme6 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI = Math.PI;
   function zyl4(S, rO, rU, h, x, y0, z2, farbe3, seg = 16, offen = false) {
@@ -58388,9 +59765,9 @@
     const weiss2 = "#f2f0ea", navy = KONKURRENZ.zentra.farbe, band = "#45525c", R10 = Math.min(12, d2 * 0.35);
     S.quader(x, 0, z2, x + w - R10, H, z2 + d2, weiss2);
     S.quader(x + w - R10, 0, z2, x + w, H, z2 + d2 - R10, weiss2);
-    const ec = new three_module_exports.CylinderGeometry(R10, R10, H, 16, 1, false, 0, PI / 2);
-    ec.translate(x + w - R10, H / 2, z2 + d2 - R10);
-    S.add(ec, weiss2);
+    const ec2 = new three_module_exports.CylinderGeometry(R10, R10, H, 16, 1, false, 0, PI / 2);
+    ec2.translate(x + w - R10, H / 2, z2 + d2 - R10);
+    S.add(ec2, weiss2);
     for (let k = 0; k < G2; k++) {
       const y0 = k === 0 ? 0.3 : eg + (k - 1) * gh + 1, y1 = k === 0 ? eg - 1 : y0 + 1.9, c = k === 0 ? "#56707f" : band;
       S.quader(x + 1, y0, z2 + d2, x + w - R10, y1, z2 + d2 + 0.12, c);
@@ -58528,7 +59905,7 @@
     return hauptbahnhof(S, scene2, { ...p2, nurEmpfang: true, w: p2.w ?? 96, d: p2.d ?? 24 });
   }
 
-  // render/src/kit/sporthaus.js
+  // src/kit/sporthaus.js
   var wurzelSumme7 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var HS_ROT = "#d23c32";
   var HS_BLAU = "#1d2f4f";
@@ -59724,9 +61101,9 @@
       const auswahl4 = [...front2, ...weitere];
       const r = rng2(String(K3.haus.id) + "/blindglas");
       const start = auswahl4.length ? Math.floor(r() * auswahl4.length) : 0;
-      const zahl4 = Math.min(4, auswahl4.length);
-      for (let i = 0; i < zahl4; i++) {
-        const g = auswahl4[(start + i * Math.max(1, Math.floor(auswahl4.length / zahl4))) % auswahl4.length];
+      const zahl5 = Math.min(4, auswahl4.length);
+      for (let i = 0; i < zahl5; i++) {
+        const g = auswahl4[(start + i * Math.max(1, Math.floor(auswahl4.length / zahl5))) % auswahl4.length];
         const front3 = g.t + 0.1;
         g.s.q(g.a + 0.1, g.b - 0.1, g.y0 + 0.12, g.y1 - 0.13, front3, front3 + 0.1, i % 2 ? "#d1d0b3" : "#b8c5b8");
         g.s.q(g.a + 0.13, g.b - 0.13, g.y1 - 0.35, g.y1 - 0.25, front3 + 0.08, front3 + 0.1, "#737c79");
@@ -60015,7 +61392,7 @@
     return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z2.status };
   }
 
-  // render/src/kit/innen.js
+  // src/kit/innen.js
   var innen_exports = {};
   __export(innen_exports, {
     BODEN: () => BODEN2,
@@ -62100,7 +63477,7 @@
     return new three_module_exports.Box3(new three_module_exports.Vector3(-0.6, -0.5, -0.6), new three_module_exports.Vector3(W3, WANDHOEHE, T));
   }
 
-  // render/src/kit/moebel/generationen.js
+  // src/kit/moebel/generationen.js
   var MATERIAL = {
     "#737e85": ["#77573a", "#7b8791"],
     "#444c55": ["#6c4c32", "#737a81"],
@@ -62135,7 +63512,7 @@
     return def.bau(zeichnet, r, d2, ctx);
   }
 
-  // render/src/kit/abteilung.js
+  // src/kit/abteilung.js
   var R = RASTER;
   var PI3 = Math.PI;
   var { PAL: PAL2, HOLZ: HOLZ2, MODUL: MODUL2, UNTERMIETE: UNTERMIETE2, MARKEN: MARKEN3, PREISE: PREISE2, anz: anz2, bunt: bunt2 } = innen_exports;
@@ -64271,7 +65648,7 @@
     return res;
   }
 
-  // render/src/kit/sportabteilung.js
+  // src/kit/sportabteilung.js
   var wurzelSumme9 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI4 = Math.PI;
   var { PAL: PAL3, HOLZ: HOLZ3 } = innen_exports;
@@ -65065,7 +66442,7 @@
     }
   }
 
-  // render/src/kit/moebel/basis.js
+  // src/kit/moebel/basis.js
   var PALETTEN = Object.freeze({
     laufen: ["#e8403a", "#1f6fd1", "#f4f4f0", "#26292e", "#ffcb30"],
     kinder: ["#ff9e43", "#1e9ed0", "#f5dd67", "#e75067", "#58b66a"],
@@ -65277,7 +66654,7 @@
     }
   }
 
-  // render/src/kit/moebel/sport-mix.js
+  // src/kit/moebel/sport-mix.js
   var THEMEN2 = Object.freeze({
     sportschuhe: ["sitzbank", "probiertisch", "spiegel", "schuhregal", "anprobebank", "schuhtisch"],
     sporttextil: ["kleiderstange", "rundstaender", "puppen", "falttisch", "haengung", "saison"],
@@ -65287,7 +66664,7 @@
     wintersport: ["ski", "boards", "skijacken", "skischuhe", "ausruestung", "wintertisch"],
     teamsport: ["ballkorb", "trikots", "tordisplay", "stollen", "vereinsware", "balltisch"]
   });
-  var FARBEN4 = {
+  var FARBEN5 = {
     sportschuhe: "laufen",
     sporttextil: "textil",
     outdoor: "outdoor",
@@ -65301,7 +66678,7 @@
     L2.box(w - 0.24, 0.07, 0.94, 0, 0.12, 0.625, farbe3);
   };
   function baueMix(L2, r, d2, art, stil, w) {
-    const pal = palette(FARBEN4[art]), farbe3 = pal[Math.floor(r() * pal.length)];
+    const pal = palette(FARBEN5[art]), farbe3 = pal[Math.floor(r() * pal.length)];
     basis2(L2, w, farbe3);
     if (LOD2.stufe === "fern") {
       L2.box(w - 0.4, 0.72, 0.72, 0, 0.23, 0.625, pal[1 % pal.length]);
@@ -65414,14 +66791,14 @@
         1,
         3,
         220,
-        (L2, r, d2, ctx) => wandModul(L2, r, d2, ctx, { art: ware3, pal: FARBEN4[art], titel, w: 2.5 })
+        (L2, r, d2, ctx) => wandModul(L2, r, d2, ctx, { art: ware3, pal: FARBEN5[art], titel, w: 2.5 })
       ));
       return id;
     }))])
   ));
   Object.freeze(SPORT_MIX_MOEBEL);
 
-  // render/src/kit/moebel/wand.js
+  // src/kit/moebel/wand.js
   var wand_exports = {};
   __export(wand_exports, {
     ALT_BETTWAREN: () => ALT_BETTWAREN,
@@ -65462,7 +66839,7 @@
   var ALT_GESCHIRR = definition("alt_geschirr", "Geschirrwand", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d2, ctx) => wandModul(L2, r, d2, ctx, { "art": "home", "pal": "allgemein", "titel": "Geschirrwand", "alt": true, "w": 5 }));
   var ALT_BETTWAREN = definition("alt_bettwaren", "Bettwarenwand", "allgemein", "wand", 4, 1, 3, 220, (L2, r, d2, ctx) => wandModul(L2, r, d2, ctx, { "art": "textil", "pal": "allgemein", "titel": "Bettwarenwand", "alt": true, "w": 5 }));
 
-  // render/src/kit/moebel/gondel.js
+  // src/kit/moebel/gondel.js
   var gondel_exports = {};
   __export(gondel_exports, {
     GONDEL_BAELLE: () => GONDEL_BAELLE,
@@ -65501,7 +66878,7 @@
   var GONDEL_WAESCHE = definition("gondel_waesche", "W\xE4schegondel", "allgemein", "gondel", 4, 1, 1.4, 120, (L2, r, d2, ctx) => gondelModul(L2, r, d2, ctx, { "art": "textil", "pal": "outlet", "w": 5 }));
   var GONDEL_SPIELZEUG = definition("gondel_spielzeug", "Spielwarengondel", "allgemein", "gondel", 2, 1, 1.4, 120, (L2, r, d2, ctx) => gondelModul(L2, r, d2, ctx, { "art": "pakete", "pal": "kinder", "w": 2.5 }));
 
-  // render/src/kit/moebel/insel.js
+  // src/kit/moebel/insel.js
   var insel_exports = {};
   __export(insel_exports, {
     INSEL_ALT_BETTW: () => INSEL_ALT_BETTW,
@@ -65532,7 +66909,7 @@
     for (let i = 0; i < 5; i++) L2.box(0.3, 0.19, 0.2, (i - 2) * 0.4, 0.85, 1.25, "#b89a66");
   });
 
-  // render/src/kit/moebel/kasse.js
+  // src/kit/moebel/kasse.js
   var kasse_exports = {};
   __export(kasse_exports, {
     KASSE_ALT_INFO: () => KASSE_ALT_INFO,
@@ -65551,7 +66928,7 @@
   var KASSE_ALT_INFO = definition("kasse_alt_info", "Information alt", "allgemein", "kasse", 2, 2, 1.5, 260, (L2, r, d2, ctx) => serviceModul(L2, r, d2, ctx, { "art": "info", "w": 2.5 }));
   var KASSE_ALT_VITRINE = definition("kasse_alt_vitrine", "Kassenvitrine", "allgemein", "kasse", 4, 2, 1.5, 260, (L2, r, d2, ctx) => serviceModul(L2, r, d2, ctx, { "art": "info", "w": 5 }));
 
-  // render/src/kit/moebel/deko.js
+  // src/kit/moebel/deko.js
   var deko_exports = {};
   __export(deko_exports, {
     DEKO_ALT_RASTERDECKE: () => DEKO_ALT_RASTERDECKE,
@@ -65579,7 +66956,7 @@
     }
   });
 
-  // render/src/kit/moebel/sport.js
+  // src/kit/moebel/sport.js
   var sport_exports = {};
   __export(sport_exports, {
     SPORT_ABVERKAUF_GITTER: () => SPORT_ABVERKAUF_GITTER,
@@ -65733,7 +67110,7 @@
     );
   });
 
-  // render/src/kit/moebel/outlet.js
+  // src/kit/moebel/outlet.js
   var outlet_exports = {};
   __export(outlet_exports, {
     OUTLET_ACCESSOIRES: () => OUTLET_ACCESSOIRES,
@@ -65861,7 +67238,7 @@
   var OUTLET_UMKLEIDE = definition("outlet_umkleide", "Umkleidereihe", "outlet", "service", 4, 2, 2.4, 260, (L2, r, d2, ctx) => serviceModul(L2, r, d2, ctx, { w: 5, art: "umkleide", kabinen: 4 }));
   var OUTLET_ROLLWAGEN = definition("outlet_rollwagen", "Nachr\xE4um-Rollwagen", "outlet", "insel", 2, 2, 1.5, 260, (L2, r, d2, ctx) => rollwagen(L2, r, d2));
 
-  // render/src/kit/moebel/service.js
+  // src/kit/moebel/service.js
   var service_exports = {};
   __export(service_exports, {
     ALT_FAHRSTUHL: () => ALT_FAHRSTUHL,
@@ -65931,7 +67308,7 @@
     L2.box(0.07, 2.1, 0.08, 0.33, 0.6, 1.63, "#786651");
   });
 
-  // render/src/kit/moebel/index.js
+  // src/kit/moebel/index.js
   var ALLE_MOEBEL = Object.freeze(
     [wand_exports, gondel_exports, insel_exports, kasse_exports, deko_exports, sport_exports, outlet_exports, service_exports].flatMap((m) => Object.values(m).filter((v) => v && typeof v === "object" && typeof v.bau === "function" && typeof v.id === "string")).concat(SPORT_MIX_MOEBEL).sort((a, b2) => a.id.localeCompare(b2.id, "de"))
   );
@@ -65945,7 +67322,7 @@
     return eintrag2;
   }
 
-  // render/src/kit/ladenbau-regeln.js
+  // src/kit/ladenbau-regeln.js
   var LADENBAU = Object.freeze({
     raster: 1.25,
     suchRaster: 0.625,
@@ -66051,7 +67428,7 @@
     return a.x < b2.x + b2.w + abstand3 - 1e-8 && a.x + a.w + abstand3 > b2.x + 1e-8 && a.z < b2.z + b2.d + abstand3 - 1e-8 && a.z + a.d + abstand3 > b2.z + 1e-8;
   }
 
-  // render/src/kit/ladenplan.js
+  // src/kit/ladenplan.js
   var wurzelSumme10 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var U = LADENBAU.raster;
   var snap = (n) => Math.round(n / U) * U;
@@ -66652,7 +68029,7 @@
     return { teile: S.anzahl - n0, moebel: plan2.moebel.length, abteilungen: plan2.abteilungen.length };
   }
 
-  // render/src/kit/ladenbau-outlet.js
+  // src/kit/ladenbau-outlet.js
   var FUNDUS_INNEN_ZUSTAENDE = Object.freeze(["normal", "schwach", "ansturm", "raeumung"]);
   var SORTIMENTE = Object.freeze({
     damen: { titel: "Damen", anteil: 0.34 },
@@ -66701,7 +68078,7 @@
     return geschoss === 0 ? 0.48 : 5.02 + (geschoss - 1) * 3.9;
   }
 
-  // render/src/kit/outlet.js
+  // src/kit/outlet.js
   var NAME_OUTLET = "FUNDUS";
   var FARBE_OUTLET = "#8c1d40";
   var WAREN = ["#263b53", "#c67e73", "#e0c7a3", "#748d74", "#d8dce0", "#b88b56", "#a7a0ba"];
@@ -67004,7 +68381,7 @@
     return { hoehe: Math.max(H + 3.8, dekor.hoehe, m.park ? 11.6 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z2.status };
   }
 
-  // render/src/kit/schwesterhaus.js
+  // src/kit/schwesterhaus.js
   var NAME_SCHWESTER = "Volkskauf";
   var FARBE_SCHWESTER = "#2f6f73";
   var EG3 = 4.9;
@@ -67448,7 +68825,7 @@
     return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile: teile2, status };
   }
 
-  // render/haeuser-schwester.json
+  // haeuser-schwester.json
   var haeuser_schwester_default = [
     {
       id: "K001",
@@ -69528,70 +70905,72 @@
     }
   ];
 
-  // render/haeuser-outlet.json
+  // haeuser-outlet.json
   var haeuser_outlet_default = [
     {
       id: "O001",
-      name: "FUNDUS Essen",
-      stadt: "Essen",
+      name: "FUNDUS Berlin",
+      stadt: "Berlin",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
-      cluster: "grossstadt",
-      grundflaecheQm: 1500,
+      cluster: "metropole",
+      region: "Ost",
+      grundflaecheQm: 4200,
       etagen: [
         0
       ],
-      baujahr: 1998,
-      fassade: 0,
+      baujahr: 2013,
+      fassade: 5,
       substanz: 40,
       status: "offen",
       flaechen: [
         {
           id: "O001-f1",
           etage: 0,
-          qm: 214,
+          qm: 600,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O001-f2",
           etage: 0,
-          qm: 214,
+          qm: 600,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O001-f3",
           etage: 0,
-          qm: 214,
+          qm: 600,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O001-f4",
           etage: 0,
-          qm: 214,
+          qm: 600,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O001-f5",
           etage: 0,
-          qm: 214,
+          qm: 600,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O001-f6",
           etage: 0,
-          qm: 214,
+          qm: 600,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O001-f7",
           etage: 0,
-          qm: 214,
+          qm: 600,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -69599,67 +70978,69 @@
     },
     {
       id: "O002",
-      name: "FUNDUS Duisburg",
-      stadt: "Duisburg",
+      name: "FUNDUS Frankfurt",
+      stadt: "Frankfurt",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
-      cluster: "grossstadt",
-      grundflaecheQm: 1637,
+      cluster: "metropole",
+      region: "Mitte",
+      grundflaecheQm: 1600,
       etagen: [
         0,
         1
       ],
-      baujahr: 2005,
-      fassade: 1,
-      substanz: 57,
+      baujahr: 2010,
+      fassade: 5,
+      substanz: 44,
       status: "offen",
       flaechen: [
         {
           id: "O002-f1",
           etage: 0,
-          qm: 468,
+          qm: 443,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O002-f2",
           etage: 1,
-          qm: 468,
+          qm: 443,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O002-f3",
           etage: 0,
-          qm: 468,
+          qm: 443,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O002-f4",
           etage: 1,
-          qm: 468,
+          qm: 443,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O002-f5",
           etage: 0,
-          qm: 468,
+          qm: 443,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O002-f6",
           etage: 1,
-          qm: 468,
+          qm: 443,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O002-f7",
           etage: 0,
-          qm: 468,
+          qm: 443,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -69667,66 +71048,68 @@
     },
     {
       id: "O003",
-      name: "FUNDUS Dortmund",
-      stadt: "Dortmund",
+      name: "FUNDUS Stuttgart",
+      stadt: "Stuttgart",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
-      cluster: "grossstadt",
-      grundflaecheQm: 1774,
+      cluster: "metropole",
+      region: "S\xFCd",
+      grundflaecheQm: 3500,
       etagen: [
         0
       ],
-      baujahr: 2012,
-      fassade: 2,
-      substanz: 74,
+      baujahr: 1998,
+      fassade: 6,
+      substanz: 85,
       status: "offen",
       flaechen: [
         {
           id: "O003-f1",
           etage: 0,
-          qm: 253,
+          qm: 500,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O003-f2",
           etage: 0,
-          qm: 253,
+          qm: 500,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O003-f3",
           etage: 0,
-          qm: 253,
+          qm: 500,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O003-f4",
           etage: 0,
-          qm: 253,
+          qm: 500,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O003-f5",
           etage: 0,
-          qm: 253,
+          qm: 500,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O003-f6",
           etage: 0,
-          qm: 253,
+          qm: 500,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O003-f7",
           etage: 0,
-          qm: 253,
+          qm: 500,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -69734,67 +71117,69 @@
     },
     {
       id: "O004",
-      name: "FUNDUS Bochum",
-      stadt: "Bochum",
+      name: "FUNDUS Essen",
+      stadt: "Essen",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
       cluster: "grossstadt",
-      grundflaecheQm: 1911,
+      region: "West",
+      grundflaecheQm: 1300,
       etagen: [
         0,
         1
       ],
-      baujahr: 2e3,
-      fassade: 3,
-      substanz: 45,
+      baujahr: 2015,
+      fassade: 6,
+      substanz: 55,
       status: "offen",
       flaechen: [
         {
           id: "O004-f1",
           etage: 0,
-          qm: 546,
+          qm: 357,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O004-f2",
           etage: 1,
-          qm: 546,
+          qm: 357,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O004-f3",
           etage: 0,
-          qm: 546,
+          qm: 357,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O004-f4",
           etage: 1,
-          qm: 546,
+          qm: 357,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O004-f5",
           etage: 0,
-          qm: 546,
+          qm: 357,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O004-f6",
           etage: 1,
-          qm: 546,
+          qm: 357,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O004-f7",
           etage: 0,
-          qm: 546,
+          qm: 357,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -69802,66 +71187,68 @@
     },
     {
       id: "O005",
-      name: "FUNDUS Oberhausen",
-      stadt: "Oberhausen",
+      name: "FUNDUS Dortmund",
+      stadt: "Dortmund",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
       cluster: "grossstadt",
-      grundflaecheQm: 2048,
+      region: "West",
+      grundflaecheQm: 4900,
       etagen: [
         0
       ],
-      baujahr: 2007,
-      fassade: 4,
-      substanz: 62,
+      baujahr: 2009,
+      fassade: 5,
+      substanz: 50,
       status: "offen",
       flaechen: [
         {
           id: "O005-f1",
           etage: 0,
-          qm: 293,
+          qm: 700,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O005-f2",
           etage: 0,
-          qm: 293,
+          qm: 700,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O005-f3",
           etage: 0,
-          qm: 293,
+          qm: 700,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O005-f4",
           etage: 0,
-          qm: 293,
+          qm: 700,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O005-f5",
           etage: 0,
-          qm: 293,
+          qm: 700,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O005-f6",
           etage: 0,
-          qm: 293,
+          qm: 700,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O005-f7",
           etage: 0,
-          qm: 293,
+          qm: 700,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -69869,67 +71256,69 @@
     },
     {
       id: "O006",
-      name: "FUNDUS Gelsenkirchen",
-      stadt: "Gelsenkirchen",
+      name: "FUNDUS Bremen",
+      stadt: "Bremen",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
       cluster: "grossstadt",
-      grundflaecheQm: 2185,
+      region: "Nord",
+      grundflaecheQm: 1800,
       etagen: [
         0,
         1
       ],
-      baujahr: 2014,
-      fassade: 5,
-      substanz: 79,
+      baujahr: 1999,
+      fassade: 4,
+      substanz: 58,
       status: "offen",
       flaechen: [
         {
           id: "O006-f1",
           etage: 0,
-          qm: 624,
+          qm: 514,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O006-f2",
           etage: 1,
-          qm: 624,
+          qm: 514,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O006-f3",
           etage: 0,
-          qm: 624,
+          qm: 514,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O006-f4",
           etage: 1,
-          qm: 624,
+          qm: 514,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O006-f5",
           etage: 0,
-          qm: 624,
+          qm: 514,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O006-f6",
           etage: 1,
-          qm: 624,
+          qm: 514,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O006-f7",
           etage: 0,
-          qm: 624,
+          qm: 514,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -69937,66 +71326,68 @@
     },
     {
       id: "O007",
-      name: "FUNDUS Wuppertal",
-      stadt: "Wuppertal",
+      name: "FUNDUS Leipzig",
+      stadt: "Leipzig",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
       cluster: "grossstadt",
-      grundflaecheQm: 2322,
+      region: "Ost",
+      grundflaecheQm: 4400,
       etagen: [
         0
       ],
-      baujahr: 2002,
-      fassade: 6,
-      substanz: 50,
+      baujahr: 2009,
+      fassade: 5,
+      substanz: 64,
       status: "offen",
       flaechen: [
         {
           id: "O007-f1",
           etage: 0,
-          qm: 332,
+          qm: 629,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O007-f2",
           etage: 0,
-          qm: 332,
+          qm: 629,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O007-f3",
           etage: 0,
-          qm: 332,
+          qm: 629,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O007-f4",
           etage: 0,
-          qm: 332,
+          qm: 629,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O007-f5",
           etage: 0,
-          qm: 332,
+          qm: 629,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O007-f6",
           etage: 0,
-          qm: 332,
+          qm: 629,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O007-f7",
           etage: 0,
-          qm: 332,
+          qm: 629,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70004,67 +71395,69 @@
     },
     {
       id: "O008",
-      name: "FUNDUS Bielefeld",
-      stadt: "Bielefeld",
+      name: "FUNDUS Dresden",
+      stadt: "Dresden",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
       cluster: "grossstadt",
-      grundflaecheQm: 1609,
+      region: "Ost",
+      grundflaecheQm: 2e3,
       etagen: [
         0,
         1
       ],
-      baujahr: 2009,
+      baujahr: 1999,
       fassade: 7,
-      substanz: 67,
+      substanz: 78,
       status: "offen",
       flaechen: [
         {
           id: "O008-f1",
           etage: 0,
-          qm: 460,
+          qm: 557,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O008-f2",
           etage: 1,
-          qm: 460,
+          qm: 557,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O008-f3",
           etage: 0,
-          qm: 460,
+          qm: 557,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O008-f4",
           etage: 1,
-          qm: 460,
+          qm: 557,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O008-f5",
           etage: 0,
-          qm: 460,
+          qm: 557,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O008-f6",
           etage: 1,
-          qm: 460,
+          qm: 557,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O008-f7",
           etage: 0,
-          qm: 460,
+          qm: 557,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70072,66 +71465,68 @@
     },
     {
       id: "O009",
-      name: "FUNDUS M\xF6nchengladbach",
-      stadt: "M\xF6nchengladbach",
+      name: "FUNDUS Hannover",
+      stadt: "Hannover",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
       cluster: "grossstadt",
-      grundflaecheQm: 1746,
+      region: "Nord",
+      grundflaecheQm: 4900,
       etagen: [
         0
       ],
-      baujahr: 2016,
-      fassade: 0,
-      substanz: 84,
+      baujahr: 2006,
+      fassade: 1,
+      substanz: 44,
       status: "offen",
       flaechen: [
         {
           id: "O009-f1",
           etage: 0,
-          qm: 249,
+          qm: 700,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O009-f2",
           etage: 0,
-          qm: 249,
+          qm: 700,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O009-f3",
           etage: 0,
-          qm: 249,
+          qm: 700,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O009-f4",
           etage: 0,
-          qm: 249,
+          qm: 700,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O009-f5",
           etage: 0,
-          qm: 249,
+          qm: 700,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O009-f6",
           etage: 0,
-          qm: 249,
+          qm: 700,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O009-f7",
           etage: 0,
-          qm: 249,
+          qm: 700,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70139,67 +71534,69 @@
     },
     {
       id: "O010",
-      name: "FUNDUS M\xFCnster",
-      stadt: "M\xFCnster",
+      name: "FUNDUS N\xFCrnberg",
+      stadt: "N\xFCrnberg",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
       cluster: "grossstadt",
-      grundflaecheQm: 1883,
+      region: "S\xFCd",
+      grundflaecheQm: 2100,
       etagen: [
         0,
         1
       ],
-      baujahr: 2004,
-      fassade: 1,
-      substanz: 55,
+      baujahr: 2013,
+      fassade: 4,
+      substanz: 70,
       status: "offen",
       flaechen: [
         {
           id: "O010-f1",
           etage: 0,
-          qm: 538,
+          qm: 586,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O010-f2",
           etage: 1,
-          qm: 538,
+          qm: 586,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O010-f3",
           etage: 0,
-          qm: 538,
+          qm: 586,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O010-f4",
           etage: 1,
-          qm: 538,
+          qm: 586,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O010-f5",
           etage: 0,
-          qm: 538,
+          qm: 586,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O010-f6",
           etage: 1,
-          qm: 538,
+          qm: 586,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O010-f7",
           etage: 0,
-          qm: 538,
+          qm: 586,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70207,66 +71604,68 @@
     },
     {
       id: "O011",
-      name: "FUNDUS Bonn",
-      stadt: "Bonn",
+      name: "FUNDUS Duisburg",
+      stadt: "Duisburg",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
       cluster: "grossstadt",
-      grundflaecheQm: 2020,
+      region: "West",
+      grundflaecheQm: 3400,
       etagen: [
         0
       ],
-      baujahr: 2011,
-      fassade: 2,
-      substanz: 72,
+      baujahr: 2002,
+      fassade: 1,
+      substanz: 85,
       status: "offen",
       flaechen: [
         {
           id: "O011-f1",
           etage: 0,
-          qm: 289,
+          qm: 486,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O011-f2",
           etage: 0,
-          qm: 289,
+          qm: 486,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O011-f3",
           etage: 0,
-          qm: 289,
+          qm: 486,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O011-f4",
           etage: 0,
-          qm: 289,
+          qm: 486,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O011-f5",
           etage: 0,
-          qm: 289,
+          qm: 486,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O011-f6",
           etage: 0,
-          qm: 289,
+          qm: 486,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O011-f7",
           etage: 0,
-          qm: 289,
+          qm: 486,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70274,67 +71673,69 @@
     },
     {
       id: "O012",
-      name: "FUNDUS Hannover",
-      stadt: "Hannover",
+      name: "FUNDUS Bochum",
+      stadt: "Bochum",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
       cluster: "grossstadt",
-      grundflaecheQm: 2157,
+      region: "West",
+      grundflaecheQm: 1600,
       etagen: [
         0,
         1
       ],
-      baujahr: 1999,
-      fassade: 3,
-      substanz: 43,
+      baujahr: 2001,
+      fassade: 4,
+      substanz: 40,
       status: "offen",
       flaechen: [
         {
           id: "O012-f1",
           etage: 0,
-          qm: 616,
+          qm: 457,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O012-f2",
           etage: 1,
-          qm: 616,
+          qm: 457,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O012-f3",
           etage: 0,
-          qm: 616,
+          qm: 457,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O012-f4",
           etage: 1,
-          qm: 616,
+          qm: 457,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O012-f5",
           etage: 0,
-          qm: 616,
+          qm: 457,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O012-f6",
           etage: 1,
-          qm: 616,
+          qm: 457,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O012-f7",
           etage: 0,
-          qm: 616,
+          qm: 457,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70342,66 +71743,68 @@
     },
     {
       id: "O013",
-      name: "FUNDUS Frankfurt",
-      stadt: "Frankfurt",
+      name: "FUNDUS Wuppertal",
+      stadt: "Wuppertal",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
-      cluster: "metropole",
-      grundflaecheQm: 2294,
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 3800,
       etagen: [
         0
       ],
-      baujahr: 2006,
+      baujahr: 2003,
       fassade: 4,
-      substanz: 60,
+      substanz: 40,
       status: "offen",
       flaechen: [
         {
           id: "O013-f1",
           etage: 0,
-          qm: 328,
+          qm: 543,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O013-f2",
           etage: 0,
-          qm: 328,
+          qm: 543,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O013-f3",
           etage: 0,
-          qm: 328,
+          qm: 543,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O013-f4",
           etage: 0,
-          qm: 328,
+          qm: 543,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O013-f5",
           etage: 0,
-          qm: 328,
+          qm: 543,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O013-f6",
           etage: 0,
-          qm: 328,
+          qm: 543,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O013-f7",
           etage: 0,
-          qm: 328,
+          qm: 543,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70409,67 +71812,69 @@
     },
     {
       id: "O014",
-      name: "FUNDUS Stuttgart",
-      stadt: "Stuttgart",
+      name: "FUNDUS Bielefeld",
+      stadt: "Bielefeld",
       format: "outlet",
+      nurDaten: true,
       lage: "rand",
-      cluster: "metropole",
-      grundflaecheQm: 1581,
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 1600,
       etagen: [
         0,
         1
       ],
-      baujahr: 2013,
-      fassade: 5,
-      substanz: 77,
+      baujahr: 2011,
+      fassade: 1,
+      substanz: 40,
       status: "offen",
       flaechen: [
         {
           id: "O014-f1",
           etage: 0,
-          qm: 452,
+          qm: 457,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O014-f2",
           etage: 1,
-          qm: 452,
+          qm: 457,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O014-f3",
           etage: 0,
-          qm: 452,
+          qm: 457,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O014-f4",
           etage: 1,
-          qm: 452,
+          qm: 457,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O014-f5",
           etage: 0,
-          qm: 452,
+          qm: 457,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O014-f6",
           etage: 1,
-          qm: 452,
+          qm: 457,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O014-f7",
           etage: 0,
-          qm: 452,
+          qm: 457,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70477,67 +71882,68 @@
     },
     {
       id: "O015",
-      name: "FUNDUS D\xFCsseldorf",
-      stadt: "D\xFCsseldorf",
+      name: "FUNDUS Bonn",
+      stadt: "Bonn",
       format: "outlet",
-      lage: "b",
-      cluster: "metropole",
-      grundflaecheQm: 2100,
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 4700,
       etagen: [
-        0,
-        1
+        0
       ],
-      baujahr: 2001,
-      fassade: 6,
-      substanz: 48,
+      baujahr: 2013,
+      fassade: 2,
+      substanz: 49,
       status: "offen",
       flaechen: [
         {
           id: "O015-f1",
           etage: 0,
-          qm: 600,
+          qm: 671,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O015-f2",
-          etage: 1,
-          qm: 600,
+          etage: 0,
+          qm: 671,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O015-f3",
           etage: 0,
-          qm: 600,
+          qm: 671,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O015-f4",
-          etage: 1,
-          qm: 600,
+          etage: 0,
+          qm: 671,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O015-f5",
           etage: 0,
-          qm: 600,
+          qm: 671,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O015-f6",
-          etage: 1,
-          qm: 600,
+          etage: 0,
+          qm: 671,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O015-f7",
           etage: 0,
-          qm: 600,
+          qm: 671,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70545,68 +71951,69 @@
     },
     {
       id: "O016",
-      name: "FUNDUS K\xF6ln",
-      stadt: "K\xF6ln",
+      name: "FUNDUS M\xFCnster",
+      stadt: "M\xFCnster",
       format: "outlet",
-      lage: "b",
-      cluster: "metropole",
-      grundflaecheQm: 2100,
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 1400,
       etagen: [
         0,
-        1,
-        2
+        1
       ],
-      baujahr: 2008,
-      fassade: 7,
-      substanz: 65,
+      baujahr: 2e3,
+      fassade: 2,
+      substanz: 56,
       status: "offen",
       flaechen: [
         {
           id: "O016-f1",
           etage: 0,
-          qm: 900,
+          qm: 386,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O016-f2",
           etage: 1,
-          qm: 900,
+          qm: 386,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O016-f3",
-          etage: 2,
-          qm: 900,
+          etage: 0,
+          qm: 386,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O016-f4",
-          etage: 0,
-          qm: 900,
+          etage: 1,
+          qm: 386,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O016-f5",
-          etage: 1,
-          qm: 900,
+          etage: 0,
+          qm: 386,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O016-f6",
-          etage: 2,
-          qm: 900,
+          etage: 1,
+          qm: 386,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O016-f7",
           etage: 0,
-          qm: 900,
+          qm: 386,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70614,67 +72021,68 @@
     },
     {
       id: "O017",
-      name: "FUNDUS Berlin",
-      stadt: "Berlin",
+      name: "FUNDUS Mannheim",
+      stadt: "Mannheim",
       format: "outlet",
-      lage: "b",
-      cluster: "metropole",
-      grundflaecheQm: 2100,
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 4600,
       etagen: [
-        0,
-        1
+        0
       ],
-      baujahr: 2015,
-      fassade: 0,
-      substanz: 82,
+      baujahr: 2010,
+      fassade: 4,
+      substanz: 60,
       status: "offen",
       flaechen: [
         {
           id: "O017-f1",
           etage: 0,
-          qm: 600,
+          qm: 657,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O017-f2",
-          etage: 1,
-          qm: 600,
+          etage: 0,
+          qm: 657,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O017-f3",
           etage: 0,
-          qm: 600,
+          qm: 657,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O017-f4",
-          etage: 1,
-          qm: 600,
+          etage: 0,
+          qm: 657,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O017-f5",
           etage: 0,
-          qm: 600,
+          qm: 657,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O017-f6",
-          etage: 1,
-          qm: 600,
+          etage: 0,
+          qm: 657,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O017-f7",
           etage: 0,
-          qm: 600,
+          qm: 657,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70682,67 +72090,69 @@
     },
     {
       id: "O018",
-      name: "FUNDUS Hamburg",
-      stadt: "Hamburg",
+      name: "FUNDUS Karlsruhe",
+      stadt: "Karlsruhe",
       format: "outlet",
-      lage: "b",
-      cluster: "metropole",
-      grundflaecheQm: 2100,
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 1700,
       etagen: [
         0,
         1
       ],
-      baujahr: 2003,
-      fassade: 1,
-      substanz: 53,
+      baujahr: 2013,
+      fassade: 5,
+      substanz: 63,
       status: "offen",
       flaechen: [
         {
           id: "O018-f1",
           etage: 0,
-          qm: 600,
+          qm: 486,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O018-f2",
           etage: 1,
-          qm: 600,
+          qm: 486,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O018-f3",
           etage: 0,
-          qm: 600,
+          qm: 486,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O018-f4",
           etage: 1,
-          qm: 600,
+          qm: 486,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O018-f5",
           etage: 0,
-          qm: 600,
+          qm: 486,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O018-f6",
           etage: 1,
-          qm: 600,
+          qm: 486,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O018-f7",
           etage: 0,
-          qm: 600,
+          qm: 486,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70750,68 +72160,68 @@
     },
     {
       id: "O019",
-      name: "FUNDUS Leipzig",
-      stadt: "Leipzig",
+      name: "FUNDUS Augsburg",
+      stadt: "Augsburg",
       format: "outlet",
-      lage: "b",
+      nurDaten: true,
+      lage: "rand",
       cluster: "grossstadt",
-      grundflaecheQm: 2100,
+      region: "S\xFCd",
+      grundflaecheQm: 3200,
       etagen: [
-        0,
-        1,
-        2
+        0
       ],
-      baujahr: 2010,
+      baujahr: 2006,
       fassade: 2,
-      substanz: 70,
+      substanz: 81,
       status: "offen",
       flaechen: [
         {
           id: "O019-f1",
           etage: 0,
-          qm: 900,
+          qm: 457,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O019-f2",
-          etage: 1,
-          qm: 900,
+          etage: 0,
+          qm: 457,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O019-f3",
-          etage: 2,
-          qm: 900,
+          etage: 0,
+          qm: 457,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O019-f4",
           etage: 0,
-          qm: 900,
+          qm: 457,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O019-f5",
-          etage: 1,
-          qm: 900,
+          etage: 0,
+          qm: 457,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O019-f6",
-          etage: 2,
-          qm: 900,
+          etage: 0,
+          qm: 457,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O019-f7",
           etage: 0,
-          qm: 900,
+          qm: 457,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70819,67 +72229,3286 @@
     },
     {
       id: "O020",
-      name: "FUNDUS M\xFCnchen",
-      stadt: "M\xFCnchen",
+      name: "FUNDUS Wiesbaden",
+      stadt: "Wiesbaden",
       format: "outlet",
-      lage: "b",
-      cluster: "metropole",
-      grundflaecheQm: 2100,
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Mitte",
+      grundflaecheQm: 2300,
       etagen: [
         0,
         1
       ],
-      baujahr: 1998,
-      fassade: 3,
-      substanz: 41,
+      baujahr: 2001,
+      fassade: 4,
+      substanz: 43,
       status: "offen",
       flaechen: [
         {
           id: "O020-f1",
           etage: 0,
-          qm: 600,
+          qm: 643,
           konzept: "eigen",
           gruppe: "damen"
         },
         {
           id: "O020-f2",
           etage: 1,
-          qm: 600,
+          qm: 643,
           konzept: "eigen",
           gruppe: "herren"
         },
         {
           id: "O020-f3",
           etage: 0,
-          qm: 600,
+          qm: 643,
           konzept: "eigen",
           gruppe: "kinder"
         },
         {
           id: "O020-f4",
           etage: 1,
-          qm: 600,
+          qm: 643,
           konzept: "eigen",
           gruppe: "schuhe"
         },
         {
           id: "O020-f5",
           etage: 0,
-          qm: 600,
+          qm: 643,
           konzept: "eigen",
           gruppe: "accessoires"
         },
         {
           id: "O020-f6",
           etage: 1,
-          qm: 600,
+          qm: 643,
           konzept: "eigen",
           gruppe: "wohnen"
         },
         {
           id: "O020-f7",
           etage: 0,
+          qm: 643,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O021",
+      name: "FUNDUS M\xF6nchengladbach",
+      stadt: "M\xF6nchengladbach",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 2500,
+      etagen: [
+        0
+      ],
+      baujahr: 1999,
+      fassade: 0,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O021-f1",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O021-f2",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O021-f3",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O021-f4",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O021-f5",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O021-f6",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O021-f7",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O022",
+      name: "FUNDUS Gelsenkirchen",
+      stadt: "Gelsenkirchen",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 2300,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2004,
+      fassade: 0,
+      substanz: 72,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O022-f1",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O022-f2",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O022-f3",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O022-f4",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O022-f5",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O022-f6",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O022-f7",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O023",
+      name: "FUNDUS Aachen",
+      stadt: "Aachen",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 3300,
+      etagen: [
+        0
+      ],
+      baujahr: 2003,
+      fassade: 6,
+      substanz: 58,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O023-f1",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O023-f2",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O023-f3",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O023-f4",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O023-f5",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O023-f6",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O023-f7",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O024",
+      name: "FUNDUS Braunschweig",
+      stadt: "Braunschweig",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Nord",
+      grundflaecheQm: 2400,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2015,
+      fassade: 6,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O024-f1",
+          etage: 0,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O024-f2",
+          etage: 1,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O024-f3",
+          etage: 0,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O024-f4",
+          etage: 1,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O024-f5",
+          etage: 0,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O024-f6",
+          etage: 1,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O024-f7",
+          etage: 0,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O025",
+      name: "FUNDUS Kiel",
+      stadt: "Kiel",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Nord",
+      grundflaecheQm: 3300,
+      etagen: [
+        0
+      ],
+      baujahr: 2011,
+      fassade: 7,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O025-f1",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O025-f2",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O025-f3",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O025-f4",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O025-f5",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O025-f6",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O025-f7",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O026",
+      name: "FUNDUS Halle",
+      stadt: "Halle",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Ost",
+      grundflaecheQm: 2100,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2007,
+      fassade: 4,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O026-f1",
+          etage: 0,
           qm: 600,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O026-f2",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O026-f3",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O026-f4",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O026-f5",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O026-f6",
+          etage: 1,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O026-f7",
+          etage: 0,
+          qm: 600,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O027",
+      name: "FUNDUS Kassel",
+      stadt: "Kassel",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Mitte",
+      grundflaecheQm: 1800,
+      etagen: [
+        0
+      ],
+      baujahr: 2015,
+      fassade: 1,
+      substanz: 77,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O027-f1",
+          etage: 0,
+          qm: 257,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O027-f2",
+          etage: 0,
+          qm: 257,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O027-f3",
+          etage: 0,
+          qm: 257,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O027-f4",
+          etage: 0,
+          qm: 257,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O027-f5",
+          etage: 0,
+          qm: 257,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O027-f6",
+          etage: 0,
+          qm: 257,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O027-f7",
+          etage: 0,
+          qm: 257,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O028",
+      name: "FUNDUS Hagen",
+      stadt: "Hagen",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 1100,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1998,
+      fassade: 1,
+      substanz: 65,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O028-f1",
+          etage: 0,
+          qm: 300,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O028-f2",
+          etage: 1,
+          qm: 300,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O028-f3",
+          etage: 0,
+          qm: 300,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O028-f4",
+          etage: 1,
+          qm: 300,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O028-f5",
+          etage: 0,
+          qm: 300,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O028-f6",
+          etage: 1,
+          qm: 300,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O028-f7",
+          etage: 0,
+          qm: 300,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O029",
+      name: "FUNDUS Potsdam",
+      stadt: "Potsdam",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Ost",
+      grundflaecheQm: 4700,
+      etagen: [
+        0
+      ],
+      baujahr: 2002,
+      fassade: 0,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O029-f1",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O029-f2",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O029-f3",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O029-f4",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O029-f5",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O029-f6",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O029-f7",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O030",
+      name: "FUNDUS Saarbr\xFCcken",
+      stadt: "Saarbr\xFCcken",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Mitte",
+      grundflaecheQm: 1700,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2012,
+      fassade: 1,
+      substanz: 45,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O030-f1",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O030-f2",
+          etage: 1,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O030-f3",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O030-f4",
+          etage: 1,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O030-f5",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O030-f6",
+          etage: 1,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O030-f7",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O031",
+      name: "FUNDUS Hamm",
+      stadt: "Hamm",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 4100,
+      etagen: [
+        0
+      ],
+      baujahr: 2015,
+      fassade: 2,
+      substanz: 61,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O031-f1",
+          etage: 0,
+          qm: 586,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O031-f2",
+          etage: 0,
+          qm: 586,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O031-f3",
+          etage: 0,
+          qm: 586,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O031-f4",
+          etage: 0,
+          qm: 586,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O031-f5",
+          etage: 0,
+          qm: 586,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O031-f6",
+          etage: 0,
+          qm: 586,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O031-f7",
+          etage: 0,
+          qm: 586,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O032",
+      name: "FUNDUS Ludwigshafen",
+      stadt: "Ludwigshafen",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Mitte",
+      grundflaecheQm: 1200,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2014,
+      fassade: 2,
+      substanz: 49,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O032-f1",
+          etage: 0,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O032-f2",
+          etage: 1,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O032-f3",
+          etage: 0,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O032-f4",
+          etage: 1,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O032-f5",
+          etage: 0,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O032-f6",
+          etage: 1,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O032-f7",
+          etage: 0,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O033",
+      name: "FUNDUS Oldenburg",
+      stadt: "Oldenburg",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Nord",
+      grundflaecheQm: 3100,
+      etagen: [
+        0
+      ],
+      baujahr: 2009,
+      fassade: 2,
+      substanz: 50,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O033-f1",
+          etage: 0,
+          qm: 443,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O033-f2",
+          etage: 0,
+          qm: 443,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O033-f3",
+          etage: 0,
+          qm: 443,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O033-f4",
+          etage: 0,
+          qm: 443,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O033-f5",
+          etage: 0,
+          qm: 443,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O033-f6",
+          etage: 0,
+          qm: 443,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O033-f7",
+          etage: 0,
+          qm: 443,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O034",
+      name: "FUNDUS M\xFClheim",
+      stadt: "M\xFClheim",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 2300,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1998,
+      fassade: 6,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O034-f1",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O034-f2",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O034-f3",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O034-f4",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O034-f5",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O034-f6",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O034-f7",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O035",
+      name: "FUNDUS Osnabr\xFCck",
+      stadt: "Osnabr\xFCck",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Nord",
+      grundflaecheQm: 3500,
+      etagen: [
+        0
+      ],
+      baujahr: 2001,
+      fassade: 7,
+      substanz: 68,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O035-f1",
+          etage: 0,
+          qm: 500,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O035-f2",
+          etage: 0,
+          qm: 500,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O035-f3",
+          etage: 0,
+          qm: 500,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O035-f4",
+          etage: 0,
+          qm: 500,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O035-f5",
+          etage: 0,
+          qm: 500,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O035-f6",
+          etage: 0,
+          qm: 500,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O035-f7",
+          etage: 0,
+          qm: 500,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O036",
+      name: "FUNDUS Leverkusen",
+      stadt: "Leverkusen",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 2300,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2009,
+      fassade: 4,
+      substanz: 65,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O036-f1",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O036-f2",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O036-f3",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O036-f4",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O036-f5",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O036-f6",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O036-f7",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O037",
+      name: "FUNDUS Darmstadt",
+      stadt: "Darmstadt",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Mitte",
+      grundflaecheQm: 3600,
+      etagen: [
+        0
+      ],
+      baujahr: 2003,
+      fassade: 5,
+      substanz: 49,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O037-f1",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O037-f2",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O037-f3",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O037-f4",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O037-f5",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O037-f6",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O037-f7",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O038",
+      name: "FUNDUS Heidelberg",
+      stadt: "Heidelberg",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 1300,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2001,
+      fassade: 1,
+      substanz: 48,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O038-f1",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O038-f2",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O038-f3",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O038-f4",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O038-f5",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O038-f6",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O038-f7",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O039",
+      name: "FUNDUS Solingen",
+      stadt: "Solingen",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 3600,
+      etagen: [
+        0
+      ],
+      baujahr: 2002,
+      fassade: 2,
+      substanz: 54,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O039-f1",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O039-f2",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O039-f3",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O039-f4",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O039-f5",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O039-f6",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O039-f7",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O040",
+      name: "FUNDUS Regensburg",
+      stadt: "Regensburg",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 1700,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2010,
+      fassade: 6,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O040-f1",
+          etage: 0,
+          qm: 486,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O040-f2",
+          etage: 1,
+          qm: 486,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O040-f3",
+          etage: 0,
+          qm: 486,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O040-f4",
+          etage: 1,
+          qm: 486,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O040-f5",
+          etage: 0,
+          qm: 486,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O040-f6",
+          etage: 1,
+          qm: 486,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O040-f7",
+          etage: 0,
+          qm: 486,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O041",
+      name: "FUNDUS Paderborn",
+      stadt: "Paderborn",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 3200,
+      etagen: [
+        0
+      ],
+      baujahr: 2006,
+      fassade: 3,
+      substanz: 66,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O041-f1",
+          etage: 0,
+          qm: 457,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O041-f2",
+          etage: 0,
+          qm: 457,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O041-f3",
+          etage: 0,
+          qm: 457,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O041-f4",
+          etage: 0,
+          qm: 457,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O041-f5",
+          etage: 0,
+          qm: 457,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O041-f6",
+          etage: 0,
+          qm: 457,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O041-f7",
+          etage: 0,
+          qm: 457,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O042",
+      name: "FUNDUS Ingolstadt",
+      stadt: "Ingolstadt",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 2e3,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2002,
+      fassade: 6,
+      substanz: 58,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O042-f1",
+          etage: 0,
+          qm: 571,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O042-f2",
+          etage: 1,
+          qm: 571,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O042-f3",
+          etage: 0,
+          qm: 571,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O042-f4",
+          etage: 1,
+          qm: 571,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O042-f5",
+          etage: 0,
+          qm: 571,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O042-f6",
+          etage: 1,
+          qm: 571,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O042-f7",
+          etage: 0,
+          qm: 571,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O043",
+      name: "FUNDUS W\xFCrzburg",
+      stadt: "W\xFCrzburg",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 2700,
+      etagen: [
+        0
+      ],
+      baujahr: 2009,
+      fassade: 3,
+      substanz: 45,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O043-f1",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O043-f2",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O043-f3",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O043-f4",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O043-f5",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O043-f6",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O043-f7",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O044",
+      name: "FUNDUS Ulm",
+      stadt: "Ulm",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 1300,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2013,
+      fassade: 3,
+      substanz: 84,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O044-f1",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O044-f2",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O044-f3",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O044-f4",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O044-f5",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O044-f6",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O044-f7",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O045",
+      name: "FUNDUS Wolfsburg",
+      stadt: "Wolfsburg",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Nord",
+      grundflaecheQm: 4900,
+      etagen: [
+        0
+      ],
+      baujahr: 2009,
+      fassade: 7,
+      substanz: 56,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O045-f1",
+          etage: 0,
+          qm: 700,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O045-f2",
+          etage: 0,
+          qm: 700,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O045-f3",
+          etage: 0,
+          qm: 700,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O045-f4",
+          etage: 0,
+          qm: 700,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O045-f5",
+          etage: 0,
+          qm: 700,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O045-f6",
+          etage: 0,
+          qm: 700,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O045-f7",
+          etage: 0,
+          qm: 700,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O046",
+      name: "FUNDUS G\xF6ttingen",
+      stadt: "G\xF6ttingen",
+      format: "outlet",
+      nurDaten: true,
+      lage: "rand",
+      cluster: "grossstadt",
+      region: "Nord",
+      grundflaecheQm: 1400,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 2007,
+      fassade: 2,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O046-f1",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O046-f2",
+          etage: 1,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O046-f3",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O046-f4",
+          etage: 1,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O046-f5",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O046-f6",
+          etage: 1,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O046-f7",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O047",
+      name: "FUNDUS Pforzheim",
+      stadt: "Pforzheim",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 900,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1974,
+      fassade: 2,
+      substanz: 49,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O047-f1",
+          etage: 0,
+          qm: 400,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O047-f2",
+          etage: 1,
+          qm: 400,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O047-f3",
+          etage: 2,
+          qm: 400,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O047-f4",
+          etage: 0,
+          qm: 400,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O047-f5",
+          etage: 1,
+          qm: 400,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O047-f6",
+          etage: 2,
+          qm: 400,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O047-f7",
+          etage: 0,
+          qm: 400,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O048",
+      name: "FUNDUS Offenbach",
+      stadt: "Offenbach",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "Mitte",
+      grundflaecheQm: 1700,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1973,
+      fassade: 5,
+      substanz: 83,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O048-f1",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O048-f2",
+          etage: 1,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O048-f3",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O048-f4",
+          etage: 1,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O048-f5",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O048-f6",
+          etage: 1,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O048-f7",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O049",
+      name: "FUNDUS Heilbronn",
+      stadt: "Heilbronn",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1971,
+      fassade: 2,
+      substanz: 80,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O049-f1",
+          etage: 0,
+          qm: 629,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O049-f2",
+          etage: 1,
+          qm: 629,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O049-f3",
+          etage: 2,
+          qm: 629,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O049-f4",
+          etage: 0,
+          qm: 629,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O049-f5",
+          etage: 1,
+          qm: 629,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O049-f6",
+          etage: 2,
+          qm: 629,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O049-f7",
+          etage: 0,
+          qm: 629,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O050",
+      name: "FUNDUS Bremerhaven",
+      stadt: "Bremerhaven",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "Nord",
+      grundflaecheQm: 1900,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1978,
+      fassade: 0,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O050-f1",
+          etage: 0,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O050-f2",
+          etage: 1,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O050-f3",
+          etage: 0,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O050-f4",
+          etage: 1,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O050-f5",
+          etage: 0,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O050-f6",
+          etage: 1,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O050-f7",
+          etage: 0,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O051",
+      name: "FUNDUS Trier",
+      stadt: "Trier",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "Mitte",
+      grundflaecheQm: 1600,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1968,
+      fassade: 3,
+      substanz: 47,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O051-f1",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O051-f2",
+          etage: 1,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O051-f3",
+          etage: 2,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O051-f4",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O051-f5",
+          etage: 1,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O051-f6",
+          etage: 2,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O051-f7",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O052",
+      name: "FUNDUS Koblenz",
+      stadt: "Koblenz",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "Mitte",
+      grundflaecheQm: 2400,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1971,
+      fassade: 4,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O052-f1",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O052-f2",
+          etage: 1,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O052-f3",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O052-f4",
+          etage: 1,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O052-f5",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O052-f6",
+          etage: 1,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O052-f7",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O053",
+      name: "FUNDUS Jena",
+      stadt: "Jena",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "Ost",
+      grundflaecheQm: 1600,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1984,
+      fassade: 3,
+      substanz: 84,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O053-f1",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O053-f2",
+          etage: 1,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O053-f3",
+          etage: 2,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O053-f4",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O053-f5",
+          etage: 1,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O053-f6",
+          etage: 2,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O053-f7",
+          etage: 0,
+          qm: 671,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O054",
+      name: "FUNDUS Siegen",
+      stadt: "Siegen",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 2300,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1982,
+      fassade: 5,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O054-f1",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O054-f2",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O054-f3",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O054-f4",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O054-f5",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O054-f6",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O054-f7",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O055",
+      name: "FUNDUS Hildesheim",
+      stadt: "Hildesheim",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "Nord",
+      grundflaecheQm: 800,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1970,
+      fassade: 2,
+      substanz: 45,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O055-f1",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O055-f2",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O055-f3",
+          etage: 2,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O055-f4",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O055-f5",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O055-f6",
+          etage: 2,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O055-f7",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O056",
+      name: "FUNDUS G\xFCtersloh",
+      stadt: "G\xFCtersloh",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 2500,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1982,
+      fassade: 4,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O056-f1",
+          etage: 0,
+          qm: 714,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O056-f2",
+          etage: 1,
+          qm: 714,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O056-f3",
+          etage: 0,
+          qm: 714,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O056-f4",
+          etage: 1,
+          qm: 714,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O056-f5",
+          etage: 0,
+          qm: 714,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O056-f6",
+          etage: 1,
+          qm: 714,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O056-f7",
+          etage: 0,
+          qm: 714,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O057",
+      name: "FUNDUS Recklinghausen",
+      stadt: "Recklinghausen",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 1100,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1971,
+      fassade: 7,
+      substanz: 83,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O057-f1",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O057-f2",
+          etage: 1,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O057-f3",
+          etage: 2,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O057-f4",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O057-f5",
+          etage: 1,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O057-f6",
+          etage: 2,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O057-f7",
+          etage: 0,
+          qm: 471,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O058",
+      name: "FUNDUS Bottrop",
+      stadt: "Bottrop",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 2400,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1966,
+      fassade: 0,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O058-f1",
+          etage: 0,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O058-f2",
+          etage: 1,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O058-f3",
+          etage: 0,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O058-f4",
+          etage: 1,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O058-f5",
+          etage: 0,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O058-f6",
+          etage: 1,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O058-f7",
+          etage: 0,
+          qm: 686,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O059",
+      name: "FUNDUS Reutlingen",
+      stadt: "Reutlingen",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 800,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1975,
+      fassade: 6,
+      substanz: 79,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O059-f1",
+          etage: 0,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O059-f2",
+          etage: 1,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O059-f3",
+          etage: 2,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O059-f4",
+          etage: 0,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O059-f5",
+          etage: 1,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O059-f6",
+          etage: 2,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O059-f7",
+          etage: 0,
+          qm: 329,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O060",
+      name: "FUNDUS Erlangen",
+      stadt: "Erlangen",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 1500,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1972,
+      fassade: 7,
+      substanz: 56,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O060-f1",
+          etage: 0,
+          qm: 414,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O060-f2",
+          etage: 1,
+          qm: 414,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O060-f3",
+          etage: 0,
+          qm: 414,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O060-f4",
+          etage: 1,
+          qm: 414,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O060-f5",
+          etage: 0,
+          qm: 414,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O060-f6",
+          etage: 1,
+          qm: 414,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O060-f7",
+          etage: 0,
+          qm: 414,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O061",
+      name: "FUNDUS F\xFCrth",
+      stadt: "F\xFCrth",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "S\xFCd",
+      grundflaecheQm: 900,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1966,
+      fassade: 0,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O061-f1",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O061-f2",
+          etage: 1,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O061-f3",
+          etage: 2,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O061-f4",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O061-f5",
+          etage: 1,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O061-f6",
+          etage: 2,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O061-f7",
+          etage: 0,
+          qm: 386,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O062",
+      name: "FUNDUS Neuss",
+      stadt: "Neuss",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 1900,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1984,
+      fassade: 6,
+      substanz: 75,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O062-f1",
+          etage: 0,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O062-f2",
+          etage: 1,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O062-f3",
+          etage: 0,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O062-f4",
+          etage: 1,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O062-f5",
+          etage: 0,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O062-f6",
+          etage: 1,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O062-f7",
+          etage: 0,
+          qm: 529,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O063",
+      name: "FUNDUS Moers",
+      stadt: "Moers",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 800,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1978,
+      fassade: 3,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O063-f1",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O063-f2",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O063-f3",
+          etage: 2,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O063-f4",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O063-f5",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O063-f6",
+          etage: 2,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O063-f7",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O064",
+      name: "FUNDUS Kaiserslautern",
+      stadt: "Kaiserslautern",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "Mitte",
+      grundflaecheQm: 1800,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1979,
+      fassade: 4,
+      substanz: 40,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O064-f1",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O064-f2",
+          etage: 1,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O064-f3",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O064-f4",
+          etage: 1,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O064-f5",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O064-f6",
+          etage: 1,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O064-f7",
+          etage: 0,
+          qm: 514,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O065",
+      name: "FUNDUS Remscheid",
+      stadt: "Remscheid",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 800,
+      etagen: [
+        0,
+        1,
+        2
+      ],
+      baujahr: 1970,
+      fassade: 2,
+      substanz: 80,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O065-f1",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O065-f2",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O065-f3",
+          etage: 2,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O065-f4",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O065-f5",
+          etage: 1,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O065-f6",
+          etage: 2,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O065-f7",
+          etage: 0,
+          qm: 357,
+          konzept: "eigen",
+          gruppe: "beauty"
+        }
+      ]
+    },
+    {
+      id: "O066",
+      name: "FUNDUS Bergisch Gladbach",
+      stadt: "Bergisch Gladbach",
+      format: "outlet",
+      nurDaten: true,
+      lage: "b",
+      cluster: "grossstadt",
+      region: "West",
+      grundflaecheQm: 2300,
+      etagen: [
+        0,
+        1
+      ],
+      baujahr: 1985,
+      fassade: 1,
+      substanz: 85,
+      status: "offen",
+      flaechen: [
+        {
+          id: "O066-f1",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "damen"
+        },
+        {
+          id: "O066-f2",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "herren"
+        },
+        {
+          id: "O066-f3",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "kinder"
+        },
+        {
+          id: "O066-f4",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "schuhe"
+        },
+        {
+          id: "O066-f5",
+          etage: 0,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "accessoires"
+        },
+        {
+          id: "O066-f6",
+          etage: 1,
+          qm: 657,
+          konzept: "eigen",
+          gruppe: "wohnen"
+        },
+        {
+          id: "O066-f7",
+          etage: 0,
+          qm: 657,
           konzept: "eigen",
           gruppe: "beauty"
         }
@@ -70887,7 +75516,7 @@
     }
   ];
 
-  // render/src/kit/premium.js
+  // src/kit/premium.js
   var wurzelSumme11 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PREMIUM_NAMEN = Object.freeze({
     P001: "Palais Hartwig",
@@ -71222,7 +75851,7 @@
     return { hoehe, w, d: d2, familie: "premium", teile: S.anzahl - start, status: zust.status };
   }
 
-  // render/haeuser.json
+  // haeuser.json
   var haeuser_default = [
     {
       id: "W001",
@@ -94244,7 +98873,7 @@
     }
   ];
 
-  // render/src/kit/bauer.js
+  // src/kit/bauer.js
   var REGION2 = { nord: "Nord", ost: "Ost", west: "West", mitte: "Mitte", sued: "S\xFCd" };
   var regionVon2 = (p2) => REGION2[p2.region] ?? p2.region ?? "Mitte";
   var regionLang = { Nord: "nord", Ost: "ost", West: "west", Mitte: "mitte", "S\xFCd": "sued" };
@@ -94442,7 +99071,7 @@
     };
   }
 
-  // render/src/kit/westbauten.js
+  // src/kit/westbauten.js
   var wurzelSumme12 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI5 = Math.PI;
   var WEST_WASSER_Y = -2.2;
@@ -98481,7 +103110,7 @@
     "slot:ruhr_brauturm": ruhrBrauturm
   };
 
-  // render/src/kit/ladenbau-sport.js
+  // src/kit/ladenbau-sport.js
   function sportLadenEingabe(haus2, etage2, o = {}, raster4 = null) {
     const fam = familieSport(haus2), masse3 = masseSport(haus2, fam), ra = raster4 ?? sportRaster(haus2, etage2, o);
     const istHindernis = (t) => /^(treppe|rt|aufzug|lager|wc|werkstatt|luft|turm|buehne|szene|radbuehne|lauf|erlebnis)/.test(String(t));
@@ -98508,7 +103137,7 @@
     };
   }
 
-  // render/src/kit/sportgrundriss.js
+  // src/kit/sportgrundriss.js
   var wurzelSumme13 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var R3 = RASTER;
   var WH2 = WANDHOEHE;
@@ -100193,7 +104822,7 @@
     }
   }
 
-  // render/src/kit/grundriss.js
+  // src/kit/grundriss.js
   var R4 = RASTER;
   var FASSADE = ["#efe4c9", "#e3d3bd", "#ece5d7", "#d3d9de", "#b9785e", "#e8dfcf", "#c9b8a0", "#dde1e4"];
   var GANG = { a: "#f2f1ee", b: "#dedcd7", m: "fliese" };
@@ -100989,7 +105618,7 @@
     }
   }
 
-  // render/src/kit/hq.js
+  // src/kit/hq.js
   var wurzelSumme14 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI7 = Math.PI;
   var ROT3 = FARBEN3.marke;
@@ -103212,7 +107841,7 @@
     text2(L2, "CRM-Leitstand", 0, 2.88, 0.05, 0.26, "#ffffff", farbe3);
   } });
 
-  // render/src/kit/ostbauten.js
+  // src/kit/ostbauten.js
   var wurzelSumme15 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI8 = Math.PI;
   function R5(ox, oz, dx, dz, L2) {
@@ -106053,7 +110682,7 @@
     "slot:brache": brache
   };
 
-  // render/src/kit/archetypen/ost.js
+  // src/kit/archetypen/ost.js
   var wurzelSumme16 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm3, fixiere: fixiere2, frei: frei2, zelleFrei: zelleFrei2, wasserSpalte: wasserSpalte2, klemm: klemm3, wahlGewichtet: wahlGewichtet2, neueParzelle: neueParzelle2, mergeRand: mergeRand2, freiePosition: freiePosition2, parzellenVon } = PLAN_HILFE;
   var OST_VIERTEL = { magistrale: "zentrum", zentrum: "zentrum", altstadt: "altstadt", barock: "barock", messe: "messe", gruenderzeit: "gruenderzeit", platte: "rand" };
@@ -106481,7 +111110,7 @@
     };
     const gewichte2 = [["wbs70_6", 3], ["p2", 1.4], ["q3a", klein ? 1.6 : 0.6], ["wbs70_11", metro ? 2 : klein ? 0.2 : 0.9], ["scheibe", metro ? 1 : 0.25]];
     const geschosse2 = (v) => /11|scheibe/.test(v) ? 11 : v === "q3a" ? 5 : 6;
-    const zeile2 = (x, z2, w, d2, front2, vWunsch) => {
+    const zeile3 = (x, z2, w, d2, front2, vWunsch) => {
       const entlangX = front2[1] === "z", L2 = entlangX ? w : d2;
       if (L2 < 26) return;
       const v = vWunsch ?? wahlGewichtet2(rb, gewichte2.filter(([q2]) => q2 !== "scheibe" || L2 >= 60));
@@ -106503,7 +111132,7 @@
       const [typ, aw, ad, variante2, g] = MA;
       setze(typ, X1 - aw, Z1 - ad, aw, ad, ["+z", "+x"], { variante: variante2, geschosse: g });
       const rw = X1 - X0 - aw - 4;
-      if (rw >= 30) zeile2(X0, Z1 - TD, rw, TD, "+z");
+      if (rw >= 30) zeile3(X0, Z1 - TD, rw, TD, "+z");
       else if (rw >= 14) b2.spiel.push({ x: X0, z: Z1 - ad, w: rw, d: ad });
       b2.wege.push({ x: X0, z: Z1 - ad - 4, w: X1 - X0, d: 2.4 });
       Z1 = Z1 - ad - 5;
@@ -106523,11 +111152,11 @@
     })();
     b2.layout = lay;
     if (lay === "hof") {
-      zeile2(X0, Z0, W3, TD, "-z");
-      zeile2(X0, Z1 - TD, W3, TD, "+z");
+      zeile3(X0, Z0, W3, TD, "-z");
+      zeile3(X0, Z1 - TD, W3, TD, "+z");
       const zi0 = Z0 + TD + 5, zi1 = Z1 - TD - 5;
-      zeile2(X0, zi0, TD, zi1 - zi0, "-x");
-      zeile2(X1 - TD, zi0, TD, zi1 - zi0, "+x");
+      zeile3(X0, zi0, TD, zi1 - zi0, "-x");
+      zeile3(X1 - TD, zi0, TD, zi1 - zi0, "+x");
       const hof2 = { x: X0 + TD + 2, z: Z0 + TD + 2, w: W3 - 2 * TD - 4, d: D - 2 * TD - 4 };
       b2.spiel.push({ x: hof2.x + hof2.w * 0.3, z: hof2.z + hof2.d * 0.3, w: Math.min(16, hof2.w * 0.4), d: Math.min(12, hof2.d * 0.4) });
       b2.wege.push({ x: X0, z: Z0 + TD + 1, w: W3, d: 2.4 }, { x: X0 + TD + 1, z: Z0, w: 2.4, d: D });
@@ -106536,7 +111165,7 @@
       let x = X0, k = 0;
       while (X1 - x >= TD) {
         const front2 = k % 2 === 0 ? "+x" : "-x";
-        zeile2(x, Z0, TD, D, front2);
+        zeile3(x, Z0, TD, D, front2);
         x += TD;
         if (k % 2 === 0 && X1 - x >= A2 + TD) {
           b2.parkplaetze.push({ x: x + 2, z: Z0 + 4, w: A2 - 4, d: Math.min(D - 8, 60) });
@@ -106553,7 +111182,7 @@
       let z2 = Z1, k = 0;
       while (z2 - Z0 >= TD) {
         const front2 = k % 2 === 0 ? "+z" : "-z";
-        zeile2(X0, z2 - TD, W3, TD, front2);
+        zeile3(X0, z2 - TD, W3, TD, front2);
         z2 -= TD;
         if (k % 2 === 0 && z2 - Z0 >= A2 + TD) {
           b2.parkplaetze.push({ x: X0 + 4, z: z2 - A2 + 2, w: Math.min(W3 - 8, 70), d: A2 - 4 });
@@ -106566,12 +111195,12 @@
         k++;
       }
     } else if (lay === "winkel") {
-      zeile2(X0, Z1 - TD, W3, TD, "+z");
-      zeile2(X1 - TD, Z0, TD, D - TD - 4, "+x");
+      zeile3(X0, Z1 - TD, W3, TD, "+z");
+      zeile3(X1 - TD, Z0, TD, D - TD - 4, "+x");
       const iw = W3 - TD - 4, id = D - TD - 4;
       b2.wege.push({ x: X0, z: Z1 - TD - 3.4, w: W3 - TD, d: 2.4 });
       if (iw >= 36 && id >= 34 && rb() < 0.6) setze("slot:platte_wohn", X0, Z0, Math.min(36, iw), Math.min(34, id), ["-z"], { variante: metro ? "ph16" : "wuerfel", zustand: zustand(), geschosse: metro ? 16 : 6 });
-      else if (id >= 26) zeile2(X0, Z0, iw, TD, "-z");
+      else if (id >= 26) zeile3(X0, Z0, iw, TD, "-z");
       b2.parkplaetze.push({ x: X0 + Math.min(40, iw * 0.55), z: Z0 + 2, w: Math.max(10, iw - Math.min(40, iw * 0.55) - 2), d: Math.min(16, id - 4) });
       b2.spiel.push({ x: X0 + iw * 0.35, z: Z0 + id * 0.6, w: Math.min(14, iw * 0.3), d: Math.min(10, id * 0.3) });
     } else if (lay === "punkt") {
@@ -106579,12 +111208,12 @@
       if (D > W3 * 1.25 && W3 >= TD + 40) {
         const n = Math.max(1, Math.floor((D + 10) / 40));
         for (let k = 0; k < n; k++) setze("slot:platte_wohn", X1 - 34, Z0 + k * (D / n), 34, Math.min(34, D / n - 4), ["+x"], { variante: vp, zustand: zustand(), geschosse: gp });
-        zeile2(X0, Z0, TD, D, "-x", metro ? "wbs70_11" : void 0);
+        zeile3(X0, Z0, TD, D, "-x", metro ? "wbs70_11" : void 0);
         b2.parkplaetze.push({ x: X0 + TD + 3, z: Z0 + 4, w: Math.max(6, Math.min(14, W3 - TD - 40)), d: Math.min(D - 8, 60) });
       } else {
         const n = Math.max(1, Math.floor((W3 + 10) / 40));
         for (let k = 0; k < n; k++) setze("slot:platte_wohn", X0 + k * (W3 / n), Z1 - 34, Math.min(34, W3 / n - 4), 34, ["+z"], { variante: vp, zustand: zustand(), geschosse: gp });
-        zeile2(X0, Z0, W3, TD, "-z", metro ? "wbs70_11" : void 0);
+        zeile3(X0, Z0, W3, TD, "-z", metro ? "wbs70_11" : void 0);
         b2.parkplaetze.push({ x: X0 + 4, z: Z0 + TD + 3, w: Math.min(W3 - 8, 60), d: Math.max(6, Math.min(14, D - TD - 40)) });
       }
     } else if (lay === "doppelwinkel") {
@@ -106600,14 +111229,14 @@
       else if (f === "+x") setze("slot:platte_wohn", X1 - Dk, Z0, Dk, D, [f], { variante: "kurve", zustand: zustand() });
       else setze("slot:platte_wohn", X0, Z0, Dk, D, [f], { variante: "kurve", zustand: zustand() });
       if (rest >= TD + 6) {
-        if (f === "+z") zeile2(X0, Z0, W3, TD, "-z");
-        else if (f === "-z") zeile2(X0, Z1 - TD, W3, TD, "+z");
-        else if (f === "+x") zeile2(X0, Z0, TD, D, "-x");
-        else zeile2(X1 - TD, Z0, TD, D, "+x");
+        if (f === "+z") zeile3(X0, Z0, W3, TD, "-z");
+        else if (f === "-z") zeile3(X0, Z1 - TD, W3, TD, "+z");
+        else if (f === "+x") zeile3(X0, Z0, TD, D, "-x");
+        else zeile3(X1 - TD, Z0, TD, D, "+x");
       }
     } else {
-      zeile2(X0, Z1 - TD, W3, TD, "+z");
-      if (D >= 2 * TD + 10) zeile2(X0, Z0, W3, TD, "-z");
+      zeile3(X0, Z1 - TD, W3, TD, "+z");
+      if (D >= 2 * TD + 10) zeile3(X0, Z0, W3, TD, "-z");
       else if (D - TD >= 12) {
         b2.parkplaetze.push({ x: X0 + 2, z: Z0 + 1, w: Math.min(W3 * 0.55, 50), d: Math.min(14, D - TD - 3) });
         if (W3 > 60) b2.spiel.push({ x: X0 + W3 * 0.68, z: Z0 + 2, w: Math.min(14, W3 * 0.25), d: Math.min(10, D - TD - 4) });
@@ -106902,7 +111531,7 @@
   });
   registriereArchetyp("ostsee_hanse", { ...GEMEINSAM, name: "Hansestadt Ost", entwurf: ostseeHanse, staedte: { Rostock: { umland: "see" }, Stralsund: { umland: "see" } } });
 
-  // render/src/kit/nordbauten.js
+  // src/kit/nordbauten.js
   var wurzelSumme17 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI9 = Math.PI;
   function R6(ox, oz, dx, dz, L2) {
@@ -109587,7 +114216,7 @@
     varianten: NORD_VARIANTEN[k]
   }]));
 
-  // render/src/kit/archetypen/nord.js
+  // src/kit/archetypen/nord.js
   var wurzelSumme18 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm4, fixiere: fixiere3, frei: frei3, zelleFrei: zelleFrei3, wasserSpalte: wasserSpalte3, klemm: klemm4, wahlGewichtet: wahlGewichtet3, neueParzelle: neueParzelle3, mergeRand: mergeRand3, parzellenVon: parzellenVon2 } = PLAN_HILFE;
   var NORD_VIERTEL = { giebel: "altstadt", fachwerk: "altstadt", kontor: "zentrum", wiederaufbau: "nord_wa", klinker: "gruenderzeit", rand: "rand" };
@@ -109936,9 +114565,9 @@
     const g = (a, b2) => Math.round(a + (b2 - a) * r()) + (metro ? 1 : 0) - (klein && b2 > 3 ? 1 : 0);
     const haus2 = (stil, geschosse2) => ({ stil, geschosse: Math.max(2, Math.min(7, geschosse2)), region: "Nord" });
     if (hof2) return haus2(r() < 0.7 ? "backstein" : "fuenfziger", 2);
-    const zeile2 = !eck && p2.front?.length === 1 && T >= 10;
+    const zeile3 = !eck && p2.front?.length === 1 && T >= 10;
     if (art === "giebel" || art === "fachwerk") {
-      if (zeile2 && L2 >= 6.5) {
+      if (zeile3 && L2 >= 6.5) {
         if (art === "fachwerk" && r() < 0.55) return haus2("fachwerk", g(2, 3));
         return nordBau(p2, "slot:nord_giebelhaus", art === "fachwerk" ? "pastell" : r() < 0.18 ? "pastell" : p2.giebelV, "nordgiebel", 3, { laden: p2.nordEinkauf ? 0.85 : void 0 });
       }
@@ -109950,18 +114579,18 @@
     }
     if (art === "wiederaufbau") {
       if (eck) return haus2(r() < 0.8 ? "backstein" : "fuenfziger", g(4, 5));
-      if (zeile2 && L2 >= 12 && r() < 0.9) {
+      if (zeile3 && L2 >= 12 && r() < 0.9) {
         const v = p2.nordEinkauf && r() < 0.6 ? "geschaeft" : waehle2(r, p2.waV ?? ["kiel", "hannover"]);
         return nordBau(p2, "slot:nord_wiederaufbau", v, "nordwa", 4);
       }
       return haus2(wahlGewichtet3(r, [["backstein", 3], ["fuenfziger", 0.8], ["wiederaufbau", 0.5]]), g(3, 5));
     }
     if (art === "klinker") {
-      if (zeile2 && L2 >= 10 && r() < 0.8) return nordBau(p2, "slot:nord_reihenhaus", waehle2(r, p2.reihenV ?? ["schumacher"]), "nordklinker", 3);
+      if (zeile3 && L2 >= 10 && r() < 0.8) return nordBau(p2, "slot:nord_reihenhaus", waehle2(r, p2.reihenV ?? ["schumacher"]), "nordklinker", 3);
       if (eck) return haus2(r() < 0.7 ? "backstein" : "gruenderzeit", g(3, 5));
       return haus2(wahlGewichtet3(r, [["backstein", 3], ["gruenderzeit", 1.4], ["jugendstil", 0.5], ["fuenfziger", 0.6]]), g(3, 5));
     }
-    if (zeile2 && L2 >= 10 && r() < 0.75) return nordBau(p2, "slot:nord_reihenhaus", r() < 0.6 ? "siedlung" : waehle2(r, p2.reihenV ?? ["schumacher"]), "nordklinker", 2);
+    if (zeile3 && L2 >= 10 && r() < 0.75) return nordBau(p2, "slot:nord_reihenhaus", r() < 0.6 ? "siedlung" : waehle2(r, p2.reihenV ?? ["schumacher"]), "nordklinker", 2);
     return haus2(wahlGewichtet3(r, [["backstein", 2.2], ["fuenfziger", 1.2], ["siebziger", 0.5], ["neubau", 0.6], ["wiederaufbau", 0.6]]), g(2, 4));
   }
   registriereStilProfil("nord", (p2) => nordStil(p2));
@@ -110177,7 +114806,7 @@
     }
   });
 
-  // render/src/kit/mittebauten.js
+  // src/kit/mittebauten.js
   var wurzelSumme19 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI10 = Math.PI;
   function R7(ox, oz, dx, dz, L2) {
@@ -113416,7 +118045,7 @@
     }, oberstadtRoh))
   };
 
-  // render/src/kit/archetypen/mitte.js
+  // src/kit/archetypen/mitte.js
   var wurzelSumme20 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm5, fixiere: fixiere4, frei: frei4, wasserSpalte: wasserSpalte4, klemm: klemm5, wahlGewichtet: wahlGewichtet4, neueParzelle: neueParzelle4, mergeRand: mergeRand4, parzellenVon: parzellenVon3 } = PLAN_HILFE;
   var breit = (E, i, w) => {
@@ -114151,7 +118780,7 @@
     }
   });
 
-  // render/node_modules/three/examples/jsm/math/ConvexHull.js
+  // node_modules/three/examples/jsm/math/ConvexHull.js
   var Visible = 0;
   var Deleted = 1;
   var _v12 = new Vector3();
@@ -114747,7 +119376,7 @@
     }
   };
 
-  // render/node_modules/three/examples/jsm/geometries/ConvexGeometry.js
+  // node_modules/three/examples/jsm/geometries/ConvexGeometry.js
   var ConvexGeometry = class extends BufferGeometry {
     constructor(points = []) {
       super();
@@ -114770,7 +119399,7 @@
     }
   };
 
-  // render/src/kit/suedbauten.js
+  // src/kit/suedbauten.js
   var wurzelSumme21 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var PI11 = Math.PI;
   function R8(ox, oz, dx, dz, L2) {
@@ -117985,7 +122614,7 @@
     "slot:sued_fluss": slot3(flussRoh, [40, 34], null, { hang: () => true })
   };
 
-  // render/src/kit/archetypen/sued.js
+  // src/kit/archetypen/sued.js
   var wurzelSumme22 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm6, fixiere: fixiere5, frei: frei5, zelleFrei: zelleFrei4, wasserSpalte: wasserSpalte5, klemm: klemm6, wahlGewichtet: wahlGewichtet5, neueParzelle: neueParzelle5, mergeRand: mergeRand5, parzellenVon: parzellenVon4, freiePosition: freiePosition3, ueberlappt: ueberlappt2 } = PLAN_HILFE;
   var PI12 = Math.PI;
@@ -119412,7 +124041,7 @@
   });
   registriereArchetyp("alpenrand", { ...GEMEINSAM4, name: "Alpenrand", entwurf: alpenrand, staedte: { Kempten: { stadt: "kempten" }, Rosenheim: { stadt: "rosenheim" } } });
 
-  // render/src/kit/archetypen/west.js
+  // src/kit/archetypen/west.js
   var wurzelSumme23 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var { nimm: nimm7, fixiere: fixiere6, zelleFrei: zelleFrei5, klemm: klemm7, wahlGewichtet: wahlGewichtet6, neueParzelle: neueParzelle6, mergeRand: mergeRand6, parzellenVon: parzellenVon5, freiePosition: freiePosition4, intervalleMinus: intervalleMinus2, LINIEN: LINIEN2, HAUPTLICH: HAUPTLICH2 } = PLAN_HILFE;
   LINIEN2.schnellweg = { breite: 27, gehweg: 1.5, mittel: 1.2 };
@@ -120464,7 +125093,7 @@
     }
   });
 
-  // render/src/kit/stadt.js
+  // src/kit/stadt.js
   var wurzelSumme24 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var YG = 0.32;
   var WASSER_Y = -2.2;
@@ -120853,7 +125482,7 @@
       }
     };
     const I = o.instanzer ?? new Instanzer();
-    const ctx = { S, I, scene: scene2, plan: plan2, r: rng2(plan2.seed * 31 + 5), dichte: TYPEN[plan2.typ].dichte * (o.dichte ?? 1), typ: plan2.typ, proBlock: /* @__PURE__ */ new Map(), ost: !!plan2.ddr };
+    const ctx = { S, I, scene: scene2, plan: plan2, r: rng2(plan2.seed * 31 + 5), dichte: TYPEN[plan2.typ].dichte * (o.dichte ?? 1), typ: plan2.typ, proBlock: /* @__PURE__ */ new Map(), ost: !!plan2.ddr, qualitaet: o.qualitaet ?? null };
     ostVerkehr = !!plan2.ddr;
     for (const p2 of plan2.parzellen) {
       if (!ctx.proBlock.has(p2.block)) ctx.proBlock.set(p2.block, []);
@@ -120923,6 +125552,8 @@
   function rahmen(s2) {
     const z2 = s2.achse === "z";
     return {
+      achse: s2.achse,
+      mitte: s2.mitte,
       w: (u, v) => z2 ? [s2.mitte + v, u] : [u, s2.mitte + v],
       quader: (S, u0, u1, v0, v1, y0, y1, f) => z2 ? S.quader(s2.mitte + v0, y0, u0, s2.mitte + v1, y1, u1, f) : S.quader(u0, y0, s2.mitte + v0, u1, y1, s2.mitte + v1, f),
       ru: z2 ? -Math.PI / 2 : 0,
@@ -120977,6 +125608,16 @@
         R10.quader(S, m0, m1, -h, -h + 0.25, 0, 0.22, F.bord);
         R10.quader(S, m0, m1, h - 0.25, h, 0, 0.22, F.bord);
         gleise(ctx, R10, s2.von, s2.bis);
+        for (const [u, arm] of [[s2.von, "-"], [s2.bis, "+"]]) {
+          const anKreuzung = ctx.plan.kreuzungen.some((k) => {
+            if (s2.achse === "z") return Math.abs(k.x - s2.mitte) < 0.6 && Math.abs((arm === "-" ? k.z + k.bz / 2 : k.z - k.bz / 2) - u) < 0.6 && !!k.arme[arm === "-" ? "+z" : "-z"]?.tram;
+            return Math.abs(k.z - s2.mitte) < 0.6 && Math.abs((arm === "-" ? k.x + k.bx / 2 : k.x - k.bx / 2) - u) < 0.6 && !!k.arme[arm === "-" ? "+x" : "-x"]?.tram;
+          });
+          const grenzen = s2.achse === "z" ? [0, ctx.plan.tiefe] : [0, ctx.plan.breite];
+          const abschluss = anKreuzung ? "anschluss" : grenzen.some((gr) => Math.abs(u - gr) < 0.6) ? "kartenrand" : "prellbock";
+          if (abschluss === "prellbock") gleisPrellbock(ctx, R10, u);
+          if (ctx.qualitaet) for (const t of [-1.6, 1.6]) ctx.qualitaet.gleisenden.push({ achse: s2.achse, mitte: s2.mitte + t, u, abschluss });
+        }
         for (let u = s2.von + 9; u < s2.bis - 7; u += 30) {
           const [x, z2] = R10.w(u, 0);
           I.setze("olmast", x, 0.12, z2, R10.ru + Math.PI / 2);
@@ -121050,6 +125691,7 @@
         figur4(I, x, YG, z2, r, R10.ru + (r() < 0.5 ? 0 : Math.PI) + zw(r, -0.3, 0.3));
       }
     }
+    if (ctx.qualitaet && s2.typ !== "fussgaenger") ctx.qualitaet.fahrbahnen.push({ achse: s2.achse, mitte: s2.mitte, von: s2.von, bis: s2.bis, breite: fb6 });
     if (!ctx.keineStandAutos) verkehrAufSegment(ctx, s2, R10, s2.von + 7, s2.bis - 7, 0);
     if (s2.typ === "haupt" && L2 > 50 && r() < 0.45) {
       const sg = r() < 0.5 ? -1 : 1;
@@ -121063,8 +125705,22 @@
     }
   }
   function gleise(ctx, R10, u0, u1, y = 0) {
-    for (const t of [-1.6, 1.6]) for (const sp of [-0.72, 0.72]) R10.quader(ctx.S, u0, u1, t + sp - 0.06, t + sp + 0.06, y, y + 0.18, F.schiene);
-    for (const t of [-1.6, 1.6]) R10.quader(ctx.S, u0, u1, t - 0.04, t + 0.04, 6.4, 6.48, F.dunkel);
+    if (u1 - u0 < 0.2) return;
+    for (const t of [-1.6, 1.6]) {
+      for (const sp of [-0.72, 0.72]) R10.quader(ctx.S, u0, u1, t + sp - 0.06, t + sp + 0.06, y, y + 0.18, F.schiene);
+      R10.quader(ctx.S, u0, u1, t - 0.04, t + 0.04, 6.4, 6.48, F.dunkel);
+      if (ctx.qualitaet) {
+        const s2 = { achse: R10.achse, mitte: R10.mitte + t, von: u0, bis: u1, breite: 2 };
+        ctx.qualitaet.gleise.push(s2);
+        ctx.qualitaet.draehte.push({ ...s2 });
+      }
+    }
+  }
+  function gleisPrellbock(ctx, R10, u) {
+    for (const t of [-1.6, 1.6]) {
+      const [x, z2] = R10.w(u, t);
+      ctx.S.box(R10.achse === "x" ? 0.42 : 2.2, 0.8, R10.achse === "x" ? 2.2 : 0.42, x, 0.52, z2, "#d8b25a");
+    }
   }
   function verkehrAufSegment(ctx, s2, R10, u0, u1, y) {
     const { I, r } = ctx;
@@ -121076,6 +125732,7 @@
         if (r() < 0.55 * ctx.dichte) {
           const [x, z2] = R10.w(u, f.v);
           const l = auto3(I, x, y, z2, R10.ru + (f.dir > 0 ? 0 : Math.PI), r);
+          if (ctx.qualitaet) ctx.qualitaet.fahrzeuge.push({ art: "auto", x, z: z2, laenge: l });
           u += l + zw(r, 3, 10);
         } else u += zw(r, 8, 22);
       }
@@ -121092,7 +125749,9 @@
       const t = (k === 0 ? r() < 0.5 : true) ? -1.6 : 1.6;
       const tt = k === 1 ? 1.6 : t;
       const plus = (s2.achse === "z" ? -1 : 1) * Math.sign(tt) > 0;
-      const [x, z2] = R10.w(zw(r, u0 + 16, u1 - 16), tt);
+      const u = zw(r, u0 + 16, u1 - 16);
+      const [x, z2] = R10.w(u, tt);
+      if (ctx.qualitaet) ctx.qualitaet.fahrzeuge.push({ art: "tram", x, z: z2, laenge: ctx.ost ? 28.6 : 30 });
       if (ctx.ost) I.setze("tatra", x, 0.06, z2, R10.ru + (plus ? 0 : Math.PI), 1, [waehle2(r, ["#e2b33a", "#d8642f", "#c8322b", "#e9d9a0"])]);
       else I.setze("strassenbahn", x, 0.06, z2, R10.ru + (plus ? 0 : Math.PI), 1, [waehle2(r, ["#c8322b", "#2f6f8f", "#3f7d56"])]);
     }
@@ -121245,8 +125904,14 @@
       }
       return;
     }
-    if (k.arme["-z"]?.tram || k.arme["+z"]?.tram) gleise(ctx, rahmen({ achse: "z", mitte: k.x }), z0, z1);
-    if (k.arme["-x"]?.tram || k.arme["+x"]?.tram) gleise(ctx, rahmen({ achse: "x", mitte: k.z }), x0, x1);
+    for (const t of tramArme(k)) {
+      const R10 = rahmen({ achse: t.achse, mitte: t.mitte });
+      gleise(ctx, R10, t.von, t.bis);
+      for (const ende of t.ende) {
+        gleisPrellbock(ctx, R10, ende);
+        if (ctx.qualitaet) for (const quer2 of [-1.6, 1.6]) ctx.qualitaet.gleisenden.push({ achse: t.achse, mitte: t.mitte + quer2, u: ende, abschluss: "prellbock" });
+      }
+    }
     for (const [seite, arm] of Object.entries(k.arme)) {
       if (!arm) continue;
       const zArm = seite[1] === "z", sg = seite[0] === "+" ? 1 : -1;
@@ -121815,34 +126480,70 @@
       figur4(I, x, y + 0.05, z2, r);
     }
   }
-  function baueKleingarten(ctx, b2, r, hinder) {
-    const { S, I } = ctx;
-    const y = 0.36;
-    S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, "#a3c98f");
-    const pw = zw(r, 9, 12), pd = zw(r, 12, 15);
-    const weg = 2.4;
-    for (let z2 = b2.z + 2; z2 + pd < b2.z + b2.d - 1; z2 += 2 * pd + weg) {
-      S.quader(b2.x + 1, y, z2 + pd, b2.x + b2.w - 1, y + 0.04, z2 + pd + weg, F.weg);
-      for (const zz of [z2, z2 + pd + weg]) for (let x = b2.x + 2; x + pw < b2.x + b2.w - 1; x += pw) {
-        if (zz + pd > b2.z + b2.d - 1) continue;
-        const cx = x + pw / 2, cz = zz + pd / 2;
-        if (hinder.some((p2) => imRechteck(cx, cz, p2, 3))) continue;
-        S.quader(x + 0.4, y, zz + 0.4, x + pw - 0.4, y + 0.05, zz + pd - 0.4, waehle2(r, ["#9cc58a", "#b2d39b", "#93bd7f"]));
-        for (let k = 0; k < 3; k++) S.quader(x + 1, y + 0.05, zz + 1.5 + k * 1.6, x + pw * 0.45, y + 0.12, zz + 2.3 + k * 1.6, waehle2(r, ["#8a6a4a", "#7a9f55", "#c5a36a"]));
-        const hf = waehle2(r, ["#c9a77c", "#8fa9b5", "#d9c49a", "#b56b4f", "#e8e4dc", "#7c9a6a"]);
-        S.quader(x + pw - 3.6, y, zz + pd - 4.4, x + pw - 0.9, y + 2.1, zz + pd - 1.6, hf);
-        S.add(dachProfil(3.1, 3.2, 0.9, 0.1, "x").translate(x + pw - 2.25, y + 2.1, zz + pd - 3), waehle2(r, ["#b4583f", "#56636c", "#6f6a5c"]));
-        if (r() < 0.6) baumSetzen(I, waehle2(r, ["kugel", "busch", "linde"]), x + 2, y, zz + pd - 2, r, 0.6);
-        for (let u = 0; u < pw; u += 2.4) I.setze("busch", x + u, y, zz + 0.3, 0, [0.55, 0.5, 0.55], ["#5f9a56"]);
-      }
+  function q02Laube(S, x, z2, y, art, farbe3, dachfarbe2) {
+    const w = [3.2, 3.5, 2.8, 3.8, 3.1, 3.4][art], d2 = [2.8, 2.6, 3.1, 2.9, 2.7, 3.1][art], h = art === 2 ? 1.85 : 2.25;
+    S.quader(x, y, z2, x + w, y + h, z2 + d2, farbe3);
+    if (art === 1 || art === 3 || art === 4) {
+      const dach3 = dachProfil(w + 0.5, d2 + 0.5, art === 3 ? 0.8 : 1.1, 0.18, art === 4 ? "z" : "x");
+      dach3.translate(x + w / 2, y + h, z2 + d2 / 2);
+      S.add(dach3, dachfarbe2);
+    } else {
+      S.quader(x - 0.2, y + h, z2 - 0.2, x + w + 0.2, y + h + 0.19, z2 + d2 + 0.2, dachfarbe2);
+      if (art === 2) S.quader(x + 0.4, y + h + 0.19, z2 + 0.3, x + w - 0.4, y + h + 0.26, z2 + d2 - 0.3, "#8c959e");
     }
-    for (let i = 0; i < 6 * ctx.dichte; i++) figur4(I, zw(r, b2.x + 2, b2.x + b2.w - 2), y, zw(r, b2.z + 2, b2.z + b2.d - 2), r);
+    S.quader(x + w * 0.3, y + 0.35, z2 + d2, x + w * 0.68, y + 1.65, z2 + d2 + 0.06, "#6f8696");
+    S.quader(x + w - 0.8, y + 0.02, z2 + d2 + 0.02, x + w - 0.1, y + 1.65, z2 + d2 + 0.1, "#6b5a48");
+    if (art === 5) {
+      S.quader(x - 0.2, y + 1.8, z2 + d2, x + w + 0.2, y + 2, z2 + d2 + 1.6, dachfarbe2);
+      for (const dx of [0, w]) S.box(0.12, 1.8, 0.12, x + dx, y + 0.9, z2 + d2 + 1.4, "#bfb3a3");
+    }
+  }
+  function baueKleingarten(ctx, b2, r, hinder) {
+    const { S, I } = ctx, y = 0.36, endeX = b2.x + b2.w - 2, endeZ = b2.z + b2.d - 2;
+    S.quader(b2.x, 0, b2.z, b2.x + b2.w, y, b2.z + b2.d, "#94c486");
+    const laubenFarben = ["#c9a77c", "#8fa9b5", "#d9c49a", "#b56b4f", "#e8e4dc", "#7c9a6a", "#cfc4ae"];
+    const daech = ["#b4583f", "#56636c", "#6f6a5c", "#807d78", "#8a6a4a"];
+    let zeile3 = 0;
+    for (let z2 = b2.z + 2; z2 + 11 < endeZ; zeile3++) {
+      const tiefe = zw(r, 12.5, 18.5), nZ = Math.min(tiefe, endeZ - z2), wegB = zw(r, 2, 3.1);
+      const wegZ = z2 + nZ;
+      if (wegZ + wegB < b2.z + b2.d - 1) S.quader(b2.x + 1, y, wegZ, endeX + 1, y + 0.05, wegZ + wegB, "#d9c4a8");
+      let x = b2.x + 2 + r() * 1.2;
+      while (x + 8 < endeX) {
+        const breite = Math.min(zw(r, 9.2, 14.6), endeX - x);
+        if (breite < 8) break;
+        const cx = x + breite / 2, cz = z2 + nZ / 2;
+        if (!hinder.some((p2) => imRechteck(cx, cz, p2, 3))) {
+          const wild = r() < 0.16, typ = Math.floor(r() * 6), laube = r() > 0.08;
+          const gras = waehle2(r, wild ? ["#7c9a6a", "#7fae6c", "#93bd7f"] : ["#9cc58a", "#b2d39b", "#93bd7f"]);
+          S.quader(x + 0.25, y, z2 + 0.25, x + breite - 0.25, y + 0.04, z2 + nZ - 0.25, gras);
+          const beetAnzahl = wild ? 1 : Math.floor(2 + r() * 3);
+          for (let k = 0; k < beetAnzahl; k++) {
+            const bw = zw(r, 1.1, Math.min(2.6, breite * 0.32));
+            const bx = x + 0.7 + r() * Math.max(0.1, breite * 0.55 - bw);
+            const bz = z2 + 1.2 + k * (nZ - 4) / Math.max(2, beetAnzahl);
+            S.quader(bx, y + 0.04, bz, bx + bw, y + 0.14, Math.min(bz + zw(r, 1.1, 2.6), z2 + nZ - 1), wild ? "#7a9f55" : waehle2(r, ["#8a6a4a", "#7a9f55", "#c5a36a"]));
+          }
+          if (laube && breite > 8.8 && nZ > 11.5) {
+            const lx = x + breite - 4.9, lz = z2 + nZ - 4.6;
+            q02Laube(S, lx, lz, y + 0.05, typ, laubenFarben[(typ + Math.floor(r() * laubenFarben.length)) % laubenFarben.length], waehle2(r, daech));
+          }
+          const obst = wild ? 2 : r() < 0.7 ? 1 : 0;
+          for (let k = 0; k < obst; k++) baumSetzen(I, waehle2(r, ["kugel", "linde", "birke"]), x + 2.2 + r() * Math.min(2, breite * 0.2), y + 0.04, z2 + nZ - 2.6 - k * 3, r, zw(r, 0.5, 0.7));
+          if (wild) for (let k = 0; k < 3; k++) I.setze("busch", x + zw(r, 1, breite - 1), y + 0.04, z2 + zw(r, 1, nZ - 1), 0, [0.6, 0.6, 0.6], [waehle2(r, KRONE.busch)]);
+          for (let u = 0; u < breite - 0.8; u += zw(r, 2.6, 4.6)) I.setze("busch", x + u, y, z2 + 0.15, 0, [0.38, 0.4, 0.38], ["#5b8f5a"]);
+          if (ctx.qualitaet) ctx.qualitaet.gruppen.push({ x: cx, z: cz, muster: "garten/" + typ + "/" + Math.round(breite) + "/" + beetAnzahl + "/" + Number(wild) + "/" + zeile3 % 3 });
+        }
+        x += breite + zw(r, 0.5, 1.6);
+      }
+      z2 += nZ + wegB;
+    }
+    for (let i = 0; i < 4 * ctx.dichte; i++) figur4(I, zw(r, b2.x + 2, b2.x + b2.w - 2), y, zw(r, b2.z + 2, b2.z + b2.d - 2), r);
   }
   var VORORT_WAND = ["#efe9dc", "#e8dfcc", "#f1ede4", "#e2d6c0", "#d9cdb6", "#e6e1d6", "#d8c8ae", "#cdbfa6", "#e9e4da"];
   var VORORT_KLINKER = ["#a8664f", "#9e5c47", "#b9785e", "#8f5a48", "#c4876a"];
   var VORORT_DACH = ["#9a4e3a", "#8a463a", "#6f6a64", "#5d6268", "#a65a40", "#7b5b4a", "#4f5459"];
   var ZEILE_WAND = ["#e9e4d6", "#e2dccd", "#d6dbd9", "#ebe2cf", "#d9d0bc", "#cfd6d4"];
-  var FELDER = ["#d4c27c", "#c9b26a", "#b8c97a", "#e0cf8f", "#9fc078", "#c7a66a", "#b59a72", "#d9c98c", "#a9c47e"];
   var WIESE3 = ["#a9cf8f", "#a3c98a", "#b0d395"];
   function rechteckMinus(R0, loecher) {
     let teile2 = [R0];
@@ -121963,8 +126664,8 @@
     for (const q2 of b2.bauten ?? []) {
       let f;
       if (q2.art === "reihenhaus") {
-        if (r() < 0.3) wand2 = waehle2(r, klinker ? VORORT_KLINKER : VORORT_WAND);
-        f = [wand2, dach3];
+        wand2 = waehle2(r, [...VORORT_WAND, ...VORORT_KLINKER, ...ZEILE_WAND]);
+        f = [wand2, waehle2(r, VORORT_DACH)];
       } else if (q2.art === "zeile") f = [waehle2(r, ZEILE_WAND), dach3];
       else if (q2.art === "halle") f = [waehle2(r, ["#d9dcdf", "#cfd3d6", "#e4e1da", "#b9bec2", "#d8cdb8"]), waehle2(r, ["#2f6f8f", "#c8322b", "#3f7d56", "#e0b23c", "#5d646b", "#2b3a55"])];
       else if (q2.art === "scheune") f = [waehle2(r, ["#8a5a45", "#a8664f", "#7a6a58", "#c9bfae"]), waehle2(r, ["#6f6a64", "#9a4e3a", "#5d6268"])];
@@ -121973,36 +126674,52 @@
       else if (q2.art === "tankstelle") f = [waehle2(r, ["#2f6f8f", "#c8322b", "#3f7d56", "#e0b23c"])];
       else f = [r() < 0.25 ? waehle2(r, VORORT_KLINKER) : waehle2(r, VORORT_WAND), waehle2(r, VORORT_DACH)];
       I.setze(q2.art, q2.x, y, q2.z, q2.ry, q2.s ?? 1, f);
+      if (ctx.qualitaet && (q2.art === "reihenhaus" || q2.art === "zeile" || q2.art === "efh")) ctx.qualitaet.gruppen.push({ x: q2.x, z: q2.z, muster: "wohn/" + q2.art + "/" + f.join("-") + "/" + Math.round((q2.w ?? 10) * 2) + "/" + Math.round((q2.d ?? 10) * 2) });
     }
     for (const [x, z2, art] of b2.baeume ?? []) baumSetzen(I, art, x, y, z2, r, zw(r, 0.65, 0.95));
   }
+  var Q02_FELDFARBEN = {
+    fruehling: ["#7fae6c", "#a9c47e", "#7fae6c", "#a9c47e", "#7fae6c", "#9fc078"],
+    sommer: ["#d4c27c", "#c9b26a", "#b8c97a", "#e0cf8f", "#9fc078", "#c7a66a"],
+    herbst: ["#b59a72", "#c9b26a", "#b59a72", "#7a9f55", "#d9c98c", "#b9785e"],
+    winter: ["#9a9690", "#b1aea6", "#b1aea6", "#c4bcae", "#9a9690", "#b1aea6"]
+  };
   function baueFeld(ctx, b2, r) {
     const { S, I } = ctx;
+    const farben = Q02_FELDFARBEN[ctx.plan?.jahreszeit ?? "sommer"] ?? Q02_FELDFARBEN.sommer;
     const quer2 = r() < 0.5;
     const L2 = quer2 ? b2.d : b2.w;
-    const n = L2 > 70 ? 1 + Math.floor(r() * 3) : 1;
+    const n = Math.max(1, Math.min(8, Math.floor(L2 / 26) + 1));
+    const gewichte2 = Array.from({ length: n }, () => zw(r, 0.65, 1.65));
+    const summe2 = gewichte2.reduce((a2, q2) => a2 + q2, 0);
     let a = 0;
     for (let k = 0; k < n; k++) {
-      const len = k === n - 1 ? L2 - a : L2 * zw(r, 0.25, 0.55);
-      const x0 = quer2 ? b2.x : b2.x + a, z0 = quer2 ? b2.z + a : b2.z, w = quer2 ? b2.w : len, d2 = quer2 ? len : b2.d;
+      const len = k === n - 1 ? L2 - a : L2 * gewichte2[k] / summe2;
+      const x0 = quer2 ? b2.x : b2.x + a, z0 = quer2 ? b2.z + a : b2.z;
+      const w = quer2 ? b2.w : len, d2 = quer2 ? len : b2.d;
       a += len;
       if (w < 3 || d2 < 3) continue;
-      const wiese = r() < 0.3;
-      S.quader(x0 + 0.6, -0.08, z0 + 0.6, x0 + w - 0.6, 0, z0 + d2 - 0.6, wiese ? waehle2(r, WIESE3) : waehle2(r, FELDER));
+      const wiese = r() < 0.17, farbe3 = wiese ? waehle2(r, WIESE3) : farben[(k + Math.floor(r() * farben.length)) % farben.length];
+      S.quader(x0 + 0.3, -0.08, z0 + 0.3, x0 + w - 0.3, 0, z0 + d2 - 0.3, farbe3);
       if (!wiese) {
-        const furchenX = r() < 0.5, ab = zw(r, 1.8, 3.2);
-        if (furchenX) for (let q2 = z0 + 1.6; q2 < z0 + d2 - 1; q2 += ab) I.setze("fugeDunkel", x0 + w / 2, 0, q2, 0, [w - 1.6, 1, 0.22]);
-        else for (let q2 = x0 + 1.6; q2 < x0 + w - 1; q2 += ab) I.setze("fugeDunkel", q2, 0, z0 + d2 / 2, 0, [0.22, 1, d2 - 1.6]);
-      } else for (let i = 0; i < w * d2 / 900; i++) baumSetzen(I, waehle2(r, ["linde", "kastanie"]), x0 + zw(r, 4, w - 4), -0.05, z0 + zw(r, 4, d2 - 4), r, zw(r, 0.9, 1.2));
+        const entlangX = r() < 0.5, ab = zw(r, 2.1, 4.6);
+        if (entlangX) for (let z2 = z0 + 1.1; z2 < z0 + d2 - 1; z2 += ab) I.setze("fugeDunkel", x0 + w / 2, 0, z2, 0, [w - 1, 1, 0.14]);
+        else for (let x = x0 + 1.1; x < x0 + w - 1; x += ab) I.setze("fugeDunkel", x, 0, z0 + d2 / 2, 0, [0.14, 1, d2 - 1]);
+      } else for (let i = 0; i < w * d2 / 1800; i++) if (w > 10 && d2 > 10) baumSetzen(I, waehle2(r, ["linde", "kastanie"]), x0 + zw(r, 4, w - 4), -0.05, z0 + zw(r, 4, d2 - 4), r, zw(r, 0.8, 1.1));
+      if (ctx.qualitaet) ctx.qualitaet.gruppen.push({ x: x0 + w / 2, z: z0 + d2 / 2, muster: "feld/" + farbe3 + "/" + Math.round(len) + "/" + Number(wiese) + "/" + k % 3 });
+      if (k > 0 && len > 6 && r() < 0.5) {
+        if (quer2) S.quader(b2.x + 0.3, 0, z0 - 0.9, b2.x + b2.w - 0.3, 0.04, z0 + 0.9, "#c9b79c");
+        else S.quader(x0 - 0.9, 0, b2.z + 0.3, x0 + 0.9, 0.04, b2.z + b2.d - 0.3, "#c9b79c");
+      }
     }
     const h = waehle2(r, ["-x", "+x", "-z", "+z", null]);
     if (h) {
-      const pap = r() < 0.4;
-      const entlangX = h[1] === "z", len = entlangX ? b2.w : b2.d;
-      for (let u = 2; u < len - 2; u += pap ? 8 : 3.2) {
-        const x = entlangX ? b2.x + u : h === "+x" ? b2.x + b2.w - 1 : b2.x + 1, z2 = entlangX ? h === "+z" ? b2.z + b2.d - 1 : b2.z + 1 : b2.z + u;
+      const pap = r() < 0.4, entlangX = h[1] === "z", len = entlangX ? b2.w : b2.d;
+      for (let u = 2; u < len - 2; u += pap ? 8 : 3.8) {
+        const x = entlangX ? b2.x + u : h === "+x" ? b2.x + b2.w - 1 : b2.x + 1;
+        const z2 = entlangX ? h === "+z" ? b2.z + b2.d - 1 : b2.z + 1 : b2.z + u;
         if (pap) baumSetzen(I, "pappel", x, -0.05, z2, r, 0.9);
-        else I.setze("busch", x, -0.05, z2, 0, [1, 0.9, 1], [waehle2(r, KRONE.busch)]);
+        else I.setze("busch", x, -0.05, z2, 0, [0.8, 0.8, 0.8], [waehle2(r, KRONE.busch)]);
       }
     }
   }
@@ -122270,7 +126987,7 @@
     const gl = b2.gleise;
     const vp = b2.vorplatz;
     const b22 = { ...b2, x: b2.z, z: b2.x, w: b2.d, d: b2.w, achse: "x", gleise: gl && { z0: gl.x0, z1: gl.x1, achse: "x" }, _bh: bh ? { x: bh.z, z: bh.x, w: bh.d, d: bh.w } : null, vorplatz: vp ? { x: vp.z, z: vp.x, w: vp.d, d: vp.w } : null, bahnParken: (b2.bahnParken ?? []).map((q2) => ({ x: q2.z, z: q2.x, w: q2.d, d: q2.w })) };
-    baueBahn({ ...ctx, S: SW, I: IW }, b22, r);
+    baueBahn({ ...ctx, S: SW, I: IW, spiegel: true }, b22, r);
   }
   function baueBahn(ctx, b2, r) {
     if (b2.achse === "z") {
@@ -122312,7 +127029,7 @@
     }
     const muster = b2.ohneBahnhof ? ["g"] : ["g", "s", "g", "g", "s", "g", "g", "g"];
     let z2 = gl.z0, i = 0;
-    const gleisZ = [];
+    const gleisZ = [], bahnsteigZ = [];
     while (z2 < gl.z1 - 4) {
       const m = muster[i % muster.length];
       if (m === "g") {
@@ -122326,6 +127043,7 @@
           continue;
         }
         const bx0 = bh ? bh.x - 10 : b2.x + 10, bx1 = bh ? bh.x + bh.w + 10 : b2.x + b2.w - 10;
+        bahnsteigZ.push(z2 + 3);
         S.quader(bx0, 0, z2 + 0.2, bx1, 1, z2 + 5.8, "#cfc8bb");
         S.quader(bx0, 1, z2 + 0.2, bx1, 1.04, z2 + 0.6, "#f2f1ec");
         S.quader(bx0, 1, z2 + 5.4, bx1, 1.04, z2 + 5.8, "#f2f1ec");
@@ -122343,18 +127061,29 @@
       for (let x = ga + 0.5; x < gb; x += 1.1) I.setze("schwelle", x, y + 0.15, gz2, 0);
       for (const sp of [-0.72, 0.72]) S.quader(ga, y + 0.2, gz2 + sp - 0.06, gb, y + 0.36, gz2 + sp + 0.06, F.schiene);
       S.quader(ga, 6.3, gz2 - 0.04, gb, 6.38, gz2 + 0.04, F.dunkel);
+      if (ctx.qualitaet) {
+        const spur = { achse: ctx.spiegel ? "z" : "x", mitte: gz2, von: ga, bis: gb, breite: 3 };
+        ctx.qualitaet.gleise.push(spur);
+        ctx.qualitaet.draehte.push({ ...spur });
+        for (const u of [ga, gb]) ctx.qualitaet.gleisenden.push({ achse: ctx.spiegel ? "z" : "x", mitte: gz2, u, abschluss: "prellbock" });
+      }
+      for (const u of [ga, gb]) S.box(0.42, 0.8, 2.3, u, y + 0.5, gz2, "#d8b25a");
     }
     if (gleisZ.length) for (let x = xa + 10; x < xb - 5; x += 45) I.setze("olmastSeite", x, y, gleisZ[0] - 2.4, 0, [1, 1, Math.max(1, (gleisZ[gleisZ.length - 1] - gleisZ[0] + 4) / 6)]);
-    const zuege = Math.min(gleisZ.length, 2 + (r() < 0.5 ? 1 : 0));
-    const frei6 = mische(r, gleisZ).slice(0, zuege);
-    for (const gz2 of frei6) {
-      const wagen2 = Math.floor(zw(r, 3, 6.9));
+    const gleiseMitBahnsteig = bh ? gleisZ.filter((gz2) => bahnsteigZ.some((pz4) => Math.abs(gz2 - pz4) <= 8.5)) : [];
+    const zuege = Math.min(gleiseMitBahnsteig.length, 2 + (r() < 0.5 ? 1 : 0));
+    const frei6 = gleiseMitBahnsteig.map((gz2) => ({ gz: gz2, los: r() })).sort((a, b3) => a.los - b3.los).slice(0, zuege);
+    for (const { gz: gz2 } of frei6) {
       const [ga, gb] = abschnitte(gz2).sort((p2, q2) => q2[1] - q2[0] - (p2[1] - p2[0]))[0] ?? [xa, xb];
-      if (gb - ga < 40) continue;
-      let x = zw(r, ga + 6, Math.max(ga + 7, gb - wagen2 * 26.5 - 2));
-      const xEnde = gb;
+      const wagen2 = Math.min(Math.floor(zw(r, 3, 6.9)), Math.floor((gb - ga - 6) / 26.5));
+      if (wagen2 < 1) continue;
+      const beginn = Math.max(ga + 3, Math.min(bh.x + bh.w / 2 - wagen2 * 13.25, gb - wagen2 * 26.5 - 3));
       const farbe3 = waehle2(r, ["#f1f1ee", "#e9eef0", "#d8dde1"]);
-      for (let w = 0; w < wagen2 && x < xEnde - 13; w++, x += 26.5) I.setze("zugwagen", x + 13, y + 0.36, gz2, 0, 1, [farbe3]);
+      for (let w = 0; w < wagen2; w++) {
+        const x = beginn + 13 + w * 26.5;
+        I.setze("zugwagen", x, y + 0.36, gz2, 0, 1, [farbe3]);
+        if (ctx.qualitaet) ctx.qualitaet.fahrzeuge.push({ art: "zug", x: ctx.spiegel ? gz2 : x, z: ctx.spiegel ? x : gz2, laenge: 26 });
+      }
     }
   }
   var MARKER = {
@@ -122857,7 +127586,7 @@
     durchgang: phDurchgang
   };
 
-  // render/src/kit/staedte.js
+  // src/kit/staedte.js
   var wurzelSumme25 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var REGION_VON = {
     nord: [
@@ -123100,7 +127829,7 @@
   var WETTBEWERBER = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1] };
   var WB_FLAECHE = { metropole: [2600, 5200], grossstadt: [1800, 3800], mittelstadt: [1500, 2600] };
   function baueEintrag(name2, liste2) {
-    const typ = liste2[0].cluster;
+    const typ = liste2[0]?.cluster ?? haeuser_schwester_default.find((h) => h.stadt === name2)?.cluster ?? haeuser_outlet_default.find((h) => h.stadt === name2)?.cluster ?? "mittelstadt";
     const seed = stadtSeed(name2);
     const r = rng2(seed * 13 + 5);
     const region = REGION3.get(name2) ?? "mitte";
@@ -123289,13 +128018,14 @@
     if (!nachStadt.has(h.stadt)) nachStadt.set(h.stadt, []);
     nachStadt.get(h.stadt).push(h);
   }
+  for (const h of [...haeuser_schwester_default, ...haeuser_outlet_default]) if (!nachStadt.has(h.stadt)) nachStadt.set(h.stadt, []);
   var STADTLISTE = [...nachStadt.entries()].map(([name2, l]) => baueEintrag(name2, l)).sort((a, b2) => a.name.localeCompare(b2.name, "de"));
   var INDEX = new Map(STADTLISTE.map((s2) => [s2.name, s2]));
   function stadtDaten2(name2) {
     return INDEX.get(name2);
   }
 
-  // render/src/kit/leben.js
+  // src/kit/leben.js
   var wurzelSumme26 = (...v) => Math.sqrt(v.reduce((s2, x) => s2 + x * x, 0));
   var STANDARD_LEBEN = "voll";
   var MODI = ["voll", "wenig", "aus"];
@@ -123471,12 +128201,12 @@
     }
     function neueFussgaenger(wege) {
       if (!wege.length) return null;
-      const aktive = hauspunkte.filter((x) => x.gewicht && sichtbar4(x.weg, 1.7));
+      const aktive2 = hauspunkte.filter((x) => x.gewicht && sichtbar4(x.weg, 1.7));
       let haus2 = null;
-      if (aktive.length && r() < 0.8) {
-        const sum2 = aktive.reduce((a, b2) => a + b2.gewicht, 0);
+      if (aktive2.length && r() < 0.8) {
+        const sum2 = aktive2.reduce((a, b2) => a + b2.gewicht, 0);
         let v = r() * sum2;
-        haus2 = aktive.find((a) => (v -= a.gewicht) <= 0) ?? aktive.at(-1);
+        haus2 = aktive2.find((a) => (v -= a.gewicht) <= 0) ?? aktive2.at(-1);
       }
       const weg = haus2?.lane ?? waehle3(wege);
       const anfang = haus2 ? clamp8(haus2.u - weg.s.von + (r() - 0.5) * 32, 0, laenge(weg)) : r() * laenge(weg);
@@ -123832,7 +128562,28 @@
     };
   }
 
-  // render/src/kit/umbau-aussen.js
+  // src/kit/abholstation.js
+  function abholstation(S, scene2, opt) {
+    const x = opt.x ?? 0, z2 = opt.z ?? 0, w = opt.w ?? 36, d2 = opt.d ?? 25;
+    const rot = "#c52e2c", weiss2 = "#f6f2e9", metall = "#657382", karton2 = "#b88f59";
+    const u = x + Math.min(w - 2, Math.max(3, w * 0.65));
+    S.quader(u - 2, 2.65, z2 + d2 + 0.12, u + 2, 3.35, z2 + d2 + 0.29, rot);
+    schild(scene2, "Abholstation", "+z", u, 2.85 + (S.y0 ?? 0), z2 + d2 + 0.48, 0.31, weiss2, rot);
+    const b2 = x + Math.min(w - 1.5, Math.max(4, w * 0.77));
+    S.quader(b2 - 0.8, 0.1, z2 + d2 + 0.18, b2 + 0.8, 2.15, z2 + d2 + 0.9, metall);
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) {
+      const l = b2 - 0.65 + j * 0.72;
+      S.quader(l, 0.35 + i * 0.56, z2 + d2 + 0.91, l + 0.62, 0.83 + i * 0.56, z2 + d2 + 0.94, weiss2);
+    }
+    for (let i = 0; i < 4; i++) {
+      const lx = x + w * 0.44 + i % 2 * 0.75;
+      const ly = 0.15 + Math.floor(i / 2) * 0.55;
+      S.quader(lx, ly, z2 + d2 - 1, lx + 0.62, ly + 0.5, z2 + d2 - 0.35, karton2);
+    }
+    return { teile: 1 + 1 + 1 + 6 + 4, schild: "Abholstation" };
+  }
+
+  // src/kit/umbau-aussen.js
   function technikAufDach(S, h, m) {
     if (!h.etagenBau || !m || !(m.hoehe > 0)) return;
     const etagen = Object.values(h.etagenBau);
@@ -123848,7 +128599,7 @@
     }
   }
 
-  // render/src/kit/bruecke.js
+  // src/kit/bruecke.js
   var kwVon = (woche2) => woche2 % 52 + 1;
   function aktionFuer(s2, h) {
     let best = null;
@@ -124028,6 +128779,7 @@
     const zustand = (h) => {
       if (!zust.has(h.id)) {
         const z2 = zustandAusHaus(h, s2, merk2);
+        z2.schluessel += "|abholstation:" + (hatAbholstation(s2, h) ? 1 : 0);
         const w = nachnutzer(h);
         if (w) z2.schluessel += "|nachnutzung:" + wbSchluessel(w);
         zust.set(h.id, z2);
@@ -124041,6 +128793,7 @@
         p2.haus = h;
         const res2 = premiumhaus(S, scene2, h, { x, z: z2, ...bauZustand(zustand(h)) });
         technikAufDach(S, h, { x, z: z2, w: f.w, d: f.d, hoehe: res2?.hoehe });
+        if (hatAbholstation(s2, h)) abholstation(S, scene2, { x, z: z2, w: f.w, d: f.d });
         return res2;
       }
       if (!wahl3.has(h.id)) {
@@ -124059,6 +128812,7 @@
       const nutzer = nachnutzer(h);
       const res = nutzer ? nachnutzung(S, scene2, roh2, nutzer, { x, z: z2, familie: fam }) : warenhaus(S, scene2, roh2, { x, z: z2, familie: fam, ...bauZustand(zustand(h)) });
       if (!nutzer) technikAufDach(S, h, { x, z: z2, w: f.w, d: f.d, hoehe: res?.hoehe });
+      if (!nutzer && hatAbholstation(s2, h)) abholstation(S, scene2, { x, z: z2, w: f.w, d: f.d });
       return res;
     };
     const baueSport = (S, scene2, p2, h) => {
@@ -124289,7 +129043,7 @@
     } };
   }
 
-  // render/src/kit/jahreszeit.js
+  // src/kit/jahreszeit.js
   var JAHRESZEITEN_AN = true;
   var LAUB2 = /* @__PURE__ */ new Set(["linde", "kastanie", "platane", "birke", "pappel", "kugel"]);
   var PALETTEN3 = {
@@ -124558,7 +129312,7 @@
     };
   }
 
-  // render/src/ui/einstellungen.js
+  // src/ui/einstellungen.js
   var SPEICHER = "hartwig.einstellungen.v1";
   var definitionen2 = /* @__PURE__ */ new Map();
   var werte = null;
@@ -124581,9 +129335,9 @@
     if (d2.art === "auswahl") return optionenVon(d2).includes(wert) ? wert : d2.standard;
     if (d2.art === "regler") {
       const o = d2.optionen ?? {}, min = Number(o.min ?? 0), max = Number(o.max ?? 100);
-      const zahl4 = Number(wert), schritt = Number(o.schritt ?? o.step ?? 1);
-      if (!Number.isFinite(zahl4)) return d2.standard;
-      const rund2 = schritt > 0 ? min + Math.round((zahl4 - min) / schritt) * schritt : zahl4;
+      const zahl5 = Number(wert), schritt = Number(o.schritt ?? o.step ?? 1);
+      if (!Number.isFinite(zahl5)) return d2.standard;
+      const rund2 = schritt > 0 ? min + Math.round((zahl5 - min) / schritt) * schritt : zahl5;
       return Math.min(max, Math.max(min, rund2));
     }
     return d2.standard;
@@ -124645,7 +129399,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "a33aa05" : "Entwicklung";
+  var version = () => true ? "67d8918" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -124715,7 +129469,7 @@
     }).observe(document.body, { childList: true, subtree: true });
   }
 
-  // render/src/ui/format.js
+  // src/ui/format.js
   var fmt = new Intl.NumberFormat("de-DE");
   function geld(x) {
     const a = Math.abs(x), v = x < 0 ? "\u2212" : "";
@@ -124730,7 +129484,7 @@
   var kwVon2 = (w) => (w % 52 + 52) % 52 + 1;
   var esc2 = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-  // render/src/ui/quelle.js
+  // src/ui/quelle.js
   function quelle(E) {
     const da = typeof E.einkaufUebersicht === "function";
     return {
@@ -124764,13 +129518,13 @@
     };
   }
 
-  // render/src/ui/eigenmarken.js
+  // src/ui/eigenmarken.js
   var ALTER = [["10-13", "Tweens"], ["13-17", "Teens"], ["18-29", "Young Adults"], ["30-49", "30 bis 49"], ["50+", "50 plus"], ["70+", "70 plus"]];
   var GESCHLECHT = [["damen", "Damen"], ["herren", "Herren"], ["unisex", "Unisex"], ["kinder", "Kinder"]];
   var KATEGORIE2 = ["Bekleidung", "Schuhe", "W\xE4sche", "Accessoires", "Home", "Beauty"];
   var PREIS2 = [["einstieg", "Einstieg"], ["mitte", "Mitte"], ["gehoben", "Gehoben"]];
   var STIL2 = [["klassisch", "klassisch"], ["modern", "modern"], ["sportlich", "sportlich"], ["trendig", "trendig"]];
-  var FARBEN5 = ["#8c5a7a", "#2f4a6b", "#6f8f4e", "#d9822b", "#c9483e", "#2f63b5", "#1f1f1f", "#d27aa0", "#3f8f8a", "#7a5a3a"];
+  var FARBEN6 = ["#8c5a7a", "#2f4a6b", "#6f8f4e", "#d9822b", "#c9483e", "#2f63b5", "#1f1f1f", "#d27aa0", "#3f8f8a", "#7a5a3a"];
   var NAMEN2 = { damen: ["Linnea", "Mira Lenz", "Johanna B.", "Ella Sommer"], herren: ["Nordhaven", "Carl Ostwind", "Feldweg", "Henrik & Co."], unisex: ["Studio Hartwig", "Kleeblatt", "Hafenblau"], kinder: ["Hafenkind", "Kai & Kalle", "Pusteblume"] };
   var REGIONEN4 = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
   var alterText = (a) => ALTER.find((x) => x[0] === a)?.[1] ?? a;
@@ -124817,7 +129571,7 @@
     return l[(s2.woche * 7 + (s2.eigenmarken?.zaehler ?? 0) * 3) % l.length];
   };
   function neuerEntwurf2(s2) {
-    return { name: nameFuer(s2, "herren"), farbe: FARBEN5[(s2.woche + 4) % FARBEN5.length], zielgruppe: { alter: "50+", geschlecht: "herren" }, kategorie: "Bekleidung", preislage: "mitte", stil: "modern", qualitaet: 3, beschaffung: "nahost", budgetWoche: 15e3, wgAnteile: {} };
+    return { name: nameFuer(s2, "herren"), farbe: FARBEN6[(s2.woche + 4) % FARBEN6.length], zielgruppe: { alter: "50+", geschlecht: "herren" }, kategorie: "Bekleidung", preislage: "mitte", stil: "modern", qualitaet: 3, beschaffung: "nahost", budgetWoche: 15e3, wgAnteile: {} };
   }
   function wgVorschlag(ctx, s2, e) {
     const p2 = ctx.q.vorschau(s2, { ...e, wgAnteile: {} }).passendeWgs;
@@ -124854,7 +129608,7 @@
       h += feld("Markenbudget je Woche", `<div class="stepper"><button data-a="emBudgetNeu" data-v="-5000">\u2212</button><span><b>${geld(m.budgetWoche)}</b></span><button data-a="emBudgetNeu" data-v="5000">+</button></div>`, "baut Bekanntheit auf");
     } else {
       h += feld("Name", `<input class="ort gross" data-a="emName" maxlength="22" value="${esc2(m.name)}">`);
-      if (!A.id) h += feld("Farbe", `<div class="farben">${FARBEN5.map((f) => `<button class="${m.farbe === f ? "an" : ""}" style="background:${f}" data-a="emFarbe" data-v="${f}" aria-label="Farbe ${f}"></button>`).join("")}</div>`, "f\xFCr Shop und Karte");
+      if (!A.id) h += feld("Farbe", `<div class="farben">${FARBEN6.map((f) => `<button class="${m.farbe === f ? "an" : ""}" style="background:${f}" data-a="emFarbe" data-v="${f}" aria-label="Farbe ${f}"></button>`).join("")}</div>`, "f\xFCr Shop und Karte");
     }
     h += "</div>";
     const nWg = Object.values(m.wgAnteile).filter((a) => a > 0).length;
@@ -125023,7 +129777,7 @@
     return "?";
   }
 
-  // render/src/ui/ware.js
+  // src/ui/ware.js
   var reichweite = (r) => r == null ? "\u2013" : (r > 99 ? "> 99" : r.toFixed(1).replace(".", ",")) + (r == null ? "" : " Wo.");
   var proz = (x) => pz3(Number.isFinite(x) ? x : 0, 1);
   var knopf = (a, v, text3, extra = "") => `<button class="mini" data-a="${a}" data-v="${esc2(String(v))}" ${extra}>${text3}</button>`;
@@ -125124,7 +129878,7 @@
     return void 0;
   }
 
-  // render/src/ui/einkauf.js
+  // src/ui/einkauf.js
   var KOPF = { umsatz: "Umsatz 13 Wo.", rohertragsquote: "Rohertrag", lagerumschlag: "Umschlag", reichweite: "Reichweite", abverkaufsquote: "Abverkauf", altwarenanteil: "Altware", nosVerfuegbarkeit: "NOS", limitFrei: "Limit frei", rohertrag: "Rohertrag \u20AC", bestandEk: "Bestand", abschriften: "Abschriften", reduzierungsquote: "Reduzierung", entgangenerUmsatz: "Fehlmengen", offeneOrders: "Orders", offeneFreigaben: "Freigaben", eigenmarkenAnteil: "Eigenmarke", eigenmarkenMarge: "EM-Marge" };
   function formatiere(format, x) {
     if (format === "eur") return geld(x);
@@ -125156,7 +129910,7 @@
     const text3 = (id, k) => formatiere(SP().get(id)?.format ?? "eur", k[id] ?? 0);
     const dot = (a) => a ? `<span class="ampel a-${a}" title="${AMPEL_TEXT[a]}"></span>` : '<span class="ampel ohne"></span>';
     const seg = (act, wert, optionen2, extra = "") => `<div class="seg">${optionen2.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
-    const zahl4 = (titel, inhalt2, p2, ton2 = "", a) => `<div class="kz ${ton2}"><span>${titel}</span><b><i data-p="${p2}">${inhalt2}</i>${a ? dot(a) : ""}</b></div>`;
+    const zahl5 = (titel, inhalt2, p2, ton2 = "", a) => `<div class="kz ${ton2}"><span>${titel}</span><b><i data-p="${p2}">${inhalt2}</i>${a ? dot(a) : ""}</b></div>`;
     function tabs() {
       const n = q2.freigaben(s2()).anzahl;
       const an = (id) => ui.seite === id || id === "uebersicht" && ui.seite === "wg" || id === "eigenmarken" && ui.seite === "gruenden";
@@ -125171,7 +129925,7 @@
       const u = q2.uebersicht(s2(), { format: ui.format }), g = u.summe.kennzahlen, ga = u.summe.ampeln;
       let h = tabs();
       h += seg("format", ui.format, [["warenhaus", "Hartwig"], ["sport", "Hartwig Sport"]]);
-      h += `<div class="raster">${zahl4("Umsatz letzte Woche", geld(g.umsatzWoche), "g:umsatzWoche")}${zahl4("Rohertragsquote 13 Wochen", pz3(g.rohertragsquote, 1), "g:rohertragsquote", "", ga.rohertragsquote)}${zahl4("Bestand EK", geld(g.bestandEk), "g:bestandEk")}${zahl4("Limit frei", geld(g.limitFrei), "g:limitFrei", g.limitFrei < 0 ? "rot" : "", ga.limitFrei)}</div>`;
+      h += `<div class="raster">${zahl5("Umsatz letzte Woche", geld(g.umsatzWoche), "g:umsatzWoche")}${zahl5("Rohertragsquote 13 Wochen", pz3(g.rohertragsquote, 1), "g:rohertragsquote", "", ga.rohertragsquote)}${zahl5("Bestand EK", geld(g.bestandEk), "g:bestandEk")}${zahl5("Limit frei", geld(g.limitFrei), "g:limitFrei", g.limitFrei < 0 ? "rot" : "", ga.limitFrei)}</div>`;
       const spalten2 = [...q2.spalten()].sort((a, b2) => b2.standard - a.standard);
       h += `<div class="spaltenwahl"><span>Spalten</span>${spalten2.map((c) => {
         const i = ui.spalten.indexOf(c.id);
@@ -125216,7 +129970,7 @@
       const k = d2.kennzahlen, st2 = d2.steuerung, a = d2.ampeln;
       let h = tabs();
       h += `<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 \xDCbersicht ${esc2(d2.bereichName)}</button>`;
-      h += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl4(c.name, text3(c.id, k), `d:${c.id}`, "", a[c.id])).join("")}${DETAIL_EXTRA.map(([id, t, f]) => zahl4(t, id === "eigenmarkenMarge" && !k.eigenmarkenAnteil ? "keine" : formatiere(f, k[id]), `d:${id}`, "", a[id])).join("")}</div>`;
+      h += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl5(c.name, text3(c.id, k), `d:${c.id}`, "", a[c.id])).join("")}${DETAIL_EXTRA.map(([id, t, f]) => zahl5(t, id === "eigenmarkenMarge" && !k.eigenmarkenAnteil ? "keine" : formatiere(f, k[id]), `d:${id}`, "", a[id])).join("")}</div>`;
       const v = d2.verlauf;
       h += kurve4("Bestand EK", v.woche, v.bestand, geld, "k:bestand", "#2f63b5");
       h += kurve4("Umsatz je Woche", v.woche, v.umsatz, geld, "k:umsatz", "#2f8f5b");
@@ -125512,7 +130266,7 @@
     };
   }
 
-  // render/src/ui/karte.js
+  // src/ui/karte.js
   var W2 = Math.SQRT2;
   var ausdehnung2 = (halb, a) => halb * (a / W2 + W2);
   function erweitert(G2) {
@@ -125682,7 +130436,7 @@
     } };
   }
 
-  // render/src/kit/portraet.js
+  // src/kit/portraet.js
   var HAUTTOENE = {
     hell: ["#f8d6c8", "#e9bcab"],
     rosig: ["#f3c6a6", "#e0aa88"],
@@ -126024,7 +130778,7 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}">${teile2.join("")}</svg>`;
   }
 
-  // render/src/ui/vorstand.js
+  // src/ui/vorstand.js
   function portraet(m, groesse2 = 96, hintergrund) {
     if (typeof portraetSVG === "function" && m) return portraetSVG(m, groesse2, hintergrund ? { hintergrund } : {});
     return `<svg viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}"><rect width="100" height="100" fill="${hintergrund ?? "none"}"/><circle cx="50" cy="36" r="17" fill="#cfc9bf"/><path d="M18 100c2-24 15-36 32-36s30 12 32 36z" fill="#b9b2a6"/></svg>`;
@@ -126304,7 +131058,7 @@
     };
   }
 
-  // render/src/ui/organisation.js
+  // src/ui/organisation.js
   function organisationModul(ctx) {
     const { E } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "zentrale", ebene: null, id: null };
@@ -126314,9 +131068,9 @@
       if (!aufgaben?.length) return "";
       return '<div class="org-aufgaben"><small>Delegation je Aufgabe, \xC4nderungen wirken ab der n\xE4chsten Woche</small>' + aufgaben.map((a) => {
         const ziel = ' data-id="' + esc2(id) + '" data-task="' + esc2(a.id) + '"' + (cluster ? ' data-cluster="1"' : "");
-        const schalter2 = '<button data-org="aufgabe"' + ziel + ' aria-pressed="' + a.an + '">' + (a.an ? "Delegiert" : "Beim CEO") + "</button>";
+        const schalter3 = '<button data-org="aufgabe"' + ziel + ' aria-pressed="' + a.an + '">' + (a.an ? "Delegiert" : "Beim CEO") + "</button>";
         const grenze = a.grenze === void 0 ? "" : '<span class="org-grenze"><button data-org="grenze"' + ziel + ' data-grenze="' + a.grenze + '" data-delta="-10000" aria-label="Grenze senken">\u2212</button><b>' + geld(a.grenze) + '</b><button data-org="grenze"' + ziel + ' data-grenze="' + a.grenze + '" data-delta="10000" aria-label="Grenze erh\xF6hen">+</button></span>';
-        return '<div class="org-aufgabe"><span>' + esc2(a.name) + "</span>" + grenze + schalter2 + "</div>";
+        return '<div class="org-aufgabe"><span>' + esc2(a.name) + "</span>" + grenze + schalter3 + "</div>";
       }).join("") + "</div>";
     };
     const profil2 = (stelle2, titel, ebene, id) => {
@@ -126348,7 +131102,13 @@
         for (const ressort of x.ressorts) {
           const bs = x.bereiche.filter((b2) => b2.ressort === ressort.id);
           h += '<div class="karte"><div class="khead"><b>' + esc2(ressort.id.toUpperCase()) + " \xB7 " + esc2(ressort.name) + "</b><small>" + (ressort.person ? esc2(ressort.person.name) : '<span class="frei">unbesetzt</span>') + "</small></div>";
-          for (const b2 of bs) h += '<div class="org-zeile"><span class="vbild">' + portraet(b2.stelle?.person?.portraet, 50) + "</span><div><b>" + esc2(b2.name) + "</b><small>" + name2(b2.stelle) + " \xB7 Stufe " + b2.hqStufe + " \xB7 " + (b2.berichtetAn === "spieler" ? "CEO" : b2.berichtetAn.toUpperCase()) + "</small>" + bar(b2.qualitaet) + "<small>" + b2.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="' + esc2(b2.id) + '">Person</button><button data-org="delegation" data-id="' + esc2(b2.id) + '" aria-pressed="' + b2.delegiert + '">Delegiert ' + (b2.delegiert ? "ja" : "nein") + "</button></div></div>" + aufgabenListe(b2.aufgaben, b2.id);
+          for (const b2 of bs) {
+            h += '<div class="org-zeile"><span class="vbild">' + portraet(b2.stelle?.person?.portraet, 50) + "</span><div><b>" + esc2(b2.name) + "</b><small>" + name2(b2.stelle) + " \xB7 Stufe " + b2.hqStufe + " \xB7 " + (b2.berichtetAn === "spieler" ? "CEO" : b2.berichtetAn.toUpperCase()) + "</small>" + bar(b2.qualitaet) + "<small>" + b2.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="' + esc2(b2.id) + '">Person</button><button data-org="delegation" data-id="' + esc2(b2.id) + '" aria-pressed="' + b2.delegiert + '">Delegiert ' + (b2.delegiert ? "ja" : "nein") + "</button></div></div>" + aufgabenListe(b2.aufgaben, b2.id);
+            if (b2.id === "marktbeobachtung") {
+              const markt = E.marktbeobachtungUebersicht(st2);
+              h += '<div class="org-markt"><small>Marktbeobachtung: ' + markt.fte + " FTE \xB7 " + esc2(geld(markt.kostenWoche)) + " / Woche \xB7 Leitung " + esc2(markt.leitung) + " \xB7 " + markt.erfasst + " Rohmeldungen, " + markt.gemeldet + ' ver\xF6ffentlicht</small><div class="org-aktionen">' + [0, 1, 2, 3].map((stufe2) => '<button data-org="marktStufe" data-stufe="' + stufe2 + '" ' + (markt.stufe === stufe2 ? "disabled " : "") + 'aria-pressed="' + (markt.stufe === stufe2) + '">Stufe ' + stufe2 + "</button>").join("") + "</div></div>";
+            }
+          }
           h += "</div>";
         }
       } else {
@@ -126397,6 +131157,7 @@
         ui.ebene = null;
         zeichnen2();
       }
+      if (a === "marktStufe") tun({ typ: "marktbeobachtungStufe", stufe: Number(el2.dataset.stufe) });
       if (a === "zurueck") {
         ui.ebene = null;
         zeichnen2();
@@ -126426,7 +131187,7 @@
     }, aktiv: () => ui.aktiv, pruefe: () => ({ reiter: ui.reiter, bereiche: E.organisationUebersicht(s2()).bereiche.length, cluster: E.organisationUebersicht(s2()).regionen.reduce((n, r) => n + r.cluster.length, 0) }) };
   }
 
-  // render/src/ui/posteingang.js
+  // src/ui/posteingang.js
   function posteingangModul(ctx) {
     const E = ctx.E, s2 = ctx.s;
     const ui = { aktiv: false, filter: "Alle", verhandlung: null, ziel: null };
@@ -126470,11 +131231,16 @@
       if (!liste2.length) return html + leer3("Keine Meldungen in dieser Kategorie.");
       const gelesen2 = new Set(einstellungen2().gelesen ?? []);
       const symbole = { Presse: "\u{1F4F0}", H\u00E4user: "\u{1F3EC}", Finanzen: "\u20AC", Personal: "\u{1F465}", Konkurrenz: "\u2197", Eigent\u00FCmer: "\u25C6", IT: "\u2699" };
-      return html + liste2.map((m) => {
+      const wettbewerb = liste2.filter((m) => m.kategorie === "Konkurrenz");
+      const andere = liste2.filter((m) => m.kategorie !== "Konkurrenz");
+      const eintrag2 = (m) => {
         const bezug = m.bezug && (m.bezug.stadt || m.bezug.modul || m.bezug.hausIds?.length);
         const info = '<span class="postsymbol" aria-hidden="true">' + symbole[m.kategorie] + '</span><span class="postnachricht"><small>' + esc2(m.kategorie) + " \xB7 KW " + kwVon2(m.woche) + (gelesen2.has(m.id) ? "" : " \xB7 Neu") + "</small><span>" + esc2(m.text) + "</span></span>";
         return '<div class="karte postmeldung ' + (gelesen2.has(m.id) ? "" : "ungelesen") + '" data-post-id="' + esc2(m.id) + '"><button data-po-a="lesen" data-id="' + esc2(m.id) + '">' + info + "</button>" + (bezug ? '<button class="postort" data-po-a="sprung" data-id="' + esc2(m.id) + '">Zum Ort \u2192</button>' : "") + "</div>";
-      }).join("");
+      };
+      const regul\u00E4r = andere.map(eintrag2).join("");
+      const rubrik = wettbewerb.length ? '<details class="karte post-konkurrenz" ' + (filter === "Konkurrenz" ? "open" : "") + "><summary>Konkurrenz \xB7 " + wettbewerb.length + " Meldung" + (wettbewerb.length === 1 ? "" : "en") + ' (anzeigen)</summary><div class="post-konkurrenz-inhalt">' + wettbewerb.map(eintrag2).join("") + "</div></details>" : "";
+      return html + regul\u00E4r + rubrik;
     }
     function erledigt(D) {
       if (!D.erledigt.length) return leer3("In den letzten 13 Wochen wurde noch nichts erledigt.");
@@ -126599,7 +131365,7 @@
     };
   }
 
-  // render/src/kit/zeitung.js
+  // src/kit/zeitung.js
   var FARBE = {
     haus: { fassade: "#d6c3a4", dach: "#796552", seite: "#a99272", akzent: "#b43e32" },
     konkurrenz: { fassade: "#bfced8", dach: "#344f66", seite: "#7897ab", akzent: "#b87837" },
@@ -126617,7 +131383,7 @@
     return '<svg class="zb-isobild" viewBox="0 0 420 260" role="img" aria-label="Isometrische Zeichnung eines Warenhauses"><rect width="420" height="260" fill="#e1e5df"/><path d="M10 222 260 135 412 180 173 260Z" fill="#cbc8bf"/><path d="M72 78 260 22 340 60 153 119Z" fill="' + c.dach + '"/><path d="M72 78 153 119 153 229 72 185Z" fill="' + c.seite + '"/><path d="M153 119 340 60 340 171 153 229Z" fill="' + c.fassade + '"/><path d="M151 188 342 130v18l-191 58Z" fill="' + c.akzent + '"/><path d="M151 208 342 150v5l-191 58Z" fill="#eee8db"/>' + fenster8.join("") + '<path d="M194 210v-34l52-16v34" fill="#597784" stroke="#485e63" stroke-width="3"/><path d="M98 147v22l24 13v-22z" fill="#55717c"/>' + muster + '<path d="M50 204 215 254M260 238l108-36" stroke="#f3eee3" stroke-width="2"/></svg>';
   }
 
-  // render/src/ui/zeitung.js
+  // src/ui/zeitung.js
   var REITER = ["Top", "Handel", "Konzern", "Markt", "Politik"];
   function zeitungModul(ctx) {
     const ui = { aktiv: false, index: -1, reiter: "Top", archiv: false };
@@ -126736,7 +131502,7 @@
     };
   }
 
-  // render/src/ui/statistik.js
+  // src/ui/statistik.js
   var FARBE2 = {
     Hartwig: "#d23c32",
     Volkskauf: "#9b63b0",
@@ -126773,7 +131539,7 @@
     const tabs = () => '<nav class="stat-auswahl" aria-label="Statistikseiten">' + [["konzern", "Konzern"], ["formate", "Formate"], ["regionen", "Regionen"], ["rangliste", "H\xE4user"]].map(([id, t]) => knopf2("seite", id, t, ui.seite === id)).join("") + "</nav>";
     const zeiten = () => '<div class="stat-auswahl" aria-label="Zeitraum">' + [[13, "13 Wochen"], [52, "52 Wochen"], ["alle", "Alle"]].map(([id, t]) => knopf2("wochen", id, t, String(ui.wochen) === String(id))).join("") + "</div>";
     const typen = () => '<div class="stat-auswahl" aria-label="Darstellung">' + [["linie", "Verlauf"], ["balken", "Wochen"], ["quartal", "Quartale"]].map(([id, t]) => knopf2("typ", id, t, ui.typ === id)).join("") + "</div>";
-    const zahl4 = (t, n, k) => '<div class="kz"><span>' + esc2(t) + "</span><b>" + esc2(wert(n, k)) + "</b></div>";
+    const zahl5 = (t, n, k) => '<div class="kz"><span>' + esc2(t) + "</span><b>" + esc2(wert(n, k)) + "</b></div>";
     function gruppieren(punkte2, kennzahl2) {
       if (ui.typ !== "quartal") return ui.typ === "balken" ? punkte2.slice(-13) : punkte2;
       const summen = /* @__PURE__ */ new Map();
@@ -126830,7 +131596,7 @@
     }
     function konzern() {
       const kennzahlen2 = [["umsatz", "Umsatz"], ["ebitda", "EBITDA"], ["cash", "Cash und Insolvenzgrenze"], ["stimmung", "Stakeholder-Stimmung"]];
-      let html = '<div class="stat-raster">' + kennzahlen2.slice(0, 3).map(([k, t]) => zahl4(t, daten("konzern", void 0, k).punkte.at(-1)?.wert ?? 0, k)).join("") + "</div>";
+      let html = '<div class="stat-raster">' + kennzahlen2.slice(0, 3).map(([k, t]) => zahl5(t, daten("konzern", void 0, k).punkte.at(-1)?.wert ?? 0, k)).join("") + "</div>";
       for (const [k, t] of kennzahlen2) {
         const d2 = daten("konzern", void 0, k);
         html += diagramm(t, [{ name: "Ist", punkte: d2.punkte }], k, { vorjahr: true, grenze: k === "cash" ? -s2().kreditlinie : void 0 });
@@ -127003,7 +131769,7 @@
     };
   }
 
-  // render/src/ui/marketing.js
+  // src/ui/marketing.js
   var ALTER2 = { jung: "unter 30", mitte: "30 bis 49", aelter: "50 bis 64", senioren: "65 plus" };
   var STATUS2 = { geplant: "geplant", laufend: "l\xE4uft", beendet: "beendet", abgesagt: "abgesagt", aktiv: "aktiv", gestoppt: "gestoppt" };
   var STATUS_FARBE = { geplant: "#2f63b5", laufend: "#2f8f5b", beendet: "#9aa3ab", abgesagt: "#d6d2ca" };
@@ -127045,9 +131811,9 @@
       const v = u.verlauf.slice(-26);
       h += kurve2("Kundschaft je Woche", v.map((x) => x.kunden), (x) => fmt.format(Math.round(x)), "k:kunden", P2, "#2f63b5");
       h += kurve2("Markenst\xE4rke", v.map((x) => x.marke), (x) => dez(x, 1), "k:marke", P2, "#8c5a7a");
-      const zeile2 = (a) => `<div class="zeile klickbar" data-a="aktion" data-v="${a.id}"><span class="dot" style="background:${STATUS_FARBE[a.status] ?? "#999"}"></span><span class="was">${esc2(a.name)} <i>${esc2(a.mechanikText)}${a.rabatt ? ` ${pz3(a.rabatt)}` : ""}</i></span><span class="qm">KW ${a.startKw} bis ${a.endeKw}</span></div>`;
-      if (u.laufend.length) h += `<div class="karte"><div class="khead">L\xE4uft gerade</div>${u.laufend.map(zeile2).join("")}</div>`;
-      if (u.naechste.length) h += `<div class="karte"><div class="khead">Als N\xE4chstes</div>${u.naechste.map(zeile2).join("")}</div>`;
+      const zeile3 = (a) => `<div class="zeile klickbar" data-a="aktion" data-v="${a.id}"><span class="dot" style="background:${STATUS_FARBE[a.status] ?? "#999"}"></span><span class="was">${esc2(a.name)} <i>${esc2(a.mechanikText)}${a.rabatt ? ` ${pz3(a.rabatt)}` : ""}</i></span><span class="qm">KW ${a.startKw} bis ${a.endeKw}</span></div>`;
+      if (u.laufend.length) h += `<div class="karte"><div class="khead">L\xE4uft gerade</div>${u.laufend.map(zeile3).join("")}</div>`;
+      if (u.naechste.length) h += `<div class="karte"><div class="khead">Als N\xE4chstes</div>${u.naechste.map(zeile3).join("")}</div>`;
       for (const x of u.hinweise) h += `<div class="olief warnung">${esc2(x)}</div>`;
       return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 ${u.kampagnenAktiv} CRM-Kampagnen aktiv \xB7 KW ${u.kw} / ${u.jahr}`, html: h };
     }
@@ -127402,7 +132168,7 @@
     };
   }
 
-  // render/src/ui/umbau.js
+  // src/ui/umbau.js
   var ETAGE = (nr) => nr === -1 ? "UG" : nr === 0 ? "EG" : nr + ". OG";
   var BEZEICHNUNG = { auffrischung: "Auffrischung", ladenbau: "Ladenbau neu", komplett: "Komplettumbau", technik: "Technik" };
   function umbauModul(ctx) {
@@ -127493,7 +132259,7 @@
     } };
   }
 
-  // render/src/kit/produktbild.js
+  // src/kit/produktbild.js
   var FARBEN_PRODUKT = {
     "wei\xDF": "#f3f2ee",
     creme: "#efe4cc",
@@ -128134,7 +132900,7 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}"><rect x="1" y="1" width="98" height="98" rx="9" fill="#5a8396" stroke="#a9c7d4" stroke-width="1.6"/><g transform="translate(14 8) scale(0.72)">${innen}</g></svg>`;
   }
 
-  // render/src/ui/produkte.js
+  // src/ui/produkte.js
   var PREISLAGE = { einstieg: "Einstieg", mitte: "Mitte", gehoben: "Gehoben" };
   var euro = (x) => `${dez(x, 2)} \u20AC`;
   var bild = (typ, farbe3, material2, g = 150) => typeof produktbildSVG === "function" ? produktbildSVG(typ, farbe3, material2, g) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc2(typ)}</text></svg>`;
@@ -128404,11 +133170,11 @@
     };
   }
 
-  // render/src/ui/speicher.js
+  // src/ui/speicher.js
   var NAME2 = "hartwig-spielstand";
   var STORE = "staende";
   var INFOS = "informationen";
-  var FORMAT = 1;
+  var FORMAT = 2;
   var PLAETZE = ["autosave", "platz-1", "platz-2", "platz-3"];
   var MAX_DATEI = 40 * 1024 * 1024;
   var MAX_INHALT = 160 * 1024 * 1024;
@@ -128479,8 +133245,8 @@
   }
   function pruefen(datensatz) {
     if (!datensatz) return null;
-    if (datensatz.format !== FORMAT || datensatz.spiel?.version !== 1)
-      throw new Error("Dieser Spielstand stammt aus einer nicht unterst\xFCtzten Version. Er wurde nicht ge\xE4ndert.");
+    if (datensatz.format !== FORMAT || datensatz.spiel?.version !== 2)
+      throw new Error("Dieser Spielstand hat ein altes, nicht mehr unterst\xFCtztes Format (Ma\xDFstab-Version 2 erforderlich). Der alte Stand wurde nicht ver\xE4ndert. Bitte ein neues Spiel starten oder den Stand l\xF6schen.");
     const s2 = datensatz.spiel;
     if (!Number.isInteger(s2.woche) || s2.woche < 0 || !Number.isFinite(s2.cash) || !Array.isArray(s2.haeuser) || !Array.isArray(s2.historie) || !s2.hq || !s2.einkauf || !s2.eigenmarken || !s2.vorstand || !s2.produkte || !s2.marketing?.stand)
       throw new Error("Der Spielstand ist unvollst\xE4ndig. Er wurde nicht ge\xE4ndert.");
@@ -128539,7 +133305,7 @@
   function speichern(spiel, stadt, ui = {}, platz = "autosave", name2 = "", bild3 = null, importDatum = null) {
     try {
       platzPruefen(platz);
-      if (!spiel || spiel.version !== 1) throw new Error("Kein g\xFCltiges Spiel gestartet.");
+      if (!spiel || spiel.version !== 2) throw new Error("Kein g\xFCltiges Spiel gestartet.");
       const datensatz = {
         format: FORMAT,
         datum: importDatum && Number.isFinite(new Date(importDatum).getTime()) ? new Date(importDatum).toISOString() : (/* @__PURE__ */ new Date()).toISOString(),
@@ -128632,7 +133398,7 @@
     }
   }
 
-  // render/src/ui/app.js
+  // src/ui/app.js
   var APP_AKTIV = true;
   var $ = (id) => document.getElementById(id);
   var bezeichnung = (platz) => platz === "autosave" ? "Autospeichern" : "Platz " + platz.slice(-1);
@@ -128776,7 +133542,7 @@
     return { oeffne, startAktualisieren, updatesAktivieren };
   }
 
-  // render/src/ui/diagnose.js
+  // src/ui/diagnose.js
   var runde = (x) => Math.round(x * 10) / 10;
   var perzentil = (a, p2) => a[Math.min(a.length - 1, Math.ceil(a.length * p2) - 1)];
   async function messen({ renderer, scene: scene2, camera, info, vorBild, anzahl = 90 }) {
@@ -128817,7 +133583,7 @@
     };
   }
 
-  // render/src/ui/reise.js
+  // src/ui/reise.js
   var ASSISTENTIN = portraetSVG({ geschlecht: "w", alter: 36, haar: "bob", haarfarbe: "braun", hautton: "rosig", kleidung: "blazer", kleidungFarbe: "marine", seed: 821 }, 110);
   var REISE_ZEIT = Object.freeze({
     kreisAuf: 240,
@@ -129041,7 +133807,7 @@
     return { oeffne, zu: schliessen, aktiv: () => aktiv5, pruefe: () => ({ stadt: ctx.stadt(), aktiv: aktiv5, schritte: [...protokoll2], zielAnzahl: z2.querySelectorAll("[data-reiseziel]").length }), fahren };
   }
 
-  // render/src/ui/wochenbericht.js
+  // src/ui/wochenbericht.js
   var ASSISTENTIN2 = portraetSVG({ geschlecht: "w", alter: 36, haar: "bob", haarfarbe: "braun", hautton: "rosig", kleidung: "blazer", kleidungFarbe: "marine", seed: 821 }, 110);
   var BANK = portraetSVG({ geschlecht: "m", alter: 56, haar: "seitenscheitel", haarfarbe: "grau", hautton: "hell", kleidung: "anzug", seed: 236 }, 110);
   var BETRIEBSRAT = portraetSVG({ geschlecht: "w", alter: 49, haar: "halblang", haarfarbe: "dunkelbraun", kleidung: "bluse", seed: 922 }, 110);
@@ -129059,7 +133825,7 @@
     vorfallAus: 200,
     reduziert: 150
   });
-  var eur2 = (n) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n ?? 0)) + " \u20AC";
+  var eur3 = (n) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n ?? 0)) + " \u20AC";
   var kurve3 = (t) => 1 - (1 - t) ** 2;
   var reduziert = () => effektiveAnimation() !== "voll";
   var ohneAnimation2 = () => new URLSearchParams(location.search).has("ohne-animation");
@@ -129182,7 +133948,7 @@
         rolle: person3?.name ?? "Vorstand"
       };
     }
-    function zeile2(name2, wert, k = "") {
+    function zeile3(name2, wert, k = "") {
       return '<div class="wb-zeile ' + k + '"><span>' + esc2(name2) + "</span><strong>" + esc2(wert) + "</strong></div>";
     }
     function berichtZeigen(meins) {
@@ -129190,11 +133956,11 @@
       status = "zaehlen";
       vorfall = 0;
       const m = bericht2.meldungen, ausgabe = ctx.zeitung?.(), titel = ausgabe?.aufmacher?.titel ?? m[0]?.text ?? "Hartwig startet in eine neue Gesch\xE4ftswoche";
-      const delta = (wert, vorher) => vorher == null ? "Noch keine Vergleichswoche" : eur2(wert - vorher) + " (" + (vorher === 0 ? "\u2013" : new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format((wert - vorher) / Math.abs(vorher) * 100) + " %") + ")";
+      const delta = (wert, vorher) => vorher == null ? "Noch keine Vergleichswoche" : eur3(wert - vorher) + " (" + (vorher === 0 ? "\u2013" : new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format((wert - vorher) / Math.abs(vorher) * 100) + " %") + ")";
       const uDelta = delta(bericht2.umsatz, bericht2.umsatzVor);
       const eDelta = delta(bericht2.ebitda, bericht2.ebitdaVor);
       const nachricht = (a, platz) => a ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? "hafen" : "altstadt") + '.jpg)"></div><span>' + esc2(a.text) + "</span></div>" : "";
-      node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2 tabindex="-1">KW ' + bericht2.kw + ' \xB7 Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schlie\xDFen">\xD7</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht2.umsatz + '">0 \u20AC</strong><span id="wb-umsatz-delta">' + esc2(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht2.ebitda + '">0 \u20AC</strong><span id="wb-ebitda-delta">' + esc2(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' + zeile2("Cash operativ", eur2(bericht2.kapitalfluss.operativ)) + zeile2("Investitionen", eur2(bericht2.kapitalfluss.investitionen)) + zeile2("Finanzierung", eur2(bericht2.kapitalfluss.finanzierung)) + zeile2("Sonstiges", eur2(bericht2.kapitalfluss.sonstiges)) + zeile2("Cash netto", eur2(bericht2.kapitalfluss.netto)) + zeile2("Cash-Bestand", eur2(bericht2.kapitalfluss.bestand), "wb-summe") + "</div>" + (bericht2.phase === "insolvenz" ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur2(bericht2.kredite) + " \xB7 Liquidit\xE4tsreichweite: " + bericht2.runway + " Wochen</span></div>" : "") + '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht2.kw + " / " + bericht2.jahr + '</small><h3>Der Handelsbote</h3><nav>Top \xB7 Handel \xB7 Konzern \xB7 Markt \xB7 Politik</nav></div><div class="wb-titelbild">' + (ausgabe ? zeitungsBild(ausgabe.aufmacher.bild, ausgabe.nummer) : "") + "</div><h4>" + esc2(titel) + '</h4><button type="button" class="wb-zeitung-lesen" data-wa="zeitung">Ausgabe lesen und Archiv \xF6ffnen \u2192</button>' + nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? "<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>" : "") + (bericht2.erfolge.length ? '<div class="wb-erfolge"><strong>Neu: ' + bericht2.erfolge.map((e) => esc2(e.titel)).join(", ") + "</strong></div>" : "") + '</div></div><div id="wb-vorfall"></div></section>';
+      node.innerHTML = '<section class="wb-bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2 tabindex="-1">KW ' + bericht2.kw + ' \xB7 Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schlie\xDFen">\xD7</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht2.umsatz + '">0 \u20AC</strong><span id="wb-umsatz-delta">' + esc2(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht2.ebitda + '">0 \u20AC</strong><span id="wb-ebitda-delta">' + esc2(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash"><h3>Kapitalfluss</h3>' + zeile3("Cash operativ", eur3(bericht2.kapitalfluss.operativ)) + zeile3("Investitionen", eur3(bericht2.kapitalfluss.investitionen)) + zeile3("Finanzierung", eur3(bericht2.kapitalfluss.finanzierung)) + zeile3("Sonstiges", eur3(bericht2.kapitalfluss.sonstiges)) + zeile3("Cash netto", eur3(bericht2.kapitalfluss.netto)) + zeile3("Cash-Bestand", eur3(bericht2.kapitalfluss.bestand), "wb-summe") + "</div>" + (bericht2.phase === "insolvenz" ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur3(bericht2.kredite) + " \xB7 Liquidit\xE4tsreichweite: " + bericht2.runway + " Wochen</span></div>" : "") + '<div class="wb-zeitung"><div class="wb-zeitungskopf"><small>KW ' + bericht2.kw + " / " + bericht2.jahr + '</small><h3>Der Handelsbote</h3><nav>Top \xB7 Handel \xB7 Konzern \xB7 Markt \xB7 Politik</nav></div><div class="wb-titelbild">' + (ausgabe ? zeitungsBild(ausgabe.aufmacher.bild, ausgabe.nummer) : "") + "</div><h4>" + esc2(titel) + '</h4><button type="button" class="wb-zeitung-lesen" data-wa="zeitung">Ausgabe lesen und Archiv \xF6ffnen \u2192</button>' + nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? "<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>" : "") + (bericht2.erfolge.length ? '<div class="wb-erfolge"><strong>Neu: ' + bericht2.erfolge.map((e) => esc2(e.titel)).join(", ") + "</strong></div>" : "") + '</div></div><div id="wb-vorfall"></div></section>';
       node.hidden = false;
       node.className = "bericht-ein";
       document.body.classList.add("wochen-aktiv");
@@ -129207,8 +133973,8 @@
         const f = sprung || !originalDauer ? 1 : kurve3(Math.max(0, Math.min(1, (t - zaehlBeginn) / originalDauer)));
         const u = node.querySelector("#wb-umsatz"), e = node.querySelector("#wb-ebitda");
         if (!u || !e || meins !== token) return;
-        u.textContent = eur2(bericht2.umsatz * f);
-        e.textContent = eur2(bericht2.ebitda * f);
+        u.textContent = eur3(bericht2.umsatz * f);
+        e.textContent = eur3(bericht2.ebitda * f);
         e.classList.toggle("negativ", bericht2.ebitda < 0);
         if (f < 1) zaehlRaf = requestAnimationFrame(zahlen);
         else if (!abgeschlossen) {
@@ -129308,7 +134074,98 @@
     } };
   }
 
-  // render/src/ui/chronik.js
+  // src/ui/ecommerce.js
+  var prozent = (x, n = 1) => (100 * (x || 0)).toFixed(n).replace(".", ",") + " %";
+  var zahl2 = (titel, wert, ton2 = "") => '<div class="kz ' + ton2 + '"><span>' + titel + "</span><b>" + wert + "</b></div>";
+  var zeile = (label, detail2, aktion) => '<div class="zeile"><span class="was"><b>' + esc2(label) + "</b><i>" + esc2(detail2) + "</i></span>" + aktion + "</div>";
+  var schalter2 = (akt, wert, parameter = "") => '<button class="mini ' + (wert ? "gruen" : "") + '" data-online="' + akt + '" ' + parameter + ">" + (wert ? "Ein" : "Aus") + "</button>";
+  function ecommerceModul(ctx) {
+    let offen = false, tab = "uebersicht";
+    const state = () => ctx.E.ecommerceUebersicht(ctx.s());
+    function anzeigen(behalten = false) {
+      if (!offen) return;
+      const u = state(), vorher = behalten ? document.getElementById("pinhalt").scrollTop : 0;
+      let h = '<div class="tabs">' + [["uebersicht", "Kennzahlen"], ["steuerung", "Steuerung"], ["haeuser", "H\xE4user"]].map(([id, name2]) => '<button class="tab ' + (tab === id ? "an" : "") + '" data-online="tab" data-wert="' + id + '">' + name2 + "</button>").join("") + "</div>";
+      if (tab === "uebersicht") {
+        h += '<div class="raster">' + zahl2("Onlineumsatz Woche", geld(u.umsatz)) + zahl2("Anteil Konzernumsatz", prozent(u.anteil)) + zahl2("Online-Conversion", prozent(u.conversion, 2)) + zahl2("Retourenquote", prozent(u.retourenquote)) + zahl2("Kosten je Bestellung", geld(u.kostenJeBestellung)) + zahl2("Deckungsbeitrag online", geld(u.deckungsbeitrag), u.deckungsbeitrag < 0 ? "rot" : "gruen") + zahl2("Click & Collect", prozent(u.clickCollectAnteil)) + zahl2("Bestellungen", fmt.format(u.bestellungen)) + "</div>";
+        h += '<div class="karte"><div class="khead">Umsatzbr\xFCcke: Effekt Online</div>' + zeile("Onlinewachstum gegen\xFCber Basis", geld(u.umsatz - u.basis), "") + zeile("Kannibalisierung in den H\xE4usern", "\u2212" + geld(u.kannibalisierung), "") + zeile("Gesamteffekt Konzernumsatz", geld(u.onlineEffekt), "") + '<div class="zeile grau">Die Ausgangsbasis von 8 % ist bereits im bisherigen Konzernumsatz enthalten und wird nicht nochmals addiert.</div></div>';
+        h += '<div class="karte"><div class="khead">Onlineumsatz der letzten Wochen</div>';
+        const max = Math.max(1, ...u.verlauf.map((q2) => q2.umsatz));
+        h += '<div class="online-verlauf">' + u.verlauf.slice(-26).map((q2) => '<div class="online-balken" style="height:' + Math.max(2, 100 * q2.umsatz / max) + '%" title="KW ' + (q2.woche % 52 + 1) + ": " + geld(q2.umsatz) + '"></div>').join("") + "</div>";
+        h += '<div class="zeile grau">Basis: Umsatzanteil station\xE4r und online ohne Doppelz\xE4hlung</div></div>';
+        h += '<div class="karte"><div class="khead">Warengruppen online</div>' + Object.entries(u.umsatzJeGruppe).sort((a, b2) => b2[1] - a[1]).map(([g, umsatz]) => zeile(ctx.E.GRUPPEN[g]?.name ?? g, geld(umsatz), "")).join("") + "</div>";
+      } else if (tab === "steuerung") {
+        const optionen2 = (id, werte2, aktuell, format) => '<div class="zeile"><span class="was">' + id + '</span><select class="ort" data-online="strategie" data-feld="' + format + '">' + werte2.map(([v, t]) => '<option value="' + v + '"' + (String(v) === String(aktuell) ? " selected" : "") + ">" + t + "</option>").join("") + "</select></div>";
+        h += '<div class="karte"><div class="khead">Online-Sortiment und Service</div>';
+        h += optionen2("Sortimentsbreite", [[0.45, "45 %"], [0.65, "65 %"], [0.8, "80 %"], [1, "100 %"]], u.sortimentsbreite, "sortimentsbreite");
+        h += optionen2("Verf\xFCgbarkeit", [[0.7, "70 %"], [0.88, "88 %"], [0.95, "95 %"], [1, "100 %"]], u.verfuegbarkeit, "verfuegbarkeit");
+        h += optionen2("Lieferzeit", [[1, "1 Tag"], [2, "2 Tage"], [3, "3 Tage"], [5, "5 Tage"], [7, "7 Tage"]], u.lieferTage, "lieferTage");
+        h += optionen2("Preisniveau", [[0.9, "\u221210 %"], [1, "Standard"], [1.1, "+10 %"], [1.2, "+20 %"]], u.preisFaktor, "preisFaktor");
+        h += zeile("Click & Collect", "Abholung nur in H\xE4usern mit Abholstation", schalter2("collect", u.clickCollect)) + "</div>";
+        h += '<div class="karte"><div class="khead">Fulfillment</div>' + zeile("Aktuelles Modell", u.fulfillment === "eigen" ? "Eigenes Lager, niedrigere Paketkosten und Fixkosten" : "Dienstleister, variable Paketkosten", "");
+        if (u.projekt) h += zeile("Projekt in Umsetzung", (u.projekt.modell === "eigen" ? "Eigenes Lager" : "Dienstleister") + " ab KW " + (u.projekt.bis % 52 + 1) + " \xB7 Investition " + geld(u.projekt.investition), "");
+        else h += '<div class="zeile"><button class="mini gruen" data-online="fulfillment" data-wert="' + (u.fulfillment === "eigen" ? "dienstleister" : "eigen") + '">' + (u.fulfillment === "eigen" ? "Zum Dienstleister wechseln" : "Eigenes Lager bauen") + "</button></div>";
+        h += '</div><div class="karte"><div class="khead">Versand aus dem Haus je Hauscluster</div>';
+        for (const c of u.cluster) h += zeile(c.id, c.haeuser + " H\xE4user", schalter2("cluster", c.aktiv, 'data-id="' + esc2(c.id) + '"'));
+        h += "</div>";
+      } else {
+        h += '<div class="karte"><div class="khead">Abholstationen und Filiallogistik</div>';
+        for (const a of u.haeuser) h += '<div class="abt"><div class="zeile"><span class="was"><b>' + esc2(a.name) + "</b><i>" + esc2(a.stadt) + " \xB7 " + esc2(a.cluster) + "</i></span>" + schalter2("station", a.station, 'data-id="' + esc2(a.id) + '"') + '</div><div class="zeile unter">Abholungen ' + fmt.format(a.abholungen) + " \xB7 Versand " + fmt.format(a.versand) + " \xB7 Retouren " + fmt.format(a.retouren) + " \xB7 " + a.instoreStunden.toFixed(1).replace(".", ",") + " Logistikstunden " + schalter2("retouren", a.retourenAn, 'data-id="' + esc2(a.id) + '"' + (a.station ? "" : " disabled")) + "</div></div>";
+        h += "</div>";
+      }
+      ctx.panel("Online", "hartwig.de \xB7 E-Commerce", h, "gross");
+      offen = true;
+      document.getElementById("pinhalt").scrollTop = vorher;
+    }
+    function tun(a) {
+      const r = ctx.E.fuehreAus(ctx.s(), a);
+      ctx.meldung(r.text, r.ok);
+      if (r.ok) {
+        ctx.nachAktion();
+        anzeigen(true);
+      }
+      return r;
+    }
+    const panel2 = document.getElementById("pinhalt");
+    panel2.addEventListener("click", (ev) => {
+      const b2 = ev.target.closest("[data-online]");
+      if (!offen || !b2 || !panel2.contains(b2) || b2.tagName === "SELECT") return;
+      const id = b2.dataset.id, typ = b2.dataset.online;
+      if (typ === "tab") {
+        tab = b2.dataset.wert;
+        anzeigen();
+      } else if (typ === "collect") tun({ typ: "onlineClickCollect", an: !state().clickCollect });
+      else if (typ === "cluster") {
+        const x = state().cluster.find((c) => c.id === id);
+        if (x) tun({ typ: "onlineVersandCluster", cluster: id, an: !x.aktiv });
+      } else if (typ === "station") {
+        const x = state().haeuser.find((h) => h.id === id);
+        if (x) tun({ typ: "onlineAbholstation", haus: id, an: !x.station });
+      } else if (typ === "retouren") {
+        const x = state().haeuser.find((h) => h.id === id);
+        if (x) tun({ typ: "onlineRetourenHaus", haus: id, an: !x.retourenAn });
+      } else if (typ === "fulfillment") tun({ typ: "onlineFulfillment", modell: b2.dataset.wert });
+    });
+    panel2.addEventListener("change", (ev) => {
+      const el2 = ev.target;
+      if (!offen || el2.dataset.online !== "strategie") return;
+      tun({ typ: "onlineStrategie", [el2.dataset.feld]: Number(el2.value) });
+    });
+    return {
+      oeffne: (seite = "uebersicht") => {
+        offen = true;
+        tab = seite;
+        anzeigen();
+      },
+      neuZeichnen: () => anzeigen(true),
+      aktiv: () => offen,
+      zu: () => {
+        offen = false;
+      }
+    };
+  }
+
+  // src/ui/chronik.js
   function chronikModul({ E, s: s2, panel: panel2, bild: bild3 }) {
     const jahreswoche = (w) => `${s2().startJahr + Math.floor(w / 52)} \xB7 KW ${String(w % 52 + 1).padStart(2, "0")}`;
     const bilder = /* @__PURE__ */ new Map();
@@ -129351,7 +134208,7 @@
     }, pruefe: () => E.chronikUebersicht(s2()) };
   }
 
-  // render/src/ui/hausbesuch.js
+  // src/ui/hausbesuch.js
   var HAUSBESUCH_AKTIV = true;
   var PHRASE = Object.freeze({
     altware: [
@@ -129806,7 +134663,7 @@
     };
   }
 
-  // render/src/kit/szenarien.js
+  // src/kit/szenarien.js
   var BILDER = {
     standard: ["#477d8c", "#f5ca85", "M0 80L30 56L58 74L96 43L126 65L165 31L220 65V110H0Z"],
     schutzschirm: ["#355d78", "#add1cf", "M0 89L35 58L77 87L120 34L166 72L220 47V110H0Z"],
@@ -129823,9 +134680,9 @@
     return '<svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration einer fiktiven Innenstadt"><rect width="220" height="110" fill="' + himmel + '"/><circle cx="175" cy="29" r="21" fill="' + licht + '"/><path d="' + berge + '" fill="#537b80"/><rect x="10" y="65" width="60" height="45" fill="#e9dcc3"/><rect x="18" y="57" width="48" height="8" fill="#a94f43"/>' + fenster8 + '<rect x="95" y="48" width="45" height="62" fill="#d9d1bc"/><path d="M91 48L118 30L144 48" fill="#895e50"/><rect x="109" y="70" width="14" height="40" fill="#426477"/><rect x="152" y="73" width="60" height="37" fill="#c9d7cf"/><path d="M148 73H216" stroke="#a9524a" stroke-width="8"/><path d="M0 109H220" stroke="#555d62" stroke-width="4"/>' + sonder + "</svg>";
   }
 
-  // render/src/ui/szenarien.js
+  // src/ui/szenarien.js
   var SPEICHERSCHLUESSEL = "ruhrkauf-szenarien-bestwerte-v1";
-  var prozent = (w) => Math.max(0, Math.min(100, Math.round(100 * w)));
+  var prozent2 = (w) => Math.max(0, Math.min(100, Math.round(100 * w)));
   var leseBestwerte = () => {
     try {
       return JSON.parse(localStorage.getItem(SPEICHERSCHLUESSEL) || "{}");
@@ -129876,8 +134733,8 @@
       }
       const ziel = ctx.E.szenarioZiel(spiel);
       zielknopf.hidden = false;
-      document.getElementById("szenarioprozent").textContent = ziel.wertung ? prozent(ziel.fortschritt) + " %" : "\u221E";
-      document.getElementById("szenariofortschritt").style.width = (ziel.wertung ? prozent(ziel.fortschritt) : 100) + "%";
+      document.getElementById("szenarioprozent").textContent = ziel.wertung ? prozent2(ziel.fortschritt) + " %" : "\u221E";
+      document.getElementById("szenariofortschritt").style.width = (ziel.wertung ? prozent2(ziel.fortschritt) : 100) + "%";
       zielknopf.setAttribute("aria-label", ziel.name + ": " + ziel.details + ". Szenarioziel \xF6ffnen");
       zielknopf.title = ziel.name + " \xB7 " + ziel.text;
       if (ziel.erreicht && ziel.wertung && letzterSieg !== spiel) {
@@ -129889,7 +134746,7 @@
       const s2 = ctx.spiel();
       if (!s2) return;
       const z2 = ctx.E.szenarioZiel(s2);
-      let inhalt = '<article class="karte sz-zielinfo"><div class="sz-zieltitel">' + esc2(z2.name) + "</div><p>" + esc2(z2.text) + '</p><div class="sz-balken"><span style="width:' + prozent(z2.fortschritt) + '%"></span></div><p><b>' + (z2.wertung ? prozent(z2.fortschritt) + " % erreicht" : "Keine Wertung") + "</b> \xB7 " + esc2(z2.details) + "</p><p>" + (z2.erreicht ? "Ziel erreicht" : z2.gescheitert ? "Ziel verfehlt" : z2.wertung ? "Herausforderung l\xE4uft" : "Freies Spiel") + "</p></article>";
+      let inhalt = '<article class="karte sz-zielinfo"><div class="sz-zieltitel">' + esc2(z2.name) + "</div><p>" + esc2(z2.text) + '</p><div class="sz-balken"><span style="width:' + prozent2(z2.fortschritt) + '%"></span></div><p><b>' + (z2.wertung ? prozent2(z2.fortschritt) + " % erreicht" : "Keine Wertung") + "</b> \xB7 " + esc2(z2.details) + "</p><p>" + (z2.erreicht ? "Ziel erreicht" : z2.gescheitert ? "Ziel verfehlt" : z2.wertung ? "Herausforderung l\xE4uft" : "Freies Spiel") + "</p></article>";
       if (z2.id === "investor") {
         const eigene = s2.haeuser.filter((h) => h.status === "offen" && h.miete.vermieter === "eigentuemer").slice(0, 16);
         inhalt += "<h3>Immobilienverkauf mit R\xFCckmietung</h3><p>Der Investor verlangt mindestens einen Verkauf pro Gesch\xE4ftsjahr. Ein Verkauf erh\xF6ht die laufende Miete.</p>" + (eigene.map((h) => '<button class="breit" type="button" data-sz-verkauf="' + esc2(h.id) + '">' + esc2(h.name) + " verkaufen \xB7 " + geld(Math.max(5e6, h.grundflaecheQm * 4500)) + "</button>").join("") || "<p>Keine verk\xE4uflichen Immobilien vorhanden.</p>");
@@ -129913,7 +134770,7 @@
     } };
   }
 
-  // render/src/ui/ton.js
+  // src/ui/ton.js
   var SPEICHER2 = "hartwig.einstellungen.v1";
   var TON_SCHALTER = [
     { schluessel: "ton_klaenge", titel: "Kl\xE4nge", gruppe: "Klang", art: "schalter", standard: true },
@@ -130260,9 +135117,9 @@
         return;
       }
       const ziel = Math.abs(Number(element.dataset.wert));
-      const zahl4 = Math.abs(Number((element.textContent || "0").replace(/[^0-9-]/g, "")));
-      if (!(ziel > 0) || !Number.isFinite(zahl4)) return;
-      const fortschritt = begrenze2(zahl4 / ziel, 0, 1);
+      const zahl5 = Math.abs(Number((element.textContent || "0").replace(/[^0-9-]/g, "")));
+      if (!(ziel > 0) || !Number.isFinite(zahl5)) return;
+      const fortschritt = begrenze2(zahl5 / ziel, 0, 1);
       const t = performance.now();
       if (fortschritt >= 0.9999) {
         if (!berichtFertig) {
@@ -130403,7 +135260,7 @@
     };
   }
 
-  // render/src/ui/einfuehrung.js
+  // src/ui/einfuehrung.js
   var EINFUEHRUNG_AKTIV = true;
   var SCHLUESSEL = "hartwig.einfuehrung.v1";
   var TIPPS = "hartwig.einfuehrung.tipps.v1";
@@ -130786,7 +135643,7 @@
     }) };
   }
 
-  // render/src/kit/abzeichen.js
+  // src/kit/abzeichen.js
   var cache2 = /* @__PURE__ */ new Map();
   var metalle = {
     bronze: ["#6d3f28", "#dba26f", "#a5673e"],
@@ -130900,7 +135757,7 @@
     return png;
   }
 
-  // render/src/ui/erfolge.js
+  // src/ui/erfolge.js
   function erfolgeModul(ctx) {
     const E = ctx.E, spielstand = ctx.s;
     const zustand = { offen: false, filter: "Alle" };
@@ -130977,7 +135834,7 @@
     };
   }
 
-  // render/src/kit/spielende.js
+  // src/kit/spielende.js
   var fenster7 = (x, y, hell4, art) => '<rect x="' + x + '" y="' + y + '" width="19" height="28" rx="2" fill="' + hell4 + '"/>' + (art === "zerschlagen" ? '<path d="M' + x + " " + (y + 15) + 'h19" stroke="#868b8a" stroke-width="3"/>' : "");
   function gebaeude2(x, breite, hoehe, art, i) {
     const grau = art === "zerschlagen";
@@ -131020,9 +135877,9 @@
     return '<svg class="se-illustration" viewBox="0 0 680 400" role="img" aria-label="' + (grau ? "Verlassene Warenh\xE4user" : winter ? "Weihnachtlich beleuchtete, belebte Innenstadt" : art === "investor" ? "Schl\xFCssel\xFCbergabe an den K\xE4ufer" : "F\xFCnf Jahre Unternehmensf\xFChrung") + '" xmlns="http://www.w3.org/2000/svg">' + himmel + stadt + zusatz + "</svg>";
   }
 
-  // render/src/ui/spielende.js
-  var zahl2 = (n) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n ?? 0));
-  var geld2 = (n) => zahl2(n) + " \u20AC";
+  // src/ui/spielende.js
+  var zahl3 = (n) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n ?? 0));
+  var geld2 = (n) => zahl3(n) + " \u20AC";
   var ART2 = {
     zerschlagen: {
       titel: "Das Ende von Hartwig",
@@ -131064,7 +135921,7 @@
     const alt = lesen2(schwierig);
     if (alt.some((x) => x.id === id)) return;
     const testspiel = Boolean(s2.testspiel || new URLSearchParams(location.search).has("testspiel"));
-    const zeile2 = {
+    const zeile3 = {
       id,
       datum: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
       seed: s2.seed,
@@ -131073,14 +135930,14 @@
       testspiel
     };
     try {
-      localStorage.setItem(KEY + schwierig, JSON.stringify([...alt, zeile2].sort((a, b2) => b2.punkte - a.punkte || a.datum.localeCompare(b2.datum) || a.seed - b2.seed).slice(0, 10)));
+      localStorage.setItem(KEY + schwierig, JSON.stringify([...alt, zeile3].sort((a, b2) => b2.punkte - a.punkte || a.datum.localeCompare(b2.datum) || a.seed - b2.seed).slice(0, 10)));
     } catch {
     }
   }
   function rangliste(schwierigkeit2) {
     const liste2 = lesen2(schwierigkeit2);
     if (!liste2.length) return '<p class="se-unter">Hier erscheinen die zehn besten Ergebnisse dieser Schwierigkeitsstufe.</p>';
-    return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' + liste2.map((x, i) => "<tr><td>" + (i + 1) + ".</td><td>" + esc2(x.datum) + "<small> \xB7 " + zahl2(x.seed) + "</small></td><td>" + esc2(ART2[x.art]?.titel || x.art) + (x.testspiel ? " <small>(Test)</small>" : "") + "</td><td>" + zahl2(x.punkte) + "</td></tr>").join("") + "</tbody></table>";
+    return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' + liste2.map((x, i) => "<tr><td>" + (i + 1) + ".</td><td>" + esc2(x.datum) + "<small> \xB7 " + zahl3(x.seed) + "</small></td><td>" + esc2(ART2[x.art]?.titel || x.art) + (x.testspiel ? " <small>(Test)</small>" : "") + "</td><td>" + zahl3(x.punkte) + "</td></tr>").join("") + "</tbody></table>";
   }
   function verlauf2(historie) {
     if (!Array.isArray(historie) || historie.length < 2) return "";
@@ -131127,7 +135984,7 @@
         const f = 1 - (1 - p2) ** 3;
         for (const el2 of felder) {
           const v = Number(el2.dataset.seWert) || 0;
-          el2.textContent = zahl2(Math.round(v * f)) + (el2.dataset.seEinheit || "");
+          el2.textContent = zahl3(Math.round(v * f)) + (el2.dataset.seEinheit || "");
         }
         if (p2 < 1) zaehlRaf = requestAnimationFrame(tick);
       }
@@ -131149,14 +136006,14 @@
       const s2 = stand2(), e = s2?.ende;
       if (!e) return;
       const a = ART2[e.art] || ART2.zerschlagen, w = e.wertung, k = e.kennzahlen;
-      const teile2 = w.teile.map((t) => '<div class="se-zeile"><span>' + esc2(t.name) + '</span><strong class="' + (t.punkte < 0 ? "se-minus" : "") + '" data-se-wert="' + t.punkte + '">' + zahl2(t.punkte) + "</strong></div>").join("");
+      const teile2 = w.teile.map((t) => '<div class="se-zeile"><span>' + esc2(t.name) + '</span><strong class="' + (t.punkte < 0 ? "se-minus" : "") + '" data-se-wert="' + t.punkte + '">' + zahl3(t.punkte) + "</strong></div>").join("");
       const kenn = [
         ["Gerettete H\xE4user", k.geretteteHaeuser + " / " + k.startHaeuser],
-        ["Besch\xE4ftigte (FTE)", zahl2(k.fte) + " / " + zahl2(k.startFte)],
+        ["Besch\xE4ftigte (FTE)", zahl3(k.fte) + " / " + zahl3(k.startFte)],
         ["EBITDA, 52 Wochen", geld2(k.ebitda52)],
         ["Konzernwert", geld2(k.unternehmenswert)]
       ].map(([name2, value]) => '<div class="se-kpi"><small>' + esc2(name2) + "</small><b>" + esc2(value) + "</b></div>").join("");
-      rahmen2("Bilanz", '<div class="se-bilanz"><h1>Ihre Bilanz</h1><p class="se-unter">' + esc2(a.titel) + " \xB7 Woche " + zahl2(e.woche) + " \xB7 " + esc2(SCHWIERIGKEIT2[w.schwierigkeit] || w.schwierigkeit) + '</p><div class="se-ergebnis"><small>GESAMTPUNKTZAHL</small><strong data-se-wert="' + w.punkte + '">0</strong><small>Grundpunkte ' + zahl2(w.grundpunkte) + " \xD7 " + new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format(w.multiplikator) + '</small></div><div class="se-karte">' + teile2 + '</div><h2>Unternehmen nach dem Spiel</h2><div class="se-kpis">' + kenn + "</div>" + verlauf2(s2.historie) + entscheidungen(s2) + "<h2>Bestenliste \xB7 " + esc2(SCHWIERIGKEIT2[w.schwierigkeit] || w.schwierigkeit) + '</h2><div class="se-karte">' + rangliste(w.schwierigkeit) + '</div><div class="se-aktionen"><button class="se-knopf" data-se="neu">Neues Spiel</button>' + (["saniert", "ruhestand"].includes(e.art) ? '<button class="se-knopf se-sek" data-se="weiter">Weiterspielen</button>' : "") + "</div></div>");
+      rahmen2("Bilanz", '<div class="se-bilanz"><h1>Ihre Bilanz</h1><p class="se-unter">' + esc2(a.titel) + " \xB7 Woche " + zahl3(e.woche) + " \xB7 " + esc2(SCHWIERIGKEIT2[w.schwierigkeit] || w.schwierigkeit) + '</p><div class="se-ergebnis"><small>GESAMTPUNKTZAHL</small><strong data-se-wert="' + w.punkte + '">0</strong><small>Grundpunkte ' + zahl3(w.grundpunkte) + " \xD7 " + new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format(w.multiplikator) + '</small></div><div class="se-karte">' + teile2 + '</div><h2>Unternehmen nach dem Spiel</h2><div class="se-kpis">' + kenn + "</div>" + verlauf2(s2.historie) + entscheidungen(s2) + "<h2>Bestenliste \xB7 " + esc2(SCHWIERIGKEIT2[w.schwierigkeit] || w.schwierigkeit) + '</h2><div class="se-karte">' + rangliste(w.schwierigkeit) + '</div><div class="se-aktionen"><button class="se-knopf" data-se="neu">Neues Spiel</button>' + (["saniert", "ruhestand"].includes(e.art) ? '<button class="se-knopf se-sek" data-se="weiter">Weiterspielen</button>' : "") + "</div></div>");
       ansicht = "bilanz";
       bilanziert = true;
       zahlenAnimieren();
@@ -131175,7 +136032,7 @@
       }
       if (!node.hidden && ansicht === "szene") return true;
       const a = ART2[e.art] || ART2.zerschlagen;
-      rahmen2(a.titel, '<div class="se-szene"><div class="se-bild">' + spielendeSzene(e.art, e.kaeufer) + '</div><div class="se-zeitung"><small>DER HANDELSBOTE \xB7 SONDERAUSGABE \xB7 WOCHE ' + zahl2(e.woche) + "</small><h1>" + esc2(a.schlagzeile) + "</h1><p>" + esc2(a.zeile) + '</p></div></div><button class="se-knopf" data-se="bilanz">Zur Abschlussbilanz</button>');
+      rahmen2(a.titel, '<div class="se-szene"><div class="se-bild">' + spielendeSzene(e.art, e.kaeufer) + '</div><div class="se-zeitung"><small>DER HANDELSBOTE \xB7 SONDERAUSGABE \xB7 WOCHE ' + zahl3(e.woche) + "</small><h1>" + esc2(a.schlagzeile) + "</h1><p>" + esc2(a.zeile) + '</p></div></div><button class="se-knopf" data-se="bilanz">Zur Abschlussbilanz</button>');
       ansicht = "szene";
       return true;
     }
@@ -131219,7 +136076,7 @@
     };
   }
 
-  // render/src/ui/werkzeuge.js
+  // src/ui/werkzeuge.js
   var WERKZEUGE_AKTIV = true;
   var BERICHT_FORMAT = "RUHRKAUF-TEST-1:gzip:";
   var MAX_FEHLER = 50;
@@ -131439,7 +136296,7 @@
       const input = String(text3 || "").trim();
       if (!input.startsWith(BERICHT_FORMAT)) throw new Error("Unbekanntes Berichtsformat.");
       const datensatz = JSON.parse(await ungzip(input.slice(BERICHT_FORMAT.length)));
-      if (datensatz.format !== 1 || datensatz.version !== 1 || datensatz.spiel?.version !== 1 || !Number.isInteger(datensatz.spiel.woche) || !Number.isInteger(datensatz.spiel.seed) || !Array.isArray(datensatz.spiel.haeuser) || !Array.isArray(datensatz.spiel.historie) || !datensatz.spiel.hq || !datensatz.spiel.einkauf || !datensatz.spiel.vorstand || !datensatz.spiel.produkte || !datensatz.spiel.marketing?.stand)
+      if (datensatz.format !== 1 || datensatz.version !== 1 || datensatz.spiel?.version !== 2 || !Number.isInteger(datensatz.spiel.woche) || !Number.isInteger(datensatz.spiel.seed) || !Array.isArray(datensatz.spiel.haeuser) || !Array.isArray(datensatz.spiel.historie) || !datensatz.spiel.hq || !datensatz.spiel.einkauf || !datensatz.spiel.vorstand || !datensatz.spiel.produkte || !datensatz.spiel.marketing?.stand)
         throw new Error("Bericht enth\xE4lt keinen g\xFCltigen Spielstand.");
       await ctx.standLaden(datensatz);
       ctx.meldung("Testbericht geladen: Seed " + datensatz.spiel.seed + ", Woche " + datensatz.spiel.woche + ".");
@@ -131498,12 +136355,12 @@
     };
   }
 
-  // render/src/ui/reporting.js
-  var prozent2 = (x) => (100 * x).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
-  var zahl3 = (x, n = 1) => Number(x).toLocaleString("de-DE", { maximumFractionDigits: n, minimumFractionDigits: n });
-  var euro2 = (x) => zahl3(x, 2) + " \u20AC";
-  var abweichung = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + prozent2(basis3 ? wert / basis3 - 1 : 0);
-  var punkt2 = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + zahl3((wert - basis3) * 100) + " Punkte";
+  // src/ui/reporting.js
+  var prozent3 = (x) => (100 * x).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
+  var zahl4 = (x, n = 1) => Number(x).toLocaleString("de-DE", { maximumFractionDigits: n, minimumFractionDigits: n });
+  var euro2 = (x) => zahl4(x, 2) + " \u20AC";
+  var abweichung = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + prozent3(basis3 ? wert / basis3 - 1 : 0);
+  var punkt2 = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + zahl4((wert - basis3) * 100) + " Punkte";
   function brueckeHtml(br) {
     if (br.status !== "ok") return '<div class="o02-hinweis">' + esc2(br.status) + "</div>";
     const eintraege = [["Frequenz", br.frequenz], ["Kaufquote", br.kaufquote], ["Teile", br.teile], ["Preis", br.preis]];
@@ -131517,10 +136374,10 @@
     const a = d2.aktuell, v = d2.vorjahr;
     const br = E.umsatzbruecke(s2, { ebene: "haus", id, vergleich: "vorjahr", wochen: 1 });
     const kpi = (name2, wert, delta) => '<div class="o02-treib"><span>' + name2 + "</span><b>" + esc2(wert) + "</b><small>" + esc2(delta) + "</small></div>";
-    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a.umsatz + '" data-o02-frequenz="' + a.frequenz + '" data-o02-kaufquote="' + a.kaufquote + '" data-o02-bon="' + a.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a.frequenz)), abweichung(a.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent2(a.kaufquote), punkt2(a.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a.bon), abweichung(a.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl3(a.teile, 2) + " Teile je Bon \xB7 " + euro2(a.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
+    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a.umsatz + '" data-o02-frequenz="' + a.frequenz + '" data-o02-kaufquote="' + a.kaufquote + '" data-o02-bon="' + a.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a.frequenz)), abweichung(a.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent3(a.kaufquote), punkt2(a.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a.bon), abweichung(a.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl4(a.teile, 2) + " Teile je Bon \xB7 " + euro2(a.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
   }
-  function zeile(z2, haus2 = false) {
-    return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z2.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z2.ampelfarbe) + '"></span>' + esc2(z2.name) + "</div><div>" + geld(z2.umsatz) + "</div><div>" + (z2.abweichung == null ? "\u2013" : geld(z2.abweichung) + " (" + prozent2(z2.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z2.frequenz)) + "</div><div>" + prozent2(z2.kaufquote) + "</div><div>" + euro2(z2.bon) + "</div></div>";
+  function zeile2(z2, haus2 = false) {
+    return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z2.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z2.ampelfarbe) + '"></span>' + esc2(z2.name) + "</div><div>" + geld(z2.umsatz) + "</div><div>" + (z2.abweichung == null ? "\u2013" : geld(z2.abweichung) + " (" + prozent3(z2.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z2.frequenz)) + "</div><div>" + prozent3(z2.kaufquote) + "</div><div>" + euro2(z2.bon) + "</div></div>";
   }
   function reportingModul(ctx) {
     const E = ctx.E, ui = { aktiv: false, ebene: "region", format: "alle", sort: "umsatz", wochen: 1 };
@@ -131528,7 +136385,7 @@
       const av = a[ui.sort], bv = b2[ui.sort];
       return (ui.sort === "name" ? String(av).localeCompare(String(bv), "de") : Number(bv ?? -1e15) - Number(av ?? -1e15)) || a.name.localeCompare(b2.name, "de");
     });
-    const karten = (werte2) => sortiere(werte2).map((z2) => zeile(z2, true)).join("");
+    const karten = (werte2) => sortiere(werte2).map((z2) => zeile2(z2, true)).join("");
     const leere = '<div class="zeile grau">Keine H\xE4user im gew\xE4hlten Filter.</div>';
     const tabelle = (inhalt) => '<div class="o02-scroll"><div class="o02-tab"><div class="o02-daten o02-kopf"><b>Einheit</b><b>Umsatz</b><b>Abw. VJ</b><b>Frequenz</b><b>Kaufquote</b><b>Bon</b></div>' + (inhalt || leere) + "</div></div>";
     const auswahl4 = (name2, key, optionen2) => "<label>" + name2 + '<select data-o02-wahl="' + key + '" class="ort">' + optionen2.map(([wert, titel]) => '<option value="' + esc2(wert) + '" ' + (String(ui[key]) === String(wert) ? "selected" : "") + ">" + esc2(titel) + "</option>").join("") + "</select></label>";
@@ -131559,10 +136416,10 @@
               const x = treff.filter((z2) => z2.hauscluster === hc);
               if (unter.length === 1 && hc === id) return karten(x);
               const g = gruppen.find((gg) => gg.ebene === "hauscluster" && gg.id === hc);
-              return '<details class="o02-unter"><summary>' + esc2(hc) + " (" + x.length + " H\xE4user)</summary>" + (g ? zeile(g) : "") + karten(x) + "</details>";
+              return '<details class="o02-unter"><summary>' + esc2(hc) + " (" + x.length + " H\xE4user)</summary>" + (g ? zeile2(g) : "") + karten(x) + "</details>";
             }).join("");
           } else innen = karten(treff);
-          return '<details class="o02-gruppe"><summary>' + esc2(id) + " (" + treff.length + " H\xE4user)</summary>" + (gruppe2 ? zeile(gruppe2) : "") + tabelle(innen) + "</details>";
+          return '<details class="o02-gruppe"><summary>' + esc2(id) + " (" + treff.length + " H\xE4user)</summary>" + (gruppe2 ? zeile2(gruppe2) : "") + tabelle(innen) + "</details>";
         }).join("");
         content += abschnitte || leere;
       }
@@ -131607,18 +136464,18 @@
     };
   }
 
-  // render/src/ui/it.js
+  // src/ui/it.js
   function itModul(ctx) {
     const { E } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, projekt: null };
     const optionen2 = ["kaufen", "entwickeln", "dienstleister"];
     const artName = { kaufen: "Standardsoftware", entwickeln: "Eigenentwicklung", dienstleister: "Dienstleister" };
     const phasen = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
-    const prozent3 = (x) => Math.round(x * 100) + " %";
+    const prozent4 = (x) => Math.round(x * 100) + " %";
     function daten() {
       return E.itUebersicht(s2());
     }
-    function zeile2(t, wert) {
+    function zeile3(t, wert) {
       return '<div class="zeile"><span class="was">' + esc2(t) + '</span><b class="uq" style="min-width:90px">' + esc2(String(wert)) + "</b></div>";
     }
     function balken7(w) {
@@ -131630,7 +136487,7 @@
     function systemKarte(x) {
       const ampel = x.risiko < 2e-3 ? "gruen" : x.risiko < 0.01 ? "gelb" : "rot";
       let h = '<div class="karte"><div class="khead">' + esc2(x.name) + "<small>Generation " + x.generation + " / 4</small></div>";
-      h += '<div class="it-werte"><span>Alter <b>' + Math.floor(x.alter) + " Jahre</b></span><span>Kosten/Woche <b>" + geld(x.kostenWoche) + '</b></span><span class="it-ampel ' + ampel + '">Ausfallrisiko ' + prozent3(x.risiko) + "/Woche</span></div>";
+      h += '<div class="it-werte"><span>Alter <b>' + Math.floor(x.alter) + " Jahre</b></span><span>Kosten/Woche <b>" + geld(x.kostenWoche) + '</b></span><span class="it-ampel ' + ampel + '">Ausfallrisiko ' + prozent4(x.risiko) + "/Woche</span></div>";
       if (x.wartungGekuendigt) h += '<p class="it-warn">Wartung durch den Anbieter beendet</p>';
       if (x.kasseAusbau) h += '<div class="zeile">SB-Kassen ' + x.kasseAusbau.selbstbedienung + "/2 \xB7 Mobile Kasse " + x.kasseAusbau.mobil + "/2</div>";
       const akt = x.verteilung.filter((c) => c.generation > x.generation);
@@ -131649,7 +136506,7 @@
         h += '<div class="karte"><div class="khead">Kassenausbau</div>';
         for (const art of ["selbstbedienung", "mobil"]) {
           const stufe2 = k.kasseAusbau?.[art] ?? 0;
-          h += zeile2(art === "mobil" ? "Mobile Kasse" : "Selbstbedienungskassen", "Stufe " + stufe2);
+          h += zeile3(art === "mobil" ? "Mobile Kasse" : "Selbstbedienungskassen", "Stufe " + stufe2);
           if (stufe2 < 2) h += '<div class="oknoepfe"><button data-it="kasseAusbau" data-v="' + art + '">Stufe ' + (stufe2 + 1) + " beauftragen</button></div>";
         }
         h += "</div>";
@@ -131658,10 +136515,10 @@
     }
     function projektKarte(p2, d2) {
       let h = '<div class="karte"><div class="khead">' + esc2(E.SYSTEME[p2.system].name) + "<small>Generation " + p2.zielGeneration + " \xB7 " + esc2(artName[p2.art]) + "</small></div>";
-      h += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent3(p2.fortschritt) + "</b></div>" + balken7(p2.fortschritt);
-      h += zeile2("Kosten Ist / Plan", geld(p2.kostenIst) + " / " + geld(p2.kostenPlan));
-      h += zeile2("Mehrwochen durch Verzug", p2.verzug);
-      h += zeile2("Rollout", p2.erledigteCluster.length + " / " + p2.clusterIds.length + " Cluster");
+      h += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent4(p2.fortschritt) + "</b></div>" + balken7(p2.fortschritt);
+      h += zeile3("Kosten Ist / Plan", geld(p2.kostenIst) + " / " + geld(p2.kostenPlan));
+      h += zeile3("Mehrwochen durch Verzug", p2.verzug);
+      h += zeile3("Rollout", p2.erledigteCluster.length + " / " + p2.clusterIds.length + " Cluster");
       const alle = new Map(d2.cluster.map((c) => [c.id, c]));
       if (p2.phase === "rollout" || p2.phase === "umsetzung" || p2.phase === "konzept") {
         const ausgabe = p2.clusterIds.map((id, i) => {
@@ -131711,8 +136568,8 @@
         const g = sys.verteilung.find((v) => v.id === c.id)?.generation ?? sys.generation;
         return '<label class="it-wahl"><input type="checkbox" data-it-cluster="' + esc2(c.id) + '" ' + (ids.has(c.id) ? "checked" : "") + " " + (g >= ui.generation ? "disabled" : "") + "><span>" + esc2(c.name) + "</span><small>Generation " + g + "</small></label>";
       }).join("") + "</div>";
-      h += zeile2("Geplante Laufzeit", plan2.gesamt + " Wochen");
-      h += zeile2("Planbudget", geld(plan2.kosten));
+      h += zeile3("Geplante Laufzeit", plan2.gesamt + " Wochen");
+      h += zeile3("Planbudget", geld(plan2.kosten));
       h += '<div class="oknoepfe"><button class="gruen" data-it="start" ' + (!ausgew.length || !zulaessig || ausgew.some((c) => (sys.verteilung.find((v) => v.id === c.id)?.generation ?? sys.generation) >= ui.generation) ? "disabled" : "") + ">Projekt beauftragen</button></div>";
       h += "</div>";
       return h;
@@ -131831,14 +136688,14 @@
     };
   }
 
-  // render/src/ui/planung.js
+  // src/ui/planung.js
   var pct = (v) => (100 * v).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
   var mio3 = (v) => (v / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " Mio. \u20AC";
   var rolle2 = { haus: "Hausleitungen", hauscluster: "Clusterleitungen", bereich: "Bereichsleitungen" };
   function planungModul(ctx) {
     const E = ctx.E, s2 = ctx.s, ui = { aktiv: false, tab: "assistent", schritt: 1 };
     const vor = () => E.planungAssistent(s2());
-    const zeile2 = (text3, wert) => '<div class="zeile"><span class="was">' + esc2(text3) + "</span><b>" + wert + "</b></div>";
+    const zeile3 = (text3, wert) => '<div class="zeile"><span class="was">' + esc2(text3) + "</span><b>" + wert + "</b></div>";
     const tabs = () => '<div class="tabs">' + [["assistent", "Planung"], ["report", "Reporting"], ["forecast", "Forecast"], ["bonus", "Boni"]].map(([id, t]) => '<button class="tab ' + (ui.tab === id ? "an" : "") + '" data-pl-tab="' + id + '">' + t + "</button>").join("") + "</div>";
     function entwurf(D) {
       const e = D.entwurf;
@@ -131868,7 +136725,7 @@
         html += renderNode("konzern", 0) + "</div>";
         html += '<div class="karte"><div class="khead">Merchandise Planning: Warengruppenziele</div><div class="olief">Die Konzernsumme bleibt bei \xC4nderungen einzelner Warengruppen erhalten.</div>' + Object.entries(D.warengruppen || {}).map(([id, value]) => '<label class="zeile"><span class="was">' + esc2(E.GRUPPEN?.[id]?.name || id) + '</span><input style="width:105px;max-width:42%" type="number" min="0" step="0.1" data-pl-wg="' + esc2(id) + '" value="' + (value / 1e6).toFixed(1) + '" aria-label="' + esc2(id) + ' Ziel Mio. Euro"></label>').join("") + '</div><div class="oknoepfe"><button class="gruen" data-pl-schritt="3">Weiter zum Abschluss \u2192</button></div>';
       } else {
-        html += '<div class="karte"><div class="khead">Jahresplan ' + e.jahr + " freigeben</div>" + zeile2("Konzernumsatz", mio3(e.ziele.umsatz)) + zeile2("EBITDA-Ziel", mio3(e.ziele.ebitda)) + zeile2("Investitionsbudget", mio3(e.ziele.investitionen)) + '<p class="olief">Mit dem Abschluss werden Wochenbudgets und Clusterziele verbindlich. Ohne Aktion wird der Controlling-Vorschlag nach Fristablauf automatisch \xFCbernommen.</p></div><div class="oknoepfe"><button class="gruen" data-pl-abschluss="spieler">Angepasste Planung beschlie\xDFen</button><button data-pl-abschluss="controlling">Controlling-Vorschlag abschlie\xDFen</button></div>';
+        html += '<div class="karte"><div class="khead">Jahresplan ' + e.jahr + " freigeben</div>" + zeile3("Konzernumsatz", mio3(e.ziele.umsatz)) + zeile3("EBITDA-Ziel", mio3(e.ziele.ebitda)) + zeile3("Investitionsbudget", mio3(e.ziele.investitionen)) + '<p class="olief">Mit dem Abschluss werden Wochenbudgets und Clusterziele verbindlich. Ohne Aktion wird der Controlling-Vorschlag nach Fristablauf automatisch \xFCbernommen.</p></div><div class="oknoepfe"><button class="gruen" data-pl-abschluss="spieler">Angepasste Planung beschlie\xDFen</button><button data-pl-abschluss="controlling">Controlling-Vorschlag abschlie\xDFen</button></div>';
       }
       return html;
     }
@@ -131879,19 +136736,19 @@
       const nodes = b2.knoten.filter((n) => n.ebene === "format" || n.ebene === "region" || n.ebene === "hauscluster");
       html += '<div class="karte"><div class="khead">Planabweichung nach Steuerungsebene</div><div class="olief">Plan: Jahresziel, Abweichung: kumuliertes Ist gegen zeitanteilige Jahresplanung.</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>Einheit</th><th>Plan</th><th>Ist</th><th>Abw.</th></tr></thead><tbody>' + nodes.map((n) => "<tr><td>" + esc2(n.name) + "</td><td>" + mio3(n.umsatz) + "</td><td>" + mio3(n.ist) + "</td><td>" + pct(n.abweichung) + "</td></tr>").join("") + "</tbody></table></div></div>";
       html += '<div class="karte"><div class="khead">Letzte 26 Wochen: Umsatz und Forecast</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>KW</th><th>Ist</th><th>Plan</th><th>Abw.</th><th>FC</th></tr></thead><tbody>' + (b2.wochen || []).slice().reverse().map((w) => "<tr><td>" + (w.woche % 52 + 1) + "</td><td>" + mio3(w.ist) + "</td><td>" + mio3(w.plan) + "</td><td>" + pct(w.abweichungQuote) + "</td><td>" + (w.forecast == null ? "\u2013" : mio3(w.forecast)) + "</td></tr>").join("") + "</tbody></table></div></div>";
-      if (b2.warengruppen) html += '<details class="karte"><summary>Merchandise Planning: Warengruppenbudgets</summary>' + Object.entries(b2.warengruppen).map(([g, v]) => zeile2(g, mio3(v))).join("") + "</details>";
+      if (b2.warengruppen) html += '<details class="karte"><summary>Merchandise Planning: Warengruppenbudgets</summary>' + Object.entries(b2.warengruppen).map(([g, v]) => zeile3(g, mio3(v))).join("") + "</details>";
       return html;
     }
     function forecasts(D) {
       const L2 = D.bericht.forecasts || [];
       let html = '<div class="karte"><div class="khead">Quartalsforecast</div><p class="olief">3+9 in KW 13, 6+6 in KW 26 und 9+3 in KW 39. Der Forecast kann vor der Abgabe an Eigent\xFCmer und Bank angepasst werden.</p></div>';
       for (const f of [...L2].reverse()) {
-        html += '<div class="karte"><div class="khead">' + f.bezeichnung + " \xB7 " + f.jahr + "<small>" + (f.status === "abgegeben" ? "Abgegeben" : f.status === "offen" ? "Zur Freigabe" : "Zur\xFCckgehalten") + "</small></div>" + zeile2("Erwarteter Jahresumsatz", mio3(f.ziele.umsatz)) + zeile2("Erwartetes EBITDA", mio3(f.ziele.ebitda));
+        html += '<div class="karte"><div class="khead">' + f.bezeichnung + " \xB7 " + f.jahr + "<small>" + (f.status === "abgegeben" ? "Abgegeben" : f.status === "offen" ? "Zur Freigabe" : "Zur\xFCckgehalten") + "</small></div>" + zeile3("Erwarteter Jahresumsatz", mio3(f.ziele.umsatz)) + zeile3("Erwartetes EBITDA", mio3(f.ziele.ebitda));
         if (f.status === "offen") html += '<div class="regler"><label>Umsatz Mio. \u20AC <input data-pl-forecast="umsatz" type="number" min="0" step="0.1" value="' + (f.ziele.umsatz / 1e6).toFixed(1) + '"></label><label>EBITDA Mio. \u20AC <input data-pl-forecast="ebitda" type="number" step="0.1" value="' + (f.ziele.ebitda / 1e6).toFixed(1) + '"></label></div><div class="oknoepfe"><button class="gruen" data-pl-forecast-abgabe="1">\xC4nderungen speichern und abgeben</button></div>';
         html += "</div>";
       }
       if (!L2.length) html += '<div class="karte">Der erste Forecast entsteht nach KW 13.</div>';
-      if (D.bericht.vertrauen?.length) html += '<div class="karte"><div class="khead">Trefferquote und Vertrauen</div>' + D.bericht.vertrauen.slice(-8).map((v) => zeile2("KW " + (v.woche % 52 + 1) + " \xB7 Abweichung " + pct(v.abweichung), (v.delta > 0 ? "+" : "") + v.delta)).join("") + "</div>";
+      if (D.bericht.vertrauen?.length) html += '<div class="karte"><div class="khead">Trefferquote und Vertrauen</div>' + D.bericht.vertrauen.slice(-8).map((v) => zeile3("KW " + (v.woche % 52 + 1) + " \xB7 Abweichung " + pct(v.abweichung), (v.delta > 0 ? "+" : "") + v.delta)).join("") + "</div>";
       return html;
     }
     function boni(D) {
@@ -131899,7 +136756,7 @@
       let html = '<div class="karte"><div class="khead">Variable Verg\xFCtung der Leitungen</div><p class="olief">Erf\xFCllung von Umsatz- und EBITDA-Zielen. Die Abrechnung erfolgt im Jahresabschluss, Auszahlung im Februar des Folgejahres als Personalaufwand.</p>';
       for (const [id, title] of Object.entries(rolle2)) html += '<label class="zeile"><span class="was">' + title + '</span><select class="ort" data-pl-bonus="' + id + '">' + [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3].map((w) => '<option value="' + w + '"' + (Math.abs((q2[id] ?? 0.1) - w) < 1e-3 ? " selected" : "") + ">" + pct(w) + "</option>").join("") + "</select></label>";
       html += "</div>";
-      for (const b2 of [...D.bericht.boni || []].reverse().slice(0, 5)) html += '<div class="karte"><div class="khead">Bonusjahr ' + b2.jahr + "<small>" + (b2.bezahlt ? "ausgezahlt" : "f\xE4llig im Februar") + "</small></div>" + zeile2("Bonussumme", geld(b2.betrag)) + zeile2("Leitungsposten", String(b2.details.length)) + "</div>";
+      for (const b2 of [...D.bericht.boni || []].reverse().slice(0, 5)) html += '<div class="karte"><div class="khead">Bonusjahr ' + b2.jahr + "<small>" + (b2.bezahlt ? "ausgezahlt" : "f\xE4llig im Februar") + "</small></div>" + zeile3("Bonussumme", geld(b2.betrag)) + zeile3("Leitungsposten", String(b2.details.length)) + "</div>";
       return html;
     }
     function zeigen(halten = false) {
@@ -131975,7 +136832,7 @@
     };
   }
 
-  // render/src/ui/haus.js
+  // src/ui/haus.js
   var PROZENT = (x) => (Number(x) * 100).toFixed(1).replace(".", ",") + " %";
   var REITER2 = [["ueberblick", "\xDCberblick"], ["leitung", "Leitung"], ["personal", "Personal"], ["ware", "Ware"], ["partner", "Fl\xE4che & Partner"], ["kosten", "Kosten"], ["kommentare", "Kommentare"]];
   var SCHWERPUNKT = { personal: "Personal", ware: "Ware", kunde: "Kunde", kosten: "Kosten" };
@@ -132061,7 +136918,7 @@
     return nav + inhalt;
   }
 
-  // render/src/ui/personaleinsatz.js
+  // src/ui/personaleinsatz.js
   var GRUPPEN2 = ["logistik", "verkauf", "kasse", "verwaltung"];
   var NAME3 = { logistik: "Instore-Logistik", verkauf: "Verkauf", kasse: "Kasse", verwaltung: "Verwaltung" };
   var pct2 = (n) => Math.round(n * 100) + " %";
@@ -132211,7 +137068,7 @@
     };
   }
 
-  // render/src/spiel.js
+  // src/spiel.js
   var param = new URLSearchParams(location.search);
   if (param.get("dev") === "1") document.querySelector(".botwahl")?.style.setProperty("display", "flex");
   var $2 = (id) => document.getElementById(id);
@@ -132632,9 +137489,9 @@
     sb = spielBauer(s, { getrennt: true, wurzel, stadt: name2, merk: merk(), hausLod: "nah", hq: hqGrafik });
     const T = new KompaktSammler();
     const offen = [];
-    const zahl4 = /* @__PURE__ */ new Map();
-    for (const p2 of plan.parzellen) zahl4.set(p2.typ, (zahl4.get(p2.typ) ?? 0) + 1);
-    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl4.get(p2.typ) >= 5);
+    const zahl5 = /* @__PURE__ */ new Map();
+    for (const p2 of plan.parzellen) zahl5.set(p2.typ, (zahl5.get(p2.typ) ?? 0) + 1);
+    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl5.get(p2.typ) >= 5);
     const grund2 = new Proxy(sb.bauer, { get(z2, typ) {
       const f = bauerFuer(z2, typ);
       return (S, sc, p2) => {
@@ -132696,9 +137553,9 @@
     sb = spielBauer(s, { getrennt: true, wurzel, stadt: name2, merk: merk(), hausLod: "nah", hq: hqGrafik });
     const T = new KompaktSammler();
     const offen = [];
-    const zahl4 = /* @__PURE__ */ new Map();
-    for (const p2 of plan.parzellen) zahl4.set(p2.typ, (zahl4.get(p2.typ) ?? 0) + 1);
-    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl4.get(p2.typ) >= 5);
+    const zahl5 = /* @__PURE__ */ new Map();
+    for (const p2 of plan.parzellen) zahl5.set(p2.typ, (zahl5.get(p2.typ) ?? 0) + 1);
+    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl5.get(p2.typ) >= 5);
     const grund2 = new Proxy(sb.bauer, { get(z2, typ) {
       const f = bauerFuer(z2, typ);
       return (S, sc, p2) => {
@@ -132995,7 +137852,7 @@
   var wk = null;
   var st = null;
   var ch = null;
-  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt, ch].filter(Boolean);
+  var module2 = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt, ch, ec].filter(Boolean);
   function panel(titel, unter, html, klasse = "") {
     for (const m of module2()) m.zu();
     menueZu();
@@ -133077,6 +137934,14 @@
       if (offenesHaus) oeffneHaus(offenesHaus);
     }
   };
+  window.filialProgramm = (programm) => {
+    const r = fuehreAus(s, { typ: "filialProgramm", programm });
+    meldung(r.text, r.ok);
+    if (r.ok) {
+      nachAktion();
+      if (offenesHaus) oeffneHaus(offenesHaus);
+    }
+  };
   function oeffneHaus(id) {
     const d2 = hausDetail(s, id);
     if (!d2) {
@@ -133102,20 +137967,44 @@
     const z2 = sb.zustand(id);
     const bild3 = z2 ? [z2.status, ...z2.zusatz].filter((q2) => q2 !== "offen").map((q2) => q2 === "aktion" && z2.aktion ? `Aktion ${AKTION_NAME[z2.aktion]}` : STATUS_TITEL[q2]).join(" \xB7 ") : "";
     const qm = h.flaechen.reduce((a, f) => a + f.qm, 0);
-    const zahl4 = (t, w, ton2 = "") => `<div class="kz ${ton2}"><span>${t}</span><b>${w}</b></div>`;
+    const zahl5 = (t, w, ton2 = "") => `<div class="kz ${ton2}"><span>${t}</span><b>${w}</b></div>`;
     let html = `<div class="chips"><span class="chip ${h.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild3 ? `<span class="chip">${bild3}</span>` : ""}<span class="chip grau">${h.lage === "1a" ? "1a-Lage" : h.lage === "b" ? "B-Lage" : h.lage === "center" ? "Center" : "Stadtrand"}</span></div>`;
-    html += `<div class="raster">${zahl4("Umsatz Woche", geld(k?.umsatz ?? 0))}${zahl4("Deckungsbeitrag", geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl4("Verkaufsfl\xE4che", fmt.format(qm) + " qm")}${zahl4("Substanz", Math.round(h.substanz) + " / 100", h.substanz < 35 ? "rot" : "")}</div>`;
+    html += `<div class="raster">${zahl5("Umsatz Woche", geld(k?.umsatz ?? 0))}${zahl5("Deckungsbeitrag", geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl5("Verkaufsfl\xE4che", fmt.format(qm) + " qm")}${zahl5("Substanz", Math.round(h.substanz) + " / 100", h.substanz < 35 ? "rot" : "")}</div>`;
     html += st?.hausGrafik(id) ?? "";
     html += hausTreiberZeile(src_exports, s, id);
     html += um?.hausKarte(id) ?? "";
     if (h.klasse === "premium") {
       const p2 = premiumUebersicht(s).find((q2) => q2.id === id);
-      html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl4("Premium-Image", Math.round(p2?.image ?? 80) + " / 100")}${zahl4("Immobilien- & Marktwert", geld(p2?.marktwert ?? 0))}${zahl4("EBITDA-Marge (DB)", ((p2?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl4("Aktionsschutz", p2?.schutz ? "Aktiv" : "Aus")}</div>`;
+      html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl5("Premium-Image", Math.round(p2?.image ?? 80) + " / 100")}${zahl5("Immobilien- & Marktwert", geld(p2?.marktwert ?? 0))}${zahl5("EBITDA-Marge (DB)", ((p2?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl5("Aktionsschutz", p2?.schutz ? "Aktiv" : "Aus")}</div>`;
       if (h.premiumEigentuemer) html += `<div class="zeile">Eigent\xFCmer: ${h.premiumEigentuemer}</div>`;
       else if (h.status === "offen") html += `<div class="zeile"><button class="mini" onclick="premiumTun('schutz','${id}')">${p2?.schutz ? "Rabatt-Schutz aufheben" : "Rabatt-Schutz aktivieren"}</button> <button class="mini" onclick="premiumTun('investieren','${id}')">10 Mio. \u20AC investieren</button></div>`;
       const an = s.angebote.find((a) => a.status === "offen" && a.typ === "premiumVerkauf" && a.wunschHaeuser?.includes(id));
       if (an) html += `<div class="zeile">Angebot: ${an.premiumKaeuferTyp || "Investor"} \xB7 ${geld(an.kaufpreis ?? 0)} <button class="mini" onclick="premiumTun('verhandeln','${an.id}')">Nachverhandeln</button> <button class="mini" onclick="premiumTun('verkaufen','${an.id}')">Verkaufen</button></div>`;
       html += "</div>";
+    }
+    if (d2.guv) {
+      const g = d2.guv;
+      const kosten = new Set(GUV_KOSTEN);
+      html += '<div class="karte"><div class="khead">Filial-GuV \xB7 aktuelle Woche (ohne Zentrale)</div>';
+      for (const p2 of REFERENZ_FILIAL_GUV) {
+        const betrag = g[p2.id] ?? 0;
+        const sign3 = kosten.has(p2.id) || p2.id === "wareneinsatz" || p2.id === "opex" ? -1 : 1;
+        const wert = sign3 * betrag;
+        const quote = g.umsatz ? (100 * wert / g.umsatz).toFixed(1).replace(".", ",") + " %" : "\u2013";
+        html += `<div class="zeile"><span class="was">${p2.name} <i>Referenz ${String(p2.ist).replace(".", ",")} %</i></span><span class="qm">${geld(wert)}</span><span class="uq">${quote}</span></div>`;
+      }
+      html += '<div class="zeile grau">Referenzdifferenz: Einzel-OPEX \u221244,6 %, Total OPEX laut Vorgabe \u221242,4 %. Keine Ausgleichsbuchung.</div></div>';
+    }
+    html += '<div class="karte"><div class="khead">Sanierungsprogramme \xB7 gesamtes Filialnetz</div>';
+    for (const [programm, def] of Object.entries(FILIAL_PROGRAMME)) {
+      const stand2 = d2.programme?.[programm];
+      const status = stand2 ? s.woche < stand2.wirksamAb ? "Anlaufphase bis Woche " + (stand2.wirksamAb + 1) : "Wirksam" : "";
+      html += `<div class="zeile"><span class="was"><b>${def.name}</b> <i>${status || def.vorlauf + " Wochen Vorlauf"} \xB7 ${def.nebenwirkung}</i></span>${stand2 ? "" : `<button class="mini" onclick="filialProgramm('${programm}')">Starten</button>`}</div>`;
+    }
+    html += "</div>";
+    if (d2.ecommerce && h.format === "warenhaus") {
+      const x = d2.ecommerce;
+      html += '<div class="karte"><div class="khead">Online und Filiallogistik</div><div class="raster">' + zahl5("Abholungen", fmt.format(x.abholungen)) + zahl5("Versand aus dem Haus", fmt.format(x.versand)) + zahl5("Retouren im Haus", fmt.format(x.retouren)) + zahl5("Instore-Logistik", x.instoreStunden.toFixed(1).replace(".", ",") + " Std.") + '</div><div class="zeile">Abholstation: ' + (x.station ? "vorhanden" : "nicht vorhanden") + " \xB7 Ship-from-Store: " + (x.versandAn ? "aktiv" : "aus") + "</div></div>";
     }
     const shops = EQ.shops(s, h);
     if (hausEtageWahl?.id === id) {
@@ -133147,7 +138036,7 @@
     html += "</div>";
     html = hausSteckbrief(d2, html, hausReiter, s.woche);
     if (hausReiter === "personal" && pe) html += pe.hausBlock(id);
-    if (hausReiter === "ware" && d2.waren) html += `<div class="karte"><div class="khead">Ware \xB7 ${esc2(d2.waren.hauscluster)}</div><div class="raster">${zahl4("Warenverf\xFCgbarkeit", (d2.waren.verfuegbarkeit * 100).toFixed(1) + " %")}${zahl4("Altwareanteil", (d2.waren.altwareanteil * 100).toFixed(1) + " %")}${zahl4("Inventurdifferenz", d2.waren.inventur ? geld(d2.waren.inventur.differenz) : "Noch offen")}${zahl4("Fl\xE4chenproduktivit\xE4t", geld(d2.waren.flaechenproduktivitaet) + "/qm")}</div></div>`;
+    if (hausReiter === "ware" && d2.waren) html += `<div class="karte"><div class="khead">Ware \xB7 ${esc2(d2.waren.hauscluster)}</div><div class="raster">${zahl5("Warenverf\xFCgbarkeit", (d2.waren.verfuegbarkeit * 100).toFixed(1) + " %")}${zahl5("Altwareanteil", (d2.waren.altwareanteil * 100).toFixed(1) + " %")}${zahl5("Inventurdifferenz", d2.waren.inventur ? geld(d2.waren.inventur.differenz) : "Noch offen")}${zahl5("Fl\xE4chenproduktivit\xE4t", geld(d2.waren.flaechenproduktivitaet) + "/qm")}</div></div>`;
     panel(h.name, `${h.stadt} \xB7 ${h.klasse === "premium" ? "Premiumhaus" : h.format === "sport" ? "Sporthaus" : "Warenhaus"} \xB7 Baujahr ${h.baujahr}`, html);
     if (neu) hausZeigen(id);
   }
@@ -133312,10 +138201,10 @@
     offenesHaus = null;
     offenesHq = gebaeudeId ?? true;
     const u = hqUebersicht(s), j = hqGrafik();
-    const zahl4 = (t, w, ton2 = "") => `<div class="kz ${ton2}"><span>${t}</span><b>${w}</b></div>`;
+    const zahl5 = (t, w, ton2 = "") => `<div class="kz ${ton2}"><span>${t}</span><b>${w}</b></div>`;
     const pz4 = (x) => `${Math.round((x ?? 0) * 100)} %`;
     const knopf2 = (text3, args, art = "") => `<button class="mini ${art}" onclick="event.stopPropagation();hqKlick(${args.map((x) => `'${x}'`).join(",")})">${text3}</button>`;
-    let html = `<div class="raster">${zahl4("Kosten Zentrale je Woche", geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? "rot" : "")}${zahl4("Besch\xE4ftigte", fmt.format(Math.round(u.fte)) + " FTE")}${zahl4("davon B\xFCromiete", geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl4("Restmiete alter B\xFCros", geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? "rot" : "")}</div>`;
+    let html = `<div class="raster">${zahl5("Kosten Zentrale je Woche", geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? "rot" : "")}${zahl5("Besch\xE4ftigte", fmt.format(Math.round(u.fte)) + " FTE")}${zahl5("davon B\xFCromiete", geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl5("Restmiete alter B\xFCros", geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? "rot" : "")}</div>`;
     const gs = u.gebaeude ?? [];
     const gWahl = gs.find((g) => g.id === hqEtageWahl?.g) ?? gs.find((g) => g.id === gebaeudeId) ?? gs[0];
     if (gWahl) {
@@ -133391,6 +138280,7 @@
   var spielende = null;
   var er = null;
   var zt = null;
+  var ec = null;
   var nachAktion = () => {
     cockpitZeigen();
     ek.badge();
@@ -133405,6 +138295,10 @@
   itM = itModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   mk = marketingModul({ E: src_exports, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf("gruenden") });
   pr = produkteModul({ E: src_exports, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf("gruenden") });
+  ec = ecommerceModul({ E: src_exports, s: () => s, panel, meldung, nachAktion: () => {
+    nachAktion();
+    grafikNachziehen();
+  } });
   er = erfolgeModul({ E: src_exports, s: () => s, panel });
   pl = planungModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   um = umbauModul({ E: src_exports, s: () => s, panel, meldung, nachAktion: () => {
@@ -133427,6 +138321,7 @@
         if (bezug.modul === "organisation") return oeffneModul(org);
         if (bezug.modul === "it") return oeffneModul(itM);
         if (bezug.modul === "marketing") return oeffneModul(mk);
+        if (bezug.modul === "ecommerce") return oeffneModul(ec);
         if (bezug.modul === "produkte") return oeffneModul(pr);
         if (bezug.modul === "planung") return oeffneModul(pl);
         if (bezug.modul === "personal") return oeffneModul(pe);
@@ -133445,6 +138340,7 @@
       else if (bezug.modul === "organisation") oeffneModul(org);
       else if (bezug.modul === "it") oeffneModul(itM);
       else if (bezug.modul === "marketing") oeffneModul(mk);
+      else if (bezug.modul === "ecommerce") oeffneModul(ec);
       else if (bezug.modul === "produkte") oeffneModul(pr);
       else if (bezug.modul === "planung") oeffneModul(pl);
       else if (bezug.modul === "personal") oeffneModul(pe);
@@ -133497,13 +138393,13 @@
     stadt: () => stadtName,
     staedte: () => STADTLISTE.filter((d2) => s?.haeuser.some((h) => h.stadt === d2.name)).map((d2) => {
       const hs = s.haeuser.filter((h) => h.stadt === d2.name && h.status !== "geschlossen");
-      const zahl4 = (rolle3) => d2.standorte.filter((p2) => p2.rolle === rolle3).length;
-      const formate = [["Hartwig", hs.filter((h) => h.format === "warenhaus").length], ["Volkskauf", zahl4("schwester")], ["Sport", hs.filter((h) => h.format === "sport").length], ["FUNDUS", zahl4("outlet")]];
+      const zahl5 = (rolle3) => d2.standorte.filter((p2) => p2.rolle === rolle3).length;
+      const formate = [["Hartwig", hs.filter((h) => h.format === "warenhaus").length], ["Volkskauf", zahl5("schwester")], ["Sport", hs.filter((h) => h.format === "sport").length], ["FUNDUS", zahl5("outlet")]];
       return {
         name: d2.name,
         region: d2.region,
         hauscluster: hs[0]?.hauscluster,
-        groesse: hs.length + zahl4("schwester") + zahl4("outlet"),
+        groesse: hs.length + zahl5("schwester") + zahl5("outlet"),
         umsatz: hs.reduce((sum2, h) => sum2 + (h.kpi?.umsatz ?? 0), 0),
         formate: formate.filter((p2) => p2[1]).map(([name2, anzahl]) => ({ name: name2, anzahl }))
       };
@@ -133624,6 +138520,7 @@
   $2("organisation").addEventListener("click", () => oeffneModul(org));
   $2("it").addEventListener("click", () => oeffneModul(itM));
   $2("marketing").addEventListener("click", () => oeffneModul(mk));
+  $2("online").addEventListener("click", () => oeffneModul(ec));
   $2("modernisierung").addEventListener("click", () => oeffneModul(um));
   $2("produkte").addEventListener("click", () => oeffneModul(pr));
   ch = chronikModul({ E: src_exports, s: () => s, panel, bild: fassadeChronik });
@@ -133709,8 +138606,8 @@
       leben.setzen(vorherLeben);
       const d2 = await messen({ ...daten, vorBild: vorherLeben === "aus" ? void 0 : () => leben.schritt(1 / 30, false) });
       d2.vergleich = { ohneFps: ohne2.fps, mitFps: d2.fps, ohneRenderMs: ohne2.renderMittelMs, mitRenderMs: d2.renderMittelMs };
-      const zeile2 = (name2, wert) => `<div class="zeile"><span class="was">${name2}</span><b>${wert}</b></div>`;
-      const html = '<div class="karte"><div class="khead">' + d2.frames + " gerenderte Frames auf diesem Ger\xE4t</div>" + zeile2("Bildrate ohne Leben", ohne2.fps + " FPS") + zeile2("Bildrate mit Leben (" + vorherLeben + ")", d2.fps + " FPS") + zeile2("Leben: Aktualisierung je Bild", d2.updateMittelMs + " ms (Ziel h\xF6chstens 2 ms)") + zeile2("Framezeit, 95. Perzentil", d2.frameP95Ms + " ms") + zeile2("Renderaufruf, 95. Perzentil", d2.renderP95Ms + " ms") + zeile2("Frames \xFCber 33 ms", d2.frameUeber33ms + " / " + (d2.frames - 1)) + zeile2("Draw Calls", d2.drawCalls) + zeile2("Dreiecke", fmt.format(d2.dreiecke)) + zeile2("Geometrien / Texturen", d2.geometrien + " / " + d2.texturen) + zeile2("Teile der Stadt", fmt.format(d2.teile)) + zeile2("Canvas", d2.bild) + zeile2("Pixelratio", d2.pixelRatio) + zeile2("Grafikprofil", d2.grafikprofil) + '</div><div class="leise">Messung unter laufender Karte, kein GPU-Profiler. Bei Rucklern echte Hardware und Safari-Version dokumentieren.</div>';
+      const zeile3 = (name2, wert) => `<div class="zeile"><span class="was">${name2}</span><b>${wert}</b></div>`;
+      const html = '<div class="karte"><div class="khead">' + d2.frames + " gerenderte Frames auf diesem Ger\xE4t</div>" + zeile3("Bildrate ohne Leben", ohne2.fps + " FPS") + zeile3("Bildrate mit Leben (" + vorherLeben + ")", d2.fps + " FPS") + zeile3("Leben: Aktualisierung je Bild", d2.updateMittelMs + " ms (Ziel h\xF6chstens 2 ms)") + zeile3("Framezeit, 95. Perzentil", d2.frameP95Ms + " ms") + zeile3("Renderaufruf, 95. Perzentil", d2.renderP95Ms + " ms") + zeile3("Frames \xFCber 33 ms", d2.frameUeber33ms + " / " + (d2.frames - 1)) + zeile3("Draw Calls", d2.drawCalls) + zeile3("Dreiecke", fmt.format(d2.dreiecke)) + zeile3("Geometrien / Texturen", d2.geometrien + " / " + d2.texturen) + zeile3("Teile der Stadt", fmt.format(d2.teile)) + zeile3("Canvas", d2.bild) + zeile3("Pixelratio", d2.pixelRatio) + zeile3("Grafikprofil", d2.grafikprofil) + '</div><div class="leise">Messung unter laufender Karte, kein GPU-Profiler. Bei Rucklern echte Hardware und Safari-Version dokumentieren.</div>';
       panel("Performance", d2.stadt + " \xB7 KW " + (d2.woche + 1), html, "gross");
       window.spiel.letzteDiagnose = d2;
     } catch (e) {
@@ -133779,6 +138676,8 @@
   if (typeof hqUebersicht === "function") $2("hq").addEventListener("click", () => oeffneHq());
   else $2("hq").style.display = "none";
   window.spiel = {
+    ecommerce: ec,
+    oeffneEcommerce: () => oeffneModul(ec),
     chronik: () => chronikUebersicht(s),
     oeffneChronik: () => oeffneModul(ch),
     personaleinsatz: pe,
@@ -133877,6 +138776,11 @@
     },
     woche,
     bot: botSchritt,
+    aktion: (a) => {
+      const r = fuehreAus(s, a);
+      nachAktion();
+      return r;
+    },
     oeffneHaus,
     schliessePanel,
     oeffneHq,
@@ -133992,16 +138896,33 @@
   $2("startseed").addEventListener("change", (e) => {
     startWahl.seed = Math.max(1, Math.round(Number(e.target.value) || 1));
   });
-  function spielStarten() {
+  var q02Bildwechsel = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  var q02Start = { phase: "bereit", zeit: 0, grundkacheln: 0 };
+  async function spielStarten() {
     $2("start").classList.remove("an");
     $2("lade").classList.add("an");
-    setTimeout(() => {
+    window.bereit = false;
+    q02Start.phase = "ladebild";
+    q02Start.zeit = performance.now();
+    try {
+      await q02Bildwechsel();
+      q02Start.phase = "grundaufbau";
       wahl2.value = startWahl.stadt;
       neuesSpiel3(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit, startWahl.szenario);
+      q02Start.phase = "grundkacheln";
+      q02Start.grundkacheln = KA.liste.filter((k) => k.gruppe).length;
+      await q02Bildwechsel();
+      q02Start.phase = "sichtbar";
       $2("lade").classList.remove("an");
       window.bereit = true;
       einfuehrung.spielStart();
-    }, 30);
+      kachelnPlanen();
+    } catch (e) {
+      $2("lade").classList.remove("an");
+      $2("start").classList.add("an");
+      q02Start.phase = "fehler";
+      throw e;
+    }
   }
   $2("startknopf").addEventListener("click", spielStarten);
   async function spielFortsetzen(platz = "autosave") {
@@ -134052,6 +138973,7 @@
   window.spiel.fortsetzen = spielFortsetzen;
   window.spiel.app = app;
   window.spiel.startZeigen = startZeigen;
+  window.spiel.q02Start = q02Start;
   window.spiel.SCHWIERIGKEITEN = SCHWIERIGKEITEN2;
   Object.defineProperty(window.spiel, "schwierigkeit", { get: () => schwierigkeitId });
   setTimeout(() => {

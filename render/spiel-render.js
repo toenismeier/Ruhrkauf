@@ -802,6 +802,127 @@ async function buendeln() {
     if (report.fehler.length) throw new Error('Wettbewerber-Integration: ' + report.fehler.slice(0, 12).join('; '));
     return report;
   }
+  // Maßstab: 560 Häuser, bis zu 220 Stadtpunkte und Sammelaktion, Seed 1 / Woche 30.
+  async function massstabPruefen() {
+    const report = { pruefungen: [], fehler: [] };
+    const pruefen = (titel, bedingung, ist) => {
+      report.pruefungen.push({ titel, ok: !!bedingung, ist });
+      if (!bedingung) report.fehler.push(titel + ': ' + JSON.stringify(ist));
+    };
+    const bilder = path.join(__dirname, '..', 'bilder');
+    fs.mkdirSync(bilder, { recursive: true });
+    await p.evaluate(() => {
+      window.spiel.neuesSpiel(1, 'Essen');
+      for (let i = 0; i < 30 && window.spiel.s.phase !== 'zerschlagen'; i++) window.spiel.woche(false);
+      window.spiel.oeffnePortfolio('karte');
+    });
+    const karte = await p.evaluate(() => {
+      const s = window.spiel.s, hs = window.spiel.E.portfolio(s);
+      return { woche: s.woche, hauser: hs.length,
+        staedte: new Set(hs.map((h) => h.stadt)).size,
+        pins: document.querySelectorAll('.deutschland-svg g[data-stadt]').length,
+        ohne: hs.filter((h) => !h.steuerbar).length,
+        fehler: window.spiel.portfolio.pruefe().fehler };
+    });
+    pruefen('Spiel erreicht Woche 30', karte.woche === 30, karte.woche);
+    pruefen('Jede Engine-Stadt erhält Kartenpunkt', karte.pins === karte.staedte, karte);
+    pruefen('Karte ohne fehlende Hausattribute', !karte.fehler.length, karte.fehler);
+    await p.screenshot({ path: path.join(bilder, 'deutschland.png') });
+    const stadt = await p.locator('.deutschland-svg g[data-stadt]').first().getAttribute('data-stadt');
+    await p.locator('.deutschland-svg g[data-stadt]').first().evaluate((el) => el.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    pruefen('Stadtauswahl per Kartenpunkt', await p.evaluate((name) => document.getElementById('stadtname').textContent === name ||
+      document.getElementById('ptitel').textContent === name, stadt), stadt);
+    await p.evaluate(() => window.spiel.oeffnePortfolio('liste'));
+    const liste = await p.evaluate(() => {
+      const hs = window.spiel.E.portfolio(window.spiel.s);
+      const d = window.spiel.portfolio.pruefe();
+      return { alle: hs.length, daten: d.anzeige, imDom: d.domZeilen,
+        spalten: [...document.querySelectorAll('[data-pp="sort"] option')].map((x) => x.value) };
+    });
+    pruefen('Portfolio zeigt alle Engine-Häuser', liste.alle === liste.daten, liste);
+    pruefen('Nur sichtbare Listenzeilen im DOM', liste.imDom > 0 && liste.imDom <= 35, liste);
+    pruefen('Sortierspalten vollständig', ['umsatz', 'ebitda', 'marge', 'mietquote', 'substanz', 'restlaufzeitMiete', 'status'].every((x) => liste.spalten.includes(x)), liste.spalten);
+    // Pro Format bis zu 50 Häuser mit den unveränderten Werten aus portfolio(s) abgleichen;
+    // Premium und Sport haben weniger als 50 Häuser, daher min(50, Formatbestand).
+    for (const format of ['hartwig', 'premium', 'sport', 'volkskauf', 'fundus']) {
+      const check = await p.evaluate((key) => {
+        const select = document.querySelector('[data-pp-filter="format"]');
+        select.value = key; select.dispatchEvent(new Event('change', { bubbles: true }));
+        const s = window.spiel.s, hs = window.spiel.E.portfolio(s).filter((h) => h.formatKey === key)
+          .sort((a, b) => b.umsatz - a.umsatz || a.stadt.localeCompare(b.stadt, 'de') || a.id.localeCompare(b.id, 'de'));
+        const scroll = document.getElementById('pp-scroll');
+        const fehlt = [];
+        for (let i = 0; i < Math.min(50, hs.length); i++) {
+          scroll.scrollTop = (i + 1) * 58;
+          scroll.dispatchEvent(new Event('scroll'));
+          const row = scroll.querySelector('[data-haus="' + hs[i].id + '"]');
+          if (!row || !row.textContent.includes(hs[i].name) ||
+            Number(row.dataset.wert) !== hs[i].umsatz) fehlt.push(hs[i].id);
+        }
+        return { anzahl: hs.length, geprueft: Math.min(50, hs.length), fehlt };
+      }, format);
+      pruefen('Portfolio-Stichprobe ' + format, !check.fehlt.length && check.geprueft > 0, check);
+    }
+    await p.evaluate(() => {
+      document.querySelector('[data-pp-filter="format"]').value = 'alle';
+      document.querySelector('[data-pp-filter="format"]').dispatchEvent(new Event('change', { bubbles: true }));
+      document.getElementById('pp-scroll').scrollTop = 0;
+    });
+    await p.screenshot({ path: path.join(bilder, 'portfolio-liste.png') });
+    const soll = await p.evaluate(() => {
+      const st = window.spiel.s;
+      const ids = window.spiel.E.portfolio(st).filter((h) => h.steuerbar).slice(0, 3).map((h) => h.id);
+      const kopie = structuredClone(st);
+      const r = window.spiel.E.fuehreAus(kopie, { typ: 'personalabbau', haeuser: ids, prozent: 0.05 });
+      if (!r.ok) return { ids, fehler: r.text };
+      return { ids, personen: kopie.haeuser.filter((h) => ids.includes(h.id))
+        .map((h) => [h.id, h.personal.vollzeit, h.personal.teilzeit]) };
+    });
+    pruefen('Personalabbau laut Engine ausführbar', !soll.fehler && soll.ids?.length === 3, soll);
+    if (!soll.fehler) {
+      await p.evaluate((ids) => {
+        const pp = window.spiel.portfolio;
+        pp.filterSetzen('alle');
+        window.spiel.oeffnePortfolio('liste');
+        // Kein direkter UI-Bypass: Liste per Checkboxen selektieren, ggf. scrollen.
+        const zeilen = window.spiel.E.portfolio(window.spiel.s);
+        const sort = [...zeilen].sort((a, b) => b.umsatz - a.umsatz || a.stadt.localeCompare(b.stadt, 'de') || a.id.localeCompare(b.id, 'de'));
+        const formatNamen = ['hartwig', 'premium', 'sport', 'volkskauf', 'fundus'];
+        const positionen = [];
+        for (const format of formatNamen) {
+          const group = sort.filter((h) => h.formatKey === format);
+          if (!group.length) continue;
+          const start = positionen.length;
+          positionen.push({ gruppe: format });
+          for (const h of group) positionen.push({ id: h.id });
+        }
+        for (const id of ids) {
+          const i = positionen.findIndex((x) => x.id === id);
+          if (i < 0) throw new Error('Nicht in der Liste: ' + id);
+          const scroll = document.getElementById('pp-scroll');
+          scroll.scrollTop = i * 58;
+          scroll.dispatchEvent(new Event('scroll'));
+          const cb = scroll.querySelector('[data-pp-id="' + id + '"]');
+          if (!cb) throw new Error('Checkbox fehlt: ' + id);
+          cb.checked = true;
+          cb.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        document.querySelector('[data-pp="abbau"]').click();
+      }, soll.ids);
+      const ist = await p.evaluate((ids) => window.spiel.s.haeuser.filter((h) => ids.includes(h.id))
+        .map((h) => [h.id, h.personal.vollzeit, h.personal.teilzeit]), soll.ids);
+      pruefen('Sammelaktion Personal −5 % wie fuehreAus', JSON.stringify(ist) === JSON.stringify(soll.personen), { ist, soll: soll.personen });
+    }
+    await p.screenshot({ path: path.join(bilder, 'sammelaktion.png') });
+    fs.writeFileSync(path.join(__dirname, 'out', 'massstab-pruefung.json'), JSON.stringify(report, null, 2));
+    console.log('Maßstab-Oberfläche: ' + report.pruefungen.length + ' Prüfungen, ' + report.fehler.length + ' Abweichungen');
+    if (report.fehler.length) throw new Error(report.fehler.join('; '));
+    return report;
+  }
+  if (process.argv.includes('--nur-massstab')) {
+    try { await massstabPruefen(); } finally { await b.close(); }
+    return;
+  }
   // N04: Browser-Abnahme mit echten UI-Handlungen. Bilder aller 14 Schritte.
   async function einfuehrungPruefen() {
     const ordner = path.join(__dirname, '..', 'bilder', 'nice', 'einfuehrung');
@@ -1174,6 +1295,7 @@ async function buendeln() {
   const pn = await panelsPruefen();
   await posteingangPruefen();
   const kt = await kartePruefen();
+  const ms = await massstabPruefen();
   await statistikPruefen();
   const messung = await p.evaluate(() => window.spiel.messung);
   const teile = await p.evaluate(() => window.spiel.teileStand());
@@ -1185,6 +1307,7 @@ async function buendeln() {
   zusammen.einkaufAbweichungen = ek.abweichungen; zusammen.einkaufAktionenOk = `${ek.aktionen.filter((x) => x.ok).length}/${ek.aktionen.length}`;
   zusammen.startOk = `${sp.aktionen.filter((x) => x.ok).length}/${sp.aktionen.length}`;
   zusammen.panelsWerte = pn.werte; zusammen.panelsAbweichungen = pn.abweichungen; zusammen.panelsAktionenOk = `${pn.aktionen.filter((x) => x.ok).length}/${pn.aktionen.length}`;
+  zusammen.massstabPruefungen = ms.pruefungen.length; zusammen.massstabAbweichungen = ms.fehler.length;
   zusammen.karte = kt.staedte.map((x) => ({ stadt: x.stadt, maxHalb: x.max, bildbreiteM: x.bildbreiteM, anteilBreite: x.anteilBreite, randPixel: x.randPixelMitte + Object.values(x.raender).reduce((a, q) => a + q.randPixel, 0), ecken: x.eckenErreicht })); zusammen.karteGestenOk = `${kt.gesten.filter((x) => x.ok).length}/${kt.gesten.length}`;
   fs.writeFileSync(path.join(__dirname, 'out', 'spiel-messung.json'), JSON.stringify({ ...zusammen, pruefung, wochen }, null, 1));
   console.log(JSON.stringify(zusammen));
