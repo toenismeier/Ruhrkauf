@@ -154,3 +154,9 @@ Neue Abnahme für #7 (ersetzt die Bot-C-Kriterien aus Abschnitt 11 bis 13):
 - Bot C ist nur noch Nebenprüfung: Die Insolvenz als letzte Option muss funktionieren (Bot C darf nicht vor Woche 104 zerschlagen werden), ist aber nicht der Maßstab.
 - Q1-Quoten aus Abschnitt 11 bleiben.
 Hebel liegen in der operativen Wirtschaft (Personal, Ware, Zentrale, Miete, Sortiment), nicht in Insolvenzmechanik und nicht in pauschalen Gutschriften. `m7-wochenverlauf.ts` um Bot D erweitern; das Skript bleibt die Abnahme, Claude misst.
+
+## 15. Messung Stand `37d446a` (Claude, 21.10.2026, 06:00)
+- Q1 jetzt im Ziel: Januar/Februar leicht −1,54 % (schlechteste Woche −2,55 %), mittel −2,69 % (−3,85 %).
+- **Zweites Halbjahr bricht ein:** ohne Eingriffe ab etwa KW 39 EBITDA-Quote −24 % bis −33 % je Woche, Insolvenz noch im ersten Jahr auf leicht und mittel. Die Verluste wurden aus dem Q1 ins zweite Halbjahr verschoben, nicht beseitigt.
+- **Bot D schlechter als auf main:** Insolvenz in KW 36 bis 47, zerschlagen in KW 55 bis 66, EBITDA letzte 52 Wochen −375 bis −476 Mio. € (main: Insolvenz KW 31 bis 33, −75 bis −123 Mio. €).
+Nächster Schritt: Ganzjahresverlauf je Woche erklären (Rohertrag, Personal, Miete, Zentrale, Abschriften je Woche als Tabelle), die Ursache des Einbruchs ab KW 39 beseitigen. Abnahme unverändert nach Abschnitt 14.
