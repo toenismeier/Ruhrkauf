@@ -7,14 +7,17 @@ const path = require('node:path');
   const dir = path.join(__dirname, 'out', 'q02-start');
   fs.mkdirSync(dir, { recursive: true });
   const browser = await chromium.launch({ headless: true,
-    args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+    args: ['--headless=new', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
+    ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}) });
   try {
     const p = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
     await p.goto('file://' + path.join(__dirname, 'spiel.html'), { waitUntil: 'load' });
+    // N09: zuerst Szenario wählen.
+    await p.click('.sz-karte[data-szenario=standard]');
     await p.waitForSelector('#startknopf');
     const beginn = Date.now(), messungen = [];
     await p.click('#startknopf', { noWaitAfter: true });
-    for (const soll of [0, 500, 1000, 2000, 3000]) {
+    for (const soll of [0, 500, 1000, 2000, 3000, 5000, 8000]) {
       const warte = soll - (Date.now() - beginn);
       if (warte > 0) await new Promise((resolve) => setTimeout(resolve, warte));
       const pfad = path.join(dir, 'start-' + String(soll).padStart(4, '0') + '.png');
