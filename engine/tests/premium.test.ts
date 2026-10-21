@@ -114,7 +114,7 @@ describe('Kronjuwelen: Struktur und Zustände',()=>{
   expect(s.zaehler).toBe(zaehler);
   const angebote=s.angebote.filter(a=>a.typ==='premiumVerkauf');
   expect(angebote).toHaveLength(5);
-  expect(new Set(angebote.map(a=>a.id)).size).toBe(4);
+  expect(new Set(angebote.map(a=>a.id)).size).toBe(5);
   premiumAngebote(s);
   expect(s.angebote.filter(a=>a.typ==='premiumVerkauf')).toHaveLength(5);
   expect(s.rng).toBe(rng);
