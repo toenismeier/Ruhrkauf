@@ -243,3 +243,60 @@ npx tsx scripts/m7-wochenverlauf.ts --write-stand    # verbindliche Abnahme Absc
 ```
 
 **Messstatus:** Quelltexte und Remote-Commits über den GitHub-Connector geschrieben, aber kein ausführbares lokales Repo mit Node-Abhängigkeiten und kein GitHub-DNS im Container. **Weder Typecheck/Jest noch das 52-Wochen- und 260-Wochen-Protokoll wurden hier ausgeführt.** Bis Claudes Zahlen die Kriterien erfüllen, keine Mergefreigabe.
+
+## M7 · Abschnitt 17 – Referenz-Filial-GuV und Turnaround ohne Schließungen (21.10.2026)
+
+**Verbindliche Referenz, keine Schätzung:** `src/filialguv.ts` enthält *alle* Originalpositionen aus Abschnitt 17 mit dem exakt gelieferten IST, einschließlich Bruttogewinn Vorjahr **41,7 %**, Plan **46,1 %** und Personal Vorjahr/Plan **−15,6 %**. Die Referenz ist intern nicht additiv konsistent: Summe der Kostenzeilen **−44,6 %**, veröffentlichtes OPEX-Total **−42,4 %** (Differenz **2,2 PP**). Die Einzelzeilen führen mit 41,2 % Bruttogewinn und 2,3 % übrigen Erträgen rechnerisch zu **−1,1 % Filial-EBITDA**, die Vorgabe lautet **−1,2 %** (0,1 PP Rundungs-/Abstimmungsdifferenz). **Keine Ausgleichs- oder Pauschalgutschrift.** Das Reporting zeigt beide Werte und die echte gebuchte Summe, die Referenz bleibt unverändert. Für eine strenge buchhalterische Abstimmung ist die Herkunftsdatenquelle zu klären.
+
+**Ausgangskalibrierung:** `welt.ts` setzt Personal/FTE und Vertragsmiete pro aktivem Haus auf die Sollgrößen **16,0 % / 11,2 % des normierten Jahresumsatzes**, statt aus dem Konzern-EBITDA abgeleitete Zuschüsse zu buchen. Die Umstellung verändert echte FTE, Mietzahlungsverpflichtung und Besetzungsgrad. Nicht simulierte Volkskauf-/FUNDUS-Datenhäuser werden bis zur Formate-Aktivierung nicht in einer Scheinkostenstelle mit Umsatz geführt. Logistikquote steigt von 2,5 % auf **6,3 %** und die Werbequote sinkt von 2,5 % auf **1,8 %**. Übrige filialeigene Ausgaben werden als einzelne kosten- und zahlungswirksame Positionen geführt. Nicht zahlungswirksame Bestandsabschriften werden **einmal** als Teil des Wareneinsatzes ausgewiesen. Zentrale/Externe bleiben außerhalb der Filial-GuV. Die initiale Umsatzrealisierung bei der FTE-/Mietkalibrierung **1,02 × normierte Nachfragebasis** ist ein Vorabschätzer, kein gemessener Jahreswert; Claude muss Ist-Abweichungen nachkalibrieren.
+
+**Formate:** Reguläre Hartwig-Häuser folgen der Referenz; Premium hat hier vorläufig ca. +8 % Personal und +12 % Miete sowie höhere Sach-/Serviceraten, Sport ca. −6 % Personal/−4 % Miete und geringere Sachkosten. FUNDUS hat bei wirtschaftlicher Aktivierung geringeren Unterhalts-/Nebenkostenbedarf und die bisher separate Offprice-Warenwirtschaft; Volkskauf ist zunächst inaktiv. Diese Multiplikatoren sind Modellannahmen, nicht Ist-Messungen. Wareneinsatz bleibt an der realen Warengruppen-/Bestandsbuchung, kein auf 41,2 % „hochgebuchter“ Rohertrag.
+
+### Maßnahmen und rechnerische EBITDA-Wirkung
+
+Brutto-Effekt in **Prozentpunkten des Umsatzes**: Ausgangsquote der Referenz × Kostenreduktion, **vor** Investitionsauszahlungen, Anlaufrisiko, Veränderung des Umsatznenners, Wechselwirkungen und Nachfrageeffekten. Kein Effekt läuft vor dem jeweiligen Vorlauf an. Alle Programme sind über `filialProgramm` spielbar, einmalige Kosten werden sofort zahlungswirksam. Effekte fließen in `hausKosten`, Werbung in `marketingKosten` und der Preishebel in den tatsächlich realisierten Verkaufsumsatz ein.
+
+| Referenzposition / Maßnahme | Vorlauf | Einmalinvestition vom Jahresumsatz | Brutto-EBITDA-Effekt | Betriebliche Nebenwirkung |
+|---|---:|---:|---:|---|
+| Bruttogewinn / Sortiments- und Preisarchitektur | 10 Wochen | 0,050 % | **+0,5 bis +0,7 PP** aus 1,2 % realisiertem Preisaufschlag auf Eigenware | −0,6 % Mengennachfrage, vor Bestands-/Mixeffekten |
+| Personal / Einsatzplanung | 6 Wochen | 0,030 % | **+1,44 PP** (16,0 % × 9 %) | −0,4 % Nachfrage (Beratungs-/Serviceeffekt) |
+| Fremdkräfte / Pooling | 4 Wochen | 0,005 % | **+0,14 PP** | geringere Peak-Reserve |
+| Miete / Nachverhandlung | 20 Wochen | 0,040 % | **+1,34 PP** (11,2 % × 12 %) | Verhandlungsaufwand, geringeres Vermietervertrauen |
+| Mietnebenkosten / Flächennutzung | 12 Wochen | 0,015 % | **+0,18 PP** | Flächeneinschränkungen |
+| Logistik / Lieferbündelung | 12 Wochen | 0,070 % | **+1,13 PP** (6,3 % × 18 %) | weniger Lieferfenster |
+| Werbung / Kanaleffizienz | 5 Wochen | 0,010 % | **+0,27 PP** (1,8 % × 15 %) | −0,6 % Nachfrage |
+| Unterhalt / Wartungsplanung | 12 Wochen | 0,030 % | **+0,34 PP** (1,9 % × 18 %) | zeitweise Betriebseingriffe |
+| Zahlungsverkehr / Payment-Mix | 6 Wochen | 0,006 % | **+0,04 PP** | Kassenterminal-Umstellung |
+| Facility Management / Neuvergabe | 10 Wochen | 0,012 % | **+0,34 PP** | reduzierte Servicefrequenz |
+| Energie / LED, HLK | 18 Wochen | 0,140 % | **+0,67 PP** (2,4 % × 28 %) | hohe Investition, zeitweise Anlagenabschaltung |
+| IT / Lizenzkonsolidierung | 10 Wochen | 0,013 % | **+0,07 PP** | Migration |
+| Administration / Prozessautomation | 8 Wochen | 0,013 % | **+0,04 PP** | Einführung und Schulung |
+| Übrige Aufwendungen / Bedarfsbündelung | 7 Wochen | 0,010 % | **+0,08 PP** | geringere Flexibilität |
+| Übrige betriebliche Erträge / Untermiete | abhängig vom tatsächlichen Angebot | Vertrags- und Umbaukosten der bestehenden Untermietaktion | **nicht pauschal bezifferbar**, nur tatsächlich vereinbarte Erlöse | Fläche entfällt für Eigenumsatz |
+| Zentrale / personeller Kapazitätsabbau Bot T | sofort mit Abfindung | reale Abfindungen gemäß HQ-Engine | höchstens ca. **+0,3 bis +0,4 PP** bei rund 3 % HQ-Kostenquote | geringere Unterstützungsleistung und Betriebsratsrisiko |
+
+Alle Kostenprogramme zusammen bieten unter den Referenzquoten eine **theoretische Brutto-Entlastung von ca. +6,10 PP** vor der Preis-/Nachfragewirkung und HQ; die Summe ist **keine gemessene Verbesserung**. Es gibt keine direkte Cash-/EBITDA-Gutschrift. Der Engpass kann weiterhin die Warenverfügbarkeit und die zwischenzeitliche Liquidität sein. Insbesondere die vorfinanzierten LED-/HLK-Projekte und die 20-wöchige Mietverhandlung wirken bei zu wenig Cash möglicherweise zu spät.
+
+**Bot T:** in `scripts/bot.ts --turnaround`. Ohne Schließungs- oder Insolvenzaktion, 14 Programme mit Vorlauf/Investition, operatives Warenmanagement, Bestellfreigaben und echte Untermietverträge. Bot D verwendet diese Programme zusätzlich zu seiner bestehenden Portfoliostrategie. Beim Schließen werden 30 % des Umsatzes als **Nachfrage** zu vorhandenen Häusern derselben Stadt, andernfalls derselben Region umgeleitet; kein pauschaler Umsatz- oder Geldzugang, reale Bestände begrenzen die Verkäufe. Die bisherige Möglichkeit, die Hauptverwaltung oder einzelne Häuser zu steuern, bleibt erhalten.
+
+**Diagnose/Reporting:** `m7-jahresdiagnose.ts` liefert neben den bisherigen 52 Zeilen jetzt alle 19 Referenzzeilen als Wochenbeträge, Wochenquoten und Jahresvergleich. Im Haus-Reiter erscheint dieselbe individuelle GuV mit laufenden zentralen Filialprogrammen und deren Nebenwirkungen. `m7-wochenverlauf.ts` prüft den 260-Wochen-Bot T auf **mittel Seeds 1–3**, außerdem leicht/schwer, unverändertes Portfolio, keine Insolvenz und EBITDA der letzten 52 Wochen positiv. Bot D bleibt eigene Prüfung (muss mindestens bestehen und besser sein); Winterlimits und Bot C bleiben sichtbar.
+
+**Ausführung/Abnahme durch Claude – noch nicht gemessen:**
+
+```bash
+cd engine
+npm ci
+npm run typecheck
+npx jest --runInBand
+npx tsx scripts/m7-jahresdiagnose.ts --seed=1 --schwierigkeit=mittel --write-stand
+npx tsx scripts/m7-jahresdiagnose.ts --seed=1 --turnaround
+npx tsx scripts/m7-wochenverlauf.ts --write-stand
+for seed in 1 2 3; do npx tsx scripts/bot.ts "$seed" 260 --turnaround; done
+for seed in 1 2 3; do npx tsx scripts/bot.ts "$seed" 260 --regulaer; done
+cd ../render
+npm ci
+npm run build
+node spiel-render.js
+```
+
+**Abnahmekriterium:** Filialebene um **−1,2 %**, Gruppe mit Zentrale um **−4 %** und Bot T auf mittel bei Seeds 1, 2, 3 ohne Insolvenz/Schließung 260 Wochen mit positivem EBITDA der letzten 52 Wochen. Erst Claudes Simulation kann das bestätigen. Hier **kein Typecheck, keine Jest-Ausführung, kein Fünfjahreslauf und kein Rendering**; der PR bleibt Draft, es erfolgt kein Merge.
