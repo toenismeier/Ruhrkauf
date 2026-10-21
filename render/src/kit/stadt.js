@@ -284,6 +284,102 @@ export function auto(I, x, y, z, ry, r, art = null) {
 /** Drehwinkel, damit die lokale +x-Achse in Weltrichtung (dx, dz) zeigt. */
 export const richtung = (dx, dz) => Math.atan2(-dz, dx);
 
+/**
+ * Q09: Die Schneeauflage folgt echten, bereits vom Bauer erzeugten Dach-Dreiecken.
+ * Die Rückgabehöhe eines Gebäudes kann auch den Turm, Technikaufbau oder First
+ * bezeichnen und darf deshalb niemals als horizontale Schneehöhe dienen.
+ *
+ * Abtasten geschieht während des normalen Hausbaus, bevor der KompaktSammler
+ * Geometrien zusammenführt. Kein zweiter Stadtbau, kein Raycasting auf iPhones
+ * und keine Änderung am Gebäude oder an dessen Material.
+ */
+export function dachFlaechenBeimBau(S, p, bauen) {
+  if (p.leer) return { ergebnis: bauen(), dachFlaechen: [] };
+  const alt = S.add;
+  const kandidaten = [];
+  const mindestFlaeche = Math.max(3, Math.min(32, (p.w ?? 10) * (p.d ?? 10) * .012));
+  S.add = function (g, farbe) {
+    const pos = g?.attributes?.position, index = g?.index;
+    if (pos && pos.count >= 3) {
+      const a = pos.array, ia = index?.array;
+      const n = ia ? index.count : pos.count;
+      const punkt = (i) => {
+        const k = (ia ? ia[i] : i) * pos.itemSize;
+        return [a[k], a[k + 1], a[k + 2]];
+      };
+      for (let i = 0; i + 2 < n; i += 3) {
+        const A = punkt(i), B = punkt(i + 1), C = punkt(i + 2);
+        const ux = B[0] - A[0], uy = B[1] - A[1], uz = B[2] - A[2];
+        const vx = C[0] - A[0], vy = C[1] - A[1], vz = C[2] - A[2];
+        const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+        const norm = Math.hypot(nx, ny, nz), flaeche = ny / 2;
+        const y = (A[1] + B[1] + C[1]) / 3;
+        // Aufwärts gerichtete, ausreichend große Dachstücke statt Fassade,
+        // Schildern, Fensterbänken und Gehwegen. Schrägdächer eingeschlossen.
+        if (norm < 1e-6 || ny / norm < .3 || flaeche < mindestFlaeche || y < 6) continue;
+        kandidaten.push({ ecken: [A, B, C], x: (A[0] + B[0] + C[0]) / 3,
+          z: (A[2] + B[2] + C[2]) / 3, y, flaeche });
+      }
+    }
+    return alt.call(this, g, farbe);
+  };
+  let ergebnis;
+  try { ergebnis = bauen(); }
+  finally { S.add = alt; }
+  const mindestHoehe = Math.max(6, (ergebnis?.hoehe ?? 0) * .28);
+  // Flächen unter darüberliegenden Steil-/Walmdächern nicht als Schnee zeigen.
+  // Damit verschwinden die massiven Deckflächen der Baukörper hinter dem Dach.
+  const dachHoeheBei = (t, x, z) => {
+    const [a, b, c] = t.ecken;
+    const den = (b[2] - c[2]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[2] - c[2]);
+    if (Math.abs(den) < 1e-7) return null;
+    const u = ((b[2] - c[2]) * (x - c[0]) + (c[0] - b[0]) * (z - c[2])) / den;
+    const v = ((c[2] - a[2]) * (x - c[0]) + (a[0] - c[0]) * (z - c[2])) / den;
+    const w = 1 - u - v;
+    return u > 1e-5 && v > 1e-5 && w > 1e-5 ? u * a[1] + v * b[1] + w * c[1] : null;
+  };
+  const auswahl = kandidaten
+    .filter((t) => t.y >= mindestHoehe)
+    .filter((t) => !kandidaten.some((anderes) => {
+      if (t === anderes || anderes.y <= t.y + .25) return false;
+      const h = dachHoeheBei(anderes, t.x, t.z);
+      return h != null && h > t.y + .25;
+    }))
+    .sort((a, b) => b.flaeche - a.flaeche || b.y - a.y)
+    .slice(0, p.typ?.startsWith('slot:') ? 14 : 8);
+  return { ergebnis, dachFlaechen: dachEinruecken(auswahl.map((t) => t.ecken)) };
+}
+
+/**
+ * Q09: Dreiecke derselben Dachebene gemeinsam zur Ebenenmitte einrücken. Je Dreieck
+ * einzeln eingerückt ergäbe ein Rechteckdach zwei Schneedreiecke mit dunklem Kreuz
+ * dazwischen; je Ebene bleibt eine geschlossene Schneefläche mit schmalem Dachrand.
+ */
+export function dachEinruecken(dreiecke, faktor = .86) {
+  const gruppen = new Map();
+  for (const ecken of dreiecke) {
+    const [a, b, c] = ecken;
+    const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
+    const vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const n = Math.hypot(nx, ny, nz) || 1; nx /= n; ny /= n; nz /= n;
+    const d = nx * a[0] + ny * a[1] + nz * a[2];
+    const key = [nx, ny, nz].map((v) => Math.round(v * 50)).join(',') + '|' + Math.round(d * 5);
+    if (!gruppen.has(key)) gruppen.set(key, []);
+    gruppen.get(key).push(ecken);
+  }
+  const aus = [];
+  for (const liste of gruppen.values()) {
+    const punkte = new Map();
+    for (const e of liste) for (const v of e) punkte.set(v.map((x) => Math.round(x * 100)).join(','), v);
+    let cx = 0, cy = 0, cz = 0;
+    for (const v of punkte.values()) { cx += v[0]; cy += v[1]; cz += v[2]; }
+    const k = punkte.size; cx /= k; cy /= k; cz /= k;
+    for (const e of liste) aus.push(e.map((v) => [cx + (v[0] - cx) * faktor, cy + (v[1] - cy) * faktor, cz + (v[2] - cz) * faktor]));
+  }
+  return aus;
+}
+
 // ====================================================================================
 // 3. STADT BAUEN
 // ====================================================================================
@@ -313,11 +409,13 @@ export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
   }
   if (plan.diagonalen?.length || plan.zwickel?.length) baueDiagonalen(ctx);
   const t1 = S.anzahl;
-  const hoehen = new Map();
+  const hoehen = new Map(), dachFlaechen = [];
   let maxH = 20;
   if (!o.ohneHaeuser) for (const p of plan.parzellen) {
     const f = bauerFuer(bauer, p.typ);
-    const e = f(S, scene, p) ?? {};
+    const { ergebnis, dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => f(S, scene, p));
+    const e = ergebnis ?? {};
+    dachFlaechen.push(...dach);
     // Slots mit eigenem Wasser (erg.wasser = [x0, z0, x1, z1]) je Block merken, für FLAECHEN[art].nachBau
     if (e.wasser) { if (!ctx.slotWasser) ctx.slotWasser = new Map(); if (!ctx.slotWasser.has(p.block)) ctx.slotWasser.set(p.block, []); ctx.slotWasser.get(p.block).push(e.wasser); }
     const h = e.hoehe ?? 12;
@@ -325,14 +423,18 @@ export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
     maxH = Math.max(maxH, h);
   }
   // Bauten im Stadtrandgürtel (Burg am Berg, plan.aussen.bauten)
-  if (plan.aussen && o.aussenring !== 0 && !o.ohneHaeuser) for (const q of plan.aussen.bauten ?? []) { const e = bauerFuer(bauer, q.typ)(S, scene, q) ?? {}; hoehen.set(q.id, e.hoehe ?? 12); }
+  if (plan.aussen && o.aussenring !== 0 && !o.ohneHaeuser) for (const q of plan.aussen.bauten ?? []) {
+    const { ergebnis, dachFlaechen: dach } = dachFlaechenBeimBau(S, q, () => bauerFuer(bauer, q.typ)(S, scene, q));
+    hoehen.set(q.id, ergebnis?.hoehe ?? 12);
+    dachFlaechen.push(...dach);
+  }
   // Flächen, die ihren Boden erst nach den Slots bauen (Aussparungen unter abgesenktem Slot-Wasser)
   for (const b of plan.bloecke) FLAECHEN[b.art]?.nachBau?.(ctx, b, ctx.slotWasser?.get(b.id) ?? [], BODEN_HILFE);
   ostVerkehr = false;
   const calls = o.instanzer ? 0 : I.bauen(scene);
   return {
     box: new THREE.Box3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(plan.breite, maxH, plan.tiefe)),
-    hoehen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: I.n, drawCallsInstanzen: calls,
+    hoehen, dachFlaechen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: I.n, drawCallsInstanzen: calls,
   };
 }
 
@@ -366,11 +468,13 @@ export async function baueStadtGestuft(S, scene, plan, bauer = platzhalterBauer,
   }
   if (plan.diagonalen?.length || plan.zwickel?.length) baueDiagonalen(ctx);
   const t1 = S.anzahl;
-  const hoehen = new Map();
+  const hoehen = new Map(), dachFlaechen = [];
   let maxH = 20;
   if (!o.ohneHaeuser) for (const p of plan.parzellen) {
     const f = bauerFuer(bauer, p.typ);
-    const e = f(S, scene, p) ?? {};
+    const { ergebnis, dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => f(S, scene, p));
+    const e = ergebnis ?? {};
+    dachFlaechen.push(...dach);
     // Slots mit eigenem Wasser (erg.wasser = [x0, z0, x1, z1]) je Block merken, für FLAECHEN[art].nachBau
     if (e.wasser) { if (!ctx.slotWasser) ctx.slotWasser = new Map(); if (!ctx.slotWasser.has(p.block)) ctx.slotWasser.set(p.block, []); ctx.slotWasser.get(p.block).push(e.wasser); }
     const h = e.hoehe ?? 12;
@@ -379,14 +483,19 @@ export async function baueStadtGestuft(S, scene, plan, bauer = platzhalterBauer,
     await bildFreigeben();
   }
   // Bauten im Stadtrandgürtel (Burg am Berg, plan.aussen.bauten)
-  if (plan.aussen && o.aussenring !== 0 && !o.ohneHaeuser) for (const q of plan.aussen.bauten ?? []) { const e = bauerFuer(bauer, q.typ)(S, scene, q) ?? {}; hoehen.set(q.id, e.hoehe ?? 12); await bildFreigeben(); }
+  if (plan.aussen && o.aussenring !== 0 && !o.ohneHaeuser) for (const q of plan.aussen.bauten ?? []) {
+    const { ergebnis, dachFlaechen: dach } = dachFlaechenBeimBau(S, q, () => bauerFuer(bauer, q.typ)(S, scene, q));
+    hoehen.set(q.id, ergebnis?.hoehe ?? 12);
+    dachFlaechen.push(...dach);
+    await bildFreigeben();
+  }
   // Flächen, die ihren Boden erst nach den Slots bauen (Aussparungen unter abgesenktem Slot-Wasser)
   for (const b of plan.bloecke) { FLAECHEN[b.art]?.nachBau?.(ctx, b, ctx.slotWasser?.get(b.id) ?? [], BODEN_HILFE); await bildFreigeben(); }
   ostVerkehr = false;
   const calls = o.instanzer ? 0 : I.bauen(scene);
   return {
     box: new THREE.Box3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(plan.breite, maxH, plan.tiefe)),
-    hoehen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: I.n, drawCallsInstanzen: calls,
+    hoehen, dachFlaechen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: I.n, drawCallsInstanzen: calls,
   };
 }
 
