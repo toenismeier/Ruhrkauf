@@ -27,12 +27,16 @@ describe('M7 Abschnitt 17: Kostenstellen statt Schein-Gutschriften', () => {
     const k = wocheAbspielen(s);
     const g = k.filialGuV!;
     expect(g).toBeDefined();
-    expect(g.umsatz).toBe(k.umsatz);
-    expect(g.opex).toBeCloseTo(GUV_KOSTEN.reduce((x, p) => x + g[p], 0), 0);
-    expect(g.ebitda).toBeCloseTo(g.bruttogewinn + g.uebrigeErtraege - g.opex, 0);
-    expect(k.ebitda).toBeCloseTo(g.ebitda - k.zentrale - k.beratung, 0);
-    expect(k.rohertrag).toBeCloseTo(g.bruttogewinn, 0);
-    expect(k.abschriften).toBeCloseTo(g.abschriften, 0);
+    // Rundung je Haus und Kostenart: beim Konsolidieren sind wenige
+    // Hundert Euro Abweichung zum nur einmal gerundeten Konzern-KPI möglich.
+    const konsolidierungsToleranz = s.haeuser.filter((h) => !h.nurDaten).length * 14;
+    expect(Math.abs(g.umsatz - k.umsatz)).toBeLessThan(konsolidierungsToleranz);
+    expect(g.wareneinsatz).toBe(g.umsatz - g.bruttogewinn);
+    expect(g.opex).toBe(GUV_KOSTEN.reduce((x, p) => x + g[p], 0));
+    expect(g.ebitda).toBe(g.bruttogewinn + g.uebrigeErtraege - g.opex);
+    expect(Math.abs(k.ebitda - (g.ebitda - k.zentrale - k.beratung))).toBeLessThan(konsolidierungsToleranz);
+    expect(Math.abs(k.rohertrag - g.bruttogewinn)).toBeLessThan(konsolidierungsToleranz);
+    expect(Math.abs(k.abschriften - g.abschriften)).toBeLessThan(konsolidierungsToleranz);
     expect(s.haeuser.some((h) => h.kpi?.guv?.energie && h.kpi?.guv?.logistik)).toBe(true);
   });
 
