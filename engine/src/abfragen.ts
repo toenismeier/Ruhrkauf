@@ -24,7 +24,24 @@ export interface PostBezug {
   wettbewerberId?: string;
   modul?: string;
 }
+export interface PostMietvertrag {
+  entscheidungId: string;
+  hausId: string;
+  haus: string;
+  stadt: string;
+  region: string;
+  format: string;
+  vermieter: string;
+  restlaufzeit: number;
+  istMiete: number;
+  angebotMiete: number;
+  mietquoteIst?: number;
+  mietquoteNeu?: number;
+  empfehlung: 'verlaengern' | 'nachverhandeln' | 'auslaufen';
+  frist: number;
+}
 export interface PostHandeln {
+  mietvertraege?: PostMietvertrag[];
   id: string;
   art: 'entscheidung' | 'angebot';
   typ: string;
@@ -81,7 +98,7 @@ function meldungKategorie(typ: PostMeldung['typ'], text: string): PostKategorie 
 export function posteingang(s: GameState): Posteingang {
   const grenze = s.woche - 12; // aktuelle plus zwölf vorangegangene Wochen
   const handeln: PostHandeln[] = [];
-  for (const e of s.entscheidungen) {
+  for (const e of s.entscheidungen.filter((x) => x.typ !== 'mietende')) {
     const restWochen = Math.max(0, e.frist - s.woche);
     const option = e.optionen.find((o) => o.id === e.standard);
     const hausId = typeof e.daten.haus === 'string' ? e.daten.haus : undefined;
@@ -93,6 +110,41 @@ export function posteingang(s: GameState): Posteingang {
       bezug: hausBezug(s, hausId ? [hausId] : [], modul),
       wert: typeof e.daten.kosten === 'number' ? { betrag: e.daten.kosten, einheit: 'einmalig' } : undefined,
       dringend: restWochen <= 1,
+    });
+  }
+  // Q07: je Anfragewoche exakt eine Sammelvorlage, statt einer Karte je Filiale.
+  const mietWochen = new Map<number, GameState['entscheidungen']>();
+  for (const e of s.entscheidungen.filter((x) => x.typ === 'mietende')) {
+    const gruppe = mietWochen.get(e.woche) ?? [];
+    gruppe.push(e);
+    mietWochen.set(e.woche, gruppe);
+  }
+  for (const [woche, gruppe] of [...mietWochen].sort((a,b) => a[0] - b[0])) {
+    const mieten: PostMietvertrag[] = gruppe.flatMap((e) => {
+      const h = s.haeuser.find((x) => x.id === e.daten.haus);
+      if (!h) return [];
+      const umsatz = h.kpi?.umsatz;
+      const markt = Number(e.daten.markt);
+      return [{
+        entscheidungId: e.id, hausId: h.id, haus: h.name, stadt: h.stadt,
+        region: h.region, format: h.format === 'schwester' ? 'Volkskauf' :
+          h.format === 'outlet' ? 'FUNDUS' : h.format === 'sport' ? 'Sport' : 'Warenhaus',
+        vermieter: h.miete.vermieterName, restlaufzeit: Math.max(0, h.miete.bisWoche - s.woche),
+        istMiete: h.miete.mieteWoche * 52, angebotMiete: markt * 52,
+        mietquoteIst: umsatz ? h.miete.mieteWoche / umsatz : undefined,
+        mietquoteNeu: umsatz ? markt / umsatz : undefined,
+        empfehlung: mietvertragEmpfehlung(h, markt), frist: e.frist,
+      }];
+    });
+    if (!mieten.length) continue;
+    const frist = Math.min(...gruppe.map((e) => e.frist));
+    const restWochen = Math.max(0, frist - s.woche);
+    handeln.push({
+      id: 'mietvertraege-' + woche, art: 'entscheidung', typ: 'mietvertraege',
+      titel: 'Mietverträge: ' + mieten.length + ' Anfragen', text: 'Immobilien empfiehlt je Vertrag eine Anschlusslösung.',
+      woche, frist, restWochen, dringend: restWochen <= 1,
+      optionen: [], standard: 'Individuelle Standardentscheidung bei Fristablauf',
+      mietvertraege: mieten, bezug: hausBezug(s, mieten.map((x) => x.hausId), 'immobilien'),
     });
   }
   for (const a of s.angebote.filter((a) => a.status === 'offen')) {
