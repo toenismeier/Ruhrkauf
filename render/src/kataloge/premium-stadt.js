@@ -6,12 +6,12 @@ import { baueStadt } from '../kit/stadt.js';
 import { stadtDaten } from '../kit/staedte.js';
 import { echterBauer } from '../kit/bauer.js';
 import { ausschnittBauer } from './_standorte-staedte.js';
-const eintraege=['Berlin','München','Hamburg','Düsseldorf'].map(name=>({
- titel:`${name}: Premium-1a-Lage`,
+const eintraege=[['Berlin','P001'],['Berlin','P005'],['München','P002'],['Hamburg','P003'],['Düsseldorf','P004']].map(([name,id])=>({
+ titel:`${name}: ${id} · Premium-1a-Lage`,
  bau(S,scene){
   const st=stadtDaten(name);
   const plan=stadtplan(st.seed,{typ:st.typ,archetyp:st.archetyp,region:st.region,...st.extra,standorte:st.standorte});
-  const stand=plan.standorte.find(s=>s.rolle==='premium');
+  const stand=plan.standorte.find(s=>s.rolle==='premium' && s.id===st.standorte.find(q=>q.rolle==='premium' && q.id===s.id && q.name===({P001:'Palais Hartwig',P002:'Hartwig am Hofgarten',P003:'Hartwig am Jungfernstieg',P004:'Hartwig am Heine-Platz',P005:'Hartwig Leipziger Platz'})[id])?.id);
   if(!stand) throw new Error('Premium-Standort fehlt in '+name);
   const p=plan.parzellen.find(p=>p.id===stand.parzelle);
   if(!p) throw new Error('Premium-Parzelle fehlt in '+name);

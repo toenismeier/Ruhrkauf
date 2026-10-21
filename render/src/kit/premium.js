@@ -1,5 +1,5 @@
 // Eigenständige Trophy-Store-Architektur. Kein Warenhaus-Familiengenerator.
-// Fünf historische Einzelbauten. Maße und Seed stammen aus der Engine, Farben aus dem Luxussegment.
+// Vier historische Einzelbauten. Maße und Seed stammen aus der Engine, Farben aus dem Luxussegment.
 // Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
 const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, zw, schild } from './basis.js';
@@ -8,19 +8,18 @@ import { zustandNormal } from './zustaende.js';
 
 export const PREMIUM_NAMEN = Object.freeze({
   P001: 'Palais Hartwig', P002: 'Hartwig am Hofgarten',
-  P003: 'Hartwig am Jungfernstieg', P004: 'Hartwig am Heine-Platz',
-  P005: 'Hartwig Leipziger Platz',
+  P003: 'Alsterhaus Hartwig', P004: 'Hartwig Königsallee',
 });
 export const PREMIUM_MESSING = '#b8955a';
 const BRONZE = '#665341', KUPFER = '#5f8f7a', DUNKEL = '#253b34';
-const STEIN = { P001: '#e2d5c1', P002: '#e5d2b8', P003: '#eeeae0', P004: '#dad5cb', P005: '#cdbba8' };
+const STEIN = { P001: '#e2d5c1', P002: '#e5d2b8', P003: '#eeeae0', P004: '#dad5cb' };
 const GLAS = '#608394', GLAS_HELL = '#8bb2bd';
 
 export function premiumMasse(haus) {
   const m = masse(haus);
   const p = haus.premiumSchluessel;
   // An den normalen Slot angeschlossen; die Monumentalwirkung entsteht aus Höhe und Architektur.
-  return { w: m.w, d: m.d, n: Math.max(p === 'P001' || p === 'P002' ? 6 : 5, m.n), H: Math.max(p === 'P001' ? 6 : 5, m.n) * 4.45 + 6.6 };
+  return { w: m.w, d: m.d, n: Math.max(p === 'P001' ? 6 : 5, m.n), H: Math.max(p === 'P001' ? 6 : 5, m.n) * 4.45 + 6.6 };
 }
 function zylinder(S,x,z,r,y,h,f,seg=16,oben=r) {
   const geo = new THREE.CylinderGeometry(oben,r,h,seg).translate(x,y+h/2,z);
@@ -125,7 +124,7 @@ function dachterrasse(S,x,z,w,d,y,r) {
     zylinder(S,xx,bz,1.8,y+3.05,0.18,['#ebddc5','#f6f1e7'][i%2],10,0.3);
   }
 }
-function variante(S,typ,x,z,w,d,y,r) {
+function variante(S,typ,x,z,w,d,y,r,n) {
   if(typ==='P001') {
     // Berliner Kaiserzeit: monumentaler Rundturm am sichtbaren Eck, Bronze-Abdeckung.
     const cx=x+w-3,cz=z+d-3;
@@ -161,35 +160,6 @@ function variante(S,typ,x,z,w,d,y,r) {
     zylinder(S,cx,cz,radius,y,6.2,STEIN.P003,28);
     kuppel(S,cx,cz,radius,y+6.2,KUPFER);
     for(let u=3;u<w-3;u+=5.5) S.box(0.9,5.2,0.85,x+u,3.1,z+d+0.65,'#f5f1e9');
-  } else if(typ==='P005') {
-    // Berlin Leipziger Platz: expressionistischer Kaufhausbau der 1920er mit
-    // strengem, horizontalem Sandsteinraster und mehrfach gestaffelter Attika.
-    // Bewusst ohne Kaiserturm und Kuppel von P001; Platzfront statt Eckpalais.
-    const sand='#c3ae91', dunkel='#4d4945', glas='#7c9fa5';
-    // Zwei dunklere, in die Platzfront eingeschnittene gläserne Portalachsen.
-    for(const u of [w*0.29,w*0.71]) {
-      S.box(6.8,5.3,0.24,x+u,3.0,z+d+0.47,glas);
-      S.box(7.4,0.46,1.25,x+u,5.85,z+d+0.68,dunkel);
-      for(const du of [-2.8,2.8]) S.box(0.35,6.1,0.95,x+u+du,3.25,z+d+0.85,sand);
-    }
-    // Gesonderter Mittelrisalit in fünf Geschossen, plastisch aus der Fassade gezogen.
-    S.box(w*0.31,n*4.45,1.5,x+w*0.50,6.6+n*4.45/2,z+d+0.70,sand);
-    for(let i=0;i<n;i++) {
-      const yy=8.2+i*4.45;
-      for(let j=-2;j<=2;j++) S.box(w*0.046,2.5,0.22,x+w/2+j*w*0.054,yy,z+d+1.55,glas);
-      S.box(w*0.33,0.35,1.90,x+w/2,6.6+(i+1)*4.45,z+d+0.85,dunkel);
-    }
-    // Dachstaffeln und ein flacher gläserner Oberlichtpavillon zum Platz.
-    S.box(w*0.86,1.4,d*0.69,x+w/2,y+0.8,z+d*0.49,sand);
-    S.box(w*0.66,2.3,d*0.50,x+w/2,y+2.65,z+d*0.46,dunkel);
-    S.box(w*0.44,2.0,d*0.38,x+w/2,y+4.8,z+d*0.46,sand);
-    S.box(w*0.33,2.1,d*0.27,x+w/2,y+6.75,z+d*0.46,glas);
-    // Goldene Einfassung, Flachdachkrone ohne steiles Dach / Rundturm.
-    for(const seite of [-1,1]) S.box(w*0.34,0.25,0.45,x+w/2,y+7.93,z+d*(0.46+seite*0.135),PREMIUM_MESSING);
-    // Platzseitige breite Eingangsmarkise und gerasterte Stützen.
-    S.box(w*0.38,0.5,3.2,x+w/2,5.8,z+d+2.1,dunkel);
-    S.box(w*0.39,0.20,3.3,x+w/2,6.17,z+d+2.1,PREMIUM_MESSING);
-    for(let u=0;u<5;u++) S.box(0.34,5.2,0.34,x+w*(0.35+u*0.075),2.6,z+d+3.1,sand);
   } else {
     // Düsseldorf: 1920er Natursteinraster und markanter, flacher Baldachin.
     S.box(w+0.7,1.1,1.2,x+w/2,y-0.6,z+d+0.15,'#c1b8ac');
@@ -298,7 +268,7 @@ function kostbareFassade(S,typ,x,z,w,d,n,H,start) {
   }
   // Verzahnte Kalksteinquader/Klinkerscharen; keine glatte Quaderwand.
   // Dichte wird an der Sammler-Teilezahl gedeckelt, damit alle Häuser zwischen 4k und 9k liegen.
-  const ziel=typ==='P001'?6400:typ==='P002'?5900:typ==='P003'?5600:typ==='P005'?5350:5100;
+  const ziel=typ==='P001'?6400:typ==='P002'?5900:typ==='P003'?5600:5100;
   const a=Math.max(8,Math.floor(w/1.55)),b=Math.max(8,Math.floor(d/1.55));
   let t=0;
   while(S.anzahl-start<ziel&&t<12000){
@@ -386,7 +356,7 @@ export function premiumhaus(S,scene,haus,opt={}) {
   S.box(lichtW,1,seitenD+0.5,mitteX,H+0.5,z+d-seitenD/2,dach);
   glasdach(S,x,z,w,d,H+1.0,typ);
   vordach(S,x,z,w,d);
-  variante(S,typ,x,z,w,d,H+1.0,r);
+  variante(S,typ,x,z,w,d,H+1.0,r,n);
   // Berlin: vier tatsächlich beflaggte Traufmasten statt leerer Antennen-Silhouette.
   // Im Verkaufsprozess werden Mast und Tuch vollständig eingeholt, nicht leer gezeigt.
   if(typ==='P001' && !opt.verkaufsprozess && !opt.insolvenz && haus.status!=='verkauft') {
@@ -403,6 +373,6 @@ export function premiumhaus(S,scene,haus,opt={}) {
   kostbareFassade(S,typ,x,z,w,d,n,H,start);
   strassenleben(S,x,z,w,d,r,{...opt,insolvenz:haus.status==='insolvenz'});
   statusBau(S,scene,typ,x,z,w,d,H,zust,haus,opt);
-  const hoehe=H+(zust.hat('umbau')?20:typ==='P003'?13:typ==='P001'?16:typ==='P002'?12:typ==='P005'?10:6);
+  const hoehe=H+(zust.hat('umbau')?20:typ==='P003'?13:typ==='P001'?16:typ==='P002'?12:6);
   return {hoehe,w,d,familie:'premium',teile:S.anzahl-start,status:zust.status};
 }
