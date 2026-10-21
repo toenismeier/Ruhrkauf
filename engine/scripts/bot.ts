@@ -23,6 +23,8 @@ function aktivesPortfolio(s: GameState) {
 
 /** Schließungen als Quote des zu sanierenden Portfolios statt fixe Hauszahl. */
 export const TIEF_SCHLIESSUNGSQUOTE = 50 / 180;
+/** Ursprünglich 35 von 180 Häusern: Turnaround muss denselben Portfolioanteil bearbeiten. */
+export const REGULAER_SCHLIESSUNGSQUOTE = 35 / 180;
 
 export function botWoche(s: GameState, log = false): void {
   const w = s.woche;
@@ -125,9 +127,13 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
     tu({ typ: 'marketingBudget', quote: 0.018 });
   }
   if (w === 4) {
-    const p = aktivesPortfolio(s).sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
-    for (const x of p.slice(0, 35)) tu({ typ: 'schliessen', haus: x.id });
-    for (const x of p.slice(35).filter((x) => x.mietquote > 0.12)) tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.15 });
+    // Zielanteil statt historischer fixer 35 Häuser; reine Datenhäuser und
+    // Premium-Kronjuwelen bleiben von der automatischen Schließung ausgenommen.
+    const p = aktivesPortfolio(s).filter((x) => !s.haeuser.some((h) => h.id === x.id && h.klasse === 'premium'))
+      .sort((a, b) => a.db / Math.max(1, a.umsatz) - b.db / Math.max(1, b.umsatz));
+    const schliessungen = Math.round(p.length * REGULAER_SCHLIESSUNGSQUOTE);
+    for (const x of p.slice(0, schliessungen)) tu({ typ: 'schliessen', haus: x.id });
+    for (const x of p.slice(schliessungen).filter((x) => x.mietquote > 0.12)) tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.15 });
     for (const h of s.haeuser.filter((x) => x.status === 'offen' && x.kpi)) {
       const ist = h.kpi!.fteIst, bedarf = h.kpi!.fteBedarf;
       if (ist > bedarf * 1.02) tu({ typ: 'personalabbau', haeuser: [h.id], prozent: Math.min(0.2, (ist - bedarf) / ist) });
