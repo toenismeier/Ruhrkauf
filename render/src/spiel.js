@@ -13,7 +13,7 @@ import { etage } from './kit/grundriss.js';
 import { RASTER } from './kit/innen.js';
 import { hqEtage, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './kit/hq.js';
 import { warenhaus } from './kit/warenhaus.js';
-import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer } from './kit/stadt.js';
+import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer, dachFlaechenBeimBau } from './kit/stadt.js';
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import { lebenModul } from './kit/leben.js';
@@ -388,7 +388,7 @@ function baueStadtAusSpiel(name) {
   setzeLod('fern');
   let e;
   try { e = baueStadt(T, scene, plan, grund, { keineStandAutos: leben.modus !== 'aus' }); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
-  jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s);
+  jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
   scene.add(wurzel);
   KA.teileGrund = T.anzahl;
   kachelnAnlegen(offen);
@@ -446,6 +446,8 @@ async function baueStadtAusSpielReise(name) {
   KA.teileGrund = T.anzahl;
   kachelnAnlegen(offen, true);
   await kachelnKloetzeBauen();
+  jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
+  jahreszeiten.registriereDachflaechenMehrfach(KA.liste.map((k) => [k.key, k.dachFlaechen]));
   // Pins: Hartwig, Sport, Wettbewerber und Zentrale wie im Katalog; freie Bürogebäude mit Schlüssel-Pin
   const pins = { warenhaus: 'hartwig', sport: 'hartwigSport', hq: 'hartwig' };
   setzeMarker(scene, plan, e, plan.standorte.filter((q) => !q.angebot && pins[q.rolle]).map((q) => ({ parzelle: q.parzelle, art: pins[q.rolle], groesse: 9 })));
@@ -492,7 +494,10 @@ function kachelnAnlegen(parzellen, gestuft = false) {
     k.box.expandByPoint(new THREE.Vector3(p.x, 0, p.z)).expandByPoint(new THREE.Vector3(p.x + p.w, klotzHoehe(p) + 4, p.z + p.d));
   }
   KA.liste = [...m.values()];
-  if (!gestuft) for (const k of KA.liste) klotzBauen(k);
+  if (!gestuft) {
+    for (const k of KA.liste) klotzBauen(k, true);
+    jahreszeiten?.registriereDachflaechenMehrfach(KA.liste.map((k) => [k.key, k.dachFlaechen]));
+  }
 }
 async function kachelnKloetzeBauen() {
   let t = performance.now();
@@ -505,10 +510,11 @@ async function kachelnKloetzeBauen() {
   }
 }
 function entsorge(k) { if (!k.gruppe) return; k.gruppe.parent?.remove(k.gruppe); k.gruppe.traverse((o) => o.geometry?.dispose()); k.gruppe = null; }
-function klotzBauen(k) {
+function klotzBauen(k, gesammelt = false) {
   entsorge(k);
-  const S = new KompaktSammler(), g = new THREE.Group();
+  const S = new KompaktSammler(), g = new THREE.Group(), dachFlaechen = [];
   for (const p of k.parz) {
+    const { dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => {
     const r = rng(((p.seed ?? 1) * 13 + 7) >>> 0), H = klotzHoehe(p);
     const f = waehle(r, [...FARBEN.fassadeHell, ...FARBEN.fassadeHell, ...FARBEN.fassadeWarm, ...FARBEN.fassadeKuehl, ...FARBEN.backstein.slice(0, 2), ...FARBEN.putzBunt]);
     S.quader(p.x, 0, p.z, p.x + p.w, H, p.z + p.d, f);
@@ -520,19 +526,30 @@ function klotzBauen(k) {
       dg.translate(p.x + p.w / 2, H, p.z + p.d / 2);
       S.add(dg, waehle(r, [...FARBEN.dach, ...FARBEN.ziegel]));
     } else S.quader(p.x + 0.3, H, p.z + 0.3, p.x + p.w - 0.3, H + 0.4, p.z + p.d - 0.3, waehle(r, FARBEN.dach));
+    return { hoehe: H + 5 };
+    });
+    dachFlaechen.push(...dach);
   }
   S.bauen(g);
   scene.add(g);
-  Object.assign(k, { gruppe: g, stufe: 'klotz', teile: S.anzahl });
+  Object.assign(k, { gruppe: g, stufe: 'klotz', teile: S.anzahl, dachFlaechen });
+  if (!gesammelt) jahreszeiten?.registriereDachflaechen(k.key, dachFlaechen);
 }
 function vollBauen(k) {
   const t0 = performance.now();
-  const S = new KompaktSammler(), g = new THREE.Group(), b = echterBauer();
+  const S = new KompaktSammler(), g = new THREE.Group(), b = echterBauer(), dachFlaechen = [];
   setzeLod('fern');
-  try { for (const p of k.parz) bauerFuer(b, p.typ)(S, g, p); S.bauen(g); entferneKleineSchilder(g); } finally { setzeLod('nah'); }
+  try {
+    for (const p of k.parz) {
+      const { dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => bauerFuer(b, p.typ)(S, g, p));
+      dachFlaechen.push(...dach);
+    }
+    S.bauen(g); entferneKleineSchilder(g);
+  } finally { setzeLod('nah'); }
   entsorge(k);
   scene.add(g);
-  Object.assign(k, { gruppe: g, stufe: 'voll', teile: S.anzahl });
+  Object.assign(k, { gruppe: g, stufe: 'voll', teile: S.anzahl, dachFlaechen });
+  jahreszeiten?.registriereDachflaechen(k.key, dachFlaechen);
   return performance.now() - t0;
 }
 function sichtbar(k, rand = 1.15) {
