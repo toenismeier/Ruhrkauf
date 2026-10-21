@@ -96,12 +96,14 @@
 //       H.nimm(E, { art: 'speicherzeile', i0: 3, i1: 3, j0: 1, j1: 1 });
 //       E.zTyp[4] = 'haupt'; E.tram.push('z4');
 //       E.zentrum = { i: 4, j: E.nz / 2 };
-//       E.viertel = (i, j) => (Math.abs(i - 2) <= 1 ? 'kanal' : Math.hypot(i - 4, j - E.nz / 2) < 2 ? 'zentrum' : 'gruenderzeit');
+//       E.viertel = (i, j) => (Math.abs(i - 2) <= 1 ? 'kanal' : wurzelSumme(i - 4, j - E.nz / 2) < 2 ? 'zentrum' : 'gruenderzeit');
 //     },
 //     nachbearbeitung(ctx, E, b, H) { if (b.viertel === 'kanal') H.mergeRand(ctx, 'slot:speicher', [24, 40], 18, ['+z'], {}); },
 //     staedte: { Oldenburg: {} },
 //   });
 // =====================================================================================================
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { rng, waehle, zw } from './basis.js';
 import { stadtrandPlan } from './stadtrand.js';
 import { outletImAussenring } from './outlet-standorte.js';
@@ -275,7 +277,7 @@ const ENTWUERFE = {
     E.reihen = E.reihen.map(() => Math.round((d * zw(r, 0.94, 1.06)) / 2) * 2);
     for (let k = 0; k <= E.nx; k++) fixiere(E, k);
     if (r() < 0.45) { const iw = waehle(r, [0, E.nx - 1, 1]); wasserSpalte(E, iw, 0, E.nz - 1, r() < 0.5 ? 'kanal' : 'fluss'); }
-    E.viertel = (i, j) => { const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j); return dd < 1.3 ? 'zentrum' : dd < 3 ? 'gruenderzeit' : 'nachkrieg'; };
+    E.viertel = (i, j) => { const dd = wurzelSumme(i - E.zentrum.i, j - E.zentrum.j); return dd < 1.3 ? 'zentrum' : dd < 3 ? 'gruenderzeit' : 'nachkrieg'; };
     E.umriss = waehle(r, ['voll', 'voll', 'oval']);
   },
   altstadt(E) {
@@ -283,11 +285,11 @@ const ENTWUERFE = {
     E.spalten = E.spalten.map((w) => Math.round((w * zw(r, 0.55, 1.25)) / 2) * 2);
     E.reihen = E.reihen.map((d) => Math.round((d * zw(r, 0.6, 1.2)) / 2) * 2);
     E.zentrum = { i: (E.nx - 1) / 2 + zw(r, -0.6, 0.6), j: (E.nz - 1) / 2 + zw(r, -0.6, 0.6) };
-    const kern = (i, j) => Math.hypot(i - E.zentrum.i, (j - E.zentrum.j) * 0.9) < 2.4;
+    const kern = (i, j) => wurzelSumme(i - E.zentrum.i, (j - E.zentrum.j) * 0.9) < 2.4;
     E.versatz = (k, j) => (kern(k - 0.5, j) ? 18 : 6);
     E.einschub = (i, j) => (kern(i, j) ? 0.4 : 0.1);
     E.durchgang = 0.35;
-    E.viertel = (i, j) => (kern(i, j) ? 'altstadt' : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 3.6 ? 'gruenderzeit' : 'rand');
+    E.viertel = (i, j) => (kern(i, j) ? 'altstadt' : wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) < 3.6 ? 'gruenderzeit' : 'rand');
     E.umriss = waehle(r, ['oval', 'oval', 'diagonal']);
     if (r() < 0.4) { const iw = r() < 0.5 ? 0 : E.nx - 1; wasserSpalte(E, iw, 0, E.nz - 1, 'kanal'); }
   },
@@ -341,7 +343,7 @@ const ENTWUERFE = {
     nimm(E, { art: 'wasser', form: 'fluss', i0: iC, i1: iC, j0: jk, j1: E.nz - 1 });
     for (let k = 0; k <= E.nx; k++) fixiere(E, k, jk, jk);
     E.versatz = (k, j) => (Math.abs(j - jk) > 1 ? 8 : 0);
-    E.viertel = (i, j) => { const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j); return dd < 1.4 ? 'zentrum' : dd < 2.6 ? 'altstadt' : dd < 3.6 ? 'gruenderzeit' : 'nachkrieg'; };
+    E.viertel = (i, j) => { const dd = wurzelSumme(i - E.zentrum.i, j - E.zentrum.j); return dd < 1.4 ? 'zentrum' : dd < 2.6 ? 'altstadt' : dd < 3.6 ? 'gruenderzeit' : 'nachkrieg'; };
     E.einschub = (i, j) => (E.viertel(i, j) === 'altstadt' ? 0.25 : 0);
     E.zentrum = { i: (iA + iC) / 2, j: jk + (r() < 0.5 ? -1.2 : 1.2) };
     E.umriss = waehle(r, ['voll', 'oval']);
@@ -356,7 +358,7 @@ const ENTWUERFE = {
     E.bruecken = 'zufall';
     E.zentrum = { i: iA + 1, j: (E.nz - 1) / 2 + zw(r, -1, 1) };
     for (let k = 0; k <= E.nx; k++) fixiere(E, k);
-    E.viertel = (i, j) => (i === E.insel ? 'altstadt' : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 2.6 ? 'gruenderzeit' : 'nachkrieg');
+    E.viertel = (i, j) => (i === E.insel ? 'altstadt' : wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) < 2.6 ? 'gruenderzeit' : 'nachkrieg');
     E.umriss = waehle(r, ['voll', 'diagonal']);
   },
   bahnhof(E) {
@@ -374,7 +376,7 @@ const ENTWUERFE = {
     E.zentrum = { i: kAx - 0.5, j: E.nz - 3 - Math.floor(zw(r, 0, 1.99)) };
     for (let k = 0; k <= E.nx; k++) fixiere(E, k);
     E.versatz = (k, j) => (j < E.zentrum.j - 1 ? 10 : 0);
-    E.viertel = (i, j) => (j >= E.nz - 3 && Math.abs(i - kAx + 0.5) < 2.5 ? 'bahnhofsviertel' : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 1.5 ? 'zentrum' : j < E.zentrum.j - 1 ? 'altstadt' : 'gruenderzeit');
+    E.viertel = (i, j) => (j >= E.nz - 3 && Math.abs(i - kAx + 0.5) < 2.5 ? 'bahnhofsviertel' : wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) < 1.5 ? 'zentrum' : j < E.zentrum.j - 1 ? 'altstadt' : 'gruenderzeit');
     E.einschub = (i, j) => (E.viertel(i, j) === 'altstadt' ? 0.25 : 0);
     E.warenhausWunsch = { i: kAx - 1, j: Math.round(E.zentrum.j), ecke: '+x+z' };
     E.umriss = waehle(r, ['voll', 'oval']);
@@ -390,9 +392,9 @@ const ENTWUERFE = {
     if (c - 1 >= 0) E.warenhausWunsch = r() < 0.5 ? { i: c - 1, j: jd, ecke: '+x+z' } : { i: c, j: jd + 1, ecke: '+x-z' };
     if (r() < 0.65) { const iw = c - 2 >= 0 && r() < 0.5 ? c - 2 : Math.min(E.nx - 1, c + 3); if (frei(E, iw, iw, 0, E.nz - 1)) wasserSpalte(E, iw, 0, E.nz - 1); }
     for (let k = 0; k <= E.nx; k++) fixiere(E, k, jd, jd);
-    E.versatz = (k, j) => (Math.hypot(k - 0.5 - E.zentrum.i, j - E.zentrum.j) < 2.2 ? 12 : 0);
-    E.einschub = (i, j) => (Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 2 ? 0.3 : 0);
-    E.viertel = (i, j) => { const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j); return dd < 2 ? 'altstadt' : dd < 3.2 ? 'zentrum' : 'gruenderzeit'; };
+    E.versatz = (k, j) => (wurzelSumme(k - 0.5 - E.zentrum.i, j - E.zentrum.j) < 2.2 ? 12 : 0);
+    E.einschub = (i, j) => (wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) < 2 ? 0.3 : 0);
+    E.viertel = (i, j) => { const dd = wurzelSumme(i - E.zentrum.i, j - E.zentrum.j); return dd < 2 ? 'altstadt' : dd < 3.2 ? 'zentrum' : 'gruenderzeit'; };
     E.umriss = waehle(r, ['voll', 'oval']);
   },
   residenz(E) {
@@ -411,7 +413,7 @@ const ENTWUERFE = {
     for (let k = 0; k <= E.nx; k++) fixiere(E, k);
     E.achse = kS;
     E.zentrum = { i: kS - 0.5, j: tief + 1.5 + zw(r, 0, 1.5) };
-    E.viertel = (i, j) => (Math.abs(i - kS + 0.5) < 1.6 && j <= tief + 3 ? 'barock' : Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 2.2 ? 'zentrum' : 'gruenderzeit');
+    E.viertel = (i, j) => (Math.abs(i - kS + 0.5) < 1.6 && j <= tief + 3 ? 'barock' : wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) < 2.2 ? 'zentrum' : 'gruenderzeit');
     E.warenhausWunsch = { i: kS - 1, j: tief + 1, ecke: '+x+z' };
     E.umriss = waehle(r, ['voll', 'oval']);
     if (E.T.tram) E.tram.push('z' + kS);
@@ -470,7 +472,7 @@ function ergaenzeEntwurf(E, o) {
   const kandidaten = [];
   for (let i = 0; i < nx(); i++) for (let j = 0; j < nz(); j++) {
     if (!zelleFrei(E, i, j)) continue;
-    const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j);
+    const dd = wurzelSumme(i - E.zentrum.i, j - E.zentrum.j);
     if (dd > 2.2) continue;
     const anHaupt = HAUPTLICH.has(E.zTyp[i + 1]) || HAUPTLICH.has(E.xTyp[j + 1]) || HAUPTLICH.has(E.zTyp[i]) || HAUPTLICH.has(E.xTyp[j]);
     kandidaten.push([[i, j], (anHaupt ? 3 : 1) / (0.6 + dd)]);
@@ -501,7 +503,7 @@ function ergaenzeEntwurf(E, o) {
     for (let k = f.i0; k <= f.i1 + 1; k++) fixiere(E, k, f.j0, f.j1);
     if (variante === 'zwei') {
       const l = [];
-      for (let i = 0; i < nx(); i++) for (let j = 0; j < nz(); j++) { const dd = Math.hypot(i - mi, j - mj); if (zelleFrei(E, i, j) && dd >= 2 && dd < 3.5) l.push([i, j]); }
+      for (let i = 0; i < nx(); i++) for (let j = 0; j < nz(); j++) { const dd = wurzelSumme(i - mi, j - mj); if (zelleFrei(E, i, j) && dd >= 2 && dd < 3.5) l.push([i, j]); }
       if (l.length) { const [i, j] = waehle(r, l); nimm(E, { art: 'platz', i0: i, i1: i, j0: j, j1: j, seiten: seitenWahl() }); }
     }
   }
@@ -521,7 +523,7 @@ function ergaenzeEntwurf(E, o) {
   };
   // Flächen-Landmarken, die der Archetyp noch nicht gesetzt hat
   if (gewaehlt('slot:kirche') && !E.flaechen.some((f) => f.art === 'domplatz' || f.art === 'kirche')) {
-    const l = zellenNach((i, j) => Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 3, (i, j) => 1 / (0.5 + Math.abs(Math.hypot(i - E.zentrum.i, j - E.zentrum.j) - 1.5)));
+    const l = zellenNach((i, j) => wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) < 3, (i, j) => 1 / (0.5 + Math.abs(wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) - 1.5)));
     if (l.length) { const [i, j] = wahlGewichtet(r, l); nimm(E, { art: 'kirche', i0: i, i1: i, j0: j, j1: j, seiten: kirchSeiten() }); }
   }
   if (gewaehlt('slot:bahnhof') && !E.flaechen.some((f) => f.art === 'bahn') && o.bahn !== false) {
@@ -534,13 +536,13 @@ function ergaenzeEntwurf(E, o) {
     else E.landmarken.splice(E.landmarken.indexOf('slot:bahnhof'), 1);
   }
   if (gewaehlt('slot:schloss') && !E.flaechen.some((f) => f.art === 'schloss')) {
-    const l = zellenNach((i, j) => zelleFrei(E, i + 1, j) && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 1.5, () => 1);
+    const l = zellenNach((i, j) => zelleFrei(E, i + 1, j) && wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) > 1.5, () => 1);
     if (l.length) { const [i, j] = wahlGewichtet(r, l); nimm(E, { art: 'schloss', i0: i, i1: i + 1, j0: j, j1: j }); E.spalten[i] = Math.max(E.spalten[i], 56); E.spalten[i + 1] = Math.max(E.spalten[i + 1], 56); }
     else E.landmarken.splice(E.landmarken.indexOf('slot:schloss'), 1);
   }
   if (gewaehlt('slot:mall')) {
     // GESTALTUNG.md 3: Einkaufszentrum nicht im Zentrumsbild, sondern am Rand der Innenstadt
-    const l = zellenNach((i, j) => Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 5 && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 3.3, () => 1);
+    const l = zellenNach((i, j) => wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) < 5 && wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) > 3.3, () => 1);
     if (l.length) { const [i, j] = wahlGewichtet(r, l); nimm(E, { art: 'mall', i0: i, i1: i, j0: j, j1: j }); }
   }
   // --- Ost: Brachen (Abrissflächen) zwischen Zentrum und Plattenbaugürtel ---
@@ -548,7 +550,7 @@ function ergaenzeEntwurf(E, o) {
   E.brachenGezaehlt = E.brachenGezaehlt ?? 0;
   for (let k = 0; k < Math.min(E.brachen ?? 0, 1); k++) {
     if (E.brachenGezaehlt >= (BRACHEN_MAX[E.typ] ?? 1)) break;
-    const l = zellenNach((i, j) => { const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j); return dd > 1.4 && dd < 3.8 && (E.bracheErlaubt ? E.bracheErlaubt(i, j) : true) && !E.einkaufKern?.(i, j); }, () => 1);
+    const l = zellenNach((i, j) => { const dd = wurzelSumme(i - E.zentrum.i, j - E.zentrum.j); return dd > 1.4 && dd < 3.8 && (E.bracheErlaubt ? E.bracheErlaubt(i, j) : true) && !E.einkaufKern?.(i, j); }, () => 1);
     if (l.length) { const [i, j] = wahlGewichtet(r, l); nimm(E, { art: 'brache', i0: i, i1: i, j0: j, j1: j }); E.brachenGezaehlt++; }
   }
   // --- Umriss (vor Randflächen bestimmen) ---
@@ -571,34 +573,34 @@ function ergaenzeEntwurf(E, o) {
     if (f && f.art !== 'wasser') return true;
     if (E.warenhaus.i === i && E.warenhaus.j === j) return true;
     if (E.einkaufZellen?.has(`${i},${j}`) || E.einkaufKern?.(i, j)) return true;
-    return Math.hypot(i - E.zentrum.i, j - E.zentrum.j) < 1.6 || aktivRoh(i, j);
+    return wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) < 1.6 || aktivRoh(i, j);
   };
   const randZelle = (i, j) => E.aktiv(i, j) && ([[-1, 0], [1, 0], [0, -1], [0, 1]].some(([a, b]) => i + a < 0 || j + b < 0 || i + a >= nx() || j + b >= nz() || !E.aktiv(i + a, j + b)));
   // --- Einkaufszentren und Fachmarktlagen am Stadtrand (Standorte 'center' und 'rand') ---
   if (E.randStandorte?.length) randLagen(E, randZelle, zellenNach);
   // --- Discounter, Parks, Kleingärten, Parkplätze ---
   if (gewaehlt('slot:discounter')) {
-    const l = zellenNach((i, j) => randZelle(i, j) && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 3.2, () => 1);   // Großbau nicht im Zentrumsbild
+    const l = zellenNach((i, j) => randZelle(i, j) && wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) > 3.2, () => 1);   // Großbau nicht im Zentrumsbild
     if (l.length) { const [i, j] = wahlGewichtet(r, l); nimm(E, { art: 'gewerbe', i0: i, i1: i, j0: j, j1: j }); }
   }
   for (let k = 0; k < T.park + (r() < 0.4 ? 1 : 0); k++) {
-    const l = zellenNach((i, j) => E.aktiv(i, j) && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 1.6, (i, j) => 1 + (randZelle(i, j) ? 1 : 0));
+    const l = zellenNach((i, j) => E.aktiv(i, j) && wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) > 1.6, (i, j) => 1 + (randZelle(i, j) ? 1 : 0));
     if (!l.length) break;
     const [i, j] = wahlGewichtet(r, l);
     if (E.typ === 'metropole' && zelleFrei(E, i, j + 1) && r() < 0.6) nimm(E, { art: 'park', i0: i, i1: i, j0: j, j1: j + 1 });
     else nimm(E, { art: 'park', i0: i, i1: i, j0: j, j1: j });
   }
   if (E.typ !== 'metropole' || E.kleingaertenExtra) for (let k = 0, m = Math.floor(zw(r, 0, 2.6)) + (E.kleingaertenExtra ?? 0); k < m; k++) {
-    const l = zellenNach((i, j) => randZelle(i, j) && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 2.4, () => 1);
+    const l = zellenNach((i, j) => randZelle(i, j) && wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) > 2.4, () => 1);
     if (l.length) { const [i, j] = wahlGewichtet(r, l); nimm(E, { art: 'kleingarten', i0: i, i1: i, j0: j, j1: j }); }
   }
   if (r() < 0.45) {
     // GESTALTUNG.md: offene Parkplatzblöcke nur am Stadtrand, nie in der Innenstadt
-    const l = zellenNach((i, j) => randZelle(i, j) && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 2.6, () => 1);
+    const l = zellenNach((i, j) => randZelle(i, j) && wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) > 2.6, () => 1);
     if (l.length) { wahlGewichtet(r, l); }   // GESTALTUNG.md: keine offenen Parkplatzblöcke (Zufallszug bleibt für gleichen Plan)
   }
   if (r() < 0.3) {
-    const l = zellenNach((i, j) => E.aktiv(i, j) && Math.hypot(i - E.zentrum.i, j - E.zentrum.j) > 2, () => 1);
+    const l = zellenNach((i, j) => E.aktiv(i, j) && wurzelSumme(i - E.zentrum.i, j - E.zentrum.j) > 2, () => 1);
     if (l.length) { const [i, j] = wahlGewichtet(r, l); nimm(E, { art: 'park', i0: i, i1: i, j0: j, j1: j, spielplatz: true }); }
   }
   // Zusätzlicher Kanal, falls die Stadt noch kein Wasser hat
@@ -625,7 +627,7 @@ export function standortMasse(st) {
   const w = Math.max(20, Math.round(Math.sqrt(A * 1.5) / 5) * 5);
   return { w, d: Math.max(15, Math.round(A / w / 5) * 5) };
 }
-export const SLOT_ROLLE = { warenhaus: 'slot:warenhaus', sport: 'slot:sport', wettbewerber: 'slot:wettbewerber', wettbewerber_reserve: 'slot:wettbewerber_reserve', schwester: 'slot:schwester', outlet: 'slot:outlet' };
+export const SLOT_ROLLE = { premium: 'slot:premium', warenhaus: 'slot:warenhaus', sport: 'slot:sport', wettbewerber: 'slot:wettbewerber', wettbewerber_reserve: 'slot:wettbewerber_reserve', schwester: 'slot:schwester', outlet: 'slot:outlet' };
 
 /**
  * Sucht ein Kreuz aus zwei Haupteinkaufsstraßen (z-Linie kF, x-Linie lF) nahe dem Zentrum und verteilt die
@@ -635,7 +637,7 @@ export const SLOT_ROLLE = { warenhaus: 'slot:warenhaus', sport: 'slot:sport', we
 function einkaufslage(E, standorte) {
   const liste = standorte.map((st, n) => ({ st, n, m: standortMasse(st), lage: st.lage ?? '1a', rolle: st.rolle ?? 'warenhaus' }));
   const innen = liste.filter((e) => e.lage === '1a' || e.lage === 'b');
-  E.randStandorte = liste.filter((e) => (e.lage === 'center' || e.lage === 'rand') && e.rolle !== 'outlet');
+  E.randStandorte = liste.filter((e) => (e.lage === 'center' || e.lage === 'rand') );
   E.einkauf = [];
   E.einkaufZellen = new Set();
   // Maßstab: Metropolen mit vielen eigenen Innenstadthäusern erhalten ein bis zwei
@@ -675,7 +677,7 @@ function einkaufslage(E, standorte) {
   E.einkaufslage = lagen[0];
   E.einkaufslagen = lagen;
   E.einkaufKern = (i, j) => lagen.some((L) => ((i === L.kF - 1 || i === L.kF) && j >= L.j0 && j <= L.j1) || ((j === L.lF - 1 || j === L.lF) && i >= L.i0 && i <= L.i1));
-  const haupt = E.einkauf.find((e) => e.typ === 'slot:warenhaus' && e.lage === '1a') ?? E.einkauf[0];
+  const haupt = E.einkauf.find((e) => ['slot:warenhaus', 'slot:premium'].includes(e.typ) && e.lage === '1a') ?? E.einkauf[0];
   const L0 = lagen[0];
   E.warenhaus = haupt ? { i: haupt.i, j: haupt.j, W: haupt.W, D: haupt.D, ecke: haupt.ecke } : { i: L0.kF - 1, j: L0.lF - 1, W: 0, D: 0, ecke: '+x+z', leer: true };
   E.zentrum = { i: L0.kF - 1, j: L0.lF - 1 };
@@ -712,7 +714,7 @@ function einkaufsKreuz(E, innen, zc) {
     // GESTALTUNG.md 3/4: Wasser und Gleise nie als großer Bildteil der Einkaufslage. Solche Zellen nahe am Kreuz kosten Punkte.
     let nass = 0;
     for (let i = kF - 3; i <= kF + 2; i++) for (let j = lF - 3; j <= lF + 2; j++) { const f = E.belegt.get(`${i},${j}`); if (f && (f.art === 'wasser' || f.art === 'bahn')) nass += Math.max(i - kF + 1, kF - i, j - lF + 1, lF - j) <= 1 ? 1.6 : 0.7; }
-    const s = Math.min(gut, n1a + 2) * 3 + Math.min(k.length, n1a + 4) - 2.2 * Math.hypot(kF - 1 - zc.i, lF - 1 - zc.j) + r() * 0.5
+    const s = Math.min(gut, n1a + 2) * 3 + Math.min(k.length, n1a + 4) - 2.2 * wurzelSumme(kF - 1 - zc.i, lF - 1 - zc.j) + r() * 0.5
       - (kF < 2 || lF < 2 || kF > nx - 2 || lF > nz - 2 ? 4 : 0) - nass;
     if (!best || s > best.s) best = { s, kF, lF, k };
   }
@@ -721,14 +723,16 @@ function einkaufsKreuz(E, innen, zc) {
   const { kF, lF } = best;
   let kand = best.k;
   const meine = [];
-  const eigenesHaus = (rolle) => ['warenhaus', 'schwester', 'sport', 'outlet'].includes(rolle);
+  // Aus der Engine übernommene Häuser werden nicht auf demselben Stadtblock gestapelt.
+  const istEigen = (rolle) => ['warenhaus', 'premium', 'schwester', 'sport', 'outlet'].includes(rolle);
+  const istHartwig = (rolle) => rolle === 'warenhaus' || rolle === 'premium';
   const zulassig = (e, i, j) => E.einkauf.every((q) => {
-    if (!eigenesHaus(e.rolle) || !eigenesHaus(q.standort?.rolle)) return true;
-    const abstand = Math.abs(q.i - i) + Math.abs(q.j - j);
-    if (e.rolle === 'warenhaus' && q.standort.rolle === 'warenhaus') return abstand >= 3;
-    if ((e.rolle === 'schwester' && q.standort.rolle === 'warenhaus') ||
-        (e.rolle === 'warenhaus' && q.standort.rolle === 'schwester')) return abstand >= 2;
-    return abstand >= 1;
+    if (!istEigen(e.rolle) || !istEigen(q.standort?.rolle)) return true;
+    const d = Math.abs(q.i - i) + Math.abs(q.j - j);
+    if (istHartwig(e.rolle) && istHartwig(q.standort.rolle)) return d >= 3;
+    if ((e.rolle === 'schwester' && istHartwig(q.standort.rolle)) ||
+        (istHartwig(e.rolle) && q.standort.rolle === 'schwester')) return d >= 2;
+    return d >= 1;
   });
   const nimmZelle = (e, q, typLage) => {
     const slot = { i: q.i, j: q.j, W: e.m.w, D: e.m.d, ecke: q.ecke, typ: SLOT_ROLLE[e.rolle] ?? 'slot:warenhaus', standort: e.st, lage: typLage };
@@ -737,7 +741,7 @@ function einkaufsKreuz(E, innen, zc) {
     kand = kand.filter((x) => x !== q);
   };
   // Reihenfolge: Hartwig-Warenhäuser (groß zuerst) bekommen die besten Ecken, danach Wettbewerber und Sport nach Größe
-  const rang = (e) => e.rolle === 'warenhaus' && e.st.premium ? 0 : e.rolle === 'warenhaus' && e.st.hausklasse === 'A' ? 1 : e.rolle === 'warenhaus' ? 2 : 3;
+  const rang = (e) => e.rolle === 'premium' ? 0 : e.rolle === 'warenhaus' && e.st.hausklasse === 'A' ? 1 : e.rolle === 'warenhaus' ? 2 : 3;
   const a1 = innen.filter((e) => e.lage === '1a').sort((a, b) => rang(a) - rang(b) || b.m.w * b.m.d - a.m.w * a.m.d || a.n - b.n);
   const zuB = [];
   for (const e of a1) {
@@ -752,7 +756,7 @@ function einkaufsKreuz(E, innen, zc) {
     const l = [];
     for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
       if (!zelleFrei(E, i, j) || !zulassig(e, i, j) || i === kF - 1 || i === kF || j === lF - 1 || j === lF) continue;
-      const dd = Math.hypot(i + 0.5 - kx, j + 0.5 - kz);
+      const dd = wurzelSumme(i + 0.5 - kx, j + 0.5 - kz);
       if (dd < 1.2 || dd > 4) continue;
       const anHaupt = istHaupt(E.zTyp[i + 1]) || istHaupt(E.xTyp[j + 1]) || istHaupt(E.zTyp[i]) || istHaupt(E.xTyp[j]);
       const nachbar = [...E.einkaufZellen].some((s) => { const [a, b] = s.split(',').map(Number); return Math.abs(a - i) + Math.abs(b - j) <= 1; });
@@ -800,12 +804,12 @@ function randLagen(E, randZelle, zellenNach) {
   const belegt = [];
   const center = E.randStandorte.filter((e) => e.lage === 'center');
   const rand = E.randStandorte.filter((e) => e.lage !== 'center');
-  // Keine zwei eigenen Häuser unter demselben Block-/Center-Dach.
-  const gruppen = [...center].sort((a, b) => (a.rolle === 'warenhaus' ? 0 : 1) - (b.rolle === 'warenhaus' ? 0 : 1)
-    || b.m.w * b.m.d - a.m.w * a.m.d || a.n - b.n).map((e) => [e]);
+  // Kein gemeinsamer Center-Block für zwei Konzernhäuser.
+  const gruppen = [...center].sort((a, b) => (a.rolle === 'premium' || a.rolle === 'warenhaus' ? 0 : 1) -
+    (b.rolle === 'premium' || b.rolle === 'warenhaus' ? 0 : 1) || b.m.w * b.m.d - a.m.w * a.m.d || a.n - b.n).map((e) => [e]);
   const lagen = [...gruppen.map((g) => ({ art: 'center', liste: g })), ...rand.map((e) => ({ art: 'fachmarkt', liste: [e] }))];
   for (const L of lagen) {
-    const dist = (i, j) => Math.hypot(i - E.zentrum.i, j - E.zentrum.j);
+    const dist = (i, j) => wurzelSumme(i - E.zentrum.i, j - E.zentrum.j);
     const anHaupt = (i, j) => HAUPTLICH.has(E.zTyp[i + 1]) || HAUPTLICH.has(E.xTyp[j + 1]) || HAUPTLICH.has(E.zTyp[i]) || HAUPTLICH.has(E.xTyp[j]);
     const abstand = (i, j) => belegt.reduce((a, [p, q]) => Math.min(a, Math.abs(p - i) + Math.abs(q - j)), 99);
     // Center innerhalb der Karte mit Abstand zum Rand (zweite Zellreihe), damit sein Ausschnitt mittig in der Stadt liegt;
@@ -848,7 +852,7 @@ export function rasterPlan(seed, cfg) {
     warenhaus: cfg.warenhaus ? { ecke: '+x+z', ...cfg.warenhaus } : null, landmarken: [], tram: cfg.tram ?? [], fz: cfg.fz ?? [],
     zentrum: cfg.kern ?? { i: cfg.spalten.length / 2, j: cfg.reihen.length / 2 }, hoch: [], strassenFaktor: cfg.strassenFaktor ?? 1,
     bruecken: cfg.bruecken ?? 'zufall', baumarten: cfg.baumarten ?? REGIONEN[region].baeume, hochhausAnzahl: cfg.hochhaus ?? 0, rathausAmMarkt: cfg.rathaus !== false,
-    viertel: cfg.viertel ?? (typ === 'mittelstadt' ? ((i, j) => (Math.hypot(i - (cfg.kern?.i ?? 0), j - (cfg.kern?.j ?? 0)) < 1.7 ? 'altstadt' : 'nachkrieg')) : null),
+    viertel: cfg.viertel ?? (typ === 'mittelstadt' ? ((i, j) => (wurzelSumme(i - (cfg.kern?.i ?? 0), j - (cfg.kern?.j ?? 0)) < 1.7 ? 'altstadt' : 'nachkrieg')) : null),
     keineDetails: cfg.keineDetails ?? false,
   };
   if (E.versatz && typeof E.versatz !== 'function') { const v = E.versatz; E.versatz = () => v; E.fest = new Set(['0', `${cfg.spalten.length}`]); }
@@ -888,7 +892,7 @@ function baueRaster(seed, E) {
   const zelle = (i, j) => (i < 0 || j < 0 || i >= nx || j >= nz ? { f: null, akt: false } : { f: feld[i][j], akt: !!(feld[i][j] && feld[i][j].art !== 'wasser') || E.aktiv(i, j) });
   const istWasser = (c) => !!(c.f && c.f.art === 'wasser');
   const land = (c) => c.akt && !istWasser(c);
-  const viertelVon = (i, j) => (E.viertel ? E.viertel(i, j) : (() => { const dd = Math.hypot(i - E.zentrum.i, j - E.zentrum.j); return dd < 1.3 ? 'zentrum' : dd < 2.8 ? 'gruenderzeit' : 'nachkrieg'; })());
+  const viertelVon = (i, j) => (E.viertel ? E.viertel(i, j) : (() => { const dd = wurzelSumme(i - E.zentrum.i, j - E.zentrum.j); return dd < 1.3 ? 'zentrum' : dd < 2.8 ? 'gruenderzeit' : 'nachkrieg'; })());
   const brueckeP = E.bruecken === 'alle' ? 1 : E.bruecken === 'viele' ? 0.9 : T.bruecke;
   // --- Brücken je Fluss (gilt für Flüsse in beiden Richtungen) ---
   // Kandidaten sind alle Linien, die eine Wasserfläche queren: bei quer liegenden Flüssen die z-Linien k = i0+1 … i1,
@@ -1622,7 +1626,8 @@ function mergeRand(ctx, typ, [bmin, bmax], tiefe, seiten, extra = {}) {
       const n0 = (start + o) % liste.length;
       let summe = 0, n1 = n0;
       while (n1 < liste.length && summe < bmin) { summe += entlangX ? liste[n1].w : liste[n1].d; n1++; }
-      if (summe < bmin || summe > bmax * 1.4) continue;
+      // Toleranz: Breitensummen tragen Rundungsreste der Winkel-/Potenzfunktionen, die je JS-Engine im letzten Bit abweichen.
+      if (summe < bmin - 1e-6 || summe > bmax * 1.4 + 1e-6) continue;
       // Lücken in der Reihe ausschließen
       let ok = true;
       for (let q = n0 + 1; q < n1; q++) { const a = liste[q - 1], c = liste[q]; if (entlangX ? Math.abs(a.x + a.w - c.x) > 0.1 : Math.abs(a.z + a.d - c.z) > 0.1) ok = false; }
@@ -1693,7 +1698,7 @@ function blockDetails(ctx, E) {
   const alt = ctx.viertel === 'altstadt';
   const meine = () => b.parzellen.map((id) => parzelleVon(ctx, id)).filter(Boolean);
   // Blöcke im Zentrumsbild (bis drei Zellen um den Kern) bleiben ganz geschlossen (Zufallszüge bleiben gleich)
-  const kernNah = Math.hypot((b.i0 + b.i1) / 2 - E.zentrum.i, (b.j0 + b.j1) / 2 - E.zentrum.j) < 3.2;
+  const kernNah = wurzelSumme((b.i0 + b.i1) / 2 - E.zentrum.i, (b.j0 + b.j1) / 2 - E.zentrum.j) < 3.2;
   for (const p of meine()) {
     if (p.typ !== 'stadthaus') continue;
     const x = rb();
@@ -1733,7 +1738,7 @@ function blockDetails(ctx, E) {
 
 function setzeLandmarke(typL, def, g) {
   const { E, r, bloecke, parzellen, T } = g;
-  const dist = (b) => Math.hypot((b.i0 + b.i1) / 2 - E.zentrum.i, (b.j0 + b.j1) / 2 - E.zentrum.j);
+  const dist = (b) => wurzelSumme((b.i0 + b.i1) / 2 - E.zentrum.i, (b.j0 + b.j1) / 2 - E.zentrum.j);
   const ctxVon = (b) => ({ T, rb: rng(b.seed + typL.length * 7), b, parzellen, region: g.region, typ: g.typ, klasse: b.klasse, viertel: b.viertel, stile: [['gruenderzeit', 1]] });
   const tiefe = zw(r, ...(def.tiefe ?? [20, 30])), br = def.breite ?? [20, 40];
   if (def.art === 'rand') {
@@ -1741,8 +1746,8 @@ function setzeLandmarke(typL, def, g) {
     const wh = bloecke.find((b) => b.art === 'warenhaus');
     const gewicht = (b) => {
       const d = dist(b);
-      if (typL === 'slot:hotel' && bahn) return 1 / (1 + Math.hypot(b.i0 - bahn.i0, b.j0 - bahn.j0));
-      if (typL === 'slot:parkhaus' && wh) return 1 / (0.5 + Math.hypot(b.i0 - wh.i0, b.j0 - wh.j0));
+      if (typL === 'slot:hotel' && bahn) return 1 / (1 + wurzelSumme(b.i0 - bahn.i0, b.j0 - bahn.j0));
+      if (typL === 'slot:parkhaus' && wh) return 1 / (0.5 + wurzelSumme(b.i0 - wh.i0, b.j0 - wh.j0));
       if (typL === 'slot:hochhaus') return E.typ === 'metropole' ? 1 / (0.6 + d) : 1 / (1 + Math.abs(d - 2.5));
       return 1 / (0.5 + d);
     };
@@ -1948,7 +1953,7 @@ function randSchliessen(b, g) {
   const V = VIERTEL[b.viertel] ?? VIERTEL.gruenderzeit;
   const ctx = { T, rb: rng((b.seed ?? 1) + 4711), b, parzellen, klasse: b.klasse ?? 3, var: 0.5, stile: V.stile, stil: b.stil, region: E.region, typ: g.typ, viertel: b.viertel, material: g.R?.material };
   const tiefe = Math.max(T.tiefe[0], Math.min(16, Math.min(b.w, b.d) * 0.22));
-  const kern = Math.hypot((b.i0 + b.i1) / 2 - E.zentrum.i, (b.j0 + b.j1) / 2 - E.zentrum.j) < 3.2;
+  const kern = wurzelSumme((b.i0 + b.i1) / 2 - E.zentrum.i, (b.j0 + b.j1) / 2 - E.zentrum.j) < 3.2;
   const ost = !!E.ddr;
   let neu = 0;
   for (const sd of ['+z', '-z', '+x', '-x']) {
@@ -2031,7 +2036,7 @@ function nachbarnSetzen(b, parzellen) {
   // GESTALTUNG.md: geschlossene Zeile. Ein Haus, dessen zweite sichtbare Seite (+x bei Straße +z, +z bei Straße +x) an
   // einen Nachbarbau stößt, bekommt dort eine Brandwand statt einer Seitenfassade (p.anbau → stadthaus seite 'nachbar').
   const BAU = (q) => q && !['luecke', 'baustelle', 'parkplatz', 'platz', 'durchgang'].includes(q.typ) && !q.leer;
-  const hartwig = meine.some((q) => q.typ === 'slot:warenhaus');
+  const hartwig = meine.some((q) => q.typ === 'slot:warenhaus' || q.typ === 'slot:premium');
   if (hartwig) for (const p of meine) if (p.typ === 'stadthaus' || p.typ === 'eck') p.hartwigBlock = true;
   for (const p of meine) {
     if (p.typ !== 'stadthaus' && p.typ !== 'hofhaus') continue;

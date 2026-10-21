@@ -55,8 +55,11 @@ function erreichbar(reach,g,r,puffer=0) {
   for(let z=c;z<d;z++)for(let x=a;x<b;x++)if(seen[z*nx+x]&&!block[z*nx+x])return true;
   return false;
 }
-function groessteLeere(g) {
-  const {nx,nz,block}=g;let max=0;
+function groessteLeere(g, gaenge=[]) {
+  const {nx,nz}=g,block=g.block.slice();let max=0;
+  // Haupt- und Nebengänge sind bewusst freigehaltene Verkehrsflächen,
+  // keine fehlbestückten Restflächen. Nur echte Verkaufsraumlücken messen.
+  for(const weg of gaenge)g.set(weg,block);
   const vorher=new Int32Array(nx+1),jetzt=new Int32Array(nx+1);
   for(let z=1;z<=nz;z++) {
     for(let x=1;x<=nx;x++){
@@ -71,7 +74,7 @@ function wanddeckung(plan) {
   // Nur wirklich gesperrte Wandabschnitte aus dem Nenner entfernen.
   // Die frühere Subtraktion der *gesamten* Ausnahmen vom belegten Band
   // hat dort Belegung als Null gezählt, wo ein Lager das Wandmodul ersetzte.
-  const exempt=plan.hindernisse.filter(h=>/^(treppe|rt|lager|umkleide|service|aufzug|wc|werkstatt|luft|turm)/.test(String(h.typ)));
+  const exempt=plan.hindernisse.filter(h=>/^(treppe|rt|lager|umkleide|service|aufzug|wc|werkstatt|luft|turm|radbuehne)/.test(String(h.typ)));
   const intervalle=(typ,max)=>({
     ausnahmen:exempt.filter(h=>typ==='west'?h.x<=S:h.z<=S).map(h=>typ==='west'?[h.z,h.z+h.d]:[h.x,h.x+h.w]),
     band:plan.moebel.filter(m=>m.typ==='wand'&&m.band===typ).map(m=>typ==='west'?[m.z,m.z+m.d]:[m.x,m.x+m.w]),
@@ -99,7 +102,7 @@ export function pruefeLadenplan(plan,{teile=null}={}) {
   const flaeche=plan.breite*plan.tiefe,verfuegbar=flaeche-zaehle(g.ob,1)*S*S;
   const belegt=zaehle(g.mob,1)*S*S;
   const dichte=verfuegbar>0?belegt/verfuegbar:0;
-  const wand=wanddeckung(plan),leer=groessteLeere(g);
+  const wand=wanddeckung(plan),leer=groessteLeere(g,plan.gaenge);
   const boeden=unique(plan.boeden.map(b=>b.typ)),akzent=plan.boeden.filter(b=>b.typ==='akzent').reduce((n,b)=>n+rechteckFlaeche(b),0)/flaeche;
   const dekoflaeche=plan.moebel.filter(m=>m.typ==='deko').reduce((n,m)=>n+rechteckFlaeche(m),0)/flaeche;
   if(!reach.start)add('Wege','Eingang blockiert');
@@ -142,8 +145,24 @@ export function pruefeLadenplan(plan,{teile=null}={}) {
   if(leer>R.leerflaecheMax+EPS)add('Leerfläche',leer.toFixed(2)+' m statt 6 m');
   for(const a of plan.abteilungen){
     const ins=plan.moebel.filter(m=>m.abteilung===a.id&&m.inszenierung);
-    if(ins.length>R.inszenierungenJeAbteilungMax)add('Insel',a.id+': '+ins.length+' Inszenierungen');
-    if(plan.profil==='outlet'&&ins.length)add('Format','FUNDUS ohne Inszenierung');
+    const fest=(plan.festeInszenierungen??[]).filter(m=>m.abteilung===a.id);
+    const anzahl=ins.length+fest.length;
+    if(anzahl>R.inszenierungenJeAbteilungMax)add('Insel',a.id+': '+anzahl+' Inszenierungen');
+    if(plan.profil==='sport'&&anzahl!==1)add('Insel',a.id+': genau eine Erlebnisinszenierung erforderlich, '+anzahl+' gefunden');
+    if(plan.profil==='outlet'&&anzahl)add('Format','FUNDUS ohne Inszenierung');
+  }
+  // Phase 4: Kompositionsprüfung zusätzlich zu Dichte und Laufwegen.
+  if(plan.profil==='sport')for(const a of plan.abteilungen) {
+    const inventar=plan.moebel.filter(m=>m.abteilung===a.id);
+    const arten=new Map();
+    for(const m of inventar) {
+      const typ=m.moebelart??m.id;
+      arten.set(typ,(arten.get(typ)??0)+1);
+    }
+    if(arten.size<4)add('Sortimentsmix',a.id+': nur '+arten.size+' Möbelarten statt 4');
+    const groesste=Math.max(0,...arten.values());
+    if(inventar.length&&groesste>0.4*inventar.length+EPS)
+      add('Sortimentsmix',a.id+': ein Möbeltyp mit '+(100*groesste/inventar.length).toFixed(1)+' % statt höchstens 40 %');
   }
   if(teile!==null&&teile>R.budgetEtage)add('Budget',teile+' Teile');
   if(teile===null)warnungen.push('Teilezahl nicht aus Geometrie gemessen');

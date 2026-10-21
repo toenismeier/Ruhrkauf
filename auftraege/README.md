@@ -1,5 +1,7 @@
 # Aufträge
 
+**Gesamtstatus aller Workstreams: `auftraege/STATUS.md`.**
+
 Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem Auftrag lesen: `README.md`, `engine/README.md`, `render/KIT.md`, `render/GESTALTUNG.md`, `HQ-VERTRAG.md`, `EINKAUF-VERTRAG.md`, `VORSTAND-MARKETING-VERTRAG.md`.
 
 ## Reihenfolge und Abhängigkeiten
@@ -9,17 +11,26 @@ Jeder Auftrag ist eigenständig und für einen eigenen Lauf gedacht. Vor jedem A
 | `grafik-schwesterkette.md` + `nachbesserung-schwesterkette.md` | `feat/grafik-schwesterkette` | **gemergt 19.10.** | |
 | `grafik-sport.md` + `nachbesserung-sport.md` | `feat/grafik-sport` | **gemergt 19.10.** | |
 | `grafik-outlet.md` + `nachbesserung-outlet.md` | `feat/grafik-outlet` | **gemergt 20.10.** | |
-| `grafik-premium.md` + `nachbesserung-premium.md` | `feat/grafik-premium` | (Merge Schwesterkette, darf vorher starten) | Outlet, Posteingang, Wettbewerber-Engine |
+| `grafik-premium.md` + `nachbesserung-premium.md` | `feat/grafik-premium` | **gemergt 20.10.** | |
 | `engine-wettbewerber.md` + `nachbesserung-wettbewerber.md` | `feat/engine-wettbewerber` | **gemergt 19.10.** | |
 | `grafik-wettbewerber-im-spiel.md` | `feat/grafik-wettbewerber-spiel` | **gemergt 19.10.** | |
 | `engine-formate.md` | `feat/engine-formate` | Merge Schwesterkette, Merge Outlet, Engine-Maßstab Phase 1 | Posteingang, Städte, Oberfläche |
-| `workstream-ladenbau.md` (mehrere Chats, Stand in `ladenbau-stand.md`), aktuell `nachbesserung-ladenbau-p3.md` | `feat/ladenbau` bzw. `feat/ladenbau-p<N>` | **Phase 1 bis 3 gemergt 20.10.** Weiter mit Phase 4 ff. von `main` | |
+| `workstream-ladenbau.md` (mehrere Chats, Stand in `ladenbau-stand.md`), aktuell Phase 5 FUNDUS innen | `feat/ladenbau` bzw. `feat/ladenbau-p<N>` | **Phase 1 bis 4 gemergt 20.10.** Phase 5 in Arbeit auf `feat/ladenbau-p5` von `main`; Sport-Restpunkte aus `nachbesserung-ladenbau-p4.md` Abschnitt 4 integriert, lokale Build-/Bildabnahme offen | |
 | `engine-massstab.md` + `nachbesserung-massstab.md` (mehrere Chats, Stand in `massstab-stand.md`) | `feat/engine-massstab` | Phase 1 Daten fertig, jetzt Phase 2 auf demselben Branch; Merge erst nach Phase 2; Phase 3 nach `engine-formate.md` | allem außer `engine-formate.md` gleichzeitig |
 | `massstab-staedte.md` | `feat/massstab-staedte` | Engine-Maßstab Phase 1 | Oberfläche, Ladenbau, Engine-Aufträgen |
 | `massstab-oberflaeche.md` | `feat/massstab-oberflaeche` | Engine-Maßstab Phase 1 | allem |
 | `massstab-leistung.md` | `feat/massstab-leistung` | Städte Phase 2 | Oberfläche |
-| `spiel-reise-und-wochenabschluss.md` | `feat/spiel-reise-woche` | | allem (nur `render/`, eigene Module) |
+| `spiel-reise-und-wochenabschluss.md` | `feat/spiel-reise-woche` | **gemergt 20.10.** Weiter: `nachbesserung-reise-woche.md` auf `feat/spiel-reise-woche-2` | allem |
 | `spiel-posteingang.md` | `feat/spiel-posteingang` | **gemergt 19.10.** Folgeschritt: Wettbewerbsmeldungen in die Kategorie Konkurrenz (kleiner Commit) | |
+
+## Operatives Paket
+Eigene Aufträge in `auftraege/operativ/` (Übersicht und Schnittstellen in `auftraege/operativ/README.md`). O01 und O02 zuerst, O03 nach O01, danach O04 bis O09 parallel.
+
+## TestFlight-Wurf 1
+Aufträge Q01 bis Q05 in `auftraege/wurf1/` (Übersicht und Reihenfolge in `auftraege/wurf1/README.md`).
+
+## Nice-to-have
+Eigene Aufträge in `auftraege/nice/` (Übersicht in `auftraege/nice/README.md`). N13 Einstellungen und N14 Testwerkzeuge zuerst, danach alles parallel.
 
 ## Ohne CI arbeiten (gilt, solange GitHub Actions blockiert ist)
 - GitHub Actions startet derzeit keine Jobs (Kontingent). Nicht auf die CI warten.
@@ -48,6 +59,9 @@ Vor dem PR immer auf den aktuellen `main` rebasen. Wer als Zweiter mergt, löst 
 Merge in `main` nur mit grüner CI bzw., solange die CI blockiert ist, mit grünem lokalem Lauf. Nach jedem Merge: `README.md` (Abschnitt Stand) und betroffene Verträge fortschreiben.
 
 ## Regeln für alle Aufträge
+- **Stadt-Fingerabdrücke (Q03):** Vor jedem Merge `cd render && node pruef-fingerabdruck.js` lokal ausführen. Jeder PR, der eine Stadt verändert, nennt **alle betroffenen Städte und den Grund** in seiner Beschreibung; ohne diese Angabe und ohne bewusst freigegebene neue Referenzen **kein Merge**. Änderungen an Stadtplan, Geometrie oder Startbild müssen nachvollziehbar sein. Referenzen ausschließlich mit `node pruef-fingerabdruck.js --neu <stadt-id …>` aktualisieren und die geänderten `render/fingerabdruck/<stadt-id>.json` sowie `render/fingerabdruck/bilder/<stadt-id>.png` einchecken. Es gibt keine automatische Referenz-Aktualisierung bei der Prüfung. Bei CI-Kontingentsperre dokumentiert die PR den grünen lokalen Lauf und das Ergebnis der Gegenprobe.
+- **Spielbarkeits-Referenz ist Bot D** (`botRegulaer`, Turnaround ohne Insolvenz), nicht mehr Bot C. Wo ein Auftrag „Bot C überlebt 5 Jahre“ verlangt, gilt ab 21.10.2026: Bot D wird nicht schlechter als auf `main`, Bot C nur als Nebenprüfung (siehe `nachbesserung-massstab.md` Abschnitt 14). Hintergrund: Turnaround und Management zuerst, Insolvenz ganz am Ende.
+- **Workflows:** Keine neuen GitHub-Workflows mit `push`-Trigger anlegen. `quality.yml` läuft nur beim Öffnen eines PR gegen `main` und von Hand.
 - **Actions-Minuten sparen:** Kataloge nicht bei jedem Push in der CI rendern. Render-Workflows nur über `workflow_dispatch` oder einmal vor dem PR. Kein `push`-Trigger für Render-Jobs, keine Bild-Commits durch den Bot bei jedem Lauf. Prüfungen und Renderings, wo möglich, lokal ausführen und das Protokoll in die Stand-Datei schreiben.
 - Deutsch mit echten Umlauten in Code-Texten, Oberfläche und Doku. Keine echten Marken, Firmen oder Personen.
 - Engine deterministisch über den Seed, Zufall nur über die vorhandenen RNG-Helfer (`engine/src/util.ts`), Geld in ganzen Euro.

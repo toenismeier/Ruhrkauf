@@ -10,6 +10,8 @@
 //   6 Postmoderne 90er: Zylinderecke innen als Rundbühne.
 // Center-Häuser (lage 'center') liegen immer an der Mall-Passage, auch als Großfläche (Familie 3).
 // Abteilungen aus sportabteilung.js über flaeche() bzw. Regalgassen (gassen()).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, zw, waehle, Sammler, dunkler, heller, baum } from './basis.js';
 import {
   RASTER, WANDHOEHE, GLAS, vorbereiten, lokal, rueckwand, stuetze, rolltreppe, aufzug, treppenhaus, lager, haengeschild,
@@ -20,6 +22,8 @@ import { flaeche, fremdflaeche, abteilungsArt } from './abteilung.js';
 import * as SA from './sportabteilung.js';
 import { familieSport, masseSport, sportGefuehl, HS_ROT, HS_BLAU } from './sporthaus.js';
 import { westAuto } from './westbauten.js';
+import { ladenplan, baueLadenplan } from './ladenplan.js';
+import { sportLadenEingabe } from './ladenbau-sport.js';
 
 const R = RASTER, WH = WANDHOEHE, PI = Math.PI;
 const HUB = 4.2 + 0.4; // Geschosshöhe innen (wie WANDHOEHE)
@@ -197,6 +201,24 @@ export function sportEtage(S, scene, haus, etageNr, o = {}) {
   vorbereiten(S, scene);
   const ra = sportRaster(haus, etageNr, o);
   const zn = sportZonen(haus, etageNr, ra);
+  // Phase 4: gemeinsame Ladenplanung ist Standard; altbestand nur für den visuellen Vorher-Vergleich.
+  const plan = o.altbestand ? null : (() => {
+    const eingabe = sportLadenEingabe(haus, etageNr, o, ra);
+    const p = ladenplan(eingabe.flaeche, 'sport', eingabe.abteilungen, haus.id + ':' + etageNr);
+    p.variante = ra.box ? 'halle' : 'flaeche';
+    // Das Formatprofil steuert die Fläche; die sechs Außenfamilien behalten ihren Gangfarbton.
+    for (const b of p.boeden) if (b.typ === 'gang') b.farbe = STIL[ra.fam].gang.a;
+    // Obere Abverkaufsetage: Waren aus der Sport-Bibliothek, keine Altgeometrie auf den Gängen.
+    if (ra.abverkauf) {
+      let n = 0;
+      for (const m of p.moebel) if (m.typ === 'gondel' && m.w === 5 && m.d === 1.25) {
+        if (n++ % 3 === 0) m.id = 'sport_abverkauf_tisch';
+        else if (n % 3 === 2) m.id = 'sport_abverkauf_gitter';
+      }
+      p.abverkauf = true;
+    }
+    return p;
+  })();
   const { B, T, nx, nz } = ra;
   let ax0 = 0, az0 = 0, ax1 = B, az1 = T;
   if (o.ausschnitt) {
@@ -219,7 +241,7 @@ export function sportEtage(S, scene, haus, etageNr, o = {}) {
   for (;;) {
     tmp = new Sammler(); gruppe = new THREE.Group(); tmp.szene = gruppe; vorbereiten(tmp, gruppe);
     kk = { ax0, az0, ax1, az1, drin, d, kunden, o };
-    bauen(tmp, gruppe, haus, etageNr, ra, zn, kk);
+    bauen(tmp, gruppe, haus, etageNr, ra, zn, kk, plan);
     if (tmp.anzahl <= budget || versuch > 8) break;
     versuch++;
     const f = Math.max(0.5, Math.min(0.92, (budget * 0.97) / tmp.anzahl));
@@ -232,10 +254,10 @@ export function sportEtage(S, scene, haus, etageNr, o = {}) {
   const eg = etageNr === 0;
   const aussen = eg ? (ra.mall ? 9.5 : ra.box ? 19 : 7) : ra.mall ? 9.5 : 0.4;
   const box = new THREE.Box3(new THREE.Vector3(ax0 - (ra.mall && eg && ax0 === 0 ? 7.6 : 0.6), eg ? -0.3 : ra.mall ? -4.8 : -2.2, az0 - (ra.mall && eg && az0 === 0 ? 7.6 : 0.6)), new THREE.Vector3(ax1 + (ra.mall ? 9.5 : eg ? 7 : 0.4), WH + (ra.hochpunkt ?? 0), az1 + aussen));
-  return { box, breite: B, tiefe: T, zonen: zn, anzahl: tmp.anzahl, dichte: d, kunden, leer: kk.leer, familie: ra.fam };
+  return { box, breite: B, tiefe: T, zonen: plan?.abteilungen ?? zn, anzahl: tmp.anzahl, dichte: d, kunden, leer: kk.leer, familie: ra.fam, ladenplan: plan };
 }
 
-function bauen(S, scene, haus, e, ra, zn, k) {
+function bauen(S, scene, haus, e, ra, zn, k, plan = null) {
   const { B, T, nx, nz, typ, fam } = ra;
   const { ax0, az0, ax1, az1, drin, d } = k;
   const hid = (haus.id ?? 'S').split('').reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0;
@@ -247,7 +269,13 @@ function bauen(S, scene, haus, e, ra, zn, k) {
   const sicht = (x, z) => x >= ax0 - 0.01 && x <= ax1 + 0.01 && z >= az0 - 0.01 && z <= az1 + 0.01;
   const frei = [], belegt = [];
   ra.belegt = belegt; ra.ausschnitt = [ax0, az0, ax1, az1]; ra.drin = drin;
-  ra.artAn = (i, j) => { const q = zoneVon[i]?.[j]; return q >= 0 ? zn[q].art : null; };
+  ra.artAn = (i, j) => {
+    if (plan) {
+      const x = (i + 0.5) * R, z = (j + 0.5) * R;
+      return plan.abteilungen.find(a => x >= a.x && x < a.x + a.w && z >= a.z && z < a.z + a.d)?.id ?? null;
+    }
+    const q = zoneVon[i]?.[j]; return q >= 0 ? zn[q].art : null;
+  };
   ra.hochpunkt = 0;
   const ctx = { S, scene, r, d, zaehler: { wand: 0, insel: 0 }, basisSeed: hid % 7 };
 
@@ -271,7 +299,18 @@ function bauen(S, scene, haus, e, ra, zn, k) {
     return 'nachbar';
   };
   const egFront = eg && [2, 3, 5, 6].includes(fam) && !ra.mall;
-  zn.forEach((z, zi) => {
+  if (plan) {
+    baueLadenplan(S, scene, plan, { vorbereiten: false, dichte: d,
+      moebelGeneration: haus.etagenBau?.[etageNr]?.moebelGeneration ?? 3,
+      ausschnitt: {x0:ax0,z0:az0,x1:ax1,z1:az1},
+      bodenAussparungen: loecher.map(([x0,z0,x1,z1])=>({x:x0,z:z0,w:x1-x0,d:z1-z0})) });
+    // Die vorhandene Leerflächenmessung und Kundenverteilung berücksichtigen die neuen Möbel.
+    belegt.push(...plan.moebel.map(m => [m.x, m.z, m.x + m.w, m.z + m.d]));
+    belegt.push(...plan.hindernisse.map(h => [h.x, h.z, h.x + h.w, h.z + h.d]));
+    for (const g of plan.gaenge) for (let z = g.z + 0.7; z < g.z + g.d - 0.3; z += 2.5)
+      for (let x = g.x + 0.7; x < g.x + g.w - 0.3; x += 2.5)
+        if (x >= ax0 && x <= ax1 && z >= az0 && z <= az1) frei.push([x, z]);
+  } else zn.forEach((z, zi) => {
     if (!z.zellen.some((c) => drin(c.i, c.j))) return;
     const f = z.flaeche, art = z.art;
     const Z = { alle: z.zellen.filter((c) => drin(c.i, c.j)), kante, sicht, y: 0, bereich: [ax0, az0, ax1, az1] };
@@ -300,6 +339,8 @@ function bauen(S, scene, haus, e, ra, zn, k) {
   for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
     if (!drin(i, j)) continue;
     const t = typ[i][j], x = i * R, z = j * R, sd = (i * 131 + j * 17 + e * 7 + 1) * 3, rr = rng(sd);
+    // Gänge, Kasse und Verkaufsflächen kommen jetzt vollständig aus dem Ladenplan.
+    if (plan && ['gang', 'neben', 'kasse', 'wagen', 'eingang', 'aktion'].includes(t)) continue;
     const zu = (x0, z0, x1, z1) => belegt.push([x0, z0, x1, z1]);
     switch (t) {
       case 'gang': gangZelle(S, scene, i, j, ra, d, frei, rr, stil); break;
@@ -389,7 +430,7 @@ function bauen(S, scene, haus, e, ra, zn, k) {
   };
   // Restflächen über 5,5 m bekommen eine Aktionsinsel passend zur Abteilung (höchstens vier)
   let lf = quadrat();
-  for (let n = 0; n < 4 && lf.m > 5.5; n++) {
+  for (let n = 0; !plan && n < 4 && lf.m > 5.5; n++) {
     const cx = lf.wo[0] + lf.m / 2, cz = lf.wo[1] + lf.m / 2;
     aktionsinsel(S, scene, cx, cz, ra.artAn(Math.floor(cx / R), Math.floor(cz / R)), rng(n * 31 + e), d, frei);
     belegt.push([cx - 1.7, cz - 1.7, cx + 1.7, cz + 1.7]);
@@ -570,8 +611,8 @@ function verbindung(S, scene, x, z, t, ra, d, r, frei) {
   const treppeLauf = (zz, y0, lauf, hoch, von) => {
     const nSt = d < 0.5 ? 10 : 18;
     for (let q = 0; q < nSt; q++) { const tt = (q + 0.5) / nSt; const hh = von + hoch * (q + 1) / nSt; S.box(lauf / nSt + 0.02, 0.18, 1.4, x + 9.2 - tt * lauf, y0 + hh - 0.09, zz, stufeF); }
-    const g = new THREE.BoxGeometry(Math.hypot(lauf, hoch), 0.35, 0.08); g.rotateZ(Math.atan2(hoch, lauf)); g.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.2, zz - 0.74); S.add(g, wangeF);
-    const g2 = new THREE.BoxGeometry(Math.hypot(lauf, hoch), 0.9, 0.04); g2.rotateZ(Math.atan2(hoch, lauf)); g2.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.8, zz + 0.74); S.add(g2, GLAS);
+    const g = new THREE.BoxGeometry(wurzelSumme(lauf, hoch), 0.35, 0.08); g.rotateZ(Math.atan2(hoch, lauf)); g.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.2, zz - 0.74); S.add(g, wangeF);
+    const g2 = new THREE.BoxGeometry(wurzelSumme(lauf, hoch), 0.9, 0.04); g2.rotateZ(Math.atan2(hoch, lauf)); g2.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.8, zz + 0.74); S.add(g2, GLAS);
   };
   if (ab) {
     const tief = 1.8;

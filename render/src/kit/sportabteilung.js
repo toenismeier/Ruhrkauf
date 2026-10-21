@@ -4,6 +4,8 @@
 //
 // export SPORT_MARKEN (fiktive Markenshops, Nordline ist Lieferantenmarke aus der Engine), regalSchwer (Schwerlastregal),
 //        einkaufswagen, radMontage, sportFigurSitz, SPORT_ARTEN
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, zw, waehle, dunkler, heller } from './basis.js';
 import { figur, puppe, GLAS, kassentresen } from './innen.js';
 import * as I from './innen.js';
@@ -253,7 +255,7 @@ function kuppelzelt(L, lx, lz, f, s = 1) {
   L.box(0.5 * s, 0.75 * s, 0.04, lx, 0.05, lz + 1.2 * s, '#30343a');
   L.box(0.05, 0.05, 1.9 * s, lx, 0.05 + 0.95 * s, lz, heller(f, 0.12)); L.box(2.4 * s, 0.04, 0.05, lx, 0.05 + 0.93 * s, lz, heller(f, 0.12));
   for (const [dx, dz] of [[-1.9, -1.1], [1.9, -1.1], [-1.9, 1.1], [1.9, 1.1]]) {
-    const len = Math.hypot(dx * 0.45, 0.9 * s), lg = new THREE.BoxGeometry(0.02, len, 0.02);
+    const len = wurzelSumme(dx * 0.45, 0.9 * s), lg = new THREE.BoxGeometry(0.02, len, 0.02);
     lg.rotateZ(Math.atan2(dx * 0.45, 0.9 * s) * (dx > 0 ? -1 : -1) * -1); lg.rotateX(dz > 0 ? 0.5 : -0.5);
     L.geo(lg, lx + dx * 0.78 * s, 0.05 + 0.45 * s, lz + dz * 0.78 * s, '#f2f1ec');
     L.box(0.05, 0.12, 0.05, lx + dx * s, 0.05, lz + dz * s, '#9aa3aa');
@@ -433,8 +435,8 @@ function stollenWand(L, w, r, d, ctx) {
 /** Jugendtor 3,2 × 1,9 m mit Netz (Gitterlinien). */
 function torGross(L, lx, lz, w = 3.2, h = 1.9) {
   L.box(w, 0.1, 0.1, lx, h, lz, '#ffffff'); for (const s of [-1, 1]) L.box(0.1, h, 0.1, lx + s * (w / 2 - 0.05), 0, lz, '#ffffff');
-  L.box(w, 0.04, 0.04, lx, 0, lz - 0.9, '#dfe5e8'); for (const s of [-1, 1]) { const g = new THREE.BoxGeometry(0.04, 0.04, Math.hypot(0.9, h)); g.rotateX(-Math.atan2(h, 0.9) + PI / 2); L.geo(g, lx + s * (w / 2 - 0.05), h / 2, lz - 0.45, '#dfe5e8'); }
-  for (let q = 1; q < 8; q++) { const u = lx - w / 2 + q * (w / 8); const g = new THREE.BoxGeometry(0.015, Math.hypot(0.9, h), 0.015); g.rotateX(Math.atan2(0.9, h)); L.geo(g, u, h / 2, lz - 0.45, '#eef2f4'); }
+  L.box(w, 0.04, 0.04, lx, 0, lz - 0.9, '#dfe5e8'); for (const s of [-1, 1]) { const g = new THREE.BoxGeometry(0.04, 0.04, wurzelSumme(0.9, h)); g.rotateX(-Math.atan2(h, 0.9) + PI / 2); L.geo(g, lx + s * (w / 2 - 0.05), h / 2, lz - 0.45, '#dfe5e8'); }
+  for (let q = 1; q < 8; q++) { const u = lx - w / 2 + q * (w / 8); const g = new THREE.BoxGeometry(0.015, wurzelSumme(0.9, h), 0.015); g.rotateX(Math.atan2(0.9, h)); L.geo(g, u, h / 2, lz - 0.45, '#eef2f4'); }
   for (let q = 1; q < 5; q++) L.box(w - 0.1, 0.015, 0.015, lx, h * q / 5, lz - 0.9 * (1 - q / 5), '#eef2f4');
 }
 function torInsel(L, r, d, ctx) {
@@ -514,6 +516,8 @@ Object.assign(ABT, {
 });
 for (const g of SPORT_ARTEN) ABT[g].kante = ABT[g].kante ?? KANTE;
 export const SPORT_NAMEN = Object.fromEntries(SPORT_ARTEN.map((g) => [g, ABT[g].name]));
+export const SPORT_BOEDEN = Object.freeze(Object.fromEntries(SPORT_ARTEN.map(g=>[g,ABT[g].boden.a])));
+export const SPORT_SCHILDER = Object.freeze(Object.fromEntries(SPORT_ARTEN.map(g=>[g,ABT[g].schild.farbe])));
 export { kanu, radWerkstatt, skiService, kuppelzelt, torGross, paar, schuh, laufband, helm, fels, pflanze, bank, karton, bildschirm, VEREINE, WINTER, OUT, SCHUH, RADF };
 
 /** Die A-Haus-Erlebnisfläche benutzt dieselben Geräte wie die regulären Sportabteilungen. */

@@ -1,8 +1,10 @@
+import { initialisiereWare } from './merchandise';
 import {
   CLUSTER_FAKTOR, GRUPPEN, LAGE_FAKTOR, LIEFERANTEN, NACHNAMEN, STAEDTE, STANDORT_ZUSATZ, VERMIETER, VORNAMEN,
   BERATER, PREMIUM_HAEUSER, gruppenFuer,
 } from './daten';
 import type { Cluster, Flaeche, Format, GameState, GruppeId, Haus, Kohorte, Lage, Region } from './types';
+import { initialisierePlanung } from './planung';
 import { chance, clamp, eur, ganzZwischen, waehle, zwischen, type RngHalter } from './util';
 import { erzeugeHq, hqAktualisiere, neueHqAngebote } from './hq';
 import { erzeugeEinkauf, initialisiereEinkauf } from './einkauf';
@@ -13,11 +15,24 @@ import { erzeugeMarketing, initialisiereMarketing } from './marketing';
 import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { ALT_WARENHAUS_STAEDTE, ALT_SPORT_STAEDTE } from './massstab-alt';
+import { kennzeichnePremium, premiumProfil } from './premium';
+import { erzeugeEcommerce } from './ecommerce';
+import { chronikInitialisieren } from './chronik';
+import { szenarioStart, type SzenarioId, type SzenarioRegeln } from './szenarien';
+import { bildeHauscluster } from './organisation';
+import { marktbeobachtungStart } from './marktbeobachtung';
+// O03 IT
+import { initialisiereIt } from './it';
+// O07 Haus
+import { initialisiereHausbetrieb } from './haus';
+import { initialisiereUmbau } from './umbau';
 
 export interface Szenario {
   warenhaeuser: number;
   sporthaeuser: number;
   premiumhaeuser?: number;
+  /** A/B-Vergleich: Premiumhäuser deaktivieren. */
+  premiumDeaktiviert?: boolean;
   schwesterhaeuser?: number;
   outlethaeuser?: number;
   startCash: number;
@@ -27,6 +42,9 @@ export interface Szenario {
   startJahr: number;
   /** Schwierigkeit (Standard mittel = Kalibrierung). */
   schwierigkeit?: SchwierigkeitId;
+  /** Nur Nice-to-have: nicht gesetzt heißt unveränderte Standardpartie. */
+  szenarioId?: SzenarioId;
+  szenarioRegeln?: SzenarioRegeln;
 }
 
 /** Phase 2: wirtschaftliche Soll-Größen der aktiven Formate (Euro p.a., Seed 1–3).
@@ -42,6 +60,10 @@ export const UMSATZZIELE_JAHR1 = {
 } as const;
 
 type AktiveKlasse = keyof typeof UMSATZZIELE_JAHR1;
+
+/** Premium-Kalibrierung (Ummo 21.10.2026: „klar besser als Schnitt“, Ziel etwa +4 bis +6 % Haus-EBITDA). */
+const PREMIUM_PERSONALQUOTE = 0.13;
+const PREMIUM_MIETFAKTOR = 1.3;
 
 function umsatzklasse(h: Haus): AktiveKlasse | undefined {
   if (h.nurDaten) return undefined;
@@ -83,6 +105,49 @@ function kalibriereStandortumsatz(haeuser: Haus[]): void {
     haus.personal.vollzeit *= personalFaktor;
     haus.personal.teilzeit *= personalFaktor;
     haus.personal.aushilfen *= personalFaktor;
+    // M7: Hartwig folgt der realen Referenz für Personal und Miete. Die
+    // Hausgröße (und damit die Kostenbasis) bleibt individuell. Statt einer
+    // GuV-Gutschrift werden reale FTE und Mietverträge umgerechnet.
+    const jahresBasis = (alt * faktor) * 52;
+    const realisierung = haus.klasse === 'premium' ? 1.06 : haus.format === 'sport' ? 0.95 : 1;
+    // Näherung an realisierten Umsatz; als Kalibrierannahme explizit dokumentiert.
+    const wocheBasis = jahresBasis / 52 * 1.02 * realisierung;
+    const zielPersonal = wocheBasis * 0.16 * (haus.klasse === 'premium' ? 1.08 : haus.format === 'sport' ? 0.94 : 1);
+    const istPersonal = haus.personal.vollzeit * PARAM.lohnVollzeit
+      + haus.personal.teilzeit * PARAM.lohnTeilzeit + haus.personal.aushilfen * PARAM.lohnAushilfe;
+    const profil = haus.klasse === 'premium' ? premiumProfil(haus.premiumSchluessel) : undefined;
+    // Premium (Ummo 21.10.): klar besser als der Schnitt. Höhere Flächenproduktivität
+    // senkt die Personalquote; die eigene Immobilie trägt einen kalkulatorischen Mietansatz.
+    const premiumPersonal = profil ? PREMIUM_PERSONALQUOTE / 0.16 / 1.08 * (1.55 / profil.produktivitaet) : 1;
+    const besetzung = profil ? (zielPersonal * premiumPersonal) / Math.max(1, istPersonal)
+      : Math.max(0.4, Math.min(1.4, zielPersonal / Math.max(1, istPersonal)));
+    haus.personal.vollzeit *= besetzung;
+    haus.personal.teilzeit *= besetzung;
+    haus.personal.aushilfen *= besetzung;
+    haus.miete.mieteWoche = eur(profil ? wocheBasis * profil.mietQuote * PREMIUM_MIETFAKTOR
+      : wocheBasis * 0.112 * (haus.format === 'sport' ? 0.96 : 1));
+    // Bestehende Entgeltverträge: Verkaufspartner buchen Werbeträger auf
+    // bespielter Eigen-/Kommissionsfläche, Dienstleister vergüten die
+    // tatsächlich am POS abgewickelten Servicevorgänge. WKZ und die aus
+    // O07 entstehenden Konzessions-/Untermietverträge bleiben separat.
+    // Der Vertragspreis folgt dem Standortpotenzial, die spätere Vergütung
+    // folgt jedoch ausschließlich genutzter Fläche bzw. echten Bons.
+    const werbeBasisQm = haus.flaechen.filter((f) =>
+      f.konzept === 'eigen' || f.konzept === 'kommission' || f.konzept === 'offprice')
+      .reduce((sum, f) => sum + f.qm, 0);
+    const werbeflaecheQm = Math.round(werbeBasisQm * 0.075);
+    haus.nebenvertrag = {
+      werbeflaecheQm,
+      werbeEuroJeQmWoche: wocheBasis * 0.00875 / Math.max(1, werbeflaecheQm),
+      dienstleistungEuroJeBon: 1.03,
+      durchschnittsBonEuro: 88,
+    };
+    // Verträge vom Typ net enthalten NK; bei anderen Verträgen werden
+    // tatsächlich abgerechnete €/qm umgestellt, keine simulierte Ertragsposition.
+    if (haus.miete.netTyp !== 'net') {
+      const qm = haus.flaechen.filter((f) => f.konzept !== 'untermiete').reduce((a, f) => a + f.qm, 0);
+      haus.miete.nebenkostenQmWoche = wocheBasis * 0.019 / Math.max(1, qm);
+    }
   }
 }
 
@@ -105,14 +170,20 @@ export const PARAM = {
   lohnVollzeit: 1_050, // € je FTE und Woche inkl. Nebenkosten
   lohnTeilzeit: 990,
   lohnAushilfe: 600,
-  qmJeFte: 500,
-  umsatzJeFte: 8_800,
+  // M7 Referenz: Produktivität zum Start dem Ziel 16 % Personalquote
+  // anpassen. Die früheren 430 qm / 6.300 € je FTE führten bei
+  // 16 % Lohnkosten zu Unterbesetzung und künstlich fehlendem Umsatz.
+  // Personalbedarf UND Anfangs-FTE werden mit derselben Norm ermittelt.
+  qmJeFte: 620,
+  umsatzJeFte: 9_000,
   sonstigeQuote: 0.016,
   sonstigeQm: 0.45,
-  logistikQuote: 0.025,
+  // Filial-GuV Referenz: Distribution/Transport/Filiallogistik 6,3 %.
+  logistikQuote: 0.063,
   nebenkostenQm: [1.0, 1.5] as [number, number],
-  zentraleQuote: 0.034,
-  marketingQuote: 0.025,
+  // Die Zentrale nutzt bei 408 aktiven Häusern Größenvorteile.
+  zentraleQuote: 0.030,
+  marketingQuote: 0.018, // IST Werbung Filialebene 1,8 % statt historisch 2,5 %
   zinsSatz: 0.08,
   konzessionsQuote: 0.22,
   kommissionsMarge: 0.25,
@@ -153,7 +224,20 @@ function fit(g: GruppeId, kaufkraft: number, alter: number, wettbewerb: number):
 export const gruppenFit = fit;
 
 function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: number[]): Flaeche[] {
-  if (f === 'schwester') return [{ id: `${id}-f1`, etage: 0, qm: vkQm, konzept: 'leer' }];
+  if (f === 'schwester') {
+    // Vollständiger, flächengewichteter Warenhausmix als Stammdaten.
+    // Keine RNG-Aufrufe: Volkskauf verändert nicht die übrigen Standortparameter.
+    const gruppen = gruppenFuer(f);
+    const summeAnteile = gruppen.reduce((sum, g) => sum + GRUPPEN[g].anteilFlaeche, 0);
+    let verbleibend = vkQm;
+    return gruppen.map((g, i) => {
+      const qm = i === gruppen.length - 1
+        ? verbleibend
+        : Math.max(1, Math.round(vkQm * GRUPPEN[g].anteilFlaeche / summeAnteile));
+      verbleibend -= qm;
+      return { id: `${id}-f${i + 1}`, etage: etagen[i % etagen.length], qm, konzept: 'eigen' as const, gruppe: g };
+    });
+  }
   if (f === 'outlet') {
     // FUNDUS ist bis Phase 3 nur Stammdatensatz, benötigt aber bereits reale
     // Abteilungsflächen für den Grafik-/Ladenbau. "schuhe" ist ein reines
@@ -173,7 +257,7 @@ function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: 
   // Etagen von oben nach unten befüllen, Reihenfolge wie im Warenhaus typisch
   const reihenfolgeWH: GruppeId[] = ['food', 'beauty', 'accessoires', 'damen', 'waesche', 'herren', 'kinder', 'sport', 'spielwaren', 'wohnen'];
   const reihenfolgeSport: GruppeId[] = ['sportschuhe', 'sporttextil', 'outdoor', 'teamsport', 'rad', 'wintersport'];
-  const reihenfolge = f === 'warenhaus' ? reihenfolgeWH : reihenfolgeSport;
+  const reihenfolge = f === 'sport' ? reihenfolgeSport : reihenfolgeWH;
   // EG zuerst, dann OGs, UG zuletzt (Food ins UG wenn vorhanden)
   const etagenOrdnung = [...etagen.filter((e) => e >= 0).sort((a, b) => a - b), ...etagen.filter((e) => e < 0)];
   const proEtage = vkQm / etagen.length;
@@ -256,8 +340,9 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
   for (const g of gruppenFuer(f)) {
     const qmG = flaechen.filter((x) => x.gruppe === g).reduce((a, b) => a + b.qm, 0);
     if (qmG <= 0) continue;
-    const sQm = GRUPPEN[g].qmUmsatz * fit(g, einzug.kaufkraft, einzug.alter, einzug.wettbewerb) * LAGE_FAKTOR[lage] * CLUSTER_FAKTOR[cluster] * zwischen(h, 0.82, 1.15);
-    const satF = zwischen(h, 0.45, 1.1); // < 1 = Fläche überdimensioniert
+    const sQm = GRUPPEN[g].qmUmsatz * fit(g, einzug.kaufkraft, einzug.alter, einzug.wettbewerb) * LAGE_FAKTOR[lage] * CLUSTER_FAKTOR[cluster] * (nurDaten ? 1 : zwischen(h, 0.82, 1.15));
+    // Neue Sortimentspotenziale dürfen den historischen RNG-Strom der Grafik-Exporte nicht verschieben.
+    const satF = nurDaten ? 0.75 : zwischen(h, 0.45, 1.1); // < 1 = Fläche überdimensioniert
     const Q = qmG * satF;
     const sat = 1 - Math.exp(-qmG / Q);
     potenzial[g] = (sQm * qmG) / sat;
@@ -288,6 +373,10 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
     ...(option.premiumSchluessel ? { klasse: 'premium' as const, premiumSchluessel: option.premiumSchluessel } : {}),
     ...(nurDaten ? { nurDaten: true } : {}),
     grundflaecheQm: grundflaeche,
+    // O02 Umsatztreiber: alle drei Hebel starten neutral.
+    treiber: { frequenz: 1, kaufquote: 1, bon: 1 },
+    treiberQuellen: {},
+    treiberVerlauf: [],
     baujahr: (() => {
       const r = zwischen(h, 0, 1);
       const basis = f === 'sport' ? ganzZwischen(h, 1975, 2015)
@@ -299,7 +388,7 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
     fassade: ganzZwischen(h, 0, 7),
     flaechen,
     miete: {
-      mieteWoche: eur((basisUmsatz * 52 * mietQuote) / 52),
+      mieteWoche: nurDaten ? 0 : eur(basisUmsatz * mietQuote),
       bisWoche: ganzZwischen(h, 26, 15 * 52),
       netTyp,
       vermieter: vermieterEig ? 'eigentuemer' : 'dritt',
@@ -320,6 +409,9 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
     transferBonus: 0,
   };
 }
+
+// O04 Personal
+import { initialisierePersonaleinsatz } from './personaleinsatz';
 
 export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameState {
   const h: RngHalter = { rng: seed >>> 0 };
@@ -381,7 +473,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   // Premium bildet vier eigenständige Warenhäuser außerhalb der 360 regulären.
   let p = 0;
   for (const premium of PREMIUM_HAEUSER) {
-    if (p >= (sz.premiumhaeuser ?? 0)) break;
+    if (sz.premiumDeaktiviert || p >= (sz.premiumhaeuser ?? 0)) break;
     const [stadt, region, cluster, kk] = stadtVon.get(premium.stadt)!;
     haeuser.push(bauHaus(h, sz.warenhaeuser + ++p, stadt, region, cluster, kk, 'warenhaus', sz, 1, { premiumSchluessel: premium.schluessel, lage: '1a' }));
   }
@@ -401,12 +493,31 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
       haeuser.push(bauHaus(fundusRng, ++oi, stadt, region, cluster, kk, 'outlet', sz, i, { outletLage: oi <= 46 ? 'rand' : 'b' }));
   }
 
+  // Premiumfelder initialisieren, ohne bereits existierende Premiumhäuser umzuwidmen.
+  if (!sz.premiumDeaktiviert && (sz.premiumhaeuser ?? 0) > 0) kennzeichnePremium(haeuser);
   kalibriereStandortumsatz(haeuser);
+
+  if (sz.szenarioRegeln?.fusionDoppelStaedte) {
+    const staedte = [...new Set(haeuser.filter((x) => x.format === 'warenhaus').map((x) => x.stadt))]
+      .slice(0, sz.szenarioRegeln.fusionDoppelStaedte);
+    let wh = haeuser.filter((x) => x.format === 'warenhaus').length;
+    for (const stadt of staedte) {
+      const eintrag = STAEDTE.find((x) => x[0] === stadt);
+      if (!eintrag) continue;
+      const [, region, cluster, kk] = eintrag;
+      const alt = bauHaus(h, ++wh, stadt, region, cluster, kk, 'warenhaus', sz, 2, { hausklasse: 'C', lage: 'b' });
+      alt.name = 'Volkskauf ' + stadt;
+      alt.fusionUrsprung = 'volkskauf';
+      haeuser.push(alt);
+    }
+  }
 
   // Bestand: Reichweite in Wochen je Gruppe, mit Altersstruktur
   const bestand: Kohorte[] = [];
   const basisUmsatz: Partial<Record<GruppeId, number>> = {};
   for (const x of haeuser) {
+    // Schwesterkette und FUNDUS besitzen Gruppen, aber bis Phase 3 keinen Umsatz/Warenbestand.
+    if (x.nurDaten) continue;
     for (const [g, P] of Object.entries(x.potenzial) as [GruppeId, number][]) {
       const qmG = x.flaechen.filter((f) => f.gruppe === g).reduce((a, b) => a + b.qm, 0);
       const ist = P * (1 - Math.exp(-qmG / (x.saettigungQm[g] as number)));
@@ -438,11 +549,17 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     firma: { name: sz.firma, sportName: sz.sportName },
     phase: 'regulaer',
     insolvenzenGesamt: 0,
+    erfolge: {},
     schwierigkeit: sz.schwierigkeit ?? 'mittel',
     cash: Math.round(sz.startCash * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].startCash),
     kreditlinie: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     kreditlinieBasis: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     haeuser,
+    spielendeStart: {
+      haeuser: haeuser.length,
+      fte: haeuser.reduce((sum, haus) => sum + haus.personal.vollzeit + haus.personal.teilzeit + haus.personal.aushilfen, 0),
+    },
+    premiumSchuetzen: true,
     wettbewerber: [],
     wettbewerbRng: (seed ^ 0x9e3779b9) >>> 0,
     wettbewerbNaechsteId: 0,
@@ -473,6 +590,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     makro: { konjunktur: 1, schockStaerke: 0, phase: zwischen(h, 0, Math.PI * 2) },
     meldungen: [],
     historie: [],
+    filialProgramme: {},
     zaehler: 0,
     einmalkostenWoche: 0,
     einmalErloeseWoche: 0,
@@ -499,7 +617,26 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   // Marketing: Kanäle, Hartwig Karte und App, CRM, Startkalender (Standardplan = Ausgangslage)
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
+  // O09: Marketing-Referenz zu Beginn speichern.
+  s.ecommerce = erzeugeEcommerce(s);
   initialisiereWettbewerb(s);
+  chronikInitialisieren(s);
+  szenarioStart(s, sz);
+  bildeHauscluster(s); // O01 Organisation: geografische Cluster und Leitungen einmal initialisieren.
+  marktbeobachtungStart(s); // Q06: im Standard inaktiv, keine Zusatzkosten.
+  // O03 IT: neutraler Ausgangszustand, keine Änderung am bestehenden Zufallsstrom.
+  initialisiereIt(s);
+  // O06 Planung: Vorjahresbudget des Vorgängers (+3 % Umsatz).
+  initialisierePlanung(s);
+  // O07 Haus: erst nach der Weltgenerierung, ohne Zufall aus dem Haupt-RNG.
+  initialisiereHausbetrieb(s);
+  // O08 Umbau
+  initialisiereUmbau(s);
+  s.kapitalflussStartCash = s.cash;
+  // O04 Personal: neutraler Referenzplan auf Basis der bisherigen FTE.
+  initialisierePersonaleinsatz(s);
+  // O05 Ware
+  initialisiereWare(s);
   return s;
 }
 

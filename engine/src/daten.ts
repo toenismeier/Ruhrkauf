@@ -15,7 +15,11 @@ export interface GruppeDef {
   saison: number[]; // 12 Monatsfaktoren, wird normalisiert
 }
 
-const WH: number[] = [0.82, 0.72, 0.88, 0.92, 0.95, 0.88, 0.95, 0.85, 0.9, 1.0, 1.2, 1.75];
+// M7: Januar/Februar weniger stark als nachgelagerte Verlustmonate gewichten.
+// Warengruppe Spielwaren behält ihren eigenständigen Abverkauf nach Weihnachten.
+// Nach Weihnachten: stärkeres Basisgeschäft im Q1, ohne isolierte EBITDA-Gutschriften.
+// Spielwaren und Wintersport behalten ihre eigenen saisonalen Abweichungen.
+const WH: number[] = [1.06, 1.045, 1.03, 0.94, 0.95, 0.88, 0.95, 0.85, 0.9, 1.0, 1.2, 1.75];
 
 function mit(basis: number[], over: Record<number, number>): number[] {
   return basis.map((x, i) => (over[i] !== undefined ? over[i] : x));
@@ -33,6 +37,8 @@ const ROH: GruppeDef[] = [
   { id: 'food', name: 'Feinkost', format: 'warenhaus', marge: 0.3, saisonAnteil: 0.05, vorlauf: 1, beratung: 0.3, kkElast: 0.5, alterElast: 0.3, qmUmsatz: 55, anteilFlaeche: 0.07, saison: mit(WH, { 11: 1.5 }) },
   { id: 'sport', name: 'Sport', format: 'warenhaus', marge: 0.38, saisonAnteil: 0.5, vorlauf: 12, beratung: 0.5, kkElast: 0.1, alterElast: -0.3, qmUmsatz: 22, anteilFlaeche: 0.1, saison: WH },
 
+  // Eigenes Schuhsortiment von FUNDUS (Phase 3: wirtschaftliche Simulation).
+  { id: 'schuhe', name: 'Schuhe', format: 'outlet', marge: 0.43, saisonAnteil: 0.5, vorlauf: 10, beratung: 0.3, kkElast: 0.2, alterElast: 0, qmUmsatz: 38, anteilFlaeche: 0.14, saison: WH },
   { id: 'sportschuhe', name: 'Sportschuhe', format: 'sport', marge: 0.4, saisonAnteil: 0.3, vorlauf: 10, beratung: 0.6, kkElast: 0.1, alterElast: -0.5, qmUmsatz: 70, anteilFlaeche: 0.22, saison: [0.9, 0.8, 1.0, 1.05, 1.05, 1.0, 1.0, 1.05, 1.1, 0.95, 1.05, 1.3] },
   { id: 'sporttextil', name: 'Sporttextil', format: 'sport', marge: 0.45, saisonAnteil: 0.6, vorlauf: 12, beratung: 0.4, kkElast: 0.1, alterElast: -0.3, qmUmsatz: 40, anteilFlaeche: 0.28, saison: [0.95, 0.8, 0.95, 1.0, 1.05, 1.05, 1.0, 0.95, 1.0, 0.95, 1.05, 1.4] },
   { id: 'outdoor', name: 'Outdoor', format: 'sport', marge: 0.45, saisonAnteil: 0.6, vorlauf: 14, beratung: 0.7, kkElast: 0.4, alterElast: 0.2, qmUmsatz: 40, anteilFlaeche: 0.2, saison: [1.0, 0.8, 0.9, 1.0, 1.0, 0.95, 0.95, 0.85, 1.0, 1.2, 1.3, 1.5] },
@@ -49,12 +55,19 @@ export const GRUPPEN: Record<GruppeId, GruppeDef> = Object.fromEntries(
 ) as Record<GruppeId, GruppeDef>;
 
 export const GRUPPEN_LISTE: GruppeId[] = ROH.map((g) => g.id);
-export const gruppenFuer = (f: Format): GruppeId[] => ROH.filter((g) => g.format === f).map((g) => g.id);
+/** Die Sortimentstruktur steht schon vor dem wirtschaftlichen Start von Engine-Formate. */
+export const gruppenFuer = (f: Format): GruppeId[] =>
+  f === 'schwester' ? ROH.filter((g) => g.format === 'warenhaus').map((g) => g.id)
+  : f === 'outlet' ? ['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty']
+  : ROH.filter((g) => g.format === f).map((g) => g.id);
 
 /** Saisonfaktor einer Gruppe in einer Woche (linear zwischen Monaten interpoliert). */
 export function saisonFaktor(g: GruppeId, woche: number): number {
   const s = GRUPPEN[g].saison;
-  const pos = ((woche % 52) / 52) * 12 - 0.5;
+  // KW 1–3 dürfen nicht anteilig Dezember/Weihnachten enthalten:
+  // Der bisherige Wert -0,5 blendete KW 1 künstlich in den Dezember zurück.
+  // Ab KW 4 bleibt die bisherige Interpolation und damit die Q4-Kurve unverändert.
+  const pos = Math.max(0, ((woche % 52) / 52) * 12 - 0.5);
   const i = Math.floor(pos);
   const t = pos - i;
   const a = s[(i + 12) % 12];
@@ -298,11 +311,26 @@ export const STAEDTE: StadtDef[] = [
 
 /** Namen und Grafikschlüssel der vier Premium-Häuser. */
 export const PREMIUM_HAEUSER = [
-  { schluessel: 'P001', name: 'Palais Hartwig', stadt: 'Berlin' },
-  { schluessel: 'P002', name: 'Hartwig am Hofgarten', stadt: 'München' },
-  { schluessel: 'P003', name: 'Alsterhaus Hartwig', stadt: 'Hamburg' },
-  { schluessel: 'P004', name: 'Hartwig Königsallee', stadt: 'Düsseldorf' },
+  { id: 'P001', schluessel: 'P001', rang: 1, name: 'Palais Hartwig', stadt: 'Berlin' },
+  { id: 'P002', schluessel: 'P002', rang: 1, name: 'Hartwig am Hofgarten', stadt: 'München' },
+  { id: 'P003', schluessel: 'P003', rang: 2, name: 'Alsterhaus Hartwig', stadt: 'Hamburg' },
+  { id: 'P004', schluessel: 'P004', rang: 3, name: 'Hartwig Königsallee', stadt: 'Düsseldorf' },
 ] as const;
+
+// Geografische Vertriebsregion ist die feste Eigenschaft der Stadt, nicht der
+// dynamisch erzeugte Hauscluster (z. B. „Lausitz“ oder „Unterweser“).
+export const STADT_REGIONEN: Readonly<Record<string, Region>> =
+  Object.freeze(Object.fromEntries(STAEDTE.map(([name, region]) => [name, region])) as Record<string, Region>);
+export function stadtRegion(name: string): Region | undefined { return STADT_REGIONEN[name]; }
+
+// O01 Organisation: Namen nach geografischen Teilräumen je Region.
+export const HAUSCLUSTER_NAMEN: Record<Region, string[]> = {
+  Nord: ['Elbe West','Unterweser','Ostholstein','Nordseeküste','Hannover Nord','Weserbergland','Schleswig'],
+  Ost: ['Berlin & Umland','Sachsen Nord','Lausitz','Thüringen Ost','Sachsen-Anhalt','Ostseeküste'],
+  West: ['Ruhr West','Ruhr Ost','Rheinland Süd','Niederrhein','Westfalen Nord','Bergisches Land','Rhein-Wupper'],
+  Mitte: ['Rhein-Main','Nordhessen','Mittelhessen','Pfalz','Mainfranken','Taunus'],
+  Süd: ['Oberbayern','Schwaben','Neckarraum','Oberfranken','Südbaden','Donau','Allgäu'],
+};
 
 export const STANDORT_ZUSATZ: Record<Lage, string[]> = {
   '1a': ['Marktplatz', 'Hauptstraße', 'Innenstadt', 'Am Markt', 'Königstraße', 'Altstadt'],
@@ -313,6 +341,15 @@ export const STANDORT_ZUSATZ: Record<Lage, string[]> = {
 
 export const VORNAMEN = ['Sabine', 'Thomas', 'Petra', 'Michael', 'Andrea', 'Frank', 'Claudia', 'Jörg', 'Kerstin', 'Ralf', 'Nicole', 'Stefan', 'Anja', 'Markus', 'Birgit', 'Holger', 'Silke', 'Dirk', 'Heike', 'Uwe', 'Melanie', 'Jens', 'Tanja', 'Sven'];
 export const NACHNAMEN = ['Krämer', 'Weber', 'Schulte', 'Hoffmann', 'Brandt', 'Wagner', 'Kaiser', 'Lorenz', 'Peters', 'Böhm', 'Seidel', 'Fuchs', 'Graf', 'Vogel', 'Hartmann', 'Busch', 'Wolff', 'Engel', 'Lange', 'Möller'];
+
+/** Fiktive Käufer für den jährlichen Konzernverkauf ab Jahr vier. */
+export const KONZERN_KAEUFER: { typ: 'Finanzinvestor' | 'Handelskonzern' | 'Immobilienfonds'; name: string }[] = [
+  { typ: 'Finanzinvestor', name: 'Rheingold Beteiligungen' },
+  { typ: 'Handelskonzern', name: 'Nordstern Handelsholding' },
+  { typ: 'Immobilienfonds', name: 'Mosaik Immobilienfonds' },
+  { typ: 'Finanzinvestor', name: 'Südwest Kapitalpartner' },
+  { typ: 'Handelskonzern', name: 'Wesergrund Handelspartner' },
+];
 
 export const VERMIETER = ['Rheinkontor Immobilien', 'Nordwert Real Estate', 'Prisma Asset Management', 'Familie von Haller', 'Stadtwerk Grundbesitz', 'Atlas Retail Properties', 'Merian Fonds IV', 'Kontinental Immobilien KG'];
 
@@ -354,7 +391,11 @@ export const MIETER: MieterDef[] = [
   { typ: 'behoerde', namen: ['Bürgeramt', 'Stadtbibliothek', 'Volkshochschule'], etagen: [1, 2, 3], qm: [1500, 4000], mieteQmMonat: [8, 12], laufzeit: [10, 20], frequenzBonus: 0.03, umbauAnteil: 0.4 },
   { typ: 'gastro', namen: ['Markthalle Kost', 'Café Fräulein', 'Burgerwerk'], etagen: [0, 4, 5], qm: [300, 900], mieteQmMonat: [14, 25], laufzeit: [5, 10], frequenzBonus: 0.015, umbauAnteil: 0.5 },
   { typ: 'coworking', namen: ['Deskhaus', 'WorkLoft', 'Raum & Ruhe'], etagen: [3, 4, 5], qm: [800, 2000], mieteQmMonat: [9, 14], laufzeit: [5, 10], frequenzBonus: 0.005, umbauAnteil: 0.3 },
-  { typ: 'drogerie', namen: ['Rossberg Drogerie', 'dm-Nachbar', 'Pflegewelt'], etagen: [0, -1], qm: [600, 1200], mieteQmMonat: [14, 22], laufzeit: [10, 15], frequenzBonus: 0.04, umbauAnteil: 0.5 },
+  { typ: 'drogerie', namen: ['Rossberg Drogerie', 'Pflegewelt', 'Drogeriekontor'], etagen: [0, -1], qm: [600, 1200], mieteQmMonat: [14, 22], laufzeit: [10, 15], frequenzBonus: 0.04, umbauAnteil: 0.5 },
+  // O07 Haus: zusätzliche Frequenzbringer mit fiktiven Eigennamen.
+  { typ: 'baeckerei', namen: ['Backstube Mühlenfeld', 'Brot & Krumme', 'Kruste & Korn'], etagen: [0, -1], qm: [120, 350], mieteQmMonat: [15, 27], laufzeit: [5, 10], frequenzBonus: 0.017, umbauAnteil: 0.4 },
+  { typ: 'paketshop', namen: ['PaketKontor', 'Paketpunkt Markt', 'Paketstube'], etagen: [0, -1], qm: [100, 270], mieteQmMonat: [12, 19], laufzeit: [5, 10], frequenzBonus: 0.014, umbauAnteil: 0.5 },
+  { typ: 'bibliothek', namen: ['Stadtteilbibliothek', 'Lesekontor', 'Bücherraum'], etagen: [1, 2, 3], qm: [400, 1200], mieteQmMonat: [6, 11], laufzeit: [10, 20], frequenzBonus: 0.025, umbauAnteil: 0.3 },
 ];
 
 export interface BeraterDef {
@@ -396,3 +437,4 @@ export const WETTBEWERB_UEBERSCHNEIDUNG: Record<WettbewerberArt, Partial<Record<
   premium: { beauty: 1, accessoires: 1, damen: 0.6, food: 0.5 },
   leer_ehemals: {},
 };
+

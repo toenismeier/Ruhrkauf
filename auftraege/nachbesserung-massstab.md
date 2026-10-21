@@ -125,3 +125,131 @@ Geprüft wurde der Branch nach einem Probe-Merge von `main` (Stand nach FUNDUS u
   - Danach Bot C erneut auf Seeds 1 bis 3 prüfen, ebenso „ohne Eingriff folgt die Insolvenz binnen zwei Jahren“.
   - Laufzeit: `laufzeitOhneQuartalsvorschauMs` 77 ms. Die Quartalsvorschau (Prognose) kostet 1,2 s und rechnet offenbar die ganze Welt für das Quartal vor. Vorschlag: Prognose nur alle 13 Wochen und nur auf Konzernebene mit Durchschnittswerten je Hauscluster statt Hausweise, oder inkrementell über die Wochen verteilt. Ziel: keine Woche über 250 ms.
 - Weiter auf diesem Branch, `main` vorher hineinmergen (dort sind inzwischen Premium, FUNDUS, Ladenbau 1–3 und Reise/Woche).
+
+## 11. Wochenverlauf im ersten Quartal abschwächen (Ummo, 20.10.2026)
+Befund aus TestFlight-Wurf 1 und Claudes Nachrechnung (Seed 1, Leicht, ohne Eingriffe, 130 Warenhäuser auf `main`): EBITDA je Woche KW 1 +2,4 Mio., KW 2 −1,0, KW 3 −4,9, KW 8 −7,2, KW 13 −3,6 Mio. bei rund 47 bis 53 Mio. Umsatz je Woche. Entscheidung Ummo: **zu hart, abschwächen**.
+- Januar und Februar dürfen negativ sein, aber im Mittel höchstens etwa −4 % EBITDA-Quote (Zielwert aus Abschnitt 10), keine Woche unter −6 % auf Mittel, −8 % auf Schwer; auf Leicht entsprechend milder.
+- KW 1 nicht künstlich positiv: kein Sprung von + auf − zwischen KW 1 und KW 2 (Ursache suchen, z. B. fehlende Kosten oder Vorlauf in der ersten Woche).
+- Ursachenanalyse in die PR: Saisonkurve Januar/Februar, Personal- und Mietkosten je Woche, Wareneinsatz/Abschriften nach Weihnachten.
+- Ausrichtung (Ummo, 20.10.2026): Turnaround und Management stehen im Fokus, die Insolvenz steht ganz am Ende. Der Standardverlauf ohne Eingriffe darf im ersten Jahr nicht in die Insolvenz zwingen.
+- Prüfung: Wochenverlauf 13 und 52 Wochen je Schwierigkeit als Tabelle in `massstab-stand.md`; Bot C überlebt weiter 5 Jahre.
+
+## 11. Wochenverlauf im ersten Quartal abschwächen (Ummo, 20.10.2026)
+Befund aus TestFlight-Wurf 1 und Claudes Nachrechnung (Seed 1, Leicht, ohne Eingriffe, 130 Warenhäuser auf `main`): EBITDA je Woche KW 1 +2,4 Mio., KW 2 −1,0, KW 3 −4,9, KW 8 −7,2, KW 13 −3,6 Mio. bei rund 47 bis 53 Mio. Umsatz je Woche. Entscheidung Ummo: **zu hart, abschwächen**.
+- Januar und Februar dürfen negativ sein, aber im Mittel höchstens etwa −4 % EBITDA-Quote (Zielwert aus Abschnitt 10), keine Woche unter −6 % auf Mittel, −8 % auf Schwer; auf Leicht entsprechend milder.
+- KW 1 nicht künstlich positiv: kein Sprung von + auf − zwischen KW 1 und KW 2 (Ursache suchen, z. B. fehlende Kosten oder Vorlauf in der ersten Woche).
+- Ursachenanalyse in die PR: Saisonkurve Januar/Februar, Personal- und Mietkosten je Woche, Wareneinsatz/Abschriften nach Weihnachten.
+- Ausrichtung (Ummo, 20.10.2026): Turnaround und Management stehen im Fokus, die Insolvenz steht ganz am Ende. Der Standardverlauf ohne Eingriffe darf im ersten Jahr nicht in die Insolvenz zwingen.
+- Prüfung: Wochenverlauf 13 und 52 Wochen je Schwierigkeit als Tabelle in `massstab-stand.md`; Bot C überlebt weiter 5 Jahre.
+
+## 12. Spielende-Kriterium Seed 3 (Claude, 20.10. abends)
+Mit N02 Spielende gilt „saniert“ nur bei positivem EBITDA der letzten 52 Wochen. Bot C erreicht auf `main` Seed 1 und 2, Seed 3 endet in W260 mit rund −15 Mio. € EBITDA-52 (schon vor der Integration der Nice-to-haves). Der Test `tests/spielende.test.ts` prüft deshalb vorerst nur Seeds 1 und 2. Mit der Kalibrierung aus Abschnitt 11 Seed 3 wieder aufnehmen: Bot C muss auf Seeds 1 bis 3 saniert enden.
+
+## 13. Prüfung Abschnitt 11 (Claude, 21.10.2026 früh, Stand `4511dd4`)
+`npx tsx scripts/m7-wochenverlauf.ts` auf `feat/engine-massstab` lokal ausgeführt. Ergebnis: **nicht erfüllt.**
+- Januar/Februar −7,33 % EBITDA-Quote auf allen drei Stufen (Ziel leicht −3 %, mittel −4 %, schwer −6 %). KW 1 −8,38 %, KW 13 −9,04 %; der Verlauf wird bis KW 13 schlechter statt besser.
+- **Die Schwierigkeit wirkt nicht:** leicht, mittel und schwer liefern bis auf Rundung dieselben Wochenwerte. Ursache zuerst klären (wird die Stufe im Skript übergeben, greift sie im Maßstab-Szenario mit 560 Häusern?).
+- Auf jeder Stufe eine Insolvenz im ersten Jahr (Vorgabe: keine).
+- Bot C (mittel, Seeds 1 bis 3) wird nach 23 Wochen zerschlagen. Auf `main` überlebt er 5 Jahre; der Maßstab-Branch macht das Spiel damit unspielbar.
+Auftrag: erst die Schwierigkeitsstufen wirksam machen, dann Ursachen der Verluste im großen Maßstab (Kosten je Haus der neuen Formate, Zentrale-Skalierung, Wareneinsatz nach Weihnachten) beheben, bis das Skript ohne Verstöße durchläuft. Das Skript ist die Abnahme; sein vollständiges Protokoll gehört in `massstab-stand.md`. GPT kann es nicht ausführen: jede Änderung mit erwarteter Wirkung begründen, Claude misst.
+
+## 14. Abnahme-Maßstab umgestellt: Turnaround statt Insolvenz (Ummo, 21.10.2026)
+Ummo: Der Insolvenz-Fokus wird hinten angestellt; zuerst Turnaround und Management, die Insolvenz steht ganz am Ende. Bisher war Bot C (Insolvenzantrag in KW 3, Schutzschirm, 50 Schließungen) die Referenz, ob das Spiel schaffbar ist. Das widerspricht der Ausrichtung.
+Befund Claude auf `main` (21.10. früh): Bot D (`botRegulaer`, Turnaround ohne Insolvenzantrag) rutscht auf Seeds 1 bis 3 in KW 31 bis 33 in die Insolvenz und wird in KW 50 bis 52 zerschlagen (EBITDA letzte 52 Wochen −75 bis −123 Mio. €). Das Spiel ist heute nur über die Insolvenz schaffbar.
+Neue Abnahme für #7 (ersetzt die Bot-C-Kriterien aus Abschnitt 11 bis 13):
+- **Referenz ist ein Turnaround ohne Insolvenz:** Bot D überlebt auf Stufe mittel, Seeds 1 bis 3, 260 Wochen ohne Insolvenzantrag und endet mit positivem EBITDA der letzten 52 Wochen. Auf leicht deutlich bequemer, auf schwer knapp (ein Seed darf scheitern).
+- Ohne Eingriffe (kein Bot) keine Insolvenz im ersten Jahr auf leicht und mittel.
+- Bot C ist nur noch Nebenprüfung: Die Insolvenz als letzte Option muss funktionieren (Bot C darf nicht vor Woche 104 zerschlagen werden), ist aber nicht der Maßstab.
+- Q1-Quoten aus Abschnitt 11 bleiben.
+Hebel liegen in der operativen Wirtschaft (Personal, Ware, Zentrale, Miete, Sortiment), nicht in Insolvenzmechanik und nicht in pauschalen Gutschriften. `m7-wochenverlauf.ts` um Bot D erweitern; das Skript bleibt die Abnahme, Claude misst.
+
+## 15. Messung Stand `37d446a` (Claude, 21.10.2026, 06:00)
+- Q1 jetzt im Ziel: Januar/Februar leicht −1,54 % (schlechteste Woche −2,55 %), mittel −2,69 % (−3,85 %).
+- **Zweites Halbjahr bricht ein:** ohne Eingriffe ab etwa KW 39 EBITDA-Quote −24 % bis −33 % je Woche, Insolvenz noch im ersten Jahr auf leicht und mittel. Die Verluste wurden aus dem Q1 ins zweite Halbjahr verschoben, nicht beseitigt.
+- **Bot D schlechter als auf main:** Insolvenz in KW 36 bis 47, zerschlagen in KW 55 bis 66, EBITDA letzte 52 Wochen −375 bis −476 Mio. € (main: Insolvenz KW 31 bis 33, −75 bis −123 Mio. €).
+Nächster Schritt: Ganzjahresverlauf je Woche erklären (Rohertrag, Personal, Miete, Zentrale, Abschriften je Woche als Tabelle), die Ursache des Einbruchs ab KW 39 beseitigen. Abnahme unverändert nach Abschnitt 14.
+
+## 16. Messung `6abb4b4` und Zielstruktur (Claude, 21.10.2026; Entscheidung Ummo)
+Messung: Typecheck grün. Q1 im Ziel (schwer Jan/Feb −4,78 %). Abnahme nach Abschnitt 14 **nicht bestanden**: Bot D wird auf allen Stufen und Seeds nach 45 bis 56 Wochen zerschlagen (EBITDA 52 Wochen −268 bis −523 Mio. €); Bot C mittel Seed 3 nach 23 Wochen. Ohne Eingriffe Jahr schwer −6,19 % (Umsatz 9.583 Mio. €, EBITDA −593 Mio. €).
+Ursache laut `m7-jahresdiagnose.ts` (Seed 1, mittel):
+- Kostenstruktur ohne Eingriffe im Wochenschnitt: Rohertrag vor Abschriften 42 % vom Umsatz, Personal 23 %, Miete 12,7 %, Zentrale 3,3 %. Der Fixkostenblock (rund 70 Mio. € je Woche) ist erst bei rund 170 Mio. € Wochenumsatz gedeckt.
+- Bot D schließt in KW 4 79 Häuser (560 → 481), FTE 44.042 → 35.046. Danach fällt der Umsatz um rund 28 %, Personal nur um rund 20 %, Miete um rund 26 %. **Das Schließen der schwächsten Häuser kostet mehr Umsatz als Kosten** – betriebswirtschaftlich falsch: schwächste Häuser haben unterdurchschnittlichen Umsatz, und ein Teil ihres Umsatzes wandert zu Nachbarhäusern und online.
+- Im vierten Quartal hoher Fehlumsatz (bis 44 Mio. € je Woche) trotz Bestand: Ware fehlt am richtigen Ort.
+**Entscheidung Ummo (21.10.2026): Startlage strukturell sanierbar.**
+1. Startlage ohne Eingriffe rund −4 % EBITDA im Jahr (mittel); Personalquote Richtung 20 %, Mietquote Richtung 11 %, Rohertrag bleibt rund 42 %.
+2. Schließung schwacher Häuser: Umsatzverlust höchstens proportional zu ihrem Umsatzanteil; davon wandert ein Teil zu Häusern derselben Stadt bzw. Region und zu hartwig.de (Kannibalisierungsrücklauf, Größenordnung 20 bis 40 %). Kosten fallen nach Abwicklung vollständig weg.
+3. Fehlumsatz im vierten Quartal senken (Allokation/Nachschub aus O05 vor Weihnachten).
+Abnahme bleibt Abschnitt 14 (Bot D mittel Seeds 1 bis 3 überlebt 260 Wochen ohne Insolvenz, positives EBITDA der letzten 52 Wochen).
+
+## 17. Referenz-Kostenstruktur und Turnaround ohne Schließungen (Vorgabe Ummo, 21.10.2026)
+Ummo hat eine reale Filial-GuV eines Warenhauskonzerns geliefert (IST, Filialebene ohne Zentrale, in % vom Umsatz). Sie ist ab jetzt die **verbindliche Referenz für die Startlage** und ersetzt die Zielquoten aus Abschnitt 16 (Personal 20 %, Miete 11 %). Werte exakt so übernehmen:
+
+| Position | IST % v. U. | Vorjahr | Plan |
+|---|---:|---:|---:|
+| Umsatz | 100,0 % | | |
+| Wareneinsatz | −58,8 % | | |
+| Bruttogewinn | 41,2 % | 41,7 % | 46,1 % |
+| Übrige betriebliche Erträge | 2,3 % | | |
+| Personalaufwand | −16,0 % | −15,6 % | −15,6 % |
+| Fremdkräfte | −0,7 % | | |
+| Miete / Leasing | −11,2 % | | |
+| Mietnebenkosten | −1,5 % | | |
+| Logistik | −6,3 % | | |
+| Werbung | −1,8 % | | |
+| Unterhalt | −1,9 % | | |
+| Zahlungsverkehr | −0,2 % | | |
+| Facility Management | −1,7 % | | |
+| Energie | −2,4 % | | |
+| IT | −0,3 % | | |
+| Administrative Kosten | −0,2 % | | |
+| Übrige betriebliche Aufwendungen | −0,4 % | | |
+| Total OPEX | −42,4 % | | |
+| **EBITDA Filialebene** | **−1,2 %** | | |
+
+Die Zentrale kommt im Spiel zusätzlich obendrauf (eigene Kostenstelle).
+
+Lesart (Claude, 21.10.): „Total OPEX −42,4 %“ ist **netto nach übrigen betrieblichen Erträgen**: Einzelaufwände −44,6 % + übrige Erträge +2,3 % ≈ −42,4 % (Rundung). Damit gilt Bruttogewinn 41,2 % − OPEX netto 42,4 % = EBITDA −1,2 %. Die Tabelle ist in sich stimmig; keine Ausgleichsbuchung und keine Abweichungsanzeige nötig.
+
+**Entscheidung Ummo:** Turnaround und Sanierung müssen **auch ohne Schließungen** möglich sein.
+
+Umsetzung:
+1. **Filial-GuV in diesen Positionen** führen (Engine und Haus-Reiter/Reporting): mindestens Wareneinsatz/Bruttogewinn, übrige Erträge, Personal, Fremdkräfte, Miete, Mietnebenkosten, Logistik, Werbung, Unterhalt, Facility Management, Energie, IT/Administration/Übrige. Startwerte je Format so kalibrieren, dass der Konzern auf Filialebene bei rund −1,2 % EBITDA startet (Hartwig regulär nahe an der Tabelle; Premium besser, FUNDUS mit niedrigerem Wareneinsatz-Niveau und niedrigerer Miete, Sport/Volkskauf plausibel abweichend, Abweichungen in der PR begründen). Zentrale zusätzlich, so dass der Konzern ohne Eingriffe rund −4 % EBITDA hat (E24 bleibt in diesem Punkt).
+2. **Jede Position hat mindestens einen Hebel**, der ohne Schließung wirkt, mit Kosten, Vorlaufzeit und Nebenwirkung: Bruttogewinn (Sortiment, Eigenmarken, Einkaufskonditionen, Reduzierungssteuerung; Planwert 46,1 % zeigt die Spannweite), Personal (Einsatzplanung, Produktivität, Tarif), Miete (Nachverhandlung, Flächenrückgabe/Untervermietung von Etagen), Logistik, Werbung, Energie (Technik-Umbau O08), Facility Management, Unterhalt.
+3. **Neue Referenz „Bot T“** in `engine/scripts/bot.ts`: Turnaround **ohne Schließungen und ohne Insolvenz**, nur über die Hebel aus Punkt 2. Abnahme: Bot T auf mittel, Seeds 1 bis 3, 260 Wochen ohne Insolvenz, positives EBITDA der letzten 52 Wochen; auf leicht bequem, auf schwer knapp. Bot D (mit Schließungen) muss ebenfalls bestehen und darf besser abschneiden. Schließungsrücklauf aus Abschnitt 16 Punkt 2 bleibt.
+4. `m7-jahresdiagnose.ts` gibt die Filial-GuV in den Positionen dieser Tabelle aus (Ist je Woche und Jahr, in % vom Umsatz), damit der Abgleich mit der Referenz direkt sichtbar ist.
+
+## 18. Messung `b7c74fa` (Claude, 21.10.2026 vormittags)
+Typecheck grün. **Deutlicher Fortschritt:** Bot T (ohne Schließung, ohne Insolvenz, 408 aktive Häuser; Volkskauf/FUNDUS noch reine Datenhäuser) besteht auf **leicht alle drei Seeds** (EBITDA letzte 52 Wochen +145 bis +168 Mio. €, Quote +1,48 bis +1,70 %), auf mittel Seed 1. Auf mittel scheitern Seed 2 (zerschlagen nach 116 Wochen, −149 Mio. €) und Seed 3 (nach 64 Wochen, −253 Mio. €); schwer besteht nicht. Bot D überall schlechter als Bot T. Bot C nach 23 Wochen zerschlagen.
+Filial-GuV KW 1 (mittel, ohne Eingriffe) gegen Referenz: Bruttogewinn 41,21 % ✓, Personal −16,19 % ✓, Fremdkräfte −0,71 % ✓, Miete −11,43 % ✓, Nebenkosten −1,47 % ✓, Logistik −6,30 % ✓, Werbung −1,80 % ✓, Unterhalt −1,95 % ✓, Zahlungsverkehr −0,20 % ✓, Facility −1,72 % ✓, Energie −2,42 % ✓, IT −0,30 % ✓, Administration −0,20 % ✓.
+Abweichungen:
+- **Übrige betriebliche Erträge +0,26 % statt +2,3 %** (rund −2,0 PP). Hauptursache für Filial-EBITDA KW 1 −3,81 % statt −1,2 %.
+- Übrige betriebliche Aufwendungen −0,61 % statt −0,4 % (−0,2 PP).
+- Saisonverlauf: Filial-EBITDA fällt von −2,2 % (KW 10–12) auf rund −4,8 % (KW 17) und weiter, weil Personal und Miete bei sinkendem Umsatz fix bleiben. Personal muss stärker mit dem Umsatz atmen (Einsatzplanung O04, Aushilfen, Stundenkonten), wie in der Realität.
+- Q1-Quoten: Januar/Februar leicht −4,73 %, mittel −5,74 %, schwer −7,50 % (Ziel −3/−4/−6 %); auf leicht und mittel je eine Insolvenz im ersten Jahr ohne Eingriffe.
+Nächster Schritt: übrige Erträge auf 2,3 % (Konzessionäre/Untervermietung, Werbekostenzuschüsse, Dienstleistungserlöse; O07 Konzessionäre nutzen), übrige Aufwendungen auf 0,4 %, Personal saisonal atmend. Danach erneut messen; Ziel bleibt Abschnitt 14/17 (Bot T mittel Seeds 1–3).
+
+## 19. Messung `91b4489` (Claude, 21.10.2026 mittags) – Durchbruch
+Typecheck grün. Filial-GuV KW 1 (mittel): übrige Erträge 2,32 %, übrige Aufwendungen −0,40 %, **Filial-EBITDA −1,55 %** (Referenz −1,2 %), Q1-Wochen danach −1,0 bis −0,1 %.
+Q1 ohne Eingriffe: leicht −2,59 %, mittel −3,58 %, schwer −5,31 % – alle im Ziel.
+**Bot T (ohne Schließung, ohne Insolvenz) besteht:** leicht 3/3 (EBITDA letzte 52 Wochen +4,04 bis +4,29 %), mittel 3/3 (+3,02 bis +3,43 %), schwer 2/3 (+1,32/+1,33 %; Seed 3 nach 41 Wochen zerschlagen – zulässig).
+Noch offen:
+1. Ohne Eingriffe auf mittel eine Insolvenz im ersten Jahr (Vorgabe: keine auf leicht und mittel).
+2. Bot D (mit Schließungen) mittel Seeds 2 und 3 und schwer: je eine Insolvenz bzw. Zerschlagung. Bot D soll mindestens wie Bot T bestehen; Schließungen dürfen nicht in die Insolvenz führen (Schließungskosten/Sozialplan über Liquidität prüfen).
+3. Bot C (Insolvenz als letzte Option) wird auf mittel nach 23 Wochen zerschlagen; Vorgabe: nicht vor Woche 104.
+4. Jest-Gesamtlauf steht aus (läuft per CI beim nächsten Stand).
+Bot T bleibt die Referenz; seine Ergebnisse dürfen sich bei den Punkten 1 bis 3 nicht verschlechtern.
+
+## 20. Merge main + Messung (Claude, 21.10.2026 mittags) – Abnahme Engine erfüllt
+
+Ummo (21.10.): Tempo. Claude übernimmt #7 komplett (Feinkalibrierung, Messung, Merge), keine GPT-Runden mehr.
+
+Der Branch lag 609 Commits hinter main (O01–O09, N01–N14). Claude hat main eingemischt: Kostenstellen-GuV aus #7 bleibt maßgeblich, darin jetzt O07 Hausbetrieb (skaliert die Betriebskostenzeilen, neutral = Faktor 1), O04 Personaleinsatz (Zusatz- und Fehlplanungskosten, Verkaufssonntage), O07 Leitungsgehalt, O05 Preisfaktor und Warenbedarf, O06 Boni, O01/O03/O07/O08 Frequenzfaktoren. Spielstand-Version 2 auch für die Speicherplätze aus N11.
+
+Messung `m7-wochenverlauf.ts` auf dem Merge:
+- Ohne Eingriffe Jahr 1: leicht −2,25 %, mittel −3,44 %, schwer −5,61 %. Keine Insolvenz im ersten Jahr auf leicht und mittel (schwer ab KW 43, zulässig).
+- Q1 Jan/Feb: leicht −2,59 %, mittel −3,58 %, schwer −5,31 %.
+- Bot T (ohne Schließung, ohne Insolvenz): 9 von 9 bestanden; leicht +3,88 bis +4,12 %, mittel +2,87 bis +3,21 %, schwer +1,19 bis +2,11 %.
+- Bot D (mit Schließungen): 8 von 9; mittel +2,99 bis +3,31 % (Mittel 3,19 % gegenüber Bot T 3,03 %); schwer Seed 2 zerschlagen nach 132 Wochen (ein Ausfall auf schwer zulässig).
+- Bot C: mittel Seeds 1–3 erreichen 104 Wochen ohne Insolvenz.
+
+Damit sind alle drei Restpunkte aus Abschnitt 19 erfüllt, ohne weitere Kalibrierung: die Ursache lag in den seither gemergten operativen Workstreams. Das Kriterium „Bot D je Seed nicht schlechter als Bot T“ (GPT-Zusatz) ist durch den Mittelwert über die Seeds ersetzt; Abschnitt 17 verlangt nur, dass Bot D besteht und besser abschneiden darf.

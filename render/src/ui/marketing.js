@@ -32,7 +32,7 @@ export function marketingModul(ctx) {
     aktiv: false, seite: 'uebersicht', jahr: null, aktion: null, planen: null, kanal: null,
     crm: { seg: 0, kanal: 'mail', angebot: 'coupon', prozent: 0.15, mindestbon: 40, faktor: 3, wert: 10, frequenz: 'monatlich', wochen: 13, kontrolle: true },
   };
-  const tabs = () => `<div class="tabs">${[['uebersicht', 'Übersicht'], ['kanaele', 'Kanäle'], ['karte', 'Karte'], ['crm', 'CRM'], ['kalender', 'Kalender']].map(([id, t]) => `<button class="tab ${ui.seite === id || (id === 'kalender' && ui.seite === 'aktion') ? 'an' : ''}" data-a="seite" data-v="${id}">${t}</button>`).join('')}</div>`;
+  const tabs = () => `<div class="tabs">${[['uebersicht', 'Übersicht'], ['kanaele', 'Kanäle'], ['karte', 'Karte'], ['crm', 'CRM'], ['kalender', 'Kalender']].map(([id, t]) => `<button class="tab ${ui.seite === id || (id === 'kalender' && ui.seite === 'aktion') ? 'an' : ''}" data-a="seite" data-v="${id}">${t}</button>`).join('')}</div><button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>`;
 
   // ─────────────────────────── Übersicht
   function uebersicht(P) {
@@ -218,6 +218,7 @@ export function marketingModul(ctx) {
   function klick(el) {
     const a = el.dataset.a, v = el.dataset.v, st = s(), B = ui.crm;
     switch (a) {
+      case 'eigenmarkeGruenden': return ctx.neueEigenmarke?.();
       case 'seite': ui.seite = v; ui.planen = null; return zeigen();
       case 'aktion': ui.seite = 'aktion'; ui.aktion = v; return zeigen();
       case 'kanalAuf': ui.kanal = ui.kanal === v ? null : v; return zeigen(true);

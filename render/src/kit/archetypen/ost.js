@@ -4,6 +4,8 @@
 //
 // Jeder Ost-Entwurf setzt E.ostArt(i, j) → 'magistrale' | 'zentrum' | 'altstadt' | 'barock' | 'messe' | 'gruenderzeit' | 'platte' | null
 // und E.ostEinkauf ('zentrum' | 'messe' | 'altstadt'): wie die Blöcke der Einkaufslage um die Hartwig-Häuser bebaut werden.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { registriereArchetyp, PLAN_HILFE as H } from '../stadtplan.js';
 import { registriereSlots, registriereStilProfil } from '../bauer.js';
 import { OST_SLOTS } from '../ostbauten.js';
@@ -46,7 +48,7 @@ function sozialistisch(E) {
   E.ostArt = (i, j) => {
     if ((i === kM - 1 || i === kM) && Math.abs(j - jc) <= 2) return 'magistrale';
     if (altKern(i, j)) return 'altstadt';
-    const dd = Math.hypot(i - kM - 0.8, (j - jc) * 1.1);
+    const dd = wurzelSumme(i - kM - 0.8, (j - jc) * 1.1);
     return dd < 2.2 ? 'zentrum' : dd < 3.3 ? 'gruenderzeit' : 'platte';
   };
   ostGrund(E, 'sozialistisch');
@@ -83,7 +85,7 @@ function ostberlin(E) {
   E.ostArt = (i, j) => {
     if (i <= kS) return null;
     if ((i === kM - 1 || i === kM) && Math.abs(j - lA) <= 3) return 'magistrale';
-    const dd = Math.hypot(i - ostKern.i, j - ostKern.j);
+    const dd = wurzelSumme(i - ostKern.i, j - ostKern.j);
     if (dd < 2.1 || (j === lA - 1 && i >= iT && i < kM)) return 'zentrum';
     return dd < 3.4 ? 'gruenderzeit' : 'platte';
   };
@@ -93,7 +95,7 @@ function ostberlin(E) {
   const ostViertel = E.viertel;
   E.viertel = (i, j) => {
     if (i > kS) return ostViertel(i, j);
-    const dd = Math.hypot(i - westKern.i, j - westKern.j);
+    const dd = wurzelSumme(i - westKern.i, j - westKern.j);
     return dd < 1.5 ? 'zentrum' : dd < 3 ? 'gruenderzeit' : 'nachkrieg';
   };
   E.landmarkVerbot = new Set(['slot:mall', 'slot:tankstelle']);
@@ -165,7 +167,7 @@ function messestadt(E) {
   E.ostArt = (i, j) => {
     if (kern(i, j)) return j === gt + 1 ? 'zentrum' : 'messe';
     if ((j === gb + 1 || j === gt - 1) && i > gl && i < gr) return 'zentrum';   // Plattenzentrum außen am Ring
-    const dd = Math.hypot(i - zc.i, j - zc.j);
+    const dd = wurzelSumme(i - zc.i, j - zc.j);
     return dd < 4.3 ? 'gruenderzeit' : 'platte';
   };
   ostGrund(E, 'messestadt', { gruenderzeit: 0.32 });
@@ -182,7 +184,7 @@ function ostAltstadt(E) {
   H.entwurf(basis, E);
   const v0 = E.viertel, zc = { ...E.zentrum };
   E.ostArt = (i, j) => {
-    const dd = Math.hypot(i - zc.i, j - zc.j);
+    const dd = wurzelSumme(i - zc.i, j - zc.j);
     if (dd > (E.T.idx === 2 ? 2.3 : 3.0)) return 'platte';
     const v = v0(i, j);
     return v === 'altstadt' || v === 'barock' || v === 'zentrum' ? 'altstadt' : 'gruenderzeit';
@@ -204,7 +206,7 @@ function ostseeHanse(E) {
   E.reihen[jW] = 48;   // Hafenbecken fest 48 m (Wasser im Nahausschnitt ≤ 15 %)
   nimm(E, { art: 'wasser', form: 'fluss', i0: 0, i1: nx - 1, j0: jW, j1: jW, quer: true, keineBruecke: true });
   const zc = { i: (nx - 1) / 2 + zw(r, -0.4, 0.4), j: jW - 3.0 };   // Innenstadt drei Reihen über dem Hafen (Wasser nah ≤ 15 %)
-  const kern = (i, j) => j < jW && Math.hypot(i - zc.i, (j - zc.j) * 1.15) < 2.3;
+  const kern = (i, j) => j < jW && wurzelSumme(i - zc.i, (j - zc.j) * 1.15) < 2.3;
   const iH = r() < 0.5 ? 0 : nx - 2;
   nimm(E, { art: 'hafen', i0: iH, i1: iH + 1, j0: jW - 1, j1: jW - 1 });
   E.landmarken.push('slot:kirche');
@@ -219,7 +221,7 @@ function ostseeHanse(E) {
   E.ostArt = (i, j) => {
     if ((j === lM - 1 || j === lM) && Math.abs(i - zc.i) <= 2.6) return 'magistrale';
     if (kern(i, j)) return 'altstadt';
-    return Math.hypot(i - zc.i, j - zc.j) < (E.T.idx === 2 ? 2.6 : 3.4) ? 'gruenderzeit' : 'platte';
+    return wurzelSumme(i - zc.i, j - zc.j) < (E.T.idx === 2 ? 2.6 : 3.4) ? 'gruenderzeit' : 'platte';
   };
   ostGrund(E, 'ostsee_hanse', { altstadt: 0.15, gruenderzeit: 0.3 });
   E.ostEinkauf = 'altstadt';
@@ -602,7 +604,7 @@ function ostAufmarsch(ctx, E, b) {
 /** Ein Heizkraftwerk am äußersten Plattenbaugebiet. */
 function nachPlan(E, _H, g) {
   const { bloecke, parzellen, T, typ } = g;
-  const dist = (b) => Math.hypot((b.i0 + b.i1) / 2 - E.zentrum.i, (b.j0 + b.j1) / 2 - E.zentrum.j);
+  const dist = (b) => wurzelSumme((b.i0 + b.i1) / 2 - E.zentrum.i, (b.j0 + b.j1) / 2 - E.zentrum.j);
   const pl = bloecke.filter((b) => b.art === 'platte').sort((a, c) => dist(c) - dist(a));
   for (const b of pl.slice(0, 6)) {
     const rects = b.parzellen.map((id) => parzellen.find((p) => p.id === id)).filter(Boolean);
@@ -703,7 +705,7 @@ function bodenAufmarsch(ctx, b, r, teile, B) {
   }
   for (const [x, z] of [[P.x + 3, P.z + 3], [P.x + P.w - 3, P.z + 3], [P.x + 3, P.z + P.d - 8], [P.x + P.w - 8, P.z + P.d - 8], [P.x + P.w / 2, P.z + P.d / 2]]) if (frei(x, z, 1)) I.setze('doppellaterne', x, y, z, 0);
   const n = Math.round((P.w * P.d) / 34 * ctx.dichte);
-  for (let i = 0; i < n; i++) { const x = B.zw(r, P.x + 1, P.x + P.w - 1), z = B.zw(r, P.z + 1, P.z + P.d - 1); if (frei(x, z, 0.5) && (!b.brunnen || Math.hypot(x - b.brunnen.x, z - b.brunnen.z) > 7)) B.figur(I, x, y, z, r); }
+  for (let i = 0; i < n; i++) { const x = B.zw(r, P.x + 1, P.x + P.w - 1), z = B.zw(r, P.z + 1, P.z + P.d - 1); if (frei(x, z, 0.5) && (!b.brunnen || wurzelSumme(x - b.brunnen.x, z - b.brunnen.z) > 7)) B.figur(I, x, y, z, r); }
 }
 
 /** Hafenkante: Kaimauer, Pflaster, Speicher aus Backstein, Portalkräne, Poller. */

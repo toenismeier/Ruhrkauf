@@ -4,6 +4,8 @@
 // ddr: true für Städte der ehemaligen DDR (eigene Ost-Archetypen, Ost-Stilmischung im Bauer, Tatra-Bahnen)
 // export stadtDaten(name) → derselbe Eintrag (oder undefined)
 // Die Einträge passen direkt zu stadtplan(seed, { typ, archetyp, region, ...extra, standorte }).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { rng, zw } from './basis.js';
 import { ARCHETYPEN, ARCHETYP_DEFS, TYPEN, wahlGewichtet } from './stadtplan.js';
 import './archetypen/index.js';   // registrierte Archetypen bringen über def.staedte eigene Städte mit
@@ -84,7 +86,7 @@ const WB_FLAECHE = { metropole: [2600, 5200], grossstadt: [1800, 3800], mittelst
 
 function baueEintrag(name, liste) {
   const geo = STADT_GEOGRAFIE[name];
-  // Der Engine-Cluster ist die Referenz – alte Render-Exporte können noch eine frühere Klassifikation enthalten.
+  // Der aktuelle Engine-Städtestamm bestimmt die Größenklasse, nicht ältere Exporte.
   const typ = geo?.typ ?? liste[0]?.cluster ?? schwesterHauser.find((h) => h.stadt === name)?.cluster ?? haeuserOutlet.find((h) => h.stadt === name)?.cluster ?? 'mittelstadt';
   const seed = stadtSeed(name);
   const r = rng(seed * 13 + 5);
@@ -96,8 +98,7 @@ function baueEintrag(name, liste) {
   const extra = { ...(bild?.[1] ?? {}), ...(ddr ? { ddr: true } : {}) };
   const standorte = liste.map((h) => {
     const f = fussabdruck(h);
-    return { id: h.id, name: h.name, rolle: h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage,
-      hausklasse: h.hausklasse, premium: h.klasse === 'premium', grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, hausklasse: h.hausklasse, premium: h.klasse === 'premium', grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
   });
   // Eine Schwesterfiliale pro ausgewaehlter Stadt. Hartwig behält die zentrale Einkaufslage.
   // Die Daten sind rein grafisch und gehoeren nicht zum Engine-Portfolio.
@@ -195,13 +196,13 @@ function baueEintrag(name, liste) {
 const PLUGIN_BILD = pluginBild();
 const WB_GENUTZT = new Map();   // Region → Map(Art → Anzahl), siehe baueEintrag
 const VIELFALT = [];            // bereits gebaute Einträge: { name, region, wb, kirche, konzern } für die Nachbarprüfung
-/** Koordinaten der 220 Engine-Städte (Stadtzentren, Breite/Länge). Nachbarschaft gilt bundesweit im Radius NACHBAR_KM. */
+/** Ungefähre Lage (Breite, Länge) der West-Städte; Nachbarn liegen näher als NACHBAR_KM (direkte Nachbarstädte im Ballungsraum). */
 const NACHBAR_KM = 28;
-const KOORD = Object.fromEntries(Object.entries(STADT_GEOGRAFIE).map(([name, meta]) => [name, meta.koord]));
-function nachbarStaedteRoh(name) { const a = KOORD[name]; return a ? Object.keys(KOORD).filter((n) => n !== name && Math.hypot((a[0] - KOORD[n][0]) * 111, (a[1] - KOORD[n][1]) * 70) < NACHBAR_KM) : []; }
+const KOORD = Object.fromEntries(Object.entries(STADT_GEOGRAFIE).map(([n, meta]) => [n, meta.koord]));
+function nachbarStaedteRoh(name) { const a = KOORD[name]; return a ? Object.keys(KOORD).filter((n) => n !== name && wurzelSumme((a[0] - KOORD[n][0]) * 111, (a[1] - KOORD[n][1]) * 70) < NACHBAR_KM) : []; }
 function nachbarnVon(name, region) {
   const a = KOORD[name];
-  if (a) return VIELFALT.filter((e) => { const b = KOORD[e.name]; return b && Math.hypot((a[0] - b[0]) * 111, (a[1] - b[1]) * 70) < NACHBAR_KM; });
+  if (a) return VIELFALT.filter((e) => { const b = KOORD[e.name]; return b && wurzelSumme((a[0] - b[0]) * 111, (a[1] - b[1]) * 70) < NACHBAR_KM; });
   return VIELFALT.filter((e) => e.region === region).slice(-3);
 }
 const nachStadt = new Map();
@@ -217,5 +218,5 @@ export function stadtDaten(name) { return INDEX.get(name); }
 export function nachbarStaedte(name) {
   const a = KOORD[name];
   if (!a) return [];
-  return STADTLISTE.filter((s) => s.name !== name && KOORD[s.name] && Math.hypot((a[0] - KOORD[s.name][0]) * 111, (a[1] - KOORD[s.name][1]) * 70) < NACHBAR_KM).map((s) => s.name);
+  return STADTLISTE.filter((s) => s.name !== name && KOORD[s.name] && wurzelSumme((a[0] - KOORD[s.name][0]) * 111, (a[1] - KOORD[s.name][1]) * 70) < NACHBAR_KM).map((s) => s.name);
 }

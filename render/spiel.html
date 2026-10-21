@@ -9,123 +9,141 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Hartwig">
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="icon" href="./app-icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="./app-icon-180.png" sizes="180x180">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1242x2688.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="./startbilder/start-750x1334.png">
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1320x2868.png">
+<link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1206x2622.png">
+<link rel="stylesheet" href="./src/ui/reise-woche.css">
+<link rel="stylesheet" href="./src/ui/zeitung.css">
+<link rel="stylesheet" href="./src/ui/einfuehrung.css">
+<link rel="stylesheet" href="./src/ui/erfolge.css">
+<link rel="stylesheet" href="./src/ui/spielende.css">
+<link rel="stylesheet" href="./src/ui/statistik.css">
 <style>
-  :root { --karte: #ffffff; --grund: #f3f1ec; --text: #1f2a33; --leise: #7b8790; --rot: #d23c32; --gruen: #2f8f5b; --linie: #e7e3dc; --schatten: 0 2px 10px rgba(20, 30, 40, 0.16); }
+  :root { --karte: #ffffff; --grund: #f3f1ec; --text: #1f2a33; --leise: #7b8790; --rot: #d23c32; --gruen: #2f8f5b; --linie: #e7e3dc; --schatten: 0 2px 10px rgba(20, 30, 40, 0.16); --schrift: 1; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: #4fb6c2; font-family: -apple-system, "SF Pro Text", "DejaVu Sans", Arial, sans-serif; color: var(--text); }
-  #karte { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; }
-  .oben { position: fixed; left: 10px; right: 10px; top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  #karte { position: fixed; inset: 0; width: 100vw; height: 100dvh; display: block; touch-action: none; }
+  .oben { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
   .leiste { display: flex; gap: 8px; align-items: center; }
   .marke { pointer-events: auto; background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 8px 12px; display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
-  .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--rot); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 17px; flex: none; }
-  .marke b { display: block; font-size: 14px; }
-  .marke small { color: var(--leise); font-size: 11px; }
+  .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--rot); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: calc(17px * var(--schrift)); flex: none; }
+  .marke b { display: block; font-size: calc(14px * var(--schrift)); }
+  .marke small { color: var(--leise); font-size: calc(11px * var(--schrift)); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .marke > div:last-child { min-width: 0; }
   .datum { pointer-events: auto; background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 8px 12px; text-align: right; flex: none; }
-  .datum b { display: block; font-size: 14px; }
-  #stufe { display: block; color: var(--leise); font-size: 11px; }
-  #phase { color: var(--rot); font-size: 11px; font-weight: 700; }
+  .datum b { display: block; font-size: calc(14px * var(--schrift)); }
+  #stufe { display: block; color: var(--leise); font-size: calc(11px * var(--schrift)); }
+  #phase { color: var(--rot); font-size: calc(11px * var(--schrift)); font-weight: 700; }
   #cockpit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: auto; }
   .kz { background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 6px 9px; min-width: 0; }
-  .kz span { display: block; color: var(--leise); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .kz b { display: block; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+  .kz span { display: block; color: var(--leise); font-size: calc(10px * var(--schrift)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kz b { display: block; font-size: calc(13.5px * var(--schrift)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
   .kz.rot b { color: var(--rot); } .kz.gruen b { color: var(--gruen); }
-  .unten { position: fixed; left: 10px; right: 10px; bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
-  #postdirekt { min-width: 46px; position: relative; font-size: 21px; padding: 0 9px; }
+  .unten { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
+  #postdirekt { min-width: 46px; position: relative; font-size: calc(21px * var(--schrift)); padding: 0 9px; }
   #postbadge.dringend, #postmenubadge.dringend { background: #a92120; }
-  #wochenstreifen { position: fixed; bottom: calc(74px + env(safe-area-inset-bottom)); left: 12px; right: 12px; z-index: 3; background: #1f2a33; color: #fff; border-radius: 13px; min-height: 48px; padding: 10px 14px; font-size: 13px; font-weight: 700; box-shadow: var(--schatten); display: none; text-align: left; }
+  #wochenstreifen { position: fixed; bottom: calc(74px + env(safe-area-inset-bottom)); left: calc(12px + env(safe-area-inset-left)); right: calc(12px + env(safe-area-inset-right)); z-index: 3; background: #1f2a33; color: #fff; border-radius: 13px; min-height: 48px; padding: 10px 14px; font-size: calc(13px * var(--schrift)); font-weight: 700; box-shadow: var(--schatten); display: none; text-align: left; }
   #wochenstreifen.an { display: block; }
   body.panel-offen #wochenstreifen { display: none; }
   .postkarte .postkopf { padding: 12px 12px 6px; }
-  .postkopf h3 { font-size: 15px; margin: 5px 0; line-height: 1.3; }
-  .posttyp, .posterledigt small { font-size: 11px; font-weight: 700; color: var(--leise); display: block; }
+  .postkopf h3 { font-size: calc(15px * var(--schrift)); margin: 5px 0; line-height: 1.3; }
+  .posttyp, .posterledigt small { font-size: calc(11px * var(--schrift)); font-weight: 700; color: var(--leise); display: block; }
   .postchips { display: flex; gap: 6px; align-items: center; justify-content: space-between; }
-  .postort { border: 0; background: transparent; color: #2f63b5; font-size: 12px; font-weight: 700; min-height: 44px; padding: 0 4px; }
-  .postdetail { padding: 0 12px 4px; font-size: 12.5px; color: var(--text); line-height: 1.45; }
+  .postort { border: 0; background: transparent; color: #2f63b5; font-size: calc(12px * var(--schrift)); font-weight: 700; min-height: 44px; padding: 0 4px; }
+  .postdetail { padding: 0 12px 4px; font-size: calc(12.5px * var(--schrift)); color: var(--text); line-height: 1.45; }
   .postdetail summary { color: #2f63b5; font-weight: 700; cursor: pointer; min-height: 35px; display: flex; align-items: center; }
   .postdetail p { margin: 6px 0; white-space: pre-wrap; }
-  .postwert { padding: 4px 12px; display: flex; align-items: baseline; gap: 6px; } .postwert b { font-size: 15px; } .postwert span { color: var(--leise); font-size: 11px; }
-  .poststandard { margin: 6px 12px 10px; background: #f8f4ed; border-radius: 9px; padding: 8px; font-size: 11.5px; color: #7d5424; }
+  .postwert { padding: 4px 12px; display: flex; align-items: baseline; gap: 6px; } .postwert b { font-size: calc(15px * var(--schrift)); } .postwert span { color: var(--leise); font-size: calc(11px * var(--schrift)); }
+  .poststandard { margin: 6px 12px 10px; background: #f8f4ed; border-radius: 9px; padding: 8px; font-size: calc(11.5px * var(--schrift)); color: #7d5424; }
   .postaktionen { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 12px; }
-  .postaktionen button { flex: 1 1 calc(50% - 8px); min-width: 130px; min-height: 44px; overflow-wrap: anywhere; background: #e9e5de; border-radius: 10px; padding: 7px 9px; color: var(--text); font-weight: 800; font-size: 12px; }
+  .postaktionen button { flex: 1 1 calc(50% - 8px); min-width: 130px; min-height: 44px; overflow-wrap: anywhere; background: #e9e5de; border-radius: 10px; padding: 7px 9px; color: var(--text); font-weight: 800; font-size: calc(12px * var(--schrift)); }
   .postaktionen button.gruen { background: var(--gruen); color: white; } .postaktionen button.rot { background: #fbe3e1; color: var(--rot); }
-  .postleer { min-height: 64px; } .postfilter { display: block; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
-  .postfilter select { display: block; } .postalle, .postzurueck { min-height: 44px; padding: 6px 10px; background: transparent; color: #2f63b5; font-size: 12px; font-weight: 700; }
+  .postleer { min-height: 64px; } .postfilter { display: block; font-size: calc(12px * var(--schrift)); font-weight: 700; margin-bottom: 8px; }
+  .postfilter select { display: block; } .postalle, .postzurueck { min-height: 44px; padding: 6px 10px; background: transparent; color: #2f63b5; font-size: calc(12px * var(--schrift)); font-weight: 700; }
   .postmeldung { position: relative; } .postmeldung.ungelesen { border-left: 4px solid var(--rot); }
   .postmeldung > button:first-child { display: flex; gap: 9px; align-items: flex-start; background: transparent; text-align: left; min-height: 54px; padding: 11px; width: 100%; }
-  .postmeldung .postort { margin: 0 8px 4px; } .postsymbol { font-size: 19px; min-width: 24px; line-height: 1.4; }
-  .postnachricht { display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; line-height: 1.4; }
-  .postnachricht small { color: var(--leise); font-size: 10.5px; }
+  .postmeldung .postort { margin: 0 8px 4px; } .postsymbol { font-size: calc(19px * var(--schrift)); min-width: 24px; line-height: 1.4; }
+  .postnachricht { display: flex; flex-direction: column; gap: 3px; font-size: calc(12.5px * var(--schrift)); line-height: 1.4; }
+  .postnachricht small { color: var(--leise); font-size: calc(10.5px * var(--schrift)); }
   .posterledigt { display: flex; flex-direction: column; gap: 5px; padding: 12px; }
-  .posterledigt b { font-size: 13px; } .posterledigt span { font-size: 12px; color: var(--gruen); }
+  .posterledigt b { font-size: calc(13px * var(--schrift)); } .posterledigt span { font-size: calc(12px * var(--schrift)); color: var(--gruen); }
   .posthausliste { max-height: 45vh; overflow: auto; border-block: 1px solid var(--linie); margin: 8px 0; }
-  .posthaus { display: flex; gap: 12px; align-items: center; padding: 7px 12px; min-height: 48px; border-top: 1px solid var(--linie); font-size: 12.5px; }
+  .posthaus { display: flex; gap: 12px; align-items: center; padding: 7px 12px; min-height: 48px; border-top: 1px solid var(--linie); font-size: calc(12.5px * var(--schrift)); }
   .posthaus input { width: 22px; height: 22px; accent-color: var(--gruen); }
-  .posthaus small { display: block; color: var(--leise); font-size: 11px; margin-top: 2px; }
-  .posthinweis { font-size: 12px; line-height: 1.4; }
-  #postwarnungswahl { margin: 12px 16px 2px; display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text); }
+  .posthaus small { display: block; color: var(--leise); font-size: calc(11px * var(--schrift)); margin-top: 2px; }
+  .posthinweis { font-size: calc(12px * var(--schrift)); line-height: 1.4; }
+  #postwarnungswahl { margin: 12px 16px 2px; display: flex; gap: 8px; align-items: center; font-size: calc(12px * var(--schrift)); color: var(--text); }
   #postwarnungswahl input { width: 20px; height: 20px; }
-  .chipstadt { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 0 12px; height: 46px; display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; position: relative; }
-  .chipstadt span { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .chipstadt i { color: var(--leise); font-style: normal; font-size: 12px; }
-  .chipstadt select { position: absolute; inset: 0; opacity: 0; font-size: 16px; }
+  .chipstadt { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 4px 10px; min-height: 46px; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; align-content: center; gap: 1px 5px; flex: 1; min-width: 0; position: relative; }
+  .chipstadt #stadtname { grid-column: 1; grid-row: 1; display: block; font-weight: 700; font-size: clamp(10px, 2.8vw, 14px); line-height: 1.1; white-space: nowrap; overflow: visible; text-align: left; }
+  .chipstadt #stadtcluster { grid-column: 1; grid-row: 2; font-size: calc(9px * var(--schrift)); font-weight: normal; text-align: left; }
+  .chipstadt i { grid-column: 2; grid-row: 1 / span 2; color: var(--leise); font-style: normal; font-size: calc(12px * var(--schrift)); }
+  .chipstadt select { position: absolute; inset: 0; opacity: 0; font-size: calc(16px * var(--schrift)); }
   button { font: inherit; border: 0; cursor: pointer; }
-  .knopf { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); height: 46px; padding: 0 14px; font-weight: 700; font-size: 14px; color: var(--text); }
+  .knopf { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); height: 46px; padding: 0 14px; font-weight: 700; font-size: calc(14px * var(--schrift)); color: var(--text); }
   #weiter { background: var(--rot); color: #fff; }
   #weiter:disabled { opacity: 0.6; }
-  .botwahl { position: fixed; right: 12px; bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 5px 9px; font-size: 11px; color: var(--leise); display: flex; gap: 5px; align-items: center; }
+  .botwahl { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 5px 9px; font-size: calc(11px * var(--schrift)); color: var(--leise); display: none; gap: 5px; align-items: center; }
   #panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 62vh; background: var(--grund); border-radius: 22px 22px 0 0; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); transform: translateY(105%); transition: transform 0.22s ease; display: flex; flex-direction: column; }
   #panel.offen { transform: none; }
   .pkopf { padding: 8px 16px 10px; background: var(--karte); border-radius: 22px 22px 0 0; border-bottom: 1px solid var(--linie); position: relative; }
   .griff { width: 38px; height: 5px; border-radius: 3px; background: #d6d2ca; margin: 0 auto 8px; }
-  #ptitel { font-size: 17px; font-weight: 800; }
-  #punter { color: var(--leise); font-size: 12px; margin-top: 2px; }
-  #pzu { position: absolute; right: 12px; top: 16px; width: 30px; height: 30px; border-radius: 15px; background: #eeebe5; font-size: 17px; color: var(--leise); }
-  #pinhalt { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 12px calc(18px + env(safe-area-inset-bottom)); }
+  #ptitel { font-size: calc(17px * var(--schrift)); font-weight: 800; }
+  #punter { color: var(--leise); font-size: calc(12px * var(--schrift)); margin-top: 2px; }
+  #pzu { position: absolute; right: 12px; top: 16px; width: 30px; height: 30px; border-radius: 15px; background: #eeebe5; font-size: calc(17px * var(--schrift)); color: var(--leise); }
+  #pinhalt { flex: 1; min-height: 0; overflow-y: auto; padding: 12px calc(12px + env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left)); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-  .chip { background: #e4f2ea; color: var(--gruen); border-radius: 10px; padding: 4px 9px; font-size: 12px; font-weight: 700; }
+  .chip { background: #e4f2ea; color: var(--gruen); border-radius: 10px; padding: 4px 9px; font-size: calc(12px * var(--schrift)); font-weight: 700; }
   .chip.warn { background: #fbe3e1; color: var(--rot); } .chip.grau { background: #ebe8e2; color: var(--leise); }
   .raster { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
   .raster .kz { box-shadow: none; border: 1px solid var(--linie); padding: 9px 11px; }
-  .raster .kz b { font-size: 16px; }
+  .raster .kz b { font-size: calc(16px * var(--schrift)); }
   .karte { background: var(--karte); border-radius: 14px; border: 1px solid var(--linie); margin-bottom: 8px; overflow: hidden; }
-  .khead { font-weight: 800; font-size: 13px; padding: 8px 12px; border-bottom: 1px solid var(--linie); }
+  .khead { font-weight: 800; font-size: calc(13px * var(--schrift)); padding: 8px 12px; border-bottom: 1px solid var(--linie); }
   .khead small { color: var(--leise); font-weight: 400; margin-left: 6px; }
-  .zeile { display: flex; align-items: center; gap: 8px; padding: 7px 12px; font-size: 13px; border-top: 1px solid #f2efea; }
+  .zeile { display: flex; align-items: center; gap: 8px; padding: 7px 12px; font-size: calc(13px * var(--schrift)); border-top: 1px solid #f2efea; }
   .zeile:first-of-type { border-top: 0; }
   .zeile.grau { color: var(--leise); }
   .was { flex: 1; min-width: 0; }
-  .was i { color: var(--leise); font-style: normal; font-size: 11px; margin-left: 4px; }
-  .was em { display: block; color: #c27b0e; font-style: normal; font-size: 11px; }
-  .qm { color: var(--leise); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .uq { width: 64px; text-align: right; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .was i { color: var(--leise); font-style: normal; font-size: calc(11px * var(--schrift)); margin-left: 4px; }
+  .was em { display: block; color: #c27b0e; font-style: normal; font-size: calc(11px * var(--schrift)); }
+  .qm { color: var(--leise); font-size: calc(12px * var(--schrift)); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .uq { width: 64px; text-align: right; font-size: calc(12px * var(--schrift)); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .dot { width: 9px; height: 9px; border-radius: 5px; flex: none; background: var(--rot); }
   .k-kommission, .k-konzession { background: #2f63b5; } .k-untermiete { background: #e8751a; } .k-offprice { background: #f5b400; } .k-leer { background: #c9c4bb; }
   body.panel-offen #cockpit, body.panel-offen .botwahl { display: none; }
-  .mini { background: #eeebe5; color: var(--text); border-radius: 9px; padding: 5px 10px; font-size: 12px; font-weight: 700; flex: none; }
+  .mini { background: #eeebe5; color: var(--text); border-radius: 9px; padding: 5px 10px; font-size: calc(12px * var(--schrift)); font-weight: 700; flex: none; }
   .mini.rot { background: #fbe3e1; color: var(--rot); } .mini.gruen { background: var(--gruen); color: #fff; }
   .khead .mini { float: right; margin-top: -2px; }
   .stufe { display: flex; align-items: center; gap: 6px; flex: none; } .stufe b { width: 14px; text-align: center; }
   .abt { border-top: 1px solid #f2efea; } .abt:first-of-type { border-top: 0; } .abt .zeile { border-top: 0; }
   .zeile.unter { padding-top: 0; padding-left: 29px; }
-  .ort { font: inherit; font-size: 12px; width: 100%; border: 1px solid var(--linie); border-radius: 9px; padding: 5px 8px; background: #faf9f6; color: var(--text); }
+  .ort { font: inherit; font-size: calc(12px * var(--schrift)); width: 100%; border: 1px solid var(--linie); border-radius: 9px; padding: 5px 8px; background: #faf9f6; color: var(--text); }
   .wirk { color: var(--leise) !important; }
   .klickbar { cursor: pointer; } .zeile.gewaehlt { background: #fdf3e6; }
   .schnitt img { display: block; width: 100%; background: #26313a; }
-  #meldung { position: fixed; left: 16px; right: 16px; top: calc(16px + env(safe-area-inset-top)); background: var(--text); color: #fff; border-radius: 14px; padding: 10px 14px; font-size: 13px; box-shadow: var(--schatten); opacity: 0; transform: translateY(-8px); transition: all 0.2s; pointer-events: none; z-index: 5; }
+  #meldung { position: fixed; left: calc(16px + env(safe-area-inset-left)); right: calc(16px + env(safe-area-inset-right)); top: calc(16px + env(safe-area-inset-top)); background: var(--text); color: #fff; border-radius: 14px; padding: 10px 14px; font-size: calc(13px * var(--schrift)); box-shadow: var(--schatten); opacity: 0; transform: translateY(-8px); transition: all 0.2s; pointer-events: none; z-index: 5; }
   #meldung.an { opacity: 1; transform: none; } #meldung.rot { background: var(--rot); }
-  #lade { position: fixed; inset: 0; display: none; place-items: center; background: rgba(79, 182, 194, 0.55); font-weight: 700; color: #fff; font-size: 16px; }
+  #lade { position: fixed; inset: 0; display: none; place-items: center; background: rgba(79, 182, 194, 0.55); font-weight: 700; color: #fff; font-size: calc(16px * var(--schrift)); }
   #lade.an { display: grid; }
   /* Einkauf und Eigenmarken */
   #panel.gross { max-height: 87vh; }
   .knopf.mitbadge { position: relative; }
-  #ekbadge { position: absolute; top: -6px; right: -6px; min-width: 21px; height: 21px; border-radius: 11px; background: var(--rot); color: #fff; font-size: 11.5px; font-weight: 800; display: grid; place-items: center; padding: 0 5px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+  #ekbadge { position: absolute; top: -6px; right: -6px; min-width: 21px; height: 21px; border-radius: 11px; background: var(--rot); color: #fff; font-size: calc(11.5px * var(--schrift)); font-weight: 800; display: grid; place-items: center; padding: 0 5px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
   .tabs { position: sticky; top: -12px; z-index: 2; display: flex; gap: 4px; background: #e6e2da; border-radius: 14px; padding: 4px; margin: -2px 0 10px; box-shadow: 0 6px 8px -6px rgba(20,30,40,.18); }
-  .tab { flex: 1; min-height: 40px; border-radius: 11px; background: transparent; font-size: 13.5px; font-weight: 700; color: var(--leise); display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .tab { flex: 1; min-height: 40px; border-radius: 11px; background: transparent; font-size: calc(13.5px * var(--schrift)); font-weight: 700; color: var(--leise); display: flex; align-items: center; justify-content: center; gap: 6px; }
   .tab.an { background: var(--karte); color: var(--text); box-shadow: 0 1px 4px rgba(20,30,40,.12); }
-  .tab .zahl { background: var(--rot); color: #fff; border-radius: 9px; font-size: 11px; padding: 1px 6px; }
+  .tab .zahl { background: var(--rot); color: #fff; border-radius: 9px; font-size: calc(11px * var(--schrift)); padding: 1px 6px; }
   .seg { display: flex; gap: 3px; background: #e9e5de; border-radius: 12px; padding: 3px; margin-bottom: 10px; }
-  .seg button { flex: 1; min-height: 40px; border-radius: 10px; background: transparent; font-size: 13px; font-weight: 700; color: var(--leise); padding: 0 6px; }
+  .seg button { flex: 1; min-height: 40px; border-radius: 10px; background: transparent; font-size: calc(13px * var(--schrift)); font-weight: 700; color: var(--leise); padding: 0 6px; }
   .seg button.an { background: var(--karte); color: var(--text); box-shadow: 0 1px 3px rgba(20,30,40,.12); }
   .seg.umbruch { flex-wrap: wrap; } .seg.umbruch button { flex: 1 0 30%; }
   .kz b i { font-style: normal; }
@@ -135,105 +153,120 @@
   .a-gruen { background: var(--gruen); } .a-gelb { background: #e3a90d; } .a-rot { background: var(--rot); }
   .spaltenwahl { display: flex; gap: 6px; overflow-x: auto; margin: 0 -12px 10px; padding: 0 12px 2px; align-items: center; scrollbar-width: none; }
   .spaltenwahl::-webkit-scrollbar { display: none; }
-  .spaltenwahl > span { font-size: 11px; color: var(--leise); flex: none; }
-  .chipk { flex: none; height: 38px; border-radius: 19px; padding: 0 13px; background: var(--karte); border: 1px solid var(--linie); font-size: 12.5px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .spaltenwahl > span { font-size: calc(11px * var(--schrift)); color: var(--leise); flex: none; }
+  .chipk { flex: none; height: 38px; border-radius: 19px; padding: 0 13px; background: var(--karte); border: 1px solid var(--linie); font-size: calc(12.5px * var(--schrift)); font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
   .chipk.an { background: var(--text); color: #fff; border-color: var(--text); }
-  .chipk b { width: 18px; height: 18px; border-radius: 9px; background: #fff; color: var(--text); font-size: 11px; display: grid; place-items: center; }
+  .chipk b { width: 18px; height: 18px; border-radius: 9px; background: #fff; color: var(--text); font-size: calc(11px * var(--schrift)); display: grid; place-items: center; }
   .liste .lkopf { display: flex; align-items: center; padding: 0 8px 0 12px; border-bottom: 1px solid var(--linie); background: #faf9f6; }
-  .lkopf button { background: transparent; min-height: 40px; font-size: 11.5px; font-weight: 700; color: var(--leise); }
+  .lkopf button { background: transparent; min-height: 40px; font-size: calc(11.5px * var(--schrift)); font-weight: 700; color: var(--leise); }
   .lkopf button.an { color: var(--text); }
   .lname { flex: 1; min-width: 0; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .lname i { color: var(--leise); font-style: normal; font-size: 11px; font-weight: 400; }
+  .lname i { color: var(--leise); font-style: normal; font-size: calc(11px * var(--schrift)); font-weight: 400; }
   .lwert { width: 98px; text-align: right; flex: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .lwert i { font-style: normal; }
-  .lzeile { display: flex; align-items: center; min-height: 46px; padding: 0 8px 0 12px; border-top: 1px solid #f2efea; font-size: 13px; cursor: pointer; }
+  .lzeile { display: flex; align-items: center; min-height: 46px; padding: 0 8px 0 12px; border-top: 1px solid #f2efea; font-size: calc(13px * var(--schrift)); cursor: pointer; }
   .lzeile:first-of-type { border-top: 0; }
   .lzeile.bereich { font-weight: 700; background: #fdfcfa; }
   .lzeile.wgz { padding-left: 30px; color: #34414b; }
   .lzeile:active { background: #fdf3e6; }
   .pfeil { display: inline-block; width: 16px; color: var(--leise); }
-  .legende { font-size: 11px; color: var(--leise); text-align: center; margin: 4px 0 6px; line-height: 1.6; }
+  .legende { font-size: calc(11px * var(--schrift)); color: var(--leise); text-align: center; margin: 4px 0 6px; line-height: 1.6; }
   .legende .ampel { margin: 0 3px 0 8px; }
   .kurve .kkopf { display: flex; align-items: baseline; gap: 8px; padding: 9px 12px 2px; }
-  .kurve .kkopf span { font-size: 12px; color: var(--leise); }
-  .kurve .kkopf b { font-size: 14px; font-variant-numeric: tabular-nums; }
-  .kurve .kkopf small { margin-left: auto; font-size: 11.5px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .kurve .kkopf span { font-size: calc(12px * var(--schrift)); color: var(--leise); }
+  .kurve .kkopf b { font-size: calc(14px * var(--schrift)); font-variant-numeric: tabular-nums; }
+  .kurve .kkopf small { margin-left: auto; font-size: calc(11.5px * var(--schrift)); color: var(--text); font-variant-numeric: tabular-nums; }
   .kurve svg { display: block; width: calc(100% - 16px); height: 64px; margin: 0 8px; touch-action: pan-y; }
-  .kfuss { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--leise); padding: 2px 12px 8px; }
+  .kfuss { display: flex; justify-content: space-between; font-size: calc(10.5px * var(--schrift)); color: var(--leise); padding: 2px 12px 8px; }
   .regler { padding: 10px 12px; border-top: 1px solid #f2efea; }
   .khead + .regler, .steuerung > .regler:first-child { border-top: 0; }
   .rkopf { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
-  .rkopf b { font-size: 13px; } .rkopf small { font-size: 11px; color: var(--leise); text-align: right; }
+  .rkopf b { font-size: calc(13px * var(--schrift)); } .rkopf small { font-size: calc(11px * var(--schrift)); color: var(--leise); text-align: right; }
   .regler .seg { margin-bottom: 0; }
   .stepper { display: flex; align-items: center; gap: 10px; }
-  .stepper button { width: 48px; height: 44px; border-radius: 12px; background: #eeebe5; font-size: 21px; font-weight: 700; color: var(--text); flex: none; }
-  .stepper span { flex: 1; text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .stepper button { width: 48px; height: 44px; border-radius: 12px; background: #eeebe5; font-size: calc(21px * var(--schrift)); font-weight: 700; color: var(--text); flex: none; }
+  .stepper span { flex: 1; text-align: center; font-size: calc(14px * var(--schrift)); font-variant-numeric: tabular-nums; }
   .stepper span i { font-style: normal; color: var(--leise); }
   .balken { height: 6px; background: #eeebe5; border-radius: 3px; margin: 9px 0 4px; overflow: hidden; } .balken span { display: block; height: 100%; background: #2f63b5; border-radius: 3px; }
-  .rfuss { font-size: 11px; color: var(--leise); } .rfuss i { font-style: normal; }
+  .rfuss { font-size: calc(11px * var(--schrift)); color: var(--leise); } .rfuss i { font-style: normal; }
   .schieber { display: flex; align-items: center; gap: 10px; }
   .schieber input { flex: 1; height: 44px; accent-color: #2f63b5; margin: 0; }
-  .schieber output { width: 46px; text-align: right; font-weight: 800; font-size: 13.5px; font-variant-numeric: tabular-nums; }
-  .zweier { display: flex; align-items: center; gap: 8px; margin-top: 6px; } .zweier > span { width: 52px; font-size: 12px; color: var(--leise); } .zweier .seg { flex: 1; }
-  .emzeile { display: flex; align-items: center; gap: 8px; } .emfarbe { width: 12px; height: 12px; border-radius: 4px; flex: none; } .emname { width: 92px; font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .emzeile .schieber { flex: 1; }
-  .ort.gross { font-size: 16px; min-height: 44px; border-radius: 12px; padding: 8px 12px; margin-top: 6px; }
-  .zurueck { background: transparent; color: #2f63b5; font-size: 14px; font-weight: 700; min-height: 40px; padding: 0 2px; margin-bottom: 4px; }
-  .breit { display: block; width: 100%; min-height: 50px; border-radius: 14px; background: var(--karte); border: 1px solid var(--linie); font-size: 14.5px; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+  .schieber output { width: 46px; text-align: right; font-weight: 800; font-size: calc(13.5px * var(--schrift)); font-variant-numeric: tabular-nums; }
+  .zweier { display: flex; align-items: center; gap: 8px; margin-top: 6px; } .zweier > span { width: 52px; font-size: calc(12px * var(--schrift)); color: var(--leise); } .zweier .seg { flex: 1; }
+  .emzeile { display: flex; align-items: center; gap: 8px; } .emfarbe { width: 12px; height: 12px; border-radius: 4px; flex: none; } .emname { width: 92px; font-size: calc(12.5px * var(--schrift)); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .emzeile .schieber { flex: 1; }
+  .ort.gross { font-size: calc(16px * var(--schrift)); min-height: 44px; border-radius: 12px; padding: 8px 12px; margin-top: 6px; }
+  .zurueck { background: transparent; color: #2f63b5; font-size: calc(14px * var(--schrift)); font-weight: 700; min-height: 40px; padding: 0 2px; margin-bottom: 4px; }
+  .breit { display: block; width: 100%; min-height: 50px; border-radius: 14px; background: var(--karte); border: 1px solid var(--linie); font-size: calc(14.5px * var(--schrift)); font-weight: 800; color: var(--text); margin-bottom: 10px; }
   .breit.gruen { background: var(--gruen); color: #fff; border-color: var(--gruen); }
   .filter { margin-bottom: 4px; } .filter .ort.gross { margin: 0 0 8px; } .filter .seg { margin-bottom: 8px; }
-  .order .ohead { padding: 10px 12px 6px; } .order .ohead b { font-size: 14.5px; display: block; } .order .ohead i { font-style: normal; color: var(--leise); font-size: 11.5px; }
+  .order .ohead { padding: 10px 12px 6px; } .order .ohead b { font-size: calc(14.5px * var(--schrift)); display: block; } .order .ohead i { font-style: normal; color: var(--leise); font-size: calc(11.5px * var(--schrift)); }
   .ochips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 8px; } .chip.blau { background: #e3ecf8; color: #2f63b5; }
   .owerte { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 2px 12px 8px; }
-  .owerte span { display: block; font-size: 10.5px; color: var(--leise); } .owerte b { font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .olief { font-size: 11.5px; color: var(--leise); padding: 0 12px 8px; line-height: 1.45; }
+  .owerte span { display: block; font-size: calc(10.5px * var(--schrift)); color: var(--leise); } .owerte b { font-size: calc(14px * var(--schrift)); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .olief { font-size: calc(11.5px * var(--schrift)); color: var(--leise); padding: 0 12px 8px; line-height: 1.45; }
   .oknoepfe { display: flex; gap: 6px; padding: 6px 12px 12px; flex-wrap: wrap; }
-  .oknoepfe button { flex: 1; min-height: 44px; border-radius: 12px; background: #eeebe5; font-size: 13px; font-weight: 800; color: var(--text); padding: 0 8px; }
+  .oknoepfe button { flex: 1; min-height: 44px; border-radius: 12px; background: #eeebe5; font-size: calc(13px * var(--schrift)); font-weight: 800; color: var(--text); padding: 0 8px; }
   .oknoepfe button.gruen { background: var(--gruen); color: #fff; } .oknoepfe button.rot { background: #fbe3e1; color: var(--rot); } .oknoepfe button.leise { color: var(--leise); }
-  .oknoepfe.unten2 { padding: 2px 0 8px; } .oknoepfe.unten2 button { min-height: 50px; font-size: 15px; }
+  .oknoepfe.unten2 { padding: 2px 0 8px; } .oknoepfe.unten2 button { min-height: 50px; font-size: calc(15px * var(--schrift)); }
   button:disabled { opacity: 0.45; }
-  .emkarte .mkopf, .vorschau .mkopf { padding: 12px 14px; color: #fff; } .mkopf b { font-size: 17px; display: block; } .mkopf small { font-size: 12px; opacity: 0.88; }
+  .emkarte .mkopf, .vorschau .mkopf { padding: 12px 14px; color: #fff; } .mkopf b { font-size: calc(17px * var(--schrift)); display: block; } .mkopf small { font-size: calc(12px * var(--schrift)); opacity: 0.88; }
   .emkarte .ochips { padding-top: 10px; } .emkarte.aus { opacity: 0.6; }
-  .mzeile { display: flex; align-items: center; gap: 8px; padding: 3px 12px; } .mzeile span:first-child { width: 112px; font-size: 12px; color: var(--leise); flex: none; } .mzeile b { width: 28px; text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .mzeile { display: flex; align-items: center; gap: 8px; padding: 3px 12px; } .mzeile span:first-child { width: 112px; font-size: calc(12px * var(--schrift)); color: var(--leise); flex: none; } .mzeile b { width: 28px; text-align: right; font-size: calc(12.5px * var(--schrift)); font-variant-numeric: tabular-nums; }
   .mbalken { flex: 1; height: 8px; background: #eeebe5; border-radius: 4px; overflow: hidden; } .mbalken span { display: block; height: 100%; border-radius: 4px; }
   .passung { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 2px 12px 10px; }
-  .passung div { display: flex; flex-direction: column; align-items: center; gap: 2px; } .passung b { font-size: 12px; font-variant-numeric: tabular-nums; } .passung i { font-style: normal; font-size: 10.5px; color: var(--leise); }
+  .passung div { display: flex; flex-direction: column; align-items: center; gap: 2px; } .passung b { font-size: calc(12px * var(--schrift)); font-variant-numeric: tabular-nums; } .passung i { font-style: normal; font-size: calc(10.5px * var(--schrift)); color: var(--leise); }
   .psaeule { width: 22px; height: 38px; background: #eeebe5; border-radius: 6px; display: flex; align-items: flex-end; overflow: hidden; } .psaeule span { width: 100%; background: #2f63b5; border-radius: 6px 6px 0 0; }
   .schritte { display: flex; gap: 4px; margin-bottom: 10px; }
-  .schritte button { flex: 1; min-width: 0; min-height: 54px; border-radius: 12px; background: var(--karte); border: 1px solid var(--linie); font-size: 10.5px; font-weight: 700; color: var(--leise); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 2px; }
-  .schritte button b { width: 22px; height: 22px; border-radius: 11px; background: #eeebe5; color: var(--leise); display: grid; place-items: center; font-size: 12px; }
+  .schritte button { flex: 1; min-width: 0; min-height: 54px; border-radius: 12px; background: var(--karte); border: 1px solid var(--linie); font-size: calc(10.5px * var(--schrift)); font-weight: 700; color: var(--leise); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0 2px; }
+  .schritte button b { width: 22px; height: 22px; border-radius: 11px; background: #eeebe5; color: var(--leise); display: grid; place-items: center; font-size: calc(12px * var(--schrift)); }
   .schritte button.an { border-color: #2f63b5; color: var(--text); } .schritte button.an b { background: #2f63b5; color: #fff; }
   .schritte button.fertig b { background: var(--gruen); color: #fff; }
   .wgliste { display: flex; flex-direction: column; gap: 6px; }
-  .wgwahl { display: flex; justify-content: space-between; align-items: center; min-height: 46px; padding: 0 12px; border-radius: 12px; background: #faf9f6; border: 1px solid var(--linie); font-size: 13.5px; font-weight: 700; color: var(--text); text-align: left; }
-  .wgwahl i { font-style: normal; font-weight: 400; color: var(--leise); font-size: 11.5px; } .wgwahl b { font-variant-numeric: tabular-nums; color: var(--leise); }
+  .wgwahl { display: flex; justify-content: space-between; align-items: center; min-height: 46px; padding: 0 12px; border-radius: 12px; background: #faf9f6; border: 1px solid var(--linie); font-size: calc(13.5px * var(--schrift)); font-weight: 700; color: var(--text); text-align: left; }
+  .wgwahl i { font-style: normal; font-weight: 400; color: var(--leise); font-size: calc(11.5px * var(--schrift)); } .wgwahl b { font-variant-numeric: tabular-nums; color: var(--leise); }
   .wgwahl.an { background: #e4f2ea; border-color: var(--gruen); } .wgwahl.an b { color: var(--gruen); }
   .wahlkarten { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .wahlkarten button { text-align: left; padding: 10px 11px; border-radius: 12px; border: 1px solid var(--linie); background: #faf9f6; min-height: 72px; color: var(--text); }
-  .wahlkarten button b { display: block; font-size: 14px; } .wahlkarten button small { font-size: 11px; color: var(--leise); line-height: 1.35; }
+  .wahlkarten button b { display: block; font-size: calc(14px * var(--schrift)); } .wahlkarten button small { font-size: calc(11px * var(--schrift)); color: var(--leise); line-height: 1.35; }
   .wahlkarten button.an { border: 2px solid #2f63b5; background: #eef3fb; padding: 9px 10px; }
   .farben { display: flex; flex-wrap: wrap; gap: 10px; } .farben button { width: 44px; height: 44px; border-radius: 22px; } .farben button.an { outline: 3px solid var(--text); outline-offset: 2px; }
-  .leise { color: var(--leise); font-size: 12px; padding: 4px 0; } .mitte { text-align: center; }
+  .leise { color: var(--leise); font-size: calc(12px * var(--schrift)); padding: 4px 0; } .mitte { text-align: center; }
   .olief.warnung { color: #c27b0e; }
-  .emname i { display: block; font-style: normal; font-weight: 400; font-size: 10.5px; color: var(--leise); }
-  .lname i.em { font-size: 9.5px; font-weight: 800; color: #8c5a7a; background: #f3e8ef; border-radius: 5px; padding: 1px 4px; margin: 0 5px 0 0; vertical-align: 1px; }
+  .emname i { display: block; font-style: normal; font-weight: 400; font-size: calc(10.5px * var(--schrift)); color: var(--leise); }
+  .lname i.em { font-size: calc(9.5px * var(--schrift)); font-weight: 800; color: #8c5a7a; background: #f3e8ef; border-radius: 5px; padding: 1px 4px; margin: 0 5px 0 0; vertical-align: 1px; }
   .vorschau .owerte { padding-top: 8px; }
   .haus3d img { display: block; width: 100%; background: #26313a; }
   /* Menü wie Coffee Inc */
   .knopf.rund { width: 46px; padding: 0; display: grid; place-items: center; flex: none; }
   .knopf.rund.an { background: var(--text); color: #fff; }
   .burger { display: flex; flex-direction: column; gap: 4px; } .burger i { display: block; width: 20px; height: 2.5px; border-radius: 2px; background: currentColor; }
-  .badge { position: absolute; top: -6px; right: -6px; min-width: 21px; height: 21px; border-radius: 11px; background: var(--rot); color: #fff; font-size: 11.5px; font-weight: 800; display: grid; place-items: center; padding: 0 5px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+  .badge { position: absolute; top: -6px; right: -6px; min-width: 21px; height: 21px; border-radius: 11px; background: var(--rot); color: #fff; font-size: calc(11.5px * var(--schrift)); font-weight: 800; display: grid; place-items: center; padding: 0 5px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
   #menue { position: fixed; inset: 0; background: rgba(20, 30, 40, 0.28); opacity: 0; pointer-events: none; transition: opacity 0.18s; z-index: 4; }
   #menue.offen { opacity: 1; pointer-events: auto; }
-  .menuekarte { position: absolute; left: 10px; right: 10px; bottom: calc(72px + env(safe-area-inset-bottom)); background: var(--grund); border-radius: 20px; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); padding: 12px; transform: translateY(12px); transition: transform 0.18s; }
+  .menuekarte { position: absolute; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(72px + env(safe-area-inset-bottom)); background: var(--grund); border-radius: 20px; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); padding: 12px; max-height: calc(100dvh - 100px); overflow-y: auto; overscroll-behavior: contain; transform: translateY(12px); transition: transform 0.18s; }
   #menue.offen .menuekarte { transform: none; }
-  .menuetitel { font-weight: 800; font-size: 15px; margin: 2px 4px 10px; }
+  .menuetitel { font-weight: 800; font-size: calc(15px * var(--schrift)); margin: 2px 4px 10px; }
   .kacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .mkachel { position: relative; background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; min-height: 104px; padding: 10px 6px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text); text-align: center; }
-  .mkachel svg { color: var(--rot); margin-bottom: 2px; } .mkachel b { font-size: 13.5px; } .mkachel small { font-size: 10.5px; color: var(--leise); line-height: 1.25; }
+  .mkachel svg { color: var(--rot); margin-bottom: 2px; } .mkachel b { font-size: calc(13.5px * var(--schrift)); } .mkachel small { font-size: calc(10.5px * var(--schrift)); color: var(--leise); line-height: 1.25; }
   .mkachel:active { background: #fdf3e6; }
   .mkachel .badge { top: 6px; right: 6px; }
   body.panel-offen .unten { display: none; }
+  /* O03 IT: Systemlandkarte und Rollout */
+  .it-werte { display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:10px 12px;font-size: calc(12px * var(--schrift)); }
+  .it-werte span {display:flex;flex-direction:column;gap:4px;}
+  .it-werte b {font-size: calc(12px * var(--schrift));}
+  .it-ampel {padding:5px 7px;border-radius:8px;font-size: calc(11px * var(--schrift));font-weight:700;}
+  .it-ampel.gruen {background:#e4f2ea;color:#2f8f5b;}.it-ampel.gelb {background:#fff2d8;color:#9e6310;}.it-ampel.rot {background:#fbe3e1;color:#b62f2b;}
+  .it-meta {padding:4px 12px 9px;font-size: calc(11px * var(--schrift));color:var(--leise);overflow-wrap:anywhere;}
+  .it-warn {margin:7px 12px;color:var(--rot);font-size: calc(12px * var(--schrift));}
+  .it-fortschritt {background:#ebe8e2;height:8px;margin:2px 12px 10px;border-radius:5px;overflow:hidden;}.it-fortschritt i {display:block;background:var(--gruen);height:100%;}
+  .it-details {padding:8px 12px;font-size: calc(12px * var(--schrift));}.it-details summary {cursor:pointer;font-weight:700;padding:7px 0;}
+  .it-cluster {display:flex;align-items:center;justify-content:space-between;gap:7px;padding:7px 3px;border-top:1px solid var(--linie);}.it-cluster.fertig {color:var(--gruen);}.it-cluster b {font-size: calc(10px * var(--schrift));white-space:nowrap;}
+  .it-pfeile {display:flex;gap:3px;}.it-pfeile button {padding:4px 6px;border-radius:6px;background:#e9e5de;min-width:27px;}
+  .it-clusterauswahl {display:grid;grid-template-columns:1fr 1fr;gap:5px;max-height:220px;overflow:auto;margin:8px 0;}
+  .it-wahl {display:flex;flex-wrap:wrap;gap:4px;align-items:center;background:#f8f7f3;border:1px solid var(--linie);padding:6px;border-radius:9px;font-size: calc(11px * var(--schrift));}.it-wahl small{display:block;width:100%;padding-left:19px;color:var(--leise);}
+  .it-vergleich {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:8px;}.it-vergleich>div {border:1px solid var(--linie);background:#fff;border-radius:9px;padding:7px;display:flex;flex-direction:column;gap:3px;}.it-vergleich>div.gewaehlt{border:2px solid var(--rot);}.it-vergleich b{font-size: calc(11px * var(--schrift));}.it-vergleich small{font-size: calc(10px * var(--schrift));color:var(--leise);}
   /* Vorstand */
   .vgitter { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin-bottom: 8px; }
   .vkarte { position: relative; background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 8px 8px 9px; display: grid; grid-template-columns: 56px 1fr; gap: 2px 8px; text-align: left; color: var(--text); min-height: 96px; align-items: start; }
@@ -242,14 +275,14 @@
   .vbild svg { width: 100%; height: 100%; display: block; }
   .vbild.mittel { width: 88px; height: 100px; border-radius: 12px; flex: none; }
   .vbild.gross { width: 112px; height: 124px; border-radius: 14px; flex: none; }
-  .vtext { min-width: 0; } .vtext b { display: block; font-size: 14px; } .vtext small { display: block; font-size: 10.5px; color: var(--leise); line-height: 1.25; }
-  .vtext em { display: block; font-style: normal; font-size: 12.5px; font-weight: 700; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .vtext em.frei { color: var(--rot); }
+  .vtext { min-width: 0; } .vtext b { display: block; font-size: calc(14px * var(--schrift)); } .vtext small { display: block; font-size: calc(10.5px * var(--schrift)); color: var(--leise); line-height: 1.25; }
+  .vtext em { display: block; font-style: normal; font-size: calc(12.5px * var(--schrift)); font-weight: 700; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .vtext em.frei { color: var(--rot); }
   .vmini { display: flex; flex-direction: column; gap: 3px; align-self: end; } .vmini span { display: block; height: 4px; background: #eeebe5; border-radius: 2px; overflow: hidden; } .vmini i { display: block; height: 100%; background: #5cb85c; }
-  .vkarte > .ampel { position: absolute; right: 8px; top: 9px; } .vkarte > .chip { align-self: end; justify-self: start; font-size: 11px; }
+  .vkarte > .ampel { position: absolute; right: 8px; top: 9px; } .vkarte > .chip { align-self: end; justify-self: start; font-size: calc(11px * var(--schrift)); }
   .vprofil .vkopf, .kandidat .vkopf { display: flex; gap: 14px; padding: 14px 14px 6px; align-items: flex-start; }
-  .vname { display: block; font-size: 19px; font-weight: 800; line-height: 1.2; } .vkopf small { display: block; color: var(--leise); font-size: 12px; margin-top: 2px; line-height: 1.35; }
-  .vseit { margin: 10px 0 6px; } .vseit span, .vtitel { display: block; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--leise); margin-top: 6px; } .vseit b { font-size: 14px; }
-  .faehigkeiten { padding: 4px 14px 8px; } .faehig { display: flex; align-items: center; gap: 8px; margin: 5px 0; font-size: 12.5px; }
+  .vname { display: block; font-size: calc(19px * var(--schrift)); font-weight: 800; line-height: 1.2; } .vkopf small { display: block; color: var(--leise); font-size: calc(12px * var(--schrift)); margin-top: 2px; line-height: 1.35; }
+  .vseit { margin: 10px 0 6px; } .vseit span, .vtitel { display: block; font-size: calc(10.5px * var(--schrift)); letter-spacing: 0.06em; text-transform: uppercase; color: var(--leise); margin-top: 6px; } .vseit b { font-size: calc(14px * var(--schrift)); }
+  .faehigkeiten { padding: 4px 14px 8px; } .faehig { display: flex; align-items: center; gap: 8px; margin: 5px 0; font-size: calc(12.5px * var(--schrift)); }
   .faehig > span:first-child { width: 78px; color: var(--leise); text-align: right; } .faehig b { width: 26px; text-align: right; font-variant-numeric: tabular-nums; }
   .fbalken { position: relative; flex: 1; height: 14px; background: #1f2a33; border-radius: 7px; overflow: hidden; } .fbalken > span { display: block; height: 100%; background: #5cb85c; border-radius: 7px; }
   .fbalken i { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.18); } .fbalken i:nth-of-type(1) { left: 20%; } .fbalken i:nth-of-type(2) { left: 40%; } .fbalken i:nth-of-type(3) { left: 60%; } .fbalken i:nth-of-type(4) { left: 80%; }
@@ -257,61 +290,238 @@
   .khead + .schalter { border-top: 0; }
   .knebel { position: relative; width: 52px; height: 30px; border-radius: 15px; background: #d6d2ca; flex: none; transition: background 0.15s; } .knebel::after { content: ''; position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 12px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: left 0.15s; }
   .schalter.an .knebel { background: var(--gruen); } .schalter.an .knebel::after { left: 25px; }
-  .stext { font-size: 13.5px; font-weight: 700; } .stext small { display: block; font-weight: 400; font-size: 11.5px; color: var(--leise); }
-  .stepper span b { font-size: 15px; } .stepper span i { font-size: 11px; }
+  .stext { font-size: calc(13.5px * var(--schrift)); font-weight: 700; } .stext small { display: block; font-weight: 400; font-size: calc(11.5px * var(--schrift)); color: var(--leise); }
+  .stepper span b { font-size: calc(15px * var(--schrift)); } .stepper span i { font-size: calc(11px * var(--schrift)); }
   .karussell { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -12px; padding: 0 12px 4px; scrollbar-width: none; } .karussell::-webkit-scrollbar { display: none; }
   .kslot { flex: none; width: calc(100% - 30px); scroll-snap-align: center; } .kslot > .karte { margin-bottom: 0; height: 100%; }
   .punkte { display: flex; justify-content: center; gap: 4px; margin: 8px 0 10px; flex-wrap: wrap; } .punkte button { width: 22px; height: 22px; border-radius: 11px; background: transparent; position: relative; } .punkte button::after { content: ''; position: absolute; left: 7px; top: 7px; width: 8px; height: 8px; border-radius: 4px; background: #cfc9bf; } .punkte button.an::after { background: var(--text); }
-  .entscheid { border-color: #e3a90d; } .entscheid .oknoepfe button { font-size: 12px; }
+  .entscheid { border-color: #e3a90d; } .entscheid .oknoepfe button { font-size: calc(12px * var(--schrift)); }
   .owerte .rotwert, .rotwert { color: var(--rot); }
   .breitwert { width: auto !important; min-width: 70px; }
   /* Marketing */
-  .tabs .tab { font-size: 12.5px; min-width: 0; padding: 0 2px; }
+  .tabs .tab { font-size: calc(12.5px * var(--schrift)); min-width: 0; padding: 0 2px; }
+  /* Viele Reiter (Einkauf mit O05): waagerecht wischen statt überlappen */
+  .tabs { overflow-x: auto; scrollbar-width: none; } .tabs::-webkit-scrollbar { display: none; }
+  .tabs .tab { flex: 1 0 auto; padding: 0 10px; }
+  .lknoepfe { display: flex; gap: 6px; margin-top: 6px; }
   .kanal .ohead i { display: block; } .kanal .regler { padding-top: 4px; }
   .zeitleiste { display: block; padding: 6px 6px 0; } .zeitleiste text { font-family: inherit; }
   /* Produkte */
   .produkt { position: relative; padding-bottom: 10px; } .pbild { display: flex; justify-content: center; padding: 10px 0 0; } .pbild svg { display: block; }
   .papierkorb { position: absolute; right: 8px; top: 8px; width: 42px; height: 42px; border-radius: 21px; background: rgba(255,255,255,0.85); color: var(--leise); display: grid; place-items: center; }
-  .pname { text-align: center; padding: 6px 12px 2px; } .pname b { font-size: 17px; display: block; } .pname small { font-size: 11.5px; color: var(--leise); }
-  .sterne { display: inline-flex; gap: 1px; vertical-align: middle; } .sternzahl { font-size: 12px; color: var(--leise); margin-left: 6px; vertical-align: middle; font-variant-numeric: tabular-nums; }
+  .pname { text-align: center; padding: 6px 12px 2px; } .pname b { font-size: calc(17px * var(--schrift)); display: block; } .pname small { font-size: calc(11.5px * var(--schrift)); color: var(--leise); }
+  .sterne { display: inline-flex; gap: 1px; vertical-align: middle; } .sternzahl { font-size: calc(12px * var(--schrift)); color: var(--leise); margin-left: 6px; vertical-align: middle; font-variant-numeric: tabular-nums; }
   .pmitte { display: flex; align-items: center; gap: 8px; padding: 6px 12px 0; } .pmitte .schalter { width: auto; flex: 1; border: 0; padding: 0; min-height: 44px; }
-  .verkauf { text-align: right; } .verkauf small, .preis small { display: block; font-size: 10.5px; color: var(--leise); letter-spacing: 0.04em; text-transform: uppercase; } .verkauf b { display: block; font-size: 24px; font-variant-numeric: tabular-nums; } .verkauf i { font-style: normal; font-size: 12px; font-variant-numeric: tabular-nums; }
-  .donut { position: relative; width: 84px; height: 84px; flex: none; } .donut span { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; } .donut small { font-size: 10px; color: #b5651d; } .donut b { font-size: 14px; color: #b5651d; }
+  .verkauf { text-align: right; } .verkauf small, .preis small { display: block; font-size: calc(10.5px * var(--schrift)); color: var(--leise); letter-spacing: 0.04em; text-transform: uppercase; } .verkauf b { display: block; font-size: calc(24px * var(--schrift)); font-variant-numeric: tabular-nums; } .verkauf i { font-style: normal; font-size: calc(12px * var(--schrift)); font-variant-numeric: tabular-nums; }
+  .donut { position: relative; width: 84px; height: 84px; flex: none; } .donut span { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; } .donut small { font-size: calc(10px * var(--schrift)); color: #b5651d; } .donut b { font-size: calc(14px * var(--schrift)); color: #b5651d; }
   .preis { flex: 1; } .preis small.rotwert { text-transform: none; letter-spacing: 0; color: #d2603a; margin-bottom: 4px; } .preis .stepper button { width: 42px; height: 40px; }
-  .kats button { font-size: 12px; } .kats button i { font-style: normal; color: var(--leise); font-weight: 400; font-size: 11px; }
+  .kats button { font-size: calc(12px * var(--schrift)); } .kats button i { font-style: normal; color: var(--leise); font-weight: 400; font-size: calc(11px * var(--schrift)); }
   .typkacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0 10px; }
   .typkacheln button { background: #e4ecf0; border: 1px solid #d3dee4; border-radius: 14px; padding: 8px 4px 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text); min-height: 100px; }
-  .typkacheln button span { font-size: 11.5px; font-weight: 700; line-height: 1.2; } .typkacheln button.an { border: 2px solid #2f63b5; background: #eef3fb; padding: 7px 3px 6px; }
-  .typkacheln button.voll { opacity: 0.55; } .typkacheln button small { font-size: 9.5px; color: var(--rot); font-weight: 700; }
+  .typkacheln button span { font-size: calc(11.5px * var(--schrift)); font-weight: 700; line-height: 1.2; } .typkacheln button.an { border: 2px solid #2f63b5; background: #eef3fb; padding: 7px 3px 6px; }
+  .typkacheln button.voll { opacity: 0.55; } .typkacheln button small { font-size: calc(9.5px * var(--schrift)); color: var(--rot); font-weight: 700; }
   .farben.klein { gap: 8px; } .farben.klein button { width: 34px; height: 34px; border-radius: 17px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
-  .trend { padding: 8px 12px; border-top: 1px solid #f2efea; } .trend > b { font-size: 13px; } .tfarben { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 5px 0 2px; } .tfarben span { width: 18px; height: 18px; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); } .tfarben i { font-style: normal; font-size: 11.5px; margin-right: 6px; } .trend .olief { padding: 0; }
+  .trend { padding: 8px 12px; border-top: 1px solid #f2efea; } .trend > b { font-size: calc(13px * var(--schrift)); } .tfarben { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 5px 0 2px; } .tfarben span { width: 18px; height: 18px; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); } .tfarben i { font-style: normal; font-size: calc(11.5px * var(--schrift)); margin-right: 6px; } .trend .olief { padding: 0; }
+  /* Szenarioauswahl und Zielanzeige: selbst erzeugte Kit-Grafik. */
+  .sz-karten { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px; }
+  .sz-karte { text-align:left; display:flex; flex-direction:column;gap:4px; padding:7px;background:var(--karte);color:var(--text);border:1px solid var(--linie);border-radius:12px;min-width:0; }
+  .sz-karte.ausgewaehlt,.sz-karte:focus-visible { outline:2px solid #337d89; }
+  .sz-karte b { font-size: calc(12px * var(--schrift)); } .sz-karte small { font-size: calc(10.5px * var(--schrift));line-height:1.28;color:var(--leise); }
+  .sz-level { font-size: calc(10px * var(--schrift)); font-weight:700; color:#477983; } .sz-best { font-size: calc(10px * var(--schrift));color:var(--leise);margin-top:auto; }
+  .sz-bild { display:block;width:100%;aspect-ratio:2 / 1;overflow:hidden;border-radius:7px; }
+  .sz-bild svg { width:100%;height:100%;display:block; }
+  .sz-zielchip { background:#eef4ed;color:#294e56;border:1px solid #abc7c7;border-radius:10px;padding:5px;min-width:53px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size: calc(10px * var(--schrift));font-weight:800; }
+  .sz-zielchip .sz-mini { width:44px;height:4px;border-radius:3px;background:#c6d9d6;overflow:hidden; }
+  .sz-zielchip .sz-mini i { display:block;height:100%;background:#4e968e; }
+  .sz-balken { height:10px;border-radius:10px;background:#d5dedb;overflow:hidden; }
+  .sz-balken span { display:block;height:100%;background:#4d918d; }
+  .sz-zieltitel { font-size: calc(19px * var(--schrift));font-weight:800; }
+  #startsetup[hidden], #startauswahl[hidden], #szenarioziel[hidden] { display:none!important; }
+  @media (max-width:365px) { .sz-karte small {font-size: calc(10px * var(--schrift));} .sz-zielchip {min-width:44px;} }
   /* Startbildschirm */
-  #start { position: fixed; inset: 0; z-index: 6; display: none; overflow-y: auto; background: radial-gradient(circle at 30% 20%, #6fc7d1, #3c9fac 70%); padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)); }
+  #start { position: fixed; inset: 0; z-index: 6; display: none; overflow-y: auto; background: radial-gradient(circle at 30% 20%, #6fc7d1, #3c9fac 70%); padding: calc(24px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
   #start.an { display: grid; place-items: center; }
   .startkarte { width: 100%; max-width: 420px; background: var(--grund); border-radius: 22px; box-shadow: 0 8px 32px rgba(20, 30, 40, 0.3); padding: 18px 16px 14px; }
-  .startkopf { display: flex; align-items: center; gap: 12px; } .startkopf b { display: block; font-size: 24px; font-weight: 800; } .startkopf small { color: var(--leise); font-size: 12px; }
-  .logo.gross { width: 54px; height: 54px; border-radius: 15px; font-size: 30px; }
-  .startintro { font-size: 13.5px; line-height: 1.45; color: #34414b; margin: 12px 2px 6px; }
+  .startkopf { display: flex; align-items: center; gap: 12px; } .startkopf b { display: block; font-size: calc(24px * var(--schrift)); font-weight: 800; } .startkopf small { color: var(--leise); font-size: calc(12px * var(--schrift)); }
+  .logo.gross { width: 54px; height: 54px; border-radius: 15px; font-size: calc(30px * var(--schrift)); }
+  .startintro { font-size: calc(13.5px * var(--schrift)); line-height: 1.45; color: #34414b; margin: 12px 2px 6px; }
   .startkarte .vtitel { margin: 12px 2px 6px; }
   .startkarte .ort.gross { margin-top: 0; }
   .stufen { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
   .stufe-karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 10px 12px; min-height: 64px; display: grid; grid-template-columns: 74px 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; text-align: left; color: var(--text); }
   .stufe-karte .sterne-stufe { grid-row: 1; } .stufe-karte b { grid-row: 2; grid-column: 1; } .stufe-karte small { grid-row: 1 / span 2; grid-column: 2; }
-  .stufe-karte b { font-size: 15px; } .stufe-karte small { font-size: 11px; color: var(--leise); line-height: 1.35; }
+  .stufe-karte b { font-size: calc(15px * var(--schrift)); } .stufe-karte small { font-size: calc(11px * var(--schrift)); color: var(--leise); line-height: 1.35; }
   .stufe-karte.an { border: 2px solid var(--rot); padding: 9px 11px; background: #fff8f6; }
-  .sterne-stufe { color: var(--rot); font-size: 11px; letter-spacing: 2px; }
+  .sterne-stufe { color: var(--rot); font-size: calc(11px * var(--schrift)); letter-spacing: 2px; }
   .breit[hidden] { display: none; }
   #fortsetzen { margin-top: 9px; border-color: #2f8f5b; color: #2f8f5b; }
-  #speicherhinweis { color: var(--rot); font-size: 12px; line-height: 1.4; margin-top: 8px; }
+  #speicherhinweis { color: var(--rot); font-size: calc(12px * var(--schrift)); line-height: 1.4; margin-top: 8px; }
   #panel, #panel.gross { max-height: min(87dvh, calc(100dvh - env(safe-area-inset-top))); }
-  .startseed { display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 11px; color: var(--leise); }
-  .startseed input { width: 64px; font: inherit; font-size: 12px; border: 1px solid var(--linie); border-radius: 8px; padding: 3px 6px; background: #faf9f6; color: var(--leise); text-align: center; }
+  .startseed { display: flex; justify-content: center; align-items: center; gap: 6px; font-size: calc(11px * var(--schrift)); color: var(--leise); }
+  .startseed input { width: 64px; font: inherit; font-size: calc(12px * var(--schrift)); border: 1px solid var(--linie); border-radius: 8px; padding: 3px 6px; background: #faf9f6; color: var(--leise); text-align: center; }
   .wbdirekt { display: flex; width: 100%; align-items: center; justify-content: space-between;
     font: inherit; color: inherit; text-align: left; background: transparent; border: 0;
     border-top: 1px solid var(--linie); cursor: pointer; padding: 11px 8px; }
   .wbdirekt .was { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-  .wbdirekt i, .wbdirekt small { font-size: 12px; color: var(--leise); font-style: normal; }
+  .wbdirekt i, .wbdirekt small { font-size: calc(12px * var(--schrift)); color: var(--leise); font-style: normal; }
   .wbdirekt:focus-visible { outline: 2px solid var(--rot); outline-offset: -2px; }
+
+  /* N12 Chronik: lesbare, mobile Zeitleiste und historische Fassadenmotive */
+  .chronik { display: grid; gap: 12px; padding-bottom: 24px; }
+  .chronik h2 { font-size: calc(17px * var(--schrift)); margin: 12px 4px 4px; }
+  .chronik .karte p { line-height: 1.45; font-size: calc(13px * var(--schrift)); }
+  .chronik-linie { border-left: 3px solid #a65a4e; margin-left: 54px; }
+  .chronik-station { display: grid; grid-template-columns: 52px minmax(0,1fr); position: relative; margin-left: -54px; margin-bottom: 12px; gap: 10px; }
+  .chronik-jahr { font-size: calc(12px * var(--schrift)); font-weight: 800; color: #813b31; text-align: right; padding-top: 14px; }
+  .chronik-inhalt { border: 1px solid var(--linie); border-radius: 12px; padding: 10px; background: var(--karte); min-width: 0; }
+  .chronik-inhalt h3 { font-size: calc(14px * var(--schrift)); margin: 0 0 9px; }
+  .chronik-inhalt p { font-size: calc(12px * var(--schrift)); line-height: 1.5; margin: 8px 0; }
+  .chronik-inhalt small, .chronik-spiel small, .chronik-spiel span { color: var(--leise); font-size: calc(11px * var(--schrift)); }
+  .chronik-motiv { width: 100%; max-height: 210px; object-fit: contain; border-radius: 8px; background: #3b444d; filter: saturate(.55) sepia(.14); }
+  .chronik-spiel { padding: 12px; background: var(--karte); border: 1px solid var(--linie); border-left: 4px solid #a65a4e; border-radius: 10px; }
+  .chronik-spiel p { font-size: calc(13px * var(--schrift)); line-height: 1.5; margin: 5px 0; }
+
+  /* N11: Speicherverwaltung und Aktualisierung */
+  .app-plaetze { display: grid; gap: 10px; margin: 8px 0 12px; }
+  .app-platz { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 11px; }
+  .app-platzkopf { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .app-platzkopf b { font-size: calc(14px * var(--schrift)); } .app-platzkopf span { font-size: calc(11px * var(--schrift)); color: var(--leise); }
+  .app-platzinhalt { display: flex; align-items: center; gap: 11px; margin: 9px 0; }
+  .app-vorschau { width: 106px; height: 62px; flex: none; object-fit: cover; border-radius: 9px; background: #4fb6c2; }
+  .app-vorschau.leer { background: var(--rot); color: #fff; display: grid; place-items: center; font-size: calc(28px * var(--schrift)); font-weight: 800; }
+  .app-daten { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .app-daten strong, .app-daten small { display: block; }
+  .app-daten strong { font-size: calc(13px * var(--schrift)); } .app-daten small { font-size: calc(11px * var(--schrift)); color: var(--leise); line-height: 1.4; }
+  .app-namenswahl { display: block; font-size: calc(11px * var(--schrift)); color: var(--leise); margin: 8px 0; }
+  .app-namenswahl input { width: 100%; min-height: 44px; border: 1px solid var(--linie); border-radius: 9px; font: inherit; font-size: calc(16px * var(--schrift)); padding: 8px; color: var(--text); }
+  .app-aktionen { display: flex; flex-wrap: wrap; gap: 6px; }
+  .app-aktionen button { background: #eeebe5; color: var(--text); min-height: 44px; padding: 6px 10px; border-radius: 9px; font-size: calc(12px * var(--schrift)); font-weight: 750; }
+  .app-aktionen button:first-child { background: #e4f2ea; color: var(--gruen); }
+  .app-aktionen button:disabled { opacity: 0.5; }
+  #app-plaetze-start { margin-top: 12px; max-height: 46dvh; overflow-y: auto; overscroll-behavior: contain; }
+  #app-plaetze-start .app-platz { padding: 9px; }
+  #app-update { position: fixed; z-index: 9; left: calc(14px + env(safe-area-inset-left)); right: calc(14px + env(safe-area-inset-right)); top: calc(12px + env(safe-area-inset-top)); border-radius: 14px; box-shadow: var(--schatten); background: var(--text); color: white; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: calc(13px * var(--schrift)); }
+  #app-update button { background: white; color: var(--text); padding: 10px 12px; border-radius: 8px; font-weight: 800; }
+/* O01 Organisation */
+.org-tabs{display:flex;gap:8px;margin-bottom:12px}.org-tabs button{flex:1;padding:12px;border:1px solid #c3cbd1;border-radius:9px;background:#f4f6f7;color:#2b4049}.org-tabs button.an{background:#243e50;color:#fff}.org-zeile{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid #e5e8eb;padding:10px 0}.org-zeile>div:nth-child(2){flex:1;min-width:0}.org-zeile small,.org-profil small{display:block;color:#667781;font-size: calc(11px * var(--schrift))}.org-aktionen{display:grid;gap:4px;max-width:100px}.org-aktionen button{font-size: calc(10px * var(--schrift));padding:6px}.org-balken{display:block;height:6px;border-radius:6px;background:#e0e6e9;overflow:hidden;margin:6px 0}.org-balken i{display:block;height:100%;background:#498875}.org-ampel{color:#5b9b68}.org-ampel.warn,.org-profil .frei{color:#b43336}.org-profil .vkopf{display:flex;gap:10px;align-items:center}.org-profil .vkopf>div{flex:1}
+  /* O02 Umsatztreiber */
+  .o02-drei { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; padding: 10px; }
+  .o02-treib { min-width: 0; padding: 8px 5px; background: #f5f3ed; border-radius: 9px; text-align: center; }
+  .o02-treib span,.o02-treib small { display:block; font-size: calc(10px * var(--schrift)); color: var(--leise); }
+  .o02-treib b { display:block; font-size: calc(14px * var(--schrift)); margin:4px 0; font-variant-numeric:tabular-nums; }
+  .o02-fuss { text-align:center; color:var(--leise); font-size: calc(11px * var(--schrift)); margin-bottom:9px; }
+  .o02-wasserfall { margin:8px 10px 12px; border-top:1px solid var(--linie); padding-top:8px; font-size: calc(12px * var(--schrift)); }
+  .o02-bruecke { padding:10px; font-size: calc(12px * var(--schrift)); }
+  .o02-end { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; padding:5px 0; }
+  .o02-end span { color:var(--leise); }
+  .o02-effekt { display:grid; grid-template-columns:70px 1fr 90px; align-items:center; gap:5px; margin:7px 0; }
+  .o02-effekt b { text-align:right; font-size: calc(11px * var(--schrift)); }
+  .o02-steg { background:#ece8e1; height:9px; border-radius:6px; overflow:hidden; }
+  .o02-steg i { display:block; height:100%; border-radius:6px; }
+  .o02-steg .plus { background:#2f8f5b; } .o02-steg .minus { background:#d23c32; }
+  .o02-hinweis { color:var(--leise); padding:12px; }
+  .o02-filter { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-bottom:10px; }
+  .o02-filter label { color:var(--leise); font-size: calc(11px * var(--schrift)); font-weight:700; }
+  .o02-filter select { margin-top:4px; min-height:38px; font-size: calc(12px * var(--schrift)); }
+  .o02-scroll { max-width:100%; overflow-x:auto; background:var(--karte); border-radius:10px; }
+  .o02-tab { min-width:700px; }
+  .o02-daten { display:grid; grid-template-columns:145px 105px 145px 90px 90px 75px; align-items:center; gap:4px; border-bottom:1px solid var(--linie); padding:10px 7px; font-size: calc(11px * var(--schrift)); font-variant-numeric:tabular-nums; }
+  .o02-daten>div:not(:first-child) { text-align:right; }
+  .o02-name { font-weight:700; display:flex; align-items:center; gap:5px; }
+  .o02-ampel { width:8px; height:8px; border-radius:50%; background:#9ca3af; flex:none; }
+  .o02-ampel.gruen { background:#2f8f5b; }.o02-ampel.gelb { background:#e0a333; }.o02-ampel.rot { background:#d23c32; }
+  .o02-klickbar,.o02-beobachtung { cursor:pointer; }
+  .o02-klickbar:active { background:#f4ede7; }
+  .o02-kopf { color:var(--leise); background:#f7f6f2; }
+  .o02-gruppe,.o02-unter { margin:6px 0; border:1px solid var(--linie); background:white; border-radius:10px; overflow:hidden; }
+  .o02-gruppe>summary,.o02-unter>summary { padding:12px; font-size: calc(13px * var(--schrift)); font-weight:800; cursor:pointer; }
+  .o02-unter { margin:6px; }.o02-unter>summary { background:#f7f6f2; }
+  .o02-beobachtung { width:100%; text-align:left; background:white; }
+  .o02-beobachtung small { display:block; font-size: calc(11px * var(--schrift)); color:var(--leise); margin-top:3px; }
+  .o02-beobachtung strong { color:var(--rot); font-size: calc(11px * var(--schrift)); white-space:nowrap; }
+  /* O07 Haus */
+  .haus-reiter { display:flex; gap:6px; overflow-x:auto; padding:10px 2px; scrollbar-width:thin; }
+  .haus-reiter button { border:1px solid var(--linie); background:var(--karte); border-radius:10px; color:var(--text); padding:8px 11px; white-space:nowrap; font:600 12px inherit; }
+  .haus-reiter button.an { background:var(--text); color:white; }
+  .haus-sprung { width:100%; background:transparent; border:0; border-bottom:1px solid var(--linie); text-align:left; color:inherit; cursor:pointer; }
+  #hausbeobachtung { align-self:flex-start; margin:4px 10px; font-size: calc(12px * var(--schrift)); border:1px solid var(--linie); padding:5px 9px; border-radius:10px; background:var(--karte); color:var(--text); }
+/* Q05: Aufgabensteuerung für die hochformatige iPhone-Ansicht. */
+.org-aufgaben { margin: 0 0 14px 56px; border-left: 2px solid #e5e8eb; padding: 2px 0 2px 10px; }
+.org-aufgaben > small { display: block; color: #65747a; margin: 6px 0 9px; }
+.org-aufgabe { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; border-top: 1px solid #edf0f1; padding: 7px 0; }
+.org-aufgabe > span:first-child { flex: 1 1 110px; font-size: calc(12px * var(--schrift)); }
+.org-aufgabe button { min-height: 32px; padding: 5px 8px; border: 1px solid #b9c8cf; background: #fff; border-radius: 6px; font-size: calc(11px * var(--schrift)); }
+.org-aufgabe button[aria-pressed="true"] { background: #e2f3eb; color: #226545; border-color: #73b998; }
+.org-grenze { display: inline-flex; align-items: center; gap: 3px; font-size: calc(11px * var(--schrift)); }
+.org-grenze b { font-weight: 600; white-space: nowrap; }
+@media (max-width: 430px) { .org-aufgaben { margin-left: 14px; } .org-aufgabe > span:first-child { flex-basis: 100px; } }
+  /* O04 Personal: Wochentagsbalken und clusterweite Einsatzübersicht */
+  .pe-gruppe { border-bottom: 1px solid var(--linie); padding: 10px 2px; }
+  .pe-gruppe:last-child { border-bottom: 0; }
+  .pe-tage { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; padding: 9px 0; }
+  .pe-tag { display: flex; flex-direction: column; text-align: center; align-items: center; gap: 4px; min-width: 0; }
+  .pe-tag small { font-size: calc(10px * var(--schrift)); color: var(--leise); }
+  .pe-saeule { height: 49px; width: 100%; max-width: 36px; background: #e8e6e0; display: flex; align-items: flex-end; border-radius: 5px; overflow: hidden; }
+  .pe-saeule span { display: block; width: 100%; border-radius: 4px 4px 0 0; }
+  .pe-slider { margin: 13px 2px; }
+  .pe-slider label { display: flex; justify-content: space-between; font-size: calc(13px * var(--schrift)); }
+  .pe-slider input { display: block; width: 100%; margin: 11px 0; accent-color: var(--gruen); min-height: 32px; }
+  .pe-slider small { font-size: calc(10px * var(--schrift)); color: var(--leise); }
+  .pe-tabellenkopf { font-size: calc(10px * var(--schrift)); font-weight: bold; color: var(--leise); padding: 8px; }
+  .pe-tabellenzeile { width: 100%; display: block; padding: 12px 7px; border-top: 1px solid var(--linie); background: transparent; text-align: left; color: var(--text); }
+  .pe-tabellenzeile b, .pe-tabellenzeile small { display: block; }
+  .pe-tabellenzeile small { color: var(--leise); font-size: calc(10px * var(--schrift)); margin-top: 5px; }
+  .pe-deckungen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; text-align: center; font-size: calc(11px * var(--schrift)); padding: 6px 0 0; }
+
+  /* N13: globale Schriftgrößen und verlässliche 44-Pixel-Tippflächen */
+  html, body { font-size: calc(16px * var(--schrift)); }
+  button { min-width: 44px !important; min-height: 44px !important; }
+  #pzu { width: 44px; height: 44px; top: 9px; right: 8px; border-radius: 22px; }
+  #ptitel { margin: 0; padding-right: 50px; outline-offset: 2px; }
+  /* Programmatischer Fokus für Screenreader (tabindex -1) ohne sichtbaren Rahmen */
+  [tabindex="-1"]:focus { outline: none; }
+  .punkte button::after { left: calc(50% - 4px); top: calc(50% - 4px); }
+  .einst-gruppe .khead { margin: 0; }
+  .einst-zeile { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 13px 12px; min-height: 60px; border-top: 1px solid var(--linie); font-size: calc(13px * var(--schrift)); line-height: 1.35; }
+  .einst-zeile > span { flex: 1; min-width: 0; font-weight: 650; }
+  .einst-zeile select { min-height: 44px; min-width: 120px; max-width: 55%; font: inherit; border: 1px solid var(--linie); border-radius: 10px; background: #faf9f6; padding: 6px; color: var(--text); }
+  .einst-zeile input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: var(--gruen); }
+  .einst-zeile input[type="range"] { flex: 1; min-width: 100px; min-height: 44px; accent-color: var(--rot); }
+  .einst-info { padding: 9px 12px; margin: 0; font-size: calc(12px * var(--schrift)); line-height: 1.5; }
+  body.farbschwach { --rot: #c07821; --gruen: #245ea8; }
+  body.farbschwach .kz.rot b::before, body.farbschwach .rotwert::before, body.farbschwach .chip.warn::before { content: "▼ "; color: #c07821; }
+  body.farbschwach .kz.gruen b::before, body.farbschwach .gruenwert::before { content: "▲ "; color: #245ea8; }
+  body.farbschwach .ampel { width: auto; height: auto; border-radius: 0; background: transparent !important; font-size: calc(14px * var(--schrift)); font-weight: 800; line-height: 1; vertical-align: baseline; }
+  body.farbschwach .ampel::before { content: "●"; color: #7b8790; }
+  body.farbschwach .ampel.a-gruen::before { content: "▲"; color: #245ea8; }
+  body.farbschwach .ampel.a-rot::before { content: "▼"; color: #c07821; }
+  body.farbschwach .ampel.a-gelb::before { content: "●"; color: #b57f16; }
+  body.farbschwach .ampel.ohne::before { content: "○"; color: #7b8790; }
+  body.farbschwach .kz.rot b, body.farbschwach .rotwert { color: #c07821; }
+  body.farbschwach .kz.gruen b, body.farbschwach .gruenwert { color: #245ea8; }
+  :root[data-animation="reduziert"] *, :root[data-animation="reduziert"] *::before, :root[data-animation="reduziert"] *::after { animation-duration: 0.15s !important; transition-duration: 0.08s !important; }
+  :root[data-animation="aus"] *, :root[data-animation="aus"] *::before, :root[data-animation="aus"] *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+
+  /* N14: Testwerkzeuge bleiben ohne Entsperrung vollständig verborgen. */
+  .datum.testfehler { position: relative; }
+  .datum.testfehler::after { content: ''; position: absolute; right: 1px; top: 1px; width: 8px; height: 8px; border-radius: 50%; background: #c52b35; box-shadow: 0 0 0 2px #fff; }
+  .testwerkzeuge { display: flex; flex-direction: column; gap: 10px; padding: 10px 0 30px; }
+  .testwerkzeuge .karte { padding: 12px; }
+  .testwerkzeuge h3 { font-size: calc(14px * var(--schrift)); margin: 8px 0; }
+  .testwerkzeuge .test-tasten { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .testwerkzeuge .test-tasten button, .testwerkzeuge button[data-test-a] { border: 1px solid #ccd3d8; border-radius: 9px; padding: 8px 10px; min-height: 40px; background: #fff; color: #26323c; }
+  .testwerkzeuge .test-eingabe { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: calc(12px * var(--schrift)); margin: 8px 0; }
+  .testwerkzeuge input[type=number], .testwerkzeuge select { max-width: 130px; padding: 8px; border: 1px solid #c7cbd0; border-radius: 8px; font-size: calc(14px * var(--schrift)); }
+  .testwerkzeuge .test-felder { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; }
+  .testwerkzeuge progress { display: block; width: 100%; height: 16px; margin: 10px 0; }
+  .testwerkzeuge progress[hidden] { display: none; }
+  .testwerkzeuge #test-status { font-size: calc(12px * var(--schrift)); margin-bottom: 8px; }
+  .testwerkzeuge #test-bericht { display: block; width: 100%; min-height: 95px; margin-top: 10px; padding: 8px; border: 1px solid #c7cbd0; border-radius: 9px; font-size: calc(11px * var(--schrift)); }
+  #werkzeuge[hidden] { display: none !important; }
+
+  /* O09 E-Commerce */
+  .online-verlauf { display:flex; align-items:flex-end; gap:3px; height:100px; padding:8px 0; border-bottom:1px solid var(--linie); }
+  .online-balken { background:#597baa; flex:1; min-width:2px; border-radius:2px 2px 0 0; }
 </style>
 </head>
 <body>
@@ -319,35 +529,69 @@
 <div class="oben">
   <div class="leiste">
     <div class="marke"><div class="logo">H</div><div><b>Hartwig</b><small id="markeunter">Warenhaus und Hartwig Sport</small></div></div>
+    <button id="szenarioziel" class="sz-zielchip" type="button" aria-label="Szenarioziel öffnen" hidden><span aria-hidden="true">◎</span><span id="szenarioprozent">0 %</span><span class="sz-mini"><i id="szenariofortschritt"></i></span></button>
     <div class="datum"><b id="kw">KW 1</b><small id="stufe"></small><span id="phase"></span></div>
   </div>
   <div id="cockpit"></div>
+  <!-- O07 Haus: Beobachtungsliste auf dem Startbildschirm -->
+  <button id="hausbeobachtung" type="button">Hausbetrieb · Beobachtung</button>
 </div>
 <label class="botwahl"><input type="checkbox" id="bot"> Bot-Strategie C</label>
 <div class="unten">
-  <div class="chipstadt"><span id="stadtname">Essen</span><i>▾</i><select id="stadtwahl" aria-label="Stadt wählen"></select></div>
+  <button type="button" class="chipstadt" id="stadt-reise" aria-label="Reise ab Hauptbahnhof öffnen"><span id="stadtname">Essen</span><small id="stadtcluster"></small><i>🚆</i></button>
   <button class="knopf" id="weiter">Woche weiter</button>
   <button class="knopf mitbadge" id="postdirekt" aria-label="Posteingang öffnen" title="Posteingang">✉<span id="postbadge" class="badge" style="display:none">0</span></button>
   <button class="knopf rund mitbadge" id="menueknopf" aria-label="Menü"><span class="burger"><i></i><i></i><i></i></span><span id="menuebadge" class="badge" style="display:none">0</span></button>
 </div>
-<div id="menue">
+<div id="menue" inert>
   <div class="menuekarte">
     <div class="menuetitel">Hartwig steuern</div>
     <div class="kacheln">
       <button class="mkachel mitbadge" id="posteingang"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9l9 6 9-6"/></svg><b>Posteingang</b><small>Angebote, Entscheidungen, Meldungen</small><span id="postmenubadge" class="badge" style="display:none">0</span></button>
+      <button class="mkachel" id="zeitung" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 3h14v17H4zM18 7h3v12a2 2 0 0 1-2 2H6M7 7h8M7 11h8M7 15h4M13 15h2"/></svg><b>Der Handelsbote</b><small>Zeitung und Archiv</small></button>
+      <!-- O02 Umsatztreiber -->
+      <button class="mkachel" id="reporting" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h18M5 16V9M10 16V5M15 16v-7M20 16V3"/></svg><b>Reporting</b><small>Umsatztreiber und Hausvergleich</small></button>
+      <!-- O07 Haus -->
+      <button class="mkachel" id="beobachtung"><b>Häuser</b><small>Beobachtungsliste und Ausnahmen</small></button>
+      <button class="mkachel" id="haus-reporting"><b>Kommentare</b><small>Kommentare, Kundenscore, Rangliste</small></button>
       <button class="mkachel" id="hq"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h2M14 8h2M8 12h2M14 12h2"/></svg><b>Zentrale</b><small>Gebäude, Abteilungen</small></button>
+      <button class="mkachel" id="chronik" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z"/><path d="M7 4v16M10 9h7M10 13h7"/></svg><b>Chronik</b><small>Geschichte und Archiv</small></button>
       <button class="mkachel mitbadge" id="einkauf"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2zM9 8V6a3 3 0 0 1 6 0v2"/></svg><b>Einkauf</b><small>Warengruppen, Freigaben</small><span id="ekbadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel mitbadge" id="vorstand"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c.6-3.8 2.8-6 5.5-6s4.9 2.2 5.5 6M13.5 14.6c.9-.4 1.9-.6 3-.6 2.3 0 4 1.8 4.5 5"/></svg><b>Vorstand</b><small>Ressorts, Einstellen</small><span id="vsbadge" class="badge" style="display:none">0</span></button>
+      <button class="mkachel" id="online"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M3 11h18M8 4h8M9 16h6"/></svg><b>Online</b><small>hartwig.de, Fulfillment, Abholung</small></button>
+      <!-- O01 Organisation -->
+      <button class="mkachel" id="organisation"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="1" y="17" width="6" height="5" rx="1"/><rect x="9" y="17" width="6" height="5" rx="1"/><rect x="17" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M4 17v-5h16v5M12 12v5"/></svg><b>Organisation</b><small>Bereiche, Regionen, Hauscluster</small></button>
+      <button class="mkachel" id="it" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="2"/><path d="M7 7V4M12 7V4M17 7V4M7 21v-3M12 21v-3M17 21v-3M7 11h2M12 11h2M17 11h2"/></svg><b>IT</b><small>CDO, Systeme, Projekte</small></button>
       <button class="mkachel" id="marketing"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4h3l7 4V6L6 10zM16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg><b>Marketing</b><small>Kanäle, Karte, CRM, Aktionen</small></button>
+      <button class="mkachel" id="statistik" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 20h18M4 16l5-6 4 3 7-9"/></svg><b>Zahlen</b><small>Verläufe, Formate, Regionen, Häuser</small></button>
+      <button class="mkachel" id="planung" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v16H3zM3 10h18M8 4v16M13 14h5M13 17h4"/></svg><b>Planung</b><small>Jahresplan, Forecast, Boni</small></button>
+      <!-- O08 Umbau -->
+      <button class="mkachel" id="modernisierung"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V5l7-3 7 3v16M9 9h6M9 13h6M12 2v8M4 17h16"/></svg><b>Modernisierung</b><small>Bauprogramme, Etagen, Fristen</small></button>
       <button class="mkachel" id="produkte"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a2 2 0 1 1 2 2c-1 0-2 .8-2 2v.5L3 17h18l-9-6.5"/></svg><b>Produkte</b><small>Eigenmarken entwickeln</small></button>
+      <button class="mkachel" id="hausbesuch" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="1"/><path d="M3 12l9-9 9 9M9 21v-6h6v6"/></svg><b>Hausbesuch</b><small>Filiale von innen erleben</small></button>
+      <button class="mkachel" id="erfolge" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="11" r="7"/><path d="M8 17l-2 5 6-3 6 3-2-5M12 6l1.5 3 3.5.5-2.5 2.5.5 3.5L12 14l-3 1.5.5-3.5L7 9.5l3.5-.5z"/></svg><b>Erfolge</b><small>Abzeichen und Ziele</small></button>
+      <!-- O04 Personal -->
+      <button class="mkachel" id="personaleinsatz"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="7" r="2.5"/><path d="M2 21v-2a6 6 0 0 1 12 0v2M14 13a5 5 0 0 1 8 4v4M3 11h10"/></svg><b>Personaleinsatz</b><small>Dienstplan, Aushilfen, Springer</small></button>
       <button class="mkachel" id="spiel-speichern" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h14l3 3v15H4zM8 3v7h9V3M8 21v-8h9v8"/></svg><b>Speichern</b><small>Auf diesem Gerät</small></button>
+      <button class="mkachel" id="app-oeffnen" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 7h8M8 12h8M8 17h4"/></svg><b>Spielstände</b><small>3 Plätze, Import, Export</small></button>
+      <button class="mkachel" id="ton" type="button" aria-label="Klang und Haptik einstellen"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a5 5 0 0 1 0 6M19 6a9 9 0 0 1 0 12"/></svg><b>Klang</b><small>Geräusche, Stadt, Musik</small></button>
+      <button class="mkachel" id="einfuehrung-neustart" type="button" aria-label="Einführung erneut starten"><span aria-hidden="true" style="font-size: calc(30px * var(--schrift));color:var(--rot)">?</span><b>Einführung</b><small>Neu starten</small></button>
+      <button class="mkachel" id="spiel-bestenliste" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M6 3h12v9a6 6 0 0 1-12 0zM6 6H3v2a4 4 0 0 0 4 4M18 6h3v2a4 4 0 0 1-4 4"/></svg><b>Bestenliste</b><small>Bilanz und Rekorde</small></button>
+      <button class="mkachel" id="spiel-ruhestand" type="button" hidden><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>Ruhestand</b><small>Ab Jahr sechs</small></button>
+      <button class="mkachel" id="werkzeuge" type="button" hidden style="display:none"><b>Testwerkzeuge</b><small>Diagnose und Fehlerberichte</small></button>
       <button class="mkachel" id="performance" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18a9 9 0 1 1 18 0M12 17l5-7M7 18h10"/></svg><b>Performance</b><small>iPhone messen</small></button>
+      <button class="mkachel" id="einstellungen" type="button" aria-label="Einstellungen"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19 13 2-1-2-1-.5-2 1-2-2-2-2 1-2-.5-1-2-1 2-2 .5-2-1-2 2 1 2-.5 2-2 1 2 1 .5 2-1 2 2 2 2-1 2 .5 1 2 1-2 2-.5 2 1 2-2-1-2z"/></svg><b>Einstellungen</b><small>Anzeige und Bedienung</small></button>
     </div>
-    <label id="postwarnungswahl"><input type="checkbox" id="postwarnung" checked> Vor Fristablauf beim Wochenwechsel warnen</label>
+    <label class="postfilter" for="leben-modus" style="margin:10px 14px 8px">Leben in der Stadt
+      <select id="leben-modus" class="ort gross" aria-label="Leben in der Stadt"><option value="voll">Voll</option><option value="wenig">Wenig</option><option value="aus">Aus</option></select>
+    </label>
+    <div class="ein-optionen"><label for="einfuehrung-tipps"><input id="einfuehrung-tipps" type="checkbox" checked> Kontext-Tipps nach der Einführung</label></div>
+    <label class="postfilter" for="stadtwahl" style="margin:10px 14px 5px">Stadt direkt wählen (ohne Reise)</label>
+    <select id="stadtwahl" class="ort gross" aria-label="Stadt direkt wählen" style="margin:0 14px 14px;width:calc(100% - 28px)"></select>
   </div>
 </div>
-<div id="panel">
-  <div class="pkopf"><div class="griff"></div><div id="ptitel"></div><div id="punter"></div><button id="pzu" aria-label="Schließen">×</button></div>
+<div id="panel" role="dialog" aria-modal="true" aria-labelledby="ptitel" aria-describedby="punter" aria-hidden="true" inert>
+  <div class="pkopf"><div class="griff"></div><h2 id="ptitel" tabindex="-1"></h2><div id="punter"></div><button id="pzu" aria-label="Schließen">×</button></div>
   <div id="pinhalt"></div>
 </div>
 <button id="wochenstreifen" type="button" aria-live="polite"></button>
@@ -356,22 +600,28 @@
 <div id="start">
   <div class="startkarte">
     <div class="startkopf"><div class="logo gross">H</div><div><b>Hartwig</b><small>Warenhaus und Hartwig Sport · Turnaround</small></div></div>
-    <p class="startintro">Die Kette steht mit dem Rücken zur Wand. Du übernimmst als CEO: Häuser, Zentrale, Einkauf, Vorstand und Marketing liegen jetzt bei dir.</p>
-    <div class="vtitel">Startstadt</div>
-    <select id="startstadt" class="ort gross" aria-label="Startstadt"></select>
-    <div class="vtitel">Schwierigkeit</div>
-    <div id="startstufen" class="stufen"></div>
-    <button id="startknopf" class="breit gruen">Neues Spiel starten</button>
-    <button id="fortsetzen" class="breit" type="button" hidden>Fortsetzen</button>
+    <p class="startintro">Übernimm die Warenhausgruppe und wähle eine Ausgangslage. Danach legst du Schwierigkeit und Startstadt fest.</p>
+    <div id="startauswahl">
+      <div class="vtitel">Szenario wählen</div>
+      <div id="startszenarien" class="sz-karten" aria-label="Szenarien"></div>
+      <button id="fortsetzen" class="breit" type="button" hidden>Fortsetzen</button>
+    </div>
+    <div id="startsetup" hidden>
+      <button id="szenario-zurueck" type="button" class="breit">← Szenario wechseln</button>
+      <p id="szenario-gewaehlt" class="startintro"></p>
+      <div class="vtitel">Schwierigkeit</div>
+      <div id="startstufen" class="stufen"></div>
+      <div class="vtitel">Startstadt</div>
+      <select id="startstadt" class="ort gross" aria-label="Startstadt"></select>
+      <label class="startseed">Seed <input id="startseed" type="number" min="1" step="1" inputmode="numeric"></label>
+      <button id="startknopf" class="breit gruen">Neues Spiel starten</button>
+    </div>
     <div id="speicherhinweis" role="status"></div>
-    <label class="startseed">Seed <input id="startseed" type="number" min="1" step="1" inputmode="numeric"></label>
+    <div class="vtitel">Gespeicherte Partien</div>
+    <div id="app-plaetze-start" class="app-plaetze" aria-label="Gespeicherte Spielstände"></div>
   </div>
 </div>
 <script src="spiel-bundle.js"></script>
-<script>
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.warn));
-  }
-</script>
+
 </body>
 </html>

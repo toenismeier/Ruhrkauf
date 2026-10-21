@@ -25,7 +25,8 @@ Bildsprache: **Coffee Inc 2**. Referenzbilder liegen in `/home/claude/render/ref
 - Text/Logos nur über `schild()`/`textTextur()`/`textMaterial()` aus basis.js (gemeinsamer Cache nach Text, Farbe, Größe,
   Hintergrund und Schrift; keine eigenen Caches in den Modulen). Alle Texte auf Deutsch mit echten Umlauten.
 - Keine echten Marken oder Firmennamen. Eigene Kette heißt **Hartwig** (Warenhaus, Rot `#d23c32`) und **Hartwig Sport**.
-- Budget: ein normales Gebäude ≤ 2.500 Teile im Sammler, ein Warenhaus ≤ 8.000. Prüfen über `S.anzahl`.
+- Budget: ein normales Gebäude ≤ 2.500 Teile im Sammler, ein Warenhaus ≤ 8.000.
+- Premium-Kronjuwelen (separater Trophy-Store-Bauer): **Ziel 4.000 bis 9.000 Teile** je Gebäude (absolute Obergrenze 12.000), keine Fassadenfamilien. Vier eigenständige Silhouetten, Relief aus echten Fassadendetails. Zustandsatlas `premium-zustaende` = vier Häuser × zwölf Grundzustände und zwei Verkaufsvarianten. Prüfen über `S.anzahl`.
 - **FUNDUS (Off-Price):** Ziel 900–1.800 Teile je Haus im Nah-LOD, absolute Obergrenze 3.000; alle 20 Häuser plus die drei Bauformen separat im Katalog und über die `teile`-Rückgabe prüfen. `fern`-LOD reduziert insbesondere die einzelnen Warenstücke. Breites 3,5-m-Markenband, weiße Versalien, Claim, 9-m-Pylon und drei klar getrennte Bauformen sind verbindliche Qualitätsmerkmale.
 - Deterministisch: Zufall nur über `rng(seed)`.
 
@@ -65,7 +66,7 @@ in allen Stufen gleich, es entfallen nur Teile.
   Zeit je Slot-Bauer und Aufruf im Browser über alle Städte (`out/zeit-bauer.txt`, Ziel: unter 0,5 s).
 
 ## Möbelbibliothek (Workstream Ladenbau, Phase 1)
-- `src/kit/moebel/index.js`: `ALLE_MOEBEL` (147 Definitionen), `MOEBEL[id]` und `moebel(id)`. Bereiche Sport (86), Off-Price (15), allgemein / Schwesterkette (46). Neue Möbel gehören in `moebel/{wand,gondel,insel,kasse,deko,sport,outlet,service}.js`, gemeinsame Hilfen in `moebel/basis.js`.
+- `src/kit/moebel/index.js`: `ALLE_MOEBEL`, `MOEBEL[id]` und `moebel(id)`. Sport hat zusätzliche sortimentsspezifische Kompaktmöbel aus `moebel/sport-mix.js`; FUNDUS erhält mit `outlet_schuhe` ein eigenständiges, maßhaltiges Schuhkarton-Modul. Möbelzahlen nicht statisch aus älteren Projektständen übernehmen. Neue Möbel gehören in `moebel/{wand,gondel,insel,kasse,deko,sport,outlet,service}.js`, gemeinsame Hilfen in `moebel/basis.js`.
 - Schnittstelle pro Stück: `{id,titel,bereich,rasterB,rasterT,hoehe,typ,budget,bau(L,r,d,ctx)}`; `L` aus `innen.js lokal()`, Vorderseite lokal +z. Breiten/Tiefen als Vielfache von 1,25 m; Wandtiefe stets 0,6 m, Wandkorpus 2,4 m mit 0,6-m-Schildband. Gondeln 1,25 m tief, 1,4 m hoch; Inseln maximal 1,5 m.
 - `rng(seed)` aus `basis.js` verwenden und an `bau` übergeben; `setzeLod('fern')` reduziert auf Korpus und Flächenfarben; keine Schrift außerhalb `basis.js`.
 - Prüfen: `cd render && node pruef-moebel.js` (oder `npm run moebel:pruefen`). Testet tatsächliche Geometrie-Abmessungen, Rückkanten, Höhen, Bauteilbudgets, reproduzierbare Farbe/Geometrie und Fernstufe. Erwartung: 0 Fehler.
@@ -82,3 +83,9 @@ Die Render-Exporte aus `engine/scripts/haeuser-export.ts` müssen vor dem endgü
 Kataloge nach dem Export: `stadtvielfalt-neu` (24 neue Städte, fünf Regionen), `standorte-mix` (zehn gemischte Städte), `alle-hartwig-1` bis `alle-hartwig-6` (60 pro Seite), `alle-premium` (4), `alle-volkskauf-1`/`-2` (60/26), `alle-sport` (44), `alle-fundus`/`alle-fundus-2` (60/6). Ausgabe `node render-katalog.js <name>` nach `npm ci`.
 
 Qualitätsprüfungen: `npm run massstab:geografie` (220 Städte/Cluster), `npm run massstab:standorte` (eindeutige Platzierung, Blockabstand, Nebenzentren), `npm run massstab:kopien` (Hausfamilie/Variante/Fassade unter 50 km), `npm run massstab:gestaltung` (alle exportierten Städte). Danach `node pruef-staedte.js`, `node spiel-render.js` und Bildabnahme in drei Runden durchführen. **Diese npm-, Bild- und Renderprüfungen sind im Feature-Branch noch nicht ausgeführt**; bis dahin keine Merge-Freigabe.
+
+## Ladenbau Phase 5 – FUNDUS innen
+- `src/kit/ladenbau-outlet.js`: Geschoss- und Sortimentsadapter (aktuell 20 FUNDUS-Filialen, insgesamt 35 Verkaufsetagen); `src/kit/outlet.js` verwendet `ladenplan` und `baueLadenplan` auch für zweigeschossige Fachmärkte und Innenstadt-Geschäftshäuser.
+- `baueLadenplan` kann `{x,z,y,bestueckung}` entgegennehmen, damit derselbe Plan ohne geometrische Duplikate in gestapelte Etagen eingebaut wird. Bei schwacher Bestückung bzw. Räumung werden Warenkörper auf Gestellen reduziert, Größenschilder und Korpusse bleiben.
+- Lokale Prüfungen: `npm run ladenbau:smoke`, `npm run ladenbau:pruefen`, `npm run ladenbau:pruefen:teile`; Render: `node render-katalog.js outlet-innen` und `node render-katalog.js outlet-innen-zustaende`, visuelle Abnahme und Budgetprüfung **vor** dem Merge.
+- Phase-4-Restpunkte im gemeinsamen Planer: Sport-Hängeschilder über den Abteilungsmitten, garantierte Rundständer-/Puppentypen soweit die Sortimentsgeometrie passt und verbreiterte Positionssuche für genau eine Erlebnispräsentation je Sportabteilung.

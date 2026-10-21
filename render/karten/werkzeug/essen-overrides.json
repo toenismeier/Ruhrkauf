@@ -1,0 +1,23 @@
+{
+  "gebaeude": {
+    "Rathaus Essen": { "hoehe_m": 106, "art": "rathaus" },
+    "Domkirche Ss. Cosmas und Damian": { "art": "kirche", "hoehe_m": 40 },
+    "Essen Hauptbahnhof": { "art": "bahnhof" }
+  },
+  "wahrzeichen": [
+    { "id": "essen-rathaus", "name": "Rathaus (Hochhaus)", "gebaeude": "Rathaus Essen" },
+    { "id": "essen-hbf", "name": "Hauptbahnhof mit Gleisharfe", "gebaeude": "Essen Hauptbahnhof" },
+    { "id": "essen-muenster", "name": "Münster", "gebaeude": "Domkirche Ss. Cosmas und Damian" },
+    { "id": "essen-marktkirche", "name": "Marktkirche", "gebaeude": "Marktkirche" },
+    { "id": "essen-limbecker", "name": "Einkaufszentrum am Limbecker Platz", "gebaeude": "Einkaufzentrum Limbecker Platz" },
+    { "id": "essen-grillo", "name": "Theater an der Grillostraße", "gebaeude": "Grillo-Theater" },
+    { "id": "essen-synagoge", "name": "Alte Synagoge", "gebaeude": "Alte Synagoge" }
+  ],
+  "hinweise": [
+    "Kettwiger Straße: Fußgängerzone (klasse fuss) vom Hauptbahnhof nach Norden zum Münster und zur Marktkirche; Hauptachse der Einkaufslage.",
+    "Limbecker Straße: Fußgängerzone nach Westen zum Limbecker Platz.",
+    "Stadtbahn und U-Bahn im Zentrum liegen im Tunnel (tunnel: true) und sind oberirdisch nicht zu bauen; sichtbar bleiben nur Rampen und oberirdische Abschnitte.",
+    "Kartenausschnitt hier 3,4 × 3,4 km; der Kern Hauptbahnhof–Rathaus–Limbecker Platz misst rund 1,3 km. Für die heutige Kartengröße (Essen rund 950 × 850 m) Maßstab etwa 0,6 bis 0,7 auf den Kern, Ränder weglassen oder stauchen.",
+    "Echte Firmen- und Markennamen aus den Daten (z. B. Hochhäuser) im Spiel nicht verwenden."
+  ]
+}

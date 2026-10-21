@@ -38,6 +38,23 @@ for(const [breite,tiefe] of [[30,30],[45,40],[55,40],[75,55]]){
  block.moebel[0].z=gang.z+gang.d/2;
  assert.ok(pruefeLadenplan(block).fehler.some(x=>x.includes('blockiert einen Gang')),
    'Gangflächen müssen von allen Möbeltypen frei bleiben');
+ // Phase 4: keine Einheitsgondeln und keine fehlenden Abteilungskennzeichen.
+ for(const raum of a.abteilungen) {
+   const moebel=a.moebel.filter(m=>m.abteilung===raum.id);
+   const arten=new Map();
+   for(const m of moebel) {
+     const id=m.moebelart??m.id;
+     arten.set(id,(arten.get(id)??0)+1);
+   }
+   assert.ok(arten.size>=4,raum.id+': mindestens vier Möbelarten');
+   assert.ok([...arten.values()].every(n=>n<=moebel.length*0.4),raum.id+': höchstens 40 % je Möbelart');
+   assert.ok(a.boeden.some(f=>f.abteilung===raum.id),raum.id+': eigene Sortimentsbodenfarbe');
+ }
+ const einheitsgondeln=structuredClone(a);
+ for(const m of einheitsgondeln.moebel.filter(m=>m.abteilung===a.abteilungen[0].id))
+   m.moebelart='immer_gleich';
+ assert.ok(pruefeLadenplan(einheitsgondeln).fehler.some(f=>f.startsWith('Sortimentsmix')),
+   'Einheitsgondeln müssen als Fehler erkannt werden');
  assert.deepEqual(q.fehler,[],breite+'×'+tiefe+' m: '+q.fehler.join(' | '));
  console.log(breite+'×'+tiefe+' m: '+a.moebel.length+' Möbel, Dichte '+(100*q.messwerte.dichte).toFixed(1)+' %, größte Leerfläche '+q.messwerte.groessteLeerflaecheM+' m');
 }
@@ -56,6 +73,23 @@ for(const haus of sport)for(const etage of haus.etagen.filter(e=>e>=0)){
  const plan=ladenplan(eingabe.flaeche,'sport',eingabe.abteilungen,haus.id+':'+etage);
  const ergebnis=pruefeLadenplan(plan);
  assert.deepEqual(ergebnis.fehler,[],haus.id+' Etage '+etage+': '+ergebnis.fehler.join(' | '));
+ assert.ok(ergebnis.messwerte.dichte>=0.35&&ergebnis.messwerte.dichte<=0.5,
+   haus.id+' Etage '+etage+': Dichte außerhalb 35–50 %');
+ assert.equal(plan.boeden.filter(b=>b.abteilung).length,plan.abteilungen.length,
+   haus.id+' Etage '+etage+': Sortimentsböden fehlen');
+ for(const raum of plan.abteilungen) {
+   const ins=plan.moebel.filter(m=>m.abteilung===raum.id&&m.inszenierung).length+
+     (plan.festeInszenierungen??[]).filter(m=>m.abteilung===raum.id).length;
+   assert.equal(ins,1,haus.id+' Etage '+etage+' '+raum.id+': genau eine Themenbühne');
+   if(raum.id==='sporttextil') {
+     const bestand=plan.moebel.filter(m=>m.abteilung===raum.id);
+     assert.ok(bestand.some(m=>m.id.includes('_rundstaender_')),
+       haus.id+' Etage '+etage+': Rundständer fehlen');
+     assert.ok(bestand.some(m=>m.id.includes('_puppen_')),
+       haus.id+' Etage '+etage+': Puppengruppen fehlen');
+   }
+ }
+
  etagen++;
 }
 assert.equal(sport.length,50,'vollständige Sporthaus-Stichprobe');

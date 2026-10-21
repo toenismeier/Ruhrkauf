@@ -28,3 +28,10 @@ Branch `feat/ladenbau-p4` (weiterarbeiten). Grundlage bleibt `auftraege/workstre
 - `sport-etagen-vergleich` für alle 8 Häuser rendern, jedes Bild ansehen, nach `bilder/` legen.
 - Sichtfrage: Erkennt man auf dem Nachher-Bild ohne Beschriftung, welche Abteilung wo ist, und sieht es nach Sporthaus aus statt nach Supermarkt? Ist es ruhiger als Vorher?
 - `pruef-ladenbau` 0 Verstöße, Dichte 35 bis 50 %, Typecheck, Tests, Build, `spiel-render.js` 0 Abweichungen. Ohne CI arbeiten wie in `auftraege/README.md`.
+
+## 4. Zweite Prüfung und Merge (20.10. vormittags)
+- Gemergt in `main`. Die Abteilungen haben jetzt Bodenfarben, an den Wänden stehen Regale, die Teile sind gegenüber vorher halbiert (S002 EG 4.127 statt 7.564), 0 Verstöße in 101 Plänen.
+- **Restpunkte, in Phase 5 mit erledigen** (gleicher Planer):
+  - Hängeschilder je Abteilung (wie vorher aus `sportabteilung.js`: „Sportschuhe“, „Sportbekleidung“, „Outdoor“ …) über der Abteilungsmitte.
+  - Bekleidung braucht sichtbar Rundständer und Puppengruppen. Heute überwiegen Gondeln und Tische.
+  - Je Abteilung genau eine Inszenierung (Laufanalyse mit Laufband, Fitness-Bühne, Zelt im Outdoor) aus Phase 4, Schritt 3.

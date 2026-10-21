@@ -8,6 +8,8 @@
 //
 // Rahmen-Konzept wie in ostbauten.js: Fassade F mit Ursprung (ox, oz), Laufrichtung (dx, dz), Normale (nx, nz), Länge L.
 // u entlang der Fassade, y Höhe, t nach außen.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, Sammler, rng, waehle, zw, FARBEN, heller, dunkler, baum, textTextur, textMaterial, dachProfil, walmdach } from './basis.js';
 import { ostFahrzeug } from './ostbauten.js';
 import { kirche } from './sonderbauten.js';
@@ -77,7 +79,7 @@ function fscheibe(S, F, u, y, t0, t1, rad, c, seg = 20) {
 }
 /** Schräger Balken in der Fassadenebene von (u0, y0) nach (u1, y1). */
 function fstrebe(S, F, u0, y0, u1, y1, br, t0, t1, c) {
-  const L = Math.hypot(u1 - u0, y1 - y0);
+  const L = wurzelSumme(u1 - u0, y1 - y0);
   const g = new THREE.BoxGeometry(L, br, t1 - t0);
   g.rotateZ(Math.atan2(y1 - y0, u1 - u0));
   g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
@@ -107,7 +109,7 @@ function stab(S, a, b, rad, c, seg = 6) {
 }
 function balken(S, a, b, br, ho, c) {
   const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
-  const hl = Math.hypot(dx, dz), L = Math.hypot(hl, dy);
+  const hl = wurzelSumme(dx, dz), L = wurzelSumme(hl, dy);
   const g = new THREE.BoxGeometry(L, ho, br);
   g.rotateZ(Math.atan2(dy, hl)); g.rotateY(Math.atan2(-dz, dx));
   g.translate((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
@@ -128,7 +130,7 @@ function prisma(S, pts, y0, h, c) {
 }
 /** Kantenrahmen eines Grundrisses (Reihenfolge wie Rechteck: +z-Seite in +x-Richtung, dann +x-Seite in -z-Richtung …). */
 function kanten(pts) {
-  return pts.map((a, i) => { const b = pts[(i + 1) % pts.length]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); return R(a[0], a[1], (b[0] - a[0]) / L, (b[1] - a[1]) / L, L); });
+  return pts.map((a, i) => { const b = pts[(i + 1) % pts.length]; const L = wurzelSumme(b[0] - a[0], b[1] - a[1]); return R(a[0], a[1], (b[0] - a[0]) / L, (b[1] - a[1]) / L, L); });
 }
 /** Gleichmäßige Achsen im Bereich u0..u1 mit Abstand ra. */
 function achsen(u0, u1, ra, rand = 0.6) {
@@ -159,7 +161,7 @@ function satteldach(S, x0, z0, x1, z1, y, hg, achse, dachF, wandF, ue = 0.45) {
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   const lang = achse === 'x' ? x1 - x0 : z1 - z0, quer = achse === 'x' ? z1 - z0 : x1 - x0;
   const g = dachProfil(lang, quer, hg, 0.02, achse); g.translate(cx, y, cz); S.add(g, wandF);
-  const a = Math.atan2(hg, quer / 2), sl = Math.hypot(quer / 2, hg) + ue;
+  const a = Math.atan2(hg, quer / 2), sl = wurzelSumme(quer / 2, hg) + ue;
   for (const s of [-1, 1]) {
     const pl = new THREE.BoxGeometry(lang + 2 * ue * 0.6, 0.24, sl);
     pl.rotateX(s * a);
@@ -1079,11 +1081,11 @@ function kurstadtRoh(S, scene, p) {
     boden(S, x0 + 3, pz0, x0 + w - 3, pz0 + 2, KIES, 0.3, 0.11);
     for (const xs of [x0 + 3, x0 + w - 5]) boden(S, xs, pz0, xs + 2, pz1, KIES, 0.3, 0.11);
     for (const fx of [(x0 + 5 + cx - 2) / 2, (cx + 2 + x0 + w - 5) / 2]) for (const fz of [(pz0 + 2 + pzm - 1.4) / 2, (pzm + 1.4 + pz1) / 2]) {
-      if (Math.hypot(fx - tx, fz - tz) < 9 || Math.hypot(fx - mx, fz - mz) < 11) { blumenbeet(S, r, fx - 5, fz - 0.8, fx + 5, fz + 0.8); continue; }
+      if (wurzelSumme(fx - tx, fz - tz) < 9 || wurzelSumme(fx - mx, fz - mz) < 11) { blumenbeet(S, r, fx - 5, fz - 0.8, fx + 5, fz + 0.8); continue; }
       zyl(S, 3.4, 3.4, 0.12, fx, 0.36, fz, '#7fae5a', 20); zyl(S, 2.5, 2.5, 0.18, fx, 0.36, fz, waehle(r, ['#e05a5a', '#e8c547', '#c86ab0', '#e88a3c']), 20); zyl(S, 1.1, 1.1, 0.22, fx, 0.36, fz, '#f2efe6', 16);
     }
     for (const xs of [x0 + 6, cx - 7, cx + 7, x0 + w - 6]) bank(S, xs, pzm + 2.0);
-    for (let i = 0; i < 10; i++) { const bx = zw(r, x0 + 5, x0 + w - 5), bz = zw(r, hz0 + ht + 8, z0 + d - 5); if (Math.hypot(bx - tx, bz - tz) > 8 && Math.hypot(bx - mx, bz - mz) > 10 && Math.abs(bx - cx) > 4) baum(S, bx, bz, r, zw(r, 1.0, 1.35)); }
+    for (let i = 0; i < 10; i++) { const bx = zw(r, x0 + 5, x0 + w - 5), bz = zw(r, hz0 + ht + 8, z0 + d - 5); if (wurzelSumme(bx - tx, bz - tz) > 8 && wurzelSumme(bx - mx, bz - mz) > 10 && Math.abs(bx - cx) > 4) baum(S, bx, bz, r, zw(r, 1.0, 1.35)); }
     for (let i = 0; i < 4; i++) bank(S, cx + (i % 2 ? 3 : -3), hz0 + ht + 5 + i * 4, true);
     return { hoehe: hk };
   }
@@ -1770,7 +1772,7 @@ function roemischRoh(S, scene, p) {
     for (let i = 0; i < n; i++) {
       const a0 = PI - (i * PI) / n, a1 = PI - ((i + 1) * PI) / n;
       const p0 = [cx + Math.cos(a0) * ra, wz + Math.sin(a0) * ra], p1 = [cx + Math.cos(a1) * ra, wz + Math.sin(a1) * ra];
-      const L2 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]), F = R(p0[0], p0[1], (p1[0] - p0[0]) / L2, (p1[1] - p0[1]) / L2, L2);
+      const L2 = wurzelSumme(p1[0] - p0[0], p1[1] - p0[1]), F = R(p0[0], p0[1], (p1[0] - p0[0]) / L2, (p1[1] - p0[1]) / L2, L2);
       const Hi = H - (i > 6 ? 4 + (i - 6) * 3 : 0);
       const loch = [{ u0: L2 / 2 - 1.2, u1: L2 / 2 + 1.2, v0: 2.5, v1: 10, bogen: true }];
       if (Hi > 17) loch.push({ u0: L2 / 2 - 1.0, u1: L2 / 2 + 1.0, v0: 12.5, v1: 18, bogen: true });
@@ -1785,7 +1787,7 @@ function roemischRoh(S, scene, p) {
       for (let i = 0; i < 5; i++) {
         const a0 = PI - (i * PI) / 5, a1 = PI - ((i + 1) * PI) / 5;
         const p0 = [ax + Math.cos(a0) * rs, wz + Math.sin(a0) * rs], p1 = [ax + Math.cos(a1) * rs, wz + Math.sin(a1) * rs];
-        const L2 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]), F = R(p0[0], p0[1], (p1[0] - p0[0]) / L2, (p1[1] - p0[1]) / L2, L2);
+        const L2 = wurzelSumme(p1[0] - p0[0], p1[1] - p0[1]), F = R(p0[0], p0[1], (p1[0] - p0[0]) / L2, (p1[1] - p0[1]) / L2, L2);
         fwand(S, F, -0.05, L2 + 0.05, 0, 9, -1.0, 0, c, [{ u0: L2 / 2 - 0.7, u1: L2 / 2 + 0.7, v0: 2.5, v1: 6.5, bogen: true }]);
         fb(S, F, -0.05, L2 + 0.05, 7.2, 7.8, -1.1, 0.1, ziegel);
         ruinenKrone(S, F, 0, L2, 9, r, c, -1.0, 0, 1.5);
@@ -2516,7 +2518,7 @@ function bahnhofRoh(S, scene, p) {
 // Detailhelfer: Geländer, Leitern, Gerüste, Prozessanlagen, Fahrräder
 // =====================================================================================
 function gelaender(S, a, b, y, c = '#e8c547', ab = 1.6) {
-  const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / ab));
+  const L = wurzelSumme(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / ab));
   for (let i = 0; i <= n; i++) { const t = i / n; S.box(0.08, 1.1, 0.08, a[0] + (b[0] - a[0]) * t, y + 0.55, a[1] + (b[1] - a[1]) * t, c); }
   balken(S, [a[0], y + 1.1, a[1]], [b[0], y + 1.1, b[1]], 0.08, 0.08, c);
   balken(S, [a[0], y + 0.55, a[1]], [b[0], y + 0.55, b[1]], 0.06, 0.06, c);

@@ -1,0 +1,15 @@
+# EAS lädt nur app/ hoch. Ausdrückliche Liste statt Negation (/* + !/app/ wird von EAS nicht unterstützt).
+/render/
+/engine/
+/bilder/
+/auftraege/
+/.github/
+/*.md
+node_modules/
+/app/ios/
+/app/android/
+/app/.expo/
+/app/spiel/smoke.png
+/testflight/
+/.osm-roh/
+/karten-roh/

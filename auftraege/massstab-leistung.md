@@ -33,3 +33,24 @@ Branch `feat/massstab-leistung`. Ein bis zwei Chats. Übergabedatei `auftraege/m
 - Zieltabelle erfüllt in der CI-Messung, Werte in `massstab-stand.md` und `MOBIL-TEST.md`.
 - `pruef-staedte` 0, Gestaltungsprüfung 0, `spiel-render.js` 0 Abweichungen.
 - Engine-Vergleichslauf bitgleich.
+
+## Erste Messung auf dem echten iPhone (TestFlight-Wurf 1, 20.10.2026)
+Berlin, KW 1, Grafikprofil `sparsam`, Canvas 502 × 1092, Pixelratio 1,25, App-Hülle (WKWebView):
+
+| Messgröße | Wert |
+|---|---|
+| Bildrate | 30 fps |
+| Framezeit 95. Perzentil | 34 ms |
+| Renderaufruf 95. Perzentil | 9 ms |
+| Frames über 33 ms | 31 / 89 |
+| Draw Calls | 965 |
+| Dreiecke | 4.480.868 |
+| Geometrien / Texturen | 4872 / 114 |
+| Teile der Stadt | 228.599 |
+
+Befund: Der Renderaufruf (9 ms) ist nicht der Engpass, die GPU ist es (4,5 Mio. Dreiecke, 965 Draw Calls). Zusätzliche Zielwerte für Metropolen auf dem iPhone: **Dreiecke unter 1,5 Mio., Draw Calls unter 300, Frames über 33 ms unter 5 / 89.** Hebel 2 (Instancing) und 3 (Detailstufe `mittel`) haben damit Vorrang vor Hebel 1. Messung immer auch in der App (TestFlight), nicht nur im Chromium-Mobilprofil.
+
+## Spielstand-Größe (Befund 20.10.2026 abends, nach Merge O04/O05/N01–N14)
+Nach 104 Wochen ist der Spielstand rund 7,5 MB groß, vor allem durch die Verlaufsdaten je Haus aus O02 (`treiberVerlauf`) und O07. Gespeichert wird nach jeder Woche komplett in IndexedDB.
+Ziele: Spielstand nach 260 Wochen unter 3 MB, Speichern nach „Woche weiter“ unter 50 ms auf dem iPhone, Laden eines 5-Jahres-Stands unter 1 s.
+Hebel in dieser Reihenfolge: (1) Verläufe je Haus verdichten (letzte 13 Wochen wöchentlich, davor Monats- bzw. Quartalswerte; Vorjahr bleibt vollständig für Q07), (2) Kennzahlen als typisierte Zahlenreihen statt Objektlisten, (3) inkrementell speichern (nur geänderte Teile), (4) Kompression vor dem Schreiben. Engine-Ergebnisse bitgleich (Vergleichslauf 260 Wochen Seed 1).

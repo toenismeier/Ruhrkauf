@@ -4,10 +4,13 @@
 // export warenhaus(S, scene, haus, { x, z, status?, zusatz?, aktion?, untermieter?, hartwig?, familie? })  → { hoehe, w, d, familie, teile }
 // Zustände (Räumung, Leerstand, Untermiete …) kommen aus zustaende.js.
 // export familieVon(haus), masse(haus), FAMILIEN, EG, GH
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, waehle, zw, heller, dunkler, textTextur, textMaterial } from './basis.js';
 import { zustandNormal, zustandFlags, zustandsDekor, eigeneMieterflaechen, ladenInhalt, merke, mieterInfo } from './zustaende.js';
 import { seitenVon as seitenFremd, plakat as plakatFremd, passend as passendFremd } from './sporthelfer.js';
 import { WETTBEWERBER_FARBEN } from './wettbewerber.js';
+import { dachInstallationen } from './dach-qualitaet.js';
 import { STADT_GEOGRAFIE } from './stadt-geografie.js';
 
 export const ROT = '#d23c32';
@@ -410,7 +413,7 @@ function vordach(K, s, o = {}) {
     if (stil === 'glas') {
       s.q(a, b, y, y + 0.1, tF, tF + tief, '#a9c6d3');
       s.q(a, b, y - 0.2, y + 0.15, tF + tief - 0.15, tF + tief, STAHL);
-      const l = Math.hypot(tief, 2.4), th = Math.atan2(-tief, 2.4);
+      const l = wurzelSumme(tief, 2.4), th = Math.atan2(-tief, 2.4);
       for (let u = a + 1; u < b; u += 3) {
         s.q(u - 0.07, u + 0.07, y - 0.22, y, tF, tF + tief, STAHL);
         s.kipp(0.07, l, 0.07, u, y + 1.2, tF + tief / 2, '#6f777e', 0, th);
@@ -477,39 +480,18 @@ function lichtkuppeln(K, x0, z0, x1, z1, y, ax = 6.5, az = 9) {
     S.box(1.5, 0.35, 1.5, ox + i * ax, y + 0.45, oz + j * az, K.alt ? '#c9cfd1' : '#e8eef0');
   }
 }
-/** Haustechnik auf einem Dachbereich. */
+/** Q02: Aufbauten bündig auf der Dachoberfläche, maximal drei Bauarten pro Dachbereich. */
 function technik(K, x0, z0, x1, z1, y, o = {}) {
-  const S = K.S, r = K.r;
-  const fl = (x1 - x0) * (z1 - z0);
-  if (x1 - x0 < 6 || z1 - z0 < 6) return;
-  const anz = Math.min(o.max ?? 9, Math.max(2, Math.round(fl / 320)));
-  const belegt = [];
-  const f = o.farbe ?? '#c9c6bf';
-  for (let v = 0; v < anz * 5 && belegt.length < anz; v++) {
-    const typ = belegt.length === 0 ? 'lueftung' : waehle(r, ['lueftung', 'kuehler', 'kuehler', 'aufzug', 'rohr', 'kasten']);
-    const [bw, bd, bh] = { lueftung: [zw(r, 7, 13), zw(r, 4, 7), zw(r, 2.6, 3.6)], kuehler: [zw(r, 4, 6), 2.2, 1.3], aufzug: [3.2, 3.2, 3.2], rohr: [zw(r, 6, 10), 0.8, 0.8], kasten: [zw(r, 2, 3.5), zw(r, 2, 3.5), zw(r, 1.4, 2.2)] }[typ];
-    if (bw > x1 - x0 - 2 || bd > z1 - z0 - 2) continue;
-    const cx = zw(r, x0 + bw / 2 + 1, x1 - bw / 2 - 1), cz = zw(r, z0 + bd / 2 + 1, z1 - bd / 2 - 1);
-    if (reserviert(K, cx, cz, Math.max(bw, bd) / 2 + 0.5)) continue;
-    if (belegt.some((b) => Math.abs(b[0] - cx) < (b[2] + bw) / 2 + 0.8 && Math.abs(b[1] - cz) < (b[3] + bd) / 2 + 0.8)) continue;
-    belegt.push([cx, cz, bw, bd]);
-    if (typ === 'rohr') {
-      const g = new THREE.CylinderGeometry(0.4, 0.4, bw, 8); g.rotateZ(Math.PI / 2); g.translate(cx, y + 0.9, cz); S.add(g, '#d6d8da');
-      S.box(0.3, 0.6, 0.3, cx - bw / 3, y + 0.3, cz, '#9aa0a5'); S.box(0.3, 0.6, 0.3, cx + bw / 3, y + 0.3, cz, '#9aa0a5');
-      continue;
-    }
-    S.box(bw, bh, bd, cx, y + bh / 2, cz, typ === 'aufzug' ? (o.aufzug ?? f) : f);
-    S.box(bw + 0.2, 0.15, bd + 0.2, cx, y + bh + 0.07, cz, heller(f, 0.05));
-    if (typ === 'lueftung') {
-      for (let k = 0; k < 4; k++) {
-        const yy = y + 0.5 + k * (bh - 0.9) / 3;
-        S.box(bw * 0.8, 0.12, 0.08, cx, yy, cz + bd / 2 + 0.04, dunkler(f, 0.14));
-        S.box(0.08, 0.12, bd * 0.75, cx + bw / 2 + 0.04, yy, cz, dunkler(f, 0.14));
-      }
-    }
-    if (typ === 'kuehler') for (let k = 0; k < Math.floor(bw / 1.8); k++) zyl(S, cx - bw / 2 + 0.9 + k * 1.8, y + bh, cz, 0.7, 0.18, '#5d646a', 10);
+  const dach = { x0, z0, x1, z1, y, steil: false };
+  if (K.dach && Math.abs(K.dach.y - y) < 1.1) {
+    dach.x0 = Math.max(x0, K.dach.x0);
+    dach.z0 = Math.max(z0, K.dach.z0);
+    dach.x1 = Math.min(x1, K.dach.x1);
+    dach.z1 = Math.min(z1, K.dach.z1);
+    dach.y = K.dach.y;
   }
-  if (o.antenne !== false && r() < 0.6) { zyl(S, x0 + 2.5, y, z0 + 2.5, 0.08, 7, '#8a9096', 5); S.box(1.6, 0.08, 0.08, x0 + 2.5, y + 6, z0 + 2.5, '#8a9096'); }
+  dachInstallationen(K.S, dach, K.r, { max: o.max, farbe: o.farbe,
+    reserviert: (x, z, rad) => reserviert(K, x, z, rad), protokoll: K.qualitaet?.daecher });
 }
 /** Parkdeck (Dach): Asphalt, Markierungen, Autos, Treppenhaus, P-Schild. */
 function parkdeck(K, x0, z0, x1, z1, y, mitSchild = true) {
@@ -1243,7 +1225,7 @@ function familie7(K) {
     sz.q(wu - wb / 2 - 0.25, wu + wb / 2 + 0.25, wy - wh / 2 - 0.25, wy + wh / 2 + 0.25, 0.3, 0.45, '#d9dcde');
     sz.q(wu - wb / 2, wu + wb / 2, wy - wh / 2, wy + wh / 2, 0.45, 0.55, bg);
     for (let i = 0; i < 3; i++) {
-      const len = Math.hypot(wh, wh) * 0.9;
+      const len = wurzelSumme(wh, wh) * 0.9;
       const uc = wu + wb * (0.12 + i * 0.12);
       if (uc + wh * 0.35 > wu + wb / 2) continue;
       sz.kipp(1.0, len * 0.8, 0.05, uc, wy, 0.58, ['#ffffff', ROT, '#f2b705'][i], -0.55);
@@ -1356,8 +1338,8 @@ function schriftGeruest(K, s, u, br, yFuss, yB, hb, t) {
     const uu = u - br / 2 - 0.4 + k * df;
     s.q(uu - 0.08, uu + 0.08, yFuss, yT + 0.16, t - 0.2, t - 0.04, st);
     s.q(uu - 0.07, uu + 0.07, yFuss, yB, t - 1.6, t - 1.45, st); // Strebe hinten
-    s.kipp(0.07, Math.hypot(1.5, yB - yFuss), 0.07, uu, (yFuss + yB) / 2, t - 0.8, st, 0, Math.atan2(1.5, yB - yFuss));
-    if (k < nf) s.kipp(0.06, Math.hypot(df, yT - yB), 0.06, uu + df / 2, (yB + yT) / 2, t - 0.15, st, (k % 2 ? 1 : -1) * Math.atan2(df, yT - yB));
+    s.kipp(0.07, wurzelSumme(1.5, yB - yFuss), 0.07, uu, (yFuss + yB) / 2, t - 0.8, st, 0, Math.atan2(1.5, yB - yFuss));
+    if (k < nf) s.kipp(0.06, wurzelSumme(df, yT - yB), 0.06, uu + df / 2, (yB + yT) / 2, t - 0.15, st, (k % 2 ? 1 : -1) * Math.atan2(df, yT - yB));
   }
 }
 
@@ -1532,9 +1514,9 @@ function familie9(K) {
 // ---------------------------------------------------------------- Mosaik (Kunst am Bau), Kacheln zu Läufen zusammengefasst
 function mosaikMotiv(motiv, W, H, P) {
   const m = Math.min(W, H);
-  const kreis = (X, Y, cx, cy, r) => Math.hypot(X - cx, Y - cy) < r;
+  const kreis = (X, Y, cx, cy, r) => wurzelSumme(X - cx, Y - cy) < r;
   if (motiv === 0) return (X, Y) => { // Sonne, Menschen, Welle
-    const sx = 0.7 * W, sy = 0.72 * H, sr = 0.17 * m, dS = Math.hypot(X - sx, Y - sy);
+    const sx = 0.7 * W, sy = 0.72 * H, sr = 0.17 * m, dS = wurzelSumme(X - sx, Y - sy);
     if (dS < sr * 0.62) return P.gelb;
     if (dS < sr) return P.orange;
     if (dS < sr * 1.75 && Math.floor((Math.atan2(Y - sy, X - sx) + Math.PI) / (Math.PI / 10)) % 2 === 0) return P.hellgelb;
@@ -1568,7 +1550,7 @@ function mosaikMotiv(motiv, W, H, P) {
     return Y > 0.5 * H ? P.blauD : P.nacht;
   };
   return (X, Y) => { // Arbeit und Fortschritt: Zahnrad, Ähren, Schwünge
-    const cx = 0.66 * W, cy = 0.52 * H, r = 0.26 * m, dz = Math.hypot(X - cx, Y - cy), wz = Math.atan2(Y - cy, X - cx);
+    const cx = 0.66 * W, cy = 0.52 * H, r = 0.26 * m, dz = wurzelSumme(X - cx, Y - cy), wz = Math.atan2(Y - cy, X - cx);
     if (dz < r * 0.42) return P.gelb;
     if (dz < r * 0.62) return P.sand;
     if (dz < r) return P.grau;
@@ -1621,7 +1603,7 @@ function flugdach(K, s, um, typ, f) {
     s.geo(g, f);
     // Randträger als dünne Kanten
     for (const [i0, j0, i1, j1] of [[0, 0, N, 0], [0, N, N, N], [0, 0, 0, N], [N, 0, N, N]]) {
-      const A = P(i0, j0, 0), Bq = P(i1, j1, 0), len = Math.hypot(Bq[0] - A[0], Bq[1] - A[1], Bq[2] - A[2]);
+      const A = P(i0, j0, 0), Bq = P(i1, j1, 0), len = wurzelSumme(Bq[0] - A[0], Bq[1] - A[1], Bq[2] - A[2]);
       const gg = new THREE.BoxGeometry(len, 0.28, 0.28);
       const dir = new THREE.Vector3(Bq[0] - A[0], Bq[1] - A[1], Bq[2] - A[2]).normalize();
       gg.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1, 0, 0), dir));
