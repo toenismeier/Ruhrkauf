@@ -371,7 +371,7 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
   const substanz = f === 'outlet' ? clamp(substanzBasis, 40, 85) : substanzBasis;
   const zusatz = waehle(h, STANDORT_ZUSATZ[lage]);
   const premiumName = PREMIUM_HAEUSER.find((p) => p.schluessel === option.premiumSchluessel)?.name;
-  const formatName = f === 'schwester' ? 'Volkskauf' : f === 'outlet' ? 'FUNDUS' : f === 'warenhaus' ? sz.firma.split(' ')[0] : sz.sportName;
+  const formatName = f === 'schwester' ? (sz.schwesterName ?? 'Volkskauf') : f === 'outlet' ? (sz.outletName ?? 'FUNDUS') : f === 'warenhaus' ? sz.firma.split(' ')[0] : sz.sportName;
   return {
     id,
     name: premiumName ?? (f === 'outlet' ? `${formatName} ${stadt}${nr > 1 ? ' ' + zusatz : ''}` : `${formatName} ${stadt}${nr > 1 ? ' ' + zusatz : lage === '1a' ? '' : ' ' + zusatz}`),
