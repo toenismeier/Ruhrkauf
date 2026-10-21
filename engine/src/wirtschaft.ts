@@ -7,7 +7,19 @@ import { schwierigkeit } from './schwierigkeit';
 import { leereFilialGuV, programmErsparnis, programmNachfrageFaktor, type FilialGuV } from './filialguv';
 import { hqBesetzungsNorm, hqLogistikFaktor, hqMarketingFaktor, hqUmsatzFaktor } from './hq';
 import { marketingGruppen, marketingHausFaktor, type AktionsMessung } from './marketing';
+import { personalVerkaufsFaktor, personalOffpriceFaktor, personalZusatzkosten, personalFehlerkosten, personalVerfuegbarkeit } from './personaleinsatz';
+// O04 Personal
 import { wettbewerbNachfrageFaktor, wettbewerbFrequenzFaktor, wettbewerbOffpriceFaktor } from './wettbewerb';
+// O01 Organisation: normierte Wirkung der Vertriebsleitungen.
+import { hausclusterFaktor } from './organisation';
+// O02 Umsatztreiber
+import { wirkeTreiber } from './treiber';
+// O03 IT
+import { itHausFaktor } from './it';
+// O07 Haus
+import { hausBetriebsFaktor, hausBetriebskosten } from './haus';
+import { umbauNachfrageFaktor, umbauFrequenzFaktor } from './umbau';
+import { szenarioFrequenz } from './szenarien';
 
 /** Rohergebnis eines Hauses vor der Bestandsprüfung. */
 export interface HausRoh {
@@ -33,7 +45,7 @@ export function istAktiv(h: Haus): boolean {
 }
 
 export function aktiveFlaeche(h: Haus, w: number) {
-  return h.flaechen.filter((f) => f.umbauBis === undefined || f.umbauBis <= w);
+  return h.flaechen.filter((f) => (f.umbauBis === undefined || f.umbauBis <= w) && !h.etagenBau?.[f.etage]?.gesperrt);
 }
 
 /** Phase 2: 52-Wochen-Realisierung gegenüber der exakt normierten
@@ -87,7 +99,7 @@ export function hausFaktor(s: GameState, h: Haus): number {
   const rauschen = s.prognose ? 1 : 1 + 0.025 * normal(s);
   // Zentrale: E-Commerce (Umsatzbonus) und Visual Merchandising (Flächenproduktivität) aus der Hauptverwaltung
   const zentrale = hqUmsatzFaktor(s);
-  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * MASSSTAB_REALISIERUNG * schwierigkeit(s).kaufneigung * premiumImageFaktor(h) * programmNachfrageFaktor(s);
+  return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s, h) * (1 + mieterBonus) * (1 + h.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen * zentrale * MASSSTAB_REALISIERUNG * schwierigkeit(s).kaufneigung * premiumImageFaktor(h) * programmNachfrageFaktor(s) * szenarioFrequenz(s) * hausclusterFaktor(s, h) * itHausFaktor(s, h) * hausBetriebsFaktor(s, h) * umbauFrequenzFaktor(h);
 }
 
 export function saettigung(qm: number, Q: number): number {
@@ -125,12 +137,12 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
     const Q = h.saettigungQm[g] ?? 1;
     const qm = (qmEigen[g] ?? 0) + (qmKomm[g] ?? 0);
     const sf = saisonFaktor(g, w);
-    const b = P * saettigung(qm, Q) * sf * hf * normalpreis * lieferantenFaktor(s, h, g) * wettbewerbNachfrageFaktor(s, h, g);
+    const b = P * saettigung(qm, Q) * sf * hf * normalpreis * lieferantenFaktor(s, h, g) * wettbewerbNachfrageFaktor(s, h, g) * umbauNachfrageFaktor(s, h, g);
     bruttoBasis[g] = b;
     summeBasis += b;
     summeBedarf += (b / Math.max(0.05, sf)) * Math.sqrt(sf);
   }
-  const offBasis = qmOff * 20 * (1.6 - 0.6 * h.einzug.kaufkraft) * hf * saisonFaktor('damen', w) * wettbewerbOffpriceFaktor(s, h);
+  const offBasis = qmOff * 20 * (1.6 - 0.6 * h.einzug.kaufkraft) * hf * saisonFaktor('damen', w) * wettbewerbOffpriceFaktor(s, h) * umbauNachfrageFaktor(s, h, null);
   summeBasis += offBasis;
   summeBedarf += offBasis;
 
@@ -153,7 +165,8 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
   for (const g of alleGruppen) {
     const d = GRUPPEN[g];
     const qualitaet = besetzung * (1 - d.beratung * Math.max(0, ahQuote - 0.15) * 0.6);
-    basisJe[g] = (bruttoBasis[g] ?? 0) * qualitaet;
+    // O04: Kaufquote durch Beratungsbesetzung und Kassenschlangen; nach Warengruppe gewichtet.
+    basisJe[g] = (bruttoBasis[g] ?? 0) * qualitaet * personalVerkaufsFaktor(h, g) * personalVerfuegbarkeit(h);
     const qe = qmEigen[g] ?? 0;
     const qk = qmKomm[g] ?? 0;
     tEJe[g] = qe + qk > 0 ? qe / (qe + qk) : 0;
@@ -172,14 +185,15 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
     if (qe > 0) roh.eigen[g] = { brutto: brutto * tE, umsatz: umsatz * tE };
     if (qk > 0) roh.kommission[g] = umsatz * (1 - tE);
   }
-  roh.offprice = offBasis * besetzung;
+  roh.offprice = offBasis * besetzung * personalOffpriceFaktor(h) * personalVerfuegbarkeit(h);
 
   for (const [g, qm] of Object.entries(qmKonz) as [GruppeId, number][]) {
     const P = h.potenzial[g] ?? 0;
     const Q = h.saettigungQm[g] ?? 1;
     roh.konzessionUmsatz += P * saettigung(qm, Q) * saisonFaktor(g, w) * hf * lieferantenFaktor(s, h, g) * wettbewerbNachfrageFaktor(s, h, g);
   }
-  return roh;
+  // O02: Quellen wirken auf die Nachfrage, ohne das Bestandsmodell zu ersetzen.
+  return wirkeTreiber(h, roh);
 }
 
 export interface HausKosten {
@@ -214,8 +228,10 @@ export function personalEinsatz(h: Haus): { vollzeit: number; teilzeit: number; 
 export function lohnKosten(s: GameState, h: Haus): number {
   const p = personalEinsatz(h);
   const tarifF = s.tarif === 'sanierung' ? 0.93 : s.tarif === 'ohne' ? 0.89 : 1;
+  // O07: Differenz zum eingepreisten Startgehalt der Hausleitung als Personalaufwand.
+  const leitungDelta = h.betrieb && !s.hausbetriebAbnahmeAus ? ((h.personal.filialleiter.gehalt ?? h.betrieb.leitungGehaltStart) - h.betrieb.leitungGehaltStart) / 52 : 0;
   return ((p.vollzeit * PARAM.lohnVollzeit + p.teilzeit * PARAM.lohnTeilzeit) * tarifF
-    + p.aushilfen * PARAM.lohnAushilfe) * (1 - programmErsparnis(s, 'personal'));
+    + p.aushilfen * PARAM.lohnAushilfe) * (1 - programmErsparnis(s, 'personal')) + leitungDelta;
 }
 
 /** Einnahmen aus einem konkret belegten Werbeinventar und tatsächlich
@@ -249,7 +265,10 @@ export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGes
     : h.format === 'sport' ? 0.93
     : h.format === 'schwester' ? 0.94 : 1;
   // Personal und Miete stammen aus dem tatsächlichen Personalbestand/Mietvertrag.
-  k.personal = guv.personal = lohnKosten(s, h);
+  k.personal = lohnKosten(s, h) + personalZusatzkosten(h);
+  // O07: genehmigter Verkaufs-Sonntag benötigt zusätzliche Besetzung.
+  if (!s.hausbetriebAbnahmeAus && s.hausbetrieb?.staedte[h.stadt]?.sonntage.includes(s.woche)) k.personal *= 1.18;
+  guv.personal = k.personal;
   k.miete = guv.miete = h.miete.mieteWoche * (1 - programmErsparnis(s, 'miete'));
   let qmNk = 0;
   let qmBetrieb = 0;
@@ -279,9 +298,18 @@ export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGes
   // Der bisherige zusätzliche Premium-Serviceaufschlag erfasste sie doppelt.
   guv.uebrigeAufwendungen = umsatzGesamt * 0.004
     * (1 - programmErsparnis(s, 'uebrigeAufwendungen'));
-  k.sonstige = guv.fremdkraefte + guv.unterhalt + guv.zahlungsverkehr
-    + guv.facilityManagement + guv.energie + guv.it + guv.administration
-    + guv.uebrigeAufwendungen;
+  {
+    // O07 Haus: Betriebsführung (Leitung, Services, Energiepreis, Modernisierung)
+    // skaliert die Betriebskostenzeilen; im neutralen Standard Faktor 1.
+    const zeilen = ['fremdkraefte', 'unterhalt', 'zahlungsverkehr', 'facilityManagement', 'energie', 'it', 'administration', 'uebrigeAufwendungen'] as const;
+    const basis = zeilen.reduce((sum, z) => sum + guv[z], 0);
+    const betrieb = hausBetriebskosten(s, h, basis);
+    const skala = basis > 0 ? betrieb / basis : 1;
+    for (const z of zeilen) guv[z] *= skala;
+    // O04 Personal: Fehlplanungskosten als übrige Aufwendungen.
+    guv.uebrigeAufwendungen += personalFehlerkosten(h);
+    k.sonstige = zeilen.reduce((sum, z) => sum + guv[z], 0);
+  }
   return k;
 }
 

@@ -7,7 +7,9 @@
 //
 // bauer: { stadthaus(S, scene, p), eck(...), 'slot:warenhaus'(...), 'slot:kirche'(...), ... } → { hoehe }
 // Fehlt ein Eintrag, greift: exakter Typ → 'slot' (für slot:*) → stadthaus → Platzhalter.
-import { THREE, rng, waehle, zw, FARBEN, mat, heller, dunkler, fensterRaster, gesims, markise, dachProfil, marker, textTextur, schild, baum, LOD } from './basis.js';
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
+import { THREE, rng, mische, waehle, zw, FARBEN, mat, heller, dunkler, fensterRaster, gesims, markise, dachProfil, marker, textTextur, schild, baum, LOD } from './basis.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { bergHoehe, gelaende, rebzeilen } from './gelaende.js';
 
@@ -87,12 +89,17 @@ export class Instanzer {
   bauen(scene) {
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), achse = new THREE.Vector3(0, 1, 0), col = new THREE.Color();
     let calls = 0;
-    for (const p of this.protos.values()) {
+    for (const [art, p] of this.protos) {
       if (!p.inst.length) continue;
       for (const t of p.teile) {
         const variabel = t.k[0] === '§';
         const slot = variabel ? +t.k.slice(1) : -1;
         const im = new THREE.InstancedMesh(t.geo, variabel ? weiss() : mat(t.k), p.inst.length);
+        // N06: Nur Metadaten für den Wechsel von Laub und Kleidung; keine zusätzliche Geometrie.
+        if (['linde', 'kastanie', 'platane', 'birke', 'pappel', 'kugel'].includes(art) || art.startsWith('figur')) {
+          im.userData.jahreszeitArt = art;
+          im.userData.jahreszeitSlot = slot;
+        }
         p.inst.forEach(([x, y, z, ry, s, f], i) => {
           q.setFromAxisAngle(achse, ry); v.set(x, y, z);
           if (Array.isArray(s)) sc.set(s[0], s[1], s[2]); else sc.set(s, s, s);
@@ -285,7 +292,7 @@ export const richtung = (dx, dz) => Math.atan2(-dz, dx);
  */
 export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
   const I = o.instanzer ?? new Instanzer();
-  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr };
+  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr, keineStandAutos: !!o.keineStandAutos };
   ostVerkehr = !!plan.ddr;
   for (const p of plan.parzellen) { if (!ctx.proBlock.has(p.block)) ctx.proBlock.set(p.block, []); ctx.proBlock.get(p.block).push(p); }
   const t0 = S.anzahl;
@@ -325,6 +332,60 @@ export function baueStadt(S, scene, plan, bauer = platzhalterBauer, o = {}) {
     hoehen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: I.n, drawCallsInstanzen: calls,
   };
 }
+
+// In Etappen aufgebaute Szene für ICE-Reise. Sonstige Aufrufer nutzen unverändert baueStadt().
+export async function baueStadtGestuft(S, scene, plan, bauer = platzhalterBauer, o = {}) {
+  // Maximal rund 9 ms JS-Arbeit am Stück: Übergang bleibt auch beim Stadtaufbau animiert.
+  let letzterFrame = performance.now();
+  const bildFreigeben = async () => {
+    if (performance.now() - letzterFrame >= 9) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      letzterFrame = performance.now();
+    }
+  };
+  const I = o.instanzer ?? new Instanzer();
+  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr };
+  ostVerkehr = !!plan.ddr;
+  for (const p of plan.parzellen) { if (!ctx.proBlock.has(p.block)) ctx.proBlock.set(p.block, []); ctx.proBlock.get(p.block).push(p); }
+  const t0 = S.anzahl;
+  for (const s of plan.strassen) { (s.bruecke ? baueBruecke : baueSegment)(ctx, s); await bildFreigeben(); }
+  for (const k of plan.kreuzungen) { baueKreuzung(ctx, k); await bildFreigeben(); }
+  for (const b of plan.bloecke) { baueBlock(ctx, b); await bildFreigeben(); }
+  // Stadtrandgürtel (plan.aussen, stadtrand.js): Wasser der Karte und des Gürtels gemeinsam, damit Ufer und Kaimauern
+  // über die Kartenkante durchlaufen. o.aussenring === 0 schaltet den Gürtel ab (Kataloge mit Einzelausschnitten).
+  const ring = plan.aussen && o.aussenring !== 0;
+  baueWasserAlle(ctx, [...plan.bloecke.filter((b) => b.art === 'wasser'), ...(ring ? plan.aussen.wasser : [])]);
+  if (ring) baueStadtrand(ctx);
+  else {
+    for (const u of plan.umland ?? []) baueUmland(ctx, u);
+    baueAussenring(ctx, o.aussenring ?? 420);
+  }
+  if (plan.diagonalen?.length || plan.zwickel?.length) baueDiagonalen(ctx);
+  const t1 = S.anzahl;
+  const hoehen = new Map();
+  let maxH = 20;
+  if (!o.ohneHaeuser) for (const p of plan.parzellen) {
+    const f = bauerFuer(bauer, p.typ);
+    const e = f(S, scene, p) ?? {};
+    // Slots mit eigenem Wasser (erg.wasser = [x0, z0, x1, z1]) je Block merken, für FLAECHEN[art].nachBau
+    if (e.wasser) { if (!ctx.slotWasser) ctx.slotWasser = new Map(); if (!ctx.slotWasser.has(p.block)) ctx.slotWasser.set(p.block, []); ctx.slotWasser.get(p.block).push(e.wasser); }
+    const h = e.hoehe ?? 12;
+    hoehen.set(p.id, h);
+    maxH = Math.max(maxH, h);
+    await bildFreigeben();
+  }
+  // Bauten im Stadtrandgürtel (Burg am Berg, plan.aussen.bauten)
+  if (plan.aussen && o.aussenring !== 0 && !o.ohneHaeuser) for (const q of plan.aussen.bauten ?? []) { const e = bauerFuer(bauer, q.typ)(S, scene, q) ?? {}; hoehen.set(q.id, e.hoehe ?? 12); await bildFreigeben(); }
+  // Flächen, die ihren Boden erst nach den Slots bauen (Aussparungen unter abgesenktem Slot-Wasser)
+  for (const b of plan.bloecke) { FLAECHEN[b.art]?.nachBau?.(ctx, b, ctx.slotWasser?.get(b.id) ?? [], BODEN_HILFE); await bildFreigeben(); }
+  ostVerkehr = false;
+  const calls = o.instanzer ? 0 : I.bauen(scene);
+  return {
+    box: new THREE.Box3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(plan.breite, maxH, plan.tiefe)),
+    hoehen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: I.n, drawCallsInstanzen: calls,
+  };
+}
+
 
 export function bauerFuer(bauer, typ) {
   // Rückwärtskompatibel: Rathaus und Hochhaus hießen früher slot:sonder (mit p.sonder)
@@ -445,7 +506,7 @@ function baueSegment(ctx, s) {
     }
   }
   // --- Verkehr ---
-  verkehrAufSegment(ctx, s, R, s.von + 7, s.bis - 7, 0);
+  if (!ctx.keineStandAutos) verkehrAufSegment(ctx, s, R, s.von + 7, s.bis - 7, 0);
   // Bushaltestelle an Hauptstraßen
   if (s.typ === 'haupt' && L > 50 && r() < 0.45) {
     const sg = r() < 0.5 ? -1 : 1;
@@ -598,7 +659,7 @@ function baueKreuzung(ctx, k) {
     const rx = k.bx / 2 - 5, rz = k.bz / 2 - 5;
     for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { baumSetzen(I, 'platane', k.x + sx * rx, 0.29, k.z + sz * rz, r, 1.0, true); I.setze('bank', k.x + sx * (rx - 3.2), 0.29, k.z + sz * rz, 0); }
     for (const [dx, dz, ry] of [[-7.5, 0, Math.PI / 2], [7.5, 0, -Math.PI / 2], [0, 7.5, Math.PI], [0, -7.5, 0]]) I.setze('bank', k.x + dx, 0.29, k.z + dz, ry);
-    for (let i = 0; i < (k.bx * k.bz) / 30 * ctx.dichte; i++) { const x = k.x + zw(r, -k.bx / 2 + 1, k.bx / 2 - 1), z = k.z + zw(r, -k.bz / 2 + 1, k.bz / 2 - 1); if (Math.hypot(x - k.x, z - k.z) > 6) figur(I, x, 0.29, z, r); }
+    for (let i = 0; i < (k.bx * k.bz) / 30 * ctx.dichte; i++) { const x = k.x + zw(r, -k.bx / 2 + 1, k.bx / 2 - 1), z = k.z + zw(r, -k.bz / 2 + 1, k.bz / 2 - 1); if (wurzelSumme(x - k.x, z - k.z) > 6) figur(I, x, 0.29, z, r); }
     return;
   }
   // Gleise und Fahrdraht durch die Kreuzung
@@ -643,7 +704,7 @@ function baueKreuzung(ctx, k) {
     if (k.arme[sz > 0 ? '+z' : '-z'] && k.arme[sx > 0 ? '+x' : '-x']) I.setze('litfass', k.x + sx * (k.bx / 2 + 1.0), YG, k.z + sz * (k.bz / 2 + 1.0), 0, 1, [waehle(r, OBERTEIL), waehle(r, OBERTEIL), waehle(r, OBERTEIL)]);
   }
   // ein paar Autos auf der Kreuzung (abbiegend)
-  if (!k.gepflastert && r() < 0.35 * ctx.dichte && az && ax) auto(I, k.x + zw(r, -2, 2), 0, k.z + zw(r, -2, 2), r() * Math.PI * 2, r);
+  if (!ctx.keineStandAutos && !k.gepflastert && r() < 0.35 * ctx.dichte && az && ax) auto(I, k.x + zw(r, -2, 2), 0, k.z + zw(r, -2, 2), r() * Math.PI * 2, r);
 }
 
 // ---- Diagonale Straßen (plan.diagonalen) und Zwickel (plan.zwickel), siehe stadtplan.js diagonaleSchneiden ----
@@ -890,7 +951,7 @@ function platzRand(ctx, b, P, y, r, art = 'linde', abstand = 9) {
 function baumraster(ctx, P, y, r, hinder, cx, cz, frei0 = 9, ab = 8) {
   if (P.w * P.d < 1200) return;
   for (let x = P.x + 5; x < P.x + P.w - 4; x += ab) for (let z = P.z + 5; z < P.z + P.d - 4; z += ab) {
-    if (Math.hypot(x - cx, z - cz) < frei0 || hinder.some((p) => imRechteck(x, z, p, 3.5))) continue;
+    if (wurzelSumme(x - cx, z - cz) < frei0 || hinder.some((p) => imRechteck(x, z, p, 3.5))) continue;
     baumSetzen(ctx.I, 'kugel', x, y, z, r, 0.75, true);
   }
 }
@@ -903,7 +964,7 @@ function baueMarkt(ctx, b, r, hinder) {
   const cx = P.x + P.w * 0.5, cz = P.z + P.d * 0.5;
   const denkmalMitte = hinder.some((p) => imRechteck(cx, cz, p, 6));
   if (!denkmalMitte) brunnen(S, cx, cz, y, P.w < 40 ? 0.8 : 1);
-  const frei = (x, z, rad) => !hinder.some((p) => imRechteck(x, z, p, rad)) && Math.hypot(x - cx, z - cz) > 7;
+  const frei = (x, z, rad) => !hinder.some((p) => imRechteck(x, z, p, rad)) && wurzelSumme(x - cx, z - cz) > 7;
   // Marktstände: Reihen quer zur längeren Seite
   const quer = P.w >= P.d;
   const lang = quer ? P.w : P.d, kurz = quer ? P.d : P.w;
@@ -922,7 +983,7 @@ function baueMarkt(ctx, b, r, hinder) {
   const n = Math.round((P.w * P.d) / 60 * ctx.dichte);
   for (let i = 0; i < n; i++) {
     const x = zw(r, P.x + 1, P.x + P.w - 1), z = zw(r, P.z + 1, P.z + P.d - 1);
-    if (!denkmalMitte && Math.hypot(x - cx, z - cz) < 4.6) continue;
+    if (!denkmalMitte && wurzelSumme(x - cx, z - cz) < 4.6) continue;
     if (hinder.some((p) => imRechteck(x, z, p, 0.4))) continue;
     figur(I, x, y, z, r);
   }
@@ -1434,7 +1495,7 @@ function bauePark(ctx, b, r, hinder = []) {
   // Diagonalwege und Mittelrondell
   const diagonalen = [[x0, z0], [x1, z0], [x0, z1], [x1, z1]];
   for (const [ex, ez] of diagonalen) {
-    const len = Math.hypot(cx - ex, cz - ez) - 3;
+    const len = wurzelSumme(cx - ex, cz - ez) - 3;
     S.box(len, 0.05, 3, (ex + cx) / 2, y + 0.025, (ez + cz) / 2, F.weg, Math.atan2(-(cz - ez), cx - ex));
   }
   ellipse(S, cx, cz, 7, 7, y, y + 0.06, F.weg);
@@ -1458,9 +1519,9 @@ function bauePark(ctx, b, r, hinder = []) {
     for (const [ex, ez] of diagonalen) {
       const dx = cx - ex, dz = cz - ez, l2 = dx * dx + dz * dz;
       const t = klemm(((x - ex) * dx + (z - ez) * dz) / l2, 0, 1);
-      if (Math.hypot(x - ex - t * dx, z - ez - t * dz) < 3.2) return true;
+      if (wurzelSumme(x - ex - t * dx, z - ez - t * dz) < 3.2) return true;
     }
-    if (Math.hypot(x - cx, z - cz) < 9) return true;
+    if (wurzelSumme(x - cx, z - cz) < 9) return true;
     if (((x - tx) / (trx + 3)) ** 2 + ((z - tz) / (trz + 3)) ** 2 < 1) return true;
     if (Math.abs(x - sx) < 7 && Math.abs(z - sz) < 6) return true;
     if (hinder.some((p) => imRechteck(x, z, p, 3))) return true;
@@ -1560,7 +1621,7 @@ function baueBahn(ctx, b, r) {
   if (gleisZ.length) for (let x = xa + 10; x < xb - 5; x += 45) I.setze('olmastSeite', x, y, gleisZ[0] - 2.4, 0, [1, 1, Math.max(1, (gleisZ[gleisZ.length - 1] - gleisZ[0] + 4) / 6)]);
   // Züge
   const zuege = Math.min(gleisZ.length, 2 + (r() < 0.5 ? 1 : 0));
-  const frei = [...gleisZ].sort(() => r() - 0.5).slice(0, zuege);
+  const frei = mische(r, gleisZ).slice(0, zuege);
   for (const gz of frei) {
     const wagen = Math.floor(zw(r, 3, 6.9));
     const [ga, gb] = abschnitte(gz).sort((p, q) => q[1] - q[0] - (p[1] - p[0]))[0] ?? [xa, xb];

@@ -13,10 +13,12 @@
 // Wasser: Kanalzellen (Fläche west_kanal) tragen slot:ruhr_kanal mit eigenem Wasser, ohne Bodenplatte darunter (FLAECHEN.ohneGehweg).
 // Rhein und Wupper sind Wasserflächen des Plans; Promenade, Hafen und Schwebebahn liegen als Parzellen darin (nachPlan),
 // Wasserspiegel gleich stadt.js (−2,2), Wasserseite zur Kamera (Front −z → Wasser an +z).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { registriereArchetyp, PLAN_HILFE as H } from '../stadtplan.js';
 import { registriereSlots, registriereStilProfil } from '../bauer.js';
 import { WEST_SLOTS, fahrrad } from '../westbauten.js';
-import { rng, waehle, zw } from '../basis.js';
+import { rng, mische, waehle, zw } from '../basis.js';
 import { SLOTS } from '../sonderbauten.js';
 
 const { nimm, fixiere, zelleFrei, klemm, wahlGewichtet, neueParzelle, mergeRand, parzellenVon, freiePosition, intervalleMinus, LINIEN, HAUPTLICH } = H;
@@ -186,7 +188,7 @@ function ruhrstadt(E) {
   E.zentrum = { i: ci, j: cj };
   const nKonzern = o.konzern ?? (klein ? 0 : 1);
   // Lage je Stadt aus dem Seed (keine Kopie von Stadt zu Stadt)
-  const konzernZellen = [[ci - 1, cj - 1], [ci + 2, cj], [ci - 1, cj + 2], [ci + 2, cj - 1], [ci + 1, cj + 2]].sort(() => r() - 0.5);
+  const konzernZellen = mische(r, [[ci - 1, cj - 1], [ci + 2, cj], [ci - 1, cj + 2], [ci + 2, cj - 1], [ci + 1, cj + 2]]);
   // Konzernverwaltung eingebettet: Slot an der Straßenseite eines normalen Blocks, übrige Seiten Blockrand (nachbearbeitung)
   E.ruhrKonzern = [];
   for (let k = 0, n = 0; k < konzernZellen.length && n < nKonzern; k++) {
@@ -198,7 +200,7 @@ function ruhrstadt(E) {
   }
   // Hauptkirche: Stil aus staedte.js (je Stadt anders als bei den Nachbarn), Lage je Stadt aus dem Seed
   const ksZufall = waehle(r, ['romanisch', 'hallenkirche']);
-  if (!o.kern60) for (const [qi, qj] of [[ci + 2, cj + 1], [ci - 1, cj + 1], [ci + 1, cj - 1], [ci - 1, cj + 2]].sort(() => r() - 0.5)) if (istFrei(E, qi, qi, qj, qj)) { nimm(E, { art: 'kirche', i0: qi, i1: qi, j0: qj, j1: qj, seiten: ['-z', '-x', '+x'], kirchStil: o.kirchStil ?? ksZufall }); E.landmarken.push('slot:kirche'); break; }
+  if (!o.kern60) for (const [qi, qj] of mische(r, [[ci + 2, cj + 1], [ci - 1, cj + 1], [ci + 1, cj - 1], [ci - 1, cj + 2]])) if (istFrei(E, qi, qi, qj, qj)) { nimm(E, { art: 'kirche', i0: qi, i1: qi, j0: qj, j1: qj, seiten: ['-z', '-x', '+x'], kirchStil: o.kirchStil ?? ksZufall }); E.landmarken.push('slot:kirche'); break; }
   // Polyzentrisch: Stadtteilzentrum mit Platz und Kirche der 50er, weit außerhalb des Nahausschnitts
   const nb = { i: 0, j: Math.min(nz - 2, cj + 2) };
   if (!klein && istFrei(E, nb.i, nb.i, nb.j, nb.j)) {
@@ -210,10 +212,10 @@ function ruhrstadt(E) {
   E.versatz = () => 0;
   const zc = { i: ci + 0.5, j: cj + 0.5 };
   E.viertel = (ii, jj) => {
-    const dd = Math.hypot(ii - zc.i, (jj - zc.j) * 1.1);
+    const dd = wurzelSumme(ii - zc.i, (jj - zc.j) * 1.1);
     if (o.altstadtRest && dd < 0.9) return 'altstadt';
     if (dd < (o.kern60 ? 2.4 : 1.7)) return 'ruhr60';
-    if (!klein && Math.hypot(ii - nb.i - 0.5, jj - nb.j) < 1.4) return 'stadtteil';
+    if (!klein && wurzelSumme(ii - nb.i - 0.5, jj - nb.j) < 1.4) return 'stadtteil';
     if (o.kern60) return 'nachkrieg';
     return dd < 3.1 ? 'gruenderzeit' : 'nachkrieg';
   };
@@ -308,7 +310,7 @@ function rheinmetropole(E) {
   E.viertel = (i, j) => {
     if (jR !== null && j > jR) return 'rheingruender';
     if (alt(i, j)) return 'rheinalt';
-    const dd = Math.hypot(i - zc.i, j - zc.j);
+    const dd = wurzelSumme(i - zc.i, j - zc.j);
     if (dd < (o.fuenfziger ? 2.2 : 1.4)) return o.fuenfziger ? 'rhein50' : 'zentrum';
     return dd < (metro ? 3.4 : 3.0) ? 'rheingruender' : 'nachkrieg';
   };
@@ -399,7 +401,7 @@ function bergisch(E) {
   E.durchgang = 0.3;
   const zc = E.zentrum;
   E.viertel = (i, j) => {
-    const dd = Math.hypot(i - zc.i, (j - zc.j) * 1.3);
+    const dd = wurzelSumme(i - zc.i, (j - zc.j) * 1.3);
     if (dd < 1.4) return 'bergkern';
     if (Math.abs(j - jW) <= 1) return 'bergtal';
     return 'berghang';

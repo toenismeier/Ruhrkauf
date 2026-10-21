@@ -11,7 +11,11 @@ const FARBEN = 'weiß, creme, sand, beige, camel, cognac, braun, grau, anthrazit
 describe('Produktentwicklung', () => {
   test('Katalog genau wie mit der Grafik abgestimmt', () => {
     const k = produktKatalog(neuesSpiel(1));
-    expect(k.typen.map((t) => t.typ)).toEqual(TYPEN);
+    // Grundkatalog unverändert vorne, Q05 ergänzt 96 Varianten (mindestens 12 je Kategorie).
+    const typen = k.typen.map((t) => t.typ);
+    expect(typen.slice(0, TYPEN.length)).toEqual(TYPEN);
+    expect(new Set(typen).size).toBe(typen.length);
+    expect(typen.length).toBeGreaterThanOrEqual(TYPEN.length + 96);
     expect(k.farben.map((f) => f.name)).toEqual(FARBEN);
     expect(k.materialien.map((m) => m.name).sort()).toEqual(['Baumwolle', 'Bio-Baumwolle', 'Denim', 'Kaschmir', 'Leder', 'Leinen', 'Merino', 'Polyester', 'Seide', 'Viskose']);
     expect(k.dauer).toEqual([4, 8, 12, 24, 48]);

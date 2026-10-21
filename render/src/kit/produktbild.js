@@ -443,9 +443,32 @@ function paket(K) {
   K.strich('M35 32 L65 44 L65 58', '#f1ebdc', 2.4);
 }
 
+/** Für Schnittvarianten wird die entsprechende Grundsilhouette eingesetzt.
+ * Die Artikelnamen, Materialien, Farben und Preise bleiben eigenständig. */
+const bildVorlage = (t) => {
+  if (TYPEN[t]) return t;
+  if (/Kleid|Tüllrock|Plisseerock|Bleistiftrock/.test(t)) return /rock/i.test(t) ? 'Rock' : 'Kleid';
+  if (/Jeans|Leggings|Hose|Culotte|Bermuda|Shorts/.test(t)) return /Jeans/.test(t) ? 'Jeans' : 'Chino';
+  if (/Hemd|Bluse|Tunika/.test(t)) return /Hemd/.test(t) ? 'Hemd' : 'Bluse';
+  if (/Jacke|Mantel|Trenchcoat|Regenjacke|Blazer|Sakko/.test(t)) return /Blazer|Sakko/.test(t) ? 'Blazer' : 'Steppjacke';
+  if (/Pullover|Cardigan|Sweatshirt|Rollkragen/.test(t)) return 'Strickjacke';
+  if (/Shirt|Polo/.test(t)) return 'T-Shirt';
+  if (/Schuh|Boot|Stiefel|Loafer|Ballerina|Sandale|Slipper|Espadrille|Sneaker/.test(t)) return 'Sneaker';
+  if (/Tasche|Rucksack|Shopper|Clutch|Weekender|Portemonnaie|Kartenetui/.test(t)) return 'Handtasche';
+  if (/Handschuh|Krawatte|Tuch|Hut/.test(t)) return 'Schal';
+  if (/Bett|Decke|Laken|Kopfkissen|Tischdecke/.test(t)) return 'Bettwäsche';
+  if (/Tuch|Serviette|Vorleger|Lappen|Schürze|Tischläufer|Tischset/.test(t)) return 'Handtuch';
+  if (/Schale|Schüssel|Becher|Dose|Topf/.test(t)) return 'Tasse';
+  if (/Korb|Tablett|Kerzenhalter/.test(t)) return 'Vase';
+  if (/Lippen|Mascara|Concealer|Rouge|Lidschatten|Nagellack/.test(t)) return 'Lippenstift';
+  if (/Creme|Serum|Gel|Lotion/.test(t)) return 'Creme';
+  if (/Parfum|Toilette/.test(t)) return 'Parfum';
+  return 'T-Shirt';
+};
+
 // ─────────────────────────────────────────── Öffentliche Funktionen
 export function produktbildSVG(artikeltyp, farbe, material, groesse = 160, opt = {}) {
-  const typ = TYPEN[artikeltyp] ? artikeltyp : null;
+  const typ = bildVorlage(artikeltyp);
   const c = produktFarbe(farbe) ?? produktFarbe(STANDARD_FARBE[typ]) ?? '#b8864e';
   const mat = material ?? STANDARD_MATERIAL[typ] ?? 'Baumwolle';
   const K = kontext(c, mat, typ);

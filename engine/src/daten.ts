@@ -317,6 +317,21 @@ export const PREMIUM_HAEUSER = [
   { id: 'P004', schluessel: 'P004', rang: 3, name: 'Hartwig Königsallee', stadt: 'Düsseldorf' },
 ] as const;
 
+// Geografische Vertriebsregion ist die feste Eigenschaft der Stadt, nicht der
+// dynamisch erzeugte Hauscluster (z. B. „Lausitz“ oder „Unterweser“).
+export const STADT_REGIONEN: Readonly<Record<string, Region>> =
+  Object.freeze(Object.fromEntries(STAEDTE.map(([name, region]) => [name, region])) as Record<string, Region>);
+export function stadtRegion(name: string): Region | undefined { return STADT_REGIONEN[name]; }
+
+// O01 Organisation: Namen nach geografischen Teilräumen je Region.
+export const HAUSCLUSTER_NAMEN: Record<Region, string[]> = {
+  Nord: ['Elbe West','Unterweser','Ostholstein','Nordseeküste','Hannover Nord','Weserbergland','Schleswig'],
+  Ost: ['Berlin & Umland','Sachsen Nord','Lausitz','Thüringen Ost','Sachsen-Anhalt','Ostseeküste'],
+  West: ['Ruhr West','Ruhr Ost','Rheinland Süd','Niederrhein','Westfalen Nord','Bergisches Land','Rhein-Wupper'],
+  Mitte: ['Rhein-Main','Nordhessen','Mittelhessen','Pfalz','Mainfranken','Taunus'],
+  Süd: ['Oberbayern','Schwaben','Neckarraum','Oberfranken','Südbaden','Donau','Allgäu'],
+};
+
 export const STANDORT_ZUSATZ: Record<Lage, string[]> = {
   '1a': ['Marktplatz', 'Hauptstraße', 'Innenstadt', 'Am Markt', 'Königstraße', 'Altstadt'],
   b: ['Bahnhofstraße', 'Am Wall', 'Neustadt', 'Ring', 'Lindenstraße'],
@@ -326,6 +341,15 @@ export const STANDORT_ZUSATZ: Record<Lage, string[]> = {
 
 export const VORNAMEN = ['Sabine', 'Thomas', 'Petra', 'Michael', 'Andrea', 'Frank', 'Claudia', 'Jörg', 'Kerstin', 'Ralf', 'Nicole', 'Stefan', 'Anja', 'Markus', 'Birgit', 'Holger', 'Silke', 'Dirk', 'Heike', 'Uwe', 'Melanie', 'Jens', 'Tanja', 'Sven'];
 export const NACHNAMEN = ['Krämer', 'Weber', 'Schulte', 'Hoffmann', 'Brandt', 'Wagner', 'Kaiser', 'Lorenz', 'Peters', 'Böhm', 'Seidel', 'Fuchs', 'Graf', 'Vogel', 'Hartmann', 'Busch', 'Wolff', 'Engel', 'Lange', 'Möller'];
+
+/** Fiktive Käufer für den jährlichen Konzernverkauf ab Jahr vier. */
+export const KONZERN_KAEUFER: { typ: 'Finanzinvestor' | 'Handelskonzern' | 'Immobilienfonds'; name: string }[] = [
+  { typ: 'Finanzinvestor', name: 'Rheingold Beteiligungen' },
+  { typ: 'Handelskonzern', name: 'Nordstern Handelsholding' },
+  { typ: 'Immobilienfonds', name: 'Mosaik Immobilienfonds' },
+  { typ: 'Finanzinvestor', name: 'Südwest Kapitalpartner' },
+  { typ: 'Handelskonzern', name: 'Wesergrund Handelspartner' },
+];
 
 export const VERMIETER = ['Rheinkontor Immobilien', 'Nordwert Real Estate', 'Prisma Asset Management', 'Familie von Haller', 'Stadtwerk Grundbesitz', 'Atlas Retail Properties', 'Merian Fonds IV', 'Kontinental Immobilien KG'];
 
@@ -367,7 +391,11 @@ export const MIETER: MieterDef[] = [
   { typ: 'behoerde', namen: ['Bürgeramt', 'Stadtbibliothek', 'Volkshochschule'], etagen: [1, 2, 3], qm: [1500, 4000], mieteQmMonat: [8, 12], laufzeit: [10, 20], frequenzBonus: 0.03, umbauAnteil: 0.4 },
   { typ: 'gastro', namen: ['Markthalle Kost', 'Café Fräulein', 'Burgerwerk'], etagen: [0, 4, 5], qm: [300, 900], mieteQmMonat: [14, 25], laufzeit: [5, 10], frequenzBonus: 0.015, umbauAnteil: 0.5 },
   { typ: 'coworking', namen: ['Deskhaus', 'WorkLoft', 'Raum & Ruhe'], etagen: [3, 4, 5], qm: [800, 2000], mieteQmMonat: [9, 14], laufzeit: [5, 10], frequenzBonus: 0.005, umbauAnteil: 0.3 },
-  { typ: 'drogerie', namen: ['Rossberg Drogerie', 'dm-Nachbar', 'Pflegewelt'], etagen: [0, -1], qm: [600, 1200], mieteQmMonat: [14, 22], laufzeit: [10, 15], frequenzBonus: 0.04, umbauAnteil: 0.5 },
+  { typ: 'drogerie', namen: ['Rossberg Drogerie', 'Pflegewelt', 'Drogeriekontor'], etagen: [0, -1], qm: [600, 1200], mieteQmMonat: [14, 22], laufzeit: [10, 15], frequenzBonus: 0.04, umbauAnteil: 0.5 },
+  // O07 Haus: zusätzliche Frequenzbringer mit fiktiven Eigennamen.
+  { typ: 'baeckerei', namen: ['Backstube Mühlenfeld', 'Brot & Krumme', 'Kruste & Korn'], etagen: [0, -1], qm: [120, 350], mieteQmMonat: [15, 27], laufzeit: [5, 10], frequenzBonus: 0.017, umbauAnteil: 0.4 },
+  { typ: 'paketshop', namen: ['PaketKontor', 'Paketpunkt Markt', 'Paketstube'], etagen: [0, -1], qm: [100, 270], mieteQmMonat: [12, 19], laufzeit: [5, 10], frequenzBonus: 0.014, umbauAnteil: 0.5 },
+  { typ: 'bibliothek', namen: ['Stadtteilbibliothek', 'Lesekontor', 'Bücherraum'], etagen: [1, 2, 3], qm: [400, 1200], mieteQmMonat: [6, 11], laufzeit: [10, 20], frequenzBonus: 0.025, umbauAnteil: 0.3 },
 ];
 
 export interface BeraterDef {

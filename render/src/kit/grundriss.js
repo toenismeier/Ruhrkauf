@@ -15,6 +15,7 @@ import {
 import * as I from './innen.js';
 import { flaeche, fremdflaeche, abteilungsArt, ABT, schirmTisch, pflanzentrog } from './abteilung.js';
 import { sportEtage } from './sportgrundriss.js';
+import { farbeGeneration } from './moebel/generationen.js';
 import { NAME_SCHWESTER, FARBE_SCHWESTER } from './schwesterhaus.js';
 
 const R = RASTER;
@@ -212,8 +213,11 @@ export function etage(S, scene, haus, etageNr, o = {}) {
     gruppe.traverse((m) => { if (m.geometry) m.geometry.dispose(); });
   }
   // Branding im gemeinsamen Sortiment-Modul: Rot der Hartwig-Infrastruktur nur fuer Schwester umfaerben.
+  // O08 Umbau: gleiche Geometrie, Materialpalette gemäß Generation der Etage.
+  const moebelGeneration=haus.etagenBau?.[etageNr]?.moebelGeneration ?? 3;
   for (const [k, gs] of tmp.teile) {
-    const farbe = haus.kette === 'schwester' && ['#d23c32', '#c8102e'].includes(k) ? FARBE_SCHWESTER : k;
+    const farbeAlt = haus.kette === 'schwester' && ['#d23c32', '#c8102e'].includes(k) ? FARBE_SCHWESTER : k;
+    const farbe = farbeGeneration(farbeAlt,moebelGeneration);
     if (!S.teile.has(farbe)) S.teile.set(farbe, []);
     S.teile.get(farbe).push(...gs);
   }

@@ -21,6 +21,8 @@
 //   ABTEILUNGEN                     Name und Farbe je Abteilung (inkl. 'produkt' Produktentwicklung).
 //   hqEtage opt.vorstand            Vorstandsetage, siehe Ergänzung am Dateiende.
 // Slot-Bauer 'slot:hq' wird über registriereSlots (bauer.js) angemeldet: p.standort.hq = Gebäude bzw. Angebot.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, waehle, zw, FARBEN, heller, dunkler, gesims, dachProfil, schild, textMaterial } from './basis.js';
 import { lokal, vorbereiten, boden, rueckwand, stuetze, treppenhaus, aufzug, figur, wandschild, haengeschild, GLAS, puppe, PAL } from './innen.js';
 import { registriereSlots } from './bauer.js';
@@ -671,7 +673,7 @@ export function hqEinplanen(plan, hq, stadt) {
   const L = plan.einkaufslage, mx = L ? L.xF : plan.breite / 2, mz = L ? L.zF : plan.tiefe / 2;
   const benutzt = new Set();
   const frei = plan.bloecke.filter((b) => b.art === 'bebaut' && imBlock(b).length > 4 && imBlock(b).every((p) => ERSETZBAR.has(p.typ) && !p.standort && !p.leer));
-  const punkte = (b, W, D) => { if (benutzt.has(b.id) || b.w < W + 12 || b.d < D + 10) return Infinity; const dd = Math.hypot(b.x + b.w / 2 - mx, b.z + b.d / 2 - mz); return Math.abs(dd - 150) + r() * 60; };
+  const punkte = (b, W, D) => { if (benutzt.has(b.id) || b.w < W + 12 || b.d < D + 10) return Infinity; const dd = wurzelSumme(b.x + b.w / 2 - mx, b.z + b.d / 2 - mz); return Math.abs(dd - 150) + r() * 60; };
   // Gruppen: Gebäude gleicher Adresse zusammen, Angebote einzeln
   const gruppen = new Map();
   for (const g of hq.gebaeude ?? []) if (g.stadt === stadt) { const k = adresse(g); if (!gruppen.has(k)) gruppen.set(k, []); gruppen.get(k).push({ g, angebot: false }); }
@@ -917,7 +919,7 @@ function linie(L, lx, ly, lz, w, h, r, farbe = '#d23c32') {
   let y0 = ly + h * zw(r, 0.2, 0.5);
   const n = 5, s = w / n;
   for (let i = 0; i < n; i++) {
-    const y1 = ly + h * zw(r, 0.15, 0.95), dx = s, dy = y1 - y0, l = Math.hypot(dx, dy);
+    const y1 = ly + h * zw(r, 0.15, 0.95), dx = s, dy = y1 - y0, l = wurzelSumme(dx, dy);
     L.geo(new THREE.BoxGeometry(l, 0.04, 0.02).rotateZ(Math.atan2(dy, dx)), lx - w / 2 + s * (i + 0.5), (y0 + y1) / 2 - 0.02, lz, farbe);
     y0 = y1;
   }
@@ -1106,7 +1108,7 @@ const SPEZIAL = {
       for (const [a, b] of umriss) L.box(0.7, 0.55, 0.01, a, 1.7 + b * 0.8, 0.055, '#b5d1b9');
       const pkt = Array.from({ length: 14 }, () => [zw(r, -1.8, 1.8), zw(r, 0.9, 2.5)]);
       for (const [a, b] of pkt) L.box(0.08, 0.08, 0.01, a, b, 0.065, '#d23c32');
-      for (let k = 0; k < 6; k++) { const [a1, b1] = pkt[k], [a2, b2] = pkt[k + 6]; const l = Math.hypot(a2 - a1, b2 - b1); L.geo(new THREE.BoxGeometry(l, 0.025, 0.01).rotateZ(Math.atan2(b2 - b1, a2 - a1)), (a1 + a2) / 2, (b1 + b2) / 2, 0.06, '#e07b2a'); }
+      for (let k = 0; k < 6; k++) { const [a1, b1] = pkt[k], [a2, b2] = pkt[k + 6]; const l = wurzelSumme(a2 - a1, b2 - b1); L.geo(new THREE.BoxGeometry(l, 0.025, 0.01).rotateZ(Math.atan2(b2 - b1, a2 - a1)), (a1 + a2) / 2, (b1 + b2) / 2, 0.06, '#e07b2a'); }
       text(L, 'Leitstand Filialbelieferung', 0, 2.95, 0.07, 0.22, '#ffffff', '#e07b2a');
     } },
     { art: 'frei', w: 4.6, d: 2.6, bau(S, sc, x, z, w, d, st, r, farbe) {
@@ -1362,18 +1364,23 @@ export function hqEtage(S, scene, g, nr, opt = {}) {
     vorstandB = Math.max(Math.min(22, nutz), Math.min(26, nutz - abtB));
     x0 += vorstandB; nutz -= vorstandB;
   }
+  const archivStart = x0;
+  const archivBreite = miet && et.archiv ? Math.min(10, Math.max(5, 90 / T)) : 0;
+  x0 += archivBreite; nutz -= archivBreite;
   let breiten = abt.map((a) => (a.fte * 14) / T);
   const summe = breiten.reduce((a, b) => a + b, 0);
   if (summe > nutz) breiten = breiten.map((b) => (b * nutz) / summe);
   breiten = breiten.map((b) => Math.max(5, Math.round(b * 2) / 2));
   const zonen = [];
-  if (vorstandHier) zonen.push({ art: 'vorstand', x0: K + 0.3, x1: x0 });
+  if (vorstandHier) zonen.push({ art: 'vorstand', x0: K + 0.3, x1: archivStart });
+  if (archivBreite) zonen.push({ art: 'archiv', x0: archivStart, x1: x0 });
   let xa = x0;
   abt.forEach((a, i) => { const xb = i === abt.length - 1 && nutz - (xa - x0) - breiten[i] < 3 ? B : Math.min(B, xa + breiten[i]); zonen.push({ art: 'abt', a, x0: xa, x1: xb }); xa = xb; });
   if (B - xa >= 0.5) zonen.push({ art: miet ? 'leer' : 'frei', x0: xa, x1: B });
   for (const [k, Z] of zonen.entries()) {
     if (k > 0) trennwand(S, Z.x0, T);
     if (Z.art === 'vorstand') vorstandZone(S, scene, Z, T, G, r, figuren, vs.ressorts ?? []);
+    else if (Z.art === 'archiv') archivZone(S, scene, Z, T);
     else if (Z.art === 'abt') abteilungsZone(S, scene, Z, T, G, r, figuren, g);
     else if (Z.art === 'leer') leerZone(S, scene, Z, T, r);
     else rohZone(S, scene, Z, T, r);
@@ -1384,6 +1391,33 @@ export function hqEtage(S, scene, g, nr, opt = {}) {
   const zz = opt.zone && zonen.find((q) => (opt.zone === 'vorstand' ? q.art === 'vorstand' : q.art === 'abt' && (opt.zone === true || q.a.id === opt.zone)));
   if (zz) box = new THREE.Box3(new THREE.Vector3(zz.x0 - 1, -1.8, -0.6), new THREE.Vector3(zz.x1 + 0.4, WH, T + 0.4));
   return { box, anzahl: S.anzahl - n0, figuren: figuren.n, zonen: zonen.map((z) => ({ art: z.art, id: z.a?.id, breite: z.x1 - z.x0 })), breite: B, tiefe: T };
+}
+
+/** Eine kleine, reine Schauabteilung mit alten Schildern, Tüten und Aktenvitrinen. */
+function archivZone(S, scene, Z, T) {
+  const x = Z.x0, w = Z.x1 - Z.x0;
+  boden(S, x, 0, w, T, 0, '#9d8062', 1);
+  const X = x + w / 2;
+  if (scene) wandschild(S, scene, 'ARCHIV', 'z', X, 2.65, 0.35, { farbe: '#783b31', hoehe: 0.48 });
+  for (let i = 0; i < 3; i++) {
+    const z = 2.4 + i * Math.max(2.4, (T - 6) / 3);
+    // Regalwände mit Buchrücken, Akten und Kartons.
+    S.box(w - 1.5, 2.4, 0.42, X, 1.25, z, '#68472f');
+    for (let k = 0; k < 11; k++) {
+      const px = x + 1.1 + (k + 0.5) * (w - 2.2) / 11;
+      S.box((w - 2.2) / 14, 0.55 + (k % 3) * 0.14, 0.06, px, 0.68, z + 0.26, ['#a66d46', '#5b6575', '#c8b78b'][k % 3]);
+    }
+  }
+  // Glasvitrinen mit rot-weißen Tragetaschen und historischen Schriftzügen.
+  for (const z of [T * 0.38, T * 0.67]) {
+    const p = lokal(S, X, 0.07, z, 0);
+    p.box(Math.min(3.6, w - 1), 1.45, 1.25, 0, 0.74, 0, '#c5d5d8');
+    p.box(Math.min(3.8, w - 0.8), 0.12, 1.35, 0, 1.51, 0, '#765e45');
+    for (let k = -1; k <= 1; k++) {
+      p.box(0.58, 0.7, 0.18, k * 0.85, 0.75, 0.15, k ? '#f1e8d6' : '#b63d35');
+      p.box(0.4, 0.05, 0.03, k * 0.85, 1.05, 0.26, '#7d352f');
+    }
+  }
 }
 
 function trennwand(S, x, T) {

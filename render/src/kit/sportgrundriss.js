@@ -10,6 +10,8 @@
 //   6 Postmoderne 90er: Zylinderecke innen als Rundbühne.
 // Center-Häuser (lage 'center') liegen immer an der Mall-Passage, auch als Großfläche (Familie 3).
 // Abteilungen aus sportabteilung.js über flaeche() bzw. Regalgassen (gassen()).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, zw, waehle, Sammler, dunkler, heller, baum } from './basis.js';
 import {
   RASTER, WANDHOEHE, GLAS, vorbereiten, lokal, rueckwand, stuetze, rolltreppe, aufzug, treppenhaus, lager, haengeschild,
@@ -299,6 +301,7 @@ function bauen(S, scene, haus, e, ra, zn, k, plan = null) {
   const egFront = eg && [2, 3, 5, 6].includes(fam) && !ra.mall;
   if (plan) {
     baueLadenplan(S, scene, plan, { vorbereiten: false, dichte: d,
+      moebelGeneration: haus.etagenBau?.[etageNr]?.moebelGeneration ?? 3,
       ausschnitt: {x0:ax0,z0:az0,x1:ax1,z1:az1},
       bodenAussparungen: loecher.map(([x0,z0,x1,z1])=>({x:x0,z:z0,w:x1-x0,d:z1-z0})) });
     // Die vorhandene Leerflächenmessung und Kundenverteilung berücksichtigen die neuen Möbel.
@@ -608,8 +611,8 @@ function verbindung(S, scene, x, z, t, ra, d, r, frei) {
   const treppeLauf = (zz, y0, lauf, hoch, von) => {
     const nSt = d < 0.5 ? 10 : 18;
     for (let q = 0; q < nSt; q++) { const tt = (q + 0.5) / nSt; const hh = von + hoch * (q + 1) / nSt; S.box(lauf / nSt + 0.02, 0.18, 1.4, x + 9.2 - tt * lauf, y0 + hh - 0.09, zz, stufeF); }
-    const g = new THREE.BoxGeometry(Math.hypot(lauf, hoch), 0.35, 0.08); g.rotateZ(Math.atan2(hoch, lauf)); g.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.2, zz - 0.74); S.add(g, wangeF);
-    const g2 = new THREE.BoxGeometry(Math.hypot(lauf, hoch), 0.9, 0.04); g2.rotateZ(Math.atan2(hoch, lauf)); g2.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.8, zz + 0.74); S.add(g2, GLAS);
+    const g = new THREE.BoxGeometry(wurzelSumme(lauf, hoch), 0.35, 0.08); g.rotateZ(Math.atan2(hoch, lauf)); g.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.2, zz - 0.74); S.add(g, wangeF);
+    const g2 = new THREE.BoxGeometry(wurzelSumme(lauf, hoch), 0.9, 0.04); g2.rotateZ(Math.atan2(hoch, lauf)); g2.translate(x + 9.2 - lauf / 2, y0 + von + hoch / 2 + 0.8, zz + 0.74); S.add(g2, GLAS);
   };
   if (ab) {
     const tief = 1.8;

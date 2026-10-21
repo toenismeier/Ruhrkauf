@@ -353,3 +353,44 @@ export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet'
   melde(s, 'presse', 'Hartwig übernimmt den Standort ' + wb.name + ' in ' + wb.stadt + ' als ' + (modus === 'outlet' ? 'Outlet' : 'Erweiterungsfläche') + '.');
   return null;
 }
+
+
+/** N14: reproduzierbare Konkurrenzereignisse über denselben Mechanismus wie der Wochenlauf. */
+export function testWettbewerbEreignis(s: GameState, art: string): boolean {
+  const h = s.haeuser.find((x) => x.status === 'offen' && x.format === 'warenhaus');
+  if (!h) return false;
+  const w = s.wettbewerber.find((x) => x.stadt === h.stadt && x.status === 'offen' && x.art !== 'leer_ehemals')
+    ?? s.wettbewerber.find((x) => x.status === 'offen' && x.art !== 'leer_ehemals');
+  switch (art) {
+    case 'eroeffnung':
+      neuEroeffnet(s, h.stadt, 'modehaus');
+      return true;
+    case 'raeumung':
+      if (!w) return false;
+      raeumung(s, w);
+      return true;
+    case 'aktion':
+      if (!w) return false;
+      w.aktionVon = s.woche; w.aktionBis = s.woche + 3; w.preisdruck = 0.3;
+      melde(s, 'ereignis', 'Test: Rabattaktion von ' + w.name + ' in ' + w.stadt + '.');
+      return true;
+    case 'konter':
+      if (!w) return false;
+      w.konterVon = s.woche + 1; w.konterBis = s.woche + 4; w.konterDruck = 0.45;
+      melde(s, 'ereignis', 'Test: Konteraktion von ' + w.name + ' ab kommender Woche.');
+      return true;
+    case 'standortwechsel':
+      if (!w) return false;
+      w.lage = w.lage === '1a' ? 'center' : '1a';
+      w.status = 'eroeffnung'; w.seit = s.woche; w.bis = s.woche + 4;
+      melde(s, 'presse', 'Test: ' + w.name + ' verlegt den Standort in ' + w.stadt + '.');
+      return true;
+    case 'nachnutzung': {
+      const geschlossen = s.haeuser.find((x) => x.status === 'geschlossen');
+      if (!geschlossen) return false;
+      neuEroeffnet(s, geschlossen.stadt, 'offprice', geschlossen.id);
+      return true;
+    }
+    default: return false;
+  }
+}

@@ -1,9 +1,13 @@
+import { warenHaus } from './merchandise';
 import { GRUPPEN } from './daten';
+// O01 Organisation: reine Datenprojektion für die Oberfläche.
+export { organisationUebersicht } from './organisation';
 import { runwayWochen } from './stakeholder';
 import type { GameState, Haus } from './types';
 import { eur, jahr, kw } from './util';
 import { bestandWert, kvLimit, offeneWarenverbindlichkeiten } from './ware';
 import { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
+import { planungBericht, planWoche } from './planung';
 
 
 /** Reine, deterministische Projektion des Spielstands für den zentralen Posteingang. */
@@ -29,7 +33,7 @@ export interface PostHandeln {
   wert?: { betrag: number; einheit: string };
   dringend: boolean;
 }
-export type PostKategorie = 'Presse' | 'Häuser' | 'Finanzen' | 'Personal' | 'Konkurrenz' | 'Eigentümer';
+export type PostKategorie = 'Presse' | 'Häuser' | 'Finanzen' | 'Personal' | 'Konkurrenz' | 'Eigentümer' | 'IT';
 export interface PostMeldung {
   id: string;
   woche: number;
@@ -75,7 +79,7 @@ export function posteingang(s: GameState): Posteingang {
     const restWochen = Math.max(0, e.frist - s.woche);
     const option = e.optionen.find((o) => o.id === e.standard);
     const hausId = typeof e.daten.haus === 'string' ? e.daten.haus : undefined;
-    const modul = e.typ.startsWith('vorstand_') ? 'vorstand' : e.typ === 'jahresgespraech' || e.typ === 'nordline_dtc' ? 'einkauf' : undefined;
+    const modul = e.typ.startsWith('personal_') ? 'personal' : e.typ.startsWith('planung_') ? 'planung' : e.typ === 'organisation_vorlage' ? 'organisation' : e.typ.startsWith('vorstand_') ? 'vorstand' : e.typ.startsWith('it_') ? 'it' : e.typ === 'jahresgespraech' || e.typ === 'nordline_dtc' ? 'einkauf' : undefined;
     handeln.push({
       id: e.id, art: 'entscheidung', typ: e.typ, titel: e.titel, text: e.text,
       woche: e.woche, frist: e.frist, restWochen, optionen: e.optionen,
@@ -109,7 +113,7 @@ export function posteingang(s: GameState): Posteingang {
     const konkurrenz = s.wettbewerber.find((w) => m.text.includes(w.name));
     return {
       id: m.id ?? `alt-${m.woche}-${i}`, woche: m.woche, typ: m.typ, text: m.text,
-      kategorie: konkurrenz ? 'Konkurrenz' : meldungKategorie(m.typ, m.text),
+      kategorie: konkurrenz ? 'Konkurrenz' : m.bezug?.modul === 'it' ? 'IT' : meldungKategorie(m.typ, m.text),
       bezug: { ...bezug, ...(m.bezug?.stadt ? { stadt: m.bezug.stadt } : {}), ...(konkurrenz ? { stadt: konkurrenz.stadt, wettbewerberId: konkurrenz.id } : {}) },
     };
   });
@@ -125,6 +129,17 @@ export function posteingang(s: GameState): Posteingang {
     })),
   ].sort((a, b) => b.woche - a.woche || a.id.localeCompare(b.id));
   return { handeln, meldungen, erledigt };
+}
+
+/** Letzter tatsächlich verbuchter Wochenkapitalfluss, auch für ältere Spielstände lesbar. */
+export function kapitalfluss(s: GameState) {
+  const k = s.historie[s.historie.length - 1];
+  if (!k) return { woche: s.woche - 1, operativ: 0, investitionen: 0, finanzierung: 0, sonstiges: 0, netto: 0, bestand: s.cash };
+  if (k.kapitalfluss) return k.kapitalfluss;
+  // Alte Spielstände haben keinen Zahlungsarten-Nachweis. Nichts als operativ ausweisen, was nicht belegt ist.
+  const vorher = s.historie[s.historie.length - 2]?.cash ?? k.cash;
+  return { woche: k.woche, operativ: 0, investitionen: 0, finanzierung: 0,
+    sonstiges: k.cash - vorher, netto: k.cash - vorher, bestand: k.cash };
 }
 
 export interface Cockpit {
@@ -215,7 +230,7 @@ export function hausDetail(s: GameState, id: string) {
       umsatzQm: f.gruppe && h.kpi?.umsatzJeGruppe[f.gruppe] ? (h.kpi.umsatzJeGruppe[f.gruppe] ?? 0) / Math.max(1, h.flaechen.filter((x) => x.gruppe === f.gruppe).reduce((a, b) => a + b.qm, 0)) : 0,
     })),
   }));
-  return { haus: h, etagen, guv: h.kpi?.guv, programme: s.filialProgramme ?? {}, wettbewerber: wettbewerbUebersicht(s, h.stadt) };
+  return { haus: h, etagen, guv: h.kpi?.guv, programme: s.filialProgramme ?? {}, waren: warenHaus(s, h), wettbewerber: wettbewerbUebersicht(s, h.stadt) };
 }
 
 export function warenwirtschaft(s: GameState) {
@@ -236,6 +251,8 @@ export { hqUebersicht, hqFuerGrafik } from './hq';
 
 /** Einkauf: Übersicht nach Bereich und WG, WG-Detail, Freigabe-Eingang. */
 export { einkaufUebersicht, wgDetail, freigaben } from './einkauf';
+// O05 Ware
+export { warenUebersicht, warenHaus, fundusFrequenzFaktor } from './merchandise';
 /** Eigenmarken: Markenkarten, Shop-Anteile je Bereich, Vorschau für den Gründungsassistenten. */
 export { eigenmarkenUebersicht, eigenmarkeVorschau } from './eigenmarken';
 /** Vorstand: Ressortkarten, Profil, Kandidatenkarussell. */
@@ -248,5 +265,23 @@ export { marketingUebersicht, kanaele, kundenkarte, crmKampagnen, aktionskalende
 /** Wettbewerbsübersicht und Übergabeobjekte für das spätere Stadtbild. */
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 
+// O03 IT: Datenmodell und Systemlandkarte liegen ausschließlich in der Engine.
+export { itUebersicht, itDeckelGrund } from './it';
+
 /** Kronjuwelen mit Marktwert, Image und operativer Performance. */
 export { premiumUebersicht } from './premium';
+export { chronikUebersicht } from './chronik';
+
+// N01: Verlauf je Ebene, Vorjahr und Eigentümer-Quartalsplan.
+export { verlauf, type StatistikFilter, type StatistikReihe, type StatistikPunkt } from './statistik';
+
+// O02 Umsatztreiber: ausschließlich lesende Projektionen, keine Berechnung in der UI.
+export { hausTreiber, umsatzbruecke, ranking, reporting, setzeTreiber, treiberFaktor } from './treiber';
+// O06 Planung: Anzeigeabfragen ausschließlich aus der Engine.
+export { planungBericht, planWoche };
+// O07 Haus: Betriebssteckbrief, Mystery-Shopping-Rangliste, Beobachtung und Wochenkommentare.
+export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking, hausKandidaten, hausKundenscore } from './haus';
+// O08 Umbau
+export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN } from './umbau';
+// O04 Personal: Anzeigeprojektionen, keine Personalberechnung in der Oberfläche.
+export { personalHaus, personalUebersicht } from './personaleinsatz';

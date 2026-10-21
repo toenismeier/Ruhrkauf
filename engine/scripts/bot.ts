@@ -84,7 +84,8 @@ export function botSchutzschirm(s: GameState, log = false): void {
  * gerade KEINE "letzte Option", sondern führte zur Ablehnung in KW 24.
  */
 export function botTief(s: GameState, log = false): void {
-  botTurnaround(s, log);
+  if (s.szenario?.id === 'investor' || s.szenario?.id === 'aufbruch') botRegulaer(s, log);
+  else botTurnaround(s, log);
   const umsatzWoche = s.historie.at(-1)?.umsatz
     ?? Object.values(s.basisUmsatz).reduce((sum, u) => sum + (u ?? 0), 0);
   const ueberfaellig = s.verbindlichkeiten.some((v) => v.ueberfaelligSeit !== undefined);
@@ -103,12 +104,29 @@ export function botTief(s: GameState, log = false): void {
       && !s.haeuser.some((h) => h.status === 'schliessung_verhandlung' || h.status === 'raeumung');
     botTiefBasis(s, log, true, einkaufStandard, frisch ? s.woche : -1);
   }
+  if (s.szenario?.id === 'lockdown') {
+    for (const angebot of s.angebote.filter((a) => a.typ === 'staatshilfe' && a.status === 'offen')) {
+      fuehreAus(s, { typ: 'angebotAnnehmen', angebot: angebot.id });
+    }
+  }
+  if (s.szenario?.id === 'fusion' && s.woche % 20 === 3) {
+    const alt = new Set(s.szenario.fusionHausIds ?? []);
+    for (const h of s.haeuser.filter((h) => alt.has(h.id) && h.status === 'offen').slice(0, 5)) {
+      fuehreAus(s, { typ: 'schliessen', haus: h.id });
+    }
+  }
+  if (s.szenario?.id === 'investor' && s.woche % 52 === 1) {
+    const haus = s.haeuser.find((h) => h.status === 'offen' && h.miete.vermieter === 'eigentuemer');
+    if (haus) fuehreAus(s, { typ: 'immobilieVerkaufen', haus: haus.id });
+  }
 }
 
 export function botTiefBasis(s: GameState, log: boolean, zentralePauschal: boolean,
   einkauf: (s: GameState) => void = einkaufStandard, antragWoche = 3): void {
   const w = s.woche;
   const tu = (a: Parameters<typeof fuehreAus>[1]) => { const r = fuehreAus(s, a); if (log) console.log(`  W${w} ${r.ok ? '✓' : '✗'} ${r.text}`); return r; };
+  // Der Sanierungsbot beantwortet Presseinterviews sachlich, ohne anderen RNG-Verbrauch.
+  for (const e of s.entscheidungen.filter((x) => x.typ === 'interview')) tu({ typ: 'entscheiden', id: e.id, option: 'sachlich' });
   if (w === antragWoche) {
     tu({ typ: 'orderLevel', gruppe: 'alle', level: 0.88 });
     tu({ typ: 'marketingBudget', quote: 0.018 });

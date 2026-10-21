@@ -1,8 +1,9 @@
 name: Ruhrkauf Qualität
+# Nur bei PRs gegen main und von Hand. Kein Lauf bei jedem Push (spart Minuten und Benachrichtigungen).
 on:
-  push:
-    branches: [main, "feat/**"]
   pull_request:
+    branches: [main]
+    types: [opened, ready_for_review, reopened]
   workflow_dispatch:
 
 concurrency:
@@ -16,7 +17,7 @@ jobs:
   engine:
     name: Engine und TypeScript
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,7 +29,8 @@ jobs:
         working-directory: engine
       - run: npm run typecheck
         working-directory: engine
-      - run: npm test -- --runInBand --silent
+      # Mehrere Worker: die Langläufe (Bot über 260 Wochen) sprengen sonst das Zeitlimit.
+      - run: npm test -- --maxWorkers=4 --silent
         working-directory: engine
 
   moebel:
@@ -128,3 +130,24 @@ jobs:
             render/out/
             render/bilder/
           if-no-files-found: ignore
+
+  fingerabdruck:
+    name: Stadt-Fingerabdruck (112 Städte)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: render/package-lock.json
+      - run: npm ci
+        working-directory: render
+      - run: npx playwright install --with-deps chromium
+        working-directory: render
+      - name: Plan, Geometrie und Referenzbilder prüfen
+        run: npm run fingerabdruck:pruefen
+        working-directory: render
+        env:
+          FINGERABDRUCK_ZEITLIMIT_S: '1500'

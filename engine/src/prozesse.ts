@@ -168,7 +168,7 @@ export function prozesse(s: GameState): void {
 }
 
 export function eroeffneInsolvenz(s: GameState, grund: string): void {
-  if (s.phase !== 'regulaer') return;
+  if (s.phase !== 'regulaer' || s.szenario?.regeln.sandkasten) return;
   const w = s.woche;
   let alt = 0;
   for (const v of s.verbindlichkeiten) alt += v.wert;
@@ -296,6 +296,8 @@ export function quartalsBewertung(s: GameState): void {
       s.cash += kapital;
       s.einmalErloeseWoche += kapital;
       s.eigentuemer.kapitalZugefuehrt += kapital;
+      s.kapitalflussOffen ??= { investitionen: 0, finanzierung: 0 };
+      s.kapitalflussOffen.finanzierung += kapital;
       txt += ` Der Eigentümer schießt ${mio(kapital)} nach.`;
     }
     melde(s, 'eigentuemer', txt, { modul: 'vorstand' });

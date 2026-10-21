@@ -36,11 +36,11 @@ export function posteingangModul(ctx) {
   function meldungen(D) {
     const filter = ui.filter;
     const liste = D.meldungen.filter((m) => filter === 'Alle' || m.kategorie === filter);
-    const kategorien = ['Alle', 'Presse', 'Häuser', 'Finanzen', 'Personal', 'Konkurrenz', 'Eigentümer'];
+    const kategorien = ['Alle', 'Presse', 'Häuser', 'Finanzen', 'Personal', 'Konkurrenz', 'Eigentümer', 'IT'];
     let html = '<label class="postfilter">Kategorie <select class="ort gross" data-po-filter aria-label="Meldungen filtern">' + kategorien.map((k) => '<option ' + (k === filter ? 'selected ' : '') + 'value="' + esc(k) + '">' + esc(k) + '</option>').join('') + '</select></label><button class="postalle" data-po-a="alleLesen">Alle als gelesen markieren</button>';
     if (!liste.length) return html + leer('Keine Meldungen in dieser Kategorie.');
     const gelesen = new Set(einstellungen().gelesen ?? []);
-    const symbole = { Presse: '📰', Häuser: '🏬', Finanzen: '€', Personal: '👥', Konkurrenz: '↗', Eigentümer: '◆' };
+    const symbole = { Presse: '📰', Häuser: '🏬', Finanzen: '€', Personal: '👥', Konkurrenz: '↗', Eigentümer: '◆', IT: '⚙' };
     return html + liste.map((m) => {
       const bezug = m.bezug && (m.bezug.stadt || m.bezug.modul || m.bezug.hausIds?.length);
       const info = '<span class="postsymbol" aria-hidden="true">' + symbole[m.kategorie] + '</span><span class="postnachricht"><small>' + esc(m.kategorie) + ' · KW ' + kwVon(m.woche) + (gelesen.has(m.id) ? '' : ' · Neu') + '</small><span>' + esc(m.text) + '</span></span>';

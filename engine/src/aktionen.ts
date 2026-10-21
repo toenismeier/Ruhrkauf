@@ -19,10 +19,29 @@ import { MARKETING_AKTIONEN, aktionKompatibel, kundenkarteKompatibel, marketingA
 import { uebernehmeWettbewerber } from './wettbewerb';
 import { premiumInvestieren, premiumVerkaufen } from './premium';
 import { FILIAL_PROGRAMME, type FilialProgrammId } from './filialguv';
+import { chronikAktualisieren, chronikInitialisieren } from './chronik';
+import { hqArchivSetzen } from './hq';
+import { immobilieVerkaufen } from './szenarien';
+import { zeitungEinstellen } from './zeitung';
+import { spielBeenden } from './spielende';
+// O05 Ware
+import { WARE_AKTIONEN, wareAktion, type WareAktion } from './merchandise';
+// O01 Organisation
+import { ORGANISATION_AKTIONEN, organisationAktion, type OrganisationAktion } from './organisation';
+// O03 IT
+import { IT_AKTIONEN, itAktion, type ItAktion } from './it';
+import { PLANUNG_AKTIONEN, planungAktion, type PlanungAktion } from './planung';
+// O07 Haus
+import { HAUS_AKTIONEN, hausAktion, type HausAktion } from './haus';
+import { UMBAU_AKTIONEN, umbauAktion, type UmbauAktion } from './umbau';
+// O04 Personal
+import { PERSONAL_AKTIONEN, personalAktion, type PersonalAktion } from './personaleinsatz';
+import { testAktion, type TestAktion } from './testwerkzeuge';
 
 export type SpielerAktion =
   | { typ: 'filialProgramm'; programm: FilialProgrammId }
   | { typ: 'schliessen'; haus: string }
+  | { typ: 'immobilieVerkaufen'; haus: string }
   | { typ: 'flaecheUmbauen'; haus: string; flaeche: string; konzept: Konzept; gruppe?: GruppeId }
   | { typ: 'flaecheTeilen'; haus: string; flaeche: string; qm: number }
   | { typ: 'geschaeftsmodell'; haeuser: string[] | 'alle'; gruppe: GruppeId; modell: 'eigen' | 'kommission' | 'konzession' }
@@ -49,20 +68,39 @@ export type SpielerAktion =
   | { typ: 'plan'; ebitda: number }
   | { typ: 'insolvenzAntrag' }
   | { typ: 'insolvenzplanQuote'; quote: number }
+  | { typ: 'ruhestand' }
+  | { typ: 'spielFortsetzen' }
   | { typ: 'entscheiden'; id: string; option: string }
+  | { typ: 'zeitungAktiv'; an: boolean }
   // Hauptverwaltung
   | { typ: 'hqMieten'; angebot: string; etagen: number[] }
   | { typ: 'hqEtageKuendigen'; gebaeude: string; etage: number }
+  | { typ: 'hqArchivSetzen'; gebaeude: string; etage: number; aktiv: boolean }
   | { typ: 'hqGebaeudeKuendigen'; gebaeude: string }
   | { typ: 'abteilungSetzen'; abteilung: AbteilungId; gebaeude: string; etage: number }
   | { typ: 'abteilungStufe'; abteilung: AbteilungId; stufe: Stufe }
   // Einkauf, Freigaben, Eigenmarken (src/einkauf.ts)
   | EinkaufAktion
+  // O05 Ware
+  | WareAktion
   // Vorstand (src/vorstand.ts) und Produktentwicklung (src/produkte.ts)
   | VorstandAktion
   // Marketing: Kanäle, Hartwig Karte und App, CRM, Aktionskalender (src/marketing.ts)
   | MarketingAktion
-  | ProduktAktion;
+  | ProduktAktion
+  // O01 Organisation
+  | OrganisationAktion
+  // O03 IT
+  | ItAktion
+  // O06 Planung
+  | PlanungAktion
+  // O07 Haus
+  | HausAktion
+  // O08 Umbau
+  | UmbauAktion
+  // O04 Personal
+  | PersonalAktion
+  | TestAktion;
 
 export interface Ergebnis { ok: boolean; text: string }
 const ok = (text: string): Ergebnis => ({ ok: true, text });
@@ -119,14 +157,37 @@ function letzterUmsatz(s: GameState): number {
   return s.historie.length ? s.historie[s.historie.length - 1].umsatz : offeneHaeuser(s).reduce((a, h) => a + basisUmsatzHaus(h), 0);
 }
 
-export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
-  if (s.phase === 'zerschlagen') return fehler('Die Kette ist zerschlagen.');
+function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
+  if (a.typ.startsWith('test')) return testAktion(s, a as TestAktion);
+  if (a.typ === 'spielFortsetzen') {
+    if (!s.ende || !['saniert', 'ruhestand'].includes(s.ende.art)) return fehler('Weiterspielen ist nur nach Sanierung oder Ruhestand möglich.');
+    s.ende = undefined;
+    s.spielendeFortgesetzt = true;
+    return ok('Die nächste Geschäftswoche kann beginnen.');
+  }
+  if (s.ende || s.phase === 'zerschlagen') return fehler('Das Spiel ist beendet.');
   const w = s.woche;
   const inso = s.phase === 'insolvenz';
+  // O03 IT
+  if (IT_AKTIONEN.has(a.typ)) return itAktion(s, a as ItAktion);
+  // O08 Umbau
+  if (UMBAU_AKTIONEN.has(a.typ)) return umbauAktion(s, a as UmbauAktion);
+  if (PERSONAL_AKTIONEN.has(a.typ)) return personalAktion(s, a as PersonalAktion);
   if (EINKAUF_AKTIONEN.has(a.typ)) return einkaufAktion(s, a as EinkaufAktion, (x) => einmalKosten(s, x));
+  // O05 Ware
+  if (WARE_AKTIONEN.has(a.typ)) return wareAktion(s, a as WareAktion);
   if (VORSTAND_AKTIONEN.has(a.typ)) return vorstandAktion(s, a as VorstandAktion);
+  // O01 Organisation
+  if (ORGANISATION_AKTIONEN.has(a.typ)) return organisationAktion(s, a as OrganisationAktion);
   if (PRODUKT_AKTIONEN.has(a.typ)) return produktAktion(s, a as ProduktAktion);
   if (MARKETING_AKTIONEN.has(a.typ)) return marketingAktion(s, a as MarketingAktion, (x) => einmalKosten(s, x));
+  // O06 Planung: alle Mutationen laufen über fuehreAus.
+  if (PLANUNG_AKTIONEN.has(a.typ as PlanungAktion['typ'])) {
+    const fehlerText = planungAktion(s, a as PlanungAktion);
+    return fehlerText ? fehler(fehlerText) : ok('Planung aktualisiert.');
+  }
+  // O07 Haus
+  if (HAUS_AKTIONEN.has(a.typ as HausAktion['typ'])) return hausAktion(s, a as HausAktion);
   switch (a.typ) {
     case 'filialProgramm': {
       const p = FILIAL_PROGRAMME[a.programm];
@@ -144,6 +205,15 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       if (a.programm === 'miete') s.stakeholder.vermieter = clamp(s.stakeholder.vermieter - 2, 0, 100);
       return ok(`${p.name}: Investition ${mio(investition)}, Wirkung ab Woche ${w + p.vorlauf + 1}. ${p.nebenwirkung}`);
     }
+    case 'zeitungAktiv':
+      zeitungEinstellen(s, a.an);
+      return ok(a.an ? 'Der Handelsbote ist aktiviert.' : 'Der Handelsbote ist deaktiviert.');
+    case 'ruhestand':
+      if (s.woche < 260) return fehler('Der Ruhestand ist erst nach fünf Jahren möglich.');
+      if (s.phase !== 'regulaer' || s.insolvenz) return fehler('Ein laufendes Insolvenzverfahren muss zuerst beendet sein.');
+      if (s.spielendeDeaktiviert) return fehler('Spielende ist deaktiviert.');
+      spielBeenden(s, 'ruhestand');
+      return ok('Der Ruhestand beginnt.');
     case 'premiumSchuetzen':
       s.premiumSchuetzen = a.an;
       return ok(a.an ? 'Premiumhäuser sind vor pauschalen Rabattaktionen geschützt.' : 'Premiumschutz deaktiviert.');
@@ -176,6 +246,8 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       const p = umbauParameter(f.konzept, a.konzept);
       const kosten = p.qm * f.qm;
       einmalKosten(s, kosten);
+      s.kapitalflussOffen ??= { investitionen: 0, finanzierung: 0 };
+      s.kapitalflussOffen.investitionen -= kosten;
       f.umbauBis = w + p.wochen;
       f.umbauZiel = { konzept: a.konzept, gruppe: a.konzept === 'eigen' ? a.gruppe : undefined };
       return ok(`Umbau ${etageName(f.etage)} in ${h.name}: ${f.qm} qm zu ${a.konzept === 'eigen' ? GRUPPEN[a.gruppe as GruppeId].name : a.konzept}, ${mio(kosten)}, ${p.wochen} Wochen.`);
@@ -270,7 +342,13 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       const p = clamp(a.prozent, 0, 0.5);
       const hs = auswahl(s, a.haeuser);
       let fte = 0;
-      for (const h of hs) { const add = (h.personal.vollzeit + h.personal.teilzeit) * p; h.personal.teilzeit += add; fte += add; }
+      for (const h of hs) { const add = (h.personal.vollzeit + h.personal.teilzeit) * p; h.personal.teilzeit += add; fte += add;
+        // O04 Personal: Neue Kräfte müssen vier Wochen eingearbeitet werden.
+        if (h.personaleinsatz && add > 0) {
+          h.personaleinsatz.einarbeitungBis = w + 4;
+          h.personaleinsatz.einarbeitungFte += add;
+        }
+      }
       einmalKosten(s, fte * 1500);
       return ok(`${Math.round(fte)} FTE Teilzeit eingestellt.`);
     }
@@ -318,6 +396,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
 
     case 'hqMieten': return hqMieten(s, a.angebot, a.etagen);
     case 'hqEtageKuendigen': return hqEtageKuendigen(s, a.gebaeude, a.etage);
+    case 'hqArchivSetzen': return hqArchivSetzen(s, a.gebaeude, a.etage, a.aktiv);
     case 'hqGebaeudeKuendigen': return hqGebaeudeKuendigen(s, a.gebaeude);
     case 'abteilungSetzen': return abteilungSetzen(s, a.abteilung, a.gebaeude, a.etage);
     case 'abteilungStufe': return abteilungStufe(s, a.abteilung, a.stufe);
@@ -415,9 +494,31 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
       return ok(`${an.titel}: abgelehnt.`);
     }
 
+    case 'immobilieVerkaufen': {
+      const grund = immobilieVerkaufen(s, a.haus);
+      return grund ? fehler(grund) : ok('Immobilie verkauft und langfristig zurückgemietet.');
+    }
+
     case 'angebotAnnehmen': {
       const an = s.angebote.find((x) => x.id === a.angebot && x.status === 'offen');
       if (!an) return fehler('Angebot nicht gefunden oder abgelaufen.');
+      if (an.typ === 'staatshilfe') {
+        if (s.szenario?.id !== 'lockdown' || s.szenario.hilfeGenutzt) return fehler('Die Hilfe ist nicht mehr verfügbar.');
+        const hilfe = an.einmalzahlung ?? 0;
+        s.cash += hilfe;
+        s.einmalErloeseWoche += hilfe;
+        s.szenario.hilfeGenutzt = true;
+        an.status = 'angenommen'; an.erledigtWoche = s.woche;
+        return ok('Überbrückungshilfe erhalten: ' + mio(hilfe) + '.');
+      }
+      if (an.typ === 'konzernVerkauf') {
+        if (s.phase !== 'regulaer') return fehler('Konzernverkauf nur außerhalb der Insolvenz möglich.');
+        if (s.spielendeDeaktiviert) return fehler('Spielende ist deaktiviert.');
+        an.status = 'angenommen'; an.erledigtWoche = s.woche;
+        spielBeenden(s, 'investor', an.konzernKaeuferName);
+        melde(s, 'presse', `${s.firma.name} wird an ${an.konzernKaeuferName ?? 'einen Investor'} verkauft. Kaufpreis ${mio(an.kaufpreis ?? 0)}.`);
+        return ok(`Konzern verkauft: ${mio(an.kaufpreis ?? 0)} Kaufpreis. Das Spiel ist beendet.`);
+      }
       if (an.typ === 'premiumVerkauf') {
         const grund = premiumVerkaufen(s, an);
         return grund ? fehler(grund) : ok(`Premiumhaus verkauft: ${mio(an.kaufpreis ?? 0)} fließen zu.`);
@@ -459,6 +560,8 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
           erfolgreich++;
         }
         einmalKosten(s, kostenGesamt);
+        s.kapitalflussOffen ??= { investitionen: 0, finanzierung: 0 };
+        s.kapitalflussOffen.investitionen -= kostenGesamt;
         an.status = erfolgreich ? 'angenommen' : 'abgelehnt'; an.erledigtWoche = w;
         if (!erfolgreich) return fehler(`Kein Standort umsetzbar. ${ergebnisse.join('; ')}`);
         melde(s, 'presse', `${an.mieterName} zieht in ${erfolgreich} Häuser von ${s.firma.name} ein.`);
@@ -533,6 +636,7 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
     }
 
     case 'insolvenzAntrag': {
+      if (s.szenario?.regeln.sandkasten) return fehler('Im Sandkasten gibt es keine Insolvenz.');
       if (inso) return fehler('Das Verfahren läuft bereits.');
       const frueh = runwayWochen(s) > 8;
       eroeffneInsolvenz(s, frueh ? 'Eigenantrag im Schutzschirmverfahren' : 'Eigenantrag');
@@ -556,3 +660,11 @@ export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
 
 export { beraterErgebnis };
 export type { Cluster, Format };
+
+/** Auch direkte Spieleraktionen erscheinen ohne Wartewoche in der Chronik. */
+export function fuehreAus(s: GameState, a: SpielerAktion): Ergebnis {
+  chronikInitialisieren(s); // Auch alte Spielstände vor der Aktion sauber übernehmen
+  const result = fuehreAusKern(s, a);
+  if (result.ok) chronikAktualisieren(s);
+  return result;
+}

@@ -1,8 +1,10 @@
+import { initialisiereWare } from './merchandise';
 import {
   CLUSTER_FAKTOR, GRUPPEN, LAGE_FAKTOR, LIEFERANTEN, NACHNAMEN, STAEDTE, STANDORT_ZUSATZ, VERMIETER, VORNAMEN,
   BERATER, PREMIUM_HAEUSER, gruppenFuer,
 } from './daten';
 import type { Cluster, Flaeche, Format, GameState, GruppeId, Haus, Kohorte, Lage, Region } from './types';
+import { initialisierePlanung } from './planung';
 import { chance, clamp, eur, ganzZwischen, waehle, zwischen, type RngHalter } from './util';
 import { erzeugeHq, hqAktualisiere, neueHqAngebote } from './hq';
 import { erzeugeEinkauf, initialisiereEinkauf } from './einkauf';
@@ -14,6 +16,14 @@ import { SCHWIERIGKEIT, type SchwierigkeitId } from './schwierigkeit';
 import { initialisiereWettbewerb } from './wettbewerb';
 import { ALT_WARENHAUS_STAEDTE, ALT_SPORT_STAEDTE } from './massstab-alt';
 import { kennzeichnePremium } from './premium';
+import { chronikInitialisieren } from './chronik';
+import { szenarioStart, type SzenarioId, type SzenarioRegeln } from './szenarien';
+import { bildeHauscluster } from './organisation';
+// O03 IT
+import { initialisiereIt } from './it';
+// O07 Haus
+import { initialisiereHausbetrieb } from './haus';
+import { initialisiereUmbau } from './umbau';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -30,6 +40,9 @@ export interface Szenario {
   startJahr: number;
   /** Schwierigkeit (Standard mittel = Kalibrierung). */
   schwierigkeit?: SchwierigkeitId;
+  /** Nur Nice-to-have: nicht gesetzt heißt unveränderte Standardpartie. */
+  szenarioId?: SzenarioId;
+  szenarioRegeln?: SzenarioRegeln;
 }
 
 /** Phase 2: wirtschaftliche Soll-Größen der aktiven Formate (Euro p.a., Seed 1–3).
@@ -349,6 +362,10 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
     ...(option.premiumSchluessel ? { klasse: 'premium' as const, premiumSchluessel: option.premiumSchluessel } : {}),
     ...(nurDaten ? { nurDaten: true } : {}),
     grundflaecheQm: grundflaeche,
+    // O02 Umsatztreiber: alle drei Hebel starten neutral.
+    treiber: { frequenz: 1, kaufquote: 1, bon: 1 },
+    treiberQuellen: {},
+    treiberVerlauf: [],
     baujahr: (() => {
       const r = zwischen(h, 0, 1);
       const basis = f === 'sport' ? ganzZwischen(h, 1975, 2015)
@@ -381,6 +398,9 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
     transferBonus: 0,
   };
 }
+
+// O04 Personal
+import { initialisierePersonaleinsatz } from './personaleinsatz';
 
 export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameState {
   const h: RngHalter = { rng: seed >>> 0 };
@@ -466,6 +486,21 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   if (!sz.premiumDeaktiviert && (sz.premiumhaeuser ?? 0) > 0) kennzeichnePremium(haeuser);
   kalibriereStandortumsatz(haeuser);
 
+  if (sz.szenarioRegeln?.fusionDoppelStaedte) {
+    const staedte = [...new Set(haeuser.filter((x) => x.format === 'warenhaus').map((x) => x.stadt))]
+      .slice(0, sz.szenarioRegeln.fusionDoppelStaedte);
+    let wh = haeuser.filter((x) => x.format === 'warenhaus').length;
+    for (const stadt of staedte) {
+      const eintrag = STAEDTE.find((x) => x[0] === stadt);
+      if (!eintrag) continue;
+      const [, region, cluster, kk] = eintrag;
+      const alt = bauHaus(h, ++wh, stadt, region, cluster, kk, 'warenhaus', sz, 2, { hausklasse: 'C', lage: 'b' });
+      alt.name = 'Volkskauf ' + stadt;
+      alt.fusionUrsprung = 'volkskauf';
+      haeuser.push(alt);
+    }
+  }
+
   // Bestand: Reichweite in Wochen je Gruppe, mit Altersstruktur
   const bestand: Kohorte[] = [];
   const basisUmsatz: Partial<Record<GruppeId, number>> = {};
@@ -503,11 +538,16 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     firma: { name: sz.firma, sportName: sz.sportName },
     phase: 'regulaer',
     insolvenzenGesamt: 0,
+    erfolge: {},
     schwierigkeit: sz.schwierigkeit ?? 'mittel',
     cash: Math.round(sz.startCash * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].startCash),
     kreditlinie: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     kreditlinieBasis: Math.round(sz.kreditlinie * SCHWIERIGKEIT[sz.schwierigkeit ?? 'mittel'].kreditlinie),
     haeuser,
+    spielendeStart: {
+      haeuser: haeuser.length,
+      fte: haeuser.reduce((sum, haus) => sum + haus.personal.vollzeit + haus.personal.teilzeit + haus.personal.aushilfen, 0),
+    },
     premiumSchuetzen: true,
     wettbewerber: [],
     wettbewerbRng: (seed ^ 0x9e3779b9) >>> 0,
@@ -567,6 +607,22 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   s.marketing.stand = erzeugeMarketing(s);
   initialisiereMarketing(s);
   initialisiereWettbewerb(s);
+  chronikInitialisieren(s);
+  szenarioStart(s, sz);
+  bildeHauscluster(s); // O01 Organisation: geografische Cluster und Leitungen einmal initialisieren.
+  // O03 IT: neutraler Ausgangszustand, keine Änderung am bestehenden Zufallsstrom.
+  initialisiereIt(s);
+  // O06 Planung: Vorjahresbudget des Vorgängers (+3 % Umsatz).
+  initialisierePlanung(s);
+  // O07 Haus: erst nach der Weltgenerierung, ohne Zufall aus dem Haupt-RNG.
+  initialisiereHausbetrieb(s);
+  // O08 Umbau
+  initialisiereUmbau(s);
+  s.kapitalflussStartCash = s.cash;
+  // O04 Personal: neutraler Referenzplan auf Basis der bisherigen FTE.
+  initialisierePersonaleinsatz(s);
+  // O05 Ware
+  initialisiereWare(s);
   return s;
 }
 

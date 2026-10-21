@@ -6,6 +6,8 @@
 // und optional E.einkaufArt (Art der Blöcke an der Einkaufslage). Das Stilprofil baut daraus Giebelhauszeilen,
 // Kontorhäuser, Klinker-Rasterbauten der 50er, Rotklinker- und Bremer Häuser statt neutraler Stadthäuser.
 // Rostock, Stralsund und Schwerin bleiben bei den Ost-Typen (archetypen/ost.js).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { registriereArchetyp, PLAN_HILFE as H } from '../stadtplan.js';
 import { registriereSlots, registriereStilProfil } from '../bauer.js';
 import { NORD_SLOTS } from '../nordbauten.js';
@@ -30,7 +32,7 @@ function nordGrund(E, typ, o = {}) {
   E.brachen = 0;
   if (!E.landmarken.includes('slot:rathaus')) E.landmarken.push('slot:rathaus');
 }
-const dist = (i, j, c) => Math.hypot(i - c.i, j - c.j);
+const dist = (i, j, c) => wurzelSumme(i - c.i, j - c.j);
 /** Backsteinkirche auf Zelle (i, j); Zelle wird so groß, dass die Kirche in Nennmaß passt. */
 function kirche(E, i, j, ex = {}) {
   if (!zelleFrei(E, i, j)) return false;
