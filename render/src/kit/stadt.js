@@ -346,7 +346,37 @@ export function dachFlaechenBeimBau(S, p, bauen) {
     }))
     .sort((a, b) => b.flaeche - a.flaeche || b.y - a.y)
     .slice(0, p.typ?.startsWith('slot:') ? 14 : 8);
-  return { ergebnis, dachFlaechen: auswahl.map((t) => t.ecken) };
+  return { ergebnis, dachFlaechen: dachEinruecken(auswahl.map((t) => t.ecken)) };
+}
+
+/**
+ * Q09: Dreiecke derselben Dachebene gemeinsam zur Ebenenmitte einrücken. Je Dreieck
+ * einzeln eingerückt ergäbe ein Rechteckdach zwei Schneedreiecke mit dunklem Kreuz
+ * dazwischen; je Ebene bleibt eine geschlossene Schneefläche mit schmalem Dachrand.
+ */
+export function dachEinruecken(dreiecke, faktor = .86) {
+  const gruppen = new Map();
+  for (const ecken of dreiecke) {
+    const [a, b, c] = ecken;
+    const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
+    const vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const n = Math.hypot(nx, ny, nz) || 1; nx /= n; ny /= n; nz /= n;
+    const d = nx * a[0] + ny * a[1] + nz * a[2];
+    const key = [nx, ny, nz].map((v) => Math.round(v * 50)).join(',') + '|' + Math.round(d * 5);
+    if (!gruppen.has(key)) gruppen.set(key, []);
+    gruppen.get(key).push(ecken);
+  }
+  const aus = [];
+  for (const liste of gruppen.values()) {
+    const punkte = new Map();
+    for (const e of liste) for (const v of e) punkte.set(v.map((x) => Math.round(x * 100)).join(','), v);
+    let cx = 0, cy = 0, cz = 0;
+    for (const v of punkte.values()) { cx += v[0]; cy += v[1]; cz += v[2]; }
+    const k = punkte.size; cx /= k; cy /= k; cz /= k;
+    for (const e of liste) aus.push(e.map((v) => [cx + (v[0] - cx) * faktor, cy + (v[1] - cy) * faktor, cz + (v[2] - cz) * faktor]));
+  }
+  return aus;
 }
 
 // ====================================================================================

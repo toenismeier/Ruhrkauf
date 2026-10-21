@@ -154,8 +154,8 @@ function sommerLeben(S, plan) {
 
 /**
  * Q09: Keine horizontalen Schneetafeln mehr. Jede weiße Fläche ist ein echtes
- * Dach-Dreieck aus stadt.js, um maximal 0,065 m entlang seiner Normale versetzt.
- * Der reduzierte Ausschnitt lässt Dachfenster, Technik und Dachschrift sichtbar.
+ * Dach-Dreieck aus stadt.js (je Dachebene eingerückt), um 0,065 m entlang seiner Normale versetzt.
+ * Der freie Dachrand lässt Traufe, Technik und Dachschrift sichtbar.
  * Ein gemeinsames Mesh für die ganze Stadt begrenzt die Draw Calls.
  */
 function schneeMesh(dachFlaechen, material) {
@@ -168,14 +168,12 @@ function schneeMesh(dachFlaechen, material) {
     const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
     const norm = Math.hypot(nx, ny, nz);
     if (!Number.isFinite(norm) || norm < 1e-6 || ny <= 0) continue;
-    const cx = (a[0] + b[0] + c[0]) / 3;
-    const cy = (a[1] + b[1] + c[1]) / 3;
-    const cz = (a[2] + b[2] + c[2]) / 3;
-    // Knapp die Hälfte der Dachfläche, direkt auf derselben Dachneigung.
+    // Die Flächen kommen je Dachebene eingerückt aus stadt.js (dachEinruecken),
+    // hier nur knapp über die Dachneigung anheben.
     for (const v of ecken) punkte.push(
-      cx + (v[0] - cx) * .68 + nx / norm * .065,
-      cy + (v[1] - cy) * .68 + ny / norm * .065,
-      cz + (v[2] - cz) * .68 + nz / norm * .065
+      v[0] + nx / norm * .065,
+      v[1] + ny / norm * .065,
+      v[2] + nz / norm * .065
     );
   }
   const geo = new THREE.BufferGeometry();
