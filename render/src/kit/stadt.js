@@ -12,6 +12,7 @@ const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, mische, waehle, zw, FARBEN, mat, heller, dunkler, fensterRaster, gesims, markise, dachProfil, marker, textTextur, schild, baum, LOD } from './basis.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { bergHoehe, gelaende, rebzeilen } from './gelaende.js';
+import { tramArme } from './q02-qualitaet.js';
 
 // ====================================================================================
 // Konstanten
@@ -344,7 +345,7 @@ export async function baueStadtGestuft(S, scene, plan, bauer = platzhalterBauer,
     }
   };
   const I = o.instanzer ?? new Instanzer();
-  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr };
+  const ctx = { S, I, scene, plan, r: rng(plan.seed * 31 + 5), dichte: TYPEN[plan.typ].dichte * (o.dichte ?? 1), typ: plan.typ, proBlock: new Map(), ost: !!plan.ddr, qualitaet: o.qualitaet ?? null };
   ostVerkehr = !!plan.ddr;
   for (const p of plan.parzellen) { if (!ctx.proBlock.has(p.block)) ctx.proBlock.set(p.block, []); ctx.proBlock.get(p.block).push(p); }
   const t0 = S.anzahl;
@@ -397,6 +398,7 @@ export function bauerFuer(bauer, typ) {
 function rahmen(s) {
   const z = s.achse === 'z';
   return {
+    achse: s.achse, mitte: s.mitte,
     w: (u, v) => (z ? [s.mitte + v, u] : [u, s.mitte + v]),
     quader: (S, u0, u1, v0, v1, y0, y1, f) => (z ? S.quader(s.mitte + v0, y0, u0, s.mitte + v1, y1, u1, f) : S.quader(u0, y0, s.mitte + v0, u1, y1, s.mitte + v1, f)),
     ru: z ? -Math.PI / 2 : 0,      // Drehung, damit Prop-x entlang +u zeigt
@@ -452,6 +454,21 @@ function baueSegment(ctx, s) {
       R.quader(S, m0, m1, -h, -h + 0.25, 0, 0.22, F.bord);
       R.quader(S, m0, m1, h - 0.25, h, 0, 0.22, F.bord);
       gleise(ctx, R, s.von, s.bis);
+      // Freies Gleisende mit Prellbock; Anschlüsse nur bei durchgehend vorhandenen Gleisarmen.
+      for (const [u, arm] of [[s.von, '-'], [s.bis, '+']]) {
+        const anKreuzung = ctx.plan.kreuzungen.some((k) => {
+          if (s.achse === 'z') return Math.abs(k.x - s.mitte) < 0.6
+            && Math.abs((arm === '-' ? k.z + k.bz / 2 : k.z - k.bz / 2) - u) < 0.6
+            && !!k.arme[arm === '-' ? '+z' : '-z']?.tram;
+          return Math.abs(k.z - s.mitte) < 0.6
+            && Math.abs((arm === '-' ? k.x + k.bx / 2 : k.x - k.bx / 2) - u) < 0.6
+            && !!k.arme[arm === '-' ? '+x' : '-x']?.tram;
+        });
+        const grenzen = s.achse === 'z' ? [0, ctx.plan.tiefe] : [0, ctx.plan.breite];
+        const abschluss = anKreuzung ? 'anschluss' : grenzen.some((gr) => Math.abs(u - gr) < 0.6) ? 'kartenrand' : 'prellbock';
+        if (abschluss === 'prellbock') gleisPrellbock(ctx, R, u);
+        if (ctx.qualitaet) for (const t of [-1.6, 1.6]) ctx.qualitaet.gleisenden.push({ achse: s.achse, mitte: s.mitte + t, u, abschluss });
+      }
       for (let u = s.von + 9; u < s.bis - 7; u += 30) { const [x, z] = R.w(u, 0); I.setze('olmast', x, 0.12, z, R.ru + Math.PI / 2); }
       if (h >= 4) for (const sg of [-1, 1]) for (let u = m0 + 5; u < m1 - 2; u += 11) { const [x, z] = R.w(u, sg * (h - 1.1)); baumSetzen(I, s.baumart, x, 0.12, z, r, 0.85); }
     } else {
@@ -506,6 +523,7 @@ function baueSegment(ctx, s) {
     }
   }
   // --- Verkehr ---
+  if (ctx.qualitaet && s.typ !== 'fussgaenger') ctx.qualitaet.fahrbahnen.push({ achse: s.achse, mitte: s.mitte, von: s.von, bis: s.bis, breite: fb });
   if (!ctx.keineStandAutos) verkehrAufSegment(ctx, s, R, s.von + 7, s.bis - 7, 0);
   // Bushaltestelle an Hauptstraßen
   if (s.typ === 'haupt' && L > 50 && r() < 0.45) {
@@ -521,8 +539,22 @@ function baueSegment(ctx, s) {
 }
 
 function gleise(ctx, R, u0, u1, y = 0) {
-  for (const t of [-1.6, 1.6]) for (const sp of [-0.72, 0.72]) R.quader(ctx.S, u0, u1, t + sp - 0.06, t + sp + 0.06, y, y + 0.18, F.schiene);
-  for (const t of [-1.6, 1.6]) R.quader(ctx.S, u0, u1, t - 0.04, t + 0.04, 6.4, 6.48, F.dunkel);
+  if (u1 - u0 < 0.2) return;
+  for (const t of [-1.6, 1.6]) {
+    for (const sp of [-0.72, 0.72]) R.quader(ctx.S, u0, u1, t + sp - 0.06, t + sp + 0.06, y, y + 0.18, F.schiene);
+    R.quader(ctx.S, u0, u1, t - 0.04, t + 0.04, 6.4, 6.48, F.dunkel);
+    if (ctx.qualitaet) {
+      const s = { achse: R.achse, mitte: R.mitte + t, von: u0, bis: u1, breite: 2.0 };
+      ctx.qualitaet.gleise.push(s);
+      ctx.qualitaet.draehte.push({ ...s });
+    }
+  }
+}
+function gleisPrellbock(ctx, R, u) {
+  for (const t of [-1.6, 1.6]) {
+    const [x, z] = R.w(u, t);
+    ctx.S.box(R.achse === 'x' ? 0.42 : 2.2, 0.8, R.achse === 'x' ? 2.2 : 0.42, x, 0.52, z, '#c9b24c');
+  }
 }
 
 /** Fahrende und parkende Autos, Straßenbahn auf einem Abschnitt. */
@@ -536,6 +568,7 @@ function verkehrAufSegment(ctx, s, R, u0, u1, y) {
       if (r() < 0.55 * ctx.dichte) {
         const [x, z] = R.w(u, f.v);
         const l = auto(I, x, y, z, R.ru + (f.dir > 0 ? 0 : Math.PI), r);
+        if (ctx.qualitaet) ctx.qualitaet.fahrzeuge.push({ art: 'auto', x, z, laenge: l });
         u += l + zw(r, 3, 10);
       } else u += zw(r, 8, 22);
     }
@@ -549,7 +582,9 @@ function verkehrAufSegment(ctx, s, R, u0, u1, y) {
     const t = (k === 0 ? r() < 0.5 : true) ? -1.6 : 1.6;
     const tt = k === 1 ? 1.6 : t;
     const plus = (s.achse === 'z' ? -1 : 1) * Math.sign(tt) > 0;
-    const [x, z] = R.w(zw(r, u0 + 16, u1 - 16), tt);
+    const u = zw(r, u0 + 16, u1 - 16);
+    const [x, z] = R.w(u, tt);
+    if (ctx.qualitaet) ctx.qualitaet.fahrzeuge.push({ art: 'tram', x, z, laenge: ctx.ost ? 28.6 : 30 });
     if (ctx.ost) I.setze('tatra', x, 0.06, z, R.ru + (plus ? 0 : Math.PI), 1, [waehle(r, ['#e2b33a', '#d8642f', '#c8322b', '#e9d9a0'])]);
     else I.setze('strassenbahn', x, 0.06, z, R.ru + (plus ? 0 : Math.PI), 1, [waehle(r, ['#c8322b', '#2f6f8f', '#3f7d56'])]);
   }
@@ -662,9 +697,15 @@ function baueKreuzung(ctx, k) {
     for (let i = 0; i < (k.bx * k.bz) / 30 * ctx.dichte; i++) { const x = k.x + zw(r, -k.bx / 2 + 1, k.bx / 2 - 1), z = k.z + zw(r, -k.bz / 2 + 1, k.bz / 2 - 1); if (wurzelSumme(x - k.x, z - k.z) > 6) figur(I, x, 0.29, z, r); }
     return;
   }
-  // Gleise und Fahrdraht durch die Kreuzung
-  if ((k.arme['-z']?.tram || k.arme['+z']?.tram)) gleise(ctx, rahmen({ achse: 'z', mitte: k.x }), z0, z1);
-  if ((k.arme['-x']?.tram || k.arme['+x']?.tram)) gleise(ctx, rahmen({ achse: 'x', mitte: k.z }), x0, x1);
+  // Fahrdraht und Schienen enden exakt mit den tatsächlich angeschlossenen Gleisarmen.
+  for (const t of tramArme(k)) {
+    const R = rahmen({ achse: t.achse, mitte: t.mitte });
+    gleise(ctx, R, t.von, t.bis);
+    for (const ende of t.ende) {
+      gleisPrellbock(ctx, R, ende);
+      if (ctx.qualitaet) for (const quer of [-1.6, 1.6]) ctx.qualitaet.gleisenden.push({ achse: t.achse, mitte: t.mitte + quer, u: ende, abschluss: 'prellbock' });
+    }
+  }
   // Zebrastreifen, Haltelinien, Poller an Fußgängerzonen
   for (const [seite, arm] of Object.entries(k.arme)) {
     if (!arm) continue;
@@ -1116,28 +1157,66 @@ function baueGarten(ctx, b, r, hinder) {
   for (let i = 0, n = Math.round((b.w + b.d) / 8 * ctx.dichte); i < n; i++) { const t = r(); const x = t < 0.5 ? cx + zw(r, -1.5, 1.5) : zw(r, b.x + 3, b.x + b.w - 3), z = t < 0.5 ? zw(r, b.z + 3, b.z + b.d - 3) : cz + zw(r, -1.5, 1.5); figur(I, x, y + 0.05, z, r); }
 }
 
-function baueKleingarten(ctx, b, r, hinder) {
-  const { S, I } = ctx;
-  const y = 0.36;
-  S.quader(b.x, 0, b.z, b.x + b.w, y, b.z + b.d, '#a3c98f');
-  const pw = zw(r, 9, 12), pd = zw(r, 12, 15);
-  const weg = 2.4;
-  for (let z = b.z + 2; z + pd < b.z + b.d - 1; z += 2 * pd + weg) {
-    S.quader(b.x + 1, y, z + pd, b.x + b.w - 1, y + 0.04, z + pd + weg, F.weg);
-    for (const zz of [z, z + pd + weg]) for (let x = b.x + 2; x + pw < b.x + b.w - 1; x += pw) {
-      if (zz + pd > b.z + b.d - 1) continue;
-      const cx = x + pw / 2, cz = zz + pd / 2;
-      if (hinder.some((p) => imRechteck(cx, cz, p, 3))) continue;
-      S.quader(x + 0.4, y, zz + 0.4, x + pw - 0.4, y + 0.05, zz + pd - 0.4, waehle(r, ['#9cc58a', '#b2d39b', '#93bd7f']));
-      for (let k = 0; k < 3; k++) S.quader(x + 1, y + 0.05, zz + 1.5 + k * 1.6, x + pw * 0.45, y + 0.12, zz + 2.3 + k * 1.6, waehle(r, ['#8a6a4a', '#7a9f55', '#c5a36a']));
-      const hf = waehle(r, ['#c9a77c', '#8fa9b5', '#d9c49a', '#b56b4f', '#e8e4dc', '#7c9a6a']);
-      S.quader(x + pw - 3.6, y, zz + pd - 4.4, x + pw - 0.9, y + 2.1, zz + pd - 1.6, hf);
-      S.add(dachProfil(3.1, 3.2, 0.9, 0.1, 'x').translate(x + pw - 2.25, y + 2.1, zz + pd - 3.0), waehle(r, ['#b4583f', '#56636c', '#6f6a5c']));
-      if (r() < 0.6) baumSetzen(I, waehle(r, ['kugel', 'busch', 'linde']), x + 2, y, zz + pd - 2, r, 0.6);
-      for (let u = 0; u < pw; u += 2.4) I.setze('busch', x + u, y, zz + 0.3, 0, [0.55, 0.5, 0.55], ['#5f9a56']);
-    }
+// Sechs Laubenformen, eigene Proportionen und Farbpaletten; keine fremden Modelle oder Texturen.
+function q02Laube(S, x, z, y, art, farbe, dachfarbe) {
+  const w = [3.2, 3.5, 2.8, 3.8, 3.1, 3.4][art], d = [2.8, 2.6, 3.1, 2.9, 2.7, 3.1][art], h = art === 2 ? 1.85 : 2.25;
+  S.quader(x, y, z, x + w, y + h, z + d, farbe);
+  if (art === 1 || art === 3 || art === 4) {
+    const dach = dachProfil(w + 0.5, d + 0.5, art === 3 ? 0.8 : 1.1, 0.18, art === 4 ? 'z' : 'x');
+    dach.translate(x + w / 2, y + h, z + d / 2); S.add(dach, dachfarbe);
+  } else {
+    S.quader(x - 0.2, y + h, z - 0.2, x + w + 0.2, y + h + 0.19, z + d + 0.2, dachfarbe);
+    if (art === 2) S.quader(x + 0.4, y + h + 0.19, z + 0.3, x + w - 0.4, y + h + 0.26, z + d - 0.3, '#869da1');
   }
-  for (let i = 0; i < 6 * ctx.dichte; i++) figur(I, zw(r, b.x + 2, b.x + b.w - 2), y, zw(r, b.z + 2, b.z + b.d - 2), r);
+  S.quader(x + w * 0.3, y + 0.35, z + d, x + w * 0.68, y + 1.65, z + d + 0.06, '#6f9094');
+  S.quader(x + w - 0.8, y + 0.02, z + d + 0.02, x + w - 0.1, y + 1.65, z + d + 0.1, '#6a5541');
+  if (art === 5) {
+    S.quader(x - 0.2, y + 1.8, z + d, x + w + 0.2, y + 2.0, z + d + 1.6, dachfarbe);
+    for (const dx of [0, w]) S.box(0.12, 1.8, 0.12, x + dx, y + 0.9, z + d + 1.4, '#bcb0a1');
+  }
+}
+function baueKleingarten(ctx, b, r, hinder) {
+  const { S, I } = ctx, y = 0.36, endeX = b.x + b.w - 2, endeZ = b.z + b.d - 2;
+  S.quader(b.x, 0, b.z, b.x + b.w, y, b.z + b.d, '#9abf85');
+  const laubenFarben = ['#c9a77c', '#8fa9b5', '#d9c49a', '#b56b4f', '#e8e4dc', '#7c9a6a', '#d2c3aa'];
+  const daech = ['#b4583f', '#56636c', '#6f6a5c', '#7c8c7a', '#8a6960'];
+  let zeile = 0;
+  for (let z = b.z + 2; z + 11 < endeZ; zeile++) {
+    const tiefe = zw(r, 12.5, 18.5), nZ = Math.min(tiefe, endeZ - z), wegB = zw(r, 2, 3.1);
+    const wegZ = z + nZ;
+    if (wegZ + wegB < b.z + b.d - 1) S.quader(b.x + 1, y, wegZ, endeX + 1, y + 0.05, wegZ + wegB, '#d6c8aa');
+    let x = b.x + 2 + r() * 1.2;
+    while (x + 8 < endeX) {
+      const breite = Math.min(zw(r, 9.2, 14.6), endeX - x);
+      if (breite < 8) break;
+      const cx = x + breite / 2, cz = z + nZ / 2;
+      if (!hinder.some((p) => imRechteck(cx, cz, p, 3))) {
+        const wild = r() < 0.16, typ = Math.floor(r() * 6), laube = r() > 0.08;
+        const gras = waehle(r, wild ? ['#779c67', '#88a973', '#9eb488'] : ['#9cc58a', '#b2d39b', '#93bd7f']);
+        S.quader(x + 0.25, y, z + 0.25, x + breite - 0.25, y + 0.04, z + nZ - 0.25, gras);
+        // Nutzbeete, Obstgehölze und unregelmäßige Gartenwege statt duplizierter Streifen.
+        const beetAnzahl = wild ? 1 : Math.floor(2 + r() * 3);
+        for (let k = 0; k < beetAnzahl; k++) {
+          const bw = zw(r, 1.1, Math.min(2.6, breite * 0.32));
+          const bx = x + 0.7 + r() * Math.max(0.1, breite * 0.55 - bw);
+          const bz = z + 1.2 + k * (nZ - 4) / Math.max(2, beetAnzahl);
+          S.quader(bx, y + 0.04, bz, bx + bw, y + 0.14, Math.min(bz + zw(r, 1.1, 2.6), z + nZ - 1), wild ? '#728d5b' : waehle(r, ['#8a6a4a', '#7a9f55', '#c5a36a']));
+        }
+        if (laube && breite > 8.8 && nZ > 11.5) {
+          const lx = x + breite - 4.9, lz = z + nZ - 4.6;
+          q02Laube(S, lx, lz, y + 0.05, typ, laubenFarben[(typ + Math.floor(r() * laubenFarben.length)) % laubenFarben.length], waehle(r, daech));
+        }
+        const obst = wild ? 2 : r() < 0.7 ? 1 : 0;
+        for (let k = 0; k < obst; k++) baumSetzen(I, waehle(r, ['kugel', 'linde', 'birke']), x + 2.2 + r() * Math.min(2, breite * 0.2), y + 0.04, z + nZ - 2.6 - k * 3, r, zw(r, 0.5, 0.7));
+        if (wild) for (let k = 0; k < 3; k++) I.setze('busch', x + zw(r, 1, breite - 1), y + 0.04, z + zw(r, 1, nZ - 1), 0, [0.6, 0.6, 0.6], [waehle(r, KRONE.busch)]);
+        for (let u = 0; u < breite - 0.8; u += zw(r, 2.6, 4.6)) I.setze('busch', x + u, y, z + 0.15, 0, [0.38, 0.4, 0.38], ['#628b54']);
+        if (ctx.qualitaet) ctx.qualitaet.gruppen.push({ x: cx, z: cz, muster: 'garten/' + typ + '/' + Math.round(breite) + '/' + beetAnzahl + '/' + Number(wild) + '/' + zeile % 3 });
+      }
+      x += breite + zw(r, 0.5, 1.6);
+    }
+    z += nZ + wegB;
+  }
+  for (let i = 0; i < 4 * ctx.dichte; i++) figur(I, zw(r, b.x + 2, b.x + b.w - 2), y, zw(r, b.z + 2, b.z + b.d - 2), r);
 }
 
 // ====================================================================================
@@ -1267,7 +1346,11 @@ function baueVorortBlock(ctx, b, r) {
   let wand = waehle(r, klinker ? VORORT_KLINKER : VORORT_WAND), dach = waehle(r, VORORT_DACH);
   for (const q of b.bauten ?? []) {
     let f;
-    if (q.art === 'reihenhaus') { if (r() < 0.3) wand = waehle(r, klinker ? VORORT_KLINKER : VORORT_WAND); f = [wand, dach]; }
+    if (q.art === 'reihenhaus') {
+      // Gedämpfte Variation je Haus: Farb- und Dachmischung ohne neue Instanzgeometrie.
+      wand = waehle(r, [...VORORT_WAND, ...VORORT_KLINKER, ...ZEILE_WAND]);
+      f = [wand, waehle(r, VORORT_DACH)];
+    }
     else if (q.art === 'zeile') f = [waehle(r, ZEILE_WAND), dach];
     else if (q.art === 'halle') f = [waehle(r, ['#d9dcdf', '#cfd3d6', '#e4e1da', '#b9bec2', '#d8cdb8']), waehle(r, ['#2f6f8f', '#c8322b', '#3f7d56', '#e0b23c', '#5d646b', '#2b3a55'])];
     else if (q.art === 'scheune') f = [waehle(r, ['#8a5a45', '#a8664f', '#7a6a58', '#c9bfae']), waehle(r, ['#6f6a64', '#9a4e3a', '#5d6268'])];
@@ -1276,38 +1359,57 @@ function baueVorortBlock(ctx, b, r) {
     else if (q.art === 'tankstelle') f = [waehle(r, ['#2f6f8f', '#c8322b', '#3f7d56', '#e0b23c'])];
     else f = [r() < 0.25 ? waehle(r, VORORT_KLINKER) : waehle(r, VORORT_WAND), waehle(r, VORORT_DACH)];
     I.setze(q.art, q.x, y, q.z, q.ry, q.s ?? 1, f);
+    if (ctx.qualitaet && (q.art === 'reihenhaus' || q.art === 'zeile' || q.art === 'efh')) ctx.qualitaet.gruppen.push({ x: q.x, z: q.z, muster: 'wohn/' + q.art + '/' + f.join('-') + '/' + Math.round((q.w ?? 10) * 2) + '/' + Math.round((q.d ?? 10) * 2) });
   }
   for (const [x, z, art] of b.baeume ?? []) baumSetzen(I, art, x, y, z, r, zw(r, 0.65, 0.95));
 }
 
-/** Acker und Wiesen: Schläge in wechselnder Richtung und Frucht, Hecken und Pappelreihen an den Rändern. */
+/** Unterschiedliche Fruchtstreifen pro Jahreszeit statt identischer Ackertexturen. */
+export const Q02_FELDFARBEN = {
+  fruehling: ['#86ae67', '#aac67a', '#8eaf73', '#b2b47b', '#7caa67', '#9aa76d'],
+  sommer: ['#d4c27c', '#c9b26a', '#b8c97a', '#e0cf8f', '#9fc078', '#c7a66a'],
+  herbst: ['#bb915d', '#d3b46d', '#bd9e74', '#8c9d5c', '#d8c48b', '#a88954'],
+  winter: ['#9ca28d', '#b0ad9b', '#a8aa95', '#c5c0b0', '#929d8a', '#b5af9b'],
+};
 function baueFeld(ctx, b, r) {
   const { S, I } = ctx;
+  const farben = Q02_FELDFARBEN[ctx.plan?.jahreszeit ?? 'sommer'] ?? Q02_FELDFARBEN.sommer;
   const quer = r() < 0.5;
   const L = quer ? b.d : b.w;
-  const n = L > 70 ? 1 + Math.floor(r() * 3) : 1;
+  // Mehrere landwirtschaftliche Schläge mit variabler Breite; Randweg und Hofzufahrt.
+  const n = Math.max(1, Math.min(8, Math.floor(L / 26) + 1));
+  const gewichte = Array.from({ length: n }, () => zw(r, 0.65, 1.65));
+  const summe = gewichte.reduce((a, q) => a + q, 0);
   let a = 0;
   for (let k = 0; k < n; k++) {
-    const len = k === n - 1 ? L - a : L * zw(r, 0.25, 0.55);
-    const x0 = quer ? b.x : b.x + a, z0 = quer ? b.z + a : b.z, w = quer ? b.w : len, d = quer ? len : b.d;
+    const len = k === n - 1 ? L - a : L * gewichte[k] / summe;
+    const x0 = quer ? b.x : b.x + a, z0 = quer ? b.z + a : b.z;
+    const w = quer ? b.w : len, d = quer ? len : b.d;
     a += len;
     if (w < 3 || d < 3) continue;
-    const wiese = r() < 0.3;
-    S.quader(x0 + 0.6, -0.08, z0 + 0.6, x0 + w - 0.6, 0.0, z0 + d - 0.6, wiese ? waehle(r, WIESE) : waehle(r, FELDER));
+    const wiese = r() < 0.17, farbe = wiese ? waehle(r, WIESE) : farben[(k + Math.floor(r() * farben.length)) % farben.length];
+    S.quader(x0 + 0.3, -0.08, z0 + 0.3, x0 + w - 0.3, 0.0, z0 + d - 0.3, farbe);
     if (!wiese) {
-      const furchenX = r() < 0.5, ab = zw(r, 1.8, 3.2);
-      if (furchenX) for (let q = z0 + 1.6; q < z0 + d - 1; q += ab) I.setze('fugeDunkel', x0 + w / 2, 0.0, q, 0, [w - 1.6, 1, 0.22]);
-      else for (let q = x0 + 1.6; q < x0 + w - 1; q += ab) I.setze('fugeDunkel', q, 0.0, z0 + d / 2, 0, [0.22, 1, d - 1.6]);
-    } else for (let i = 0; i < (w * d) / 900; i++) baumSetzen(I, waehle(r, ['linde', 'kastanie']), x0 + zw(r, 4, w - 4), -0.05, z0 + zw(r, 4, d - 4), r, zw(r, 0.9, 1.2));
+      const entlangX = r() < 0.5, ab = zw(r, 2.1, 4.6);
+      if (entlangX) for (let z = z0 + 1.1; z < z0 + d - 1; z += ab) I.setze('fugeDunkel', x0 + w / 2, 0, z, 0, [w - 1, 1, 0.14]);
+      else for (let x = x0 + 1.1; x < x0 + w - 1; x += ab) I.setze('fugeDunkel', x, 0, z0 + d / 2, 0, [0.14, 1, d - 1]);
+    } else for (let i = 0; i < (w * d) / 1800; i++) if (w > 10 && d > 10) baumSetzen(I, waehle(r, ['linde', 'kastanie']), x0 + zw(r, 4, w - 4), -0.05, z0 + zw(r, 4, d - 4), r, zw(r, 0.8, 1.1));
+    if (ctx.qualitaet) ctx.qualitaet.gruppen.push({ x: x0 + w / 2, z: z0 + d / 2, muster: 'feld/' + farbe + '/' + Math.round(len) + '/' + Number(wiese) + '/' + k % 3 });
+    if (k > 0 && len > 6 && r() < 0.5) {
+      // Feldweg zwischen Nutzflächen, kein großflächiger Parkplatz.
+      if (quer) S.quader(b.x + 0.3, 0, z0 - 0.9, b.x + b.w - 0.3, 0.04, z0 + 0.9, '#c6b89b');
+      else S.quader(x0 - 0.9, 0, b.z + 0.3, x0 + 0.9, 0.04, b.z + b.d - 0.3, '#c6b89b');
+    }
   }
-  // Hecke oder Pappelreihe an einer Seite
+  // Baumreihe oder Hecke als Grenze. Die Felder werden durch echte Höfe aus stadtrand.js ergänzt.
   const h = waehle(r, ['-x', '+x', '-z', '+z', null]);
   if (h) {
-    const pap = r() < 0.4;
-    const entlangX = h[1] === 'z', len = entlangX ? b.w : b.d;
-    for (let u = 2; u < len - 2; u += pap ? 8 : 3.2) {
-      const x = entlangX ? b.x + u : h === '+x' ? b.x + b.w - 1 : b.x + 1, z = entlangX ? (h === '+z' ? b.z + b.d - 1 : b.z + 1) : b.z + u;
-      if (pap) baumSetzen(I, 'pappel', x, -0.05, z, r, 0.9); else I.setze('busch', x, -0.05, z, 0, [1, 0.9, 1], [waehle(r, KRONE.busch)]);
+    const pap = r() < 0.4, entlangX = h[1] === 'z', len = entlangX ? b.w : b.d;
+    for (let u = 2; u < len - 2; u += pap ? 8 : 3.8) {
+      const x = entlangX ? b.x + u : h === '+x' ? b.x + b.w - 1 : b.x + 1;
+      const z = entlangX ? (h === '+z' ? b.z + b.d - 1 : b.z + 1) : b.z + u;
+      if (pap) baumSetzen(I, 'pappel', x, -0.05, z, r, 0.9);
+      else I.setze('busch', x, -0.05, z, 0, [0.8, 0.8, 0.8], [waehle(r, KRONE.busch)]);
     }
   }
 }
@@ -1559,7 +1661,7 @@ function baueBahnZ(ctx, b, r) {
   const gl = b.gleise;
   const vp = b.vorplatz;
   const b2 = { ...b, x: b.z, z: b.x, w: b.d, d: b.w, achse: 'x', gleise: gl && { z0: gl.x0, z1: gl.x1, achse: 'x' }, _bh: bh ? { x: bh.z, z: bh.x, w: bh.d, d: bh.w } : null, vorplatz: vp ? { x: vp.z, z: vp.x, w: vp.d, d: vp.w } : null, bahnParken: (b.bahnParken ?? []).map((q) => ({ x: q.z, z: q.x, w: q.d, d: q.w })) };
-  baueBahn({ ...ctx, S: SW, I: IW }, b2, r);
+  baueBahn({ ...ctx, S: SW, I: IW, spiegel: true }, b2, r);
 }
 function baueBahn(ctx, b, r) {
   if (b.achse === 'z') { baueBahnZ(ctx, b, r); return; }
@@ -1591,7 +1693,7 @@ function baueBahn(ctx, b, r) {
   // Gleisband ohne Empfangsgebäude (b.ohneBahnhof): nur Gleise, kein Bahnsteig über die ganze Kartenbreite
   const muster = b.ohneBahnhof ? ['g'] : ['g', 's', 'g', 'g', 's', 'g', 'g', 'g'];
   let z = gl.z0, i = 0;
-  const gleisZ = [];
+  const gleisZ = [], bahnsteigZ = [];
   while (z < gl.z1 - 4) {
     const m = muster[i % muster.length];
     if (m === 'g') { gleisZ.push(z + 2.25); z += 4.5; }
@@ -1599,6 +1701,7 @@ function baueBahn(ctx, b, r) {
       if (z + 6 > gl.z1 - 4) break;
       if (bh && b.oben && z + 6 > bh.z - 3) { z += 6; i++; continue; }   // Bahnsteige nur hinter dem Empfangsgebäude
       const bx0 = bh ? bh.x - 10 : b.x + 10, bx1 = bh ? bh.x + bh.w + 10 : b.x + b.w - 10;
+      bahnsteigZ.push(z + 3);
       S.quader(bx0, 0, z + 0.2, bx1, 1.0, z + 5.8, '#cfc8bb');
       S.quader(bx0, 1.0, z + 0.2, bx1, 1.04, z + 0.6, '#f2f1ec');
       S.quader(bx0, 1.0, z + 5.4, bx1, 1.04, z + 5.8, '#f2f1ec');
@@ -1617,19 +1720,29 @@ function baueBahn(ctx, b, r) {
     for (let x = ga + 0.5; x < gb; x += 1.1) I.setze('schwelle', x, y + 0.15, gz, 0);
     for (const sp of [-0.72, 0.72]) S.quader(ga, y + 0.2, gz + sp - 0.06, gb, y + 0.36, gz + sp + 0.06, F.schiene);
     S.quader(ga, 6.3, gz - 0.04, gb, 6.38, gz + 0.04, F.dunkel);
+    if (ctx.qualitaet) {
+      const spur = { achse: ctx.spiegel ? 'z' : 'x', mitte: gz, von: ga, bis: gb, breite: 3 };
+      ctx.qualitaet.gleise.push(spur); ctx.qualitaet.draehte.push({ ...spur });
+      for (const u of [ga, gb]) ctx.qualitaet.gleisenden.push({ achse: ctx.spiegel ? 'z' : 'x', mitte: gz, u, abschluss: 'prellbock' });
+    }
+    for (const u of [ga, gb]) S.box(0.42, 0.8, 2.3, u, y + 0.5, gz, '#c9b24c');
   }
   if (gleisZ.length) for (let x = xa + 10; x < xb - 5; x += 45) I.setze('olmastSeite', x, y, gleisZ[0] - 2.4, 0, [1, 1, Math.max(1, (gleisZ[gleisZ.length - 1] - gleisZ[0] + 4) / 6)]);
-  // Züge
-  const zuege = Math.min(gleisZ.length, 2 + (r() < 0.5 ? 1 : 0));
-  const frei = mische(r, gleisZ).slice(0, zuege);
-  for (const gz of frei) {
-    const wagen = Math.floor(zw(r, 3, 6.9));
-    const [ga, gb] = abschnitte(gz).sort((p, q) => q[1] - q[0] - (p[1] - p[0]))[0] ?? [xa, xb];
-    if (gb - ga < 40) continue;
-    let x = zw(r, ga + 6, Math.max(ga + 7, gb - wagen * 26.5 - 2));
-    const xEnde = gb;
+  // Züge ausschließlich an Bahnsteigen, Wagenlänge und Gleisende werden respektiert.
+  const gleiseMitBahnsteig = bh ? gleisZ.filter((gz) => bahnsteigZ.some((pz) => Math.abs(gz - pz) <= 8.5)) : [];
+  const zuege = Math.min(gleiseMitBahnsteig.length, 2 + (r() < 0.5 ? 1 : 0));
+  const frei = gleiseMitBahnsteig.map((gz) => ({ gz, los: r() })).sort((a, b) => a.los - b.los).slice(0, zuege);
+  for (const { gz } of frei) {
+    const [ga, gb] = abschnitte(gz).sort((p, q) => (q[1] - q[0]) - (p[1] - p[0]))[0] ?? [xa, xb];
+    const wagen = Math.min(Math.floor(zw(r, 3, 6.9)), Math.floor((gb - ga - 6) / 26.5));
+    if (wagen < 1) continue;
+    const beginn = Math.max(ga + 3, Math.min(bh.x + bh.w / 2 - wagen * 13.25, gb - wagen * 26.5 - 3));
     const farbe = waehle(r, ['#f1f1ee', '#e9eef0', '#d8dde1']);
-    for (let w = 0; w < wagen && x < xEnde - 13; w++, x += 26.5) I.setze('zugwagen', x + 13, y + 0.36, gz, 0, 1, [farbe]);
+    for (let w = 0; w < wagen; w++) {
+      const x = beginn + 13 + w * 26.5;
+      I.setze('zugwagen', x, y + 0.36, gz, 0, 1, [farbe]);
+      if (ctx.qualitaet) ctx.qualitaet.fahrzeuge.push({ art: 'zug', x: ctx.spiegel ? gz : x, z: ctx.spiegel ? x : gz, laenge: 26 });
+    }
   }
 }
 
