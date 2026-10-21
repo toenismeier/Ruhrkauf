@@ -41,6 +41,10 @@ export interface Abteilung {
   /** Zusatz: neu eingestellte FTE wirken bis zu dieser Woche nur zur Hälfte. */
   einarbeitungBis?: number;
   neuFte?: number;
+  /** Q15: Vergütungsfaktor 1 ist der unveränderte Kalibrierungsstandard. */
+  gehaltFaktor?: number;
+  /** Kumulierte zusätzliche Abgänge wegen Unterbezahlung, ohne RNG-Verbrauch. */
+  abgangRest?: number;
 }
 
 export interface HqAngebot {
@@ -202,6 +206,22 @@ export function sollFte(s: GameState, id: AbteilungId, stufe: Stufe): number {
 }
 
 export const qmBedarf = (a: Abteilung): number => a.fte * HQ_PARAM.qmJeFte;
+/** Q15: Tatsächlich verfügbare Schreibtische in den bereits gemieteten Etagen. */
+export function abteilungKapazitaet(s: GameState, a: Abteilung): number {
+  const g = gebaeude(s, a.gebaeudeId);
+  if (!g) return a.fte;
+  const freieQm = g.etagen.reduce((x, e) => x + freiQm(s, g, e), 0);
+  return Math.max(a.fte, Math.floor((platzQm(s, a) + freieQm) / HQ_PARAM.qmJeFte));
+}
+/** Abweichungen zur Vergütungsreferenz. Standard (Faktor 1) lässt alle Engine-Werte unverändert. */
+export function abteilungArbeitsklima(a: Abteilung): { moral: number; fluktuation: number; qualitaet: number } {
+  const f = a.gehaltFaktor ?? 1;
+  return {
+    moral: Math.round(clamp(72 + (f - 1) * 100, 0, 100)),
+    fluktuation: Math.round(clamp(0.08 - (f - 1) * 0.20, 0.01, 0.30) * 1000) / 1000,
+    qualitaet: Math.round(clamp(1 + (f - 1) * 0.5, 0.85, 1.15) * 1000) / 1000,
+  };
+}
 const qmAufEtage = (a: Abteilung, nr: number): number => (a.belegung ?? []).filter((b) => b.etage === nr).reduce((x, b) => x + b.qm, 0);
 
 export function abteilung(s: GameState, id: AbteilungId): Abteilung {
@@ -387,7 +407,7 @@ export function hqKosten(s: GameState): HqKosten {
     const stadt = abteilungsStadt(s, a);
     let st = cache.get(stadt);
     if (!st) { st = standort(s, stadt); cache.set(stadt, st); }
-    personal += a.fte * HQ_PARAM.lohn[a.id] * st.lohnFaktor;
+    personal += a.fte * HQ_PARAM.lohn[a.id] * st.lohnFaktor * (a.gehaltFaktor ?? 1);
     reise += a.fte * st.reiseJeFte;
     fte += a.fte;
   }
@@ -415,7 +435,8 @@ export function hqAktualisiere(s: GameState): void {
   syncEtagen(s);
   const v = verteilungsFaktor(s);
   // Vorstand: Führung des Ressorts verstärkt oder schwächt die Abteilungen (Start = 1)
-  for (const a of hq.abteilungen) hq.wirkung[a.id] = Math.min(3, wirksameStufe(s, a, v) * vorstandWirkung(s, a.id));
+  for (const a of hq.abteilungen) hq.wirkung[a.id] = Math.min(3,
+    wirksameStufe(s, a, v) * vorstandWirkung(s, a.id) * abteilungArbeitsklima(a).qualitaet);
   const k = hqKosten(s);
   s.zentrale.kostenWoche = eur(k.gesamt);
   s.zentrale.fte = Math.round(hq.abteilungen.reduce((x, a) => x + a.fte, 0) + (s.marktbeobachtung?.fte ?? 0));
@@ -588,6 +609,19 @@ export function hqWoche(s: GameState): void {
   const w = s.woche;
   // Angebote kommen aus dem eigenen Zufallsstrom und laufen auch in Prognosen gleich
   if (w > 0 && w % 13 === 0) neueHqAngebote(s);
+  // Q15: Nur zusätzliche Fluktuation gegenüber dem neutralen Gehaltsstandard.
+  // Ohne Änderung des Gehalts bleibt die wöchentliche Simulation bytegenau neutral.
+  for (const a of hq.abteilungen) {
+    const mehrAbgang = Math.max(0, abteilungArbeitsklima(a).fluktuation - 0.08);
+    if (mehrAbgang <= 0 || a.fte <= 1) continue;
+    a.abgangRest = (a.abgangRest ?? 0) + a.fte * mehrAbgang / 52;
+    const abgang = Math.min(a.fte - 1, Math.floor(a.abgangRest));
+    if (abgang > 0) {
+      a.fte -= abgang;
+      a.abgangRest -= abgang;
+      schrumpfe(a, qmBedarf(a));
+    }
+  }
   // Abbau schlägt verzögert auf die Wirkung durch
   for (const a of hq.abteilungen) {
     const ziel = besetzungsStufe(s, a);
@@ -803,6 +837,50 @@ export function abteilungStufe(s: GameState, id: AbteilungId, stufe: number): Hq
   return ok(alteStufe === st ? `${name} ist bereits passend besetzt.` : `${name} arbeitet ab sofort auf Stufe ${st}.`);
 }
 
+/** Q15: Einzelne Stellen innerhalb der bestehenden HQ-Fläche besetzen oder abbauen. */
+export function abteilungFteSetzen(s: GameState, id: AbteilungId, ziel: number): HqErgebnis {
+  if (!ABTEILUNGEN.includes(id) || !Number.isInteger(ziel) || ziel < 1) return fehler('Ungültige Mitarbeiterzahl.');
+  const a = abteilung(s, id);
+  if (ziel === a.fte) return ok('Die Besetzung ist unverändert.');
+  const max = abteilungKapazitaet(s, a);
+  if (ziel > max) return fehler(`Nur ${max} Arbeitsplätze verfügbar. Zuerst zusätzliche Etagen anmieten.`);
+  if (ziel < a.fte) {
+    const weg = a.fte - ziel;
+    const abf = weg * abfindungJeFte(s);
+    einmal(s, abf);
+    a.fte = ziel;
+    schrumpfe(a, qmBedarf(a));
+    const gesamt = Math.max(1, s.hq.abteilungen.reduce((x, x0) => x + x0.fte, 0));
+    s.stakeholder.betriebsrat = clamp(s.stakeholder.betriebsrat - weg / gesamt * 30, 0, 100);
+    hqAktualisiere(s);
+    return ok(`${ABTEILUNG_NAME[id]}: ${weg} Stellen abgebaut, Abfindung ${mio(abf)}.`);
+  }
+  const g = gebaeude(s, a.gebaeudeId);
+  if (!g || a.etage === undefined) return fehler('Zuerst eine gemietete Etage zuweisen.');
+  const neu = ziel - a.fte;
+  const plan = planeBelegung(s, g, a.etage, neu * HQ_PARAM.qmJeFte);
+  if (!plan) return fehler('Die freien Arbeitsplätze liegen nicht auf ausreichend nutzbaren Etagen.');
+  const recruiting = neu * HQ_PARAM.einarbeitungJeFte * standort(s, g.stadt).recruitingFaktor;
+  einmal(s, recruiting);
+  a.belegung = vereinige(a.belegung ?? [], plan);
+  a.fte = ziel;
+  a.neuFte = (a.einarbeitungBis !== undefined && a.einarbeitungBis > s.woche ? a.neuFte ?? 0 : 0) + neu;
+  a.einarbeitungBis = s.woche + HQ_PARAM.einarbeitungWochen;
+  hqAktualisiere(s);
+  return ok(`${ABTEILUNG_NAME[id]}: ${neu} Stellen besetzt. Recruiting ${mio(recruiting)}, Einarbeitung ${HQ_PARAM.einarbeitungWochen} Wochen.`);
+}
+
+/** Q15: Lohnanpassung mit eigenständiger Wirkung auf Kosten, Arbeitsklima und Qualität. */
+export function abteilungGehaltSetzen(s: GameState, id: AbteilungId, faktor: number): HqErgebnis {
+  if (!ABTEILUNGEN.includes(id) || !Number.isFinite(faktor) || faktor < 0.8 || faktor > 1.2 ||
+      Math.abs(faktor * 20 - Math.round(faktor * 20)) > 0.00001) return fehler('Gehaltsniveau von 80 bis 120 % in 5-%-Schritten wählen.');
+  const a = abteilung(s, id);
+  a.gehaltFaktor = Math.round(faktor * 20) / 20;
+  hqAktualisiere(s);
+  const klima = abteilungArbeitsklima(a);
+  return ok(`${ABTEILUNG_NAME[id]}: Gehalt ${Math.round(a.gehaltFaktor * 100)} % des Standards. Moral ${klima.moral}/100, Fluktuationsrisiko ${Math.round(klima.fluktuation * 1000) / 10} % im Jahr.`);
+}
+
 /** Bestehende Aktion 'zentrale': kürzt alle Abteilungen anteilig (Stufen bleiben, Besetzung sinkt). */
 export function zentraleKuerzen(s: GameState, prozent: number): HqErgebnis {
   const p = clamp(prozent, 0, 0.3);
@@ -881,6 +959,7 @@ export interface HqUebersicht {
     id: AbteilungId; name: string; stufe: Stufe; wirksameStufe: number; fte: number; sollFte: number; qmBedarf: number;
     gebaeudeId?: string; gebaeude?: string; stadt?: string; etage?: number; etagen: number[]; platzQm: number; umzugBis?: number; einarbeitungBis?: number;
     kostenWoche: number; wirkung: string;
+    kapazitaetFte: number; gehaltFaktor: number; moral: number; fluktuation: number; qualitaet: number;
   }[];
   angebote: {
     id: string; name: string; stadt: string; typ: HqTyp; vermieter: string; frist: number; laufzeitJahre: number;
@@ -920,12 +999,15 @@ export function hqUebersicht(s: GameState): HqUebersicht {
     }),
     abteilungen: hq.abteilungen.map((a) => {
       const g = gebaeude(s, a.gebaeudeId);
+      const klima = abteilungArbeitsklima(a);
       return {
         id: a.id, name: ABTEILUNG_NAME[a.id], stufe: a.stufe, wirksameStufe: Math.round(hq.wirkung[a.id] * 100) / 100, fte: a.fte,
         sollFte: Math.round(sollFte(s, a.id, a.stufe)), qmBedarf: Math.round(qmBedarf(a)),
         gebaeudeId: a.gebaeudeId, gebaeude: g?.name, stadt: g?.stadt, etage: a.etage, etagen: (a.belegung ?? []).map((b) => b.etage),
         platzQm: Math.round(platzQm(s, a)), umzugBis: a.umzugBis, einarbeitungBis: a.einarbeitungBis,
-        kostenWoche: eur(a.fte * (HQ_PARAM.lohn[a.id] + hq.sachJeFte)), wirkung: wirkungText(s, a.id),
+        kostenWoche: eur(a.fte * (HQ_PARAM.lohn[a.id] * (a.gehaltFaktor ?? 1) + hq.sachJeFte)), wirkung: wirkungText(s, a.id),
+        kapazitaetFte: abteilungKapazitaet(s, a), gehaltFaktor: a.gehaltFaktor ?? 1,
+        moral: klima.moral, fluktuation: klima.fluktuation, qualitaet: klima.qualitaet,
       };
     }),
     angebote: hq.angebote.map((an) => ({
