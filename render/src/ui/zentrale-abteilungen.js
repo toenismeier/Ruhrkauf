@@ -137,8 +137,10 @@ export function zentraleAbteilungHtml(u, grafik, organisation, id, etageWahl) {
     '</b></span></div>' + stufeWahl + '<div class="q15-hinweis">Personalkosten je Woche: <b>' +
     geld(a.kostenWoche) + '</b></div></section>';
   h += '<section class="q15-team"><h3>Stimmen aus dem Team</h3><div class="q15-stimmen">' +
-    stimmungsTexte(a, a.fte, kap).map((satz, i) => '<div class="q15-stimme"><span class="q15-avatar">' +
-      (i + 1) + '</span><p>' + esc(satz) + '</p></div>').join('') + '</div></section>';
+    stimmungsTexte(a, a.fte, kap).map((satz) => '<div class="q15-stimme"><span class="q15-avatar" aria-hidden="true">' +
+      '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5">' +
+      '<circle cx="12" cy="7.5" r="3"/><path d="M5.5 21v-4c0-3.5 2.5-5.5 6.5-5.5s6.5 2 6.5 5.5v4"/></svg>' +
+      '</span><p>' + esc(satz) + '</p></div>').join('') + '</div></section>';
   h += '<section class="q15-fuehrung"><h3>Leitung</h3>' + (leitung ?
     balken('Fachliche Kompetenz', leitung.qualitaet * 100) + balken('Stimmung', leitung.stimmung) :
     '<p>Die Leitungsstelle ist vakant. Besetzen Sie diese über Organisation.</p>') +
@@ -158,13 +160,23 @@ export function zentraleAbteilungHtml(u, grafik, organisation, id, etageWahl) {
     }
     h += '</details>';
   }
-  h += '</section><nav class="q15-navigation" aria-label="Fachabteilungen und Gebäude">';
-  for (const id0 of REIHENFOLGE) {
-    if (!(u.abteilungen ?? []).some((x) => x.id === id0)) continue;
-    h += '<button type="button" class="' + (id0 === id ? 'an' : '') +
-      '" aria-current="' + (id0 === id ? 'page' : 'false') + '" onclick="hqKlick(\'abteilung\',\'' +
-      id0 + '\')">' + TITEL[id0] + '</button>';
+  h += '</section><div class="q15-navgebaeude">';
+  const gebaeudeGruppen = (u.gebaeude ?? []).map((g) => ({
+    name: g.name,
+    ids: REIHENFOLGE.filter((id0) => (u.abteilungen ?? []).some((x) => x.id === id0 && x.gebaeudeId === g.id)),
+  })).filter((g) => g.ids.length);
+  const ohneBuero = REIHENFOLGE.filter((id0) => (u.abteilungen ?? []).some((x) => x.id === id0 && !x.gebaeudeId));
+  if (ohneBuero.length) gebaeudeGruppen.push({ name: 'Ohne zugewiesenes Büro', ids: ohneBuero });
+  for (const gruppe of gebaeudeGruppen) {
+    h += '<div class="q15-navtitel">' + esc(gruppe.name) + '</div>';
+    h += '<nav class="q15-navigation" aria-label="Abteilungen in ' + esc(gruppe.name) + '">';
+    for (const id0 of gruppe.ids) {
+      h += '<button type="button" class="' + (id0 === id ? 'an' : '') +
+        '" aria-current="' + (id0 === id ? 'page' : 'false') +
+        '" onclick="hqKlick(\\'abteilung\\',\\'' + id0 + '\\')">' + TITEL[id0] + '</button>';
+    }
+    h += '<button type="button" onclick="hqKlick(\\'uebersicht\\')">Etage hinzufügen</button></nav>';
   }
-  h += '<button type="button" onclick="hqKlick(\'uebersicht\')">Etage hinzufügen</button></nav></div>';
+  h += '</div></div>';
   return { titel: a.name, unter: (a.stadt ?? u.sitz) + ' · ' + (wahl ? etageName(wahl.etage.nr) : 'ohne Etage'), html: h };
 }
