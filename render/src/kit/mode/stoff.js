@@ -4,7 +4,7 @@ export const FARBEN = {
   'weiß': '#f4f3ef', offwhite: '#ece6d8', creme: '#e9dcc0', sand: '#d6c19a', beige: '#c9b08a', camel: '#b8864e', cognac: '#9a5a2e', braun: '#6a4630',
   grau: '#a2a6ab', hellgrau: '#c9ccd0', anthrazit: '#474c53', schwarz: '#2a2c30', marine: '#273659', hellblau: '#a9c8e8', jeansblau: '#4d6f9a', hellerdenim: '#87a3c3', dunkeldenim: '#2f4466',
   petrol: '#1f6b78', mint: '#9fd9bf', salbei: '#9fb393', olive: '#757a45', khaki: '#a49a6c', flaschengruen: '#2c5a40', senf: '#cc9f2e',
-  gelb: '#f1cf4a', orange: '#e8833a', koralle: '#ec7a6a', rot: '#c8372f', bordeaux: '#76263a', rosa: '#f2b8cc', altrosa: '#d29a9c', flieder: '#c4b0dc', lila: '#7a4f9a', terrakotta: '#c0643f', ecru: '#efe7d6',
+  gelb: '#f1cf4a', orange: '#e8833a', koralle: '#ec7a6a', rot: '#c8372f', bordeaux: '#76263a', rosa: '#f2b8cc', altrosa: '#d29a9c', flieder: '#c4b0dc', lila: '#7a4f9a', terrakotta: '#c0643f', ecru: '#efe7d6', mint: '#9fd9bf', 'mintgrün': '#9fd9bf', mintgruen: '#9fd9bf', 'flaschengrün': '#2c5a40', 'hellgrün': '#a8cf8e', natur: '#e6dcc6', silber: '#c9ced3', gold: '#c9a24a',
 };
 
 function rgb(h) { h = String(h).replace('#', ''); if (h.length === 3) h = h.split('').map((c) => c + c).join(''); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
@@ -13,7 +13,7 @@ export const mische = (a, b, t) => { const A = rgb(a), B = rgb(b); return hex(A.
 export const hell = (c, t) => (t < 0 ? dunkel(c, -t) : mische(c, '#ffffff', t));
 export const dunkel = (c, t) => mische(c, '#1a1612', t);
 export const helligkeit = (c) => { const [r, g, b] = rgb(c); return (0.299 * r + 0.587 * g + 0.114 * b) / 255; };
-export const farbeVon = (f) => FARBEN[f] ?? (/^#[0-9a-f]{3,6}$/i.test(String(f)) ? f : FARBEN.grau);
+export const farbeVon = (f) => FARBEN[f] ?? FARBEN[String(f ?? '').toLowerCase()] ?? (/^#[0-9a-f]{3,6}$/i.test(String(f)) ? f : FARBEN.grau);
 
 let zaehler = 0;
 // Legt Muster/Verläufe für ein Teil an und gibt den Stoffkontext zurück.

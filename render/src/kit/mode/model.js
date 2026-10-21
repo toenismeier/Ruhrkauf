@@ -200,7 +200,7 @@ function haarSVG(K, farbe, stil, hinten) {
 // Oberteile: o = { aermel: ohne|kurz|halb|lang, passform: tailliert|gerade|oversize, laenge: crop|normal|lang|tunika, ausschnitt: rund|v|carree|kragen|stehkragen, kapuze, kaenguru, rippbund, knopfleiste }
 function oberteil(K, S, o) {
   const plus = o.passform === 'oversize' ? 6 : o.passform === 'tailliert' ? 2.4 : 3.4;
-  const unten = o.laenge === 'crop' ? K.m.taille - 2 : o.laenge === 'lang' ? K.m.huefte + 8 : o.laenge === 'tunika' ? K.m.schritt + 12 : K.m.huefte - 2;
+  const unten = o.laenge === 'taille' ? K.m.taille + 4 : o.laenge === 'crop' ? K.m.taille - 2 : o.laenge === 'lang' ? K.m.huefte + 8 : o.laenge === 'tunika' ? K.m.schritt + 12 : K.m.huefte - 2;
   const sw = K.schulter.at(-1);
   const t = [];
   // Ärmel
@@ -289,13 +289,19 @@ function hose(K, S, o) {
   else for (const x of [-bw + 3, -7, 7, bw - 3]) t.push(`<rect x="${f(100 + x - 0.8)}" y="${f(bund - 0.6)}" width="1.6" height="6.2" rx="0.4" fill="${S.cD}"/>`);
   if (S.denim || o.knopf) t.push(`<circle cx="100" cy="${f(bund + 2.5)}" r="1.4" fill="#caa34c" stroke="#8f6f2a" stroke-width="0.35"/>`, `<path d="M101.6 ${f(bund + 5)} Q102 ${f(K.schritt[1] - 10)} 104.6 ${f(K.schritt[1] - 13)}" stroke="${S.cD}" stroke-width="0.7" fill="none"/>`);
   if (o.bundfalte) for (const s of [-1, 1]) t.push(`<path d="M${f(100 + s * 8)} ${f(bund + 5)} l${s * 1.2} 12" stroke="${S.cD}" stroke-width="0.7"/>`);
+  if (o.latz) {
+    const lb = K.breite(K.m.brust) * 0.62, oy = K.m.brust - 2;
+    t.push(flaeche(S, glatt([[100 - lb, bund + 1, E], [100 - lb, oy, E], [100 + lb, oy, E], [100 + lb, bund + 1, E]], true, 0.2)));
+    t.push(flaeche(S, glatt([[100 - lb * 0.55, oy + 4, E], [100 + lb * 0.55, oy + 4, E], [100 + lb * 0.55, oy + 13, E], [100 - lb * 0.55, oy + 13, E]], true, 0.2), { ton: -0.05 }));
+    for (const s of [-1, 1]) t.push(`<path d="M${f(100 + s * (lb - 2))} ${f(oy + 1)} L${f(100 + s * (K.breite(K.m.brust) - 1))} ${f(K.m.schulterY - 2)}" stroke="${S.cD}" stroke-width="3.2" stroke-linecap="round"/>`, `<circle cx="${f(100 + s * (lb - 2))}" cy="${f(oy + 2)}" r="1.4" fill="#caa34c"/>`);
+  }
   return t.join('');
 }
 
 function rock(K, S, o) {
   const bund = K.m.taille + (o.leibhoehe === 'hoch' ? -2 : 3);
   const ende = o.laenge === 'mini' ? K.m.schritt + 12 : o.laenge === 'knie' ? K.m.knie + 4 : o.laenge === 'midi' ? K.m.knie + (K.m.knoechel - K.m.knie) * 0.5 : K.m.knoechel - 4;
-  const ausstell = { bleistift: -2, gerade: 1.5, 'a-linie': 9, plissee: 11, glocke: 14 }[o.form ?? 'a-linie'];
+  const ausstell = { bleistift: -2, etui: -1, gerade: 1.5, slip: 3, 'a-linie': 9, wickel: 8, plissee: 11, stufen: 12, glocke: 14 }[o.form ?? 'a-linie'] ?? 9;
   const hw = K.breite(K.m.huefte) + 2;
   const r = [[100 + K.breite(bund) + 1.5, bund, E], [100 + hw, K.m.huefte], [100 + hw + ausstell, ende, E]];
   const pts = [...r, [100 + (hw + ausstell) * 0.4, ende + 2.5], [100 - (hw + ausstell) * 0.4, ende + 2.5], ...spiegelX([...r].reverse())];
@@ -308,7 +314,7 @@ function rock(K, S, o) {
 
 function kleid(K, S, o) {
   return rock(K, S, { form: o.form ?? 'a-linie', laenge: o.laenge ?? 'knie', leibhoehe: 'normal' })
-    + oberteil(K, S, { aermel: o.aermel ?? 'ohne', ausschnitt: o.ausschnitt ?? 'v', passform: 'tailliert', laenge: 'crop' })
+    + oberteil(K, S, { aermel: o.aermel ?? 'ohne', ausschnitt: o.ausschnitt ?? 'v', passform: 'tailliert', laenge: 'taille', kragen: o.kragen })
     + (o.guertel ? `<rect x="${f(100 - K.breite(K.m.taille) - 2)}" y="${f(K.m.taille - 3)}" width="${f(2 * K.breite(K.m.taille) + 4)}" height="4" rx="1" fill="${dunkel(S.c, 0.3)}"/>` : '');
 }
 
@@ -321,7 +327,7 @@ function jacke(K, S, o) {
     const weit = 3;
     const aussen = K.armA.map(([x, y]) => [x + weit, y]);
     const innen = K.armI.map(([x, y]) => [x - weit * 0.6, y]).reverse();
-    t.push(flaeche(S, glatt(sp([[K.schulter.at(-1)[0] - 1, K.schulter.at(-1)[1] - 3], ...aussen.slice(1, -1), [aussen.at(-1)[0] + 0.5, K.m.handgelenk + 1, E], [innen[0][0] - 0.5, K.m.handgelenk + 1.5, E], ...innen.slice(1), [K.armI[0][0] - 6, K.armI[0][1] - 6]]))));
+    if (!o.weste) t.push(flaeche(S, glatt(sp([[K.schulter.at(-1)[0] - 1, K.schulter.at(-1)[1] - 3], ...aussen.slice(1, -1), [aussen.at(-1)[0] + 0.5, K.m.handgelenk + 1, E], [innen[0][0] - 0.5, K.m.handgelenk + 1.5, E], ...innen.slice(1), [K.armI[0][0] - 6, K.armI[0][1] - 6]]))));
     // Vorderteil je Seite (offen in der Mitte bis zur Knopfung)
     const plus = 5;
     const seite = [[100 + K.hals.b + 1, K.hals.y1 - 4, E], [K.schulter.at(-1)[0] + 2, K.schulter.at(-1)[1] - 2], [100 + K.breite(K.m.brust) + plus, K.m.brust], [100 + K.breite(K.m.taille) + plus - (o.guertel ? 2 : 0), K.m.taille], [100 + K.breite(K.m.huefte) + plus, K.m.huefte]];
@@ -385,7 +391,8 @@ export function modelSVG({ geschlecht = 'damen', zielgruppe = 'young', haut = HA
   const K = koerper(geschlecht, zielgruppe);
   const defs = [];
   const teile = [];
-  const sortiert = [...outfit].sort((a, b) => REIHENFOLGE.indexOf(a.teil) - REIHENFOLGE.indexOf(b.teil));
+  const rang = (o) => (o.teil === 'hose' && o.latz ? REIHENFOLGE.indexOf('oberteil') + 0.5 : REIHENFOLGE.indexOf(o.teil));
+  const sortiert = [...outfit].sort((a, b) => rang(a) - rang(b));
   const oben = [];
   for (const o of sortiert) (o.teil === 'muetze' ? oben : teile).push(TEILE[o.teil](K, materialDefs(o.farbe, o.material, defs, o.muster), o));
   const hg = hintergrund ? `<rect width="200" height="420" fill="${hintergrund}"/><ellipse cx="100" cy="${f(K.fuss + 3)}" rx="${f(K.zielgruppe === 'kinder' ? 26 : 38)}" ry="4.5" fill="#000" opacity="0.09"/>` : '';
