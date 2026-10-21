@@ -10,12 +10,17 @@ jest.setTimeout(120000);
 
 describe('Wettbewerber: Initialisierung', () => {
   const s = neuesSpiel(1);
-  test('nurDaten-Formate durchlaufen keinen Wettbewerbszyklus als eigene Handelsstandorte', () => {
+  test('Volkskauf und FUNDUS sind seit engine-formate echte Standorte mit Wettbewerbs-Startwerten', () => {
     const t = neuesSpiel(7);
-    const nurDaten = t.haeuser.filter((h) => h.nurDaten);
-    expect(nurDaten).toHaveLength(152);
+    expect(t.haeuser.filter((h) => h.nurDaten)).toHaveLength(0);
+    const formate = t.haeuser.filter((h) => h.format === 'schwester' || h.format === 'outlet');
+    expect(formate).toHaveLength(152);
+    for (const h of formate) {
+      expect(h.wettbewerbLeerStart).toBeDefined();
+      expect(wettbewerbOffpriceFaktor(t, h)).toBe(1);
+    }
     for (let i = 0; i < 12; i++) wocheAbspielen(t);
-    for (const h of nurDaten) expect(h.kpi).toBeUndefined();
+    for (const h of formate) expect(h.kpi).toBeDefined();
   });
   // Maßstab Phase 2: neu kalibrieren
   test.skip('jede Stadt hat einen plausiblen Bestand und die Startkalibrierung bleibt exakt', () => {

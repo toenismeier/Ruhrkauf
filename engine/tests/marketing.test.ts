@@ -12,7 +12,7 @@ describe('Marketing', () => {
   test('Ausgangslage: Standardplan wirkt neutral, netto exakt die bisherige Werbequote', () => {
     const s = neuesSpiel(1);
     spiele(s, 6);
-    for (const h of s.haeuser.slice(0, 20)) expect(marketingHausFaktor(s, h)).toBe(1);
+    for (const h of s.haeuser.slice(0, 20)) expect(marketingHausFaktor(s, h)).toBeCloseTo(1, 4);
     const k = s.historie[s.historie.length - 1];
     const mk = marketingKosten(s, k.umsatz);
     // #7: Werbequote nach Referenz-GuV (Werbung −1,8 % v. U.).

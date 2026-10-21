@@ -8,6 +8,7 @@ import type { Bestellung, Format, GameState, GruppeId, Kohorte } from './types';
 import { clamp, eur, melde, mio, normal, zwischen, type RngHalter } from './util';
 import type { HausRoh } from './wirtschaft';
 import { produktMargeDelta, produktNachfrageFaktor } from './produkte';
+import { outletKapazitaet } from './formate';
 import { marketingAltVerkauf, marketingAltwareFaktor, marketingWgTilt } from './marketing';
 import {
   attraktivitaet, BESCHAFFUNG, eigenmarkeAnteil, eigenmarkeEinstellen, eigenmarkeGruenden, eigenmarkeNeupositionieren,
@@ -889,7 +890,8 @@ export function verbraucheAltwareWg(s: GameState, f: Format, wertVoll: number): 
 /** Konzerninterner Bestandsübertrag an FUNDUS, 3 % reale Transportkosten. */
 export function outletVersorgung(s: GameState): number {
   if (!s.formate) return 0;
-  const quote = clamp(s.einkauf.altwareOutlet ?? 0.5, 0, 1);
+  // Nur so viel Altware, wie das offene FUNDUS-Netz aufnehmen kann.
+  const quote = clamp(s.einkauf.altwareOutlet ?? 0.5, 0, 1) * Math.min(1, outletKapazitaet(s));
   let transport = 0, eingang = 0;
   for (const k of s.bestand) {
     const alt = !!k.ladenhueter || (k.art === 'nos' ? k.alter > EK_PARAM.altNos : k.alter > EK_PARAM.altSaison);

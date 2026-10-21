@@ -4,6 +4,7 @@ import { STAEDTE } from './daten';
 import { clamp, eur, chance, zwischen, melde, type RngHalter } from './util';
 import { simuliereHaus, hausKosten, leereKpi, nebenvertragsErtraege } from './wirtschaft';
 import { guvAbschluss, type FilialGuV } from './filialguv';
+import { wettbewerbStartwerte } from './wettbewerb';
 
 export interface FormatPosten { quelle: 'markenposten' | 'altware'; wert: number; preisFaktor: number; alter: number; ladenhueter?: boolean }
 export interface FormatProjekt { haus: string; start: number; bis: number; typ: 'umflaggen' | 'eroeffnen' }
@@ -12,6 +13,10 @@ export interface FormateStand {
   naechsteOutletId: number; altwareEingang: number; zukaufWoche: number;
   umsatzWoche: number; abverkaufWoche: number; abschriftenWoche: number;
   schwesterZentraleWoche: number;
+  /** Verkaufsfläche der offenen FUNDUS-Häuser beim Start (Bezug für Zukauf und Altwarefluss). */
+  outletQmStart?: number;
+  /** Verkaufsfläche der Volkskauf-Häuser beim Start (Bezug für die Regionalführung). */
+  volkskaufQmStart?: number;
 }
 export interface FormatBuchung {
   haus: Haus; kpi: HausKpi; guv: FilialGuV;
@@ -39,7 +44,7 @@ export function initialisiereFormate(s:GameState):void{
   const out=s.haeuser.filter(h=>h.format==='outlet');
   let volksUmsatz=0;
   for(const h of [...volks,...out]){
-    h.nurDaten=false;
+    h.nurDaten=false;wettbewerbStartwerte(s,h);
     const umsatz=h.format==='schwester'?basis(h)*0.72:qm(h)*72;
     const quote=h.format==='schwester'?0.165:0.115;
     const fte=Math.max(3,umsatz*quote/980);
@@ -49,7 +54,14 @@ export function initialisiereFormate(s:GameState):void{
       volksUmsatz+=umsatz;
       h.einzug.alter*=1.1;
       h.substanz=clamp(h.substanz-18,15,60);h.substanzStart=h.substanz;
-      h.personal.filialleiter.skill=Math.min(0.6,h.personal.filialleiter.skill);
+      const fl=h.personal.filialleiter;
+      if(fl.skill>0.6){
+        // O07: skill bleibt das Mittel der vier Stärken, daher proportional kappen.
+        const k=0.6/fl.skill;fl.skill=0.6;
+        if(fl.staerken)for(const key of Object.keys(fl.staerken) as (keyof typeof fl.staerken)[])fl.staerken[key]*=k;
+        // Startzustand der Leitung: O07 misst Änderungen gegen diesen Wert.
+        if(h.betrieb)h.betrieb.leitungStart=fl.skill;
+      }
       for(const g of Object.keys(h.potenzial) as (keyof Haus['potenzial'])[])h.potenzial[g]!*=0.72;
     }
     h.nebenvertrag={
@@ -65,7 +77,22 @@ export function initialisiereFormate(s:GameState):void{
     volkskaufBestand:eur(volksUmsatz*VK_EK*8),projekte:[],
     naechsteOutletId:1+Math.max(66,...out.map(h=>Number(h.id.slice(1))||0)),
     altwareEingang:0,zukaufWoche:0,umsatzWoche:0,abverkaufWoche:0,abschriftenWoche:0,
-    schwesterZentraleWoche:eur(volksUmsatz*0.004)};
+    schwesterZentraleWoche:eur(volksUmsatz*0.004),outletQmStart:out.reduce((n,h)=>n+qm(h),0),volkskaufQmStart:volks.reduce((n,h)=>n+qm(h),0)};
+}
+/** Offene FUNDUS-Fläche relativ zum Start: Zukauf und Altwarefluss folgen dem Netz,
+ * sonst laufen Ware und Abschriften nach Schließungen auf wenige Häuser auf. */
+export function outletKapazitaet(s:GameState):number{
+  const f=s.formate;if(!f)return 0;
+  const offen=s.haeuser.filter(h=>h.format==='outlet'&&!h.nurDaten&&h.status==='offen').reduce((n,h)=>n+qm(h),0);
+  f.outletQmStart??=Math.max(1,offen);
+  return clamp(offen/Math.max(1,f.outletQmStart),0,2);
+}
+/** Volkskauf-Regionalführung: 40 % fix, 60 % schrumpfen mit dem offenen Netz
+ * (Schließung oder Umflaggen spart anteilig Regionalleitung). */
+function volkskaufZentraleFaktor(s:GameState,offen:Haus[]):number{
+  const f=s.formate!;const jetzt=offen.reduce((n,h)=>n+qm(h),0);
+  f.volkskaufQmStart??=Math.max(1,jetzt);
+  return 0.4+0.6*clamp(jetzt/Math.max(1,f.volkskaufQmStart),0,1);
 }
 export function formateProjekteWoche(s:GameState):void{
   const stand=s.formate;if(!stand)return;
@@ -75,7 +102,7 @@ export function formateProjekteWoche(s:GameState):void{
       h.format='warenhaus';h.hausklasse='C';h.name='Hartwig '+h.stadt;
       for(const g of Object.keys(h.potenzial) as (keyof Haus['potenzial'])[])h.potenzial[g]!*=1.125;
       h.formatIntegrationBis=s.woche+52;
-    } else h.nurDaten=false;
+    } else {h.nurDaten=false;wettbewerbStartwerte(s,h);}
     melde(s,'info',h.name+': Formatprojekt abgeschlossen.',{stadt:h.stadt,hausId:h.id});
   }
   stand.projekte=stand.projekte.filter(p=>p.bis>s.woche);
@@ -142,7 +169,7 @@ export function formateWoche(s:GameState):FormateWoche{
   const aktive=s.haeuser.filter(h=>!h.nurDaten&&h.status==='offen'&&(h.format==='schwester'||h.format==='outlet'));
   const out=aktive.filter(h=>h.format==='outlet');
   const volks=aktive.filter(h=>h.format==='schwester');
-  const budget=out.length?Math.max(0,eur(s.einkauf.offpriceZukauf??0)):0;
+  const budget=out.length?Math.max(0,eur((s.einkauf.offpriceZukauf??0)*outletKapazitaet(s))):0;
   const stufe=s.hq.abteilungen.find(a=>a.id==='einkauf')?.stufe??0;
   const preisFaktor=clamp(0.56+stufe*0.02,0.5,0.7)/clamp(0.378-stufe*0.013,0.3,0.4);
   if(budget)f.pool.push({quelle:'markenposten',wert:budget,preisFaktor,alter:0});
@@ -206,7 +233,7 @@ export function formateWoche(s:GameState):FormateWoche{
     melde(s,'warnung','FUNDUS: Warenüberhang und Abschriftenrisiko.');
   return {buchungen,warenZukauf:eur(warenZukauf),abschriften:eur(abschriften),
     marketing:buchungen.reduce((n,b)=>n+b.guv.werbung,0),
-    zentrale:volks.length?f.schwesterZentraleWoche:0};
+    zentrale:volks.length?eur(f.schwesterZentraleWoche*volkskaufZentraleFaktor(s,volks)):0};
 }
 export function outletUebersicht(s:GameState){
   const f=s.formate;const pool=f?.pool??[];

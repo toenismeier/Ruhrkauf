@@ -646,6 +646,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisiereWare(s);
   // Die Hartwig-Referenz samt HQ und Einkaufsbestand wurde bereits kalibriert.
   initialisiereFormate(s);
+  // Volkskauf/FUNDUS sind jetzt aktiv: HQ-Wirkung und Zentralkosten auf das ganze Netz beziehen.
+  hqAktualisiere(s);
   return s;
 }
 
