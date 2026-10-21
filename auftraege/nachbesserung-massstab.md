@@ -172,3 +172,38 @@ Ursache laut `m7-jahresdiagnose.ts` (Seed 1, mittel):
 2. Schließung schwacher Häuser: Umsatzverlust höchstens proportional zu ihrem Umsatzanteil; davon wandert ein Teil zu Häusern derselben Stadt bzw. Region und zu hartwig.de (Kannibalisierungsrücklauf, Größenordnung 20 bis 40 %). Kosten fallen nach Abwicklung vollständig weg.
 3. Fehlumsatz im vierten Quartal senken (Allokation/Nachschub aus O05 vor Weihnachten).
 Abnahme bleibt Abschnitt 14 (Bot D mittel Seeds 1 bis 3 überlebt 260 Wochen ohne Insolvenz, positives EBITDA der letzten 52 Wochen).
+
+## 17. Referenz-Kostenstruktur und Turnaround ohne Schließungen (Vorgabe Ummo, 21.10.2026)
+Ummo hat eine reale Filial-GuV eines Warenhauskonzerns geliefert (IST, Filialebene ohne Zentrale, in % vom Umsatz). Sie ist ab jetzt die **verbindliche Referenz für die Startlage** und ersetzt die Zielquoten aus Abschnitt 16 (Personal 20 %, Miete 11 %). Werte exakt so übernehmen:
+
+| Position | IST % v. U. | Vorjahr | Plan |
+|---|---:|---:|---:|
+| Umsatz | 100,0 % | | |
+| Wareneinsatz | −58,8 % | | |
+| Bruttogewinn | 41,2 % | 41,7 % | 46,1 % |
+| Übrige betriebliche Erträge | 2,3 % | | |
+| Personalaufwand | −16,0 % | −15,6 % | −15,6 % |
+| Fremdkräfte | −0,7 % | | |
+| Miete / Leasing | −11,2 % | | |
+| Mietnebenkosten | −1,5 % | | |
+| Logistik | −6,3 % | | |
+| Werbung | −1,8 % | | |
+| Unterhalt | −1,9 % | | |
+| Zahlungsverkehr | −0,2 % | | |
+| Facility Management | −1,7 % | | |
+| Energie | −2,4 % | | |
+| IT | −0,3 % | | |
+| Administrative Kosten | −0,2 % | | |
+| Übrige betriebliche Aufwendungen | −0,4 % | | |
+| Total OPEX | −42,4 % | | |
+| **EBITDA Filialebene** | **−1,2 %** | | |
+
+Die Zentrale kommt im Spiel zusätzlich obendrauf (eigene Kostenstelle).
+
+**Entscheidung Ummo:** Turnaround und Sanierung müssen **auch ohne Schließungen** möglich sein.
+
+Umsetzung:
+1. **Filial-GuV in diesen Positionen** führen (Engine und Haus-Reiter/Reporting): mindestens Wareneinsatz/Bruttogewinn, übrige Erträge, Personal, Fremdkräfte, Miete, Mietnebenkosten, Logistik, Werbung, Unterhalt, Facility Management, Energie, IT/Administration/Übrige. Startwerte je Format so kalibrieren, dass der Konzern auf Filialebene bei rund −1,2 % EBITDA startet (Hartwig regulär nahe an der Tabelle; Premium besser, FUNDUS mit niedrigerem Wareneinsatz-Niveau und niedrigerer Miete, Sport/Volkskauf plausibel abweichend, Abweichungen in der PR begründen). Zentrale zusätzlich, so dass der Konzern ohne Eingriffe rund −4 % EBITDA hat (E24 bleibt in diesem Punkt).
+2. **Jede Position hat mindestens einen Hebel**, der ohne Schließung wirkt, mit Kosten, Vorlaufzeit und Nebenwirkung: Bruttogewinn (Sortiment, Eigenmarken, Einkaufskonditionen, Reduzierungssteuerung; Planwert 46,1 % zeigt die Spannweite), Personal (Einsatzplanung, Produktivität, Tarif), Miete (Nachverhandlung, Flächenrückgabe/Untervermietung von Etagen), Logistik, Werbung, Energie (Technik-Umbau O08), Facility Management, Unterhalt.
+3. **Neue Referenz „Bot T“** in `engine/scripts/bot.ts`: Turnaround **ohne Schließungen und ohne Insolvenz**, nur über die Hebel aus Punkt 2. Abnahme: Bot T auf mittel, Seeds 1 bis 3, 260 Wochen ohne Insolvenz, positives EBITDA der letzten 52 Wochen; auf leicht bequem, auf schwer knapp. Bot D (mit Schließungen) muss ebenfalls bestehen und darf besser abschneiden. Schließungsrücklauf aus Abschnitt 16 Punkt 2 bleibt.
+4. `m7-jahresdiagnose.ts` gibt die Filial-GuV in den Positionen dieser Tabelle aus (Ist je Woche und Jahr, in % vom Umsatz), damit der Abgleich mit der Referenz direkt sichtbar ist.
