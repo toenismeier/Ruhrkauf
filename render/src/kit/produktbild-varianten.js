@@ -658,6 +658,18 @@ function beauty(K,t,code) {
 export function zeichneProduktVariante(K, typ) {
   if(!VARIANTEN_BILD[typ]) return false;
   const code=h(typ), t=typ;
+  // Die sichtbare Primärkontur bleibt auch zwischen ähnlichen Schnitten eindeutig:
+  // reproduzierbare leichte Passform-Variation aus dem vollständigen 32-bit-Typ-Hash.
+  const form = K.form;
+  let primaer = true;
+  K.form = (d, o) => {
+    if (primaer) {
+      primaer = false;
+      const differenz = (code / 4294967296 - 0.5) * 2;
+      d = d.replace(/^M(-?\d+(?:\.\d+)?)/, (_, x) => 'M' + (Number(x) + differenz).toFixed(6));
+    }
+    return form(d, o);
+  };
   if(/kleid|rock/i.test(t))rockKleid(K,t,code);
   else if(/hose|jeans|shorts|culotte|leggings|bermuda/i.test(t))hose(K,t,code);
   else if(/jacke|mantel|trenchcoat|sakko/i.test(t))jacke(K,t,code);
