@@ -980,7 +980,13 @@ function baueRaster(seed, E) {
         if (x.fest || x.art !== 'strasse') continue;
         let best = null;
         for (const o of oben) if (!best || Math.abs(o.x - x.x) < Math.abs(best.x - x.x)) best = o;
-        if (best && Math.abs(best.x - x.x) > 0.01 && Math.abs(best.x - x.x) < (best.L.breite + x.L.breite) / 2 + 10) x.x = best.x;
+        if (best && Math.abs(best.x - x.x) > 0.01 && Math.abs(best.x - x.x) < (best.L.breite + x.L.breite) / 2 + 10) {
+          // Nicht ausrichten, wenn dadurch ein Block der Reihe schmaler als 12 m würde (sonst Parzellen mit negativer Breite
+          // auf der Straße, z. B. Kitzingen, Landau); bei allen bisherigen Städten greift das nicht
+          const alt = x.x; x.x = best.x;
+          const eng = g.some((y) => y !== x && (y.art === 'strasse' || y.art === 'rand' || y.art === 'virtuell') && Math.abs(y.x - x.x) - (y.L.breite + x.L.breite) / 2 < 12);
+          if (eng) x.x = alt;
+        }
       }
       g.sort((a, b) => a.x - b.x);
     }
