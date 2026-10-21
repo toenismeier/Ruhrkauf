@@ -1,7 +1,7 @@
 import { neuesSpiel, wocheAbspielen, fuehreAus, WG_DEF } from '../src';
 import { einkaufDispo } from '../src/einkauf';
 import { botRegulaer, botTief, botTurnaround, REGULAER_SCHLIESSUNGSQUOTE, schliessungsBudgetBotD } from '../scripts/bot';
-import { schliessungsFolgekosten, schliesseEndgueltig } from '../src/prozesse';
+import { schliessungsFolgekosten, schliesseEndgueltig, eroeffneInsolvenz } from '../src/prozesse';
 import { aktualisiereStakeholder } from '../src/stakeholder';
 
 describe('M7 – Versorgung und Turnaround im großen Maßstab', () => {
@@ -90,6 +90,20 @@ describe('M7 – Versorgung und Turnaround im großen Maßstab', () => {
     s.cash = -s.kreditlinie - 1_000_000_000;
     botTief(s);
     expect(s.insolvenzenGesamt).toBe(1);
+    expect(s.phase).toBe('insolvenz');
+  });
+
+  test('Bot C reagiert auch auf eine von der Engine ausgelöste Insolvenz mit echter Restrukturierung', () => {
+    const s = neuesSpiel(3, { schwierigkeit: 'mittel' });
+    botTief(s); // operative Programme, noch kein Schutzschirm
+    wocheAbspielen(s);
+    eroeffneInsolvenz(s, 'Zahlungsunfähigkeit im Test');
+    const vorher = s.haeuser.filter((h) => h.status === 'schliessung_verhandlung').length;
+    botTief(s);
+    const nachher = s.haeuser.filter((h) => h.status === 'schliessung_verhandlung').length;
+    expect(vorher).toBe(0);
+    expect(nachher).toBeGreaterThan(0);
+    expect(s.insolvenzenGesamt).toBe(1); // kein zweiter Antrag
     expect(s.phase).toBe('insolvenz');
   });
 
