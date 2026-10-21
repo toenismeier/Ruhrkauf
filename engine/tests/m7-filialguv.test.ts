@@ -1,5 +1,5 @@
 import { neuesSpiel, wocheAbspielen, fuehreAus } from '../src';
-import { hausKosten } from '../src/wirtschaft';
+import { hausKosten, lohnKosten, nebenvertragsErtraege, personalEinsatz } from '../src/wirtschaft';
 import { botTurnaround } from '../scripts/bot';
 import {
   REFERENZ_FILIAL_GUV, FILIAL_PROGRAMME, GUV_KOSTEN, guvAbschluss,
@@ -74,6 +74,53 @@ describe('M7 Abschnitt 17: Kostenstellen statt Schein-Gutschriften', () => {
     expect(s.insolvenzenGesamt).toBe(0);
     expect(s.phase).toBe('regulaer');
     expect(s.insolvenz).toBeUndefined();
+  });
+
+  test('Abschnitt 18: KW 1 erzielt Erträge aus nachvollziehbaren Verträgen ohne Änderung der Kostenreferenz', () => {
+    const s = neuesSpiel(1, { schwierigkeit: 'mittel' });
+    const k = wocheAbspielen(s);
+    const g = k.filialGuV!;
+    expect(g.werbeflaechen).toBeGreaterThan(0);
+    expect(g.dienstleistungen).toBeGreaterThan(0);
+    expect(g.werbeflaechen).toBe(k.werbeflaechen);
+    expect(g.dienstleistungen).toBe(k.dienstleistungen);
+    expect(g.uebrigeErtraege).toBeGreaterThan(g.werbeflaechen + g.dienstleistungen);
+    expect(100 * g.uebrigeErtraege / g.umsatz).toBeGreaterThan(1.9);
+    expect(100 * g.uebrigeErtraege / g.umsatz).toBeLessThan(2.75);
+    expect(100 * g.uebrigeAufwendungen / g.umsatz).toBeCloseTo(0.4, 1);
+    expect(Math.abs(k.ebitda - (g.ebitda - k.zentrale - k.beratung)))
+      .toBeLessThan(s.haeuser.filter((h) => !h.nurDaten).length * 14);
+  });
+
+  test('Werbeplätze und Serviceleistungen entstehen nur bei tatsächlicher Nutzung', () => {
+    const s = neuesSpiel(2);
+    const h = s.haeuser.find((x) => x.nebenvertrag)!;
+    const vorher = nebenvertragsErtraege(h, 440_000, s.woche);
+    expect(vorher.werbeflaechen).toBeGreaterThan(0);
+    expect(vorher.dienstleistungen).toBeGreaterThan(0);
+    expect(nebenvertragsErtraege(h, 0, s.woche).dienstleistungen).toBe(0);
+    h.flaechen.forEach((f) => { f.konzept = 'leer'; });
+    expect(nebenvertragsErtraege(h, 0, s.woche)).toEqual({ werbeflaechen: 0, dienstleistungen: 0 });
+    h.status = 'geschlossen';
+    expect(nebenvertragsErtraege(h, 440_000, s.woche)).toEqual({ werbeflaechen: 0, dienstleistungen: 0 });
+  });
+
+  test('Saisonale Einsatzplanung verändert nur variable Stunden und dieselben FTE bedienen die Nachfrage', () => {
+    const s = neuesSpiel(3);
+    const h = s.haeuser.find((x) => !x.nurDaten)!;
+    const start = personalEinsatz(h);
+    const startLohn = lohnKosten(s, h);
+    h.personal.umsatzReferenzWoche = 300_000;
+    h.kpi = { woche: 0, umsatz: 180_000, rohertrag: 0, konzessionserloes: 0, untermiete: 0,
+      personal: 0, miete: 0, nebenkosten: 0, sonstige: 0, db: 0, fteBedarf: 0, fteIst: 0, umsatzJeGruppe: {} };
+    const schwach = personalEinsatz(h);
+    expect(schwach.vollzeit).toBe(start.vollzeit);
+    expect(schwach.teilzeit).toBeLessThan(start.teilzeit);
+    expect(schwach.aushilfen).toBeLessThan(start.aushilfen);
+    expect(lohnKosten(s, h)).toBeLessThan(startLohn);
+    h.kpi.umsatz = 390_000;
+    expect(lohnKosten(s, h)).toBeGreaterThan(startLohn);
+    expect(h.personal.teilzeit).toBeGreaterThan(0); // Kein Vertrags-FTE-Abbau.
   });
 
   test('GuV-Summenbildung führt keine unsichtbaren Erträge ein', () => {

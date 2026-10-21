@@ -92,10 +92,23 @@ export interface Filialleiter {
 }
 
 export interface Personal {
-  vollzeit: number; // FTE
-  teilzeit: number; // FTE
-  aushilfen: number; // FTE
+  vollzeit: number; // Vertrags-FTE
+  teilzeit: number; // Vertrags-FTE
+  aushilfen: number; // Vertrags-FTE
+  /** Realisierter Ausgangsumsatz als Bezug für die flexible Wochen-Einsatzplanung. */
+  umsatzReferenzWoche?: number;
   filialleiter: Filialleiter;
+}
+
+/** Entgeltliche, bereits bei Spielstart vertraglich belegte Filialleistungen.
+ * Die Werbeflächen sind Vermarktungsplätze IM Verkaufsraum (keine Umwandlung der Fläche).
+ * O07-Konzessionäre/Untervermieter bleiben eigenständige, zusätzliche Vertragsquellen.
+ */
+export interface FilialNebenvertrag {
+  werbeflaecheQm: number;
+  werbeEuroJeQmWoche: number;
+  dienstleistungEuroJeBon: number;
+  durchschnittsBonEuro: number;
 }
 
 export type HausStatus = 'offen' | 'schliessung_verhandlung' | 'raeumung' | 'geschlossen' | 'verkauft';
@@ -163,6 +176,8 @@ export interface Haus {
   restmieteWoche?: Eur; // laufende Miete nach Schließung
   restmieteBis?: number;
   personal: Personal;
+  /** Werbeplatz- und Dienstleistungsverträge, ohne Filialumsatz-Gutschrift. */
+  nebenvertrag?: FilialNebenvertrag;
   substanz: number; // 0..100
   substanzStart: number;
   status: HausStatus;
@@ -385,6 +400,8 @@ export interface WochenKpi {
   konzession: Eur;
   untermiete: Eur;
   wkz: Eur;
+  werbeflaechen: Eur;
+  dienstleistungen: Eur;
   personal: Eur;
   miete: Eur;
   nebenkosten: Eur;

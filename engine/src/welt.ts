@@ -102,6 +102,22 @@ function kalibriereStandortumsatz(haeuser: Haus[]): void {
     haus.personal.aushilfen *= besetzung;
     haus.miete.mieteWoche = eur(wocheBasis * 0.112
       * (haus.klasse === 'premium' ? 1.12 : haus.format === 'sport' ? 0.96 : 1));
+    // Bestehende Entgeltverträge: Verkaufspartner buchen Werbeträger auf
+    // bespielter Eigen-/Kommissionsfläche, Dienstleister vergüten die
+    // tatsächlich am POS abgewickelten Servicevorgänge. WKZ und die aus
+    // O07 entstehenden Konzessions-/Untermietverträge bleiben separat.
+    // Der Vertragspreis folgt dem Standortpotenzial, die spätere Vergütung
+    // folgt jedoch ausschließlich genutzter Fläche bzw. echten Bons.
+    const werbeBasisQm = haus.flaechen.filter((f) =>
+      f.konzept === 'eigen' || f.konzept === 'kommission' || f.konzept === 'offprice')
+      .reduce((sum, f) => sum + f.qm, 0);
+    const werbeflaecheQm = Math.round(werbeBasisQm * 0.075);
+    haus.nebenvertrag = {
+      werbeflaecheQm,
+      werbeEuroJeQmWoche: wocheBasis * 0.00875 / Math.max(1, werbeflaecheQm),
+      dienstleistungEuroJeBon: 1.03,
+      durchschnittsBonEuro: 88,
+    };
     // Verträge vom Typ net enthalten NK; bei anderen Verträgen werden
     // tatsächlich abgerechnete €/qm umgestellt, keine simulierte Ertragsposition.
     if (haus.miete.netTyp !== 'net') {

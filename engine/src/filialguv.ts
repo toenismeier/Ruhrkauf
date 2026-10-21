@@ -36,6 +36,10 @@ export interface FilialGuV {
   wareneinsatz: number;
   bruttogewinn: number;
   uebrigeErtraege: number;
+  /** Davon nach realer Belegung abrechenbare Werbeplätze (Teil der übrigen Erträge). */
+  werbeflaechen: number;
+  /** Davon je abgewickeltem Kassenbon vergütete Drittleistungen. */
+  dienstleistungen: number;
   personal: number;
   fremdkraefte: number;
   miete: number;
@@ -64,6 +68,7 @@ export const GUV_KOSTEN: GuVKostenPosition[] = [
 export function leereFilialGuV(): FilialGuV {
   return {
     umsatz: 0, wareneinsatz: 0, bruttogewinn: 0, uebrigeErtraege: 0,
+    werbeflaechen: 0, dienstleistungen: 0,
     personal: 0, fremdkraefte: 0, miete: 0, mietnebenkosten: 0,
     logistik: 0, werbung: 0, unterhalt: 0, zahlungsverkehr: 0,
     facilityManagement: 0, energie: 0, it: 0, administration: 0,

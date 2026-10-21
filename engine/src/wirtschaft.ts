@@ -2,7 +2,7 @@ import { GRUPPEN, saisonFaktor, TREND_LAGE } from './daten';
 import type { Aktion, GameState, GruppeId, Haus, HausKpi } from './types';
 import { clamp, eur, normal } from './util';
 import { PARAM } from './welt';
-import { premiumImageFaktor, premiumServiceQuote } from './premium';
+import { premiumImageFaktor } from './premium';
 import { schwierigkeit } from './schwierigkeit';
 import { leereFilialGuV, programmErsparnis, programmNachfrageFaktor, type FilialGuV } from './filialguv';
 import { hqBesetzungsNorm, hqLogistikFaktor, hqMarketingFaktor, hqUmsatzFaktor } from './hq';
@@ -19,6 +19,8 @@ export interface HausRoh {
   konzessionUmsatz: number;
   untermiete: number;
   fteBedarf: number;
+  /** Tatsächlich für die Woche geplante, vergütete Einsatz-FTE. */
+  fteIst: number;
   aktion?: Aktion;
   ohneAktion: number; // Umsatz ohne Aktion (für Messung)
   ohneAktionRohertrag: number;
@@ -94,7 +96,7 @@ export function saettigung(qm: number, Q: number): number {
 
 export function simuliereHaus(s: GameState, h: Haus): HausRoh {
   const w = s.woche;
-  const roh: HausRoh = { haus: h, eigen: {}, kommission: {}, offprice: 0, konzessionUmsatz: 0, untermiete: 0, fteBedarf: 0, ohneAktion: 0, ohneAktionRohertrag: 0 };
+  const roh: HausRoh = { haus: h, eigen: {}, kommission: {}, offprice: 0, konzessionUmsatz: 0, untermiete: 0, fteBedarf: 0, fteIst: 0, ohneAktion: 0, ohneAktionRohertrag: 0 };
   if (!istAktiv(h) || h.nurDaten) return roh;
   const hf = hausFaktor(s, h);
   const fl = aktiveFlaeche(h, w);
@@ -134,11 +136,16 @@ export function simuliereHaus(s: GameState, h: Haus): HausRoh {
 
   // Personal
   const p = h.personal;
-  const fteIst = p.vollzeit + p.teilzeit + p.aushilfen;
+  // O04-kompatible Einsatzplanung: Fest-FTE bleiben fix, Teilzeitstunden
+  // und Aushilfenschichten folgen mit Grenzen der Vorwochen-Nachfrage.
+  // Dieselben Einsatz-FTE bestimmen Abdeckung UND tatsächlich gezahlte Löhne.
+  const einsatz = personalEinsatz(h);
+  const fteIst = einsatz.fte;
+  roh.fteIst = fteIst;
   roh.fteBedarf = (qmVerkauf / PARAM.qmJeFte) * (h.klasse === 'premium' ? 1.15 : 1) + summeBedarf / PARAM.umsatzJeFte;
   // Besetzungsnorm: eine gute Personalabteilung plant Einsätze effizienter
   const besetzung = roh.fteBedarf > 0 ? Math.pow(clamp(fteIst / roh.fteBedarf / hqBesetzungsNorm(s), 0, 1), 0.5) : 1;
-  const ahQuote = fteIst > 0 ? p.aushilfen / fteIst : 0;
+  const ahQuote = fteIst > 0 ? einsatz.aushilfen / fteIst : 0;
 
   // Aktionskalender, Hartwig Karte und CRM je Gruppe (src/marketing.ts); Räumung wie bisher 35 % auf alles
   const basisJe: Partial<Record<GruppeId, number>> = {};
@@ -186,11 +193,44 @@ export interface HausKosten {
   guv: FilialGuV;
 }
 
-export function lohnKosten(s: GameState, h: Haus): number {
+/** Planbare Einsatzstunden statt künstlicher Personalkostengutschrift.
+ * Teilzeit nutzt flexible Wochenstunden, Aushilfen werden je Schicht vergütet;
+ * Vollzeit bleibt vertraglich fix. Bei Nachfrageanstieg werden Stunden aufgebaut.
+ * Die Vorwoche verhindert, dass eine fiktive Buchung des laufenden Umsatzes
+ * rückwirkend den Personaleinsatz und dessen Verkaufseffekt bestimmt.
+ */
+export function personalEinsatz(h: Haus): { vollzeit: number; teilzeit: number; aushilfen: number; fte: number } {
   const p = h.personal;
+  const referenz = p.umsatzReferenzWoche;
+  const vorwoche = h.kpi?.umsatz;
+  const delta = referenz && referenz > 0 && vorwoche !== undefined
+    ? clamp(vorwoche / referenz - 1, -0.55, 0.35) : 0;
+  const vollzeit = p.vollzeit;
+  const teilzeit = p.teilzeit * (1 + delta * 0.60);
+  const aushilfen = p.aushilfen * (1 + delta);
+  return { vollzeit, teilzeit, aushilfen, fte: vollzeit + teilzeit + aushilfen };
+}
+
+export function lohnKosten(s: GameState, h: Haus): number {
+  const p = personalEinsatz(h);
   const tarifF = s.tarif === 'sanierung' ? 0.93 : s.tarif === 'ohne' ? 0.89 : 1;
   return ((p.vollzeit * PARAM.lohnVollzeit + p.teilzeit * PARAM.lohnTeilzeit) * tarifF
     + p.aushilfen * PARAM.lohnAushilfe) * (1 - programmErsparnis(s, 'personal'));
+}
+
+/** Einnahmen aus einem konkret belegten Werbeinventar und tatsächlich
+ * abgewickelten Servicevorgängen. Keine Quote als pauschale GuV-Gutschrift:
+ * unbespielte Flächen liefern keine Werbeentgelte, ohne Bons keine Services.
+ */
+export function nebenvertragsErtraege(h: Haus, umsatzAmPos: number, woche: number): { werbeflaechen: number; dienstleistungen: number } {
+  const v = h.nebenvertrag;
+  if (!v || !istAktiv(h) || h.nurDaten) return { werbeflaechen: 0, dienstleistungen: 0 };
+  const qmBespielt = aktiveFlaeche(h, woche)
+    .filter((f) => f.konzept === 'eigen' || f.konzept === 'kommission' || f.konzept === 'offprice')
+    .reduce((sum, f) => sum + f.qm, 0);
+  const werbeflaechen = Math.min(v.werbeflaecheQm, qmBespielt * 0.075) * v.werbeEuroJeQmWoche;
+  const bons = Math.floor(Math.max(0, umsatzAmPos) / v.durchschnittsBonEuro);
+  return { werbeflaechen: eur(werbeflaechen), dienstleistungen: eur(bons * v.dienstleistungEuroJeBon) };
 }
 
 export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGesamt: number): HausKosten {
@@ -234,7 +274,10 @@ export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGes
   guv.energie = umsatzGesamt * 0.024 * form * (1 - programmErsparnis(s, 'energie'));
   guv.it = umsatzGesamt * 0.003 * (1 - programmErsparnis(s, 'it'));
   guv.administration = umsatzGesamt * 0.002 * (1 - programmErsparnis(s, 'administration'));
-  guv.uebrigeAufwendungen = (umsatzGesamt * 0.004 + premiumServiceQuote(h) * umsatzGesamt)
+  // Concierge, Sicherheit und Warenpräsentation des Premiumformats sind bereits
+  // in Unterhalt, Facility Management und der Premium-Betriebsführung enthalten.
+  // Der bisherige zusätzliche Premium-Serviceaufschlag erfasste sie doppelt.
+  guv.uebrigeAufwendungen = umsatzGesamt * 0.004
     * (1 - programmErsparnis(s, 'uebrigeAufwendungen'));
   k.sonstige = guv.fremdkraefte + guv.unterhalt + guv.zahlungsverkehr
     + guv.facilityManagement + guv.energie + guv.it + guv.administration

@@ -11,7 +11,7 @@ import { einkaufAltern, einkaufBuchen, einkaufDispo, einkaufFristen, einkaufNach
 import { eigenmarkenWoche, istVerkaufsaktiv } from './eigenmarken';
 import { neueWelt, PARAM, STANDARD_SZENARIO, type Szenario } from './welt';
 import { hqControllingExzellenz, hqEinkaufKonditionen, hqRestmieteWoche, hqWkzFaktor, hqWoche } from './hq';
-import { hausKosten, leereKpi, rundeKpi, simuliereHaus, type HausRoh } from './wirtschaft';
+import { hausKosten, leereKpi, nebenvertragsErtraege, rundeKpi, simuliereHaus, type HausRoh } from './wirtschaft';
 import { vorstandWoche } from './vorstand';
 import { produkteBuchen, produkteWoche } from './produkte';
 import { marketingAbschluss, marketingKosten, marketingRng, marketingVorbereiten, messeAktionen } from './marketing';
@@ -116,10 +116,10 @@ export function wocheAbspielen(s: GameState): WochenKpi {
 
   // 4. Hausergebnisse
   const k: WochenKpi = {
-    woche: w, umsatz: 0, rohertrag: 0, abschriften: 0, konzession: 0, untermiete: 0, wkz: 0, personal: 0, miete: 0, nebenkosten: 0,
+    woche: w, umsatz: 0, rohertrag: 0, abschriften: 0, konzession: 0, untermiete: 0, wkz: 0, werbeflaechen: 0, dienstleistungen: 0, personal: 0, miete: 0, nebenkosten: 0,
     sonstige: 0, logistik: 0, zentrale: 0, marketing: 0, beratung: 0, ebitda: 0, sondereffekte: 0, cash: 0, kreditFrei: 0, bestand: 0, offeneHaeuser: 0, fte: 0,
   };
-  const hausBuchungen: { haus: GameState['haeuser'][number]; kpi: HausKpi; kosten: ReturnType<typeof hausKosten> }[] = [];
+  const hausBuchungen: { haus: GameState['haeuser'][number]; kpi: HausKpi; kosten: ReturnType<typeof hausKosten>; neben: ReturnType<typeof nebenvertragsErtraege> }[] = [];
   const umsatzEigenJe: Partial<Record<GruppeId, number>> = {};
   let kommissionAuszahlung = 0;
   let restmieten = 0;
@@ -158,15 +158,23 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     kpi.konzessionserloes = r.konzessionUmsatz * PARAM.konzessionsQuote;
     kpi.untermiete = r.untermiete;
     const kosten = hausKosten(s, h, umsatzEigen, kpi.umsatz);
+    const neben = nebenvertragsErtraege(h, kpi.umsatz, w);
+    k.werbeflaechen += neben.werbeflaechen;
+    k.dienstleistungen += neben.dienstleistungen;
+    // Einmalige Fixierung der echten KW-1-Umsatzbasis je Haus; die
+    // folgende Einsatzplanung greift auf die jeweils abgeschlossene Vorwoche zu.
+    if (h.personal.umsatzReferenzWoche === undefined && kpi.umsatz > 0 && h.status === 'offen') {
+      h.personal.umsatzReferenzWoche = eur(kpi.umsatz);
+    }
     kpi.personal = kosten.personal;
     kpi.miete = h.status === 'geschlossen' ? 0 : kosten.miete;
     if (h.status === 'geschlossen') restmieten += kosten.miete;
     kpi.nebenkosten = kosten.nebenkosten;
     kpi.sonstige = kosten.sonstige + kosten.logistik;
-    hausBuchungen.push({ haus: h, kpi, kosten });
+    hausBuchungen.push({ haus: h, kpi, kosten, neben });
     kpi.db = kpi.rohertrag + kpi.konzessionserloes + kpi.untermiete - kpi.personal - kpi.miete - kpi.nebenkosten - kpi.sonstige;
     kpi.fteBedarf = r.fteBedarf;
-    kpi.fteIst = h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen;
+    kpi.fteIst = r.fteIst;
     if (h.status !== 'geschlossen' && h.status !== 'verkauft') h.kpi = rundeKpi(kpi);
 
     k.umsatz += kpi.umsatz;
@@ -216,14 +224,17 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // zentral gebuchte Werbung/Abschriften werden verursachungsgerecht auf
   // aktive Häuser im Verhältnis ihres Umsatzes verteilt. Kein Doppelansatz.
   const gesamtFilialGuV = leereFilialGuV();
-  for (const { haus, kpi, kosten } of hausBuchungen) {
+  for (const { haus, kpi, kosten, neben } of hausBuchungen) {
     const anteil = k.umsatz > 0 ? kpi.umsatz / k.umsatz : 0;
     const g = kosten.guv;
     g.umsatz = kpi.umsatz;
     g.abschriften = k.abschriften * anteil;
     g.bruttogewinn = kpi.rohertrag - g.abschriften;
     g.wareneinsatz = g.umsatz - g.bruttogewinn;
-    g.uebrigeErtraege = kpi.konzessionserloes + kpi.untermiete + k.wkz * anteil;
+    g.werbeflaechen = neben.werbeflaechen;
+    g.dienstleistungen = neben.dienstleistungen;
+    g.uebrigeErtraege = kpi.konzessionserloes + kpi.untermiete + k.wkz * anteil
+      + g.werbeflaechen + g.dienstleistungen;
     g.werbung = k.marketing * anteil;
     // Jede Filiale bucht in ganzen Euro. Erst die Einzelpositionen runden,
     // dann Summen und EBITDA daraus neu abschließen: keine stille
@@ -242,7 +253,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   produkteBuchen(s);
   s.marketing.gewoehnung = Math.max(0, s.marketing.gewoehnung * 0.99);
 
-  k.ebitda = k.rohertrag + k.konzession + k.untermiete + k.wkz - k.personal - k.miete - k.nebenkosten - k.sonstige - k.logistik - k.zentrale - k.marketing - k.beratung;
+  k.ebitda = k.rohertrag + k.konzession + k.untermiete + k.wkz + k.werbeflaechen + k.dienstleistungen - k.personal - k.miete - k.nebenkosten - k.sonstige - k.logistik - k.zentrale - k.marketing - k.beratung;
   k.sondereffekte = s.einmalErloeseWoche - s.einmalkostenWoche - restmieten;
   marketingAbschluss(s, k.umsatz, mk);
 
@@ -251,7 +262,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
 
   // 8. Zahlungen: erst Pflichtzahlungen, dann Lieferanten
   const zinsen = Math.max(0, -s.cash) * (PARAM.zinsSatz / 52);
-  const einzahlung = k.umsatz + k.konzession + k.untermiete + k.wkz;
+  const einzahlung = k.umsatz + k.konzession + k.untermiete + k.wkz + k.werbeflaechen + k.dienstleistungen;
   const pflicht = kommissionAuszahlung + personalCash + k.miete + restmieten + k.nebenkosten + k.sonstige + k.logistik + k.zentrale + k.marketing + k.beratung + zinsen + offEinsatz.warenhaus.zukauf + offEinsatz.sport.zukauf;
   s.cash += eur(einzahlung - pflicht);
   if (insolvenzgeld && s.insolvenz) s.insolvenz.altVerbindlichkeiten += eur(k.personal);
