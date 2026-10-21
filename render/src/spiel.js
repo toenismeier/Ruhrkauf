@@ -33,7 +33,7 @@ import { statistikModul } from './ui/statistik.js';
 import { marketingModul } from './ui/marketing.js';
 import { umbauModul } from './ui/umbau.js';
 import { produkteModul } from './ui/produkte.js';
-import { laden, speichern } from './ui/speicher.js';
+import { laden, speichern, speicherDiagnose } from './ui/speicher.js';
 import { appModul } from './ui/app.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
@@ -69,7 +69,7 @@ const neuerPostUi = () => ({ gelesen: [], reiter: 'handeln', reiseZuletzt: [] })
 let postUi = neuerPostUi();
 let streifenTimer = null;
 function speicherFehler(e) {
-  console.error('Spielstand konnte nicht gespeichert werden:', e);
+  console.error('Spielstand konnte nicht gespeichert werden:', e, speicherDiagnose());
   if (!speicherWarnung) meldung('Speichern fehlgeschlagen: ' + e.message, false);
   speicherWarnung = true;
 }
@@ -1004,10 +1004,20 @@ function hqTun(aktion) {
   oeffneHq(offenesHq === true ? undefined : offenesHq, true);
 }
 let meldungTimer = null;
+let letzteMeldung = { text: '', zeit: 0 };
+function meldungSchliessen() {
+  clearTimeout(meldungTimer);
+  $('meldung').className = '';
+}
+$('meldung').addEventListener('click', meldungSchliessen);
 function meldung(text, ok = true) {
-  const m = $('meldung');
-  m.textContent = text; m.className = ok ? 'an' : 'an rot';
-  clearTimeout(meldungTimer); meldungTimer = setTimeout(() => { m.className = ''; }, 3500);
+  const m = $('meldung'), jetzt = Date.now();
+  if (text === letzteMeldung.text && jetzt - letzteMeldung.zeit < 5000) return;
+  letzteMeldung = { text, zeit: jetzt };
+  m.textContent = text;
+  m.className = ok ? 'an' : 'an rot';
+  clearTimeout(meldungTimer);
+  meldungTimer = setTimeout(meldungSchliessen, ok ? 2500 : 4000);
 }
 window.hqKlick = (art, a, b, c) => {
   if (art === 'mieten') { const an = E.hqUebersicht(s).angebote.find((q) => q.id === a); hqTun({ typ: 'hqMieten', angebot: a, etagen: an.etagen.map((e) => e.nr) }); }
