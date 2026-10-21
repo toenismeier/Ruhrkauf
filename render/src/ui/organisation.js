@@ -45,17 +45,26 @@ export function organisationModul(ctx) {
       for (const r of x.regionen) {
         h+='<div class="karte"><div class="khead"><b>Region '+esc(r.id)+'</b><button data-org="profil" data-ebene="region" data-id="'+esc(r.id)+'">'+name(r.stelle)+'</button></div>';
         for (const c of r.cluster) {
-          const rot = !c.stelle.person, ampel=c.umsatz>0?'●':'○';
-          h+='<div class="org-zeile"><span class="org-ampel '+(rot?'warn':'')+'">'+ampel+'</span><div><b>'+esc(c.name)+'</b><small>'+c.anzahl+' Häuser · Umsatz/Woche '+geld(c.umsatz)+'</small>'+bar(c.qualitaet)+'</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="'+esc(c.id)+'">'+(rot?'besetzen':'Leitung')+'</button><button data-org="delegation" data-id="'+esc(c.id)+'" data-cluster="1" aria-pressed="'+c.stelle.delegiert+'">Delegiert '+(c.stelle.delegiert?'ja':'nein')+'</button></div></div>';
+          const rot = !c.stelle.person, ampel=st.woche>0&&c.umsatz>0?'●':'○';
+          h+='<div class="org-zeile"><span class="org-ampel '+(rot?'warn':'')+'">'+ampel+'</span><div><b>'+esc(c.name)+'</b><small>'+c.anzahl+' Häuser · Umsatz/Woche '+(st.woche===0?'noch offen':geld(c.umsatz))+'</small>'+bar(c.qualitaet)+'</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="'+esc(c.id)+'">'+(rot?'besetzen':'Leitung')+'</button><button data-org="delegation" data-id="'+esc(c.id)+'" data-cluster="1" aria-pressed="'+c.stelle.delegiert+'">Delegiert '+(c.stelle.delegiert?'ja':'nein')+'</button></div></div>';
         }
         h+='</div>';
       }
       if (x.sonder) {
         const c=x.sonder;
         h+='<div class="karte"><div class="khead"><b>Premium & Flagships</b><button data-org="profil" data-ebene="cluster" data-id="'+esc(c.id)+'">'+name(c.stelle)+'</button></div><p>'+c.hausIds.length+' Häuser · '+x.flagships.length+' gewählte Flagships</p>';
-        for (const haus of st.haeuser.filter((v)=>v.format==='warenhaus'&&v.status==='offen').sort((a,b)=>b.grundflaecheQm*b.etagen.length-a.grundflaecheQm*a.etagen.length).slice(0,12)) {
+        // Premium ist immer sichtbar, auch außerhalb des Rankings der größten zwölf Häuser.
+        const premiumHaeuser = st.haeuser.filter((haus)=>haus.klasse==='premium');
+        const gewaehlte = st.haeuser.filter((haus)=>x.flagships.includes(haus.id));
+        const kandidaten = st.haeuser.filter((haus)=>haus.format==='warenhaus'&&haus.status==='offen'&&haus.klasse!=='premium')
+          .sort((a,b)=>b.grundflaecheQm*b.etagen.length-a.grundflaecheQm*a.etagen.length).slice(0,12);
+        const liste = [...new Map([...premiumHaeuser,...gewaehlte,...kandidaten].map((haus)=>[haus.id,haus])).values()];
+        const namen = new Map();
+        for (const haus of liste) namen.set(haus.name, (namen.get(haus.name)??0)+1);
+        for (const haus of liste) {
           const an=x.flagships.includes(haus.id), premium=haus.klasse==='premium';
-          h+='<div class="zeile"><span class="was">'+esc(haus.name)+(premium?' · Premium':'')+'</span><button '+(premium?'disabled':'')+' data-org="flagship" data-haus="'+esc(haus.id)+'" data-an="'+(!an)+'">'+(premium?'fest':an?'Flagship abwählen':'Flagship wählen')+'</button></div>';
+          const zusatz = namen.get(haus.name)>1 ? ' · '+esc(haus.stadt)+' ('+esc(haus.id)+')' : '';
+          h+='<div class="zeile"><span class="was">'+esc(haus.name)+zusatz+(premium?' · Premium':'')+'</span><button '+(premium?'disabled':'')+' data-org="flagship" data-haus="'+esc(haus.id)+'" data-an="'+(!an)+'">'+(premium?'fest':an?'Flagship abwählen':'Flagship wählen')+'</button></div>';
         }
         h+='</div>';
       }

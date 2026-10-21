@@ -48,6 +48,8 @@
     RESSORT_INFO: () => RESSORT_INFO,
     SCHWIERIGKEIT: () => SCHWIERIGKEIT,
     SCHWIERIGKEITEN: () => SCHWIERIGKEITEN,
+    STADT_REGIONEN: () => STADT_REGIONEN,
+    STAEDTE: () => STAEDTE,
     STANDARD_SZENARIO: () => STANDARD_SZENARIO,
     STARTKALENDER: () => STARTKALENDER,
     SYSTEME: () => SYSTEME,
@@ -156,6 +158,7 @@
     sollFte: () => sollFte,
     spielBeenden: () => spielBeenden,
     spielendePruefen: () => spielendePruefen,
+    stadtRegion: () => stadtRegion,
     szenarioKonfiguration: () => szenarioKonfiguration,
     szenarioName: () => szenarioName,
     szenarioZiel: () => szenarioZiel,
@@ -361,6 +364,10 @@
     ["Detmold", "West", "mittelstadt", 0.97, 1, 0],
     ["Minden", "West", "mittelstadt", 0.95, 1, 0]
   ];
+  var STADT_REGIONEN = Object.freeze(Object.fromEntries(STAEDTE.map(([name2, region]) => [name2, region])));
+  function stadtRegion(name2) {
+    return STADT_REGIONEN[name2];
+  }
   var STANDORT_ZUSATZ = {
     "1a": ["Marktplatz", "Hauptstra\xDFe", "Innenstadt", "Am Markt", "K\xF6nigstra\xDFe", "Altstadt"],
     b: ["Bahnhofstra\xDFe", "Am Wall", "Neustadt", "Ring", "Lindenstra\xDFe"],
@@ -1905,7 +1912,7 @@
         if (rest > 0) {
           const liquide = s2.cash + s2.kreditlinie - liquiditaetsReserve;
           if (s2.vorkasseAkzeptieren && liquide > 0) {
-            const zahlbar = Math.min(rest, liquide);
+            const zahlbar = eur(Math.min(rest, liquide));
             s2.cash -= zahlbar;
             vorkasse += zahlbar;
             rest -= zahlbar;
@@ -4187,7 +4194,7 @@
         eintragen(s2, "vorstand", `${person3.name} \xFCbernimmt das Ressort ${id.toUpperCase()}.`, id, ereignisWoche);
       }
     }
-    const q2 = s2.quartale.find((q3) => q3.start + 12 === ereignisWoche && q3.nr > alt.letztesQuartal);
+    const q2 = s2.quartale.find((q3) => q3.start + 12 === ereignisWoche && q3.start + 13 <= s2.woche && q3.nr > alt.letztesQuartal);
     let bestesQuartal = alt.bestesQuartal;
     let letztesQuartal = alt.letztesQuartal;
     if (q2) {
@@ -4479,7 +4486,7 @@
     if (!zeitungAktiv(s2) || e.typ !== "interview") return;
     const wirkung = {
       offensiv: { image: 2, betriebsrat: -2, bank: -1, kreditversicherer: -1, zitat: "Wir treiben den Umbau konsequent voran und werden unsere Ziele erreichen." },
-      sachlich: { image: 1, betriebsrat: 1, bank: 1, kreditversicherer: 1, zitat: "Wir gehen Schritt f\xFCr Schritt vor und messen jede Ma\xDFnahme an belastbaren Zahlen." },
+      sachlich: { image: 0, betriebsrat: 0, bank: 0, kreditversicherer: 0, zitat: "Wir gehen Schritt f\xFCr Schritt vor und messen jede Ma\xDFnahme an belastbaren Zahlen." },
       ausweichend: { image: -2, betriebsrat: -1, bank: -2, kreditversicherer: -2, zitat: "Zu einzelnen Punkten m\xF6chten wir uns gegenw\xE4rtig nicht \xE4u\xDFern." }
     }[option2];
     if (!wirkung) return;
@@ -10614,10 +10621,11 @@
     s2.bestand = bestand;
     s2.bestellungen = bestellungen;
   }
-  function limitFuer(s2, st2, sid) {
+  function limitFuer(s2, st2, sid, nurLesen = false) {
     const key = String(sid);
     let l = st2.limits[key];
-    if (!l) {
+    if (!l && nurLesen) l = { plan: 0, verbraucht: 0, stand: -1 };
+    else if (!l) {
       l = st2.limits[key] = { plan: 0, verbraucht: 0, stand: -1 };
       for (const k of Object.keys(st2.limits)) if (Number(k) < sid - 2) delete st2.limits[k];
     }
@@ -11404,7 +11412,7 @@
     b2.sEin = sz.eingang;
     b2.sAb = sz.abverkauf * R10("s");
     const sid = saisonId(s2.woche);
-    const L2 = limitFuer(s2, st2, sid);
+    const L2 = limitFuer(s2, st2, sid, true);
     b2.limit = limitWert(st2, L2);
     b2.limitV = L2.verbraucht;
     for (const x of s2.bestellungen) if (x.wg === d2.id) b2.pipe += x.wert;
@@ -123690,6 +123698,8 @@
     const famBenutzt = /* @__PURE__ */ new Set();
     const wahl3 = /* @__PURE__ */ new Map();
     const haeuser = /* @__PURE__ */ new Map();
+    const statischeDaten = new Map([...haeuser_schwester_default, ...haeuser_outlet_default].map((h) => [h.id, h]));
+    const statischeHaeuser = /* @__PURE__ */ new Map();
     const wettbewerber2 = /* @__PURE__ */ new Map();
     const wbSlots = /* @__PURE__ */ new Map();
     let wbCache = null;
@@ -123872,6 +123882,20 @@
       if (x.wbId) wettbewerber2.set(x.wbId, x);
       return e;
     };
+    const statischerSlot = (typ) => (S, scene2, p2) => {
+      const e = basis3[typ](S, scene2, p2);
+      const haus2 = statischeDaten.get(p2.standort?.id);
+      if (haus2 && o.getrennt) {
+        const f = fussabdruck(haus2), { x, z: z2 } = imSlot2(p2, f.w, f.d);
+        const hoehe = Math.max(8, e?.hoehe ?? 18);
+        const bounds = new three_module_exports.Box3(
+          new three_module_exports.Vector3(x, 0, z2),
+          new three_module_exports.Vector3(x + f.w, hoehe, z2 + f.d)
+        );
+        statischeHaeuser.set(haus2.id, { haus: haus2, p: p2, bounds, e });
+      }
+      return e;
+    };
     const hqSlot = (S, scene2, p2) => {
       if (!basis3["slot:hq"] || !p2.standort) return { hoehe: 0 };
       if (o.getrennt) return baueHq(p2);
@@ -123890,8 +123914,8 @@
       ...basis3,
       "slot:warenhaus": slot4("slot:warenhaus"),
       "slot:sport": slot4("slot:sport"),
-      "slot:schwester": slot4("slot:schwester"),
-      "slot:outlet": basis3["slot:outlet"],
+      "slot:schwester": statischerSlot("slot:schwester"),
+      "slot:outlet": statischerSlot("slot:outlet"),
       "slot:premium": slot4("slot:premium"),
       "slot:hq": hqSlot,
       "slot:wettbewerber": wbSlot,
@@ -123944,7 +123968,7 @@
       if (vater && !o.wurzel) vater.add(neu.gruppe);
       return e;
     }
-    return { bauer, haeuser, hqs, wettbewerber: wettbewerber2, wbSlots, aktualisiere, neuBauen, zustand: (id) => {
+    return { bauer, haeuser, statischeHaeuser, hqs, wettbewerber: wettbewerber2, wbSlots, aktualisiere, neuBauen, zustand: (id) => {
       const h = hausVon(id);
       return h ? zustand(h) : null;
     } };
@@ -124306,7 +124330,7 @@
   for (const d2 of einstellungen) meldeSchalter(d2);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o) => typeof o === "object" ? { wert: o.wert ?? o.value, titel: o.titel ?? o.label ?? o.wert } : { wert: o, titel: o };
-  var version = () => true ? "7b3dc52" : "Entwicklung";
+  var version = () => true ? "2f45ad3" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d2) {
@@ -126006,17 +126030,24 @@
         for (const r of x.regionen) {
           h += '<div class="karte"><div class="khead"><b>Region ' + esc2(r.id) + '</b><button data-org="profil" data-ebene="region" data-id="' + esc2(r.id) + '">' + name2(r.stelle) + "</button></div>";
           for (const c of r.cluster) {
-            const rot = !c.stelle.person, ampel = c.umsatz > 0 ? "\u25CF" : "\u25CB";
-            h += '<div class="org-zeile"><span class="org-ampel ' + (rot ? "warn" : "") + '">' + ampel + "</span><div><b>" + esc2(c.name) + "</b><small>" + c.anzahl + " H\xE4user \xB7 Umsatz/Woche " + geld(c.umsatz) + "</small>" + bar(c.qualitaet) + '</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + (rot ? "besetzen" : "Leitung") + '</button><button data-org="delegation" data-id="' + esc2(c.id) + '" data-cluster="1" aria-pressed="' + c.stelle.delegiert + '">Delegiert ' + (c.stelle.delegiert ? "ja" : "nein") + "</button></div></div>";
+            const rot = !c.stelle.person, ampel = st2.woche > 0 && c.umsatz > 0 ? "\u25CF" : "\u25CB";
+            h += '<div class="org-zeile"><span class="org-ampel ' + (rot ? "warn" : "") + '">' + ampel + "</span><div><b>" + esc2(c.name) + "</b><small>" + c.anzahl + " H\xE4user \xB7 Umsatz/Woche " + (st2.woche === 0 ? "noch offen" : geld(c.umsatz)) + "</small>" + bar(c.qualitaet) + '</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + (rot ? "besetzen" : "Leitung") + '</button><button data-org="delegation" data-id="' + esc2(c.id) + '" data-cluster="1" aria-pressed="' + c.stelle.delegiert + '">Delegiert ' + (c.stelle.delegiert ? "ja" : "nein") + "</button></div></div>";
           }
           h += "</div>";
         }
         if (x.sonder) {
           const c = x.sonder;
           h += '<div class="karte"><div class="khead"><b>Premium & Flagships</b><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + name2(c.stelle) + "</button></div><p>" + c.hausIds.length + " H\xE4user \xB7 " + x.flagships.length + " gew\xE4hlte Flagships</p>";
-          for (const haus2 of st2.haeuser.filter((v) => v.format === "warenhaus" && v.status === "offen").sort((a, b2) => b2.grundflaecheQm * b2.etagen.length - a.grundflaecheQm * a.etagen.length).slice(0, 12)) {
+          const premiumHaeuser = st2.haeuser.filter((haus2) => haus2.klasse === "premium");
+          const gewaehlte = st2.haeuser.filter((haus2) => x.flagships.includes(haus2.id));
+          const kandidaten2 = st2.haeuser.filter((haus2) => haus2.format === "warenhaus" && haus2.status === "offen" && haus2.klasse !== "premium").sort((a, b2) => b2.grundflaecheQm * b2.etagen.length - a.grundflaecheQm * a.etagen.length).slice(0, 12);
+          const liste2 = [...new Map([...premiumHaeuser, ...gewaehlte, ...kandidaten2].map((haus2) => [haus2.id, haus2])).values()];
+          const namen = /* @__PURE__ */ new Map();
+          for (const haus2 of liste2) namen.set(haus2.name, (namen.get(haus2.name) ?? 0) + 1);
+          for (const haus2 of liste2) {
             const an = x.flagships.includes(haus2.id), premium2 = haus2.klasse === "premium";
-            h += '<div class="zeile"><span class="was">' + esc2(haus2.name) + (premium2 ? " \xB7 Premium" : "") + "</span><button " + (premium2 ? "disabled" : "") + ' data-org="flagship" data-haus="' + esc2(haus2.id) + '" data-an="' + !an + '">' + (premium2 ? "fest" : an ? "Flagship abw\xE4hlen" : "Flagship w\xE4hlen") + "</button></div>";
+            const zusatz = namen.get(haus2.name) > 1 ? " \xB7 " + esc2(haus2.stadt) + " (" + esc2(haus2.id) + ")" : "";
+            h += '<div class="zeile"><span class="was">' + esc2(haus2.name) + zusatz + (premium2 ? " \xB7 Premium" : "") + "</span><button " + (premium2 ? "disabled" : "") + ' data-org="flagship" data-haus="' + esc2(haus2.id) + '" data-an="' + !an + '">' + (premium2 ? "fest" : an ? "Flagship abw\xE4hlen" : "Flagship w\xE4hlen") + "</button></div>";
           }
           h += "</div>";
         }
@@ -128542,7 +128573,7 @@
       });
       const liste2 = z2.querySelector(".reise-zielraster");
       if (!liste2) return;
-      liste2.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc2(c.name) + '">' + stadtVorschau(c) + "<span><strong>" + esc2(c.name) + "</strong><small>" + esc2(c.formate ?? "") + "</small></span></button>").join("");
+      liste2.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc2(c.name) + '">' + stadtVorschau(c) + "<span><strong>" + esc2(c.name) + '</strong><small class="reise-formate">' + (Array.isArray(c.formate) ? c.formate.map((f) => '<span class="reise-format">' + esc2(f.name) + "&nbsp;" + esc2(String(f.anzahl)) + "</span>").join("") : esc2(c.formate ?? "")) + "</small></span></button>").join("");
       if (!sortiert.length) liste2.innerHTML = "<p>Keine Reiseziele gefunden.</p>";
     }
     function schreibe(el2, text3, dauer, meins) {
@@ -131656,6 +131687,26 @@
   function hausReportingHtml(kommentare, ranking2) {
     return '<div class="karte"><div class="khead">Kommentare der Woche</div>' + (kommentare.length ? kommentare.map((x) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was"><b>` + esc2(x.name) + " \xB7 " + PROZENT(x.abweichung) + "</b><i>" + esc2(GRUENDE[x.grund] ?? x.grund) + " / " + esc2(MASS[x.massnahme] ?? x.massnahme) + "</i><small>" + esc2(x.pruefung) + "</small></span><span>\u2192</span></button>").join("") : '<div class="zeile">Noch keine kommentierungspflichtigen Abweichungen.</div>') + '</div><div class="karte"><div class="khead">Mystery Shopping \xB7 Top 20</div>' + ranking2.slice(0, 20).map((x, i) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x.id) + `')"><span class="was">` + (i + 1) + ". " + esc2(x.name) + "</span><b>" + x.score + "/100</b></button>").join("") + "</div>";
   }
+  function hausStatischHtml(haus2, reiter = "ueberblick") {
+    const istOutlet = haus2.format === "outlet";
+    const name2 = istOutlet ? "FUNDUS" : "Volkskauf";
+    const tabs = istOutlet ? [["ueberblick", "\xDCberblick"], ["sortiment", "Sortiment"], ["etagen", "Verkaufsfl\xE4chen"]] : [["ueberblick", "\xDCberblick"], ["sortiment", "Sortiment"], ["etagen", "Etagen"]];
+    const auswahl4 = tabs.some(([id]) => id === reiter) ? reiter : "ueberblick";
+    const nav = '<nav class="haus-reiter">' + tabs.map(([id, titel]) => `<button class="${id === auswahl4 ? "an" : ""}" onclick="hausReiterWahl('${id}')">${esc2(titel)}</button>`).join("") + "</nav>";
+    const flaechen = haus2.flaechen ?? [];
+    let inhalt = "";
+    if (auswahl4 === "ueberblick") {
+      inhalt = '<div class="karte"><div class="khead">' + name2 + " \xB7 Standort</div>" + line("Haus", haus2.name) + line("Stadt", haus2.stadt) + line("Baujahr", haus2.baujahr) + line("Verkaufsfl\xE4che", fmt.format(flaechen.reduce((sum2, f) => sum2 + (f.qm ?? 0), 0)) + " qm") + line("Substanz", Math.round(haus2.substanz ?? 0) + " / 100") + line("Status", haus2.status === "offen" ? "Ge\xF6ffnet" : haus2.status ?? "Unbekannt") + '<div class="zeile grau">Betriebskennzahlen und Entscheidungen folgen mit der Engine-Anbindung dieses Formats.</div></div>';
+    } else if (auswahl4 === "sortiment") {
+      const gruppen = /* @__PURE__ */ new Map();
+      for (const f of flaechen) gruppen.set(f.gruppe ?? "Sonstiges", (gruppen.get(f.gruppe ?? "Sonstiges") ?? 0) + (f.qm ?? 0));
+      inhalt = '<div class="karte"><div class="khead">' + name2 + " \xB7 Sortimentsfl\xE4chen</div>" + [...gruppen].map(([gruppe2, qm]) => line(gruppe2, fmt.format(qm) + " qm")).join("") + "</div>";
+    } else {
+      const etagen = [...new Set(flaechen.map((f) => f.etage))].sort((a, b2) => b2 - a);
+      inhalt = etagen.map((nr) => '<div class="karte"><div class="khead">' + (nr === 0 ? "Erdgeschoss" : nr === -1 ? "Untergeschoss" : nr + ". Obergeschoss") + "</div>" + flaechen.filter((f) => f.etage === nr).map((f) => line(f.gruppe ?? f.konzept, fmt.format(f.qm) + " qm")).join("") + "</div>").join("");
+    }
+    return nav + inhalt;
+  }
 
   // src/ui/personaleinsatz.js
   var GRUPPEN2 = ["logistik", "verkauf", "kasse", "verwaltung"];
@@ -131809,6 +131860,7 @@
 
   // src/spiel.js
   var param = new URLSearchParams(location.search);
+  if (param.get("dev") === "1") document.querySelector(".botwahl")?.style.setProperty("display", "flex");
   var $2 = (id) => document.getElementById(id);
   var messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
   var speicherTimer = null;
@@ -131988,6 +132040,18 @@
     const ap = angebotPins.length ? ray.intersectObjects(angebotPins, false)[0] : null;
     if (ap?.object.userData.angebotId) return "angebot:" + ap.object.userData.angebotId;
     const t = ray.intersectObject(wurzel, true)[0];
+    let statisch = null, distanz2 = t?.distance ?? Infinity;
+    for (const [id, eintrag2] of sb?.statischeHaeuser ?? []) {
+      const treffer = ray.ray.intersectBox(eintrag2.bounds, new three_module_exports.Vector3());
+      if (treffer) {
+        const d2 = treffer.distanceTo(ray.ray.origin);
+        if (d2 < distanz2) {
+          distanz2 = d2;
+          statisch = id;
+        }
+      }
+    }
+    if (statisch) return statisch;
     const u = t?.object.userData;
     return u?.hausId ?? (u?.wbId ? "wb:" + u.wbId : u?.hqId ? "hq:" + u.hqId : null);
   }
@@ -132194,6 +132258,11 @@
     K2.halb = 63;
     kameraSetzen();
   }
+  function stadtchipSetzen(name2) {
+    $2("stadtname").textContent = name2;
+    const region = stadtRegion(name2) ?? s.haeuser.find((h) => h.stadt === name2)?.region;
+    $2("stadtcluster").textContent = region ? "Region " + region : "";
+  }
   function baueStadtAusSpiel(name2) {
     const t0 = performance.now();
     raeumeSzene();
@@ -132253,11 +132322,7 @@
     kachelnSichtbarBauen();
     const ms = Math.round(performance.now() - t0);
     messung.stadtMs.push({ stadt: name2, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
-    $2("stadtname").textContent = name2;
-    const hausHier = s.haeuser.find((h) => h.stadt === name2 && h.hauscluster);
-    const geoCluster = s.organisation?.hauscluster.find((c) => c.id === hausHier?.hauscluster);
-    const chipCluster = $2("stadtcluster");
-    if (chipCluster) chipCluster.textContent = geoCluster?.name ?? "";
+    stadtchipSetzen(name2);
     return ms;
   }
   async function baueStadtAusSpielReise(name2) {
@@ -132320,7 +132385,7 @@
     zeichnen();
     const ms = Math.round(performance.now() - t0);
     messung.stadtMs.push({ stadt: name2, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
-    $2("stadtname").textContent = name2;
+    stadtchipSetzen(name2);
     return ms;
   }
   var KACHEL = 110;
@@ -132660,7 +132725,19 @@
   };
   function oeffneHaus(id) {
     const d2 = hausDetail(s, id);
-    if (!d2) return;
+    if (!d2) {
+      const statisch = sb?.statischeHaeuser.get(id);
+      if (!statisch) return;
+      const neu2 = offenesHaus !== id;
+      if (neu2) hausReiter = "ueberblick";
+      offenesHaus = id;
+      offenesHq = null;
+      offenerWettbewerber = null;
+      const h2 = statisch.haus;
+      panel(h2.name, h2.stadt + " \xB7 " + (h2.format === "outlet" ? "FUNDUS" : "Volkskauf") + " \xB7 Baujahr " + h2.baujahr, hausStatischHtml(h2, hausReiter));
+      if (neu2) hausZeigen(id);
+      return;
+    }
     const neu = offenesHaus !== id;
     if (neu) hausReiter = "ueberblick";
     d2.betrieb = hausUebersicht(s, id);
@@ -133074,7 +133151,7 @@
         hauscluster: hs[0]?.hauscluster,
         groesse: hs.length + zahl4("schwester") + zahl4("outlet"),
         umsatz: hs.reduce((sum2, h) => sum2 + (h.kpi?.umsatz ?? 0), 0),
-        formate: formate.filter((p2) => p2[1]).map((p2) => p2[0] + " " + p2[1]).join(" \xB7 ")
+        formate: formate.filter((p2) => p2[1]).map(([name2, anzahl]) => ({ name: name2, anzahl }))
       };
     }),
     pinPunkt: bahnhofBildpunkt,
@@ -133143,8 +133220,6 @@
     s.testGenutzt = true;
     postUi = { ...neuerPostUi(), ...d2.ui ?? {} };
     if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
-    $2("postwarnung").checked = !!postUi.warnen;
-    $2("wochenbericht-modus").value = ["voll", "kurz", "aus"].includes(postUi.wochenbericht) ? postUi.wochenbericht : "voll";
     schwierigkeitId = s.schwierigkeit ?? "mittel";
     $2("stufe").textContent = SCHWIERIGKEITEN2.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();
