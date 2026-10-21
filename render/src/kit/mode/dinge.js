@@ -208,23 +208,85 @@ export const DINGE = {
     t.push(linie('M29 40 L71 40', '#c9c6bf', 0.9));
   },
   loafer(S, t) {
-    t.push(schatten(50, 76, 40, 3));
-    for (const [dx, ton] of [[8, -0.08], [-6, 0]]) {
-      t.push(`<g transform="translate(${dx} ${dx > 0 ? -8 : 0})">`);
-      t.push(flaeche(S, glatt([[14, 66], [20, 52], [40, 50], [66, 54], [84, 58], [88, 66, E], [14, 70, E]], true, 0.4), { ton }));
-      t.push(`<path d="M12 70 L90 68 L90 72 L12 74 Z" fill="${dunkel(S.c, 0.45)}"/>`);
-      t.push(linie('M48 52 Q60 50 70 56', S.cK, 0.8), `<rect x="52" y="54" width="12" height="3" rx="1" fill="${dunkel(S.c, 0.2)}"/>`);
-      t.push(`<path d="M22 54 Q34 48 46 52" stroke="#fff" stroke-width="1.2" fill="none" opacity="0.4"/></g>`);
-    }
+    t.push(schatten(52, 80, 40, 3));
+    const schuh = (dx, dy, k, ton) => {
+      const g = [];
+      const P = (pts) => pts.map(([x, y, e]) => [dx + x * k, dy + y * k, e]);
+      // Sohle und Absatz
+      g.push(`<path d="${glatt(P([[10, 70, E], [88, 69, E], [92, 72], [88, 75, E], [24, 75, E], [24, 78, E], [11, 78, E]]), true, 0.3)}" fill="${dunkel(S.c, 0.55)}"/>`);
+      g.push(`<path d="M${dx + 24 * k} ${dy + 74.6 * k} L${dx + 88 * k} ${dy + 74.6 * k}" stroke="${hell(S.c, 0.25)}" stroke-width="0.5" opacity="0.5"/>`);
+      // Schaft
+      const schaft = glatt(P([[11, 70, E], [10, 56], [14, 49], [22, 47.6], [34, 50.6], [46, 51], [58, 48.6], [70, 50], [82, 55], [90, 62], [90, 68], [86, 70, E]]), true, 0.4);
+      g.push(flaeche(S, schaft, { ton }));
+      // Fußöffnung
+      g.push(`<path d="${glatt(P([[14.5, 50], [22, 48.8], [34, 51.4], [44, 51.8], [34, 53.6], [22, 52.6]]), true, 0.4)}" fill="${dunkel(S.c, 0.6)}"/>`);
+      // Mokassinnaht und Riegel
+      g.push(`<path d="M${dx + 46 * k} ${dy + 52.4 * k} Q${dx + 60 * k} ${dy + 49.4 * k} ${dx + 74 * k} ${dy + 52.6 * k} Q${dx + 86 * k} ${dy + 57 * k} ${dx + 88.6 * k} ${dy + 63 * k}" stroke="${dunkel(S.c, 0.35)}" stroke-width="${0.8 * k}" fill="none"/>`);
+      g.push(`<path d="M${dx + 46.6 * k} ${dy + 53.6 * k} Q${dx + 60 * k} ${dy + 50.8 * k} ${dx + 73.6 * k} ${dy + 54 * k}" stroke="${hell(S.c, 0.4)}" stroke-width="${0.45 * k}" stroke-dasharray="${1 * k} ${0.8 * k}" fill="none" opacity="0.8"/>`);
+      g.push(`<path d="${glatt(P([[45, 53.4, E], [60, 50.4, E], [62, 56.6, E], [46.4, 59.4, E]]), true, 0.2)}" fill="${dunkel(S.c, 0.2)}"/>`);
+      g.push(`<path d="${glatt(P([[51, 54.6, E], [56, 53.6, E], [56.6, 56.6, E], [51.6, 57.6, E]]), true, 0.2)}" fill="${dunkel(S.c, 0.55)}"/>`);
+      // Ferse, Glanz
+      g.push(`<path d="M${dx + 12 * k} ${dy + 58 * k} Q${dx + 16 * k} ${dy + 64 * k} ${dx + 13 * k} ${dy + 69 * k}" stroke="${dunkel(S.c, 0.25)}" stroke-width="${0.6 * k}" fill="none"/>`);
+      g.push(`<path d="M${dx + 66 * k} ${dy + 53.4 * k} Q${dx + 80 * k} ${dy + 56 * k} ${dx + 86 * k} ${dy + 63 * k}" stroke="#fff" stroke-width="${1.6 * k}" fill="none" opacity="0.35" stroke-linecap="round"/>`);
+      return g.join('');
+    };
+    t.push(schuh(4, -14, 0.92, -0.12), schuh(-2, 0, 1, 0));
   },
   sandale(S, t) {
-    t.push(schatten(50, 78, 40, 3));
-    for (const [dx, dy] of [[-14, 0], [14, -6]]) {
-      t.push(`<g transform="translate(${dx} ${dy})">`);
-      t.push(`<ellipse cx="50" cy="68" rx="13" ry="7" fill="#c7a77d"/><ellipse cx="50" cy="66.4" rx="12" ry="6" fill="#e3cba6"/>`);
-      t.push(flaeche(S, glatt([[39, 62, E], [61, 62, E], [58, 68, E], [42, 68, E]], true, 0.3)), flaeche(S, glatt([[40, 54, E], [60, 54, E], [59, 58, E], [41, 58, E]], true, 0.3)));
-      t.push('</g>');
-    }
+    t.push(schatten(50, 86, 36, 3));
+    const bett = [[0, -32], [7.4, -29], [10.6, -18], [10, -6], [7.6, 6], [8.4, 18], [7.6, 28], [0, 33], [-6.4, 28], [-7.4, 16], [-8.4, 4], [-9.6, -10], [-8.8, -24], [-5, -31]];
+    const sandale = (cx, cy, rot, spiegel) => {
+      const g = [`<g transform="translate(${cx} ${cy}) rotate(${rot}) scale(${spiegel} 1)">`];
+      g.push(`<path d="${glatt(bett.map(([x, y]) => [x * 1.12, y * 1.04 + 1.6]))}" fill="${dunkel('#c7a77d', 0.25)}"/>`);
+      g.push(`<path d="${glatt(bett.map(([x, y]) => [x * 1.08, y]))}" fill="#c7a77d"/>`);
+      g.push(`<path d="${glatt(bett.map(([x, y]) => [x * 0.9, y * 0.94 - 0.4]))}" fill="#e7d3b1"/>`);
+      g.push(`<ellipse cx="0.6" cy="-24" rx="5.6" ry="4" fill="#d9c19c" opacity="0.7"/><ellipse cx="0" cy="22" rx="4.6" ry="5" fill="#d9c19c" opacity="0.7"/>`);
+      // Riemen
+      g.push(flaeche(S, glatt([[-11.6, -19, E], [12, -21, E], [12.4, -12, E], [-11.2, -9.6, E]], true, 0.3)));
+      g.push(flaeche(S, glatt([[-10.6, 2, E], [10.4, 0, E], [10.8, 8.4, E], [-10.2, 10.4, E]], true, 0.3)));
+      for (const y of [-15.4, 5.2]) {
+        g.push(`<rect x="7.6" y="${y - 3.6}" width="5" height="7.2" rx="1" fill="none" stroke="#c9a24a" stroke-width="1.1"/>`);
+        g.push(`<path d="M-9 ${y - 2.6} L7 ${y - 3.6} M-9 ${y + 2.6} L7 ${y + 1.8}" stroke="${hell(S.c, 0.35)}" stroke-width="0.4" stroke-dasharray="0.9 0.7"/>`);
+      }
+      g.push('</g>');
+      return g.join('');
+    };
+    t.push(sandale(36, 50, -6, -1), sandale(64, 48, 6, 1));
+  },
+  schal(S, t) {
+    t.push(schatten(50, 86, 34, 3));
+    // gefaltetes Paket mit Faltkanten
+    t.push(flaeche(S, glatt([[20, 30, E], [80, 30, E], [80, 70, E], [20, 70, E]], true, 0.2), { ton: -0.06 }));
+    for (const y of [43.3, 56.6]) t.push(`<path d="M20 ${y} Q50 ${y + 1.6} 80 ${y}" stroke="${dunkel(S.c, 0.35)}" stroke-width="0.9" fill="none" opacity="0.7"/><path d="M20 ${y + 1} Q50 ${y + 2.6} 80 ${y + 1}" stroke="${hell(S.c, 0.3)}" stroke-width="0.6" fill="none" opacity="0.5"/>`);
+    t.push(flaeche(S, glatt([[22, 24, E], [78, 24, E], [80, 30, E], [20, 30, E]], true, 0.2), { ton: 0.08 }));
+    // herabhängendes Ende mit Fransen
+    const ende = [[56, 28, E], [76, 28, E], [74, 46], [72, 66], [70, 84, E], [50, 84, E], [52, 64], [54, 46]];
+    t.push(flaeche(S, glatt(ende, true, 0.35)));
+    t.push(`<path d="M56 28 Q66 33 76 28" stroke="${dunkel(S.c, 0.3)}" stroke-width="0.9" fill="none"/>`);
+    for (let i = 0; i <= 12; i++) { const x = 50.6 + i * 1.6; t.push(linie(`M${f(x)} 84 l${f(-0.2 + (i % 3) * 0.2)} ${4 + (i % 2) * 0.8}`, dunkel(S.c, 0.12), 0.8)); }
+    t.push(`<path d="M51.4 80 L70.4 80" stroke="${hell(S.c, 0.3)}" stroke-width="1.2" opacity="0.5"/>`);
+    t.push(`<path d="M60 34 Q58 56 56 78" stroke="#fff" stroke-width="2" fill="none" opacity="0.12" stroke-linecap="round"/>`);
+  },
+  guertel(S, t) {
+    t.push(schatten(50, 82, 34, 3));
+    // aufgerollter Gürtel von oben: Spirale, außen das Schnallenende
+    const pts = [];
+    for (let a = 0; a <= Math.PI * 4.2; a += Math.PI / 10) { const r = 9 + 7.2 * a / (2 * Math.PI); pts.push([46 + Math.cos(a) * r, 50 + Math.sin(a) * r * 0.86]); }
+    const d = glatt(pts, false, 0.5);
+    t.push(`<path d="${d}" stroke="${dunkel(S.c, 0.45)}" stroke-width="8" fill="none" stroke-linecap="butt"/>`);
+    t.push(`<path d="${d}" stroke="${S.c}" stroke-width="6.6" fill="none"/>`);
+    t.push(`<path d="${d}" stroke="${hell(S.c, 0.4)}" stroke-width="0.5" stroke-dasharray="1.1 0.8" fill="none" opacity="0.8" transform="translate(-0.4 -0.6)"/>`);
+    t.push(`<path d="${d}" stroke="#fff" stroke-width="1.4" fill="none" opacity="0.14" transform="translate(-1.2 -1.6)"/>`);
+    // Spitze innen mit Löchern
+    const [x0, y0] = pts[0];
+    t.push(`<circle cx="${f(x0)}" cy="${f(y0 - 0.2)}" r="3.3" fill="${S.c}"/>`);
+    for (const k of [2, 4]) { const [x, y] = pts[k]; t.push(`<ellipse cx="${f(x)}" cy="${f(y)}" rx="0.9" ry="0.8" fill="${dunkel(S.c, 0.6)}"/>`); }
+    // Schnalle am äußeren Ende
+    const [xe, ye] = pts.at(-1);
+    t.push(`<rect x="${f(xe - 2)}" y="${f(ye - 6.6)}" width="10" height="13.2" rx="2.6" fill="none" stroke="#7f858c" stroke-width="2.6"/>`);
+    t.push(`<rect x="${f(xe - 2)}" y="${f(ye - 6.6)}" width="10" height="13.2" rx="2.6" fill="none" stroke="#d9dde1" stroke-width="1.4"/>`);
+    t.push(`<path d="M${f(xe - 2)} ${f(ye)} L${f(xe + 6)} ${f(ye)}" stroke="#aeb3b8" stroke-width="1.2" stroke-linecap="round"/>`);
+    t.push(`<rect x="${f(xe - 6)}" y="${f(ye - 3.6)}" width="4.2" height="7.2" rx="0.6" fill="${dunkel(S.c, 0.25)}"/>`);
   },
   lippenstift(S, t) {
     t.push(schatten(50, 86, 24, 2.6));

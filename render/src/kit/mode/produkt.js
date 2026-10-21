@@ -27,8 +27,9 @@ function zoom(s, p) {
   if (s.zeichner === 'hose' && p.laenge === 'bermuda') return [1.12, 50, 40];
   if (s.zeichner === 'rock' && p.laenge === 'mini') return [1.5, 50, 32];
   if (s.zeichner === 'rock' && p.laenge === 'knie') return [1.2, 50, 42];
-  if (s.zeichner === 'ding:sandale') return [1.3, 50, 62];
+  if (s.zeichner === 'ding:sandale') return [1.05, 50, 52];
   if (s.zeichner === 'ding:jeansshorts') return [1.32, 50, 44];
+  if (s.zeichner === 'ding:guertel') return [1.3, 50, 52];
   return null;
 }
 

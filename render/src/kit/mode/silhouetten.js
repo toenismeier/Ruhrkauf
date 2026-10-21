@@ -116,8 +116,8 @@ export const SILHOUETTEN = {
   cap: d('accessoire', 'cap', 'baumwolle', 'marine', 'muetze', { art: 'cap' }),
   buckethat: d('accessoire', 'buckethat', 'baumwolle', 'sand', 'muetze', { art: 'bucket' }),
   muetze: a('accessoire', 'Mütze', 'merino', 'senf', 'muetze', { art: 'beanie' }),
-  schal: a('accessoire', 'Schal', 'kaschmir', 'bordeaux'),
-  guertel: a('accessoire', 'Gürtel', 'leder', 'braun'),
+  schal: d('accessoire', 'schal', 'kaschmir', 'bordeaux'),
+  guertel: d('accessoire', 'guertel', 'leder', 'cognac'),
   socken: a('waesche', 'Socken', 'merino', 'anthrazit'),
   // Wäsche
   pyjama: a('waesche', 'Pyjama', 'baumwolle', 'hellblau'),

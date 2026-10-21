@@ -129399,7 +129399,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o2) => typeof o2 === "object" ? { wert: o2.wert ?? o2.value, titel: o2.titel ?? o2.label ?? o2.wert } : { wert: o2, titel: o2 };
-  var version = () => true ? "3a1f4a3" : "Entwicklung";
+  var version = () => true ? "6ca5e71" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
@@ -133220,23 +133220,83 @@
       t.push(linie2("M29 40 L71 40", "#c9c6bf", 0.9));
     },
     loafer(S, t) {
-      t.push(schatten(50, 76, 40, 3));
-      for (const [dx, ton2] of [[8, -0.08], [-6, 0]]) {
-        t.push(`<g transform="translate(${dx} ${dx > 0 ? -8 : 0})">`);
-        t.push(flaeche5(S, glatt2([[14, 66], [20, 52], [40, 50], [66, 54], [84, 58], [88, 66, E3], [14, 70, E3]], true, 0.4), { ton: ton2 }));
-        t.push(`<path d="M12 70 L90 68 L90 72 L12 74 Z" fill="${dunkel2(S.c, 0.45)}"/>`);
-        t.push(linie2("M48 52 Q60 50 70 56", S.cK, 0.8), `<rect x="52" y="54" width="12" height="3" rx="1" fill="${dunkel2(S.c, 0.2)}"/>`);
-        t.push(`<path d="M22 54 Q34 48 46 52" stroke="#fff" stroke-width="1.2" fill="none" opacity="0.4"/></g>`);
-      }
+      t.push(schatten(52, 80, 40, 3));
+      const schuh2 = (dx, dy, k2, ton2) => {
+        const g = [];
+        const P2 = (pts) => pts.map(([x, y, e]) => [dx + x * k2, dy + y * k2, e]);
+        g.push(`<path d="${glatt2(P2([[10, 70, E3], [88, 69, E3], [92, 72], [88, 75, E3], [24, 75, E3], [24, 78, E3], [11, 78, E3]]), true, 0.3)}" fill="${dunkel2(S.c, 0.55)}"/>`);
+        g.push(`<path d="M${dx + 24 * k2} ${dy + 74.6 * k2} L${dx + 88 * k2} ${dy + 74.6 * k2}" stroke="${hell3(S.c, 0.25)}" stroke-width="0.5" opacity="0.5"/>`);
+        const schaft = glatt2(P2([[11, 70, E3], [10, 56], [14, 49], [22, 47.6], [34, 50.6], [46, 51], [58, 48.6], [70, 50], [82, 55], [90, 62], [90, 68], [86, 70, E3]]), true, 0.4);
+        g.push(flaeche5(S, schaft, { ton: ton2 }));
+        g.push(`<path d="${glatt2(P2([[14.5, 50], [22, 48.8], [34, 51.4], [44, 51.8], [34, 53.6], [22, 52.6]]), true, 0.4)}" fill="${dunkel2(S.c, 0.6)}"/>`);
+        g.push(`<path d="M${dx + 46 * k2} ${dy + 52.4 * k2} Q${dx + 60 * k2} ${dy + 49.4 * k2} ${dx + 74 * k2} ${dy + 52.6 * k2} Q${dx + 86 * k2} ${dy + 57 * k2} ${dx + 88.6 * k2} ${dy + 63 * k2}" stroke="${dunkel2(S.c, 0.35)}" stroke-width="${0.8 * k2}" fill="none"/>`);
+        g.push(`<path d="M${dx + 46.6 * k2} ${dy + 53.6 * k2} Q${dx + 60 * k2} ${dy + 50.8 * k2} ${dx + 73.6 * k2} ${dy + 54 * k2}" stroke="${hell3(S.c, 0.4)}" stroke-width="${0.45 * k2}" stroke-dasharray="${1 * k2} ${0.8 * k2}" fill="none" opacity="0.8"/>`);
+        g.push(`<path d="${glatt2(P2([[45, 53.4, E3], [60, 50.4, E3], [62, 56.6, E3], [46.4, 59.4, E3]]), true, 0.2)}" fill="${dunkel2(S.c, 0.2)}"/>`);
+        g.push(`<path d="${glatt2(P2([[51, 54.6, E3], [56, 53.6, E3], [56.6, 56.6, E3], [51.6, 57.6, E3]]), true, 0.2)}" fill="${dunkel2(S.c, 0.55)}"/>`);
+        g.push(`<path d="M${dx + 12 * k2} ${dy + 58 * k2} Q${dx + 16 * k2} ${dy + 64 * k2} ${dx + 13 * k2} ${dy + 69 * k2}" stroke="${dunkel2(S.c, 0.25)}" stroke-width="${0.6 * k2}" fill="none"/>`);
+        g.push(`<path d="M${dx + 66 * k2} ${dy + 53.4 * k2} Q${dx + 80 * k2} ${dy + 56 * k2} ${dx + 86 * k2} ${dy + 63 * k2}" stroke="#fff" stroke-width="${1.6 * k2}" fill="none" opacity="0.35" stroke-linecap="round"/>`);
+        return g.join("");
+      };
+      t.push(schuh2(4, -14, 0.92, -0.12), schuh2(-2, 0, 1, 0));
     },
     sandale(S, t) {
-      t.push(schatten(50, 78, 40, 3));
-      for (const [dx, dy] of [[-14, 0], [14, -6]]) {
-        t.push(`<g transform="translate(${dx} ${dy})">`);
-        t.push(`<ellipse cx="50" cy="68" rx="13" ry="7" fill="#c7a77d"/><ellipse cx="50" cy="66.4" rx="12" ry="6" fill="#e3cba6"/>`);
-        t.push(flaeche5(S, glatt2([[39, 62, E3], [61, 62, E3], [58, 68, E3], [42, 68, E3]], true, 0.3)), flaeche5(S, glatt2([[40, 54, E3], [60, 54, E3], [59, 58, E3], [41, 58, E3]], true, 0.3)));
-        t.push("</g>");
+      t.push(schatten(50, 86, 36, 3));
+      const bett = [[0, -32], [7.4, -29], [10.6, -18], [10, -6], [7.6, 6], [8.4, 18], [7.6, 28], [0, 33], [-6.4, 28], [-7.4, 16], [-8.4, 4], [-9.6, -10], [-8.8, -24], [-5, -31]];
+      const sandale = (cx, cy, rot, spiegel) => {
+        const g = [`<g transform="translate(${cx} ${cy}) rotate(${rot}) scale(${spiegel} 1)">`];
+        g.push(`<path d="${glatt2(bett.map(([x, y]) => [x * 1.12, y * 1.04 + 1.6]))}" fill="${dunkel2("#c7a77d", 0.25)}"/>`);
+        g.push(`<path d="${glatt2(bett.map(([x, y]) => [x * 1.08, y]))}" fill="#c7a77d"/>`);
+        g.push(`<path d="${glatt2(bett.map(([x, y]) => [x * 0.9, y * 0.94 - 0.4]))}" fill="#e7d3b1"/>`);
+        g.push(`<ellipse cx="0.6" cy="-24" rx="5.6" ry="4" fill="#d9c19c" opacity="0.7"/><ellipse cx="0" cy="22" rx="4.6" ry="5" fill="#d9c19c" opacity="0.7"/>`);
+        g.push(flaeche5(S, glatt2([[-11.6, -19, E3], [12, -21, E3], [12.4, -12, E3], [-11.2, -9.6, E3]], true, 0.3)));
+        g.push(flaeche5(S, glatt2([[-10.6, 2, E3], [10.4, 0, E3], [10.8, 8.4, E3], [-10.2, 10.4, E3]], true, 0.3)));
+        for (const y of [-15.4, 5.2]) {
+          g.push(`<rect x="7.6" y="${y - 3.6}" width="5" height="7.2" rx="1" fill="none" stroke="#c9a24a" stroke-width="1.1"/>`);
+          g.push(`<path d="M-9 ${y - 2.6} L7 ${y - 3.6} M-9 ${y + 2.6} L7 ${y + 1.8}" stroke="${hell3(S.c, 0.35)}" stroke-width="0.4" stroke-dasharray="0.9 0.7"/>`);
+        }
+        g.push("</g>");
+        return g.join("");
+      };
+      t.push(sandale(36, 50, -6, -1), sandale(64, 48, 6, 1));
+    },
+    schal(S, t) {
+      t.push(schatten(50, 86, 34, 3));
+      t.push(flaeche5(S, glatt2([[20, 30, E3], [80, 30, E3], [80, 70, E3], [20, 70, E3]], true, 0.2), { ton: -0.06 }));
+      for (const y of [43.3, 56.6]) t.push(`<path d="M20 ${y} Q50 ${y + 1.6} 80 ${y}" stroke="${dunkel2(S.c, 0.35)}" stroke-width="0.9" fill="none" opacity="0.7"/><path d="M20 ${y + 1} Q50 ${y + 2.6} 80 ${y + 1}" stroke="${hell3(S.c, 0.3)}" stroke-width="0.6" fill="none" opacity="0.5"/>`);
+      t.push(flaeche5(S, glatt2([[22, 24, E3], [78, 24, E3], [80, 30, E3], [20, 30, E3]], true, 0.2), { ton: 0.08 }));
+      const ende = [[56, 28, E3], [76, 28, E3], [74, 46], [72, 66], [70, 84, E3], [50, 84, E3], [52, 64], [54, 46]];
+      t.push(flaeche5(S, glatt2(ende, true, 0.35)));
+      t.push(`<path d="M56 28 Q66 33 76 28" stroke="${dunkel2(S.c, 0.3)}" stroke-width="0.9" fill="none"/>`);
+      for (let i = 0; i <= 12; i++) {
+        const x = 50.6 + i * 1.6;
+        t.push(linie2(`M${f3(x)} 84 l${f3(-0.2 + i % 3 * 0.2)} ${4 + i % 2 * 0.8}`, dunkel2(S.c, 0.12), 0.8));
       }
+      t.push(`<path d="M51.4 80 L70.4 80" stroke="${hell3(S.c, 0.3)}" stroke-width="1.2" opacity="0.5"/>`);
+      t.push(`<path d="M60 34 Q58 56 56 78" stroke="#fff" stroke-width="2" fill="none" opacity="0.12" stroke-linecap="round"/>`);
+    },
+    guertel(S, t) {
+      t.push(schatten(50, 82, 34, 3));
+      const pts = [];
+      for (let a2 = 0; a2 <= Math.PI * 4.2; a2 += Math.PI / 10) {
+        const r3 = 9 + 7.2 * a2 / (2 * Math.PI);
+        pts.push([46 + Math.cos(a2) * r3, 50 + Math.sin(a2) * r3 * 0.86]);
+      }
+      const d3 = glatt2(pts, false, 0.5);
+      t.push(`<path d="${d3}" stroke="${dunkel2(S.c, 0.45)}" stroke-width="8" fill="none" stroke-linecap="butt"/>`);
+      t.push(`<path d="${d3}" stroke="${S.c}" stroke-width="6.6" fill="none"/>`);
+      t.push(`<path d="${d3}" stroke="${hell3(S.c, 0.4)}" stroke-width="0.5" stroke-dasharray="1.1 0.8" fill="none" opacity="0.8" transform="translate(-0.4 -0.6)"/>`);
+      t.push(`<path d="${d3}" stroke="#fff" stroke-width="1.4" fill="none" opacity="0.14" transform="translate(-1.2 -1.6)"/>`);
+      const [x0, y0] = pts[0];
+      t.push(`<circle cx="${f3(x0)}" cy="${f3(y0 - 0.2)}" r="3.3" fill="${S.c}"/>`);
+      for (const k2 of [2, 4]) {
+        const [x, y] = pts[k2];
+        t.push(`<ellipse cx="${f3(x)}" cy="${f3(y)}" rx="0.9" ry="0.8" fill="${dunkel2(S.c, 0.6)}"/>`);
+      }
+      const [xe, ye] = pts.at(-1);
+      t.push(`<rect x="${f3(xe - 2)}" y="${f3(ye - 6.6)}" width="10" height="13.2" rx="2.6" fill="none" stroke="#7f858c" stroke-width="2.6"/>`);
+      t.push(`<rect x="${f3(xe - 2)}" y="${f3(ye - 6.6)}" width="10" height="13.2" rx="2.6" fill="none" stroke="#d9dde1" stroke-width="1.4"/>`);
+      t.push(`<path d="M${f3(xe - 2)} ${f3(ye)} L${f3(xe + 6)} ${f3(ye)}" stroke="#aeb3b8" stroke-width="1.2" stroke-linecap="round"/>`);
+      t.push(`<rect x="${f3(xe - 6)}" y="${f3(ye - 3.6)}" width="4.2" height="7.2" rx="0.6" fill="${dunkel2(S.c, 0.25)}"/>`);
     },
     lippenstift(S, t) {
       t.push(schatten(50, 86, 24, 2.6));
@@ -133344,8 +133404,8 @@
     cap: d2("accessoire", "cap", "baumwolle", "marine", "muetze", { art: "cap" }),
     buckethat: d2("accessoire", "buckethat", "baumwolle", "sand", "muetze", { art: "bucket" }),
     muetze: a("accessoire", "M\xFCtze", "merino", "senf", "muetze", { art: "beanie" }),
-    schal: a("accessoire", "Schal", "kaschmir", "bordeaux"),
-    guertel: a("accessoire", "G\xFCrtel", "leder", "braun"),
+    schal: d2("accessoire", "schal", "kaschmir", "bordeaux"),
+    guertel: d2("accessoire", "guertel", "leder", "cognac"),
     socken: a("waesche", "Socken", "merino", "anthrazit"),
     // Wäsche
     pyjama: a("waesche", "Pyjama", "baumwolle", "hellblau"),
@@ -133389,8 +133449,9 @@
     if (s2.zeichner === "hose" && p2.laenge === "bermuda") return [1.12, 50, 40];
     if (s2.zeichner === "rock" && p2.laenge === "mini") return [1.5, 50, 32];
     if (s2.zeichner === "rock" && p2.laenge === "knie") return [1.2, 50, 42];
-    if (s2.zeichner === "ding:sandale") return [1.3, 50, 62];
+    if (s2.zeichner === "ding:sandale") return [1.05, 50, 52];
     if (s2.zeichner === "ding:jeansshorts") return [1.32, 50, 44];
+    if (s2.zeichner === "ding:guertel") return [1.3, 50, 52];
     return null;
   }
   function produktSVG(bild3, farbe3, material2, groesse2 = 160, opt = {}) {
