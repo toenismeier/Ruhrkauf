@@ -658,13 +658,13 @@ function beauty(K,t,code) {
 export function zeichneProduktVariante(K, typ) {
   if(!VARIANTEN_BILD[typ]) return false;
   const code=h(typ), t=typ;
-  if(/Kleid|Rock/.test(t))rockKleid(K,t,code);
-  else if(/Hose|Jeans|Shorts|Culotte|Leggings|Bermuda/.test(t))hose(K,t,code);
-  else if(/Jacke|Mantel|Trenchcoat|Sakko/.test(t))jacke(K,t,code);
-  else if(/Schuh|Stiefel|Stiefelette|Sneaker|Boot|Loafer|Ballerina|Sandale|Espadrille|Slipper/.test(t))schuh(K,t,code);
-  else if(/Tasche|Shopper|Clutch|Portemonnaie|Rucksack|Weekender|Kartenetui|Krawatte|Handschuh|Tuch|Hut|Etui/.test(t))accessoire(K,t,code);
-  else if(/Mascara|Foundation|Concealer|Rouge|Lidschatten|Nagellack|Creme|Serum|Gel|Lotion|Toilette/.test(t))beauty(K,t,code);
-  else if(/Bett|Laken|Decke|Handtuch|Waschlappen|Vorleger|Tisch|Geschirr|Schürze|Topflappen|Serviette|Dose|Becher|Schale|Schüssel|Kerzenhalter|Korb|Tablett|Kissen/.test(t))heim(K,t,code);
+  if(/kleid|rock/i.test(t))rockKleid(K,t,code);
+  else if(/hose|jeans|shorts|culotte|leggings|bermuda/i.test(t))hose(K,t,code);
+  else if(/jacke|mantel|trenchcoat|sakko/i.test(t))jacke(K,t,code);
+  else if(/schuh|stiefel|stiefelette|sneaker|boot|loafer|ballerina|sandale|espadrille|slipper/i.test(t))schuh(K,t,code);
+  else if(/tasche|shopper|clutch|portemonnaie|rucksack|weekender|kartenetui|krawatte|handschuh|tuch|hut|etui/i.test(t))accessoire(K,t,code);
+  else if(/mascara|foundation|concealer|rouge|lidschatten|nagellack|creme|serum|gel|lotion|toilette/i.test(t))beauty(K,t,code);
+  else if(/bett|laken|decke|handtuch|waschlappen|vorleger|tisch|geschirr|schürze|topflappen|serviette|dose|becher|schale|schüssel|kerzenhalter|korb|tablett|kissen|pyjama/i.test(t))heim(K,t,code);
   else oberteil(K,t,code);
   return true;
 }
