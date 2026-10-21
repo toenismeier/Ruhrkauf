@@ -4,6 +4,8 @@
 // export warenhaus(S, scene, haus, { x, z, status?, zusatz?, aktion?, untermieter?, hartwig?, familie? })  → { hoehe, w, d, familie, teile }
 // Zustände (Räumung, Leerstand, Untermiete …) kommen aus zustaende.js.
 // export familieVon(haus), masse(haus), FAMILIEN, EG, GH
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, waehle, zw, heller, dunkler, textTextur, textMaterial } from './basis.js';
 import { zustandNormal, zustandFlags, zustandsDekor, eigeneMieterflaechen, ladenInhalt, merke, mieterInfo } from './zustaende.js';
 import { seitenVon as seitenFremd, plakat as plakatFremd, passend as passendFremd } from './sporthelfer.js';
@@ -409,7 +411,7 @@ function vordach(K, s, o = {}) {
     if (stil === 'glas') {
       s.q(a, b, y, y + 0.1, tF, tF + tief, '#a9c6d3');
       s.q(a, b, y - 0.2, y + 0.15, tF + tief - 0.15, tF + tief, STAHL);
-      const l = Math.hypot(tief, 2.4), th = Math.atan2(-tief, 2.4);
+      const l = wurzelSumme(tief, 2.4), th = Math.atan2(-tief, 2.4);
       for (let u = a + 1; u < b; u += 3) {
         s.q(u - 0.07, u + 0.07, y - 0.22, y, tF, tF + tief, STAHL);
         s.kipp(0.07, l, 0.07, u, y + 1.2, tF + tief / 2, '#6f777e', 0, th);
@@ -1242,7 +1244,7 @@ function familie7(K) {
     sz.q(wu - wb / 2 - 0.25, wu + wb / 2 + 0.25, wy - wh / 2 - 0.25, wy + wh / 2 + 0.25, 0.3, 0.45, '#d9dcde');
     sz.q(wu - wb / 2, wu + wb / 2, wy - wh / 2, wy + wh / 2, 0.45, 0.55, bg);
     for (let i = 0; i < 3; i++) {
-      const len = Math.hypot(wh, wh) * 0.9;
+      const len = wurzelSumme(wh, wh) * 0.9;
       const uc = wu + wb * (0.12 + i * 0.12);
       if (uc + wh * 0.35 > wu + wb / 2) continue;
       sz.kipp(1.0, len * 0.8, 0.05, uc, wy, 0.58, ['#ffffff', ROT, '#f2b705'][i], -0.55);
@@ -1355,8 +1357,8 @@ function schriftGeruest(K, s, u, br, yFuss, yB, hb, t) {
     const uu = u - br / 2 - 0.4 + k * df;
     s.q(uu - 0.08, uu + 0.08, yFuss, yT + 0.16, t - 0.2, t - 0.04, st);
     s.q(uu - 0.07, uu + 0.07, yFuss, yB, t - 1.6, t - 1.45, st); // Strebe hinten
-    s.kipp(0.07, Math.hypot(1.5, yB - yFuss), 0.07, uu, (yFuss + yB) / 2, t - 0.8, st, 0, Math.atan2(1.5, yB - yFuss));
-    if (k < nf) s.kipp(0.06, Math.hypot(df, yT - yB), 0.06, uu + df / 2, (yB + yT) / 2, t - 0.15, st, (k % 2 ? 1 : -1) * Math.atan2(df, yT - yB));
+    s.kipp(0.07, wurzelSumme(1.5, yB - yFuss), 0.07, uu, (yFuss + yB) / 2, t - 0.8, st, 0, Math.atan2(1.5, yB - yFuss));
+    if (k < nf) s.kipp(0.06, wurzelSumme(df, yT - yB), 0.06, uu + df / 2, (yB + yT) / 2, t - 0.15, st, (k % 2 ? 1 : -1) * Math.atan2(df, yT - yB));
   }
 }
 
@@ -1531,9 +1533,9 @@ function familie9(K) {
 // ---------------------------------------------------------------- Mosaik (Kunst am Bau), Kacheln zu Läufen zusammengefasst
 function mosaikMotiv(motiv, W, H, P) {
   const m = Math.min(W, H);
-  const kreis = (X, Y, cx, cy, r) => Math.hypot(X - cx, Y - cy) < r;
+  const kreis = (X, Y, cx, cy, r) => wurzelSumme(X - cx, Y - cy) < r;
   if (motiv === 0) return (X, Y) => { // Sonne, Menschen, Welle
-    const sx = 0.7 * W, sy = 0.72 * H, sr = 0.17 * m, dS = Math.hypot(X - sx, Y - sy);
+    const sx = 0.7 * W, sy = 0.72 * H, sr = 0.17 * m, dS = wurzelSumme(X - sx, Y - sy);
     if (dS < sr * 0.62) return P.gelb;
     if (dS < sr) return P.orange;
     if (dS < sr * 1.75 && Math.floor((Math.atan2(Y - sy, X - sx) + Math.PI) / (Math.PI / 10)) % 2 === 0) return P.hellgelb;
@@ -1567,7 +1569,7 @@ function mosaikMotiv(motiv, W, H, P) {
     return Y > 0.5 * H ? P.blauD : P.nacht;
   };
   return (X, Y) => { // Arbeit und Fortschritt: Zahnrad, Ähren, Schwünge
-    const cx = 0.66 * W, cy = 0.52 * H, r = 0.26 * m, dz = Math.hypot(X - cx, Y - cy), wz = Math.atan2(Y - cy, X - cx);
+    const cx = 0.66 * W, cy = 0.52 * H, r = 0.26 * m, dz = wurzelSumme(X - cx, Y - cy), wz = Math.atan2(Y - cy, X - cx);
     if (dz < r * 0.42) return P.gelb;
     if (dz < r * 0.62) return P.sand;
     if (dz < r) return P.grau;
@@ -1620,7 +1622,7 @@ function flugdach(K, s, um, typ, f) {
     s.geo(g, f);
     // Randträger als dünne Kanten
     for (const [i0, j0, i1, j1] of [[0, 0, N, 0], [0, N, N, N], [0, 0, 0, N], [N, 0, N, N]]) {
-      const A = P(i0, j0, 0), Bq = P(i1, j1, 0), len = Math.hypot(Bq[0] - A[0], Bq[1] - A[1], Bq[2] - A[2]);
+      const A = P(i0, j0, 0), Bq = P(i1, j1, 0), len = wurzelSumme(Bq[0] - A[0], Bq[1] - A[1], Bq[2] - A[2]);
       const gg = new THREE.BoxGeometry(len, 0.28, 0.28);
       const dir = new THREE.Vector3(Bq[0] - A[0], Bq[1] - A[1], Bq[2] - A[2]).normalize();
       gg.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1, 0, 0), dir));

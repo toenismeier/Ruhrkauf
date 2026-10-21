@@ -2,6 +2,8 @@
 // Discounter/Drogerie, Fachmarktzentrum, Konkurrenz-Warenhäuser, Theater/Oper/Museum, Markthalle, Tankstelle, Hotel.
 // Alle Funktionen: name(S, scene, { x, z, w, d, seed, ... }) -> { hoehe, teile }
 // Sichtbar: +z (links im Bild) und +x (rechts im Bild). Eingänge, Schilder und Uhren sitzen dort.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, Sammler, rng, mische, waehle, zw, FARBEN, heller, dunkler, fensterRaster, gesims, markise, baum, schild, textTextur, dachProfil, walmdach } from './basis.js';
 
 const PI = Math.PI;
@@ -582,7 +584,7 @@ function langhausKirche(S, scene, p, c) {
     else if (c.lisenen) S.box(0.7, Hs, 0.3, u, Hs / 2, az1 + 0.12, sH);
   }
   if (c.schiff === 'basilika') {
-    const ang = Math.atan((c.pult ?? 3.5) / sb), hyp = Math.hypot(sb, c.pult ?? 3.5) + 1;
+    const ang = Math.atan((c.pult ?? 3.5) / sb), hyp = wurzelSumme(sb, c.pult ?? 3.5) + 1;
     for (const s of [1, -1]) { const g = new THREE.BoxGeometry(L, 0.45, hyp); g.rotateX(ang * s); g.translate(nx0 + L / 2, Hs + (c.pult ?? 3.5) / 2 + 0.2, cz + s * (nb / 2 + sb / 2)); S.add(g, dach); }
     S.quader(nx0, Hs, nz0, nx1, Hn, nz1 - 0.3, '#46525d');
     lochwand(S, '+z', nx0, nx1, Hs, Hn, nz1, 0.5, st, fenster(Hs + (c.pult ?? 3.5) + 0.8, Hn - 1.2));
@@ -795,7 +797,7 @@ function domNeugotik(S, scene, p, c) {
   }
   lochwand(S, '+z', nx0, nx1, -0.3, Hs, sz1, 0.6, stein, loS);
   gesims(S, nx0, sz0, L, sz1 - sz0, Hs, 0.5, 0.3, sH);
-  const sb = sz1 - nz1, ang = Math.atan(4 / sb), hyp = Math.hypot(sb, 4) + 1;
+  const sb = sz1 - nz1, ang = Math.atan(4 / sb), hyp = wurzelSumme(sb, 4) + 1;
   for (const s of [1, -1]) { const g = new THREE.BoxGeometry(L, 0.5, hyp); g.rotateX(ang * s); g.translate(nx0 + L / 2, Hs + 2.1, cz + s * (nb / 2 + sb / 2)); S.add(g, dachF); }
   S.quader(nx0, Hs, nz0, nx1, Hn, nz1 - 0.3, '#4a5560');
   lochwand(S, '+z', nx0, nx1, Hs, Hn, nz1, 0.6, stein, loO);
@@ -2404,7 +2406,7 @@ export function bruecke(S, scene, p) {
     S.quader(x, Hd + th - 0.5, zz - 0.35, x + w, Hd + th, zz + 0.35, stahl);
     S.quader(x, Hd, zz - 0.35, x + w, Hd + 0.6, zz + 0.35, stahl);
     for (let i = 0; i <= n; i++) S.box(0.4, th, 0.5, x + i * fb, Hd + th / 2, zz, stahl);
-    for (let i = 0; i < n; i++) { const g = new THREE.BoxGeometry(Math.hypot(fb, th) + 0.2, 0.35, 0.4); g.rotateZ((i < n / 2 ? 1 : -1) * Math.atan(th / fb)); g.translate(x + (i + 0.5) * fb, Hd + th / 2, zz); S.add(g, stahl); }
+    for (let i = 0; i < n; i++) { const g = new THREE.BoxGeometry(wurzelSumme(fb, th) + 0.2, 0.35, 0.4); g.rotateZ((i < n / 2 ? 1 : -1) * Math.atan(th / fb)); g.translate(x + (i + 0.5) * fb, Hd + th / 2, zz); S.add(g, stahl); }
   }
   for (let i = 0; i <= n; i += 2) S.box(0.4, 0.4, d - 1.2, x + i * fb, Hd + th - 0.25, z + d / 2, stahl);
   for (const u of [x + 0.5, x + w - 0.5]) { S.box(0.6, 1.6, d - 1, u, Hd + th - 1.2, z + d / 2, stahl); }

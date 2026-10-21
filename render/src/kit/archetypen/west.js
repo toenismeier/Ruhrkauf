@@ -13,6 +13,8 @@
 // Wasser: Kanalzellen (Fläche west_kanal) tragen slot:ruhr_kanal mit eigenem Wasser, ohne Bodenplatte darunter (FLAECHEN.ohneGehweg).
 // Rhein und Wupper sind Wasserflächen des Plans; Promenade, Hafen und Schwebebahn liegen als Parzellen darin (nachPlan),
 // Wasserspiegel gleich stadt.js (−2,2), Wasserseite zur Kamera (Front −z → Wasser an +z).
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { registriereArchetyp, PLAN_HILFE as H } from '../stadtplan.js';
 import { registriereSlots, registriereStilProfil } from '../bauer.js';
 import { WEST_SLOTS, fahrrad } from '../westbauten.js';
@@ -210,10 +212,10 @@ function ruhrstadt(E) {
   E.versatz = () => 0;
   const zc = { i: ci + 0.5, j: cj + 0.5 };
   E.viertel = (ii, jj) => {
-    const dd = Math.hypot(ii - zc.i, (jj - zc.j) * 1.1);
+    const dd = wurzelSumme(ii - zc.i, (jj - zc.j) * 1.1);
     if (o.altstadtRest && dd < 0.9) return 'altstadt';
     if (dd < (o.kern60 ? 2.4 : 1.7)) return 'ruhr60';
-    if (!klein && Math.hypot(ii - nb.i - 0.5, jj - nb.j) < 1.4) return 'stadtteil';
+    if (!klein && wurzelSumme(ii - nb.i - 0.5, jj - nb.j) < 1.4) return 'stadtteil';
     if (o.kern60) return 'nachkrieg';
     return dd < 3.1 ? 'gruenderzeit' : 'nachkrieg';
   };
@@ -308,7 +310,7 @@ function rheinmetropole(E) {
   E.viertel = (i, j) => {
     if (jR !== null && j > jR) return 'rheingruender';
     if (alt(i, j)) return 'rheinalt';
-    const dd = Math.hypot(i - zc.i, j - zc.j);
+    const dd = wurzelSumme(i - zc.i, j - zc.j);
     if (dd < (o.fuenfziger ? 2.2 : 1.4)) return o.fuenfziger ? 'rhein50' : 'zentrum';
     return dd < (metro ? 3.4 : 3.0) ? 'rheingruender' : 'nachkrieg';
   };
@@ -399,7 +401,7 @@ function bergisch(E) {
   E.durchgang = 0.3;
   const zc = E.zentrum;
   E.viertel = (i, j) => {
-    const dd = Math.hypot(i - zc.i, (j - zc.j) * 1.3);
+    const dd = wurzelSumme(i - zc.i, (j - zc.j) * 1.3);
     if (dd < 1.4) return 'bergkern';
     if (Math.abs(j - jW) <= 1) return 'bergtal';
     return 'berghang';

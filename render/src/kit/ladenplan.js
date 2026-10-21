@@ -1,3 +1,5 @@
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { baueMoebelGeneration } from './moebel/generationen.js';
 // Datenorientierter Ladenplaner. Geometrie entsteht erst in baueLadenplan().
 // Koordinaten in Metern, x/z links-hinten, Eingang in der +z-Fassade.
@@ -370,7 +372,7 @@ function verdichteLadenplan(plan,profil){
             if(!passeIn(m,raum)||!passe(m,plan,
               [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
             const nah=plan.moebel.some(q=>q.typ==='gondel'&&q.abteilung===raum.id&&
-              Math.hypot(Math.max(0,q.x-x-w,x-q.x-q.w),
+              wurzelSumme(Math.max(0,q.x-x-w,x-q.x-q.w),
                          Math.max(0,q.z-z-d,z-q.z-q.d))<=3*U);
             const gangNah=plan.gaenge.some(g=>schneidet(m,g,2*U));
             if(!nah&&!gangNah)continue;
@@ -407,7 +409,7 @@ function verdichteLadenplan(plan,profil){
           if(!passeIn(m,raum)||!passe(m,plan,
             [...plan.hindernisse,...plan.gaenge,...plan.moebel,...plan.kassenVorfeld]))continue;
           const nahe=plan.moebel.some(q=>q.typ==='gondel'&&q.abteilung===raum.id&&
-            Math.hypot(Math.max(0,q.x-x-m.w,x-q.x-q.w),
+            wurzelSumme(Math.max(0,q.x-x-m.w,x-q.x-q.w),
                        Math.max(0,q.z-z-m.d,z-q.z-q.d))<=3*U);
           if(!nahe)continue;
           const zuEng=plan.moebel.some(q=>{

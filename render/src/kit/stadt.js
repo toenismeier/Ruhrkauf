@@ -7,6 +7,8 @@
 //
 // bauer: { stadthaus(S, scene, p), eck(...), 'slot:warenhaus'(...), 'slot:kirche'(...), ... } → { hoehe }
 // Fehlt ein Eintrag, greift: exakter Typ → 'slot' (für slot:*) → stadthaus → Platzhalter.
+// Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
+const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, mische, waehle, zw, FARBEN, mat, heller, dunkler, fensterRaster, gesims, markise, dachProfil, marker, textTextur, schild, baum, LOD } from './basis.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { bergHoehe, gelaende, rebzeilen } from './gelaende.js';
@@ -657,7 +659,7 @@ function baueKreuzung(ctx, k) {
     const rx = k.bx / 2 - 5, rz = k.bz / 2 - 5;
     for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { baumSetzen(I, 'platane', k.x + sx * rx, 0.29, k.z + sz * rz, r, 1.0, true); I.setze('bank', k.x + sx * (rx - 3.2), 0.29, k.z + sz * rz, 0); }
     for (const [dx, dz, ry] of [[-7.5, 0, Math.PI / 2], [7.5, 0, -Math.PI / 2], [0, 7.5, Math.PI], [0, -7.5, 0]]) I.setze('bank', k.x + dx, 0.29, k.z + dz, ry);
-    for (let i = 0; i < (k.bx * k.bz) / 30 * ctx.dichte; i++) { const x = k.x + zw(r, -k.bx / 2 + 1, k.bx / 2 - 1), z = k.z + zw(r, -k.bz / 2 + 1, k.bz / 2 - 1); if (Math.hypot(x - k.x, z - k.z) > 6) figur(I, x, 0.29, z, r); }
+    for (let i = 0; i < (k.bx * k.bz) / 30 * ctx.dichte; i++) { const x = k.x + zw(r, -k.bx / 2 + 1, k.bx / 2 - 1), z = k.z + zw(r, -k.bz / 2 + 1, k.bz / 2 - 1); if (wurzelSumme(x - k.x, z - k.z) > 6) figur(I, x, 0.29, z, r); }
     return;
   }
   // Gleise und Fahrdraht durch die Kreuzung
@@ -949,7 +951,7 @@ function platzRand(ctx, b, P, y, r, art = 'linde', abstand = 9) {
 function baumraster(ctx, P, y, r, hinder, cx, cz, frei0 = 9, ab = 8) {
   if (P.w * P.d < 1200) return;
   for (let x = P.x + 5; x < P.x + P.w - 4; x += ab) for (let z = P.z + 5; z < P.z + P.d - 4; z += ab) {
-    if (Math.hypot(x - cx, z - cz) < frei0 || hinder.some((p) => imRechteck(x, z, p, 3.5))) continue;
+    if (wurzelSumme(x - cx, z - cz) < frei0 || hinder.some((p) => imRechteck(x, z, p, 3.5))) continue;
     baumSetzen(ctx.I, 'kugel', x, y, z, r, 0.75, true);
   }
 }
@@ -962,7 +964,7 @@ function baueMarkt(ctx, b, r, hinder) {
   const cx = P.x + P.w * 0.5, cz = P.z + P.d * 0.5;
   const denkmalMitte = hinder.some((p) => imRechteck(cx, cz, p, 6));
   if (!denkmalMitte) brunnen(S, cx, cz, y, P.w < 40 ? 0.8 : 1);
-  const frei = (x, z, rad) => !hinder.some((p) => imRechteck(x, z, p, rad)) && Math.hypot(x - cx, z - cz) > 7;
+  const frei = (x, z, rad) => !hinder.some((p) => imRechteck(x, z, p, rad)) && wurzelSumme(x - cx, z - cz) > 7;
   // Marktstände: Reihen quer zur längeren Seite
   const quer = P.w >= P.d;
   const lang = quer ? P.w : P.d, kurz = quer ? P.d : P.w;
@@ -981,7 +983,7 @@ function baueMarkt(ctx, b, r, hinder) {
   const n = Math.round((P.w * P.d) / 60 * ctx.dichte);
   for (let i = 0; i < n; i++) {
     const x = zw(r, P.x + 1, P.x + P.w - 1), z = zw(r, P.z + 1, P.z + P.d - 1);
-    if (!denkmalMitte && Math.hypot(x - cx, z - cz) < 4.6) continue;
+    if (!denkmalMitte && wurzelSumme(x - cx, z - cz) < 4.6) continue;
     if (hinder.some((p) => imRechteck(x, z, p, 0.4))) continue;
     figur(I, x, y, z, r);
   }
@@ -1493,7 +1495,7 @@ function bauePark(ctx, b, r, hinder = []) {
   // Diagonalwege und Mittelrondell
   const diagonalen = [[x0, z0], [x1, z0], [x0, z1], [x1, z1]];
   for (const [ex, ez] of diagonalen) {
-    const len = Math.hypot(cx - ex, cz - ez) - 3;
+    const len = wurzelSumme(cx - ex, cz - ez) - 3;
     S.box(len, 0.05, 3, (ex + cx) / 2, y + 0.025, (ez + cz) / 2, F.weg, Math.atan2(-(cz - ez), cx - ex));
   }
   ellipse(S, cx, cz, 7, 7, y, y + 0.06, F.weg);
@@ -1517,9 +1519,9 @@ function bauePark(ctx, b, r, hinder = []) {
     for (const [ex, ez] of diagonalen) {
       const dx = cx - ex, dz = cz - ez, l2 = dx * dx + dz * dz;
       const t = klemm(((x - ex) * dx + (z - ez) * dz) / l2, 0, 1);
-      if (Math.hypot(x - ex - t * dx, z - ez - t * dz) < 3.2) return true;
+      if (wurzelSumme(x - ex - t * dx, z - ez - t * dz) < 3.2) return true;
     }
-    if (Math.hypot(x - cx, z - cz) < 9) return true;
+    if (wurzelSumme(x - cx, z - cz) < 9) return true;
     if (((x - tx) / (trx + 3)) ** 2 + ((z - tz) / (trz + 3)) ** 2 < 1) return true;
     if (Math.abs(x - sx) < 7 && Math.abs(z - sz) < 6) return true;
     if (hinder.some((p) => imRechteck(x, z, p, 3))) return true;
