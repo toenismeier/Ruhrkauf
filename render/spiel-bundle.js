@@ -1239,13 +1239,13 @@
     const alle = [...werte2.keys()].sort((a2, b2) => a2 - b2);
     for (const w of alle) {
       if (w < beginn) continue;
-      const punkt3 = { woche: w, wert: werte2.get(w) };
-      if (werte2.has(w - 52)) punkt3.vorjahr = werte2.get(w - 52);
+      const punkt4 = { woche: w, wert: werte2.get(w) };
+      if (werte2.has(w - 52)) punkt4.vorjahr = werte2.get(w - 52);
       if (ebene === "konzern" && kennzahl2 === "ebitda") {
         const q2 = s2.quartale.find((x) => w >= x.start && w < x.start + 13);
-        if (q2) punkt3.plan = (q2.plan ?? q2.planStandard) / 13;
+        if (q2) punkt4.plan = (q2.plan ?? q2.planStandard) / 13;
       }
-      ergebnis.punkte.push(punkt3);
+      ergebnis.punkte.push(punkt4);
     }
     return ergebnis;
   }
@@ -3843,12 +3843,12 @@
   }
   function eroeffnungsArt(s2, stadt) {
     const hs = betroffeneHaeuser(s2, stadt);
-    const kandidaten2 = ARTEN.filter((a2) => a2 !== "leer_ehemals");
+    const kandidaten3 = ARTEN.filter((a2) => a2 !== "leer_ehemals");
     const score = (art) => hs.reduce((sum2, h2) => sum2 + gruppenFuer(h2.format).reduce((x, g) => {
       const qm = h2.flaechen.filter((f4) => f4.gruppe === g && f4.konzept !== "leer").reduce((a2, f4) => a2 + f4.qm, 0);
       return x + qm * GRUPPEN[g].qmUmsatz * (WETTBEWERB_UEBERSCHNEIDUNG[art][g] ?? 0);
     }, 0), 0) / (1 + s2.wettbewerber.filter((w) => w.stadt === stadt && w.art === art && istMarktAktiv(w)).length);
-    return [...kandidaten2].sort((a2, b2) => score(b2) - score(a2))[0];
+    return [...kandidaten3].sort((a2, b2) => score(b2) - score(a2))[0];
   }
   function neuEroeffnet(s2, stadt, art, inHaus) {
     const hs = aktive(s2).filter((h3) => h3.stadt === stadt), c = hs[0].cluster;
@@ -4213,8 +4213,8 @@
     }
     const ursprung = haeuser.reduce((a2, h2) => a2 + grundumsatz(h2), 0);
     for (const p2 of PREMIUM_HAEUSER) {
-      const kandidaten2 = haeuser.filter((h3) => h3.format === "warenhaus" && h3.stadt === p2.stadt && h3.klasse !== "premium");
-      const h2 = [...kandidaten2].sort((a2, b2) => (b2.lage === "1a" ? 1 : 0) - (a2.lage === "1a" ? 1 : 0) || b2.grundflaecheQm * b2.etagen.length - a2.grundflaecheQm * a2.etagen.length || a2.id.localeCompare(b2.id))[0];
+      const kandidaten3 = haeuser.filter((h3) => h3.format === "warenhaus" && h3.stadt === p2.stadt && h3.klasse !== "premium");
+      const h2 = [...kandidaten3].sort((a2, b2) => (b2.lage === "1a" ? 1 : 0) - (a2.lage === "1a" ? 1 : 0) || b2.grundflaecheQm * b2.etagen.length - a2.grundflaecheQm * a2.etagen.length || a2.id.localeCompare(b2.id))[0];
       if (!h2) continue;
       h2.name = p2.name;
       h2.klasse = "premium";
@@ -14115,11 +14115,11 @@
     h2.flaechen = h2.flaechen.map((f4) => ({ ...f4, konzept: "leer", gruppe: void 0, mieter: void 0, lieferantId: void 0, umbauBis: void 0, umbauZiel: void 0 }));
     const lokal3 = s2.haeuser.filter((x) => x !== h2 && !x.nurDaten && x.stadt === h2.stadt && x.format === h2.format && x.status === "offen");
     const regional = s2.haeuser.filter((x) => x !== h2 && !x.nurDaten && x.region === h2.region && x.format === h2.format && x.status === "offen");
-    const nachbarn = lokal3.length ? lokal3 : regional;
+    const nachbarn2 = lokal3.length ? lokal3 : regional;
     const abgang = h2.kpi?.umsatz ?? 0;
-    const umsatzNachbarn = nachbarn.reduce((a2, x) => a2 + (x.kpi?.umsatz ?? 0), 0);
+    const umsatzNachbarn = nachbarn2.reduce((a2, x) => a2 + (x.kpi?.umsatz ?? 0), 0);
     if (abgang > 0 && umsatzNachbarn > 0) {
-      for (const n of nachbarn) {
+      for (const n of nachbarn2) {
         const basis3 = Math.max(1, n.kpi?.umsatz ?? 0);
         const anteil3 = (n.kpi?.umsatz ?? 0) / umsatzNachbarn;
         n.transferBonus += 0.3 * abgang * anteil3 / basis3;
@@ -14366,9 +14366,9 @@
     return h2.flaechen.filter((f4) => f4.etage === etage2 && f4.konzept !== "untermiete" && f4.umbauBis === void 0).reduce((a2, b2) => a2 + b2.qm, 0);
   }
   function untermietAnfrage(s2) {
-    const kandidaten2 = offeneHaeuser(s2).filter((h3) => !s2.angebote.some((a2) => a2.status === "offen" && a2.typ === "untermiete" && a2.wunschHaeuser?.[0] === h3.id));
-    if (!kandidaten2.length) return;
-    const h2 = waehle(s2, kandidaten2);
+    const kandidaten3 = offeneHaeuser(s2).filter((h3) => !s2.angebote.some((a2) => a2.status === "offen" && a2.typ === "untermiete" && a2.wunschHaeuser?.[0] === h3.id));
+    if (!kandidaten3.length) return;
+    const h2 = waehle(s2, kandidaten3);
     const passende = MIETER.filter((m2) => m2.etagen.some((e) => h2.etagen.includes(e) && qmAufEtage2(h2, e) >= m2.qm[0]));
     if (!passende.length) return;
     const m = waehle(s2, passende);
@@ -14603,10 +14603,10 @@
       }
       const fl = h2.personal.filialleiter;
       if (fl.moral < 40 && fl.skill > 0.6 && chance(s2, 0.02)) {
-        const kandidaten2 = s2.wettbewerber.filter((x) => x.stadt === h2.stadt && ["modehaus", "premium", "fastfashion"].includes(x.art) && (x.status === "offen" || x.status === "eroeffnung"));
+        const kandidaten3 = s2.wettbewerber.filter((x) => x.stadt === h2.stadt && ["modehaus", "premium", "fastfashion"].includes(x.art) && (x.status === "offen" || x.status === "eroeffnung"));
         const interimSkill = zwischen(s2, 0.3, 0.65);
-        if (!s2.wettbewerbDeaktiviert && !s2.wettbewerbEreignisseDeaktiviert && !kandidaten2.length) continue;
-        const ziel = kandidaten2[0]?.name;
+        if (!s2.wettbewerbDeaktiviert && !s2.wettbewerbEreignisseDeaktiviert && !kandidaten3.length) continue;
+        const ziel = kandidaten3[0]?.name;
         melde(s2, "warnung", `Filialleiter${fl.name.endsWith("a") || fl.name.endsWith("e") ? "in" : ""} ${fl.name} verl\xE4sst ${h2.name} und geht ${ziel ? "zu " + ziel : "zur Konkurrenz"}.`, { stadt: h2.stadt, hausId: h2.id });
         h2.personal.filialleiter = {
           name: `Interim (${fl.name.split(" ")[1]}-Nachfolge)`,
@@ -45068,8 +45068,8 @@
     }
     // restrict phi to be between EPS and PI-EPS
     makeSafe() {
-      const EPS = 1e-6;
-      this.phi = Math.max(EPS, Math.min(Math.PI - EPS, this.phi));
+      const EPS2 = 1e-6;
+      this.phi = Math.max(EPS2, Math.min(Math.PI - EPS2, this.phi));
       return this;
     }
     setFromVector3(v) {
@@ -50622,15 +50622,15 @@
       einkaufslage(E4, o2.standorte);
       wh = [E4.warenhaus.i, E4.warenhaus.j];
     } else {
-      const kandidaten2 = [];
+      const kandidaten3 = [];
       for (let i = 0; i < nx(); i++) for (let j2 = 0; j2 < nz(); j2++) {
         if (!zelleFrei(E4, i, j2)) continue;
         const dd = wurzelSumme3(i - E4.zentrum.i, j2 - E4.zentrum.j);
         if (dd > 2.2) continue;
         const anHaupt = HAUPTLICH.has(E4.zTyp[i + 1]) || HAUPTLICH.has(E4.xTyp[j2 + 1]) || HAUPTLICH.has(E4.zTyp[i]) || HAUPTLICH.has(E4.xTyp[j2]);
-        kandidaten2.push([[i, j2], (anHaupt ? 3 : 1) / (0.6 + dd)]);
+        kandidaten3.push([[i, j2], (anHaupt ? 3 : 1) / (0.6 + dd)]);
       }
-      wh = E4.warenhausWunsch && zelleFrei(E4, E4.warenhausWunsch.i, E4.warenhausWunsch.j) ? [E4.warenhausWunsch.i, E4.warenhausWunsch.j] : kandidaten2.length ? wahlGewichtet(r3, kandidaten2) : [zi, zj];
+      wh = E4.warenhausWunsch && zelleFrei(E4, E4.warenhausWunsch.i, E4.warenhausWunsch.j) ? [E4.warenhausWunsch.i, E4.warenhausWunsch.j] : kandidaten3.length ? wahlGewichtet(r3, kandidaten3) : [zi, zj];
       const ecke = E4.warenhausWunsch?.ecke ?? wahlGewichtet(r3, [["+x+z", 0.45], ["+x-z", 0.18], ["-x+z", 0.18], ["block", 0.12], ["-x-z", 0.07]]);
       const W3 = Math.round(zw(r3, ...T.whB)), D = Math.round(zw(r3, ...T.whT));
       E4.warenhaus = { i: wh[0], j: wh[1], W: W3, D, ecke };
@@ -50643,13 +50643,13 @@
       }
       for (const k2 of [wh[0], wh[0] + 1]) fixiere(E4, k2, wh[1], wh[1]);
     }
-    const nachbarn = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a2, b2]) => [wh[0] + a2, wh[1] + b2]).filter(([i, j2]) => zelleFrei(E4, i, j2));
+    const nachbarn2 = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a2, b2]) => [wh[0] + a2, wh[1] + b2]).filter(([i, j2]) => zelleFrei(E4, i, j2));
     const variante2 = E4.marktVariante ?? (E4.archetyp === "dom" ? wahlGewichtet(r3, [["keiner", 0.5], ["einer", 0.5]]) : wahlGewichtet(r3, [["keiner", 0.12], ["einer", 0.43], ["laenglich", 0.27], ["zwei", 0.18]]));
     E4.marktVariante = variante2;
     const kirchSeiten = () => waehle2(r3, [["-z", "-x"], ["-z", "-x"], ["-z", "-x", "+x"], ["-x"], ["-z"], ["-z", "-x", "+z"]]);
     const seitenWahl = () => waehle2(r3, [["-z", "-x", "+x"], ["-z", "-x", "+z"], ["-z", "-x", "+x"], ["-z", "-x", "+z", "+x"]]);
-    if (variante2 !== "keiner" && nachbarn.length) {
-      const [mi, mj] = waehle2(r3, nachbarn);
+    if (variante2 !== "keiner" && nachbarn2.length) {
+      const [mi, mj] = waehle2(r3, nachbarn2);
       let f4 = { art: "markt", i0: mi, i1: mi, j0: mj, j1: mj, seiten: seitenWahl() };
       if (variante2 === "laenglich") {
         const opt = [[mi + 1, mj, "x"], [mi - 1, mj, "x"], [mi, mj + 1, "z"], [mi, mj - 1, "z"]].filter(([i, j2]) => zelleFrei(E4, i, j2));
@@ -51418,7 +51418,7 @@
     const whBlock = E4.einkauf ? null : einkauf[0]?.block ?? null;
     if (E4.fzAuto && whBlock) {
       const fronten = E4.warenhaus.ecke === "block" ? ["+z", "+x", "-z", "-x"] : E4.warenhaus.ecke.match(/[+-][xz]/g);
-      const kandidaten2 = fronten.map((s2) => strassen.find((q2) => q2.id === whBlock.rand[s2].seg)).filter((s2) => s2 && s2.typ !== "haupt" && !s2.bruecke);
+      const kandidaten3 = fronten.map((s2) => strassen.find((q2) => q2.id === whBlock.rand[s2].seg)).filter((s2) => s2 && s2.typ !== "haupt" && !s2.bruecke);
       const markt = bloecke.find((b2) => b2.art === "markt");
       const n = E4.archetyp === "altstadt" ? 4 : E4.archetyp === "raster" ? 1 : 2;
       const gewaehlt = /* @__PURE__ */ new Set();
@@ -51428,7 +51428,7 @@
           gewaehlt.add(s2.id);
         }
       };
-      if (kandidaten2.length) nimmSeg(waehle2(r3, kandidaten2));
+      if (kandidaten3.length) nimmSeg(waehle2(r3, kandidaten3));
       if (markt) {
         for (const s2 of Object.values(markt.rand)) if (s2.seg && r3() < 0.5) nimmSeg(strassen.find((q2) => q2.id === s2.seg));
       }
@@ -61202,8 +61202,8 @@
   }
   function erlebnisPortal(K3) {
     if (!K3.erlebnis || K3.zu) return;
-    const s2 = K3.seiten[0], kandidaten2 = K3.glas.filter((g2) => g2.s === s2 && g2.eg && !g2.tuer && !g2.mieter && g2.b - g2.a > 2.1);
-    const g = kandidaten2[0];
+    const s2 = K3.seiten[0], kandidaten3 = K3.glas.filter((g2) => g2.s === s2 && g2.eg && !g2.tuer && !g2.mieter && g2.b - g2.a > 2.1);
+    const g = kandidaten3[0];
     const center = g ? (g.a + g.b) / 2 : Math.max(7, s2.L * 0.31);
     const maxW = Math.min(13, s2.L - 2);
     const a2 = clamp4(center - maxW / 2, 0.7, s2.L - maxW - 0.7), b2 = a2 + maxW;
@@ -67471,18 +67471,18 @@
   }
   function hauptgangWaehlen(b2, t, e, hindernisse) {
     const w = gangZellen(LADENBAU.hauptgang) * U;
-    const kandidaten2 = [];
+    const kandidaten3 = [];
     const maxRueckversatz = Math.min(10 * U, t - 8 * U);
     for (let z2 = 2 * U; z2 <= maxRueckversatz + 1e-8; z2 += U)
       for (let x = 2 * U; x + w <= b2 - 2 * U; x += U) {
         const lauf = quadrat(x, z2, w, t - z2);
         if (hindernisse.some((h2) => schneidet(lauf, h2))) continue;
         const dist2 = e.reduce((s2, p2) => s2 + Math.abs(p2.x - (x + w / 2)), 0);
-        kandidaten2.push({ ...lauf, typ: "haupt", score: z2 * 0.3 + dist2 * 0.8 + Math.abs(x + w / 2 - b2 / 2) });
+        kandidaten3.push({ ...lauf, typ: "haupt", score: z2 * 0.3 + dist2 * 0.8 + Math.abs(x + w / 2 - b2 / 2) });
       }
-    kandidaten2.sort((a2, b3) => a2.score - b3.score || a2.z - b3.z || a2.x - b3.x);
-    if (!kandidaten2.length) throw new Error("Kein hindernisfreier Hauptgang");
-    const { score, ...gang } = kandidaten2[0];
+    kandidaten3.sort((a2, b3) => a2.score - b3.score || a2.z - b3.z || a2.x - b3.x);
+    if (!kandidaten3.length) throw new Error("Kein hindernisfreier Hauptgang");
+    const { score, ...gang } = kandidaten3[0];
     return gang;
   }
   function teilung(teile2, abteile, schacht) {
@@ -67867,15 +67867,15 @@
       };
       if (gueltig2()) continue;
       const ids = SPORT_MIX_WAENDE[raum.id] ?? SPORT_MIX_WAENDE.sporttextil;
-      const kandidaten2 = [];
+      const kandidaten3 = [];
       for (let z2 = raum.z; z2 + 2.5 <= raum.z + raum.d + 1e-8; z2 += U)
         for (const x of [raum.x, raum.x + raum.w - LADENBAU.wandTiefe])
-          kandidaten2.push({ x, z: z2, winkel: 90 });
+          kandidaten3.push({ x, z: z2, winkel: 90 });
       for (let x = raum.x; x + 2.5 <= raum.x + raum.w + 1e-8; x += U)
         for (const z2 of [raum.z, raum.z + raum.d - LADENBAU.wandTiefe])
-          kandidaten2.push({ x, z: z2, winkel: 0 });
+          kandidaten3.push({ x, z: z2, winkel: 0 });
       let gesetzt = 0;
-      for (const k2 of kandidaten2) {
+      for (const k2 of kandidaten3) {
         if (gueltig2() || gesetzt >= 8) break;
         const id = ids[gesetzt % ids.length];
         const m = item(id, k2.x, k2.z, k2.winkel, raum.id, { innenwand: true, moebelart: id });
@@ -98905,10 +98905,10 @@
   function passendesHaus(slot4, wunschId) {
     if (wunschId) return haeuser_default.find((h2) => h2.id === wunschId);
     const region = regionVon2(slot4);
-    const kandidaten2 = haeuser_default.filter((h2) => h2.format === "warenhaus" && h2.lage !== "center").map((h2) => ({ h: h2, m: masse(h2) })).filter(({ m }) => m.w <= slot4.w && m.d <= slot4.d).map((k2) => ({ ...k2, punkte: k2.m.w * k2.m.d * (k2.h.cluster === slot4.cluster ? 1.4 : 1) * (regionLang[region] && k2.h.stadt ? 1 : 1) })).sort((a2, b2) => b2.punkte - a2.punkte);
+    const kandidaten3 = haeuser_default.filter((h2) => h2.format === "warenhaus" && h2.lage !== "center").map((h2) => ({ h: h2, m: masse(h2) })).filter(({ m }) => m.w <= slot4.w && m.d <= slot4.d).map((k2) => ({ ...k2, punkte: k2.m.w * k2.m.d * (k2.h.cluster === slot4.cluster ? 1.4 : 1) * (regionLang[region] && k2.h.stadt ? 1 : 1) })).sort((a2, b2) => b2.punkte - a2.punkte);
     const flaeche6 = slot4.w * slot4.d;
-    const gross2 = kandidaten2.filter((k2) => k2.m.w * k2.m.d >= 0.55 * flaeche6);
-    const pool = gross2.length >= 4 ? gross2 : kandidaten2.slice(0, 12);
+    const gross2 = kandidaten3.filter((k2) => k2.m.w * k2.m.d >= 0.55 * flaeche6);
+    const pool = gross2.length >= 4 ? gross2 : kandidaten3.slice(0, 12);
     const i = Math.floor((Math.imul((slot4.seed ?? 1) >>> 0, 2654435761) >>> 0) / 4294967296 * pool.length);
     return (pool[i] ?? { h: haeuser_default[0] }).h;
   }
@@ -103161,15 +103161,15 @@
     ra.erlebnis = e === 0 ? g.erlebnis : null;
     if (!ra.erlebnis || ra.nx < 5 || ra.nz < 3) return ra;
     const gueltig2 = /* @__PURE__ */ new Set([null, "lauf", "aktion"]);
-    const kandidaten2 = [];
+    const kandidaten3 = [];
     for (let i2 = 1; i2 < ra.nx - 2; i2++)
-      if (gueltig2.has(ra.typ[i2][ra.nz - 1]) && gueltig2.has(ra.typ[i2 + 1][ra.nz - 1])) kandidaten2.push(i2);
-    if (!kandidaten2.length) {
+      if (gueltig2.has(ra.typ[i2][ra.nz - 1]) && gueltig2.has(ra.typ[i2 + 1][ra.nz - 1])) kandidaten3.push(i2);
+    if (!kandidaten3.length) {
       ra.erlebnis = null;
       return ra;
     }
     const ziel = ra.gx + (ra.gx < ra.nx / 2 ? 3 : -4);
-    const i = kandidaten2.sort((a2, b2) => Math.abs(a2 - ziel) - Math.abs(b2 - ziel))[0];
+    const i = kandidaten3.sort((a2, b2) => Math.abs(a2 - ziel) - Math.abs(b2 - ziel))[0];
     ra.typ[i][ra.nz - 1] = "erlebnis";
     ra.typ[i + 1][ra.nz - 1] = "erlebnis";
     ra.erlebnisZelle = [i, ra.nz - 1];
@@ -103372,13 +103372,13 @@
     });
     return zz;
   }
-  function sportEtage(S, scene2, haus2, etageNr2, o2 = {}) {
+  function sportEtage(S, scene2, haus2, etageNr, o2 = {}) {
     vorbereiten(S, scene2);
-    const ra = sportRaster(haus2, etageNr2, o2);
-    const zn = sportZonen(haus2, etageNr2, ra);
+    const ra = sportRaster(haus2, etageNr, o2);
+    const zn = sportZonen(haus2, etageNr, ra);
     const plan2 = o2.altbestand ? null : (() => {
-      const eingabe = sportLadenEingabe(haus2, etageNr2, o2, ra);
-      const p2 = ladenplan(eingabe.flaeche, "sport", eingabe.abteilungen, haus2.id + ":" + etageNr2);
+      const eingabe = sportLadenEingabe(haus2, etageNr, o2, ra);
+      const p2 = ladenplan(eingabe.flaeche, "sport", eingabe.abteilungen, haus2.id + ":" + etageNr);
       p2.variante = ra.box ? "halle" : "flaeche";
       for (const b2 of p2.boeden) if (b2.typ === "gang") b2.farbe = STIL[ra.fam].gang.a;
       if (ra.abverkauf) {
@@ -103408,7 +103408,7 @@
     const k2 = haus2.kpi ?? {};
     const zellenImBild = zn.reduce((s2, z2) => s2 + z2.zellen.filter((c) => drin(c.i, c.j)).length, 0);
     const jeZelle = Math.max(0.4, Math.min(1.6, (k2.umsatz ?? 6e4) / 700 / Math.max(1, zn.reduce((s2, z2) => s2 + z2.zellen.length, 0))));
-    let kunden = o2.kunden ?? Math.round(jeZelle * (zellenImBild + 3) * (etageNr2 === 0 ? 0.75 : 0.65));
+    let kunden = o2.kunden ?? Math.round(jeZelle * (zellenImBild + 3) * (etageNr === 0 ? 0.75 : 0.65));
     let d3 = o2.dichte ?? 1;
     let tmp2, gruppe2, versuch = 0, kk;
     for (; ; ) {
@@ -103417,7 +103417,7 @@
       tmp2.szene = gruppe2;
       vorbereiten(tmp2, gruppe2);
       kk = { ax0, az0, ax1, az1, drin, d: d3, kunden, o: o2 };
-      bauen(tmp2, gruppe2, haus2, etageNr2, ra, zn, kk, plan2);
+      bauen(tmp2, gruppe2, haus2, etageNr, ra, zn, kk, plan2);
       if (tmp2.anzahl <= budget || versuch > 8) break;
       versuch++;
       const f4 = Math.max(0.5, Math.min(0.92, budget * 0.97 / tmp2.anzahl));
@@ -103433,10 +103433,10 @@
     }
     S.anzahl += tmp2.anzahl;
     while (gruppe2.children.length) scene2.add(gruppe2.children[0]);
-    const eg = etageNr2 === 0;
+    const eg = etageNr === 0;
     const aussen = eg ? ra.mall ? 9.5 : ra.box ? 19 : 7 : ra.mall ? 9.5 : 0.4;
     const box = new three_module_exports.Box3(new three_module_exports.Vector3(ax0 - (ra.mall && eg && ax0 === 0 ? 7.6 : 0.6), eg ? -0.3 : ra.mall ? -4.8 : -2.2, az0 - (ra.mall && eg && az0 === 0 ? 7.6 : 0.6)), new three_module_exports.Vector3(ax1 + (ra.mall ? 9.5 : eg ? 7 : 0.4), WH2 + (ra.hochpunkt ?? 0), az1 + aussen));
-    return { box, breite: B2, tiefe: T, zonen: plan2?.abteilungen ?? zn, anzahl: tmp2.anzahl, dichte: d3, kunden, leer: kk.leer, familie: ra.fam, ladenplan: plan2 };
+    return { box, breite: B2, tiefe: T, zonen: plan2?.abteilungen ?? zn, anzahl: tmp2.anzahl, dichte: d3, kunden, leer: kk.leer, familie: ra.fam, ladenplan: plan2, navigation: kk.navigation };
   }
   function bauen(S, scene2, haus2, e, ra, zn, k2, plan2 = null) {
     const { B: B2, T, nx, nz, typ, fam } = ra;
@@ -103489,7 +103489,7 @@
       baueLadenplan(S, scene2, plan2, {
         vorbereiten: false,
         dichte: d3,
-        moebelGeneration: haus2.etagenBau?.[etageNr]?.moebelGeneration ?? 3,
+        moebelGeneration: haus2.etagenBau?.[e]?.moebelGeneration ?? 3,
         ausschnitt: { x0: ax0, z0: az0, x1: ax1, z1: az1 },
         bodenAussparungen: loecher.map(([x0, z0, x1, z1]) => ({ x: x0, z: z0, w: x1 - x0, d: z1 - z0 }))
       });
@@ -103644,6 +103644,7 @@
       if (um2.some((t) => ohne2.has(t))) continue;
       if (belegt2.some((b2) => x > b2[0] - 0.45 && x < b2[2] + 0.45 && z2 > b2[1] - 0.45 && z2 < b2[3] + 0.45)) continue;
       stuetze(S, x, z2, 0, WH2, stil.stuetze);
+      belegt2.push([x - 0.35, z2 - 0.35, x + 0.35, z2 + 0.35]);
     }
     rueckwand(S, "x", ax0, ax1, az0, 0, WH2, { pilasterVersatz: 0, putz: stil.wand, pilaster: stil.pilaster });
     rueckwand(S, "z", az0, az1, ax0, 0, WH2, { pilasterVersatz: 0, putz: heller(stil.wand, 0.02), pilaster: stil.pilaster });
@@ -103695,6 +103696,7 @@
       lf = quadrat2();
     }
     k2.leer = lf;
+    k2.navigation = { hindernisse: belegt2.map(([x0, z0, x1, z1]) => ({ x: x0, z: z0, w: x1 - x0, d: z1 - z0 })) };
     const n = Math.min(k2.kunden, frei6.length);
     for (let q2 = 0; q2 < n; q2++) {
       const [fx, fz] = frei6.splice(Math.floor(r3() * frei6.length), 1)[0];
@@ -104834,7 +104836,7 @@
     const T = Math.max(15, Math.round(gf / B2 / 5) * 5);
     return { B: B2, T, nx: B2 / R4, nz: T / R4 };
   }
-  function raster(haus2, etageNr2) {
+  function raster(haus2, etageNr) {
     const { B: B2, T, nx, nz } = masse2(haus2);
     const typ = Array.from({ length: nx }, () => Array(nz).fill(null));
     const setz = (i, j2, t) => {
@@ -104872,7 +104874,7 @@
     }
     return { B: B2, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring, schwester: haus2.kette === "schwester" };
   }
-  function unterteilen(fl, etageNr2) {
+  function unterteilen(fl, etageNr) {
     const out = [];
     for (const f4 of fl) {
       const art = abteilungsArt(f4);
@@ -104884,15 +104886,15 @@
       else if (!fremd && art === "wohnen" && f4.qm >= 600) teil6([["wohnen", 0.5], ["haushalt", 0.5]]);
       else out.push({ ...f4, art });
     }
-    if (etageNr2 === 0) {
+    if (etageNr === 0) {
       const prio = { beauty: 0, schmuck: 1, lederwaren: 2, strumpf: 3, accessoires: 4 };
       out.sort((a2, b2) => (prio[a2.art] ?? 9) - (prio[b2.art] ?? 9));
     }
     return out;
   }
-  function zonen(haus2, etageNr2, ra) {
+  function zonen(haus2, etageNr, ra) {
     const { nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring } = ra;
-    let fl = unterteilen(haus2.flaechen.filter((f4) => f4.etage === etageNr2 && f4.qm >= 10), etageNr2);
+    let fl = unterteilen(haus2.flaechen.filter((f4) => f4.etage === etageNr && f4.qm >= 10), etageNr);
     const blocks = ring ? [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 3, nx, 0, gz2, -1], [kx - 1, kx + 3, 0, kz2 - 1, -1], [0, kx - 1, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]] : [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 2, nx, 0, gz2, -1], [kx, kx + 2, 0, kz2, -1], [0, kx, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]];
     const vergeben = Array.from({ length: nx }, () => Array(nz).fill(false));
     let spuren = [];
@@ -104975,12 +104977,12 @@
     S.box(3, 2.4, 0.24, B2 - 4.5, 1.2, T - 0.35, FARBE_SCHWESTER);
     return { box: new three_module_exports.Box3(new three_module_exports.Vector3(-0.6, -0.6, -0.6), new three_module_exports.Vector3(B2 + 0.6, 4, T + 0.6)), breite: B2, tiefe: T, zonen: [], anzahl: S.anzahl, dichte: 0, kunden: 0, regale };
   }
-  function etage(S, scene2, haus2, etageNr2, o2 = {}) {
-    if (haus2.kette === "schwester" && etageNr2 < 0) return lagerSchwester(S, scene2, haus2);
-    if (haus2.format === "sport") return sportEtage(S, scene2, haus2, etageNr2, o2);
+  function etage(S, scene2, haus2, etageNr, o2 = {}) {
+    if (haus2.kette === "schwester" && etageNr < 0) return lagerSchwester(S, scene2, haus2);
+    if (haus2.format === "sport") return sportEtage(S, scene2, haus2, etageNr, o2);
     vorbereiten(S, scene2);
-    const ra = raster(haus2, etageNr2);
-    const zn = zonen(haus2, etageNr2, ra);
+    const ra = raster(haus2, etageNr);
+    const zn = zonen(haus2, etageNr, ra);
     const { B: B2, T, nx, nz } = ra;
     let ax0 = 0, az0 = 0, ax1 = B2, az1 = T;
     if (o2.ausschnitt) {
@@ -105003,7 +105005,7 @@
     const jeZelle = Math.max(0.35, Math.min(1.9, umsatz / 850 / verkaufsZellen));
     const anteil3 = (ax1 - ax0) * (az1 - az0) / (B2 * T);
     const zellenImBild = zn.reduce((s2, z2) => s2 + z2.zellen.filter((c) => drin(c.i, c.j)).length, 0);
-    let kunden = o2.kunden ?? Math.round(jeZelle * (zellenImBild + 0.5 * (nx + nz) * anteil3) * (etageNr2 === 0 ? 1.15 : 1) * (haus2.kette === "schwester" ? 0.6 : 1));
+    let kunden = o2.kunden ?? Math.round(jeZelle * (zellenImBild + 0.5 * (nx + nz) * anteil3) * (etageNr === 0 ? 1.15 : 1) * (haus2.kette === "schwester" ? 0.6 : 1));
     let d3 = o2.dichte ?? 1;
     let tmp2, gruppe2, versuch = 0;
     for (; ; ) {
@@ -105012,8 +105014,8 @@
       tmp2.szene = gruppe2;
       vorbereiten(tmp2, gruppe2);
       var kk = { ax0, az0, ax1, az1, drin, d: d3, kunden, o: o2 };
-      bauen2(tmp2, gruppe2, haus2, etageNr2, ra, zn, kk);
-      if (premium2) premiumInnen(tmp2, gruppe2, haus2, etageNr2, { ax0, az0, ax1, az1, d: d3 });
+      bauen2(tmp2, gruppe2, haus2, etageNr, ra, zn, kk);
+      if (premium2) premiumInnen(tmp2, gruppe2, haus2, etageNr, { ax0, az0, ax1, az1, d: d3 });
       if (tmp2.anzahl <= budget || versuch > 8) break;
       versuch++;
       const f4 = Math.max(0.5, Math.min(0.92, budget * 0.97 / tmp2.anzahl));
@@ -105023,7 +105025,7 @@
         if (m.geometry) m.geometry.dispose();
       });
     }
-    const moebelGeneration = haus2.etagenBau?.[etageNr2]?.moebelGeneration ?? 3;
+    const moebelGeneration = haus2.etagenBau?.[etageNr]?.moebelGeneration ?? 3;
     for (const [k2, gs] of tmp2.teile) {
       const farbeAlt = haus2.kette === "schwester" && ["#d23c32", "#c8102e"].includes(k2) ? FARBE_SCHWESTER : k2;
       const farbe3 = farbeGeneration(farbeAlt, moebelGeneration);
@@ -105032,24 +105034,24 @@
     }
     S.anzahl += tmp2.anzahl;
     while (gruppe2.children.length) scene2.add(gruppe2.children[0]);
-    const eg = etageNr2 === 0;
+    const eg = etageNr === 0;
     const box = new three_module_exports.Box3(new three_module_exports.Vector3(ax0 - 0.6, eg ? -0.3 : -2.2, az0 - 0.6), new three_module_exports.Vector3(ax1 + (eg ? 7 : 0.4), WANDHOEHE, az1 + (eg ? 7 : 0.4)));
-    return { box, breite: B2, tiefe: T, zonen: zn, anzahl: tmp2.anzahl, dichte: d3, kunden, leer: kk.leer };
+    return { box, breite: B2, tiefe: T, zonen: zn, anzahl: tmp2.anzahl, dichte: d3, kunden, leer: kk.leer, navigation: kk.navigation };
   }
-  function bauen2(S, scene2, haus2, etageNr2, ra, zn, k2) {
+  function bauen2(S, scene2, haus2, etageNr, ra, zn, k2) {
     const { B: B2, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring } = ra;
     const { ax0, az0, ax1, az1, drin, d: d3 } = k2;
     const hid = (haus2.id ?? "H").split("").reduce((a2, c) => a2 * 31 + c.charCodeAt(0), 7) >>> 0;
-    const r3 = rng2(hid + etageNr2 * 101);
-    const eg = etageNr2 === 0;
+    const r3 = rng2(hid + etageNr * 101);
+    const eg = etageNr === 0;
     const sport = haus2.format === "sport";
     const fassade3 = FASSADE[(haus2.fassade ?? 0) % FASSADE.length];
-    const hatOben = haus2.etagen.includes(etageNr2 + 1), hatUnten = haus2.etagen.includes(etageNr2 - 1);
+    const hatOben = haus2.etagen.includes(etageNr + 1), hatUnten = haus2.etagen.includes(etageNr - 1);
     const zoneVon = Array.from({ length: nx }, () => Array(nz).fill(-1));
     zn.forEach((z2, zi) => z2.zellen.forEach((c) => zoneVon[c.i][c.j] = zi));
     const sicht3 = (x, z2) => x >= ax0 - 0.01 && x <= ax1 + 0.01 && z2 >= az0 - 0.01 && z2 <= az1 + 0.01;
     const freiGang = [], freiZone = [], belegt2 = [];
-    ra.ug = etageNr2 < 0;
+    ra.ug = etageNr < 0;
     ra.belegt = belegt2;
     ra.ausschnitt = [ax0, az0, ax1, az1];
     ra.artAn = (i, j2) => {
@@ -105072,7 +105074,7 @@
       S.box(0.3, 1.7, az1 - az0 + 0.3, ax1 + 0.15, -1.35, (az0 + az1) / 2, dunkler(fassade3, 0.04));
       S.box(ax1 - ax0 + 0.6, 0.25, 0.5, (ax0 + ax1) / 2, -0.4, az1 + 0.2, heller(fassade3, 0.04));
       S.box(0.5, 0.25, az1 - az0 + 0.6, ax1 + 0.2, -0.4, (az0 + az1) / 2, heller(fassade3, 0.03));
-      if (etageNr2 > 0) {
+      if (etageNr > 0) {
         for (let x = ax0 + 1.25; x < ax1; x += 2.5) S.box(1.4, 1, 0.1, x, -1.2, az1 + 0.31, "#55636f");
         for (let z2 = az0 + 1.25; z2 < az1; z2 += 2.5) S.box(0.1, 1, 1.4, ax1 + 0.31, -1.2, z2, "#55636f");
       }
@@ -105091,14 +105093,14 @@
       if (!z2.zellen.some((c) => drin(c.i, c.j))) return;
       const f4 = z2.flaeche, art = z2.art;
       const Z2 = { alle: z2.zellen.filter((c) => drin(c.i, c.j)), kante, sicht: sicht3, y: 0, bereich: [ax0, az0, ax1, az1] };
-      const opt = { seed: hid % 1e3 + zi * 37 + etageNr2 * 11 + 1, dichte: ra.schwester ? Math.min(d3, 0.48) : d3, eg, basis: f4.gruppe, mieter: f4.mieter, marke: ra.schwester ? void 0 : f4.marke, name: f4.name, ...ra.schwester ? { teil: true, schildEinmal: true } : {} };
-      const res = art === "konzession" || art === "untermiete" ? fremdflaeche(S, scene2, art, Z2, { ...opt, mieter: f4.mieter ?? ["discounter", "gastro", "fitness", "arzt"][(zi + etageNr2) % 4], marke: MARKEN2.find((m) => m.gruppe === f4.gruppe) ?? MARKEN2[((hid >> 3) + zi) % MARKEN2.length], seed: (hid >> 3) + zi }) : flaeche2(S, scene2, art, Z2, opt);
+      const opt = { seed: hid % 1e3 + zi * 37 + etageNr * 11 + 1, dichte: ra.schwester ? Math.min(d3, 0.48) : d3, eg, basis: f4.gruppe, mieter: f4.mieter, marke: ra.schwester ? void 0 : f4.marke, name: f4.name, ...ra.schwester ? { teil: true, schildEinmal: true } : {} };
+      const res = art === "konzession" || art === "untermiete" ? fremdflaeche(S, scene2, art, Z2, { ...opt, mieter: f4.mieter ?? ["discounter", "gastro", "fitness", "arzt"][(zi + etageNr) % 4], marke: MARKEN2.find((m) => m.gruppe === f4.gruppe) ?? MARKEN2[((hid >> 3) + zi) % MARKEN2.length], seed: (hid >> 3) + zi }) : flaeche2(S, scene2, art, Z2, opt);
       if (!["leer", "umbau"].includes(art)) freiZone.push(...res.frei);
       belegt2.push(...res.belegt);
     });
     for (let i = 0; i < nx; i++) for (let j2 = 0; j2 < nz; j2++) {
       if (!drin(i, j2)) continue;
-      const t = typ[i][j2], x = i * R4, z2 = j2 * R4, seed = (i * 131 + j2 * 17 + etageNr2 * 7 + 1) * 3;
+      const t = typ[i][j2], x = i * R4, z2 = j2 * R4, seed = (i * 131 + j2 * 17 + etageNr * 7 + 1) * 3;
       if (t === "neben") {
         nebengangZelle(S, scene2, i, j2, ra, d3, freiGang, rng2(seed), drin);
         continue;
@@ -105180,6 +105182,7 @@
       if (um2.some((t) => t === "kern" || t === "lager" || (t || "").startsWith("treppe") || t === "aufzug" || t === "wc")) continue;
       if (belegt2.some((b2) => x > b2[0] - 0.45 && x < b2[2] + 0.45 && z2 > b2[1] - 0.45 && z2 < b2[3] + 0.45)) continue;
       stuetze(S, x, z2, 0, WANDHOEHE, "#e9e3d8");
+      belegt2.push([x - 0.35, z2 - 0.35, x + 0.35, z2 + 0.35]);
     }
     rueckwand(S, "x", ax0, ax1, az0, 0, WANDHOEHE, { pilasterVersatz: 0 });
     rueckwand(S, "z", az0, az1, ax0, 0, WANDHOEHE, { pilasterVersatz: 0, putz: "#f1e9dd" });
@@ -105229,12 +105232,14 @@
       S.box(0.8, 0.25, 0.42, kx2 - 0.6, 1.19, kz3, "#48565b");
       S.box(0.3, 0.18, 0.35, kx2 + 0.55, 1.2, kz3, "#d9d0bd");
     }
+    const kassen = ra.schwester ? [{ x: B2 - 5, z: T - 3.4 }] : !eg && ring ? [{ x: (kx + 2.5) * R4, z: (kz2 - 1) * R4 + 4.7 }] : [];
+    k2.navigation = { hindernisse: belegt2.map(([x0, z0, x1, z1]) => ({ x: x0, z: z0, w: x1 - x0, d: z1 - z0 })), kassen };
     const pool = freiZone.concat(freiGang);
     const n = Math.min(k2.kunden, pool.length);
     for (let q2 = 0; q2 < n; q2++) {
       const idx = Math.floor(r3() * pool.length);
       const [fx, fz] = pool.splice(idx, 1)[0];
-      figur2(S, fx + zw(r3, -0.2, 0.2), fz + zw(r3, -0.2, 0.2), q2 * 7 + etageNr2 * 1e3 + 3, r3() < 0.1 ? "kind" : "kunde", { ry: Math.atan2(kx * R4 + 5 - fx, kz2 * R4 + 5 - fz) + zw(r3, -1.2, 1.2) });
+      figur2(S, fx + zw(r3, -0.2, 0.2), fz + zw(r3, -0.2, 0.2), q2 * 7 + etageNr * 1e3 + 3, r3() < 0.1 ? "kind" : "kunde", { ry: Math.atan2(kx * R4 + 5 - fx, kz2 * R4 + 5 - fz) + zw(r3, -1.2, 1.2) });
     }
   }
   function aktionswand(S, scene2, L2, art, r3, d3) {
@@ -125422,6 +125427,96 @@
     return a2 === "lieferwagen" ? 5.6 : a2 === "kleinwagen" ? 3.6 : 4.8;
   }
   var richtung = (dx, dz) => Math.atan2(-dz, dx);
+  function dachFlaechenBeimBau(S, p2, bauen3) {
+    if (p2.leer) return { ergebnis: bauen3(), dachFlaechen: [] };
+    const alt = S.add;
+    const kandidaten3 = [];
+    const mindestFlaeche = Math.max(3, Math.min(32, (p2.w ?? 10) * (p2.d ?? 10) * 0.012));
+    S.add = function(g, farbe3) {
+      const pos = g?.attributes?.position, index2 = g?.index;
+      if (pos && pos.count >= 3) {
+        const a2 = pos.array, ia = index2?.array;
+        const n = ia ? index2.count : pos.count;
+        const punkt4 = (i) => {
+          const k2 = (ia ? ia[i] : i) * pos.itemSize;
+          return [a2[k2], a2[k2 + 1], a2[k2 + 2]];
+        };
+        for (let i = 0; i + 2 < n; i += 3) {
+          const A = punkt4(i), B2 = punkt4(i + 1), C2 = punkt4(i + 2);
+          const ux = B2[0] - A[0], uy = B2[1] - A[1], uz = B2[2] - A[2];
+          const vx = C2[0] - A[0], vy = C2[1] - A[1], vz = C2[2] - A[2];
+          const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+          const norm2 = Math.hypot(nx, ny, nz), flaeche6 = ny / 2;
+          const y = (A[1] + B2[1] + C2[1]) / 3;
+          if (norm2 < 1e-6 || ny / norm2 < 0.3 || flaeche6 < mindestFlaeche || y < 6) continue;
+          kandidaten3.push({
+            ecken: [A, B2, C2],
+            x: (A[0] + B2[0] + C2[0]) / 3,
+            z: (A[2] + B2[2] + C2[2]) / 3,
+            y,
+            flaeche: flaeche6
+          });
+        }
+      }
+      return alt.call(this, g, farbe3);
+    };
+    let ergebnis;
+    try {
+      ergebnis = bauen3();
+    } finally {
+      S.add = alt;
+    }
+    const mindestHoehe = Math.max(6, (ergebnis?.hoehe ?? 0) * 0.28);
+    const dachHoeheBei = (t, x, z2) => {
+      const [a2, b2, c] = t.ecken;
+      const den = (b2[2] - c[2]) * (a2[0] - c[0]) + (c[0] - b2[0]) * (a2[2] - c[2]);
+      if (Math.abs(den) < 1e-7) return null;
+      const u = ((b2[2] - c[2]) * (x - c[0]) + (c[0] - b2[0]) * (z2 - c[2])) / den;
+      const v = ((c[2] - a2[2]) * (x - c[0]) + (a2[0] - c[0]) * (z2 - c[2])) / den;
+      const w = 1 - u - v;
+      return u > 1e-5 && v > 1e-5 && w > 1e-5 ? u * a2[1] + v * b2[1] + w * c[1] : null;
+    };
+    const auswahl4 = kandidaten3.filter((t) => t.y >= mindestHoehe).filter((t) => !kandidaten3.some((anderes) => {
+      if (t === anderes || anderes.y <= t.y + 0.25) return false;
+      const h2 = dachHoeheBei(anderes, t.x, t.z);
+      return h2 != null && h2 > t.y + 0.25;
+    })).sort((a2, b2) => b2.flaeche - a2.flaeche || b2.y - a2.y).slice(0, p2.typ?.startsWith("slot:") ? 14 : 8);
+    return { ergebnis, dachFlaechen: dachEinruecken(auswahl4.map((t) => t.ecken)) };
+  }
+  function dachEinruecken(dreiecke, faktor2 = 0.86) {
+    const gruppen = /* @__PURE__ */ new Map();
+    for (const ecken of dreiecke) {
+      const [a2, b2, c] = ecken;
+      const ux = b2[0] - a2[0], uy = b2[1] - a2[1], uz = b2[2] - a2[2];
+      const vx = c[0] - a2[0], vy = c[1] - a2[1], vz = c[2] - a2[2];
+      let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      const n = Math.hypot(nx, ny, nz) || 1;
+      nx /= n;
+      ny /= n;
+      nz /= n;
+      const d3 = nx * a2[0] + ny * a2[1] + nz * a2[2];
+      const key = [nx, ny, nz].map((v) => Math.round(v * 50)).join(",") + "|" + Math.round(d3 * 5);
+      if (!gruppen.has(key)) gruppen.set(key, []);
+      gruppen.get(key).push(ecken);
+    }
+    const aus = [];
+    for (const liste2 of gruppen.values()) {
+      const punkte2 = /* @__PURE__ */ new Map();
+      for (const e of liste2) for (const v of e) punkte2.set(v.map((x) => Math.round(x * 100)).join(","), v);
+      let cx = 0, cy = 0, cz = 0;
+      for (const v of punkte2.values()) {
+        cx += v[0];
+        cy += v[1];
+        cz += v[2];
+      }
+      const k2 = punkte2.size;
+      cx /= k2;
+      cy /= k2;
+      cz /= k2;
+      for (const e of liste2) aus.push(e.map((v) => [cx + (v[0] - cx) * faktor2, cy + (v[1] - cy) * faktor2, cz + (v[2] - cz) * faktor2]));
+    }
+    return aus;
+  }
   function baueStadt(S, scene2, plan2, bauer = platzhalterBauer, o2 = {}) {
     const I = o2.instanzer ?? new Instanzer();
     const ctx = { S, I, scene: scene2, plan: plan2, r: rng2(plan2.seed * 31 + 5), dichte: TYPEN[plan2.typ].dichte * (o2.dichte ?? 1), typ: plan2.typ, proBlock: /* @__PURE__ */ new Map(), ost: !!plan2.ddr, keineStandAutos: !!o2.keineStandAutos };
@@ -125443,11 +125538,13 @@
     }
     if (plan2.diagonalen?.length || plan2.zwickel?.length) baueDiagonalen(ctx);
     const t1 = S.anzahl;
-    const hoehen = /* @__PURE__ */ new Map();
+    const hoehen = /* @__PURE__ */ new Map(), dachFlaechen = [];
     let maxH = 20;
     if (!o2.ohneHaeuser) for (const p2 of plan2.parzellen) {
       const f4 = bauerFuer(bauer, p2.typ);
-      const e = f4(S, scene2, p2) ?? {};
+      const { ergebnis, dachFlaechen: dach3 } = dachFlaechenBeimBau(S, p2, () => f4(S, scene2, p2));
+      const e = ergebnis ?? {};
+      dachFlaechen.push(...dach3);
       if (e.wasser) {
         if (!ctx.slotWasser) ctx.slotWasser = /* @__PURE__ */ new Map();
         if (!ctx.slotWasser.has(p2.block)) ctx.slotWasser.set(p2.block, []);
@@ -125458,8 +125555,9 @@
       maxH = Math.max(maxH, h2);
     }
     if (plan2.aussen && o2.aussenring !== 0 && !o2.ohneHaeuser) for (const q2 of plan2.aussen.bauten ?? []) {
-      const e = bauerFuer(bauer, q2.typ)(S, scene2, q2) ?? {};
-      hoehen.set(q2.id, e.hoehe ?? 12);
+      const { ergebnis, dachFlaechen: dach3 } = dachFlaechenBeimBau(S, q2, () => bauerFuer(bauer, q2.typ)(S, scene2, q2));
+      hoehen.set(q2.id, ergebnis?.hoehe ?? 12);
+      dachFlaechen.push(...dach3);
     }
     for (const b2 of plan2.bloecke) FLAECHEN[b2.art]?.nachBau?.(ctx, b2, ctx.slotWasser?.get(b2.id) ?? [], BODEN_HILFE);
     ostVerkehr = false;
@@ -125467,6 +125565,7 @@
     return {
       box: new three_module_exports.Box3(new three_module_exports.Vector3(0, 0, 0), new three_module_exports.Vector3(plan2.breite, maxH, plan2.tiefe)),
       hoehen,
+      dachFlaechen,
       teileStrasse: t1 - t0,
       teileHaeuser: S.anzahl - t1,
       instanzen: I.n,
@@ -125510,11 +125609,13 @@
     }
     if (plan2.diagonalen?.length || plan2.zwickel?.length) baueDiagonalen(ctx);
     const t1 = S.anzahl;
-    const hoehen = /* @__PURE__ */ new Map();
+    const hoehen = /* @__PURE__ */ new Map(), dachFlaechen = [];
     let maxH = 20;
     if (!o2.ohneHaeuser) for (const p2 of plan2.parzellen) {
       const f4 = bauerFuer(bauer, p2.typ);
-      const e = f4(S, scene2, p2) ?? {};
+      const { ergebnis, dachFlaechen: dach3 } = dachFlaechenBeimBau(S, p2, () => f4(S, scene2, p2));
+      const e = ergebnis ?? {};
+      dachFlaechen.push(...dach3);
       if (e.wasser) {
         if (!ctx.slotWasser) ctx.slotWasser = /* @__PURE__ */ new Map();
         if (!ctx.slotWasser.has(p2.block)) ctx.slotWasser.set(p2.block, []);
@@ -125526,8 +125627,9 @@
       await bildFreigeben();
     }
     if (plan2.aussen && o2.aussenring !== 0 && !o2.ohneHaeuser) for (const q2 of plan2.aussen.bauten ?? []) {
-      const e = bauerFuer(bauer, q2.typ)(S, scene2, q2) ?? {};
-      hoehen.set(q2.id, e.hoehe ?? 12);
+      const { ergebnis, dachFlaechen: dach3 } = dachFlaechenBeimBau(S, q2, () => bauerFuer(bauer, q2.typ)(S, scene2, q2));
+      hoehen.set(q2.id, ergebnis?.hoehe ?? 12);
+      dachFlaechen.push(...dach3);
       await bildFreigeben();
     }
     for (const b2 of plan2.bloecke) {
@@ -125539,6 +125641,7 @@
     return {
       box: new three_module_exports.Box3(new three_module_exports.Vector3(0, 0, 0), new three_module_exports.Vector3(plan2.breite, maxH, plan2.tiefe)),
       hoehen,
+      dachFlaechen,
       teileStrasse: t1 - t0,
       teileHaeuser: S.anzahl - t1,
       instanzen: I.n,
@@ -128836,9 +128939,9 @@
       const S = new Sammler();
       const alt = LOD2.stufe;
       setzeLod(o2.hausLod ?? "nah");
-      let e;
+      let e, dachFlaechen;
       try {
-        e = bau2(S, gruppe2, p2, h2);
+        ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p2, () => bau2(S, gruppe2, p2, h2)));
         S.bauen(gruppe2);
       } finally {
         setzeLod(alt);
@@ -128847,7 +128950,8 @@
         m.userData.hausId = h2.id;
       });
       (o2.wurzel ?? null)?.add(gruppe2);
-      haeuser.set(h2.id, { p: p2, gruppe: gruppe2, e, schluessel: zustand(h2).schluessel });
+      haeuser.set(h2.id, { p: p2, gruppe: gruppe2, e, dachFlaechen, schluessel: zustand(h2).schluessel });
+      o2.dachFlaechenAktualisieren?.("haus:" + h2.id, dachFlaechen);
       return e;
     };
     const hqDaten = (p2) => {
@@ -128865,9 +128969,9 @@
       gruppe2.userData.hqId = p2.standort.id;
       const S = new Sammler(), alt = LOD2.stufe;
       setzeLod(o2.hausLod ?? "nah");
-      let e;
+      let e, dachFlaechen;
       try {
-        e = basis3["slot:hq"](S, gruppe2, hqDaten(p2));
+        ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p2, () => basis3["slot:hq"](S, gruppe2, hqDaten(p2))));
         S.bauen(gruppe2);
       } finally {
         setzeLod(alt);
@@ -128876,7 +128980,8 @@
         m.userData.hqId = p2.standort.id;
       });
       (o2.wurzel ?? null)?.add(gruppe2);
-      hqs.set(p2.standort.id, { p: p2, gruppe: gruppe2, e, teile: S.anzahl, schluessel: hqSchluessel(p2) });
+      hqs.set(p2.standort.id, { p: p2, gruppe: gruppe2, e, dachFlaechen, teile: S.anzahl, schluessel: hqSchluessel(p2) });
+      o2.dachFlaechenAktualisieren?.("hq:" + p2.standort.id, dachFlaechen);
       return e;
     };
     const hqs = /* @__PURE__ */ new Map();
@@ -128921,9 +129026,9 @@
       const gruppe2 = new three_module_exports.Group(), S = new Sammler(), alt = LOD2.stufe;
       if (x.wbId) gruppe2.userData.wbId = x.wbId;
       setzeLod(o2.hausLod ?? "nah");
-      let e;
+      let e, dachFlaechen;
       try {
-        e = wbBau(S, gruppe2, x.p, wbVon(x.wbId));
+        ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, x.p, () => wbBau(S, gruppe2, x.p, wbVon(x.wbId))));
         S.bauen(gruppe2);
       } finally {
         setzeLod(alt);
@@ -128932,7 +129037,8 @@
         m.userData.wbId = x.wbId;
       });
       o2.wurzel?.add(gruppe2);
-      Object.assign(x, { gruppe: gruppe2, e, schluessel: wbSchluessel(wbVon(x.wbId)) });
+      Object.assign(x, { gruppe: gruppe2, e, dachFlaechen, schluessel: wbSchluessel(wbVon(x.wbId)) });
+      o2.dachFlaechenAktualisieren?.("wb:" + (x.p.standort?.id ?? x.p.id), dachFlaechen);
       if (x.wbId) wettbewerber2.set(x.wbId, x);
       return e;
     }
@@ -129181,30 +129287,27 @@
       for (let i = 0; i < 5; i++) addBox(S, x - 1.3 + i * 0.6, 2.75, z2 + 1.18, 0.23, 0.26, 0.12, ["#eccb68", "#a6d5ab", "#efad9f"][i % 3]);
     }
   }
-  function schneeDaten(plan2, hoehen) {
-    const haeuser = [];
-    for (const p2 of plan2.parzellen ?? []) {
-      if (p2.leer || !(["stadthaus", "eck", "hofhaus"].includes(p2.typ) || p2.typ?.startsWith("slot:"))) continue;
-      const h2 = hoehen?.get(p2.id);
-      if (!Number.isFinite(h2) || h2 < 4 || p2.w < 6 || p2.d < 6) continue;
-      haeuser.push({ x: p2.x + p2.w / 2, y: h2 + 0.055, z: p2.z + p2.d / 2, w: p2.w - 0.8, d: p2.d - 0.8 });
+  function schneeMesh(dachFlaechen, material2) {
+    const punkte2 = [];
+    for (const ecken of dachFlaechen ?? []) {
+      if (!Array.isArray(ecken) || ecken.length !== 3) continue;
+      const [a2, b2, c] = ecken;
+      const ux = b2[0] - a2[0], uy = b2[1] - a2[1], uz = b2[2] - a2[2];
+      const vx = c[0] - a2[0], vy = c[1] - a2[1], vz = c[2] - a2[2];
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      const norm2 = Math.hypot(nx, ny, nz);
+      if (!Number.isFinite(norm2) || norm2 < 1e-6 || ny <= 0) continue;
+      for (const v of ecken) punkte2.push(
+        v[0] + nx / norm2 * 0.065,
+        v[1] + ny / norm2 * 0.065,
+        v[2] + nz / norm2 * 0.065
+      );
     }
-    return haeuser;
-  }
-  function schneeMesh(plan2, hoehen) {
-    const dach3 = schneeDaten(plan2, hoehen);
-    const mesh = new three_module_exports.InstancedMesh(
-      new three_module_exports.BoxGeometry(1, 0.09, 1),
-      new three_module_exports.MeshLambertMaterial({ color: "#f3f5f3", depthWrite: true }),
-      dach3.length || 1
-    );
-    mesh.count = dach3.length;
-    const matrix2 = new three_module_exports.Matrix4(), pos = new three_module_exports.Vector3(), scl = new three_module_exports.Vector3(), rot = new three_module_exports.Quaternion();
-    dach3.forEach((p2, i) => {
-      matrix2.compose(pos.set(p2.x, p2.y, p2.z), rot, scl.set(p2.w, 1, p2.d));
-      mesh.setMatrixAt(i, matrix2);
-    });
-    mesh.instanceMatrix.needsUpdate = true;
+    const geo = new three_module_exports.BufferGeometry();
+    geo.setAttribute("position", new three_module_exports.Float32BufferAttribute(punkte2, 3));
+    if (punkte2.length) geo.computeVertexNormals();
+    const mesh = new three_module_exports.Mesh(geo, material2);
+    mesh.name = "Schnee auf Dachfl\xE4chen";
     mesh.castShadow = false;
     mesh.receiveShadow = true;
     return mesh;
@@ -129229,7 +129332,7 @@
       addBox(S, x, 9 + r3() * 6, z2, 0.035, 1.8 + r3(), 0.035, "#a4d2e0");
     }
   }
-  function jahreszeitenStadt(scene2, plan2, hoehen, spielstand, aktiv5 = JAHRESZEITEN_AN) {
+  function jahreszeitenStadt(scene2, plan2, hoehen, spielstand, aktiv5 = JAHRESZEITEN_AN, dachFlaechen = []) {
     const { baeume, figuren: figuren2 } = maschen(scene2);
     const wurzel2 = new three_module_exports.Group();
     wurzel2.name = "Jahreszeiten";
@@ -129242,7 +129345,20 @@
     bauen3(fest, (S) => festSchmuck(S, plan2));
     bauen3(sommer, (S) => sommerLeben(S, plan2));
     bauen3(schnee, (S) => randSchnee(S, plan2));
-    schnee.add(schneeMesh(plan2, hoehen));
+    const dachMaterial = new three_module_exports.MeshLambertMaterial({ color: "#ebefec", side: three_module_exports.DoubleSide, depthWrite: true });
+    const kachelDaecher = /* @__PURE__ */ new Map();
+    let dachMesh = schneeMesh(dachFlaechen, dachMaterial);
+    schnee.add(dachMesh);
+    const setzeDachKacheln = (eintraege) => {
+      for (const [id, flaechen] of eintraege) {
+        if (flaechen?.length) kachelDaecher.set(id, flaechen);
+        else kachelDaecher.delete(id);
+      }
+      schnee.remove(dachMesh);
+      dachMesh.geometry.dispose();
+      dachMesh = schneeMesh([...dachFlaechen, ...[...kachelDaecher.values()].flat()], dachMaterial);
+      schnee.add(dachMesh);
+    };
     bauen3(regen, (S) => regenOverlay(S, plan2));
     const geo = zweigGeometrie(), mat2 = new three_module_exports.MeshLambertMaterial({ color: "#806b50" });
     const matrix2 = new three_module_exports.Matrix4();
@@ -129301,6 +129417,8 @@
     return {
       aktualisiere: setze,
       abschalten: () => setze(spielstand, false),
+      registriereDachflaechen: (id, flaechen) => setzeDachKacheln([[id, flaechen]]),
+      registriereDachflaechenMehrfach: (eintraege) => setzeDachKacheln(eintraege),
       aufraeumen() {
         wurzel2.parent?.remove(wurzel2);
         wurzel2.traverse((m) => {
@@ -129308,6 +129426,7 @@
         });
         geo.dispose();
         mat2.dispose();
+        dachMaterial.dispose();
       }
     };
   }
@@ -129399,7 +129518,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o2) => typeof o2 === "object" ? { wert: o2.wert ?? o2.value, titel: o2.titel ?? o2.label ?? o2.wert } : { wert: o2, titel: o2 };
-  var version = () => true ? "6ca5e71" : "Entwicklung";
+  var version = () => true ? "b835a8b" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
@@ -130345,6 +130464,7 @@
       }
     };
     canvas2.addEventListener("pointerdown", (e) => {
+      o2.interaktion?.();
       stopp();
       canvas2.setPointerCapture(e.pointerId);
       zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -130424,6 +130544,7 @@
     canvas2.addEventListener("pointercancel", loslassen);
     canvas2.addEventListener("wheel", (e) => {
       e.preventDefault();
+      o2.interaktion?.();
       stopp();
       const p2 = o2.aufBoden(e.clientX, e.clientY);
       K3.halb *= Math.exp(e.deltaY * 15e-4);
@@ -131125,8 +131246,8 @@
           h2 += '<div class="karte"><div class="khead"><b>Premium & Flagships</b><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + name2(c.stelle) + "</button></div><p>" + c.hausIds.length + " H\xE4user \xB7 " + x.flagships.length + " gew\xE4hlte Flagships</p>";
           const premiumHaeuser = st2.haeuser.filter((haus2) => haus2.klasse === "premium");
           const gewaehlte = st2.haeuser.filter((haus2) => x.flagships.includes(haus2.id));
-          const kandidaten2 = st2.haeuser.filter((haus2) => haus2.format === "warenhaus" && haus2.status === "offen" && haus2.klasse !== "premium").sort((a2, b2) => b2.grundflaecheQm * b2.etagen.length - a2.grundflaecheQm * a2.etagen.length).slice(0, 12);
-          const liste2 = [...new Map([...premiumHaeuser, ...gewaehlte, ...kandidaten2].map((haus2) => [haus2.id, haus2])).values()];
+          const kandidaten3 = st2.haeuser.filter((haus2) => haus2.format === "warenhaus" && haus2.status === "offen" && haus2.klasse !== "premium").sort((a2, b2) => b2.grundflaecheQm * b2.etagen.length - a2.grundflaecheQm * a2.etagen.length).slice(0, 12);
+          const liste2 = [...new Map([...premiumHaeuser, ...gewaehlte, ...kandidaten3].map((haus2) => [haus2.id, haus2])).values()];
           const namen = /* @__PURE__ */ new Map();
           for (const haus2 of liste2) namen.set(haus2.name, (namen.get(haus2.name) ?? 0) + 1);
           for (const haus2 of liste2) {
@@ -135742,6 +135863,389 @@
     }, pruefe: () => E4.chronikUebersicht(s2()) };
   }
 
+  // src/ui/hausbesuch-navigation.js
+  var LAUFRASTER = 0.625;
+  var PERSONENRADIUS = 0.34;
+  var EPS = 1e-8;
+  function zufall4(seed) {
+    let s2 = 2166136261;
+    for (const c of String(seed)) {
+      s2 ^= c.charCodeAt(0);
+      s2 = Math.imul(s2, 16777619);
+    }
+    return () => {
+      s2 ^= s2 << 13;
+      s2 ^= s2 >>> 17;
+      s2 ^= s2 << 5;
+      return (s2 >>> 0) / 4294967296;
+    };
+  }
+  function rechteck7(r3) {
+    if (Array.isArray(r3)) return { x: r3[0], z: r3[1], w: r3[2] - r3[0], d: r3[3] - r3[1] };
+    return { x: r3.x, z: r3.z, w: r3.w, d: r3.d };
+  }
+  function segmentSchneidet(a2, b2, r3, radius) {
+    const x0 = r3.x - radius, x1 = r3.x + r3.w + radius;
+    const z0 = r3.z - radius, z1 = r3.z + r3.d + radius;
+    let min = 0, max = 1;
+    for (const [p2, q2, lo, hi] of [[a2.x, b2.x - a2.x, x0, x1], [a2.z, b2.z - a2.z, z0, z1]]) {
+      if (Math.abs(q2) < EPS) {
+        if (p2 > lo && p2 < hi) continue;
+        return false;
+      }
+      const t0 = (lo - p2) / q2, t1 = (hi - p2) / q2;
+      min = Math.max(min, Math.min(t0, t1));
+      max = Math.min(max, Math.max(t0, t1));
+      if (min >= max - EPS) return false;
+    }
+    return true;
+  }
+  function inGrenze(nav, p2) {
+    return p2.x >= nav.radius && p2.z >= nav.radius && p2.x <= nav.breite - nav.radius && p2.z <= nav.tiefe - nav.radius;
+  }
+  function kandidaten2(nav, a2, b2 = a2) {
+    const n = nav.bucketGroesse;
+    const x0 = Math.floor((Math.min(a2.x, b2.x) - nav.radius) / n);
+    const x1 = Math.floor((Math.max(a2.x, b2.x) + nav.radius) / n);
+    const z0 = Math.floor((Math.min(a2.z, b2.z) - nav.radius) / n);
+    const z1 = Math.floor((Math.max(a2.z, b2.z) + nav.radius) / n);
+    const ids = /* @__PURE__ */ new Set();
+    for (let z2 = z0; z2 <= z1; z2++) for (let x = x0; x <= x1; x++)
+      for (const id of nav.buckets.get(x + ":" + z2) ?? []) ids.add(id);
+    return ids;
+  }
+  function istKollisionsfrei(nav, x, z2) {
+    const p2 = { x, z: z2 };
+    if (!inGrenze(nav, p2)) return false;
+    for (const id of kandidaten2(nav, p2)) {
+      const r3 = nav.hindernisse[id];
+      if (x > r3.x - nav.radius && x < r3.x + r3.w + nav.radius && z2 > r3.z - nav.radius && z2 < r3.z + r3.d + nav.radius) return false;
+    }
+    return true;
+  }
+  function streckeFrei(nav, a2, b2) {
+    if (!inGrenze(nav, a2) || !inGrenze(nav, b2)) return false;
+    for (const id of kandidaten2(nav, a2, b2))
+      if (segmentSchneidet(a2, b2, nav.hindernisse[id], nav.radius)) return false;
+    return true;
+  }
+  var punkt2 = (nav, idx) => ({
+    x: (idx % nav.nx + 0.5) * nav.schritt,
+    z: (Math.floor(idx / nav.nx) + 0.5) * nav.schritt
+  });
+  function nachbarn(nav, idx) {
+    const x = idx % nav.nx, z2 = Math.floor(idx / nav.nx);
+    return [
+      x > 0 ? idx - 1 : -1,
+      x < nav.nx - 1 ? idx + 1 : -1,
+      z2 > 0 ? idx - nav.nx : -1,
+      z2 < nav.nz - 1 ? idx + nav.nx : -1
+    ];
+  }
+  function navigationsRaster(buehne) {
+    const breite = buehne.breite, tiefe = buehne.tiefe;
+    const plan2 = buehne.ladenplan;
+    const ausPlan = plan2 ? [...plan2.moebel, ...plan2.hindernisse] : [];
+    const extras = buehne.navigation?.hindernisse ?? [];
+    const verwendet = /* @__PURE__ */ new Set();
+    const hindernisse = [...ausPlan, ...extras].map(rechteck7).filter((r3) => {
+      if (!Number.isFinite(r3.x + r3.z + r3.w + r3.d) || r3.w <= EPS || r3.d <= EPS) return false;
+      const key = [r3.x, r3.z, r3.w, r3.d].map((n) => n.toFixed(3)).join(":");
+      if (verwendet.has(key)) return false;
+      verwendet.add(key);
+      return true;
+    });
+    const schritt = LAUFRASTER, nx = Math.floor(breite / schritt), nz = Math.floor(tiefe / schritt);
+    const nav = {
+      breite,
+      tiefe,
+      schritt,
+      nx,
+      nz,
+      radius: PERSONENRADIUS,
+      hindernisse,
+      bucketGroesse: 5,
+      buckets: /* @__PURE__ */ new Map(),
+      frei: new Uint8Array(nx * nz),
+      kanten: new Uint8Array(nx * nz),
+      komponenten: new Int32Array(nx * nz),
+      kassen: (plan2?.kassenVorfeld ?? []).map((r3) => ({ x: r3.x + r3.w / 2, z: r3.z + r3.d / 2 })).concat(buehne.navigation?.kassen ?? [])
+    };
+    hindernisse.forEach((r3, id) => {
+      const x0 = Math.floor((r3.x - nav.radius) / nav.bucketGroesse);
+      const x1 = Math.floor((r3.x + r3.w + nav.radius) / nav.bucketGroesse);
+      const z0 = Math.floor((r3.z - nav.radius) / nav.bucketGroesse);
+      const z1 = Math.floor((r3.z + r3.d + nav.radius) / nav.bucketGroesse);
+      for (let z2 = z0; z2 <= z1; z2++) for (let x = x0; x <= x1; x++) {
+        const key = x + ":" + z2;
+        if (!nav.buckets.has(key)) nav.buckets.set(key, []);
+        nav.buckets.get(key).push(id);
+      }
+    });
+    for (let i = 0; i < nav.frei.length; i++) {
+      const p2 = punkt2(nav, i);
+      nav.frei[i] = istKollisionsfrei(nav, p2.x, p2.z) ? 1 : 0;
+    }
+    for (let i = 0; i < nav.frei.length; i++) {
+      if (!nav.frei[i]) continue;
+      const x = i % nav.nx, z2 = Math.floor(i / nav.nx), a2 = punkt2(nav, i);
+      if (x + 1 < nav.nx && nav.frei[i + 1] && streckeFrei(nav, a2, punkt2(nav, i + 1))) {
+        nav.kanten[i] |= 2;
+        nav.kanten[i + 1] |= 1;
+      }
+      if (z2 + 1 < nav.nz && nav.frei[i + nav.nx] && streckeFrei(nav, a2, punkt2(nav, i + nav.nx))) {
+        nav.kanten[i] |= 8;
+        nav.kanten[i + nav.nx] |= 4;
+      }
+    }
+    nav.komponenten.fill(-1);
+    let gruppe2 = 0;
+    const queue2 = new Int32Array(nav.frei.length);
+    for (let i = 0; i < nav.frei.length; i++) {
+      if (!nav.frei[i] || nav.komponenten[i] !== -1) continue;
+      let anfang = 0, ende = 1;
+      queue2[0] = i;
+      nav.komponenten[i] = gruppe2;
+      while (anfang < ende) {
+        const hier = queue2[anfang++];
+        const neben = nachbarn(nav, hier);
+        for (let k2 = 0; k2 < 4; k2++) {
+          const j2 = neben[k2];
+          if (j2 < 0 || !(nav.kanten[hier] & 1 << k2) || nav.komponenten[j2] !== -1) continue;
+          nav.komponenten[j2] = gruppe2;
+          queue2[ende++] = j2;
+        }
+      }
+      gruppe2++;
+    }
+    nav.anzahlKomponenten = gruppe2;
+    nav.freieZellen = nav.frei.reduce((n, a2) => n + a2, 0);
+    return nav;
+  }
+  function findeGangpunkt(nav, p2, gruppe2 = -1) {
+    let best = -1, dist2 = Infinity;
+    const xi = Math.floor(p2.x / nav.schritt), zi = Math.floor(p2.z / nav.schritt);
+    for (let rad2 = 0; rad2 <= 20; rad2++) {
+      for (let z2 = Math.max(0, zi - rad2); z2 <= Math.min(nav.nz - 1, zi + rad2); z2++)
+        for (let x = Math.max(0, xi - rad2); x <= Math.min(nav.nx - 1, xi + rad2); x++) {
+          if (rad2 && Math.max(Math.abs(x - xi), Math.abs(z2 - zi)) !== rad2) continue;
+          const idx = z2 * nav.nx + x;
+          if (!nav.frei[idx] || gruppe2 >= 0 && nav.komponenten[idx] !== gruppe2) continue;
+          const q2 = punkt2(nav, idx), d3 = (p2.x - q2.x) ** 2 + (p2.z - q2.z) ** 2;
+          if (d3 < dist2) {
+            best = idx;
+            dist2 = d3;
+          }
+        }
+      if (best >= 0 && rad2 * nav.schritt > Math.sqrt(dist2) + nav.schritt) break;
+    }
+    return best;
+  }
+  function heapPush(heap, v) {
+    let i = heap.length;
+    heap.push(v);
+    while (i > 0) {
+      const p2 = i - 1 >> 1;
+      if (heap[p2].f <= v.f) break;
+      heap[i] = heap[p2];
+      i = p2;
+    }
+    heap[i] = v;
+  }
+  function heapPop(heap) {
+    const v = heap[0], last = heap.pop();
+    if (!heap.length) return v;
+    let i = 0;
+    while (2 * i + 1 < heap.length) {
+      let c = 2 * i + 1;
+      if (c + 1 < heap.length && heap[c + 1].f < heap[c].f) c++;
+      if (heap[c].f >= last.f) break;
+      heap[i] = heap[c];
+      i = c;
+    }
+    heap[i] = last;
+    return v;
+  }
+  function sucheWeg(nav, start, ziel) {
+    if (start < 0 || ziel < 0 || !nav.frei[start] || !nav.frei[ziel] || nav.komponenten[start] !== nav.komponenten[ziel]) return null;
+    if (start === ziel) return [];
+    const vorher = new Int32Array(nav.frei.length);
+    vorher.fill(-1);
+    const kosten = new Float64Array(nav.frei.length);
+    kosten.fill(Infinity);
+    const erledigt = new Uint8Array(nav.frei.length);
+    const heuristik = (i) => (Math.abs(i % nav.nx - ziel % nav.nx) + Math.abs(Math.floor(i / nav.nx) - Math.floor(ziel / nav.nx))) * nav.schritt;
+    const offen = [];
+    kosten[start] = 0;
+    heapPush(offen, { i: start, f: heuristik(start) });
+    while (offen.length) {
+      const hier = heapPop(offen).i;
+      if (erledigt[hier]) continue;
+      if (hier === ziel) {
+        const weg = [];
+        for (let i = ziel; i !== start; i = vorher[i]) weg.push(punkt2(nav, i));
+        return weg.reverse();
+      }
+      erledigt[hier] = 1;
+      const neben = nachbarn(nav, hier);
+      for (let k2 = 0; k2 < 4; k2++) {
+        const i = neben[k2];
+        if (i < 0 || !(nav.kanten[hier] & 1 << k2) || erledigt[i]) continue;
+        const n = kosten[hier] + nav.schritt;
+        if (n + EPS >= kosten[i]) continue;
+        kosten[i] = n;
+        vorher[i] = hier;
+        heapPush(offen, { i, f: n + heuristik(i) });
+      }
+    }
+    return null;
+  }
+  function neuesZiel(nav, p2, zonen2) {
+    const r3 = p2.zufall;
+    const kasse = !p2.personal && nav.kassen.length > 0 && r3() < 0.17;
+    let zone = p2.zone;
+    for (let versuch = 0; versuch < 12; versuch++) {
+      const kassenziel = kasse && versuch < 5;
+      if (!kassenziel) zone = zonen2[Math.floor(r3() * zonen2.length)];
+      const wunsch = kassenziel ? nav.kassen[Math.floor(r3() * nav.kassen.length)] : zone.punkte[Math.floor(r3() * zone.punkte.length)];
+      const ziel = findeGangpunkt(nav, wunsch, p2.komponente);
+      if (ziel < 0 || ziel === p2.zelle) continue;
+      const route = sucheWeg(nav, p2.zelle, ziel);
+      if (!route?.length) continue;
+      p2.route = route;
+      p2.routeIndex = 0;
+      p2.zielZone = zone;
+      p2.zielKasse = !!kassenziel;
+      return true;
+    }
+    p2.pause = 1 + r3();
+    return false;
+  }
+  function erstelleBesucher(nav, zonen2, besatz, seed) {
+    const personen = [];
+    if (!nav.freieZellen || !zonen2?.length) return personen;
+    const n = besatz.kunden + besatz.verkauf;
+    for (let i = 0; i < n; i++) {
+      const r3 = zufall4(seed + ":" + i), personal = i >= besatz.kunden;
+      let zone = null, zelle2 = -1;
+      for (let versuch = 0; versuch < 16 && zelle2 < 0; versuch++) {
+        const kandidat = zonen2[Math.floor(r3() * zonen2.length)];
+        if (!kandidat?.punkte?.length) continue;
+        const anKasse = personal && (i - besatz.kunden) % 2 === 0 && nav.kassen.length > 0;
+        const q2 = anKasse ? nav.kassen[Math.floor(r3() * nav.kassen.length)] : kandidat.punkte[Math.floor(r3() * kandidat.punkte.length)];
+        const gefunden = findeGangpunkt(nav, q2);
+        if (gefunden < 0) continue;
+        zone = kandidat;
+        zelle2 = gefunden;
+      }
+      if (zelle2 < 0) continue;
+      const p2 = punkt2(nav, zelle2);
+      personen.push({
+        ...p2,
+        index: i,
+        personal,
+        zone,
+        zoneJetzt: zone,
+        zielZone: zone,
+        zelle: zelle2,
+        komponente: nav.komponenten[zelle2],
+        zielKasse: false,
+        route: [],
+        routeIndex: 0,
+        pause: personal ? r3() * 3 : r3() * 0.8,
+        tempo: personal ? 0.7 + r3() * 0.18 : 1.05 + r3() * 0.27,
+        richtung: r3() * Math.PI * 2,
+        zufall: r3
+      });
+    }
+    return personen;
+  }
+  function bewegeBesucher(nav, personen, delta, zonen2) {
+    const statistik = { kundenMeter: 0, kundenGehsekunden: 0, personalMeter: 0, maxTempo: 0, kollisionen: 0 };
+    if (!Number.isFinite(delta) || delta <= 0) return statistik;
+    for (const p2 of personen) {
+      let rest = delta, schritte = 0;
+      while (rest > EPS && schritte++ < 30) {
+        if (p2.pause > 0) {
+          const t = Math.min(rest, p2.pause);
+          p2.pause -= t;
+          rest -= t;
+          if (p2.pause > EPS) break;
+          p2.pause = 0;
+          continue;
+        }
+        if (p2.routeIndex >= p2.route.length) {
+          if (p2.route.length) {
+            p2.zoneJetzt = p2.zielZone;
+            p2.pause = p2.personal ? 3 + p2.zufall() * 4 : p2.zielKasse ? 1.8 + p2.zufall() * 2 : 0.7 + p2.zufall() * 1.3;
+            p2.route = [];
+            p2.routeIndex = 0;
+            continue;
+          }
+          if (!neuesZiel(nav, p2, zonen2)) break;
+        }
+        const ziel = p2.route[p2.routeIndex], dx = ziel.x - p2.x, dz = ziel.z - p2.z;
+        const dist2 = Math.hypot(dx, dz);
+        if (dist2 < EPS) {
+          p2.routeIndex++;
+          continue;
+        }
+        const meter = Math.min(dist2, p2.tempo * rest);
+        const neu = { x: p2.x + dx * meter / dist2, z: p2.z + dz * meter / dist2 };
+        if (!streckeFrei(nav, p2, neu)) {
+          statistik.kollisionen++;
+          p2.route = [];
+          p2.routeIndex = 0;
+          p2.pause = 2;
+          break;
+        }
+        p2.richtung = Math.atan2(dx, dz);
+        p2.x = neu.x;
+        p2.z = neu.z;
+        rest -= meter / p2.tempo;
+        if (meter >= dist2 - EPS) {
+          p2.x = ziel.x;
+          p2.z = ziel.z;
+          p2.zelle = Math.floor(ziel.z / nav.schritt) * nav.nx + Math.floor(ziel.x / nav.schritt);
+          p2.routeIndex++;
+        }
+        if (p2.personal) statistik.personalMeter += meter;
+        else {
+          statistik.kundenMeter += meter;
+          statistik.kundenGehsekunden += meter / p2.tempo;
+        }
+        statistik.maxTempo = Math.max(statistik.maxTempo, p2.tempo);
+      }
+      if (!istKollisionsfrei(nav, p2.x, p2.z)) statistik.kollisionen++;
+    }
+    return statistik;
+  }
+  function simuliereLaufwege(nav, zonen2, besatz, seed, dauer = 60, schritt = 0.05) {
+    const personen = erstelleBesucher(nav, zonen2, besatz, seed);
+    const ergebnis = {
+      sekunden: dauer,
+      personen: personen.length,
+      kunden: personen.filter((p2) => !p2.personal).length,
+      kollisionen: 0,
+      kundenMeter: 0,
+      kundenGehsekunden: 0,
+      personalMeter: 0,
+      maxTempo: 0
+    };
+    for (let t = 0; t < dauer - EPS; ) {
+      const dt = Math.min(schritt, dauer - t);
+      const s2 = bewegeBesucher(nav, personen, dt, zonen2);
+      for (const key of ["kollisionen", "kundenMeter", "kundenGehsekunden", "personalMeter"])
+        ergebnis[key] += s2[key];
+      ergebnis.maxTempo = Math.max(ergebnis.maxTempo, s2.maxTempo);
+      t += dt;
+    }
+    ergebnis.kundentempo = ergebnis.kundenGehsekunden ? ergebnis.kundenMeter / ergebnis.kundenGehsekunden : 0;
+    ergebnis.kundenDurchschnittMitPausen = ergebnis.kunden ? ergebnis.kundenMeter / (dauer * ergebnis.kunden) : 0;
+    ergebnis.freieZellen = nav.freieZellen;
+    return ergebnis;
+  }
+
   // src/ui/hausbesuch.js
   var HAUSBESUCH_AKTIV = true;
   var PHRASE = Object.freeze({
@@ -135814,8 +136318,8 @@
     const saetze = PHRASE[PHRASE[lage] ? lage : "gut"];
     return saetze[hash6(String(woche2) + ":" + abteilung2 + ":" + person3) % saetze.length];
   }
-  function hausbesuchBesatz(haus2, etageNr2) {
-    const fl = (haus2.flaechen ?? []).filter((f4) => f4.etage === etageNr2 && f4.konzept !== "leer");
+  function hausbesuchBesatz(haus2, etageNr) {
+    const fl = (haus2.flaechen ?? []).filter((f4) => f4.etage === etageNr && f4.konzept !== "leer");
     const qm = fl.reduce((n, f4) => n + f4.qm, 0);
     const gesamt = Math.max(1, (haus2.flaechen ?? []).filter((f4) => f4.konzept !== "leer").reduce((n, f4) => n + f4.qm, 0));
     const k2 = haus2.kpi ?? {};
@@ -135855,6 +136359,7 @@
   function hausbesuchModul(ctx) {
     let aktiv5 = HAUSBESUCH_AKTIV, haus2 = null, nr = 0, host, bild3, canvas2, renderer, scene2, cam2, buehne;
     let figuren2 = [], personenMesh = [], treffer = [], animation = 0, fahrt = null, rahmenzeiten = [], letzte = 0;
+    let navigation = null, besuchZonen = [], besuchSeed = "";
     let K3 = { x: 0, z: 0, halb: 40, min: 8, max: 100 };
     let steuerung2, kalender = null;
     const status = () => ({ offen: !!haus2, haus: haus2?.id, etage: nr, figuren: figuren2.length, kunden: figuren2.filter((f4) => !f4.personal).length, personal: figuren2.filter((f4) => f4.personal).length });
@@ -135931,6 +136436,8 @@
       figuren2 = [];
       personenMesh = [];
       treffer = [];
+      navigation = null;
+      besuchZonen = [];
     }
     function instanz(anz3, farbe3, geo) {
       const m = new three_module_exports.InstancedMesh(geo, new three_module_exports.MeshLambertMaterial({ color: farbe3 }), Math.max(1, anz3));
@@ -135941,53 +136448,23 @@
       return m;
     }
     function menschen(zn, besatz) {
-      const r3 = rng2(haus2.id + ":besuch:" + nr + ":" + ctx.s().woche);
-      const personen = [];
-      if (!zn.length) return;
-      for (let i = 0; i < besatz.kunden + besatz.verkauf; i++) {
-        const personal = i >= besatz.kunden, zone = zn[Math.floor(r3() * zn.length)];
-        const pos = zone.punkte[Math.floor(r3() * zone.punkte.length)];
-        const zielZone = personal ? zone : zn[Math.floor(r3() * zn.length)];
-        const ziel = zielZone.punkte[Math.floor(r3() * zielZone.punkte.length)];
-        const x = begrenze(pos.x + (r3() - 0.5) * 2, 1, buehne.breite - 1);
-        const z2 = begrenze(pos.z + (r3() - 0.5) * 2, 1, buehne.tiefe - 1);
-        personen.push({
-          x,
-          z: z2,
-          startX: x,
-          startZ: z2,
-          zielX: begrenze(ziel.x, 1, buehne.breite - 1),
-          zielZ: begrenze(ziel.z, 1, buehne.tiefe - 1),
-          phase: r3() * Math.PI * 2,
-          tempo: personal ? 0 : 0.13 + r3() * 0.23,
-          richtung: r3() * Math.PI * 2,
-          zone,
-          zielZone,
-          personal,
-          index: i
-        });
-      }
-      figuren2 = personen;
+      besuchZonen = zn;
+      besuchSeed = haus2.id + ":besuch:" + nr + ":" + ctx.s().woche;
+      figuren2 = erstelleBesucher(navigation, zn, besatz, besuchSeed);
       const koerper4 = new three_module_exports.BoxGeometry(0.66, 1.15, 0.42), kopf = new three_module_exports.SphereGeometry(0.37, 6, 5);
       for (const p2 of [false, true]) {
-        const n = personen.filter((f4) => f4.personal === p2).length;
+        const n = figuren2.filter((f4) => f4.personal === p2).length;
         instanz(n, p2 ? "#235a79" : "#ac715e", koerper4);
         instanz(n, p2 ? "#d5a37f" : "#edc9a4", kopf);
       }
     }
-    function menschenSetzen(t) {
+    function menschenSetzen() {
       const obj = new three_module_exports.Object3D();
       for (const personal of [false, true]) {
         const liste2 = figuren2.filter((p2) => p2.personal === personal);
         const ms = personal ? personenMesh.slice(2, 4) : personenMesh.slice(0, 2);
         liste2.forEach((p2, i) => {
-          const weg = p2.personal ? 0 : (1 - Math.cos(t * p2.tempo + p2.phase)) / 2;
-          const x = begrenze(p2.startX + (p2.zielX - p2.startX) * weg, 0.5, buehne.breite - 0.5);
-          const z2 = begrenze(p2.startZ + (p2.zielZ - p2.startZ) * weg, 0.5, buehne.tiefe - 0.5);
-          p2.x = x;
-          p2.z = z2;
-          p2.zoneJetzt = weg > 0.5 ? p2.zielZone : p2.zone;
-          obj.position.set(x, 0.82, z2);
+          obj.position.set(p2.x, 0.82, p2.z);
           obj.rotation.set(0, p2.richtung, 0);
           obj.updateMatrix();
           ms[0].setMatrixAt(i, obj.matrix);
@@ -135998,7 +136475,7 @@
         for (const m of ms) m.instanceMatrix.needsUpdate = true;
       }
     }
-    function bauen3(etageNr2, delta = 0) {
+    function bauen3(etageNr, delta = 0) {
       const s2 = ctx.s();
       const frisch = s2.haeuser.find((h2) => h2.id === haus2.id);
       buehne = null;
@@ -136007,23 +136484,24 @@
       scene2 = neueSzene("#26313a");
       const S = new Sammler();
       if (haus2.format === "outlet") {
-        const m = masseOutlet(haus2), flaechen = haus2.flaechen.filter((f4) => f4.etage === etageNr2 && f4.qm >= 10);
+        const m = masseOutlet(haus2), flaechen = haus2.flaechen.filter((f4) => f4.etage === etageNr && f4.qm >= 10);
         if (flaechen.length) {
-          const plan2 = ladenplan({ breite: m.bw, tiefe: m.bd }, "outlet", flaechen, haus2.id + ":" + etageNr2);
+          const plan2 = ladenplan({ breite: m.bw, tiefe: m.bd }, "outlet", flaechen, haus2.id + ":" + etageNr);
           S.quader(0, -0.3, 0, m.bw, 0, m.bd, "#e7e6e1");
           baueLadenplan(S, scene2, plan2, { dichte: 0.42 });
-          buehne = { box: new three_module_exports.Box3(new three_module_exports.Vector3(-0.5, -0.5, -0.5), new three_module_exports.Vector3(m.bw + 0.5, 4.6, m.bd + 0.5)), breite: m.bw, tiefe: m.bd, zonen: plan2.abteilungen, anzahl: S.anzahl };
+          buehne = { box: new three_module_exports.Box3(new three_module_exports.Vector3(-0.5, -0.5, -0.5), new three_module_exports.Vector3(m.bw + 0.5, 4.6, m.bd + 0.5)), breite: m.bw, tiefe: m.bd, zonen: plan2.abteilungen, ladenplan: plan2, anzahl: S.anzahl };
         }
       }
       if (!buehne) {
         const grafikHaus = { ...haus2, flaechen: haus2.flaechen };
-        buehne = etage(S, scene2, grafikHaus, etageNr2, { kunden: 0, dichte: 0.42, budget: 14500 });
+        buehne = etage(S, scene2, grafikHaus, etageNr, { kunden: 0, dichte: 0.42, budget: 14500 });
       }
       S.bauen(scene2);
       const bbox = buehne.box;
       sonneAuf(scene2, bbox.getCenter(new three_module_exports.Vector3()), Math.max(30, bbox.getSize(new three_module_exports.Vector3()).length()));
       const zn = zonenNormalisieren(buehne.zonen, haus2);
-      const besatz = hausbesuchBesatz(haus2, etageNr2);
+      const besatz = hausbesuchBesatz(haus2, etageNr);
+      navigation = navigationsRaster(buehne);
       menschen(zn, besatz);
       treffer = zn;
       K3.x = buehne.breite / 2;
@@ -136031,16 +136509,20 @@
       K3.max = Math.max(20, Math.max(buehne.breite, buehne.tiefe) * 1.25);
       K3.min = 7;
       K3.halb = Math.min(K3.max, Math.max(16, Math.max(buehne.breite, buehne.tiefe) * 0.8));
-      host.querySelector(".hb-unter").textContent = etageName2(etageNr2) + " \xB7 " + besatz.kunden + " Kunden \xB7 " + besatz.verkauf + " Besch\xE4ftigte" + (haus2.format === "outlet" ? " \xB7 Modellbetrieb" : " \xB7 " + besatz.fte + " FTE");
+      host.querySelector(".hb-unter").textContent = etageName2(etageNr) + " \xB7 " + besatz.kunden + " Kunden \xB7 " + besatz.verkauf + " Besch\xE4ftigte" + (haus2.format === "outlet" ? " \xB7 Modellbetrieb" : " \xB7 " + besatz.fte + " FTE");
       host.querySelector(".hb-blase").hidden = true;
-      host.querySelectorAll("[data-hb=etage]").forEach((b2) => b2.setAttribute("aria-pressed", String(Number(b2.dataset.nr) === etageNr2)));
+      host.querySelectorAll("[data-hb=etage]").forEach((b2) => b2.setAttribute("aria-pressed", String(Number(b2.dataset.nr) === etageNr)));
       fahrt = delta ? { seit: performance.now(), start: delta > 0 ? -8 : 8, dauer: 300 } : null;
       kameraSetzen2();
     }
     function frame(t) {
       if (!haus2 || !scene2) return;
       animation = requestAnimationFrame(frame);
-      if (letzte) rahmenzeiten.push(Math.min(1e3, t - letzte));
+      if (letzte) {
+        const dt = Math.min(0.25, Math.max(0, (t - letzte) / 1e3));
+        rahmenzeiten.push(Math.min(1e3, t - letzte));
+        bewegeBesucher(navigation, figuren2, dt, besuchZonen);
+      }
       if (rahmenzeiten.length > 120) rahmenzeiten.shift();
       letzte = t;
       if (fahrt) {
@@ -136051,7 +136533,7 @@
           fahrt = null;
         }
       }
-      menschenSetzen(t / 1e3);
+      menschenSetzen();
       renderer.render(scene2, cam2);
     }
     function sprechblase(titel, inhalt, zusatz = "") {
@@ -136138,14 +136620,16 @@
       const angebot = h2.etagen.includes(0) ? 0 : h2.etagen[0];
       nr = angebot;
       host.querySelector(".hb-titel").textContent = h2.name + " \xB7 Hausbesuch";
-      const kandidaten2 = [...s2.haeuser.filter((q2) => q2.stadt === ctx.stadtName() && q2.status !== "verkauft"), ...haeuser_outlet_default.filter((q2) => q2.stadt === ctx.stadtName())];
-      host.querySelector(".hb-hauswahl").innerHTML = kandidaten2.map((q2) => '<option value="' + sicher(q2.id) + '"' + (q2.id === h2.id ? " selected" : "") + ">" + sicher(q2.name) + "</option>").join("");
+      const kandidaten3 = [...s2.haeuser.filter((q2) => q2.stadt === ctx.stadtName() && q2.status !== "verkauft"), ...haeuser_outlet_default.filter((q2) => q2.stadt === ctx.stadtName())];
+      host.querySelector(".hb-hauswahl").innerHTML = kandidaten3.map((q2) => '<option value="' + sicher(q2.id) + '"' + (q2.id === h2.id ? " selected" : "") + ">" + sicher(q2.name) + "</option>").join("");
       host.querySelector(".hb-etagen").innerHTML = [...h2.etagen].sort((a2, b2) => a2 - b2).map((n) => '<button type="button" data-hb="etage" data-nr="' + n + '" aria-pressed="' + (n === nr) + '">' + etageName2(n) + "</button>").join("");
       host.hidden = false;
-      renderer = new three_module_exports.WebGLRenderer({ canvas: canvas2, antialias: false });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.3));
-      renderer.outputColorSpace = three_module_exports.SRGBColorSpace;
-      renderer.shadowMap.enabled = false;
+      if (!renderer) {
+        renderer = new three_module_exports.WebGLRenderer({ canvas: canvas2, antialias: false });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.3));
+        renderer.outputColorSpace = three_module_exports.SRGBColorSpace;
+        renderer.shadowMap.enabled = false;
+      }
       rahmenzeiten = [];
       letzte = 0;
       try {
@@ -136164,9 +136648,7 @@
       animation = 0;
       steuerung2?.stopp();
       sceneLeeren();
-      renderer?.dispose();
-      renderer?.forceContextLoss();
-      renderer = null;
+      renderer?.renderLists?.dispose();
       cam2 = null;
       haus2 = null;
       letzte = 0;
@@ -136181,12 +136663,31 @@
       const id = ctx.erstHaus();
       if (id) oeffne(id);
     });
+    const pruefung = (sekunden = 60, schritt = 0.05) => {
+      if (!haus2 || !navigation) throw new Error("F\xFCr die Laufwegpr\xFCfung zuerst einen Hausbesuch \xF6ffnen.");
+      return { haus: haus2.id, etage: nr, ...simuliereLaufwege(
+        navigation,
+        besuchZonen,
+        hausbesuchBesatz(haus2, nr),
+        besuchSeed,
+        sekunden,
+        schritt
+      ) };
+    };
+    const bildschritt = (sekunden = 5) => {
+      if (!haus2 || !navigation) throw new Error("Hausbesuch ist nicht ge\xF6ffnet.");
+      bewegeBesucher(navigation, figuren2, Math.max(0, sekunden), besuchZonen);
+      menschenSetzen();
+      renderer.render(scene2, cam2);
+    };
     return {
       oeffne,
       schliesse,
       etage: etageWaehlen,
       status,
       messung: messung2,
+      pruefung,
+      bildschritt,
       get aktiv() {
         return aktiv5;
       },
@@ -137894,7 +138395,7 @@
   var zahl4 = (x, n = 1) => Number(x).toLocaleString("de-DE", { maximumFractionDigits: n, minimumFractionDigits: n });
   var euro2 = (x) => zahl4(x, 2) + " \u20AC";
   var abweichung = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + prozent3(basis3 ? wert / basis3 - 1 : 0);
-  var punkt2 = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + zahl4((wert - basis3) * 100) + " Punkte";
+  var punkt3 = (wert, basis3) => basis3 == null ? "Kein Vorjahr" : (wert >= basis3 ? "\u2191 " : "\u2193 ") + zahl4((wert - basis3) * 100) + " Punkte";
   function brueckeHtml(br) {
     if (br.status !== "ok") return '<div class="o02-hinweis">' + esc2(br.status) + "</div>";
     const eintraege = [["Frequenz", br.frequenz], ["Kaufquote", br.kaufquote], ["Teile", br.teile], ["Preis", br.preis]];
@@ -137908,7 +138409,7 @@
     const a2 = d3.aktuell, v = d3.vorjahr;
     const br = E4.umsatzbruecke(s2, { ebene: "haus", id, vergleich: "vorjahr", wochen: 1 });
     const kpi = (name2, wert, delta) => '<div class="o02-treib"><span>' + name2 + "</span><b>" + esc2(wert) + "</b><small>" + esc2(delta) + "</small></div>";
-    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a2.umsatz + '" data-o02-frequenz="' + a2.frequenz + '" data-o02-kaufquote="' + a2.kaufquote + '" data-o02-bon="' + a2.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a2.frequenz)), abweichung(a2.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent3(a2.kaufquote), punkt2(a2.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a2.bon), abweichung(a2.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl4(a2.teile, 2) + " Teile je Bon \xB7 " + euro2(a2.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
+    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a2.umsatz + '" data-o02-frequenz="' + a2.frequenz + '" data-o02-kaufquote="' + a2.kaufquote + '" data-o02-bon="' + a2.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a2.frequenz)), abweichung(a2.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent3(a2.kaufquote), punkt3(a2.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a2.bon), abweichung(a2.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl4(a2.teile, 2) + " Teile je Bon \xB7 " + euro2(a2.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
   }
   function zeile2(z2, haus2 = false) {
     return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z2.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z2.ampelfarbe) + '"></span>' + esc2(z2.name) + "</div><div>" + geld(z2.umsatz) + "</div><div>" + (z2.abweichung == null ? "\u2013" : geld(z2.abweichung) + " (" + prozent3(z2.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z2.frequenz)) + "</div><div>" + prozent3(z2.kaufquote) + "</div><div>" + euro2(z2.bon) + "</div></div>";
@@ -138670,6 +139171,7 @@
   var sb = null;
   var s = null;
   var stadtName = null;
+  var kameraZiel = null;
   var jahreszeiten = null;
   var offenesHaus = null;
   var offenesHq = null;
@@ -138703,13 +139205,61 @@
   function groesse() {
     return [canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight];
   }
+  function hausKameraPunkt(id) {
+    const haus2 = sb?.haeuser.get(id), gruppe2 = haus2?.gruppe;
+    if (gruppe2) {
+      gruppe2.updateWorldMatrix(true, true);
+      const box2 = new three_module_exports.Box3().setFromObject(gruppe2);
+      if (!box2.isEmpty()) {
+        const p2 = haus2.p;
+        if (p2) return new three_module_exports.Vector3(p2.x + p2.w / 2, (haus2.e?.hoehe ?? box2.max.y) + 4, p2.z + p2.d / 2);
+        return box2.getCenter(new three_module_exports.Vector3());
+      }
+    }
+    const box = sb?.statischeHaeuser.get(id)?.bounds;
+    return box && !box.isEmpty() ? box.getCenter(new three_module_exports.Vector3()) : null;
+  }
+  function hausFokusPixel(w, h2) {
+    const frei6 = Math.max(140, h2 - Math.min($2("panel").offsetHeight || h2 * 0.62, h2 * 0.62));
+    const oben = Math.min(70, frei6 * 0.35);
+    return { x: w / 2, y: (oben + frei6 - 12) / 2 };
+  }
+  function hausKameraMessung() {
+    if (!kameraZiel || !cam || kameraZiel.stadt !== stadtName) return null;
+    const punkt4 = hausKameraPunkt(kameraZiel.id) ?? kameraZiel.punkt;
+    const [w, h2] = groesse(), ziel = hausFokusPixel(w, h2), v = punkt4.clone().project(cam);
+    const pin = { x: (v.x + 1) * w / 2, y: (1 - v.y) * h2 / 2 };
+    return {
+      id: kameraZiel.id,
+      stadt: stadtName,
+      ziel,
+      pin,
+      abweichungPx: Math.hypot(pin.x - ziel.x, pin.y - ziel.y),
+      mitte: { x: K2.x, z: K2.z },
+      halb: K2.halb
+    };
+  }
   function kameraSetzen() {
     if (!scene) return;
-    const [w, h2] = groesse();
-    klemmen(K2, w / h2);
+    const [w, h2] = groesse(), aspekt = w / h2;
+    klemmen(K2, aspekt);
     ren.setSize(w, h2, false);
     cam = isoKamera(w, h2, K2.halb, new three_module_exports.Vector3(K2.x, 0, K2.z));
     cam.updateMatrixWorld();
+    if (kameraZiel && kameraZiel.stadt === stadtName && kameraZiel.id === offenesHaus) {
+      const punkt4 = hausKameraPunkt(kameraZiel.id) ?? kameraZiel.punkt;
+      kameraZiel.punkt = punkt4.clone();
+      const v = punkt4.clone().project(cam), ziel = hausFokusPixel(w, h2), r4 = canvas.getBoundingClientRect();
+      const ist = aufBoden(r4.left + (v.x + 1) * w / 2, r4.top + (1 - v.y) * h2 / 2);
+      const soll = aufBoden(r4.left + ziel.x, r4.top + ziel.y);
+      if (ist && soll) {
+        K2.x += ist.x - soll.x;
+        K2.z += ist.z - soll.z;
+        klemmen(K2, aspekt);
+        cam = isoKamera(w, h2, K2.halb, new three_module_exports.Vector3(K2.x, 0, K2.z));
+        cam.updateMatrixWorld();
+      }
+    }
     const sonne = scene.userData.sonne, r3 = K2.halb * 2.4;
     sonne.position.set(K2.x - 40, 120, K2.z + 90);
     sonne.target.position.set(K2.x, 0, K2.z);
@@ -138800,6 +139350,7 @@
     return u?.hausId ?? (u?.wbId ? "wb:" + u.wbId : u?.hqId ? "hq:" + u.hqId : null);
   }
   function fokusHaeuser() {
+    kameraZiel = null;
     const b2 = new three_module_exports.Box3();
     for (const x of sb.haeuser.values()) if (x.gruppe) b2.union(new three_module_exports.Box3().setFromObject(x.gruppe));
     if (b2.isEmpty()) return;
@@ -138839,14 +139390,23 @@
     }
     return null;
   }
-  var steuerung = karteSteuerung({ canvas, K: K2, setzen: () => kameraSetzen(), aufBoden, tippen: (e) => {
-    const id = hausUnter(e.clientX, e.clientY);
-    if (id === "bahn:hauptbahnhof") reise?.oeffne();
-    else if (id?.startsWith("angebot:")) oeffneModul(po, "handeln", id.slice(8));
-    else if (id?.startsWith("hq:")) oeffneHq(id.slice(3));
-    else if (id?.startsWith("wb:")) oeffneWettbewerber(id.slice(3));
-    else if (id) oeffneHaus(id);
-  } });
+  var steuerung = karteSteuerung({
+    canvas,
+    K: K2,
+    setzen: () => kameraSetzen(),
+    aufBoden,
+    interaktion: () => {
+      kameraZiel = null;
+    },
+    tippen: (e) => {
+      const id = hausUnter(e.clientX, e.clientY);
+      if (id === "bahn:hauptbahnhof") reise?.oeffne();
+      else if (id?.startsWith("angebot:")) oeffneModul(po, "handeln", id.slice(8));
+      else if (id?.startsWith("hq:")) oeffneHq(id.slice(3));
+      else if (id?.startsWith("wb:")) oeffneWettbewerber(id.slice(3));
+      else if (id) oeffneHaus(id);
+    }
+  });
   window.addEventListener("resize", kameraSetzen);
   function raeumeSzene() {
     leben.zu();
@@ -138997,6 +139557,7 @@
   }
   function bahnhofFokussieren() {
     if (!bahnhofOrt) return;
+    kameraZiel = null;
     K2.x = bahnhofOrt.x;
     K2.z = bahnhofOrt.z;
     K2.halb = 63;
@@ -139008,8 +139569,17 @@
     const region = stadtRegion(name2) ?? s.haeuser.find((h2) => h2.stadt === name2)?.region;
     $2("stadtcluster").textContent = region ? "Region " + region : "";
   }
+  function getrennteSchneedachFlaechen() {
+    return [
+      ...[...sb.haeuser.entries()].map(([id, x]) => ["haus:" + id, x.dachFlaechen]),
+      ...[...sb.hqs.entries()].map(([id, x]) => ["hq:" + id, x.dachFlaechen]),
+      ...[...sb.wbSlots.values()].map((x) => ["wb:" + (x.p.standort?.id ?? x.p.id), x.dachFlaechen])
+    ];
+  }
   function baueStadtAusSpiel(name2) {
     const t0 = performance.now();
+    const kameraVorher = scene && stadtName === name2 ? { x: K2.x, z: K2.z, halb: K2.halb } : null;
+    if (stadtName !== name2) kameraZiel = null;
     raeumeSzene();
     stadtName = name2;
     const hqJson = hqGrafik();
@@ -139020,7 +139590,15 @@
     scene = neueSzene("#4fb6c2");
     scene.userData.sonne.shadow.mapSize.set(2048, 2048);
     wurzel = new three_module_exports.Group();
-    sb = spielBauer(s, { getrennt: true, wurzel, stadt: name2, merk: merk(), hausLod: "nah", hq: hqGrafik });
+    sb = spielBauer(s, {
+      getrennt: true,
+      wurzel,
+      stadt: name2,
+      merk: merk(),
+      hausLod: "nah",
+      hq: hqGrafik,
+      dachFlaechenAktualisieren: (id, dach3) => jahreszeiten?.registriereDachflaechen(id, dach3)
+    });
     const T = new KompaktSammler();
     const offen = [];
     const zahl5 = /* @__PURE__ */ new Map();
@@ -139043,7 +139621,8 @@
     } finally {
       setzeLod("nah");
     }
-    jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s);
+    jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
+    jahreszeiten.registriereDachflaechenMehrfach(getrennteSchneedachFlaechen());
     scene.add(wurzel);
     KA.teileGrund = T.anzahl;
     kachelnAnlegen(offen);
@@ -139058,9 +139637,12 @@
     bahnhofPinErstellen();
     K2.G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
     const nm = nahMitte(plan, "einkauf", 62);
-    K2.x = nm.x;
-    K2.z = nm.z;
-    K2.halb = param.has("zoom") ? Number(param.get("zoom")) : 60;
+    if (kameraVorher) Object.assign(K2, kameraVorher);
+    else {
+      K2.x = nm.x;
+      K2.z = nm.z;
+      K2.halb = param.has("zoom") ? Number(param.get("zoom")) : 60;
+    }
     K2._G = null;
     kameraSetzen();
     leben.stadt(plan);
@@ -139072,6 +139654,7 @@
   }
   async function baueStadtAusSpielReise(name2) {
     const t0 = performance.now();
+    kameraZiel = null;
     KA.pause = true;
     raeumeSzene();
     stadtName = name2;
@@ -139084,7 +139667,15 @@
     scene = neueSzene("#4fb6c2");
     scene.userData.sonne.shadow.mapSize.set(2048, 2048);
     wurzel = new three_module_exports.Group();
-    sb = spielBauer(s, { getrennt: true, wurzel, stadt: name2, merk: merk(), hausLod: "nah", hq: hqGrafik });
+    sb = spielBauer(s, {
+      getrennt: true,
+      wurzel,
+      stadt: name2,
+      merk: merk(),
+      hausLod: "nah",
+      hq: hqGrafik,
+      dachFlaechenAktualisieren: (id, dach3) => jahreszeiten?.registriereDachflaechen(id, dach3)
+    });
     const T = new KompaktSammler();
     const offen = [];
     const zahl5 = /* @__PURE__ */ new Map();
@@ -139111,6 +139702,8 @@
     KA.teileGrund = T.anzahl;
     kachelnAnlegen(offen, true);
     await kachelnKloetzeBauen();
+    jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
+    jahreszeiten.registriereDachflaechenMehrfach([...getrennteSchneedachFlaechen(), ...KA.liste.map((k2) => [k2.key, k2.dachFlaechen])]);
     const pins = { warenhaus: "hartwig", sport: "hartwigSport", hq: "hartwig" };
     setzeMarker(scene, plan, e, plan.standorte.filter((q2) => !q2.angebot && pins[q2.rolle]).map((q2) => ({ parzelle: q2.parzelle, art: pins[q2.rolle], groesse: 9 })));
     for (const q2 of plan.standorte.filter((x) => x.angebot)) {
@@ -139159,7 +139752,10 @@
       k2.box.expandByPoint(new three_module_exports.Vector3(p2.x, 0, p2.z)).expandByPoint(new three_module_exports.Vector3(p2.x + p2.w, klotzHoehe(p2) + 4, p2.z + p2.d));
     }
     KA.liste = [...m.values()];
-    if (!gestuft) for (const k2 of KA.liste) klotzBauen(k2);
+    if (!gestuft) {
+      for (const k2 of KA.liste) klotzBauen(k2, true);
+      jahreszeiten?.registriereDachflaechenMehrfach(KA.liste.map((k2) => [k2.key, k2.dachFlaechen]));
+    }
   }
   async function kachelnKloetzeBauen() {
     let t = performance.now();
@@ -139177,32 +139773,40 @@
     k2.gruppe.traverse((o2) => o2.geometry?.dispose());
     k2.gruppe = null;
   }
-  function klotzBauen(k2) {
+  function klotzBauen(k2, gesammelt = false) {
     entsorge(k2);
-    const S = new KompaktSammler(), g = new three_module_exports.Group();
+    const S = new KompaktSammler(), g = new three_module_exports.Group(), dachFlaechen = [];
     for (const p2 of k2.parz) {
-      const r3 = rng2((p2.seed ?? 1) * 13 + 7 >>> 0), H = klotzHoehe(p2);
-      const f4 = waehle2(r3, [...FARBEN3.fassadeHell, ...FARBEN3.fassadeHell, ...FARBEN3.fassadeWarm, ...FARBEN3.fassadeKuehl, ...FARBEN3.backstein.slice(0, 2), ...FARBEN3.putzBunt]);
-      S.quader(p2.x, 0, p2.z, p2.x + p2.w, H, p2.z + p2.d, f4);
-      S.quader(p2.x - 0.1, 4, p2.z - 0.1, p2.x + p2.w + 0.1, 4.4, p2.z + p2.d + 0.1, dunkler(f4, 0.08));
-      const steil = !p2.hofbau && p2.typ !== "hofhaus" && (p2.geschosse ?? 4) <= 5 && r3() < 0.75;
-      if (steil) {
-        const ax = p2.w >= p2.d ? "x" : "z", L2 = Math.max(p2.w, p2.d), T2 = Math.min(p2.w, p2.d);
-        const dg = dachProfil(L2, T2 + 0.4, Math.min(5, T2 * 0.4), 0.4, ax);
-        dg.translate(p2.x + p2.w / 2, H, p2.z + p2.d / 2);
-        S.add(dg, waehle2(r3, [...FARBEN3.dach, ...FARBEN3.ziegel]));
-      } else S.quader(p2.x + 0.3, H, p2.z + 0.3, p2.x + p2.w - 0.3, H + 0.4, p2.z + p2.d - 0.3, waehle2(r3, FARBEN3.dach));
+      const { dachFlaechen: dach3 } = dachFlaechenBeimBau(S, p2, () => {
+        const r3 = rng2((p2.seed ?? 1) * 13 + 7 >>> 0), H = klotzHoehe(p2);
+        const f4 = waehle2(r3, [...FARBEN3.fassadeHell, ...FARBEN3.fassadeHell, ...FARBEN3.fassadeWarm, ...FARBEN3.fassadeKuehl, ...FARBEN3.backstein.slice(0, 2), ...FARBEN3.putzBunt]);
+        S.quader(p2.x, 0, p2.z, p2.x + p2.w, H, p2.z + p2.d, f4);
+        S.quader(p2.x - 0.1, 4, p2.z - 0.1, p2.x + p2.w + 0.1, 4.4, p2.z + p2.d + 0.1, dunkler(f4, 0.08));
+        const steil = !p2.hofbau && p2.typ !== "hofhaus" && (p2.geschosse ?? 4) <= 5 && r3() < 0.75;
+        if (steil) {
+          const ax = p2.w >= p2.d ? "x" : "z", L2 = Math.max(p2.w, p2.d), T2 = Math.min(p2.w, p2.d);
+          const dg = dachProfil(L2, T2 + 0.4, Math.min(5, T2 * 0.4), 0.4, ax);
+          dg.translate(p2.x + p2.w / 2, H, p2.z + p2.d / 2);
+          S.add(dg, waehle2(r3, [...FARBEN3.dach, ...FARBEN3.ziegel]));
+        } else S.quader(p2.x + 0.3, H, p2.z + 0.3, p2.x + p2.w - 0.3, H + 0.4, p2.z + p2.d - 0.3, waehle2(r3, FARBEN3.dach));
+        return { hoehe: H + 5 };
+      });
+      dachFlaechen.push(...dach3);
     }
     S.bauen(g);
     scene.add(g);
-    Object.assign(k2, { gruppe: g, stufe: "klotz", teile: S.anzahl });
+    Object.assign(k2, { gruppe: g, stufe: "klotz", teile: S.anzahl, dachFlaechen });
+    if (!gesammelt) jahreszeiten?.registriereDachflaechen(k2.key, dachFlaechen);
   }
   function vollBauen(k2) {
     const t0 = performance.now();
-    const S = new KompaktSammler(), g = new three_module_exports.Group(), b2 = echterBauer();
+    const S = new KompaktSammler(), g = new three_module_exports.Group(), b2 = echterBauer(), dachFlaechen = [];
     setzeLod("fern");
     try {
-      for (const p2 of k2.parz) bauerFuer(b2, p2.typ)(S, g, p2);
+      for (const p2 of k2.parz) {
+        const { dachFlaechen: dach3 } = dachFlaechenBeimBau(S, p2, () => bauerFuer(b2, p2.typ)(S, g, p2));
+        dachFlaechen.push(...dach3);
+      }
       S.bauen(g);
       entferneKleineSchilder(g);
     } finally {
@@ -139210,7 +139814,8 @@
     }
     entsorge(k2);
     scene.add(g);
-    Object.assign(k2, { gruppe: g, stufe: "voll", teile: S.anzahl });
+    Object.assign(k2, { gruppe: g, stufe: "voll", teile: S.anzahl, dachFlaechen });
+    jahreszeiten?.registriereDachflaechen(k2.key, dachFlaechen);
     return performance.now() - t0;
   }
   function sichtbar3(k2, rand = 1.15) {
@@ -139291,10 +139896,7 @@
   var hqIdsStadt = "";
   function grafikNachziehen() {
     if (hqIdsIn(hqGrafik(), stadtName) !== hqIdsStadt) {
-      const k2 = { x: K2.x, z: K2.z, halb: K2.halb };
       baueStadtAusSpiel(stadtName);
-      Object.assign(K2, k2);
-      kameraSetzen();
       return ["stadt"];
     }
     const geaendert = sb.aktualisiere();
@@ -139391,6 +139993,7 @@
     for (const m of module2()) m.zu();
     menueZu();
     $2("panel").classList.toggle("gross", klasse === "gross");
+    $2("panel").classList.toggle("hausdetail", klasse === "hausdetail");
     $2("ptitel").textContent = titel;
     $2("punter").textContent = unter;
     $2("pinhalt").innerHTML = html;
@@ -139403,6 +140006,7 @@
     if (neu) $2("ptitel").focus({ preventScroll: true });
   }
   function schliessePanel() {
+    kameraZiel = null;
     for (const m of module2()) m.zu();
     $2("panel").classList.remove("offen");
     $2("panel").inert = true;
@@ -139420,24 +140024,27 @@
     automatischSpeichern();
   } });
   function hausZeigen(id) {
-    const x = sb?.haeuser.get(id);
-    if (!x?.gruppe) return;
-    x.gruppe.updateWorldMatrix(true, true);
-    x.gruppe.updateWorldMatrix(true, true);
-    const b2 = new three_module_exports.Box3().setFromObject(x.gruppe), m = b2.getCenter(new three_module_exports.Vector3());
-    const r3 = canvas.getBoundingClientRect(), oben = 70, unten = r3.height * 0.38;
-    const ziel = (oben + unten) / 2;
-    const v = m.clone().project(cam), py2 = (1 - v.y) / 2 * r3.height, px2 = (v.x + 1) / 2 * r3.width;
-    const a2 = aufBoden(r3.left + px2, r3.top + py2), c = aufBoden(r3.left + r3.width / 2, r3.top + ziel);
-    if (!a2 || !c) return;
-    const hoehe = (unten - oben) * 0.9;
-    const ecken = [];
-    for (const xx of [b2.min.x, b2.max.x]) for (const yy of [b2.min.y, b2.max.y]) for (const zz of [b2.min.z, b2.max.z]) ecken.push(new three_module_exports.Vector3(xx, yy, zz).project(cam));
-    const hy = (Math.max(...ecken.map((q2) => q2.y)) - Math.min(...ecken.map((q2) => q2.y))) / 2 * r3.height;
-    if (hy > hoehe) K2.halb *= hy / hoehe;
-    K2.x += a2.x - c.x;
-    K2.z += a2.z - c.z;
+    const punkt4 = hausKameraPunkt(id);
+    if (!punkt4) return;
+    steuerung.stopp();
+    K2.halb = Math.min(K2.halb, 65);
+    kameraZiel = { id, stadt: stadtName, punkt: punkt4.clone() };
     kameraSetzen();
+    const x = sb?.haeuser.get(id);
+    const b2 = x?.gruppe ? new three_module_exports.Box3().setFromObject(x.gruppe) : sb?.statischeHaeuser.get(id)?.bounds;
+    if (b2 && !b2.isEmpty()) {
+      const [w, h2] = groesse(), frei6 = hausFokusPixel(w, h2).y * 2 - 70 + 12;
+      const ecken = [];
+      for (const xx of [b2.min.x, b2.max.x]) for (const yy of [b2.min.y, b2.max.y])
+        for (const zz of [b2.min.z, b2.max.z]) ecken.push(new three_module_exports.Vector3(xx, yy, zz).project(cam));
+      const breite = (Math.max(...ecken.map((v) => v.x)) - Math.min(...ecken.map((v) => v.x))) * w / 2;
+      const hoehe = (Math.max(...ecken.map((v) => v.y)) - Math.min(...ecken.map((v) => v.y))) * h2 / 2;
+      const faktor2 = Math.max(breite / (w * 0.85), hoehe / (Math.max(70, frei6 - 70) * 0.85));
+      if (faktor2 > 1.01) {
+        K2.halb *= faktor2;
+        kameraSetzen();
+      }
+    }
   }
   $2("pzu").addEventListener("click", schliessePanel);
   document.addEventListener("keydown", (e) => {
@@ -139487,7 +140094,7 @@
       offenesHq = null;
       offenerWettbewerber = null;
       const h3 = statisch.haus;
-      panel(h3.name, h3.stadt + " \xB7 " + (h3.format === "outlet" ? "FUNDUS" : "Volkskauf") + " \xB7 Baujahr " + h3.baujahr, hausStatischHtml(h3, hausReiter));
+      panel(h3.name, h3.stadt + " \xB7 " + (h3.format === "outlet" ? "FUNDUS" : "Volkskauf") + " \xB7 Baujahr " + h3.baujahr, hausStatischHtml(h3, hausReiter), "hausdetail");
       if (neu2) hausZeigen(id);
       return;
     }
@@ -139571,7 +140178,7 @@
     html = hausSteckbrief(d3, html, hausReiter, s.woche);
     if (hausReiter === "personal" && pe) html += pe.hausBlock(id);
     if (hausReiter === "ware" && d3.waren) html += `<div class="karte"><div class="khead">Ware \xB7 ${esc2(d3.waren.hauscluster)}</div><div class="raster">${zahl5("Warenverf\xFCgbarkeit", (d3.waren.verfuegbarkeit * 100).toFixed(1) + " %")}${zahl5("Altwareanteil", (d3.waren.altwareanteil * 100).toFixed(1) + " %")}${zahl5("Inventurdifferenz", d3.waren.inventur ? geld(d3.waren.inventur.differenz) : "Noch offen")}${zahl5("Fl\xE4chenproduktivit\xE4t", geld(d3.waren.flaechenproduktivitaet) + "/qm")}</div></div>`;
-    panel(h2.name, `${h2.stadt} \xB7 ${h2.klasse === "premium" ? "Premiumhaus" : h2.format === "sport" ? "Sporthaus" : "Warenhaus"} \xB7 Baujahr ${h2.baujahr}`, html);
+    panel(h2.name, `${h2.stadt} \xB7 ${h2.klasse === "premium" ? "Premiumhaus" : h2.format === "sport" ? "Sporthaus" : "Warenhaus"} \xB7 Baujahr ${h2.baujahr}`, html, "hausdetail");
     if (neu) hausZeigen(id);
   }
   window.hausReiterWahl = (reiter) => {
@@ -140259,6 +140866,8 @@
     EQ,
     pruefeEinkauf: () => ek.pruefe(),
     oeffneWettbewerber,
+    kameraHaus: hausKameraMessung,
+    // lesender Pixelabgleich für den Mobil-Smoketest
     leben,
     reise,
     wochenbericht,
@@ -140383,6 +140992,8 @@
       }
     },
     kamera: (o2) => {
+      kameraZiel = null;
+      steuerung.stopp();
       Object.assign(K2, o2);
       kameraSetzen();
     },
