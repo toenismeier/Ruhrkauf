@@ -144,3 +144,13 @@ Mit N02 Spielende gilt „saniert“ nur bei positivem EBITDA der letzten 52 Woc
 - Auf jeder Stufe eine Insolvenz im ersten Jahr (Vorgabe: keine).
 - Bot C (mittel, Seeds 1 bis 3) wird nach 23 Wochen zerschlagen. Auf `main` überlebt er 5 Jahre; der Maßstab-Branch macht das Spiel damit unspielbar.
 Auftrag: erst die Schwierigkeitsstufen wirksam machen, dann Ursachen der Verluste im großen Maßstab (Kosten je Haus der neuen Formate, Zentrale-Skalierung, Wareneinsatz nach Weihnachten) beheben, bis das Skript ohne Verstöße durchläuft. Das Skript ist die Abnahme; sein vollständiges Protokoll gehört in `massstab-stand.md`. GPT kann es nicht ausführen: jede Änderung mit erwarteter Wirkung begründen, Claude misst.
+
+## 14. Abnahme-Maßstab umgestellt: Turnaround statt Insolvenz (Ummo, 21.10.2026)
+Ummo: Der Insolvenz-Fokus wird hinten angestellt; zuerst Turnaround und Management, die Insolvenz steht ganz am Ende. Bisher war Bot C (Insolvenzantrag in KW 3, Schutzschirm, 50 Schließungen) die Referenz, ob das Spiel schaffbar ist. Das widerspricht der Ausrichtung.
+Befund Claude auf `main` (21.10. früh): Bot D (`botRegulaer`, Turnaround ohne Insolvenzantrag) rutscht auf Seeds 1 bis 3 in KW 31 bis 33 in die Insolvenz und wird in KW 50 bis 52 zerschlagen (EBITDA letzte 52 Wochen −75 bis −123 Mio. €). Das Spiel ist heute nur über die Insolvenz schaffbar.
+Neue Abnahme für #7 (ersetzt die Bot-C-Kriterien aus Abschnitt 11 bis 13):
+- **Referenz ist ein Turnaround ohne Insolvenz:** Bot D überlebt auf Stufe mittel, Seeds 1 bis 3, 260 Wochen ohne Insolvenzantrag und endet mit positivem EBITDA der letzten 52 Wochen. Auf leicht deutlich bequemer, auf schwer knapp (ein Seed darf scheitern).
+- Ohne Eingriffe (kein Bot) keine Insolvenz im ersten Jahr auf leicht und mittel.
+- Bot C ist nur noch Nebenprüfung: Die Insolvenz als letzte Option muss funktionieren (Bot C darf nicht vor Woche 104 zerschlagen werden), ist aber nicht der Maßstab.
+- Q1-Quoten aus Abschnitt 11 bleiben.
+Hebel liegen in der operativen Wirtschaft (Personal, Ware, Zentrale, Miete, Sortiment), nicht in Insolvenzmechanik und nicht in pauschalen Gutschriften. `m7-wochenverlauf.ts` um Bot D erweitern; das Skript bleibt die Abnahme, Claude misst.

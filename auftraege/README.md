@@ -59,6 +59,7 @@ Vor dem PR immer auf den aktuellen `main` rebasen. Wer als Zweiter mergt, löst 
 Merge in `main` nur mit grüner CI bzw., solange die CI blockiert ist, mit grünem lokalem Lauf. Nach jedem Merge: `README.md` (Abschnitt Stand) und betroffene Verträge fortschreiben.
 
 ## Regeln für alle Aufträge
+- **Spielbarkeits-Referenz ist Bot D** (`botRegulaer`, Turnaround ohne Insolvenz), nicht mehr Bot C. Wo ein Auftrag „Bot C überlebt 5 Jahre“ verlangt, gilt ab 21.10.2026: Bot D wird nicht schlechter als auf `main`, Bot C nur als Nebenprüfung (siehe `nachbesserung-massstab.md` Abschnitt 14). Hintergrund: Turnaround und Management zuerst, Insolvenz ganz am Ende.
 - **Workflows:** Keine neuen GitHub-Workflows mit `push`-Trigger anlegen. `quality.yml` läuft nur beim Öffnen eines PR gegen `main` und von Hand.
 - **Actions-Minuten sparen:** Kataloge nicht bei jedem Push in der CI rendern. Render-Workflows nur über `workflow_dispatch` oder einmal vor dem PR. Kein `push`-Trigger für Render-Jobs, keine Bild-Commits durch den Bot bei jedem Lauf. Prüfungen und Renderings, wo möglich, lokal ausführen und das Protokoll in die Stand-Datei schreiben.
 - Deutsch mit echten Umlauten in Code-Texten, Oberfläche und Doku. Keine echten Marken, Firmen oder Personen.
