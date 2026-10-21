@@ -64,7 +64,7 @@ const server = http.createServer((req, res) => {
     });
     assert.equal(mapStatus.pins, mapStatus.staedte, 'Karte besitzt einen Punkt je Engine-Stadt');
     assert.deepEqual(mapStatus.fehler, [], 'Karte nutzt gültige Engine-Attribute');
-    await page.locator('.deutschland-svg g[data-stadt]').first().evaluate((element) => element.click());
+    await page.locator('.deutschland-svg g[data-stadt]').first().evaluate((element) => element.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     assert.ok(await page.evaluate(() => document.getElementById('ptitel').textContent.length > 0), 'Stadt über Kartenpunkt geöffnet');
     await page.evaluate(() => window.spiel.oeffnePortfolio('liste'));
     const rowsBefore = await page.locator('#pp-scroll .pp-haus').count();
