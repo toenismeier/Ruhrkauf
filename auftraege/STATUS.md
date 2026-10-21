@@ -27,7 +27,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q09 Schnee (schwebende Platten) | – | **gemergt 21.10.** (#54, 390b69d) | Schnee liegt auf echten Dachflächen, je Dachebene eingerückt (Claude-Fix: kein Kreuzmuster auf Satteldächern); Winter-Dreiecke unter main, Draw Calls gleich; Fingerabdrücke 112/112 unverändert |
 | Q10 Kamera bleibt über Haus | – | **gemergt 21.10.** (#53, 7af4959) | Hausdetail lässt oben Kartenstreifen frei (62 dvh), Kamera bleibt am Haus bei Kachelnachladen, Woche, Scroll, Resize; Mobil-Smoke Berlin 3 Häuser ≤ 40 px; Fingerabdrücke 112/112 unverändert |
 | Q11 Eigenmarken Sortiment (Bilder, Kategorien, Zielgruppen) | `feat/q11-eigenmarken-sortiment` | **startet 21.10.** | `auftraege/wurf2/` |
-| Q12 Hausbesuch Laufwege | `feat/q12-hausbesuch-laufwege` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q12 Hausbesuch Laufwege | – | **gemergt 21.10.** (#56) | Wegsuche auf Ladenbau-Belegung, 9 Etagen (Warenhaus, Sport, FUNDUS) je 60 s: 0 Kollisionen, 1,17–1,21 m/s, bildratenunabhängig; Claude-Fixes: zweiter Hausbesuch/Hauswechsel scheiterte (Kontext zerstört), Sporthaus-Etagen mit Etagenbau warfen Fehler (`etageNr`); Fingerabdrücke 112/112 unverändert |
 | Q13 Sandkasten unbegrenzt | `feat/q13-sandkasten` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q14 Oberfläche gesamt (Gestaltungssystem) | `feat/q14-oberflaeche-design` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q15 Zentrale Abteilungsseiten | `feat/q15-zentrale-abteilungen` | **startet 21.10.** | `auftraege/wurf2/` |
