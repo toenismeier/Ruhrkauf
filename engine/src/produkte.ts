@@ -857,7 +857,7 @@ export function produkte(s: GameState, marke?: string): ProdukteListe {
  * Eigenmarke = tatsächlich gebuchte Produktumsätze der Marke; Fremdmarke = WG-Umsatz
  * abzüglich aller Eigenmarken. Leere Wochen sind 0, keine hochgerechneten Daten. */
 export function produktAbsatzVerlauf(s: GameState, marke: string, kategorie?: ProduktKategorie) {
-  const liste = s.produkte?.liste.filter((p) => p.marke === marke && p.status !== 'ausgelistet' && (!kategorie || p.kategorie === kategorie)) ?? [];
+  const liste = s.produkte?.liste.filter((p) => p.marke === marke && (!kategorie || p.kategorie === kategorie)) ?? [];
   const wgs = [...new Set(liste.map((p) => p.wg))];
   const eigen: number[] = [], fremd: number[] = [], wochen: number[] = [];
   for (let i = 4; i >= 0; i--) {
