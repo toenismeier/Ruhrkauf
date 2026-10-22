@@ -1060,8 +1060,8 @@
     "teller": {
       "gruppe": "home",
       "standard": {},
-      "material": "keramik",
-      "farbe": "creme",
+      "material": "steingut",
+      "farbe": "offwhite",
       "model": null
     },
     "glas": {
@@ -1089,7 +1089,7 @@
       "gruppe": "home",
       "standard": {},
       "material": "leinen",
-      "farbe": "altrosa",
+      "farbe": "salbei",
       "model": null
     },
     "bilderrahmen": {
@@ -1117,12 +1117,14 @@
       "gruppe": "beauty",
       "standard": {},
       "material": "kosmetik",
-      "farbe": "rosa",
+      "farbe": "altrosa",
       "model": null
     },
     "parfum": {
       "gruppe": "beauty",
-      "standard": {},
+      "standard": {
+        "form": "eckig"
+      },
       "material": "glas",
       "farbe": "flieder",
       "model": null
@@ -1130,7 +1132,7 @@
     "plueschtier": {
       "gruppe": "spielzeug",
       "standard": {},
-      "material": "polyester",
+      "material": "pluesch",
       "farbe": "camel",
       "model": null
     },
@@ -2003,6 +2005,335 @@
       "standard": {},
       "material": "satin",
       "farbe": "beige",
+      "model": null
+    },
+    "bettdecke": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": null
+    },
+    "kopfkissen": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "offwhite",
+      "model": null
+    },
+    "spannbettlaken": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": null
+    },
+    "tagesdecke": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "salbei",
+      "model": null
+    },
+    "badematte": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "frottee",
+      "farbe": "sand",
+      "model": null
+    },
+    "waffelhandtuch": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "waffel",
+      "farbe": "offwhite",
+      "model": null
+    },
+    "tischdecke": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "leinen",
+      "farbe": "ecru",
+      "model": null
+    },
+    "tischlaeufer": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "leinen",
+      "farbe": "terrakotta",
+      "model": null
+    },
+    "vorhang": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "leinen",
+      "farbe": "beige",
+      "model": null
+    },
+    "geschirrset": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "steingut",
+      "farbe": "sand",
+      "model": null
+    },
+    "schalen": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "steingut",
+      "farbe": "salbei",
+      "model": null
+    },
+    "besteck": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "edelstahl",
+      "farbe": "silber",
+      "model": null
+    },
+    "wasserglas": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "glas",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "weinglas": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "glas",
+      "farbe": "bordeaux",
+      "model": null
+    },
+    "becherset": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "steingut",
+      "farbe": "petrol",
+      "model": null
+    },
+    "teekanne": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "steingut",
+      "farbe": "ecru",
+      "model": null
+    },
+    "topf": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "edelstahl",
+      "farbe": "silber",
+      "model": null
+    },
+    "pfanne": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "aluminium",
+      "farbe": "anthrazit",
+      "model": null
+    },
+    "schneidebrett": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "holz",
+      "farbe": "camel",
+      "model": null
+    },
+    "vorratsglas": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "glas",
+      "farbe": "hellgrau",
+      "model": null
+    },
+    "servierplatte": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "steingut",
+      "farbe": "creme",
+      "model": null
+    },
+    "tischleuchte": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "keramik",
+      "farbe": "salbei",
+      "model": null
+    },
+    "spiegel": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "messing",
+      "farbe": "gold",
+      "model": null
+    },
+    "laterne": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "metall",
+      "farbe": "anthrazit",
+      "model": null
+    },
+    "kerzenhalter": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "messing",
+      "farbe": "gold",
+      "model": null
+    },
+    "pflanze": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "keramik",
+      "farbe": "terrakotta",
+      "model": null
+    },
+    "duftstaebchen": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "glas",
+      "farbe": "bordeaux",
+      "model": null
+    },
+    "aufbewahrungsbox": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "leinen",
+      "farbe": "beige",
+      "model": null
+    },
+    "waeschekorb": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "rattan",
+      "farbe": "camel",
+      "model": null
+    },
+    "wanduhr": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "holz",
+      "farbe": "camel",
+      "model": null
+    },
+    "bilderrahmenset": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "holz",
+      "farbe": "schwarz",
+      "model": null
+    },
+    "dekoschale": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "steingut",
+      "farbe": "sand",
+      "model": null
+    },
+    "tiegel": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "glas",
+      "farbe": "braun",
+      "model": null
+    },
+    "mascara": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "kosmetik",
+      "farbe": "schwarz",
+      "model": null
+    },
+    "nagellack": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "kosmetik",
+      "farbe": "bordeaux",
+      "model": null
+    },
+    "lidschatten": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "kosmetik",
+      "farbe": "altrosa",
+      "model": null
+    },
+    "foundation": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "glas",
+      "farbe": "beige",
+      "model": null
+    },
+    "serum": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "glas",
+      "farbe": "braun",
+      "model": null
+    },
+    "tube": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "kosmetik",
+      "farbe": "mint",
+      "model": null
+    },
+    "pumpspender": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "keramik",
+      "farbe": "anthrazit",
+      "model": null
+    },
+    "duschgel": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "kosmetik",
+      "farbe": "petrol",
+      "model": null
+    },
+    "rasierer": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "kosmetik",
+      "farbe": "marine",
+      "model": null
+    },
+    "haarbuerste": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "holz",
+      "farbe": "camel",
+      "model": null
+    },
+    "holzspielzeug": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "holz",
+      "farbe": "rot",
+      "model": null
+    },
+    "puzzle": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "pappe",
+      "farbe": "salbei",
+      "model": null
+    },
+    "bauklotze": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "holz",
+      "farbe": "koralle",
+      "model": null
+    },
+    "puppe": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "hellblau",
       "model": null
     }
   }
