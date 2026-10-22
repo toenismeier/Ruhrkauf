@@ -1,4 +1,4 @@
-// N06: Essen und München in vier Jahreszeiten, Advent und einer Schneewoche.
+// N06/Q09: Jahreszeitenvergleich und dachgebundener Schnee in vier Städten.
 import { THREE, KompaktSammler, setzeLod, entferneKleineSchilder } from '../kit/basis.js';
 import { stadtplan, baueStadt, setzeMarker } from '../kit/stadt.js';
 import { echterBauer } from '../kit/bauer.js';
@@ -15,7 +15,10 @@ const BEISPIELE = [
   { woche: 47, name: 'Weihnachten' },
   { woche: 3, name: 'Schnee', schnee: true },
 ];
-const eintraege = ['Essen', 'München'].flatMap((name) => BEISPIELE.map((bild) => ({
+// Essen und München behalten alle N06-Ansichten. Berlin und Hamburg ergänzen
+// den direkten Sommer-/Schneevergleich für unterschiedliche Dachtypen und Formate.
+const eintraege = ['Essen', 'München', 'Berlin', 'Hamburg'].flatMap((name) =>
+  (['Essen', 'München'].includes(name) ? BEISPIELE : [BEISPIELE[2], BEISPIELE[5]]).map((bild) => ({
   titel: name + ' · ' + bild.name,
   unter: '',
   bau(S, scene) {
@@ -41,7 +44,7 @@ const eintraege = ['Essen', 'München'].flatMap((name) => BEISPIELE.map((bild) =
       while (!jahreszeit({ woche: bild.woche, seed, startJahr: 2026 }).schnee) seed++;
     }
     const s = { woche: bild.woche, seed, startJahr: 2026, marketing: { aktionen: [] } };
-    const saison = jahreszeitenStadt(scene, plan, e.hoehen, s);
+    const saison = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
     const j = saison.aktualisiere(s);
     if (bild.schnee && !j.schnee) throw new Error('Schneewoche nicht gefunden');
     const box = stadtRahmen(plan, { hoehen: e.hoehen });
@@ -52,6 +55,6 @@ const eintraege = ['Essen', 'München'].flatMap((name) => BEISPIELE.map((bild) =
 })));
 
 window.addEventListener('load', () => setTimeout(() => zeigeKatalog(eintraege, {
-  titel: 'Jahreszeiten in Essen und München',
+  titel: 'Jahreszeiten: Essen, München, Berlin und Hamburg',
   spalten: 2, kachel: STADT_KACHEL, rand: 1.06,
 }), 20));

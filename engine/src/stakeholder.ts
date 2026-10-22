@@ -2,6 +2,7 @@ import type { GameState } from './types';
 import { clamp, melde } from './util';
 import { hqBetriebsratZiel, hqControllingExzellenz, hqVerwaltungMalus } from './hq';
 import { schwierigkeit } from './schwierigkeit';
+import { istSandkasten } from './sandkasten';
 
 /** Freie Liquidität: Kasse plus ungenutzte Kreditlinie. */
 export function freieLiquiditaet(s: GameState): number {
@@ -13,6 +14,7 @@ const PRIOR_EBITDA_WOCHE = -2_200_000;
 
 /** Reichweite in Wochen auf Basis der EBITDA-Jahres-Run-Rate (so schauen Bank und Kreditversicherer). */
 export function runwayWochen(s: GameState): number {
+  if (istSandkasten(s)) return 52; // Kein finanzierungsbedingter Handlungsdruck.
   const h = s.historie.slice(-52);
   const summe = h.reduce((a, b) => a + b.ebitda + b.sondereffekte, 0) + (52 - h.length) * PRIOR_EBITDA_WOCHE;
   const burn = -summe / 52;
@@ -64,7 +66,7 @@ export function aktualisiereStakeholder(s: GameState): void {
   // 55 % Inventarwert minus 20 % Lieferanten-Eigentumsvorbehalt, gedeckelt
   // auf weitere 50 % des bestehenden Rahmens. Keine Kassen-/GuV-Gutschrift:
   // Ziehungen bleiben verzinsliche Schulden; ohne echte Ware keine Sicherheit.
-  if (s.phase === 'regulaer') {
+  if (s.phase === 'regulaer' && !istSandkasten(s)) {
     const umsatzWoche = s.historie.at(-1)?.umsatz
       ?? Object.values(s.basisUmsatz).reduce((sum, u) => sum + (u ?? 0), 0);
     const kritisch = freieLiquiditaet(s) < 2.5 * umsatzWoche && st.bank >= 35;

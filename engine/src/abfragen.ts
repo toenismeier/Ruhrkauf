@@ -1,15 +1,20 @@
 import { warenHaus } from './merchandise';
 import { GRUPPEN } from './daten';
+import { abfindungJeFte } from './prozesse';
+import { hqRechtFaktor } from './hq';
 // O01 Organisation: reine Datenprojektion für die Oberfläche.
 export { organisationUebersicht } from './organisation';
 export { marktbeobachtungUebersicht } from './marktbeobachtung';
 import { runwayWochen } from './stakeholder';
+import { istSandkasten } from './sandkasten';
 import type { GameState, Haus } from './types';
 import { eur, jahr, kw } from './util';
 import { bestandWert, kvLimit, offeneWarenverbindlichkeiten } from './ware';
 import { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 import { ecommerceHaus } from './ecommerce';
 import { planungBericht, planWoche } from './planung';
+export { vertriebUebersicht } from './vertrieb';
+import { mietvertragEmpfehlung } from './vertrieb';
 
 
 /** Reine, deterministische Projektion des Spielstands für den zentralen Posteingang. */
@@ -20,7 +25,25 @@ export interface PostBezug {
   wettbewerberId?: string;
   modul?: string;
 }
+export interface PostMietvertrag {
+  entscheidungId: string;
+  hausId: string;
+  haus: string;
+  stadt: string;
+  region: string;
+  format: string;
+  vermieter: string;
+  restlaufzeit: number;
+  istMiete: number;
+  angebotMiete: number;
+  mietquoteIst?: number;
+  mietquoteNeu?: number;
+  ebitdaHaus?: number;
+  empfehlung: 'verlaengern' | 'nachverhandeln' | 'auslaufen';
+  frist: number;
+}
 export interface PostHandeln {
+  mietvertraege?: PostMietvertrag[];
   id: string;
   art: 'entscheidung' | 'angebot';
   typ: string;
@@ -77,7 +100,7 @@ function meldungKategorie(typ: PostMeldung['typ'], text: string): PostKategorie 
 export function posteingang(s: GameState): Posteingang {
   const grenze = s.woche - 12; // aktuelle plus zwölf vorangegangene Wochen
   const handeln: PostHandeln[] = [];
-  for (const e of s.entscheidungen) {
+  for (const e of s.entscheidungen.filter((x) => x.typ !== 'mietende')) {
     const restWochen = Math.max(0, e.frist - s.woche);
     const option = e.optionen.find((o) => o.id === e.standard);
     const hausId = typeof e.daten.haus === 'string' ? e.daten.haus : undefined;
@@ -89,6 +112,42 @@ export function posteingang(s: GameState): Posteingang {
       bezug: hausBezug(s, hausId ? [hausId] : [], modul),
       wert: typeof e.daten.kosten === 'number' ? { betrag: e.daten.kosten, einheit: 'einmalig' } : undefined,
       dringend: restWochen <= 1,
+    });
+  }
+  // Q07: je Anfragewoche exakt eine Sammelvorlage, statt einer Karte je Filiale.
+  const mietWochen = new Map<number, GameState['entscheidungen']>();
+  for (const e of s.entscheidungen.filter((x) => x.typ === 'mietende')) {
+    const gruppe = mietWochen.get(e.woche) ?? [];
+    gruppe.push(e);
+    mietWochen.set(e.woche, gruppe);
+  }
+  for (const [woche, gruppe] of [...mietWochen].sort((a,b) => a[0] - b[0])) {
+    const mieten: PostMietvertrag[] = gruppe.flatMap((e) => {
+      const h = s.haeuser.find((x) => x.id === e.daten.haus);
+      if (!h) return [];
+      const umsatz = h.kpi?.umsatz;
+      const markt = Number(e.daten.markt);
+      return [{
+        entscheidungId: e.id, hausId: h.id, haus: h.name, stadt: h.stadt,
+        region: h.region, format: h.format === 'schwester' ? 'Volkskauf' :
+          h.format === 'outlet' ? 'FUNDUS' : h.format === 'sport' ? 'Sport' : 'Warenhaus',
+        vermieter: h.miete.vermieterName, restlaufzeit: Math.max(0, h.miete.bisWoche - s.woche),
+        istMiete: h.miete.mieteWoche * 52, angebotMiete: markt * 52,
+        mietquoteIst: umsatz ? h.miete.mieteWoche / umsatz : undefined,
+        mietquoteNeu: umsatz ? markt / umsatz : undefined,
+        ebitdaHaus: h.kpi?.guv?.ebitda ?? h.kpi?.db,
+        empfehlung: mietvertragEmpfehlung(h, markt), frist: e.frist,
+      }];
+    });
+    if (!mieten.length) continue;
+    const frist = Math.min(...gruppe.map((e) => e.frist));
+    const restWochen = Math.max(0, frist - s.woche);
+    handeln.push({
+      id: 'mietvertraege-' + woche, art: 'entscheidung', typ: 'mietvertraege',
+      titel: 'Mietverträge: ' + mieten.length + ' Anfragen', text: 'Immobilien empfiehlt je Vertrag eine Anschlusslösung.',
+      woche, frist, restWochen, dringend: restWochen <= 1,
+      optionen: [], standard: 'Individuelle Standardentscheidung bei Fristablauf',
+      mietvertraege: mieten, bezug: hausBezug(s, mieten.map((x) => x.hausId), 'immobilien'),
     });
   }
   for (const a of s.angebote.filter((a) => a.status === 'offen')) {
@@ -145,11 +204,13 @@ export function kapitalfluss(s: GameState) {
 }
 
 export interface Cockpit {
+  formate: {format: Haus['format']; haeuser: number; umsatz: number; ebitda: number; fte: number}[];
   kw: number;
   jahr: number;
   phase: GameState['phase'];
   cash: number;
   kreditFrei: number;
+  geldUnbegrenzt: boolean;
   runwayWochen: number;
   ebitdaWoche: number;
   ebitda13: number;
@@ -165,12 +226,20 @@ export function cockpit(s: GameState): Cockpit {
   const h13 = s.historie.slice(-13);
   const lief = s.lieferanten.filter((l) => l.aktiv);
   const lv = (lief.reduce((a, l) => a + l.vertrauen, 0) + s.restLieferantenVertrauen) / (lief.length + 1);
+  const formate=(['warenhaus','sport','schwester','outlet'] as Haus['format'][]).map(format=>{
+    const hs=s.haeuser.filter(h=>h.format===format&&h.status==='offen'&&!h.nurDaten);
+    return {format,haeuser:hs.length,umsatz:eur(hs.reduce((n,h)=>n+(h.kpi?.umsatz??0),0)),
+      ebitda:eur(hs.reduce((n,h)=>n+(h.kpi?.guv?.ebitda??0),0)),
+      fte:eur(hs.reduce((n,h)=>n+h.personal.vollzeit+h.personal.teilzeit+h.personal.aushilfen,0))};
+  });
   return {
+    formate,
     kw: kw(s.woche),
     jahr: jahr(s),
     phase: s.phase,
     cash: s.cash,
     kreditFrei: s.cash + s.kreditlinie,
+    geldUnbegrenzt: istSandkasten(s),
     runwayWochen: Math.round(runwayWochen(s)),
     ebitdaWoche: letzte?.ebitda ?? 0,
     ebitda13: h13.reduce((a, b) => a + b.ebitda, 0),
@@ -185,7 +254,17 @@ export function cockpit(s: GameState): Cockpit {
 export interface PortfolioZeile {
   id: string;
   name: string;
+  stadt: string;
   format: Haus['format'];
+  /** Eigenständige Portfolio-Formate, Premium ist wirtschaftlich ein Warenhaus. */
+  formatKey: 'hartwig' | 'premium' | 'sport' | 'volkskauf' | 'fundus';
+  klasse: 'A' | 'B' | 'C' | 'Premium' | null;
+  steuerbar: boolean;
+  ampel: 'gruen' | 'gelb' | 'rot' | 'ohne';
+  ebitda: number;
+  marge: number;
+  substanz: number;
+  restlaufzeitMiete: number;
   region: Haus['region'];
   cluster: Haus['cluster'];
   lage: Haus['lage'];
@@ -211,8 +290,18 @@ export function portfolio(s: GameState): PortfolioZeile[] {
       const f = 1 + rausch * ((seed / 100) * 2 - 1);
       const umsatz = k?.umsatz ?? 0;
       const db = k ? k.db + Math.abs(umsatz) * (f - 1) * 0.5 : 0;
+      const formatKey: PortfolioZeile['formatKey'] = h.format === 'outlet' ? 'fundus' : h.format === 'schwester' ? 'volkskauf' : h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'hartwig';
+      const klasse: PortfolioZeile['klasse'] = h.hausklasse ?? (h.klasse === 'premium' ? 'Premium' : null);
+      const ampel: PortfolioZeile['ampel'] = h.nurDaten || !h.kpi || h.status !== 'offen' ? 'ohne' : db < 0 ? 'rot' : (umsatz > 0 && db / umsatz < 0.04 ? 'gelb' : 'gruen');
       return {
-        id: h.id, name: h.name, format: h.format, region: h.region, cluster: h.cluster, lage: h.lage, status: h.status, qm,
+        id: h.id, name: h.name, stadt: h.stadt, format: h.format,
+        formatKey, klasse,
+        steuerbar: !h.nurDaten && h.status === 'offen',
+        ampel,
+        ebitda: eur(db), marge: umsatz > 0 ? db / umsatz : 0,
+        substanz: h.substanz,
+        restlaufzeitMiete: Math.max(0, h.miete.bisWoche - s.woche),
+        region: h.region, cluster: h.cluster, lage: h.lage, status: h.status, qm,
         umsatz: eur(umsatz), db: eur(db),
         mietquote: umsatz > 0 ? (k?.miete ?? 0) / umsatz : 0,
         personalquote: umsatz > 0 ? (k?.personal ?? 0) / umsatz : 0,
@@ -221,13 +310,42 @@ export function portfolio(s: GameState): PortfolioZeile[] {
     });
 }
 
+/** Verdichtete, ebenfalls aus der Engine stammende Formatzeilen für das Cockpit. */
+export function formatCockpit(s: GameState) {
+  const formen = [
+    ['hartwig', 'Hartwig'], ['premium', 'Hartwig Premium'], ['sport', 'Hartwig Sport'],
+    ['volkskauf', 'Volkskauf'], ['fundus', 'FUNDUS'],
+  ] as const;
+  const zeilen = portfolio(s);
+  return formen.map(([formatKey, name]) => {
+    const hs = zeilen.filter((h) => h.formatKey === formatKey);
+    return { formatKey, name, anzahl: hs.length, offen: hs.filter((h) => h.status === 'offen').length,
+      steuerbar: hs.filter((h) => h.steuerbar).length,
+      umsatz: eur(hs.reduce((sum, h) => sum + h.umsatz, 0)),
+      ebitda: eur(hs.reduce((sum, h) => sum + h.ebitda, 0)),
+    };
+  });
+}
+
+/** Unverbindliche Vorschau: Abfindungen und gedeckelte Restmiete, nicht die tatsächliche Schlussabrechnung. */
+export function schliessungVorschau(s: GameState, ids: string[]) {
+  const hs = [...new Set(ids)].map((id) => s.haeuser.find((h) => h.id === id))
+    .filter((h): h is Haus => !!h && !h.nurDaten && h.status === 'offen' && !h.standortgarantie);
+  const jeFte = abfindungJeFte(s) * hqRechtFaktor(s);
+  const sozialplan = eur(hs.reduce((sum, h) => sum + (h.personal.vollzeit + h.personal.teilzeit) * jeFte, 0));
+  const restmiete = eur(hs.reduce((sum, h) => sum + h.miete.mieteWoche * hqRechtFaktor(s) *
+    Math.max(0, Math.min(s.phase === 'insolvenz' ? 13 : h.miete.vermieter === 'eigentuemer' ? 26 : 52, h.miete.bisWoche - s.woche)), 0));
+  return { anzahl: hs.length, sozialplan, restmiete, gesamt: sozialplan + restmiete,
+    hinweis: 'Schätzung ohne Verhandlungs-, Transfer- und Rechtsabteilungseffekte; tatsächliche Kosten können abweichen.' };
+}
+
 export function hausDetail(s: GameState, id: string) {
   const h = s.haeuser.find((x) => x.id === id);
   if (!h) return undefined;
   const etagen = h.etagen.map((e) => ({
     etage: e,
     flaechen: h.flaechen.filter((f) => f.etage === e).map((f) => ({
-      id: f.id, qm: f.qm, konzept: f.konzept, gruppe: f.gruppe ? GRUPPEN[f.gruppe].name : undefined,
+      id: f.id, qm: f.qm, konzept: f.konzept, gruppe: f.gruppe ? (GRUPPEN[f.gruppe]?.name ?? (String(f.gruppe) === 'schuhe' ? 'Schuhe' : String(f.gruppe))) : undefined,
       mieter: f.mieter?.name, umbauBis: f.umbauBis,
       umsatzQm: f.gruppe && h.kpi?.umsatzJeGruppe[f.gruppe] ? (h.kpi.umsatzJeGruppe[f.gruppe] ?? 0) / Math.max(1, h.flaechen.filter((x) => x.gruppe === f.gruppe).reduce((a, b) => a + b.qm, 0)) : 0,
     })),
