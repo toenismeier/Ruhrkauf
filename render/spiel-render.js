@@ -1149,11 +1149,11 @@ async function buendeln() {
       const daten = await p.evaluate(({id,r}) => {
         window.spiel.oeffneHausReiter(id,r);
         const el = document.getElementById('pinhalt'), d = window.spiel.E.hausUebersicht(window.spiel.s,id);
-        const tab = [...el.querySelectorAll('.haus-reiter button')].find(q => q.classList.contains('an'));
+        const tab = el.querySelector('.haus-reiter button[aria-current=page] span');
         return { aktiv: tab?.textContent, tabs: el.querySelectorAll('.haus-reiter button').length, text: el.textContent, d };
       }, {id,r});
       if (daten.tabs !== 7) fehler.push(r + ': 7 Reiter erwartet');
-      const title = {ueberblick:'Überblick',leitung:'Leitung',personal:'Personal',ware:'Ware',partner:'Fläche & Partner',kosten:'Kosten',kommentare:'Kommentare'}[r];
+      const title = {ueberblick:'Haus',leitung:'Leitung',personal:'Personal',ware:'Ware',partner:'Fläche',kosten:'Kosten',kommentare:'Notizen'}[r]; // Q30: Reiterleiste unten
       if (daten.aktiv !== title) fehler.push(r+': falscher aktiver Reiter ' + daten.aktiv);
       if (r==='ueberblick' && !daten.text.includes(String(daten.d.kundenScore))) fehler.push('Kundenscore stimmt nicht');
       if (r==='leitung' && !daten.text.includes(daten.d.leitungsdaten.name)) fehler.push('Name Hausleitung fehlt');

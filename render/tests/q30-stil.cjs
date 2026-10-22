@@ -8,7 +8,7 @@ async function stilpruefungLaden(p) {
 }
 
 /** Öffnet jedes Panel, speichert ein Bild (wenn ordner) und prüft umgestellte Panels (umgestellt: true) oder alle (alle: true). */
-async function panelLauf(p, panels, { ordner = null, alle = false, nur = null, log = console.log } = {}) {
+async function panelLauf(p, panels, { ordner = null, alle = false, nur = null, lang = false, log = console.log } = {}) {
   await stilpruefungLaden(p);
   if (ordner) fs.mkdirSync(ordner, { recursive: true });
   const ruhig = async () => {
@@ -30,9 +30,9 @@ async function panelLauf(p, panels, { ordner = null, alle = false, nur = null, l
       await p.waitForTimeout(200);
       await ruhig();
       if (panel.nach) { await p.evaluate(`(async () => { ${panel.nach} })()`); await p.waitForTimeout(150); }
-      await p.evaluate(() => { const m = document.getElementById('meldung'); if (m) m.className = ''; const t = document.getElementById('erfolge-toast'); if (t) t.hidden = true; });
+      await p.evaluate(() => { const m = document.getElementById('meldung'); if (m) m.className = ''; const t = document.getElementById('erfolge-toast'); if (t) { t.hidden = true; t.classList.remove('sichtbar'); } });
       let bild = null;
-      if (ordner) { bild = path.join(ordner, panel.name + '.png'); await p.screenshot({ path: bild }); }
+      if (ordner) { bild = path.join(ordner, panel.name + '.png'); if (lang && (await p.locator('#panel.offen').count())) await p.locator('#panel').screenshot({ path: bild }); else await p.screenshot({ path: bild }); }
       const verstoesse = (panel.umgestellt || alle)
         ? await p.evaluate((w) => window.hartwigStilpruefung(w), panel.wurzel ?? '#panel') : [];
       ergebnis.push({ name: panel.name, bild, geprueft: !!(panel.umgestellt || alle), verstoesse });

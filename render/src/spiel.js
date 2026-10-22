@@ -57,7 +57,8 @@ import { reportingModul, hausTreiberZeile } from './ui/reporting.js';
 import { itModul } from './ui/it.js';
 import { planungModul } from './ui/planung.js';
 // O07 Haus
-import { hausSteckbrief, hausBeobachtungHtml, hausReportingHtml, hausStatischHtml } from './ui/haus.js';
+import { hausDetailHtml, hausBeobachtungHtml, hausReportingHtml, hausStatischHtml } from './ui/haus.js';
+import * as HK from './ui/komponenten.js';
 // O04 Personal
 import { personalModul } from './ui/personaleinsatz.js';
 
@@ -786,7 +787,7 @@ function cockpitZeigen() {
     kachel('Kreditrahmen frei', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? 'rot' : ''),
     fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : 'noch offen', !s.historie.length ? '' : fx.ebitda < 0 ? 'rot' : 'gruen')
       : kachel('EBITDA 13 Wo.', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
-    kachel('Umsatz · ' + auswahl, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : 'noch offen'),
+    kachel('Umsatz<em> · ' + FORMATNAME[cockpitFormat] + '</em>' + auswahl, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : 'noch offen', 'mitwahl'),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
   ].join('');
@@ -901,6 +902,8 @@ function hausZeigen(id) {
   }
 }
 $('pzu').addEventListener('click', schliessePanel);
+// Q30: isometrische Symbole der großen Menüeinstiege
+document.querySelectorAll('.msym[data-sym]').forEach((el) => { el.innerHTML = HK.SYMBOLE[el.dataset.sym] ?? ''; });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('panel').classList.contains('offen')) schliessePanel(); });
 
 // O07 Haus
@@ -953,105 +956,47 @@ function oeffneHaus(id) {
   // O07 Haus
   d.betrieb = E.hausUebersicht(s, id);
   offenesHaus = id; offenesHq = null; offenerWettbewerber = null;
-  const h = d.haus, k = h.kpi;
+  const h = d.haus;
   const z = sb.zustand(id);
   const bild = z ? [z.status, ...z.zusatz].filter((q) => q !== 'offen').map((q) => (q === 'aktion' && z.aktion ? (AKTION_NAME[z.aktion] ? `Aktion ${AKTION_NAME[z.aktion]}` : 'Aktion') : STATUS_TITEL[q] ?? '')).filter(Boolean).join(' · ') : '';
-  const qm = h.flaechen.reduce((a, f) => a + f.qm, 0);
-  const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
-  let html = `<div class="chips"><span class="chip ${h.status === 'offen' ? '' : 'warn'}">${STATUS_HAUS[h.status] ?? h.status}</span>${h.klasse === 'premium' ? '<span class="chip" style="background:#fbefd2;color:#6d4b18;border:1px solid #c4a06a;font-weight:700">♛ Premium</span>' : ''}${bild ? `<span class="chip">${bild}</span>` : ''}<span class="chip grau">${h.lage === '1a' ? '1a-Lage' : h.lage === 'b' ? 'B-Lage' : h.lage === 'center' ? 'Center' : h.lage === 'stadtteil' ? 'Stadtteilzentrum' : 'Stadtrand'}</span></div>`;
-  html += `<div class="raster">${zahl('Umsatz Woche', geld(k?.umsatz ?? 0))}${zahl('Deckungsbeitrag', geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? 'rot' : 'gruen')}${zahl('Verkaufsfläche', fmt.format(qm) + ' qm')}${zahl('Substanz', Math.round(h.substanz) + ' / 100', h.substanz < 35 ? 'rot' : '')}</div>`;
-  html += st?.hausGrafik(id) ?? '';
-  // O02: ausschließlich Engine-Werte, auch bei geschlossenen Häusern oder fehlendem Vorjahr.
-  html += hausTreiberZeile(E, s, id);
-  // O08 Umbau: Bau-Reiter mit Etagenstatus, Fristen und Umbauplanung.
-  html += um?.hausKarte(id) ?? '';
-  if(h.format==='schwester'){
-    const f=E.schwesterUebersicht(s);
-    html += '<div class="karte"><div class="khead">Volkskauf · Regionalführung</div><div class="raster">'+zahl('Häuser',fmt.format(f.haeuser))+zahl('EBITDA',geld(f.ebitda))+zahl('Umbauten',fmt.format(f.umbauten))+'</div>';
-    if(h.status==='offen')html += '<button class="mini" onclick="formateTun(\'schwesterUmflaggen\',\''+id+'\')">Zu Hartwig umflaggen</button>';
-    html+='</div>';
+  // Q30: Formatblöcke (Volkskauf, FUNDUS, Premium) als Bausteine
+  let formate = '';
+  if (h.format === 'schwester') {
+    const f = E.schwesterUebersicht(s);
+    formate += HK.abschnitt('Volkskauf · Regionalführung') + HK.liste([HK.zeile({ was: 'Häuser', wert: fmt.format(f.haeuser) }), HK.zeile({ was: 'EBITDA', wert: geld(f.ebitda) }), HK.zeile({ was: 'Umbauten', wert: fmt.format(f.umbauten) })]);
+    if (h.status === 'offen') formate += `<div class="hk-knopfreihe">${HK.knopf('Zu Hartwig umflaggen', `onclick="formateTun('schwesterUmflaggen','${id}')"`, 'zweit')}</div>`;
   }
-  if(h.format==='outlet'){
-    const f=E.outletUebersicht(s);
-    html += '<div class="karte"><div class="khead">FUNDUS · Off-Price-Markenposten</div><div class="raster">'+zahl('Bestand EK',geld(f.poolWert))+zahl('Markenposten',geld(f.markenposten))+zahl('Konzern-Altware',geld(f.altware))+zahl('Reichweite',f.reichweite.toFixed(1).replace('.',',')+' Wo.')+'</div>';
-    html += '<button class="mini" onclick="formateTun(\'altwareOutlet\',80)">Altwarequote 80 %</button></div>';
+  if (h.format === 'outlet') {
+    const f = E.outletUebersicht(s);
+    formate += HK.abschnitt('FUNDUS · Off-Price-Markenposten') + HK.liste([HK.zeile({ was: 'Bestand EK', wert: geld(f.poolWert) }), HK.zeile({ was: 'Markenposten', wert: geld(f.markenposten) }), HK.zeile({ was: 'Konzern-Altware', wert: geld(f.altware) }), HK.zeile({ was: 'Reichweite', wert: f.reichweite.toFixed(1).replace('.', ',') + ' Wochen' })])
+      + `<div class="hk-knopfreihe">${HK.knopf('Altwarequote 80 %', `onclick="formateTun('altwareOutlet',80)"`, 'zweit')}</div>`;
   }
   if (h.klasse === 'premium') {
-    const p = E.premiumUebersicht(s).find((q) => q.id === id);
-    html += `<div class="karte"><div class="khead">Kronjuwel · Premiumsegment</div><div class="raster">${zahl('Premium-Image', Math.round(p?.image ?? 80) + ' / 100')}${zahl('Immobilien- & Marktwert', geld(p?.marktwert ?? 0))}${zahl('EBITDA-Marge (DB)', ((p?.marge ?? 0)*100).toFixed(1).replace('.', ',') + ' %')}${zahl('Aktionsschutz', p?.schutz ? 'Aktiv' : 'Aus')}</div>`;
-    if (h.premiumEigentuemer) html += `<div class="zeile">Eigentümer: ${h.premiumEigentuemer}</div>`;
-    else if (h.status === 'offen') html += `<div class="zeile"><button class="mini" onclick="premiumTun('schutz','${id}')">${p?.schutz ? 'Rabatt-Schutz aufheben' : 'Rabatt-Schutz aktivieren'}</button> <button class="mini" onclick="premiumTun('investieren','${id}')">10 Mio. € investieren</button></div>`;
+    const pq = E.premiumUebersicht(s).find((q) => q.id === id);
+    formate += HK.abschnitt('Kronjuwel · Premiumsegment') + HK.liste([HK.zeile({ was: 'Premium-Image', wert: Math.round(pq?.image ?? 80) + ' / 100' }), HK.zeile({ was: 'Immobilien- und Marktwert', wert: geld(pq?.marktwert ?? 0) }),
+      HK.zeile({ was: 'EBITDA-Marge (DB)', wert: ((pq?.marge ?? 0) * 100).toFixed(1).replace('.', ',') + ' %' }), HK.zeile({ was: 'Aktionsschutz', wert: pq?.schutz ? 'aktiv' : 'aus' })]);
+    if (h.premiumEigentuemer) formate += HK.hinweis('Eigentümer: ' + esc(h.premiumEigentuemer));
+    else if (h.status === 'offen') formate += `<div class="hk-knopfreihe">${HK.knopf(pq?.schutz ? 'Rabatt-Schutz aufheben' : 'Rabatt-Schutz aktivieren', `onclick="premiumTun('schutz','${id}')"`, 'zweit')}${HK.knopf('10 Mio. € investieren', `onclick="premiumTun('investieren','${id}')"`, 'zweit')}</div>`;
     const an = s.angebote.find((a) => a.status === 'offen' && a.typ === 'premiumVerkauf' && a.wunschHaeuser?.includes(id));
-    if (an) html += `<div class="zeile">Angebot: ${an.premiumKaeuferTyp || 'Investor'} · ${geld(an.kaufpreis ?? 0)} <button class="mini" onclick="premiumTun('verhandeln','${an.id}')">Nachverhandeln</button> <button class="mini" onclick="premiumTun('verkaufen','${an.id}')">Verkaufen</button></div>`;
-    html += '</div>';
+    if (an) formate += HK.hinweis(`Angebot: ${esc(an.premiumKaeuferTyp || 'Investor')} bietet ${geld(an.kaufpreis ?? 0)}.`, 'achtung') + `<div class="hk-knopfreihe">${HK.knopf('Nachverhandeln', `onclick="premiumTun('verhandeln','${an.id}')"`, 'zweit')}${HK.knopf('Verkaufen', `onclick="premiumTun('verkaufen','${an.id}')"`, 'zweit')}</div>`;
   }
-  // Tatsächlich gebuchte GuV, ohne Zentrale, als eigener Block im Haus-Reiter.
-  if (d.guv) {
-    const g = d.guv;
-    const kosten = new Set(E.GUV_KOSTEN);
-    html += '<div class="karte"><div class="khead">Filial-GuV · aktuelle Woche (ohne Zentrale)</div>';
-    for (const p of E.REFERENZ_FILIAL_GUV) {
-      const betrag = g[p.id] ?? 0;
-      const sign = kosten.has(p.id) || p.id === 'wareneinsatz' || p.id === 'opex' ? -1 : 1;
-      const wert = sign * betrag;
-      const quote = g.umsatz ? (100 * wert / g.umsatz).toFixed(1).replace('.', ',') + ' %' : '–';
-      html += `<div class="zeile"><span class="was">${p.name} <i>Referenz ${String(p.ist).replace('.', ',')} %</i></span><span class="qm">${geld(wert)}</span><span class="uq">${quote}</span></div>`;
-    }
-    html += '<div class="zeile grau">Referenzdifferenz: Einzel-OPEX −44,6 %, Total OPEX laut Vorgabe −42,4 %. Keine Ausgleichsbuchung.</div></div>';
-  }
-  html += '<div class="karte"><div class="khead">Sanierungsprogramme · gesamtes Filialnetz</div>';
-  for (const [programm, def] of Object.entries(E.FILIAL_PROGRAMME)) {
-    const stand = d.programme?.[programm];
-    const status = stand ? s.woche < stand.wirksamAb ? 'Anlaufphase bis Woche ' + (stand.wirksamAb + 1) : 'Wirksam' : '';
-    html += `<div class="zeile"><span class="was"><b>${def.name}</b> <i>${status || def.vorlauf + ' Wochen Vorlauf'} · ${def.nebenwirkung}</i></span>${stand ? '' : `<button class="mini" onclick="filialProgramm('${programm}')">Starten</button>`}</div>`;
-  }
-  html += '</div>';
-  // O09: zusätzliche Logistik im Haussteckbrief.
-  if (d.ecommerce && h.format === 'warenhaus') {
-    const x = d.ecommerce;
-    html += '<div class="karte"><div class="khead">Online und Filiallogistik</div><div class="raster">' +
-      zahl('Abholungen', fmt.format(x.abholungen)) + zahl('Versand aus dem Haus', fmt.format(x.versand)) +
-      zahl('Retouren im Haus', fmt.format(x.retouren)) + zahl('Instore-Logistik', x.instoreStunden.toFixed(1).replace('.', ',') + ' Std.') +
-      '</div><div class="zeile">Abholstation: ' + (x.station ? 'vorhanden' : 'nicht vorhanden') +
-      ' · Ship-from-Store: ' + (x.versandAn ? 'aktiv' : 'aus') + '</div></div>';
-  }
-  const shops = EQ.shops(s, h);
+  // Innenansicht einer gewählten Etage
+  let innen = '';
   if (hausEtageWahl?.id === id) {
+    const shops = EQ.shops(s, h);
     const b = innenBild(h, hausEtageWahl.nr);
     letztesInnenbild = { id, nr: hausEtageWahl.nr, shops: h.flaechen.filter((f) => f.etage === hausEtageWahl.nr && shops[f.gruppe] && ['eigen', 'kommission'].includes(f.konzept)).map((f) => shops[f.gruppe].name), teile: b.res?.anzahl };
-    html += `<div class="karte haus3d"><img src="${b.url}" alt=""><div class="zeile"><span class="was"><b>${etageName(hausEtageWahl.nr)}</b> <i>Innenansicht</i></span><button class="mini" onclick="hausKlick('zu')">Schließen</button></div></div>`;
-    if (b.nah) html += `<div class="karte haus3d"><img src="${b.nah}" alt=""><div class="zeile"><span class="dot" style="background:${b.shop.farbe}"></span><span class="was"><b>Eigenmarken-Shop ${b.shop.name}</b> <i>${Math.round(b.shop.anteil * 100)} % der Fläche</i></span></div></div>`;
+    innen = `<div class="hk-innen"><img src="${b.url}" alt="${esc(etageName(hausEtageWahl.nr))} von innen"><div class="hk-zeile"><span class="hk-was">${esc(etageName(hausEtageWahl.nr))}<small>Innenansicht</small></span>${HK.knopf('Schließen', `onclick="hausKlick('zu')"`, 'zweit')}</div>`
+      + (b.nah ? `<img src="${b.nah}" alt="Eigenmarken-Shop ${esc(b.shop.name)}"><div class="hk-zeile"><span class="hk-was">Eigenmarken-Shop ${esc(b.shop.name)}<small>${Math.round(b.shop.anteil * 100)} % der Fläche</small></span></div>` : '') + '</div>';
   }
-  html += '<div class="karte"><button type="button" class="mini" data-hausbesuch="' + esc(id) + '">Haus besuchen</button></div>';
-  for (const e of [...d.etagen].reverse()) {
-    html += `<div class="karte"><div class="khead">${etageName(e.etage)}<button class="mini" onclick="hausKlick('etage','${id}',${e.etage})">Ansehen</button></div>`;
-    if (!e.flaechen.length) html += '<div class="zeile grau">keine Fläche</div>';
-    for (const f of e.flaechen) {
-      const was = f.konzept === 'untermiete' ? (f.mieter ?? 'Untermieter') : f.konzept === 'leer' ? 'Leerfläche' : (f.gruppe ?? KONZEPT[f.konzept]);
-      const art = f.konzept === 'eigen' || f.konzept === 'leer' || f.konzept === 'untermiete' ? (f.konzept === 'untermiete' ? 'Untermiete' : '') : KONZEPT[f.konzept];
-      const umbau = f.umbauBis !== undefined && f.umbauBis > s.woche ? `<em>Umbau bis KW ${(f.umbauBis % 52) + 1}</em>` : '';
-      const raw = h.flaechen.find((q) => q.id === f.id);
-      const em = raw && shops[raw.gruppe] && ['eigen', 'kommission'].includes(raw.konzept) && !umbau ? `<em style="color:${shops[raw.gruppe].farbe}">Eigenmarken-Shop ${shops[raw.gruppe].name}</em>` : '';
-      html += `<div class="zeile"><span class="dot k-${f.konzept}"></span><span class="was">${was}${art ? ` <i>${art}</i>` : ''}${umbau}${em}</span><span class="qm">${fmt.format(f.qm)} qm</span><span class="uq">${f.umsatzQm ? fmt.format(Math.round(f.umsatzQm)) + ' €/qm' : ''}</span></div>`;
-    }
-    html += '</div>';
-  }
-  html += '<div class="karte"><div class="khead">Konkurrenz in der Stadt</div>';
-  if (!d.wettbewerber?.length) html += '<div class="zeile">Keine Wettbewerber in dieser Stadt</div>';
-  for (const w of d.wettbewerber ?? []) {
-    const wirkung = Object.entries(w.wirkung ?? {}).filter(([, v]) => v < 0)
-      .sort((a, b) => a[1] - b[1]).slice(0, 3).map(([g, v]) => esc(E.GRUPPEN[g]?.name ?? g) + ' ' + v.toFixed(2) + ' %').join(' · ');
-    html += '<button class="zeile wbdirekt" data-wb-id="' + esc(w.id) + '"><span class="was"><b>' +
-      esc(w.name) + '</b> <i>' + esc(WB_ART[w.art] ?? w.art) + ' · ' + esc(WB_STATUS[w.status] ?? w.status) + '</i>' +
-      (wirkung ? '<small>' + wirkung + '</small>' : '') + '</span><span>→</span></button>';
-  }
-  html += '</div>';
-  // O07 Haus: alter Etagen- und Konkurrenzinhalt bleibt im Reiter Überblick.
-  html = hausSteckbrief(d, html, hausReiter, s.woche);
-  // O04 Personal: Wochentagsplanung im Reiter Personal des Hausdetails.
-  if (hausReiter === 'personal' && pe) html += pe.hausBlock(id);
-  // O05 Ware
-  if (hausReiter === 'ware' && d.waren) html += `<div class="karte"><div class="khead">Ware · ${esc(d.waren.hauscluster)}</div><div class="raster">${zahl('Warenverfügbarkeit', (d.waren.verfuegbarkeit * 100).toFixed(1) + ' %')}${zahl('Altwareanteil', (d.waren.altwareanteil * 100).toFixed(1) + ' %')}${zahl('Inventurdifferenz', d.waren.inventur ? geld(d.waren.inventur.differenz) : 'Noch offen')}${zahl('Flächenproduktivität', geld(d.waren.flaechenproduktivitaet) + '/qm')}</div></div>`;
+  const uw = s.woche - 1;
+  const vorjahrPunkt = h.betrieb?.umsatzHistorie?.find((x) => x.woche === uw - 52) ?? s.vorjahrHistorie?.[id]?.find((x) => x.woche === uw - 52);
+  const html = hausDetailHtml({
+    E, s, d, b: d.betrieb, reiter: hausReiter, zustand: bild,
+    verlaufU: E.verlauf(s, { ebene: 'haus', id, kennzahl: 'umsatz', wochen: 5 }), verlaufD: E.verlauf(s, { ebene: 'haus', id, kennzahl: 'db', wochen: 5 }),
+    vorjahr: vorjahrPunkt?.umsatz ?? 0, treiber: E.hausTreiber(s, id), umbauKarte: um?.hausKarte(id) ?? '',
+    personalBlock: hausReiter === 'personal' && pe ? pe.hausBlock(id) : '', innen, formate, wbArt: WB_ART, wbStatus: WB_STATUS,
+  });
   panel(h.name, `${h.stadt} · ${h.klasse === 'premium' ? 'Premiumhaus' : h.format === 'sport' ? 'Sporthaus' : h.format === 'schwester' ? 'Volkskauf' : h.format === 'outlet' ? 'FUNDUS' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html, 'hausdetail');
   if (neu) hausZeigen(id);
 }

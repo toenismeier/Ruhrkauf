@@ -84,7 +84,8 @@
 #panel:has(.hk-bereich[data-symbol=karte]) { --hk-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M3 18l10-5 10 5 10-5v13l-10 5-10-5-10 5z' fill='%23b9c4b2'/%3E%3Cpath d='M13 13v13l10 5V18z' fill='%23d5ddcf'/%3E%3Cpath d='M18 6a5 5 0 0 1 5 5c0 4-5 9-5 9s-5-5-5-9a5 5 0 0 1 5-5z' fill='%23d23c32'/%3E%3Ccircle cx='18' cy='11' r='2' fill='%23fff'/%3E%3C/svg%3E"); }
 
 /* ───────────── Inhalt ───────────── */
-#panel:has(.hk-bereich) #pinhalt { padding: 0 0 calc(16px + env(safe-area-inset-bottom)); }
+#panel:has(.hk-bereich) #pinhalt { padding: 0; }
+#panel:has(.hk-bereich) #pinhalt > :last-child:not(.hk-reiter) { margin-bottom: calc(16px + env(safe-area-inset-bottom)); }
 .hk-rumpf { padding: var(--hk-3) calc(var(--hk-4) + env(safe-area-inset-right)) var(--hk-3) calc(var(--hk-4) + env(safe-area-inset-left)); }
 
 /* Sprecherzeile: eine Person sagt den Befund der Woche, keine Begrüßung */
@@ -108,7 +109,7 @@
 /* Abschnittskopf in Versalien */
 .hk-abschnitt { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: var(--hk-5) 0 var(--hk-2); font-size: var(--hk-xs); line-height: 16px;
   letter-spacing: 0.08em; text-transform: uppercase; color: var(--tx); font-weight: 700; }
-.hk-abschnitt:first-child { margin-top: var(--hk-2); }
+.hk-rumpf > .hk-abschnitt:first-child { margin-top: var(--hk-2); }
 .hk-abschnitt small { letter-spacing: 0; text-transform: none; font-weight: 400; color: var(--le); font-size: var(--hk-xs); }
 
 /* Großkennzahlen: Beschriftung in Versalien, Zahl groß, Abweichung darunter */
@@ -117,11 +118,11 @@
 .hk-gross > div > span { display: block; font-size: var(--hk-xs); line-height: 16px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--le); }
 .hk-gross b { display: block; font-size: clamp(22px, 7vw, var(--hk-xl)); line-height: 1.15; font-weight: 400; color: var(--tx); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .hk-gross b.gut { color: var(--hk-gut); } .hk-gross b.schlecht { color: var(--hk-schlecht); }
-.hk-gross i { display: block; font-style: normal; font-size: var(--hk-xs); line-height: 16px; color: var(--le); font-variant-numeric: tabular-nums; }
+.hk-gross i { display: block; white-space: nowrap; font-style: normal; font-size: var(--hk-xs); line-height: 16px; color: var(--le); font-variant-numeric: tabular-nums; }
 .hk-gross i .gut { color: var(--hk-gut); } .hk-gross i .schlecht { color: var(--hk-schlecht); }
 
 /* Balken ohne Achsen: 5 Wochen, gepaart */
-.hk-balken { display: grid; grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); gap: var(--hk-2); align-items: end; height: 132px; padding: 0 var(--hk-2); margin: var(--hk-2) 0 0; }
+.hk-balken { display: grid; grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); gap: var(--hk-2); align-items: end; height: var(--hk-balkenhoehe, 96px); padding: 0 var(--hk-2); margin: var(--hk-2) 0 0; }
 .hk-balken > div { height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 4px; }
 .hk-balken span { display: block; width: 12px; min-height: 2px; border-radius: 6px; background: var(--hk-serie-a); }
 .hk-balken span.b { background: var(--hk-serie-b); } .hk-balken span.neg { background: var(--hk-schlecht); }
@@ -191,7 +192,7 @@
 /* Reiterleiste unten mit illustrierten Symbolen */
 .hk-reiter { position: sticky; bottom: 0; z-index: 3; display: flex; gap: 2px; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: var(--t); border-top: 1px solid var(--l); overflow-x: auto; scrollbar-width: none; margin-top: var(--hk-4); }
 .hk-reiter::-webkit-scrollbar { display: none; }
-.hk-reiter button { flex: 1 0 58px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 12px; background: transparent; border: 0; color: var(--le); font: inherit; font-size: var(--hk-xs); line-height: 16px; white-space: nowrap; }
+.hk-reiter button { flex: 1 1 0; min-width: 48px; padding: 0 2px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 12px; background: transparent; border: 0; color: var(--le); font: inherit; font-size: var(--hk-xs); line-height: 16px; white-space: nowrap; }
 .hk-reiter button svg { width: 34px; height: 34px; display: block; }
 .hk-reiter button[aria-current=page] { background: var(--f); color: var(--tx); font-weight: 700; }
 
@@ -234,3 +235,33 @@
 #panel:has(.hk-bereich) .lzeile { border-color: var(--l); color: var(--tx); }
 #panel:has(.hk-bereich) .leise, #panel:has(.hk-bereich) .legende, #panel:has(.hk-bereich) .rfuss { color: var(--le); }
 #panel:has(.hk-bereich) .kz { background: var(--f); border-color: var(--l); }
+
+/* ───────────── Ergänzungen Q30 Teil 2 (Haus, Personal, Regler) ───────────── */
+.hk-gross.klein b { font-size: var(--hk-lg); }
+.hk-marken { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: var(--hk-3) 0 0; }
+.hk-schnitt { background: var(--t); border: 1px solid var(--l); border-radius: var(--hk-radius); padding: var(--hk-2) var(--hk-2) 0; margin-bottom: var(--hk-2); }
+.hk-etagenschnitt { display: block; width: 100%; height: auto; }
+.hk-innen { background: var(--f); border: 1px solid var(--l); border-radius: var(--hk-radius); overflow: hidden; margin-bottom: var(--hk-2); }
+.hk-innen img { display: block; width: 100%; background: var(--t); }
+.hk-person-karte { display: flex; gap: var(--hk-4); align-items: center; padding: var(--hk-3); background: var(--f); border: 1px solid var(--l); border-radius: var(--hk-radius); }
+.hk-person-karte .hk-portraet { flex: none; width: 96px; height: 104px; border-radius: 10px; overflow: hidden; background: var(--t); }
+.hk-person-karte .hk-portraet svg { display: block; width: 104px; height: 104px; margin-left: -4px; }
+.hk-person-karte b { display: block; font-size: var(--hk-lg); line-height: 28px; font-weight: 700; }
+.hk-person-karte small { display: block; color: var(--le); font-size: var(--hk-xs); line-height: 18px; }
+.hk-figuren { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px 4px; margin: var(--hk-2) 0 var(--hk-3); }
+.hk-figuren i { display: block; height: 30px; background: center bottom / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 30'%3E%3Ccircle cx='6' cy='4' r='3.4' fill='%23574e46'/%3E%3Cpath d='M2 9h8l1 11H9l-.5 10h-5L3 20H1z' fill='%23574e46'/%3E%3C/svg%3E"); }
+.hk-figuren i.an { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 30'%3E%3Ccircle cx='6' cy='4' r='3.4' fill='%23e8c4a2'/%3E%3Cpath d='M2 9h8l1 11H9l-.5 10h-5L3 20H1z' fill='%23d23c32'/%3E%3Cpath d='M3.5 20h5l-.2 10H3.7z' fill='%23302a26'/%3E%3C/svg%3E"); }
+.hk-regel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(170px, 52%); gap: var(--hk-3); align-items: center; margin: 0 0 var(--hk-2); font-size: var(--hk-sm); }
+.hk-regel > span { overflow-wrap: anywhere; }
+.hk-knopfreihe.zweispaltig > .hk-knopf { flex: 1 1 calc(50% - 8px); }
+#panel:has(.hk-bereich) #pinhalt > .hk-reiter { margin-left: 0; margin-right: 0; }
+
+/* Zwei Balkenreihen nebeneinander mit eigener Skala (z. B. Umsatz und Deckungsbeitrag, die sich um Größenordnungen unterscheiden) */
+.hk-balkenpaar { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hk-3); margin: var(--hk-2) 0 0; }
+.hk-balkenpaar > div { min-width: 0; background: var(--t); border: 1px solid var(--l); border-radius: var(--hk-radius); padding: var(--hk-2) 4px var(--hk-2); }
+.hk-balkenpaar h4 { margin: 0 0 4px; text-align: center; font-size: var(--hk-xs); line-height: 16px; font-weight: 400; color: var(--le); letter-spacing: 0.06em; text-transform: uppercase; }
+.hk-balkenpaar .hk-balken { --hk-balkenhoehe: 72px; gap: 4px; padding: 0 4px; position: relative; }
+.hk-balkenpaar .hk-balken.mitnull { align-items: stretch; }
+.hk-balkenpaar .hk-balkenfuss { gap: 4px; padding: 4px 4px 0; }
+.hk-balkenpaar .hk-balkenfuss span { overflow: hidden; white-space: nowrap; }
+.hk-balken .null-linie { position: absolute; left: 0; right: 0; height: 1px; background: var(--l); }

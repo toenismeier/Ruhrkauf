@@ -41,6 +41,23 @@ export function balken(reihen, legende = []) {
     + (legende.length ? `<div class="hk-legende">${legende.map((l, i) => `<span><i class="${i ? 'b' : ''}"></i>${esc(l)}</span>`).join('')}</div>` : '');
 }
 
+/** Zwei kleine Balkenreihen mit eigener Skala nebeneinander. reihen: [{ titel, serie: 'a'|'b', punkte: [{ label, wert }] }].
+ *  Negative Werte hängen unter einer Nulllinie (rot). Unter zwei Punkten: leerer Zustand. */
+export function balkenPaar(reihen) {
+  const eine = (r) => {
+    const w = r.punkte.map((q) => q.wert ?? 0);
+    if (w.length < 2) return `<div><h4>${esc(r.titel)}</h4>${leer('Ab der zweiten Woche.')}</div>`;
+    const pos = Math.max(0, ...w), neg = Math.max(0, ...w.map((v) => -v)), ges = pos + neg || 1;
+    const oben = pos / ges * 100, unten = neg / ges * 100;
+    const saeule = (v) => `<div style="display:flex;flex-direction:column;height:100%"><div style="height:${oben}%;display:flex;align-items:flex-end;justify-content:center">${v > 0 ? `<span class="${r.serie}" style="height:${Math.max(3, v / ges * 100 / (oben / 100) )}%" data-w="${Math.round(v)}"></span>` : ''}</div>`
+      + `<div style="height:${unten}%;display:flex;align-items:flex-start;justify-content:center">${v < 0 ? `<span class="${r.serie} neg" style="height:${Math.max(3, -v / ges * 100 / (unten / 100))}%" data-w="${Math.round(v)}"></span>` : ''}</div>${v === 0 ? '<span class="null" style="height:2px;align-self:center" data-w="0"></span>' : ''}</div>`;
+    const von = r.punkte[0].label, bis = r.punkte[r.punkte.length - 1].label;
+    return `<div><h4>${esc(r.titel)}</h4><div class="hk-balken mitnull" style="--n:${w.length}" role="img" aria-label="${esc(r.titel)} ${esc(von)} bis ${esc(bis)}">${neg ? `<i class="null-linie" style="top:${oben}%"></i>` : ''}${w.map(saeule).join('')}</div>`
+      + `<div class="hk-balkenfuss" style="--n:${w.length}">${r.punkte.map((q) => `<span>${esc(q.label)}</span>`).join('')}</div></div>`;
+  };
+  return `<div class="hk-balkenpaar">${reihen.map(eine).join('')}</div>`;
+}
+
 /** Tabelle (GuV). spalten: Kopf rechts (z. B. ['KW 8', 'KW 9']); zeilen: [{ name, werte: [Text], roh?: [Zahl], ton?: [..] }];
  *  summe: { name, werte, roh }. Mit `pruefen: true` muss summe.roh[i] = Σ zeilen.roh[i] gelten (Summenprüfung). */
 export function tabelle({ titel = '', spalten = [], zeilen, summe = null, pruefen = false }) {
@@ -120,6 +137,7 @@ export const SYMBOLE = {
   umbau: svg(quader(-3.5, -3.5, 0, 0.5, 0.5, 7, SAND) + quader(3, -3.5, 0, 0.5, 0.5, 7, SAND) + quader(-3.5, -3.5, 3.3, 7, 0.5, 0.5, SAND) + quader(-3.5, -3.5, 6.5, 7, 0.5, 0.5, SAND) + quader(-2.5, -1, 0, 5, 4, 3, WEISS)),
   kommentare: svg(quader(-3.5, -3, 0, 7, 6, 0.6, WEISS) + quader(-2.5, -2, 0.6, 5, 4, 0.3, ['#f6f2e9', '#ddd6c7', '#c9c0ae']) + quader(-2, 1.5, 0.9, 4, 0.2, 0.2, DUNKEL)),
   post: svg(quader(-4, -3, 0, 8, 6, 1.6, SAND) + quader(-3.4, -2.4, 1.6, 6.8, 4.8, 0.4, WEISS) + quader(-3, -2, 2, 6, 4, 0.4, ['#fbf7ee', '#e5ddcd', '#cdc3ad']) + quader(-1, -0.6, 2.4, 2, 1.2, 0.2, ROT)),
+  zentrale: svg(quader(-2.5, -2.5, 0, 5, 5, 10, WEISS) + quader(-2.5, 2.45, 2, 5, 0.1, 1, BLAU) + quader(-2.5, 2.45, 4.5, 5, 0.1, 1, BLAU) + quader(-2.5, 2.45, 7, 5, 0.1, 1, BLAU) + quader(-2.5, -2.5, 10, 5, 5, 0.6, ROT)),
   zahlen: svg(quader(-4, -1, 0, 2, 2, 3, WEISS) + quader(-1, -1, 0, 2, 2, 6, WEISS) + quader(2, -1, 0, 2, 2, 4.4, GRUEN)),
 };
 
