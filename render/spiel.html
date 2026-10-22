@@ -351,6 +351,7 @@
   .startkarte .vtitel { margin: 12px 2px 6px; }
   .startkarte .ort.gross { margin-top: 0; }
   .stufen { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .stufen[hidden], .startkarte .vtitel[hidden] { display: none; }
   .stufe-karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 10px 12px; min-height: 64px; display: grid; grid-template-columns: 74px 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; text-align: left; color: var(--text); }
   .stufe-karte .sterne-stufe { grid-row: 1; } .stufe-karte b { grid-row: 2; grid-column: 1; } .stufe-karte small { grid-row: 1 / span 2; grid-column: 2; }
   .stufe-karte b { font-size: calc(15px * var(--schrift)); } .stufe-karte small { font-size: calc(11px * var(--schrift)); color: var(--leise); line-height: 1.35; }

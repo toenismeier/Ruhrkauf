@@ -60,6 +60,7 @@
     STARTKALENDER: () => STARTKALENDER,
     SYSTEME: () => SYSTEME,
     SZENARIEN: () => SZENARIEN,
+    SZENARIO_STUFENTEXTE: () => SZENARIO_STUFENTEXTE,
     TEST_EREIGNISSE: () => TEST_EREIGNISSE,
     TREND_GRUPPEN: () => TREND_GRUPPEN,
     UMBAU_STUFEN: () => UMBAU_STUFEN,
@@ -182,6 +183,7 @@
     schliessungVorschau: () => schliessungVorschau,
     schwesterUebersicht: () => schwesterUebersicht,
     schwierigkeit: () => schwierigkeit,
+    schwierigkeitenFuerSzenario: () => schwierigkeitenFuerSzenario,
     segmentText: () => segmentText,
     setzeTreiber: () => setzeTreiber,
     sollFte: () => sollFte,
@@ -2110,6 +2112,45 @@
     }
   };
   var SCHWIERIGKEITEN = Object.keys(SCHWIERIGKEIT).map((id) => ({ id, name: SCHWIERIGKEIT[id].name, beschreibung: SCHWIERIGKEIT[id].beschreibung }));
+  var SZENARIO_STUFENTEXTE = {
+    standard: {
+      leicht: "Die Sanierung startet mit mehr Liquidit\xE4t, geduldigeren Lieferanten und geringeren Imagesch\xE4den bei Schlie\xDFungen.",
+      mittel: "Die Sanierung beginnt mit den kalibrierten Krisenwerten und den \xFCblichen Reaktionen von Banken und Lieferanten.",
+      schwer: "Die Sanierung beginnt mit weniger Kreditspielraum, skeptischen Lieferanten und st\xE4rkeren R\xFCckschl\xE4gen."
+    },
+    schutzschirm: {
+      leicht: "Die Gl\xE4ubiger stimmen dem Insolvenzplan eher zu. F\xFCr die Annahme bleiben zw\xF6lf Wochen.",
+      mittel: "Zw\xF6lf Wochen bis zur Gl\xE4ubigerversammlung: Der Insolvenzplan wird ohne zus\xE4tzlichen Zustimmungsbonus bewertet.",
+      schwer: "Die Gl\xE4ubiger pr\xFCfen den Insolvenzplan strenger. Auch jetzt bleiben nur zw\xF6lf Wochen."
+    },
+    lockdown: {
+      leicht: "Zehn Wochen mit 60 % Frequenzverlust; als \xDCberbr\xFCckungshilfe werden 170 Mio. \u20AC angeboten.",
+      mittel: "Zehn Wochen mit 70 % Frequenzverlust; als \xDCberbr\xFCckungshilfe werden 140 Mio. \u20AC angeboten.",
+      schwer: "Zehn Wochen mit 80 % Frequenzverlust; als \xDCberbr\xFCckungshilfe werden nur 110 Mio. \u20AC angeboten."
+    },
+    fusion: {
+      leicht: "30 Doppelstandorte verursachen 20 % weniger Miete. Der Betriebsrat ist verhandlungsbereiter.",
+      mittel: "30 Doppelstandorte mit regul\xE4ren Mietkosten. Der Betriebsrat startet ohne zus\xE4tzlichen Vertrauensbonus.",
+      schwer: "30 Doppelstandorte verursachen 25 % mehr Miete. Der Betriebsrat steht Schlie\xDFungen kritischer gegen\xFCber."
+    },
+    investor: {
+      leicht: "Ein Hausverkauf pro Jahr bleibt Pflicht. R\xFCckmietung zu 5 % und mildere Sanktionen bei Verzug.",
+      mittel: "Ein Hausverkauf pro Jahr bleibt Pflicht. R\xFCckmietung zu 6 % und zehn Vertrauenspunkte Abzug bei Verzug.",
+      schwer: "Ein Hausverkauf pro Jahr bleibt Pflicht. R\xFCckmietung zu 8 % und 16 Vertrauenspunkte Abzug bei Verzug."
+    },
+    aufbruch: {
+      leicht: "Der Ausbau trifft auf milderen Wettbewerb: Der zus\xE4tzliche Frequenzabschlag betr\xE4gt 5 %.",
+      mittel: "Der Ausbau trifft auf starken Wettbewerb: Der zus\xE4tzliche Frequenzabschlag betr\xE4gt 14 %.",
+      schwer: "Der Ausbau trifft auf besonders starken Wettbewerb: Der zus\xE4tzliche Frequenzabschlag betr\xE4gt 22 %."
+    }
+  };
+  function schwierigkeitenFuerSzenario(id) {
+    if (id === "sandkasten") return [];
+    return SCHWIERIGKEITEN.map((stufe2) => ({
+      ...stufe2,
+      beschreibung: SZENARIO_STUFENTEXTE[id]?.[stufe2.id] ?? stufe2.beschreibung
+    }));
+  }
   var schwierigkeit = (s2) => SCHWIERIGKEIT[s2.schwierigkeit ?? "mittel"];
 
   // ../engine/src/sandkasten.ts
@@ -5073,10 +5114,34 @@
     { id: "aufbruch", name: "Aufbruch", beschreibung: "Solide finanzierte Kette, aber starke Konkurrenz.", schwierigkeit: "Mittel", ziel: "In drei Jahren Umsatzmarktf\xFChrer werden", bild: "aufbruch", start: { startCash: 9e8, kreditlinie: 3e8, szenarioRegeln: { aufbruchKonkurrenz: 0.86 } } },
     { id: "sandkasten", name: "Sandkasten", beschreibung: "Unbegrenzte Mittel, kein Insolvenzrisiko und keine Wertung.", schwierigkeit: "Frei", ziel: "Ohne Zeitlimit experimentieren", bild: "sandkasten", start: { szenarioRegeln: { sandkasten: true } } }
   ];
-  function szenarioKonfiguration(id) {
+  function szenarioKonfiguration(id, stufe2 = "mittel") {
     const karte = SZENARIEN.find((x2) => x2.id === id);
     if (!SZENARIEN_AKTIV || !karte || karte.id === "standard") return {};
-    return { ...karte.start, szenarioId: karte.id };
+    if (stufe2 === "mittel" || karte.id === "sandkasten") return { ...karte.start, szenarioId: karte.id };
+    const regeln = structuredClone(karte.start.szenarioRegeln ?? {});
+    switch (karte.id) {
+      case "schutzschirm":
+        regeln.schutzschirmZustimmung = stufe2 === "leicht" ? 8 : -8;
+        break;
+      case "lockdown":
+        if (regeln.lockdown) {
+          regeln.lockdown.frequenz = stufe2 === "leicht" ? 0.4 : 0.2;
+          regeln.lockdown.staatshilfe = stufe2 === "leicht" ? 17e7 : 11e7;
+        }
+        break;
+      case "fusion":
+        regeln.fusionMietfaktor = stufe2 === "leicht" ? 0.8 : 1.25;
+        regeln.fusionBetriebsrat = stufe2 === "leicht" ? 10 : -12;
+        break;
+      case "investor":
+        regeln.investorMietrendite = stufe2 === "leicht" ? 0.05 : 0.08;
+        regeln.investorStrafe = stufe2 === "leicht" ? 6 : 16;
+        break;
+      case "aufbruch":
+        regeln.aufbruchKonkurrenz = stufe2 === "leicht" ? 0.95 : 0.78;
+        break;
+    }
+    return { ...karte.start, szenarioRegeln: regeln, szenarioId: karte.id };
   }
   function szenarioName(s2) {
     return SZENARIEN.find((x2) => x2.id === (s2.szenario?.id ?? "standard"))?.name ?? SZENARIEN[0].name;
@@ -5104,7 +5169,16 @@
     const regeln = structuredClone(sz.szenarioRegeln ?? {});
     const lauf = { id: sz.szenarioId, regeln };
     s2.szenario = lauf;
-    if (regeln.fusionDoppelStaedte) lauf.fusionHausIds = s2.haeuser.filter((h3) => h3.fusionUrsprung === "volkskauf").map((h3) => h3.id);
+    if (regeln.fusionDoppelStaedte) {
+      const doppelte = s2.haeuser.filter((h3) => h3.fusionUrsprung === "volkskauf");
+      lauf.fusionHausIds = doppelte.map((h3) => h3.id);
+      if (regeln.fusionMietfaktor !== void 0) {
+        for (const haus2 of doppelte) haus2.miete.mieteWoche = eur(haus2.miete.mieteWoche * regeln.fusionMietfaktor);
+      }
+      if (regeln.fusionBetriebsrat !== void 0) {
+        s2.stakeholder.betriebsrat = Math.max(0, Math.min(100, s2.stakeholder.betriebsrat + regeln.fusionBetriebsrat));
+      }
+    }
     if (regeln.immobilienInvestor) {
       lauf.immobilienVerkaeufe = [];
       lauf.wertStart = unternehmensWert(s2);
@@ -5139,10 +5213,10 @@
         text: "Einmalige Hilfe zur Deckung laufender Kosten bei geschlossenen Innenst\xE4dten. Annehmen oder ablehnen.",
         einmalzahlung: lockdown.staatshilfe
       });
-      melde(s2, "warnung", "Innenst\xE4dte geschlossen: zehn Wochen mit 70 % weniger Kundenfrequenz. Die \xDCberbr\xFCckungshilfe liegt im Posteingang.");
+      melde(s2, "warnung", "Innenst\xE4dte geschlossen: " + lockdown.dauer + " Wochen mit " + Math.round((1 - lockdown.frequenz) * 100) + " % weniger Kundenfrequenz. Die \xDCberbr\xFCckungshilfe liegt im Posteingang.");
     }
     if (lauf.regeln.immobilienInvestor && s2.woche > 0 && s2.woche % 52 === 0 && !(lauf.immobilienVerkaeufe ?? []).some((w2) => w2 >= s2.woche - 52 && w2 < s2.woche)) {
-      s2.stakeholder.eigentuemer = Math.max(0, s2.stakeholder.eigentuemer - 10);
+      s2.stakeholder.eigentuemer = Math.max(0, s2.stakeholder.eigentuemer - (lauf.regeln.investorStrafe ?? 10));
       melde(s2, "eigentuemer", "Der Investor beanstandet das vergangene Jahr: kein Immobilienverkauf.");
     }
     if (lauf.fusionHausIds?.length && s2.haeuser.some((h3) => h3.streikBis !== void 0 && h3.streikBis > s2.woche)) lauf.streikErlebt = true;
@@ -5154,7 +5228,7 @@
     const wert = hausWert(h3);
     h3.miete.vermieter = "dritt";
     h3.miete.vermieterName = "Immobilienfonds Nord";
-    h3.miete.mieteWoche = eur(h3.miete.mieteWoche + wert * 0.06 / 52);
+    h3.miete.mieteWoche = eur(h3.miete.mieteWoche + wert * (s2.szenario.regeln.investorMietrendite ?? 0.06) / 52);
     s2.cash += wert;
     s2.einmalErloeseWoche += wert;
     s2.szenario.immobilienVerkaeufe = [...s2.szenario.immobilienVerkaeufe ?? [], s2.woche];
@@ -15130,7 +15204,8 @@
       ["Vermieter", st2.vermieter],
       ["Arbeitnehmer", st2.betriebsrat]
     ];
-    const ja = gruppen.filter(([, v]) => v + planBonus + quoteBonus >= 42).map(([n3]) => n3);
+    const schutzschirmBonus = s2.szenario?.regeln.schutzschirmZustimmung ?? 0;
+    const ja = gruppen.filter(([, v]) => v + planBonus + quoteBonus + schutzschirmBonus >= 42).map(([n3]) => n3);
     const nein = gruppen.filter(([n3]) => !ja.includes(n3)).map(([n3]) => n3);
     const sofort = zahlung * 0.4;
     const finanzierbar = s2.cash >= sofort;
@@ -16518,7 +16593,7 @@
     for (const m of s2.meldungen.filter((m2) => ["insolvenz", "eigentuemer", "warnung"].includes(m2.typ)).slice(-12)) console.log(`  [W${m.woche} ${m.typ}] ${m.text}`);
   }
 
-  // node_modules/three/build/three.module.js
+  // ../../../../../home/claude/ruhrkauf/render/node_modules/three/build/three.module.js
   var three_module_exports = {};
   __export(three_module_exports, {
     ACESFilmicToneMapping: () => ACESFilmicToneMapping,
@@ -47159,7 +47234,7 @@
     }
   }
 
-  // node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
+  // ../../../../../home/claude/ruhrkauf/render/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
   function mergeGeometries(geometries, useGroups = false) {
     const isIndexed = geometries[0].index !== null;
     const attributesUsed = new Set(Object.keys(geometries[0].attributes));
@@ -119757,7 +119832,7 @@
     }
   });
 
-  // node_modules/three/examples/jsm/math/ConvexHull.js
+  // ../../../../../home/claude/ruhrkauf/render/node_modules/three/examples/jsm/math/ConvexHull.js
   var Visible = 0;
   var Deleted = 1;
   var _v12 = new Vector3();
@@ -120353,7 +120428,7 @@
     }
   };
 
-  // node_modules/three/examples/jsm/geometries/ConvexGeometry.js
+  // ../../../../../home/claude/ruhrkauf/render/node_modules/three/examples/jsm/geometries/ConvexGeometry.js
   var ConvexGeometry = class extends BufferGeometry {
     constructor(points = []) {
       super();
@@ -130691,7 +130766,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "220265b" : "Entwicklung";
+  var version = () => true ? "c36bf39" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
@@ -142566,7 +142641,8 @@
       document.getElementById("startsetup").hidden = seite2 !== "setup";
       document.getElementById("startauswahl").hidden = seite2 !== "karten";
       const auswahl4 = ctx.E.SZENARIEN.find((k3) => k3.id === id) ?? ctx.E.SZENARIEN[0];
-      document.getElementById("szenario-gewaehlt").textContent = auswahl4.name + " \xB7 " + (auswahl4.id === "sandkasten" ? "Cash und Kreditrahmen: unbegrenzt" : auswahl4.ziel);
+      document.getElementById("szenario-gewaehlt").textContent = auswahl4.name + " \xB7 " + (auswahl4.id === "sandkasten" ? "Cash und Kreditrahmen: unbegrenzt \xB7 ohne Schwierigkeitsstufen" : auswahl4.ziel);
+      ctx.stufenAktualisieren?.();
     }
     document.getElementById("startszenarien").addEventListener("click", (event) => {
       const karte = event.target.closest("[data-szenario]");
@@ -145902,7 +145978,7 @@
     if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true });
     vorherigerFokus = null;
   }
-  var szenarienUI = szenarienModul({ E: src_exports, spiel: () => s, wahl: () => startWahl, panel, meldung, nachAktion: () => {
+  var szenarienUI = szenarienModul({ E: src_exports, spiel: () => s, wahl: () => startWahl, panel, meldung, stufenAktualisieren: zeichneStufen, nachAktion: () => {
     cockpitZeigen();
     szenarienUI.aktualisieren();
     automatischSpeichern();
@@ -146716,8 +146792,8 @@
   function neuesSpiel3(seed = 1, stadt = "Essen", schwierigkeit2 = schwierigkeitId, szenario = "standard", startMonat = 1) {
     spielende?.zu();
     $2("spiel-ruhestand").hidden = true;
-    schwierigkeitId = SCHWIERIGKEITEN2.some((x2) => x2.id === schwierigkeit2) ? schwierigkeit2 : "mittel";
-    s = neuesSpiel(seed, { ...szenarioKonfiguration(szenario), schwierigkeit: schwierigkeitId, startMonat: Number(startMonat) });
+    schwierigkeitId = szenario === "sandkasten" ? "mittel" : SCHWIERIGKEITEN2.some((x2) => x2.id === schwierigkeit2) ? schwierigkeit2 : "mittel";
+    s = neuesSpiel(seed, { ...szenarioKonfiguration(szenario, schwierigkeitId), schwierigkeit: schwierigkeitId, startMonat: Number(startMonat) });
     postUi = neuerPostUi();
     $2("stufe").textContent = SCHWIERIGKEITEN2.find((x2) => x2.id === schwierigkeitId)?.name ?? schwierigkeitId;
     MERK.clear();
@@ -146987,9 +147063,18 @@
   var einfuehrung = einfuehrungModul();
   window.spiel.einfuehrung = einfuehrung;
   var startWahl = { stadt: param.get("stadt") ?? "Essen", schwierigkeit: param.get("schwierigkeit") ?? "mittel", szenario: param.get("szenario") ?? "standard", seed: Number(param.get("seed") ?? 1), startMonat: [1, 4, 7, 10].includes(Number(param.get("monat"))) ? Number(param.get("monat")) : 1 };
+  function zeichneStufen() {
+    const stufen = schwierigkeitenFuerSzenario?.(startWahl.szenario) ?? (startWahl.szenario === "sandkasten" ? [] : SCHWIERIGKEITEN2);
+    const stufenWahl = $2("startstufen");
+    stufenWahl.hidden = stufen.length === 0;
+    stufenWahl.previousElementSibling.hidden = stufen.length === 0;
+    if (!stufen.length) startWahl.schwierigkeit = "mittel";
+    stufenWahl.innerHTML = stufen.map(
+      (x2, index2) => `<button class="stufe-karte ${x2.id === startWahl.schwierigkeit ? "an" : ""}" data-v="${x2.id}"><span class="sterne-stufe">${"\u25CF".repeat(index2 + 1)}${"\u25CB".repeat(stufen.length - index2 - 1)}</span><b>${x2.name}</b><small>${esc2(x2.beschreibung)}</small></button>`
+    ).join("");
+  }
   function startZeigen() {
     $2("startstadt").innerHTML = STADTLISTE.map((q2) => `<option${q2.name === startWahl.stadt ? " selected" : ""}>${q2.name}</option>`).join("");
-    $2("startstufen").innerHTML = SCHWIERIGKEITEN2.map((x2) => `<button class="stufe-karte ${x2.id === startWahl.schwierigkeit ? "an" : ""}" data-v="${x2.id}"><span class="sterne-stufe">${"\u25CF".repeat(1 + SCHWIERIGKEITEN2.indexOf(x2))}${"\u25CB".repeat(SCHWIERIGKEITEN2.length - 1 - SCHWIERIGKEITEN2.indexOf(x2))}</span><b>${x2.name}</b><small>${x2.beschreibung}</small></button>`).join("");
     $2("startseed").value = startWahl.seed;
     $2("startmonat").value = startWahl.startMonat;
     szenarienUI.zeichneStart();
