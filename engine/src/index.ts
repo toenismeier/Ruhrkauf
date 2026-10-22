@@ -59,6 +59,7 @@ export {
   endwertung, ebitdaJahr, immobilienWert, unternehmenswert, endKennzahlen, spielBeenden, spielendePruefen,
 } from './spielende';
 // O03 IT
+export { IT_PRODUKT_IDS, itProdukte, itProduktZustand, type ItProduktId } from './it-produkte';
 export { SYSTEME, IT_IDS, itUebersicht, itDeckel, itDeckelGrund, itCluster, itProjektPlan, generationInCluster, itAlter, ausfallRisiko, type ItStand, type ItSystemId, type ItProjekt, type ItAktion, type ItPhase, type ProjektArt, type Generation } from './it';
 
 export { PREMIUM_HAEUSER } from './daten';
