@@ -59,8 +59,9 @@ export function einkaufModul(ctx) {
       zahl('Reichweite',dez(o.reichweite,1)+' Wo.','format:reichweite')+
       zahl('Abschriften',geld(o.abschriften),'format:abschriften')+
       zahl('Markenposten',geld(o.markenposten),'format:markenposten')+'</div>'+
-      '<label>Altwarequote <input type="range" data-a="formatQuote" min="0" max="100" step="5" value="'+Math.round(o.altwareQuote*100)+'"></label>'+
-      '<label>Markenposten-Zukauf pro Woche (€) <input type="number" data-a="formatBudget" min="0" step="100000" value="'+o.zukaufBudget+'"></label></div>';
+      // Q14: Eingaben als beschriftete Zeilen statt freier Labels im Fließtext.
+      '<label class="ek-eingabe"><span>Altwarequote <b>'+Math.round(o.altwareQuote*100)+' %</b></span><input type="range" data-a="formatQuote" min="0" max="100" step="5" value="'+Math.round(o.altwareQuote*100)+'"></label>'+
+      '<label class="ek-eingabe"><span>Markenposten-Zukauf je Woche</span><input type="number" inputmode="numeric" data-a="formatBudget" min="0" step="100000" value="'+o.zukaufBudget+'"></label></div>';
     const kandidaten=ctx.E.outletKandidaten(s()).slice(0,8);
     if(kandidaten.length){
       h += '<div class="karte"><div class="khead">Neue FUNDUS-Standorte · 12 Wochen Vorlauf</div>';

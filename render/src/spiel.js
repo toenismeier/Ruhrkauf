@@ -955,7 +955,7 @@ function oeffneHaus(id) {
   offenesHaus = id; offenesHq = null; offenerWettbewerber = null;
   const h = d.haus, k = h.kpi;
   const z = sb.zustand(id);
-  const bild = z ? [z.status, ...z.zusatz].filter((q) => q !== 'offen').map((q) => (q === 'aktion' && z.aktion ? `Aktion ${AKTION_NAME[z.aktion]}` : STATUS_TITEL[q])).join(' · ') : '';
+  const bild = z ? [z.status, ...z.zusatz].filter((q) => q !== 'offen').map((q) => (q === 'aktion' && z.aktion ? (AKTION_NAME[z.aktion] ? `Aktion ${AKTION_NAME[z.aktion]}` : 'Aktion') : STATUS_TITEL[q] ?? '')).filter(Boolean).join(' · ') : '';
   const qm = h.flaechen.reduce((a, f) => a + f.qm, 0);
   const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
   let html = `<div class="chips"><span class="chip ${h.status === 'offen' ? '' : 'warn'}">${STATUS_HAUS[h.status] ?? h.status}</span>${h.klasse === 'premium' ? '<span class="chip" style="background:#fbefd2;color:#6d4b18;border:1px solid #c4a06a;font-weight:700">♛ Premium</span>' : ''}${bild ? `<span class="chip">${bild}</span>` : ''}<span class="chip grau">${h.lage === '1a' ? '1a-Lage' : h.lage === 'b' ? 'B-Lage' : h.lage === 'center' ? 'Center' : h.lage === 'stadtteil' ? 'Stadtteilzentrum' : 'Stadtrand'}</span></div>`;
@@ -1259,7 +1259,7 @@ function oeffneHq(gebaeudeId, bleiben = false) {
   const ziele = [];
   for (const g of gs) for (const e of g.etagen) if (e.gemietet) ziele.push({ v: `${g.id}|${e.nr}`, t: `${g.name.replace('Hartwig-', '')}, ${e.nr === 0 ? 'EG' : e.nr + '. Etage'} (${fmt.format(e.qm - e.belegtQm)} qm frei)` });
   for (const g of [...gs].sort((a, b) => (a.id === gebaeudeId ? -1 : b.id === gebaeudeId ? 1 : 0))) {
-    html += `<div class="karte"><div class="khead">${g.name}<small>${g.stadt} · ${fmt.format(g.qmGemietet)} qm gemietet · ${pz(g.auslastung)} belegt · ${geld(g.kostenWoche)} je Woche</small>${gs.length > 1 ? knopf('Kündigen', ['kuendigenG', g.id], 'rot') : ''}</div>`;
+    html += `<div class="karte"><div class="khead kopf-mit-knopf"><div>${g.name}<small>${g.stadt} · ${fmt.format(g.qmGemietet)} qm gemietet · ${pz(g.auslastung)} belegt · ${geld(g.kostenWoche)} je Woche</small></div>${gs.length > 1 ? knopf('Kündigen', ['kuendigenG', g.id], 'rot') : ''}</div>`;
     for (const e of [...(g.etagen ?? [])].sort((x, y) => y.nr - x.nr)) {
       const ab = (e.abteilungen ?? []).map((a) => a.name).join(', ');
       const gewaehlt = gWahl?.id === g.id && (hqEtageWahl?.g === g.id ? hqEtageWahl.nr === e.nr : false);

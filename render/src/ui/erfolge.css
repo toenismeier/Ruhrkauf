@@ -19,15 +19,16 @@
 .erfolge-karte .erfolge-frei { font-size: calc(10.5px * var(--schrift)); color: #237647; font-weight: 700; margin-top: auto; }
 .erfolge-hinweis { font-size: calc(10.5px * var(--schrift)); line-height: 1.35; color: var(--leise); margin-top: auto; min-height: 30px; }
 .erfolge-karte .erfolge-balken { margin: 3px 0; }
-#erfolge-toast { position: fixed; left: 15px; right: 15px; max-width: 470px; margin: auto; top: calc(16px + env(safe-area-inset-top)); z-index: 13; background: #243746; color: white; border-radius: 15px; box-shadow: 0 8px 30px #0005; display: flex; align-items: center; gap: 12px; padding: 10px 14px; opacity: 0; transform: translateY(-20px); transition: opacity 180ms, transform 180ms; pointer-events: none; }
+#erfolge-toast { position: fixed; left: 15px; right: 15px; max-width: 470px; margin: auto; bottom: calc(92px + env(safe-area-inset-bottom)); z-index: 13; background: #243746; color: white; border-radius: 15px; box-shadow: 0 8px 30px #0005; display: flex; align-items: center; gap: 12px; padding: 8px 12px; opacity: 0; transform: translateY(20px); transition: opacity 180ms, transform 180ms; pointer-events: none; }
 #erfolge-toast[hidden] { display: none; }
 #erfolge-toast.sichtbar { opacity: 1; transform: translateY(0); }
-#erfolge-toast .erfolge-bild { width: 64px; height: 64px; }
+/* Q14: kompakt über der unteren Leiste, damit Cockpit und Panelköpfe frei bleiben. */
+#erfolge-toast .erfolge-bild { width: 40px; height: 40px; }
 #erfolge-toast .erfolge-toast-bild { perspective: 450px; flex: none; }
 #erfolge-toast.sichtbar .erfolge-bild { animation: erfolge-drehung 600ms ease-in-out 1; }
 #erfolge-toast small { display: block; color: #e9bf6b; font-weight: 800; font-size: calc(10px * var(--schrift)); letter-spacing: .08em; }
 #erfolge-toast strong { display: block; font-size: calc(15px * var(--schrift)); line-height: 1.3; }
-#erfolge-toast span { display: block; font-size: calc(11px * var(--schrift)); line-height: 1.3; opacity: .8; margin-top: 2px; }
+#erfolge-toast span { display: none; font-size: calc(11px * var(--schrift)); line-height: 1.3; opacity: .8; margin-top: 2px; }
 @keyframes erfolge-drehung { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
 @media (prefers-reduced-motion: reduce) {
   #erfolge-toast, .erfolge-balken i { transition: none; }

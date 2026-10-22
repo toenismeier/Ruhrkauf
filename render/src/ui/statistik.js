@@ -44,7 +44,7 @@ export function statistikModul(ctx) {
       const p = reihen[0].punkte.filter(x => x.plan !== undefined).map(x => ({ woche:x.woche, wert:x.plan }));
       if (p.length) listen.push({ name: 'Plan', punkte: p, farbe: FARBE.Plan });
     }
-    const w = opt.klein ? 300 : 340, h = opt.klein ? 90 : 184, l = 42, r = 10, t = 10, u = opt.klein ? 14 : 29;
+    const w = opt.klein ? 300 : 340, h = opt.klein ? 90 : 184, l = opt.klein ? 42 : 66, r = 10, t = 10, u = opt.klein ? 14 : 29;
     const alle = listen.flatMap(x => x.punkte), xs = alle.map(p => p.woche), ys = alle.map(p => p.wert);
     if (Number.isFinite(opt.grenze)) ys.push(opt.grenze);
     const minW = Math.min(...xs), maxW = Math.max(...xs), breite = Math.max(1,maxW-minW);
@@ -78,7 +78,7 @@ export function statistikModul(ctx) {
   }
   function konzern() {
     const kennzahlen = [['umsatz','Umsatz'], ['ebitda','EBITDA'], ['cash','Cash und Insolvenzgrenze'], ['stimmung','Stakeholder-Stimmung']];
-    let html = '<div class="stat-raster">' + kennzahlen.slice(0,3).map(([k,t]) => zahl(t, daten('konzern',undefined,k).punkte.at(-1)?.wert ?? 0,k)).join('') + '</div>';
+    let html = '<div class="stat-raster">' + kennzahlen.slice(0,3).map(([k,t]) => zahl(k === 'cash' ? 'Cash' : t, daten('konzern',undefined,k).punkte.at(-1)?.wert ?? 0,k)).join('') + '</div>';
     for (const [k,t] of kennzahlen) {
       const d = daten('konzern',undefined,k);
       html += diagramm(t, [{ name:'Ist', punkte:d.punkte }], k, { vorjahr:true, grenze:k==='cash' ? -s().kreditlinie : undefined });

@@ -25,7 +25,7 @@ export function itModul(ctx) {
     const akt=x.verteilung.filter(c=>c.generation>x.generation);
     if(akt.length)h+='<div class="zeile">Bereits modernisierte Cluster: '+akt.length+' / '+x.verteilung.length+'</div>';
     const bereiche=E.SYSTEME[x.id].bereiche;
-    h+='<div class="it-meta">Begrenzt: '+esc(bereiche.join(', '))+'</div>';
+    h+='<div class="it-meta">Begrenzt: '+esc(bereiche.map(id=>E.BEREICHE?.find(q=>q.id===id)?.name??id).join(', '))+'</div>'; // Q14: Namen statt interner IDs
     h+='<div class="oknoepfe"><button data-it="neues" data-v="'+x.id+'">Modernisieren</button></div></div>';
     return h;
   }

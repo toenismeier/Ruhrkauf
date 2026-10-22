@@ -71,7 +71,7 @@
   .postwert { padding: 4px 12px; display: flex; align-items: baseline; gap: 6px; } .postwert b { font-size: calc(15px * var(--schrift)); } .postwert span { color: var(--leise); font-size: calc(11px * var(--schrift)); }
   .poststandard { margin: 6px 12px 10px; background: #f8f4ed; border-radius: 9px; padding: 8px; font-size: calc(11.5px * var(--schrift)); color: #7d5424; }
   .postaktionen { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 12px; }
-  .postaktionen button { flex: 1 1 calc(50% - 8px); min-width: 130px; min-height: 44px; overflow-wrap: anywhere; background: #e9e5de; border-radius: 10px; padding: 7px 9px; color: var(--text); font-weight: 800; font-size: calc(12px * var(--schrift)); }
+  .postaktionen button { flex: 1 1 auto; min-width: 130px; min-height: 44px; overflow-wrap: break-word; hyphens: auto; background: #e9e5de; border-radius: 10px; padding: 7px 9px; color: var(--text); font-weight: 800; font-size: calc(12px * var(--schrift)); }
   .postaktionen button.gruen { background: var(--gruen); color: white; } .postaktionen button.rot { background: #fbe3e1; color: var(--rot); }
   .postleer { min-height: 64px; } .postfilter { display: block; font-size: calc(12px * var(--schrift)); font-weight: 700; margin-bottom: 8px; }
   .postfilter select { display: block; } .postalle, .postzurueck { min-height: 44px; padding: 6px 10px; background: transparent; color: #2f63b5; font-size: calc(12px * var(--schrift)); font-weight: 700; }
@@ -282,8 +282,8 @@
   .vbild svg { width: 100%; height: 100%; display: block; }
   .vbild.mittel { width: 88px; height: 100px; border-radius: 12px; flex: none; }
   .vbild.gross { width: 112px; height: 124px; border-radius: 14px; flex: none; }
-  .vtext { min-width: 0; } .vtext b { display: block; font-size: calc(14px * var(--schrift)); } .vtext small { display: block; font-size: calc(10.5px * var(--schrift)); color: var(--leise); line-height: 1.25; }
-  .vtext em { display: block; font-style: normal; font-size: calc(12.5px * var(--schrift)); font-weight: 700; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .vtext em.frei { color: var(--rot); }
+  .vtext { min-width: 0; } .vtext b { display: block; font-size: calc(14px * var(--schrift)); } .vtext small { display: block; font-size: calc(10.5px * var(--schrift)); color: var(--leise); line-height: 1.25; overflow-wrap: break-word; hyphens: auto; }
+  .vtext em { display: block; font-style: normal; font-size: calc(12.5px * var(--schrift)); font-weight: 700; margin-top: 3px; overflow-wrap: break-word; hyphens: auto; } .vtext em.frei { color: var(--rot); }
   .vmini { display: flex; flex-direction: column; gap: 3px; align-self: end; } .vmini span { display: block; height: 4px; background: #eeebe5; border-radius: 2px; overflow: hidden; } .vmini i { display: block; height: 100%; background: #5cb85c; }
   .vkarte > .ampel { position: absolute; right: 8px; top: 9px; } .vkarte > .chip { align-self: end; justify-self: start; font-size: calc(11px * var(--schrift)); }
   .vprofil .vkopf, .kandidat .vkopf { display: flex; gap: 14px; padding: 14px 14px 6px; align-items: flex-start; }
@@ -677,7 +677,19 @@
 #panel .postkarte .postwert b{overflow-wrap:anywhere}
 #pzu{width:44px;height:44px;right:8px;top:10px}
 #ptitel,#punter{padding-right:40px;overflow-wrap:anywhere}
-@media(max-width:390px){#panel .zeile>.was{flex-basis:100%}#panel .org-zeile>div{flex:1 1 100%}#cockpit{gap:4px}#cockpit .kz{padding:6px}}
+/* Q14 Abnahme Claude: Organisationszeile Porträt | Text, Aktionen darunter in einer Reihe */
+#panel .org-zeile>.vbild{flex:0 0 56px}
+#panel .org-zeile>div:nth-child(2){flex:1 1 0;overflow-wrap:break-word}
+#panel .org-aktionen{max-width:none;flex:1 1 100%}
+#panel .org-aktionen button{flex:0 1 auto;padding:6px 12px}
+#panel .kopf-mit-knopf{display:flex;gap:8px;align-items:flex-start}
+#panel .kopf-mit-knopf>div{flex:1;min-width:0}
+#panel .kopf-mit-knopf small{display:block;margin-left:0}
+#panel .ek-eingabe{display:flex;flex-direction:column;gap:6px;padding:12px 16px;border-top:1px solid var(--ui-border,#e5e2dc);font-size:14px}
+#panel .ek-eingabe span{display:flex;justify-content:space-between}
+#panel .ek-eingabe input[type=number]{min-height:44px;border:1px solid var(--ui-border,#d8d4cc);border-radius:10px;padding:0 12px;font-size:16px}
+#panel .ek-eingabe input[type=range]{width:100%}
+@media(max-width:390px){#panel .zeile>.was{flex-basis:100%}#cockpit{gap:4px}#cockpit .kz{padding:6px}}
 </style>
 
 </head>
