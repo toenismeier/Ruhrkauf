@@ -258,6 +258,9 @@ export interface Produkt {
   preislage: Preislage; qualitaet: number; wg: WgId; kategorie: ProduktKategorie;
   /** Normpreis (aus Typ, Preislage, Material, Qualität) und aktueller Preis in €. */
   normpreis: number; preis: number; ekStueck: number;
+  /** Standard: einheitlicher Preis. Filialpreise sind nur bei Freigabe erlaubt. */
+  preisAlleHaeuser?: boolean;
+  hauspreise?: Record<string, number>;
   /** Marge, die die Marke in der WG bei Einführung erwarten durfte (Bezug für den Margeneffekt). */
   margeErwartet: number;
   status: ProduktStatus;
@@ -504,15 +507,19 @@ export function produktNachfrageFaktor(s: GameState, markeId: string, wg: WgId):
 /** Altersstruktur des Einzugsgebiets beeinflusst neue, gezielt entwickelte Produkte je Haus.
  * Ohne explizite Produktzielgruppe: exakt 1 (Bestand/Spielstände Version 2 bleiben neutral).
  * Die Hauspassung wird über dieselben Engine-Parameter wie bei den Eigenmarken berechnet. */
-export function produktHausFaktor(s: GameState, m: Eigenmarke, wg: WgId, h: Pick<Haus, 'einzug' | 'cluster' | 'region'>): number {
+export function produktHausFaktor(s: GameState, m: Eigenmarke, wg: WgId, h: Pick<Haus, 'id' | 'einzug' | 'cluster' | 'region'>): number {
   if (!s.produkte) return 1;
   const liste = s.produkte.liste.filter((p) => p.marke === m.id && p.wg === wg && imSortiment(p));
-  if (!liste.some((p) => p.zielgruppe)) return 1;
+  if (!liste.some((p) => p.zielgruppe || (p.preisAlleHaeuser === false && p.hauspreise?.[h.id] !== undefined))) return 1;
   const alt = passungHaus(m, h);
-  let gewichtet = 0, sum = 0;
+  let gewichtet = 0, sum = 0, preisAbweichung = 0;
   for (const p of liste) {
     const w = gewicht(s, p);
     sum += w;
+    // Filialpreise wirken nur in der jeweiligen Filiale auf die lokale Nachfrage.
+    // Ohne Abweichung bleibt die bisherige Kalibrierung exakt erhalten.
+    const lokal = p.preisAlleHaeuser === false ? p.hauspreise?.[h.id] : undefined;
+    if (lokal !== undefined) preisAbweichung += w * (Math.pow(p.preis / lokal, PRODUKT_PARAM.preisElastizitaet) - 1);
     // Altprodukte ohne Kennzeichnung übernehmen neutral die Zielgruppe der Marke.
     if (!p.zielgruppe) continue;
     const z = ZIELGRUPPE_PRODUKT[p.zielgruppe];
@@ -520,7 +527,7 @@ export function produktHausFaktor(s: GameState, m: Eigenmarke, wg: WgId, h: Pick
     const ziel = passungHaus({ zielgruppe: { ...m.zielgruppe, alter }, preislage: p.preislage }, h);
     gewichtet += w * (ziel - alt);
   }
-  return clamp(1 + 0.8 * gewichtet / Math.max(sum, 0.01), 0.75, 1.25);
+  return clamp(1 + 0.8 * gewichtet / Math.max(sum, 0.01) + preisAbweichung / Math.max(sum, 0.01), 0.7, 1.3);
 }
 
 /** Margenverschiebung der Marke in der WG gegenüber dem Start (Preis, Material, Qualität der Produkte). */
@@ -719,10 +726,12 @@ export function produkteBuchen(s: GameState): void {
 export type ProduktAktion =
   | { typ: 'produktEntwickeln'; entwurf: ProduktEntwurf }
   | { typ: 'produktPreis'; produkt: string; preis: number }
+  | { typ: 'produktPreisAlleHaeuser'; produkt: string; an: boolean }
+  | { typ: 'produktHauspreis'; produkt: string; haus: string; preis: number }
   | { typ: 'produktAuslisten'; produkt: string }
   | { typ: 'produktSortiment'; produkt: string; an: boolean };
 
-export const PRODUKT_AKTIONEN = new Set<string>(['produktEntwickeln', 'produktPreis', 'produktAuslisten', 'produktSortiment']);
+export const PRODUKT_AKTIONEN = new Set<string>(['produktEntwickeln', 'produktPreis', 'produktPreisAlleHaeuser', 'produktHauspreis', 'produktAuslisten', 'produktSortiment']);
 
 interface Pruefung { fehler?: string; m?: Eigenmarke; t?: TypDef; wg?: WgId; preislage: Preislage; qualitaet: number; stil: Stil; kapFrei: number }
 
@@ -768,6 +777,21 @@ export function produktAktion(s: GameState, a: ProduktAktion): { ok: boolean; te
       p.preis = neu;
       const marge = 1 - p.ekStueck / neu;
       return ok(`${p.name}: Preis ${neu.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €, Marge ${Math.round(marge * 100)} %.`);
+    }
+    case 'produktPreisAlleHaeuser': {
+      p.preisAlleHaeuser = a.an;
+      if (a.an) p.hauspreise = {};
+      return ok(a.an ? p.name + ': Preis in allen Häusern vereinheitlicht.' : p.name + ': Filialpreise freigegeben.');
+    }
+    case 'produktHauspreis': {
+      if (p.preisAlleHaeuser !== false) return fehler('Filialpreise sind für dieses Produkt nicht freigegeben.');
+      if (!s.haeuser.some((h) => h.id === a.haus && h.status === 'offen')) return fehler('Haus nicht gefunden oder geschlossen.');
+      if (!Number.isFinite(a.preis) || a.preis <= 0) return fehler('Ungültiger Filialpreis.');
+      const neu = Math.round(clamp(a.preis, p.normpreis * 0.4, p.normpreis * 2.5) * 100) / 100;
+      p.hauspreise ??= {};
+      if (neu === p.preis) delete p.hauspreise[a.haus];
+      else p.hauspreise[a.haus] = neu;
+      return ok(p.name + ': Filialpreis auf ' + neu.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' € gesetzt.');
     }
     case 'produktAuslisten': {
       const warEnt = p.status === 'entwicklung';
@@ -844,7 +868,7 @@ export function produktKi(s: GameState, guete: number, r: RngHalter): string | u
 export interface ProduktKarte {
   id: string; marke: string; markeName: string; typ: ArtikelTyp; name: string; farbe: Farbe; farbeHex: string; material: Material; stil: Stil; zielgruppe?: ProduktZielgruppe; zielgruppeName: string;
   preislage: Preislage; qualitaet: number; wg: WgId; wgName: string; bereich: GruppeId; kategorie: ProduktKategorie; kategorieName: string;
-  status: ProduktStatus; normpreis: number; preis: number; ekStueck: number; marge: number;
+  status: ProduktStatus; normpreis: number; preis: number; ekStueck: number; marge: number; preisAlleHaeuser: boolean; hauspreise: Record<string, number>;
   sterne: number; sterneEinfuehrung?: number; sterneTeile?: SterneTeile;
   verkaufLetzteWoche: number; verkaufVorwoche: number; veraenderung: number; veraenderungProzent: number; umsatzLetzteWoche: number;
   start: number; fertigWoche: number; dauer: number; budgetWoche: number; fortschritt: number; seit?: number; basis: boolean;
@@ -870,7 +894,9 @@ export function produktKarte(s: GameState, p: Produkt): ProduktKarte {
   return {
     id: p.id, marke: p.marke, markeName: m?.name ?? p.marke, typ: p.typ, name: p.name, farbe: p.farbe, farbeHex: FARBEN[p.farbe], material: p.material, stil: p.stil, zielgruppe: p.zielgruppe, zielgruppeName: p.zielgruppe ? ZIELGRUPPE_PRODUKT[p.zielgruppe].name : 'Markenzielgruppe',
     preislage: p.preislage, qualitaet: p.qualitaet, wg: p.wg, wgName: WG[p.wg]?.name ?? p.wg, bereich: WG[p.wg]?.bereich, kategorie: p.kategorie, kategorieName: PRODUKT_KATEGORIEN[p.kategorie],
-    status: p.status, normpreis: p.normpreis, preis: p.preis, ekStueck: p.ekStueck, marge: Math.round((1 - p.ekStueck / Math.max(0.5, p.preis)) * 1000) / 1000,
+    status: p.status, normpreis: p.normpreis, preis: p.preis, ekStueck: p.ekStueck,
+    preisAlleHaeuser: p.preisAlleHaeuser !== false, hauspreise: { ...p.hauspreise },
+    marge: Math.round((1 - p.ekStueck / Math.max(0.5, p.preis)) * 1000) / 1000,
     sterne: ent ? 0 : halbe(sterneWirksam(s, p)), sterneEinfuehrung: p.sterne, sterneTeile: p.teile,
     verkaufLetzteWoche: a, verkaufVorwoche: b, veraenderung: a - b, veraenderungProzent: b > 0 ? Math.round(((a - b) / b) * 1000) / 1000 : 0,
     umsatzLetzteWoche: p.umsatz.length ? p.umsatz[p.umsatz.length - 1] : 0,
@@ -898,6 +924,47 @@ export function produkte(s: GameState, marke?: string): ProdukteListe {
     };
   });
   return { woche: s.woche, kapazitaet: kap, stufe: Math.round(produktStufe(s) * 100) / 100, team: Math.round(teamStaerke(s) * 100) / 100, kostenWoche: eur(produktKostenWoche(s)), marken };
+}
+
+
+/** Q17: zwei vergleichbare Absatzlinien derselben Warengruppen in € je Woche.
+ * Eigenmarke = tatsächlich gebuchte Produktumsätze der Marke; Fremdmarke = WG-Umsatz
+ * abzüglich aller Eigenmarken. Leere Wochen sind 0, keine hochgerechneten Daten. */
+export function produktAbsatzVerlauf(s: GameState, marke: string, kategorie?: ProduktKategorie) {
+  const liste = s.produkte?.liste.filter((p) => p.marke === marke && (!kategorie || p.kategorie === kategorie)) ?? [];
+  const wgs = [...new Set(liste.map((p) => p.wg))];
+  const eigen: number[] = [], fremd: number[] = [], wochen: number[] = [];
+  for (let i = 4; i >= 0; i--) {
+    let e = 0, f = 0;
+    for (const p of liste) e += p.umsatz[p.umsatz.length - 1 - i] ?? 0;
+    for (const wg of wgs) {
+      const v = s.einkauf.wgs[wg]?.v;
+      if (!v) continue;
+      const j = v.u.length - 1 - i;
+      f += Math.max(0, (v.u[j] ?? 0) - (v.eu[j] ?? 0));
+    }
+    eigen.push(Math.round(e)); fremd.push(Math.round(f)); wochen.push(s.woche - i);
+  }
+  return { eigen, fremd, wochen, letzteEigen: eigen[4], letzteFremd: fremd[4], warengruppen: wgs.length };
+}
+
+/** Q17: Profil aus vorhandenen Markenmerkmalen; Nachhaltigkeit ist ein Orientierungsindex,
+ * keine zertifizierte Ökobilanz. Verwaltung erfolgt über die bestehende Eigenmarkenlogik. */
+export function produktLinienprofil(s: GameState, id: string) {
+  const m = s.eigenmarken.marken.find((x) => x.id === id && x.status !== 'eingestellt');
+  if (!m) return null;
+  const artikel = s.produkte.liste.filter((p) => p.marke === id && p.status === 'sortiment');
+  const preispunkt = artikel.length ? Math.round(artikel.reduce((a, p) => a + p.preis, 0) / artikel.length * 100) / 100 : 0;
+  const stilFaktor: Record<Stil, number> = { klassisch: 0.6, modern: 0.85, sportlich: 0.7, trendig: 1 };
+  const standortFaktor = { fernost: 30, nahost: 55, europa: 85 }[m.beschaffung];
+  const nachhaltige = artikel.filter((p) => ['Bio-Baumwolle', 'Leinen', 'Merino'].includes(p.material)).length;
+  return {
+    marke: m.id, name: m.name, farbe: m.farbe, qualitaet: m.qualitaet * 20,
+    modegrad: Math.round(m.stilAktualitaet * stilFaktor[m.stil]),
+    preislage: { einstieg: 25, mitte: 55, gehoben: 85 }[m.preislage],
+    nachhaltigkeit: Math.round(standortFaktor * 0.75 + (artikel.length ? nachhaltige / artikel.length : 0) * 25),
+    preispunkt, stil: m.stil,
+  };
 }
 
 export interface ProduktKatalog {

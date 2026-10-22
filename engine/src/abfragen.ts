@@ -378,7 +378,7 @@ export { eigenmarkenUebersicht, eigenmarkeVorschau } from './eigenmarken';
 /** Vorstand: Ressortkarten, Profil, Kandidatenkarussell. */
 export { vorstandUebersicht, vorstandProfil, kandidaten, angebotsChance } from './vorstand';
 /** Produktentwicklung: Produktkarten je Marke, Katalog, Trendbericht, Vorschau für den Assistenten. */
-export { produkte, produktKatalog, trendbericht, produktVorschau } from './produkte';
+export { produkte, produktKatalog, trendbericht, produktVorschau, produktAbsatzVerlauf, produktLinienprofil } from './produkte';
 /** Marketing: Übersicht, Kanäle, Hartwig Karte und App, CRM-Kampagnen, Aktionskalender, Aktionsauswertung. */
 export { marketingUebersicht, kanaele, kundenkarte, crmKampagnen, aktionskalender, aktionsAuswertung } from './marketing';
 

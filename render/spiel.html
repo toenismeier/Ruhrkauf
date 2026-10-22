@@ -329,6 +329,39 @@
   .typkacheln button.voll { opacity: 0.55; } .typkacheln button small { font-size: calc(9.5px * var(--schrift)); color: var(--rot); font-weight: 700; }
   .farben.klein { gap: 8px; } .farben.klein button { width: 34px; height: 34px; border-radius: 17px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
   .trend { padding: 8px 12px; border-top: 1px solid #f2efea; } .trend > b { font-size: calc(13px * var(--schrift)); } .tfarben { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 5px 0 2px; } .tfarben span { width: 18px; height: 18px; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); } .tfarben i { font-style: normal; font-size: calc(11.5px * var(--schrift)); margin-right: 6px; } .trend .olief { padding: 0; }
+
+  /* Q17: Eigenmarken-Produktkarten und Fünf-Wochen-Vergleich (mobile first). */
+  .q17-kopf {display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:11px 12px 8px;border-bottom:1px solid var(--linie);}
+  .q17-kopf b {font-size:calc(13px * var(--schrift));}
+  .q17-kopf small {font-size:calc(10.5px * var(--schrift));color:var(--leise);text-align:right;}
+  .q17-kpis {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;}
+  .q17-kpis>div {padding:12px 10px 8px;min-width:0;}
+  .q17-kpis>div+div {border-left:1px solid var(--linie);}
+  .q17-kpis small {display:flex;align-items:center;gap:5px;font-size:calc(11px * var(--schrift));color:var(--leise);}
+  .q17-kpis b {display:block;font-size:clamp(17px,4vw,24px);line-height:1.25;overflow-wrap:anywhere;font-variant-numeric:tabular-nums;}
+  .q17-kpis span {display:block;font-size:calc(10px * var(--schrift));color:var(--leise);}
+  .q17-punkt {display:inline-block;width:8px;height:8px;border-radius:50%;}
+  .q17-punkt.eigen {background:#b65a44;}.q17-punkt.fremd {background:#88939a;}
+  .q17-linien {display:block;width:100%;height:auto;padding:0 8px;box-sizing:border-box;}
+  .q17-hinweis {font-size:calc(10.5px * var(--schrift));line-height:1.4;color:var(--leise);padding:0 12px 10px;margin:2px 0 0;}
+  .q17-profil-inhalt {padding:9px 12px 4px;}
+  .q17-merkmal {display:grid;grid-template-columns:96px minmax(0,1fr) 28px;gap:8px;align-items:center;min-height:29px;font-size:calc(11.5px * var(--schrift));}
+  .q17-merkmal b {text-align:right;font-variant-numeric:tabular-nums;}
+  .q17-balken {height:8px;border-radius:4px;background:#e9e6e0;overflow:hidden;}
+  .q17-balken i {display:block;height:100%;border-radius:4px;background:#526a78;}
+  .q17-preispunkt {display:flex;justify-content:space-between;gap:12px;padding:10px 0 5px;margin-top:7px;border-top:1px solid var(--linie);font-size:calc(11.5px * var(--schrift));}
+  .q17-preispunkt b {font-size:calc(15px * var(--schrift));}
+  .q17-linienknopf {display:block;width:100%;padding:13px 12px;border-top:1px solid var(--linie);text-align:center;color:var(--text);font-weight:700;background:#faf9f6;min-height:44px;}
+  .q17-preis {padding:7px 12px 5px;display:flex;flex-direction:column;gap:4px;}
+  .q17-preis label,.q17-hauspreis label {font-weight:700;font-size:calc(11.5px * var(--schrift));}
+  .q17-preis input {width:100%;min-height:32px;accent-color:#b65a44;touch-action:pan-y;}
+  .q17-preis small,.q17-hauspreis small {font-size:calc(10.5px * var(--schrift));color:var(--leise);}
+  .q17-einheit {padding:7px 12px 0;border-top:1px solid var(--linie);}
+  .q17-einheit .schalter {width:100%;min-height:44px;}
+  .q17-hauspreis {padding:7px 12px 13px;display:flex;flex-direction:column;gap:7px;}
+  .q17-hauspreis select {width:100%;min-height:44px;border:1px solid var(--linie);border-radius:8px;background:var(--karte);color:var(--text);padding:6px 8px;font:inherit;font-size:calc(12px * var(--schrift));}
+  .q17-hauspreis .stepper {margin:0;}
+
   /* Szenarioauswahl und Zielanzeige: selbst erzeugte Kit-Grafik. */
   .sz-karten { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px; }
   .sz-karte { text-align:left; display:flex; flex-direction:column;gap:4px; padding:7px;background:var(--karte);color:var(--text);border:1px solid var(--linie);border-radius:12px;min-width:0; }
