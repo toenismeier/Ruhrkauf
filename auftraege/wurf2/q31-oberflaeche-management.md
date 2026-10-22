@@ -6,6 +6,7 @@ Branch `feat/q31-oberflaeche-management`. Hintergrund und Regeln wie `q30-oberfl
 Einkauf (`einkauf.js`, Ware/WG-Detail), Eigenmarken und Produktentwicklung (`eigenmarken.js`, `produkte.js`, `produkte-q24.js`), Marketing (`marketing.js`, `marketing-q16.js`), IT und IT-Produkte (`it.js`, `it-produkte.js`), E-Commerce (`ecommerce.js`), Planung, Reporting, Vorstand, App/Spielstände (`app.js`).
 
 ## Regeln
+- **Grundlook dunkel nach Coffee (Ummo 22.10. per Auswahl):** Muster und Bildzuordnung in `auftraege/wurf2/coffee-muster.md`, Tokens kommen aus Q30.
 - Baut auf den gemeinsamen Bausteinen aus Q30 auf (`render/src/ui/komponenten.css`); bis Q30 sie gemergt hat, mit der Bestandsaufnahme und Vorher-Bildern beginnen. `spiel.html`/`spiel.js` nicht ändern, Bedarf an Q30 melden.
 - Eigenmarken: Produktbilder kommen aus `render/src/kit/mode/` (Q25, Q27–Q29), nicht anfassen; nur Rahmen, Raster, Hierarchie.
 - Den Abschnitt „Gegen den KI-Look“ unten genauso anwenden; eigene Bereichselemente z. B. Orderbuch (Einkauf), Musterkarte/Kollektionstafel (Eigenmarken), Kampagnenkalender (Marketing).

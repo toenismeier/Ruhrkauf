@@ -6,6 +6,7 @@ Branch `feat/q30-oberflaeche-spiel`. **Ummo (22.10.2026, per Auswahl):** Die res
 Cockpit/Kopfzeile, Menü und Chips (`render/src/spiel.js`, `render/spiel.html`), Startbildschirm und Szenarien (`szenarien.js`), Hausdetail (`haus.js`) und Hausbesuch, Karte/Portfolio/Vertrieb (`karte.js`, `portfolio.js`, `vertrieb.js`), Posteingang, Wochenbericht, Zeitung, Reise und Deutschlandkarte, Chronik, Statistik, Erfolge, Spielende, Einführung, Einstellungen, Organisation, Zentrale-Abteilungen, Personaleinsatz, Umbau, Ware.
 
 ## Regeln
+- **Grundlook dunkel nach Coffee (Ummo 22.10. per Auswahl):** Q30 ersetzt die hellen Q14-Tokens in `render/GESTALTUNG-UI.md` durch dunkle Tokens je Bereich und setzt die Muster aus `auftraege/wurf2/coffee-muster.md` um (Blatt mit Kopfbild, Sprecherzeile mit Befund, Reiterleiste unten, Großkennzahlen, Balken, Stepper). Vorlagen `testflight/vorlage-coffee/01–32.png`, Zuordnung zu Hartwig-Panels in der Musterdatei.
 - `render/GESTALTUNG-UI.md` ist verbindlich (Tokens, Komponentenvertrag, Panel-Abnahme). Gemeinsame Tokens und Komponenten (Panelkopf, Karte, Liste, Reiter, Knöpfe, Kennzahl, leerer Zustand) baut **Q30** als gemeinsame Bausteine (`render/src/ui/komponenten.css` + kleine Hilfsfunktionen) und mergt sie **zuerst als eigenen kleinen PR**, damit Q31 darauf aufsetzt.
 - Q31 ändert `spiel.html`/`spiel.js` nicht; Bedarf meldet Q31 an Q30.
 - Keine Engine-Änderung, Spielwerte unverändert (`node spiel-render.js --nur-panels` 0 Abweichungen).
