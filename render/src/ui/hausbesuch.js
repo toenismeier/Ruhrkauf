@@ -1,6 +1,6 @@
 // Optionaler, rein visueller Hausbesuch. Keine Änderungen am Spielstand und keine Engine-Zufallszahlen.
 // Der Schalter kann nach Einbau von N13 über setzenAktiv() angebunden werden.
-import { THREE, Sammler, neueSzene, isoKamera, rng, sonneAuf } from '../kit/basis.js';
+import { THREE, Sammler, neueSzene, isoKamera, sonneAuf } from '../kit/basis.js';
 import { etage } from '../kit/grundriss.js';
 import { masseOutlet } from '../kit/outlet.js';
 import { ladenplan, baueLadenplan } from '../kit/ladenplan.js';
@@ -8,6 +8,7 @@ import fundusHaeuser from '../../haeuser-outlet.json';
 import { karteSteuerung } from './karte.js';
 import { esc } from './format.js';
 import { portraetSVG, zufallsMerkmale } from '../kit/portraet.js';
+import { navigationsRaster, erstelleBesucher, bewegeBesucher, simuliereLaufwege } from './hausbesuch-navigation.js';
 
 export const HAUSBESUCH_AKTIV = true;
 const PHRASE = Object.freeze({
@@ -100,6 +101,7 @@ function stilEinbauen(wurzel) {
 export function hausbesuchModul(ctx) {
   let aktiv = HAUSBESUCH_AKTIV, haus = null, nr = 0, host, bild, canvas, renderer, scene, cam, buehne;
   let figuren = [], personenMesh = [], treffer = [], animation = 0, fahrt = null, rahmenzeiten = [], letzte = 0;
+  let navigation = null, besuchZonen = [], besuchSeed = '';
   let K = { x: 0, z: 0, halb: 40, min: 8, max: 100 };
   let steuerung, kalender = null;
   const status = () => ({ offen: !!haus, haus: haus?.id, etage: nr, figuren: figuren.length, kunden: figuren.filter((f) => !f.personal).length, personal: figuren.filter((f) => f.personal).length });
@@ -160,45 +162,30 @@ export function hausbesuchModul(ctx) {
     scene.userData.sonne?.shadow?.map?.dispose();
     renderer?.renderLists?.dispose();
     scene = null; buehne = null; figuren = []; personenMesh = []; treffer = [];
+    navigation = null; besuchZonen = [];
   }
   function instanz(anz, farbe, geo) {
     const m = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ color: farbe }), Math.max(1, anz));
     m.count = anz; m.frustumCulled = false; scene.add(m); personenMesh.push(m); return m;
   }
   function menschen(zn, besatz) {
-    const r = rng(haus.id + ':besuch:' + nr + ':' + ctx.s().woche);
-    const personen = [];
-    if (!zn.length) return;
-    for (let i = 0; i < besatz.kunden + besatz.verkauf; i++) {
-      const personal = i >= besatz.kunden, zone = zn[Math.floor(r() * zn.length)];
-      const pos = zone.punkte[Math.floor(r() * zone.punkte.length)];
-      const zielZone = personal ? zone : zn[Math.floor(r() * zn.length)];
-      const ziel = zielZone.punkte[Math.floor(r() * zielZone.punkte.length)];
-      const x = begrenze(pos.x + (r() - 0.5) * 2, 1, buehne.breite - 1);
-      const z = begrenze(pos.z + (r() - 0.5) * 2, 1, buehne.tiefe - 1);
-      personen.push({ x, z, startX: x, startZ: z, zielX: begrenze(ziel.x, 1, buehne.breite - 1), zielZ: begrenze(ziel.z, 1, buehne.tiefe - 1),
-        phase: r() * Math.PI * 2, tempo: personal ? 0 : 0.13 + r() * 0.23,
-        richtung: r() * Math.PI * 2, zone, zielZone, personal, index: i });
-    }
-    figuren = personen;
+    besuchZonen = zn;
+    besuchSeed = haus.id + ':besuch:' + nr + ':' + ctx.s().woche;
+    figuren = erstelleBesucher(navigation, zn, besatz, besuchSeed);
     const koerper = new THREE.BoxGeometry(0.66, 1.15, 0.42), kopf = new THREE.SphereGeometry(0.37, 6, 5);
     for (const p of [false, true]) {
-      const n = personen.filter((f) => f.personal === p).length;
+      const n = figuren.filter((f) => f.personal === p).length;
       instanz(n, p ? '#235a79' : '#ac715e', koerper);
       instanz(n, p ? '#d5a37f' : '#edc9a4', kopf);
     }
   }
-  function menschenSetzen(t) {
+  function menschenSetzen() {
     const obj = new THREE.Object3D();
     for (const personal of [false, true]) {
       const liste = figuren.filter((p) => p.personal === personal);
       const ms = personal ? personenMesh.slice(2, 4) : personenMesh.slice(0, 2);
       liste.forEach((p, i) => {
-        const weg = p.personal ? 0 : (1 - Math.cos(t * p.tempo + p.phase)) / 2;
-        const x = begrenze(p.startX + (p.zielX - p.startX) * weg, 0.5, buehne.breite - 0.5);
-        const z = begrenze(p.startZ + (p.zielZ - p.startZ) * weg, 0.5, buehne.tiefe - 0.5);
-        p.x = x; p.z = z; p.zoneJetzt = weg > 0.5 ? p.zielZone : p.zone;
-        obj.position.set(x, 0.82, z); obj.rotation.set(0, p.richtung, 0); obj.updateMatrix();
+        obj.position.set(p.x, 0.82, p.z); obj.rotation.set(0, p.richtung, 0); obj.updateMatrix();
         ms[0].setMatrixAt(i, obj.matrix);
         obj.position.y = 1.6; obj.updateMatrix(); ms[1].setMatrixAt(i, obj.matrix);
       });
@@ -218,7 +205,7 @@ export function hausbesuchModul(ctx) {
         const plan = ladenplan({ breite: m.bw, tiefe: m.bd }, 'outlet', flaechen, haus.id + ':' + etageNr);
         S.quader(0, -0.3, 0, m.bw, 0, m.bd, '#e7e6e1');
         baueLadenplan(S, scene, plan, { dichte: 0.42 });
-        buehne = { box: new THREE.Box3(new THREE.Vector3(-0.5, -0.5, -0.5), new THREE.Vector3(m.bw + 0.5, 4.6, m.bd + 0.5)), breite: m.bw, tiefe: m.bd, zonen: plan.abteilungen, anzahl: S.anzahl };
+        buehne = { box: new THREE.Box3(new THREE.Vector3(-0.5, -0.5, -0.5), new THREE.Vector3(m.bw + 0.5, 4.6, m.bd + 0.5)), breite: m.bw, tiefe: m.bd, zonen: plan.abteilungen, ladenplan: plan, anzahl: S.anzahl };
       }
     }
     if (!buehne) {
@@ -230,6 +217,7 @@ export function hausbesuchModul(ctx) {
     sonneAuf(scene, bbox.getCenter(new THREE.Vector3()), Math.max(30, bbox.getSize(new THREE.Vector3()).length()));
     const zn = zonenNormalisieren(buehne.zonen, haus);
     const besatz = hausbesuchBesatz(haus, etageNr);
+    navigation = navigationsRaster(buehne);
     menschen(zn, besatz);
     treffer = zn;
     K.x = buehne.breite / 2; K.z = buehne.tiefe / 2;
@@ -244,7 +232,12 @@ export function hausbesuchModul(ctx) {
   function frame(t) {
     if (!haus || !scene) return;
     animation = requestAnimationFrame(frame);
-    if (letzte) rahmenzeiten.push(Math.min(1000, t - letzte));
+    if (letzte) {
+      const dt = Math.min(0.25, Math.max(0, (t - letzte) / 1000));
+      rahmenzeiten.push(Math.min(1000, t - letzte));
+      // Meter pro Sekunde statt Weganteil pro Frame; keine Strecken durch Regale.
+      bewegeBesucher(navigation, figuren, dt, besuchZonen);
+    }
     if (rahmenzeiten.length > 120) rahmenzeiten.shift();
     letzte = t;
     if (fahrt) {
@@ -252,7 +245,7 @@ export function hausbesuchModul(ctx) {
       scene.position.y = fahrt.start * (1 - k) * (1 - k);
       if (k === 1) { scene.position.y = 0; fahrt = null; }
     }
-    menschenSetzen(t / 1000);
+    menschenSetzen();
     renderer.render(scene, cam);
   }
   function sprechblase(titel, inhalt, zusatz = '') {
@@ -331,10 +324,14 @@ export function hausbesuchModul(ctx) {
     host.querySelector('.hb-etagen').innerHTML = [...h.etagen].sort((a, b) => a - b).map((n) =>
       '<button type="button" data-hb="etage" data-nr="' + n + '" aria-pressed="' + (n === nr) + '">' + etageName(n) + '</button>').join('');
     host.hidden = false;
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.3));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.shadowMap.enabled = false;
+    // Ein Renderer für die ganze Sitzung: Nach forceContextLoss() bekäme dieselbe Canvas keinen
+    // neuen Kontext mehr, ein zweiter Hausbesuch oder ein Hauswechsel scheiterte dann.
+    if (!renderer) {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.3));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.shadowMap.enabled = false;
+    }
     rahmenzeiten = []; letzte = 0;
     try { bauen(nr); animation = requestAnimationFrame(frame); }
     catch (e) { console.error('Hausbesuch konnte nicht aufgebaut werden:', e); schliesse(); return false; }
@@ -343,11 +340,24 @@ export function hausbesuchModul(ctx) {
   function schliesse() {
     if (!haus) return;
     cancelAnimationFrame(animation); animation = 0; steuerung?.stopp(); 
-    sceneLeeren(); renderer?.dispose(); renderer?.forceContextLoss(); renderer = null; cam = null;
+    sceneLeeren(); renderer?.renderLists?.dispose(); cam = null;
     haus = null; letzte = 0; if (host) host.hidden = true;
   }
   document.getElementById('pinhalt')?.addEventListener('click', (e) => { const t = e.target.closest('[data-hausbesuch]'); if (t) oeffne(t.dataset.hausbesuch); });
   document.getElementById('hausbesuch')?.addEventListener('click', () => { ctx.menueZu(); const id = ctx.erstHaus(); if (id) oeffne(id); });
-  return { oeffne, schliesse, etage: etageWaehlen, status, messung, get aktiv() { return aktiv; },
+  // Abnahme auf derselben Etagenbelegung ohne Zeitraffereffekt im laufenden Spiel.
+  const pruefung = (sekunden = 60, schritt = 0.05) => {
+    if (!haus || !navigation) throw new Error('Für die Laufwegprüfung zuerst einen Hausbesuch öffnen.');
+    return { haus: haus.id, etage: nr, ...simuliereLaufwege(navigation, besuchZonen,
+      hausbesuchBesatz(haus, nr), besuchSeed, sekunden, schritt) };
+  };
+  // Bildfolgen-Katalog: gezielt simulierte Sekunden ohne Screenshot-Abhängigkeit im Spiel.
+  const bildschritt = (sekunden = 5) => {
+    if (!haus || !navigation) throw new Error('Hausbesuch ist nicht geöffnet.');
+    bewegeBesucher(navigation, figuren, Math.max(0, sekunden), besuchZonen);
+    menschenSetzen();
+    renderer.render(scene, cam);
+  };
+  return { oeffne, schliesse, etage: etageWaehlen, status, messung, pruefung, bildschritt, get aktiv() { return aktiv; },
     setzenAktiv: (an) => { aktiv = !!an; if (!aktiv) schliesse(); } };
 }

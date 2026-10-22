@@ -22,6 +22,7 @@
 <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1206x2622.png">
 <link rel="stylesheet" href="./src/ui/reise-woche.css">
 <link rel="stylesheet" href="./src/ui/zeitung.css">
+<link rel="stylesheet" href="./src/ui/produkte-q11.css">
 <link rel="stylesheet" href="./src/ui/einfuehrung.css">
 <link rel="stylesheet" href="./src/ui/erfolge.css">
 <link rel="stylesheet" href="./src/ui/spielende.css">
@@ -45,6 +46,8 @@
   #cockpit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: auto; }
   .kz { background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 6px 9px; min-width: 0; }
   .kz span { display: block; color: var(--leise); font-size: calc(10px * var(--schrift)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kz .kzwahl { font: inherit; font-size: calc(10px * var(--schrift)); color: var(--rot, #d23c32); background: transparent; border: 0; padding: 0; margin: 0; height: 1.3em; line-height: 1; -webkit-appearance: none; appearance: none; }
+  .kz span:has(.kzwahl) { text-overflow: clip; }
   .kz b { display: block; font-size: calc(13.5px * var(--schrift)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
   .kz.rot b { color: var(--rot); } .kz.gruen b { color: var(--gruen); }
   .unten { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
@@ -357,6 +360,8 @@
   #fortsetzen { margin-top: 9px; border-color: #2f8f5b; color: #2f8f5b; }
   #speicherhinweis { color: var(--rot); font-size: calc(12px * var(--schrift)); line-height: 1.4; margin-top: 8px; }
   #panel, #panel.gross { max-height: min(87dvh, calc(100dvh - env(safe-area-inset-top))); }
+  /* Q10: Hausdetail lässt einen sichtbaren Streifen für das fokussierte Gebäude frei. */
+  #panel.hausdetail { max-height: 62dvh; }
   .startseed { display: flex; justify-content: center; align-items: center; gap: 6px; font-size: calc(11px * var(--schrift)); color: var(--leise); }
   .startseed input { width: 64px; font: inherit; font-size: calc(12px * var(--schrift)); border: 1px solid var(--linie); border-radius: 8px; padding: 3px 6px; background: #faf9f6; color: var(--leise); text-align: center; }
   .wbdirekt { display: flex; width: 100%; align-items: center; justify-content: space-between;

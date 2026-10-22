@@ -56,6 +56,8 @@ Grenzwerte unten in eckigen Klammern sind die Prüfwerte des Skripts für den Na
   Gleisband von vier Gleisen (26 m, Mittelstadt zwei Gleise mit Bahnsteig, 16 m) an der Kartenseite, gegenüber und seitlich
   der Einkaufslage. Keine Gleisfelder [Gleisfläche nah höchstens 2 %, Bahnhof nah höchstens 3 %].
   Der Vorplatz liegt nur vor dem Empfangsgebäude (± 26 m); seitlich davon Häuserzeile zur Straße und P+R-Parkplatz.
+  Ausnahme Kartenstadt Essen (Q01): Hauptbahnhof mit Gleisharfe (64 m, Bahnsteige, Züge) ist Wahrzeichen und liegt im Startbild
+  (Blick vom Hbf die Kettwiger Straße hinunter) [Gleisfläche nah höchstens 16 %, Bahnhof nah höchstens 5 %].
 - Zeche, Hütte, Kokerei, Halde, Siedlung, Stadion, Einkaufszentrum, Kanalhafen gehören an den Stadtrand. Im Nahausschnitt
   höchstens ein Großbau und nur am Rand [Großbauten nah höchstens 1, innen 0]. Gleisband zählt mit.
 - Hartwig ist das prägnanteste Haus der Einkaufslage: Nachbarn im Hartwig-Block höchstens vier Geschosse, Wettbewerber

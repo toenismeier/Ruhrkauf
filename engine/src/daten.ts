@@ -56,8 +56,9 @@ export const GRUPPEN: Record<GruppeId, GruppeDef> = Object.fromEntries(
 
 export const GRUPPEN_LISTE: GruppeId[] = ROH.map((g) => g.id);
 /** Die Sortimentstruktur steht schon vor dem wirtschaftlichen Start von Engine-Formate. */
+export const sortimentVon = (f: Format): 'warenhaus' | 'sport' | 'outlet' => f === 'schwester' ? 'warenhaus' : f;
 export const gruppenFuer = (f: Format): GruppeId[] =>
-  f === 'schwester' ? ROH.filter((g) => g.format === 'warenhaus').map((g) => g.id)
+  f === 'schwester' ? ROH.filter((g) => g.format === 'warenhaus' && g.id !== 'food').map((g) => g.id)
   : f === 'outlet' ? ['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty']
   : ROH.filter((g) => g.format === f).map((g) => g.id);
 
