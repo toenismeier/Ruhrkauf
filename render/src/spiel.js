@@ -1317,7 +1317,7 @@ reise = reiseModul({
     const hs = s.haeuser.filter((h) => h.stadt === d.name && h.status !== 'geschlossen');
     const zahl = (rolle) => d.standorte.filter((p) => p.rolle === rolle).length;
     const formate = [['Hartwig', hs.filter((h) => h.format === 'warenhaus').length], ['Volkskauf', hs.filter((h) => h.format === 'schwester').length], ['Sport', hs.filter((h) => h.format === 'sport').length], ['FUNDUS', hs.filter((h) => h.format === 'outlet').length]];
-    return { name: d.name, region: d.region, hauscluster: hs[0]?.hauscluster, groesse: hs.length, umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
+    return { name: d.name, region: d.region, archetyp: d.archetyp, hauscluster: hs[0]?.hauscluster, groesse: hs.length, umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
       formate: formate.filter((p) => p[1]).map(([name, anzahl]) => ({ name, anzahl })) };
   }),
   pinPunkt: bahnhofBildpunkt,
