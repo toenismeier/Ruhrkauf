@@ -54,7 +54,7 @@ export function organisationModul(ctx) {
       for (const ressort of x.ressorts) {
         const bs=x.bereiche.filter((b)=>b.ressort===ressort.id);
         h+='<div class="karte"><div class="khead"><b>' + esc(ressort.id.toUpperCase()) + ' · ' + esc(ressort.name) + '</b><small>' + (ressort.person?esc(ressort.person.name):'<span class="frei">unbesetzt</span>') + '</small></div>';
-        for (const b of bs) { h+='<div class="org-zeile"><span class="vbild">' + portraet(b.stelle?.person?.portraet,50) + '</span><div><b>'+esc(b.name)+'</b><small>' + name(b.stelle) + ' · Stufe ' + b.hqStufe + ' · ' + (b.berichtetAn==='spieler'?'CEO':b.berichtetAn.toUpperCase()) + '</small>' + bar(b.qualitaet) + '<small>' + b.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="'+esc(b.id)+'">Person</button><button data-org="delegation" data-id="'+esc(b.id)+'" aria-pressed="'+b.delegiert+'">Delegiert '+(b.delegiert?'ja':'nein')+'</button></div></div>' + aufgabenListe(b.aufgaben, b.id);
+        for (const b of bs) { h+='<div class="org-zeile"><span class="vbild">' + portraet(b.stelle?.person?.portraet,50) + '</span><div><b>'+esc(b.name)+'</b><small>' + name(b.stelle) + ' · Stufe ' + b.hqStufe + ' · ' + (b.berichtetAn==='spieler'?'CEO':b.berichtetAn.toUpperCase()) + '</small>' + bar(b.qualitaet) + '<small>' + b.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="'+esc(b.id)+'">Person</button><button type="button" data-org="etage" data-id="'+esc(b.abteilung)+'">Etage</button><button data-org="delegation" data-id="'+esc(b.id)+'" aria-pressed="'+b.delegiert+'">Delegiert '+(b.delegiert?'ja':'nein')+'</button></div></div>' + aufgabenListe(b.aufgaben, b.id);
           // Q06: Marktbeobachtung als eigene steuerbare Fachabteilung unter dem CSO.
           if (b.id === 'marktbeobachtung') {
             const markt = E.marktbeobachtungUebersicht(st);
@@ -110,6 +110,7 @@ export function organisationModul(ctx) {
     const v=ev.target.closest('[data-vtr]');if(v){if(vertrieb.klick(v))zeichnen();return;}
     const el=ev.target.closest('[data-org]');if(!el)return;
     const a=el.dataset.org;
+    if(a==='etage'){ctx.oeffneAbteilung?.(el.dataset.id);return;}
     if(a==='reiter'){ui.reiter=el.dataset.reiter;ui.ebene=null;zeichnen();}
     if(a==='marktStufe')tun({typ:'marktbeobachtungStufe',stufe:Number(el.dataset.stufe)});
     if(a==='zurueck'){ui.ebene=null;zeichnen();}

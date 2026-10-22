@@ -3,13 +3,15 @@
 // und Marge der Marke in ihren Warengruppen (relativ zum Start, damit die Ausgangslage unverändert bleibt).
 // Vertrag: ../VORSTAND-MARKETING-VERTRAG.md, Abschnitt 3.
 import type { GameState, GruppeId, Haus } from './types';
-import { PRODUKT_ZIELGRUPPEN, ZIELGRUPPE_PRODUKT, sortimentsBaum, type ProduktZielgruppe, type BaumAst } from './produkt-sortiment';
+import { PRODUKT_ZIELGRUPPEN, ZIELGRUPPE_PRODUKT, sortimentsBaum, type ProduktZielgruppe, type BaumAst, type BaumKategorie } from './produkt-sortiment';
 export { PRODUKT_ZIELGRUPPEN, sortimentsBaum } from './produkt-sortiment';
 export type { ProduktZielgruppe } from './produkt-sortiment';
 import { clamp, eur, melde, mio, normal, waehle, zufall, type RngHalter } from './util';
 import { WG, saisonId, saisonName, type WgId } from './einkauf';
 import { eigenmarkeAnteil, istVerkaufsaktiv, mehrmarge, passungWg, passungHaus, ZIELGRUPPEN_TEXT, type Eigenmarke, type EmKategorie, type Preislage, type Stil } from './eigenmarken';
 import { hqAktualisiere } from './hq';
+import { SORTIMENT_TYPEN, type ArtikelBild, type SortimentName } from './sortiment';
+export { SORTIMENT_TYPEN, type ArtikelBild, type SortimentTyp, type SortimentName } from './sortiment';
 
 // ---------------------------------------------------------------------------------------------
 // Katalog (abgestimmt mit der Grafik: render/src/kit/produktbild.js zeichnet genau diese Typen und Farben)
@@ -32,7 +34,8 @@ export type ArtikelTyp =
   | 'Jeans-Shorts' | 'Kaschmirpullover' | 'Strickjacke' | 'Bluse' | 'Hemd' | 'T-Shirt' | 'Poloshirt' | 'Kleid' | 'Rock' | 'Chino' | 'Jeans'
   | 'Mantel' | 'Steppjacke' | 'Blazer' | 'Sneaker' | 'Pumps' | 'Stiefel' | 'Pyjama' | 'Unterwäsche' | 'BH' | 'Socken' | 'Schal' | 'Mütze'
   | 'Handtasche' | 'Gürtel' | 'Bettwäsche' | 'Handtuch' | 'Kissen' | 'Tasse' | 'Vase' | 'Lippenstift' | 'Creme' | 'Parfum'
-  | 'Kinderbody' | 'Kinderkleid' | 'Plüschtier' | 'Top' | 'Crop-Top' | 'Stoffhose' | 'Leinenhose' | 'Cargohose' | 'Minirock' | 'A-Linien-Rock';
+  | 'Kinderbody' | 'Kinderkleid' | 'Plüschtier' | 'Top' | 'Crop-Top' | 'Stoffhose' | 'Leinenhose' | 'Cargohose' | 'Minirock' | 'A-Linien-Rock'
+  | SortimentName;
 
 export type Farbe =
   | 'weiß' | 'creme' | 'sand' | 'beige' | 'camel' | 'cognac' | 'braun' | 'grau' | 'anthrazit' | 'schwarz' | 'marine' | 'hellblau' | 'jeansblau'
@@ -85,6 +88,10 @@ export interface TypDef {
   /** Entwicklungsaufwand (1 einfach, 3 aufwendig). */
   aufwand: number;
   sparte?: Produktsparte;
+  /** Bild aus der Silhouetten-Bibliothek (Q27–Q29); ohne Angabe leitet die Grafik das Bild aus dem Namen ab. */
+  bild?: ArtikelBild;
+  /** Platz im Sortimentsbaum [Kategorie, Unterkategorie]; ohne Angabe aus dem Namen (sortimentsPfad). */
+  pfad?: readonly [BaumKategorie, string];
 }
 
 const G = (kinder: number, jung: number, mitte: number, reif: number): Record<TrendGruppe, number> => ({ kinder, jung, mitte, reif });
@@ -205,6 +212,8 @@ export const Q11_ARTIKELTYPEN: TypDef[] = [
   { ...ARTIKELTYPEN.find((t) => t.typ === 'Rock')!, typ: 'A-Linien-Rock', preis: 49, wgs: ['damen.hosen', 'damen.young'] },
 ];
 ARTIKELTYPEN.push(...Q11_ARTIKELTYPEN);
+// Q27–Q29: neue Artikeltypen der Bild-Chats (engine/src/sortiment), immer hinten angehängt.
+ARTIKELTYPEN.push(...(SORTIMENT_TYPEN as TypDef[]));
 export const TYP: Record<string, TypDef> = Object.fromEntries(ARTIKELTYPEN.map((t) => [t.typ, t]));
 
 /** Grundfarben je Zielgruppe (unabhängig vom Trend). */
@@ -779,6 +788,8 @@ export interface ProduktKarte {
   sterne: number; sterneEinfuehrung?: number; sterneTeile?: SterneTeile;
   verkaufLetzteWoche: number; verkaufVorwoche: number; veraenderung: number; veraenderungProzent: number; umsatzLetzteWoche: number;
   start: number; fertigWoche: number; dauer: number; budgetWoche: number; fortschritt: number; seit?: number; basis: boolean;
+  /** Bild des Artikeltyps (Silhouette + Parameter), falls im Katalog hinterlegt. */
+  bild?: ArtikelBild;
 }
 
 export interface MarkenProdukte {
@@ -804,6 +815,7 @@ export function produktKarte(s: GameState, p: Produkt): ProduktKarte {
     umsatzLetzteWoche: p.umsatz.length ? p.umsatz[p.umsatz.length - 1] : 0,
     start: p.start, fertigWoche: p.fertig, dauer: p.dauer, budgetWoche: p.budgetWoche,
     fortschritt: ent ? clamp((s.woche - p.start) / Math.max(1, p.dauer), 0, 1) : 1, seit: p.seit, basis: !!p.basis,
+    ...(TYP[p.typ]?.bild ? { bild: { ...TYP[p.typ].bild! } } : {}),
   };
 }
 
@@ -832,7 +844,7 @@ export interface ProduktKatalog {
   zielgruppen: typeof PRODUKT_ZIELGRUPPEN;
   sparten: { id: Produktsparte; name: string; typen: ArtikelTyp[] }[];
   kategorien: { id: ProduktKategorie; name: string }[];
-  typen: { typ: ArtikelTyp; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preisMitte: number; materialien: Material[]; aufwand: number; gruppe: Record<TrendGruppe, number> }[];
+  typen: { typ: ArtikelTyp; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preisMitte: number; materialien: Material[]; aufwand: number; gruppe: Record<TrendGruppe, number>; bild?: ArtikelBild }[];
   farben: { name: Farbe; hex: string }[];
   materialien: { name: Material; preis: number; kosten: number; wertig: number }[];
   preislagen: { id: Preislage; faktor: number }[];
@@ -849,7 +861,7 @@ export function produktKatalog(_s: GameState): ProduktKatalog {
       typen: [...ZUSATZ_ARTIKEL[id]],
     })),
     kategorien: (Object.keys(PRODUKT_KATEGORIEN) as ProduktKategorie[]).map((id) => ({ id, name: PRODUKT_KATEGORIEN[id] })),
-    typen: ARTIKELTYPEN.map((t) => ({ typ: t.typ, kategorie: t.kategorie, wgs: [...t.wgs], saison: t.saison, preisMitte: t.preis, materialien: [...t.materialien], aufwand: t.aufwand, gruppe: { ...t.gruppe } })),
+    typen: ARTIKELTYPEN.map((t) => ({ typ: t.typ, kategorie: t.kategorie, wgs: [...t.wgs], saison: t.saison, preisMitte: t.preis, materialien: [...t.materialien], aufwand: t.aufwand, gruppe: { ...t.gruppe }, ...(t.bild ? { bild: { ...t.bild } } : {}) })),
     farben: FARBLISTE.map((f) => ({ name: f, hex: FARBEN[f] })),
     materialien: MATERIALLISTE.map((m) => ({ name: m, ...MATERIALIEN[m] })),
     preislagen: (Object.keys(PREISLAGE_FAKTOR) as Preislage[]).map((id) => ({ id, faktor: PREISLAGE_FAKTOR[id] })),
