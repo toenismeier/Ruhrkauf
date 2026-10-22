@@ -32,7 +32,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q14 Oberfläche gesamt (Gestaltungssystem) | `feat/q14-oberflaeche-design` #51 | GPT fertig gemeldet | Q11 gemergt 22.10.: Prüfung durch QA Grafik jetzt frei |
 | Q15 Zentrale Abteilungsseiten | `feat/q15-zentrale-abteilungen` (#65) | **gemergt 22.10. (47cd64f)**; Claude: Leitungssatz nach Personalbedarf statt freien Plätzen | `auftraege/wurf2/` |
 | Q16 Marketing-Kanäle und Marktanteil | `feat/q16-marketing-kanaele` (#64) | **gemergt 22.10. (12bbab8)**; Claude: öffnet mit aktueller Stadt | `auftraege/wurf2/` |
-| Q17 Eigenmarken-Produktkarten (nach Q11) | `feat/q17-eigenmarken-karten` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q17 Eigenmarken-Produktkarten (nach Q11) | main | **gemergt 22.10.** (#72) | Produktkarten mit VK-Regler, Preis in allen Häusern / Hauspreis, Absatzübersicht Eigen- vs. Fremdmarke (5 Wochen), Linienprofil; auf Q24 aufgesetzt. Claude: doppelte VK-Beschriftung entfernt, Absatz in Stück |
 | Q18 Handelsbote Gestaltung | `feat/q18-handelsbote` | **gemergt 22.10. (#60)**: Serifenkopf, sechs Rubriken, 53 isometrische Motive je Artikelart; Claude: Schildtexte gestaucht, alle Reiter auf 375 px sichtbar; Fingerabdruck unverändert | `auftraege/wurf2/` |
 | Q19 IT-Produkte als Karten | `feat/q19-it-produkte` (#63) | **gemergt 22.10. (48ba00c)**; Claude: Abnahmetest repariert, Mobile Pay ohne Ausbau „noch nicht eingeführt“ | `auftraege/wurf2/` |
 | Q20 Schwierigkeit je Szenario | `feat/q20-szenario-schwierigkeit` (#58) | **gemergt 22.10. (4cf811a)** | `auftraege/wurf2/` |
