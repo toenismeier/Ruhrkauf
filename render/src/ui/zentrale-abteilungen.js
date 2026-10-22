@@ -67,10 +67,14 @@ export function abteilungsEtageSvg(ist, kapazitaet, name) {
   }
   return svg + '</svg>';
 }
+// Besetzung gegen den Personalbedarf der Ausbaustufe (sollFte), nicht gegen freie Schreibtische im Gebäude.
+const unterbesetzt = (a, fte) => a.sollFte > 0 && fte < a.sollFte * 0.9;
+const ueberbesetzt = (a, fte) => a.sollFte > 0 && fte > a.sollFte * 1.15;
 function spruch(a, fte, kap) {
-  if (fte < kap * .65) return 'Uns fehlen Kolleginnen und Kollegen. Wir müssen offene Stellen besetzen.';
+  if (unterbesetzt(a, fte)) return 'Uns fehlen Kolleginnen und Kollegen. Wir müssen offene Stellen besetzen.';
   if (a.einarbeitungBis) return 'Neue Kolleginnen und Kollegen werden eingearbeitet.';
   if (a.moral < 65) return 'Die Gehälter belasten die Stimmung im Team.';
+  if (ueberbesetzt(a, fte)) return 'Wir sind mehr Leute, als die Aufgaben derzeit brauchen.';
   if (fte >= kap) return 'Unsere Plätze sind voll. Für weitere Einstellungen brauchen wir Raum.';
   return 'Die Aufgaben sind verteilt. Wir arbeiten an den Zielen.';
 }
@@ -79,7 +83,7 @@ function stimmungsTexte(a, fte, kap) {
     a.gehaltFaktor < 1 ? 'Ich wünsche mir ein höheres Gehalt.' : 'Das Gehalt ist für mich in Ordnung.',
     a.moral >= 70 ? 'Unser Team erreicht seine Ziele.' : 'Die Stimmung ist angespannt.',
     a.fluktuation > .08 ? 'Ich sehe mich nach einer anderen Stelle um.' : 'Ich möchte bleiben.',
-    fte < kap * .65 ? 'Die Arbeit ist kaum zu schaffen.' : 'Die Aufgaben sind gut verteilt.',
+    unterbesetzt(a, fte) ? 'Die Arbeit ist kaum zu schaffen.' : ueberbesetzt(a, fte) ? 'Mir fehlt manchmal eine richtige Aufgabe.' : 'Die Aufgaben sind gut verteilt.',
   ];
 }
 /** Reine Projektion der Engine-Abfragen. Auswahl ist eine bereits vorhandene HQ-Abteilung. */
