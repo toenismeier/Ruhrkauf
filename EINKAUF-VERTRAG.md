@@ -30,3 +30,12 @@ Spiel: Turnaround-Tycoon über die fiktive Warenhauskette "Hartwig" (+ "Hartwig 
 - Einkauf-Panel (Knopf "Einkauf"): Übersicht nach Bereich aufklappbar zu WG, Spalten auswählbar (Umsatz, Rohertragsquote, Umschlag, Reichweite, Abverkauf, Altware, NOS-Verfügbarkeit, Limit frei), Sortieren und Ampeln; WG-Detail mit Kurven (Bestand, Umsatz, Reichweite über 26 Wochen) und allen Reglern; Freigabe-Eingang mit Badge am Knopf, Einzel- und Sammelfreigabe, Grenze einstellbar; Eigenmarken-Seite mit Markenkarten (Zielgruppe, Positionierung, Bekanntheit, Marge, Umsatz, Passung je Region) und Assistent zum Gründen.
 - Häuser: Flächen mit hohem Eigenmarkenanteil zeigen in der Grafik einen Eigenmarken-Shop mit Markenname und Farbe (Innenraum, abteilung.js, nur Erweiterung).
 - spiel-render.js gleicht Panelwerte gegen die Engine-Abfragen ab (0 Abweichungen) und erzeugt Bilder: einkauf-uebersicht, einkauf-wg, einkauf-freigaben, eigenmarken, eigenmarke-gruenden.
+
+
+## FUNDUS: Zukauf von Markenposten und Altware als Nebenkanal (21.10.2026)
+
+FUNDUS ist ein eigenständiger Marken-Off-Price-Laden, kein Restpostenlager. Rund 65 % des Wareneinsatzes sollen auf externe Markenposten entfallen, die zu 30 bis 40 % des früheren Listenpreises zugekauft und zu 50 bis 70 % verkauft werden. Einkaufskompetenz verbessert diese Konditionen. Rund 35 % des Wareneinsatzes kommen aus alter Hartwig-/Sport-Ware.
+
+Das Feld s.einkauf.offpriceZukauf begrenzt den wöchentlichen zu bezahlenden Markenpostenzukauf in Euro. s.einkauf.altwareOutlet begrenzt den Anteil geeigneter Konzernaltware zwischen 0 und 1 (Start 0,5). outletVersorgung(s) überträgt Altware aus dem Konzernbestand in s.formate.pool zum Buchwert und belastet 3 % tatsächliche Logistikkosten. Alte Ladenhüter werden höchstens zu 6 % des jeweiligen Postens je Woche verkauft. Fehlmengen senken realisierte Umsätze; Überhang erzeugt Abschriften. Die Filial-GuV enthält echte Wareneinsatz-, Miet-, Personal-, Logistik-, Werbe- und Abschriftenbuchungen; keine pauschale Ausgleichsgutschrift.
+
+Volkskauf verfügt über ein eigenes Beschaffungs- und Bestandsmodell außerhalb des Hartwig-OTB. Für Mengen, wirtschaftliche Zielquoten und die Bot-T-/Bot-D-Wirkung sind Messungen durch Claude erforderlich.

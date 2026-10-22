@@ -4,7 +4,8 @@
 // eigenmarkeAnteil, eigenmarkeEinstellen.
 import { geld, pz, kwVon, esc } from './format.js';
 
-const ALTER = [['10-13', 'Tweens'], ['13-17', 'Teens'], ['18-29', 'Young Adults'], ['30-49', '30 bis 49'], ['50+', '50 plus'], ['70+', '70 plus']];
+const ALTER = [['10-13', 'Kinder'], ['13-17', 'Teens & Tweens'], ['18-29', 'Young Adults'], ['30-49', 'Adults'], ['50+', 'Best Ager']];
+const alterOptionen = (aktuell) => aktuell === '70+' ? [...ALTER, ['70+', 'Best Ager 70+']] : ALTER;
 const GESCHLECHT = [['damen', 'Damen'], ['herren', 'Herren'], ['unisex', 'Unisex'], ['kinder', 'Kinder']];
 const KATEGORIE = ['Bekleidung', 'Schuhe', 'Wäsche', 'Accessoires', 'Home', 'Beauty'];
 const PREIS = [['einstieg', 'Einstieg'], ['mitte', 'Mitte'], ['gehoben', 'Gehoben']];
@@ -12,7 +13,7 @@ const STIL = [['klassisch', 'klassisch'], ['modern', 'modern'], ['sportlich', 's
 const FARBEN = ['#8c5a7a', '#2f4a6b', '#6f8f4e', '#d9822b', '#c9483e', '#2f63b5', '#1f1f1f', '#d27aa0', '#3f8f8a', '#7a5a3a'];
 const NAMEN = { damen: ['Linnea', 'Mira Lenz', 'Johanna B.', 'Ella Sommer'], herren: ['Nordhaven', 'Carl Ostwind', 'Feldweg', 'Henrik & Co.'], unisex: ['Studio Hartwig', 'Kleeblatt', 'Hafenblau'], kinder: ['Hafenkind', 'Kai & Kalle', 'Pusteblume'] };
 const REGIONEN = ['Nord', 'Ost', 'West', 'Mitte', 'Süd'];
-const alterText = (a) => ALTER.find((x) => x[0] === a)?.[1] ?? a;
+const alterText = (a) => a === '70+' ? 'Best Ager 70+' : ALTER.find((x) => x[0] === a)?.[1] ?? a;
 const zielText = (z) => `${GESCHLECHT.find((g) => g[0] === z.geschlecht)?.[1] ?? ''} ${alterText(z.alter)}`;
 const preisText = (p) => PREIS.find((x) => x[0] === p)?.[1] ?? p;
 const STATUS = { aufbau: 'im Aufbau', neupositionierung: 'Neupositionierung', eingestellt: 'eingestellt' };
@@ -73,7 +74,7 @@ function assistent(ctx, ui, tabs) {
   h += '<div class="karte steuerung">';
   if (A.schritt === 0) {
     if (!A.id) h += feld('Vorlage', `<div class="seg umbruch">${ctx.q.vorlagen().map((x, i) => `<button class="${A.vorlage === i ? 'an' : ''}" data-a="emVorlage" data-v="${i}">${esc(x.titel)}</button>`).join('')}</div>`, 'füllt alle Schritte vor');
-    h += feld('Alter', seg('emAlter', m.zielgruppe.alter, ALTER));
+    h += feld('Alter', seg('emAlter', m.zielgruppe.alter, alterOptionen(m.zielgruppe.alter)));
     h += feld('Geschlecht', seg('emGeschlecht', m.zielgruppe.geschlecht, GESCHLECHT));
   } else if (A.schritt === 1) {
     h += feld('Kategorie', seg('emKategorie', m.kategorie, KATEGORIE.map((k) => [k, k]), !!A.id), A.id ? 'bleibt bei Neupositionierung' : '');

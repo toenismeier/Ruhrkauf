@@ -1,8 +1,32 @@
-# Workstream Leistung: iPhone mit rund 560 Häusern und 180 Städten
+# Workstream Leistung: iPhone mit 560 Häusern und 220 Städten
 
-Branch `feat/massstab-leistung`. Ein bis zwei Chats. Übergabedatei `auftraege/massstab-stand.md` (Abschnitt Leistung).
+Branch `feat/massstab-leistung`, **abgezweigt von `feat/massstab-staedte` (PR #31, Stand `ed226e7`)**, nicht von `main`. Ein bis zwei Chats. Übergabedatei `auftraege/massstab-stand.md` (Abschnitt Leistung).
 
-**Start nach Phase 2 von `massstab-staedte.md`** (dann gibt es dichte Städte mit mehreren eigenen Häusern).
+## Neustart 22.10.2026: Leistung vor dem Merge von #31 (Ummo)
+#31 ist fachlich abgenommen (220 Städte, Städteprüfung 0, Standortregeln 0, Kopien 0, Gestaltung nicht schlechter als `main`, 220 Fingerabdrücke). **#31 wird erst zusammen mit diesem Workstream gemergt**, weil die Städte mit dem 560er-Bestand schwerer geworden sind und die Regel gilt: Leistung je Stadt nicht schlechter als `main`.
+
+**Befund Claude (Fingerabdruck-Messung, Chrome 130, Startbild 512 × 1024, LOD fern):** 91 der 112 bisherigen Städte haben auf #31 mehr Draw Calls oder Dreiecke als auf `main`, am stärksten Gütersloh (Dreiecke +78 %, Draw Calls +36 %), Recklinghausen (+74 % / +36 %), Kaiserslautern, Hanau, Erlangen, Moers, Neuss (je rund +50 % Dreiecke). Im Spiel (iPhone-Viewport, Start, Kacheln fertig) Gütersloh 2,74 → 3,76 Mio. Dreiecke, 1.397 → 1.608 Draw Calls. Ursache sind mehr eigene Häuser und Blöcke je Stadt, kein einzelner Fehler. Aufschlüsselung Gütersloh im Spiel (sichtbare Meshes): InstancedMesh mit 80 Dreiecken je Instanz 4.254 → 7.077 Instanzen (+226 Tsd. Dreiecke), 12 Dreiecke 11.077 → 17.769, 96 Dreiecke 757 → 2.060, 576 Dreiecke 176 → 298; die zusammengeführten Meshes sind gleich geblieben. Der Zuwachs steckt also in den Instanzen (Fenster, Dachaufbauten, Bäume, Autos, Figuren) der zusätzlichen Blöcke.
+
+**Messtabelle je Stadt:** `auftraege/massstab-leistung-basis.csv` (Draw Calls und Dreiecke `main` und #31 für alle 220 Städte).
+
+### Abnahme Neustart (zusätzlich zu den Zielen unten)
+1. **Jede der 112 bisherigen Städte**: Draw Calls und Render-Dreiecke in der Fingerabdruck-Messung höchstens so hoch wie die Spalte `main` in `massstab-leistung-basis.csv`.
+2. **Jede der 108 neuen Städte**: höchstens der Höchstwert von `main` für ihren Stadttyp: Metropole 1.233 Draw Calls / 10.148.022 Dreiecke, Großstadt 1.022 / 7.322.207, Mittelstadt 826 / 4.224.050.
+3. **Spiel** (iPhone-Viewport 390 × 844, Pixelratio 2, Start, Kacheln fertig) für Berlin, Essen, Gütersloh, Recklinghausen, Hamburg, München: Draw Calls und Dreiecke höchstens wie auf `main`.
+4. Kein Hebel verändert das Bild sichtbar. Wo sich Fingerabdrücke ändern, nennt der PR je Stadt den Grund (z. B. Instanzen außerhalb des Startbilds nicht mehr gebaut); Claude vergleicht Vorher/Nachher-Bilder.
+5. #31-Prüfungen bleiben 0: `pruef-staedte`, `massstab:standorte`, `massstab:kopien`, Gestaltung nicht schlechter als `main`.
+
+### Hebel in dieser Reihenfolge (jeweils danach messen lassen)
+1. **Instanzen nach Sichtbereich und Entfernung**: Instanzen (Fenster, Markisen, Dachaufbauten, Bäume, Autos, Figuren) nur für Kacheln im Kamerabereich plus Rand; ferne Kacheln ohne Kleinteile. Grundlage Kachelsystem `KA` in `render/src/spiel.js`, `Instanzer` in `render/src/kit/stadt.js`.
+2. **Billigere Instanz-Geometrie in `fern`**: das 80-Dreiecke-Objekt (häufigste Instanz) und das 96-Dreiecke-Objekt in einer Fern-Variante mit höchstens einem Viertel der Dreiecke.
+3. **Detailstufe `mittel`** zwischen `nah` und `fern` für Kacheln am Bildrand.
+4. **Blockfüllung**: Höfe und Rückseiten großer Blöcke im Fernbild als einfache Baukörper statt Einzelhäuser.
+5. Danach die bisherigen Hebel unten (Zusammenführen je Haus, Engine-Hotpaths, Spielstand).
+
+### Messung
+GPT kann nichts ausführen. Claude misst: `node pruef-fingerabdruck.js --neu <stadt …>` (Ausgabe Draw Calls und Render-Dreiecke je Stadt), Spielmessung über die Performance-Kachel. GPT legt je Hebel einen Commit an und schreibt in die PR-Beschreibung, welche Städte und welche Instanzarten betroffen sein sollen.
+
+## Bisheriger Auftrag (Stand 20.10.2026)
 
 ## Ausgangslage
 - Heute: Stadtaufbau 1,7 bis 2,9 s, rund 42.000 Teile beim Start, „Woche weiter“ rund 17 ms Engine plus 54 ms Neubau (README, Stand 18.10.).

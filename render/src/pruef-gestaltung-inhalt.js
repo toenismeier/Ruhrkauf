@@ -310,6 +310,8 @@ function pruefe(name) {
   const ringFehler = oh?.lage === 'rand' && !(plan.aussen?.bauten ?? []).includes(op);
   const innenFehler = oh?.lage === 'b' && (!plan.parzellen.includes(op) || masseOutlet(oh).bw * masseOutlet(oh).bd > maxHartwig * 0.8 + 1e-9);
   return {
+    // Q01 Essen: Gleisharfe am Hauptbahnhof ist Wahrzeichen und liegt bewusst im Startbild (GESTALTUNG.md 3, Ausnahme Kartenstadt)
+    ausnahmen: plan.startBlick === 'hbf' ? { 'Gleisfläche nah %': 16, 'Bahnhof nah %': 5, 'Großbauten nah innen': 1, 'Großbauten nah (Anzahl)': 2 } : null,
     name, plan,
     werte: {
       ...(q02?.werte ?? {}),
@@ -378,7 +380,7 @@ for (const id of saisonListe) {
 }
 console.log(''.padEnd(br) + erg.map((e) => (' ' + e.name.slice(0, 15)).padStart(17)).join(''));
 const verstoss = new Map(erg.map((e) => [e.name, 0]));
-for (const z of zeilen) console.log(z.padEnd(br) + erg.map((e) => { const v = e.werte[z], g = GRENZE[z]; const x = g !== undefined && Number(v) > g + 1e-9; if (x) verstoss.set(e.name, verstoss.get(e.name) + 1); return ((x ? '!' : '') + v).padStart(17); }).join(''));
+for (const z of zeilen) console.log(z.padEnd(br) + erg.map((e) => { const v = e.werte[z], g = e.ausnahmen?.[z] ?? GRENZE[z]; const x = g !== undefined && Number(v) > g + 1e-9; if (x) verstoss.set(e.name, verstoss.get(e.name) + 1); return ((x ? '!' : '') + v).padStart(17); }).join(''));
 console.log('Verstöße (Grenzwerte GESTALTUNG.md)'.padEnd(br) + erg.map((e) => String(verstoss.get(e.name)).padStart(17)).join(''));
 if (Q02) for (const e of erg) for (const [regel, liste] of Object.entries(e.q02Fehler ?? {})) {
   if (liste.length) console.error('Q02-Verstoß', e.name, regel, JSON.stringify(liste.slice(0, 8)));

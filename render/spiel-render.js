@@ -471,7 +471,30 @@ async function buendeln() {
     await oben();
     await bild('produkte.png');
     await tippe('[data-a=neu]');
-    await tippe('.typkacheln button:not(.voll):not(.an)');
+    const q11Pfad = await ev(() => {
+      const s = window.spiel.s, E = window.spiel.E, K = E.produktKatalog(s), u = window.spiel.produkte.ui;
+      const M = E.produkte(s).marken.find((m) => m.marke === u.marke);
+      const freie = new Set(M.kategorien.filter((k) => k.belegt < k.kapazitaet).map((k) => k.id));
+      const kandidaten = K.typen.filter((t) => freie.has(t.kategorie) && (t.gruppe[M.trendGruppe] ?? 0) > 0.15);
+      const t = kandidaten.find((t) => {
+        const e = { ...u.neu, marke: M.marke, typ: t.typ, material: t.materialien[0], zielgruppe: 'bestager' };
+        return E.produktVorschau(s, e).ok;
+      }) ?? kandidaten[0];
+      const ast = K.baum.flatMap((k) => k.unterkategorien.map((a) => ({ k: k.id, a: a.id, typen: a.typen }))).find((x) => x.typen.includes(t?.typ));
+      return ast ? { kategorie: ast.k, unterkategorie: ast.a, typ: t.typ } : null;
+    });
+    soll('Q11: Freier Artikel im Kategoriebaum', !!q11Pfad, JSON.stringify(q11Pfad));
+    if (q11Pfad) {
+      await tippe(`[data-a=baumKat][data-v="${q11Pfad.kategorie}"]`);
+      await tippe(`[data-a=baumAst][data-v="${q11Pfad.unterkategorie}"]`);
+      await oben();
+      await bild('q11-kategorie-artikel.png');
+      await tippe(`[data-a=typ][data-v="${q11Pfad.typ}"]`);
+      soll('Q11: Artikeltyp führt zur Zielgruppe', await ev(() => window.spiel.produkte.ui.neuSchritt === 1), q11Pfad.typ);
+      await bild('q11-zielgruppen.png');
+      await tippe('[data-a=zielgruppe][data-v="bestager"]');
+      soll('Q11: Best Ager in Produktentwurf', await ev(() => window.spiel.produkte.ui.neu.zielgruppe === 'bestager' && window.spiel.produkte.ui.neuSchritt === 2), 'Best Ager');
+    }
     await tippe('[data-a=dauer][data-v="8"]');
     await tippe('[data-a=budget][data-v="1"]');
     await pruef('produkte', 'Neues Produkt');
