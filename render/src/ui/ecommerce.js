@@ -36,11 +36,11 @@ export function ecommerceModul(ctx) {
         '<div class="q-zeile"><span class="q-name">Online-Conversion</span><span class="q-wert">' + prozent(u.conversion, 2) + '</span></div>' +
         '<div class="q-zeile"><span class="q-name">Retourenquote</span><span class="q-wert">' + prozent(u.retourenquote) + '</span></div>' +
         '<div class="q-zeile"><span class="q-name">Click & Collect<small>Anteil der Bestellungen</small></span><span class="q-wert">' + prozent(u.clickCollectAnteil) + '</span></div></div>';
-      h += '<div class="q-buch"><div class="q-buch-kopf"><span>Umsatzbrücke Online</span><b>Woche</b></div>' +
-        '<div class="q-zeile"><span class="q-name">Onlinewachstum gegenüber Basis<small>Basis 8 % ist im Konzernumsatz schon enthalten</small></span><span class="q-wert">' + vz(wachstum) + '</span></div>' +
-        '<div class="q-zeile"><span class="q-name">Mitkäufe bei Abholung im Haus</span><span class="q-wert">' + vz(mitkauf) + '</span></div>' +
-        '<div class="q-zeile"><span class="q-name">Kannibalisierung in den Häusern</span><span class="q-wert">' + vz(-u.kannibalisierung) + '</span></div>' +
-        '<div class="q-summe"><span>Effekt auf den Konzernumsatz</span><span class="q-wert ' + (u.onlineEffekt < 0 ? 'q-minus' : '') + '">' + vz(u.onlineEffekt) + '</span></div></div>';
+      h += '<div class="q-buch" data-summenbuch="Umsatzbrücke Online"><div class="q-buch-kopf"><span>Umsatzbrücke Online</span><b>Woche</b></div>' +
+        '<div class="q-zeile"><span class="q-name">Onlinewachstum gegenüber Basis<small>Basis 8 % ist im Konzernumsatz schon enthalten</small></span><span class="q-wert" data-s="e">' + vz(wachstum) + '</span></div>' +
+        '<div class="q-zeile"><span class="q-name">Mitkäufe bei Abholung im Haus</span><span class="q-wert" data-s="e">' + vz(mitkauf) + '</span></div>' +
+        '<div class="q-zeile"><span class="q-name">Kannibalisierung in den Häusern</span><span class="q-wert" data-s="e">' + vz(-u.kannibalisierung) + '</span></div>' +
+        '<div class="q-summe"><span>Effekt auf den Konzernumsatz</span><span data-summe="e" class="q-wert ' + (u.onlineEffekt < 0 ? 'q-minus' : '') + '">' + vz(u.onlineEffekt) + '</span></div></div>';
       const v = u.verlauf.slice(-26);
       if (v.length < 2) h += '<div class="q-buch"><div class="q-leer">Ein Verlauf ist ab der zweiten Woche verfügbar.</div></div>';
       else {
@@ -50,9 +50,9 @@ export function ecommerceModul(ctx) {
           '<div class="q-zwischen" style="border:0"><span>KW ' + ((v[0].woche % 52) + 1) + '</span><span>KW ' + ((v[v.length - 1].woche % 52) + 1) + '</span></div></div>';
       }
       const gr = Object.entries(u.umsatzJeGruppe).sort((a, b) => b[1] - a[1]);
-      h += '<div class="q-buch"><div class="q-buch-kopf"><span>Warengruppen online</span><b>Umsatz</b></div>' +
-        (gr.length ? gr.map(([g, umsatz]) => '<div class="q-zeile"><span class="q-name">' + esc(ctx.E.GRUPPEN[g]?.name ?? g) + '</span><span class="q-wert">' + geld(umsatz) + '</span></div>').join('') +
-        '<div class="q-summe"><span>Summe</span><span class="q-wert">' + geld(gr.reduce((a, [, x]) => a + x, 0)) + '</span></div>' : '<div class="q-leer">Noch kein Onlineumsatz.</div>') + '</div>';
+      h += '<div class="q-buch" data-summenbuch="Warengruppen online"><div class="q-buch-kopf"><span>Warengruppen online</span><b>Umsatz</b></div>' +
+        (gr.length ? gr.map(([g, umsatz]) => '<div class="q-zeile"><span class="q-name">' + esc(ctx.E.GRUPPEN[g]?.name ?? g) + '</span><span class="q-wert" data-s="u">' + geld(umsatz) + '</span></div>').join('') +
+        '<div class="q-summe"><span>Summe</span><span class="q-wert" data-summe="u">' + geld(gr.reduce((a, [, x]) => a + x, 0)) + '</span></div>' : '<div class="q-leer">Noch kein Onlineumsatz.</div>') + '</div>';
       h += '</div>';
     } else if (tab === 'steuerung') {
       const optionen = (id, werte, aktuell, format) => '<div class="zeile"><span class="was">' +

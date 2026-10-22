@@ -55,10 +55,10 @@ function wasserfall(br) {
   const x = (w) => ((w - lo) / (hi - lo) * 100).toFixed(1);
   const vz = (w) => (w > 0 ? '+' : w < 0 ? '−' : '') + geld(Math.abs(w));
   const strich = (w) => '<span class="q-wf-spur"><i class="q-wf-marke" style="left:' + x(w) + '%"></i></span>';
-  let h = '<div class="o02-bruecke q-wf" data-o02-diff="' + br.differenz + '" data-o02-summe="' + (br.frequenz + br.kaufquote + br.teile + br.preis) + '">';
-  h += '<div class="q-wf-zeile q-wf-ende"><span class="q-name">Vorjahr</span>' + strich(br.vorher) + '<span class="q-wert">' + geld(br.vorher) + '</span></div>';
-  for (const s of pos) h += '<div class="q-wf-zeile"><span class="q-name">' + s.n + '<small>' + s.d + '</small></span><span class="q-wf-spur"><i class="q-wf-balken ' + (s.v < 0 ? 'minus' : 'plus') + '" style="left:' + x(Math.min(s.a, s.b)) + '%;width:' + Math.max(0.6, Math.abs(s.v) / (hi - lo) * 100).toFixed(1) + '%"></i></span><span class="q-wert ' + (s.v < 0 ? 'q-minus' : '') + '">' + vz(s.v) + '</span></div>';
-  h += '<div class="q-wf-zeile q-wf-ende q-wf-summe"><span class="q-name">Ist</span>' + strich(br.aktuell) + '<span class="q-wert">' + geld(br.aktuell) + '</span></div>';
+  let h = '<div class="o02-bruecke q-wf" data-summenbuch="Konzernbrücke" data-o02-diff="' + br.differenz + '" data-o02-summe="' + (br.frequenz + br.kaufquote + br.teile + br.preis) + '">';
+  h += '<div class="q-wf-zeile q-wf-ende"><span class="q-name">Vorjahr</span>' + strich(br.vorher) + '<span class="q-wert" data-s="e">' + geld(br.vorher) + '</span></div>';
+  for (const s of pos) h += '<div class="q-wf-zeile"><span class="q-name">' + s.n + '<small>' + s.d + '</small></span><span class="q-wf-spur"><i class="q-wf-balken ' + (s.v < 0 ? 'minus' : 'plus') + '" style="left:' + x(Math.min(s.a, s.b)) + '%;width:' + Math.max(0.6, Math.abs(s.v) / (hi - lo) * 100).toFixed(1) + '%"></i></span><span data-s="e" class="q-wert ' + (s.v < 0 ? 'q-minus' : '') + '">' + vz(s.v) + '</span></div>';
+  h += '<div class="q-wf-zeile q-wf-ende q-wf-summe"><span class="q-name">Ist</span>' + strich(br.aktuell) + '<span class="q-wert" data-summe="e">' + geld(br.aktuell) + '</span></div>';
   h += '<div class="legende" style="padding:8px 14px 10px">Boneffekt zusammen ' + vz(br.bon) + ' · Balken im Ausschnitt ' + geld(lo) + ' bis ' + geld(hi) + '</div>';
   if (br.vorjahrGeschaetzt) h += '<div class="legende" style="padding:0 14px 10px">Vorjahreswerte teilweise aus 4-Wochen-Blöcken geschätzt.</div>';
   return h + '</div>';
@@ -79,6 +79,8 @@ export function reportingModul(ctx) {
       '>' + esc(titel) + '</option>').join('') + '</select></label>';
   function anzeigen() {
     const daten = E.reporting(ctx.s(), ui.wochen, ui.format);
+    // Q31: Gruppenzeilen der Hauscluster tragen intern die Cluster-ID als Namen
+    for (const g of daten.gruppen) if (g.ebene === 'hauscluster') g.name = clusterName(ctx.s(), g.id);
     const hs = daten.zeilen;
     const gruppen = daten.gruppen;
     const filter = '<div class="o02-filter">' +

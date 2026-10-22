@@ -19,13 +19,13 @@ export function warenSeite(ctx, ui, tabs) {
     const summe = d.plaene.reduce((a, p) => a + p.budget, 0);
     html += `<div class="q-gross"><span class="q-label">Saisonbudget EK</span><span class="q-haupt" data-p="ware:plansumme">${geld(summe)}</span><span class="q-neben"><b data-p="ware:konzern">${geld(d.konzernbestand)}</b>Bestand Konzern</span></div>`;
     html += `<div class="q-befund">Saisonplanung rund 30 Wochen vor dem Start. ${d.vorlagen.length ? `<b data-p="ware:vorlagen">${teile(d.vorlagen.length)}</b> Vorlagen warten.` : `<span data-p="ware:vorlagen" hidden>${teile(d.vorlagen.length)}</span>Ohne Änderung gilt die bestehende Einkaufssteuerung.`}</div>`;
-    html += '<div class="q-buch"><div class="q-buch-kopf"><span>Saisonplan je Warengruppe</span><b>Budget EK</b></div>';
+    html += '<div class="q-buch" data-summenbuch="Saisonplan"><div class="q-buch-kopf"><span>Saisonplan je Warengruppe</span><b>Budget EK</b></div>';
     if (!d.plaene.length) html += '<div class="q-leer"><b>Kein Saisonplan offen.</b>Die nächste Planungsrunde beginnt rund 30 Wochen vor Saisonstart.</div>';
     for (const p of d.plaene) {
-      html += `<div class="q-zeile"><span class="q-name">${esc(p.name)}<small>${esc(p.saisonName)}</small><small>Marge ${proz(p.zielmarge)} · Abverkauf ${proz(p.zielabverkauf)} · Vororder ${proz(p.vororderquote)}</small></span><span class="q-wert"><b data-p="ware:plan:${p.wg}">${geld(p.budget)}</b></span>
+      html += `<div class="q-zeile"><span class="q-name">${esc(p.name)}<small>${esc(p.saisonName)}</small><small>Marge ${proz(p.zielmarge)} · Abverkauf ${proz(p.zielabverkauf)} · Vororder ${proz(p.vororderquote)}</small></span><span class="q-wert"><b data-s="b" data-p="ware:plan:${p.wg}">${geld(p.budget)}</b></span>
         <span class="q-knoepfe"><button data-a="warePlanMinus" data-v="${esc(p.wg)}" aria-label="${esc(p.name)} Budget minus 5 Prozent">−5 %</button><button data-a="warePlanPlus" data-v="${esc(p.wg)}" aria-label="${esc(p.name)} Budget plus 5 Prozent">+5 %</button></span></div>`;
     }
-    if (d.plaene.length) html += `<div class="q-summe"><span>Summe ${d.plaene.length} Warengruppen</span><span class="q-wert" data-p="ware:plansumme">${geld(summe)}</span></div>`;
+    if (d.plaene.length) html += `<div class="q-summe"><span>Summe ${d.plaene.length} Warengruppen</span><span class="q-wert" data-summe="b" data-p="ware:plansumme">${geld(summe)}</span></div>`;
     html += '</div></div>';
     return { titel: 'Merchandise Planning', unter: `${d.plaene.length} Warengruppen · ${d.vorlagen.length} Vorlagen`, html };
   }

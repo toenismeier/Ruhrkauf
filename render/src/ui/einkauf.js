@@ -184,7 +184,7 @@ export function einkaufModul(ctx) {
     h += seg('filterArt', ui.filter.art, [['', 'Alle'], ['nos', 'NOS'], ['saison', 'Saison']]);
     h += seg('filterWert', ui.filter.wert, [['', 'Jeder Wert'], ['klein', 'bis 100 Tsd. €'], ['gross', 'über 100 Tsd. €']]) + '</div>';
     h += `<div class="q-buch"><div class="q-stepzeile" style="border-top:0"><span class="q-name">Freigabegrenze<small>Orders darüber brauchen dich</small></span><div class="stepper"><button data-a="grenze" data-v="-10000" aria-label="Grenze senken">−</button><span><b data-p="grenze">${geld(alle.grenze)}</b></span><button data-a="grenze" data-v="10000" aria-label="Grenze erhöhen">+</button></div></div></div>`;
-    h += `<div class="q-buch"><div class="q-buch-kopf"><span>Orderbuch KW ${kwVon(s().woche)}</span><b>Wert EK</b></div>`;
+    h += `<div class="q-buch" data-summenbuch="Orderbuch"><div class="q-buch-kopf"><span>Orderbuch KW ${kwVon(s().woche)}</span><b>Wert EK</b></div>`;
     if (!l.length) h += `<div class="q-leer"><b>${alle.anzahl ? 'Keine Order passt zum Filter.' : 'Das Orderbuch ist leer.'}</b>${alle.anzahl ? `${alle.anzahl} Orders warten in anderen Bereichen oder Wertklassen.` : 'Neue Orders kommen mit der nächsten Orderrunde oder Nachorder.'}</div>`;
     const zeigeN = ui.mehrOrders ? l.length : Math.min(l.length, 25);
     let gruppe = null;
@@ -193,7 +193,7 @@ export function einkaufModul(ctx) {
       if (g !== gruppe) { gruppe = g; const n = l.filter((x) => (x.restWochen <= 0 ? 'Frist diese Woche' : x.restWochen === 1 ? 'Frist nächste Woche' : 'Frist später') === g); h += `<div class="q-zwischen"><span>${g}</span><span>${n.length} · ${geld(n.reduce((a, x) => a + x.wert, 0))}</span></div>`; }
       const auf = ui.orderAuf === o.id || ui.kuerzen === o.id;
       h += `<div class="q-zeile q-order${auf ? ' q-auf' : ''}"><button class="q-name q-zeilenknopf" data-a="orderAuf" data-v="${o.id}" aria-expanded="${auf}">${esc(o.wgName)}<small>${esc(o.lieferant)} · ${TYP[o.typ] ?? ART[o.art]}${o.markeName ? ` · ${esc(o.markeName)}` : ''}${o.ueberLimit ? ' · gekürzt' : ''}</small></button>
-        <span class="q-wert"><b data-p="f:${o.id}:wert">${geld(o.wert)}</b><small>${o.modus === 'auto' ? 'sonst automatisch' : 'sonst verfällt sie'}</small></span>
+        <span class="q-wert"><b data-s="w" data-p="f:${o.id}:wert">${geld(o.wert)}</b><small>${o.modus === 'auto' ? 'sonst automatisch' : 'sonst verfällt sie'}</small></span>
         <button class="q-haken" data-a="frei" data-v="${o.id}" aria-label="${esc(o.wgName)} freigeben">Frei</button>`;
       if (auf) {
         h += `<span class="q-details">Abverkauf 8 Wochen <i data-p="f:${o.id}:abverkauf">${geld(o.erwarteterAbverkauf)}</i> · Reichweite danach <i data-p="f:${o.id}:reichweite">${dez(o.reichweiteDanach, 1)} Wo.</i> · erste Lieferung KW ${kwVon(o.ersteLieferung)}${o.lieferungen.length > 1 ? ` in ${o.lieferungen.length} Teilen` : ''}${o.hinweis ? ` · ${esc(o.hinweis)}` : ''}</span>`;
@@ -202,8 +202,8 @@ export function einkaufModul(ctx) {
       }
       h += '</div>';
     }
-    if (zeigeN < l.length) h += `<button class="q-mehr" data-a="mehrOrders">Weitere ${l.length - zeigeN} Orders zeigen</button>`;
-    if (l.length) h += `<div class="q-summe"><span>Summe ${l.length} ${l.length === 1 ? 'Order' : 'Orders'}</span><span class="q-wert" data-p="sammel">${geld(summe)}</span></div>`;
+    if (zeigeN < l.length) { const rest = l.slice(zeigeN); h += `<div class="q-zeile"><span class="q-name">Weitere ${rest.length} Orders<small>kleinere Werte</small></span><span class="q-wert"><b data-s="w">${geld(rest.reduce((a, o) => a + o.wert, 0))}</b></span></div><button class="q-mehr" data-a="mehrOrders">Alle ${l.length} Orders zeigen</button>`; }
+    if (l.length) h += `<div class="q-summe"><span>Summe ${l.length} ${l.length === 1 ? 'Order' : 'Orders'}</span><span class="q-wert" data-summe="w" data-p="sammel">${geld(summe)}</span></div>`;
     h += '</div>';
     const p = alle.protokoll[alle.protokoll.length - 1];
     if (p) h += `<div class="legende">Letzte Woche: ${p.neu} neue Orders, ${p.direkt} direkt unter der Grenze, ${p.freigegeben} freigegeben, ${p.auto} automatisch, ${p.verfallen} verfallen${p.verfallenWert ? ` (${geld(p.verfallenWert)})` : ''}, ${p.abgelehnt} abgelehnt</div>`;

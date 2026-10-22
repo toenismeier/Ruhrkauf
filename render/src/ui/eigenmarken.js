@@ -40,16 +40,16 @@ export function eigenmarkenSeite(ctx, ui, tabs) {
   if (!reihe.some((m) => m.id === ui.em.auf)) ui.em.auf = reihe[0]?.id;
   let h = tabs + '<div class="q31">';
   h += `<div class="q-gross"><span class="q-label">Eigenmarkenanteil am Umsatz</span><span class="q-haupt" data-p="mg:anteil">${pz(u.anteilUmsatz, 1)}</span><span class="q-neben"><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b>Mehrmarge zu Fremdware</span></div>`;
-  if (!reihe.length) h += '<div class="q-befund">Hartwig führt keine Eigenmarke. Jede Marke bringt rund 10 bis 14 Punkte mehr Marge als Fremdware.</div>';
+  if (!reihe.length) h += '<div class="q-befund">Hartwig führt keine Eigenmarke. Eine Marke gründest du über den freien Platz in der Tafel.</div>';
   else if (veraltet.length) h += `<div class="q-befund"><b>${veraltet.map((m) => esc(m.name)).join(', ')}</b> ${veraltet.length === 1 ? 'wirkt' : 'wirken'} veraltet. Ohne Neupositionierung sinkt die Nachfrage weiter.</div>`;
   else h += '<div class="q-befund">Alle aktiven Marken sind im Stil aktuell.</div>';
-  h += `<div class="q-buch q-tafel"><div class="q-buch-kopf"><span>Kollektionstafel</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace('.', ',')} sinnvollen</b></div>`;
+  h += `<div class="q-buch q-tafel" data-summenbuch="Kollektionstafel"><div class="q-buch-kopf"><span>Kollektionstafel</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace('.', ',')} sinnvollen</b></div>`;
   for (const m of reihe) {
     const st = m.status !== 'aktiv' ? `${STATUS[m.status] ?? m.status}${m.bis !== undefined ? ` bis KW ${kwVon(m.bis)}` : ''}` : m.stilAktualitaet < 45 ? 'Stil veraltet' : `${m.stil}, ${preisText(m.preislage)}`;
-    h += `<button class="q-muster${ui.em.auf === m.id ? ' q-an' : ''}" data-a="emAuf" data-v="${m.id}" aria-expanded="${ui.em.auf === m.id}"><span class="q-probe" style="--farbe:${m.farbe}"></span><span class="q-name">${esc(m.name)}<small>${zielText(m.zielgruppe)} · ${m.kategorie}</small><small class="${m.status === 'aktiv' && m.stilAktualitaet < 45 ? 'q-minus' : ''}">${st}</small></span><span class="q-wert"><b>${geld(m.umsatz13)}</b><small>${punkte(m.mehrmarge)}</small></span></button>`;
+    h += `<button class="q-muster${ui.em.auf === m.id ? ' q-an' : ''}" data-a="emAuf" data-v="${m.id}" aria-expanded="${ui.em.auf === m.id}"><span class="q-probe" style="--farbe:${m.farbe}"></span><span class="q-name">${esc(m.name)}<small>${zielText(m.zielgruppe)} · ${m.kategorie}</small><small class="${m.status === 'aktiv' && m.stilAktualitaet < 45 ? 'q-minus' : ''}">${st}</small></span><span class="q-wert"><b data-s="u">${geld(m.umsatz13)}</b><small>${punkte(m.mehrmarge)}</small></span></button>`;
   }
   if (u.gefuehrt < u.kapazitaet) h += '<button class="q-muster q-frei" data-a="emGruenden"><span class="q-probe"></span><span class="q-name">Freier Platz<small>Neue Eigenmarke gründen</small></span><span class="q-wert">+</span></button>';
-  if (reihe.length) h += `<div class="q-summe"><span>Umsatz 13 Wochen gesamt</span><span class="q-wert" data-p="mg:umsatz">${geld(gesamt)}</span></div>`;
+  if (reihe.length) h += `<div class="q-summe"><span>Umsatz 13 Wochen gesamt</span><span class="q-wert" data-summe="u" data-p="mg:umsatz">${geld(gesamt)}</span></div>`;
   h += '</div>';
   if (u.gefuehrt >= u.kapazitaet) h += '<button class="q-neben-akt" data-a="emGruenden" style="margin-bottom:12px">+ Neue Eigenmarke (Kapazität voll)</button>';
   for (const m of reihe.filter((x) => x.id === ui.em.auf)) {

@@ -159335,7 +159335,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "21df8bb" : "Entwicklung";
+  var version = () => true ? "6ebadf9" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld2(d3) {
@@ -159629,16 +159629,16 @@
     if (!reihe.some((m) => m.id === ui.em.auf)) ui.em.auf = reihe[0]?.id;
     let h3 = tabs + '<div class="q31">';
     h3 += `<div class="q-gross"><span class="q-label">Eigenmarkenanteil am Umsatz</span><span class="q-haupt" data-p="mg:anteil">${pz3(u.anteilUmsatz, 1)}</span><span class="q-neben"><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b>Mehrmarge zu Fremdware</span></div>`;
-    if (!reihe.length) h3 += '<div class="q-befund">Hartwig f\xFChrt keine Eigenmarke. Jede Marke bringt rund 10 bis 14 Punkte mehr Marge als Fremdware.</div>';
+    if (!reihe.length) h3 += '<div class="q-befund">Hartwig f\xFChrt keine Eigenmarke. Eine Marke gr\xFCndest du \xFCber den freien Platz in der Tafel.</div>';
     else if (veraltet.length) h3 += `<div class="q-befund"><b>${veraltet.map((m) => esc2(m.name)).join(", ")}</b> ${veraltet.length === 1 ? "wirkt" : "wirken"} veraltet. Ohne Neupositionierung sinkt die Nachfrage weiter.</div>`;
     else h3 += '<div class="q-befund">Alle aktiven Marken sind im Stil aktuell.</div>';
-    h3 += `<div class="q-buch q-tafel"><div class="q-buch-kopf"><span>Kollektionstafel</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace(".", ",")} sinnvollen</b></div>`;
+    h3 += `<div class="q-buch q-tafel" data-summenbuch="Kollektionstafel"><div class="q-buch-kopf"><span>Kollektionstafel</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace(".", ",")} sinnvollen</b></div>`;
     for (const m of reihe) {
       const st2 = m.status !== "aktiv" ? `${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}` : m.stilAktualitaet < 45 ? "Stil veraltet" : `${m.stil}, ${preisText(m.preislage)}`;
-      h3 += `<button class="q-muster${ui.em.auf === m.id ? " q-an" : ""}" data-a="emAuf" data-v="${m.id}" aria-expanded="${ui.em.auf === m.id}"><span class="q-probe" style="--farbe:${m.farbe}"></span><span class="q-name">${esc2(m.name)}<small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie}</small><small class="${m.status === "aktiv" && m.stilAktualitaet < 45 ? "q-minus" : ""}">${st2}</small></span><span class="q-wert"><b>${geld(m.umsatz13)}</b><small>${punkte(m.mehrmarge)}</small></span></button>`;
+      h3 += `<button class="q-muster${ui.em.auf === m.id ? " q-an" : ""}" data-a="emAuf" data-v="${m.id}" aria-expanded="${ui.em.auf === m.id}"><span class="q-probe" style="--farbe:${m.farbe}"></span><span class="q-name">${esc2(m.name)}<small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie}</small><small class="${m.status === "aktiv" && m.stilAktualitaet < 45 ? "q-minus" : ""}">${st2}</small></span><span class="q-wert"><b data-s="u">${geld(m.umsatz13)}</b><small>${punkte(m.mehrmarge)}</small></span></button>`;
     }
     if (u.gefuehrt < u.kapazitaet) h3 += '<button class="q-muster q-frei" data-a="emGruenden"><span class="q-probe"></span><span class="q-name">Freier Platz<small>Neue Eigenmarke gr\xFCnden</small></span><span class="q-wert">+</span></button>';
-    if (reihe.length) h3 += `<div class="q-summe"><span>Umsatz 13 Wochen gesamt</span><span class="q-wert" data-p="mg:umsatz">${geld(gesamt)}</span></div>`;
+    if (reihe.length) h3 += `<div class="q-summe"><span>Umsatz 13 Wochen gesamt</span><span class="q-wert" data-summe="u" data-p="mg:umsatz">${geld(gesamt)}</span></div>`;
     h3 += "</div>";
     if (u.gefuehrt >= u.kapazitaet) h3 += '<button class="q-neben-akt" data-a="emGruenden" style="margin-bottom:12px">+ Neue Eigenmarke (Kapazit\xE4t voll)</button>';
     for (const m of reihe.filter((x2) => x2.id === ui.em.auf)) {
@@ -159895,13 +159895,13 @@
       const summe2 = d3.plaene.reduce((a2, p2) => a2 + p2.budget, 0);
       html += `<div class="q-gross"><span class="q-label">Saisonbudget EK</span><span class="q-haupt" data-p="ware:plansumme">${geld(summe2)}</span><span class="q-neben"><b data-p="ware:konzern">${geld(d3.konzernbestand)}</b>Bestand Konzern</span></div>`;
       html += `<div class="q-befund">Saisonplanung rund 30 Wochen vor dem Start. ${d3.vorlagen.length ? `<b data-p="ware:vorlagen">${teile(d3.vorlagen.length)}</b> Vorlagen warten.` : `<span data-p="ware:vorlagen" hidden>${teile(d3.vorlagen.length)}</span>Ohne \xC4nderung gilt die bestehende Einkaufssteuerung.`}</div>`;
-      html += '<div class="q-buch"><div class="q-buch-kopf"><span>Saisonplan je Warengruppe</span><b>Budget EK</b></div>';
+      html += '<div class="q-buch" data-summenbuch="Saisonplan"><div class="q-buch-kopf"><span>Saisonplan je Warengruppe</span><b>Budget EK</b></div>';
       if (!d3.plaene.length) html += '<div class="q-leer"><b>Kein Saisonplan offen.</b>Die n\xE4chste Planungsrunde beginnt rund 30 Wochen vor Saisonstart.</div>';
       for (const p2 of d3.plaene) {
-        html += `<div class="q-zeile"><span class="q-name">${esc2(p2.name)}<small>${esc2(p2.saisonName)}</small><small>Marge ${proz(p2.zielmarge)} \xB7 Abverkauf ${proz(p2.zielabverkauf)} \xB7 Vororder ${proz(p2.vororderquote)}</small></span><span class="q-wert"><b data-p="ware:plan:${p2.wg}">${geld(p2.budget)}</b></span>
+        html += `<div class="q-zeile"><span class="q-name">${esc2(p2.name)}<small>${esc2(p2.saisonName)}</small><small>Marge ${proz(p2.zielmarge)} \xB7 Abverkauf ${proz(p2.zielabverkauf)} \xB7 Vororder ${proz(p2.vororderquote)}</small></span><span class="q-wert"><b data-s="b" data-p="ware:plan:${p2.wg}">${geld(p2.budget)}</b></span>
         <span class="q-knoepfe"><button data-a="warePlanMinus" data-v="${esc2(p2.wg)}" aria-label="${esc2(p2.name)} Budget minus 5 Prozent">\u22125 %</button><button data-a="warePlanPlus" data-v="${esc2(p2.wg)}" aria-label="${esc2(p2.name)} Budget plus 5 Prozent">+5 %</button></span></div>`;
       }
-      if (d3.plaene.length) html += `<div class="q-summe"><span>Summe ${d3.plaene.length} Warengruppen</span><span class="q-wert" data-p="ware:plansumme">${geld(summe2)}</span></div>`;
+      if (d3.plaene.length) html += `<div class="q-summe"><span>Summe ${d3.plaene.length} Warengruppen</span><span class="q-wert" data-summe="b" data-p="ware:plansumme">${geld(summe2)}</span></div>`;
       html += "</div></div>";
       return { titel: "Merchandise Planning", unter: `${d3.plaene.length} Warengruppen \xB7 ${d3.vorlagen.length} Vorlagen`, html };
     }
@@ -160161,7 +160161,7 @@
       h3 += seg("filterArt", ui.filter.art, [["", "Alle"], ["nos", "NOS"], ["saison", "Saison"]]);
       h3 += seg("filterWert", ui.filter.wert, [["", "Jeder Wert"], ["klein", "bis 100 Tsd. \u20AC"], ["gross", "\xFCber 100 Tsd. \u20AC"]]) + "</div>";
       h3 += `<div class="q-buch"><div class="q-stepzeile" style="border-top:0"><span class="q-name">Freigabegrenze<small>Orders dar\xFCber brauchen dich</small></span><div class="stepper"><button data-a="grenze" data-v="-10000" aria-label="Grenze senken">\u2212</button><span><b data-p="grenze">${geld(alle.grenze)}</b></span><button data-a="grenze" data-v="10000" aria-label="Grenze erh\xF6hen">+</button></div></div></div>`;
-      h3 += `<div class="q-buch"><div class="q-buch-kopf"><span>Orderbuch KW ${kwVon2(s2().woche)}</span><b>Wert EK</b></div>`;
+      h3 += `<div class="q-buch" data-summenbuch="Orderbuch"><div class="q-buch-kopf"><span>Orderbuch KW ${kwVon2(s2().woche)}</span><b>Wert EK</b></div>`;
       if (!l.length) h3 += `<div class="q-leer"><b>${alle.anzahl ? "Keine Order passt zum Filter." : "Das Orderbuch ist leer."}</b>${alle.anzahl ? `${alle.anzahl} Orders warten in anderen Bereichen oder Wertklassen.` : "Neue Orders kommen mit der n\xE4chsten Orderrunde oder Nachorder."}</div>`;
       const zeigeN = ui.mehrOrders ? l.length : Math.min(l.length, 25);
       let gruppe3 = null;
@@ -160174,7 +160174,7 @@
         }
         const auf = ui.orderAuf === o3.id || ui.kuerzen === o3.id;
         h3 += `<div class="q-zeile q-order${auf ? " q-auf" : ""}"><button class="q-name q-zeilenknopf" data-a="orderAuf" data-v="${o3.id}" aria-expanded="${auf}">${esc2(o3.wgName)}<small>${esc2(o3.lieferant)} \xB7 ${TYP3[o3.typ] ?? ART[o3.art]}${o3.markeName ? ` \xB7 ${esc2(o3.markeName)}` : ""}${o3.ueberLimit ? " \xB7 gek\xFCrzt" : ""}</small></button>
-        <span class="q-wert"><b data-p="f:${o3.id}:wert">${geld(o3.wert)}</b><small>${o3.modus === "auto" ? "sonst automatisch" : "sonst verf\xE4llt sie"}</small></span>
+        <span class="q-wert"><b data-s="w" data-p="f:${o3.id}:wert">${geld(o3.wert)}</b><small>${o3.modus === "auto" ? "sonst automatisch" : "sonst verf\xE4llt sie"}</small></span>
         <button class="q-haken" data-a="frei" data-v="${o3.id}" aria-label="${esc2(o3.wgName)} freigeben">Frei</button>`;
         if (auf) {
           h3 += `<span class="q-details">Abverkauf 8 Wochen <i data-p="f:${o3.id}:abverkauf">${geld(o3.erwarteterAbverkauf)}</i> \xB7 Reichweite danach <i data-p="f:${o3.id}:reichweite">${dez(o3.reichweiteDanach, 1)} Wo.</i> \xB7 erste Lieferung KW ${kwVon2(o3.ersteLieferung)}${o3.lieferungen.length > 1 ? ` in ${o3.lieferungen.length} Teilen` : ""}${o3.hinweis ? ` \xB7 ${esc2(o3.hinweis)}` : ""}</span>`;
@@ -160183,8 +160183,11 @@
         }
         h3 += "</div>";
       }
-      if (zeigeN < l.length) h3 += `<button class="q-mehr" data-a="mehrOrders">Weitere ${l.length - zeigeN} Orders zeigen</button>`;
-      if (l.length) h3 += `<div class="q-summe"><span>Summe ${l.length} ${l.length === 1 ? "Order" : "Orders"}</span><span class="q-wert" data-p="sammel">${geld(summe2)}</span></div>`;
+      if (zeigeN < l.length) {
+        const rest = l.slice(zeigeN);
+        h3 += `<div class="q-zeile"><span class="q-name">Weitere ${rest.length} Orders<small>kleinere Werte</small></span><span class="q-wert"><b data-s="w">${geld(rest.reduce((a2, o3) => a2 + o3.wert, 0))}</b></span></div><button class="q-mehr" data-a="mehrOrders">Alle ${l.length} Orders zeigen</button>`;
+      }
+      if (l.length) h3 += `<div class="q-summe"><span>Summe ${l.length} ${l.length === 1 ? "Order" : "Orders"}</span><span class="q-wert" data-summe="w" data-p="sammel">${geld(summe2)}</span></div>`;
       h3 += "</div>";
       const p2 = alle.protokoll[alle.protokoll.length - 1];
       if (p2) h3 += `<div class="legende">Letzte Woche: ${p2.neu} neue Orders, ${p2.direkt} direkt unter der Grenze, ${p2.freigegeben} freigegeben, ${p2.auto} automatisch, ${p2.verfallen} verfallen${p2.verfallenWert ? ` (${geld(p2.verfallenWert)})` : ""}, ${p2.abgelehnt} abgelehnt</div>`;
@@ -162629,11 +162632,11 @@
       h3 += `<div class="q-befund">${delta == null ? "Ein Vergleich ist ab der zweiten Woche verf\xFCgbar." : `<b class="${delta < 0 ? "q-minus" : "q-plus"}">${delta >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(Math.round(delta)))}</b> Kunden gegen\xFCber der Vorwoche bei ${P4("u:netto", geld(u.wocheNetto), "b")} Werbung netto.`}${u.rabattquote13 > 0.08 ? ` Die Rabattquote liegt mit ${pz3(u.rabattquote13, 1)} hoch, Kunden gew\xF6hnen sich an Preisaktionen.` : ""}</div>`;
       const zeilen = [["kanaele", "Kan\xE4le", "Prospekt, Anzeigen, Plakat, Radio, TV, Online, Social"], ["karte", "Hartwig Karte", "Punkte, Stufen, Betrieb, Daten"], ["app", "Hartwig App", "Pflege und Werbung"], ["crm", "CRM-Versand", "Mail, Push, Brief"]].map(([k3, t3, d3]) => ({ k: k3, t: t3, d: d3, n: tsd(u.bloecke[k3]) }));
       const brutto2 = zeilen.reduce((a2, z4) => a2 + z4.n, 0), beteiligung = tsd(u.wocheBeteiligung);
-      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Werbebudget je Woche</span><b>Tsd. \u20AC</b></div>';
-      for (const z4 of zeilen) h3 += `<div class="q-zeile"><span class="q-name">${z4.t}<small>${z4.d}</small></span><span class="q-wert">${P4(`u:block:${z4.k}`, tsdText(z4.n), "span")}</span></div>`;
-      h3 += `<div class="q-summe"><span>Brutto</span><span class="q-wert">${P4("u:brutto", tsdText(brutto2), "span")}</span></div>`;
-      h3 += `<div class="q-zeile"><span class="q-name">Lieferantenbeteiligung<small>Werbekostenzusch\xFCsse</small></span><span class="q-wert">${P4("u:beteiligung", `\u2212${tsdText(beteiligung)}`, "span")}</span></div>`;
-      h3 += `<div class="q-summe"><span>Netto</span><span class="q-wert">${P4("u:nettoTsd", tsdText(brutto2 - beteiligung), "span")}</span></div></div>`;
+      h3 += '<div class="q-buch" data-summenbuch="Werbebudget"><div class="q-buch-kopf"><span>Werbebudget je Woche</span><b>Tsd. \u20AC</b></div>';
+      for (const z4 of zeilen) h3 += `<div class="q-zeile"><span class="q-name">${z4.t}<small>${z4.d}</small></span><span class="q-wert">${P4(`u:block:${z4.k}`, tsdText(z4.n), "span", ' data-s="e"')}</span></div>`;
+      h3 += `<div class="q-summe"><span>Brutto</span><span class="q-wert">${P4("u:brutto", tsdText(brutto2), "span", ' data-summe="e"')}</span></div>`;
+      h3 += `<div class="q-zeile"><span class="q-name">Lieferantenbeteiligung<small>Werbekostenzusch\xFCsse</small></span><span class="q-wert">${P4("u:beteiligung", `\u2212${tsdText(beteiligung)}`, "span", ' data-s="e"')}</span></div>`;
+      h3 += `<div class="q-summe"><span>Netto</span><span class="q-wert">${P4("u:nettoTsd", tsdText(brutto2 - beteiligung), "span", ' data-summe="e"')}</span></div></div>`;
       const kzz = (n3, w2, p2, ton2 = "") => `<div class="q-zeile"><span class="q-name">${n3}</span><span class="q-wert ${ton2}">${P4(p2, w2, "span")}</span></div>`;
       h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Marke und Kundschaft</span></div>';
       h3 += kzz("Werbequote netto", pz3(u.werbequoteNetto, 1), "u:quote") + kzz("Markenst\xE4rke", `${Math.round(u.markenstaerke)} / 100`, "u:marke") + kzz("Image", `${Math.round(u.image)} / 100`, "u:image");
@@ -168904,7 +168907,7 @@
     function liste2(P4) {
       const st2 = s2(), L2 = E8.produkte(st2), M2 = aktuelleMarke(L2);
       let h3 = "";
-      if (!M2) return { titel: "Produktentwicklung", unter: "", html: '<div class="leise">Keine Eigenmarke vorhanden. Eine Marke gr\xFCndest du im Einkauf.</div>' };
+      if (!M2) return { titel: "Produktentwicklung", unter: "keine Eigenmarke", html: '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Keine Eigenmarke vorhanden.</b>Produkte entstehen immer unter einer Eigenmarke. Gr\xFCnde zuerst eine Marke.</div></div><button class="q-haupt-akt" data-a="eigenmarkeGruenden">Eigenmarke gr\xFCnden</button></div>' };
       h3 += markenwahl(L2);
       const kats = M2.kategorien.filter((k4) => k4.kapazitaet > 0 || k4.belegt > 0);
       if (!kats.some((k4) => k4.id === ui.kategorie)) ui.kategorie = (kats.find((k4) => M2.produkte.some((p2) => p2.kategorie === k4.id && p2.status !== "ausgelistet")) ?? kats[0])?.id ?? null;
@@ -170987,7 +170990,7 @@
         h3 += '<div class="q-gross"><span class="q-label">Deckungsbeitrag online</span><span class="q-haupt ' + (u.deckungsbeitrag < 0 ? "q-minus" : "") + '">' + geld(u.deckungsbeitrag) + '</span><span class="q-neben"><b>' + geld(u.umsatz) + "</b>Onlineumsatz Woche</span></div>";
         h3 += '<div class="q-befund">' + (u.bestellungen ? (u.deckungsbeitrag < 0 ? '<b class="q-minus">hartwig.de verliert Geld.</b> ' : "") + "<b>" + fmt.format(u.bestellungen) + "</b> Bestellungen zu je <b>" + geld(u.kostenJeBestellung) + "</b> Kosten, " + prozent3(u.retourenquote) + " gehen zur\xFCck." : "Diese Woche gab es keine Onlinebestellung.") + "</div>";
         h3 += '<div class="q-buch q-paketschein"><div class="q-buch-kopf"><span>Paketschein KW ' + (ctx.s().woche % 52 + 1) + '</span><b>hartwig.de</b></div><div class="q-zeile"><span class="q-name">Anteil am Konzernumsatz</span><span class="q-wert">' + prozent3(u.anteil) + '</span></div><div class="q-zeile"><span class="q-name">Online-Conversion</span><span class="q-wert">' + prozent3(u.conversion, 2) + '</span></div><div class="q-zeile"><span class="q-name">Retourenquote</span><span class="q-wert">' + prozent3(u.retourenquote) + '</span></div><div class="q-zeile"><span class="q-name">Click & Collect<small>Anteil der Bestellungen</small></span><span class="q-wert">' + prozent3(u.clickCollectAnteil) + "</span></div></div>";
-        h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Umsatzbr\xFCcke Online</span><b>Woche</b></div><div class="q-zeile"><span class="q-name">Onlinewachstum gegen\xFCber Basis<small>Basis 8 % ist im Konzernumsatz schon enthalten</small></span><span class="q-wert">' + vz(wachstum) + '</span></div><div class="q-zeile"><span class="q-name">Mitk\xE4ufe bei Abholung im Haus</span><span class="q-wert">' + vz(mitkauf) + '</span></div><div class="q-zeile"><span class="q-name">Kannibalisierung in den H\xE4usern</span><span class="q-wert">' + vz(-u.kannibalisierung) + '</span></div><div class="q-summe"><span>Effekt auf den Konzernumsatz</span><span class="q-wert ' + (u.onlineEffekt < 0 ? "q-minus" : "") + '">' + vz(u.onlineEffekt) + "</span></div></div>";
+        h3 += '<div class="q-buch" data-summenbuch="Umsatzbr\xFCcke Online"><div class="q-buch-kopf"><span>Umsatzbr\xFCcke Online</span><b>Woche</b></div><div class="q-zeile"><span class="q-name">Onlinewachstum gegen\xFCber Basis<small>Basis 8 % ist im Konzernumsatz schon enthalten</small></span><span class="q-wert" data-s="e">' + vz(wachstum) + '</span></div><div class="q-zeile"><span class="q-name">Mitk\xE4ufe bei Abholung im Haus</span><span class="q-wert" data-s="e">' + vz(mitkauf) + '</span></div><div class="q-zeile"><span class="q-name">Kannibalisierung in den H\xE4usern</span><span class="q-wert" data-s="e">' + vz(-u.kannibalisierung) + '</span></div><div class="q-summe"><span>Effekt auf den Konzernumsatz</span><span data-summe="e" class="q-wert ' + (u.onlineEffekt < 0 ? "q-minus" : "") + '">' + vz(u.onlineEffekt) + "</span></div></div>";
         const v = u.verlauf.slice(-26);
         if (v.length < 2) h3 += '<div class="q-buch"><div class="q-leer">Ein Verlauf ist ab der zweiten Woche verf\xFCgbar.</div></div>';
         else {
@@ -170995,7 +170998,7 @@
           h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Onlineumsatz</span><b>' + v.length + ' Wochen</b></div><div class="online-verlauf" style="padding:8px 14px 0">' + v.map((q2) => '<div class="online-balken" style="height:' + Math.max(2, 100 * q2.umsatz / max) + '%" title="KW ' + (q2.woche % 52 + 1) + ": " + geld(q2.umsatz) + '"></div>').join("") + '</div><div class="q-zwischen" style="border:0"><span>KW ' + (v[0].woche % 52 + 1) + "</span><span>KW " + (v[v.length - 1].woche % 52 + 1) + "</span></div></div>";
         }
         const gr = Object.entries(u.umsatzJeGruppe).sort((a2, b3) => b3[1] - a2[1]);
-        h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Warengruppen online</span><b>Umsatz</b></div>' + (gr.length ? gr.map(([g, umsatz]) => '<div class="q-zeile"><span class="q-name">' + esc2(ctx.E.GRUPPEN[g]?.name ?? g) + '</span><span class="q-wert">' + geld(umsatz) + "</span></div>").join("") + '<div class="q-summe"><span>Summe</span><span class="q-wert">' + geld(gr.reduce((a2, [, x2]) => a2 + x2, 0)) + "</span></div>" : '<div class="q-leer">Noch kein Onlineumsatz.</div>') + "</div>";
+        h3 += '<div class="q-buch" data-summenbuch="Warengruppen online"><div class="q-buch-kopf"><span>Warengruppen online</span><b>Umsatz</b></div>' + (gr.length ? gr.map(([g, umsatz]) => '<div class="q-zeile"><span class="q-name">' + esc2(ctx.E.GRUPPEN[g]?.name ?? g) + '</span><span class="q-wert" data-s="u">' + geld(umsatz) + "</span></div>").join("") + '<div class="q-summe"><span>Summe</span><span class="q-wert" data-summe="u">' + geld(gr.reduce((a2, [, x2]) => a2 + x2, 0)) + "</span></div>" : '<div class="q-leer">Noch kein Onlineumsatz.</div>') + "</div>";
         h3 += "</div>";
       } else if (tab === "steuerung") {
         const optionen3 = (id, werte3, aktuell, format) => '<div class="zeile"><span class="was">' + id + '</span><select class="ort" data-online="strategie" data-feld="' + format + '">' + werte3.map(([v, t3]) => '<option value="' + v + '"' + (String(v) === String(aktuell) ? " selected" : "") + ">" + t3 + "</option>").join("") + "</select></div>";
@@ -173682,10 +173685,10 @@
     const x2 = (w2) => ((w2 - lo) / (hi - lo) * 100).toFixed(1);
     const vz = (w2) => (w2 > 0 ? "+" : w2 < 0 ? "\u2212" : "") + geld(Math.abs(w2));
     const strich2 = (w2) => '<span class="q-wf-spur"><i class="q-wf-marke" style="left:' + x2(w2) + '%"></i></span>';
-    let h3 = '<div class="o02-bruecke q-wf" data-o02-diff="' + br.differenz + '" data-o02-summe="' + (br.frequenz + br.kaufquote + br.teile + br.preis) + '">';
-    h3 += '<div class="q-wf-zeile q-wf-ende"><span class="q-name">Vorjahr</span>' + strich2(br.vorher) + '<span class="q-wert">' + geld(br.vorher) + "</span></div>";
-    for (const s2 of pos) h3 += '<div class="q-wf-zeile"><span class="q-name">' + s2.n + "<small>" + s2.d + '</small></span><span class="q-wf-spur"><i class="q-wf-balken ' + (s2.v < 0 ? "minus" : "plus") + '" style="left:' + x2(Math.min(s2.a, s2.b)) + "%;width:" + Math.max(0.6, Math.abs(s2.v) / (hi - lo) * 100).toFixed(1) + '%"></i></span><span class="q-wert ' + (s2.v < 0 ? "q-minus" : "") + '">' + vz(s2.v) + "</span></div>";
-    h3 += '<div class="q-wf-zeile q-wf-ende q-wf-summe"><span class="q-name">Ist</span>' + strich2(br.aktuell) + '<span class="q-wert">' + geld(br.aktuell) + "</span></div>";
+    let h3 = '<div class="o02-bruecke q-wf" data-summenbuch="Konzernbr\xFCcke" data-o02-diff="' + br.differenz + '" data-o02-summe="' + (br.frequenz + br.kaufquote + br.teile + br.preis) + '">';
+    h3 += '<div class="q-wf-zeile q-wf-ende"><span class="q-name">Vorjahr</span>' + strich2(br.vorher) + '<span class="q-wert" data-s="e">' + geld(br.vorher) + "</span></div>";
+    for (const s2 of pos) h3 += '<div class="q-wf-zeile"><span class="q-name">' + s2.n + "<small>" + s2.d + '</small></span><span class="q-wf-spur"><i class="q-wf-balken ' + (s2.v < 0 ? "minus" : "plus") + '" style="left:' + x2(Math.min(s2.a, s2.b)) + "%;width:" + Math.max(0.6, Math.abs(s2.v) / (hi - lo) * 100).toFixed(1) + '%"></i></span><span data-s="e" class="q-wert ' + (s2.v < 0 ? "q-minus" : "") + '">' + vz(s2.v) + "</span></div>";
+    h3 += '<div class="q-wf-zeile q-wf-ende q-wf-summe"><span class="q-name">Ist</span>' + strich2(br.aktuell) + '<span class="q-wert" data-summe="e">' + geld(br.aktuell) + "</span></div>";
     h3 += '<div class="legende" style="padding:8px 14px 10px">Boneffekt zusammen ' + vz(br.bon) + " \xB7 Balken im Ausschnitt " + geld(lo) + " bis " + geld(hi) + "</div>";
     if (br.vorjahrGeschaetzt) h3 += '<div class="legende" style="padding:0 14px 10px">Vorjahreswerte teilweise aus 4-Wochen-Bl\xF6cken gesch\xE4tzt.</div>';
     return h3 + "</div>";
@@ -173702,6 +173705,7 @@
     const auswahl4 = (name2, key, optionen3) => "<label>" + name2 + '<select data-o02-wahl="' + key + '" class="ort">' + optionen3.map(([wert, titel]) => '<option value="' + esc2(wert) + '" ' + (String(ui[key]) === String(wert) ? "selected" : "") + ">" + esc2(titel) + "</option>").join("") + "</select></label>";
     function anzeigen() {
       const daten = E8.reporting(ctx.s(), ui.wochen, ui.format);
+      for (const g of daten.gruppen) if (g.ebene === "hauscluster") g.name = clusterName3(ctx.s(), g.id);
       const hs = daten.zeilen;
       const gruppen = daten.gruppen;
       const filter = '<div class="o02-filter">' + auswahl4("Ebene", "ebene", [["region", "Region"], ["hauscluster", "Hauscluster"], ["haus", "Haus"]]) + auswahl4("Format", "format", [["alle", "Alle"], ...[...new Set(ctx.s().haeuser.map((z4) => z4.format))].map((f11) => [f11, f11 === "warenhaus" ? "Hartwig" : f11 === "sport" ? "Hartwig Sport" : f11 === "fundus" ? "FUNDUS" : f11])]) + auswahl4("Zeitraum", "wochen", [[1, "1 Woche"], [4, "4 Wochen"], [13, "13 Wochen"], [52, "52 Wochen"]]) + auswahl4("Sortieren", "sort", [
@@ -174128,15 +174132,15 @@
       const formate = K3.filter((n3) => n3.ebene === "format");
       const m1 = (v) => (v / 1e6).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
       const fname = (f11) => FORMATNAME[f11.id.replace("format:", "")] ?? f11.name;
-      const zeileP = (n3, klasse = "") => '<div class="q-zeile q-plan ' + klasse + '"><span class="q-name">' + esc2(nname(n3)) + '</span><span class="q-wert">' + m1(n3.umsatz) + '</span><span class="q-wert">' + m1(n3.ist) + '</span><span class="q-wert ' + (n3.abweichung < 0 ? "q-minus" : "") + '">' + pctV(n3.abweichung) + "</span></div>";
+      const zeileP = (n3, klasse = "") => '<div class="q-zeile q-plan ' + klasse + '"><span class="q-name">' + esc2(nname(n3)) + '</span><span class="q-wert"' + (klasse ? "" : ' data-s="p"') + ">" + m1(n3.umsatz) + '</span><span class="q-wert"' + (klasse ? "" : ' data-s="i"') + ">" + m1(n3.ist) + '</span><span class="q-wert ' + (n3.abweichung < 0 ? "q-minus" : "") + '">' + pctV(n3.abweichung) + "</span></div>";
       for (const f11 of formate) {
         const regionen = kinder(f11.id, "region");
-        html += '<div class="q-buch"><div class="q-buch-kopf q-plan"><span>' + esc2(fname(f11)) + "</span><b>Plan Mio. \u20AC</b><b>Ist Mio. \u20AC</b><b>Abw.</b></div>";
+        html += '<div class="q-buch" data-summenbuch="Planblatt ' + esc2(fname(f11)) + '"><div class="q-buch-kopf q-plan"><span>' + esc2(fname(f11)) + "</span><b>Plan Mio. \u20AC</b><b>Ist Mio. \u20AC</b><b>Abw.</b></div>";
         for (const r3 of regionen) {
           const cl = kinder(r3.id, "hauscluster");
           html += cl.length ? '<details class="q-plan-auf"><summary>' + zeileP(r3) + "</summary>" + cl.map((c) => zeileP(c, "q-unter")).join("") + "</details>" : zeileP(r3);
         }
-        html += '<div class="q-summe q-plan"><span>' + esc2(fname(f11)) + ' gesamt</span><span class="q-wert">' + m1(f11.umsatz) + '</span><span class="q-wert">' + m1(f11.ist) + '</span><span class="q-wert">' + pctV(f11.abweichung) + "</span></div></div>";
+        html += '<div class="q-summe q-plan"><span>' + esc2(fname(f11)) + ' gesamt</span><span class="q-wert" data-summe="p">' + m1(f11.umsatz) + '</span><span class="q-wert" data-summe="i">' + m1(f11.ist) + '</span><span class="q-wert">' + pctV(f11.abweichung) + "</span></div></div>";
       }
       const w2 = (b3.wochen || []).slice().reverse();
       html += '<div class="q-buch"><div class="q-buch-kopf q-plan q-wochen"><span>Woche</span><b>Ist Mio. \u20AC</b><b>Plan Mio. \u20AC</b><b>Abw.</b></div>' + (w2.length ? w2.map((x2) => '<div class="q-zeile q-plan q-wochen"><span class="q-name">KW ' + (x2.woche % 52 + 1) + '</span><span class="q-wert">' + m1(x2.ist) + '</span><span class="q-wert">' + m1(x2.plan) + '</span><span class="q-wert ' + (x2.abweichungQuote < 0 ? "q-minus" : "") + '">' + pctV(x2.abweichungQuote) + "</span></div>").join("") : '<div class="q-leer">Noch keine Woche im Plan.</div>') + "</div>";

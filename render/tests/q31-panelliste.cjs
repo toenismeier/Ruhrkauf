@@ -6,7 +6,7 @@ const PANELS = [
   { name: 'q31-einkauf-wg', vorSpiel: false, umgestellt: true, oeffne: "window.spiel.einkauf.oeffne('wg', 'damen.kleider');" },
   { name: 'q31-freigaben', vorSpiel: false, umgestellt: true, oeffne: "window.spiel.einkauf.oeffne('freigaben');" },
   { name: 'q31-eigenmarken', vorSpiel: false, umgestellt: true, oeffne: "window.spiel.einkauf.oeffne('eigenmarken');" },
-  { name: 'q31-merchandise', vorSpiel: false, umgestellt: false, oeffne: "window.spiel.einkauf.oeffne('merchandise');" },
+  { name: 'q31-merchandise', vorSpiel: false, umgestellt: true, oeffne: "window.spiel.einkauf.oeffne('merchandise');" },
   { name: 'q31-produkte', vorSpiel: false, umgestellt: true, oeffne: menue('produkte') },
   { name: 'q31-marketing', vorSpiel: false, umgestellt: true, oeffne: menue('marketing') },
   { name: 'q31-it', vorSpiel: false, umgestellt: true, oeffne: menue('it') },

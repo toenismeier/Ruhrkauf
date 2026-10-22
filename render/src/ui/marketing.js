@@ -49,11 +49,11 @@ export function marketingModul(ctx) {
     h += `<div class="q-befund">${delta == null ? 'Ein Vergleich ist ab der zweiten Woche verfügbar.' : `<b class="${delta < 0 ? 'q-minus' : 'q-plus'}">${delta >= 0 ? '+' : '−'}${fmt.format(Math.abs(Math.round(delta)))}</b> Kunden gegenüber der Vorwoche bei ${P('u:netto', geld(u.wocheNetto), 'b')} Werbung netto.`}${u.rabattquote13 > 0.08 ? ` Die Rabattquote liegt mit ${pz(u.rabattquote13, 1)} hoch, Kunden gewöhnen sich an Preisaktionen.` : ''}</div>`;
     const zeilen = [['kanaele', 'Kanäle', 'Prospekt, Anzeigen, Plakat, Radio, TV, Online, Social'], ['karte', 'Hartwig Karte', 'Punkte, Stufen, Betrieb, Daten'], ['app', 'Hartwig App', 'Pflege und Werbung'], ['crm', 'CRM-Versand', 'Mail, Push, Brief']].map(([k, t, d]) => ({ k, t, d, n: tsd(u.bloecke[k]) }));
     const brutto = zeilen.reduce((a, z) => a + z.n, 0), beteiligung = tsd(u.wocheBeteiligung);
-    h += '<div class="q-buch"><div class="q-buch-kopf"><span>Werbebudget je Woche</span><b>Tsd. €</b></div>';
-    for (const z of zeilen) h += `<div class="q-zeile"><span class="q-name">${z.t}<small>${z.d}</small></span><span class="q-wert">${P(`u:block:${z.k}`, tsdText(z.n), 'span')}</span></div>`;
-    h += `<div class="q-summe"><span>Brutto</span><span class="q-wert">${P('u:brutto', tsdText(brutto), 'span')}</span></div>`;
-    h += `<div class="q-zeile"><span class="q-name">Lieferantenbeteiligung<small>Werbekostenzuschüsse</small></span><span class="q-wert">${P('u:beteiligung', `−${tsdText(beteiligung)}`, 'span')}</span></div>`;
-    h += `<div class="q-summe"><span>Netto</span><span class="q-wert">${P('u:nettoTsd', tsdText(brutto - beteiligung), 'span')}</span></div></div>`;
+    h += '<div class="q-buch" data-summenbuch="Werbebudget"><div class="q-buch-kopf"><span>Werbebudget je Woche</span><b>Tsd. €</b></div>';
+    for (const z of zeilen) h += `<div class="q-zeile"><span class="q-name">${z.t}<small>${z.d}</small></span><span class="q-wert">${P(`u:block:${z.k}`, tsdText(z.n), 'span', ' data-s="e"')}</span></div>`;
+    h += `<div class="q-summe"><span>Brutto</span><span class="q-wert">${P('u:brutto', tsdText(brutto), 'span', ' data-summe="e"')}</span></div>`;
+    h += `<div class="q-zeile"><span class="q-name">Lieferantenbeteiligung<small>Werbekostenzuschüsse</small></span><span class="q-wert">${P('u:beteiligung', `−${tsdText(beteiligung)}`, 'span', ' data-s="e"')}</span></div>`;
+    h += `<div class="q-summe"><span>Netto</span><span class="q-wert">${P('u:nettoTsd', tsdText(brutto - beteiligung), 'span', ' data-summe="e"')}</span></div></div>`;
     const kzz = (n, w, p, ton = '') => `<div class="q-zeile"><span class="q-name">${n}</span><span class="q-wert ${ton}">${P(p, w, 'span')}</span></div>`;
     h += '<div class="q-buch"><div class="q-buch-kopf"><span>Marke und Kundschaft</span></div>';
     h += kzz('Werbequote netto', pz(u.werbequoteNetto, 1), 'u:quote') + kzz('Markenstärke', `${Math.round(u.markenstaerke)} / 100`, 'u:marke') + kzz('Image', `${Math.round(u.image)} / 100`, 'u:image');

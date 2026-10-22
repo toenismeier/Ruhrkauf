@@ -199,3 +199,4 @@
 #panel:has(.q31-marke) .app-aktionen button[data-app-aktion=speichern] { border-color: var(--hk-akzent, #d23c32); color: var(--hk-akzent-hell, #ef7a6f); font-weight: 700; }
 #panel:has(.q31-marke) .app-namenswahl input { background: var(--hk-zen-tief, #162026); color: var(--ui-text); border: 1px solid var(--ui-border); border-radius: 10px; min-height: 44px; font: inherit; font-size: 16px; padding: 0 10px; }
 #panel:has(.q31-marke) .app-aktionen button[data-app-aktion=loeschen] { color: var(--hk-schlecht, #ef6f62); }
+#panel:has(.q31-marke) .o02-daten { min-height: 44px; align-items: center; }

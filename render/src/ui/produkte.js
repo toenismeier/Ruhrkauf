@@ -101,7 +101,7 @@ export function produkteModul(ctx) {
   function liste(P) {
     const st = s(), L = E.produkte(st), M = aktuelleMarke(L);
     let h = '';
-    if (!M) return { titel: 'Produktentwicklung', unter: '', html: '<div class="leise">Keine Eigenmarke vorhanden. Eine Marke gründest du im Einkauf.</div>' };
+    if (!M) return { titel: 'Produktentwicklung', unter: 'keine Eigenmarke', html: '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Keine Eigenmarke vorhanden.</b>Produkte entstehen immer unter einer Eigenmarke. Gründe zuerst eine Marke.</div></div><button class="q-haupt-akt" data-a="eigenmarkeGruenden">Eigenmarke gründen</button></div>' };
     // Q31 Kollektionsstange. Hauptfrage: Was läuft im Sortiment, was entsteht? Marke und Kategorie wählen,
     // darunter sofort das Produktkarussell und die Hauptaktion; Absatz, Profil und Team folgen kleiner.
     h += markenwahl(L);

@@ -80,6 +80,25 @@ const EXTRA = {
       await seiten(`${name}-x-${x}`);
     }
   }
+  // Schlechte Tage: frisches Spiel in Woche 1 (kein Verlauf, kein Vorjahr), Eigenmarken ausgelistet, Panels leer
+  if (!nur || nur.includes('schlecht')) {
+    await p.evaluate(() => { window.spiel.schliessePanel(); window.spiel.neuesSpiel(1, 'Essen'); });
+    const SCHLECHT = [
+      ['reporting', () => { document.getElementById('menueknopf').click(); document.getElementById('reporting').click(); }],
+      ['online', () => { document.getElementById('menueknopf').click(); document.getElementById('online').click(); }],
+      ['marketing', () => { document.getElementById('menueknopf').click(); document.getElementById('marketing').click(); }],
+      ['planung-forecast', () => { document.getElementById('menueknopf').click(); document.getElementById('planung').click(); document.querySelector('[data-pl-tab=forecast]')?.click(); }],
+      ['eigenmarken-leer', () => { window.spiel.s.eigenmarken.marken = []; window.spiel.einkauf.oeffne('eigenmarken'); }],
+      ['produkte-leer', () => { document.getElementById('menueknopf').click(); document.getElementById('produkte').click(); }],
+    ];
+    for (const [x, f] of SCHLECHT) {
+      await p.evaluate(() => window.spiel.schliessePanel());
+      await p.evaluate(f); await p.waitForTimeout(250);
+      await textPruefen('schlecht-' + x);
+      await p.evaluate(() => { document.getElementById('pinhalt').scrollTop = 0; });
+      await bild(`schlecht-${x}.png`);
+    }
+  }
   await b.close();
   if (fehler.length) process.exitCode = 1;
 })();

@@ -79,15 +79,15 @@ export function planungModul(ctx) {
     const formate = K.filter((n) => n.ebene === 'format');
     const m1 = (v) => (v / 1e6).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const fname = (f) => FORMATNAME[f.id.replace('format:', '')] ?? f.name;
-    const zeileP = (n, klasse = '') => '<div class="q-zeile q-plan ' + klasse + '"><span class="q-name">' + esc(nname(n)) + '</span><span class="q-wert">' + m1(n.umsatz) + '</span><span class="q-wert">' + m1(n.ist) + '</span><span class="q-wert ' + (n.abweichung < 0 ? 'q-minus' : '') + '">' + pctV(n.abweichung) + '</span></div>';
+    const zeileP = (n, klasse = '') => '<div class="q-zeile q-plan ' + klasse + '"><span class="q-name">' + esc(nname(n)) + '</span><span class="q-wert"' + (klasse ? '' : ' data-s="p"') + '>' + m1(n.umsatz) + '</span><span class="q-wert"' + (klasse ? '' : ' data-s="i"') + '>' + m1(n.ist) + '</span><span class="q-wert ' + (n.abweichung < 0 ? 'q-minus' : '') + '">' + pctV(n.abweichung) + '</span></div>';
     for (const f of formate) {
       const regionen = kinder(f.id, 'region');
-      html += '<div class="q-buch"><div class="q-buch-kopf q-plan"><span>' + esc(fname(f)) + '</span><b>Plan Mio. €</b><b>Ist Mio. €</b><b>Abw.</b></div>';
+      html += '<div class="q-buch" data-summenbuch="Planblatt ' + esc(fname(f)) + '"><div class="q-buch-kopf q-plan"><span>' + esc(fname(f)) + '</span><b>Plan Mio. €</b><b>Ist Mio. €</b><b>Abw.</b></div>';
       for (const r of regionen) {
         const cl = kinder(r.id, 'hauscluster');
         html += cl.length ? '<details class="q-plan-auf"><summary>' + zeileP(r) + '</summary>' + cl.map((c) => zeileP(c, 'q-unter')).join('') + '</details>' : zeileP(r);
       }
-      html += '<div class="q-summe q-plan"><span>' + esc(fname(f)) + ' gesamt</span><span class="q-wert">' + m1(f.umsatz) + '</span><span class="q-wert">' + m1(f.ist) + '</span><span class="q-wert">' + pctV(f.abweichung) + '</span></div></div>';
+      html += '<div class="q-summe q-plan"><span>' + esc(fname(f)) + ' gesamt</span><span class="q-wert" data-summe="p">' + m1(f.umsatz) + '</span><span class="q-wert" data-summe="i">' + m1(f.ist) + '</span><span class="q-wert">' + pctV(f.abweichung) + '</span></div></div>';
     }
     const w = (b.wochen || []).slice().reverse();
     html += '<div class="q-buch"><div class="q-buch-kopf q-plan q-wochen"><span>Woche</span><b>Ist Mio. €</b><b>Plan Mio. €</b><b>Abw.</b></div>' +
