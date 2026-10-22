@@ -131,7 +131,7 @@ export function modelFuerProdukt(bild, farbe, material, { geschlecht = 'damen', 
 // ─────────────────────────────────────────── Artikelnamen der heutigen Engine → Silhouette
 const NAMEN = {
   'Jeans-Shorts': 'jeansshorts', 'Kinder-Jeansshorts': 'jeansshorts', Kaschmirpullover: 'pullover', Strickjacke: 'strickjacke', Bluse: 'bluse', Hemd: 'hemd', 'T-Shirt': 'tshirt', Poloshirt: 'polo',
-  Kleid: 'kleid', Rock: 'rock', Chino: 'chino', Jeans: 'jeans', Mantel: 'mantel', Steppjacke: 'steppjacke', Blazer: 'blazer', 'A-Linien-Kleid': 'kleid', Wickelkleid: 'wickelkleid',
+  Kleid: 'kleid', Rock: 'rock', 'A-Linien-Rock': { silhouette: 'rock', laenge: 'midi', form: 'a-linie' }, Chino: 'chino', Jeans: 'jeans', Mantel: 'mantel', Steppjacke: 'steppjacke', Blazer: 'blazer', 'A-Linien-Kleid': 'kleid', Wickelkleid: 'wickelkleid',
   Tunikabluse: 'tunika', 'Oversize-Bluse': { silhouette: 'bluse', passform: 'oversize' }, 'Bootcut-Jeans': 'flarejeans', Culotte: 'culotte', Plisseerock: 'plisseerock', Bleistiftrock: 'bleistiftrock',
   Feinstrickpullover: { silhouette: 'pullover', material: 'merino' }, Longcardigan: { silhouette: 'strickjacke', laenge: 'lang' }, Trenchcoat: 'trenchcoat', 'Bouclé-Jacke': { silhouette: 'blazer', art: 'blazer' },
   'Slim-Fit-Hemd': { silhouette: 'hemd', passform: 'tailliert' }, 'Regular-Fit-Hemd': 'hemd', 'Oxford-Hemd': { silhouette: 'hemd', kragen: 'hemd' }, 'Henley-Shirt': 'henley',

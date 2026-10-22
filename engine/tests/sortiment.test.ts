@@ -32,3 +32,17 @@ describe('Sortiment-Haken (Q27–Q29)', () => {
     for (const t of SORTIMENT_TYPEN) expect(K.typen.find((x) => x.typ === t.typ)?.bild).toEqual(t.bild);
   });
 });
+
+describe('Q27 Mode-Artikeltypen', () => {
+  const Q27 = SORTIMENT_TYPEN.filter((t) => ['oberteile', 'unterteile', 'jacken', 'kinder'].includes(t.kategorie) || /Bade|Bikini/.test(t.typ));
+  test('mindestens 100 neue Mode-Typen', () => expect(Q27.length).toBeGreaterThanOrEqual(100));
+  test('zielgruppengerecht: nichts Junges für Best Ager, nichts Gesetztes für Teens', () => {
+    for (const t of Q27) {
+      if (/Baggy|Cargo|Crop|Corsage|Minikleid|Mini|Trainings|Oversize|Babytee|Boxy|Varsity|Tanktop/.test(t.typ)) expect(t.gruppe.reif).toBeLessThanOrEqual(0.2);
+      if (/Twinset|Komfort|Poncho|Schluppen|Kaftan/.test(t.typ)) expect(t.gruppe.jung).toBeLessThanOrEqual(0.4);
+    }
+  });
+  test('jede Zielgruppe hat eigene Auswahl', () => {
+    for (const g of ['kinder', 'jung', 'mitte', 'reif'] as const) expect(Q27.filter((t) => t.gruppe[g] >= 0.5).length).toBeGreaterThanOrEqual(20);
+  });
+});
