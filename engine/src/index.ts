@@ -6,7 +6,7 @@ export { neuesSpiel, wocheAbspielen, vorschau, type VorschauWoche } from './engi
 export { vertriebUebersicht, mietvertragEmpfehlung, type VertriebsUebersicht, type VertriebsZeile, type VertriebsKennzahlen, type VorjahrWoche, type VertriebsFormat, type VertriebsZeitraum } from './vertrieb';
 export { fuehreAus, type SpielerAktion, type Ergebnis } from './aktionen';
 export { organisationUebersicht, kapitalfluss, posteingang, cockpit, portfolio, formatCockpit, schliessungVorschau, hausDetail, warenwirtschaft, kreditversicherung, hqUebersicht, hqFuerGrafik, einkaufUebersicht, wgDetail, freigaben, eigenmarkenUebersicht, eigenmarkeVorschau } from './abfragen';
-export { vorstandUebersicht, vorstandProfil, kandidaten, angebotsChance, produkte, produktKatalog, trendbericht, produktVorschau } from './abfragen';
+export { vorstandUebersicht, vorstandProfil, kandidaten, angebotsChance, produkte, produktKatalog, trendbericht, produktVorschau, produktAbsatzVerlauf, produktLinienprofil } from './abfragen';
 export {
   ABTEILUNGEN, ABTEILUNG_NAME, HQ_PARAM, HQ_TYPEN, HQ_WIRKUNG, sollFte, abteilungKapazitaet, abteilungArbeitsklima,
   type AbteilungId, type Abteilung, type Hq, type HqAngebot, type HqEtage, type HqGebaeude, type HqTyp, type Stufe,

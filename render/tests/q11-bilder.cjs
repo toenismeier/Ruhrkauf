@@ -21,13 +21,15 @@ export { ARTIKELTYPEN, produktbildSVG, bildFuer, SILHOUETTEN };`,
 });
 const { ARTIKELTYPEN, produktbildSVG, bildFuer, SILHOUETTEN } = require(out);
 const engine = ARTIKELTYPEN.map((t) => t.typ);
-assert.equal(engine.length, 139, '36 Grundtypen + 96 Q05 + 7 Q11');
+assert.ok(engine.length >= 139, '36 Grundtypen + 96 Q05 + 7 Q11, dazu Q27–Q29 (engine/src/sortiment)');
 assert.equal(new Set(engine).size, engine.length, 'Artikeltypen eindeutig');
+// Sortimenttypen (Q27–Q29) bringen ihr Bild selbst mit (t.bild), die übrigen über den Namen.
+const BILD = new Map(ARTIKELTYPEN.map((t) => [t.typ, t.bild]));
 for (const typ of engine) {
-  const b = bildFuer(typ);
+  const b = BILD.get(typ) ?? bildFuer(typ);
   assert.ok(SILHOUETTEN[b.silhouette], typ + ' → unbekannte Silhouette ' + b.silhouette);
-  assert.ok(b.silhouette !== 'tshirt' || typ === 'T-Shirt', typ + ': fällt auf T-Shirt zurück');
-  const svg = produktbildSVG(typ, undefined, undefined, 120);
+  assert.ok(b.silhouette !== 'tshirt' || /T-Shirt|Tee\b/i.test(typ) || BILD.get(typ)?.silhouette === 'tshirt', typ + ': fällt auf T-Shirt zurück');
+  const svg = produktbildSVG(typ, undefined, undefined, 120, BILD.get(typ) ? { bild: BILD.get(typ) } : {});
   assert.match(svg, /^<svg/);
   assert.doesNotMatch(svg, /NaN|undefined/, typ);
 }

@@ -1310,7 +1310,7 @@ org = organisationModul({ E, s: () => s, panel, meldung, nachAktion, oeffneAbtei
 // O03 IT
 itM = itModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, stadt: () => stadtName, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
-pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
+pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden'), linienVerwalten: () => oeffneEinkauf('eigenmarken') });
 // O09 E-Commerce
 ec = ecommerceModul({ E, s: () => s, panel, meldung, nachAktion: () => { nachAktion(); grafikNachziehen(); }, oeffneItProdukt: id => itM.oeffne('produkte',id) });
 er = erfolgeModul({ E, s: () => s, panel });
