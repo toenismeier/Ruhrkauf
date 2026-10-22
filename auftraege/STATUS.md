@@ -42,7 +42,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11; nur noch Bedienung + Teamleistung, Artikeltypen kommen aus Q27–Q29** | `auftraege/wurf2/` |
 | Q25 Produktbilder und Model (Claude) | `q25/feat/q25-produktbilder` (PR #67) | **gemergt 21.10. (97c21aa), CI grün; Model-Stil von Ummo abgenommen; 106 Silhouetten, Model je Produkt** | `auftraege/wurf2/` |
 | Q27 Mode-Bilder + Mode-Artikeltypen (Claude-Chat) | `feat/q27-mode-bilder` (PR #69) | **Phase 1 gemergt 22.10. (5e11375): 47 neue Mode-Silhouetten, Nachschärfung, Model mit Händen/Spielbein, Blindtest 100 %; lokal grün, CI nicht gestartet (GitHub-Billing: Zahlung fehlgeschlagen/Ausgabelimit). Phase 2 Artikeltypen wartet auf Merge Q11 #57** | `auftraege/wurf2/` |
-| Q28 Schuhe, Taschen, Accessoires, Wäsche (Claude-Chat) | `feat/q28-zubehoer-bilder` | **startet 22.10.** | `auftraege/wurf2/` |
+| Q28 Schuhe, Taschen, Accessoires, Wäsche (Claude-Chat) | `feat/q28-zubehoer-bilder` #70 | **Phase 1 gemergt 22.10. (d90a530), CI grün**: 58 Silhouetten (alte `alt:`-Zeichner ersetzt, Loafer/BH neu, Schuhe und Taschen Dreiviertelansicht), Blindtest 58/58 auch in 64 px | Phase 2 Artikeltypen `engine/src/sortiment/q28-zubehoer.ts` nach Merge Q11 #57 + Q27-Haken; Bedarf an Q27 (Model-Sets, `bildFuer`) im PR |
 | Q29 Home/Living, Beauty, Spielwaren (Claude-Chat) | `feat/q29-home-beauty-bilder` | **startet 22.10.** | `auftraege/wurf2/` |
 | Q26 Meldungen und Speichern | `feat/q26-meldungen-speichern` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q08 Fünf Premiumhäuser | `feat/q08-premium-fuenf` | **startet 21.10.** | `auftraege/wurf1/q08-premium-fuenf.md` (Ummo E29) |
