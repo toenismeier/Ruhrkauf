@@ -1120,11 +1120,15 @@ async function buendeln() {
     const hausId = await p.evaluate(() => window.spiel.s.haeuser.find(h=>h.verlauf?.length && h.status === 'offen')?.id);
     if (hausId) {
       await p.evaluate(id=>window.spiel.oeffneHaus(id),hausId);
-      const test = await p.evaluate(() => ({
-        diagramme:document.querySelectorAll('.stat-hausdetail .stat-diagramm').length,
-        letztes:window.spiel.E.verlauf(window.spiel.s,{ebene:'haus',id:window.spiel.s.haeuser.find(h=>h.status==='offen')?.id,kennzahl:'umsatz',wochen:52}).punkte.at(-1)?.wert
-      }));
-      if(test.diagramme!==2)bericht.abweichungen.push('Hausdetail: '+test.diagramme+' Diagramme statt 2');
+      // Q30: Hausdetail zeigt Umsatz und Deckungsbeitrag als zwei Balkenreihen (5 Wochen, je eigene Skala).
+      const test = await p.evaluate((id) => {
+        const reihen = [...document.querySelectorAll('#pinhalt .hk-balkenpaar .hk-balken')];
+        const letzterBalken = reihen[0] ? [...reihen[0].querySelectorAll('[data-w]')].at(-1)?.dataset.w : null;
+        return { diagramme: reihen.length, balken: letzterBalken == null ? null : Number(letzterBalken),
+          letztes: window.spiel.E.verlauf(window.spiel.s, { ebene: 'haus', id, kennzahl: 'umsatz', wochen: 5 }).punkte.at(-1)?.wert };
+      }, hausId);
+      if(test.diagramme!==2)bericht.abweichungen.push('Hausdetail: '+test.diagramme+' Balkenreihen statt 2');
+      else if(test.balken!==Math.round(test.letztes))bericht.abweichungen.push('Hausdetail: letzter Umsatzbalken '+test.balken+' statt '+test.letztes);
       await p.screenshot({ path:path.join(ziel,'hausdetail.png') });
       bericht.bilder.push('hausdetail.png');
     }
