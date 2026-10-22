@@ -125,7 +125,8 @@ export function produkteModul(ctx) {
     const typ = p?.typ ?? t.typ;
     const material = p?.material ?? t.materialien[0];
     const farbe = p?.farbe ?? (K.farben.find((x) => x.name === 'marine')?.name ?? K.farben[0]?.name ?? 'marine');
-    const gruppe = p?.zielgruppe ?? ui.zielgruppe;
+    const markenGruppe = M?.trendGruppe === 'kinder' ? 'kinder' : M?.trendGruppe === 'reif' ? 'bestager' : M?.trendGruppe === 'jung' ? 'young' : 'adults';
+    const gruppe = p ? (p.zielgruppe ?? markenGruppe) : ui.zielgruppe;
     const wg = p?.wg ?? t.wgs.find((x) => x.startsWith(ui.fach === 'home' ? 'wohnen.' : ui.fach + '.')) ?? t.wgs[0];
     const model = modelBild(typ, farbe, material, wg, gruppeTrend(gruppe), 230);
     const name = K.zielgruppen.find((x) => x.id === gruppe)?.name ?? gruppe;
