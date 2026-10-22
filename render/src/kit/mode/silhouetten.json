@@ -863,6 +863,7 @@
     "sneaker": {
       "gruppe": "schuhe",
       "standard": {
+        "schuh": "sneaker",
         "art": "sneaker"
       },
       "material": "leder",
@@ -872,6 +873,7 @@
     "pumps": {
       "gruppe": "schuhe",
       "standard": {
+        "schuh": "pumps",
         "art": "pumps"
       },
       "material": "leder",
@@ -881,15 +883,17 @@
     "stiefel": {
       "gruppe": "schuhe",
       "standard": {
+        "schuh": "stiefel",
         "art": "stiefel"
       },
       "material": "leder",
-      "farbe": "cognac",
+      "farbe": "braun",
       "model": "schuhe"
     },
     "loafer": {
       "gruppe": "schuhe",
       "standard": {
+        "schuh": "loafer",
         "art": "halb"
       },
       "material": "leder",
@@ -908,7 +912,7 @@
     "handtasche": {
       "gruppe": "tasche",
       "standard": {
-        "art": "umhaenge"
+        "art": "tote"
       },
       "material": "leder",
       "farbe": "cognac",
@@ -953,7 +957,7 @@
       "standard": {
         "art": "beanie"
       },
-      "material": "merino",
+      "material": "strick",
       "farbe": "senf",
       "model": "muetze"
     },
@@ -980,22 +984,27 @@
     },
     "pyjama": {
       "gruppe": "waesche",
-      "standard": {},
+      "standard": {
+        "aermel": "lang",
+        "kragen": "hemd",
+        "knopfleiste": true,
+        "muster": "streifen"
+      },
       "material": "baumwolle",
       "farbe": "hellblau",
-      "model": null
+      "model": "oberteil"
     },
     "unterwaesche": {
       "gruppe": "waesche",
       "standard": {},
       "material": "baumwolle",
-      "farbe": "schwarz",
+      "farbe": "anthrazit",
       "model": null
     },
     "bh": {
       "gruppe": "waesche",
       "standard": {},
-      "material": "seide",
+      "material": "satin",
       "farbe": "altrosa",
       "model": null
     },
@@ -1583,6 +1592,418 @@
       "farbe": "ecru",
       "model": "oberteil",
       "nur": "damen"
+    },
+    "chunkysneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "chunky",
+        "art": "sneaker"
+      },
+      "material": "leder",
+      "farbe": "offwhite",
+      "model": "schuhe"
+    },
+    "plateausneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "plateau",
+        "art": "sneaker"
+      },
+      "material": "leder",
+      "farbe": "weiß",
+      "model": "schuhe"
+    },
+    "chelseaboot": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "chelsea",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "schuhe"
+    },
+    "schnuerstiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "schnuerstiefel",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "winterstiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "winterstiefel",
+        "art": "halb"
+      },
+      "material": "polyester",
+      "farbe": "anthrazit",
+      "model": "schuhe"
+    },
+    "overknee": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "overknee",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "ballerina": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "ballerina",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "altrosa",
+      "model": "schuhe"
+    },
+    "mule": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "mule",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "camel",
+      "model": "schuhe"
+    },
+    "espadrille": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "espadrille",
+        "art": "halb"
+      },
+      "material": "baumwolle",
+      "farbe": "marine",
+      "model": "schuhe"
+    },
+    "slipper": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "slipper",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "cognac",
+      "model": "schuhe"
+    },
+    "businessschuh": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "business",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "hausschuh": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "hausschuh",
+        "art": "halb"
+      },
+      "material": "wolle",
+      "farbe": "grau",
+      "model": "schuhe"
+    },
+    "wanderschuh": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "wanderschuh",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "anthrazit",
+      "model": "schuhe"
+    },
+    "gummistiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "gummistiefel",
+        "art": "stiefel"
+      },
+      "material": "lack",
+      "farbe": "gelb",
+      "model": "schuhe"
+    },
+    "lauflernschuh": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "lauflern",
+        "art": "sneaker"
+      },
+      "material": "leder",
+      "farbe": "hellblau",
+      "model": "schuhe"
+    },
+    "crossbody": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": "umhaenge"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "tasche"
+    },
+    "clutch": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": "tote"
+      },
+      "material": "leder",
+      "farbe": "gold",
+      "model": "tasche"
+    },
+    "shopper": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": "tote"
+      },
+      "material": "leder",
+      "farbe": "camel",
+      "model": "tasche"
+    },
+    "weekender": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": "tote"
+      },
+      "material": "baumwolle",
+      "farbe": "olive",
+      "model": "tasche"
+    },
+    "reisetasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": "tote"
+      },
+      "material": "polyester",
+      "farbe": "marine",
+      "model": "tasche"
+    },
+    "portemonnaie": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": null
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": null
+    },
+    "kartenetui": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": null
+      },
+      "material": "leder",
+      "farbe": "cognac",
+      "model": null
+    },
+    "guerteltasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": "umhaenge"
+      },
+      "material": "polyester",
+      "farbe": "olive",
+      "model": "tasche"
+    },
+    "kinderrucksack": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": null
+      },
+      "material": "polyester",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "minibag": {
+      "gruppe": "tasche",
+      "standard": {
+        "art": "umhaenge"
+      },
+      "material": "leder",
+      "farbe": "altrosa",
+      "model": "tasche"
+    },
+    "beanie": {
+      "gruppe": "accessoire",
+      "standard": {
+        "art": "beanie",
+        "bommel": false
+      },
+      "material": "rippe",
+      "farbe": "olive",
+      "model": "muetze"
+    },
+    "strohhut": {
+      "gruppe": "accessoire",
+      "standard": {
+        "art": "bucket"
+      },
+      "material": "leinen",
+      "farbe": "sand",
+      "model": "muetze"
+    },
+    "muetzeschalset": {
+      "gruppe": "accessoire",
+      "standard": {
+        "art": "beanie"
+      },
+      "material": "strick",
+      "farbe": "koralle",
+      "model": "muetze"
+    },
+    "sonnenbrille": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "schwarz",
+      "model": null
+    },
+    "halskette": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "metall",
+      "farbe": "gold",
+      "model": null
+    },
+    "ohrringe": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "metall",
+      "farbe": "gold",
+      "model": null
+    },
+    "armband": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "metall",
+      "farbe": "gold",
+      "model": null
+    },
+    "haarreif": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "samt",
+      "farbe": "bordeaux",
+      "model": null
+    },
+    "handschuhe": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "leder",
+      "farbe": "cognac",
+      "model": null
+    },
+    "regenschirm": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "marine",
+      "model": null
+    },
+    "seidentuch": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "seide",
+      "farbe": "petrol",
+      "model": null
+    },
+    "krawatte": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "seide",
+      "farbe": "marine",
+      "model": null
+    },
+    "fliege": {
+      "gruppe": "accessoire",
+      "standard": {
+        "muster": "punkte"
+      },
+      "material": "seide",
+      "farbe": "bordeaux",
+      "model": null
+    },
+    "sockenset": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "strick",
+      "farbe": "marine",
+      "model": null
+    },
+    "strumpfhose": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": null
+    },
+    "nachthemd": {
+      "gruppe": "waesche",
+      "standard": {
+        "laenge": "maxi",
+        "form": "a-linie",
+        "aermel": "halb",
+        "kragen": "rund"
+      },
+      "material": "baumwolle",
+      "farbe": "flieder",
+      "model": "kleid"
+    },
+    "bademantel": {
+      "gruppe": "waesche",
+      "standard": {
+        "art": "mantel"
+      },
+      "material": "frottee",
+      "farbe": "hellgrau",
+      "model": "jacke"
+    },
+    "unterhemd": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "rippe",
+      "farbe": "weiß",
+      "model": null
+    },
+    "slip": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "altrosa",
+      "model": null
+    },
+    "boxershorts": {
+      "gruppe": "waesche",
+      "standard": {
+        "muster": "karo"
+      },
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "sportbh": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "petrol",
+      "model": null
+    },
+    "shapewear": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "satin",
+      "farbe": "beige",
+      "model": null
     }
   }
 }
