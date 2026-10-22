@@ -23,7 +23,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q05 Eigenmarken und Delegation je Aufgabe | – | gemergt (#42) | – |
 | Maßstab Engine Phase 1/2 (#7, 560 Häuser) | main | **gemergt 21.10.** (b5534a0) | Abnahme `nachbesserung-massstab.md` Abschnitt 20; Premium klar über Schnitt (E28) |
 | Maßstab Oberfläche (Deutschlandkarte, Häuserliste, Sammelaktionen) | main | **gemergt 21.10.** (bf215bc) | – |
-| Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | main | **gemergt 21.10.** (#50, 74a5704) | Mittel, 52 Wochen: Volkskauf −2,7 bis −3,6 %, FUNDUS −1,0 bis −1,5 % EBITDA (Claude nachkalibriert); FUNDUS-Zukauf und Altwarefluss folgen der offenen Fläche; Umsatzanteile (je rund 7 % statt 11/9 %) folgen in Maßstab Phase 3. Offen: M7-Kriterium „Bot D ≥ Bot T“ scheitert schon auf main (Bot D mittel 3,39 % vs. Bot T 4,11 %), Bot D wird als nächster Schritt nachgezogen |
+| Engine-Formate (Wirtschaft Volkskauf, FUNDUS/Off-Price) | main | **gemergt 21.10.** (#50, 74a5704) | Mittel, 52 Wochen: Volkskauf −2,7 bis −3,6 %, FUNDUS −1,0 bis −1,5 % EBITDA (Claude nachkalibriert); FUNDUS-Zukauf und Altwarefluss folgen der offenen Fläche; Umsatzanteile (je rund 7 % statt 11/9 %) folgen in Maßstab Phase 3. M7 seit 22.10. komplett bestanden: Bot D schließt nach 26-Wochen-Ergebnis (#75), mittel 4,79 % gegen Bot T 4,69 % |
 | Q09 Schnee (schwebende Platten) | – | **gemergt 21.10.** (#54, 390b69d) | Schnee liegt auf echten Dachflächen, je Dachebene eingerückt (Claude-Fix: kein Kreuzmuster auf Satteldächern); Winter-Dreiecke unter main, Draw Calls gleich; Fingerabdrücke 112/112 unverändert |
 | Q10 Kamera bleibt über Haus | – | **gemergt 21.10.** (#53, 7af4959) | Hausdetail lässt oben Kartenstreifen frei (62 dvh), Kamera bleibt am Haus bei Kachelnachladen, Woche, Scroll, Resize; Mobil-Smoke Berlin 3 Häuser ≤ 40 px; Fingerabdrücke 112/112 unverändert |
 | Q11 Eigenmarken Sortiment (Bilder, Kategorien, Zielgruppen) | main | **gemergt 22.10.** (#57, 5aefc30) | Kategoriebaum und Zielgruppen; 7 neue Artikeltypen (139 gesamt). Bilder aus kit/mode (Q25-Fassung von produktbild.js), Q11-Eigenzeichner entfernt; alle 139 Typen mit eigener Silhouette, A-Linien-Rock noch auf `rock` (Q27 Phase 2). Freigabe für Q14, Q17, Q24, Q27–Q29 Phase 2 |
@@ -76,5 +76,5 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 4. ~~O09 E-Commerce (#46) und Q06 Marktbeobachtung (#47)~~ gemergt 21.10.
 5. ~~#7 Maßstab Engine~~ gemergt 21.10. #23 Oberfläche gemergt 21.10., Q07 gestartet. Neu: fünf Premiumhäuser (E29, eigener Auftrag).
 5. Maßstab Städte fertig und mergen; danach Q01 Essen starten.
-6. ~~Engine-Formate~~ gemergt 21.10. (#50); danach Bot D (Schließungslogik) nachziehen.
+6. ~~Engine-Formate~~ gemergt 21.10. (#50); ~~Bot D~~ gemergt 22.10. (#75), M7 bestanden.
 7. Danach Build-Zug: Spiel einpacken, Update aufs iPhone, Messung.

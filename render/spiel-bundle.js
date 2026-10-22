@@ -16467,8 +16467,13 @@
       const pool = s2.haeuser.filter((h3) => !h3.nurDaten && h3.klasse !== "premium" && h3.format !== "outlet");
       const ziel = Math.round(pool.length * REGULAER_SCHLIESSUNGSQUOTE);
       const inArbeit = pool.filter((h3) => h3.status !== "offen").length;
-      const verlustIds = new Set(pool.filter((h3) => (h3.kpi?.guv?.ebitda ?? 0) < 0).map((h3) => h3.id));
-      const p2 = aktivesPortfolio(s2).filter((x2) => verlustIds.has(x2.id) && x2.db < 0 && x2.umsatz > 0).sort((a2, b2) => a2.db / a2.umsatz - b2.db / b2.umsatz);
+      const quote26 = (h3) => {
+        const v = (h3.verlauf ?? []).slice(-26);
+        const u = v.reduce((a2, x2) => a2 + x2.umsatz, 0);
+        return v.length >= 26 && u > 0 ? v.reduce((a2, x2) => a2 + x2.db, 0) / u : 0;
+      };
+      const verlustIds = new Set(pool.filter((h3) => quote26(h3) < -0.02).map((h3) => h3.id));
+      const p2 = aktivesPortfolio(s2).filter((x2) => verlustIds.has(x2.id) && x2.umsatz > 0).sort((a2, b2) => a2.db / a2.umsatz - b2.db / b2.umsatz);
       let budget = schliessungsBudgetBotD(s2).budget;
       let beauftragt = 0;
       for (const x2 of p2) {
@@ -16487,9 +16492,6 @@
           tu2({ typ: "mieteVerhandeln", haus: x2.id, reduktion: 0.15 });
       }
     }
-    if (w2 === 4) tu2({ typ: "aushilfen", haeuser: "alle", quote: 0.16 });
-    if (w2 % 52 === 44) tu2({ typ: "aushilfen", haeuser: "alle", quote: 0.22 });
-    if (w2 % 52 === 2 && w2 > 4) tu2({ typ: "aushilfen", haeuser: "alle", quote: 0.16 });
     if (w2 % 13 === 0) {
       const q2 = s2.quartale[s2.quartale.length - 1];
       if (q2) tu2({ typ: "plan", ebitda: q2.planStandard });
@@ -130689,7 +130691,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "a15563b" : "Entwicklung";
+  var version = () => true ? "220265b" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
@@ -139974,6 +139976,78 @@
   var MAX_DATEI = 40 * 1024 * 1024;
   var MAX_INHALT = 160 * 1024 * 1024;
   var queue = Promise.resolve();
+  var letzteSpeicherDiagnose = null;
+  function speicherDiagnose() {
+    return letzteSpeicherDiagnose ? { ...letzteSpeicherDiagnose } : null;
+  }
+  function diagnoseFehler(e, phase, bytes = 0) {
+    letzteSpeicherDiagnose = { zeit: (/* @__PURE__ */ new Date()).toISOString(), phase, bytes, name: e?.name ?? "Error", grund: e?.message ?? String(e) };
+  }
+  function fehlermeldung(e) {
+    const f11 = fehlerText(e);
+    return new Error(f11.message + " (" + (e?.name ?? "Fehler") + ": " + (e?.message ?? String(e)) + ")");
+  }
+  var SPALTEN = "\xA7s";
+  function packen(x2) {
+    if (Array.isArray(x2)) {
+      if (x2.length >= 4 && x2.every((o3) => o3 && typeof o3 === "object" && !Array.isArray(o3))) {
+        const k3 = Object.keys(x2[0]);
+        const gleich2 = k3.length > 0 && x2.every((o3) => {
+          const ok6 = Object.keys(o3);
+          return ok6.length === k3.length && ok6.every((key, i) => key === k3[i] && (o3[key] === null || typeof o3[key] !== "object" && o3[key] !== void 0));
+        });
+        if (gleich2) return { [SPALTEN]: k3, v: k3.map((key) => x2.map((o3) => o3[key])) };
+      }
+      return x2.map(packen);
+    }
+    if (x2 && typeof x2 === "object") {
+      const o3 = {};
+      for (const key of Object.keys(x2)) o3[key] = packen(x2[key]);
+      return o3;
+    }
+    return x2;
+  }
+  function auspacken(x2) {
+    if (Array.isArray(x2)) return x2.map(auspacken);
+    if (x2 && typeof x2 === "object") {
+      if (Array.isArray(x2[SPALTEN]) && Array.isArray(x2.v) && Object.keys(x2).length === 2) {
+        const k3 = x2[SPALTEN], n3 = x2.v[0]?.length ?? 0, out = new Array(n3);
+        for (let i = 0; i < n3; i++) {
+          const o4 = {};
+          for (let j3 = 0; j3 < k3.length; j3++) o4[k3[j3]] = x2.v[j3][i];
+          out[i] = o4;
+        }
+        return out;
+      }
+      const o3 = {};
+      for (const key of Object.keys(x2)) o3[key] = auspacken(x2[key]);
+      return o3;
+    }
+    return x2;
+  }
+  async function komprimieren(text3) {
+    if (typeof CompressionStream === "undefined") return null;
+    const strom = new Blob([text3]).stream().pipeThrough(new CompressionStream("gzip"));
+    return new Uint8Array(await new Response(strom).arrayBuffer());
+  }
+  async function dekomprimieren(bytes) {
+    const strom = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+    return new Response(strom).text();
+  }
+  async function aufklappen(d3) {
+    if (!d3 || d3.spiel) return d3;
+    if (!d3.gz && typeof d3.json !== "string") return d3;
+    const text3 = d3.gz ? await dekomprimieren(d3.gz) : d3.json;
+    const inhalt = auspacken(JSON.parse(text3));
+    const { gz: gz2, json, ...rest } = d3;
+    return { ...rest, spiel: inhalt.spiel, ui: inhalt.ui };
+  }
+  function aktion(modus, arbeit) {
+    return transaktion([INFOS], modus, (tx, set) => {
+      const r3 = arbeit(tx.objectStore(INFOS));
+      r3.onsuccess = () => set(r3.result);
+    });
+  }
   function platzPruefen(platz) {
     if (!PLAETZE.includes(platz)) throw new Error("Unbekannter Speicherplatz.");
     return platz;
@@ -140077,7 +140151,7 @@
         const r3 = tx.objectStore(STORE).get(platz);
         r3.onsuccess = () => set(r3.result ?? null);
       });
-      return pruefen(d3);
+      return pruefen(await aufklappen(d3));
     } catch (e) {
       throw fehlerText(e);
     }
@@ -140103,26 +140177,50 @@
     try {
       platzPruefen(platz);
       if (!spiel2 || spiel2.version !== 2) throw new Error("Kein g\xFCltiges Spiel gestartet.");
-      const datensatz = {
+      const kopf = {
         format: FORMAT,
         datum: importDatum && Number.isFinite(new Date(importDatum).getTime()) ? new Date(importDatum).toISOString() : (/* @__PURE__ */ new Date()).toISOString(),
         stadt,
-        spiel: structuredClone(spiel2),
-        ui: structuredClone(ui),
         name: String(name2 || (platz === "autosave" ? "Automatisch" : "Spielstand")).trim().slice(0, 60),
         bild: bildPruefen(bild3)
       };
-      pruefen(datensatz);
-      const info = infoVon(datensatz, platz);
-      const naechste = queue.then(() => transaktion([STORE, INFOS], "readwrite", (tx) => {
-        tx.objectStore(STORE).put(datensatz, platz);
-        tx.objectStore(INFOS).put(info, platz);
-      }));
+      pruefen({ ...kopf, spiel: spiel2 });
+      const info = infoVon({ ...kopf, spiel: spiel2 }, platz);
+      const start = performance.now();
+      const text3 = JSON.stringify({ spiel: packen(spiel2), ui: packen(ui) });
+      const tText = performance.now() - start;
+      const naechste = queue.then(async () => {
+        const t0 = performance.now();
+        const gz2 = await komprimieren(text3);
+        const t1 = performance.now();
+        const datensatz = gz2 ? { ...kopf, gz: gz2 } : { ...kopf, json: text3 };
+        await transaktion([STORE, INFOS], "readwrite", (tx) => {
+          tx.objectStore(STORE).put(datensatz, platz);
+          tx.objectStore(INFOS).put(info, platz);
+        });
+        const t2 = performance.now();
+        letzteSpeicherDiagnose = {
+          zeit: (/* @__PURE__ */ new Date()).toISOString(),
+          phase: "gespeichert",
+          platz,
+          dauerMs: Math.round(t2 - start),
+          serialisierenMs: Math.round(tText),
+          warteMs: Math.round(t0 - start - tText),
+          komprimierenMs: Math.round(t1 - t0),
+          schreibenMs: Math.round(t2 - t1),
+          roh: text3.length,
+          bytes: gz2 ? gz2.byteLength : text3.length
+        };
+      }).catch((e) => {
+        diagnoseFehler(e, "Komprimieren/IndexedDB-Schreiben", text3.length);
+        throw fehlermeldung(e);
+      });
       queue = naechste.catch(() => {
       });
       return naechste;
     } catch (e) {
-      return Promise.reject(fehlerText(e));
+      diagnoseFehler(e, "Serialisieren/Validierung");
+      return Promise.reject(fehlermeldung(e));
     }
   }
   async function loeschen(platz = "autosave") {
@@ -144836,7 +144934,7 @@
   var postUi = neuerPostUi();
   var streifenTimer = null;
   function speicherFehler(e) {
-    console.error("Spielstand konnte nicht gespeichert werden:", e);
+    console.error("Spielstand konnte nicht gespeichert werden:", e, JSON.stringify(speicherDiagnose()));
     if (!speicherWarnung) meldung("Speichern fehlgeschlagen: " + e.message, false);
     speicherWarnung = true;
   }
@@ -146116,14 +146214,20 @@
     oeffneHq(offenesHq === true ? void 0 : offenesHq, true);
   }
   var meldungTimer = null;
+  var letzteMeldung = { text: "", zeit: 0 };
+  function meldungSchliessen() {
+    clearTimeout(meldungTimer);
+    $2("meldung").className = "";
+  }
+  $2("meldung").addEventListener("click", meldungSchliessen);
   function meldung(text3, ok6 = true) {
-    const m = $2("meldung");
+    const m = $2("meldung"), jetzt = Date.now();
+    if (text3 === letzteMeldung.text && jetzt - letzteMeldung.zeit < 5e3) return;
+    letzteMeldung = { text: text3, zeit: jetzt };
     m.textContent = text3;
     m.className = ok6 ? "an" : "an rot";
     clearTimeout(meldungTimer);
-    meldungTimer = setTimeout(() => {
-      m.className = "";
-    }, 3500);
+    meldungTimer = setTimeout(meldungSchliessen, ok6 ? 2500 : 4e3);
   }
   window.hqKlick = (art, a2, b2, c) => {
     if (art === "mieten") {
@@ -146657,6 +146761,8 @@
   if (typeof hqUebersicht === "function") $2("hq").addEventListener("click", () => oeffneHq());
   else $2("hq").style.display = "none";
   window.spiel = {
+    speicherDiagnose,
+    meldung,
     ecommerce: ec,
     oeffneEcommerce: () => oeffneModul(ec),
     chronik: () => chronikUebersicht(s),
