@@ -9,7 +9,7 @@ const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { rng, zw } from './basis.js';
 import { ARCHETYPEN, ARCHETYP_DEFS, TYPEN, wahlGewichtet } from './stadtplan.js';
 import './archetypen/index.js';   // registrierte Archetypen bringen über def.staedte eigene Städte mit
-import { fussabdruck } from './bauer.js';
+import { fussabdruck, WARENHAUS_VARIANTEN } from './bauer.js';
 import { masse } from './warenhaus.js';
 import { NAMEN as WB_NAMEN } from './wettbewerber.js';
 import haeuser from '../../haeuser.json';
@@ -97,8 +97,10 @@ function baueEintrag(name, liste) {
   const archetyp = bild?.[0] ?? wahlGewichtet(r, Object.entries(ARCHETYPEN).map(([k, v]) => [k, v.gewicht[TYPEN[typ].idx]]));
   const extra = { ...(bild?.[1] ?? {}), ...(ddr ? { ddr: true } : {}) };
   const standorte = liste.map((h) => {
-    const f = fussabdruck(h);
-    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, hausklasse: h.hausklasse, premium: h.klasse === 'premium', grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+    const v = WARENHAUS_VARIANTEN.get(h.id);
+    const f = fussabdruck(h, v?.familie);
+    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, hausklasse: h.hausklasse, premium: h.klasse === 'premium', grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d,
+      ...(v ? { familie: v.familie, variante: v.fassade } : {}) };
   });
   // Eine Schwesterfiliale pro ausgewaehlter Stadt. Hartwig behält die zentrale Einkaufslage.
   // Die Daten sind rein grafisch und gehoeren nicht zum Engine-Portfolio.

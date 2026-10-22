@@ -1142,11 +1142,26 @@ function mallFluegel(K, xm, M, dm, hm) {
   S.box(2.2, 11, 1.0, px, 5.8, pz, '#2b3a4a');
   const sp = new Seite(S, px - 1.1, pz - 0.5, 2.2, 1.0, '+z');
   plakat(K, sp, 'EINKAUFEN', 1.1, 9.8, 0.04, 0.32, '#ffffff', '#2b3a4a');
-  // Dach: Glastonne + Parkdeck
+  // Dach: Glastonne + wahlweise offenes Parkdeck oder mehrgeschossiges Parkhaus.
   const g = new THREE.CylinderGeometry(3.2, 3.2, M - 4, 10, 1, false, -Math.PI / 2, Math.PI); g.rotateZ(Math.PI / 2); g.translate(xm + M / 2, hm + 0.4, zm + dm * 0.72); S.add(g, '#a9c6d3');
   for (let x = xm + 3; x < xm + M - 2; x += 3) { const rg = new THREE.TorusGeometry(3.25, 0.08, 3, 10, Math.PI); rg.rotateY(Math.PI / 2); rg.translate(x, hm + 0.4, zm + dm * 0.72); S.add(rg, '#eef1f2'); }
   S.quader(xm, hm, zm, xm + M, hm + 0.4, zm + dm, KIES_D);
-  if (dm * 0.72 - 4 > 10) parkdeck(K, xm + 1, zm + 1, xm + M - 1, zm + dm * 0.72 - 4.2, hm + 0.4, false);
+  if (dm * 0.72 - 4 > 10) {
+    if ([1, 4, 7].includes(K.v)) {
+      // Q21: Parkhausvariante ohne größere Grundfläche; gestapelte offene
+      // Decks statt eines immer gleichen ebenerdigen Parkplatz-Motivs.
+      const x1 = xm + 2, x2 = xm + M - 2;
+      const z1 = zm + 1, z2 = zm + dm * 0.72 - 4.2;
+      for (const y of [hm + 2.8, hm + 5.4]) {
+        S.quader(x1, y, z1, x2, y + 0.32, z2, '#7e858c'); // Farben aus parkdeck/STAHL: keine zusätzlichen Draw Calls
+        for (const px of [x1 + 1, x2 - 1]) for (const pz of [z1 + 1, z2 - 1])
+          S.box(0.65, 2.35, 0.65, px, y - 1.15, pz, STAHL);
+        for (const px of [x1 + 1, x2 - 1])
+          S.box(0.24, 0.9, z2 - z1, px, y + 0.75, (z1 + z2) / 2, STAHL);
+      }
+      parkdeck(K, x1, z1, x2, z2, hm + 5.72, false);
+    } else parkdeck(K, xm + 1, zm + 1, xm + M - 1, zm + dm * 0.72 - 4.2, hm + 0.4, false);
+  }
   if (K.alt) flecken(K, s, 0, M, EG, hm, 0.06, f, 6);
 }
 

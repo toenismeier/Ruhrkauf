@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { STADT_GEOGRAFIE } from './kit/stadt-geografie.js';
 import { familieVon, VARIANTEN } from './kit/warenhaus.js';
+import { warenhausVielfalt, familienKandidaten } from './kit/warenhaus-vielfalt.js';
 import { familieSport } from './kit/sporthaus.js';
 import { familieSchwester } from './kit/schwesterhaus.js';
 import { familieOutlet, masseOutlet } from './kit/outlet.js';
@@ -20,13 +21,16 @@ const km = (a, b) => {
   if (!c || !d) throw new Error('Stadtgeografie fehlt: ' + a.stadt + '/' + b.stadt);
   return Math.sqrt(((c[0] - d[0]) * 111) ** 2 + ((c[1] - d[1]) * 70) ** 2);
 };
+const Q21 = warenhausVielfalt(haupt);
 const gruppen = [
-  ['hartwig', haupt.filter((h) => h.format === 'warenhaus' && h.klasse !== 'premium'), familieVon, VARIANTEN],
+  // Q21: Hartwig-Familie je Haus aus warenhausVielfalt (eigene Familie je Stadt), nicht mehr aus familieVon.
+  ['hartwig', haupt.filter((h) => h.format === 'warenhaus' && h.klasse !== 'premium'), (h) => Q21.get(h.id)?.familie ?? familieVon(h), VARIANTEN],
   ['sport', haupt.filter((h) => h.format === 'sport'), familieSport, () => 8],
   ['volkskauf', volkskauf, familieSchwester, () => 8],
   ['fundus', fundus, familieOutlet, () => 8],
 ];
 let geaendert = 0, rest = 0;
+const ergebnisse = new Map();
 for (const [name, liste, familie, anzahl] of gruppen) {
   const fertig = [];
   for (const h of [...liste].sort((a, b) => String(a.id).localeCompare(String(b.id), 'de', { numeric: true }))) {
@@ -53,7 +57,52 @@ for (const [name, liste, familie, anzahl] of gruppen) {
     }
     if (!neu) break;
   }
-  console.log('Fassaden', name, liste.length, 'Häuser, höchstens', Math.max(...fertig.map((x) => nb.get(x).length)), 'gleichfamilige Nachbarn');
+  // Restkonflikte per Min-Conflicts-Suche (deterministisch, Seed fest): ein Konflikthaus wechselt auf die Variante
+  // mit den wenigsten Konflikten, bei Gleichstand zufällig. Löst dichte Regionen, an denen der Greedy-Lauf hängen bleibt.
+  let zufall = 12345;
+  const rnd = () => ((zufall = (zufall * 1103515245 + 12345) >>> 0) / 4294967296);
+  const zaehle = (x, v) => nb.get(x).filter((q) => q.v === v).length;
+  for (let schritt = 0; schritt < 200000; schritt++) {
+    const offen = fertig.filter((x) => zaehle(x, x.v) > 0);
+    if (!offen.length) break;
+    const x = offen[Math.floor(rnd() * offen.length)], N = anzahl(x.f);
+    let best = Infinity, wahl = [];
+    for (let v = 0; v < N; v++) { if (v === x.v) continue; const n = zaehle(x, v); if (n < best) { best = n; wahl = [v]; } else if (n === best) wahl.push(v); }
+    const v = wahl[Math.floor(rnd() * wahl.length)];
+    x.v = v; x.h.fassade = v;
+  }
+  ergebnisse.set(name, { fertig, nb, anzahl });
+  console.log('Fassaden', name, 'Restkonflikte', fertig.filter((x) => zaehle(x, x.v) > 0).length, liste.length, 'Häuser, höchstens', Math.max(...fertig.map((x) => nb.get(x).length)), 'gleichfamilige Nachbarn');
+}
+// Hartwig: verbleibende Kopien in dichten Regionen (mehr gleichfamilige Nachbarn als Varianten) über einen Familienwechsel
+// lösen. Familie bleibt je Stadt eindeutig (Q21) und stammt aus den zulässigen Kandidaten; ein Wechsel kostet etwas,
+// damit die Engine-Wunschfamilie wo möglich bleibt. Ergebnis landet als h.familie im Export, warenhausVielfalt übernimmt es.
+{
+  const { fertig } = ergebnisse.get('hartwig');
+  const nahe = new Map(fertig.map((x) => [x, fertig.filter((q) => q !== x && km(q.h, x.h) < 50)]));
+  const konflikte = (x, f, v) => nahe.get(x).filter((q) => q.f === f && q.v === v).length;
+  let zufall = 4711;
+  const rnd = () => ((zufall = (zufall * 1103515245 + 12345) >>> 0) / 4294967296);
+  for (let schritt = 0; schritt < 100000; schritt++) {
+    const offen = fertig.filter((x) => konflikte(x, x.f, x.v) > 0);
+    if (!offen.length) break;
+    const x = offen[Math.floor(rnd() * offen.length)];
+    const belegt = new Set(fertig.filter((q) => q !== x && q.h.stadt === x.h.stadt).map((q) => q.f));
+    let best = Infinity, wahl = [];
+    for (const f of familienKandidaten(x.h)) {
+      if (belegt.has(f)) continue;
+      for (let v = 0; v < VARIANTEN(f); v++) {
+        if (f === x.f && v === x.v) continue;
+        const k = konflikte(x, f, v) + (f === x.f ? 0 : 0.5);
+        if (k < best) { best = k; wahl = [[f, v]]; } else if (k === best) wahl.push([f, v]);
+      }
+    }
+    if (!wahl.length) continue;
+    [x.f, x.v] = wahl[Math.floor(rnd() * wahl.length)];
+    x.h.fassade = x.v;
+  }
+  for (const x of fertig) x.h.familie = x.f;
+  console.log('Hartwig nach Familienausgleich: Restkonflikte', fertig.filter((x) => konflikte(x, x.f, x.v) > 0).length);
 }
 // Grafikfläche: Hartwig bleibt das prägnanteste Haus der Stadt (GESTALTUNG.md 3 und 3b). Volkskauf höchstens 80 % der
 // größten Hartwig-Grundfläche der Stadt, FUNDUS in b-Lage mit Baukörper höchstens 80 %. Nur die Grafikdateien,

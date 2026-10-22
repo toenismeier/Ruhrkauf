@@ -173,6 +173,8 @@ export function botTurnaround(s: GameState, log = false): void {
     for (const programm of Object.keys(FILIAL_PROGRAMME) as FilialProgrammId[]) {
       tu({ typ: 'filialProgramm', programm });
     }
+    // Bot T saniert ohne Schließungen und nutzt den echten FUNDUS-Warenfluss.
+    tu({ typ: 'altwareOutlet', quote: 0.8 });
     tu({ typ: 'wgServicegrad', wg: 'alle', ziel: 0.98 });
     tu({ typ: 'wgLimit', wg: 'alle', faktor: 1.00 });
   }
@@ -239,12 +241,22 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
     // Maximal der ursprüngliche Portfolioanteil, aber verteilt über Zeit.
     // Geschlossen wird nur bei negativem FILIAL-EBITDA: auch ein schwacher
     // Standort mit positivem operativem Beitrag darf nicht Umsatz vernichten.
-    const pool = s.haeuser.filter((h) => !h.nurDaten && h.klasse !== 'premium');
+    // FUNDUS ist der Altwarekanal des Konzerns (Bot T steuert ihn); Bot D schließt
+    // nur Hartwig, Sport und die schwächsten Volkskauf-Häuser (engine-formate.md 6).
+    const pool = s.haeuser.filter((h) => !h.nurDaten && h.klasse !== 'premium' && h.format !== 'outlet');
     const ziel = Math.round(pool.length * REGULAER_SCHLIESSUNGSQUOTE);
     const inArbeit = pool.filter((h) => h.status !== 'offen').length;
-    const verlustIds = new Set(pool.filter((h) => (h.kpi?.guv?.ebitda ?? 0) < 0).map((h) => h.id));
+    // Entscheidung nach dem Filial-EBITDA der letzten 26 Wochen, nicht nach einer
+    // einzelnen (saisonal schwachen) Woche: sonst schließt Bot D im Winter Häuser,
+    // die übers Jahr Geld verdienen (mittel Jahr 5: 4,10 % statt 4,79 % EBITDA-Quote).
+    const quote26 = (h: (typeof pool)[number]) => {
+      const v = (h.verlauf ?? []).slice(-26);
+      const u = v.reduce((a, x) => a + x.umsatz, 0);
+      return v.length >= 26 && u > 0 ? v.reduce((a, x) => a + x.db, 0) / u : 0;
+    };
+    const verlustIds = new Set(pool.filter((h) => quote26(h) < -0.02).map((h) => h.id));
     const p = aktivesPortfolio(s)
-      .filter((x) => verlustIds.has(x.id) && x.db < 0 && x.umsatz > 0)
+      .filter((x) => verlustIds.has(x.id) && x.umsatz > 0)
       .sort((a, b) => a.db / a.umsatz - b.db / b.umsatz);
     let budget = schliessungsBudgetBotD(s).budget;
     let beauftragt = 0;
@@ -266,9 +278,8 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
       // Liquidität; Bot T erreicht die Personaleinsparung bereits über O04.
     }
   }
-  if (w === 4) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.16 });
-  if (w % 52 === 44) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.22 });
-  if (w % 52 === 2 && w > 4) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.16 });
+  // Aushilfenquote wie Bot T (10 % ab KW 9). Die frühere eigene Staffel 16/22 %
+  // senkte die Kaufquote stärker, als sie Personalkosten sparte.
   if (w % 13 === 0) { const q = s.quartale[s.quartale.length - 1]; if (q) tu({ typ: 'plan', ebitda: q.planStandard }); }
   for (const a of s.angebote.filter((x) => x.status === 'offen')) {
     if (a.typ === 'untermiete' || a.typ === 'paket' || a.typ === 'stadt') tu({ typ: 'angebotAnnehmen', angebot: a.id });

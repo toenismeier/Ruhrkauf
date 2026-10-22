@@ -5,6 +5,7 @@ import { lohnKosten } from './wirtschaft';
 import { runwayWochen } from './stakeholder';
 import { hqMoralZiel, hqRechtFaktor } from './hq';
 import { schwierigkeit } from './schwierigkeit';
+import { istSandkasten } from './sandkasten';
 
 /** Schließungen je Spielstand in der laufenden Woche (für die abnehmende Imagewirkung einer Schließungswelle). */
 const SCHLIESSUNGEN_WOCHE = new WeakMap<GameState, { woche: number; n: number }>();
@@ -30,7 +31,7 @@ export function starteSchliessung(s: GameState, h: Haus, opts: { mietvertragEnde
   if (h.status !== 'offen') return `${h.name} ist nicht offen.`;
   if (h.standortgarantie) return `${h.name} steht unter Standortgarantie aus dem Sanierungstarifvertrag.`;
   const br = s.stakeholder.betriebsrat;
-  const dauer = s.phase === 'insolvenz' ? 4 : Math.round(16 - (10 * br) / 100);
+  const dauer = s.phase === 'insolvenz' ? 4 : Math.round((16 - (10 * br) / 100) * (h.format === 'schwester' ? 0.85 : 1));
   h.status = 'schliessung_verhandlung';
   h.statusBis = s.woche + dauer;
   if (opts.mietvertragEndetMit) h.miete.bisWoche = Math.min(h.miete.bisWoche, s.woche + dauer + 6);
@@ -48,7 +49,7 @@ export function schliessungsFolgekosten(s: GameState, h: Haus, bisSchliessung = 
 } {
   const schliessWoche = s.woche + Math.max(0, bisSchliessung);
   const fte = h.personal.vollzeit + h.personal.teilzeit;
-  const sozialplan = eur(fte * abfindungJeFte(s) * hqRechtFaktor(s));
+  const sozialplan = eur(fte * abfindungJeFte(s) * hqRechtFaktor(s) * (h.format === 'schwester' ? 0.85 : 1));
   const untermiete = h.flaechen.reduce((a, f) =>
     a + (f.konzept === 'untermiete' && f.mieter ? f.mieter.mieteWoche : 0), 0);
   const vertragWochen = s.phase === 'insolvenz' ? 13 : h.miete.vermieter === 'eigentuemer' ? 26 : 52;
@@ -98,7 +99,7 @@ export function schliesseEndgueltig(s: GameState, h: Haus): void {
   const sw = SCHLIESSUNGEN_WOCHE.get(s);
   const k = sw && sw.woche === w ? sw.n : 0;
   SCHLIESSUNGEN_WOCHE.set(s, { woche: w, n: k + 1 });
-  st.image = clamp(st.image - 1.5 * Math.pow(schwierigkeit(s).imageDaempfung, k), 0, 100);
+  st.image = clamp(st.image - 1.5 * (h.format === 'schwester' ? 0.5 : 1) * Math.pow(schwierigkeit(s).imageDaempfung, k), 0, 100);
   st.vermieter = clamp(st.vermieter - (h.miete.vermieter === 'dritt' ? 2 : 0), 0, 100);
   if (h.lage === '1a' && h.format === 'warenhaus') {
     const arvel = s.lieferanten.find((l) => l.id === 'arvel');
@@ -231,7 +232,10 @@ export function glaeubigerversammlung(s: GameState): void {
     ['Banken', st.bank], ['Kreditversicherer', st.kreditversicherer], ['Lieferanten', lieferanten],
     ['Vermieter', st.vermieter], ['Arbeitnehmer', st.betriebsrat],
   ];
-  const ja = gruppen.filter(([, v]) => v + planBonus + quoteBonus >= 42).map(([n]) => n);
+  // Q20: Im Schutzschirm beeinflusst die Stufe zusätzlich die Zustimmung zum Plan.
+  // Alle anderen Szenarien, insbesondere Standard/Mittel, behalten exakt die bisherige Schwelle.
+  const schutzschirmBonus = s.szenario?.regeln.schutzschirmZustimmung ?? 0;
+  const ja = gruppen.filter(([, v]) => v + planBonus + quoteBonus + schutzschirmBonus >= 42).map(([n]) => n);
   const nein = gruppen.filter(([n]) => !ja.includes(n)).map(([n]) => n);
   const sofort = zahlung * 0.4;
   const finanzierbar = s.cash >= sofort;
@@ -291,7 +295,7 @@ export function quartalsBewertung(s: GameState): void {
     const vorjahr = s.quartale.find((x) => x.nr === q.nr - 4);
     const besser = vorjahr ? ist > vorjahr.ebitdaIst : ist > q.planStandard + 0.1 * Math.abs(q.planStandard);
     if (!besser) txt += ' Ohne sichtbare Verbesserung gegenüber dem Vorjahr gibt es kein frisches Geld.';
-    if (s.phase === 'regulaer' && besser && (runwayWochen(s) < 26 || s.cash + s.kreditlinie < 150_000_000 * volumen)) {
+    if (s.phase === 'regulaer' && !istSandkasten(s) && besser && (runwayWochen(s) < 26 || s.cash + s.kreditlinie < 150_000_000 * volumen)) {
       const kapital = eur(12_000_000 * volumen * (st.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
       s.cash += kapital;
       s.einmalErloeseWoche += kapital;

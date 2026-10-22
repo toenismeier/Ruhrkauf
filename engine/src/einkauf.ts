@@ -7,7 +7,8 @@ import { GRUPPEN, LIEFERANTEN, saisonFaktor } from './daten';
 import type { Bestellung, Format, GameState, GruppeId, Kohorte } from './types';
 import { clamp, eur, melde, mio, normal, zwischen, type RngHalter } from './util';
 import type { HausRoh } from './wirtschaft';
-import { produktMargeDelta, produktNachfrageFaktor } from './produkte';
+import { produktMargeDelta, produktNachfrageFaktor, produktHausFaktor } from './produkte';
+import { outletKapazitaet } from './formate';
 import { marketingAltVerkauf, marketingAltwareFaktor, marketingWgTilt } from './marketing';
 import {
   attraktivitaet, BESCHAFFUNG, eigenmarkeAnteil, eigenmarkeEinstellen, eigenmarkeGruenden, eigenmarkeNeupositionieren,
@@ -117,6 +118,8 @@ export interface FreigabeProtokoll { woche: number; neu: number; direkt: number;
 
 export interface Einkauf {
   grenze: number;
+  altwareOutlet?: number;
+  offpriceZukauf?: number;
   wgs: Record<WgId, WgStand>;
   freigaben: Freigabe[];
   rng: number;
@@ -662,7 +665,7 @@ export function einkaufNachfrage(s: GameState, roh: HausRoh[]): EinkaufNachfrage
           let A = attrCache.get(key);
           if (A === undefined) { A = attraktivitaet(s, x.m, h); attrCache.set(key, A); }
           // Nachfragewirkung gedämpft: Wurzel aus Attraktivität und WG-Passung
-          const t = (v.brutto * om * x.e * Math.sqrt(A * x.fit) * nAttr) / st.norm;
+          const t = (v.brutto * om * x.e * Math.sqrt(A * x.fit * produktHausFaktor(s, x.m, d.id, h)) * nAttr) / st.norm;
           if (teile) teile.push([ziel, x.m.id, t]); else ziel[x.m.id] = (ziel[x.m.id] ?? 0) + t;
           F += t; F0 += t / tl;
           rest -= x.e;
@@ -882,6 +885,25 @@ export function verbraucheAltwareWg(s: GameState, f: Format, wertVoll: number): 
   }
   s.bestand = s.bestand.filter((k) => k.wert > 0.5);
   return { gebucht, zukauf: rest };
+}
+
+/** Konzerninterner Bestandsübertrag an FUNDUS, 3 % reale Transportkosten. */
+export function outletVersorgung(s: GameState): number {
+  if (!s.formate) return 0;
+  // Nur so viel Altware, wie das offene FUNDUS-Netz aufnehmen kann.
+  const quote = clamp(s.einkauf.altwareOutlet ?? 0.5, 0, 1) * Math.min(1, outletKapazitaet(s));
+  let transport = 0, eingang = 0;
+  for (const k of s.bestand) {
+    const alt = !!k.ladenhueter || (k.art === 'nos' ? k.alter > EK_PARAM.altNos : k.alter > EK_PARAM.altSaison);
+    if (!alt || k.wert <= 0) continue;
+    const ek = eur(k.wert * quote * 0.12);
+    if (!ek) continue;
+    k.wert -= ek; eingang += ek; transport += ek * 0.03;
+    s.formate.pool.push({quelle:'altware',wert:ek,preisFaktor:k.ladenhueter?0.65:0.88,alter:k.alter,ladenhueter:k.ladenhueter});
+  }
+  s.bestand = s.bestand.filter(k => k.wert > 0.5);
+  s.formate.altwareEingang = eur(eingang);
+  return eur(transport);
 }
 
 /** Bucht die Wochenwerte je WG (Umsatz nach Aktionen auf die WG verteilt) und je Marke. */

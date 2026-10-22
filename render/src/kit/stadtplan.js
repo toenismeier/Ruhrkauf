@@ -632,12 +632,12 @@ export const SLOT_ROLLE = { premium: 'slot:premium', warenhaus: 'slot:warenhaus'
 
 /**
  * Sucht ein Kreuz aus zwei Haupteinkaufsstraßen (z-Linie kF, x-Linie lF) nahe dem Zentrum und verteilt die
- * 1a- und b-Standorte auf Blöcke daran. Die Blöcke werden so vergrößert, dass die Slots hineinpassen.
+ * 1a-, b- und Stadtteilstandorte auf Blöcke daran. Die Blöcke werden so vergrößert, dass die Slots hineinpassen.
  * Ergebnis: E.einkauf (Slots in bebauten Blöcken), E.randStandorte (center/rand, später), E.fz, E.einkaufslage.
  */
 function einkaufslage(E, standorte) {
   const liste = standorte.map((st, n) => ({ st, n, m: standortMasse(st), lage: st.lage ?? '1a', rolle: st.rolle ?? 'warenhaus' }));
-  const innen = liste.filter((e) => e.lage === '1a' || e.lage === 'b');
+  const innen = liste.filter((e) => e.lage === '1a' || e.lage === 'b' || e.lage === 'stadtteil');
   E.randStandorte = liste.filter((e) => (e.lage === 'center' || e.lage === 'rand') && !(e.rolle === 'outlet' && e.lage === 'rand'));
   E.einkauf = [];
   E.einkaufZellen = new Set();
@@ -755,25 +755,29 @@ function einkaufsKreuz(E, innen, zc) {
   }
   // Nebenlagen: frei, nicht an der Einkaufsstraße, 1,5 bis 3,5 Zellen vom Kreuz, gern an einer Hauptstraße
   const kx = kF - 0.5, kz = lF - 0.5;
-  for (const e of [...innen.filter((x) => x.lage === 'b'), ...zuB]) {
+  for (const e of [...innen.filter((x) => x.lage === 'b'), ...zuB, ...innen.filter((x) => x.lage === 'stadtteil')]) {
     const l = [];
     for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
       if (!zelleFrei(E, i, j) || !zulassig(e, i, j) || i === kF - 1 || i === kF || j === lF - 1 || j === lF) continue;
       const dd = wurzelSumme(i + 0.5 - kx, j + 0.5 - kz);
-      if (dd < 1.2 || dd > 4) continue;
+      if (dd < (e.lage === 'stadtteil' ? 2.5 : 1.2) || dd > (e.lage === 'stadtteil' ? 6.5 : 4)) continue;
+      // Stadtteilzentrum nie in der Blockgruppe direkt am Hauptkreuz (pruef-standorte: höchstens drei eigene Häuser dort).
+      if (e.lage === 'stadtteil' && Math.max(Math.abs(i - kx), Math.abs(j - kz)) <= 1.5) continue;
       const anHaupt = istHaupt(E.zTyp[i + 1]) || istHaupt(E.xTyp[j + 1]) || istHaupt(E.zTyp[i]) || istHaupt(E.xTyp[j]);
       const nachbar = [...E.einkaufZellen].some((s) => { const [a, b] = s.split(',').map(Number); return Math.abs(a - i) + Math.abs(b - j) <= 1; });
-      l.push([{ i, j, ecke: '+x+z' }, (anHaupt ? 2.5 : 1) / (0.5 + Math.abs(dd - 2.2)) * (nachbar ? 0.3 : 1)]);
+      l.push([{ i, j, ecke: '+x+z' }, (anHaupt ? 2.5 : 1) / (0.5 + Math.abs(dd - (e.lage === 'stadtteil' ? 4.5 : 2.2))) * (nachbar ? 0.3 : 1)]);
     }
     kand = kand.filter((q) => zelleFrei(E, q.i, q.j));
-    if (l.length) nimmZelle(e, wahlGewichtet(r, l), 'b');
+    if (l.length) nimmZelle(e, wahlGewichtet(r, l), e.lage === 'stadtteil' ? 'stadtteil' : 'b');
     else {
       const ausweich = [];
       for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++)
-        if (zelleFrei(E, i, j) && zulassig(e, i, j)) ausweich.push({ i, j, ecke: '+x+z' });
+        if (zelleFrei(E, i, j) && zulassig(e, i, j) && !(e.lage === 'stadtteil' && Math.max(Math.abs(i - kx), Math.abs(j - kz)) <= 1.5)) ausweich.push({ i, j, ecke: '+x+z' });
       if (ausweich.length) {
-        ausweich.sort((a, b) => Math.abs(a.i - kF) + Math.abs(a.j - lF) - Math.abs(b.i - kF) - Math.abs(b.j - lF));
-        nimmZelle(e, ausweich[0], 'b');
+        // Stadtteilzentren im Ausweichfall möglichst weit vom Hauptkreuz (Abstand ~4,5), b-Lagen möglichst nah.
+        const ab = (q) => Math.abs(q.i - kF) + Math.abs(q.j - lF);
+        ausweich.sort(e.lage === 'stadtteil' ? (a, b) => Math.abs(ab(a) - 4.5) - Math.abs(ab(b) - 4.5) : (a, b) => ab(a) - ab(b));
+        nimmZelle(e, ausweich[0], e.lage === 'stadtteil' ? 'stadtteil' : 'b');
       } else throw new Error('Kein regelkonformer Standort für ' + e.st.id + ' im Raster');
     }
   }

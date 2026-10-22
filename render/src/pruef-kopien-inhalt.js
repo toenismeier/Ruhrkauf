@@ -5,6 +5,7 @@ import volkskauf from '../haeuser-schwester.json';
 import fundus from '../haeuser-outlet.json';
 import { STADT_GEOGRAFIE } from './kit/stadt-geografie.js';
 import { familieVon } from './kit/warenhaus.js';
+import { warenhausVielfalt } from './kit/warenhaus-vielfalt.js';
 import { familieSport } from './kit/sporthaus.js';
 import { familieSchwester, architekturSchwester } from './kit/schwesterhaus.js';
 import { familieOutlet } from './kit/outlet.js';
@@ -21,14 +22,18 @@ const formatHaeuser = {
   fundus,
 };
 // Kein grüner Kopienbericht anhand des veralteten Teilbestands.
-for (const [format, anzahl] of Object.entries({ hartwig: 360, premium: 4, sport: 44, volkskauf: 86, fundus: 66 }))
+for (const [format, anzahl] of Object.entries({ hartwig: 360, premium: 5, sport: 44, volkskauf: 86, fundus: 66 }))
   if (formatHaeuser[format].length !== anzahl)
     throw new Error('Unvollständiger Seed-1-Export: ' + format + ' ' + formatHaeuser[format].length + '/' + anzahl);
 const ids = [...haupt, ...volkskauf, ...fundus].map((h) => h.id);
-if (new Set(ids).size !== 560) throw new Error('Doppelte Haus-IDs im Engine-Export');
-const familie = (k, h) => k === 'sport' ? familieSport(h) : k === 'volkskauf' ? familieSchwester(h)
+if (new Set(ids).size !== 561) throw new Error('Doppelte Haus-IDs im Engine-Export');
+// Q21: Hartwig wird mit Familie/Fassade aus warenhausVielfalt gebaut, also genau diese Signatur prüfen.
+const Q21 = warenhausVielfalt(haupt);
+const gebaut = (k, h) => (k === 'hartwig' && Q21.has(h.id) ? { ...h, fassade: Q21.get(h.id).fassade } : h);
+const familie = (k, h) => k === 'hartwig' && Q21.has(h.id) ? Q21.get(h.id).familie : k === 'sport' ? familieSport(h) : k === 'volkskauf' ? familieSchwester(h)
   : k === 'fundus' ? familieOutlet(h) : familieVon(h);
-const signatur = (k, h) => {
+const signatur = (k, h0) => {
+  const h = gebaut(k, h0);
   const f = familie(k, h);
   const variant = k === 'volkskauf' ? architekturSchwester(h).variante : (h.variante ?? h.fassade ?? 0);
   return [f, variant, h.fassade ?? 0].join('/');

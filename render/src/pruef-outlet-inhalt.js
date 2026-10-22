@@ -24,7 +24,7 @@ for (const h of outlets) {
 
   pruefe(h.substanz >= 40 && h.substanz <= 85, h.id + ' Substanz');
   pruefe(h.lage === 'b' ? h.baujahr >= 1965 && h.baujahr <= 1985 : h.baujahr >= 1998 && h.baujahr <= 2016, h.id + ' Baujahr passend zur Bauform');
-  pruefe(h.flaechen.length === 7 && h.flaechen.every((f) => f.konzept === 'eigen' && !!f.gruppe), h.id + ': sieben Abteilungsflächen');
+  pruefe(h.flaechen.length === 7 && h.flaechen.every((f) => f.konzept === 'offprice' && !!f.gruppe), h.id + ': sieben Abteilungsflächen');
   if (h.lage === 'b') {
     // Die alte 20er-Illustration begrenzte Innenstadt-FUNDUS auf 80 % eines
     // Hartwig-Hauses. Im eigenständigen 66er-Netz ist Hartwig kein verlässlicher

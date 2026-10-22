@@ -20,9 +20,11 @@
 import { THREE, Sammler, LOD, setzeLod } from './basis.js';
 import { echterBauer, fussabdruck } from './bauer.js';
 import { dachFlaechenBeimBau } from './stadt.js';
-import { warenhaus, familieVon, nachnutzung } from './warenhaus.js';
+import { warenhaus, nachnutzung } from './warenhaus.js';
+import { warenhausVielfalt } from './warenhaus-vielfalt.js';
 import { sporthaus, nachnutzungSport } from './sporthaus.js';
 import { outlet } from './outlet.js';
+import { schwesterhaus } from './schwesterhaus.js';
 import { premiumhaus } from './premium.js';
 import { stadtDaten } from './staedte.js';
 import { wettbewerber as baueWettbewerber } from './wettbewerber.js';
@@ -34,6 +36,10 @@ import schwesterHaeuser from '../../haeuser-schwester.json';
 import exportHaeuser from '../../haeuser.json';
 // Maßstab: Fassadenvariante aus dem Export (fassaden-verteilen.js, keine Kopien unter 50 km), für alle Spielstände gleich
 const FASSADE = new Map(exportHaeuser.map((h) => [h.id, h.fassade]));
+/** #31: Fassadenindex und Familie aus dem verteilten Export (50-km-Regel), Q21 übernimmt beides. */
+const EXPORT_FAMILIE = new Map(exportHaeuser.filter((h) => h.familie != null).map((h) => [h.id, h.familie]));
+const mitExportFassade = (liste) => liste.map((h) => (FASSADE.has(h.id) && (FASSADE.get(h.id) !== h.fassade || EXPORT_FAMILIE.has(h.id))
+  ? { ...h, fassade: FASSADE.get(h.id), ...(EXPORT_FAMILIE.has(h.id) ? { familie: EXPORT_FAMILIE.get(h.id) } : {}) } : h));
 import outletHaeuser from '../../haeuser-outlet.json';
 import './hq.js';   // meldet 'slot:hq' an
 
@@ -157,10 +163,13 @@ export function stadtEintragAusSpiel(s, name) {
   const d = stadtDaten(name);
   if (!d) return undefined;
   // Hartwig, Premium und Sport aus der Engine; Volkskauf und FUNDUS kommen mit ihren Grafikdaten aus staedte.js
-  // (gleiche IDs wie in der Engine). Früher landeten Engine-Volkskauf-Häuser als Hartwig-Warenhaus im Plan.
+  // (gleiche IDs wie in der Engine). Q21: Familie/Variante je Haus aus warenhausVielfalt, Fassade aus dem #31-Export.
+  const verteilung = warenhausVielfalt(mitExportFassade(s.haeuser.filter((h) => h.stadt === name)));
   const eigene = s.haeuser.filter((h) => h.stadt === name && (h.format === 'warenhaus' || h.format === 'sport')).map((h) => {
-    const f = fussabdruck(h);
-    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, hausklasse: h.hausklasse, premium: h.klasse === 'premium', grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+    const v = verteilung.get(h.id);
+    const f = fussabdruck(h, v?.familie);
+    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, hausklasse: h.hausklasse, premium: h.klasse === 'premium', grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d,
+      ...(v ? { familie: v.familie, variante: v.fassade } : {}) };
   });
   // Die ursprünglichen Parzellen sind unabhängig vom aktuellen Spielstand. Zwei zusätzliche
   // Flächen werden von Beginn an als normaler Blockrand bebaut und erst bei Bedarf umgenutzt.
@@ -184,8 +193,7 @@ function imSlot(p, W, D) {
 export function spielBauer(s, o = {}) {
   const basis = echterBauer(o.bauerOpt ?? {});
   const merk = o.merk;
-  const famBenutzt = new Set();
-  const wahl = new Map();      // hausId → { fam, fassade } (bleibt beim Neubau gleich)
+  const wahl = warenhausVielfalt(mitExportFassade(s.haeuser)); // Q21: stabil bei Kamerawechsel und Neubau
   const haeuser = new Map();   // Engine-Häuser
   // Volkskauf und FUNDUS liegen bis zur Engine-Maßstab-Integration nur im Grafikkatalog.
   // Unsichtbare Ray-Boxen (keine Zusatzmeshes) machen sie anklickbar.
@@ -214,20 +222,11 @@ export function spielBauer(s, o = {}) {
   };
 
   const baueWarenhaus = (S, scene, p, h) => {
-    const f = fussabdruck(h);
+    const variant = wahl.get(h.id);
+    const f = fussabdruck(h, variant?.familie);
     const { x, z } = imSlot(p, f.w, f.d);
     if (h.klasse === 'premium') { p.haus = h; const res=premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe}); if (hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d }); return res; }
-    // bauer.js B4: zwei Hartwig-Häuser einer Stadt nie in gleicher Familie und Variante
-    if (!wahl.has(h.id)) {
-      let fam = familieVon(h), fassade = FASSADE.get(h.id) ?? h.fassade;
-      if (famBenutzt.has(fam)) {
-        const alt = fam <= 5 ? [fam + 1, fam - 1, fam + 2, fam - 2].find((q) => q >= 1 && q <= 5 && !famBenutzt.has(q)) : null;
-        if (alt) fam = alt; else fassade = ((fassade ?? 0) + 3) % 8;
-      }
-      famBenutzt.add(fam);
-      wahl.set(h.id, { fam, fassade });
-    }
-    const { fam, fassade } = wahl.get(h.id);
+    const fam = variant?.familie, fassade = variant?.fassade ?? h.fassade;
     p.haus = h;
     const roh = fassade === h.fassade ? h : { ...h, fassade };
     const nutzer = nachnutzer(h);
@@ -252,7 +251,11 @@ export function spielBauer(s, o = {}) {
     p.haus = h;
     return outlet(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
   };
-  const bau = (S, scene, p, h) => (h.format === 'outlet' ? baueOutlet : h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
+  const baueSchwester=(S,scene,p,h)=>{
+    const fl=fussabdruck(h),{x,z}=imSlot(p,fl.w,fl.d);p.haus=h;
+    return schwesterhaus(S,scene,h,{x,z,...bauZustand(zustand(h))});
+  };
+  const bau = (S, scene, p, h) => (h.format === 'outlet' ? baueOutlet : h.format === 'schwester' ? baueSchwester : h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
 
   const getrennt = (p, h) => {
     const gruppe = new THREE.Group();
@@ -396,7 +399,7 @@ export function spielBauer(s, o = {}) {
   };
   const bauer = {
     ...basis, 'slot:warenhaus': slot('slot:warenhaus'), 'slot:sport': slot('slot:sport'),
-    'slot:schwester': statischerSlot('slot:schwester'), 'slot:outlet': statischerSlot('slot:outlet'),
+    'slot:schwester': slot('slot:schwester'), 'slot:outlet': slot('slot:outlet'),
     'slot:premium': slot('slot:premium'),
     'slot:hq': hqSlot, 'slot:wettbewerber': wbSlot, 'slot:wettbewerber_reserve': wbSlot,
   };

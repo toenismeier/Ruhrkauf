@@ -1,11 +1,11 @@
 [
   {
     "id": "W001",
-    "name": "Hartwig Berlin Einkaufszentrum",
+    "name": "Hartwig Berlin Neustadt",
     "stadt": "Berlin",
     "format": "warenhaus",
     "hausklasse": "A",
-    "lage": "center",
+    "lage": "b",
     "cluster": "metropole",
     "region": "Ost",
     "grundflaecheQm": 4300,
@@ -112,7 +112,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W002",
@@ -250,15 +251,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W003",
-    "name": "Hartwig Berlin Einkaufszentrum",
+    "name": "Hartwig Berlin Kreuzstraße",
     "stadt": "Berlin",
     "format": "warenhaus",
     "hausklasse": "A",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "metropole",
     "region": "Ost",
     "grundflaecheQm": 3500,
@@ -388,7 +390,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W004",
@@ -518,15 +521,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W005",
-    "name": "Hartwig Hamburg Galerie am Fluss",
+    "name": "Hartwig Hamburg Lindenstraße",
     "stadt": "Hamburg",
     "format": "warenhaus",
     "hausklasse": "A",
-    "lage": "center",
+    "lage": "b",
     "cluster": "metropole",
     "region": "Nord",
     "grundflaecheQm": 3600,
@@ -648,7 +652,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W006",
@@ -778,15 +783,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W007",
-    "name": "Hartwig Hamburg Arkaden",
+    "name": "Hartwig Hamburg Stadtteilzentrum",
     "stadt": "Hamburg",
     "format": "warenhaus",
     "hausklasse": "A",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "metropole",
     "region": "Nord",
     "grundflaecheQm": 2700,
@@ -916,15 +922,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W008",
-    "name": "Hartwig München Einkaufszentrum",
+    "name": "Hartwig München Ring",
     "stadt": "München",
     "format": "warenhaus",
     "hausklasse": "A",
-    "lage": "center",
+    "lage": "b",
     "cluster": "metropole",
     "region": "Süd",
     "grundflaecheQm": 2600,
@@ -1046,7 +1053,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W009",
@@ -1184,15 +1192,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W010",
-    "name": "Hartwig München City-Center",
+    "name": "Hartwig München Neue Mitte",
     "stadt": "München",
     "format": "warenhaus",
     "hausklasse": "A",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "metropole",
     "region": "Süd",
     "grundflaecheQm": 3500,
@@ -1314,7 +1323,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W011",
@@ -1429,7 +1439,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W012",
@@ -1551,7 +1562,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W013",
@@ -1673,7 +1685,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W014",
@@ -1811,15 +1824,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W015",
-    "name": "Hartwig Düsseldorf City-Center",
+    "name": "Hartwig Düsseldorf Neustadt",
     "stadt": "Düsseldorf",
     "format": "warenhaus",
     "hausklasse": "A",
-    "lage": "center",
+    "lage": "b",
     "cluster": "metropole",
     "region": "West",
     "grundflaecheQm": 3200,
@@ -1949,7 +1963,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W016",
@@ -1969,7 +1984,7 @@
       3
     ],
     "baujahr": 1939,
-    "fassade": 5,
+    "fassade": 2,
     "substanz": 83,
     "status": "offen",
     "flaechen": [
@@ -2071,7 +2086,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W017",
@@ -2193,7 +2209,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W018",
@@ -2331,7 +2348,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W019",
@@ -2438,7 +2456,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W020",
@@ -2457,7 +2476,7 @@
       2
     ],
     "baujahr": 2004,
-    "fassade": 2,
+    "fassade": 7,
     "substanz": 39,
     "status": "offen",
     "flaechen": [
@@ -2545,7 +2564,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W021",
@@ -2675,7 +2695,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W022",
@@ -2782,7 +2803,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W023",
@@ -2904,7 +2926,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W024",
@@ -3011,7 +3034,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W025",
@@ -3133,7 +3157,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 9
   },
   {
     "id": "W026",
@@ -3240,7 +3265,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W027",
@@ -3362,7 +3388,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W028",
@@ -3484,7 +3511,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W029",
@@ -3606,7 +3634,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W030",
@@ -3720,7 +3749,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W031",
@@ -3842,7 +3872,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W032",
@@ -3957,7 +3988,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W033",
@@ -3977,7 +4009,7 @@
       4
     ],
     "baujahr": 1951,
-    "fassade": 7,
+    "fassade": 3,
     "substanz": 78,
     "status": "offen",
     "flaechen": [
@@ -4079,7 +4111,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W034",
@@ -4209,7 +4242,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W035",
@@ -4323,7 +4357,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W036",
@@ -4453,7 +4488,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W037",
@@ -4560,7 +4596,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W038",
@@ -4690,7 +4727,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W039",
@@ -4804,7 +4842,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W040",
@@ -4911,7 +4950,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W041",
@@ -5041,7 +5081,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W042",
@@ -5163,7 +5204,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W043",
@@ -5285,7 +5327,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W044",
@@ -5306,7 +5349,7 @@
       4
     ],
     "baujahr": 2000,
-    "fassade": 4,
+    "fassade": 6,
     "substanz": 64,
     "status": "offen",
     "flaechen": [
@@ -5415,7 +5458,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W045",
@@ -5529,7 +5573,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W046",
@@ -5651,7 +5696,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W047",
@@ -5758,7 +5804,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W048",
@@ -5888,7 +5935,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W049",
@@ -6002,7 +6050,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W050",
@@ -6124,7 +6173,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W051",
@@ -6224,7 +6274,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W052",
@@ -6354,7 +6405,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W053",
@@ -6476,7 +6528,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W054",
@@ -6606,7 +6659,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W055",
@@ -6728,7 +6782,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 9
   },
   {
     "id": "W056",
@@ -6850,7 +6905,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W057",
@@ -6980,7 +7036,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W058",
@@ -7094,7 +7151,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W059",
@@ -7224,7 +7282,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W060",
@@ -7354,7 +7413,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W061",
@@ -7484,7 +7544,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W062",
@@ -7591,7 +7652,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W063",
@@ -7721,7 +7783,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W064",
@@ -7851,7 +7914,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W065",
@@ -7981,7 +8045,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W066",
@@ -8088,7 +8153,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W067",
@@ -8218,7 +8284,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W068",
@@ -8325,7 +8392,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W069",
@@ -8455,7 +8523,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W070",
@@ -8562,7 +8631,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W071",
@@ -8669,7 +8739,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W072",
@@ -8784,7 +8855,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W073",
@@ -8914,7 +8986,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W074",
@@ -9044,7 +9117,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W075",
@@ -9174,7 +9248,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W076",
@@ -9296,7 +9371,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W077",
@@ -9426,7 +9502,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W078",
@@ -9556,7 +9633,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W079",
@@ -9671,7 +9749,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W080",
@@ -9785,7 +9864,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W081",
@@ -9899,7 +9979,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W082",
@@ -10014,7 +10095,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W083",
@@ -10144,7 +10226,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W084",
@@ -10274,7 +10357,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W085",
@@ -10381,7 +10465,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W086",
@@ -10503,7 +10588,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W087",
@@ -10609,7 +10695,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W088",
@@ -10731,7 +10818,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W089",
@@ -10861,7 +10949,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W090",
@@ -10983,7 +11072,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W091",
@@ -11097,7 +11187,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W092",
@@ -11211,7 +11302,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W093",
@@ -11341,7 +11433,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W094",
@@ -11448,7 +11541,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W095",
@@ -11540,7 +11634,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W096",
@@ -11647,7 +11742,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W097",
@@ -11762,7 +11858,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W098",
@@ -11854,7 +11951,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W099",
@@ -11969,7 +12067,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W100",
@@ -12076,7 +12175,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W101",
@@ -12182,7 +12282,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W102",
@@ -12296,7 +12397,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W103",
@@ -12403,7 +12505,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W104",
@@ -12510,7 +12613,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W105",
@@ -12632,7 +12736,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W106",
@@ -12754,7 +12859,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W107",
@@ -12861,7 +12967,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W108",
@@ -12967,7 +13074,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W109",
@@ -13089,7 +13197,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W110",
@@ -13203,7 +13312,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W111",
@@ -13295,7 +13405,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W112",
@@ -13409,7 +13520,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W113",
@@ -13516,7 +13628,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W114",
@@ -13630,7 +13743,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W115",
@@ -13737,7 +13851,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W116",
@@ -13844,7 +13959,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W117",
@@ -13936,7 +14052,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 9
   },
   {
     "id": "W118",
@@ -14043,7 +14160,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W119",
@@ -14165,7 +14283,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W120",
@@ -14287,7 +14406,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W121",
@@ -14379,7 +14499,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W122",
@@ -14486,7 +14607,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W123",
@@ -14593,7 +14715,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W124",
@@ -14700,7 +14823,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W125",
@@ -14822,7 +14946,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W126",
@@ -14914,7 +15039,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W127",
@@ -14934,7 +15060,7 @@
       4
     ],
     "baujahr": 1996,
-    "fassade": 7,
+    "fassade": 11,
     "substanz": 39,
     "status": "offen",
     "flaechen": [
@@ -15036,7 +15162,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W128",
@@ -15150,7 +15277,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W129",
@@ -15242,7 +15370,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W130",
@@ -15334,7 +15463,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W131",
@@ -15472,7 +15602,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 6
   },
   {
     "id": "W132",
@@ -15602,7 +15733,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W133",
@@ -15724,7 +15856,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 6
   },
   {
     "id": "W134",
@@ -15854,7 +15987,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W135",
@@ -15984,15 +16118,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 6
   },
   {
     "id": "W136",
-    "name": "Hartwig Köln Galerie am Fluss",
+    "name": "Hartwig Köln Am Marktplatz Süd",
     "stadt": "Köln",
     "format": "warenhaus",
     "hausklasse": "A",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "metropole",
     "region": "West",
     "grundflaecheQm": 2700,
@@ -16005,7 +16140,7 @@
       5
     ],
     "baujahr": 1982,
-    "fassade": 2,
+    "fassade": 1,
     "substanz": 52,
     "status": "offen",
     "flaechen": [
@@ -16114,7 +16249,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W137",
@@ -16236,7 +16372,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W138",
@@ -16366,15 +16503,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 6
   },
   {
     "id": "W139",
-    "name": "Hartwig Frankfurt Einkaufszentrum",
+    "name": "Hartwig Frankfurt Kreuzstraße",
     "stadt": "Frankfurt",
     "format": "warenhaus",
     "hausklasse": "A",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "metropole",
     "region": "Mitte",
     "grundflaecheQm": 4000,
@@ -16488,7 +16626,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W140",
@@ -16610,7 +16749,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W141",
@@ -16748,15 +16888,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 6
   },
   {
     "id": "W142",
-    "name": "Hartwig Düsseldorf Einkaufszentrum",
+    "name": "Hartwig Düsseldorf Kreuzstraße",
     "stadt": "Düsseldorf",
     "format": "warenhaus",
     "hausklasse": "A",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "metropole",
     "region": "West",
     "grundflaecheQm": 4000,
@@ -16769,7 +16910,7 @@
       4
     ],
     "baujahr": 1914,
-    "fassade": 3,
+    "fassade": 1,
     "substanz": 64,
     "status": "offen",
     "flaechen": [
@@ -16878,7 +17019,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W143",
@@ -17016,15 +17158,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W144",
-    "name": "Hartwig Stuttgart City-Center",
+    "name": "Hartwig Stuttgart Neue Mitte",
     "stadt": "Stuttgart",
     "format": "warenhaus",
     "hausklasse": "A",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "metropole",
     "region": "Süd",
     "grundflaecheQm": 2800,
@@ -17154,7 +17297,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W145",
@@ -17284,7 +17428,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W146",
@@ -17414,15 +17559,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 6
   },
   {
     "id": "W147",
-    "name": "Hartwig Essen Einkaufszentrum",
+    "name": "Hartwig Essen Kreuzstraße",
     "stadt": "Essen",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 3000,
@@ -17434,7 +17580,7 @@
       3
     ],
     "baujahr": 1961,
-    "fassade": 4,
+    "fassade": 2,
     "substanz": 71,
     "status": "offen",
     "flaechen": [
@@ -17536,15 +17682,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W148",
-    "name": "Hartwig Dortmund Arkaden",
+    "name": "Hartwig Dortmund Stadtteilzentrum",
     "stadt": "Dortmund",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 3600,
@@ -17643,15 +17790,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W149",
-    "name": "Hartwig Bremen City-Center",
+    "name": "Hartwig Bremen Neue Mitte",
     "stadt": "Bremen",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Nord",
     "grundflaecheQm": 2900,
@@ -17758,15 +17906,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W150",
-    "name": "Hartwig Leipzig Einkaufszentrum",
+    "name": "Hartwig Leipzig Kreuzstraße",
     "stadt": "Leipzig",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Ost",
     "grundflaecheQm": 1400,
@@ -17888,15 +18037,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W151",
-    "name": "Hartwig Dresden Galerie am Fluss",
+    "name": "Hartwig Dresden Am Marktplatz Süd",
     "stadt": "Dresden",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Ost",
     "grundflaecheQm": 2900,
@@ -17995,15 +18145,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 9
   },
   {
     "id": "W152",
-    "name": "Hartwig Hannover Galerie am Fluss",
+    "name": "Hartwig Hannover Am Marktplatz Süd",
     "stadt": "Hannover",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Nord",
     "grundflaecheQm": 2600,
@@ -18110,15 +18261,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W153",
-    "name": "Hartwig Nürnberg Galerie am Fluss",
+    "name": "Hartwig Nürnberg Am Marktplatz Süd",
     "stadt": "Nürnberg",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 2300,
@@ -18225,7 +18377,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W154",
@@ -18245,7 +18398,7 @@
       3
     ],
     "baujahr": 1959,
-    "fassade": 4,
+    "fassade": 5,
     "substanz": 36,
     "status": "offen",
     "flaechen": [
@@ -18347,15 +18500,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W155",
-    "name": "Hartwig Duisburg Galerie am Fluss",
+    "name": "Hartwig Duisburg Am Marktplatz Süd",
     "stadt": "Duisburg",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 2200,
@@ -18367,7 +18521,7 @@
       4
     ],
     "baujahr": 1968,
-    "fassade": 2,
+    "fassade": 5,
     "substanz": 82,
     "status": "offen",
     "flaechen": [
@@ -18469,7 +18623,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W156",
@@ -18490,7 +18645,7 @@
       4
     ],
     "baujahr": 1991,
-    "fassade": 6,
+    "fassade": 1,
     "substanz": 56,
     "status": "offen",
     "flaechen": [
@@ -18599,15 +18754,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W157",
-    "name": "Hartwig Bochum Arkaden",
+    "name": "Hartwig Bochum Stadtteilzentrum",
     "stadt": "Bochum",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1700,
@@ -18620,7 +18776,7 @@
       4
     ],
     "baujahr": 1933,
-    "fassade": 6,
+    "fassade": 4,
     "substanz": 59,
     "status": "offen",
     "flaechen": [
@@ -18729,7 +18885,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W158",
@@ -18748,7 +18905,7 @@
       2
     ],
     "baujahr": 2006,
-    "fassade": 8,
+    "fassade": 7,
     "substanz": 56,
     "status": "offen",
     "flaechen": [
@@ -18829,15 +18986,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W159",
-    "name": "Hartwig Wuppertal Einkaufszentrum",
+    "name": "Hartwig Wuppertal Kreuzstraße",
     "stadt": "Wuppertal",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 2900,
@@ -18849,7 +19007,7 @@
       3
     ],
     "baujahr": 1964,
-    "fassade": 7,
+    "fassade": 4,
     "substanz": 42,
     "status": "offen",
     "flaechen": [
@@ -18944,7 +19102,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W160",
@@ -19074,15 +19233,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W161",
-    "name": "Hartwig Bielefeld Arkaden",
+    "name": "Hartwig Bielefeld Stadtteilzentrum",
     "stadt": "Bielefeld",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 2500,
@@ -19196,7 +19356,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W162",
@@ -19318,15 +19479,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W163",
-    "name": "Hartwig Bonn Galerie am Fluss",
+    "name": "Hartwig Bonn Am Marktplatz Süd",
     "stadt": "Bonn",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1800,
@@ -19448,7 +19610,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W164",
@@ -19578,15 +19741,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W165",
-    "name": "Hartwig Münster Arkaden",
+    "name": "Hartwig Münster Stadtteilzentrum",
     "stadt": "Münster",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 2900,
@@ -19692,7 +19856,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W166",
@@ -19814,15 +19979,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W167",
-    "name": "Hartwig Mannheim Galerie am Fluss",
+    "name": "Hartwig Mannheim Am Marktplatz Süd",
     "stadt": "Mannheim",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 2600,
@@ -19936,7 +20102,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W168",
@@ -20058,15 +20225,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W169",
-    "name": "Hartwig Karlsruhe Galerie am Fluss",
+    "name": "Hartwig Karlsruhe Am Marktplatz Süd",
     "stadt": "Karlsruhe",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 2900,
@@ -20180,7 +20348,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W170",
@@ -20310,15 +20479,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W171",
-    "name": "Hartwig Augsburg Arkaden",
+    "name": "Hartwig Augsburg Stadtteilzentrum",
     "stadt": "Augsburg",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 3600,
@@ -20424,7 +20594,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W172",
@@ -20539,15 +20710,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W173",
-    "name": "Hartwig Wiesbaden Arkaden",
+    "name": "Hartwig Wiesbaden Stadtteilzentrum",
     "stadt": "Wiesbaden",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Mitte",
     "grundflaecheQm": 2400,
@@ -20560,7 +20732,7 @@
       5
     ],
     "baujahr": 1969,
-    "fassade": 5,
+    "fassade": 4,
     "substanz": 87,
     "status": "offen",
     "flaechen": [
@@ -20669,7 +20841,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W174",
@@ -20799,15 +20972,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W175",
-    "name": "Hartwig Mönchengladbach City-Center",
+    "name": "Hartwig Mönchengladbach Neue Mitte",
     "stadt": "Mönchengladbach",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1600,
@@ -20929,7 +21103,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W176",
@@ -21036,15 +21211,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W177",
-    "name": "Hartwig Gelsenkirchen Galerie am Fluss",
+    "name": "Hartwig Gelsenkirchen Am Marktplatz Süd",
     "stadt": "Gelsenkirchen",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 2400,
@@ -21056,7 +21232,7 @@
       3
     ],
     "baujahr": 1949,
-    "fassade": 8,
+    "fassade": 7,
     "substanz": 35,
     "status": "offen",
     "flaechen": [
@@ -21158,7 +21334,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W178",
@@ -21288,15 +21465,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W179",
-    "name": "Hartwig Aachen Arkaden",
+    "name": "Hartwig Aachen Stadtteilzentrum",
     "stadt": "Aachen",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1500,
@@ -21418,7 +21596,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W180",
@@ -21548,15 +21727,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W181",
-    "name": "Hartwig Braunschweig City-Center",
+    "name": "Hartwig Braunschweig Neue Mitte",
     "stadt": "Braunschweig",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Nord",
     "grundflaecheQm": 2200,
@@ -21678,7 +21858,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W182",
@@ -21808,15 +21989,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W183",
-    "name": "Hartwig Kiel Arkaden",
+    "name": "Hartwig Kiel Stadtteilzentrum",
     "stadt": "Kiel",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Nord",
     "grundflaecheQm": 3700,
@@ -21915,7 +22097,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W184",
@@ -22037,15 +22220,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 9
   },
   {
     "id": "W185",
-    "name": "Hartwig Chemnitz Galerie am Fluss",
+    "name": "Hartwig Chemnitz Am Marktplatz Süd",
     "stadt": "Chemnitz",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Ost",
     "grundflaecheQm": 2900,
@@ -22151,7 +22335,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W186",
@@ -22266,15 +22451,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W187",
-    "name": "Hartwig Halle Einkaufszentrum",
+    "name": "Hartwig Halle Kreuzstraße",
     "stadt": "Halle",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Ost",
     "grundflaecheQm": 1500,
@@ -22396,7 +22582,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 9
   },
   {
     "id": "W188",
@@ -22510,15 +22697,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W189",
-    "name": "Hartwig Magdeburg Galerie am Fluss",
+    "name": "Hartwig Magdeburg Am Marktplatz Süd",
     "stadt": "Magdeburg",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Ost",
     "grundflaecheQm": 1700,
@@ -22640,7 +22828,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W190",
@@ -22770,15 +22959,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W191",
-    "name": "Hartwig Freiburg City-Center",
+    "name": "Hartwig Freiburg Neue Mitte",
     "stadt": "Freiburg",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 2300,
@@ -22877,7 +23067,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W192",
@@ -22896,7 +23087,7 @@
       3
     ],
     "baujahr": 1997,
-    "fassade": 5,
+    "fassade": 8,
     "substanz": 81,
     "status": "offen",
     "flaechen": [
@@ -22991,15 +23182,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W193",
-    "name": "Hartwig Krefeld City-Center",
+    "name": "Hartwig Krefeld Neue Mitte",
     "stadt": "Krefeld",
     "format": "warenhaus",
     "hausklasse": "B",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 2400,
@@ -23010,7 +23202,7 @@
       3
     ],
     "baujahr": 1975,
-    "fassade": 5,
+    "fassade": 2,
     "substanz": 87,
     "status": "offen",
     "flaechen": [
@@ -23105,7 +23297,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W194",
@@ -23124,7 +23317,7 @@
       2
     ],
     "baujahr": 1937,
-    "fassade": 1,
+    "fassade": 2,
     "substanz": 66,
     "status": "offen",
     "flaechen": [
@@ -23212,15 +23405,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W195",
-    "name": "Hartwig Mainz Galerie am Fluss",
+    "name": "Hartwig Mainz Am Marktplatz Süd",
     "stadt": "Mainz",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Mitte",
     "grundflaecheQm": 1400,
@@ -23319,7 +23513,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W196",
@@ -23434,15 +23629,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W197",
-    "name": "Hartwig Lübeck City-Center",
+    "name": "Hartwig Lübeck Neue Mitte",
     "stadt": "Lübeck",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Nord",
     "grundflaecheQm": 1000,
@@ -23549,7 +23745,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W198",
@@ -23641,15 +23838,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W199",
-    "name": "Hartwig Erfurt Arkaden",
+    "name": "Hartwig Erfurt Stadtteilzentrum",
     "stadt": "Erfurt",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Ost",
     "grundflaecheQm": 1600,
@@ -23733,7 +23931,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W200",
@@ -23839,15 +24038,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W201",
-    "name": "Hartwig Oberhausen Galerie am Fluss",
+    "name": "Hartwig Oberhausen Am Marktplatz Süd",
     "stadt": "Oberhausen",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 2100,
@@ -23857,7 +24057,7 @@
       2
     ],
     "baujahr": 1960,
-    "fassade": 9,
+    "fassade": 2,
     "substanz": 35,
     "status": "offen",
     "flaechen": [
@@ -23945,7 +24145,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W202",
@@ -24052,15 +24253,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W203",
-    "name": "Hartwig Rostock Galerie am Fluss",
+    "name": "Hartwig Rostock Am Marktplatz Süd",
     "stadt": "Rostock",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Ost",
     "grundflaecheQm": 1000,
@@ -24166,7 +24368,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W204",
@@ -24258,15 +24461,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W205",
-    "name": "Hartwig Kassel City-Center",
+    "name": "Hartwig Kassel Neue Mitte",
     "stadt": "Kassel",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Mitte",
     "grundflaecheQm": 1300,
@@ -24373,7 +24577,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W206",
@@ -24495,15 +24700,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W207",
-    "name": "Hartwig Hagen Arkaden",
+    "name": "Hartwig Hagen Stadtteilzentrum",
     "stadt": "Hagen",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1200,
@@ -24617,7 +24823,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W208",
@@ -24724,15 +24931,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W209",
-    "name": "Hartwig Potsdam Arkaden",
+    "name": "Hartwig Potsdam Stadtteilzentrum",
     "stadt": "Potsdam",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Ost",
     "grundflaecheQm": 1400,
@@ -24744,7 +24952,7 @@
       3
     ],
     "baujahr": 1899,
-    "fassade": 1,
+    "fassade": 0,
     "substanz": 83,
     "status": "offen",
     "flaechen": [
@@ -24846,7 +25054,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W210",
@@ -24961,15 +25170,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W211",
-    "name": "Hartwig Saarbrücken Einkaufszentrum",
+    "name": "Hartwig Saarbrücken Kreuzstraße",
     "stadt": "Saarbrücken",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Mitte",
     "grundflaecheQm": 2000,
@@ -25053,7 +25263,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W212",
@@ -25175,15 +25386,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W213",
-    "name": "Hartwig Hamm City-Center",
+    "name": "Hartwig Hamm Neue Mitte",
     "stadt": "Hamm",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1000,
@@ -25195,7 +25407,7 @@
       4
     ],
     "baujahr": 1936,
-    "fassade": 8,
+    "fassade": 6,
     "substanz": 78,
     "status": "offen",
     "flaechen": [
@@ -25297,7 +25509,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W214",
@@ -25404,15 +25617,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W215",
-    "name": "Hartwig Ludwigshafen City-Center",
+    "name": "Hartwig Ludwigshafen Neue Mitte",
     "stadt": "Ludwigshafen",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Mitte",
     "grundflaecheQm": 1900,
@@ -25422,7 +25636,7 @@
       1
     ],
     "baujahr": 1968,
-    "fassade": 1,
+    "fassade": 2,
     "substanz": 31,
     "status": "offen",
     "flaechen": [
@@ -25496,7 +25710,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W216",
@@ -25588,15 +25803,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W217",
-    "name": "Hartwig Oldenburg Galerie am Fluss",
+    "name": "Hartwig Oldenburg Am Marktplatz Süd",
     "stadt": "Oldenburg",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Nord",
     "grundflaecheQm": 1000,
@@ -25702,7 +25918,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W218",
@@ -25720,7 +25937,7 @@
       1
     ],
     "baujahr": 1998,
-    "fassade": 9,
+    "fassade": 6,
     "substanz": 70,
     "status": "offen",
     "flaechen": [
@@ -25794,15 +26011,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W219",
-    "name": "Hartwig Mülheim Galerie am Fluss",
+    "name": "Hartwig Mülheim Am Marktplatz Süd",
     "stadt": "Mülheim",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 2300,
@@ -25812,7 +26030,7 @@
       1
     ],
     "baujahr": 1921,
-    "fassade": 10,
+    "fassade": 6,
     "substanz": 79,
     "status": "offen",
     "flaechen": [
@@ -25886,7 +26104,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W220",
@@ -25993,15 +26212,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W221",
-    "name": "Hartwig Osnabrück City-Center",
+    "name": "Hartwig Osnabrück Neue Mitte",
     "stadt": "Osnabrück",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Nord",
     "grundflaecheQm": 1200,
@@ -26107,7 +26327,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W222",
@@ -26229,15 +26450,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W223",
-    "name": "Hartwig Leverkusen Galerie am Fluss",
+    "name": "Hartwig Leverkusen Am Marktplatz Süd",
     "stadt": "Leverkusen",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1200,
@@ -26248,7 +26470,7 @@
       2
     ],
     "baujahr": 1996,
-    "fassade": 6,
+    "fassade": 4,
     "substanz": 40,
     "status": "offen",
     "flaechen": [
@@ -26336,7 +26558,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W224",
@@ -26354,7 +26577,7 @@
       1
     ],
     "baujahr": 1916,
-    "fassade": 2,
+    "fassade": 3,
     "substanz": 88,
     "status": "offen",
     "flaechen": [
@@ -26428,15 +26651,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W225",
-    "name": "Hartwig Darmstadt City-Center",
+    "name": "Hartwig Darmstadt Neue Mitte",
     "stadt": "Darmstadt",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Mitte",
     "grundflaecheQm": 1000,
@@ -26550,7 +26774,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W226",
@@ -26650,15 +26875,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W227",
-    "name": "Hartwig Heidelberg Galerie am Fluss",
+    "name": "Hartwig Heidelberg Am Marktplatz Süd",
     "stadt": "Heidelberg",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 1500,
@@ -26764,7 +26990,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W228",
@@ -26783,7 +27010,7 @@
       2
     ],
     "baujahr": 1984,
-    "fassade": 10,
+    "fassade": 2,
     "substanz": 31,
     "status": "offen",
     "flaechen": [
@@ -26871,15 +27098,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W229",
-    "name": "Hartwig Solingen Einkaufszentrum",
+    "name": "Hartwig Solingen Kreuzstraße",
     "stadt": "Solingen",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1000,
@@ -26890,7 +27118,7 @@
       3
     ],
     "baujahr": 1919,
-    "fassade": 11,
+    "fassade": 5,
     "substanz": 74,
     "status": "offen",
     "flaechen": [
@@ -26985,7 +27213,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W230",
@@ -27107,15 +27336,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W231",
-    "name": "Hartwig Regensburg City-Center",
+    "name": "Hartwig Regensburg Neue Mitte",
     "stadt": "Regensburg",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 1000,
@@ -27214,7 +27444,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W232",
@@ -27336,15 +27567,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W233",
-    "name": "Hartwig Paderborn Galerie am Fluss",
+    "name": "Hartwig Paderborn Am Marktplatz Süd",
     "stadt": "Paderborn",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 2100,
@@ -27428,7 +27660,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W234",
@@ -27520,15 +27753,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W235",
-    "name": "Hartwig Ingolstadt City-Center",
+    "name": "Hartwig Ingolstadt Neue Mitte",
     "stadt": "Ingolstadt",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 1600,
@@ -27642,7 +27876,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W236",
@@ -27749,15 +27984,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W237",
-    "name": "Hartwig Würzburg City-Center",
+    "name": "Hartwig Würzburg Neue Mitte",
     "stadt": "Würzburg",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 1000,
@@ -27871,7 +28107,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W238",
@@ -27977,15 +28214,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W239",
-    "name": "Hartwig Ulm City-Center",
+    "name": "Hartwig Ulm Neue Mitte",
     "stadt": "Ulm",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 1300,
@@ -28099,7 +28337,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W240",
@@ -28205,15 +28444,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W241",
-    "name": "Hartwig Wolfsburg Einkaufszentrum",
+    "name": "Hartwig Wolfsburg Kreuzstraße",
     "stadt": "Wolfsburg",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Nord",
     "grundflaecheQm": 1000,
@@ -28319,7 +28559,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W242",
@@ -28441,15 +28682,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W243",
-    "name": "Hartwig Göttingen City-Center",
+    "name": "Hartwig Göttingen Neue Mitte",
     "stadt": "Göttingen",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Nord",
     "grundflaecheQm": 1900,
@@ -28547,7 +28789,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W244",
@@ -28639,15 +28882,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W245",
-    "name": "Hartwig Pforzheim Einkaufszentrum",
+    "name": "Hartwig Pforzheim Kreuzstraße",
     "stadt": "Pforzheim",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 1700,
@@ -28657,7 +28901,7 @@
       1
     ],
     "baujahr": 1996,
-    "fassade": 8,
+    "fassade": 6,
     "substanz": 67,
     "status": "offen",
     "flaechen": [
@@ -28731,7 +28975,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W246",
@@ -28853,15 +29098,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W247",
-    "name": "Hartwig Offenbach Einkaufszentrum",
+    "name": "Hartwig Offenbach Kreuzstraße",
     "stadt": "Offenbach",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Mitte",
     "grundflaecheQm": 1200,
@@ -28871,7 +29117,7 @@
       1
     ],
     "baujahr": 1968,
-    "fassade": 6,
+    "fassade": 5,
     "substanz": 77,
     "status": "offen",
     "flaechen": [
@@ -28945,7 +29191,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W248",
@@ -28963,7 +29210,7 @@
       1
     ],
     "baujahr": 2002,
-    "fassade": 6,
+    "fassade": 2,
     "substanz": 48,
     "status": "offen",
     "flaechen": [
@@ -29037,15 +29284,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W249",
-    "name": "Hartwig Heilbronn Einkaufszentrum",
+    "name": "Hartwig Heilbronn Kreuzstraße",
     "stadt": "Heilbronn",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 1200,
@@ -29057,7 +29305,7 @@
       4
     ],
     "baujahr": 1915,
-    "fassade": 9,
+    "fassade": 7,
     "substanz": 57,
     "status": "offen",
     "flaechen": [
@@ -29159,7 +29407,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W250",
@@ -29266,15 +29515,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W251",
-    "name": "Hartwig Bremerhaven Galerie am Fluss",
+    "name": "Hartwig Bremerhaven Am Marktplatz Süd",
     "stadt": "Bremerhaven",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Nord",
     "grundflaecheQm": 1600,
@@ -29372,7 +29622,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W252",
@@ -29479,15 +29730,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W253",
-    "name": "Hartwig Trier Arkaden",
+    "name": "Hartwig Trier Stadtteilzentrum",
     "stadt": "Trier",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Mitte",
     "grundflaecheQm": 2400,
@@ -29571,7 +29823,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 9
   },
   {
     "id": "W254",
@@ -29678,15 +29931,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W255",
-    "name": "Hartwig Koblenz Arkaden",
+    "name": "Hartwig Koblenz Stadtteilzentrum",
     "stadt": "Koblenz",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Mitte",
     "grundflaecheQm": 1700,
@@ -29770,7 +30024,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W256",
@@ -29862,15 +30117,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W257",
-    "name": "Hartwig Jena City-Center",
+    "name": "Hartwig Jena Neue Mitte",
     "stadt": "Jena",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Ost",
     "grundflaecheQm": 1000,
@@ -29984,7 +30240,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 11
   },
   {
     "id": "W258",
@@ -30106,15 +30363,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W259",
-    "name": "Hartwig Siegen Arkaden",
+    "name": "Hartwig Siegen Stadtteilzentrum",
     "stadt": "Siegen",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1000,
@@ -30220,7 +30478,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W260",
@@ -30327,15 +30586,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W261",
-    "name": "Hartwig Hildesheim City-Center",
+    "name": "Hartwig Hildesheim Neue Mitte",
     "stadt": "Hildesheim",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Nord",
     "grundflaecheQm": 1800,
@@ -30434,7 +30694,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 9
   },
   {
     "id": "W262",
@@ -30526,15 +30787,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 8
   },
   {
     "id": "W263",
-    "name": "Hartwig Gütersloh Einkaufszentrum",
+    "name": "Hartwig Gütersloh Kreuzstraße",
     "stadt": "Gütersloh",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1200,
@@ -30546,7 +30808,7 @@
       4
     ],
     "baujahr": 1916,
-    "fassade": 1,
+    "fassade": 2,
     "substanz": 40,
     "status": "offen",
     "flaechen": [
@@ -30648,7 +30910,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W264",
@@ -30666,7 +30929,7 @@
       1
     ],
     "baujahr": 1924,
-    "fassade": 1,
+    "fassade": 2,
     "substanz": 43,
     "status": "offen",
     "flaechen": [
@@ -30740,15 +31003,16 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W265",
-    "name": "Hartwig Recklinghausen Galerie am Fluss",
+    "name": "Hartwig Recklinghausen Am Marktplatz Süd",
     "stadt": "Recklinghausen",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1700,
@@ -30758,7 +31022,7 @@
       2
     ],
     "baujahr": 1910,
-    "fassade": 3,
+    "fassade": 1,
     "substanz": 57,
     "status": "offen",
     "flaechen": [
@@ -30846,7 +31110,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W266",
@@ -30865,7 +31130,7 @@
       3
     ],
     "baujahr": 1945,
-    "fassade": 6,
+    "fassade": 4,
     "substanz": 48,
     "status": "offen",
     "flaechen": [
@@ -30960,15 +31225,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W267",
-    "name": "Hartwig Bottrop Arkaden",
+    "name": "Hartwig Bottrop Stadtteilzentrum",
     "stadt": "Bottrop",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1100,
@@ -30979,7 +31245,7 @@
       2
     ],
     "baujahr": 1933,
-    "fassade": 12,
+    "fassade": 1,
     "substanz": 69,
     "status": "offen",
     "flaechen": [
@@ -31074,7 +31340,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W268",
@@ -31092,7 +31359,7 @@
       2
     ],
     "baujahr": 1959,
-    "fassade": 2,
+    "fassade": 1,
     "substanz": 39,
     "status": "offen",
     "flaechen": [
@@ -31180,15 +31447,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W269",
-    "name": "Hartwig Reutlingen Galerie am Fluss",
+    "name": "Hartwig Reutlingen Am Marktplatz Süd",
     "stadt": "Reutlingen",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 1100,
@@ -31302,7 +31570,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W270",
@@ -31416,15 +31685,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W271",
-    "name": "Hartwig Erlangen Galerie am Fluss",
+    "name": "Hartwig Erlangen Am Marktplatz Süd",
     "stadt": "Erlangen",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 1600,
@@ -31508,7 +31778,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W272",
@@ -31528,7 +31799,7 @@
       3
     ],
     "baujahr": 1991,
-    "fassade": 7,
+    "fassade": 6,
     "substanz": 57,
     "status": "offen",
     "flaechen": [
@@ -31630,15 +31901,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W273",
-    "name": "Hartwig Fürth Arkaden",
+    "name": "Hartwig Fürth Stadtteilzentrum",
     "stadt": "Fürth",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Süd",
     "grundflaecheQm": 1000,
@@ -31752,7 +32024,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W274",
@@ -31858,15 +32131,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W275",
-    "name": "Hartwig Hanau Galerie am Fluss",
+    "name": "Hartwig Hanau Am Marktplatz Süd",
     "stadt": "Hanau",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Mitte",
     "grundflaecheQm": 1900,
@@ -31876,7 +32150,7 @@
       1
     ],
     "baujahr": 2001,
-    "fassade": 7,
+    "fassade": 4,
     "substanz": 74,
     "status": "offen",
     "flaechen": [
@@ -31950,7 +32224,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W276",
@@ -31969,7 +32244,7 @@
       2
     ],
     "baujahr": 1992,
-    "fassade": 11,
+    "fassade": 10,
     "substanz": 61,
     "status": "offen",
     "flaechen": [
@@ -32057,15 +32332,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W277",
-    "name": "Hartwig Neuss City-Center",
+    "name": "Hartwig Neuss Neue Mitte",
     "stadt": "Neuss",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1500,
@@ -32076,7 +32352,7 @@
       2
     ],
     "baujahr": 1895,
-    "fassade": 13,
+    "fassade": 0,
     "substanz": 85,
     "status": "offen",
     "flaechen": [
@@ -32164,7 +32440,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W278",
@@ -32183,7 +32460,7 @@
       2
     ],
     "baujahr": 1933,
-    "fassade": 2,
+    "fassade": 3,
     "substanz": 35,
     "status": "offen",
     "flaechen": [
@@ -32271,15 +32548,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W279",
-    "name": "Hartwig Moers Galerie am Fluss",
+    "name": "Hartwig Moers Am Marktplatz Süd",
     "stadt": "Moers",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1800,
@@ -32289,7 +32567,7 @@
       1
     ],
     "baujahr": 1966,
-    "fassade": 14,
+    "fassade": 0,
     "substanz": 58,
     "status": "offen",
     "flaechen": [
@@ -32363,7 +32641,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W280",
@@ -32470,15 +32749,16 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W281",
-    "name": "Hartwig Kaiserslautern Arkaden",
+    "name": "Hartwig Kaiserslautern Stadtteilzentrum",
     "stadt": "Kaiserslautern",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "Mitte",
     "grundflaecheQm": 1000,
@@ -32592,7 +32872,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W282",
@@ -32699,7 +32980,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W283",
@@ -32806,7 +33088,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W284",
@@ -32913,7 +33196,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W285",
@@ -32932,7 +33216,7 @@
       2
     ],
     "baujahr": 2000,
-    "fassade": 4,
+    "fassade": 5,
     "substanz": 35,
     "status": "offen",
     "flaechen": [
@@ -33020,7 +33304,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W286",
@@ -33142,7 +33427,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W287",
@@ -33264,7 +33550,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W288",
@@ -33371,7 +33658,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W289",
@@ -33493,7 +33781,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W290",
@@ -33615,7 +33904,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 9
   },
   {
     "id": "W291",
@@ -33707,7 +33997,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W292",
@@ -33813,7 +34104,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W293",
@@ -33935,7 +34227,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W294",
@@ -33954,7 +34247,7 @@
       3
     ],
     "baujahr": 1987,
-    "fassade": 0,
+    "fassade": 1,
     "substanz": 33,
     "status": "offen",
     "flaechen": [
@@ -34049,7 +34342,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W295",
@@ -34163,7 +34457,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W296",
@@ -34285,7 +34580,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W297",
@@ -34407,7 +34703,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W298",
@@ -34499,7 +34796,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W299",
@@ -34517,7 +34815,7 @@
       1
     ],
     "baujahr": 1939,
-    "fassade": 3,
+    "fassade": 5,
     "substanz": 67,
     "status": "offen",
     "flaechen": [
@@ -34591,7 +34889,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W300",
@@ -34698,7 +34997,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W301",
@@ -34718,7 +35018,7 @@
       3
     ],
     "baujahr": 1917,
-    "fassade": 6,
+    "fassade": 2,
     "substanz": 66,
     "status": "offen",
     "flaechen": [
@@ -34820,7 +35120,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W302",
@@ -34840,7 +35141,7 @@
       4
     ],
     "baujahr": 1959,
-    "fassade": 1,
+    "fassade": 6,
     "substanz": 67,
     "status": "offen",
     "flaechen": [
@@ -34942,7 +35243,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W303",
@@ -34960,7 +35262,7 @@
       1
     ],
     "baujahr": 1994,
-    "fassade": 11,
+    "fassade": 8,
     "substanz": 74,
     "status": "offen",
     "flaechen": [
@@ -35034,7 +35336,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W304",
@@ -35054,7 +35357,7 @@
       3
     ],
     "baujahr": 1937,
-    "fassade": 2,
+    "fassade": 5,
     "substanz": 40,
     "status": "offen",
     "flaechen": [
@@ -35156,7 +35459,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W305",
@@ -35263,7 +35567,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W306",
@@ -35363,7 +35668,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W307",
@@ -35455,7 +35761,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W308",
@@ -35473,7 +35780,7 @@
       2
     ],
     "baujahr": 1938,
-    "fassade": 4,
+    "fassade": 5,
     "substanz": 49,
     "status": "offen",
     "flaechen": [
@@ -35561,15 +35868,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W309",
-    "name": "Hartwig Remscheid Einkaufszentrum",
+    "name": "Hartwig Remscheid Kreuzstraße",
     "stadt": "Remscheid",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1700,
@@ -35579,7 +35887,7 @@
       1
     ],
     "baujahr": 2007,
-    "fassade": 15,
+    "fassade": 9,
     "substanz": 54,
     "status": "offen",
     "flaechen": [
@@ -35653,7 +35961,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W310",
@@ -35671,7 +35980,7 @@
       1
     ],
     "baujahr": 1897,
-    "fassade": 3,
+    "fassade": 6,
     "substanz": 78,
     "status": "offen",
     "flaechen": [
@@ -35745,7 +36054,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W311",
@@ -35765,7 +36075,7 @@
       3
     ],
     "baujahr": 2005,
-    "fassade": 6,
+    "fassade": 7,
     "substanz": 37,
     "status": "offen",
     "flaechen": [
@@ -35867,15 +36177,16 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W312",
-    "name": "Hartwig Bergisch Gladbach Einkaufszentrum",
+    "name": "Hartwig Bergisch Gladbach Kreuzstraße",
     "stadt": "Bergisch Gladbach",
     "format": "warenhaus",
     "hausklasse": "C",
-    "lage": "center",
+    "lage": "stadtteil",
     "cluster": "grossstadt",
     "region": "West",
     "grundflaecheQm": 1300,
@@ -35887,7 +36198,7 @@
       3
     ],
     "baujahr": 1958,
-    "fassade": 5,
+    "fassade": 3,
     "substanz": 88,
     "status": "offen",
     "flaechen": [
@@ -35982,7 +36293,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W313",
@@ -36074,7 +36386,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W314",
@@ -36188,7 +36501,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W315",
@@ -36294,7 +36608,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W316",
@@ -36400,7 +36715,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W317",
@@ -36522,7 +36838,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W318",
@@ -36628,7 +36945,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W319",
@@ -36743,7 +37061,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W320",
@@ -36835,7 +37154,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W321",
@@ -36935,7 +37255,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W322",
@@ -37027,7 +37348,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W323",
@@ -37119,7 +37441,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W324",
@@ -37211,7 +37534,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W325",
@@ -37303,7 +37627,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W326",
@@ -37409,7 +37734,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W327",
@@ -37516,7 +37842,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W328",
@@ -37608,7 +37935,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W329",
@@ -37715,7 +38043,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W330",
@@ -37807,7 +38136,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W331",
@@ -37929,7 +38259,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W332",
@@ -38035,7 +38366,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W333",
@@ -38127,7 +38459,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W334",
@@ -38249,7 +38582,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W335",
@@ -38341,7 +38675,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W336",
@@ -38455,7 +38790,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W337",
@@ -38547,7 +38883,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 2
   },
   {
     "id": "W338",
@@ -38669,7 +39006,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W339",
@@ -38775,7 +39113,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W340",
@@ -38889,7 +39228,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W341",
@@ -38995,7 +39335,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W342",
@@ -39095,7 +39436,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W343",
@@ -39113,7 +39455,7 @@
       2
     ],
     "baujahr": 1992,
-    "fassade": 7,
+    "fassade": 6,
     "substanz": 48,
     "status": "offen",
     "flaechen": [
@@ -39201,7 +39543,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W344",
@@ -39221,7 +39564,7 @@
       3
     ],
     "baujahr": 1995,
-    "fassade": 3,
+    "fassade": 7,
     "substanz": 57,
     "status": "offen",
     "flaechen": [
@@ -39323,7 +39666,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W345",
@@ -39445,7 +39789,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W346",
@@ -39537,7 +39882,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W347",
@@ -39659,7 +40005,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W348",
@@ -39774,7 +40121,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W349",
@@ -39896,7 +40244,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W350",
@@ -39988,7 +40337,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W351",
@@ -40102,7 +40452,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 1
   },
   {
     "id": "W352",
@@ -40194,7 +40545,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W353",
@@ -40286,7 +40638,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W354",
@@ -40401,7 +40754,8 @@
         "konzept": "eigen",
         "gruppe": "spielwaren"
       }
-    ]
+    ],
+    "familie": 4
   },
   {
     "id": "W355",
@@ -40493,7 +40847,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W356",
@@ -40615,7 +40970,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 9
   },
   {
     "id": "W357",
@@ -40729,7 +41085,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W358",
@@ -40851,7 +41208,8 @@
         "konzept": "eigen",
         "gruppe": "wohnen"
       }
-    ]
+    ],
+    "familie": 5
   },
   {
     "id": "W359",
@@ -40951,7 +41309,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 3
   },
   {
     "id": "W360",
@@ -41043,7 +41402,8 @@
         "konzept": "eigen",
         "gruppe": "sport"
       }
-    ]
+    ],
+    "familie": 10
   },
   {
     "id": "W361",
@@ -41311,7 +41671,7 @@
   },
   {
     "id": "W363",
-    "name": "Alsterhaus Hartwig",
+    "name": "Hartwig am Jungfernstieg",
     "stadt": "Hamburg",
     "format": "warenhaus",
     "klasse": "premium",
@@ -41435,7 +41795,7 @@
   },
   {
     "id": "W364",
-    "name": "Hartwig Königsallee",
+    "name": "Hartwig am Heine-Platz",
     "stadt": "Düsseldorf",
     "format": "warenhaus",
     "klasse": "premium",
@@ -41566,6 +41926,144 @@
         "id": "W364-f16",
         "etage": 3,
         "qm": 1759,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      }
+    ]
+  },
+  {
+    "id": "W365",
+    "name": "Hartwig Leipziger Platz",
+    "stadt": "Berlin",
+    "format": "warenhaus",
+    "klasse": "premium",
+    "premiumSchluessel": "P005",
+    "premiumImage": 80,
+    "lage": "1a",
+    "cluster": "metropole",
+    "region": "Ost",
+    "grundflaecheQm": 4000,
+    "etagen": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1998,
+    "fassade": 2,
+    "substanz": 78,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "W365-f1",
+        "etage": -1,
+        "qm": 1400,
+        "konzept": "eigen",
+        "gruppe": "food"
+      },
+      {
+        "id": "W365-f2",
+        "etage": -1,
+        "qm": 1200,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "W365-f3",
+        "etage": -1,
+        "qm": 73,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "W365-f4",
+        "etage": 0,
+        "qm": 1927,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "W365-f5",
+        "etage": 0,
+        "qm": 571,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "W365-f6",
+        "etage": 0,
+        "qm": 2385,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "W365-f7",
+        "etage": 1,
+        "qm": 1044,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "W365-f8",
+        "etage": 1,
+        "qm": 1400,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "W365-f9",
+        "etage": 1,
+        "qm": 457,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "W365-f10",
+        "etage": 2,
+        "qm": 1943,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "W365-f11",
+        "etage": 2,
+        "qm": 1400,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "W365-f12",
+        "etage": 2,
+        "qm": 54,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      },
+      {
+        "id": "W365-f13",
+        "etage": 2,
+        "qm": 1946,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      },
+      {
+        "id": "W365-f14",
+        "etage": 2,
+        "qm": 989,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "W365-f15",
+        "etage": 3,
+        "qm": 211,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "W365-f16",
+        "etage": 3,
+        "qm": 3000,
         "konzept": "eigen",
         "gruppe": "wohnen"
       }

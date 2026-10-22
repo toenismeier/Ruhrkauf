@@ -18,76 +18,69 @@
     ],
     "baujahr": 1984,
     "fassade": 7,
-    "substanz": 57,
+    "substanz": 39,
     "status": "offen",
     "flaechen": [
       {
         "id": "K001-f1",
         "etage": 0,
-        "qm": 1720,
+        "qm": 1849,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K001-f2",
         "etage": 1,
-        "qm": 1032,
+        "qm": 1110,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K001-f3",
         "etage": 2,
-        "qm": 602,
+        "qm": 647,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K001-f4",
         "etage": 3,
-        "qm": 516,
+        "qm": 555,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K001-f5",
         "etage": 4,
-        "qm": 860,
+        "qm": 925,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K001-f6",
         "etage": 0,
-        "qm": 602,
+        "qm": 647,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K001-f7",
         "etage": 1,
-        "qm": 1290,
+        "qm": 1387,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K001-f8",
         "etage": 2,
-        "qm": 516,
+        "qm": 555,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K001-f9",
         "etage": 3,
-        "qm": 602,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K001-f10",
-        "etage": 4,
-        "qm": 860,
+        "qm": 925,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -113,76 +106,69 @@
     ],
     "baujahr": 1959,
     "fassade": 6,
-    "substanz": 34,
+    "substanz": 16,
     "status": "offen",
     "flaechen": [
       {
         "id": "K002-f1",
         "etage": 0,
-        "qm": 1740,
+        "qm": 1871,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K002-f2",
         "etage": 1,
-        "qm": 1044,
+        "qm": 1123,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K002-f3",
         "etage": 2,
-        "qm": 609,
+        "qm": 655,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K002-f4",
         "etage": 3,
-        "qm": 522,
+        "qm": 561,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K002-f5",
         "etage": 4,
-        "qm": 870,
+        "qm": 935,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K002-f6",
         "etage": 5,
-        "qm": 609,
+        "qm": 655,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K002-f7",
         "etage": 0,
-        "qm": 1305,
+        "qm": 1403,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K002-f8",
         "etage": 1,
-        "qm": 522,
+        "qm": 561,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K002-f9",
         "etage": 2,
-        "qm": 609,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K002-f10",
-        "etage": 3,
-        "qm": 870,
+        "qm": 936,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -209,76 +195,69 @@
     ],
     "baujahr": 1960,
     "fassade": 4,
-    "substanz": 74,
+    "substanz": 56,
     "status": "offen",
     "flaechen": [
       {
         "id": "K003-f1",
         "etage": 0,
-        "qm": 1720,
+        "qm": 1849,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K003-f2",
         "etage": 1,
-        "qm": 1032,
+        "qm": 1110,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K003-f3",
         "etage": 2,
-        "qm": 602,
+        "qm": 647,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K003-f4",
         "etage": 3,
-        "qm": 516,
+        "qm": 555,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K003-f5",
         "etage": 4,
-        "qm": 860,
+        "qm": 925,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K003-f6",
         "etage": 5,
-        "qm": 602,
+        "qm": 647,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K003-f7",
         "etage": 6,
-        "qm": 1290,
+        "qm": 1387,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K003-f8",
         "etage": 0,
-        "qm": 516,
+        "qm": 555,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K003-f9",
         "etage": 1,
-        "qm": 602,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K003-f10",
-        "etage": 2,
-        "qm": 860,
+        "qm": 925,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -304,76 +283,69 @@
     ],
     "baujahr": 1987,
     "fassade": 6,
-    "substanz": 71,
+    "substanz": 53,
     "status": "offen",
     "flaechen": [
       {
         "id": "K004-f1",
         "etage": 0,
-        "qm": 1340,
+        "qm": 1441,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K004-f2",
         "etage": 1,
-        "qm": 804,
+        "qm": 865,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K004-f3",
         "etage": 2,
-        "qm": 469,
+        "qm": 504,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K004-f4",
         "etage": 3,
-        "qm": 402,
+        "qm": 432,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K004-f5",
         "etage": 4,
-        "qm": 670,
+        "qm": 720,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K004-f6",
         "etage": 5,
-        "qm": 469,
+        "qm": 504,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K004-f7",
         "etage": 0,
-        "qm": 1005,
+        "qm": 1081,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K004-f8",
         "etage": 1,
-        "qm": 402,
+        "qm": 432,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K004-f9",
         "etage": 2,
-        "qm": 469,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K004-f10",
-        "etage": 3,
-        "qm": 670,
+        "qm": 721,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -398,76 +370,69 @@
     ],
     "baujahr": 1995,
     "fassade": 6,
-    "substanz": 87,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K005-f1",
         "etage": 0,
-        "qm": 1920,
+        "qm": 2065,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K005-f2",
         "etage": 1,
-        "qm": 1152,
+        "qm": 1239,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K005-f3",
         "etage": 2,
-        "qm": 672,
+        "qm": 723,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K005-f4",
         "etage": 3,
-        "qm": 576,
+        "qm": 619,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K005-f5",
         "etage": 4,
-        "qm": 960,
+        "qm": 1032,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K005-f6",
         "etage": 0,
-        "qm": 672,
+        "qm": 723,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K005-f7",
         "etage": 1,
-        "qm": 1440,
+        "qm": 1548,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K005-f8",
         "etage": 2,
-        "qm": 576,
+        "qm": 619,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K005-f9",
         "etage": 3,
-        "qm": 672,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K005-f10",
-        "etage": 4,
-        "qm": 960,
+        "qm": 1032,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -493,76 +458,69 @@
     ],
     "baujahr": 1940,
     "fassade": 1,
-    "substanz": 51,
+    "substanz": 33,
     "status": "offen",
     "flaechen": [
       {
         "id": "K006-f1",
         "etage": 0,
-        "qm": 1980,
+        "qm": 2129,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K006-f2",
         "etage": 1,
-        "qm": 1188,
+        "qm": 1277,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K006-f3",
         "etage": 2,
-        "qm": 693,
+        "qm": 745,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K006-f4",
         "etage": 3,
-        "qm": 594,
+        "qm": 639,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K006-f5",
         "etage": 4,
-        "qm": 990,
+        "qm": 1065,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K006-f6",
         "etage": 5,
-        "qm": 693,
+        "qm": 745,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K006-f7",
         "etage": 0,
-        "qm": 1485,
+        "qm": 1597,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K006-f8",
         "etage": 1,
-        "qm": 594,
+        "qm": 639,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K006-f9",
         "etage": 2,
-        "qm": 693,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K006-f10",
-        "etage": 3,
-        "qm": 990,
+        "qm": 1064,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -587,76 +545,69 @@
     ],
     "baujahr": 1895,
     "fassade": 0,
-    "substanz": 62,
+    "substanz": 44,
     "status": "offen",
     "flaechen": [
       {
         "id": "K007-f1",
         "etage": 0,
-        "qm": 1760,
+        "qm": 1892,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K007-f2",
         "etage": 1,
-        "qm": 1056,
+        "qm": 1135,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K007-f3",
         "etage": 2,
-        "qm": 616,
+        "qm": 662,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K007-f4",
         "etage": 3,
-        "qm": 528,
+        "qm": 568,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K007-f5",
         "etage": 4,
-        "qm": 880,
+        "qm": 946,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K007-f6",
         "etage": 0,
-        "qm": 616,
+        "qm": 662,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K007-f7",
         "etage": 1,
-        "qm": 1320,
+        "qm": 1419,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K007-f8",
         "etage": 2,
-        "qm": 528,
+        "qm": 568,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K007-f9",
         "etage": 3,
-        "qm": 616,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K007-f10",
-        "etage": 4,
-        "qm": 880,
+        "qm": 948,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -682,76 +633,69 @@
     ],
     "baujahr": 1975,
     "fassade": 0,
-    "substanz": 54,
+    "substanz": 36,
     "status": "offen",
     "flaechen": [
       {
         "id": "K008-f1",
         "etage": 0,
-        "qm": 1380,
+        "qm": 1484,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K008-f2",
         "etage": 1,
-        "qm": 828,
+        "qm": 890,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K008-f3",
         "etage": 2,
-        "qm": 483,
+        "qm": 519,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K008-f4",
         "etage": 3,
-        "qm": 414,
+        "qm": 445,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K008-f5",
         "etage": 4,
-        "qm": 690,
+        "qm": 742,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K008-f6",
         "etage": 5,
-        "qm": 483,
+        "qm": 519,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K008-f7",
         "etage": 0,
-        "qm": 1035,
+        "qm": 1113,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K008-f8",
         "etage": 1,
-        "qm": 414,
+        "qm": 445,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K008-f9",
         "etage": 2,
-        "qm": 483,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K008-f10",
-        "etage": 3,
-        "qm": 690,
+        "qm": 743,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -775,76 +719,69 @@
     ],
     "baujahr": 1968,
     "fassade": 2,
-    "substanz": 42,
+    "substanz": 24,
     "status": "offen",
     "flaechen": [
       {
         "id": "K009-f1",
         "etage": 0,
-        "qm": 1540,
+        "qm": 1656,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K009-f2",
         "etage": 1,
-        "qm": 924,
+        "qm": 994,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K009-f3",
         "etage": 2,
-        "qm": 539,
+        "qm": 580,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K009-f4",
         "etage": 3,
-        "qm": 462,
+        "qm": 497,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K009-f5",
         "etage": 0,
-        "qm": 770,
+        "qm": 828,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K009-f6",
         "etage": 1,
-        "qm": 539,
+        "qm": 580,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K009-f7",
         "etage": 2,
-        "qm": 1155,
+        "qm": 1242,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K009-f8",
         "etage": 3,
-        "qm": 462,
+        "qm": 497,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K009-f9",
         "etage": 0,
-        "qm": 539,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K009-f10",
-        "etage": 1,
-        "qm": 770,
+        "qm": 826,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -870,76 +807,69 @@
     ],
     "baujahr": 2001,
     "fassade": 5,
-    "substanz": 45,
+    "substanz": 27,
     "status": "offen",
     "flaechen": [
       {
         "id": "K010-f1",
         "etage": 0,
-        "qm": 1160,
+        "qm": 1247,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K010-f2",
         "etage": 1,
-        "qm": 696,
+        "qm": 748,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K010-f3",
         "etage": 2,
-        "qm": 406,
+        "qm": 437,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K010-f4",
         "etage": 3,
-        "qm": 348,
+        "qm": 374,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K010-f5",
         "etage": 4,
-        "qm": 580,
+        "qm": 624,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K010-f6",
         "etage": 5,
-        "qm": 406,
+        "qm": 437,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K010-f7",
         "etage": 0,
-        "qm": 870,
+        "qm": 935,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K010-f8",
         "etage": 1,
-        "qm": 348,
+        "qm": 374,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K010-f9",
         "etage": 2,
-        "qm": 406,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K010-f10",
-        "etage": 3,
-        "qm": 580,
+        "qm": 624,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -965,76 +895,69 @@
     ],
     "baujahr": 1903,
     "fassade": 0,
-    "substanz": 55,
+    "substanz": 37,
     "status": "offen",
     "flaechen": [
       {
         "id": "K011-f1",
         "etage": 0,
-        "qm": 1760,
+        "qm": 1892,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K011-f2",
         "etage": 1,
-        "qm": 1056,
+        "qm": 1135,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K011-f3",
         "etage": 2,
-        "qm": 616,
+        "qm": 662,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K011-f4",
         "etage": 3,
-        "qm": 528,
+        "qm": 568,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K011-f5",
         "etage": 4,
-        "qm": 880,
+        "qm": 946,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K011-f6",
         "etage": 5,
-        "qm": 616,
+        "qm": 662,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K011-f7",
         "etage": 0,
-        "qm": 1320,
+        "qm": 1419,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K011-f8",
         "etage": 1,
-        "qm": 528,
+        "qm": 568,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K011-f9",
         "etage": 2,
-        "qm": 616,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K011-f10",
-        "etage": 3,
-        "qm": 880,
+        "qm": 948,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -1060,76 +983,69 @@
     ],
     "baujahr": 2003,
     "fassade": 1,
-    "substanz": 35,
+    "substanz": 17,
     "status": "offen",
     "flaechen": [
       {
         "id": "K012-f1",
         "etage": 0,
-        "qm": 1940,
+        "qm": 2086,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K012-f2",
         "etage": 1,
-        "qm": 1164,
+        "qm": 1252,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K012-f3",
         "etage": 2,
-        "qm": 679,
+        "qm": 730,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K012-f4",
         "etage": 3,
-        "qm": 582,
+        "qm": 626,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K012-f5",
         "etage": 4,
-        "qm": 970,
+        "qm": 1043,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K012-f6",
         "etage": 5,
-        "qm": 679,
+        "qm": 730,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K012-f7",
         "etage": 0,
-        "qm": 1455,
+        "qm": 1565,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K012-f8",
         "etage": 1,
-        "qm": 582,
+        "qm": 626,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K012-f9",
         "etage": 2,
-        "qm": 679,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K012-f10",
-        "etage": 3,
-        "qm": 970,
+        "qm": 1042,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -1154,76 +1070,69 @@
     ],
     "baujahr": 1979,
     "fassade": 6,
-    "substanz": 87,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K013-f1",
         "etage": 0,
-        "qm": 840,
+        "qm": 903,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K013-f2",
         "etage": 1,
-        "qm": 504,
+        "qm": 542,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K013-f3",
         "etage": 2,
-        "qm": 294,
+        "qm": 316,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K013-f4",
         "etage": 3,
-        "qm": 252,
+        "qm": 271,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K013-f5",
         "etage": 4,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K013-f6",
         "etage": 0,
-        "qm": 294,
+        "qm": 316,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K013-f7",
         "etage": 1,
-        "qm": 630,
+        "qm": 677,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K013-f8",
         "etage": 2,
-        "qm": 252,
+        "qm": 271,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K013-f9",
         "etage": 3,
-        "qm": 294,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K013-f10",
-        "etage": 4,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -1249,76 +1158,69 @@
     ],
     "baujahr": 1902,
     "fassade": 3,
-    "substanz": 38,
+    "substanz": 20,
     "status": "offen",
     "flaechen": [
       {
         "id": "K014-f1",
         "etage": 0,
-        "qm": 1400,
+        "qm": 1505,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K014-f2",
         "etage": 1,
-        "qm": 840,
+        "qm": 903,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K014-f3",
         "etage": 2,
-        "qm": 490,
+        "qm": 527,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K014-f4",
         "etage": 3,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K014-f5",
         "etage": 4,
-        "qm": 700,
+        "qm": 753,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K014-f6",
         "etage": 5,
-        "qm": 490,
+        "qm": 527,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K014-f7",
         "etage": 0,
-        "qm": 1050,
+        "qm": 1129,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K014-f8",
         "etage": 1,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K014-f9",
         "etage": 2,
-        "qm": 490,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K014-f10",
-        "etage": 3,
-        "qm": 700,
+        "qm": 752,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -1343,76 +1245,69 @@
     ],
     "baujahr": 1978,
     "fassade": 5,
-    "substanz": 84,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K015-f1",
         "etage": 0,
-        "qm": 1920,
+        "qm": 2065,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K015-f2",
         "etage": 1,
-        "qm": 1152,
+        "qm": 1239,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K015-f3",
         "etage": 2,
-        "qm": 672,
+        "qm": 723,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K015-f4",
         "etage": 3,
-        "qm": 576,
+        "qm": 619,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K015-f5",
         "etage": 4,
-        "qm": 960,
+        "qm": 1032,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K015-f6",
         "etage": 0,
-        "qm": 672,
+        "qm": 723,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K015-f7",
         "etage": 1,
-        "qm": 1440,
+        "qm": 1548,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K015-f8",
         "etage": 2,
-        "qm": 576,
+        "qm": 619,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K015-f9",
         "etage": 3,
-        "qm": 672,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K015-f10",
-        "etage": 4,
-        "qm": 960,
+        "qm": 1032,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -1437,76 +1332,69 @@
     ],
     "baujahr": 1915,
     "fassade": 6,
-    "substanz": 80,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K016-f1",
         "etage": 0,
-        "qm": 1080,
+        "qm": 1161,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K016-f2",
         "etage": 1,
-        "qm": 648,
+        "qm": 697,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K016-f3",
         "etage": 2,
-        "qm": 378,
+        "qm": 406,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K016-f4",
         "etage": 3,
-        "qm": 324,
+        "qm": 348,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K016-f5",
         "etage": 4,
-        "qm": 540,
+        "qm": 581,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K016-f6",
         "etage": 0,
-        "qm": 378,
+        "qm": 406,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K016-f7",
         "etage": 1,
-        "qm": 810,
+        "qm": 871,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K016-f8",
         "etage": 2,
-        "qm": 324,
+        "qm": 348,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K016-f9",
         "etage": 3,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K016-f10",
-        "etage": 4,
-        "qm": 540,
+        "qm": 582,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -1531,76 +1419,69 @@
     ],
     "baujahr": 1962,
     "fassade": 5,
-    "substanz": 54,
+    "substanz": 36,
     "status": "offen",
     "flaechen": [
       {
         "id": "K017-f1",
         "etage": 0,
-        "qm": 1040,
+        "qm": 1118,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K017-f2",
         "etage": 1,
-        "qm": 624,
+        "qm": 671,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K017-f3",
         "etage": 2,
-        "qm": 364,
+        "qm": 391,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K017-f4",
         "etage": 3,
-        "qm": 312,
+        "qm": 335,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K017-f5",
         "etage": 4,
-        "qm": 520,
+        "qm": 559,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K017-f6",
         "etage": 0,
-        "qm": 364,
+        "qm": 391,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K017-f7",
         "etage": 1,
-        "qm": 780,
+        "qm": 839,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K017-f8",
         "etage": 2,
-        "qm": 312,
+        "qm": 335,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K017-f9",
         "etage": 3,
-        "qm": 364,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K017-f10",
-        "etage": 4,
-        "qm": 520,
+        "qm": 561,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -1626,76 +1507,69 @@
     ],
     "baujahr": 1979,
     "fassade": 5,
-    "substanz": 83,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K018-f1",
         "etage": 0,
-        "qm": 1240,
+        "qm": 1333,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K018-f2",
         "etage": 1,
-        "qm": 744,
+        "qm": 800,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K018-f3",
         "etage": 2,
-        "qm": 434,
+        "qm": 467,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K018-f4",
         "etage": 3,
-        "qm": 372,
+        "qm": 400,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K018-f5",
         "etage": 4,
-        "qm": 620,
+        "qm": 667,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K018-f6",
         "etage": 5,
-        "qm": 434,
+        "qm": 467,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K018-f7",
         "etage": 0,
-        "qm": 930,
+        "qm": 1000,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K018-f8",
         "etage": 1,
-        "qm": 372,
+        "qm": 400,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K018-f9",
         "etage": 2,
-        "qm": 434,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K018-f10",
-        "etage": 3,
-        "qm": 620,
+        "qm": 666,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -1719,76 +1593,69 @@
     ],
     "baujahr": 1977,
     "fassade": 3,
-    "substanz": 74,
+    "substanz": 56,
     "status": "offen",
     "flaechen": [
       {
         "id": "K019-f1",
         "etage": 0,
-        "qm": 1360,
+        "qm": 1462,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K019-f2",
         "etage": 1,
-        "qm": 816,
+        "qm": 877,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K019-f3",
         "etage": 2,
-        "qm": 476,
+        "qm": 512,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K019-f4",
         "etage": 3,
-        "qm": 408,
+        "qm": 439,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K019-f5",
         "etage": 0,
-        "qm": 680,
+        "qm": 731,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K019-f6",
         "etage": 1,
-        "qm": 476,
+        "qm": 512,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K019-f7",
         "etage": 2,
-        "qm": 1020,
+        "qm": 1097,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K019-f8",
         "etage": 3,
-        "qm": 408,
+        "qm": 439,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K019-f9",
         "etage": 0,
-        "qm": 476,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K019-f10",
-        "etage": 1,
-        "qm": 680,
+        "qm": 731,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -1813,76 +1680,69 @@
     ],
     "baujahr": 1975,
     "fassade": 2,
-    "substanz": 34,
+    "substanz": 16,
     "status": "offen",
     "flaechen": [
       {
         "id": "K020-f1",
         "etage": 0,
-        "qm": 1380,
+        "qm": 1484,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K020-f2",
         "etage": 1,
-        "qm": 828,
+        "qm": 890,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K020-f3",
         "etage": 2,
-        "qm": 483,
+        "qm": 519,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K020-f4",
         "etage": 3,
-        "qm": 414,
+        "qm": 445,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K020-f5",
         "etage": 4,
-        "qm": 690,
+        "qm": 742,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K020-f6",
         "etage": 0,
-        "qm": 483,
+        "qm": 519,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K020-f7",
         "etage": 1,
-        "qm": 1035,
+        "qm": 1113,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K020-f8",
         "etage": 2,
-        "qm": 414,
+        "qm": 445,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K020-f9",
         "etage": 3,
-        "qm": 483,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K020-f10",
-        "etage": 4,
-        "qm": 690,
+        "qm": 743,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -1908,76 +1768,69 @@
     ],
     "baujahr": 1980,
     "fassade": 1,
-    "substanz": 89,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K021-f1",
         "etage": 0,
-        "qm": 1200,
+        "qm": 1290,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K021-f2",
         "etage": 1,
-        "qm": 720,
+        "qm": 774,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K021-f3",
         "etage": 2,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K021-f4",
         "etage": 3,
-        "qm": 360,
+        "qm": 387,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K021-f5",
         "etage": 4,
-        "qm": 600,
+        "qm": 645,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K021-f6",
         "etage": 5,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K021-f7",
         "etage": 0,
-        "qm": 900,
+        "qm": 968,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K021-f8",
         "etage": 1,
-        "qm": 360,
+        "qm": 387,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K021-f9",
         "etage": 2,
-        "qm": 420,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K021-f10",
-        "etage": 3,
-        "qm": 600,
+        "qm": 645,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -2001,76 +1854,69 @@
     ],
     "baujahr": 1906,
     "fassade": 1,
-    "substanz": 45,
+    "substanz": 27,
     "status": "offen",
     "flaechen": [
       {
         "id": "K022-f1",
         "etage": 0,
-        "qm": 1300,
+        "qm": 1398,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K022-f2",
         "etage": 1,
-        "qm": 780,
+        "qm": 839,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K022-f3",
         "etage": 2,
-        "qm": 455,
+        "qm": 489,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K022-f4",
         "etage": 3,
-        "qm": 390,
+        "qm": 419,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K022-f5",
         "etage": 0,
-        "qm": 650,
+        "qm": 699,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K022-f6",
         "etage": 1,
-        "qm": 455,
+        "qm": 489,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K022-f7",
         "etage": 2,
-        "qm": 975,
+        "qm": 1048,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K022-f8",
         "etage": 3,
-        "qm": 390,
+        "qm": 419,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K022-f9",
         "etage": 0,
-        "qm": 455,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K022-f10",
-        "etage": 1,
-        "qm": 650,
+        "qm": 700,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -2095,76 +1941,69 @@
     ],
     "baujahr": 1964,
     "fassade": 0,
-    "substanz": 64,
+    "substanz": 46,
     "status": "offen",
     "flaechen": [
       {
         "id": "K023-f1",
         "etage": 0,
-        "qm": 1740,
+        "qm": 1871,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K023-f2",
         "etage": 1,
-        "qm": 1044,
+        "qm": 1123,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K023-f3",
         "etage": 2,
-        "qm": 609,
+        "qm": 655,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K023-f4",
         "etage": 3,
-        "qm": 522,
+        "qm": 561,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K023-f5",
         "etage": 4,
-        "qm": 870,
+        "qm": 935,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K023-f6",
         "etage": 0,
-        "qm": 609,
+        "qm": 655,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K023-f7",
         "etage": 1,
-        "qm": 1305,
+        "qm": 1403,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K023-f8",
         "etage": 2,
-        "qm": 522,
+        "qm": 561,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K023-f9",
         "etage": 3,
-        "qm": 609,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K023-f10",
-        "etage": 4,
-        "qm": 870,
+        "qm": 936,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -2190,76 +2029,69 @@
     ],
     "baujahr": 1983,
     "fassade": 0,
-    "substanz": 89,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K024-f1",
         "etage": 0,
-        "qm": 1460,
+        "qm": 1570,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K024-f2",
         "etage": 1,
-        "qm": 876,
+        "qm": 942,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K024-f3",
         "etage": 2,
-        "qm": 511,
+        "qm": 549,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K024-f4",
         "etage": 3,
-        "qm": 438,
+        "qm": 471,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K024-f5",
         "etage": 4,
-        "qm": 730,
+        "qm": 785,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K024-f6",
         "etage": 5,
-        "qm": 511,
+        "qm": 549,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K024-f7",
         "etage": 0,
-        "qm": 1095,
+        "qm": 1177,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K024-f8",
         "etage": 1,
-        "qm": 438,
+        "qm": 471,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K024-f9",
         "etage": 2,
-        "qm": 511,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K024-f10",
-        "etage": 3,
-        "qm": 730,
+        "qm": 786,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -2285,76 +2117,69 @@
     ],
     "baujahr": 1964,
     "fassade": 4,
-    "substanz": 48,
+    "substanz": 30,
     "status": "offen",
     "flaechen": [
       {
         "id": "K025-f1",
         "etage": 0,
-        "qm": 820,
+        "qm": 882,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K025-f2",
         "etage": 1,
-        "qm": 492,
+        "qm": 529,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K025-f3",
         "etage": 2,
-        "qm": 287,
+        "qm": 309,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K025-f4",
         "etage": 3,
-        "qm": 246,
+        "qm": 265,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K025-f5",
         "etage": 4,
-        "qm": 410,
+        "qm": 441,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K025-f6",
         "etage": 5,
-        "qm": 287,
+        "qm": 309,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K025-f7",
         "etage": 0,
-        "qm": 615,
+        "qm": 661,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K025-f8",
         "etage": 1,
-        "qm": 246,
+        "qm": 265,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K025-f9",
         "etage": 2,
-        "qm": 287,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K025-f10",
-        "etage": 3,
-        "qm": 410,
+        "qm": 439,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -2379,76 +2204,69 @@
     ],
     "baujahr": 1955,
     "fassade": 4,
-    "substanz": 44,
+    "substanz": 26,
     "status": "offen",
     "flaechen": [
       {
         "id": "K026-f1",
         "etage": 0,
-        "qm": 1240,
+        "qm": 1333,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K026-f2",
         "etage": 1,
-        "qm": 744,
+        "qm": 800,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K026-f3",
         "etage": 2,
-        "qm": 434,
+        "qm": 467,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K026-f4",
         "etage": 3,
-        "qm": 372,
+        "qm": 400,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K026-f5",
         "etage": 4,
-        "qm": 620,
+        "qm": 667,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K026-f6",
         "etage": 0,
-        "qm": 434,
+        "qm": 467,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K026-f7",
         "etage": 1,
-        "qm": 930,
+        "qm": 1000,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K026-f8",
         "etage": 2,
-        "qm": 372,
+        "qm": 400,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K026-f9",
         "etage": 3,
-        "qm": 434,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K026-f10",
-        "etage": 4,
-        "qm": 620,
+        "qm": 666,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -2473,76 +2291,69 @@
     ],
     "baujahr": 1972,
     "fassade": 6,
-    "substanz": 53,
+    "substanz": 35,
     "status": "offen",
     "flaechen": [
       {
         "id": "K027-f1",
         "etage": 0,
-        "qm": 1280,
+        "qm": 1376,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K027-f2",
         "etage": 1,
-        "qm": 768,
+        "qm": 826,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K027-f3",
         "etage": 2,
-        "qm": 448,
+        "qm": 482,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K027-f4",
         "etage": 3,
-        "qm": 384,
+        "qm": 413,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K027-f5",
         "etage": 4,
-        "qm": 640,
+        "qm": 688,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K027-f6",
         "etage": 0,
-        "qm": 448,
+        "qm": 482,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K027-f7",
         "etage": 1,
-        "qm": 960,
+        "qm": 1032,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K027-f8",
         "etage": 2,
-        "qm": 384,
+        "qm": 413,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K027-f9",
         "etage": 3,
-        "qm": 448,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K027-f10",
-        "etage": 4,
-        "qm": 640,
+        "qm": 688,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -2566,76 +2377,69 @@
     ],
     "baujahr": 1958,
     "fassade": 3,
-    "substanz": 75,
+    "substanz": 57,
     "status": "offen",
     "flaechen": [
       {
         "id": "K028-f1",
         "etage": 0,
-        "qm": 920,
+        "qm": 989,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K028-f2",
         "etage": 1,
-        "qm": 552,
+        "qm": 594,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K028-f3",
         "etage": 2,
-        "qm": 322,
+        "qm": 346,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K028-f4",
         "etage": 3,
-        "qm": 276,
+        "qm": 297,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K028-f5",
         "etage": 0,
-        "qm": 460,
+        "qm": 495,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K028-f6",
         "etage": 1,
-        "qm": 322,
+        "qm": 346,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K028-f7",
         "etage": 2,
-        "qm": 690,
+        "qm": 742,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K028-f8",
         "etage": 3,
-        "qm": 276,
+        "qm": 297,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K028-f9",
         "etage": 0,
-        "qm": 322,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K028-f10",
-        "etage": 1,
-        "qm": 460,
+        "qm": 494,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -2659,76 +2463,69 @@
     ],
     "baujahr": 1985,
     "fassade": 2,
-    "substanz": 87,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K029-f1",
         "etage": 0,
-        "qm": 1440,
+        "qm": 1548,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K029-f2",
         "etage": 1,
-        "qm": 864,
+        "qm": 929,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K029-f3",
         "etage": 2,
-        "qm": 504,
+        "qm": 542,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K029-f4",
         "etage": 3,
-        "qm": 432,
+        "qm": 465,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K029-f5",
         "etage": 0,
-        "qm": 720,
+        "qm": 774,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K029-f6",
         "etage": 1,
-        "qm": 504,
+        "qm": 542,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K029-f7",
         "etage": 2,
-        "qm": 1080,
+        "qm": 1161,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K029-f8",
         "etage": 3,
-        "qm": 432,
+        "qm": 465,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K029-f9",
         "etage": 0,
-        "qm": 504,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K029-f10",
-        "etage": 1,
-        "qm": 720,
+        "qm": 774,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -2754,76 +2551,69 @@
     ],
     "baujahr": 1959,
     "fassade": 6,
-    "substanz": 60,
+    "substanz": 42,
     "status": "offen",
     "flaechen": [
       {
         "id": "K030-f1",
         "etage": 0,
-        "qm": 1540,
+        "qm": 1656,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K030-f2",
         "etage": 1,
-        "qm": 924,
+        "qm": 994,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K030-f3",
         "etage": 2,
-        "qm": 539,
+        "qm": 580,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K030-f4",
         "etage": 3,
-        "qm": 462,
+        "qm": 497,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K030-f5",
         "etage": 4,
-        "qm": 770,
+        "qm": 828,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K030-f6",
         "etage": 5,
-        "qm": 539,
+        "qm": 580,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K030-f7",
         "etage": 0,
-        "qm": 1155,
+        "qm": 1242,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K030-f8",
         "etage": 1,
-        "qm": 462,
+        "qm": 497,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K030-f9",
         "etage": 2,
-        "qm": 539,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K030-f10",
-        "etage": 3,
-        "qm": 770,
+        "qm": 826,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -2849,76 +2639,69 @@
     ],
     "baujahr": 1984,
     "fassade": 2,
-    "substanz": 47,
+    "substanz": 29,
     "status": "offen",
     "flaechen": [
       {
         "id": "K031-f1",
         "etage": 0,
-        "qm": 1860,
+        "qm": 2000,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K031-f2",
         "etage": 1,
-        "qm": 1116,
+        "qm": 1200,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K031-f3",
         "etage": 2,
-        "qm": 651,
+        "qm": 700,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K031-f4",
         "etage": 3,
-        "qm": 558,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K031-f5",
         "etage": 4,
-        "qm": 930,
+        "qm": 1000,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K031-f6",
         "etage": 5,
-        "qm": 651,
+        "qm": 700,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K031-f7",
         "etage": 0,
-        "qm": 1395,
+        "qm": 1500,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K031-f8",
         "etage": 1,
-        "qm": 558,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K031-f9",
         "etage": 2,
-        "qm": 651,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K031-f10",
-        "etage": 3,
-        "qm": 930,
+        "qm": 1000,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -2943,76 +2726,69 @@
     ],
     "baujahr": 1923,
     "fassade": 6,
-    "substanz": 75,
+    "substanz": 57,
     "status": "offen",
     "flaechen": [
       {
         "id": "K032-f1",
         "etage": 0,
-        "qm": 1260,
+        "qm": 1355,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K032-f2",
         "etage": 1,
-        "qm": 756,
+        "qm": 813,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K032-f3",
         "etage": 2,
-        "qm": 441,
+        "qm": 474,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K032-f4",
         "etage": 3,
-        "qm": 378,
+        "qm": 406,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K032-f5",
         "etage": 4,
-        "qm": 630,
+        "qm": 677,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K032-f6",
         "etage": 0,
-        "qm": 441,
+        "qm": 474,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K032-f7",
         "etage": 1,
-        "qm": 945,
+        "qm": 1016,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K032-f8",
         "etage": 2,
-        "qm": 378,
+        "qm": 406,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K032-f9",
         "etage": 3,
-        "qm": 441,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K032-f10",
-        "etage": 4,
-        "qm": 630,
+        "qm": 679,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -3038,76 +2814,69 @@
     ],
     "baujahr": 1999,
     "fassade": 2,
-    "substanz": 54,
+    "substanz": 36,
     "status": "offen",
     "flaechen": [
       {
         "id": "K033-f1",
         "etage": 0,
-        "qm": 1640,
+        "qm": 1763,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K033-f2",
         "etage": 1,
-        "qm": 984,
+        "qm": 1058,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K033-f3",
         "etage": 2,
-        "qm": 574,
+        "qm": 617,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K033-f4",
         "etage": 3,
-        "qm": 492,
+        "qm": 529,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K033-f5",
         "etage": 4,
-        "qm": 820,
+        "qm": 882,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K033-f6",
         "etage": 5,
-        "qm": 574,
+        "qm": 617,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K033-f7",
         "etage": 0,
-        "qm": 1230,
+        "qm": 1323,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K033-f8",
         "etage": 1,
-        "qm": 492,
+        "qm": 529,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K033-f9",
         "etage": 2,
-        "qm": 574,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K033-f10",
-        "etage": 3,
-        "qm": 820,
+        "qm": 882,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -3131,76 +2900,69 @@
     ],
     "baujahr": 1990,
     "fassade": 4,
-    "substanz": 79,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K034-f1",
         "etage": 0,
-        "qm": 1500,
+        "qm": 1613,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K034-f2",
         "etage": 1,
-        "qm": 900,
+        "qm": 968,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K034-f3",
         "etage": 2,
-        "qm": 525,
+        "qm": 565,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K034-f4",
         "etage": 3,
-        "qm": 450,
+        "qm": 484,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K034-f5",
         "etage": 0,
-        "qm": 750,
+        "qm": 806,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K034-f6",
         "etage": 1,
-        "qm": 525,
+        "qm": 565,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K034-f7",
         "etage": 2,
-        "qm": 1125,
+        "qm": 1210,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K034-f8",
         "etage": 3,
-        "qm": 450,
+        "qm": 484,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K034-f9",
         "etage": 0,
-        "qm": 525,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K034-f10",
-        "etage": 1,
-        "qm": 750,
+        "qm": 805,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -3226,76 +2988,69 @@
     ],
     "baujahr": 2008,
     "fassade": 3,
-    "substanz": 45,
+    "substanz": 27,
     "status": "offen",
     "flaechen": [
       {
         "id": "K035-f1",
         "etage": 0,
-        "qm": 1260,
+        "qm": 1355,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K035-f2",
         "etage": 1,
-        "qm": 756,
+        "qm": 813,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K035-f3",
         "etage": 2,
-        "qm": 441,
+        "qm": 474,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K035-f4",
         "etage": 3,
-        "qm": 378,
+        "qm": 406,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K035-f5",
         "etage": 4,
-        "qm": 630,
+        "qm": 677,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K035-f6",
         "etage": 5,
-        "qm": 441,
+        "qm": 474,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K035-f7",
         "etage": 0,
-        "qm": 945,
+        "qm": 1016,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K035-f8",
         "etage": 1,
-        "qm": 378,
+        "qm": 406,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K035-f9",
         "etage": 2,
-        "qm": 441,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K035-f10",
-        "etage": 3,
-        "qm": 630,
+        "qm": 679,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -3321,76 +3076,69 @@
     ],
     "baujahr": 1990,
     "fassade": 3,
-    "substanz": 35,
+    "substanz": 17,
     "status": "offen",
     "flaechen": [
       {
         "id": "K036-f1",
         "etage": 0,
-        "qm": 920,
+        "qm": 989,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K036-f2",
         "etage": 1,
-        "qm": 552,
+        "qm": 594,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K036-f3",
         "etage": 2,
-        "qm": 322,
+        "qm": 346,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K036-f4",
         "etage": 3,
-        "qm": 276,
+        "qm": 297,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K036-f5",
         "etage": 4,
-        "qm": 460,
+        "qm": 495,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K036-f6",
         "etage": 5,
-        "qm": 322,
+        "qm": 346,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K036-f7",
         "etage": 0,
-        "qm": 690,
+        "qm": 742,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K036-f8",
         "etage": 1,
-        "qm": 276,
+        "qm": 297,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K036-f9",
         "etage": 2,
-        "qm": 322,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K036-f10",
-        "etage": 3,
-        "qm": 460,
+        "qm": 494,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -3413,76 +3161,69 @@
     ],
     "baujahr": 1959,
     "fassade": 0,
-    "substanz": 52,
+    "substanz": 34,
     "status": "offen",
     "flaechen": [
       {
         "id": "K037-f1",
         "etage": 0,
-        "qm": 940,
+        "qm": 1011,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K037-f2",
         "etage": 1,
-        "qm": 564,
+        "qm": 606,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K037-f3",
         "etage": 2,
-        "qm": 329,
+        "qm": 354,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K037-f4",
         "etage": 0,
-        "qm": 282,
+        "qm": 303,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K037-f5",
         "etage": 1,
-        "qm": 470,
+        "qm": 505,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K037-f6",
         "etage": 2,
-        "qm": 329,
+        "qm": 354,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K037-f7",
         "etage": 0,
-        "qm": 705,
+        "qm": 758,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K037-f8",
         "etage": 1,
-        "qm": 282,
+        "qm": 303,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K037-f9",
         "etage": 2,
-        "qm": 329,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K037-f10",
-        "etage": 0,
-        "qm": 470,
+        "qm": 506,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -3507,76 +3248,69 @@
     ],
     "baujahr": 1971,
     "fassade": 1,
-    "substanz": 48,
+    "substanz": 30,
     "status": "offen",
     "flaechen": [
       {
         "id": "K038-f1",
         "etage": 0,
-        "qm": 1280,
+        "qm": 1376,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K038-f2",
         "etage": 1,
-        "qm": 768,
+        "qm": 826,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K038-f3",
         "etage": 2,
-        "qm": 448,
+        "qm": 482,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K038-f4",
         "etage": 3,
-        "qm": 384,
+        "qm": 413,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K038-f5",
         "etage": 4,
-        "qm": 640,
+        "qm": 688,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K038-f6",
         "etage": 0,
-        "qm": 448,
+        "qm": 482,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K038-f7",
         "etage": 1,
-        "qm": 960,
+        "qm": 1032,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K038-f8",
         "etage": 2,
-        "qm": 384,
+        "qm": 413,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K038-f9",
         "etage": 3,
-        "qm": 448,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K038-f10",
-        "etage": 4,
-        "qm": 640,
+        "qm": 688,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -3599,76 +3333,69 @@
     ],
     "baujahr": 1931,
     "fassade": 6,
-    "substanz": 50,
+    "substanz": 32,
     "status": "offen",
     "flaechen": [
       {
         "id": "K039-f1",
         "etage": 0,
-        "qm": 1420,
+        "qm": 1527,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K039-f2",
         "etage": 1,
-        "qm": 852,
+        "qm": 916,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K039-f3",
         "etage": 2,
-        "qm": 497,
+        "qm": 534,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K039-f4",
         "etage": 0,
-        "qm": 426,
+        "qm": 458,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K039-f5",
         "etage": 1,
-        "qm": 710,
+        "qm": 763,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K039-f6",
         "etage": 2,
-        "qm": 497,
+        "qm": 534,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K039-f7",
         "etage": 0,
-        "qm": 1065,
+        "qm": 1145,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K039-f8",
         "etage": 1,
-        "qm": 426,
+        "qm": 458,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K039-f9",
         "etage": 2,
-        "qm": 497,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K039-f10",
-        "etage": 0,
-        "qm": 710,
+        "qm": 765,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -3691,76 +3418,69 @@
     ],
     "baujahr": 1936,
     "fassade": 6,
-    "substanz": 76,
+    "substanz": 58,
     "status": "offen",
     "flaechen": [
       {
         "id": "K040-f1",
         "etage": 0,
-        "qm": 1460,
+        "qm": 1570,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K040-f2",
         "etage": 1,
-        "qm": 876,
+        "qm": 942,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K040-f3",
         "etage": 2,
-        "qm": 511,
+        "qm": 549,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K040-f4",
         "etage": 0,
-        "qm": 438,
+        "qm": 471,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K040-f5",
         "etage": 1,
-        "qm": 730,
+        "qm": 785,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K040-f6",
         "etage": 2,
-        "qm": 511,
+        "qm": 549,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K040-f7",
         "etage": 0,
-        "qm": 1095,
+        "qm": 1177,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K040-f8",
         "etage": 1,
-        "qm": 438,
+        "qm": 471,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K040-f9",
         "etage": 2,
-        "qm": 511,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K040-f10",
-        "etage": 0,
-        "qm": 730,
+        "qm": 786,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -3786,76 +3506,69 @@
     ],
     "baujahr": 1918,
     "fassade": 6,
-    "substanz": 55,
+    "substanz": 37,
     "status": "offen",
     "flaechen": [
       {
         "id": "K041-f1",
         "etage": 0,
-        "qm": 880,
+        "qm": 946,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K041-f2",
         "etage": 1,
-        "qm": 528,
+        "qm": 568,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K041-f3",
         "etage": 2,
-        "qm": 308,
+        "qm": 331,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K041-f4",
         "etage": 3,
-        "qm": 264,
+        "qm": 284,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K041-f5",
         "etage": 4,
-        "qm": 440,
+        "qm": 473,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K041-f6",
         "etage": 5,
-        "qm": 308,
+        "qm": 331,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K041-f7",
         "etage": 0,
-        "qm": 660,
+        "qm": 710,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K041-f8",
         "etage": 1,
-        "qm": 264,
+        "qm": 284,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K041-f9",
         "etage": 2,
-        "qm": 308,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K041-f10",
-        "etage": 3,
-        "qm": 440,
+        "qm": 473,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -3879,76 +3592,69 @@
     ],
     "baujahr": 1961,
     "fassade": 5,
-    "substanz": 30,
+    "substanz": 15,
     "status": "offen",
     "flaechen": [
       {
         "id": "K042-f1",
         "etage": 0,
-        "qm": 900,
+        "qm": 968,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K042-f2",
         "etage": 1,
-        "qm": 540,
+        "qm": 581,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K042-f3",
         "etage": 2,
-        "qm": 315,
+        "qm": 339,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K042-f4",
         "etage": 3,
-        "qm": 270,
+        "qm": 290,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K042-f5",
         "etage": 0,
-        "qm": 450,
+        "qm": 484,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K042-f6",
         "etage": 1,
-        "qm": 315,
+        "qm": 339,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K042-f7",
         "etage": 2,
-        "qm": 675,
+        "qm": 726,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K042-f8",
         "etage": 3,
-        "qm": 270,
+        "qm": 290,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K042-f9",
         "etage": 0,
-        "qm": 315,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K042-f10",
-        "etage": 1,
-        "qm": 450,
+        "qm": 483,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -3972,76 +3678,69 @@
     ],
     "baujahr": 1932,
     "fassade": 7,
-    "substanz": 65,
+    "substanz": 47,
     "status": "offen",
     "flaechen": [
       {
         "id": "K043-f1",
         "etage": 0,
-        "qm": 1540,
+        "qm": 1656,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K043-f2",
         "etage": 1,
-        "qm": 924,
+        "qm": 994,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K043-f3",
         "etage": 2,
-        "qm": 539,
+        "qm": 580,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K043-f4",
         "etage": 3,
-        "qm": 462,
+        "qm": 497,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K043-f5",
         "etage": 0,
-        "qm": 770,
+        "qm": 828,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K043-f6",
         "etage": 1,
-        "qm": 539,
+        "qm": 580,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K043-f7",
         "etage": 2,
-        "qm": 1155,
+        "qm": 1242,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K043-f8",
         "etage": 3,
-        "qm": 462,
+        "qm": 497,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K043-f9",
         "etage": 0,
-        "qm": 539,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K043-f10",
-        "etage": 1,
-        "qm": 770,
+        "qm": 826,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -4066,76 +3765,69 @@
     ],
     "baujahr": 1955,
     "fassade": 7,
-    "substanz": 63,
+    "substanz": 45,
     "status": "offen",
     "flaechen": [
       {
         "id": "K044-f1",
         "etage": 0,
-        "qm": 1120,
+        "qm": 1204,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K044-f2",
         "etage": 1,
-        "qm": 672,
+        "qm": 723,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K044-f3",
         "etage": 2,
-        "qm": 392,
+        "qm": 422,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K044-f4",
         "etage": 3,
-        "qm": 336,
+        "qm": 361,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K044-f5",
         "etage": 4,
-        "qm": 560,
+        "qm": 602,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K044-f6",
         "etage": 0,
-        "qm": 392,
+        "qm": 422,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K044-f7",
         "etage": 1,
-        "qm": 840,
+        "qm": 903,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K044-f8",
         "etage": 2,
-        "qm": 336,
+        "qm": 361,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K044-f9",
         "etage": 3,
-        "qm": 392,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K044-f10",
-        "etage": 4,
-        "qm": 560,
+        "qm": 602,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -4158,76 +3850,69 @@
     ],
     "baujahr": 1996,
     "fassade": 7,
-    "substanz": 55,
+    "substanz": 37,
     "status": "offen",
     "flaechen": [
       {
         "id": "K045-f1",
         "etage": 0,
-        "qm": 1000,
+        "qm": 1075,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K045-f2",
         "etage": 1,
-        "qm": 600,
+        "qm": 645,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K045-f3",
         "etage": 2,
-        "qm": 350,
+        "qm": 376,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K045-f4",
         "etage": 0,
-        "qm": 300,
+        "qm": 323,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K045-f5",
         "etage": 1,
-        "qm": 500,
+        "qm": 538,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K045-f6",
         "etage": 2,
-        "qm": 350,
+        "qm": 376,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K045-f7",
         "etage": 0,
-        "qm": 750,
+        "qm": 806,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K045-f8",
         "etage": 1,
-        "qm": 300,
+        "qm": 323,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K045-f9",
         "etage": 2,
-        "qm": 350,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K045-f10",
-        "etage": 0,
-        "qm": 500,
+        "qm": 538,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -4251,76 +3936,69 @@
     ],
     "baujahr": 1983,
     "fassade": 4,
-    "substanz": 88,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K046-f1",
         "etage": 0,
-        "qm": 1340,
+        "qm": 1441,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K046-f2",
         "etage": 1,
-        "qm": 804,
+        "qm": 865,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K046-f3",
         "etage": 2,
-        "qm": 469,
+        "qm": 504,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K046-f4",
         "etage": 3,
-        "qm": 402,
+        "qm": 432,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K046-f5",
         "etage": 0,
-        "qm": 670,
+        "qm": 720,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K046-f6",
         "etage": 1,
-        "qm": 469,
+        "qm": 504,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K046-f7",
         "etage": 2,
-        "qm": 1005,
+        "qm": 1081,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K046-f8",
         "etage": 3,
-        "qm": 402,
+        "qm": 432,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K046-f9",
         "etage": 0,
-        "qm": 469,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K046-f10",
-        "etage": 1,
-        "qm": 670,
+        "qm": 721,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -4345,76 +4023,69 @@
     ],
     "baujahr": 1968,
     "fassade": 1,
-    "substanz": 60,
+    "substanz": 42,
     "status": "offen",
     "flaechen": [
       {
         "id": "K047-f1",
         "etage": 0,
-        "qm": 1980,
+        "qm": 2129,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K047-f2",
         "etage": 1,
-        "qm": 1188,
+        "qm": 1277,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K047-f3",
         "etage": 2,
-        "qm": 693,
+        "qm": 745,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K047-f4",
         "etage": 3,
-        "qm": 594,
+        "qm": 639,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K047-f5",
         "etage": 4,
-        "qm": 990,
+        "qm": 1065,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K047-f6",
         "etage": 0,
-        "qm": 693,
+        "qm": 745,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K047-f7",
         "etage": 1,
-        "qm": 1485,
+        "qm": 1597,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K047-f8",
         "etage": 2,
-        "qm": 594,
+        "qm": 639,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K047-f9",
         "etage": 3,
-        "qm": 693,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K047-f10",
-        "etage": 4,
-        "qm": 990,
+        "qm": 1064,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -4439,76 +4110,69 @@
     ],
     "baujahr": 1962,
     "fassade": 4,
-    "substanz": 75,
+    "substanz": 57,
     "status": "offen",
     "flaechen": [
       {
         "id": "K048-f1",
         "etage": 0,
-        "qm": 920,
+        "qm": 989,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K048-f2",
         "etage": 1,
-        "qm": 552,
+        "qm": 594,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K048-f3",
         "etage": 2,
-        "qm": 322,
+        "qm": 346,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K048-f4",
         "etage": 3,
-        "qm": 276,
+        "qm": 297,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K048-f5",
         "etage": 4,
-        "qm": 460,
+        "qm": 495,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K048-f6",
         "etage": 0,
-        "qm": 322,
+        "qm": 346,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K048-f7",
         "etage": 1,
-        "qm": 690,
+        "qm": 742,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K048-f8",
         "etage": 2,
-        "qm": 276,
+        "qm": 297,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K048-f9",
         "etage": 3,
-        "qm": 322,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K048-f10",
-        "etage": 4,
-        "qm": 460,
+        "qm": 494,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -4532,76 +4196,69 @@
     ],
     "baujahr": 1958,
     "fassade": 6,
-    "substanz": 68,
+    "substanz": 50,
     "status": "offen",
     "flaechen": [
       {
         "id": "K049-f1",
         "etage": 0,
-        "qm": 1780,
+        "qm": 1914,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K049-f2",
         "etage": 1,
-        "qm": 1068,
+        "qm": 1148,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K049-f3",
         "etage": 2,
-        "qm": 623,
+        "qm": 670,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K049-f4",
         "etage": 3,
-        "qm": 534,
+        "qm": 574,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K049-f5",
         "etage": 0,
-        "qm": 890,
+        "qm": 957,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K049-f6",
         "etage": 1,
-        "qm": 623,
+        "qm": 670,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K049-f7",
         "etage": 2,
-        "qm": 1335,
+        "qm": 1435,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K049-f8",
         "etage": 3,
-        "qm": 534,
+        "qm": 574,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K049-f9",
         "etage": 0,
-        "qm": 623,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K049-f10",
-        "etage": 1,
-        "qm": 890,
+        "qm": 958,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -4624,76 +4281,69 @@
     ],
     "baujahr": 2004,
     "fassade": 2,
-    "substanz": 48,
+    "substanz": 30,
     "status": "offen",
     "flaechen": [
       {
         "id": "K050-f1",
         "etage": 0,
-        "qm": 1420,
+        "qm": 1527,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K050-f2",
         "etage": 1,
-        "qm": 852,
+        "qm": 916,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K050-f3",
         "etage": 2,
-        "qm": 497,
+        "qm": 534,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K050-f4",
         "etage": 0,
-        "qm": 426,
+        "qm": 458,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K050-f5",
         "etage": 1,
-        "qm": 710,
+        "qm": 763,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K050-f6",
         "etage": 2,
-        "qm": 497,
+        "qm": 534,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K050-f7",
         "etage": 0,
-        "qm": 1065,
+        "qm": 1145,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K050-f8",
         "etage": 1,
-        "qm": 426,
+        "qm": 458,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K050-f9",
         "etage": 2,
-        "qm": 497,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K050-f10",
-        "etage": 0,
-        "qm": 710,
+        "qm": 765,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -4718,76 +4368,69 @@
     ],
     "baujahr": 2003,
     "fassade": 3,
-    "substanz": 79,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K051-f1",
         "etage": 0,
-        "qm": 1060,
+        "qm": 1140,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K051-f2",
         "etage": 1,
-        "qm": 636,
+        "qm": 684,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K051-f3",
         "etage": 2,
-        "qm": 371,
+        "qm": 399,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K051-f4",
         "etage": 3,
-        "qm": 318,
+        "qm": 342,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K051-f5",
         "etage": 4,
-        "qm": 530,
+        "qm": 570,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K051-f6",
         "etage": 0,
-        "qm": 371,
+        "qm": 399,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K051-f7",
         "etage": 1,
-        "qm": 795,
+        "qm": 855,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K051-f8",
         "etage": 2,
-        "qm": 318,
+        "qm": 342,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K051-f9",
         "etage": 3,
-        "qm": 371,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K051-f10",
-        "etage": 4,
-        "qm": 530,
+        "qm": 569,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -4812,76 +4455,69 @@
     ],
     "baujahr": 2007,
     "fassade": 0,
-    "substanz": 46,
+    "substanz": 28,
     "status": "offen",
     "flaechen": [
       {
         "id": "K052-f1",
         "etage": 0,
-        "qm": 1700,
+        "qm": 1828,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K052-f2",
         "etage": 1,
-        "qm": 1020,
+        "qm": 1097,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K052-f3",
         "etage": 2,
-        "qm": 595,
+        "qm": 640,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K052-f4",
         "etage": 3,
-        "qm": 510,
+        "qm": 548,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K052-f5",
         "etage": 4,
-        "qm": 850,
+        "qm": 914,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K052-f6",
         "etage": 0,
-        "qm": 595,
+        "qm": 640,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K052-f7",
         "etage": 1,
-        "qm": 1275,
+        "qm": 1371,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K052-f8",
         "etage": 2,
-        "qm": 510,
+        "qm": 548,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K052-f9",
         "etage": 3,
-        "qm": 595,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K052-f10",
-        "etage": 4,
-        "qm": 850,
+        "qm": 914,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -4905,76 +4541,69 @@
     ],
     "baujahr": 1957,
     "fassade": 6,
-    "substanz": 44,
+    "substanz": 26,
     "status": "offen",
     "flaechen": [
       {
         "id": "K053-f1",
         "etage": 0,
-        "qm": 1900,
+        "qm": 2043,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K053-f2",
         "etage": 1,
-        "qm": 1140,
+        "qm": 1226,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K053-f3",
         "etage": 2,
-        "qm": 665,
+        "qm": 715,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K053-f4",
         "etage": 3,
-        "qm": 570,
+        "qm": 613,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K053-f5",
         "etage": 0,
-        "qm": 950,
+        "qm": 1022,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K053-f6",
         "etage": 1,
-        "qm": 665,
+        "qm": 715,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K053-f7",
         "etage": 2,
-        "qm": 1425,
+        "qm": 1532,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K053-f8",
         "etage": 3,
-        "qm": 570,
+        "qm": 613,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K053-f9",
         "etage": 0,
-        "qm": 665,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K053-f10",
-        "etage": 1,
-        "qm": 950,
+        "qm": 1021,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -4997,76 +4626,69 @@
     ],
     "baujahr": 1936,
     "fassade": 0,
-    "substanz": 81,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K054-f1",
         "etage": 0,
-        "qm": 1040,
+        "qm": 1118,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K054-f2",
         "etage": 1,
-        "qm": 624,
+        "qm": 671,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K054-f3",
         "etage": 2,
-        "qm": 364,
+        "qm": 391,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K054-f4",
         "etage": 0,
-        "qm": 312,
+        "qm": 335,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K054-f5",
         "etage": 1,
-        "qm": 520,
+        "qm": 559,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K054-f6",
         "etage": 2,
-        "qm": 364,
+        "qm": 391,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K054-f7",
         "etage": 0,
-        "qm": 780,
+        "qm": 839,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K054-f8",
         "etage": 1,
-        "qm": 312,
+        "qm": 335,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K054-f9",
         "etage": 2,
-        "qm": 364,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K054-f10",
-        "etage": 0,
-        "qm": 520,
+        "qm": 561,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -5089,76 +4711,69 @@
     ],
     "baujahr": 1971,
     "fassade": 7,
-    "substanz": 72,
+    "substanz": 54,
     "status": "offen",
     "flaechen": [
       {
         "id": "K055-f1",
         "etage": 0,
-        "qm": 1220,
+        "qm": 1312,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K055-f2",
         "etage": 1,
-        "qm": 732,
+        "qm": 787,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K055-f3",
         "etage": 2,
-        "qm": 427,
+        "qm": 459,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K055-f4",
         "etage": 0,
-        "qm": 366,
+        "qm": 394,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K055-f5",
         "etage": 1,
-        "qm": 610,
+        "qm": 656,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K055-f6",
         "etage": 2,
-        "qm": 427,
+        "qm": 459,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K055-f7",
         "etage": 0,
-        "qm": 915,
+        "qm": 984,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K055-f8",
         "etage": 1,
-        "qm": 366,
+        "qm": 394,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K055-f9",
         "etage": 2,
-        "qm": 427,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K055-f10",
-        "etage": 0,
-        "qm": 610,
+        "qm": 655,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -5182,76 +4797,69 @@
     ],
     "baujahr": 1920,
     "fassade": 4,
-    "substanz": 71,
+    "substanz": 53,
     "status": "offen",
     "flaechen": [
       {
         "id": "K056-f1",
         "etage": 0,
-        "qm": 840,
+        "qm": 903,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K056-f2",
         "etage": 1,
-        "qm": 504,
+        "qm": 542,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K056-f3",
         "etage": 2,
-        "qm": 294,
+        "qm": 316,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K056-f4",
         "etage": 3,
-        "qm": 252,
+        "qm": 271,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K056-f5",
         "etage": 0,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K056-f6",
         "etage": 1,
-        "qm": 294,
+        "qm": 316,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K056-f7",
         "etage": 2,
-        "qm": 630,
+        "qm": 677,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K056-f8",
         "etage": 3,
-        "qm": 252,
+        "qm": 271,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K056-f9",
         "etage": 0,
-        "qm": 294,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K056-f10",
-        "etage": 1,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -5274,76 +4882,69 @@
     ],
     "baujahr": 1951,
     "fassade": 4,
-    "substanz": 72,
+    "substanz": 54,
     "status": "offen",
     "flaechen": [
       {
         "id": "K057-f1",
         "etage": 0,
-        "qm": 1640,
+        "qm": 1763,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K057-f2",
         "etage": 1,
-        "qm": 984,
+        "qm": 1058,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K057-f3",
         "etage": 2,
-        "qm": 574,
+        "qm": 617,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K057-f4",
         "etage": 0,
-        "qm": 492,
+        "qm": 529,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K057-f5",
         "etage": 1,
-        "qm": 820,
+        "qm": 882,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K057-f6",
         "etage": 2,
-        "qm": 574,
+        "qm": 617,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K057-f7",
         "etage": 0,
-        "qm": 1230,
+        "qm": 1323,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K057-f8",
         "etage": 1,
-        "qm": 492,
+        "qm": 529,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K057-f9",
         "etage": 2,
-        "qm": 574,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K057-f10",
-        "etage": 0,
-        "qm": 820,
+        "qm": 882,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -5368,76 +4969,69 @@
     ],
     "baujahr": 1990,
     "fassade": 1,
-    "substanz": 38,
+    "substanz": 20,
     "status": "offen",
     "flaechen": [
       {
         "id": "K058-f1",
         "etage": 0,
-        "qm": 1140,
+        "qm": 1226,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K058-f2",
         "etage": 1,
-        "qm": 684,
+        "qm": 735,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K058-f3",
         "etage": 2,
-        "qm": 399,
+        "qm": 429,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K058-f4",
         "etage": 3,
-        "qm": 342,
+        "qm": 368,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K058-f5",
         "etage": 4,
-        "qm": 570,
+        "qm": 613,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K058-f6",
         "etage": 0,
-        "qm": 399,
+        "qm": 429,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K058-f7",
         "etage": 1,
-        "qm": 855,
+        "qm": 919,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K058-f8",
         "etage": 2,
-        "qm": 342,
+        "qm": 368,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K058-f9",
         "etage": 3,
-        "qm": 399,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K058-f10",
-        "etage": 4,
-        "qm": 570,
+        "qm": 613,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -5461,76 +5055,69 @@
     ],
     "baujahr": 1916,
     "fassade": 3,
-    "substanz": 71,
+    "substanz": 53,
     "status": "offen",
     "flaechen": [
       {
         "id": "K059-f1",
         "etage": 0,
-        "qm": 860,
+        "qm": 925,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K059-f2",
         "etage": 1,
-        "qm": 516,
+        "qm": 555,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K059-f3",
         "etage": 2,
-        "qm": 301,
+        "qm": 324,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K059-f4",
         "etage": 3,
-        "qm": 258,
+        "qm": 277,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K059-f5",
         "etage": 0,
-        "qm": 430,
+        "qm": 462,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K059-f6",
         "etage": 1,
-        "qm": 301,
+        "qm": 324,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K059-f7",
         "etage": 2,
-        "qm": 645,
+        "qm": 694,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K059-f8",
         "etage": 3,
-        "qm": 258,
+        "qm": 277,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K059-f9",
         "etage": 0,
-        "qm": 301,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K059-f10",
-        "etage": 1,
-        "qm": 430,
+        "qm": 462,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -5553,76 +5140,69 @@
     ],
     "baujahr": 1976,
     "fassade": 0,
-    "substanz": 64,
+    "substanz": 46,
     "status": "offen",
     "flaechen": [
       {
         "id": "K060-f1",
         "etage": 0,
-        "qm": 1120,
+        "qm": 1204,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K060-f2",
         "etage": 1,
-        "qm": 672,
+        "qm": 723,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K060-f3",
         "etage": 2,
-        "qm": 392,
+        "qm": 422,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K060-f4",
         "etage": 0,
-        "qm": 336,
+        "qm": 361,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K060-f5",
         "etage": 1,
-        "qm": 560,
+        "qm": 602,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K060-f6",
         "etage": 2,
-        "qm": 392,
+        "qm": 422,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K060-f7",
         "etage": 0,
-        "qm": 840,
+        "qm": 903,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K060-f8",
         "etage": 1,
-        "qm": 336,
+        "qm": 361,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K060-f9",
         "etage": 2,
-        "qm": 392,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K060-f10",
-        "etage": 0,
-        "qm": 560,
+        "qm": 602,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -5646,76 +5226,69 @@
     ],
     "baujahr": 1929,
     "fassade": 0,
-    "substanz": 42,
+    "substanz": 24,
     "status": "offen",
     "flaechen": [
       {
         "id": "K061-f1",
         "etage": 0,
-        "qm": 1600,
+        "qm": 1720,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K061-f2",
         "etage": 1,
-        "qm": 960,
+        "qm": 1032,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K061-f3",
         "etage": 2,
-        "qm": 560,
+        "qm": 602,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K061-f4",
         "etage": 3,
-        "qm": 480,
+        "qm": 516,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K061-f5",
         "etage": 0,
-        "qm": 800,
+        "qm": 860,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K061-f6",
         "etage": 1,
-        "qm": 560,
+        "qm": 602,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K061-f7",
         "etage": 2,
-        "qm": 1200,
+        "qm": 1290,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K061-f8",
         "etage": 3,
-        "qm": 480,
+        "qm": 516,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K061-f9",
         "etage": 0,
-        "qm": 560,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K061-f10",
-        "etage": 1,
-        "qm": 800,
+        "qm": 862,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -5738,76 +5311,69 @@
     ],
     "baujahr": 2005,
     "fassade": 0,
-    "substanz": 63,
+    "substanz": 45,
     "status": "offen",
     "flaechen": [
       {
         "id": "K062-f1",
         "etage": 0,
-        "qm": 1540,
+        "qm": 1656,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K062-f2",
         "etage": 1,
-        "qm": 924,
+        "qm": 994,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K062-f3",
         "etage": 2,
-        "qm": 539,
+        "qm": 580,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K062-f4",
         "etage": 0,
-        "qm": 462,
+        "qm": 497,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K062-f5",
         "etage": 1,
-        "qm": 770,
+        "qm": 828,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K062-f6",
         "etage": 2,
-        "qm": 539,
+        "qm": 580,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K062-f7",
         "etage": 0,
-        "qm": 1155,
+        "qm": 1242,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K062-f8",
         "etage": 1,
-        "qm": 462,
+        "qm": 497,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K062-f9",
         "etage": 2,
-        "qm": 539,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K062-f10",
-        "etage": 0,
-        "qm": 770,
+        "qm": 826,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -5831,76 +5397,69 @@
     ],
     "baujahr": 1978,
     "fassade": 2,
-    "substanz": 86,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K063-f1",
         "etage": 0,
-        "qm": 1660,
+        "qm": 1785,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K063-f2",
         "etage": 1,
-        "qm": 996,
+        "qm": 1071,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K063-f3",
         "etage": 2,
-        "qm": 581,
+        "qm": 625,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K063-f4",
         "etage": 3,
-        "qm": 498,
+        "qm": 535,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K063-f5",
         "etage": 0,
-        "qm": 830,
+        "qm": 892,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K063-f6",
         "etage": 1,
-        "qm": 581,
+        "qm": 625,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K063-f7",
         "etage": 2,
-        "qm": 1245,
+        "qm": 1339,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K063-f8",
         "etage": 3,
-        "qm": 498,
+        "qm": 535,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K063-f9",
         "etage": 0,
-        "qm": 581,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K063-f10",
-        "etage": 1,
-        "qm": 830,
+        "qm": 893,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -5925,76 +5484,69 @@
     ],
     "baujahr": 1935,
     "fassade": 1,
-    "substanz": 70,
+    "substanz": 52,
     "status": "offen",
     "flaechen": [
       {
         "id": "K064-f1",
         "etage": 0,
-        "qm": 1880,
+        "qm": 2022,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K064-f2",
         "etage": 1,
-        "qm": 1128,
+        "qm": 1213,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K064-f3",
         "etage": 2,
-        "qm": 658,
+        "qm": 708,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K064-f4",
         "etage": 3,
-        "qm": 564,
+        "qm": 606,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K064-f5",
         "etage": 4,
-        "qm": 940,
+        "qm": 1011,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K064-f6",
         "etage": 0,
-        "qm": 658,
+        "qm": 708,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K064-f7",
         "etage": 1,
-        "qm": 1410,
+        "qm": 1516,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K064-f8",
         "etage": 2,
-        "qm": 564,
+        "qm": 606,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K064-f9",
         "etage": 3,
-        "qm": 658,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K064-f10",
-        "etage": 4,
-        "qm": 940,
+        "qm": 1010,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -6019,76 +5571,69 @@
     ],
     "baujahr": 1929,
     "fassade": 1,
-    "substanz": 45,
+    "substanz": 27,
     "status": "offen",
     "flaechen": [
       {
         "id": "K065-f1",
         "etage": 0,
-        "qm": 1380,
+        "qm": 1484,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K065-f2",
         "etage": 1,
-        "qm": 828,
+        "qm": 890,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K065-f3",
         "etage": 2,
-        "qm": 483,
+        "qm": 519,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K065-f4",
         "etage": 3,
-        "qm": 414,
+        "qm": 445,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K065-f5",
         "etage": 4,
-        "qm": 690,
+        "qm": 742,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K065-f6",
         "etage": 0,
-        "qm": 483,
+        "qm": 519,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K065-f7",
         "etage": 1,
-        "qm": 1035,
+        "qm": 1113,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K065-f8",
         "etage": 2,
-        "qm": 414,
+        "qm": 445,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K065-f9",
         "etage": 3,
-        "qm": 483,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K065-f10",
-        "etage": 4,
-        "qm": 690,
+        "qm": 743,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -6113,76 +5658,69 @@
     ],
     "baujahr": 2006,
     "fassade": 5,
-    "substanz": 79,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K066-f1",
         "etage": 0,
-        "qm": 1860,
+        "qm": 2000,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K066-f2",
         "etage": 1,
-        "qm": 1116,
+        "qm": 1200,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K066-f3",
         "etage": 2,
-        "qm": 651,
+        "qm": 700,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K066-f4",
         "etage": 3,
-        "qm": 558,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K066-f5",
         "etage": 4,
-        "qm": 930,
+        "qm": 1000,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K066-f6",
         "etage": 0,
-        "qm": 651,
+        "qm": 700,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K066-f7",
         "etage": 1,
-        "qm": 1395,
+        "qm": 1500,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K066-f8",
         "etage": 2,
-        "qm": 558,
+        "qm": 600,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K066-f9",
         "etage": 3,
-        "qm": 651,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K066-f10",
-        "etage": 4,
-        "qm": 930,
+        "qm": 1000,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -6205,76 +5743,69 @@
     ],
     "baujahr": 1905,
     "fassade": 3,
-    "substanz": 65,
+    "substanz": 47,
     "status": "offen",
     "flaechen": [
       {
         "id": "K067-f1",
         "etage": 0,
-        "qm": 1840,
+        "qm": 1978,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K067-f2",
         "etage": 1,
-        "qm": 1104,
+        "qm": 1187,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K067-f3",
         "etage": 2,
-        "qm": 644,
+        "qm": 692,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K067-f4",
         "etage": 0,
-        "qm": 552,
+        "qm": 594,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K067-f5",
         "etage": 1,
-        "qm": 920,
+        "qm": 989,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K067-f6",
         "etage": 2,
-        "qm": 644,
+        "qm": 692,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K067-f7",
         "etage": 0,
-        "qm": 1380,
+        "qm": 1484,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K067-f8",
         "etage": 1,
-        "qm": 552,
+        "qm": 594,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K067-f9",
         "etage": 2,
-        "qm": 644,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K067-f10",
-        "etage": 0,
-        "qm": 920,
+        "qm": 990,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -6298,76 +5829,69 @@
     ],
     "baujahr": 1916,
     "fassade": 5,
-    "substanz": 51,
+    "substanz": 33,
     "status": "offen",
     "flaechen": [
       {
         "id": "K068-f1",
         "etage": 0,
-        "qm": 1460,
+        "qm": 1570,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K068-f2",
         "etage": 1,
-        "qm": 876,
+        "qm": 942,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K068-f3",
         "etage": 2,
-        "qm": 511,
+        "qm": 549,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K068-f4",
         "etage": 3,
-        "qm": 438,
+        "qm": 471,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K068-f5",
         "etage": 0,
-        "qm": 730,
+        "qm": 785,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K068-f6",
         "etage": 1,
-        "qm": 511,
+        "qm": 549,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K068-f7",
         "etage": 2,
-        "qm": 1095,
+        "qm": 1177,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K068-f8",
         "etage": 3,
-        "qm": 438,
+        "qm": 471,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K068-f9",
         "etage": 0,
-        "qm": 511,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K068-f10",
-        "etage": 1,
-        "qm": 730,
+        "qm": 786,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -6390,76 +5914,69 @@
     ],
     "baujahr": 1957,
     "fassade": 2,
-    "substanz": 73,
+    "substanz": 55,
     "status": "offen",
     "flaechen": [
       {
         "id": "K069-f1",
         "etage": 0,
-        "qm": 1060,
+        "qm": 1140,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K069-f2",
         "etage": 1,
-        "qm": 636,
+        "qm": 684,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K069-f3",
         "etage": 2,
-        "qm": 371,
+        "qm": 399,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K069-f4",
         "etage": 0,
-        "qm": 318,
+        "qm": 342,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K069-f5",
         "etage": 1,
-        "qm": 530,
+        "qm": 570,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K069-f6",
         "etage": 2,
-        "qm": 371,
+        "qm": 399,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K069-f7",
         "etage": 0,
-        "qm": 795,
+        "qm": 855,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K069-f8",
         "etage": 1,
-        "qm": 318,
+        "qm": 342,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K069-f9",
         "etage": 2,
-        "qm": 371,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K069-f10",
-        "etage": 0,
-        "qm": 530,
+        "qm": 569,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -6482,76 +5999,69 @@
     ],
     "baujahr": 1904,
     "fassade": 7,
-    "substanz": 54,
+    "substanz": 36,
     "status": "offen",
     "flaechen": [
       {
         "id": "K070-f1",
         "etage": 0,
-        "qm": 1440,
+        "qm": 1548,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K070-f2",
         "etage": 1,
-        "qm": 864,
+        "qm": 929,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K070-f3",
         "etage": 2,
-        "qm": 504,
+        "qm": 542,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K070-f4",
         "etage": 0,
-        "qm": 432,
+        "qm": 465,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K070-f5",
         "etage": 1,
-        "qm": 720,
+        "qm": 774,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K070-f6",
         "etage": 2,
-        "qm": 504,
+        "qm": 542,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K070-f7",
         "etage": 0,
-        "qm": 1080,
+        "qm": 1161,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K070-f8",
         "etage": 1,
-        "qm": 432,
+        "qm": 465,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K070-f9",
         "etage": 2,
-        "qm": 504,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K070-f10",
-        "etage": 0,
-        "qm": 720,
+        "qm": 774,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -6575,76 +6085,69 @@
     ],
     "baujahr": 1959,
     "fassade": 0,
-    "substanz": 52,
+    "substanz": 34,
     "status": "offen",
     "flaechen": [
       {
         "id": "K071-f1",
         "etage": 0,
-        "qm": 1220,
+        "qm": 1312,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K071-f2",
         "etage": 1,
-        "qm": 732,
+        "qm": 787,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K071-f3",
         "etage": 2,
-        "qm": 427,
+        "qm": 459,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K071-f4",
         "etage": 3,
-        "qm": 366,
+        "qm": 394,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K071-f5",
         "etage": 0,
-        "qm": 610,
+        "qm": 656,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K071-f6",
         "etage": 1,
-        "qm": 427,
+        "qm": 459,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K071-f7",
         "etage": 2,
-        "qm": 915,
+        "qm": 984,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K071-f8",
         "etage": 3,
-        "qm": 366,
+        "qm": 394,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K071-f9",
         "etage": 0,
-        "qm": 427,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K071-f10",
-        "etage": 1,
-        "qm": 610,
+        "qm": 655,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -6668,76 +6171,69 @@
     ],
     "baujahr": 1970,
     "fassade": 7,
-    "substanz": 74,
+    "substanz": 56,
     "status": "offen",
     "flaechen": [
       {
         "id": "K072-f1",
         "etage": 0,
-        "qm": 1440,
+        "qm": 1548,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K072-f2",
         "etage": 1,
-        "qm": 864,
+        "qm": 929,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K072-f3",
         "etage": 2,
-        "qm": 504,
+        "qm": 542,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K072-f4",
         "etage": 3,
-        "qm": 432,
+        "qm": 465,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K072-f5",
         "etage": 0,
-        "qm": 720,
+        "qm": 774,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K072-f6",
         "etage": 1,
-        "qm": 504,
+        "qm": 542,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K072-f7",
         "etage": 2,
-        "qm": 1080,
+        "qm": 1161,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K072-f8",
         "etage": 3,
-        "qm": 432,
+        "qm": 465,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K072-f9",
         "etage": 0,
-        "qm": 504,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K072-f10",
-        "etage": 1,
-        "qm": 720,
+        "qm": 774,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -6762,76 +6258,69 @@
     ],
     "baujahr": 1970,
     "fassade": 4,
-    "substanz": 64,
+    "substanz": 46,
     "status": "offen",
     "flaechen": [
       {
         "id": "K073-f1",
         "etage": 0,
-        "qm": 800,
+        "qm": 860,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K073-f2",
         "etage": 1,
-        "qm": 480,
+        "qm": 516,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K073-f3",
         "etage": 2,
-        "qm": 280,
+        "qm": 301,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K073-f4",
         "etage": 3,
-        "qm": 240,
+        "qm": 258,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K073-f5",
         "etage": 4,
-        "qm": 400,
+        "qm": 430,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K073-f6",
         "etage": 0,
-        "qm": 280,
+        "qm": 301,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K073-f7",
         "etage": 1,
-        "qm": 600,
+        "qm": 645,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K073-f8",
         "etage": 2,
-        "qm": 240,
+        "qm": 258,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K073-f9",
         "etage": 3,
-        "qm": 280,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K073-f10",
-        "etage": 4,
-        "qm": 400,
+        "qm": 431,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -6854,76 +6343,69 @@
     ],
     "baujahr": 1947,
     "fassade": 4,
-    "substanz": 49,
+    "substanz": 31,
     "status": "offen",
     "flaechen": [
       {
         "id": "K074-f1",
         "etage": 0,
-        "qm": 1200,
+        "qm": 1290,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K074-f2",
         "etage": 1,
-        "qm": 720,
+        "qm": 774,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K074-f3",
         "etage": 2,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K074-f4",
         "etage": 0,
-        "qm": 360,
+        "qm": 387,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K074-f5",
         "etage": 1,
-        "qm": 600,
+        "qm": 645,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K074-f6",
         "etage": 2,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K074-f7",
         "etage": 0,
-        "qm": 900,
+        "qm": 968,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K074-f8",
         "etage": 1,
-        "qm": 360,
+        "qm": 387,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K074-f9",
         "etage": 2,
-        "qm": 420,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K074-f10",
-        "etage": 0,
-        "qm": 600,
+        "qm": 645,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -6946,76 +6428,69 @@
     ],
     "baujahr": 2001,
     "fassade": 3,
-    "substanz": 78,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K075-f1",
         "etage": 0,
-        "qm": 1880,
+        "qm": 2022,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K075-f2",
         "etage": 1,
-        "qm": 1128,
+        "qm": 1213,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K075-f3",
         "etage": 2,
-        "qm": 658,
+        "qm": 708,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K075-f4",
         "etage": 0,
-        "qm": 564,
+        "qm": 606,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K075-f5",
         "etage": 1,
-        "qm": 940,
+        "qm": 1011,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K075-f6",
         "etage": 2,
-        "qm": 658,
+        "qm": 708,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K075-f7",
         "etage": 0,
-        "qm": 1410,
+        "qm": 1516,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K075-f8",
         "etage": 1,
-        "qm": 564,
+        "qm": 606,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K075-f9",
         "etage": 2,
-        "qm": 658,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K075-f10",
-        "etage": 0,
-        "qm": 940,
+        "qm": 1010,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -7040,76 +6515,69 @@
     ],
     "baujahr": 2005,
     "fassade": 5,
-    "substanz": 58,
+    "substanz": 40,
     "status": "offen",
     "flaechen": [
       {
         "id": "K076-f1",
         "etage": 0,
-        "qm": 1260,
+        "qm": 1355,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K076-f2",
         "etage": 1,
-        "qm": 756,
+        "qm": 813,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K076-f3",
         "etage": 2,
-        "qm": 441,
+        "qm": 474,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K076-f4",
         "etage": 3,
-        "qm": 378,
+        "qm": 406,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K076-f5",
         "etage": 4,
-        "qm": 630,
+        "qm": 677,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K076-f6",
         "etage": 0,
-        "qm": 441,
+        "qm": 474,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K076-f7",
         "etage": 1,
-        "qm": 945,
+        "qm": 1016,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K076-f8",
         "etage": 2,
-        "qm": 378,
+        "qm": 406,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K076-f9",
         "etage": 3,
-        "qm": 441,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K076-f10",
-        "etage": 4,
-        "qm": 630,
+        "qm": 679,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -7133,76 +6601,69 @@
     ],
     "baujahr": 1904,
     "fassade": 1,
-    "substanz": 32,
+    "substanz": 15,
     "status": "offen",
     "flaechen": [
       {
         "id": "K077-f1",
         "etage": 0,
-        "qm": 1840,
+        "qm": 1978,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K077-f2",
         "etage": 1,
-        "qm": 1104,
+        "qm": 1187,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K077-f3",
         "etage": 2,
-        "qm": 644,
+        "qm": 692,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K077-f4",
         "etage": 3,
-        "qm": 552,
+        "qm": 594,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K077-f5",
         "etage": 0,
-        "qm": 920,
+        "qm": 989,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K077-f6",
         "etage": 1,
-        "qm": 644,
+        "qm": 692,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K077-f7",
         "etage": 2,
-        "qm": 1380,
+        "qm": 1484,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K077-f8",
         "etage": 3,
-        "qm": 552,
+        "qm": 594,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K077-f9",
         "etage": 0,
-        "qm": 644,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K077-f10",
-        "etage": 1,
-        "qm": 920,
+        "qm": 990,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -7226,76 +6687,69 @@
     ],
     "baujahr": 1968,
     "fassade": 0,
-    "substanz": 89,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K078-f1",
         "etage": 0,
-        "qm": 1020,
+        "qm": 1097,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K078-f2",
         "etage": 1,
-        "qm": 612,
+        "qm": 658,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K078-f3",
         "etage": 2,
-        "qm": 357,
+        "qm": 384,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K078-f4",
         "etage": 3,
-        "qm": 306,
+        "qm": 329,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K078-f5",
         "etage": 0,
-        "qm": 510,
+        "qm": 548,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K078-f6",
         "etage": 1,
-        "qm": 357,
+        "qm": 384,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K078-f7",
         "etage": 2,
-        "qm": 765,
+        "qm": 823,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K078-f8",
         "etage": 3,
-        "qm": 306,
+        "qm": 329,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K078-f9",
         "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K078-f10",
-        "etage": 1,
-        "qm": 510,
+        "qm": 548,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -7319,76 +6773,69 @@
     ],
     "baujahr": 1936,
     "fassade": 1,
-    "substanz": 38,
+    "substanz": 20,
     "status": "offen",
     "flaechen": [
       {
         "id": "K079-f1",
         "etage": 0,
-        "qm": 1020,
+        "qm": 1097,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K079-f2",
         "etage": 1,
-        "qm": 612,
+        "qm": 658,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K079-f3",
         "etage": 2,
-        "qm": 357,
+        "qm": 384,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K079-f4",
         "etage": 3,
-        "qm": 306,
+        "qm": 329,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K079-f5",
         "etage": 0,
-        "qm": 510,
+        "qm": 548,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K079-f6",
         "etage": 1,
-        "qm": 357,
+        "qm": 384,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K079-f7",
         "etage": 2,
-        "qm": 765,
+        "qm": 823,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K079-f8",
         "etage": 3,
-        "qm": 306,
+        "qm": 329,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K079-f9",
         "etage": 0,
-        "qm": 357,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K079-f10",
-        "etage": 1,
-        "qm": 510,
+        "qm": 548,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -7414,76 +6861,69 @@
     ],
     "baujahr": 2007,
     "fassade": 7,
-    "substanz": 83,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K080-f1",
         "etage": 0,
-        "qm": 1940,
+        "qm": 2086,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K080-f2",
         "etage": 1,
-        "qm": 1164,
+        "qm": 1252,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K080-f3",
         "etage": 2,
-        "qm": 679,
+        "qm": 730,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K080-f4",
         "etage": 3,
-        "qm": 582,
+        "qm": 626,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K080-f5",
         "etage": 4,
-        "qm": 970,
+        "qm": 1043,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K080-f6",
         "etage": 5,
-        "qm": 679,
+        "qm": 730,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K080-f7",
         "etage": 0,
-        "qm": 1455,
+        "qm": 1565,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K080-f8",
         "etage": 1,
-        "qm": 582,
+        "qm": 626,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K080-f9",
         "etage": 2,
-        "qm": 679,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K080-f10",
-        "etage": 3,
-        "qm": 970,
+        "qm": 1042,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -7506,76 +6946,69 @@
     ],
     "baujahr": 1904,
     "fassade": 0,
-    "substanz": 64,
+    "substanz": 46,
     "status": "offen",
     "flaechen": [
       {
         "id": "K081-f1",
         "etage": 0,
-        "qm": 820,
+        "qm": 882,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K081-f2",
         "etage": 1,
-        "qm": 492,
+        "qm": 529,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K081-f3",
         "etage": 2,
-        "qm": 287,
+        "qm": 309,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K081-f4",
         "etage": 0,
-        "qm": 246,
+        "qm": 265,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K081-f5",
         "etage": 1,
-        "qm": 410,
+        "qm": 441,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K081-f6",
         "etage": 2,
-        "qm": 287,
+        "qm": 309,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K081-f7",
         "etage": 0,
-        "qm": 615,
+        "qm": 661,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K081-f8",
         "etage": 1,
-        "qm": 246,
+        "qm": 265,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K081-f9",
         "etage": 2,
-        "qm": 287,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K081-f10",
-        "etage": 0,
-        "qm": 410,
+        "qm": 439,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -7600,76 +7033,69 @@
     ],
     "baujahr": 1900,
     "fassade": 3,
-    "substanz": 36,
+    "substanz": 18,
     "status": "offen",
     "flaechen": [
       {
         "id": "K082-f1",
         "etage": 0,
-        "qm": 1460,
+        "qm": 1570,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K082-f2",
         "etage": 1,
-        "qm": 876,
+        "qm": 942,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K082-f3",
         "etage": 2,
-        "qm": 511,
+        "qm": 549,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K082-f4",
         "etage": 3,
-        "qm": 438,
+        "qm": 471,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K082-f5",
         "etage": 4,
-        "qm": 730,
+        "qm": 785,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K082-f6",
         "etage": 0,
-        "qm": 511,
+        "qm": 549,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K082-f7",
         "etage": 1,
-        "qm": 1095,
+        "qm": 1177,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K082-f8",
         "etage": 2,
-        "qm": 438,
+        "qm": 471,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K082-f9",
         "etage": 3,
-        "qm": 511,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K082-f10",
-        "etage": 4,
-        "qm": 730,
+        "qm": 786,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -7692,76 +7118,69 @@
     ],
     "baujahr": 1968,
     "fassade": 0,
-    "substanz": 41,
+    "substanz": 23,
     "status": "offen",
     "flaechen": [
       {
         "id": "K083-f1",
         "etage": 0,
-        "qm": 1760,
+        "qm": 1892,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K083-f2",
         "etage": 1,
-        "qm": 1056,
+        "qm": 1135,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K083-f3",
         "etage": 2,
-        "qm": 616,
+        "qm": 662,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K083-f4",
         "etage": 0,
-        "qm": 528,
+        "qm": 568,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K083-f5",
         "etage": 1,
-        "qm": 880,
+        "qm": 946,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K083-f6",
         "etage": 2,
-        "qm": 616,
+        "qm": 662,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K083-f7",
         "etage": 0,
-        "qm": 1320,
+        "qm": 1419,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K083-f8",
         "etage": 1,
-        "qm": 528,
+        "qm": 568,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K083-f9",
         "etage": 2,
-        "qm": 616,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K083-f10",
-        "etage": 0,
-        "qm": 880,
+        "qm": 948,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -7785,76 +7204,69 @@
     ],
     "baujahr": 1935,
     "fassade": 0,
-    "substanz": 33,
+    "substanz": 15,
     "status": "offen",
     "flaechen": [
       {
         "id": "K084-f1",
         "etage": 0,
-        "qm": 1400,
+        "qm": 1505,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K084-f2",
         "etage": 1,
-        "qm": 840,
+        "qm": 903,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K084-f3",
         "etage": 2,
-        "qm": 490,
+        "qm": 527,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K084-f4",
         "etage": 3,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K084-f5",
         "etage": 0,
-        "qm": 700,
+        "qm": 753,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K084-f6",
         "etage": 1,
-        "qm": 490,
+        "qm": 527,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K084-f7",
         "etage": 2,
-        "qm": 1050,
+        "qm": 1129,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K084-f8",
         "etage": 3,
-        "qm": 420,
+        "qm": 452,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K084-f9",
         "etage": 0,
-        "qm": 490,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K084-f10",
-        "etage": 1,
-        "qm": 700,
+        "qm": 752,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -7878,76 +7290,69 @@
     ],
     "baujahr": 1959,
     "fassade": 5,
-    "substanz": 63,
+    "substanz": 45,
     "status": "offen",
     "flaechen": [
       {
         "id": "K085-f1",
         "etage": 0,
-        "qm": 1220,
+        "qm": 1312,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K085-f2",
         "etage": 1,
-        "qm": 732,
+        "qm": 787,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K085-f3",
         "etage": 2,
-        "qm": 427,
+        "qm": 459,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K085-f4",
         "etage": 3,
-        "qm": 366,
+        "qm": 394,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K085-f5",
         "etage": 0,
-        "qm": 610,
+        "qm": 656,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K085-f6",
         "etage": 1,
-        "qm": 427,
+        "qm": 459,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K085-f7",
         "etage": 2,
-        "qm": 915,
+        "qm": 984,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K085-f8",
         "etage": 3,
-        "qm": 366,
+        "qm": 394,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K085-f9",
         "etage": 0,
-        "qm": 427,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K085-f10",
-        "etage": 1,
-        "qm": 610,
+        "qm": 655,
         "konzept": "eigen",
         "gruppe": "sport"
       }
@@ -7971,76 +7376,69 @@
     ],
     "baujahr": 2000,
     "fassade": 4,
-    "substanz": 36,
+    "substanz": 18,
     "status": "offen",
     "flaechen": [
       {
         "id": "K086-f1",
         "etage": 0,
-        "qm": 960,
+        "qm": 1032,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
         "id": "K086-f2",
         "etage": 1,
-        "qm": 576,
+        "qm": 619,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
         "id": "K086-f3",
         "etage": 2,
-        "qm": 336,
+        "qm": 361,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
         "id": "K086-f4",
         "etage": 3,
-        "qm": 288,
+        "qm": 310,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K086-f5",
         "etage": 0,
-        "qm": 480,
+        "qm": 516,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K086-f6",
         "etage": 1,
-        "qm": 336,
+        "qm": 361,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K086-f7",
         "etage": 2,
-        "qm": 720,
+        "qm": 774,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K086-f8",
         "etage": 3,
-        "qm": 288,
+        "qm": 310,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K086-f9",
         "etage": 0,
-        "qm": 336,
-        "konzept": "eigen",
-        "gruppe": "food"
-      },
-      {
-        "id": "K086-f10",
-        "etage": 1,
-        "qm": 480,
+        "qm": 517,
         "konzept": "eigen",
         "gruppe": "sport"
       }

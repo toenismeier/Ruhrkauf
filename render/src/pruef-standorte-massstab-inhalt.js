@@ -6,11 +6,11 @@ import haupt from '../haeuser.json';
 import volkskauf from '../haeuser-schwester.json';
 import fundus from '../haeuser-outlet.json';
 // Eine Teilabnahme mit alten 180/24/66-Exporten ist nicht gültig.
-if (haupt.length !== 408 || volkskauf.length !== 86 || fundus.length !== 66 || STADTLISTE.length !== 220)
+if (haupt.length !== 409 || volkskauf.length !== 86 || fundus.length !== 66 || STADTLISTE.length !== 220)
   throw new Error('Hausexport unvollständig: ' +
-    `${haupt.length}/408 Hartwig+Sport, ${volkskauf.length}/86 Volkskauf, ${fundus.length}/66 FUNDUS, ${STADTLISTE.length}/220 Städte. Seed 1 neu exportieren.`);
+    `${haupt.length}/409 Hartwig+Sport, ${volkskauf.length}/86 Volkskauf, ${fundus.length}/66 FUNDUS, ${STADTLISTE.length}/220 Städte. Seed 1 neu exportieren.`);
 const alleIds = [...haupt, ...volkskauf, ...fundus].map((h) => h.id);
-if (new Set(alleIds).size !== 560) throw new Error('Doppelte oder fehlende Haus-IDs im 560er-Export');
+if (new Set(alleIds).size !== 561) throw new Error('Doppelte oder fehlende Haus-IDs im 561er-Export');
 const auswahl = process.argv[2] ? new Set(process.argv[2].split(',')) : null;
 let plaene = 0, fehler = 0, standorte = 0, fehlende = 0, nebenzentren = 0;
 const eigener = (q) => ['warenhaus', 'premium', 'schwester', 'sport', 'outlet'].includes(q.rolle);

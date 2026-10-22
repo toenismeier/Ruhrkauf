@@ -4,7 +4,7 @@ import { geld, esc, kwVon } from './format.js';
 // Zentraler Posteingang: reine Engine-Abfragen und bestehende Spieleraktionen.
 export function posteingangModul(ctx) {
   const E = ctx.E, s = ctx.s;
-  const ui = { aktiv: false, filter: 'Alle', verhandlung: null, ziel: null };
+  const ui = { aktiv: false, filter: 'Alle', verhandlung: null, ziel: null, mietAuswahl: new Map() };
   const einstellungen = () => ctx.zustand();
   const daten = () => E.posteingang(s());
   const wochen = (n) => n === 0 ? 'läuft diese Woche ab' : n === 1 ? 'noch 1 Woche' : 'noch ' + n + ' Wochen';
@@ -16,10 +16,47 @@ export function posteingangModul(ctx) {
       ['handeln', 'Zu tun', D.handeln.length], ['meldungen', 'Meldungen', D.meldungen.length], ['erledigt', 'Erledigt', D.erledigt.length],
     ].map(([v, t, n]) => '<button role="tab" aria-selected="' + (aktiv === v) + '" class="tab ' + (aktiv === v ? 'an' : '') + '" data-po-a="tab" data-v="' + v + '">' + t + (v === 'handeln' && n ? '<span class="zahl">' + n + '</span>' : '') + '</button>').join('') + '</div>';
   }
+  const mietenOptionen = [
+    ['verlaengern','Verlängern'], ['nachverhandeln','Nachverhandeln'], ['auslaufen','Auslaufen lassen / schließen'],
+  ];
+  function mietvertragKarte(p) {
+    const aus = p.mietvertraege ?? [];
+    const reihen = aus.map((m) => {
+      if (!ui.mietAuswahl.has(m.entscheidungId))
+        ui.mietAuswahl.set(m.entscheidungId, { aktiv: true, option: m.empfehlung });
+      const wahl = ui.mietAuswahl.get(m.entscheidungId);
+      const qual = (v) => v === undefined ? '—' : (100 * v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %';
+      return '<div class="post-miete-zeile" data-miet-id="' + esc(m.entscheidungId) + '"><div>' +
+        '<label><input type="checkbox" data-po-miet-check="' + esc(m.entscheidungId) + '"' +
+        (wahl.aktiv ? ' checked' : '') + '><b>' + esc(m.haus) + '</b></label>' +
+        '<small>' + esc(m.stadt) + ' · ' + esc(m.region) + ' · ' + esc(m.format) +
+        ' · Restlaufzeit ' + m.restlaufzeit + ' Wochen</small>' +
+        '<small>Vermieter: ' + esc(m.vermieter) + '</small>' +
+        '<small>Miete p.a. ' + esc(geld(m.istMiete)) + ' → ' + esc(geld(m.angebotMiete)) +
+        ' · Quote ' + qual(m.mietquoteIst) + ' → ' + qual(m.mietquoteNeu) + '</small>' +
+        '<small>Haus-DB: ' + (m.ebitdaHaus === undefined ? 'Keine Buchung' : esc(geld(m.ebitdaHaus))) + '</small>' +
+        '<small>Empfehlung Immobilien: ' + esc(mietenOptionen.find((x) => x[0] === m.empfehlung)?.[1] || m.empfehlung) + '</small></div>' +
+        '<div><label>Entscheidung<select data-po-miet-option="' + esc(m.entscheidungId) + '">' +
+          mietenOptionen.map(([value, text]) => '<option value="' + value + '"' +
+            (wahl.option === value ? ' selected' : '') + '>' + esc(text) + '</option>').join('') +
+          '</select></label><button data-po-a="mieteEinzel" data-id="' + esc(m.entscheidungId) +
+          '">Entscheiden</button></div></div>';
+    }).join('');
+    return '<article class="karte postkarte" data-post-id="' + esc(p.id) + '">' +
+      '<div class="postkopf"><div class="posttyp">Immobilien · KW ' + kwVon(p.woche) +
+      '</div><h3>' + esc(p.titel) + '</h3><p>' + esc(p.text) +
+      '</p><span class="chip ' + (p.dringend ? 'warn' : 'grau') + '">' +
+      wochen(p.restWochen) + '</span></div>' + reihen +
+      '<div class="post-miete-fuss"><button data-po-a="mieteAuswahl" data-id="' + esc(p.id) +
+      '">Auswahl verbindlich entscheiden</button>' +
+      '<button data-po-a="mieteEmpfehlungen" data-id="' + esc(p.id) +
+      '">Empfehlungen für alle übernehmen</button></div></article>';
+  }
   function handeln(D) {
     if (ui.verhandlung) return verhandeln();
     if (!D.handeln.length) return leer('Keine offenen Angebote oder Entscheidungen.');
     return D.handeln.map((p) => {
+      if (p.typ === 'mietvertraege') return mietvertragKarte(p);
       const rest = '<span class="chip ' + (p.dringend ? 'warn' : 'grau') + '">' + wochen(p.restWochen) + '</span>';
       const wert = p.wert ? '<div class="postwert"><b>' + esc(geld(p.wert.betrag)) + '</b><span>' + esc(p.wert.einheit) + '</span></div>' : '';
       const buttons = p.optionen.map((o) => '<button class="' + (o.id === 'ablehnen' ? 'rot' : o.id === 'annehmen' ? 'gruen' : '') + '" data-po-a="option" data-id="' + esc(p.id) + '" data-v="' + esc(o.id) + '">' + esc(o.label) + '</button>').join('');
@@ -94,6 +131,24 @@ export function posteingangModul(ctx) {
   }
   function klicken(el) {
     const a = el.dataset.poA, id = el.dataset.id, v = el.dataset.v;
+    if (['mieteEinzel','mieteAuswahl','mieteEmpfehlungen'].includes(a)) {
+      const alle = daten().handeln.flatMap((x) => x.mietvertraege ?? []);
+      const gruppe = a === 'mieteEinzel' ? alle.filter((x) => x.entscheidungId === id) :
+        (daten().handeln.find((x) => x.id === id)?.mietvertraege ?? []);
+      let erledigt = 0, fehler = 0;
+      for (const m of gruppe) {
+        const aus = ui.mietAuswahl.get(m.entscheidungId);
+        if (a === 'mieteAuswahl' && !aus?.aktiv) continue;
+        const option = a === 'mieteEmpfehlungen' ? m.empfehlung : aus?.option ?? m.empfehlung;
+        const res = E.fuehreAus(s(), { typ: 'entscheiden', id: m.entscheidungId, option });
+        if (res.ok) { erledigt++; ui.mietAuswahl.delete(m.entscheidungId); }
+        else fehler++;
+      }
+      ctx.meldung(erledigt + ' Mietvertragsentscheidungen bearbeitet' +
+        (fehler ? ', ' + fehler + ' fehlgeschlagen' : '') + '.', fehler === 0 && erledigt > 0);
+      if (erledigt) ctx.nachAktion?.();
+      return zeigen(true);
+    }
     if (a === 'tab') { einstellungen().reiter = v; ui.verhandlung = null; ctx.nachZustand(); return zeigen(); }
     if (a === 'alleLesen') { for (const m of daten().meldungen) gelesen(m.id); return zeigen(true); }
     if (a === 'lesen') { gelesen(id); return zeigen(true); }
@@ -123,6 +178,18 @@ export function posteingangModul(ctx) {
   });
   inhalt.addEventListener('change', (event) => {
     if (!ui.aktiv) return;
+    if (event.target.matches('[data-po-miet-check]')) {
+      const id = event.target.dataset.poMietCheck;
+      const old = ui.mietAuswahl.get(id);
+      if (old) old.aktiv = event.target.checked;
+      return;
+    }
+    if (event.target.matches('[data-po-miet-option]')) {
+      const id = event.target.dataset.poMietOption;
+      const old = ui.mietAuswahl.get(id);
+      if (old) old.option = event.target.value;
+      return;
+    }
     if (event.target.matches('[data-po-filter]')) { ui.filter = event.target.value; zeigen(); }
     if (event.target.matches('[data-po-haus]') && ui.verhandlung) {
       if (event.target.checked) ui.verhandlung.haeuser.add(event.target.dataset.poHaus);

@@ -33,6 +33,6 @@ const kataloge = ['haeuser.json', 'haeuser-schwester.json', 'haeuser-outlet.json
 for (const [datei, haeuser] of kataloge) for (const h of haeuser) if (!ist.has(h.stadt)) fehler.push(datei + ': ' + h.id + ' ohne Stadtgeografie ' + h.stadt);
 console.log('Geografie: ' + ist.size + ' Städte, ' + (ist.size - alteNamen.size) + ' neue, Cluster ' + JSON.stringify(klassen));
 console.log('Render-Exporte (Stand): ' + kataloge.map(([f, h]) => f + '=' + h.length).join(', '));
-if (kataloge[0][1].length !== 408 || kataloge[1][1].length !== 86 || kataloge[2][1].length !== 66) console.warn('OFFEN: Render-Exporte haben noch nicht den 560-Häuser-Maßstab. Erneuter Seed-Export durch Engine-Branch erforderlich.');
+if (kataloge[0][1].length !== 409 || kataloge[1][1].length !== 86 || kataloge[2][1].length !== 66) console.warn('OFFEN: Render-Exporte haben noch nicht den 561-Häuser-Maßstab (Q08: fünftes Premiumhaus). Erneuter Seed-Export durch Engine-Branch erforderlich.');
 if (fehler.length) { fehler.forEach((x) => console.error('FEHLER: ' + x)); process.exitCode = 1; }
 else console.log('Geografie: 0 statische Verstöße.');

@@ -1,4 +1,5 @@
 /** Wettbewerber als persistente, autonome Akteure. Eigener Mulberry32-Zufallsstrom. */
+import { liquiditaetReicht } from './sandkasten';
 import { GRUPPEN, WETTBEWERBER_NAMEN, WETTBEWERB_UEBERSCHNEIDUNG, gruppenFuer } from './daten';
 import { KOORDINATEN } from './standorte';
 import type { GameState, GruppeId, Haus, Lage, Wettbewerber, WettbewerberArt } from './types';
@@ -143,16 +144,19 @@ export function initialisiereWettbewerb(s: GameState): void {
       anlegen(s, stadt, art, lage, qm, 0);
     }
   }
-  for (const h of aktive(s)) {
-    // Historische Nachfragebasen je Haus und Gruppe einfrieren.
-    // Rohwerte der Konkurrenten liefern später ausschließlich die Differenz zum Start.
-    h.wettbewerbGruppeStart = Object.fromEntries(gruppenFuer(h.format).map((g) => [g, h.wettbewerbStart]));
-    h.wettbewerbOffpriceStart = h.wettbewerbStart;
-    h.wettbewerbRohStart = roh(s, h);
-    h.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(h.format).map((g) => [g, roh(s, h, g)]));
-    h.wettbewerbLeerStart = leerzahl(s, h.stadt);
-    h.wettbewerbRohOffpriceStart = roh(s, h, 'offprice');
-  }
+  for (const h of aktive(s)) wettbewerbStartwerte(s, h);
+}
+
+/** Historische Nachfragebasen je Haus und Gruppe einfrieren (ohne Zufall).
+ * Rohwerte der Konkurrenten liefern später ausschließlich die Differenz zum Start.
+ * Auch für Häuser, die erst später wirtschaftlich aktiv werden (Volkskauf, FUNDUS). */
+export function wettbewerbStartwerte(s: GameState, h: Haus): void {
+  h.wettbewerbGruppeStart = Object.fromEntries(gruppenFuer(h.format).map((g) => [g, h.wettbewerbStart]));
+  h.wettbewerbOffpriceStart = h.wettbewerbStart;
+  h.wettbewerbRohStart = roh(s, h);
+  h.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(h.format).map((g) => [g, roh(s, h, g)]));
+  h.wettbewerbLeerStart = leerzahl(s, h.stadt);
+  h.wettbewerbRohOffpriceStart = roh(s, h, 'offprice');
 }
 
 /** Häuser mit eigener Wirtschaft; Formate mit nurDaten (Volkskauf, FUNDUS bis engine-formate) bleiben außen vor. */
@@ -324,7 +328,7 @@ export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet'
   if (!basis) return 'Kein offenes Hartwig-Warenhaus am Standort.';
   const qm = wb.grundflaecheQm;
   const kosten = eur(qm * (modus === 'erweiterung' ? 250 : 200));
-  if (s.cash + s.kreditlinie < kosten) return 'Nicht genug Liquidität für die Umbaukosten.';
+  if (!liquiditaetReicht(s, kosten)) return 'Nicht genug Liquidität für die Umbaukosten.';
   s.cash -= kosten;
   s.einmalkostenWoche += kosten;
   if (modus === 'erweiterung') {
