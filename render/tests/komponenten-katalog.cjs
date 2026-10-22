@@ -10,7 +10,7 @@ const eintrag = `
 import * as K from './src/ui/komponenten.js';
 import { portraetSVG } from './src/kit/portraet.js';
 const person = portraetSVG({ geschlecht: 'w', alter: 44, haar: 'dutt', haarfarbe: 'dunkelbraun', hautton: 'hell', kleidung: 'blazer', kleidungFarbe: 'anthrazit', seed: 7 }, 72);
-const demo = (b) => '<div class="hk-flaeche-demo" data-bereich="' + b + '" style="width:390px">' + K.bereich(b)
+const demo = (b) => '<div class="hk-flaeche" data-bereich="' + b + '" style="width:390px">' + K.bereich(b)
  + K.sprecher({ text: '<b>Zwei Abteilungen sind unterbesetzt.</b> Damen und Herren fehlen zusammen 6 Stellen.', person, ton: 'engpass' })
  + K.rumpf(K.gross([{ label: 'Umsatz Woche', wert: '1,2 Mio. €', unter: K.abweichung(42000, '+42 Tsd. €', 0.036) }, { label: 'Haus-EBITDA', wert: '−18 Tsd. €', ton: 'schlecht', unter: K.abweichung(-9000, '−9 Tsd. €', -1) }])
  + K.balken([{ label: 'KW 5', a: 1100, b: 40 }, { label: 'KW 6', a: 1180, b: 60 }, { label: 'KW 7', a: 1050, b: -20 }, { label: 'KW 8', a: 1150, b: 0 }, { label: 'KW 9', a: 1200, b: -18 }], ['Umsatz', 'Ergebnis'])
@@ -21,7 +21,7 @@ const demo = (b) => '<div class="hk-flaeche-demo" data-bereich="' + b + '" style
  + '<div class="hk-knopfreihe">' + K.knopf('Umbau starten') + K.knopf('Vergleichen', '', 'zweit') + '</div>' + K.knopf('Alle Häuser', '', 'text')
  + K.skala('Führung', 78) + K.skala('Fachwissen', 41)
  + K.hinweis('Mietvertrag läuft in 3 Wochen aus.', 'achtung') + K.hinweis('Aktion konnte nicht gestartet werden: Budget fehlt 120 Tsd. €.', 'fehler')
- + K.leer('Diese Woche keine Vorgänge.', 'Posteingang leer') + ' ' + K.marke('Premium') + ' ' + K.marke('Umbau', 'achtung'))
+ + K.abschnitt('Karussell') + K.karussell(['<b>Lisanne</b><br>Damen 50+', '<b>Brehm & Sohn</b><br>Herren', '<b>Casa Linde</b><br>Wohnen'], { label: 'Marken' }) + K.leer('Diese Woche keine Vorgänge.', 'Posteingang leer') + ' ' + K.marke('Premium') + ' ' + K.marke('Umbau', 'achtung'))
  + K.reiterUnten([['ueberblick', 'Haus'], ['personal', 'Personal'], ['sortiment', 'Sortiment'], ['marketing', 'Marketing'], ['finanzen', 'Finanzen'], ['umbau', 'Umbau']], 'finanzen', () => '') + '</div>';
 document.body.innerHTML = '<div style="display:flex;gap:16px;align-items:flex-start">' + demo('haus') + demo('zentrale') + demo('betrieb') + demo('papier') + '</div>';
 document.querySelectorAll('.hk-reiter').forEach((r) => { r.style.position = 'static'; });

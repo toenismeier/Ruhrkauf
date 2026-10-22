@@ -110,7 +110,7 @@
 /* Erfolgsmeldung: nie über Panelkopf oder Inhalt; bei offenem Blatt oben über dem Kartenstreifen */
 #erfolge-toast { box-shadow: var(--ob-schatten) !important; background: #1d1f22 !important; border: 1px solid var(--ob-rand); }
 #erfolge-toast small { font-size: 12px !important; }
-body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(64px + env(safe-area-inset-top)); }
+body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(safe-area-inset-top)); } /* über Kopfleiste, nie über dem Blatt (auch bei 87 dvh) */
 
 /* ───────────── Einstellungen (Q30) ───────────── */
 .einst-gruppe .einst-zeile:first-child { border-top: 0; }

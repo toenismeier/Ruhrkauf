@@ -270,3 +270,13 @@
   background: center / 22px 22px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Crect x='1' y='1' width='20' height='20' rx='5' fill='none' stroke='%23a4a9ae' stroke-width='1.6'/%3E%3C/svg%3E"); }
 #panel:has(.hk-bereich) input[type=checkbox]:checked { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Crect x='1' y='1' width='20' height='20' rx='5' fill='%23d23c32' stroke='%23ef7a6f' stroke-width='1.6'/%3E%3Cpath d='M6 11.5l3.2 3.2L16 8' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 #panel:has(.hk-bereich) input[type=checkbox]:disabled { opacity: 0.35; }
+
+/* Blatt in voller Höhe (Q31-Bedarf): bereich(name, symbol, { voll: true }) */
+#panel:has(.hk-bereich[data-hoehe=voll]) { height: min(87dvh, calc(100dvh - env(safe-area-inset-top))); }
+/* Karussell mit Seitenpunkten */
+.hk-karussell { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 calc(-1 * var(--hk-4)); padding: 4px var(--hk-4) 4px; scrollbar-width: none; }
+.hk-karussell::-webkit-scrollbar { display: none; }
+.hk-karussell-karte { flex: none; width: calc(100% - 40px); scroll-snap-align: center; background: var(--f); border: 1px solid var(--l); border-radius: var(--hk-radius-gross); padding: var(--hk-3); }
+.hk-punkte { display: flex; justify-content: center; gap: 6px; margin: var(--hk-2) 0; }
+.hk-punkte i { width: 7px; height: 7px; border-radius: 4px; background: var(--l); }
+.hk-punkte i.an { background: var(--tx); }

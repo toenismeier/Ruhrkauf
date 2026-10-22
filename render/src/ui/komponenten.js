@@ -4,7 +4,15 @@
 import { esc } from './format.js';
 
 /** Marker, der den dunklen Look und das Kopfsymbol des Panels einschaltet. bereich: haus | zentrale | betrieb | papier. */
-export const bereich = (name, symbol = name) => `<i class="hk-bereich" data-bereich="${esc(name)}" data-symbol="${esc(symbol)}" aria-hidden="true"></i>`;
+export const bereich = (name, symbol = name, { voll = false } = {}) => `<i class="hk-bereich" data-bereich="${esc(name)}" data-symbol="${esc(symbol)}"${voll ? ' data-hoehe="voll"' : ''} aria-hidden="true"></i>`;
+
+/** Karussell gleichartiger Karten mit Seitenpunkten; die Nachbarkarte schaut an der Kante heraus.
+ *  karten: fertiges HTML je Karte. Die Punkte springen per Wischen mit (scroll-snap); `aktiv` setzt die Startkarte. */
+export function karussell(karten, { aktiv = 0, label = 'Karten' } = {}) {
+  if (!karten.length) return leer('Keine Einträge vorhanden.');
+  return `<div class="hk-karussell" role="group" aria-label="${esc(label)}" data-aktiv="${aktiv}" onscroll="const i=Math.round(this.scrollLeft/(this.firstElementChild.offsetWidth+12));this.nextElementSibling.querySelectorAll('i').forEach((p,k)=>p.classList.toggle('an',k===i))">${karten.map((k) => `<div class="hk-karussell-karte">${k}</div>`).join('')}</div>`
+    + `<div class="hk-punkte" aria-hidden="true">${karten.map((_, i) => `<i class="${i === aktiv ? 'an' : ''}"></i>`).join('')}</div>`;
+}
 
 /** Innenrand für Inhalt unterhalb randloser Elemente (Kopfbild, Sprecher). */
 export const rumpf = (html) => `<div class="hk-rumpf">${html}</div>`;
