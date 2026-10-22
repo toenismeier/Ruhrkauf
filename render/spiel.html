@@ -373,13 +373,10 @@
 
   /* Maßstab: formatbezogenes Cockpit und direkt erreichbare 220-Städte-Karte */
   #deutschland-direkt { min-width: 46px; height: 46px; padding: 0 8px; pointer-events: auto; background: var(--karte); box-shadow: var(--schatten); border-radius: 14px; font-size: 12px; font-weight: 800; }
-  .formatkopfe { display: flex; gap: 5px; overflow-x: auto; grid-column: 1 / -1; padding-bottom: 3px; scrollbar-width: none; }
-  .formatkopfe button { flex: 0 0 118px; background: var(--karte); border-radius: 9px; padding: 6px; color: var(--text); min-height: 48px; text-align: left; }
-  .formatkopfe button strong, .formatkopfe button small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .formatkopfe button strong { font-size: 11px; }
-  .formatkopfe button small { color: var(--leise); font-size: 10px; margin-top: 3px; }
-  .formatsumme { grid-column: 1 / -1; padding: 4px 8px; background: rgba(255,255,255,.94); border-radius: 8px; font-size: 11px; display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; }
-  #stadt-chips { pointer-events: auto; display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
+  /* Q07: Häuserleiste über der unteren Leiste, damit die Kartenmitte frei bleibt (Cockpit wächst nicht). */
+  #stadt-chips { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(80px + env(safe-area-inset-bottom)); display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
+  body.panel-offen #stadt-chips { display: none; }
+  #stadt-chips button { min-height: 36px !important; }
   #stadt-chips button { flex: none; min-height: 44px; padding: 5px 10px; border-radius: 10px; background: var(--karte); color: var(--text); box-shadow: var(--schatten); font-size: 11px; font-weight: 700; }
   #stadt-chips .volkskauf { border-bottom: 3px solid #2363b0; } #stadt-chips .fundus { border-bottom: 3px solid #d69b24; }
   #stadt-chips .sport { border-bottom: 3px solid #35895b; } #stadt-chips .premium { border-bottom: 3px solid #a47a34; }
@@ -619,11 +616,11 @@
     <button id="deutschland-direkt" aria-label="Deutschlandkarte öffnen" title="Deutschlandkarte">DE</button><div class="datum"><b id="kw">KW 1</b><small id="stufe"></small><span id="phase"></span></div>
   </div>
   <div id="cockpit"></div>
-  <div id="stadt-chips" aria-label="Häuser und Wettbewerber der Stadt"></div>
   <!-- O07 Haus: Beobachtungsliste auf dem Startbildschirm -->
   <button id="hausbeobachtung" type="button">Hausbetrieb · Beobachtung</button>
 </div>
 <label class="botwahl"><input type="checkbox" id="bot"> Bot-Strategie C</label>
+<div id="stadt-chips" aria-label="Häuser und Wettbewerber der Stadt"></div>
 <div class="unten">
   <button type="button" class="chipstadt" id="stadt-reise" aria-label="Reise ab Hauptbahnhof öffnen"><span id="stadtname">Essen</span><small id="stadtcluster"></small><i>🚆</i></button>
   <button class="knopf" id="weiter">Woche weiter</button>

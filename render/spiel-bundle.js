@@ -130512,7 +130512,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "8fb85ae" : "Entwicklung";
+  var version = () => true ? "299b012" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
@@ -144981,7 +144981,6 @@
   }
   function cockpitZeigen() {
     const c = cockpit(s);
-    const formate = formatCockpit(s);
     const kachel2 = (titel, wert, ton2 = "") => `<div class="kz ${ton2}"><span>${titel}</span><b>${wert}</b></div>`;
     const FORMATNAME = { alle: "Alle", warenhaus: "Hartwig", sport: "Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
     const fx = cockpitFormat === "alle" ? null : c.formate.find((x2) => x2.format === cockpitFormat);
@@ -144992,9 +144991,7 @@
       fx ? kachel2("EBITDA " + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : "noch offen", !s.historie.length ? "" : fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wochen", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
       kachel2("Umsatz \xB7 " + auswahl4, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : "noch offen"),
       kachel2("Vertrauen", `${c.vertrauen} / 100`, c.vertrauen < 35 ? "rot" : ""),
-      kachel2("Image", `${c.image} / 100`, c.image < 35 ? "rot" : ""),
-      '<div class="formatkopfe">' + formate.map((f11) => '<button data-format="' + f11.formatKey + '" aria-label="' + esc2(f11.name) + ' im Portfolio filtern"><strong>' + esc2(f11.name) + "</strong><small>" + geld(f11.umsatz) + " / " + geld(f11.ebitda) + " \xB7 " + f11.offen + " offen</small></button>").join("") + "</div>",
-      '<div class="formatsumme"><b>Gesamtportfolio</b><span>' + geld(formate.reduce((a2, f11) => a2 + f11.umsatz, 0)) + " / " + geld(formate.reduce((a2, f11) => a2 + f11.ebitda, 0)) + " \xB7 " + formate.reduce((a2, f11) => a2 + f11.offen, 0) + " offen</span></div>"
+      kachel2("Image", `${c.image} / 100`, c.image < 35 ? "rot" : "")
     ].join("");
     $2("cockpit").querySelector("[data-cockpit-format]")?.addEventListener("change", (e) => {
       cockpitFormat = e.target.value;

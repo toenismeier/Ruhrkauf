@@ -740,7 +740,6 @@ function portfolioStadtOeffnen(name, id) {
 
 function cockpitZeigen() {
   const c = E.cockpit(s);
-  const formate = E.formatCockpit(s);
   const kachel = (titel, wert, ton = '') => `<div class="kz ${ton}"><span>${titel}</span><b>${wert}</b></div>`;
   // Formatfilter ohne zusätzliche Zeilen: das Cockpit darf auf dem iPhone nicht wachsen
   // (es überdeckt sonst die Karte). Auswahl im Titel der Umsatz-Kachel.
@@ -757,12 +756,6 @@ function cockpitZeigen() {
     kachel('Umsatz · ' + auswahl, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : 'noch offen'),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
-    '<div class="formatkopfe">' + formate.map((f) => '<button data-format="' + f.formatKey + '" aria-label="' + esc(f.name) + ' im Portfolio filtern">' +
-      '<strong>' + esc(f.name) + '</strong><small>' + geld(f.umsatz) + ' / ' + geld(f.ebitda) +
-      ' · ' + f.offen + ' offen</small></button>').join('') + '</div>',
-    '<div class="formatsumme"><b>Gesamtportfolio</b><span>' + geld(formate.reduce((a, f) => a + f.umsatz, 0)) +
-      ' / ' + geld(formate.reduce((a, f) => a + f.ebitda, 0)) +
-      ' · ' + formate.reduce((a, f) => a + f.offen, 0) + ' offen</span></div>',
   ].join('');
   $('cockpit').querySelector('[data-cockpit-format]')?.addEventListener('change', (e) => { cockpitFormat = e.target.value; cockpitZeigen(); });
   // O07 Haus: Ausnahme-Kachel im Cockpit.
