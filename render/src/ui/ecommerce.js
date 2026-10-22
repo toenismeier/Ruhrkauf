@@ -1,5 +1,5 @@
 // O09 E-Commerce: Panel hartwig.de, ausschließlich Engine-Abfragen und SpielerAktion.
-import { geld, fmt, esc } from './format.js';
+import { geld, fmt, esc, clusterName } from './format.js';
 import { itProdukteKarten } from './it-produkte.js';
 
 const prozent = (x, n = 1) => (100 * (x || 0)).toFixed(n).replace('.', ',') + ' %';
@@ -62,12 +62,12 @@ export function ecommerceModul(ctx) {
         (u.fulfillment === 'eigen' ? 'dienstleister' : 'eigen') + '">' +
         (u.fulfillment === 'eigen' ? 'Zum Dienstleister wechseln' : 'Eigenes Lager bauen') + '</button></div>';
       h += '</div><div class="karte"><div class="khead">Versand aus dem Haus je Hauscluster</div>';
-      for (const c of u.cluster) h += zeile(c.id, c.haeuser + ' Häuser', schalter('cluster', c.aktiv, 'data-id="' + esc(c.id) + '"'));
+      for (const c of u.cluster) h += zeile(clusterName(ctx.s(), c.id), c.haeuser + ' Häuser', schalter('cluster', c.aktiv, 'data-id="' + esc(c.id) + '"'));
       h += '</div>';
     } else {
       h += '<div class="karte"><div class="khead">Abholstationen und Filiallogistik</div>';
       for (const a of u.haeuser) h += '<div class="abt"><div class="zeile"><span class="was"><b>' +
-        esc(a.name) + '</b><i>' + esc(a.stadt) + ' · ' + esc(a.cluster) + '</i></span>' +
+        esc(a.name) + '</b><i>' + esc(a.stadt) + ' · ' + esc(clusterName(ctx.s(), a.cluster)) + '</i></span>' +
         schalter('station', a.station, 'data-id="' + esc(a.id) + '"') + '</div>' +
         '<div class="zeile unter">Abholungen ' + fmt.format(a.abholungen) +
         ' · Versand ' + fmt.format(a.versand) + ' · Retouren ' + fmt.format(a.retouren) +
