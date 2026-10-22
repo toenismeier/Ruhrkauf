@@ -494,8 +494,8 @@ export function altbildSVG(artikeltyp, farbe, material, groesse = 160, opt = {})
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse}" height="${groesse}"><defs>${K.defs.join('')}</defs>${hg}${K.teile.join('')}</svg>`;
 }
 
-export function typKachelSVG(artikeltyp, groesse = 120) {
-  const innen = produktbildSVG(artikeltyp, STANDARD_FARBE[artikeltyp], STANDARD_MATERIAL[artikeltyp], 100)
+export function typKachelSVG(artikeltyp, groesse = 120, opt = {}) {
+  const innen = produktbildSVG(artikeltyp, STANDARD_FARBE[artikeltyp], STANDARD_MATERIAL[artikeltyp], 100, opt)
     .replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse}" height="${groesse}"><rect x="1" y="1" width="98" height="98" rx="9" fill="#5a8396" stroke="#a9c7d4" stroke-width="1.6"/><g transform="translate(14 8) scale(0.72)">${innen}</g></svg>`;
 }
