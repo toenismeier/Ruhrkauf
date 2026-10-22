@@ -129,10 +129,12 @@ async function buendeln() {
     const weg = await ev((id) => !window.spiel.E.freigaben(window.spiel.s).liste.some((o) => o.id === id), a.id);
     pruefSoll('Einzelfreigabe', weg && nA > oA, `${a.id} ${a.wg}: offene Orders ${oA} → ${nA} (Order ${a.wert})`);
     const oB = await orders(bb.wg);
+    await tippe(`[data-a=orderAuf][data-v="${bb.id}"]`); // Q31: Kürzen/Ablehnen erst nach Antippen der Orderzeile
     await tippe(`[data-a=kuerzenAuf][data-v="${bb.id}"]`);
     await tippe(`[data-a=kuerzen][data-v="${bb.id}"][data-p2="25"]`);
     const nB = await orders(bb.wg);
     pruefSoll('Kürzen um 25 % und freigeben', Math.abs(nB - oB - bb.wert * 0.75) <= bb.lieferungen.length + 1, `${bb.wg}: offene Orders +${nB - oB} bei Order ${bb.wert}`);
+    await tippe(`[data-a=orderAuf][data-v="${c.id}"]`);
     await tippe(`[data-a=ablehnen][data-v="${c.id}"]`);
     const wegC = await ev((id) => !window.spiel.E.freigaben(window.spiel.s).liste.some((o) => o.id === id), c.id);
     pruefSoll('Ablehnen', wegC, c.id);

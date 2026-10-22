@@ -5429,8 +5429,8 @@
       ausweichend: { image: -2, betriebsrat: -1, bank: -2, kreditversicherer: -2, zitat: "Zu einzelnen Punkten m\xF6chten wir uns gegenw\xE4rtig nicht \xE4u\xDFern." }
     }[option2];
     if (!wirkung) return;
-    for (const feld of ["image", "betriebsrat", "bank", "kreditversicherer"]) {
-      s2.stakeholder[feld] = clamp(s2.stakeholder[feld] + wirkung[feld], 0, 100);
+    for (const feld2 of ["image", "betriebsrat", "bank", "kreditversicherer"]) {
+      s2.stakeholder[feld2] = clamp(s2.stakeholder[feld2] + wirkung[feld2], 0, 100);
     }
     stand(s2).naechstesZitat = { abWoche: s2.woche, text: `Im Interview sagt die Hartwig-Gesch\xE4ftsf\xFChrung: \u201E${wirkung.zitat}\u201C` };
   }
@@ -6136,9 +6136,9 @@
     return ergebnis;
   }
   function clusterName(gruppe3, vergeben) {
-    const zahl6 = /* @__PURE__ */ new Map();
-    for (const h3 of gruppe3) zahl6.set(h3.stadt, (zahl6.get(h3.stadt) ?? 0) + 1);
-    const staedte = [...zahl6.entries()].sort((a2, b3) => b3[1] - a2[1] || a2[0].localeCompare(b3[0], "de")).map(([st2]) => st2);
+    const zahl5 = /* @__PURE__ */ new Map();
+    for (const h3 of gruppe3) zahl5.set(h3.stadt, (zahl5.get(h3.stadt) ?? 0) + 1);
+    const staedte = [...zahl5.entries()].sort((a2, b3) => b3[1] - a2[1] || a2[0].localeCompare(b3[0], "de")).map(([st2]) => st2);
     for (let i = 1; i < staedte.length; i++) {
       const name2 = "Raum " + staedte[0] + " \xB7 " + staedte[i];
       if (!vergeben.includes("Raum " + staedte[0])) break;
@@ -14374,12 +14374,12 @@
     { id: "eigenmarkenMarge", name: "Eigenmarkenmarge", format: "prozent", standard: false }
   ];
   var leer2 = () => ({ u13: 0, uW: 0, r13: 0, best: 0, e52: 0, bSum52: 0, n52: 0, e13: 0, bSum13: 0, n13: 0, ab13: 0, fehl13: 0, nosZ: 0, nosN: 0, eu13: 0, er13: 0, alt: 0, sEin: 0, sAb: 0, limit: 0, limitV: 0, pipe: 0, offenN: 0, offenW: 0, bedarf4: 0, plMarge: 0, sollAbverkauf: 0 });
-  function rauschen(s2, wg, feld, woche2 = s2.woche) {
+  function rauschen(s2, wg, feld2, woche2 = s2.woche) {
     const stufe2 = s2.hq?.wirkung.controlling ?? 1;
     const r3 = stufe2 >= 2.5 ? 0 : [0.12, 0.04, 0][s2.controllingStufe];
     if (r3 === 0) return 1;
     let h3 = 2166136261;
-    const t3 = `${wg}|${woche2}|${feld}`;
+    const t3 = `${wg}|${woche2}|${feld2}`;
     for (let i = 0; i < t3.length; i++) {
       h3 ^= t3.charCodeAt(i);
       h3 = Math.imul(h3, 16777619);
@@ -52830,13 +52830,13 @@
       return nx - 1;
     };
     const flaechen = E8.flaechen.map((f11, n3) => ({ ...f11, nr: n3 }));
-    const feld = [];
+    const feld2 = [];
     for (let i = 0; i < nx; i++) {
-      feld.push([]);
-      for (let j3 = 0; j3 < nz; j3++) feld[i].push(null);
+      feld2.push([]);
+      for (let j3 = 0; j3 < nz; j3++) feld2[i].push(null);
     }
-    for (const f11 of flaechen) for (let i = f11.i0; i <= f11.i1; i++) for (let j3 = f11.j0; j3 <= f11.j1; j3++) if (i >= 0 && j3 >= 0 && i < nx && j3 < nz) feld[i][j3] = f11;
-    const zelle2 = (i, j3) => i < 0 || j3 < 0 || i >= nx || j3 >= nz ? { f: null, akt: false } : { f: feld[i][j3], akt: !!(feld[i][j3] && feld[i][j3].art !== "wasser") || E8.aktiv(i, j3) };
+    for (const f11 of flaechen) for (let i = f11.i0; i <= f11.i1; i++) for (let j3 = f11.j0; j3 <= f11.j1; j3++) if (i >= 0 && j3 >= 0 && i < nx && j3 < nz) feld2[i][j3] = f11;
+    const zelle2 = (i, j3) => i < 0 || j3 < 0 || i >= nx || j3 >= nz ? { f: null, akt: false } : { f: feld2[i][j3], akt: !!(feld2[i][j3] && feld2[i][j3].art !== "wasser") || E8.aktiv(i, j3) };
     const istWasser = (c) => !!(c.f && c.f.art === "wasser");
     const land = (c) => c.akt && !istWasser(c);
     const viertelVon = (i, j3) => E8.viertel ? E8.viertel(i, j3) : (() => {
@@ -53012,18 +53012,18 @@
       }
       knoten.sort((a2, b3) => a2.x - b3.x);
       if (l === 0 || l === nz) {
-        const jr = l === 0 ? 0 : nz - 1, fq = feld[0]?.[jr];
-        if (fq && fq.art === "wasser" && fq.quer && !fq.keineBruecke && feld[nx - 1]?.[jr] === fq) {
+        const jr = l === 0 ? 0 : nz - 1, fq = feld2[0]?.[jr];
+        if (fq && fq.art === "wasser" && fq.quer && !fq.keineBruecke && feld2[nx - 1]?.[jr] === fq) {
           if (!knoten.length || knoten[0].x - knoten[0].bw / 2 > 1) knoten.unshift({ x: 0, bw: 0, gw: 0, oben: null, unten: null, virt: true });
           if (knoten[knoten.length - 1].x + knoten[knoten.length - 1].bw / 2 < breite - 1) knoten.push({ x: breite, bw: 0, gw: 0, oben: null, unten: null, virt: true });
         }
       } else if (knoten.length) {
         const istW = (i, j3) => {
-          const f11 = feld[i]?.[j3];
+          const f11 = feld2[i]?.[j3];
           return !!(f11 && f11.art === "wasser" && !f11.quer);
         };
         const istQ = (i, j3) => {
-          const f11 = feld[i]?.[j3];
+          const f11 = feld2[i]?.[j3];
           return !!(f11 && f11.art === "wasser" && f11.quer);
         };
         const rand = (i) => istW(i, l - 1) !== istW(i, l) || istQ(i, l - 1) !== istQ(i, l);
@@ -63211,9 +63211,9 @@
       const auswahl4 = [...front2, ...weitere];
       const r3 = rng3(String(K3.haus.id) + "/blindglas");
       const start = auswahl4.length ? Math.floor(r3() * auswahl4.length) : 0;
-      const zahl6 = Math.min(4, auswahl4.length);
-      for (let i = 0; i < zahl6; i++) {
-        const g = auswahl4[(start + i * Math.max(1, Math.floor(auswahl4.length / zahl6))) % auswahl4.length];
+      const zahl5 = Math.min(4, auswahl4.length);
+      for (let i = 0; i < zahl5; i++) {
+        const g = auswahl4[(start + i * Math.max(1, Math.floor(auswahl4.length / zahl5))) % auswahl4.length];
         const front3 = g.t + 0.1;
         g.s.q(g.a + 0.1, g.b - 0.1, g.y0 + 0.12, g.y1 - 0.13, front3, front3 + 0.1, i % 2 ? "#d1d0b3" : "#b8c5b8");
         g.s.q(g.a + 0.13, g.b - 0.13, g.y1 - 0.35, g.y1 - 0.25, front3 + 0.08, front3 + 0.1, "#737c79");
@@ -67522,8 +67522,8 @@
   }
   function oberfries(L2, w2, r3, ctx, k3) {
     if (ctx.A.rahmen) return;
-    const feld = ctx.marke?.kopf ?? ctx.A.schild.farbe, sf = ctx.marke?.schrift ?? ctx.A.schild.schrift;
-    L2.box(w2 + 0.12, 0.72, 0.14, 0, 3.86, 0.24, feld);
+    const feld2 = ctx.marke?.kopf ?? ctx.A.schild.farbe, sf = ctx.marke?.schrift ?? ctx.A.schild.schrift;
+    L2.box(w2 + 0.12, 0.72, 0.14, 0, 3.86, 0.24, feld2);
     if (ctx.scene && k3 % 2 === 0 && w2 > 2.4) schrift(L2, ctx.marke?.name ?? ctx.A.name, 0, 4.22, 0.32, 0.42, sf);
     return;
     const f11 = ctx.marke?.wand ?? ctx.A.korpus ?? "#ece6dc";
@@ -129216,9 +129216,9 @@
     n3.translate(cx, cy, cz);
     S.add(n3, "#2f3438");
   }
-  function gitterturm(S, x0, z0, x1, z1, y0, y1, c, feld = 5, dick = 0.6) {
+  function gitterturm(S, x0, z0, x1, z1, y0, y1, c, feld2 = 5, dick = 0.6) {
     for (const [x2, z4] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) S.box(dick, y1 - y0, dick, x2, (y0 + y1) / 2, z4, c);
-    const n3 = Math.max(1, Math.round((y1 - y0) / feld)), dy = (y1 - y0) / n3;
+    const n3 = Math.max(1, Math.round((y1 - y0) / feld2)), dy = (y1 - y0) / n3;
     for (let k3 = 0; k3 <= n3; k3++) {
       const y2 = y0 + k3 * dy;
       S.box(x1 - x0, 0.35, 0.35, (x0 + x1) / 2, y2, z0, c);
@@ -159271,9 +159271,9 @@
     if (d3.art === "auswahl") return optionenVon(d3).includes(wert) ? wert : d3.standard;
     if (d3.art === "regler") {
       const o3 = d3.optionen ?? {}, min = Number(o3.min ?? 0), max = Number(o3.max ?? 100);
-      const zahl6 = Number(wert), schritt = Number(o3.schritt ?? o3.step ?? 1);
-      if (!Number.isFinite(zahl6)) return d3.standard;
-      const rund3 = schritt > 0 ? min + Math.round((zahl6 - min) / schritt) * schritt : zahl6;
+      const zahl5 = Number(wert), schritt = Number(o3.schritt ?? o3.step ?? 1);
+      if (!Number.isFinite(zahl5)) return d3.standard;
+      const rund3 = schritt > 0 ? min + Math.round((zahl5 - min) / schritt) * schritt : zahl5;
       return Math.min(max, Math.max(min, rund3));
     }
     return d3.standard;
@@ -159335,10 +159335,10 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "5d6fdde" : "Entwicklung";
+  var version = () => true ? "ca405f3" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
-    function feld(d3) {
+    function feld2(d3) {
       const v = einstellung(d3.schluessel), id = "einst-" + d3.schluessel;
       if (d3.art === "schalter") return '<label class="einst-zeile einst-schalter" for="' + id + '"><span>' + esc(d3.titel) + '</span><input id="' + id + '" type="checkbox" data-einstellung="' + d3.schluessel + '" ' + (v ? "checked" : "") + ' aria-label="' + esc(d3.titel) + '"></label>';
       if (d3.art === "auswahl") return '<label class="einst-zeile" for="' + id + '"><span>' + esc(d3.titel) + '</span><select id="' + id + '" data-einstellung="' + d3.schluessel + '" aria-label="' + esc(d3.titel) + '">' + d3.optionen.map((o4) => {
@@ -159353,7 +159353,7 @@
       const gruppen = /* @__PURE__ */ new Map();
       for (const d3 of definitionen2.values()) {
         if (!gruppen.has(d3.gruppe)) gruppen.set(d3.gruppe, []);
-        gruppen.get(d3.gruppe).push(feld(d3));
+        gruppen.get(d3.gruppe).push(feld2(d3));
       }
       const html = '<i class="hk-bereich" data-bereich="betrieb" data-symbol="zahlen" aria-hidden="true"></i><div class="hk-rumpf">' + [...gruppen.entries()].map(([name2, zeilen]) => '<h3 class="hk-abschnitt">' + esc(name2) + '</h3><section class="hk-liste einst-gruppe">' + zeilen.join("") + "</section>").join("") + '<h3 class="hk-abschnitt">\xDCber</h3><section class="hk-liste einst-gruppe"><div class="einst-info">Version <strong>' + esc(version()) + '</strong></div><p class="einst-info">Alle Namen sind frei erfunden.</p><p class="einst-info">Stadtplan Essen: Kartendaten \xA9 OpenStreetMap-Mitwirkende (ODbL). Quelle: OpenStreetMap, 20.10.2026.</p><p class="einst-info">Die Einstellungen gelten ger\xE4teweit und geh\xF6ren nicht zum Spielstand.</p></section></div>';
       ctx.panel("Einstellungen", "Darstellung, Bedienung und Spiel", html, "gross");
@@ -159463,6 +159463,94 @@
     };
   }
 
+  // src/ui/komponenten.js
+  var bereich = (name2, symbol2 = name2, { voll: voll2 = false } = {}) => `<i class="hk-bereich" data-bereich="${esc2(name2)}" data-symbol="${esc2(symbol2)}"${voll2 ? ' data-hoehe="voll"' : ""} aria-hidden="true"></i>`;
+  var rumpf2 = (html) => `<div class="hk-rumpf">${html}</div>`;
+  function sprecher({ text: text3, unter = "", person: person3 = "", ton: ton2 = "" }) {
+    return `<div class="hk-sprecher${ton2 ? " hk-" + ton2 : ""}" role="note"><p>${text3}${unter ? `<small>${esc2(unter)}</small>` : ""}</p>${person3 ? `<span class="hk-person" aria-hidden="true">${person3}</span>` : ""}</div>`;
+  }
+  var abschnitt = (titel, rechts = "") => `<h3 class="hk-abschnitt">${esc2(titel)}${rechts ? `<small>${esc2(rechts)}</small>` : ""}</h3>`;
+  function abweichung(roh2, text3, quote = null, umgekehrt = false) {
+    if (roh2 == null) return "<span>keine Vergleichswoche</span>";
+    const gut = umgekehrt ? roh2 < 0 : roh2 > 0, schlecht = umgekehrt ? roh2 > 0 : roh2 < 0;
+    const q2 = quote == null || !Number.isFinite(quote) ? "" : ` (${quote > 0 ? "+" : quote < 0 ? "\u2212" : "\xB1"}${Math.abs(quote * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %)`;
+    return `<span class="${gut ? "gut" : schlecht ? "schlecht" : ""}">${esc2(text3)}${q2}</span>`;
+  }
+  function gross2(werte3) {
+    return `<div class="hk-gross" style="--n:${werte3.length}">${werte3.map((w2) => `<div><span>${esc2(w2.label)}</span><b class="${w2.ton ?? ""}"${w2.p ? ` data-p="${esc2(w2.p)}"` : ""}>${esc2(w2.wert)}</b>${w2.unter ? `<i>${w2.unter}</i>` : ""}</div>`).join("")}</div>`;
+  }
+  function balkenPaar(reihen) {
+    const eine = (r3) => {
+      const w2 = r3.punkte.map((q2) => q2.wert ?? 0);
+      if (w2.length < 2) return `<div><h4>${esc2(r3.titel)}</h4>${leer3("Ab der zweiten Woche.")}</div>`;
+      const pos = Math.max(0, ...w2), neg = Math.max(0, ...w2.map((v) => -v)), ges = pos + neg || 1;
+      const oben = pos / ges * 100, unten = neg / ges * 100;
+      const saeule3 = (v) => `<div style="display:flex;flex-direction:column;height:100%"><div style="height:${oben}%;display:flex;align-items:flex-end;justify-content:center">${v > 0 ? `<span class="${r3.serie}" style="height:${Math.max(3, v / ges * 100 / (oben / 100))}%" data-w="${Math.round(v)}"></span>` : ""}</div><div style="height:${unten}%;display:flex;align-items:flex-start;justify-content:center">${v < 0 ? `<span class="${r3.serie} neg" style="height:${Math.max(3, -v / ges * 100 / (unten / 100))}%" data-w="${Math.round(v)}"></span>` : ""}</div>${v === 0 ? '<span class="null" style="height:2px;align-self:center" data-w="0"></span>' : ""}</div>`;
+      const von = r3.punkte[0].label, bis = r3.punkte[r3.punkte.length - 1].label;
+      return `<div><h4>${esc2(r3.titel)}</h4><div class="hk-balken mitnull" style="--n:${w2.length}" role="img" aria-label="${esc2(r3.titel)} ${esc2(von)} bis ${esc2(bis)}">${neg ? `<i class="null-linie" style="top:${oben}%"></i>` : ""}${w2.map(saeule3).join("")}</div><div class="hk-balkenfuss" style="--n:${w2.length}">${r3.punkte.map((q2) => `<span>${esc2(q2.label)}</span>`).join("")}</div></div>`;
+    };
+    return `<div class="hk-balkenpaar">${reihen.map(eine).join("")}</div>`;
+  }
+  function tabelle({ titel = "", spalten: spalten2 = [], zeilen, summe: summe2 = null, pruefen: pruefen2 = false }) {
+    const zelle2 = (t3, roh2, ton2) => `<td class="${ton2 ?? ""}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${esc2(t3)}</td>`;
+    const zeile4 = (z4, k3 = "") => `<tr${k3 ? ` class="${k3}"` : ""}><td>${esc2(z4.name)}</td>${z4.werte.map((w2, i) => zelle2(w2, z4.roh?.[i], z4.ton?.[i])).join("")}</tr>`;
+    return `${titel ? abschnitt(titel) : ""}<table class="hk-tabelle"${pruefen2 ? ' data-summen="1"' : ""}>${spalten2.length ? `<thead><tr><th></th>${spalten2.map((s2) => `<th>${esc2(s2)}</th>`).join("")}</tr></thead>` : ""}<tbody>${zeilen.map((z4) => zeile4(z4)).join("")}${summe2 ? zeile4(summe2, "summe") : ""}</tbody></table>`;
+  }
+  function zeile({ was, unter = "", wert = "", wertUnter = "", ton: ton2 = "", attr = "", tippbar = false, roh: roh2 = null }) {
+    const tag = tippbar ? "button" : "div";
+    return `<${tag} class="hk-zeile${tippbar ? " hk-tippbar" : ""}"${tippbar ? ' type="button"' : ""} ${attr}><span class="hk-was">${was}${unter ? `<small>${unter}</small>` : ""}</span>${wert !== "" ? `<span class="hk-wert ${ton2}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${wert}${wertUnter ? `<small>${wertUnter}</small>` : ""}</span>` : ""}${tippbar ? '<span class="hk-pfeil" aria-hidden="true">\u203A</span>' : ""}</${tag}>`;
+  }
+  var liste = (zeilen) => `<div class="hk-liste">${zeilen.join("")}</div>`;
+  var knopf = (text3, attr = "", art = "", aus = false) => `<button type="button" class="hk-knopf ${art}" ${attr}${aus ? " disabled" : ""}>${esc2(text3)}</button>`;
+  var stepper = ({ wert, unter = "", attrMinus = "", attrPlus = "", minusAus = false, plusAus = false, label = "" }) => `<div class="hk-stepper"${label ? ` role="group" aria-label="${esc2(label)}"` : ""}><button type="button" aria-label="weniger" ${attrMinus}${minusAus ? " disabled" : ""}>\u2212</button><output>${esc2(wert)}${unter ? `<small>${esc2(unter)}</small>` : ""}</output><button type="button" aria-label="mehr" ${attrPlus}${plusAus ? " disabled" : ""}>+</button></div>`;
+  var schalter = ({ text: text3, unter = "", an, attr = "" }) => `<button type="button" class="hk-schalter" aria-pressed="${an ? "true" : "false"}" ${attr}><span class="hk-knebel" aria-hidden="true"></span><span>${esc2(text3)}${unter ? `<small>${esc2(unter)}</small>` : ""}</span></button>`;
+  var seg = (optionen3, aktiv6, attr) => `<div class="hk-seg" role="group">${optionen3.map(([w2, t3]) => `<button type="button" aria-pressed="${w2 === aktiv6}" ${attr(w2)}>${esc2(t3)}</button>`).join("")}</div>`;
+  var leer3 = (grund2, titel = "", aktion2 = "") => `<div class="hk-leer">${titel ? `<b>${esc2(titel)}</b>` : ""}${esc2(grund2)}${aktion2}</div>`;
+  var hinweis = (html, ton2 = "") => `<div class="hk-hinweis ${ton2}" role="${ton2 === "fehler" ? "alert" : "note"}"><span>${html}</span></div>`;
+  var marke4 = (text3, ton2 = "") => `<span class="hk-marke ${ton2}">${esc2(text3)}</span>`;
+  function skala(name2, wert) {
+    const n3 = Math.round(Math.max(0, Math.min(100, wert)) / 20);
+    return `<div class="hk-skala"><span>${esc2(name2)}</span><span class="hk-segmente" aria-hidden="true">${[0, 1, 2, 3, 4].map((i) => `<i class="${i < n3 ? "an" : ""}"></i>`).join("")}</span><b>${Math.round(wert)}</b></div>`;
+  }
+  var C30 = Math.cos(Math.PI / 6);
+  var pt = (x2, y2, z4, s2 = 2.9, ox = 16, oy = 19) => [ox + (x2 - y2) * C30 * s2, oy + (x2 + y2) * 0.5 * s2 - z4 * s2];
+  var poly = (pts, f11) => `<path d="M${pts.map(([a2, b3]) => a2.toFixed(1) + " " + b3.toFixed(1)).join("L")}Z" fill="${f11}"/>`;
+  function quader(x2, y2, z4, w2, d3, h3, [o3, l, r3]) {
+    const P4 = (a2, b3, c) => pt(a2, b3, c);
+    return poly([P4(x2, y2, z4 + h3), P4(x2 + w2, y2, z4 + h3), P4(x2 + w2, y2 + d3, z4 + h3), P4(x2, y2 + d3, z4 + h3)], o3) + poly([P4(x2, y2 + d3, z4), P4(x2 + w2, y2 + d3, z4), P4(x2 + w2, y2 + d3, z4 + h3), P4(x2, y2 + d3, z4 + h3)], l) + poly([P4(x2 + w2, y2, z4), P4(x2 + w2, y2 + d3, z4), P4(x2 + w2, y2 + d3, z4 + h3), P4(x2 + w2, y2, z4 + h3)], r3);
+  }
+  function svg(inhalt) {
+    const z4 = [...inhalt.matchAll(/(-?[\d.]+) (-?[\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
+    const x0 = Math.min(...z4.map((q2) => q2[0])), x1 = Math.max(...z4.map((q2) => q2[0])), y0 = Math.min(...z4.map((q2) => q2[1])), y1 = Math.max(...z4.map((q2) => q2[1]));
+    const g = Math.max(x1 - x0, y1 - y0) + 2, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    return `<svg viewBox="${(cx - g / 2).toFixed(1)} ${(cy - g / 2).toFixed(1)} ${g.toFixed(1)} ${g.toFixed(1)}" aria-hidden="true">${inhalt}</svg>`;
+  }
+  var GRAU = ["#d9d3cb", "#b3aba1", "#8d847a"];
+  var DUNKEL3 = ["#6c655e", "#55504a", "#433f3a"];
+  var ROT4 = ["#ef6b60", "#d23c32", "#a62a22"];
+  var GRUEN = ["#8ed694", "#6dbf73", "#4a8d50"];
+  var BLAU = ["#9dc2dc", "#6f9cbd", "#4f7a99"];
+  var SAND2 = ["#f0dfb8", "#d9c393", "#b8a170"];
+  var WEISS4 = ["#ffffff", "#e5e1db", "#c9c3bb"];
+  var figur5 = (x2, y2, f11) => quader(x2, y2, 0, 1.4, 1.4, 3.2, f11) + quader(x2 + 0.15, y2 + 0.15, 3.3, 1.1, 1.1, 1.1, ["#f2d2b6", "#dcb593", "#c29a77"]);
+  var SYMBOLE = {
+    ueberblick: svg(quader(-3, -3, 0, 6, 6, 4.5, WEISS4) + quader(-3, -3, 2.4, 6, 6, 0.6, ROT4) + quader(-3, -3, 4.5, 6, 6, 0.5, DUNKEL3)),
+    etagen: svg(quader(-3.5, -3.5, 0, 7, 7, 1, GRAU) + quader(-3.5, -3.5, 2.4, 7, 7, 1, WEISS4) + quader(-3.5, -3.5, 4.8, 7, 7, 1, ROT4)),
+    personal: svg(figur5(-2.5, 0, BLAU) + figur5(0.5, -2, ROT4) + figur5(1.5, 1.5, GRUEN)),
+    leitung: svg(quader(-3.5, -1, 0, 7, 3, 2.2, SAND2) + figur5(-0.5, -3.5, DUNKEL3) + quader(-1, 0, 2.2, 2, 1.2, 0.8, ["#333", "#222", "#111"])),
+    sortiment: svg(quader(-4, -0.3, 0, 0.6, 0.6, 6, DUNKEL3) + quader(3.4, -0.3, 0, 0.6, 0.6, 6, DUNKEL3) + quader(-4, -0.3, 5.6, 8, 0.6, 0.5, DUNKEL3) + quader(-3, -0.8, 2, 1.6, 1.6, 3.2, ROT4) + quader(-0.9, -0.8, 2, 1.6, 1.6, 3.2, BLAU) + quader(1.2, -0.8, 2, 1.6, 1.6, 3.2, SAND2)),
+    marketing: svg(quader(-0.4, -0.4, 0, 0.8, 0.8, 4, DUNKEL3) + quader(-4, -0.5, 3.6, 8, 1, 4.6, WEISS4) + quader(-3.4, 0.5, 4.2, 6.8, 0.1, 3.4, ROT4)),
+    kosten: svg(quader(-3.5, -2.5, 0, 7, 5, 2.5, GRAU) + quader(-3, -2, 2.5, 3, 4, 2.2, DUNKEL3) + quader(0.4, -1.5, 2.5, 2.6, 3, 0.5, GRUEN)),
+    finanzen: svg(quader(-3.5, -2.5, 0, 7, 5, 2.5, GRAU) + quader(-3, -2, 2.5, 3, 4, 2.2, DUNKEL3) + quader(0.4, -1.5, 2.5, 2.6, 3, 0.5, GRUEN)),
+    ware: svg(quader(-4, -3, 0, 4, 4, 3.4, SAND2) + quader(0.3, -3, 0, 3.7, 4, 3.4, SAND2) + quader(-2, -1.5, 3.4, 4, 4, 3.2, SAND2) + quader(-2, 0.6, 5, 4, 0.1, 0.5, ROT4)),
+    umbau: svg(quader(-3.5, -3.5, 0, 0.5, 0.5, 7, SAND2) + quader(3, -3.5, 0, 0.5, 0.5, 7, SAND2) + quader(-3.5, -3.5, 3.3, 7, 0.5, 0.5, SAND2) + quader(-3.5, -3.5, 6.5, 7, 0.5, 0.5, SAND2) + quader(-2.5, -1, 0, 5, 4, 3, WEISS4)),
+    kommentare: svg(quader(-3.5, -3, 0, 7, 6, 0.6, WEISS4) + quader(-2.5, -2, 0.6, 5, 4, 0.3, ["#f6f2e9", "#ddd6c7", "#c9c0ae"]) + quader(-2, 1.5, 0.9, 4, 0.2, 0.2, DUNKEL3)),
+    post: svg(quader(-4, -3, 0, 8, 6, 1.6, SAND2) + quader(-3.4, -2.4, 1.6, 6.8, 4.8, 0.4, WEISS4) + quader(-3, -2, 2, 6, 4, 0.4, ["#fbf7ee", "#e5ddcd", "#cdc3ad"]) + quader(-1, -0.6, 2.4, 2, 1.2, 0.2, ROT4)),
+    zentrale: svg(quader(-2.5, -2.5, 0, 5, 5, 10, WEISS4) + quader(-2.5, 2.45, 2, 5, 0.1, 1, BLAU) + quader(-2.5, 2.45, 4.5, 5, 0.1, 1, BLAU) + quader(-2.5, 2.45, 7, 5, 0.1, 1, BLAU) + quader(-2.5, -2.5, 10, 5, 5, 0.6, ROT4)),
+    zahlen: svg(quader(-4, -1, 0, 2, 2, 3, WEISS4) + quader(-1, -1, 0, 2, 2, 6, WEISS4) + quader(2, -1, 0, 2, 2, 4.4, GRUEN))
+  };
+  var reiterUnten = (reiter, aktiv6, attr) => `<nav class="hk-reiter" aria-label="Bereiche">${reiter.map(([id, name2, sym3]) => `<button type="button" ${attr(id)}${id === aktiv6 ? ' aria-current="page"' : ""}>${SYMBOLE[sym3 ?? id] ?? ""}<span>${esc2(name2)}</span></button>`).join("")}</nav>`;
+
   // src/ui/produkte-q24.js
   var FAECHER = [["damen", "Damen"], ["herren", "Herren"], ["kinder", "Kinder"], ["home", "Home"]];
   var ZIEL = { kinder: "kinder", teens: "jung", young: "jung", adults: "mitte", bestager: "reif" };
@@ -159525,8 +159613,8 @@
     let h3 = '<div class="q11baum q24-baum">';
     for (const kat of baum2) {
       const offen = ui.baumOffen === kat.id;
-      const zahl6 = kat.unterkategorien.reduce((n3, a2) => n3 + a2.typen.length, 0);
-      h3 += '<button class="q11kategorie ' + (offen ? "an" : "") + '" data-a="baumKat" data-v="' + esc2(kat.id) + '" aria-expanded="' + offen + '"><span>' + esc2(kat.name) + "</span><small>" + zahl6 + ' Artikel</small><b aria-hidden="true">' + (offen ? "\u2212" : "+") + "</b></button>";
+      const zahl5 = kat.unterkategorien.reduce((n3, a2) => n3 + a2.typen.length, 0);
+      h3 += '<button class="q11kategorie ' + (offen ? "an" : "") + '" data-a="baumKat" data-v="' + esc2(kat.id) + '" aria-expanded="' + offen + '"><span>' + esc2(kat.name) + "</span><small>" + zahl5 + ' Artikel</small><b aria-hidden="true">' + (offen ? "\u2212" : "+") + "</b></button>";
       if (!offen) continue;
       for (const ast2 of kat.unterkategorien) {
         const astOffen = ui.astOffen === ast2.id;
@@ -159568,7 +159656,8 @@
   var NAMEN2 = { damen: ["Linnea", "Mira Lenz", "Johanna B.", "Ella Sommer"], herren: ["Nordhaven", "Carl Ostwind", "Feldweg", "Henrik & Co."], unisex: ["Studio Hartwig", "Kleeblatt", "Hafenblau"], kinder: ["Hafenkind", "Kai & Kalle", "Pusteblume"] };
   var REGIONEN4 = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
   var alterText = (a2) => a2 === "70+" ? "Best Ager 70+" : ALTER.find((x2) => x2[0] === a2)?.[1] ?? a2;
-  var zielText = (z4) => `${GESCHLECHT.find((g) => g[0] === z4.geschlecht)?.[1] ?? ""} ${alterText(z4.alter)}`;
+  var ELTERN = { "18-29": "Eltern 18 bis 29", "30-49": "Eltern 30 bis 49", "50+": "Gro\xDFeltern" };
+  var zielText = (z4) => z4.geschlecht === "kinder" && ELTERN[z4.alter] ? `Kinder, ${ELTERN[z4.alter]}` : `${GESCHLECHT.find((g) => g[0] === z4.geschlecht)?.[1] ?? ""} ${alterText(z4.alter)}`;
   var preisText = (p2) => PREIS2.find((x2) => x2[0] === p2)?.[1] ?? p2;
   var STATUS = { aufbau: "im Aufbau", neupositionierung: "Neupositionierung", eingestellt: "eingestellt" };
   var punkte = (x2) => `+${(x2 * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Punkte`;
@@ -159583,28 +159672,44 @@
     ui.seite = "eigenmarken";
     const s2 = ctx.s(), u = ctx.q.marken(s2);
     const leistungen = new Map((typeof ctx.E?.produkte === "function" ? ctx.E.produkte(s2).marken : []).map((m) => [m.marke, m.leistung]));
-    let h3 = tabs;
-    h3 += `<div class="raster"><div class="kz"><span>Eigenmarkenanteil am Umsatz</span><b data-p="mg:anteil">${pz3(u.anteilUmsatz, 1)}</b></div><div class="kz"><span>Mehrmarge zu Fremdware</span><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b></div><div class="kz"><span>Marken gef\xFChrt</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace(".", ",")} sinnvollen</b></div><div class="kz"><span>Umsatz Eigenmarken 13 Wochen</span><b data-p="mg:umsatz">${geld(u.marken.reduce((a2, m) => a2 + m.umsatz13, 0))}</b></div></div>`;
-    h3 += '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>';
-    for (const m of u.marken) {
-      const veraltet = m.stilAktualitaet < 45;
-      const status2 = m.status !== "aktiv" ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}</span>` : veraltet ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
+    const reihe = [...u.marken].sort((a2, b3) => b3.umsatz13 - a2.umsatz13);
+    const gesamt = u.marken.reduce((a2, m) => a2 + m.umsatz13, 0);
+    const veraltet = reihe.filter((m) => m.status === "aktiv" && m.stilAktualitaet < 45);
+    if (!reihe.some((m) => m.id === ui.em.auf)) ui.em.auf = reihe[0]?.id;
+    let h3 = tabs + '<div class="q31">';
+    h3 += `<div class="q-gross"><span class="q-label">Eigenmarkenanteil am Umsatz</span><span class="q-haupt" data-p="mg:anteil">${pz3(u.anteilUmsatz, 1)}</span><span class="q-neben"><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b>Mehrmarge zu Fremdware</span></div>`;
+    if (!reihe.length) h3 += '<div class="q-befund">Hartwig f\xFChrt keine Eigenmarke. Eine Marke gr\xFCndest du \xFCber den freien Platz in der Tafel.</div>';
+    else if (veraltet.length) h3 += `<div class="q-befund"><b>${veraltet.map((m) => esc2(m.name)).join(", ")}</b> ${veraltet.length === 1 ? "wirkt" : "wirken"} veraltet. Ohne Neupositionierung sinkt die Nachfrage weiter.</div>`;
+    else h3 += '<div class="q-befund">Alle aktiven Marken sind im Stil aktuell.</div>';
+    h3 += `<div class="q-buch q-tafel" data-summenbuch="Kollektionstafel"><div class="q-buch-kopf"><span>Kollektionstafel</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace(".", ",")} sinnvollen</b></div>`;
+    for (const m of reihe) {
+      const st2 = m.status !== "aktiv" ? `${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}` : m.stilAktualitaet < 45 ? "Stil veraltet" : `${m.stil}, ${preisText(m.preislage)}`;
+      h3 += `<button class="q-muster${ui.em.auf === m.id ? " q-an" : ""}" data-a="emAuf" data-v="${m.id}" aria-expanded="${ui.em.auf === m.id}"><span class="q-probe" style="--farbe:${m.farbe}"></span><span class="q-name">${esc2(m.name)}<small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie}</small><small class="${m.status === "aktiv" && m.stilAktualitaet < 45 ? "q-minus" : ""}">${st2}</small></span><span class="q-wert"><b data-s="u">${geld(m.umsatz13)}</b><small>${punkte(m.mehrmarge)}</small></span></button>`;
+    }
+    if (u.gefuehrt < u.kapazitaet) h3 += '<button class="q-muster q-frei" data-a="emGruenden"><span class="q-probe"></span><span class="q-name">Freier Platz<small>Neue Eigenmarke gr\xFCnden</small></span><span class="q-wert">+</span></button>';
+    if (reihe.length) h3 += `<div class="q-summe"><span>Umsatz 13 Wochen gesamt</span><span class="q-wert" data-summe="u" data-p="mg:umsatz">${geld(gesamt)}</span></div>`;
+    h3 += "</div>";
+    if (u.gefuehrt >= u.kapazitaet) h3 += '<button class="q-neben-akt" data-a="emGruenden" style="margin-bottom:12px">+ Neue Eigenmarke (Kapazit\xE4t voll)</button>';
+    for (const m of reihe.filter((x2) => x2.id === ui.em.auf)) {
+      const veraltetM = m.stilAktualitaet < 45;
+      const status2 = m.status !== "aktiv" ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}</span>` : veraltetM ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
       h3 += `<div class="karte emkarte"><div class="mkopf" style="background:${m.farbe}"><b>${esc2(m.name)}</b><small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie}${m.gewachsen ? " \xB7 gewachsene Hartwig-Marke" : ""}</small></div>`;
-      h3 += teamAufschluesselung(leistungen.get(m.id));
-      h3 += `<div class="ochips">${status2}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualit\xE4t ${"\u2605".repeat(m.qualitaet)}${"\u2606".repeat(5 - m.qualitaet)}</span><span class="chip grau">${esc2(m.beschaffungName)}</span></div>`;
       h3 += `<div class="owerte"><div><span>Umsatz 13 Wochen</span><b data-p="m:${m.id}:umsatz">${geld(m.umsatz13)}</b></div><div><span>Rohertragsquote</span><b data-p="m:${m.id}:marge">${pz3(m.rohertragsquote, 1)}</b></div><div><span>Mehrmarge</span><b data-p="m:${m.id}:mehrmarge">${punkte(m.mehrmarge)}</b></div></div>`;
+      h3 += `<div class="ochips">${status2}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualit\xE4t ${m.qualitaet} von 5</span><span class="chip grau">${esc2(m.beschaffungName)}</span></div>`;
       h3 += `<div class="mzeile"><span>Bekanntheit</span>${balken6(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
-      h3 += `<div class="mzeile"><span>Stil aktuell</span>${balken6(m.stilAktualitaet, veraltet ? "#d23c32" : "#2f8f5b")}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
+      h3 += `<div class="mzeile"><span>Stil aktuell</span>${balken6(m.stilAktualitaet, veraltetM ? "#d23c32" : "#2f8f5b")}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
       h3 += `<div class="mzeile"><span>Passung je Region</span></div>${passungZeile(m.passungRegion, `m:${m.id}:passung`)}`;
-      h3 += `<div class="olief">${m.wgs.filter((w2) => w2.anteilZiel > 0 || w2.anteilIst > 0).map((w2) => `${esc2(w2.name)} ${pz3(w2.anteilIst)}`).join(" \xB7 ") || "keine Warengruppe"}</div>`;
+      h3 += teamAufschluesselung(leistungen.get(m.id));
+      h3 += `<div class="olief">${m.wgs.filter((w2) => w2.anteilZiel > 0 || w2.anteilIst > 0).map((w2) => `${esc2(w2.name)} ${pz3(w2.anteilIst)}`).join(" \xB7 ") || "Noch in keiner Warengruppe."}</div>`;
       if (m.hinweise?.length) h3 += `<div class="olief warnung">${m.hinweise.map(esc2).join(" \xB7 ")}</div>`;
       if (ui.em.einstellen === m.id) h3 += `<div class="oknoepfe"><button class="rot" data-a="emEinstellenJa" data-v="${m.id}">Wirklich einstellen</button><button data-a="emEinstellenNein">Behalten</button></div>`;
       else {
-        h3 += `<div class="regler"><div class="rkopf"><b>Markenbudget je Woche</b><small>baut Bekanntheit auf</small></div><div class="stepper"><button data-a="emBudget" data-v="${m.id}" data-d="-5000">\u2212</button><span><b data-p="m:${m.id}:budget">${geld(m.budgetWoche)}</b></span><button data-a="emBudget" data-v="${m.id}" data-d="5000">+</button></div></div>`;
+        h3 += `<div class="regler"><div class="rkopf"><b>Markenbudget je Woche</b><small>baut Bekanntheit auf</small></div><div class="stepper"><button data-a="emBudget" data-v="${m.id}" data-d="-5000" aria-label="Budget senken">\u2212</button><span><b data-p="m:${m.id}:budget">${geld(m.budgetWoche)}</b></span><button data-a="emBudget" data-v="${m.id}" data-d="5000" aria-label="Budget erh\xF6hen">+</button></div></div>`;
         h3 += `<div class="oknoepfe"><button data-a="emPositionieren" data-v="${m.id}"${m.status === "aktiv" ? "" : " disabled"}>Neu positionieren</button><button class="rot" data-a="emEinstellen" data-v="${m.id}">Einstellen</button></div>`;
       }
       h3 += "</div>";
     }
+    h3 += "</div>";
     return { titel: "Eigenmarken", unter: `${u.gefuehrt} Marken \xB7 ${pz3(u.anteilUmsatz, 1)} vom Umsatz \xB7 KW ${kwVon2(s2.woche)}`, html: h3 };
   }
   var SCHRITTE = ["Zielgruppe", "Sortiment", "Profil", "Beschaffung", "Name"];
@@ -159622,35 +159727,35 @@
   function assistent(ctx, ui, tabs) {
     const s2 = ctx.s(), A = ui.em.assistent, m = A.daten, u = ctx.q.marken(s2);
     const seg2 = (act, wert, opt, sperre2 = false) => `<div class="seg umbruch">${opt.map(([v2, t3]) => `<button class="${String(v2) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v2}"${sperre2 ? " disabled" : ""}>${t3}</button>`).join("")}</div>`;
-    const feld = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
+    const feld2 = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
     const v = ctx.q.vorschau(s2, m);
     let h3 = tabs;
     h3 += `<button class="zurueck" data-a="emAbbrechen">\u2039 Eigenmarken</button>`;
     h3 += `<div class="schritte">${SCHRITTE.map((t3, i) => `<button class="${i === A.schritt ? "an" : i < A.schritt ? "fertig" : ""}" data-a="emSchritt" data-v="${i}"><b>${i + 1}</b>${t3}</button>`).join("")}</div>`;
     h3 += '<div class="karte steuerung">';
     if (A.schritt === 0) {
-      if (!A.id) h3 += feld("Vorlage", `<div class="seg umbruch">${ctx.q.vorlagen().map((x2, i) => `<button class="${A.vorlage === i ? "an" : ""}" data-a="emVorlage" data-v="${i}">${esc2(x2.titel)}</button>`).join("")}</div>`, "f\xFCllt alle Schritte vor");
-      h3 += feld("Alter", seg2("emAlter", m.zielgruppe.alter, alterOptionen(m.zielgruppe.alter)));
-      h3 += feld("Geschlecht", seg2("emGeschlecht", m.zielgruppe.geschlecht, GESCHLECHT));
+      if (!A.id) h3 += feld2("Vorlage", `<div class="seg umbruch">${ctx.q.vorlagen().map((x2, i) => `<button class="${A.vorlage === i ? "an" : ""}" data-a="emVorlage" data-v="${i}">${esc2(x2.titel)}</button>`).join("")}</div>`, "f\xFCllt alle Schritte vor");
+      h3 += feld2("Alter", seg2("emAlter", m.zielgruppe.alter, alterOptionen(m.zielgruppe.alter)));
+      h3 += feld2("Geschlecht", seg2("emGeschlecht", m.zielgruppe.geschlecht, GESCHLECHT));
     } else if (A.schritt === 1) {
-      h3 += feld("Kategorie", seg2("emKategorie", m.kategorie, KATEGORIE2.map((k3) => [k3, k3]), !!A.id), A.id ? "bleibt bei Neupositionierung" : "");
+      h3 += feld2("Kategorie", seg2("emKategorie", m.kategorie, KATEGORIE2.map((k3) => [k3, k3]), !!A.id), A.id ? "bleibt bei Neupositionierung" : "");
       const liste3 = [...v.passendeWgs].sort((a2, b3) => b3.passung - a2.passung);
       const inh = liste3.length ? liste3.map((w2) => {
         const a2 = m.wgAnteile[w2.wg];
         return `<button class="wgwahl ${a2 ? "an" : ""}" data-a="emWg" data-v="${w2.wg}"><span>${esc2(w2.name)} <i>${esc2(ctx.E.GRUPPEN[w2.bereich]?.name ?? w2.bereich)} \xB7 ${w2.passung >= 1 ? "passt sehr gut" : w2.passung >= 0.7 ? "passt gut" : "passt bedingt"}</i></span><b>${a2 ? pz3(a2) : "+"}</b></button>`;
       }).join("") : '<div class="leise">Keine Warengruppe passt zu Zielgruppe und Kategorie.</div>';
-      h3 += feld("Warengruppen", `<div class="wgliste">${inh}</div>`, "Antippen: 15, 25, 40 % oder aus");
+      h3 += feld2("Warengruppen", `<div class="wgliste">${inh}</div>`, "Antippen: 15, 25, 40 % oder aus");
     } else if (A.schritt === 2) {
-      h3 += feld("Preislage", seg2("emPreis", m.preislage, PREIS2));
-      h3 += feld("Stil", seg2("emStil", m.stil, STIL3), "trendig veraltet schneller");
-      h3 += feld("Qualit\xE4t", seg2("emQualitaet", m.qualitaet, [1, 2, 3, 4, 5].map((x2) => [x2, "\u2605".repeat(x2)])));
+      h3 += feld2("Preislage", seg2("emPreis", m.preislage, PREIS2));
+      h3 += feld2("Stil", seg2("emStil", m.stil, STIL3), "trendig veraltet schneller");
+      h3 += feld2("Qualit\xE4t", seg2("emQualitaet", m.qualitaet, [1, 2, 3, 4, 5].map((x2) => [x2, "\u2605".repeat(x2)])));
     } else if (A.schritt === 3) {
       const B8 = ctx.q.beschaffung();
-      h3 += feld("Beschaffung", `<div class="wahlkarten">${Object.entries(B8).map(([k3, b3]) => `<button class="${m.beschaffung === k3 ? "an" : ""}" data-a="emBeschaffung" data-v="${k3}"><b>${esc2(b3.name)}</b><small>${b3.vorlauf} Wochen Vorlauf, Mindestabnahme ${geld(b3.mindestabnahme)}, ${punkte(b3.mehrmarge)} Marge</small></button>`).join("")}</div>`);
-      h3 += feld("Markenbudget je Woche", `<div class="stepper"><button data-a="emBudgetNeu" data-v="-5000">\u2212</button><span><b>${geld(m.budgetWoche)}</b></span><button data-a="emBudgetNeu" data-v="5000">+</button></div>`, "baut Bekanntheit auf");
+      h3 += feld2("Beschaffung", `<div class="wahlkarten">${Object.entries(B8).map(([k3, b3]) => `<button class="${m.beschaffung === k3 ? "an" : ""}" data-a="emBeschaffung" data-v="${k3}"><b>${esc2(b3.name)}</b><small>${b3.vorlauf} Wochen Vorlauf, Mindestabnahme ${geld(b3.mindestabnahme)}, ${punkte(b3.mehrmarge)} Marge</small></button>`).join("")}</div>`);
+      h3 += feld2("Markenbudget je Woche", `<div class="stepper"><button data-a="emBudgetNeu" data-v="-5000">\u2212</button><span><b>${geld(m.budgetWoche)}</b></span><button data-a="emBudgetNeu" data-v="5000">+</button></div>`, "baut Bekanntheit auf");
     } else {
-      h3 += feld("Name", `<input class="ort gross" data-a="emName" maxlength="22" value="${esc2(m.name)}">`);
-      if (!A.id) h3 += feld("Farbe", `<div class="farben">${FARBEN6.map((f11) => `<button class="${m.farbe === f11 ? "an" : ""}" style="background:${f11}" data-a="emFarbe" data-v="${f11}" aria-label="Farbe ${f11}"></button>`).join("")}</div>`, "f\xFCr Shop und Karte");
+      h3 += feld2("Name", `<input class="ort gross" data-a="emName" maxlength="22" value="${esc2(m.name)}">`);
+      if (!A.id) h3 += feld2("Farbe", `<div class="farben">${FARBEN6.map((f11) => `<button class="${m.farbe === f11 ? "an" : ""}" style="background:${f11}" data-a="emFarbe" data-v="${f11}" aria-label="Farbe ${f11}"></button>`).join("")}</div>`, "f\xFCr Shop und Karte");
     }
     h3 += "</div>";
     const nWg = Object.values(m.wgAnteile).filter((a2) => a2 > 0).length;
@@ -159774,6 +159879,10 @@
         }
         return oben();
       }
+      case "emAuf":
+        ui.em.auf = v;
+        ui.em.einstellen = null;
+        return "";
       case "emEinstellen":
         ui.em.einstellen = v;
         return "";
@@ -159822,64 +159931,73 @@
   // src/ui/ware.js
   var reichweite = (r3) => r3 == null ? "\u2013" : (r3 > 99 ? "> 99" : r3.toFixed(1).replace(".", ",")) + (r3 == null ? "" : " Wo.");
   var proz = (x2) => pz3(Number.isFinite(x2) ? x2 : 0, 1);
-  var knopf = (a2, v, text3, extra = "") => `<button class="mini" data-a="${a2}" data-v="${esc2(String(v))}" ${extra}>${text3}</button>`;
+  var knopf2 = (a2, v, text3, extra = "") => `<button class="q-neben-akt" data-a="${a2}" data-v="${esc2(String(v))}" ${extra}>${text3}</button>`;
   var optionen = (werte3, auswahl4) => werte3.map(([id, name2]) => `<option value="${esc2(id)}" ${id === auswahl4 ? "selected" : ""}>${esc2(name2)}</option>`).join("");
   var teile = (n3) => fmt.format(Math.round(n3));
+  var feld = (titel, inhalt) => `<label class="q-stepzeile"><span class="q-name">${titel}</span>${inhalt}</label>`;
   function warenSeite(ctx, ui, tabs) {
     const d3 = ctx.E.warenUebersicht(ctx.s());
     const w2 = ui.ware ?? (ui.ware = { von: d3.cluster[0]?.id ?? "", nach: d3.cluster[1]?.id ?? "", gruppe: "damen", wert: 5e4, pp: 10 });
     const cluster = d3.cluster.map((c) => [c.id, c.name]), gruppen = Object.entries(ctx.E.GRUPPEN).map(([id, x2]) => [id, x2.name]);
-    let html = typeof tabs === "function" ? tabs() : tabs;
+    let html = (typeof tabs === "function" ? tabs() : tabs) + '<div class="q31">';
     if (ui.seite === "merchandise") {
-      html += `<div class="raster"><div class="kz"><span>Bestand Konzern</span><b data-p="ware:bestand">${geld(d3.konzernbestand)}</b></div><div class="kz"><span>Offene Saisonvorlagen</span><b data-p="ware:vorlagen">${teile(d3.vorlagen.length)}</b></div></div>`;
-      html += `<div class="legende">Saisonplanung circa 30 Wochen vor dem Start. Budgets in Euro EK (Open-to-Buy), Zielmarge, Zielabverkauf, Breite und Vororderquote. Solange keine \xC4nderung erfolgt, gilt die bestehende Einkaufssteuerung.</div>`;
-      html += '<div class="karte liste"><div class="lkopf"><span class="lname">Warengruppe / Saison</span><span class="lwert">Budget EK</span><span class="lwert">Zielabverkauf</span></div>';
+      const summe2 = d3.plaene.reduce((a2, p2) => a2 + p2.budget, 0);
+      html += `<div class="q-gross"><span class="q-label">Saisonbudget EK</span><span class="q-haupt" data-p="ware:plansumme">${geld(summe2)}</span><span class="q-neben"><b data-p="ware:konzern">${geld(d3.konzernbestand)}</b>Bestand Konzern</span></div>`;
+      html += `<div class="q-befund">Saisonplanung rund 30 Wochen vor dem Start. ${d3.vorlagen.length ? `<b data-p="ware:vorlagen">${teile(d3.vorlagen.length)}</b> Vorlagen warten.` : `<span data-p="ware:vorlagen" hidden>${teile(d3.vorlagen.length)}</span>Ohne \xC4nderung gilt die bestehende Einkaufssteuerung.`}</div>`;
+      html += '<div class="q-buch" data-summenbuch="Saisonplan"><div class="q-buch-kopf"><span>Saisonplan je Warengruppe</span><b>Budget EK</b></div>';
+      if (!d3.plaene.length) html += '<div class="q-leer"><b>Kein Saisonplan offen.</b>Die n\xE4chste Planungsrunde beginnt rund 30 Wochen vor Saisonstart.</div>';
       for (const p2 of d3.plaene) {
-        html += `<div class="lzeile"><span class="lname">${esc2(p2.name)}<i>${esc2(p2.saisonName)} \xB7 Marge ${proz(p2.zielmarge)} \xB7 Breite ${proz(p2.breite)} \xB7 Vororder ${proz(p2.vororderquote)}</i><span class="lknoepfe">${knopf("warePlanMinus", p2.wg, "\u22125 %")} ${knopf("warePlanPlus", p2.wg, "+5 %")}</span></span><span class="lwert"><i data-p="ware:plan:${p2.wg}">${geld(p2.budget)}</i></span><span class="lwert">${proz(p2.zielabverkauf)}</span></div>`;
+        html += `<div class="q-zeile"><span class="q-name">${esc2(p2.name)}<small>${esc2(p2.saisonName)}</small><small>Marge ${proz(p2.zielmarge)} \xB7 Abverkauf ${proz(p2.zielabverkauf)} \xB7 Vororder ${proz(p2.vororderquote)}</small></span><span class="q-wert"><b data-s="b" data-p="ware:plan:${p2.wg}">${geld(p2.budget)}</b></span>
+        <span class="q-knoepfe"><button data-a="warePlanMinus" data-v="${esc2(p2.wg)}" aria-label="${esc2(p2.name)} Budget minus 5 Prozent">\u22125 %</button><button data-a="warePlanPlus" data-v="${esc2(p2.wg)}" aria-label="${esc2(p2.name)} Budget plus 5 Prozent">+5 %</button></span></div>`;
       }
-      html += "</div>";
+      if (d3.plaene.length) html += `<div class="q-summe"><span>Summe ${d3.plaene.length} Warengruppen</span><span class="q-wert" data-summe="b" data-p="ware:plansumme">${geld(summe2)}</span></div>`;
+      html += "</div></div>";
       return { titel: "Merchandise Planning", unter: `${d3.plaene.length} Warengruppen \xB7 ${d3.vorlagen.length} Vorlagen`, html };
     }
     if (ui.seite === "allokation") {
-      html += `<div class="raster"><div class="kz"><span>Clusterbestand</span><b data-p="ware:bestand">${geld(d3.clusterbestand)}</b></div><div class="kz"><span>Steuerungsqualit\xE4t</span><b data-p="ware:qualitaet">${proz(d3.allokationQualitaet)}</b></div></div>`;
-      html += `<div class="karte"><div class="khead">Allokation und Nachschub</div><div class="zeile">${knopf("wareQual", "1", "Bedarfsgerecht")} ${knopf("wareQual", "0.5", "Schwache Allokation")} ${knopf("wareQual", "0.8", "Verbessern")}</div><div class="legende">Schwache Allokation verschiebt Saisonware und NOS-Nachschub in die falschen Cluster. Reichweite: Bestand geteilt durch gesch\xE4tzten Wochenwareneinsatz.</div></div>`;
-      html += '<div class="karte liste"><div class="lkopf"><span class="lname">Hauscluster</span><span class="lwert">Reichweite</span><span class="lwert">Altware</span></div>';
-      for (const c of d3.cluster) {
-        const ton2 = c.reichweite != null && c.reichweite < 6 ? "rot" : c.altware > 0.2 ? "warn" : "";
-        html += `<div class="lzeile ${ton2}"><span class="lname">${esc2(c.name)} <i>${c.haeuser} H\xE4user \xB7 Bestand <i data-p="ware:cluster:${c.id}:bestand">${geld(c.bestand)}</i> \xB7 Fehlmenge ${geld(c.fehlmenge)}</i></span><span class="lwert" data-p="ware:cluster:${c.id}:reichweite">${reichweite(c.reichweite)}</span><span class="lwert" data-p="ware:cluster:${c.id}:alt">${proz(c.altware)}</span></div>`;
+      const knapp = d3.cluster.filter((c) => c.reichweite != null && c.reichweite < 6), alt = d3.cluster.filter((c) => c.altware > 0.2);
+      html += `<div class="q-gross"><span class="q-label">Clusterbestand</span><span class="q-haupt" data-p="ware:bestand">${geld(d3.clusterbestand)}</span><span class="q-neben"><b data-p="ware:qualitaet">${proz(d3.allokationQualitaet)}</b>Steuerungsqualit\xE4t</span></div>`;
+      html += `<div class="q-befund">${knapp.length || alt.length ? `${knapp.length ? `<b>${knapp.length} Cluster</b> unter 6 Wochen Reichweite` : ""}${knapp.length && alt.length ? ", " : ""}${alt.length ? `<b>${alt.length} Cluster</b> mit \xFCber 20 % Altware` : ""}.` : "Kein Cluster knapp, keiner mit viel Altware."}</div>`;
+      const q2 = d3.allokationQualitaet;
+      html += `<div class="seg" style="margin-bottom:12px">${[["1", "Bedarfsgerecht"], ["0.8", "Verbessern"], ["0.5", "Schwach"]].map(([v, t3]) => `<button class="${Math.abs(q2 - Number(v)) < 0.01 ? "an" : ""}" data-a="wareQual" data-v="${v}">${t3}</button>`).join("")}</div>`;
+      const reihe = [...d3.cluster].sort((a2, b3) => (a2.reichweite ?? 999) - (b3.reichweite ?? 999));
+      html += '<div class="q-buch"><div class="q-buch-kopf"><span>Hauscluster</span><b>Reichweite \xB7 Altware</b></div>';
+      for (const c of reihe) {
+        const ton2 = c.reichweite != null && c.reichweite < 6 ? "q-minus" : "";
+        html += `<div class="q-zeile"><span class="q-name">${esc2(c.name)}<small>${c.haeuser} H\xE4user \xB7 Bestand <i data-p="ware:cluster:${c.id}:bestand">${geld(c.bestand)}</i> \xB7 Fehlmenge ${geld(c.fehlmenge)}</small></span><span class="q-wert"><b class="${ton2}" data-p="ware:cluster:${c.id}:reichweite">${reichweite(c.reichweite)}</b><small class="${c.altware > 0.2 ? "q-minus" : ""}" data-p="ware:cluster:${c.id}:alt">${proz(c.altware)}</small></span></div>`;
       }
       html += "</div>";
-      html += `<div class="karte"><div class="khead">Umlagerung (1 bis 2 Wochen)</div>
-      <div class="zeile">Von <select data-a="wareVon">${optionen(cluster, w2.von)}</select></div>
-      <div class="zeile">Nach <select data-a="wareNach">${optionen(cluster, w2.nach)}</select></div>
-      <div class="zeile">Bereich <select data-a="wareGruppe">${optionen(gruppen, w2.gruppe)}</select></div>
-      <div class="zeile">EK-Wert <input data-a="wareWert" type="number" min="1" step="10000" value="${w2.wert}"></div>
-      <div class="zeile">${knopf("wareUmlagern", "ja", "Umlagerung beauftragen")}</div></div>`;
+      html += `<div class="q-buch"><div class="q-buch-kopf"><span>Umlagerung</span><b>1 bis 2 Wochen</b></div>
+      ${feld("Von", `<select data-a="wareVon">${optionen(cluster, w2.von)}</select>`)}${feld("Nach", `<select data-a="wareNach">${optionen(cluster, w2.nach)}</select>`)}
+      ${feld("Bereich", `<select data-a="wareGruppe">${optionen(gruppen, w2.gruppe)}</select>`)}${feld("EK-Wert", `<input data-a="wareWert" type="number" inputmode="numeric" min="1" step="10000" value="${w2.wert}">`)}
+      <div class="q-stepzeile">${knopf2("wareUmlagern", "ja", "Umlagerung beauftragen")}</div></div>`;
       if (d3.umlagerungen.length) {
-        html += '<div class="karte"><div class="khead">Unterwegs</div>';
-        for (const t3 of d3.umlagerungen) html += `<div class="zeile">${esc2(t3.gruppe)}: ${esc2(t3.von)} \u2192 ${esc2(t3.nach)} \xB7 ${geld(t3.wert)} \xB7 Woche ${t3.ankunft + 1}</div>`;
+        html += '<div class="q-buch"><div class="q-buch-kopf"><span>Unterwegs</span><b>Wert EK</b></div>';
+        for (const t3 of d3.umlagerungen) html += `<div class="q-zeile"><span class="q-name">${esc2(t3.gruppe)}<small>${esc2(t3.von)} \u2192 ${esc2(t3.nach)} \xB7 Ankunft Woche ${t3.ankunft + 1}</small></span><span class="q-wert">${geld(t3.wert)}</span></div>`;
         html += "</div>";
       }
-      html += `<div class="karte"><div class="khead">Abfluss an FUNDUS</div><div class="raster">
-      <div class="kz"><span>Eigenwarequote</span><b data-p="ware:fundusquote">${proz(d3.fundus.quote)}</b></div>
-      <div class="kz"><span>Frequenzfaktor</span><b data-p="ware:fundusfaktor">${proz(d3.fundus.frequenzFaktor)}</b></div></div>
-      <div class="legende">Bis 25 % Eigenware ohne Nachteil. Bei 50 % Eigenware sinkt die FUNDUS-Frequenz um 15 %.</div>
-      <div class="zeile">${knopf("wareFundus", "ja", "Altware abgeben")} <i>Ausgew\xE4hlter Bereich und EK-Wert von oben</i></div></div>`;
+      html += `<div class="q-buch"><div class="q-buch-kopf"><span>Abfluss an FUNDUS</span></div>
+      <div class="q-zeile"><span class="q-name">Eigenwarequote<small>bis 25 % ohne Nachteil</small></span><span class="q-wert" data-p="ware:fundusquote">${proz(d3.fundus.quote)}</span></div>
+      <div class="q-zeile"><span class="q-name">Frequenzfaktor FUNDUS<small>bei 50 % Eigenware \u221215 %</small></span><span class="q-wert" data-p="ware:fundusfaktor">${proz(d3.fundus.frequenzFaktor)}</span></div>
+      <div class="q-stepzeile">${knopf2("wareFundus", "ja", "Altware abgeben")}<span class="q-name"><small>Bereich und EK-Wert aus der Umlagerung</small></span></div></div>`;
+      html += "</div>";
       return { titel: "Allokation", unter: `${d3.cluster.length} Hauscluster \xB7 ${d3.umlagerungen.length} Umlagerungen unterwegs`, html };
     }
     const global = !!ctx.s().ware?.zentral?.["*|*"];
-    html += `<div class="karte"><div class="khead">Zentraler Reduzierungskalender</div><div class="zeile">${knopf("wareZentralGlobal", "ja", global ? "Durchsetzen aufheben" : "\xDCberall zentral durchsetzen")}</div>
-    <div class="legende">\u221220 % \u2192 \u221230 % \u2192 \u221250 % \u2192 R\xE4umung, bei \xDCberschreiten der jeweiligen Abverkaufsstufe. Der Standard entspricht der bisherigen Strategie. Mid-Season-Sales bleiben Bestandteil des Aktionskalenders.</div></div>`;
-    html += `<div class="karte"><div class="khead">Lokaler Spielraum</div>
-    <div class="zeile">Hauscluster <select data-a="wareVon">${optionen(cluster, w2.von)}</select></div>
-    <div class="zeile">Bereich <select data-a="wareGruppe">${optionen(gruppen, w2.gruppe)}</select></div>
-    <div class="zeile">${knopf("wareLokal10", "ja", "10 PP nachreduzieren")} ${knopf("wareLokal0", "ja", "Lokale Reduzierung zur\xFCcknehmen")} ${knopf("wareZentralCluster", "ja", "Cluster zentral steuern")}</div>
-    <div class="legende">Maximal zehn zus\xE4tzliche Prozentpunkte. Bei zentraler Durchsetzung ist der Spielraum gesperrt.</div></div>`;
-    html += '<div class="karte liste"><div class="lkopf"><span class="lname">Warengruppe</span><span class="lwert">Abverkauf</span><span class="lwert">Stufe</span></div>';
+    const faellig = d3.kalender.filter((k3) => k3.stufe > 0);
+    html += `<div class="q-gross"><span class="q-label">Warengruppen mit Reduzierung</span><span class="q-haupt">${faellig.length} von ${d3.kalender.length}</span><span class="q-neben"><b>${global ? "zentral" : "lokal frei"}</b>Steuerung</span></div>`;
+    html += '<div class="q-befund">Stufen \u221220 % \u2192 \u221230 % \u2192 \u221250 % \u2192 R\xE4umung, jeweils beim \xDCberschreiten der Abverkaufsstufe. Mid-Season-Sales laufen \xFCber den Aktionskalender.</div>';
+    html += `<div style="margin-bottom:12px">${knopf2("wareZentralGlobal", "ja", global ? "Zentrale Durchsetzung aufheben" : "\xDCberall zentral durchsetzen")}</div>`;
+    html += '<div class="q-buch"><div class="q-buch-kopf"><span>Reduzierungskalender</span><b>Abverkauf \xB7 Stufe</b></div>';
     for (const k3 of d3.kalender) {
-      const stufe2 = k3.stufe === 1 ? "R\xE4umung" : k3.stufe === 0 ? "Noch keine" : "\u2212" + Math.round(k3.stufe * 100) + " %";
-      html += `<div class="lzeile"><span class="lname">${esc2(k3.name)} <i>Strategie: ${esc2(k3.strategie)} \xB7 Saison ${k3.saison}</i></span><span class="lwert" data-p="ware:kal:${k3.wg}">${proz(k3.abverkauf)}</span><span class="lwert">${stufe2}</span></div>`;
+      const stufe2 = k3.stufe === 1 ? "R\xE4umung" : k3.stufe === 0 ? "keine Stufe" : "\u2212" + Math.round(k3.stufe * 100) + " %";
+      html += `<div class="q-zeile"><span class="q-name">${esc2(k3.name)}<small>Reduzierung ${esc2({ frueh: "fr\xFCh", spaet: "sp\xE4t" }[k3.strategie] ?? k3.strategie)}</small></span><span class="q-wert"><b data-p="ware:kal:${k3.wg}">${proz(k3.abverkauf)}</b><small>${stufe2}</small></span></div>`;
     }
+    html += "</div>";
+    html += `<div class="q-buch"><div class="q-buch-kopf"><span>Lokaler Spielraum</span><b>h\xF6chstens 10 Punkte</b></div>
+    ${feld("Hauscluster", `<select data-a="wareVon">${optionen(cluster, w2.von)}</select>`)}${feld("Bereich", `<select data-a="wareGruppe">${optionen(gruppen, w2.gruppe)}</select>`)}
+    <div class="q-zeile"><span class="q-knoepfe" style="padding:0">${knopf2("wareLokal10", "ja", "10 Punkte nachreduzieren")}${knopf2("wareLokal0", "ja", "Zur\xFCcknehmen")}${knopf2("wareZentralCluster", "ja", "Cluster zentral steuern")}</span></div>
+    ${global ? '<div class="q-leer">Bei zentraler Durchsetzung ist der lokale Spielraum gesperrt.</div>' : ""}</div>`;
     html += "</div>";
     return { titel: "Reduzierungskalender", unter: `${d3.kalender.length} Warengruppen \xB7 lokale Abweichungen je Hauscluster`, html };
   }
@@ -159909,6 +160027,8 @@
     if (basis4 !== "ware") return void 0;
     const d3 = E8.warenUebersicht(s2);
     if (art === "bestand") return geld(d3.clusterbestand);
+    if (art === "konzern") return geld(d3.konzernbestand);
+    if (art === "plansumme") return geld(d3.plaene.reduce((a2, p2) => a2 + p2.budget, 0));
     if (art === "vorlagen") return teile(d3.vorlagen.length);
     if (art === "qualitaet") return proz(d3.allokationQualitaet);
     if (art === "fundusquote") return proz(d3.fundus.quote);
@@ -159952,12 +160072,12 @@
     const text3 = (id, k3) => formatiere(SP().get(id)?.format ?? "eur", k3[id] ?? 0);
     const dot = (a2) => a2 ? `<span class="ampel a-${a2}" title="${AMPEL_TEXT[a2]}"></span>` : '<span class="ampel ohne"></span>';
     const seg2 = (act, wert, optionen3, extra = "") => `<div class="seg">${optionen3.map(([v, t3]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t3}</button>`).join("")}</div>`;
-    const zahl6 = (titel, inhalt2, p2, ton2 = "", a2) => `<div class="kz ${ton2}"><span>${titel}</span><b><i data-p="${p2}">${inhalt2}</i>${a2 ? dot(a2) : ""}</b></div>`;
+    const zahl5 = (titel, inhalt2, p2, ton2 = "", a2) => `<div class="kz ${ton2}"><span>${titel}</span><b><i data-p="${p2}">${inhalt2}</i>${a2 ? dot(a2) : ""}</b></div>`;
     function tabs() {
       const n3 = q2.freigaben(s2()).anzahl;
       const an = (id) => ui.seite === id || id === "uebersicht" && ui.seite === "wg" || id === "eigenmarken" && ui.seite === "gruenden";
       const t3 = (id, inhalt2) => `<button class="tab ${an(id) ? "an" : ""}" data-a="seite" data-v="${id}">${inhalt2}</button>`;
-      return `<div class="tabs">${t3("uebersicht", "\xDCbersicht")}${t3("freigaben", `Freigaben${n3 ? ` <span class="zahl" data-p="badge">${n3}</span>` : ""}`)}${t3("eigenmarken", "Eigenmarken")}${t3("merchandise", "Merchandise")}${t3("allokation", "Allokation")}${t3("reduzierungKalender", "Reduzierung")}</div>${["eigenmarken", "gruenden"].includes(ui.seite) ? "" : '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>'}`;
+      return `<div class="tabs">${t3("uebersicht", "\xDCbersicht")}${t3("freigaben", `Freigaben${n3 ? ` <span class="zahl" data-p="badge">${n3}</span>` : ""}`)}${t3("eigenmarken", "Eigenmarken")}${t3("merchandise", "Merchandise")}${t3("allokation", "Allokation")}${t3("reduzierungKalender", "Reduzierung")}</div>`;
     }
     function sortiere(liste3) {
       const { key, dir } = ui.sort;
@@ -159966,32 +160086,43 @@
     function uebersicht() {
       const u = q2.uebersicht(s2(), { format: ui.format }), g = u.summe.kennzahlen, ga = u.summe.ampeln;
       let h3 = tabs();
+      h3 += '<div class="q31">';
       h3 += seg2("format", ui.format, [["warenhaus", "Hartwig"], ["sport", "Hartwig Sport"]]);
-      const o3 = ctx.E.outletUebersicht(s2());
-      h3 += '<div class="karte"><div class="khead">Altware ins Outlet \xB7 FUNDUS</div><div class="raster">' + zahl6("Poolbestand EK", geld(o3.poolWert), "format:poolWert") + zahl6("Reichweite", dez(o3.reichweite, 1) + " Wo.", "format:reichweite") + zahl6("Abschriften", geld(o3.abschriften), "format:abschriften") + zahl6("Markenposten", geld(o3.markenposten), "format:markenposten") + '</div><label class="ek-eingabe"><span>Altwarequote <b>' + Math.round(o3.altwareQuote * 100) + ' %</b></span><input type="range" data-a="formatQuote" min="0" max="100" step="5" value="' + Math.round(o3.altwareQuote * 100) + '"></label><label class="ek-eingabe"><span>Markenposten-Zukauf je Woche</span><input type="number" inputmode="numeric" data-a="formatBudget" min="0" step="100000" value="' + o3.zukaufBudget + '"></label></div>';
-      const kandidaten3 = ctx.E.outletKandidaten(s2()).slice(0, 8);
-      if (kandidaten3.length) {
-        h3 += '<div class="karte"><div class="khead">Neue FUNDUS-Standorte \xB7 12 Wochen Vorlauf</div>';
-        for (const k3 of kandidaten3) h3 += '<div class="zeile"><span class="was">' + esc2(k3.stadt) + " \xB7 " + k3.qm + " qm \xB7 Miete " + geld(k3.mieteWoche) + "/Wo. \xB7 Investition " + geld(k3.investition) + `</span><button class="mini" onclick="formateTun('outletEroeffnen','` + esc2(k3.stadt) + `')">Er\xF6ffnen</button></div>`;
-        h3 += "</div>";
-      }
-      h3 += `<div class="raster">${zahl6("Umsatz letzte Woche", geld(g.umsatzWoche), "g:umsatzWoche")}${zahl6("Rohertragsquote 13 Wochen", pz3(g.rohertragsquote, 1), "g:rohertragsquote", "", ga.rohertragsquote)}${zahl6("Bestand EK", geld(g.bestandEk), "g:bestandEk")}${zahl6("Limit frei", geld(g.limitFrei), "g:limitFrei", g.limitFrei < 0 ? "rot" : "", ga.limitFrei)}</div>`;
+      const rot = u.bereiche.filter((b3) => Object.values(b3.ampeln).includes("rot"));
+      h3 += `<div class="q-gross"><span class="q-label">Rohertragsquote 13 Wochen</span><span class="q-haupt" data-p="g:rohertragsquote">${text3("rohertragsquote", g)}</span>
+      <span class="q-neben"><b class="${g.limitFrei < 0 ? "q-minus" : ""}" data-p="g:limitFrei">${text3("limitFrei", g)}</b>Limit frei</span></div>`;
+      h3 += rot.length ? `<div class="q-befund"><b>${rot.length} von ${u.bereiche.length} Bereichen</b> stehen auf Rot: ${rot.slice(0, 3).map((b3) => esc2(b3.name)).join(", ")}${rot.length > 3 ? " und weitere" : ""}.</div>` : `<div class="q-befund">Kein Bereich auf Rot. Umsatz letzte Woche <b data-p="g:umsatzWoche">${geld(g.umsatzWoche)}</b>, Bestand EK <b data-p="g:bestandEk">${geld(g.bestandEk)}</b>.</div>`;
       const spalten2 = [...q2.spalten()].sort((a2, b3) => b3.standard - a2.standard);
       h3 += `<div class="spaltenwahl"><span>Spalten</span>${spalten2.map((c) => {
         const i = ui.spalten.indexOf(c.id);
         return `<button class="chipk ${i >= 0 ? "an" : ""}" data-a="spalte" data-v="${c.id}">${i >= 0 ? `<b>${i + 1}</b>` : ""}${c.name}</button>`;
       }).join("")}</div>`;
       const kopf = (key, t3, klasse) => `<button class="${klasse} ${ui.sort.key === key ? "an" : ""}" data-a="sort" data-v="${key}">${t3}${ui.sort.key === key ? ui.sort.dir < 0 ? " \u25BC" : " \u25B2" : ""}</button>`;
-      h3 += `<div class="karte liste"><div class="lkopf">${kopf("name", "Bereich und WG", "lname")}${ui.spalten.map((k3) => kopf(k3, KOPF[k3] ?? SP().get(k3)?.name, "lwert")).join("")}</div>`;
+      h3 += `<div class="karte liste q-warenbuch"><div class="lkopf">${kopf("name", "Bereich und WG", "lname")}${ui.spalten.map((k3) => kopf(k3, KOPF[k3] ?? SP().get(k3)?.name, "lwert")).join("")}</div>`;
       const werte3 = (k3, a2, p2) => ui.spalten.map((c) => `<span class="lwert"><i data-p="${p2}:${c}">${text3(c, k3)}</i>${dot(a2[c])}</span>`).join("");
       for (const b3 of sortiere(u.bereiche)) {
         const auf = ui.offen.has(b3.bereich);
         h3 += `<div class="lzeile bereich" data-a="bereich" data-v="${b3.bereich}"><span class="lname"><span class="pfeil">${auf ? "\u25BE" : "\u25B8"}</span>${esc2(b3.name)} <i>${b3.wgs.length} WG</i></span>${werte3(b3.kennzahlen, b3.ampeln, `b:${b3.bereich}`)}</div>`;
         if (auf) for (const w2 of sortiere(b3.wgs)) h3 += `<div class="lzeile wgz" data-a="wg" data-v="${w2.id}"><span class="lname">${w2.eigenmarken.length ? '<i class="em" title="mit Eigenmarke">EM</i>' : ""}${esc2(w2.name)}</span>${werte3(w2.kennzahlen, w2.ampeln, `w:${w2.id}`)}</div>`;
       }
+      h3 += `<div class="lzeile q-gesamt"><span class="lname">${ui.format === "sport" ? "Hartwig Sport" : "Hartwig"} gesamt</span>${ui.spalten.map((c) => `<span class="lwert"><i data-p="g:${c}">${text3(c, g)}</i>${dot(ga[c])}</span>`).join("")}</div>`;
       h3 += "</div>";
       const gen = { grob: "grob (Controlling schwach besetzt)", normal: "normal", exakt: "exakt" }[u.genauigkeit] ?? u.genauigkeit;
-      h3 += `<div class="legende">${dot("gruen")} im Ziel ${dot("gelb")} beobachten ${dot("rot")} handeln<br>${esc2(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen} \xB7 Genauigkeit ${gen} \xB7 EM = mit Eigenmarke</div>`;
+      h3 += `<div class="legende">${dot("gruen")} im Ziel ${dot("gelb")} beobachten ${dot("rot")} handeln \xB7 EM = mit Eigenmarke<br>${esc2(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen} \xB7 Genauigkeit ${gen}</div>`;
+      const o3 = ctx.E.outletUebersicht(s2());
+      h3 += `<div class="q-buch"><div class="q-buch-kopf"><span>Altware ins Outlet \xB7 FUNDUS</span></div>
+      <div class="q-zeile"><span class="q-name">Poolbestand EK<small>Reichweite <i data-p="format:reichweite">${dez(o3.reichweite, 1)} Wo.</i></small></span><span class="q-wert" data-p="format:poolWert">${geld(o3.poolWert)}</span></div>
+      <div class="q-zeile"><span class="q-name">Abschriften</span><span class="q-wert" data-p="format:abschriften">${geld(o3.abschriften)}</span></div>
+      <div class="q-zeile"><span class="q-name">Markenposten</span><span class="q-wert" data-p="format:markenposten">${geld(o3.markenposten)}</span></div>
+      <label class="ek-eingabe" style="padding:10px 14px;border-top:1px solid var(--q-linie)"><span>Altwarequote <b>${Math.round(o3.altwareQuote * 100)} %</b></span><input type="range" data-a="formatQuote" min="0" max="100" step="5" value="${Math.round(o3.altwareQuote * 100)}"></label>
+      <div class="q-stepzeile"><span class="q-name">Markenposten-Zukauf<small>je Woche</small></span><div class="stepper"><button data-a="formatBudgetSchritt" data-v="-500000" aria-label="weniger Zukauf">\u2212</button><span><b>${geld(o3.zukaufBudget)}</b></span><button data-a="formatBudgetSchritt" data-v="500000" aria-label="mehr Zukauf">+</button></div></div></div>`;
+      const kandidaten3 = ctx.E.outletKandidaten(s2()).slice(0, 8);
+      if (kandidaten3.length) {
+        h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Neue FUNDUS-Standorte</span><b>12 Wochen Vorlauf</b></div>';
+        for (const k3 of kandidaten3) h3 += `<div class="q-zeile"><span class="q-name">${esc2(k3.stadt)}<small>${fmt.format(k3.qm)} qm \xB7 Miete ${geld(k3.mieteWoche)} je Woche</small></span><span class="q-wert">${geld(k3.investition)}<small>Investition</small></span><span class="q-knoepfe"><button onclick="formateTun('outletEroeffnen','${esc2(k3.stadt)}')">In ${esc2(k3.stadt)} er\xF6ffnen</button></span></div>`;
+        h3 += "</div>";
+      }
+      h3 += "</div>";
       return { titel: "Einkauf", unter: `${u.bereiche.length} Bereiche \xB7 ${u.bereiche.reduce((a2, b3) => a2 + b3.wgs.length, 0)} Warengruppen \xB7 KW ${kwVon2(s2().woche)}`, html: h3 };
     }
     function kurve5(titel, wochen, werte3, fmtW, p2, farbe3) {
@@ -160020,13 +160151,20 @@
       const k3 = d3.kennzahlen, st2 = d3.steuerung, a2 = d3.ampeln;
       let h3 = tabs();
       h3 += `<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 \xDCbersicht ${esc2(d3.bereichName)}</button>`;
-      h3 += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl6(c.name, text3(c.id, k3), `d:${c.id}`, "", a2[c.id])).join("")}${DETAIL_EXTRA.map(([id, t3, f11]) => zahl6(t3, id === "eigenmarkenMarge" && !k3.eigenmarkenAnteil ? "keine" : formatiere(f11, k3[id]), `d:${id}`, "", a2[id])).join("")}</div>`;
+      const rw = q2.spalten().find((c) => c.id === "reichweite");
+      h3 += '<div class="q31">';
+      h3 += `<div class="q-gross"><span class="q-label">Reichweite</span><span class="q-haupt" data-p="d:reichweite">${text3("reichweite", k3)}</span><span class="q-neben"><b data-p="d:umsatzWoche">${formatiere("eur", k3.umsatzWoche)}</b>Umsatz letzte Woche</span></div>`;
+      const buchZeile = (name2, wert, p2, amp) => `<div class="q-zeile"><span class="q-name">${name2}</span><span class="q-wert"><i data-p="${p2}">${wert}</i>${amp ? dot(amp) : ""}</span></div>`;
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Kennzahlen</span><b>Ampel</b></div>';
+      h3 += q2.spalten().filter((c) => c.standard && c !== rw).map((c) => buchZeile(c.name, text3(c.id, k3), `d:${c.id}`, a2[c.id])).join("");
+      h3 += DETAIL_EXTRA.filter(([id]) => id !== "umsatzWoche").map(([id, tt, f11]) => buchZeile(tt, id === "eigenmarkenMarge" && !k3.eigenmarkenAnteil ? "keine" : formatiere(f11, k3[id]), `d:${id}`, a2[id])).join("");
+      h3 += "</div></div>";
       const v = d3.verlauf;
       h3 += kurve5("Bestand EK", v.woche, v.bestand, geld, "k:bestand", "#2f63b5");
       h3 += kurve5("Umsatz je Woche", v.woche, v.umsatz, geld, "k:umsatz", "#2f8f5b");
       h3 += kurve5("Reichweite in Wochen", v.woche, v.reichweite, (x2) => `${dez(x2, 1)} Wo.`, "k:reichweite", "#c27b0e");
       const regler2 = (titel, inhalt2, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt2}</div>`;
-      const schieber = (feld, wert, min, max, schritt) => `<div class="schieber"><input type="range" min="${min}" max="${max}" step="${schritt}" value="${wert}" data-a="regel" data-f="${feld}"><output>${wert} %</output></div>`;
+      const schieber = (feld2, wert, min, max, schritt) => `<div class="schieber"><input type="range" min="${min}" max="${max}" step="${schritt}" value="${wert}" data-a="regel" data-f="${feld2}"><output>${wert} %</output></div>`;
       h3 += '<div class="karte steuerung"><div class="khead">Steuerung</div>';
       const genutzt = k3.limit > 0 ? Math.min(1, k3.limitVerbraucht / k3.limit) : 0;
       const naechste = d3.limits[1];
@@ -160058,31 +160196,57 @@
     function freigabenSeite() {
       const alle = q2.freigaben(s2()), l = gefiltert();
       const bereiche = [...new Map(alle.liste.map((o3) => [o3.bereich, o3.bereichName])).entries()];
+      const summe2 = l.reduce((a2, o3) => a2 + o3.wert, 0);
+      const dringend = l.filter((o3) => o3.restWochen <= 0), verfall = dringend.filter((o3) => o3.modus !== "auto");
       let h3 = tabs();
-      h3 += `<div class="karte"><div class="regler"><div class="rkopf"><b>Freigabegrenze</b><small>Orders dar\xFCber brauchen deine Freigabe</small></div><div class="stepper"><button data-a="grenze" data-v="-10000">\u2212</button><span><b data-p="grenze">${geld(alle.grenze)}</b> EK je Order</span><button data-a="grenze" data-v="10000">+</button></div></div></div>`;
-      h3 += `<div class="filter"><select class="ort gross" data-a="filterBereich"><option value="">Alle Bereiche (${alle.anzahl})</option>${bereiche.map(([b3, n3]) => `<option value="${b3}"${ui.filter.bereich === b3 ? " selected" : ""}>${esc2(n3)} (${alle.liste.filter((o3) => o3.bereich === b3).length})</option>`).join("")}</select>`;
+      h3 += '<div class="q31">';
+      h3 += `<div class="q-gross"><span class="q-label">Wartet auf deine Freigabe</span><span class="q-haupt" data-p="sammel">${geld(summe2)}</span>
+      <span class="q-neben"><b>${l.length} ${l.length === 1 ? "Order" : "Orders"}</b>${dringend.length} f\xE4llig</span></div>`;
+      if (!alle.anzahl) h3 += `<div class="q-befund">Keine Order wartet. Orders bis <b>${geld(alle.grenze)}</b> EK gehen ohne dich durch.</div>`;
+      else if (verfall.length) h3 += `<div class="q-befund"><b>${verfall.length} ${verfall.length === 1 ? "Saisonorder verf\xE4llt" : "Saisonorders verfallen"}</b> diese Woche ohne Freigabe, zusammen ${geld(verfall.reduce((a2, o3) => a2 + o3.wert, 0))} EK. Die Ware fehlt dann in der Saison.</div>`;
+      else if (dringend.length) h3 += `<div class="q-befund"><b>${dringend.length}</b> ${dringend.length === 1 ? "Order l\xE4uft" : "Orders laufen"} diese Woche ab und ${dringend.length === 1 ? "geht" : "gehen"} danach automatisch durch.</div>`;
+      if (l.length) h3 += `<button class="q-haupt-akt" data-a="sammel">Alle ${l.length} freigeben \xB7 <span>${geld(summe2)}</span></button>`;
+      h3 += `<div class="q-filter"><select class="ort" data-a="filterBereich" aria-label="Bereich"><option value="">Alle Bereiche (${alle.anzahl})</option>${bereiche.map(([b3, n3]) => `<option value="${b3}"${ui.filter.bereich === b3 ? " selected" : ""}>${esc2(n3)} (${alle.liste.filter((o3) => o3.bereich === b3).length})</option>`).join("")}</select>`;
       h3 += seg2("filterArt", ui.filter.art, [["", "Alle"], ["nos", "NOS"], ["saison", "Saison"]]);
       h3 += seg2("filterWert", ui.filter.wert, [["", "Jeder Wert"], ["klein", "bis 100 Tsd. \u20AC"], ["gross", "\xFCber 100 Tsd. \u20AC"]]) + "</div>";
-      if (l.length) h3 += `<button class="breit gruen" data-a="sammel">Alle ${l.length} freigeben \xB7 <span data-p="sammel">${geld(l.reduce((a2, o3) => a2 + o3.wert, 0))}</span></button>`;
-      else h3 += `<div class="karte"><div class="zeile grau">${alle.anzahl ? "Keine Order passt zum Filter." : "Keine Order wartet auf Freigabe."}</div></div>`;
-      for (const o3 of l) {
-        const frist = o3.restWochen <= 0 ? '<span class="chip warn">Frist l\xE4uft diese Woche ab</span>' : `<span class="chip ${o3.restWochen <= 1 ? "warn" : "grau"}">Frist KW ${kwVon2(o3.frist)} \xB7 noch ${o3.restWochen} ${o3.restWochen === 1 ? "Woche" : "Wochen"}</span>`;
-        h3 += `<div class="karte order"><div class="ohead"><b>${esc2(o3.wgName)}</b><i>${esc2(o3.bereichName)} \xB7 ${TYP3[o3.typ] ?? ART[o3.art]}${o3.markeName ? ` \xB7 Eigenmarke ${esc2(o3.markeName)}` : ""}</i></div>
-        <div class="ochips"><span class="chip ${o3.art === "nos" ? "" : "blau"}">${ART[o3.art]}</span>${frist}<span class="chip grau">danach ${o3.modus === "auto" ? "automatisch frei" : "verf\xE4llt"}</span>${o3.ueberLimit ? '<span class="chip warn">\xFCber Limit gek\xFCrzt</span>' : ""}</div>
-        <div class="owerte"><div><span>Wert EK</span><b data-p="f:${o3.id}:wert">${geld(o3.wert)}</b></div><div><span>Erw. Abverkauf 8 Wo.</span><b data-p="f:${o3.id}:abverkauf">${geld(o3.erwarteterAbverkauf)}</b></div><div><span>Reichweite danach</span><b data-p="f:${o3.id}:reichweite">${dez(o3.reichweiteDanach, 1)} Wo.</b></div></div>
-        <div class="olief">${esc2(o3.lieferant)} \xB7 erste Lieferung KW ${kwVon2(o3.ersteLieferung)}${o3.lieferungen.length > 1 ? ` in ${o3.lieferungen.length} Teilen` : ""}${o3.hinweis ? ` \xB7 ${esc2(o3.hinweis)}` : ""}</div>`;
-        if (ui.kuerzen === o3.id) h3 += `<div class="oknoepfe">${[10, 25, 50].map((p3) => `<button data-a="kuerzen" data-v="${o3.id}" data-p2="${p3}">\u2212${p3} % und frei</button>`).join("")}<button data-a="kuerzenZu" class="leise">Zur\xFCck</button></div>`;
-        else h3 += `<div class="oknoepfe"><button class="gruen" data-a="frei" data-v="${o3.id}">Freigeben</button><button data-a="kuerzenAuf" data-v="${o3.id}">K\xFCrzen</button><button class="rot" data-a="ablehnen" data-v="${o3.id}">Ablehnen</button></div>`;
+      h3 += `<div class="q-buch"><div class="q-stepzeile" style="border-top:0"><span class="q-name">Freigabegrenze<small>Orders dar\xFCber brauchen dich</small></span><div class="stepper"><button data-a="grenze" data-v="-10000" aria-label="Grenze senken">\u2212</button><span><b data-p="grenze">${geld(alle.grenze)}</b></span><button data-a="grenze" data-v="10000" aria-label="Grenze erh\xF6hen">+</button></div></div></div>`;
+      h3 += `<div class="q-buch" data-summenbuch="Orderbuch"><div class="q-buch-kopf"><span>Orderbuch KW ${kwVon2(s2().woche)}</span><b>Wert EK</b></div>`;
+      if (!l.length) h3 += `<div class="q-leer"><b>${alle.anzahl ? "Keine Order passt zum Filter." : "Das Orderbuch ist leer."}</b>${alle.anzahl ? `${alle.anzahl} Orders warten in anderen Bereichen oder Wertklassen.` : "Neue Orders kommen mit der n\xE4chsten Orderrunde oder Nachorder."}</div>`;
+      const zeigeN = ui.mehrOrders ? l.length : Math.min(l.length, 25);
+      let gruppe3 = null;
+      for (const o3 of l.slice(0, zeigeN)) {
+        const g = o3.restWochen <= 0 ? "Frist diese Woche" : o3.restWochen === 1 ? "Frist n\xE4chste Woche" : "Frist sp\xE4ter";
+        if (g !== gruppe3) {
+          gruppe3 = g;
+          const n3 = l.filter((x2) => (x2.restWochen <= 0 ? "Frist diese Woche" : x2.restWochen === 1 ? "Frist n\xE4chste Woche" : "Frist sp\xE4ter") === g);
+          h3 += `<div class="q-zwischen"><span>${g}</span><span>${n3.length} \xB7 ${geld(n3.reduce((a2, x2) => a2 + x2.wert, 0))}</span></div>`;
+        }
+        const auf = ui.orderAuf === o3.id || ui.kuerzen === o3.id;
+        h3 += `<div class="q-zeile q-order${auf ? " q-auf" : ""}"><button class="q-name q-zeilenknopf" data-a="orderAuf" data-v="${o3.id}" aria-expanded="${auf}">${esc2(o3.wgName)}<small>${esc2(o3.lieferant)} \xB7 ${TYP3[o3.typ] ?? ART[o3.art]}${o3.markeName ? ` \xB7 ${esc2(o3.markeName)}` : ""}${o3.ueberLimit ? " \xB7 gek\xFCrzt" : ""}</small></button>
+        <span class="q-wert"><b data-s="w" data-p="f:${o3.id}:wert">${geld(o3.wert)}</b><small>${o3.modus === "auto" ? "sonst automatisch" : "sonst verf\xE4llt sie"}</small></span>
+        <button class="q-haken" data-a="frei" data-v="${o3.id}" aria-label="${esc2(o3.wgName)} freigeben">Frei</button>`;
+        if (auf) {
+          h3 += `<span class="q-details">Abverkauf 8 Wochen <i data-p="f:${o3.id}:abverkauf">${geld(o3.erwarteterAbverkauf)}</i> \xB7 Reichweite danach <i data-p="f:${o3.id}:reichweite">${dez(o3.reichweiteDanach, 1)} Wo.</i> \xB7 erste Lieferung KW ${kwVon2(o3.ersteLieferung)}${o3.lieferungen.length > 1 ? ` in ${o3.lieferungen.length} Teilen` : ""}${o3.hinweis ? ` \xB7 ${esc2(o3.hinweis)}` : ""}</span>`;
+          if (ui.kuerzen === o3.id) h3 += `<span class="q-knoepfe">${[10, 25, 50].map((p3) => `<button data-a="kuerzen" data-v="${o3.id}" data-p2="${p3}">\u2212${p3} % und frei</button>`).join("")}<button data-a="kuerzenZu">Zur\xFCck</button></span>`;
+          else h3 += `<span class="q-knoepfe"><button data-a="kuerzenAuf" data-v="${o3.id}">K\xFCrzen</button><button data-a="ablehnen" data-v="${o3.id}">Ablehnen</button></span>`;
+        }
         h3 += "</div>";
       }
+      if (zeigeN < l.length) {
+        const rest = l.slice(zeigeN);
+        h3 += `<div class="q-zeile"><span class="q-name">Weitere ${rest.length} Orders<small>kleinere Werte</small></span><span class="q-wert"><b data-s="w">${geld(rest.reduce((a2, o3) => a2 + o3.wert, 0))}</b></span></div><button class="q-mehr" data-a="mehrOrders">Alle ${l.length} Orders zeigen</button>`;
+      }
+      if (l.length) h3 += `<div class="q-summe"><span>Summe ${l.length} ${l.length === 1 ? "Order" : "Orders"}</span><span class="q-wert" data-summe="w" data-p="sammel">${geld(summe2)}</span></div>`;
+      h3 += "</div>";
       const p2 = alle.protokoll[alle.protokoll.length - 1];
       if (p2) h3 += `<div class="legende">Letzte Woche: ${p2.neu} neue Orders, ${p2.direkt} direkt unter der Grenze, ${p2.freigegeben} freigegeben, ${p2.auto} automatisch, ${p2.verfallen} verfallen${p2.verfallenWert ? ` (${geld(p2.verfallenWert)})` : ""}, ${p2.abgelehnt} abgelehnt</div>`;
+      h3 += "</div>";
       return { titel: "Freigaben", unter: `${alle.anzahl} Orders offen \xB7 ${geld(alle.wert)} EK \xB7 KW ${kwVon2(s2().woche)}`, html: h3 };
     }
     function zeigen(scrollHalten = false) {
       const sc = document.getElementById("pinhalt").scrollTop;
       const r3 = ui.seite === "wg" ? wgSeite() : ui.seite === "freigaben" ? freigabenSeite() : ui.seite === "eigenmarken" || ui.seite === "gruenden" ? eigenmarkenSeite(ctx, ui, tabs()) : ["merchandise", "allokation", "reduzierungKalender"].includes(ui.seite) ? warenSeite(ctx, ui, tabs()) : uebersicht();
-      ctx.panel(r3.titel, r3.unter, r3.html, "gross");
+      ctx.panel(r3.titel, r3.unter, bereich("zentrale") + '<i class="q31-marke" hidden></i>' + r3.html, "gross");
       ui.aktiv = true;
       if (scrollHalten) document.getElementById("pinhalt").scrollTop = sc;
       const leiste = document.querySelector("#pinhalt .tabs"), an = leiste?.querySelector(".tab.an");
@@ -160184,6 +160348,20 @@
           zeigen(true);
           return;
         case "kuerzenZu":
+          ui.kuerzen = null;
+          zeigen(true);
+          return;
+        case "formatBudgetSchritt": {
+          const o3 = ctx.E.outletUebersicht(s2());
+          tun2({ typ: "offpriceZukauf", budget: Math.max(0, o3.zukaufBudget + Number(v)) });
+          return;
+        }
+        case "mehrOrders":
+          ui.mehrOrders = true;
+          zeigen(true);
+          return;
+        case "orderAuf":
+          ui.orderAuf = ui.orderAuf === v ? null : v;
           ui.kuerzen = null;
           zeigen(true);
           return;
@@ -160869,10 +161047,10 @@
     }
     return { werte: n3, fehler: fehler6 };
   }
-  var schalter = (an, attr, text3, unter = "") => `<button class="schalter ${an ? "an" : ""}" ${attr} role="switch" aria-checked="${an}"><span class="knebel"></span><span class="stext">${text3}${unter ? `<small>${unter}</small>` : ""}</span></button>`;
+  var schalter2 = (an, attr, text3, unter = "") => `<button class="schalter ${an ? "an" : ""}" ${attr} role="switch" aria-checked="${an}"><span class="knebel"></span><span class="stext">${text3}${unter ? `<small>${unter}</small>` : ""}</span></button>`;
   var segment = (act, wert, optionen3, extra = "") => `<div class="seg${optionen3.length > 5 || optionen3.reduce((a2, [, t3]) => a2 + String(t3).length, 0) > 30 ? " umbruch" : ""}">${optionen3.map(([v, t3]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t3}</button>`).join("")}</div>`;
   var regler = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
-  var stepper = (act, wertHtml, unter = "", extra = "") => `<div class="stepper"><button data-a="${act}" data-v="-1"${extra} aria-label="weniger">\u2212</button><span>${wertHtml}${unter ? `<br><i>${unter}</i>` : ""}</span><button data-a="${act}" data-v="1"${extra} aria-label="mehr">+</button></div>`;
+  var stepper2 = (act, wertHtml, unter = "", extra = "") => `<div class="stepper"><button data-a="${act}" data-v="-1"${extra} aria-label="weniger">\u2212</button><span>${wertHtml}${unter ? `<br><i>${unter}</i>` : ""}</span><button data-a="${act}" data-v="1"${extra} aria-label="mehr">+</button></div>`;
   var faehigkeit = (name2, wert, p2) => `<div class="faehig"><span>${name2}</span><span class="fbalken"><span style="width:${Math.max(0, Math.min(100, wert))}%"></span><i></i><i></i><i></i><i></i></span>${p2}</div>`;
   var kz = (titel, inhalt, ton2 = "") => `<div class="kz ${ton2}"><span>${titel}</span>${inhalt}</div>`;
   var wocheText = (s2, w2) => `KW ${kwVon2(w2)} / ${s2.startJahr + Math.floor(w2 / 52)}`;
@@ -160894,6 +161072,7 @@
     }, { passive: true });
   }
   var RISIKO = { gruen: "gering", gelb: "erh\xF6ht", rot: "hoch" };
+  var RESSORT_KURZ = { cfo: "Finanzen", coo: "Operations", cso: "Vertrieb", cpo: "Einkauf", cmo: "Marketing", chro: "Personal", cro: "Restrukturierung", cdo: "Digital" };
   var HALTE = [[0, "kein"], [0.25, "25 %"], [0.5, "50 %"], [1, "100 %"]];
   var ERFOLG = [[0, "kein"], [0.1, "10 %"], [0.2, "20 %"], [0.3, "30 %"]];
   function vorstandModul(ctx) {
@@ -160902,28 +161081,33 @@
     const ui = { aktiv: false, seite: "uebersicht", ressort: null, k: 0, angebot: null, entlassen: false };
     function uebersicht(P4) {
       const st2 = s2(), u = E8.vorstandUebersicht(st2);
-      let h3 = `<div class="raster">${kz("Vorstand besetzt", P4("u:besetzt", `${u.besetzt} von ${u.ressorts.length}`))}${kz("Geh\xE4lter im Jahr", P4("u:kostenJahr", geld(u.kostenJahr)))}${kz("Kosten je Woche", P4("u:kostenWoche", geld(u.kostenWoche)))}${kz("N\xE4chste Sitzung", P4("u:sitzung", wocheText(st2, u.naechsteSitzung)))}</div>`;
+      const frei6 = u.ressorts.filter((r3) => !r3.person), risiko = u.ressorts.filter((r3) => r3.person && r3.risikoAmpel === "rot");
+      let h3 = '<div class="q31">';
+      h3 += `<div class="q-gross"><span class="q-label">Vorstand besetzt</span><span class="q-haupt">${P4("u:besetzt", `${u.besetzt} von ${u.ressorts.length}`, "span")}</span><span class="q-neben"><b>${P4("u:kostenJahr", geld(u.kostenJahr), "span")}</b>Geh\xE4lter im Jahr</span></div>`;
+      h3 += `<div class="q-befund">${frei6.length ? `<b>${frei6.map((r3) => r3.kurz).join(" und ")}</b> ${frei6.length === 1 ? "fehlt" : "fehlen"}; ${frei6.length === 1 ? "das Ressort arbeitet" : "die Ressorts arbeiten"} ohne F\xFChrung schw\xE4cher.` : "Alle Ressorts sind besetzt."}${risiko.length ? ` Abwerberisiko hoch: ${risiko.map((r3) => r3.kurz).join(", ")}.` : ""} N\xE4chste Sitzung ${P4("u:sitzung", wocheText(st2, u.naechsteSitzung), "b")}, Kosten je Woche ${P4("u:kostenWoche", geld(u.kostenWoche), "b")}.</div>`;
       for (const e of u.offeneEntscheidungen) {
         const roh2 = st2.entscheidungen.find((x2) => x2.id === e.id);
-        h3 += `<div class="karte order entscheid"><div class="ohead"><b>${esc2(e.titel)}</b><i>Frist ${wocheText(st2, e.frist)}</i></div><div class="olief">${esc2(roh2?.text ?? "")}</div><div class="oknoepfe">${(roh2?.optionen ?? []).map((o3, i) => `<button class="${i === 0 ? "gruen" : ""}" data-a="entscheiden" data-v="${e.id}" data-o="${o3.id}">${esc2(o3.label)}</button>`).join("")}</div></div>`;
+        h3 += `<div class="q-buch q-vorlage"><div class="q-buch-kopf"><span>Sitzungsvorlage</span><b>Frist ${wocheText(st2, e.frist)}</b></div><div class="q-zeile"><span class="q-name"><b>${esc2(e.titel)}</b><small>${esc2(roh2?.text ?? "")}</small></span></div><div class="oknoepfe" style="padding:0 14px 12px">${(roh2?.optionen ?? []).map((o3, i) => `<button class="${i === 0 ? "gruen" : ""}" data-a="entscheiden" data-v="${e.id}" data-o="${o3.id}">${esc2(o3.label)}</button>`).join("")}</div></div>`;
       }
-      h3 += '<div class="vgitter">';
-      for (const r3 of u.ressorts) {
+      const platz = (r3) => {
         const p2 = r3.person;
-        h3 += `<button class="vkarte ${p2 ? "" : "leer"}" data-a="profil" data-v="${r3.id}"><span class="vbild">${portraet(p2?.portraet, 64)}</span><span class="vtext"><b>${r3.kurz}</b><small>${esc2(r3.titel)}</small>${p2 ? P4(`r:${r3.id}:name`, p2.name, "em") : '<em class="frei">unbesetzt</em>'}</span>`;
-        if (p2) h3 += `<span class="vmini"><span title="F\xFChrung"><i style="width:${p2.fuehrung}%"></i></span><span title="Fachwissen"><i style="width:${p2.fachwissen}%"></i></span><span title="Loyalit\xE4t"><i style="width:${p2.loyalitaet}%"></i></span></span><span class="ampel a-${r3.risikoAmpel}" title="Abwerberisiko ${RISIKO[r3.risikoAmpel]}"></span>`;
-        else h3 += '<span class="chip warn">einstellen</span>';
-        h3 += "</button>";
-      }
-      h3 += '</div><div class="legende">Balken: F\xFChrung, Fachwissen, Loyalit\xE4t \xB7 Punkt: Abwerberisiko</div>';
+        let x2 = `<button class="vkarte q-platz ${p2 ? "" : "leer"}" data-a="profil" data-v="${r3.id}"><span class="vbild">${p2 ? portraet(p2.portraet, 56) : '<span class="q-stuhl" aria-hidden="true"></span>'}</span><span class="vtext"><b>${r3.kurz}</b><small title="${esc2(r3.titel)}">${esc2(RESSORT_KURZ[r3.id] ?? r3.titel)}</small>${p2 ? P4(`r:${r3.id}:name`, p2.name, "em") : '<em class="frei">Platz frei, einstellen</em>'}</span>`;
+        if (p2) x2 += `<span class="vmini" aria-label="F\xFChrung ${p2.fuehrung}, Fachwissen ${p2.fachwissen}, Loyalit\xE4t ${p2.loyalitaet}"><span><i style="width:${p2.fuehrung}%"></i></span><span><i style="width:${p2.fachwissen}%"></i></span><span><i style="width:${p2.loyalitaet}%"></i></span></span><span class="ampel a-${r3.risikoAmpel}" title="Abwerberisiko ${RISIKO[r3.risikoAmpel]}"></span>`;
+        return x2 + "</button>";
+      };
+      const links = u.ressorts.filter((_, i) => i % 2 === 0), rechts = u.ressorts.filter((_, i) => i % 2 === 1);
+      h3 += `<div class="q-buch"><div class="q-buch-kopf"><span>Sitzungstisch</span><b>Platz antippen</b></div><div class="q-tisch"><div class="q-seite">${links.map(platz).join("")}</div><div class="q-tafel" aria-hidden="true"></div><div class="q-seite">${rechts.map(platz).join("")}</div></div>
+      <div class="legende" style="padding:0 14px 10px">Balken: F\xFChrung, Fachwissen, Loyalit\xE4t \xB7 Punkt: Abwerberisiko</div></div>`;
       const ls = u.letzteSitzung;
-      if (ls) {
-        h3 += `<div class="karte"><div class="khead">Letzte Vorstandssitzung<small>${wocheText(st2, ls.woche)}</small></div>`;
-        for (const b3 of ls.berichte) h3 += `<div class="zeile"><span class="was"><b>${E8.RESSORT_INFO?.[b3.ressort]?.kurz ?? b3.ressort}</b>${b3.name ? ` <i>${esc2(b3.name)}</i>` : ""}<em class="wirk">${esc2(b3.text)}</em></span></div>`;
-        if (ls.thema) h3 += `<div class="zeile"><span class="was"><b>Beschluss</b> <i>${esc2(ls.thema.titel)}</i><em>${esc2(ls.thema.ergebnis ?? "offen")}</em></span></div>`;
-        h3 += "</div>";
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Letzte Sitzung</span><b>' + (ls ? wocheText(st2, ls.woche) : "") + "</b></div>";
+      if (!ls) h3 += '<div class="q-leer"><b>Noch keine Sitzung.</b>Der Vorstand tagt einmal im Quartal.</div>';
+      else {
+        for (const b3 of ls.berichte) h3 += `<div class="q-zeile"><span class="q-name">${E8.RESSORT_INFO?.[b3.ressort]?.kurz ?? b3.ressort}${b3.name ? ` \xB7 ${esc2(b3.name)}` : ""}<small>${esc2(b3.text)}</small></span></div>`;
+        if (ls.thema) h3 += `<div class="q-zeile"><span class="q-name">Beschluss: ${esc2(ls.thema.titel)}<small>${esc2(ls.thema.ergebnis ?? "offen")}</small></span></div>`;
       }
+      h3 += "</div>";
       for (const b3 of u.boosts) h3 += `<div class="olief">${esc2(b3.text)} wirkt bis ${wocheText(st2, b3.bis)}</div>`;
+      h3 += "</div>";
       return { titel: "Vorstand", unter: `Du bist CEO \xB7 ${u.besetzt} von ${u.ressorts.length} Ressorts besetzt \xB7 KW ${kwVon2(st2.woche)}`, html: h3 };
     }
     function profil2(P4) {
@@ -160946,10 +161130,10 @@
       if (r3.vorgeschichte) h3 += `<div class="olief">${esc2(r3.vorgeschichte)}</div>`;
       h3 += `<div class="olief">Wirkung auf ${r3.abteilungen.map((a2) => `${esc2(a2.name)} ${P4(`p:${id}:abt:${a2.id}`, pz3(a2.faktor), "b")}`).join(" \xB7 ")} \xB7 Abwerberisiko im Jahr ${P4(`p:${id}:risiko`, pz3(r3.risiko), "b")}<span class="ampel a-${r3.risikoAmpel}"></span></div></div>`;
       h3 += '<div class="karte"><div class="khead">Delegation<small>die Ressort-KI entscheidet in der G\xFCte des Fachwissens</small></div>';
-      for (const d3 of r3.delegationen) h3 += schalter(d3.an, `data-a="delegation" data-v="${d3.id}"`, esc2(d3.label), esc2(d3.beschreibung));
+      for (const d3 of r3.delegationen) h3 += schalter2(d3.an, `data-a="delegation" data-v="${d3.id}"`, esc2(d3.label), esc2(d3.beschreibung));
       h3 += "</div>";
       h3 += '<div class="karte steuerung"><div class="khead">Verg\xFCtung</div>';
-      h3 += regler("Jahresgehalt", stepper("gehalt", P4(`p:${id}:gehalt`, geld(p2.gehalt)), P4(`p:${id}:gehaltProzent`, `${r3.gehaltProzent >= 0 ? "+" : "\u2212"}${Math.abs(r3.gehaltProzent)} % zur Forderung von ${geld(p2.gehaltsforderung)}`, "i")), `Schritt ${geld(r3.gehaltsSchritt)}`);
+      h3 += regler("Jahresgehalt", stepper2("gehalt", P4(`p:${id}:gehalt`, geld(p2.gehalt)), P4(`p:${id}:gehaltProzent`, `${r3.gehaltProzent >= 0 ? "+" : "\u2212"}${Math.abs(r3.gehaltProzent)} % zur Forderung von ${geld(p2.gehaltsforderung)}`, "i")), `Schritt ${geld(r3.gehaltsSchritt)}`);
       const halteAnteil = p2.haltebonus > 0 ? Math.round(p2.haltebonus / Math.max(1, p2.gehalt) * 4) / 4 : 0;
       h3 += regler("Haltebonus \xFCber 52 Wochen", segment("haltebonus", halteAnteil, HALTE) + `<small class="rfuss">${p2.haltebonus > 0 ? `${P4(`p:${id}:haltebonus`, geld(p2.haltebonus), "i")} bis ${p2.halteBis !== void 0 ? wocheText(st2, p2.halteBis) : "offen"}, senkt das Abwerberisiko` : "Anteil vom Jahresgehalt, in Raten ausgezahlt"}</small>`, "vom Jahresgehalt");
       h3 += regler("Erfolgsbonus bei Planerf\xFCllung", segment("erfolgsbonus", Math.round(p2.erfolgsbonus * 10) / 10, ERFOLG), "vom Jahresgehalt je Jahr");
@@ -160985,7 +161169,7 @@
       if (!ui.angebot || ui.angebot.id !== k3.id) ui.angebot = { id: k3.id, gehalt: k3.gehaltsforderung, halte: 0, erfolg: 0 };
       const A = ui.angebot, hb2 = Math.round(A.gehalt * A.halte), ch2 = E8.angebotsChance(st2, L2.ressort, k3.id, A.gehalt, hb2, A.erfolg);
       h3 += '<div class="karte steuerung"><div class="khead">Angebot an ' + esc2(k3.name) + "</div>";
-      h3 += regler("Jahresgehalt", stepper("angebotGehalt", P4("a:gehalt", geld(A.gehalt)), `${A.gehalt >= k3.gehaltsforderung ? "+" : "\u2212"}${Math.abs(Math.round((A.gehalt / k3.gehaltsforderung - 1) * 100))} % zur Forderung`), `Schritt ${geld(L2.gehaltsSchritt)}`);
+      h3 += regler("Jahresgehalt", stepper2("angebotGehalt", P4("a:gehalt", geld(A.gehalt)), `${A.gehalt >= k3.gehaltsforderung ? "+" : "\u2212"}${Math.abs(Math.round((A.gehalt / k3.gehaltsforderung - 1) * 100))} % zur Forderung`), `Schritt ${geld(L2.gehaltsSchritt)}`);
       h3 += regler("Haltebonus", segment("angebotHalte", A.halte, HALTE), hb2 ? geld(hb2) : "vom Jahresgehalt");
       h3 += regler("Erfolgsbonus", segment("angebotErfolg", A.erfolg, ERFOLG), "vom Jahresgehalt");
       h3 += `<div class="regler"><div class="rkopf"><b>Annahmechance</b>${P4("a:chance", pz3(ch2))}</div><div class="balken"><span style="width:${(ch2 * 100).toFixed(0)}%;background:${ch2 >= 0.6 ? "var(--gruen)" : ch2 >= 0.35 ? "#e3a90d" : "var(--rot)"}"></span></div><small class="rfuss">h\xE4ngt von Angebot, Lage der Firma und Image ab</small></div>`;
@@ -161001,7 +161185,7 @@
     function zeigen(scrollHalten = false) {
       const sc = document.getElementById("pinhalt").scrollTop;
       const { r: r3 } = rendern();
-      ctx.panel(r3.titel, r3.unter, r3.html, "gross");
+      ctx.panel(r3.titel, r3.unter, bereich("zentrale") + '<i class="q31-marke" hidden></i>' + r3.html, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? sc : 0;
       if (ui.seite === "einstellen") karussellBinden("kandidaten", ui.k, (i) => {
@@ -161194,94 +161378,6 @@
     }
     return { darstellen, klick, wahl: wahl3, ui };
   }
-
-  // src/ui/komponenten.js
-  var bereich = (name2, symbol2 = name2, { voll: voll2 = false } = {}) => `<i class="hk-bereich" data-bereich="${esc2(name2)}" data-symbol="${esc2(symbol2)}"${voll2 ? ' data-hoehe="voll"' : ""} aria-hidden="true"></i>`;
-  var rumpf2 = (html) => `<div class="hk-rumpf">${html}</div>`;
-  function sprecher({ text: text3, unter = "", person: person3 = "", ton: ton2 = "" }) {
-    return `<div class="hk-sprecher${ton2 ? " hk-" + ton2 : ""}" role="note"><p>${text3}${unter ? `<small>${esc2(unter)}</small>` : ""}</p>${person3 ? `<span class="hk-person" aria-hidden="true">${person3}</span>` : ""}</div>`;
-  }
-  var abschnitt = (titel, rechts = "") => `<h3 class="hk-abschnitt">${esc2(titel)}${rechts ? `<small>${esc2(rechts)}</small>` : ""}</h3>`;
-  function abweichung(roh2, text3, quote = null, umgekehrt = false) {
-    if (roh2 == null) return "<span>keine Vergleichswoche</span>";
-    const gut = umgekehrt ? roh2 < 0 : roh2 > 0, schlecht = umgekehrt ? roh2 > 0 : roh2 < 0;
-    const q2 = quote == null || !Number.isFinite(quote) ? "" : ` (${quote > 0 ? "+" : quote < 0 ? "\u2212" : "\xB1"}${Math.abs(quote * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %)`;
-    return `<span class="${gut ? "gut" : schlecht ? "schlecht" : ""}">${esc2(text3)}${q2}</span>`;
-  }
-  function gross2(werte3) {
-    return `<div class="hk-gross" style="--n:${werte3.length}">${werte3.map((w2) => `<div><span>${esc2(w2.label)}</span><b class="${w2.ton ?? ""}"${w2.p ? ` data-p="${esc2(w2.p)}"` : ""}>${esc2(w2.wert)}</b>${w2.unter ? `<i>${w2.unter}</i>` : ""}</div>`).join("")}</div>`;
-  }
-  function balkenPaar(reihen) {
-    const eine = (r3) => {
-      const w2 = r3.punkte.map((q2) => q2.wert ?? 0);
-      if (w2.length < 2) return `<div><h4>${esc2(r3.titel)}</h4>${leer3("Ab der zweiten Woche.")}</div>`;
-      const pos = Math.max(0, ...w2), neg = Math.max(0, ...w2.map((v) => -v)), ges = pos + neg || 1;
-      const oben = pos / ges * 100, unten = neg / ges * 100;
-      const saeule3 = (v) => `<div style="display:flex;flex-direction:column;height:100%"><div style="height:${oben}%;display:flex;align-items:flex-end;justify-content:center">${v > 0 ? `<span class="${r3.serie}" style="height:${Math.max(3, v / ges * 100 / (oben / 100))}%" data-w="${Math.round(v)}"></span>` : ""}</div><div style="height:${unten}%;display:flex;align-items:flex-start;justify-content:center">${v < 0 ? `<span class="${r3.serie} neg" style="height:${Math.max(3, -v / ges * 100 / (unten / 100))}%" data-w="${Math.round(v)}"></span>` : ""}</div>${v === 0 ? '<span class="null" style="height:2px;align-self:center" data-w="0"></span>' : ""}</div>`;
-      const von = r3.punkte[0].label, bis = r3.punkte[r3.punkte.length - 1].label;
-      return `<div><h4>${esc2(r3.titel)}</h4><div class="hk-balken mitnull" style="--n:${w2.length}" role="img" aria-label="${esc2(r3.titel)} ${esc2(von)} bis ${esc2(bis)}">${neg ? `<i class="null-linie" style="top:${oben}%"></i>` : ""}${w2.map(saeule3).join("")}</div><div class="hk-balkenfuss" style="--n:${w2.length}">${r3.punkte.map((q2) => `<span>${esc2(q2.label)}</span>`).join("")}</div></div>`;
-    };
-    return `<div class="hk-balkenpaar">${reihen.map(eine).join("")}</div>`;
-  }
-  function tabelle({ titel = "", spalten: spalten2 = [], zeilen, summe: summe2 = null, pruefen: pruefen2 = false }) {
-    const zelle2 = (t3, roh2, ton2) => `<td class="${ton2 ?? ""}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${esc2(t3)}</td>`;
-    const zeile4 = (z4, k3 = "") => `<tr${k3 ? ` class="${k3}"` : ""}><td>${esc2(z4.name)}</td>${z4.werte.map((w2, i) => zelle2(w2, z4.roh?.[i], z4.ton?.[i])).join("")}</tr>`;
-    return `${titel ? abschnitt(titel) : ""}<table class="hk-tabelle"${pruefen2 ? ' data-summen="1"' : ""}>${spalten2.length ? `<thead><tr><th></th>${spalten2.map((s2) => `<th>${esc2(s2)}</th>`).join("")}</tr></thead>` : ""}<tbody>${zeilen.map((z4) => zeile4(z4)).join("")}${summe2 ? zeile4(summe2, "summe") : ""}</tbody></table>`;
-  }
-  function zeile({ was, unter = "", wert = "", wertUnter = "", ton: ton2 = "", attr = "", tippbar = false, roh: roh2 = null }) {
-    const tag = tippbar ? "button" : "div";
-    return `<${tag} class="hk-zeile${tippbar ? " hk-tippbar" : ""}"${tippbar ? ' type="button"' : ""} ${attr}><span class="hk-was">${was}${unter ? `<small>${unter}</small>` : ""}</span>${wert !== "" ? `<span class="hk-wert ${ton2}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${wert}${wertUnter ? `<small>${wertUnter}</small>` : ""}</span>` : ""}${tippbar ? '<span class="hk-pfeil" aria-hidden="true">\u203A</span>' : ""}</${tag}>`;
-  }
-  var liste = (zeilen) => `<div class="hk-liste">${zeilen.join("")}</div>`;
-  var knopf2 = (text3, attr = "", art = "", aus = false) => `<button type="button" class="hk-knopf ${art}" ${attr}${aus ? " disabled" : ""}>${esc2(text3)}</button>`;
-  var stepper2 = ({ wert, unter = "", attrMinus = "", attrPlus = "", minusAus = false, plusAus = false, label = "" }) => `<div class="hk-stepper"${label ? ` role="group" aria-label="${esc2(label)}"` : ""}><button type="button" aria-label="weniger" ${attrMinus}${minusAus ? " disabled" : ""}>\u2212</button><output>${esc2(wert)}${unter ? `<small>${esc2(unter)}</small>` : ""}</output><button type="button" aria-label="mehr" ${attrPlus}${plusAus ? " disabled" : ""}>+</button></div>`;
-  var schalter2 = ({ text: text3, unter = "", an, attr = "" }) => `<button type="button" class="hk-schalter" aria-pressed="${an ? "true" : "false"}" ${attr}><span class="hk-knebel" aria-hidden="true"></span><span>${esc2(text3)}${unter ? `<small>${esc2(unter)}</small>` : ""}</span></button>`;
-  var seg = (optionen3, aktiv6, attr) => `<div class="hk-seg" role="group">${optionen3.map(([w2, t3]) => `<button type="button" aria-pressed="${w2 === aktiv6}" ${attr(w2)}>${esc2(t3)}</button>`).join("")}</div>`;
-  var leer3 = (grund2, titel = "", aktion2 = "") => `<div class="hk-leer">${titel ? `<b>${esc2(titel)}</b>` : ""}${esc2(grund2)}${aktion2}</div>`;
-  var hinweis = (html, ton2 = "") => `<div class="hk-hinweis ${ton2}" role="${ton2 === "fehler" ? "alert" : "note"}"><span>${html}</span></div>`;
-  var marke4 = (text3, ton2 = "") => `<span class="hk-marke ${ton2}">${esc2(text3)}</span>`;
-  function skala(name2, wert) {
-    const n3 = Math.round(Math.max(0, Math.min(100, wert)) / 20);
-    return `<div class="hk-skala"><span>${esc2(name2)}</span><span class="hk-segmente" aria-hidden="true">${[0, 1, 2, 3, 4].map((i) => `<i class="${i < n3 ? "an" : ""}"></i>`).join("")}</span><b>${Math.round(wert)}</b></div>`;
-  }
-  var C30 = Math.cos(Math.PI / 6);
-  var pt = (x2, y2, z4, s2 = 2.9, ox = 16, oy = 19) => [ox + (x2 - y2) * C30 * s2, oy + (x2 + y2) * 0.5 * s2 - z4 * s2];
-  var poly = (pts, f11) => `<path d="M${pts.map(([a2, b3]) => a2.toFixed(1) + " " + b3.toFixed(1)).join("L")}Z" fill="${f11}"/>`;
-  function quader(x2, y2, z4, w2, d3, h3, [o3, l, r3]) {
-    const P4 = (a2, b3, c) => pt(a2, b3, c);
-    return poly([P4(x2, y2, z4 + h3), P4(x2 + w2, y2, z4 + h3), P4(x2 + w2, y2 + d3, z4 + h3), P4(x2, y2 + d3, z4 + h3)], o3) + poly([P4(x2, y2 + d3, z4), P4(x2 + w2, y2 + d3, z4), P4(x2 + w2, y2 + d3, z4 + h3), P4(x2, y2 + d3, z4 + h3)], l) + poly([P4(x2 + w2, y2, z4), P4(x2 + w2, y2 + d3, z4), P4(x2 + w2, y2 + d3, z4 + h3), P4(x2 + w2, y2, z4 + h3)], r3);
-  }
-  function svg(inhalt) {
-    const z4 = [...inhalt.matchAll(/(-?[\d.]+) (-?[\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
-    const x0 = Math.min(...z4.map((q2) => q2[0])), x1 = Math.max(...z4.map((q2) => q2[0])), y0 = Math.min(...z4.map((q2) => q2[1])), y1 = Math.max(...z4.map((q2) => q2[1]));
-    const g = Math.max(x1 - x0, y1 - y0) + 2, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-    return `<svg viewBox="${(cx - g / 2).toFixed(1)} ${(cy - g / 2).toFixed(1)} ${g.toFixed(1)} ${g.toFixed(1)}" aria-hidden="true">${inhalt}</svg>`;
-  }
-  var GRAU = ["#d9d3cb", "#b3aba1", "#8d847a"];
-  var DUNKEL3 = ["#6c655e", "#55504a", "#433f3a"];
-  var ROT4 = ["#ef6b60", "#d23c32", "#a62a22"];
-  var GRUEN = ["#8ed694", "#6dbf73", "#4a8d50"];
-  var BLAU = ["#9dc2dc", "#6f9cbd", "#4f7a99"];
-  var SAND2 = ["#f0dfb8", "#d9c393", "#b8a170"];
-  var WEISS4 = ["#ffffff", "#e5e1db", "#c9c3bb"];
-  var figur5 = (x2, y2, f11) => quader(x2, y2, 0, 1.4, 1.4, 3.2, f11) + quader(x2 + 0.15, y2 + 0.15, 3.3, 1.1, 1.1, 1.1, ["#f2d2b6", "#dcb593", "#c29a77"]);
-  var SYMBOLE = {
-    ueberblick: svg(quader(-3, -3, 0, 6, 6, 4.5, WEISS4) + quader(-3, -3, 2.4, 6, 6, 0.6, ROT4) + quader(-3, -3, 4.5, 6, 6, 0.5, DUNKEL3)),
-    etagen: svg(quader(-3.5, -3.5, 0, 7, 7, 1, GRAU) + quader(-3.5, -3.5, 2.4, 7, 7, 1, WEISS4) + quader(-3.5, -3.5, 4.8, 7, 7, 1, ROT4)),
-    personal: svg(figur5(-2.5, 0, BLAU) + figur5(0.5, -2, ROT4) + figur5(1.5, 1.5, GRUEN)),
-    leitung: svg(quader(-3.5, -1, 0, 7, 3, 2.2, SAND2) + figur5(-0.5, -3.5, DUNKEL3) + quader(-1, 0, 2.2, 2, 1.2, 0.8, ["#333", "#222", "#111"])),
-    sortiment: svg(quader(-4, -0.3, 0, 0.6, 0.6, 6, DUNKEL3) + quader(3.4, -0.3, 0, 0.6, 0.6, 6, DUNKEL3) + quader(-4, -0.3, 5.6, 8, 0.6, 0.5, DUNKEL3) + quader(-3, -0.8, 2, 1.6, 1.6, 3.2, ROT4) + quader(-0.9, -0.8, 2, 1.6, 1.6, 3.2, BLAU) + quader(1.2, -0.8, 2, 1.6, 1.6, 3.2, SAND2)),
-    marketing: svg(quader(-0.4, -0.4, 0, 0.8, 0.8, 4, DUNKEL3) + quader(-4, -0.5, 3.6, 8, 1, 4.6, WEISS4) + quader(-3.4, 0.5, 4.2, 6.8, 0.1, 3.4, ROT4)),
-    kosten: svg(quader(-3.5, -2.5, 0, 7, 5, 2.5, GRAU) + quader(-3, -2, 2.5, 3, 4, 2.2, DUNKEL3) + quader(0.4, -1.5, 2.5, 2.6, 3, 0.5, GRUEN)),
-    finanzen: svg(quader(-3.5, -2.5, 0, 7, 5, 2.5, GRAU) + quader(-3, -2, 2.5, 3, 4, 2.2, DUNKEL3) + quader(0.4, -1.5, 2.5, 2.6, 3, 0.5, GRUEN)),
-    ware: svg(quader(-4, -3, 0, 4, 4, 3.4, SAND2) + quader(0.3, -3, 0, 3.7, 4, 3.4, SAND2) + quader(-2, -1.5, 3.4, 4, 4, 3.2, SAND2) + quader(-2, 0.6, 5, 4, 0.1, 0.5, ROT4)),
-    umbau: svg(quader(-3.5, -3.5, 0, 0.5, 0.5, 7, SAND2) + quader(3, -3.5, 0, 0.5, 0.5, 7, SAND2) + quader(-3.5, -3.5, 3.3, 7, 0.5, 0.5, SAND2) + quader(-3.5, -3.5, 6.5, 7, 0.5, 0.5, SAND2) + quader(-2.5, -1, 0, 5, 4, 3, WEISS4)),
-    kommentare: svg(quader(-3.5, -3, 0, 7, 6, 0.6, WEISS4) + quader(-2.5, -2, 0.6, 5, 4, 0.3, ["#f6f2e9", "#ddd6c7", "#c9c0ae"]) + quader(-2, 1.5, 0.9, 4, 0.2, 0.2, DUNKEL3)),
-    post: svg(quader(-4, -3, 0, 8, 6, 1.6, SAND2) + quader(-3.4, -2.4, 1.6, 6.8, 4.8, 0.4, WEISS4) + quader(-3, -2, 2, 6, 4, 0.4, ["#fbf7ee", "#e5ddcd", "#cdc3ad"]) + quader(-1, -0.6, 2.4, 2, 1.2, 0.2, ROT4)),
-    zentrale: svg(quader(-2.5, -2.5, 0, 5, 5, 10, WEISS4) + quader(-2.5, 2.45, 2, 5, 0.1, 1, BLAU) + quader(-2.5, 2.45, 4.5, 5, 0.1, 1, BLAU) + quader(-2.5, 2.45, 7, 5, 0.1, 1, BLAU) + quader(-2.5, -2.5, 10, 5, 5, 0.6, ROT4)),
-    zahlen: svg(quader(-4, -1, 0, 2, 2, 3, WEISS4) + quader(-1, -1, 0, 2, 2, 6, WEISS4) + quader(2, -1, 0, 2, 2, 4.4, GRUEN))
-  };
-  var reiterUnten = (reiter, aktiv6, attr) => `<nav class="hk-reiter" aria-label="Bereiche">${reiter.map(([id, name2, sym3]) => `<button type="button" ${attr(id)}${id === aktiv6 ? ' aria-current="page"' : ""}>${SYMBOLE[sym3 ?? id] ?? ""}<span>${esc2(name2)}</span></button>`).join("")}</nav>`;
 
   // src/ui/organisation.js
   function organisationModul(ctx) {
@@ -162208,7 +162304,7 @@
     const tabs = () => '<nav class="hk-seg stat-auswahl" aria-label="Statistikseiten">' + [["konzern", "Konzern"], ["formate", "Formate"], ["regionen", "Regionen"], ["rangliste", "H\xE4user"]].map(([id, t3]) => knopf5("seite", id, t3, ui.seite === id)).join("") + "</nav>";
     const zeiten = () => '<div class="hk-seg stat-auswahl" aria-label="Zeitraum">' + [[13, "13 Wochen"], [52, "52 Wochen"], ["alle", "Alle"]].map(([id, t3]) => knopf5("wochen", id, t3, String(ui.wochen) === String(id))).join("") + "</div>";
     const typen = () => '<div class="hk-seg stat-auswahl" aria-label="Darstellung">' + [["linie", "Verlauf"], ["balken", "Wochen"], ["quartal", "Quartale"]].map(([id, t3]) => knopf5("typ", id, t3, ui.typ === id)).join("") + "</div>";
-    const zahl6 = (t3, n3, k3) => '<div class="kz"><span>' + esc2(t3) + "</span><b>" + esc2(wert(n3, k3)) + "</b></div>";
+    const zahl5 = (t3, n3, k3) => '<div class="kz"><span>' + esc2(t3) + "</span><b>" + esc2(wert(n3, k3)) + "</b></div>";
     function gruppieren(punkte2, kennzahl2) {
       if (ui.typ !== "quartal") return ui.typ === "balken" ? punkte2.slice(-13) : punkte2;
       const summen = /* @__PURE__ */ new Map();
@@ -162275,7 +162371,7 @@
         html += diagramm(t3, [{ name: "Ist", punkte: d3.punkte }], k3, { vorjahr: true, grenze: k3 === "cash" ? -s2().kreditlinie : void 0 });
         if (k3 === "cash") html += '<p class="stat-hinweis">Aktuelle Insolvenzgrenze: ' + esc2(geld(-s2().kreditlinie)) + " (verf\xFCgbarer Kreditrahmen). \xC4nderungen der Kreditlinie sind historisch nicht rekonstruierbar.</p>";
       }
-      html += wasserfall();
+      html += wasserfall2();
       return html;
     }
     function formate() {
@@ -162302,7 +162398,7 @@
       if (ui.zeilen < hauser.length) html += '<button class="stat-mehr" data-st-a="mehr">Weitere H\xE4user (' + (hauser.length - ui.zeilen) + ")</button>";
       return html;
     }
-    function wasserfall() {
+    function wasserfall2() {
       const k3 = s2().historie.at(-1);
       if (!k3) return "";
       const daten2 = [
@@ -162564,7 +162660,7 @@
 
   // src/ui/marketing.js
   var STATUS2 = { geplant: "geplant", laufend: "l\xE4uft", beendet: "beendet", abgesagt: "abgesagt", aktiv: "aktiv", gestoppt: "gestoppt" };
-  var STATUS_FARBE = { geplant: "#2f63b5", laufend: "#2f8f5b", beendet: "#9aa3ab", abgesagt: "#d6d2ca" };
+  var STATUS_FARBE = { geplant: "#6f9cbd", laufend: "#6dbf73", beendet: "#5d6b73", abgesagt: "#3b4b54" };
   var MONATE = ["Jan", "Feb", "M\xE4r", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
   var ANGEBOT = [["coupon", "Coupon"], ["punkte", "Mehrfachpunkte"], ["zugabe", "Gratiszugabe"], ["info", "nur Info"]];
   var FREQUENZ = [["einmalig", "einmalig"], ["woechentlich", "w\xF6chentlich"], ["zweiwoechentlich", "14-t\xE4gig"], ["monatlich", "monatlich"], ["quartal", "Quartal"]];
@@ -162594,22 +162690,35 @@
       kanalScroll: 0,
       crm: { seg: 0, kanal: "mail", angebot: "coupon", prozent: 0.15, mindestbon: 40, faktor: 3, wert: 10, frequenz: "monatlich", wochen: 13, kontrolle: true }
     };
-    const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["stadt", "St\xE4dte"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t3]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t3}</button>`).join("")}</div><button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>`;
+    const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["stadt", "St\xE4dte"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t3]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t3}</button>`).join("")}</div>`;
     function uebersicht(P4) {
       const st2 = s2(), u = E8.marketingUebersicht(st2);
-      let h3 = tabs();
-      h3 += `<div class="raster">${kz("Werbung je Woche netto", P4("u:netto", geld(u.wocheNetto)))}${kz("Werbequote netto", P4("u:quote", pz3(u.werbequoteNetto, 1)))}${kz("Markenst\xE4rke", P4("u:marke", `${Math.round(u.markenstaerke)} / 100`))}${kz("Image", P4("u:image", `${Math.round(u.image)} / 100`))}${kz("Kundschaft je Woche", P4("u:frequenz", fmt.format(Math.round(u.frequenzWoche))))}${kz("Durchschnittsbon", P4("u:bon", geld(u.bon)))}${kz("Umsatz mit Karte", P4("u:karte", pz3(u.kartenanteil, 1)))}${kz("Rabattquote 13 Wochen", P4("u:rabatt", pz3(u.rabattquote13, 1)), u.rabattquote13 > 0.08 ? "rot" : "")}</div>`;
-      h3 += `<div class="karte"><div class="khead">Budget je Woche<small>brutto ${geld(u.wocheBrutto)}, Lieferantenbeteiligung ${geld(u.wocheBeteiligung)}</small></div>`;
-      const sum2 = Math.max(1, u.bloecke.kanaele + u.bloecke.karte + u.bloecke.app + u.bloecke.crm);
-      for (const [k3, t3, f11] of [["kanaele", "Kan\xE4le", "#2f63b5"], ["karte", "Hartwig Karte", "#d23c32"], ["app", "Hartwig App", "#8c5a7a"], ["crm", "CRM-Versand", "#2f8f5b"]]) h3 += `<div class="mzeile"><span>${t3}</span><span class="mbalken"><span style="width:${(u.bloecke[k3] / sum2 * 100).toFixed(0)}%;background:${f11}"></span></span>${P4(`u:block:${k3}`, geld(u.bloecke[k3]), "b", ' class="breitwert"')}</div>`;
-      h3 += '<div class="zeile unter"></div></div>';
-      const v = u.verlauf.slice(-26);
-      h3 += kurve2("Kundschaft je Woche", v.map((x2) => x2.kunden), (x2) => fmt.format(Math.round(x2)), "k:kunden", P4, "#2f63b5");
-      h3 += kurve2("Markenst\xE4rke", v.map((x2) => x2.marke), (x2) => dez(x2, 1), "k:marke", P4, "#8c5a7a");
-      const zeile4 = (a2) => `<div class="zeile klickbar" data-a="aktion" data-v="${a2.id}"><span class="dot" style="background:${STATUS_FARBE[a2.status] ?? "#999"}"></span><span class="was">${esc2(a2.name)} <i>${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""}</i></span><span class="qm">KW ${a2.startKw} bis ${a2.endeKw}</span></div>`;
-      if (u.laufend.length) h3 += `<div class="karte"><div class="khead">L\xE4uft gerade</div>${u.laufend.map(zeile4).join("")}</div>`;
-      if (u.naechste.length) h3 += `<div class="karte"><div class="khead">Als N\xE4chstes</div>${u.naechste.map(zeile4).join("")}</div>`;
+      const tsd = (x2) => Math.round(x2 / 1e3), tsdText = (n3) => `${fmt.format(n3)} Tsd. \u20AC`;
+      let h3 = tabs() + '<div class="q31">';
+      const v = u.verlauf.slice(-26), vor = v.length > 1 ? v[v.length - 2].kunden : null;
+      const delta = vor == null ? null : u.frequenzWoche - vor;
+      h3 += `<div class="q-gross"><span class="q-label">Kundschaft je Woche</span><span class="q-haupt">${P4("u:frequenz", fmt.format(Math.round(u.frequenzWoche)), "span")}</span><span class="q-neben"><b>${P4("u:bon", geld(u.bon), "span")}</b>Durchschnittsbon</span></div>`;
+      h3 += `<div class="q-befund">${delta == null ? "Ein Vergleich ist ab der zweiten Woche verf\xFCgbar." : `<b class="${delta < 0 ? "q-minus" : "q-plus"}">${delta >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(Math.round(delta)))}</b> Kunden gegen\xFCber der Vorwoche bei ${P4("u:netto", geld(u.wocheNetto), "b")} Werbung netto.`}${u.rabattquote13 > 0.08 ? ` Die Rabattquote liegt mit ${pz3(u.rabattquote13, 1)} hoch, Kunden gew\xF6hnen sich an Preisaktionen.` : ""}</div>`;
+      const zeilen = [["kanaele", "Kan\xE4le", "Prospekt, Anzeigen, Plakat, Radio, TV, Online, Social"], ["karte", "Hartwig Karte", "Punkte, Stufen, Betrieb, Daten"], ["app", "Hartwig App", "Pflege und Werbung"], ["crm", "CRM-Versand", "Mail, Push, Brief"]].map(([k3, t3, d3]) => ({ k: k3, t: t3, d: d3, n: tsd(u.bloecke[k3]) }));
+      const brutto2 = zeilen.reduce((a2, z4) => a2 + z4.n, 0), beteiligung = tsd(u.wocheBeteiligung);
+      h3 += '<div class="q-buch" data-summenbuch="Werbebudget"><div class="q-buch-kopf"><span>Werbebudget je Woche</span><b>Tsd. \u20AC</b></div>';
+      for (const z4 of zeilen) h3 += `<div class="q-zeile"><span class="q-name">${z4.t}<small>${z4.d}</small></span><span class="q-wert">${P4(`u:block:${z4.k}`, tsdText(z4.n), "span", ' data-s="e"')}</span></div>`;
+      h3 += `<div class="q-summe"><span>Brutto</span><span class="q-wert">${P4("u:brutto", tsdText(brutto2), "span", ' data-summe="e"')}</span></div>`;
+      h3 += `<div class="q-zeile"><span class="q-name">Lieferantenbeteiligung<small>Werbekostenzusch\xFCsse</small></span><span class="q-wert">${P4("u:beteiligung", `\u2212${tsdText(beteiligung)}`, "span", ' data-s="e"')}</span></div>`;
+      h3 += `<div class="q-summe"><span>Netto</span><span class="q-wert">${P4("u:nettoTsd", tsdText(brutto2 - beteiligung), "span", ' data-summe="e"')}</span></div></div>`;
+      const kzz = (n3, w2, p2, ton2 = "") => `<div class="q-zeile"><span class="q-name">${n3}</span><span class="q-wert ${ton2}">${P4(p2, w2, "span")}</span></div>`;
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Marke und Kundschaft</span></div>';
+      h3 += kzz("Werbequote netto", pz3(u.werbequoteNetto, 1), "u:quote") + kzz("Markenst\xE4rke", `${Math.round(u.markenstaerke)} / 100`, "u:marke") + kzz("Image", `${Math.round(u.image)} / 100`, "u:image");
+      h3 += kzz("Umsatz mit Karte", pz3(u.kartenanteil, 1), "u:karte") + kzz("Rabattquote 13 Wochen", pz3(u.rabattquote13, 1), "u:rabatt", u.rabattquote13 > 0.08 ? "q-minus" : "") + "</div>";
+      h3 += kurve2("Kundschaft je Woche", v.map((x2) => x2.kunden), (x2) => fmt.format(Math.round(x2)), "k:kunden", P4, "#6f9cbd");
+      h3 += kurve2("Markenst\xE4rke", v.map((x2) => x2.marke), (x2) => dez(x2, 1), "k:marke", P4, "#c08aa8");
+      const zeile4 = (a2) => `<button class="q-zeile q-tipp" data-a="aktion" data-v="${a2.id}"><span class="q-name">${esc2(a2.name)}<small>${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""}</small></span><span class="q-wert">KW ${a2.startKw}${a2.endeKw !== a2.startKw ? ` bis ${a2.endeKw}` : ""}<small>${STATUS2[a2.status] ?? a2.status}</small></span></button>`;
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Aktionen</span><b>l\xE4uft und als N\xE4chstes</b></div>';
+      if (!u.laufend.length && !u.naechste.length) h3 += '<div class="q-leer"><b>Keine Aktion geplant.</b>Im Kalender planst du die n\xE4chste.</div>';
+      h3 += u.laufend.map(zeile4).join("") + u.naechste.map(zeile4).join("") + "</div>";
       for (const x2 of u.hinweise) h3 += `<div class="olief warnung">${esc2(x2)}</div>`;
+      h3 += '<button class="q-neben-akt" data-a="eigenmarkeGruenden" style="margin:4px 0 12px">+ Neue Eigenmarke</button>';
+      h3 += "</div>";
       return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 ${u.kampagnenAktiv} CRM-Kampagnen aktiv \xB7 KW ${u.kw} / ${u.jahr}`, html: h3 };
     }
     const mitReitern = (r3) => ({ ...r3, html: tabs() + r3.html });
@@ -162627,16 +162736,16 @@
       h3 += `<div class="mzeile"><span>Datenqualit\xE4t</span><span class="mbalken"><span style="width:${(k3.datenqualitaet * 100).toFixed(0)}%;background:#2f63b5"></span></span>${P4("ka:daten", String(Math.round(k3.datenqualitaet * 100)))}</div><div class="olief">Bessere Daten machen CRM-Kampagnen treffsicherer.</div></div>`;
       h3 += '<div class="karte steuerung"><div class="khead">Vorteile</div>';
       h3 += regler("Punkte", segment("punkte", k3.punkteSatz, [[25e-4, "1 je 4 \u20AC"], [5e-3, "1 je 2 \u20AC"], [0.01, "1 je 1 \u20AC"]]), "1 Punkt = 1 Cent");
-      h3 += schalter(k3.stufen, 'data-a="stufen"', "Statusstufen Silber und Gold", "bindet Top-Kunden, Einf\xFChrung kostet einmalig");
+      h3 += schalter2(k3.stufen, 'data-a="stufen"', "Statusstufen Silber und Gold", "bindet Top-Kunden, Einf\xFChrung kostet einmalig");
       h3 += regler("Kartenrabatt", segment("kartenrabatt", k3.kartenrabatt, [[0, "kein"], [0.02, "2 %"], [0.03, "3 %"], [0.05, "5 %"]]), "dauerhaft auf Kartenk\xE4ufe");
       h3 += regler("Anmeldepr\xE4mie f\xFCr 8 Wochen", segment("praemie", k3.anmeldeBis !== void 0 && k3.anmeldeBis > s2().woche ? k3.anmeldepraemie : 0, [[0, "keine"], [5, "5 \u20AC"], [10, "10 \u20AC"], [20, "20 \u20AC"]]), k3.anmeldeBis !== void 0 && k3.anmeldeBis > s2().woche ? `l\xE4uft bis ${wocheText(s2(), k3.anmeldeBis)}` : "Willkommensgutschein");
-      h3 += regler("Datenpflege je Woche", stepper("daten", P4("ka:datenBudget", geld(k3.datenBudgetWoche))), "Adressen, Dubletten, Einwilligungen");
+      h3 += regler("Datenpflege je Woche", stepper2("daten", P4("ka:datenBudget", geld(k3.datenBudgetWoche))), "Adressen, Dubletten, Einwilligungen");
       h3 += `<div class="regler"><small class="rfuss">Kosten je Woche: Punkte ${P4("ka:k:punkte", geld(k3.kostenWoche.punkte), "i")}, Stufen ${geld(k3.kostenWoche.stufen)}, Betrieb ${geld(k3.kostenWoche.betrieb)}, Daten ${geld(k3.kostenWoche.daten)}, Anmeldung ${geld(k3.kostenWoche.anmeldung)}, zusammen ${P4("ka:k:summe", geld(k3.kostenWoche.summe), "i")}</small></div></div>`;
       h3 += `<div class="karte emkarte"><div class="mkopf" style="background:#8c5a7a"><b>${esc2(a2.name)}</b><small>${a2.relaunchBis !== void 0 && a2.relaunchBis > s2().woche ? `Relaunch bis ${wocheText(s2(), a2.relaunchBis)}` : "Coupons, Punkte, Push"}</small></div>`;
       h3 += `<div class="owerte"><div><span>Downloads</span>${P4("ap:downloads", fmt.format(a2.downloads))}</div><div><span>aktive Nutzer</span>${P4("ap:aktiv", fmt.format(a2.aktiveNutzer))}</div><div><span>Push erlaubt</span>${P4("ap:push", pz3(a2.pushQuote))}</div></div>`;
       h3 += `<div class="mzeile"><span>App-Qualit\xE4t</span><span class="mbalken"><span style="width:${(a2.qualitaet * 100).toFixed(0)}%;background:${a2.qualitaet < 0.3 ? "#d23c32" : "#2f8f5b"}"></span></span>${P4("ap:qualitaet", String(Math.round(a2.qualitaet * 100)))}</div>`;
-      h3 += regler("App-Budget je Woche", stepper("appBudget", P4("ap:budget", geld(a2.budgetWoche))), "Pflege und Werbung f\xFCr Downloads");
-      h3 += schalter(a2.appCoupons, 'data-a="appCoupons"', "Aktions-Coupons in der App", "holt Nutzer in die App");
+      h3 += regler("App-Budget je Woche", stepper2("appBudget", P4("ap:budget", geld(a2.budgetWoche))), "Pflege und Werbung f\xFCr Downloads");
+      h3 += schalter2(a2.appCoupons, 'data-a="appCoupons"', "Aktions-Coupons in der App", "holt Nutzer in die App");
       h3 += `<div class="oknoepfe"><button data-a="relaunch"${a2.relaunchBis !== void 0 && a2.relaunchBis > s2().woche ? " disabled" : ""}>App-Relaunch beauftragen</button></div></div>`;
       return { titel: "Hartwig Karte und App", unter: `${fmt.format(k3.mitglieder)} Mitglieder \xB7 ${pz3(k3.umsatzAnteil, 1)} vom Umsatz`, html: h3 };
     }
@@ -162653,7 +162762,7 @@
       if (B8.angebot === "zugabe") h3 += `<div class="regler">${segment("crmWert", B8.wert, [[5, "5 \u20AC"], [10, "10 \u20AC"], [20, "20 \u20AC"]])}</div>`;
       h3 += regler("Frequenz", segment("crmFrequenz", B8.frequenz, FREQUENZ));
       if (B8.frequenz !== "einmalig") h3 += regler("Laufzeit", segment("crmWochen", B8.wochen, [[4, "4 Wo."], [8, "8 Wo."], [13, "13 Wo."], [26, "26 Wo."]]));
-      h3 += schalter(B8.kontrolle, 'data-a="crmKontrolle"', "Kontrollgruppe (10 % ohne Versand)", "macht die Auswertung genauer");
+      h3 += schalter2(B8.kontrolle, 'data-a="crmKontrolle"', "Kontrollgruppe (10 % ohne Versand)", "macht die Auswertung genauer");
       h3 += '<div class="oknoepfe"><button class="gruen" data-a="crmStart">Kampagne starten</button></div></div>';
       const liste3 = [...c.kampagnen].sort((a2, b3) => (a2.status === "aktiv" ? -1 : 0) - (b3.status === "aktiv" ? -1 : 0) || b3.start - a2.start);
       for (const k3 of liste3) {
@@ -162680,20 +162789,20 @@
         zeilen[z4] = bis + 0.4;
         balken8.push({ a: a2, von, bis, z: z4 });
       }
-      const RH = 20, H = 22 + Math.max(1, zeilen.length) * RH + 4;
+      const RH = 26, H = 24 + Math.max(1, zeilen.length) * RH + 18;
       let g = `<svg class="zeitleiste" viewBox="0 0 ${W3} ${H}" width="100%">`;
       for (let m = 0; m < 12; m++) {
         const x2 = L2 + m * 52 / 12 * B8;
-        g += `<line x1="${x2}" x2="${x2}" y1="14" y2="${H}" stroke="#ece8e1"/><text x="${x2 + 2}" y="10" font-size="8.5" fill="#7b8790">${MONATE[m]}</text>`;
+        g += `<line x1="${x2}" x2="${x2}" y1="16" y2="${H}" stroke="var(--ui-border, #ece8e1)"/><text x="${x2 + 2}" y="12" font-size="12" fill="var(--ui-muted, #7b8790)">${MONATE[m].slice(0, 1)}</text>`;
       }
       for (const { a: a2, von, bis, z: z4 } of balken8) {
-        const x2 = L2 + von * B8, w2 = Math.max(3, (bis - von) * B8 - 1), y2 = 18 + z4 * RH;
-        g += `<g data-a="aktion" data-v="${a2.id}" class="klickbar"><rect x="${x2}" y="${y2}" width="${w2}" height="${RH - 4}" rx="4" fill="${STATUS_FARBE[a2.status]}"${a2.status === "abgesagt" ? ' stroke="#b9b2a6" stroke-dasharray="2 2"' : ""}/>${w2 > 34 ? `<text x="${x2 + 4}" y="${y2 + 11.5}" font-size="8.5" font-weight="700" fill="#fff">${esc2(a2.name.length > Math.floor(w2 / 4.6) ? a2.name.slice(0, Math.max(3, Math.floor(w2 / 4.6) - 1)) + "." : a2.name)}</text>` : ""}</g>`;
+        const x2 = L2 + von * B8, w2 = Math.max(3, (bis - von) * B8 - 1), y2 = 20 + z4 * RH;
+        g += `<g data-a="aktion" data-v="${a2.id}" class="klickbar"><rect x="${x2}" y="${y2}" width="${w2}" height="${RH - 4}" rx="4" fill="${STATUS_FARBE[a2.status]}"${a2.status === "abgesagt" ? ' stroke="#b9b2a6" stroke-dasharray="2 2"' : ""}/>${w2 > 6.5 * a2.name.length + 8 ? `<text x="${x2 + 4}" y="${y2 + 15}" font-size="12" font-weight="700" fill="#14202a">${esc2(a2.name)}</text>` : ""}</g>`;
       }
       const jetzt = s2().woche - (K3.jahr - s2().startJahr) * 52;
       if (jetzt >= 0 && jetzt < 52) {
         const x2 = L2 + (jetzt + 0.5) * B8;
-        g += `<line x1="${x2}" x2="${x2}" y1="12" y2="${H}" stroke="#d23c32" stroke-width="1.5"/><text x="${Math.min(W3 - 30, x2 + 3)}" y="${H - 3}" font-size="8" fill="#d23c32" font-weight="700">KW ${K3.kw}</text>`;
+        g += `<line x1="${x2}" x2="${x2}" y1="14" y2="${H}" stroke="#d23c32" stroke-width="1.5"/><text x="${Math.min(W3 - 40, x2 + 3)}" y="${H - 3}" font-size="12" fill="#ef6f62" font-weight="700">KW ${K3.kw}</text>`;
       }
       return g + "</svg>";
     }
@@ -162703,13 +162812,15 @@
       const K3 = E8.aktionskalender(st2, ui.jahr);
       let h3 = tabs();
       h3 += segment("jahr", ui.jahr, [[jahr0, String(jahr0)], [jahr0 + 1, String(jahr0 + 1)]]);
-      h3 += `<div class="karte schnittk">${zeitleiste(K3, P4)}<div class="legende"><span class="ampel" style="background:#2f63b5"></span> geplant <span class="ampel" style="background:#2f8f5b"></span> l\xE4uft <span class="ampel" style="background:#9aa3ab"></span> beendet \xB7 Balken antippen</div></div>`;
-      h3 += '<button class="breit gruen" data-a="planen">+ Aktion planen</button>';
+      h3 += '<div class="q31">';
+      h3 += `<div class="q-buch q-kalender"><div class="q-buch-kopf"><span>Kampagnenkalender ${K3.jahr}</span><b>Balken antippen</b></div><div style="padding:4px 8px 8px">${zeitleiste(K3, P4)}</div>
+      <div class="legende" style="padding:0 14px 10px">${["geplant", "laufend", "beendet"].map((x2) => `<span class="ampel" style="background:${STATUS_FARBE[x2]}"></span> ${STATUS2[x2]}`).join("  ")}</div></div>`;
+      h3 += '<button class="q-haupt-akt" data-a="planen">+ Aktion planen</button>';
       if (ui.planen) h3 += planenKarte(K3);
-      h3 += '<div class="karte">';
-      for (const a2 of K3.eintraege) h3 += `<div class="zeile klickbar" data-a="aktion" data-v="${a2.id}"><span class="dot" style="background:${STATUS_FARBE[a2.status]}"></span><span class="was">${esc2(a2.name)} <i>${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""} \xB7 ${esc2(a2.scopeText)}</i></span><span class="qm">KW ${a2.startKw}${a2.wochen > 1 ? ` bis ${a2.endeKw}` : ""}</span><span class="uq">${P4(`kal:${a2.id}:status`, STATUS2[a2.status], "span")}</span></div>`;
-      if (!K3.eintraege.length) h3 += '<div class="zeile grau">Keine Aktion in diesem Jahr.</div>';
-      h3 += "</div>";
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Aktionsbuch</span><b>Wochen \xB7 Status</b></div>';
+      for (const a2 of K3.eintraege) h3 += `<button class="zeile q-zeile q-tipp" data-a="aktion" data-v="${a2.id}"><span class="q-name">${esc2(a2.name)}<small>${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""} \xB7 ${esc2(a2.scopeText)}</small></span><span class="q-wert">KW ${a2.startKw}${a2.wochen > 1 ? ` bis ${a2.endeKw}` : ""}<small>${P4(`kal:${a2.id}:status`, STATUS2[a2.status], "span")}</small></span></button>`;
+      if (!K3.eintraege.length) h3 += '<div class="q-leer"><b>Keine Aktion in diesem Jahr.</b>Plane die erste \xFCber den Knopf oben.</div>';
+      h3 += "</div></div>";
       for (const r3 of K3.raeumungen) h3 += `<div class="olief">${esc2(r3.name)}: ${esc2(r3.text)}</div>`;
       return { titel: "Aktionskalender", unter: `${K3.jahr} \xB7 ${K3.eintraege.filter((a2) => a2.status !== "abgesagt").length} Aktionen \xB7 KW ${K3.kw}`, html: h3 };
     }
@@ -162720,10 +162831,10 @@
       h3 += regler("Mechanik", `<select class="ort gross" data-a="planMechanik">${K3.mechaniken.map((m) => `<option value="${m.id}"${m.id === p2.mechanik ? " selected" : ""}>${esc2(m.text)}</option>`).join("")}</select>`, an?.bereiche ? `Bereiche: ${an.bereiche.length}` : "");
       if (!["punkte", "staffel"].includes(p2.mechanik)) h3 += regler("Rabatt", segment("planRabatt", p2.rabatt, [[0.1, "10 %"], [0.15, "15 %"], [0.2, "20 %"], [0.3, "30 %"], [0.4, "40 %"]]));
       if (p2.mechanik === "punkte") h3 += regler("Punkte", segment("planPunkte", p2.punkteFaktor, [[3, "3-fach"], [5, "5-fach"], [10, "10-fach"]]));
-      h3 += regler("Start", stepper("planKw", `<b>KW ${p2.kw} / ${p2.jahr}</b>`), "Kalenderwoche");
+      h3 += regler("Start", stepper2("planKw", `<b>KW ${p2.kw} / ${p2.jahr}</b>`), "Kalenderwoche");
       h3 += regler("Dauer", segment("planWochen", p2.wochen, [[1, "1 Woche"], [2, "2 Wochen"], [3, "3 Wochen"], [4, "4 Wochen"]]));
       h3 += regler("Sonderwerbung", segment("planWerbung", p2.sonderwerbung, [[0, "keine"], [25e4, "250 Tsd. \u20AC"], [75e4, "750 Tsd. \u20AC"], [15e5, "1,5 Mio. \u20AC"]]), "Beilage, Spots");
-      h3 += schalter(p2.kontrolle, 'data-a="planKontrolle"', "5 Kontrollh\xE4user ohne Aktion", "genauere Auswertung, etwas weniger Umsatz");
+      h3 += schalter2(p2.kontrolle, 'data-a="planKontrolle"', "5 Kontrollh\xE4user ohne Aktion", "genauere Auswertung, etwas weniger Umsatz");
       h3 += '<div class="oknoepfe"><button class="gruen" data-a="planFertig">Aktion einplanen</button><button class="leise" data-a="planZu">Abbrechen</button></div></div>';
       return h3;
     }
@@ -162757,7 +162868,7 @@
       const altKar = document.querySelector("#pinhalt .mk-kanalreihe");
       if (altKar) ui.kanalScroll = altKar.scrollLeft;
       const { r: r3 } = rendern();
-      ctx.panel(r3.titel, r3.unter, r3.html, "gross");
+      ctx.panel(r3.titel, r3.unter, bereich("zentrale") + '<i class="q31-marke" hidden></i>' + r3.html, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? sc : 0;
       const neuKar = document.querySelector("#pinhalt .mk-kanalreihe");
@@ -168844,7 +168955,7 @@
     return `<section class="karte q17-profil" aria-label="Linienprofil">
     <div class="q17-kopf"><b>Linienprofil</b><small>${esc2(m.stil)}</small></div>
     <div class="q17-profil-inhalt">
-      ${achsen7.map(([titel, feld]) => `<div class="q17-merkmal"><span>${titel}</span><span class="q17-balken"><i style="width:${m[feld]}%"></i></span><b>${P4("lp:" + feld, String(m[feld]))}</b></div>`).join("")}
+      ${achsen7.map(([titel, feld2]) => `<div class="q17-merkmal"><span>${titel}</span><span class="q17-balken"><i style="width:${m[feld2]}%"></i></span><b>${P4("lp:" + feld2, String(m[feld2]))}</b></div>`).join("")}
       <div class="q17-preispunkt"><span>\xD8 Verkaufspreis im Sortiment</span><b>${P4("lp:preispunkt", euro(m.preispunkt))}</b></div>
     </div>
     <p class="q17-hinweis">Nachhaltigkeit ist ein Orientierungswert aus Beschaffung und Materialmix, keine \xD6kobilanz.</p>
@@ -168874,17 +168985,11 @@
     function liste3(P4) {
       const st2 = s2(), L2 = E8.produkte(st2), M2 = aktuelleMarke(L2);
       let h3 = "";
-      if (!M2) return { titel: "Produktentwicklung", unter: "", html: '<div class="leise">Keine Eigenmarke vorhanden. Eine Marke gr\xFCndest du im Einkauf.</div>' };
-      h3 += '<button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>';
+      if (!M2) return { titel: "Produktentwicklung", unter: "keine Eigenmarke", html: '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Keine Eigenmarke vorhanden.</b>Produkte entstehen immer unter einer Eigenmarke. Gr\xFCnde zuerst eine Marke.</div></div><button class="q-haupt-akt" data-a="eigenmarkeGruenden">Eigenmarke gr\xFCnden</button></div>' };
       h3 += markenwahl(L2);
-      h3 += teamAufschluesselung(M2.leistung);
-      h3 += '<button class="breit q24-katalogknopf" data-a="katalog">Sortiment durchsuchen: Damen, Herren, Kinder, Home</button>';
-      h3 += `<div class="raster">${kz("HQ-Team (Basis)", P4("l:team", `${Math.round(L2.team * 100)} / 100`))}${kz("Kosten je Woche", P4("l:kosten", geld(L2.kostenWoche)))}</div>`;
       const kats = M2.kategorien.filter((k4) => k4.kapazitaet > 0 || k4.belegt > 0);
       if (!kats.some((k4) => k4.id === ui.kategorie)) ui.kategorie = (kats.find((k4) => M2.produkte.some((p2) => p2.kategorie === k4.id && p2.status !== "ausgelistet")) ?? kats[0])?.id ?? null;
       h3 += `<div class="seg umbruch kats">${kats.map((k4) => `<button class="${k4.id === ui.kategorie ? "an" : ""}" data-a="kategorie" data-v="${k4.id}">${esc2(k4.name)} ${P4(`l:kat:${k4.id}`, `${k4.belegt} / ${k4.kapazitaet}`, "i")}</button>`).join("")}</div>`;
-      h3 += absatzGrafik(E8.produktAbsatzVerlauf(st2, M2.marke, ui.kategorie), P4, kats.find((k4) => k4.id === ui.kategorie)?.name ?? M2.name);
-      h3 += linienProfil(E8.produktLinienprofil(st2, M2.marke), P4);
       const offeneHaeuser2 = st2.haeuser.filter((haus2) => haus2.status === "offen");
       if (!offeneHaeuser2.some((haus2) => haus2.id === ui.haus)) ui.haus = offeneHaeuser2[0]?.id ?? null;
       const prod = M2.produkte.filter((p2) => p2.kategorie === ui.kategorie && p2.status !== "ausgelistet");
@@ -168895,7 +169000,7 @@
         const karten = prod.map((p2, index2) => {
           const ent = p2.status === "entwicklung";
           const mb = ui.model.has(p2.id) ? modelBild(p2.typ, p2.farbe, p2.material, p2.wg, M2.trendGruppe, 190, p2.bild) : null;
-          let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p2.id}" role="button" aria-label="Produkt oder Model zeigen" style="background:linear-gradient(#f7f4ee,#efe9df)">${mb ?? bild(p2.typ, p2.farbe, p2.material, 150, p2.bild)}</div>`;
+          let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p2.id}" role="button" aria-label="Produkt oder Model zeigen" >${mb ?? bild(p2.typ, p2.farbe, p2.material, 150, p2.bild)}</div>`;
           if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p2.id}" aria-label="Produkt l\xF6schen"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
           c += `<button class="q24-detailsknopf" data-a="detailProdukt" data-v="${esc2(p2.id)}">Produktdetails und Model ansehen</button>`;
           c += `<div class="pname">${P4(`p:${p2.id}:name`, p2.name, "b")}<small>${esc2(p2.typ)} \xB7 ${esc2(p2.zielgruppeName ?? "Markenzielgruppe")} \xB7 ${esc2(p2.farbe)} \xB7 ${esc2(p2.material)} \xB7 ${PREISLAGE[p2.preislage] ?? p2.preislage}</small></div>`;
@@ -168903,16 +169008,16 @@
             c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P4(`p:${p2.id}:fertig`, `fertig ${wocheText(st2, p2.fertigWoche)}`, "small")}</div><div class="balken"><span style="width:${(p2.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P4(`p:${p2.id}:fortschritt`, pz3(p2.fortschritt), "i")} \xB7 ${geld(p2.budgetWoche)} je Woche \xFCber ${p2.dauer} Wochen</small></div>`;
           } else {
             c += `<div class="mitte" title="${dez(p2.sterne, 1)} Sterne">${sterne(p2.sterne, 24)}<span class="sternzahl">${P4(`p:${p2.id}:sterne`, dez(p2.sterne, 1), "span")}</span></div>`;
-            const ver = `${p2.veraenderung >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(p2.veraenderung))} (${p2.veraenderungProzent >= 0 ? "+" : "\u2212"}${pz3(Math.abs(p2.veraenderungProzent))})`;
-            c += `<div class="pmitte">${schalter(p2.status === "sortiment", `data-a="sortiment" data-v="${p2.id}"`, "Im Sortiment")}<div class="verkauf"><small>St\xFCck letzte Woche</small>${P4(`p:${p2.id}:verkauf`, fmt.format(p2.verkaufLetzteWoche), "b")}${P4(`p:${p2.id}:veraenderung`, ver, "i", p2.veraenderung < 0 ? ' class="rotwert"' : "")}</div></div>`;
-            c += `<div class="pmitte">${donut(p2.marge, P4(`p:${p2.id}:marge`, pz3(p2.marge), "b"))}<div class="preis"><small class="rotwert">EK je St\xFCck ${P4(`p:${p2.id}:ek`, euro(p2.ekStueck), "span")}</small><small>VK je St\xFCck</small>${stepper("preis", P4(`p:${p2.id}:preis`, euro(p2.preis)), `Normpreis ${euro(p2.normpreis)}`, ` data-p2="${p2.id}"`)}</div></div>`;
+            const ver = `${p2.veraenderung >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(p2.veraenderung))} (${p2.veraenderungProzent >= 0 ? "+" : "\u2212"}${pz3(Math.abs(p2.veraenderungProzent), 1)})`;
+            c += `<div class="pmitte">${schalter2(p2.status === "sortiment", `data-a="sortiment" data-v="${p2.id}"`, "Im Sortiment")}<div class="verkauf"><small>St\xFCck letzte Woche</small>${P4(`p:${p2.id}:verkauf`, fmt.format(p2.verkaufLetzteWoche), "b")}${P4(`p:${p2.id}:veraenderung`, ver, "i", p2.veraenderung < 0 ? ' class="rotwert"' : "")}</div></div>`;
+            c += `<div class="pmitte">${donut(p2.marge, P4(`p:${p2.id}:marge`, pz3(p2.marge), "b"))}<div class="preis"><small class="rotwert">EK je St\xFCck ${P4(`p:${p2.id}:ek`, euro(p2.ekStueck), "span")}</small><small>VK je St\xFCck</small>${stepper2("preis", P4(`p:${p2.id}:preis`, euro(p2.preis)), `Normpreis ${euro(p2.normpreis)}`, ` data-p2="${p2.id}"`)}</div></div>`;
             const minimum = Math.round(p2.normpreis * 0.4 * 100) / 100, maximum = Math.round(p2.normpreis * 2.5 * 100) / 100;
             c += `<div class="q17-preis"><input id="vk-${esc2(p2.id)}" type="range" min="${minimum}" max="${maximum}" step="0.01" value="${p2.preis}" data-a="preisSlider" data-p2="${esc2(p2.id)}" aria-label="VK ${esc2(p2.name)}"/><small>${euro(minimum)} bis ${euro(maximum)}</small></div>`;
-            c += `<div class="q17-einheit">${schalter(p2.preisAlleHaeuser, `data-a="einheitspreis" data-v="${p2.id}"`, "Preis in allen H\xE4usern")}</div>`;
+            c += `<div class="q17-einheit">${schalter2(p2.preisAlleHaeuser, `data-a="einheitspreis" data-v="${p2.id}"`, "Preis in allen H\xE4usern")}</div>`;
             if (!p2.preisAlleHaeuser && index2 === ui.k && ui.haus) {
               const haus2 = offeneHaeuser2.find((x2) => x2.id === ui.haus);
               const hp = p2.hauspreise[ui.haus] ?? p2.preis;
-              c += `<div class="q17-hauspreis"><label for="hauspreis-${esc2(p2.id)}">Filialpreis f\xFCr ${esc2(haus2?.stadt ?? ui.haus)}</label><select id="hauspreis-${esc2(p2.id)}" data-a="hausWahl" aria-label="Haus w\xE4hlen">${offeneHaeuser2.map((x2) => `<option value="${esc2(x2.id)}"${x2.id === ui.haus ? " selected" : ""}>${esc2(x2.stadt)} \xB7 ${esc2(x2.name)}</option>`).join("")}</select>${stepper("hauspreis", P4(`p:${p2.id}:hauspreis:${ui.haus}`, euro(hp)), `Einheitspreis ${euro(p2.preis)}`, ` data-p2="${p2.id}"`)}<small>Abweichung nur f\xFCr dieses Haus. Einheitspreis wieder einschalten, um alle Abweichungen zu l\xF6schen.</small></div>`;
+              c += `<div class="q17-hauspreis"><label for="hauspreis-${esc2(p2.id)}">Filialpreis f\xFCr ${esc2(haus2?.stadt ?? ui.haus)}</label><select id="hauspreis-${esc2(p2.id)}" data-a="hausWahl" aria-label="Haus w\xE4hlen">${offeneHaeuser2.map((x2) => `<option value="${esc2(x2.id)}"${x2.id === ui.haus ? " selected" : ""}>${esc2(x2.stadt)} \xB7 ${esc2(x2.name)}</option>`).join("")}</select>${stepper2("hauspreis", P4(`p:${p2.id}:hauspreis:${ui.haus}`, euro(hp)), `Einheitspreis ${euro(p2.preis)}`, ` data-p2="${p2.id}"`)}<small>Abweichung nur f\xFCr dieses Haus. Einheitspreis wieder einschalten, um alle Abweichungen zu l\xF6schen.</small></div>`;
             }
             if (ui.auslisten === p2.id) c += `<div class="oknoepfe"><button class="rot" data-a="auslistenJa" data-v="${p2.id}">Wirklich auslisten</button><button data-a="auslistenNein">Behalten</button></div>`;
           }
@@ -168924,6 +169029,12 @@
       const voll2 = k3 && k3.belegt >= k3.kapazitaet;
       h3 += `<div class="oknoepfe unten2"><button class="gruen" data-a="neu">+ Neues Produkt</button><button data-a="trend">Trendbericht</button></div>`;
       if (voll2 && !M2.hinweis) h3 += `<div class="olief warnung">Kapazit\xE4t in ${esc2(k3.name)} erreicht: f\xFCr ein neues Produkt erst eines auslisten.</div>`;
+      h3 += absatzGrafik(E8.produktAbsatzVerlauf(st2, M2.marke, ui.kategorie), P4, kats.find((k4) => k4.id === ui.kategorie)?.name ?? M2.name);
+      h3 += linienProfil(E8.produktLinienprofil(st2, M2.marke), P4);
+      h3 += teamAufschluesselung(M2.leistung);
+      h3 += `<div class="raster">${kz("HQ-Team (Basis)", P4("l:team", `${Math.round(L2.team * 100)} / 100`))}${kz("Kosten je Woche", P4("l:kosten", geld(L2.kostenWoche)))}</div>`;
+      h3 += '<button class="breit q24-katalogknopf" data-a="katalog">Sortiment durchsuchen: Damen, Herren, Kinder, Home</button>';
+      h3 += '<button class="q-neben-akt" data-a="eigenmarkeGruenden" style="margin:4px 0 12px">+ Neue Eigenmarke</button>';
       return { titel: "Produktentwicklung", unter: `${esc2(M2.name)} \xB7 ${esc2(M2.zielgruppe)} \xB7 ${M2.inEntwicklung} in Entwicklung \xB7 KW ${kwVon2(st2.woche)}`, html: h3 };
     }
     function katalog() {
@@ -169020,11 +169131,11 @@
       h3 += regler("Preislage", segment("preislage", e.preislage, K3.preislagen.map((p2) => [p2.id, PREISLAGE[p2.id] ?? p2.id])));
       h3 += regler("Qualit\xE4t", segment("qualitaet", e.qualitaet, [1, 2, 3, 4, 5].map((x2) => [x2, "\u2605".repeat(x2)])));
       h3 += regler("Entwicklungsdauer", segment("dauer", e.dauer, K3.dauer.map((d3) => [d3, String(d3)])), "Wochen");
-      h3 += regler("Budget je Woche", stepper("budget", P4("n:budget", geld(e.budgetWoche))), `Schritt ${geld(K3.budgetSchritt)}`);
+      h3 += regler("Budget je Woche", stepper2("budget", P4("n:budget", geld(e.budgetWoche))), `Schritt ${geld(K3.budgetSchritt)}`);
       h3 += "</div>";
       const wgV = K3.typen.find((t3) => t3.typ === e.typ)?.wgs?.find((w2) => !/^kinder/.test(w2) || M2.trendGruppe === "kinder");
       const mbV = modelBild(e.typ, e.farbe, e.material, wgV, M2.trendGruppe, 150);
-      h3 += `<div class="karte vorschau produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(e.typ, e.farbe, e.material, 132)}${mbV ?? ""}</div><div class="pname">${P4("n:name", v.name ?? e.typ, "b")}<small>${v.wgName ? `${esc2(v.wgName)} \xB7 ` : ""}Einf\xFChrung ${esc2(v.saisonEinfuehrung)}</small></div>`;
+      h3 += `<div class="karte vorschau produkt"><div class="pbild" >${bild(e.typ, e.farbe, e.material, 132)}${mbV ?? ""}</div><div class="pname">${P4("n:name", v.name ?? e.typ, "b")}<small>${v.wgName ? `${esc2(v.wgName)} \xB7 ` : ""}Einf\xFChrung ${esc2(v.saisonEinfuehrung)}</small></div>`;
       h3 += `<div class="mitte">${sterne(v.sterneErwartet, 22)}<span class="sternzahl">${P4("n:sterne", `${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)}`, "span")}</span></div>`;
       h3 += `<div class="owerte"><div><span>Normpreis</span>${P4("n:preis", euro(v.normpreis))}</div><div><span>EK je St\xFCck</span>${P4("n:ek", euro(v.ekStueck))}</div><div><span>Marge</span>${P4("n:marge", pz3(v.marge))}</div><div><span>Entwicklung</span>${P4("n:kosten", geld(v.kosten))}</div><div><span>Fertig</span>${P4("n:fertig", wocheText(st2, v.fertigWoche))}</div><div><span>Platz frei</span>${P4("n:frei", String(v.kapazitaetFrei))}</div></div>`;
       h3 += `<p class="leise">Passform zur Zielgruppe: <b>${P4("n:passform", pz3(v.passform), "span")}</b> \xB7 wirkt auf die Produktbewertung und damit auf die Nachfrage.</p>`;
@@ -169059,7 +169170,7 @@
     function zeigen(scrollHalten = false) {
       const sc = document.getElementById("pinhalt").scrollTop;
       const { r: r3 } = rendern();
-      ctx.panel(r3.titel, r3.unter, r3.html, "gross");
+      ctx.panel(r3.titel, r3.unter, bereich("zentrale") + '<i class="q31-marke" hidden></i>' + r3.html, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? sc : 0;
       if (ui.seite === "liste") karussellBinden("produkte", ui.k, (i) => {
@@ -169893,10 +170004,10 @@
     const suche = String(filter.suche ?? "").trim().toLocaleLowerCase("de");
     return zeilen.filter((h3) => (filter.format === "alle" || h3.formatKey === filter.format) && (filter.region === "alle" || h3.region === filter.region) && (filter.klasse === "alle" || h3.klasse === filter.klasse) && (filter.ampel === "alle" || h3.ampel === filter.ampel) && (!suche || (h3.stadt + " " + h3.name + " " + h3.id).toLocaleLowerCase("de").includes(suche)));
   }
-  function portfolioSortieren(zeilen, feld = "umsatz", absteigend = true) {
+  function portfolioSortieren(zeilen, feld2 = "umsatz", absteigend = true) {
     const vorzeichen = absteigend ? -1 : 1;
     return [...zeilen].sort((a2, b3) => {
-      const aa = a2[feld], bb = b3[feld];
+      const aa = a2[feld2], bb = b3[feld2];
       const vergleich = typeof aa === "number" && typeof bb === "number" ? aa - bb : String(aa ?? "").localeCompare(String(bb ?? ""), "de");
       return vergleich * vorzeichen || a2.stadt.localeCompare(b3.stadt, "de") || a2.id.localeCompare(b3.id, "de");
     });
@@ -170131,10 +170242,12 @@
       try {
         const infos = await liste2();
         const vorhanden = Object.fromEntries(infos.map((i, n3) => [PLAETZE[n3], i]));
-        root.innerHTML = PLAETZE.map((platz) => {
+        const belegt2 = PLAETZE.filter((p2) => p2 !== "autosave" && vorhanden[p2]).length, auto4 = vorhanden.autosave;
+        const kopf = start ? "" : '<div class="q31"><div class="q-gross"><span class="q-label">Zuletzt automatisch gespeichert</span><span class="q-haupt">' + (auto4 ? "Woche " + (auto4.woche + 1) : "noch nie") + '</span><span class="q-neben"><b>' + belegt2 + " von " + (PLAETZE.length - 1) + '</b>Pl\xE4tzen belegt</span></div><div class="q-befund">' + (auto4 ? esc2(auto4.stadt) + ", " + datumFormatieren(auto4.datum) + ". Der automatische Stand wird jede Woche \xFCberschrieben; f\xFCr einen festen Stand einen Platz w\xE4hlen." : "Noch kein Spielstand. Speichere auf einem der drei Pl\xE4tze.") + "</div></div>";
+        root.innerHTML = kopf + PLAETZE.map((platz) => {
           const info = vorhanden[platz];
           const name2 = info?.name ?? (platz === "autosave" ? "Automatisch" : "");
-          const vorschau2 = info?.bild ? '<img class="app-vorschau" alt="Kartenausschnitt des Spielstands" src="' + info.bild + '">' : '<div class="app-vorschau leer" aria-hidden="true">H</div>';
+          const vorschau2 = info?.bild ? '<img class="app-vorschau" alt="Kartenausschnitt des Spielstands" src="' + info.bild + '">' : '<div class="app-vorschau leer q-ruecken" aria-hidden="true"><span>' + (platz === "autosave" ? "Auto" : platz.slice(-1)) + "</span></div>";
           return '<article class="app-platz" data-platz="' + platz + '"><div class="app-platzkopf"><b>' + bezeichnung(platz) + "</b><span>" + (info ? datumFormatieren(info.datum) : "Leer") + '</span></div><div class="app-platzinhalt">' + vorschau2 + '<div class="app-daten">' + (info ? "<strong>" + esc2(info.name) + "</strong><small>" + esc2(info.stadt) + " \xB7 Woche " + (info.woche + 1) + "</small><small>" + (info.unbegrenzt || info.szenario === "sandkasten" ? "Sandkasten \xB7 unbegrenzt" : esc2(info.szenario) + " \xB7 Cash " + geld(info.cash)) + "</small>" : "<small>Hier ist noch kein Spielstand gespeichert.</small>") + "</div></div>" + (start || platz === "autosave" ? "" : '<label class="app-namenswahl">Name <input data-name maxlength="60" aria-label="Name f\xFCr ' + bezeichnung(platz) + '" value="' + esc2(name2) + '" placeholder="Spielstand benennen"></label>') + '<div class="app-aktionen">' + (!start && platz !== "autosave" ? '<button type="button" data-app-aktion="speichern">Speichern</button>' : "") + (info ? '<button type="button" data-app-aktion="laden">Laden</button><button type="button" data-app-aktion="export">Export</button>' : "") + (platz !== "autosave" ? '<button type="button" data-app-aktion="import">Import</button>' : "") + (info && platz !== "autosave" ? '<button type="button" data-app-aktion="loeschen">L\xF6schen</button>' : "") + '<input type="file" data-app-datei accept=".hartwig,application/gzip" aria-label="Spielstand importieren" hidden></div></article>';
         }).join("");
         root.dataset.start = start ? "1" : "0";
@@ -170203,7 +170316,7 @@
     }
     function oeffne() {
       if (!APP_AKTIV) return;
-      panel2("Spielst\xE4nde", "Drei benannte Pl\xE4tze und ein automatischer Spielstand", '<div id="app-plaetze" class="app-plaetze">Lade Spielst\xE4nde \u2026</div>', "gross");
+      panel2("Spielst\xE4nde", "Drei benannte Pl\xE4tze und ein automatischer Spielstand", bereich("zentrale") + '<i class="q31-marke" hidden></i><div id="app-plaetze" class="app-plaetze">Lade Spielst\xE4nde \u2026</div>', "gross");
       return zeichne($("app-plaetze"));
     }
     function startAktualisieren() {
@@ -170828,12 +170941,12 @@
       if (!m || !node.querySelector("#wb-vorfall")) return;
       status2 = "vorfall";
       markieren("Vorfall " + (vorfall + 1));
-      const feld = node.querySelector("#wb-vorfall"), meins = token;
+      const feld2 = node.querySelector("#wb-vorfall"), meins = token;
       const verantwortlich = portraetZumVorgang(m);
-      feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall hk-flaeche" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc2(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + '</div></div><h4 tabindex="-1">' + esc2(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + '</small><button data-wa="spaeter" hidden>Sp\xE4ter</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + " weitere im Posteingang</p>" : "") + "</section></div>";
-      feld.querySelector(".wb-vorfall h4")?.focus({ preventScroll: true });
-      requestAnimationFrame(() => feld.classList.add("offen"));
-      const text3 = m.text ?? "", el2 = feld.querySelector(".wb-tippt"), beginn = performance.now();
+      feld2.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall hk-flaeche" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc2(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + '</div></div><h4 tabindex="-1">' + esc2(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + '</small><button data-wa="spaeter" hidden>Sp\xE4ter</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + " weitere im Posteingang</p>" : "") + "</section></div>";
+      feld2.querySelector(".wb-vorfall h4")?.focus({ preventScroll: true });
+      requestAnimationFrame(() => feld2.classList.add("offen"));
+      const text3 = m.text ?? "", el2 = feld2.querySelector(".wb-tippt"), beginn = performance.now();
       function tick(t3) {
         if (meins !== token || status2 !== "vorfall") return;
         const n3 = schnell() ? text3.length : Math.floor((t3 - beginn) / 1e3 * 70);
@@ -170841,19 +170954,19 @@
         if (el2.textContent.length !== text3.length && t3 - beginn < WOCHEN_ZEIT.vorfallText) requestAnimationFrame(tick);
         else {
           el2.textContent = text3;
-          feld.querySelector(".wb-vorfallfuss small").hidden = true;
-          for (const b3 of feld.querySelectorAll(".wb-vorfallfuss button")) b3.hidden = false;
+          feld2.querySelector(".wb-vorfallfuss small").hidden = true;
+          for (const b3 of feld2.querySelectorAll(".wb-vorfallfuss button")) b3.hidden = false;
         }
       }
       requestAnimationFrame(tick);
     }
     function vorfallWeiter(ansehen) {
       const item2 = bericht2.vorgaenge[vorfall], t3 = token;
-      const feld = node.querySelector("#wb-vorfall");
-      feld?.classList.remove("offen");
+      const feld2 = node.querySelector("#wb-vorfall");
+      feld2?.classList.remove("offen");
       setTimeout(() => {
         if (t3 !== token) return;
-        feld.innerHTML = "";
+        feld2.innerHTML = "";
         vorfall++;
         status2 = "bericht";
         if (ansehen) {
@@ -170951,9 +171064,9 @@
 
   // src/ui/ecommerce.js
   var prozent3 = (x2, n3 = 1) => (100 * (x2 || 0)).toFixed(n3).replace(".", ",") + " %";
-  var zahl3 = (titel, wert, ton2 = "") => '<div class="kz ' + ton2 + '"><span>' + titel + "</span><b>" + wert + "</b></div>";
   var zeile2 = (label, detail2, aktion2) => '<div class="zeile"><span class="was"><b>' + esc2(label) + "</b><i>" + esc2(detail2) + "</i></span>" + aktion2 + "</div>";
   var schalter3 = (akt, wert, parameter = "") => '<button class="mini ' + (wert ? "gruen" : "") + '" data-online="' + akt + '" ' + parameter + ">" + (wert ? "Ein" : "Aus") + "</button>";
+  var knopfText = (akt, an, text3, id) => '<button class="mini' + (an ? " q-an-knopf" : "") + '" data-online="' + akt + '" data-id="' + esc2(id) + '" aria-pressed="' + !!an + '">' + text3 + "</button>";
   function ecommerceModul(ctx) {
     let offen = false, tab = "uebersicht";
     const state = () => ctx.E.ecommerceUebersicht(ctx.s());
@@ -170964,13 +171077,22 @@
       if (tab === "produkte") {
         h3 += itProdukteKarten(ctx.E.itProdukte(ctx.s()), "online");
       } else if (tab === "uebersicht") {
-        h3 += '<div class="raster">' + zahl3("Onlineumsatz Woche", geld(u.umsatz)) + zahl3("Anteil Konzernumsatz", prozent3(u.anteil)) + zahl3("Online-Conversion", prozent3(u.conversion, 2)) + zahl3("Retourenquote", prozent3(u.retourenquote)) + zahl3("Kosten je Bestellung", geld(u.kostenJeBestellung)) + zahl3("Deckungsbeitrag online", geld(u.deckungsbeitrag), u.deckungsbeitrag < 0 ? "rot" : "gruen") + zahl3("Click & Collect", prozent3(u.clickCollectAnteil)) + zahl3("Bestellungen", fmt.format(u.bestellungen)) + "</div>";
-        h3 += '<div class="karte"><div class="khead">Umsatzbr\xFCcke: Effekt Online</div>' + zeile2("Onlinewachstum gegen\xFCber Basis", geld(u.umsatz - u.basis), "") + zeile2("Kannibalisierung in den H\xE4usern", "\u2212" + geld(u.kannibalisierung), "") + zeile2("Gesamteffekt Konzernumsatz", geld(u.onlineEffekt), "") + '<div class="zeile grau">Die Ausgangsbasis von 8 % ist bereits im bisherigen Konzernumsatz enthalten und wird nicht nochmals addiert.</div></div>';
-        h3 += '<div class="karte"><div class="khead">Onlineumsatz der letzten Wochen</div>';
-        const max = Math.max(1, ...u.verlauf.map((q2) => q2.umsatz));
-        h3 += '<div class="online-verlauf">' + u.verlauf.slice(-26).map((q2) => '<div class="online-balken" style="height:' + Math.max(2, 100 * q2.umsatz / max) + '%" title="KW ' + (q2.woche % 52 + 1) + ": " + geld(q2.umsatz) + '"></div>').join("") + "</div>";
-        h3 += '<div class="zeile grau">Basis: Umsatzanteil station\xE4r und online ohne Doppelz\xE4hlung</div></div>';
-        h3 += '<div class="karte"><div class="khead">Warengruppen online</div>' + Object.entries(u.umsatzJeGruppe).sort((a2, b3) => b3[1] - a2[1]).map(([g, umsatz]) => zeile2(ctx.E.GRUPPEN[g]?.name ?? g, geld(umsatz), "")).join("") + "</div>";
+        const wachstum = u.umsatz - u.basis, mitkauf = u.onlineEffekt - wachstum + u.kannibalisierung;
+        const vz = (x2) => (x2 < 0 ? "\u2212" : x2 > 0 ? "+" : "") + geld(Math.abs(x2));
+        h3 += '<div class="q31">';
+        h3 += '<div class="q-gross"><span class="q-label">Deckungsbeitrag online</span><span class="q-haupt ' + (u.deckungsbeitrag < 0 ? "q-minus" : "") + '">' + geld(u.deckungsbeitrag) + '</span><span class="q-neben"><b>' + geld(u.umsatz) + "</b>Onlineumsatz Woche</span></div>";
+        h3 += '<div class="q-befund">' + (u.bestellungen ? (u.deckungsbeitrag < 0 ? '<b class="q-minus">hartwig.de verliert Geld.</b> ' : "") + "<b>" + fmt.format(u.bestellungen) + "</b> Bestellungen zu je <b>" + geld(u.kostenJeBestellung) + "</b> Kosten, " + prozent3(u.retourenquote) + " gehen zur\xFCck." : "Diese Woche gab es keine Onlinebestellung.") + "</div>";
+        h3 += '<div class="q-buch q-paketschein"><div class="q-buch-kopf"><span>Paketschein KW ' + (ctx.s().woche % 52 + 1) + '</span><b>hartwig.de</b></div><div class="q-zeile"><span class="q-name">Anteil am Konzernumsatz</span><span class="q-wert">' + prozent3(u.anteil) + '</span></div><div class="q-zeile"><span class="q-name">Online-Conversion</span><span class="q-wert">' + prozent3(u.conversion, 2) + '</span></div><div class="q-zeile"><span class="q-name">Retourenquote</span><span class="q-wert">' + prozent3(u.retourenquote) + '</span></div><div class="q-zeile"><span class="q-name">Click & Collect<small>Anteil der Bestellungen</small></span><span class="q-wert">' + prozent3(u.clickCollectAnteil) + "</span></div></div>";
+        h3 += '<div class="q-buch" data-summenbuch="Umsatzbr\xFCcke Online"><div class="q-buch-kopf"><span>Umsatzbr\xFCcke Online</span><b>Woche</b></div><div class="q-zeile"><span class="q-name">Onlinewachstum gegen\xFCber Basis<small>Basis 8 % ist im Konzernumsatz schon enthalten</small></span><span class="q-wert" data-s="e">' + vz(wachstum) + '</span></div><div class="q-zeile"><span class="q-name">Mitk\xE4ufe bei Abholung im Haus</span><span class="q-wert" data-s="e">' + vz(mitkauf) + '</span></div><div class="q-zeile"><span class="q-name">Kannibalisierung in den H\xE4usern</span><span class="q-wert" data-s="e">' + vz(-u.kannibalisierung) + '</span></div><div class="q-summe"><span>Effekt auf den Konzernumsatz</span><span data-summe="e" class="q-wert ' + (u.onlineEffekt < 0 ? "q-minus" : "") + '">' + vz(u.onlineEffekt) + "</span></div></div>";
+        const v = u.verlauf.slice(-26);
+        if (v.length < 2) h3 += '<div class="q-buch"><div class="q-leer">Ein Verlauf ist ab der zweiten Woche verf\xFCgbar.</div></div>';
+        else {
+          const max = Math.max(1, ...v.map((q2) => q2.umsatz));
+          h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Onlineumsatz</span><b>' + v.length + ' Wochen</b></div><div class="online-verlauf" style="padding:8px 14px 0">' + v.map((q2) => '<div class="online-balken" style="height:' + Math.max(2, 100 * q2.umsatz / max) + '%" title="KW ' + (q2.woche % 52 + 1) + ": " + geld(q2.umsatz) + '"></div>').join("") + '</div><div class="q-zwischen" style="border:0"><span>KW ' + (v[0].woche % 52 + 1) + "</span><span>KW " + (v[v.length - 1].woche % 52 + 1) + "</span></div></div>";
+        }
+        const gr = Object.entries(u.umsatzJeGruppe).sort((a2, b3) => b3[1] - a2[1]);
+        h3 += '<div class="q-buch" data-summenbuch="Warengruppen online"><div class="q-buch-kopf"><span>Warengruppen online</span><b>Umsatz</b></div>' + (gr.length ? gr.map(([g, umsatz]) => '<div class="q-zeile"><span class="q-name">' + esc2(ctx.E.GRUPPEN[g]?.name ?? g) + '</span><span class="q-wert" data-s="u">' + geld(umsatz) + "</span></div>").join("") + '<div class="q-summe"><span>Summe</span><span class="q-wert" data-summe="u">' + geld(gr.reduce((a2, [, x2]) => a2 + x2, 0)) + "</span></div>" : '<div class="q-leer">Noch kein Onlineumsatz.</div>') + "</div>";
+        h3 += "</div>";
       } else if (tab === "steuerung") {
         const optionen3 = (id, werte3, aktuell, format) => '<div class="zeile"><span class="was">' + id + '</span><select class="ort" data-online="strategie" data-feld="' + format + '">' + werte3.map(([v, t3]) => '<option value="' + v + '"' + (String(v) === String(aktuell) ? " selected" : "") + ">" + t3 + "</option>").join("") + "</select></div>";
         h3 += '<div class="karte"><div class="khead">Online-Sortiment und Service</div>';
@@ -170986,11 +171108,14 @@
         for (const c of u.cluster) h3 += zeile2(clusterName3(ctx.s(), c.id), c.haeuser + " H\xE4user", schalter3("cluster", c.aktiv, 'data-id="' + esc2(c.id) + '"'));
         h3 += "</div>";
       } else {
-        h3 += '<div class="karte"><div class="khead">Abholstationen und Filiallogistik</div>';
-        for (const a2 of u.haeuser) h3 += '<div class="abt"><div class="zeile"><span class="was"><b>' + esc2(a2.name) + "</b><i>" + esc2(a2.stadt) + " \xB7 " + esc2(clusterName3(ctx.s(), a2.cluster)) + "</i></span>" + schalter3("station", a2.station, 'data-id="' + esc2(a2.id) + '"') + '</div><div class="zeile unter">Abholungen ' + fmt.format(a2.abholungen) + " \xB7 Versand " + fmt.format(a2.versand) + " \xB7 Retouren " + fmt.format(a2.retouren) + " \xB7 " + a2.instoreStunden.toFixed(1).replace(".", ",") + " Logistikstunden " + schalter3("retouren", a2.retourenAn, 'data-id="' + esc2(a2.id) + '"' + (a2.station ? "" : " disabled")) + "</div></div>";
-        h3 += "</div>";
+        const an = u.haeuser.filter((a2) => a2.station).length;
+        h3 += '<div class="q31"><div class="q-gross"><span class="q-label">H\xE4user mit Abholstation</span><span class="q-haupt">' + an + " von " + u.haeuser.length + '</span><span class="q-neben"><b>' + fmt.format(u.haeuser.reduce((s2, a2) => s2 + a2.abholungen, 0)) + "</b>Abholungen Woche</span></div>";
+        if (!an) h3 += '<div class="q-befund">Kein Haus hat eine Abholstation. Click & Collect braucht mindestens eine.</div>';
+        h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Abholstationen</span><b>Station \xB7 Retouren</b></div>';
+        for (const a2 of u.haeuser) h3 += '<div class="q-zeile"><span class="q-name">' + esc2(a2.name) + "<small>" + esc2(a2.stadt) + " \xB7 " + esc2(clusterName3(ctx.s(), a2.cluster)) + "</small>" + (a2.station ? "<small>Abholungen " + fmt.format(a2.abholungen) + " \xB7 Versand " + fmt.format(a2.versand) + " \xB7 Retouren " + fmt.format(a2.retouren) + " \xB7 " + a2.instoreStunden.toFixed(1).replace(".", ",") + " Logistikstunden</small>" : "") + '</span><span class="q-knoepfe" style="grid-column:auto;padding:0">' + knopfText("station", a2.station, a2.station ? "Station an" : "Station einrichten", a2.id) + (a2.station ? knopfText("retouren", a2.retourenAn, a2.retourenAn ? "Retouren an" : "Retouren aus", a2.id) : "") + "</span></div>";
+        h3 += "</div></div>";
       }
-      ctx.panel("Online", "hartwig.de \xB7 E-Commerce", h3, "gross");
+      ctx.panel("Online", "hartwig.de \xB7 E-Commerce", bereich("zentrale") + '<i class="q31-marke" hidden></i>' + h3, "gross");
       offen = true;
       document.getElementById("pinhalt").scrollTop = vorher;
     }
@@ -171238,9 +171363,9 @@
     if (c.zustand) marken2.push(marke4(c.zustand, "achtung"));
     marken2.push(marke4(LAGE[h3.lage] ?? "Lage offen"));
     x2 += `<div class="hk-marken">${marken2.join("")}</div>`;
-    x2 += `<div class="hk-knopfreihe">${knopf2("Haus besuchen", `data-hausbesuch="${esc2(id)}"`, "zweit")}${(() => {
+    x2 += `<div class="hk-knopfreihe">${knopf("Haus besuchen", `data-hausbesuch="${esc2(id)}"`, "zweit")}${(() => {
       const et = typeof E8.umbauHaus === "function" ? [...E8.umbauHaus(s2, id) ?? []].sort((a2, z4) => a2.substanz - z4.substanz)[0] : null;
-      return et ? knopf2("Umbau planen", `data-umbau="planen" data-id="${esc2(id)}" data-etage="${et.etage}"`, "zweit") : "";
+      return et ? knopf("Umbau planen", `data-umbau="planen" data-id="${esc2(id)}" data-etage="${et.etage}"`, "zweit") : "";
     })()}</div>`;
     const qm2 = h3.flaechen.reduce((a2, f11) => a2 + f11.qm, 0);
     x2 += abschnitt("Etagen", fmt.format(qm2) + " qm Verkaufsfl\xE4che");
@@ -171305,7 +171430,7 @@
     x2 += liste(Object.entries(E8.FILIAL_PROGRAMME).map(([programm, def]) => {
       const st2 = d3.programme?.[programm];
       const status2 = st2 ? s2.woche < st2.wirksamAb ? "Anlauf bis KW " + ((st2.wirksamAb + 1 - 1) % 52 + 1) : "Wirksam" : def.vorlauf + " Wochen Vorlauf";
-      return `<div class="hk-zeile"><span class="hk-was">${esc2(def.name)}<small>${esc2(status2)} \xB7 ${esc2(def.nebenwirkung)}</small></span>${st2 ? marke4(s2.woche < st2.wirksamAb ? "Anlauf" : "Wirksam", "gut") : knopf2("Starten", `onclick="filialProgramm('${programm}')"`, "zweit")}</div>`;
+      return `<div class="hk-zeile"><span class="hk-was">${esc2(def.name)}<small>${esc2(status2)} \xB7 ${esc2(def.nebenwirkung)}</small></span>${st2 ? marke4(s2.woche < st2.wirksamAb ? "Anlauf" : "Wirksam", "gut") : knopf("Starten", `onclick="filialProgramm('${programm}')"`, "zweit")}</div>`;
     }));
     return x2;
   }
@@ -171344,10 +171469,10 @@
     else x2 += hinweis(`Wechselwille ${PROZENT(l?.wechselwille ?? 0)}.`);
     x2 += liste([zeile({ was: "Stellvertretung", unter: l?.stellvertretung?.name ?? "nicht benannt", wert: PROZENT(l?.stellvertretung?.qualitaet ?? 0), wertUnter: "Qualit\xE4t" })]);
     x2 += abschnitt("F\xF6rdern", "eine St\xE4rke je Woche");
-    x2 += `<div class="hk-knopfreihe zweispaltig">${Object.keys(SCHWERPUNKT).map((key) => knopf2(SCHWERPUNKT[key], tun("foerdern", id, key), "zweit")).join("")}</div>`;
-    x2 += `<div class="hk-knopfreihe">${knopf2("Haltepr\xE4mie 10.000 \u20AC", tun("praemie", id), "zweit")}${knopf2("Zur Clusterleitung bef\xF6rdern", tun("befoerdern", id), "zweit")}</div>`;
+    x2 += `<div class="hk-knopfreihe zweispaltig">${Object.keys(SCHWERPUNKT).map((key) => knopf(SCHWERPUNKT[key], tun("foerdern", id, key), "zweit")).join("")}</div>`;
+    x2 += `<div class="hk-knopfreihe">${knopf("Haltepr\xE4mie 10.000 \u20AC", tun("praemie", id), "zweit")}${knopf("Zur Clusterleitung bef\xF6rdern", tun("befoerdern", id), "zweit")}</div>`;
     x2 += abschnitt("Kandidaten \xFCber die Clusterleitung", `${b3?.kandidaten?.length ?? 0} Personen`);
-    x2 += b3?.kandidaten?.length ? liste(b3.kandidaten.map((k3, i) => `<div class="hk-zeile"><span class="hk-was">${esc2(k3.name)}<small>Kompetenz ${PROZENT(k3.qualitaet)} \xB7 ${geld(k3.gehalt)} im Jahr</small></span>${knopf2("Einstellen", tun("ersetzen", id, "", i), "zweit")}</div>`)) : leer3("Die Clusterleitung hat gerade niemanden vorgeschlagen.");
+    x2 += b3?.kandidaten?.length ? liste(b3.kandidaten.map((k3, i) => `<div class="hk-zeile"><span class="hk-was">${esc2(k3.name)}<small>Kompetenz ${PROZENT(k3.qualitaet)} \xB7 ${geld(k3.gehalt)} im Jahr</small></span>${knopf("Einstellen", tun("ersetzen", id, "", i), "zweit")}</div>`)) : leer3("Die Clusterleitung hat gerade niemanden vorgeschlagen.");
     return x2;
   }
   function personal(c, h3, k3) {
@@ -171393,18 +171518,18 @@
   function partner(c, h3, b3) {
     const id = h3.id, std = b3?.standard;
     let x2 = abschnitt("Hausstandards", "Stufe 1 bis 3");
-    x2 += [["sauberkeit", "Sauberkeit"], ["praesentation", "Warenpr\xE4sentation"], ["kasse", "Kassenstandard"]].map(([key, name2]) => `<div class="hk-regel"><span>${name2}</span>${stepper2({ wert: `Stufe ${p(std?.[key])}`, label: name2, attrMinus: tun("standard", id, key, -1), attrPlus: tun("standard", id, key, 1), minusAus: (std?.[key] ?? 1) <= 1, plusAus: (std?.[key] ?? 3) >= 3 })}</div>`).join("");
+    x2 += [["sauberkeit", "Sauberkeit"], ["praesentation", "Warenpr\xE4sentation"], ["kasse", "Kassenstandard"]].map(([key, name2]) => `<div class="hk-regel"><span>${name2}</span>${stepper({ wert: `Stufe ${p(std?.[key])}`, label: name2, attrMinus: tun("standard", id, key, -1), attrPlus: tun("standard", id, key, 1), minusAus: (std?.[key] ?? 1) <= 1, plusAus: (std?.[key] ?? 3) >= 3 })}</div>`).join("");
     x2 += abschnitt("\xD6ffnungszeiten", "gilt f\xFCr den Hauscluster");
-    x2 += [["von", "\xD6ffnung ab"], ["bis", "\xD6ffnung bis"], ["samstagBis", "Samstag bis"]].map(([feld, titel]) => `<div class="hk-regel"><span>${titel}</span>${stepper2({ wert: `${p(std?.oeffnung?.[feld])} Uhr`, label: titel, attrMinus: tun("stunden", id, feld, -1), attrPlus: tun("stunden", id, feld, 1) })}</div>`).join("");
+    x2 += [["von", "\xD6ffnung ab"], ["bis", "\xD6ffnung bis"], ["samstagBis", "Samstag bis"]].map(([feld2, titel]) => `<div class="hk-regel"><span>${titel}</span>${stepper({ wert: `${p(std?.oeffnung?.[feld2])} Uhr`, label: titel, attrMinus: tun("stunden", id, feld2, -1), attrPlus: tun("stunden", id, feld2, 1) })}</div>`).join("");
     x2 += abschnitt("Services");
     const services = Object.entries(b3?.services ?? {});
-    x2 += services.length ? liste(services.map(([key, an]) => schalter2({ text: SERVICE[key] ?? key, unter: an ? "in diesem Haus aktiv" : "in diesem Haus aus", an, attr: tun("service", id, key, String(!an)) }))) + `<div class="hk-knopfreihe">${services.map(([key, an]) => knopf2(`${SERVICE[key] ?? key} clusterweit ${an ? "aus" : "an"}`, tun("clusterservice", id, key, String(!an)), "text")).join("")}</div>` : leer3("Keine Services hinterlegt.");
+    x2 += services.length ? liste(services.map(([key, an]) => schalter({ text: SERVICE[key] ?? key, unter: an ? "in diesem Haus aktiv" : "in diesem Haus aus", an, attr: tun("service", id, key, String(!an)) }))) + `<div class="hk-knopfreihe">${services.map(([key, an]) => knopf(`${SERVICE[key] ?? key} clusterweit ${an ? "aus" : "an"}`, tun("clusterservice", id, key, String(!an)), "text")).join("")}</div>` : leer3("Keine Services hinterlegt.");
     x2 += abschnitt("Gastronomie", p(b3?.restaurantQm) + " qm Restaurantfl\xE4che");
     x2 += seg([["selbst", "Selbst betreiben"], ["pacht", "Verpachten"]], b3?.gastro ?? "", (w2) => tun("gastro", id, w2));
     x2 += liste([zeile({ was: "Betriebsform", wert: b3?.gastro === "selbst" ? "Eigenbetrieb" : b3?.gastro === "pacht" ? "Verpachtet" : "Noch keine" }), zeile({ was: "Vertrag bis", wert: b3?.gastroVertragBis != null ? "KW " + (b3.gastroVertragBis % 52 + 1) : "ohne Vertrag" })]);
     x2 += abschnitt("Stadt und Sonntagsverkauf");
     x2 += liste([zeile({ was: "Umfeld", wert: esc2(b3?.umfeld?.ereignis ?? "Regul\xE4r") }), zeile({ was: "Innenstadtfrequenz", wert: PROZENT(b3?.umfeld?.trend ?? 1) })]);
-    x2 += `<div class="hk-knopfreihe">${knopf2("Verkaufsoffenen Sonntag beantragen", tun("sonntag", id), "zweit")}</div>`;
+    x2 += `<div class="hk-knopfreihe">${knopf("Verkaufsoffenen Sonntag beantragen", tun("sonntag", id), "zweit")}</div>`;
     const partnerZeilen = (b3?.flaechen ?? []).map((f11) => {
       const info = b3?.konzessionen?.[f11.id];
       return zeile({ was: (f11.konzept === "konzession" ? "Konzession " : "Untermiete ") + esc2(f11.gruppe ?? f11.mieter?.name ?? "ohne Namen"), wert: fmt.format(Math.round(f11.qm)) + " qm", wertUnter: info ? PROZENT(info.quote) + " Umsatzmiete" : "" });
@@ -171417,7 +171542,7 @@
     const id = h3.id;
     let x2 = gross2([{ label: "Betriebskosten Woche", wert: geld(k3?.sonstige ?? 0) }, { label: "Energiepreis", wert: PROZENT(b3?.energiePreis ?? 1), unter: "zum Ausgangswert" }]);
     x2 += abschnitt("Budget je Posten", "100 % = Ausgangsbudget");
-    x2 += Object.entries(POSTEN2).map(([key, name2]) => `<div class="hk-regel"><span>${name2}</span>${stepper2({ wert: PROZENT(b3?.kosten?.[key] ?? 1), unter: "Budget", label: name2, attrMinus: tun("kosten", id, key, -0.1), attrPlus: tun("kosten", id, key, 0.1) })}</div>`).join("");
+    x2 += Object.entries(POSTEN2).map(([key, name2]) => `<div class="hk-regel"><span>${name2}</span>${stepper({ wert: PROZENT(b3?.kosten?.[key] ?? 1), unter: "Budget", label: name2, attrMinus: tun("kosten", id, key, -0.1), attrPlus: tun("kosten", id, key, 0.1) })}</div>`).join("");
     x2 += hinweis("Weniger Reinigung senkt den Kundenscore; weniger Sicherheit und Instandhaltung erh\xF6hen Betriebsrisiken.", "achtung");
     return x2;
   }
@@ -171426,7 +171551,7 @@
     let x2 = abschnitt("Wochenkommentierung", "Abweichungen unter \u22125 %");
     x2 += b3?.kommentare?.length ? liste(b3.kommentare.map((q2) => zeile({ was: `KW ${q2.woche % 52 + 1} \xB7 ${esc2(GRUENDE[q2.grund] ?? q2.grund)}`, unter: esc2(MASS[q2.massnahme] ?? q2.massnahme) + " \xB7 " + esc2(q2.pruefung), wert: PROZENT(q2.abweichung), ton: q2.abweichung < 0 ? "schlecht" : "" }))) : leer3("Noch keine Abweichung unter \u22125 % zum Vorjahr oder Plan.");
     x2 += abschnitt("Ma\xDFnahme vor Ort");
-    x2 += `<div class="hk-knopfreihe zweispaltig">${Object.entries(MASS).map(([key, name2]) => knopf2(name2, tun("massnahme", id, key), "zweit")).join("")}</div>`;
+    x2 += `<div class="hk-knopfreihe zweispaltig">${Object.entries(MASS).map(([key, name2]) => knopf(name2, tun("massnahme", id, key), "zweit")).join("")}</div>`;
     return x2;
   }
   function hausBeobachtungHtml(liste3) {
@@ -172752,9 +172877,9 @@
         return;
       }
       const ziel = Math.abs(Number(element2.dataset.wert));
-      const zahl6 = Math.abs(Number((element2.textContent || "0").replace(/[^0-9-]/g, "")));
-      if (!(ziel > 0) || !Number.isFinite(zahl6)) return;
-      const fortschritt = begrenze2(zahl6 / ziel, 0, 1);
+      const zahl5 = Math.abs(Number((element2.textContent || "0").replace(/[^0-9-]/g, "")));
+      if (!(ziel > 0) || !Number.isFinite(zahl5)) return;
+      const fortschritt = begrenze2(zahl5 / ziel, 0, 1);
       const t3 = performance.now();
       if (fortschritt >= 0.9999) {
         if (!berichtFertig) {
@@ -172776,11 +172901,11 @@
       haptik("tippen");
     }
     function oeffne() {
-      const feld = (d3) => {
+      const feld2 = (d3) => {
         const v = tonEinstellung(d3.schluessel), id = "ton-" + d3.schluessel;
         return '<label class="zeile" for="' + id + '" style="display:flex;align-items:center;gap:12px;min-height:48px"><span style="flex:1">' + d3.titel + (d3.art === "regler" ? ': <output id="' + id + '-wert">' + v + " %</output>" : "") + "</span>" + (d3.art === "schalter" ? '<input id="' + id + '" data-ton="' + d3.schluessel + '" type="checkbox" ' + (v ? "checked " : "") + 'aria-label="' + d3.titel + '">' : '<input id="' + id + '" data-ton="' + d3.schluessel + '" type="range" min="0" max="100" step="5" value="' + v + '" aria-label="' + d3.titel + '">') + "</label>";
       };
-      ctx.panel?.("Klang & Haptik", "Synthetische Kl\xE4nge \xB7 ger\xE4teweit", '<div class="karte">' + TON_SCHALTER.map(feld).join("") + '</div><div class="karte"><p class="leise">Musik ist standardm\xE4\xDFig ausgeschaltet. Der iPhone-Stummschalter schaltet Web Audio nicht zuverl\xE4ssig stumm. Zum vollst\xE4ndigen Stummschalten die Regler hier ausschalten.</p><p class="leise">Haptik steht nicht auf allen Ger\xE4ten zur Verf\xFCgung.</p><button class="breit" data-ton-probe="erfolg">Klang testen</button></div>', "gross");
+      ctx.panel?.("Klang & Haptik", "Synthetische Kl\xE4nge \xB7 ger\xE4teweit", '<div class="karte">' + TON_SCHALTER.map(feld2).join("") + '</div><div class="karte"><p class="leise">Musik ist standardm\xE4\xDFig ausgeschaltet. Der iPhone-Stummschalter schaltet Web Audio nicht zuverl\xE4ssig stumm. Zum vollst\xE4ndigen Stummschalten die Regler hier ausschalten.</p><p class="leise">Haptik steht nicht auf allen Ger\xE4ten zur Verf\xFCgung.</p><button class="breit" data-ton-probe="erfolg">Klang testen</button></div>', "gross");
       uiAktiv = true;
     }
     function aendern(e) {
@@ -173520,8 +173645,8 @@
   }
 
   // src/ui/spielende.js
-  var zahl4 = (n3) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n3 ?? 0));
-  var geld2 = (n3) => zahl4(n3) + " \u20AC";
+  var zahl3 = (n3) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n3 ?? 0));
+  var geld2 = (n3) => zahl3(n3) + " \u20AC";
   var ART3 = {
     zerschlagen: {
       titel: "Das Ende von Hartwig",
@@ -173579,7 +173704,7 @@
   function rangliste(schwierigkeit2) {
     const liste3 = lesen2(schwierigkeit2);
     if (!liste3.length) return '<p class="se-unter">Hier erscheinen die zehn besten Ergebnisse dieser Schwierigkeitsstufe.</p>';
-    return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' + liste3.map((x2, i) => "<tr><td>" + (i + 1) + ".</td><td>" + esc2(x2.datum) + "<small> \xB7 " + zahl4(x2.seed) + "</small></td><td>" + esc2(ART3[x2.art]?.titel || x2.art) + (x2.testspiel ? " <small>(Test)</small>" : "") + "</td><td>" + zahl4(x2.punkte) + "</td></tr>").join("") + "</tbody></table>";
+    return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' + liste3.map((x2, i) => "<tr><td>" + (i + 1) + ".</td><td>" + esc2(x2.datum) + "<small> \xB7 " + zahl3(x2.seed) + "</small></td><td>" + esc2(ART3[x2.art]?.titel || x2.art) + (x2.testspiel ? " <small>(Test)</small>" : "") + "</td><td>" + zahl3(x2.punkte) + "</td></tr>").join("") + "</tbody></table>";
   }
   function verlauf3(historie) {
     if (!Array.isArray(historie) || historie.length < 2) return "";
@@ -173626,7 +173751,7 @@
         const f11 = 1 - (1 - p2) ** 3;
         for (const el2 of felder) {
           const v = Number(el2.dataset.seWert) || 0;
-          el2.textContent = zahl4(Math.round(v * f11)) + (el2.dataset.seEinheit || "");
+          el2.textContent = zahl3(Math.round(v * f11)) + (el2.dataset.seEinheit || "");
         }
         if (p2 < 1) zaehlRaf = requestAnimationFrame(tick);
       }
@@ -173648,14 +173773,14 @@
       const s2 = stand2(), e = s2?.ende;
       if (!e) return;
       const a2 = ART3[e.art] || ART3.zerschlagen, w2 = e.wertung, k3 = e.kennzahlen;
-      const teile2 = w2.teile.map((t3) => '<div class="se-zeile"><span>' + esc2(t3.name) + '</span><strong class="' + (t3.punkte < 0 ? "se-minus" : "") + '" data-se-wert="' + t3.punkte + '">' + zahl4(t3.punkte) + "</strong></div>").join("");
+      const teile2 = w2.teile.map((t3) => '<div class="se-zeile"><span>' + esc2(t3.name) + '</span><strong class="' + (t3.punkte < 0 ? "se-minus" : "") + '" data-se-wert="' + t3.punkte + '">' + zahl3(t3.punkte) + "</strong></div>").join("");
       const kenn = [
         ["Gerettete H\xE4user", k3.geretteteHaeuser + " / " + k3.startHaeuser],
-        ["Besch\xE4ftigte (FTE)", zahl4(k3.fte) + " / " + zahl4(k3.startFte)],
+        ["Besch\xE4ftigte (FTE)", zahl3(k3.fte) + " / " + zahl3(k3.startFte)],
         ["EBITDA, 52 Wochen", geld2(k3.ebitda52)],
         ["Konzernwert", geld2(k3.unternehmenswert)]
       ].map(([name2, value]) => '<div class="se-kpi"><small>' + esc2(name2) + "</small><b>" + esc2(value) + "</b></div>").join("");
-      rahmen2("Bilanz", '<div class="se-bilanz"><h1>Ihre Bilanz</h1><p class="se-unter">' + esc2(a2.titel) + " \xB7 Woche " + zahl4(e.woche) + " \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</p><div class="se-ergebnis"><small>GESAMTPUNKTZAHL</small><strong data-se-wert="' + w2.punkte + '">0</strong><small>Grundpunkte ' + zahl4(w2.grundpunkte) + " \xD7 " + new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format(w2.multiplikator) + '</small></div><div class="se-karte">' + teile2 + '</div><h2>Unternehmen nach dem Spiel</h2><div class="se-kpis">' + kenn + "</div>" + verlauf3(s2.historie) + entscheidungen(s2) + "<h2>Bestenliste \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</h2><div class="se-karte">' + rangliste(w2.schwierigkeit) + '</div><div class="se-aktionen"><button class="se-knopf" data-se="neu">Neues Spiel</button>' + (["saniert", "ruhestand"].includes(e.art) ? '<button class="se-knopf se-sek" data-se="weiter">Weiterspielen</button>' : "") + "</div></div>");
+      rahmen2("Bilanz", '<div class="se-bilanz"><h1>Ihre Bilanz</h1><p class="se-unter">' + esc2(a2.titel) + " \xB7 Woche " + zahl3(e.woche) + " \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</p><div class="se-ergebnis"><small>GESAMTPUNKTZAHL</small><strong data-se-wert="' + w2.punkte + '">0</strong><small>Grundpunkte ' + zahl3(w2.grundpunkte) + " \xD7 " + new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format(w2.multiplikator) + '</small></div><div class="se-karte">' + teile2 + '</div><h2>Unternehmen nach dem Spiel</h2><div class="se-kpis">' + kenn + "</div>" + verlauf3(s2.historie) + entscheidungen(s2) + "<h2>Bestenliste \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</h2><div class="se-karte">' + rangliste(w2.schwierigkeit) + '</div><div class="se-aktionen"><button class="se-knopf" data-se="neu">Neues Spiel</button>' + (["saniert", "ruhestand"].includes(e.art) ? '<button class="se-knopf se-sek" data-se="weiter">Weiterspielen</button>' : "") + "</div></div>");
       ansicht = "bilanz";
       bilanziert = true;
       zahlenAnimieren();
@@ -173674,7 +173799,7 @@
       }
       if (!node.hidden && ansicht === "szene") return true;
       const a2 = ART3[e.art] || ART3.zerschlagen;
-      rahmen2(a2.titel, '<div class="se-szene"><div class="se-bild">' + spielendeSzene(e.art, e.kaeufer) + '</div><div class="se-zeitung"><small>DER HANDELSBOTE \xB7 SONDERAUSGABE \xB7 WOCHE ' + zahl4(e.woche) + "</small><h1>" + esc2(a2.schlagzeile) + "</h1><p>" + esc2(a2.zeile) + '</p></div></div><button class="se-knopf" data-se="bilanz">Zur Abschlussbilanz</button>');
+      rahmen2(a2.titel, '<div class="se-szene"><div class="se-bild">' + spielendeSzene(e.art, e.kaeufer) + '</div><div class="se-zeitung"><small>DER HANDELSBOTE \xB7 SONDERAUSGABE \xB7 WOCHE ' + zahl3(e.woche) + "</small><h1>" + esc2(a2.schlagzeile) + "</h1><p>" + esc2(a2.zeile) + '</p></div></div><button class="se-knopf" data-se="bilanz">Zur Abschlussbilanz</button>');
       ansicht = "szene";
       return true;
     }
@@ -173753,13 +173878,13 @@
       } catch (_) {
       }
     }
-    const feld = document.createElement("textarea");
-    feld.value = text3;
-    feld.style.cssText = "position:fixed;left:-9999px;top:0";
-    document.body.appendChild(feld);
-    feld.select();
+    const feld2 = document.createElement("textarea");
+    feld2.value = text3;
+    feld2.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(feld2);
+    feld2.select();
     const ok6 = document.execCommand("copy");
-    feld.remove();
+    feld2.remove();
     if (!ok6) throw new Error("Kopieren nicht erlaubt. Bitte den Text im Berichtsfeld manuell kopieren.");
   }
   function werkzeugeModul(ctx) {
@@ -173843,7 +173968,7 @@
     function zeigen(scroll = false) {
       if (!freigeschaltet || !ctx.s()) return;
       const sc = scroll ? inhalt.scrollTop : 0, s2 = ctx.s();
-      const stakeholder = Object.entries(s2.stakeholder).map(([feld, wert]) => '<label class="test-eingabe">' + esc2(feld) + ' <input type="number" min="0" max="100" step="1" data-test-stake="' + esc2(feld) + '" value="' + Math.round(wert) + '"></label>').join("");
+      const stakeholder = Object.entries(s2.stakeholder).map(([feld2, wert]) => '<label class="test-eingabe">' + esc2(feld2) + ' <input type="number" min="0" max="100" step="1" data-test-stake="' + esc2(feld2) + '" value="' + Math.round(wert) + '"></label>').join("");
       const angebot = ctx.E.TEST_EREIGNISSE.filter((e) => e.id.startsWith("angebot:"));
       const ereignis = ctx.E.TEST_EREIGNISSE.filter((e) => !e.id.startsWith("angebot:"));
       const knoepfe = (list) => list.map((e) => '<button type="button" data-test-ereignis="' + esc2(e.id) + '">' + esc2(e.name) + "</button>").join("");
@@ -173927,8 +174052,8 @@
     async function berichtKopieren() {
       const bericht2 = await erstelleBericht();
       berichteingabe = bericht2;
-      const feld = document.getElementById("test-bericht");
-      if (feld) feld.value = bericht2;
+      const feld2 = document.getElementById("test-bericht");
+      if (feld2) feld2.value = bericht2;
       await kopiereText(bericht2);
       ctx.meldung("Fehlerbericht kopiert (" + bericht2.length + " Zeichen).");
       return bericht2;
@@ -173950,9 +174075,9 @@
     });
     inhalt.addEventListener("change", (e) => {
       if (!aktiv6) return;
-      const feld = e.target.dataset.testStake;
-      if (feld && e.target.validity.valid && e.target.value !== "")
-        sende({ typ: "testStakeholder", feld, wert: Number(e.target.value) });
+      const feld2 = e.target.dataset.testStake;
+      if (feld2 && e.target.validity.valid && e.target.value !== "")
+        sende({ typ: "testStakeholder", feld: feld2, wert: Number(e.target.value) });
     });
     inhalt.addEventListener("click", async (e) => {
       if (!aktiv6 || beschaeftigt) return;
@@ -173999,17 +174124,33 @@
 
   // src/ui/reporting.js
   var prozent5 = (x2) => (100 * x2).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
-  var zahl5 = (x2, n3 = 1) => Number(x2).toLocaleString("de-DE", { maximumFractionDigits: n3, minimumFractionDigits: n3 });
-  var euro2 = (x2) => zahl5(x2, 2) + " \u20AC";
-  function brueckeHtml(br) {
-    if (br.status !== "ok") return '<div class="o02-hinweis">' + esc2(br.status) + "</div>";
-    const eintraege = [["Frequenz", br.frequenz], ["Kaufquote", br.kaufquote], ["Teile", br.teile], ["Preis", br.preis]];
-    const maximal = Math.max(1, ...eintraege.map((x2) => Math.abs(x2[1])));
-    const zeilen = eintraege.map(([name2, wert]) => '<div class="o02-effekt"><span>' + name2 + '</span><div class="o02-steg"><i class="' + (wert < 0 ? "minus" : "plus") + '" style="width:' + Math.max(1, Math.round(Math.abs(wert) / maximal * 100)) + '%"></i></div><b>' + esc2(geld(wert)) + "</b></div>").join("");
-    return '<div class="o02-bruecke" data-o02-diff="' + br.differenz + '" data-o02-summe="' + (br.frequenz + br.kaufquote + br.teile + br.preis) + '"><div class="o02-end"><b>Vorjahr ' + geld(br.vorher) + "</b><b>Ist " + geld(br.aktuell) + "</b></div>" + zeilen + '<div class="o02-end"><b>Abweichung ' + geld(br.differenz) + "</b><span>Boneffekt " + geld(br.bon) + "</span></div>" + (br.vorjahrGeschaetzt ? "<small>Vorjahreswerte teilweise aus 4-Wochen-Bl\xF6cken gesch\xE4tzt.</small>" : "") + "</div>";
-  }
+  var zahl4 = (x2, n3 = 1) => Number(x2).toLocaleString("de-DE", { maximumFractionDigits: n3, minimumFractionDigits: n3 });
+  var euro2 = (x2) => zahl4(x2, 2) + " \u20AC";
   function zeile3(z4, haus2 = false) {
     return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z4.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z4.ampelfarbe) + '"></span>' + esc2(z4.name) + "</div><div>" + geld(z4.umsatz) + "</div><div>" + (z4.abweichung == null ? "\u2013" : geld(z4.abweichung) + " (" + prozent5(z4.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z4.frequenz)) + "</div><div>" + prozent5(z4.kaufquote) + "</div><div>" + euro2(z4.bon) + "</div></div>";
+  }
+  function wasserfall(br) {
+    if (br.status !== "ok") return '<div class="q-leer"><b>Noch keine Vorjahresbr\xFCcke.</b>' + esc2(br.status) + "</div>";
+    const schritte = [["Frequenz", br.frequenz, "Besucher"], ["Kaufquote", br.kaufquote, "K\xE4ufer je Besucher"], ["Teile je Bon", br.teile, "Boneffekt"], ["Preis je Teil", br.preis, "Boneffekt"]];
+    let lauf = br.vorher;
+    const pos = schritte.map(([n3, v, d3]) => {
+      const a2 = lauf;
+      lauf += v;
+      return { n: n3, v, d: d3, a: a2, b: lauf };
+    });
+    const werte3 = [br.vorher, br.aktuell, ...pos.flatMap((x3) => [x3.a, x3.b])];
+    const spanne = Math.max(1, Math.max(...werte3) - Math.min(...werte3));
+    const lo = Math.min(...werte3) - spanne * 0.08, hi = Math.max(...werte3) + spanne * 0.08;
+    const x2 = (w2) => ((w2 - lo) / (hi - lo) * 100).toFixed(1);
+    const vz = (w2) => (w2 > 0 ? "+" : w2 < 0 ? "\u2212" : "") + geld(Math.abs(w2));
+    const strich2 = (w2) => '<span class="q-wf-spur"><i class="q-wf-marke" style="left:' + x2(w2) + '%"></i></span>';
+    let h3 = '<div class="o02-bruecke q-wf" data-summenbuch="Konzernbr\xFCcke" data-o02-diff="' + br.differenz + '" data-o02-summe="' + (br.frequenz + br.kaufquote + br.teile + br.preis) + '">';
+    h3 += '<div class="q-wf-zeile q-wf-ende"><span class="q-name">Vorjahr</span>' + strich2(br.vorher) + '<span class="q-wert" data-s="e">' + geld(br.vorher) + "</span></div>";
+    for (const s2 of pos) h3 += '<div class="q-wf-zeile"><span class="q-name">' + s2.n + "<small>" + s2.d + '</small></span><span class="q-wf-spur"><i class="q-wf-balken ' + (s2.v < 0 ? "minus" : "plus") + '" style="left:' + x2(Math.min(s2.a, s2.b)) + "%;width:" + Math.max(0.6, Math.abs(s2.v) / (hi - lo) * 100).toFixed(1) + '%"></i></span><span data-s="e" class="q-wert ' + (s2.v < 0 ? "q-minus" : "") + '">' + vz(s2.v) + "</span></div>";
+    h3 += '<div class="q-wf-zeile q-wf-ende q-wf-summe"><span class="q-name">Ist</span>' + strich2(br.aktuell) + '<span class="q-wert" data-summe="e">' + geld(br.aktuell) + "</span></div>";
+    h3 += '<div class="legende" style="padding:8px 14px 10px">Boneffekt zusammen ' + vz(br.bon) + " \xB7 Balken im Ausschnitt " + geld(lo) + " bis " + geld(hi) + "</div>";
+    if (br.vorjahrGeschaetzt) h3 += '<div class="legende" style="padding:0 14px 10px">Vorjahreswerte teilweise aus 4-Wochen-Bl\xF6cken gesch\xE4tzt.</div>';
+    return h3 + "</div>";
   }
   function reportingModul(ctx) {
     const E8 = ctx.E, ui = { aktiv: false, ebene: "region", format: "alle", sort: "umsatz", wochen: 1 };
@@ -174023,9 +174164,10 @@
     const auswahl4 = (name2, key, optionen3) => "<label>" + name2 + '<select data-o02-wahl="' + key + '" class="ort">' + optionen3.map(([wert, titel]) => '<option value="' + esc2(wert) + '" ' + (String(ui[key]) === String(wert) ? "selected" : "") + ">" + esc2(titel) + "</option>").join("") + "</select></label>";
     function anzeigen() {
       const daten = E8.reporting(ctx.s(), ui.wochen, ui.format);
+      for (const g of daten.gruppen) if (g.ebene === "hauscluster") g.name = clusterName3(ctx.s(), g.id);
       const hs = daten.zeilen;
       const gruppen = daten.gruppen;
-      let content = '<div class="o02-filter">' + auswahl4("Ebene", "ebene", [["region", "Region"], ["hauscluster", "Hauscluster"], ["haus", "Haus"]]) + auswahl4("Format", "format", [["alle", "Alle"], ...[...new Set(ctx.s().haeuser.map((z4) => z4.format))].map((f11) => [f11, f11 === "warenhaus" ? "Hartwig" : f11 === "sport" ? "Hartwig Sport" : f11 === "fundus" ? "FUNDUS" : f11])]) + auswahl4("Zeitraum", "wochen", [[1, "1 Woche"], [4, "4 Wochen"], [13, "13 Wochen"], [52, "52 Wochen"]]) + auswahl4("Sortieren", "sort", [
+      const filter = '<div class="o02-filter">' + auswahl4("Ebene", "ebene", [["region", "Region"], ["hauscluster", "Hauscluster"], ["haus", "Haus"]]) + auswahl4("Format", "format", [["alle", "Alle"], ...[...new Set(ctx.s().haeuser.map((z4) => z4.format))].map((f11) => [f11, f11 === "warenhaus" ? "Hartwig" : f11 === "sport" ? "Hartwig Sport" : f11 === "fundus" ? "FUNDUS" : f11])]) + auswahl4("Zeitraum", "wochen", [[1, "1 Woche"], [4, "4 Wochen"], [13, "13 Wochen"], [52, "52 Wochen"]]) + auswahl4("Sortieren", "sort", [
         ["umsatz", "Umsatz"],
         ["abweichung", "Abweichung"],
         ["frequenz", "Frequenz"],
@@ -174033,7 +174175,17 @@
         ["bon", "Bon"],
         ["name", "Name"]
       ]) + "</div>";
-      content += '<div class="karte"><div class="khead">Konzernbr\xFCcke zum Vorjahr</div>' + brueckeHtml(daten.bruecke) + "</div>";
+      const B8 = daten.bruecke;
+      let content = '<div class="q31">';
+      content += B8.status === "ok" ? '<div class="q-gross"><span class="q-label">Umsatz gegen Vorjahr</span><span class="q-haupt ' + (B8.differenz < 0 ? "q-minus" : "q-plus") + '">' + (B8.differenz > 0 ? "+" : B8.differenz < 0 ? "\u2212" : "") + geld(Math.abs(B8.differenz)) + '</span><span class="q-neben"><b>' + geld(B8.aktuell) + "</b>Ist " + (ui.wochen === 1 ? "letzte Woche" : ui.wochen + " Wochen") + "</span></div>" : "";
+      if (B8.status === "ok") {
+        const g = [["Frequenz", B8.frequenz], ["Kaufquote", B8.kaufquote], ["Teile je Bon", B8.teile], ["Preis je Teil", B8.preis]].sort((a2, b3) => Math.abs(b3[1]) - Math.abs(a2[1]))[0];
+        content += '<div class="q-befund">Gr\xF6\xDFter Treiber: <b>' + g[0] + "</b> mit " + (g[1] < 0 ? "\u2212" : "+") + geld(Math.abs(g[1])) + ".</div>";
+      }
+      content += '<div class="q-buch"><div class="q-buch-kopf"><span>Konzernbr\xFCcke zum Vorjahr</span></div>' + wasserfall(B8) + "</div>";
+      const beob = daten.beobachtung.filter((o3) => hs.some((z4) => z4.id === o3.hausId));
+      content += '<div class="q-buch"><div class="q-buch-kopf"><span>Beobachtungsliste</span><b>gr\xF6\xDFte R\xFCckg\xE4nge</b></div>' + (beob.length ? beob.map((o3) => '<button class="q-zeile q-tipp o02-beobachtung" data-o02-open="' + esc2(o3.hausId) + '"><span class="q-name">' + esc2(o3.name) + "<small>" + esc2(o3.haupttreiber) + '</small></span><span class="q-wert q-minus">' + geld(o3.abweichung) + "</span></button>").join("") : '<div class="q-leer"><b>Kein Haus unter Vorjahr.</b>Sobald ein Haus zur\xFCckf\xE4llt, steht es hier.</div>') + "</div>";
+      content += "</div>" + filter;
       if (ui.ebene === "haus") content += tabelle3(karten(hs));
       else {
         const ebene = ui.ebene;
@@ -174055,8 +174207,7 @@
         }).join("");
         content += abschnitte || leere;
       }
-      content += '<div class="karte"><div class="khead">Beobachtungsliste <small>zehn gr\xF6\xDFte negative Umsatzabweichungen</small></div>' + (daten.beobachtung.length ? daten.beobachtung.filter((o3) => hs.some((z4) => z4.id === o3.hausId)).map((o3) => '<button class="zeile o02-beobachtung" data-o02-open="' + esc2(o3.hausId) + '"><span class="was"><b>' + esc2(o3.name) + "</b><small>" + esc2(o3.haupttreiber) + "</small></span><strong>" + geld(o3.abweichung) + "</strong><span>\u2192</span></button>").join("") : '<div class="zeile grau">Noch keine negativen Vorjahresabweichungen verf\xFCgbar.</div>') + "</div>";
-      ctx.panel("Reporting", "Operatives Wochenreporting \xB7 " + ui.wochen + " Woche(n)", content, "gross");
+      ctx.panel("Reporting", "Operatives Wochenreporting \xB7 " + (ui.wochen === 1 ? "1 Woche" : ui.wochen + " Wochen"), bereich("zentrale") + '<i class="q31-marke" hidden></i>' + content, "gross");
       ui.aktiv = true;
     }
     ctx.inhalt.addEventListener("change", (e) => {
@@ -174101,7 +174252,7 @@
     const { E: E8 } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, projekt: null, produkt: null, bestaetigung: false };
     const optionen3 = ["kaufen", "entwickeln", "dienstleister"];
-    const artName = { kaufen: "Standardsoftware", entwickeln: "Eigenentwicklung", dienstleister: "Dienstleister" };
+    const artName = { kaufen: "Standard\xADsoftware", entwickeln: "Eigen\xADentwicklung", dienstleister: "Dienst\xADleister" };
     const phasen = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
     const prozent6 = (x2) => Math.round(x2 * 100) + " %";
     function daten() {
@@ -174116,33 +174267,35 @@
     function reiter() {
       return '<div class="tabs">' + [["systeme", "Systeme"], ["produkte", "Produkte"], ["projekte", "Projekte"], ["neu", "Neues Projekt"]].map((x2) => '<button type="button" class="tab ' + (ui.reiter === x2[0] ? "an" : "") + '" data-it="reiter" data-v="' + x2[0] + '">' + x2[1] + "</button>").join("") + "</div>";
     }
-    function systemKarte(x2) {
-      const ampel = x2.risiko < 2e-3 ? "gruen" : x2.risiko < 0.01 ? "gelb" : "rot";
-      let h3 = '<div class="karte"><div class="khead">' + esc2(x2.name) + "<small>Generation " + x2.generation + " / 4</small></div>";
-      h3 += '<div class="it-werte"><span>Alter <b>' + Math.floor(x2.alter) + " Jahre</b></span><span>Kosten/Woche <b>" + geld(x2.kostenWoche) + '</b></span><span class="it-ampel ' + ampel + '">Ausfallrisiko ' + prozent6(x2.risiko) + "/Woche</span></div>";
-      if (x2.wartungGekuendigt) h3 += '<p class="it-warn">Wartung durch den Anbieter beendet</p>';
-      if (x2.kasseAusbau) h3 += '<div class="zeile">SB-Kassen ' + x2.kasseAusbau.selbstbedienung + "/2 \xB7 Mobile Kasse " + x2.kasseAusbau.mobil + "/2</div>";
-      const akt = x2.verteilung.filter((c) => c.generation > x2.generation);
-      if (akt.length) h3 += '<div class="zeile">Bereits modernisierte Cluster: ' + akt.length + " / " + x2.verteilung.length + "</div>";
-      const bereiche = E8.SYSTEME[x2.id].bereiche;
-      h3 += '<div class="it-meta">Begrenzt: ' + esc2(bereiche.map((id) => E8.BEREICHE?.find((q2) => q2.id === id)?.name ?? id).join(", ")) + "</div>";
-      h3 += '<div class="oknoepfe"><button data-it="neues" data-v="' + x2.id + '">Modernisieren</button></div></div>';
+    const risikoText = (x2) => (x2 * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " %";
+    function leiter3(g) {
+      return '<span class="q-leiter" aria-label="Generation ' + g + ' von 4">' + [1, 2, 3, 4].map((i) => '<i class="' + (i <= g ? "an" : "") + '"></i>').join("") + "</span>";
+    }
+    function systemZeile(x2) {
+      const ton2 = x2.risiko >= 0.01 ? "q-minus" : "";
+      const bereiche = E8.SYSTEME[x2.id].bereiche.map((id) => E8.BEREICHE?.find((q2) => q2.id === id)?.name ?? id);
+      const akt = x2.verteilung.filter((c) => c.generation > x2.generation).length;
+      let h3 = '<div class="q-zeile q-system">' + leiter3(x2.generation) + '<span class="q-name">' + esc2(x2.name) + (x2.generation > 0 ? "<small>Generation " + x2.generation + " von 4 \xB7 " + Math.floor(x2.alter) + " Jahre \xB7 " + geld(x2.kostenWoche) + " je Woche</small>" : "<small>Noch nicht eingef\xFChrt, keine laufenden Kosten</small>") + (x2.wartungGekuendigt ? '<small class="q-minus">Wartung durch den Anbieter beendet</small>' : "") + (akt ? "<small>" + akt + " von " + x2.verteilung.length + " Clustern schon modernisiert</small>" : "") + "<small>Bremst: " + esc2(bereiche.slice(0, 3).join(", ")) + (bereiche.length > 3 ? " und " + (bereiche.length - 3) + " weitere" : "") + '</small></span><span class="q-wert"><b class="' + ton2 + '">' + risikoText(x2.risiko) + '</b><small>Ausfall je Woche</small></span><span class="q-knoepfe"><button data-it="neues" data-v="' + x2.id + '">Modernisieren</button></span></div>';
       return h3;
     }
     function systeme(d3) {
-      let h3 = '<div class="raster"><div class="kz"><span>Systeme</span><b>' + d3.systeme.length + '</b></div><div class="kz"><span>IT-Betrieb pro Woche</span><b>' + geld(d3.betriebskostenWoche) + "</b></div></div>";
-      h3 += '<div class="olief">CDO und IT-Leitung beeinflussen das Risiko von Verz\xF6gerungen und St\xF6rungen. Die Anfangsgenerationen bleiben f\xFCr die Basiskalibrierung neutral.</div>';
-      h3 += d3.systeme.map(systemKarte).join("");
+      const reihe = [...d3.systeme].sort((a2, b3) => b3.risiko - a2.risiko || a2.generation - b3.generation);
+      const top = reihe[0];
+      let h3 = '<div class="q31">';
+      h3 += '<div class="q-gross"><span class="q-label">H\xF6chstes Ausfallrisiko</span><span class="q-haupt ' + (top && top.risiko >= 0.01 ? "q-minus" : "") + '">' + (top ? risikoText(top.risiko) : "0 %") + '</span><span class="q-neben"><b>' + geld(d3.betriebskostenWoche) + "</b>IT-Betrieb je Woche</span></div>";
+      const alt = reihe.filter((x2) => x2.generation <= 1 || x2.wartungGekuendigt);
+      h3 += '<div class="q-befund">' + (top && top.risiko >= 2e-3 ? "<b>" + esc2(top.name) + "</b> f\xE4llt mit " + risikoText(top.risiko) + " je Woche am ehesten aus." : "Alle " + d3.systeme.length + " Systeme laufen stabil.") + (alt.length ? " " + alt.length + " " + (alt.length === 1 ? "System ist" : "Systeme sind") + " veraltet oder ohne Wartung." : "") + "</div>";
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Systemlandkarte</span><b>nach Risiko</b></div>' + reihe.map(systemZeile).join("") + "</div>";
       const k3 = d3.systeme.find((x2) => x2.id === "kasse");
       if (k3 && k3.generation >= 2) {
-        h3 += '<div class="karte"><div class="khead">Kassenausbau</div>';
+        h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Kassenausbau</span><b>Stufe von 2</b></div>';
         for (const art of ["selbstbedienung", "mobil"]) {
           const stufe2 = k3.kasseAusbau?.[art] ?? 0;
-          h3 += zeile4(art === "mobil" ? "Mobile Kasse" : "Selbstbedienungskassen", "Stufe " + stufe2);
-          if (stufe2 < 2) h3 += '<div class="oknoepfe"><button data-it="kasseAusbau" data-v="' + art + '">Stufe ' + (stufe2 + 1) + " beauftragen</button></div>";
+          h3 += '<div class="q-zeile"><span class="q-name">' + (art === "mobil" ? "Mobile Kasse" : "Selbstbedienungskassen") + '</span><span class="q-wert">' + stufe2 + " von 2</span>" + (stufe2 < 2 ? '<span class="q-knoepfe"><button data-it="kasseAusbau" data-v="' + art + '">Stufe ' + (stufe2 + 1) + " beauftragen</button></span>" : "") + "</div>";
         }
         h3 += "</div>";
       }
+      h3 += '<div class="legende">CDO und IT-Leitung beeinflussen das Risiko von Verz\xF6gerungen und St\xF6rungen.</div></div>';
       return h3;
     }
     function projektKarte(p2, d3) {
@@ -174214,7 +174367,7 @@
     function zeichnen2() {
       if (!ui.aktiv) return;
       const d3 = daten(), seiten4 = { systeme: "Systemlandkarte", produkte: "Digitale Produkte", projekte: "IT-Projekte", neu: "Neues IT-Projekt" };
-      ctx.panel("IT \xB7 " + seiten4[ui.reiter], "CDO / Bereich IT \xB7 " + d3.projekte.filter((x2) => x2.phase !== "abgeschlossen").length + " aktive Projekte", reiter() + (ui.reiter === "systeme" ? systeme(d3) : ui.reiter === "produkte" ? produkte2() : ui.reiter === "projekte" ? projekte(d3) : neu(d3)), "gross");
+      ctx.panel("IT \xB7 " + seiten4[ui.reiter], "CDO / Bereich IT \xB7 " + d3.projekte.filter((x2) => x2.phase !== "abgeschlossen").length + " aktive Projekte", bereich("zentrale") + '<i class="q31-marke" hidden></i>' + reiter() + (ui.reiter === "systeme" ? systeme(d3) : ui.reiter === "produkte" ? produkte2() : ui.reiter === "projekte" ? projekte(d3) : neu(d3)), "gross");
       ui.aktiv = true;
     }
     function aktion2(a2) {
@@ -174384,8 +174537,10 @@
 
   // src/ui/planung.js
   var pct = (v) => (100 * v).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
+  var pctV = (v) => (v > 0 ? "+" : v < 0 ? "\u2212" : "") + pct(Math.abs(v));
   var mio3 = (v) => (v / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " Mio. \u20AC";
   var rolle2 = { haus: "Hausleitungen", hauscluster: "Clusterleitungen", bereich: "Bereichsleitungen" };
+  var FORMATNAME = { warenhaus: "Hartwig", sport: "Hartwig Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
   var EBENE = { konzern: "Konzern", format: "Format", region: "Region", hauscluster: "Hauscluster", haus: "Haus", warengruppe: "Warengruppe" };
   function planungModul(ctx) {
     const E8 = ctx.E, s2 = ctx.s, ui = { aktiv: false, tab: "assistent", schritt: 1 };
@@ -174395,7 +174550,7 @@
     const tabs = () => '<div class="tabs">' + [["assistent", "Planung"], ["report", "Reporting"], ["forecast", "Forecast"], ["bonus", "Boni"]].map(([id, t3]) => '<button class="tab ' + (ui.tab === id ? "an" : "") + '" data-pl-tab="' + id + '">' + t3 + "</button>").join("") + "</div>";
     function entwurf(D) {
       const e = D.entwurf;
-      if (!e || e.stand !== "offen") return '<div class="karte"><div class="khead">Jahresplanung</div><div class="zeile">N\xE4chste Planungsrunde KW 40 bis 44. Der aktuelle Jahresplan ist unten im Reporting abrufbar.</div></div>';
+      if (!e || e.stand !== "offen") return '<div class="q31"><div class="q-buch"><div class="q-buch-kopf"><span>Jahresplanung</span></div><div class="q-leer"><b>Keine Planungsrunde offen.</b>Die n\xE4chste l\xE4uft in KW 40 bis 44. Den laufenden Jahresplan zeigt der Reiter Reporting.</div><button class="q-mehr" data-pl-tab="report">Zum Reporting</button></div></div>';
       const steps = ["Konzernziel", "Gegenstrom", "Abschluss"];
       let html = '<div class="tabs">' + steps.map((t3, i) => '<button class="tab ' + (ui.schritt === i + 1 ? "an" : "") + '" data-pl-schritt="' + (i + 1) + '">' + (i + 1) + ". " + t3 + "</button>").join("") + "</div>";
       if (ui.schritt === 1) {
@@ -174427,13 +174582,29 @@
     }
     function bericht2(D) {
       const b3 = D.bericht;
-      if (!b3.ziele) return '<div class="karte">Kein Jahresplan vorhanden.</div>';
-      let html = '<div class="raster"><div class="kz"><span>Umsatzplan ' + b3.jahr + "</span><b>" + mio3(b3.ziele.umsatz) + '</b></div><div class="kz"><span>Ist kumuliert</span><b>' + mio3(b3.ist) + '</b></div><div class="kz"><span>Plan bis heute</span><b>' + mio3(b3.planBisHeute) + '</b></div><div class="kz"><span>Abweichung zum Plan</span><b>' + mio3(b3.abweichung) + '</b></div><div class="kz"><span>Jahresforecast</span><b>' + (b3.forecasting == null ? "noch offen" : mio3(b3.forecasting)) + '</b></div><div class="kz"><span>EBITDA-Plan</span><b>' + mio3(b3.ziele.ebitda) + "</b></div></div>";
-      const nodes = b3.knoten.filter((n3) => n3.ebene === "format" || n3.ebene === "region" || n3.ebene === "hauscluster");
-      html += '<div class="karte"><div class="khead">Planabweichung nach Steuerungsebene</div><div class="olief">Plan: Jahresziel, Abweichung: kumuliertes Ist gegen zeitanteilige Jahresplanung.</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>Einheit</th><th>Plan</th><th>Ist</th><th>Abw.</th></tr></thead><tbody>' + nodes.map((n3) => "<tr><td>" + esc2(nname(n3)) + "</td><td>" + mio3(n3.umsatz) + "</td><td>" + mio3(n3.ist) + "</td><td>" + pct(n3.abweichung) + "</td></tr>").join("") + "</tbody></table></div></div>";
-      html += '<div class="karte"><div class="khead">Letzte 26 Wochen: Umsatz und Forecast</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>KW</th><th>Ist</th><th>Plan</th><th>Abw.</th><th>FC</th></tr></thead><tbody>' + (b3.wochen || []).slice().reverse().map((w2) => "<tr><td>" + (w2.woche % 52 + 1) + "</td><td>" + mio3(w2.ist) + "</td><td>" + mio3(w2.plan) + "</td><td>" + pct(w2.abweichungQuote) + "</td><td>" + (w2.forecast == null ? "\u2013" : mio3(w2.forecast)) + "</td></tr>").join("") + "</tbody></table></div></div>";
-      if (b3.warengruppen) html += '<details class="karte"><summary>Merchandise Planning: Warengruppenbudgets</summary>' + Object.entries(b3.warengruppen).map(([g, v]) => zeile4(g, mio3(v))).join("") + "</details>";
-      return html;
+      if (!b3.ziele) return '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Kein Jahresplan vorhanden.</b>Die Planungsrunde l\xE4uft in KW 40 bis 44; bis dahin gibt es nichts zu vergleichen.</div></div></div>';
+      const vz = (x2) => (x2 > 0 ? "+" : x2 < 0 ? "\u2212" : "") + mio3(Math.abs(x2));
+      let html = '<div class="q31">';
+      html += '<div class="q-gross"><span class="q-label">Abweichung zum Plan bis heute</span><span class="q-haupt ' + (b3.abweichung < 0 ? "q-minus" : "q-plus") + '">' + vz(b3.abweichung) + '</span><span class="q-neben"><b>' + mio3(b3.ist) + "</b>Ist kumuliert</span></div>";
+      html += '<div class="q-befund">Plan bis heute ' + mio3(b3.planBisHeute) + ", Jahresplan " + b3.jahr + " " + mio3(b3.ziele.umsatz) + ", EBITDA-Plan " + mio3(b3.ziele.ebitda) + ". " + (b3.forecasting == null ? "Der erste Jahresforecast entsteht nach KW 13." : "Forecast " + mio3(b3.forecasting) + ".") + "</div>";
+      const K3 = b3.knoten, kinder = (id, ebene) => K3.filter((n3) => n3.ebene === ebene && n3.parent === id);
+      const formate = K3.filter((n3) => n3.ebene === "format");
+      const m1 = (v) => (v / 1e6).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      const fname = (f11) => FORMATNAME[f11.id.replace("format:", "")] ?? f11.name;
+      const zeileP = (n3, klasse = "") => '<div class="q-zeile q-plan ' + klasse + '"><span class="q-name">' + esc2(nname(n3)) + '</span><span class="q-wert"' + (klasse ? "" : ' data-s="p"') + ">" + m1(n3.umsatz) + '</span><span class="q-wert"' + (klasse ? "" : ' data-s="i"') + ">" + m1(n3.ist) + '</span><span class="q-wert ' + (n3.abweichung < 0 ? "q-minus" : "") + '">' + pctV(n3.abweichung) + "</span></div>";
+      for (const f11 of formate) {
+        const regionen = kinder(f11.id, "region");
+        html += '<div class="q-buch" data-summenbuch="Planblatt ' + esc2(fname(f11)) + '"><div class="q-buch-kopf q-plan"><span>' + esc2(fname(f11)) + "</span><b>Plan Mio. \u20AC</b><b>Ist Mio. \u20AC</b><b>Abw.</b></div>";
+        for (const r3 of regionen) {
+          const cl = kinder(r3.id, "hauscluster");
+          html += cl.length ? '<details class="q-plan-auf"><summary>' + zeileP(r3) + "</summary>" + cl.map((c) => zeileP(c, "q-unter")).join("") + "</details>" : zeileP(r3);
+        }
+        html += '<div class="q-summe q-plan"><span>' + esc2(fname(f11)) + ' gesamt</span><span class="q-wert" data-summe="p">' + m1(f11.umsatz) + '</span><span class="q-wert" data-summe="i">' + m1(f11.ist) + '</span><span class="q-wert">' + pctV(f11.abweichung) + "</span></div></div>";
+      }
+      const w2 = (b3.wochen || []).slice().reverse();
+      html += '<div class="q-buch"><div class="q-buch-kopf q-plan q-wochen"><span>Woche</span><b>Ist Mio. \u20AC</b><b>Plan Mio. \u20AC</b><b>Abw.</b></div>' + (w2.length ? w2.map((x2) => '<div class="q-zeile q-plan q-wochen"><span class="q-name">KW ' + (x2.woche % 52 + 1) + '</span><span class="q-wert">' + m1(x2.ist) + '</span><span class="q-wert">' + m1(x2.plan) + '</span><span class="q-wert ' + (x2.abweichungQuote < 0 ? "q-minus" : "") + '">' + pctV(x2.abweichungQuote) + "</span></div>").join("") : '<div class="q-leer">Noch keine Woche im Plan.</div>') + "</div>";
+      if (b3.warengruppen) html += '<details class="q-buch"><summary class="q-buch-kopf"><span>Warengruppenbudgets</span><b>\xF6ffnen</b></summary>' + Object.entries(b3.warengruppen).map(([g, v]) => '<div class="q-zeile"><span class="q-name">' + esc2(E8.GRUPPEN?.[g]?.name ?? g) + '</span><span class="q-wert">' + mio3(v) + "</span></div>").join("") + "</details>";
+      return html + "</div>";
     }
     function forecasts(D) {
       const L2 = D.bericht.forecasts || [];
@@ -174443,7 +174614,7 @@
         if (f11.status === "offen") html += '<div class="regler"><label>Umsatz Mio. \u20AC <input data-pl-forecast="umsatz" type="number" min="0" step="0.1" value="' + (f11.ziele.umsatz / 1e6).toFixed(1) + '"></label><label>EBITDA Mio. \u20AC <input data-pl-forecast="ebitda" type="number" step="0.1" value="' + (f11.ziele.ebitda / 1e6).toFixed(1) + '"></label></div><div class="oknoepfe"><button class="gruen" data-pl-forecast-abgabe="1">\xC4nderungen speichern und abgeben</button></div>';
         html += "</div>";
       }
-      if (!L2.length) html += '<div class="karte">Der erste Forecast entsteht nach KW 13.</div>';
+      if (!L2.length) html += '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Noch kein Forecast.</b>Der erste Forecast (3+9) entsteht nach KW 13.</div></div></div>';
       if (D.bericht.vertrauen?.length) html += '<div class="karte"><div class="khead">Trefferquote und Vertrauen</div>' + D.bericht.vertrauen.slice(-8).map((v) => zeile4("KW " + (v.woche % 52 + 1) + " \xB7 Abweichung " + pct(v.abweichung), (v.delta > 0 ? "+" : "") + v.delta)).join("") + "</div>";
       return html;
     }
@@ -174458,7 +174629,7 @@
     function zeigen(halten = false) {
       const position = document.getElementById("pinhalt").scrollTop, D = vor();
       const html = tabs() + (ui.tab === "assistent" ? entwurf(D) : ui.tab === "report" ? bericht2(D) : ui.tab === "forecast" ? forecasts(D) : boni(D));
-      ctx.panel("Planung & Forecast", "Konzerncontrolling \xB7 KW " + (s2().woche % 52 + 1), html, "gross");
+      ctx.panel("Planung & Forecast", "Konzerncontrolling \xB7 KW " + (s2().woche % 52 + 1), bereich("zentrale") + '<i class="q31-marke" hidden></i>' + html, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = halten ? position : 0;
     }
@@ -174514,8 +174685,9 @@
       }
     });
     return {
-      oeffne: (tab = "assistent") => {
-        ui.tab = tab;
+      // Q31: Ohne offene Planungsrunde ist das Reporting die Hauptaufgabe und öffnet direkt.
+      oeffne: (tab) => {
+        ui.tab = tab ?? (vor().entwurf?.stand === "offen" ? "assistent" : "report");
         ui.schritt = 1;
         zeigen();
       },
@@ -175205,9 +175377,9 @@
     });
     const T = new KompaktSammler();
     const offen = [];
-    const zahl6 = /* @__PURE__ */ new Map();
-    for (const p2 of plan.parzellen) zahl6.set(p2.typ, (zahl6.get(p2.typ) ?? 0) + 1);
-    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl6.get(p2.typ) >= 5);
+    const zahl5 = /* @__PURE__ */ new Map();
+    for (const p2 of plan.parzellen) zahl5.set(p2.typ, (zahl5.get(p2.typ) ?? 0) + 1);
+    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl5.get(p2.typ) >= 5);
     const grund2 = new Proxy(sb.bauer, { get(z4, typ) {
       const f11 = bauerFuer(z4, typ);
       return (S, sc, p2) => {
@@ -175283,9 +175455,9 @@
     });
     const T = new KompaktSammler();
     const offen = [];
-    const zahl6 = /* @__PURE__ */ new Map();
-    for (const p2 of plan.parzellen) zahl6.set(p2.typ, (zahl6.get(p2.typ) ?? 0) + 1);
-    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl6.get(p2.typ) >= 5);
+    const zahl5 = /* @__PURE__ */ new Map();
+    for (const p2 of plan.parzellen) zahl5.set(p2.typ, (zahl5.get(p2.typ) ?? 0) + 1);
+    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl5.get(p2.typ) >= 5);
     const grund2 = new Proxy(sb.bauer, { get(z4, typ) {
       const f11 = bauerFuer(z4, typ);
       return (S, sc, p2) => {
@@ -175543,14 +175715,14 @@
   function cockpitZeigen() {
     const c = cockpit(s);
     const kachel2 = (titel, wert, ton2 = "") => `<div class="kz ${ton2}"><span>${titel}</span><b>${wert}</b></div>`;
-    const FORMATNAME = { alle: "Alle", warenhaus: "Hartwig", sport: "Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
+    const FORMATNAME2 = { alle: "Alle", warenhaus: "Hartwig", sport: "Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
     const fx = cockpitFormat === "alle" ? null : c.formate.find((x2) => x2.format === cockpitFormat);
-    const auswahl4 = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME).filter(([id]) => id === "alle" || c.formate.some((x2) => x2.format === id && x2.haeuser)).map(([id, name2]) => '<option value="' + id + '"' + (id === cockpitFormat ? " selected" : "") + ">" + name2 + "</option>").join("") + "</select>";
+    const auswahl4 = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME2).filter(([id]) => id === "alle" || c.formate.some((x2) => x2.format === id && x2.haeuser)).map(([id, name2]) => '<option value="' + id + '"' + (id === cockpitFormat ? " selected" : "") + ">" + name2 + "</option>").join("") + "</select>";
     $2("cockpit").innerHTML = [
       kachel2("Cash", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? "rot" : ""),
       kachel2("Kreditrahmen frei", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? "rot" : ""),
-      fx ? kachel2("EBITDA " + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : "noch offen", !s.historie.length ? "" : fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wo.", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
-      kachel2("Umsatz<em> \xB7 " + FORMATNAME[cockpitFormat] + "</em>" + auswahl4, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : "noch offen", "mitwahl"),
+      fx ? kachel2("EBITDA " + FORMATNAME2[cockpitFormat], s.historie.length ? geld(fx.ebitda) : "noch offen", !s.historie.length ? "" : fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wo.", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
+      kachel2("Umsatz<em> \xB7 " + FORMATNAME2[cockpitFormat] + "</em>" + auswahl4, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : "noch offen", "mitwahl"),
       kachel2("Vertrauen", `${c.vertrauen} / 100`, c.vertrauen < 35 ? "rot" : ""),
       kachel2("Image", `${c.image} / 100`, c.image < 35 ? "rot" : "")
     ].join("");
@@ -175765,11 +175937,11 @@
     if (h3.format === "schwester") {
       const f11 = schwesterUebersicht(s);
       formate += abschnitt("Volkskauf \xB7 Regionalf\xFChrung") + liste([zeile({ was: "H\xE4user", wert: fmt.format(f11.haeuser) }), zeile({ was: "EBITDA", wert: geld(f11.ebitda) }), zeile({ was: "Umbauten", wert: fmt.format(f11.umbauten) })]);
-      if (h3.status === "offen") formate += `<div class="hk-knopfreihe">${knopf2("Zu Hartwig umflaggen", `onclick="formateTun('schwesterUmflaggen','${id}')"`, "zweit")}</div>`;
+      if (h3.status === "offen") formate += `<div class="hk-knopfreihe">${knopf("Zu Hartwig umflaggen", `onclick="formateTun('schwesterUmflaggen','${id}')"`, "zweit")}</div>`;
     }
     if (h3.format === "outlet") {
       const f11 = outletUebersicht(s);
-      formate += abschnitt("FUNDUS \xB7 Off-Price-Markenposten") + liste([zeile({ was: "Bestand EK", wert: geld(f11.poolWert) }), zeile({ was: "Markenposten", wert: geld(f11.markenposten) }), zeile({ was: "Konzern-Altware", wert: geld(f11.altware) }), zeile({ was: "Reichweite", wert: f11.reichweite.toFixed(1).replace(".", ",") + " Wochen" })]) + `<div class="hk-knopfreihe">${knopf2("Altwarequote 80 %", `onclick="formateTun('altwareOutlet',80)"`, "zweit")}</div>`;
+      formate += abschnitt("FUNDUS \xB7 Off-Price-Markenposten") + liste([zeile({ was: "Bestand EK", wert: geld(f11.poolWert) }), zeile({ was: "Markenposten", wert: geld(f11.markenposten) }), zeile({ was: "Konzern-Altware", wert: geld(f11.altware) }), zeile({ was: "Reichweite", wert: f11.reichweite.toFixed(1).replace(".", ",") + " Wochen" })]) + `<div class="hk-knopfreihe">${knopf("Altwarequote 80 %", `onclick="formateTun('altwareOutlet',80)"`, "zweit")}</div>`;
     }
     if (h3.klasse === "premium") {
       const pq = premiumUebersicht(s).find((q2) => q2.id === id);
@@ -175780,16 +175952,16 @@
         zeile({ was: "Aktionsschutz", wert: pq?.schutz ? "aktiv" : "aus" })
       ]);
       if (h3.premiumEigentuemer) formate += hinweis("Eigent\xFCmer: " + esc2(h3.premiumEigentuemer));
-      else if (h3.status === "offen") formate += `<div class="hk-knopfreihe">${knopf2(pq?.schutz ? "Rabatt-Schutz aufheben" : "Rabatt-Schutz aktivieren", `onclick="premiumTun('schutz','${id}')"`, "zweit")}${knopf2("10 Mio. \u20AC investieren", `onclick="premiumTun('investieren','${id}')"`, "zweit")}</div>`;
+      else if (h3.status === "offen") formate += `<div class="hk-knopfreihe">${knopf(pq?.schutz ? "Rabatt-Schutz aufheben" : "Rabatt-Schutz aktivieren", `onclick="premiumTun('schutz','${id}')"`, "zweit")}${knopf("10 Mio. \u20AC investieren", `onclick="premiumTun('investieren','${id}')"`, "zweit")}</div>`;
       const an = s.angebote.find((a2) => a2.status === "offen" && a2.typ === "premiumVerkauf" && a2.wunschHaeuser?.includes(id));
-      if (an) formate += hinweis(`Angebot: ${esc2(an.premiumKaeuferTyp || "Investor")} bietet ${geld(an.kaufpreis ?? 0)}.`, "achtung") + `<div class="hk-knopfreihe">${knopf2("Nachverhandeln", `onclick="premiumTun('verhandeln','${an.id}')"`, "zweit")}${knopf2("Verkaufen", `onclick="premiumTun('verkaufen','${an.id}')"`, "zweit")}</div>`;
+      if (an) formate += hinweis(`Angebot: ${esc2(an.premiumKaeuferTyp || "Investor")} bietet ${geld(an.kaufpreis ?? 0)}.`, "achtung") + `<div class="hk-knopfreihe">${knopf("Nachverhandeln", `onclick="premiumTun('verhandeln','${an.id}')"`, "zweit")}${knopf("Verkaufen", `onclick="premiumTun('verkaufen','${an.id}')"`, "zweit")}</div>`;
     }
     let innen = "";
     if (hausEtageWahl?.id === id) {
       const shops = EQ.shops(s, h3);
       const b3 = innenBild(h3, hausEtageWahl.nr);
       letztesInnenbild = { id, nr: hausEtageWahl.nr, shops: h3.flaechen.filter((f11) => f11.etage === hausEtageWahl.nr && shops[f11.gruppe] && ["eigen", "kommission"].includes(f11.konzept)).map((f11) => shops[f11.gruppe].name), teile: b3.res?.anzahl };
-      innen = `<div class="hk-innen haus3d"><img src="${b3.url}" alt="${esc2(etageName4(hausEtageWahl.nr))} von innen"><div class="hk-zeile"><span class="hk-was">${esc2(etageName4(hausEtageWahl.nr))}<small>Innenansicht</small></span>${knopf2("Schlie\xDFen", `onclick="hausKlick('zu')"`, "zweit")}</div></div>` + (b3.nah ? `<div class="hk-innen haus3d"><img src="${b3.nah}" alt="Eigenmarken-Shop ${esc2(b3.shop.name)}"><div class="hk-zeile"><span class="hk-was">Eigenmarken-Shop ${esc2(b3.shop.name)}<small>${Math.round(b3.shop.anteil * 100)} % der Fl\xE4che</small></span></div></div>` : "");
+      innen = `<div class="hk-innen haus3d"><img src="${b3.url}" alt="${esc2(etageName4(hausEtageWahl.nr))} von innen"><div class="hk-zeile"><span class="hk-was">${esc2(etageName4(hausEtageWahl.nr))}<small>Innenansicht</small></span>${knopf("Schlie\xDFen", `onclick="hausKlick('zu')"`, "zweit")}</div></div>` + (b3.nah ? `<div class="hk-innen haus3d"><img src="${b3.nah}" alt="Eigenmarken-Shop ${esc2(b3.shop.name)}"><div class="hk-zeile"><span class="hk-was">Eigenmarken-Shop ${esc2(b3.shop.name)}<small>${Math.round(b3.shop.anteil * 100)} % der Fl\xE4che</small></span></div></div>` : "");
     }
     const uw = s.woche - 1;
     const vorjahrPunkt = h3.betrieb?.umsatzHistorie?.find((x2) => x2.woche === uw - 52) ?? s.vorjahrHistorie?.[id]?.find((x2) => x2.woche === uw - 52);
@@ -176026,7 +176198,7 @@
       if (bleiben) $2("pinhalt").scrollTop = sc2;
       return;
     }
-    const zahl6 = (t3, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t3}</span><b>${w2}</b></div>`;
+    const zahl5 = (t3, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t3}</span><b>${w2}</b></div>`;
     const pz5 = (x2) => `${Math.round((x2 ?? 0) * 100)} %`;
     const knopf5 = (text3, args, art = "") => `<button class="mini ${art}" onclick="event.stopPropagation();hqKlick(${args.map((x2) => `'${x2}'`).join(",")})">${text3}</button>`;
     const leerEtagen = (u.gebaeude ?? []).flatMap((g) => g.etagen.filter((e) => e.gemietet && !e.abteilungen.length && !e.archiv));
@@ -176239,7 +176411,7 @@
     stadt: () => stadtName,
     staedte: () => STADTLISTE.filter((d3) => s?.haeuser.some((h3) => h3.stadt === d3.name)).map((d3) => {
       const hs = s.haeuser.filter((h3) => h3.stadt === d3.name && h3.status !== "geschlossen");
-      const zahl6 = (rolle3) => d3.standorte.filter((p2) => p2.rolle === rolle3).length;
+      const zahl5 = (rolle3) => d3.standorte.filter((p2) => p2.rolle === rolle3).length;
       const formate = [["Hartwig", hs.filter((h3) => h3.format === "warenhaus").length], ["Volkskauf", hs.filter((h3) => h3.format === "schwester").length], ["Sport", hs.filter((h3) => h3.format === "sport").length], ["FUNDUS", hs.filter((h3) => h3.format === "outlet").length]];
       return {
         name: d3.name,

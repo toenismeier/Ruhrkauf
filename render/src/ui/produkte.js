@@ -5,6 +5,7 @@
 // Daten: produkte, produktKatalog, trendbericht, produktVorschau; Aktionen produktEntwickeln, produktPreis,
 // produktAuslisten, produktSortiment. Prüfung wie im Vorstand.
 import { geld, fmt, pz, dez, kwVon, esc } from './format.js';
+import { bereich } from './komponenten.js';
 import { werteSammler, vergleiche, schalter, segment, regler, stepper, kz, wocheText, karussell, karussellBinden } from './vorstand.js';
 import * as PB from '../kit/produktbild.js';
 import { passendeTypen, fachSegmente, zielChips, sortimentBedienung, gruppeTrend, teamAufschluesselung } from './produkte-q24.js';
@@ -100,17 +101,13 @@ export function produkteModul(ctx) {
   function liste(P) {
     const st = s(), L = E.produkte(st), M = aktuelleMarke(L);
     let h = '';
-    if (!M) return { titel: 'Produktentwicklung', unter: '', html: '<div class="leise">Keine Eigenmarke vorhanden. Eine Marke gründest du im Einkauf.</div>' };
-    h += '<button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>';
+    if (!M) return { titel: 'Produktentwicklung', unter: 'keine Eigenmarke', html: '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Keine Eigenmarke vorhanden.</b>Produkte entstehen immer unter einer Eigenmarke. Gründe zuerst eine Marke.</div></div><button class="q-haupt-akt" data-a="eigenmarkeGruenden">Eigenmarke gründen</button></div>' };
+    // Q31 Kollektionsstange. Hauptfrage: Was läuft im Sortiment, was entsteht? Marke und Kategorie wählen,
+    // darunter sofort das Produktkarussell und die Hauptaktion; Absatz, Profil und Team folgen kleiner.
     h += markenwahl(L);
-    h += teamAufschluesselung(M.leistung);
-    h += '<button class="breit q24-katalogknopf" data-a="katalog">Sortiment durchsuchen: Damen, Herren, Kinder, Home</button>';
-    h += `<div class="raster">${kz('HQ-Team (Basis)', P('l:team', `${Math.round(L.team * 100)} / 100`))}${kz('Kosten je Woche', P('l:kosten', geld(L.kostenWoche)))}</div>`;
     const kats = M.kategorien.filter((k) => k.kapazitaet > 0 || k.belegt > 0);
     if (!kats.some((k) => k.id === ui.kategorie)) ui.kategorie = (kats.find((k) => M.produkte.some((p) => p.kategorie === k.id && p.status !== 'ausgelistet')) ?? kats[0])?.id ?? null;
     h += `<div class="seg umbruch kats">${kats.map((k) => `<button class="${k.id === ui.kategorie ? 'an' : ''}" data-a="kategorie" data-v="${k.id}">${esc(k.name)} ${P(`l:kat:${k.id}`, `${k.belegt} / ${k.kapazitaet}`, 'i')}</button>`).join('')}</div>`;
-    h += absatzGrafik(E.produktAbsatzVerlauf(st, M.marke, ui.kategorie), P, kats.find((k) => k.id === ui.kategorie)?.name ?? M.name);
-    h += linienProfil(E.produktLinienprofil(st, M.marke), P);
     const offeneHaeuser = st.haeuser.filter((haus) => haus.status === 'offen');
     if (!offeneHaeuser.some((haus) => haus.id === ui.haus)) ui.haus = offeneHaeuser[0]?.id ?? null;
     const prod = M.produkte.filter((p) => p.kategorie === ui.kategorie && p.status !== 'ausgelistet');
@@ -121,7 +118,7 @@ export function produkteModul(ctx) {
       const karten = prod.map((p, index) => {
         const ent = p.status === 'entwicklung';
         const mb = ui.model.has(p.id) ? modelBild(p.typ, p.farbe, p.material, p.wg, M.trendGruppe, 190, p.bild) : null;
-        let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p.id}" role="button" aria-label="Produkt oder Model zeigen" style="background:linear-gradient(#f7f4ee,#efe9df)">${mb ?? bild(p.typ, p.farbe, p.material, 150, p.bild)}</div>`;
+        let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p.id}" role="button" aria-label="Produkt oder Model zeigen" >${mb ?? bild(p.typ, p.farbe, p.material, 150, p.bild)}</div>`;
         if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p.id}" aria-label="Produkt löschen"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
         c += `<button class="q24-detailsknopf" data-a="detailProdukt" data-v="${esc(p.id)}">Produktdetails und Model ansehen</button>`;
         c += `<div class="pname">${P(`p:${p.id}:name`, p.name, 'b')}<small>${esc(p.typ)} · ${esc(p.zielgruppeName ?? 'Markenzielgruppe')} · ${esc(p.farbe)} · ${esc(p.material)} · ${PREISLAGE[p.preislage] ?? p.preislage}</small></div>`;
@@ -129,7 +126,7 @@ export function produkteModul(ctx) {
           c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P(`p:${p.id}:fertig`, `fertig ${wocheText(st, p.fertigWoche)}`, 'small')}</div><div class="balken"><span style="width:${(p.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P(`p:${p.id}:fortschritt`, pz(p.fortschritt), 'i')} · ${geld(p.budgetWoche)} je Woche über ${p.dauer} Wochen</small></div>`;
         } else {
           c += `<div class="mitte" title="${dez(p.sterne, 1)} Sterne">${sterne(p.sterne, 24)}<span class="sternzahl">${P(`p:${p.id}:sterne`, dez(p.sterne, 1), 'span')}</span></div>`;
-          const ver = `${p.veraenderung >= 0 ? '+' : '−'}${fmt.format(Math.abs(p.veraenderung))} (${p.veraenderungProzent >= 0 ? '+' : '−'}${pz(Math.abs(p.veraenderungProzent))})`;
+          const ver = `${p.veraenderung >= 0 ? '+' : '−'}${fmt.format(Math.abs(p.veraenderung))} (${p.veraenderungProzent >= 0 ? '+' : '−'}${pz(Math.abs(p.veraenderungProzent), 1)})`;
           c += `<div class="pmitte">${schalter(p.status === 'sortiment', `data-a="sortiment" data-v="${p.id}"`, 'Im Sortiment')}<div class="verkauf"><small>Stück letzte Woche</small>${P(`p:${p.id}:verkauf`, fmt.format(p.verkaufLetzteWoche), 'b')}${P(`p:${p.id}:veraenderung`, ver, 'i', p.veraenderung < 0 ? ' class="rotwert"' : '')}</div></div>`;
           c += `<div class="pmitte">${donut(p.marge, P(`p:${p.id}:marge`, pz(p.marge), 'b'))}<div class="preis"><small class="rotwert">EK je Stück ${P(`p:${p.id}:ek`, euro(p.ekStueck), 'span')}</small><small>VK je Stück</small>${stepper('preis', P(`p:${p.id}:preis`, euro(p.preis)), `Normpreis ${euro(p.normpreis)}`, ` data-p2="${p.id}"`)}</div></div>`;
           const minimum = Math.round(p.normpreis * 0.4 * 100) / 100, maximum = Math.round(p.normpreis * 2.5 * 100) / 100;
@@ -150,6 +147,12 @@ export function produkteModul(ctx) {
     const voll = k && k.belegt >= k.kapazitaet;
     h += `<div class="oknoepfe unten2"><button class="gruen" data-a="neu">+ Neues Produkt</button><button data-a="trend">Trendbericht</button></div>`;
     if (voll && !M.hinweis) h += `<div class="olief warnung">Kapazität in ${esc(k.name)} erreicht: für ein neues Produkt erst eines auslisten.</div>`;
+    h += absatzGrafik(E.produktAbsatzVerlauf(st, M.marke, ui.kategorie), P, kats.find((k) => k.id === ui.kategorie)?.name ?? M.name);
+    h += linienProfil(E.produktLinienprofil(st, M.marke), P);
+    h += teamAufschluesselung(M.leistung);
+    h += `<div class="raster">${kz('HQ-Team (Basis)', P('l:team', `${Math.round(L.team * 100)} / 100`))}${kz('Kosten je Woche', P('l:kosten', geld(L.kostenWoche)))}</div>`;
+    h += '<button class="breit q24-katalogknopf" data-a="katalog">Sortiment durchsuchen: Damen, Herren, Kinder, Home</button>';
+    h += '<button class="q-neben-akt" data-a="eigenmarkeGruenden" style="margin:4px 0 12px">+ Neue Eigenmarke</button>';
     return { titel: 'Produktentwicklung', unter: `${esc(M.name)} · ${esc(M.zielgruppe)} · ${M.inEntwicklung} in Entwicklung · KW ${kwVon(st.woche)}`, html: h };
   }
 
@@ -252,7 +255,7 @@ export function produkteModul(ctx) {
     h += '</div>';
     const wgV = K.typen.find((t) => t.typ === e.typ)?.wgs?.find((w) => !/^kinder/.test(w) || M.trendGruppe === 'kinder');
     const mbV = modelBild(e.typ, e.farbe, e.material, wgV, M.trendGruppe, 150);
-    h += `<div class="karte vorschau produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(e.typ, e.farbe, e.material, 132)}${mbV ?? ''}</div><div class="pname">${P('n:name', v.name ?? e.typ, 'b')}<small>${v.wgName ? `${esc(v.wgName)} · ` : ''}Einführung ${esc(v.saisonEinfuehrung)}</small></div>`;
+    h += `<div class="karte vorschau produkt"><div class="pbild" >${bild(e.typ, e.farbe, e.material, 132)}${mbV ?? ''}</div><div class="pname">${P('n:name', v.name ?? e.typ, 'b')}<small>${v.wgName ? `${esc(v.wgName)} · ` : ''}Einführung ${esc(v.saisonEinfuehrung)}</small></div>`;
     h += `<div class="mitte">${sterne(v.sterneErwartet, 22)}<span class="sternzahl">${P('n:sterne', `${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)}`, 'span')}</span></div>`;
     h += `<div class="owerte"><div><span>Normpreis</span>${P('n:preis', euro(v.normpreis))}</div><div><span>EK je Stück</span>${P('n:ek', euro(v.ekStueck))}</div><div><span>Marge</span>${P('n:marge', pz(v.marge))}</div><div><span>Entwicklung</span>${P('n:kosten', geld(v.kosten))}</div><div><span>Fertig</span>${P('n:fertig', wocheText(st, v.fertigWoche))}</div><div><span>Platz frei</span>${P('n:frei', String(v.kapazitaetFrei))}</div></div>`;
     h += `<p class="leise">Passform zur Zielgruppe: <b>${P('n:passform', pz(v.passform), 'span')}</b> · wirkt auf die Produktbewertung und damit auf die Nachfrage.</p>`;
@@ -290,7 +293,7 @@ export function produkteModul(ctx) {
   function zeigen(scrollHalten = false) {
     const sc = document.getElementById('pinhalt').scrollTop;
     const { r } = rendern();
-    ctx.panel(r.titel, r.unter, r.html, 'gross');
+    ctx.panel(r.titel, r.unter, bereich('zentrale') + '<i class="q31-marke" hidden></i>' + r.html, 'gross'); // Q31: dunkler Zentrale-Look (Q30-Bausteine)
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = scrollHalten ? sc : 0;
     if (ui.seite === 'liste') karussellBinden('produkte', ui.k, (i) => { if (!ui.aktiv) return; ui.k = i; ui.auslisten = null; zeigen(true); });

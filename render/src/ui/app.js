@@ -1,6 +1,7 @@
 // N11: unabhängige App-Oberfläche. Keine Änderungen an Engine und Simulation.
 import { liste, speichern, laden, loeschen, exportieren, importieren, PLAETZE } from './speicher.js';
 import { esc, geld } from './format.js';
+import { bereich } from './komponenten.js';
 
 // Bis zum Einbau von N13 separat abschaltbar.
 export const APP_AKTIV = true;
@@ -22,10 +23,14 @@ export function appModul({ panel, meldung, aktuell, ladenInSpiel, vorNeuladen })
     try {
       const infos = await liste();
       const vorhanden = Object.fromEntries(infos.map((i, n) => [PLAETZE[n], i]));
-      root.innerHTML = PLAETZE.map((platz) => {
+      const belegt = PLAETZE.filter((p) => p !== 'autosave' && vorhanden[p]).length, auto = vorhanden.autosave;
+      const kopf = start ? '' : '<div class="q31"><div class="q-gross"><span class="q-label">Zuletzt automatisch gespeichert</span><span class="q-haupt">' + (auto ? 'Woche ' + (auto.woche + 1) : 'noch nie') + '</span><span class="q-neben"><b>' + belegt + ' von ' + (PLAETZE.length - 1) + '</b>Plätzen belegt</span></div>' +
+        '<div class="q-befund">' + (auto ? esc(auto.stadt) + ', ' + datumFormatieren(auto.datum) + '. Der automatische Stand wird jede Woche überschrieben; für einen festen Stand einen Platz wählen.' : 'Noch kein Spielstand. Speichere auf einem der drei Plätze.') + '</div></div>';
+      root.innerHTML = kopf + PLAETZE.map((platz) => {
         const info = vorhanden[platz];
         const name = info?.name ?? (platz === 'autosave' ? 'Automatisch' : '');
-        const vorschau = info?.bild ? '<img class="app-vorschau" alt="Kartenausschnitt des Spielstands" src="' + info.bild + '">' : '<div class="app-vorschau leer" aria-hidden="true">H</div>';
+        // Q31 Aktenregal: jeder Platz ein Ordnerrücken; leerer Platz ohne Platzhalterlogo
+        const vorschau = info?.bild ? '<img class="app-vorschau" alt="Kartenausschnitt des Spielstands" src="' + info.bild + '">' : '<div class="app-vorschau leer q-ruecken" aria-hidden="true"><span>' + (platz === 'autosave' ? 'Auto' : platz.slice(-1)) + '</span></div>';
         return '<article class="app-platz" data-platz="' + platz + '">' +
           '<div class="app-platzkopf"><b>' + bezeichnung(platz) + '</b><span>' + (info ? datumFormatieren(info.datum) : 'Leer') + '</span></div>' +
           '<div class="app-platzinhalt">' + vorschau + '<div class="app-daten">' +
@@ -100,7 +105,7 @@ export function appModul({ panel, meldung, aktuell, ladenInSpiel, vorNeuladen })
 
   function oeffne() {
     if (!APP_AKTIV) return;
-    panel('Spielstände', 'Drei benannte Plätze und ein automatischer Spielstand', '<div id="app-plaetze" class="app-plaetze">Lade Spielstände …</div>', 'gross');
+    panel('Spielstände', 'Drei benannte Plätze und ein automatischer Spielstand', bereich('zentrale') + '<i class="q31-marke" hidden></i><div id="app-plaetze" class="app-plaetze">Lade Spielstände …</div>', 'gross');
     return zeichne($('app-plaetze'));
   }
 

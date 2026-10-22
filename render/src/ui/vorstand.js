@@ -6,6 +6,7 @@
 // Die Bausteine (Schalter, Stepper, Balken, Karussell, Porträt, Prüfung) nutzen auch marketing.js und produkte.js.
 import { geld, fmt, pz, kwVon, esc } from './format.js';
 import * as PT from '../kit/portraet.js';
+import { bereich } from './komponenten.js';
 
 // ─────────────────────────────────────────── gemeinsame Bausteine
 /** Porträt als SVG (kit/portraet.js); fehlt die Datei, eine neutrale Silhouette. */
@@ -57,6 +58,7 @@ export function karussellBinden(id, idx, beiWechsel) {
 }
 
 const RISIKO = { gruen: 'gering', gelb: 'erhöht', rot: 'hoch' };
+const RESSORT_KURZ = { cfo: 'Finanzen', coo: 'Operations', cso: 'Vertrieb', cpo: 'Einkauf', cmo: 'Marketing', chro: 'Personal', cro: 'Restrukturierung', cdo: 'Digital' }; // Q31: passt auf den Platz
 const HALTE = [[0, 'kein'], [0.25, '25 %'], [0.5, '50 %'], [1, '100 %']];
 const ERFOLG = [[0, 'kein'], [0.1, '10 %'], [0.2, '20 %'], [0.3, '30 %']];
 const tsd = (x) => geld(x);
@@ -68,29 +70,36 @@ export function vorstandModul(ctx) {
 
   // ─────────────────────────── Übersicht
   function uebersicht(P) {
+    // Q31 Sitzungstisch. Hauptfrage: Wer fehlt im Vorstand, was steht zur Entscheidung? Größter Block = offene
+    // Sitzungsvorlage (wenn vorhanden), sonst der Tisch mit acht Plätzen; unbesetzte Ressorts als leerer Stuhl.
     const st = s(), u = E.vorstandUebersicht(st);
-    let h = `<div class="raster">${kz('Vorstand besetzt', P('u:besetzt', `${u.besetzt} von ${u.ressorts.length}`))}${kz('Gehälter im Jahr', P('u:kostenJahr', geld(u.kostenJahr)))}${kz('Kosten je Woche', P('u:kostenWoche', geld(u.kostenWoche)))}${kz('Nächste Sitzung', P('u:sitzung', wocheText(st, u.naechsteSitzung)))}</div>`;
+    const frei = u.ressorts.filter((r) => !r.person), risiko = u.ressorts.filter((r) => r.person && r.risikoAmpel === 'rot');
+    let h = '<div class="q31">';
+    h += `<div class="q-gross"><span class="q-label">Vorstand besetzt</span><span class="q-haupt">${P('u:besetzt', `${u.besetzt} von ${u.ressorts.length}`, 'span')}</span><span class="q-neben"><b>${P('u:kostenJahr', geld(u.kostenJahr), 'span')}</b>Gehälter im Jahr</span></div>`;
+    h += `<div class="q-befund">${frei.length ? `<b>${frei.map((r) => r.kurz).join(' und ')}</b> ${frei.length === 1 ? 'fehlt' : 'fehlen'}; ${frei.length === 1 ? 'das Ressort arbeitet' : 'die Ressorts arbeiten'} ohne Führung schwächer.` : 'Alle Ressorts sind besetzt.'}${risiko.length ? ` Abwerberisiko hoch: ${risiko.map((r) => r.kurz).join(', ')}.` : ''} Nächste Sitzung ${P('u:sitzung', wocheText(st, u.naechsteSitzung), 'b')}, Kosten je Woche ${P('u:kostenWoche', geld(u.kostenWoche), 'b')}.</div>`;
     for (const e of u.offeneEntscheidungen) {
       const roh = st.entscheidungen.find((x) => x.id === e.id);
-      h += `<div class="karte order entscheid"><div class="ohead"><b>${esc(e.titel)}</b><i>Frist ${wocheText(st, e.frist)}</i></div><div class="olief">${esc(roh?.text ?? '')}</div><div class="oknoepfe">${(roh?.optionen ?? []).map((o, i) => `<button class="${i === 0 ? 'gruen' : ''}" data-a="entscheiden" data-v="${e.id}" data-o="${o.id}">${esc(o.label)}</button>`).join('')}</div></div>`;
+      h += `<div class="q-buch q-vorlage"><div class="q-buch-kopf"><span>Sitzungsvorlage</span><b>Frist ${wocheText(st, e.frist)}</b></div><div class="q-zeile"><span class="q-name"><b>${esc(e.titel)}</b><small>${esc(roh?.text ?? '')}</small></span></div><div class="oknoepfe" style="padding:0 14px 12px">${(roh?.optionen ?? []).map((o, i) => `<button class="${i === 0 ? 'gruen' : ''}" data-a="entscheiden" data-v="${e.id}" data-o="${o.id}">${esc(o.label)}</button>`).join('')}</div></div>`;
     }
-    h += '<div class="vgitter">';
-    for (const r of u.ressorts) {
+    const platz = (r) => {
       const p = r.person;
-      h += `<button class="vkarte ${p ? '' : 'leer'}" data-a="profil" data-v="${r.id}"><span class="vbild">${portraet(p?.portraet, 64)}</span><span class="vtext"><b>${r.kurz}</b><small>${esc(r.titel)}</small>${p ? P(`r:${r.id}:name`, p.name, 'em') : '<em class="frei">unbesetzt</em>'}</span>`;
-      if (p) h += `<span class="vmini"><span title="Führung"><i style="width:${p.fuehrung}%"></i></span><span title="Fachwissen"><i style="width:${p.fachwissen}%"></i></span><span title="Loyalität"><i style="width:${p.loyalitaet}%"></i></span></span><span class="ampel a-${r.risikoAmpel}" title="Abwerberisiko ${RISIKO[r.risikoAmpel]}"></span>`;
-      else h += '<span class="chip warn">einstellen</span>';
-      h += '</button>';
-    }
-    h += '</div><div class="legende">Balken: Führung, Fachwissen, Loyalität · Punkt: Abwerberisiko</div>';
+      let x = `<button class="vkarte q-platz ${p ? '' : 'leer'}" data-a="profil" data-v="${r.id}"><span class="vbild">${p ? portraet(p.portraet, 56) : '<span class="q-stuhl" aria-hidden="true"></span>'}</span><span class="vtext"><b>${r.kurz}</b><small title="${esc(r.titel)}">${esc(RESSORT_KURZ[r.id] ?? r.titel)}</small>${p ? P(`r:${r.id}:name`, p.name, 'em') : '<em class="frei">Platz frei, einstellen</em>'}</span>`;
+      if (p) x += `<span class="vmini" aria-label="Führung ${p.fuehrung}, Fachwissen ${p.fachwissen}, Loyalität ${p.loyalitaet}"><span><i style="width:${p.fuehrung}%"></i></span><span><i style="width:${p.fachwissen}%"></i></span><span><i style="width:${p.loyalitaet}%"></i></span></span><span class="ampel a-${r.risikoAmpel}" title="Abwerberisiko ${RISIKO[r.risikoAmpel]}"></span>`;
+      return x + '</button>';
+    };
+    const links = u.ressorts.filter((_, i) => i % 2 === 0), rechts = u.ressorts.filter((_, i) => i % 2 === 1);
+    h += `<div class="q-buch"><div class="q-buch-kopf"><span>Sitzungstisch</span><b>Platz antippen</b></div><div class="q-tisch"><div class="q-seite">${links.map(platz).join('')}</div><div class="q-tafel" aria-hidden="true"></div><div class="q-seite">${rechts.map(platz).join('')}</div></div>
+      <div class="legende" style="padding:0 14px 10px">Balken: Führung, Fachwissen, Loyalität · Punkt: Abwerberisiko</div></div>`;
     const ls = u.letzteSitzung;
-    if (ls) {
-      h += `<div class="karte"><div class="khead">Letzte Vorstandssitzung<small>${wocheText(st, ls.woche)}</small></div>`;
-      for (const b of ls.berichte) h += `<div class="zeile"><span class="was"><b>${E.RESSORT_INFO?.[b.ressort]?.kurz ?? b.ressort}</b>${b.name ? ` <i>${esc(b.name)}</i>` : ''}<em class="wirk">${esc(b.text)}</em></span></div>`;
-      if (ls.thema) h += `<div class="zeile"><span class="was"><b>Beschluss</b> <i>${esc(ls.thema.titel)}</i><em>${esc(ls.thema.ergebnis ?? 'offen')}</em></span></div>`;
-      h += '</div>';
+    h += '<div class="q-buch"><div class="q-buch-kopf"><span>Letzte Sitzung</span><b>' + (ls ? wocheText(st, ls.woche) : '') + '</b></div>';
+    if (!ls) h += '<div class="q-leer"><b>Noch keine Sitzung.</b>Der Vorstand tagt einmal im Quartal.</div>';
+    else {
+      for (const b of ls.berichte) h += `<div class="q-zeile"><span class="q-name">${E.RESSORT_INFO?.[b.ressort]?.kurz ?? b.ressort}${b.name ? ` · ${esc(b.name)}` : ''}<small>${esc(b.text)}</small></span></div>`;
+      if (ls.thema) h += `<div class="q-zeile"><span class="q-name">Beschluss: ${esc(ls.thema.titel)}<small>${esc(ls.thema.ergebnis ?? 'offen')}</small></span></div>`;
     }
+    h += '</div>';
     for (const b of u.boosts) h += `<div class="olief">${esc(b.text)} wirkt bis ${wocheText(st, b.bis)}</div>`;
+    h += '</div>';
     return { titel: 'Vorstand', unter: `Du bist CEO · ${u.besetzt} von ${u.ressorts.length} Ressorts besetzt · KW ${kwVon(st.woche)}`, html: h };
   }
 
@@ -169,7 +178,7 @@ export function vorstandModul(ctx) {
   function zeigen(scrollHalten = false) {
     const sc = document.getElementById('pinhalt').scrollTop;
     const { r } = rendern();
-    ctx.panel(r.titel, r.unter, r.html, 'gross');
+    ctx.panel(r.titel, r.unter, bereich('zentrale') + '<i class="q31-marke" hidden></i>' + r.html, 'gross'); // Q31
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = scrollHalten ? sc : 0;
     if (ui.seite === 'einstellen') karussellBinden('kandidaten', ui.k, (i) => { if (!ui.aktiv) return; ui.k = i; zeigen(true); });
