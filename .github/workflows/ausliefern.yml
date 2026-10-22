@@ -1,0 +1,24 @@
+# Build-Zug außer der Reihe: startet den EAS-Workflow app/.eas/workflows/ausliefern.yml.
+# Nur von Hand (workflow_dispatch), kein push-Trigger. Braucht das Repo-Secret EXPO_TOKEN.
+name: Ausliefern (EAS, von Hand)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  eas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: EAS-Workflow starten
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: npx eas-cli@latest workflow:run .eas/workflows/ausliefern.yml --non-interactive
