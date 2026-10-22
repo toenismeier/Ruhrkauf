@@ -1,5 +1,5 @@
 import { neuesSpiel, wocheAbspielen, fuehreAus, portfolio, hqUebersicht, ABTEILUNGEN, WG_DEF } from '../src';
-import { standort, sollFte } from '../src/hq';
+import { standort } from '../src/hq';
 import type { AbteilungId, Stufe } from '../src';
 import type { GameState } from '../src';
 import { mio } from '../src/util';
@@ -46,13 +46,9 @@ export function botWoche(s: GameState, log = false): void {
   if (w === 5) tu({ typ: 'tarif', ziel: 'sanierung', garantieWochen: 52 });
   if (w % 52 === 44) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.2 });
   if (w % 52 === 2) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.1 });
-  if (process.env.D_HQ && w >= 13 && w % 13 === 0) {
-    for (const a of s.hq.abteilungen) if (Math.round(sollFte(s, a.id, a.stufe)) < a.fte * 0.97)
-      tu({ typ: 'abteilungStufe', abteilung: a.id, stufe: a.stufe });
-  }
   if (w % 13 === 0) { const q = s.quartale[s.quartale.length - 1]; if (q) tu({ typ: 'plan', ebitda: q.planStandard }); }
   for (const a of s.angebote.filter((x) => x.status === 'offen')) {
-    if (a.typ === 'untermiete' || a.typ === 'paket' || (a.typ === 'stadt' && !process.env.D_NOSTADT)) tu({ typ: 'angebotAnnehmen', angebot: a.id });
+    if (a.typ === 'untermiete' || a.typ === 'paket' || a.typ === 'stadt') tu({ typ: 'angebotAnnehmen', angebot: a.id });
   }
   einkaufStandard(s);
 }
@@ -235,7 +231,7 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
     // Zusätzlicher HQ-Abbau nur, wenn die Barliquidität samt Linie
     // mindestens fünf Wochenumsätze deckt; Bot T hat bereits 12 % reduziert.
     const wochenUmsatz = Object.values(s.basisUmsatz).reduce((sum, u) => sum + (u ?? 0), 0);
-    if (!process.env.D_NOZ && zentralePauschal > 0 && freieLiquiditaet(s) >= 5 * wochenUmsatz)
+    if (zentralePauschal > 0 && freieLiquiditaet(s) >= 5 * wochenUmsatz)
       tu({ typ: 'zentrale', prozent: zentralePauschal });
     // Die Warensteuerung von Bot T bleibt erhalten: pauschale Kürzungen
     // von 15 % erzeugten Fehlmengen und machten die Schließungen unprofitabel.
@@ -250,19 +246,18 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
     const pool = s.haeuser.filter((h) => !h.nurDaten && h.klasse !== 'premium' && h.format !== 'outlet');
     const ziel = Math.round(pool.length * REGULAER_SCHLIESSUNGSQUOTE);
     const inArbeit = pool.filter((h) => h.status !== 'offen').length;
-    // Entscheidung nach dem Ergebnis der letzten 26 Wochen, nicht nach einer
-    // einzelnen (saisonal schwachen) Woche: sonst schließt Bot D im Winter
-    // Häuser, die übers Jahr Geld verdienen.
+    // Entscheidung nach dem Filial-EBITDA der letzten 26 Wochen, nicht nach einer
+    // einzelnen (saisonal schwachen) Woche: sonst schließt Bot D im Winter Häuser,
+    // die übers Jahr Geld verdienen (mittel Jahr 5: 4,10 % statt 4,79 % EBITDA-Quote).
     const quote26 = (h: (typeof pool)[number]) => {
       const v = (h.verlauf ?? []).slice(-26);
       const u = v.reduce((a, x) => a + x.umsatz, 0);
       return v.length >= 26 && u > 0 ? v.reduce((a, x) => a + x.db, 0) / u : 0;
     };
-    const verlustIds = new Set(pool.filter((h) => process.env.D_ROLL ? quote26(h) < -0.02 : (h.kpi?.guv?.ebitda ?? 0) < 0).map((h) => h.id));
+    const verlustIds = new Set(pool.filter((h) => quote26(h) < -0.02).map((h) => h.id));
     const p = aktivesPortfolio(s)
-      .filter((x) => verlustIds.has(x.id) && (process.env.D_ROLL || x.db < 0) && x.umsatz > 0 && (!process.env.D_STRENG || x.db / x.umsatz < -0.02))
+      .filter((x) => verlustIds.has(x.id) && x.umsatz > 0)
       .sort((a, b) => a.db / a.umsatz - b.db / b.umsatz);
-    if (process.env.D_NOCLOSE) p.length = 0;
     let budget = schliessungsBudgetBotD(s).budget;
     let beauftragt = 0;
     for (const x of p) {
@@ -276,18 +271,15 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
         beauftragt++;
       }
     }
-    if (w === 4 && !process.env.D_NOMIETE) {
+    if (w === 4) {
       for (const x of aktivesPortfolio(s).filter((x) => x.mietquote > 0.12))
         tu({ typ: 'mieteVerhandeln', haus: x.id, reduktion: 0.15 });
       // Zusätzliche Abfindungen für Filialpersonal erst bei gesicherter
       // Liquidität; Bot T erreicht die Personaleinsparung bereits über O04.
     }
   }
-  if (!process.env.D_NOAUSH) {
-  if (w === 4) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.16 });
-  if (w % 52 === 44) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.22 });
-  if (w % 52 === 2 && w > 4) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.16 });
-  }
+  // Aushilfenquote wie Bot T (10 % ab KW 9). Die frühere eigene Staffel 16/22 %
+  // senkte die Kaufquote stärker, als sie Personalkosten sparte.
   if (w % 13 === 0) { const q = s.quartale[s.quartale.length - 1]; if (q) tu({ typ: 'plan', ebitda: q.planStandard }); }
   for (const a of s.angebote.filter((x) => x.status === 'offen')) {
     if (a.typ === 'untermiete' || a.typ === 'paket' || a.typ === 'stadt') tu({ typ: 'angebotAnnehmen', angebot: a.id });
