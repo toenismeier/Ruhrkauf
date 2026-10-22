@@ -27,7 +27,8 @@ describe('Q21: Warenhauslagen pro Stadt', () => {
   test('Premiumhäuser behalten ihre 1a-Lage, normale Städte ihren Innenstadtanker', () => {
     for (const stadt of new Set(spiel.haeuser.filter((h) => h.format === 'warenhaus').map((h) => h.stadt))) {
       const alle = spiel.haeuser.filter((h) => h.format === 'warenhaus' && h.stadt === stadt);
-      expect(alle.filter((h) => h.lage === '1a')).toHaveLength(1);
+      // Q08: Berlin besitzt zwei selbständige Premium-1a-Lagen.
+      expect(alle.filter((h) => h.lage === '1a')).toHaveLength(Math.max(1, alle.filter((h) => h.klasse === 'premium').length));
       expect(alle.filter((h) => h.klasse === 'premium').every((h) => h.lage === '1a')).toBe(true);
     }
   });
