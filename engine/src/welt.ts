@@ -6,7 +6,7 @@ import {
 import type { Cluster, Flaeche, Format, GameState, GruppeId, Haus, Kohorte, Lage, Region } from './types';
 import { initialisierePlanung } from './planung';
 import { chance, clamp, eur, ganzZwischen, waehle, zwischen, type RngHalter } from './util';
-import { erzeugeHq, hqAktualisiere, neueHqAngebote } from './hq';
+import { erzeugeHq, hqAktualisiere, neueHqAngebote, reiseIndex } from './hq';
 import { erzeugeEinkauf, initialisiereEinkauf } from './einkauf';
 import { erzeugeEigenmarken } from './eigenmarken';
 import { erzeugeVorstand, vorstandKostenWoche } from './vorstand';
@@ -26,6 +26,7 @@ import { initialisiereIt } from './it';
 // O07 Haus
 import { initialisiereHausbetrieb } from './haus';
 import { initialisiereUmbau } from './umbau';
+import { initialisiereFormate } from './formate';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -39,6 +40,8 @@ export interface Szenario {
   kreditlinie: number;
   firma: string;
   sportName: string;
+  schwesterName?: string;
+  outletName?: string;
   startJahr: number;
   /** Schwierigkeit (Standard mittel = Kalibrierung). */
   schwierigkeit?: SchwierigkeitId;
@@ -162,6 +165,8 @@ export const STANDARD_SZENARIO: Szenario = {
   kreditlinie: 300_000_000,
   firma: 'Hartwig & Brehm Warenhaus AG',
   sportName: 'Hartwig Sport',
+  schwesterName: 'Volkskauf',
+  outletName: 'FUNDUS',
   startJahr: 2027,
 };
 
@@ -228,6 +233,8 @@ function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: 
     // Vollständiger, flächengewichteter Warenhausmix als Stammdaten.
     // Keine RNG-Aufrufe: Volkskauf verändert nicht die übrigen Standortparameter.
     const gruppen = gruppenFuer(f);
+    // Im Volkskauf bleibt das Untergeschoss Lager; kein Food-Verkauf.
+    const verkaufsEtagen = etagen.filter(e=>e>=0);
     const summeAnteile = gruppen.reduce((sum, g) => sum + GRUPPEN[g].anteilFlaeche, 0);
     let verbleibend = vkQm;
     return gruppen.map((g, i) => {
@@ -235,7 +242,7 @@ function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: 
         ? verbleibend
         : Math.max(1, Math.round(vkQm * GRUPPEN[g].anteilFlaeche / summeAnteile));
       verbleibend -= qm;
-      return { id: `${id}-f${i + 1}`, etage: etagen[i % etagen.length], qm, konzept: 'eigen' as const, gruppe: g };
+      return { id: `${id}-f${i + 1}`, etage: verkaufsEtagen[i % verkaufsEtagen.length] ?? 0, qm, konzept: 'eigen' as const, gruppe: g };
     });
   }
   if (f === 'outlet') {
@@ -245,7 +252,7 @@ function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: 
     const sortimente = ['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty'] as const;
     return sortimente.map((gruppe, i) => ({
       id: `${id}-f${i + 1}`, etage: etagen[i % etagen.length],
-      qm: Math.round(vkQm / sortimente.length), konzept: 'eigen' as const,
+      qm: Math.round(vkQm / sortimente.length), konzept: 'offprice' as const,
       gruppe: gruppe as GruppeId,
     }));
   }
@@ -364,7 +371,7 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
   const substanz = f === 'outlet' ? clamp(substanzBasis, 40, 85) : substanzBasis;
   const zusatz = waehle(h, STANDORT_ZUSATZ[lage]);
   const premiumName = PREMIUM_HAEUSER.find((p) => p.schluessel === option.premiumSchluessel)?.name;
-  const formatName = f === 'schwester' ? 'Volkskauf' : f === 'outlet' ? 'FUNDUS' : f === 'warenhaus' ? sz.firma.split(' ')[0] : sz.sportName;
+  const formatName = f === 'schwester' ? (sz.schwesterName ?? 'Volkskauf') : f === 'outlet' ? (sz.outletName ?? 'FUNDUS') : f === 'warenhaus' ? sz.firma.split(' ')[0] : sz.sportName;
   return {
     id,
     name: premiumName ?? (f === 'outlet' ? `${formatName} ${stadt}${nr > 1 ? ' ' + zusatz : ''}` : `${formatName} ${stadt}${nr > 1 ? ' ' + zusatz : lage === '1a' ? '' : ' ' + zusatz}`),
@@ -554,7 +561,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     rng: h.rng,
     woche: 0,
     startJahr: sz.startJahr,
-    firma: { name: sz.firma, sportName: sz.sportName },
+    firma: { name: sz.firma, sportName: sz.sportName, schwesterName: sz.schwesterName ?? 'Volkskauf', outletName: sz.outletName ?? 'FUNDUS' },
     phase: 'regulaer',
     insolvenzenGesamt: 0,
     erfolge: {},
@@ -645,6 +652,12 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisierePersonaleinsatz(s);
   // O05 Ware
   initialisiereWare(s);
+  // Die Hartwig-Referenz samt HQ und Einkaufsbestand wurde bereits kalibriert.
+  initialisiereFormate(s);
+  // Volkskauf/FUNDUS sind jetzt aktiv: Erreichbarkeit der Zentrale auf das ganze Netz
+  // neu beziehen (Startwirkung bleibt exakt 1), Zentralkosten neu rechnen.
+  s.hq.reiseBasis = reiseIndex(s, s.hq.sitz);
+  hqAktualisiere(s);
   return s;
 }
 
