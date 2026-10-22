@@ -2,8 +2,8 @@
    Aktenregal). Nur --ui-*-Tokens, damit die dunklen Q30-Tokens ohne Änderung greifen. Keine Schatten, keine Verläufe,
    keine Symbole in Kreisen, Schrift ab 12 px. */
 .q31 { --q-text: var(--ui-text, #242424); --q-leise: var(--ui-muted, #62666a); --q-linie: var(--ui-border, #e2e1dd);
-  --q-flaeche: var(--ui-surface, #fff); --q-grund: var(--ui-bg, #f5f4f1); --q-akzent: var(--ui-brand, #b32632);
-  --q-plus: var(--ui-positive, #247153); --q-minus: var(--ui-negative, #a52d38); color: var(--q-text); }
+  --q-flaeche: var(--ui-surface, #fff); --q-grund: var(--ui-bg, #f5f4f1); --q-akzent: var(--hk-akzent, var(--ui-brand, #b32632));
+  --q-plus: var(--hk-gut, #247153); --q-minus: var(--hk-schlecht, #a52d38); color: var(--q-text); }
 .q31 .zahl, .q31 .q-wert { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* Großkennzahl mit Abweichung (Coffee 08, 12): Beschriftung in Versalien, Zahl groß, Abweichung darunter */
@@ -83,3 +83,22 @@
 .q-muster .q-name small { display: block; font-size: 12px; line-height: 16px; color: var(--q-leise); }
 .q-muster .q-wert { text-align: right; font-size: 15px; } .q-muster .q-wert small { display: block; font-size: 12px; color: var(--q-leise); }
 .q-muster.q-frei .q-wert { font-size: 22px; color: var(--q-akzent); }
+
+/* Q31-Panels (Marker .q31-marke): Altklassen auf mindestens 12 px, Beschriftungen umbrechen statt abschneiden */
+#panel:has(.q31-marke) :is(.legende, .olief, .rfuss, .kz span, small, .zahl, .spaltenwahl span, .spaltenwahl b, .lname i, .chip, .mzeile span, .q17-hinweis, .q17-kopf small, .q24-anzahl):not(.q31 *) { font-size: 12px; }
+#panel:has(.q31-marke) :is(.kz b, .chipk, .seg button, .tab, label, .owerte span):not(.q31 *) { font-size: max(12px, 0.95em); }
+#panel:has(.q31-marke) :is(.verkauf small, .preis small, .donut small, .pname small, .sternzahl, .kats i, .seg i) { font-size: 12px; }
+#panel:has(.q31-marke) :is(.lname, .kz span, .kz b, .zeile .was, .was b, .was i) { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+#panel:has(.q31-marke) .lzeile { height: auto; min-height: 44px; }
+#panel:has(.q31-marke) .papierkorb { background: transparent; border: 1px solid var(--ui-border); border-radius: 10px; width: 44px; height: 44px; color: var(--ui-text); }
+
+/* Auswahlchips (Spaltenwahl, Markenwahl) im dunklen Look: Kontur, aktiv in Hartwig-Rot */
+#panel:has(.q31-marke) .chipk { background: transparent; color: var(--ui-text); border: 1px solid var(--ui-border); box-shadow: none; min-height: 44px; }
+#panel:has(.q31-marke) .chipk.an { background: var(--hk-akzent, #d23c32); color: #fff; border-color: #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell, #ef7a6f); }
+#panel:has(.q31-marke) .chipk b { background: transparent; color: inherit; }
+#panel:has(.q31-marke) :is(.q24-detailsknopf, .q17-linienknopf, .q24-katalogknopf) { background: transparent; color: var(--ui-text); border: 1px solid var(--ui-border); min-height: 44px; border-radius: 10px; }
+#panel:has(.q31-marke) .karte.produkt, #panel:has(.q31-marke) .pbild { background: var(--ui-surface); }
+.q31 :is(.spaltenwahl span, .spaltenwahl b, .legende) { font-size: 12px; }
+#panel:has(.q31-marke) .stepper i { font-size: 12px; }
+#panel:has(.q31-marke) input[type=range] { min-height: 44px; }
+.q31 .q-stepzeile select, .q31 .q-stepzeile input { max-width: 60%; }

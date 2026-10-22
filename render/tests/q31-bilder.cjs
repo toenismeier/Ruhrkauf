@@ -31,6 +31,7 @@ const EXTRA = {
   p.on('pageerror', (e) => { fehler.push(e.message); console.log('FEHLER', e.message); });
   await p.goto('file://' + path.join(__dirname, '..', 'spiel.html') + '?stadt=Essen&seed=1&leben=aus&ohne-animation=1', { waitUntil: 'load', timeout: 0 });
   await p.waitForFunction('window.bereit === true', null, { timeout: 0, polling: 500 });
+  await p.addScriptTag({ path: path.join(__dirname, '..', 'src', 'ui', 'stilpruefung.js') });
   await p.evaluate(() => { window.spiel.schliessePanel(); window.spiel.neuesSpiel(1, 'Essen'); for (let i = 0; i < 8; i++) window.spiel.woche(false); window.spiel.fokusHaeuser(); });
   const ruhig = async () => { await p.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))); await p.waitForTimeout(250); };
   const bild = async (name) => { await ruhig(); await p.evaluate(() => { const m = document.getElementById('meldung'); if (m) m.className = ''; document.querySelectorAll('.erfolge-toast-bild').forEach((x) => { const t = x.parentElement; if (t) t.style.display = 'none'; }); /* Banner-Überdeckung ist an Q30 gemeldet */ }); const f = path.join(ziel, name); await p.screenshot({ path: f }); console.log('gespeichert:', f); };
@@ -40,6 +41,9 @@ const EXTRA = {
       return [...new Set((t.match(/\b(undefined|null|NaN)\b|hc-[a-zäöü]+-\d+|premium-flagships/g) || []))];
     });
     if (treffer.length) { fehler.push(`${basis}: ${treffer.join(', ')}`); console.log('FEHLER Text', basis, treffer.join(', ')); }
+    // Stilprüfung der Q30-Bausteine (nur Panels im dunklen Look)
+    const stil = await p.evaluate(() => (document.querySelector('#panel .hk-bereich') ? window.hartwigStilpruefung('#panel') : null));
+    if (stil?.length) { fehler.push(`${basis}: ${stil.length} Stilverstöße`); console.log('STIL', basis, stil.slice(0, 10).join(' | ')); }
   };
   const seiten = async (basis) => {
     await textPruefen(basis);

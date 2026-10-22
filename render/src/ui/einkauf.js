@@ -4,6 +4,7 @@
 // (einkaufUebersicht, wgDetail, freigaben). Jeder angezeigte Wert trägt data-p; pruefe() rechnet ihn aus einer frischen
 // Abfrage nach (0 Abweichungen erwartet).
 import { geld, fmt, pz, dez, kwVon, esc } from './format.js';
+import { bereich } from './komponenten.js';
 import { eigenmarkenSeite, eigenmarkenAktion, eigenmarkenErwartet, neuerEntwurf } from './eigenmarken.js';
 // O05 Ware
 import { warenSeite, warenAktion, wareErwartet } from './ware.js';
@@ -214,7 +215,7 @@ export function einkaufModul(ctx) {
   function zeigen(scrollHalten = false) {
     const sc = document.getElementById('pinhalt').scrollTop;
     const r = ui.seite === 'wg' ? wgSeite() : ui.seite === 'freigaben' ? freigabenSeite() : ui.seite === 'eigenmarken' || ui.seite === 'gruenden' ? eigenmarkenSeite(ctx, ui, tabs()) : ['merchandise','allokation','reduzierungKalender'].includes(ui.seite) ? warenSeite(ctx, ui, tabs()) : uebersicht();
-    ctx.panel(r.titel, r.unter, r.html, 'gross');
+    ctx.panel(r.titel, r.unter, bereich('zentrale') + '<i class="q31-marke" hidden></i>' + r.html, 'gross'); // Q31: dunkler Zentrale-Look (Q30-Bausteine)
     ui.aktiv = true;
     if (scrollHalten) document.getElementById('pinhalt').scrollTop = sc;
     // Aktiven Reiter in der wischbaren Leiste sichtbar halten, ohne den Panelinhalt zu verschieben.

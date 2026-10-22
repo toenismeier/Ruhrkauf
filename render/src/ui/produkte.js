@@ -5,6 +5,7 @@
 // Daten: produkte, produktKatalog, trendbericht, produktVorschau; Aktionen produktEntwickeln, produktPreis,
 // produktAuslisten, produktSortiment. Prüfung wie im Vorstand.
 import { geld, fmt, pz, dez, kwVon, esc } from './format.js';
+import { bereich } from './komponenten.js';
 import { werteSammler, vergleiche, schalter, segment, regler, stepper, kz, wocheText, karussell, karussellBinden } from './vorstand.js';
 import * as PB from '../kit/produktbild.js';
 import { passendeTypen, fachSegmente, zielChips, sortimentBedienung, gruppeTrend, teamAufschluesselung } from './produkte-q24.js';
@@ -292,7 +293,7 @@ export function produkteModul(ctx) {
   function zeigen(scrollHalten = false) {
     const sc = document.getElementById('pinhalt').scrollTop;
     const { r } = rendern();
-    ctx.panel(r.titel, r.unter, r.html, 'gross');
+    ctx.panel(r.titel, r.unter, bereich('zentrale') + '<i class="q31-marke" hidden></i>' + r.html, 'gross'); // Q31: dunkler Zentrale-Look (Q30-Bausteine)
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = scrollHalten ? sc : 0;
     if (ui.seite === 'liste') karussellBinden('produkte', ui.k, (i) => { if (!ui.aktiv) return; ui.k = i; ui.auslisten = null; zeigen(true); });
