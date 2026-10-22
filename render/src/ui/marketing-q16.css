@@ -1,3 +1,4 @@
+@import url('./management.css');
 
 /* Q16, ausschließlich Marketing: Q14-Tokens mit rückwärtskompatiblem Fallback. */
 .mk-stadtwahl,.mk-marktkarte,.mk-kanalkarte,.mk-hinweis { font-family:inherit; }

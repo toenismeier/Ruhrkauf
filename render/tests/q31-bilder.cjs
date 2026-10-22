@@ -13,6 +13,14 @@ const PANELS = [
   ['app-oeffnen', 'spielstaende'],
 ];
 
+// Zusatzansichten je Panel (Detailseiten, schlechte Tage). Jede Funktion läuft im Browser.
+const EXTRA = {
+  einkauf: [
+    ['wg', () => window.spiel.einkauf.oeffne('wg', 'damen.kleider')],
+    ['freigaben-leer', () => { const S = window.spiel.s; window.spiel.E.fuehreAus(S, { typ: 'sammelfreigabe', filter: {} }); window.spiel.einkauf.oeffne('freigaben'); }],
+  ],
+};
+
 (async () => {
   fs.mkdirSync(ziel, { recursive: true });
   const opt = { headless: true, args: ['--headless=new', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] };
@@ -25,7 +33,7 @@ const PANELS = [
   await p.waitForFunction('window.bereit === true', null, { timeout: 0, polling: 500 });
   await p.evaluate(() => { window.spiel.schliessePanel(); window.spiel.neuesSpiel(1, 'Essen'); for (let i = 0; i < 8; i++) window.spiel.woche(false); window.spiel.fokusHaeuser(); });
   const ruhig = async () => { await p.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))); await p.waitForTimeout(250); };
-  const bild = async (name) => { await ruhig(); await p.evaluate(() => { const m = document.getElementById('meldung'); if (m) m.className = ''; }); const f = path.join(ziel, name); await p.screenshot({ path: f }); console.log('gespeichert:', f); };
+  const bild = async (name) => { await ruhig(); await p.evaluate(() => { const m = document.getElementById('meldung'); if (m) m.className = ''; document.querySelectorAll('.erfolge-toast-bild').forEach((x) => { const t = x.parentElement; if (t) t.hidden = true; }); /* Banner-Überdeckung ist an Q30 gemeldet */ }); const f = path.join(ziel, name); await p.screenshot({ path: f }); console.log('gespeichert:', f); };
   const textPruefen = async (basis) => {
     const treffer = await p.evaluate(() => {
       const t = document.getElementById('panel').innerText;
@@ -57,6 +65,10 @@ const PANELS = [
       if (!ok) continue;
       await p.waitForTimeout(200);
       await seiten(`${name}-r${r}`);
+    }
+    for (const [x, f] of EXTRA[name] ?? []) {
+      await p.evaluate(f); await p.waitForTimeout(250);
+      await seiten(`${name}-x-${x}`);
     }
   }
   await b.close();

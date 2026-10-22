@@ -1,0 +1,73 @@
+/* Q31 Management-Panels: Fachelemente (Orderbuch, Warenbuch, Kollektionstafel, Werbeplan, Planblatt, Sitzungstisch,
+   Aktenregal). Nur --ui-*-Tokens, damit die dunklen Q30-Tokens ohne Änderung greifen. Keine Schatten, keine Verläufe,
+   keine Symbole in Kreisen, Schrift ab 12 px. */
+.q31 { --q-text: var(--ui-text, #242424); --q-leise: var(--ui-muted, #62666a); --q-linie: var(--ui-border, #e2e1dd);
+  --q-flaeche: var(--ui-surface, #fff); --q-grund: var(--ui-bg, #f5f4f1); --q-akzent: var(--ui-brand, #b32632);
+  --q-plus: var(--ui-positive, #247153); --q-minus: var(--ui-negative, #a52d38); color: var(--q-text); }
+.q31 .zahl, .q31 .q-wert { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Großkennzahl mit Abweichung (Coffee 08, 12): Beschriftung in Versalien, Zahl groß, Abweichung darunter */
+.q-gross { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: end; padding: 14px 4px 10px; }
+.q-gross .q-label { grid-column: 1 / -1; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--q-leise); }
+.q-gross .q-haupt { font-size: 34px; line-height: 38px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.q-gross .q-neben { font-size: 14px; color: var(--q-leise); text-align: right; line-height: 18px; }
+.q-gross .q-neben b { display: block; color: var(--q-text); font-size: 16px; font-weight: 600; }
+.q-befund { font-size: 15px; line-height: 21px; padding: 2px 4px 12px; }
+.q-befund b { font-weight: 600; }
+.q-minus { color: var(--q-minus) !important; } .q-plus { color: var(--q-plus) !important; }
+
+/* Hauptaktion: eine volle Zeile, 48 px */
+.q-haupt-akt { display: block; width: 100%; min-height: 48px; border: 0; border-radius: var(--ui-radius, 10px); background: var(--q-akzent);
+  color: #fff; font: inherit; font-size: 16px; font-weight: 600; padding: 0 14px; margin: 0 0 12px; }
+.q-haupt-akt span { font-variant-numeric: tabular-nums; }
+.q-neben-akt { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid var(--q-linie); border-radius: var(--ui-radius, 10px);
+  background: transparent; color: var(--q-text); font: inherit; font-size: 14px; }
+
+/* Buch: linierte Seite mit Summenstrich (Orderbuch, Warenbuch, Werbeplan, Planblatt) */
+.q-buch { background: var(--q-flaeche); border: 1px solid var(--q-linie); border-radius: var(--ui-radius, 10px); margin: 0 0 12px; overflow: hidden; }
+.q-buch-kopf { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 12px 14px 8px; font-size: 12px;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--q-leise); }
+.q-buch-kopf b { font-size: 12px; font-weight: 600; color: var(--q-leise); }
+.q-zeile { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 14px; border-top: 1px solid var(--q-linie); align-items: center; }
+.q-zeile .q-name { font-size: 15px; line-height: 20px; min-width: 0; overflow-wrap: anywhere; }
+.q-zeile .q-name small { display: block; font-size: 12px; line-height: 16px; color: var(--q-leise); }
+.q-zeile .q-wert { font-size: 15px; text-align: right; }
+.q-zeile .q-wert small { display: block; font-size: 12px; color: var(--q-leise); }
+.q-zeile .q-knoepfe { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; padding-top: 6px; }
+.q-zeile .q-knoepfe button { min-height: 44px; min-width: 44px; padding: 0 12px; border-radius: var(--ui-radius, 10px); font: inherit; font-size: 14px;
+  border: 1px solid var(--q-linie); background: transparent; color: var(--q-text); }
+.q-zeile .q-knoepfe button.q-ja { border-color: var(--q-akzent); color: var(--q-akzent); font-weight: 600; }
+.q-summe { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 10px 14px 12px; border-top: 2px solid var(--q-text); font-weight: 600; font-size: 15px; }
+.q-summe .q-wert { text-align: right; }
+.q-leer { padding: 18px 14px; color: var(--q-leise); font-size: 15px; line-height: 21px; border-top: 1px solid var(--q-linie); }
+.q-leer b { display: block; color: var(--q-text); font-weight: 600; margin-bottom: 2px; }
+.q-mehr { display: block; width: 100%; min-height: 44px; border: 0; border-top: 1px solid var(--q-linie); background: transparent; color: var(--q-akzent); font: inherit; font-size: 15px; }
+
+/* Filterzeile: Segmentleisten kompakt nebeneinander */
+.q-filter { display: flex; gap: 8px; overflow-x: auto; padding: 0 0 10px; }
+.q-filter .seg { flex: none; margin: 0; }
+.q-filter select { flex: none; min-height: 44px; }
+
+/* Grenze und Stepper in einer Zeile */
+.q-stepzeile { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid var(--q-linie); }
+.q-stepzeile .q-name { font-size: 15px; } .q-stepzeile .q-name small { display: block; font-size: 12px; color: var(--q-leise); }
+.q-stepzeile .stepper { flex: none; }
+
+/* Orderbuch: eine Zeile je Order, Freigabe mit einem Tipp, Details nach Antippen */
+.q-zwischen { display: flex; justify-content: space-between; gap: 8px; padding: 10px 14px 6px; border-top: 1px solid var(--q-linie); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--q-leise); font-variant-numeric: tabular-nums; }
+.q-zeile.q-order { grid-template-columns: minmax(0, 1fr) auto 52px; padding: 6px 10px 6px 14px; }
+.q-zeilenknopf { all: unset; display: block; min-height: 44px; padding: 3px 0; cursor: pointer; font-size: 15px; line-height: 20px; overflow-wrap: anywhere; }
+.q-zeilenknopf small { display: block; font-size: 12px; line-height: 16px; color: var(--q-leise); }
+.q-haken { width: 52px; min-height: 44px; border: 1px solid var(--q-akzent); border-radius: var(--ui-radius, 10px); background: transparent; color: var(--q-akzent); font: inherit; font-size: 14px; font-weight: 600; }
+.q-details { grid-column: 1 / -1; font-size: 13px; line-height: 18px; color: var(--q-leise); padding-top: 2px; }
+.q-details i { font-style: normal; color: var(--q-text); font-variant-numeric: tabular-nums; }
+.q-zeile.q-auf { background: var(--q-grund); }
+
+/* Warenbuch: Gesamtzeile unter Summenstrich */
+.q-warenbuch .lzeile.q-gesamt { border-top: 2px solid var(--q-text); font-weight: 600; cursor: default; }
+.q31 .spaltenwahl { margin-bottom: 8px; }
+.q-warenbuch .lzeile .lname { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; line-height: 18px; }
+.q-warenbuch .lzeile { min-height: 44px; height: auto; }
+.q-warenbuch .lname i, .q-warenbuch .lname i.em { font-size: 12px; }
+.q-warenbuch .lkopf button { font-size: 12px; min-height: 44px; }
+.q31 .q-wert i, .q31 .q-name i { font-style: normal; }
