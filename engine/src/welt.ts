@@ -5,6 +5,7 @@ import {
 } from './daten';
 import type { Cluster, Flaeche, Format, GameState, GruppeId, Haus, Kohorte, Lage, Region } from './types';
 import { initialisierePlanung } from './planung';
+import { erzeugeVorjahrHistorie } from './vertrieb';
 import { chance, clamp, eur, ganzZwischen, waehle, zwischen, type RngHalter } from './util';
 import { erzeugeHq, hqAktualisiere, neueHqAngebote, reiseIndex } from './hq';
 import { erzeugeEinkauf, initialisiereEinkauf } from './einkauf';
@@ -43,6 +44,8 @@ export interface Szenario {
   schwesterName?: string;
   outletName?: string;
   startJahr: number;
+  /** Q07: kalendergerechter Spieleinstieg, Jan/Apr/Jul/Okt. */
+  startMonat?: 1 | 4 | 7 | 10;
   /** Schwierigkeit (Standard mittel = Kalibrierung). */
   schwierigkeit?: SchwierigkeitId;
   /** Nur Nice-to-have: nicht gesetzt heißt unveränderte Standardpartie. */
@@ -648,10 +651,27 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   marktbeobachtungStart(s); // Q06: im Standard inaktiv, keine Zusatzkosten.
   // O03 IT: neutraler Ausgangszustand, keine Änderung am bestehenden Zufallsstrom.
   initialisiereIt(s);
-  // O06 Planung: Vorjahresbudget des Vorgängers (+3 % Umsatz).
-  initialisierePlanung(s);
-  // O07 Haus: erst nach der Weltgenerierung, ohne Zufall aus dem Haupt-RNG.
+  // Q07: nicht im Haupt-RNG ziehen; Simulation der historischen 52 Wochen vor dem Spiel.
+  const startMonat = ([1, 4, 7, 10] as number[]).includes(sz.startMonat ?? 1) ? (sz.startMonat ?? 1) as 1 | 4 | 7 | 10 : 1;
+  const startOffset = (startMonat - 1) / 3 * 13;
+  s.startMonat = startMonat;
+  s.spielStartWoche = startOffset;
+  s.woche = startOffset;
+  if (startOffset) {
+    // Geschützte Einlaufkohorten, Verbindlichkeiten und noch nicht gestartete Verträge
+    // ebenfalls verschieben: sonst wären sie bei Apr/Jul/Okt schon abgelaufen.
+    for (const h of s.haeuser) h.miete.bisWoche += startOffset;
+    for (const b of s.bestellungen) b.ankunft += startOffset;
+    for (const v of s.verbindlichkeiten) v.faellig += startOffset;
+    for (const a of s.angebote) { a.woche += startOffset; a.frist += startOffset; }
+    for (const e of s.entscheidungen) { e.woche += startOffset; e.frist += startOffset; }
+    for (const m of s.meldungen) m.woche += startOffset;
+  }
+  // O07: vor dem Vorjahr, damit Betriebskosten und Vergleichswerte konsistent sind.
   initialisiereHausbetrieb(s);
+  erzeugeVorjahrHistorie(s);
+  // O06: Vorjahresbudget verwendet den tatsächlichen historischen Verlauf.
+  initialisierePlanung(s);
   // O08 Umbau
   initialisiereUmbau(s);
   s.kapitalflussStartCash = s.cash;
@@ -661,6 +681,8 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisiereWare(s);
   // Die Hartwig-Referenz samt HQ und Einkaufsbestand wurde bereits kalibriert.
   initialisiereFormate(s);
+  // Q07: Vorjahr auch für die jetzt aktiven Volkskauf- und FUNDUS-Häuser.
+  erzeugeVorjahrHistorie(s, true);
   // Volkskauf/FUNDUS sind jetzt aktiv: Erreichbarkeit der Zentrale auf das ganze Netz
   // neu beziehen (Startwirkung bleibt exakt 1), Zentralkosten neu rechnen.
   s.hq.reiseBasis = reiseIndex(s, s.hq.sitz);

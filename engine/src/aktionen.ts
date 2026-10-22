@@ -45,7 +45,7 @@ import { testAktion, type TestAktion } from './testwerkzeuge';
 
 export type SpielerAktion =
   | { typ: 'filialProgramm'; programm: FilialProgrammId }
-  | { typ: 'schliessen'; haus: string }
+  | { typ: 'schliessen'; haus?: string; haeuser?: string[] }
   | { typ: 'altwareOutlet'; quote: number }
   | { typ: 'offpriceZukauf'; budget: number }
   | { typ: 'schwesterUmflaggen'; haus: string }
@@ -67,7 +67,7 @@ export type SpielerAktion =
   | { typ: 'kundenkarte' }
   | { typ: 'orderLevel'; gruppe: GruppeId | 'alle'; level: number }
   | { typ: 'vorkasse'; erlaubt: boolean }
-  | { typ: 'mieteVerhandeln'; haus: string; reduktion: number; tripleNet?: boolean }
+  | { typ: 'mieteVerhandeln'; haus?: string; haeuser?: string[]; reduktion: number; tripleNet?: boolean }
   | { typ: 'angebotVerhandeln'; angebot: string; haeuser: string[] }
   | { typ: 'angebotAnnehmen'; angebot: string }
   | { typ: 'angebotUebernehmen'; angebot: string; modus: 'outlet' | 'erweiterung' }
@@ -178,6 +178,21 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
     return ok('Die nächste Geschäftswoche kann beginnen.');
   }
   if (s.ende || s.phase === 'zerschlagen') return fehler('Das Spiel ist beendet.');
+  // Sammelaktionen rufen für jede ID ausschließlich den bestehenden Engine-Aktionspfad auf.
+  // Keine UI-eigene Mutation, doppelte IDs werden nur einmal angewendet.
+  if ((a.typ === 'schliessen' || a.typ === 'mieteVerhandeln') && a.haeuser) {
+    const ids = [...new Set(a.haeuser)];
+    if (!ids.length) return fehler('Keine Häuser ausgewählt.');
+    const ergebnisse = ids.map((id) => fuehreAus(s, a.typ === 'schliessen'
+      ? { typ: 'schliessen', haus: id }
+      : { typ: 'mieteVerhandeln', haus: id, reduktion: a.reduktion, tripleNet: a.tripleNet }));
+    const gelungen = ergebnisse.filter((e) => e.ok).length;
+    return { ok: gelungen > 0 && gelungen === ids.length,
+      text: `${gelungen} von ${ids.length} Häusern bearbeitet. ${ergebnisse.filter((e) => !e.ok).slice(0, 5).map((e) => e.text).join(' · ')}` };
+  }
+  if ((a.typ === 'schliessen' || a.typ === 'mieteVerhandeln') && !a.haus)
+    return fehler('Kein Haus angegeben.');
+
   const w = s.woche;
   const inso = s.phase === 'insolvenz';
   // O03 IT
@@ -255,7 +270,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
       return fehlerText ? fehler(fehlerText) : ok('Premium-Investition gestartet (26 Wochen).');
     }
     case 'schliessen': {
-      const h = haus(s, a.haus);
+      const h = haus(s, a.haus ?? '');
       if (!h) return fehler('Haus nicht gefunden.');
       const f = starteSchliessung(s, h);
       return f ? fehler(f) : ok(`Schließung von ${h.name} eingeleitet.`);
@@ -453,7 +468,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
       return ok(a.erlaubt ? 'Ware wird bei Bedarf gegen Vorkasse bezogen.' : 'Keine Vorkasse: Lieferungen über dem Limit entfallen.');
 
     case 'mieteVerhandeln': {
-      const h = haus(s, a.haus);
+      const h = haus(s, a.haus ?? '');
       if (!h || h.status !== 'offen') return fehler('Haus nicht offen.');
       if (h.miete.verhandeltWoche !== undefined && w - h.miete.verhandeltWoche < 26) return fehler('Mit diesem Vermieter wurde vor weniger als 26 Wochen verhandelt.');
       h.miete.verhandeltWoche = w;

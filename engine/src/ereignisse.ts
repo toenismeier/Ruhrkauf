@@ -12,7 +12,8 @@ import { zeitungInterviewAntwort } from './zeitung';
 import { konzernVerkaufAnbieten } from './spielende';
 import { formateZufall, formateZahl } from './formate';
 // O01 Organisation
-import { organisationVorlageEntscheidung } from './organisation';
+import { organisationVorlageEntscheidung, istAufgabeDelegiert, delegationsGrenze } from './organisation';
+import { mietvertragEmpfehlung } from './vertrieb';
 // O07 Haus
 import { loeseHausVorlage } from './haus';
 import { umbauProgrammEntscheiden } from './umbau';
@@ -165,6 +166,15 @@ function mietende(s: GameState, h: Haus): void {
     optionen: [{ id: 'verlaengern', label: 'Verlängern' }, { id: 'nachverhandeln', label: 'Nachverhandeln' }, { id: 'auslaufen', label: 'Auslaufen lassen und schließen' }],
     standard: 'verlaengern', daten: { haus: h.id, markt },
   });
+  // Q05: nur explizite Mietvertrags-Delegation, nur innerhalb der freigegebenen Grenze.
+  if (istAufgabeDelegiert(s, 'mietvertraege', 'immobilien') &&
+      Math.abs(markt - h.miete.mieteWoche) * 52 <= (delegationsGrenze(s, 'mietvertraege', 'immobilien') ?? Infinity)) {
+    const offen = s.entscheidungen[s.entscheidungen.length - 1];
+    if (offen?.typ === 'mietende' && offen.daten.haus === h.id) {
+      // loeseEntscheidung nimmt die Vorlage selbst aus der Liste.
+      loeseEntscheidung(s, offen.id, mietvertragEmpfehlung(h, markt));
+    }
+  }
 }
 
 function jahresgespraech(s: GameState): void {

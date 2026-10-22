@@ -268,7 +268,7 @@ function stelleKommentar(s: GameState, h: Haus, vergleich: 'vorjahr' | 'plan', d
   h.betrieb.kommentare.unshift({ woche: s.woche, abweichung: delta, vergleich, grund, wahrerGrund: wahr, massnahme, ...pruefung });
   h.betrieb.kommentare.length = Math.min(h.betrieb.kommentare.length, 26);
   // Im ersten Geschäftsjahr nur Kommentar gegen den Vorgängerplan, Maßnahmen wirken erst mit Vorjahresvergleich (Ausgangslage neutral).
-  if (vergleich !== 'vorjahr' && s.woche < 52) return;
+  if (s.woche - (s.spielStartWoche ?? 0) < 52) return; // Q07: frühe Vorjahreswerte dürfen die Ausgangswirtschaft nicht verändern.
   // Clusterleitung setzt ihre Routineempfehlung um. O01 kann hier die Qualität übersteuern.
   const organisation = (s as GameState & { organisation?: { hauscluster: { id:string; stelle:{ person?:{ qualitaet:number } } }[] } }).organisation;
   const qualitaet = clamp(organisation?.hauscluster.find(x => x.id === steuerungscluster(s,h))?.stelle.person?.qualitaet ?? h.clusterleitungQualitaet ?? 0.55, 0, 1);
@@ -369,7 +369,8 @@ export function hausAbschluss(s: GameState): void {
   if (!s.hausbetrieb || s.prognose || s.hausbetriebAbnahmeAus) return;
   for (const h of s.haeuser) {
     if (!istOffen(h) || !h.kpi || !h.betrieb) continue;
-    const b = h.betrieb, vorher = b.umsatzHistorie.find(x => x.woche === s.woche - 52);
+    const b = h.betrieb, vorher = b.umsatzHistorie.find(x => x.woche === s.woche - 52) ??
+      s.vorjahrHistorie?.[h.id]?.find(x => x.woche === s.woche - 52);
     // O06: Jahresphasing ist die führende Quelle; das optionale Feld ist ein Fallback.
     const geplant = (s as GameState & { planung?: { jahre: { jahr:number; phasing: Record<string,number[]> }[] } }).planung;
     const jahr=s.startJahr+Math.floor(s.woche/52);

@@ -47,7 +47,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q26 Meldungen und Speichern | `feat/q26-meldungen-speichern` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q08 Fünf Premiumhäuser | main | **gemergt 22.10.** (#49, 685b42b) | 561 Häuser; P005 „Hartwig Leipziger Platz“ (Berlin, eigener Bau neben P001); P003/P004 fiktiv umbenannt. Haus-EBITDA Jahr 1 mittel +1,8 bis +6,7 %. Fingerabdrücke neu: München (P002 sechs Geschosse), Hamburg, Düsseldorf (Namen) |
 | Q06 Marktbeobachtung (Meldungen filtern) | main | **gemergt 21.10.** (#47) | – |
-| Q07 Vertriebssteuerung (Region bis Haus, Vorjahr, Startmonat, Mietverträge) | `feat/q07-vertriebssteuerung` | **startet 21.10.** | – |
+| Q07 Vertriebssteuerung (Region bis Haus, Vorjahr, Startmonat, Mietverträge) | main | **gemergt 22.10.** (#52, dad3d98) | Drilldown Region → Cluster → Haus je Format, 52 Wochen Vorjahr, Startmonat Jan/Apr/Jul/Okt, Mietverträge als Sammelvorlage. Claude: Typfehler Mietvertrags-Delegation, Vorjahr über Stützwochen (Spielstart 1,3 → 0,5 s), Vorjahr auch für Volkskauf/FUNDUS, Formatzeilen aus dem Cockpit, Häuserleiste nach unten (Karte war auf dem iPhone nicht mehr antippbar); M7 unverändert gegenüber main |
 | Reise und Wochenabschluss 1 und 2 | – | gemergt | – |
 
 ## Operatives Paket

@@ -178,9 +178,11 @@ function summiere(eintraege: TreiberPeriode[]): TreiberPeriode {
     eintraege.reduce((s, e) => s + e.kaeufe, 0),
     eintraege.reduce((s, e) => s + e.artikel, 0));
 }
-function zeitraum(h: Haus, von: number, bis: number): { wert?: TreiberPeriode; geschaetzt: boolean } {
-  const messungen = h.treiberVerlauf ?? [];
-  if (von < 0 || bis < von) return { geschaetzt: false };
+function zeitraum(s: GameState, h: Haus, von: number, bis: number): { wert?: TreiberPeriode; geschaetzt: boolean } {
+  const start = s.spielStartWoche ?? 0;
+  const historisch = (s.vorjahrHistorie?.[h.id] ?? []).map((p) => komplett(p.woche, p.woche, p.umsatz, p.frequenz, p.kaeufe, p.artikel));
+  const messungen = [...historisch, ...(h.treiberVerlauf ?? [])];
+  if (von < start - 52 || bis < von) return { geschaetzt: false };
   const teile: TreiberPeriode[] = [];
   let abgedeckt = 0, geschaetzt = false;
   for (const m of messungen) {
@@ -203,9 +205,9 @@ export function hausTreiber(s: GameState, hausId: string, wochen = 1): TreiberVe
   const h = s.haeuser.find((x) => x.id === hausId);
   if (!h) return undefined;
   const bis = s.woche - 1;
-  const aktuell = zeitraum(h, bis - wochen + 1, bis);
+  const aktuell = zeitraum(s, h, bis - wochen + 1, bis);
   if (!aktuell.wert) return undefined;
-  const vorjahr = zeitraum(h, bis - wochen + 1 - 52, bis - 52);
+  const vorjahr = zeitraum(s, h, bis - wochen + 1 - 52, bis - 52);
   return { aktuell: aktuell.wert, vorjahr: vorjahr.wert,
     vorjahrGeschaetzt: vorjahr.geschaetzt,
     abweichung: vorjahr.wert ? aktuell.wert.umsatz - vorjahr.wert.umsatz : undefined };
@@ -225,8 +227,8 @@ export function umsatzbruecke(s: GameState, o: { ebene: Ebene; id?: string; verg
   const alt: TreiberPeriode[] = [], neu: TreiberPeriode[] = [];
   let geschaetzt = false;
   for (const h of auswahl(s, o.ebene, o.id, o.format)) {
-    const jetzt = zeitraum(h, ende - anzahl + 1, ende);
-    const frueher = zeitraum(h, ende - anzahl + 1 - 52, ende - 52);
+    const jetzt = zeitraum(s, h, ende - anzahl + 1, ende);
+    const frueher = zeitraum(s, h, ende - anzahl + 1 - 52, ende - 52);
     if (!jetzt.wert || !frueher.wert) continue;
     neu.push(jetzt.wert); alt.push(frueher.wert);
     geschaetzt ||= frueher.geschaetzt;

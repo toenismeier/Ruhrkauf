@@ -34,7 +34,8 @@ import { statistikModul } from './ui/statistik.js';
 import { marketingModul } from './ui/marketing.js';
 import { umbauModul } from './ui/umbau.js';
 import { produkteModul } from './ui/produkte.js';
-import { laden, speichern } from './ui/speicher.js';
+import { laden, speichern, speicherDiagnose } from './ui/speicher.js';
+import { portfolioModul } from './ui/portfolio.js';
 import { appModul } from './ui/app.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
 import { reiseModul } from './ui/reise.js';
@@ -70,7 +71,7 @@ const neuerPostUi = () => ({ gelesen: [], reiter: 'handeln', reiseZuletzt: [] })
 let postUi = neuerPostUi();
 let streifenTimer = null;
 function speicherFehler(e) {
-  console.error('Spielstand konnte nicht gespeichert werden:', e);
+  console.error('Spielstand konnte nicht gespeichert werden:', e, JSON.stringify(speicherDiagnose()));
   if (!speicherWarnung) meldung('Speichern fehlgeschlagen: ' + e.message, false);
   speicherWarnung = true;
 }
@@ -506,6 +507,7 @@ function baueStadtAusSpiel(name) {
   const ms = Math.round(performance.now() - t0);
   messung.stadtMs.push({ stadt: name, ms, ...teileStand(), haeuser: sb.haeuser.size, kacheln: KA.liste.length });
   stadtchipSetzen(name);
+  stadtChipsZeigen();
   return ms;
 }
 // Für Bahnreisen wird derselbe Szenenaufbau in Animationsbilder aufgeteilt; Detailkacheln folgen bei Ankunft.
@@ -733,6 +735,41 @@ const MERK = new Map();
 function merk() { return MERK; }
 
 // ─────────────────────────────────────────── Cockpit
+/** Schnelle Stadtnavigation über alle eigenen Häuser und die Konkurrenz. */
+function stadtChipsZeigen() {
+  if (!s || !stadtName) return;
+  const hs = E.portfolio(s).filter((h) => h.stadt === stadtName);
+  const konkurrenz = E.wettbewerbFuerGrafik(s, stadtName).filter((w) => w.status !== 'geschlossen');
+  $('stadt-chips').innerHTML = hs.map((h) => '<button class="' + h.formatKey +
+    '" data-stadthaus="' + esc(h.id) + '" title="' + esc(h.name) + '">' +
+    esc(h.name) + '</button>').join('') +
+    konkurrenz.map((w) => '<button data-stadtwb="' + esc(w.id) + '" title="Wettbewerber: ' +
+    esc(w.name) + '">Konkurrenz: ' + esc(w.name) + '</button>').join('');
+}
+$('stadt-chips').addEventListener('click', (e) => {
+  const h = e.target.closest('[data-stadthaus]'), w = e.target.closest('[data-stadtwb]');
+  if (h) oeffneHaus(h.dataset.stadthaus);
+  else if (w) oeffneWettbewerber(w.dataset.stadtwb);
+});
+/** Orte ohne bereits neu erzeugte Render-JSON bleiben über die Portfolio-Daten nutzbar. */
+function portfolioStadtOeffnen(name, id) {
+  if (STADTLISTE.some((stadt) => stadt.name === name)) {
+    wahl.value = name;
+    baueStadtAusSpiel(name);
+    if (id) oeffneHaus(id);
+    else schliessePanel();
+    return;
+  }
+  const hs = E.portfolio(s).filter((h) => h.stadt === name);
+  const konkurrenz = E.wettbewerbFuerGrafik(s, name).filter((w) => w.status !== 'geschlossen');
+  panel(name, 'Standortnetz · Stadtgrafik nach vollständigem Haus-Export', '<div class="karte">' +
+    hs.map((h) => '<div class="zeile"><span class="was"><b>' + esc(h.name) + '</b><i>' +
+      esc(h.formatKey) + ' · ' + esc(h.status) + '</i></span><b>' + geld(h.umsatz) + '</b></div>').join('') +
+    '</div><div class="karte"><div class="khead">Wettbewerber der Stadt</div>' +
+    konkurrenz.map((w) => '<div class="zeile"><span>' + esc(w.name) + '</span></div>').join('') +
+    '</div>');
+}
+
 function cockpitZeigen() {
   const c = E.cockpit(s);
   const kachel = (titel, wert, ton = '') => `<div class="kz ${ton}"><span>${titel}</span><b>${wert}</b></div>`;
@@ -779,6 +816,7 @@ function woche(mitBot = false, test = false) {
   leben.woche(ankommendeOrders);
   const t2 = performance.now();
   cockpitZeigen();
+  stadtChipsZeigen();
   szenarienUI.aktualisieren();
   if (offenesHaus) oeffneHaus(offenesHaus);
   else if (offenerWettbewerber) oeffneWettbewerber(offenerWettbewerber);
@@ -815,11 +853,12 @@ function botSchritt(st) {
 }
 
 // ─────────────────────────────────────────── Panels
+let pp = null;
 let vorherigerFokus = null;
 let wk = null;
 let st = null;
 let ch = null;
-const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt, ch, ec].filter(Boolean);
+const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt, ch, ec, pp].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
@@ -1148,10 +1187,20 @@ function hqTun(aktion) {
   oeffneHq(offenesHq === true ? undefined : offenesHq, true);
 }
 let meldungTimer = null;
+let letzteMeldung = { text: '', zeit: 0 };
+function meldungSchliessen() {
+  clearTimeout(meldungTimer);
+  $('meldung').className = '';
+}
+$('meldung').addEventListener('click', meldungSchliessen);
 function meldung(text, ok = true) {
-  const m = $('meldung');
-  m.textContent = text; m.className = ok ? 'an' : 'an rot';
-  clearTimeout(meldungTimer); meldungTimer = setTimeout(() => { m.className = ''; }, 3500);
+  const m = $('meldung'), jetzt = Date.now();
+  if (text === letzteMeldung.text && jetzt - letzteMeldung.zeit < 5000) return;
+  letzteMeldung = { text, zeit: jetzt };
+  m.textContent = text;
+  m.className = ok ? 'an' : 'an rot';
+  clearTimeout(meldungTimer);
+  meldungTimer = setTimeout(meldungSchliessen, ok ? 2500 : 4000);
 }
 window.hqKlick = (art, a, b, c) => {
   if (art === 'mieten') { const an = E.hqUebersicht(s).angebote.find((q) => q.id === a); hqTun({ typ: 'hqMieten', angebot: a, etagen: an.etagen.map((e) => e.nr) }); }
@@ -1229,9 +1278,10 @@ $('einkauf').addEventListener('click', () => oeffneEinkauf());
 const hb = hausbesuchModul({ E, s: () => s, stadtName: () => stadtName, oeffneEinkauf, erstHaus: () => offenesHaus || s?.haeuser.find((h) => h.stadt === stadtName && h.status === 'offen')?.id, menueZu });
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
 let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null, ec = null;
-const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); hausPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
+const nachAktion = () => { cockpitZeigen(); stadtChipsZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); hausPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
-org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
+org = organisationModul({ E, s: () => s, panel, meldung, nachAktion,
+  oeffneHaus: (id) => oeffneHaus(id), oeffnePortfolio: () => oeffneModul(pp, 'liste') });
 // O03 IT
 itM = itModul({ E, s: () => s, panel, meldung, nachAktion });
 mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
@@ -1388,6 +1438,20 @@ window.addEventListener('einstellung', (e) => {
 });
 
 const oeffneModul = (m, ...a) => { offenesHaus = null; offenesHq = null; m.oeffne(...a); };
+pp = portfolioModul({ E, s: () => s, panel, meldung, nachAktion,
+  sprungStadt: (name) => portfolioStadtOeffnen(name),
+  sprungHaus: (id) => {
+    const h = s.haeuser.find((x) => x.id === id);
+    if (h) portfolioStadtOeffnen(h.stadt, id);
+  },
+});
+$('deutschland').addEventListener('click', () => oeffneModul(pp, 'karte'));
+$('deutschland-direkt').addEventListener('click', () => oeffneModul(pp, 'karte'));
+$('haeuser').addEventListener('click', () => oeffneModul(pp, 'liste'));
+$('cockpit').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-format]');
+  if (b) { pp.filterSetzen(b.dataset.format); oeffneModul(pp, 'liste'); }
+});
 $('vorstand').addEventListener('click', () => oeffneModul(vs));
 $('organisation').addEventListener('click', () => oeffneModul(org));
 // O03 IT
@@ -1489,10 +1553,10 @@ const SCHWIERIGKEITEN = Array.isArray(E.SCHWIERIGKEITEN) && E.SCHWIERIGKEITEN.le
   { id: 'schwer', name: 'Schwer', beschreibung: 'Knappe Kasse, nervöse Gläubiger, wenig Zeit.' },
 ];
 let schwierigkeitId = 'mittel';
-function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId, szenario = 'standard') {
+function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId, szenario = 'standard', startMonat = 1) {
   spielende?.zu(); $('spiel-ruhestand').hidden = true;
   schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
-  s = E.neuesSpiel(seed, { ...E.szenarioKonfiguration(szenario), schwierigkeit: schwierigkeitId });
+  s = E.neuesSpiel(seed, { ...E.szenarioKonfiguration(szenario), schwierigkeit: schwierigkeitId, startMonat: Number(startMonat) });
   postUi = neuerPostUi();
   $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
   MERK.clear();
@@ -1519,7 +1583,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   kameraHaus: hausKameraMessung, // lesender Pixelabgleich für den Mobil-Smoketest
   leben,
@@ -1626,11 +1690,12 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
 const einfuehrung = einfuehrungModul();
 window.spiel.einfuehrung = einfuehrung;
 // ─────────────────────────────────────────── Startbildschirm (Startstadt, Schwierigkeit, Seed); mit URL-Parametern direkt ins Spiel
-const startWahl = { stadt: param.get('stadt') ?? 'Essen', schwierigkeit: param.get('schwierigkeit') ?? 'mittel', szenario: param.get('szenario') ?? 'standard', seed: Number(param.get('seed') ?? 1) };
+const startWahl = { stadt: param.get('stadt') ?? 'Essen', schwierigkeit: param.get('schwierigkeit') ?? 'mittel', szenario: param.get('szenario') ?? 'standard', seed: Number(param.get('seed') ?? 1), startMonat: [1,4,7,10].includes(Number(param.get('monat'))) ? Number(param.get('monat')) : 1 };
 function startZeigen() {
   $('startstadt').innerHTML = STADTLISTE.map((q) => `<option${q.name === startWahl.stadt ? ' selected' : ''}>${q.name}</option>`).join('');
   $('startstufen').innerHTML = SCHWIERIGKEITEN.map((x) => `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? 'an' : ''}" data-v="${x.id}"><span class="sterne-stufe">${'●'.repeat(1 + SCHWIERIGKEITEN.indexOf(x))}${'○'.repeat(SCHWIERIGKEITEN.length - 1 - SCHWIERIGKEITEN.indexOf(x))}</span><b>${x.name}</b><small>${x.beschreibung}</small></button>`).join('');
   $('startseed').value = startWahl.seed;
+  $('startmonat').value = startWahl.startMonat;
   szenarienUI.zeichneStart();
   $('start').classList.add('an');
   $('lade').classList.remove('an');
@@ -1644,6 +1709,7 @@ function startZeigen() {
 }
 $('startstufen').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (!b) return; startWahl.schwierigkeit = b.dataset.v; startZeigen(); });
 $('startstadt').addEventListener('change', (e) => { startWahl.stadt = e.target.value; });
+$('startmonat').addEventListener('change', (e) => { startWahl.startMonat = Number(e.target.value); });
 $('startseed').addEventListener('change', (e) => { startWahl.seed = Math.max(1, Math.round(Number(e.target.value) || 1)); });
 // Q02: Das Ladebild muss tatsächlich gezeichnet sein, bevor die synchrone Stadterzeugung beginnt.
 const q02Bildwechsel = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -1657,7 +1723,7 @@ async function spielStarten() {
     await q02Bildwechsel();
     q02Start.phase = 'grundaufbau';
     wahl.value = startWahl.stadt;
-    neuesSpiel(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit, startWahl.szenario);
+    neuesSpiel(startWahl.seed, startWahl.stadt, startWahl.schwierigkeit, startWahl.szenario, startWahl.startMonat);
     q02Start.phase = 'grundkacheln'; q02Start.grundkacheln = KA.liste.filter((k) => k.gruppe).length;
     // Das erste sichtbare Bild zeigt Plan, Grundkacheln und alle bereits gebauten mittigen Details.
     await q02Bildwechsel();
