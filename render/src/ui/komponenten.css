@@ -280,3 +280,8 @@
 .hk-punkte { display: flex; justify-content: center; gap: 6px; margin: var(--hk-2) 0; }
 .hk-punkte i { width: 7px; height: 7px; border-radius: 4px; background: var(--l); }
 .hk-punkte i.an { background: var(--tx); }
+
+/* Mindestschrift 12 px für Bestandsklassen, die Q31-Panels im dunklen Look weiter nutzen (Stilprüfung auch unterhalb der Falz) */
+#panel:has(.hk-bereich) :is(.kfuss, .kfuss span, .owerte span, .passung i, .passung b, .q17-merkmal, .q17-merkmal b, .q17-merkmal span, .emname i, .q24-leistung > small,
+  .q24-werte span, .q24-detailwerte span, .q11auswahl small, .q11kategorie small, .q11ast small, .q11zielgruppen button span, .q11fortschritt span, .lname i, .q17-kpis span,
+  .q17-hinweis, .q17-preispunkt, .verkauf small, .preis small, .donut small, .sternzahl, .rkopf small, .rfuss, .typkacheln button small, .typkacheln button span, .mzeile span, .mzeile b, .legende) { font-size: 12px !important; }

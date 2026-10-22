@@ -4,7 +4,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
-const { PANELS } = require('./q30-panelliste.cjs');
+const { PANELS } = require(process.argv.includes('--q31') ? './q31-panelliste.cjs' : './q30-panelliste.cjs');
 const { panelLauf } = require('./q30-stil.cjs');
 
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i > 0 ? process.argv[i + 1] : d; };
