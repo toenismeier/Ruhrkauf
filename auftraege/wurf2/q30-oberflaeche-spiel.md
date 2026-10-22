@@ -20,6 +20,7 @@ Ein ordentlich angewandtes Kit reicht nicht; jedes Panel braucht ein Gesicht, da
 - **Hauptfrage je Panel:** Vor dem Bauen pro Panel einen Satz notieren, welche Frage es beantwortet (z. B. Hausdetail: „Läuft dieses Haus diese Woche?“). Der größte Block beantwortet genau diese Frage; alles andere ist kleiner.
 - **Hauptaufgabe mit einem Tipp:** Was man im Panel meistens tun will, ist ohne Scrollen mit einem Tipp erreichbar.
 - **Eine Sache, die nur ein Warenhaus hat:** je Bereich ein eigenes Element statt Kachelraster, z. B. Etagenschnitt im Hausdetail, Wochenbericht als Zeitungsspalte, Posteingang als Aktenstapel/Hauspost, Einkauf als Orderbuch. Keine Begrüßungszeilen und keine Floskelköpfe.
+- **Verbotene Muster als Skript, nicht als Bitte:** Q30 baut mit den gemeinsamen Bausteinen eine Prüfung in `spiel-render.js --nur-panels` (berechnete Stile je Panel bei 390 × 844: Schatten-Unschärfe > 8 px, Schrift < 12 px, Touch-Ziel < 44 px, Platzhalternamen, `undefined`/`null`/`hc-`), die mit Fehler endet; Q31 nutzt sie mit.
 - **Verbotene Muster** (prüfen, nicht hoffen): schwere Schatten, Symbole in eingefärbten Kreisen, Text unter 12 px, Creme-mit-Terrakotta als Ausweichpalette, Platzhalterdaten wie „Max Mustermann“, gleichförmige Kachelraster ohne Rangfolge, Verläufe/Glas.
 - **Zahlen zuerst:** Angezeigte Summen müssen aus den angezeigten Zeilen nachrechenbar sein; ein Test prüft das je Panel mit Summen.
 - **Schlechte Tage zeichnen:** leerer Zustand, Nullwert, Fehlerfall und Engpass (z. B. Abteilung unterbesetzt) sind je Panel bewusst gestaltet und gerendert.
