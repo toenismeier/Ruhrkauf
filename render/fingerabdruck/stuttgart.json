@@ -86,7 +86,7 @@
       {"id":"bloecke/b7","bauer":"bahn","lage":[939.5,945,391,74],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"16cc3c181d4ef5de"},
       {"id":"bloecke/b70","bauer":"bebaut","lage":[805,945,112,74],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"518b45a448085f92"},
       {"id":"bloecke/b8","bauer":"mall","lage":[1062,750,128,92],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"71b3c4600ff34e32"},
-      {"id":"bloecke/b9","bauer":"center","lage":[135,750,240,92],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"a8c6dcb64ecba142"},
+      {"id":"bloecke/b9","bauer":"center","lage":[135,750,240,92],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"bfabadeb8fd3c3d7"},
       {"id":"kreuzungen/k0","bauer":"kreuzungen","lage":[123.75,139.75,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"eb32f32fc6235307"},
       {"id":"kreuzungen/k1","bauer":"kreuzungen","lage":[386.25,139.75,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"e3b926d813c3f70e"},
       {"id":"kreuzungen/k10","bauer":"kreuzungen","lage":[386.25,236.25,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"32091c5162d7787d"},
@@ -831,7 +831,7 @@
       {"id":"parzellen/p553","bauer":"slot:bay_muenchen","lage":[469.31,460.5,19.69,22.5],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"79bc37e240ed0d18"},
       {"id":"parzellen/p554","bauer":"stadthaus","lage":[495,483,22.5,13.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"1761443be0de60cf"},
       {"id":"parzellen/p555","bauer":"slot:bay_muenchen","lage":[397.5,483,22.5,30],"drehung":0,"variante":"neubarock","standort":null,"pruefsumme":"4259cab01eaa9484"},
-      {"id":"parzellen/p556","bauer":"slot:warenhaus","lage":[714,486.5,62,52],"drehung":0,"variante":"warenhaus","standort":"W017","pruefsumme":"0c7a0a58479f1f7a"},
+      {"id":"parzellen/p556","bauer":"slot:warenhaus","lage":[714,486.5,62,52],"drehung":0,"variante":4,"standort":"W017","pruefsumme":"6701d3afe7ceffcb"},
       {"id":"parzellen/p557","bauer":"slot:bay_muenchen","lage":[676,460.5,21.5,24.5],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"034ec677cb7da92f"},
       {"id":"parzellen/p558","bauer":"slot:bay_muenchen","lage":[676,515,21.5,23.5],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"3fd06a5416943cc8"},
       {"id":"parzellen/p559","bauer":"slot:bay_muenchen","lage":[752.5,460.5,23.5,21.5],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"806bb1dbdbbfba5b"},
@@ -944,7 +944,7 @@
       {"id":"parzellen/p657","bauer":"slot:bay_muenchen","lage":[540,590,22.5,21],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"9e99b39e56aa6582"},
       {"id":"parzellen/p658","bauer":"hofhaus","lage":[566.5,594,10.09,15],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"7471edca8446ff30"},
       {"id":"parzellen/p659","bauer":"hofhaus","lage":[576.59,594,11.89,15],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"8669b3eb1cea34a9"},
-      {"id":"parzellen/p66","bauer":"slot:warenhaus","lage":[138,753,102,42],"drehung":0,"variante":"warenhaus","standort":"W018","pruefsumme":"c688648237a92476"},
+      {"id":"parzellen/p66","bauer":"slot:warenhaus","lage":[138,753,102,42],"drehung":0,"variante":2,"standort":"W018","pruefsumme":"1108ebd1bc2f5f43"},
       {"id":"parzellen/p660","bauer":"hofhaus","lage":[588.48,594,10.8,15],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"7ef8bc5c7d1ddf68"},
       {"id":"parzellen/p661","bauer":"hofhaus","lage":[599.29,594,18.21,15],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"e6e6b709eac1d107"},
       {"id":"parzellen/p662","bauer":"slot:wettbewerber","lage":[714,593.5,62,42],"drehung":0,"variante":"wettbewerber","standort":"K-Stuttgart-3","pruefsumme":"63895a785a397170"},
@@ -1476,7 +1476,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"61e2c839e72b9553"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"5155787cd02d906c"}
     ],
-    "gesamt": "33bddc556c64fc07"
+    "gesamt": "3f022a64d31911d6"
   },
   "geometrie": {
     "kacheln": [
@@ -2640,7 +2640,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "e57ae111f6c3c59c7d91f44dd8c2d9d53056463853a7d9e4268296e3e7a946d8",
+    "stadtplan": "37c2cc624a45b258238e2d498b6df88ebc6621761b71bbbdbf0db769f453b58a",
     "geometrie": "d0ad5387e84b98f1d3bc14e72fed1d00bd981d9d098c3b4ae67cc83491ce37eb",
     "bildReferenz": "f94fd818e8eadb25b5c3fe9fa4a57b0aa38703b758bff4ba603a76b44d305fd1"
   }

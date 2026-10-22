@@ -312,7 +312,7 @@
       {"id":"parzellen/p55","bauer":"stadthaus","lage":[363.5,217.5,9,19.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"cafea4490561cb01"},
       {"id":"parzellen/p56","bauer":"slot:bay_buergerhaus","lage":[376.5,192.5,19.5,25],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"04d9097814acd05c"},
       {"id":"parzellen/p57","bauer":"slot:bay_buergerhaus","lage":[344,192.5,19.5,22],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"79aad21542848da1"},
-      {"id":"parzellen/p58","bauer":"slot:warenhaus","lage":[446.5,200,62,37],"drehung":0,"variante":"warenhaus","standort":"W097","pruefsumme":"903305ec2128e896"},
+      {"id":"parzellen/p58","bauer":"slot:warenhaus","lage":[446.5,200,62,37],"drehung":0,"variante":1,"standort":"W097","pruefsumme":"894fc4fdcb93b165"},
       {"id":"parzellen/p59","bauer":"slot:bay_buergerhaus","lage":[418.5,173,19,25],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"90f3210f6a1d6af1"},
       {"id":"parzellen/p6","bauer":"slot:sued_berg","lage":[323.11,22.5,66.85,128],"drehung":0,"variante":"alpen","standort":null,"pruefsumme":"c0e0ca134b600299"},
       {"id":"parzellen/p60","bauer":"slot:bay_buergerhaus","lage":[418.5,218,22,19],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"1de8fe0c2413c832"},
@@ -437,7 +437,7 @@
       {"id":"strassen/s8","bauer":"haupt","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"d292ce26af057c48"},
       {"id":"strassen/s9","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"65be3a41dceb72a9"}
     ],
-    "gesamt": "072035a6ab2e5bd6"
+    "gesamt": "851e82836de25965"
   },
   "geometrie": {
     "kacheln": [
@@ -719,8 +719,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "20be8d7d9eea82f976bb29972f4d65e1744777525090c8f5ccffbb7d01245ff7",
+    "stadtplan": "f84517a436e7110c8ec369b2246ffe12dd6b81c7ee857de9286c47817feabe20",
     "geometrie": "83abb834e73370c1ed69f9754f73e00a12aba95c1823e5007380e89f3122a50c",
-    "bildReferenz": "cedbb7c0112b8f856cb4028d7d3f722e50b418e1169daa1a7c8f866939ac4a03"
+    "bildReferenz": "28206dabe54407a98f62ba923a5d72247f828eb5127d4879276b8167d62379dc"
   }
 }

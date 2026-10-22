@@ -817,7 +817,7 @@
       {"id":"parzellen/p726","bauer":"slot:rhein_brauhaus","lage":[627.19,529,14.84,18],"drehung":0,"variante":"rhein_brauhaus","standort":null,"pruefsumme":"93d1cad4af8145dc"},
       {"id":"parzellen/p728","bauer":"stadthaus","lage":[642.03,531.5,7.74,15.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"0d00263dd9880d71"},
       {"id":"parzellen/p729","bauer":"stadthaus","lage":[649.77,531.5,9.39,15.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"abf3555a114e39bc"},
-      {"id":"parzellen/p73","bauer":"slot:warenhaus","lage":[273.5,60.5,52,32],"drehung":0,"variante":"warenhaus","standort":"W037","pruefsumme":"8293507e6a37af22"},
+      {"id":"parzellen/p73","bauer":"slot:warenhaus","lage":[273.5,60.5,52,32],"drehung":0,"variante":3,"standort":"W037","pruefsumme":"60598b7acd1e23d2"},
       {"id":"parzellen/p730","bauer":"stadthaus","lage":[659.17,531.5,11.33,15.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"81d14c50318525c6"},
       {"id":"parzellen/p731","bauer":"stadthaus","lage":[610.5,481,10.82,15.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"487cb7b8963ca832"},
       {"id":"parzellen/p732","bauer":"stadthaus","lage":[621.32,481,10.03,15.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"49f53e29bd5712a3"},
@@ -1138,7 +1138,7 @@
       {"id":"strassen/s98","bauer":"fussgaenger","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"2ff8644fa8786975"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"70f1cd2f5fa53df5"}
     ],
-    "gesamt": "b5049490897426f4"
+    "gesamt": "9dfc3efcdfdd3ac4"
   },
   "geometrie": {
     "kacheln": [
@@ -1990,7 +1990,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "15f5bce305b12dad899c9f86ec1653f07d03f33e6909848624a8b93bf298e9d8",
+    "stadtplan": "124c385e2bc2d25b82882724fe455989cc108a8ba9ce7735ff2c7ffc379a796d",
     "geometrie": "faee971fbe980aea3499b9c78cc860ac5710e40e26ef39bc959be13140742ff6",
     "bildReferenz": "1ecc22819fc87fceddb4158ee8e60397c9138aa639648584ee77e484c65170cc"
   }
