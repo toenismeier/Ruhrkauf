@@ -54,15 +54,15 @@ function stadtliste() {
 }
 function auswahl(args, staedte) {
   args = [...args];
-  const neu = args.includes('--neu'), pruefen = args.includes('--pruefen'), gegenprobe = args.includes('--gegenprobe');
-  if (Number(neu) + Number(pruefen) + Number(gegenprobe) > 1) throw new Error('Nur einen Prüfmodus angeben');
+  const neu = args.includes('--neu'), pruefen = args.includes('--pruefen'), gegenprobe = args.includes('--gegenprobe'), messen = args.includes('--messen');
+  if (Number(neu) + Number(pruefen) + Number(gegenprobe) + Number(messen) > 1) throw new Error('Nur einen Prüfmodus angeben');
   const alle = args.includes('--alle');
-  if (alle && !neu) throw new Error('--alle ist nur zusammen mit --neu erlaubt');
+  if (alle && !neu && !messen) throw new Error('--alle ist nur zusammen mit --neu oder --messen erlaubt');
   // --teil n/m: nur jede m-te Stadt ab n (CI teilt die 220 Städte auf zwei Jobs)
   const teilArg = args.find((a) => a.startsWith('--teil='));
   const teil = teilArg ? teilArg.slice(7).split('/').map(Number) : null;
   args = args.filter((a) => !a.startsWith('--teil='));
-  const unbekannteOptionen = args.filter((a) => a.startsWith('--') && !['--neu', '--pruefen', '--alle', '--gegenprobe'].includes(a));
+  const unbekannteOptionen = args.filter((a) => a.startsWith('--') && !['--neu', '--pruefen', '--alle', '--gegenprobe', '--messen'].includes(a));
   if (unbekannteOptionen.length) throw new Error('Unbekannte Option: ' + unbekannteOptionen.join(', '));
   const ids = args.filter((a) => !a.startsWith('--')).map((a) => {
     const id = kennung(a);
@@ -73,9 +73,9 @@ function auswahl(args, staedte) {
   if (neu && !alle && !ids.length) throw new Error('--neu benötigt konkrete Stadt-IDs oder --alle');
   if (alle && ids.length) throw new Error('--alle nicht mit einzelnen Städten kombinieren');
   if (gegenprobe && ids.length !== 1) throw new Error('--gegenprobe benötigt genau eine Stadt');
-  if (gegenprobe) return { neu, gegenprobe, ids: [ids[0], [...staedte.keys()].find((id) => id !== ids[0])] };
+  if (gegenprobe) return { neu, gegenprobe, messen, ids: [ids[0], [...staedte.keys()].find((id) => id !== ids[0])] };
   const liste = alle || !ids.length ? [...staedte.keys()] : ids;
-  return { neu, gegenprobe, ids: teil ? liste.filter((_, i) => i % teil[1] === teil[0] - 1) : liste };
+  return { neu, gegenprobe, messen, ids: teil ? liste.filter((_, i) => i % teil[1] === teil[0] - 1) : liste };
 }
 function dateien(id) {
   return { json: path.join(REFERENZEN, id + '.json'), bild: path.join(BILDER, id + '.png') };
@@ -125,7 +125,7 @@ async function bilderVergleichen(seite, referenz, aktuell) {
       anteilProzent, mittelwert, bildgroesse: [a.w, a.h] };
   }, { referenz: referenz.toString('base64'), aktuell, grenzen: GRENZEN });
 }
-async function arbeiter(ids, neu, gegenprobe = false) {
+async function arbeiter(ids, neu, gegenprobe = false, messen = false) {
   const { chromium } = require('playwright');
   const optionen = {
     headless: true,
@@ -146,6 +146,11 @@ async function arbeiter(ids, neu, gegenprobe = false) {
         const messung = await page.evaluate(({ stadt, mutieren }) =>
           globalThis.stadtFingerabdruck(stadt, { mutiereHausbauer: mutieren }),
           { stadt: name, mutieren: gegenprobe && id === ids[0] });
+        // Rein lesende Leistungsmessung: keine Referenzen schreiben oder abgleichen.
+        if (messen) {
+          console.log('MESSUNG;' + name + ';' + messung.leistung.drawCalls + ';' + messung.leistung.dreiecke);
+          continue;
+        }
         const bild = Buffer.from(messung.bild, 'base64');
         const daten = vorbereiten(messung.daten, id, bild);
         if (neu) {
@@ -196,9 +201,9 @@ async function arbeiter(ids, neu, gegenprobe = false) {
   } finally { await browser.close(); }
   if (fehler.length) process.exitCode = 1;
 }
-function gruppeStarten(ids, neu, gegenprobe = false) {
+function gruppeStarten(ids, neu, gegenprobe = false, messen = false) {
   return new Promise((resolve) => {
-    const kind = spawn(process.execPath, [__filename, '--intern', neu ? '--neu' : gegenprobe ? '--gegenprobe' : '--pruefen', ...ids], { cwd: ROOT, env: process.env });
+    const kind = spawn(process.execPath, [__filename, '--intern', neu ? '--neu' : gegenprobe ? '--gegenprobe' : messen ? '--messen' : '--pruefen', ...ids], { cwd: ROOT, env: process.env });
     let aus = '', err = '', abgebrochen = false;
     const timeout = setTimeout(() => { abgebrochen = true; kind.kill('SIGKILL'); }, Math.max(160000, ZEITLIMIT_MS / 4)); // Gruppen-Zeitlimit wächst mit dem Gesamtlimit (langsame CI)
     kind.stdout.on('data', (d) => { aus += d; });
@@ -215,10 +220,10 @@ function gruppeStarten(ids, neu, gegenprobe = false) {
 async function hauptlauf(args) {
   if (args[0] === '--intern') {
     const neu = args[1] === '--neu';
-    await arbeiter(args.slice(2), neu, args[1] === '--gegenprobe');
+    await arbeiter(args.slice(2), neu, args[1] === '--gegenprobe', args[1] === '--messen');
     return;
   }
-  const staedte = stadtliste(), { neu, gegenprobe, ids } = auswahl(args, staedte);
+  const staedte = stadtliste(), { neu, gegenprobe, messen, ids } = auswahl(args, staedte);
   fs.mkdirSync(OUT, { recursive: true });
   // Bundle nur einmal für sämtliche Gruppen erstellen. Es enthält exakt den Quellcode des Branches.
   const esbuild = require('esbuild');
@@ -227,7 +232,7 @@ async function hauptlauf(args) {
     outfile: path.join(OUT, '.fingerabdruck.js'), loader: { '.json': 'json' }, logLevel: 'error' });
   fs.writeFileSync(path.join(OUT, '.fingerabdruck.html'),
     '<!doctype html><html lang="de"><meta charset="utf-8"><body style="margin:0"><script src=".fingerabdruck.js"></script></body></html>');
-  console.log((neu ? 'Referenzen erneuern: ' : gegenprobe ? 'Gegenprobe Hausbauer: ' : 'Fingerabdrücke prüfen: ') + ids.length + ' Städte; Bild '
+  console.log((neu ? 'Referenzen erneuern: ' : gegenprobe ? 'Gegenprobe Hausbauer: ' : messen ? 'Leistung messen (ohne Referenzänderung): ' : 'Fingerabdrücke prüfen: ') + ids.length + ' Städte; Bild '
     + GROESSE.breite + '×' + GROESSE.hoehe + '; max. ' + PARALLEL + ' Gruppen parallel');
   const beginn = Date.now();
   const gruppen = [];
@@ -237,7 +242,7 @@ async function hauptlauf(args) {
   async function schleife() {
     while (position < gruppen.length) {
       const gruppe = gruppen[position++];
-      ergebnisse.push(await gruppeStarten(gruppe, neu, gegenprobe));
+      ergebnisse.push(await gruppeStarten(gruppe, neu, gegenprobe, messen));
     }
   }
   await Promise.all(Array.from({ length: Math.min(PARALLEL, gruppen.length) }, schleife));
