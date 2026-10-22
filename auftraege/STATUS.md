@@ -37,7 +37,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q19 IT-Produkte als Karten | `feat/q19-it-produkte` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q20 Schwierigkeit je Szenario | `feat/q20-szenario-schwierigkeit` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q21 Warenhaus-Vielfalt je Stadt | `feat/q21-warenhaus-vielfalt` | **startet 21.10.** | `auftraege/wurf2/` |
-| Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **gemergt 22.10. (#59)**: Pins am Dach, Krone und Name bei Premium, Abzeichen Aktion/Umbau/Warnung; Fingerabdruck unverändert | `auftraege/wurf2/` |
 | Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11; nur noch Bedienung + Teamleistung, Artikeltypen kommen aus Q27–Q29** | `auftraege/wurf2/` |
 | Q25 Produktbilder und Model (Claude) | `q25/feat/q25-produktbilder` (PR #67) | **gemergt 21.10. (97c21aa), CI grün; Model-Stil von Ummo abgenommen; 106 Silhouetten, Model je Produkt** | `auftraege/wurf2/` |
