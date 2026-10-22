@@ -140,6 +140,7 @@
     kundenkarte: () => kundenkarte,
     leereFilialGuV: () => leereFilialGuV,
     marketingKosten: () => marketingKosten,
+    marketingStaedte: () => marketingStaedte,
     marketingUebersicht: () => marketingUebersicht,
     marktbeobachtungKostenWoche: () => marktbeobachtungKostenWoche,
     marktbeobachtungStufe: () => marktbeobachtungStufe,
@@ -3148,7 +3149,7 @@
       s2.marketing.aktionen = s2.marketing.aktionen.filter((a2) => a2.ende > grenze);
     }
   }
-  var MARKETING_AKTIONEN = /* @__PURE__ */ new Set(["kanalBudget", "kundenkarteSetzen", "appSetzen", "crmKampagneAnlegen", "crmKampagneStoppen", "aktionPlanen", "aktionAendern", "aktionAbsagen"]);
+  var MARKETING_AKTIONEN = /* @__PURE__ */ new Set(["kanalBudget", "kanalTeam", "kundenkarteSetzen", "appSetzen", "crmKampagneAnlegen", "crmKampagneStoppen", "aktionPlanen", "aktionAendern", "aktionAbsagen"]);
   var ok2 = (text3, id) => ({ ok: true, text: text3, id });
   var fehler2 = (text3) => ({ ok: false, text: text3 });
   var pz = (x2, d3 = 0) => `${(x2 * 100).toLocaleString("de-DE", { minimumFractionDigits: d3, maximumFractionDigits: d3 })} %`;
@@ -3278,6 +3279,18 @@
         s2.marketing.budgetQuote = netto / Math.max(1, bezug);
         const txt = ids.length === 1 ? `${KANAL[ids[0]].name}: ${mio(I.kanaele[ids[0]].quote * bezug * 52)} im Jahr (${mio(I.kanaele[ids[0]].quote * bezug)} je Woche)` : `Alle Kan\xE4le angepasst`;
         return ok2(`${txt}. Werbequote netto ${pz(s2.marketing.budgetQuote, 1)}.`);
+      }
+      case "kanalTeam": {
+        if (!KANAL[a2.kanal]) return fehler2("Unbekannter Kanal.");
+        const teams = m.kanalTeams ?? (m.kanalTeams = {});
+        const bisher = teams[a2.kanal] ?? 0;
+        const neu = bisher + a2.delta;
+        if (neu < 0) return fehler2("Diesem Kanal ist kein Teammitglied zugeordnet.");
+        const verfuegbar2 = Math.max(0, Math.floor(s2.hq.abteilungen.find((x2) => x2.id === "marketing")?.fte ?? 0));
+        const belegt2 = Object.values(teams).reduce((sum2, n3) => sum2 + (n3 ?? 0), 0);
+        if (a2.delta > 0 && belegt2 >= verfuegbar2) return fehler2("Alle Marketing-FTE sind bereits zugeordnet. Kapazit\xE4t zun\xE4chst in der Zentrale ausbauen oder neu verteilen.");
+        teams[a2.kanal] = neu;
+        return ok2(`${KANAL[a2.kanal].name}: ${neu} Marketing-FTE organisatorisch zugeordnet. Die Kanalwirkung bleibt an das bestehende Budget und die Zentrale gekoppelt.`);
       }
       case "kundenkarteSetzen": {
         const k3 = I.karte;
@@ -4359,9 +4372,9 @@
         h3.substanz = clamp(h3.substanz + inv.substanzProWoche, 0, 100);
         h3.premiumImage = clamp((h3.premiumImage ?? 80) + inv.imageProWoche, 0, 100);
       }
-      const aktiv5 = s2.marketing.aktionen.filter((a2) => a2.status !== "abgesagt" && a2.start <= s2.woche && s2.woche < a2.ende && !a2.kontrollHaeuser?.includes(h3.id) && (a2.scope.typ === "alle" ? s2.premiumSchuetzen === false : a2.scope.typ === "haeuser" ? a2.scope.ids.includes(h3.id) : a2.scope.typ === "format" ? a2.scope.format === "warenhaus" : a2.scope.typ === "region" ? a2.scope.region === h3.region : a2.scope.cluster === h3.cluster));
-      const imageVerlust = aktiv5.reduce((a2, x2) => a2 + Math.min(2.5, x2.rabatt * 5), 0);
-      h3.premiumImage = clamp((h3.premiumImage ?? 80) - imageVerlust + (aktiv5.length ? 0 : 0.05), 0, 100);
+      const aktiv6 = s2.marketing.aktionen.filter((a2) => a2.status !== "abgesagt" && a2.start <= s2.woche && s2.woche < a2.ende && !a2.kontrollHaeuser?.includes(h3.id) && (a2.scope.typ === "alle" ? s2.premiumSchuetzen === false : a2.scope.typ === "haeuser" ? a2.scope.ids.includes(h3.id) : a2.scope.typ === "format" ? a2.scope.format === "warenhaus" : a2.scope.typ === "region" ? a2.scope.region === h3.region : a2.scope.cluster === h3.cluster));
+      const imageVerlust = aktiv6.reduce((a2, x2) => a2 + Math.min(2.5, x2.rabatt * 5), 0);
+      h3.premiumImage = clamp((h3.premiumImage ?? 80) - imageVerlust + (aktiv6.length ? 0 : 0.05), 0, 100);
     }
   }
   function premiumMarktwert(h3) {
@@ -4724,8 +4737,8 @@
         zusatz += kauf;
       }
     }
-    for (const [c, aktiv5] of Object.entries(e.versandCluster)) {
-      if (!aktiv5 || !clusterHaeuser[c]?.length) continue;
+    for (const [c, aktiv6] of Object.entries(e.versandCluster)) {
+      if (!aktiv6 || !clusterHaeuser[c]?.length) continue;
       const hs = clusterHaeuser[c];
       const anteil3 = hs.reduce((a2, h3) => a2 + (h3.kpi?.umsatz ?? 0), 0) / Math.max(1, haeuser.reduce((a2, h3) => a2 + (h3.kpi?.umsatz ?? 0), 0));
       const n3 = Math.round(bestellungen * 0.22 * anteil3);
@@ -5310,9 +5323,9 @@
     const aus = zeitungArchiv(s2);
     return aus.length ? aus[aus.length - 1] : null;
   };
-  function zeitungEinstellen(s2, aktiv5) {
-    stand(s2).aktiv = aktiv5;
-    if (!aktiv5) s2.entscheidungen = s2.entscheidungen.filter((e) => e.typ !== "interview");
+  function zeitungEinstellen(s2, aktiv6) {
+    stand(s2).aktiv = aktiv6;
+    if (!aktiv6) s2.entscheidungen = s2.entscheidungen.filter((e) => e.typ !== "interview");
   }
   function ausVorlage2(v, woche2, zusatz, nummer) {
     return {
@@ -9445,10 +9458,10 @@
     const summe2 = (hs) => {
       let umsatz = 0, umsatzYtd = 0, vj = 0, ebitda = 0, vjDb = 0, plan2 = 0;
       let fre = 0, kaeufe = 0, personal = 0, miete = 0;
-      let vjVorhanden = 0, aktiv5 = 0, geschaetzt = false;
+      let vjVorhanden = 0, aktiv6 = 0, geschaetzt = false;
       for (const h3 of hs) {
         if (h3.nurDaten) continue;
-        aktiv5++;
+        aktiv6++;
         const bisIst = Math.max(start, von);
         for (let w2 = bisIst; w2 <= bis; w2++) {
           const p2 = historische(h3, w2);
@@ -9475,7 +9488,7 @@
         }
         if (voll2 && von >= start) vjVorhanden++;
       }
-      const mitVj = aktiv5 > 0 && vjVorhanden === aktiv5 && bis >= start;
+      const mitVj = aktiv6 > 0 && vjVorhanden === aktiv6 && bis >= start;
       const vorjahr2 = mitVj ? eur(vj) : void 0;
       const abweichung2 = vorjahr2 === void 0 ? void 0 : eur(umsatz) - vorjahr2;
       const abweichungProzent = vorjahr2 && abweichung2 !== void 0 ? abweichung2 / Math.abs(vorjahr2) : void 0;
@@ -9500,7 +9513,7 @@
         bon: kaeufe > 0 ? umsatz / kaeufe : 0,
         personalquote: umsatz > 0 ? personal / umsatz : 0,
         mietquote: umsatz > 0 ? miete / umsatz : 0,
-        ampel: !aktiv5 || !umsatz ? "ohne" : abweichungProzent === void 0 ? ebitda < 0 ? "rot" : "gelb" : abweichungProzent < -0.05 ? "rot" : abweichungProzent < 0 ? "gelb" : "gruen",
+        ampel: !aktiv6 || !umsatz ? "ohne" : abweichungProzent === void 0 ? ebitda < 0 ? "rot" : "gelb" : abweichungProzent < -0.05 ? "rot" : abweichungProzent < 0 ? "gelb" : "gruen",
         vorjahrGeschaetzt: mitVj && geschaetzt
       };
     };
@@ -10835,8 +10848,8 @@
   }
   var wochenMiete = (qm2, qmMonat) => qm2 * qmMonat * 12 / 52;
   function hausGewicht(h3) {
-    const aktiv5 = h3.status === "offen" || h3.status === "schliessung_verhandlung" || h3.status === "raeumung";
-    return aktiv5 && !h3.nurDaten ? h3.format === "warenhaus" ? 1 : 0.3 : 0;
+    const aktiv6 = h3.status === "offen" || h3.status === "schliessung_verhandlung" || h3.status === "raeumung";
+    return aktiv6 && !h3.nurDaten ? h3.format === "warenhaus" ? 1 : 0.3 : 0;
   }
   function groessenFaktor(s2) {
     const jetzt = s2.haeuser.reduce((a2, h3) => a2 + (h3.status === "offen" ? hausGewicht(h3) : 0), 0);
@@ -11323,16 +11336,16 @@
     }
     return { rest, wochen, ohnePlatz };
   }
-  function hqArchivSetzen(s2, gebaeudeId, nr3, aktiv5) {
+  function hqArchivSetzen(s2, gebaeudeId, nr3, aktiv6) {
     if (!ARCHIV_AKTIV) return fehler5("Das Archiv ist in den Einstellungen deaktiviert.");
     const g = gebaeude(s2, gebaeudeId);
     const e = g?.etagen.find((x2) => x2.nr === nr3);
     if (!g || !e || !e.gemietet) return fehler5("F\xFCr das Archiv ist eine gemietete HQ-Etage erforderlich.");
-    if (!!e.archiv === aktiv5) return fehler5(aktiv5 ? "Auf dieser Etage befindet sich bereits ein Archiv." : "Hier ist kein Archiv eingerichtet.");
-    if (aktiv5 && s2.hq.gebaeude.some((bau2) => bau2.etagen.some((et) => et.archiv))) return fehler5("Es gibt bereits eine Archiv-Etage. Bitte zuerst das bestehende Archiv aufl\xF6sen.");
-    e.archiv = aktiv5;
+    if (!!e.archiv === aktiv6) return fehler5(aktiv6 ? "Auf dieser Etage befindet sich bereits ein Archiv." : "Hier ist kein Archiv eingerichtet.");
+    if (aktiv6 && s2.hq.gebaeude.some((bau2) => bau2.etagen.some((et) => et.archiv))) return fehler5("Es gibt bereits eine Archiv-Etage. Bitte zuerst das bestehende Archiv aufl\xF6sen.");
+    e.archiv = aktiv6;
     hqAktualisiere(s2);
-    return ok5(aktiv5 ? `Archiv auf Etage ${etageText(nr3)} eingerichtet, zus\xE4tzliche Miete ${eur(wochenMiete(ARCHIV_QM, g.mieteQmMonat)).toLocaleString("de-DE")} \u20AC je Woche.` : `Archiv auf Etage ${etageText(nr3)} aufgel\xF6st. Die Zusatzmiete entf\xE4llt.`);
+    return ok5(aktiv6 ? `Archiv auf Etage ${etageText(nr3)} eingerichtet, zus\xE4tzliche Miete ${eur(wochenMiete(ARCHIV_QM, g.mieteQmMonat)).toLocaleString("de-DE")} \u20AC je Woche.` : `Archiv auf Etage ${etageText(nr3)} aufgel\xF6st. Die Zusatzmiete entf\xE4llt.`);
   }
   function hqEtageKuendigen(s2, gebaeudeId, nr3) {
     const g = gebaeude(s2, gebaeudeId);
@@ -14026,9 +14039,9 @@
       }
       const offene = s2.haeuser.filter((h3) => h3.status === "offen");
       for (const h3 of offene) for (const g of Object.keys(h3.potenzial)) {
-        const volumen = basis2(h3, g), key = `${hausclusterId(h3)}|${g}`;
-        basisCluster.set(key, (basisCluster.get(key) ?? 0) + volumen);
-        schadenCluster.set(key, (schadenCluster.get(key) ?? 0) + volumen * (h3.warensicherung ? 3e-3 : 6e-3));
+        const volumen2 = basis2(h3, g), key = `${hausclusterId(h3)}|${g}`;
+        basisCluster.set(key, (basisCluster.get(key) ?? 0) + volumen2);
+        schadenCluster.set(key, (schadenCluster.get(key) ?? 0) + volumen2 * (h3.warensicherung ? 3e-3 : 6e-3));
       }
       let summe2 = 0;
       for (const h3 of offene) {
@@ -14051,8 +14064,8 @@
       rang.sort((a2, b2) => b2.differenz - a2.differenz);
       melde(s2, "info", `Inventur KW 6: ${eur(summe2).toLocaleString("de-DE")} \u20AC rechnerische Differenz. H\xF6chste Werte: ${rang.slice(0, 5).map((x2) => x2.haus.name).join(", ")}.`, { modul: "einkauf" });
       if (w2.steuerungAktiv) for (const k3 of s2.bestand) {
-        const key = `${k3.hauscluster}|${k3.gruppe}`, volumen = basisCluster.get(key) ?? 0;
-        const rate = volumen > 0 ? (schadenCluster.get(key) ?? 0) / volumen : 0;
+        const key = `${k3.hauscluster}|${k3.gruppe}`, volumen2 = basisCluster.get(key) ?? 0;
+        const rate = volumen2 > 0 ? (schadenCluster.get(key) ?? 0) / volumen2 : 0;
         const alt = k3.wert;
         k3.wert = eur(k3.wert * (1 - rate));
         w2.inventurAufwandWoche = (w2.inventurAufwandWoche ?? 0) + eur((alt - k3.wert) * k3.kostenFaktor);
@@ -15072,8 +15085,8 @@
     s2.zahlungsstockungSeit = void 0;
     s2.insolvenz = { seit: w2, versammlung: w2 + 20, altVerbindlichkeiten: eur(alt), insolvenzgeldBis: w2 + 12, quote: 0.1, grund: grund2 };
     const nettoUmsatzJahr = Object.values(s2.basisUmsatz).reduce((a2, u) => a2 + (u ?? 0), 0) * 52;
-    const volumen = Math.max(1, nettoUmsatzJahr / 31e8);
-    s2.kreditlinie = eur(25e6 * volumen);
+    const volumen2 = Math.max(1, nettoUmsatzJahr / 31e8);
+    s2.kreditlinie = eur(25e6 * volumen2);
     const st2 = s2.stakeholder;
     st2.kreditversicherer = clamp(st2.kreditversicherer - 20, 0, 100);
     st2.bank = clamp(st2.bank - 15, 0, 100);
@@ -15157,8 +15170,8 @@
     const ist = s2.historie.filter((k3) => k3.woche >= q2.start && k3.woche < q2.start + 13).reduce((a2, b2) => a2 + b2.ebitda, 0);
     q2.ebitdaIst = eur(ist);
     const plan2 = q2.plan ?? q2.planStandard;
-    const volumen = Math.max(1, Object.values(s2.basisUmsatz).reduce((a2, u) => a2 + (u ?? 0), 0) * 52 / 31e8);
-    const tol = Math.max(2e6 * volumen, 0.12 * Math.abs(plan2));
+    const volumen2 = Math.max(1, Object.values(s2.basisUmsatz).reduce((a2, u) => a2 + (u ?? 0), 0) * 52 / 31e8);
+    const tol = Math.max(2e6 * volumen2, 0.12 * Math.abs(plan2));
     const st2 = s2.stakeholder;
     const ambitioniert = plan2 >= q2.planStandard;
     if (ist >= plan2 - 0.25 * tol) {
@@ -15168,8 +15181,8 @@
       const vorjahr2 = s2.quartale.find((x2) => x2.nr === q2.nr - 4);
       const besser = vorjahr2 ? ist > vorjahr2.ebitdaIst : ist > q2.planStandard + 0.1 * Math.abs(q2.planStandard);
       if (!besser) txt += " Ohne sichtbare Verbesserung gegen\xFCber dem Vorjahr gibt es kein frisches Geld.";
-      if (s2.phase === "regulaer" && !istSandkasten(s2) && besser && (runwayWochen(s2) < 26 || s2.cash + s2.kreditlinie < 15e7 * volumen)) {
-        const kapital = eur(12e6 * volumen * (st2.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
+      if (s2.phase === "regulaer" && !istSandkasten(s2) && besser && (runwayWochen(s2) < 26 || s2.cash + s2.kreditlinie < 15e7 * volumen2)) {
+        const kapital = eur(12e6 * volumen2 * (st2.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
         s2.cash += kapital;
         s2.einmalErloeseWoche += kapital;
         s2.eigentuemer.kapitalZugefuehrt += kapital;
@@ -15934,12 +15947,12 @@
   }
   var beendet = (s2) => s2.phase === "zerschlagen";
   function quartalsPlanSchnell(s2) {
-    const aktiv5 = s2.haeuser.filter((h3) => !h3.nurDaten && h3.status !== "geschlossen");
+    const aktiv6 = s2.haeuser.filter((h3) => !h3.nurDaten && h3.status !== "geschlossen");
     const letzte = s2.historie.slice(-13);
     const basisRoh = Object.entries(s2.basisUmsatz).reduce((sum2, [g, u]) => sum2 + u * GRUPPEN[g].marge, 0);
     const basisUmsatz = Object.values(s2.basisUmsatz).reduce((sum2, u) => sum2 + (u ?? 0), 0);
-    const basisPersonal = aktiv5.reduce((sum2, h3) => sum2 + h3.personal.vollzeit * PARAM.lohnVollzeit + h3.personal.teilzeit * PARAM.lohnTeilzeit + h3.personal.aushilfen * PARAM.lohnAushilfe, 0);
-    const basisMiete = aktiv5.reduce((sum2, h3) => sum2 + h3.miete.mieteWoche, 0);
+    const basisPersonal = aktiv6.reduce((sum2, h3) => sum2 + h3.personal.vollzeit * PARAM.lohnVollzeit + h3.personal.teilzeit * PARAM.lohnTeilzeit + h3.personal.aushilfen * PARAM.lohnAushilfe, 0);
+    const basisMiete = aktiv6.reduce((sum2, h3) => sum2 + h3.miete.mieteWoche, 0);
     const basis4 = letzte.length ? letzte.reduce((sum2, k3) => sum2 + k3.ebitda, 0) / letzte.length : basisRoh - basisPersonal - basisMiete - s2.zentrale.kostenWoche - basisUmsatz * (PARAM.marketingQuote + PARAM.logistikQuote + PARAM.sonstigeQuote);
     const vorigeStartwoche = letzte.length ? s2.woche - letzte.length : s2.woche;
     let saisonDelta = 0;
@@ -16302,6 +16315,64 @@
       out.push({ woche: k3.woche, cash: k3.cash, kreditFrei: k3.kreditFrei, ebitda: k3.ebitda, umsatz: k3.umsatz });
     }
     return out;
+  }
+
+  // ../engine/src/marketing-stadt.ts
+  var aktiv5 = (h3) => !["geschlossen", "verkauft"].includes(h3.status);
+  function volumen(h3) {
+    const ist = h3.kpi?.umsatz ?? 0;
+    if (ist > 0) return ist;
+    const proQm = h3.format === "warenhaus" ? 65 : h3.format === "sport" ? 52 : h3.format === "schwester" ? 42 : 39;
+    return Math.max(1, h3.grundflaecheQm * proQm);
+  }
+  function marketingStaedte(s2) {
+    const ortsgruppen = /* @__PURE__ */ new Map();
+    for (const h3 of s2.haeuser) {
+      const gruppe3 = ortsgruppen.get(h3.stadt) ?? [];
+      gruppe3.push(h3);
+      ortsgruppen.set(h3.stadt, gruppe3);
+    }
+    const result = [];
+    const m = s2.marketing.stand;
+    for (const [stadt, alle] of ortsgruppen) {
+      const offen = alle.filter(aktiv5);
+      const anteile = { hartwig: 0, volkskauf: 0, fundus: 0, wettbewerber: 0 };
+      for (const h3 of offen) {
+        const gruppe3 = h3.format === "schwester" ? "volkskauf" : h3.format === "outlet" ? "fundus" : "hartwig";
+        anteile[gruppe3] += volumen(h3);
+      }
+      const konkurrenten = wettbewerbUebersicht(s2, stadt).filter((w2) => w2.status !== "geschlossen" && w2.art !== "leer_ehemals");
+      const mittel = alle.reduce((sum2, h3) => sum2 + h3.wettbewerbStart, 0) / Math.max(1, alle.length);
+      const sonstigerMarkt = (anteile.hartwig + anteile.volkskauf + anteile.fundus) * clamp(mittel * 0.7, 0.2, 0.8);
+      anteile.wettbewerber = sonstigerMarkt + konkurrenten.reduce((sum2, w2) => {
+        const roh2 = s2.wettbewerber.find((x2) => x2.id === w2.id);
+        return sum2 + (roh2?.grundflaecheQm ?? 0) * 55 * clamp(w2.staerke, 0, 3);
+      }, 0);
+      const gesamt = Object.values(anteile).reduce((sum2, x2) => sum2 + x2, 0);
+      const quote = Object.fromEntries(Object.entries(anteile).map(([k3, v]) => [k3, gesamt > 0 ? v / gesamt : 0]));
+      const druck = offen.length && m ? offen.reduce((sum2, h3) => {
+        const plan2 = kanalWirkung(s2, m.plan, h3);
+        return sum2 + (plan2 > 0 ? kanalWirkung(s2, m.ist, h3) / plan2 : 1);
+      }, 0) / offen.length : 1;
+      const praesenz = offen.length / Math.max(1, alle.length);
+      result.push({
+        stadt,
+        region: alle[0].region,
+        markenbekanntheit: Math.round(clamp(s2.stakeholder.image * clamp(druck, 0.7, 1.3) * praesenz, 0, 100)),
+        marketingdruck: druck,
+        praesenz,
+        marktanteile: quote,
+        wettbewerberAnzahl: konkurrenten.length,
+        haeuserAktiv: offen.length
+      });
+    }
+    const verfuegbar2 = Math.max(0, Math.floor(s2.hq.abteilungen.find((x2) => x2.id === "marketing")?.fte ?? 0));
+    const teams = { ...m?.kanalTeams ?? {} };
+    return {
+      staedte: result.sort((a2, b2) => a2.stadt.localeCompare(b2.stadt, "de")),
+      kanaele: kanaele(s2),
+      kapazitaet: { verfuegbar: verfuegbar2, zugeordnet: Object.values(teams).reduce((sum2, n3) => sum2 + (n3 ?? 0), 0), teams }
+    };
   }
 
   // ../engine/scripts/bot.ts
@@ -60854,14 +60925,14 @@
     const erlebnis = haus2.lage === "1a" && (haus2.grundflaecheQm ?? 0) >= 2e3 ? rng3(String(haus2.id) + "/erlebnisart")() < 0.5 ? "laufanalyse" : "fitness" : null;
     const rohRabatt = Number(zustand.rabatt ?? 0);
     const rabatt = rohRabatt > 1 ? rohRabatt : rohRabatt * 100;
-    const aktiv5 = !!zustand.aktion || zustand.status === "aktion" || (zustand.zusatz ?? []).includes("aktion");
+    const aktiv6 = !!zustand.aktion || zustand.status === "aktion" || (zustand.zusatz ?? []).includes("aktion");
     const offen = !["geschlossen", "leer", "verfall", "abriss", "raeumung"].includes(zustand.status ?? haus2.status);
     return {
       erlebnis,
       erlebnisSeite: "+z",
       // Hauptseite zum Kunden, identisch für Vorbau und normale Glasfront
-      abverkauf: n3 > 1 && offen && aktiv5 && rabatt > 0,
-      rabatt: aktiv5 && rabatt > 0 ? Math.round(rabatt) : null,
+      abverkauf: n3 > 1 && offen && aktiv6 && rabatt > 0,
+      rabatt: aktiv6 && rabatt > 0 ? Math.round(rabatt) : null,
       obereEtage: Math.max(0, ...(haus2.etagen ?? [0]).filter((e) => e >= 0)),
       matt: (haus2.substanz ?? 100) < 40 && offen
     };
@@ -130488,7 +130559,7 @@
       addBox(S, x2, 9 + r3() * 6, z4, 0.035, 1.8 + r3(), 0.035, "#a4d2e0");
     }
   }
-  function jahreszeitenStadt(scene2, plan2, hoehen, spielstand, aktiv5 = JAHRESZEITEN_AN, dachFlaechen = []) {
+  function jahreszeitenStadt(scene2, plan2, hoehen, spielstand, aktiv6 = JAHRESZEITEN_AN, dachFlaechen = []) {
     const { baeume, figuren: figuren3 } = maschen(scene2);
     const wurzel2 = new three_module_exports.Group();
     wurzel2.name = "Jahreszeiten";
@@ -130531,7 +130602,7 @@
     wurzel2.add(fest, sommer, schnee, regen, winter);
     scene2.add(wurzel2);
     let letzteSaison = null, letzterSchluessel = null;
-    const setze = (s2 = spielstand, ein = aktiv5) => {
+    const setze = (s2 = spielstand, ein = aktiv6) => {
       const j3 = jahreszeit(s2);
       const an = !!ein;
       const schluessel = [j3.name, j3.kw, j3.schnee, j3.regen, an].join("/");
@@ -130569,7 +130640,7 @@
       regen.visible = an && j3.regen;
       return j3;
     };
-    setze(spielstand, aktiv5);
+    setze(spielstand, aktiv6);
     return {
       aktualisiere: setze,
       abschalten: () => setze(spielstand, false),
@@ -130674,9 +130745,9 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "6a2c723" : "Entwicklung";
+  var version = () => true ? "374087e" : "Entwicklung";
   function einstellungenModul(ctx) {
-    let aktiv5 = false;
+    let aktiv6 = false;
     function feld(d3) {
       const v = einstellung(d3.schluessel), id = "einst-" + d3.schluessel;
       if (d3.art === "schalter") return '<label class="einst-zeile einst-schalter" for="' + id + '"><span>' + esc(d3.titel) + '</span><input id="' + id + '" type="checkbox" data-einstellung="' + d3.schluessel + '" ' + (v ? "checked" : "") + ' aria-label="' + esc(d3.titel) + '"></label>';
@@ -130696,25 +130767,25 @@
       }
       const html = [...gruppen.entries()].map(([name2, zeilen]) => '<section class="karte einst-gruppe"><h3 class="khead">' + esc(name2) + "</h3>" + zeilen.join("") + "</section>").join("") + '<section class="karte einst-gruppe"><h3 class="khead">\xDCber</h3><div class="einst-info">Version: <strong>' + esc(version()) + '</strong></div><p class="einst-info">Alle Namen sind frei erfunden.</p><p class="einst-info">Stadtplan Essen: Kartendaten \xA9 OpenStreetMap-Mitwirkende (ODbL). Quelle: OpenStreetMap, 20.10.2026.</p><p class="einst-info">Die Einstellungen gelten ger\xE4teweit und geh\xF6ren nicht zum Spielstand.</p></section>';
       ctx.panel("Einstellungen", "Darstellung, Bedienung und Spiel", html, "gross");
-      aktiv5 = true;
+      aktiv6 = true;
       document.getElementById("pinhalt").scrollTop = scroll;
     }
     const inhalt = document.getElementById("pinhalt");
     inhalt.addEventListener("change", (e) => {
-      if (!aktiv5 || !e.target.matches("[data-einstellung]")) return;
+      if (!aktiv6 || !e.target.matches("[data-einstellung]")) return;
       const d3 = definitionen2.get(e.target.dataset.einstellung);
       if (!d3) return;
       setzeEinstellung(d3.schluessel, d3.art === "schalter" ? e.target.checked : e.target.value);
       if (d3.art !== "regler") zeigen(true);
     });
     inhalt.addEventListener("input", (e) => {
-      if (!aktiv5 || !e.target.matches('input[type="range"][data-einstellung]')) return;
+      if (!aktiv6 || !e.target.matches('input[type="range"][data-einstellung]')) return;
       const wert = setzeEinstellung(e.target.dataset.einstellung, Number(e.target.value));
       const output = document.getElementById(e.target.id + "-wert");
       if (output) output.textContent = wert;
     });
     window.addEventListener("einstellung-registriert", () => {
-      if (aktiv5) zeigen(true);
+      if (aktiv6) zeigen(true);
     });
     anwendenDarstellung();
     try {
@@ -130723,9 +130794,9 @@
     } catch {
     }
     return { oeffne: () => zeigen(), zu: () => {
-      aktiv5 = false;
-    }, aktiv: () => aktiv5, neuZeichnen: () => {
-      if (aktiv5) zeigen(true);
+      aktiv6 = false;
+    }, aktiv: () => aktiv6, neuZeichnen: () => {
+      if (aktiv6) zeigen(true);
     } };
   }
   function aktiviereBarrierefreiheit() {
@@ -132579,12 +132650,12 @@
     const wochen = (n3) => n3 === 0 ? "l\xE4uft diese Woche ab" : n3 === 1 ? "noch 1 Woche" : "noch " + n3 + " Wochen";
     const leer3 = (t) => '<div class="karte"><div class="zeile postleer">' + esc2(t) + "</div></div>";
     function tabs(D) {
-      const aktiv5 = einstellungen2().reiter;
+      const aktiv6 = einstellungen2().reiter;
       return '<div class="tabs posttabs" role="tablist">' + [
         ["handeln", "Zu tun", D.handeln.length],
         ["meldungen", "Meldungen", D.meldungen.length],
         ["erledigt", "Erledigt", D.erledigt.length]
-      ].map(([v, t, n3]) => '<button role="tab" aria-selected="' + (aktiv5 === v) + '" class="tab ' + (aktiv5 === v ? "an" : "") + '" data-po-a="tab" data-v="' + v + '">' + t + (v === "handeln" && n3 ? '<span class="zahl">' + n3 + "</span>" : "") + "</button>").join("") + "</div>";
+      ].map(([v, t, n3]) => '<button role="tab" aria-selected="' + (aktiv6 === v) + '" class="tab ' + (aktiv6 === v ? "an" : "") + '" data-po-a="tab" data-v="' + v + '">' + t + (v === "handeln" && n3 ? '<span class="zahl">' + n3 + "</span>" : "") + "</button>").join("") + "</div>";
     }
     const mietenOptionen = [
       ["verlaengern", "Verl\xE4ngern"],
@@ -133040,7 +133111,7 @@
   function zeitungModul(ctx) {
     const ui = { aktiv: false, index: -1, reiter: "Top", archiv: false };
     const ausgaben = () => ctx.E.zeitungArchiv(ctx.s());
-    const aktiv5 = () => ctx.E.zeitungAktiv(ctx.s());
+    const aktiv6 = () => ctx.E.zeitungAktiv(ctx.s());
     const sortiert = () => [...ausgaben()].reverse();
     const ausgabe = () => ausgaben()[ui.index] ?? null;
     function leer3() {
@@ -133070,7 +133141,7 @@
       const a2 = ausgabe();
       const n3 = ui.index + 1;
       const navigation = '<div class="zb-navigation"><button data-z-a="vor" ' + (ui.index <= 0 || ui.archiv ? "disabled" : "") + ' aria-label="\xC4ltere Ausgabe">\u2039 \xC4lter</button><button data-z-a="archiv" aria-pressed="' + ui.archiv + '">' + (ui.archiv ? "Zur Zeitung" : "Archiv (" + aus.length + ")") + '</button><button data-z-a="naechste" ' + (ui.index >= aus.length - 1 || ui.archiv ? "disabled" : "") + ' aria-label="Neuere Ausgabe">Neuer \u203A</button></div><div class="zb-zahl" aria-live="polite">Ausgabe ' + (aus.length ? n3 : 0) + " von " + aus.length + "</div>";
-      const einstellungen2 = '<label class="zb-einstellung"><input type="checkbox" data-z-a="schalter" ' + (aktiv5() ? "checked" : "") + "> Neue Zeitungsausgaben und Interviews aktivieren</label>" + (!aktiv5() ? '<p class="zb-hinweis">Der Handelsbote ist ausgeschaltet. Das bisherige Archiv bleibt lesbar.</p>' : "");
+      const einstellungen2 = '<label class="zb-einstellung"><input type="checkbox" data-z-a="schalter" ' + (aktiv6() ? "checked" : "") + "> Neue Zeitungsausgaben und Interviews aktivieren</label>" + (!aktiv6() ? '<p class="zb-hinweis">Der Handelsbote ist ausgeschaltet. Das bisherige Archiv bleibt lesbar.</p>' : "");
       ctx.panel("Der Handelsbote", "Unabh\xE4ngige Wochenzeitung \xB7 Archiv", '<div class="zb-root">' + einstellungen2 + navigation + (ui.archiv ? archivZeigen() : a2 ? ausgabeZeigen(a2) : leer3()) + (!ui.archiv ? '<div class="zb-wischhinweis">Nach links oder rechts wischen, um eine andere Ausgabe zu lesen.</div>' : "") + "</div>", "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = vorher;
@@ -133151,7 +133222,7 @@
       neuZeichnen: () => {
         if (ui.aktiv) anzeigen(true);
       },
-      pruefe: () => ({ archiv: ausgaben().length, sichtbar: ausgabe()?.woche ?? null, reiter: ui.reiter, aktiv: aktiv5() })
+      pruefe: () => ({ archiv: ausgaben().length, sichtbar: ausgabe()?.woche ?? null, reiter: ui.reiter, aktiv: aktiv6() })
     };
   }
 
@@ -133422,8 +133493,127 @@
     };
   }
 
+  // src/kit/marketing-bilder.js
+  var MARKETING_KANAL_INFO = {
+    "prospekt": [
+      "Der Wochenprospekt b\xFCndelt Angebote und erzeugt kurzfristige Besuche. Die Verteilung l\xE4sst sich regional verst\xE4rken.",
+      "Agentur"
+    ],
+    "anzeigen": [
+      "Anzeigen erreichen insbesondere die Leserschaft regionaler Zeitungen. Sie erg\xE4nzen den Prospekt um lokale Pr\xE4senz.",
+      "Agentur"
+    ],
+    "plakat": [
+      "Plakate sichern Sichtbarkeit in Innenst\xE4dten und an Haltestellen. Wiederholung st\xFCtzt die Markenbekanntheit.",
+      "Agentur"
+    ],
+    "radio": [
+      "Radiospots bewerben Aktionen in der Region. Ihre Wirkung baut sich \xFCber mehrere Wochen auf.",
+      "Agentur"
+    ],
+    "tv": [
+      "Fernsehwerbung st\xE4rkt die Marke bundesweit. Die hohe Reichweite entfaltet ihre Wirkung zeitverz\xF6gert.",
+      "Agentur"
+    ],
+    "online": [
+      "Such- und Displayanzeigen begleiten konkrete Kaufabsichten. Das Budget beeinflusst kurzfristig die Reichweite.",
+      "Inhouse"
+    ],
+    "social": [
+      "Social-Media-Kampagnen sprechen insbesondere j\xFCngere Gruppen an. Wiederholte Motive k\xF6nnen an Wirkung verlieren.",
+      "Inhouse"
+    ],
+    "schaufenster": [
+      "Schaufenster zeigen Saisonware und Aktionen direkt am Standort. Die Pr\xE4sentation bindet die Werbung an das Haus.",
+      "Inhouse"
+    ],
+    "crm": [
+      "Mailings und Kundenkartenkommunikation aktivieren bekannte Kundschaft. Kampagnenversand wird weiterhin im CRM gesteuert.",
+      "Inhouse"
+    ]
+  };
+  var kanalBildSVG = function bildKanal(id) {
+    const gegenstand = {
+      prospekt: '<rect x="36" y="24" width="112" height="108" rx="3" fill="#fff" stroke="#3b4248" stroke-width="3"/><rect x="46" y="34" width="92" height="27" fill="#b32632"/><text x="92" y="53" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">HARTWIG</text><rect x="46" y="70" width="46" height="47" fill="#d8d2c7"/><path d="M98 73h38M98 83h38M98 93h34M98 103h36M98 113h26" stroke="#8a8986" stroke-width="4"/>',
+      anzeigen: '<rect x="25" y="27" width="140" height="106" rx="2" fill="#fff" stroke="#555a5d" stroke-width="3"/><path d="M36 42h118" stroke="#555a5d" stroke-width="3"/><text x="95" y="38" font-size="10" font-weight="700" text-anchor="middle" fill="#333">STADTNACHRICHTEN</text><rect x="35" y="53" width="60" height="62" fill="#b32632"/><text x="65" y="79" font-size="12" font-weight="700" text-anchor="middle" fill="#fff">HARTWIG</text><path d="M104 57h47M104 67h47M104 77h45M104 87h45M104 97h45M104 107h35M35 122h117" stroke="#858c8e" stroke-width="4"/>',
+      plakat: '<rect x="48" y="15" width="94" height="108" rx="3" fill="#faf9f6" stroke="#39434b" stroke-width="4"/><rect x="58" y="25" width="74" height="71" fill="#b32632"/><text x="95" y="52" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">HARTWIG</text><text x="95" y="73" fill="#fff" font-size="10" text-anchor="middle">F\xDCR DEINE STADT</text><path d="M64 105h62" stroke="#444" stroke-width="4"/><path d="M70 123v27M120 123v27" stroke="#39434b" stroke-width="5"/>',
+      radio: '<rect x="32" y="45" width="127" height="83" rx="9" fill="#fff" stroke="#424d53" stroke-width="4"/><rect x="43" y="59" width="73" height="43" rx="3" fill="#d9dedf"/><path d="M52 87L114 59M40 45l45-26" stroke="#424d53" stroke-width="4"/><circle cx="136" cy="79" r="12" fill="#b32632"/><circle cx="136" cy="111" r="5" fill="#424d53"/><text x="80" y="120" font-size="10" font-weight="700" text-anchor="middle" fill="#424d53">HARTWIG</text>',
+      tv: '<rect x="19" y="29" width="151" height="92" rx="7" fill="#3f494e"/><rect x="28" y="38" width="133" height="74" rx="3" fill="#e7e5df"/><rect x="35" y="45" width="119" height="57" fill="#b32632"/><text x="94" y="76" font-size="18" font-weight="800" text-anchor="middle" fill="#fff">HARTWIG</text><path d="M82 121v12M107 121v12M70 135h50" stroke="#424d53" stroke-width="5"/>',
+      online: '<rect x="24" y="25" width="142" height="103" rx="7" fill="#fff" stroke="#465056" stroke-width="4"/><path d="M25 48h140" stroke="#465056" stroke-width="3"/><circle cx="37" cy="37" r="4" fill="#b32632"/><circle cx="49" cy="37" r="4" fill="#a7a7a4"/><rect x="39" y="60" width="111" height="28" fill="#b32632"/><text x="94" y="78" font-size="15" font-weight="700" text-anchor="middle" fill="#fff">HARTWIG</text><path d="M40 101h91M40 112h70" stroke="#919998" stroke-width="5"/>',
+      social: '<rect x="52" y="13" width="87" height="138" rx="12" fill="#39434b"/><rect x="59" y="26" width="73" height="111" rx="5" fill="#fff"/><rect x="64" y="33" width="63" height="58" fill="#b32632"/><text x="96" y="61" font-size="11" font-weight="700" text-anchor="middle" fill="#fff">HARTWIG</text><path d="M70 100h51M70 110h45" stroke="#909596" stroke-width="4"/><path d="M78 121l8 6 9-6 9 6 8-6" fill="none" stroke="#b32632" stroke-width="3"/>',
+      schaufenster: '<rect x="20" y="36" width="150" height="94" fill="#fff" stroke="#465056" stroke-width="4"/><rect x="30" y="45" width="130" height="74" fill="#d5e5e7"/><path d="M95 46v72M20 130h150" stroke="#465056" stroke-width="5"/><rect x="35" y="51" width="53" height="15" fill="#b32632"/><text x="61" y="62" fill="#fff" font-size="9" text-anchor="middle" font-weight="700">HARTWIG</text><path d="M57 77l-10 16 4 17h25l3-17-10-16zM125 77l-11 16 4 17h25l3-17-10-16z" fill="#a9a197"/>',
+      crm: '<rect x="38" y="28" width="113" height="100" rx="6" fill="#fff" stroke="#465056" stroke-width="4"/><rect x="47" y="38" width="95" height="23" fill="#b32632"/><text x="95" y="54" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">HARTWIG</text><path d="M47 72l46 28 48-28" fill="none" stroke="#889596" stroke-width="4"/><path d="M49 117l33-24M141 117l-34-24" fill="none" stroke="#889596" stroke-width="3"/>'
+    };
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 160" role="img" aria-label="Hartwig-Werbemotiv: ${id}"><rect width="190" height="160" rx="8" fill="#f0eee9"/><rect y="140" width="190" height="20" fill="#e2dfd8"/>${gegenstand[id] ?? gegenstand.prospekt}</svg>`;
+  };
+  var stadtSymbolSVG = function bildStadt(name2) {
+    const n3 = String(name2).toLowerCase();
+    const turm4 = '<rect x="46" y="20" width="7" height="46" fill="#59636a"/><circle cx="49.5" cy="24" r="9" fill="#b32632"/><path d="M49 6v9" stroke="#59636a" stroke-width="3"/>';
+    const dom = '<path d="M18 74V40l8-10 7 10v34h8V40l8-10 7 10v34h10" fill="#9aa19e"/><path d="M20 38l6-25 6 25M43 38l6-25 6 25" fill="none" stroke="#59636a" stroke-width="4"/>';
+    const skyline = '<rect x="13" y="42" width="12" height="31" fill="#7f8b8e"/><rect x="30" y="26" width="14" height="47" fill="#65767e"/><rect x="48" y="34" width="17" height="39" fill="#a1a8a5"/><rect x="69" y="20" width="15" height="53" fill="#6c7c80"/>';
+    const rathaus2 = '<path d="M15 72V40h69v32M32 40V28h36v12M44 28V15h12v13" fill="#a4aaaa"/><path d="M47 15l3-9 3 9" fill="#b32632"/><path d="M24 51h8M42 51h8M60 51h8M24 62h8M60 62h8" stroke="#fff" stroke-width="4"/>';
+    const zeche = '<path d="M21 73L38 18H64L81 73M19 73h64M34 37h34M28 54h47" stroke="#677579" stroke-width="5" fill="none"/><rect x="40" y="22" width="22" height="9" fill="#b32632"/>';
+    const hafen = '<path d="M10 72h80M25 72V29l25-14 25 14v43M36 72V39h27v33" stroke="#68767d" stroke-width="4" fill="none"/><path d="M18 74q8-6 16 0t16 0t16 0t16 0" fill="none" stroke="#a1b8be" stroke-width="4"/>';
+    const motif = n3.includes("k\xF6ln") ? dom : n3.includes("berlin") || n3.includes("stuttgart") || n3.includes("d\xFCsseldorf") ? turm4 : n3.includes("essen") || n3.includes("bochum") ? zeche : n3.includes("hamburg") || n3.includes("bremen") ? hafen : n3.includes("hannover") || n3.includes("m\xFCnchen") || n3.includes("dresden") ? rathaus2 : skyline;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 85" role="img" aria-label="Stadtzeichen ${String(name2).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;")}"><path d="M3 76h94" stroke="#59636a" stroke-width="3"/>${motif}</svg>`;
+  };
+
+  // src/ui/marketing-q16.js
+  function ortDaten(E8, spiel2, ui) {
+    const daten = E8.marketingStaedte(spiel2());
+    const regionen = ["alle", ...new Set(daten.staedte.map((x2) => x2.region))];
+    const auswahl4 = daten.staedte.filter((x2) => ui.region === "alle" || x2.region === ui.region);
+    const index2 = Math.max(0, auswahl4.findIndex((x2) => x2.stadt === ui.stadt));
+    const stadt = auswahl4[index2];
+    return { daten, regionen, auswahl: auswahl4, stadt, index: index2 };
+  }
+  function stadtWahl(E8, spiel2, ui) {
+    const { regionen, auswahl: auswahl4, stadt, index: index2 } = ortDaten(E8, spiel2, ui);
+    const reg = regionen.map((r3) => `<option value="${esc2(r3)}"${r3 === ui.region ? " selected" : ""}>${r3 === "alle" ? "Alle Regionen" : "Region " + esc2(r3)}</option>`).join("");
+    const ort = auswahl4.map((x2) => `<option value="${esc2(x2.stadt)}"${x2.stadt === stadt?.stadt ? " selected" : ""}>${esc2(x2.stadt)}</option>`).join("");
+    const v = Math.max(0, index2 - 3), sicht3 = auswahl4.slice(v, v + 7);
+    return `<div class="mk-stadtwahl"><div class="mk-stadtfilter"><label>Region<select data-a="stadtRegionChoose" aria-label="Region ausw\xE4hlen">${reg}</select></label><label>Stadt<select data-a="stadtChoose" aria-label="Stadt ausw\xE4hlen">${ort}</select></label></div><div class="mk-ortband"><button data-a="stadtShift" data-v="-1" aria-label="Vorherige Stadt" ${auswahl4.length < 2 ? "disabled" : ""}>\u2039</button><div class="mk-minis" aria-label="St\xE4dteauswahl">${sicht3.map((x2) => `<button data-a="stadtSymbol" data-v="${esc2(x2.stadt)}" class="${x2.stadt === stadt?.stadt ? "an" : ""}" aria-label="Stadt ${esc2(x2.stadt)}" aria-pressed="${x2.stadt === stadt?.stadt}">${stadtSymbolSVG(x2.stadt)}<span>${esc2(x2.stadt)}</span></button>`).join("")}</div><button data-a="stadtShift" data-v="1" aria-label="N\xE4chste Stadt" ${auswahl4.length < 2 ? "disabled" : ""}>\u203A</button></div></div>`;
+  }
+  function stadtAnsicht(E8, spiel2, ui, P4) {
+    const { stadt } = ortDaten(E8, spiel2, ui);
+    let h3 = stadtWahl(E8, spiel2, ui);
+    if (!stadt) return { titel: "Marktanteile", unter: "Keine Standorte in dieser Region", html: h3 + '<p class="mk-hinweis">Keine Stadt verf\xFCgbar.</p>' };
+    const farben = { hartwig: "#B32632", volkskauf: "#6c7980", fundus: "#b68b47", wettbewerber: "#a6a6a3" };
+    const texte = { hartwig: "Hartwig einschlie\xDFlich Sport", volkskauf: "Volkskauf", fundus: "FUNDUS", wettbewerber: "Wettbewerber" };
+    const werte2 = stadt.marktanteile, umfang = 2 * Math.PI * 78;
+    let offset = 0;
+    const ring2 = Object.keys(farben).map((k3) => {
+      const a2 = Math.max(0, werte2[k3]), laenge2 = umfang * a2, start = offset;
+      offset += laenge2;
+      return `<circle cx="105" cy="105" r="78" fill="none" stroke="${farben[k3]}" stroke-width="24" stroke-dasharray="${laenge2} ${umfang - laenge2}" stroke-dashoffset="${-start}" transform="rotate(-90 105 105)"/>`;
+    }).join("");
+    h3 += `<section class="mk-marktkarte"><h3>Marktanteil in ${esc2(stadt.stadt)}</h3><p>Indikative Marktposition auf Basis der Standorte und Wettbewerber.</p><div class="mk-ringwrap"><svg viewBox="0 0 210 210" role="img" aria-label="Gesch\xE4tzter Marktanteil in ${esc2(stadt.stadt)}">${ring2}</svg><div class="mk-ringmitte">${stadtSymbolSVG(stadt.stadt)}<strong>${esc2(stadt.stadt)}</strong></div></div><div class="mk-legende">${Object.keys(farben).map((k3) => `<div class="mk-lzeile"><span style="--farbe:${farben[k3]}">${texte[k3]}</span>${P4(`ms:${stadt.stadt}:${k3}`, pz3(werte2[k3], 1))}</div>`).join("")}</div><p class="mk-hinweis">${stadt.wettbewerberAnzahl} modellierte Wettbewerber. Der \xFCbrige lokale Handel ist im Wettbewerbsanteil ber\xFCcksichtigt.</p></section>`;
+    h3 += `<section class="mk-marktkarte"><h3>Markenbekanntheit</h3><p>Hartwig in ${esc2(stadt.stadt)}</p><div class="mk-bekannt-zahl">${P4(`bek:${stadt.stadt}`, `${stadt.markenbekanntheit} / 100`)}</div><div class="mk-bekannt-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${stadt.markenbekanntheit}" aria-label="Markenbekanntheit"><span style="width:${stadt.markenbekanntheit}%"></span></div><p class="mk-hinweis">Modellsch\xE4tzung aus Konzernimage, Marketingdruck und Standortpr\xE4senz. Ohne Eingriffe neutral zum Konzernwert.</p></section>`;
+    return { titel: "Marktanteile", unter: `${stadt.stadt} \xB7 Region ${stadt.region} \xB7 ${stadt.haeuserAktiv} aktive H\xE4user`, html: h3 };
+  }
+  function kanaeleAnsicht(E8, spiel2, ui, P4) {
+    const { stadt, daten } = ortDaten(E8, spiel2, ui);
+    let h3 = stadtWahl(E8, spiel2, ui);
+    const k3 = daten.kanaele, q2 = E8.marketingUebersicht(spiel2());
+    h3 += `<div class="mk-marktkarte"><h3>Werbebudget</h3><div class="mk-kanalinfo"><span>Kan\xE4le je Woche</span>${P4("kn:summe", geld(k3.summeWoche))}</div><div class="mk-kanalinfo"><span>Werbequote netto</span>${P4("kn:netto", pz3(q2.werbequoteNetto, 1))}</div><p class="mk-hinweis">Budgets und Werbequote gelten konzernweit. Regionale Kan\xE4le k\xF6nnen je Region verst\xE4rkt werden.</p></div>`;
+    h3 += `<div class="mk-kanalinfo"><strong>Kan\xE4le</strong><span>${k3.kanaele.length} Karten \xB7 horizontal wischen</span></div><div class="mk-kanalreihe" role="region" aria-label="Marketingkan\xE4le" tabindex="0">`;
+    for (const c of k3.kanaele) {
+      const [beschreibung, betreuung] = MARKETING_KANAL_INFO[c.id] ?? [c.text, "Inhouse"];
+      const team = daten.kapazitaet.teams[c.id] ?? 0;
+      const uebrig = daten.kapazitaet.verfuegbar - daten.kapazitaet.zugeordnet;
+      const max = Math.max(1, c.startBudgetWoche * 4);
+      const region = stadt?.region;
+      const faktor2 = region ? c.regionen[region] ?? 1 : 1;
+      h3 += `<article class="mk-kanalkarte" data-kanal="${esc2(c.id)}"><figure>${kanalBildSVG(c.id)}</figure><h3>${esc2(c.name)}</h3><p class="mk-text">${esc2(beschreibung)}</p><div class="mk-team"><span>Betreut von <strong>${esc2(betreuung)}</strong></span><div class="mk-teamaktionen"><button data-a="teamAendern" data-k="${esc2(c.id)}" data-v="-1" aria-label="${esc2(c.name)}: Team minus eins" ${team ? "" : "disabled"}>\u2212</button><span>${P4(`kn:${c.id}:team`, team)}</span><button data-a="teamAendern" data-k="${esc2(c.id)}" data-v="1" aria-label="${esc2(c.name)}: Team plus eins" ${uebrig > 0 ? "" : "disabled"}>+1</button></div></div><div class="mk-budgetbox"><label for="mk-budget-${esc2(c.id)}">Wochenbudget <output>${P4(`kn:${c.id}:woche`, geld(c.budgetWoche))}</output></label><input id="mk-budget-${esc2(c.id)}" type="range" min="0" max="${max}" step="100" value="${c.budgetWoche}" data-a="kanalBudgetSlider" data-k="${esc2(c.id)}" aria-label="Wochenbudget ${esc2(c.name)}"><small>Standard: ${geld(c.startBudgetWoche)} / Woche \xB7 maximal das Vierfache</small></div>`;
+      if (c.regional && region) h3 += `<div class="mk-budgetbox"><label for="mk-region-${esc2(c.id)}">Ausspielung Region ${esc2(region)} <output>${faktor2.toFixed(1).replace(".", ",")} \xD7</output></label><input id="mk-region-${esc2(c.id)}" type="range" min="0" max="3" step="0.1" value="${faktor2}" data-a="kanalRegionSlider" data-k="${esc2(c.id)}" data-region="${esc2(region)}" aria-label="Regionale Ausspielung ${esc2(c.name)}"><small>0 \xD7 bis 3 \xD7 \xB7 bestehende regionale Kanalsteuerung</small></div>`;
+      else h3 += '<p class="mk-hinweis">Bundesweite Kanalsteuerung</p>';
+      h3 += "</article>";
+    }
+    h3 += `</div><p class="mk-kanalzaehler">Zugeordnete Marketing-FTE: ${P4("kn:teamSum", daten.kapazitaet.zugeordnet)} von ${P4("kn:fte", daten.kapazitaet.verfuegbar)}. Die Teamzuordnung ist organisatorisch; die Wirkung folgt unver\xE4ndert aus Kanalbudgets und Marketingabteilung.</p>`;
+    return { titel: "Marketingkan\xE4le", unter: `${stadt?.stadt ?? "Alle St\xE4dte"} \xB7 ${geld(k3.summeWoche)} / Woche \xB7 Nettoquote ${pz3(q2.werbequoteNetto, 1)}`, html: h3 };
+  }
+
   // src/ui/marketing.js
-  var ALTER2 = { jung: "unter 30", mitte: "30 bis 49", aelter: "50 bis 64", senioren: "65 plus" };
   var STATUS2 = { geplant: "geplant", laufend: "l\xE4uft", beendet: "beendet", abgesagt: "abgesagt", aktiv: "aktiv", gestoppt: "gestoppt" };
   var STATUS_FARBE = { geplant: "#2f63b5", laufend: "#2f8f5b", beendet: "#9aa3ab", abgesagt: "#d6d2ca" };
   var MONATE = ["Jan", "Feb", "M\xE4r", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
@@ -133450,9 +133640,12 @@
       aktion: null,
       planen: null,
       kanal: null,
+      stadt: null,
+      region: "alle",
+      kanalScroll: 0,
       crm: { seg: 0, kanal: "mail", angebot: "coupon", prozent: 0.15, mindestbon: 40, faktor: 3, wert: 10, frequenz: "monatlich", wochen: 13, kontrolle: true }
     };
-    const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t}</button>`).join("")}</div><button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>`;
+    const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["stadt", "St\xE4dte"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t}</button>`).join("")}</div><button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>`;
     function uebersicht(P4) {
       const st2 = s2(), u = E8.marketingUebersicht(st2);
       let h3 = tabs();
@@ -133471,21 +133664,10 @@
       return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 ${u.kampagnenAktiv} CRM-Kampagnen aktiv \xB7 KW ${u.kw} / ${u.jahr}`, html: h3 };
     }
     function kanaele2(P4) {
-      const k3 = E8.kanaele(s2());
-      let h3 = tabs();
-      h3 += `<div class="raster">${kz("Kan\xE4le je Woche", P4("kn:summe", geld(k3.summeWoche)))}${kz("Anteil am Umsatz", P4("kn:quote", pz3(k3.quote, 2)))}</div>`;
-      h3 += `<div class="oknoepfe unten2"><button data-a="kanalAlle" data-v="0.9">Alle \u221210 %</button><button data-a="kanalAlle" data-v="1.1">Alle +10 %</button></div>`;
-      for (const c of k3.kanaele) {
-        const auf = ui.kanal === c.id;
-        h3 += `<div class="karte kanal"><div class="ohead klickbar" data-a="kanalAuf" data-v="${c.id}"><b>${esc2(c.name)}</b><i>${esc2(c.text)}</i></div>`;
-        h3 += `<div class="regler">${stepper("kanalBudget", P4(`kn:${c.id}:woche`, geld(c.budgetWoche)), `${P4(`kn:${c.id}:jahr`, geld(c.budgetJahr), "span")} im Jahr \xB7 Start ${geld(c.startBudgetWoche)}`, ` data-k="${c.id}"`)}</div>`;
-        h3 += `<div class="mzeile"><span>Anteil am Budget</span><span class="mbalken"><span style="width:${(c.anteil * 100).toFixed(0)}%;background:#2f63b5"></span></span>${P4(`kn:${c.id}:anteil`, pz3(c.anteil))}</div>`;
-        h3 += `<div class="mzeile"><span>Wirkung</span><span class="mbalken"><span style="width:${Math.min(100, c.wirkung * 50).toFixed(0)}%;background:#2f8f5b"></span></span>${P4(`kn:${c.id}:wirkung`, dez(c.wirkung, 2))}</div>`;
-        if (c.abnutzung > 0.02) h3 += `<div class="mzeile"><span>Abnutzung</span><span class="mbalken"><span style="width:${Math.min(100, c.abnutzung * 300).toFixed(0)}%;background:#d23c32"></span></span>${P4(`kn:${c.id}:abnutzung`, pz3(c.abnutzung))}</div>`;
-        if (auf) h3 += `<div class="passung">${Object.entries(c.reichweite).map(([g, x2]) => `<div><span class="psaeule"><span style="height:${(x2 * 100).toFixed(0)}%"></span></span><b>${pz3(x2)}</b><i>${ALTER2[g]}</i></div>`).join("")}</div><div class="olief">Reichweite je Altersgruppe \xB7 Marke ${dez(c.marke, 1)} \xB7 Aktion ${dez(c.aktion, 1)}${c.regional ? " \xB7 regional steuerbar" : ""}</div>`;
-        h3 += '<div class="zeile unter"></div></div>';
-      }
-      return { titel: "Kan\xE4le", unter: `${k3.kanaele.length} Kan\xE4le \xB7 ${geld(k3.summeWoche)} je Woche`, html: h3 };
+      return kanaeleAnsicht(E8, s2, ui, P4);
+    }
+    function staedte(P4) {
+      return stadtAnsicht(E8, s2, ui, P4);
     }
     function karte(P4) {
       const k3 = E8.kundenkarte(s2()), a2 = k3.app;
@@ -133617,15 +133799,19 @@
     function rendern() {
       const S = werteSammler();
       if (!da) return { S, r: { titel: "Marketing", unter: "", html: '<div class="leise">Die Engine liefert noch kein Marketing.</div>' } };
-      const f11 = { kanaele: kanaele2, karte, crm, kalender, aktion: aktion2 }[ui.seite] ?? uebersicht;
+      const f11 = { kanaele: kanaele2, stadt: staedte, karte, crm, kalender, aktion: aktion2 }[ui.seite] ?? uebersicht;
       return { S, r: f11(S.P) };
     }
     function zeigen(scrollHalten = false) {
       const sc = document.getElementById("pinhalt").scrollTop;
+      const altKar = document.querySelector("#pinhalt .mk-kanalreihe");
+      if (altKar) ui.kanalScroll = altKar.scrollLeft;
       const { r: r3 } = rendern();
       ctx.panel(r3.titel, r3.unter, r3.html, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? sc : 0;
+      const neuKar = document.querySelector("#pinhalt .mk-kanalreihe");
+      if (neuKar) neuKar.scrollLeft = ui.kanalScroll;
     }
     function tun(aktion3, halten = true) {
       const r3 = E8.fuehreAus(s2(), aktion3);
@@ -133648,7 +133834,19 @@
         case "seite":
           ui.seite = v;
           ui.planen = null;
+          ui.kanalScroll = 0;
           return zeigen();
+        case "stadtShift": {
+          const d3 = ortDaten(E8, s2, ui);
+          if (!d3.auswahl.length) return;
+          ui.stadt = d3.auswahl[(d3.index + Number(v) + d3.auswahl.length) % d3.auswahl.length].stadt;
+          return zeigen(true);
+        }
+        case "stadtSymbol":
+          ui.stadt = v;
+          return zeigen(true);
+        case "teamAendern":
+          return tun({ typ: "kanalTeam", kanal: el2.dataset.k, delta: Number(v) > 0 ? 1 : -1 });
         case "aktion":
           ui.seite = "aktion";
           ui.aktion = v;
@@ -133777,6 +133975,26 @@
     }
     function wechsel(el2) {
       const a2 = el2.dataset.a;
+      if (a2 === "stadtRegionChoose") {
+        ui.region = el2.value;
+        ui.stadt = null;
+        ui.kanalScroll = 0;
+        return zeigen(true);
+      }
+      if (a2 === "stadtChoose") {
+        ui.stadt = el2.value;
+        return zeigen(true);
+      }
+      if (a2 === "kanalBudgetSlider") {
+        const v = Number(el2.value);
+        if (Number.isFinite(v)) return tun({ typ: "kanalBudget", kanal: el2.dataset.k, euroWoche: v });
+        return;
+      }
+      if (a2 === "kanalRegionSlider") {
+        const v = Number(el2.value);
+        if (Number.isFinite(v)) return tun({ typ: "kanalBudget", kanal: el2.dataset.k, regionen: { [el2.dataset.region]: v } });
+        return;
+      }
       if (a2 === "crmSeg") {
         ui.crm.seg = Number(el2.value);
         zeigen(true);
@@ -133792,11 +134010,34 @@
       }
     }
     const inhalt = document.getElementById("pinhalt");
+    let ringStart = null;
+    inhalt.addEventListener("pointerdown", (ev) => {
+      ringStart = ui.aktiv && ui.seite === "stadt" && ev.target.closest(".mk-ringwrap") ? { x: ev.clientX, y: ev.clientY } : null;
+    }, { passive: true });
+    inhalt.addEventListener("pointerup", (ev) => {
+      if (!ringStart) return;
+      const dx = ev.clientX - ringStart.x, dy = ev.clientY - ringStart.y;
+      ringStart = null;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+        const d3 = ortDaten(E8, s2, ui);
+        if (d3.auswahl.length > 1) {
+          ui.stadt = d3.auswahl[(d3.index + (dx < 0 ? 1 : -1) + d3.auswahl.length) % d3.auswahl.length].stadt;
+          zeigen(true);
+        }
+      }
+    }, { passive: true });
     inhalt.addEventListener("click", (ev) => {
       if (!ui.aktiv) return;
       const el2 = ev.target.closest("[data-a]");
       if (!el2 || el2.disabled || el2.tagName === "SELECT") return;
       klick(el2);
+    });
+    inhalt.addEventListener("input", (ev) => {
+      if (!ui.aktiv) return;
+      const el2 = ev.target.closest('input[data-a="kanalBudgetSlider"], input[data-a="kanalRegionSlider"]');
+      if (!el2) return;
+      const out = el2.closest(".mk-budgetbox")?.querySelector("output");
+      if (out) out.textContent = el2.dataset.a === "kanalBudgetSlider" ? geld(Number(el2.value)) : Number(el2.value).toFixed(1).replace(".", ",") + " \xD7";
     });
     inhalt.addEventListener("change", (ev) => {
       if (!ui.aktiv) return;
@@ -133807,6 +134048,7 @@
       ui,
       da,
       oeffne: (seite2 = "uebersicht", arg) => {
+        if (!ui.stadt) ui.stadt = ctx.stadt?.() ?? null;
         ui.seite = seite2;
         if (seite2 === "aktion") ui.aktion = arg;
         ui.planen = null;
@@ -133843,12 +134085,12 @@
       if (ui.haus) {
         const h3 = s2().haeuser.find((x2) => x2.id === ui.haus);
         const p2 = E8.umbauSchaetzung(s2(), ui.haus, ui.etage, ui.stufe);
-        const aktiv5 = (s2().umbau?.projekte ?? []).some((x2) => x2.status === "laufend" && x2.haus === ui.haus && x2.etagen.includes(ui.etage));
+        const aktiv6 = (s2().umbau?.projekte ?? []).some((x2) => x2.status === "laufend" && x2.haus === ui.haus && x2.etagen.includes(ui.etage));
         let html2 = '<div class="karte"><div class="khead">Umbau planen</div><div class="zeile"><b>' + esc2(h3?.name ?? "Haus") + " \xB7 " + ETAGE(ui.etage) + "</b></div>";
         html2 += '<label>Stufe <select class="ort gross" data-umbau="stufe">' + Object.entries(BEZEICHNUNG).map(([id, name2]) => '<option value="' + id + '"' + (id === ui.stufe ? " selected" : "") + ">" + name2 + "</option>").join("") + "</select></label>";
         html2 += '<div class="raster"><div class="kz"><span>Fl\xE4che</span><b>' + fmt.format(p2?.qm ?? 0) + ' qm</b></div><div class="kz"><span>Kosten</span><b>' + geld(p2?.kosten ?? 0) + '</b></div><div class="kz"><span>Bauzeit</span><b>' + (p2?.wochen ?? 0) + ' Wochen</b></div><div class="kz"><span>Wirkung Kaufquote</span><b>+' + Math.round((p2?.kaufquote ?? 0) * 100) + " %</b></div></div>";
         if (ui.stufe === "komplett") html2 += '<div class="zeile warnung">Komplettumbau betrifft das gesamte Haus.</div>';
-        html2 += '<button class="breit gruen" data-umbau="starten" ' + (aktiv5 ? "disabled" : "") + ">Umbau starten</button></div>";
+        html2 += '<button class="breit gruen" data-umbau="starten" ' + (aktiv6 ? "disabled" : "") + ">Umbau starten</button></div>";
         ctx.panel("Bau", esc2(h3?.stadt ?? ""), html2);
         ui.aktiv = true;
         return;
@@ -134074,7 +134316,7 @@
       marken: { brust: 116, taille: 152, huefte: 188, schritt: 210, knie: 284, knoechel: 387, ellbogen: 147, handgelenk: 190, schulterY: 84 }
     }
   };
-  var ALTER3 = {
+  var ALTER2 = {
     kinder: { h: 0.62, kopf: 0.92, breit: { schulter: 0.6, taille: 0.66, huefte: 0.64, bein: 0.62, arm: 0.62 } },
     teens: { h: 0.92, kopf: 1, breit: { schulter: 0.9, taille: 0.9, huefte: 0.9, bein: 0.88, arm: 0.88 } },
     young: { h: 1, kopf: 1, breit: { schulter: 1, taille: 1, huefte: 1, bein: 1, arm: 1 } },
@@ -134108,7 +134350,7 @@
   var ALLTAG = { damen: alltag(VORLAGE.damen), herren: alltag(VORLAGE.herren) };
   function koerper3(geschlecht, zielgruppe) {
     const V = ALLTAG[geschlecht === "herren" ? "herren" : "damen"];
-    const A = ALTER3[zielgruppe] ?? ALTER3.young;
+    const A = ALTER2[zielgruppe] ?? ALTER2.young;
     const boden10 = 404;
     const yT = (y2) => boden10 - (boden10 - y2) * A.h;
     const zone = (y2) => y2 < V.marken.brust ? "schulter" : y2 < V.marken.huefte - 12 ? "taille" : "huefte";
@@ -140431,7 +140673,7 @@
     const verfuegbar2 = punkte2.filter((p2) => Array.isArray(p2.koordinaten) && p2.koordinaten.length === 2).sort((a2, b2) => gewicht2(a2) - gewicht2(b2) || a2.stadt.localeCompare(b2.stadt, "de"));
     for (const punkt5 of verfuegbar2) {
       const [lat, lon] = punkt5.koordinaten, cx = x(lon), cy = y(lat);
-      const aktiv5 = punkt5.stadt === aktuell;
+      const aktiv6 = punkt5.stadt === aktuell;
       const radius = Math.min(9, Math.max(
         3.6,
         3.6 + Math.sqrt(Math.max(0, modus === "reise" ? punkt5.anzahl : punkt5.umsatz / 1e6)) * (modus === "reise" ? 0.9 : 0.6)
@@ -140441,19 +140683,19 @@
         tabindex: "0",
         role: "button",
         "data-stadt": name2,
-        class: "deutschland-stadt" + (aktiv5 ? " deutschland-aktuell" : ""),
-        "aria-label": name2 + ", " + punkt5.anzahl + " " + (punkt5.anzahl === 1 ? "Haus" : "H\xE4user") + (aktiv5 ? ", aktueller Standort" : "")
+        class: "deutschland-stadt" + (aktiv6 ? " deutschland-aktuell" : ""),
+        "aria-label": name2 + ", " + punkt5.anzahl + " " + (punkt5.anzahl === 1 ? "Haus" : "H\xE4user") + (aktiv6 ? ", aktueller Standort" : "")
       });
       const title = element("title");
-      title.textContent = name2 + " \xB7 " + punkt5.anzahl + " H\xE4user" + (aktiv5 ? " \xB7 aktuell" : "");
+      title.textContent = name2 + " \xB7 " + punkt5.anzahl + " H\xE4user" + (aktiv6 ? " \xB7 aktuell" : "");
       g.append(title);
-      g.append(element("circle", { cx, cy, r: GROSSE_STAEDTE.has(name2) || aktiv5 ? 21 : 12, fill: "transparent", stroke: "none" }));
-      if (aktiv5) g.append(element("circle", { cx, cy, r: radius + 5, fill: "#fff", stroke: "#b32632", "stroke-width": "2", "pointer-events": "none" }));
+      g.append(element("circle", { cx, cy, r: GROSSE_STAEDTE.has(name2) || aktiv6 ? 21 : 12, fill: "transparent", stroke: "none" }));
+      if (aktiv6) g.append(element("circle", { cx, cy, r: radius + 5, fill: "#fff", stroke: "#b32632", "stroke-width": "2", "pointer-events": "none" }));
       g.append(element("circle", {
         cx,
         cy,
         r: radius,
-        fill: aktiv5 ? "#b32632" : modus === "reise" ? "#365e78" : AMPEL_FARBE[punkt5.amp] ?? AMPEL_FARBE.ohne,
+        fill: aktiv6 ? "#b32632" : modus === "reise" ? "#365e78" : AMPEL_FARBE[punkt5.amp] ?? AMPEL_FARBE.ohne,
         stroke: "#fff",
         "stroke-width": "1.3",
         "pointer-events": "none"
@@ -140554,8 +140796,8 @@
     const zeilen = () => ctx.E.portfolio(ctx.s());
     const gefiltert = () => portfolioFiltern(zeilen(), ui.filter);
     const aktionsIds = () => {
-      const aktiv5 = new Set(zeilen().filter((h3) => h3.steuerbar).map((h3) => h3.id));
-      return [...ui.ausgewaehlt].filter((id) => aktiv5.has(id));
+      const aktiv6 = new Set(zeilen().filter((h3) => h3.steuerbar).map((h3) => h3.id));
+      return [...ui.ausgewaehlt].filter((id) => aktiv6.has(id));
     };
     function kopf() {
       return '<div class="pp-tabs"><button class="pp-tab ' + (ui.seite === "karte" ? "an" : "") + '" data-pp="seite" data-v="karte">Deutschland</button><button class="pp-tab ' + (ui.seite === "liste" ? "an" : "") + '" data-pp="seite" data-v="liste">H\xE4user</button></div><div class="pp-filter"><label>Format<select data-pp-filter="format">' + optionen2([["alle", "Alle"], ...FORMATE3], ui.filter.format) + '</select></label><label>Region<select data-pp-filter="region">' + optionen2([["alle", "Alle"], ...["West", "Nord", "S\xFCd", "Mitte", "Ost"].map((v) => [v, v])], ui.filter.region) + '</select></label><label>Hausklasse<select data-pp-filter="klasse">' + optionen2([["alle", "Alle"], ...["A", "B", "C", "Premium"].map((v) => [v, v])], ui.filter.klasse) + '</select></label><label>Ampel<select data-pp-filter="ampel">' + optionen2([["alle", "Alle"], ["gruen", "Gr\xFCn"], ["gelb", "Gelb"], ["rot", "Rot"], ["ohne", "Ohne Daten"]], ui.filter.ampel) + '</select></label></div><label class="pp-suchlabel">Stadt oder Haus suchen<input id="pp-suche" type="search" placeholder="Stadt, Name oder Haus-ID" value="' + esc2(ui.filter.suche) + '" autocomplete="off" /></label><div class="pp-speichern"><button data-pp="merken">Filter speichern</button><select data-pp="gespeichert" aria-label="Gespeicherte Auswahl laden">' + optionen2([["", "Gespeicherte Auswahl \u2026"], ...ui.gespeicherte.map((q2) => [q2.name, q2.name])], "") + '</select></div><div id="pp-inhalt"></div>';
@@ -141001,7 +141243,7 @@
     const region = typeof stadt === "string" ? "" : stadt.region;
     return STADT[name2] ?? TYP4[typ] ?? (/nord/i.test(region) ? "hafen" : /ost/i.test(region) ? "altstadt" : "rathaus");
   }
-  function stadtSymbolSVG(stadt) {
+  function stadtSymbolSVG2(stadt) {
     const art = stadtSymbolArt(stadt);
     return '<svg class="reise-wahrzeichen" viewBox="0 0 60 60" focusable="false" aria-hidden="true"><rect x="0.5" y="0.5" width="59" height="59" rx="9" fill="#eef1f2" stroke="#dce3e6"/><g fill="none" stroke="#3b5e70" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">' + ART2[art] + "</g></svg>";
   }
@@ -141048,7 +141290,7 @@
   var vorschauen = /* @__PURE__ */ new Map();
   function stadtVorschau(c) {
     const data = vorschauen.get(c.name);
-    return '<span class="reise-vorschaurahmen">' + (data ? '<img src="' + data + '" alt="" loading="lazy">' : stadtSymbolSVG(c)) + "</span>";
+    return '<span class="reise-vorschaurahmen">' + (data ? '<img src="' + data + '" alt="" loading="lazy">' : stadtSymbolSVG2(c)) + "</span>";
   }
   var zug3 = '<svg class="reise-zug" viewBox="0 0 780 180" aria-hidden="true"><path d="M42 85 Q72 37 153 32 L598 32 Q693 37 748 106 L754 134 Q747 148 717 151 L82 151 Q43 142 42 115Z" fill="#f7f8f9" stroke="#a5b1ba" stroke-width="5"/><path d="M44 118 L748 118" stroke="#cf392e" stroke-width="17"/><path d="M75 76 Q102 43 170 45 L222 45 L222 88 L62 88Z M246 45 H350 V88 H246Z M373 45 H475 V88 H373Z M497 45 H601 V88 H497Z M621 53 Q685 66 712 95 H621Z" fill="#263d50"/><path d="M76 150 L711 150" stroke="#59636c" stroke-width="7"/></svg>';
   function reiseModul(ctx) {
@@ -141057,14 +141299,14 @@
     z4.hidden = true;
     document.body.append(z4);
     const protokoll2 = [];
-    let aktiv5 = false, token = 0, gestartet = 0, zielStart = null, letzte = [];
+    let aktiv6 = false, token = 0, gestartet = 0, zielStart = null, letzte = [];
     const messen2 = (schritt) => {
       const t = performance.now();
       protokoll2.push({ schritt, ms: Math.round(t - gestartet), ...zielStart === null ? {} : { reiseMs: Math.round(t - zielStart) } });
     };
     function schliessen() {
       ++token;
-      aktiv5 = false;
+      aktiv6 = false;
       z4.hidden = true;
       z4.innerHTML = "";
       z4.className = "";
@@ -141097,7 +141339,7 @@
       if (treffer) treffer.textContent = sortiert.length + " " + (sortiert.length === 1 ? "Reiseziel" : "Reiseziele");
     }
     function ansichtSetzen(name2) {
-      if (!aktiv5 || !["karte", "liste"].includes(name2)) return;
+      if (!aktiv6 || !["karte", "liste"].includes(name2)) return;
       for (const art of ["karte", "liste"]) {
         const an = art === name2;
         z4.querySelector("#reise-blatt-" + art)?.toggleAttribute("hidden", !an);
@@ -141121,11 +141363,11 @@
       requestAnimationFrame(tick);
     }
     function oeffne() {
-      if (aktiv5) return;
+      if (aktiv6) return;
       ++token;
       const meins = token;
       letzte = [...ctx.zuletzt?.() ?? letzte];
-      aktiv5 = true;
+      aktiv6 = true;
       gestartet = performance.now();
       zielStart = null;
       protokoll2.length = 0;
@@ -141183,7 +141425,7 @@
       }, animate ? REISE_ZEIT.zieleAb : 0);
     }
     async function fahren(ziel) {
-      if (!aktiv5 || !ctx.staedte().some((c) => c.name === ziel) || ziel === ctx.stadt()) return;
+      if (!aktiv6 || !ctx.staedte().some((c) => c.name === ziel) || ziel === ctx.stadt()) return;
       const meins = ++token, von = ctx.stadt(), start = performance.now(), reduziert3 = bewegungReduziert() || ohneAnimation();
       zielStart = start;
       messen2("Reiseziel gew\xE4hlt");
@@ -141246,9 +141488,9 @@
       const b2 = e.target.closest("[data-reiseziel]");
       if (b2) fahren(b2.dataset.reiseziel);
     });
-    return { oeffne, zu: schliessen, aktiv: () => aktiv5, pruefe: () => ({
+    return { oeffne, zu: schliessen, aktiv: () => aktiv6, pruefe: () => ({
       stadt: ctx.stadt(),
-      aktiv: aktiv5,
+      aktiv: aktiv6,
       schritte: [...protokoll2],
       zielAnzahl: z4.querySelectorAll("[data-reiseziel]").length,
       kartenPunkte: z4.querySelectorAll(".deutschland-stadt").length,
@@ -142151,7 +142393,7 @@
     wurzel2.append(css);
   }
   function hausbesuchModul(ctx) {
-    let aktiv5 = HAUSBESUCH_AKTIV, haus2 = null, nr3 = 0, host, bild3, canvas2, renderer, scene2, cam2, buehne;
+    let aktiv6 = HAUSBESUCH_AKTIV, haus2 = null, nr3 = 0, host, bild3, canvas2, renderer, scene2, cam2, buehne;
     let figuren3 = [], personenMesh = [], treffer = [], animation = 0, fahrt = null, rahmenzeiten = [], letzte = 0;
     let navigation = null, besuchZonen = [], besuchSeed = "";
     let K3 = { x: 0, z: 0, halb: 40, min: 8, max: 100 };
@@ -142403,7 +142645,7 @@
       bauen3(n3, delta);
     }
     function oeffne(id) {
-      if (!aktiv5) return false;
+      if (!aktiv6) return false;
       const s2 = ctx.s();
       if (!s2) return false;
       const h3 = s2.haeuser.find((q2) => q2.id === id) ?? haeuser_outlet_default.find((q2) => q2.id === id && q2.stadt === ctx.stadtName());
@@ -142483,11 +142725,11 @@
       pruefung,
       bildschritt,
       get aktiv() {
-        return aktiv5;
+        return aktiv6;
       },
       setzenAktiv: (an) => {
-        aktiv5 = !!an;
-        if (!aktiv5) schliesse();
+        aktiv6 = !!an;
+        if (!aktiv6) schliesse();
       }
     };
   }
@@ -142691,7 +142933,7 @@
     let reiseToken = 0, musikNaechste = 0, musikSchritt = 0;
     let timer = null, zugRaf = 0, letztePhase = null;
     const jetzt = () => audio?.currentTime ?? 0;
-    const aktiv5 = () => audio && audio.state === "running" && typeof document !== "undefined" && !document.hidden;
+    const aktiv6 = () => audio && audio.state === "running" && typeof document !== "undefined" && !document.hidden;
     const laut = (typ) => tonEinstellung("ton_" + typ) ? tonEinstellung("ton_" + typ + "_lautstaerke") / 100 : 0;
     const leise = (g, wert, zeit = 0.07) => {
       if (!g || !audio) return;
@@ -142745,7 +142987,7 @@
       }
     }
     function note(freq, zeit, dauer, pegel, typ = "sine", ziel = effekt, ende = freq) {
-      if (!aktiv5() || !ziel || pegel <= 0) return;
+      if (!aktiv6() || !ziel || pegel <= 0) return;
       const osz = audio.createOscillator(), g = audio.createGain();
       osz.type = typ;
       osz.frequency.setValueAtTime(freq, zeit);
@@ -142767,7 +143009,7 @@
       return b2;
     }
     function rauschen2(zeit, dauer, pegel, filterFrequenz = 800, art = "lowpass", ziel = effekt) {
-      if (!aktiv5() || !ziel || pegel <= 0) return;
+      if (!aktiv6() || !ziel || pegel <= 0) return;
       const quelle2 = audio.createBufferSource(), f11 = audio.createBiquadFilter(), g = audio.createGain();
       quelle2.buffer = rauschPuffer();
       quelle2.loop = dauer >= 4.5;
@@ -142784,7 +143026,7 @@
       quelle2.stop(zeit + dauer + 0.01);
     }
     function abspielen(art, faktor2 = 1) {
-      if (!gestartet || !aktiv5() || !tonEinstellung("ton_klaenge")) return false;
+      if (!gestartet || !aktiv6() || !tonEinstellung("ton_klaenge")) return false;
       const p2 = laut("klaenge") * begrenze2(faktor2, 0, 1), t = jetzt() + 8e-3;
       if (p2 === 0) return false;
       switch (art) {
@@ -142828,7 +143070,7 @@
       return true;
     }
     function reisen() {
-      if (!gestartet || !aktiv5() || !laut("klaenge")) return false;
+      if (!gestartet || !aktiv6() || !laut("klaenge")) return false;
       ++reiseToken;
       const token = reiseToken, start = performance.now(), t = jetzt();
       const q2 = audio.createBufferSource(), filter = audio.createBiquadFilter(), g = audio.createGain();
@@ -142847,7 +143089,7 @@
         note(90, z4, 0.044, laut("klaenge") * 0.09, "triangle", effekt, 58);
       }
       function lautstaerke() {
-        if (token !== reiseToken || !aktiv5() || !tonEinstellung("ton_klaenge")) {
+        if (token !== reiseToken || !aktiv6() || !tonEinstellung("ton_klaenge")) {
           leise(g, 0, 0.015);
           return;
         }
@@ -142866,7 +143108,7 @@
       return true;
     }
     function stadtrauschen() {
-      if (!aktiv5() || stadtNah) return;
+      if (!aktiv6() || stadtNah) return;
       function schicht(typ, frequenz) {
         const quelle2 = audio.createBufferSource(), filter = audio.createBiquadFilter(), g = audio.createGain();
         quelle2.buffer = rauschPuffer();
@@ -142890,7 +143132,7 @@
       note(ton2 * 2, start, dauer * 0.85, pegel * 0.1, "triangle", musik);
     }
     function musikNachziehen() {
-      if (!aktiv5() || !laut("musik")) {
+      if (!aktiv6() || !laut("musik")) {
         musikNaechste = 0;
         return;
       }
@@ -142917,7 +143159,7 @@
       }
       letztePhase = phase;
       if (!audio) return;
-      const sichtbar4 = aktiv5();
+      const sichtbar4 = aktiv6();
       const zv = sichtbar4 ? laut("stadt") : 0, mv = sichtbar4 ? laut("musik") : 0;
       leise(stadt, zv, 0.09);
       leise(musik, mv, 0.13);
@@ -143145,7 +143387,7 @@
     document.body.append(root);
     const zustand = lesen(SCHLUESSEL, { modus: "neu", index: 0 });
     let index2 = Math.max(0, Math.min(EINFUEHRUNG.length - 1, Number(zustand.index) || 0));
-    let aktiv5 = false, frage = false, tick = 0, rAF = 0, startZeit = 0, kompletterText = false;
+    let aktiv6 = false, frage = false, tick = 0, rAF = 0, startZeit = 0, kompletterText = false;
     let kartenStart = null, kartenZeiger = /* @__PURE__ */ new Map(), geschoben = false, gezoomt = false;
     let wocheVor = 0, stadtVor = "", gesehen = /* @__PURE__ */ new Set(), freigabenVor = 0;
     let tippsAn = lesen(TIPPS, true);
@@ -143155,7 +143397,7 @@
       sichern(SCHLUESSEL, zustand);
     };
     function beenden(fertig2 = false) {
-      aktiv5 = false;
+      aktiv6 = false;
       frage = false;
       clearInterval(tick);
       tick = 0;
@@ -143171,7 +143413,7 @@
       }
     }
     function ganzenText() {
-      if (!aktiv5 || kompletterText) return;
+      if (!aktiv6 || kompletterText) return;
       kompletterText = true;
       cancelAnimationFrame(rAF);
       rAF = 0;
@@ -143188,7 +143430,7 @@
       }
       startZeit = performance.now();
       function frame(t) {
-        if (!aktiv5 || !p2.isConnected || kompletterText) return;
+        if (!aktiv6 || !p2.isConnected || kompletterText) return;
         const text3 = EINFUEHRUNG[index2].text;
         const zeichen = Math.min(text3.length, Math.floor((t - startZeit) * TEMPO / 1e3));
         p2.textContent = text3.slice(0, zeichen);
@@ -143201,7 +143443,7 @@
       rAF = requestAnimationFrame(frame);
     }
     function schritt() {
-      if (!aktiv5) return;
+      if (!aktiv6) return;
       cancelAnimationFrame(rAF);
       rAF = 0;
       const d3 = EINFUEHRUNG[index2];
@@ -143214,7 +143456,7 @@
       positionieren();
     }
     function weiter() {
-      if (!aktiv5) return;
+      if (!aktiv6) return;
       if (index2 + 1 === EINFUEHRUNG.length) return beenden(true);
       index2++;
       speichern2();
@@ -143268,7 +143510,7 @@
       }
     }
     function positionieren() {
-      if (!aktiv5) return;
+      if (!aktiv6) return;
       const ziel = fokusElement();
       let b2 = ziel?.getBoundingClientRect();
       if (EINFUEHRUNG[index2].ziel === "karte" && b2) {
@@ -143300,7 +143542,7 @@
       if (neustart) index2 = 0;
       zustand.modus = "aktiv";
       speichern2();
-      aktiv5 = true;
+      aktiv6 = true;
       frage = false;
       document.body.classList.add("einfuehrung-aktiv");
       geschoben = false;
@@ -143311,7 +143553,7 @@
       stadtVor = getSpiel().reise?.pruefe()?.stadt ?? "";
       schritt();
       tick = setInterval(() => {
-        if (!aktiv5) return;
+        if (!aktiv6) return;
         const d3 = EINFUEHRUNG[index2];
         if (d3.warte === "woche" && getSpiel()?.s?.woche > wocheVor) weiter();
         else if (d3.warte === "reise" && (getSpiel()?.reise?.pruefe()?.stadt ?? "") !== stadtVor && !getSpiel()?.reise?.aktiv()) weiter();
@@ -143319,7 +143561,7 @@
       }, 160);
     }
     function abfrage() {
-      if (aktiv5 || frage) return;
+      if (aktiv6 || frage) return;
       frage = true;
       root.hidden = false;
       root.innerHTML = '<div class="ein-fragemaske"></div><section class="ein-frage" role="dialog" aria-modal="true" aria-label="Einf\xFChrung starten"><div class="ein-inhalt"><p><b>Einf\xFChrung starten?</b><span>Die Vorstandsassistentin erkl\xE4rt in 14 Schritten die wichtigsten Funktionen.</span></p><div class="ein-portraet">' + ASSISTENTIN3 + '</div></div><div class="ein-antworten"><button type="button" data-ein="ja">Ja</button><button type="button" data-ein="spaeter">Sp\xE4ter</button><button type="button" data-ein="nie">Nie</button></div></section>';
@@ -143362,12 +143604,12 @@
       }
     });
     document.addEventListener("click", (e) => {
-      if (aktiv5 && EINFUEHRUNG[index2].warte === "freigabe" && ["frei", "sammel", "kuerzen"].includes(e.target.closest("[data-a]")?.dataset.a)) {
+      if (aktiv6 && EINFUEHRUNG[index2].warte === "freigabe" && ["frei", "sammel", "kuerzen"].includes(e.target.closest("[data-a]")?.dataset.a)) {
         freigabenVor = getSpiel()?.E?.freigaben(getSpiel().s)?.anzahl ?? 0;
       }
     }, true);
     document.addEventListener("click", (e) => {
-      if (!aktiv5) return;
+      if (!aktiv6) return;
       const d3 = EINFUEHRUNG[index2], ziel = e.target.closest("button, [data-a]");
       if (d3.warte === "posteingang" && (ziel?.id === "postdirekt" || ziel?.id === "posteingang") && getSpiel()?.posteingang?.aktiv()) return weiter();
       if (d3.warte === "freigabe" && ["frei", "sammel", "kuerzen"].includes(ziel?.dataset.a)) {
@@ -143380,12 +143622,12 @@
       requestAnimationFrame(positionieren);
     });
     document.addEventListener("pointerdown", (e) => {
-      if (!aktiv5 || EINFUEHRUNG[index2].warte !== "karte" || e.target !== el("karte")) return;
+      if (!aktiv6 || EINFUEHRUNG[index2].warte !== "karte" || e.target !== el("karte")) return;
       kartenZeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (kartenZeiger.size === 1) kartenStart = { x: e.clientX, y: e.clientY };
     }, true);
     document.addEventListener("pointermove", (e) => {
-      if (!aktiv5 || EINFUEHRUNG[index2].warte !== "karte" || !kartenZeiger.has(e.pointerId)) return;
+      if (!aktiv6 || EINFUEHRUNG[index2].warte !== "karte" || !kartenZeiger.has(e.pointerId)) return;
       const p2 = kartenZeiger.get(e.pointerId);
       if (kartenZeiger.size > 1 && Math.hypot(p2.x - e.clientX, p2.y - e.clientY) > 12) gezoomt = true;
       if (kartenStart && Math.hypot(kartenStart.x - e.clientX, kartenStart.y - e.clientY) > 18) geschoben = true;
@@ -143393,18 +143635,18 @@
       if (geschoben && gezoomt) weiter();
     }, true);
     document.addEventListener("pointerup", (e) => {
-      if (!aktiv5) return;
+      if (!aktiv6) return;
       if (EINFUEHRUNG[index2].warte === "karte") {
         kartenZeiger.delete(e.pointerId);
         if (geschoben && gezoomt) weiter();
       } else if (EINFUEHRUNG[index2].warte === "haus" && e.target === el("karte")) {
         requestAnimationFrame(() => {
-          if (aktiv5 && EINFUEHRUNG[index2].warte === "haus" && el("panel")?.classList.contains("offen") && !["Zentrale", "Wettbewerber"].includes(el("ptitel")?.textContent)) weiter();
+          if (aktiv6 && EINFUEHRUNG[index2].warte === "haus" && el("panel")?.classList.contains("offen") && !["Zentrale", "Wettbewerber"].includes(el("ptitel")?.textContent)) weiter();
         });
       }
     });
     document.addEventListener("wheel", (e) => {
-      if (aktiv5 && EINFUEHRUNG[index2].warte === "karte" && e.target === el("karte")) {
+      if (aktiv6 && EINFUEHRUNG[index2].warte === "karte" && e.target === el("karte")) {
         gezoomt = true;
         if (geschoben) weiter();
       }
@@ -143426,7 +143668,7 @@
     hinweis.hidden = true;
     document.body.append(hinweis);
     function panelTipp() {
-      if (aktiv5 || frage || !tippsAn || zustand.modus !== "fertig") return;
+      if (aktiv6 || frage || !tippsAn || zustand.modus !== "fertig") return;
       if (!el("panel")?.classList.contains("offen")) return;
       const titel = el("ptitel")?.textContent ?? "";
       const key = Object.keys(HINWEISE).find((k3) => titel.includes(k3)) || (getSpiel()?.s?.haeuser?.some((h3) => h3.name === titel) ? "Hausdetail" : null);
@@ -143461,7 +143703,7 @@
       });
     }
     return { spielStart, starten, beenden, zustand: () => ({
-      aktiv: aktiv5,
+      aktiv: aktiv6,
       frage,
       index: index2,
       schritt: EINFUEHRUNG[index2].id,
@@ -143956,7 +144198,7 @@
     const fehler6 = [];
     const frames = [];
     const einmal2 = new URLSearchParams(location.search).get("werkzeuge") === "1";
-    let freigeschaltet = false, aktiv5 = false, beschaeftigt = false;
+    let freigeschaltet = false, aktiv6 = false, beschaeftigt = false;
     let messTimer = null, raf = null;
     let berichteingabe = "";
     let letzterBericht = "";
@@ -144003,7 +144245,7 @@
       };
     }
     function animation(t) {
-      if (!aktiv5) return;
+      if (!aktiv6) return;
       ctx.renderFrame();
       frames.push(t);
       fenster8();
@@ -144017,7 +144259,7 @@
       return { ...m, teile: teile2, engineMs: ende?.engineMs ?? null, speicherMiB: speicher === void 0 ? null : num2(speicher / 1048576) };
     }
     function metrikZeigen() {
-      if (!aktiv5) return;
+      if (!aktiv6) return;
       const m = metriken();
       for (const [id, wert] of Object.entries(m)) {
         const el2 = document.getElementById("test-" + id);
@@ -144036,7 +144278,7 @@
       const knoepfe = (list) => list.map((e) => '<button type="button" data-test-ereignis="' + esc2(e.id) + '">' + esc2(e.name) + "</button>").join("");
       const html = '<div class="testwerkzeuge"><div class="karte"><h3>Teststeuerung</h3><p class="leise">Nur f\xFCr Tests. \xC4nderungen markieren den Spielstand dauerhaft als Testspiel.</p><label><input id="test-bot" type="checkbox"' + (document.getElementById("test-bot")?.checked ? " checked" : "") + '> Bot C f\xFCr den Zeitsprung einsetzen</label><div class="test-tasten">' + [1, 4, 13, 52].map((n3) => '<button type="button" data-test-wochen="' + n3 + '">' + n3 + " Woche" + (n3 > 1 ? "n" : "") + "</button>").join("") + '</div><progress id="test-fortschritt" max="1" value="0" hidden></progress><div id="test-status" role="status"></div><label class="test-eingabe">Cash (\u20AC) <input id="test-cash" type="number" step="1" value="' + s2.cash + '"></label><button type="button" data-test-a="cash">Cash setzen</button> <button type="button" class="rot" data-test-a="insolvenz">Insolvenz er\xF6ffnen</button><h3>Stakeholder</h3><div class="test-felder">' + stakeholder + '</div><label class="test-eingabe">Schwierigkeit <select id="test-schwierigkeit">' + ["leicht", "mittel", "schwer"].map((v) => '<option value="' + v + '"' + ((s2.schwierigkeit ?? "mittel") === v ? " selected" : "") + ">" + v + "</option>").join("") + '</select></label><button type="button" data-test-a="schwierigkeit">Schwierigkeit setzen</button></div><div class="karte"><h3>Angebote ausl\xF6sen</h3><div class="test-tasten">' + knoepfe(angebot) + '</div><h3>Ereignisse ausl\xF6sen</h3><div class="test-tasten">' + knoepfe(ereignis) + '</div></div><div class="karte"><h3>Live-Messung (letzte 2 Sekunden)</h3>' + zeigeMetrik("Bildrate Mittel", "fpsMittel", " FPS") + zeigeMetrik("Schlechteste Bildrate", "fpsSchlechteste", " FPS") + zeigeMetrik("Szenenteile", "teile", "") + zeigeMetrik("Engine letzte Woche", "engineMs", " ms") + zeigeMetrik("JS-Speicher", "speicherMiB", " MiB") + '</div><div class="karte"><h3>Fehlerbericht</h3><p class="leise">Enth\xE4lt den vollst\xE4ndigen Spielstand und Ger\xE4teinformationen. Nur an vertrauensw\xFCrdige Empf\xE4nger weitergeben.</p><button type="button" data-test-a="kopieren">Bericht kopieren</button> <button type="button" data-test-a="laden">Bericht laden</button><textarea id="test-bericht" rows="4" placeholder="Komprimierten Fehlerbericht hier einf\xFCgen" spellcheck="false"></textarea><small>' + fehler6.length + " Konsolenfehler gespeichert, 20 im Bericht</small></div></div>";
       ctx.panel("Testwerkzeuge", "Seed " + s2.seed + " \xB7 Woche " + s2.woche + " \xB7 Version " + s2.version, html, "gross");
-      aktiv5 = true;
+      aktiv6 = true;
       inhalt.scrollTop = sc;
       document.getElementById("test-bericht").value = berichteingabe;
       metrikZeigen();
@@ -144049,7 +144291,7 @@
       return true;
     }
     function zu() {
-      aktiv5 = false;
+      aktiv6 = false;
       clearInterval(messTimer);
       messTimer = null;
       if (raf !== null) cancelAnimationFrame(raf);
@@ -144060,11 +144302,11 @@
       const r3 = ctx.E.fuehreAus(ctx.s(), a2);
       ctx.meldung(r3.text, r3.ok);
       if (r3.ok) ctx.nachAktion();
-      if (aktiv5) zeigen(true);
+      if (aktiv6) zeigen(true);
       return r3;
     };
     async function springen(n3, bot) {
-      if (!aktiv5 || beschaeftigt || ![1, 4, 13, 52].includes(n3)) return { fertig: 0 };
+      if (!aktiv6 || beschaeftigt || ![1, 4, 13, 52].includes(n3)) return { fertig: 0 };
       beschaeftigt = true;
       const bar = document.getElementById("test-fortschritt");
       const status = document.getElementById("test-status");
@@ -144090,7 +144332,7 @@
         throw e;
       } finally {
         beschaeftigt = false;
-        if (aktiv5) zeigen();
+        if (aktiv6) zeigen();
       }
     }
     async function erstelleBericht() {
@@ -144129,20 +144371,20 @@
         throw new Error("Bericht enth\xE4lt keinen g\xFCltigen Spielstand.");
       await ctx.standLaden(datensatz);
       ctx.meldung("Testbericht geladen: Seed " + datensatz.spiel.seed + ", Woche " + datensatz.spiel.woche + ".");
-      if (aktiv5) zeigen();
+      if (aktiv6) zeigen();
       return { seed: ctx.s().seed, woche: ctx.s().woche, cash: ctx.s().cash };
     }
     inhalt.addEventListener("input", (e) => {
-      if (aktiv5 && e.target.id === "test-bericht") berichteingabe = e.target.value;
+      if (aktiv6 && e.target.id === "test-bericht") berichteingabe = e.target.value;
     });
     inhalt.addEventListener("change", (e) => {
-      if (!aktiv5) return;
+      if (!aktiv6) return;
       const feld = e.target.dataset.testStake;
       if (feld && e.target.validity.valid && e.target.value !== "")
         sende({ typ: "testStakeholder", feld, wert: Number(e.target.value) });
     });
     inhalt.addEventListener("click", async (e) => {
-      if (!aktiv5 || beschaeftigt) return;
+      if (!aktiv6 || beschaeftigt) return;
       const button2 = e.target.closest("[data-test-a],[data-test-wochen],[data-test-ereignis]");
       if (!button2) return;
       const a2 = button2.dataset.testA;
@@ -144162,9 +144404,9 @@
     return {
       oeffne,
       zu,
-      aktiv: () => aktiv5,
+      aktiv: () => aktiv6,
       neuZeichnen: () => {
-        if (aktiv5 && !beschaeftigt) zeigen(true);
+        if (aktiv6 && !beschaeftigt) zeigen(true);
       },
       nachStart: () => {
         if (einmal2 && entsperren()) oeffne();
@@ -144360,9 +144602,9 @@
     }
     function projekte(d3) {
       let h3 = '<div class="olief">Projekte durchlaufen Konzept, Umsetzung und einen sequenziellen Rollout. Vier Wochen nach jedem Wechsel sind lokale Startprobleme m\xF6glich.</div>';
-      const aktiv5 = d3.projekte.filter((x2) => x2.phase !== "abgeschlossen");
-      if (!aktiv5.length) h3 += '<div class="karte"><div class="zeile">Keine laufenden Projekte.</div></div>';
-      h3 += aktiv5.map((p2) => projektKarte(p2, d3)).join("");
+      const aktiv6 = d3.projekte.filter((x2) => x2.phase !== "abgeschlossen");
+      if (!aktiv6.length) h3 += '<div class="karte"><div class="zeile">Keine laufenden Projekte.</div></div>';
+      h3 += aktiv6.map((p2) => projektKarte(p2, d3)).join("");
       const alt = d3.projekte.filter((x2) => x2.phase === "abgeschlossen").slice(-8).reverse();
       if (alt.length) h3 += '<div class="vtitel">Abgeschlossene Projekte</div>' + alt.map((p2) => projektKarte(p2, d3)).join("");
       h3 += '<div class="oknoepfe"><button data-it="reiter" data-v="neu">Neues Projekt planen</button></div>';
@@ -146329,7 +146571,7 @@
     oeffnePortfolio: () => oeffneModul(pp, "liste")
   });
   itM = itModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
-  mk = marketingModul({ E: src_exports, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf("gruenden") });
+  mk = marketingModul({ E: src_exports, s: () => s, stadt: () => stadtName, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf("gruenden") });
   pr = produkteModul({ E: src_exports, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf("gruenden") });
   ec = ecommerceModul({ E: src_exports, s: () => s, panel, meldung, nachAktion: () => {
     nachAktion();

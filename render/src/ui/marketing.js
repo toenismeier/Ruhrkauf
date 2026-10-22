@@ -314,7 +314,7 @@ export function marketingModul(ctx) {
 
   return {
     ui, da,
-    oeffne: (seite = 'uebersicht', arg) => { ui.seite = seite; if (seite === 'aktion') ui.aktion = arg; ui.planen = null; zeigen(); },
+    oeffne: (seite = 'uebersicht', arg) => { if (!ui.stadt) ui.stadt = ctx.stadt?.() ?? null; ui.seite = seite; if (seite === 'aktion') ui.aktion = arg; ui.planen = null; zeigen(); },
     neuZeichnen: () => zeigen(true), aktiv: () => ui.aktiv, zu: () => { ui.aktiv = false; },
     pruefe: () => ({ seite: ui.seite, ...vergleiche(rendern().S.W) }),
   };

@@ -1284,7 +1284,7 @@ org = organisationModul({ E, s: () => s, panel, meldung, nachAktion,
   oeffneHaus: (id) => oeffneHaus(id), oeffnePortfolio: () => oeffneModul(pp, 'liste') });
 // O03 IT
 itM = itModul({ E, s: () => s, panel, meldung, nachAktion });
-mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
+mk = marketingModul({ E, s: () => s, stadt: () => stadtName, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
 // O09 E-Commerce
 ec = ecommerceModul({ E, s: () => s, panel, meldung, nachAktion: () => { nachAktion(); grafikNachziehen(); } });
