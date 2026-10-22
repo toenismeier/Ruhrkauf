@@ -38,7 +38,7 @@ const preisSchritt = (p) => (p < 20 ? 1 : p < 100 ? 5 : 10);
 export function produkteModul(ctx) {
   const E = ctx.E, s = () => ctx.s();
   const da = typeof E.produkte === 'function';
-  const ui = { aktiv: false, seite: 'liste', marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: new Set(), fach: 'damen', zielgruppe: 'adults', detail: null };
+  const ui = { aktiv: false, seite: 'liste', marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: new Set(), fach: null, zielgruppe: null, detail: null };
 
   function markenwahl(L) {
     return `<div class="spaltenwahl">${L.marken.map((m) => `<button class="chipk ${m.marke === ui.marke ? 'an' : ''}" data-a="marke" data-v="${m.marke}"><b style="background:${m.farbe}"></b>${esc(m.name)}</button>`).join('')}</div>`;
@@ -46,11 +46,13 @@ export function produkteModul(ctx) {
   function aktuelleMarke(L) {
     if (!L.marken.length) return null;
     if (!L.marken.some((m) => m.marke === ui.marke)) ui.marke = L.marken[0].marke;
-    return L.marken.find((m) => m.marke === ui.marke);
+    const m = L.marken.find((x) => x.marke === ui.marke);
+    if (!ui.fach || !ui.zielgruppe) vorauswahl(m);
+    return m;
   }
 
   function vorauswahl(M) {
-    ui.fach = M.kategorien.some((k) => k.id === 'home') && M.kategorien.every((k) => k.id === 'home') ? 'home'
+    ui.fach = M.produkte.length > 0 && M.produkte.every((p) => p.kategorie === 'home') ? 'home'
       : M.trendGruppe === 'kinder' ? 'kinder' : /Herren/i.test(M.zielgruppe) ? 'herren' : 'damen';
     ui.zielgruppe = M.trendGruppe === 'kinder' ? 'kinder' : M.trendGruppe === 'reif' ? 'bestager' : M.trendGruppe === 'jung' ? 'young' : 'adults';
     ui.baumOffen = null; ui.astOffen = null;
@@ -65,7 +67,7 @@ export function produkteModul(ctx) {
     h += markenwahl(L);
     h += teamAufschluesselung(M.leistung);
     h += '<button class="breit q24-katalogknopf" data-a="katalog">Sortiment durchsuchen: Damen, Herren, Kinder, Home</button>';
-    h += `<div class="raster">${kz('Team Produktentwicklung', P('l:team', `${Math.round(L.team * 100)} / 100`))}${kz('Kosten je Woche', P('l:kosten', geld(L.kostenWoche)))}</div>`;
+    h += `<div class="raster">${kz('HQ-Team (Basis)', P('l:team', `${Math.round(L.team * 100)} / 100`))}${kz('Kosten je Woche', P('l:kosten', geld(L.kostenWoche)))}</div>`;
     const kats = M.kategorien.filter((k) => k.kapazitaet > 0 || k.belegt > 0);
     if (!kats.some((k) => k.id === ui.kategorie)) ui.kategorie = (kats.find((k) => M.produkte.some((p) => p.kategorie === k.id && p.status !== 'ausgelistet')) ?? kats[0])?.id ?? null;
     h += `<div class="seg umbruch kats">${kats.map((k) => `<button class="${k.id === ui.kategorie ? 'an' : ''}" data-a="kategorie" data-v="${k.id}">${esc(k.name)} ${P(`l:kat:${k.id}`, `${k.belegt} / ${k.kapazitaet}`, 'i')}</button>`).join('')}</div>`;
@@ -112,7 +114,7 @@ export function produkteModul(ctx) {
     h += fachSegmente(ui) + zielChips(K, ui);
     h += '<div class="q24-anzahl">' + typen.length + ' Artikeltypen · Kategorie öffnen und Artikel auswählen</div>';
     h += sortimentBedienung(K, ui, typen, kachel, 'detailTyp');
-    return { titel: 'Sortiment', unter: M.name + ' · ' + typen.length + ' passende Typen', html: h };
+    return { titel: 'Sortiment', unter: esc(M.name) + ' · ' + typen.length + ' passende Typen', html: h };
   }
 
   function detail() {
