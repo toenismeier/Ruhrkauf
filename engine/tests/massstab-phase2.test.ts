@@ -30,7 +30,7 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
       const abweichung = Math.abs(summen[k] / UMSATZZIELE_JAHR1[k] - 1);
       expect(abweichung).toBeLessThan(0.0001);
     }
-    expect(s.haeuser.filter((h) => !h.nurDaten)).toHaveLength(560);
+    expect(s.haeuser.filter((h) => !h.nurDaten)).toHaveLength(561);
     expect(s.haeuser.filter((h) => h.nurDaten)).toHaveLength(0);
   });
 
@@ -92,6 +92,6 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
 
   test('Bot C schließt proportional und berücksichtigt keine Datenhäuser', () => {
     expect(TIEF_SCHLIESSUNGSQUOTE).toBeCloseTo(50 / 180, 10);
-    expect(Math.round(408 * TIEF_SCHLIESSUNGSQUOTE)).toBe(113);
+    expect(Math.round(409 * TIEF_SCHLIESSUNGSQUOTE)).toBe(114);
   });
 });

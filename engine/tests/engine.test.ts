@@ -16,8 +16,8 @@ function spiele(s: GameState, n: number, freigeben = false): WochenKpi[] {
 
 describe('Welt', () => {
   const s = neuesSpiel(1);
-  test('364 Warenhäuser inklusive Premium und 44 Sporthäuser', () => {
-    expect(s.haeuser.filter((h) => h.format === 'warenhaus')).toHaveLength(364);
+  test('365 Warenhäuser inklusive Premium und 44 Sporthäuser', () => {
+    expect(s.haeuser.filter((h) => h.format === 'warenhaus')).toHaveLength(365);
     expect(s.haeuser.filter((h) => h.format === 'sport')).toHaveLength(44);
   });
   test('jedes Haus hat Etagen, Flächen und Potenzial je Sortiment', () => {
