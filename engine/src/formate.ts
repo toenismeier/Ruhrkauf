@@ -5,6 +5,7 @@ import { clamp, eur, chance, zwischen, melde, type RngHalter } from './util';
 import { simuliereHaus, hausKosten, leereKpi, nebenvertragsErtraege } from './wirtschaft';
 import { guvAbschluss, type FilialGuV } from './filialguv';
 import { wettbewerbStartwerte } from './wettbewerb';
+import { liquiditaetReicht } from './sandkasten';
 
 export interface FormatPosten { quelle: 'markenposten' | 'altware'; wert: number; preisFaktor: number; alter: number; ladenhueter?: boolean }
 export interface FormatProjekt { haus: string; start: number; bis: number; typ: 'umflaggen' | 'eroeffnen' }
@@ -124,7 +125,7 @@ export function outletKandidaten(s:GameState):{stadt:string;lage:Lage;qm:number;
 export function outletEroeffnen(s:GameState,stadt:string):string|null{
   const k=outletKandidaten(s).find(k=>k.stadt===stadt);
   if(!k)return 'Kein freier geeigneter FUNDUS-Standort in dieser Stadt.';
-  if(s.cash+s.kreditlinie<k.investition)return 'Zu wenig Liquidität für die Eröffnung.';
+  if(!liquiditaetReicht(s,k.investition))return 'Zu wenig Liquidität für die Eröffnung.';
   const muster=s.haeuser.find(h=>h.format==='outlet');
   if(!muster||!s.formate)return 'FUNDUS-Musterhaus fehlt.';
   const id='O'+String(s.formate.naechsteOutletId++).padStart(3,'0');
@@ -148,7 +149,7 @@ export function schwesterUmflaggen(s:GameState,id:string):string|null{
   if(!h)return 'Offenes Volkskauf-Haus nicht gefunden.';
   if((s.hq.abteilungen.find(a=>a.id==='immobilien')?.stufe??0)<1)return 'Immobilienabteilung ab Stufe 1 erforderlich.';
   if(s.formate?.projekte.some(p=>p.haus===id))return 'Umflaggen läuft bereits.';
-  const kosten=eur(qm(h)*180);if(s.cash+s.kreditlinie<kosten)return 'Umbaukosten sind nicht gedeckt.';
+  const kosten=eur(qm(h)*180);if(!liquiditaetReicht(s,kosten))return 'Umbaukosten sind nicht gedeckt.';
   const dauer=20+Number(id.slice(1))%11;
   s.cash-=kosten;s.einmalkostenWoche+=kosten;
   s.kapitalflussOffen??={investitionen:0,finanzierung:0};s.kapitalflussOffen.investitionen-=kosten;

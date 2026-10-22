@@ -85,10 +85,11 @@ function infoVon(d, platz) {
   if (!d) return null;
   const s = d.spiel;
   const n = String(d.name ?? (platz === 'autosave' ? 'Automatisch' : 'Spielstand')).trim().slice(0, 60);
+  const unbegrenzt = s.szenario?.id === 'sandkasten' || s.szenario?.regeln?.sandkasten === true;
   return {
     platz, name: n || 'Spielstand', datum: d.datum, woche: s.woche,
-    szenario: String(s.szenario?.name ?? s.szenario?.id ?? s.szenario ?? s.schwierigkeit ?? 'Standard').slice(0, 80),
-    cash: s.cash, bild: bildPruefen(d.bild), stadt: d.stadt
+    szenario: unbegrenzt ? 'Sandkasten' : String(s.szenario?.name ?? s.szenario?.id ?? s.szenario ?? s.schwierigkeit ?? 'Standard').slice(0, 80),
+    unbegrenzt, cash: s.cash, bild: bildPruefen(d.bild), stadt: d.stadt
   };
 }
 

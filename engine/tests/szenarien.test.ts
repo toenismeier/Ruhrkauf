@@ -93,17 +93,17 @@ describe('N09 Szenarien', () => {
     expect(szenarioZiel(s).text).toContain('marktführer');
   });
 
-  test('Sandkasten: keine Insolvenz, kein Wertungsziel, wiederauffüllbare Kasse', () => {
+  test('Sandkasten: keine Insolvenz, keine Wertung, keine fiktive Kapitalzufuhr', () => {
     const s = neuesSpiel(1, szenarioKonfiguration('sandkasten'));
     expect(szenarioZiel(s).wertung).toBe(false);
-    expect(s.cash).toBeGreaterThan(1e12);
-    const vorher = s.cash;
+    expect(s.cash).toBe(neuesSpiel(1).cash);
+    expect(s.kreditlinie).toBe(neuesSpiel(1).kreditlinie);
     eroeffneInsolvenz(s, 'Test');
     expect(s.phase).toBe('regulaer');
     expect(fuehreAus(s, { typ: 'insolvenzAntrag' }).ok).toBe(false);
-    s.cash = 1;
+    s.cash = -1_000_000_000;
     szenarioWoche(s);
-    expect(s.cash).toBeGreaterThan(vorher - 1);
+    expect(s.cash).toBe(-1_000_000_000);
   });
 
   test('Sonderaktionen in der Standardpartie gesperrt', () => {

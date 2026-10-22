@@ -5,6 +5,7 @@ import { GRUPPEN } from './daten';
 import type { GameState, GruppeId, Haus, WochenKpi } from './types';
 import { clamp, eur, melde } from './util';
 import { einmalKosten } from './prozesse';
+import { liquiditaetReicht } from './sandkasten';
 import { vorstandWirkung } from './vorstand';
 
 export type FulfillmentModell = 'dienstleister' | 'eigen';
@@ -372,7 +373,7 @@ export function ecommerceAktion(s: GameState, a: EcommerceAktion): { ok: boolean
     if (e.projekt) return { ok: false, text: 'Ein Fulfillment-Projekt läuft bereits.' };
     if (e.fulfillment === a.modell) return { ok: false, text: 'Dieses Fulfillment-Modell ist bereits aktiv.' };
     const investition = a.modell === 'eigen' ? 4_800_000 : 320_000;
-    if (s.cash + s.kreditlinie < investition) return { ok: false, text: 'Nicht genügend Finanzierungsspielraum.' };
+    if (!liquiditaetReicht(s, investition)) return { ok: false, text: 'Nicht genügend Finanzierungsspielraum.' };
     e.projekt = { modell: a.modell, start: s.woche, bis: s.woche + (a.modell === 'eigen' ? 16 : 8), investition };
     einmalKosten(s, investition);
     melde(s, 'info', 'Projekt Fulfillment gestartet. Geplante Fertigstellung KW ' + ((e.projekt.bis % 52) + 1) + '.', { modul: 'ecommerce' });
