@@ -38,7 +38,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q20 Schwierigkeit je Szenario | `feat/q20-szenario-schwierigkeit` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q21 Warenhaus-Vielfalt je Stadt | `feat/q21-warenhaus-vielfalt` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **gemergt 22.10. (#59)**: Pins am Dach, Krone und Name bei Premium, Abzeichen Aktion/Umbau/Warnung; Fingerabdruck unverändert | `auftraege/wurf2/` |
-| Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **gemergt 22.10. (#61)**: Deutschlandkarte mit 16 Ländern, Liste als eigenes Blatt bis zur letzten Stadt; Claude: große Städte oben, Berlin auf 375 px antippbar; Fingerabdruck unverändert | `auftraege/wurf2/` |
 | Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11; nur noch Bedienung + Teamleistung, Artikeltypen kommen aus Q27–Q29** | `auftraege/wurf2/` |
 | Q25 Produktbilder und Model (Claude) | `q25/feat/q25-produktbilder` (PR #67) | **gemergt 21.10. (97c21aa), CI grün; Model-Stil von Ummo abgenommen; 106 Silhouetten, Model je Produkt** | `auftraege/wurf2/` |
 | Q27 Mode-Bilder + Mode-Artikeltypen (Claude-Chat) | `feat/q27-mode-bilder` (PR #69) | **Phase 1 gemergt 22.10. (5e11375): 47 neue Mode-Silhouetten, Nachschärfung, Model mit Händen/Spielbein, Blindtest 100 %; lokal grün, CI nicht gestartet (GitHub-Billing: Zahlung fehlgeschlagen/Ausgabelimit). Phase 2 Artikeltypen jetzt frei (Q11 #57 gemergt 22.10.)** | `auftraege/wurf2/` |
