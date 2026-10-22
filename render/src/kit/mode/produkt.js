@@ -6,7 +6,7 @@
 import { materialDefs, farbeVon, hell } from './stoff.js';
 import { oberteilFlat, hoseFlat, rockFlat, kleidFlat, jackeFlat } from './flatlay.js';
 import { DINGE } from './dinge.js';
-import { SILHOUETTEN } from './silhouetten.js';
+import { SILHOUETTEN, ZEICHNER_ERWEITERT } from './silhouetten.js';
 import { modelSVG, HAUT, HAAR } from './model.js';
 import { altbildSVG } from '../produktbild.js';
 
@@ -44,7 +44,8 @@ export function produktSVG(bild, farbe, material, groesse = 160, opt = {}) {
   if (FLAT[s.zeichner]) {
     t.push(`<ellipse cx="50" cy="96" rx="30" ry="2.4" fill="#000" opacity="0.07"/>`);
     FLAT[s.zeichner](S, t, q);
-  } else DINGE[s.zeichner.slice(5)](S, t, q);
+  } else if (s.zeichner.startsWith('z:')) ZEICHNER_ERWEITERT[s.zeichner.slice(2)](S, t, q);
+  else DINGE[s.zeichner.slice(5)](S, t, q);
   // kleine Motive füllen die Kachel
   const z = zoom(s, q);
   if (z) { t.unshift(`<g transform="translate(${50 - z[1] * z[0]} ${50 - z[2] * z[0]}) scale(${z[0]})">`); t.push('</g>'); }

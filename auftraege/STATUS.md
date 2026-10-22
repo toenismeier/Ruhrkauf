@@ -39,8 +39,11 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q21 Warenhaus-Vielfalt je Stadt | `feat/q21-warenhaus-vielfalt` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **startet 21.10.** | `auftraege/wurf2/` |
-| Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11; Bildschnittstelle in main: `render/src/kit/mode/silhouetten.json`** | `auftraege/wurf2/` |
+| Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11; nur noch Bedienung + Teamleistung, Artikeltypen kommen aus Q27–Q29** | `auftraege/wurf2/` |
 | Q25 Produktbilder und Model (Claude) | `q25/feat/q25-produktbilder` (PR #67) | **gemergt 21.10. (97c21aa), CI grün; Model-Stil von Ummo abgenommen; 106 Silhouetten, Model je Produkt** | `auftraege/wurf2/` |
+| Q27 Mode-Bilder + Mode-Artikeltypen (Claude-Chat) | `feat/q27-mode-bilder` | **startet 22.10.; Phase 2 Artikeltypen nach Merge Q11 #57** | `auftraege/wurf2/` |
+| Q28 Schuhe, Taschen, Accessoires, Wäsche (Claude-Chat) | `feat/q28-zubehoer-bilder` | **startet 22.10.** | `auftraege/wurf2/` |
+| Q29 Home/Living, Beauty, Spielwaren (Claude-Chat) | `feat/q29-home-beauty-bilder` | **startet 22.10.** | `auftraege/wurf2/` |
 | Q26 Meldungen und Speichern | `feat/q26-meldungen-speichern` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q08 Fünf Premiumhäuser | `feat/q08-premium-fuenf` | **startet 21.10.** | `auftraege/wurf1/q08-premium-fuenf.md` (Ummo E29) |
 | Q06 Marktbeobachtung (Meldungen filtern) | main | **gemergt 21.10.** (#47) | – |

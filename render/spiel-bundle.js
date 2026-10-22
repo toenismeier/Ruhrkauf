@@ -130011,7 +130011,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o2) => typeof o2 === "object" ? { wert: o2.wert ?? o2.value, titel: o2.titel ?? o2.label ?? o2.wert } : { wert: o2, titel: o2 };
-  var version = () => true ? "3387bd8" : "Entwicklung";
+  var version = () => true ? "7bff69b" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
@@ -133940,6 +133940,18 @@
     }
   };
 
+  // src/kit/mode/erweiterung-q27.js
+  var SILHOUETTEN = {};
+  var ZEICHNER = {};
+
+  // src/kit/mode/erweiterung-q28.js
+  var SILHOUETTEN2 = {};
+  var ZEICHNER2 = {};
+
+  // src/kit/mode/erweiterung-q29.js
+  var SILHOUETTEN3 = {};
+  var ZEICHNER3 = {};
+
   // src/kit/mode/silhouetten.js
   var o = (p2, model = "oberteil", material2 = "baumwolle", farbe3 = "wei\xDF") => ({ gruppe: "oberteil", zeichner: "oberteil", p: p2, material: material2, farbe: farbe3, model });
   var h = (p2, material2 = "baumwolle", farbe3 = "sand") => ({ gruppe: "unterteil", zeichner: "hose", p: p2, material: material2, farbe: farbe3, model: "hose" });
@@ -133948,7 +133960,7 @@
   var j = (art, material2, farbe3, p2 = {}) => ({ gruppe: "jacke", zeichner: "jacke", p: { art, ...p2 }, material: material2, farbe: farbe3, model: "jacke" });
   var d2 = (gruppe2, id, material2, farbe3, model = null, p2 = {}) => ({ gruppe: gruppe2, zeichner: "ding:" + id, p: p2, material: material2, farbe: farbe3, model });
   var a = (gruppe2, alt, material2, farbe3, model = null, p2 = {}) => ({ gruppe: gruppe2, zeichner: "alt:" + alt, p: p2, material: material2, farbe: farbe3, model });
-  var SILHOUETTEN = {
+  var SILHOUETTEN4 = {
     // Oberteile
     tshirt: o({ aermel: "kurz", kragen: "rund" }),
     babytee: o({ aermel: "kurz", kragen: "rund", passform: "tailliert", laenge: "crop" }, "oberteil", "baumwolle", "rosa"),
@@ -134066,16 +134078,18 @@
     parfum: a("beauty", "Parfum", "glas", "flieder"),
     plueschtier: a("spielzeug", "Pl\xFCschtier", "polyester", "camel")
   };
-  var SILHOUETTEN_IDS = Object.keys(SILHOUETTEN);
+  Object.assign(SILHOUETTEN4, SILHOUETTEN, SILHOUETTEN2, SILHOUETTEN3);
+  var ZEICHNER_ERWEITERT = { ...ZEICHNER, ...ZEICHNER2, ...ZEICHNER3 };
+  var SILHOUETTEN_IDS = Object.keys(SILHOUETTEN4);
 
   // src/kit/mode/produkt.js
   var FLAT = { oberteil: oberteilFlat, hose: hoseFlat, rock: (S, t, p2) => rockFlat(S, t, p2, 16), kleid: kleidFlat, jacke: jackeFlat };
   var normMaterial = (m) => String(m ?? "").toLowerCase().replace("bio-baumwolle", "baumwolle").replace("\xFC", "ue");
   function aufloesen(bild3) {
     const b2 = typeof bild3 === "string" ? { silhouette: bild3 } : bild3 ?? {};
-    const s2 = SILHOUETTEN[b2.silhouette] ?? SILHOUETTEN.tshirt;
+    const s2 = SILHOUETTEN4[b2.silhouette] ?? SILHOUETTEN4.tshirt;
     const { silhouette, ...rest } = b2;
-    return { id: SILHOUETTEN[silhouette] ? silhouette : "tshirt", s: s2, p: { ...s2.p, ...rest } };
+    return { id: SILHOUETTEN4[silhouette] ? silhouette : "tshirt", s: s2, p: { ...s2.p, ...rest } };
   }
   function zoom(s2, p2) {
     if (s2.zeichner === "oberteil" && p2.laenge === "crop") return [1.3, 50, 36];
@@ -134099,7 +134113,8 @@
     if (FLAT[s2.zeichner]) {
       t.push(`<ellipse cx="50" cy="96" rx="30" ry="2.4" fill="#000" opacity="0.07"/>`);
       FLAT[s2.zeichner](S, t, q2);
-    } else DINGE[s2.zeichner.slice(5)](S, t, q2);
+    } else if (s2.zeichner.startsWith("z:")) ZEICHNER_ERWEITERT[s2.zeichner.slice(2)](S, t, q2);
+    else DINGE[s2.zeichner.slice(5)](S, t, q2);
     const z2 = zoom(s2, q2);
     if (z2) {
       t.unshift(`<g transform="translate(${50 - z2[1] * z2[0]} ${50 - z2[2] * z2[0]}) scale(${z2[0]})">`);
