@@ -29,3 +29,5 @@ Vorlagebilder Coffee Inc 2 (nur Referenz, keine Übernahme von Grafik oder Texte
 | Q29 | Home/Living, Beauty, Spielwaren neu (**Claude-Chat**) | `feat/q29-home-beauty-bilder` | `q29-home-beauty-bilder.md` |
 
 Q27–Q29: gemeinsame Regeln in `produktbilder-regeln.md` (Ummo 22.10.: „zu wenig Produkte“, „manche sehen echt schräg aus“). Artikeltypen kommen jetzt aus Q27–Q29, Q24 behält Bedienung und Teamleistung.
+| Q30 | Oberfläche Teil 2: Spiel-Panels (**Claude-Chat**) | `feat/q30-oberflaeche-spiel` | `q30-oberflaeche-spiel.md` |
+| Q31 | Oberfläche Teil 2: Management-Panels (**Claude-Chat**) | `feat/q31-oberflaeche-management` | `q31-oberflaeche-management.md` |
