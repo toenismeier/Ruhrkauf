@@ -159335,7 +159335,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "5ab3ae8" : "Entwicklung";
+  var version = () => true ? "db51a68" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld(d3) {
@@ -162495,11 +162495,12 @@
       for (const x2 of u.hinweise) h3 += `<div class="olief warnung">${esc2(x2)}</div>`;
       return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 ${u.kampagnenAktiv} CRM-Kampagnen aktiv \xB7 KW ${u.kw} / ${u.jahr}`, html: h3 };
     }
+    const mitReitern = (r3) => ({ ...r3, html: tabs() + r3.html });
     function kanaele2(P4) {
-      return kanaeleAnsicht(E8, s2, ui, P4);
+      return mitReitern(kanaeleAnsicht(E8, s2, ui, P4));
     }
     function staedte(P4) {
-      return stadtAnsicht(E8, s2, ui, P4);
+      return mitReitern(stadtAnsicht(E8, s2, ui, P4));
     }
     function karte(P4) {
       const k3 = E8.kundenkarte(s2()), a2 = k3.app;
