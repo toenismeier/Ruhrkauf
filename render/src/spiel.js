@@ -877,7 +877,7 @@ function panel(titel, unter, html, klasse = '') {
   if (neu) $('ptitel').focus({ preventScroll: true });
 }
 function schliessePanel() { kameraZiel = null; for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; hqAbteilung = null; hqEtageWahl = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
-const szenarienUI = szenarienModul({ E, spiel: () => s, wahl: () => startWahl, panel, meldung, nachAktion: () => { cockpitZeigen(); szenarienUI.aktualisieren(); automatischSpeichern(); } });
+const szenarienUI = szenarienModul({ E, spiel: () => s, wahl: () => startWahl, panel, meldung, stufenAktualisieren: zeichneStufen, nachAktion: () => { cockpitZeigen(); szenarienUI.aktualisieren(); automatischSpeichern(); } });
 /** Q10: Neues Haus bewusst fokussieren; spätere Renderläufe erhalten das Ziel. */
 function hausZeigen(id) {
   const punkt = hausKameraPunkt(id);
@@ -1580,8 +1580,9 @@ const SCHWIERIGKEITEN = Array.isArray(E.SCHWIERIGKEITEN) && E.SCHWIERIGKEITEN.le
 let schwierigkeitId = 'mittel';
 function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId, szenario = 'standard', startMonat = 1) {
   spielende?.zu(); $('spiel-ruhestand').hidden = true;
-  schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
-  s = E.neuesSpiel(seed, { ...E.szenarioKonfiguration(szenario), schwierigkeit: schwierigkeitId, startMonat: Number(startMonat) });
+  // Sandkasten bietet keine Stufenwahl, auch bei einem Direktstart per URL.
+  schwierigkeitId = szenario === 'sandkasten' ? 'mittel' : SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
+  s = E.neuesSpiel(seed, { ...E.szenarioKonfiguration(szenario, schwierigkeitId), schwierigkeit: schwierigkeitId, startMonat: Number(startMonat) });
   postUi = neuerPostUi();
   $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
   MERK.clear();
@@ -1721,9 +1722,19 @@ const einfuehrung = einfuehrungModul();
 window.spiel.einfuehrung = einfuehrung;
 // ─────────────────────────────────────────── Startbildschirm (Startstadt, Schwierigkeit, Seed); mit URL-Parametern direkt ins Spiel
 const startWahl = { stadt: param.get('stadt') ?? 'Essen', schwierigkeit: param.get('schwierigkeit') ?? 'mittel', szenario: param.get('szenario') ?? 'standard', seed: Number(param.get('seed') ?? 1), startMonat: [1,4,7,10].includes(Number(param.get('monat'))) ? Number(param.get('monat')) : 1 };
+function zeichneStufen() {
+  const stufen = E.schwierigkeitenFuerSzenario?.(startWahl.szenario) ??
+    (startWahl.szenario === 'sandkasten' ? [] : SCHWIERIGKEITEN);
+  const stufenWahl = $('startstufen');
+  stufenWahl.hidden = stufen.length === 0;
+  stufenWahl.previousElementSibling.hidden = stufen.length === 0;
+  if (!stufen.length) startWahl.schwierigkeit = 'mittel';
+  stufenWahl.innerHTML = stufen.map((x, index) =>
+    `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? 'an' : ''}" data-v="${x.id}"><span class="sterne-stufe">${'●'.repeat(index + 1)}${'○'.repeat(stufen.length - index - 1)}</span><b>${x.name}</b><small>${esc(x.beschreibung)}</small></button>`
+  ).join('');
+}
 function startZeigen() {
   $('startstadt').innerHTML = STADTLISTE.map((q) => `<option${q.name === startWahl.stadt ? ' selected' : ''}>${q.name}</option>`).join('');
-  $('startstufen').innerHTML = SCHWIERIGKEITEN.map((x) => `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? 'an' : ''}" data-v="${x.id}"><span class="sterne-stufe">${'●'.repeat(1 + SCHWIERIGKEITEN.indexOf(x))}${'○'.repeat(SCHWIERIGKEITEN.length - 1 - SCHWIERIGKEITEN.indexOf(x))}</span><b>${x.name}</b><small>${x.beschreibung}</small></button>`).join('');
   $('startseed').value = startWahl.seed;
   $('startmonat').value = startWahl.startMonat;
   szenarienUI.zeichneStart();

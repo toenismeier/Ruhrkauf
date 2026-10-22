@@ -232,7 +232,10 @@ export function glaeubigerversammlung(s: GameState): void {
     ['Banken', st.bank], ['Kreditversicherer', st.kreditversicherer], ['Lieferanten', lieferanten],
     ['Vermieter', st.vermieter], ['Arbeitnehmer', st.betriebsrat],
   ];
-  const ja = gruppen.filter(([, v]) => v + planBonus + quoteBonus >= 42).map(([n]) => n);
+  // Q20: Im Schutzschirm beeinflusst die Stufe zusätzlich die Zustimmung zum Plan.
+  // Alle anderen Szenarien, insbesondere Standard/Mittel, behalten exakt die bisherige Schwelle.
+  const schutzschirmBonus = s.szenario?.regeln.schutzschirmZustimmung ?? 0;
+  const ja = gruppen.filter(([, v]) => v + planBonus + quoteBonus + schutzschirmBonus >= 42).map(([n]) => n);
   const nein = gruppen.filter(([n]) => !ja.includes(n)).map(([n]) => n);
   const sofort = zahlung * 0.4;
   const finanzierbar = s.cash >= sofort;
