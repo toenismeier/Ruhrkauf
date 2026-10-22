@@ -172,7 +172,7 @@
       {"id":"parzellen/p164","bauer":"stadthaus","lage":[150.5,436.5,12,18.5],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"bc615cb9af4e7c87"},
       {"id":"parzellen/p165","bauer":"slot:bay_buergerhaus","lage":[162.5,458,18.5,18],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"bf12a488e64d4c66"},
       {"id":"parzellen/p166","bauer":"slot:bay_buergerhaus","lage":[129,455,18.5,21],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"b2535b8c2321c32a"},
-      {"id":"parzellen/p167","bauer":"slot:warenhaus","lage":[242,462.5,47,32],"drehung":0,"variante":"warenhaus","standort":"W097","pruefsumme":"4ccc9214d9e60a8a"},
+      {"id":"parzellen/p167","bauer":"slot:warenhaus","lage":[242,462.5,47,32],"drehung":0,"variante":1,"standort":"W097","pruefsumme":"ef0f53c64bc6651e"},
       {"id":"parzellen/p168","bauer":"slot:bay_buergerhaus","lage":[213,436.5,20.5,19.5],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"39b71e593a408765"},
       {"id":"parzellen/p169","bauer":"slot:bay_buergerhaus","lage":[213,475,24.5,19.5],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"5c11a3c66ac5590a"},
       {"id":"parzellen/p17","bauer":"slot:bay_buergerhaus","lage":[129,362,19,19],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"01cd6af4d762aa92"},
@@ -458,7 +458,7 @@
       {"id":"strassen/s80","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"c42427ffb5b3f0bf"},
       {"id":"strassen/s9","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"b080f817d44b3527"}
     ],
-    "gesamt": "767926192a3fa907"
+    "gesamt": "5121f05385131993"
   },
   "geometrie": {
     "kacheln": [
@@ -742,8 +742,8 @@
       {"id":"p99","teile":122,"dreiecke":1460,"boundingBox":[547.48,0,186.98,561.73,17.39,200.82]}
     ],
     "umgebung": {
-      "teile": 2090,
-      "dreiecke": 119027,
+      "teile": 3994,
+      "dreiecke": 164455,
       "boundingBox": [-480,-6.2,-480,1110,337.23,1158.5]
     },
     "gesamt": {
@@ -751,12 +751,12 @@
       "strasse": 1991,
       "haeuser": 68535,
       "instanzen": 20396,
-      "drawCallsInstanzen": 99
+      "drawCallsInstanzen": 2003
     }
   },
   "pruefsummen": {
-    "stadtplan": "0901a2da0184642aff573230b42c322fcc98a5c32f9eb2eb1255c524b9eb4865",
-    "geometrie": "ce1a18e890fba3efd0bbffb11e31c340236e563d5eea198bd167a771fdbaa756",
-    "bildReferenz": "25223f1a61538b955096b1b13963a65decad5eef3d103ddf27d6f27263ca6658"
+    "stadtplan": "61e9f287be45cde4a2d7ae1705d50b853a34bb73a1508bb63f458bd24edb36ed",
+    "geometrie": "af9c8bdb0252bbc0f3348232a7e3d6ad15b64e7e503c6aa920adc8fc52f32964",
+    "bildReferenz": "9e79bd714b832b04c968bc435603f084bfa252025c75024d6c736143ce5eeb3b"
   }
 }

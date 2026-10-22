@@ -171,7 +171,7 @@
       {"id":"parzellen/p151","bauer":"slot:bay_muenchen","lage":[44.5,472,20,20.5],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"4aae248cc568d4aa"},
       {"id":"parzellen/p152","bauer":"slot:bay_muenchen","lage":[44.5,455,20,17],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"436f3457c852ded3"},
       {"id":"parzellen/p153","bauer":"slot:bay_muenchen","lage":[22.5,455,20,17],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"1109e352422b66fa"},
-      {"id":"parzellen/p154","bauer":"slot:warenhaus","lage":[116,460.5,47,32],"drehung":0,"variante":"warenhaus","standort":"W101","pruefsumme":"d146c410e53a3b2a"},
+      {"id":"parzellen/p154","bauer":"slot:warenhaus","lage":[116,460.5,47,32],"drehung":0,"variante":4,"standort":"W101","pruefsumme":"ded28e98147c129a"},
       {"id":"parzellen/p155","bauer":"slot:bw_fachwerk","lage":[87,434.5,22,28],"drehung":0,"variante":"esslingen","standort":null,"pruefsumme":"b6af69cfb58ead67"},
       {"id":"parzellen/p156","bauer":"slot:bw_fachwerk","lage":[87,470.5,22,22],"drehung":0,"variante":"tuebingen","standort":null,"pruefsumme":"124c71b5526ddf31"},
       {"id":"parzellen/p157","bauer":"stadthaus","lage":[109,470.5,7,22],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"206ecc93cbf83007"},
@@ -481,7 +481,7 @@
       {"id":"strassen/s91","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"b5b7f0ab18a2cbbf"},
       {"id":"strassen/s92","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"d3c6c879f2c2671f"}
     ],
-    "gesamt": "34dbb9ce67b0f5d4"
+    "gesamt": "778a01f24ed66224"
   },
   "geometrie": {
     "kacheln": [
@@ -763,8 +763,8 @@
       {"id":"p99","teile":103,"dreiecke":9730,"boundingBox":[400.26,0,270.41,420.74,37.34,286.29]}
     ],
     "umgebung": {
-      "teile": 2275,
-      "dreiecke": 165721,
+      "teile": 4698,
+      "dreiecke": 222819,
       "boundingBox": [-480,-6.2,-483.28,1029,91.91,1166.5]
     },
     "gesamt": {
@@ -772,12 +772,12 @@
       "strasse": 2179,
       "haeuser": 68207,
       "instanzen": 23915,
-      "drawCallsInstanzen": 96
+      "drawCallsInstanzen": 2519
     }
   },
   "pruefsummen": {
-    "stadtplan": "0c0ebaf053ff224d67ea7459540b59939da45ac0799d1e364eacdfa843253bcd",
-    "geometrie": "d1c74847c1a3cee481c0e2dc99e666b69fb88a093bd5f9587c9b3bcaad4a002d",
-    "bildReferenz": "850c1ffac87ac38ac4cf6f11dc21eac4e1556029231f39634e9c91898bfd08d4"
+    "stadtplan": "58d6126ed515d7bc88edce90ba27cf00ecca002dec6613c4736de9cc264299b3",
+    "geometrie": "c1a98b627a1afc4b1fd4b8059770e0cd43f0e800fb748114f99536a092a1efa0",
+    "bildReferenz": "1869a97f616b84ef6523a362493f9b3e2c6a3877f80dc1dd18d951f0e2c49740"
   }
 }

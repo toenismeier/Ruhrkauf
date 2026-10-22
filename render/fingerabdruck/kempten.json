@@ -194,7 +194,7 @@
       {"id":"parzellen/p175","bauer":"eck","lage":[197,477,12,19.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"5aba8a67f6037369"},
       {"id":"parzellen/p176","bauer":"slot:bay_buergerhaus","lage":[197,448,12,29],"drehung":0,"variante":"wasserburg","standort":null,"pruefsumme":"7851b245d7c1fdaf"},
       {"id":"parzellen/p177","bauer":"slot:bay_buergerhaus","lage":[182.5,448,12,26],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"9e126a02787467be"},
-      {"id":"parzellen/p178","bauer":"slot:warenhaus","lage":[270,454.5,67,42],"drehung":0,"variante":"warenhaus","standort":"W098","pruefsumme":"572d64e39e13ac47"},
+      {"id":"parzellen/p178","bauer":"slot:warenhaus","lage":[270,454.5,67,42],"drehung":0,"variante":7,"standort":"W098","pruefsumme":"c5c8c79096794654"},
       {"id":"parzellen/p179","bauer":"slot:bay_buergerhaus","lage":[241,428.5,21,26],"drehung":0,"variante":"wasserburg","standort":null,"pruefsumme":"8298c70f3514d1c3"},
       {"id":"parzellen/p18","bauer":"slot:sued_berg","lage":[22.5,561.98,92,74.02],"drehung":0,"variante":"wiese","standort":null,"pruefsumme":"34bae62619dfe92c"},
       {"id":"parzellen/p180","bauer":"slot:bay_buergerhaus","lage":[241,473.5,21,23],"drehung":0,"variante":"wasserburg","standort":null,"pruefsumme":"7792618cfcaf5ebc"},
@@ -497,7 +497,7 @@
       {"id":"strassen/s88","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"1a7aa2a5ab017cbf"},
       {"id":"strassen/s9","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"bbacd49738084439"}
     ],
-    "gesamt": "78c6754a25f07634"
+    "gesamt": "54281553ee75ad87"
   },
   "geometrie": {
     "kacheln": [
@@ -803,8 +803,8 @@
       {"id":"p99","teile":160,"dreiecke":2472,"boundingBox":[540,0,237.42,558.5,15.81,262.1]}
     ],
     "umgebung": {
-      "teile": 1788,
-      "dreiecke": 117035,
+      "teile": 3857,
+      "dreiecke": 166649,
       "boundingBox": [-480,-6.2,-480,1185,303.39,1138.5]
     },
     "gesamt": {
@@ -812,12 +812,12 @@
       "strasse": 1694,
       "haeuser": 70881,
       "instanzen": 21391,
-      "drawCallsInstanzen": 94
+      "drawCallsInstanzen": 2163
     }
   },
   "pruefsummen": {
-    "stadtplan": "8677bcc63a2af0cba8cc3f8d915648b09af5241acebbf1bc1d7841a8e9e498dc",
-    "geometrie": "6c45423f79fe7f2d648553d6bdccfab7257e25dc2777dec66de28f30a7225cde",
-    "bildReferenz": "58199045a9acda8c81566cd5a41a665f96b5794a840b5799e4332477fe140df4"
+    "stadtplan": "e3d7deb5206eb20aa5778fee068d490cd23df9073999a231893c80429a699456",
+    "geometrie": "e6ec5ffb7794de542584282827e29ff3a1b15db171049b600a5c81f9748c7985",
+    "bildReferenz": "6888a079a12b8ff6be83e5b2b4a409f20a6d1270f3c13ea9b8a9c2769d60dc21"
   }
 }

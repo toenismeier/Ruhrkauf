@@ -397,7 +397,7 @@
       {"id":"parzellen/p345","bauer":"stadthaus","lage":[177,331.3,14,12.2],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"5ff219dbaf7cfdf7"},
       {"id":"parzellen/p346","bauer":"hofhaus","lage":[195,311.5,14.9,28],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"2c1435321d01b628"},
       {"id":"parzellen/p347","bauer":"hofhaus","lage":[209.9,311.5,21.1,28],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"9ad07ddc975af75c"},
-      {"id":"parzellen/p348","bauer":"slot:warenhaus","lage":[300.5,320.5,57,37],"drehung":0,"variante":"warenhaus","standort":"W306","pruefsumme":"65987ddf00294d7f"},
+      {"id":"parzellen/p348","bauer":"slot:warenhaus","lage":[300.5,320.5,57,37],"drehung":0,"variante":5,"standort":"W306","pruefsumme":"3e2c14cc867602a8"},
       {"id":"parzellen/p349","bauer":"eck","lage":[271.5,293.5,15,15],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"83500905827dc7b7"},
       {"id":"parzellen/p35","bauer":"stadthaus","lage":[386.5,340.58,14,16.92],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"12530c777bb7c4c5"},
       {"id":"parzellen/p350","bauer":"eck","lage":[271.5,342.5,21,15],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"3880d1eb9df517cd"},
@@ -880,7 +880,7 @@
       {"id":"strassen/s98","bauer":"fussgaenger","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"38f69162897476da"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"a320595f1b7a58dd"}
     ],
-    "gesamt": "7c6e0341a50a5e19"
+    "gesamt": "ba4e491e1b36a74e"
   },
   "geometrie": {
     "kacheln": [
@@ -1496,8 +1496,8 @@
       {"id":"p99","teile":274,"dreiecke":3248,"boundingBox":[517.48,0,22.48,533.51,19.43,41.51]}
     ],
     "umgebung": {
-      "teile": 3028,
-      "dreiecke": 70059,
+      "teile": 6491,
+      "dreiecke": 150032,
       "boundingBox": [-480,-6.2,-480,1180.5,29,1194.5]
     },
     "gesamt": {
@@ -1505,12 +1505,12 @@
       "strasse": 2929,
       "haeuser": 154346,
       "instanzen": 33320,
-      "drawCallsInstanzen": 99
+      "drawCallsInstanzen": 3562
     }
   },
   "pruefsummen": {
-    "stadtplan": "814589292e66b7189c631c24eb48ad2f66a664780ba8ed924377b911236976a4",
-    "geometrie": "f33378d9bc2b667888483897f1375198ba823c88bcfeeccf1417de4bd559b734",
-    "bildReferenz": "0301796f545a462dd4749f42ad2148c165f9c0b5d871c8211013b2ff0ebb4053"
+    "stadtplan": "e3d862f336aa6aa839615ff1c0a71c9809b47ac7073662d44a564d640118f18d",
+    "geometrie": "e524944251c97f7ffe5a93e8240180d6cbf704037df0c2f0432b938396bdd59e",
+    "bildReferenz": "0dfc7c43748b27255e68d446e37860b3ec5959e1e72e4141781218dcb89d97e3"
   }
 }

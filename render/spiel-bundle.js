@@ -47720,10 +47720,15 @@
     if (!cache.has(k3)) cache.set(k3, new MeshLambertMaterial({ color: k3 }));
     return cache.get(k3);
   }
+  var vertexMaterial = null;
+  var SAMMEL_ZELLE = 120;
+  function vertexMat() {
+    return vertexMaterial ?? (vertexMaterial = new MeshLambertMaterial({ color: "#ffffff", vertexColors: true }));
+  }
   var LOD2 = { stufe: "nah", duenn: 0.3, lang: 6, schrift: 24, schildMin: 1.4 };
   function setzeLod(stufe2) {
     LOD2.stufe = stufe2;
-    SCHRIFT_LOD.maxGroesse = stufe2 === "nah" ? Infinity : LOD2.schrift;
+    SCHRIFT_LOD.maxGroesse = stufe2 === "fern" ? LOD2.schrift : Infinity;
   }
   function kleinteil(g) {
     if (!g.boundingBox) g.computeBoundingBox();
@@ -47731,7 +47736,7 @@
     return m[1] < LOD2.duenn && m[2] < LOD2.lang;
   }
   function entferneKleineSchilder(scene2) {
-    if (LOD2.stufe === "nah") return 0;
+    if (LOD2.stufe !== "fern") return 0;
     const weg = [];
     scene2.traverse((o3) => {
       const pp2 = o3.isMesh && !o3.isInstancedMesh && o3.geometry?.parameters;
@@ -47760,7 +47765,7 @@
       this.box(Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0), (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, farbe3);
     }
     add(g, farbe3) {
-      if (LOD2.stufe !== "nah" && kleinteil(g)) {
+      if (LOD2.stufe === "fern" && kleinteil(g)) {
         this.anzahl++;
         this.verworfen = (this.verworfen ?? 0) + 1;
         return;
@@ -47822,7 +47827,7 @@
     }
     add(g, farbe3) {
       this.anzahl++;
-      if (LOD2.stufe !== "nah" && kleinteil(g)) {
+      if (LOD2.stufe === "fern" && kleinteil(g)) {
         this.verworfen++;
         return;
       }
@@ -47838,26 +47843,46 @@
       if (!this.puffer.has(k3)) this.puffer.set(k3, { p: [], n: [], len: 0 });
       const b2 = this.puffer.get(k3);
       let P4 = gg.attributes.position.array, N = gg.attributes.normal.array;
-      if (LOD2.stufe !== "nah") [P4, N] = sichtbareDreiecke(P4, N);
+      if (LOD2.stufe === "fern") [P4, N] = sichtbareDreiecke(P4, N);
       if (!P4.length) return;
       b2.p.push(P4);
       b2.n.push(N);
       b2.len += P4.length;
     }
     bauen(scene2, schatten4 = true) {
+      const zellen = /* @__PURE__ */ new Map();
+      const farbe3 = new Color();
       for (const [k3, b2] of this.puffer) {
-        const P4 = new Float32Array(b2.len), N = new Float32Array(b2.len);
-        let o3 = 0;
+        farbe3.set(k3);
+        const rgb4 = [farbe3.r, farbe3.g, farbe3.b];
         for (let i = 0; i < b2.p.length; i++) {
-          P4.set(b2.p[i], o3);
-          N.set(b2.n[i], o3);
-          o3 += b2.p[i].length;
+          const Pt = b2.p[i];
+          const key = Math.floor(Pt[0] / SAMMEL_ZELLE) + ":" + Math.floor(Pt[2] / SAMMEL_ZELLE);
+          if (!zellen.has(key)) zellen.set(key, { len: 0, teile: [] });
+          const z4 = zellen.get(key);
+          z4.len += Pt.length;
+          z4.teile.push([Pt, b2.n[i], rgb4]);
           b2.p[i] = b2.n[i] = null;
+        }
+      }
+      for (const z4 of zellen.values()) {
+        const P4 = new Float32Array(z4.len), N = new Float32Array(z4.len), C3 = new Float32Array(z4.len);
+        let o3 = 0;
+        for (const [Pt, Nt, rgb4] of z4.teile) {
+          P4.set(Pt, o3);
+          N.set(Nt, o3);
+          for (let i = o3, e = o3 + Pt.length; i < e; i += 3) {
+            C3[i] = rgb4[0];
+            C3[i + 1] = rgb4[1];
+            C3[i + 2] = rgb4[2];
+          }
+          o3 += Pt.length;
         }
         const g = new BufferGeometry();
         g.setAttribute("position", new BufferAttribute(P4, 3));
         g.setAttribute("normal", new BufferAttribute(N, 3));
-        const m = new Mesh(g, mat(k3));
+        g.setAttribute("color", new BufferAttribute(C3, 3));
+        const m = new Mesh(g, vertexMat());
         m.castShadow = schatten4;
         m.receiveShadow = true;
         scene2.add(m);
@@ -154338,7 +154363,7 @@
     }
     /** s: Zahl oder [sx, sy, sz]; farben: Array für die Slots 0, 1, 2 … */
     setze(name2, x2, y2, z4, ry = 0, s2 = 1, farben = null) {
-      if (LOD2.stufe !== "nah" && FERN_WEG.has(name2)) return;
+      if (LOD2.stufe === "fern" && FERN_WEG.has(name2)) return;
       const p2 = this.protos.get(name2);
       if (!p2) throw new Error("Prop fehlt: " + name2);
       p2.inst.push([x2, y2, z4, ry, s2, farben]);
@@ -154370,6 +154395,7 @@
           const variabel = t.k[0] === "\xA7";
           const slot4 = variabel ? +t.k.slice(1) : -1;
           const im = new three_module_exports.InstancedMesh(t.geo, variabel ? weiss() : mat(t.k), instanzen2.length);
+          im.userData.diagArt = art;
           if (["linde", "kastanie", "platane", "birke", "pappel", "kugel"].includes(art) || art.startsWith("figur")) {
             im.userData.jahreszeitArt = art;
             im.userData.jahreszeitSlot = slot4;
@@ -158873,7 +158899,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "dd84ed6" : "Entwicklung";
+  var version = () => true ? "4dba35c" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld(d3) {
@@ -174261,39 +174287,13 @@
     Object.assign(k3, { gruppe: g, stufe: "klotz", teile: S.anzahl, dachFlaechen });
     if (!gesammelt) jahreszeiten?.registriereDachflaechen(k3.key, dachFlaechen);
   }
-  function fernHofBau(S, p2) {
-    const r3 = rng3((p2.seed ?? 1) * 13 + 7 >>> 0), H = klotzHoehe(p2);
-    const f11 = waehle2(r3, [
-      ...FARBEN3.fassadeHell,
-      ...FARBEN3.fassadeHell,
-      ...FARBEN3.fassadeWarm,
-      ...FARBEN3.fassadeKuehl,
-      ...FARBEN3.backstein.slice(0, 2),
-      ...FARBEN3.putzBunt
-    ]);
-    S.quader(p2.x, 0, p2.z, p2.x + p2.w, H, p2.z + p2.d, f11);
-    S.quader(
-      p2.x - 0.1,
-      H - 0.1,
-      p2.z - 0.1,
-      p2.x + p2.w + 0.1,
-      H + 0.35,
-      p2.z + p2.d + 0.1,
-      dunkler(f11, 0.08)
-    );
-    return { hoehe: H + 0.35 };
-  }
-  function vollBauen(k3, detail2 = detailFuer(k3)) {
+  function vollBauen(k3) {
     const t0 = performance.now();
     const S = new KompaktSammler(), g = new three_module_exports.Group(), b2 = echterBauer(), dachFlaechen = [];
-    const anzahlBlock = /* @__PURE__ */ new Map();
-    for (const p2 of k3.parz) anzahlBlock.set(p2.block, (anzahlBlock.get(p2.block) ?? 0) + 1);
-    setzeLod(detail2);
+    setzeLod("fern");
     try {
       for (const p2 of k3.parz) {
-        const hof2 = p2.hofbau || p2.typ === "hofhaus";
-        const fernHof = detail2 === "fern" && !p2.standort && hof2 && (anzahlBlock.get(p2.block) ?? 0) >= 3;
-        const { dachFlaechen: dach3 } = dachFlaechenBeimBau(S, p2, () => fernHof ? fernHofBau(S, p2) : bauerFuer(b2, p2.typ)(S, g, p2));
+        const { dachFlaechen: dach3 } = dachFlaechenBeimBau(S, p2, () => bauerFuer(b2, p2.typ)(S, g, p2));
         dachFlaechen.push(...dach3);
       }
       S.bauen(g);
@@ -174303,7 +174303,7 @@
     }
     entsorge(k3);
     scene.add(g);
-    Object.assign(k3, { gruppe: g, stufe: "voll", detail: detail2, teile: S.anzahl, dachFlaechen });
+    Object.assign(k3, { gruppe: g, stufe: "voll", teile: S.anzahl, dachFlaechen });
     jahreszeiten?.registriereDachflaechen(k3.key, dachFlaechen);
     return performance.now() - t0;
   }
@@ -174334,18 +174334,15 @@
     const hq = [...sb?.hqs?.values() ?? []].reduce((a2, x2) => a2 + (x2.teile ?? 0), 0);
     return { teile: KA.teileGrund + voll2 + klotz2 + haeuser + hq, teileGrund: KA.teileGrund, teileVoll: voll2, teileKlotz: klotz2, teileHartwig: haeuser, teileHq: hq, kachelnVoll: nv };
   }
-  function detailFuer(k3) {
-    if (K2.halb <= 34 && sichtbar3(k3, 0.55)) return "nah";
-    return sichtbar3(k3, 0.92) ? "mittel" : "fern";
-  }
   function naechsteKachel() {
     if (K2.halb > VOLL_MAX_ZOOM) return null;
     const st2 = teileStand();
-    const kand = KA.liste.filter((k3) => sichtbar3(k3, 1.08) && (k3.stufe !== "voll" || k3.detail !== detailFuer(k3))).map((k3) => ({ k: k3, d: abstand2(k3) })).sort((a2, b2) => a2.d - b2.d);
+    const kand = KA.liste.filter((k3) => k3.stufe !== "voll").map((k3) => ({ k: k3, s: sichtbar3(k3), d: abstand2(k3) })).sort((a2, b2) => b2.s - a2.s || a2.d - b2.d);
     const n3 = kand[0];
     if (!n3) return null;
-    const schaetzung = n3.k.stufe === "voll" ? 0 : n3.k.parz.length * 380;
+    const schaetzung = n3.k.parz.length * 380;
     if (st2.teile + schaetzung <= BUDGET) return n3.k;
+    if (!n3.s) return null;
     const weg = KA.liste.filter((k3) => k3.stufe === "voll" && !sichtbar3(k3, 1.4)).sort((a2, b2) => abstand2(b2) - abstand2(a2))[0];
     if (!weg) return null;
     klotzBauen(weg);
@@ -174353,8 +174350,8 @@
   }
   function kachelnSichtbarBauen() {
     if (K2.halb > VOLL_MAX_ZOOM) return;
-    for (const k3 of KA.liste.filter((q2) => sichtbar3(q2, 1.05) && (q2.stufe !== "voll" || q2.detail !== detailFuer(q2))).sort((a2, b2) => abstand2(a2) - abstand2(b2))) {
-      if (teileStand().teile + (k3.stufe === "voll" ? 0 : k3.parz.length * 380) > BUDGET) break;
+    for (const k3 of KA.liste.filter((q2) => q2.stufe !== "voll" && sichtbar3(q2, 1.05)).sort((a2, b2) => abstand2(a2) - abstand2(b2))) {
+      if (teileStand().teile + k3.parz.length * 380 > BUDGET) break;
       vollBauen(k3);
     }
     zeichnen();

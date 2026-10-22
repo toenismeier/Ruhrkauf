@@ -241,7 +241,7 @@
       {"id":"parzellen/p216","bauer":"stadthaus","lage":[228,241.22,15.5,13.28],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"d47c1fee08f3172a"},
       {"id":"parzellen/p217","bauer":"hofhaus","lage":[247.5,225.5,14.06,25],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"b50a8708e830a2a4"},
       {"id":"parzellen/p218","bauer":"hofhaus","lage":[261.56,225.5,20.94,25],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"a5885e3fa0049d23"},
-      {"id":"parzellen/p219","bauer":"slot:warenhaus","lage":[362,233,52,37],"drehung":0,"variante":"warenhaus","standort":"W335","pruefsumme":"292f3b8aa023126c"},
+      {"id":"parzellen/p219","bauer":"slot:warenhaus","lage":[362,233,52,37],"drehung":0,"variante":2,"standort":"W335","pruefsumme":"4cb51c8a5fc3f3ba"},
       {"id":"parzellen/p22","bauer":"stadthaus","lage":[112.5,22.5,10,14.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"1e7a808173182a35"},
       {"id":"parzellen/p220","bauer":"eck","lage":[334,206,14.5,15.5],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"cc06cde731bcc81f"},
       {"id":"parzellen/p221","bauer":"eck","lage":[334,255.5,14.5,14.5],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"a80996e7d983069f"},
@@ -577,7 +577,7 @@
       {"id":"umland/6","bauer":"land","lage":[0,424,138,66.5],"drehung":0,"variante":null,"standort":null,"pruefsumme":"3c434427bd5150cd"},
       {"id":"umland/7","bauer":"land","lage":[443,424,71.25,66.5],"drehung":0,"variante":null,"standort":null,"pruefsumme":"f431c3d4b519d636"}
     ],
-    "gesamt": "97cc37b8a6a583c2"
+    "gesamt": "b85e663e201494b4"
   },
   "geometrie": {
     "kacheln": [
@@ -951,8 +951,8 @@
       {"id":"p99","teile":450,"dreiecke":5418,"boundingBox":[247,0,109,263.12,24.13,126.62]}
     ],
     "umgebung": {
-      "teile": 3090,
-      "dreiecke": 64671,
+      "teile": 5780,
+      "dreiecke": 126768,
       "boundingBox": [-480,-6.2,-480,1048,29,970.5]
     },
     "gesamt": {
@@ -960,12 +960,12 @@
       "strasse": 2988,
       "haeuser": 123722,
       "instanzen": 26932,
-      "drawCallsInstanzen": 102
+      "drawCallsInstanzen": 2792
     }
   },
   "pruefsummen": {
-    "stadtplan": "3d64170213a5499c0590de994f26adb4bbdcfe1b21a831a3c0b0caff5cd9cbe4",
-    "geometrie": "1965396e549c609122eed89182a76edc8680201cbc5a70f2ed900a57d8563ac9",
-    "bildReferenz": "93d0fdc2028eaad3cfed4d8bc77b0599d9f63a48d38cbd51fca4dd523d10047f"
+    "stadtplan": "64f0c33c296409b5ba194c2095bcb7feaa04af58bbe5a53d848d0e56f6906301",
+    "geometrie": "587b6c11b6afb16fbc8ddb0d041249347be162a923eb696ab3f92aa6cbcf9b12",
+    "bildReferenz": "084fb9ab2453af189528be9f5509e908498c5d22415422aaebacba132e49818e"
   }
 }
