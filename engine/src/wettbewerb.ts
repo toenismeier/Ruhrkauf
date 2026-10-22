@@ -1,4 +1,5 @@
 /** Wettbewerber als persistente, autonome Akteure. Eigener Mulberry32-Zufallsstrom. */
+import { liquiditaetReicht } from './sandkasten';
 import { GRUPPEN, WETTBEWERBER_NAMEN, WETTBEWERB_UEBERSCHNEIDUNG, gruppenFuer } from './daten';
 import { KOORDINATEN } from './standorte';
 import type { GameState, GruppeId, Haus, Lage, Wettbewerber, WettbewerberArt } from './types';
@@ -327,7 +328,7 @@ export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet'
   if (!basis) return 'Kein offenes Hartwig-Warenhaus am Standort.';
   const qm = wb.grundflaecheQm;
   const kosten = eur(qm * (modus === 'erweiterung' ? 250 : 200));
-  if (s.cash + s.kreditlinie < kosten) return 'Nicht genug Liquidität für die Umbaukosten.';
+  if (!liquiditaetReicht(s, kosten)) return 'Nicht genug Liquidität für die Umbaukosten.';
   s.cash -= kosten;
   s.einmalkostenWoche += kosten;
   if (modus === 'erweiterung') {

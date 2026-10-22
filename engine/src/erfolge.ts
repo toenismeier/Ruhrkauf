@@ -1,5 +1,6 @@
 /** N03 – Erfolge: ausschließlich beobachtende, deterministische Spielziele. */
 import { GRUPPEN } from './daten';
+import { istSandkasten } from './sandkasten';
 import { einkaufUebersicht, type EinkaufKennzahlen } from './einkauf';
 import type { GameState } from './types';
 
@@ -98,7 +99,7 @@ const leererVerlauf = (s: GameState): ErfolgStand => ({
   letzteGeschlossen: s.haeuser.filter(h => ['geschlossen', 'verkauft'].includes(h.status)).map(h => h.id),
   letzteInsolvenzen: s.insolvenzenGesamt, beworbeneBereiche: [],
 });
-const aktiv = (s: GameState) => ERFOLGE_AKTIV && s.erfolgeAktiv !== false;
+const aktiv = (s: GameState) => ERFOLGE_AKTIV && s.erfolgeAktiv !== false && !istSandkasten(s);
 
 /** Nur Erfolge-Zustand; weder RNG noch Cash, Personal, Prognose oder sonstiges Balancing werden verändert. */
 export function erfolgeWoche(s: GameState): string[] {

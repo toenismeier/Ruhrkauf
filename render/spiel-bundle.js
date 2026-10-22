@@ -265,7 +265,7 @@
   var TREND_LAGE = { "1a": 0.02, b: 0.035, center: 0.01, rand: 0.015 };
   var MARKTMIETE = { "1a": 0.1, b: 0.075, center: 0.11, rand: 0.065 };
   var STAEDTE = [
-    ["Berlin", "Ost", "metropole", 0.97, { hartwig: 5, premium: 1, volkskauf: 0, sport: 2, fundus: 1 }],
+    ["Berlin", "Ost", "metropole", 0.97, { hartwig: 5, premium: 2, volkskauf: 0, sport: 2, fundus: 1 }],
     ["Hamburg", "Nord", "metropole", 1.1, { hartwig: 5, premium: 1, volkskauf: 1, sport: 2, fundus: 0 }],
     ["M\xFCnchen", "S\xFCd", "metropole", 1.3, { hartwig: 5, premium: 1, volkskauf: 1, sport: 2, fundus: 0 }],
     ["K\xF6ln", "West", "metropole", 1.05, { hartwig: 5, premium: 0, volkskauf: 2, sport: 2, fundus: 0 }],
@@ -489,8 +489,9 @@
   var PREMIUM_HAEUSER = [
     { id: "P001", schluessel: "P001", rang: 1, name: "Palais Hartwig", stadt: "Berlin" },
     { id: "P002", schluessel: "P002", rang: 1, name: "Hartwig am Hofgarten", stadt: "M\xFCnchen" },
-    { id: "P003", schluessel: "P003", rang: 2, name: "Alsterhaus Hartwig", stadt: "Hamburg" },
-    { id: "P004", schluessel: "P004", rang: 3, name: "Hartwig K\xF6nigsallee", stadt: "D\xFCsseldorf" }
+    { id: "P003", schluessel: "P003", rang: 2, name: "Hartwig am Jungfernstieg", stadt: "Hamburg" },
+    { id: "P004", schluessel: "P004", rang: 3, name: "Hartwig am Heine-Platz", stadt: "D\xFCsseldorf" },
+    { id: "P005", schluessel: "P005", rang: 2, name: "Hartwig Leipziger Platz", stadt: "Berlin" }
   ];
   var STADT_REGIONEN = Object.freeze(Object.fromEntries(STAEDTE.map(([name2, region]) => [name2, region])));
   function stadtRegion(name2) {
@@ -2103,12 +2104,21 @@
   var SCHWIERIGKEITEN = Object.keys(SCHWIERIGKEIT).map((id) => ({ id, name: SCHWIERIGKEIT[id].name, beschreibung: SCHWIERIGKEIT[id].beschreibung }));
   var schwierigkeit = (s2) => SCHWIERIGKEIT[s2.schwierigkeit ?? "mittel"];
 
+  // ../engine/src/sandkasten.ts
+  function istSandkasten(s2) {
+    return s2.szenario?.id === "sandkasten" || s2.szenario?.regeln?.sandkasten === true;
+  }
+  function liquiditaetReicht(s2, betrag) {
+    return istSandkasten(s2) || s2.cash + s2.kreditlinie >= betrag;
+  }
+
   // ../engine/src/stakeholder.ts
   function freieLiquiditaet(s2) {
     return s2.cash + s2.kreditlinie;
   }
   var PRIOR_EBITDA_WOCHE = -22e5;
   function runwayWochen(s2) {
+    if (istSandkasten(s2)) return 52;
     const h3 = s2.historie.slice(-52);
     const summe2 = h3.reduce((a2, b2) => a2 + b2.ebitda + b2.sondereffekte, 0) + (52 - h3.length) * PRIOR_EBITDA_WOCHE;
     const burn = -summe2 / 52;
@@ -2146,7 +2156,7 @@
     }
     const restZiel = (st2.kreditversicherer + 70 - (ueberfaellig ? 25 : 0) - (inso ? 15 : 0)) / 2;
     s2.restLieferantenVertrauen = annaehern(s2.restLieferantenVertrauen, restZiel, 0.05);
-    if (s2.phase === "regulaer") {
+    if (s2.phase === "regulaer" && !istSandkasten(s2)) {
       const umsatzWoche = s2.historie.at(-1)?.umsatz ?? Object.values(s2.basisUmsatz).reduce((sum2, u) => sum2 + (u ?? 0), 0);
       const kritisch = freieLiquiditaet(s2) < 2.5 * umsatzWoche && st2.bank >= 35;
       const warenwert = s2.bestand.reduce((sum2, k3) => sum2 + k3.wert, 0);
@@ -2202,12 +2212,12 @@
       if (!b2.vorkasse) {
         const ziel = zielWochen(s2, b2.gruppe);
         const frei6 = Math.max(0, limit - exposure);
-        const aufZiel = ziel > 0 ? Math.min(wert, frei6) : 0;
+        const aufZiel = ziel > 0 ? istSandkasten(s2) ? wert : Math.min(wert, frei6) : 0;
         let rest = wert - aufZiel;
         if (rest > 0) {
           const liquide = s2.cash + s2.kreditlinie - liquiditaetsReserve;
-          if (s2.vorkasseAkzeptieren && liquide > 0) {
-            const zahlbar = eur(Math.min(rest, liquide));
+          if (istSandkasten(s2) || s2.vorkasseAkzeptieren && liquide > 0) {
+            const zahlbar = istSandkasten(s2) ? eur(rest) : eur(Math.min(rest, liquide));
             s2.cash -= zahlbar;
             vorkasse += zahlbar;
             rest -= zahlbar;
@@ -4121,7 +4131,7 @@
     if (!basis4) return "Kein offenes Hartwig-Warenhaus am Standort.";
     const qm2 = wb.grundflaecheQm;
     const kosten = eur(qm2 * (modus === "erweiterung" ? 250 : 200));
-    if (s2.cash + s2.kreditlinie < kosten) return "Nicht genug Liquidit\xE4t f\xFCr die Umbaukosten.";
+    if (!liquiditaetReicht(s2, kosten)) return "Nicht genug Liquidit\xE4t f\xFCr die Umbaukosten.";
     s2.cash -= kosten;
     s2.einmalkostenWoche += kosten;
     if (modus === "erweiterung") {
@@ -4209,7 +4219,8 @@
     P001: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.012, mietQuote: 0.057 },
     P002: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.016, mietQuote: 0.057 },
     P003: { qm: 18e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.06 },
-    P004: { qm: 14e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.041, mietQuote: 0.065 }
+    P004: { qm: 14e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.041, mietQuote: 0.065 },
+    P005: { qm: 2e4, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.06 }
   };
   var premiumProfil = (id) => id && Object.prototype.hasOwnProperty.call(PREMIUM_PROFIL, id) ? PREMIUM_PROFIL[id] : void 0;
   var EURO_JE_QM_WOCHE = 40;
@@ -4221,7 +4232,7 @@
     spielwaren: 0.55,
     wohnen: 0.6
   };
-  var IMMOBILIE = { P001: 9e8, P002: 9e8, P003: 6e8, P004: 145e6 };
+  var IMMOBILIE = { P001: 9e8, P002: 9e8, P003: 6e8, P004: 145e6, P005: 65e7 };
   var KAEUFER = [
     { typ: "Luxusgruppe", name: "Luxusgruppe Valens" },
     { typ: "Family Office", name: "Family Office Merian" },
@@ -4269,11 +4280,11 @@
     }
   }
   function kennzeichnePremium(haeuser) {
-    const vorhanden = PREMIUM_HAEUSER.every((p2) => haeuser.some((h3) => h3.premiumSchluessel === p2.id || h3.klasse === "premium" && h3.stadt === p2.stadt));
-    if (vorhanden) {
-      for (const p2 of PREMIUM_HAEUSER) {
-        const h3 = haeuser.find((x) => x.premiumSchluessel === p2.id || x.klasse === "premium" && x.stadt === p2.stadt);
-        if (!h3) continue;
+    const vorhanden = haeuser.filter((h3) => h3.klasse === "premium" && h3.premiumSchluessel);
+    if (vorhanden.length) {
+      for (const h3 of vorhanden) {
+        const p2 = PREMIUM_HAEUSER.find((x) => x.id === h3.premiumSchluessel);
+        if (!p2) throw new Error(`Unbekannter Premiumschl\xFCssel: ${h3.premiumSchluessel}`);
         h3.klasse = "premium";
         h3.premiumSchluessel = p2.id;
         h3.name = p2.name;
@@ -4378,7 +4389,7 @@
     if (!h3) return "Premium-Haus nicht verf\xFCgbar.";
     if (!Number.isSafeInteger(betrag) || betrag < 5e5 || betrag > 1e8) return "Investition von 0,5 bis 100 Mio. \u20AC w\xE4hlen.";
     if (h3.premiumInvestition && s2.woche < h3.premiumInvestition.bis) return "Eine Premium-Investition l\xE4uft bereits. Bitte zun\xE4chst die 26 Wochen abwarten.";
-    if (s2.cash + s2.kreditlinie < betrag) return "Nicht gen\xFCgend Liquidit\xE4t.";
+    if (!liquiditaetReicht(s2, betrag)) return "Nicht gen\xFCgend Liquidit\xE4t.";
     s2.cash -= betrag;
     s2.einmalkostenWoche += betrag;
     s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
@@ -4878,7 +4889,7 @@
       if (e.projekt) return { ok: false, text: "Ein Fulfillment-Projekt l\xE4uft bereits." };
       if (e.fulfillment === a2.modell) return { ok: false, text: "Dieses Fulfillment-Modell ist bereits aktiv." };
       const investition = a2.modell === "eigen" ? 48e5 : 32e4;
-      if (s2.cash + s2.kreditlinie < investition) return { ok: false, text: "Nicht gen\xFCgend Finanzierungsspielraum." };
+      if (!liquiditaetReicht(s2, investition)) return { ok: false, text: "Nicht gen\xFCgend Finanzierungsspielraum." };
       e.projekt = { modell: a2.modell, start: s2.woche, bis: s2.woche + (a2.modell === "eigen" ? 16 : 8), investition };
       einmalKosten(s2, investition);
       melde(s2, "info", "Projekt Fulfillment gestartet. Geplante Fertigstellung KW " + (e.projekt.bis % 52 + 1) + ".", { modul: "ecommerce" });
@@ -5098,10 +5109,6 @@
       eroeffneInsolvenz(s2, "Schutzschirm zum Spielstart");
       if (s2.insolvenz) s2.insolvenz.versammlung = s2.woche + regeln.schutzschirmFrist;
     }
-    if (regeln.sandkasten) {
-      s2.cash = 1e15;
-      s2.kreditlinie = 1e15;
-    }
   }
   function szenarioFrequenz(s2) {
     const r3 = s2.szenario?.regeln;
@@ -5131,7 +5138,6 @@
       melde(s2, "eigentuemer", "Der Investor beanstandet das vergangene Jahr: kein Immobilienverkauf.");
     }
     if (lauf.fusionHausIds?.length && s2.haeuser.some((h3) => h3.streikBis !== void 0 && h3.streikBis > s2.woche)) lauf.streikErlebt = true;
-    if (lauf.regeln.sandkasten) s2.cash = Math.max(s2.cash, 1e15);
   }
   function immobilieVerkaufen(s2, hausId) {
     if (s2.szenario?.id !== "investor") return "Immobilien-Sale-and-Leaseback ist nur in \u201EDer neue Eigent\xFCmer\u201C verf\xFCgbar.";
@@ -6308,7 +6314,7 @@
     const neue = MARKT_FTE[ziel], alte = x.fte;
     if (neue > alte) {
       const kosten = (neue - alte) * 4e3;
-      if (s2.cash + s2.kreditlinie < kosten) return { ok: false, text: "Nicht gen\xFCgend Liquidit\xE4t f\xFCr die Einstellungskosten." };
+      if (!liquiditaetReicht(s2, kosten)) return { ok: false, text: "Nicht gen\xFCgend Liquidit\xE4t f\xFCr die Einstellungskosten." };
       s2.cash -= kosten;
       s2.einmalkostenWoche += kosten;
     }
@@ -8356,7 +8362,7 @@
   function outletEroeffnen(s2, stadt) {
     const k3 = outletKandidaten(s2).find((k4) => k4.stadt === stadt);
     if (!k3) return "Kein freier geeigneter FUNDUS-Standort in dieser Stadt.";
-    if (s2.cash + s2.kreditlinie < k3.investition) return "Zu wenig Liquidit\xE4t f\xFCr die Er\xF6ffnung.";
+    if (!liquiditaetReicht(s2, k3.investition)) return "Zu wenig Liquidit\xE4t f\xFCr die Er\xF6ffnung.";
     const muster2 = s2.haeuser.find((h3) => h3.format === "outlet");
     if (!muster2 || !s2.formate) return "FUNDUS-Musterhaus fehlt.";
     const id = "O" + String(s2.formate.naechsteOutletId++).padStart(3, "0");
@@ -8397,7 +8403,7 @@
     if ((s2.hq.abteilungen.find((a2) => a2.id === "immobilien")?.stufe ?? 0) < 1) return "Immobilienabteilung ab Stufe 1 erforderlich.";
     if (s2.formate?.projekte.some((p2) => p2.haus === id)) return "Umflaggen l\xE4uft bereits.";
     const kosten = eur(qm(h3) * 180);
-    if (s2.cash + s2.kreditlinie < kosten) return "Umbaukosten sind nicht gedeckt.";
+    if (!liquiditaetReicht(s2, kosten)) return "Umbaukosten sind nicht gedeckt.";
     const dauer = 20 + Number(id.slice(1)) % 11;
     s2.cash -= kosten;
     s2.einmalkostenWoche += kosten;
@@ -8545,7 +8551,7 @@
   // ../engine/src/spielende.ts
   var faktor = { leicht: 0.8, mittel: 1, schwer: 1.3 };
   var SPIELENDE_AKTIV = true;
-  var aktiv3 = (s2) => SPIELENDE_AKTIV && !s2.spielendeDeaktiviert;
+  var aktiv3 = (s2) => SPIELENDE_AKTIV && !s2.spielendeDeaktiviert && !istSandkasten(s2);
   function ebitdaJahr(s2) {
     return eur(s2.historie.slice(-52).reduce((sum2, k3) => sum2 + k3.ebitda, 0));
   }
@@ -8809,6 +8815,7 @@
         zeitungEinstellen(s2, a2.an);
         return ok4(a2.an ? "Der Handelsbote ist aktiviert." : "Der Handelsbote ist deaktiviert.");
       case "ruhestand":
+        if (istSandkasten(s2)) return fehler4("Im Sandkasten gibt es keine Wertung und kein Spielende.");
         if (s2.woche < 260) return fehler4("Der Ruhestand ist erst nach f\xFCnf Jahren m\xF6glich.");
         if (s2.phase !== "regulaer" || s2.insolvenz) return fehler4("Ein laufendes Insolvenzverfahren muss zuerst beendet sein.");
         if (s2.spielendeDeaktiviert) return fehler4("Spielende ist deaktiviert.");
@@ -9229,7 +9236,7 @@
         }
         if (an.typ === "sonderposten") {
           const wert = an.wert ?? 0;
-          if (s2.cash + s2.kreditlinie < wert) return fehler4("Nicht genug Liquidit\xE4t f\xFCr die Vorkasse.");
+          if (!liquiditaetReicht(s2, wert)) return fehler4("Nicht genug Liquidit\xE4t f\xFCr die Vorkasse.");
           s2.cash -= wert;
           const g = an.gruppe;
           if (an.formatZiel === "outlet" && s2.formate) s2.formate.pool.push({ quelle: "markenposten", wert, preisFaktor: an._passt ? 1.8 : 1.32, alter: an._passt ? 2 : 20, ladenhueter: !an._passt });
@@ -9428,6 +9435,7 @@
       phase: s2.phase,
       cash: s2.cash,
       kreditFrei: s2.cash + s2.kreditlinie,
+      geldUnbegrenzt: istSandkasten(s2),
       runwayWochen: Math.round(runwayWochen(s2)),
       ebitdaWoche: letzte?.ebitda ?? 0,
       ebitda13: h13.reduce((a2, b2) => a2 + b2.ebitda, 0),
@@ -14024,7 +14032,9 @@
     A: 895e7 * (45 * 48) / (45 * 48 + 115 * 30 + 200 * 17),
     B: 895e7 * (115 * 30) / (45 * 48 + 115 * 30 + 200 * 17),
     C: 895e7 * (200 * 17) / (45 * 48 + 115 * 30 + 200 * 17),
-    premium: 82e7,
+    // P005 erhöht den alten Anker um 20.000 m² × 1,52 relativ zur Leistung von P001–P004.
+    // Andere Klassen bleiben bei ihren Referenzwerten; keine Gutschrift in der GuV.
+    premium: Math.round(82e7 * (1 + 2e4 * 1.52 / (3e4 * 1.55 * 2 + 18e3 * 1.52 + 14e3 * 1.45))),
     sport: 545e6
   };
   var PREMIUM_PERSONALQUOTE = 0.13;
@@ -14093,7 +14103,7 @@
   var STANDARD_SZENARIO = {
     warenhaeuser: 360,
     sporthaeuser: 44,
-    premiumhaeuser: 4,
+    premiumhaeuser: 5,
     schwesterhaeuser: 86,
     outlethaeuser: 66,
     // Liquidität analog zum 3,3-fachen Umsatz gegenüber dem alten 130er-Maßstab.
@@ -14393,10 +14403,12 @@
       haeuser.push(bauHaus(h3, haeuser.filter((x) => x.format === "warenhaus").length + 1, stadt, region, cluster, kk, "warenhaus", sz, r3.nr, { hausklasse: a2.has(r3) ? "A" : b2.has(r3) ? "B" : "C", lage }));
     }
     let p2 = 0;
+    const p005Rng = { rng: (seed ^ 187818405) >>> 0 };
     for (const premium2 of PREMIUM_HAEUSER) {
       if (sz.premiumDeaktiviert || p2 >= (sz.premiumhaeuser ?? 0)) break;
       const [stadt, region, cluster, kk] = stadtVon.get(premium2.stadt);
-      haeuser.push(bauHaus(h3, sz.warenhaeuser + ++p2, stadt, region, cluster, kk, "warenhaus", sz, 1, { premiumSchluessel: premium2.schluessel, lage: "1a" }));
+      const quelle2 = premium2.schluessel === "P005" ? p005Rng : h3;
+      haeuser.push(bauHaus(quelle2, sz.warenhaeuser + ++p2, stadt, region, cluster, kk, "warenhaus", sz, 1, { premiumSchluessel: premium2.schluessel, lage: "1a" }));
     }
     let si = 0;
     for (const r3 of sport) {
@@ -14796,7 +14808,7 @@
       const vorjahr2 = s2.quartale.find((x) => x.nr === q2.nr - 4);
       const besser = vorjahr2 ? ist > vorjahr2.ebitdaIst : ist > q2.planStandard + 0.1 * Math.abs(q2.planStandard);
       if (!besser) txt += " Ohne sichtbare Verbesserung gegen\xFCber dem Vorjahr gibt es kein frisches Geld.";
-      if (s2.phase === "regulaer" && besser && (runwayWochen(s2) < 26 || s2.cash + s2.kreditlinie < 15e7 * volumen)) {
+      if (s2.phase === "regulaer" && !istSandkasten(s2) && besser && (runwayWochen(s2) < 26 || s2.cash + s2.kreditlinie < 15e7 * volumen)) {
         const kapital = eur(12e6 * volumen * (st2.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
         s2.cash += kapital;
         s2.einmalErloeseWoche += kapital;
@@ -15485,7 +15497,7 @@
     letzteInsolvenzen: s2.insolvenzenGesamt,
     beworbeneBereiche: []
   });
-  var aktiv4 = (s2) => ERFOLGE_AKTIV && s2.erfolgeAktiv !== false;
+  var aktiv4 = (s2) => ERFOLGE_AKTIV && s2.erfolgeAktiv !== false && !istSandkasten(s2);
   function erfolgeWoche(s2) {
     if (s2.prognose || !aktiv4(s2)) return [];
     const v = s2.erfolgeVerlauf ?? (s2.erfolgeVerlauf = leererVerlauf2(s2));
@@ -15816,7 +15828,7 @@
     const pflicht = kommissionAuszahlung + personalCash + k3.miete + restmieten + k3.nebenkosten + k3.sonstige + k3.logistik + k3.zentrale + k3.marketing + k3.beratung + zinsen + offEinsatz.warenhaus.zukauf + offEinsatz.sport.zukauf + formatWoche.warenZukauf;
     s2.cash += eur(einzahlung - pflicht);
     if (insolvenzgeld && s2.insolvenz) s2.insolvenz.altVerbindlichkeiten += eur(k3.personal);
-    if (s2.cash + s2.kreditlinie < 0) {
+    if (!istSandkasten(s2) && s2.cash + s2.kreditlinie < 0) {
       if (s2.phase === "regulaer") eroeffneInsolvenz(s2, "Zahlungsunf\xE4higkeit: L\xF6hne und Mieten nicht gedeckt");
       else if (s2.phase === "insolvenz") zerschlagungDurchMasseunzulaenglichkeit(s2);
     }
@@ -15871,7 +15883,7 @@
     const faellig = s2.verbindlichkeiten.filter((v) => v.faellig <= w2).sort((a2, b2) => a2.faellig - b2.faellig);
     let unbezahlt = false;
     for (const v of faellig) {
-      if (s2.cash - v.wert >= -s2.kreditlinie) {
+      if (liquiditaetReicht(s2, v.wert)) {
         s2.cash -= v.wert;
         v.wert = 0;
       } else {
@@ -16123,7 +16135,7 @@
     for (const m of s2.meldungen.filter((m2) => ["insolvenz", "eigentuemer", "warnung"].includes(m2.typ)).slice(-12)) console.log(`  [W${m.woche} ${m.typ}] ${m.text}`);
   }
 
-  // node_modules/three/build/three.module.js
+  // ../../ruhrkauf/render/node_modules/three/build/three.module.js
   var three_module_exports = {};
   __export(three_module_exports, {
     ACESFilmicToneMapping: () => ACESFilmicToneMapping,
@@ -46764,7 +46776,7 @@
     }
   }
 
-  // node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
+  // ../../ruhrkauf/render/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
   function mergeGeometries(geometries, useGroups = false) {
     const isIndexed = geometries[0].index !== null;
     const attributesUsed = new Set(Object.keys(geometries[0].attributes));
@@ -76076,20 +76088,21 @@
   var PREMIUM_NAMEN = Object.freeze({
     P001: "Palais Hartwig",
     P002: "Hartwig am Hofgarten",
-    P003: "Alsterhaus Hartwig",
-    P004: "Hartwig K\xF6nigsallee"
+    P003: "Hartwig am Jungfernstieg",
+    P004: "Hartwig am Heine-Platz",
+    P005: "Hartwig Leipziger Platz"
   });
   var PREMIUM_MESSING = "#b8955a";
   var BRONZE2 = "#665341";
   var KUPFER2 = "#5f8f7a";
   var DUNKEL = "#253b34";
-  var STEIN = { P001: "#e2d5c1", P002: "#e5d2b8", P003: "#eeeae0", P004: "#dad5cb" };
+  var STEIN = { P001: "#e2d5c1", P002: "#e5d2b8", P003: "#eeeae0", P004: "#dad5cb", P005: "#cdbba8" };
   var GLAS5 = "#608394";
   var GLAS_HELL3 = "#8bb2bd";
   function premiumMasse(haus2) {
     const m = masse(haus2);
     const p2 = haus2.premiumSchluessel;
-    return { w: m.w, d: m.d, n: Math.max(p2 === "P001" ? 6 : 5, m.n), H: Math.max(p2 === "P001" ? 6 : 5, m.n) * 4.45 + 6.6 };
+    return { w: m.w, d: m.d, n: Math.max(p2 === "P001" || p2 === "P002" ? 6 : 5, m.n), H: Math.max(p2 === "P001" ? 6 : 5, m.n) * 4.45 + 6.6 };
   }
   function zylinder(S, x, z4, r3, y, h3, f11, seg = 16, oben = r3) {
     const geo = new three_module_exports.CylinderGeometry(oben, r3, h3, seg).translate(x, y + h3 / 2, z4);
@@ -76185,7 +76198,7 @@
       zylinder(S, xx, bz, 1.8, y + 3.05, 0.18, ["#ebddc5", "#f6f1e7"][i % 2], 10, 0.3);
     }
   }
-  function variante(S, typ, x, z4, w2, d3, y, r3) {
+  function variante(S, typ, x, z4, w2, d3, y, r3, n2) {
     if (typ === "P001") {
       const cx = x + w2 - 3, cz = z4 + d3 - 3;
       zylinder(S, cx, cz, 4.1, 3, y + 9.2 - 3, STEIN.P001, 22);
@@ -76214,6 +76227,27 @@
       zylinder(S, cx, cz, radius, y, 6.2, STEIN.P003, 28);
       kuppel2(S, cx, cz, radius, y + 6.2, KUPFER2);
       for (let u = 3; u < w2 - 3; u += 5.5) S.box(0.9, 5.2, 0.85, x + u, 3.1, z4 + d3 + 0.65, "#f5f1e9");
+    } else if (typ === "P005") {
+      const sand = "#c3ae91", dunkel4 = "#4d4945", glas3 = "#7c9fa5";
+      for (const u of [w2 * 0.29, w2 * 0.71]) {
+        S.box(6.8, 5.3, 0.24, x + u, 3, z4 + d3 + 0.47, glas3);
+        S.box(7.4, 0.46, 1.25, x + u, 5.85, z4 + d3 + 0.68, dunkel4);
+        for (const du of [-2.8, 2.8]) S.box(0.35, 6.1, 0.95, x + u + du, 3.25, z4 + d3 + 0.85, sand);
+      }
+      S.box(w2 * 0.31, n2 * 4.45, 1.5, x + w2 * 0.5, 6.6 + n2 * 4.45 / 2, z4 + d3 + 0.7, sand);
+      for (let i = 0; i < n2; i++) {
+        const yy = 8.2 + i * 4.45;
+        for (let j3 = -2; j3 <= 2; j3++) S.box(w2 * 0.046, 2.5, 0.22, x + w2 / 2 + j3 * w2 * 0.054, yy, z4 + d3 + 1.55, glas3);
+        S.box(w2 * 0.33, 0.35, 1.9, x + w2 / 2, 6.6 + (i + 1) * 4.45, z4 + d3 + 0.85, dunkel4);
+      }
+      S.box(w2 * 0.86, 1.4, d3 * 0.69, x + w2 / 2, y + 0.8, z4 + d3 * 0.49, sand);
+      S.box(w2 * 0.66, 2.3, d3 * 0.5, x + w2 / 2, y + 2.65, z4 + d3 * 0.46, dunkel4);
+      S.box(w2 * 0.44, 2, d3 * 0.38, x + w2 / 2, y + 4.8, z4 + d3 * 0.46, sand);
+      S.box(w2 * 0.33, 2.1, d3 * 0.27, x + w2 / 2, y + 6.75, z4 + d3 * 0.46, glas3);
+      for (const seite2 of [-1, 1]) S.box(w2 * 0.34, 0.25, 0.45, x + w2 / 2, y + 7.93, z4 + d3 * (0.46 + seite2 * 0.135), PREMIUM_MESSING);
+      S.box(w2 * 0.38, 0.5, 3.2, x + w2 / 2, 5.8, z4 + d3 + 2.1, dunkel4);
+      S.box(w2 * 0.39, 0.2, 3.3, x + w2 / 2, 6.17, z4 + d3 + 2.1, PREMIUM_MESSING);
+      for (let u = 0; u < 5; u++) S.box(0.34, 5.2, 0.34, x + w2 * (0.35 + u * 0.075), 2.6, z4 + d3 + 3.1, sand);
     } else {
       S.box(w2 + 0.7, 1.1, 1.2, x + w2 / 2, y - 0.6, z4 + d3 + 0.15, "#c1b8ac");
       S.box(13, 0.9, 5, x + w2 / 2, 5.3, z4 + d3 + 2.4, BRONZE2);
@@ -76308,7 +76342,7 @@
         }
       }
     }
-    const ziel = typ === "P001" ? 6400 : typ === "P002" ? 5900 : typ === "P003" ? 5600 : 5100;
+    const ziel = typ === "P001" ? 6400 : typ === "P002" ? 5900 : typ === "P003" ? 5600 : typ === "P005" ? 5350 : 5100;
     const a2 = Math.max(8, Math.floor(w2 / 1.55)), b2 = Math.max(8, Math.floor(d3 / 1.55));
     let t = 0;
     while (S.anzahl - start < ziel && t < 12e3) {
@@ -76387,7 +76421,7 @@
     S.box(lichtW, 1, seitenD + 0.5, mitteX, H + 0.5, z4 + d3 - seitenD / 2, dach3);
     glasdach(S, x, z4, w2, d3, H + 1, typ);
     vordach2(S, x, z4, w2, d3);
-    variante(S, typ, x, z4, w2, d3, H + 1, r3);
+    variante(S, typ, x, z4, w2, d3, H + 1, r3, n2);
     if (typ === "P001" && !opt.verkaufsprozess && !opt.insolvenz && haus2.status !== "verkauft") {
       for (let i = 0; i < 4; i++) {
         const fx = x + w2 * (0.16 + i * 0.22), fz = z4 + d3 - 1.5;
@@ -76402,7 +76436,7 @@
     kostbareFassade(S, typ, x, z4, w2, d3, n2, H, start);
     strassenleben(S, x, z4, w2, d3, r3, { ...opt, insolvenz: haus2.status === "insolvenz" });
     statusBau(S, scene2, typ, x, z4, w2, d3, H, zust, haus2, opt);
-    const hoehe = H + (zust.hat("umbau") ? 20 : typ === "P003" ? 13 : typ === "P001" ? 16 : typ === "P002" ? 12 : 6);
+    const hoehe = H + (zust.hat("umbau") ? 20 : typ === "P003" ? 13 : typ === "P001" ? 16 : typ === "P002" ? 12 : typ === "P005" ? 10 : 6);
     return { hoehe, w: w2, d: d3, familie: "premium", teile: S.anzahl - start, status: zust.status };
   }
 
@@ -77467,7 +77501,7 @@
     },
     {
       id: "W006",
-      name: "Alsterhaus Hartwig",
+      name: "Hartwig am Jungfernstieg",
       stadt: "Hamburg",
       format: "warenhaus",
       lage: "1a",
@@ -79837,7 +79871,7 @@
     },
     {
       id: "W016",
-      name: "Hartwig K\xF6nigsallee",
+      name: "Hartwig am Heine-Platz",
       stadt: "D\xFCsseldorf",
       format: "warenhaus",
       lage: "1a",
@@ -99603,7 +99637,7 @@
         return e;
       },
       "slot:premium": (S, scene2, p2) => {
-        const h3 = HAUS.get(p2.standort?.id) ?? haeuser_default.find((q2) => q2.klasse === "premium" && q2.stadt === p2.standort?.stadt);
+        const h3 = HAUS.get(p2.standort?.id);
         if (!h3) return { hoehe: 0 };
         const f11 = fussabdruck(h3), { x, z: z4 } = imSlot(p2, f11.w, f11.d);
         p2.haus = h3;
@@ -119340,7 +119374,7 @@
     }
   });
 
-  // node_modules/three/examples/jsm/math/ConvexHull.js
+  // ../../ruhrkauf/render/node_modules/three/examples/jsm/math/ConvexHull.js
   var Visible = 0;
   var Deleted = 1;
   var _v12 = new Vector3();
@@ -119936,7 +119970,7 @@
     }
   };
 
-  // node_modules/three/examples/jsm/geometries/ConvexGeometry.js
+  // ../../ruhrkauf/render/node_modules/three/examples/jsm/geometries/ConvexGeometry.js
   var ConvexGeometry = class extends BufferGeometry {
     constructor(points = []) {
       super();
@@ -130118,7 +130152,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "39cb898" : "Entwicklung";
+  var version = () => true ? "5ec49f5" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
@@ -139121,12 +139155,14 @@
     if (!d3) return null;
     const s2 = d3.spiel;
     const n2 = String(d3.name ?? (platz === "autosave" ? "Automatisch" : "Spielstand")).trim().slice(0, 60);
+    const unbegrenzt = s2.szenario?.id === "sandkasten" || s2.szenario?.regeln?.sandkasten === true;
     return {
       platz,
       name: n2 || "Spielstand",
       datum: d3.datum,
       woche: s2.woche,
-      szenario: String(s2.szenario?.name ?? s2.szenario?.id ?? s2.szenario ?? s2.schwierigkeit ?? "Standard").slice(0, 80),
+      szenario: unbegrenzt ? "Sandkasten" : String(s2.szenario?.name ?? s2.szenario?.id ?? s2.szenario ?? s2.schwierigkeit ?? "Standard").slice(0, 80),
+      unbegrenzt,
       cash: s2.cash,
       bild: bildPruefen(d3.bild),
       stadt: d3.stadt
@@ -139279,7 +139315,7 @@
           const info = vorhanden[platz];
           const name2 = info?.name ?? (platz === "autosave" ? "Automatisch" : "");
           const vorschau2 = info?.bild ? '<img class="app-vorschau" alt="Kartenausschnitt des Spielstands" src="' + info.bild + '">' : '<div class="app-vorschau leer" aria-hidden="true">H</div>';
-          return '<article class="app-platz" data-platz="' + platz + '"><div class="app-platzkopf"><b>' + bezeichnung(platz) + "</b><span>" + (info ? datumFormatieren(info.datum) : "Leer") + '</span></div><div class="app-platzinhalt">' + vorschau2 + '<div class="app-daten">' + (info ? "<strong>" + esc2(info.name) + "</strong><small>" + esc2(info.stadt) + " \xB7 Woche " + (info.woche + 1) + "</small><small>" + esc2(info.szenario) + " \xB7 Cash " + geld(info.cash) + "</small>" : "<small>Hier ist noch kein Spielstand gespeichert.</small>") + "</div></div>" + (start || platz === "autosave" ? "" : '<label class="app-namenswahl">Name <input data-name maxlength="60" aria-label="Name f\xFCr ' + bezeichnung(platz) + '" value="' + esc2(name2) + '" placeholder="Spielstand benennen"></label>') + '<div class="app-aktionen">' + (!start && platz !== "autosave" ? '<button type="button" data-app-aktion="speichern">Speichern</button>' : "") + (info ? '<button type="button" data-app-aktion="laden">Laden</button><button type="button" data-app-aktion="export">Export</button>' : "") + (platz !== "autosave" ? '<button type="button" data-app-aktion="import">Import</button>' : "") + (info && platz !== "autosave" ? '<button type="button" data-app-aktion="loeschen">L\xF6schen</button>' : "") + '<input type="file" data-app-datei accept=".hartwig,application/gzip" aria-label="Spielstand importieren" hidden></div></article>';
+          return '<article class="app-platz" data-platz="' + platz + '"><div class="app-platzkopf"><b>' + bezeichnung(platz) + "</b><span>" + (info ? datumFormatieren(info.datum) : "Leer") + '</span></div><div class="app-platzinhalt">' + vorschau2 + '<div class="app-daten">' + (info ? "<strong>" + esc2(info.name) + "</strong><small>" + esc2(info.stadt) + " \xB7 Woche " + (info.woche + 1) + "</small><small>" + (info.unbegrenzt || info.szenario === "sandkasten" ? "Sandkasten \xB7 unbegrenzt" : esc2(info.szenario) + " \xB7 Cash " + geld(info.cash)) + "</small>" : "<small>Hier ist noch kein Spielstand gespeichert.</small>") + "</div></div>" + (start || platz === "autosave" ? "" : '<label class="app-namenswahl">Name <input data-name maxlength="60" aria-label="Name f\xFCr ' + bezeichnung(platz) + '" value="' + esc2(name2) + '" placeholder="Spielstand benennen"></label>') + '<div class="app-aktionen">' + (!start && platz !== "autosave" ? '<button type="button" data-app-aktion="speichern">Speichern</button>' : "") + (info ? '<button type="button" data-app-aktion="laden">Laden</button><button type="button" data-app-aktion="export">Export</button>' : "") + (platz !== "autosave" ? '<button type="button" data-app-aktion="import">Import</button>' : "") + (info && platz !== "autosave" ? '<button type="button" data-app-aktion="loeschen">L\xF6schen</button>' : "") + '<input type="file" data-app-datei accept=".hartwig,application/gzip" aria-label="Spielstand importieren" hidden></div></article>';
         }).join("");
         root.dataset.start = start ? "1" : "0";
         root.onclick = async (event) => {
@@ -140947,11 +140983,11 @@
       const id = start().szenario;
       const best = leseBestwerte();
       const karten = document.getElementById("startszenarien");
-      karten.innerHTML = ctx.E.SZENARIEN.map((k3) => '<button type="button" class="sz-karte ' + (id === k3.id ? "ausgewaehlt" : "") + '" data-szenario="' + esc2(k3.id) + '" aria-label="' + esc2(k3.name + ": " + k3.ziel) + '"><span class="sz-bild">' + szenarioBild(k3.id) + "</span><b>" + esc2(k3.name) + '</b><span class="sz-level">' + esc2(k3.schwierigkeit) + "</span><small>" + esc2(k3.beschreibung) + '</small><span class="sz-best">' + (best[k3.id] !== void 0 ? "Bestwert: " + best[k3.id] + " Wochen" : "Noch kein Bestwert") + "</span></button>").join("");
+      karten.innerHTML = ctx.E.SZENARIEN.map((k3) => '<button type="button" class="sz-karte ' + (id === k3.id ? "ausgewaehlt" : "") + '" data-szenario="' + esc2(k3.id) + '" aria-label="' + esc2(k3.name + ": " + k3.ziel) + '"><span class="sz-bild">' + szenarioBild(k3.id) + "</span><b>" + esc2(k3.name) + '</b><span class="sz-level">' + esc2(k3.schwierigkeit) + "</span><small>" + esc2(k3.beschreibung) + '</small><span class="sz-best">' + (k3.id === "sandkasten" ? "Cash und Kreditrahmen: unbegrenzt \xB7 Keine Wertung" : best[k3.id] !== void 0 ? "Bestwert: " + best[k3.id] + " Wochen" : "Noch kein Bestwert") + "</span></button>").join("");
       document.getElementById("startsetup").hidden = seite2 !== "setup";
       document.getElementById("startauswahl").hidden = seite2 !== "karten";
       const auswahl4 = ctx.E.SZENARIEN.find((k3) => k3.id === id) ?? ctx.E.SZENARIEN[0];
-      document.getElementById("szenario-gewaehlt").textContent = auswahl4.name + " \xB7 " + auswahl4.ziel;
+      document.getElementById("szenario-gewaehlt").textContent = auswahl4.name + " \xB7 " + (auswahl4.id === "sandkasten" ? "Cash und Kreditrahmen: unbegrenzt" : auswahl4.ziel);
     }
     document.getElementById("startszenarien").addEventListener("click", (event) => {
       const karte = event.target.closest("[data-szenario]");
@@ -144123,8 +144159,8 @@
     const fx = cockpitFormat === "alle" ? null : c.formate.find((x) => x.format === cockpitFormat);
     const auswahl4 = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME).filter(([id]) => id === "alle" || c.formate.some((x) => x.format === id && x.haeuser)).map(([id, name2]) => '<option value="' + id + '"' + (id === cockpitFormat ? " selected" : "") + ">" + name2 + "</option>").join("") + "</select>";
     $2("cockpit").innerHTML = [
-      kachel2("Cash", geld(c.cash), c.cash < 0 ? "rot" : ""),
-      kachel2("Kreditrahmen frei", geld(c.kreditFrei), c.kreditFrei < 2e7 ? "rot" : ""),
+      kachel2("Cash", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? "rot" : ""),
+      kachel2("Kreditrahmen frei", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? "rot" : ""),
       fx ? kachel2("EBITDA " + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : "noch offen", !s.historie.length ? "" : fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wochen", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
       kachel2("Umsatz \xB7 " + auswahl4, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : "noch offen"),
       kachel2("Vertrauen", `${c.vertrauen} / 100`, c.vertrauen < 35 ? "rot" : ""),
@@ -144185,7 +144221,7 @@
     const m = { woche: s.woche, engineMs: Math.round(t1 - t0), neuBauMs: Math.round(t2 - t1), neu: geaendert };
     messung.wocheMs.push(m);
     automatischSpeichern();
-    if ($2("spiel-ruhestand")) $2("spiel-ruhestand").hidden = s.woche < 260 || !!s.ende;
+    if ($2("spiel-ruhestand")) $2("spiel-ruhestand").hidden = s.woche < 260 || !!s.ende || s.szenario?.id === "sandkasten";
     if (s.ende) setTimeout(() => {
       wochenbericht?.zu();
       spielende?.anzeigen();
@@ -144736,7 +144772,7 @@
     },
     fortgesetzt: () => {
       cockpitZeigen();
-      $2("spiel-ruhestand").hidden = s.woche < 260;
+      $2("spiel-ruhestand").hidden = s.woche < 260 || s.szenario?.id === "sandkasten";
       automatischSpeichern();
     },
     fehler: (text3) => meldung(text3, false)
@@ -145169,7 +145205,7 @@
       const titel = (sp6) => [...sp6.childNodes].filter((n2) => n2.nodeType === 3).map((n2) => n2.textContent).join("").replace(/\s*·\s*$/, "").trim();
       const kz2 = (wurzel2) => new Map([...wurzel2.querySelectorAll(".kz")].map((k3) => [titel(k3.querySelector("span")), k3.querySelector("b").textContent]));
       const ck = kz2($2("cockpit"));
-      const soll = { Cash: geld(c.cash), "Kreditrahmen frei": geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
+      const soll = { Cash: c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash), "Kreditrahmen frei": c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
       if (s.historie.length) Object.assign(soll, { "EBITDA 13 Wochen": geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
       for (const [k3, v] of Object.entries(soll)) if (ck.get(k3) !== v) fehler6.push(`Cockpit ${k3}: ${ck.get(k3)} statt ${v}`);
       if ($2("kw").textContent !== `KW ${c.kw} / ${c.jahr}`) fehler6.push(`KW: ${$2("kw").textContent}`);
@@ -145335,7 +145371,7 @@
       window.bereit = true;
       $2("lade").classList.remove("an");
       einfuehrung.spielStart(true);
-      $2("spiel-ruhestand").hidden = s.woche < 260 || !!s.ende;
+      $2("spiel-ruhestand").hidden = s.woche < 260 || !!s.ende || s.szenario?.id === "sandkasten";
       if (s.ende || s.phase === "zerschlagen") spielende.anzeigen();
       else meldung("Spielstand fortgesetzt.");
       return true;

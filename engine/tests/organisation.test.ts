@@ -96,12 +96,12 @@ describe('O01 Organisation', () => {
     expect(organisationUebersicht(s).bereiche.find((b)=>b.id==='immobilien')?.delegiert).toBe(true);
   });
 
-  test('Auch die Maßstab-Welt mit 560 Häusern bildet Cluster ohne harte Stadtgrenzen',()=>{
-    const s=neuesSpiel(1); // #7: Standardwelt ist der Ruhrkauf-Maßstab mit 560 Häusern.
+  test('Auch die Maßstab-Welt mit 561 Häusern bildet Cluster ohne harte Stadtgrenzen',()=>{
+    const s=neuesSpiel(1); // #7: Standardwelt ist der Ruhrkauf-Maßstab mit 561 Häusern.
     const geo=s.organisation!.hauscluster.filter((c)=>!c.sonder);
     const ids=geo.flatMap((c)=>c.hausIds);
-    expect(ids.length).toBe(560);
-    expect(new Set(ids).size).toBe(560);
+    expect(ids.length).toBe(561);
+    expect(new Set(ids).size).toBe(561);
     for(const c of geo){
       expect(c.hausIds.length).toBeGreaterThanOrEqual(6);
       expect(c.hausIds.length).toBeLessThanOrEqual(12);
