@@ -219,7 +219,7 @@
       {"id":"parzellen/p180","bauer":"slot:bay_muenchen","lage":[459,217.5,15,20.5],"drehung":0,"variante":"neubarock","standort":null,"pruefsumme":"d4fd68e44211f868"},
       {"id":"parzellen/p181","bauer":"slot:bay_muenchen","lage":[474,238,20.5,26],"drehung":0,"variante":"neubarock","standort":null,"pruefsumme":"2f69eae1c15ea97f"},
       {"id":"parzellen/p182","bauer":"slot:bay_muenchen","lage":[438.5,238,20.5,23],"drehung":0,"variante":"neubarock","standort":null,"pruefsumme":"5b918802ffd61504"},
-      {"id":"parzellen/p183","bauer":"slot:warenhaus","lage":[546,243.5,67,42],"drehung":0,"variante":"warenhaus","standort":"W092","pruefsumme":"24b659933af62cf1"},
+      {"id":"parzellen/p183","bauer":"slot:warenhaus","lage":[546,243.5,67,42],"drehung":0,"variante":0,"standort":"W092","pruefsumme":"5ae745cb57299ac5"},
       {"id":"parzellen/p184","bauer":"slot:bay_muenchen","lage":[517,217.5,21.5,21.5],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"14b394d9657ebdab"},
       {"id":"parzellen/p185","bauer":"slot:bay_muenchen","lage":[517,260,21.5,25.5],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"ef9f1dd367c5bab7"},
       {"id":"parzellen/p186","bauer":"slot:bay_muenchen","lage":[589.5,217.5,23.5,21.5],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"4a97e9a67950beb0"},
@@ -703,7 +703,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"d0c3c2e6cedfe2f2"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"93f12b9b97c21097"}
     ],
-    "gesamt": "5896e237cbffb3d1"
+    "gesamt": "505f3ca19c97ae45"
   },
   "geometrie": {
     "kacheln": [
@@ -1187,7 +1187,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "fb3cc223b0568da209f41b489e97c6c24e8ae6fd4a519e909f4cf2d6d1e80c48",
+    "stadtplan": "d6346744cc90528dd04a54147cd24e0113a4404778de0968b3a4b19a222e1848",
     "geometrie": "8687e66124c476e2d4cfb16579b6c24ead14b11fbe1f97a4077297d302bcc7c6",
     "bildReferenz": "08e99879798575b6204dd73eae4d14749c7a56ca1077e36006a82696c79342ce"
   }

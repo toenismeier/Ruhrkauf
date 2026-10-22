@@ -221,7 +221,7 @@
       {"id":"parzellen/p165","bauer":"slot:bw_stuttgart","lage":[402.5,239.5,45,32],"drehung":0,"variante":"geschaeft50","standort":null,"pruefsumme":"6710c28f2a7f786b"},
       {"id":"parzellen/p167","bauer":"stadthaus","lage":[447.5,261.5,22,10],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"b3df245ff66cddb7"},
       {"id":"parzellen/p168","bauer":"slot:bay_muenchen","lage":[379.5,261.5,22,30],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"d0babc011203bf2d"},
-      {"id":"parzellen/p169","bauer":"slot:warenhaus","lage":[628,266.5,67,47],"drehung":0,"variante":"warenhaus","standort":"W078","pruefsumme":"efcd99bfc6122a25"},
+      {"id":"parzellen/p169","bauer":"slot:warenhaus","lage":[628,266.5,67,47],"drehung":0,"variante":5,"standort":"W078","pruefsumme":"8eee6c31384d9113"},
       {"id":"parzellen/p17","bauer":"slot:bw_fachwerk","lage":[551.75,239.5,22.75,20.5],"drehung":0,"variante":"tuebingen","standort":null,"pruefsumme":"80593cdfec9d89a5"},
       {"id":"parzellen/p170","bauer":"slot:bay_muenchen","lage":[597,239.5,20.5,24.5],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"890389d075051698"},
       {"id":"parzellen/p171","bauer":"slot:bw_fachwerk","lage":[597,293,20.5,20.5],"drehung":0,"variante":"tuebingen","standort":null,"pruefsumme":"6951e501730dfac3"},
@@ -811,7 +811,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"5da6be37d3f70cc1"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"25e6dd6938d1d4eb"}
     ],
-    "gesamt": "63215ddc2c868250"
+    "gesamt": "d2dadd0c5eca8d46"
   },
   "geometrie": {
     "kacheln": [
@@ -1365,8 +1365,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "718cb29e02f5d58f1a051442c701f2fa39b9f44395d9cffda8d6220d23af4a59",
+    "stadtplan": "f445143da0bbbc41358ee993973d14fb7c2701eece2ba58f2ce427813d8884a3",
     "geometrie": "f5036bb16049db4c218de29407f48cc4b481f413b26c1544780362243c43d109",
-    "bildReferenz": "9689d018b33c8428e6a6a70ecc65d15173afe9a1ecbfa540e2c86ad64f6fb954"
+    "bildReferenz": "7354e9ba356ce4e0a8b3c341bc091158b70e00251904f601e6dcfd77c6cfaa9d"
   }
 }

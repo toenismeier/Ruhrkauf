@@ -411,7 +411,7 @@
       {"id":"parzellen/p299","bauer":"slot:messehaus","lage":[477.4,508.48,13,21.02],"drehung":0,"variante":"messehaus","standort":null,"pruefsumme":"1e28b3f447fcada6"},
       {"id":"parzellen/p3","bauer":"stadthaus","lage":[270.96,128.5,13.96,18],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"aca69395eafb2f89"},
       {"id":"parzellen/p30","bauer":"stadthaus","lage":[647.86,128.5,13.96,18],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"ed2e10c721a37787"},
-      {"id":"parzellen/p300","bauer":"slot:warenhaus","lage":[556.5,496,72,52],"drehung":0,"variante":"warenhaus","standort":"W026","pruefsumme":"cbb439d02bb4ef06"},
+      {"id":"parzellen/p300","bauer":"slot:warenhaus","lage":[556.5,496,72,52],"drehung":0,"variante":7,"standort":"W026","pruefsumme":"52f6105c36514bb2"},
       {"id":"parzellen/p301","bauer":"slot:messehaus","lage":[528.5,470,17.5,17.5],"drehung":0,"variante":"eck","standort":null,"pruefsumme":"f62610c54f3f8ecb"},
       {"id":"parzellen/p302","bauer":"eck","lage":[528.5,530.5,21.5,17.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"b1c2d6a23d02a7c2"},
       {"id":"parzellen/p303","bauer":"eck","lage":[610,470,18.5,17.5],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"5e6281d6d0bd1e4a"},
@@ -535,7 +535,7 @@
       {"id":"parzellen/p414","bauer":"hofhaus","lage":[443,593.5,17.73,25],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"2e75136e557d66f2"},
       {"id":"parzellen/p415","bauer":"hofhaus","lage":[460.73,593.5,11.29,25],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"0c3bc1ef5824ef61"},
       {"id":"parzellen/p416","bauer":"hofhaus","lage":[472.02,593.5,10.98,25],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"a10c743726fa4b3d"},
-      {"id":"parzellen/p417","bauer":"slot:warenhaus","lage":[556.5,618.5,72,52],"drehung":0,"variante":"warenhaus","standort":"W025","pruefsumme":"2aee46db803de869"},
+      {"id":"parzellen/p417","bauer":"slot:warenhaus","lage":[556.5,618.5,72,52],"drehung":0,"variante":4,"standort":"W025","pruefsumme":"8c12e71dd654640d"},
       {"id":"parzellen/p418","bauer":"slot:messehaus","lage":[528.5,570.5,27,22],"drehung":0,"variante":"eck","standort":null,"pruefsumme":"3fc55deeaa2399f8"},
       {"id":"parzellen/p419","bauer":"eck","lage":[528.5,648.5,24,22],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"d6ebf5b86b8ba4a6"},
       {"id":"parzellen/p42","bauer":"stadthaus","lage":[815.37,128.5,13.96,18],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"907cf6924181eac6"},
@@ -896,7 +896,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"d8ad59628020210a"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"708ced5c6d16f4a2"}
     ],
-    "gesamt": "c85f391d3441456f"
+    "gesamt": "0c71e7ff31cf307f"
   },
   "geometrie": {
     "kacheln": [
@@ -1416,8 +1416,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "d824aa23d293abf4cdf764c818d674c5ca72fcd30d45b2b6cda5aac228efb8e3",
+    "stadtplan": "37e1080254be61710ad52dcd959298322d9652a78f9c30db3bc16b1babce6ff9",
     "geometrie": "3ffff4886e5c367c7f86ec95c17bf8548ff4a5fc323dc3421df4c4476db35998",
-    "bildReferenz": "4a77192fe26c216505494e8da7f5545aaa6a6c6ad291f06ca33d28e14824d555"
+    "bildReferenz": "dde727c7b6150d6c9983fcfadcb939477d7ec38069ed72eaa1a0813960701180"
   }
 }

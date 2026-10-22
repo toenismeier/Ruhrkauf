@@ -428,7 +428,7 @@
       {"id":"parzellen/p416","bauer":"stadthaus","lage":[603.5,264.24,14.5,9.76],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"c3943e51ea3cc257"},
       {"id":"parzellen/p417","bauer":"hofhaus","lage":[622,249,10.15,21],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"1fecf7707a19dd6a"},
       {"id":"parzellen/p418","bauer":"hofhaus","lage":[632.15,249,18.85,21],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"f2e24c5a64d38960"},
-      {"id":"parzellen/p419","bauer":"slot:warenhaus","lage":[139,337,62,42],"drehung":0,"variante":"warenhaus","standort":"W121","pruefsumme":"5ff11a9064af9576"},
+      {"id":"parzellen/p419","bauer":"slot:warenhaus","lage":[139,337,62,42],"drehung":0,"variante":7,"standort":"W121","pruefsumme":"2a3ebca6bbacc804"},
       {"id":"parzellen/p420","bauer":"eck","lage":[111,311,15,15],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"94d2abb9ae1823e5"},
       {"id":"parzellen/p421","bauer":"eck","lage":[111,360,15,19],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"ae3109749c655e24"},
       {"id":"parzellen/p422","bauer":"eck","lage":[186,311,15,15],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"30506381caf9e25d"},
@@ -867,7 +867,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"bcba7b8ab38130d4"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"b9986757ddb3d6b9"}
     ],
-    "gesamt": "52c7c5628188bdb8"
+    "gesamt": "354ece0458d42d8a"
   },
   "geometrie": {
     "kacheln": [
@@ -1507,7 +1507,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "9ff0884e9d9831b403bfd3e60dd05223f0ca0eaa43d41d9f26650c7f32982292",
+    "stadtplan": "30cab0d458ba8b213ff5adefade51e4c32d83bb79588ffc94b954f8be5a098fa",
     "geometrie": "9ebe4a018913d78e8e77b211fe5a335155e56d1cf776bbc0f93396c9e937f9c6",
     "bildReferenz": "56555d29aede4acc9d63c1315fac3d9466c033e0b5cdf4b38756760869f0ab63"
   }

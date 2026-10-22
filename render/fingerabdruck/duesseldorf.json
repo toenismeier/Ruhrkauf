@@ -21,7 +21,7 @@
       {"id":"bloecke/b10","bauer":"west_medienhafen","lage":[22.5,694,376.5,100.5],"drehung":0,"variante":"gehry","standort":null,"pruefsumme":"7c47e58806d50d7e"},
       {"id":"bloecke/b11","bauer":"markt","lage":[905,432.5,100,78],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"a3d10200dab822ce"},
       {"id":"bloecke/b12","bauer":"bahn","lage":[22.5,911,513,70],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"e88265d092c35ee2"},
-      {"id":"bloecke/b13","bauer":"center","lage":[135,314,264,96],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"67125004ef4eca86"},
+      {"id":"bloecke/b13","bauer":"center","lage":[135,314,264,96],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"141c481e1af6dc74"},
       {"id":"bloecke/b14","bauer":"center","lage":[421.5,111,114,86],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"c862d1cb8c110943"},
       {"id":"bloecke/b15","bauer":"gewerbe","lage":[1274.5,22.5,100,66],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"8bce1da6cb8f60c6"},
       {"id":"bloecke/b16","bauer":"park","lage":[666,588,100,184],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"3cb9976300a4b00b"},
@@ -1233,7 +1233,7 @@
       {"id":"parzellen/p657","bauer":"slot:rhein_gruenderzeit","lage":[687,314,21.12,21],"drehung":0,"variante":"laden","standort":null,"pruefsumme":"58cc7e849842a100"},
       {"id":"parzellen/p658","bauer":"slot:rhein_wiederaufbau","lage":[708.12,314,21.92,22],"drehung":0,"variante":"geschaeft","standort":null,"pruefsumme":"53b91c9df31aeac1"},
       {"id":"parzellen/p659","bauer":"stadthaus","lage":[730.04,314,14.96,21],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"545db50e7cb83e3e"},
-      {"id":"parzellen/p66","bauer":"slot:warenhaus","lage":[138,317,152,52],"drehung":0,"variante":"warenhaus","standort":"W015","pruefsumme":"39c7e598f42d7ef8"},
+      {"id":"parzellen/p66","bauer":"slot:warenhaus","lage":[138,317,152,52],"drehung":0,"variante":5,"standort":"W015","pruefsumme":"0b17dbc6a98de74a"},
       {"id":"parzellen/p660","bauer":"slot:rhein_wiederaufbau","lage":[744,338,22,25],"drehung":0,"variante":"geschaeft","standort":null,"pruefsumme":"3b5faf2ec6584804"},
       {"id":"parzellen/p661","bauer":"slot:rhein_wiederaufbau","lage":[666,340,22,26.56],"drehung":0,"variante":"geschaeft","standort":null,"pruefsumme":"8122646b6ebe0327"},
       {"id":"parzellen/p662","bauer":"stadthaus","lage":[666,366.56,21,22.44],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"0de59612ad22e8bc"},
@@ -1790,7 +1790,7 @@
       {"id":"strassen/s98","bauer":"haupt","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"ef9228ff577cce8f"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"3261260c2ebcb3fa"}
     ],
-    "gesamt": "f67c3078769fa0ca"
+    "gesamt": "f5e8df20d42accca"
   },
   "geometrie": {
     "kacheln": [
@@ -3160,7 +3160,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "8bafbd6dea746a000fc69b4fefda2931faf9f2219f01f4dd37b9676982fe551d",
+    "stadtplan": "6733387ffff421fc9ef2acddc68498f598e283f35f7284613afccc2758315ed6",
     "geometrie": "e9421fdaccb1b1c074c9ec47991b08ea22c893f417015afc2953d66c90704c11",
     "bildReferenz": "a1fa9b9515984ef47ec4fd3ccf10d1fad99056d73c3deb37953aa12fc0a09c16"
   }

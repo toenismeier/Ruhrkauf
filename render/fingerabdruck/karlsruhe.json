@@ -170,7 +170,7 @@
       {"id":"parzellen/p125","bauer":"slot:bay_buergerhaus","lage":[392,375,21,21],"drehung":0,"variante":"wasserburg","standort":null,"pruefsumme":"acec773ddcc0d0c1"},
       {"id":"parzellen/p126","bauer":"hofhaus","lage":[417,379,11.7,18],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"0402dc9328315ca9"},
       {"id":"parzellen/p127","bauer":"hofhaus","lage":[428.7,379,10.02,18],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"f38a4573e21b14ad"},
-      {"id":"parzellen/p129","bauer":"slot:warenhaus","lage":[571,379,72,43],"drehung":0,"variante":"warenhaus","standort":"W040","pruefsumme":"5a752c2d8bb2b1f1"},
+      {"id":"parzellen/p129","bauer":"slot:warenhaus","lage":[571,379,72,43],"drehung":0,"variante":4,"standort":"W040","pruefsumme":"5b7f88fb209c1c61"},
       {"id":"parzellen/p13","bauer":"slot:bay_muenchen","lage":[620,467.5,23,20.89],"drehung":0,"variante":"neubarock","standort":null,"pruefsumme":"200356aa2b15372a"},
       {"id":"parzellen/p130","bauer":"slot:bay_buergerhaus","lage":[541,354,23.01,21],"drehung":0,"variante":"wasserburg","standort":null,"pruefsumme":"b7234a0658158154"},
       {"id":"parzellen/p131","bauer":"slot:bay_muenchen","lage":[541,397,21,25],"drehung":0,"variante":"neubarock","standort":null,"pruefsumme":"587b36e363bc4ce9"},
@@ -862,7 +862,7 @@
       {"id":"zwickel/zwickel-8","bauer":"gruen","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"6cb9baa808a48d96"},
       {"id":"zwickel/zwickel-9","bauer":"gruen","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"4fdfac9200426d5c"}
     ],
-    "gesamt": "27eab9bdd4232739"
+    "gesamt": "09f2afc51185cb89"
   },
   "geometrie": {
     "kacheln": [
@@ -1405,8 +1405,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "f321faf213c1e88efab98279dd1342e8892b5718cfc3394a98710bde76267483",
+    "stadtplan": "4619024b047fa7e2a29938a11c17d96533fee3b427d8ad5a9231973c2e490043",
     "geometrie": "e62d82635ea639ba200f7fcbbeb852786340bb4b936edc9d85dca7340fef7f2d",
-    "bildReferenz": "0eb5f5964f4cd49c00cc1ac055b23cd0afca8ff286b5fffe464ed3a69bde198d"
+    "bildReferenz": "4b8d838cc30851cc8ca10084851303bd2f3d3cd21764b82af336f1b853299a2b"
   }
 }

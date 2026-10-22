@@ -138,7 +138,7 @@
       {"id":"parzellen/p126","bauer":"hofhaus","lage":[149.27,347.5,10.74,13],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"1f8cda597fc755df"},
       {"id":"parzellen/p127","bauer":"hofhaus","lage":[160.01,347.5,15.49,13],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"26876adea9fc3f56"},
       {"id":"parzellen/p128","bauer":"hofhaus","lage":[175.5,347.5,8,13],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"fe2989e40a262cb2"},
-      {"id":"parzellen/p129","bauer":"slot:warenhaus","lage":[319.5,349,47,37],"drehung":0,"variante":"warenhaus","standort":"W094","pruefsumme":"128bd9fa7cb6aa98"},
+      {"id":"parzellen/p129","bauer":"slot:warenhaus","lage":[319.5,349,47,37],"drehung":0,"variante":1,"standort":"W094","pruefsumme":"91dbc182824d1f4a"},
       {"id":"parzellen/p13","bauer":"slot:franken_fachwerk","lage":[188.05,133,20.95,20.5],"drehung":0,"variante":"bamberg","standort":null,"pruefsumme":"35a6e0addadeed67"},
       {"id":"parzellen/p130","bauer":"slot:franken_fachwerk","lage":[290.5,322,20,20],"drehung":0,"variante":"bamberg","standort":null,"pruefsumme":"82bf9feaf4b0c09a"},
       {"id":"parzellen/p131","bauer":"slot:franken_fachwerk","lage":[290.5,366,24,20],"drehung":0,"variante":"bamberg","standort":null,"pruefsumme":"c879001f3744daef"},
@@ -482,7 +482,7 @@
       {"id":"strassen/s89","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"4c44beab20b3acf3"},
       {"id":"strassen/s9","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"87c87c3b706575bf"}
     ],
-    "gesamt": "d02c423045e673aa"
+    "gesamt": "a4dddeaa81534618"
   },
   "geometrie": {
     "kacheln": [
@@ -787,7 +787,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "5975ea617377fd3622667fae848cefc525d2129deea919425a64248ad53b37df",
+    "stadtplan": "64c59eb274c361cba30a944511417eb56f0a43f8074387cd7d97a556d71b9a5c",
     "geometrie": "7e1a6e64d4cd1546a53a5a5abb863d809c7a3d66f3a46ecc58379d8351063f37",
     "bildReferenz": "27d3330be4c7d755a077942eba10c7d93a77867b1d435fc04052b057ea62297a"
   }
