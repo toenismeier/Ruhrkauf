@@ -18,6 +18,69 @@ function fehlermeldung(e) {
   return new Error(f.message + ' (' + (e?.name ?? 'Fehler') + ': ' + (e?.message ?? String(e)) + ')');
 }
 
+// Q26: Spielstände werden spaltenweise gepackt und gzip-komprimiert gespeichert (verlustfrei, Engine bitgleich).
+// Nach 52 Wochen: 22,4 MB roh → wenige MB; vorher kopierte structuredClone + IndexedDB den Rohstand nach jeder Woche.
+// Gleichförmige Objektlisten (gleiche Schlüssel, nur Zahlen/Texte/Wahrheitswerte/null) werden zu Spalten.
+const SPALTEN = '§s';
+function packen(x) {
+  if (Array.isArray(x)) {
+    if (x.length >= 4 && x.every((o) => o && typeof o === 'object' && !Array.isArray(o))) {
+      const k = Object.keys(x[0]);
+      const gleich = k.length > 0 && x.every((o) => {
+        const ok = Object.keys(o);
+        return ok.length === k.length && ok.every((key, i) => key === k[i] && (o[key] === null || (typeof o[key] !== 'object' && o[key] !== undefined)));
+      });
+      if (gleich) return { [SPALTEN]: k, v: k.map((key) => x.map((o) => o[key])) };
+    }
+    return x.map(packen);
+  }
+  if (x && typeof x === 'object') {
+    const o = {};
+    for (const key of Object.keys(x)) o[key] = packen(x[key]);
+    return o;
+  }
+  return x;
+}
+function auspacken(x) {
+  if (Array.isArray(x)) return x.map(auspacken);
+  if (x && typeof x === 'object') {
+    if (Array.isArray(x[SPALTEN]) && Array.isArray(x.v) && Object.keys(x).length === 2) {
+      const k = x[SPALTEN], n = x.v[0]?.length ?? 0, out = new Array(n);
+      for (let i = 0; i < n; i++) { const o = {}; for (let j = 0; j < k.length; j++) o[k[j]] = x.v[j][i]; out[i] = o; }
+      return out;
+    }
+    const o = {};
+    for (const key of Object.keys(x)) o[key] = auspacken(x[key]);
+    return o;
+  }
+  return x;
+}
+async function komprimieren(text) {
+  if (typeof CompressionStream === 'undefined') return null;
+  const strom = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+  return new Uint8Array(await new Response(strom).arrayBuffer());
+}
+async function dekomprimieren(bytes) {
+  const strom = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return new Response(strom).text();
+}
+// Kompakter Datensatz { format, datum, stadt, name, bild, gz | json } → voller Datensatz mit spiel/ui
+async function aufklappen(d) {
+  if (!d || d.spiel) return d;
+  if (!d.gz && typeof d.json !== 'string') return d;
+  const text = d.gz ? await dekomprimieren(d.gz) : d.json;
+  const inhalt = auspacken(JSON.parse(text));
+  const { gz, json, ...rest } = d;
+  return { ...rest, spiel: inhalt.spiel, ui: inhalt.ui };
+}
+// Gemeinsamer Zugriff auf den Info-Speicher (Portfolio-Filter u. a.)
+function aktion(modus, arbeit) {
+  return transaktion([INFOS], modus, (tx, set) => {
+    const r = arbeit(tx.objectStore(INFOS));
+    r.onsuccess = () => set(r.result);
+  });
+}
+
 function platzPruefen(platz) {
   if (!PLAETZE.includes(platz)) throw new Error('Unbekannter Speicherplatz.');
   return platz;
@@ -110,7 +173,7 @@ export async function laden(platz = 'autosave') {
       const r = tx.objectStore(STORE).get(platz);
       r.onsuccess = () => set(r.result ?? null);
     });
-    return pruefen(d);
+    return pruefen(await aufklappen(d));
   } catch (e) { throw fehlerText(e); }
 }
 
@@ -135,35 +198,38 @@ export function speichern(spiel, stadt, ui = {}, platz = 'autosave', name = '', 
   try {
     platzPruefen(platz);
     if (!spiel || spiel.version !== 2) throw new Error('Kein gültiges Spiel gestartet.');
-    // Vor dem Warten auf die Schreibwarteschlange kopieren, da die Engine weiterläuft.
-    const datensatz = {
+    const kopf = {
       format: FORMAT, datum: importDatum && Number.isFinite(new Date(importDatum).getTime()) ? new Date(importDatum).toISOString() : new Date().toISOString(), stadt,
-      // IndexedDB führt beim put() bereits den Structured-Clone-Algorithmus aus.
-      // Vorheriges structuredClone des vollständigen 560-Häuser-Spielstands
-      // verdoppelte den Peak-Speicherbedarf und verursachte auf iOS WebViews
-      // vermeidbaren Speicherdruck. Snapshot stattdessen unmittelbar in der
-      // synchronen Transaktion kopieren; keine Mutation vor dem put().
-      spiel, ui,
       name: String(name || (platz === 'autosave' ? 'Automatisch' : 'Spielstand')).trim().slice(0, 60),
       bild: bildPruefen(bild)
     };
-    pruefen(datensatz);
-    const info = infoVon(datensatz, platz);
+    pruefen({ ...kopf, spiel });
+    const info = infoVon({ ...kopf, spiel }, platz);
+    // Synchron serialisieren: Schnappschuss genau dieser Woche, die Engine darf danach weiterlaufen.
     const start = performance.now();
-    const naechste = queue.then(() => transaktion([STORE, INFOS], 'readwrite', (tx) => {
-      tx.objectStore(STORE).put(datensatz, platz);
-      tx.objectStore(INFOS).put(info, platz);
-    })).then(() => {
-      letzteSpeicherDiagnose = { zeit: new Date().toISOString(), phase: 'gespeichert',
-        dauerMs: Math.round(performance.now() - start), platz };
+    const text = JSON.stringify({ spiel: packen(spiel), ui: packen(ui) });
+    const tText = performance.now() - start;
+    const naechste = queue.then(async () => {
+      const t0 = performance.now();
+      const gz = await komprimieren(text);
+      const t1 = performance.now();
+      const datensatz = gz ? { ...kopf, gz } : { ...kopf, json: text };
+      await transaktion([STORE, INFOS], 'readwrite', (tx) => {
+        tx.objectStore(STORE).put(datensatz, platz);
+        tx.objectStore(INFOS).put(info, platz);
+      });
+      const t2 = performance.now();
+      letzteSpeicherDiagnose = { zeit: new Date().toISOString(), phase: 'gespeichert', platz,
+        dauerMs: Math.round(t2 - start), serialisierenMs: Math.round(tText), warteMs: Math.round(t0 - start - tText),
+        komprimierenMs: Math.round(t1 - t0), schreibenMs: Math.round(t2 - t1), roh: text.length, bytes: gz ? gz.byteLength : text.length };
     }).catch((e) => {
-      diagnoseFehler(e, 'IndexedDB-Schreiben');
+      diagnoseFehler(e, 'Komprimieren/IndexedDB-Schreiben', text.length);
       throw fehlermeldung(e);
     });
     queue = naechste.catch(() => {});
     return naechste;
   } catch (e) {
-    diagnoseFehler(e, 'structuredClone/Validierung');
+    diagnoseFehler(e, 'Serialisieren/Validierung');
     return Promise.reject(fehlermeldung(e));
   }
 }

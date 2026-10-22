@@ -36,6 +36,7 @@ const html = fs.readFileSync(path.join(__dirname, '..', 'spiel', 'spiel.html'), 
   const speicherStart = Date.now();
   await page.evaluate(() => window.spiel.speichern());
   const speicherMs = Date.now() - speicherStart;
+  console.log('Speicherdiagnose:', JSON.stringify(await page.evaluate(() => window.spiel.speicherDiagnose())));
   const groesse = await page.evaluate(async () => {
     const db = await new Promise((resolve, reject) => {
       const r = indexedDB.open('hartwig-spielstand', 2);
@@ -49,22 +50,20 @@ const html = fs.readFileSync(path.join(__dirname, '..', 'spiel', 'spiel.html'), 
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
       });
-      return { bytes: new Blob([JSON.stringify(datensatz)]).size, hauser: datensatz.spiel.haeuser.length };
+      return { bytes: datensatz.gz ? datensatz.gz.byteLength : new Blob([JSON.stringify(datensatz)]).size };
     } finally { db.close(); }
   });
-  assert.ok(groesse.hauser >= 560, '560 Häuser im gespeicherten Stand');
   await page.reload({ waitUntil: 'load' });
   await page.locator('#fortsetzen').waitFor({ state: 'visible' });
   await page.locator('#fortsetzen').click();
   await page.waitForFunction(() => window.bereit === true && window.spiel?.s?.woche === 52);
+  groesse.hauser = await page.evaluate(() => window.spiel.s.haeuser.length);
+  assert.ok(groesse.hauser >= 560, '560 Häuser im geladenen Stand');
   const nachher = await page.evaluate(() => ({ woche: window.spiel.s.woche, cash: window.spiel.s.cash }));
   assert.deepEqual(nachher, vorher, 'Spielstand über IndexedDB am festen Ursprung erhalten');
   await page.evaluate(() => window.spiel.oeffneHq());
-  await page.evaluate(() => {
-    const b = document.querySelector('#meldung');
-    b.textContent = 'Q26 Testmeldung'; b.className = 'an';
-  });
-  await page.locator('#meldung').click({ force: true });
+  await page.evaluate(() => window.spiel.meldung('Q26 Testmeldung', false));
+  await page.locator('#meldung').click();
   assert.equal(await page.locator('#meldung').evaluate((el) => el.classList.contains('an')), false,
     'Meldung nach Antippen geschlossen');
   await page.screenshot({ path: path.join(__dirname, '..', 'spiel', 'smoke.png') });

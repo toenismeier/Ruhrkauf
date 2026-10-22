@@ -133,7 +133,7 @@
   .wirk { color: var(--leise) !important; }
   .klickbar { cursor: pointer; } .zeile.gewaehlt { background: #fdf3e6; }
   .schnitt img { display: block; width: 100%; background: #26313a; }
-  #meldung { position: fixed; left: calc(16px + env(safe-area-inset-left)); right: calc(16px + env(safe-area-inset-right)); top: calc(16px + env(safe-area-inset-top)); background: var(--text); color: #fff; border-radius: 14px; padding: 10px 14px; font-size: calc(13px * var(--schrift)); box-shadow: var(--schatten); opacity: 0; transform: translateY(-8px); transition: all 0.2s; pointer-events: none; z-index: 5; }
+  #meldung { position: fixed; left: calc(16px + env(safe-area-inset-left)); right: calc(16px + env(safe-area-inset-right)); top: calc(16px + env(safe-area-inset-top)); background: var(--text); color: #fff; border-radius: 14px; padding: 10px 14px; font-size: calc(13px * var(--schrift)); box-shadow: var(--schatten); opacity: 0; transform: translateY(-8px); transition: all 0.2s; pointer-events: none; z-index: 100; }
   #meldung.an { opacity: 1; transform: none; pointer-events: auto; cursor: pointer; } #meldung.rot { background: var(--rot); }
   #lade { position: fixed; inset: 0; display: none; place-items: center; background: rgba(79, 182, 194, 0.55); font-weight: 700; color: #fff; font-size: calc(16px * var(--schrift)); }
   #lade.an { display: grid; }
