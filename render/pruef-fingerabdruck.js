@@ -17,7 +17,7 @@ const OUT = path.join(ROOT, 'out');
 const GROESSE = { breite: 512, hoehe: 1024 };
 const GRENZEN = { kanal: 18, anteilProzent: 2, mittelwert: 1.5 };
 // Zeitlimit lokal 5 Minuten; auf schwächeren Rechnern (CI, 2 Kerne ohne GPU) per Umgebung anheben.
-const STADTZAHL = 112, GRUPPEN_GROESSE = 5, PARALLEL = 2, ZEITLIMIT_MS = 1000 * Number(process.env.FINGERABDRUCK_ZEITLIMIT_S || 300);
+const STADTZAHL = 220, GRUPPEN_GROESSE = 5, PARALLEL = 2, ZEITLIMIT_MS = 1000 * Number(process.env.FINGERABDRUCK_ZEITLIMIT_S || 300);
 
 function kennung(name) {
   return name.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe')
@@ -40,7 +40,8 @@ function hash(wert) {
   return crypto.createHash('sha256').update(typeof wert === 'string' || Buffer.isBuffer(wert) ? wert : JSON.stringify(wert)).digest('hex');
 }
 function stadtliste() {
-  const haeuser = require('./haeuser.json');
+  // Alle grafisch gebauten Städte: Hartwig und Sport, Volkskauf und FUNDUS (Maßstab: 220 Städte)
+  const haeuser = [...require('./haeuser.json'), ...require('./haeuser-schwester.json'), ...require('./haeuser-outlet.json')];
   const namen = [...new Set(haeuser.map((h) => h.stadt))].sort((a, b) => a.localeCompare(b, 'de'));
   if (namen.length !== STADTZAHL) throw new Error('Unerwartete Stadtanzahl: ' + namen.length + ' statt ' + STADTZAHL);
   const map = new Map();
@@ -52,10 +53,15 @@ function stadtliste() {
   return map;
 }
 function auswahl(args, staedte) {
+  args = [...args];
   const neu = args.includes('--neu'), pruefen = args.includes('--pruefen'), gegenprobe = args.includes('--gegenprobe');
   if (Number(neu) + Number(pruefen) + Number(gegenprobe) > 1) throw new Error('Nur einen Prüfmodus angeben');
   const alle = args.includes('--alle');
   if (alle && !neu) throw new Error('--alle ist nur zusammen mit --neu erlaubt');
+  // --teil n/m: nur jede m-te Stadt ab n (CI teilt die 220 Städte auf zwei Jobs)
+  const teilArg = args.find((a) => a.startsWith('--teil='));
+  const teil = teilArg ? teilArg.slice(7).split('/').map(Number) : null;
+  args = args.filter((a) => !a.startsWith('--teil='));
   const unbekannteOptionen = args.filter((a) => a.startsWith('--') && !['--neu', '--pruefen', '--alle', '--gegenprobe'].includes(a));
   if (unbekannteOptionen.length) throw new Error('Unbekannte Option: ' + unbekannteOptionen.join(', '));
   const ids = args.filter((a) => !a.startsWith('--')).map((a) => {
@@ -68,7 +74,8 @@ function auswahl(args, staedte) {
   if (alle && ids.length) throw new Error('--alle nicht mit einzelnen Städten kombinieren');
   if (gegenprobe && ids.length !== 1) throw new Error('--gegenprobe benötigt genau eine Stadt');
   if (gegenprobe) return { neu, gegenprobe, ids: [ids[0], [...staedte.keys()].find((id) => id !== ids[0])] };
-  return { neu, gegenprobe, ids: alle || !ids.length ? [...staedte.keys()] : ids };
+  const liste = alle || !ids.length ? [...staedte.keys()] : ids;
+  return { neu, gegenprobe, ids: teil ? liste.filter((_, i) => i % teil[1] === teil[0] - 1) : liste };
 }
 function dateien(id) {
   return { json: path.join(REFERENZEN, id + '.json'), bild: path.join(BILDER, id + '.png') };
