@@ -1255,6 +1255,77 @@
     return ergebnis;
   }
 
+  // ../engine/src/produkt-sortiment.ts
+  var PRODUKT_ZIELGRUPPEN = [
+    { id: "kinder", name: "Kinder", alter: "10-13", trend: "kinder", preis: 0.82, kosten: 0.83 },
+    { id: "teens", name: "Teens & Tweens", alter: "13-17", trend: "jung", preis: 0.9, kosten: 0.89 },
+    { id: "young", name: "Young Adults", alter: "18-29", trend: "jung", preis: 0.96, kosten: 0.94 },
+    { id: "adults", name: "Adults", alter: "30-49", trend: "mitte", preis: 1, kosten: 1 },
+    { id: "bestager", name: "Best Ager", alter: "50+", trend: "reif", preis: 1.12, kosten: 1.08 }
+  ];
+  var ZIELGRUPPE_PRODUKT = Object.fromEntries(PRODUKT_ZIELGRUPPEN.map((z3) => [z3.id, z3]));
+  var BAUM_KATEGORIEN = [
+    { id: "oberteile", name: "Oberteile" },
+    { id: "unterteile", name: "Unterteile" },
+    { id: "kleider", name: "Kleider" },
+    { id: "jacken", name: "Jacken und M\xE4ntel" },
+    { id: "schuhe", name: "Schuhe" },
+    { id: "waesche", name: "W\xE4sche und Nachtw\xE4sche" },
+    { id: "accessoires", name: "Accessoires" },
+    { id: "home", name: "Wohnen und Haushalt" },
+    { id: "beauty", name: "Beauty" },
+    { id: "kinder", name: "Kinder und Baby" }
+  ];
+  function sortimentsPfad(typ, basis4) {
+    const t = typ.toLowerCase();
+    if (/body|plüsch|kinder-/i.test(t)) return ["kinder", /plüsch/.test(t) ? "Pl\xFCsch und Spielwaren" : /body/.test(t) ? "Bodys" : "Kinderbekleidung"];
+    if (/kleid/.test(t) && !/kleidung/.test(t)) return ["kleider", /wickel/.test(t) ? "Wickelkleider" : /a-linien/.test(t) ? "A-Linien-Kleider" : "Kleider"];
+    if (/rock/.test(t)) return ["unterteile", /plissee/.test(t) ? "Plisseer\xF6cke" : /bleistift/.test(t) ? "Bleistiftr\xF6cke" : /tüll/.test(t) ? "T\xFCllr\xF6cke" : "R\xF6cke"];
+    if (/hose|jeans|chino|culotte|shorts|leggings|bermuda/.test(t)) {
+      const u = /jeans|denim/.test(t) ? "Jeans und Denim" : /leinen/.test(t) ? "Leinenhosen" : /cargo/.test(t) ? "Cargohosen" : /stoff|anzug|culotte/.test(t) ? "Stoffhosen" : /chino/.test(t) ? "Chinos" : /shorts|bermuda/.test(t) ? "Shorts" : /leggings/.test(t) ? "Leggings" : "Hosen";
+      return ["unterteile", u];
+    }
+    if (/jacke|mantel|trench|blazer|sakko|softshell/.test(t)) {
+      const u = /trench/.test(t) ? "Trenchcoats" : /mantel/.test(t) ? "M\xE4ntel" : /blazer|sakko/.test(t) ? "Blazer und Sakkos" : "Jacken";
+      return ["jacken", u];
+    }
+    if (/bluse|hemd/.test(t)) return ["oberteile", /bluse/.test(t) ? "Blusen" : "Hemden"];
+    if (/cardigan|strickjacke/.test(t)) return ["oberteile", "Cardigans und Strickjacken"];
+    if (/pullover|strick|sweatshirt/.test(t)) return ["oberteile", /strick/.test(t) ? "Strick" : "Pullover und Sweatshirts"];
+    if (/crop-top/.test(t)) return ["oberteile", "Crop-Tops"];
+    if (/^top$/.test(t)) return ["oberteile", "Tops"];
+    if (/polo/.test(t)) return ["oberteile", "Polos"];
+    if (/shirt/.test(t)) return ["oberteile", "Shirts"];
+    if (basis4 === "oberteile") return ["oberteile", "Weitere Oberteile"];
+    if (basis4 === "jacken") return ["jacken", "Weitere Jacken"];
+    if (basis4 === "unterteile") return ["unterteile", "Weitere Unterteile"];
+    if (basis4 === "schuhe") return ["schuhe", /sneaker/.test(t) ? "Sneaker" : /stiefel|boot|stiefelette/.test(t) ? "Stiefel und Boots" : /sandale|espadrille/.test(t) ? "Sommerschuhe" : "Weitere Schuhe"];
+    if (basis4 === "waesche") return ["waesche", /pyjama/.test(t) ? "Nachtw\xE4sche" : "Unterw\xE4sche"];
+    if (basis4 === "accessoires") return ["accessoires", /tasche|rucksack|clutch|shopper|weekender/.test(t) ? "Taschen" : "Weitere Accessoires"];
+    if (basis4 === "home") return ["home", /bett|kissen|decke|laken/.test(t) ? "Bett und Textilien" : /handtuch|waschlappen/.test(t) ? "Badtextilien" : "Haushalt und Dekoration"];
+    if (basis4 === "beauty") return ["beauty", /serum|creme|lotion|gel/.test(t) ? "Pflege" : /parfum|toilette/.test(t) ? "Duft" : "Make-up"];
+    return ["kinder", "Baby und Kind"];
+  }
+  function sortimentsBaum(typen) {
+    const ast = /* @__PURE__ */ new Map();
+    for (const t of typen) {
+      const [k3, u] = sortimentsPfad(t.typ, t.kategorie);
+      if (!ast.has(k3)) ast.set(k3, /* @__PURE__ */ new Map());
+      const gruppen = ast.get(k3);
+      if (!gruppen.has(u)) gruppen.set(u, []);
+      gruppen.get(u).push(t.typ);
+    }
+    return BAUM_KATEGORIEN.map((k3) => {
+      const eintraege = [...ast.get(k3.id)?.entries() ?? []];
+      return {
+        id: k3.id,
+        name: k3.name,
+        unterkategorien: eintraege.map(([name2, liste2], i) => ({ id: k3.id + "-" + i, name: name2, typen: liste2.sort((a2, b2) => a2.localeCompare(b2, "de")) })),
+        anzahl: eintraege.reduce((n, [, t]) => n + t.length, 0)
+      };
+    }).filter((k3) => k3.anzahl > 0);
+  }
+
   // ../engine/src/eigenmarken.ts
   var BESCHAFFUNG = {
     fernost: { name: "Fernost", vorlauf: 22, mindestabnahme: 15e4, mehrmarge: 0.14, produzent: "Golden Thread" },
@@ -11377,6 +11448,16 @@
   );
   var BASIS_ARTIKELTYPEN = [...ARTIKELTYPEN];
   ARTIKELTYPEN.push(...ZUSATZ_ARTIKELTYPEN);
+  var Q11_ARTIKELTYPEN = [
+    { ...ARTIKELTYPEN.find((t) => t.typ === "T-Shirt"), typ: "Top", preis: 24, wgs: ["damen.blusen", "damen.young"] },
+    { ...ARTIKELTYPEN.find((t) => t.typ === "T-Shirt"), typ: "Crop-Top", preis: 22, wgs: ["damen.young", "damen.blusen"], gruppe: G(0.2, 1, 0.5, 0.1) },
+    { ...ARTIKELTYPEN.find((t) => t.typ === "Chino"), typ: "Stoffhose", preis: 65, wgs: ["damen.hosen", "herren.hosen"] },
+    { ...ARTIKELTYPEN.find((t) => t.typ === "Chino"), typ: "Leinenhose", preis: 69, materialien: ["Leinen"], saison: "sommer" },
+    { ...ARTIKELTYPEN.find((t) => t.typ === "Chino"), typ: "Cargohose", preis: 59, wgs: ["damen.young", "herren.casual"] },
+    { ...ARTIKELTYPEN.find((t) => t.typ === "Rock"), typ: "Minirock", preis: 39, wgs: ["damen.young", "damen.hosen"] },
+    { ...ARTIKELTYPEN.find((t) => t.typ === "Rock"), typ: "A-Linien-Rock", preis: 49, wgs: ["damen.hosen", "damen.young"] }
+  ];
+  ARTIKELTYPEN.push(...Q11_ARTIKELTYPEN);
   var TYP = Object.fromEntries(ARTIKELTYPEN.map((t) => [t.typ, t]));
   var FARB_BASIS = {
     kinder: ["gelb", "rot", "hellblau", "rosa", "mintgr\xFCn", "orange", "jeansblau", "wei\xDF", "koralle"],
@@ -11437,8 +11518,8 @@
     return a2 === "50+" || a2 === "70+" ? "reif" : a2 === "30-49" ? "mitte" : "jung";
   }
   var PREIS_STUFE = { einstieg: 0, mitte: 1, gehoben: 2 };
-  function normpreis(typ, preislage, material2, qualitaet3) {
-    const p2 = typ.preis * PREISLAGE_FAKTOR[preislage] * MATERIALIEN[material2].preis * (0.85 + 0.05 * qualitaet3);
+  function normpreis(typ, preislage, material2, qualitaet3, zielgruppe) {
+    const p2 = typ.preis * PREISLAGE_FAKTOR[preislage] * MATERIALIEN[material2].preis * (0.85 + 0.05 * qualitaet3) * (zielgruppe ? ZIELGRUPPE_PRODUKT[zielgruppe].preis : 1);
     return Math.max(3, Math.round(p2) - 0.01);
   }
   var produktStufe = (s2) => clamp(s2.hq?.wirkung.produkt ?? 1, 0, 3);
@@ -11453,7 +11534,7 @@
   }
   function bewerte2(s2, m, e, team, trend, trendOhne = 0.4) {
     const t = TYP[e.typ];
-    const g = trendGruppe(m);
+    const g = e.zielgruppe ? ZIELGRUPPE_PRODUKT[e.zielgruppe].trend : trendGruppe(m);
     const mat2 = MATERIALIEN[e.material];
     const farbBasis = FARB_BASIS[g].includes(e.farbe) ? 1 : 0.35;
     const matZiel = g === "reif" ? mat2.wertig : g === "mitte" ? 0.4 + 0.6 * mat2.wertig : g === "jung" ? 1 - 0.5 * mat2.wertig : e.material === "Bio-Baumwolle" || e.material === "Baumwolle" || e.material === "Merino" ? 1 : 0.4;
@@ -11518,6 +11599,23 @@
     const f10 = rohFaktor(s2, markeId, wg) / (pr2.basisF[key] ?? 1);
     return clamp(f10, PRODUKT_PARAM.faktorMin, PRODUKT_PARAM.faktorMax);
   }
+  function produktHausFaktor(s2, m, wg, h3) {
+    if (!s2.produkte) return 1;
+    const liste2 = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.wg === wg && imSortiment(p2));
+    if (!liste2.some((p2) => p2.zielgruppe)) return 1;
+    const alt = passungHaus(m, h3);
+    let gewichtet2 = 0, sum2 = 0;
+    for (const p2 of liste2) {
+      const w2 = gewicht(s2, p2);
+      sum2 += w2;
+      if (!p2.zielgruppe) continue;
+      const z3 = ZIELGRUPPE_PRODUKT[p2.zielgruppe];
+      const alter = p2.zielgruppe === "bestager" && m.zielgruppe.alter === "70+" ? "70+" : z3.alter;
+      const ziel = passungHaus({ zielgruppe: { ...m.zielgruppe, alter }, preislage: p2.preislage }, h3);
+      gewichtet2 += w2 * (ziel - alt);
+    }
+    return clamp(1 + 0.8 * gewichtet2 / Math.max(sum2, 0.01), 0.75, 1.25);
+  }
   function produktMargeDelta(s2, markeId, wg) {
     const pr2 = s2.produkte;
     if (!pr2) return 0;
@@ -11527,9 +11625,9 @@
     const st2 = s2.einkauf?.wgs[wg];
     return (st2?.margeSaison ?? WG[wg]?.margeSaison ?? 0.5) + mehrmarge(m);
   }
-  function ekStueck(normp, me, material2, qualitaet3) {
+  function ekStueck(normp, me, material2, qualitaet3, zielgruppe) {
     const mat2 = MATERIALIEN[material2];
-    return Math.round(normp * (1 - me) * (mat2.kosten / mat2.preis) * (1 + 0.03 * (qualitaet3 - 3)) * 100) / 100;
+    return Math.round(normp * (1 - me) * (mat2.kosten / mat2.preis) * (1 + 0.03 * (qualitaet3 - 3)) * (zielgruppe ? ZIELGRUPPE_PRODUKT[zielgruppe].kosten / ZIELGRUPPE_PRODUKT[zielgruppe].preis : 1) * 100) / 100;
   }
   function produktName(typ, farbe3, material2) {
     const t = TYP[typ];
@@ -11538,7 +11636,7 @@
   }
   function neuesProdukt(s2, m, e, wg, team) {
     const t = TYP[e.typ];
-    const np = normpreis(t, e.preislage, e.material, e.qualitaet);
+    const np = normpreis(t, e.preislage, e.material, e.qualitaet, e.zielgruppe);
     const me = margeErwartet(s2, m, wg);
     s2.produkte.zaehler += 1;
     return {
@@ -11551,11 +11649,12 @@
       stil: e.stil,
       preislage: e.preislage,
       qualitaet: e.qualitaet,
+      zielgruppe: e.zielgruppe,
       wg,
       kategorie: t.kategorie,
       normpreis: np,
       preis: np,
-      ekStueck: ekStueck(np, me, e.material, e.qualitaet),
+      ekStueck: ekStueck(np, me, e.material, e.qualitaet, e.zielgruppe),
       margeErwartet: me,
       status: "entwicklung",
       start: s2.woche,
@@ -11742,6 +11841,7 @@
     if (!m || m.status === "eingestellt") return { ...leer3, fehler: "Marke nicht gefunden." };
     const t = TYP[e.typ];
     if (!t) return { ...leer3, m, fehler: "Unbekannter Artikeltyp." };
+    if (e.zielgruppe && !ZIELGRUPPE_PRODUKT[e.zielgruppe]) return { ...leer3, m, t, fehler: "Unbekannte Zielgruppe." };
     if (!FARBEN2[e.farbe]) return { ...leer3, m, t, fehler: "Unbekannte Farbe." };
     if (!t.materialien.includes(e.material)) return { ...leer3, m, t, fehler: `${e.typ} gibt es nicht aus ${e.material}. M\xF6glich: ${t.materialien.join(", ")}.` };
     if (!DAUER_STUFEN.includes(e.dauer)) return { ...leer3, m, t, fehler: "Entwicklungsdauer 4, 8, 12, 24 oder 48 Wochen." };
@@ -11850,6 +11950,8 @@
       farbeHex: FARBEN2[p2.farbe],
       material: p2.material,
       stil: p2.stil,
+      zielgruppe: p2.zielgruppe,
+      zielgruppeName: p2.zielgruppe ? ZIELGRUPPE_PRODUKT[p2.zielgruppe].name : "Markenzielgruppe",
       preislage: p2.preislage,
       qualitaet: p2.qualitaet,
       wg: p2.wg,
@@ -11903,6 +12005,9 @@
   }
   function produktKatalog(_s) {
     return {
+      version: 2,
+      baum: sortimentsBaum(ARTIKELTYPEN),
+      zielgruppen: PRODUKT_ZIELGRUPPEN,
       sparten: Object.keys(ZUSATZ_ARTIKEL).map((id) => ({
         id,
         name: {
@@ -11941,21 +12046,22 @@
     const fertig2 = s2.woche + (e.dauer || 0);
     const sid = saisonId(fertig2);
     const bekannt = sid <= saisonId(s2.woche) + 1;
-    const leer3 = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig2, saisonEinfuehrung: saisonName(s2, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, hinweise: [] };
+    const leer3 = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig2, saisonEinfuehrung: saisonName(s2, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, passform: 0, hinweise: [] };
     if (!c.m || !c.t || !c.wg) return leer3;
     const team = teamStaerke(s2);
-    const teile2 = bewerte2(s2, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche }, team, bekannt ? trendFuer(s2, sid) : void 0);
+    const teile2 = bewerte2(s2, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche, zielgruppe: e.zielgruppe }, team, bekannt ? trendFuer(s2, sid) : void 0);
     const st2 = sterneAus(scoreAus(teile2));
     const cpo = s2.vorstand?.ressorts.cpo.person;
     const spanne = halbe(0.5 + 1.5 * (1 - (cpo ? cpo.fachwissen / 100 : 0))) - 0.5 + (bekannt ? 0 : 0.5);
-    const np = normpreis(c.t, c.preislage, e.material, c.qualitaet);
+    const np = normpreis(c.t, c.preislage, e.material, c.qualitaet, e.zielgruppe);
     const me = margeErwartet(s2, c.m, c.wg);
-    const ek2 = ekStueck(np, me, e.material, c.qualitaet);
+    const ek2 = ekStueck(np, me, e.material, c.qualitaet, e.zielgruppe);
     const hinweise = [];
     if (teile2.trend < 0.3 && bekannt) hinweise.push("Trifft den Trend der Einf\xFChrungssaison kaum");
-    if (teile2.zielgruppe < 0.5) hinweise.push(`Passt wenig zur Zielgruppe von ${c.m.name}`);
+    if (teile2.zielgruppe < 0.5) hinweise.push(`Passt wenig zur gew\xE4hlten Zielgruppe`);
     if (teile2.entwicklung < 0.5) hinweise.push("Budget oder Dauer knapp f\xFCr diesen Artikel");
     if (!bekannt) hinweise.push("Trend der Einf\xFChrungssaison noch unbekannt");
+    if (e.zielgruppe) hinweise.push(`Zielgruppe ${ZIELGRUPPE_PRODUKT[e.zielgruppe].name}: Preis, Marge und Nachfrage nach Standort werden ber\xFCcksichtigt`);
     if ((c.m.wgAnteile[c.wg] ?? 0) <= 0) hinweise.push(`${c.m.name} bekommt daf\xFCr einen Anteil von ${Math.round(PRODUKT_PARAM.anteilNeu * 100)} % in ${WG[c.wg].name}`);
     return {
       ok: !c.fehler,
@@ -11976,6 +12082,7 @@
       teile: teile2,
       trendBekannt: bekannt,
       kapazitaetFrei: c.kapFrei,
+      passform: c.t.gruppe[e.zielgruppe ? ZIELGRUPPE_PRODUKT[e.zielgruppe].trend : trendGruppe(c.m)],
       hinweise
     };
   }
@@ -12469,7 +12576,7 @@
               A = attraktivitaet(s2, x.m, h3);
               attrCache.set(key, A);
             }
-            const t2 = v.brutto * om * x.e * Math.sqrt(A * x.fit) * nAttr / st2.norm;
+            const t2 = v.brutto * om * x.e * Math.sqrt(A * x.fit * produktHausFaktor(s2, x.m, d3.id, h3)) * nAttr / st2.norm;
             if (teile2) teile2.push([ziel, x.m.id, t2]);
             else ziel[x.m.id] = (ziel[x.m.id] ?? 0) + t2;
             F2 += t2;
@@ -130011,7 +130118,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "346269d" : "Entwicklung";
+  var version = () => true ? "d9b607d" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
@@ -130131,7 +130238,8 @@
   }
 
   // src/ui/eigenmarken.js
-  var ALTER = [["10-13", "Tweens"], ["13-17", "Teens"], ["18-29", "Young Adults"], ["30-49", "30 bis 49"], ["50+", "50 plus"], ["70+", "70 plus"]];
+  var ALTER = [["10-13", "Kinder"], ["13-17", "Teens & Tweens"], ["18-29", "Young Adults"], ["30-49", "Adults"], ["50+", "Best Ager"]];
+  var alterOptionen = (aktuell) => aktuell === "70+" ? [...ALTER, ["70+", "Best Ager 70+"]] : ALTER;
   var GESCHLECHT = [["damen", "Damen"], ["herren", "Herren"], ["unisex", "Unisex"], ["kinder", "Kinder"]];
   var KATEGORIE2 = ["Bekleidung", "Schuhe", "W\xE4sche", "Accessoires", "Home", "Beauty"];
   var PREIS2 = [["einstieg", "Einstieg"], ["mitte", "Mitte"], ["gehoben", "Gehoben"]];
@@ -130139,7 +130247,7 @@
   var FARBEN6 = ["#8c5a7a", "#2f4a6b", "#6f8f4e", "#d9822b", "#c9483e", "#2f63b5", "#1f1f1f", "#d27aa0", "#3f8f8a", "#7a5a3a"];
   var NAMEN2 = { damen: ["Linnea", "Mira Lenz", "Johanna B.", "Ella Sommer"], herren: ["Nordhaven", "Carl Ostwind", "Feldweg", "Henrik & Co."], unisex: ["Studio Hartwig", "Kleeblatt", "Hafenblau"], kinder: ["Hafenkind", "Kai & Kalle", "Pusteblume"] };
   var REGIONEN4 = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
-  var alterText = (a2) => ALTER.find((x) => x[0] === a2)?.[1] ?? a2;
+  var alterText = (a2) => a2 === "70+" ? "Best Ager 70+" : ALTER.find((x) => x[0] === a2)?.[1] ?? a2;
   var zielText = (z3) => `${GESCHLECHT.find((g) => g[0] === z3.geschlecht)?.[1] ?? ""} ${alterText(z3.alter)}`;
   var preisText = (p2) => PREIS2.find((x) => x[0] === p2)?.[1] ?? p2;
   var STATUS = { aufbau: "im Aufbau", neupositionierung: "Neupositionierung", eingestellt: "eingestellt" };
@@ -130200,7 +130308,7 @@
     h3 += '<div class="karte steuerung">';
     if (A.schritt === 0) {
       if (!A.id) h3 += feld("Vorlage", `<div class="seg umbruch">${ctx.q.vorlagen().map((x, i) => `<button class="${A.vorlage === i ? "an" : ""}" data-a="emVorlage" data-v="${i}">${esc2(x.titel)}</button>`).join("")}</div>`, "f\xFCllt alle Schritte vor");
-      h3 += feld("Alter", seg("emAlter", m.zielgruppe.alter, ALTER));
+      h3 += feld("Alter", seg("emAlter", m.zielgruppe.alter, alterOptionen(m.zielgruppe.alter)));
       h3 += feld("Geschlecht", seg("emGeschlecht", m.zielgruppe.geschlecht, GESCHLECHT));
     } else if (A.schritt === 1) {
       h3 += feld("Kategorie", seg("emKategorie", m.kategorie, KATEGORIE2.map((k3) => [k3, k3]), !!A.id), A.id ? "bleibt bei Neupositionierung" : "");
@@ -137500,7 +137608,7 @@
   function produkteModul(ctx) {
     const E7 = ctx.E, s2 = () => ctx.s();
     const da = typeof E7.produkte === "function";
-    const ui = { aktiv: false, seite: "liste", marke: null, kategorie: null, k: 0, auslisten: null, neu: null, model: /* @__PURE__ */ new Set() };
+    const ui = { aktiv: false, seite: "liste", marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: /* @__PURE__ */ new Set() };
     function markenwahl(L2) {
       return `<div class="spaltenwahl">${L2.marken.map((m) => `<button class="chipk ${m.marke === ui.marke ? "an" : ""}" data-a="marke" data-v="${m.marke}"><b style="background:${m.farbe}"></b>${esc2(m.name)}</button>`).join("")}</div>`;
     }
@@ -137529,7 +137637,7 @@
           const mb = ui.model.has(p2.id) ? modelBild(p2.typ, p2.farbe, p2.material, p2.wg, M2.trendGruppe, 190) : null;
           let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p2.id}" role="button" aria-label="Produkt oder Model zeigen" style="background:linear-gradient(#f7f4ee,#efe9df)">${mb ?? bild(p2.typ, p2.farbe, p2.material, 150)}</div>`;
           if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p2.id}" aria-label="Auslisten"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
-          c += `<div class="pname">${P2(`p:${p2.id}:name`, p2.name, "b")}<small>${esc2(p2.typ)} \xB7 ${esc2(p2.farbe)} \xB7 ${esc2(p2.material)} \xB7 ${PREISLAGE[p2.preislage] ?? p2.preislage}</small></div>`;
+          c += `<div class="pname">${P2(`p:${p2.id}:name`, p2.name, "b")}<small>${esc2(p2.typ)} \xB7 ${esc2(p2.zielgruppeName ?? "Markenzielgruppe")} \xB7 ${esc2(p2.farbe)} \xB7 ${esc2(p2.material)} \xB7 ${PREISLAGE[p2.preislage] ?? p2.preislage}</small></div>`;
           if (ent) {
             c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P2(`p:${p2.id}:fertig`, `fertig ${wocheText(st2, p2.fertigWoche)}`, "small")}</div><div class="balken"><span style="width:${(p2.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P2(`p:${p2.id}:fortschritt`, pz3(p2.fortschritt), "i")} \xB7 ${geld(p2.budgetWoche)} je Woche \xFCber ${p2.dauer} Wochen</small></div>`;
           } else {
@@ -137561,11 +137669,54 @@
       if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];
       let h3 = `<button class="zurueck" data-a="liste">\u2039 ${esc2(M2.name)}</button>`;
       h3 += markenwahl(L2);
-      const v = E7.produktVorschau(st2, { marke: M2.marke, typ: e.typ, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche });
+      if (!typen.length) return { titel: "Neues Produkt", unter: esc2(M2.name), html: h3 + '<div class="leise">F\xFCr diese Marke sind keine Artikeltypen verf\xFCgbar.</div>' };
+      const typenIds = new Set(typen.map((t) => t.typ));
+      const baum2 = (K3.baum ?? []).map((kat) => ({
+        ...kat,
+        unterkategorien: kat.unterkategorien.map((ast) => ({
+          ...ast,
+          typen: ast.typen.filter((typ) => typenIds.has(typ))
+        })).filter((ast) => ast.typen.length)
+      })).filter((kat) => kat.unterkategorien.length);
+      const pfad3 = baum2.flatMap((k3) => k3.unterkategorien.map((a2) => ({ k: k3, a: a2 }))).find((x) => x.a.typen.includes(e.typ));
+      h3 += '<div class="q11fortschritt"><span class="' + (ui.neuSchritt === 0 ? "an" : "fertig") + '">1 Kategorie und Artikel</span><span class="' + (ui.neuSchritt === 1 ? "an" : ui.neuSchritt > 1 ? "fertig" : "") + '">2 Zielgruppe</span><span class="' + (ui.neuSchritt === 2 ? "an" : "") + '">3 Entwicklung</span></div>';
+      if (ui.neuSchritt === 0) {
+        h3 += '<div class="vtitel">Sortiment w\xE4hlen</div><p class="leise">Kategorie antippen, Unterkategorie \xF6ffnen und einen Artikeltyp ausw\xE4hlen.</p>';
+        h3 += '<div class="q11baum">';
+        for (const kat of baum2) {
+          const offen = ui.baumOffen === kat.id;
+          const zahl5 = kat.unterkategorien.reduce((sum2, a2) => sum2 + a2.typen.length, 0);
+          h3 += `<button class="q11kategorie ${offen ? "an" : ""}" data-a="baumKat" data-v="${kat.id}" aria-expanded="${offen}"><span>${esc2(kat.name)}</span><small>${zahl5} Artikel</small><b aria-hidden="true">${offen ? "\u2212" : "+"}</b></button>`;
+          if (offen) for (const ast of kat.unterkategorien) {
+            const astOffen = ui.astOffen === ast.id;
+            h3 += `<button class="q11ast ${astOffen ? "an" : ""}" data-a="baumAst" data-v="${esc2(ast.id)}" aria-expanded="${astOffen}"><span>${esc2(ast.name)}</span><small>${ast.typen.length}</small><b aria-hidden="true">${astOffen ? "\u2212" : "+"}</b></button>`;
+            if (astOffen) {
+              h3 += '<div class="typkacheln q11typen">';
+              for (const typ of ast.typen) {
+                const t = typen.find((x) => x.typ === typ);
+                h3 += `<button class="${typ === e.typ ? "an" : ""} ${voll2.has(t.kategorie) ? "voll" : ""}" data-a="typ" data-v="${esc2(typ)}">${kachel(typ, 64)}<span>${esc2(typ)}</span>${voll2.has(t.kategorie) ? "<small>Kapazit\xE4t erreicht</small>" : ""}</button>`;
+              }
+              h3 += "</div>";
+            }
+          }
+        }
+        h3 += "</div>";
+        return { titel: "Neues Produkt", unter: `${esc2(M2.name)} \xB7 Kategorie \u2192 Artikeltyp`, html: h3 };
+      }
+      if (ui.neuSchritt === 1) {
+        h3 += '<button class="zurueck" data-a="neuZurTyp">\u2039 Artikeltyp \xE4ndern</button>';
+        h3 += `<div class="q11auswahl"><b>${esc2(e.typ)}</b><small>${esc2(pfad3?.k.name ?? "")} / ${esc2(pfad3?.a.name ?? "")}</small>${bild(e.typ, e.farbe, e.material, 96)}</div>`;
+        h3 += '<div class="vtitel">Zielgruppe w\xE4hlen</div><p class="leise">Die Altersgruppe beeinflusst Preislage, Passform, regionale Nachfrage und Marge. Bisherige Produkte bleiben unver\xE4ndert.</p>';
+        h3 += '<div class="q11zielgruppen">';
+        for (const z3 of K3.zielgruppen) h3 += `<button class="${e.zielgruppe === z3.id ? "an" : ""}" data-a="zielgruppe" data-v="${z3.id}"><b>${esc2(z3.name)}</b><span>${z3.id === "kinder" ? "Kinderbekleidung" : z3.id === "teens" ? "Junge Mode" : z3.id === "young" ? "Trendorientiert" : z3.id === "adults" ? "Beruf und Alltag" : "Klassik und Komfort"}</span></button>`;
+        h3 += "</div>";
+        return { titel: "Neues Produkt", unter: `${esc2(M2.name)} \xB7 Zielgruppe`, html: h3 };
+      }
+      h3 += '<button class="zurueck" data-a="neuZurZiel">\u2039 Zielgruppe \xE4ndern</button>';
+      h3 += `<div class="q11gewaehlt"><b>${esc2(e.typ)}</b><span>${esc2(K3.zielgruppen.find((z3) => z3.id === e.zielgruppe)?.name ?? "")} \xB7 ${esc2(pfad3?.k.name ?? "")}</span></div>`;
+      const v = E7.produktVorschau(st2, { marke: M2.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche });
       if (v.kapazitaetFrei <= 0) h3 += `<div class="olief warnung">Kapazit\xE4t erreicht: in dieser Kategorie ist bei ${esc2(M2.name)} kein Platz mehr. F\xFCr Neues bitte erst ein Produkt auslisten.</div>`;
-      h3 += '<div class="vtitel">Artikeltyp</div><div class="typkacheln">';
-      for (const t of typen) h3 += `<button class="${t.typ === e.typ ? "an" : ""} ${voll2.has(t.kategorie) ? "voll" : ""}" data-a="typ" data-v="${esc2(t.typ)}">${kachel(t.typ, 64)}<span>${esc2(t.typ)}</span>${voll2.has(t.kategorie) ? "<small>Kapazit\xE4t erreicht</small>" : ""}</button>`;
-      h3 += '</div><div class="karte steuerung">';
+      h3 += '<div class="vtitel">Produkt konfigurieren</div><div class="karte steuerung">';
       h3 += regler("Farbe", `<div class="farben klein">${K3.farben.map((f10) => `<button class="${f10.name === e.farbe ? "an" : ""}" style="background:${f10.hex}" data-a="farbe" data-v="${esc2(f10.name)}" aria-label="${esc2(f10.name)}"></button>`).join("")}</div>`, esc2(e.farbe));
       h3 += regler("Material", segment("material", e.material, (T?.materialien ?? []).map((m) => [m, m])));
       h3 += regler("Preislage", segment("preislage", e.preislage, K3.preislagen.map((p2) => [p2.id, PREISLAGE[p2.id] ?? p2.id])));
@@ -137578,6 +137729,7 @@
       h3 += `<div class="karte vorschau produkt"><div class="pbild" style="background:linear-gradient(#f7f4ee,#efe9df)">${bild(e.typ, e.farbe, e.material, 132)}${mbV ?? ""}</div><div class="pname">${P2("n:name", v.name ?? e.typ, "b")}<small>${v.wgName ? `${esc2(v.wgName)} \xB7 ` : ""}Einf\xFChrung ${esc2(v.saisonEinfuehrung)}</small></div>`;
       h3 += `<div class="mitte">${sterne(v.sterneErwartet, 22)}<span class="sternzahl">${P2("n:sterne", `${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)}`, "span")}</span></div>`;
       h3 += `<div class="owerte"><div><span>Normpreis</span>${P2("n:preis", euro(v.normpreis))}</div><div><span>EK je St\xFCck</span>${P2("n:ek", euro(v.ekStueck))}</div><div><span>Marge</span>${P2("n:marge", pz3(v.marge))}</div><div><span>Entwicklung</span>${P2("n:kosten", geld(v.kosten))}</div><div><span>Fertig</span>${P2("n:fertig", wocheText(st2, v.fertigWoche))}</div><div><span>Platz frei</span>${P2("n:frei", String(v.kapazitaetFrei))}</div></div>`;
+      h3 += `<p class="leise">Passform zur Zielgruppe: <b>${P2("n:passform", pz3(v.passform), "span")}</b> \xB7 wirkt auf die Produktbewertung und damit auf die Nachfrage.</p>`;
       if (v.teile) h3 += `<div class="passung">${[["zielgruppe", "Zielgruppe"], ["trend", "Trend"], ["preisQualitaet", "Preis"], ["entwicklung", "Aufwand"], ["team", "Team"]].map(([k3, t]) => `<div><span class="psaeule"><span style="height:${(v.teile[k3] * 100).toFixed(0)}%"></span></span><b>${Math.round(v.teile[k3] * 100)}</b><i>${t}</i></div>`).join("")}</div>`;
       for (const x of v.hinweise) h3 += `<div class="olief">${esc2(x)}</div>`;
       if (v.fehler) h3 += `<div class="olief warnung">${esc2(v.fehler)}</div>`;
@@ -137645,7 +137797,12 @@
           ui.marke = v;
           ui.k = 0;
           ui.kategorie = null;
-          if (ui.neu) ui.neu = neuerEntwurf3();
+          if (ui.neu) {
+            ui.neu = neuerEntwurf3();
+            ui.neuSchritt = 0;
+            ui.baumOffen = null;
+            ui.astOffen = null;
+          }
           return zeigen(true);
         case "kategorie":
           ui.kategorie = v;
@@ -137665,6 +137822,26 @@
         case "neu":
           ui.seite = "neu";
           ui.neu = neuerEntwurf3();
+          ui.neuSchritt = 0;
+          ui.baumOffen = null;
+          ui.astOffen = null;
+          return zeigen();
+        case "baumKat":
+          ui.baumOffen = ui.baumOffen === v ? null : v;
+          ui.astOffen = null;
+          return zeigen(true);
+        case "baumAst":
+          ui.astOffen = ui.astOffen === v ? null : v;
+          return zeigen(true);
+        case "neuZurTyp":
+          ui.neuSchritt = 0;
+          return zeigen(true);
+        case "neuZurZiel":
+          ui.neuSchritt = 1;
+          return zeigen(true);
+        case "zielgruppe":
+          ui.neu.zielgruppe = v;
+          ui.neuSchritt = 2;
           return zeigen();
         case "sortiment": {
           const p2 = karte(v);
@@ -137692,7 +137869,9 @@
           return zeigen(true);
         case "typ":
           ui.neu.typ = v;
-          return zeigen(true);
+          ui.neu.zielgruppe = void 0;
+          ui.neuSchritt = 1;
+          return zeigen();
         case "farbe":
           ui.neu.farbe = v;
           return zeigen(true);
@@ -137714,7 +137893,7 @@
           return zeigen(true);
         }
         case "entwickeln": {
-          const e = ui.neu, r3 = tun({ typ: "produktEntwickeln", entwurf: { marke: ui.marke, typ: e.typ, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche } });
+          const e = ui.neu, r3 = tun({ typ: "produktEntwickeln", entwurf: { marke: ui.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche } });
           if (r3?.ok) {
             ui.seite = "liste";
             const p2 = E7.produkte(s2()).marken.find((m) => m.marke === ui.marke)?.produkte.filter((x) => x.status === "entwicklung").pop();
@@ -137743,7 +137922,12 @@
         if (marke4) ui.marke = marke4;
         ui.k = 0;
         ui.auslisten = null;
-        if (seite2 === "neu") ui.neu = neuerEntwurf3();
+        if (seite2 === "neu") {
+          ui.neu = neuerEntwurf3();
+          ui.neuSchritt = 0;
+          ui.baumOffen = null;
+          ui.astOffen = null;
+        }
         zeigen();
       },
       neuZeichnen: () => zeigen(true),
