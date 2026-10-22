@@ -120,6 +120,7 @@ export class Instanzer {
         const variabel = t.k[0] === '§';
         const slot = variabel ? +t.k.slice(1) : -1;
         const im = new THREE.InstancedMesh(t.geo, variabel ? weiss() : mat(t.k), instanzen.length);
+        im.userData.diagArt = art;
         // N06: Pro räumlicher Gruppe bleiben die saisonalen Farbslots vollständig erhalten.
         if (['linde', 'kastanie', 'platane', 'birke', 'pappel', 'kugel'].includes(art) || art.startsWith('figur')) {
           im.userData.jahreszeitArt = art;

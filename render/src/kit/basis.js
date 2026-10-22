@@ -71,6 +71,11 @@ export function mat(c) {
   return cache.get(k);
 }
 
+let vertexMaterial = null;
+const SAMMEL_ZELLE = 120;
+/** Gemeinsames Lambert-Material mit Vertexfarben für den KompaktSammler. */
+export function vertexMat() { return vertexMaterial ?? (vertexMaterial = new THREE.MeshLambertMaterial({ color: '#ffffff', vertexColors: true })); }
+
 // ---------- Detailstufen (LOD) ----------
 // LOD.stufe: 'nah' (Detailansicht) | 'mittel' (sichtbarer Stadtbereich) | 'fern' (Bildrand/Übersicht). In 'fern' verwerfen alle Sammler
 // Kleinteile (zwei Kanten unter LOD.duenn m und keine über LOD.lang m: Fensterbänke, Rahmen, Sprossen, Geländer,
@@ -172,13 +177,34 @@ export class KompaktSammler {
     b.p.push(P); b.n.push(N); b.len += P.length;
   }
   bauen(scene, schatten = true) {
+    // Leistung (#31): Farben als Vertexfarben in wenigen Meshes statt einem Mesh je Farbe (gleiche Lambert-Beleuchtung,
+    // gleiche linearen Farbwerte wie material.color). Teile werden nach Raumzellen (SAMMEL_ZELLE m) gruppiert, damit das
+    // Frustum-Culling ferne Zellen auslässt: wenige Draw Calls und nur die sichtbaren Dreiecke.
+    const zellen = new Map();
+    const farbe = new THREE.Color();
     for (const [k, b] of this.puffer) {
-      const P = new Float32Array(b.len), N = new Float32Array(b.len);
+      farbe.set(k);
+      const rgb = [farbe.r, farbe.g, farbe.b];
+      for (let i = 0; i < b.p.length; i++) {
+        const Pt = b.p[i];
+        const key = Math.floor(Pt[0] / SAMMEL_ZELLE) + ':' + Math.floor(Pt[2] / SAMMEL_ZELLE);
+        if (!zellen.has(key)) zellen.set(key, { len: 0, teile: [] });
+        const z = zellen.get(key); z.len += Pt.length; z.teile.push([Pt, b.n[i], rgb]);
+        b.p[i] = b.n[i] = null;
+      }
+    }
+    for (const z of zellen.values()) {
+      const P = new Float32Array(z.len), N = new Float32Array(z.len), C = new Float32Array(z.len);
       let o = 0;
-      for (let i = 0; i < b.p.length; i++) { P.set(b.p[i], o); N.set(b.n[i], o); o += b.p[i].length; b.p[i] = b.n[i] = null; }
+      for (const [Pt, Nt, rgb] of z.teile) {
+        P.set(Pt, o); N.set(Nt, o);
+        for (let i = o, e = o + Pt.length; i < e; i += 3) { C[i] = rgb[0]; C[i + 1] = rgb[1]; C[i + 2] = rgb[2]; }
+        o += Pt.length;
+      }
       const g = new THREE.BufferGeometry();
       g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.BufferAttribute(N, 3));
-      const m = new THREE.Mesh(g, mat(k)); m.castShadow = schatten; m.receiveShadow = true; scene.add(m);
+      g.setAttribute('color', new THREE.BufferAttribute(C, 3));
+      const m = new THREE.Mesh(g, vertexMat()); m.castShadow = schatten; m.receiveShadow = true; scene.add(m);
     }
     this.puffer.clear();
   }

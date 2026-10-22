@@ -149,6 +149,7 @@ async function arbeiter(ids, neu, gegenprobe = false, messen = false) {
         // Rein lesende Leistungsmessung: keine Referenzen schreiben oder abgleichen.
         if (messen) {
           console.log('MESSUNG;' + name + ';' + messung.leistung.drawCalls + ';' + messung.leistung.dreiecke);
+          if (process.env.FINGERABDRUCK_DIAG) for (const [k, n] of messung.leistung.aufschluesselung) console.log('DIAG;' + name + ';' + n + ';' + k);
           continue;
         }
         const bild = Buffer.from(messung.bild, 'base64');
