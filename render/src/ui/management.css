@@ -102,3 +102,15 @@
 #panel:has(.q31-marke) .stepper i { font-size: 12px; }
 #panel:has(.q31-marke) input[type=range] { min-height: 44px; }
 .q31 .q-stepzeile select, .q31 .q-stepzeile input { max-width: 60%; }
+.q-zeile.q-tipp { all: unset; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; width: 100%; padding: 10px 14px; border-top: 1px solid var(--q-linie); min-height: 52px; cursor: pointer; }
+.q-zeile.q-tipp .q-name { font-size: 15px; } .q-zeile.q-tipp .q-wert { font-size: 14px; text-align: right; }
+.q-zeile.q-tipp small { display: block; font-size: 12px; color: var(--q-leise); }
+
+/* Q31 Marketing Q16-Teile im dunklen Look: Stadtwahl als Liste lesbarer Namen statt 10-px-Kacheln */
+#panel:has(.q31-marke) .mk-stadtwahl, #panel:has(.q31-marke) .mk-marktkarte, #panel:has(.q31-marke) .mk-kanalkarte { background: var(--ui-surface); border-color: var(--ui-border); color: var(--ui-text); }
+#panel:has(.q31-marke) .mk-minis button { background: transparent; border-color: var(--ui-border); color: var(--ui-text); min-width: 76px; font-size: 12px; }
+#panel:has(.q31-marke) .mk-minis button span { font-size: 12px; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; line-height: 14px; }
+#panel:has(.q31-marke) .mk-minis button.an { border-color: var(--hk-akzent, #d23c32); box-shadow: inset 0 0 0 1px var(--hk-akzent-hell, #ef7a6f); }
+#panel:has(.q31-marke) .mk-ortband > button, #panel:has(.q31-marke) .mk-teamaktionen button { background: transparent; color: var(--ui-text); border-color: var(--ui-border); }
+#panel:has(.q31-marke) .mk-ringmitte strong { font-size: 13px; }
+#panel:has(.q31-marke) :is(.mk-kanalinfo, .mk-team, .mk-budgetbox > label, .mk-legende span) { color: var(--ui-text); }

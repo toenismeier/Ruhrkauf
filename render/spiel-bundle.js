@@ -159335,7 +159335,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "a98a84a" : "Entwicklung";
+  var version = () => true ? "1b46326" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld2(d3) {
@@ -162582,7 +162582,7 @@
 
   // src/ui/marketing.js
   var STATUS2 = { geplant: "geplant", laufend: "l\xE4uft", beendet: "beendet", abgesagt: "abgesagt", aktiv: "aktiv", gestoppt: "gestoppt" };
-  var STATUS_FARBE = { geplant: "#2f63b5", laufend: "#2f8f5b", beendet: "#9aa3ab", abgesagt: "#d6d2ca" };
+  var STATUS_FARBE = { geplant: "#6f9cbd", laufend: "#6dbf73", beendet: "#5d6b73", abgesagt: "#3b4b54" };
   var MONATE = ["Jan", "Feb", "M\xE4r", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
   var ANGEBOT = [["coupon", "Coupon"], ["punkte", "Mehrfachpunkte"], ["zugabe", "Gratiszugabe"], ["info", "nur Info"]];
   var FREQUENZ = [["einmalig", "einmalig"], ["woechentlich", "w\xF6chentlich"], ["zweiwoechentlich", "14-t\xE4gig"], ["monatlich", "monatlich"], ["quartal", "Quartal"]];
@@ -162612,22 +162612,35 @@
       kanalScroll: 0,
       crm: { seg: 0, kanal: "mail", angebot: "coupon", prozent: 0.15, mindestbon: 40, faktor: 3, wert: 10, frequenz: "monatlich", wochen: 13, kontrolle: true }
     };
-    const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["stadt", "St\xE4dte"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t3]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t3}</button>`).join("")}</div><button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>`;
+    const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["stadt", "St\xE4dte"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t3]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t3}</button>`).join("")}</div>`;
     function uebersicht(P4) {
       const st2 = s2(), u = E8.marketingUebersicht(st2);
-      let h3 = tabs();
-      h3 += `<div class="raster">${kz("Werbung je Woche netto", P4("u:netto", geld(u.wocheNetto)))}${kz("Werbequote netto", P4("u:quote", pz3(u.werbequoteNetto, 1)))}${kz("Markenst\xE4rke", P4("u:marke", `${Math.round(u.markenstaerke)} / 100`))}${kz("Image", P4("u:image", `${Math.round(u.image)} / 100`))}${kz("Kundschaft je Woche", P4("u:frequenz", fmt.format(Math.round(u.frequenzWoche))))}${kz("Durchschnittsbon", P4("u:bon", geld(u.bon)))}${kz("Umsatz mit Karte", P4("u:karte", pz3(u.kartenanteil, 1)))}${kz("Rabattquote 13 Wochen", P4("u:rabatt", pz3(u.rabattquote13, 1)), u.rabattquote13 > 0.08 ? "rot" : "")}</div>`;
-      h3 += `<div class="karte"><div class="khead">Budget je Woche<small>brutto ${geld(u.wocheBrutto)}, Lieferantenbeteiligung ${geld(u.wocheBeteiligung)}</small></div>`;
-      const sum2 = Math.max(1, u.bloecke.kanaele + u.bloecke.karte + u.bloecke.app + u.bloecke.crm);
-      for (const [k3, t3, f11] of [["kanaele", "Kan\xE4le", "#2f63b5"], ["karte", "Hartwig Karte", "#d23c32"], ["app", "Hartwig App", "#8c5a7a"], ["crm", "CRM-Versand", "#2f8f5b"]]) h3 += `<div class="mzeile"><span>${t3}</span><span class="mbalken"><span style="width:${(u.bloecke[k3] / sum2 * 100).toFixed(0)}%;background:${f11}"></span></span>${P4(`u:block:${k3}`, geld(u.bloecke[k3]), "b", ' class="breitwert"')}</div>`;
-      h3 += '<div class="zeile unter"></div></div>';
-      const v = u.verlauf.slice(-26);
-      h3 += kurve2("Kundschaft je Woche", v.map((x2) => x2.kunden), (x2) => fmt.format(Math.round(x2)), "k:kunden", P4, "#2f63b5");
-      h3 += kurve2("Markenst\xE4rke", v.map((x2) => x2.marke), (x2) => dez(x2, 1), "k:marke", P4, "#8c5a7a");
-      const zeile3 = (a2) => `<div class="zeile klickbar" data-a="aktion" data-v="${a2.id}"><span class="dot" style="background:${STATUS_FARBE[a2.status] ?? "#999"}"></span><span class="was">${esc2(a2.name)} <i>${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""}</i></span><span class="qm">KW ${a2.startKw} bis ${a2.endeKw}</span></div>`;
-      if (u.laufend.length) h3 += `<div class="karte"><div class="khead">L\xE4uft gerade</div>${u.laufend.map(zeile3).join("")}</div>`;
-      if (u.naechste.length) h3 += `<div class="karte"><div class="khead">Als N\xE4chstes</div>${u.naechste.map(zeile3).join("")}</div>`;
+      const tsd = (x2) => Math.round(x2 / 1e3), tsdText = (n3) => `${fmt.format(n3)} Tsd. \u20AC`;
+      let h3 = tabs() + '<div class="q31">';
+      const v = u.verlauf.slice(-26), vor = v.length > 1 ? v[v.length - 2].kunden : null;
+      const delta = vor == null ? null : u.frequenzWoche - vor;
+      h3 += `<div class="q-gross"><span class="q-label">Kundschaft je Woche</span><span class="q-haupt">${P4("u:frequenz", fmt.format(Math.round(u.frequenzWoche)), "span")}</span><span class="q-neben"><b>${P4("u:bon", geld(u.bon), "span")}</b>Durchschnittsbon</span></div>`;
+      h3 += `<div class="q-befund">${delta == null ? "Ein Vergleich ist ab der zweiten Woche verf\xFCgbar." : `<b class="${delta < 0 ? "q-minus" : "q-plus"}">${delta >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(Math.round(delta)))}</b> Kunden gegen\xFCber der Vorwoche bei ${P4("u:netto", geld(u.wocheNetto), "b")} Werbung netto.`}${u.rabattquote13 > 0.08 ? ` Die Rabattquote liegt mit ${pz3(u.rabattquote13, 1)} hoch, Kunden gew\xF6hnen sich an Preisaktionen.` : ""}</div>`;
+      const zeilen = [["kanaele", "Kan\xE4le", "Prospekt, Anzeigen, Plakat, Radio, TV, Online, Social"], ["karte", "Hartwig Karte", "Punkte, Stufen, Betrieb, Daten"], ["app", "Hartwig App", "Pflege und Werbung"], ["crm", "CRM-Versand", "Mail, Push, Brief"]].map(([k3, t3, d3]) => ({ k: k3, t: t3, d: d3, n: tsd(u.bloecke[k3]) }));
+      const brutto2 = zeilen.reduce((a2, z4) => a2 + z4.n, 0), beteiligung = tsd(u.wocheBeteiligung);
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Werbebudget je Woche</span><b>Tsd. \u20AC</b></div>';
+      for (const z4 of zeilen) h3 += `<div class="q-zeile"><span class="q-name">${z4.t}<small>${z4.d}</small></span><span class="q-wert">${P4(`u:block:${z4.k}`, tsdText(z4.n), "span")}</span></div>`;
+      h3 += `<div class="q-summe"><span>Brutto</span><span class="q-wert">${P4("u:brutto", tsdText(brutto2), "span")}</span></div>`;
+      h3 += `<div class="q-zeile"><span class="q-name">Lieferantenbeteiligung<small>Werbekostenzusch\xFCsse</small></span><span class="q-wert">${P4("u:beteiligung", `\u2212${tsdText(beteiligung)}`, "span")}</span></div>`;
+      h3 += `<div class="q-summe"><span>Netto</span><span class="q-wert">${P4("u:nettoTsd", tsdText(brutto2 - beteiligung), "span")}</span></div></div>`;
+      const kzz = (n3, w2, p2, ton2 = "") => `<div class="q-zeile"><span class="q-name">${n3}</span><span class="q-wert ${ton2}">${P4(p2, w2, "span")}</span></div>`;
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Marke und Kundschaft</span></div>';
+      h3 += kzz("Werbequote netto", pz3(u.werbequoteNetto, 1), "u:quote") + kzz("Markenst\xE4rke", `${Math.round(u.markenstaerke)} / 100`, "u:marke") + kzz("Image", `${Math.round(u.image)} / 100`, "u:image");
+      h3 += kzz("Umsatz mit Karte", pz3(u.kartenanteil, 1), "u:karte") + kzz("Rabattquote 13 Wochen", pz3(u.rabattquote13, 1), "u:rabatt", u.rabattquote13 > 0.08 ? "q-minus" : "") + "</div>";
+      h3 += kurve2("Kundschaft je Woche", v.map((x2) => x2.kunden), (x2) => fmt.format(Math.round(x2)), "k:kunden", P4, "#6f9cbd");
+      h3 += kurve2("Markenst\xE4rke", v.map((x2) => x2.marke), (x2) => dez(x2, 1), "k:marke", P4, "#c08aa8");
+      const zeile3 = (a2) => `<button class="q-zeile q-tipp" data-a="aktion" data-v="${a2.id}"><span class="q-name">${esc2(a2.name)}<small>${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""}</small></span><span class="q-wert">KW ${a2.startKw}${a2.endeKw !== a2.startKw ? ` bis ${a2.endeKw}` : ""}<small>${STATUS2[a2.status] ?? a2.status}</small></span></button>`;
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Aktionen</span><b>l\xE4uft und als N\xE4chstes</b></div>';
+      if (!u.laufend.length && !u.naechste.length) h3 += '<div class="q-leer"><b>Keine Aktion geplant.</b>Im Kalender planst du die n\xE4chste.</div>';
+      h3 += u.laufend.map(zeile3).join("") + u.naechste.map(zeile3).join("") + "</div>";
       for (const x2 of u.hinweise) h3 += `<div class="olief warnung">${esc2(x2)}</div>`;
+      h3 += '<button class="q-neben-akt" data-a="eigenmarkeGruenden" style="margin:4px 0 12px">+ Neue Eigenmarke</button>';
+      h3 += "</div>";
       return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 ${u.kampagnenAktiv} CRM-Kampagnen aktiv \xB7 KW ${u.kw} / ${u.jahr}`, html: h3 };
     }
     const mitReitern = (r3) => ({ ...r3, html: tabs() + r3.html });
@@ -162698,20 +162711,20 @@
         zeilen[z4] = bis + 0.4;
         balken8.push({ a: a2, von, bis, z: z4 });
       }
-      const RH = 20, H = 22 + Math.max(1, zeilen.length) * RH + 4;
+      const RH = 26, H = 24 + Math.max(1, zeilen.length) * RH + 18;
       let g = `<svg class="zeitleiste" viewBox="0 0 ${W3} ${H}" width="100%">`;
       for (let m = 0; m < 12; m++) {
         const x2 = L2 + m * 52 / 12 * B8;
-        g += `<line x1="${x2}" x2="${x2}" y1="14" y2="${H}" stroke="#ece8e1"/><text x="${x2 + 2}" y="10" font-size="8.5" fill="#7b8790">${MONATE[m]}</text>`;
+        g += `<line x1="${x2}" x2="${x2}" y1="16" y2="${H}" stroke="var(--ui-border, #ece8e1)"/><text x="${x2 + 2}" y="12" font-size="12" fill="var(--ui-muted, #7b8790)">${MONATE[m].slice(0, 1)}</text>`;
       }
       for (const { a: a2, von, bis, z: z4 } of balken8) {
-        const x2 = L2 + von * B8, w2 = Math.max(3, (bis - von) * B8 - 1), y2 = 18 + z4 * RH;
-        g += `<g data-a="aktion" data-v="${a2.id}" class="klickbar"><rect x="${x2}" y="${y2}" width="${w2}" height="${RH - 4}" rx="4" fill="${STATUS_FARBE[a2.status]}"${a2.status === "abgesagt" ? ' stroke="#b9b2a6" stroke-dasharray="2 2"' : ""}/>${w2 > 34 ? `<text x="${x2 + 4}" y="${y2 + 11.5}" font-size="8.5" font-weight="700" fill="#fff">${esc2(a2.name.length > Math.floor(w2 / 4.6) ? a2.name.slice(0, Math.max(3, Math.floor(w2 / 4.6) - 1)) + "." : a2.name)}</text>` : ""}</g>`;
+        const x2 = L2 + von * B8, w2 = Math.max(3, (bis - von) * B8 - 1), y2 = 20 + z4 * RH;
+        g += `<g data-a="aktion" data-v="${a2.id}" class="klickbar"><rect x="${x2}" y="${y2}" width="${w2}" height="${RH - 4}" rx="4" fill="${STATUS_FARBE[a2.status]}"${a2.status === "abgesagt" ? ' stroke="#b9b2a6" stroke-dasharray="2 2"' : ""}/>${w2 > 6.5 * a2.name.length + 8 ? `<text x="${x2 + 4}" y="${y2 + 15}" font-size="12" font-weight="700" fill="#14202a">${esc2(a2.name)}</text>` : ""}</g>`;
       }
       const jetzt = s2().woche - (K3.jahr - s2().startJahr) * 52;
       if (jetzt >= 0 && jetzt < 52) {
         const x2 = L2 + (jetzt + 0.5) * B8;
-        g += `<line x1="${x2}" x2="${x2}" y1="12" y2="${H}" stroke="#d23c32" stroke-width="1.5"/><text x="${Math.min(W3 - 30, x2 + 3)}" y="${H - 3}" font-size="8" fill="#d23c32" font-weight="700">KW ${K3.kw}</text>`;
+        g += `<line x1="${x2}" x2="${x2}" y1="14" y2="${H}" stroke="#d23c32" stroke-width="1.5"/><text x="${Math.min(W3 - 40, x2 + 3)}" y="${H - 3}" font-size="12" fill="#ef6f62" font-weight="700">KW ${K3.kw}</text>`;
       }
       return g + "</svg>";
     }
@@ -162721,13 +162734,15 @@
       const K3 = E8.aktionskalender(st2, ui.jahr);
       let h3 = tabs();
       h3 += segment("jahr", ui.jahr, [[jahr0, String(jahr0)], [jahr0 + 1, String(jahr0 + 1)]]);
-      h3 += `<div class="karte schnittk">${zeitleiste(K3, P4)}<div class="legende"><span class="ampel" style="background:#2f63b5"></span> geplant <span class="ampel" style="background:#2f8f5b"></span> l\xE4uft <span class="ampel" style="background:#9aa3ab"></span> beendet \xB7 Balken antippen</div></div>`;
-      h3 += '<button class="breit gruen" data-a="planen">+ Aktion planen</button>';
+      h3 += '<div class="q31">';
+      h3 += `<div class="q-buch q-kalender"><div class="q-buch-kopf"><span>Kampagnenkalender ${K3.jahr}</span><b>Balken antippen</b></div><div style="padding:4px 8px 8px">${zeitleiste(K3, P4)}</div>
+      <div class="legende" style="padding:0 14px 10px">${["geplant", "laufend", "beendet"].map((x2) => `<span class="ampel" style="background:${STATUS_FARBE[x2]}"></span> ${STATUS2[x2]}`).join("  ")}</div></div>`;
+      h3 += '<button class="q-haupt-akt" data-a="planen">+ Aktion planen</button>';
       if (ui.planen) h3 += planenKarte(K3);
-      h3 += '<div class="karte">';
-      for (const a2 of K3.eintraege) h3 += `<div class="zeile klickbar" data-a="aktion" data-v="${a2.id}"><span class="dot" style="background:${STATUS_FARBE[a2.status]}"></span><span class="was">${esc2(a2.name)} <i>${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""} \xB7 ${esc2(a2.scopeText)}</i></span><span class="qm">KW ${a2.startKw}${a2.wochen > 1 ? ` bis ${a2.endeKw}` : ""}</span><span class="uq">${P4(`kal:${a2.id}:status`, STATUS2[a2.status], "span")}</span></div>`;
-      if (!K3.eintraege.length) h3 += '<div class="zeile grau">Keine Aktion in diesem Jahr.</div>';
-      h3 += "</div>";
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Aktionsbuch</span><b>Wochen \xB7 Status</b></div>';
+      for (const a2 of K3.eintraege) h3 += `<button class="zeile q-zeile q-tipp" data-a="aktion" data-v="${a2.id}"><span class="q-name">${esc2(a2.name)}<small>${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""} \xB7 ${esc2(a2.scopeText)}</small></span><span class="q-wert">KW ${a2.startKw}${a2.wochen > 1 ? ` bis ${a2.endeKw}` : ""}<small>${P4(`kal:${a2.id}:status`, STATUS2[a2.status], "span")}</small></span></button>`;
+      if (!K3.eintraege.length) h3 += '<div class="q-leer"><b>Keine Aktion in diesem Jahr.</b>Plane die erste \xFCber den Knopf oben.</div>';
+      h3 += "</div></div>";
       for (const r3 of K3.raeumungen) h3 += `<div class="olief">${esc2(r3.name)}: ${esc2(r3.text)}</div>`;
       return { titel: "Aktionskalender", unter: `${K3.jahr} \xB7 ${K3.eintraege.filter((a2) => a2.status !== "abgesagt").length} Aktionen \xB7 KW ${K3.kw}`, html: h3 };
     }
@@ -162775,7 +162790,7 @@
       const altKar = document.querySelector("#pinhalt .mk-kanalreihe");
       if (altKar) ui.kanalScroll = altKar.scrollLeft;
       const { r: r3 } = rendern();
-      ctx.panel(r3.titel, r3.unter, r3.html, "gross");
+      ctx.panel(r3.titel, r3.unter, bereich("zentrale") + '<i class="q31-marke" hidden></i>' + r3.html, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? sc : 0;
       const neuKar = document.querySelector("#pinhalt .mk-kanalreihe");
