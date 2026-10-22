@@ -202,6 +202,8 @@ export interface MarketingStand {
   woche: MarketingWocheArbeit;
   verlauf: MarketingVerlauf[];
   kalenderJahre: number[];
+  /** Organisatorische Zuordnung bestehender Marketing-FTE, ohne eigene Budget-/Wirkungslogik. */
+  kanalTeams?: Partial<Record<KanalId, number>>;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -437,7 +439,7 @@ function altersAnteile(h: Haus): Record<Altersgruppe, number> {
   return { jung: roh.jung / sum, mitte: roh.mitte / sum, aelter: roh.aelter / sum, senioren: roh.senioren / sum };
 }
 
-const LAGE_SCHAUFENSTER: Record<Haus['lage'], number> = { '1a': 1.2, b: 1, center: 0.9, rand: 0.7 };
+const LAGE_SCHAUFENSTER: Record<Haus['lage'], number> = { '1a': 1.2, b: 1, stadtteil: 0.95, center: 0.9, rand: 0.7 };
 
 function kanalRel(sc: MarketingSzenario, k: KanalId): number { return sc.kanaele[k].adstock / KANAL[k].quote; }
 
@@ -449,7 +451,7 @@ function regionFaktor(st: KanalStand, def: KanalDef, r: Region, anteil: Record<R
 }
 
 /** Kanalwirkung in einem Haus (Summe Reichweite × Budgetwirkung). */
-function kanalWirkung(s: GameState, sc: MarketingSzenario, h: Haus): number {
+export function kanalWirkung(s: GameState, sc: MarketingSzenario, h: Haus): number {
   const al = altersAnteile(h);
   const anteil = s.marketing.stand.woche.regionAnteil;
   let x = 0;
@@ -1011,6 +1013,7 @@ export function marketingAbschluss(s: GameState, umsatz: number, kosten: Marketi
 
 export type MarketingAktion =
   | { typ: 'kanalBudget'; kanal: KanalId | 'alle'; euroWoche?: number; quote?: number; faktor?: number; regionen?: Partial<Record<Region, number>> }
+  | { typ: 'kanalTeam'; kanal: KanalId; delta: -1 | 1 }
   | { typ: 'kundenkarteSetzen'; punkteSatz?: number; stufen?: boolean; kartenrabatt?: number; anmeldepraemie?: number; anmeldeWochen?: number; datenBudgetWoche?: number }
   | { typ: 'appSetzen'; budgetWoche?: number; relaunch?: boolean; appCoupons?: boolean }
   | { typ: 'crmKampagneAnlegen'; name?: string; segment: CrmSegment; kanal: CrmKanal; angebot: CrmAngebot; frequenz: CrmFrequenz; start?: number; wochen?: number; kontrollgruppe?: boolean }
@@ -1040,7 +1043,7 @@ export interface AktionEntwurf {
   sonderwerbung?: number;
 }
 
-export const MARKETING_AKTIONEN = new Set<string>(['kanalBudget', 'kundenkarteSetzen', 'appSetzen', 'crmKampagneAnlegen', 'crmKampagneStoppen', 'aktionPlanen', 'aktionAendern', 'aktionAbsagen']);
+export const MARKETING_AKTIONEN = new Set<string>(['kanalBudget', 'kanalTeam', 'kundenkarteSetzen', 'appSetzen', 'crmKampagneAnlegen', 'crmKampagneStoppen', 'aktionPlanen', 'aktionAendern', 'aktionAbsagen']);
 
 type Erg = { ok: boolean; text: string; id?: string };
 const ok = (text: string, id?: string): Erg => ({ ok: true, text, id });
@@ -1167,6 +1170,18 @@ export function marketingAktion(s: GameState, a: MarketingAktion, einmalKosten: 
       s.marketing.budgetQuote = netto / Math.max(1, bezug);
       const txt = ids.length === 1 ? `${KANAL[ids[0]].name}: ${mio(I.kanaele[ids[0]].quote * bezug * 52)} im Jahr (${mio(I.kanaele[ids[0]].quote * bezug)} je Woche)` : `Alle Kanäle angepasst`;
       return ok(`${txt}. Werbequote netto ${pz(s.marketing.budgetQuote, 1)}.`);
+    }
+    case 'kanalTeam': {
+      if (!KANAL[a.kanal]) return fehler('Unbekannter Kanal.');
+      const teams = m.kanalTeams ?? (m.kanalTeams = {});
+      const bisher = teams[a.kanal] ?? 0;
+      const neu = bisher + a.delta;
+      if (neu < 0) return fehler('Diesem Kanal ist kein Teammitglied zugeordnet.');
+      const verfuegbar = Math.max(0, Math.floor(s.hq.abteilungen.find((x) => x.id === 'marketing')?.fte ?? 0));
+      const belegt = Object.values(teams).reduce((sum, n) => sum + (n ?? 0), 0);
+      if (a.delta > 0 && belegt >= verfuegbar) return fehler('Alle Marketing-FTE sind bereits zugeordnet. Kapazität zunächst in der Zentrale ausbauen oder neu verteilen.');
+      teams[a.kanal] = neu;
+      return ok(`${KANAL[a.kanal].name}: ${neu} Marketing-FTE organisatorisch zugeordnet. Die Kanalwirkung bleibt an das bestehende Budget und die Zentrale gekoppelt.`);
     }
     case 'kundenkarteSetzen': {
       const k = I.karte;

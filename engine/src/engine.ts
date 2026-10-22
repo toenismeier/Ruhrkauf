@@ -26,6 +26,7 @@ import { vorstandWoche } from './vorstand';
 import { organisationWoche } from './organisation';
 // O03 IT
 import { itWoche } from './it';
+import { itProdukteWoche } from './it-produkte';
 import { produkteBuchen, produkteWoche } from './produkte';
 // O04 Personal
 import { personaleinsatzWoche } from './personaleinsatz';
@@ -373,6 +374,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   k.kreditFrei = eur(s.cash + s.kreditlinie);
   k.bestand = eur(s.bestand.reduce((a,b)=>a+b.wert,0) + (s.formate?.volkskaufBestand??0) + (s.formate?.pool.reduce((a,b)=>a+b.wert,0)??0));
   s.historie.push(k);
+  // Q19: echte Wochenwerte nach Marketing- und Onlineabschluss, rein lesender Snapshot.
+  itProdukteWoche(s);
   // O02: aktuelle Haus-KPI in die Umsatztreiber zerlegen, ohne weitere Umsatzbuchung.
   erfasseTreiber(s);
   if (s.historie.length > 520) s.historie.splice(0, s.historie.length - 520);

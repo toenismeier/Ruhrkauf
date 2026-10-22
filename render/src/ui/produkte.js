@@ -12,12 +12,16 @@ import { passendeTypen, fachSegmente, zielChips, sortimentBedienung, gruppeTrend
 const PREISLAGE = { einstieg: 'Einstieg', mitte: 'Mitte', gehoben: 'Gehoben' };
 const STATUS = { entwicklung: 'in Entwicklung', sortiment: 'im Sortiment', pausiert: 'pausiert', ausgelistet: 'ausgelistet' };
 const euro = (x) => `${dez(x, 2)} €`;
-const bild = (typ, farbe, material, g = 150) => (typeof PB.produktbildSVG === 'function' ? PB.produktbildSVG(typ, farbe, material, g) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc(typ)}</text></svg>`);
+// Q27: Bild je Artikeltyp aus dem Katalog (Silhouette + Parameter, engine/src/sortiment); ohne Eintrag leitet die Grafik es aus dem Namen ab
+const BILD = new Map();
+const merkeBilder = (K) => { for (const t of K.typen ?? []) if (t.bild) BILD.set(t.typ, t.bild); return K; };
+const bildOpt = (typ, b) => { const x = b ?? BILD.get(typ); return x ? { bild: x } : {}; };
+const bild = (typ, farbe, material, g = 150, b) => (typeof PB.produktbildSVG === 'function' ? PB.produktbildSVG(typ, farbe, material, g, bildOpt(typ, b)) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc(typ)}</text></svg>`);
 // Q25: Model-Ansicht (Antippen des Bildes wechselt Produkt ↔ Model)
 const ZG_MODEL = { kinder: 'kinder', jung: 'young', mitte: 'adults', reif: 'bestager' };
 const geschlechtVon = (wg) => (/^herren|kinder\.jungen/.test(String(wg ?? '')) ? 'herren' : 'damen');
-const modelBild = (typ, farbe, material, wg, trendGruppe, g = 150) => (typeof PB.modelbildSVG === 'function' ? PB.modelbildSVG(typ, farbe, material, { geschlecht: geschlechtVon(wg), zielgruppe: ZG_MODEL[trendGruppe] ?? 'young', groesse: g, hintergrund: null }) : null);
-const kachel = (typ, g = 76) => (typeof PB.typKachelSVG === 'function' ? PB.typKachelSVG(typ, g) : bild(typ, undefined, undefined, g));
+const modelBild = (typ, farbe, material, wg, trendGruppe, g = 150, b) => (typeof PB.modelbildSVG === 'function' ? PB.modelbildSVG(typ, farbe, material, { geschlecht: geschlechtVon(wg), zielgruppe: ZG_MODEL[trendGruppe] ?? 'young', groesse: g, hintergrund: null, ...bildOpt(typ, b) }) : null);
+const kachel = (typ, g = 76) => (typeof PB.typKachelSVG === 'function' ? PB.typKachelSVG(typ, g, bildOpt(typ)) : bild(typ, undefined, undefined, g));
 let sternNr = 0;
 /** Fünf Sterne mit halben Schritten. */
 function sterne(x, g = 18) {
@@ -78,8 +82,8 @@ export function produkteModul(ctx) {
     else {
       const karten = prod.map((p) => {
         const ent = p.status === 'entwicklung';
-        const mb = ui.model.has(p.id) ? modelBild(p.typ, p.farbe, p.material, p.wg, M.trendGruppe, 190) : null;
-        let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p.id}" role="button" aria-label="Produkt oder Model zeigen" style="background:linear-gradient(#f7f4ee,#efe9df)">${mb ?? bild(p.typ, p.farbe, p.material, 150)}</div>`;
+        const mb = ui.model.has(p.id) ? modelBild(p.typ, p.farbe, p.material, p.wg, M.trendGruppe, 190, p.bild) : null;
+        let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p.id}" role="button" aria-label="Produkt oder Model zeigen" style="background:linear-gradient(#f7f4ee,#efe9df)">${mb ?? bild(p.typ, p.farbe, p.material, 150, p.bild)}</div>`;
         if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p.id}" aria-label="Auslisten"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
         c += `<button class="q24-detailsknopf" data-a="detailProdukt" data-v="${esc(p.id)}">Produktdetails und Model ansehen</button>`;
         c += `<div class="pname">${P(`p:${p.id}:name`, p.name, 'b')}<small>${esc(p.typ)} · ${esc(p.zielgruppeName ?? 'Markenzielgruppe')} · ${esc(p.farbe)} · ${esc(p.material)} · ${PREISLAGE[p.preislage] ?? p.preislage}</small></div>`;
@@ -153,7 +157,7 @@ export function produkteModul(ctx) {
 
   // ─────────────────────────── Neues Produkt
   function neu(P) {
-    const st = s(), K = E.produktKatalog(st), L = E.produkte(st), M = aktuelleMarke(L), e = ui.neu;
+    const st = s(), K = merkeBilder(E.produktKatalog(st)), L = E.produkte(st), M = aktuelleMarke(L), e = ui.neu;
     const markeKats = new Set(M.kategorien.filter((k) => k.kapazitaet > 0).map((k) => k.id));
     const voll = new Set(M.kategorien.filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
     const typen = passendeTypen(K, ui.fach, ui.zielgruppe).filter((t) => markeKats.has(t.kategorie) && (t.gruppe[M.trendGruppe] ?? 0) > 0.15).sort((a, b) => Number(voll.has(a.kategorie)) - Number(voll.has(b.kategorie)));
@@ -215,7 +219,7 @@ export function produkteModul(ctx) {
 
   // ─────────────────────────── Trendbericht
   function trend(P) {
-    const st = s(), T = E.trendbericht(st), K = E.produktKatalog(st), hex = new Map(K.farben.map((f) => [f.name, f.hex]));
+    const st = s(), T = E.trendbericht(st), K = merkeBilder(E.produktKatalog(st)), hex = new Map(K.farben.map((f) => [f.name, f.hex]));
     let h = '<button class="zurueck" data-a="liste">‹ Produkte</button>';
     h += `<div class="olief">${esc(T.hinweis)}</div>`;
     for (const [titel, S, pre] of [['Laufende Saison', T.aktuell, 'a'], ['Nächste Saison', T.naechste, 'n']]) {
@@ -254,7 +258,7 @@ export function produkteModul(ctx) {
   const neuerEntwurf = () => {
     const st = s(), T = E.trendbericht(st), L = E.produkte(st), M = aktuelleMarke(L);
     const g = T.naechste.gruppen[M?.trendGruppe] ?? T.aktuell.gruppen[M?.trendGruppe];
-    const K = E.produktKatalog(st), voll = new Set((M?.kategorien ?? []).filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
+    const K = merkeBilder(E.produktKatalog(st)), voll = new Set((M?.kategorien ?? []).filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
     const frei = (typ) => { const t = K.typen.find((x) => x.typ === typ); return t && !voll.has(t.kategorie) && M.kategorien.some((k) => k.id === t.kategorie && k.kapazitaet > 0); };
     return { typ: g?.artikel?.find(frei) ?? g?.artikel?.[0], farbe: g?.farben?.[0] ?? 'marine', material: g?.materialien?.[0] ?? 'Baumwolle', preislage: 'mitte', qualitaet: 3, dauer: 12, budgetWoche: 20000 };
   };
@@ -294,7 +298,7 @@ export function produkteModul(ctx) {
       case 'preislage': ui.neu.preislage = v; return zeigen(true);
       case 'qualitaet': ui.neu.qualitaet = Number(v); return zeigen(true);
       case 'dauer': ui.neu.dauer = Number(v); return zeigen(true);
-      case 'budget': { const K = E.produktKatalog(st); ui.neu.budgetWoche = Math.max(K.budgetSchritt, ui.neu.budgetWoche + Number(v) * K.budgetSchritt); return zeigen(true); }
+      case 'budget': { const K = merkeBilder(E.produktKatalog(st)); ui.neu.budgetWoche = Math.max(K.budgetSchritt, ui.neu.budgetWoche + Number(v) * K.budgetSchritt); return zeigen(true); }
       case 'entwickeln': {
         const e = ui.neu, r = tun({ typ: 'produktEntwickeln', entwurf: { marke: ui.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche } });
         if (r?.ok) { ui.seite = 'liste'; const p = E.produkte(s()).marken.find((m) => m.marke === ui.marke)?.produkte.filter((x) => x.status === 'entwicklung').pop(); if (p) { ui.kategorie = p.kategorie; const l = E.produkte(s()).marken.find((m) => m.marke === ui.marke).produkte.filter((x) => x.kategorie === p.kategorie && x.status !== 'ausgelistet'); ui.k = l.findIndex((x) => x.id === p.id); } }

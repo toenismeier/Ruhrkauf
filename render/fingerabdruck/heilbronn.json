@@ -422,7 +422,7 @@
       {"id":"parzellen/p335","bauer":"slot:bw_fachwerk","lage":[442.03,565.5,14.47,21.5],"drehung":0,"variante":"tuebingen","standort":null,"pruefsumme":"bba91c57c6734853"},
       {"id":"parzellen/p336","bauer":"slot:bw_fachwerk","lage":[443.5,540.5,13,25],"drehung":0,"variante":"esslingen","standort":null,"pruefsumme":"fd70310d66fdd3c7"},
       {"id":"parzellen/p337","bauer":"slot:bw_fachwerk","lage":[427.55,540.5,13,25],"drehung":0,"variante":"tuebingen","standort":null,"pruefsumme":"9a1ebd10a573c50a"},
-      {"id":"parzellen/p338","bauer":"slot:warenhaus","lage":[513.5,545,65,42],"drehung":0,"variante":"warenhaus","standort":"W080","pruefsumme":"e8b3e99a4b221ad0"},
+      {"id":"parzellen/p338","bauer":"slot:warenhaus","lage":[513.5,545,65,42],"drehung":0,"variante":0,"standort":"W080","pruefsumme":"2047ec84b703ebc0"},
       {"id":"parzellen/p339","bauer":"eck","lage":[488.5,519,25,22],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"92768482bae858ac"},
       {"id":"parzellen/p34","bauer":"eck","lage":[179.5,191,16.29,20],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"adb0106a9af6deaa"},
       {"id":"parzellen/p340","bauer":"slot:bw_fachwerk","lage":[488.5,565,25,22],"drehung":0,"variante":"tuebingen","standort":null,"pruefsumme":"237b2c5d40abbd79"},
@@ -826,7 +826,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"1d39e5b32ed6f739"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"9606d5246d2854ae"}
     ],
-    "gesamt": "891749afb0f9d333"
+    "gesamt": "dcbecde588ce11a3"
   },
   "geometrie": {
     "kacheln": [
@@ -1366,8 +1366,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "f76dcc11b4f4f6995d63a9115e0126d0088f9daf210ccc00c2177001af0f7cfc",
+    "stadtplan": "cf10e0ea0954d17034a6607234490515ee063f2d2ade84dae57354a633a70bd2",
     "geometrie": "46042b44507242ceb5e169d0a81b2c2cd2ce98f12df0510de20f3b6e8e12f7f5",
-    "bildReferenz": "7c865e0d5103b310ad02dc8c9a14b30350ce75da9a7ec1d3affdee84b8edb244"
+    "bildReferenz": "a77fafaa936903c5d7228026ae90d802e9704f2e513f20c830ead32aefd5a13a"
   }
 }

@@ -28,13 +28,14 @@ import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
 import { vorstandModul } from './ui/vorstand.js';
 // O01 Organisation
 import { organisationModul } from './ui/organisation.js';
+import { zentraleAbteilungHtml } from './ui/zentrale-abteilungen.js';
 import { posteingangModul } from './ui/posteingang.js';
 import { zeitungModul } from './ui/zeitung.js';
 import { statistikModul } from './ui/statistik.js';
 import { marketingModul } from './ui/marketing.js';
 import { umbauModul } from './ui/umbau.js';
 import { produkteModul } from './ui/produkte.js';
-import { laden, speichern } from './ui/speicher.js';
+import { laden, speichern, speicherDiagnose } from './ui/speicher.js';
 import { portfolioModul } from './ui/portfolio.js';
 import { appModul } from './ui/app.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
@@ -71,7 +72,7 @@ const neuerPostUi = () => ({ gelesen: [], reiter: 'handeln', reiseZuletzt: [] })
 let postUi = neuerPostUi();
 let streifenTimer = null;
 function speicherFehler(e) {
-  console.error('Spielstand konnte nicht gespeichert werden:', e);
+  console.error('Spielstand konnte nicht gespeichert werden:', e, JSON.stringify(speicherDiagnose()));
   if (!speicherWarnung) meldung('Speichern fehlgeschlagen: ' + e.message, false);
   speicherWarnung = true;
 }
@@ -875,8 +876,8 @@ function panel(titel, unter, html, klasse = '') {
   document.body.classList.add('panel-offen');
   if (neu) $('ptitel').focus({ preventScroll: true });
 }
-function schliessePanel() { kameraZiel = null; for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
-const szenarienUI = szenarienModul({ E, spiel: () => s, wahl: () => startWahl, panel, meldung, nachAktion: () => { cockpitZeigen(); szenarienUI.aktualisieren(); automatischSpeichern(); } });
+function schliessePanel() { kameraZiel = null; for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; hqAbteilung = null; hqEtageWahl = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
+const szenarienUI = szenarienModul({ E, spiel: () => s, wahl: () => startWahl, panel, meldung, stufenAktualisieren: zeichneStufen, nachAktion: () => { cockpitZeigen(); szenarienUI.aktualisieren(); automatischSpeichern(); } });
 /** Q10: Neues Haus bewusst fokussieren; spätere Renderläufe erhalten das Ziel. */
 function hausZeigen(id) {
   const punkt = hausKameraPunkt(id);
@@ -957,7 +958,7 @@ function oeffneHaus(id) {
   const bild = z ? [z.status, ...z.zusatz].filter((q) => q !== 'offen').map((q) => (q === 'aktion' && z.aktion ? `Aktion ${AKTION_NAME[z.aktion]}` : STATUS_TITEL[q])).join(' · ') : '';
   const qm = h.flaechen.reduce((a, f) => a + f.qm, 0);
   const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
-  let html = `<div class="chips"><span class="chip ${h.status === 'offen' ? '' : 'warn'}">${STATUS_HAUS[h.status] ?? h.status}</span>${h.klasse === 'premium' ? '<span class="chip" style="background:#fbefd2;color:#6d4b18;border:1px solid #c4a06a;font-weight:700">♛ Premium</span>' : ''}${bild ? `<span class="chip">${bild}</span>` : ''}<span class="chip grau">${h.lage === '1a' ? '1a-Lage' : h.lage === 'b' ? 'B-Lage' : h.lage === 'center' ? 'Center' : 'Stadtrand'}</span></div>`;
+  let html = `<div class="chips"><span class="chip ${h.status === 'offen' ? '' : 'warn'}">${STATUS_HAUS[h.status] ?? h.status}</span>${h.klasse === 'premium' ? '<span class="chip" style="background:#fbefd2;color:#6d4b18;border:1px solid #c4a06a;font-weight:700">♛ Premium</span>' : ''}${bild ? `<span class="chip">${bild}</span>` : ''}<span class="chip grau">${h.lage === '1a' ? '1a-Lage' : h.lage === 'b' ? 'B-Lage' : h.lage === 'center' ? 'Center' : h.lage === 'stadtteil' ? 'Stadtteilzentrum' : 'Stadtrand'}</span></div>`;
   html += `<div class="raster">${zahl('Umsatz Woche', geld(k?.umsatz ?? 0))}${zahl('Deckungsbeitrag', geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? 'rot' : 'gruen')}${zahl('Verkaufsfläche', fmt.format(qm) + ' qm')}${zahl('Substanz', Math.round(h.substanz) + ' / 100', h.substanz < 35 ? 'rot' : '')}</div>`;
   html += st?.hausGrafik(id) ?? '';
   // O02: ausschließlich Engine-Werte, auch bei geschlossenen Häusern oder fehlendem Vorjahr.
@@ -1128,6 +1129,7 @@ $('pinhalt').addEventListener('click', (e) => {
 
 // ─────────────────────────────────────────── Zentrale (HQ)
 const STUFE_FARBE = ['#c9c4bb', '#e0b23c', '#2f8f5b', '#2f63b5'];
+let hqAbteilung = null; // Q15: gewählte Seite der Fachabteilung
 let hqEtageWahl = null;   // { g: Gebäude-Id, nr } für den 3D-Schnitt
 let hqRen = null;
 /** Etagenschnitt aus hq.js als Bild (eigener kleiner Renderer, damit die Karte unberührt bleibt). */
@@ -1187,12 +1189,38 @@ function hqTun(aktion) {
   oeffneHq(offenesHq === true ? undefined : offenesHq, true);
 }
 let meldungTimer = null;
+let letzteMeldung = { text: '', zeit: 0 };
+function meldungSchliessen() {
+  clearTimeout(meldungTimer);
+  $('meldung').className = '';
+}
+$('meldung').addEventListener('click', meldungSchliessen);
 function meldung(text, ok = true) {
-  const m = $('meldung');
-  m.textContent = text; m.className = ok ? 'an' : 'an rot';
-  clearTimeout(meldungTimer); meldungTimer = setTimeout(() => { m.className = ''; }, 3500);
+  const m = $('meldung'), jetzt = Date.now();
+  if (text === letzteMeldung.text && jetzt - letzteMeldung.zeit < 5000) return;
+  letzteMeldung = { text, zeit: jetzt };
+  m.textContent = text;
+  m.className = ok ? 'an' : 'an rot';
+  clearTimeout(meldungTimer);
+  meldungTimer = setTimeout(meldungSchliessen, ok ? 2500 : 4000);
+}
+function oeffneHqAbteilung(id) {
+  hqAbteilung = id;
+  hqEtageWahl = null;
+  oeffneHq();
 }
 window.hqKlick = (art, a, b, c) => {
+  if (art === 'uebersicht') { hqAbteilung = null; hqEtageWahl = null; return oeffneHq(); }
+  if (art === 'abteilung') return oeffneHqAbteilung(a);
+  if (art === 'abteilungEtage') {
+    hqAbteilung = a;
+    hqEtageWahl = { g: b, nr: Number(c) };
+    return oeffneHq(undefined, true);
+  }
+  if (art === 'fte') return hqTun({ typ: 'abteilungFte', abteilung: a, fte: Number(b) });
+  if (art === 'gehalt') return hqTun({ typ: 'abteilungGehalt', abteilung: a, faktor: Number(b) / 100 });
+  if (art === 'aufgabe') return hqTun({ typ: 'delegation', bereich: a, aufgabe: b, an: c === 'true' });
+  if (art === 'organisation') { offenesHq = null; return oeffneModul(org); }
   if (art === 'mieten') { const an = E.hqUebersicht(s).angebote.find((q) => q.id === a); hqTun({ typ: 'hqMieten', angebot: a, etagen: an.etagen.map((e) => e.nr) }); }
   if (art === 'kuendigenE') hqTun({ typ: 'hqEtageKuendigen', gebaeude: a, etage: Number(b) });
   if (art === 'archiv') hqTun({ typ: 'hqArchivSetzen', gebaeude: a, etage: Number(b), aktiv: c === 'true' });
@@ -1206,6 +1234,13 @@ function oeffneHq(gebaeudeId, bleiben = false) {
   if (typeof E.hqUebersicht !== 'function') return;
   offenesHaus = null; offenesHq = gebaeudeId ?? true;
   const u = E.hqUebersicht(s), j = hqGrafik();
+  if (hqAbteilung && u.abteilungen.some((a) => a.id === hqAbteilung)) {
+    const r = zentraleAbteilungHtml(u, j, E.organisationUebersicht(s), hqAbteilung, hqEtageWahl);
+    const sc = $('pinhalt').scrollTop;
+    panel(r.titel, r.unter, r.html, 'gross');
+    if (bleiben) $('pinhalt').scrollTop = sc;
+    return;
+  }
   const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
   const pz = (x) => `${Math.round((x ?? 0) * 100)} %`;
   const knopf = (text, args, art = '') => `<button class="mini ${art}" onclick="event.stopPropagation();hqKlick(${args.map((x) => `'${x}'`).join(',')})">${text}</button>`;
@@ -1238,7 +1273,7 @@ function oeffneHq(gebaeudeId, bleiben = false) {
       const um = a.umzugBis !== undefined && a.umzugBis > s.woche ? ` · Umzug bis KW ${(a.umzugBis % 52) + 1}` : '';
       const ort = a.gebaeudeId ? `${a.gebaeudeId}|${a.etage}` : '';
       const wahl = `<select class="ort" onchange="hqKlick('setzen','${a.id}',this.value)">${ort ? '' : '<option selected>ohne Platz</option>'}${ziele.map((z) => `<option value="${z.v}"${z.v === ort ? ' selected' : ''}>${z.t}</option>`).join('')}</select>`;
-      html += `<div class="abt"><div class="zeile"><span class="dot" style="background:${HQ_ABT[a.id]?.farbe ?? STUFE_FARBE[a.stufe]}"></span><span class="was"><b>${a.name}</b> <i>${fmt.format(Math.round(a.fte))} von ${fmt.format(a.sollFte)} FTE · ${geld(a.kostenWoche)} je Woche${um}</i><em class="wirk">${a.wirkung ?? ''}</em></span><span class="stufe">${knopf('−', ['stufe', a.id, a.stufe - 1])}<b>${a.stufe}</b>${knopf('+', ['stufe', a.id, a.stufe + 1])}</span></div><div class="zeile unter">${wahl}</div></div>`;
+      html += `<div class="abt"><div class="zeile"><span class="dot" style="background:${HQ_ABT[a.id]?.farbe ?? STUFE_FARBE[a.stufe]}"></span><span class="was"><b>${a.name}</b> <i>${fmt.format(Math.round(a.fte))} von ${fmt.format(a.sollFte)} FTE · ${geld(a.kostenWoche)} je Woche${um}</i><em class="wirk">${a.wirkung ?? ''}</em></span><span class="stufe">${knopf('Öffnen', ['abteilung', a.id])}${knopf('−', ['stufe', a.id, a.stufe - 1])}<b>${a.stufe}</b>${knopf('+', ['stufe', a.id, a.stufe + 1])}</span></div><div class="zeile unter">${wahl}</div></div>`;
     }
     html += '</div>';
   }
@@ -1270,14 +1305,14 @@ const hb = hausbesuchModul({ E, s: () => s, stadtName: () => stadtName, oeffneEi
 let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null, ec = null;
 const nachAktion = () => { cockpitZeigen(); stadtChipsZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); hausPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
-org = organisationModul({ E, s: () => s, panel, meldung, nachAktion,
+org = organisationModul({ E, s: () => s, panel, meldung, nachAktion, oeffneAbteilung: oeffneHqAbteilung,
   oeffneHaus: (id) => oeffneHaus(id), oeffnePortfolio: () => oeffneModul(pp, 'liste') });
 // O03 IT
 itM = itModul({ E, s: () => s, panel, meldung, nachAktion });
-mk = marketingModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
+mk = marketingModul({ E, s: () => s, stadt: () => stadtName, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
 pr = produkteModul({ E, s: () => s, panel, meldung, nachAktion, neueEigenmarke: () => oeffneEinkauf('gruenden') });
 // O09 E-Commerce
-ec = ecommerceModul({ E, s: () => s, panel, meldung, nachAktion: () => { nachAktion(); grafikNachziehen(); } });
+ec = ecommerceModul({ E, s: () => s, panel, meldung, nachAktion: () => { nachAktion(); grafikNachziehen(); }, oeffneItProdukt: id => itM.oeffne('produkte',id) });
 er = erfolgeModul({ E, s: () => s, panel });
 // O06 Planung: eigenständiger Assistent und Forecast.
 pl = planungModul({ E, s: () => s, panel, meldung, nachAktion });
@@ -1545,8 +1580,9 @@ const SCHWIERIGKEITEN = Array.isArray(E.SCHWIERIGKEITEN) && E.SCHWIERIGKEITEN.le
 let schwierigkeitId = 'mittel';
 function neuesSpiel(seed = 1, stadt = 'Essen', schwierigkeit = schwierigkeitId, szenario = 'standard', startMonat = 1) {
   spielende?.zu(); $('spiel-ruhestand').hidden = true;
-  schwierigkeitId = SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
-  s = E.neuesSpiel(seed, { ...E.szenarioKonfiguration(szenario), schwierigkeit: schwierigkeitId, startMonat: Number(startMonat) });
+  // Sandkasten bietet keine Stufenwahl, auch bei einem Direktstart per URL.
+  schwierigkeitId = szenario === 'sandkasten' ? 'mittel' : SCHWIERIGKEITEN.some((x) => x.id === schwierigkeit) ? schwierigkeit : 'mittel';
+  s = E.neuesSpiel(seed, { ...E.szenarioKonfiguration(szenario, schwierigkeitId), schwierigkeit: schwierigkeitId, startMonat: Number(startMonat) });
   postUi = neuerPostUi();
   $('stufe').textContent = SCHWIERIGKEITEN.find((x) => x.id === schwierigkeitId)?.name ?? schwierigkeitId;
   MERK.clear();
@@ -1573,7 +1609,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...a) => oeffneModul(ec, ...a), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   kameraHaus: hausKameraMessung, // lesender Pixelabgleich für den Mobil-Smoketest
   leben,
@@ -1621,7 +1657,7 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
     const fehler = soll.filter((w) => w.status !== 'geschlossen' && !gezeigt.has(w.id)).map((w) => 'Fehlt: ' + w.id);
     for (const id of gezeigt) if (!pinIds.has(id)) fehler.push('Pin fehlt: ' + id);
     return { stadt: stadtName, woche: s.woche, quelle: soll.length, dargestellt: gezeigt.size, pins: pinIds.size, fehler };
-  }, jahreszeit: () => jahreszeit(s), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, aktion: (a) => { const r = E.fuehreAus(s, a); nachAktion(); return r; }, oeffneHaus, schliessePanel, oeffneHq, messung, jetztZeichnen,
+  }, jahreszeit: () => jahreszeit(s), stadt: (n) => { wahl.value = n; return baueStadtAusSpiel(n); }, woche, bot: botSchritt, aktion: (a) => { const r = E.fuehreAus(s, a); nachAktion(); return r; }, oeffneHaus, schliessePanel, oeffneHq, oeffneHqAbteilung, messung, jetztZeichnen,
   /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
   pruefeAnzeigen: () => {
     const fehler = [], c = E.cockpit(s);
@@ -1645,7 +1681,12 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
       } else if (d) fehler.push('O02 Haus-Treiberzeile fehlt');
     }
     if (rg?.aktiv?.() && !rg.pruefe()) fehler.push('O02 Reporting-Brücke summiert nicht exakt');
-    if (offenesHq && typeof E.hqUebersicht === 'function') {
+    if (offenesHq && hqAbteilung && typeof E.hqUebersicht === 'function') {
+      const a = E.hqUebersicht(s).abteilungen.find((x) => x.id === hqAbteilung);
+      const fte = $('pinhalt').querySelector('[data-q15-fte]'), gehalt = $('pinhalt').querySelector('[data-q15-gehalt]');
+      if (!a || Number(fte?.dataset.q15Fte) !== a.fte || Number(gehalt?.dataset.q15Gehalt) !== a.gehaltFaktor)
+        fehler.push('Q15: Abteilungswerte nicht identisch mit der Engine');
+    } else if (offenesHq && typeof E.hqUebersicht === 'function') {
       const u = E.hqUebersicht(s), hk = kz($('pinhalt'));
       const sollHq = { 'Kosten Zentrale je Woche': geld(u.kostenWoche), 'Beschäftigte': fmt.format(Math.round(u.fte)) + ' FTE' };
       for (const [k, v] of Object.entries(sollHq)) if (hk.get(k) !== v) fehler.push(`HQ ${k}: ${hk.get(k)} statt ${v}`);
@@ -1681,9 +1722,19 @@ const einfuehrung = einfuehrungModul();
 window.spiel.einfuehrung = einfuehrung;
 // ─────────────────────────────────────────── Startbildschirm (Startstadt, Schwierigkeit, Seed); mit URL-Parametern direkt ins Spiel
 const startWahl = { stadt: param.get('stadt') ?? 'Essen', schwierigkeit: param.get('schwierigkeit') ?? 'mittel', szenario: param.get('szenario') ?? 'standard', seed: Number(param.get('seed') ?? 1), startMonat: [1,4,7,10].includes(Number(param.get('monat'))) ? Number(param.get('monat')) : 1 };
+function zeichneStufen() {
+  const stufen = E.schwierigkeitenFuerSzenario?.(startWahl.szenario) ??
+    (startWahl.szenario === 'sandkasten' ? [] : SCHWIERIGKEITEN);
+  const stufenWahl = $('startstufen');
+  stufenWahl.hidden = stufen.length === 0;
+  stufenWahl.previousElementSibling.hidden = stufen.length === 0;
+  if (!stufen.length) startWahl.schwierigkeit = 'mittel';
+  stufenWahl.innerHTML = stufen.map((x, index) =>
+    `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? 'an' : ''}" data-v="${x.id}"><span class="sterne-stufe">${'●'.repeat(index + 1)}${'○'.repeat(stufen.length - index - 1)}</span><b>${x.name}</b><small>${esc(x.beschreibung)}</small></button>`
+  ).join('');
+}
 function startZeigen() {
   $('startstadt').innerHTML = STADTLISTE.map((q) => `<option${q.name === startWahl.stadt ? ' selected' : ''}>${q.name}</option>`).join('');
-  $('startstufen').innerHTML = SCHWIERIGKEITEN.map((x) => `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? 'an' : ''}" data-v="${x.id}"><span class="sterne-stufe">${'●'.repeat(1 + SCHWIERIGKEITEN.indexOf(x))}${'○'.repeat(SCHWIERIGKEITEN.length - 1 - SCHWIERIGKEITEN.indexOf(x))}</span><b>${x.name}</b><small>${x.beschreibung}</small></button>`).join('');
   $('startseed').value = startWahl.seed;
   $('startmonat').value = startWahl.startMonat;
   szenarienUI.zeichneStart();

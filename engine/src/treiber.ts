@@ -117,7 +117,7 @@ export function wirkeTreiber(h: Haus, roh: HausRoh): HausRoh {
 }
 function frequenzBasis(s: GameState, h: Haus): number {
   const qm = h.flaechen.filter((f) => f.konzept !== 'leer' && f.konzept !== 'untermiete').reduce((sum, f) => sum + f.qm, 0);
-  const lage = { '1a': 1.12, b: 0.87, center: 1.07, rand: 0.79 }[h.lage];
+  const lage = { '1a': 1.12, b: 0.87, stadtteil: 0.92, center: 1.07, rand: 0.79 }[h.lage];
   const groesse = { metropole: 1.16, grossstadt: 1, mittelstadt: 0.84 }[h.cluster];
   const saison = clamp(saisonFaktor('damen', s.woche), 0.65, 1.75);
   const marketing = marketingHausFaktor(s, h);

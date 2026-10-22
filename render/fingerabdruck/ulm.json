@@ -447,7 +447,7 @@
       {"id":"parzellen/p332","bauer":"slot:bay_muenchen","lage":[389,381,17,27],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"3e23dd634ee768b3"},
       {"id":"parzellen/p333","bauer":"slot:bay_muenchen","lage":[389,357,17,24],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"5c5eaaf05387dc94"},
       {"id":"parzellen/p334","bauer":"slot:bay_muenchen","lage":[369.27,359,17,28],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"d5960d97ae1fe5bd"},
-      {"id":"parzellen/p335","bauer":"slot:warenhaus","lage":[580.5,366,72,42],"drehung":0,"variante":"warenhaus","standort":"W075","pruefsumme":"09b9d10807224274"},
+      {"id":"parzellen/p335","bauer":"slot:warenhaus","lage":[580.5,366,72,42],"drehung":0,"variante":0,"standort":"W075","pruefsumme":"fe2457d6b0a6a386"},
       {"id":"parzellen/p336","bauer":"slot:bw_fachwerk","lage":[552.5,334,20,25],"drehung":0,"variante":"esslingen","standort":null,"pruefsumme":"84be3fba44f26660"},
       {"id":"parzellen/p337","bauer":"slot:bw_fachwerk","lage":[552.5,388,23,20],"drehung":0,"variante":"esslingen","standort":null,"pruefsumme":"1d716182d1bdd81e"},
       {"id":"parzellen/p338","bauer":"slot:bw_fachwerk","lage":[632.5,334,20,25],"drehung":0,"variante":"esslingen","standort":null,"pruefsumme":"9a92a3ee9e91854e"},
@@ -1001,7 +1001,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"45e853d822cbb5f4"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"631c4c60f3d00816"}
     ],
-    "gesamt": "b9719d7b89f7df89"
+    "gesamt": "08993ddf01e5c31b"
   },
   "geometrie": {
     "kacheln": [
@@ -1665,8 +1665,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "664336ebf662b793efd87937fee331d06c27fcc64f72f48625b9fb6b857144a6",
+    "stadtplan": "1b58939d296d98310ff53fa5c9e50568b4155acffc77c9e449226f5c2977ca26",
     "geometrie": "76183826051b5f1706b2262696ebb9f96a8bc95203bcf29736782ae219f562b0",
-    "bildReferenz": "69cbd7fecdd15562deae1f0c5030e0598ddd459f4845fede33be4b73609da3ff"
+    "bildReferenz": "19e74940352442b28ab4e6c36fd7883c754a052b2cb9984a84b1181d152e510b"
   }
 }

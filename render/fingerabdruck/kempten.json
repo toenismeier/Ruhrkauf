@@ -46,7 +46,7 @@
       {"id":"bloecke/b34","bauer":"bebaut","lage":[608.5,606,108,44],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"dad647abdce0e45b"},
       {"id":"bloecke/b4","bauer":"residenz","lage":[346,237.5,100,94],"drehung":0,"variante":"quadrat","standort":null,"pruefsumme":"d1e68ed79843559d"},
       {"id":"bloecke/b5","bauer":"suedmarkt","lage":[241,354,76,52],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"6b04f216ba4713e4"},
-      {"id":"bloecke/b6","bauer":"fachmarkt","lage":[608.5,428.5,108,82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"1e50e85c73dabe9c"},
+      {"id":"bloecke/b6","bauer":"fachmarkt","lage":[608.5,428.5,108,82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"917cf9d81e6eb04e"},
       {"id":"bloecke/b7","bauer":"park","lage":[608.5,354,108,52],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"7f3164a1a118d765"},
       {"id":"bloecke/b8","bauer":"bebaut","lage":[137,167,72,48],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"2ff3498057a92d4c"},
       {"id":"bloecke/b9","bauer":"bebaut","lage":[241,167,76,48],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"ecac81d454bb9714"},
@@ -375,7 +375,7 @@
       {"id":"parzellen/p35","bauer":"slot:bay_buergerhaus","lage":[241,374.5,20.5,15.9],"drehung":0,"variante":"wasserburg","standort":null,"pruefsumme":"aa40e9a82bddca1a"},
       {"id":"parzellen/p36","bauer":"slot:bay_buergerhaus","lage":[241,390.4,20.5,15.6],"drehung":0,"variante":"wasserburg","standort":null,"pruefsumme":"3407e389f4f20d77"},
       {"id":"parzellen/p37","bauer":"slot:bay_maibaum","lage":[291.8,376.5,22.2,22.2],"drehung":0,"variante":"markt","standort":null,"pruefsumme":"1bcf5044c0cb634a"},
-      {"id":"parzellen/p38","bauer":"slot:warenhaus","lage":[611.5,431.5,47,37],"drehung":0,"variante":"warenhaus","standort":"W098","pruefsumme":"c3663122e940dd50"},
+      {"id":"parzellen/p38","bauer":"slot:warenhaus","lage":[611.5,431.5,47,37],"drehung":0,"variante":7,"standort":"W098","pruefsumme":"a842efa8aee2ff62"},
       {"id":"parzellen/p39","bauer":"slot:discounter","lage":[666.5,431.5,47,37],"drehung":0,"variante":"discounter","standort":null,"pruefsumme":"6b649f9c89a2fb16"},
       {"id":"parzellen/p4","bauer":"slot:sued_berg","lage":[199.48,22.5,67.77,122],"drehung":0,"variante":"alpen","standort":null,"pruefsumme":"678fa42240197fb0"},
       {"id":"parzellen/p40","bauer":"slot:bay_buergerhaus","lage":[137,167,19.5,19.5],"drehung":0,"variante":"wasserburg","standort":null,"pruefsumme":"c0cf2a512b1cf0e9"},
@@ -530,7 +530,7 @@
       {"id":"strassen/s85","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"535ec79400e07338"},
       {"id":"strassen/s9","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"61c711e908c649ff"}
     ],
-    "gesamt": "7fbe4c422a2120ca"
+    "gesamt": "95b12f547e7a7eaa"
   },
   "geometrie": {
     "kacheln": [
@@ -888,8 +888,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "cb00a7abbfcb9efe32ae901e8f4b5b7be88087aa1e0940372ab893a059255c8b",
+    "stadtplan": "ac4c6f4f2fd85d118708c634f12941073d12078a63e309df3487ea3ae994c9d1",
     "geometrie": "9adf2252e8da676f96daf9d5c37200124a8b13129d9f5efb5b2135ef8930f3ce",
-    "bildReferenz": "c09ad88845c928514c23d15e9a9a2eaa401985308168b519b0514297a5032af9"
+    "bildReferenz": "8ecddd90c177b190da677ca24ab6776bb4f8a582b8f6251088e96da71b450dad"
   }
 }

@@ -291,7 +291,7 @@
       {"id":"parzellen/p267","bauer":"stadthaus","lage":[299,289.33,14,7.36],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"9c513648d4b85fc4"},
       {"id":"parzellen/p268","bauer":"stadthaus","lage":[299,296.68,14,6.82],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"8d410738d53ba7ae"},
       {"id":"parzellen/p269","bauer":"stadthaus","lage":[253,223.5,14,8.88],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"97ad2c4c50d29508"},
-      {"id":"parzellen/p27","bauer":"slot:warenhaus","lage":[159,49.5,62,47],"drehung":0,"variante":"warenhaus","standort":"W129","pruefsumme":"8d745353a414a6a9"},
+      {"id":"parzellen/p27","bauer":"slot:warenhaus","lage":[159,49.5,62,47],"drehung":0,"variante":4,"standort":"W129","pruefsumme":"483e9747f8cefedd"},
       {"id":"parzellen/p270","bauer":"stadthaus","lage":[253,232.38,14,10.3],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"9e4f460674a39f46"},
       {"id":"parzellen/p271","bauer":"stadthaus","lage":[253,242.68,14,6.32],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"fa57cd8ea314d7b6"},
       {"id":"parzellen/p272","bauer":"stadthaus","lage":[253,249,14,7.25],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"6d4bf0460a08faf0"},
@@ -807,7 +807,7 @@
       {"id":"strassen/s92","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"10ec5a9b1258ef59"},
       {"id":"strassen/s93","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"9306c73af40bc9c2"}
     ],
-    "gesamt": "13e91ae060815922"
+    "gesamt": "b1a62d0227f07e76"
   },
   "geometrie": {
     "kacheln": [
@@ -1426,8 +1426,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "bdb359d5ac642fe4ee4c36249d386779b6dad8e2fb1d13b62fc91df139c23d50",
+    "stadtplan": "d432fcee6d7ee864961cdfd62698b4a3713c13d7758ccdd58ae327394a7c9013",
     "geometrie": "18d92905463ad8922e59df7e542cb6afc7e43bf1e46949aff65a106f90a30deb",
-    "bildReferenz": "bfdcfbb690538fae4d209edce1a45ab514933114a2012525478471a310600ab3"
+    "bildReferenz": "d9c8d28f7f8f378db8610342ed7b63786f89ce174a98dcc409e5b4cfdb6807ff"
   }
 }

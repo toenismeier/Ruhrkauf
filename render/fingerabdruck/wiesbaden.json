@@ -895,7 +895,7 @@
       {"id":"parzellen/p760","bauer":"hofhaus","lage":[179.39,688.5,19.61,23.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"74421785831f621b"},
       {"id":"parzellen/p761","bauer":"hofhaus","lage":[164,716,14.56,23.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"1e52d6a063ac0f2a"},
       {"id":"parzellen/p762","bauer":"hofhaus","lage":[178.56,716,20.44,23.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"ed1c8985f9acd9cb"},
-      {"id":"parzellen/p763","bauer":"slot:warenhaus","lage":[271,718,67,42],"drehung":0,"variante":"warenhaus","standort":"W042","pruefsumme":"9a2e821f71e023ab"},
+      {"id":"parzellen/p763","bauer":"slot:warenhaus","lage":[271,718,67,42],"drehung":0,"variante":7,"standort":"W042","pruefsumme":"c2165b592151cf99"},
       {"id":"parzellen/p764","bauer":"eck","lage":[242,668,20,20],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"acf58ce814bccf1c"},
       {"id":"parzellen/p765","bauer":"eck","lage":[242,737,20,23],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"b908b10256f62d30"},
       {"id":"parzellen/p766","bauer":"eck","lage":[318,668,20,25],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"f36124d5ab7b067d"},
@@ -1295,7 +1295,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"8f5c69ece0394976"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"5a3181f70db9474f"}
     ],
-    "gesamt": "fe35afe97a3fb8b3"
+    "gesamt": "61d7a4b999545d21"
   },
   "geometrie": {
     "kacheln": [
@@ -2319,8 +2319,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "e5ea40c9cab6fbc74880c0ad7e987e2f2572fe45e4ead0b32d7b5f233c6eee7a",
+    "stadtplan": "106145970ae9bf2562af580fbd6751ea99fcfec4457b3793d3a5ec4f2d9ae05b",
     "geometrie": "f5b605eff377a345a273c501096f58a400a2db43985169382b832ecf72f064bb",
-    "bildReferenz": "dec95ae6e4111defa461b4c53d565ff053ecc1ad7adf7e6521c7cc4911031d76"
+    "bildReferenz": "742b75ea9db072d8d6f89e4665ca222a617d32af634ccf39d12dfd5b23804efa"
   }
 }

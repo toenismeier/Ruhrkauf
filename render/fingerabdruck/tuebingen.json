@@ -50,7 +50,7 @@
       {"id":"bloecke/b37","bauer":"bebaut","lage":[249.5,481.5,28.09,82],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"686c04d3db77262d"},
       {"id":"bloecke/b38","bauer":"bebaut","lage":[296.59,481.5,26.91,82],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"e010eb26c8cfdec2"},
       {"id":"bloecke/b39","bauer":"bebaut","lage":[423,481.5,36,82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"bd05b3dd93346521"},
-      {"id":"bloecke/b4","bauer":"fachmarkt","lage":[481.5,481.5,112,82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"46edecfdb65fff93"},
+      {"id":"bloecke/b4","bauer":"fachmarkt","lage":[481.5,481.5,112,82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"f1339ef830d27ce0"},
       {"id":"bloecke/b5","bauer":"park","lage":[352.5,481.5,48,82],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"ee8272dfbccf56f3"},
       {"id":"bloecke/b6","bauer":"park","lage":[89,481.5,46,82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"695fc16d1467b59f"},
       {"id":"bloecke/b7","bauer":"park","lage":[481.5,151,112,56],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"4736b678afb7dad4"},
@@ -257,7 +257,7 @@
       {"id":"parzellen/p227","bauer":"slot:bay_muenchen","lage":[504,407,23.25,21.5],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"e940c463c6a46d97"},
       {"id":"parzellen/p228","bauer":"slot:bay_muenchen","lage":[527.25,407,21.92,21.5],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"c2d7ed0092a6507e"},
       {"id":"parzellen/p229","bauer":"slot:bay_muenchen","lage":[549.17,407,21.83,21.5],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"11424b93e2393307"},
-      {"id":"parzellen/p23","bauer":"slot:warenhaus","lage":[484.5,484.5,52,37],"drehung":0,"variante":"warenhaus","standort":"W103","pruefsumme":"bd4d695e1644429c"},
+      {"id":"parzellen/p23","bauer":"slot:warenhaus","lage":[484.5,484.5,52,37],"drehung":0,"variante":7,"standort":"W103","pruefsumme":"87a0911d7311bbcf"},
       {"id":"parzellen/p230","bauer":"stadthaus","lage":[572,428.5,21.5,9],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"af0405a681764d56"},
       {"id":"parzellen/p231","bauer":"stadthaus","lage":[481.5,428.5,21.5,9],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"6304c9121a32a39e"},
       {"id":"parzellen/p232","bauer":"slot:bay_muenchen","lage":[22.5,481.5,22.5,26.5],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"6202badac3b0bbae"},
@@ -481,7 +481,7 @@
       {"id":"strassen/s92","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"9b025832ae0e9052"},
       {"id":"strassen/s93","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"407728f0f7be1d1c"}
     ],
-    "gesamt": "0246a7b3376e11f5"
+    "gesamt": "cabe7eb5deabda95"
   },
   "geometrie": {
     "kacheln": [
@@ -774,8 +774,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "458503bc85ed6a59b5f3a7860c79fad537a1473772459ece29eacadf7eb85f39",
+    "stadtplan": "4db884f8e5cfda13670b767d9f21a5508ad33ec393848b8e579e881561c529b1",
     "geometrie": "373f7f6b92c284d8f4b1608e1390d659d4b5687ec852a234ec85764ce166b10e",
-    "bildReferenz": "41063a9eff14985ce8bd31c2af0590424cc57b4f020bb4263e455f81c6d7139b"
+    "bildReferenz": "42363ff702d7c5ce3a1c20e5e13bc309dae6ada5bdb9efc0dabde3d58748fc9e"
   }
 }
