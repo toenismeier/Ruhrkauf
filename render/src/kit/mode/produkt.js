@@ -6,7 +6,7 @@
 import { materialDefs, farbeVon, hell } from './stoff.js';
 import { oberteilFlat, hoseFlat, rockFlat, kleidFlat, jackeFlat } from './flatlay.js';
 import { DINGE } from './dinge.js';
-import { SILHOUETTEN } from './silhouetten.js';
+import { SILHOUETTEN, ZEICHNER_ERWEITERT } from './silhouetten.js';
 import { modelSVG, HAUT, HAAR } from './model.js';
 import { altbildSVG } from '../produktbild.js';
 
@@ -22,11 +22,13 @@ export function aufloesen(bild) {
 }
 
 function zoom(s, p) {
+  if (s.zoom) return typeof s.zoom === 'function' ? s.zoom(p) : s.zoom;
   if (s.zeichner === 'oberteil' && p.laenge === 'crop') return [1.3, 50, 36];
   if (s.zeichner === 'hose' && p.laenge === 'kurz') return [1.4, 50, 32];
-  if (s.zeichner === 'hose' && p.laenge === 'bermuda') return [1.12, 50, 40];
+  if (s.zeichner === 'hose' && p.laenge === 'bermuda') return [1.22, 50, 37];
   if (s.zeichner === 'rock' && p.laenge === 'mini') return [1.5, 50, 32];
   if (s.zeichner === 'rock' && p.laenge === 'knie') return [1.2, 50, 42];
+  if (s.zeichner === 'jacke' && ['regenjacke', 'parka', 'funktion'].includes(p.art)) return [0.92, 50, 45];
   if (s.zeichner === 'ding:sandale') return [1.05, 50, 52];
   if (s.zeichner === 'ding:jeansshorts') return [1.32, 50, 44];
   if (s.zeichner === 'ding:guertel') return [1.3, 50, 52];
@@ -44,7 +46,8 @@ export function produktSVG(bild, farbe, material, groesse = 160, opt = {}) {
   if (FLAT[s.zeichner]) {
     t.push(`<ellipse cx="50" cy="96" rx="30" ry="2.4" fill="#000" opacity="0.07"/>`);
     FLAT[s.zeichner](S, t, q);
-  } else DINGE[s.zeichner.slice(5)](S, t, q);
+  } else if (s.zeichner.startsWith('z:')) ZEICHNER_ERWEITERT[s.zeichner.slice(2)](S, t, q);
+  else DINGE[s.zeichner.slice(5)](S, t, q);
   // kleine Motive füllen die Kachel
   const z = zoom(s, q);
   if (z) { t.unshift(`<g transform="translate(${50 - z[1] * z[0]} ${50 - z[2] * z[0]}) scale(${z[0]})">`); t.push('</g>'); }
@@ -74,6 +77,7 @@ const GRUND = {
 // Silhouettenparameter → Parameter der Model-Kleidung (model.js)
 function alsModelTeil(id, s, p, farbe, material) {
   const basis = { teil: s.model, farbe, material: normMaterial(material), muster: p.muster };
+  if (typeof s.modelTeile === 'function') return s.modelTeile(p, farbe, normMaterial(material));
   if (s.model === 'oberteil') {
     const kr = p.kragen;
     return { ...basis, aermel: p.aermel === 'traeger' || p.aermel === 'puff' ? (p.aermel === 'puff' ? 'kurz' : 'ohne') : p.aermel ?? 'kurz', passform: p.passform === 'boxy' ? 'oversize' : p.passform ?? 'gerade',
@@ -85,26 +89,42 @@ function alsModelTeil(id, s, p, farbe, material) {
   if (s.model === 'kleid') return { ...basis, laenge: p.laenge === 'maxi' ? 'midi' : p.laenge, form: p.form === 'slip' || p.form === 'etui' ? 'gerade' : p.form === 'stufen' ? 'glocke' : p.form, aermel: p.aermel === 'traeger' ? 'ohne' : p.aermel === 'puff' ? 'kurz' : p.aermel, ausschnitt: p.kragen === 'v' ? 'v' : p.kragen === 'carree' ? 'carree' : 'rund', guertel: p.guertel };
   if (s.model === 'jacke') {
     const art = p.art;
-    return { ...basis, laenge: art === 'mantel' || art === 'trench' ? 'mantel' : art === 'bomber' || art === 'jeansjacke' || art === 'lederjacke' || art === 'varsity' ? 'kurz' : 'normal', revers: ['blazer', 'mantel', 'trench'].includes(art), steppung: art === 'steppjacke' || art === 'steppweste', guertel: art === 'trench', kapuze: art === 'regenjacke' || art === 'parka', weste: art === 'steppweste' };
+    return { ...basis, laenge: art === 'mantel' || art === 'trench' ? 'mantel' : ['bomber', 'jeansjacke', 'lederjacke', 'varsity', 'harrington', 'track', 'teddy'].includes(art) || p.laenge === 'kurz' || p.laenge === 'crop' ? 'kurz' : 'normal', revers: ['blazer', 'sakko', 'mantel', 'trench'].includes(art), steppung: art === 'steppjacke' || art === 'steppweste', guertel: art === 'trench' || p.guertel, kapuze: ['regenjacke', 'parka', 'funktion'].includes(art), weste: ['steppweste', 'strickweste', 'anzugweste'].includes(art), zip: ['steppjacke', 'steppweste', 'regenjacke', 'parka', 'bomber', 'lederjacke', 'teddy', 'harrington', 'funktion', 'track', 'fieldjacket'].includes(art) };
   }
   if (s.model === 'schuhe' || s.model === 'muetze' || s.model === 'tasche') return { ...basis, art: p.art };
   return null;
 }
 
+// Schuhe passend zum Outfit (statt immer der Grundschuhe der Zielgruppe)
+function passendeSchuhe(s, teile, g, zg, G) {
+  if (s.schuhe) return { teil: 'schuhe', material: 'leder', ...G.teile.schuhe, ...s.schuhe };
+  const hatKleid = teile.some((x) => x.teil === 'kleid' || x.teil === 'rock');
+  const kurz = teile.some((x) => x.teil === 'hose' && (x.laenge === 'kurz' || x.laenge === 'bermuda'));
+  const anzug = teile.some((x) => x.teil === 'jacke' && x.revers) && g === 'herren';
+  if (hatKleid && g === 'damen') return { teil: 'schuhe', material: 'leder', ...(zg === 'kinder' ? { art: 'ballerina', farbe: 'rosa' } : zg === 'adults' ? { art: 'pumps', farbe: 'schwarz' } : zg === 'bestager' ? { art: 'halb', farbe: 'schwarz' } : { art: 'ballerina', farbe: 'ecru' }) };
+  if (kurz && zg !== 'kinder') return { teil: 'schuhe', material: 'leder', ...(g === 'damen' ? { art: 'sandale', farbe: 'cognac' } : { art: 'sneaker', farbe: 'weiß' }) };
+  if (anzug) return { teil: 'schuhe', material: 'leder', art: 'halb', farbe: zg === 'young' || zg === 'teens' ? 'cognac' : 'schwarz' };
+  return { teil: 'schuhe', material: 'baumwolle', ...G.teile.schuhe };
+}
+
 export function modelFuerProdukt(bild, farbe, material, { geschlecht = 'damen', zielgruppe = 'young', groesse = 300, hintergrund = '#eef1f4', haut } = {}) {
   const { id, s, p } = aufloesen(bild);
   if (!s.model) return null;
-  const g = geschlecht === 'herren' ? 'herren' : 'damen';
-  const zg = GRUND[g][zielgruppe] ? zielgruppe : 'young';
+  // Damenartikel nur an Damen, Herrenartikel nur an Herren, Kinderartikel nur an Kindern
+  const g = s.geschlecht ?? (s.nur === 'damen' || s.nur === 'herren' ? s.nur : geschlecht === 'herren' ? 'herren' : 'damen');
+  const zg0 = s.nur === 'kinder' ? 'kinder' : s.nur === 'teens' ? 'teens' : zielgruppe;
+  const zg = GRUND[g][zg0] ? zg0 : 'young';
   const G = GRUND[g][zg];
-  const teil = alsModelTeil(id, s, p, farbe ?? s.farbe, material ?? s.material);
+  let teile = alsModelTeil(id, s, p, farbe ?? s.farbe, material ?? s.material);
+  teile = Array.isArray(teile) ? teile : [teile];
   const outfit = [];
-  const ersetzt = new Set([teil.teil]);
-  if (teil.teil === 'kleid') ersetzt.add('oberteil').add('hose');
-  if (teil.teil === 'rock') ersetzt.add('hose');
+  const ersetzt = new Set(teile.map((x) => x.teil));
+  if (ersetzt.has('kleid') || ersetzt.has('einteiler')) ersetzt.add('oberteil').add('hose');
+  if (ersetzt.has('rock')) ersetzt.add('hose');
+  ersetzt.add('schuhe');
   for (const [platz, o] of Object.entries(G.teile)) if (!ersetzt.has(platz)) outfit.push({ teil: platz, material: 'baumwolle', ...o });
-  // Kleid/Rock: Schuhe passend, Jacke: Grundteile bleiben darunter
-  outfit.push(teil);
+  outfit.push(...teile);
+  if (!teile.some((x) => x.teil === 'schuhe')) outfit.push(passendeSchuhe(s, [...outfit, ...teile], g, zg, G));
   return modelSVG({ geschlecht: g, zielgruppe: zg, haut: haut ?? HAUT[0], haar: G.haar, outfit, hintergrund, groesse });
 }
 
@@ -114,11 +134,11 @@ const NAMEN = {
   Kleid: 'kleid', Rock: 'rock', Chino: 'chino', Jeans: 'jeans', Mantel: 'mantel', Steppjacke: 'steppjacke', Blazer: 'blazer', 'A-Linien-Kleid': 'kleid', Wickelkleid: 'wickelkleid',
   Tunikabluse: 'tunika', 'Oversize-Bluse': { silhouette: 'bluse', passform: 'oversize' }, 'Bootcut-Jeans': 'flarejeans', Culotte: 'culotte', Plisseerock: 'plisseerock', Bleistiftrock: 'bleistiftrock',
   Feinstrickpullover: { silhouette: 'pullover', material: 'merino' }, Longcardigan: { silhouette: 'strickjacke', laenge: 'lang' }, Trenchcoat: 'trenchcoat', 'Bouclé-Jacke': { silhouette: 'blazer', art: 'blazer' },
-  'Slim-Fit-Hemd': { silhouette: 'hemd', passform: 'tailliert' }, 'Regular-Fit-Hemd': 'hemd', 'Oxford-Hemd': { silhouette: 'hemd', kragen: 'hemd' }, 'Henley-Shirt': { silhouette: 'longsleeve', knopfleiste: false, kragen: 'polo' },
-  Rundhalspullover: 'pullover', Rollkragenpullover: 'rollkragen', 'Cargo-Hose': 'cargohose', Anzughose: 'stoffhose', 'Bermuda-Shorts': 'bermuda', Stricksakko: 'blazer', Wollmantel: 'mantel', 'Leinen-Sakko': 'blazer',
+  'Slim-Fit-Hemd': { silhouette: 'hemd', passform: 'tailliert' }, 'Regular-Fit-Hemd': 'hemd', 'Oxford-Hemd': { silhouette: 'hemd', kragen: 'hemd' }, 'Henley-Shirt': 'henley',
+  Rundhalspullover: 'pullover', Rollkragenpullover: 'rollkragen', 'Cargo-Hose': 'cargohose', Anzughose: 'stoffhose', 'Bermuda-Shorts': 'bermuda', Stricksakko: 'sakko', Wollmantel: 'mantel', 'Leinen-Sakko': { silhouette: 'sakko', muster: 'uni' },
   Latzhose: 'latzhose', 'Kinder-Sweatshirt': 'sweatshirt', 'Kinder-Regenjacke': 'regenjacke', 'Kinder-Leggings': 'leggings', 'Kinder-Softshelljacke': 'regenjacke', 'Kinder-Polo': 'polo', 'Kinder-Pyjama': 'pyjama',
   'Kinder-Strickpullover': 'pullover', 'Kinder-Tüllrock': { silhouette: 'rock', form: 'glocke', laenge: 'knie' }, 'Kinder-Sonnenhut': 'buckethat', 'Kinder-Jogginghose': 'jogginghose',
-  Kinderbody: 'kinderbody', Kinderkleid: 'kinderkleid', Sneaker: 'sneaker', 'Plateau-Sneaker': 'sneaker', Pumps: 'pumps', Stiefel: 'stiefel', 'Chelsea-Boot': 'stiefel', Stiefelette: 'stiefel', Winterstiefel: 'stiefel', Wanderschuh: 'stiefel',
+  Kinderbody: 'kinderbody', Strampler: 'strampler', Schneeanzug: 'schneeanzug', Schlafsack: 'schlafsack', Matschhose: 'matschhose', Kinderkleid: 'kinderkleid', Sneaker: 'sneaker', 'Plateau-Sneaker': 'sneaker', Pumps: 'pumps', Stiefel: 'stiefel', 'Chelsea-Boot': 'stiefel', Stiefelette: 'stiefel', Winterstiefel: 'stiefel', Wanderschuh: 'stiefel',
   Loafer: 'loafer', Slipper: 'loafer', Ballerina: 'loafer', 'Schnürschuh': 'loafer', 'Business-Schuh': 'loafer', Sandale: 'sandale', Espadrille: 'sandale',
   Handtasche: 'handtasche', 'Umhängetasche': 'handtasche', 'Crossbody-Tasche': 'handtasche', Clutch: 'handtasche', Portemonnaie: 'handtasche', Kartenetui: 'handtasche', Shopper: 'tote', Rucksack: 'rucksack', Weekender: 'tote', Reisetasche: 'tote',
   Schal: 'schal', Seidentuch: 'schal', Krawatte: 'schal', Handschuhe: 'schal', 'Mütze': 'muetze', 'Gürtel': 'guertel', Socken: 'socken', Pyjama: 'pyjama', 'Unterwäsche': 'unterwaesche', BH: 'bh',
@@ -129,6 +149,14 @@ const NAMEN = {
   Parfum: 'parfum', 'Eau de Toilette': 'parfum', 'Plüschtier': 'plueschtier',
 };
 const REGELN = [
+  // Q27: neue Mode-Silhouetten zuerst
+  [/Kinder.?Bade/i, 'kinderbadeanzug'], [/Badeanzug/i, 'badeanzug'], [/Bikini/i, 'bikini'], [/Badeshorts|Badehose/i, 'badeshorts'], [/Jumpsuit|Overall/i, 'jumpsuit'], [/Hosenanzug/i, 'hosenanzug'], [/Anzugweste/i, 'anzugweste'], [/Anzug/i, 'anzug'], [/Puff/i, 'puffaermelbluse'], [/Off.?Shoulder|Carmen/i, 'offshoulder'],
+  [/Corsage|Korsage|Bustier/i, 'corsagetop'], [/Twinset/i, 'twinset'], [/Kimono|Kaftan/i, 'kimono'], [/Pullunder/i, 'pullunder'], [/Teddy/i, 'teddyjacke'], [/Poncho/i, 'poncho'],
+  [/Tüll/i, 'tuellrock'], [/Lederrock/i, 'lederrock'], [/Paperbag/i, 'paperbaghose'],
+  [/Blusenkleid/i, 'blusenkleid'], [/Strickweste/i, 'strickweste'], [/Sakko/i, 'sakko'], [/Henley/i, 'henley'], [/Troyer/i, 'troyer'], [/Rugby/i, 'rugbyshirt'], [/Cargo.?Shorts/i, 'cargoshorts'], [/Chino.?Shorts/i, 'chinoshorts'],
+  [/Harrington/i, 'harringtonjacke'], [/Field/i, 'fieldjacket'], [/Funktions/i, 'funktionsjacke'], [/Shacket|Hemdjacke/i, 'hemdjacke'], [/Strampler/i, 'strampler'], [/Langarm.?Body/i, 'langarmbody'],
+  [/Latzkleid/i, 'latzkleid'], [/Matsch/i, 'matschhose'], [/Schneeanzug/i, 'schneeanzug'], [/Schlafsack/i, 'schlafsack'], [/Leggings.?Set/i, 'leggingsset'], [/Kapuzenjacke|Sweatjacke/i, 'kapuzenjacke'],
+  [/Track.?Jacket|Trainingsjacke/i, 'trackjacket'], [/Track.?Pants|Trainingshose/i, 'trackpants'], [/Oversize.?Hemd/i, 'oversizehemd'], [/Cargorock|Cargo.?Rock/i, 'cargorock'], [/Minikleid/i, 'minikleid'], [/Cropped.?Cardigan/i, 'croppedcardigan'],
   [/Crop/i, 'croptop'], [/Babytee|Baby-Tee/i, 'babytee'], [/Boxy/i, 'boxytee'], [/Hoodie|Kapuzen/i, 'hoodie'], [/Sweat/i, 'sweatshirt'], [/Rollkragen/i, 'rollkragen'], [/Pullover|Strickpulli/i, 'pullover'],
   [/Cardigan|Strickjacke|Twinset/i, 'strickjacke'], [/Polo/i, 'polo'], [/Longsleeve/i, 'longsleeve'], [/Träger|Spaghetti/i, 'traegertop'], [/Top/i, 'top'], [/Tunika/i, 'tunika'], [/Bluse/i, 'bluse'], [/Overshirt/i, 'overshirt'], [/Hemd/i, 'hemd'], [/Shirt/i, 'tshirt'],
   [/Jeansshorts|Jeans-Shorts/i, 'jeansshorts'], [/Wide.?Leg.*Jeans|Weite Jeans/i, 'widelegjeans'], [/Baggy/i, 'baggyjeans'], [/Mom/i, 'momjeans'], [/Skinny/i, 'skinnyjeans'], [/Flare|Bootcut/i, 'flarejeans'], [/Jeans/i, 'jeans'],

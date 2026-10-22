@@ -4,7 +4,10 @@
 
 **Ummo (21.10.2026):** Eigenmarken sind „die margenstarken Brummer“. „Deutlich, deutlich mehr Produkte in der Eigenmarke.“ „Button, dass du umschalten kannst zwischen Männer, Frauen.“ „Zielgruppengerechte Kleidung: Teens and Tweens kriegt natürlich andere Produkte als jetzt die Best-Ager.“ „Dass die alle denselben Effekt haben bei allen Marken, also 51 von 100 in der Performance durch die Teams, das sollte man anpassen.“ Die Produkte „sehen wirklich so Asbach-uralt aus“, Home/Living „so verstaubt“.
 
-## 1. Sortiment (Engine, `engine/src/produkt-sortiment.ts`, `produkte.ts`)
+## Änderung 22.10.2026 (Ummo per Auswahl)
+Die neuen Artikeltypen legen die Claude-Chats Q27–Q29 an (`engine/src/sortiment/`, siehe `produktbilder-regeln.md`). Q24 macht nur noch **Abschnitt 2 Bedienung** und **Abschnitt 3 Teamleistung**; Abschnitt 1 bleibt als Zielbild für Q27–Q29 stehen. Die Bedienung muss mit beliebig vielen Artikeltypen aus `engine/src/sortiment/` funktionieren.
+
+## 1. Sortiment (Engine, `engine/src/produkt-sortiment.ts`, `produkte.ts`) – jetzt Q27–Q29
 - Achsen: **Abteilung** (Damen, Herren, Kinder, Home/Living, Accessoires, Beauty) × **Zielgruppe** (Kinder, Teens & Tweens, Young Adults, Adults, Best Ager) × **Kategorie** × **Artikeltyp**. Mindestens **300 Artikeltypen**, jeder mit Zielgruppen, für die er sinnvoll ist (kein Twinset für Teens, keine Baggy-Cargo für Best Ager).
 - Beispiele zielgruppengerecht (nicht abschließend, ausbauen):
   - Teens & Tweens Damen: Crop-Top, Babytee, Oversize-Hoodie, Baggy-Jeans, Cargo-Hose, Plisseeminirock, Puffer-Weste, Bucket-Hat. Herren: Boxy-Tee, Hoodie, Baggy-Jeans, Track-Pants, Varsity-Jacke, Cap.

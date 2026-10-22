@@ -8,14 +8,17 @@
 //   p        Standardparameter, überschreibbar durch den Artikeltyp
 //   material Standardmaterial, farbe Standardfarbe
 //   model    Platz am Model (oberteil | hose | rock | kleid | jacke | schuhe | tasche | muetze) oder null (nur Freisteller)
+//   nur      optional: damen | herren | kinder | teens – Model nur in dieser Gruppe (Kleider nicht am Herrenmodel)
+//   modelTeile optional (p, farbe, material) → [Teile] für Sets und Einteiler am Model (Q27)
 
 export const PARAMETER = {
   aermel: ['ohne', 'traeger', 'kurz', 'halb', 'lang', 'puff'],
   laenge: ['crop', 'normal', 'lang', 'tunika', 'kurz', 'bermuda', 'cropped', 'mini', 'knie', 'midi', 'maxi', 'mantel'],
-  kragen: ['rund', 'v', 'carree', 'hemd', 'polo', 'stehkragen', 'rollkragen', 'kapuze', 'wickel'],
+  kragen: ['rund', 'v', 'carree', 'hemd', 'polo', 'stehkragen', 'rollkragen', 'kapuze', 'wickel', 'offshoulder', 'troyer', 'henley'],
   passform: ['tailliert', 'gerade', 'oversize', 'boxy', 'skinny', 'schmal', 'weit', 'baggy', 'flare', 'jogger', 'leggings'],
-  form: ['a-linie', 'plissee', 'bleistift', 'wickel', 'glocke', 'stufen', 'gerade', 'slip', 'etui'],
-  muster: ['uni', 'streifen', 'karo', 'blumen'],
+  form: ['a-linie', 'plissee', 'bleistift', 'wickel', 'glocke', 'stufen', 'gerade', 'slip', 'etui', 'tuell'],
+  muster: ['uni', 'streifen', 'karo', 'blumen', 'punkte', 'blockstreifen', 'print'],
+  jackenart: ['blazer', 'sakko', 'mantel', 'trench', 'steppjacke', 'steppweste', 'jeansjacke', 'regenjacke', 'varsity', 'overshirt', 'parka', 'lederjacke', 'bomber', 'strickjacke', 'teddy', 'harrington', 'fieldjacket', 'funktion', 'track', 'strickweste', 'anzugweste'],
 };
 
 const o = (p, model = 'oberteil', material = 'baumwolle', farbe = 'weiß') => ({ gruppe: 'oberteil', zeichner: 'oberteil', p, material, farbe, model });
@@ -66,7 +69,7 @@ export const SILHOUETTEN = {
   komforthose: h({ passform: 'gerade', komfortbund: true }, 'baumwolle', 'anthrazit'),
   cordhose: h({ passform: 'gerade' }, 'cord', 'braun'),
   shorts: h({ laenge: 'kurz', passform: 'weit' }, 'baumwolle', 'sand'),
-  bermuda: h({ laenge: 'bermuda', passform: 'gerade', saum: 'umschlag' }, 'baumwolle', 'marine'),
+  bermuda: h({ laenge: 'bermuda', passform: 'gerade', saum: 'umschlag' }, 'baumwolle', 'beige'),
   culotte: h({ laenge: 'cropped', passform: 'weit', bundfalte: true }, 'viskose', 'olive'),
   latzhose: h({ passform: 'gerade', latz: true }, 'denim', 'jeansblau'),
   jeansshorts: { gruppe: 'unterteil', zeichner: 'ding:jeansshorts', p: { laenge: 'kurz', passform: 'gerade', saum: 'offen' }, material: 'denim', farbe: 'jeansblau', model: 'hose' },
@@ -99,7 +102,7 @@ export const SILHOUETTEN = {
   regenjacke: j('regenjacke', 'polyester', 'gelb'),
   parka: j('parka', 'baumwolle', 'olive'),
   varsityjacke: j('varsity', 'wolle', 'flaschengruen'),
-  bomberjacke: j('bomber', 'polyester', 'schwarz'),
+  bomberjacke: j('bomber', 'nylon', 'olive'),
   lederjacke: j('lederjacke', 'leder', 'schwarz'),
   overshirt: j('overshirt', 'cord', 'cognac'),
   strickjacke: j('strickjacke', 'strick', 'grau', { laenge: 'normal' }),
@@ -145,6 +148,19 @@ export const SILHOUETTEN = {
   plueschtier: a('spielzeug', 'Plüschtier', 'polyester', 'camel'),
 };
 
+// Model nur in passender Gruppe (Q27): Röcke, Kleider, typische Damenoberteile nur an Damen; Kinderteile nur an Kindern
+for (const [id, s] of Object.entries(SILHOUETTEN)) if (s.gruppe === 'rock' || s.gruppe === 'kleid') s.nur = 'damen';
+for (const id of ['babytee', 'traegertop', 'croptop', 'schluppenbluse', 'tunika', 'wickelshirt']) SILHOUETTEN[id].nur = 'damen';
+Object.assign(SILHOUETTEN.kinderkleid, { nur: 'kinder', geschlecht: 'damen' });
+SILHOUETTEN.kinderbody.nur = 'kinder';
+
+// Erweiterungen der Bild-Chats Q27–Q29 (überschreiben gleichnamige Basiseinträge)
+import * as Q27 from './erweiterung-q27.js';
+import * as Q28 from './erweiterung-q28.js';
+import * as Q29 from './erweiterung-q29.js';
+Object.assign(SILHOUETTEN, Q27.SILHOUETTEN, Q28.SILHOUETTEN, Q29.SILHOUETTEN);
+export const ZEICHNER_ERWEITERT = { ...Q27.ZEICHNER, ...Q28.ZEICHNER, ...Q29.ZEICHNER };
+
 export const SILHOUETTEN_IDS = Object.keys(SILHOUETTEN);
 
 // Daten für silhouetten.json (ohne Zeichner-Interna)
@@ -152,6 +168,6 @@ export function silhouettenDaten() {
   return {
     hinweis: 'Q25-Bildschnittstelle. Artikeltyp: bild: { silhouette, …Parameter }. Erzeugt aus render/src/kit/mode/silhouetten.js, nicht von Hand ändern.',
     parameter: PARAMETER,
-    silhouetten: Object.fromEntries(Object.entries(SILHOUETTEN).map(([id, s]) => [id, { gruppe: s.gruppe, standard: s.p, material: s.material, farbe: s.farbe, model: s.model }])),
+    silhouetten: Object.fromEntries(Object.entries(SILHOUETTEN).map(([id, s]) => [id, { gruppe: s.gruppe, standard: s.p, material: s.material, farbe: s.farbe, model: s.model, ...(s.nur ? { nur: s.nur } : {}), ...(s.geschlecht ? { geschlecht: s.geschlecht } : {}) }])),
   };
 }

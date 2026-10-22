@@ -24,3 +24,8 @@ Vorlagebilder Coffee Inc 2 (nur Referenz, keine Übernahme von Grafik oder Texte
 | Q24 | Eigenmarken Deep Dive: Sortiment ≥ 300 Typen, Damen/Herren, Zielgruppen, Teamleistung (nach Q11) | `feat/q24-eigenmarken-deep-dive` | `q24-eigenmarken-deep-dive.md` |
 | Q25 | Produktbilder und Model (**macht Claude**) | `feat/q25-produktbilder` | `q25-produktbilder-model.md` |
 | Q26 | Meldungsleiste und „Speichern fehlgeschlagen“ | `feat/q26-meldungen-speichern` | `q26-meldungen-speichern.md` |
+| Q27 | Mode-Bilder nachschärfen, neue Mode-Silhouetten, Mode-Artikeltypen (**Claude-Chat**) | `feat/q27-mode-bilder` | `q27-mode-bilder.md` |
+| Q28 | Schuhe, Taschen, Accessoires, Wäsche neu (**Claude-Chat**) | `feat/q28-zubehoer-bilder` | `q28-zubehoer-bilder.md` |
+| Q29 | Home/Living, Beauty, Spielwaren neu (**Claude-Chat**) | `feat/q29-home-beauty-bilder` | `q29-home-beauty-bilder.md` |
+
+Q27–Q29: gemeinsame Regeln in `produktbilder-regeln.md` (Ummo 22.10.: „zu wenig Produkte“, „manche sehen echt schräg aus“). Artikeltypen kommen jetzt aus Q27–Q29, Q24 behält Bedienung und Teamleistung.
