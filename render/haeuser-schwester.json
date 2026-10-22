@@ -1,612 +1,1067 @@
 [
   {
     "id": "K001",
-    "name": "Essen Nebenlage",
-    "stadt": "Essen",
+    "name": "Volkskauf Hamburg Bahnhofstraße",
+    "stadt": "Hamburg",
     "format": "schwester",
-    "lage": "1a",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 900,
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "metropole",
+    "region": "Nord",
+    "grundflaecheQm": 1700,
     "etagen": [
-      -1,
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
-    "baujahr": 1955,
-    "fassade": 0,
-    "substanz": 15,
+    "baujahr": 1984,
+    "fassade": 7,
+    "substanz": 39,
     "status": "offen",
     "flaechen": [
       {
         "id": "K001-f1",
         "etage": 0,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K001-f2",
-        "etage": 0,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K001-f3",
-        "etage": 1,
-        "qm": 522,
+        "qm": 1849,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K001-f4",
+        "id": "K001-f2",
         "etage": 1,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K001-f5",
-        "etage": 2,
-        "qm": 522,
+        "qm": 1110,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K001-f6",
+        "id": "K001-f3",
         "etage": 2,
-        "qm": 378,
+        "qm": 647,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K001-f7",
+        "id": "K001-f4",
         "etage": 3,
-        "qm": 522,
+        "qm": 555,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K001-f5",
+        "etage": 4,
+        "qm": 925,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K001-f6",
+        "etage": 0,
+        "qm": 647,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K001-f7",
+        "etage": 1,
+        "qm": 1387,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K001-f8",
-        "etage": 3,
-        "qm": 378,
+        "etage": 2,
+        "qm": 555,
         "konzept": "eigen",
         "gruppe": "spielwaren"
+      },
+      {
+        "id": "K001-f9",
+        "etage": 3,
+        "qm": 925,
+        "konzept": "eigen",
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
     "id": "K002",
-    "name": "Dortmund Nebenlage",
-    "stadt": "Dortmund",
+    "name": "Volkskauf München",
+    "stadt": "München",
     "format": "schwester",
-    "lage": "b",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 1030,
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "metropole",
+    "region": "Süd",
+    "grundflaecheQm": 1500,
     "etagen": [
-      -1,
       0,
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
-    "baujahr": 1962,
-    "fassade": 0,
-    "substanz": 26,
+    "baujahr": 1959,
+    "fassade": 6,
+    "substanz": 16,
     "status": "offen",
     "flaechen": [
       {
         "id": "K002-f1",
         "etage": 0,
-        "qm": 597,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K002-f2",
-        "etage": 0,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K002-f3",
-        "etage": 1,
-        "qm": 597,
+        "qm": 1871,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K002-f4",
+        "id": "K002-f2",
         "etage": 1,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K002-f5",
-        "etage": 2,
-        "qm": 597,
+        "qm": 1123,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K002-f6",
+        "id": "K002-f3",
         "etage": 2,
-        "qm": 433,
+        "qm": 655,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K002-f7",
+        "id": "K002-f4",
         "etage": 3,
-        "qm": 597,
+        "qm": 561,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K002-f5",
+        "etage": 4,
+        "qm": 935,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K002-f6",
+        "etage": 5,
+        "qm": 655,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K002-f7",
+        "etage": 0,
+        "qm": 1403,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K002-f8",
-        "etage": 3,
-        "qm": 433,
+        "etage": 1,
+        "qm": 561,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K002-f9",
-        "etage": 4,
-        "qm": 597,
+        "etage": 2,
+        "qm": 936,
         "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K002-f10",
-        "etage": 4,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
     "id": "K003",
-    "name": "Duisburg Nebenlage",
-    "stadt": "Duisburg",
+    "name": "Volkskauf Köln",
+    "stadt": "Köln",
     "format": "schwester",
-    "lage": "b",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 1160,
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "metropole",
+    "region": "West",
+    "grundflaecheQm": 1200,
     "etagen": [
-      -1,
       0,
       1,
       2,
-      3
+      3,
+      4,
+      5,
+      6
     ],
-    "baujahr": 1969,
-    "fassade": 0,
-    "substanz": 37,
+    "baujahr": 1960,
+    "fassade": 4,
+    "substanz": 56,
     "status": "offen",
     "flaechen": [
       {
         "id": "K003-f1",
         "etage": 0,
-        "qm": 673,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K003-f2",
-        "etage": 0,
-        "qm": 487,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K003-f3",
-        "etage": 1,
-        "qm": 673,
+        "qm": 1849,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K003-f4",
+        "id": "K003-f2",
         "etage": 1,
-        "qm": 487,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K003-f5",
-        "etage": 2,
-        "qm": 673,
+        "qm": 1110,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K003-f6",
+        "id": "K003-f3",
         "etage": 2,
-        "qm": 487,
+        "qm": 647,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K003-f7",
+        "id": "K003-f4",
         "etage": 3,
-        "qm": 673,
+        "qm": 555,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K003-f5",
+        "etage": 4,
+        "qm": 925,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K003-f6",
+        "etage": 5,
+        "qm": 647,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K003-f7",
+        "etage": 6,
+        "qm": 1387,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K003-f8",
-        "etage": 3,
-        "qm": 487,
+        "etage": 0,
+        "qm": 555,
         "konzept": "eigen",
         "gruppe": "spielwaren"
+      },
+      {
+        "id": "K003-f9",
+        "etage": 1,
+        "qm": 925,
+        "konzept": "eigen",
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
     "id": "K004",
-    "name": "Bochum Nebenlage",
-    "stadt": "Bochum",
+    "name": "Volkskauf Köln Innenstadt",
+    "stadt": "Köln",
     "format": "schwester",
-    "lage": "b",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 1200,
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "metropole",
+    "region": "West",
+    "grundflaecheQm": 1100,
     "etagen": [
-      -1,
       0,
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
-    "baujahr": 1976,
-    "fassade": 1,
-    "substanz": 48,
+    "baujahr": 1987,
+    "fassade": 6,
+    "substanz": 53,
     "status": "offen",
     "flaechen": [
       {
         "id": "K004-f1",
         "etage": 0,
-        "qm": 696,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K004-f2",
-        "etage": 0,
-        "qm": 504,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K004-f3",
-        "etage": 1,
-        "qm": 696,
+        "qm": 1441,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K004-f4",
+        "id": "K004-f2",
         "etage": 1,
-        "qm": 504,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K004-f5",
-        "etage": 2,
-        "qm": 696,
+        "qm": 865,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K004-f6",
+        "id": "K004-f3",
         "etage": 2,
         "qm": 504,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K004-f7",
+        "id": "K004-f4",
         "etage": 3,
-        "qm": 696,
+        "qm": 432,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K004-f5",
+        "etage": 4,
+        "qm": 720,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K004-f6",
+        "etage": 5,
+        "qm": 504,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K004-f7",
+        "etage": 0,
+        "qm": 1081,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K004-f8",
-        "etage": 3,
-        "qm": 504,
+        "etage": 1,
+        "qm": 432,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K004-f9",
-        "etage": 4,
-        "qm": 696,
+        "etage": 2,
+        "qm": 721,
         "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K004-f10",
-        "etage": 4,
-        "qm": 504,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
     "id": "K005",
-    "name": "Wuppertal Nebenlage",
-    "stadt": "Wuppertal",
+    "name": "Volkskauf Frankfurt Am Wall",
+    "stadt": "Frankfurt",
     "format": "schwester",
+    "nurDaten": true,
     "lage": "b",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 1420,
+    "cluster": "metropole",
+    "region": "Mitte",
+    "grundflaecheQm": 1900,
     "etagen": [
-      -1,
-      0,
-      1,
-      2,
-      3
-    ],
-    "baujahr": 1958,
-    "fassade": 1,
-    "substanz": 59,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "K005-f1",
-        "etage": 0,
-        "qm": 824,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K005-f2",
-        "etage": 0,
-        "qm": 596,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K005-f3",
-        "etage": 1,
-        "qm": 824,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K005-f4",
-        "etage": 1,
-        "qm": 596,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K005-f5",
-        "etage": 2,
-        "qm": 824,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "K005-f6",
-        "etage": 2,
-        "qm": 596,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "K005-f7",
-        "etage": 3,
-        "qm": 824,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "K005-f8",
-        "etage": 3,
-        "qm": 596,
-        "konzept": "eigen",
-        "gruppe": "spielwaren"
-      }
-    ],
-    "kette": "schwester"
-  },
-  {
-    "id": "K006",
-    "name": "Gelsenkirchen Nebenlage",
-    "stadt": "Gelsenkirchen",
-    "format": "schwester",
-    "lage": "1a",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 900,
-    "etagen": [
-      -1,
       0,
       1,
       2,
       3,
       4
     ],
-    "baujahr": 1965,
+    "baujahr": 1995,
+    "fassade": 6,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K005-f1",
+        "etage": 0,
+        "qm": 2065,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K005-f2",
+        "etage": 1,
+        "qm": 1239,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K005-f3",
+        "etage": 2,
+        "qm": 723,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K005-f4",
+        "etage": 3,
+        "qm": 619,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K005-f5",
+        "etage": 4,
+        "qm": 1032,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K005-f6",
+        "etage": 0,
+        "qm": 723,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K005-f7",
+        "etage": 1,
+        "qm": 1548,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K005-f8",
+        "etage": 2,
+        "qm": 619,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K005-f9",
+        "etage": 3,
+        "qm": 1032,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K006",
+    "name": "Volkskauf Düsseldorf",
+    "stadt": "Düsseldorf",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "metropole",
+    "region": "West",
+    "grundflaecheQm": 1700,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1940,
     "fassade": 1,
-    "substanz": 24,
+    "substanz": 33,
     "status": "offen",
     "flaechen": [
       {
         "id": "K006-f1",
         "etage": 0,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K006-f2",
-        "etage": 0,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K006-f3",
-        "etage": 1,
-        "qm": 522,
+        "qm": 2129,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K006-f4",
+        "id": "K006-f2",
         "etage": 1,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K006-f5",
-        "etage": 2,
-        "qm": 522,
+        "qm": 1277,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K006-f6",
+        "id": "K006-f3",
         "etage": 2,
-        "qm": 378,
+        "qm": 745,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K006-f7",
+        "id": "K006-f4",
         "etage": 3,
-        "qm": 522,
+        "qm": 639,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K006-f5",
+        "etage": 4,
+        "qm": 1065,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K006-f6",
+        "etage": 5,
+        "qm": 745,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K006-f7",
+        "etage": 0,
+        "qm": 1597,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K006-f8",
-        "etage": 3,
-        "qm": 378,
+        "etage": 1,
+        "qm": 639,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K006-f9",
-        "etage": 4,
-        "qm": 522,
+        "etage": 2,
+        "qm": 1064,
         "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K006-f10",
-        "etage": 4,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
     "id": "K007",
-    "name": "Mülheim Nebenlage",
-    "stadt": "Mülheim",
+    "name": "Volkskauf Düsseldorf Am Wall",
+    "stadt": "Düsseldorf",
     "format": "schwester",
+    "nurDaten": true,
     "lage": "b",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 1030,
+    "cluster": "metropole",
+    "region": "West",
+    "grundflaecheQm": 1800,
     "etagen": [
-      -1,
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
-    "baujahr": 1972,
-    "fassade": 2,
-    "substanz": 35,
+    "baujahr": 1895,
+    "fassade": 0,
+    "substanz": 44,
     "status": "offen",
     "flaechen": [
       {
         "id": "K007-f1",
         "etage": 0,
-        "qm": 597,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K007-f2",
-        "etage": 0,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K007-f3",
-        "etage": 1,
-        "qm": 597,
+        "qm": 1892,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K007-f4",
+        "id": "K007-f2",
         "etage": 1,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K007-f5",
-        "etage": 2,
-        "qm": 597,
+        "qm": 1135,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K007-f6",
+        "id": "K007-f3",
         "etage": 2,
-        "qm": 433,
+        "qm": 662,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K007-f7",
+        "id": "K007-f4",
         "etage": 3,
-        "qm": 597,
+        "qm": 568,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K007-f5",
+        "etage": 4,
+        "qm": 946,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K007-f6",
+        "etage": 0,
+        "qm": 662,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K007-f7",
+        "etage": 1,
+        "qm": 1419,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K007-f8",
-        "etage": 3,
-        "qm": 433,
+        "etage": 2,
+        "qm": 568,
         "konzept": "eigen",
         "gruppe": "spielwaren"
+      },
+      {
+        "id": "K007-f9",
+        "etage": 3,
+        "qm": 948,
+        "konzept": "eigen",
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
     "id": "K008",
-    "name": "Bottrop Nebenlage",
-    "stadt": "Bottrop",
+    "name": "Volkskauf Stuttgart",
+    "stadt": "Stuttgart",
     "format": "schwester",
-    "lage": "b",
-    "cluster": "mittelstadt",
-    "grundflaecheQm": 1050,
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "metropole",
+    "region": "Süd",
+    "grundflaecheQm": 1200,
     "etagen": [
-      -1,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1975,
+    "fassade": 0,
+    "substanz": 36,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K008-f1",
+        "etage": 0,
+        "qm": 1484,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K008-f2",
+        "etage": 1,
+        "qm": 890,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K008-f3",
+        "etage": 2,
+        "qm": 519,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K008-f4",
+        "etage": 3,
+        "qm": 445,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K008-f5",
+        "etage": 4,
+        "qm": 742,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K008-f6",
+        "etage": 5,
+        "qm": 519,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K008-f7",
+        "etage": 0,
+        "qm": 1113,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K008-f8",
+        "etage": 1,
+        "qm": 445,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K008-f9",
+        "etage": 2,
+        "qm": 743,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K009",
+    "name": "Volkskauf Essen Galerie am Fluss",
+    "stadt": "Essen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "center",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1900,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1968,
+    "fassade": 2,
+    "substanz": 24,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K009-f1",
+        "etage": 0,
+        "qm": 1656,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K009-f2",
+        "etage": 1,
+        "qm": 994,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K009-f3",
+        "etage": 2,
+        "qm": 580,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K009-f4",
+        "etage": 3,
+        "qm": 497,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K009-f5",
+        "etage": 0,
+        "qm": 828,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K009-f6",
+        "etage": 1,
+        "qm": 580,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K009-f7",
+        "etage": 2,
+        "qm": 1242,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K009-f8",
+        "etage": 3,
+        "qm": 497,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K009-f9",
+        "etage": 0,
+        "qm": 826,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K010",
+    "name": "Volkskauf Dortmund Einkaufszentrum",
+    "stadt": "Dortmund",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "center",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1000,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 2001,
+    "fassade": 5,
+    "substanz": 27,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K010-f1",
+        "etage": 0,
+        "qm": 1247,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K010-f2",
+        "etage": 1,
+        "qm": 748,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K010-f3",
+        "etage": 2,
+        "qm": 437,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K010-f4",
+        "etage": 3,
+        "qm": 374,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K010-f5",
+        "etage": 4,
+        "qm": 624,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K010-f6",
+        "etage": 5,
+        "qm": 437,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K010-f7",
+        "etage": 0,
+        "qm": 935,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K010-f8",
+        "etage": 1,
+        "qm": 374,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K010-f9",
+        "etage": 2,
+        "qm": 624,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K011",
+    "name": "Volkskauf Bremen Am Wall",
+    "stadt": "Bremen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1500,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1903,
+    "fassade": 0,
+    "substanz": 37,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K011-f1",
+        "etage": 0,
+        "qm": 1892,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K011-f2",
+        "etage": 1,
+        "qm": 1135,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K011-f3",
+        "etage": 2,
+        "qm": 662,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K011-f4",
+        "etage": 3,
+        "qm": 568,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K011-f5",
+        "etage": 4,
+        "qm": 946,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K011-f6",
+        "etage": 5,
+        "qm": 662,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K011-f7",
+        "etage": 0,
+        "qm": 1419,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K011-f8",
+        "etage": 1,
+        "qm": 568,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K011-f9",
+        "etage": 2,
+        "qm": 948,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K012",
+    "name": "Volkskauf Leipzig Am Wall",
+    "stadt": "Leipzig",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Ost",
+    "grundflaecheQm": 1600,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 2003,
+    "fassade": 1,
+    "substanz": 17,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K012-f1",
+        "etage": 0,
+        "qm": 2086,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K012-f2",
+        "etage": 1,
+        "qm": 1252,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K012-f3",
+        "etage": 2,
+        "qm": 730,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K012-f4",
+        "etage": 3,
+        "qm": 626,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K012-f5",
+        "etage": 4,
+        "qm": 1043,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K012-f6",
+        "etage": 5,
+        "qm": 730,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K012-f7",
+        "etage": 0,
+        "qm": 1565,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K012-f8",
+        "etage": 1,
+        "qm": 626,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K012-f9",
+        "etage": 2,
+        "qm": 1042,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K013",
+    "name": "Volkskauf Dresden Ring",
+    "stadt": "Dresden",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "Ost",
+    "grundflaecheQm": 1000,
+    "etagen": [
       0,
       1,
       2,
@@ -614,518 +1069,2177 @@
       4
     ],
     "baujahr": 1979,
-    "fassade": 2,
-    "substanz": 46,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "K008-f1",
-        "etage": 0,
-        "qm": 609,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K008-f2",
-        "etage": 0,
-        "qm": 441,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K008-f3",
-        "etage": 1,
-        "qm": 609,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K008-f4",
-        "etage": 1,
-        "qm": 441,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K008-f5",
-        "etage": 2,
-        "qm": 609,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "K008-f6",
-        "etage": 2,
-        "qm": 441,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "K008-f7",
-        "etage": 3,
-        "qm": 609,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "K008-f8",
-        "etage": 3,
-        "qm": 441,
-        "konzept": "eigen",
-        "gruppe": "spielwaren"
-      },
-      {
-        "id": "K008-f9",
-        "etage": 4,
-        "qm": 609,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K008-f10",
-        "etage": 4,
-        "qm": 441,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      }
-    ],
-    "kette": "schwester"
-  },
-  {
-    "id": "K009",
-    "name": "Düren Nebenlage",
-    "stadt": "Düren",
-    "format": "schwester",
-    "lage": "b",
-    "cluster": "mittelstadt",
-    "grundflaecheQm": 1290,
-    "etagen": [
-      -1,
-      0,
-      1,
-      2,
-      3
-    ],
-    "baujahr": 1961,
-    "fassade": 2,
-    "substanz": 57,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "K009-f1",
-        "etage": 0,
-        "qm": 748,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K009-f2",
-        "etage": 0,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K009-f3",
-        "etage": 1,
-        "qm": 748,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K009-f4",
-        "etage": 1,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K009-f5",
-        "etage": 2,
-        "qm": 748,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "K009-f6",
-        "etage": 2,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "K009-f7",
-        "etage": 3,
-        "qm": 748,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "K009-f8",
-        "etage": 3,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "spielwaren"
-      }
-    ],
-    "kette": "schwester"
-  },
-  {
-    "id": "K010",
-    "name": "Wesel Nebenlage",
-    "stadt": "Wesel",
-    "format": "schwester",
-    "lage": "b",
-    "cluster": "mittelstadt",
-    "grundflaecheQm": 1300,
-    "etagen": [
-      -1,
-      0,
-      1,
-      2,
-      3,
-      4
-    ],
-    "baujahr": 1968,
-    "fassade": 3,
-    "substanz": 22,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "K010-f1",
-        "etage": 0,
-        "qm": 754,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K010-f2",
-        "etage": 0,
-        "qm": 546,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K010-f3",
-        "etage": 1,
-        "qm": 754,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K010-f4",
-        "etage": 1,
-        "qm": 546,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K010-f5",
-        "etage": 2,
-        "qm": 754,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "K010-f6",
-        "etage": 2,
-        "qm": 546,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "K010-f7",
-        "etage": 3,
-        "qm": 754,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "K010-f8",
-        "etage": 3,
-        "qm": 546,
-        "konzept": "eigen",
-        "gruppe": "spielwaren"
-      },
-      {
-        "id": "K010-f9",
-        "etage": 4,
-        "qm": 754,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K010-f10",
-        "etage": 4,
-        "qm": 546,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      }
-    ],
-    "kette": "schwester"
-  },
-  {
-    "id": "K011",
-    "name": "Neuss Nebenlage",
-    "stadt": "Neuss",
-    "format": "schwester",
-    "lage": "1a",
-    "cluster": "mittelstadt",
-    "grundflaecheQm": 900,
-    "etagen": [
-      -1,
-      0,
-      1,
-      2,
-      3
-    ],
-    "baujahr": 1975,
-    "fassade": 3,
-    "substanz": 33,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "K011-f1",
-        "etage": 0,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K011-f2",
-        "etage": 0,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K011-f3",
-        "etage": 1,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K011-f4",
-        "etage": 1,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K011-f5",
-        "etage": 2,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "K011-f6",
-        "etage": 2,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "K011-f7",
-        "etage": 3,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "K011-f8",
-        "etage": 3,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "spielwaren"
-      }
-    ],
-    "kette": "schwester"
-  },
-  {
-    "id": "K012",
-    "name": "Krefeld Nebenlage",
-    "stadt": "Krefeld",
-    "format": "schwester",
-    "lage": "b",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 1030,
-    "etagen": [
-      -1,
-      0,
-      1,
-      2,
-      3,
-      4
-    ],
-    "baujahr": 1957,
-    "fassade": 3,
-    "substanz": 44,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "K012-f1",
-        "etage": 0,
-        "qm": 597,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K012-f2",
-        "etage": 0,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K012-f3",
-        "etage": 1,
-        "qm": 597,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K012-f4",
-        "etage": 1,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K012-f5",
-        "etage": 2,
-        "qm": 597,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "K012-f6",
-        "etage": 2,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "K012-f7",
-        "etage": 3,
-        "qm": 597,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "K012-f8",
-        "etage": 3,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "spielwaren"
-      },
-      {
-        "id": "K012-f9",
-        "etage": 4,
-        "qm": 597,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K012-f10",
-        "etage": 4,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      }
-    ],
-    "kette": "schwester"
-  },
-  {
-    "id": "K013",
-    "name": "Gütersloh Nebenlage",
-    "stadt": "Gütersloh",
-    "format": "schwester",
-    "lage": "b",
-    "cluster": "mittelstadt",
-    "grundflaecheQm": 1160,
-    "etagen": [
-      -1,
-      0,
-      1,
-      2,
-      3
-    ],
-    "baujahr": 1964,
-    "fassade": 4,
-    "substanz": 55,
+    "fassade": 6,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
         "id": "K013-f1",
         "etage": 0,
-        "qm": 673,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K013-f2",
-        "etage": 0,
-        "qm": 487,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K013-f3",
-        "etage": 1,
-        "qm": 673,
+        "qm": 903,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K013-f4",
+        "id": "K013-f2",
         "etage": 1,
-        "qm": 487,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K013-f5",
-        "etage": 2,
-        "qm": 673,
+        "qm": 542,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K013-f6",
+        "id": "K013-f3",
         "etage": 2,
-        "qm": 487,
+        "qm": 316,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K013-f7",
+        "id": "K013-f4",
         "etage": 3,
-        "qm": 673,
+        "qm": 271,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K013-f5",
+        "etage": 4,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K013-f6",
+        "etage": 0,
+        "qm": 316,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K013-f7",
+        "etage": 1,
+        "qm": 677,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K013-f8",
-        "etage": 3,
-        "qm": 487,
+        "etage": 2,
+        "qm": 271,
         "konzept": "eigen",
         "gruppe": "spielwaren"
+      },
+      {
+        "id": "K013-f9",
+        "etage": 3,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
     "id": "K014",
-    "name": "Recklinghausen Nebenlage",
+    "name": "Volkskauf Hannover",
+    "stadt": "Hannover",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1200,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1902,
+    "fassade": 3,
+    "substanz": 20,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K014-f1",
+        "etage": 0,
+        "qm": 1505,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K014-f2",
+        "etage": 1,
+        "qm": 903,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K014-f3",
+        "etage": 2,
+        "qm": 527,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K014-f4",
+        "etage": 3,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K014-f5",
+        "etage": 4,
+        "qm": 753,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K014-f6",
+        "etage": 5,
+        "qm": 527,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K014-f7",
+        "etage": 0,
+        "qm": 1129,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K014-f8",
+        "etage": 1,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K014-f9",
+        "etage": 2,
+        "qm": 752,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K015",
+    "name": "Volkskauf Nürnberg",
+    "stadt": "Nürnberg",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1900,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1978,
+    "fassade": 5,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K015-f1",
+        "etage": 0,
+        "qm": 2065,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K015-f2",
+        "etage": 1,
+        "qm": 1239,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K015-f3",
+        "etage": 2,
+        "qm": 723,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K015-f4",
+        "etage": 3,
+        "qm": 619,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K015-f5",
+        "etage": 4,
+        "qm": 1032,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K015-f6",
+        "etage": 0,
+        "qm": 723,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K015-f7",
+        "etage": 1,
+        "qm": 1548,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K015-f8",
+        "etage": 2,
+        "qm": 619,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K015-f9",
+        "etage": 3,
+        "qm": 1032,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K016",
+    "name": "Volkskauf Duisburg",
+    "stadt": "Duisburg",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1100,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1915,
+    "fassade": 6,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K016-f1",
+        "etage": 0,
+        "qm": 1161,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K016-f2",
+        "etage": 1,
+        "qm": 697,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K016-f3",
+        "etage": 2,
+        "qm": 406,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K016-f4",
+        "etage": 3,
+        "qm": 348,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K016-f5",
+        "etage": 4,
+        "qm": 581,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K016-f6",
+        "etage": 0,
+        "qm": 406,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K016-f7",
+        "etage": 1,
+        "qm": 871,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K016-f8",
+        "etage": 2,
+        "qm": 348,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K016-f9",
+        "etage": 3,
+        "qm": 582,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K017",
+    "name": "Volkskauf Bochum",
+    "stadt": "Bochum",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1000,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1962,
+    "fassade": 5,
+    "substanz": 36,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K017-f1",
+        "etage": 0,
+        "qm": 1118,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K017-f2",
+        "etage": 1,
+        "qm": 671,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K017-f3",
+        "etage": 2,
+        "qm": 391,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K017-f4",
+        "etage": 3,
+        "qm": 335,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K017-f5",
+        "etage": 4,
+        "qm": 559,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K017-f6",
+        "etage": 0,
+        "qm": 391,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K017-f7",
+        "etage": 1,
+        "qm": 839,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K017-f8",
+        "etage": 2,
+        "qm": 335,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K017-f9",
+        "etage": 3,
+        "qm": 561,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K018",
+    "name": "Volkskauf Wuppertal Ring",
+    "stadt": "Wuppertal",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1000,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1979,
+    "fassade": 5,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K018-f1",
+        "etage": 0,
+        "qm": 1333,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K018-f2",
+        "etage": 1,
+        "qm": 800,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K018-f3",
+        "etage": 2,
+        "qm": 467,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K018-f4",
+        "etage": 3,
+        "qm": 400,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K018-f5",
+        "etage": 4,
+        "qm": 667,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K018-f6",
+        "etage": 5,
+        "qm": 467,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K018-f7",
+        "etage": 0,
+        "qm": 1000,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K018-f8",
+        "etage": 1,
+        "qm": 400,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K018-f9",
+        "etage": 2,
+        "qm": 666,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K019",
+    "name": "Volkskauf Bielefeld Bahnhofstraße",
+    "stadt": "Bielefeld",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1700,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1977,
+    "fassade": 3,
+    "substanz": 56,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K019-f1",
+        "etage": 0,
+        "qm": 1462,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K019-f2",
+        "etage": 1,
+        "qm": 877,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K019-f3",
+        "etage": 2,
+        "qm": 512,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K019-f4",
+        "etage": 3,
+        "qm": 439,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K019-f5",
+        "etage": 0,
+        "qm": 731,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K019-f6",
+        "etage": 1,
+        "qm": 512,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K019-f7",
+        "etage": 2,
+        "qm": 1097,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K019-f8",
+        "etage": 3,
+        "qm": 439,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K019-f9",
+        "etage": 0,
+        "qm": 731,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K020",
+    "name": "Volkskauf Bonn Lindenstraße",
+    "stadt": "Bonn",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1400,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1975,
+    "fassade": 2,
+    "substanz": 16,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K020-f1",
+        "etage": 0,
+        "qm": 1484,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K020-f2",
+        "etage": 1,
+        "qm": 890,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K020-f3",
+        "etage": 2,
+        "qm": 519,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K020-f4",
+        "etage": 3,
+        "qm": 445,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K020-f5",
+        "etage": 4,
+        "qm": 742,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K020-f6",
+        "etage": 0,
+        "qm": 519,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K020-f7",
+        "etage": 1,
+        "qm": 1113,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K020-f8",
+        "etage": 2,
+        "qm": 445,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K020-f9",
+        "etage": 3,
+        "qm": 743,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K021",
+    "name": "Volkskauf Münster Am Wall",
+    "stadt": "Münster",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1000,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1980,
+    "fassade": 1,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K021-f1",
+        "etage": 0,
+        "qm": 1290,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K021-f2",
+        "etage": 1,
+        "qm": 774,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K021-f3",
+        "etage": 2,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K021-f4",
+        "etage": 3,
+        "qm": 387,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K021-f5",
+        "etage": 4,
+        "qm": 645,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K021-f6",
+        "etage": 5,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K021-f7",
+        "etage": 0,
+        "qm": 968,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K021-f8",
+        "etage": 1,
+        "qm": 387,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K021-f9",
+        "etage": 2,
+        "qm": 645,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K022",
+    "name": "Volkskauf Mönchengladbach Bahnhofstraße",
+    "stadt": "Mönchengladbach",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1600,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1906,
+    "fassade": 1,
+    "substanz": 27,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K022-f1",
+        "etage": 0,
+        "qm": 1398,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K022-f2",
+        "etage": 1,
+        "qm": 839,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K022-f3",
+        "etage": 2,
+        "qm": 489,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K022-f4",
+        "etage": 3,
+        "qm": 419,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K022-f5",
+        "etage": 0,
+        "qm": 699,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K022-f6",
+        "etage": 1,
+        "qm": 489,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K022-f7",
+        "etage": 2,
+        "qm": 1048,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K022-f8",
+        "etage": 3,
+        "qm": 419,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K022-f9",
+        "etage": 0,
+        "qm": 700,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K023",
+    "name": "Volkskauf Gelsenkirchen",
+    "stadt": "Gelsenkirchen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1700,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1964,
+    "fassade": 0,
+    "substanz": 46,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K023-f1",
+        "etage": 0,
+        "qm": 1871,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K023-f2",
+        "etage": 1,
+        "qm": 1123,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K023-f3",
+        "etage": 2,
+        "qm": 655,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K023-f4",
+        "etage": 3,
+        "qm": 561,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K023-f5",
+        "etage": 4,
+        "qm": 935,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K023-f6",
+        "etage": 0,
+        "qm": 655,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K023-f7",
+        "etage": 1,
+        "qm": 1403,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K023-f8",
+        "etage": 2,
+        "qm": 561,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K023-f9",
+        "etage": 3,
+        "qm": 936,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K024",
+    "name": "Volkskauf Aachen Bahnhofstraße",
+    "stadt": "Aachen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1200,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1983,
+    "fassade": 0,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K024-f1",
+        "etage": 0,
+        "qm": 1570,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K024-f2",
+        "etage": 1,
+        "qm": 942,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K024-f3",
+        "etage": 2,
+        "qm": 549,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K024-f4",
+        "etage": 3,
+        "qm": 471,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K024-f5",
+        "etage": 4,
+        "qm": 785,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K024-f6",
+        "etage": 5,
+        "qm": 549,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K024-f7",
+        "etage": 0,
+        "qm": 1177,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K024-f8",
+        "etage": 1,
+        "qm": 471,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K024-f9",
+        "etage": 2,
+        "qm": 786,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K025",
+    "name": "Volkskauf Krefeld",
+    "stadt": "Krefeld",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1000,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1964,
+    "fassade": 4,
+    "substanz": 30,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K025-f1",
+        "etage": 0,
+        "qm": 882,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K025-f2",
+        "etage": 1,
+        "qm": 529,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K025-f3",
+        "etage": 2,
+        "qm": 309,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K025-f4",
+        "etage": 3,
+        "qm": 265,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K025-f5",
+        "etage": 4,
+        "qm": 441,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K025-f6",
+        "etage": 5,
+        "qm": 309,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K025-f7",
+        "etage": 0,
+        "qm": 661,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K025-f8",
+        "etage": 1,
+        "qm": 265,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K025-f9",
+        "etage": 2,
+        "qm": 439,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K026",
+    "name": "Volkskauf Oberhausen",
+    "stadt": "Oberhausen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1200,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1955,
+    "fassade": 4,
+    "substanz": 26,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K026-f1",
+        "etage": 0,
+        "qm": 1333,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K026-f2",
+        "etage": 1,
+        "qm": 800,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K026-f3",
+        "etage": 2,
+        "qm": 467,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K026-f4",
+        "etage": 3,
+        "qm": 400,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K026-f5",
+        "etage": 4,
+        "qm": 667,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K026-f6",
+        "etage": 0,
+        "qm": 467,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K026-f7",
+        "etage": 1,
+        "qm": 1000,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K026-f8",
+        "etage": 2,
+        "qm": 400,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K026-f9",
+        "etage": 3,
+        "qm": 666,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K027",
+    "name": "Volkskauf Hagen",
+    "stadt": "Hagen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1280,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1972,
+    "fassade": 6,
+    "substanz": 35,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K027-f1",
+        "etage": 0,
+        "qm": 1376,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K027-f2",
+        "etage": 1,
+        "qm": 826,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K027-f3",
+        "etage": 2,
+        "qm": 482,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K027-f4",
+        "etage": 3,
+        "qm": 413,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K027-f5",
+        "etage": 4,
+        "qm": 688,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K027-f6",
+        "etage": 0,
+        "qm": 482,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K027-f7",
+        "etage": 1,
+        "qm": 1032,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K027-f8",
+        "etage": 2,
+        "qm": 413,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K027-f9",
+        "etage": 3,
+        "qm": 688,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K028",
+    "name": "Volkskauf Hamm",
+    "stadt": "Hamm",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1200,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1958,
+    "fassade": 3,
+    "substanz": 57,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K028-f1",
+        "etage": 0,
+        "qm": 989,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K028-f2",
+        "etage": 1,
+        "qm": 594,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K028-f3",
+        "etage": 2,
+        "qm": 346,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K028-f4",
+        "etage": 3,
+        "qm": 297,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K028-f5",
+        "etage": 0,
+        "qm": 495,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K028-f6",
+        "etage": 1,
+        "qm": 346,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K028-f7",
+        "etage": 2,
+        "qm": 742,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K028-f8",
+        "etage": 3,
+        "qm": 297,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K028-f9",
+        "etage": 0,
+        "qm": 494,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K029",
+    "name": "Volkskauf Mülheim",
+    "stadt": "Mülheim",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1800,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1985,
+    "fassade": 2,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K029-f1",
+        "etage": 0,
+        "qm": 1548,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K029-f2",
+        "etage": 1,
+        "qm": 929,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K029-f3",
+        "etage": 2,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K029-f4",
+        "etage": 3,
+        "qm": 465,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K029-f5",
+        "etage": 0,
+        "qm": 774,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K029-f6",
+        "etage": 1,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K029-f7",
+        "etage": 2,
+        "qm": 1161,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K029-f8",
+        "etage": 3,
+        "qm": 465,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K029-f9",
+        "etage": 0,
+        "qm": 774,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K030",
+    "name": "Volkskauf Leverkusen Lindenstraße",
+    "stadt": "Leverkusen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1120,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1959,
+    "fassade": 6,
+    "substanz": 42,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K030-f1",
+        "etage": 0,
+        "qm": 1656,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K030-f2",
+        "etage": 1,
+        "qm": 994,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K030-f3",
+        "etage": 2,
+        "qm": 580,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K030-f4",
+        "etage": 3,
+        "qm": 497,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K030-f5",
+        "etage": 4,
+        "qm": 828,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K030-f6",
+        "etage": 5,
+        "qm": 580,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K030-f7",
+        "etage": 0,
+        "qm": 1242,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K030-f8",
+        "etage": 1,
+        "qm": 497,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K030-f9",
+        "etage": 2,
+        "qm": 826,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K031",
+    "name": "Volkskauf Solingen",
+    "stadt": "Solingen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1600,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1984,
+    "fassade": 2,
+    "substanz": 29,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K031-f1",
+        "etage": 0,
+        "qm": 2000,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K031-f2",
+        "etage": 1,
+        "qm": 1200,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K031-f3",
+        "etage": 2,
+        "qm": 700,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K031-f4",
+        "etage": 3,
+        "qm": 600,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K031-f5",
+        "etage": 4,
+        "qm": 1000,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K031-f6",
+        "etage": 5,
+        "qm": 700,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K031-f7",
+        "etage": 0,
+        "qm": 1500,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K031-f8",
+        "etage": 1,
+        "qm": 600,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K031-f9",
+        "etage": 2,
+        "qm": 1000,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K032",
+    "name": "Volkskauf Paderborn",
+    "stadt": "Paderborn",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1300,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1923,
+    "fassade": 6,
+    "substanz": 57,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K032-f1",
+        "etage": 0,
+        "qm": 1355,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K032-f2",
+        "etage": 1,
+        "qm": 813,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K032-f3",
+        "etage": 2,
+        "qm": 474,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K032-f4",
+        "etage": 3,
+        "qm": 406,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K032-f5",
+        "etage": 4,
+        "qm": 677,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K032-f6",
+        "etage": 0,
+        "qm": 474,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K032-f7",
+        "etage": 1,
+        "qm": 1016,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K032-f8",
+        "etage": 2,
+        "qm": 406,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K032-f9",
+        "etage": 3,
+        "qm": 679,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K033",
+    "name": "Volkskauf Siegen",
+    "stadt": "Siegen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1400,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1999,
+    "fassade": 2,
+    "substanz": 36,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K033-f1",
+        "etage": 0,
+        "qm": 1763,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K033-f2",
+        "etage": 1,
+        "qm": 1058,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K033-f3",
+        "etage": 2,
+        "qm": 617,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K033-f4",
+        "etage": 3,
+        "qm": 529,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K033-f5",
+        "etage": 4,
+        "qm": 882,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K033-f6",
+        "etage": 5,
+        "qm": 617,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K033-f7",
+        "etage": 0,
+        "qm": 1323,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K033-f8",
+        "etage": 1,
+        "qm": 529,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K033-f9",
+        "etage": 2,
+        "qm": 882,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K034",
+    "name": "Volkskauf Gütersloh Neustadt",
+    "stadt": "Gütersloh",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1900,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1990,
+    "fassade": 4,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K034-f1",
+        "etage": 0,
+        "qm": 1613,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K034-f2",
+        "etage": 1,
+        "qm": 968,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K034-f3",
+        "etage": 2,
+        "qm": 565,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K034-f4",
+        "etage": 3,
+        "qm": 484,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K034-f5",
+        "etage": 0,
+        "qm": 806,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K034-f6",
+        "etage": 1,
+        "qm": 565,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K034-f7",
+        "etage": 2,
+        "qm": 1210,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K034-f8",
+        "etage": 3,
+        "qm": 484,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K034-f9",
+        "etage": 0,
+        "qm": 805,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K035",
+    "name": "Volkskauf Recklinghausen Am Wall",
     "stadt": "Recklinghausen",
     "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1100,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 2008,
+    "fassade": 3,
+    "substanz": 27,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K035-f1",
+        "etage": 0,
+        "qm": 1355,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K035-f2",
+        "etage": 1,
+        "qm": 813,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K035-f3",
+        "etage": 2,
+        "qm": 474,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K035-f4",
+        "etage": 3,
+        "qm": 406,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K035-f5",
+        "etage": 4,
+        "qm": 677,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K035-f6",
+        "etage": 5,
+        "qm": 474,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K035-f7",
+        "etage": 0,
+        "qm": 1016,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K035-f8",
+        "etage": 1,
+        "qm": 406,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K035-f9",
+        "etage": 2,
+        "qm": 679,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K036",
+    "name": "Volkskauf Bottrop",
+    "stadt": "Bottrop",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1000,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1990,
+    "fassade": 3,
+    "substanz": 17,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K036-f1",
+        "etage": 0,
+        "qm": 989,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K036-f2",
+        "etage": 1,
+        "qm": 594,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K036-f3",
+        "etage": 2,
+        "qm": 346,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K036-f4",
+        "etage": 3,
+        "qm": 297,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K036-f5",
+        "etage": 4,
+        "qm": 495,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K036-f6",
+        "etage": 5,
+        "qm": 346,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K036-f7",
+        "etage": 0,
+        "qm": 742,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K036-f8",
+        "etage": 1,
+        "qm": 297,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K036-f9",
+        "etage": 2,
+        "qm": 494,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K037",
+    "name": "Volkskauf Bamberg",
+    "stadt": "Bamberg",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1280,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1959,
+    "fassade": 0,
+    "substanz": 34,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K037-f1",
+        "etage": 0,
+        "qm": 1011,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K037-f2",
+        "etage": 1,
+        "qm": 606,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K037-f3",
+        "etage": 2,
+        "qm": 354,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K037-f4",
+        "etage": 0,
+        "qm": 303,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K037-f5",
+        "etage": 1,
+        "qm": 505,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K037-f6",
+        "etage": 2,
+        "qm": 354,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K037-f7",
+        "etage": 0,
+        "qm": 758,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K037-f8",
+        "etage": 1,
+        "qm": 303,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K037-f9",
+        "etage": 2,
+        "qm": 506,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K038",
+    "name": "Volkskauf Bayreuth Lindenstraße",
+    "stadt": "Bayreuth",
+    "format": "schwester",
+    "nurDaten": true,
     "lage": "b",
     "cluster": "mittelstadt",
-    "grundflaecheQm": 1290,
+    "region": "Süd",
+    "grundflaecheQm": 1300,
     "etagen": [
-      -1,
       0,
       1,
       2,
@@ -1133,946 +3247,4201 @@
       4
     ],
     "baujahr": 1971,
-    "fassade": 4,
-    "substanz": 20,
+    "fassade": 1,
+    "substanz": 30,
     "status": "offen",
     "flaechen": [
       {
-        "id": "K014-f1",
+        "id": "K038-f1",
         "etage": 0,
-        "qm": 748,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K014-f2",
-        "etage": 0,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K014-f3",
-        "etage": 1,
-        "qm": 748,
+        "qm": 1376,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K014-f4",
+        "id": "K038-f2",
         "etage": 1,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K014-f5",
-        "etage": 2,
-        "qm": 748,
+        "qm": 826,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K014-f6",
+        "id": "K038-f3",
         "etage": 2,
-        "qm": 542,
+        "qm": 482,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K014-f7",
+        "id": "K038-f4",
         "etage": 3,
-        "qm": 748,
+        "qm": 413,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K038-f5",
+        "etage": 4,
+        "qm": 688,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K038-f6",
+        "etage": 0,
+        "qm": 482,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K038-f7",
+        "etage": 1,
+        "qm": 1032,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
-        "id": "K014-f8",
-        "etage": 3,
-        "qm": 542,
+        "id": "K038-f8",
+        "etage": 2,
+        "qm": 413,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
-        "id": "K014-f9",
-        "etage": 4,
-        "qm": 748,
+        "id": "K038-f9",
+        "etage": 3,
+        "qm": 688,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K039",
+    "name": "Volkskauf Landshut",
+    "stadt": "Landshut",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1280,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1931,
+    "fassade": 6,
+    "substanz": 32,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K039-f1",
+        "etage": 0,
+        "qm": 1527,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K014-f10",
-        "etage": 4,
-        "qm": 542,
+        "id": "K039-f2",
+        "etage": 1,
+        "qm": 916,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K039-f3",
+        "etage": 2,
+        "qm": 534,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K039-f4",
+        "etage": 0,
+        "qm": 458,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K039-f5",
+        "etage": 1,
+        "qm": 763,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K039-f6",
+        "etage": 2,
+        "qm": 534,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K039-f7",
+        "etage": 0,
+        "qm": 1145,
         "konzept": "eigen",
         "gruppe": "wohnen"
+      },
+      {
+        "id": "K039-f8",
+        "etage": 1,
+        "qm": 458,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K039-f9",
+        "etage": 2,
+        "qm": 765,
+        "konzept": "eigen",
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
-    "id": "K015",
-    "name": "Oberhausen Nebenlage",
-    "stadt": "Oberhausen",
+    "id": "K040",
+    "name": "Volkskauf Rosenheim",
+    "stadt": "Rosenheim",
     "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1040,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1936,
+    "fassade": 6,
+    "substanz": 58,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K040-f1",
+        "etage": 0,
+        "qm": 1570,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K040-f2",
+        "etage": 1,
+        "qm": 942,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K040-f3",
+        "etage": 2,
+        "qm": 549,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K040-f4",
+        "etage": 0,
+        "qm": 471,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K040-f5",
+        "etage": 1,
+        "qm": 785,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K040-f6",
+        "etage": 2,
+        "qm": 549,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K040-f7",
+        "etage": 0,
+        "qm": 1177,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K040-f8",
+        "etage": 1,
+        "qm": 471,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K040-f9",
+        "etage": 2,
+        "qm": 786,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K041",
+    "name": "Volkskauf Neuss",
+    "stadt": "Neuss",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1000,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 1918,
+    "fassade": 6,
+    "substanz": 37,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K041-f1",
+        "etage": 0,
+        "qm": 946,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K041-f2",
+        "etage": 1,
+        "qm": 568,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K041-f3",
+        "etage": 2,
+        "qm": 331,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K041-f4",
+        "etage": 3,
+        "qm": 284,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K041-f5",
+        "etage": 4,
+        "qm": 473,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K041-f6",
+        "etage": 5,
+        "qm": 331,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K041-f7",
+        "etage": 0,
+        "qm": 710,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K041-f8",
+        "etage": 1,
+        "qm": 284,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K041-f9",
+        "etage": 2,
+        "qm": 473,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K042",
+    "name": "Volkskauf Düren Neustadt",
+    "stadt": "Düren",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1040,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1961,
+    "fassade": 5,
+    "substanz": 15,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K042-f1",
+        "etage": 0,
+        "qm": 968,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K042-f2",
+        "etage": 1,
+        "qm": 581,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K042-f3",
+        "etage": 2,
+        "qm": 339,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K042-f4",
+        "etage": 3,
+        "qm": 290,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K042-f5",
+        "etage": 0,
+        "qm": 484,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K042-f6",
+        "etage": 1,
+        "qm": 339,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K042-f7",
+        "etage": 2,
+        "qm": 726,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K042-f8",
+        "etage": 3,
+        "qm": 290,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K042-f9",
+        "etage": 0,
+        "qm": 483,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K043",
+    "name": "Volkskauf Wesel",
+    "stadt": "Wesel",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1280,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1932,
+    "fassade": 7,
+    "substanz": 47,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K043-f1",
+        "etage": 0,
+        "qm": 1656,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K043-f2",
+        "etage": 1,
+        "qm": 994,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K043-f3",
+        "etage": 2,
+        "qm": 580,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K043-f4",
+        "etage": 3,
+        "qm": 497,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K043-f5",
+        "etage": 0,
+        "qm": 828,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K043-f6",
+        "etage": 1,
+        "qm": 580,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K043-f7",
+        "etage": 2,
+        "qm": 1242,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K043-f8",
+        "etage": 3,
+        "qm": 497,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K043-f9",
+        "etage": 0,
+        "qm": 826,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K044",
+    "name": "Volkskauf Iserlohn Am Wall",
+    "stadt": "Iserlohn",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 800,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1955,
+    "fassade": 7,
+    "substanz": 45,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K044-f1",
+        "etage": 0,
+        "qm": 1204,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K044-f2",
+        "etage": 1,
+        "qm": 723,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K044-f3",
+        "etage": 2,
+        "qm": 422,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K044-f4",
+        "etage": 3,
+        "qm": 361,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K044-f5",
+        "etage": 4,
+        "qm": 602,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K044-f6",
+        "etage": 0,
+        "qm": 422,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K044-f7",
+        "etage": 1,
+        "qm": 903,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K044-f8",
+        "etage": 2,
+        "qm": 361,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K044-f9",
+        "etage": 3,
+        "qm": 602,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K045",
+    "name": "Volkskauf Lüdenscheid",
+    "stadt": "Lüdenscheid",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1200,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1996,
+    "fassade": 7,
+    "substanz": 37,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K045-f1",
+        "etage": 0,
+        "qm": 1075,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K045-f2",
+        "etage": 1,
+        "qm": 645,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K045-f3",
+        "etage": 2,
+        "qm": 376,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K045-f4",
+        "etage": 0,
+        "qm": 323,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K045-f5",
+        "etage": 1,
+        "qm": 538,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K045-f6",
+        "etage": 2,
+        "qm": 376,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K045-f7",
+        "etage": 0,
+        "qm": 806,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K045-f8",
+        "etage": 1,
+        "qm": 323,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K045-f9",
+        "etage": 2,
+        "qm": 538,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K046",
+    "name": "Volkskauf Witten Am Wall",
+    "stadt": "Witten",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 960,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1983,
+    "fassade": 4,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K046-f1",
+        "etage": 0,
+        "qm": 1441,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K046-f2",
+        "etage": 1,
+        "qm": 865,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K046-f3",
+        "etage": 2,
+        "qm": 504,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K046-f4",
+        "etage": 3,
+        "qm": 432,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K046-f5",
+        "etage": 0,
+        "qm": 720,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K046-f6",
+        "etage": 1,
+        "qm": 504,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K046-f7",
+        "etage": 2,
+        "qm": 1081,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K046-f8",
+        "etage": 3,
+        "qm": 432,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K046-f9",
+        "etage": 0,
+        "qm": 721,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K047",
+    "name": "Volkskauf Marl Neustadt",
+    "stadt": "Marl",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1680,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1968,
+    "fassade": 1,
+    "substanz": 42,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K047-f1",
+        "etage": 0,
+        "qm": 2129,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K047-f2",
+        "etage": 1,
+        "qm": 1277,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K047-f3",
+        "etage": 2,
+        "qm": 745,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K047-f4",
+        "etage": 3,
+        "qm": 639,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K047-f5",
+        "etage": 4,
+        "qm": 1065,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K047-f6",
+        "etage": 0,
+        "qm": 745,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K047-f7",
+        "etage": 1,
+        "qm": 1597,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K047-f8",
+        "etage": 2,
+        "qm": 639,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K047-f9",
+        "etage": 3,
+        "qm": 1064,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K048",
+    "name": "Volkskauf Moers Neustadt",
+    "stadt": "Moers",
+    "format": "schwester",
+    "nurDaten": true,
     "lage": "b",
     "cluster": "grossstadt",
-    "grundflaecheQm": 1300,
+    "region": "West",
+    "grundflaecheQm": 1000,
     "etagen": [
-      -1,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1962,
+    "fassade": 4,
+    "substanz": 57,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K048-f1",
+        "etage": 0,
+        "qm": 989,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K048-f2",
+        "etage": 1,
+        "qm": 594,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K048-f3",
+        "etage": 2,
+        "qm": 346,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K048-f4",
+        "etage": 3,
+        "qm": 297,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K048-f5",
+        "etage": 4,
+        "qm": 495,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K048-f6",
+        "etage": 0,
+        "qm": 346,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K048-f7",
+        "etage": 1,
+        "qm": 742,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K048-f8",
+        "etage": 2,
+        "qm": 297,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K048-f9",
+        "etage": 3,
+        "qm": 494,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K049",
+    "name": "Volkskauf Lünen",
+    "stadt": "Lünen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 800,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1958,
+    "fassade": 6,
+    "substanz": 50,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K049-f1",
+        "etage": 0,
+        "qm": 1914,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K049-f2",
+        "etage": 1,
+        "qm": 1148,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K049-f3",
+        "etage": 2,
+        "qm": 670,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K049-f4",
+        "etage": 3,
+        "qm": 574,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K049-f5",
+        "etage": 0,
+        "qm": 957,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K049-f6",
+        "etage": 1,
+        "qm": 670,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K049-f7",
+        "etage": 2,
+        "qm": 1435,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K049-f8",
+        "etage": 3,
+        "qm": 574,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K049-f9",
+        "etage": 0,
+        "qm": 958,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K050",
+    "name": "Volkskauf Bergkamen Lindenstraße",
+    "stadt": "Bergkamen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 800,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 2004,
+    "fassade": 2,
+    "substanz": 30,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K050-f1",
+        "etage": 0,
+        "qm": 1527,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K050-f2",
+        "etage": 1,
+        "qm": 916,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K050-f3",
+        "etage": 2,
+        "qm": 534,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K050-f4",
+        "etage": 0,
+        "qm": 458,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K050-f5",
+        "etage": 1,
+        "qm": 763,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K050-f6",
+        "etage": 2,
+        "qm": 534,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K050-f7",
+        "etage": 0,
+        "qm": 1145,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K050-f8",
+        "etage": 1,
+        "qm": 458,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K050-f9",
+        "etage": 2,
+        "qm": 765,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K051",
+    "name": "Volkskauf Unna Arkaden",
+    "stadt": "Unna",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "center",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1100,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 2003,
+    "fassade": 3,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K051-f1",
+        "etage": 0,
+        "qm": 1140,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K051-f2",
+        "etage": 1,
+        "qm": 684,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K051-f3",
+        "etage": 2,
+        "qm": 399,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K051-f4",
+        "etage": 3,
+        "qm": 342,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K051-f5",
+        "etage": 4,
+        "qm": 570,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K051-f6",
+        "etage": 0,
+        "qm": 399,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K051-f7",
+        "etage": 1,
+        "qm": 855,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K051-f8",
+        "etage": 2,
+        "qm": 342,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K051-f9",
+        "etage": 3,
+        "qm": 569,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K052",
+    "name": "Volkskauf Schwerte Ring",
+    "stadt": "Schwerte",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1700,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 2007,
+    "fassade": 0,
+    "substanz": 28,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K052-f1",
+        "etage": 0,
+        "qm": 1828,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K052-f2",
+        "etage": 1,
+        "qm": 1097,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K052-f3",
+        "etage": 2,
+        "qm": 640,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K052-f4",
+        "etage": 3,
+        "qm": 548,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K052-f5",
+        "etage": 4,
+        "qm": 914,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K052-f6",
+        "etage": 0,
+        "qm": 640,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K052-f7",
+        "etage": 1,
+        "qm": 1371,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K052-f8",
+        "etage": 2,
+        "qm": 548,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K052-f9",
+        "etage": 3,
+        "qm": 914,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K053",
+    "name": "Volkskauf Menden",
+    "stadt": "Menden",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 2400,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1957,
+    "fassade": 6,
+    "substanz": 26,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K053-f1",
+        "etage": 0,
+        "qm": 2043,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K053-f2",
+        "etage": 1,
+        "qm": 1226,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K053-f3",
+        "etage": 2,
+        "qm": 715,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K053-f4",
+        "etage": 3,
+        "qm": 613,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K053-f5",
+        "etage": 0,
+        "qm": 1022,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K053-f6",
+        "etage": 1,
+        "qm": 715,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K053-f7",
+        "etage": 2,
+        "qm": 1532,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K053-f8",
+        "etage": 3,
+        "qm": 613,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K053-f9",
+        "etage": 0,
+        "qm": 1021,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K054",
+    "name": "Volkskauf Arnsberg",
+    "stadt": "Arnsberg",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1700,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1936,
+    "fassade": 0,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K054-f1",
+        "etage": 0,
+        "qm": 1118,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K054-f2",
+        "etage": 1,
+        "qm": 671,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K054-f3",
+        "etage": 2,
+        "qm": 391,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K054-f4",
+        "etage": 0,
+        "qm": 335,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K054-f5",
+        "etage": 1,
+        "qm": 559,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K054-f6",
+        "etage": 2,
+        "qm": 391,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K054-f7",
+        "etage": 0,
+        "qm": 839,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K054-f8",
+        "etage": 1,
+        "qm": 335,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K054-f9",
+        "etage": 2,
+        "qm": 561,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K055",
+    "name": "Volkskauf Soest Lindenstraße",
+    "stadt": "Soest",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 2000,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1971,
+    "fassade": 7,
+    "substanz": 54,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K055-f1",
+        "etage": 0,
+        "qm": 1312,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K055-f2",
+        "etage": 1,
+        "qm": 787,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K055-f3",
+        "etage": 2,
+        "qm": 459,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K055-f4",
+        "etage": 0,
+        "qm": 394,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K055-f5",
+        "etage": 1,
+        "qm": 656,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K055-f6",
+        "etage": 2,
+        "qm": 459,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K055-f7",
+        "etage": 0,
+        "qm": 984,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K055-f8",
+        "etage": 1,
+        "qm": 394,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K055-f9",
+        "etage": 2,
+        "qm": 655,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K056",
+    "name": "Volkskauf Lippstadt",
+    "stadt": "Lippstadt",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1100,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1920,
+    "fassade": 4,
+    "substanz": 53,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K056-f1",
+        "etage": 0,
+        "qm": 903,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K056-f2",
+        "etage": 1,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K056-f3",
+        "etage": 2,
+        "qm": 316,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K056-f4",
+        "etage": 3,
+        "qm": 271,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K056-f5",
+        "etage": 0,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K056-f6",
+        "etage": 1,
+        "qm": 316,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K056-f7",
+        "etage": 2,
+        "qm": 677,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K056-f8",
+        "etage": 3,
+        "qm": 271,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K056-f9",
+        "etage": 0,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K057",
+    "name": "Volkskauf Warendorf",
+    "stadt": "Warendorf",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 2700,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1951,
+    "fassade": 4,
+    "substanz": 54,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K057-f1",
+        "etage": 0,
+        "qm": 1763,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K057-f2",
+        "etage": 1,
+        "qm": 1058,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K057-f3",
+        "etage": 2,
+        "qm": 617,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K057-f4",
+        "etage": 0,
+        "qm": 529,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K057-f5",
+        "etage": 1,
+        "qm": 882,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K057-f6",
+        "etage": 2,
+        "qm": 617,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K057-f7",
+        "etage": 0,
+        "qm": 1323,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K057-f8",
+        "etage": 1,
+        "qm": 529,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K057-f9",
+        "etage": 2,
+        "qm": 882,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K058",
+    "name": "Volkskauf Ahlen Bahnhofstraße",
+    "stadt": "Ahlen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1100,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1990,
+    "fassade": 1,
+    "substanz": 20,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K058-f1",
+        "etage": 0,
+        "qm": 1226,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K058-f2",
+        "etage": 1,
+        "qm": 735,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K058-f3",
+        "etage": 2,
+        "qm": 429,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K058-f4",
+        "etage": 3,
+        "qm": 368,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K058-f5",
+        "etage": 4,
+        "qm": 613,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K058-f6",
+        "etage": 0,
+        "qm": 429,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K058-f7",
+        "etage": 1,
+        "qm": 919,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K058-f8",
+        "etage": 2,
+        "qm": 368,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K058-f9",
+        "etage": 3,
+        "qm": 613,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K059",
+    "name": "Volkskauf Beckum",
+    "stadt": "Beckum",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1100,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1916,
+    "fassade": 3,
+    "substanz": 53,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K059-f1",
+        "etage": 0,
+        "qm": 925,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K059-f2",
+        "etage": 1,
+        "qm": 555,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K059-f3",
+        "etage": 2,
+        "qm": 324,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K059-f4",
+        "etage": 3,
+        "qm": 277,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K059-f5",
+        "etage": 0,
+        "qm": 462,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K059-f6",
+        "etage": 1,
+        "qm": 324,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K059-f7",
+        "etage": 2,
+        "qm": 694,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K059-f8",
+        "etage": 3,
+        "qm": 277,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K059-f9",
+        "etage": 0,
+        "qm": 462,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K060",
+    "name": "Volkskauf Rheda-Wiedenbrück",
+    "stadt": "Rheda-Wiedenbrück",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1900,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1976,
+    "fassade": 0,
+    "substanz": 46,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K060-f1",
+        "etage": 0,
+        "qm": 1204,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K060-f2",
+        "etage": 1,
+        "qm": 723,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K060-f3",
+        "etage": 2,
+        "qm": 422,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K060-f4",
+        "etage": 0,
+        "qm": 361,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K060-f5",
+        "etage": 1,
+        "qm": 602,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K060-f6",
+        "etage": 2,
+        "qm": 422,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K060-f7",
+        "etage": 0,
+        "qm": 903,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K060-f8",
+        "etage": 1,
+        "qm": 361,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K060-f9",
+        "etage": 2,
+        "qm": 602,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K061",
+    "name": "Volkskauf Oelde Lindenstraße",
+    "stadt": "Oelde",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 2000,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1929,
+    "fassade": 0,
+    "substanz": 24,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K061-f1",
+        "etage": 0,
+        "qm": 1720,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K061-f2",
+        "etage": 1,
+        "qm": 1032,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K061-f3",
+        "etage": 2,
+        "qm": 602,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K061-f4",
+        "etage": 3,
+        "qm": 516,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K061-f5",
+        "etage": 0,
+        "qm": 860,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K061-f6",
+        "etage": 1,
+        "qm": 602,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K061-f7",
+        "etage": 2,
+        "qm": 1290,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K061-f8",
+        "etage": 3,
+        "qm": 516,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K061-f9",
+        "etage": 0,
+        "qm": 862,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K062",
+    "name": "Volkskauf Bünde",
+    "stadt": "Bünde",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 2600,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 2005,
+    "fassade": 0,
+    "substanz": 45,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K062-f1",
+        "etage": 0,
+        "qm": 1656,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K062-f2",
+        "etage": 1,
+        "qm": 994,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K062-f3",
+        "etage": 2,
+        "qm": 580,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K062-f4",
+        "etage": 0,
+        "qm": 497,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K062-f5",
+        "etage": 1,
+        "qm": 828,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K062-f6",
+        "etage": 2,
+        "qm": 580,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K062-f7",
+        "etage": 0,
+        "qm": 1242,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K062-f8",
+        "etage": 1,
+        "qm": 497,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K062-f9",
+        "etage": 2,
+        "qm": 826,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K063",
+    "name": "Volkskauf Bad Oeynhausen Einkaufszentrum",
+    "stadt": "Bad Oeynhausen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "center",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 2100,
+    "etagen": [
       0,
       1,
       2,
       3
     ],
     "baujahr": 1978,
-    "fassade": 4,
-    "substanz": 31,
+    "fassade": 2,
+    "substanz": 60,
     "status": "offen",
     "flaechen": [
       {
-        "id": "K015-f1",
+        "id": "K063-f1",
         "etage": 0,
-        "qm": 754,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K015-f2",
-        "etage": 0,
-        "qm": 546,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K015-f3",
-        "etage": 1,
-        "qm": 754,
+        "qm": 1785,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K015-f4",
+        "id": "K063-f2",
         "etage": 1,
-        "qm": 546,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K015-f5",
-        "etage": 2,
-        "qm": 754,
+        "qm": 1071,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K015-f6",
+        "id": "K063-f3",
         "etage": 2,
-        "qm": 546,
+        "qm": 625,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K015-f7",
+        "id": "K063-f4",
         "etage": 3,
-        "qm": 754,
+        "qm": 535,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K063-f5",
+        "etage": 0,
+        "qm": 892,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K063-f6",
+        "etage": 1,
+        "qm": 625,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K063-f7",
+        "etage": 2,
+        "qm": 1339,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
-        "id": "K015-f8",
+        "id": "K063-f8",
         "etage": 3,
-        "qm": 546,
+        "qm": 535,
         "konzept": "eigen",
         "gruppe": "spielwaren"
+      },
+      {
+        "id": "K063-f9",
+        "etage": 0,
+        "qm": 893,
+        "konzept": "eigen",
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
-    "id": "K016",
-    "name": "Hamm Nebenlage",
-    "stadt": "Hamm",
+    "id": "K064",
+    "name": "Volkskauf Löhne",
+    "stadt": "Löhne",
     "format": "schwester",
+    "nurDaten": true,
     "lage": "1a",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 900,
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1900,
     "etagen": [
-      -1,
       0,
       1,
       2,
       3,
       4
     ],
-    "baujahr": 1960,
-    "fassade": 5,
-    "substanz": 42,
+    "baujahr": 1935,
+    "fassade": 1,
+    "substanz": 52,
     "status": "offen",
     "flaechen": [
       {
-        "id": "K016-f1",
+        "id": "K064-f1",
         "etage": 0,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K016-f2",
-        "etage": 0,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K016-f3",
-        "etage": 1,
-        "qm": 522,
+        "qm": 2022,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K016-f4",
+        "id": "K064-f2",
         "etage": 1,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K016-f5",
-        "etage": 2,
-        "qm": 522,
+        "qm": 1213,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K016-f6",
+        "id": "K064-f3",
         "etage": 2,
-        "qm": 378,
+        "qm": 708,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K016-f7",
+        "id": "K064-f4",
         "etage": 3,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "K016-f8",
-        "etage": 3,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "spielwaren"
-      },
-      {
-        "id": "K016-f9",
-        "etage": 4,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K016-f10",
-        "etage": 4,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      }
-    ],
-    "kette": "schwester"
-  },
-  {
-    "id": "K017",
-    "name": "Iserlohn Nebenlage",
-    "stadt": "Iserlohn",
-    "format": "schwester",
-    "lage": "b",
-    "cluster": "mittelstadt",
-    "grundflaecheQm": 1030,
-    "etagen": [
-      -1,
-      0,
-      1,
-      2,
-      3
-    ],
-    "baujahr": 1967,
-    "fassade": 5,
-    "substanz": 53,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "K017-f1",
-        "etage": 0,
-        "qm": 597,
+        "qm": 606,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
-        "id": "K017-f2",
-        "etage": 0,
-        "qm": 433,
+        "id": "K064-f5",
+        "etage": 4,
+        "qm": 1011,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
-        "id": "K017-f3",
-        "etage": 1,
-        "qm": 597,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K017-f4",
-        "etage": 1,
-        "qm": 433,
+        "id": "K064-f6",
+        "etage": 0,
+        "qm": 708,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
-        "id": "K017-f5",
-        "etage": 2,
-        "qm": 597,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "K017-f6",
-        "etage": 2,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "K017-f7",
-        "etage": 3,
-        "qm": 597,
+        "id": "K064-f7",
+        "etage": 1,
+        "qm": 1516,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
-        "id": "K017-f8",
-        "etage": 3,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "spielwaren"
-      }
-    ],
-    "kette": "schwester"
-  },
-  {
-    "id": "K018",
-    "name": "Lüdenscheid Nebenlage",
-    "stadt": "Lüdenscheid",
-    "format": "schwester",
-    "lage": "b",
-    "cluster": "mittelstadt",
-    "grundflaecheQm": 1160,
-    "etagen": [
-      -1,
-      0,
-      1,
-      2,
-      3,
-      4
-    ],
-    "baujahr": 1974,
-    "fassade": 5,
-    "substanz": 18,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "K018-f1",
-        "etage": 0,
-        "qm": 673,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K018-f2",
-        "etage": 0,
-        "qm": 487,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K018-f3",
-        "etage": 1,
-        "qm": 673,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K018-f4",
-        "etage": 1,
-        "qm": 487,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K018-f5",
+        "id": "K064-f8",
         "etage": 2,
-        "qm": 673,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "K018-f6",
-        "etage": 2,
-        "qm": 487,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "K018-f7",
-        "etage": 3,
-        "qm": 673,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "K018-f8",
-        "etage": 3,
-        "qm": 487,
+        "qm": 606,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
-        "id": "K018-f9",
-        "etage": 4,
-        "qm": 673,
+        "id": "K064-f9",
+        "etage": 3,
+        "qm": 1010,
         "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K018-f10",
-        "etage": 4,
-        "qm": 487,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
-    "id": "K019",
-    "name": "Witten Nebenlage",
-    "stadt": "Witten",
+    "id": "K065",
+    "name": "Volkskauf Bad Salzuflen",
+    "stadt": "Bad Salzuflen",
     "format": "schwester",
-    "lage": "b",
-    "cluster": "mittelstadt",
-    "grundflaecheQm": 1290,
-    "etagen": [
-      -1,
-      0,
-      1,
-      2,
-      3
-    ],
-    "baujahr": 1956,
-    "fassade": 6,
-    "substanz": 29,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "K019-f1",
-        "etage": 0,
-        "qm": 748,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K019-f2",
-        "etage": 0,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K019-f3",
-        "etage": 1,
-        "qm": 748,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K019-f4",
-        "etage": 1,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K019-f5",
-        "etage": 2,
-        "qm": 748,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "K019-f6",
-        "etage": 2,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "K019-f7",
-        "etage": 3,
-        "qm": 748,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "K019-f8",
-        "etage": 3,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "spielwaren"
-      }
-    ],
-    "kette": "schwester"
-  },
-  {
-    "id": "K020",
-    "name": "Solingen Nebenlage",
-    "stadt": "Solingen",
-    "format": "schwester",
-    "lage": "b",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 1420,
-    "etagen": [
-      -1,
-      0,
-      1,
-      2,
-      3,
-      4
-    ],
-    "baujahr": 1963,
-    "fassade": 6,
-    "substanz": 40,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "K020-f1",
-        "etage": 0,
-        "qm": 824,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K020-f2",
-        "etage": 0,
-        "qm": 596,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K020-f3",
-        "etage": 1,
-        "qm": 824,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K020-f4",
-        "etage": 1,
-        "qm": 596,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K020-f5",
-        "etage": 2,
-        "qm": 824,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "K020-f6",
-        "etage": 2,
-        "qm": 596,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "K020-f7",
-        "etage": 3,
-        "qm": 824,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "K020-f8",
-        "etage": 3,
-        "qm": 596,
-        "konzept": "eigen",
-        "gruppe": "spielwaren"
-      },
-      {
-        "id": "K020-f9",
-        "etage": 4,
-        "qm": 824,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K020-f10",
-        "etage": 4,
-        "qm": 596,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      }
-    ],
-    "kette": "schwester"
-  },
-  {
-    "id": "K021",
-    "name": "Leverkusen Nebenlage",
-    "stadt": "Leverkusen",
-    "format": "schwester",
+    "nurDaten": true,
     "lage": "1a",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 900,
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1400,
     "etagen": [
-      -1,
-      0,
-      1,
-      2,
-      3
-    ],
-    "baujahr": 1970,
-    "fassade": 6,
-    "substanz": 51,
-    "status": "offen",
-    "flaechen": [
-      {
-        "id": "K021-f1",
-        "etage": 0,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K021-f2",
-        "etage": 0,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K021-f3",
-        "etage": 1,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K021-f4",
-        "etage": 1,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K021-f5",
-        "etage": 2,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "herren"
-      },
-      {
-        "id": "K021-f6",
-        "etage": 2,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "kinder"
-      },
-      {
-        "id": "K021-f7",
-        "etage": 3,
-        "qm": 522,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
-      },
-      {
-        "id": "K021-f8",
-        "etage": 3,
-        "qm": 378,
-        "konzept": "eigen",
-        "gruppe": "spielwaren"
-      }
-    ],
-    "kette": "schwester"
-  },
-  {
-    "id": "K022",
-    "name": "Paderborn Nebenlage",
-    "stadt": "Paderborn",
-    "format": "schwester",
-    "lage": "b",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 1030,
-    "etagen": [
-      -1,
       0,
       1,
       2,
       3,
       4
     ],
-    "baujahr": 1977,
+    "baujahr": 1929,
+    "fassade": 1,
+    "substanz": 27,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K065-f1",
+        "etage": 0,
+        "qm": 1484,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K065-f2",
+        "etage": 1,
+        "qm": 890,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K065-f3",
+        "etage": 2,
+        "qm": 519,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K065-f4",
+        "etage": 3,
+        "qm": 445,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K065-f5",
+        "etage": 4,
+        "qm": 742,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K065-f6",
+        "etage": 0,
+        "qm": 519,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K065-f7",
+        "etage": 1,
+        "qm": 1113,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K065-f8",
+        "etage": 2,
+        "qm": 445,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K065-f9",
+        "etage": 3,
+        "qm": 743,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K066",
+    "name": "Volkskauf Lemgo",
+    "stadt": "Lemgo",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1900,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 2006,
+    "fassade": 5,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K066-f1",
+        "etage": 0,
+        "qm": 2000,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K066-f2",
+        "etage": 1,
+        "qm": 1200,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K066-f3",
+        "etage": 2,
+        "qm": 700,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K066-f4",
+        "etage": 3,
+        "qm": 600,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K066-f5",
+        "etage": 4,
+        "qm": 1000,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K066-f6",
+        "etage": 0,
+        "qm": 700,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K066-f7",
+        "etage": 1,
+        "qm": 1500,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K066-f8",
+        "etage": 2,
+        "qm": 600,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K066-f9",
+        "etage": 3,
+        "qm": 1000,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K067",
+    "name": "Volkskauf Euskirchen",
+    "stadt": "Euskirchen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 3100,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1905,
+    "fassade": 3,
+    "substanz": 47,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K067-f1",
+        "etage": 0,
+        "qm": 1978,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K067-f2",
+        "etage": 1,
+        "qm": 1187,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K067-f3",
+        "etage": 2,
+        "qm": 692,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K067-f4",
+        "etage": 0,
+        "qm": 594,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K067-f5",
+        "etage": 1,
+        "qm": 989,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K067-f6",
+        "etage": 2,
+        "qm": 692,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K067-f7",
+        "etage": 0,
+        "qm": 1484,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K067-f8",
+        "etage": 1,
+        "qm": 594,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K067-f9",
+        "etage": 2,
+        "qm": 990,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K068",
+    "name": "Volkskauf Brühl Galerie am Fluss",
+    "stadt": "Brühl",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "center",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1800,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1916,
+    "fassade": 5,
+    "substanz": 33,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K068-f1",
+        "etage": 0,
+        "qm": 1570,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K068-f2",
+        "etage": 1,
+        "qm": 942,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K068-f3",
+        "etage": 2,
+        "qm": 549,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K068-f4",
+        "etage": 3,
+        "qm": 471,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K068-f5",
+        "etage": 0,
+        "qm": 785,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K068-f6",
+        "etage": 1,
+        "qm": 549,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K068-f7",
+        "etage": 2,
+        "qm": 1177,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K068-f8",
+        "etage": 3,
+        "qm": 471,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K068-f9",
+        "etage": 0,
+        "qm": 786,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K069",
+    "name": "Volkskauf Hürth City-Center",
+    "stadt": "Hürth",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "center",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1800,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1957,
+    "fassade": 2,
+    "substanz": 55,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K069-f1",
+        "etage": 0,
+        "qm": 1140,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K069-f2",
+        "etage": 1,
+        "qm": 684,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K069-f3",
+        "etage": 2,
+        "qm": 399,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K069-f4",
+        "etage": 0,
+        "qm": 342,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K069-f5",
+        "etage": 1,
+        "qm": 570,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K069-f6",
+        "etage": 2,
+        "qm": 399,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K069-f7",
+        "etage": 0,
+        "qm": 855,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K069-f8",
+        "etage": 1,
+        "qm": 342,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K069-f9",
+        "etage": 2,
+        "qm": 569,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K070",
+    "name": "Volkskauf Pulheim Arkaden",
+    "stadt": "Pulheim",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "center",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 2400,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1904,
     "fassade": 7,
-    "substanz": 16,
+    "substanz": 36,
     "status": "offen",
     "flaechen": [
       {
-        "id": "K022-f1",
+        "id": "K070-f1",
         "etage": 0,
-        "qm": 597,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K022-f2",
-        "etage": 0,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K022-f3",
-        "etage": 1,
-        "qm": 597,
+        "qm": 1548,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K022-f4",
+        "id": "K070-f2",
         "etage": 1,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K022-f5",
-        "etage": 2,
-        "qm": 597,
+        "qm": 929,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K022-f6",
+        "id": "K070-f3",
         "etage": 2,
-        "qm": 433,
+        "qm": 542,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K022-f7",
-        "etage": 3,
-        "qm": 597,
+        "id": "K070-f4",
+        "etage": 0,
+        "qm": 465,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K070-f5",
+        "etage": 1,
+        "qm": 774,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K070-f6",
+        "etage": 2,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K070-f7",
+        "etage": 0,
+        "qm": 1161,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
-        "id": "K022-f8",
-        "etage": 3,
-        "qm": 433,
+        "id": "K070-f8",
+        "etage": 1,
+        "qm": 465,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
-        "id": "K022-f9",
-        "etage": 4,
-        "qm": 597,
+        "id": "K070-f9",
+        "etage": 2,
+        "qm": 774,
         "konzept": "eigen",
-        "gruppe": "damen"
-      },
-      {
-        "id": "K022-f10",
-        "etage": 4,
-        "qm": 433,
-        "konzept": "eigen",
-        "gruppe": "wohnen"
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
-    "id": "K023",
-    "name": "Aachen Nebenlage",
-    "stadt": "Aachen",
+    "id": "K071",
+    "name": "Volkskauf Frechen Ring",
+    "stadt": "Frechen",
     "format": "schwester",
+    "nurDaten": true,
     "lage": "b",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 1160,
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1500,
     "etagen": [
-      -1,
       0,
       1,
       2,
       3
     ],
     "baujahr": 1959,
-    "fassade": 7,
-    "substanz": 27,
+    "fassade": 0,
+    "substanz": 34,
     "status": "offen",
     "flaechen": [
       {
-        "id": "K023-f1",
+        "id": "K071-f1",
         "etage": 0,
-        "qm": 673,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K023-f2",
-        "etage": 0,
-        "qm": 487,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K023-f3",
-        "etage": 1,
-        "qm": 673,
+        "qm": 1312,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K023-f4",
+        "id": "K071-f2",
         "etage": 1,
-        "qm": 487,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K023-f5",
-        "etage": 2,
-        "qm": 673,
+        "qm": 787,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K023-f6",
+        "id": "K071-f3",
         "etage": 2,
-        "qm": 487,
+        "qm": 459,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K023-f7",
+        "id": "K071-f4",
         "etage": 3,
-        "qm": 673,
+        "qm": 394,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K071-f5",
+        "etage": 0,
+        "qm": 656,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K071-f6",
+        "etage": 1,
+        "qm": 459,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K071-f7",
+        "etage": 2,
+        "qm": 984,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
-        "id": "K023-f8",
+        "id": "K071-f8",
         "etage": 3,
-        "qm": 487,
+        "qm": 394,
         "konzept": "eigen",
         "gruppe": "spielwaren"
+      },
+      {
+        "id": "K071-f9",
+        "etage": 0,
+        "qm": 655,
+        "konzept": "eigen",
+        "gruppe": "sport"
       }
-    ],
-    "kette": "schwester"
+    ]
   },
   {
-    "id": "K024",
-    "name": "Bielefeld Nebenlage",
-    "stadt": "Bielefeld",
+    "id": "K072",
+    "name": "Volkskauf Bergheim",
+    "stadt": "Bergheim",
     "format": "schwester",
-    "lage": "b",
-    "cluster": "grossstadt",
-    "grundflaecheQm": 1290,
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1800,
     "etagen": [
-      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1970,
+    "fassade": 7,
+    "substanz": 56,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K072-f1",
+        "etage": 0,
+        "qm": 1548,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K072-f2",
+        "etage": 1,
+        "qm": 929,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K072-f3",
+        "etage": 2,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K072-f4",
+        "etage": 3,
+        "qm": 465,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K072-f5",
+        "etage": 0,
+        "qm": 774,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K072-f6",
+        "etage": 1,
+        "qm": 542,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K072-f7",
+        "etage": 2,
+        "qm": 1161,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K072-f8",
+        "etage": 3,
+        "qm": 465,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K072-f9",
+        "etage": 0,
+        "qm": 774,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K073",
+    "name": "Volkskauf Kerpen",
+    "stadt": "Kerpen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1000,
+    "etagen": [
       0,
       1,
       2,
       3,
       4
     ],
-    "baujahr": 1966,
-    "fassade": 7,
-    "substanz": 38,
+    "baujahr": 1970,
+    "fassade": 4,
+    "substanz": 46,
     "status": "offen",
     "flaechen": [
       {
-        "id": "K024-f1",
+        "id": "K073-f1",
         "etage": 0,
-        "qm": 748,
-        "konzept": "eigen",
-        "gruppe": "beauty"
-      },
-      {
-        "id": "K024-f2",
-        "etage": 0,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "accessoires"
-      },
-      {
-        "id": "K024-f3",
-        "etage": 1,
-        "qm": 748,
+        "qm": 860,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K024-f4",
+        "id": "K073-f2",
         "etage": 1,
-        "qm": 542,
-        "konzept": "eigen",
-        "gruppe": "waesche"
-      },
-      {
-        "id": "K024-f5",
-        "etage": 2,
-        "qm": 748,
+        "qm": 516,
         "konzept": "eigen",
         "gruppe": "herren"
       },
       {
-        "id": "K024-f6",
+        "id": "K073-f3",
         "etage": 2,
-        "qm": 542,
+        "qm": 301,
         "konzept": "eigen",
         "gruppe": "kinder"
       },
       {
-        "id": "K024-f7",
+        "id": "K073-f4",
         "etage": 3,
-        "qm": 748,
+        "qm": 258,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K073-f5",
+        "etage": 4,
+        "qm": 430,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K073-f6",
+        "etage": 0,
+        "qm": 301,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K073-f7",
+        "etage": 1,
+        "qm": 645,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
-        "id": "K024-f8",
-        "etage": 3,
-        "qm": 542,
+        "id": "K073-f8",
+        "etage": 2,
+        "qm": 258,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
-        "id": "K024-f9",
-        "etage": 4,
-        "qm": 748,
+        "id": "K073-f9",
+        "etage": 3,
+        "qm": 431,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K074",
+    "name": "Volkskauf Troisdorf",
+    "stadt": "Troisdorf",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 2000,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1947,
+    "fassade": 4,
+    "substanz": 31,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K074-f1",
+        "etage": 0,
+        "qm": 1290,
         "konzept": "eigen",
         "gruppe": "damen"
       },
       {
-        "id": "K024-f10",
-        "etage": 4,
-        "qm": 542,
+        "id": "K074-f2",
+        "etage": 1,
+        "qm": 774,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K074-f3",
+        "etage": 2,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K074-f4",
+        "etage": 0,
+        "qm": 387,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K074-f5",
+        "etage": 1,
+        "qm": 645,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K074-f6",
+        "etage": 2,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K074-f7",
+        "etage": 0,
+        "qm": 968,
         "konzept": "eigen",
         "gruppe": "wohnen"
+      },
+      {
+        "id": "K074-f8",
+        "etage": 1,
+        "qm": 387,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K074-f9",
+        "etage": 2,
+        "qm": 645,
+        "konzept": "eigen",
+        "gruppe": "sport"
       }
+    ]
+  },
+  {
+    "id": "K075",
+    "name": "Volkskauf Sankt Augustin Neustadt",
+    "stadt": "Sankt Augustin",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 3100,
+    "etagen": [
+      0,
+      1,
+      2
     ],
-    "kette": "schwester"
+    "baujahr": 2001,
+    "fassade": 3,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K075-f1",
+        "etage": 0,
+        "qm": 2022,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K075-f2",
+        "etage": 1,
+        "qm": 1213,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K075-f3",
+        "etage": 2,
+        "qm": 708,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K075-f4",
+        "etage": 0,
+        "qm": 606,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K075-f5",
+        "etage": 1,
+        "qm": 1011,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K075-f6",
+        "etage": 2,
+        "qm": 708,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K075-f7",
+        "etage": 0,
+        "qm": 1516,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K075-f8",
+        "etage": 1,
+        "qm": 606,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K075-f9",
+        "etage": 2,
+        "qm": 1010,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K076",
+    "name": "Volkskauf Hennef City-Center",
+    "stadt": "Hennef",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "center",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1300,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 2005,
+    "fassade": 5,
+    "substanz": 40,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K076-f1",
+        "etage": 0,
+        "qm": 1355,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K076-f2",
+        "etage": 1,
+        "qm": 813,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K076-f3",
+        "etage": 2,
+        "qm": 474,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K076-f4",
+        "etage": 3,
+        "qm": 406,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K076-f5",
+        "etage": 4,
+        "qm": 677,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K076-f6",
+        "etage": 0,
+        "qm": 474,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K076-f7",
+        "etage": 1,
+        "qm": 1016,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K076-f8",
+        "etage": 2,
+        "qm": 406,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K076-f9",
+        "etage": 3,
+        "qm": 679,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K077",
+    "name": "Volkskauf Siegburg Bahnhofstraße",
+    "stadt": "Siegburg",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 2300,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1904,
+    "fassade": 1,
+    "substanz": 15,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K077-f1",
+        "etage": 0,
+        "qm": 1978,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K077-f2",
+        "etage": 1,
+        "qm": 1187,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K077-f3",
+        "etage": 2,
+        "qm": 692,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K077-f4",
+        "etage": 3,
+        "qm": 594,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K077-f5",
+        "etage": 0,
+        "qm": 989,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K077-f6",
+        "etage": 1,
+        "qm": 692,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K077-f7",
+        "etage": 2,
+        "qm": 1484,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K077-f8",
+        "etage": 3,
+        "qm": 594,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K077-f9",
+        "etage": 0,
+        "qm": 990,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K078",
+    "name": "Volkskauf Gummersbach Neustadt",
+    "stadt": "Gummersbach",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1300,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1968,
+    "fassade": 0,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K078-f1",
+        "etage": 0,
+        "qm": 1097,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K078-f2",
+        "etage": 1,
+        "qm": 658,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K078-f3",
+        "etage": 2,
+        "qm": 384,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K078-f4",
+        "etage": 3,
+        "qm": 329,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K078-f5",
+        "etage": 0,
+        "qm": 548,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K078-f6",
+        "etage": 1,
+        "qm": 384,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K078-f7",
+        "etage": 2,
+        "qm": 823,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K078-f8",
+        "etage": 3,
+        "qm": 329,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K078-f9",
+        "etage": 0,
+        "qm": 548,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K079",
+    "name": "Volkskauf Remscheid Am Wall",
+    "stadt": "Remscheid",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1300,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1936,
+    "fassade": 1,
+    "substanz": 20,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K079-f1",
+        "etage": 0,
+        "qm": 1097,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K079-f2",
+        "etage": 1,
+        "qm": 658,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K079-f3",
+        "etage": 2,
+        "qm": 384,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K079-f4",
+        "etage": 3,
+        "qm": 329,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K079-f5",
+        "etage": 0,
+        "qm": 548,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K079-f6",
+        "etage": 1,
+        "qm": 384,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K079-f7",
+        "etage": 2,
+        "qm": 823,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K079-f8",
+        "etage": 3,
+        "qm": 329,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K079-f9",
+        "etage": 0,
+        "qm": 548,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K080",
+    "name": "Volkskauf Bergisch Gladbach Arkaden",
+    "stadt": "Bergisch Gladbach",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "center",
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1520,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "baujahr": 2007,
+    "fassade": 7,
+    "substanz": 60,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K080-f1",
+        "etage": 0,
+        "qm": 2086,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K080-f2",
+        "etage": 1,
+        "qm": 1252,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K080-f3",
+        "etage": 2,
+        "qm": 730,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K080-f4",
+        "etage": 3,
+        "qm": 626,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K080-f5",
+        "etage": 4,
+        "qm": 1043,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K080-f6",
+        "etage": 5,
+        "qm": 730,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K080-f7",
+        "etage": 0,
+        "qm": 1565,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K080-f8",
+        "etage": 1,
+        "qm": 626,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K080-f9",
+        "etage": 2,
+        "qm": 1042,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K081",
+    "name": "Volkskauf Ratingen",
+    "stadt": "Ratingen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "West",
+    "grundflaecheQm": 1400,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1904,
+    "fassade": 0,
+    "substanz": 46,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K081-f1",
+        "etage": 0,
+        "qm": 882,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K081-f2",
+        "etage": 1,
+        "qm": 529,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K081-f3",
+        "etage": 2,
+        "qm": 309,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K081-f4",
+        "etage": 0,
+        "qm": 265,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K081-f5",
+        "etage": 1,
+        "qm": 441,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K081-f6",
+        "etage": 2,
+        "qm": 309,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K081-f7",
+        "etage": 0,
+        "qm": 661,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K081-f8",
+        "etage": 1,
+        "qm": 265,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K081-f9",
+        "etage": 2,
+        "qm": 439,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K082",
+    "name": "Volkskauf Meißen",
+    "stadt": "Meißen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "Ost",
+    "grundflaecheQm": 1500,
+    "etagen": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baujahr": 1900,
+    "fassade": 3,
+    "substanz": 18,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K082-f1",
+        "etage": 0,
+        "qm": 1570,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K082-f2",
+        "etage": 1,
+        "qm": 942,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K082-f3",
+        "etage": 2,
+        "qm": 549,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K082-f4",
+        "etage": 3,
+        "qm": 471,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K082-f5",
+        "etage": 4,
+        "qm": 785,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K082-f6",
+        "etage": 0,
+        "qm": 549,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K082-f7",
+        "etage": 1,
+        "qm": 1177,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K082-f8",
+        "etage": 2,
+        "qm": 471,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K082-f9",
+        "etage": 3,
+        "qm": 786,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K083",
+    "name": "Volkskauf Bernburg",
+    "stadt": "Bernburg",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "Ost",
+    "grundflaecheQm": 2900,
+    "etagen": [
+      0,
+      1,
+      2
+    ],
+    "baujahr": 1968,
+    "fassade": 0,
+    "substanz": 23,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K083-f1",
+        "etage": 0,
+        "qm": 1892,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K083-f2",
+        "etage": 1,
+        "qm": 1135,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K083-f3",
+        "etage": 2,
+        "qm": 662,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K083-f4",
+        "etage": 0,
+        "qm": 568,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K083-f5",
+        "etage": 1,
+        "qm": 946,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K083-f6",
+        "etage": 2,
+        "qm": 662,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K083-f7",
+        "etage": 0,
+        "qm": 1419,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K083-f8",
+        "etage": 1,
+        "qm": 568,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K083-f9",
+        "etage": 2,
+        "qm": 948,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K084",
+    "name": "Volkskauf Bitterfeld-Wolfen",
+    "stadt": "Bitterfeld-Wolfen",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "Ost",
+    "grundflaecheQm": 1800,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1935,
+    "fassade": 0,
+    "substanz": 15,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K084-f1",
+        "etage": 0,
+        "qm": 1505,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K084-f2",
+        "etage": 1,
+        "qm": 903,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K084-f3",
+        "etage": 2,
+        "qm": 527,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K084-f4",
+        "etage": 3,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K084-f5",
+        "etage": 0,
+        "qm": 753,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K084-f6",
+        "etage": 1,
+        "qm": 527,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K084-f7",
+        "etage": 2,
+        "qm": 1129,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K084-f8",
+        "etage": 3,
+        "qm": 452,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K084-f9",
+        "etage": 0,
+        "qm": 752,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K085",
+    "name": "Volkskauf Eberswalde Neustadt",
+    "stadt": "Eberswalde",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "b",
+    "cluster": "mittelstadt",
+    "region": "Ost",
+    "grundflaecheQm": 1500,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 1959,
+    "fassade": 5,
+    "substanz": 45,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K085-f1",
+        "etage": 0,
+        "qm": 1312,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K085-f2",
+        "etage": 1,
+        "qm": 787,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K085-f3",
+        "etage": 2,
+        "qm": 459,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K085-f4",
+        "etage": 3,
+        "qm": 394,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K085-f5",
+        "etage": 0,
+        "qm": 656,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K085-f6",
+        "etage": 1,
+        "qm": 459,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K085-f7",
+        "etage": 2,
+        "qm": 984,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K085-f8",
+        "etage": 3,
+        "qm": 394,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K085-f9",
+        "etage": 0,
+        "qm": 655,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
+  },
+  {
+    "id": "K086",
+    "name": "Volkskauf Oranienburg",
+    "stadt": "Oranienburg",
+    "format": "schwester",
+    "nurDaten": true,
+    "lage": "1a",
+    "cluster": "mittelstadt",
+    "region": "Ost",
+    "grundflaecheQm": 1200,
+    "etagen": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "baujahr": 2000,
+    "fassade": 4,
+    "substanz": 18,
+    "status": "offen",
+    "flaechen": [
+      {
+        "id": "K086-f1",
+        "etage": 0,
+        "qm": 1032,
+        "konzept": "eigen",
+        "gruppe": "damen"
+      },
+      {
+        "id": "K086-f2",
+        "etage": 1,
+        "qm": 619,
+        "konzept": "eigen",
+        "gruppe": "herren"
+      },
+      {
+        "id": "K086-f3",
+        "etage": 2,
+        "qm": 361,
+        "konzept": "eigen",
+        "gruppe": "kinder"
+      },
+      {
+        "id": "K086-f4",
+        "etage": 3,
+        "qm": 310,
+        "konzept": "eigen",
+        "gruppe": "beauty"
+      },
+      {
+        "id": "K086-f5",
+        "etage": 0,
+        "qm": 516,
+        "konzept": "eigen",
+        "gruppe": "accessoires"
+      },
+      {
+        "id": "K086-f6",
+        "etage": 1,
+        "qm": 361,
+        "konzept": "eigen",
+        "gruppe": "waesche"
+      },
+      {
+        "id": "K086-f7",
+        "etage": 2,
+        "qm": 774,
+        "konzept": "eigen",
+        "gruppe": "wohnen"
+      },
+      {
+        "id": "K086-f8",
+        "etage": 3,
+        "qm": 310,
+        "konzept": "eigen",
+        "gruppe": "spielwaren"
+      },
+      {
+        "id": "K086-f9",
+        "etage": 0,
+        "qm": 517,
+        "konzept": "eigen",
+        "gruppe": "sport"
+      }
+    ]
   }
 ]

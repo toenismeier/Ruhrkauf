@@ -33,10 +33,15 @@
     "symbol": "node symbol.js",
     "smoke:app": "node tests/app-pwa-smoke.cjs",
     "marktbeobachtung:bilder": "node tests/marktbeobachtung-bilder.cjs",
+    "massstab:geografie": "node pruef-stadt-geografie.js",
+    "massstab:standorte": "node pruef-standorte-massstab.js",
+    "massstab:kopien": "node pruef-kopien.js",
+    "massstab:gestaltung": "node pruef-alle-gestaltung.js",
     "smoke:reise": "npm run build && node tests/q23-reise-mobile.cjs",
     "hauspins:pruefen": "node pruef-hauspins.js",
     "hausbesuch:laufwege:unit": "node tests/hausbesuch-navigation.cjs",
-    "hausbesuch:laufwege": "node tests/hausbesuch-navigation.cjs && node tests/hausbesuch-laufwege.cjs"
+    "hausbesuch:laufwege": "node tests/hausbesuch-navigation.cjs && node tests/hausbesuch-laufwege.cjs",
+    "massstab:export": "cd ../engine && npx tsx scripts/haeuser-export.ts && cd ../render && node fassaden-verteilen.js"
   },
   "keywords": [],
   "author": "",

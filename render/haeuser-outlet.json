@@ -2307,7 +2307,7 @@
       1
     ],
     "baujahr": 1998,
-    "fassade": 6,
+    "fassade": 7,
     "substanz": 85,
     "status": "offen",
     "flaechen": [
@@ -2654,7 +2654,7 @@
       0
     ],
     "baujahr": 2002,
-    "fassade": 2,
+    "fassade": 3,
     "substanz": 54,
     "status": "offen",
     "flaechen": [
@@ -3353,7 +3353,7 @@
       2
     ],
     "baujahr": 1971,
-    "fassade": 2,
+    "fassade": 3,
     "substanz": 80,
     "status": "offen",
     "flaechen": [
@@ -3558,7 +3558,7 @@
     "lage": "b",
     "cluster": "grossstadt",
     "region": "Mitte",
-    "grundflaecheQm": 2400,
+    "grundflaecheQm": 1325,
     "etagen": [
       0,
       1
@@ -3628,7 +3628,7 @@
     "lage": "b",
     "cluster": "grossstadt",
     "region": "Ost",
-    "grundflaecheQm": 1600,
+    "grundflaecheQm": 1300,
     "etagen": [
       0,
       1,
@@ -3840,7 +3840,7 @@
     "lage": "b",
     "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 2500,
+    "grundflaecheQm": 2150,
     "etagen": [
       0,
       1
@@ -3981,7 +3981,7 @@
     "lage": "b",
     "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 2400,
+    "grundflaecheQm": 1425,
     "etagen": [
       0,
       1
@@ -4263,7 +4263,7 @@
     "lage": "b",
     "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1900,
+    "grundflaecheQm": 1825,
     "etagen": [
       0,
       1
@@ -4404,7 +4404,7 @@
     "lage": "b",
     "cluster": "grossstadt",
     "region": "Mitte",
-    "grundflaecheQm": 1800,
+    "grundflaecheQm": 1700,
     "etagen": [
       0,
       1
@@ -4545,7 +4545,7 @@
     "lage": "b",
     "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 2300,
+    "grundflaecheQm": 1475,
     "etagen": [
       0,
       1
