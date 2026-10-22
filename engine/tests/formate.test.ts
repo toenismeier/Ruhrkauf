@@ -5,9 +5,9 @@ import { formateProjekteWoche, formateZufall } from '../src/formate';
 jest.setTimeout(120_000);
 
 describe('Engine-Formate Volkskauf und FUNDUS', () => {
-  test('560 Häuser, 86 aktive Volkskauf und 66 aktive FUNDUS mit Filial-GuV',()=>{
+  test('561 Häuser, 86 aktive Volkskauf und 66 aktive FUNDUS mit Filial-GuV',()=>{
     const s=neuesSpiel(1);
-    expect(s.haeuser).toHaveLength(560);
+    expect(s.haeuser).toHaveLength(561);
     expect(s.haeuser.filter(h=>h.format==='schwester'&&!h.nurDaten)).toHaveLength(86);
     expect(s.haeuser.filter(h=>h.format==='outlet'&&!h.nurDaten)).toHaveLength(66);
     expect(s.haeuser.filter(h=>h.format==='outlet').every(h=>h.flaechen.every(f=>f.konzept==='offprice'))).toBe(true);

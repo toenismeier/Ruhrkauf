@@ -265,7 +265,7 @@
   var TREND_LAGE = { "1a": 0.02, b: 0.035, center: 0.01, rand: 0.015 };
   var MARKTMIETE = { "1a": 0.1, b: 0.075, center: 0.11, rand: 0.065 };
   var STAEDTE = [
-    ["Berlin", "Ost", "metropole", 0.97, { hartwig: 5, premium: 1, volkskauf: 0, sport: 2, fundus: 1 }],
+    ["Berlin", "Ost", "metropole", 0.97, { hartwig: 5, premium: 2, volkskauf: 0, sport: 2, fundus: 1 }],
     ["Hamburg", "Nord", "metropole", 1.1, { hartwig: 5, premium: 1, volkskauf: 1, sport: 2, fundus: 0 }],
     ["M\xFCnchen", "S\xFCd", "metropole", 1.3, { hartwig: 5, premium: 1, volkskauf: 1, sport: 2, fundus: 0 }],
     ["K\xF6ln", "West", "metropole", 1.05, { hartwig: 5, premium: 0, volkskauf: 2, sport: 2, fundus: 0 }],
@@ -489,8 +489,9 @@
   var PREMIUM_HAEUSER = [
     { id: "P001", schluessel: "P001", rang: 1, name: "Palais Hartwig", stadt: "Berlin" },
     { id: "P002", schluessel: "P002", rang: 1, name: "Hartwig am Hofgarten", stadt: "M\xFCnchen" },
-    { id: "P003", schluessel: "P003", rang: 2, name: "Alsterhaus Hartwig", stadt: "Hamburg" },
-    { id: "P004", schluessel: "P004", rang: 3, name: "Hartwig K\xF6nigsallee", stadt: "D\xFCsseldorf" }
+    { id: "P003", schluessel: "P003", rang: 2, name: "Hartwig am Jungfernstieg", stadt: "Hamburg" },
+    { id: "P004", schluessel: "P004", rang: 3, name: "Hartwig am Heine-Platz", stadt: "D\xFCsseldorf" },
+    { id: "P005", schluessel: "P005", rang: 2, name: "Hartwig Leipziger Platz", stadt: "Berlin" }
   ];
   var STADT_REGIONEN = Object.freeze(Object.fromEntries(STAEDTE.map(([name2, region]) => [name2, region])));
   function stadtRegion(name2) {
@@ -4209,7 +4210,8 @@
     P001: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.012, mietQuote: 0.057 },
     P002: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.016, mietQuote: 0.057 },
     P003: { qm: 18e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.06 },
-    P004: { qm: 14e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.041, mietQuote: 0.065 }
+    P004: { qm: 14e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.041, mietQuote: 0.065 },
+    P005: { qm: 2e4, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.06 }
   };
   var premiumProfil = (id) => id && Object.prototype.hasOwnProperty.call(PREMIUM_PROFIL, id) ? PREMIUM_PROFIL[id] : void 0;
   var EURO_JE_QM_WOCHE = 40;
@@ -4221,7 +4223,7 @@
     spielwaren: 0.55,
     wohnen: 0.6
   };
-  var IMMOBILIE = { P001: 9e8, P002: 9e8, P003: 6e8, P004: 145e6 };
+  var IMMOBILIE = { P001: 9e8, P002: 9e8, P003: 6e8, P004: 145e6, P005: 65e7 };
   var KAEUFER = [
     { typ: "Luxusgruppe", name: "Luxusgruppe Valens" },
     { typ: "Family Office", name: "Family Office Merian" },
@@ -4269,11 +4271,11 @@
     }
   }
   function kennzeichnePremium(haeuser) {
-    const vorhanden = PREMIUM_HAEUSER.every((p2) => haeuser.some((h3) => h3.premiumSchluessel === p2.id || h3.klasse === "premium" && h3.stadt === p2.stadt));
-    if (vorhanden) {
-      for (const p2 of PREMIUM_HAEUSER) {
-        const h3 = haeuser.find((x) => x.premiumSchluessel === p2.id || x.klasse === "premium" && x.stadt === p2.stadt);
-        if (!h3) continue;
+    const vorhanden = haeuser.filter((h3) => h3.klasse === "premium" && h3.premiumSchluessel);
+    if (vorhanden.length) {
+      for (const h3 of vorhanden) {
+        const p2 = PREMIUM_HAEUSER.find((x) => x.id === h3.premiumSchluessel);
+        if (!p2) throw new Error(`Unbekannter Premiumschl\xFCssel: ${h3.premiumSchluessel}`);
         h3.klasse = "premium";
         h3.premiumSchluessel = p2.id;
         h3.name = p2.name;
@@ -14024,7 +14026,9 @@
     A: 895e7 * (45 * 48) / (45 * 48 + 115 * 30 + 200 * 17),
     B: 895e7 * (115 * 30) / (45 * 48 + 115 * 30 + 200 * 17),
     C: 895e7 * (200 * 17) / (45 * 48 + 115 * 30 + 200 * 17),
-    premium: 82e7,
+    // P005 erhöht den alten Anker um 20.000 m² × 1,52 relativ zur Leistung von P001–P004.
+    // Andere Klassen bleiben bei ihren Referenzwerten; keine Gutschrift in der GuV.
+    premium: Math.round(82e7 * (1 + 2e4 * 1.52 / (3e4 * 1.55 * 2 + 18e3 * 1.52 + 14e3 * 1.45))),
     sport: 545e6
   };
   var PREMIUM_PERSONALQUOTE = 0.13;
@@ -14093,7 +14097,7 @@
   var STANDARD_SZENARIO = {
     warenhaeuser: 360,
     sporthaeuser: 44,
-    premiumhaeuser: 4,
+    premiumhaeuser: 5,
     schwesterhaeuser: 86,
     outlethaeuser: 66,
     // Liquidität analog zum 3,3-fachen Umsatz gegenüber dem alten 130er-Maßstab.
@@ -14393,10 +14397,12 @@
       haeuser.push(bauHaus(h3, haeuser.filter((x) => x.format === "warenhaus").length + 1, stadt, region, cluster, kk, "warenhaus", sz, r3.nr, { hausklasse: a2.has(r3) ? "A" : b2.has(r3) ? "B" : "C", lage }));
     }
     let p2 = 0;
+    const p005Rng = { rng: (seed ^ 187818405) >>> 0 };
     for (const premium2 of PREMIUM_HAEUSER) {
       if (sz.premiumDeaktiviert || p2 >= (sz.premiumhaeuser ?? 0)) break;
       const [stadt, region, cluster, kk] = stadtVon.get(premium2.stadt);
-      haeuser.push(bauHaus(h3, sz.warenhaeuser + ++p2, stadt, region, cluster, kk, "warenhaus", sz, 1, { premiumSchluessel: premium2.schluessel, lage: "1a" }));
+      const quelle2 = premium2.schluessel === "P005" ? p005Rng : h3;
+      haeuser.push(bauHaus(quelle2, sz.warenhaeuser + ++p2, stadt, region, cluster, kk, "warenhaus", sz, 1, { premiumSchluessel: premium2.schluessel, lage: "1a" }));
     }
     let si = 0;
     for (const r3 of sport) {
@@ -76076,20 +76082,21 @@
   var PREMIUM_NAMEN = Object.freeze({
     P001: "Palais Hartwig",
     P002: "Hartwig am Hofgarten",
-    P003: "Alsterhaus Hartwig",
-    P004: "Hartwig K\xF6nigsallee"
+    P003: "Hartwig am Jungfernstieg",
+    P004: "Hartwig am Heine-Platz",
+    P005: "Hartwig Leipziger Platz"
   });
   var PREMIUM_MESSING = "#b8955a";
   var BRONZE2 = "#665341";
   var KUPFER2 = "#5f8f7a";
   var DUNKEL = "#253b34";
-  var STEIN = { P001: "#e2d5c1", P002: "#e5d2b8", P003: "#eeeae0", P004: "#dad5cb" };
+  var STEIN = { P001: "#e2d5c1", P002: "#e5d2b8", P003: "#eeeae0", P004: "#dad5cb", P005: "#cdbba8" };
   var GLAS5 = "#608394";
   var GLAS_HELL3 = "#8bb2bd";
   function premiumMasse(haus2) {
     const m = masse(haus2);
     const p2 = haus2.premiumSchluessel;
-    return { w: m.w, d: m.d, n: Math.max(p2 === "P001" ? 6 : 5, m.n), H: Math.max(p2 === "P001" ? 6 : 5, m.n) * 4.45 + 6.6 };
+    return { w: m.w, d: m.d, n: Math.max(p2 === "P001" || p2 === "P002" ? 6 : 5, m.n), H: Math.max(p2 === "P001" ? 6 : 5, m.n) * 4.45 + 6.6 };
   }
   function zylinder(S, x, z4, r3, y, h3, f11, seg = 16, oben = r3) {
     const geo = new three_module_exports.CylinderGeometry(oben, r3, h3, seg).translate(x, y + h3 / 2, z4);
@@ -76185,7 +76192,7 @@
       zylinder(S, xx, bz, 1.8, y + 3.05, 0.18, ["#ebddc5", "#f6f1e7"][i % 2], 10, 0.3);
     }
   }
-  function variante(S, typ, x, z4, w2, d3, y, r3) {
+  function variante(S, typ, x, z4, w2, d3, y, r3, n2) {
     if (typ === "P001") {
       const cx = x + w2 - 3, cz = z4 + d3 - 3;
       zylinder(S, cx, cz, 4.1, 3, y + 9.2 - 3, STEIN.P001, 22);
@@ -76214,6 +76221,27 @@
       zylinder(S, cx, cz, radius, y, 6.2, STEIN.P003, 28);
       kuppel2(S, cx, cz, radius, y + 6.2, KUPFER2);
       for (let u = 3; u < w2 - 3; u += 5.5) S.box(0.9, 5.2, 0.85, x + u, 3.1, z4 + d3 + 0.65, "#f5f1e9");
+    } else if (typ === "P005") {
+      const sand = "#c3ae91", dunkel4 = "#4d4945", glas3 = "#7c9fa5";
+      for (const u of [w2 * 0.29, w2 * 0.71]) {
+        S.box(6.8, 5.3, 0.24, x + u, 3, z4 + d3 + 0.47, glas3);
+        S.box(7.4, 0.46, 1.25, x + u, 5.85, z4 + d3 + 0.68, dunkel4);
+        for (const du of [-2.8, 2.8]) S.box(0.35, 6.1, 0.95, x + u + du, 3.25, z4 + d3 + 0.85, sand);
+      }
+      S.box(w2 * 0.31, n2 * 4.45, 1.5, x + w2 * 0.5, 6.6 + n2 * 4.45 / 2, z4 + d3 + 0.7, sand);
+      for (let i = 0; i < n2; i++) {
+        const yy = 8.2 + i * 4.45;
+        for (let j3 = -2; j3 <= 2; j3++) S.box(w2 * 0.046, 2.5, 0.22, x + w2 / 2 + j3 * w2 * 0.054, yy, z4 + d3 + 1.55, glas3);
+        S.box(w2 * 0.33, 0.35, 1.9, x + w2 / 2, 6.6 + (i + 1) * 4.45, z4 + d3 + 0.85, dunkel4);
+      }
+      S.box(w2 * 0.86, 1.4, d3 * 0.69, x + w2 / 2, y + 0.8, z4 + d3 * 0.49, sand);
+      S.box(w2 * 0.66, 2.3, d3 * 0.5, x + w2 / 2, y + 2.65, z4 + d3 * 0.46, dunkel4);
+      S.box(w2 * 0.44, 2, d3 * 0.38, x + w2 / 2, y + 4.8, z4 + d3 * 0.46, sand);
+      S.box(w2 * 0.33, 2.1, d3 * 0.27, x + w2 / 2, y + 6.75, z4 + d3 * 0.46, glas3);
+      for (const seite2 of [-1, 1]) S.box(w2 * 0.34, 0.25, 0.45, x + w2 / 2, y + 7.93, z4 + d3 * (0.46 + seite2 * 0.135), PREMIUM_MESSING);
+      S.box(w2 * 0.38, 0.5, 3.2, x + w2 / 2, 5.8, z4 + d3 + 2.1, dunkel4);
+      S.box(w2 * 0.39, 0.2, 3.3, x + w2 / 2, 6.17, z4 + d3 + 2.1, PREMIUM_MESSING);
+      for (let u = 0; u < 5; u++) S.box(0.34, 5.2, 0.34, x + w2 * (0.35 + u * 0.075), 2.6, z4 + d3 + 3.1, sand);
     } else {
       S.box(w2 + 0.7, 1.1, 1.2, x + w2 / 2, y - 0.6, z4 + d3 + 0.15, "#c1b8ac");
       S.box(13, 0.9, 5, x + w2 / 2, 5.3, z4 + d3 + 2.4, BRONZE2);
@@ -76308,7 +76336,7 @@
         }
       }
     }
-    const ziel = typ === "P001" ? 6400 : typ === "P002" ? 5900 : typ === "P003" ? 5600 : 5100;
+    const ziel = typ === "P001" ? 6400 : typ === "P002" ? 5900 : typ === "P003" ? 5600 : typ === "P005" ? 5350 : 5100;
     const a2 = Math.max(8, Math.floor(w2 / 1.55)), b2 = Math.max(8, Math.floor(d3 / 1.55));
     let t = 0;
     while (S.anzahl - start < ziel && t < 12e3) {
@@ -76387,7 +76415,7 @@
     S.box(lichtW, 1, seitenD + 0.5, mitteX, H + 0.5, z4 + d3 - seitenD / 2, dach3);
     glasdach(S, x, z4, w2, d3, H + 1, typ);
     vordach2(S, x, z4, w2, d3);
-    variante(S, typ, x, z4, w2, d3, H + 1, r3);
+    variante(S, typ, x, z4, w2, d3, H + 1, r3, n2);
     if (typ === "P001" && !opt.verkaufsprozess && !opt.insolvenz && haus2.status !== "verkauft") {
       for (let i = 0; i < 4; i++) {
         const fx = x + w2 * (0.16 + i * 0.22), fz = z4 + d3 - 1.5;
@@ -76402,7 +76430,7 @@
     kostbareFassade(S, typ, x, z4, w2, d3, n2, H, start);
     strassenleben(S, x, z4, w2, d3, r3, { ...opt, insolvenz: haus2.status === "insolvenz" });
     statusBau(S, scene2, typ, x, z4, w2, d3, H, zust, haus2, opt);
-    const hoehe = H + (zust.hat("umbau") ? 20 : typ === "P003" ? 13 : typ === "P001" ? 16 : typ === "P002" ? 12 : 6);
+    const hoehe = H + (zust.hat("umbau") ? 20 : typ === "P003" ? 13 : typ === "P001" ? 16 : typ === "P002" ? 12 : typ === "P005" ? 10 : 6);
     return { hoehe, w: w2, d: d3, familie: "premium", teile: S.anzahl - start, status: zust.status };
   }
 
@@ -77467,7 +77495,7 @@
     },
     {
       id: "W006",
-      name: "Alsterhaus Hartwig",
+      name: "Hartwig am Jungfernstieg",
       stadt: "Hamburg",
       format: "warenhaus",
       lage: "1a",
@@ -79837,7 +79865,7 @@
     },
     {
       id: "W016",
-      name: "Hartwig K\xF6nigsallee",
+      name: "Hartwig am Heine-Platz",
       stadt: "D\xFCsseldorf",
       format: "warenhaus",
       lage: "1a",
@@ -99603,7 +99631,7 @@
         return e;
       },
       "slot:premium": (S, scene2, p2) => {
-        const h3 = HAUS.get(p2.standort?.id) ?? haeuser_default.find((q2) => q2.klasse === "premium" && q2.stadt === p2.standort?.stadt);
+        const h3 = HAUS.get(p2.standort?.id);
         if (!h3) return { hoehe: 0 };
         const f11 = fussabdruck(h3), { x, z: z4 } = imSlot(p2, f11.w, f11.d);
         p2.haus = h3;
@@ -130118,7 +130146,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "39cb898" : "Entwicklung";
+  var version = () => true ? "c4d6370" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
