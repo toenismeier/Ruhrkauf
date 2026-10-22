@@ -744,8 +744,8 @@ function cockpitZeigen() {
     .filter(([id]) => id === 'alle' || c.formate.some((x) => x.format === id && x.haeuser))
     .map(([id, name]) => '<option value="' + id + '"' + (id === cockpitFormat ? ' selected' : '') + '>' + name + '</option>').join('') + '</select>';
   $('cockpit').innerHTML = [
-    kachel('Cash', geld(c.cash), c.cash < 0 ? 'rot' : ''),
-    kachel('Kreditrahmen frei', geld(c.kreditFrei), c.kreditFrei < 2e7 ? 'rot' : ''),
+    kachel('Cash', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? 'rot' : ''),
+    kachel('Kreditrahmen frei', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? 'rot' : ''),
     fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : 'noch offen', !s.historie.length ? '' : fx.ebitda < 0 ? 'rot' : 'gruen')
       : kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
     kachel('Umsatz · ' + auswahl, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : 'noch offen'),
@@ -802,7 +802,7 @@ function woche(mitBot = false, test = false) {
   const m = { woche: s.woche, engineMs: Math.round(t1 - t0), neuBauMs: Math.round(t2 - t1), neu: geaendert };
   messung.wocheMs.push(m);
   automatischSpeichern();
-  if ($('spiel-ruhestand')) $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende;
+  if ($('spiel-ruhestand')) $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende || s.szenario?.id === 'sandkasten';
   if (s.ende) setTimeout(() => { wochenbericht?.zu(); spielende?.anzeigen(); }, 0);
   return m;
 }
@@ -1290,7 +1290,7 @@ $('zeitung').addEventListener('click', () => oeffneModul(zt));
 spielende = spielendeModul({
   E, s: () => s,
   neuesSpiel: () => { schliessePanel(); menueZu(); startZeigen(); },
-  fortgesetzt: () => { cockpitZeigen(); $('spiel-ruhestand').hidden = s.woche < 260; automatischSpeichern(); },
+  fortgesetzt: () => { cockpitZeigen(); $('spiel-ruhestand').hidden = s.woche < 260 || s.szenario?.id === 'sandkasten'; automatischSpeichern(); },
   fehler: (text) => meldung(text, false),
 });
 $('spiel-bestenliste').addEventListener('click', () => { menueZu(); spielende.bestenliste(); });
@@ -1575,7 +1575,7 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
     const titel = (sp) => [...sp.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').replace(/\s*·\s*$/, '').trim();
     const kz = (wurzel) => new Map([...wurzel.querySelectorAll('.kz')].map((k) => [titel(k.querySelector('span')), k.querySelector('b').textContent]));
     const ck = kz($('cockpit'));
-    const soll = { Cash: geld(c.cash), 'Kreditrahmen frei': geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
+    const soll = { Cash: c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), 'Kreditrahmen frei': c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
     if (s.historie.length) Object.assign(soll, { 'EBITDA 13 Wochen': geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
     for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
     if ($('kw').textContent !== `KW ${c.kw} / ${c.jahr}`) fehler.push(`KW: ${$('kw').textContent}`);
@@ -1706,7 +1706,7 @@ async function spielFortsetzen(platz = 'autosave') {
     window.bereit = true;
     $('lade').classList.remove('an');
     einfuehrung.spielStart(true);
-    $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende;
+    $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende || s.szenario?.id === 'sandkasten';
     if (s.ende || s.phase === 'zerschlagen') spielende.anzeigen();
     else meldung('Spielstand fortgesetzt.');
     return true;
