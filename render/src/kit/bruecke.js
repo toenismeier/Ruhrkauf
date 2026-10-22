@@ -33,6 +33,13 @@ import { hatAbholstation } from '../../../engine/src/ecommerce.ts';
 import { abholstation } from './abholstation.js';
 import { technikAufDach } from './umbau-aussen.js';
 import schwesterHaeuser from '../../haeuser-schwester.json';
+import exportHaeuser from '../../haeuser.json';
+// Maßstab: Fassadenvariante aus dem Export (fassaden-verteilen.js, keine Kopien unter 50 km), für alle Spielstände gleich
+const FASSADE = new Map(exportHaeuser.map((h) => [h.id, h.fassade]));
+/** #31: Fassadenindex und Familie aus dem verteilten Export (50-km-Regel), Q21 übernimmt beides. */
+const EXPORT_FAMILIE = new Map(exportHaeuser.filter((h) => h.familie != null).map((h) => [h.id, h.familie]));
+const mitExportFassade = (liste) => liste.map((h) => (FASSADE.has(h.id) && (FASSADE.get(h.id) !== h.fassade || EXPORT_FAMILIE.has(h.id))
+  ? { ...h, fassade: FASSADE.get(h.id), ...(EXPORT_FAMILIE.has(h.id) ? { familie: EXPORT_FAMILIE.get(h.id) } : {}) } : h));
 import outletHaeuser from '../../haeuser-outlet.json';
 import './hq.js';   // meldet 'slot:hq' an
 
@@ -155,17 +162,19 @@ function bauZustand(z) { const { schluessel, ...rest } = z; return rest; }
 export function stadtEintragAusSpiel(s, name) {
   const d = stadtDaten(name);
   if (!d) return undefined;
-  const verteilung = warenhausVielfalt(s.haeuser.filter((h) => h.stadt === name));
-  const eigene = s.haeuser.filter((h) => h.stadt === name).map((h) => {
+  // Hartwig, Premium und Sport aus der Engine; Volkskauf und FUNDUS kommen mit ihren Grafikdaten aus staedte.js
+  // (gleiche IDs wie in der Engine). Q21: Familie/Variante je Haus aus warenhausVielfalt, Fassade aus dem #31-Export.
+  const verteilung = warenhausVielfalt(mitExportFassade(s.haeuser.filter((h) => h.stadt === name)));
+  const eigene = s.haeuser.filter((h) => h.stadt === name && (h.format === 'warenhaus' || h.format === 'sport')).map((h) => {
     const v = verteilung.get(h.id);
     const f = fussabdruck(h, v?.familie);
-    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : h.format === 'schwester' ? 'schwester' : h.format === 'outlet' ? 'outlet' : 'warenhaus',
-      lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d,
+    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, hausklasse: h.hausklasse, premium: h.klasse === 'premium', grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d,
       ...(v ? { familie: v.familie, variante: v.fassade } : {}) };
   });
   // Die ursprünglichen Parzellen sind unabhängig vom aktuellen Spielstand. Zwei zusätzliche
   // Flächen werden von Beginn an als normaler Blockrand bebaut und erst bei Bedarf umgenutzt.
-  const alt = d.standorte.filter((q) => q.rolle === 'wettbewerber');
+  const ids = new Set(eigene.map((q) => q.id));
+  const alt = d.standorte.filter((q) => (q.rolle === 'wettbewerber' || q.rolle === 'schwester' || q.rolle === 'outlet') && !ids.has(q.id));
   const reserve = Array.from({ length: 2 }, (_, i) => ({
     id: 'KR-' + name + '-' + (i + 1), name: '', rolle: 'wettbewerber_reserve',
     lage: i === 0 ? '1a' : 'b', grundflaecheQm: 1800,
@@ -184,7 +193,7 @@ function imSlot(p, W, D) {
 export function spielBauer(s, o = {}) {
   const basis = echterBauer(o.bauerOpt ?? {});
   const merk = o.merk;
-  const wahl = warenhausVielfalt(s.haeuser); // Q21: stabil bei Kamerawechsel und Neubau
+  const wahl = warenhausVielfalt(mitExportFassade(s.haeuser)); // Q21: stabil bei Kamerawechsel und Neubau
   const haeuser = new Map();   // Engine-Häuser
   // Volkskauf und FUNDUS liegen bis zur Engine-Maßstab-Integration nur im Grafikkatalog.
   // Unsichtbare Ray-Boxen (keine Zusatzmeshes) machen sie anklickbar.
@@ -233,7 +242,7 @@ export function spielBauer(s, o = {}) {
     p.haus = h;
     const nutzer = nachnutzer(h);
     const res=nutzer ? nachnutzungSport(S, scene, h, nutzer, { x, z })
-      : sporthaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
+      : sporthaus(S, scene, FASSADE.has(h.id) && FASSADE.get(h.id) !== h.fassade ? { ...h, fassade: FASSADE.get(h.id) } : h, { x, z, ...bauZustand(zustand(h)) });
     if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe});
     return res;
   };

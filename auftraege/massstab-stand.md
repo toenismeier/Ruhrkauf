@@ -111,6 +111,21 @@ Hartwig 360 regulär (45 A, 115 B, 200 C) plus 4 Premium, Volkskauf 86, Hartwig 
 
 **Technische Abnahme weiter ausdrücklich offen:** In diesem GitHub-Connector-Lauf steht kein Checkout mit Node/Abhängigkeiten bereit; kein Typecheck, Jest, `tsx`-Seed-Export, Render oder Simulationslauf ausgeführt. Insbesondere `render/haeuser.json` (historischer, derzeit 180 Positionen statt 408 aktive Häuser) und `render/haeuser-schwester.json` sind noch im Komplett-Export zu ersetzen. Danach alle drei JSON-Dateien **zweimal deterministisch** erzeugen und vergleichen. Pflichtevidenz vor Merge: `npm run typecheck && npx jest` (Engine), `scripts/massstab-phase2.ts 1,2,3` und `--bot`, `scripts/schwierigkeit-vergleich.ts`, `npm run build && node pruef-staedte.js && node spiel-render.js` (Render), Leistungsziel <60 ms. Die 14 vorläufig ausgesetzten Tests müssen nach echtem Lauf fachlich reaktiviert bzw. begründet gehalten werden. **Keine Freigabe für Merge nach main.**
 
+
+### Grafik-Städte (Branch `feat/massstab-staedte`, Basis: `feat/engine-massstab`, 20.10.2026)
+
+**Status: Implementierungsstand, keine technische Abnahme. Kein Merge.** Branch wurde direkt vom Engine-Maßstab-Commit `f6f2d643c262ab5dc7edc30fc7d5196377499529` erstellt.
+
+**Phase 1 – umgesetzt im Code:** `render/src/kit/stadt-geografie.js` enthält 220 eindeutige Stadtzentren/Koordinaten, Engine-Cluster und regionale Zuordnung, 108 neue explizite Stadtbild-Archetypen, Küsten- und DDR-Eigenschaften. Bestandsarchetypen bleiben erhalten. `staedte.js` nutzt bundesweite 28-km-Nachbarn; `warenhaus.js` erweitert die DDR-Familien auf neue Ost-Städte. `stadtvielfalt-neu` umfasst 24 neue Stadtbilder aus allen fünf Regionen; bisher **kein** Drei-Runden-Bildprotokoll.
+
+**Phase 2 – implementiert, noch nicht validiert:** Primäre und ein bis zwei sekundäre Einkaufsachsen bei dichtem Metropolenbestand; `plan.nebenzentren`, eigene Plätze, bevorzugte Premium-/A-Lagen, keine zwei eigenen Häuser in einem Block, Hausabstände, einzelne statt geteilte Center-Häuser. `standorte-mix` vergleicht zehn Städte mit Übersicht und Einkaufslage. `pruef-standorte-massstab.js` prüft die Platzierung nach dem Export. Bild-/Planabnahme ist offen.
+
+**Phase 3 – Kataloggeneratoren vorhanden:** sechs Hartwig-Seiten à maximal 60, Premium, zwei Volkskauf-Seiten, Sport, zwei FUNDUS-Seiten. Ein Modul `_massstab-haeuser.js` bündelt sämtliche Fassadengeneratoren. `pruef-kopien.js` meldet identische Familie/Variante/Fassade bei Städten näher als 50 km. Ob die Prüfung 0 Kopien ergibt, ist ungemessen; keine zehn visuellen Abnahmen.
+
+**Statischer Datenabgleich außerhalb der lokalen npm-Testumgebung:** 220/220 Namen, 7/73/140 Cluster, Koordinaten und Regionen ohne Abweichung kontrolliert. Kein `npm run`, kein `pruef-staedte.js`, kein Playwright, keine Katalog-PNG ausgeführt.
+
+**Blocker:** Render-JSON auf dem Engine-Ausgangscommit noch **180/24/20 statt 408/86/66**. Zuerst im Engine-Branch Seed-1-Export `cd engine && npx tsx scripts/haeuser-export.ts` zweimal reproduzierbar ausführen und die drei JSON-Dateien nachziehen. Danach die Grafik-Branch auf aktuellen Engine-Stand bringen. Im Anschluss `cd render && npm ci && npm run massstab:geografie && npm run massstab:standorte && npm run massstab:kopien && npm run massstab:gestaltung && node pruef-staedte.js && node spiel-render.js` sowie Katalogbilder dreimal gegen `GESTALTUNG.md` sichten und Findings korrigieren. Engine-Testabnahme ebenfalls abwarten. Keine Freigabe vor 0 Fehlern.
+
 ### Fortsetzung am 20.10.2026: Abschnitt 10, Integration und nächste Phase-2-Kalibrierung
 
 **Integrationsstand:** `main` bei `9db5ab70` in `feat/engine-massstab` per zweieltrigem Merge-Commit **`3c9a303e`** integriert. Hintergrund: Der direkte GitHub-Merge war wegen überlappender Änderungen blockiert; die Dateiversionen wurden über Git-Objekte dreiseitig zusammengeführt. Premium-Code und seine Felder, proportionale Bot-C-Schließungen mit Premium-Ausnahme, die neuen Gameplay-/Ladenbau-Änderungen sowie 66 FUNDUS-Häuser wurden erhalten. Integrations-PR: #15 (technischer Merge in den Featurebranch, nicht in `main`).
@@ -331,3 +346,12 @@ for seed in 1 2 3; do
 done
 ```
 **Kriterien:** ohne Eingriffe leicht/mittel 52 Wochen ohne Insolvenz; Bot D mittel drei Seeds 260 Wochen ohne Insolvenz mit positivem EBITDA; Bot C mittel drei Seeds mindestens 104 Wochen; Bot T mindestens leicht 3/3, mittel 3/3, schwer 2/3; Filial-GuV unverändert nahe der Referenz. **Keine Behauptung einer bestandenen Messung.**
+
+
+### Grafik-Städte – Integration mit main (21.10.2026)
+
+Aktueller main ist Grundlage der Zusammenführung; Grafik- und Prüfmodule aus PR #31 werden unter Erhaltung von Q02 (Dach- und Stadtgrafik), Q03 (Fingerabdruck-Gate), Premium und der vollständigen Engine in denselben Feature-Branch integriert. Essen verbleibt im separaten Q01-Kartendaten-Pilot; keine Essener Kartendaten, Archetyp-Einstellungen oder Fingerabdruck-Referenzen werden hier verändert.
+
+**Wichtige Datenlücke:** Die auf main eingecheckten Dateien `render/haeuser.json` und `render/haeuser-schwester.json` enthalten aktuell noch 180 bzw. 24 Standorte; `render/haeuser-outlet.json` enthält 66. Die Engine besitzt zwar den 560-Häuser-Maßstab, aber ohne erneuten Export auf main gibt es **noch keine belastbare 560-Häuser-Grafikabnahme**. Die Prüfungen sollen einen unvollständigen Export nicht mehr als grün akzeptieren. Claude muss `cd engine && npx tsx scripts/haeuser-export.ts` zweimal ausführen und die drei Render-JSON-Dateien deterministisch abgleichen.
+
+**Abnahme offen:** `cd render && npm ci && npm run build && npm run massstab:geografie && npm run massstab:standorte && npm run massstab:kopien && npm run massstab:gestaltung && node pruef-staedte.js && node pruef-fingerabdruck.js && node spiel-render.js` sowie sämtliche zwölf Hausatlas-Seiten, `stadtvielfalt-neu` und `standorte-mix` rendern und in drei Runden visuell prüfen; `node pruef-render.js` für alle 220 Städte einschließlich `out/render-protokoll.csv`. Abweichende Fingerabdrücke vor einem Merge ausschließlich bewusst pro Stadt mit `node pruef-fingerabdruck.js --neu <stadt-id …>` aktualisieren, PNG/JSON einchecken und Gegenprobe dokumentieren. Ohne lokale Ausführung und Bildabnahme bleiben alle Zähler **unbestätigt**, kein Merge.

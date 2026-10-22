@@ -80,7 +80,15 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
       flaechen: h.flaechen.map((f) => ({ id: f.id, etage: f.etage, qm: f.qm, konzept: f.konzept, ...(f.gruppe ? { gruppe: f.gruppe } : {}) })),
     }));
     expect(exportiert).toHaveLength(66);
-    expect(exportiert).toEqual(ausWelt);
+    // #31: fassaden-verteilen.js verschiebt nur die Grafikfelder Fassade (50-km-Kopienregel) und kappt die
+    // Grafik-Grundfläche (FUNDUS b-Lage höchstens 80 % von Hartwig); alles Übrige ist der unveränderte Engine-Export.
+    const ohneGrafik = (h: Record<string, unknown>) => { const { fassade, grundflaecheQm, ...rest } = h; return rest; };
+    expect(exportiert.map(ohneGrafik)).toEqual(ausWelt.map(ohneGrafik));
+    for (const [i, h] of exportiert.entries()) {
+      expect(h.fassade as number).toBeGreaterThanOrEqual(0);
+      expect(h.fassade as number).toBeLessThan(8);
+      expect(h.grundflaecheQm as number).toBeLessThanOrEqual(ausWelt[i].grundflaecheQm);
+    }
     for (const h of exportiert) {
       const f = h.flaechen as { gruppe?: string; konzept: string }[];
       expect(f.map((x) => x.gruppe)).toEqual(['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty']);

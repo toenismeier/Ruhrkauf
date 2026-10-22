@@ -109,3 +109,8 @@ Deutsch mit echten Umlauten, kurz. Entscheidungen über Auswahlfragen mit Empfeh
 - Phase 1: zentraler Möbelbaukasten unter `render/src/kit/moebel/` mit **147 deterministischen Möbeln** (86 Sport, 15 Off-Price, 46 allgemein); einheitliche Raster-, Budget- und Höhenangaben. Unveränderte Bestandsaufrufer bleiben kompatibel.
 - Prüfung: `cd render && npm run moebel:pruefen` misst die echte Bounding Box, Maße, Bauteilbudget, Determinismus und Fernstufe; CI-Job „Ladenbau Möbelprüfung“. Vier Kataloge für Sport, Outlet, allgemein und Möbelreihen wurden in der Feature-Branch-CI gerendert (CI-Artefakt `ladenbau-kataloge`); die Versionierung unter `bilder/katalog-moebel-*.png` ist vorbereitet, aber wegen eines nachfolgenden Runner-Problems noch nicht bestätigt.
 - Phasenfortschritt, Abnahme und weitere Schritte verbindlich unter `auftraege/ladenbau-stand.md`; Spezifikation unter `auftraege/workstream-ladenbau.md`.
+
+
+## Grafik-Städte im Maßstab (Branch `feat/massstab-staedte`, 20.10.2026)
+
+Der Grafik-Workstream wird **von `feat/engine-massstab`** abgezweigt (nicht von `main`): geografische Grundlage aller 220 Engine-Städte, explizite Stadtbildprofile für 108 zusätzliche Städte, Standort-Mischung mit mehrteiligen Metropolen und Atlas-Kataloge für alle fünf Handelsformate. Einstieg und Prüfkommandos unter `render/KIT.md`, Fortschritt unter `auftraege/massstab-stand.md`. **Noch nicht mergefähig:** Seed-1-Hausexporte, lokale Render-/Jest-/Bildprüfungen und drei Abnahmerunden stehen aus.

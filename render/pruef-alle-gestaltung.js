@@ -1,13 +1,15 @@
-// Alle 112 Staedte in kleinen Batches pruefen, damit die Planungsdaten nicht gleichzeitig im Speicher liegen.
+// Alle exportierten Städte in kleinen Batches prüfen, damit die Planungsdaten nicht gleichzeitig im Speicher liegen.
 const esbuild = require('esbuild');
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const root = __dirname, out = path.join(root, 'out');
 fs.mkdirSync(out, { recursive: true });
-const json = require('./haeuser.json');
-const staedte = [...new Set(json.map((h) => h.stadt))].sort((a,b)=>a.localeCompare(b,'de'));
-if (staedte.length !== 112) throw new Error('Stadtzahl unerwartet: ' + staedte.length);
+const hauskataloge = ['./haeuser.json', './haeuser-schwester.json', './haeuser-outlet.json'].flatMap((datei) => require(datei));
+const staedte = [...new Set(hauskataloge.map((h) => h.stadt))].sort((a,b)=>a.localeCompare(b,'de'));
+if (hauskataloge.length !== 561 || staedte.length !== 220 || require('./haeuser.json').length !== 409 ||
+    require('./haeuser-schwester.json').length !== 86 || require('./haeuser-outlet.json').length !== 66)
+  throw new Error('Unvollständige Seed-1-Exporte: ' + hauskataloge.length + '/561 Häuser, ' + staedte.length + '/220 Städte. Engine-Export erneut durchführen.');
 const protokoll = [], fehler = [];
 for (let i = 0; i < staedte.length; i += 5) {
   const gruppe = staedte.slice(i, i + 5);
@@ -25,6 +27,6 @@ for (let i = 0; i < staedte.length; i += 5) {
   protokoll.push(gruppe.join(', ') + ': ' + (zeile ?? 'FEHLER'));
   console.log('Gestaltung ' + Math.min(i+5,staedte.length) + '/' + staedte.length + ': ' + (zeile ? zeile.trim() : 'Fehler'));
 }
-fs.writeFileSync(path.join(out, 'schwester-gestaltung.txt'), protokoll.join('\n') + '\n' + fehler.join('\n') + '\n');
+fs.writeFileSync(path.join(out, 'massstab-gestaltung.txt'), protokoll.join('\n') + '\n' + fehler.join('\n') + '\n');
 if(fehler.length){fehler.forEach(f=>console.error('FEHLER '+f));process.exitCode=1}
-else console.log('Gestaltung: alle 112 Städte ohne Verstöße');
+else console.log('Gestaltung: alle ' + staedte.length + ' exportierten Städte ohne Verstöße');

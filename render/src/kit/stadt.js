@@ -58,7 +58,12 @@ export function ausschnitt(plan, i0, j0, i1, j1, hoehe = 25) {
 // ====================================================================================
 const B = (w, h, d, x = 0, y = 0, z = 0, ry = 0) => { const g = new THREE.BoxGeometry(w, h, d); if (ry) g.rotateY(ry); return g.translate(x, y, z); };
 const C = (rt, rb, h, seg, x = 0, y = 0, z = 0) => new THREE.CylinderGeometry(rt, rb, h, seg).translate(x, y, z);
-const K = (r, x, y, z, sx = 1, sy = 1, sz = 1, det = 1) => new THREE.IcosahedronGeometry(r, det).scale(sx, sy, sz).translate(x, y, z);
+// Nur in der Fernansicht: die 80 Dreiecke der großen Baumkronen
+// werden durch ein Ikosaeder mit 20 Dreiecken ersetzt (gleiche Maße/Farbe).
+// Kleine Kronen mit bereits 20 Dreiecken bleiben unverändert.
+const K = (r, x, y, z, sx = 1, sy = 1, sz = 1, det = 1) =>
+  new THREE.IcosahedronGeometry(r, LOD.stufe === 'fern' ? 0 : det)
+    .scale(sx, sy, sz).translate(x, y, z);
 let _weiss = null;
 const weiss = () => (_weiss ??= new THREE.MeshLambertMaterial({ color: '#ffffff' }));
 
@@ -92,16 +97,36 @@ export class Instanzer {
     let calls = 0;
     for (const [art, p] of this.protos) {
       if (!p.inst.length) continue;
-      for (const t of p.teile) {
+      // Ein stadtweites InstancedMesh besitzt eine stadtweite BoundingSphere:
+      // Bereits ein sichtbarer Baum zwingt dann ALLE Bäume auf die GPU.
+      // Räumlich dichte Gruppen behalten Instancing, ferne Gruppen werden vom
+      // THREE-Frustum (auch beim Schattenpass) vollständig ausgespart.
+      const raumtyp = RAUM_INSTANZEN.has(art);
+      let xmin = Infinity, xmax = -Infinity, zmin = Infinity, zmax = -Infinity;
+      if (raumtyp && p.inst.length >= 96) for (const [x, , z] of p.inst) {
+        xmin = Math.min(xmin, x); xmax = Math.max(xmax, x);
+        zmin = Math.min(zmin, z); zmax = Math.max(zmax, z);
+      }
+      const teilen = raumtyp && p.inst.length >= 96 && (xmax - xmin > INSTANZ_KACHEL * 1.4 || zmax - zmin > INSTANZ_KACHEL * 1.4);
+      const gruppen = new Map();
+      if (teilen) {
+        for (const eintrag of p.inst) {
+          const key = Math.floor(eintrag[0] / INSTANZ_KACHEL) + ':' + Math.floor(eintrag[2] / INSTANZ_KACHEL);
+          if (!gruppen.has(key)) gruppen.set(key, []);
+          gruppen.get(key).push(eintrag);
+        }
+      } else gruppen.set('gesamt', p.inst);
+      for (const instanzen of gruppen.values()) for (const t of p.teile) {
         const variabel = t.k[0] === '§';
         const slot = variabel ? +t.k.slice(1) : -1;
-        const im = new THREE.InstancedMesh(t.geo, variabel ? weiss() : mat(t.k), p.inst.length);
-        // N06: Nur Metadaten für den Wechsel von Laub und Kleidung; keine zusätzliche Geometrie.
+        const im = new THREE.InstancedMesh(t.geo, variabel ? weiss() : mat(t.k), instanzen.length);
+        im.userData.diagArt = art;
+        // N06: Pro räumlicher Gruppe bleiben die saisonalen Farbslots vollständig erhalten.
         if (['linde', 'kastanie', 'platane', 'birke', 'pappel', 'kugel'].includes(art) || art.startsWith('figur')) {
           im.userData.jahreszeitArt = art;
           im.userData.jahreszeitSlot = slot;
         }
-        p.inst.forEach(([x, y, z, ry, s, f], i) => {
+        instanzen.forEach(([x, y, z, ry, s, f], i) => {
           q.setFromAxisAngle(achse, ry); v.set(x, y, z);
           if (Array.isArray(s)) sc.set(s[0], s[1], s[2]); else sc.set(s, s, s);
           m4.compose(v, q, sc);
@@ -119,6 +144,15 @@ export class Instanzer {
     return calls;
   }
 }
+
+// Größere Instanzgruppen werden nur bei räumlicher Ausdehnung aufgeteilt.
+// Häuser, Schilder und Markierungen bleiben unverändert; das vermeidet
+// unnötige zusätzliche Draw Calls bei ohnehin wenigen Exemplaren.
+const INSTANZ_KACHEL = 160;
+const RAUM_INSTANZEN = new Set([
+  'linde', 'kastanie', 'platane', 'birke', 'pappel', 'nadel', 'kugel', 'busch',
+  'kleinwagen', 'limousine', 'kombi', 'taxi', 'lieferwagen', 'bus',
+]);
 
 function definiereProps(I) {
   const glas = F.glas, rad = '#24272b', vl = '#f6f3dc', rl = '#b8352d';
