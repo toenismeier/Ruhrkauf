@@ -365,8 +365,13 @@ function markenLeistungRoh(s: GameState, m: Eigenmarke, saison: TrendSaison): Ro
   const erfahrung = clamp(0.35 + 0.035 * liste.length + 0.2 * erfahren, 0, 1);
   const team = clamp(0.22 + teamgroesse * 0.055 + erfahrung * 0.38, 0, 1);
   const g = trendGruppe(m);
-  const artikel = liste.map((p) => TYP[p.typ]).filter((t): t is TypDef => !!t);
-  const zielgruppe = artikel.length ? artikel.reduce((sum, t) => sum + t.gruppe[g], 0) / artikel.length : 0.5;
+  const zielgruppe = liste.length ? liste.reduce((sum, p) => {
+    const t = TYP[p.typ];
+    if (!t) return sum + 0.5;
+    const ziel = p.zielgruppe ? ZIELGRUPPE_PRODUKT[p.zielgruppe].trend : g;
+    const markenFit = ziel === g || (ziel === 'jung' && g === 'mitte') ? 1 : 0.55;
+    return sum + t.gruppe[ziel] * markenFit;
+  }, 0) / liste.length : 0.5;
   const sTrend = saison.gruppen[g];
   const treffer = liste.length ? liste.reduce((sum, p) =>
     sum + (sTrend.artikel.includes(p.typ) ? 0.5 : 0) + (sTrend.farben.includes(p.farbe) ? 0.3 : 0)
@@ -906,7 +911,7 @@ export function produktKatalog(_s: GameState): ProduktKatalog {
       typen: [...ZUSATZ_ARTIKEL[id]],
     })),
     kategorien: (Object.keys(PRODUKT_KATEGORIEN) as ProduktKategorie[]).map((id) => ({ id, name: PRODUKT_KATEGORIEN[id] })),
-    typen: ARTIKELTYPEN.map((t) => ({ typ: t.typ, kategorie: t.kategorie, wgs: [...t.wgs], saison: t.saison, preisMitte: t.preis, materialien: [...t.materialien], aufwand: t.aufwand, gruppe: { ...t.gruppe } })),
+    typen: ARTIKELTYPEN.map((t) => ({ ...t, preisMitte: t.preis, wgs: [...t.wgs], materialien: [...t.materialien], gruppe: { ...t.gruppe } })),
     farben: FARBLISTE.map((f) => ({ name: f, hex: FARBEN[f] })),
     materialien: MATERIALLISTE.map((m) => ({ name: m, ...MATERIALIEN[m] })),
     preislagen: (Object.keys(PREISLAGE_FAKTOR) as Preislage[]).map((id) => ({ id, faktor: PREISLAGE_FAKTOR[id] })),
