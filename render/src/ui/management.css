@@ -71,3 +71,15 @@
 .q-warenbuch .lname i, .q-warenbuch .lname i.em { font-size: 12px; }
 .q-warenbuch .lkopf button { font-size: 12px; min-height: 44px; }
 .q31 .q-wert i, .q31 .q-name i { font-style: normal; }
+
+/* Kollektionstafel: Musterkarten mit Stoffprobe in Markenfarbe (gezackte Kante wie eine Musterkarte) */
+.q-muster { all: unset; box-sizing: border-box; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%;
+  min-height: 64px; padding: 10px 14px; border-top: 1px solid var(--q-linie); cursor: pointer; }
+.q-muster.q-an { background: var(--q-grund); }
+.q-muster .q-probe { width: 40px; height: 48px; background: var(--farbe, transparent); border: 1px solid var(--q-linie);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 90% 94%, 80% 100%, 70% 94%, 60% 100%, 50% 94%, 40% 100%, 30% 94%, 20% 100%, 10% 94%, 0 100%); }
+.q-muster.q-frei .q-probe { background: transparent; border: 1px dashed var(--q-leise); clip-path: none; }
+.q-muster .q-name { font-size: 16px; line-height: 20px; min-width: 0; }
+.q-muster .q-name small { display: block; font-size: 12px; line-height: 16px; color: var(--q-leise); }
+.q-muster .q-wert { text-align: right; font-size: 15px; } .q-muster .q-wert small { display: block; font-size: 12px; color: var(--q-leise); }
+.q-muster.q-frei .q-wert { font-size: 22px; color: var(--q-akzent); }

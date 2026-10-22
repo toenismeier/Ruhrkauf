@@ -33,7 +33,7 @@ const EXTRA = {
   await p.waitForFunction('window.bereit === true', null, { timeout: 0, polling: 500 });
   await p.evaluate(() => { window.spiel.schliessePanel(); window.spiel.neuesSpiel(1, 'Essen'); for (let i = 0; i < 8; i++) window.spiel.woche(false); window.spiel.fokusHaeuser(); });
   const ruhig = async () => { await p.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))); await p.waitForTimeout(250); };
-  const bild = async (name) => { await ruhig(); await p.evaluate(() => { const m = document.getElementById('meldung'); if (m) m.className = ''; document.querySelectorAll('.erfolge-toast-bild').forEach((x) => { const t = x.parentElement; if (t) t.hidden = true; }); /* Banner-Überdeckung ist an Q30 gemeldet */ }); const f = path.join(ziel, name); await p.screenshot({ path: f }); console.log('gespeichert:', f); };
+  const bild = async (name) => { await ruhig(); await p.evaluate(() => { const m = document.getElementById('meldung'); if (m) m.className = ''; document.querySelectorAll('.erfolge-toast-bild').forEach((x) => { const t = x.parentElement; if (t) t.style.display = 'none'; }); /* Banner-Überdeckung ist an Q30 gemeldet */ }); const f = path.join(ziel, name); await p.screenshot({ path: f }); console.log('gespeichert:', f); };
   const textPruefen = async (basis) => {
     const treffer = await p.evaluate(() => {
       const t = document.getElementById('panel').innerText;
