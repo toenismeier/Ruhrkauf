@@ -371,6 +371,59 @@
   .wbdirekt i, .wbdirekt small { font-size: calc(12px * var(--schrift)); color: var(--leise); font-style: normal; }
   .wbdirekt:focus-visible { outline: 2px solid var(--rot); outline-offset: -2px; }
 
+  /* Maßstab: formatbezogenes Cockpit und direkt erreichbare 220-Städte-Karte */
+  #deutschland-direkt { min-width: 46px; height: 46px; padding: 0 8px; pointer-events: auto; background: var(--karte); box-shadow: var(--schatten); border-radius: 14px; font-size: 12px; font-weight: 800; }
+  /* Q07: Häuserleiste über der unteren Leiste, damit die Kartenmitte frei bleibt (Cockpit wächst nicht). */
+  #stadt-chips { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(80px + env(safe-area-inset-bottom)); display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
+  body.panel-offen #stadt-chips { display: none; }
+  #stadt-chips button { min-height: 36px !important; }
+  #stadt-chips button { flex: none; min-height: 44px; padding: 5px 10px; border-radius: 10px; background: var(--karte); color: var(--text); box-shadow: var(--schatten); font-size: 11px; font-weight: 700; }
+  #stadt-chips .volkskauf { border-bottom: 3px solid #2363b0; } #stadt-chips .fundus { border-bottom: 3px solid #d69b24; }
+  #stadt-chips .sport { border-bottom: 3px solid #35895b; } #stadt-chips .premium { border-bottom: 3px solid #a47a34; }
+  #stadt-chips .hartwig { border-bottom: 3px solid var(--rot); }
+  .pp-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+  .pp-tab { flex: 1; border-radius: 12px; background: #e3dfd7; min-height: 44px; font-weight: 800; font-size: 13px; }
+  .pp-tab.an { background: var(--text); color: white; }
+  .pp-filter { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 7px; }
+  .pp-filter label, .pp-suchlabel, .pp-sort label { font-size: 11px; font-weight: 700; color: #52616a; }
+  .pp-filter select, .pp-suchlabel input, .pp-sort select, .pp-speichern select { display: block; width: 100%; min-height: 44px; background: #fff; color: var(--text); border: 1px solid #c7cdd1; border-radius: 10px; font: inherit; font-size: 13px; padding: 4px 9px; }
+  .pp-suchlabel { display: block; margin-top: 9px; }
+  .pp-speichern { display: flex; gap: 6px; margin: 9px 0; }
+  .pp-speichern button, .pp-sort button, .pp-auswahl button { background: #e7e5e1; color: var(--text); min-height: 44px; border-radius: 10px; padding: 6px 10px; font-size: 12px; font-weight: 700; }
+  .pp-speichern select { flex: 1; width: 0; min-width: 0; }
+  .pp-info { background: #fff; border-radius: 9px; padding: 9px; color: #52616a; font-size: 12px; }
+  .pp-karte { border: 1px solid #c7d0d6; background: #f7f8f8; border-radius: 12px; display: grid; place-items: center; margin-top: 8px; min-height: 320px; }
+  .deutschland-svg { display: block; height: min(45vh, 435px); max-width: 100%; }
+  .deutschland-svg g { cursor: pointer; outline-offset: -2px; }
+  .deutschland-svg g:focus-visible circle:last-of-type { stroke: #1c2a33; stroke-width: 3; }
+  .pp-hinweis { font-size: 11px; line-height: 1.4; color: #60717a; }
+  .pp-legende { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; }
+  .pp-legende span:nth-child(1) { color: #248453; } .pp-legende span:nth-child(2) { color: #b17a09; }
+  .pp-legende span:nth-child(3) { color: #c43e36; } .pp-legende span:nth-child(4) { color: #88929a; }
+  .pp-sort, .pp-auswahl { display: flex; align-items: end; gap: 6px; margin: 7px 0; }
+  .pp-sort label { flex: 1; }
+  .pp-auswahl button { flex: 1; }
+  .pp-scroll { height: min(39vh, 370px); overflow: auto; overscroll-behavior: contain; background: #fff; border-radius: 12px; border: 1px solid var(--linie); }
+  .pp-haus, .pp-gruppe { position: absolute; left: 0; right: 0; display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-bottom: 1px solid #eae6e1; }
+  .pp-gruppe { font-weight: 800; background: #e7eff0; font-size: 12px; }
+  .pp-haus input { flex: none; width: 44px; height: 44px; accent-color: var(--gruen); }
+  .pp-hausname { min-width: 0; flex: 1; background: transparent; text-align: left; }
+  .pp-hausname b, .pp-hausname small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pp-hausname b { font-size: 12px; } .pp-hausname small { font-size: 10px; color: var(--leise); }
+  .pp-zahl { display: flex; align-items: center; gap: 4px; font-size: 11px; flex: none; }
+  .pp-zahl strong { font-variant-numeric: tabular-nums; } .pp-zahl .ampel { margin: 0; }
+  .pp-aktionen { margin-top: 12px; padding: 12px 0; }
+  .pp-aktionen > b { display: block; font-size: 13px; margin-bottom: 8px; }
+  .pp-aktionraster { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pp-aktionraster button, .pp-vorschau button { min-height: 44px; padding: 8px; border-radius: 11px; background: #e3e7ea; font-size: 12px; font-weight: 700; color: var(--text); }
+  .pp-aktionraster button:disabled { opacity: .45; cursor: default; }
+  .pp-aktionraster button:first-child, .pp-vorschau button:first-of-type { background: #ffe1dd; color: #9b322b; }
+  .pp-vorschau { margin-top: 12px; padding: 11px; border: 1px solid #d7c49e; background: #fff8e8; border-radius: 10px; font-size: 12px; }
+  .pp-vorschau p { line-height: 1.4; }
+  #pzu { width: 44px; height: 44px; top: 8px; border-radius: 22px; }
+  #panel .pkopf { padding-right: 64px; }
+
+
   /* N12 Chronik: lesbare, mobile Zeitleiste und historische Fassadenmotive */
   .chronik { display: grid; gap: 12px; padding-bottom: 24px; }
   .chronik h2 { font-size: calc(17px * var(--schrift)); margin: 12px 4px 4px; }
@@ -527,6 +580,31 @@
   /* O09 E-Commerce */
   .online-verlauf { display:flex; align-items:flex-end; gap:3px; height:100px; padding:8px 0; border-bottom:1px solid var(--linie); }
   .online-balken { background:#597baa; flex:1; min-width:2px; border-radius:2px 2px 0 0; }
+  /* Q07: kompakte, responsive Vertriebsansicht; 44-px-Steuerziele. */
+  .vtr-filter {display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+  .vtr-filter label {display:flex;align-items:center;flex:1 1 110px;gap:5px;font-size:calc(12px * var(--schrift));}
+  .vtr-filter select {min-height:44px;max-width:100%;flex:1;border:1px solid var(--linie);border-radius:7px;padding:6px;background:#fff;}
+  .vtr-pfad {display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0;}
+  .vtr-pfad button {min-height:44px;text-decoration:underline;background:transparent;}
+  .vtr-kennzahlen {display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:8px;margin:12px 0;}
+  .vtr-kpi {display:flex;flex-direction:column;gap:5px;padding:11px;border:1px solid var(--linie);border-radius:8px;}
+  .vtr-kpi strong {font-size:calc(15px * var(--schrift));overflow-wrap:anywhere;}
+  .vtr-kpi small,.vtr-zeile small,.vtr-hinweis {color:var(--leise);font-size:calc(11px * var(--schrift));}
+  .vtr-liste {display:flex;flex-direction:column;gap:6px;margin:8px 0 14px;}
+  .vtr-zeile {display:grid;grid-template-columns:minmax(120px,1fr) minmax(180px,2fr);gap:8px;align-items:center;border:1px solid var(--linie);border-radius:8px;padding:8px;}
+  .vtr-zeile button,.vtr-zeile>div:first-child {display:flex;flex-direction:column;gap:4px;text-align:left;background:transparent;color:inherit;}
+  .vtr-zeile button {min-height:44px;}
+  .vtr-zahlen {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+  .vtr-zahlen span {display:flex;flex-direction:column;overflow-wrap:anywhere;min-width:0;}
+  .vtr-zahlen b {font-size:calc(12px * var(--schrift));}
+  .vtr-ampel {font-weight:700;}.vtr-ampel.rot{color:var(--rot);}.vtr-ampel.gruen{color:var(--gruen);}.vtr-ampel.gelb{color:#986800;}.vtr-ampel.ohne{color:var(--leise);}
+  .vtr-portfolio {width:100%;padding:12px;border:1px solid var(--linie);border-radius:8px;background:transparent;}
+  .vtr-leitungen {margin-top:15px;}
+  .startmonat {display:flex;justify-content:center;align-items:center;gap:8px;margin:12px 0;}
+  .post-miete-zeile {border-top:1px solid var(--linie);display:grid;grid-template-columns:minmax(80px,2fr) minmax(85px,1fr);gap:8px;padding:12px 0;}
+  .post-miete-zeile select {min-height:44px;width:100%;}
+  .post-miete-fuss {display:flex;gap:8px;flex-wrap:wrap;padding:10px 0;}
+  @media(max-width:480px) {.vtr-zeile {grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -535,13 +613,14 @@
   <div class="leiste">
     <div class="marke"><div class="logo">H</div><div><b>Hartwig</b><small id="markeunter">Warenhaus und Hartwig Sport</small></div></div>
     <button id="szenarioziel" class="sz-zielchip" type="button" aria-label="Szenarioziel öffnen" hidden><span aria-hidden="true">◎</span><span id="szenarioprozent">0 %</span><span class="sz-mini"><i id="szenariofortschritt"></i></span></button>
-    <div class="datum"><b id="kw">KW 1</b><small id="stufe"></small><span id="phase"></span></div>
+    <button id="deutschland-direkt" aria-label="Deutschlandkarte öffnen" title="Deutschlandkarte">DE</button><div class="datum"><b id="kw">KW 1</b><small id="stufe"></small><span id="phase"></span></div>
   </div>
   <div id="cockpit"></div>
   <!-- O07 Haus: Beobachtungsliste auf dem Startbildschirm -->
   <button id="hausbeobachtung" type="button">Hausbetrieb · Beobachtung</button>
 </div>
 <label class="botwahl"><input type="checkbox" id="bot"> Bot-Strategie C</label>
+<div id="stadt-chips" aria-label="Häuser und Wettbewerber der Stadt"></div>
 <div class="unten">
   <button type="button" class="chipstadt" id="stadt-reise" aria-label="Reise ab Hauptbahnhof öffnen"><span id="stadtname">Essen</span><small id="stadtcluster"></small><i>🚆</i></button>
   <button class="knopf" id="weiter">Woche weiter</button>
@@ -552,6 +631,8 @@
   <div class="menuekarte">
     <div class="menuetitel">Hartwig steuern</div>
     <div class="kacheln">
+      <button class="mkachel" id="deutschland"><b>Deutschland</b><small>Städte und Ergebnisampeln</small></button>
+      <button class="mkachel" id="haeuser"><b>Häuser</b><small>Portfolio, Filter, Sammelaktionen</small></button>
       <button class="mkachel mitbadge" id="posteingang"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9l9 6 9-6"/></svg><b>Posteingang</b><small>Angebote, Entscheidungen, Meldungen</small><span id="postmenubadge" class="badge" style="display:none">0</span></button>
       <button class="mkachel" id="zeitung" type="button"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 3h14v17H4zM18 7h3v12a2 2 0 0 1-2 2H6M7 7h8M7 11h8M7 15h4M13 15h2"/></svg><b>Der Handelsbote</b><small>Zeitung und Archiv</small></button>
       <!-- O02 Umsatztreiber -->
@@ -618,6 +699,7 @@
       <div id="startstufen" class="stufen"></div>
       <div class="vtitel">Startstadt</div>
       <select id="startstadt" class="ort gross" aria-label="Startstadt"></select>
+       <label class="startmonat">Startmonat <select id="startmonat" class="ort gross" aria-label="Startmonat"><option value="1">Januar</option><option value="4">April</option><option value="7">Juli</option><option value="10">Oktober</option></select></label>
       <label class="startseed">Seed <input id="startseed" type="number" min="1" step="1" inputmode="numeric"></label>
       <button id="startknopf" class="breit gruen">Neues Spiel starten</button>
     </div>
