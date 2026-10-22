@@ -4,6 +4,7 @@ import { KOORDINATEN } from './standorte';
 import { bereichsQualitaet } from './organisation';
 import type { GameState, Haus, Meldung, Wettbewerber, WettbewerberArt } from './types';
 import { clamp, eur } from './util';
+import { liquiditaetReicht } from './sandkasten';
 
 export interface MarktbeobachtungWoche {
   woche: number;
@@ -42,7 +43,7 @@ export function marktbeobachtungStufe(s: GameState, stufe: number): { ok: boolea
   // Einmalige Einstellungskosten verändern nur bei einer ausdrücklichen Spieleraktion die Bilanz.
   if (neue > alte) {
     const kosten = (neue - alte) * 4_000;
-    if (s.cash + s.kreditlinie < kosten) return { ok: false, text: 'Nicht genügend Liquidität für die Einstellungskosten.' };
+    if (!liquiditaetReicht(s, kosten)) return { ok: false, text: 'Nicht genügend Liquidität für die Einstellungskosten.' };
     s.cash -= kosten;
     s.einmalkostenWoche += kosten;
   }

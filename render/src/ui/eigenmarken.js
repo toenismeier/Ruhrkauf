@@ -3,8 +3,10 @@
 // eigenmarkenUebersicht und eigenmarkeVorschau, Aktionen eigenmarkeGruenden, eigenmarkeNeupositionieren, eigenmarkeSetzen,
 // eigenmarkeAnteil, eigenmarkeEinstellen.
 import { geld, pz, kwVon, esc } from './format.js';
+import { teamAufschluesselung } from './produkte-q24.js';
 
-const ALTER = [['10-13', 'Tweens'], ['13-17', 'Teens'], ['18-29', 'Young Adults'], ['30-49', '30 bis 49'], ['50+', '50 plus'], ['70+', '70 plus']];
+const ALTER = [['10-13', 'Kinder'], ['13-17', 'Teens & Tweens'], ['18-29', 'Young Adults'], ['30-49', 'Adults'], ['50+', 'Best Ager']];
+const alterOptionen = (aktuell) => aktuell === '70+' ? [...ALTER, ['70+', 'Best Ager 70+']] : ALTER;
 const GESCHLECHT = [['damen', 'Damen'], ['herren', 'Herren'], ['unisex', 'Unisex'], ['kinder', 'Kinder']];
 const KATEGORIE = ['Bekleidung', 'Schuhe', 'Wäsche', 'Accessoires', 'Home', 'Beauty'];
 const PREIS = [['einstieg', 'Einstieg'], ['mitte', 'Mitte'], ['gehoben', 'Gehoben']];
@@ -12,7 +14,7 @@ const STIL = [['klassisch', 'klassisch'], ['modern', 'modern'], ['sportlich', 's
 const FARBEN = ['#8c5a7a', '#2f4a6b', '#6f8f4e', '#d9822b', '#c9483e', '#2f63b5', '#1f1f1f', '#d27aa0', '#3f8f8a', '#7a5a3a'];
 const NAMEN = { damen: ['Linnea', 'Mira Lenz', 'Johanna B.', 'Ella Sommer'], herren: ['Nordhaven', 'Carl Ostwind', 'Feldweg', 'Henrik & Co.'], unisex: ['Studio Hartwig', 'Kleeblatt', 'Hafenblau'], kinder: ['Hafenkind', 'Kai & Kalle', 'Pusteblume'] };
 const REGIONEN = ['Nord', 'Ost', 'West', 'Mitte', 'Süd'];
-const alterText = (a) => ALTER.find((x) => x[0] === a)?.[1] ?? a;
+const alterText = (a) => a === '70+' ? 'Best Ager 70+' : ALTER.find((x) => x[0] === a)?.[1] ?? a;
 const zielText = (z) => `${GESCHLECHT.find((g) => g[0] === z.geschlecht)?.[1] ?? ''} ${alterText(z.alter)}`;
 const preisText = (p) => PREIS.find((x) => x[0] === p)?.[1] ?? p;
 const STATUS = { aufbau: 'im Aufbau', neupositionierung: 'Neupositionierung', eingestellt: 'eingestellt' };
@@ -27,6 +29,7 @@ export function eigenmarkenSeite(ctx, ui, tabs) {
   if (ui.seite === 'gruenden' && ui.em.assistent) return assistent(ctx, ui, tabs);
   ui.seite = 'eigenmarken';
   const s = ctx.s(), u = ctx.q.marken(s);
+  const leistungen = new Map((typeof ctx.E?.produkte === 'function' ? ctx.E.produkte(s).marken : []).map((m) => [m.marke, m.leistung]));
   let h = tabs;
   h += `<div class="raster"><div class="kz"><span>Eigenmarkenanteil am Umsatz</span><b data-p="mg:anteil">${pz(u.anteilUmsatz, 1)}</b></div><div class="kz"><span>Mehrmarge zu Fremdware</span><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b></div><div class="kz"><span>Marken geführt</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace('.', ',')} sinnvollen</b></div><div class="kz"><span>Umsatz Eigenmarken 13 Wochen</span><b data-p="mg:umsatz">${geld(u.marken.reduce((a, m) => a + m.umsatz13, 0))}</b></div></div>`;
   h += '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>';
@@ -34,6 +37,7 @@ export function eigenmarkenSeite(ctx, ui, tabs) {
     const veraltet = m.stilAktualitaet < 45;
     const status = m.status !== 'aktiv' ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== undefined ? ` bis KW ${kwVon(m.bis)}` : ''}</span>` : veraltet ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
     h += `<div class="karte emkarte"><div class="mkopf" style="background:${m.farbe}"><b>${esc(m.name)}</b><small>${zielText(m.zielgruppe)} · ${m.kategorie}${m.gewachsen ? ' · gewachsene Hartwig-Marke' : ''}</small></div>`;
+    h += teamAufschluesselung(leistungen.get(m.id));
     h += `<div class="ochips">${status}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualität ${'★'.repeat(m.qualitaet)}${'☆'.repeat(5 - m.qualitaet)}</span><span class="chip grau">${esc(m.beschaffungName)}</span></div>`;
     h += `<div class="owerte"><div><span>Umsatz 13 Wochen</span><b data-p="m:${m.id}:umsatz">${geld(m.umsatz13)}</b></div><div><span>Rohertragsquote</span><b data-p="m:${m.id}:marge">${pz(m.rohertragsquote, 1)}</b></div><div><span>Mehrmarge</span><b data-p="m:${m.id}:mehrmarge">${punkte(m.mehrmarge)}</b></div></div>`;
     h += `<div class="mzeile"><span>Bekanntheit</span>${balken(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
@@ -73,7 +77,7 @@ function assistent(ctx, ui, tabs) {
   h += '<div class="karte steuerung">';
   if (A.schritt === 0) {
     if (!A.id) h += feld('Vorlage', `<div class="seg umbruch">${ctx.q.vorlagen().map((x, i) => `<button class="${A.vorlage === i ? 'an' : ''}" data-a="emVorlage" data-v="${i}">${esc(x.titel)}</button>`).join('')}</div>`, 'füllt alle Schritte vor');
-    h += feld('Alter', seg('emAlter', m.zielgruppe.alter, ALTER));
+    h += feld('Alter', seg('emAlter', m.zielgruppe.alter, alterOptionen(m.zielgruppe.alter)));
     h += feld('Geschlecht', seg('emGeschlecht', m.zielgruppe.geschlecht, GESCHLECHT));
   } else if (A.schritt === 1) {
     h += feld('Kategorie', seg('emKategorie', m.kategorie, KATEGORIE.map((k) => [k, k]), !!A.id), A.id ? 'bleibt bei Neupositionierung' : '');

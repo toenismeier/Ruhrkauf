@@ -3,6 +3,7 @@
 import type { GameState, Haus, Region } from './types';
 import { clamp, eur, melde, chance, type RngHalter } from './util';
 import { einmalKosten } from './prozesse';
+import { IT_PRODUKT_IDS, IT_TEAM_KOSTEN_PRO_KOPF, itProduktZustand, type ItProduktId, type ItProduktZustand, type ItProduktWochenwert } from './it-produkte';
 
 export type BereichId = string; // Gemeinsame Schnittstelle zu O01, ohne vorgezogenen Import.
 export type ItSystemId = 'kasse' | 'warenwirtschaft' | 'planung' | 'personaleinsatz' | 'preisschilder' | 'app' | 'ecommerce' | 'datenplattform';
@@ -33,6 +34,9 @@ export interface ItStand {
   hausCluster: Record<string, string>; // vorberechnete Zuordnung, O(1) je Haus
   startprobleme: Record<string, number>; // Schlüssel System:Cluster, Ende exklusiv
   meldungen: number;
+  /** Optional für Speicherstände vor Q19. Standard: alle Produkte aktiv, Team 0. */
+  produkte?: Partial<Record<ItProduktId, ItProduktZustand>>;
+  produktVerlauf?: ItProduktWochenwert[];
 }
 export interface ItProjektAktion {
   typ: 'itProjekt'; system: ItSystemId; art: ProjektArt; zielGeneration: Generation;
@@ -40,9 +44,11 @@ export interface ItProjektAktion {
 }
 export type ItAktion = ItProjektAktion
   | { typ: 'itRolloutPlan'; projekt: string; clusterIds: string[] }
-  | { typ: 'itKasseAusbau'; art: 'selbstbedienung' | 'mobil'; stufe: number };
+  | { typ: 'itKasseAusbau'; art: 'selbstbedienung' | 'mobil'; stufe: number }
+  | { typ: 'itProduktTeam'; produkt: ItProduktId; anzahl: number }
+  | { typ: 'itProduktAktiv'; produkt: ItProduktId; an: boolean };
 
-export const IT_AKTIONEN = new Set<string>(['itProjekt', 'itRolloutPlan', 'itKasseAusbau']);
+export const IT_AKTIONEN = new Set<string>(['itProjekt', 'itRolloutPlan', 'itKasseAusbau', 'itProduktTeam', 'itProduktAktiv']);
 export const SYSTEME: Record<ItSystemId, { name: string; start: Generation; alter: number; kosten: number; bereiche: string[] }> = {
   kasse: { name: 'Kassensoftware', start: 2, alter: 14, kosten: 78000, bereiche: ['store_operations','vertriebssteuerung','flagship_management'] },
   warenwirtschaft: { name: 'Warenwirtschaft', start: 2, alter: 10, kosten: 62000, bereiche: ['allokation','logistik','einkauf_damen','einkauf_herren_kinder','einkauf_beauty','einkauf_wohnen','einkauf_food','preis_reduzierung'] },
@@ -167,6 +173,19 @@ function vorlage(s: GameState, titel: string, text: string, frist = 3): void {
 export function itAktion(s: GameState, a: ItAktion): {ok:boolean;text:string} {
   initialisiereIt(s);
   const it = s.it!;
+  if (a.typ === 'itProduktTeam' || a.typ === 'itProduktAktiv') {
+    if (!IT_PRODUKT_IDS.includes(a.produkt)) return { ok: false, text: 'Unbekanntes IT-Produkt.' };
+    const bisher = itProduktZustand(s, a.produkt);
+    if (a.typ === 'itProduktTeam') {
+      if (!Number.isInteger(a.anzahl) || ![-3, 3].includes(a.anzahl) || bisher.team + a.anzahl < 0 || bisher.team + a.anzahl > 30)
+        return { ok: false, text: 'Das Team kann nur in Schritten zu drei Personen zwischen 0 und 30 verändert werden.' };
+      (it.produkte ??= {})[a.produkt] = { ...bisher, team: bisher.team + a.anzahl };
+      return { ok: true, text: 'IT-Team um '+a.anzahl+' Personen angepasst.' };
+    }
+    if (typeof a.an !== 'boolean') return { ok: false, text: 'Ungültiger Produktstatus.' };
+    (it.produkte ??= {})[a.produkt] = { ...bisher, aktiv: a.an };
+    return { ok: true, text: 'Produkt '+(a.an?'aktiviert.':'abgeschaltet. Die Nachfragewirkung gilt ab der nächsten Woche.') };
+  }
   if (a.typ === 'itKasseAusbau') {
     if (!Number.isInteger(a.stufe) || a.stufe<0 || a.stufe>2) return {ok:false,text:'Ungültige Ausbaustufe.'};
     const x=it.systeme.kasse;
@@ -249,7 +268,9 @@ export function itWoche(s: GameState): void {
   it.hausCluster={};
   for (const cluster of clusters) for (const id of cluster.hausIds) it.hausCluster[id]=cluster.id;
   const delta=IT_IDS.reduce((sum,id)=>sum+it.systeme[id].kostenWoche-it.systeme[id].basisKosten,0);
-  s.zentrale.kostenWoche+=delta;
+  // Nur neu zugeteilte IT-Teams verursachen Zusatzkosten; Baseline bleibt unverändert.
+  const teamKosten = IT_PRODUKT_IDS.reduce((sum,id)=>sum+itProduktZustand(s,id).team*IT_TEAM_KOSTEN_PRO_KOPF,0);
+  s.zentrale.kostenWoche+=delta+teamKosten;
   const q=qualitaet(s);
   for (const p of it.projekte) {
     if(p.phase==='abgeschlossen') continue;
@@ -314,9 +335,13 @@ export function itHausFaktor(s: GameState, h: Haus): number {
   const app=Math.max(0,generationInCluster(s,'app',id)-SYSTEME.app.start);
   const ware=Math.max(0,generationInCluster(s,'warenwirtschaft',id)-SYSTEME.warenwirtschaft.start);
   const kAusbau=it.systeme.kasse.kasseAusbau;
+  const aktiv=(produkt:ItProduktId)=>itProduktZustand(s,produkt).aktiv;
+  const teamBonus=IT_PRODUKT_IDS.reduce((sum,p)=>sum+(aktiv(p)?itProduktZustand(s,p).team*0.0002:0),0);
   const qualitaet=1 + kasse*0.005 + app*0.004 + ware*0.002
-    + (kAusbau?.selbstbedienung??0)*0.002+(kAusbau?.mobil??0)*0.001;
-  return qualitaet * (it.umsatzFaktoren[h.id] ?? 1);
+    + (kAusbau?.selbstbedienung??0)*0.002+(aktiv('mobile_pay')?(kAusbau?.mobil??0)*0.001:0)+teamBonus;
+  // Abschaltungen nutzen den vorhandenen Nachfragefaktor. Kein zweites Kassen- oder CRM-Modell.
+  const abschaltung=(aktiv('kasse')?1:0.85)*(aktiv('kundenkarte')?1:0.99)*(aktiv('hartwig_app')?1:0.992);
+  return qualitaet * abschaltung * (it.umsatzFaktoren[h.id] ?? 1);
 }
 export function itUebersicht(s: GameState) {
   const clusters=itCluster(s), it=s.it;

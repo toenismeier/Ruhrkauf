@@ -2,7 +2,7 @@ import { zeigeKatalog } from '../kit/katalog.js';
 import { etage, dach } from '../kit/grundriss.js';
 import haeuser from '../../haeuser.json';
 const premium=haeuser.filter(h=>h.klasse==='premium');
-if(premium.length!==4) throw new Error('Vier Premiumhäuser fehlen');
+if(premium.length!==5) throw new Error('Fünf Premiumhäuser fehlen – Engine-Export neu erstellen');
 const eintraege=[];
 for(const h of premium){
  const oben=Math.max(...h.etagen);

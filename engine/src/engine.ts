@@ -4,6 +4,7 @@ import { ereignisse } from './ereignisse';
 import { premiumWoche } from './premium';
 import { chronikAktualisieren, chronikInitialisieren } from './chronik';
 import { erfolgeWoche } from './erfolge';
+import { istSandkasten, liquiditaetReicht } from './sandkasten';
 import { spielendePruefen } from './spielende';
 import { umbauWoche } from './umbau';
 import { wettbewerbWoche } from './wettbewerb';
@@ -14,7 +15,8 @@ import { aktualisiereStakeholder } from './stakeholder';
 import type { Format, GameState, GruppeId, HausKpi, WochenKpi } from './types';
 import { clamp, eur, melde, mio, normal, zwischen } from './util';
 import { wareneingang } from './ware';
-import { einkaufAltern, einkaufBuchen, einkaufDispo, einkaufFristen, einkaufNachfrage, einkaufVerbrauch, kannibalisierung, verbraucheAltwareWg } from './einkauf';
+import { einkaufAltern, einkaufBuchen, einkaufDispo, einkaufFristen, einkaufNachfrage, einkaufVerbrauch, kannibalisierung, verbraucheAltwareWg, outletVersorgung } from './einkauf';
+import { formateWoche, formateProjekteWoche } from './formate';
 import { eigenmarkenWoche, istVerkaufsaktiv } from './eigenmarken';
 import { neueWelt, PARAM, STANDARD_SZENARIO, type Szenario } from './welt';
 import { hqControllingExzellenz, hqEinkaufKonditionen, hqRestmieteWoche, hqWkzFaktor, hqWoche } from './hq';
@@ -24,6 +26,7 @@ import { vorstandWoche } from './vorstand';
 import { organisationWoche } from './organisation';
 // O03 IT
 import { itWoche } from './it';
+import { itProdukteWoche } from './it-produkte';
 import { produkteBuchen, produkteWoche } from './produkte';
 // O04 Personal
 import { personaleinsatzWoche } from './personaleinsatz';
@@ -93,6 +96,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   szenarioWoche(s);
   prozesse(s);
   premiumWoche(s);
+  formateProjekteWoche(s);
   // O08 Umbau
   umbauWoche(s);
   hqWoche(s);
@@ -117,8 +121,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   wareWoche(s);
 
   // 1. Nachfrage aller Häuser; Eigenmarken und Sortimentsmix je Warengruppe wirken auf die Bruttonachfrage
-  // Volkskauf und FUNDUS erst in Phase 3 wirtschaftlich aktivieren.
-  const roh: HausRoh[] = s.haeuser.filter((h) => !h.nurDaten).map((h) => simuliereHaus(s, h));
+  // Hauptsortiment bleibt in Hartwigs M7-Einkauf isoliert; Formate separat buchen.
+  const roh: HausRoh[] = s.haeuser.filter((h) => !h.nurDaten && h.format !== 'schwester' && h.format !== 'outlet').map((h) => simuliereHaus(s, h));
   // O05 Ware
   wareBedarf(s, roh);
   const nachfrage = einkaufNachfrage(s, roh);
@@ -298,6 +302,33 @@ export function wocheAbspielen(s: GameState): WochenKpi {
     statistikHaus(s, haus, rundeKpi(kpi));
     guvAddiere(gesamtFilialGuV, g);
   }
+  const formatTransport = outletVersorgung(s);
+  const formatWoche = formateWoche(s);
+  const formatUmsatz = Math.max(1, formatWoche.buchungen.reduce((n,b)=>n+b.kpi.umsatz,0));
+  const outletUmsatz = Math.max(1, formatWoche.buchungen.filter(b=>b.haus.format==='outlet').reduce((n,b)=>n+b.kpi.umsatz,0));
+  for (const { haus, kpi, guv, kosten, neben } of formatWoche.buchungen) {
+    const zusatzLogistik = eur(formatTransport * kpi.umsatz / formatUmsatz);
+    const anteilAbschriften = haus.format === 'outlet' ? kpi.umsatz / outletUmsatz : 0;
+    guv.logistik += zusatzLogistik;
+    guv.abschriften += eur(formatWoche.abschriften * anteilAbschriften);
+    guv.bruttogewinn -= guv.abschriften;
+    guv.wareneinsatz = guv.umsatz - guv.bruttogewinn;
+    guvAbschluss(guv); kpi.guv = guv; kpi.db = guv.ebitda;
+    kpi.rohertrag -= guv.abschriften; haus.kpi = rundeKpi(kpi);
+    // N01 Hausstatistik muss auch Volkskauf und FUNDUS sehen.
+    statistikHaus(s, haus, rundeKpi(kpi));
+    guvAddiere(gesamtFilialGuV, guv);
+    k.umsatz += kpi.umsatz; k.rohertrag += kpi.rohertrag;
+    k.werbeflaechen += neben.werbeflaechen; k.dienstleistungen += neben.dienstleistungen;
+    k.personal += kosten.personal; k.miete += kosten.miete; k.nebenkosten += kosten.nebenkosten;
+    k.sonstige += kosten.sonstige; k.logistik += kosten.logistik + zusatzLogistik;
+    k.fte += kpi.fteIst;
+    if (!insolvenzgeld) personalCash += kosten.personal;
+    if (haus.status === 'offen') k.offeneHaeuser++;
+  }
+  k.abschriften += formatWoche.abschriften;
+  k.marketing += formatWoche.marketing;
+  k.zentrale += formatWoche.zentrale;
   k.filialGuV = gesamtFilialGuV;
   eigenmarkenWoche(s, einkaufBuchen(s, umsatzEigenJe));
   produkteBuchen(s);
@@ -315,11 +346,11 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   // 8. Zahlungen: erst Pflichtzahlungen, dann Lieferanten
   const zinsen = Math.max(0, -s.cash) * (PARAM.zinsSatz / 52);
   const einzahlung = k.umsatz + k.konzession + k.untermiete + k.wkz + k.werbeflaechen + k.dienstleistungen;
-  const pflicht = kommissionAuszahlung + personalCash + k.miete + restmieten + k.nebenkosten + k.sonstige + k.logistik + k.zentrale + k.marketing + k.beratung + zinsen + offEinsatz.warenhaus.zukauf + offEinsatz.sport.zukauf;
+  const pflicht = kommissionAuszahlung + personalCash + k.miete + restmieten + k.nebenkosten + k.sonstige + k.logistik + k.zentrale + k.marketing + k.beratung + zinsen + offEinsatz.warenhaus.zukauf + offEinsatz.sport.zukauf + formatWoche.warenZukauf;
   s.cash += eur(einzahlung - pflicht);
   if (insolvenzgeld && s.insolvenz) s.insolvenz.altVerbindlichkeiten += eur(k.personal);
 
-  if (s.cash + s.kreditlinie < 0) {
+  if (!istSandkasten(s) && s.cash + s.kreditlinie < 0) {
     if (s.phase === 'regulaer') eroeffneInsolvenz(s, 'Zahlungsunfähigkeit: Löhne und Mieten nicht gedeckt');
     else if (s.phase === 'insolvenz') zerschlagungDurchMasseunzulaenglichkeit(s);
   }
@@ -341,8 +372,10 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   k.fte = Math.round(k.fte);
   k.cash = eur(s.cash);
   k.kreditFrei = eur(s.cash + s.kreditlinie);
-  k.bestand = eur(s.bestand.reduce((a, b) => a + b.wert, 0));
+  k.bestand = eur(s.bestand.reduce((a,b)=>a+b.wert,0) + (s.formate?.volkskaufBestand??0) + (s.formate?.pool.reduce((a,b)=>a+b.wert,0)??0));
   s.historie.push(k);
+  // Q19: echte Wochenwerte nach Marketing- und Onlineabschluss, rein lesender Snapshot.
+  itProdukteWoche(s);
   // O02: aktuelle Haus-KPI in die Umsatztreiber zerlegen, ohne weitere Umsatzbuchung.
   erfasseTreiber(s);
   if (s.historie.length > 520) s.historie.splice(0, s.historie.length - 520);
@@ -381,7 +414,7 @@ function lieferantenZahlungen(s: GameState): void {
   const faellig = s.verbindlichkeiten.filter((v) => v.faellig <= w).sort((a, b) => a.faellig - b.faellig);
   let unbezahlt = false;
   for (const v of faellig) {
-    if (s.cash - v.wert >= -s.kreditlinie) {
+    if (liquiditaetReicht(s, v.wert)) {
       s.cash -= v.wert;
       v.wert = 0;
     } else {

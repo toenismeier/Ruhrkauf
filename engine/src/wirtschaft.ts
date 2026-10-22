@@ -288,7 +288,11 @@ export function hausKosten(s: GameState, h: Haus, umsatzEigen: number, umsatzGes
   guv.fremdkraefte = umsatzGesamt * 0.007 * form * (1 - programmErsparnis(s, 'fremdkraefte'));
   guv.unterhalt = umsatzGesamt * 0.019 * form
     * (1 + Math.max(0, 55 - h.substanz) / 400) * (1 - programmErsparnis(s, 'unterhalt'));
-  guv.zahlungsverkehr = umsatzGesamt * 0.002 * (1 - programmErsparnis(s, 'zahlungsverkehr'));
+  // Q19: Mobile Kasse reduziert bei aktivem Ausbau den vorhandenen Zahlungsverkehrsaufwand.
+  // Die Standardquote bleibt bei Ausbaustufe 0 unverändert 0,2 % des Umsatzes.
+  const mobileStufe = s.it?.produkte?.mobile_pay?.aktiv === false ? 0 : (s.it?.systeme.kasse.kasseAusbau?.mobil ?? 0);
+  guv.zahlungsverkehr = umsatzGesamt * 0.002 * (1 - programmErsparnis(s, 'zahlungsverkehr'))
+    * (1 - 0.025 * mobileStufe);
   guv.facilityManagement = umsatzGesamt * 0.017 * form * (1 - programmErsparnis(s, 'facilityManagement'));
   guv.energie = umsatzGesamt * 0.024 * form * (1 - programmErsparnis(s, 'energie'));
   guv.it = umsatzGesamt * 0.003 * (1 - programmErsparnis(s, 'it'));

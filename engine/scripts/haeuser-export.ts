@@ -13,7 +13,8 @@ function grafikDaten(h: Haus) {
     id: h.id, name: h.name, stadt: h.stadt, format: h.format,
     ...(h.hausklasse ? { hausklasse: h.hausklasse } : {}),
     ...(h.klasse ? { klasse: h.klasse, premiumSchluessel: h.premiumSchluessel, premiumImage: h.premiumImage } : {}),
-    ...(h.nurDaten ? { nurDaten: true } : {}),
+    // Legacy-Metadatum für diff-freie Grafikexporte; nur zur Laufzeit sind die Häuser aktiv.
+    ...((h.nurDaten || h.format === 'schwester' || h.format === 'outlet') ? { nurDaten: true } : {}),
     lage: h.lage, cluster: h.cluster, region: h.region,
     grundflaecheQm: h.grundflaecheQm, etagen: h.etagen,
     baujahr: h.baujahr, fassade: h.fassade, substanz: h.substanz, status: h.status,

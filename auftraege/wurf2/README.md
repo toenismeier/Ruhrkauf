@@ -10,3 +10,22 @@ Bilder: `testflight/wurf-2/` (16 Screenshots, Bildfolge aus Ummos Bildschirmvide
 | Q12 | Hausbesuch: Laufgeschwindigkeit und Kollision mit Regalen | `feat/q12-hausbesuch-laufwege` | `q12-hausbesuch-laufwege.md` |
 | Q13 | Sandkasten: unbegrenztes Geld | `feat/q13-sandkasten` | `q13-sandkasten.md` |
 | Q14 | Oberfläche gesamt: hochwertig statt „KI-generiert“ | `feat/q14-oberflaeche-design` | `q14-oberflaeche-design.md` |
+| Q15 | Zentrale: Abteilung als Etage (Vorlage Coffee Inc) | `feat/q15-zentrale-abteilungen` | `q15-zentrale-abteilungen.md` |
+| Q16 | Marketing: Kanäle als Karten, Markenbekanntheit, Marktanteil je Stadt | `feat/q16-marketing-kanaele` | `q16-marketing-kanaele.md` |
+| Q17 | Eigenmarken: Produktkarten, Linienprofil (nach Q11) | `feat/q17-eigenmarken-karten` | `q17-eigenmarken-karten.md` |
+| Q18 | Handelsbote: Gestaltung und Illustrationen | `feat/q18-handelsbote` | `q18-handelsbote-gestaltung.md` |
+| Q19 | IT-Produkte als Karten: Kundenkarte, App, Kasse | `feat/q19-it-produkte` | `q19-it-produkte.md` |
+| Q20 | Schwierigkeit je Szenario eigens beschrieben | `feat/q20-szenario-schwierigkeit` | `q20-szenario-schwierigkeit.md` |
+| Q21 | Warenhäuser einer Stadt verschieden | `feat/q21-warenhaus-vielfalt` | `q21-warenhaus-vielfalt.md` |
+| Q22 | Hauspins sichtbar, auf dem Gebäude, Premium erkennbar | `feat/q22-hauspins` | `q22-hauspins-premium.md` |
+| Q23 | Reise: Deutschlandkarte und Liste | `feat/q23-reise-karte` | `q23-reise-karte.md` |
+
+Vorlagebilder Coffee Inc 2 (nur Referenz, keine Übernahme von Grafik oder Texten): `testflight/vorlage-coffee/01–14.png`. Q15–Q19, Q23 bauen auf dem Gestaltungssystem aus Q14 (`render/GESTALTUNG-UI.md`) auf; wenn Q14 noch nicht gemergt ist, dessen Branch als Grundlage lesen.
+| Q24 | Eigenmarken Deep Dive: Sortiment ≥ 300 Typen, Damen/Herren, Zielgruppen, Teamleistung (nach Q11) | `feat/q24-eigenmarken-deep-dive` | `q24-eigenmarken-deep-dive.md` |
+| Q25 | Produktbilder und Model (**macht Claude**) | `feat/q25-produktbilder` | `q25-produktbilder-model.md` |
+| Q26 | Meldungsleiste und „Speichern fehlgeschlagen“ | `feat/q26-meldungen-speichern` | `q26-meldungen-speichern.md` |
+| Q27 | Mode-Bilder nachschärfen, neue Mode-Silhouetten, Mode-Artikeltypen (**Claude-Chat**) | `feat/q27-mode-bilder` | `q27-mode-bilder.md` |
+| Q28 | Schuhe, Taschen, Accessoires, Wäsche neu (**Claude-Chat**) | `feat/q28-zubehoer-bilder` | `q28-zubehoer-bilder.md` |
+| Q29 | Home/Living, Beauty, Spielwaren neu (**Claude-Chat**) | `feat/q29-home-beauty-bilder` | `q29-home-beauty-bilder.md` |
+
+Q27–Q29: gemeinsame Regeln in `produktbilder-regeln.md` (Ummo 22.10.: „zu wenig Produkte“, „manche sehen echt schräg aus“). Artikeltypen kommen jetzt aus Q27–Q29, Q24 behält Bedienung und Teamleistung.

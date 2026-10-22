@@ -1,9 +1,10 @@
 // O03 IT: Systemlandkarte, Projektvergleich, Meilensteine und clusterweiser Rollout.
 import { esc, geld } from './format.js';
+import { itProdukteKarten, itProduktDetail } from './it-produkte.js';
 
 export function itModul(ctx) {
   const { E }=ctx, s=()=>ctx.s();
-  const ui={ aktiv:false, reiter:'systeme', system:'kasse', art:'kaufen', generation:3, auswahl:null, projekt:null };
+  const ui={ aktiv:false, reiter:'systeme', system:'kasse', art:'kaufen', generation:3, auswahl:null, projekt:null, produkt:null, bestaetigung:false };
   const optionen=['kaufen','entwickeln','dienstleister'];
   const artName={kaufen:'Standardsoftware',entwickeln:'Eigenentwicklung',dienstleister:'Dienstleister'};
   const phasen={konzept:'Konzept',umsetzung:'Umsetzung',rollout:'Rollout',abgeschlossen:'Abgeschlossen'};
@@ -12,7 +13,7 @@ export function itModul(ctx) {
   function zeile(t,wert){return '<div class="zeile"><span class="was">'+esc(t)+'</span><b class="uq" style="min-width:90px">'+esc(String(wert))+'</b></div>';}
   function balken(w){return '<div class="it-fortschritt"><i style="width:'+Math.max(0,Math.min(100,Math.round(w*100)))+'%"></i></div>';}
   function reiter(){
-    return '<div class="tabs">'+[['systeme','Systeme'],['projekte','Projekte'],['neu','Neues Projekt']].map(x=>
+    return '<div class="tabs">'+[['systeme','Systeme'],['produkte','Produkte'],['projekte','Projekte'],['neu','Neues Projekt']].map(x=>
       '<button type="button" class="tab '+(ui.reiter===x[0]?'an':'')+'" data-it="reiter" data-v="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>';
   }
   function systemKarte(x) {
@@ -111,11 +112,16 @@ export function itModul(ctx) {
     h+='</div>';
     return h;
   }
+  function produkte(){
+    const k=E.itProdukte(s());
+    const p=k.find(x=>x.id===ui.produkt);
+    return p ? itProduktDetail(p,ui.bestaetigung) : itProdukteKarten(k);
+  }
   function zeichnen(){
     if(!ui.aktiv)return;
-    const d=daten(),seiten={systeme:'Systemlandkarte',projekte:'IT-Projekte',neu:'Neues IT-Projekt'};
+    const d=daten(),seiten={systeme:'Systemlandkarte',produkte:'Digitale Produkte',projekte:'IT-Projekte',neu:'Neues IT-Projekt'};
     ctx.panel('IT · '+seiten[ui.reiter], 'CDO / Bereich IT · '+d.projekte.filter(x=>x.phase!=='abgeschlossen').length+' aktive Projekte',reiter()+
-      (ui.reiter==='systeme'?systeme(d):ui.reiter==='projekte'?projekte(d):neu(d)),'gross');
+      (ui.reiter==='systeme'?systeme(d):ui.reiter==='produkte'?produkte():ui.reiter==='projekte'?projekte(d):neu(d)),'gross');
     ui.aktiv=true;
   }
   function aktion(a){
@@ -127,7 +133,34 @@ export function itModul(ctx) {
   function bearbeiten(el){
     const v=el.dataset.v, d=daten();
     switch(el.dataset.it){
-      case 'reiter':ui.reiter=v;ui.auswahl=null;break;
+      case 'reiter':ui.reiter=v;ui.auswahl=null;ui.produkt=null;ui.bestaetigung=false;break;
+      case 'produkt':ui.reiter='produkte';ui.produkt=v;ui.bestaetigung=false;break;
+      case 'zurueck':ui.produkt=null;ui.bestaetigung=false;break;
+      case 'abschalten':ui.bestaetigung=true;break;
+      case 'abbrechen':ui.bestaetigung=false;break;
+      case 'team':{
+        const r=E.fuehreAus(s(),{typ:'itProduktTeam',produkt:v,anzahl:Number(el.dataset.n)});
+        ctx.meldung(r.text,!r.ok);if(r.ok)ctx.nachAktion?.();break;
+      }
+      case 'aktiv':{
+        const p=E.itProdukte(s()).find(x=>x.id===v);if(!p)return;
+        const r=E.fuehreAus(s(),{typ:'itProduktAktiv',produkt:v,an:!p.aktiv});
+        ctx.meldung(r.text,!r.ok);if(r.ok)ctx.nachAktion?.();
+        ui.bestaetigung=false;break;
+      }
+      case 'modernisieren':{
+        const p=E.itProdukte(s()).find(x=>x.id===v);if(!p)return;
+        if(v==='mobile_pay'){
+          const k=d.systeme.find(x=>x.id==='kasse'),stufe=k?.kasseAusbau?.mobil??0;
+          if(k?.generation>=3){
+            if(stufe>=2){ctx.meldung('Mobile Kasse ist bereits vollständig ausgebaut.',false);break;}
+            const r=E.fuehreAus(s(),{typ:'itKasseAusbau',art:'mobil',stufe:stufe+1});
+            ctx.meldung(r.text,!r.ok);if(r.ok)ctx.nachAktion?.();break;
+          }
+        }
+        ui.reiter='neu';ui.system=p.system;ui.generation=Math.max(3,p.generation+1);
+        ui.auswahl=null;ui.produkt=null;break;
+      }
       case 'neues':ui.reiter='neu';ui.system=v;ui.auswahl=null;ui.generation=3;break;
       case 'art':ui.art=v;if(v==='dienstleister')ui.generation=3;else if(v==='kaufen'&&ui.generation>3)ui.generation=3;break;
       case 'generation':ui.generation=Number(v);ui.auswahl=null;break;
@@ -167,7 +200,7 @@ export function itModul(ctx) {
     if(el.dataset.itChange==='system'){ui.system=el.value;ui.auswahl=null;ui.generation=3;zeichnen();}
     if(el.dataset.itCluster){const ids=auswahl(daten());if(el.checked)ids.add(el.dataset.itCluster);else ids.delete(el.dataset.itCluster);zeichnen();}
   });
-  return {oeffne:(seite='systeme')=>{ui.aktiv=true;ui.reiter=seite;ui.auswahl=null;zeichnen();},
+  return {oeffne:(seite='systeme',produkt=null)=>{ui.aktiv=true;ui.reiter=seite;ui.produkt=seite==='produkte'?produkt:null;ui.bestaetigung=false;ui.auswahl=null;zeichnen();},
     zu:()=>{ui.aktiv=false;},aktiv:()=>ui.aktiv,
     pruefe:()=>({seite:ui.reiter,systeme:daten().systeme.length,projekte:daten().projekte.length})};
 }

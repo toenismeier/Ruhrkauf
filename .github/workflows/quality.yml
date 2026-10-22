@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: quality-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  group: quality-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 permissions:
@@ -155,9 +155,13 @@ jobs:
           if-no-files-found: ignore
 
   fingerabdruck:
-    name: Stadt-Fingerabdruck (112 Städte)
+    name: Stadt-Fingerabdruck (220 Städte, Teil ${{ matrix.teil }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        teil: ['1/2', '2/2']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -170,7 +174,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
         working-directory: render
       - name: Plan, Geometrie und Referenzbilder prüfen
-        run: npm run fingerabdruck:pruefen
+        run: node pruef-fingerabdruck.js --teil=${{ matrix.teil }}
         working-directory: render
         env:
           FINGERABDRUCK_ZEITLIMIT_S: '2400'

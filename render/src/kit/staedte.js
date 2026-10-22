@@ -9,7 +9,7 @@ const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { rng, zw } from './basis.js';
 import { ARCHETYPEN, ARCHETYP_DEFS, TYPEN, wahlGewichtet } from './stadtplan.js';
 import './archetypen/index.js';   // registrierte Archetypen bringen über def.staedte eigene Städte mit
-import { fussabdruck } from './bauer.js';
+import { fussabdruck, WARENHAUS_VARIANTEN } from './bauer.js';
 import { masse } from './warenhaus.js';
 import { NAMEN as WB_NAMEN } from './wettbewerber.js';
 import haeuser from '../../haeuser.json';
@@ -17,6 +17,7 @@ import schwesterHauser from '../../haeuser-schwester.json';
 import { NAME_SCHWESTER, masseSchwester, familieSchwester } from './schwesterhaus.js';
 import haeuserOutlet from '../../haeuser-outlet.json';
 import { NAME_OUTLET } from './outlet.js';
+import { STADT_GEOGRAFIE } from './stadt-geografie.js';
 
 /** Region aus der echten Lage der Stadt (grob: Nord, Ost, West = NRW, Mitte = Hessen/RLP/Saar/Südniedersachsen, Süd = BW/BY). */
 const REGION_VON = {
@@ -41,7 +42,8 @@ function pluginBild() {
   return m;
 }
 /** Städte der ehemaligen DDR (aus den registrierten Archetypen mit ddr: true; Region bleibt, Rostock/Stralsund/Schwerin sind 'nord'). */
-export const DDR_STAEDTE = new Set([...pluginBild()].filter(([, [a]]) => ARCHETYP_DEFS[a]?.ddr).map(([s]) => s));
+export const DDR_STAEDTE = new Set([ ...[...pluginBild()].filter(([, [a]]) => ARCHETYP_DEFS[a]?.ddr).map(([s]) => s),
+  ...Object.entries(STADT_GEOGRAFIE).filter(([, meta]) => meta.ddr).map(([name]) => name) ]);
 
 /**
  * Stadtbild nach echter Geografie: [archetyp, extra]. Hafen- und Küstenstädte bekommen Wasser als Umland,
@@ -83,18 +85,22 @@ const WETTBEWERBER = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1
 const WB_FLAECHE = { metropole: [2600, 5200], grossstadt: [1800, 3800], mittelstadt: [1500, 2600] };
 
 function baueEintrag(name, liste) {
-  const typ = liste[0]?.cluster ?? schwesterHauser.find((h) => h.stadt === name)?.cluster ?? haeuserOutlet.find((h) => h.stadt === name)?.cluster ?? 'mittelstadt';
+  const geo = STADT_GEOGRAFIE[name];
+  // Der aktuelle Engine-Städtestamm bestimmt die Größenklasse, nicht ältere Exporte.
+  const typ = geo?.typ ?? liste[0]?.cluster ?? schwesterHauser.find((h) => h.stadt === name)?.cluster ?? haeuserOutlet.find((h) => h.stadt === name)?.cluster ?? 'mittelstadt';
   const seed = stadtSeed(name);
   const r = rng(seed * 13 + 5);
-  const region = REGION.get(name) ?? 'mitte';
+  const region = REGION.get(name) ?? geo?.region ?? 'mitte';
   const plug = PLUGIN_BILD.get(name);
-  const ddr = !!(plug && ARCHETYP_DEFS[plug[0]]?.ddr);
-  const bild = plug ?? BILD[name];
+  const ddr = !!(plug && ARCHETYP_DEFS[plug[0]]?.ddr) || !!geo?.ddr;
+  const bild = plug ?? BILD[name] ?? (geo?.bild ? [geo.bild, geo.extra ?? {}] : undefined);
   const archetyp = bild?.[0] ?? wahlGewichtet(r, Object.entries(ARCHETYPEN).map(([k, v]) => [k, v.gewicht[TYPEN[typ].idx]]));
   const extra = { ...(bild?.[1] ?? {}), ...(ddr ? { ddr: true } : {}) };
   const standorte = liste.map((h) => {
-    const f = fussabdruck(h);
-    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+    const v = WARENHAUS_VARIANTEN.get(h.id);
+    const f = fussabdruck(h, v?.familie);
+    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, hausklasse: h.hausklasse, premium: h.klasse === 'premium', grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d,
+      ...(v ? { familie: v.familie, variante: v.fassade } : {}) };
   });
   // Eine Schwesterfiliale pro ausgewaehlter Stadt. Hartwig behält die zentrale Einkaufslage.
   // Die Daten sind rein grafisch und gehoeren nicht zum Engine-Portfolio.
@@ -192,15 +198,9 @@ function baueEintrag(name, liste) {
 const PLUGIN_BILD = pluginBild();
 const WB_GENUTZT = new Map();   // Region → Map(Art → Anzahl), siehe baueEintrag
 const VIELFALT = [];            // bereits gebaute Einträge: { name, region, wb, kirche, konzern } für die Nachbarprüfung
-/** Ungefähre Lage (Breite, Länge) der West-Städte; Nachbarn liegen näher als NACHBAR_KM (direkte Nachbarstädte im Ballungsraum). */
+/** Geografie aller 220 Engine-Städte für die bundesweite 28-km-Nachbarprüfung. */
 const NACHBAR_KM = 28;
-const KOORD = {
-  'Köln': [50.94, 6.96], 'Düsseldorf': [51.23, 6.78], Essen: [51.46, 7.01], Dortmund: [51.51, 7.47], Oberhausen: [51.47, 6.85], Duisburg: [51.43, 6.76],
-  Bochum: [51.48, 7.22], Wuppertal: [51.26, 7.15], 'Münster': [51.96, 7.63], Aachen: [50.78, 6.08], Bonn: [50.74, 7.10], Hagen: [51.36, 7.47], Marl: [51.66, 7.09],
-  Moers: [51.45, 6.63], 'Mönchengladbach': [51.19, 6.44], Gelsenkirchen: [51.51, 7.10], 'Mülheim': [51.43, 6.88], Solingen: [51.17, 7.08], Paderborn: [51.72, 8.75],
-  Bielefeld: [52.02, 8.53], Siegen: [50.88, 8.02], Bottrop: [51.52, 6.93], Neuss: [51.20, 6.69], Wesel: [51.66, 6.62], Iserlohn: [51.38, 7.70], 'Lüdenscheid': [51.22, 7.63],
-  Witten: [51.44, 7.34], Krefeld: [51.33, 6.56], Hamm: [51.68, 7.82], Leverkusen: [51.03, 6.98], 'Gütersloh': [51.91, 8.38], Recklinghausen: [51.61, 7.20], 'Düren': [50.80, 6.48],
-};
+const KOORD = Object.fromEntries(Object.entries(STADT_GEOGRAFIE).map(([n, meta]) => [n, meta.koord]));
 function nachbarStaedteRoh(name) { const a = KOORD[name]; return a ? Object.keys(KOORD).filter((n) => n !== name && wurzelSumme((a[0] - KOORD[n][0]) * 111, (a[1] - KOORD[n][1]) * 70) < NACHBAR_KM) : []; }
 function nachbarnVon(name, region) {
   const a = KOORD[name];

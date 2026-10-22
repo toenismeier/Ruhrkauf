@@ -1,0 +1,63 @@
+/* Q19: Gestaltungssystem Q14, auf main mit identischen Fallback-Tokens nutzbar. */
+.itp-intro,.itp-detail {color:var(--ui-text,#242424);font-size:var(--ui-font-sm,14px);line-height:1.45;}
+.itp-intro {margin:8px 0 16px;color:var(--ui-muted,#62666a);}
+.itp-karten {display:grid;gap:var(--ui-space-3,12px);grid-template-columns:1fr;min-width:0;}
+.itp-karte {display:flex;gap:12px;text-align:left;width:100%;min-height:148px;background:var(--ui-surface,#fff);border:1px solid var(--ui-border,#e2e1dd);border-radius:var(--ui-radius,10px);padding:12px;color:var(--ui-text,#242424);font:inherit;overflow:hidden;align-items:center;cursor:pointer;}
+.itp-karte:focus-visible,.itp-detail button:focus-visible {outline:3px solid var(--ui-brand,#b32632);outline-offset:2px;}
+.itp-visual {width:96px;height:100px;flex:0 0 96px;border-radius:8px;background:var(--ui-bg,#f5f4f1);display:grid;place-items:center;color:#62666a;}
+.itp-bild {width:100%;max-width:105px;height:92px;display:block;}
+.itp-karteinhalt {min-width:0;flex:1;display:flex;flex-direction:column;gap:3px;}
+.itp-kartenkopf {display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+.itp-kartenkopf b {font-size:16px;line-height:22px;}
+.itp-status {display:inline-block;padding:2px 7px;border:1px solid var(--ui-border,#e2e1dd);border-radius:5px;font-size:12px;font-weight:600;color:var(--ui-positive,#247153);white-space:nowrap;}
+.itp-status.aus {color:var(--ui-negative,#a52d38);}
+.itp-kurz,.itp-einheit,.itp-kartenfuss {color:var(--ui-muted,#62666a);font-size:12px;line-height:17px;overflow-wrap:anywhere;}
+.itp-kartenzahl {font-size:24px;line-height:30px;font-variant-numeric:tabular-nums;margin-top:5px;}
+.itp-kartenfuss {border-top:1px solid var(--ui-border,#e2e1dd);padding-top:6px;margin-top:5px;display:flex;justify-content:space-between;}
+.itp-detail {min-width:0;padding-bottom:20px;}
+.itp-zurueck {font:inherit;border:0;background:none;color:var(--ui-text,#242424);min-height:44px;padding:8px 0;margin-bottom:4px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+.itp-hero {display:flex;gap:14px;align-items:center;padding:12px 0 14px;}
+.itp-heroillustration {width:118px;flex:0 0 118px;height:110px;background:var(--ui-bg,#f5f4f1);border:1px solid var(--ui-border,#e2e1dd);border-radius:10px;display:grid;place-items:center;color:#62666a;}
+.itp-herotext {min-width:0;flex:1;}
+.itp-ueber {display:block;color:var(--ui-muted,#62666a);font-size:12px;letter-spacing:0.07em;}
+.itp-herotext h3 {font-size:24px;line-height:30px;overflow-wrap:anywhere;margin:6px 0 8px;}
+.itp-beschreibung {margin:0 0 16px;}
+.itp-beschreibung p {margin:0 0 6px;}
+.itp-abschnitt {background:var(--ui-surface,#fff);border:1px solid var(--ui-border,#e2e1dd);border-radius:var(--ui-radius,10px);padding:16px 14px;margin:0 0 10px;min-width:0;}
+.itp-abschnitt h4 {font-size:16px;line-height:24px;margin:0 0 10px;font-weight:700;}
+.itp-abschnittkopf {display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.itp-abschnittkopf h4 {margin:0;}
+.itp-abschnittkopf span {color:var(--ui-muted,#62666a);font-size:12px;overflow-wrap:anywhere;}
+.itp-hauptzahl {font-size:38px;line-height:46px;font-weight:750;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;margin:12px 0 0;}
+.itp-delta {display:block;color:var(--ui-muted,#62666a);font-size:12px;line-height:19px;margin-top:2px;}
+.itp-delta.positiv {color:var(--ui-positive,#247153);}
+.itp-delta.negativ {color:var(--ui-negative,#a52d38);}
+.itp-verlauf {margin-top:16px;min-width:0;}
+.itp-verlauf svg {display:block;width:100%;height:90px;overflow:visible;}
+.itp-raster {fill:none;stroke:var(--ui-border,#e2e1dd);stroke-width:1;}
+.itp-linie {fill:none;stroke:var(--ui-brand,#b32632);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.itp-punkt {fill:var(--ui-surface,#fff);stroke:var(--ui-brand,#b32632);stroke-width:2;}
+.itp-achse {display:flex;justify-content:space-between;gap:4px;margin-top:6px;}
+.itp-achse span {font-size:11px;color:var(--ui-muted,#62666a);font-variant-numeric:tabular-nums;text-align:center;min-width:0;display:flex;flex-direction:column;overflow-wrap:anywhere;}
+.itp-achse b {font-size:11px;color:var(--ui-text,#242424);font-weight:600;white-space:nowrap;}
+.itp-leer {color:var(--ui-muted,#62666a);font-size:13px;margin:16px 0 0;}
+.itp-datenzeile {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 0;min-height:44px;border-top:1px solid var(--ui-border,#e2e1dd);}
+.itp-datenzeile span {color:var(--ui-muted,#62666a);min-width:0;flex:1;overflow-wrap:anywhere;}
+.itp-datenzeile b {font-size:14px;font-variant-numeric:tabular-nums;text-align:right;max-width:65%;overflow-wrap:anywhere;}
+.itp-sterne {display:inline-flex;gap:2px;flex:0 0 auto;}
+.itp-sterne svg {width:17px;height:17px;fill:none;stroke:#62666a;stroke-width:1.4;}
+.itp-sterne svg.voll {fill:#62666a;}
+.itp-taste {min-height:44px;padding:10px 14px;border-radius:var(--ui-radius,10px);font-size:14px;font-weight:700;border:1px solid var(--ui-border,#e2e1dd);cursor:pointer;}
+.itp-taste.sekund {background:#fff;color:var(--ui-text,#242424);}
+.itp-taste.primaer {background:var(--ui-brand,#b32632);color:#fff;border-color:var(--ui-brand,#b32632);}
+.itp-taste.warnung {background:#fff;color:var(--ui-negative,#a52d38);border-color:var(--ui-negative,#a52d38);}
+.itp-taste:disabled {opacity:0.4;cursor:default;}
+.itp-abschnitt > .itp-taste {margin-top:10px;}
+.itp-team {display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+.itp-team strong {font-size:28px;font-variant-numeric:tabular-nums;}
+.itp-team span {flex:1;min-width:70px;color:var(--ui-muted,#62666a);}
+.itp-hinweis {color:var(--ui-muted,#62666a);font-size:12px;line-height:18px;margin:12px 0 0;}
+.itp-gefahr p {margin:2px 0 12px;line-height:20px;}
+.itp-aktionen {display:flex;gap:8px;flex-wrap:wrap;}
+@media(min-width:700px){.itp-karten{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:360px){.itp-visual{width:76px;flex-basis:76px;height:90px}.itp-heroillustration{width:90px;flex-basis:90px}.itp-karte{padding:10px;gap:9px}}

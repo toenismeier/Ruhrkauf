@@ -1,10 +1,10 @@
-// Kontaktbogen der vier einmaligen Luxusfassaden.
+// Kontaktbogen der fünf einmaligen Luxusfassaden.
 import { sockel, THREE } from '../kit/basis.js';
 import { zeigeKatalog } from '../kit/katalog.js';
 import { premiumhaus } from '../kit/premium.js';
 import haeuser from '../../haeuser.json';
 const premium=haeuser.filter(h=>h.klasse==='premium');
-if(premium.length!==4) throw new Error('Vier Premiumhäuser fehlen im JSON');
+if(premium.length!==5) throw new Error('Fünf Premiumhäuser fehlen im JSON – Engine-Export neu erstellen');
 const zustaende=[
   [{status:'offen'},'Regelbetrieb'],
   [{status:'umbau',zusatz:['neueroeffnung']},'Investition / Umbau'],

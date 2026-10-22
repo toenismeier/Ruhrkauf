@@ -3,15 +3,17 @@ export * from './types';
 export { planungBericht, planungAssistent, planJahr, planWoche, planBudgetFaktor, forecastVertrauensDelta } from './planung';
 export type { PlanungStand, Jahresplan, PlanZiele, PlanKnoten, PlanungAktion, Quartalsforecast } from './planung';
 export { neuesSpiel, wocheAbspielen, vorschau, type VorschauWoche } from './engine';
+export { vertriebUebersicht, mietvertragEmpfehlung, type VertriebsUebersicht, type VertriebsZeile, type VertriebsKennzahlen, type VorjahrWoche, type VertriebsFormat, type VertriebsZeitraum } from './vertrieb';
 export { fuehreAus, type SpielerAktion, type Ergebnis } from './aktionen';
-export { organisationUebersicht, kapitalfluss, posteingang, cockpit, portfolio, hausDetail, warenwirtschaft, kreditversicherung, hqUebersicht, hqFuerGrafik, einkaufUebersicht, wgDetail, freigaben, eigenmarkenUebersicht, eigenmarkeVorschau } from './abfragen';
-export { vorstandUebersicht, vorstandProfil, kandidaten, angebotsChance, produkte, produktKatalog, trendbericht, produktVorschau } from './abfragen';
+export { organisationUebersicht, kapitalfluss, posteingang, cockpit, portfolio, formatCockpit, schliessungVorschau, hausDetail, warenwirtschaft, kreditversicherung, hqUebersicht, hqFuerGrafik, einkaufUebersicht, wgDetail, freigaben, eigenmarkenUebersicht, eigenmarkeVorschau } from './abfragen';
+export { vorstandUebersicht, vorstandProfil, kandidaten, angebotsChance, produkte, produktKatalog, trendbericht, produktVorschau, produktAbsatzVerlauf, produktLinienprofil } from './abfragen';
 export {
-  ABTEILUNGEN, ABTEILUNG_NAME, HQ_PARAM, HQ_TYPEN, HQ_WIRKUNG, sollFte,
+  ABTEILUNGEN, ABTEILUNG_NAME, HQ_PARAM, HQ_TYPEN, HQ_WIRKUNG, sollFte, abteilungKapazitaet, abteilungArbeitsklima,
   type AbteilungId, type Abteilung, type Hq, type HqAngebot, type HqEtage, type HqGebaeude, type HqTyp, type Stufe,
   type HqUebersicht, type HqGrafik, type HqKosten,
 } from './hq';
-export { GRUPPEN, gruppenFuer, STAEDTE, STADT_REGIONEN, stadtRegion } from './daten';
+export { GRUPPEN, gruppenFuer, sortimentVon, STAEDTE, STADT_REGIONEN, stadtRegion } from './daten';
+export { outletUebersicht, schwesterUebersicht, outletKandidaten, type FormateStand, type FormatPosten } from './formate';
 // O05 Ware
 export { warenUebersicht, warenHaus, fundusFrequenzFaktor, clusterListe, hausclusterId, type WareAktion, type WareStand } from './merchandise';
 export { STANDARD_SZENARIO, type Szenario } from './welt';
@@ -34,7 +36,7 @@ export {
 } from './vorstand';
 export {
   ARTIKELTYPEN, ZUSATZ_ARTIKEL, ZUSATZ_ARTIKELTYPEN, FARBEN, MATERIALIEN, PRODUKT_KATEGORIEN, PRODUKT_PARAM, DAUER_STUFEN, TREND_GRUPPEN, trendFuer, produktNachfrageFaktor, produktMargeDelta,
-  type ArtikelTyp, type Produktsparte, type Farbe, type Material, type ProduktKategorie, type TrendGruppe, type Produkt, type ProduktEntwurf, type ProduktAktion, type ProdukteStand,
+  type ArtikelTyp, type ArtikelBild, type SortimentTyp, type SortimentName, SORTIMENT_TYPEN, type Produktsparte, type Farbe, type Material, type ProduktKategorie, type TrendGruppe, type Produkt, type ProduktEntwurf, type ProduktAktion, type ProdukteStand,
   type ProduktKarte, type ProdukteListe, type MarkenProdukte, type ProduktKatalog, type Trendbericht, type TrendSaison, type ProduktVorschau, type SterneTeile,
 } from './produkte';
 export {
@@ -44,7 +46,8 @@ export {
   type CrmFrequenz, type CrmKampagne, type CrmErgebnis, type Mechanik, type Anlass, type AktionEntwurf, type MarketingAktion, type MarketingStand, type MarketingSzenario,
   type MarketingUebersicht, type MarketingVerlauf, type MarketingKosten, type KanalZeile, type KalenderVorlage,
 } from './marketing';
-export { SCHWIERIGKEIT, SCHWIERIGKEITEN, schwierigkeit, type SchwierigkeitId, type SchwierigkeitParam } from './schwierigkeit';
+export { marketingStaedte, type MarketingStadt, type MarketingStadtDaten } from './marketing-stadt';
+export { SCHWIERIGKEIT, SCHWIERIGKEITEN, SZENARIO_STUFENTEXTE, schwierigkeitenFuerSzenario, schwierigkeit, type SchwierigkeitId, type SchwierigkeitParam } from './schwierigkeit';
 
 export type { Posteingang, PostHandeln, PostMeldung, PostErledigt, PostBezug, PostKategorie } from './abfragen';
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './abfragen';
@@ -56,6 +59,7 @@ export {
   endwertung, ebitdaJahr, immobilienWert, unternehmenswert, endKennzahlen, spielBeenden, spielendePruefen,
 } from './spielende';
 // O03 IT
+export { IT_PRODUKT_IDS, itProdukte, itProduktZustand, type ItProduktId } from './it-produkte';
 export { SYSTEME, IT_IDS, itUebersicht, itDeckel, itDeckelGrund, itCluster, itProjektPlan, generationInCluster, itAlter, ausfallRisiko, type ItStand, type ItSystemId, type ItProjekt, type ItAktion, type ItPhase, type ProjektArt, type Generation } from './it';
 
 export { PREMIUM_HAEUSER } from './daten';

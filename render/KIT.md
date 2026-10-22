@@ -26,7 +26,7 @@ Bildsprache: **Coffee Inc 2**. Referenzbilder liegen in `/home/claude/render/ref
   Hintergrund und Schrift; keine eigenen Caches in den Modulen). Alle Texte auf Deutsch mit echten Umlauten.
 - Keine echten Marken oder Firmennamen. Eigene Kette heißt **Hartwig** (Warenhaus, Rot `#d23c32`) und **Hartwig Sport**.
 - Budget: ein normales Gebäude ≤ 2.500 Teile im Sammler, ein Warenhaus ≤ 8.000.
-- Premium-Kronjuwelen (separater Trophy-Store-Bauer): **Ziel 4.000 bis 9.000 Teile** je Gebäude (absolute Obergrenze 12.000), keine Fassadenfamilien. Vier eigenständige Silhouetten, Relief aus echten Fassadendetails. Zustandsatlas `premium-zustaende` = vier Häuser × zwölf Grundzustände und zwei Verkaufsvarianten. Prüfen über `S.anzahl`.
+- Premium-Kronjuwelen (separater Trophy-Store-Bauer): **Ziel 4.000 bis 9.000 Teile** je Gebäude (absolute Obergrenze 12.000), keine Fassadenfamilien. Fünf eigenständige Silhouetten, Relief aus echten Fassadendetails. Zustandsatlas `premium-zustaende` = fünf Häuser × zwölf Grundzustände und zwei Verkaufsvarianten. Prüfen über `S.anzahl`.
 - **FUNDUS (Off-Price):** Ziel 900–1.800 Teile je Haus im Nah-LOD, absolute Obergrenze 3.000; alle 20 Häuser plus die drei Bauformen separat im Katalog und über die `teile`-Rückgabe prüfen. `fern`-LOD reduziert insbesondere die einzelnen Warenstücke. Breites 3,5-m-Markenband, weiße Versalien, Claim, 9-m-Pylon und drei klar getrennte Bauformen sind verbindliche Qualitätsmerkmale.
 - Deterministisch: Zufall nur über `rng(seed)`.
 
@@ -72,6 +72,17 @@ in allen Stufen gleich, es entfallen nur Teile.
 - Prüfen: `cd render && node pruef-moebel.js` (oder `npm run moebel:pruefen`). Testet tatsächliche Geometrie-Abmessungen, Rückkanten, Höhen, Bauteilbudgets, reproduzierbare Farbe/Geometrie und Fernstufe. Erwartung: 0 Fehler.
 - Kataloge: `node render-katalog.js moebel-sport`, `moebel-outlet`, `moebel-allgemein`, `moebel-reihen` und optional `moebel-sport-fern`. Ergebnisse unter `render/out/katalog-moebel-*.png`; der Grafik-CI-Workflow stellt die vier Kernkataloge zusätzlich als Artifact `ladenbau-kataloge` bereit.
 - Alte Aufrufer (`innen.js`, `sportabteilung.js`) bleiben unverändert. Der gemeinsame Ladenplaner aus Phase 3 wird die IDs verwenden.
+
+
+## Maßstab – 220 Städte und 560 Filialen (Feature-Branch `feat/massstab-staedte`, 20.10.2026)
+
+**Entwicklung, noch nicht abgenommen.** Stadtstamm aus `engine/src/daten.ts` (220 Städte; 7 Metropolen, 73 Großstädte, 140 Mittelstädte), Render-Geografie und Koordinaten aus `src/kit/stadt-geografie.js`. Alte 112 Stadtbilder in `src/kit/staedte.js` behalten ihre regionalen Sonderentwürfe; 108 neue erhalten explizite Grundrissfamilien, regionale Zuordnung und DDR-Prägung statt Zufallsauswahl. Nachbarstädte werden bundesweit mit demselben 28-km-Radius auf Basis gerundeter Stadtkoordinaten bestimmt.
+
+Die Render-Exporte aus `engine/scripts/haeuser-export.ts` müssen vor dem endgültigen Grafiktest mit Seed 1 neu erzeugt werden: `haeuser.json` 408 (360 reguläre Hartwig, 4 Premium, 44 Sport), `haeuser-schwester.json` 86 (Volkskauf), `haeuser-outlet.json` 66 (FUNDUS). Der Stand des Ausgangsbranches enthält bisher nur 180/24/20 Exporte, deshalb sind die neuen Kataloge noch nicht belastbar renderbar.
+
+Kataloge nach dem Export: `stadtvielfalt-neu` (24 neue Städte, fünf Regionen), `standorte-mix` (zehn gemischte Städte), `alle-hartwig-1` bis `alle-hartwig-6` (60 pro Seite), `alle-premium` (4), `alle-volkskauf-1`/`-2` (60/26), `alle-sport` (44), `alle-fundus`/`alle-fundus-2` (60/6). Ausgabe `node render-katalog.js <name>` nach `npm ci`.
+
+Qualitätsprüfungen: `npm run massstab:geografie` (220 Städte/Cluster), `npm run massstab:standorte` (eindeutige Platzierung, Blockabstand, Nebenzentren), `npm run massstab:kopien` (Hausfamilie/Variante/Fassade unter 50 km), `npm run massstab:gestaltung` (alle exportierten Städte). Danach `node pruef-staedte.js`, `node spiel-render.js` und Bildabnahme in drei Runden durchführen. **Diese npm-, Bild- und Renderprüfungen sind im Feature-Branch noch nicht ausgeführt**; bis dahin keine Merge-Freigabe.
 
 ## Ladenbau Phase 5 – FUNDUS innen
 - `src/kit/ladenbau-outlet.js`: Geschoss- und Sortimentsadapter (aktuell 20 FUNDUS-Filialen, insgesamt 35 Verkaufsetagen); `src/kit/outlet.js` verwendet `ladenplan` und `baueLadenplan` auch für zweigeschossige Fachmärkte und Innenstadt-Geschäftshäuser.

@@ -144,8 +144,19 @@ async function messen(name, optionen = {}) {
     Object.assign(sonne.shadow.camera, { left: -r, right: r, top: r, bottom: -r });
     sonne.shadow.camera.updateProjectionMatrix();
     const ren = renderer(BREITE, HOEHE);
+    // Diagnose (nur Ausgabe, keine Referenzdaten): Draw Calls je Objektart und Durchgang (Schatten/Bild).
+    const aufschluesselung = new Map();
+    const original = ren.renderBufferDirect.bind(ren);
+    ren.renderBufferDirect = (camera, scene, geometry, material, object, group) => {
+      const pass = camera === cam ? 'bild' : 'schatten';
+      const art = object.isInstancedMesh ? 'I ' + (object.userData.diagArt ?? '?') : object.isMesh ? 'M ' + (object.userData.diagArt ?? (object.name || (object.parent?.name || object.parent?.type || '') + ' ' + (object.material?.type || '') + ' ' + (object.geometry?.index ? object.geometry.index.count / 3 : (object.geometry?.attributes?.position?.count ?? 0) / 3 > 5000 ? 'gross' : 'klein'))) : 'S ' + object.type;
+      const k = pass + ' | ' + art;
+      aufschluesselung.set(k, (aufschluesselung.get(k) ?? 0) + 1);
+      return original(camera, scene, geometry, material, object, group);
+    };
     ren.render(szene, cam);
-    const leistung = { drawCalls: ren.info.render.calls, dreiecke: ren.info.render.triangles };
+    const leistung = { drawCalls: ren.info.render.calls, dreiecke: ren.info.render.triangles,
+      aufschluesselung: [...aufschluesselung].sort((x, y) => y[1] - x[1]) };
     const bild = ren.domElement.toDataURL('image/png').split(',')[1];
     const teile = [...einzeln.entries()].map(([id, z]) => ({ id, ...fertig(z) })).sort((a, b) => a.id.localeCompare(b.id, 'de'));
     return {

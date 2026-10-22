@@ -11,6 +11,7 @@ import { zustandNormal, zustandFlags, zustandsDekor, eigeneMieterflaechen, laden
 import { seitenVon as seitenFremd, plakat as plakatFremd, passend as passendFremd } from './sporthelfer.js';
 import { WETTBEWERBER_FARBEN } from './wettbewerber.js';
 import { dachInstallationen } from './dach-qualitaet.js';
+import { STADT_GEOGRAFIE } from './stadt-geografie.js';
 
 export const ROT = '#d23c32';
 export const EG = 5.5, GH = 4.5;
@@ -18,7 +19,7 @@ export const FAMILIEN = { 1: 'Kaiserzeit', 2: 'Neue Sachlichkeit', 3: 'Nachkrieg
   8: 'Aluwabe', 9: 'Kachelraster Ost', 10: 'Glasvorhang 70er Ost', 11: 'Magistrale 50er' };
 
 /** Städte der ehemaligen DDR (Berlin nur teilweise, siehe istOstHaus). */
-export const DDR_STAEDTE = ['Berlin', 'Dresden', 'Leipzig', 'Magdeburg', 'Erfurt', 'Chemnitz', 'Halle', 'Potsdam', 'Cottbus', 'Jena', 'Zwickau', 'Görlitz', 'Dessau', 'Gera', 'Weimar', 'Rostock', 'Stralsund', 'Schwerin'];
+export const DDR_STAEDTE = Object.keys(STADT_GEOGRAFIE).filter((name) => STADT_GEOGRAFIE[name].ddr || ['Berlin', 'Rostock', 'Stralsund', 'Schwerin', 'Dresden', 'Leipzig', 'Magdeburg', 'Erfurt', 'Chemnitz', 'Halle', 'Potsdam', 'Cottbus', 'Jena', 'Zwickau', 'Görlitz', 'Dessau', 'Gera', 'Weimar'].includes(name));
 const anteil = (id, salz) => rng(`${id}/${salz}`)();
 /**
  * Ehemaliges DDR-Warenhaus? Nur Warenhäuser außerhalb von Centern (Grundfläche/Mall-Flügel bleiben unverändert).
@@ -51,6 +52,9 @@ const SLOGANS = ['LAUF LOS.', 'RAUS. JETZT.', 'NEUE SAISON', 'BERG RUFT.', 'DEIN
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 // ---------------------------------------------------------------- Daten → Form
+/** Anzahl Fassadenvarianten je Familie (Index haus.fassade). */
+export const VARIANTEN = (fam) => (fam === 6 ? 16 : fam === 5 ? 12 : 8);
+
 export function familieVon(haus) {
   if (haus.format === 'sport') return 7;
   if (haus.lage === 'center') return 6;
@@ -1009,8 +1013,9 @@ function familie4(K) {
 // ---------------------------------------------------------------- Familie 5: Glas / Postmoderne (1981 bis 2015)
 function familie5(K) {
   const { S, v, x0, z0, w, d, n, Hw } = K;
-  const stil = ['pomo', 'glas', 'pomo', 'stein', 'glas', 'stein', 'pomo', 'glas'][v];
-  const basisF = K.c({ pomo: ['#eadfce', '#e6dccf', '#efe4d2'][v % 3], stein: '#dcd9d2', glas: '#d5dcdf' }[stil]);
+  const stil = ['pomo', 'glas', 'pomo', 'stein', 'glas', 'stein', 'pomo', 'glas', 'stein', 'glas', 'pomo', 'stein'][v];
+  // Varianten 8 bis 11: wärmere bzw. dunklere Verkleidung (Klinkerrot, Sandstein, Anthrazit, Terrakotta)
+  const basisF = K.c(v >= 8 ? ['#c99a82', '#d8c39f', '#9aa1a6', '#d6a98c'][v - 8] : { pomo: ['#eadfce', '#e6dccf', '#efe4d2'][v % 3], stein: '#dcd9d2', glas: '#d5dcdf' }[stil]);
   const akzent = K.c(['#3f8f8e', '#c46a55', '#2f6f8f', '#7a5aa0'][v % 4]);
   const band = K.c(['#d9a48f', '#c7b8a3', '#a9bfc9'][v % 3]);
   const A = clamp(Math.min(w, d) * 0.32, 8, 18);
@@ -1137,18 +1142,35 @@ function mallFluegel(K, xm, M, dm, hm) {
   S.box(2.2, 11, 1.0, px, 5.8, pz, '#2b3a4a');
   const sp = new Seite(S, px - 1.1, pz - 0.5, 2.2, 1.0, '+z');
   plakat(K, sp, 'EINKAUFEN', 1.1, 9.8, 0.04, 0.32, '#ffffff', '#2b3a4a');
-  // Dach: Glastonne + Parkdeck
+  // Dach: Glastonne + wahlweise offenes Parkdeck oder mehrgeschossiges Parkhaus.
   const g = new THREE.CylinderGeometry(3.2, 3.2, M - 4, 10, 1, false, -Math.PI / 2, Math.PI); g.rotateZ(Math.PI / 2); g.translate(xm + M / 2, hm + 0.4, zm + dm * 0.72); S.add(g, '#a9c6d3');
   for (let x = xm + 3; x < xm + M - 2; x += 3) { const rg = new THREE.TorusGeometry(3.25, 0.08, 3, 10, Math.PI); rg.rotateY(Math.PI / 2); rg.translate(x, hm + 0.4, zm + dm * 0.72); S.add(rg, '#eef1f2'); }
   S.quader(xm, hm, zm, xm + M, hm + 0.4, zm + dm, KIES_D);
-  if (dm * 0.72 - 4 > 10) parkdeck(K, xm + 1, zm + 1, xm + M - 1, zm + dm * 0.72 - 4.2, hm + 0.4, false);
+  if (dm * 0.72 - 4 > 10) {
+    if ([1, 4, 7].includes(K.v)) {
+      // Q21: Parkhausvariante ohne größere Grundfläche; gestapelte offene
+      // Decks statt eines immer gleichen ebenerdigen Parkplatz-Motivs.
+      const x1 = xm + 2, x2 = xm + M - 2;
+      const z1 = zm + 1, z2 = zm + dm * 0.72 - 4.2;
+      for (const y of [hm + 2.8, hm + 5.4]) {
+        S.quader(x1, y, z1, x2, y + 0.32, z2, '#7e858c'); // Farben aus parkdeck/STAHL: keine zusätzlichen Draw Calls
+        for (const px of [x1 + 1, x2 - 1]) for (const pz of [z1 + 1, z2 - 1])
+          S.box(0.65, 2.35, 0.65, px, y - 1.15, pz, STAHL);
+        for (const px of [x1 + 1, x2 - 1])
+          S.box(0.24, 0.9, z2 - z1, px, y + 0.75, (z1 + z2) / 2, STAHL);
+      }
+      parkdeck(K, x1, z1, x2, z2, hm + 5.72, false);
+    } else parkdeck(K, xm + 1, zm + 1, xm + M - 1, zm + dm * 0.72 - 4.2, hm + 0.4, false);
+  }
   if (K.alt) flecken(K, s, 0, M, EG, hm, 0.06, f, 6);
 }
 
 // ---------------------------------------------------------------- Familie 6: Kopfbau im Einkaufszentrum
 function familie6(K) {
   const { S, v, x0, z0, w, d, n, Hw } = K;
-  const verkl = K.c(['#d6d9db', '#e3dccf', '#cfd4d6', '#e6e0d4', '#d9d5cc', '#dfe2e3', '#d2cdc2', '#e2e4e4'][v]);
+  // Varianten 8 bis 15: Klinker, Sandstein, Anthrazit, Terrakotta, Taubenblau, Ocker, Umbra, Salbei (Center-Kopfbauten der
+  // dichten Rhein-Ruhr-Schiene ohne Kopie unter 50 km)
+  const verkl = K.c(['#d6d9db', '#e3dccf', '#cfd4d6', '#e6e0d4', '#d9d5cc', '#dfe2e3', '#d2cdc2', '#e2e4e4', '#b9806a', '#d4bf98', '#7f878d', '#c9906f', '#9fb0bd', '#b5a48c', '#8d7f72', '#a8b39f'][v]);
   const rueck = 0.7, ei = rueck + 0.1;
   K.tRelief = 0.3;
   mallFluegel(K, K.xm, K.M, Math.min(d, Math.max(26, d * 0.8)), Math.min(Hw, EG + GH * (n >= 3 ? 1 : 0) + 1.5));
@@ -1914,7 +1936,8 @@ export function warenhaus(S, scene, haus, opt = {}) {
   // Center-Häuser: Mall-Flügel links (Richtung −x), Kopfbau rechts
   const M = fam === 6 ? Math.max(40, Math.round((m.w * 0.85) / 5) * 5) : (fam === 7 && haus.lage === 'center' ? Math.max(25, Math.round((m.w * 0.5) / 5) * 5) : 0);
   const K = {
-    S, scene, haus, fam, v: ((haus.fassade ?? 0) % 8 + 8) % 8, r: rng(`${haus.id}:${haus.fassade}:${fam}`),
+    // Familie 5 hat zwölf, Familie 6 sechzehn Varianten (Maßstab: dichte Ruhr- und Rheinschiene ohne Kopien unter 50 km), sonst acht
+    S, scene, haus, fam, v: ((haus.fassade ?? 0) % VARIANTEN(fam) + VARIANTEN(fam)) % VARIANTEN(fam), r: rng(`${haus.id}:${haus.fassade}:${fam}`),
     n: m.n, H: m.H, Hw: m.H + (m.n === 1 ? (fam === 7 ? 4.0 : 2.4) : 0), w: m.w, d: m.d, x0: x + M, z0: z, xm: x, M,
     alt: (haus.substanz ?? 100) < 40 || F.alt, verblichen: F.verblichen, status: F.eg, zu: F.zu, ohneLogo: F.ohneLogo,
     zonen: {}, nutz: {}, eingaenge: [], fensterEG: [], abbauPos: {}, abbau: Z.status === 'geschlossen' && !Z.ohneMarke,

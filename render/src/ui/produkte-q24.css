@@ -1,0 +1,33 @@
+/* Q24: kompakte Sortimentsnavigation und Produktdetails, für 320-440 px Breite. */
+.q24-seg { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;margin:12px 0 10px;padding:3px;border-radius:11px;background:#e7ebed; }
+.q24-seg button { border:0;border-radius:8px;padding:12px 2px;min-width:0;font:inherit;font-size:calc(12px * var(--schrift));font-weight:600;color:#42515c;background:transparent; }
+.q24-seg button.an { color:#183d5c;background:#fff;box-shadow:0 1px 4px #24394a22; }
+.q24-chips { display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;padding:4px 1px 11px;scrollbar-width:thin; }
+.q24-chips button { flex:none;border:1px solid #cbd5da;border-radius:19px;background:#fff;color:#405260;font:inherit;font-size:calc(11px * var(--schrift));padding:9px 12px;min-height:40px; }
+.q24-chips button.an { color:#fff;background:#204e77;border-color:#204e77;font-weight:700; }
+.q24-anzahl { font-size:calc(12px * var(--schrift));color:#69737c;margin:3px 1px 10px; }
+.q24-baum { margin-top:5px; }
+.q24-typen { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:9px; }
+.q24-typen button { min-height:122px;padding:8px 5px;border:1px solid #d6dadd;border-radius:9px;background:#faf9f6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;overflow-wrap:anywhere; }
+.q24-typen button svg { max-width:100%;height:77px; }
+.q24-typen button span { font-size:calc(12px * var(--schrift));line-height:1.2; }
+.q24-typen button small { color:#a34c29; }
+.q24-typen button:focus-visible,.q24-chips button:focus-visible,.q24-seg button:focus-visible { outline:3px solid #2f63b5;outline-offset:2px; }
+.q24-katalogknopf { margin:10px 0 13px;background:#f5f7f7;color:#234a67;border:1px solid #aec3ce; }
+.q24-detailsknopf { display:block;margin:4px auto 11px;border:1px solid #d2d9da;background:#fff;color:#244967;border-radius:8px;padding:9px 12px;font:inherit;font-size:calc(12px * var(--schrift)); }
+.q24-detail {padding:14px;}
+.q24-detailbild {background:linear-gradient(#f8f6f1,#eeeae2);border-radius:12px;display:flex;align-items:center;justify-content:center;min-height:228px;margin-bottom:13px;overflow:hidden;}
+.q24-detailbild svg {width:min(100%,245px);max-height:240px;}
+.q24-detail h3 {font-size:calc(18px * var(--schrift));margin:0 0 12px;}
+.q24-detailwerte {display:grid;grid-template-columns:1fr 1fr;gap:12px 9px;margin-bottom:15px;}
+.q24-detailwerte div {display:flex;flex-direction:column;gap:3px;min-width:0;}
+.q24-detailwerte span {color:#69747a;font-size:calc(11px * var(--schrift));}
+.q24-detailwerte b {font-size:calc(13px * var(--schrift));overflow-wrap:anywhere;}
+.q24-leistung { margin:10px 0 12px;padding:12px;border:1px solid #d8deda;border-radius:11px;background:#fafaf8; }
+.q24-leistungstitel {display:flex;justify-content:space-between;gap:10px;font-size:calc(13px * var(--schrift));font-weight:600;margin-bottom:10px;}
+.q24-leistungstitel b {color:#244d70;}
+.q24-werte {display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.q24-werte span {border-radius:6px;background:#e9edf0;padding:6px 7px;color:#40515e;font-size:calc(11px * var(--schrift));}
+.q24-werte b {font-variant-numeric:tabular-nums;color:#183b56;}
+.q24-leistung>small {font-size:calc(10px * var(--schrift));color:#707b82;line-height:1.4;}
+@media(max-width:350px){.q24-seg button{font-size:calc(11px * var(--schrift));}.q24-typen{gap:5px;}}
