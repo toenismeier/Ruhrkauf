@@ -1,5 +1,5 @@
 import { neuesSpiel, produkte, produktVorschau, fuehreAus, produktNachfrageFaktor, produktMargeDelta } from '../src';
-import { markenLeistung, teamStaerke, trendFuer, TYP } from '../src/produkte';
+import { markenLeistung, teamStaerke } from '../src/produkte';
 
 describe('Q24: markenbezogene Produktentwicklung', () => {
   test('Leistung unterscheidet sich, ist deterministisch und bleibt im Mittel neutral', () => {
@@ -51,11 +51,12 @@ describe('Q24: markenbezogene Produktentwicklung', () => {
     });
     expect(v.ok).toBe(true);
     expect(v.teile?.team).toBeCloseTo(markenLeistung(s, 'em1').wert / 100, 2);
+    const teamVorStart = markenLeistung(s, 'em1').wert / 100;
     const ergebnis = fuehreAus(s, { typ: 'produktEntwickeln',
       entwurf: { marke: 'em1', typ: 'Bluse', farbe: 'weiß', material: 'Baumwolle', dauer: 12, budgetWoche: 20000 } });
     expect(ergebnis.ok).toBe(true);
     const neu = s.produkte.liste[s.produkte.liste.length - 1];
-    expect(neu.team).toBeCloseTo(markenLeistung(s, 'em1').wert / 100, 2);
+    expect(neu.team).toBeCloseTo(teamVorStart, 2);
     expect(p.team).toBe(bisher);
   });
 });
