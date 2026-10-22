@@ -18,7 +18,7 @@ export function hausSteckbrief(d, ueberblick, reiter, woche) {
     const tr = b?.treiberAktuell;
     inhalt = '<div class="karte"><div class="khead">Kunden und Standort</div>' +
       line('Mystery Shopping', (b?.kundenScore ?? '–') + ' / 100') +
-      line('Hauscluster', b?.hauscluster ?? h.region) +
+      line('Region', ({ ost: 'Ost', west: 'West', nord: 'Nord', sued: 'Süd', mitte: 'Mitte' })[String(h.region ?? '').toLowerCase()] ?? (h.stadt || 'Nicht zugeordnet')) +
       line('Stadtgröße', h.cluster === 'metropole' ? 'Metropole' : h.cluster === 'grossstadt' ? 'Großstadt' : 'Mittelstadt') +
       (Number.isFinite(b?.planWoche) ? line('Umsatzplan aktuelle Woche', geld(b.planWoche)) : '') +
       (tr ? line('Frequenz Vorwoche',fmt.format(Math.round(tr.frequenz))) + line('Kaufquote Vorwoche',PROZENT(tr.kaufquote)) + line('Bon Vorwoche',geld(tr.bon)) : line('Umsatztreiber','Nach 1. Wochenabschluss verfügbar')) + '</div>' + ueberblick;
@@ -106,7 +106,7 @@ export function hausSteckbrief(d, ueberblick, reiter, woche) {
       (b?.kommentare?.length ? b.kommentare.map(c=>'<div class="zeile"><span class="was"><b>KW '+((c.woche%52)+1)+' · '+PROZENT(c.abweichung)+'</b><i>'+esc(GRUENDE[c.grund]??c.grund)+' · '+esc(MASS[c.massnahme]??c.massnahme)+'</i><small>'+esc(c.pruefung)+'</small></span></div>').join(''):'<div class="zeile">Noch keine Abweichung unter −5 % mit Vorjahres- oder Planvergleich.</div>') +
       '<div class="zeile">'+Object.entries(MASS).map(([key,name])=>button(name,"hausTun('massnahme','"+id+"','"+key+"')")).join(' ')+'</div></div>';
   }
-  return '<nav class="haus-reiter">'+REITER.map(([key,name])=>'<button class="'+(key===r?'an':'')+'" onclick="hausReiterWahl(\''+key+'\')">'+name+'</button>').join('')+'</nav>'+inhalt;
+  return '<nav class="haus-reiter" aria-label="Hausbereiche" style="display:flex;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch;padding-bottom:8px">'+REITER.map(([key,name])=>'<button style="flex:0 0 auto;white-space:nowrap;min-height:44px" class="'+(key===r?'an':'')+'" onclick="hausReiterWahl(\''+key+'\')">'+name+'</button>').join('')+'</nav>'+inhalt;
 }
 export function hausBeobachtungHtml(liste) {
   return '<div class="karte"><div class="khead">Beobachtungsliste · Ausnahmen priorisiert</div>' +
@@ -132,8 +132,8 @@ export function hausStatischHtml(haus, reiter = 'ueberblick') {
     ? [['ueberblick','Überblick'],['sortiment','Sortiment'],['etagen','Verkaufsflächen']]
     : [['ueberblick','Überblick'],['sortiment','Sortiment'],['etagen','Etagen']];
   const auswahl = tabs.some(([id]) => id === reiter) ? reiter : 'ueberblick';
-  const nav = '<nav class="haus-reiter">' + tabs.map(([id, titel]) =>
-    `<button class="${id === auswahl ? 'an' : ''}" onclick="hausReiterWahl('${id}')">${esc(titel)}</button>`).join('') + '</nav>';
+  const nav = '<nav class="haus-reiter" aria-label="Hausbereiche" style="display:flex;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch;padding-bottom:8px">' + tabs.map(([id, titel]) =>
+    `<button style="flex:0 0 auto;white-space:nowrap;min-height:44px" class="${id === auswahl ? 'an' : ''}" onclick="hausReiterWahl('${id}')">${esc(titel)}</button>`).join('') + '</nav>';
   const flaechen = haus.flaechen ?? [];
   let inhalt = '';
   if (auswahl === 'ueberblick') {

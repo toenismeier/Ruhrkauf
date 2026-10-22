@@ -26,10 +26,10 @@ export function organisationModul(ctx) {
     if (!stelle) return '';
     const p = stelle.person;
     let h = '<button data-org="zurueck" class="zurueck">‹ Organigramm</button><div class="karte org-profil"><h3>' + esc(titel) + '</h3>';
-    if (p) h += '<div class="vkopf"><span class="vbild gross">' + portraet(p.portraet,110) + '</span><div><b>' + esc(p.name) + '</b><small>' + geld(p.gehalt) + ' / Jahr</small>' + bar(p.qualitaet) + '<small>Qualität ' + Math.round(p.qualitaet*100) + '% · Stimmung ' + Math.round(p.stimmung) + '% · Wechselwille ' + Math.round(p.wechselwille*100) + '%</small></div></div><div class="oknoepfe"><button data-org="entlassen">Entlassen</button><button data-org="praemie">Halteprämie 10.000 €</button></div>';
+    if (p) h += '<div class="vkopf"><span class="vbild gross">' + portraet(p.portraet,110) + '</span><div><b>' + esc(p.name) + '</b><small>' + geld(p.gehalt) + ' / Jahr</small>' + '<small>Qualität ' + Math.round(p.qualitaet*100) + '% · Stimmung ' + Math.round(p.stimmung) + '% · Wechselwille ' + Math.round(p.wechselwille*100) + '%</small></div></div><div class="oknoepfe"><button data-org="entlassen">Entlassen</button><button data-org="praemie">Halteprämie 10.000 €</button></div>';
     else h += '<div class="olief">Vakante Leitungsstelle – berichtet unmittelbar nach oben.</div>';
     h += '<h4>Kandidaten</h4>';
-    for (const k of stelle.kandidaten) h += '<div class="zeile"><span class="vbild">' + portraet(k.portraet,56) + '</span><span class="was"><b>' + esc(k.name) + '</b><small>Qualität ' + Math.round(k.qualitaet*100) + '% · Jahresgehalt ' + geld(k.gehalt) + '</small>' + bar(k.qualitaet) + '</span><button data-org="besetzen" data-kandidat="' + esc(k.id) + '">Einstellen</button></div>';
+    for (const k of stelle.kandidaten) h += '<div class="zeile"><span class="vbild">' + portraet(k.portraet,56) + '</span><span class="was"><b>' + esc(k.name) + '</b><small>Qualität ' + Math.round(k.qualitaet*100) + '% · Jahresgehalt ' + geld(k.gehalt) + '</small>' + '</span><button data-org="besetzen" data-kandidat="' + esc(k.id) + '">Einstellen</button></div>';
     if(ebene==='cluster'){
       const moeglich=s().haeuser.filter((h)=>h.status==='offen'&&h.personal.filialleiter.skill>=0.7&&E.hausclusterVon(s(),h.id)?.id===id).slice(0,8);
       if(moeglich.length){
@@ -54,7 +54,7 @@ export function organisationModul(ctx) {
       for (const ressort of x.ressorts) {
         const bs=x.bereiche.filter((b)=>b.ressort===ressort.id);
         h+='<div class="karte"><div class="khead"><b>' + esc(ressort.id.toUpperCase()) + ' · ' + esc(ressort.name) + '</b><small>' + (ressort.person?esc(ressort.person.name):'<span class="frei">unbesetzt</span>') + '</small></div>';
-        for (const b of bs) { h+='<div class="org-zeile"><span class="vbild">' + portraet(b.stelle?.person?.portraet,50) + '</span><div><b>'+esc(b.name)+'</b><small>' + name(b.stelle) + ' · Stufe ' + b.hqStufe + ' · ' + (b.berichtetAn==='spieler'?'CEO':b.berichtetAn.toUpperCase()) + '</small>' + bar(b.qualitaet) + '<small>' + b.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="'+esc(b.id)+'">Person</button><button type="button" data-org="etage" data-id="'+esc(b.abteilung)+'">Etage</button><button data-org="delegation" data-id="'+esc(b.id)+'" aria-pressed="'+b.delegiert+'">Delegiert '+(b.delegiert?'ja':'nein')+'</button></div></div>' + aufgabenListe(b.aufgaben, b.id);
+        for (const b of bs) { h+='<div class="org-zeile"><span class="vbild">' + portraet(b.stelle?.person?.portraet,50) + '</span><div><b>'+esc(b.name)+'</b><small>' + name(b.stelle) + ' · Stufe ' + b.hqStufe + ' · ' + (b.berichtetAn==='spieler'?'CEO':b.berichtetAn.toUpperCase()) + '</small>' + '<small>' + b.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="'+esc(b.id)+'">Person</button><button type="button" data-org="etage" data-id="'+esc(b.abteilung)+'">Etage</button><button data-org="delegation" data-id="'+esc(b.id)+'" aria-pressed="'+b.delegiert+'">Delegiert '+(b.delegiert?'ja':'nein')+'</button></div></div>' + aufgabenListe(b.aufgaben, b.id);
           // Q06: Marktbeobachtung als eigene steuerbare Fachabteilung unter dem CSO.
           if (b.id === 'marktbeobachtung') {
             const markt = E.marktbeobachtungUebersicht(st);
@@ -76,7 +76,7 @@ export function organisationModul(ctx) {
         h+='<div class="karte"><div class="khead"><b>Region '+esc(r.id)+'</b><button data-org="profil" data-ebene="region" data-id="'+esc(r.id)+'">'+name(r.stelle)+'</button></div>';
         for (const c of r.cluster) {
           const rot = !c.stelle.person, ampel=st.woche>0&&c.umsatz>0?'●':'○';
-          h+='<div class="org-zeile"><span class="org-ampel '+(rot?'warn':'')+'">'+ampel+'</span><div><b>'+esc(c.name)+'</b><small>'+c.anzahl+' Häuser · Umsatz/Woche '+(st.woche===0?'noch offen':geld(c.umsatz))+'</small>'+bar(c.qualitaet)+'</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="'+esc(c.id)+'">'+(rot?'besetzen':'Leitung')+'</button><button data-org="delegation" data-id="'+esc(c.id)+'" data-cluster="1" aria-pressed="'+c.stelle.delegiert+'">Delegiert '+(c.stelle.delegiert?'ja':'nein')+'</button></div></div>' + aufgabenListe(c.aufgaben, c.id, true);
+          h+='<div class="org-zeile"><span class="org-ampel '+(rot?'warn':'')+'">'+ampel+'</span><div><b>'+esc(c.name)+'</b><small>'+c.anzahl+' Häuser · Umsatz/Woche '+(st.woche===0?'noch offen':geld(c.umsatz))+'</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="'+esc(c.id)+'">'+(rot?'besetzen':'Leitung')+'</button><button data-org="delegation" data-id="'+esc(c.id)+'" data-cluster="1" aria-pressed="'+c.stelle.delegiert+'">Delegiert '+(c.stelle.delegiert?'ja':'nein')+'</button></div></div>' + aufgabenListe(c.aufgaben, c.id, true);
         }
         h+='</div>';
       }
@@ -93,7 +93,7 @@ export function organisationModul(ctx) {
         for (const haus of liste) namen.set(haus.name, (namen.get(haus.name)??0)+1);
         for (const haus of liste) {
           const an=x.flagships.includes(haus.id), premium=haus.klasse==='premium';
-          const zusatz = namen.get(haus.name)>1 ? ' · '+esc(haus.stadt)+' ('+esc(haus.id)+')' : '';
+          const zusatz = namen.get(haus.name)>1 ? ' · '+esc(haus.stadt) : '';
           h+='<div class="zeile"><span class="was">'+esc(haus.name)+zusatz+(premium?' · Premium':'')+'</span><button '+(premium?'disabled':'')+' data-org="flagship" data-haus="'+esc(haus.id)+'" data-an="'+(!an)+'">'+(premium?'fest':an?'Flagship abwählen':'Flagship wählen')+'</button></div>';
         }
         h+=aufgabenListe(c.aufgaben,c.id,true);
