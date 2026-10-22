@@ -56,8 +56,9 @@ export function marketingModul(ctx) {
 
   // ─────────────────────────── Q16, bestehende Engine-Abfragen und Aktionen
   // Reiterleiste auch auf den Q16-Seiten: sonst führt von Kanäle/Städte kein Weg zurück zu Karte, CRM, Kalender.
-  function kanaele(P) { return tabs() + kanaeleAnsicht(E, s, ui, P); }
-  function staedte(P) { return tabs() + stadtAnsicht(E, s, ui, P); }
+  const mitReitern = (r) => ({ ...r, html: tabs() + r.html });
+  function kanaele(P) { return mitReitern(kanaeleAnsicht(E, s, ui, P)); }
+  function staedte(P) { return mitReitern(stadtAnsicht(E, s, ui, P)); }
 
   // ─────────────────────────── Karte und App
   function karte(P) {
