@@ -34,6 +34,7 @@
     "smoke:app": "node tests/app-pwa-smoke.cjs",
     "marktbeobachtung:bilder": "node tests/marktbeobachtung-bilder.cjs",
     "smoke:reise": "npm run build && node tests/q23-reise-mobile.cjs",
+    "hauspins:pruefen": "node pruef-hauspins.js",
     "hausbesuch:laufwege:unit": "node tests/hausbesuch-navigation.cjs",
     "hausbesuch:laufwege": "node tests/hausbesuch-navigation.cjs && node tests/hausbesuch-laufwege.cjs"
   },
