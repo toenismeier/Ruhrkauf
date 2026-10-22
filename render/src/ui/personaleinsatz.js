@@ -1,10 +1,11 @@
 // O04 Personal: alle Kennzahlen aus Engine-Abfragen, keine Simulation im Browser.
 import { esc, fmt, geld } from './format.js';
+import * as K from './komponenten.js';
 
 const GRUPPEN = ['logistik', 'verkauf', 'kasse', 'verwaltung'];
 const NAME = { logistik: 'Instore-Logistik', verkauf: 'Verkauf', kasse: 'Kasse', verwaltung: 'Verwaltung' };
 const pct = (n) => Math.round(n * 100) + ' %';
-const farbe = (n) => n < 0.85 ? 'var(--rot)' : n < 0.98 ? '#d8a123' : 'var(--gruen)';
+const farbe = (n) => n < 0.85 ? 'var(--hk-schlecht, #ef6f62)' : n < 0.98 ? 'var(--hk-achtung, #e7b04b)' : 'var(--hk-gut, #6dbf73)';
 const steuer = (a, opts = {}) =>
   Object.entries({ 'data-pe': a, ...opts }).map(([k, v]) => ' ' + k + '="' + esc(String(v)) + '"').join('');
 
@@ -69,13 +70,13 @@ export function personalModul(ctx) {
     let out = '<div class="karte"><div class="khead">' + esc(c.name) + '</div>' +
       '<div class="zeile"><span>' + c.haeuser.length + ' Häuser · Springerbewegungen</span><b>' +
       c.bewegungen + '</b></div>' +
-      '<button class="mini"' + steuer('springer', { 'data-cluster': c.id, 'data-an': c.springerAktiv ? '0' : '1' }) +
+      '<div class="hk-knopfreihe"><button type="button" class="hk-knopf zweit"' + steuer('springer', { 'data-cluster': c.id, 'data-an': c.springerAktiv ? '0' : '1' }) +
       '>' + (c.springerAktiv ? 'Springerpool deaktivieren' : 'Springerpool aktivieren') + '</button>' +
-      '<button class="mini"' + steuer('weiterbildung', { 'data-cluster': c.id }) +
+      '<button type="button" class="hk-knopf zweit"' + steuer('weiterbildung', { 'data-cluster': c.id }) +
       '>Weiterbildung Stufe +1</button>' +
-      (ctx.s().woche % 52 >= 43 ? '<button class="mini"' + steuer('weihnachten', { 'data-cluster': c.id }) +
-      '>Weihnachts-Aushilfen nachbuchen (teurer, knapper)</button>' : '') + '</div>';
-    out += '<div class="karte pe-uebersicht"><div class="pe-tabellenkopf">Haus · Logistik · Verkauf · Kasse · Verwaltung</div>';
+      (ctx.s().woche % 52 >= 43 ? '<button type="button" class="hk-knopf zweit"' + steuer('weihnachten', { 'data-cluster': c.id }) +
+      '>Weihnachts-Aushilfen nachbuchen</button>' : '') + '</div></div>';
+    out += '<div class="karte pe-uebersicht"><div class="pe-tabellenkopf"><span>Haus</span><span>Logistik</span><span>Verkauf</span><span>Kasse</span><span>Verwaltung</span></div>';
     for (const h of c.haeuser) {
       out += '<button class="pe-tabellenzeile"' + steuer('haus', { 'data-haus': h.id }) + '><b>' +
         esc(h.name) + '</b><span class="pe-deckungen">' + GRUPPEN.map((g) =>
@@ -93,11 +94,17 @@ export function personalModul(ctx) {
     if (ui.cluster && !liste.some((c) => c.id === ui.cluster)) ui.cluster = null;
     const gewaehlt = liste.find((c) => c.id === ui.cluster) ?? liste[0];
     if (gewaehlt) ui.cluster = gewaehlt.id;
-    const selector = '<div class="karte"><div class="khead">Hauscluster</div><select class="ort" data-pe="cluster" aria-label="Hauscluster wählen">' +
+    // Q30: Hauptfrage „Wo fehlt diese Woche Personal?“ Die Personalabteilung nennt die Häuser unter 90 % Deckung.
+    const knapp = gewaehlt ? gewaehlt.haeuser.filter((h) => GRUPPEN.some((g) => h.gruppen[g] < 0.9)) : [];
+    const selector = '<label class="pe-wahl">Hauscluster<select class="ort" data-pe="cluster" aria-label="Hauscluster wählen">' +
       liste.map((c) => '<option value="' + esc(c.id) + '"' + (c.id === ui.cluster ? ' selected' : '') + '>' +
-      esc(c.name) + ' (' + c.haeuser.length + ')</option>').join('') + '</select></div>';
+      esc(c.name) + ' (' + c.haeuser.length + ')</option>').join('') + '</select></label>';
+    const befund = !gewaehlt ? '<b>Keine offenen Häuser.</b>' : knapp.length
+      ? '<b>' + knapp.length + ' von ' + gewaehlt.haeuser.length + ' Häusern sind unter 90 % besetzt.</b> Am knappsten: ' + esc(knapp.slice(0, 2).map((h) => h.name).join(', ')) + '.'
+      : '<b>Alle ' + gewaehlt.haeuser.length + ' Häuser sind ausreichend besetzt.</b> Kein Springer nötig.';
     ctx.panel('Personaleinsatz', 'Wochentagsplanung · vier Personalgruppen',
-      selector + (gewaehlt ? clusterBlock(gewaehlt) : '<div class="karte">Keine offenen Häuser.</div>'), 'gross');
+      K.bereich('haus', 'haus') + K.sprecher({ text: befund, unter: 'Personalplanung ' + (gewaehlt?.name ?? ''), ton: knapp.length ? 'engpass' : '' }) +
+      K.rumpf(selector + (gewaehlt ? clusterBlock(gewaehlt) : K.leer('Keine offenen Häuser in diesem Cluster.'))), 'gross');
     ui.aktiv = true;
     if (scrollHalten) document.getElementById('pinhalt').scrollTop = vorher;
   }

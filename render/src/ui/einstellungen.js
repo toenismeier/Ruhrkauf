@@ -99,8 +99,9 @@ export function einstellungenModul(ctx) {
       if (!gruppen.has(d.gruppe)) gruppen.set(d.gruppe, []);
       gruppen.get(d.gruppe).push(feld(d));
     }
-    const html = [...gruppen.entries()].map(([name, zeilen]) => '<section class="karte einst-gruppe"><h3 class="khead">' + esc(name) + '</h3>' + zeilen.join('') + '</section>').join('') +
-      '<section class="karte einst-gruppe"><h3 class="khead">Über</h3><div class="einst-info">Version: <strong>' + esc(version()) + '</strong></div><p class="einst-info">Alle Namen sind frei erfunden.</p><p class="einst-info">Stadtplan Essen: Kartendaten © OpenStreetMap-Mitwirkende (ODbL). Quelle: OpenStreetMap, 20.10.2026.</p><p class="einst-info">Die Einstellungen gelten geräteweit und gehören nicht zum Spielstand.</p></section>';
+    // Q30: dunkler Grundlook, Gruppen als Abschnitte mit Zeilen
+    const html = '<i class="hk-bereich" data-bereich="betrieb" data-symbol="zahlen" aria-hidden="true"></i><div class="hk-rumpf">' + [...gruppen.entries()].map(([name, zeilen]) => '<h3 class="hk-abschnitt">' + esc(name) + '</h3><section class="hk-liste einst-gruppe">' + zeilen.join('') + '</section>').join('') +
+      '<h3 class="hk-abschnitt">Über</h3><section class="hk-liste einst-gruppe"><div class="einst-info">Version <strong>' + esc(version()) + '</strong></div><p class="einst-info">Alle Namen sind frei erfunden.</p><p class="einst-info">Stadtplan Essen: Kartendaten © OpenStreetMap-Mitwirkende (ODbL). Quelle: OpenStreetMap, 20.10.2026.</p><p class="einst-info">Die Einstellungen gelten geräteweit und gehören nicht zum Spielstand.</p></section></div>';
     ctx.panel('Einstellungen', 'Darstellung, Bedienung und Spiel', html, 'gross');
     aktiv = true;
     document.getElementById('pinhalt').scrollTop = scroll;

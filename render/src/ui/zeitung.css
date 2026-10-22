@@ -49,7 +49,7 @@
 }
 .zb-ausgabenzeile, .zb-datum {
   display: flex; justify-content: space-between; flex-wrap: wrap; gap: 3px 8px;
-  text-align: left; font: 10px/16px Georgia, "DejaVu Serif", serif;
+  text-align: left; font: 12px/16px Georgia, "DejaVu Serif", serif;
   letter-spacing: .02em;
 }
 .zb-ausgabenzeile span:last-child, .zb-datum span:last-child { white-space: nowrap; }
@@ -70,7 +70,7 @@
   flex: 1 1 auto; min-height: 44px; padding: 9px 4px;
   border: none; border-bottom: 3px solid transparent;
   background: none; color: #59544d; cursor: pointer;
-  font: 600 12.5px/20px -apple-system, "DejaVu Sans", Arial, sans-serif;
+  font: 600 13px/20px -apple-system, "DejaVu Sans", Arial, sans-serif;
   white-space: nowrap; /* alle sechs Reiter passen ab 375 px nebeneinander */
 }
 .zb-tabs button.aktiv { border-bottom-color: var(--zb-rot); color: #732630; font-weight: 700; }
@@ -79,7 +79,7 @@
   padding-top: 9px; margin-bottom: 18px; border-top: 1px solid var(--zb-linie); }
 .zb-aufmacher { column-span: all; border-top: none; padding-top: 0; margin-bottom: 17px; }
 .zb-rubrik {
-  margin-bottom: 5px; font: 700 10px/16px -apple-system, "DejaVu Sans", Arial, sans-serif;
+  margin-bottom: 5px; font: 700 12px/16px -apple-system, "DejaVu Sans", Arial, sans-serif;
   letter-spacing: .08em; text-transform: uppercase; color: #8b3030;
 }
 .zb-artikel h3 {
@@ -102,7 +102,7 @@
   font: 11px/1.4 -apple-system, "DejaVu Sans", Arial, sans-serif; color: #55656a;
 }
 .zb-isobild { display: block; width: 100%; height: 100%; position: relative; z-index: 1; }
-.zb-bild figcaption { margin-top: 4px; color: #5f5b55; font: 10px/15px Georgia, "DejaVu Serif", serif; }
+.zb-bild figcaption { margin-top: 4px; color: #5f5b55; font: 12px/16px Georgia, "DejaVu Serif", serif; }
 .zb-archivtitel { margin: 20px 0 6px; text-align: center; font: bold 23px Georgia, serif; }
 .zb-archivliste { display: flex; flex-direction: column; gap: 7px; }
 .zb-archivliste button {

@@ -7,7 +7,7 @@
   const sichtbar = (el) => {
     const r = el.getBoundingClientRect();
     if (r.width < 1 || r.height < 1) return false;
-    if (r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) return false;
+    if (r.right < 0 || r.left > innerWidth) return false; // senkrecht: auch Inhalt unterhalb der Falz (per Scrollen erreichbar)
     const st = getComputedStyle(el);
     return st.visibility !== 'hidden' && st.display !== 'none' && Number(st.opacity) > 0.05 && !el.closest('[inert], [hidden], [aria-hidden=true]:not(.hk-person)');
   };
@@ -23,7 +23,7 @@
     const wurzeln = [...document.querySelectorAll(selektor)].filter((w) => w.getBoundingClientRect().height > 0);
     const v = new Set();
     for (const w of wurzeln) {
-      const dunkel = !!w.querySelector?.('.hk-bereich:not([data-bereich=papier])') || w.matches?.(':has(.hk-bereich:not([data-bereich=papier]))');
+      const dunkel = !!w.querySelector?.('.hk-bereich:not([data-bereich=papier]), .hk-flaeche:not([data-bereich=papier])') || w.matches?.('.hk-flaeche:not([data-bereich=papier])');
       const alle = [w, ...w.querySelectorAll('*')];
       for (const el of alle) {
         if (el.closest('svg') && el.tagName.toLowerCase() !== 'svg') continue;
@@ -59,7 +59,7 @@
         if (r.width <= 52 && Math.abs(r.width - r.height) < 3 && parseFloat(st.borderTopLeftRadius) >= r.width / 2 - 1 && fb && fb.a > 0.3
           && (el.querySelector('svg, img') || /^\p{Extended_Pictographic}$/u.test(el.textContent.trim())) && !el.matches('.hk-person, .vbild, .vbild *')) v.add(`Symbol im Farbkreis: ${name(el)}`);
         // 7. Creme-Flächen als Ausweichpalette im dunklen Look
-        if (dunkel && fb && fb.a > 0.5 && fb.r > 225 && fb.g > 210 && fb.b > 180 && fb.r - fb.b > 15 && r.width > 120 && r.height > 40) v.add(`helle Cremefläche im dunklen Look: ${name(el)}`);
+        if (dunkel && !el.closest('.hk-papier, [data-bereich=papier]') && fb && fb.a > 0.5 && fb.r > 225 && fb.g > 210 && fb.b > 180 && fb.r - fb.b > 15 && r.width > 120 && r.height > 40) v.add(`helle Cremefläche im dunklen Look: ${name(el)}`);
       }
       // 8. Platzhalter und technische Werte im sichtbaren Text
       const text = alle.filter((el) => sichtbar(el)).map((el) => [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(' ')).join(' ');

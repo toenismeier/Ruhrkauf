@@ -2,12 +2,13 @@
 import { esc, geld } from './format.js';
 import { portraet } from './vorstand.js';
 import { vertriebModul } from './vertrieb.js';
+import * as K from './komponenten.js';
 export function organisationModul(ctx) {
   const { E } = ctx, s = () => ctx.s();
   const ui = { aktiv:false, reiter:'zentrale', ebene:null, id:null };
   const vertrieb = vertriebModul({ E, s, oeffneHaus: ctx.oeffneHaus, oeffnePortfolio: ctx.oeffnePortfolio });
   const bar = (q) => '<span class="org-balken"><i style="width:' + Math.round(Math.max(0,Math.min(1,q))*100) + '%"></i></span>';
-  const name = (st) => st?.person ? esc(st.person.name) : '<span class="frei">unbesetzt – besetzen</span>';
+  const name = (st) => st?.person ? esc(st.person.name) : '<span class="frei">unbesetzt</span>';
   const aufgabenListe = (aufgaben, id, cluster = false) => {
     if (!aufgaben?.length) return '';
     return '<div class="org-aufgaben"><small>Delegation je Aufgabe, Änderungen wirken ab der nächsten Woche</small>' +
@@ -25,9 +26,9 @@ export function organisationModul(ctx) {
   const profil = (stelle, titel, ebene, id) => {
     if (!stelle) return '';
     const p = stelle.person;
-    let h = '<button data-org="zurueck" class="zurueck">‹ Organigramm</button><div class="karte org-profil"><h3>' + esc(titel) + '</h3>';
+    let h = '<button type="button" data-org="zurueck" class="hk-knopf text zurueck">Zurück zum Organigramm</button><div class="karte org-profil"><h3>' + esc(titel) + '</h3>';
     if (p) h += '<div class="vkopf"><span class="vbild gross">' + portraet(p.portraet,110) + '</span><div><b>' + esc(p.name) + '</b><small>' + geld(p.gehalt) + ' / Jahr</small>' + '<small>Qualität ' + Math.round(p.qualitaet*100) + '% · Stimmung ' + Math.round(p.stimmung) + '% · Wechselwille ' + Math.round(p.wechselwille*100) + '%</small></div></div><div class="oknoepfe"><button data-org="entlassen">Entlassen</button><button data-org="praemie">Halteprämie 10.000 €</button></div>';
-    else h += '<div class="olief">Vakante Leitungsstelle – berichtet unmittelbar nach oben.</div>';
+    else h += '<div class="olief">Vakante Leitungsstelle, berichtet unmittelbar nach oben.</div>';
     h += '<h4>Kandidaten</h4>';
     for (const k of stelle.kandidaten) h += '<div class="zeile"><span class="vbild">' + portraet(k.portraet,56) + '</span><span class="was"><b>' + esc(k.name) + '</b><small>Qualität ' + Math.round(k.qualitaet*100) + '% · Jahresgehalt ' + geld(k.gehalt) + '</small>' + '</span><button data-org="besetzen" data-kandidat="' + esc(k.id) + '">Einstellen</button></div>';
     if(ebene==='cluster'){
@@ -42,7 +43,13 @@ export function organisationModul(ctx) {
   };
   function zeichnen() {
     const st = s(), x = E.organisationUebersicht(st);
-    let h = '<div class="org-tabs"><button data-org="reiter" data-reiter="zentrale" class="' + (ui.reiter==='zentrale'?'an':'') + '">Zentrale</button><button data-org="reiter" data-reiter="vertrieb" class="' + (ui.reiter==='vertrieb'?'an':'') + '">Vertrieb</button></div>';
+    // Q30: Hauptfrage „Wer führt was, und wo fehlt eine Leitung oder liegt Arbeit beim CEO?“
+    const frei = x.bereiche.filter((b) => !b.stelle?.person).length + x.ressorts.filter((r) => !r.person).length
+      + x.regionen.reduce((n, r) => n + (r.stelle?.person ? 0 : 1) + r.cluster.filter((c) => !c.stelle?.person).length, 0);
+    const vorlagen = x.bereiche.reduce((n, b) => n + (b.offen ?? 0), 0), selbst = x.bereiche.filter((b) => !b.delegiert).length;
+    let h = K.bereich('zentrale', 'zentrale') + K.sprecher({ text: (frei ? '<b>' + frei + (frei === 1 ? ' Leitungsstelle ist' : ' Leitungsstellen sind') + ' unbesetzt.</b> ' : '<b>Alle Leitungsstellen sind besetzt.</b> ')
+      + (vorlagen ? vorlagen + ' Vorlagen warten auf Entscheidung' : 'Keine offenen Vorlagen') + (selbst ? ', ' + selbst + ' Bereiche entscheiden Sie selbst.' : '.'), unter: 'Personalabteilung', ton: frei ? 'engpass' : '' })
+      + '<div class="hk-rumpf">' + K.seg([['zentrale', 'Zentrale'], ['vertrieb', 'Vertrieb']], ui.reiter, (v) => 'data-org="reiter" data-reiter="' + v + '"');
     if (ui.ebene) {
       const stelle = ui.ebene === 'bereich' ? x.bereiche.find((b)=>b.id===ui.id)?.stelle
         : ui.ebene === 'region' ? x.regionen.find((r)=>r.id===ui.id)?.stelle
@@ -101,7 +108,8 @@ export function organisationModul(ctx) {
       }
       h += '</details>';
     }
-    ctx.panel('Organisation',ui.reiter==='zentrale'?'Vorstand → Bereiche':'Haus → Hauscluster → Region → CSO',h,'gross');
+    h += '</div>';
+    ctx.panel('Organisation',ui.reiter==='zentrale'?'Vorstand und Bereiche':'Haus, Hauscluster, Region, Vertriebsvorstand',h,'gross');
     ui.aktiv=true;
   }
   function tun(aktion){const r=E.fuehreAus(s(),aktion);ctx.meldung(r.text,r.ok);ctx.nachAktion?.();if(r.ok) zeichnen();}

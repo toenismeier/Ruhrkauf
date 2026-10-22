@@ -1,5 +1,6 @@
 // N03: reine Darstellung; alle Entscheidungen über Freischaltungen trifft die Engine.
 import { esc } from './format.js';
+import * as K from './komponenten.js';
 import { abzeichen } from '../kit/abzeichen.js';
 
 export function erfolgeModul(ctx) {
@@ -17,27 +18,29 @@ export function erfolgeModul(ctx) {
   const freigeschaltet = (e) => Object.prototype.hasOwnProperty.call(e, 'freigeschaltet');
   const bild = (e) => '<img class="erfolge-bild" src="' + abzeichen(e.gruppe, e.stufe) + '" alt="">';
 
+  // Q30: Hauptfrage „Was habe ich erreicht, und was ist als Nächstes in Reichweite?“ Erreichtes steht in der Vitrine.
   function karten() {
     const alle = liste();
-    const offen = alle.filter(freigeschaltet).length;
+    const frei = alle.filter(freigeschaltet).sort((a, b) => b.freigeschaltet - a.freigeschaltet);
     const gruppen = ['Alle', 'Sanierung', 'Handel', 'Menschen', 'Formate', 'Kurios'];
     const ausw = zustand.filter === 'Alle' ? alle : alle.filter(e => e.gruppe === zustand.filter);
-    return '<div class="erfolge-seite"><div class="erfolge-kopf"><b>' + offen + ' / ' + alle.length + '</b><span>Abzeichen freigeschaltet</span>' +
-      '<div class="erfolge-balken" role="progressbar" aria-valuenow="' + offen + '" aria-valuemin="0" aria-valuemax="' + alle.length + '"><i style="width:' + (alle.length ? offen / alle.length * 100 : 0) + '%"></i></div></div>' +
-      '<div class="erfolge-filter" role="group" aria-label="Erfolge filtern">' + gruppen.map(g => '<button type="button" data-erfolge-filter="' + g +
-      '" class="' + (zustand.filter === g ? 'an' : '') + '">' + g + '</button>').join('') + '</div>' +
-      '<div class="erfolge-raster">' + ausw.map(e => {
-        const frei = freigeschaltet(e), geheim = e.geheim && !frei;
-        return '<article class="erfolge-karte' + (frei ? ' frei' : ' gesperrt') + '" data-erfolg="' + esc(e.id) + '" aria-label="' + (geheim ? 'Geheimer Erfolg' : esc(e.titel)) + '">' +
-          (geheim ? '<div class="erfolge-geheim" aria-hidden="true">?</div>' : bild(e)) +
-          '<b>' + (geheim ? 'Geheim' : esc(e.titel)) + '</b>' +
-          '<small>' + (geheim ? 'Noch nicht enthüllt' : esc(e.gruppe + ' · ' + e.stufe)) + '</small>' +
-          (frei ? '<span class="erfolge-frei">Seit Woche ' + e.freigeschaltet + '</span>' :
-            geheim ? '<span class="erfolge-hinweis">Geheimer Erfolg</span>' :
-            '<span class="erfolge-hinweis">' + esc(e.hinweis) + '</span><div class="erfolge-balken" role="progressbar" aria-valuenow="' +
-            Math.round(e.fortschritt * 100) + '" aria-valuemin="0" aria-valuemax="100" aria-label="Fortschritt"><i style="width:' +
-            Math.round(e.fortschritt * 100) + '%"></i></div>') + '</article>';
-      }).join('') + '</div></div>';
+    const nah = alle.filter((e) => !freigeschaltet(e) && !e.geheim).sort((a, b) => b.fortschritt - a.fortschritt).slice(0, 3);
+    let h = K.gross([{ label: 'Abzeichen', wert: frei.length + ' von ' + alle.length, unter: frei.length ? 'zuletzt: ' + esc(frei[0].titel) : 'noch keines' }]);
+    h += K.abschnitt('Vitrine', frei.length + ' freigeschaltet');
+    h += frei.length ? '<div class="erfolge-vitrine">' + frei.map((e) => '<figure title="' + esc(e.titel) + '">' + bild(e) + '<figcaption>' + esc(e.titel) + '</figcaption></figure>').join('') + '</div>'
+      : K.leer('Das erste Abzeichen kommt meist mit dem ersten Wochenabschluss.', 'Vitrine leer');
+    if (nah.length) h += K.abschnitt('In Reichweite') + K.liste(nah.map((e) => K.zeile({ was: esc(e.titel), unter: esc(e.hinweis), wert: Math.round(e.fortschritt * 100) + ' %' })));
+    h += K.abschnitt('Alle Abzeichen') + K.seg(gruppen.map((g) => [g, g]), zustand.filter, (g) => 'data-erfolge-filter="' + g + '"');
+    h += '<div class="erfolge-raster">' + ausw.map(e => {
+      const ok = freigeschaltet(e), geheim = e.geheim && !ok;
+      return '<article class="erfolge-karte' + (ok ? ' frei' : ' gesperrt') + '" data-erfolg="' + esc(e.id) + '" aria-label="' + (geheim ? 'Geheimer Erfolg' : esc(e.titel)) + '">' +
+        (geheim ? '<div class="erfolge-geheim" aria-hidden="true"></div>' : bild(e)) +
+        '<b>' + (geheim ? 'Geheim' : esc(e.titel)) + '</b>' +
+        '<small>' + (geheim ? 'noch nicht enthüllt' : esc(e.gruppe + ' · ' + e.stufe)) + '</small>' +
+        (ok ? '<span class="erfolge-frei">seit KW ' + ((e.freigeschaltet % 52) + 1) + '</span>' :
+          geheim ? '' : '<span class="erfolge-hinweis">' + esc(e.hinweis) + '</span><span class="erfolge-prozent">' + Math.round(e.fortschritt * 100) + ' %</span>') + '</article>';
+    }).join('') + '</div>';
+    return K.bereich('betrieb', 'zahlen') + K.rumpf(h);
   }
   function neuZeichnen() {
     if (!zustand.offen) return;

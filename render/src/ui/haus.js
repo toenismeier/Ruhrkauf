@@ -145,7 +145,7 @@ function ueberblick(c, h, k, vorwoche, vorwocheDb, uPunkte, dPunkte) {
   if (c.zustand) marken.push(K.marke(c.zustand, 'achtung'));
   marken.push(K.marke(LAGE[h.lage] ?? 'Lage offen'));
   x += `<div class="hk-marken">${marken.join('')}</div>`;
-  x += `<div class="hk-knopfreihe">${K.knopf('Haus besuchen', `data-hausbesuch="${esc(id)}"`, 'zweit')}${K.knopf('Umbau planen', `onclick="hausReiterWahl('partner')"`, 'zweit')}</div>`;
+  x += `<div class="hk-knopfreihe">${K.knopf('Haus besuchen', `data-hausbesuch="${esc(id)}"`, 'zweit')}${(() => { const et = typeof E.umbauHaus === 'function' ? [...(E.umbauHaus(s, id) ?? [])].sort((a, z) => a.substanz - z.substanz)[0] : null; return et ? K.knopf('Umbau planen', `data-umbau="planen" data-id="${esc(id)}" data-etage="${et.etage}"`, 'zweit') : ''; })()}</div>`;
   // Etagen: der Schnitt durch das Haus
   const qm = h.flaechen.reduce((a, f) => a + f.qm, 0);
   x += K.abschnitt('Etagen', fmt.format(qm) + ' qm Verkaufsfläche');

@@ -37,7 +37,7 @@ window.fertig = true;`;
   await p.goto('file://' + path.join(out, 'katalog.html'));
   await p.waitForFunction('window.fertig === true');
   await stilpruefungLaden(p);
-  const v = await p.evaluate(() => window.hartwigStilpruefung('.hk-flaeche-demo'));
+  const v = await p.evaluate(() => window.hartwigStilpruefung('.hk-flaeche'));
   await p.screenshot({ path: path.join(out, 'komponenten.png'), fullPage: true });
   console.log('Katalog:', path.join(out, 'komponenten.png'), v.length ? 'Verstöße: ' + v.join(' | ') : '0 Verstöße');
   await b.close();

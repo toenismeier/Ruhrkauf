@@ -25,10 +25,11 @@ export function chronikModul({ E, s, panel, bild }) {
       </article>`;
     }).join('');
     const spiel = d.spiel.map(x => `<article class="chronik-spiel"><small>${jahreswoche(x.woche)} · ${esc(x.art)}</small><p>${esc(x.text)}</p><span>Bezug: ${esc(x.bezug)}</span></article>`).join('');
+    // Q30: Archiv auf Papier. Zuerst, was unter Ihrer Führung geschah, dann die Geschichte als Zeitstrahl.
     panel('Konzernchronik', `${d.geschichte.length} Stationen · ${d.spiel.length} Spielereignisse`,
-      `<div class="chronik"><div class="karte"><b>Hartwig im Wandel der Zeit</b><p>Die Gründungsgeschichte der fiktiven Warenhausgruppe. Die Chronik ist jederzeit abrufbar, auch ohne gemietete Archiv-Etage.</p></div>
-      <h2>Unternehmensgeschichte</h2><div class="chronik-linie">${stationen}</div>
-      <h2>Ihre Spielchronik</h2>${spiel || '<div class="karte">Noch keine Meilensteine. Entscheidungen und Quartalsrekorde erscheinen im Spielverlauf.</div>'}
+      `<i class="hk-bereich" data-bereich="papier" data-symbol="kommentare" aria-hidden="true"></i><div class="hk-rumpf chronik">
+      <h3 class="hk-abschnitt">Unter Ihrer Führung<small>${d.spiel.length} Einträge</small></h3>${spiel || '<div class="hk-leer"><b>Noch keine Einträge</b>Entscheidungen und Quartalsrekorde erscheinen hier im Spielverlauf.</div>'}
+      <h3 class="hk-abschnitt">Hartwig seit ${d.geschichte[0]?.jahr ?? ''}<small>${d.geschichte.length} Stationen</small></h3><div class="chronik-linie">${stationen}</div>
       </div>`, 'gross');
   }
   return { oeffne, zu() {}, pruefe: () => E.chronikUebersicht(s()) };
