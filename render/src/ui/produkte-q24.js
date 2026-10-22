@@ -89,6 +89,6 @@ export function teamAufschluesselung(l) {
   return '<div class="q24-leistung"><div class="q24-leistungstitel">Teamleistung je Marke <b>' +
     l.wert + ' / 100</b></div><div class="q24-werte">' +
     werte.map(([name, wert]) => '<span>' + name + ' <b>' + wert + '</b></span>').join('') +
-    '</div><small>Designteam: ' + l.teamgroesse +
-    ' modellierte Kapazitätseinheiten · Kategorieerfahrung ' + l.kategorieErfahrung + ' / 100</small></div>';
+    '</div><small>Designteam: ' + l.teamgroesse + ' Designer' +
+    ' · Erfahrung in der Kategorie ' + l.kategorieErfahrung + ' / 100</small></div>';
 }

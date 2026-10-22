@@ -273,10 +273,10 @@
     const b2 = s2[(i + 13) % 12];
     return a2 + (b2 - a2) * t2;
   }
-  var LAGE_FAKTOR = { "1a": 1.15, b: 0.9, center: 1, rand: 0.8 };
+  var LAGE_FAKTOR = { "1a": 1.15, b: 0.9, stadtteil: 0.94, center: 1, rand: 0.8 };
   var CLUSTER_FAKTOR = { metropole: 1.1, grossstadt: 1, mittelstadt: 0.85 };
-  var TREND_LAGE = { "1a": 0.02, b: 0.035, center: 0.01, rand: 0.015 };
-  var MARKTMIETE = { "1a": 0.1, b: 0.075, center: 0.11, rand: 0.065 };
+  var TREND_LAGE = { "1a": 0.02, b: 0.035, stadtteil: 0.025, center: 0.01, rand: 0.015 };
+  var MARKTMIETE = { "1a": 0.1, b: 0.075, stadtteil: 0.08, center: 0.11, rand: 0.065 };
   var STAEDTE = [
     ["Berlin", "Ost", "metropole", 0.97, { hartwig: 5, premium: 2, volkskauf: 0, sport: 2, fundus: 1 }],
     ["Hamburg", "Nord", "metropole", 1.1, { hartwig: 5, premium: 1, volkskauf: 1, sport: 2, fundus: 0 }],
@@ -513,6 +513,7 @@
   var STANDORT_ZUSATZ = {
     "1a": ["Marktplatz", "Hauptstra\xDFe", "Innenstadt", "Am Markt", "K\xF6nigstra\xDFe", "Altstadt"],
     b: ["Bahnhofstra\xDFe", "Am Wall", "Neustadt", "Ring", "Lindenstra\xDFe"],
+    stadtteil: ["Stadtteilzentrum", "Neue Mitte", "Kreuzstra\xDFe", "Am Marktplatz S\xFCd"],
     center: ["Arkaden", "City-Center", "Einkaufszentrum", "Galerie am Fluss"],
     rand: ["Gewerbepark", "Am Stadtrand", "Fachmarktzentrum"]
   };
@@ -2583,7 +2584,7 @@
     const sum2 = roh2.jung + roh2.mitte + roh2.aelter + roh2.senioren;
     return { jung: roh2.jung / sum2, mitte: roh2.mitte / sum2, aelter: roh2.aelter / sum2, senioren: roh2.senioren / sum2 };
   }
-  var LAGE_SCHAUFENSTER = { "1a": 1.2, b: 1, center: 0.9, rand: 0.7 };
+  var LAGE_SCHAUFENSTER = { "1a": 1.2, b: 1, stadtteil: 0.95, center: 0.9, rand: 0.7 };
   function kanalRel(sc, k3) {
     return sc.kanaele[k3].adstock / KANAL[k3].quote;
   }
@@ -4011,8 +4012,8 @@
     const wb = anlegen(s2, stadt, art, chance2(s2, 0.7) ? "1a" : "b", qm2, s2.woche, inHaus);
     const h3 = betroffeneHaeuser(s2, stadt)[0];
     const gruppe3 = h3 ? gruppenFuer(h3.format).sort((a2, b2) => (WETTBEWERB_UEBERSCHNEIDUNG[art][b2] ?? 0) - (WETTBEWERB_UEBERSCHNEIDUNG[art][a2] ?? 0))[0] : "damen";
-    const prozent5 = h3 ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h3, gruppe3)) * 100) : 0;
-    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe3].name + ": rund " + prozent5 + " %.", { stadt, modul: "wettbewerb" });
+    const prozent6 = h3 ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h3, gruppe3)) * 100) : 0;
+    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe3].name + ": rund " + prozent6 + " %.", { stadt, modul: "wettbewerb" });
     if ((art === "modehaus" || art === "premium") && qm2 >= 2300) {
       neueEntscheidung(s2, {
         typ: "wettbewerb_eroeffnung",
@@ -6748,7 +6749,7 @@
   }
   function frequenzBasis(s2, h3) {
     const qm2 = h3.flaechen.filter((f11) => f11.konzept !== "leer" && f11.konzept !== "untermiete").reduce((sum2, f11) => sum2 + f11.qm, 0);
-    const lage = { "1a": 1.12, b: 0.87, center: 1.07, rand: 0.79 }[h3.lage];
+    const lage = { "1a": 1.12, b: 0.87, stadtteil: 0.92, center: 1.07, rand: 0.79 }[h3.lage];
     const groesse2 = { metropole: 1.16, grossstadt: 1, mittelstadt: 0.84 }[h3.cluster];
     const saison2 = clamp(saisonFaktor("damen", s2.woche), 0.65, 1.75);
     const marketing = marketingHausFaktor(s2, h3);
@@ -8678,9 +8679,9 @@
     }
     const nachfrage = aktive2.map((haus2) => {
       const roh2 = simuliereHaus(s2, haus2);
-      const normal2 = haus2.format === "outlet" ? roh2.offprice * 3.65 * clamp(2 - haus2.einzug.kaufkraft, 0.8, 1.2) / Math.max(0.1, 1.6 - 0.6 * haus2.einzug.kaufkraft) : Object.values(roh2.eigen).reduce((n3, x2) => n3 + (x2?.umsatz ?? 0), 0);
+      const normal3 = haus2.format === "outlet" ? roh2.offprice * 3.65 * clamp(2 - haus2.einzug.kaufkraft, 0.8, 1.2) / Math.max(0.1, 1.6 - 0.6 * haus2.einzug.kaufkraft) : Object.values(roh2.eigen).reduce((n3, x2) => n3 + (x2?.umsatz ?? 0), 0);
       const bau2 = f11.projekte.some((p2) => p2.haus === haus2.id && p2.typ === "umflaggen");
-      return { haus: haus2, nachfrage: normal2 * (bau2 ? 0.55 : 1) };
+      return { haus: haus2, nachfrage: normal3 * (bau2 ? 0.55 : 1) };
     });
     const volksNachfrage = nachfrage.filter((x2) => x2.haus.format === "schwester").reduce((n3, x2) => n3 + x2.nachfrage, 0);
     const warenVerfuegbar = Math.min(1, f11.volkskaufBestand / Math.max(1, volksNachfrage * VK_EK));
@@ -11719,8 +11720,8 @@
     const klima = abteilungArbeitsklima(a2);
     return ok5(`${ABTEILUNG_NAME[id]}: Gehalt ${Math.round(a2.gehaltFaktor * 100)} % des Standards. Moral ${klima.moral}/100, Fluktuationsrisiko ${Math.round(klima.fluktuation * 1e3) / 10} % im Jahr.`);
   }
-  function zentraleKuerzen(s2, prozent5) {
-    const p2 = clamp(prozent5, 0, 0.3);
+  function zentraleKuerzen(s2, prozent6) {
+    const p2 = clamp(prozent6, 0, 0.3);
     let fte2 = 0;
     for (const a2 of s2.hq.abteilungen) {
       const weg = Math.round(a2.fte * p2);
@@ -12298,6 +12299,62 @@
     const cpo = s2.vorstand?.ressorts.cpo.person;
     return clamp(0.6 * Math.min(1, produktStufe(s2) / 2) + 0.4 * (cpo ? cpo.fachwissen / 100 : 0.2), 0, 1);
   }
+  var prozent = (x2) => Math.round(clamp(x2, 0, 1) * 100);
+  function markenLeistungRoh(s2, m, saison2) {
+    const liste2 = (s2.produkte?.liste ?? []).filter((p2) => p2.marke === m.id && p2.status !== "ausgelistet");
+    const kategorien = /* @__PURE__ */ new Map();
+    for (const p2 of liste2) kategorien.set(p2.kategorie, (kategorien.get(p2.kategorie) ?? 0) + 1);
+    const erfahren = liste2.length ? Math.max(...kategorien.values()) / liste2.length : 0;
+    const teamgroesse = Math.max(1, Math.round(1 + produktStufe(s2) * 2 + Math.min(4, liste2.length / 3)));
+    const erfahrung = clamp(0.35 + 0.035 * liste2.length + 0.2 * erfahren, 0, 1);
+    const team = clamp(0.22 + teamgroesse * 0.055 + erfahrung * 0.38, 0, 1);
+    const g = trendGruppe(m);
+    const zielgruppe = liste2.length ? liste2.reduce((sum2, p2) => {
+      const t2 = TYP[p2.typ];
+      if (!t2) return sum2 + 0.5;
+      const ziel = p2.zielgruppe ? ZIELGRUPPE_PRODUKT[p2.zielgruppe].trend : g;
+      const markenFit = ziel === g || ziel === "jung" && g === "mitte" ? 1 : 0.55;
+      return sum2 + t2.gruppe[ziel] * markenFit;
+    }, 0) / liste2.length : 0.5;
+    const sTrend = saison2.gruppen[g];
+    const treffer = liste2.length ? liste2.reduce((sum2, p2) => sum2 + (sTrend.artikel.includes(p2.typ) ? 0.5 : 0) + (sTrend.farben.includes(p2.farbe) ? 0.3 : 0) + (sTrend.materialien.includes(p2.material) ? 0.2 : 0), 0) / liste2.length : 0.4;
+    const trend = clamp(0.35 * treffer + 0.65 * m.stilAktualitaet / 100, 0, 1);
+    const lieferant = clamp((m.beschaffung === "europa" ? 0.76 : m.beschaffung === "nahost" ? 0.66 : 0.56) + 0.055 * (m.qualitaet - 3) + 0.08 * BESCHAFFUNG[m.beschaffung].mehrmarge, 0, 1);
+    const hq = clamp(0.25 + 0.14 * produktStufe(s2) + 0.1 * (s2.hq?.wirkung.einkauf ?? 1), 0, 1);
+    const roh2 = 0.28 * team + 0.25 * zielgruppe + 0.18 * trend + 0.14 * lieferant + 0.15 * hq;
+    return {
+      roh: roh2,
+      team: prozent(team),
+      zielgruppe: prozent(zielgruppe),
+      trend: prozent(trend),
+      lieferant: prozent(lieferant),
+      hq: prozent(hq),
+      teamgroesse,
+      kategorieErfahrung: prozent(erfahrung)
+    };
+  }
+  function markenLeistung(s2, markeId) {
+    const marken2 = s2.eigenmarken.marken.filter((m) => m.status !== "eingestellt");
+    const saison2 = trendFuer(s2, saisonId(s2.woche));
+    const daten = marken2.map((m) => ({ id: m.id, daten: markenLeistungRoh(s2, m, saison2) }));
+    const mittel = daten.length ? daten.reduce((sum2, x2) => sum2 + x2.daten.roh, 0) / daten.length : 0;
+    const gefunden = daten.find((x2) => x2.id === markeId)?.daten;
+    if (!gefunden) return {
+      wert: prozent(teamStaerke(s2)),
+      team: 0,
+      zielgruppe: 0,
+      trend: 0,
+      lieferant: 0,
+      hq: 0,
+      teamgroesse: 0,
+      kategorieErfahrung: 0
+    };
+    const { roh: roh2, ...teile2 } = gefunden;
+    const basis4 = teamStaerke(s2);
+    const groessteAbweichung = Math.max(0, ...daten.map((x2) => Math.abs(x2.daten.roh - mittel)));
+    const faktor2 = groessteAbweichung ? Math.min(0.65, Math.min(basis4, 1 - basis4) / groessteAbweichung) : 0;
+    return { wert: prozent(basis4 + faktor2 * (roh2 - mittel)), ...teile2 };
+  }
   function wgFuer(s2, m, t2, wunsch) {
     const ok6 = (wg) => !!WG[wg] && s2.basisUmsatz[WG[wg].bereich] !== void 0 && passungWg(m, wg) > 0;
     if (wunsch) return t2.wgs.includes(wunsch) && ok6(wunsch) ? wunsch : void 0;
@@ -12631,7 +12688,7 @@
       const c = pruefe(s2, e);
       if (c.fehler || !c.m || !c.wg) return fehler6(c.fehler ?? "Ung\xFCltiger Entwurf.");
       if (s2.phase === "insolvenz" && e.budgetWoche * e.dauer > 15e5) return fehler6("Im Verfahren gibt der Sachwalter h\xF6chstens 1,5 Mio. \u20AC je Entwicklung frei.");
-      const p3 = neuesProdukt(s2, c.m, { ...e, budgetWoche: eur(e.budgetWoche), preislage: c.preislage, qualitaet: c.qualitaet, stil: c.stil }, c.wg, teamStaerke(s2));
+      const p3 = neuesProdukt(s2, c.m, { ...e, budgetWoche: eur(e.budgetWoche), preislage: c.preislage, qualitaet: c.qualitaet, stil: c.stil }, c.wg, markenLeistung(s2, c.m.id).wert / 100);
       s2.produkte.liste.push(p3);
       hqAktualisiere(s2);
       return ok6(`${c.m.name}: ${p3.name} in Entwicklung, ${e.dauer} Wochen, ${mio(e.budgetWoche * e.dauer)} Budget. Fertig in Woche ${p3.fertig + 1}.`);
@@ -12676,6 +12733,7 @@
       const kats = [...new Set(eigene.map((p2) => p2.kategorie))];
       if (!kats.length) continue;
       const gut = trifft3();
+      const markenteam = markenLeistung(s2, m.id).wert / 100;
       for (const k3 of kats) {
         if (belegt(s2, m.id, k3) < kap) continue;
         const liste2 = eigene.filter((p2) => p2.kategorie === k3).sort((a2, b2) => sterneWirksam(s2, a2) - sterneWirksam(s2, b2));
@@ -12693,7 +12751,7 @@
       if (!kand.length) continue;
       let e;
       if (gut) {
-        const bewertet = kand.flatMap((t2) => [.../* @__PURE__ */ new Set([...trend.farben, ...FARB_BASIS[g].slice(0, 2)])].flatMap((farbe3) => t2.materialien.map((material2) => ({ t: t2, farbe: farbe3, material: material2 })))).map((x2) => ({ ...x2, sc: scoreAus(bewerte2(s2, m, { typ: x2.t.typ, farbe: x2.farbe, material: x2.material, preislage: m.preislage, qualitaet: m.qualitaet, dauer: 12, budgetWoche: 2e4 }, teamStaerke(s2), trendFuer(s2, saisonId(s2.woche + 12)))) })).sort((a2, b3) => b3.sc - a2.sc);
+        const bewertet = kand.flatMap((t2) => [.../* @__PURE__ */ new Set([...trend.farben, ...FARB_BASIS[g].slice(0, 2)])].flatMap((farbe3) => t2.materialien.map((material2) => ({ t: t2, farbe: farbe3, material: material2 })))).map((x2) => ({ ...x2, sc: scoreAus(bewerte2(s2, m, { typ: x2.t.typ, farbe: x2.farbe, material: x2.material, preislage: m.preislage, qualitaet: m.qualitaet, dauer: 12, budgetWoche: 2e4 }, markenteam, trendFuer(s2, saisonId(s2.woche + 12)))) })).sort((a2, b3) => b3.sc - a2.sc);
         const b2 = bewertet[0];
         e = { marke: m.id, typ: b2.t.typ, farbe: b2.farbe, material: b2.material, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * b2.t.aufwand * 1.6 / 12 / 1e3) * 1e3 };
       } else {
@@ -12767,6 +12825,7 @@
         farbe: m.farbe,
         zielgruppe: `${ZIELGRUPPEN_TEXT[m.zielgruppe.alter]}, ${m.zielgruppe.geschlecht.charAt(0).toUpperCase() + m.zielgruppe.geschlecht.slice(1)}`,
         trendGruppe: trendGruppe(m),
+        leistung: markenLeistung(s2, m.id),
         kategorien: kats.map((k3) => ({ id: k3, name: PRODUKT_KATEGORIEN[k3], kapazitaet: kap, belegt: belegt(s2, m.id, k3) })),
         produkte: liste2.map((p2) => produktKarte(s2, p2)),
         inEntwicklung: ent,
@@ -12795,7 +12854,7 @@
         typen: [...ZUSATZ_ARTIKEL[id]]
       })),
       kategorien: Object.keys(PRODUKT_KATEGORIEN).map((id) => ({ id, name: PRODUKT_KATEGORIEN[id] })),
-      typen: ARTIKELTYPEN.map((t2) => ({ typ: t2.typ, kategorie: t2.kategorie, wgs: [...t2.wgs], saison: t2.saison, preisMitte: t2.preis, materialien: [...t2.materialien], aufwand: t2.aufwand, gruppe: { ...t2.gruppe }, ...t2.bild ? { bild: { ...t2.bild } } : {} })),
+      typen: ARTIKELTYPEN.map((t2) => ({ ...t2, preisMitte: t2.preis, wgs: [...t2.wgs], materialien: [...t2.materialien], gruppe: { ...t2.gruppe }, ...t2.bild ? { bild: { ...t2.bild } } : {} })),
       farben: FARBLISTE.map((f11) => ({ name: f11, hex: FARBEN2[f11] })),
       materialien: MATERIALLISTE.map((m) => ({ name: m, ...MATERIALIEN[m] })),
       preislagen: Object.keys(PREISLAGE_FAKTOR).map((id) => ({ id, faktor: PREISLAGE_FAKTOR[id] })),
@@ -12820,7 +12879,7 @@
     const bekannt = sid <= saisonId(s2.woche) + 1;
     const leer3 = { ok: false, fehler: c.fehler, normpreis: 0, ekStueck: 0, marge: 0, kosten: eur((e.budgetWoche || 0) * (e.dauer || 0)), fertigWoche: fertig2, saisonEinfuehrung: saisonName(s2, sid), sterneErwartet: 0, sterneVon: 0, sterneBis: 0, trendBekannt: bekannt, kapazitaetFrei: c.kapFrei, passform: 0, hinweise: [] };
     if (!c.m || !c.t || !c.wg) return leer3;
-    const team = teamStaerke(s2);
+    const team = markenLeistung(s2, c.m.id).wert / 100;
     const teile2 = bewerte2(s2, c.m, { typ: e.typ, farbe: e.farbe, material: e.material, preislage: c.preislage, qualitaet: c.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche, zielgruppe: e.zielgruppe }, team, bekannt ? trendFuer(s2, sid) : void 0);
     const st2 = sterneAus(scoreAus(teile2));
     const cpo = s2.vorstand?.ressorts.cpo.person;
@@ -14924,9 +14983,9 @@
     if (f11 === "sport") return r3 < 0.55 ? "1a" : r3 < 0.85 ? "center" : "b";
     if (f11 === "outlet") return r3 < 0.7 ? "rand" : "b";
     if (f11 === "schwester") return r3 < 0.65 ? "1a" : r3 < 0.9 ? "b" : "center";
-    if (c === "metropole") return r3 < 0.75 ? "1a" : "center";
-    if (c === "grossstadt") return r3 < 0.6 ? "1a" : r3 < 0.85 ? "b" : "center";
-    return r3 < 0.4 ? "1a" : r3 < 0.8 ? "b" : r3 < 0.9 ? "center" : "rand";
+    if (c === "metropole") return r3 < 0.57 ? "1a" : r3 < 0.8 ? "b" : r3 < 0.94 ? "stadtteil" : "center";
+    if (c === "grossstadt") return r3 < 0.55 ? "1a" : r3 < 0.78 ? "b" : r3 < 0.95 ? "stadtteil" : "center";
+    return r3 < 0.4 ? "1a" : r3 < 0.78 ? "b" : r3 < 0.93 ? "stadtteil" : "rand";
   }
   function fit(g, kaufkraft, alter, wettbewerb) {
     const d3 = GRUPPEN[g];
@@ -15163,7 +15222,7 @@
     for (const r3 of regulare) {
       const [stadt, region, cluster, kk] = stadtVon.get(r3.stadt);
       const premiumInStadt = PREMIUM_HAEUSER.some((p3) => p3.stadt === stadt);
-      const lage = r3.nr === 1 && !premiumInStadt ? "1a" : r3.nr % 2 === 0 ? "b" : "center";
+      const lage = r3.nr === 1 ? premiumInStadt ? "b" : "1a" : r3.nr === 2 ? "b" : r3.nr === 3 ? "stadtteil" : r3.nr === 4 ? "b" : r3.nr === 5 && cluster === "metropole" ? "center" : r3.nr % 2 === 0 ? "b" : "stadtteil";
       haeuser.push(bauHaus(h3, haeuser.filter((x2) => x2.format === "warenhaus").length + 1, stadt, region, cluster, kk, "warenhaus", sz, r3.nr, { hausklasse: a2.has(r3) ? "A" : b2.has(r3) ? "B" : "C", lage }));
     }
     let p2 = 0;
@@ -20051,8 +20110,8 @@
       _vector$c.copy(this).projectOnVector(planeNormal);
       return this.sub(_vector$c);
     }
-    reflect(normal2) {
-      return this.sub(_vector$c.copy(normal2).multiplyScalar(2 * this.dot(normal2)));
+    reflect(normal3) {
+      return this.sub(_vector$c.copy(normal3).multiplyScalar(2 * this.dot(normal3)));
     }
     angleTo(v) {
       const denominator = Math.sqrt(this.lengthSq() * v.lengthSq());
@@ -23900,11 +23959,11 @@
         position.applyMatrix4(matrix2);
         position.needsUpdate = true;
       }
-      const normal2 = this.attributes.normal;
-      if (normal2 !== void 0) {
+      const normal3 = this.attributes.normal;
+      if (normal3 !== void 0) {
         const normalMatrix = new Matrix3().getNormalMatrix(matrix2);
-        normal2.applyNormalMatrix(normalMatrix);
-        normal2.needsUpdate = true;
+        normal3.applyNormalMatrix(normalMatrix);
+        normal3.needsUpdate = true;
       }
       const tangent = this.attributes.tangent;
       if (tangent !== void 0) {
@@ -24488,7 +24547,7 @@
       const position = geometry.attributes.position;
       const uv = geometry.attributes.uv;
       const uv1 = geometry.attributes.uv1;
-      const normal2 = geometry.attributes.normal;
+      const normal3 = geometry.attributes.normal;
       const groups = geometry.groups;
       const drawRange = geometry.drawRange;
       if (index2 !== null) {
@@ -24502,7 +24561,7 @@
               const a2 = index2.getX(j3);
               const b2 = index2.getX(j3 + 1);
               const c = index2.getX(j3 + 2);
-              intersection = checkGeometryIntersection(this, groupMaterial, raycaster, rayLocalSpace, uv, uv1, normal2, a2, b2, c);
+              intersection = checkGeometryIntersection(this, groupMaterial, raycaster, rayLocalSpace, uv, uv1, normal3, a2, b2, c);
               if (intersection) {
                 intersection.faceIndex = Math.floor(j3 / 3);
                 intersection.face.materialIndex = group.materialIndex;
@@ -24517,7 +24576,7 @@
             const a2 = index2.getX(i);
             const b2 = index2.getX(i + 1);
             const c = index2.getX(i + 2);
-            intersection = checkGeometryIntersection(this, material2, raycaster, rayLocalSpace, uv, uv1, normal2, a2, b2, c);
+            intersection = checkGeometryIntersection(this, material2, raycaster, rayLocalSpace, uv, uv1, normal3, a2, b2, c);
             if (intersection) {
               intersection.faceIndex = Math.floor(i / 3);
               intersects2.push(intersection);
@@ -24535,7 +24594,7 @@
               const a2 = j3;
               const b2 = j3 + 1;
               const c = j3 + 2;
-              intersection = checkGeometryIntersection(this, groupMaterial, raycaster, rayLocalSpace, uv, uv1, normal2, a2, b2, c);
+              intersection = checkGeometryIntersection(this, groupMaterial, raycaster, rayLocalSpace, uv, uv1, normal3, a2, b2, c);
               if (intersection) {
                 intersection.faceIndex = Math.floor(j3 / 3);
                 intersection.face.materialIndex = group.materialIndex;
@@ -24550,7 +24609,7 @@
             const a2 = i;
             const b2 = i + 1;
             const c = i + 2;
-            intersection = checkGeometryIntersection(this, material2, raycaster, rayLocalSpace, uv, uv1, normal2, a2, b2, c);
+            intersection = checkGeometryIntersection(this, material2, raycaster, rayLocalSpace, uv, uv1, normal3, a2, b2, c);
             if (intersection) {
               intersection.faceIndex = Math.floor(i / 3);
               intersects2.push(intersection);
@@ -24578,7 +24637,7 @@
       object
     };
   }
-  function checkGeometryIntersection(object, material2, raycaster, ray2, uv, uv1, normal2, a2, b2, c) {
+  function checkGeometryIntersection(object, material2, raycaster, ray2, uv, uv1, normal3, a2, b2, c) {
     object.getVertexPosition(a2, _vA$1);
     object.getVertexPosition(b2, _vB$1);
     object.getVertexPosition(c, _vC$1);
@@ -24597,10 +24656,10 @@
         intersection.uv1 = Triangle.getInterpolation(_intersectionPoint, _vA$1, _vB$1, _vC$1, _uvA$1, _uvB$1, _uvC$1, new Vector2());
         intersection.uv2 = intersection.uv1;
       }
-      if (normal2) {
-        _normalA.fromBufferAttribute(normal2, a2);
-        _normalB.fromBufferAttribute(normal2, b2);
-        _normalC.fromBufferAttribute(normal2, c);
+      if (normal3) {
+        _normalA.fromBufferAttribute(normal3, a2);
+        _normalB.fromBufferAttribute(normal3, b2);
+        _normalC.fromBufferAttribute(normal3, c);
         intersection.normal = Triangle.getInterpolation(_intersectionPoint, _vA$1, _vB$1, _vC$1, _normalA, _normalB, _normalC, new Vector3());
         if (intersection.normal.dot(ray2.direction) > 0) {
           intersection.normal.multiplyScalar(-1);
@@ -25275,13 +25334,13 @@
   var _vector2 = /* @__PURE__ */ new Vector3();
   var _normalMatrix = /* @__PURE__ */ new Matrix3();
   var Plane = class {
-    constructor(normal2 = new Vector3(1, 0, 0), constant = 0) {
+    constructor(normal3 = new Vector3(1, 0, 0), constant = 0) {
       this.isPlane = true;
-      this.normal = normal2;
+      this.normal = normal3;
       this.constant = constant;
     }
-    set(normal2, constant) {
-      this.normal.copy(normal2);
+    set(normal3, constant) {
+      this.normal.copy(normal3);
       this.constant = constant;
       return this;
     }
@@ -25290,14 +25349,14 @@
       this.constant = w2;
       return this;
     }
-    setFromNormalAndCoplanarPoint(normal2, point) {
-      this.normal.copy(normal2);
+    setFromNormalAndCoplanarPoint(normal3, point) {
+      this.normal.copy(normal3);
       this.constant = -point.dot(this.normal);
       return this;
     }
     setFromCoplanarPoints(a2, b2, c) {
-      const normal2 = _vector1.subVectors(c, b2).cross(_vector2.subVectors(a2, b2)).normalize();
-      this.setFromNormalAndCoplanarPoint(normal2, a2);
+      const normal3 = _vector1.subVectors(c, b2).cross(_vector2.subVectors(a2, b2)).normalize();
+      this.setFromNormalAndCoplanarPoint(normal3, a2);
       return this;
     }
     copy(plane) {
@@ -25357,8 +25416,8 @@
     applyMatrix4(matrix2, optionalNormalMatrix) {
       const normalMatrix = optionalNormalMatrix || _normalMatrix.getNormalMatrix(matrix2);
       const referencePoint = this.coplanarPoint(_vector1).applyMatrix4(matrix2);
-      const normal2 = this.normal.applyMatrix3(normalMatrix).normalize();
-      this.constant = -referencePoint.dot(normal2);
+      const normal3 = this.normal.applyMatrix3(normalMatrix).normalize();
+      this.constant = -referencePoint.dot(normal3);
       return this;
     }
     translate(offset) {
@@ -37570,7 +37629,7 @@
       return this.getTangent(t2, optionalTarget);
     }
     computeFrenetFrames(segments, closed) {
-      const normal2 = new Vector3();
+      const normal3 = new Vector3();
       const tangents = [];
       const normals = [];
       const binormals = [];
@@ -37588,16 +37647,16 @@
       const tz = Math.abs(tangents[0].z);
       if (tx <= min) {
         min = tx;
-        normal2.set(1, 0, 0);
+        normal3.set(1, 0, 0);
       }
       if (ty <= min) {
         min = ty;
-        normal2.set(0, 1, 0);
+        normal3.set(0, 1, 0);
       }
       if (tz <= min) {
-        normal2.set(0, 0, 1);
+        normal3.set(0, 0, 1);
       }
-      vec.crossVectors(tangents[0], normal2).normalize();
+      vec.crossVectors(tangents[0], normal3).normalize();
       normals[0].crossVectors(tangents[0], vec);
       binormals[0].crossVectors(tangents[0], normals[0]);
       for (let i = 1; i <= segments; i++) {
@@ -38493,7 +38552,7 @@
       const inverseSegments = 1 / segments;
       const vertex2 = new Vector3();
       const uv = new Vector2();
-      const normal2 = new Vector3();
+      const normal3 = new Vector3();
       const curNormal = new Vector3();
       const prevNormal = new Vector3();
       let dx = 0;
@@ -38503,12 +38562,12 @@
           case 0:
             dx = points[j3 + 1].x - points[j3].x;
             dy = points[j3 + 1].y - points[j3].y;
-            normal2.x = dy * 1;
-            normal2.y = -dx;
-            normal2.z = dy * 0;
-            prevNormal.copy(normal2);
-            normal2.normalize();
-            initNormals.push(normal2.x, normal2.y, normal2.z);
+            normal3.x = dy * 1;
+            normal3.y = -dx;
+            normal3.z = dy * 0;
+            prevNormal.copy(normal3);
+            normal3.normalize();
+            initNormals.push(normal3.x, normal3.y, normal3.z);
             break;
           case points.length - 1:
             initNormals.push(prevNormal.x, prevNormal.y, prevNormal.z);
@@ -38516,15 +38575,15 @@
           default:
             dx = points[j3 + 1].x - points[j3].x;
             dy = points[j3 + 1].y - points[j3].y;
-            normal2.x = dy * 1;
-            normal2.y = -dx;
-            normal2.z = dy * 0;
-            curNormal.copy(normal2);
-            normal2.x += prevNormal.x;
-            normal2.y += prevNormal.y;
-            normal2.z += prevNormal.z;
-            normal2.normalize();
-            initNormals.push(normal2.x, normal2.y, normal2.z);
+            normal3.x = dy * 1;
+            normal3.y = -dx;
+            normal3.z = dy * 0;
+            curNormal.copy(normal3);
+            normal3.x += prevNormal.x;
+            normal3.y += prevNormal.y;
+            normal3.z += prevNormal.z;
+            normal3.normalize();
+            initNormals.push(normal3.x, normal3.y, normal3.z);
             prevNormal.copy(curNormal);
         }
       }
@@ -38671,7 +38730,7 @@
       this.setAttribute("normal", new Float32BufferAttribute(normals, 3));
       this.setAttribute("uv", new Float32BufferAttribute(uvs, 2));
       function generateTorso() {
-        const normal2 = new Vector3();
+        const normal3 = new Vector3();
         const vertex2 = new Vector3();
         let groupCount = 0;
         const slope = (radiusBottom - radiusTop) / height;
@@ -38688,8 +38747,8 @@
             vertex2.y = -v * height + halfHeight;
             vertex2.z = radius * cosTheta;
             vertices.push(vertex2.x, vertex2.y, vertex2.z);
-            normal2.set(sinTheta, slope, cosTheta).normalize();
-            normals.push(normal2.x, normal2.y, normal2.z);
+            normal3.set(sinTheta, slope, cosTheta).normalize();
+            normals.push(normal3.x, normal3.y, normal3.z);
             uvs.push(u, 1 - v);
             indexRow.push(index2++);
           }
@@ -39736,14 +39795,14 @@
         const extrudePath = options.extrudePath;
         const uvgen = options.UVGenerator !== void 0 ? options.UVGenerator : WorldUVGenerator;
         let extrudePts, extrudeByPath = false;
-        let splineTube, binormal, normal2, position2;
+        let splineTube, binormal, normal3, position2;
         if (extrudePath) {
           extrudePts = extrudePath.getSpacedPoints(steps);
           extrudeByPath = true;
           bevelEnabled = false;
           splineTube = extrudePath.computeFrenetFrames(steps, false);
           binormal = new Vector3();
-          normal2 = new Vector3();
+          normal3 = new Vector3();
           position2 = new Vector3();
         }
         if (!bevelEnabled) {
@@ -39869,9 +39928,9 @@
           if (!extrudeByPath) {
             v(vert.x, vert.y, 0);
           } else {
-            normal2.copy(splineTube.normals[0]).multiplyScalar(vert.x);
+            normal3.copy(splineTube.normals[0]).multiplyScalar(vert.x);
             binormal.copy(splineTube.binormals[0]).multiplyScalar(vert.y);
-            position2.copy(extrudePts[0]).add(normal2).add(binormal);
+            position2.copy(extrudePts[0]).add(normal3).add(binormal);
             v(position2.x, position2.y, position2.z);
           }
         }
@@ -39881,9 +39940,9 @@
             if (!extrudeByPath) {
               v(vert.x, vert.y, depth / steps * s2);
             } else {
-              normal2.copy(splineTube.normals[s2]).multiplyScalar(vert.x);
+              normal3.copy(splineTube.normals[s2]).multiplyScalar(vert.x);
               binormal.copy(splineTube.binormals[s2]).multiplyScalar(vert.y);
-              position2.copy(extrudePts[s2]).add(normal2).add(binormal);
+              position2.copy(extrudePts[s2]).add(normal3).add(binormal);
               v(position2.x, position2.y, position2.z);
             }
           }
@@ -40435,7 +40494,7 @@
       let index2 = 0;
       const grid = [];
       const vertex2 = new Vector3();
-      const normal2 = new Vector3();
+      const normal3 = new Vector3();
       const indices = [];
       const vertices = [];
       const normals = [];
@@ -40455,8 +40514,8 @@
           vertex2.y = radius * Math.cos(thetaStart + v * thetaLength);
           vertex2.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
           vertices.push(vertex2.x, vertex2.y, vertex2.z);
-          normal2.copy(vertex2).normalize();
-          normals.push(normal2.x, normal2.y, normal2.z);
+          normal3.copy(vertex2).normalize();
+          normals.push(normal3.x, normal3.y, normal3.z);
           uvs.push(u + uOffset, 1 - v);
           verticesRow.push(index2++);
         }
@@ -40546,7 +40605,7 @@
       const uvs = [];
       const center = new Vector3();
       const vertex2 = new Vector3();
-      const normal2 = new Vector3();
+      const normal3 = new Vector3();
       for (let j3 = 0; j3 <= radialSegments; j3++) {
         for (let i = 0; i <= tubularSegments; i++) {
           const u = i / tubularSegments * arc;
@@ -40557,8 +40616,8 @@
           vertices.push(vertex2.x, vertex2.y, vertex2.z);
           center.x = radius * Math.cos(u);
           center.y = radius * Math.sin(u);
-          normal2.subVectors(vertex2, center).normalize();
-          normals.push(normal2.x, normal2.y, normal2.z);
+          normal3.subVectors(vertex2, center).normalize();
+          normals.push(normal3.x, normal3.y, normal3.z);
           uvs.push(i / tubularSegments);
           uvs.push(j3 / radialSegments);
         }
@@ -40606,7 +40665,7 @@
       const normals = [];
       const uvs = [];
       const vertex2 = new Vector3();
-      const normal2 = new Vector3();
+      const normal3 = new Vector3();
       const P1 = new Vector3();
       const P22 = new Vector3();
       const B8 = new Vector3();
@@ -40630,8 +40689,8 @@
           vertex2.y = P1.y + (cx * N.y + cy * B8.y);
           vertex2.z = P1.z + (cx * N.z + cy * B8.z);
           vertices.push(vertex2.x, vertex2.y, vertex2.z);
-          normal2.subVectors(vertex2, P1).normalize();
-          normals.push(normal2.x, normal2.y, normal2.z);
+          normal3.subVectors(vertex2, P1).normalize();
+          normals.push(normal3.x, normal3.y, normal3.z);
           uvs.push(i / tubularSegments);
           uvs.push(j3 / radialSegments);
         }
@@ -40685,7 +40744,7 @@
       this.normals = frames.normals;
       this.binormals = frames.binormals;
       const vertex2 = new Vector3();
-      const normal2 = new Vector3();
+      const normal3 = new Vector3();
       const uv = new Vector2();
       let P4 = new Vector3();
       const vertices = [];
@@ -40713,14 +40772,14 @@
           const v = j3 / radialSegments * Math.PI * 2;
           const sin = Math.sin(v);
           const cos = -Math.cos(v);
-          normal2.x = cos * N.x + sin * B8.x;
-          normal2.y = cos * N.y + sin * B8.y;
-          normal2.z = cos * N.z + sin * B8.z;
-          normal2.normalize();
-          normals.push(normal2.x, normal2.y, normal2.z);
-          vertex2.x = P4.x + radius * normal2.x;
-          vertex2.y = P4.y + radius * normal2.y;
-          vertex2.z = P4.z + radius * normal2.z;
+          normal3.x = cos * N.x + sin * B8.x;
+          normal3.y = cos * N.y + sin * B8.y;
+          normal3.z = cos * N.z + sin * B8.z;
+          normal3.normalize();
+          normals.push(normal3.x, normal3.y, normal3.z);
+          vertex2.x = P4.x + radius * normal3.x;
+          vertex2.y = P4.y + radius * normal3.y;
+          vertex2.z = P4.z + radius * normal3.z;
           vertices.push(vertex2.x, vertex2.y, vertex2.z);
         }
       }
@@ -43189,8 +43248,8 @@
     }
     // get the radiance in the direction of the normal
     // target is a Vector3
-    getAt(normal2, target) {
-      const x2 = normal2.x, y2 = normal2.y, z4 = normal2.z;
+    getAt(normal3, target) {
+      const x2 = normal3.x, y2 = normal3.y, z4 = normal3.z;
       const coeff = this.coefficients;
       target.copy(coeff[0]).multiplyScalar(0.282095);
       target.addScaledVector(coeff[1], 0.488603 * y2);
@@ -43206,8 +43265,8 @@
     // get the irradiance (radiance convolved with cosine lobe) in the direction of the normal
     // target is a Vector3
     // https://graphics.stanford.edu/papers/envmap/envmap.pdf
-    getIrradianceAt(normal2, target) {
-      const x2 = normal2.x, y2 = normal2.y, z4 = normal2.z;
+    getIrradianceAt(normal3, target) {
+      const x2 = normal3.x, y2 = normal3.y, z4 = normal3.z;
       const coeff = this.coefficients;
       target.copy(coeff[0]).multiplyScalar(0.886227);
       target.addScaledVector(coeff[1], 2 * 0.511664 * y2);
@@ -43274,8 +43333,8 @@
     }
     // evaluate the basis functions
     // shBasis is an Array[ 9 ]
-    static getBasisAt(normal2, shBasis) {
-      const x2 = normal2.x, y2 = normal2.y, z4 = normal2.z;
+    static getBasisAt(normal3, shBasis) {
+      const x2 = normal3.x, y2 = normal3.y, z4 = normal3.z;
       shBasis[0] = 0.282095;
       shBasis[1] = 0.488603 * y2;
       shBasis[2] = 0.488603 * z4;
@@ -52225,7 +52284,7 @@
   var SLOT_ROLLE = { premium: "slot:premium", warenhaus: "slot:warenhaus", sport: "slot:sport", wettbewerber: "slot:wettbewerber", wettbewerber_reserve: "slot:wettbewerber_reserve", schwester: "slot:schwester", outlet: "slot:outlet" };
   function einkaufslage(E8, standorte) {
     const liste2 = standorte.map((st2, n3) => ({ st: st2, n: n3, m: standortMasse(st2), lage: st2.lage ?? "1a", rolle: st2.rolle ?? "warenhaus" }));
-    const innen = liste2.filter((e) => e.lage === "1a" || e.lage === "b");
+    const innen = liste2.filter((e) => e.lage === "1a" || e.lage === "b" || e.lage === "stadtteil");
     E8.randStandorte = liste2.filter((e) => (e.lage === "center" || e.lage === "rand") && e.rolle !== "outlet");
     E8.einkauf = [];
     E8.einkaufZellen = /* @__PURE__ */ new Set();
@@ -52308,22 +52367,22 @@
       else zuB.push(e);
     }
     const kx = kF - 0.5, kz2 = lF - 0.5;
-    for (const e of [...innen.filter((x2) => x2.lage === "b"), ...zuB]) {
+    for (const e of [...innen.filter((x2) => x2.lage === "b"), ...zuB, ...innen.filter((x2) => x2.lage === "stadtteil")]) {
       const l = [];
       for (let i = 0; i < nx; i++) for (let j3 = 0; j3 < nz; j3++) {
         if (!zelleFrei(E8, i, j3) || i === kF - 1 || i === kF || j3 === lF - 1 || j3 === lF) continue;
         const dd = wurzelSumme3(i + 0.5 - kx, j3 + 0.5 - kz2);
-        if (dd < 1.2 || dd > 4) continue;
+        if (dd < (e.lage === "stadtteil" ? 2.5 : 1.2) || dd > (e.lage === "stadtteil" ? 6.5 : 4)) continue;
         const anHaupt = istHaupt(E8.zTyp[i + 1]) || istHaupt(E8.xTyp[j3 + 1]) || istHaupt(E8.zTyp[i]) || istHaupt(E8.xTyp[j3]);
         const nachbar = [...E8.einkaufZellen].some((s2) => {
           const [a2, b2] = s2.split(",").map(Number);
           return Math.abs(a2 - i) + Math.abs(b2 - j3) <= 1;
         });
-        l.push([{ i, j: j3, ecke: "+x+z" }, (anHaupt ? 2.5 : 1) / (0.5 + Math.abs(dd - 2.2)) * (nachbar ? 0.3 : 1)]);
+        l.push([{ i, j: j3, ecke: "+x+z" }, (anHaupt ? 2.5 : 1) / (0.5 + Math.abs(dd - (e.lage === "stadtteil" ? 4.5 : 2.2))) * (nachbar ? 0.3 : 1)]);
       }
       kand = kand.filter((q2) => zelleFrei(E8, q2.i, q2.j));
-      if (l.length) nimmZelle(e, wahlGewichtet(r3, l), "b");
-      else if (kand.length) nimmZelle(e, kand[0], "b");
+      if (l.length) nimmZelle(e, wahlGewichtet(r3, l), e.lage === "stadtteil" ? "stadtteil" : "b");
+      else if (kand.length) nimmZelle(e, kand[0], e.lage === "stadtteil" ? "stadtteil" : "b");
     }
     for (const e of meine) {
       E8.spalten[e.i] = Math.max(E8.spalten[e.i], Math.ceil((e.W + 30) / 2) * 2);
@@ -57450,7 +57509,20 @@
       S.add(rg2, "#eef1f2");
     }
     S.quader(xm, hm, zm, xm + M2, hm + 0.4, zm + dm, KIES_D);
-    if (dm * 0.72 - 4 > 10) parkdeck(K3, xm + 1, zm + 1, xm + M2 - 1, zm + dm * 0.72 - 4.2, hm + 0.4, false);
+    if (dm * 0.72 - 4 > 10) {
+      if ([1, 4, 7].includes(K3.v)) {
+        const x1 = xm + 2, x2 = xm + M2 - 2;
+        const z1 = zm + 1, z22 = zm + dm * 0.72 - 4.2;
+        for (const y2 of [hm + 2.8, hm + 5.4]) {
+          S.quader(x1, y2, z1, x2, y2 + 0.32, z22, "#7e858c");
+          for (const px3 of [x1 + 1, x2 - 1]) for (const pz6 of [z1 + 1, z22 - 1])
+            S.box(0.65, 2.35, 0.65, px3, y2 - 1.15, pz6, STAHL);
+          for (const px3 of [x1 + 1, x2 - 1])
+            S.box(0.24, 0.9, z22 - z1, px3, y2 + 0.75, (z1 + z22) / 2, STAHL);
+        }
+        parkdeck(K3, x1, z1, x2, z22, hm + 5.72, false);
+      } else parkdeck(K3, xm + 1, zm + 1, xm + M2 - 1, zm + dm * 0.72 - 4.2, hm + 0.4, false);
+    }
     if (K3.alt) flecken(K3, s2, 0, M2, EG2, hm, 0.06, f11, 6);
   }
   function familie6(K3) {
@@ -58375,6 +58447,42 @@
     hoehe = Math.max(hoehe, dek.hoehe);
     if (opt.vorplatz !== false) hartwigVorplatz(S, koerper5, Z2, rng3(`${haus2.id}/vorplatz`));
     return { hoehe, w: K3.w + M2, d: K3.d, familie: fam, teile: S.anzahl - start, status: Z2.status };
+  }
+
+  // src/kit/warenhaus-vielfalt.js
+  var WEST = [1, 2, 3, 4, 5, 8, 9, 10, 11];
+  var OST = [8, 9, 10, 11, 3, 4, 5, 2, 1];
+  var normal2 = (n3) => (n3 % 8 + 8) % 8;
+  function warenhausVielfalt(haeuser) {
+    const gruppen = /* @__PURE__ */ new Map();
+    for (const h3 of haeuser) {
+      if (h3.format !== "warenhaus" || h3.klasse === "premium") continue;
+      if (!gruppen.has(h3.stadt)) gruppen.set(h3.stadt, []);
+      gruppen.get(h3.stadt).push(h3);
+    }
+    const ergebnis = /* @__PURE__ */ new Map();
+    for (const [, liste2] of gruppen) {
+      const familien = /* @__PURE__ */ new Set();
+      const kombinationen = /* @__PURE__ */ new Set();
+      for (const h3 of [...liste2].sort((a2, b2) => a2.id.localeCompare(b2.id, "de"))) {
+        const wunsch = familieVon(h3);
+        const kandidaten3 = [.../* @__PURE__ */ new Set([wunsch, ...istOstHaus(h3) ? OST : WEST])];
+        const familie = kandidaten3.find((f11) => !familien.has(f11)) ?? kandidaten3.find((f11) => [...Array(8).keys()].some((v) => !kombinationen.has(`${f11}/${v}`))) ?? wunsch;
+        const start = normal2(h3.fassade ?? 0);
+        let fassade3 = start;
+        for (let k3 = 0; k3 < 8; k3++) {
+          const v = (start + k3) % 8;
+          if (!kombinationen.has(`${familie}/${v}`)) {
+            fassade3 = v;
+            break;
+          }
+        }
+        familien.add(familie);
+        kombinationen.add(`${familie}/${fassade3}`);
+        ergebnis.set(h3.id, { familie, fassade: fassade3 });
+      }
+    }
+    return ergebnis;
   }
 
   // src/kit/sonderbauten.js
@@ -100320,6 +100428,7 @@
   var regionVon2 = (p2) => REGION2[p2.region] ?? p2.region ?? "Mitte";
   var regionLang = { Nord: "nord", Ost: "ost", West: "west", Mitte: "mitte", "S\xFCd": "sued" };
   var HAUS = new Map(haeuser_default.map((h3) => [h3.id, h3]));
+  var WARENHAUS_VARIANTEN = warenhausVielfalt(haeuser_default);
   var SCHWESTER = new Map(haeuser_schwester_default.map((h3) => [h3.id, h3]));
   var OUTLETS = new Map(haeuser_outlet_default.map((h3) => [h3.id, h3]));
   function fussabdruck(haus2, familie = null) {
@@ -100416,7 +100525,6 @@
     const sport = o3.sport ?? ERSATZ.sport, wettbewerber2 = o3.wettbewerber ?? ERSATZ.wettbewerber;
     const zustandFuer = (h3) => (typeof o3.zustand === "function" ? o3.zustand(h3) : o3.zustand?.[h3?.id]) ?? (o3.status ? { status: o3.status } : {});
     const gebaut = /* @__PURE__ */ new Map();
-    const famBenutzt = /* @__PURE__ */ new Set();
     const traufe = /* @__PURE__ */ new Map();
     const reihen = /* @__PURE__ */ new Map();
     const harmonisiere = (g, p2, eck) => {
@@ -100472,20 +100580,15 @@
       ...slots,
       "slot:warenhaus": (S, scene2, p2) => {
         const h0 = p2.standort?.id && HAUS.get(p2.standort.id) || passendesHaus(p2, o3.warenhausId);
-        const f11 = fussabdruck(h0);
+        const variant = WARENHAUS_VARIANTEN.get(h0.id);
+        const f11 = fussabdruck(h0, variant?.familie);
         const { x: x2, z: z4 } = imSlot(p2, f11.w, f11.d);
         if (h0.klasse === "premium") {
           p2.haus = h0;
           return premiumhaus(S, scene2, h0, { x: x2, z: z4, ...zustandFuer(h0) });
         }
-        let fam = familieVon(h0), h3 = h0;
-        if (famBenutzt.has(fam)) {
-          const alt = fam <= 5 ? [fam + 1, fam - 1, fam + 2, fam - 2].find((q2) => q2 >= 1 && q2 <= 5 && !famBenutzt.has(q2)) : null;
-          if (alt) fam = alt;
-          else h3 = { ...h0, fassade: ((h0.fassade ?? 0) + 3) % 8 };
-        }
-        famBenutzt.add(fam);
-        const e = warenhaus(S, scene2, h3, { x: x2, z: z4, familie: fam, ...zustandFuer(h0) });
+        const h3 = variant ? { ...h0, fassade: variant.fassade } : h0;
+        const e = warenhaus(S, scene2, h3, { x: x2, z: z4, familie: variant?.familie, ...zustandFuer(h0) });
         p2.haus = h3;
         return e;
       },
@@ -129424,8 +129527,18 @@
     const archetyp = bild3?.[0] ?? wahlGewichtet(r3, Object.entries(ARCHETYPEN).map(([k3, v]) => [k3, v.gewicht[TYPEN4[typ].idx]]));
     const extra = { ...bild3?.[1] ?? {}, ...ddr ? { ddr: true } : {} };
     const standorte = liste2.map((h3) => {
-      const f11 = fussabdruck(h3);
-      return { id: h3.id, name: h3.name, rolle: h3.klasse === "premium" ? "premium" : h3.format === "sport" ? "sport" : "warenhaus", lage: h3.lage, grundflaecheQm: h3.grundflaecheQm, w: f11.w, d: f11.d };
+      const v = WARENHAUS_VARIANTEN.get(h3.id);
+      const f11 = fussabdruck(h3, v?.familie);
+      return {
+        id: h3.id,
+        name: h3.name,
+        rolle: h3.klasse === "premium" ? "premium" : h3.format === "sport" ? "sport" : "warenhaus",
+        lage: h3.lage,
+        grundflaecheQm: h3.grundflaecheQm,
+        w: f11.w,
+        d: f11.d,
+        ...v ? { familie: v.familie, variante: v.fassade } : {}
+      };
     });
     const schwester = haeuser_schwester_default.find((h3) => h3.stadt === name2);
     if (schwester) {
@@ -130322,9 +130435,20 @@
   function stadtEintragAusSpiel(s2, name2) {
     const d3 = stadtDaten2(name2);
     if (!d3) return void 0;
+    const verteilung = warenhausVielfalt(s2.haeuser.filter((h3) => h3.stadt === name2));
     const eigene = s2.haeuser.filter((h3) => h3.stadt === name2).map((h3) => {
-      const f11 = fussabdruck(h3);
-      return { id: h3.id, name: h3.name, rolle: h3.klasse === "premium" ? "premium" : h3.format === "sport" ? "sport" : h3.format === "schwester" ? "schwester" : h3.format === "outlet" ? "outlet" : "warenhaus", lage: h3.lage, grundflaecheQm: h3.grundflaecheQm, w: f11.w, d: f11.d };
+      const v = verteilung.get(h3.id);
+      const f11 = fussabdruck(h3, v?.familie);
+      return {
+        id: h3.id,
+        name: h3.name,
+        rolle: h3.klasse === "premium" ? "premium" : h3.format === "sport" ? "sport" : h3.format === "schwester" ? "schwester" : h3.format === "outlet" ? "outlet" : "warenhaus",
+        lage: h3.lage,
+        grundflaecheQm: h3.grundflaecheQm,
+        w: f11.w,
+        d: f11.d,
+        ...v ? { familie: v.familie, variante: v.fassade } : {}
+      };
     });
     const alt = d3.standorte.filter((q2) => q2.rolle === "wettbewerber");
     const reserve = Array.from({ length: 2 }, (_, i) => ({
@@ -130346,8 +130470,7 @@
   function spielBauer(s2, o3 = {}) {
     const basis4 = echterBauer(o3.bauerOpt ?? {});
     const merk2 = o3.merk;
-    const famBenutzt = /* @__PURE__ */ new Set();
-    const wahl3 = /* @__PURE__ */ new Map();
+    const wahl3 = warenhausVielfalt(s2.haeuser);
     const haeuser = /* @__PURE__ */ new Map();
     const statischeDaten = new Map([...haeuser_schwester_default, ...haeuser_outlet_default].map((h3) => [h3.id, h3]));
     const statischeHaeuser = /* @__PURE__ */ new Map();
@@ -130372,7 +130495,8 @@
       return zust.get(h3.id);
     };
     const baueWarenhaus = (S, scene2, p2, h3) => {
-      const f11 = fussabdruck(h3);
+      const variant = wahl3.get(h3.id);
+      const f11 = fussabdruck(h3, variant?.familie);
       const { x: x2, z: z4 } = imSlot2(p2, f11.w, f11.d);
       if (h3.klasse === "premium") {
         p2.haus = h3;
@@ -130381,17 +130505,7 @@
         if (hatAbholstation(s2, h3)) abholstation(S, scene2, { x: x2, z: z4, w: f11.w, d: f11.d });
         return res2;
       }
-      if (!wahl3.has(h3.id)) {
-        let fam2 = familieVon(h3), fassade4 = h3.fassade;
-        if (famBenutzt.has(fam2)) {
-          const alt = fam2 <= 5 ? [fam2 + 1, fam2 - 1, fam2 + 2, fam2 - 2].find((q2) => q2 >= 1 && q2 <= 5 && !famBenutzt.has(q2)) : null;
-          if (alt) fam2 = alt;
-          else fassade4 = ((h3.fassade ?? 0) + 3) % 8;
-        }
-        famBenutzt.add(fam2);
-        wahl3.set(h3.id, { fam: fam2, fassade: fassade4 });
-      }
-      const { fam, fassade: fassade3 } = wahl3.get(h3.id);
+      const fam = variant?.familie, fassade3 = variant?.fassade ?? h3.fassade;
       p2.haus = h3;
       const roh2 = fassade3 === h3.fassade ? h3 : { ...h3, fassade: fassade3 };
       const nutzer = nachnutzer(h3);
@@ -131161,7 +131275,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "0d0ecb3" : "Entwicklung";
+  var version = () => true ? "83c53d5" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld(d3) {
@@ -131280,6 +131394,100 @@
     };
   }
 
+  // src/ui/produkte-q24.js
+  var FAECHER = [["damen", "Damen"], ["herren", "Herren"], ["kinder", "Kinder"], ["home", "Home"]];
+  var ZIEL = { kinder: "kinder", teens: "jung", young: "jung", adults: "mitte", bestager: "reif" };
+  var gruppeTrend = (gruppe3) => ZIEL[gruppe3] ?? "mitte";
+  function faecherFuer(t2) {
+    const wgs = Array.isArray(t2.wgs) ? t2.wgs : [];
+    const sp6 = String(t2.sparte ?? t2.abteilung ?? "").toLowerCase();
+    const kat = String(t2.kategorie ?? "").toLowerCase();
+    const f11 = /* @__PURE__ */ new Set();
+    if (wgs.some((w2) => /^damen[.]|damenschuhe/.test(w2)) || sp6 === "damen") f11.add("damen");
+    if (wgs.some((w2) => /^herren[.]|herrenschuhe/.test(w2)) || sp6 === "herren") f11.add("herren");
+    if (wgs.some((w2) => /^kinder[.]/.test(w2)) || sp6 === "kinder" || kat === "kinder") f11.add("kinder");
+    if (wgs.some((w2) => /^wohnen[.]|^haushalt[.]|^spielwaren[.]/.test(w2)) || ["home", "heimtextil", "haushalt"].includes(sp6) || kat === "home") f11.add("home");
+    if (["schuhe", "accessoires", "beauty", "waesche"].includes(kat) && !f11.size) {
+      f11.add("damen");
+      f11.add("herren");
+    }
+    if (sp6 === "accessoires" || sp6 === "beauty") {
+      f11.add("damen");
+      f11.add("herren");
+    }
+    if (!f11.size) {
+      f11.add("damen");
+      f11.add("herren");
+    }
+    return f11;
+  }
+  function passendeTypen(K3, fach, gruppe3) {
+    return (K3.typen ?? []).filter((t2) => {
+      if (!faecherFuer(t2).has(fach)) return false;
+      if (fach === "home") return true;
+      if (Array.isArray(t2.zielgruppen)) return t2.zielgruppen.includes(gruppe3);
+      const gewichte2 = t2.gruppe ?? {};
+      return Number(gewichte2[gruppeTrend(gruppe3)] ?? 0) >= 0.4;
+    });
+  }
+  function zielChips(K3, ui) {
+    const z4 = K3.zielgruppen ?? [];
+    return '<div class="q24-chips" aria-label="Zielgruppe">' + z4.map((x2) => '<button data-a="q24Ziel" data-v="' + esc2(x2.id) + '" aria-pressed="' + (ui.zielgruppe === x2.id) + '" class="' + (ui.zielgruppe === x2.id ? "an" : "") + '">' + esc2(x2.name) + "</button>").join("") + "</div>";
+  }
+  function sortimentBedienung(K3, ui, typen, kachel2, aktion2, gesperrt2 = /* @__PURE__ */ new Set()) {
+    const erlaubt = new Set(typen.map((t2) => t2.typ));
+    const index2 = new Map(typen.map((t2) => [t2.typ, t2]));
+    let baum2 = (K3.baum ?? []).map((kat) => ({
+      ...kat,
+      unterkategorien: (kat.unterkategorien ?? []).map((ast2) => ({ ...ast2, typen: (ast2.typen ?? []).filter((t2) => erlaubt.has(t2)) })).filter((ast2) => ast2.typen.length)
+    })).filter((kat) => kat.unterkategorien.length);
+    const erfasst = new Set(baum2.flatMap((x2) => x2.unterkategorien.flatMap((a2) => a2.typen)));
+    const fehlend = typen.filter((t2) => !erfasst.has(t2.typ));
+    if (fehlend.length) baum2 = [...baum2, {
+      id: "weitere",
+      name: "Weitere Artikel",
+      unterkategorien: [{ id: "weitere-typen", name: "Neu im Sortiment", typen: fehlend.map((t2) => t2.typ) }]
+    }];
+    if (!baum2.length) return '<div class="olief">Keine passenden Artikeltypen. Bitte Abteilung oder Zielgruppe wechseln.</div>';
+    if (!baum2.some((b2) => b2.id === ui.baumOffen)) {
+      ui.baumOffen = baum2[0].id;
+      ui.astOffen = baum2[0].unterkategorien[0].id;
+    }
+    let h3 = '<div class="q11baum q24-baum">';
+    for (const kat of baum2) {
+      const offen = ui.baumOffen === kat.id;
+      const zahl6 = kat.unterkategorien.reduce((n3, a2) => n3 + a2.typen.length, 0);
+      h3 += '<button class="q11kategorie ' + (offen ? "an" : "") + '" data-a="baumKat" data-v="' + esc2(kat.id) + '" aria-expanded="' + offen + '"><span>' + esc2(kat.name) + "</span><small>" + zahl6 + ' Artikel</small><b aria-hidden="true">' + (offen ? "\u2212" : "+") + "</b></button>";
+      if (!offen) continue;
+      for (const ast2 of kat.unterkategorien) {
+        const astOffen = ui.astOffen === ast2.id;
+        h3 += '<button class="q11ast ' + (astOffen ? "an" : "") + '" data-a="baumAst" data-v="' + esc2(ast2.id) + '" aria-expanded="' + astOffen + '"><span>' + esc2(ast2.name) + "</span><small>" + ast2.typen.length + '</small><b aria-hidden="true">' + (astOffen ? "\u2212" : "+") + "</b></button>";
+        if (!astOffen) continue;
+        h3 += '<div class="typkacheln q11typen q24-typen">';
+        for (const typ of ast2.typen) {
+          const t2 = index2.get(typ), voll2 = gesperrt2.has(t2.kategorie);
+          h3 += '<button class="' + (voll2 ? "voll" : "") + '" data-a="' + aktion2 + '" data-v="' + esc2(typ) + '" aria-label="' + esc2(typ) + ' ansehen">' + kachel2(typ, 76) + "<span>" + esc2(typ) + "</span>" + (voll2 ? "<small>Kapazit\xE4t erreicht</small>" : "") + "</button>";
+        }
+        h3 += "</div>";
+      }
+    }
+    return h3 + "</div>";
+  }
+  function fachSegmente(ui) {
+    return '<div class="q24-seg" role="group" aria-label="Abteilung">' + FAECHER.map(([id, name2]) => '<button data-a="q24Fach" data-v="' + id + '" aria-pressed="' + (ui.fach === id) + '" class="' + (ui.fach === id ? "an" : "") + '">' + name2 + "</button>").join("") + "</div>";
+  }
+  function teamAufschluesselung(l) {
+    if (!l) return "";
+    const werte3 = [
+      ["Team", l.team],
+      ["Zielgruppe", l.zielgruppe],
+      ["Trend", l.trend],
+      ["Lieferant", l.lieferant],
+      ["HQ", l.hq]
+    ];
+    return '<div class="q24-leistung"><div class="q24-leistungstitel">Teamleistung je Marke <b>' + l.wert + ' / 100</b></div><div class="q24-werte">' + werte3.map(([name2, wert]) => "<span>" + name2 + " <b>" + wert + "</b></span>").join("") + "</div><small>Designteam: " + l.teamgroesse + " Designer \xB7 Erfahrung in der Kategorie " + l.kategorieErfahrung + " / 100</small></div>";
+  }
+
   // src/ui/eigenmarken.js
   var ALTER = [["10-13", "Kinder"], ["13-17", "Teens & Tweens"], ["18-29", "Young Adults"], ["30-49", "Adults"], ["50+", "Best Ager"]];
   var alterOptionen = (aktuell) => aktuell === "70+" ? [...ALTER, ["70+", "Best Ager 70+"]] : ALTER;
@@ -131305,6 +131513,7 @@
     if (ui.seite === "gruenden" && ui.em.assistent) return assistent(ctx, ui, tabs);
     ui.seite = "eigenmarken";
     const s2 = ctx.s(), u = ctx.q.marken(s2);
+    const leistungen = new Map((typeof ctx.E?.produkte === "function" ? ctx.E.produkte(s2).marken : []).map((m) => [m.marke, m.leistung]));
     let h3 = tabs;
     h3 += `<div class="raster"><div class="kz"><span>Eigenmarkenanteil am Umsatz</span><b data-p="mg:anteil">${pz3(u.anteilUmsatz, 1)}</b></div><div class="kz"><span>Mehrmarge zu Fremdware</span><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b></div><div class="kz"><span>Marken gef\xFChrt</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace(".", ",")} sinnvollen</b></div><div class="kz"><span>Umsatz Eigenmarken 13 Wochen</span><b data-p="mg:umsatz">${geld(u.marken.reduce((a2, m) => a2 + m.umsatz13, 0))}</b></div></div>`;
     h3 += '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>';
@@ -131312,6 +131521,7 @@
       const veraltet = m.stilAktualitaet < 45;
       const status2 = m.status !== "aktiv" ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}</span>` : veraltet ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
       h3 += `<div class="karte emkarte"><div class="mkopf" style="background:${m.farbe}"><b>${esc2(m.name)}</b><small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie}${m.gewachsen ? " \xB7 gewachsene Hartwig-Marke" : ""}</small></div>`;
+      h3 += teamAufschluesselung(leistungen.get(m.id));
       h3 += `<div class="ochips">${status2}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualit\xE4t ${"\u2605".repeat(m.qualitaet)}${"\u2606".repeat(5 - m.qualitaet)}</span><span class="chip grau">${esc2(m.beschaffungName)}</span></div>`;
       h3 += `<div class="owerte"><div><span>Umsatz 13 Wochen</span><b data-p="m:${m.id}:umsatz">${geld(m.umsatz13)}</b></div><div><span>Rohertragsquote</span><b data-p="m:${m.id}:marge">${pz3(m.rohertragsquote, 1)}</b></div><div><span>Mehrmarge</span><b data-p="m:${m.id}:mehrmarge">${punkte(m.mehrmarge)}</b></div></div>`;
       h3 += `<div class="mzeile"><span>Bekanntheit</span>${balken6(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
@@ -133088,7 +133298,7 @@
     "verwaltung",
     "produkt"
   ];
-  var prozent = (q2) => Math.round(q2 * 100) + " %";
+  var prozent2 = (q2) => Math.round(q2 * 100) + " %";
   var etageName2 = (n3) => n3 === 0 ? "Erdgeschoss" : n3 + ". Etage";
   var balken7 = (label, wert) => '<div class="q15-balken"><div><span>' + esc2(label) + "</span><b>" + Math.round(wert) + ' / 100</b></div><div class="q15-balken-bahn"><i style="width:' + Math.min(100, Math.max(0, wert)) + '%"></i></div></div>';
   function iso(x2, y2, schritt) {
@@ -133172,7 +133382,7 @@
     if (raeume.length > 1) h3 += '<nav class="q15-etagenwahl" aria-label="Etage ausw\xE4hlen">' + raeume.map((q2) => '<button type="button" class="' + (q2 === wahl3 ? "an" : "") + `" onclick="hqKlick('abteilungEtage','` + esc2(id) + "','" + esc2(q2.gebaeude.id) + "','" + q2.etage.nr + `')">` + esc2(etageName2(q2.etage.nr)) + "</button>").join("") + "</nav>";
     h3 += '<section class="q15-leitung"><div class="q15-portrait" aria-hidden="true">' + (leitung2 ? esc2(leitung2.name.split(" ").map((w2) => w2[0]).slice(0, 2).join("")) : "\u2013") + "</div><div><small>" + esc2(team?.name ?? "Bereichsleitung") + "</small><b>" + esc2(leitung2?.name ?? "Leitung unbesetzt") + "</b><p>\u201E" + esc2(spruch(a2, a2.fte, kap)) + "\u201C</p></div></section>";
     h3 += '<section class="q15-steuerung"><h3>Personal und Verg\xFCtung</h3><div class="q15-reglerkopf"><b>Besetzung</b><b>' + a2.fte + " / " + kap + ' FTE</b></div><input type="range" aria-label="Besetzung der Abteilung" min="1" max="' + kap + '" step="1" value="' + a2.fte + `" onchange="hqKlick('fte','` + esc2(a2.id) + `',this.value)" data-q15-fte="` + a2.fte + '"><small>Zus\xE4tzliche Einstellungen ben\xF6tigen freie B\xFCrofl\xE4che und Einarbeitung. Stellenabbau verursacht Abfindungen.</small>';
-    h3 += '<div class="q15-reglerkopf"><b>Gehaltsniveau</b><b>' + Math.round(st2 * 100) + ' % des Standards</b></div><input type="range" aria-label="Gehaltsniveau der Abteilung" min="80" max="120" step="5" value="' + Math.round(st2 * 100) + `" onchange="hqKlick('gehalt','` + esc2(a2.id) + `',this.value)" data-q15-gehalt="` + st2 + '"><div class="q15-werte"><span>Moral <b>' + a2.moral + " / 100</b></span><span>Fluktuationsrisiko <b>" + prozent(a2.fluktuation) + " p. a.</b></span><span>Qualit\xE4tsfaktor <b>" + prozent(a2.qualitaet) + "</b></span></div>" + stufeWahl + '<div class="q15-hinweis">Personalkosten je Woche: <b>' + geld(a2.kostenWoche) + "</b></div></section>";
+    h3 += '<div class="q15-reglerkopf"><b>Gehaltsniveau</b><b>' + Math.round(st2 * 100) + ' % des Standards</b></div><input type="range" aria-label="Gehaltsniveau der Abteilung" min="80" max="120" step="5" value="' + Math.round(st2 * 100) + `" onchange="hqKlick('gehalt','` + esc2(a2.id) + `',this.value)" data-q15-gehalt="` + st2 + '"><div class="q15-werte"><span>Moral <b>' + a2.moral + " / 100</b></span><span>Fluktuationsrisiko <b>" + prozent2(a2.fluktuation) + " p. a.</b></span><span>Qualit\xE4tsfaktor <b>" + prozent2(a2.qualitaet) + "</b></span></div>" + stufeWahl + '<div class="q15-hinweis">Personalkosten je Woche: <b>' + geld(a2.kostenWoche) + "</b></div></section>";
     h3 += '<section class="q15-team"><h3>Stimmen aus dem Team</h3><div class="q15-stimmen">' + stimmungsTexte(a2, a2.fte, kap).map((satz) => '<div class="q15-stimme"><span class="q15-avatar" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="7.5" r="3"/><path d="M5.5 21v-4c0-3.5 2.5-5.5 6.5-5.5s6.5 2 6.5 5.5v4"/></svg></span><p>' + esc2(satz) + "</p></div>").join("") + "</div></section>";
     h3 += '<section class="q15-fuehrung"><h3>Leitung</h3>' + (leitung2 ? balken7("Fachliche Kompetenz", leitung2.qualitaet * 100) + balken7("Stimmung", leitung2.stimmung) : "<p>Die Leitungsstelle ist vakant. Besetzen Sie diese \xFCber Organisation.</p>") + `<button type="button" class="q15-sekundaer" onclick="hqKlick('organisation')">Leitung und Kandidaten in Organisation</button></section>`;
     h3 += '<section class="q15-delegation"><h3>Delegation je Aufgabe</h3><small>Die Fachbereiche nutzen die bestehende Organisation (Q05).</small>';
@@ -140391,6 +140601,7 @@
 
   // src/ui/produkte.js
   var PREISLAGE = { einstieg: "Einstieg", mitte: "Mitte", gehoben: "Gehoben" };
+  var STATUS3 = { entwicklung: "in Entwicklung", sortiment: "im Sortiment", pausiert: "pausiert", ausgelistet: "ausgelistet" };
   var euro = (x2) => `${dez(x2, 2)} \u20AC`;
   var BILD2 = /* @__PURE__ */ new Map();
   var merkeBilder = (K3) => {
@@ -140423,14 +140634,22 @@
   function produkteModul(ctx) {
     const E8 = ctx.E, s2 = () => ctx.s();
     const da = typeof E8.produkte === "function";
-    const ui = { aktiv: false, seite: "liste", marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: /* @__PURE__ */ new Set() };
+    const ui = { aktiv: false, seite: "liste", marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: /* @__PURE__ */ new Set(), fach: null, zielgruppe: null, detail: null };
     function markenwahl(L2) {
       return `<div class="spaltenwahl">${L2.marken.map((m) => `<button class="chipk ${m.marke === ui.marke ? "an" : ""}" data-a="marke" data-v="${m.marke}"><b style="background:${m.farbe}"></b>${esc2(m.name)}</button>`).join("")}</div>`;
     }
     function aktuelleMarke(L2) {
       if (!L2.marken.length) return null;
-      if (!L2.marken.some((m) => m.marke === ui.marke)) ui.marke = L2.marken[0].marke;
-      return L2.marken.find((m) => m.marke === ui.marke);
+      if (!L2.marken.some((m2) => m2.marke === ui.marke)) ui.marke = L2.marken[0].marke;
+      const m = L2.marken.find((x2) => x2.marke === ui.marke);
+      if (!ui.fach || !ui.zielgruppe) vorauswahl(m);
+      return m;
+    }
+    function vorauswahl(M2) {
+      ui.fach = M2.produkte.length > 0 && M2.produkte.every((p2) => p2.kategorie === "home") ? "home" : M2.trendGruppe === "kinder" ? "kinder" : /Herren/i.test(M2.zielgruppe) ? "herren" : "damen";
+      ui.zielgruppe = M2.trendGruppe === "kinder" ? "kinder" : M2.trendGruppe === "reif" ? "bestager" : M2.trendGruppe === "jung" ? "young" : "adults";
+      ui.baumOffen = null;
+      ui.astOffen = null;
     }
     function liste2(P4) {
       const st2 = s2(), L2 = E8.produkte(st2), M2 = aktuelleMarke(L2);
@@ -140438,7 +140657,9 @@
       if (!M2) return { titel: "Produktentwicklung", unter: "", html: '<div class="leise">Keine Eigenmarke vorhanden. Eine Marke gr\xFCndest du im Einkauf.</div>' };
       h3 += '<button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>';
       h3 += markenwahl(L2);
-      h3 += `<div class="raster">${kz("Team Produktentwicklung", P4("l:team", `${Math.round(L2.team * 100)} / 100`))}${kz("Kosten je Woche", P4("l:kosten", geld(L2.kostenWoche)))}</div>`;
+      h3 += teamAufschluesselung(M2.leistung);
+      h3 += '<button class="breit q24-katalogknopf" data-a="katalog">Sortiment durchsuchen: Damen, Herren, Kinder, Home</button>';
+      h3 += `<div class="raster">${kz("HQ-Team (Basis)", P4("l:team", `${Math.round(L2.team * 100)} / 100`))}${kz("Kosten je Woche", P4("l:kosten", geld(L2.kostenWoche)))}</div>`;
       const kats = M2.kategorien.filter((k4) => k4.kapazitaet > 0 || k4.belegt > 0);
       if (!kats.some((k4) => k4.id === ui.kategorie)) ui.kategorie = (kats.find((k4) => M2.produkte.some((p2) => p2.kategorie === k4.id && p2.status !== "ausgelistet")) ?? kats[0])?.id ?? null;
       h3 += `<div class="seg umbruch kats">${kats.map((k4) => `<button class="${k4.id === ui.kategorie ? "an" : ""}" data-a="kategorie" data-v="${k4.id}">${esc2(k4.name)} ${P4(`l:kat:${k4.id}`, `${k4.belegt} / ${k4.kapazitaet}`, "i")}</button>`).join("")}</div>`;
@@ -140452,6 +140673,7 @@
           const mb = ui.model.has(p2.id) ? modelBild(p2.typ, p2.farbe, p2.material, p2.wg, M2.trendGruppe, 190, p2.bild) : null;
           let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p2.id}" role="button" aria-label="Produkt oder Model zeigen" style="background:linear-gradient(#f7f4ee,#efe9df)">${mb ?? bild(p2.typ, p2.farbe, p2.material, 150, p2.bild)}</div>`;
           if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p2.id}" aria-label="Auslisten"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
+          c += `<button class="q24-detailsknopf" data-a="detailProdukt" data-v="${esc2(p2.id)}">Produktdetails und Model ansehen</button>`;
           c += `<div class="pname">${P4(`p:${p2.id}:name`, p2.name, "b")}<small>${esc2(p2.typ)} \xB7 ${esc2(p2.zielgruppeName ?? "Markenzielgruppe")} \xB7 ${esc2(p2.farbe)} \xB7 ${esc2(p2.material)} \xB7 ${PREISLAGE[p2.preislage] ?? p2.preislage}</small></div>`;
           if (ent) {
             c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P4(`p:${p2.id}:fertig`, `fertig ${wocheText(st2, p2.fertigWoche)}`, "small")}</div><div class="balken"><span style="width:${(p2.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P4(`p:${p2.id}:fortschritt`, pz3(p2.fortschritt), "i")} \xB7 ${geld(p2.budgetWoche)} je Woche \xFCber ${p2.dauer} Wochen</small></div>`;
@@ -140472,11 +140694,56 @@
       if (voll2 && !M2.hinweis) h3 += `<div class="olief warnung">Kapazit\xE4t in ${esc2(k3.name)} erreicht: f\xFCr ein neues Produkt erst eines auslisten.</div>`;
       return { titel: "Produktentwicklung", unter: `${esc2(M2.name)} \xB7 ${esc2(M2.zielgruppe)} \xB7 ${M2.inEntwicklung} in Entwicklung \xB7 KW ${kwVon2(st2.woche)}`, html: h3 };
     }
+    function katalog() {
+      const K3 = merkeBilder(E8.produktKatalog(s2())), L2 = E8.produkte(s2()), M2 = aktuelleMarke(L2);
+      if (!M2) return { titel: "Sortiment", unter: "", html: '<div class="leise">Noch keine Marke vorhanden.</div>' };
+      const typen = passendeTypen(K3, ui.fach, ui.zielgruppe);
+      let h3 = '<button class="zurueck" data-a="liste">\u2039 Produktentwicklung</button>';
+      h3 += markenwahl(L2);
+      h3 += fachSegmente(ui) + zielChips(K3, ui);
+      h3 += '<div class="q24-anzahl">' + typen.length + " Artikeltypen \xB7 Kategorie \xF6ffnen und Artikel ausw\xE4hlen</div>";
+      h3 += sortimentBedienung(K3, ui, typen, kachel, "detailTyp");
+      return { titel: "Sortiment", unter: esc2(M2.name) + " \xB7 " + typen.length + " passende Typen", html: h3 };
+    }
+    function detail2() {
+      const st2 = s2(), K3 = merkeBilder(E8.produktKatalog(st2)), L2 = E8.produkte(st2), M2 = aktuelleMarke(L2), d3 = ui.detail;
+      const p2 = d3?.produktId ? M2?.produkte.find((x2) => x2.id === d3.produktId) : null;
+      const t2 = K3.typen.find((x2) => x2.typ === (p2?.typ ?? d3?.typ));
+      if (!t2) {
+        ui.seite = "katalog";
+        return katalog();
+      }
+      const typ = p2?.typ ?? t2.typ;
+      const material2 = p2?.material ?? t2.materialien[0];
+      const farbe3 = p2?.farbe ?? (K3.farben.find((x2) => x2.name === "marine")?.name ?? K3.farben[0]?.name ?? "marine");
+      const markenGruppe = M2?.trendGruppe === "kinder" ? "kinder" : M2?.trendGruppe === "reif" ? "bestager" : M2?.trendGruppe === "jung" ? "young" : "adults";
+      const gruppe3 = p2 ? p2.zielgruppe ?? markenGruppe : ui.zielgruppe;
+      const wg = p2?.wg ?? t2.wgs.find((x2) => x2.startsWith(ui.fach === "home" ? "wohnen." : ui.fach + ".")) ?? t2.wgs[0];
+      const model = modelBild(typ, farbe3, material2, wg, gruppeTrend(gruppe3), 230);
+      const name2 = K3.zielgruppen.find((x2) => x2.id === gruppe3)?.name ?? gruppe3;
+      const preis = p2?.preis ?? t2.preisMitte;
+      const zurueck = d3?.quelle === "liste" ? "liste" : "katalog";
+      let h3 = '<button class="zurueck" data-a="detailZurueck" data-v="' + zurueck + '">\u2039 Zur\xFCck</button>';
+      h3 += '<div class="karte q24-detail"><div class="q24-detailbild">' + (model ?? bild(typ, farbe3, material2, 220)) + "</div>";
+      h3 += "<h3>" + esc2(p2?.name ?? typ) + '</h3><div class="q24-detailwerte">';
+      h3 += "<div><span>Artikeltyp</span><b>" + esc2(typ) + "</b></div>";
+      h3 += "<div><span>Material</span><b>" + esc2(material2) + "</b></div>";
+      h3 += "<div><span>Farbe</span><b>" + esc2(farbe3) + "</b></div>";
+      h3 += "<div><span>" + (p2 ? "Verkaufspreis" : "Basispreis, ca.") + "</span><b>" + euro(preis) + "</b></div>";
+      h3 += "<div><span>Zielgruppe</span><b>" + esc2(name2) + "</b></div>";
+      h3 += "</div>";
+      if (p2) h3 += '<div class="olief">Status: ' + esc2(STATUS3[p2.status] ?? p2.status) + " \xB7 " + esc2(p2.kategorieName) + "</div>";
+      else {
+        const freigegeben = M2 && M2.kategorien.some((x2) => x2.id === t2.kategorie && x2.kapazitaet > 0) && Number(t2.gruppe?.[M2.trendGruppe] ?? 0) > 0.15;
+        h3 += freigegeben ? '<button class="breit gruen" data-a="detailPlanen">F\xFCr ' + esc2(M2.name) + " entwickeln</button>" : '<div class="olief">Dieser Artikeltyp passt derzeit nicht zum Sortiment der gew\xE4hlten Marke.</div>';
+      }
+      return { titel: "Produktdetails", unter: esc2(M2?.name ?? "") + " \xB7 " + esc2(typ), html: h3 + "</div>" };
+    }
     function neu(P4) {
       const st2 = s2(), K3 = merkeBilder(E8.produktKatalog(st2)), L2 = E8.produkte(st2), M2 = aktuelleMarke(L2), e = ui.neu;
       const markeKats = new Set(M2.kategorien.filter((k3) => k3.kapazitaet > 0).map((k3) => k3.id));
       const voll2 = new Set(M2.kategorien.filter((k3) => k3.belegt >= k3.kapazitaet).map((k3) => k3.id));
-      const typen = K3.typen.filter((t2) => markeKats.has(t2.kategorie) && (t2.gruppe[M2.trendGruppe] ?? 0) > 0.15).sort((a2, b2) => voll2.has(a2.kategorie) - voll2.has(b2.kategorie));
+      const typen = passendeTypen(K3, ui.fach, ui.zielgruppe).filter((t2) => markeKats.has(t2.kategorie) && (t2.gruppe[M2.trendGruppe] ?? 0) > 0.15).sort((a2, b2) => Number(voll2.has(a2.kategorie)) - Number(voll2.has(b2.kategorie)));
       if (!typen.some((t2) => t2.typ === e.typ)) {
         e.typ = (typen.find((t2) => !voll2.has(t2.kategorie)) ?? typen[0])?.typ;
       }
@@ -140484,7 +140751,7 @@
       if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];
       let h3 = `<button class="zurueck" data-a="liste">\u2039 ${esc2(M2.name)}</button>`;
       h3 += markenwahl(L2);
-      if (!typen.length) return { titel: "Neues Produkt", unter: esc2(M2.name), html: h3 + '<div class="leise">F\xFCr diese Marke sind keine Artikeltypen verf\xFCgbar.</div>' };
+      if (!typen.length && ui.neuSchritt !== 0) ui.neuSchritt = 0;
       const typenIds = new Set(typen.map((t2) => t2.typ));
       const baum2 = (K3.baum ?? []).map((kat) => ({
         ...kat,
@@ -140496,27 +140763,11 @@
       const pfad4 = baum2.flatMap((k3) => k3.unterkategorien.map((a2) => ({ k: k3, a: a2 }))).find((x2) => x2.a.typen.includes(e.typ));
       h3 += '<div class="q11fortschritt"><span class="' + (ui.neuSchritt === 0 ? "an" : "fertig") + '">1 Kategorie und Artikel</span><span class="' + (ui.neuSchritt === 1 ? "an" : ui.neuSchritt > 1 ? "fertig" : "") + '">2 Zielgruppe</span><span class="' + (ui.neuSchritt === 2 ? "an" : "") + '">3 Entwicklung</span></div>';
       if (ui.neuSchritt === 0) {
-        h3 += '<div class="vtitel">Sortiment w\xE4hlen</div><p class="leise">Kategorie antippen, Unterkategorie \xF6ffnen und einen Artikeltyp ausw\xE4hlen.</p>';
-        h3 += '<div class="q11baum">';
-        for (const kat of baum2) {
-          const offen = ui.baumOffen === kat.id;
-          const zahl6 = kat.unterkategorien.reduce((sum2, a2) => sum2 + a2.typen.length, 0);
-          h3 += `<button class="q11kategorie ${offen ? "an" : ""}" data-a="baumKat" data-v="${kat.id}" aria-expanded="${offen}"><span>${esc2(kat.name)}</span><small>${zahl6} Artikel</small><b aria-hidden="true">${offen ? "\u2212" : "+"}</b></button>`;
-          if (offen) for (const ast2 of kat.unterkategorien) {
-            const astOffen = ui.astOffen === ast2.id;
-            h3 += `<button class="q11ast ${astOffen ? "an" : ""}" data-a="baumAst" data-v="${esc2(ast2.id)}" aria-expanded="${astOffen}"><span>${esc2(ast2.name)}</span><small>${ast2.typen.length}</small><b aria-hidden="true">${astOffen ? "\u2212" : "+"}</b></button>`;
-            if (astOffen) {
-              h3 += '<div class="typkacheln q11typen">';
-              for (const typ of ast2.typen) {
-                const t2 = typen.find((x2) => x2.typ === typ);
-                h3 += `<button class="${typ === e.typ ? "an" : ""} ${voll2.has(t2.kategorie) ? "voll" : ""}" data-a="typ" data-v="${esc2(typ)}">${kachel(typ, 64)}<span>${esc2(typ)}</span>${voll2.has(t2.kategorie) ? "<small>Kapazit\xE4t erreicht</small>" : ""}</button>`;
-              }
-              h3 += "</div>";
-            }
-          }
-        }
-        h3 += "</div>";
-        return { titel: "Neues Produkt", unter: `${esc2(M2.name)} \xB7 Kategorie \u2192 Artikeltyp`, html: h3 };
+        h3 += '<div class="vtitel">Sortiment w\xE4hlen</div>';
+        h3 += fachSegmente(ui) + zielChips(K3, ui);
+        h3 += '<div class="q24-anzahl">' + typen.length + " Artikeltypen f\xFCr " + esc2(M2.name) + "</div>";
+        h3 += sortimentBedienung(K3, ui, typen, kachel, "typ", voll2);
+        return { titel: "Neues Produkt", unter: esc2(M2.name) + " \xB7 Kategorie und Artikeltyp", html: h3 };
       }
       if (ui.neuSchritt === 1) {
         h3 += '<button class="zurueck" data-a="neuZurTyp">\u2039 Artikeltyp \xE4ndern</button>';
@@ -140570,7 +140821,7 @@
       const S = werteSammler();
       sternNr = 0;
       if (!da) return { S, r: { titel: "Produkte", unter: "", html: '<div class="leise">Die Engine liefert noch keine Produkte.</div>' } };
-      const r3 = ui.seite === "neu" && ui.neu ? neu(S.P) : ui.seite === "trend" ? trend(S.P) : liste2(S.P);
+      const r3 = ui.seite === "neu" && ui.neu ? neu(S.P) : ui.seite === "trend" ? trend(S.P) : ui.seite === "katalog" ? katalog() : ui.seite === "detail" ? detail2() : liste2(S.P);
       return { S, r: r3 };
     }
     function zeigen(scrollHalten = false) {
@@ -140612,6 +140863,7 @@
           ui.marke = v;
           ui.k = 0;
           ui.kategorie = null;
+          vorauswahl(aktuelleMarke(E8.produkte(st2)));
           if (ui.neu) {
             ui.neu = neuerEntwurf3();
             ui.neuSchritt = 0;
@@ -140619,6 +140871,46 @@
             ui.astOffen = null;
           }
           return zeigen(true);
+        case "katalog":
+          ui.seite = "katalog";
+          ui.baumOffen = null;
+          ui.astOffen = null;
+          return zeigen();
+        case "q24Fach":
+          ui.fach = v;
+          ui.baumOffen = null;
+          ui.astOffen = null;
+          if (ui.seite === "neu") ui.neu.typ = null;
+          return zeigen(true);
+        case "q24Ziel":
+          ui.zielgruppe = v;
+          ui.baumOffen = null;
+          ui.astOffen = null;
+          if (ui.seite === "neu") {
+            ui.neu.typ = null;
+            ui.neu.zielgruppe = v;
+          }
+          return zeigen(true);
+        case "detailTyp":
+          ui.detail = { typ: v, quelle: "katalog" };
+          ui.seite = "detail";
+          return zeigen();
+        case "detailProdukt":
+          ui.detail = { produktId: v, quelle: "liste" };
+          ui.seite = "detail";
+          return zeigen();
+        case "detailZurueck":
+          ui.seite = v === "liste" ? "liste" : "katalog";
+          return zeigen();
+        case "detailPlanen":
+          ui.seite = "neu";
+          ui.neu = neuerEntwurf3();
+          ui.neu.typ = ui.detail.typ;
+          ui.neu.zielgruppe = ui.zielgruppe;
+          ui.neuSchritt = 2;
+          ui.baumOffen = null;
+          ui.astOffen = null;
+          return zeigen();
         case "kategorie":
           ui.kategorie = v;
           ui.k = 0;
@@ -140636,6 +140928,7 @@
           return zeigen();
         case "neu":
           ui.seite = "neu";
+          vorauswahl(aktuelleMarke(E8.produkte(st2)));
           ui.neu = neuerEntwurf3();
           ui.neuSchritt = 0;
           ui.baumOffen = null;
@@ -140684,7 +140977,7 @@
           return zeigen(true);
         case "typ":
           ui.neu.typ = v;
-          ui.neu.zielgruppe = void 0;
+          ui.neu.zielgruppe = ui.zielgruppe;
           ui.neuSchritt = 1;
           return zeigen();
         case "farbe":
@@ -140738,6 +141031,7 @@
         ui.k = 0;
         ui.auslisten = null;
         if (seite2 === "neu") {
+          vorauswahl(aktuelleMarke(E8.produkte(s2())));
           ui.neu = neuerEntwurf3();
           ui.neuSchritt = 0;
           ui.baumOffen = null;
@@ -142385,7 +142679,7 @@
   }
 
   // src/ui/ecommerce.js
-  var prozent2 = (x2, n3 = 1) => (100 * (x2 || 0)).toFixed(n3).replace(".", ",") + " %";
+  var prozent3 = (x2, n3 = 1) => (100 * (x2 || 0)).toFixed(n3).replace(".", ",") + " %";
   var zahl3 = (titel, wert, ton2 = "") => '<div class="kz ' + ton2 + '"><span>' + titel + "</span><b>" + wert + "</b></div>";
   var zeile = (label, detail2, aktion2) => '<div class="zeile"><span class="was"><b>' + esc2(label) + "</b><i>" + esc2(detail2) + "</i></span>" + aktion2 + "</div>";
   var schalter2 = (akt, wert, parameter = "") => '<button class="mini ' + (wert ? "gruen" : "") + '" data-online="' + akt + '" ' + parameter + ">" + (wert ? "Ein" : "Aus") + "</button>";
@@ -142399,7 +142693,7 @@
       if (tab === "produkte") {
         h3 += itProdukteKarten(ctx.E.itProdukte(ctx.s()), "online");
       } else if (tab === "uebersicht") {
-        h3 += '<div class="raster">' + zahl3("Onlineumsatz Woche", geld(u.umsatz)) + zahl3("Anteil Konzernumsatz", prozent2(u.anteil)) + zahl3("Online-Conversion", prozent2(u.conversion, 2)) + zahl3("Retourenquote", prozent2(u.retourenquote)) + zahl3("Kosten je Bestellung", geld(u.kostenJeBestellung)) + zahl3("Deckungsbeitrag online", geld(u.deckungsbeitrag), u.deckungsbeitrag < 0 ? "rot" : "gruen") + zahl3("Click & Collect", prozent2(u.clickCollectAnteil)) + zahl3("Bestellungen", fmt.format(u.bestellungen)) + "</div>";
+        h3 += '<div class="raster">' + zahl3("Onlineumsatz Woche", geld(u.umsatz)) + zahl3("Anteil Konzernumsatz", prozent3(u.anteil)) + zahl3("Online-Conversion", prozent3(u.conversion, 2)) + zahl3("Retourenquote", prozent3(u.retourenquote)) + zahl3("Kosten je Bestellung", geld(u.kostenJeBestellung)) + zahl3("Deckungsbeitrag online", geld(u.deckungsbeitrag), u.deckungsbeitrag < 0 ? "rot" : "gruen") + zahl3("Click & Collect", prozent3(u.clickCollectAnteil)) + zahl3("Bestellungen", fmt.format(u.bestellungen)) + "</div>";
         h3 += '<div class="karte"><div class="khead">Umsatzbr\xFCcke: Effekt Online</div>' + zeile("Onlinewachstum gegen\xFCber Basis", geld(u.umsatz - u.basis), "") + zeile("Kannibalisierung in den H\xE4usern", "\u2212" + geld(u.kannibalisierung), "") + zeile("Gesamteffekt Konzernumsatz", geld(u.onlineEffekt), "") + '<div class="zeile grau">Die Ausgangsbasis von 8 % ist bereits im bisherigen Konzernumsatz enthalten und wird nicht nochmals addiert.</div></div>';
         h3 += '<div class="karte"><div class="khead">Onlineumsatz der letzten Wochen</div>';
         const max = Math.max(1, ...u.verlauf.map((q2) => q2.umsatz));
@@ -143375,7 +143669,7 @@
 
   // src/ui/szenarien.js
   var SPEICHERSCHLUESSEL = "ruhrkauf-szenarien-bestwerte-v1";
-  var prozent3 = (w2) => Math.max(0, Math.min(100, Math.round(100 * w2)));
+  var prozent4 = (w2) => Math.max(0, Math.min(100, Math.round(100 * w2)));
   var leseBestwerte = () => {
     try {
       return JSON.parse(localStorage.getItem(SPEICHERSCHLUESSEL) || "{}");
@@ -143427,8 +143721,8 @@
       }
       const ziel = ctx.E.szenarioZiel(spiel2);
       zielknopf.hidden = false;
-      document.getElementById("szenarioprozent").textContent = ziel.wertung ? prozent3(ziel.fortschritt) + " %" : "\u221E";
-      document.getElementById("szenariofortschritt").style.width = (ziel.wertung ? prozent3(ziel.fortschritt) : 100) + "%";
+      document.getElementById("szenarioprozent").textContent = ziel.wertung ? prozent4(ziel.fortschritt) + " %" : "\u221E";
+      document.getElementById("szenariofortschritt").style.width = (ziel.wertung ? prozent4(ziel.fortschritt) : 100) + "%";
       zielknopf.setAttribute("aria-label", ziel.name + ": " + ziel.details + ". Szenarioziel \xF6ffnen");
       zielknopf.title = ziel.name + " \xB7 " + ziel.text;
       if (ziel.erreicht && ziel.wertung && letzterSieg !== spiel2) {
@@ -143440,7 +143734,7 @@
       const s2 = ctx.spiel();
       if (!s2) return;
       const z4 = ctx.E.szenarioZiel(s2);
-      let inhalt = '<article class="karte sz-zielinfo"><div class="sz-zieltitel">' + esc2(z4.name) + "</div><p>" + esc2(z4.text) + '</p><div class="sz-balken"><span style="width:' + prozent3(z4.fortschritt) + '%"></span></div><p><b>' + (z4.wertung ? prozent3(z4.fortschritt) + " % erreicht" : "Keine Wertung") + "</b> \xB7 " + esc2(z4.details) + "</p><p>" + (z4.erreicht ? "Ziel erreicht" : z4.gescheitert ? "Ziel verfehlt" : z4.wertung ? "Herausforderung l\xE4uft" : "Freies Spiel") + "</p></article>";
+      let inhalt = '<article class="karte sz-zielinfo"><div class="sz-zieltitel">' + esc2(z4.name) + "</div><p>" + esc2(z4.text) + '</p><div class="sz-balken"><span style="width:' + prozent4(z4.fortschritt) + '%"></span></div><p><b>' + (z4.wertung ? prozent4(z4.fortschritt) + " % erreicht" : "Keine Wertung") + "</b> \xB7 " + esc2(z4.details) + "</p><p>" + (z4.erreicht ? "Ziel erreicht" : z4.gescheitert ? "Ziel verfehlt" : z4.wertung ? "Herausforderung l\xE4uft" : "Freies Spiel") + "</p></article>";
       if (z4.id === "investor") {
         const eigene = s2.haeuser.filter((h3) => h3.status === "offen" && h3.miete.vermieter === "eigentuemer").slice(0, 16);
         inhalt += "<h3>Immobilienverkauf mit R\xFCckmietung</h3><p>Der Investor verlangt mindestens einen Verkauf pro Gesch\xE4ftsjahr. Ein Verkauf erh\xF6ht die laufende Miete.</p>" + (eigene.map((h3) => '<button class="breit" type="button" data-sz-verkauf="' + esc2(h3.id) + '">' + esc2(h3.name) + " verkaufen \xB7 " + geld(Math.max(5e6, h3.grundflaecheQm * 4500)) + "</button>").join("") || "<p>Keine verk\xE4uflichen Immobilien vorhanden.</p>");
@@ -145050,10 +145344,10 @@
   }
 
   // src/ui/reporting.js
-  var prozent4 = (x2) => (100 * x2).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
+  var prozent5 = (x2) => (100 * x2).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
   var zahl5 = (x2, n3 = 1) => Number(x2).toLocaleString("de-DE", { maximumFractionDigits: n3, minimumFractionDigits: n3 });
   var euro2 = (x2) => zahl5(x2, 2) + " \u20AC";
-  var abweichung = (wert, basis4) => basis4 == null ? "Kein Vorjahr" : (wert >= basis4 ? "\u2191 " : "\u2193 ") + prozent4(basis4 ? wert / basis4 - 1 : 0);
+  var abweichung = (wert, basis4) => basis4 == null ? "Kein Vorjahr" : (wert >= basis4 ? "\u2191 " : "\u2193 ") + prozent5(basis4 ? wert / basis4 - 1 : 0);
   var punkt5 = (wert, basis4) => basis4 == null ? "Kein Vorjahr" : (wert >= basis4 ? "\u2191 " : "\u2193 ") + zahl5((wert - basis4) * 100) + " Punkte";
   function brueckeHtml(br) {
     if (br.status !== "ok") return '<div class="o02-hinweis">' + esc2(br.status) + "</div>";
@@ -145068,10 +145362,10 @@
     const a2 = d3.aktuell, v = d3.vorjahr;
     const br = E8.umsatzbruecke(s2, { ebene: "haus", id, vergleich: "vorjahr", wochen: 1 });
     const kpi = (name2, wert, delta) => '<div class="o02-treib"><span>' + name2 + "</span><b>" + esc2(wert) + "</b><small>" + esc2(delta) + "</small></div>";
-    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a2.umsatz + '" data-o02-frequenz="' + a2.frequenz + '" data-o02-kaufquote="' + a2.kaufquote + '" data-o02-bon="' + a2.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a2.frequenz)), abweichung(a2.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent4(a2.kaufquote), punkt5(a2.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a2.bon), abweichung(a2.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl5(a2.teile, 2) + " Teile je Bon \xB7 " + euro2(a2.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
+    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a2.umsatz + '" data-o02-frequenz="' + a2.frequenz + '" data-o02-kaufquote="' + a2.kaufquote + '" data-o02-bon="' + a2.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a2.frequenz)), abweichung(a2.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent5(a2.kaufquote), punkt5(a2.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a2.bon), abweichung(a2.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl5(a2.teile, 2) + " Teile je Bon \xB7 " + euro2(a2.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
   }
   function zeile2(z4, haus2 = false) {
-    return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z4.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z4.ampelfarbe) + '"></span>' + esc2(z4.name) + "</div><div>" + geld(z4.umsatz) + "</div><div>" + (z4.abweichung == null ? "\u2013" : geld(z4.abweichung) + " (" + prozent4(z4.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z4.frequenz)) + "</div><div>" + prozent4(z4.kaufquote) + "</div><div>" + euro2(z4.bon) + "</div></div>";
+    return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z4.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z4.ampelfarbe) + '"></span>' + esc2(z4.name) + "</div><div>" + geld(z4.umsatz) + "</div><div>" + (z4.abweichung == null ? "\u2013" : geld(z4.abweichung) + " (" + prozent5(z4.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z4.frequenz)) + "</div><div>" + prozent5(z4.kaufquote) + "</div><div>" + euro2(z4.bon) + "</div></div>";
   }
   function reportingModul(ctx) {
     const E8 = ctx.E, ui = { aktiv: false, ebene: "region", format: "alle", sort: "umsatz", wochen: 1 };
@@ -145165,7 +145459,7 @@
     const optionen3 = ["kaufen", "entwickeln", "dienstleister"];
     const artName = { kaufen: "Standardsoftware", entwickeln: "Eigenentwicklung", dienstleister: "Dienstleister" };
     const phasen = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
-    const prozent5 = (x2) => Math.round(x2 * 100) + " %";
+    const prozent6 = (x2) => Math.round(x2 * 100) + " %";
     function daten() {
       return E8.itUebersicht(s2());
     }
@@ -145181,7 +145475,7 @@
     function systemKarte(x2) {
       const ampel = x2.risiko < 2e-3 ? "gruen" : x2.risiko < 0.01 ? "gelb" : "rot";
       let h3 = '<div class="karte"><div class="khead">' + esc2(x2.name) + "<small>Generation " + x2.generation + " / 4</small></div>";
-      h3 += '<div class="it-werte"><span>Alter <b>' + Math.floor(x2.alter) + " Jahre</b></span><span>Kosten/Woche <b>" + geld(x2.kostenWoche) + '</b></span><span class="it-ampel ' + ampel + '">Ausfallrisiko ' + prozent5(x2.risiko) + "/Woche</span></div>";
+      h3 += '<div class="it-werte"><span>Alter <b>' + Math.floor(x2.alter) + " Jahre</b></span><span>Kosten/Woche <b>" + geld(x2.kostenWoche) + '</b></span><span class="it-ampel ' + ampel + '">Ausfallrisiko ' + prozent6(x2.risiko) + "/Woche</span></div>";
       if (x2.wartungGekuendigt) h3 += '<p class="it-warn">Wartung durch den Anbieter beendet</p>';
       if (x2.kasseAusbau) h3 += '<div class="zeile">SB-Kassen ' + x2.kasseAusbau.selbstbedienung + "/2 \xB7 Mobile Kasse " + x2.kasseAusbau.mobil + "/2</div>";
       const akt = x2.verteilung.filter((c) => c.generation > x2.generation);
@@ -145209,7 +145503,7 @@
     }
     function projektKarte(p2, d3) {
       let h3 = '<div class="karte"><div class="khead">' + esc2(E8.SYSTEME[p2.system].name) + "<small>Generation " + p2.zielGeneration + " \xB7 " + esc2(artName[p2.art]) + "</small></div>";
-      h3 += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent5(p2.fortschritt) + "</b></div>" + balken8(p2.fortschritt);
+      h3 += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent6(p2.fortschritt) + "</b></div>" + balken8(p2.fortschritt);
       h3 += zeile3("Kosten Ist / Plan", geld(p2.kostenIst) + " / " + geld(p2.kostenPlan));
       h3 += zeile3("Mehrwochen durch Verzug", p2.verzug);
       h3 += zeile3("Rollout", p2.erledigteCluster.length + " / " + p2.clusterIds.length + " Cluster");
@@ -146906,7 +147200,7 @@
     const bild3 = z4 ? [z4.status, ...z4.zusatz].filter((q2) => q2 !== "offen").map((q2) => q2 === "aktion" && z4.aktion ? `Aktion ${AKTION_NAME[z4.aktion]}` : STATUS_TITEL[q2]).join(" \xB7 ") : "";
     const qm2 = h3.flaechen.reduce((a2, f11) => a2 + f11.qm, 0);
     const zahl6 = (t2, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t2}</span><b>${w2}</b></div>`;
-    let html = `<div class="chips"><span class="chip ${h3.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h3.status] ?? h3.status}</span>${h3.klasse === "premium" ? '<span class="chip" style="background:#fbefd2;color:#6d4b18;border:1px solid #c4a06a;font-weight:700">\u265B Premium</span>' : ""}${bild3 ? `<span class="chip">${bild3}</span>` : ""}<span class="chip grau">${h3.lage === "1a" ? "1a-Lage" : h3.lage === "b" ? "B-Lage" : h3.lage === "center" ? "Center" : "Stadtrand"}</span></div>`;
+    let html = `<div class="chips"><span class="chip ${h3.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h3.status] ?? h3.status}</span>${h3.klasse === "premium" ? '<span class="chip" style="background:#fbefd2;color:#6d4b18;border:1px solid #c4a06a;font-weight:700">\u265B Premium</span>' : ""}${bild3 ? `<span class="chip">${bild3}</span>` : ""}<span class="chip grau">${h3.lage === "1a" ? "1a-Lage" : h3.lage === "b" ? "B-Lage" : h3.lage === "center" ? "Center" : h3.lage === "stadtteil" ? "Stadtteilzentrum" : "Stadtrand"}</span></div>`;
     html += `<div class="raster">${zahl6("Umsatz Woche", geld(k3?.umsatz ?? 0))}${zahl6("Deckungsbeitrag", geld(k3?.db ?? 0), (k3?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl6("Verkaufsfl\xE4che", fmt.format(qm2) + " qm")}${zahl6("Substanz", Math.round(h3.substanz) + " / 100", h3.substanz < 35 ? "rot" : "")}</div>`;
     html += st?.hausGrafik(id) ?? "";
     html += hausTreiberZeile(src_exports, s, id);

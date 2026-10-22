@@ -46,14 +46,15 @@ describe('Q24: markenbezogene Produktentwicklung', () => {
     expect(p.team).toBe(bisher);
     expect(produktNachfrageFaktor(s, p.marke, p.wg)).toBe(f);
     expect(produktMargeDelta(s, p.marke, p.wg)).toBe(m);
+    // Oberteile sind im Startsortiment voll belegt; Röcke haben freie Kapazität.
     const v = produktVorschau(s, {
-      marke: 'em1', typ: 'Bluse', farbe: 'weiß', material: 'Baumwolle', dauer: 12, budgetWoche: 20000,
+      marke: 'em1', typ: 'Rock', farbe: 'marine', material: 'Polyester', dauer: 12, budgetWoche: 20000,
     });
     expect(v.ok).toBe(true);
     expect(v.teile?.team).toBeCloseTo(markenLeistung(s, 'em1').wert / 100, 2);
     const teamVorStart = markenLeistung(s, 'em1').wert / 100;
     const ergebnis = fuehreAus(s, { typ: 'produktEntwickeln',
-      entwurf: { marke: 'em1', typ: 'Bluse', farbe: 'weiß', material: 'Baumwolle', dauer: 12, budgetWoche: 20000 } });
+      entwurf: { marke: 'em1', typ: 'Rock', farbe: 'marine', material: 'Polyester', dauer: 12, budgetWoche: 20000 } });
     expect(ergebnis.ok).toBe(true);
     const neu = s.produkte.liste[s.produkte.liste.length - 1];
     expect(neu.team).toBeCloseTo(teamVorStart, 2);

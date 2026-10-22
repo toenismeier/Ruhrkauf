@@ -110,7 +110,7 @@ export function produkteModul(ctx) {
 
   // Q24: Alle Typen stammen ausschließlich aus produktKatalog (auch spätere Q27-Q29-Typen).
   function katalog() {
-    const K = E.produktKatalog(s()), L = E.produkte(s()), M = aktuelleMarke(L);
+    const K = merkeBilder(E.produktKatalog(s())), L = E.produkte(s()), M = aktuelleMarke(L);
     if (!M) return { titel: 'Sortiment', unter: '', html: '<div class="leise">Noch keine Marke vorhanden.</div>' };
     const typen = passendeTypen(K, ui.fach, ui.zielgruppe);
     let h = '<button class="zurueck" data-a="liste">‹ Produktentwicklung</button>';
@@ -122,7 +122,7 @@ export function produkteModul(ctx) {
   }
 
   function detail() {
-    const st = s(), K = E.produktKatalog(st), L = E.produkte(st), M = aktuelleMarke(L), d = ui.detail;
+    const st = s(), K = merkeBilder(E.produktKatalog(st)), L = E.produkte(st), M = aktuelleMarke(L), d = ui.detail;
     const p = d?.produktId ? M?.produkte.find((x) => x.id === d.produktId) : null;
     const t = K.typen.find((x) => x.typ === (p?.typ ?? d?.typ));
     if (!t) { ui.seite = 'katalog'; return katalog(); }
