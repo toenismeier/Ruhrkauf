@@ -6136,9 +6136,9 @@
     return ergebnis;
   }
   function clusterName(gruppe3, vergeben) {
-    const zahl6 = /* @__PURE__ */ new Map();
-    for (const h3 of gruppe3) zahl6.set(h3.stadt, (zahl6.get(h3.stadt) ?? 0) + 1);
-    const staedte = [...zahl6.entries()].sort((a2, b3) => b3[1] - a2[1] || a2[0].localeCompare(b3[0], "de")).map(([st2]) => st2);
+    const zahl5 = /* @__PURE__ */ new Map();
+    for (const h3 of gruppe3) zahl5.set(h3.stadt, (zahl5.get(h3.stadt) ?? 0) + 1);
+    const staedte = [...zahl5.entries()].sort((a2, b3) => b3[1] - a2[1] || a2[0].localeCompare(b3[0], "de")).map(([st2]) => st2);
     for (let i = 1; i < staedte.length; i++) {
       const name2 = "Raum " + staedte[0] + " \xB7 " + staedte[i];
       if (!vergeben.includes("Raum " + staedte[0])) break;
@@ -63211,9 +63211,9 @@
       const auswahl4 = [...front2, ...weitere];
       const r3 = rng3(String(K3.haus.id) + "/blindglas");
       const start = auswahl4.length ? Math.floor(r3() * auswahl4.length) : 0;
-      const zahl6 = Math.min(4, auswahl4.length);
-      for (let i = 0; i < zahl6; i++) {
-        const g = auswahl4[(start + i * Math.max(1, Math.floor(auswahl4.length / zahl6))) % auswahl4.length];
+      const zahl5 = Math.min(4, auswahl4.length);
+      for (let i = 0; i < zahl5; i++) {
+        const g = auswahl4[(start + i * Math.max(1, Math.floor(auswahl4.length / zahl5))) % auswahl4.length];
         const front3 = g.t + 0.1;
         g.s.q(g.a + 0.1, g.b - 0.1, g.y0 + 0.12, g.y1 - 0.13, front3, front3 + 0.1, i % 2 ? "#d1d0b3" : "#b8c5b8");
         g.s.q(g.a + 0.13, g.b - 0.13, g.y1 - 0.35, g.y1 - 0.25, front3 + 0.08, front3 + 0.1, "#737c79");
@@ -159271,9 +159271,9 @@
     if (d3.art === "auswahl") return optionenVon(d3).includes(wert) ? wert : d3.standard;
     if (d3.art === "regler") {
       const o3 = d3.optionen ?? {}, min = Number(o3.min ?? 0), max = Number(o3.max ?? 100);
-      const zahl6 = Number(wert), schritt = Number(o3.schritt ?? o3.step ?? 1);
-      if (!Number.isFinite(zahl6)) return d3.standard;
-      const rund3 = schritt > 0 ? min + Math.round((zahl6 - min) / schritt) * schritt : zahl6;
+      const zahl5 = Number(wert), schritt = Number(o3.schritt ?? o3.step ?? 1);
+      if (!Number.isFinite(zahl5)) return d3.standard;
+      const rund3 = schritt > 0 ? min + Math.round((zahl5 - min) / schritt) * schritt : zahl5;
       return Math.min(max, Math.max(min, rund3));
     }
     return d3.standard;
@@ -159335,7 +159335,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "1b46326" : "Entwicklung";
+  var version = () => true ? "afd7f10" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld2(d3) {
@@ -159564,8 +159564,8 @@
     let h3 = '<div class="q11baum q24-baum">';
     for (const kat of baum2) {
       const offen = ui.baumOffen === kat.id;
-      const zahl6 = kat.unterkategorien.reduce((n3, a2) => n3 + a2.typen.length, 0);
-      h3 += '<button class="q11kategorie ' + (offen ? "an" : "") + '" data-a="baumKat" data-v="' + esc2(kat.id) + '" aria-expanded="' + offen + '"><span>' + esc2(kat.name) + "</span><small>" + zahl6 + ' Artikel</small><b aria-hidden="true">' + (offen ? "\u2212" : "+") + "</b></button>";
+      const zahl5 = kat.unterkategorien.reduce((n3, a2) => n3 + a2.typen.length, 0);
+      h3 += '<button class="q11kategorie ' + (offen ? "an" : "") + '" data-a="baumKat" data-v="' + esc2(kat.id) + '" aria-expanded="' + offen + '"><span>' + esc2(kat.name) + "</span><small>" + zahl5 + ' Artikel</small><b aria-hidden="true">' + (offen ? "\u2212" : "+") + "</b></button>";
       if (!offen) continue;
       for (const ast2 of kat.unterkategorien) {
         const astOffen = ui.astOffen === ast2.id;
@@ -160023,7 +160023,7 @@
     const text3 = (id, k3) => formatiere(SP().get(id)?.format ?? "eur", k3[id] ?? 0);
     const dot = (a2) => a2 ? `<span class="ampel a-${a2}" title="${AMPEL_TEXT[a2]}"></span>` : '<span class="ampel ohne"></span>';
     const seg = (act, wert, optionen3, extra = "") => `<div class="seg">${optionen3.map(([v, t3]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t3}</button>`).join("")}</div>`;
-    const zahl6 = (titel, inhalt2, p2, ton2 = "", a2) => `<div class="kz ${ton2}"><span>${titel}</span><b><i data-p="${p2}">${inhalt2}</i>${a2 ? dot(a2) : ""}</b></div>`;
+    const zahl5 = (titel, inhalt2, p2, ton2 = "", a2) => `<div class="kz ${ton2}"><span>${titel}</span><b><i data-p="${p2}">${inhalt2}</i>${a2 ? dot(a2) : ""}</b></div>`;
     function tabs() {
       const n3 = q2.freigaben(s2()).anzahl;
       const an = (id) => ui.seite === id || id === "uebersicht" && ui.seite === "wg" || id === "eigenmarken" && ui.seite === "gruenden";
@@ -162230,7 +162230,7 @@
     const tabs = () => '<nav class="stat-auswahl" aria-label="Statistikseiten">' + [["konzern", "Konzern"], ["formate", "Formate"], ["regionen", "Regionen"], ["rangliste", "H\xE4user"]].map(([id, t3]) => knopf4("seite", id, t3, ui.seite === id)).join("") + "</nav>";
     const zeiten = () => '<div class="stat-auswahl" aria-label="Zeitraum">' + [[13, "13 Wochen"], [52, "52 Wochen"], ["alle", "Alle"]].map(([id, t3]) => knopf4("wochen", id, t3, String(ui.wochen) === String(id))).join("") + "</div>";
     const typen = () => '<div class="stat-auswahl" aria-label="Darstellung">' + [["linie", "Verlauf"], ["balken", "Wochen"], ["quartal", "Quartale"]].map(([id, t3]) => knopf4("typ", id, t3, ui.typ === id)).join("") + "</div>";
-    const zahl6 = (t3, n3, k3) => '<div class="kz"><span>' + esc2(t3) + "</span><b>" + esc2(wert(n3, k3)) + "</b></div>";
+    const zahl5 = (t3, n3, k3) => '<div class="kz"><span>' + esc2(t3) + "</span><b>" + esc2(wert(n3, k3)) + "</b></div>";
     function gruppieren(punkte2, kennzahl2) {
       if (ui.typ !== "quartal") return ui.typ === "balken" ? punkte2.slice(-13) : punkte2;
       const summen = /* @__PURE__ */ new Map();
@@ -162287,7 +162287,7 @@
     }
     function konzern() {
       const kennzahlen2 = [["umsatz", "Umsatz"], ["ebitda", "EBITDA"], ["cash", "Cash und Insolvenzgrenze"], ["stimmung", "Stakeholder-Stimmung"]];
-      let html = '<div class="stat-raster">' + kennzahlen2.slice(0, 3).map(([k3, t3]) => zahl6(k3 === "cash" ? "Cash" : t3, daten("konzern", void 0, k3).punkte.at(-1)?.wert ?? 0, k3)).join("") + "</div>";
+      let html = '<div class="stat-raster">' + kennzahlen2.slice(0, 3).map(([k3, t3]) => zahl5(k3 === "cash" ? "Cash" : t3, daten("konzern", void 0, k3).punkte.at(-1)?.wert ?? 0, k3)).join("") + "</div>";
       for (const [k3, t3] of kennzahlen2) {
         const d3 = daten("konzern", void 0, k3);
         html += diagramm(t3, [{ name: "Ist", punkte: d3.punkte }], k3, { vorjahr: true, grenze: k3 === "cash" ? -s2().kreditlinie : void 0 });
@@ -170960,9 +170960,9 @@
 
   // src/ui/ecommerce.js
   var prozent3 = (x2, n3 = 1) => (100 * (x2 || 0)).toFixed(n3).replace(".", ",") + " %";
-  var zahl3 = (titel, wert, ton2 = "") => '<div class="kz ' + ton2 + '"><span>' + titel + "</span><b>" + wert + "</b></div>";
   var zeile = (label, detail2, aktion2) => '<div class="zeile"><span class="was"><b>' + esc2(label) + "</b><i>" + esc2(detail2) + "</i></span>" + aktion2 + "</div>";
   var schalter2 = (akt, wert, parameter = "") => '<button class="mini ' + (wert ? "gruen" : "") + '" data-online="' + akt + '" ' + parameter + ">" + (wert ? "Ein" : "Aus") + "</button>";
+  var knopfText = (akt, an, text3, id) => '<button class="mini' + (an ? " q-an-knopf" : "") + '" data-online="' + akt + '" data-id="' + esc2(id) + '" aria-pressed="' + !!an + '">' + text3 + "</button>";
   function ecommerceModul(ctx) {
     let offen = false, tab = "uebersicht";
     const state = () => ctx.E.ecommerceUebersicht(ctx.s());
@@ -170973,13 +170973,22 @@
       if (tab === "produkte") {
         h3 += itProdukteKarten(ctx.E.itProdukte(ctx.s()), "online");
       } else if (tab === "uebersicht") {
-        h3 += '<div class="raster">' + zahl3("Onlineumsatz Woche", geld(u.umsatz)) + zahl3("Anteil Konzernumsatz", prozent3(u.anteil)) + zahl3("Online-Conversion", prozent3(u.conversion, 2)) + zahl3("Retourenquote", prozent3(u.retourenquote)) + zahl3("Kosten je Bestellung", geld(u.kostenJeBestellung)) + zahl3("Deckungsbeitrag online", geld(u.deckungsbeitrag), u.deckungsbeitrag < 0 ? "rot" : "gruen") + zahl3("Click & Collect", prozent3(u.clickCollectAnteil)) + zahl3("Bestellungen", fmt.format(u.bestellungen)) + "</div>";
-        h3 += '<div class="karte"><div class="khead">Umsatzbr\xFCcke: Effekt Online</div>' + zeile("Onlinewachstum gegen\xFCber Basis", geld(u.umsatz - u.basis), "") + zeile("Kannibalisierung in den H\xE4usern", "\u2212" + geld(u.kannibalisierung), "") + zeile("Gesamteffekt Konzernumsatz", geld(u.onlineEffekt), "") + '<div class="zeile grau">Die Ausgangsbasis von 8 % ist bereits im bisherigen Konzernumsatz enthalten und wird nicht nochmals addiert.</div></div>';
-        h3 += '<div class="karte"><div class="khead">Onlineumsatz der letzten Wochen</div>';
-        const max = Math.max(1, ...u.verlauf.map((q2) => q2.umsatz));
-        h3 += '<div class="online-verlauf">' + u.verlauf.slice(-26).map((q2) => '<div class="online-balken" style="height:' + Math.max(2, 100 * q2.umsatz / max) + '%" title="KW ' + (q2.woche % 52 + 1) + ": " + geld(q2.umsatz) + '"></div>').join("") + "</div>";
-        h3 += '<div class="zeile grau">Basis: Umsatzanteil station\xE4r und online ohne Doppelz\xE4hlung</div></div>';
-        h3 += '<div class="karte"><div class="khead">Warengruppen online</div>' + Object.entries(u.umsatzJeGruppe).sort((a2, b3) => b3[1] - a2[1]).map(([g, umsatz]) => zeile(ctx.E.GRUPPEN[g]?.name ?? g, geld(umsatz), "")).join("") + "</div>";
+        const wachstum = u.umsatz - u.basis, mitkauf = u.onlineEffekt - wachstum + u.kannibalisierung;
+        const vz = (x2) => (x2 < 0 ? "\u2212" : x2 > 0 ? "+" : "") + geld(Math.abs(x2));
+        h3 += '<div class="q31">';
+        h3 += '<div class="q-gross"><span class="q-label">Deckungsbeitrag online</span><span class="q-haupt ' + (u.deckungsbeitrag < 0 ? "q-minus" : "") + '">' + geld(u.deckungsbeitrag) + '</span><span class="q-neben"><b>' + geld(u.umsatz) + "</b>Onlineumsatz Woche</span></div>";
+        h3 += '<div class="q-befund">' + (u.bestellungen ? (u.deckungsbeitrag < 0 ? '<b class="q-minus">hartwig.de verliert Geld.</b> ' : "") + "<b>" + fmt.format(u.bestellungen) + "</b> Bestellungen zu je <b>" + geld(u.kostenJeBestellung) + "</b> Kosten, " + prozent3(u.retourenquote) + " gehen zur\xFCck." : "Diese Woche gab es keine Onlinebestellung.") + "</div>";
+        h3 += '<div class="q-buch q-paketschein"><div class="q-buch-kopf"><span>Paketschein KW ' + (ctx.s().woche % 52 + 1) + '</span><b>hartwig.de</b></div><div class="q-zeile"><span class="q-name">Anteil am Konzernumsatz</span><span class="q-wert">' + prozent3(u.anteil) + '</span></div><div class="q-zeile"><span class="q-name">Online-Conversion</span><span class="q-wert">' + prozent3(u.conversion, 2) + '</span></div><div class="q-zeile"><span class="q-name">Retourenquote</span><span class="q-wert">' + prozent3(u.retourenquote) + '</span></div><div class="q-zeile"><span class="q-name">Click & Collect<small>Anteil der Bestellungen</small></span><span class="q-wert">' + prozent3(u.clickCollectAnteil) + "</span></div></div>";
+        h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Umsatzbr\xFCcke Online</span><b>Woche</b></div><div class="q-zeile"><span class="q-name">Onlinewachstum gegen\xFCber Basis<small>Basis 8 % ist im Konzernumsatz schon enthalten</small></span><span class="q-wert">' + vz(wachstum) + '</span></div><div class="q-zeile"><span class="q-name">Mitk\xE4ufe bei Abholung im Haus</span><span class="q-wert">' + vz(mitkauf) + '</span></div><div class="q-zeile"><span class="q-name">Kannibalisierung in den H\xE4usern</span><span class="q-wert">' + vz(-u.kannibalisierung) + '</span></div><div class="q-summe"><span>Effekt auf den Konzernumsatz</span><span class="q-wert ' + (u.onlineEffekt < 0 ? "q-minus" : "") + '">' + vz(u.onlineEffekt) + "</span></div></div>";
+        const v = u.verlauf.slice(-26);
+        if (v.length < 2) h3 += '<div class="q-buch"><div class="q-leer">Ein Verlauf ist ab der zweiten Woche verf\xFCgbar.</div></div>';
+        else {
+          const max = Math.max(1, ...v.map((q2) => q2.umsatz));
+          h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Onlineumsatz</span><b>' + v.length + ' Wochen</b></div><div class="online-verlauf" style="padding:8px 14px 0">' + v.map((q2) => '<div class="online-balken" style="height:' + Math.max(2, 100 * q2.umsatz / max) + '%" title="KW ' + (q2.woche % 52 + 1) + ": " + geld(q2.umsatz) + '"></div>').join("") + '</div><div class="q-zwischen" style="border:0"><span>KW ' + (v[0].woche % 52 + 1) + "</span><span>KW " + (v[v.length - 1].woche % 52 + 1) + "</span></div></div>";
+        }
+        const gr = Object.entries(u.umsatzJeGruppe).sort((a2, b3) => b3[1] - a2[1]);
+        h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Warengruppen online</span><b>Umsatz</b></div>' + (gr.length ? gr.map(([g, umsatz]) => '<div class="q-zeile"><span class="q-name">' + esc2(ctx.E.GRUPPEN[g]?.name ?? g) + '</span><span class="q-wert">' + geld(umsatz) + "</span></div>").join("") + '<div class="q-summe"><span>Summe</span><span class="q-wert">' + geld(gr.reduce((a2, [, x2]) => a2 + x2, 0)) + "</span></div>" : '<div class="q-leer">Noch kein Onlineumsatz.</div>') + "</div>";
+        h3 += "</div>";
       } else if (tab === "steuerung") {
         const optionen3 = (id, werte3, aktuell, format) => '<div class="zeile"><span class="was">' + id + '</span><select class="ort" data-online="strategie" data-feld="' + format + '">' + werte3.map(([v, t3]) => '<option value="' + v + '"' + (String(v) === String(aktuell) ? " selected" : "") + ">" + t3 + "</option>").join("") + "</select></div>";
         h3 += '<div class="karte"><div class="khead">Online-Sortiment und Service</div>';
@@ -170995,11 +171004,14 @@
         for (const c of u.cluster) h3 += zeile(clusterName3(ctx.s(), c.id), c.haeuser + " H\xE4user", schalter2("cluster", c.aktiv, 'data-id="' + esc2(c.id) + '"'));
         h3 += "</div>";
       } else {
-        h3 += '<div class="karte"><div class="khead">Abholstationen und Filiallogistik</div>';
-        for (const a2 of u.haeuser) h3 += '<div class="abt"><div class="zeile"><span class="was"><b>' + esc2(a2.name) + "</b><i>" + esc2(a2.stadt) + " \xB7 " + esc2(clusterName3(ctx.s(), a2.cluster)) + "</i></span>" + schalter2("station", a2.station, 'data-id="' + esc2(a2.id) + '"') + '</div><div class="zeile unter">Abholungen ' + fmt.format(a2.abholungen) + " \xB7 Versand " + fmt.format(a2.versand) + " \xB7 Retouren " + fmt.format(a2.retouren) + " \xB7 " + a2.instoreStunden.toFixed(1).replace(".", ",") + " Logistikstunden " + schalter2("retouren", a2.retourenAn, 'data-id="' + esc2(a2.id) + '"' + (a2.station ? "" : " disabled")) + "</div></div>";
-        h3 += "</div>";
+        const an = u.haeuser.filter((a2) => a2.station).length;
+        h3 += '<div class="q31"><div class="q-gross"><span class="q-label">H\xE4user mit Abholstation</span><span class="q-haupt">' + an + " von " + u.haeuser.length + '</span><span class="q-neben"><b>' + fmt.format(u.haeuser.reduce((s2, a2) => s2 + a2.abholungen, 0)) + "</b>Abholungen Woche</span></div>";
+        if (!an) h3 += '<div class="q-befund">Kein Haus hat eine Abholstation. Click & Collect braucht mindestens eine.</div>';
+        h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Abholstationen</span><b>Station \xB7 Retouren</b></div>';
+        for (const a2 of u.haeuser) h3 += '<div class="q-zeile"><span class="q-name">' + esc2(a2.name) + "<small>" + esc2(a2.stadt) + " \xB7 " + esc2(clusterName3(ctx.s(), a2.cluster)) + "</small>" + (a2.station ? "<small>Abholungen " + fmt.format(a2.abholungen) + " \xB7 Versand " + fmt.format(a2.versand) + " \xB7 Retouren " + fmt.format(a2.retouren) + " \xB7 " + a2.instoreStunden.toFixed(1).replace(".", ",") + " Logistikstunden</small>" : "") + '</span><span class="q-knoepfe" style="grid-column:auto;padding:0">' + knopfText("station", a2.station, a2.station ? "Station an" : "Station einrichten", a2.id) + (a2.station ? knopfText("retouren", a2.retourenAn, a2.retourenAn ? "Retouren an" : "Retouren aus", a2.id) : "") + "</span></div>";
+        h3 += "</div></div>";
       }
-      ctx.panel("Online", "hartwig.de \xB7 E-Commerce", h3, "gross");
+      ctx.panel("Online", "hartwig.de \xB7 E-Commerce", bereich("zentrale") + '<i class="q31-marke" hidden></i>' + h3, "gross");
       offen = true;
       document.getElementById("pinhalt").scrollTop = vorher;
     }
@@ -172385,9 +172397,9 @@
         return;
       }
       const ziel = Math.abs(Number(element2.dataset.wert));
-      const zahl6 = Math.abs(Number((element2.textContent || "0").replace(/[^0-9-]/g, "")));
-      if (!(ziel > 0) || !Number.isFinite(zahl6)) return;
-      const fortschritt = begrenze2(zahl6 / ziel, 0, 1);
+      const zahl5 = Math.abs(Number((element2.textContent || "0").replace(/[^0-9-]/g, "")));
+      if (!(ziel > 0) || !Number.isFinite(zahl5)) return;
+      const fortschritt = begrenze2(zahl5 / ziel, 0, 1);
       const t3 = performance.now();
       if (fortschritt >= 0.9999) {
         if (!berichtFertig) {
@@ -173146,8 +173158,8 @@
   }
 
   // src/ui/spielende.js
-  var zahl4 = (n3) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n3 ?? 0));
-  var geld2 = (n3) => zahl4(n3) + " \u20AC";
+  var zahl3 = (n3) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n3 ?? 0));
+  var geld2 = (n3) => zahl3(n3) + " \u20AC";
   var ART3 = {
     zerschlagen: {
       titel: "Das Ende von Hartwig",
@@ -173205,7 +173217,7 @@
   function rangliste(schwierigkeit2) {
     const liste2 = lesen2(schwierigkeit2);
     if (!liste2.length) return '<p class="se-unter">Hier erscheinen die zehn besten Ergebnisse dieser Schwierigkeitsstufe.</p>';
-    return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' + liste2.map((x2, i) => "<tr><td>" + (i + 1) + ".</td><td>" + esc2(x2.datum) + "<small> \xB7 " + zahl4(x2.seed) + "</small></td><td>" + esc2(ART3[x2.art]?.titel || x2.art) + (x2.testspiel ? " <small>(Test)</small>" : "") + "</td><td>" + zahl4(x2.punkte) + "</td></tr>").join("") + "</tbody></table>";
+    return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' + liste2.map((x2, i) => "<tr><td>" + (i + 1) + ".</td><td>" + esc2(x2.datum) + "<small> \xB7 " + zahl3(x2.seed) + "</small></td><td>" + esc2(ART3[x2.art]?.titel || x2.art) + (x2.testspiel ? " <small>(Test)</small>" : "") + "</td><td>" + zahl3(x2.punkte) + "</td></tr>").join("") + "</tbody></table>";
   }
   function verlauf3(historie) {
     if (!Array.isArray(historie) || historie.length < 2) return "";
@@ -173252,7 +173264,7 @@
         const f11 = 1 - (1 - p2) ** 3;
         for (const el2 of felder) {
           const v = Number(el2.dataset.seWert) || 0;
-          el2.textContent = zahl4(Math.round(v * f11)) + (el2.dataset.seEinheit || "");
+          el2.textContent = zahl3(Math.round(v * f11)) + (el2.dataset.seEinheit || "");
         }
         if (p2 < 1) zaehlRaf = requestAnimationFrame(tick);
       }
@@ -173274,14 +173286,14 @@
       const s2 = stand2(), e = s2?.ende;
       if (!e) return;
       const a2 = ART3[e.art] || ART3.zerschlagen, w2 = e.wertung, k3 = e.kennzahlen;
-      const teile2 = w2.teile.map((t3) => '<div class="se-zeile"><span>' + esc2(t3.name) + '</span><strong class="' + (t3.punkte < 0 ? "se-minus" : "") + '" data-se-wert="' + t3.punkte + '">' + zahl4(t3.punkte) + "</strong></div>").join("");
+      const teile2 = w2.teile.map((t3) => '<div class="se-zeile"><span>' + esc2(t3.name) + '</span><strong class="' + (t3.punkte < 0 ? "se-minus" : "") + '" data-se-wert="' + t3.punkte + '">' + zahl3(t3.punkte) + "</strong></div>").join("");
       const kenn = [
         ["Gerettete H\xE4user", k3.geretteteHaeuser + " / " + k3.startHaeuser],
-        ["Besch\xE4ftigte (FTE)", zahl4(k3.fte) + " / " + zahl4(k3.startFte)],
+        ["Besch\xE4ftigte (FTE)", zahl3(k3.fte) + " / " + zahl3(k3.startFte)],
         ["EBITDA, 52 Wochen", geld2(k3.ebitda52)],
         ["Konzernwert", geld2(k3.unternehmenswert)]
       ].map(([name2, value]) => '<div class="se-kpi"><small>' + esc2(name2) + "</small><b>" + esc2(value) + "</b></div>").join("");
-      rahmen2("Bilanz", '<div class="se-bilanz"><h1>Ihre Bilanz</h1><p class="se-unter">' + esc2(a2.titel) + " \xB7 Woche " + zahl4(e.woche) + " \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</p><div class="se-ergebnis"><small>GESAMTPUNKTZAHL</small><strong data-se-wert="' + w2.punkte + '">0</strong><small>Grundpunkte ' + zahl4(w2.grundpunkte) + " \xD7 " + new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format(w2.multiplikator) + '</small></div><div class="se-karte">' + teile2 + '</div><h2>Unternehmen nach dem Spiel</h2><div class="se-kpis">' + kenn + "</div>" + verlauf3(s2.historie) + entscheidungen(s2) + "<h2>Bestenliste \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</h2><div class="se-karte">' + rangliste(w2.schwierigkeit) + '</div><div class="se-aktionen"><button class="se-knopf" data-se="neu">Neues Spiel</button>' + (["saniert", "ruhestand"].includes(e.art) ? '<button class="se-knopf se-sek" data-se="weiter">Weiterspielen</button>' : "") + "</div></div>");
+      rahmen2("Bilanz", '<div class="se-bilanz"><h1>Ihre Bilanz</h1><p class="se-unter">' + esc2(a2.titel) + " \xB7 Woche " + zahl3(e.woche) + " \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</p><div class="se-ergebnis"><small>GESAMTPUNKTZAHL</small><strong data-se-wert="' + w2.punkte + '">0</strong><small>Grundpunkte ' + zahl3(w2.grundpunkte) + " \xD7 " + new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format(w2.multiplikator) + '</small></div><div class="se-karte">' + teile2 + '</div><h2>Unternehmen nach dem Spiel</h2><div class="se-kpis">' + kenn + "</div>" + verlauf3(s2.historie) + entscheidungen(s2) + "<h2>Bestenliste \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</h2><div class="se-karte">' + rangliste(w2.schwierigkeit) + '</div><div class="se-aktionen"><button class="se-knopf" data-se="neu">Neues Spiel</button>' + (["saniert", "ruhestand"].includes(e.art) ? '<button class="se-knopf se-sek" data-se="weiter">Weiterspielen</button>' : "") + "</div></div>");
       ansicht = "bilanz";
       bilanziert = true;
       zahlenAnimieren();
@@ -173300,7 +173312,7 @@
       }
       if (!node.hidden && ansicht === "szene") return true;
       const a2 = ART3[e.art] || ART3.zerschlagen;
-      rahmen2(a2.titel, '<div class="se-szene"><div class="se-bild">' + spielendeSzene(e.art, e.kaeufer) + '</div><div class="se-zeitung"><small>DER HANDELSBOTE \xB7 SONDERAUSGABE \xB7 WOCHE ' + zahl4(e.woche) + "</small><h1>" + esc2(a2.schlagzeile) + "</h1><p>" + esc2(a2.zeile) + '</p></div></div><button class="se-knopf" data-se="bilanz">Zur Abschlussbilanz</button>');
+      rahmen2(a2.titel, '<div class="se-szene"><div class="se-bild">' + spielendeSzene(e.art, e.kaeufer) + '</div><div class="se-zeitung"><small>DER HANDELSBOTE \xB7 SONDERAUSGABE \xB7 WOCHE ' + zahl3(e.woche) + "</small><h1>" + esc2(a2.schlagzeile) + "</h1><p>" + esc2(a2.zeile) + '</p></div></div><button class="se-knopf" data-se="bilanz">Zur Abschlussbilanz</button>');
       ansicht = "szene";
       return true;
     }
@@ -173625,10 +173637,10 @@
 
   // src/ui/reporting.js
   var prozent5 = (x2) => (100 * x2).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
-  var zahl5 = (x2, n3 = 1) => Number(x2).toLocaleString("de-DE", { maximumFractionDigits: n3, minimumFractionDigits: n3 });
-  var euro2 = (x2) => zahl5(x2, 2) + " \u20AC";
+  var zahl4 = (x2, n3 = 1) => Number(x2).toLocaleString("de-DE", { maximumFractionDigits: n3, minimumFractionDigits: n3 });
+  var euro2 = (x2) => zahl4(x2, 2) + " \u20AC";
   var abweichung = (wert, basis4) => basis4 == null ? "Kein Vorjahr" : (wert >= basis4 ? "\u2191 " : "\u2193 ") + prozent5(basis4 ? wert / basis4 - 1 : 0);
-  var punkt5 = (wert, basis4) => basis4 == null ? "Kein Vorjahr" : (wert >= basis4 ? "\u2191 " : "\u2193 ") + zahl5((wert - basis4) * 100) + " Punkte";
+  var punkt5 = (wert, basis4) => basis4 == null ? "Kein Vorjahr" : (wert >= basis4 ? "\u2191 " : "\u2193 ") + zahl4((wert - basis4) * 100) + " Punkte";
   function brueckeHtml(br) {
     if (br.status !== "ok") return '<div class="o02-hinweis">' + esc2(br.status) + "</div>";
     const eintraege = [["Frequenz", br.frequenz], ["Kaufquote", br.kaufquote], ["Teile", br.teile], ["Preis", br.preis]];
@@ -173642,7 +173654,7 @@
     const a2 = d3.aktuell, v = d3.vorjahr;
     const br = E8.umsatzbruecke(s2, { ebene: "haus", id, vergleich: "vorjahr", wochen: 1 });
     const kpi = (name2, wert, delta) => '<div class="o02-treib"><span>' + name2 + "</span><b>" + esc2(wert) + "</b><small>" + esc2(delta) + "</small></div>";
-    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a2.umsatz + '" data-o02-frequenz="' + a2.frequenz + '" data-o02-kaufquote="' + a2.kaufquote + '" data-o02-bon="' + a2.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a2.frequenz)), abweichung(a2.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent5(a2.kaufquote), punkt5(a2.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a2.bon), abweichung(a2.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl5(a2.teile, 2) + " Teile je Bon \xB7 " + euro2(a2.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
+    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a2.umsatz + '" data-o02-frequenz="' + a2.frequenz + '" data-o02-kaufquote="' + a2.kaufquote + '" data-o02-bon="' + a2.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a2.frequenz)), abweichung(a2.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent5(a2.kaufquote), punkt5(a2.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a2.bon), abweichung(a2.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl4(a2.teile, 2) + " Teile je Bon \xB7 " + euro2(a2.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
   }
   function zeile2(z4, haus2 = false) {
     return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z4.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z4.ampelfarbe) + '"></span>' + esc2(z4.name) + "</div><div>" + geld(z4.umsatz) + "</div><div>" + (z4.abweichung == null ? "\u2013" : geld(z4.abweichung) + " (" + prozent5(z4.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z4.frequenz)) + "</div><div>" + prozent5(z4.kaufquote) + "</div><div>" + euro2(z4.bon) + "</div></div>";
@@ -173737,7 +173749,7 @@
     const { E: E8 } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, projekt: null, produkt: null, bestaetigung: false };
     const optionen3 = ["kaufen", "entwickeln", "dienstleister"];
-    const artName = { kaufen: "Standardsoftware", entwickeln: "Eigenentwicklung", dienstleister: "Dienstleister" };
+    const artName = { kaufen: "Standard\xADsoftware", entwickeln: "Eigen\xADentwicklung", dienstleister: "Dienst\xADleister" };
     const phasen = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
     const prozent6 = (x2) => Math.round(x2 * 100) + " %";
     function daten() {
@@ -173752,33 +173764,35 @@
     function reiter() {
       return '<div class="tabs">' + [["systeme", "Systeme"], ["produkte", "Produkte"], ["projekte", "Projekte"], ["neu", "Neues Projekt"]].map((x2) => '<button type="button" class="tab ' + (ui.reiter === x2[0] ? "an" : "") + '" data-it="reiter" data-v="' + x2[0] + '">' + x2[1] + "</button>").join("") + "</div>";
     }
-    function systemKarte(x2) {
-      const ampel = x2.risiko < 2e-3 ? "gruen" : x2.risiko < 0.01 ? "gelb" : "rot";
-      let h3 = '<div class="karte"><div class="khead">' + esc2(x2.name) + "<small>Generation " + x2.generation + " / 4</small></div>";
-      h3 += '<div class="it-werte"><span>Alter <b>' + Math.floor(x2.alter) + " Jahre</b></span><span>Kosten/Woche <b>" + geld(x2.kostenWoche) + '</b></span><span class="it-ampel ' + ampel + '">Ausfallrisiko ' + prozent6(x2.risiko) + "/Woche</span></div>";
-      if (x2.wartungGekuendigt) h3 += '<p class="it-warn">Wartung durch den Anbieter beendet</p>';
-      if (x2.kasseAusbau) h3 += '<div class="zeile">SB-Kassen ' + x2.kasseAusbau.selbstbedienung + "/2 \xB7 Mobile Kasse " + x2.kasseAusbau.mobil + "/2</div>";
-      const akt = x2.verteilung.filter((c) => c.generation > x2.generation);
-      if (akt.length) h3 += '<div class="zeile">Bereits modernisierte Cluster: ' + akt.length + " / " + x2.verteilung.length + "</div>";
-      const bereiche = E8.SYSTEME[x2.id].bereiche;
-      h3 += '<div class="it-meta">Begrenzt: ' + esc2(bereiche.map((id) => E8.BEREICHE?.find((q2) => q2.id === id)?.name ?? id).join(", ")) + "</div>";
-      h3 += '<div class="oknoepfe"><button data-it="neues" data-v="' + x2.id + '">Modernisieren</button></div></div>';
+    const risikoText = (x2) => (x2 * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " %";
+    function leiter3(g) {
+      return '<span class="q-leiter" aria-label="Generation ' + g + ' von 4">' + [1, 2, 3, 4].map((i) => '<i class="' + (i <= g ? "an" : "") + '"></i>').join("") + "</span>";
+    }
+    function systemZeile(x2) {
+      const ton2 = x2.risiko >= 0.01 ? "q-minus" : "";
+      const bereiche = E8.SYSTEME[x2.id].bereiche.map((id) => E8.BEREICHE?.find((q2) => q2.id === id)?.name ?? id);
+      const akt = x2.verteilung.filter((c) => c.generation > x2.generation).length;
+      let h3 = '<div class="q-zeile q-system">' + leiter3(x2.generation) + '<span class="q-name">' + esc2(x2.name) + (x2.generation > 0 ? "<small>Generation " + x2.generation + " von 4 \xB7 " + Math.floor(x2.alter) + " Jahre \xB7 " + geld(x2.kostenWoche) + " je Woche</small>" : "<small>Noch nicht eingef\xFChrt, keine laufenden Kosten</small>") + (x2.wartungGekuendigt ? '<small class="q-minus">Wartung durch den Anbieter beendet</small>' : "") + (akt ? "<small>" + akt + " von " + x2.verteilung.length + " Clustern schon modernisiert</small>" : "") + "<small>Bremst: " + esc2(bereiche.slice(0, 3).join(", ")) + (bereiche.length > 3 ? " und " + (bereiche.length - 3) + " weitere" : "") + '</small></span><span class="q-wert"><b class="' + ton2 + '">' + risikoText(x2.risiko) + '</b><small>Ausfall je Woche</small></span><span class="q-knoepfe"><button data-it="neues" data-v="' + x2.id + '">Modernisieren</button></span></div>';
       return h3;
     }
     function systeme(d3) {
-      let h3 = '<div class="raster"><div class="kz"><span>Systeme</span><b>' + d3.systeme.length + '</b></div><div class="kz"><span>IT-Betrieb pro Woche</span><b>' + geld(d3.betriebskostenWoche) + "</b></div></div>";
-      h3 += '<div class="olief">CDO und IT-Leitung beeinflussen das Risiko von Verz\xF6gerungen und St\xF6rungen. Die Anfangsgenerationen bleiben f\xFCr die Basiskalibrierung neutral.</div>';
-      h3 += d3.systeme.map(systemKarte).join("");
+      const reihe = [...d3.systeme].sort((a2, b3) => b3.risiko - a2.risiko || a2.generation - b3.generation);
+      const top = reihe[0];
+      let h3 = '<div class="q31">';
+      h3 += '<div class="q-gross"><span class="q-label">H\xF6chstes Ausfallrisiko</span><span class="q-haupt ' + (top && top.risiko >= 0.01 ? "q-minus" : "") + '">' + (top ? risikoText(top.risiko) : "0 %") + '</span><span class="q-neben"><b>' + geld(d3.betriebskostenWoche) + "</b>IT-Betrieb je Woche</span></div>";
+      const alt = reihe.filter((x2) => x2.generation <= 1 || x2.wartungGekuendigt);
+      h3 += '<div class="q-befund">' + (top && top.risiko >= 2e-3 ? "<b>" + esc2(top.name) + "</b> f\xE4llt mit " + risikoText(top.risiko) + " je Woche am ehesten aus." : "Alle " + d3.systeme.length + " Systeme laufen stabil.") + (alt.length ? " " + alt.length + " " + (alt.length === 1 ? "System ist" : "Systeme sind") + " veraltet oder ohne Wartung." : "") + "</div>";
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Systemlandkarte</span><b>nach Risiko</b></div>' + reihe.map(systemZeile).join("") + "</div>";
       const k3 = d3.systeme.find((x2) => x2.id === "kasse");
       if (k3 && k3.generation >= 2) {
-        h3 += '<div class="karte"><div class="khead">Kassenausbau</div>';
+        h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Kassenausbau</span><b>Stufe von 2</b></div>';
         for (const art of ["selbstbedienung", "mobil"]) {
           const stufe2 = k3.kasseAusbau?.[art] ?? 0;
-          h3 += zeile3(art === "mobil" ? "Mobile Kasse" : "Selbstbedienungskassen", "Stufe " + stufe2);
-          if (stufe2 < 2) h3 += '<div class="oknoepfe"><button data-it="kasseAusbau" data-v="' + art + '">Stufe ' + (stufe2 + 1) + " beauftragen</button></div>";
+          h3 += '<div class="q-zeile"><span class="q-name">' + (art === "mobil" ? "Mobile Kasse" : "Selbstbedienungskassen") + '</span><span class="q-wert">' + stufe2 + " von 2</span>" + (stufe2 < 2 ? '<span class="q-knoepfe"><button data-it="kasseAusbau" data-v="' + art + '">Stufe ' + (stufe2 + 1) + " beauftragen</button></span>" : "") + "</div>";
         }
         h3 += "</div>";
       }
+      h3 += '<div class="legende">CDO und IT-Leitung beeinflussen das Risiko von Verz\xF6gerungen und St\xF6rungen.</div></div>';
       return h3;
     }
     function projektKarte(p2, d3) {
@@ -173850,7 +173864,7 @@
     function zeichnen2() {
       if (!ui.aktiv) return;
       const d3 = daten(), seiten4 = { systeme: "Systemlandkarte", produkte: "Digitale Produkte", projekte: "IT-Projekte", neu: "Neues IT-Projekt" };
-      ctx.panel("IT \xB7 " + seiten4[ui.reiter], "CDO / Bereich IT \xB7 " + d3.projekte.filter((x2) => x2.phase !== "abgeschlossen").length + " aktive Projekte", reiter() + (ui.reiter === "systeme" ? systeme(d3) : ui.reiter === "produkte" ? produkte2() : ui.reiter === "projekte" ? projekte(d3) : neu(d3)), "gross");
+      ctx.panel("IT \xB7 " + seiten4[ui.reiter], "CDO / Bereich IT \xB7 " + d3.projekte.filter((x2) => x2.phase !== "abgeschlossen").length + " aktive Projekte", bereich("zentrale") + '<i class="q31-marke" hidden></i>' + reiter() + (ui.reiter === "systeme" ? systeme(d3) : ui.reiter === "produkte" ? produkte2() : ui.reiter === "projekte" ? projekte(d3) : neu(d3)), "gross");
       ui.aktiv = true;
     }
     function aktion2(a2) {
@@ -174927,9 +174941,9 @@
     });
     const T = new KompaktSammler();
     const offen = [];
-    const zahl6 = /* @__PURE__ */ new Map();
-    for (const p2 of plan.parzellen) zahl6.set(p2.typ, (zahl6.get(p2.typ) ?? 0) + 1);
-    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl6.get(p2.typ) >= 5);
+    const zahl5 = /* @__PURE__ */ new Map();
+    for (const p2 of plan.parzellen) zahl5.set(p2.typ, (zahl5.get(p2.typ) ?? 0) + 1);
+    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl5.get(p2.typ) >= 5);
     const grund2 = new Proxy(sb.bauer, { get(z4, typ) {
       const f11 = bauerFuer(z4, typ);
       return (S, sc, p2) => {
@@ -175005,9 +175019,9 @@
     });
     const T = new KompaktSammler();
     const offen = [];
-    const zahl6 = /* @__PURE__ */ new Map();
-    for (const p2 of plan.parzellen) zahl6.set(p2.typ, (zahl6.get(p2.typ) ?? 0) + 1);
-    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl6.get(p2.typ) >= 5);
+    const zahl5 = /* @__PURE__ */ new Map();
+    for (const p2 of plan.parzellen) zahl5.set(p2.typ, (zahl5.get(p2.typ) ?? 0) + 1);
+    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl5.get(p2.typ) >= 5);
     const grund2 = new Proxy(sb.bauer, { get(z4, typ) {
       const f11 = bauerFuer(z4, typ);
       return (S, sc, p2) => {
@@ -175481,26 +175495,26 @@
     const z4 = sb.zustand(id);
     const bild3 = z4 ? [z4.status, ...z4.zusatz].filter((q2) => q2 !== "offen").map((q2) => q2 === "aktion" && z4.aktion ? AKTION_NAME[z4.aktion] ? `Aktion ${AKTION_NAME[z4.aktion]}` : "Aktion" : STATUS_TITEL[q2] ?? "").filter(Boolean).join(" \xB7 ") : "";
     const qm2 = h3.flaechen.reduce((a2, f11) => a2 + f11.qm, 0);
-    const zahl6 = (t3, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t3}</span><b>${w2}</b></div>`;
+    const zahl5 = (t3, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t3}</span><b>${w2}</b></div>`;
     let html = `<div class="chips"><span class="chip ${h3.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h3.status] ?? h3.status}</span>${h3.klasse === "premium" ? '<span class="chip" style="background:#fbefd2;color:#6d4b18;border:1px solid #c4a06a;font-weight:700">\u265B Premium</span>' : ""}${bild3 ? `<span class="chip">${bild3}</span>` : ""}<span class="chip grau">${h3.lage === "1a" ? "1a-Lage" : h3.lage === "b" ? "B-Lage" : h3.lage === "center" ? "Center" : h3.lage === "stadtteil" ? "Stadtteilzentrum" : "Stadtrand"}</span></div>`;
-    html += `<div class="raster">${zahl6("Umsatz Woche", geld(k3?.umsatz ?? 0))}${zahl6("Deckungsbeitrag", geld(k3?.db ?? 0), (k3?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl6("Verkaufsfl\xE4che", fmt.format(qm2) + " qm")}${zahl6("Substanz", Math.round(h3.substanz) + " / 100", h3.substanz < 35 ? "rot" : "")}</div>`;
+    html += `<div class="raster">${zahl5("Umsatz Woche", geld(k3?.umsatz ?? 0))}${zahl5("Deckungsbeitrag", geld(k3?.db ?? 0), (k3?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl5("Verkaufsfl\xE4che", fmt.format(qm2) + " qm")}${zahl5("Substanz", Math.round(h3.substanz) + " / 100", h3.substanz < 35 ? "rot" : "")}</div>`;
     html += st?.hausGrafik(id) ?? "";
     html += hausTreiberZeile(src_exports, s, id);
     html += um?.hausKarte(id) ?? "";
     if (h3.format === "schwester") {
       const f11 = schwesterUebersicht(s);
-      html += '<div class="karte"><div class="khead">Volkskauf \xB7 Regionalf\xFChrung</div><div class="raster">' + zahl6("H\xE4user", fmt.format(f11.haeuser)) + zahl6("EBITDA", geld(f11.ebitda)) + zahl6("Umbauten", fmt.format(f11.umbauten)) + "</div>";
+      html += '<div class="karte"><div class="khead">Volkskauf \xB7 Regionalf\xFChrung</div><div class="raster">' + zahl5("H\xE4user", fmt.format(f11.haeuser)) + zahl5("EBITDA", geld(f11.ebitda)) + zahl5("Umbauten", fmt.format(f11.umbauten)) + "</div>";
       if (h3.status === "offen") html += `<button class="mini" onclick="formateTun('schwesterUmflaggen','` + id + `')">Zu Hartwig umflaggen</button>`;
       html += "</div>";
     }
     if (h3.format === "outlet") {
       const f11 = outletUebersicht(s);
-      html += '<div class="karte"><div class="khead">FUNDUS \xB7 Off-Price-Markenposten</div><div class="raster">' + zahl6("Bestand EK", geld(f11.poolWert)) + zahl6("Markenposten", geld(f11.markenposten)) + zahl6("Konzern-Altware", geld(f11.altware)) + zahl6("Reichweite", f11.reichweite.toFixed(1).replace(".", ",") + " Wo.") + "</div>";
+      html += '<div class="karte"><div class="khead">FUNDUS \xB7 Off-Price-Markenposten</div><div class="raster">' + zahl5("Bestand EK", geld(f11.poolWert)) + zahl5("Markenposten", geld(f11.markenposten)) + zahl5("Konzern-Altware", geld(f11.altware)) + zahl5("Reichweite", f11.reichweite.toFixed(1).replace(".", ",") + " Wo.") + "</div>";
       html += `<button class="mini" onclick="formateTun('altwareOutlet',80)">Altwarequote 80 %</button></div>`;
     }
     if (h3.klasse === "premium") {
       const p2 = premiumUebersicht(s).find((q2) => q2.id === id);
-      html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl6("Premium-Image", Math.round(p2?.image ?? 80) + " / 100")}${zahl6("Immobilien- & Marktwert", geld(p2?.marktwert ?? 0))}${zahl6("EBITDA-Marge (DB)", ((p2?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl6("Aktionsschutz", p2?.schutz ? "Aktiv" : "Aus")}</div>`;
+      html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl5("Premium-Image", Math.round(p2?.image ?? 80) + " / 100")}${zahl5("Immobilien- & Marktwert", geld(p2?.marktwert ?? 0))}${zahl5("EBITDA-Marge (DB)", ((p2?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl5("Aktionsschutz", p2?.schutz ? "Aktiv" : "Aus")}</div>`;
       if (h3.premiumEigentuemer) html += `<div class="zeile">Eigent\xFCmer: ${h3.premiumEigentuemer}</div>`;
       else if (h3.status === "offen") html += `<div class="zeile"><button class="mini" onclick="premiumTun('schutz','${id}')">${p2?.schutz ? "Rabatt-Schutz aufheben" : "Rabatt-Schutz aktivieren"}</button> <button class="mini" onclick="premiumTun('investieren','${id}')">10 Mio. \u20AC investieren</button></div>`;
       const an = s.angebote.find((a2) => a2.status === "offen" && a2.typ === "premiumVerkauf" && a2.wunschHaeuser?.includes(id));
@@ -175529,7 +175543,7 @@
     html += "</div>";
     if (d3.ecommerce && h3.format === "warenhaus") {
       const x2 = d3.ecommerce;
-      html += '<div class="karte"><div class="khead">Online und Filiallogistik</div><div class="raster">' + zahl6("Abholungen", fmt.format(x2.abholungen)) + zahl6("Versand aus dem Haus", fmt.format(x2.versand)) + zahl6("Retouren im Haus", fmt.format(x2.retouren)) + zahl6("Instore-Logistik", x2.instoreStunden.toFixed(1).replace(".", ",") + " Std.") + '</div><div class="zeile">Abholstation: ' + (x2.station ? "vorhanden" : "nicht vorhanden") + " \xB7 Ship-from-Store: " + (x2.versandAn ? "aktiv" : "aus") + "</div></div>";
+      html += '<div class="karte"><div class="khead">Online und Filiallogistik</div><div class="raster">' + zahl5("Abholungen", fmt.format(x2.abholungen)) + zahl5("Versand aus dem Haus", fmt.format(x2.versand)) + zahl5("Retouren im Haus", fmt.format(x2.retouren)) + zahl5("Instore-Logistik", x2.instoreStunden.toFixed(1).replace(".", ",") + " Std.") + '</div><div class="zeile">Abholstation: ' + (x2.station ? "vorhanden" : "nicht vorhanden") + " \xB7 Ship-from-Store: " + (x2.versandAn ? "aktiv" : "aus") + "</div></div>";
     }
     const shops = EQ.shops(s, h3);
     if (hausEtageWahl?.id === id) {
@@ -175561,7 +175575,7 @@
     html += "</div>";
     html = hausSteckbrief(d3, html, hausReiter, s.woche);
     if (hausReiter === "personal" && pe) html += pe.hausBlock(id);
-    if (hausReiter === "ware" && d3.waren) html += `<div class="karte"><div class="khead">Ware \xB7 ${esc2(d3.waren.hauscluster)}</div><div class="raster">${zahl6("Warenverf\xFCgbarkeit", (d3.waren.verfuegbarkeit * 100).toFixed(1) + " %")}${zahl6("Altwareanteil", (d3.waren.altwareanteil * 100).toFixed(1) + " %")}${zahl6("Inventurdifferenz", d3.waren.inventur ? geld(d3.waren.inventur.differenz) : "Noch offen")}${zahl6("Fl\xE4chenproduktivit\xE4t", geld(d3.waren.flaechenproduktivitaet) + "/qm")}</div></div>`;
+    if (hausReiter === "ware" && d3.waren) html += `<div class="karte"><div class="khead">Ware \xB7 ${esc2(d3.waren.hauscluster)}</div><div class="raster">${zahl5("Warenverf\xFCgbarkeit", (d3.waren.verfuegbarkeit * 100).toFixed(1) + " %")}${zahl5("Altwareanteil", (d3.waren.altwareanteil * 100).toFixed(1) + " %")}${zahl5("Inventurdifferenz", d3.waren.inventur ? geld(d3.waren.inventur.differenz) : "Noch offen")}${zahl5("Fl\xE4chenproduktivit\xE4t", geld(d3.waren.flaechenproduktivitaet) + "/qm")}</div></div>`;
     panel(h3.name, `${h3.stadt} \xB7 ${h3.klasse === "premium" ? "Premiumhaus" : h3.format === "sport" ? "Sporthaus" : h3.format === "schwester" ? "Volkskauf" : h3.format === "outlet" ? "FUNDUS" : "Warenhaus"} \xB7 Baujahr ${h3.baujahr}`, html, "hausdetail");
     if (neu) hausZeigen(id);
   }
@@ -175763,10 +175777,10 @@
       if (bleiben) $2("pinhalt").scrollTop = sc2;
       return;
     }
-    const zahl6 = (t3, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t3}</span><b>${w2}</b></div>`;
+    const zahl5 = (t3, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t3}</span><b>${w2}</b></div>`;
     const pz5 = (x2) => `${Math.round((x2 ?? 0) * 100)} %`;
     const knopf4 = (text3, args, art = "") => `<button class="mini ${art}" onclick="event.stopPropagation();hqKlick(${args.map((x2) => `'${x2}'`).join(",")})">${text3}</button>`;
-    let html = `<div class="raster">${zahl6("Kosten Zentrale je Woche", geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? "rot" : "")}${zahl6("Besch\xE4ftigte", fmt.format(Math.round(u.fte)) + " FTE")}${zahl6("davon B\xFCromiete", geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl6("Restmiete alter B\xFCros", geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? "rot" : "")}</div>`;
+    let html = `<div class="raster">${zahl5("Kosten Zentrale je Woche", geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? "rot" : "")}${zahl5("Besch\xE4ftigte", fmt.format(Math.round(u.fte)) + " FTE")}${zahl5("davon B\xFCromiete", geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl5("Restmiete alter B\xFCros", geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? "rot" : "")}</div>`;
     const gs = u.gebaeude ?? [];
     const gWahl = gs.find((g) => g.id === hqEtageWahl?.g) ?? gs.find((g) => g.id === gebaeudeId) ?? gs[0];
     if (gWahl) {
@@ -175966,7 +175980,7 @@
     stadt: () => stadtName,
     staedte: () => STADTLISTE.filter((d3) => s?.haeuser.some((h3) => h3.stadt === d3.name)).map((d3) => {
       const hs = s.haeuser.filter((h3) => h3.stadt === d3.name && h3.status !== "geschlossen");
-      const zahl6 = (rolle3) => d3.standorte.filter((p2) => p2.rolle === rolle3).length;
+      const zahl5 = (rolle3) => d3.standorte.filter((p2) => p2.rolle === rolle3).length;
       const formate = [["Hartwig", hs.filter((h3) => h3.format === "warenhaus").length], ["Volkskauf", hs.filter((h3) => h3.format === "schwester").length], ["Sport", hs.filter((h3) => h3.format === "sport").length], ["FUNDUS", hs.filter((h3) => h3.format === "outlet").length]];
       return {
         name: d3.name,

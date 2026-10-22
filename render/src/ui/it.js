@@ -1,12 +1,13 @@
 // O03 IT: Systemlandkarte, Projektvergleich, Meilensteine und clusterweiser Rollout.
 import { esc, geld } from './format.js';
 import { itProdukteKarten, itProduktDetail } from './it-produkte.js';
+import { bereich } from './komponenten.js';
 
 export function itModul(ctx) {
   const { E }=ctx, s=()=>ctx.s();
   const ui={ aktiv:false, reiter:'systeme', system:'kasse', art:'kaufen', generation:3, auswahl:null, projekt:null, produkt:null, bestaetigung:false };
   const optionen=['kaufen','entwickeln','dienstleister'];
-  const artName={kaufen:'Standardsoftware',entwickeln:'Eigenentwicklung',dienstleister:'Dienstleister'};
+  const artName={kaufen:'Standard\u00adsoftware',entwickeln:'Eigen\u00adentwicklung',dienstleister:'Dienst\u00adleister'}; // Q31: weiche Trennstellen, sonst Wortbruch im Segment
   const phasen={konzept:'Konzept',umsetzung:'Umsetzung',rollout:'Rollout',abgeschlossen:'Abgeschlossen'};
   const prozent=x=>Math.round(x*100)+' %';
   function daten(){return E.itUebersicht(s());}
@@ -16,33 +17,39 @@ export function itModul(ctx) {
     return '<div class="tabs">'+[['systeme','Systeme'],['produkte','Produkte'],['projekte','Projekte'],['neu','Neues Projekt']].map(x=>
       '<button type="button" class="tab '+(ui.reiter===x[0]?'an':'')+'" data-it="reiter" data-v="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>';
   }
-  function systemKarte(x) {
-    const ampel=x.risiko<0.002?'gruen':x.risiko<0.01?'gelb':'rot';
-    let h='<div class="karte"><div class="khead">'+esc(x.name)+'<small>Generation '+x.generation+' / 4</small></div>';
-    h+='<div class="it-werte"><span>Alter <b>'+Math.floor(x.alter)+' Jahre</b></span><span>Kosten/Woche <b>'+geld(x.kostenWoche)+'</b></span><span class="it-ampel '+ampel+'">Ausfallrisiko '+prozent(x.risiko)+'/Woche</span></div>';
-    if(x.wartungGekuendigt)h+='<p class="it-warn">Wartung durch den Anbieter beendet</p>';
-    if(x.kasseAusbau)h+='<div class="zeile">SB-Kassen '+x.kasseAusbau.selbstbedienung+'/2 · Mobile Kasse '+x.kasseAusbau.mobil+'/2</div>';
-    const akt=x.verteilung.filter(c=>c.generation>x.generation);
-    if(akt.length)h+='<div class="zeile">Bereits modernisierte Cluster: '+akt.length+' / '+x.verteilung.length+'</div>';
-    const bereiche=E.SYSTEME[x.id].bereiche;
-    h+='<div class="it-meta">Begrenzt: '+esc(bereiche.map(id=>E.BEREICHE?.find(q=>q.id===id)?.name??id).join(', '))+'</div>'; // Q14: Namen statt interner IDs
-    h+='<div class="oknoepfe"><button data-it="neues" data-v="'+x.id+'">Modernisieren</button></div></div>';
+  // Q31 Generationenleiter. Hauptfrage: Welches System droht auszufallen? Größter Block = höchstes Ausfallrisiko,
+  // darunter alle Systeme nach Risiko als Leiter (Generation 1 bis 4), Modernisieren mit einem Tipp je System.
+  const risikoText=x=>(x*100).toLocaleString('de-DE',{maximumFractionDigits:1})+' %';
+  function leiter(g){return '<span class="q-leiter" aria-label="Generation '+g+' von 4">'+[1,2,3,4].map(i=>'<i class="'+(i<=g?'an':'')+'"></i>').join('')+'</span>';}
+  function systemZeile(x){
+    const ton=x.risiko>=0.01?'q-minus':'';
+    const bereiche=E.SYSTEME[x.id].bereiche.map(id=>E.BEREICHE?.find(q=>q.id===id)?.name??id);
+    const akt=x.verteilung.filter(c=>c.generation>x.generation).length;
+    let h='<div class="q-zeile q-system">'+leiter(x.generation)+'<span class="q-name">'+esc(x.name)+(x.generation>0?'<small>Generation '+x.generation+' von 4 · '+Math.floor(x.alter)+' Jahre · '+geld(x.kostenWoche)+' je Woche</small>':'<small>Noch nicht eingeführt, keine laufenden Kosten</small>')+
+      (x.wartungGekuendigt?'<small class="q-minus">Wartung durch den Anbieter beendet</small>':'')+(akt?'<small>'+akt+' von '+x.verteilung.length+' Clustern schon modernisiert</small>':'')+
+      '<small>Bremst: '+esc(bereiche.slice(0,3).join(', '))+(bereiche.length>3?' und '+(bereiche.length-3)+' weitere':'')+'</small></span>'+
+      '<span class="q-wert"><b class="'+ton+'">'+risikoText(x.risiko)+'</b><small>Ausfall je Woche</small></span>'+
+      '<span class="q-knoepfe"><button data-it="neues" data-v="'+x.id+'">Modernisieren</button></span></div>';
     return h;
   }
   function systeme(d){
-    let h='<div class="raster"><div class="kz"><span>Systeme</span><b>'+d.systeme.length+'</b></div><div class="kz"><span>IT-Betrieb pro Woche</span><b>'+geld(d.betriebskostenWoche)+'</b></div></div>';
-    h+='<div class="olief">CDO und IT-Leitung beeinflussen das Risiko von Verzögerungen und Störungen. Die Anfangsgenerationen bleiben für die Basiskalibrierung neutral.</div>';
-    h+=d.systeme.map(systemKarte).join('');
+    const reihe=[...d.systeme].sort((a,b)=>b.risiko-a.risiko||a.generation-b.generation);
+    const top=reihe[0];
+    let h='<div class="q31">';
+    h+='<div class="q-gross"><span class="q-label">Höchstes Ausfallrisiko</span><span class="q-haupt '+(top&&top.risiko>=0.01?'q-minus':'')+'">'+(top?risikoText(top.risiko):'0 %')+'</span><span class="q-neben"><b>'+geld(d.betriebskostenWoche)+'</b>IT-Betrieb je Woche</span></div>';
+    const alt=reihe.filter(x=>x.generation<=1||x.wartungGekuendigt);
+    h+='<div class="q-befund">'+(top&&top.risiko>=0.002?'<b>'+esc(top.name)+'</b> fällt mit '+risikoText(top.risiko)+' je Woche am ehesten aus.':'Alle '+d.systeme.length+' Systeme laufen stabil.')+(alt.length?' '+alt.length+' '+(alt.length===1?'System ist':'Systeme sind')+' veraltet oder ohne Wartung.':'')+'</div>';
+    h+='<div class="q-buch"><div class="q-buch-kopf"><span>Systemlandkarte</span><b>nach Risiko</b></div>'+reihe.map(systemZeile).join('')+'</div>';
     const k=d.systeme.find(x=>x.id==='kasse');
     if(k && k.generation>=2) {
-      h+='<div class="karte"><div class="khead">Kassenausbau</div>';
+      h+='<div class="q-buch"><div class="q-buch-kopf"><span>Kassenausbau</span><b>Stufe von 2</b></div>';
       for(const art of ['selbstbedienung','mobil']){
         const stufe=k.kasseAusbau?.[art]??0;
-        h+=zeile(art==='mobil'?'Mobile Kasse':'Selbstbedienungskassen','Stufe '+stufe);
-        if(stufe<2)h+='<div class="oknoepfe"><button data-it="kasseAusbau" data-v="'+art+'">Stufe '+(stufe+1)+' beauftragen</button></div>';
+        h+='<div class="q-zeile"><span class="q-name">'+(art==='mobil'?'Mobile Kasse':'Selbstbedienungskassen')+'</span><span class="q-wert">'+stufe+' von 2</span>'+(stufe<2?'<span class="q-knoepfe"><button data-it="kasseAusbau" data-v="'+art+'">Stufe '+(stufe+1)+' beauftragen</button></span>':'')+'</div>';
       }
       h+='</div>';
     }
+    h+='<div class="legende">CDO und IT-Leitung beeinflussen das Risiko von Verzögerungen und Störungen.</div></div>';
     return h;
   }
   function projektKarte(p,d) {
@@ -120,7 +127,7 @@ export function itModul(ctx) {
   function zeichnen(){
     if(!ui.aktiv)return;
     const d=daten(),seiten={systeme:'Systemlandkarte',produkte:'Digitale Produkte',projekte:'IT-Projekte',neu:'Neues IT-Projekt'};
-    ctx.panel('IT · '+seiten[ui.reiter], 'CDO / Bereich IT · '+d.projekte.filter(x=>x.phase!=='abgeschlossen').length+' aktive Projekte',reiter()+
+    ctx.panel('IT · '+seiten[ui.reiter], 'CDO / Bereich IT · '+d.projekte.filter(x=>x.phase!=='abgeschlossen').length+' aktive Projekte',bereich('zentrale')+'<i class="q31-marke" hidden></i>'+reiter()+
       (ui.reiter==='systeme'?systeme(d):ui.reiter==='produkte'?produkte():ui.reiter==='projekte'?projekte(d):neu(d)),'gross');
     ui.aktiv=true;
   }

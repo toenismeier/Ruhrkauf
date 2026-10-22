@@ -1,6 +1,7 @@
 // O09 E-Commerce: Panel hartwig.de, ausschließlich Engine-Abfragen und SpielerAktion.
 import { geld, fmt, esc, clusterName } from './format.js';
 import { itProdukteKarten } from './it-produkte.js';
+import { bereich } from './komponenten.js';
 
 const prozent = (x, n = 1) => (100 * (x || 0)).toFixed(n).replace('.', ',') + ' %';
 const zahl = (titel, wert, ton = '') => '<div class="kz ' + ton + '"><span>' + titel + '</span><b>' + wert + '</b></div>';
@@ -8,6 +9,8 @@ const zeile = (label, detail, aktion) => '<div class="zeile"><span class="was"><
   '</b><i>' + esc(detail) + '</i></span>' + aktion + '</div>';
 const schalter = (akt, wert, parameter = '') => '<button class="mini ' + (wert ? 'gruen' : '') +
   '" data-online="' + akt + '" ' + parameter + '>' + (wert ? 'Ein' : 'Aus') + '</button>';
+
+const knopfText = (akt, an, text, id) => '<button class="mini' + (an ? ' q-an-knopf' : '') + '" data-online="' + akt + '" data-id="' + esc(id) + '" aria-pressed="' + !!an + '">' + text + '</button>';
 
 export function ecommerceModul(ctx) {
   let offen = false, tab = 'uebersicht';
@@ -21,28 +24,36 @@ export function ecommerceModul(ctx) {
     if (tab === 'produkte') {
       h += itProdukteKarten(ctx.E.itProdukte(ctx.s()), 'online');
     } else if (tab === 'uebersicht') {
-      h += '<div class="raster">' + zahl('Onlineumsatz Woche', geld(u.umsatz)) +
-        zahl('Anteil Konzernumsatz', prozent(u.anteil)) +
-        zahl('Online-Conversion', prozent(u.conversion, 2)) +
-        zahl('Retourenquote', prozent(u.retourenquote)) +
-        zahl('Kosten je Bestellung', geld(u.kostenJeBestellung)) +
-        zahl('Deckungsbeitrag online', geld(u.deckungsbeitrag), u.deckungsbeitrag < 0 ? 'rot' : 'gruen') +
-        zahl('Click & Collect', prozent(u.clickCollectAnteil)) +
-        zahl('Bestellungen', fmt.format(u.bestellungen)) + '</div>';
-      h += '<div class="karte"><div class="khead">Umsatzbrücke: Effekt Online</div>' +
-        zeile('Onlinewachstum gegenüber Basis', geld(u.umsatz - u.basis), '') +
-        zeile('Kannibalisierung in den Häusern', '−' + geld(u.kannibalisierung), '') +
-        zeile('Gesamteffekt Konzernumsatz', geld(u.onlineEffekt), '') +
-        '<div class="zeile grau">Die Ausgangsbasis von 8 % ist bereits im bisherigen Konzernumsatz enthalten und wird nicht nochmals addiert.</div></div>';
-      h += '<div class="karte"><div class="khead">Onlineumsatz der letzten Wochen</div>';
-      const max = Math.max(1, ...u.verlauf.map((q) => q.umsatz));
-      h += '<div class="online-verlauf">' + u.verlauf.slice(-26).map((q) =>
-        '<div class="online-balken" style="height:' + Math.max(2, 100 * q.umsatz / max) +
-        '%" title="KW ' + ((q.woche % 52) + 1) + ': ' + geld(q.umsatz) + '"></div>').join('') + '</div>';
-      h += '<div class="zeile grau">Basis: Umsatzanteil stationär und online ohne Doppelzählung</div></div>';
-      h += '<div class="karte"><div class="khead">Warengruppen online</div>' +
-        Object.entries(u.umsatzJeGruppe).sort((a, b) => b[1] - a[1]).map(([g, umsatz]) =>
-          zeile(ctx.E.GRUPPEN[g]?.name ?? g, geld(umsatz), '')).join('') + '</div>';
+      // Q31 Paketschein. Hauptfrage: Verdient hartwig.de diese Woche Geld? Größter Block = Deckungsbeitrag online,
+      // darunter die Umsatzbrücke mit Summenstrich (Zeilen ergeben den Gesamteffekt) und der Verlauf.
+      const wachstum = u.umsatz - u.basis, mitkauf = u.onlineEffekt - wachstum + u.kannibalisierung;
+      const vz = (x) => (x < 0 ? '−' : x > 0 ? '+' : '') + geld(Math.abs(x));
+      h += '<div class="q31">';
+      h += '<div class="q-gross"><span class="q-label">Deckungsbeitrag online</span><span class="q-haupt ' + (u.deckungsbeitrag < 0 ? 'q-minus' : '') + '">' + geld(u.deckungsbeitrag) + '</span><span class="q-neben"><b>' + geld(u.umsatz) + '</b>Onlineumsatz Woche</span></div>';
+      h += '<div class="q-befund">' + (u.bestellungen ? (u.deckungsbeitrag < 0 ? '<b class="q-minus">hartwig.de verliert Geld.</b> ' : '') + '<b>' + fmt.format(u.bestellungen) + '</b> Bestellungen zu je <b>' + geld(u.kostenJeBestellung) + '</b> Kosten, ' + prozent(u.retourenquote) + ' gehen zurück.' : 'Diese Woche gab es keine Onlinebestellung.') + '</div>';
+      h += '<div class="q-buch q-paketschein"><div class="q-buch-kopf"><span>Paketschein KW ' + ((ctx.s().woche % 52) + 1) + '</span><b>hartwig.de</b></div>' +
+        '<div class="q-zeile"><span class="q-name">Anteil am Konzernumsatz</span><span class="q-wert">' + prozent(u.anteil) + '</span></div>' +
+        '<div class="q-zeile"><span class="q-name">Online-Conversion</span><span class="q-wert">' + prozent(u.conversion, 2) + '</span></div>' +
+        '<div class="q-zeile"><span class="q-name">Retourenquote</span><span class="q-wert">' + prozent(u.retourenquote) + '</span></div>' +
+        '<div class="q-zeile"><span class="q-name">Click & Collect<small>Anteil der Bestellungen</small></span><span class="q-wert">' + prozent(u.clickCollectAnteil) + '</span></div></div>';
+      h += '<div class="q-buch"><div class="q-buch-kopf"><span>Umsatzbrücke Online</span><b>Woche</b></div>' +
+        '<div class="q-zeile"><span class="q-name">Onlinewachstum gegenüber Basis<small>Basis 8 % ist im Konzernumsatz schon enthalten</small></span><span class="q-wert">' + vz(wachstum) + '</span></div>' +
+        '<div class="q-zeile"><span class="q-name">Mitkäufe bei Abholung im Haus</span><span class="q-wert">' + vz(mitkauf) + '</span></div>' +
+        '<div class="q-zeile"><span class="q-name">Kannibalisierung in den Häusern</span><span class="q-wert">' + vz(-u.kannibalisierung) + '</span></div>' +
+        '<div class="q-summe"><span>Effekt auf den Konzernumsatz</span><span class="q-wert ' + (u.onlineEffekt < 0 ? 'q-minus' : '') + '">' + vz(u.onlineEffekt) + '</span></div></div>';
+      const v = u.verlauf.slice(-26);
+      if (v.length < 2) h += '<div class="q-buch"><div class="q-leer">Ein Verlauf ist ab der zweiten Woche verfügbar.</div></div>';
+      else {
+        const max = Math.max(1, ...v.map((q) => q.umsatz));
+        h += '<div class="q-buch"><div class="q-buch-kopf"><span>Onlineumsatz</span><b>' + v.length + ' Wochen</b></div><div class="online-verlauf" style="padding:8px 14px 0">' + v.map((q) =>
+          '<div class="online-balken" style="height:' + Math.max(2, 100 * q.umsatz / max) + '%" title="KW ' + ((q.woche % 52) + 1) + ': ' + geld(q.umsatz) + '"></div>').join('') + '</div>' +
+          '<div class="q-zwischen" style="border:0"><span>KW ' + ((v[0].woche % 52) + 1) + '</span><span>KW ' + ((v[v.length - 1].woche % 52) + 1) + '</span></div></div>';
+      }
+      const gr = Object.entries(u.umsatzJeGruppe).sort((a, b) => b[1] - a[1]);
+      h += '<div class="q-buch"><div class="q-buch-kopf"><span>Warengruppen online</span><b>Umsatz</b></div>' +
+        (gr.length ? gr.map(([g, umsatz]) => '<div class="q-zeile"><span class="q-name">' + esc(ctx.E.GRUPPEN[g]?.name ?? g) + '</span><span class="q-wert">' + geld(umsatz) + '</span></div>').join('') +
+        '<div class="q-summe"><span>Summe</span><span class="q-wert">' + geld(gr.reduce((a, [, x]) => a + x, 0)) + '</span></div>' : '<div class="q-leer">Noch kein Onlineumsatz.</div>') + '</div>';
+      h += '</div>';
     } else if (tab === 'steuerung') {
       const optionen = (id, werte, aktuell, format) => '<div class="zeile"><span class="was">' +
         id + '</span><select class="ort" data-online="strategie" data-feld="' + format + '">' +
@@ -65,17 +76,18 @@ export function ecommerceModul(ctx) {
       for (const c of u.cluster) h += zeile(clusterName(ctx.s(), c.id), c.haeuser + ' Häuser', schalter('cluster', c.aktiv, 'data-id="' + esc(c.id) + '"'));
       h += '</div>';
     } else {
-      h += '<div class="karte"><div class="khead">Abholstationen und Filiallogistik</div>';
-      for (const a of u.haeuser) h += '<div class="abt"><div class="zeile"><span class="was"><b>' +
-        esc(a.name) + '</b><i>' + esc(a.stadt) + ' · ' + esc(clusterName(ctx.s(), a.cluster)) + '</i></span>' +
-        schalter('station', a.station, 'data-id="' + esc(a.id) + '"') + '</div>' +
-        '<div class="zeile unter">Abholungen ' + fmt.format(a.abholungen) +
-        ' · Versand ' + fmt.format(a.versand) + ' · Retouren ' + fmt.format(a.retouren) +
-        ' · ' + a.instoreStunden.toFixed(1).replace('.', ',') + ' Logistikstunden ' +
-        schalter('retouren', a.retourenAn, 'data-id="' + esc(a.id) + '"' + (a.station ? '' : ' disabled')) + '</div></div>';
-      h += '</div>';
+      // Q31: Abholstationen als Liste je Haus; Werte nur, wenn eine Station läuft
+      const an = u.haeuser.filter((a) => a.station).length;
+      h += '<div class="q31"><div class="q-gross"><span class="q-label">Häuser mit Abholstation</span><span class="q-haupt">' + an + ' von ' + u.haeuser.length + '</span><span class="q-neben"><b>' + fmt.format(u.haeuser.reduce((s, a) => s + a.abholungen, 0)) + '</b>Abholungen Woche</span></div>';
+      if (!an) h += '<div class="q-befund">Kein Haus hat eine Abholstation. Click & Collect braucht mindestens eine.</div>';
+      h += '<div class="q-buch"><div class="q-buch-kopf"><span>Abholstationen</span><b>Station · Retouren</b></div>';
+      for (const a of u.haeuser) h += '<div class="q-zeile"><span class="q-name">' + esc(a.name) + '<small>' + esc(a.stadt) + ' · ' + esc(clusterName(ctx.s(), a.cluster)) + '</small>' +
+        (a.station ? '<small>Abholungen ' + fmt.format(a.abholungen) + ' · Versand ' + fmt.format(a.versand) + ' · Retouren ' + fmt.format(a.retouren) + ' · ' + a.instoreStunden.toFixed(1).replace('.', ',') + ' Logistikstunden</small>' : '') +
+        '</span><span class="q-knoepfe" style="grid-column:auto;padding:0">' + knopfText('station', a.station, a.station ? 'Station an' : 'Station einrichten', a.id) +
+        (a.station ? knopfText('retouren', a.retourenAn, a.retourenAn ? 'Retouren an' : 'Retouren aus', a.id) : '') + '</span></div>';
+      h += '</div></div>';
     }
-    ctx.panel('Online', 'hartwig.de · E-Commerce', h, 'gross');
+    ctx.panel('Online', 'hartwig.de · E-Commerce', bereich('zentrale') + '<i class="q31-marke" hidden></i>' + h, 'gross');
     offen = true; // Das gemeinsame Panel schließt zunächst die übrigen Module.
     document.getElementById('pinhalt').scrollTop = vorher;
   }
