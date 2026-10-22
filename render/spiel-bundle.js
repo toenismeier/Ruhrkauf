@@ -35,6 +35,7 @@
     HQ_TYPEN: () => HQ_TYPEN,
     HQ_WIRKUNG: () => HQ_WIRKUNG,
     IT_IDS: () => IT_IDS,
+    IT_PRODUKT_IDS: () => IT_PRODUKT_IDS,
     KANAELE: () => KANAELE,
     KANAL: () => KANAL,
     KONZERN_GESCHICHTE: () => KONZERN_GESCHICHTE,
@@ -131,6 +132,8 @@
     itCluster: () => itCluster,
     itDeckel: () => itDeckel,
     itDeckelGrund: () => itDeckelGrund,
+    itProduktZustand: () => itProduktZustand,
+    itProdukte: () => itProdukte,
     itProjektPlan: () => itProjektPlan,
     itUebersicht: () => itUebersicht,
     kanaele: () => kanaele,
@@ -1235,25 +1238,25 @@
     if (kennzahl2 === "frequenz") ergebnis.hinweis = "Kundenfrequenz gesch\xE4tzt aus Umsatz / 45 \u20AC; kein gemessener Besucherz\xE4hler.";
     const letzteWoche = s2.historie.length ? s2.historie[s2.historie.length - 1].woche : s2.woche - 1;
     const beginn = filter.wochen === "alle" ? -Infinity : letzteWoche - Math.max(1, Number(filter.wochen) || 52) + 1;
-    const werte2 = /* @__PURE__ */ new Map();
+    const werte3 = /* @__PURE__ */ new Map();
     if (ebene === "konzern" && kennzahl2 === "stimmung") {
-      for (const p2 of s2.statistik?.stimmung ?? []) werte2.set(p2.woche, p2.wert);
+      for (const p2 of s2.statistik?.stimmung ?? []) werte3.set(p2.woche, p2.wert);
     } else if (ebene === "konzern" && ["umsatz", "ebitda", "cash", "personalFte"].includes(kennzahl2)) {
       for (const k3 of s2.historie) {
         const wert = kennzahl2 === "personalFte" ? k3.fte : k3[kennzahl2];
-        werte2.set(k3.woche, wert);
+        werte3.set(k3.woche, wert);
       }
     } else if (!["cash", "ebitda", "stimmung"].includes(kennzahl2)) {
       const haeuser = passendeHaeuser(s2, ebene, id);
       for (const h3 of haeuser) for (const p2 of h3.verlauf ?? []) {
-        werte2.set(p2.woche, (werte2.get(p2.woche) ?? 0) + p2[kennzahl2]);
+        werte3.set(p2.woche, (werte3.get(p2.woche) ?? 0) + p2[kennzahl2]);
       }
     }
-    const alle = [...werte2.keys()].sort((a2, b2) => a2 - b2);
+    const alle = [...werte3.keys()].sort((a2, b2) => a2 - b2);
     for (const w2 of alle) {
       if (w2 < beginn) continue;
-      const punkt5 = { woche: w2, wert: werte2.get(w2) };
-      if (werte2.has(w2 - 52)) punkt5.vorjahr = werte2.get(w2 - 52);
+      const punkt5 = { woche: w2, wert: werte3.get(w2) };
+      if (werte3.has(w2 - 52)) punkt5.vorjahr = werte3.get(w2 - 52);
       if (ebene === "konzern" && kennzahl2 === "ebitda") {
         const q2 = s2.quartale.find((x2) => w2 >= x2.start && w2 < x2.start + 13);
         if (q2) punkt5.plan = (q2.plan ?? q2.planStandard) / 13;
@@ -3994,10 +3997,10 @@
     return s2.marketing.aktionen.some((a2) => a2.status !== "abgesagt" && a2.start === s2.woche && aktive(s2).some((h3) => h3.stadt === stadt && (a2.scope.typ === "alle" || a2.scope.typ === "region" && a2.scope.region === h3.region || a2.scope.typ === "cluster" && a2.scope.cluster === h3.cluster || a2.scope.typ === "format" && a2.scope.format === h3.format || a2.scope.typ === "haeuser" && a2.scope.ids.includes(h3.id))));
   }
   function stadtWachstum(s2, stadt) {
-    const werte2 = s2.wettbewerbStadtUmsatz[stadt] ?? [];
-    if (werte2.length < 65) return false;
-    const neu = werte2.slice(-13).reduce((a2, b2) => a2 + b2, 0);
-    const vorjahr2 = werte2.slice(-65, -52).reduce((a2, b2) => a2 + b2, 0);
+    const werte3 = s2.wettbewerbStadtUmsatz[stadt] ?? [];
+    if (werte3.length < 65) return false;
+    const neu = werte3.slice(-13).reduce((a2, b2) => a2 + b2, 0);
+    const vorjahr2 = werte3.slice(-65, -52).reduce((a2, b2) => a2 + b2, 0);
     return vorjahr2 > 0 && neu / vorjahr2 > 1.08;
   }
   function wettbewerbWoche(s2) {
@@ -4254,10 +4257,10 @@
   function normierePremiumFlaechen(h3, p2) {
     const alteEtagen = [...h3.etagen].sort((a2, b2) => a2 - b2);
     const neueEtagen = [...p2.etagen];
-    const anzahl = Math.max(1, alteEtagen.length - 1);
+    const anzahl2 = Math.max(1, alteEtagen.length - 1);
     for (const f11 of h3.flaechen) {
       const index2 = Math.max(0, alteEtagen.indexOf(f11.etage));
-      f11.etage = neueEtagen[Math.round(index2 / anzahl * (neueEtagen.length - 1))];
+      f11.etage = neueEtagen[Math.round(index2 / anzahl2 * (neueEtagen.length - 1))];
     }
     h3.etagen = neueEtagen;
     h3.grundflaecheQm = p2.qm / neueEtagen.length;
@@ -5406,8 +5409,119 @@
     }
   }
 
+  // ../engine/src/it-produkte.ts
+  var IT_PRODUKT_IDS = ["kundenkarte", "hartwig_app", "kasse", "mobile_pay"];
+  var IT_TEAM_KOSTEN_PRO_KOPF = 1400;
+  var texte = {
+    kundenkarte: {
+      name: "Hartwig Karte",
+      system: "app",
+      einheit: "aktive Karteninhaber",
+      beschreibung: [
+        "Die Hartwig Karte verbindet Einkauf und Kundenbindung in allen H\xE4usern.",
+        "Ihre Reichweite und CRM-Nutzung stammen aus den bestehenden Marketingdaten."
+      ]
+    },
+    hartwig_app: {
+      name: "Hartwig App",
+      system: "app",
+      einheit: "aktive App-Nutzer",
+      beschreibung: [
+        "Die Hartwig App b\xFCndelt Kundenkonto, Angebote und den Online-Shop.",
+        "Click & Collect und Abholstationen werden durch den bestehenden Onlinekanal gesteuert."
+      ]
+    },
+    kasse: {
+      name: "Hartwig Kasse",
+      system: "kasse",
+      einheit: "gesch\xE4tzte Transaktionen",
+      beschreibung: [
+        "Die Kasse verarbeitet Eink\xE4ufe im Filialnetz und steuert den Kassenfluss.",
+        "Modernisierung und SB-Kassen wirken \xFCber die vorhandene IT- und Filialsteuerung."
+      ]
+    },
+    mobile_pay: {
+      name: "Mobile Pay",
+      system: "kasse",
+      einheit: "modellierte mobile Transaktionen",
+      beschreibung: [
+        "Mobile Pay ist die mobile Zahlvariante der Hartwig Kasse.",
+        "Der Ausbau nutzt die vorhandene mobile Kassenstufe, keine zweite Zahlungslogik."
+      ]
+    }
+  };
+  function itProduktZustand(s2, id) {
+    return s2.it?.produkte?.[id] ?? { aktiv: true, team: 0 };
+  }
+  function werte(s2) {
+    const k3 = s2.marketing?.stand?.ist?.karte;
+    const mobileStufe = s2.it?.systeme.kasse.kasseAusbau?.mobil ?? 0;
+    const bon = s2.marketing?.stand?.verlauf?.at(-1)?.bon || 41;
+    const transaktionen = Math.max(0, Math.round((s2.historie.at(-1)?.umsatz ?? 0) / Math.max(1, bon)));
+    return {
+      kundenkarte: itProduktZustand(s2, "kundenkarte").aktiv ? Math.round((k3?.mitglieder ?? 0) * (k3?.aktivQuote ?? 0)) : 0,
+      hartwig_app: itProduktZustand(s2, "hartwig_app").aktiv ? Math.round(k3?.app?.aktiveNutzer ?? 0) : 0,
+      kasse: itProduktZustand(s2, "kasse").aktiv ? transaktionen : 0,
+      mobile_pay: itProduktZustand(s2, "kasse").aktiv && itProduktZustand(s2, "mobile_pay").aktiv ? Math.round(transaktionen * clamp(0.04 * mobileStufe, 0, 1)) : 0
+    };
+  }
+  function itProdukteWoche(s2) {
+    if (s2.prognose || !s2.it) return;
+    const punkt5 = { woche: s2.woche, ...werte(s2) };
+    const v = s2.it.produktVerlauf ?? (s2.it.produktVerlauf = []);
+    if (v.at(-1)?.woche === punkt5.woche) v[v.length - 1] = punkt5;
+    else v.push(punkt5);
+    if (v.length > 52) v.splice(0, v.length - 52);
+  }
+  function itProdukte(s2) {
+    const alle = werte(s2), verlauf4 = s2.it?.produktVerlauf ?? [];
+    const e = s2.ecommerce;
+    const k3 = s2.marketing?.stand?.ist?.karte;
+    const ausbau = s2.it?.systeme.kasse.kasseAusbau;
+    return IT_PRODUKT_IDS.map((id) => {
+      const meta = texte[id], status2 = itProduktZustand(s2, id);
+      const system2 = s2.it?.systeme[meta.system], generation = system2?.generation ?? SYSTEME[meta.system].start;
+      const version2 = id === "mobile_pay" ? ausbau?.mobil ?? 0 : generation;
+      const qualitaet3 = id === "hartwig_app" || id === "kundenkarte" ? Math.round(clamp((k3?.app?.qualitaet ?? 0.35) * 3 + generation, 1, 5)) : id === "mobile_pay" && version2 === 0 ? 0 : Math.max(1, Math.min(5, generation + 1));
+      const punkte2 = verlauf4.slice(-5).map((p2) => ({ woche: p2.woche, wert: p2[id] }));
+      const aktuell = alle[id];
+      const vorher = punkte2.length >= 2 ? punkte2[punkte2.length - 2].wert : void 0;
+      const aenderung = vorher === void 0 ? void 0 : aktuell - vorher;
+      return {
+        id,
+        ...meta,
+        aktiv: status2.aktiv,
+        team: status2.team,
+        teamKostenWoche: status2.team * IT_TEAM_KOSTEN_PRO_KOPF,
+        kennzahl: aktuell,
+        aenderung,
+        aenderungQuote: vorher && aenderung !== void 0 ? aenderung / vorher : void 0,
+        verlauf: punkte2,
+        version: version2 + ".0",
+        generation,
+        sterne: qualitaet3,
+        systemAlter: system2?.alter ?? SYSTEME[meta.system].alter,
+        details: id === "kundenkarte" ? [
+          ["Mitglieder insgesamt", Math.round(k3?.mitglieder ?? 0)],
+          ["Umsatzanteil mit Karte", Math.round((k3?.umsatzAnteil ?? 0) * 1e3) / 10 + " %"]
+        ] : id === "hartwig_app" ? [
+          ["Downloads", Math.round(k3?.app?.downloads ?? 0)],
+          ["Click & Collect", e?.letzte ? Math.round(e.letzte.bestellungen * e.letzte.clickCollectAnteil) : 0],
+          ["Abholstationen", s2.haeuser.filter((h3) => !!e?.abholstationen?.[h3.id]).length],
+          ["Online-Shop", "hartwig.de"]
+        ] : id === "kasse" ? [
+          ["Selbstbedienungskassen", "Stufe " + (ausbau?.selbstbedienung ?? 0)],
+          ["Zahlungsverkehr", "0,2 % des Umsatzes vor Einsparprogramm"]
+        ] : [
+          ["Mobile Kasse", "Stufe " + (ausbau?.mobil ?? 0)],
+          ["Zahlungsverkehr", "\xFCber bestehende Filial-GuV"]
+        ]
+      };
+    });
+  }
+
   // ../engine/src/it.ts
-  var IT_AKTIONEN = /* @__PURE__ */ new Set(["itProjekt", "itRolloutPlan", "itKasseAusbau"]);
+  var IT_AKTIONEN = /* @__PURE__ */ new Set(["itProjekt", "itRolloutPlan", "itKasseAusbau", "itProduktTeam", "itProduktAktiv"]);
   var SYSTEME = {
     kasse: { name: "Kassensoftware", start: 2, alter: 14, kosten: 78e3, bereiche: ["store_operations", "vertriebssteuerung", "flagship_management"] },
     warenwirtschaft: { name: "Warenwirtschaft", start: 2, alter: 10, kosten: 62e3, bereiche: ["allokation", "logistik", "einkauf_damen", "einkauf_herren_kinder", "einkauf_beauty", "einkauf_wohnen", "einkauf_food", "preis_reduzierung"] },
@@ -5510,11 +5624,11 @@
     const millionen = { kaufen: 1.8, entwickeln: 4.2, dienstleister: 0.8 }[art];
     return eur((millionen + ziel * 0.65) * 1e6 * (0.35 + clusterCount * 0.65 / 18));
   }
-  function itProjektPlan(s2, id, art, ziel, anzahl) {
+  function itProjektPlan(s2, id, art, ziel, anzahl2) {
     const faktor2 = { kaufen: 1, entwickeln: 1.9, dienstleister: 0.75 }[art];
     const konzept = Math.ceil(3 * faktor2), umsetzung = Math.ceil((6 + ziel * 3) * faktor2);
-    const rollout = Math.max(1, anzahl);
-    return { konzept, umsetzung, rollout, gesamt: konzept + umsetzung + rollout, kosten: projektKosten(art, ziel, anzahl) };
+    const rollout = Math.max(1, anzahl2);
+    return { konzept, umsetzung, rollout, gesamt: konzept + umsetzung + rollout, kosten: projektKosten(art, ziel, anzahl2) };
   }
   function qualitaet(s2) {
     const o3 = s2.organisation;
@@ -5540,6 +5654,19 @@
   function itAktion(s2, a2) {
     initialisiereIt(s2);
     const it = s2.it;
+    if (a2.typ === "itProduktTeam" || a2.typ === "itProduktAktiv") {
+      if (!IT_PRODUKT_IDS.includes(a2.produkt)) return { ok: false, text: "Unbekanntes IT-Produkt." };
+      const bisher = itProduktZustand(s2, a2.produkt);
+      if (a2.typ === "itProduktTeam") {
+        if (!Number.isInteger(a2.anzahl) || ![-3, 3].includes(a2.anzahl) || bisher.team + a2.anzahl < 0 || bisher.team + a2.anzahl > 30)
+          return { ok: false, text: "Das Team kann nur in Schritten zu drei Personen zwischen 0 und 30 ver\xE4ndert werden." };
+        (it.produkte ?? (it.produkte = {}))[a2.produkt] = { ...bisher, team: bisher.team + a2.anzahl };
+        return { ok: true, text: "IT-Team um " + a2.anzahl + " Personen angepasst." };
+      }
+      if (typeof a2.an !== "boolean") return { ok: false, text: "Ung\xFCltiger Produktstatus." };
+      (it.produkte ?? (it.produkte = {}))[a2.produkt] = { ...bisher, aktiv: a2.an };
+      return { ok: true, text: "Produkt " + (a2.an ? "aktiviert." : "abgeschaltet. Die Nachfragewirkung gilt ab der n\xE4chsten Woche.") };
+    }
     if (a2.typ === "itKasseAusbau") {
       if (!Number.isInteger(a2.stufe) || a2.stufe < 0 || a2.stufe > 2) return { ok: false, text: "Ung\xFCltige Ausbaustufe." };
       const x2 = it.systeme.kasse;
@@ -5637,7 +5764,8 @@
     it.hausCluster = {};
     for (const cluster of clusters) for (const id of cluster.hausIds) it.hausCluster[id] = cluster.id;
     const delta = IT_IDS.reduce((sum2, id) => sum2 + it.systeme[id].kostenWoche - it.systeme[id].basisKosten, 0);
-    s2.zentrale.kostenWoche += delta;
+    const teamKosten = IT_PRODUKT_IDS.reduce((sum2, id) => sum2 + itProduktZustand(s2, id).team * IT_TEAM_KOSTEN_PRO_KOPF, 0);
+    s2.zentrale.kostenWoche += delta + teamKosten;
     const q2 = qualitaet(s2);
     for (const p2 of it.projekte) {
       if (p2.phase === "abgeschlossen") continue;
@@ -5706,8 +5834,11 @@
     const app2 = Math.max(0, generationInCluster(s2, "app", id) - SYSTEME.app.start);
     const ware3 = Math.max(0, generationInCluster(s2, "warenwirtschaft", id) - SYSTEME.warenwirtschaft.start);
     const kAusbau = it.systeme.kasse.kasseAusbau;
-    const qualitaet3 = 1 + kasse * 5e-3 + app2 * 4e-3 + ware3 * 2e-3 + (kAusbau?.selbstbedienung ?? 0) * 2e-3 + (kAusbau?.mobil ?? 0) * 1e-3;
-    return qualitaet3 * (it.umsatzFaktoren[h3.id] ?? 1);
+    const aktiv5 = (produkt) => itProduktZustand(s2, produkt).aktiv;
+    const teamBonus = IT_PRODUKT_IDS.reduce((sum2, p2) => sum2 + (aktiv5(p2) ? itProduktZustand(s2, p2).team * 2e-4 : 0), 0);
+    const qualitaet3 = 1 + kasse * 5e-3 + app2 * 4e-3 + ware3 * 2e-3 + (kAusbau?.selbstbedienung ?? 0) * 2e-3 + (aktiv5("mobile_pay") ? (kAusbau?.mobil ?? 0) * 1e-3 : 0) + teamBonus;
+    const abschaltung = (aktiv5("kasse") ? 1 : 0.85) * (aktiv5("kundenkarte") ? 1 : 0.99) * (aktiv5("hartwig_app") ? 1 : 0.992);
+    return qualitaet3 * abschaltung * (it.umsatzFaktoren[h3.id] ?? 1);
   }
   function itUebersicht(s2) {
     const clusters = itCluster(s2), it = s2.it;
@@ -5912,9 +6043,9 @@
     return ergebnis;
   }
   function clusterName(gruppe3, vergeben) {
-    const zahl5 = /* @__PURE__ */ new Map();
-    for (const h3 of gruppe3) zahl5.set(h3.stadt, (zahl5.get(h3.stadt) ?? 0) + 1);
-    const staedte = [...zahl5.entries()].sort((a2, b2) => b2[1] - a2[1] || a2[0].localeCompare(b2[0], "de")).map(([st2]) => st2);
+    const zahl6 = /* @__PURE__ */ new Map();
+    for (const h3 of gruppe3) zahl6.set(h3.stadt, (zahl6.get(h3.stadt) ?? 0) + 1);
+    const staedte = [...zahl6.entries()].sort((a2, b2) => b2[1] - a2[1] || a2[0].localeCompare(b2[0], "de")).map(([st2]) => st2);
     for (let i = 1; i < staedte.length; i++) {
       const name2 = "Raum " + staedte[0] + " \xB7 " + staedte[i];
       if (!vergeben.includes("Raum " + staedte[0])) break;
@@ -6641,8 +6772,8 @@
     return s2.haeuser.filter((h3) => h3.status !== "verkauft" && (!format || format === "alle" || h3.format === format) && (ebene === "konzern" || ebene === "haus" && h3.id === id || ebene === "region" && h3.region === id || ebene === "hauscluster" && hauscluster(h3) === id));
   }
   function umsatzbruecke(s2, o3) {
-    const fehlend = (status) => ({
-      status,
+    const fehlend = (status2) => ({
+      status: status2,
       vorher: 0,
       aktuell: 0,
       differenz: 0,
@@ -6654,12 +6785,12 @@
       vorjahrGeschaetzt: false
     });
     if (o3.vergleich === "plan") return fehlend("kein Plan vorhanden");
-    const ende = s2.woche - 1, anzahl = Math.max(1, Math.floor(o3.wochen));
+    const ende = s2.woche - 1, anzahl2 = Math.max(1, Math.floor(o3.wochen));
     const alt = [], neu = [];
     let geschaetzt = false;
     for (const h3 of auswahl(s2, o3.ebene, o3.id, o3.format)) {
-      const jetzt = zeitraum(s2, h3, ende - anzahl + 1, ende);
-      const frueher = zeitraum(s2, h3, ende - anzahl + 1 - 52, ende - 52);
+      const jetzt = zeitraum(s2, h3, ende - anzahl2 + 1, ende);
+      const frueher = zeitraum(s2, h3, ende - anzahl2 + 1 - 52, ende - 52);
       if (!jetzt.wert || !frueher.wert) continue;
       neu.push(jetzt.wert);
       alt.push(frueher.wert);
@@ -8073,13 +8204,13 @@
     const fl = h3.personal.filialleiter;
     const skill2 = fl.interimBis !== void 0 && fl.interimBis > w2 ? 0.3 : fl.skill;
     const flF = (0.95 + 0.1 * skill2) / 1.05;
-    let status = 1;
-    if (h3.status === "schliessung_verhandlung") status = 0.95;
-    if (h3.status === "raeumung") status = 1.7;
+    let status2 = 1;
+    if (h3.status === "schliessung_verhandlung") status2 = 0.95;
+    if (h3.status === "raeumung") status2 = 1.7;
     const streik = h3.streikBis !== void 0 && h3.streikBis > w2 ? 0.72 : 1;
     const rauschen2 = s2.prognose ? 1 : 1 + 0.025 * normal(s2);
     const zentrale = hqUmsatzFaktor(s2);
-    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h3) * (1 + mieterBonus) * (1 + h3.transferBonus) * flF * status * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * MASSSTAB_REALISIERUNG * schwierigkeit(s2).kaufneigung * premiumImageFaktor(h3) * programmNachfrageFaktor(s2) * szenarioFrequenz(s2) * hausclusterFaktor(s2, h3) * itHausFaktor(s2, h3) * hausBetriebsFaktor(s2, h3) * umbauFrequenzFaktor(h3);
+    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h3) * (1 + mieterBonus) * (1 + h3.transferBonus) * flF * status2 * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * MASSSTAB_REALISIERUNG * schwierigkeit(s2).kaufneigung * premiumImageFaktor(h3) * programmNachfrageFaktor(s2) * szenarioFrequenz(s2) * hausclusterFaktor(s2, h3) * itHausFaktor(s2, h3) * hausBetriebsFaktor(s2, h3) * umbauFrequenzFaktor(h3);
   }
   function saettigung(qm2, Q) {
     return Q > 0 ? 1 - Math.exp(-qm2 / Q) : 0;
@@ -8222,7 +8353,8 @@
     guv.logistik = k3.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s2) * (1 - programmErsparnis(s2, "logistik")) * (h3.format === "outlet" ? 0.9 : 1);
     guv.fremdkraefte = umsatzGesamt * 7e-3 * form2 * (1 - programmErsparnis(s2, "fremdkraefte"));
     guv.unterhalt = umsatzGesamt * 0.019 * form2 * (1 + Math.max(0, 55 - h3.substanz) / 400) * (1 - programmErsparnis(s2, "unterhalt"));
-    guv.zahlungsverkehr = umsatzGesamt * 2e-3 * (1 - programmErsparnis(s2, "zahlungsverkehr"));
+    const mobileStufe = s2.it?.produkte?.mobile_pay?.aktiv === false ? 0 : s2.it?.systeme.kasse.kasseAusbau?.mobil ?? 0;
+    guv.zahlungsverkehr = umsatzGesamt * 2e-3 * (1 - programmErsparnis(s2, "zahlungsverkehr")) * (1 - 0.025 * mobileStufe);
     guv.facilityManagement = umsatzGesamt * 0.017 * form2 * (1 - programmErsparnis(s2, "facilityManagement"));
     guv.energie = umsatzGesamt * 0.024 * form2 * (1 - programmErsparnis(s2, "energie"));
     guv.it = umsatzGesamt * 3e-3 * (1 - programmErsparnis(s2, "it"));
@@ -11187,10 +11319,10 @@
     for (const h3 of s2.haeuser) if (h3.status === "offen" && !h3.nurDaten && !staedte.has(h3.stadt)) staedte.set(h3.stadt, h3.cluster);
     const liste2 = [...staedte.keys()];
     if (!liste2.length) return;
-    const anzahl = ganzZwischen(r3, 2, 4);
+    const anzahl2 = ganzZwischen(r3, 2, 4);
     const gewaehlt = [];
     if (staedte.has(hq.sitz) && zwischen(r3, 0, 1) < 0.5) gewaehlt.push(hq.sitz);
-    for (let i = 0; gewaehlt.length < anzahl && i < 20; i++) {
+    for (let i = 0; gewaehlt.length < anzahl2 && i < 20; i++) {
       const st2 = waehle(r3, liste2);
       if (!gewaehlt.includes(st2)) gewaehlt.push(st2);
     }
@@ -12243,7 +12375,7 @@
   }
   function produktKi(s2, guete, r3) {
     if (s2.woche % 4 !== 2) return void 0;
-    const texte = [];
+    const texte2 = [];
     const trifft3 = () => zufall(r3) < 0.3 + 0.65 * guete;
     const kap = kapazitaet(s2);
     for (const m of s2.eigenmarken.marken.filter(istVerkaufsaktiv)) {
@@ -12258,7 +12390,7 @@
         const weg = gut ? liste2[0] : waehle(r3, liste2);
         if (weg && (!gut || sterneWirksam(s2, weg) <= 3)) {
           produktAktion(s2, { typ: "produktAuslisten", produkt: weg.id });
-          texte.push(`${m.name}: ${weg.name} ausgelistet`);
+          texte2.push(`${m.name}: ${weg.name} ausgelistet`);
         }
       }
       const frei6 = kats.filter((k3) => belegt(s2, m.id, k3) < kap);
@@ -12277,9 +12409,9 @@
         e = { marke: m.id, typ: t.typ, farbe: waehle(r3, FARBLISTE), material: waehle(r3, t.materialien), dauer: waehle(r3, [4, 8]), budgetWoche: 5e3 };
       }
       const res = produktAktion(s2, { typ: "produktEntwickeln", entwurf: e });
-      if (res.ok) texte.push(res.text);
+      if (res.ok) texte2.push(res.text);
     }
-    return texte.length ? texte.join(" ") : void 0;
+    return texte2.length ? texte2.join(" ") : void 0;
   }
   function produktKarte(s2, p2) {
     const m = s2.eigenmarken.marken.find((x2) => x2.id === p2.marke);
@@ -12539,8 +12671,8 @@
       for (const r3 of liste2) {
         const [kurz, name2, anteil3, nos, md, vv, vn, vnos, mk2, em, lief, sai, extra] = r3;
         const m = G2.marge + md;
-        const kurve4 = G2.saison.map((x2, i) => x2 * (sai?.[i] ?? 1));
-        const mittel = kurve4.reduce((a2, b2) => a2 + b2, 0) / 12;
+        const kurve5 = G2.saison.map((x2, i) => x2 * (sai?.[i] ?? 1));
+        const mittel = kurve5.reduce((a2, b2) => a2 + b2, 0) / 12;
         out.push({
           id: `${g}.${kurz}`,
           name: name2,
@@ -12552,7 +12684,7 @@
           vorlaufVor: vv,
           vorlaufNach: vn,
           vorlaufNos: vnos,
-          saison: kurve4.map((x2) => x2 / mittel),
+          saison: kurve5.map((x2) => x2 / mittel),
           mindestabnahme: mk2 * 1e3,
           eigenmarkenfaehig: em !== "",
           kategorie: em || void 0,
@@ -15538,9 +15670,9 @@
     if (!b2) return;
     const offen = offeneHaeuser(s2).filter((h3) => h3.kpi);
     const nachDb = [...offen].sort((a2, c) => (a2.kpi?.db ?? 0) - (c.kpi?.db ?? 0));
-    const anzahl = Math.max(5, Math.round(offen.length * 0.15));
+    const anzahl2 = Math.max(5, Math.round(offen.length * 0.15));
     const liste2 = [];
-    for (let i = 0; i < anzahl && i < nachDb.length; i++) {
+    for (let i = 0; i < anzahl2 && i < nachDb.length; i++) {
       const treffer = zufall(s2) < b2._qualitaet;
       const h3 = treffer ? nachDb[i] : waehle(s2, offen);
       if (!liste2.includes(h3.id)) liste2.push(h3.id);
@@ -16213,6 +16345,7 @@
     k3.kreditFrei = eur(s2.cash + s2.kreditlinie);
     k3.bestand = eur(s2.bestand.reduce((a2, b2) => a2 + b2.wert, 0) + (s2.formate?.volkskaufBestand ?? 0) + (s2.formate?.pool.reduce((a2, b2) => a2 + b2.wert, 0) ?? 0));
     s2.historie.push(k3);
+    itProdukteWoche(s2);
     erfasseTreiber(s2);
     if (s2.historie.length > 520) s2.historie.splice(0, s2.historie.length - 520);
     planungWoche(s2);
@@ -28626,9 +28759,9 @@
     }
   }
   function getShaderErrors(gl, shader, type) {
-    const status = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+    const status2 = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
     const errors = gl.getShaderInfoLog(shader).trim();
-    if (status && errors === "") return "";
+    if (status2 && errors === "") return "";
     const errorMatches = /ERROR: 0:(\d+)/.exec(errors);
     if (errorMatches) {
       const errorLine = parseInt(errorMatches[1]);
@@ -53375,10 +53508,10 @@
   }
   function zustandNormal(opt = {}, quelle2 = {}) {
     if (opt && opt.__zustand) return opt;
-    let status = opt.status ?? quelle2.status ?? "offen";
-    if (!STATI.includes(status)) status = "offen";
-    const zusatz = [...new Set((opt.zusatz ?? []).filter((s2) => STATI.includes(s2) && s2 !== status))];
-    const hat = (s2) => status === s2 || zusatz.includes(s2);
+    let status2 = opt.status ?? quelle2.status ?? "offen";
+    if (!STATI.includes(status2)) status2 = "offen";
+    const zusatz = [...new Set((opt.zusatz ?? []).filter((s2) => STATI.includes(s2) && s2 !== status2))];
+    const hat = (s2) => status2 === s2 || zusatz.includes(s2);
     let unter = (opt.untermieter ?? quelle2.untermieter ?? []).map((m, i) => mieterInfo(m, i));
     if (hat("untermiete") && !unter.length) {
       const r3 = rng3(`${opt.seed ?? "z"}/mieter`);
@@ -53392,7 +53525,7 @@
     const mk2 = opt.marketing ?? {};
     const marketing = { karte: !!(mk2.karte ?? opt.karte), app: !!(mk2.app ?? opt.app), prospekt: !!(mk2.prospekt ?? opt.prospekt) };
     const mechanik = opt.mechanik ?? null, punkteFaktor = Number.isFinite(opt.punkteFaktor) ? opt.punkteFaktor : null;
-    return { __zustand: true, status, zusatz, aktion: aktion2, rabatt, mechanik, punkteFaktor, marketing, untermieter: unter, offpriceEtage: opt.offpriceEtage ?? 0, ohneMarke: opt.hartwig === false, hat };
+    return { __zustand: true, status: status2, zusatz, aktion: aktion2, rabatt, mechanik, punkteFaktor, marketing, untermieter: unter, offpriceEtage: opt.offpriceEtage ?? 0, ohneMarke: opt.hartwig === false, hat };
   }
   function zustandFlags(Z2) {
     const h3 = Z2.hat;
@@ -53531,13 +53664,13 @@
     S.box(0.54 * sk, 0.74 * sk, 0.34 * sk, x2, y2 + 1.22 * sk, z4, oben ?? waehle2(r3, KLEID));
     S.box(0.28 * sk, 0.3 * sk, 0.28 * sk, x2, y2 + 1.75 * sk, z4, waehle2(r3, HAUT));
   }
-  function menge(Z2, s2, u, t, anzahl, ru, rt, o3 = {}) {
+  function menge(Z2, s2, u, t, anzahl2, ru, rt, o3 = {}) {
     if (Z2.leute === false) return;
     const r3 = Z2.r;
-    anzahl = Math.round(anzahl * Math.max(0, Math.min(1, Z2.passantenFaktor ?? 1)));
+    anzahl2 = Math.round(anzahl2 * Math.max(0, Math.min(1, Z2.passantenFaktor ?? 1)));
     const tMin = o3.tMin ?? 1, tMax = o3.tMax ?? 5.2, uMin = o3.uMin ?? -2, uMax = o3.uMax ?? s2.L + 3;
     const pos = [];
-    for (let i = 0, v = 0; i < anzahl && v < anzahl * 8; v++) {
+    for (let i = 0, v = 0; i < anzahl2 && v < anzahl2 * 8; v++) {
       const a2 = r3() * Math.PI * 2, rr3 = Math.sqrt(r3());
       const uu = u + Math.cos(a2) * ru * rr3, tt = t + Math.sin(a2) * rt * rr3;
       if (tt < tMin || tt > tMax || uu < uMin || uu > uMax) continue;
@@ -55481,9 +55614,9 @@
     leer_ehemals: "#777d80"
   };
   function dekorZustand(S, scene2, p2, art, hoehe) {
-    const z4 = p2.zustand ?? {}, status = z4.status ?? p2.status ?? "offen";
+    const z4 = p2.zustand ?? {}, status2 = z4.status ?? p2.status ?? "offen";
     const rabatt = Math.max(0, Math.min(1, z4.rabatt ?? p2.rabatt ?? 0));
-    if (status === "offen" && !rabatt) return hoehe;
+    if (status2 === "offen" && !rabatt) return hoehe;
     const w2 = Math.max(16, Math.min(90, p2.w ?? 40)), d3 = Math.max(16, Math.min(70, p2.d ?? 30));
     const x2 = p2.x ?? 0, zz = p2.z ?? 0;
     const farbe3 = WETTBEWERBER_FARBEN[art] ?? "#51677a";
@@ -55492,7 +55625,7 @@
       s2.q(s2.L * (1 - breite) / 2, s2.L * (1 + breite) / 2, y2 - h3 * 0.65, y2 + h3 * 0.65, 0.6, 0.86, bg);
       plakat2(scene2, s2, t, s2.L / 2, y2, 1.02, passend(t, s2.L * breite * 0.88, h3), "#ffffff");
     };
-    if (status === "eroeffnung") {
+    if (status2 === "eroeffnung") {
       banner(seiten4[0], "NEUER\xD6FFNUNG", EG + 2, 0.78, 1.65);
       S.quader(x2 + w2 * 0.37, 0.02, zz + d3, x2 + w2 * 0.63, 0.09, zz + d3 + 4.5, "#b5292c");
       const r3 = rng3("eroeffnung:" + (p2.seed ?? 0));
@@ -55506,7 +55639,7 @@
       for (let i = 0; i < 12; i++) mensch(S, r3, x2 + r3() * w2, 0.15, zz + d3 + 1 + r3() * 5);
       hoehe = Math.max(hoehe, EG + 6);
     }
-    if (rabatt && status !== "raeumung" && status !== "geschlossen") {
+    if (rabatt && status2 !== "raeumung" && status2 !== "geschlossen") {
       const t = Math.round(rabatt * 100) + " %";
       for (const s2 of seiten4) banner(s2, t, EG + 1.9, 0.28, 1.6);
       if (art === "offprice") {
@@ -55514,7 +55647,7 @@
         banner(seiten4[0], "AKTION", EG + 4.3, 0.38, 1);
       }
     }
-    if (status === "raeumung") {
+    if (status2 === "raeumung") {
       for (const s2 of seiten4) {
         banner(s2, "ALLES MUSS RAUS", EG + 2, 0.87, 1.6, "#bf302c");
         banner(s2, "WIR SCHLIESSEN", EG + 4.3, 0.6, 1.05, "#7c2525");
@@ -55522,7 +55655,7 @@
         for (let i = 0; i < 4; i++) s2.q(1 + i * (s2.L - 2) / 4, 1.7 + i * (s2.L - 2) / 4, 0.5, 3.4, 0.1, 0.2, "#a9adb0");
       }
     }
-    if (status === "geschlossen" || art === "leer_ehemals") {
+    if (status2 === "geschlossen" || art === "leer_ehemals") {
       for (const s2 of seiten4) {
         banner(s2, "ZU VERMIETEN", EG + 1.7, 0.72, 1.35, "#596066");
         if (p2.name) plakat2(scene2, s2, p2.name, s2.L / 2, Math.min(hoehe - 2, EG + 5), 0.35, passend(p2.name, s2.L * 0.5, 1), "#a3a3a3");
@@ -57786,12 +57919,12 @@
     const flaechen = haus2.flaechen ?? [];
     const sumQm = flaechen.reduce((a2, f11) => a2 + (f11.qm || 0), 0);
     const leerQm = flaechen.filter((f11) => f11.konzept === "leer").reduce((a2, f11) => a2 + (f11.qm || 0), 0);
-    let status = opt.status ?? haus2.status ?? "offen";
-    if (!opt.status && sumQm > 0 && leerQm / sumQm > 0.9) status = "leer";
+    let status2 = opt.status ?? haus2.status ?? "offen";
+    if (!opt.status && sumQm > 0 && leerQm / sumQm > 0.9) status2 = "leer";
     const namen = ["Preisfuchs Markt", "FitWerk 24", "MVZ Stadtmitte", "B\xFCcherinsel", "Kita Sonnenschein", "Lagerraum 24", "Drogerie Nachbar", "WorkLoft"];
     const rM = rng3(`${haus2.id}/mieter`);
     const ausDaten = flaechen.filter((f11) => f11.konzept === "untermiete").map((f11) => mieterInfo({ name: namen[Math.floor(rM() * namen.length)], etage: f11.etage }));
-    const Z2 = zustandNormal({ ...opt, status, seed: haus2.id }, { untermieter: ausDaten });
+    const Z2 = zustandNormal({ ...opt, status: status2, seed: haus2.id }, { untermieter: ausDaten });
     const F2 = zustandFlags(Z2);
     const M2 = fam === 6 ? Math.max(40, Math.round(m.w * 0.85 / 5) * 5) : fam === 7 && haus2.lage === "center" ? Math.max(25, Math.round(m.w * 0.5 / 5) * 5) : 0;
     const K3 = {
@@ -62034,9 +62167,9 @@
       const auswahl4 = [...front2, ...weitere];
       const r3 = rng3(String(K3.haus.id) + "/blindglas");
       const start = auswahl4.length ? Math.floor(r3() * auswahl4.length) : 0;
-      const zahl5 = Math.min(4, auswahl4.length);
-      for (let i = 0; i < zahl5; i++) {
-        const g = auswahl4[(start + i * Math.max(1, Math.floor(auswahl4.length / zahl5))) % auswahl4.length];
+      const zahl6 = Math.min(4, auswahl4.length);
+      for (let i = 0; i < zahl6; i++) {
+        const g = auswahl4[(start + i * Math.max(1, Math.floor(auswahl4.length / zahl6))) % auswahl4.length];
         const front3 = g.t + 0.1;
         g.s.q(g.a + 0.1, g.b - 0.1, g.y0 + 0.12, g.y1 - 0.13, front3, front3 + 0.1, i % 2 ? "#d1d0b3" : "#b8c5b8");
         g.s.q(g.a + 0.13, g.b - 0.13, g.y1 - 0.35, g.y1 - 0.25, front3 + 0.08, front3 + 0.1, "#737c79");
@@ -62207,12 +62340,12 @@
     const flaechen = haus2.flaechen ?? [];
     const sumQm = flaechen.reduce((a2, f11) => a2 + (f11.qm || 0), 0);
     const leerQm = flaechen.filter((f11) => f11.konzept === "leer").reduce((a2, f11) => a2 + (f11.qm || 0), 0);
-    let status = opt.status ?? haus2.status ?? "offen";
-    if (!opt.status && sumQm > 0 && leerQm / sumQm > 0.9) status = "leer";
+    let status2 = opt.status ?? haus2.status ?? "offen";
+    if (!opt.status && sumQm > 0 && leerQm / sumQm > 0.9) status2 = "leer";
     const namen = ["Drogerie Nachbar", "FitWerk 24", "Caf\xE9 Fr\xE4ulein", "Pulsraum", "Kaufgut", "Praxisgemeinschaft Zentrum"];
     const rM = rng3(`${haus2.id}/mieter`);
     const ausDaten = flaechen.filter((f11) => f11.konzept === "untermiete").map((f11) => mieterInfo({ name: namen[Math.floor(rM() * namen.length)], etage: f11.etage }));
-    const Z2 = zustandNormal({ ...opt, status, seed: haus2.id }, { untermieter: ausDaten });
+    const Z2 = zustandNormal({ ...opt, status: status2, seed: haus2.id }, { untermieter: ausDaten });
     const F2 = zustandFlags(Z2);
     const gefuehl = sportGefuehl(haus2, Z2);
     const M2 = fam === 4 ? m.w - m.bw : 0;
@@ -64435,10 +64568,10 @@
       get(z4, k3) {
         const methode = Reflect.get(z4, k3);
         if (typeof methode !== "function" || !["box", "zyl", "geo"].includes(k3)) return methode;
-        return (...werte2) => {
+        return (...werte3) => {
           const stelle2 = k3 === "geo" ? 4 : 6;
-          if (typeof werte2[stelle2] === "string") werte2[stelle2] = farbeGeneration(werte2[stelle2], generation);
-          return methode.apply(z4, werte2);
+          if (typeof werte3[stelle2] === "string") werte3[stelle2] = farbeGeneration(werte3[stelle2], generation);
+          return methode.apply(z4, werte3);
         };
       }
     });
@@ -69048,8 +69181,8 @@
   }
   function innenOutlet(S, scene2, haus2, opt = {}) {
     const m = masseOutlet(haus2), x2 = opt.x ?? 0, z4 = opt.z ?? 0;
-    const status = fundusInnenZustand(opt.innenZustand ?? opt.status);
-    const bestueckung = { normal: 1, schwach: 0.32, ansturm: 0.82, raeumung: 0.06 }[status];
+    const status2 = fundusInnenZustand(opt.innenZustand ?? opt.status);
+    const bestueckung = { normal: 1, schwach: 0.32, ansturm: 0.82, raeumung: 0.06 }[status2];
     const geschosse2 = opt.geschosse ?? Array.from({ length: m.n }, (_, i) => i);
     const ergebnisse = [];
     vorbereiten(S, scene2);
@@ -69079,10 +69212,10 @@
         vorbereiten: false,
         dichte: opt.dichte ?? 1
       });
-      if (geschoss === 0 && (status === "ansturm" || status === "raeumung")) {
-        const r3 = rng3(String(haus2.id) + "/fundus/publikum/" + status);
+      if (geschoss === 0 && (status2 === "ansturm" || status2 === "raeumung")) {
+        const r3 = rng3(String(haus2.id) + "/fundus/publikum/" + status2);
         const g = plan2.gaenge.find((g2) => g2.typ === "haupt");
-        if (g) for (let i = 0; i < (status === "ansturm" ? 12 : 3); i++) {
+        if (g) for (let i = 0; i < (status2 === "ansturm" ? 12 : 3); i++) {
           const rz = Math.max(g.z + 0.9, g.z + g.d - 1.6 - i * 1.05);
           mensch(S, r3, x2 + g.x + g.w / 2 + (i % 2 ? 0.4 : -0.4), y2 + 0.1, z4 + rz);
         }
@@ -69097,7 +69230,7 @@
           );
         }
       }
-      if (geschoss === 0 && status === "raeumung") {
+      if (geschoss === 0 && status2 === "raeumung") {
         const k3 = plan2.moebel.find((q2) => q2.typ === "kasse");
         if (k3) {
           S.box(Math.min(4.3, k3.w), 0.62, 0.12, x2 + k3.x + k3.w / 2, y2 + 2.9, z4 + k3.z + 0.16, FARBE_OUTLET);
@@ -69116,7 +69249,7 @@
       }
       ergebnisse.push({ geschoss, plan: plan2, teile: gebaut.teile, bestueckung });
     }
-    return { hoehe: m.H, w: m.bw, d: m.bd, status, geschosse: ergebnisse };
+    return { hoehe: m.H, w: m.bw, d: m.bd, status: status2, geschosse: ergebnisse };
   }
   function glasfront(S, scene2, s2, maxY, offen, r3, oben = false, eingangU = 0.52) {
     const y0 = 0.48, y1 = Math.max(3.2, Math.min(maxY, oben ? 7.05 : 4.25));
@@ -69661,8 +69794,8 @@
     }
     if (K3.leute) {
       const pr2 = rng3(String(K3.haus.id) + "/passanten");
-      const anzahl = Math.max(2, Math.round((K3.w + K3.d) / 12 * 0.6));
-      for (let i = 0; i < anzahl; i++) {
+      const anzahl2 = Math.max(2, Math.round((K3.w + K3.d) / 12 * 0.6));
+      for (let i = 0; i < anzahl2; i++) {
         const anFront = i % 3 !== 2;
         const px3 = anFront ? K3.x + 2.5 + pr2() * (K3.w - 5) : K3.x + K3.w + 2.8;
         const pz5 = anFront ? K3.z + K3.d + 2 + pr2() * 1.5 : K3.z + 3 + pr2() * (K3.d - 6);
@@ -69678,8 +69811,8 @@
     const fam = opt.familie ?? m.familie;
     const variant = ((haus2.fassade ?? Math.floor(index(haus2) / 3)) % 8 + 8) % 8;
     const r3 = rng3(String(haus2.id) + "/" + fam + "/" + variant);
-    const status = opt.status ?? haus2.status ?? "offen";
-    const dekorStatus = status === "verfall" ? "offen" : status;
+    const status2 = opt.status ?? haus2.status ?? "offen";
+    const dekorStatus = status2 === "verfall" ? "offen" : status2;
     const Z2 = zustandNormal({ ...opt, status: dekorStatus, seed: haus2.id }, { untermieter: haus2.flaechen?.filter((f11) => f11.konzept === "untermiete").map((f11) => ({ name: "Mieter", etage: f11.etage })) });
     const flags = zustandFlags(Z2);
     const K3 = {
@@ -69719,7 +69852,7 @@
       beschriftung(scene2, s2, K3, t.ySchrift, t.hSchrift);
     }
     dach2(S, K3);
-    if (status === "verfall") mildePatina(S, K3);
+    if (status2 === "verfall") mildePatina(S, K3);
     moebel2(S, K3);
     const ueber = eigeneMieterflaechen(Z2, { "+z": K3.w, "+x": K3.d }, ["+x", "+z"], NAME_SCHWESTER + " Restposten").map((q2) => ({ ...q2, ua: q2.u0, ub: q2.u1 }));
     const k3 = {
@@ -69755,7 +69888,7 @@
     const dek = zustandsDekor(S, scene2, k3, Z2, { passanten: opt.passanten === false ? false : void 0, logosAbdecken: true, pylon: false });
     const teile2 = S.anzahl - start;
     if (teile2 > 8e3) throw new Error("Schwesterhaus " + haus2.id + ": Teilebudget " + teile2 + " > 8000");
-    return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile: teile2, status };
+    return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile: teile2, status: status2 };
   }
 
   // haeuser-schwester.json
@@ -108238,8 +108371,8 @@
     if (scene2) {
       wandschild(S, scene2, info.name, "x", Z2.x0 + w2 / 2, WH3 - 0.55, 0.31, { schrift: "#ffffff", hoehe: 0.32 });
       haengeschild(S, scene2, info.name, Z2.x0 + w2 / 2, WH3 - 0.8, T * 0.55, { farbe: farbe3, hoehe: 0.75 });
-      const sterne2 = "\u2605".repeat(st2) + "\u2606".repeat(3 - st2);
-      haengeschild(S, scene2, `Stufe ${st2} ${sterne2}`, Z2.x0 + w2 / 2, WH3 - 1.55, T * 0.55, { farbe: "#2a3540", hoehe: 0.42, seile: false });
+      const sterne3 = "\u2605".repeat(st2) + "\u2606".repeat(3 - st2);
+      haengeschild(S, scene2, `Stufe ${st2} ${sterne3}`, Z2.x0 + w2 / 2, WH3 - 1.55, T * 0.55, { farbe: "#2a3540", hoehe: 0.42, seile: false });
     }
     const B2 = { x0: Z2.x0 + 0.5, x1: Z2.x1 - 0.4, z0: 0.6, z1: T - 1.6 };
     const sp6 = SPEZIAL[a2.id] ?? [];
@@ -129569,9 +129702,9 @@
     function woche2(neueBestellungen = 0) {
       if (!scene2) return;
       hauspunkte = hausStandorte();
-      const anzahl = Math.min(MAX_LKW, Math.max(0, Math.floor(neueBestellungen)));
+      const anzahl2 = Math.min(MAX_LKW, Math.max(0, Math.floor(neueBestellungen)));
       const rang = [...hauspunkte].filter((h3) => h3.gewicht > 0).sort((a2, b2) => b2.gewicht - a2.gewicht);
-      lkw = rang.slice(0, anzahl).map((h3) => {
+      lkw = rang.slice(0, anzahl2).map((h3) => {
         const s2 = netz3.spuren.filter((l) => l.s.typ !== "fussgaenger").sort((a2, b2) => abstand(punkt(a2, laenge(a2) / 2), h3.mitte) - abstand(punkt(b2, laenge(b2) / 2), h3.mitte))[0];
         const p2 = s2 ? koordinate(
           s2.s,
@@ -130590,17 +130723,17 @@
   // src/ui/einstellungen.js
   var SPEICHER = "hartwig.einstellungen.v1";
   var definitionen2 = /* @__PURE__ */ new Map();
-  var werte = null;
+  var werte2 = null;
   function gespeicherteWerte() {
-    if (werte) return werte;
-    werte = {};
+    if (werte2) return werte2;
+    werte2 = {};
     try {
       const roh2 = typeof localStorage !== "undefined" ? localStorage.getItem(SPEICHER) : null;
       const gelesen = roh2 ? JSON.parse(roh2) : {};
-      if (gelesen && typeof gelesen === "object" && !Array.isArray(gelesen)) werte = gelesen;
+      if (gelesen && typeof gelesen === "object" && !Array.isArray(gelesen)) werte2 = gelesen;
     } catch {
     }
-    return werte;
+    return werte2;
   }
   function optionenVon(d3) {
     return Array.isArray(d3.optionen) ? d3.optionen.map((o3) => typeof o3 === "object" ? o3.wert ?? o3.value : o3) : [];
@@ -130610,9 +130743,9 @@
     if (d3.art === "auswahl") return optionenVon(d3).includes(wert) ? wert : d3.standard;
     if (d3.art === "regler") {
       const o3 = d3.optionen ?? {}, min = Number(o3.min ?? 0), max = Number(o3.max ?? 100);
-      const zahl5 = Number(wert), schritt = Number(o3.schritt ?? o3.step ?? 1);
-      if (!Number.isFinite(zahl5)) return d3.standard;
-      const rund3 = schritt > 0 ? min + Math.round((zahl5 - min) / schritt) * schritt : zahl5;
+      const zahl6 = Number(wert), schritt = Number(o3.schritt ?? o3.step ?? 1);
+      if (!Number.isFinite(zahl6)) return d3.standard;
+      const rund3 = schritt > 0 ? min + Math.round((zahl6 - min) / schritt) * schritt : zahl6;
       return Math.min(max, Math.max(min, rund3));
     }
     return d3.standard;
@@ -130638,7 +130771,7 @@
     if (Object.is(neu, alt)) return alt;
     gespeicherteWerte()[schluessel] = neu;
     try {
-      if (typeof localStorage !== "undefined") localStorage.setItem(SPEICHER, JSON.stringify(werte));
+      if (typeof localStorage !== "undefined") localStorage.setItem(SPEICHER, JSON.stringify(werte2));
     } catch {
     }
     if (typeof window !== "undefined") {
@@ -130674,7 +130807,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "6a2c723" : "Entwicklung";
+  var version = () => true ? "5399048" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv5 = false;
     function feld(d3) {
@@ -130823,9 +130956,9 @@
     h3 += '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>';
     for (const m of u.marken) {
       const veraltet = m.stilAktualitaet < 45;
-      const status = m.status !== "aktiv" ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}</span>` : veraltet ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
+      const status2 = m.status !== "aktiv" ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}</span>` : veraltet ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
       h3 += `<div class="karte emkarte"><div class="mkopf" style="background:${m.farbe}"><b>${esc2(m.name)}</b><small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie}${m.gewachsen ? " \xB7 gewachsene Hartwig-Marke" : ""}</small></div>`;
-      h3 += `<div class="ochips">${status}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualit\xE4t ${"\u2605".repeat(m.qualitaet)}${"\u2606".repeat(5 - m.qualitaet)}</span><span class="chip grau">${esc2(m.beschaffungName)}</span></div>`;
+      h3 += `<div class="ochips">${status2}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualit\xE4t ${"\u2605".repeat(m.qualitaet)}${"\u2606".repeat(5 - m.qualitaet)}</span><span class="chip grau">${esc2(m.beschaffungName)}</span></div>`;
       h3 += `<div class="owerte"><div><span>Umsatz 13 Wochen</span><b data-p="m:${m.id}:umsatz">${geld(m.umsatz13)}</b></div><div><span>Rohertragsquote</span><b data-p="m:${m.id}:marge">${pz3(m.rohertragsquote, 1)}</b></div><div><span>Mehrmarge</span><b data-p="m:${m.id}:mehrmarge">${punkte(m.mehrmarge)}</b></div></div>`;
       h3 += `<div class="mzeile"><span>Bekanntheit</span>${balken6(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
       h3 += `<div class="mzeile"><span>Stil aktuell</span>${balken6(m.stilAktualitaet, veraltet ? "#d23c32" : "#2f8f5b")}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
@@ -131057,7 +131190,7 @@
   var reichweite = (r3) => r3 == null ? "\u2013" : (r3 > 99 ? "> 99" : r3.toFixed(1).replace(".", ",")) + (r3 == null ? "" : " Wo.");
   var proz = (x2) => pz3(Number.isFinite(x2) ? x2 : 0, 1);
   var knopf = (a2, v, text3, extra = "") => `<button class="mini" data-a="${a2}" data-v="${esc2(String(v))}" ${extra}>${text3}</button>`;
-  var optionen = (werte2, auswahl4) => werte2.map(([id, name2]) => `<option value="${esc2(id)}" ${id === auswahl4 ? "selected" : ""}>${esc2(name2)}</option>`).join("");
+  var optionen = (werte3, auswahl4) => werte3.map(([id, name2]) => `<option value="${esc2(id)}" ${id === auswahl4 ? "selected" : ""}>${esc2(name2)}</option>`).join("");
   var teile = (n3) => fmt.format(Math.round(n3));
   function warenSeite(ctx, ui, tabs) {
     const d3 = ctx.E.warenUebersicht(ctx.s());
@@ -131186,7 +131319,7 @@
     const text3 = (id, k3) => formatiere(SP().get(id)?.format ?? "eur", k3[id] ?? 0);
     const dot = (a2) => a2 ? `<span class="ampel a-${a2}" title="${AMPEL_TEXT[a2]}"></span>` : '<span class="ampel ohne"></span>';
     const seg = (act, wert, optionen3, extra = "") => `<div class="seg">${optionen3.map(([v, t]) => `<button class="${String(v) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join("")}</div>`;
-    const zahl5 = (titel, inhalt2, p2, ton2 = "", a2) => `<div class="kz ${ton2}"><span>${titel}</span><b><i data-p="${p2}">${inhalt2}</i>${a2 ? dot(a2) : ""}</b></div>`;
+    const zahl6 = (titel, inhalt2, p2, ton2 = "", a2) => `<div class="kz ${ton2}"><span>${titel}</span><b><i data-p="${p2}">${inhalt2}</i>${a2 ? dot(a2) : ""}</b></div>`;
     function tabs() {
       const n3 = q2.freigaben(s2()).anzahl;
       const an = (id) => ui.seite === id || id === "uebersicht" && ui.seite === "wg" || id === "eigenmarken" && ui.seite === "gruenden";
@@ -131202,14 +131335,14 @@
       let h3 = tabs();
       h3 += seg("format", ui.format, [["warenhaus", "Hartwig"], ["sport", "Hartwig Sport"]]);
       const o3 = ctx.E.outletUebersicht(s2());
-      h3 += '<div class="karte"><div class="khead">Altware ins Outlet \xB7 FUNDUS</div><div class="raster">' + zahl5("Poolbestand EK", geld(o3.poolWert), "format:poolWert") + zahl5("Reichweite", dez(o3.reichweite, 1) + " Wo.", "format:reichweite") + zahl5("Abschriften", geld(o3.abschriften), "format:abschriften") + zahl5("Markenposten", geld(o3.markenposten), "format:markenposten") + '</div><label>Altwarequote <input type="range" data-a="formatQuote" min="0" max="100" step="5" value="' + Math.round(o3.altwareQuote * 100) + '"></label><label>Markenposten-Zukauf pro Woche (\u20AC) <input type="number" data-a="formatBudget" min="0" step="100000" value="' + o3.zukaufBudget + '"></label></div>';
+      h3 += '<div class="karte"><div class="khead">Altware ins Outlet \xB7 FUNDUS</div><div class="raster">' + zahl6("Poolbestand EK", geld(o3.poolWert), "format:poolWert") + zahl6("Reichweite", dez(o3.reichweite, 1) + " Wo.", "format:reichweite") + zahl6("Abschriften", geld(o3.abschriften), "format:abschriften") + zahl6("Markenposten", geld(o3.markenposten), "format:markenposten") + '</div><label>Altwarequote <input type="range" data-a="formatQuote" min="0" max="100" step="5" value="' + Math.round(o3.altwareQuote * 100) + '"></label><label>Markenposten-Zukauf pro Woche (\u20AC) <input type="number" data-a="formatBudget" min="0" step="100000" value="' + o3.zukaufBudget + '"></label></div>';
       const kandidaten3 = ctx.E.outletKandidaten(s2()).slice(0, 8);
       if (kandidaten3.length) {
         h3 += '<div class="karte"><div class="khead">Neue FUNDUS-Standorte \xB7 12 Wochen Vorlauf</div>';
         for (const k3 of kandidaten3) h3 += '<div class="zeile"><span class="was">' + esc2(k3.stadt) + " \xB7 " + k3.qm + " qm \xB7 Miete " + geld(k3.mieteWoche) + "/Wo. \xB7 Investition " + geld(k3.investition) + `</span><button class="mini" onclick="formateTun('outletEroeffnen','` + esc2(k3.stadt) + `')">Er\xF6ffnen</button></div>`;
         h3 += "</div>";
       }
-      h3 += `<div class="raster">${zahl5("Umsatz letzte Woche", geld(g.umsatzWoche), "g:umsatzWoche")}${zahl5("Rohertragsquote 13 Wochen", pz3(g.rohertragsquote, 1), "g:rohertragsquote", "", ga.rohertragsquote)}${zahl5("Bestand EK", geld(g.bestandEk), "g:bestandEk")}${zahl5("Limit frei", geld(g.limitFrei), "g:limitFrei", g.limitFrei < 0 ? "rot" : "", ga.limitFrei)}</div>`;
+      h3 += `<div class="raster">${zahl6("Umsatz letzte Woche", geld(g.umsatzWoche), "g:umsatzWoche")}${zahl6("Rohertragsquote 13 Wochen", pz3(g.rohertragsquote, 1), "g:rohertragsquote", "", ga.rohertragsquote)}${zahl6("Bestand EK", geld(g.bestandEk), "g:bestandEk")}${zahl6("Limit frei", geld(g.limitFrei), "g:limitFrei", g.limitFrei < 0 ? "rot" : "", ga.limitFrei)}</div>`;
       const spalten2 = [...q2.spalten()].sort((a2, b2) => b2.standard - a2.standard);
       h3 += `<div class="spaltenwahl"><span>Spalten</span>${spalten2.map((c) => {
         const i = ui.spalten.indexOf(c.id);
@@ -131217,31 +131350,31 @@
       }).join("")}</div>`;
       const kopf = (key, t, klasse) => `<button class="${klasse} ${ui.sort.key === key ? "an" : ""}" data-a="sort" data-v="${key}">${t}${ui.sort.key === key ? ui.sort.dir < 0 ? " \u25BC" : " \u25B2" : ""}</button>`;
       h3 += `<div class="karte liste"><div class="lkopf">${kopf("name", "Bereich und WG", "lname")}${ui.spalten.map((k3) => kopf(k3, KOPF[k3] ?? SP().get(k3)?.name, "lwert")).join("")}</div>`;
-      const werte2 = (k3, a2, p2) => ui.spalten.map((c) => `<span class="lwert"><i data-p="${p2}:${c}">${text3(c, k3)}</i>${dot(a2[c])}</span>`).join("");
+      const werte3 = (k3, a2, p2) => ui.spalten.map((c) => `<span class="lwert"><i data-p="${p2}:${c}">${text3(c, k3)}</i>${dot(a2[c])}</span>`).join("");
       for (const b2 of sortiere(u.bereiche)) {
         const auf = ui.offen.has(b2.bereich);
-        h3 += `<div class="lzeile bereich" data-a="bereich" data-v="${b2.bereich}"><span class="lname"><span class="pfeil">${auf ? "\u25BE" : "\u25B8"}</span>${esc2(b2.name)} <i>${b2.wgs.length} WG</i></span>${werte2(b2.kennzahlen, b2.ampeln, `b:${b2.bereich}`)}</div>`;
-        if (auf) for (const w2 of sortiere(b2.wgs)) h3 += `<div class="lzeile wgz" data-a="wg" data-v="${w2.id}"><span class="lname">${w2.eigenmarken.length ? '<i class="em" title="mit Eigenmarke">EM</i>' : ""}${esc2(w2.name)}</span>${werte2(w2.kennzahlen, w2.ampeln, `w:${w2.id}`)}</div>`;
+        h3 += `<div class="lzeile bereich" data-a="bereich" data-v="${b2.bereich}"><span class="lname"><span class="pfeil">${auf ? "\u25BE" : "\u25B8"}</span>${esc2(b2.name)} <i>${b2.wgs.length} WG</i></span>${werte3(b2.kennzahlen, b2.ampeln, `b:${b2.bereich}`)}</div>`;
+        if (auf) for (const w2 of sortiere(b2.wgs)) h3 += `<div class="lzeile wgz" data-a="wg" data-v="${w2.id}"><span class="lname">${w2.eigenmarken.length ? '<i class="em" title="mit Eigenmarke">EM</i>' : ""}${esc2(w2.name)}</span>${werte3(w2.kennzahlen, w2.ampeln, `w:${w2.id}`)}</div>`;
       }
       h3 += "</div>";
       const gen = { grob: "grob (Controlling schwach besetzt)", normal: "normal", exakt: "exakt" }[u.genauigkeit] ?? u.genauigkeit;
       h3 += `<div class="legende">${dot("gruen")} im Ziel ${dot("gelb")} beobachten ${dot("rot")} handeln<br>${esc2(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen} \xB7 Genauigkeit ${gen} \xB7 EM = mit Eigenmarke</div>`;
       return { titel: "Einkauf", unter: `${u.bereiche.length} Bereiche \xB7 ${u.bereiche.reduce((a2, b2) => a2 + b2.wgs.length, 0)} Warengruppen \xB7 KW ${kwVon2(s2().woche)}`, html: h3 };
     }
-    function kurve4(titel, wochen, werte2, fmtW, p2, farbe3) {
-      const W3 = 340, H = 64, n3 = werte2.length;
-      if (n3 < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p2}">${n3 ? fmtW(werte2[0]) : "noch keine Daten"}</b></div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
-      const min = Math.min(...werte2), max = Math.max(...werte2);
+    function kurve5(titel, wochen, werte3, fmtW, p2, farbe3) {
+      const W3 = 340, H = 64, n3 = werte3.length;
+      if (n3 < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p2}">${n3 ? fmtW(werte3[0]) : "noch keine Daten"}</b></div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
+      const min = Math.min(...werte3), max = Math.max(...werte3);
       const lo = min - (max - min) * 0.1, hi = max + (max - min) * 0.1 || max + 1;
       const X5 = (i) => 4 + i / (n3 - 1) * (W3 - 8), Y = (v) => H - 4 - (v - lo) / (hi - lo || 1) * (H - 10);
-      const pts = werte2.map((v, i) => `${X5(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
-      const daten = esc2(JSON.stringify(werte2.map((v, i) => [kwVon2(wochen[i]), fmtW(v)])));
-      return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p2}">${fmtW(werte2[n3 - 1])}</b><small class="khover"></small></div>
+      const pts = werte3.map((v, i) => `${X5(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+      const daten = esc2(JSON.stringify(werte3.map((v, i) => [kwVon2(wochen[i]), fmtW(v)])));
+      return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p2}">${fmtW(werte3[n3 - 1])}</b><small class="khover"></small></div>
       <svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none" data-reihe="${daten}" data-x0="4" data-dx="${(W3 - 8) / (n3 - 1)}">
         <line x1="0" x2="${W3}" y1="${H - 4}" y2="${H - 4}" stroke="#e7e3dc" stroke-width="1"/>
         <polygon points="4,${H - 4} ${pts} ${X5(n3 - 1).toFixed(1)},${H - 4}" fill="${farbe3}" opacity="0.10"/>
         <polyline points="${pts}" fill="none" stroke="${farbe3}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-        <circle cx="${X5(n3 - 1).toFixed(1)}" cy="${Y(werte2[n3 - 1]).toFixed(1)}" r="4" fill="${farbe3}" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/>
+        <circle cx="${X5(n3 - 1).toFixed(1)}" cy="${Y(werte3[n3 - 1]).toFixed(1)}" r="4" fill="${farbe3}" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/>
         <line class="kreuz" x1="0" x2="0" y1="0" y2="${H}" stroke="#7b8790" stroke-width="1" vector-effect="non-scaling-stroke" opacity="0"/>
       </svg><div class="kfuss"><span>KW ${kwVon2(wochen[0])}</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>KW ${kwVon2(wochen[n3 - 1])}</span></div></div>`;
     }
@@ -131254,11 +131387,11 @@
       const k3 = d3.kennzahlen, st2 = d3.steuerung, a2 = d3.ampeln;
       let h3 = tabs();
       h3 += `<button class="zurueck" data-a="seite" data-v="uebersicht">\u2039 \xDCbersicht ${esc2(d3.bereichName)}</button>`;
-      h3 += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl5(c.name, text3(c.id, k3), `d:${c.id}`, "", a2[c.id])).join("")}${DETAIL_EXTRA.map(([id, t, f11]) => zahl5(t, id === "eigenmarkenMarge" && !k3.eigenmarkenAnteil ? "keine" : formatiere(f11, k3[id]), `d:${id}`, "", a2[id])).join("")}</div>`;
+      h3 += `<div class="raster">${q2.spalten().filter((c) => c.standard).map((c) => zahl6(c.name, text3(c.id, k3), `d:${c.id}`, "", a2[c.id])).join("")}${DETAIL_EXTRA.map(([id, t, f11]) => zahl6(t, id === "eigenmarkenMarge" && !k3.eigenmarkenAnteil ? "keine" : formatiere(f11, k3[id]), `d:${id}`, "", a2[id])).join("")}</div>`;
       const v = d3.verlauf;
-      h3 += kurve4("Bestand EK", v.woche, v.bestand, geld, "k:bestand", "#2f63b5");
-      h3 += kurve4("Umsatz je Woche", v.woche, v.umsatz, geld, "k:umsatz", "#2f8f5b");
-      h3 += kurve4("Reichweite in Wochen", v.woche, v.reichweite, (x2) => `${dez(x2, 1)} Wo.`, "k:reichweite", "#c27b0e");
+      h3 += kurve5("Bestand EK", v.woche, v.bestand, geld, "k:bestand", "#2f63b5");
+      h3 += kurve5("Umsatz je Woche", v.woche, v.umsatz, geld, "k:umsatz", "#2f8f5b");
+      h3 += kurve5("Reichweite in Wochen", v.woche, v.reichweite, (x2) => `${dez(x2, 1)} Wo.`, "k:reichweite", "#c27b0e");
       const regler2 = (titel, inhalt2, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt2}</div>`;
       const schieber = (feld, wert, min, max, schritt) => `<div class="schieber"><input type="range" min="${min}" max="${max}" step="${schritt}" value="${wert}" data-a="regel" data-f="${feld}"><output>${wert} %</output></div>`;
       h3 += '<div class="karte steuerung"><div class="khead">Steuerung</div>';
@@ -133192,7 +133325,7 @@
     const tabs = () => '<nav class="stat-auswahl" aria-label="Statistikseiten">' + [["konzern", "Konzern"], ["formate", "Formate"], ["regionen", "Regionen"], ["rangliste", "H\xE4user"]].map(([id, t]) => knopf4("seite", id, t, ui.seite === id)).join("") + "</nav>";
     const zeiten = () => '<div class="stat-auswahl" aria-label="Zeitraum">' + [[13, "13 Wochen"], [52, "52 Wochen"], ["alle", "Alle"]].map(([id, t]) => knopf4("wochen", id, t, String(ui.wochen) === String(id))).join("") + "</div>";
     const typen = () => '<div class="stat-auswahl" aria-label="Darstellung">' + [["linie", "Verlauf"], ["balken", "Wochen"], ["quartal", "Quartale"]].map(([id, t]) => knopf4("typ", id, t, ui.typ === id)).join("") + "</div>";
-    const zahl5 = (t, n3, k3) => '<div class="kz"><span>' + esc2(t) + "</span><b>" + esc2(wert(n3, k3)) + "</b></div>";
+    const zahl6 = (t, n3, k3) => '<div class="kz"><span>' + esc2(t) + "</span><b>" + esc2(wert(n3, k3)) + "</b></div>";
     function gruppieren(punkte2, kennzahl2) {
       if (ui.typ !== "quartal") return ui.typ === "balken" ? punkte2.slice(-13) : punkte2;
       const summen = /* @__PURE__ */ new Map();
@@ -133249,7 +133382,7 @@
     }
     function konzern() {
       const kennzahlen2 = [["umsatz", "Umsatz"], ["ebitda", "EBITDA"], ["cash", "Cash und Insolvenzgrenze"], ["stimmung", "Stakeholder-Stimmung"]];
-      let html = '<div class="stat-raster">' + kennzahlen2.slice(0, 3).map(([k3, t]) => zahl5(t, daten("konzern", void 0, k3).punkte.at(-1)?.wert ?? 0, k3)).join("") + "</div>";
+      let html = '<div class="stat-raster">' + kennzahlen2.slice(0, 3).map(([k3, t]) => zahl6(t, daten("konzern", void 0, k3).punkte.at(-1)?.wert ?? 0, k3)).join("") + "</div>";
       for (const [k3, t] of kennzahlen2) {
         const d3 = daten("konzern", void 0, k3);
         html += diagramm(t, [{ name: "Ist", punkte: d3.punkte }], k3, { vorjahr: true, grenze: k3 === "cash" ? -s2().kreditlinie : void 0 });
@@ -133430,15 +133563,15 @@
   var ANGEBOT = [["coupon", "Coupon"], ["punkte", "Mehrfachpunkte"], ["zugabe", "Gratiszugabe"], ["info", "nur Info"]];
   var FREQUENZ = [["einmalig", "einmalig"], ["woechentlich", "w\xF6chentlich"], ["zweiwoechentlich", "14-t\xE4gig"], ["monatlich", "monatlich"], ["quartal", "Quartal"]];
   var KANAL2 = [["mail", "Mail"], ["push", "Push"], ["brief", "Brief"]];
-  function kurve2(titel, werte2, fmtW, p2, P4, farbe3) {
-    const W3 = 340, H = 56, n3 = werte2.length;
-    if (n3 < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P4(p2, n3 ? fmtW(werte2[0]) : "noch keine Daten")}</div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
-    let min = Math.min(...werte2), max = Math.max(...werte2);
+  function kurve2(titel, werte3, fmtW, p2, P4, farbe3) {
+    const W3 = 340, H = 56, n3 = werte3.length;
+    if (n3 < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P4(p2, n3 ? fmtW(werte3[0]) : "noch keine Daten")}</div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
+    let min = Math.min(...werte3), max = Math.max(...werte3);
     const flach = max - min < 1e-9 * Math.max(1, Math.abs(max));
     const lo = flach ? min - 1 : min - (max - min) * 0.1, hi = flach ? max + 1 : max + (max - min) * 0.1;
     const X5 = (i) => 4 + i / (n3 - 1) * (W3 - 8), Y = (v) => H - 4 - (v - lo) / (hi - lo || 1) * (H - 10);
-    const pts = werte2.map((v, i) => `${X5(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
-    return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P4(p2, fmtW(werte2[n3 - 1]))}</div><svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none"><polygon points="4,${H - 4} ${pts} ${X5(n3 - 1).toFixed(1)},${H - 4}" fill="${farbe3}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${farbe3}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="kfuss"><span>vor ${n3} Wochen</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>jetzt</span></div></div>`;
+    const pts = werte3.map((v, i) => `${X5(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+    return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P4(p2, fmtW(werte3[n3 - 1]))}</div><svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none"><polygon points="4,${H - 4} ${pts} ${X5(n3 - 1).toFixed(1)},${H - 4}" fill="${farbe3}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${farbe3}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="kfuss"><span>vor ${n3} Wochen</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>jetzt</span></div></div>`;
   }
   function marketingModul(ctx) {
     const E8 = ctx.E, s2 = () => ctx.s();
@@ -136142,8 +136275,8 @@
       g.push(bereich(4e-3, 0.2, (x2) => [Math.max(L2.sK(x2) + 0.02, 0.45), 1], SG));
     }
     if (p2.seitenpanel) {
-      const kurve4 = glatt3([SP(0.05, 0.86), SP(0.22, 0.72), SP(0.38, 0.6), SP(0.52, 0.66), SP(0.64, 0.9)], 3);
-      g.push(polylinie(K3, kurve4, dunkel2(S.c, 0.3), 0.6, { op: 0.8 }));
+      const kurve5 = glatt3([SP(0.05, 0.86), SP(0.22, 0.72), SP(0.38, 0.6), SP(0.52, 0.66), SP(0.64, 0.9)], 3);
+      g.push(polylinie(K3, kurve5, dunkel2(S.c, 0.3), 0.6, { op: 0.8 }));
       const kurve22 = glatt3([SP(0.1, 0.62), SP(0.24, 0.52), SP(0.36, 0.4)], 3);
       if (p2.zweiton) g.push(polylinie(K3, kurve22, dunkel2(S.c, 0.3), 0.55, { op: 0.7 }));
       g.push(polylinie(K3, [SP(0.02, 0.55), SP(0.08, 0.6), SP(0.16, 0.74), SP(0.2, 0.96)], dunkel2(S.c, 0.3), 0.55, { op: 0.7 }));
@@ -139687,8 +139820,8 @@
         h3 += '<div class="q11baum">';
         for (const kat of baum2) {
           const offen = ui.baumOffen === kat.id;
-          const zahl5 = kat.unterkategorien.reduce((sum2, a2) => sum2 + a2.typen.length, 0);
-          h3 += `<button class="q11kategorie ${offen ? "an" : ""}" data-a="baumKat" data-v="${kat.id}" aria-expanded="${offen}"><span>${esc2(kat.name)}</span><small>${zahl5} Artikel</small><b aria-hidden="true">${offen ? "\u2212" : "+"}</b></button>`;
+          const zahl6 = kat.unterkategorien.reduce((sum2, a2) => sum2 + a2.typen.length, 0);
+          h3 += `<button class="q11kategorie ${offen ? "an" : ""}" data-a="baumKat" data-v="${kat.id}" aria-expanded="${offen}"><span>${esc2(kat.name)}</span><small>${zahl6} Artikel</small><b aria-hidden="true">${offen ? "\u2212" : "+"}</b></button>`;
           if (offen) for (const ast of kat.unterkategorien) {
             const astOffen = ui.astOffen === ast.id;
             h3 += `<button class="q11ast ${astOffen ? "an" : ""}" data-a="baumAst" data-v="${esc2(ast.id)}" aria-expanded="${astOffen}"><span>${esc2(ast.name)}</span><small>${ast.typen.length}</small><b aria-hidden="true">${astOffen ? "\u2212" : "+"}</b></button>`;
@@ -140524,7 +140657,7 @@
     ["status", "Status"]
   ];
   var START3 = () => ({ format: "alle", region: "alle", klasse: "alle", ampel: "alle", suche: "" });
-  var optionen2 = (werte2, aktuell) => werte2.map(([wert, titel]) => '<option value="' + esc2(wert) + '"' + (aktuell === wert ? " selected" : "") + ">" + esc2(titel) + "</option>").join("");
+  var optionen2 = (werte3, aktuell) => werte3.map(([wert, titel]) => '<option value="' + esc2(wert) + '"' + (aktuell === wert ? " selected" : "") + ">" + esc2(titel) + "</option>").join("");
   var statusName = { offen: "Offen", schliessung_verhandlung: "Verhandlung", raeumung: "R\xE4umung", geschlossen: "Geschlossen", verkauft: "Verkauft" };
   function portfolioFiltern(zeilen, filter) {
     const suche = String(filter.suche ?? "").trim().toLocaleLowerCase("de");
@@ -140589,8 +140722,8 @@
         }
       }
       ui.eintraege = sortierte;
-      const anzahl = aktionsIds().length;
-      ziel.innerHTML = '<div class="pp-info">' + fmt.format(hs.length) + " von " + fmt.format(zeilen().length) + " H\xE4usern \xB7 " + anzahl + ' ausgew\xE4hlt</div><div class="pp-sort"><label>Sortieren nach <select data-pp="sort">' + optionen2(FELDER, ui.sort) + '</select></label><button data-pp="richtung">' + (ui.absteigend ? "Absteigend \u2193" : "Aufsteigend \u2191") + '</button></div><div class="pp-auswahl"><button data-pp="alle">Gefilterte ausw\xE4hlen</button><button data-pp="leeren">Auswahl l\xF6schen</button></div><div id="pp-scroll" class="pp-scroll" role="list" aria-label="Hausportfolio"><div id="pp-spacer" style="height:' + sortierte.length * HOEHE2 + 'px;position:relative"></div></div><div class="pp-aktionen"><b>Sammelaktionen \xB7 ' + anzahl + ' steuerbare H\xE4user</b><div class="pp-aktionraster"><button data-pp="schliessen"' + (!anzahl ? " disabled" : "") + '>Schlie\xDFen</button><button data-pp="abbau"' + (!anzahl ? " disabled" : "") + '>Personal \u22125 %</button><button data-pp="aufbau"' + (!anzahl ? " disabled" : "") + '>Personal +5 %</button><button data-pp="aushilfen"' + (!anzahl ? " disabled" : "") + '>Aushilfen 10 %</button><button data-pp="miete"' + (!anzahl ? " disabled" : "") + '>Miete \u22125 % verhandeln</button><button data-pp="marketing"' + (!anzahl ? " disabled" : "") + ">Marketing 15 % Rabatt</button></div></div>" + (ui.vorschau ? '<div class="pp-vorschau" role="status"><b>Schlie\xDFungsvorschau f\xFCr ' + ui.vorschau.anzahl + " H\xE4user</b><p>Sozialplan ca. " + geld(ui.vorschau.sozialplan) + ", Restmiete ca. " + geld(ui.vorschau.restmiete) + ", gesamt ca. <b>" + geld(ui.vorschau.gesamt) + "</b>.</p><p>" + esc2(ui.vorschau.hinweis) + '</p><button data-pp="schliessen-ja">Schlie\xDFungen verbindlich einleiten</button> <button data-pp="schliessen-nein">Abbrechen</button></div>' : "");
+      const anzahl2 = aktionsIds().length;
+      ziel.innerHTML = '<div class="pp-info">' + fmt.format(hs.length) + " von " + fmt.format(zeilen().length) + " H\xE4usern \xB7 " + anzahl2 + ' ausgew\xE4hlt</div><div class="pp-sort"><label>Sortieren nach <select data-pp="sort">' + optionen2(FELDER, ui.sort) + '</select></label><button data-pp="richtung">' + (ui.absteigend ? "Absteigend \u2193" : "Aufsteigend \u2191") + '</button></div><div class="pp-auswahl"><button data-pp="alle">Gefilterte ausw\xE4hlen</button><button data-pp="leeren">Auswahl l\xF6schen</button></div><div id="pp-scroll" class="pp-scroll" role="list" aria-label="Hausportfolio"><div id="pp-spacer" style="height:' + sortierte.length * HOEHE2 + 'px;position:relative"></div></div><div class="pp-aktionen"><b>Sammelaktionen \xB7 ' + anzahl2 + ' steuerbare H\xE4user</b><div class="pp-aktionraster"><button data-pp="schliessen"' + (!anzahl2 ? " disabled" : "") + '>Schlie\xDFen</button><button data-pp="abbau"' + (!anzahl2 ? " disabled" : "") + '>Personal \u22125 %</button><button data-pp="aufbau"' + (!anzahl2 ? " disabled" : "") + '>Personal +5 %</button><button data-pp="aushilfen"' + (!anzahl2 ? " disabled" : "") + '>Aushilfen 10 %</button><button data-pp="miete"' + (!anzahl2 ? " disabled" : "") + '>Miete \u22125 % verhandeln</button><button data-pp="marketing"' + (!anzahl2 ? " disabled" : "") + ">Marketing 15 % Rabatt</button></div></div>" + (ui.vorschau ? '<div class="pp-vorschau" role="status"><b>Schlie\xDFungsvorschau f\xFCr ' + ui.vorschau.anzahl + " H\xE4user</b><p>Sozialplan ca. " + geld(ui.vorschau.sozialplan) + ", Restmiete ca. " + geld(ui.vorschau.restmiete) + ", gesamt ca. <b>" + geld(ui.vorschau.gesamt) + "</b>.</p><p>" + esc2(ui.vorschau.hinweis) + '</p><button data-pp="schliessen-ja">Schlie\xDFungen verbindlich einleiten</button> <button data-pp="schliessen-nein">Abbrechen</button></div>' : "");
       const scroll = ziel.querySelector("#pp-scroll");
       scroll.scrollTop = altScroll;
       scroll.addEventListener("scroll", zeilenZeichnen, { passive: true });
@@ -140891,12 +141024,12 @@
   // src/ui/diagnose.js
   var runde = (x2) => Math.round(x2 * 10) / 10;
   var perzentil = (a2, p2) => a2[Math.min(a2.length - 1, Math.ceil(a2.length * p2) - 1)];
-  async function messen({ renderer, scene: scene2, camera, info, vorBild, anzahl = 90 }) {
+  async function messen({ renderer, scene: scene2, camera, info, vorBild, anzahl: anzahl2 = 90 }) {
     if (!scene2 || !camera) throw new Error("Bitte zuerst ein Spiel starten.");
     const renderMs = [], frameMs = [], updateMs = [];
     let vorher = 0;
     const startGesamt = performance.now();
-    for (let i = 0; i < anzahl; i++) {
+    for (let i = 0; i < anzahl2; i++) {
       if (i >= 5 && performance.now() - startGesamt > 8e3) break;
       const zeit = await new Promise((resolve) => requestAnimationFrame(resolve));
       if (vorher) frameMs.push(zeit - vorher);
@@ -141285,7 +141418,7 @@
     node.id = "wochen-overlay";
     node.hidden = true;
     document.body.append(node);
-    let status = "zu", token = 0, bericht2 = null, vorfall = 0, start = 0, bestaetigt = null, zaehlRaf = 0;
+    let status2 = "zu", token = 0, bericht2 = null, vorfall = 0, start = 0, bestaetigt = null, zaehlRaf = 0;
     const zeiten = [];
     const markieren = (ereignis) => {
       const t = performance.now();
@@ -141300,12 +141433,12 @@
       node.hidden = true;
       node.innerHTML = "";
       node.className = "";
-      status = "zu";
+      status2 = "zu";
       document.body.classList.remove("wochen-aktiv");
       ctx.entsperren?.();
     }
     function abbruch() {
-      if (status !== "rechnen") aufraeumen();
+      if (status2 !== "rechnen") aufraeumen();
     }
     function fragDialog() {
       const warnungen = ctx.posteingang().handeln.filter((x2) => x2.restWochen === 0);
@@ -141313,12 +141446,12 @@
       node.hidden = false;
       node.className = "frage-ein";
       document.body.classList.add("wochen-aktiv");
-      status = "frage";
+      status2 = "frage";
       node.querySelector(".wochen-frage h2")?.focus({ preventScroll: true });
       requestAnimationFrame(() => node.classList.add("sichtbar"));
     }
     function oeffne() {
-      if (status !== "zu") return;
+      if (status2 !== "zu") return;
       ++token;
       start = performance.now();
       bestaetigt = null;
@@ -141329,13 +141462,13 @@
       fragDialog();
     }
     async function berechnen(mitDialog = true) {
-      if (status === "rechnen") return;
+      if (status2 === "rechnen") return;
       const meins = ++token, istReduziert = schnell();
       if (mitDialog) {
         bestaetigt = performance.now();
         markieren("Ja gew\xE4hlt");
       }
-      status = "rechnen";
+      status2 = "rechnen";
       ctx.sperren?.();
       node.classList.remove("sichtbar");
       if (mitDialog) await warten2(istReduziert ? 0 : WOCHEN_ZEIT.frageAus + WOCHEN_ZEIT.stillstand);
@@ -141402,7 +141535,7 @@
     }
     function berichtZeigen(meins) {
       if (meins !== token) return;
-      status = "zaehlen";
+      status2 = "zaehlen";
       vorfall = 0;
       const m = bericht2.meldungen, ausgabe = ctx.zeitung?.(), titel = ausgabe?.aufmacher?.titel ?? m[0]?.text ?? "Hartwig startet in eine neue Gesch\xE4ftswoche";
       const delta = (wert, vorher) => vorher == null ? "Noch keine Vergleichswoche" : eur3(wert - vorher) + " (" + (vorher === 0 ? "\u2013" : new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format((wert - vorher) / Math.abs(vorher) * 100) + " %") + ")";
@@ -141429,7 +141562,7 @@
         else if (!abgeschlossen) {
           abgeschlossen = true;
           node.classList.add("gezaehlt");
-          status = "bericht";
+          status2 = "bericht";
           markieren("Z\xE4hlung beendet");
           if (bericht2.vorgaenge.length) setTimeout(() => {
             if (meins === token) vorfallZeigen();
@@ -141437,7 +141570,7 @@
         }
       }
       node.querySelector(".wb-bericht").addEventListener("click", (e) => {
-        if (status === "zaehlen" && !e.target.closest("[data-wa]")) {
+        if (status2 === "zaehlen" && !e.target.closest("[data-wa]")) {
           cancelAnimationFrame(zaehlRaf);
           zahlen(performance.now(), true);
         }
@@ -141448,7 +141581,7 @@
     function vorfallZeigen() {
       const alle = bericht2?.vorgaenge ?? [], lauf = alle.slice(0, 3), m = lauf[vorfall];
       if (!m || !node.querySelector("#wb-vorfall")) return;
-      status = "vorfall";
+      status2 = "vorfall";
       markieren("Vorfall " + (vorfall + 1));
       const feld = node.querySelector("#wb-vorfall"), meins = token;
       const verantwortlich = portraetZumVorgang(m);
@@ -141457,7 +141590,7 @@
       requestAnimationFrame(() => feld.classList.add("offen"));
       const text3 = m.text ?? "", el2 = feld.querySelector(".wb-tippt"), beginn = performance.now();
       function tick(t) {
-        if (meins !== token || status !== "vorfall") return;
+        if (meins !== token || status2 !== "vorfall") return;
         const n3 = schnell() ? text3.length : Math.floor((t - beginn) / 1e3 * 70);
         el2.textContent = text3.slice(0, n3);
         if (el2.textContent.length !== text3.length && t - beginn < WOCHEN_ZEIT.vorfallText) requestAnimationFrame(tick);
@@ -141477,7 +141610,7 @@
         if (t !== token) return;
         feld.innerHTML = "";
         vorfall++;
-        status = "bericht";
+        status2 = "bericht";
         if (ansehen) {
           const id = item2.id;
           aufraeumen();
@@ -141498,14 +141631,14 @@
           berechnen(true);
           break;
         case "schliessen":
-          if (status === "bericht") abbruch();
-          else if (status === "zaehlen") {
+          if (status2 === "bericht") abbruch();
+          else if (status2 === "zaehlen") {
             cancelAnimationFrame(zaehlRaf);
             node.querySelector(".wb-kennzahlen")?.click();
           }
           break;
         case "zeitung":
-          if (status === "bericht" || status === "zaehlen") {
+          if (status2 === "bericht" || status2 === "zaehlen") {
             abbruch();
             ctx.oeffneZeitung?.();
           }
@@ -141518,14 +141651,62 @@
           break;
       }
     });
-    return { oeffne, zu: abbruch, pruefe: () => ({ status, bericht: bericht2 && { ...bericht2, vorgaenge: bericht2.vorgaenge.length, meldungen: bericht2.meldungen.length, meldungstexte: bericht2.meldungen.slice(0, 3).map((m) => m.text) }, zeiten: [...zeiten] }), get status() {
-      return status;
+    return { oeffne, zu: abbruch, pruefe: () => ({ status: status2, bericht: bericht2 && { ...bericht2, vorgaenge: bericht2.vorgaenge.length, meldungen: bericht2.meldungen.length, meldungstexte: bericht2.meldungen.slice(0, 3).map((m) => m.text) }, zeiten: [...zeiten] }), get status() {
+      return status2;
     } };
+  }
+
+  // src/ui/it-produkte.js
+  var zahl2 = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
+  var anzahl = (n3) => zahl2.format(Number(n3) || 0);
+  var iconPfad = {
+    kundenkarte: '<rect x="7" y="15" width="104" height="65" rx="8"/><path d="M8 35h102M20 52h30M20 63h42"/><circle cx="91" cy="61" r="9"/>',
+    hartwig_app: '<rect x="31" y="7" width="59" height="84" rx="11"/><path d="M52 16h17M57 82h8"/><rect x="42" y="29" width="37" height="31" rx="4"/><path d="M50 39h21M50 46h15M50 53h11"/>',
+    kasse: '<path d="M18 43h85v40H18zM26 43V22h68v21M26 62h68M37 72h30"/><rect x="36" y="13" width="49" height="21" rx="3"/><path d="M47 22h27M82 72h8"/>',
+    mobile_pay: '<rect x="43" y="7" width="39" height="83" rx="8"/><path d="M57 18h12M60 80h5M53 48h19M53 56h11M20 33q-12 15 0 29M29 40q-6 8 0 15M98 33q12 15 0 29M89 40q6 8 0 15"/>'
+  };
+  var itIllustration = (id) => '<svg class="itp-bild" viewBox="0 0 120 100" role="img" aria-label="' + esc2({ kundenkarte: "Kundenkarte", hartwig_app: "Smartphone-App", kasse: "Kassenterminal", mobile_pay: "Mobiles Bezahlen" }[id] ?? "IT-Produkt") + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (iconPfad[id] ?? "") + "</svg>";
+  function sterne2(n3) {
+    return '<span class="itp-sterne" aria-label="' + n3 + ' von 5 Qualit\xE4tssternen">' + Array.from({ length: 5 }, (_, i) => '<svg viewBox="0 0 24 24" aria-hidden="true" class="' + (i < n3 ? "voll" : "") + '"><path d="m12 2 3.15 6.38 7.04 1.02-5.09 4.96 1.2 7.01L12 18.07l-6.3 3.3 1.2-7.01-5.09-4.96 7.04-1.02Z"/></svg>').join("") + "</span>";
+  }
+  var status = (p2) => {
+    const neu = p2.aktiv && p2.version === "0.0";
+    return '<span class="itp-status ' + (p2.aktiv && !neu ? "" : "aus") + '">' + (neu ? "Noch nicht eingef\xFChrt" : p2.aktiv ? "Aktiv" : "Abgeschaltet") + "</span>";
+  };
+  var formatAenderung = (p2) => {
+    if (p2.aenderung === void 0) return '<span class="itp-delta">Ab der zweiten Woche vergleichbar</span>';
+    const d3 = p2.aenderung, zeichen = d3 > 0 ? "+" : d3 < 0 ? "\u2212" : "\xB1";
+    const quote = p2.aenderungQuote === void 0 ? "" : " (" + (p2.aenderungQuote > 0 ? "+" : "") + (p2.aenderungQuote * 100).toFixed(1).replace(".", ",") + " %)";
+    return '<span class="itp-delta ' + (d3 > 0 ? "positiv" : d3 < 0 ? "negativ" : "") + '">' + zeichen + anzahl(Math.abs(d3)) + " zur Vorwoche" + quote + "</span>";
+  };
+  function kurve4(p2) {
+    const v = p2.verlauf;
+    if (v.length < 2) return '<p class="itp-leer">Ein Verlauf ist ab der zweiten Woche verf\xFCgbar.</p>';
+    const min = Math.min(...v.map((x2) => x2.wert)), max = Math.max(...v.map((x2) => x2.wert));
+    const breite = 300, hoehe = 90, rand = 9;
+    const punkte2 = v.map((x2, i) => {
+      const px2 = rand + i * (breite - 2 * rand) / (v.length - 1);
+      const py2 = min === max ? hoehe / 2 : hoehe - rand - (x2.wert - min) / (max - min) * (hoehe - 2 * rand);
+      return { px: px2, py: py2 };
+    });
+    const str = punkte2.map(({ px: px2, py: py2 }) => px2.toFixed(1) + "," + py2.toFixed(1)).join(" ");
+    const labels = v.map((x2) => "<span><b>KW " + (x2.woche % 52 + 1) + "</b>" + anzahl(x2.wert) + "</span>").join("");
+    return '<div class="itp-verlauf"><svg viewBox="0 0 300 90" aria-hidden="true" preserveAspectRatio="none"><path d="M9 45H291" class="itp-raster"/><polyline points="' + str + '" class="itp-linie"/>' + punkte2.map(({ px: px2, py: py2 }) => '<circle cx="' + px2 + '" cy="' + py2 + '" r="3.5" class="itp-punkt"/>').join("") + '</svg><div class="itp-achse" aria-label="Wochenwerte">' + labels + "</div></div>";
+  }
+  function itProdukteKarten(produkte2, quelle2 = "it") {
+    return '<div class="itp-intro">Vier digitale Produkte von Hartwig. Die Kennzahlen stammen aus Marketing, Filialumsatz und E-Commerce.</div><div class="itp-karten">' + produkte2.map(
+      (p2) => '<button type="button" class="itp-karte" data-' + quelle2 + '="produkt" data-' + (quelle2 === "it" ? "v" : "id") + '="' + esc2(p2.id) + '" aria-label="' + esc2(p2.name) + ' \xF6ffnen"><span class="itp-visual">' + itIllustration(p2.id) + '</span><span class="itp-karteinhalt"><span class="itp-kartenkopf"><b>' + esc2(p2.name) + "</b>" + status(p2) + '</span><span class="itp-kurz">' + esc2(p2.beschreibung[0]) + '</span><strong class="itp-kartenzahl">' + anzahl(p2.kennzahl) + '</strong><span class="itp-einheit">' + esc2(p2.einheit) + '</span><span class="itp-kartenfuss">Version ' + esc2(p2.version) + " \xB7 Team " + anzahl(p2.team) + ' <span aria-hidden="true">\u2192</span></span></span></button>'
+    ).join("") + "</div>";
+  }
+  function itProduktDetail(p2, bestaetigen = false) {
+    const beschreibung = p2.beschreibung.map((t) => "<p>" + esc2(t) + "</p>").join("");
+    const teamHinweis = "Zus\xE4tzliche IT-Mitarbeiter erh\xF6hen die laufenden Kosten um 1.400 \u20AC je Person und Woche.";
+    return '<div class="itp-detail"><button type="button" class="itp-zurueck" data-it="zurueck">\u2190 Alle Produkte</button><div class="itp-hero"><div class="itp-heroillustration">' + itIllustration(p2.id) + '</div><div class="itp-herotext"><span class="itp-ueber">DIGITALES PRODUKT</span><h3>' + esc2(p2.name) + "</h3>" + status(p2) + '</div></div><div class="itp-beschreibung">' + beschreibung + '</div><section class="itp-abschnitt"><div class="itp-abschnittkopf"><h4>Letzte Woche</h4><span>' + esc2(p2.einheit) + '</span></div><div class="itp-hauptzahl">' + anzahl(p2.kennzahl) + "</div>" + formatAenderung(p2) + kurve4(p2) + '</section><section class="itp-abschnitt"><h4>Version und Qualit\xE4t</h4><div class="itp-datenzeile"><span>Installierte Version</span><b>' + esc2(p2.version) + '</b></div><div class="itp-datenzeile"><span>Qualit\xE4t</span>' + sterne2(p2.sterne) + '</div><div class="itp-datenzeile"><span>Systemgeneration</span><b>' + p2.generation + ' von 4</b></div><button type="button" class="itp-taste sekund" data-it="modernisieren" data-v="' + esc2(p2.id) + '">Version modernisieren</button></section><section class="itp-abschnitt"><h4>Zugewiesenes Team</h4><div class="itp-team"><strong>' + anzahl(p2.team) + '</strong><span>Personen</span><button type="button" class="itp-taste sekund" data-it="team" data-n="-3" data-v="' + esc2(p2.id) + '"' + (p2.team < 3 ? " disabled" : "") + ' aria-label="Drei Personen abziehen">\u22123</button><button type="button" class="itp-taste primaer" data-it="team" data-n="3" data-v="' + esc2(p2.id) + '"' + (p2.team >= 30 ? " disabled" : "") + '>+3</button></div><p class="itp-hinweis">' + teamHinweis + " Aktuell: " + anzahl(p2.teamKostenWoche) + ' \u20AC pro Woche.</p></section><section class="itp-abschnitt"><h4>Produktkennzahlen</h4>' + p2.details.map(([t, v]) => '<div class="itp-datenzeile"><span>' + esc2(t) + "</span><b>" + esc2(typeof v === "number" ? anzahl(v) : String(v)) + "</b></div>").join("") + '</section><section class="itp-abschnitt itp-gefahr"><h4>Betrieb</h4>' + (bestaetigen ? '<p>Produkt wirklich abschalten? Die Auswirkung auf die Filialnachfrage wird ab der n\xE4chsten Woche ber\xFCcksichtigt.</p><div class="itp-aktionen"><button type="button" class="itp-taste sekund" data-it="abbrechen">Abbrechen</button><button type="button" class="itp-taste warnung" data-it="aktiv" data-v="' + esc2(p2.id) + '">Abschalten best\xE4tigen</button></div>' : "<p>" + (p2.aktiv ? "Bei Abschaltung wird der Betrieb dieses Produkts eingeschr\xE4nkt." : "Das Produkt ist abgeschaltet und kann wieder aktiviert werden.") + '</p><button type="button" class="itp-taste ' + (p2.aktiv ? "sekund" : "primaer") + '" data-it="' + (p2.aktiv ? "abschalten" : "aktiv") + '" data-v="' + esc2(p2.id) + '">' + (p2.aktiv ? "Abschalten" : "Wieder aktivieren") + "</button>") + "</section></div>";
   }
 
   // src/ui/ecommerce.js
   var prozent = (x2, n3 = 1) => (100 * (x2 || 0)).toFixed(n3).replace(".", ",") + " %";
-  var zahl2 = (titel, wert, ton2 = "") => '<div class="kz ' + ton2 + '"><span>' + titel + "</span><b>" + wert + "</b></div>";
+  var zahl3 = (titel, wert, ton2 = "") => '<div class="kz ' + ton2 + '"><span>' + titel + "</span><b>" + wert + "</b></div>";
   var zeile = (label, detail2, aktion2) => '<div class="zeile"><span class="was"><b>' + esc2(label) + "</b><i>" + esc2(detail2) + "</i></span>" + aktion2 + "</div>";
   var schalter2 = (akt, wert, parameter = "") => '<button class="mini ' + (wert ? "gruen" : "") + '" data-online="' + akt + '" ' + parameter + ">" + (wert ? "Ein" : "Aus") + "</button>";
   function ecommerceModul(ctx) {
@@ -141534,9 +141715,11 @@
     function anzeigen(behalten = false) {
       if (!offen) return;
       const u = state(), vorher = behalten ? document.getElementById("pinhalt").scrollTop : 0;
-      let h3 = '<div class="tabs">' + [["uebersicht", "Kennzahlen"], ["steuerung", "Steuerung"], ["haeuser", "H\xE4user"]].map(([id, name2]) => '<button class="tab ' + (tab === id ? "an" : "") + '" data-online="tab" data-wert="' + id + '">' + name2 + "</button>").join("") + "</div>";
-      if (tab === "uebersicht") {
-        h3 += '<div class="raster">' + zahl2("Onlineumsatz Woche", geld(u.umsatz)) + zahl2("Anteil Konzernumsatz", prozent(u.anteil)) + zahl2("Online-Conversion", prozent(u.conversion, 2)) + zahl2("Retourenquote", prozent(u.retourenquote)) + zahl2("Kosten je Bestellung", geld(u.kostenJeBestellung)) + zahl2("Deckungsbeitrag online", geld(u.deckungsbeitrag), u.deckungsbeitrag < 0 ? "rot" : "gruen") + zahl2("Click & Collect", prozent(u.clickCollectAnteil)) + zahl2("Bestellungen", fmt.format(u.bestellungen)) + "</div>";
+      let h3 = '<div class="tabs">' + [["uebersicht", "Kennzahlen"], ["steuerung", "Steuerung"], ["haeuser", "H\xE4user"], ["produkte", "IT-Produkte"]].map(([id, name2]) => '<button class="tab ' + (tab === id ? "an" : "") + '" data-online="tab" data-wert="' + id + '">' + name2 + "</button>").join("") + "</div>";
+      if (tab === "produkte") {
+        h3 += itProdukteKarten(ctx.E.itProdukte(ctx.s()), "online");
+      } else if (tab === "uebersicht") {
+        h3 += '<div class="raster">' + zahl3("Onlineumsatz Woche", geld(u.umsatz)) + zahl3("Anteil Konzernumsatz", prozent(u.anteil)) + zahl3("Online-Conversion", prozent(u.conversion, 2)) + zahl3("Retourenquote", prozent(u.retourenquote)) + zahl3("Kosten je Bestellung", geld(u.kostenJeBestellung)) + zahl3("Deckungsbeitrag online", geld(u.deckungsbeitrag), u.deckungsbeitrag < 0 ? "rot" : "gruen") + zahl3("Click & Collect", prozent(u.clickCollectAnteil)) + zahl3("Bestellungen", fmt.format(u.bestellungen)) + "</div>";
         h3 += '<div class="karte"><div class="khead">Umsatzbr\xFCcke: Effekt Online</div>' + zeile("Onlinewachstum gegen\xFCber Basis", geld(u.umsatz - u.basis), "") + zeile("Kannibalisierung in den H\xE4usern", "\u2212" + geld(u.kannibalisierung), "") + zeile("Gesamteffekt Konzernumsatz", geld(u.onlineEffekt), "") + '<div class="zeile grau">Die Ausgangsbasis von 8 % ist bereits im bisherigen Konzernumsatz enthalten und wird nicht nochmals addiert.</div></div>';
         h3 += '<div class="karte"><div class="khead">Onlineumsatz der letzten Wochen</div>';
         const max = Math.max(1, ...u.verlauf.map((q2) => q2.umsatz));
@@ -141544,7 +141727,7 @@
         h3 += '<div class="zeile grau">Basis: Umsatzanteil station\xE4r und online ohne Doppelz\xE4hlung</div></div>';
         h3 += '<div class="karte"><div class="khead">Warengruppen online</div>' + Object.entries(u.umsatzJeGruppe).sort((a2, b2) => b2[1] - a2[1]).map(([g, umsatz]) => zeile(ctx.E.GRUPPEN[g]?.name ?? g, geld(umsatz), "")).join("") + "</div>";
       } else if (tab === "steuerung") {
-        const optionen3 = (id, werte2, aktuell, format) => '<div class="zeile"><span class="was">' + id + '</span><select class="ort" data-online="strategie" data-feld="' + format + '">' + werte2.map(([v, t]) => '<option value="' + v + '"' + (String(v) === String(aktuell) ? " selected" : "") + ">" + t + "</option>").join("") + "</select></div>";
+        const optionen3 = (id, werte3, aktuell, format) => '<div class="zeile"><span class="was">' + id + '</span><select class="ort" data-online="strategie" data-feld="' + format + '">' + werte3.map(([v, t]) => '<option value="' + v + '"' + (String(v) === String(aktuell) ? " selected" : "") + ">" + t + "</option>").join("") + "</select></div>";
         h3 += '<div class="karte"><div class="khead">Online-Sortiment und Service</div>';
         h3 += optionen3("Sortimentsbreite", [[0.45, "45 %"], [0.65, "65 %"], [0.8, "80 %"], [1, "100 %"]], u.sortimentsbreite, "sortimentsbreite");
         h3 += optionen3("Verf\xFCgbarkeit", [[0.7, "70 %"], [0.88, "88 %"], [0.95, "95 %"], [1, "100 %"]], u.verfuegbarkeit, "verfuegbarkeit");
@@ -141583,7 +141766,8 @@
       if (typ === "tab") {
         tab = b2.dataset.wert;
         anzeigen();
-      } else if (typ === "collect") tun({ typ: "onlineClickCollect", an: !state().clickCollect });
+      } else if (typ === "produkt") ctx.oeffneItProdukt?.(b2.dataset.id);
+      else if (typ === "collect") tun({ typ: "onlineClickCollect", an: !state().clickCollect });
       else if (typ === "cluster") {
         const x2 = state().cluster.find((c) => c.id === id);
         if (x2) tun({ typ: "onlineVersandCluster", cluster: id, an: !x2.aktiv });
@@ -142156,11 +142340,11 @@
     let navigation = null, besuchZonen = [], besuchSeed = "";
     let K3 = { x: 0, z: 0, halb: 40, min: 8, max: 100 };
     let steuerung2, kalender = null;
-    const status = () => ({ offen: !!haus2, haus: haus2?.id, etage: nr3, figuren: figuren3.length, kunden: figuren3.filter((f11) => !f11.personal).length, personal: figuren3.filter((f11) => f11.personal).length });
+    const status2 = () => ({ offen: !!haus2, haus: haus2?.id, etage: nr3, figuren: figuren3.length, kunden: figuren3.filter((f11) => !f11.personal).length, personal: figuren3.filter((f11) => f11.personal).length });
     const messung2 = () => {
       const a2 = rahmenzeiten.slice(-90).filter((n3) => n3 > 0);
       const ms = a2.length ? a2.reduce((s2, x2) => s2 + x2, 0) / a2.length : 0;
-      return { ...status(), frames: a2.length, fps: ms ? Math.round(1e3 / ms) : null, durchschnittMs: Math.round(ms * 10) / 10, renderer: renderer ? { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles } : null };
+      return { ...status2(), frames: a2.length, fps: ms ? Math.round(1e3 / ms) : null, durchschnittMs: Math.round(ms * 10) / 10, renderer: renderer ? { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles } : null };
     };
     const sicher = (s2) => esc2(String(s2 ?? ""));
     function anlegen2() {
@@ -142478,7 +142662,7 @@
       oeffne,
       schliesse,
       etage: etageWaehlen,
-      status,
+      status: status2,
       messung: messung2,
       pruefung,
       bildschritt,
@@ -142946,9 +143130,9 @@
         return;
       }
       const ziel = Math.abs(Number(element2.dataset.wert));
-      const zahl5 = Math.abs(Number((element2.textContent || "0").replace(/[^0-9-]/g, "")));
-      if (!(ziel > 0) || !Number.isFinite(zahl5)) return;
-      const fortschritt = begrenze2(zahl5 / ziel, 0, 1);
+      const zahl6 = Math.abs(Number((element2.textContent || "0").replace(/[^0-9-]/g, "")));
+      if (!(ziel > 0) || !Number.isFinite(zahl6)) return;
+      const fortschritt = begrenze2(zahl6 / ziel, 0, 1);
       const t = performance.now();
       if (fortschritt >= 0.9999) {
         if (!berichtFertig) {
@@ -143707,8 +143891,8 @@
   }
 
   // src/ui/spielende.js
-  var zahl3 = (n3) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n3 ?? 0));
-  var geld2 = (n3) => zahl3(n3) + " \u20AC";
+  var zahl4 = (n3) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n3 ?? 0));
+  var geld2 = (n3) => zahl4(n3) + " \u20AC";
   var ART3 = {
     zerschlagen: {
       titel: "Das Ende von Hartwig",
@@ -143766,7 +143950,7 @@
   function rangliste(schwierigkeit2) {
     const liste2 = lesen2(schwierigkeit2);
     if (!liste2.length) return '<p class="se-unter">Hier erscheinen die zehn besten Ergebnisse dieser Schwierigkeitsstufe.</p>';
-    return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' + liste2.map((x2, i) => "<tr><td>" + (i + 1) + ".</td><td>" + esc2(x2.datum) + "<small> \xB7 " + zahl3(x2.seed) + "</small></td><td>" + esc2(ART3[x2.art]?.titel || x2.art) + (x2.testspiel ? " <small>(Test)</small>" : "") + "</td><td>" + zahl3(x2.punkte) + "</td></tr>").join("") + "</tbody></table>";
+    return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' + liste2.map((x2, i) => "<tr><td>" + (i + 1) + ".</td><td>" + esc2(x2.datum) + "<small> \xB7 " + zahl4(x2.seed) + "</small></td><td>" + esc2(ART3[x2.art]?.titel || x2.art) + (x2.testspiel ? " <small>(Test)</small>" : "") + "</td><td>" + zahl4(x2.punkte) + "</td></tr>").join("") + "</tbody></table>";
   }
   function verlauf3(historie) {
     if (!Array.isArray(historie) || historie.length < 2) return "";
@@ -143774,15 +143958,15 @@
       { key: "umsatz", farbe: "#eacb91" },
       { key: "ebitda", farbe: "#79c2bb" }
     ];
-    const werte2 = historie.filter((k3, i) => i % 13 === 12 || i === historie.length - 1);
-    if (werte2.length < 2) return "";
+    const werte3 = historie.filter((k3, i) => i % 13 === 12 || i === historie.length - 1);
+    if (werte3.length < 2) return "";
     const unten = 95, oben = 9, links = 16, rechts = 594;
-    const alle = werte2.flatMap((k3) => [schonen(k3.umsatz), schonen(k3.ebitda)]);
+    const alle = werte3.flatMap((k3) => [schonen(k3.umsatz), schonen(k3.ebitda)]);
     const min = Math.min(0, ...alle), max = Math.max(1, ...alle), span = Math.max(1, max - min);
-    const px2 = (i) => links + (rechts - links) * i / (werte2.length - 1);
+    const px2 = (i) => links + (rechts - links) * i / (werte3.length - 1);
     const py2 = (n3) => unten - (schonen(n3) - min) / span * (unten - oben);
     const nullinie = py2(0);
-    const pfade = serien.map((serie) => '<path fill="none" stroke="' + serie.farbe + '" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round" d="' + werte2.map((k3, i) => (i ? "L" : "M") + px2(i).toFixed(1) + "," + py2(k3[serie.key]).toFixed(1)).join(" ") + '"/>').join("");
+    const pfade = serien.map((serie) => '<path fill="none" stroke="' + serie.farbe + '" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round" d="' + werte3.map((k3, i) => (i ? "L" : "M") + px2(i).toFixed(1) + "," + py2(k3[serie.key]).toFixed(1)).join(" ") + '"/>').join("");
     return '<h2>Umsatz und EBITDA im Verlauf</h2><div class="se-karte"><svg class="se-chart" viewBox="0 0 610 112" role="img" aria-label="Verlauf von Umsatz und EBITDA, quartalsweise"><path d="M' + links + " " + nullinie.toFixed(1) + "h" + (rechts - links) + '" stroke="#718087" stroke-width="1" stroke-dasharray="5 5"/>' + pfade + '</svg><div class="se-legende"><span>Umsatz je Woche</span><span>EBITDA je Woche</span></div></div>';
   }
   function entscheidungen(s2) {
@@ -143813,7 +143997,7 @@
         const f11 = 1 - (1 - p2) ** 3;
         for (const el2 of felder) {
           const v = Number(el2.dataset.seWert) || 0;
-          el2.textContent = zahl3(Math.round(v * f11)) + (el2.dataset.seEinheit || "");
+          el2.textContent = zahl4(Math.round(v * f11)) + (el2.dataset.seEinheit || "");
         }
         if (p2 < 1) zaehlRaf = requestAnimationFrame(tick);
       }
@@ -143835,14 +144019,14 @@
       const s2 = stand2(), e = s2?.ende;
       if (!e) return;
       const a2 = ART3[e.art] || ART3.zerschlagen, w2 = e.wertung, k3 = e.kennzahlen;
-      const teile2 = w2.teile.map((t) => '<div class="se-zeile"><span>' + esc2(t.name) + '</span><strong class="' + (t.punkte < 0 ? "se-minus" : "") + '" data-se-wert="' + t.punkte + '">' + zahl3(t.punkte) + "</strong></div>").join("");
+      const teile2 = w2.teile.map((t) => '<div class="se-zeile"><span>' + esc2(t.name) + '</span><strong class="' + (t.punkte < 0 ? "se-minus" : "") + '" data-se-wert="' + t.punkte + '">' + zahl4(t.punkte) + "</strong></div>").join("");
       const kenn = [
         ["Gerettete H\xE4user", k3.geretteteHaeuser + " / " + k3.startHaeuser],
-        ["Besch\xE4ftigte (FTE)", zahl3(k3.fte) + " / " + zahl3(k3.startFte)],
+        ["Besch\xE4ftigte (FTE)", zahl4(k3.fte) + " / " + zahl4(k3.startFte)],
         ["EBITDA, 52 Wochen", geld2(k3.ebitda52)],
         ["Konzernwert", geld2(k3.unternehmenswert)]
       ].map(([name2, value]) => '<div class="se-kpi"><small>' + esc2(name2) + "</small><b>" + esc2(value) + "</b></div>").join("");
-      rahmen2("Bilanz", '<div class="se-bilanz"><h1>Ihre Bilanz</h1><p class="se-unter">' + esc2(a2.titel) + " \xB7 Woche " + zahl3(e.woche) + " \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</p><div class="se-ergebnis"><small>GESAMTPUNKTZAHL</small><strong data-se-wert="' + w2.punkte + '">0</strong><small>Grundpunkte ' + zahl3(w2.grundpunkte) + " \xD7 " + new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format(w2.multiplikator) + '</small></div><div class="se-karte">' + teile2 + '</div><h2>Unternehmen nach dem Spiel</h2><div class="se-kpis">' + kenn + "</div>" + verlauf3(s2.historie) + entscheidungen(s2) + "<h2>Bestenliste \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</h2><div class="se-karte">' + rangliste(w2.schwierigkeit) + '</div><div class="se-aktionen"><button class="se-knopf" data-se="neu">Neues Spiel</button>' + (["saniert", "ruhestand"].includes(e.art) ? '<button class="se-knopf se-sek" data-se="weiter">Weiterspielen</button>' : "") + "</div></div>");
+      rahmen2("Bilanz", '<div class="se-bilanz"><h1>Ihre Bilanz</h1><p class="se-unter">' + esc2(a2.titel) + " \xB7 Woche " + zahl4(e.woche) + " \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</p><div class="se-ergebnis"><small>GESAMTPUNKTZAHL</small><strong data-se-wert="' + w2.punkte + '">0</strong><small>Grundpunkte ' + zahl4(w2.grundpunkte) + " \xD7 " + new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format(w2.multiplikator) + '</small></div><div class="se-karte">' + teile2 + '</div><h2>Unternehmen nach dem Spiel</h2><div class="se-kpis">' + kenn + "</div>" + verlauf3(s2.historie) + entscheidungen(s2) + "<h2>Bestenliste \xB7 " + esc2(SCHWIERIGKEIT2[w2.schwierigkeit] || w2.schwierigkeit) + '</h2><div class="se-karte">' + rangliste(w2.schwierigkeit) + '</div><div class="se-aktionen"><button class="se-knopf" data-se="neu">Neues Spiel</button>' + (["saniert", "ruhestand"].includes(e.art) ? '<button class="se-knopf se-sek" data-se="weiter">Weiterspielen</button>' : "") + "</div></div>");
       ansicht = "bilanz";
       bilanziert = true;
       zahlenAnimieren();
@@ -143861,7 +144045,7 @@
       }
       if (!node.hidden && ansicht === "szene") return true;
       const a2 = ART3[e.art] || ART3.zerschlagen;
-      rahmen2(a2.titel, '<div class="se-szene"><div class="se-bild">' + spielendeSzene(e.art, e.kaeufer) + '</div><div class="se-zeitung"><small>DER HANDELSBOTE \xB7 SONDERAUSGABE \xB7 WOCHE ' + zahl3(e.woche) + "</small><h1>" + esc2(a2.schlagzeile) + "</h1><p>" + esc2(a2.zeile) + '</p></div></div><button class="se-knopf" data-se="bilanz">Zur Abschlussbilanz</button>');
+      rahmen2(a2.titel, '<div class="se-szene"><div class="se-bild">' + spielendeSzene(e.art, e.kaeufer) + '</div><div class="se-zeitung"><small>DER HANDELSBOTE \xB7 SONDERAUSGABE \xB7 WOCHE ' + zahl4(e.woche) + "</small><h1>" + esc2(a2.schlagzeile) + "</h1><p>" + esc2(a2.zeile) + '</p></div></div><button class="se-knopf" data-se="bilanz">Zur Abschlussbilanz</button>');
       ansicht = "szene";
       return true;
     }
@@ -144067,7 +144251,7 @@
       if (!aktiv5 || beschaeftigt || ![1, 4, 13, 52].includes(n3)) return { fertig: 0 };
       beschaeftigt = true;
       const bar = document.getElementById("test-fortschritt");
-      const status = document.getElementById("test-status");
+      const status2 = document.getElementById("test-status");
       bar.hidden = false;
       bar.max = n3;
       bar.value = 0;
@@ -144079,10 +144263,10 @@
           if (!m) break;
           fertig2++;
           bar.value = fertig2;
-          status.textContent = fertig2 + " / " + n3 + " Wochen";
+          status2.textContent = fertig2 + " / " + n3 + " Wochen";
           await new Promise((resolve) => setTimeout(resolve, 0));
         }
-        status.textContent = "Zeitsprung: " + fertig2 + " von " + n3 + " Wochen abgeschlossen.";
+        status2.textContent = "Zeitsprung: " + fertig2 + " von " + n3 + " Wochen abgeschlossen.";
         if (fertig2 !== n3) ctx.meldung("Zeitsprung beendet: Spielende erreicht.", false);
         return { fertig: fertig2 };
       } catch (e) {
@@ -144186,10 +144370,10 @@
 
   // src/ui/reporting.js
   var prozent3 = (x2) => (100 * x2).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
-  var zahl4 = (x2, n3 = 1) => Number(x2).toLocaleString("de-DE", { maximumFractionDigits: n3, minimumFractionDigits: n3 });
-  var euro2 = (x2) => zahl4(x2, 2) + " \u20AC";
+  var zahl5 = (x2, n3 = 1) => Number(x2).toLocaleString("de-DE", { maximumFractionDigits: n3, minimumFractionDigits: n3 });
+  var euro2 = (x2) => zahl5(x2, 2) + " \u20AC";
   var abweichung = (wert, basis4) => basis4 == null ? "Kein Vorjahr" : (wert >= basis4 ? "\u2191 " : "\u2193 ") + prozent3(basis4 ? wert / basis4 - 1 : 0);
-  var punkt4 = (wert, basis4) => basis4 == null ? "Kein Vorjahr" : (wert >= basis4 ? "\u2191 " : "\u2193 ") + zahl4((wert - basis4) * 100) + " Punkte";
+  var punkt4 = (wert, basis4) => basis4 == null ? "Kein Vorjahr" : (wert >= basis4 ? "\u2191 " : "\u2193 ") + zahl5((wert - basis4) * 100) + " Punkte";
   function brueckeHtml(br) {
     if (br.status !== "ok") return '<div class="o02-hinweis">' + esc2(br.status) + "</div>";
     const eintraege = [["Frequenz", br.frequenz], ["Kaufquote", br.kaufquote], ["Teile", br.teile], ["Preis", br.preis]];
@@ -144203,18 +144387,18 @@
     const a2 = d3.aktuell, v = d3.vorjahr;
     const br = E8.umsatzbruecke(s2, { ebene: "haus", id, vergleich: "vorjahr", wochen: 1 });
     const kpi = (name2, wert, delta) => '<div class="o02-treib"><span>' + name2 + "</span><b>" + esc2(wert) + "</b><small>" + esc2(delta) + "</small></div>";
-    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a2.umsatz + '" data-o02-frequenz="' + a2.frequenz + '" data-o02-kaufquote="' + a2.kaufquote + '" data-o02-bon="' + a2.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a2.frequenz)), abweichung(a2.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent3(a2.kaufquote), punkt4(a2.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a2.bon), abweichung(a2.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl4(a2.teile, 2) + " Teile je Bon \xB7 " + euro2(a2.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
+    return '<div class="karte o02-haus" data-o02-haus="' + esc2(id) + '" data-o02-umsatz="' + a2.umsatz + '" data-o02-frequenz="' + a2.frequenz + '" data-o02-kaufquote="' + a2.kaufquote + '" data-o02-bon="' + a2.bon + '"><div class="khead">Umsatztreiber <small>Frequenz \xD7 Kaufquote \xD7 Bon</small></div><div class="o02-drei">' + kpi("Frequenz", fmt.format(Math.round(a2.frequenz)), abweichung(a2.frequenz, v?.frequenz)) + kpi("Kaufquote", prozent3(a2.kaufquote), punkt4(a2.kaufquote, v?.kaufquote)) + kpi("Durchschnittsbon", euro2(a2.bon), abweichung(a2.bon, v?.bon)) + '</div><div class="o02-fuss">\xD8 ' + zahl5(a2.teile, 2) + " Teile je Bon \xB7 " + euro2(a2.preis) + ' je Teil</div><div class="o02-wasserfall"><b>Umsatzbr\xFCcke zur Vorjahreswoche</b>' + brueckeHtml(br) + "</div></div>";
   }
   function zeile2(z4, haus2 = false) {
     return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z4.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z4.ampelfarbe) + '"></span>' + esc2(z4.name) + "</div><div>" + geld(z4.umsatz) + "</div><div>" + (z4.abweichung == null ? "\u2013" : geld(z4.abweichung) + " (" + prozent3(z4.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z4.frequenz)) + "</div><div>" + prozent3(z4.kaufquote) + "</div><div>" + euro2(z4.bon) + "</div></div>";
   }
   function reportingModul(ctx) {
     const E8 = ctx.E, ui = { aktiv: false, ebene: "region", format: "alle", sort: "umsatz", wochen: 1 };
-    const sortiere = (werte2) => [...werte2].sort((a2, b2) => {
+    const sortiere = (werte3) => [...werte3].sort((a2, b2) => {
       const av = a2[ui.sort], bv = b2[ui.sort];
       return (ui.sort === "name" ? String(av).localeCompare(String(bv), "de") : Number(bv ?? -1e15) - Number(av ?? -1e15)) || a2.name.localeCompare(b2.name, "de");
     });
-    const karten = (werte2) => sortiere(werte2).map((z4) => zeile2(z4, true)).join("");
+    const karten = (werte3) => sortiere(werte3).map((z4) => zeile2(z4, true)).join("");
     const leere = '<div class="zeile grau">Keine H\xE4user im gew\xE4hlten Filter.</div>';
     const tabelle2 = (inhalt) => '<div class="o02-scroll"><div class="o02-tab"><div class="o02-daten o02-kopf"><b>Einheit</b><b>Umsatz</b><b>Abw. VJ</b><b>Frequenz</b><b>Kaufquote</b><b>Bon</b></div>' + (inhalt || leere) + "</div></div>";
     const auswahl4 = (name2, key, optionen3) => "<label>" + name2 + '<select data-o02-wahl="' + key + '" class="ort">' + optionen3.map(([wert, titel]) => '<option value="' + esc2(wert) + '" ' + (String(ui[key]) === String(wert) ? "selected" : "") + ">" + esc2(titel) + "</option>").join("") + "</select></label>";
@@ -144296,7 +144480,7 @@
   // src/ui/it.js
   function itModul(ctx) {
     const { E: E8 } = ctx, s2 = () => ctx.s();
-    const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, projekt: null };
+    const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, projekt: null, produkt: null, bestaetigung: false };
     const optionen3 = ["kaufen", "entwickeln", "dienstleister"];
     const artName = { kaufen: "Standardsoftware", entwickeln: "Eigenentwicklung", dienstleister: "Dienstleister" };
     const phasen = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
@@ -144311,7 +144495,7 @@
       return '<div class="it-fortschritt"><i style="width:' + Math.max(0, Math.min(100, Math.round(w2 * 100))) + '%"></i></div>';
     }
     function reiter() {
-      return '<div class="tabs">' + [["systeme", "Systeme"], ["projekte", "Projekte"], ["neu", "Neues Projekt"]].map((x2) => '<button type="button" class="tab ' + (ui.reiter === x2[0] ? "an" : "") + '" data-it="reiter" data-v="' + x2[0] + '">' + x2[1] + "</button>").join("") + "</div>";
+      return '<div class="tabs">' + [["systeme", "Systeme"], ["produkte", "Produkte"], ["projekte", "Projekte"], ["neu", "Neues Projekt"]].map((x2) => '<button type="button" class="tab ' + (ui.reiter === x2[0] ? "an" : "") + '" data-it="reiter" data-v="' + x2[0] + '">' + x2[1] + "</button>").join("") + "</div>";
     }
     function systemKarte(x2) {
       const ampel = x2.risiko < 2e-3 ? "gruen" : x2.risiko < 0.01 ? "gelb" : "rot";
@@ -144403,10 +144587,15 @@
       h3 += "</div>";
       return h3;
     }
+    function produkte2() {
+      const k3 = E8.itProdukte(s2());
+      const p2 = k3.find((x2) => x2.id === ui.produkt);
+      return p2 ? itProduktDetail(p2, ui.bestaetigung) : itProdukteKarten(k3);
+    }
     function zeichnen2() {
       if (!ui.aktiv) return;
-      const d3 = daten(), seiten4 = { systeme: "Systemlandkarte", projekte: "IT-Projekte", neu: "Neues IT-Projekt" };
-      ctx.panel("IT \xB7 " + seiten4[ui.reiter], "CDO / Bereich IT \xB7 " + d3.projekte.filter((x2) => x2.phase !== "abgeschlossen").length + " aktive Projekte", reiter() + (ui.reiter === "systeme" ? systeme(d3) : ui.reiter === "projekte" ? projekte(d3) : neu(d3)), "gross");
+      const d3 = daten(), seiten4 = { systeme: "Systemlandkarte", produkte: "Digitale Produkte", projekte: "IT-Projekte", neu: "Neues IT-Projekt" };
+      ctx.panel("IT \xB7 " + seiten4[ui.reiter], "CDO / Bereich IT \xB7 " + d3.projekte.filter((x2) => x2.phase !== "abgeschlossen").length + " aktive Projekte", reiter() + (ui.reiter === "systeme" ? systeme(d3) : ui.reiter === "produkte" ? produkte2() : ui.reiter === "projekte" ? projekte(d3) : neu(d3)), "gross");
       ui.aktiv = true;
     }
     function aktion2(a2) {
@@ -144423,7 +144612,62 @@
         case "reiter":
           ui.reiter = v;
           ui.auswahl = null;
+          ui.produkt = null;
+          ui.bestaetigung = false;
           break;
+        case "produkt":
+          ui.reiter = "produkte";
+          ui.produkt = v;
+          ui.bestaetigung = false;
+          break;
+        case "zurueck":
+          ui.produkt = null;
+          ui.bestaetigung = false;
+          break;
+        case "abschalten":
+          ui.bestaetigung = true;
+          break;
+        case "abbrechen":
+          ui.bestaetigung = false;
+          break;
+        case "team": {
+          const r3 = E8.fuehreAus(s2(), { typ: "itProduktTeam", produkt: v, anzahl: Number(el2.dataset.n) });
+          ctx.meldung(r3.text, !r3.ok);
+          if (r3.ok) ctx.nachAktion?.();
+          break;
+        }
+        case "aktiv": {
+          const p2 = E8.itProdukte(s2()).find((x2) => x2.id === v);
+          if (!p2) return;
+          const r3 = E8.fuehreAus(s2(), { typ: "itProduktAktiv", produkt: v, an: !p2.aktiv });
+          ctx.meldung(r3.text, !r3.ok);
+          if (r3.ok) ctx.nachAktion?.();
+          ui.bestaetigung = false;
+          break;
+        }
+        case "modernisieren": {
+          const p2 = E8.itProdukte(s2()).find((x2) => x2.id === v);
+          if (!p2) return;
+          if (v === "mobile_pay") {
+            const k3 = d3.systeme.find((x2) => x2.id === "kasse"), stufe2 = k3?.kasseAusbau?.mobil ?? 0;
+            if (k3?.generation >= 3) {
+              if (stufe2 >= 2) {
+                ctx.meldung("Mobile Kasse ist bereits vollst\xE4ndig ausgebaut.", false);
+                break;
+              }
+              const r3 = E8.fuehreAus(s2(), { typ: "itKasseAusbau", art: "mobil", stufe: stufe2 + 1 });
+              ctx.meldung(r3.text, !r3.ok);
+              if (r3.ok) ctx.nachAktion?.();
+              break;
+            }
+          }
+          ui.reiter = "neu";
+          ui.system = p2.system;
+          ui.generation = Math.max(3, p2.generation + 1);
+          ui.auswahl = null;
+          ui.produkt = null;
+          break;
+        }
         case "neues":
           ui.reiter = "neu";
           ui.system = v;
@@ -144503,9 +144747,11 @@
       }
     });
     return {
-      oeffne: (seite2 = "systeme") => {
+      oeffne: (seite2 = "systeme", produkt = null) => {
         ui.aktiv = true;
         ui.reiter = seite2;
+        ui.produkt = seite2 === "produkte" ? produkt : null;
+        ui.bestaetigung = false;
         ui.auswahl = null;
         zeichnen2();
       },
@@ -145424,9 +145670,9 @@
     });
     const T = new KompaktSammler();
     const offen = [];
-    const zahl5 = /* @__PURE__ */ new Map();
-    for (const p2 of plan.parzellen) zahl5.set(p2.typ, (zahl5.get(p2.typ) ?? 0) + 1);
-    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl5.get(p2.typ) >= 5);
+    const zahl6 = /* @__PURE__ */ new Map();
+    for (const p2 of plan.parzellen) zahl6.set(p2.typ, (zahl6.get(p2.typ) ?? 0) + 1);
+    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl6.get(p2.typ) >= 5);
     const grund2 = new Proxy(sb.bauer, { get(z4, typ) {
       const f11 = bauerFuer(z4, typ);
       return (S, sc, p2) => {
@@ -145502,9 +145748,9 @@
     });
     const T = new KompaktSammler();
     const offen = [];
-    const zahl5 = /* @__PURE__ */ new Map();
-    for (const p2 of plan.parzellen) zahl5.set(p2.typ, (zahl5.get(p2.typ) ?? 0) + 1);
-    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl5.get(p2.typ) >= 5);
+    const zahl6 = /* @__PURE__ */ new Map();
+    for (const p2 of plan.parzellen) zahl6.set(p2.typ, (zahl6.get(p2.typ) ?? 0) + 1);
+    const kachelTyp = (p2) => !p2.standort && !IMMER_GRUND.has(p2.typ) && (HAUSTYPEN.has(p2.typ) || p2.typ.startsWith("slot:") && zahl6.get(p2.typ) >= 5);
     const grund2 = new Proxy(sb.bauer, { get(z4, typ) {
       const f11 = bauerFuer(z4, typ);
       return (S, sc, p2) => {
@@ -145976,26 +146222,26 @@
     const z4 = sb.zustand(id);
     const bild3 = z4 ? [z4.status, ...z4.zusatz].filter((q2) => q2 !== "offen").map((q2) => q2 === "aktion" && z4.aktion ? `Aktion ${AKTION_NAME[z4.aktion]}` : STATUS_TITEL[q2]).join(" \xB7 ") : "";
     const qm2 = h3.flaechen.reduce((a2, f11) => a2 + f11.qm, 0);
-    const zahl5 = (t, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t}</span><b>${w2}</b></div>`;
+    const zahl6 = (t, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t}</span><b>${w2}</b></div>`;
     let html = `<div class="chips"><span class="chip ${h3.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h3.status] ?? h3.status}</span>${h3.klasse === "premium" ? '<span class="chip" style="background:#fbefd2;color:#6d4b18;border:1px solid #c4a06a;font-weight:700">\u265B Premium</span>' : ""}${bild3 ? `<span class="chip">${bild3}</span>` : ""}<span class="chip grau">${h3.lage === "1a" ? "1a-Lage" : h3.lage === "b" ? "B-Lage" : h3.lage === "center" ? "Center" : "Stadtrand"}</span></div>`;
-    html += `<div class="raster">${zahl5("Umsatz Woche", geld(k3?.umsatz ?? 0))}${zahl5("Deckungsbeitrag", geld(k3?.db ?? 0), (k3?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl5("Verkaufsfl\xE4che", fmt.format(qm2) + " qm")}${zahl5("Substanz", Math.round(h3.substanz) + " / 100", h3.substanz < 35 ? "rot" : "")}</div>`;
+    html += `<div class="raster">${zahl6("Umsatz Woche", geld(k3?.umsatz ?? 0))}${zahl6("Deckungsbeitrag", geld(k3?.db ?? 0), (k3?.db ?? 0) < 0 ? "rot" : "gruen")}${zahl6("Verkaufsfl\xE4che", fmt.format(qm2) + " qm")}${zahl6("Substanz", Math.round(h3.substanz) + " / 100", h3.substanz < 35 ? "rot" : "")}</div>`;
     html += st?.hausGrafik(id) ?? "";
     html += hausTreiberZeile(src_exports, s, id);
     html += um?.hausKarte(id) ?? "";
     if (h3.format === "schwester") {
       const f11 = schwesterUebersicht(s);
-      html += '<div class="karte"><div class="khead">Volkskauf \xB7 Regionalf\xFChrung</div><div class="raster">' + zahl5("H\xE4user", fmt.format(f11.haeuser)) + zahl5("EBITDA", geld(f11.ebitda)) + zahl5("Umbauten", fmt.format(f11.umbauten)) + "</div>";
+      html += '<div class="karte"><div class="khead">Volkskauf \xB7 Regionalf\xFChrung</div><div class="raster">' + zahl6("H\xE4user", fmt.format(f11.haeuser)) + zahl6("EBITDA", geld(f11.ebitda)) + zahl6("Umbauten", fmt.format(f11.umbauten)) + "</div>";
       if (h3.status === "offen") html += `<button class="mini" onclick="formateTun('schwesterUmflaggen','` + id + `')">Zu Hartwig umflaggen</button>`;
       html += "</div>";
     }
     if (h3.format === "outlet") {
       const f11 = outletUebersicht(s);
-      html += '<div class="karte"><div class="khead">FUNDUS \xB7 Off-Price-Markenposten</div><div class="raster">' + zahl5("Bestand EK", geld(f11.poolWert)) + zahl5("Markenposten", geld(f11.markenposten)) + zahl5("Konzern-Altware", geld(f11.altware)) + zahl5("Reichweite", f11.reichweite.toFixed(1).replace(".", ",") + " Wo.") + "</div>";
+      html += '<div class="karte"><div class="khead">FUNDUS \xB7 Off-Price-Markenposten</div><div class="raster">' + zahl6("Bestand EK", geld(f11.poolWert)) + zahl6("Markenposten", geld(f11.markenposten)) + zahl6("Konzern-Altware", geld(f11.altware)) + zahl6("Reichweite", f11.reichweite.toFixed(1).replace(".", ",") + " Wo.") + "</div>";
       html += `<button class="mini" onclick="formateTun('altwareOutlet',80)">Altwarequote 80 %</button></div>`;
     }
     if (h3.klasse === "premium") {
       const p2 = premiumUebersicht(s).find((q2) => q2.id === id);
-      html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl5("Premium-Image", Math.round(p2?.image ?? 80) + " / 100")}${zahl5("Immobilien- & Marktwert", geld(p2?.marktwert ?? 0))}${zahl5("EBITDA-Marge (DB)", ((p2?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl5("Aktionsschutz", p2?.schutz ? "Aktiv" : "Aus")}</div>`;
+      html += `<div class="karte"><div class="khead">Kronjuwel \xB7 Premiumsegment</div><div class="raster">${zahl6("Premium-Image", Math.round(p2?.image ?? 80) + " / 100")}${zahl6("Immobilien- & Marktwert", geld(p2?.marktwert ?? 0))}${zahl6("EBITDA-Marge (DB)", ((p2?.marge ?? 0) * 100).toFixed(1).replace(".", ",") + " %")}${zahl6("Aktionsschutz", p2?.schutz ? "Aktiv" : "Aus")}</div>`;
       if (h3.premiumEigentuemer) html += `<div class="zeile">Eigent\xFCmer: ${h3.premiumEigentuemer}</div>`;
       else if (h3.status === "offen") html += `<div class="zeile"><button class="mini" onclick="premiumTun('schutz','${id}')">${p2?.schutz ? "Rabatt-Schutz aufheben" : "Rabatt-Schutz aktivieren"}</button> <button class="mini" onclick="premiumTun('investieren','${id}')">10 Mio. \u20AC investieren</button></div>`;
       const an = s.angebote.find((a2) => a2.status === "offen" && a2.typ === "premiumVerkauf" && a2.wunschHaeuser?.includes(id));
@@ -146018,13 +146264,13 @@
     html += '<div class="karte"><div class="khead">Sanierungsprogramme \xB7 gesamtes Filialnetz</div>';
     for (const [programm, def] of Object.entries(FILIAL_PROGRAMME)) {
       const stand2 = d3.programme?.[programm];
-      const status = stand2 ? s.woche < stand2.wirksamAb ? "Anlaufphase bis Woche " + (stand2.wirksamAb + 1) : "Wirksam" : "";
-      html += `<div class="zeile"><span class="was"><b>${def.name}</b> <i>${status || def.vorlauf + " Wochen Vorlauf"} \xB7 ${def.nebenwirkung}</i></span>${stand2 ? "" : `<button class="mini" onclick="filialProgramm('${programm}')">Starten</button>`}</div>`;
+      const status2 = stand2 ? s.woche < stand2.wirksamAb ? "Anlaufphase bis Woche " + (stand2.wirksamAb + 1) : "Wirksam" : "";
+      html += `<div class="zeile"><span class="was"><b>${def.name}</b> <i>${status2 || def.vorlauf + " Wochen Vorlauf"} \xB7 ${def.nebenwirkung}</i></span>${stand2 ? "" : `<button class="mini" onclick="filialProgramm('${programm}')">Starten</button>`}</div>`;
     }
     html += "</div>";
     if (d3.ecommerce && h3.format === "warenhaus") {
       const x2 = d3.ecommerce;
-      html += '<div class="karte"><div class="khead">Online und Filiallogistik</div><div class="raster">' + zahl5("Abholungen", fmt.format(x2.abholungen)) + zahl5("Versand aus dem Haus", fmt.format(x2.versand)) + zahl5("Retouren im Haus", fmt.format(x2.retouren)) + zahl5("Instore-Logistik", x2.instoreStunden.toFixed(1).replace(".", ",") + " Std.") + '</div><div class="zeile">Abholstation: ' + (x2.station ? "vorhanden" : "nicht vorhanden") + " \xB7 Ship-from-Store: " + (x2.versandAn ? "aktiv" : "aus") + "</div></div>";
+      html += '<div class="karte"><div class="khead">Online und Filiallogistik</div><div class="raster">' + zahl6("Abholungen", fmt.format(x2.abholungen)) + zahl6("Versand aus dem Haus", fmt.format(x2.versand)) + zahl6("Retouren im Haus", fmt.format(x2.retouren)) + zahl6("Instore-Logistik", x2.instoreStunden.toFixed(1).replace(".", ",") + " Std.") + '</div><div class="zeile">Abholstation: ' + (x2.station ? "vorhanden" : "nicht vorhanden") + " \xB7 Ship-from-Store: " + (x2.versandAn ? "aktiv" : "aus") + "</div></div>";
     }
     const shops = EQ.shops(s, h3);
     if (hausEtageWahl?.id === id) {
@@ -146056,7 +146302,7 @@
     html += "</div>";
     html = hausSteckbrief(d3, html, hausReiter, s.woche);
     if (hausReiter === "personal" && pe) html += pe.hausBlock(id);
-    if (hausReiter === "ware" && d3.waren) html += `<div class="karte"><div class="khead">Ware \xB7 ${esc2(d3.waren.hauscluster)}</div><div class="raster">${zahl5("Warenverf\xFCgbarkeit", (d3.waren.verfuegbarkeit * 100).toFixed(1) + " %")}${zahl5("Altwareanteil", (d3.waren.altwareanteil * 100).toFixed(1) + " %")}${zahl5("Inventurdifferenz", d3.waren.inventur ? geld(d3.waren.inventur.differenz) : "Noch offen")}${zahl5("Fl\xE4chenproduktivit\xE4t", geld(d3.waren.flaechenproduktivitaet) + "/qm")}</div></div>`;
+    if (hausReiter === "ware" && d3.waren) html += `<div class="karte"><div class="khead">Ware \xB7 ${esc2(d3.waren.hauscluster)}</div><div class="raster">${zahl6("Warenverf\xFCgbarkeit", (d3.waren.verfuegbarkeit * 100).toFixed(1) + " %")}${zahl6("Altwareanteil", (d3.waren.altwareanteil * 100).toFixed(1) + " %")}${zahl6("Inventurdifferenz", d3.waren.inventur ? geld(d3.waren.inventur.differenz) : "Noch offen")}${zahl6("Fl\xE4chenproduktivit\xE4t", geld(d3.waren.flaechenproduktivitaet) + "/qm")}</div></div>`;
     panel(h3.name, `${h3.stadt} \xB7 ${h3.klasse === "premium" ? "Premiumhaus" : h3.format === "sport" ? "Sporthaus" : h3.format === "schwester" ? "Volkskauf" : h3.format === "outlet" ? "FUNDUS" : "Warenhaus"} \xB7 Baujahr ${h3.baujahr}`, html, "hausdetail");
     if (neu) hausZeigen(id);
   }
@@ -146227,10 +146473,10 @@
     offenesHaus = null;
     offenesHq = gebaeudeId ?? true;
     const u = hqUebersicht(s), j3 = hqGrafik();
-    const zahl5 = (t, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t}</span><b>${w2}</b></div>`;
+    const zahl6 = (t, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t}</span><b>${w2}</b></div>`;
     const pz5 = (x2) => `${Math.round((x2 ?? 0) * 100)} %`;
     const knopf4 = (text3, args, art = "") => `<button class="mini ${art}" onclick="event.stopPropagation();hqKlick(${args.map((x2) => `'${x2}'`).join(",")})">${text3}</button>`;
-    let html = `<div class="raster">${zahl5("Kosten Zentrale je Woche", geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? "rot" : "")}${zahl5("Besch\xE4ftigte", fmt.format(Math.round(u.fte)) + " FTE")}${zahl5("davon B\xFCromiete", geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl5("Restmiete alter B\xFCros", geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? "rot" : "")}</div>`;
+    let html = `<div class="raster">${zahl6("Kosten Zentrale je Woche", geld(u.kostenWoche), u.kostenWoche > u.kostenStart ? "rot" : "")}${zahl6("Besch\xE4ftigte", fmt.format(Math.round(u.fte)) + " FTE")}${zahl6("davon B\xFCromiete", geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)))}${zahl6("Restmiete alter B\xFCros", geld(u.restmieteWoche ?? 0), u.restmieteWoche > 0 ? "rot" : "")}</div>`;
     const gs = u.gebaeude ?? [];
     const gWahl = gs.find((g) => g.id === hqEtageWahl?.g) ?? gs.find((g) => g.id === gebaeudeId) ?? gs[0];
     if (gWahl) {
@@ -146334,7 +146580,7 @@
   ec = ecommerceModul({ E: src_exports, s: () => s, panel, meldung, nachAktion: () => {
     nachAktion();
     grafikNachziehen();
-  } });
+  }, oeffneItProdukt: (id) => itM.oeffne("produkte", id) });
   er = erfolgeModul({ E: src_exports, s: () => s, panel });
   pl = planungModul({ E: src_exports, s: () => s, panel, meldung, nachAktion });
   um = umbauModul({ E: src_exports, s: () => s, panel, meldung, nachAktion: () => {
@@ -146429,7 +146675,7 @@
     stadt: () => stadtName,
     staedte: () => STADTLISTE.filter((d3) => s?.haeuser.some((h3) => h3.stadt === d3.name)).map((d3) => {
       const hs = s.haeuser.filter((h3) => h3.stadt === d3.name && h3.status !== "geschlossen");
-      const zahl5 = (rolle3) => d3.standorte.filter((p2) => p2.rolle === rolle3).length;
+      const zahl6 = (rolle3) => d3.standorte.filter((p2) => p2.rolle === rolle3).length;
       const formate = [["Hartwig", hs.filter((h3) => h3.format === "warenhaus").length], ["Volkskauf", hs.filter((h3) => h3.format === "schwester").length], ["Sport", hs.filter((h3) => h3.format === "sport").length], ["FUNDUS", hs.filter((h3) => h3.format === "outlet").length]];
       return {
         name: d3.name,
@@ -146438,7 +146684,7 @@
         hauscluster: hs[0]?.hauscluster,
         groesse: hs.length,
         umsatz: hs.reduce((sum2, h3) => sum2 + (h3.kpi?.umsatz ?? 0), 0),
-        formate: formate.filter((p2) => p2[1]).map(([name2, anzahl]) => ({ name: name2, anzahl }))
+        formate: formate.filter((p2) => p2[1]).map(([name2, anzahl2]) => ({ name: name2, anzahl: anzahl2 }))
       };
     }),
     pinPunkt: bahnhofBildpunkt,
@@ -146738,7 +146984,7 @@
     speicherDiagnose,
     meldung,
     ecommerce: ec,
-    oeffneEcommerce: () => oeffneModul(ec),
+    oeffneEcommerce: (...a2) => oeffneModul(ec, ...a2),
     chronik: () => chronikUebersicht(s),
     oeffneChronik: () => oeffneModul(ch),
     personaleinsatz: pe,

@@ -18,7 +18,9 @@ function sterne(n) {
     Array.from({ length: 5 }, (_, i) => '<svg viewBox="0 0 24 24" aria-hidden="true" class="' + (i<n ? 'voll' : '') +
       '"><path d="m12 2 3.15 6.38 7.04 1.02-5.09 4.96 1.2 7.01L12 18.07l-6.3 3.3 1.2-7.01-5.09-4.96 7.04-1.02Z"/></svg>').join('') + '</span>';
 }
-const status = p => '<span class="itp-status ' + (p.aktiv ? '' : 'aus') + '">' + (p.aktiv ? 'Aktiv' : 'Abgeschaltet') + '</span>';
+// Version 0.0 = noch nicht eingeführt (z. B. Mobile Pay ohne mobile Kassenstufe): nicht als „Aktiv“ ausweisen.
+const status = p => { const neu = p.aktiv && p.version === '0.0';
+  return '<span class="itp-status ' + (p.aktiv && !neu ? '' : 'aus') + '">' + (neu ? 'Noch nicht eingeführt' : p.aktiv ? 'Aktiv' : 'Abgeschaltet') + '</span>'; };
 const formatAenderung = p => {
   if (p.aenderung === undefined) return '<span class="itp-delta">Ab der zweiten Woche vergleichbar</span>';
   const d = p.aenderung, zeichen = d > 0 ? '+' : d < 0 ? '−' : '±';

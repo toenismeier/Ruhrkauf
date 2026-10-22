@@ -45,6 +45,7 @@ const assert = require('node:assert/strict');
       assert.equal(result.knoepfe,0,'Touch-Ziele sind kleiner als 44 px');
     };
     await page.evaluate(() => window.spiel.oeffneIt('produkte'));
+    await page.locator('[data-it="produkt"]').first().waitFor();
     assert.equal(await page.locator('[data-it="produkt"]').count(),4);
     await bild('01-it-produktuebersicht');
     await pruefeLayout();
