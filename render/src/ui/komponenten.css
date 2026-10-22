@@ -33,24 +33,24 @@
 }
 
 /* ───────────── Bereich: Tokens auf das Panel abbilden ───────────── */
-#panel:has(.hk-bereich), .hk-flaeche-demo {
+#panel:has(.hk-bereich), .hk-flaeche {
   --g: var(--hk-bet-grund); --f: var(--hk-bet-flaeche); --t: var(--hk-bet-tief); --l: var(--hk-bet-linie);
   --tx: var(--hk-bet-text); --le: var(--hk-bet-leise);
 }
-#panel:has(.hk-bereich[data-bereich=haus]), .hk-flaeche-demo[data-bereich=haus] {
+#panel:has(.hk-bereich[data-bereich=haus]), .hk-flaeche[data-bereich=haus] {
   --g: var(--hk-haus-grund); --f: var(--hk-haus-flaeche); --t: var(--hk-haus-tief); --l: var(--hk-haus-linie);
   --tx: var(--hk-haus-text); --le: var(--hk-haus-leise);
 }
-#panel:has(.hk-bereich[data-bereich=zentrale]), .hk-flaeche-demo[data-bereich=zentrale] {
+#panel:has(.hk-bereich[data-bereich=zentrale]), .hk-flaeche[data-bereich=zentrale] {
   --g: var(--hk-zen-grund); --f: var(--hk-zen-flaeche); --t: var(--hk-zen-tief); --l: var(--hk-zen-linie);
   --tx: var(--hk-zen-text); --le: var(--hk-zen-leise);
 }
-#panel:has(.hk-bereich[data-bereich=papier]), .hk-flaeche-demo[data-bereich=papier] {
+#panel:has(.hk-bereich[data-bereich=papier]), .hk-flaeche[data-bereich=papier] {
   --g: var(--hk-pap-grund); --f: var(--hk-pap-flaeche); --t: var(--hk-pap-tief); --l: var(--hk-pap-linie);
   --tx: var(--hk-pap-text); --le: var(--hk-pap-leise);
 }
 /* Alte Variablen der Bestandsklassen auf den Bereich umlenken, damit .karte, .zeile usw. mitziehen. */
-#panel:has(.hk-bereich), .hk-flaeche-demo {
+#panel:has(.hk-bereich), .hk-flaeche {
   --grund: var(--g); --karte: var(--f); --text: var(--tx); --leise: var(--le); --linie: var(--l);
   --ui-bg: var(--g); --ui-surface: var(--f); --ui-text: var(--tx); --ui-muted: var(--le); --ui-border: var(--l);
   --gruen: var(--hk-gut); --rot: var(--hk-akzent); --ui-brand: var(--hk-akzent);
@@ -59,13 +59,13 @@
 .hk-bereich { display: none; }
 
 /* Grund mit feinem senkrechtem Streifen (Helligkeitsunterschied unter 3 %) */
-#panel:has(.hk-bereich), .hk-flaeche-demo {
+#panel:has(.hk-bereich), .hk-flaeche {
   background-color: var(--g);
   background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 7px, rgba(255,255,255,0.022) 7px 8px);
   box-shadow: 0 -2px 8px rgba(0,0,0,0.35);
 }
 #panel:has(.hk-bereich[data-bereich=papier]) { background-image: none; }
-#panel:has(.hk-bereich[data-bereich=papier]), .hk-flaeche-demo[data-bereich=papier] { --hk-serie-a: #3b3832; --hk-serie-b: #3e8a45; --hk-gut: #2f7a37; --hk-schlecht: #b6362c; --hk-achtung: #9a6a12; }
+#panel:has(.hk-bereich[data-bereich=papier]), .hk-flaeche[data-bereich=papier] { --hk-serie-a: #3b3832; --hk-serie-b: #3e8a45; --hk-gut: #2f7a37; --hk-schlecht: #b6362c; --hk-achtung: #9a6a12; }
 
 /* ───────────── Blattkopf ───────────── */
 #panel:has(.hk-bereich) .pkopf { background: var(--t); border-bottom: 1px solid var(--l); color: var(--tx);
@@ -84,7 +84,8 @@
 #panel:has(.hk-bereich[data-symbol=karte]) { --hk-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M3 18l10-5 10 5 10-5v13l-10 5-10-5-10 5z' fill='%23b9c4b2'/%3E%3Cpath d='M13 13v13l10 5V18z' fill='%23d5ddcf'/%3E%3Cpath d='M18 6a5 5 0 0 1 5 5c0 4-5 9-5 9s-5-5-5-9a5 5 0 0 1 5-5z' fill='%23d23c32'/%3E%3Ccircle cx='18' cy='11' r='2' fill='%23fff'/%3E%3C/svg%3E"); }
 
 /* ───────────── Inhalt ───────────── */
-#panel:has(.hk-bereich) #pinhalt { padding: 0 0 calc(16px + env(safe-area-inset-bottom)); }
+#panel:has(.hk-bereich) #pinhalt { padding: 0; }
+#panel:has(.hk-bereich) #pinhalt > :last-child:not(.hk-reiter) { margin-bottom: calc(16px + env(safe-area-inset-bottom)); }
 .hk-rumpf { padding: var(--hk-3) calc(var(--hk-4) + env(safe-area-inset-right)) var(--hk-3) calc(var(--hk-4) + env(safe-area-inset-left)); }
 
 /* Sprecherzeile: eine Person sagt den Befund der Woche, keine Begrüßung */
@@ -108,7 +109,7 @@
 /* Abschnittskopf in Versalien */
 .hk-abschnitt { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: var(--hk-5) 0 var(--hk-2); font-size: var(--hk-xs); line-height: 16px;
   letter-spacing: 0.08em; text-transform: uppercase; color: var(--tx); font-weight: 700; }
-.hk-abschnitt:first-child { margin-top: var(--hk-2); }
+.hk-rumpf > .hk-abschnitt:first-child { margin-top: var(--hk-2); }
 .hk-abschnitt small { letter-spacing: 0; text-transform: none; font-weight: 400; color: var(--le); font-size: var(--hk-xs); }
 
 /* Großkennzahlen: Beschriftung in Versalien, Zahl groß, Abweichung darunter */
@@ -117,11 +118,11 @@
 .hk-gross > div > span { display: block; font-size: var(--hk-xs); line-height: 16px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--le); }
 .hk-gross b { display: block; font-size: clamp(22px, 7vw, var(--hk-xl)); line-height: 1.15; font-weight: 400; color: var(--tx); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .hk-gross b.gut { color: var(--hk-gut); } .hk-gross b.schlecht { color: var(--hk-schlecht); }
-.hk-gross i { display: block; font-style: normal; font-size: var(--hk-xs); line-height: 16px; color: var(--le); font-variant-numeric: tabular-nums; }
+.hk-gross i { display: block; white-space: nowrap; font-style: normal; font-size: var(--hk-xs); line-height: 16px; color: var(--le); font-variant-numeric: tabular-nums; }
 .hk-gross i .gut { color: var(--hk-gut); } .hk-gross i .schlecht { color: var(--hk-schlecht); }
 
 /* Balken ohne Achsen: 5 Wochen, gepaart */
-.hk-balken { display: grid; grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); gap: var(--hk-2); align-items: end; height: 132px; padding: 0 var(--hk-2); margin: var(--hk-2) 0 0; }
+.hk-balken { display: grid; grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); gap: var(--hk-2); align-items: end; height: var(--hk-balkenhoehe, 96px); padding: 0 var(--hk-2); margin: var(--hk-2) 0 0; }
 .hk-balken > div { height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 4px; }
 .hk-balken span { display: block; width: 12px; min-height: 2px; border-radius: 6px; background: var(--hk-serie-a); }
 .hk-balken span.b { background: var(--hk-serie-b); } .hk-balken span.neg { background: var(--hk-schlecht); }
@@ -191,7 +192,7 @@
 /* Reiterleiste unten mit illustrierten Symbolen */
 .hk-reiter { position: sticky; bottom: 0; z-index: 3; display: flex; gap: 2px; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: var(--t); border-top: 1px solid var(--l); overflow-x: auto; scrollbar-width: none; margin-top: var(--hk-4); }
 .hk-reiter::-webkit-scrollbar { display: none; }
-.hk-reiter button { flex: 1 0 58px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 12px; background: transparent; border: 0; color: var(--le); font: inherit; font-size: var(--hk-xs); line-height: 16px; white-space: nowrap; }
+.hk-reiter button { flex: 1 1 0; min-width: 48px; padding: 0 2px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 12px; background: transparent; border: 0; color: var(--le); font: inherit; font-size: var(--hk-xs); line-height: 16px; white-space: nowrap; }
 .hk-reiter button svg { width: 34px; height: 34px; display: block; }
 .hk-reiter button[aria-current=page] { background: var(--f); color: var(--tx); font-weight: 700; }
 
@@ -227,10 +228,60 @@
 #panel:has(.hk-bereich) .tab, #panel:has(.hk-bereich) .seg button { color: var(--le); min-height: 44px; }
 #panel:has(.hk-bereich) .tab.an, #panel:has(.hk-bereich) .seg button.an { background: var(--hk-akzent); color: #fff; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
 #panel:has(.hk-bereich) .stepper button { background: var(--hk-akzent); color: #fff; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
-#panel:has(.hk-bereich) .breit { background: transparent; color: var(--tx); border-color: var(--l); }
-#panel:has(.hk-bereich) .breit.gruen { background: var(--hk-akzent); border-color: #8f2219; color: #fff; }
+#panel:has(.hk-bereich) .breit:not(.hk-knopf) { background: transparent; color: var(--tx); border-color: var(--l); }
+#panel:has(.hk-bereich) .breit.gruen:not(.hk-knopf) { background: var(--hk-akzent); border-color: #8f2219; color: #fff; }
 #panel:has(.hk-bereich) .zurueck, #panel:has(.hk-bereich) .postalle, #panel:has(.hk-bereich) .postzurueck, #panel:has(.hk-bereich) .postort { color: var(--tx); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; }
 #panel:has(.hk-bereich) .lkopf, #panel:has(.hk-bereich) .lzeile.bereich { background: var(--t); border-color: var(--l); }
 #panel:has(.hk-bereich) .lzeile { border-color: var(--l); color: var(--tx); }
 #panel:has(.hk-bereich) .leise, #panel:has(.hk-bereich) .legende, #panel:has(.hk-bereich) .rfuss { color: var(--le); }
 #panel:has(.hk-bereich) .kz { background: var(--f); border-color: var(--l); }
+
+/* ───────────── Ergänzungen Q30 Teil 2 (Haus, Personal, Regler) ───────────── */
+.hk-gross.klein b { font-size: var(--hk-lg); }
+.hk-marken { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: var(--hk-3) 0 0; }
+.hk-schnitt { background: var(--t); border: 1px solid var(--l); border-radius: var(--hk-radius); padding: var(--hk-2) var(--hk-2) 0; margin-bottom: var(--hk-2); }
+.hk-etagenschnitt { display: block; width: 100%; height: auto; }
+.hk-innen { background: var(--f); border: 1px solid var(--l); border-radius: var(--hk-radius); overflow: hidden; margin-bottom: var(--hk-2); }
+.hk-innen img { display: block; width: 100%; background: var(--t); }
+.hk-person-karte { display: flex; gap: var(--hk-4); align-items: center; padding: var(--hk-3); background: var(--f); border: 1px solid var(--l); border-radius: var(--hk-radius); }
+.hk-person-karte .hk-portraet { flex: none; width: 96px; height: 104px; border-radius: 10px; overflow: hidden; background: var(--t); }
+.hk-person-karte .hk-portraet svg { display: block; width: 104px; height: 104px; margin-left: -4px; }
+.hk-person-karte b { display: block; font-size: var(--hk-lg); line-height: 28px; font-weight: 700; }
+.hk-person-karte small { display: block; color: var(--le); font-size: var(--hk-xs); line-height: 18px; }
+.hk-figuren { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px 4px; margin: var(--hk-2) 0 var(--hk-3); }
+.hk-figuren i { display: block; height: 30px; background: center bottom / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 30'%3E%3Ccircle cx='6' cy='4' r='3.4' fill='%23574e46'/%3E%3Cpath d='M2 9h8l1 11H9l-.5 10h-5L3 20H1z' fill='%23574e46'/%3E%3C/svg%3E"); }
+.hk-figuren i.an { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 30'%3E%3Ccircle cx='6' cy='4' r='3.4' fill='%23e8c4a2'/%3E%3Cpath d='M2 9h8l1 11H9l-.5 10h-5L3 20H1z' fill='%23d23c32'/%3E%3Cpath d='M3.5 20h5l-.2 10H3.7z' fill='%23302a26'/%3E%3C/svg%3E"); }
+.hk-regel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(170px, 52%); gap: var(--hk-3); align-items: center; margin: 0 0 var(--hk-2); font-size: var(--hk-sm); }
+.hk-regel > span { overflow-wrap: anywhere; }
+.hk-knopfreihe.zweispaltig > .hk-knopf { flex: 1 1 calc(50% - 8px); }
+#panel:has(.hk-bereich) #pinhalt > .hk-reiter { margin-left: 0; margin-right: 0; }
+
+/* Zwei Balkenreihen nebeneinander mit eigener Skala (z. B. Umsatz und Deckungsbeitrag, die sich um Größenordnungen unterscheiden) */
+.hk-balkenpaar { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hk-3); margin: var(--hk-2) 0 0; }
+.hk-balkenpaar > div { min-width: 0; background: var(--t); border: 1px solid var(--l); border-radius: var(--hk-radius); padding: var(--hk-2) 4px var(--hk-2); }
+.hk-balkenpaar h4 { margin: 0 0 4px; text-align: center; font-size: var(--hk-xs); line-height: 16px; font-weight: 400; color: var(--le); letter-spacing: 0.06em; text-transform: uppercase; }
+.hk-balkenpaar .hk-balken { --hk-balkenhoehe: 72px; gap: 4px; padding: 0 4px; position: relative; }
+.hk-balkenpaar .hk-balken.mitnull { align-items: stretch; }
+.hk-balkenpaar .hk-balkenfuss { gap: 4px; padding: 4px 4px 0; }
+.hk-balkenpaar .hk-balkenfuss span { overflow: hidden; white-space: nowrap; }
+.hk-balken .null-linie { position: absolute; left: 0; right: 0; height: 1px; background: var(--l); }
+/* Ankreuzfelder im dunklen Look: 22-px-Kasten, Trefferfläche bleibt die Zeile bzw. 44 px */
+#panel:has(.hk-bereich) input[type=checkbox] { -webkit-appearance: none; appearance: none; flex: none; width: 44px; height: 44px; margin: 0; border: 0; border-radius: 6px; cursor: pointer;
+  background: center / 22px 22px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Crect x='1' y='1' width='20' height='20' rx='5' fill='none' stroke='%23a4a9ae' stroke-width='1.6'/%3E%3C/svg%3E"); }
+#panel:has(.hk-bereich) input[type=checkbox]:checked { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Crect x='1' y='1' width='20' height='20' rx='5' fill='%23d23c32' stroke='%23ef7a6f' stroke-width='1.6'/%3E%3Cpath d='M6 11.5l3.2 3.2L16 8' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+#panel:has(.hk-bereich) input[type=checkbox]:disabled { opacity: 0.35; }
+
+/* Blatt in voller Höhe (Q31-Bedarf): bereich(name, symbol, { voll: true }) */
+#panel:has(.hk-bereich[data-hoehe=voll]) { height: min(87dvh, calc(100dvh - env(safe-area-inset-top))); }
+/* Karussell mit Seitenpunkten */
+.hk-karussell { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 calc(-1 * var(--hk-4)); padding: 4px var(--hk-4) 4px; scrollbar-width: none; }
+.hk-karussell::-webkit-scrollbar { display: none; }
+.hk-karussell-karte { flex: none; width: calc(100% - 40px); scroll-snap-align: center; background: var(--f); border: 1px solid var(--l); border-radius: var(--hk-radius-gross); padding: var(--hk-3); }
+.hk-punkte { display: flex; justify-content: center; gap: 6px; margin: var(--hk-2) 0; }
+.hk-punkte i { width: 7px; height: 7px; border-radius: 4px; background: var(--l); }
+.hk-punkte i.an { background: var(--tx); }
+
+/* Mindestschrift 12 px für Bestandsklassen, die Q31-Panels im dunklen Look weiter nutzen (Stilprüfung auch unterhalb der Falz) */
+#panel:has(.hk-bereich) :is(.kfuss, .kfuss span, .owerte span, .passung i, .passung b, .q17-merkmal, .q17-merkmal b, .q17-merkmal span, .emname i, .q24-leistung > small,
+  .q24-werte span, .q24-detailwerte span, .q11auswahl small, .q11kategorie small, .q11ast small, .q11zielgruppen button span, .q11fortschritt span, .lname i, .q17-kpis span,
+  .q17-hinweis, .q17-preispunkt, .verkauf small, .preis small, .donut small, .sternzahl, .rkopf small, .rfuss, .typkacheln button small, .typkacheln button span, .mzeile span, .mzeile b, .legende) { font-size: 12px !important; }

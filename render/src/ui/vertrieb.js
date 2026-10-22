@@ -70,7 +70,7 @@ export function vertriebModul(ctx) {
     h += '<h4>' + (ui.ebene === 'alle' ? 'Regionen' : ui.ebene === 'region' ? 'Hauscluster' : 'Häuser') +
       ' · ' + sortiert.length + '</h4><div class="vtr-liste">' +
       (sortiert.length ? sortiert.map((z) => zeile(z, true)).join('') : '<p>Keine Standorte im Filter.</p>') +
-      '</div><button class="vtr-portfolio" data-vtr="portfolio">Portfolio & Sammelaktionen (#23) öffnen →</button>';
+      '</div><button class="vtr-portfolio" data-vtr="portfolio">Portfolio und Sammelaktionen öffnen</button>';
     return h;
   }
   function klick(el) {

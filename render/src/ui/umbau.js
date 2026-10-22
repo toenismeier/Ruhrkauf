@@ -6,49 +6,51 @@ export function umbauModul(ctx) {
   const E=ctx.E, s=()=>ctx.s();
   const ui={aktiv:false,haus:null,etage:0,stufe:'auffrischung'};
   const zustand=()=>E.umbauUebersicht(s());
+  const kw=(w)=>'KW '+((w%52)+1)+'/'+(s().startJahr+Math.floor(w/52));
+  // Q30: im Hausdetail beantwortet der Block „Welche Etage braucht Bau?“, schlechteste Substanz zuerst.
   function hausKarte(id) {
     if(typeof E.umbauHaus!=='function')return '';
-    const etagen=E.umbauHaus(s(),id)??[];
-    let html='<div class="karte" data-umbau-karte="'+esc(id)+'"><div class="khead">Bau · Modernisierung</div>';
-    html+='<div class="tabs"><button class="tab an" data-umbau="haus" data-id="'+esc(id)+'">Bau</button><button class="tab" data-umbau="modernisierung">Konzernprogramm</button></div>';
-    for(const e of [...etagen].reverse()) {
-      const pf=e.pflichten,technik=e.technik;
-      html+='<div class="zeile"><span class="was"><b>'+ETAGE(e.etage)+'</b> <i>Substanz '+Math.round(e.substanz)+'/100 · Möbel '+e.moebelGeneration+
-        ' · Klima '+technik.klima+'/2, Licht '+technik.licht+'/2, Brandschutz '+technik.brandschutz+'/2</i>'+
-        '<small>Prüffristen: Brandschutz W'+pf.brandschutz+' · Aufzug W'+pf.aufzug+'</small>'+
-        (e.gesperrt?'<small class="rot">Behördlich gesperrt</small>':e.projekt?'<small>Baustelle bis Woche '+e.projekt.ende+'</small>':'')+'</span>'+
-        '<button class="mini" data-umbau="planen" data-id="'+esc(id)+'" data-etage="'+e.etage+'">Umbau planen</button></div>';
-    }
-    return html+'</div>';
+    const etagen=[...(E.umbauHaus(s(),id)??[])].sort((a,b)=>b.etage-a.etage);
+    const zeilen=etagen.map((e)=>{
+      const pf=e.pflichten,t=e.technik,frist=Math.min(pf.brandschutz,pf.aufzug),bald=frist-s().woche<13;
+      const status=e.gesperrt?'<span class="hk-schlecht">Behördlich gesperrt</span>':e.projekt?'<span class="hk-achtung">Baustelle bis '+kw(e.projekt.ende)+'</span>':'';
+      return '<div class="hk-zeile" data-umbau-etage="'+e.etage+'"><span class="hk-was">'+ETAGE(e.etage)+' · Substanz <span class="'+(e.substanz<35?'hk-schlecht':'')+'">'+Math.round(e.substanz)+'</span>'+
+        '<small>Möbel Generation '+e.moebelGeneration+' · Klima '+t.klima+'/2 · Licht '+t.licht+'/2 · Brandschutz '+t.brandschutz+'/2</small>'+
+        '<small class="'+(bald?'hk-achtung':'')+'">Prüffrist Brandschutz '+kw(pf.brandschutz)+' · Aufzug '+kw(pf.aufzug)+'</small>'+(status?'<small>'+status+'</small>':'')+'</span>'+
+        '<button type="button" class="hk-knopf zweit" data-umbau="planen" data-id="'+esc(id)+'" data-etage="'+e.etage+'">Planen</button></div>';
+    });
+    return '<h3 class="hk-abschnitt">Bau und Technik<small>'+etagen.length+' Etagen</small></h3><div class="hk-liste" data-umbau-karte="'+esc(id)+'">'+zeilen.join('')+'</div>'+
+      '<div class="hk-knopfreihe"><button type="button" class="hk-knopf text" data-umbau="modernisierung">Konzernprogramm Modernisierung</button></div>';
   }
   function anzeigen() {
+    const B='<i class="hk-bereich" data-bereich="haus" data-symbol="haus" aria-hidden="true"></i>';
     if(ui.haus) {
       const h=s().haeuser.find(x=>x.id===ui.haus);
       const p=E.umbauSchaetzung(s(),ui.haus,ui.etage,ui.stufe);
       const aktiv=(s().umbau?.projekte??[]).some(x=>x.status==='laufend'&&x.haus===ui.haus&&x.etagen.includes(ui.etage));
-      let html='<div class="karte"><div class="khead">Umbau planen</div><div class="zeile"><b>'+esc(h?.name??'Haus')+' · '+ETAGE(ui.etage)+'</b></div>';
-      html+='<label>Stufe <select class="ort gross" data-umbau="stufe">'+Object.entries(BEZEICHNUNG).map(([id,name])=>'<option value="'+id+'"'+(id===ui.stufe?' selected':'')+'>'+name+'</option>').join('')+'</select></label>';
-      html+='<div class="raster"><div class="kz"><span>Fläche</span><b>'+fmt.format(p?.qm??0)+' qm</b></div>'+
-        '<div class="kz"><span>Kosten</span><b>'+geld(p?.kosten??0)+'</b></div>'+
-        '<div class="kz"><span>Bauzeit</span><b>'+ (p?.wochen??0)+' Wochen</b></div>'+
-        '<div class="kz"><span>Wirkung Kaufquote</span><b>+'+Math.round((p?.kaufquote??0)*100)+' %</b></div></div>';
-      if(ui.stufe==='komplett')html+='<div class="zeile warnung">Komplettumbau betrifft das gesamte Haus.</div>';
-      html+='<button class="breit gruen" data-umbau="starten" '+(aktiv?'disabled':'')+'>Umbau starten</button></div>';
-      ctx.panel('Bau',esc(h?.stadt??''),html);
+      const rest=zustand().rest;
+      let html=B+'<div class="hk-rumpf"><h3 class="hk-abschnitt">'+esc(h?.name??'Haus')+' · '+ETAGE(ui.etage)+'</h3>';
+      html+='<div class="hk-seg" role="group" aria-label="Umbaustufe">'+Object.entries(BEZEICHNUNG).map(([id,name])=>'<button type="button" aria-pressed="'+(id===ui.stufe)+'" data-umbau="stufewahl" data-v="'+id+'">'+name+'</button>').join('')+'</div>';
+      html+='<div class="hk-gross" style="--n:2"><div><span>Kosten</span><b class="'+((p?.kosten??0)>rest?'schlecht':'')+'">'+geld(p?.kosten??0)+'</b><i>Budgetrest '+geld(rest)+'</i></div><div><span>Kaufquote</span><b class="gut">+'+Math.round((p?.kaufquote??0)*100)+' %</b><i>nach Fertigstellung</i></div></div>';
+      html+='<div class="hk-liste"><div class="hk-zeile"><span class="hk-was">Fläche</span><span class="hk-wert">'+fmt.format(p?.qm??0)+' qm</span></div><div class="hk-zeile"><span class="hk-was">Bauzeit</span><span class="hk-wert">'+(p?.wochen??0)+' Wochen</span></div></div>';
+      if(ui.stufe==='komplett')html+='<div class="hk-hinweis achtung"><span>Ein Komplettumbau betrifft das gesamte Haus.</span></div>';
+      if(aktiv)html+='<div class="hk-hinweis achtung"><span>Auf dieser Etage läuft bereits eine Baustelle.</span></div>';
+      html+='<div class="hk-knopfreihe"><button type="button" class="hk-knopf breit" data-umbau="starten" '+(aktiv?'disabled':'')+'>Umbau starten</button></div>';
+      html+='<div class="hk-knopfreihe"><button type="button" class="hk-knopf text" data-umbau="modernisierung">Zum Konzernprogramm</button></div></div>';
+      ctx.panel('Umbau planen',esc(h?.stadt??''),html);
       ui.aktiv=true;return;
     }
     const u=zustand();
-    let html='<div class="raster"><div class="kz"><span>Jahresbudget</span><b>'+geld(u.budget)+'</b></div>'+
-      '<div class="kz"><span>Verbraucht</span><b>'+geld(u.verbraucht)+'</b></div>'+
-      '<div class="kz"><span>Rest</span><b>'+geld(u.rest)+'</b></div>'+
-      '<div class="kz"><span>Laufende Baustellen</span><b>'+u.laufend.length+'</b></div></div>';
-    html+='<div class="karte"><div class="khead">Programm von Bau & Ladenbau · Priorität nach Rendite</div>';
-    for(const v of u.programm.slice(0,20))html+='<button class="zeile" data-umbau="planen" data-id="'+esc(v.haus)+'" data-etage="'+v.etage+'"><span class="was"><b>'+esc(v.name)+'</b> · '+ETAGE(v.etage)+'<i>'+BEZEICHNUNG[v.stufe]+' · '+v.rendite.toFixed(1)+' % Jahrespotenzial</i></span><span>'+geld(v.kosten)+'</span></button>';
-    html+='</div><div class="karte"><div class="khead">Laufende Baustellen</div>';
-    if(!u.laufend.length)html+='<div class="zeile">Keine laufenden Umbauten.</div>';
-    for(const p of u.laufend)html+='<div class="zeile"><span class="was"><b>'+esc(s().haeuser.find(x=>x.id===p.haus)?.name??p.haus)+'</b><i>'+BEZEICHNUNG[p.stufe]+' · bis Woche '+p.ende+'</i></span><span>'+geld(p.kosten)+'</span></div>';
-    html+='</div><div class="karte"><div class="khead">Premium-Investitionen</div><div class="zeile">'+u.premiumInvestitionen+' laufend · zählen als freiwillige Modernisierung</div></div>';
-    ctx.panel('Modernisierung','Programm '+u.jahr+' · Bau & Ladenbau',html,'gross');
+    // Hauptfrage: Wo bringt das Baubudget am meisten?
+    let html=B+'<div class="hk-rumpf"><div class="hk-gross" style="--n:2"><div><span>Budget frei</span><b class="'+(u.rest<0?'schlecht':'')+'">'+geld(u.rest)+'</b><i>von '+geld(u.budget)+' · verbraucht '+geld(u.verbraucht)+'</i></div><div><span>Baustellen</span><b>'+u.laufend.length+'</b><i>'+u.premiumInvestitionen+' Premium-Investitionen</i></div></div>';
+    html+='<h3 class="hk-abschnitt">Vorschläge Bau und Ladenbau<small>nach Rendite</small></h3>';
+    html+=u.programm.length?'<div class="hk-liste">'+u.programm.slice(0,20).map((v)=>'<button type="button" class="hk-zeile hk-tippbar" data-umbau="planen" data-id="'+esc(v.haus)+'" data-etage="'+v.etage+'"><span class="hk-was">'+esc(v.name)+' · '+ETAGE(v.etage)+'<small>'+BEZEICHNUNG[v.stufe]+' · '+geld(v.kosten)+'</small></span><span class="hk-wert gut">'+v.rendite.toFixed(1).replace('.',',')+' %<small>Jahrespotenzial</small></span></button>').join('')+'</div>'
+      :'<div class="hk-leer">Bau und Ladenbau haben keine lohnenden Vorschläge.</div>';
+    html+='<h3 class="hk-abschnitt">Laufende Baustellen<small>'+u.laufend.length+'</small></h3>';
+    html+=u.laufend.length?'<div class="hk-liste">'+u.laufend.map((p)=>'<div class="hk-zeile"><span class="hk-was">'+esc(s().haeuser.find(x=>x.id===p.haus)?.name??p.haus)+'<small>'+BEZEICHNUNG[p.stufe]+' · bis '+kw(p.ende)+'</small></span><span class="hk-wert">'+geld(p.kosten)+'</span></div>').join('')+'</div>'
+      :'<div class="hk-leer">Keine laufenden Umbauten.</div>';
+    html+='</div>';
+    ctx.panel('Modernisierung','Programm '+u.jahr+' · Bau und Ladenbau',html,'gross');
     ui.aktiv=true;
   }
   function tun(a) {
@@ -64,6 +66,7 @@ export function umbauModul(ctx) {
     if(art==='modernisierung'){ui.haus=null;anzeigen();return;}
     if(art==='haus'){ui.haus=null;ctx.hausOeffnen(el.dataset.id);return;}
     if(art==='planen'){ui.haus=el.dataset.id;ui.etage=Number(el.dataset.etage);ui.stufe='auffrischung';anzeigen();return;}
+    if(art==='stufewahl'){ui.stufe=el.dataset.v;anzeigen();return;}
     if(art==='starten'){tun({typ:'umbauPlanen',haus:ui.haus,etage:ui.etage,stufe:ui.stufe});return;}
   });
   document.getElementById('pinhalt').addEventListener('change',(ev)=>{

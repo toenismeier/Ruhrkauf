@@ -71,6 +71,8 @@ const server = http.createServer((req, res) => {
     await page.locator('#pp-scroll').evaluate((el) => { el.scrollTop = 1800; el.dispatchEvent(new Event('scroll')); });
     const rowsAfter = await page.locator('#pp-scroll .pp-haus').count();
     assert.ok(rowsBefore > 0 && rowsBefore < 36 && rowsAfter > 0 && rowsAfter < 36, 'Portfolio listet nur sichtbare Häuser');
+    // Q30: Filter liegen in einer aufklappbaren Leiste
+    if (!(await page.locator('.pp-filterbox[open]').count())) await page.locator('.pp-filterbox > summary').click();
     await page.locator('[data-pp-filter="format"]').selectOption('sport');
     const sportAuswahl = await page.evaluate(() => {
       const hs = window.spiel.E.portfolio(window.spiel.s).filter((h) => h.formatKey === 'sport' && h.steuerbar);

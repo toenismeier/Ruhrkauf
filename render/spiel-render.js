@@ -1122,11 +1122,15 @@ async function buendeln() {
     const hausId = await p.evaluate(() => window.spiel.s.haeuser.find(h=>h.verlauf?.length && h.status === 'offen')?.id);
     if (hausId) {
       await p.evaluate(id=>window.spiel.oeffneHaus(id),hausId);
-      const test = await p.evaluate(() => ({
-        diagramme:document.querySelectorAll('.stat-hausdetail .stat-diagramm').length,
-        letztes:window.spiel.E.verlauf(window.spiel.s,{ebene:'haus',id:window.spiel.s.haeuser.find(h=>h.status==='offen')?.id,kennzahl:'umsatz',wochen:52}).punkte.at(-1)?.wert
-      }));
-      if(test.diagramme!==2)bericht.abweichungen.push('Hausdetail: '+test.diagramme+' Diagramme statt 2');
+      // Q30: Hausdetail zeigt Umsatz und Deckungsbeitrag als zwei Balkenreihen (5 Wochen, je eigene Skala).
+      const test = await p.evaluate((id) => {
+        const reihen = [...document.querySelectorAll('#pinhalt .hk-balkenpaar .hk-balken')];
+        const letzterBalken = reihen[0] ? [...reihen[0].querySelectorAll('[data-w]')].at(-1)?.dataset.w : null;
+        return { diagramme: reihen.length, balken: letzterBalken == null ? null : Number(letzterBalken),
+          letztes: window.spiel.E.verlauf(window.spiel.s, { ebene: 'haus', id, kennzahl: 'umsatz', wochen: 5 }).punkte.at(-1)?.wert };
+      }, hausId);
+      if(test.diagramme!==2)bericht.abweichungen.push('Hausdetail: '+test.diagramme+' Balkenreihen statt 2');
+      else if(test.balken!==Math.round(test.letztes))bericht.abweichungen.push('Hausdetail: letzter Umsatzbalken '+test.balken+' statt '+test.letztes);
       await p.screenshot({ path:path.join(ziel,'hausdetail.png') });
       bericht.bilder.push('hausdetail.png');
     }
@@ -1151,11 +1155,11 @@ async function buendeln() {
       const daten = await p.evaluate(({id,r}) => {
         window.spiel.oeffneHausReiter(id,r);
         const el = document.getElementById('pinhalt'), d = window.spiel.E.hausUebersicht(window.spiel.s,id);
-        const tab = [...el.querySelectorAll('.haus-reiter button')].find(q => q.classList.contains('an'));
+        const tab = el.querySelector('.haus-reiter button[aria-current=page] span');
         return { aktiv: tab?.textContent, tabs: el.querySelectorAll('.haus-reiter button').length, text: el.textContent, d };
       }, {id,r});
       if (daten.tabs !== 7) fehler.push(r + ': 7 Reiter erwartet');
-      const title = {ueberblick:'Überblick',leitung:'Leitung',personal:'Personal',ware:'Ware',partner:'Fläche & Partner',kosten:'Kosten',kommentare:'Kommentare'}[r];
+      const title = {ueberblick:'Haus',leitung:'Leitung',personal:'Personal',ware:'Ware',partner:'Fläche',kosten:'Kosten',kommentare:'Notizen'}[r]; // Q30: Reiterleiste unten
       if (daten.aktiv !== title) fehler.push(r+': falscher aktiver Reiter ' + daten.aktiv);
       if (r==='ueberblick' && !daten.text.includes(String(daten.d.kundenScore))) fehler.push('Kundenscore stimmt nicht');
       if (r==='leitung' && !daten.text.includes(daten.d.leitungsdaten.name)) fehler.push('Name Hausleitung fehlt');

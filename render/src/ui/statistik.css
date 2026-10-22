@@ -1,26 +1,24 @@
-/* N01: Statistik der Hartwig-Konzernsteuerung */
-.stat-auswahl { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:9px; }
-.stat-wahl { background:#eceae5; color:var(--text); padding:8px 10px; border-radius:9px; min-height:38px; font-size: calc(12px * var(--schrift)); font-weight:700; }
-.stat-wahl.an { background:var(--text);color:white; }
-.stat-raster { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:8px; }
-.stat-karte { padding:10px 9px 8px; margin-bottom:10px;overflow:hidden; }
-.stat-titel { font-size: calc(13px * var(--schrift));font-weight:800;padding:2px 4px 8px; }
-.stat-karte svg { width:100%;display:block;max-width:100%;overflow:visible; }
-.stat-diagramm { touch-action:pan-y;user-select:none;cursor:crosshair;min-height:80px; }
-.stat-karte .stat-achse { fill:#73818d; font-size: calc(8px * var(--schrift)); font-weight:600; }
-.stat-legende { display:flex; flex-wrap:wrap;gap:9px;margin:0 4px 7px;font-size: calc(11px * var(--schrift)); }
-.stat-legende span { display:inline-flex;align-items:center;gap:4px; }
-.stat-legende i {width:12px;height:4px;display:inline-block;border-radius:2px;}
-.stat-wert { color:#48545d;background:#f2f1ed;border-radius:7px;padding:7px;margin:6px 2px 0;font-size: calc(11px * var(--schrift));min-height:29px; }
-.stat-hinweis,.stat-leer {font-size: calc(11px * var(--schrift));color:var(--leise);line-height:1.4;margin:8px 4px;}
-.stat-haus { padding:8px 10px;margin-bottom:8px; }
-.stat-hauskopf { background:none; border:0; display:flex;justify-content:space-between;text-align:left;width:100%;padding:3px 0;gap:6px;color:var(--text); }
-.stat-hauskopf b {font-size: calc(12px * var(--schrift));overflow-wrap:anywhere;}
-.stat-hauskopf span {font-size: calc(12px * var(--schrift));font-weight:800;white-space:nowrap;}
-.stat-haus small {color:var(--leise);font-size: calc(10px * var(--schrift));}
-.stat-haus .stat-karte {padding:0;margin:2px 0 0;box-shadow:none;border:0;}
-.stat-haus .stat-titel {font-size: calc(10px * var(--schrift));padding:2px 0;}
-.stat-haus .stat-diagramm {min-height:60px;}
-.stat-mehr { display:block;width:100%;padding:12px;margin:10px 0;background:#e9e5df;border-radius:11px;font-weight:800;font-size: calc(12px * var(--schrift));}
-.stat-hausdetail {padding-top:8px;}
-@media (prefers-reduced-motion:reduce){.stat-karte *{animation:none!important;transition:none!important;}}
+/* N01/Q30: Statistik im dunklen Grundlook (Bereich betrieb). */
+.stat-zeile { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 8px 0 12px; }
+#panel .stat-auswahl { margin-bottom: 8px; }
+.stat-karte { padding: 12px 10px 10px; margin-bottom: 12px; overflow: hidden; background: var(--f, #2f3338); border: 1px solid var(--l, #43484e); border-radius: 10px; }
+.stat-titel { font-size: 12px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; padding: 2px 4px 8px; color: var(--tx, #f1f1ef); }
+.stat-karte svg { width: 100%; display: block; max-width: 100%; overflow: visible; }
+.stat-diagramm { touch-action: pan-y; user-select: none; cursor: crosshair; min-height: 80px; }
+.stat-karte .stat-achse { fill: var(--le, #9da2a7); font-size: 12px; font-weight: 400; }
+.stat-legende { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 4px 8px; font-size: 12px; color: var(--le, #9da2a7); }
+.stat-legende span { display: inline-flex; align-items: center; gap: 6px; }
+.stat-legende i { width: 14px; height: 4px; display: inline-block; border-radius: 2px; }
+.stat-wert { color: var(--le, #9da2a7); background: var(--t, #1a1c1f); border-radius: 8px; padding: 8px 10px; margin: 8px 2px 0; font-size: 12px; min-height: 32px; }
+.stat-hinweis, .stat-leer { font-size: 12px; color: var(--le, #9da2a7); line-height: 1.45; margin: 8px 4px; }
+.stat-haus { padding: 10px 12px; margin-bottom: 8px; background: var(--f, #2f3338); border: 1px solid var(--l, #43484e); border-radius: 10px; }
+.stat-hauskopf { background: none; border: 0; display: flex; justify-content: space-between; text-align: left; width: 100%; min-height: 44px; align-items: center; gap: 8px; color: var(--tx, #f1f1ef); padding: 0; }
+.stat-hauskopf b { font-size: 14px; overflow-wrap: anywhere; }
+.stat-hauskopf span { font-size: 14px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.stat-haus small { color: var(--le, #9da2a7); font-size: 12px; }
+.stat-haus .stat-karte { padding: 0; margin: 4px 0 0; border: 0; background: transparent; }
+.stat-haus .stat-titel { font-size: 12px; padding: 2px 0; }
+.stat-haus .stat-diagramm { min-height: 60px; }
+.stat-mehr { display: block; width: 100%; min-height: 48px; margin: 10px 0; background: transparent; border: 1px solid var(--l, #43484e); border-radius: 12px; color: var(--tx, #f1f1ef); font-weight: 700; font-size: 14px; }
+.stat-hausdetail { padding-top: 8px; }
+@media (prefers-reduced-motion: reduce) { .stat-karte * { animation: none !important; transition: none !important; } }

@@ -1,9 +1,10 @@
 // N01: SVG-Diagramme ohne Chart-Bibliothek. Daten ausschließlich aus Engine-Abfragen.
 import { geld, fmt, esc } from './format.js';
+import * as K from './komponenten.js';
 
-const FARBE = { Hartwig: '#d23c32', Volkskauf: '#9b63b0', Sport: '#2f8f5b', FUNDUS: '#b5651d',
-  Nord: '#3e7eae', Ost: '#9b63b0', West: '#d23c32', Mitte: '#b5651d', Süd: '#2f8f5b', Ist: '#d23c32',
-  Vorjahr: '#8296a3', Plan: '#2f8f5b' };
+const FARBE = { Hartwig: '#ef6b60', Volkskauf: '#b88ccb', Sport: '#6dbf73', FUNDUS: '#d6a35a',
+  Nord: '#7fb0d6', Ost: '#b88ccb', West: '#ef6b60', Mitte: '#d6a35a', Süd: '#6dbf73', Ist: '#f1f1ef',
+  Vorjahr: '#9da2a7', Plan: '#6dbf73' };
 const KENNZAHL = { umsatz: 'Umsatz', ebitda: 'EBITDA', cash: 'Cash', db: 'Deckungsbeitrag',
   frequenz: 'Kundenfrequenz (Schätzung)', personalFte: 'Personal (FTE)', stimmung: 'Stakeholder-Stimmung' };
 const GELD = new Set(['umsatz', 'ebitda', 'cash', 'db']);
@@ -16,10 +17,10 @@ export function statistikModul(ctx) {
   let naechsteId = 0, ausstehend = false, zeiger = null;
   const daten = (ebene, id, kennzahl = ui.kennzahl, wochen = ui.wochen) => E.verlauf(s(), { ebene, id, kennzahl, wochen });
   const wert = (n, k) => GELD.has(k) ? geld(n) : fmt.format(Math.round(n));
-  const knopf = (a, v, label, an) => '<button type="button" class="stat-wahl' + (an ? ' an' : '') + '" data-st-a="' + a + '" data-v="' + esc(v) + '">' + esc(label) + '</button>';
-  const tabs = () => '<nav class="stat-auswahl" aria-label="Statistikseiten">' + [['konzern','Konzern'],['formate','Formate'],['regionen','Regionen'],['rangliste','Häuser']].map(([id,t])=>knopf('seite',id,t,ui.seite===id)).join('') + '</nav>';
-  const zeiten = () => '<div class="stat-auswahl" aria-label="Zeitraum">' + [[13,'13 Wochen'],[52,'52 Wochen'],['alle','Alle']].map(([id,t])=>knopf('wochen',id,t,String(ui.wochen)===String(id))).join('') + '</div>';
-  const typen = () => '<div class="stat-auswahl" aria-label="Darstellung">' + [['linie','Verlauf'],['balken','Wochen'],['quartal','Quartale']].map(([id,t])=>knopf('typ',id,t,ui.typ===id)).join('') + '</div>';
+  const knopf = (a, v, label, an) => '<button type="button" class="stat-wahl' + (an ? ' an' : '') + '" aria-pressed="' + !!an + '" data-st-a="' + a + '" data-v="' + esc(v) + '">' + esc(label) + '</button>';
+  const tabs = () => '<nav class="hk-seg stat-auswahl" aria-label="Statistikseiten">' + [['konzern','Konzern'],['formate','Formate'],['regionen','Regionen'],['rangliste','Häuser']].map(([id,t])=>knopf('seite',id,t,ui.seite===id)).join('') + '</nav>';
+  const zeiten = () => '<div class="hk-seg stat-auswahl" aria-label="Zeitraum">' + [[13,'13 Wochen'],[52,'52 Wochen'],['alle','Alle']].map(([id,t])=>knopf('wochen',id,t,String(ui.wochen)===String(id))).join('') + '</div>';
+  const typen = () => '<div class="hk-seg stat-auswahl" aria-label="Darstellung">' + [['linie','Verlauf'],['balken','Wochen'],['quartal','Quartale']].map(([id,t])=>knopf('typ',id,t,ui.typ===id)).join('') + '</div>';
   const zahl = (t,n,k) => '<div class="kz"><span>' + esc(t) + '</span><b>' + esc(wert(n,k)) + '</b></div>';
 
   function gruppieren(punkte, kennzahl) {
@@ -44,7 +45,7 @@ export function statistikModul(ctx) {
       const p = reihen[0].punkte.filter(x => x.plan !== undefined).map(x => ({ woche:x.woche, wert:x.plan }));
       if (p.length) listen.push({ name: 'Plan', punkte: p, farbe: FARBE.Plan });
     }
-    const w = opt.klein ? 300 : 340, h = opt.klein ? 90 : 184, l = opt.klein ? 42 : 66, r = 10, t = 10, u = opt.klein ? 14 : 29;
+    const w = opt.klein ? 300 : 340, h = opt.klein ? 90 : 184, l = opt.klein ? 42 : 78, r = 10, t = 10, u = opt.klein ? 14 : 29;
     const alle = listen.flatMap(x => x.punkte), xs = alle.map(p => p.woche), ys = alle.map(p => p.wert);
     if (Number.isFinite(opt.grenze)) ys.push(opt.grenze);
     const minW = Math.min(...xs), maxW = Math.max(...xs), breite = Math.max(1,maxW-minW);
@@ -64,7 +65,7 @@ export function statistikModul(ctx) {
     }).join('');
     const id = ++naechsteId;
     charts.set(id, { reihen:listen, minW, maxW, x:l, breite:w-r-l, kennzahl });
-    const achsen = opt.klein ? '' : '<line x1="' + l + '" x2="' + (w-r) + '" y1="' + (h-u) + '" y2="' + (h-u) + '" stroke="#cdd4d8"/>' +
+    const achsen = opt.klein ? '' : '<line x1="' + l + '" x2="' + (w-r) + '" y1="' + (h-u) + '" y2="' + (h-u) + '" stroke="var(--l, #43484e)"/>' +
       [0,.5,1].map(f => '<text x="2" y="' + (py(maxY-(maxY-minY)*f)+3).toFixed(1) + '" class="stat-achse">' + esc(wert(maxY-(maxY-minY)*f,kennzahl)) + '</text>').join('') +
       '<text x="' + l + '" y="' + (h-4) + '" class="stat-achse">' + xAchse(minW) + '</text>' +
       '<text x="' + (w-r) + '" y="' + (h-4) + '" text-anchor="end" class="stat-achse">' + xAchse(maxW) + '</text>';
@@ -72,13 +73,15 @@ export function statistikModul(ctx) {
     return '<article class="karte stat-karte"><div class="stat-titel">' + esc(titel) + '</div>' + legende +
       '<svg role="img" aria-label="' + esc(titel) + ': Werte durch Antippen oder Ziehen anzeigen" class="stat-diagramm" data-st-chart="' + id + '" data-st-ende="' + esc(String(reihen[0]?.punkte?.at(-1)?.wert ?? 0)) +
       '" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' + achsen + grenzlinie + kurven +
-      '<line class="stat-cross" x1="' + l + '" x2="' + l + '" y1="' + t + '" y2="' + (h-u) + '" stroke="#1f2a33" stroke-dasharray="3 3" visibility="hidden"/></svg>' +
+      '<line class="stat-cross" x1="' + l + '" x2="' + l + '" y1="' + t + '" y2="' + (h-u) + '" stroke="var(--tx, #f1f1ef)" stroke-dasharray="3 3" visibility="hidden"/></svg>' +
       (opt.klein ? '' : '<div class="stat-wert" aria-live="polite">Punkt antippen oder über den Verlauf ziehen</div>') +
       '</article>';
   }
   function konzern() {
     const kennzahlen = [['umsatz','Umsatz'], ['ebitda','EBITDA'], ['cash','Cash und Insolvenzgrenze'], ['stimmung','Stakeholder-Stimmung']];
-    let html = '<div class="stat-raster">' + kennzahlen.slice(0,3).map(([k,t]) => zahl(k === 'cash' ? 'Cash' : t, daten('konzern',undefined,k).punkte.at(-1)?.wert ?? 0,k)).join('') + '</div>';
+    const gk = (k, t) => { const pk = daten('konzern', undefined, k, 2).punkte, a = pk.at(-1)?.wert ?? 0, v = pk.length > 1 ? pk.at(-2).wert : null;
+      return { label: t, wert: wert(a, k), ton: k === 'ebitda' ? (a < 0 ? 'schlecht' : 'gut') : '', unter: v == null ? 'keine Vorwoche' : K.abweichung(a - v, (a >= v ? '+' : '−') + geld(Math.abs(a - v)), v ? (a - v) / Math.abs(v) : null) }; };
+    let html = K.gross([gk('umsatz', 'Umsatz Woche'), gk('ebitda', 'EBITDA Woche')]) + K.gross([gk('cash', 'Cash')]);
     for (const [k,t] of kennzahlen) {
       const d = daten('konzern',undefined,k);
       html += diagramm(t, [{ name:'Ist', punkte:d.punkte }], k, { vorjahr:true, grenze:k==='cash' ? -s().kreditlinie : undefined });
@@ -103,7 +106,7 @@ export function statistikModul(ctx) {
       const marge=p.umsatz > 0 ? (p.db + zentral*p.umsatz/Math.max(1,wk?.umsatz??1))/p.umsatz : -Infinity;
       return {h,p,marge};
     }).sort((a,b)=>b.marge-a.marge || a.h.name.localeCompare(b.h.name));
-    if (!hauser.length) return '<div class="karte stat-leer">Nach der ersten Woche erscheinen die Ranglisten.</div>';
+    if (!hauser.length) return K.leer('Nach der ersten Woche erscheinen die Ranglisten.');
     let html='<p class="stat-hinweis">EBITDA-Marge je Haus: Deckungsbeitrag mit proportional zum Umsatz verteilten Zuschüssen, Abschriften und Zentralkosten. Unternehmensweit identische Verteilungsschlüssel, geschätzte Hauszuordnung. Häuser ohne Umsatz am Ende.</p>';
     for (const [i,x] of hauser.slice(0,ui.zeilen).entries()) {
       const d=daten('haus',x.h.id,'db',52);
@@ -127,12 +130,12 @@ export function statistikModul(ctx) {
     const bars=daten.map(([name,v],i)=>{
       const oben=Math.min(y(positionen[i]),y(positionen[i+1])), hoehe=Math.max(1,Math.abs(y(positionen[i])-y(positionen[i+1])));
       return '<rect data-st-wf="' + i + '" x="' + (10+i*33) + '" y="' + oben.toFixed(1) +
-        '" width="23" height="' + hoehe.toFixed(1) + '" fill="' + (v<0?'#d23c32':'#2f8f5b') + '"><title>' +
+        '" width="23" height="' + hoehe.toFixed(1) + '" fill="' + (v<0?'#ef6f62':'#6dbf73') + '"><title>' +
         esc(name+': '+geld(v)) + '</title></rect>';
     }).join('');
     const endOben=Math.min(y(k.ebitda),y(0)), endHoehe=Math.max(1,Math.abs(y(k.ebitda)-y(0)));
     const ende='<rect data-st-wf="9" x="307" y="' + endOben.toFixed(1) + '" width="25" height="' + endHoehe.toFixed(1) +
-      '" fill="#1f2a33"><title>EBITDA: ' + esc(geld(k.ebitda)) + '</title></rect>';
+      '" fill="var(--tx, #f1f1ef)"><title>EBITDA: ' + esc(geld(k.ebitda)) + '</title></rect>';
     return '<article class="karte stat-karte"><div class="stat-titel">EBITDA-Brücke · letzte Woche</div>' +
       '<svg role="img" aria-label="EBITDA-Wasserfall" viewBox="0 0 342 140">' + bars + ende +
       '<line x1="6" y1="' + y(0).toFixed(1) + '" x2="338" y2="' + y(0).toFixed(1) + '" stroke="#8296a3"/></svg>' +
@@ -142,7 +145,7 @@ export function statistikModul(ctx) {
     const vorher=document.getElementById('pinhalt').scrollTop;
     charts.clear();
     const steuer=ui.seite==='konzern'? konzern():ui.seite==='formate'?formate():ui.seite==='regionen'?regionen():rangliste();
-    const html = tabs()+zeiten()+(ui.seite!=='rangliste'?typen():'')+steuer;
+    const html = K.bereich('betrieb','zahlen') + K.rumpf(tabs()+'<div class="stat-zeile">'+zeiten()+(ui.seite!=='rangliste'?typen():'')+'</div>'+steuer);
     ctx.panel('Zahlen','Verläufe und Vergleich · KW '+(s().woche%52+1),html,'gross');
     ui.aktiv=true;
     if(halten) document.getElementById('pinhalt').scrollTop=vorher;

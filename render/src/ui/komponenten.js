@@ -4,7 +4,15 @@
 import { esc } from './format.js';
 
 /** Marker, der den dunklen Look und das Kopfsymbol des Panels einschaltet. bereich: haus | zentrale | betrieb | papier. */
-export const bereich = (name, symbol = name) => `<i class="hk-bereich" data-bereich="${esc(name)}" data-symbol="${esc(symbol)}" aria-hidden="true"></i>`;
+export const bereich = (name, symbol = name, { voll = false } = {}) => `<i class="hk-bereich" data-bereich="${esc(name)}" data-symbol="${esc(symbol)}"${voll ? ' data-hoehe="voll"' : ''} aria-hidden="true"></i>`;
+
+/** Karussell gleichartiger Karten mit Seitenpunkten; die Nachbarkarte schaut an der Kante heraus.
+ *  karten: fertiges HTML je Karte. Die Punkte springen per Wischen mit (scroll-snap); `aktiv` setzt die Startkarte. */
+export function karussell(karten, { aktiv = 0, label = 'Karten' } = {}) {
+  if (!karten.length) return leer('Keine Einträge vorhanden.');
+  return `<div class="hk-karussell" role="group" aria-label="${esc(label)}" data-aktiv="${aktiv}" onscroll="const i=Math.round(this.scrollLeft/(this.firstElementChild.offsetWidth+12));this.nextElementSibling.querySelectorAll('i').forEach((p,k)=>p.classList.toggle('an',k===i))">${karten.map((k) => `<div class="hk-karussell-karte">${k}</div>`).join('')}</div>`
+    + `<div class="hk-punkte" aria-hidden="true">${karten.map((_, i) => `<i class="${i === aktiv ? 'an' : ''}"></i>`).join('')}</div>`;
+}
 
 /** Innenrand für Inhalt unterhalb randloser Elemente (Kopfbild, Sprecher). */
 export const rumpf = (html) => `<div class="hk-rumpf">${html}</div>`;
@@ -39,6 +47,23 @@ export function balken(reihen, legende = []) {
   return `<div class="hk-balken" style="--n:${reihen.length}" role="img" aria-label="${esc(legende.join(' und '))}">${reihen.map((r) => `<div>${saeule(r.a, 'a')}${saeule(r.b, 'b')}</div>`).join('')}</div>`
     + `<div class="hk-balkenfuss" style="--n:${reihen.length}">${reihen.map((r) => `<span>${esc(r.label)}</span>`).join('')}</div>`
     + (legende.length ? `<div class="hk-legende">${legende.map((l, i) => `<span><i class="${i ? 'b' : ''}"></i>${esc(l)}</span>`).join('')}</div>` : '');
+}
+
+/** Zwei kleine Balkenreihen mit eigener Skala nebeneinander. reihen: [{ titel, serie: 'a'|'b', punkte: [{ label, wert }] }].
+ *  Negative Werte hängen unter einer Nulllinie (rot). Unter zwei Punkten: leerer Zustand. */
+export function balkenPaar(reihen) {
+  const eine = (r) => {
+    const w = r.punkte.map((q) => q.wert ?? 0);
+    if (w.length < 2) return `<div><h4>${esc(r.titel)}</h4>${leer('Ab der zweiten Woche.')}</div>`;
+    const pos = Math.max(0, ...w), neg = Math.max(0, ...w.map((v) => -v)), ges = pos + neg || 1;
+    const oben = pos / ges * 100, unten = neg / ges * 100;
+    const saeule = (v) => `<div style="display:flex;flex-direction:column;height:100%"><div style="height:${oben}%;display:flex;align-items:flex-end;justify-content:center">${v > 0 ? `<span class="${r.serie}" style="height:${Math.max(3, v / ges * 100 / (oben / 100) )}%" data-w="${Math.round(v)}"></span>` : ''}</div>`
+      + `<div style="height:${unten}%;display:flex;align-items:flex-start;justify-content:center">${v < 0 ? `<span class="${r.serie} neg" style="height:${Math.max(3, -v / ges * 100 / (unten / 100))}%" data-w="${Math.round(v)}"></span>` : ''}</div>${v === 0 ? '<span class="null" style="height:2px;align-self:center" data-w="0"></span>' : ''}</div>`;
+    const von = r.punkte[0].label, bis = r.punkte[r.punkte.length - 1].label;
+    return `<div><h4>${esc(r.titel)}</h4><div class="hk-balken mitnull" style="--n:${w.length}" role="img" aria-label="${esc(r.titel)} ${esc(von)} bis ${esc(bis)}">${neg ? `<i class="null-linie" style="top:${oben}%"></i>` : ''}${w.map(saeule).join('')}</div>`
+      + `<div class="hk-balkenfuss" style="--n:${w.length}">${r.punkte.map((q) => `<span>${esc(q.label)}</span>`).join('')}</div></div>`;
+  };
+  return `<div class="hk-balkenpaar">${reihen.map(eine).join('')}</div>`;
 }
 
 /** Tabelle (GuV). spalten: Kopf rechts (z. B. ['KW 8', 'KW 9']); zeilen: [{ name, werte: [Text], roh?: [Zahl], ton?: [..] }];
@@ -120,6 +145,7 @@ export const SYMBOLE = {
   umbau: svg(quader(-3.5, -3.5, 0, 0.5, 0.5, 7, SAND) + quader(3, -3.5, 0, 0.5, 0.5, 7, SAND) + quader(-3.5, -3.5, 3.3, 7, 0.5, 0.5, SAND) + quader(-3.5, -3.5, 6.5, 7, 0.5, 0.5, SAND) + quader(-2.5, -1, 0, 5, 4, 3, WEISS)),
   kommentare: svg(quader(-3.5, -3, 0, 7, 6, 0.6, WEISS) + quader(-2.5, -2, 0.6, 5, 4, 0.3, ['#f6f2e9', '#ddd6c7', '#c9c0ae']) + quader(-2, 1.5, 0.9, 4, 0.2, 0.2, DUNKEL)),
   post: svg(quader(-4, -3, 0, 8, 6, 1.6, SAND) + quader(-3.4, -2.4, 1.6, 6.8, 4.8, 0.4, WEISS) + quader(-3, -2, 2, 6, 4, 0.4, ['#fbf7ee', '#e5ddcd', '#cdc3ad']) + quader(-1, -0.6, 2.4, 2, 1.2, 0.2, ROT)),
+  zentrale: svg(quader(-2.5, -2.5, 0, 5, 5, 10, WEISS) + quader(-2.5, 2.45, 2, 5, 0.1, 1, BLAU) + quader(-2.5, 2.45, 4.5, 5, 0.1, 1, BLAU) + quader(-2.5, 2.45, 7, 5, 0.1, 1, BLAU) + quader(-2.5, -2.5, 10, 5, 5, 0.6, ROT)),
   zahlen: svg(quader(-4, -1, 0, 2, 2, 3, WEISS) + quader(-1, -1, 0, 2, 2, 6, WEISS) + quader(2, -1, 0, 2, 2, 4.4, GRUEN)),
 };
 

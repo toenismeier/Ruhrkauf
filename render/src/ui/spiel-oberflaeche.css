@@ -1,0 +1,337 @@
+/* Q30: Spieloberfläche über der Karte (Kopfleiste, Cockpit, untere Leiste, Häuserleiste, Menü, Meldungen) im dunklen
+   Grundlook. Flächen sind dunkel und deckend (kein Glas), Schatten höchstens 8 px Unschärfe. Tokens: komponenten.css. */
+:root {
+  --ob-flaeche: rgba(29, 31, 34, 0.94); --ob-rand: rgba(255, 255, 255, 0.12); --ob-text: #f1f1ef; --ob-leise: #a4a9ae;
+  --ob-schatten: 0 2px 6px rgba(0, 0, 0, 0.28);
+}
+/* Kopfleiste */
+.marke, .datum, #deutschland-direkt, .sz-zielchip, #hausbeobachtung, .kz, .chipstadt, .knopf, #stadt-chips button {
+  background: var(--ob-flaeche) !important; color: var(--ob-text) !important; border: 1px solid var(--ob-rand) !important; box-shadow: var(--ob-schatten) !important; }
+.marke { border-radius: 14px; padding: 6px 10px; min-height: 48px; }
+.marke b { font-size: 15px; letter-spacing: 0.01em; }
+.logo { border-radius: 8px; }
+.datum { border-radius: 14px; min-height: 48px; padding: 6px 12px; }
+.datum b { font-size: 15px; } #stufe { color: var(--ob-leise); font-size: 12px; } #phase { font-size: 12px; color: #ef6f62; }
+#deutschland-direkt { border-radius: 14px; min-width: 48px; height: 48px; font-size: 13px; letter-spacing: 0.04em; }
+.sz-zielchip { min-height: 48px; min-width: 52px; border-radius: 14px; font-size: 12px; }
+.sz-zielchip .sz-mini { background: rgba(255,255,255,0.14); } .sz-zielchip .sz-mini i { background: #6dbf73; }
+/* Cockpit: Kasse zuerst, als Zahl, nicht als Schmuck */
+#cockpit { gap: 4px !important; }
+#cockpit .kz { border-radius: 10px !important; padding: 5px 9px !important; }
+#cockpit .kz span { color: var(--ob-leise) !important; font-size: 12px !important; line-height: 15px !important; }
+#cockpit .kz b { color: var(--ob-text); font-size: clamp(13px, 3.6vw, 16px) !important; font-weight: 600; }
+#cockpit .kz:first-child b { font-size: clamp(14px, 4vw, 17px) !important; font-weight: 700; }
+#cockpit .kz.rot b { color: #ef6f62 !important; } #cockpit .kz.gruen b { color: #6dbf73 !important; }
+#cockpit .kz.mitwahl { position: relative; } #cockpit .kz em { font-style: normal; color: #ef7a6f; }
+#cockpit .kz .kzwahl { position: absolute; inset: 0; width: 100%; height: 100% !important; opacity: 0; font-size: 16px !important; }
+#cockpit .kz .kzwahl option { color: #111; }
+#hausbeobachtung { border-radius: 10px !important; min-height: 44px; padding: 0 12px !important; font-size: 13px !important; margin: 2px 0 !important; pointer-events: auto; }
+/* Untere Leiste */
+.chipstadt { border-radius: 14px !important; min-height: 50px !important; }
+.chipstadt #stadtname { font-size: 15px !important; } .chipstadt #stadtcluster { color: var(--ob-leise) !important; font-size: 12px !important; }
+.chipstadt i { color: var(--ob-leise) !important; }
+.knopf { border-radius: 14px !important; height: 50px !important; }
+#weiter { background: #d23c32 !important; border: 1px solid #8f2219 !important; box-shadow: inset 0 0 0 1px #ef7a6f, var(--ob-schatten) !important; color: #fff !important; font-size: 15px; padding: 0 18px; }
+.knopf.rund { width: 50px !important; } .knopf.rund.an { background: #d23c32 !important; }
+.badge { box-shadow: none !important; border: 2px solid #1d1f22; font-size: 12px !important; min-width: 22px; height: 22px; }
+#stadt-chips button { border-radius: 10px !important; min-height: 44px !important; font-size: 12px !important; color: var(--ob-text) !important; }
+#wochenstreifen { background: var(--ob-flaeche); border: 1px solid var(--ob-rand); box-shadow: var(--ob-schatten); font-size: 14px; }
+#meldung { background: #1d1f22; border: 1px solid var(--ob-rand); box-shadow: var(--ob-schatten); font-size: 14px; top: calc(70px + env(safe-area-inset-top)); }
+#meldung.rot { background: #6b1f19; border-color: #ef6f62; }
+
+/* Menü: Rangfolge statt Kachelwand. Vier große Einstiege, darunter Gruppen als Zeilen. */
+#menue { background: rgba(10, 12, 14, 0.5); }
+.menuekarte { background-color: #24272b !important; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 7px, rgba(255,255,255,0.022) 7px 8px) !important;
+  color: #f1f1ef; border: 1px solid #43484e; box-shadow: 0 -2px 8px rgba(0,0,0,0.35) !important; padding: 12px 12px 4px !important; }
+.menuetitel { color: #f1f1ef; font-size: 16px !important; margin: 2px 4px 10px !important; }
+.menue-gross { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mgross { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 8px; align-items: center; min-height: 64px; padding: 8px 10px;
+  background: #2f3338; border: 1px solid #43484e; border-radius: 12px; color: #f1f1ef; text-align: left; }
+.mgross .msym { grid-row: 1 / span 2; width: 44px; height: 44px; } .mgross .msym svg { width: 44px; height: 44px; display: block; }
+.mgross b { font-size: 15px; line-height: 20px; } .mgross small { font-size: 12px; line-height: 16px; color: #9da2a7; }
+.mgross .badge, .mgross #postmenubadge { top: 2px; left: 38px; right: auto; }
+.menue-gruppe { margin: 16px 4px 6px; font-size: 12px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: #9da2a7; font-weight: 700; }
+.menue-liste { display: grid; grid-template-columns: 1fr 1fr; gap: 0 8px; border-top: 1px solid #43484e; }
+.mzeile { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding: 0 6px; background: transparent; border: 0; border-bottom: 1px solid #43484e; color: #f1f1ef; text-align: left; }
+.mzeile b { font-size: 14px; font-weight: 600; } .mzeile .badge, .mzeile #ekbadge, .mzeile #vsbadge { position: static !important; margin-left: 6px; }
+.mzeile:active, .mgross:active { background: #1a1c1f; }
+.menuekarte .postfilter { color: #f1f1ef; font-size: 14px !important; }
+.menuekarte select { background: #1a1c1f !important; color: #f1f1ef !important; border: 1px solid #43484e !important; min-height: 44px; font-size: 16px !important; }
+.menuekarte .ein-optionen { color: #f1f1ef; font-size: 14px !important; min-height: 44px; }
+.menuekarte .ein-optionen input { width: 22px; height: 22px; accent-color: #d23c32; }
+
+/* ───────────── Posteingang als Hauspost (Q30) ───────────── */
+#panel .posttabs { margin: 0 0 var(--hk-3); }
+.postinhalt { display: flex; flex-direction: column; gap: 14px; }
+.postmappe { position: relative; margin-top: 14px; background: var(--f); border: 1px solid var(--l); border-radius: 0 10px 10px 10px; box-shadow: 0 1px 0 var(--t); }
+.postmappe .post-reiter { position: absolute; left: -1px; top: -26px; height: 26px; display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: 8px 8px 0 0;
+  background: #a8916a; color: #1f1d1a; font-size: 12px; font-weight: 700; max-width: calc(100% + 2px); white-space: nowrap; }
+.postmappe .post-frist { padding: 0 6px; border-radius: 4px; background: rgba(0,0,0,0.12); font-weight: 700; }
+.postmappe .post-frist.bald { background: #e7b04b; color: #1f1d1a; } .postmappe .post-frist.ab { background: #b8382d; color: #fff; }
+.postmappe .postkopf { padding: 14px 14px 4px !important; }
+.postmappe h3 { margin: 0 0 4px !important; font-size: 16px !important; line-height: 22px !important; color: var(--tx); }
+.postmappe .postwert { padding: 2px 0 0 !important; display: flex; align-items: baseline; gap: 8px; }
+.postmappe .postwert b { font-size: 22px !important; font-weight: 400; font-variant-numeric: tabular-nums; color: var(--tx); }
+.postmappe .postwert span { font-size: 12px !important; color: var(--le); }
+.postmappe .postdetail { padding: 0 14px !important; font-size: 14px !important; color: var(--tx) !important; }
+.postmappe .postdetail summary { min-height: 44px !important; color: var(--tx) !important; text-decoration: underline; text-underline-offset: 3px; font-weight: 400 !important; }
+.postmappe .poststandard { margin: 4px 14px 10px !important; padding: 8px 10px !important; background: var(--t) !important; border: 1px solid var(--l); border-radius: 8px !important; color: var(--le) !important; font-size: 13px !important; }
+.postmappe .postaktionen { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 14px 14px !important; }
+.postmappe .postaktionen .hk-knopf { flex: 1 1 130px; min-height: 44px; }
+.postmappe .postfuss { border-top: 1px solid var(--l); padding: 0 6px; }
+.postmappe .posthinweis { font-size: 14px !important; color: var(--le); margin: 4px 0; }
+.post-miete-zeile { display: grid; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--l); font-size: 14px; }
+.post-miete-zeile small { display: block; color: var(--le); font-size: 12px; line-height: 17px; }
+.post-miete-zeile label { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; }
+.post-miete-zeile input[type=checkbox] { width: 22px; height: 22px; accent-color: #d23c32; }
+.post-miete-zeile select { width: 100%; }
+.post-filterzeile { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.post-filterzeile .postfilter { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 12px !important; color: var(--le); margin: 0 !important; }
+.post-filterzeile select { width: 100%; }
+.postliste .postmeldung { display: flex; flex-direction: column; border-top: 1px solid var(--l); border-left: 3px solid transparent !important; margin: 0 !important; background: transparent; }
+.postliste .postmeldung:first-child { border-top: 0; }
+.postliste .postmeldung.ungelesen { border-left-color: #d23c32 !important; }
+.postliste .postmeldung > button:first-child { background: transparent; color: var(--tx); padding: 10px 12px !important; min-height: 48px; }
+.postliste .postmeldung.ungelesen .postnachricht > span { font-weight: 700; }
+.postliste .postnachricht small { color: var(--le) !important; font-size: 12px !important; }
+.postliste .postnachricht small b { color: var(--tx); font-weight: 700; }
+.postliste .postmeldung .postort { align-self: flex-start; margin: -6px 0 4px 6px !important; }
+.post-konkurrenz { background: var(--f); border: 1px solid var(--l); border-radius: 10px; }
+.post-konkurrenz > summary { min-height: 48px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; font-weight: 700; color: var(--tx); cursor: pointer; }
+.post-konkurrenz .postmeldung { border-top: 1px solid var(--l); }
+.post-konkurrenz .postmeldung > button:first-child { background: transparent; color: var(--tx); padding: 10px 12px; min-height: 48px; width: 100%; text-align: left; }
+.posthausliste .posthaus { border-color: var(--l) !important; color: var(--tx); font-size: 14px !important; }
+.posthausliste .posthaus small { color: var(--le) !important; font-size: 12px !important; }
+.postmappe .postaktionen .hk-knopf, .post-miete-zeile .hk-knopf { background: var(--hk-akzent); color: #fff; border: 1px solid #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); font-size: 14px; font-weight: 700; border-radius: 12px; }
+.postmappe .postaktionen .hk-knopf.zweit, .post-miete-zeile .hk-knopf.zweit { background: transparent; color: var(--tx); border: 1px solid var(--l); box-shadow: none; }
+.post-miete-zeile { grid-template-columns: 1fr !important; }
+.post-miete-zeile > div:last-child { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+.post-miete-zeile > div:last-child label { flex-direction: column; align-items: stretch; gap: 4px; font-size: 12px; color: var(--le); }
+/* Erfolgsmeldung: nie über Panelkopf oder Inhalt; bei offenem Blatt oben über dem Kartenstreifen */
+#erfolge-toast { box-shadow: var(--ob-schatten) !important; background: #1d1f22 !important; border: 1px solid var(--ob-rand); }
+#erfolge-toast small { font-size: 12px !important; }
+body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(safe-area-inset-top)); } /* über Kopfleiste, nie über dem Blatt (auch bei 87 dvh) */
+
+/* ───────────── Einstellungen (Q30) ───────────── */
+.einst-gruppe .einst-zeile:first-child { border-top: 0; }
+#panel .einst-zeile { font-size: 14px; border-color: var(--l); color: var(--tx); }
+#panel .einst-zeile select { background: var(--t); color: var(--tx); border-color: var(--l); font-size: 16px; max-width: 58%; }
+#panel .einst-zeile input[type="checkbox"] { accent-color: var(--hk-akzent); }
+#panel .einst-info { color: var(--le); font-size: 12px; border-top: 1px solid var(--l); }
+#panel .einst-info:first-child { border-top: 0; color: var(--tx); font-size: 14px; }
+
+/* ───────────── Chronik auf Papier (Q30) ───────────── */
+#panel .chronik { display: block; }
+#panel .chronik-linie { border-left: 3px solid #8a3a30; margin-left: 58px; }
+#panel .chronik-station { grid-template-columns: 54px minmax(0,1fr); margin-left: -58px; }
+#panel .chronik-jahr { font-size: 14px; color: #8a3a30; font-family: Georgia, "Times New Roman", serif; }
+#panel .chronik-inhalt { background: var(--f); border-color: var(--l); border-radius: 4px; }
+#panel .chronik-inhalt h3 { font-size: 16px; font-family: Georgia, "Times New Roman", serif; color: var(--tx); }
+#panel .chronik-inhalt p, #panel .chronik-spiel p { font-size: 14px; color: var(--tx); }
+#panel .chronik-inhalt small, #panel .chronik-spiel small, #panel .chronik-spiel span { font-size: 12px; color: var(--le); }
+#panel .chronik-spiel { background: var(--f); border-color: var(--l); border-left: 4px solid #8a3a30; border-radius: 4px; margin-bottom: 8px; }
+
+/* ───────────── Deutschland und Häuser (Q30) ───────────── */
+#panel .pp-filterbox { margin: 8px 0; background: var(--f); border: 1px solid var(--l); border-radius: 10px; padding: 0 10px; }
+#panel .pp-filterbox > summary { min-height: 44px; display: flex; align-items: center; font-size: 14px; font-weight: 700; cursor: pointer; }
+#panel .pp-filterbox[open] { padding-bottom: 10px; }
+#panel .pp-filter label, #panel .pp-suchlabel, #panel .pp-sort label { font-size: 12px; color: var(--le); }
+#panel .pp-filter select, #panel .pp-suchlabel input, #panel .pp-sort select, #panel .pp-speichern select { background: var(--t); color: var(--tx); border-color: var(--l); font-size: 16px; }
+#panel .pp-speichern .hk-knopf, #panel .pp-sort .hk-knopf, #panel .pp-auswahl .hk-knopf, #panel .pp-aktionraster .hk-knopf { background: transparent; color: var(--tx); border: 1px solid var(--l); font-size: 14px; border-radius: 12px; }
+#panel .pp-info { background: var(--t); color: var(--le); font-size: 12px; }
+#panel .pp-karte { background: var(--t); border-color: var(--l); min-height: 300px; }
+#panel .pp-hinweis { font-size: 12px; color: var(--le); }
+#panel .pp-legende { font-size: 12px; color: var(--le); gap: 12px; justify-content: center; margin: 8px 0 0; }
+#panel .pp-legende span { color: var(--le) !important; display: inline-flex; align-items: center; gap: 6px; }
+#panel .pp-legende i { width: 10px; height: 10px; border-radius: 5px; display: inline-block; }
+#panel .pp-legende i.g { background: #248453; } #panel .pp-legende i.y { background: #d69b24; } #panel .pp-legende i.r { background: #c43e36; } #panel .pp-legende i.o { background: #88929a; }
+.deutschland-svg path { fill: #3a3f45; stroke: #5b636b; }
+.deutschland-svg text { fill: #f1f1ef; stroke: #1a1c1f; }
+#panel .pp-scroll { background: var(--f); border-color: var(--l); }
+#panel .pp-haus, #panel .pp-gruppe { border-color: var(--l); }
+#panel .pp-gruppe { background: var(--t); color: var(--tx); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+#panel .pp-haus input { accent-color: var(--hk-akzent); }
+#panel .pp-hausname { color: var(--tx); min-height: 44px; }
+#panel .pp-hausname b, #panel .pp-hausname small { white-space: normal; overflow: hidden; text-overflow: clip; max-height: 20px; line-height: 20px; }
+#panel .pp-hausname b { font-size: 14px; } #panel .pp-hausname small { font-size: 12px; color: var(--le); line-height: 16px; max-height: 16px; }
+#panel .pp-zahl { font-size: 14px; color: var(--tx); }
+#panel .pp-aktionen > b { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tx); }
+#panel .pp-aktionraster .hk-knopf:first-child { border-color: #b8382d; color: #ef6f62; }
+#panel .pp-vorschau { background: var(--t); border: 1px solid #b8382d; color: var(--tx); font-size: 14px; }
+
+/* ───────────── Organisation und Vertrieb (Q30) ───────────── */
+#panel .org-zeile { display: flex; align-items: flex-start; padding: 10px 12px; border-top: 1px solid var(--l); }
+#panel .org-zeile b { font-size: 14px; } #panel .org-zeile small { display: block; font-size: 12px; color: var(--le); line-height: 17px; }
+#panel .org-zeile .frei, #panel .khead .frei { color: var(--hk-achtung); font-weight: 700; }
+#panel .org-aktionen button, #panel .khead button { min-height: 44px; padding: 0 12px; background: transparent; color: var(--tx); border: 1px solid var(--l); border-radius: 10px; font-size: 14px; font-weight: 600; }
+#panel .org-aktionen button[aria-pressed="true"] { background: var(--hk-akzent); border-color: #8f2219; color: #fff; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+#panel .khead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; font-size: 14px; }
+#panel .khead small { color: var(--le); font-size: 12px; margin: 0; }
+#panel .org-aufgaben { border-left-color: var(--l); margin-left: 24px; }
+#panel .org-aufgaben > small { color: var(--le); font-size: 12px; }
+#panel .org-aufgabe { border-color: var(--l); }
+#panel .org-aufgabe > span:first-child { font-size: 14px; color: var(--tx); }
+#panel .org-aufgabe button { min-height: 44px; min-width: 44px; padding: 0 10px; background: transparent; color: var(--tx); border: 1px solid var(--l); border-radius: 10px; font-size: 13px; }
+#panel .org-aufgabe button[aria-pressed="true"] { background: var(--hk-akzent); color: #fff; border-color: #8f2219; }
+#panel .org-grenze { font-size: 13px; color: var(--tx); }
+#panel .org-markt small { color: var(--le); font-size: 12px; }
+#panel .org-profil h3, #panel .org-profil h4 { color: var(--tx); font-size: 14px; margin: 12px; }
+#panel .vkopf small { color: var(--le); font-size: 12px; }
+#panel .olief { color: var(--le); font-size: 13px; }
+#panel .vtr-filter label { font-size: 12px; color: var(--le); }
+#panel .vtr-filter select { background: var(--t); color: var(--tx); border-color: var(--l); }
+#panel .vtr-kpi, #panel .vtr-zeile, #panel .vtr-portfolio { border-color: var(--l); background: var(--f); color: var(--tx); }
+#panel .vtr-kpi small, #panel .vtr-zeile small, #panel .vtr-hinweis { font-size: 12px; color: var(--le); }
+#panel .vtr-zahlen b { font-size: 14px; }
+#panel .vtr-portfolio { min-height: 48px; font-size: 14px; font-weight: 700; }
+#panel .vtr-leitungen > summary { min-height: 48px; display: flex; align-items: center; font-size: 14px; font-weight: 700; color: var(--tx); }
+#panel .vtr-pfad button { color: var(--tx); }
+#panel .org-ampel { color: var(--hk-gut); } #panel .org-ampel.warn { color: var(--hk-achtung); }
+
+/* ───────────── Zentrale (Q30) ───────────── */
+#panel .hk-kopfbild.schnitt img { background: var(--t); max-height: 220px; object-fit: cover; }
+#panel .hk-bildtitel { position: absolute; left: 8px; right: 8px; bottom: 8px; padding: 4px 8px; border-radius: 8px; background: rgba(22,32,38,0.88); color: var(--tx); font-size: 12px; line-height: 16px; }
+#panel .zeile.klickbar { min-height: 52px; }
+#panel .zeile .qm, #panel .zeile .uq { color: var(--le); font-size: 13px; }
+#panel .zeile .was i { color: var(--le); font-size: 12px; }
+#panel .zeile.gewaehlt { background: var(--t); box-shadow: inset 3px 0 0 var(--hk-akzent); }
+#panel .mini.text { border: 0 !important; text-decoration: underline; text-underline-offset: 3px; }
+#panel .mini.rot { border-color: #b8382d !important; color: #ef6f62 !important; }
+#panel .mini.gruen { background: var(--hk-akzent) !important; color: #fff !important; border-color: #8f2219 !important; }
+#panel .stufe b { color: var(--tx); font-size: 15px; }
+#panel .ort { background: var(--t); color: var(--tx); border-color: var(--l); min-height: 44px; font-size: 16px; }
+#panel .zeile.grau { color: var(--le); }
+#panel .dot.k-leer { background: #5d5650; }
+.menuekarte .ein-optionen label { min-height: 44px; }
+#panel .was em { font-size: 12px; }
+
+/* ───────────── Personaleinsatz (Q30) ───────────── */
+#panel .pe-wahl { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--le); margin: 4px 0 12px; }
+#panel .pe-gruppe { border-color: var(--l); }
+#panel .pe-tag small, #panel .pe-slider small, #panel .pe-tabellenzeile small { font-size: 12px; color: var(--le); }
+#panel .pe-saeule { background: var(--t); border: 1px solid var(--l); }
+#panel .pe-slider label { font-size: 14px; color: var(--tx); }
+#panel .pe-slider input { accent-color: var(--hk-akzent); min-height: 44px; }
+#panel .pe-tabellenkopf { display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; font-size: 12px; color: var(--le); letter-spacing: 0.04em; padding: 8px 10px; }
+#panel .pe-tabellenkopf span:first-child { display: none; }
+#panel .pe-tabellenzeile { border-color: var(--l); color: var(--tx); min-height: 48px; }
+#panel .pe-tabellenzeile b { font-size: 14px; }
+#panel .pe-deckungen { font-size: 13px; font-variant-numeric: tabular-nums; }
+#panel .raster .kz span { font-size: 12px; color: var(--le); } #panel .raster .kz b { color: var(--tx); }
+#panel .zeile > span, #panel .zeile > b, #panel .zeile > strong { font-size: 14px; }
+#panel:has(.hk-bereich) .zeile.klickbar { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto auto; column-gap: 8px; row-gap: 4px; align-items: center; }
+#panel:has(.hk-bereich) .zeile.klickbar > .was { flex: none; }
+#panel:has(.hk-bereich) .zeile.klickbar > .mini { grid-column: 2 / -1; justify-self: start; }
+
+/* ───────────── Wochenabschluss und Wochenbericht (Q30) ───────────── */
+.hk-flaeche { color: var(--tx); }
+.wochen-frage.hk-flaeche { border: 1px solid var(--l); box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+.wochen-frage h2 { color: var(--tx); font-size: 20px; }
+.wochen-frageinhalt { color: var(--tx); font-size: 16px; }
+.wochen-gesicht, .wb-gesicht { background: var(--t) !important; border-radius: 10px !important; overflow: hidden; }
+.wochen-x { background: transparent !important; color: var(--tx) !important; width: 44px !important; height: 44px !important; }
+.wochen-warnung { background: var(--t) !important; color: var(--tx) !important; border-left: 3px solid var(--hk-schlecht); font-size: 14px !important; }
+.wochen-knopfreihe button { background: transparent !important; color: var(--tx) !important; border: 1px solid var(--l) !important; }
+.wochen-knopfreihe button.prim { background: var(--hk-akzent) !important; color: #fff !important; border-color: #8f2219 !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+.wb-bericht.hk-flaeche { background-color: var(--g); }
+.wb-bericht > header { border-color: var(--l); background: var(--t); }
+.wb-logo { border-radius: 8px; }
+.wb-kennzahlen article { background: transparent !important; border-radius: 0 !important; }
+.wb-kennzahlen small { font-size: 12px !important; color: var(--le) !important; font-weight: 400 !important; letter-spacing: 0.06em !important; }
+.wb-kennzahlen strong { font-weight: 400; }
+.wb-kennzahlen strong.negativ { color: var(--hk-schlecht) !important; }
+.wb-kennzahlen article > span { font-size: 12px !important; color: var(--le) !important; }
+.wb-cash .hk-tabelle { margin-bottom: 4px; }
+.wb-zeile { font-size: 14px !important; border-color: var(--l) !important; }
+.wb-zeile strong { font-size: 14px !important; }
+.wb-summe { border-top: 1px solid var(--tx) !important; }
+.wb-insolvenz { background: var(--t) !important; border: 1px solid var(--hk-schlecht); }
+.wb-insolvenz span { font-size: 13px !important; }
+.wb-zeitung.hk-papier { border-radius: 4px; }
+.wb-zeitungskopf small, .wb-zeitungskopf nav, .wb-meldung, .wb-zeitung > p { font-size: 12px !important; }
+.wb-zeitung-lesen { min-height: 44px; font-size: 14px !important; }
+.wb-vorfall.hk-flaeche { background: var(--f) !important; color: var(--tx) !important; border-top: 1px solid var(--l); }
+.wb-vorfallkopf small, .wb-vorfallfuss small, .wb-rest { color: var(--le) !important; font-size: 12px !important; }
+.wb-vorfallfuss button { background: transparent !important; color: var(--tx) !important; border: 1px solid var(--l) !important; }
+.wb-vorfallfuss button[data-wa=ansehen] { background: var(--hk-akzent) !important; color: #fff !important; border-color: #8f2219 !important; }
+
+/* ───────────── Reise (Q30): Bahnsteig bei Nacht statt Prospektweiß ───────────── */
+.reise-panel.hk-flaeche { background-color: var(--g); }
+.reise-kopf { background: var(--t) !important; color: var(--tx); }
+.reise-kopfbild { background: #2a3640 !important; }
+.reise-kopfbild::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 22%; background: #3c464f; }
+.reise-kopfbild:before { z-index: 1; }
+.reise-kopfbild .reise-zug { z-index: 2; filter: none !important; }
+.reise-zu { background: rgba(26,28,31,0.9) !important; color: var(--tx) !important; box-shadow: none !important; width: 44px !important; height: 44px !important; }
+.reise-bahnhof { color: var(--le) !important; font-size: 13px !important; }
+.reise-kopf strong { color: var(--tx); }
+.reise-assistent { background: var(--t) !important; border-color: var(--l) !important; color: var(--tx); }
+.reise-text { font-size: 15px !important; }
+.reise-portraet { background: var(--f) !important; border-radius: 10px !important; overflow: hidden; }
+.reise-ziele h2 { color: var(--tx); font-size: 12px !important; }
+.reise-suche { background: var(--t) !important; color: var(--tx) !important; border-color: var(--l) !important; font-size: 16px !important; }
+.reise-treffer, .reise-kartenhinweis { color: var(--le) !important; font-size: 12px !important; }
+.reise-wechsel { border-color: var(--l) !important; }
+.reise-wechsel button { color: var(--le) !important; }
+.reise-wechsel button[aria-selected="true"] { color: var(--tx) !important; border-bottom-color: var(--hk-akzent) !important; }
+.reise-karteblatt { background: var(--t) !important; border-color: var(--l) !important; }
+.reise-ziel { background: var(--f) !important; border-color: var(--l) !important; color: var(--tx) !important; }
+.reise-ziel strong { font-size: 14px !important; }
+.reise-ziel small { font-size: 12px !important; color: var(--le) !important; }
+.reise-ziel .reise-vorschaurahmen { background: var(--t) !important; }
+.reise-leer { color: var(--le); }
+.reise-flug { background: #2a3640 !important; }
+.reise-strecke { color: #f1f1ef !important; text-shadow: none !important; }
+.reise-dunst { background: rgba(26,28,31,0.25) !important; }
+.reise-flug > .reise-zug { filter: none !important; }
+#wb-vorfall { z-index: 20; } /* Titelbild der Zeitung lag über dem Vorfall-Blatt */
+
+/* ───────────── Startbildschirm und Szenarien (Q30) ───────────── */
+#start { background-color: #1a1c1f !important; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 7px, rgba(255,255,255,0.022) 7px 8px) !important; }
+.startkarte.hk-flaeche { background-color: var(--g) !important; border: 1px solid var(--l); box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; }
+.startkopf small { color: var(--le) !important; font-size: 12px !important; }
+.startintro { color: var(--tx) !important; font-size: 14px !important; }
+.startkarte .vtitel { color: var(--tx) !important; font-size: 12px !important; letter-spacing: 0.08em; font-weight: 700; }
+.sz-karte { background: var(--f) !important; border-color: var(--l) !important; color: var(--tx) !important; }
+.sz-karte.ausgewaehlt, .sz-karte:focus-visible { outline: 2px solid var(--hk-akzent) !important; }
+.sz-karte b { font-size: 14px !important; } .sz-karte small, .sz-best { font-size: 12px !important; color: var(--le) !important; }
+.sz-level { font-size: 12px !important; color: #e7b04b !important; }
+.stufe-karte { background: var(--f) !important; border-color: var(--l) !important; color: var(--tx) !important; }
+.stufe-karte small { font-size: 12px !important; color: var(--le) !important; }
+.stufe-karte.an { border: 2px solid var(--hk-akzent) !important; background: var(--t) !important; }
+.sterne-stufe { color: var(--hk-akzent-hell) !important; font-size: 12px !important; }
+.startkarte .ort, .startkarte select, .startseed input { background: var(--t) !important; color: var(--tx) !important; border-color: var(--l) !important; font-size: 16px !important; min-height: 44px; }
+.startseed, .startmonat { color: var(--le) !important; font-size: 12px !important; }
+.startkarte .breit { background: transparent !important; color: var(--tx) !important; border-color: var(--l) !important; }
+.startkarte .breit.gruen { background: var(--hk-akzent) !important; color: #fff !important; border-color: #8f2219 !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+#fortsetzen { border-color: var(--hk-gut) !important; color: var(--hk-gut) !important; }
+.startkarte .app-platz { background: var(--f); border-color: var(--l); color: var(--tx); }
+.startkarte .app-platzkopf span, .startkarte .app-daten small { font-size: 12px !important; color: var(--le); }
+.startkarte .app-daten strong { font-size: 14px !important; }
+#speicherhinweis { font-size: 13px !important; color: #ef6f62 !important; }
+.startkarte .app-aktionen button { background: transparent !important; color: var(--tx) !important; border: 1px solid var(--l); font-size: 13px !important; }
+.startkarte .app-aktionen button:first-child { border-color: var(--hk-gut); color: var(--hk-gut) !important; }
+.startkarte .app-namenswahl { color: var(--le); font-size: 12px !important; }
+.startkarte .app-namenswahl input { background: var(--t); color: var(--tx); border-color: var(--l); }
+
+/* ───────────── Einführung (Q30): Vorstandsassistentin im dunklen Blatt ───────────── */
+.ein-sheet, .ein-frage { background: #24272b !important; color: #f1f1ef !important; border: 1px solid #43484e; box-shadow: 0 -2px 8px rgba(0,0,0,0.4) !important; }
+.ein-kopf small, .ein-fuss span { font-size: 12px !important; color: #9da2a7 !important; }
+.ein-kopf b { font-size: 14px !important; }
+.ein-kopf button { background: transparent !important; color: #f1f1ef !important; min-width: 44px !important; height: 44px !important; }
+.ein-portraet { background: #1a1c1f !important; border-radius: 10px !important; }
+.ein-fuss button, .ein-antworten button { background: #d23c32 !important; color: #fff !important; box-shadow: inset 0 0 0 1px #ef7a6f; font-size: 14px !important; }
+.ein-fuss button.ein-ueberspringen, .ein-antworten button:not(:first-child) { background: transparent !important; color: #f1f1ef !important; border: 1px solid #43484e; box-shadow: none; font-size: 13px !important; }
+.ein-ring { box-shadow: 0 0 0 1px #fff9 !important; }
+
+/* ───────────── Spielende (Q30): ohne Verläufe und schwere Schatten, Schrift ab 12 px ───────────── */
+#spielende-overlay { background-color: #1a1c1f !important; }
+#spielende-overlay .se-bild, #spielende-overlay .se-zeitung { box-shadow: 0 2px 8px rgba(0,0,0,0.45) !important; }
+#spielende-overlay .se-zeitung small, #spielende-overlay .se-ergebnis small, #spielende-overlay .se-kpi small { font-size: 12px !important; }
+#spielende-overlay .se-ergebnis { background: #24272b !important; border-color: #43484e !important; }
+#spielende-overlay .se-karte, #spielende-overlay .se-kpi { background: #24272b !important; border-color: #43484e !important; }
+#spielende-overlay .se-zeile { border-color: #43484e !important; font-size: 14px !important; }
+#spielende-overlay button.se-knopf:not(.se-sek) { background: #d23c32 !important; color: #fff !important; box-shadow: inset 0 0 0 1px #ef7a6f; }
+#spielende-overlay button.se-knopf.se-sek { background: transparent !important; border-color: #43484e !important; }
+#spielende-overlay .se-legende { font-size: 12px !important; }
+#spielende-overlay small { font-size: 12px !important; }

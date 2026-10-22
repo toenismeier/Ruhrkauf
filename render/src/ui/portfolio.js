@@ -3,6 +3,7 @@
 import { geld, pz, fmt, esc } from './format.js';
 import { deutschlandKarte, kartenStaedte } from './deutschland.js';
 import { auswahlFilterLaden, auswahlFilterSpeichern } from './speicher.js';
+import * as K from './komponenten.js';
 
 export const FORMATE = [
   ['hartwig', 'Hartwig'], ['premium', 'Hartwig Premium'], ['sport', 'Hartwig Sport'],
@@ -51,21 +52,28 @@ export function portfolioModul(ctx) {
     return [...ui.ausgewaehlt].filter((id) => aktiv.has(id));
   };
   // Die Filter gehören nur in die Anzeige; ein Spielstand erhält niemals UI-eigene Haus-KPIs.
+  // Q30: Deutschland beantwortet „Wo läuft das Netz, wo brennt es?“, Häuser „Welche Häuser brauchen einen Eingriff?“
   function kopf() {
-    return '<div class="pp-tabs">' +
-      '<button class="pp-tab ' + (ui.seite === 'karte' ? 'an' : '') + '" data-pp="seite" data-v="karte">Deutschland</button>' +
-      '<button class="pp-tab ' + (ui.seite === 'liste' ? 'an' : '') + '" data-pp="seite" data-v="liste">Häuser</button></div>' +
-      '<div class="pp-filter">' +
+    const aktiv = Object.entries(ui.filter).filter(([k, v]) => k !== 'suche' && v !== 'alle').length + (ui.filter.suche ? 1 : 0);
+    return K.bereich('betrieb', 'karte') + '<div class="hk-rumpf">' + K.seg([['karte', 'Deutschland'], ['liste', 'Häuser']], ui.seite, (v) => 'class="pp-tab" data-pp="seite" data-v="' + v + '"') +
+      '<div id="pp-ampel"></div>' +
+      '<details class="pp-filterbox"' + (aktiv ? ' open' : '') + '><summary>Filter' + (aktiv ? ' · ' + aktiv + ' aktiv' : '') + '</summary><div class="pp-filter">' +
       '<label>Format<select data-pp-filter="format">' + optionen([['alle', 'Alle'], ...FORMATE], ui.filter.format) + '</select></label>' +
       '<label>Region<select data-pp-filter="region">' + optionen([['alle', 'Alle'], ...['West', 'Nord', 'Süd', 'Mitte', 'Ost'].map((v) => [v, v])], ui.filter.region) + '</select></label>' +
       '<label>Hausklasse<select data-pp-filter="klasse">' + optionen([['alle', 'Alle'], ...['A', 'B', 'C', 'Premium'].map((v) => [v, v])], ui.filter.klasse) + '</select></label>' +
       '<label>Ampel<select data-pp-filter="ampel">' + optionen([['alle', 'Alle'], ['gruen', 'Grün'], ['gelb', 'Gelb'], ['rot', 'Rot'], ['ohne', 'Ohne Daten']], ui.filter.ampel) + '</select></label>' +
       '</div><label class="pp-suchlabel">Stadt oder Haus suchen' +
       '<input id="pp-suche" type="search" placeholder="Stadt, Name oder Haus-ID" value="' + esc(ui.filter.suche) + '" autocomplete="off" /></label>' +
-      '<div class="pp-speichern"><button data-pp="merken">Filter speichern</button>' +
+      '<div class="pp-speichern"><button type="button" class="hk-knopf zweit" data-pp="merken">Filter speichern</button>' +
       '<select data-pp="gespeichert" aria-label="Gespeicherte Auswahl laden">' +
       optionen([['', 'Gespeicherte Auswahl …'], ...ui.gespeicherte.map((q) => [q.name, q.name])], '') +
-      '</select></div><div id="pp-inhalt"></div>';
+      '</select></div></details><div id="pp-inhalt"></div></div>';
+  }
+  function ampelKopf(hs) {
+    const n = (a) => hs.filter((h) => h.ampel === a).length;
+    const el = wurzel.querySelector('#pp-ampel');
+    if (el) el.innerHTML = K.gross([{ label: 'Positiv', wert: fmt.format(n('gruen')), ton: 'gut' }, { label: 'Knapp', wert: fmt.format(n('gelb')) }, { label: 'Negativ', wert: fmt.format(n('rot')), ton: n('rot') ? 'schlecht' : '' }])
+      + '<p class="pp-hinweis">Häuser nach Ergebnisampel · ' + fmt.format(n('ohne')) + ' ohne Daten (geschlossen oder noch nicht simuliert)</p>';
   }
   function oeffne(seite = ui.seite) {
     ui.seite = seite;
@@ -79,13 +87,12 @@ export function portfolioModul(ctx) {
     if (!ui.aktiv || !inhalt()) return;
     const hs = gefiltert(), ziel = inhalt();
     const altScroll = ziel.querySelector('#pp-scroll')?.scrollTop ?? 0;
+    ampelKopf(hs);
     if (ui.seite === 'karte') {
       const alle = kartenStaedte(hs), koord = alle.filter((x) => x.koordinaten).length;
-      ziel.innerHTML = '<div class="pp-info">' + fmt.format(alle.length) + ' Städte · ' +
-        fmt.format(hs.length) + ' Häuser · ' + koord + ' Kartenpunkte</div>' +
-        '<div id="pp-karte" class="pp-karte"></div>' +
-        '<p class="pp-hinweis">Punktgröße: Wochenumsatz. Farbe: Ergebnisampel. Grau: noch nicht simulierte oder geschlossene Häuser.</p>' +
-        '<div class="pp-legende"><span>● Positiv</span><span>● Knapp</span><span>● Negativ</span><span>● Ohne Daten</span></div>';
+      ziel.innerHTML = '<div id="pp-karte" class="pp-karte"></div>' +
+        '<div class="pp-legende"><span><i class="g"></i>Positiv</span><span><i class="y"></i>Knapp</span><span><i class="r"></i>Negativ</span><span><i class="o"></i>Ohne Daten</span></div>' +
+        '<p class="pp-hinweis">' + fmt.format(alle.length) + ' Städte · ' + fmt.format(hs.length) + ' Häuser · ' + koord + ' Kartenpunkte. Punktgröße: Wochenumsatz. Stadt antippen öffnet sie.</p>';
       ziel.querySelector('#pp-karte').append(deutschlandKarte(hs, ctx.sprungStadt));
       return;
     }
@@ -102,26 +109,26 @@ export function portfolioModul(ctx) {
     ziel.innerHTML = '<div class="pp-info">' + fmt.format(hs.length) + ' von ' + fmt.format(zeilen().length) +
       ' Häusern · ' + anzahl + ' ausgewählt</div>' +
       '<div class="pp-sort"><label>Sortieren nach <select data-pp="sort">' + optionen(FELDER, ui.sort) + '</select></label>' +
-      '<button data-pp="richtung">' + (ui.absteigend ? 'Absteigend ↓' : 'Aufsteigend ↑') + '</button></div>' +
-      '<div class="pp-auswahl"><button data-pp="alle">Gefilterte auswählen</button>' +
-      '<button data-pp="leeren">Auswahl löschen</button></div>' +
+      '<button type="button" class="hk-knopf zweit" data-pp="richtung">' + (ui.absteigend ? 'Absteigend ↓' : 'Aufsteigend ↑') + '</button></div>' +
+      '<div class="pp-auswahl"><button type="button" class="hk-knopf zweit" data-pp="alle">Gefilterte auswählen</button>' +
+      '<button type="button" class="hk-knopf zweit" data-pp="leeren">Auswahl löschen</button></div>' +
       '<div id="pp-scroll" class="pp-scroll" role="list" aria-label="Hausportfolio">' +
       '<div id="pp-spacer" style="height:' + (sortierte.length * HOEHE) + 'px;position:relative"></div></div>' +
       '<div class="pp-aktionen"><b>Sammelaktionen · ' + anzahl + ' steuerbare Häuser</b>' +
       '<div class="pp-aktionraster">' +
-      '<button data-pp="schliessen"' + (!anzahl ? ' disabled' : '') + '>Schließen</button>' +
-      '<button data-pp="abbau"' + (!anzahl ? ' disabled' : '') + '>Personal −5 %</button>' +
-      '<button data-pp="aufbau"' + (!anzahl ? ' disabled' : '') + '>Personal +5 %</button>' +
-      '<button data-pp="aushilfen"' + (!anzahl ? ' disabled' : '') + '>Aushilfen 10 %</button>' +
-      '<button data-pp="miete"' + (!anzahl ? ' disabled' : '') + '>Miete −5 % verhandeln</button>' +
-      '<button data-pp="marketing"' + (!anzahl ? ' disabled' : '') + '>Marketing 15 % Rabatt</button>' +
+      '<button type="button" class="hk-knopf zweit" data-pp="schliessen"' + (!anzahl ? ' disabled' : '') + '>Schließen</button>' +
+      '<button type="button" class="hk-knopf zweit" data-pp="abbau"' + (!anzahl ? ' disabled' : '') + '>Personal −5 %</button>' +
+      '<button type="button" class="hk-knopf zweit" data-pp="aufbau"' + (!anzahl ? ' disabled' : '') + '>Personal +5 %</button>' +
+      '<button type="button" class="hk-knopf zweit" data-pp="aushilfen"' + (!anzahl ? ' disabled' : '') + '>Aushilfen 10 %</button>' +
+      '<button type="button" class="hk-knopf zweit" data-pp="miete"' + (!anzahl ? ' disabled' : '') + '>Miete −5 % verhandeln</button>' +
+      '<button type="button" class="hk-knopf zweit" data-pp="marketing"' + (!anzahl ? ' disabled' : '') + '>Marketing 15 % Rabatt</button>' +
       '</div></div>' + (ui.vorschau
         ? '<div class="pp-vorschau" role="status"><b>Schließungsvorschau für ' + ui.vorschau.anzahl + ' Häuser</b>' +
           '<p>Sozialplan ca. ' + geld(ui.vorschau.sozialplan) + ', Restmiete ca. ' +
           geld(ui.vorschau.restmiete) + ', gesamt ca. <b>' + geld(ui.vorschau.gesamt) + '</b>.</p>' +
           '<p>' + esc(ui.vorschau.hinweis) + '</p>' +
-          '<button data-pp="schliessen-ja">Schließungen verbindlich einleiten</button> ' +
-          '<button data-pp="schliessen-nein">Abbrechen</button></div>'
+          '<div class="hk-knopfreihe"><button type="button" class="hk-knopf" data-pp="schliessen-ja">Schließungen einleiten</button>' +
+          '<button type="button" class="hk-knopf zweit" data-pp="schliessen-nein">Abbrechen</button></div></div>'
         : '');
     const scroll = ziel.querySelector('#pp-scroll');
     scroll.scrollTop = altScroll;

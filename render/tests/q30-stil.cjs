@@ -8,7 +8,7 @@ async function stilpruefungLaden(p) {
 }
 
 /** Öffnet jedes Panel, speichert ein Bild (wenn ordner) und prüft umgestellte Panels (umgestellt: true) oder alle (alle: true). */
-async function panelLauf(p, panels, { ordner = null, alle = false, nur = null, log = console.log } = {}) {
+async function panelLauf(p, panels, { ordner = null, alle = false, nur = null, lang = false, log = console.log } = {}) {
   await stilpruefungLaden(p);
   if (ordner) fs.mkdirSync(ordner, { recursive: true });
   const ruhig = async () => {
@@ -29,10 +29,11 @@ async function panelLauf(p, panels, { ordner = null, alle = false, nur = null, l
       await p.evaluate(`(async () => { ${panel.oeffne} })()`);
       await p.waitForTimeout(200);
       await ruhig();
+      if (!panel.nach) await p.evaluate(() => { const pi = document.getElementById('pinhalt'); if (pi) pi.scrollTop = 0; });
       if (panel.nach) { await p.evaluate(`(async () => { ${panel.nach} })()`); await p.waitForTimeout(150); }
-      await p.evaluate(() => { const m = document.getElementById('meldung'); if (m) m.className = ''; const t = document.getElementById('erfolge-toast'); if (t) t.hidden = true; });
+      await p.evaluate(() => { const m = document.getElementById('meldung'); if (m) m.className = ''; const t = document.getElementById('erfolge-toast'); if (t) { t.hidden = true; t.classList.remove('sichtbar'); t.style.display = 'none'; } });
       let bild = null;
-      if (ordner) { bild = path.join(ordner, panel.name + '.png'); await p.screenshot({ path: bild }); }
+      if (ordner) { bild = path.join(ordner, panel.name + '.png'); if (lang && (await p.locator('#panel.offen').count())) await p.locator('#panel').screenshot({ path: bild }); else await p.screenshot({ path: bild }); }
       const verstoesse = (panel.umgestellt || alle)
         ? await p.evaluate((w) => window.hartwigStilpruefung(w), panel.wurzel ?? '#panel') : [];
       ergebnis.push({ name: panel.name, bild, geprueft: !!(panel.umgestellt || alle), verstoesse });
@@ -41,7 +42,7 @@ async function panelLauf(p, panels, { ordner = null, alle = false, nur = null, l
       ergebnis.push({ name: panel.name, fehler: String(e) });
       log('FEHLER Stil ' + panel.name + ' ' + String(e).slice(0, 200));
     }
-    await p.evaluate(() => { try { window.spiel.wochenbericht.zu(); } catch {} try { window.spiel.reise.zu(); } catch {} try { window.spiel.schliessePanel(); } catch {} document.getElementById('start')?.classList.remove('an'); document.getElementById('menue')?.classList.remove('offen'); });
+    await p.evaluate(() => { try { window.spiel.wochenbericht.zu(); } catch {} try { window.spiel.reise.zu(); } catch {} try { window.spiel.hausbesuch.schliesse(); } catch {} try { window.spiel.spielende.zu(); } catch {} try { document.querySelector('.ein-kopf button')?.click(); } catch {} try { window.spiel.schliessePanel(); } catch {} document.getElementById('start')?.classList.remove('an'); document.getElementById('menue')?.classList.remove('offen'); });
   }
   return ergebnis;
 }

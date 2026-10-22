@@ -64,7 +64,7 @@ export function reiseModul(ctx) {
       (Array.isArray(c.formate) ? c.formate.map((f) => '<span class="reise-format">' +
         esc(f.name) + '&nbsp;' + esc(String(f.anzahl)) + '</span>').join('') : esc(c.formate ?? '')) +
       '</small></span></button>').join('');
-    if (!sortiert.length) liste.innerHTML = '<p class="reise-leer">Keine Reiseziele gefunden.</p>';
+    if (!sortiert.length) liste.innerHTML = '<p class="reise-leer">Keine Stadt passt zur Suche. Ein Teil des Namens reicht, zum Beispiel „Müh“ für Mülheim.</p>';
     const treffer = z.querySelector('.reise-treffer');
     if (treffer) treffer.textContent = sortiert.length + ' ' + (sortiert.length === 1 ? 'Reiseziel' : 'Reiseziele');
   }
@@ -98,7 +98,7 @@ export function reiseModul(ctx) {
     const ausschnitt = ctx.vorschau?.();
     if (ausschnitt) vorschauen.set(hier, ausschnitt);
     z.hidden = false;
-    z.innerHTML = `<section class="reise-panel" role="dialog" aria-modal="true" aria-label="Reiseziele">
+    z.innerHTML = `<section class="reise-panel hk-flaeche" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Reiseziele">
       <header class="reise-kopf"><div class="reise-kopfbild">${zug}</div>
         <button class="reise-zu" aria-label="Schließen" data-reisezu>×</button>
         <span class="reise-bahnhof">Hauptbahnhof ${esc(hier)}</span><strong>${esc(hier)}</strong></header>

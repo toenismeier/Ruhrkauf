@@ -1,24 +1,19 @@
 /* N03 Erfolge: Raster und eigene, nicht mit Systemmeldungen kollidierende Toast-Ebene */
-.erfolge-seite { padding: 0 0 20px; }
-.erfolge-kopf { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 13px; margin-bottom: 10px; display: grid; gap: 6px; }
-.erfolge-kopf b { font-size: calc(25px * var(--schrift)); font-variant-numeric: tabular-nums; }
-.erfolge-kopf span { color: var(--leise); font-size: calc(12px * var(--schrift)); }
-.erfolge-balken { height: 7px; border-radius: 7px; overflow: hidden; background: #e6e2db; width: 100%; }
-.erfolge-balken i { display: block; height: 100%; border-radius: inherit; background: #2f8f5b; transition: width .2s; }
-.erfolge-filter { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: thin; }
-.erfolge-filter button { background: var(--karte); border: 1px solid var(--linie); border-radius: 12px; padding: 8px 10px; flex: none; color: var(--text); font-size: calc(12px * var(--schrift)); font-weight: 700; }
-.erfolge-filter button.an { background: #2f8f5b; border-color: #2f8f5b; color: white; }
-.erfolge-raster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
-.erfolge-karte { min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 5px; background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 11px 8px; }
-.erfolge-karte.frei { border-color: #c0dac9; }
-.erfolge-karte.gesperrt .erfolge-bild { filter: grayscale(1); opacity: .3; }
-.erfolge-bild { width: 72px; height: 72px; object-fit: contain; }
-.erfolge-geheim { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; color: #92979b; background: #eeeae4; font-size: calc(42px * var(--schrift)); font-weight: 800; }
-.erfolge-karte b { font-size: calc(12px * var(--schrift)); line-height: 1.25; }
-.erfolge-karte small { color: var(--leise); font-size: calc(10px * var(--schrift)); text-transform: capitalize; }
-.erfolge-karte .erfolge-frei { font-size: calc(10.5px * var(--schrift)); color: #237647; font-weight: 700; margin-top: auto; }
-.erfolge-hinweis { font-size: calc(10.5px * var(--schrift)); line-height: 1.35; color: var(--leise); margin-top: auto; min-height: 30px; }
-.erfolge-karte .erfolge-balken { margin: 3px 0; }
+.erfolge-vitrine { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 6px; padding: 10px 8px 0; background: var(--t); border: 1px solid var(--l); border-radius: 10px; }
+.erfolge-vitrine figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; padding-bottom: 8px; border-bottom: 3px solid #5b534c; }
+.erfolge-vitrine img { width: 56px; height: 56px; }
+.erfolge-vitrine figcaption { font-size: 12px; line-height: 15px; text-align: center; color: var(--le); overflow-wrap: anywhere; }
+#panel .hk-seg { margin-bottom: 10px; }
+.erfolge-raster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.erfolge-karte { min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; background: var(--f); border: 1px solid var(--l); border-radius: 10px; padding: 12px 8px; color: var(--tx); }
+.erfolge-karte.gesperrt .erfolge-bild { filter: grayscale(1); opacity: .35; }
+.erfolge-bild { width: 64px; height: 64px; object-fit: contain; }
+.erfolge-geheim { width: 64px; height: 64px; border-radius: 10px; border: 2px dashed var(--l); }
+.erfolge-karte b { font-size: 14px; line-height: 1.25; }
+.erfolge-karte small { color: var(--le); font-size: 12px; }
+.erfolge-karte .erfolge-frei { font-size: 12px; color: var(--hk-gut); font-weight: 700; margin-top: auto; }
+.erfolge-hinweis { font-size: 12px; line-height: 1.35; color: var(--le); margin-top: auto; }
+.erfolge-prozent { font-size: 12px; font-weight: 700; color: var(--tx); font-variant-numeric: tabular-nums; }
 #erfolge-toast { position: fixed; left: 15px; right: 15px; max-width: 470px; margin: auto; bottom: calc(92px + env(safe-area-inset-bottom)); z-index: 13; background: #243746; color: white; border-radius: 15px; box-shadow: 0 8px 30px #0005; display: flex; align-items: center; gap: 12px; padding: 8px 12px; opacity: 0; transform: translateY(20px); transition: opacity 180ms, transform 180ms; pointer-events: none; }
 #erfolge-toast[hidden] { display: none; }
 #erfolge-toast.sichtbar { opacity: 1; transform: translateY(0); }
@@ -36,5 +31,5 @@
 }
 
 /* Freischaltungen innerhalb des Wochenberichts sichtbar lassen. */
-.wb-erfolge { margin: 12px 0 0; border-top: 1px solid #d9cfb8; padding: 10px 2px; font-size: calc(12px * var(--schrift)); line-height: 1.4; color: #276745; }
+.wb-erfolge { margin: 12px 0 0; border-top: 1px solid #d9cfb8; padding: 10px 2px; font-size: 12px; line-height: 1.4; color: #276745; }
 .wb-erfolge strong { font-weight: 800; }
