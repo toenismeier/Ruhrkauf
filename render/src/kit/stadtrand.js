@@ -541,6 +541,11 @@ export function nahMitte(plan, ansicht = 'einkauf', zoom = 62, o = {}) {
     const b = st && plan.bloecke.find((q) => q.id === st.block);
     [x, z] = b ? [b.x + b.w / 2, b.z + b.d / 2] : [plan.breite / 2, plan.tiefe / 2];
   } else if (o.punkt) [x, z] = [plan.breite * o.punkt[0], plan.tiefe * o.punkt[1]];
+  else if (plan.startBlick === 'hbf' && plan.einkaufslage) {
+    // Kartenstadt Essen: Start am Hauptbahnhof mit Blick die Kettwiger Straße hinunter
+    const L = plan.einkaufslage, bh = plan.parzellen.find((p) => p.typ === 'slot:bahnhof');
+    [x, z] = bh ? [L.xF + 6, Math.min(L.zF - 8, bh.z + bh.d + 30)] : [L.xF - 8, L.zF - 8];
+  }
   else { const L = plan.einkaufslage; [x, z] = L ? [L.xF - 8, L.zF - 8] : [plan.breite / 2, plan.tiefe / 2]; }
   const G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
   if (!o.ungeklemmt) { x = Math.min(Math.max(x, G.x0), G.x1); z = Math.min(Math.max(z, G.z0), G.z1); }

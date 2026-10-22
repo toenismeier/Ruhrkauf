@@ -3,6 +3,7 @@ import type { Format, GameState, GruppeId } from './types';
 import { clamp, eur, melde, neueId } from './util';
 import { PARAM } from './welt';
 import { einbuchen } from './einkauf';
+import { istSandkasten } from './sandkasten';
 
 export function bestandWert(s: GameState, g?: GruppeId): number {
   let x = 0;
@@ -58,12 +59,12 @@ export function wareneingang(s: GameState, liquiditaetsReserve: number): { vorka
     if (!b.vorkasse) {
       const ziel = zielWochen(s, b.gruppe);
       const frei = Math.max(0, limit - exposure);
-      const aufZiel = ziel > 0 ? Math.min(wert, frei) : 0;
+      const aufZiel = ziel > 0 ? (istSandkasten(s) ? wert : Math.min(wert, frei)) : 0;
       let rest = wert - aufZiel;
       if (rest > 0) {
         const liquide = s.cash + s.kreditlinie - liquiditaetsReserve;
-        if (s.vorkasseAkzeptieren && liquide > 0) {
-          const zahlbar = eur(Math.min(rest, liquide)); // ganze Euro (Cash bleibt ganzzahlig)
+        if (istSandkasten(s) || (s.vorkasseAkzeptieren && liquide > 0)) {
+          const zahlbar = istSandkasten(s) ? eur(rest) : eur(Math.min(rest, liquide)); // ganze Euro (Cash bleibt ganzzahlig)
           s.cash -= zahlbar;
           vorkasse += zahlbar;
           rest -= zahlbar;

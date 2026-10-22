@@ -1,9 +1,11 @@
 // O01 Organisation: Zentrale und Vertrieb. Alle Kennzahlen stammen aus Engine-Abfragen.
 import { esc, geld } from './format.js';
 import { portraet } from './vorstand.js';
+import { vertriebModul } from './vertrieb.js';
 export function organisationModul(ctx) {
   const { E } = ctx, s = () => ctx.s();
   const ui = { aktiv:false, reiter:'zentrale', ebene:null, id:null };
+  const vertrieb = vertriebModul({ E, s, oeffneHaus: ctx.oeffneHaus, oeffnePortfolio: ctx.oeffnePortfolio });
   const bar = (q) => '<span class="org-balken"><i style="width:' + Math.round(Math.max(0,Math.min(1,q))*100) + '%"></i></span>';
   const name = (st) => st?.person ? esc(st.person.name) : '<span class="frei">unbesetzt – besetzen</span>';
   const aufgabenListe = (aufgaben, id, cluster = false) => {
@@ -68,6 +70,8 @@ export function organisationModul(ctx) {
         h+='</div>';
       }
     } else {
+      h += vertrieb.darstellen();
+      h += '<details class="vtr-leitungen"><summary>Regional- und Clusterleitungen verwalten</summary>';
       for (const r of x.regionen) {
         h+='<div class="karte"><div class="khead"><b>Region '+esc(r.id)+'</b><button data-org="profil" data-ebene="region" data-id="'+esc(r.id)+'">'+name(r.stelle)+'</button></div>';
         for (const c of r.cluster) {
@@ -95,6 +99,7 @@ export function organisationModul(ctx) {
         h+=aufgabenListe(c.aufgaben,c.id,true);
         h+='</div>';
       }
+      h += '</details>';
     }
     ctx.panel('Organisation',ui.reiter==='zentrale'?'Vorstand → Bereiche':'Haus → Hauscluster → Region → CSO',h,'gross');
     ui.aktiv=true;
@@ -102,6 +107,7 @@ export function organisationModul(ctx) {
   function tun(aktion){const r=E.fuehreAus(s(),aktion);ctx.meldung(r.text,r.ok);ctx.nachAktion?.();if(r.ok) zeichnen();}
   document.getElementById('pinhalt').addEventListener('click',(ev)=>{
     if(!ui.aktiv)return;
+    const v=ev.target.closest('[data-vtr]');if(v){if(vertrieb.klick(v))zeichnen();return;}
     const el=ev.target.closest('[data-org]');if(!el)return;
     const a=el.dataset.org;
     if(a==='etage'){ctx.oeffneAbteilung?.(el.dataset.id);return;}
@@ -117,6 +123,9 @@ export function organisationModul(ctx) {
     if(a==='entlassen')tun({typ:'organisationEntlassen',ebene:ui.ebene,id:ui.id});
     if(a==='praemie')tun({typ:'organisationHaltepraemie',ebene:ui.ebene,id:ui.id,betrag:10000});
     if(a==='befoerdern')tun({typ:'organisationBefoerdern',haus:el.dataset.haus,hauscluster:ui.id});
+  });
+  document.getElementById('pinhalt').addEventListener('change',(ev)=>{
+    if(ui.aktiv && ev.target.matches('[data-vtr-wahl]') && vertrieb.wahl(ev.target)) zeichnen();
   });
   return { oeffne:(reiter='zentrale')=>{ui.reiter=reiter;ui.ebene=null;zeichnen();},zu:()=>{ui.aktiv=false;},aktiv:()=>ui.aktiv,pruefe:()=>({reiter:ui.reiter,bereiche:E.organisationUebersicht(s()).bereiche.length,cluster:E.organisationUebersicht(s()).regionen.reduce((n,r)=>n+r.cluster.length,0)}) };
 }

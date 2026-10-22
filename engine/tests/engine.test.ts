@@ -16,8 +16,8 @@ function spiele(s: GameState, n: number, freigeben = false): WochenKpi[] {
 
 describe('Welt', () => {
   const s = neuesSpiel(1);
-  test('364 Warenhäuser inklusive Premium und 44 Sporthäuser', () => {
-    expect(s.haeuser.filter((h) => h.format === 'warenhaus')).toHaveLength(364);
+  test('365 Warenhäuser inklusive Premium und 44 Sporthäuser', () => {
+    expect(s.haeuser.filter((h) => h.format === 'warenhaus')).toHaveLength(365);
     expect(s.haeuser.filter((h) => h.format === 'sport')).toHaveLength(44);
   });
   test('jedes Haus hat Etagen, Flächen und Potenzial je Sortiment', () => {
@@ -206,6 +206,8 @@ describe('Mechaniken', () => {
 
   test('Sonderposten, der nicht passt, verkauft sich nur über Offprice', () => {
     const s = neuesSpiel(12);
+    // Ohne Altwarefluss ins FUNDUS (engine-formate.md 3); mit Fluss wandert der Ladenhüter dorthin.
+    s.einkauf.altwareOutlet = 0;
     s.angebote.push({ id: 'sp', typ: 'sonderposten', woche: 0, frist: 5, titel: 'x', text: 'x', gruppe: 'damen', wert: 4_000_000, _passt: false, status: 'offen' });
     expect(fuehreAus(s, { typ: 'angebotAnnehmen', angebot: 'sp' }).ok).toBe(true);
     const k = s.bestand.find((x) => x.ladenhueter)!;

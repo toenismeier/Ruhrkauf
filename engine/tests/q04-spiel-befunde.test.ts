@@ -15,12 +15,12 @@ describe('Q04 TestFlight-Wurf 1: Spielbefunde', () => {
     expect(stadtRegion('Nicht vorhanden')).toBeUndefined();
   });
 
-  test.each([1, 2, 3])('Alle vier Premiumhäuser erscheinen in der Sondergruppe (Seed %i)', (seed) => {
+  test.each([1, 2, 3])('Alle fünf Premiumhäuser erscheinen in der Sondergruppe (Seed %i)', (seed) => {
     const s = neuesSpiel(seed);
     const premium = s.haeuser.filter((h) => h.klasse === 'premium');
     const sonder = organisationUebersicht(s).sonder;
-    expect(premium).toHaveLength(4);
-    expect(PREMIUM_HAEUSER).toHaveLength(4);
+    expect(premium).toHaveLength(5);
+    expect(PREMIUM_HAEUSER).toHaveLength(5);
     expect(sonder).toBeDefined();
     expect(new Set(sonder?.hausIds)).toEqual(new Set(premium.map((h) => h.id)));
     for (const def of PREMIUM_HAEUSER) {

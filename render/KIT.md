@@ -26,7 +26,7 @@ Bildsprache: **Coffee Inc 2**. Referenzbilder liegen in `/home/claude/render/ref
   Hintergrund und Schrift; keine eigenen Caches in den Modulen). Alle Texte auf Deutsch mit echten Umlauten.
 - Keine echten Marken oder Firmennamen. Eigene Kette heißt **Hartwig** (Warenhaus, Rot `#d23c32`) und **Hartwig Sport**.
 - Budget: ein normales Gebäude ≤ 2.500 Teile im Sammler, ein Warenhaus ≤ 8.000.
-- Premium-Kronjuwelen (separater Trophy-Store-Bauer): **Ziel 4.000 bis 9.000 Teile** je Gebäude (absolute Obergrenze 12.000), keine Fassadenfamilien. Vier eigenständige Silhouetten, Relief aus echten Fassadendetails. Zustandsatlas `premium-zustaende` = vier Häuser × zwölf Grundzustände und zwei Verkaufsvarianten. Prüfen über `S.anzahl`.
+- Premium-Kronjuwelen (separater Trophy-Store-Bauer): **Ziel 4.000 bis 9.000 Teile** je Gebäude (absolute Obergrenze 12.000), keine Fassadenfamilien. Fünf eigenständige Silhouetten, Relief aus echten Fassadendetails. Zustandsatlas `premium-zustaende` = fünf Häuser × zwölf Grundzustände und zwei Verkaufsvarianten. Prüfen über `S.anzahl`.
 - **FUNDUS (Off-Price):** Ziel 900–1.800 Teile je Haus im Nah-LOD, absolute Obergrenze 3.000; alle 20 Häuser plus die drei Bauformen separat im Katalog und über die `teile`-Rückgabe prüfen. `fern`-LOD reduziert insbesondere die einzelnen Warenstücke. Breites 3,5-m-Markenband, weiße Versalien, Claim, 9-m-Pylon und drei klar getrennte Bauformen sind verbindliche Qualitätsmerkmale.
 - Deterministisch: Zufall nur über `rng(seed)`.
 
