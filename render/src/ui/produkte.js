@@ -34,10 +34,44 @@ function donut(marge, p) {
 }
 const preisSchritt = (p) => (p < 20 ? 1 : p < 100 ? 5 : 10);
 
+function absatzGrafik(A, P, name) {
+  const hoch = Math.max(1, ...A.eigen, ...A.fremd);
+  const punkte = (werte) => werte.map((wert, i) => `${15 + i * 72},${91 - 73 * wert / hoch}`).join(' ');
+  const leer = !A.eigen.some((v) => v > 0) && !A.fremd.some((v) => v > 0);
+  return `<section class="q17-absatz karte" aria-label="Umsatzentwicklung der letzten fünf Wochen">
+    <div class="q17-kopf"><b>Absatzübersicht</b><small>5 Wochen · ${esc(name)}</small></div>
+    <div class="q17-kpis">
+      <div><small><i class="q17-punkt eigen"></i>Eigenmarke</small><b>${P('a:eigen', geld(A.letzteEigen))}</b><span>Umsatz letzte Woche</span></div>
+      <div><small><i class="q17-punkt fremd"></i>Fremdmarken</small><b>${P('a:fremd', geld(A.letzteFremd))}</b><span>Umsatz letzte Woche</span></div>
+    </div>
+    ${A.warengruppen ? `<svg class="q17-linien" viewBox="0 0 320 117" role="img" aria-label="Eigenmarke und Fremdmarken: fünf Wochen im Vergleich">
+      <path d="M15 18H303M15 54H303M15 91H303" stroke="#e5e2dd" stroke-width="1" fill="none"/>
+      <polyline points="${punkte(A.fremd)}" stroke="#88939a" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+      <polyline points="${punkte(A.eigen)}" stroke="#b65a44" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+      ${A.wochen.map((w, i) => `<text x="${15 + i * 72}" y="111" text-anchor="middle" font-size="9" fill="#6c7780">KW ${kwVon(Math.max(0,w))}</text>`).join('')}
+    </svg>` : ''}
+    <p class="q17-hinweis">${leer ? 'Noch keine Verkaufsdaten erfasst. ' : ''}Vergleich mit Fremdmarkenumsatz in denselben Warengruppen. Beträge in € pro Woche.</p>
+  </section>`;
+}
+
+function linienProfil(m, P) {
+  if (!m) return '';
+  const achsen = [['Qualität', 'qualitaet'], ['Modegrad', 'modegrad'], ['Preislage', 'preislage'], ['Nachhaltigkeit', 'nachhaltigkeit']];
+  return `<section class="karte q17-profil" aria-label="Linienprofil">
+    <div class="q17-kopf"><b>Linienprofil</b><small>${esc(m.stil)}</small></div>
+    <div class="q17-profil-inhalt">
+      ${achsen.map(([titel, feld]) => `<div class="q17-merkmal"><span>${titel}</span><span class="q17-balken"><i style="width:${m[feld]}%"></i></span><b>${P('lp:' + feld, String(m[feld]))}</b></div>`).join('')}
+      <div class="q17-preispunkt"><span>Ø Verkaufspreis im Sortiment</span><b>${P('lp:preispunkt', euro(m.preispunkt))}</b></div>
+    </div>
+    <p class="q17-hinweis">Nachhaltigkeit ist ein Orientierungswert aus Beschaffung und Materialmix, keine Ökobilanz.</p>
+    <button class="q17-linienknopf" data-a="linienVerwalten">Linien verwalten ›</button>
+  </section>`;
+}
+
 export function produkteModul(ctx) {
   const E = ctx.E, s = () => ctx.s();
   const da = typeof E.produkte === 'function';
-  const ui = { aktiv: false, seite: 'liste', marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: new Set() };
+  const ui = { aktiv: false, seite: 'liste', marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: new Set(), haus: null };
 
   function markenwahl(L) {
     return `<div class="spaltenwahl">${L.marken.map((m) => `<button class="chipk ${m.marke === ui.marke ? 'an' : ''}" data-a="marke" data-v="${m.marke}"><b style="background:${m.farbe}"></b>${esc(m.name)}</button>`).join('')}</div>`;
@@ -59,12 +93,16 @@ export function produkteModul(ctx) {
     const kats = M.kategorien.filter((k) => k.kapazitaet > 0 || k.belegt > 0);
     if (!kats.some((k) => k.id === ui.kategorie)) ui.kategorie = (kats.find((k) => M.produkte.some((p) => p.kategorie === k.id && p.status !== 'ausgelistet')) ?? kats[0])?.id ?? null;
     h += `<div class="seg umbruch kats">${kats.map((k) => `<button class="${k.id === ui.kategorie ? 'an' : ''}" data-a="kategorie" data-v="${k.id}">${esc(k.name)} ${P(`l:kat:${k.id}`, `${k.belegt} / ${k.kapazitaet}`, 'i')}</button>`).join('')}</div>`;
+    h += absatzGrafik(E.produktAbsatzVerlauf(st, M.marke, ui.kategorie), P, kats.find((k) => k.id === ui.kategorie)?.name ?? M.name);
+    h += linienProfil(E.produktLinienprofil(st, M.marke), P);
+    const offeneHaeuser = st.haeuser.filter((haus) => haus.status === 'offen');
+    if (!offeneHaeuser.some((haus) => haus.id === ui.haus)) ui.haus = offeneHaeuser[0]?.id ?? null;
     const prod = M.produkte.filter((p) => p.kategorie === ui.kategorie && p.status !== 'ausgelistet');
     ui.k = Math.min(ui.k, Math.max(0, prod.length - 1));
     if (M.hinweis) h += `<div class="olief warnung">${esc(M.hinweis)}</div>`;
     if (!prod.length) h += '<div class="karte"><div class="zeile grau">In dieser Kategorie gibt es noch kein Produkt.</div></div>';
     else {
-      const karten = prod.map((p) => {
+      const karten = prod.map((p, index) => {
         const ent = p.status === 'entwicklung';
         const mb = ui.model.has(p.id) ? modelBild(p.typ, p.farbe, p.material, p.wg, M.trendGruppe, 190) : null;
         let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p.id}" role="button" aria-label="Produkt oder Model zeigen" style="background:linear-gradient(#f7f4ee,#efe9df)">${mb ?? bild(p.typ, p.farbe, p.material, 150)}</div>`;
@@ -76,7 +114,15 @@ export function produkteModul(ctx) {
           c += `<div class="mitte" title="${dez(p.sterne, 1)} Sterne">${sterne(p.sterne, 24)}<span class="sternzahl">${P(`p:${p.id}:sterne`, dez(p.sterne, 1), 'span')}</span></div>`;
           const ver = `${p.veraenderung >= 0 ? '+' : '−'}${fmt.format(Math.abs(p.veraenderung))} (${p.veraenderungProzent >= 0 ? '+' : '−'}${pz(Math.abs(p.veraenderungProzent))})`;
           c += `<div class="pmitte">${schalter(p.status === 'sortiment', `data-a="sortiment" data-v="${p.id}"`, 'Im Sortiment')}<div class="verkauf"><small>Verkauf letzte Woche</small>${P(`p:${p.id}:verkauf`, fmt.format(p.verkaufLetzteWoche), 'b')}${P(`p:${p.id}:veraenderung`, ver, 'i', p.veraenderung < 0 ? ' class="rotwert"' : '')}</div></div>`;
-          c += `<div class="pmitte">${donut(p.marge, P(`p:${p.id}:marge`, pz(p.marge), 'b'))}<div class="preis"><small class="rotwert">EK je Stück ${P(`p:${p.id}:ek`, euro(p.ekStueck), 'span')}</small><small>Preis</small>${stepper('preis', P(`p:${p.id}:preis`, euro(p.preis)), `Normpreis ${euro(p.normpreis)}`, ` data-p2="${p.id}"`)}</div></div>`;
+          c += `<div class="pmitte">${donut(p.marge, P(`p:${p.id}:marge`, pz(p.marge), 'b'))}<div class="preis"><small class="rotwert">EK je Stück ${P(`p:${p.id}:ek`, euro(p.ekStueck), 'span')}</small><small>VK je Stück</small>${stepper('preis', P(`p:${p.id}:preis`, euro(p.preis)), `Normpreis ${euro(p.normpreis)}`, ` data-p2="${p.id}"`)}</div></div>`;
+          const minimum = Math.round(p.normpreis * 0.4 * 100) / 100, maximum = Math.round(p.normpreis * 2.5 * 100) / 100;
+          c += `<div class="q17-preis"><label for="vk-${esc(p.id)}">Verkaufspreis (VK)</label><input id="vk-${esc(p.id)}" type="range" min="${minimum}" max="${maximum}" step="0.01" value="${p.preis}" data-a="preisSlider" data-p2="${esc(p.id)}" aria-label="VK ${esc(p.name)}"/><small>${euro(minimum)} bis ${euro(maximum)}</small></div>`;
+          c += `<div class="q17-einheit">${schalter(p.preisAlleHaeuser, `data-a="einheitspreis" data-v="${p.id}"`, 'Preis in allen Häusern')}</div>`;
+          if (!p.preisAlleHaeuser && index === ui.k && ui.haus) {
+            const haus = offeneHaeuser.find((x) => x.id === ui.haus);
+            const hp = p.hauspreise[ui.haus] ?? p.preis;
+            c += `<div class="q17-hauspreis"><label for="hauspreis-${esc(p.id)}">Filialpreis für ${esc(haus?.stadt ?? ui.haus)}</label><select id="hauspreis-${esc(p.id)}" data-a="hausWahl" aria-label="Haus wählen">${offeneHaeuser.map((x) => `<option value="${esc(x.id)}"${x.id === ui.haus ? ' selected' : ''}>${esc(x.stadt)} · ${esc(x.name)}</option>`).join('')}</select>${stepper('hauspreis', P(`p:${p.id}:hauspreis:${ui.haus}`, euro(hp)), `Einheitspreis ${euro(p.preis)}`, ` data-p2="${p.id}"`)}<small>Abweichung nur für dieses Haus. Einheitspreis wieder einschalten, um alle Abweichungen zu löschen.</small></div>`;
+          }
           if (ui.auslisten === p.id) c += `<div class="oknoepfe"><button class="rot" data-a="auslistenJa" data-v="${p.id}">Wirklich auslisten</button><button data-a="auslistenNein">Behalten</button></div>`;
         }
         return c + '</div>';
@@ -230,6 +276,11 @@ export function produkteModul(ctx) {
       case 'zielgruppe': ui.neu.zielgruppe = v; ui.neuSchritt = 2; return zeigen();
       case 'sortiment': { const p = karte(v); tun({ typ: 'produktSortiment', produkt: v, an: p.status !== 'sortiment' }); return zeigen(true); }
       case 'preis': { const id = el.dataset.p2, p = karte(id), d = preisSchritt(p.preis); tun({ typ: 'produktPreis', produkt: id, preis: Math.max(1, Math.round((p.preis + Number(v) * d) / d) * d - (d >= 5 ? 0.01 : 0)) }); return zeigen(true); }
+      case 'preisSlider': tun({ typ: 'produktPreis', produkt: el.dataset.p2, preis: Number(el.value) }); return zeigen(true);
+      case 'einheitspreis': { const p = karte(v); tun({ typ: 'produktPreisAlleHaeuser', produkt: v, an: !p.preisAlleHaeuser }); return zeigen(true); }
+      case 'hausWahl': ui.haus = el.value; return zeigen(true);
+      case 'hauspreis': { const p = karte(el.dataset.p2), d = preisSchritt(p.hauspreise[ui.haus] ?? p.preis), alt = p.hauspreise[ui.haus] ?? p.preis; tun({ typ: 'produktHauspreis', produkt: p.id, haus: ui.haus, preis: Math.max(1, Math.round((alt + Number(v) * d) / d) * d - (d >= 5 ? 0.01 : 0)) }); return zeigen(true); }
+      case 'linienVerwalten': ctx.linienVerwalten?.(ui.marke); return;
       case 'bildwechsel': if (ui.model.has(v)) ui.model.delete(v); else ui.model.add(v); return zeigen(true);
       case 'auslisten': ui.auslisten = v; return zeigen(true);
       case 'auslistenNein': ui.auslisten = null; return zeigen(true);
@@ -250,7 +301,8 @@ export function produkteModul(ctx) {
     }
   }
   const inhalt = document.getElementById('pinhalt');
-  inhalt.addEventListener('click', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('[data-a]'); if (el && !el.disabled) klick(el); });
+  inhalt.addEventListener('click', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('[data-a]'); if (el && !el.disabled && el.tagName !== 'INPUT' && el.tagName !== 'SELECT') klick(el); });
+  inhalt.addEventListener('change', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('input[data-a="preisSlider"], select[data-a="hausWahl"]'); if (el && !el.disabled) klick(el); });
 
   return {
     ui, da,
