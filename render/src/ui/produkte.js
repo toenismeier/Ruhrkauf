@@ -7,6 +7,7 @@
 import { geld, fmt, pz, dez, kwVon, esc } from './format.js';
 import { werteSammler, vergleiche, schalter, segment, regler, stepper, kz, wocheText, karussell, karussellBinden } from './vorstand.js';
 import * as PB from '../kit/produktbild.js';
+import { passendeTypen, fachSegmente, zielChips, sortimentBedienung, gruppeTrend, teamAufschluesselung } from './produkte-q24.js';
 
 const PREISLAGE = { einstieg: 'Einstieg', mitte: 'Mitte', gehoben: 'Gehoben' };
 const STATUS = { entwicklung: 'in Entwicklung', sortiment: 'im Sortiment', pausiert: 'pausiert', ausgelistet: 'ausgelistet' };
@@ -37,7 +38,7 @@ const preisSchritt = (p) => (p < 20 ? 1 : p < 100 ? 5 : 10);
 export function produkteModul(ctx) {
   const E = ctx.E, s = () => ctx.s();
   const da = typeof E.produkte === 'function';
-  const ui = { aktiv: false, seite: 'liste', marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: new Set() };
+  const ui = { aktiv: false, seite: 'liste', marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: new Set(), fach: 'damen', zielgruppe: 'adults', detail: null };
 
   function markenwahl(L) {
     return `<div class="spaltenwahl">${L.marken.map((m) => `<button class="chipk ${m.marke === ui.marke ? 'an' : ''}" data-a="marke" data-v="${m.marke}"><b style="background:${m.farbe}"></b>${esc(m.name)}</button>`).join('')}</div>`;
@@ -48,6 +49,13 @@ export function produkteModul(ctx) {
     return L.marken.find((m) => m.marke === ui.marke);
   }
 
+  function vorauswahl(M) {
+    ui.fach = M.kategorien.some((k) => k.id === 'home') && M.kategorien.every((k) => k.id === 'home') ? 'home'
+      : M.trendGruppe === 'kinder' ? 'kinder' : /Herren/i.test(M.zielgruppe) ? 'herren' : 'damen';
+    ui.zielgruppe = M.trendGruppe === 'kinder' ? 'kinder' : M.trendGruppe === 'reif' ? 'bestager' : M.trendGruppe === 'jung' ? 'young' : 'adults';
+    ui.baumOffen = null; ui.astOffen = null;
+  }
+
   // ─────────────────────────── Produktliste
   function liste(P) {
     const st = s(), L = E.produkte(st), M = aktuelleMarke(L);
@@ -55,6 +63,8 @@ export function produkteModul(ctx) {
     if (!M) return { titel: 'Produktentwicklung', unter: '', html: '<div class="leise">Keine Eigenmarke vorhanden. Eine Marke gründest du im Einkauf.</div>' };
     h += '<button class="breit gruen" data-a="eigenmarkeGruenden">+ Neue Eigenmarke</button>';
     h += markenwahl(L);
+    h += teamAufschluesselung(M.leistung);
+    h += '<button class="breit q24-katalogknopf" data-a="katalog">Sortiment durchsuchen: Damen, Herren, Kinder, Home</button>';
     h += `<div class="raster">${kz('Team Produktentwicklung', P('l:team', `${Math.round(L.team * 100)} / 100`))}${kz('Kosten je Woche', P('l:kosten', geld(L.kostenWoche)))}</div>`;
     const kats = M.kategorien.filter((k) => k.kapazitaet > 0 || k.belegt > 0);
     if (!kats.some((k) => k.id === ui.kategorie)) ui.kategorie = (kats.find((k) => M.produkte.some((p) => p.kategorie === k.id && p.status !== 'ausgelistet')) ?? kats[0])?.id ?? null;
@@ -69,6 +79,7 @@ export function produkteModul(ctx) {
         const mb = ui.model.has(p.id) ? modelBild(p.typ, p.farbe, p.material, p.wg, M.trendGruppe, 190) : null;
         let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p.id}" role="button" aria-label="Produkt oder Model zeigen" style="background:linear-gradient(#f7f4ee,#efe9df)">${mb ?? bild(p.typ, p.farbe, p.material, 150)}</div>`;
         if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p.id}" aria-label="Auslisten"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
+        c += `<button class="q24-detailsknopf" data-a="detailProdukt" data-v="${esc(p.id)}">Produktdetails und Model ansehen</button>`;
         c += `<div class="pname">${P(`p:${p.id}:name`, p.name, 'b')}<small>${esc(p.typ)} · ${esc(p.zielgruppeName ?? 'Markenzielgruppe')} · ${esc(p.farbe)} · ${esc(p.material)} · ${PREISLAGE[p.preislage] ?? p.preislage}</small></div>`;
         if (ent) {
           c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P(`p:${p.id}:fertig`, `fertig ${wocheText(st, p.fertigWoche)}`, 'small')}</div><div class="balken"><span style="width:${(p.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P(`p:${p.id}:fortschritt`, pz(p.fortschritt), 'i')} · ${geld(p.budgetWoche)} je Woche über ${p.dauer} Wochen</small></div>`;
@@ -90,18 +101,66 @@ export function produkteModul(ctx) {
     return { titel: 'Produktentwicklung', unter: `${esc(M.name)} · ${esc(M.zielgruppe)} · ${M.inEntwicklung} in Entwicklung · KW ${kwVon(st.woche)}`, html: h };
   }
 
+
+  // Q24: Alle Typen stammen ausschließlich aus produktKatalog (auch spätere Q27-Q29-Typen).
+  function katalog() {
+    const K = E.produktKatalog(s()), L = E.produkte(s()), M = aktuelleMarke(L);
+    if (!M) return { titel: 'Sortiment', unter: '', html: '<div class="leise">Noch keine Marke vorhanden.</div>' };
+    const typen = passendeTypen(K, ui.fach, ui.zielgruppe);
+    let h = '<button class="zurueck" data-a="liste">‹ Produktentwicklung</button>';
+    h += markenwahl(L);
+    h += fachSegmente(ui) + zielChips(K, ui);
+    h += '<div class="q24-anzahl">' + typen.length + ' Artikeltypen · Kategorie öffnen und Artikel auswählen</div>';
+    h += sortimentBedienung(K, ui, typen, kachel, 'detailTyp');
+    return { titel: 'Sortiment', unter: M.name + ' · ' + typen.length + ' passende Typen', html: h };
+  }
+
+  function detail() {
+    const st = s(), K = E.produktKatalog(st), L = E.produkte(st), M = aktuelleMarke(L), d = ui.detail;
+    const p = d?.produktId ? M?.produkte.find((x) => x.id === d.produktId) : null;
+    const t = K.typen.find((x) => x.typ === (p?.typ ?? d?.typ));
+    if (!t) { ui.seite = 'katalog'; return katalog(); }
+    const typ = p?.typ ?? t.typ;
+    const material = p?.material ?? t.materialien[0];
+    const farbe = p?.farbe ?? (K.farben.find((x) => x.name === 'marine')?.name ?? K.farben[0]?.name ?? 'marine');
+    const gruppe = p?.zielgruppe ?? ui.zielgruppe;
+    const wg = p?.wg ?? t.wgs.find((x) => x.startsWith(ui.fach === 'home' ? 'wohnen.' : ui.fach + '.')) ?? t.wgs[0];
+    const model = modelBild(typ, farbe, material, wg, gruppeTrend(gruppe), 230);
+    const name = K.zielgruppen.find((x) => x.id === gruppe)?.name ?? gruppe;
+    const preis = p?.preis ?? t.preisMitte;
+    const zurueck = d?.quelle === 'liste' ? 'liste' : 'katalog';
+    let h = '<button class="zurueck" data-a="detailZurueck" data-v="' + zurueck + '">‹ Zurück</button>';
+    h += '<div class="karte q24-detail"><div class="q24-detailbild">' + (model ?? bild(typ, farbe, material, 220)) + '</div>';
+    h += '<h3>' + esc(p?.name ?? typ) + '</h3><div class="q24-detailwerte">';
+    h += '<div><span>Artikeltyp</span><b>' + esc(typ) + '</b></div>';
+    h += '<div><span>Material</span><b>' + esc(material) + '</b></div>';
+    h += '<div><span>Farbe</span><b>' + esc(farbe) + '</b></div>';
+    h += '<div><span>' + (p ? 'Verkaufspreis' : 'Basispreis, ca.') + '</span><b>' + euro(preis) + '</b></div>';
+    h += '<div><span>Zielgruppe</span><b>' + esc(name) + '</b></div>';
+    h += '</div>';
+    if (p) h += '<div class="olief">Status: ' + esc(STATUS[p.status] ?? p.status) + ' · ' + esc(p.kategorieName) + '</div>';
+    else {
+      const freigegeben = M && M.kategorien.some((x) => x.id === t.kategorie && x.kapazitaet > 0)
+        && Number(t.gruppe?.[M.trendGruppe] ?? 0) > 0.15;
+      h += freigegeben ? '<button class="breit gruen" data-a="detailPlanen">Für ' + esc(M.name) + ' entwickeln</button>'
+        : '<div class="olief">Dieser Artikeltyp passt derzeit nicht zum Sortiment der gewählten Marke.</div>';
+    }
+    return { titel: 'Produktdetails', unter: esc(M?.name ?? '') + ' · ' + esc(typ), html: h + '</div>' };
+  }
+
   // ─────────────────────────── Neues Produkt
   function neu(P) {
     const st = s(), K = E.produktKatalog(st), L = E.produkte(st), M = aktuelleMarke(L), e = ui.neu;
     const markeKats = new Set(M.kategorien.filter((k) => k.kapazitaet > 0).map((k) => k.id));
     const voll = new Set(M.kategorien.filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
-    const typen = K.typen.filter((t) => markeKats.has(t.kategorie) && (t.gruppe[M.trendGruppe] ?? 0) > 0.15).sort((a, b) => voll.has(a.kategorie) - voll.has(b.kategorie));
+    const typen = passendeTypen(K, ui.fach, ui.zielgruppe).filter((t) => markeKats.has(t.kategorie) && (t.gruppe[M.trendGruppe] ?? 0) > 0.15).sort((a, b) => Number(voll.has(a.kategorie)) - Number(voll.has(b.kategorie)));
     if (!typen.some((t) => t.typ === e.typ)) { e.typ = (typen.find((t) => !voll.has(t.kategorie)) ?? typen[0])?.typ; }
     const T = K.typen.find((t) => t.typ === e.typ);
     if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];
     let h = `<button class="zurueck" data-a="liste">‹ ${esc(M.name)}</button>`;
     h += markenwahl(L);
-    if (!typen.length) return { titel: 'Neues Produkt', unter: esc(M.name), html: h + '<div class="leise">Für diese Marke sind keine Artikeltypen verfügbar.</div>' };
+    if (!typen.length && ui.neuSchritt !== 0) ui.neuSchritt = 0;
+
     const typenIds = new Set(typen.map((t) => t.typ));
     const baum = (K.baum ?? []).map((kat) => ({
       ...kat, unterkategorien: kat.unterkategorien.map((ast) => ({
@@ -111,27 +170,11 @@ export function produkteModul(ctx) {
     const pfad = baum.flatMap((k) => k.unterkategorien.map((a) => ({ k, a }))).find((x) => x.a.typen.includes(e.typ));
     h += '<div class="q11fortschritt"><span class="' + (ui.neuSchritt === 0 ? 'an' : 'fertig') + '">1 Kategorie und Artikel</span><span class="' + (ui.neuSchritt === 1 ? 'an' : ui.neuSchritt > 1 ? 'fertig' : '') + '">2 Zielgruppe</span><span class="' + (ui.neuSchritt === 2 ? 'an' : '') + '">3 Entwicklung</span></div>';
     if (ui.neuSchritt === 0) {
-      h += '<div class="vtitel">Sortiment wählen</div><p class="leise">Kategorie antippen, Unterkategorie öffnen und einen Artikeltyp auswählen.</p>';
-      h += '<div class="q11baum">';
-      for (const kat of baum) {
-        const offen = ui.baumOffen === kat.id;
-        const zahl = kat.unterkategorien.reduce((sum, a) => sum + a.typen.length, 0);
-        h += `<button class="q11kategorie ${offen ? 'an' : ''}" data-a="baumKat" data-v="${kat.id}" aria-expanded="${offen}"><span>${esc(kat.name)}</span><small>${zahl} Artikel</small><b aria-hidden="true">${offen ? '−' : '+'}</b></button>`;
-        if (offen) for (const ast of kat.unterkategorien) {
-          const astOffen = ui.astOffen === ast.id;
-          h += `<button class="q11ast ${astOffen ? 'an' : ''}" data-a="baumAst" data-v="${esc(ast.id)}" aria-expanded="${astOffen}"><span>${esc(ast.name)}</span><small>${ast.typen.length}</small><b aria-hidden="true">${astOffen ? '−' : '+'}</b></button>`;
-          if (astOffen) {
-            h += '<div class="typkacheln q11typen">';
-            for (const typ of ast.typen) {
-              const t = typen.find((x) => x.typ === typ);
-              h += `<button class="${typ === e.typ ? 'an' : ''} ${voll.has(t.kategorie) ? 'voll' : ''}" data-a="typ" data-v="${esc(typ)}">${kachel(typ, 64)}<span>${esc(typ)}</span>${voll.has(t.kategorie) ? '<small>Kapazität erreicht</small>' : ''}</button>`;
-            }
-            h += '</div>';
-          }
-        }
-      }
-      h += '</div>';
-      return { titel: 'Neues Produkt', unter: `${esc(M.name)} · Kategorie → Artikeltyp`, html: h };
+      h += '<div class="vtitel">Sortiment wählen</div>';
+      h += fachSegmente(ui) + zielChips(K, ui);
+      h += '<div class="q24-anzahl">' + typen.length + ' Artikeltypen für ' + esc(M.name) + '</div>';
+      h += sortimentBedienung(K, ui, typen, kachel, 'typ', voll);
+      return { titel: 'Neues Produkt', unter: esc(M.name) + ' · Kategorie und Artikeltyp', html: h };
     }
     if (ui.neuSchritt === 1) {
       h += '<button class="zurueck" data-a="neuZurTyp">‹ Artikeltyp ändern</button>';
@@ -188,7 +231,7 @@ export function produkteModul(ctx) {
     const S = werteSammler();
     sternNr = 0;
     if (!da) return { S, r: { titel: 'Produkte', unter: '', html: '<div class="leise">Die Engine liefert noch keine Produkte.</div>' } };
-    const r = ui.seite === 'neu' && ui.neu ? neu(S.P) : ui.seite === 'trend' ? trend(S.P) : liste(S.P);
+    const r = ui.seite === 'neu' && ui.neu ? neu(S.P) : ui.seite === 'trend' ? trend(S.P) : ui.seite === 'katalog' ? katalog() : ui.seite === 'detail' ? detail() : liste(S.P);
     return { S, r };
   }
   function zeigen(scrollHalten = false) {
@@ -217,12 +260,20 @@ export function produkteModul(ctx) {
     const karte = (id) => E.produkte(st).marken.flatMap((m) => m.produkte).find((p) => p.id === id);
     switch (a) {
       case 'eigenmarkeGruenden': return ctx.neueEigenmarke?.();
-      case 'marke': ui.marke = v; ui.k = 0; ui.kategorie = null; if (ui.neu) { ui.neu = neuerEntwurf(); ui.neuSchritt = 0; ui.baumOffen = null; ui.astOffen = null; } return zeigen(true);
+      case 'marke': ui.marke = v; ui.k = 0; ui.kategorie = null; vorauswahl(aktuelleMarke(E.produkte(st))); if (ui.neu) { ui.neu = neuerEntwurf(); ui.neuSchritt = 0; ui.baumOffen = null; ui.astOffen = null; } return zeigen(true);
+      case 'katalog': ui.seite = 'katalog'; ui.baumOffen = null; ui.astOffen = null; return zeigen();
+      case 'q24Fach': ui.fach = v; ui.baumOffen = null; ui.astOffen = null; if (ui.seite === 'neu') ui.neu.typ = null; return zeigen(true);
+      case 'q24Ziel': ui.zielgruppe = v; ui.baumOffen = null; ui.astOffen = null; if (ui.seite === 'neu') { ui.neu.typ = null; ui.neu.zielgruppe = v; } return zeigen(true);
+      case 'detailTyp': ui.detail = { typ: v, quelle: 'katalog' }; ui.seite = 'detail'; return zeigen();
+      case 'detailProdukt': ui.detail = { produktId: v, quelle: 'liste' }; ui.seite = 'detail'; return zeigen();
+      case 'detailZurueck': ui.seite = v === 'liste' ? 'liste' : 'katalog'; return zeigen();
+      case 'detailPlanen': ui.seite = 'neu'; ui.neu = neuerEntwurf(); ui.neu.typ = ui.detail.typ;
+        ui.neu.zielgruppe = ui.zielgruppe; ui.neuSchritt = 2; ui.baumOffen = null; ui.astOffen = null; return zeigen();
       case 'kategorie': ui.kategorie = v; ui.k = 0; ui.auslisten = null; return zeigen(true);
       case 'pkarte': ui.k = Number(v); ui.auslisten = null; return zeigen(true);
       case 'liste': ui.seite = 'liste'; return zeigen();
       case 'trend': ui.seite = 'trend'; return zeigen();
-      case 'neu': ui.seite = 'neu'; ui.neu = neuerEntwurf(); ui.neuSchritt = 0; ui.baumOffen = null; ui.astOffen = null; return zeigen();
+      case 'neu': ui.seite = 'neu'; vorauswahl(aktuelleMarke(E.produkte(st))); ui.neu = neuerEntwurf(); ui.neuSchritt = 0; ui.baumOffen = null; ui.astOffen = null; return zeigen();
       case 'baumKat': ui.baumOffen = ui.baumOffen === v ? null : v; ui.astOffen = null; return zeigen(true);
       case 'baumAst': ui.astOffen = ui.astOffen === v ? null : v; return zeigen(true);
       case 'neuZurTyp': ui.neuSchritt = 0; return zeigen(true);
@@ -234,7 +285,7 @@ export function produkteModul(ctx) {
       case 'auslisten': ui.auslisten = v; return zeigen(true);
       case 'auslistenNein': ui.auslisten = null; return zeigen(true);
       case 'auslistenJa': ui.auslisten = null; tun({ typ: 'produktAuslisten', produkt: v }); return zeigen(true);
-      case 'typ': ui.neu.typ = v; ui.neu.zielgruppe = undefined; ui.neuSchritt = 1; return zeigen();
+      case 'typ': ui.neu.typ = v; ui.neu.zielgruppe = ui.zielgruppe; ui.neuSchritt = 1; return zeigen();
       case 'farbe': ui.neu.farbe = v; return zeigen(true);
       case 'material': ui.neu.material = v; return zeigen(true);
       case 'preislage': ui.neu.preislage = v; return zeigen(true);
@@ -254,7 +305,7 @@ export function produkteModul(ctx) {
 
   return {
     ui, da,
-    oeffne: (seite = 'liste', marke) => { ui.seite = seite; if (marke) ui.marke = marke; ui.k = 0; ui.auslisten = null; if (seite === 'neu') { ui.neu = neuerEntwurf(); ui.neuSchritt = 0; ui.baumOffen = null; ui.astOffen = null; } zeigen(); },
+    oeffne: (seite = 'liste', marke) => { ui.seite = seite; if (marke) ui.marke = marke; ui.k = 0; ui.auslisten = null; if (seite === 'neu') { vorauswahl(aktuelleMarke(E.produkte(s()))); ui.neu = neuerEntwurf(); ui.neuSchritt = 0; ui.baumOffen = null; ui.astOffen = null; } zeigen(); },
     neuZeichnen: () => zeigen(true), aktiv: () => ui.aktiv, zu: () => { ui.aktiv = false; },
     pruefe: () => ({ seite: ui.seite, ...vergleiche(rendern().S.W) }),
   };
