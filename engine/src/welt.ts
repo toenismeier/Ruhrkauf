@@ -5,8 +5,9 @@ import {
 } from './daten';
 import type { Cluster, Flaeche, Format, GameState, GruppeId, Haus, Kohorte, Lage, Region } from './types';
 import { initialisierePlanung } from './planung';
+import { erzeugeVorjahrHistorie } from './vertrieb';
 import { chance, clamp, eur, ganzZwischen, waehle, zwischen, type RngHalter } from './util';
-import { erzeugeHq, hqAktualisiere, neueHqAngebote } from './hq';
+import { erzeugeHq, hqAktualisiere, neueHqAngebote, reiseIndex } from './hq';
 import { erzeugeEinkauf, initialisiereEinkauf } from './einkauf';
 import { erzeugeEigenmarken } from './eigenmarken';
 import { erzeugeVorstand, vorstandKostenWoche } from './vorstand';
@@ -26,6 +27,7 @@ import { initialisiereIt } from './it';
 // O07 Haus
 import { initialisiereHausbetrieb } from './haus';
 import { initialisiereUmbau } from './umbau';
+import { initialisiereFormate } from './formate';
 
 export interface Szenario {
   warenhaeuser: number;
@@ -39,7 +41,11 @@ export interface Szenario {
   kreditlinie: number;
   firma: string;
   sportName: string;
+  schwesterName?: string;
+  outletName?: string;
   startJahr: number;
+  /** Q07: kalendergerechter Spieleinstieg, Jan/Apr/Jul/Okt. */
+  startMonat?: 1 | 4 | 7 | 10;
   /** Schwierigkeit (Standard mittel = Kalibrierung). */
   schwierigkeit?: SchwierigkeitId;
   /** Nur Nice-to-have: nicht gesetzt heißt unveränderte Standardpartie. */
@@ -55,7 +61,10 @@ export const UMSATZZIELE_JAHR1 = {
   A: 8_950_000_000 * (45 * 48) / (45 * 48 + 115 * 30 + 200 * 17),
   B: 8_950_000_000 * (115 * 30) / (45 * 48 + 115 * 30 + 200 * 17),
   C: 8_950_000_000 * (200 * 17) / (45 * 48 + 115 * 30 + 200 * 17),
-  premium: 820_000_000,
+  // P005 erhöht den alten Anker um 20.000 m² × 1,52 relativ zur Leistung von P001–P004.
+  // Andere Klassen bleiben bei ihren Referenzwerten; keine Gutschrift in der GuV.
+  premium: Math.round(820_000_000 * (1 + (20_000 * 1.52) /
+    (30_000 * 1.55 * 2 + 18_000 * 1.52 + 14_000 * 1.45))),
   sport: 545_000_000,
 } as const;
 
@@ -154,7 +163,7 @@ function kalibriereStandortumsatz(haeuser: Haus[]): void {
 export const STANDARD_SZENARIO: Szenario = {
   warenhaeuser: 360,
   sporthaeuser: 44,
-  premiumhaeuser: 4,
+  premiumhaeuser: 5,
   schwesterhaeuser: 86,
   outlethaeuser: 66,
   // Liquidität analog zum 3,3-fachen Umsatz gegenüber dem alten 130er-Maßstab.
@@ -162,6 +171,8 @@ export const STANDARD_SZENARIO: Szenario = {
   kreditlinie: 300_000_000,
   firma: 'Hartwig & Brehm Warenhaus AG',
   sportName: 'Hartwig Sport',
+  schwesterName: 'Volkskauf',
+  outletName: 'FUNDUS',
   startJahr: 2027,
 };
 
@@ -228,6 +239,8 @@ function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: 
     // Vollständiger, flächengewichteter Warenhausmix als Stammdaten.
     // Keine RNG-Aufrufe: Volkskauf verändert nicht die übrigen Standortparameter.
     const gruppen = gruppenFuer(f);
+    // Im Volkskauf bleibt das Untergeschoss Lager; kein Food-Verkauf.
+    const verkaufsEtagen = etagen.filter(e=>e>=0);
     const summeAnteile = gruppen.reduce((sum, g) => sum + GRUPPEN[g].anteilFlaeche, 0);
     let verbleibend = vkQm;
     return gruppen.map((g, i) => {
@@ -235,7 +248,7 @@ function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: 
         ? verbleibend
         : Math.max(1, Math.round(vkQm * GRUPPEN[g].anteilFlaeche / summeAnteile));
       verbleibend -= qm;
-      return { id: `${id}-f${i + 1}`, etage: etagen[i % etagen.length], qm, konzept: 'eigen' as const, gruppe: g };
+      return { id: `${id}-f${i + 1}`, etage: verkaufsEtagen[i % verkaufsEtagen.length] ?? 0, qm, konzept: 'eigen' as const, gruppe: g };
     });
   }
   if (f === 'outlet') {
@@ -245,7 +258,7 @@ function bauFlaechen(h: RngHalter, id: string, f: Format, vkQm: number, etagen: 
     const sortimente = ['damen', 'herren', 'kinder', 'schuhe', 'accessoires', 'wohnen', 'beauty'] as const;
     return sortimente.map((gruppe, i) => ({
       id: `${id}-f${i + 1}`, etage: etagen[i % etagen.length],
-      qm: Math.round(vkQm / sortimente.length), konzept: 'eigen' as const,
+      qm: Math.round(vkQm / sortimente.length), konzept: 'offprice' as const,
       gruppe: gruppe as GruppeId,
     }));
   }
@@ -364,7 +377,7 @@ function bauHaus(h: RngHalter, idx: number, stadt: string, region: Region, clust
   const substanz = f === 'outlet' ? clamp(substanzBasis, 40, 85) : substanzBasis;
   const zusatz = waehle(h, STANDORT_ZUSATZ[lage]);
   const premiumName = PREMIUM_HAEUSER.find((p) => p.schluessel === option.premiumSchluessel)?.name;
-  const formatName = f === 'schwester' ? 'Volkskauf' : f === 'outlet' ? 'FUNDUS' : f === 'warenhaus' ? sz.firma.split(' ')[0] : sz.sportName;
+  const formatName = f === 'schwester' ? (sz.schwesterName ?? 'Volkskauf') : f === 'outlet' ? (sz.outletName ?? 'FUNDUS') : f === 'warenhaus' ? sz.firma.split(' ')[0] : sz.sportName;
   return {
     id,
     name: premiumName ?? (f === 'outlet' ? `${formatName} ${stadt}${nr > 1 ? ' ' + zusatz : ''}` : `${formatName} ${stadt}${nr > 1 ? ' ' + zusatz : lage === '1a' ? '' : ' ' + zusatz}`),
@@ -470,12 +483,16 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     const lage: Lage = r.nr === 1 && !premiumInStadt ? '1a' : r.nr % 2 === 0 ? 'b' : 'center';
     haeuser.push(bauHaus(h, haeuser.filter((x) => x.format === 'warenhaus').length + 1, stadt, region, cluster, kk, 'warenhaus', sz, r.nr, { hausklasse: a.has(r) ? 'A' : b.has(r) ? 'B' : 'C', lage }));
   }
-  // Premium bildet vier eigenständige Warenhäuser außerhalb der 360 regulären.
+  // Premium bildet fünf eigenständige Häuser außerhalb der 360 regulären.
+  // P005 nutzt einen separaten RNG-Strom, damit Sport, Volkskauf und andere
+  // Städte durch das neue Berliner Haus keine neuen Seed-Zahlen erhalten.
   let p = 0;
+  const p005Rng: RngHalter = { rng: (seed ^ 0xb31e1a5) >>> 0 };
   for (const premium of PREMIUM_HAEUSER) {
     if (sz.premiumDeaktiviert || p >= (sz.premiumhaeuser ?? 0)) break;
     const [stadt, region, cluster, kk] = stadtVon.get(premium.stadt)!;
-    haeuser.push(bauHaus(h, sz.warenhaeuser + ++p, stadt, region, cluster, kk, 'warenhaus', sz, 1, { premiumSchluessel: premium.schluessel, lage: '1a' }));
+    const quelle = premium.schluessel === 'P005' ? p005Rng : h;
+    haeuser.push(bauHaus(quelle, sz.warenhaeuser + ++p, stadt, region, cluster, kk, 'warenhaus', sz, 1, { premiumSchluessel: premium.schluessel, lage: '1a' }));
   }
   let si = 0;
   for (const r of sport) {
@@ -546,7 +563,7 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
     rng: h.rng,
     woche: 0,
     startJahr: sz.startJahr,
-    firma: { name: sz.firma, sportName: sz.sportName },
+    firma: { name: sz.firma, sportName: sz.sportName, schwesterName: sz.schwesterName ?? 'Volkskauf', outletName: sz.outletName ?? 'FUNDUS' },
     phase: 'regulaer',
     insolvenzenGesamt: 0,
     erfolge: {},
@@ -626,10 +643,27 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   marktbeobachtungStart(s); // Q06: im Standard inaktiv, keine Zusatzkosten.
   // O03 IT: neutraler Ausgangszustand, keine Änderung am bestehenden Zufallsstrom.
   initialisiereIt(s);
-  // O06 Planung: Vorjahresbudget des Vorgängers (+3 % Umsatz).
-  initialisierePlanung(s);
-  // O07 Haus: erst nach der Weltgenerierung, ohne Zufall aus dem Haupt-RNG.
+  // Q07: nicht im Haupt-RNG ziehen; Simulation der historischen 52 Wochen vor dem Spiel.
+  const startMonat = ([1, 4, 7, 10] as number[]).includes(sz.startMonat ?? 1) ? (sz.startMonat ?? 1) as 1 | 4 | 7 | 10 : 1;
+  const startOffset = (startMonat - 1) / 3 * 13;
+  s.startMonat = startMonat;
+  s.spielStartWoche = startOffset;
+  s.woche = startOffset;
+  if (startOffset) {
+    // Geschützte Einlaufkohorten, Verbindlichkeiten und noch nicht gestartete Verträge
+    // ebenfalls verschieben: sonst wären sie bei Apr/Jul/Okt schon abgelaufen.
+    for (const h of s.haeuser) h.miete.bisWoche += startOffset;
+    for (const b of s.bestellungen) b.ankunft += startOffset;
+    for (const v of s.verbindlichkeiten) v.faellig += startOffset;
+    for (const a of s.angebote) { a.woche += startOffset; a.frist += startOffset; }
+    for (const e of s.entscheidungen) { e.woche += startOffset; e.frist += startOffset; }
+    for (const m of s.meldungen) m.woche += startOffset;
+  }
+  // O07: vor dem Vorjahr, damit Betriebskosten und Vergleichswerte konsistent sind.
   initialisiereHausbetrieb(s);
+  erzeugeVorjahrHistorie(s);
+  // O06: Vorjahresbudget verwendet den tatsächlichen historischen Verlauf.
+  initialisierePlanung(s);
   // O08 Umbau
   initialisiereUmbau(s);
   s.kapitalflussStartCash = s.cash;
@@ -637,6 +671,14 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   initialisierePersonaleinsatz(s);
   // O05 Ware
   initialisiereWare(s);
+  // Die Hartwig-Referenz samt HQ und Einkaufsbestand wurde bereits kalibriert.
+  initialisiereFormate(s);
+  // Q07: Vorjahr auch für die jetzt aktiven Volkskauf- und FUNDUS-Häuser.
+  erzeugeVorjahrHistorie(s, true);
+  // Volkskauf/FUNDUS sind jetzt aktiv: Erreichbarkeit der Zentrale auf das ganze Netz
+  // neu beziehen (Startwirkung bleibt exakt 1), Zentralkosten neu rechnen.
+  s.hq.reiseBasis = reiseIndex(s, s.hq.sitz);
+  hqAktualisiere(s);
   return s;
 }
 

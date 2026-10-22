@@ -104,10 +104,8 @@ export function szenarioStart(s: GameState, sz: Szenario): void {
     eroeffneInsolvenz(s, 'Schutzschirm zum Spielstart');
     if (s.insolvenz) s.insolvenz.versammlung = s.woche + regeln.schutzschirmFrist;
   }
-  if (regeln.sandkasten) {
-    s.cash = 1_000_000_000_000_000;
-    s.kreditlinie = 1_000_000_000_000_000;
-  }
+  // Q13: Im Sandkasten bleiben echte Buchungen und Anfangsbestände erhalten.
+  // Unbegrenzte Zahlungsfähigkeit wird an den Freigaben geprüft, nicht simuliert.
 }
 
 /** In der normalen Partie immer Faktor 1: keine zusätzliche Simulation und kein RNG-Verbrauch. */
@@ -137,7 +135,6 @@ export function szenarioWoche(s: GameState): void {
     melde(s, 'eigentuemer', 'Der Investor beanstandet das vergangene Jahr: kein Immobilienverkauf.');
   }
   if (lauf.fusionHausIds?.length && s.haeuser.some((h) => h.streikBis !== undefined && h.streikBis > s.woche)) lauf.streikErlebt = true;
-  if (lauf.regeln.sandkasten) s.cash = Math.max(s.cash, 1_000_000_000_000_000);
 }
 
 /** Nur im Investor-Szenario verfügbar: Verkauf mit Rückmietung, operative Filiale bleibt offen. */

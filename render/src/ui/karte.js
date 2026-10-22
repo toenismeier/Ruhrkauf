@@ -80,6 +80,7 @@ export function karteSteuerung(o) {
   const festhalten = (p, px, py) => { const q = o.aufBoden(px, py); if (p && q) { K.x += p.x - q.x; K.z += p.z - q.z; } };
 
   canvas.addEventListener('pointerdown', (e) => {
+    o.interaktion?.(); // Nutzergeste darf das programmatische Hausziel lösen
     stopp();
     canvas.setPointerCapture(e.pointerId);
     zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -147,6 +148,7 @@ export function karteSteuerung(o) {
   canvas.addEventListener('pointercancel', loslassen);
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
+    o.interaktion?.();
     stopp();
     const p = o.aufBoden(e.clientX, e.clientY);
     K.halb *= Math.exp(e.deltaY * 0.0015);

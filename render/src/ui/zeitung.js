@@ -3,7 +3,19 @@
 import { esc } from './format.js';
 import { zeitungsBild } from '../kit/zeitung.js';
 
-const REITER = ['Top', 'Handel', 'Konzern', 'Markt', 'Politik'];
+// Die Engine-Rubrik "Konzern" wird lesefreundlich als "Wirtschaft" angezeigt.
+// "Region" ist eine zusätzliche redaktionelle Sicht auf bestehende Standortmeldungen,
+// keine neue Meldungsquelle, keine zweite Filter-/Abfragelogik.
+const REITER = ['Top', 'Handel', 'Wirtschaft', 'Markt', 'Politik', 'Region'];
+const REGIONALE_ARTEN = new Set([
+  'markt_einzel', 'markt_ueberblick', 'konkurrenz_neu', 'konkurrenz_zu',
+  'konkurrenz_aktion', 'konkurrenz_uebernahme', 'haus_schliessung',
+  'haus_raeumung', 'haus_umbau', 'haus_miete', 'immobilie', 'stadt', 'kommunen'
+]);
+function rubrik(a) { return a.reiter === 'Konzern' ? 'Wirtschaft' : a.reiter; }
+function passt(a, reiter) {
+  return reiter === 'Top' || (reiter === 'Region' ? REGIONALE_ARTEN.has(a.art) : rubrik(a) === reiter);
+}
 export function zeitungModul(ctx) {
   const ui = { aktiv: false, index: -1, reiter: 'Top', archiv: false };
   const ausgaben = () => ctx.E.zeitungArchiv(ctx.s());
@@ -19,18 +31,22 @@ export function zeitungModul(ctx) {
       '<h2>Der Handelsbote</h2><div class="zb-datum"><span>KW ' + a.kw + ' / ' + a.jahr + '</span><span>Wochenzeitung für den Handel</span></div></header>';
   }
   function artikel(a, aufmacher = false) {
-    return '<article class="zb-artikel ' + (aufmacher ? 'zb-aufmacher' : '') + '"><div class="zb-rubrik">' + esc(a.reiter) + '</div>' +
+    const illustr = zeitungsBild(a.art, a.bild, ui.index);
+    return '<article data-art="' + esc(a.art || 'presse') + '" class="zb-artikel ' + (aufmacher ? 'zb-aufmacher' : '') + '">' +
+      '<div class="zb-rubrik">' + esc(rubrik(a)) + '</div>' +
       '<h3>' + esc(a.titel) + '</h3><p class="zb-unter">' + esc(a.unterzeile) + '</p>' +
-      (aufmacher ? '<figure class="zb-bild">' + zeitungsBild(a.bild, ui.index) + '<figcaption>Illustration: Redaktion Der Handelsbote</figcaption></figure>' : '') +
+      '<figure class="zb-bild"><div class="zb-bildrahmen">' +
+      '<div class="zb-bildlade" aria-hidden="true">Illustration wird vorbereitet …</div>' + illustr + '</div>' +
+      '<figcaption>Illustration: Redaktion Der Handelsbote</figcaption></figure>' +
       '<p class="zb-text">' + esc(a.text) + '</p></article>';
   }
   function ausgabeZeigen(a) {
     const alle = [a.aufmacher, ...a.meldungen];
-    const gewaehlt = ui.reiter === 'Top' ? alle : alle.filter((x) => x.reiter === ui.reiter);
-    const inhalt = gewaehlt.length ? gewaehlt.map((x, i) => artikel(x, i === 0 && ui.reiter === 'Top')).join('') : '<p class="zb-keine">In dieser Rubrik liegen in dieser Woche keine Artikel vor.</p>';
+    const gewaehlt = alle.filter((x) => passt(x, ui.reiter));
+    const inhalt = gewaehlt.length ? gewaehlt.map((x, i) => artikel(x, i === 0)).join('') : '<p class="zb-keine">In dieser Rubrik liegen in dieser Woche keine Artikel vor.</p>';
     return kopf(a) +
-      '<nav class="zb-tabs" aria-label="Zeitungsrubriken">' + REITER.map((v) =>
-        '<button role="tab" aria-selected="' + (ui.reiter === v) + '" data-z-a="tab" data-v="' + v + '" class="' + (ui.reiter === v ? 'aktiv' : '') + '">' + v + '</button>').join('') +
+      '<nav class="zb-tabs" role="tablist" aria-label="Zeitungsrubriken">' + REITER.map((v) =>
+        '<button type="button" role="tab" aria-selected="' + (ui.reiter === v) + '" data-z-a="tab" data-v="' + v + '" class="' + (ui.reiter === v ? 'aktiv' : '') + '">' + v + '</button>').join('') +
       '</nav><div class="zb-spalten">' + inhalt + '</div>';
   }
   function archivZeigen() {
@@ -49,7 +65,7 @@ export function zeitungModul(ctx) {
     const navigation = '<div class="zb-navigation"><button data-z-a="vor" ' + (ui.index <= 0 || ui.archiv ? 'disabled' : '') + ' aria-label="Ältere Ausgabe">‹ Älter</button>' +
       '<button data-z-a="archiv" aria-pressed="' + ui.archiv + '">' + (ui.archiv ? 'Zur Zeitung' : 'Archiv (' + aus.length + ')') + '</button>' +
       '<button data-z-a="naechste" ' + (ui.index >= aus.length - 1 || ui.archiv ? 'disabled' : '') + ' aria-label="Neuere Ausgabe">Neuer ›</button></div>' +
-      '<div class="zb-zahl">Ausgabe ' + (aus.length ? n : 0) + ' von ' + aus.length + '</div>';
+      '<div class="zb-zahl" aria-live="polite">Ausgabe ' + (aus.length ? n : 0) + ' von ' + aus.length + '</div>';
     const einstellungen = '<label class="zb-einstellung"><input type="checkbox" data-z-a="schalter" ' + (aktiv() ? 'checked' : '') + '> Neue Zeitungsausgaben und Interviews aktivieren</label>' +
       (!aktiv() ? '<p class="zb-hinweis">Der Handelsbote ist ausgeschaltet. Das bisherige Archiv bleibt lesbar.</p>' : '');
     ctx.panel('Der Handelsbote', 'Unabhängige Wochenzeitung · Archiv', '<div class="zb-root">' +
