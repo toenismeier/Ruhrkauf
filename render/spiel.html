@@ -692,7 +692,7 @@
 #panel .ek-eingabe input[type=range]{width:100%}
 @media(max-width:390px){#panel .zeile>.was{flex-basis:100%}}
 </style>
-
+<link rel="stylesheet" href="./src/ui/komponenten.css">
 </head>
 <body>
 <canvas id="karte"></canvas>
@@ -764,7 +764,7 @@
   </div>
 </div>
 <div id="panel" role="dialog" aria-modal="true" aria-labelledby="ptitel" aria-describedby="punter" aria-hidden="true" inert>
-  <div class="pkopf"><div class="griff"></div><h2 id="ptitel" tabindex="-1"></h2><div id="punter"></div><button id="pzu" aria-label="Schließen">×</button></div>
+  <div class="pkopf"><div class="griff"></div><span id="psymbol" aria-hidden="true"></span><h2 id="ptitel" tabindex="-1"></h2><div id="punter"></div><button id="pzu" aria-label="Schließen">×</button></div>
   <div id="pinhalt"></div>
 </div>
 <button id="wochenstreifen" type="button" aria-live="polite"></button>
