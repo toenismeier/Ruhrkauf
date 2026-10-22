@@ -34,7 +34,7 @@ import { statistikModul } from './ui/statistik.js';
 import { marketingModul } from './ui/marketing.js';
 import { umbauModul } from './ui/umbau.js';
 import { produkteModul } from './ui/produkte.js';
-import { laden, speichern } from './ui/speicher.js';
+import { laden, speichern, speicherDiagnose } from './ui/speicher.js';
 import { portfolioModul } from './ui/portfolio.js';
 import { appModul } from './ui/app.js';
 import { messen as performanceMessen } from './ui/diagnose.js';
@@ -71,7 +71,7 @@ const neuerPostUi = () => ({ gelesen: [], reiter: 'handeln', reiseZuletzt: [] })
 let postUi = neuerPostUi();
 let streifenTimer = null;
 function speicherFehler(e) {
-  console.error('Spielstand konnte nicht gespeichert werden:', e);
+  console.error('Spielstand konnte nicht gespeichert werden:', e, JSON.stringify(speicherDiagnose()));
   if (!speicherWarnung) meldung('Speichern fehlgeschlagen: ' + e.message, false);
   speicherWarnung = true;
 }
@@ -1187,10 +1187,20 @@ function hqTun(aktion) {
   oeffneHq(offenesHq === true ? undefined : offenesHq, true);
 }
 let meldungTimer = null;
+let letzteMeldung = { text: '', zeit: 0 };
+function meldungSchliessen() {
+  clearTimeout(meldungTimer);
+  $('meldung').className = '';
+}
+$('meldung').addEventListener('click', meldungSchliessen);
 function meldung(text, ok = true) {
-  const m = $('meldung');
-  m.textContent = text; m.className = ok ? 'an' : 'an rot';
-  clearTimeout(meldungTimer); meldungTimer = setTimeout(() => { m.className = ''; }, 3500);
+  const m = $('meldung'), jetzt = Date.now();
+  if (text === letzteMeldung.text && jetzt - letzteMeldung.zeit < 5000) return;
+  letzteMeldung = { text, zeit: jetzt };
+  m.textContent = text;
+  m.className = ok ? 'an' : 'an rot';
+  clearTimeout(meldungTimer);
+  meldungTimer = setTimeout(meldungSchliessen, ok ? 2500 : 4000);
 }
 window.hqKlick = (art, a, b, c) => {
   if (art === 'mieten') { const an = E.hqUebersicht(s).angebote.find((q) => q.id === a); hqTun({ typ: 'hqMieten', angebot: a, etagen: an.etagen.map((e) => e.nr) }); }
@@ -1574,7 +1584,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
 
-window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   kameraHaus: hausKameraMessung, // lesender Pixelabgleich für den Mobil-Smoketest
   leben,

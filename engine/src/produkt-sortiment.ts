@@ -62,10 +62,11 @@ export function sortimentsPfad(typ: string, basis: string): [BaumKategorie, stri
   return ['kinder', 'Baby und Kind'];
 }
 
-export function sortimentsBaum(typen: readonly { typ: string; kategorie: string }[]): BaumAst[] {
+export function sortimentsBaum(typen: readonly { typ: string; kategorie: string; pfad?: readonly [BaumKategorie, string] }[]): BaumAst[] {
   const ast = new Map<string, Map<string, string[]>>();
   for (const t of typen) {
-    const [k, u] = sortimentsPfad(t.typ, t.kategorie);
+    // Q27–Q29: ein Typ aus engine/src/sortiment kann seinen Platz im Baum selbst angeben
+    const [k, u] = t.pfad ?? sortimentsPfad(t.typ, t.kategorie);
     if (!ast.has(k)) ast.set(k, new Map());
     const gruppen = ast.get(k)!;
     if (!gruppen.has(u)) gruppen.set(u, []);
