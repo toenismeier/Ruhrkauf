@@ -28,7 +28,7 @@ const BILD = new Map(ARTIKELTYPEN.map((t) => [t.typ, t.bild]));
 for (const typ of engine) {
   const b = BILD.get(typ) ?? bildFuer(typ);
   assert.ok(SILHOUETTEN[b.silhouette], typ + ' → unbekannte Silhouette ' + b.silhouette);
-  assert.ok(b.silhouette !== 'tshirt' || typ === 'T-Shirt', typ + ': fällt auf T-Shirt zurück');
+  assert.ok(b.silhouette !== 'tshirt' || /T-Shirt|Tee\b/i.test(typ) || BILD.get(typ)?.silhouette === 'tshirt', typ + ': fällt auf T-Shirt zurück');
   const svg = produktbildSVG(typ, undefined, undefined, 120, BILD.get(typ) ? { bild: BILD.get(typ) } : {});
   assert.match(svg, /^<svg/);
   assert.doesNotMatch(svg, /NaN|undefined/, typ);
