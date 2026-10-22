@@ -135,3 +135,15 @@
 #panel:has(.q31-marke) .oknoepfe button.gruen, #panel:has(.q31-marke) button.breit.gruen { background: var(--hk-akzent, #d23c32); color: #fff; border: 1px solid #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell, #ef7a6f); font-weight: 700; }
 #panel:has(.q31-marke) .mini.q-an-knopf { border-color: var(--hk-gut, #6dbf73); color: var(--hk-gut, #6dbf73); }
 #panel:has(.q31-marke) .zeile .was i { font-size: 12px; }
+
+/* Planblatt: Name, Jahresplan, Ist, Abweichung in festen Spalten */
+.q31 .q-plan { display: grid; grid-template-columns: minmax(0, 1fr) 72px 64px 58px; gap: 6px; align-items: baseline; }
+.q31 .q-plan.q-wochen { grid-template-columns: minmax(0, 1fr) 72px 72px 58px; }
+.q31 .q-plan .q-wert, .q31 .q-buch-kopf.q-plan b { text-align: right; font-size: 13px; }
+.q31 .q-zeile.q-plan .q-name { font-size: 14px; }
+.q31 .q-zeile.q-unter { padding-left: 26px; } .q31 .q-zeile.q-unter .q-name { color: var(--q-leise); font-size: 13px; }
+.q31 details.q-plan-auf > summary { list-style: none; cursor: pointer; } .q31 details.q-plan-auf > summary::-webkit-details-marker { display: none; }
+.q31 details.q-plan-auf > summary .q-name::before { content: '▸ '; color: var(--q-leise); } .q31 details.q-plan-auf[open] > summary .q-name::before { content: '▾ '; }
+.q31 details.q-buch > summary { list-style: none; cursor: pointer; min-height: 44px; }
+.q31 details.q-plan-auf > summary .q-zeile { min-height: 44px; }
+.q31 .q-buch-kopf.q-plan b { font-size: 12px; letter-spacing: 0; text-transform: none; white-space: normal; line-height: 14px; }

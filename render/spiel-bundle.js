@@ -159335,7 +159335,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "afd7f10" : "Entwicklung";
+  var version = () => true ? "3d52ebc" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld2(d3) {
@@ -174034,8 +174034,10 @@
 
   // src/ui/planung.js
   var pct = (v) => (100 * v).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
+  var pctV = (v) => (v > 0 ? "+" : v < 0 ? "\u2212" : "") + pct(Math.abs(v));
   var mio3 = (v) => (v / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " Mio. \u20AC";
   var rolle2 = { haus: "Hausleitungen", hauscluster: "Clusterleitungen", bereich: "Bereichsleitungen" };
+  var FORMATNAME = { warenhaus: "Hartwig", sport: "Hartwig Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
   var EBENE = { konzern: "Konzern", format: "Format", region: "Region", hauscluster: "Hauscluster", haus: "Haus", warengruppe: "Warengruppe" };
   function planungModul(ctx) {
     const E8 = ctx.E, s2 = ctx.s, ui = { aktiv: false, tab: "assistent", schritt: 1 };
@@ -174045,7 +174047,7 @@
     const tabs = () => '<div class="tabs">' + [["assistent", "Planung"], ["report", "Reporting"], ["forecast", "Forecast"], ["bonus", "Boni"]].map(([id, t3]) => '<button class="tab ' + (ui.tab === id ? "an" : "") + '" data-pl-tab="' + id + '">' + t3 + "</button>").join("") + "</div>";
     function entwurf(D) {
       const e = D.entwurf;
-      if (!e || e.stand !== "offen") return '<div class="karte"><div class="khead">Jahresplanung</div><div class="zeile">N\xE4chste Planungsrunde KW 40 bis 44. Der aktuelle Jahresplan ist unten im Reporting abrufbar.</div></div>';
+      if (!e || e.stand !== "offen") return '<div class="q31"><div class="q-buch"><div class="q-buch-kopf"><span>Jahresplanung</span></div><div class="q-leer"><b>Keine Planungsrunde offen.</b>Die n\xE4chste l\xE4uft in KW 40 bis 44. Den laufenden Jahresplan zeigt der Reiter Reporting.</div><button class="q-mehr" data-pl-tab="report">Zum Reporting</button></div></div>';
       const steps = ["Konzernziel", "Gegenstrom", "Abschluss"];
       let html = '<div class="tabs">' + steps.map((t3, i) => '<button class="tab ' + (ui.schritt === i + 1 ? "an" : "") + '" data-pl-schritt="' + (i + 1) + '">' + (i + 1) + ". " + t3 + "</button>").join("") + "</div>";
       if (ui.schritt === 1) {
@@ -174077,13 +174079,29 @@
     }
     function bericht2(D) {
       const b3 = D.bericht;
-      if (!b3.ziele) return '<div class="karte">Kein Jahresplan vorhanden.</div>';
-      let html = '<div class="raster"><div class="kz"><span>Umsatzplan ' + b3.jahr + "</span><b>" + mio3(b3.ziele.umsatz) + '</b></div><div class="kz"><span>Ist kumuliert</span><b>' + mio3(b3.ist) + '</b></div><div class="kz"><span>Plan bis heute</span><b>' + mio3(b3.planBisHeute) + '</b></div><div class="kz"><span>Abweichung zum Plan</span><b>' + mio3(b3.abweichung) + '</b></div><div class="kz"><span>Jahresforecast</span><b>' + (b3.forecasting == null ? "noch offen" : mio3(b3.forecasting)) + '</b></div><div class="kz"><span>EBITDA-Plan</span><b>' + mio3(b3.ziele.ebitda) + "</b></div></div>";
-      const nodes = b3.knoten.filter((n3) => n3.ebene === "format" || n3.ebene === "region" || n3.ebene === "hauscluster");
-      html += '<div class="karte"><div class="khead">Planabweichung nach Steuerungsebene</div><div class="olief">Plan: Jahresziel, Abweichung: kumuliertes Ist gegen zeitanteilige Jahresplanung.</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>Einheit</th><th>Plan</th><th>Ist</th><th>Abw.</th></tr></thead><tbody>' + nodes.map((n3) => "<tr><td>" + esc2(nname(n3)) + "</td><td>" + mio3(n3.umsatz) + "</td><td>" + mio3(n3.ist) + "</td><td>" + pct(n3.abweichung) + "</td></tr>").join("") + "</tbody></table></div></div>";
-      html += '<div class="karte"><div class="khead">Letzte 26 Wochen: Umsatz und Forecast</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>KW</th><th>Ist</th><th>Plan</th><th>Abw.</th><th>FC</th></tr></thead><tbody>' + (b3.wochen || []).slice().reverse().map((w2) => "<tr><td>" + (w2.woche % 52 + 1) + "</td><td>" + mio3(w2.ist) + "</td><td>" + mio3(w2.plan) + "</td><td>" + pct(w2.abweichungQuote) + "</td><td>" + (w2.forecast == null ? "\u2013" : mio3(w2.forecast)) + "</td></tr>").join("") + "</tbody></table></div></div>";
-      if (b3.warengruppen) html += '<details class="karte"><summary>Merchandise Planning: Warengruppenbudgets</summary>' + Object.entries(b3.warengruppen).map(([g, v]) => zeile3(g, mio3(v))).join("") + "</details>";
-      return html;
+      if (!b3.ziele) return '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Kein Jahresplan vorhanden.</b>Die Planungsrunde l\xE4uft in KW 40 bis 44; bis dahin gibt es nichts zu vergleichen.</div></div></div>';
+      const vz = (x2) => (x2 > 0 ? "+" : x2 < 0 ? "\u2212" : "") + mio3(Math.abs(x2));
+      let html = '<div class="q31">';
+      html += '<div class="q-gross"><span class="q-label">Abweichung zum Plan bis heute</span><span class="q-haupt ' + (b3.abweichung < 0 ? "q-minus" : "q-plus") + '">' + vz(b3.abweichung) + '</span><span class="q-neben"><b>' + mio3(b3.ist) + "</b>Ist kumuliert</span></div>";
+      html += '<div class="q-befund">Plan bis heute ' + mio3(b3.planBisHeute) + ", Jahresplan " + b3.jahr + " " + mio3(b3.ziele.umsatz) + ", EBITDA-Plan " + mio3(b3.ziele.ebitda) + ". " + (b3.forecasting == null ? "Der erste Jahresforecast entsteht nach KW 13." : "Forecast " + mio3(b3.forecasting) + ".") + "</div>";
+      const K3 = b3.knoten, kinder = (id, ebene) => K3.filter((n3) => n3.ebene === ebene && n3.parent === id);
+      const formate = K3.filter((n3) => n3.ebene === "format");
+      const m1 = (v) => (v / 1e6).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      const fname = (f11) => FORMATNAME[f11.id.replace("format:", "")] ?? f11.name;
+      const zeileP = (n3, klasse = "") => '<div class="q-zeile q-plan ' + klasse + '"><span class="q-name">' + esc2(nname(n3)) + '</span><span class="q-wert">' + m1(n3.umsatz) + '</span><span class="q-wert">' + m1(n3.ist) + '</span><span class="q-wert ' + (n3.abweichung < 0 ? "q-minus" : "") + '">' + pctV(n3.abweichung) + "</span></div>";
+      for (const f11 of formate) {
+        const regionen = kinder(f11.id, "region");
+        html += '<div class="q-buch"><div class="q-buch-kopf q-plan"><span>' + esc2(fname(f11)) + "</span><b>Plan Mio. \u20AC</b><b>Ist Mio. \u20AC</b><b>Abw.</b></div>";
+        for (const r3 of regionen) {
+          const cl = kinder(r3.id, "hauscluster");
+          html += cl.length ? '<details class="q-plan-auf"><summary>' + zeileP(r3) + "</summary>" + cl.map((c) => zeileP(c, "q-unter")).join("") + "</details>" : zeileP(r3);
+        }
+        html += '<div class="q-summe q-plan"><span>' + esc2(fname(f11)) + ' gesamt</span><span class="q-wert">' + m1(f11.umsatz) + '</span><span class="q-wert">' + m1(f11.ist) + '</span><span class="q-wert">' + pctV(f11.abweichung) + "</span></div></div>";
+      }
+      const w2 = (b3.wochen || []).slice().reverse();
+      html += '<div class="q-buch"><div class="q-buch-kopf q-plan q-wochen"><span>Woche</span><b>Ist Mio. \u20AC</b><b>Plan Mio. \u20AC</b><b>Abw.</b></div>' + (w2.length ? w2.map((x2) => '<div class="q-zeile q-plan q-wochen"><span class="q-name">KW ' + (x2.woche % 52 + 1) + '</span><span class="q-wert">' + m1(x2.ist) + '</span><span class="q-wert">' + m1(x2.plan) + '</span><span class="q-wert ' + (x2.abweichungQuote < 0 ? "q-minus" : "") + '">' + pctV(x2.abweichungQuote) + "</span></div>").join("") : '<div class="q-leer">Noch keine Woche im Plan.</div>') + "</div>";
+      if (b3.warengruppen) html += '<details class="q-buch"><summary class="q-buch-kopf"><span>Warengruppenbudgets</span><b>\xF6ffnen</b></summary>' + Object.entries(b3.warengruppen).map(([g, v]) => '<div class="q-zeile"><span class="q-name">' + esc2(E8.GRUPPEN?.[g]?.name ?? g) + '</span><span class="q-wert">' + mio3(v) + "</span></div>").join("") + "</details>";
+      return html + "</div>";
     }
     function forecasts(D) {
       const L2 = D.bericht.forecasts || [];
@@ -174093,7 +174111,7 @@
         if (f11.status === "offen") html += '<div class="regler"><label>Umsatz Mio. \u20AC <input data-pl-forecast="umsatz" type="number" min="0" step="0.1" value="' + (f11.ziele.umsatz / 1e6).toFixed(1) + '"></label><label>EBITDA Mio. \u20AC <input data-pl-forecast="ebitda" type="number" step="0.1" value="' + (f11.ziele.ebitda / 1e6).toFixed(1) + '"></label></div><div class="oknoepfe"><button class="gruen" data-pl-forecast-abgabe="1">\xC4nderungen speichern und abgeben</button></div>';
         html += "</div>";
       }
-      if (!L2.length) html += '<div class="karte">Der erste Forecast entsteht nach KW 13.</div>';
+      if (!L2.length) html += '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Noch kein Forecast.</b>Der erste Forecast (3+9) entsteht nach KW 13.</div></div></div>';
       if (D.bericht.vertrauen?.length) html += '<div class="karte"><div class="khead">Trefferquote und Vertrauen</div>' + D.bericht.vertrauen.slice(-8).map((v) => zeile3("KW " + (v.woche % 52 + 1) + " \xB7 Abweichung " + pct(v.abweichung), (v.delta > 0 ? "+" : "") + v.delta)).join("") + "</div>";
       return html;
     }
@@ -174108,7 +174126,7 @@
     function zeigen(halten = false) {
       const position = document.getElementById("pinhalt").scrollTop, D = vor();
       const html = tabs() + (ui.tab === "assistent" ? entwurf(D) : ui.tab === "report" ? bericht2(D) : ui.tab === "forecast" ? forecasts(D) : boni(D));
-      ctx.panel("Planung & Forecast", "Konzerncontrolling \xB7 KW " + (s2().woche % 52 + 1), html, "gross");
+      ctx.panel("Planung & Forecast", "Konzerncontrolling \xB7 KW " + (s2().woche % 52 + 1), bereich("zentrale") + '<i class="q31-marke" hidden></i>' + html, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = halten ? position : 0;
     }
@@ -174164,8 +174182,9 @@
       }
     });
     return {
-      oeffne: (tab = "assistent") => {
-        ui.tab = tab;
+      // Q31: Ohne offene Planungsrunde ist das Reporting die Hauptaufgabe und öffnet direkt.
+      oeffne: (tab) => {
+        ui.tab = tab ?? (vor().entwurf?.stand === "offen" ? "assistent" : "report");
         ui.schritt = 1;
         zeigen();
       },
@@ -175279,13 +175298,13 @@
   function cockpitZeigen() {
     const c = cockpit(s);
     const kachel2 = (titel, wert, ton2 = "") => `<div class="kz ${ton2}"><span>${titel}</span><b>${wert}</b></div>`;
-    const FORMATNAME = { alle: "Alle", warenhaus: "Hartwig", sport: "Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
+    const FORMATNAME2 = { alle: "Alle", warenhaus: "Hartwig", sport: "Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
     const fx = cockpitFormat === "alle" ? null : c.formate.find((x2) => x2.format === cockpitFormat);
-    const auswahl4 = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME).filter(([id]) => id === "alle" || c.formate.some((x2) => x2.format === id && x2.haeuser)).map(([id, name2]) => '<option value="' + id + '"' + (id === cockpitFormat ? " selected" : "") + ">" + name2 + "</option>").join("") + "</select>";
+    const auswahl4 = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME2).filter(([id]) => id === "alle" || c.formate.some((x2) => x2.format === id && x2.haeuser)).map(([id, name2]) => '<option value="' + id + '"' + (id === cockpitFormat ? " selected" : "") + ">" + name2 + "</option>").join("") + "</select>";
     $2("cockpit").innerHTML = [
       kachel2("Cash", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? "rot" : ""),
       kachel2("Kreditrahmen frei", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? "rot" : ""),
-      fx ? kachel2("EBITDA " + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : "noch offen", !s.historie.length ? "" : fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wo.", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
+      fx ? kachel2("EBITDA " + FORMATNAME2[cockpitFormat], s.historie.length ? geld(fx.ebitda) : "noch offen", !s.historie.length ? "" : fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wo.", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
       kachel2("Umsatz \xB7 " + auswahl4, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : "noch offen"),
       kachel2("Vertrauen", `${c.vertrauen} / 100`, c.vertrauen < 35 ? "rot" : ""),
       kachel2("Image", `${c.image} / 100`, c.image < 35 ? "rot" : "")

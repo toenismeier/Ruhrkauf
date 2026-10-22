@@ -11,7 +11,7 @@ const PANELS = [
   { name: 'q31-marketing', vorSpiel: false, umgestellt: true, oeffne: menue('marketing') },
   { name: 'q31-it', vorSpiel: false, umgestellt: true, oeffne: menue('it') },
   { name: 'q31-online', vorSpiel: false, umgestellt: true, oeffne: menue('online') },
-  { name: 'q31-planung', vorSpiel: false, umgestellt: false, oeffne: menue('planung') },
+  { name: 'q31-planung', vorSpiel: false, umgestellt: true, oeffne: menue('planung') },
   { name: 'q31-reporting', vorSpiel: false, umgestellt: false, oeffne: menue('reporting') },
   { name: 'q31-vorstand', vorSpiel: false, umgestellt: false, oeffne: menue('vorstand') },
   { name: 'q31-spielstaende', vorSpiel: false, umgestellt: false, oeffne: menue('app-oeffnen') },

@@ -1,10 +1,13 @@
 // O06 Planung: Planungsassistent, Abweichungsreporting, Forecast und Führungsboni.
 import { geld, esc, clusterName } from './format.js';
+import { bereich } from './komponenten.js';
 
 const zahl = (x) => Number(x || 0).toLocaleString('de-DE', { maximumFractionDigits: 0 });
 const pct = (v) => (100 * v).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' %';
+const pctV = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + pct(Math.abs(v)); // Q31: Abweichung mit Vorzeichen
 const mio = (v) => (v / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' Mio. €';
 const rolle = { haus: 'Hausleitungen', hauscluster: 'Clusterleitungen', bereich: 'Bereichsleitungen' };
+const FORMATNAME = { warenhaus: 'Hartwig', sport: 'Hartwig Sport', schwester: 'Volkskauf', outlet: 'FUNDUS' };
 const EBENE = { konzern: 'Konzern', format: 'Format', region: 'Region', hauscluster: 'Hauscluster', haus: 'Haus', warengruppe: 'Warengruppe' };
 
 export function planungModul(ctx) {
@@ -18,7 +21,7 @@ export function planungModul(ctx) {
 
   function entwurf(D) {
     const e = D.entwurf;
-    if (!e || e.stand !== 'offen') return '<div class="karte"><div class="khead">Jahresplanung</div><div class="zeile">Nächste Planungsrunde KW 40 bis 44. Der aktuelle Jahresplan ist unten im Reporting abrufbar.</div></div>';
+    if (!e || e.stand !== 'offen') return '<div class="q31"><div class="q-buch"><div class="q-buch-kopf"><span>Jahresplanung</span></div><div class="q-leer"><b>Keine Planungsrunde offen.</b>Die nächste läuft in KW 40 bis 44. Den laufenden Jahresplan zeigt der Reiter Reporting.</div><button class="q-mehr" data-pl-tab="report">Zum Reporting</button></div></div>';
     const steps = ['Konzernziel', 'Gegenstrom', 'Abschluss'];
     let html = '<div class="tabs">' + steps.map((t, i) => '<button class="tab ' + (ui.schritt === i + 1 ? 'an' : '') + '" data-pl-schritt="' + (i + 1) + '">' + (i + 1) + '. ' + t + '</button>').join('') + '</div>';
     if (ui.schritt === 1) {
@@ -62,27 +65,36 @@ export function planungModul(ctx) {
   }
 
   function bericht(D) {
+    // Q31 Planblatt. Hauptfrage: Liegen wir im Plan? Größter Block = kumulierte Abweichung, darunter das Planblatt
+    // je Format mit Regionen als Zeilen und Summenstrich (Regionen ergeben das Format), Hauscluster aufklappbar.
     const b = D.bericht;
-    if (!b.ziele) return '<div class="karte">Kein Jahresplan vorhanden.</div>';
-    let html = '<div class="raster"><div class="kz"><span>Umsatzplan ' + b.jahr + '</span><b>' + mio(b.ziele.umsatz) + '</b></div>' +
-      '<div class="kz"><span>Ist kumuliert</span><b>' + mio(b.ist) + '</b></div>' +
-      '<div class="kz"><span>Plan bis heute</span><b>' + mio(b.planBisHeute) + '</b></div>' +
-      '<div class="kz"><span>Abweichung zum Plan</span><b>' + mio(b.abweichung) + '</b></div>' +
-      '<div class="kz"><span>Jahresforecast</span><b>' + (b.forecasting == null ? 'noch offen' : mio(b.forecasting)) + '</b></div>' +
-      '<div class="kz"><span>EBITDA-Plan</span><b>' + mio(b.ziele.ebitda) + '</b></div></div>';
-    const nodes = b.knoten.filter((n) => n.ebene === 'format' || n.ebene === 'region' || n.ebene === 'hauscluster');
-    html += '<div class="karte"><div class="khead">Planabweichung nach Steuerungsebene</div><div class="olief">Plan: Jahresziel, Abweichung: kumuliertes Ist gegen zeitanteilige Jahresplanung.</div>' +
-      '<div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>Einheit</th><th>Plan</th><th>Ist</th><th>Abw.</th></tr></thead><tbody>' +
-      nodes.map((n) => '<tr><td>' + esc(nname(n)) + '</td><td>' + mio(n.umsatz) + '</td><td>' + mio(n.ist) + '</td><td>' + pct(n.abweichung) + '</td></tr>').join('') +
-      '</tbody></table></div></div>';
-    html += '<div class="karte"><div class="khead">Letzte 26 Wochen: Umsatz und Forecast</div>' +
-      '<div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>KW</th><th>Ist</th><th>Plan</th><th>Abw.</th><th>FC</th></tr></thead><tbody>' +
-      (b.wochen || []).slice().reverse().map((w) => '<tr><td>' + ((w.woche % 52) + 1) + '</td><td>' + mio(w.ist) +
-        '</td><td>' + mio(w.plan) + '</td><td>' + pct(w.abweichungQuote) + '</td><td>' + (w.forecast == null ? '–' : mio(w.forecast)) + '</td></tr>').join('') +
-      '</tbody></table></div></div>';
-    if (b.warengruppen) html += '<details class="karte"><summary>Merchandise Planning: Warengruppenbudgets</summary>' +
-      Object.entries(b.warengruppen).map(([g, v]) => zeile(g, mio(v))).join('') + '</details>';
-    return html;
+    if (!b.ziele) return '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Kein Jahresplan vorhanden.</b>Die Planungsrunde läuft in KW 40 bis 44; bis dahin gibt es nichts zu vergleichen.</div></div></div>';
+    const vz = (x) => (x > 0 ? '+' : x < 0 ? '−' : '') + mio(Math.abs(x));
+    let html = '<div class="q31">';
+    html += '<div class="q-gross"><span class="q-label">Abweichung zum Plan bis heute</span><span class="q-haupt ' + (b.abweichung < 0 ? 'q-minus' : 'q-plus') + '">' + vz(b.abweichung) + '</span>' +
+      '<span class="q-neben"><b>' + mio(b.ist) + '</b>Ist kumuliert</span></div>';
+    html += '<div class="q-befund">Plan bis heute ' + mio(b.planBisHeute) + ', Jahresplan ' + b.jahr + ' ' + mio(b.ziele.umsatz) + ', EBITDA-Plan ' + mio(b.ziele.ebitda) + '. ' +
+      (b.forecasting == null ? 'Der erste Jahresforecast entsteht nach KW 13.' : 'Forecast ' + mio(b.forecasting) + '.') + '</div>';
+    const K = b.knoten, kinder = (id, ebene) => K.filter((n) => n.ebene === ebene && n.parent === id);
+    const formate = K.filter((n) => n.ebene === 'format');
+    const m1 = (v) => (v / 1e6).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const fname = (f) => FORMATNAME[f.id.replace('format:', '')] ?? f.name;
+    const zeileP = (n, klasse = '') => '<div class="q-zeile q-plan ' + klasse + '"><span class="q-name">' + esc(nname(n)) + '</span><span class="q-wert">' + m1(n.umsatz) + '</span><span class="q-wert">' + m1(n.ist) + '</span><span class="q-wert ' + (n.abweichung < 0 ? 'q-minus' : '') + '">' + pctV(n.abweichung) + '</span></div>';
+    for (const f of formate) {
+      const regionen = kinder(f.id, 'region');
+      html += '<div class="q-buch"><div class="q-buch-kopf q-plan"><span>' + esc(fname(f)) + '</span><b>Plan Mio. €</b><b>Ist Mio. €</b><b>Abw.</b></div>';
+      for (const r of regionen) {
+        const cl = kinder(r.id, 'hauscluster');
+        html += cl.length ? '<details class="q-plan-auf"><summary>' + zeileP(r) + '</summary>' + cl.map((c) => zeileP(c, 'q-unter')).join('') + '</details>' : zeileP(r);
+      }
+      html += '<div class="q-summe q-plan"><span>' + esc(fname(f)) + ' gesamt</span><span class="q-wert">' + m1(f.umsatz) + '</span><span class="q-wert">' + m1(f.ist) + '</span><span class="q-wert">' + pctV(f.abweichung) + '</span></div></div>';
+    }
+    const w = (b.wochen || []).slice().reverse();
+    html += '<div class="q-buch"><div class="q-buch-kopf q-plan q-wochen"><span>Woche</span><b>Ist Mio. €</b><b>Plan Mio. €</b><b>Abw.</b></div>' +
+      (w.length ? w.map((x) => '<div class="q-zeile q-plan q-wochen"><span class="q-name">KW ' + ((x.woche % 52) + 1) + '</span><span class="q-wert">' + m1(x.ist) + '</span><span class="q-wert">' + m1(x.plan) + '</span><span class="q-wert ' + (x.abweichungQuote < 0 ? 'q-minus' : '') + '">' + pctV(x.abweichungQuote) + '</span></div>').join('') : '<div class="q-leer">Noch keine Woche im Plan.</div>') + '</div>';
+    if (b.warengruppen) html += '<details class="q-buch"><summary class="q-buch-kopf"><span>Warengruppenbudgets</span><b>öffnen</b></summary>' +
+      Object.entries(b.warengruppen).map(([g, v]) => '<div class="q-zeile"><span class="q-name">' + esc(E.GRUPPEN?.[g]?.name ?? g) + '</span><span class="q-wert">' + mio(v) + '</span></div>').join('') + '</details>';
+    return html + '</div>';
   }
 
   function forecasts(D) {
@@ -96,7 +108,7 @@ export function planungModul(ctx) {
         '<div class="oknoepfe"><button class="gruen" data-pl-forecast-abgabe="1">Änderungen speichern und abgeben</button></div>';
       html += '</div>';
     }
-    if (!L.length) html += '<div class="karte">Der erste Forecast entsteht nach KW 13.</div>';
+    if (!L.length) html += '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Noch kein Forecast.</b>Der erste Forecast (3+9) entsteht nach KW 13.</div></div></div>';
     if (D.bericht.vertrauen?.length) html += '<div class="karte"><div class="khead">Trefferquote und Vertrauen</div>' +
       D.bericht.vertrauen.slice(-8).map((v) => zeile('KW ' + ((v.woche % 52) + 1) + ' · Abweichung ' + pct(v.abweichung), (v.delta > 0 ? '+' : '') + v.delta)).join('') + '</div>';
     return html;
@@ -116,7 +128,7 @@ export function planungModul(ctx) {
   function zeigen(halten = false) {
     const position = document.getElementById('pinhalt').scrollTop, D = vor();
     const html = tabs() + (ui.tab === 'assistent' ? entwurf(D) : ui.tab === 'report' ? bericht(D) : ui.tab === 'forecast' ? forecasts(D) : boni(D));
-    ctx.panel('Planung & Forecast', 'Konzerncontrolling · KW ' + ((s().woche % 52) + 1), html, 'gross');
+    ctx.panel('Planung & Forecast', 'Konzerncontrolling · KW ' + ((s().woche % 52) + 1), bereich('zentrale') + '<i class="q31-marke" hidden></i>' + html, 'gross');
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = halten ? position : 0;
   }
@@ -154,7 +166,8 @@ export function planungModul(ctx) {
     if (el.dataset.plBonus) { tun({ typ: 'planungBonus', ebene: el.dataset.plBonus, anteil: Number(el.value) }); return zeigen(true); }
   });
   return {
-    oeffne: (tab = 'assistent') => { ui.tab = tab; ui.schritt = 1; zeigen(); },
+    // Q31: Ohne offene Planungsrunde ist das Reporting die Hauptaufgabe und öffnet direkt.
+    oeffne: (tab) => { ui.tab = tab ?? (vor().entwurf?.stand === 'offen' ? 'assistent' : 'report'); ui.schritt = 1; zeigen(); },
     aktiv: () => ui.aktiv, zu: () => { ui.aktiv = false; }, neuZeichnen: () => zeigen(true),
     pruefe: () => ({ jahr: vor().bericht.jahr, knoten: vor().bericht.knoten.length, freigaben: s().entscheidungen.filter((x) => x.typ.startsWith('planung_')).length }),
   };
