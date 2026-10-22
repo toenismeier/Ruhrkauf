@@ -1264,7 +1264,20 @@ async function buendeln() {
     if (fehler.length) throw new Error(`Browser-Smoke-Test: ${fehler.length} Fehler: ${fehler.map((x) => x.name).join(', ')}`);
     return;
   }
-  if (process.argv.includes('--nur-panels')) { await startPruefen(); await panelsPruefen(); await b.close(); return; }
+  // Q30/Q31: verbotene Muster (Schatten, Schrift < 12 px, Touch-Ziel < 44 px, Platzhalter, Verläufe, Summen) für alle
+  // umgestellten Panels; endet mit Fehler. Panellisten: tests/q30-panelliste.cjs, tests/q31-panelliste.cjs (falls vorhanden).
+  async function stilPruefen() {
+    const { panelLauf } = require('./tests/q30-stil.cjs');
+    const listen = ['./tests/q30-panelliste.cjs', './tests/q31-panelliste.cjs'].filter((f) => fs.existsSync(path.join(__dirname, f)));
+    const panels = listen.flatMap((f) => require(f).PANELS);
+    await p.evaluate(() => window.spiel.schliessePanel());
+    const erg = await panelLauf(p, panels);
+    const schlecht = erg.filter((e) => e.fehler || e.verstoesse?.length);
+    fs.writeFileSync(path.join(__dirname, 'out', 'stil-pruefung.json'), JSON.stringify(erg, null, 1));
+    console.log(`Stilprüfung: ${erg.length} umgestellte Panels geprüft, ${schlecht.length} mit Verstößen`);
+    if (schlecht.length) process.exitCode = 1;
+  }
+  if (process.argv.includes('--nur-panels')) { await startPruefen(); await panelsPruefen(); await stilPruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-karte') || process.argv.includes('--nur-gesten')) { await kartePruefen(); await b.close(); return; }
   if (process.argv.includes('--nur-einkauf')) { await einkaufPruefen(); await b.close(); return; }
   // Kamera auf die Hartwig-Häuser der Stadt
