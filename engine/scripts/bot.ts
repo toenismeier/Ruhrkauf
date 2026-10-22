@@ -250,9 +250,17 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
     const pool = s.haeuser.filter((h) => !h.nurDaten && h.klasse !== 'premium' && h.format !== 'outlet');
     const ziel = Math.round(pool.length * REGULAER_SCHLIESSUNGSQUOTE);
     const inArbeit = pool.filter((h) => h.status !== 'offen').length;
-    const verlustIds = new Set(pool.filter((h) => (h.kpi?.guv?.ebitda ?? 0) < 0).map((h) => h.id));
+    // Entscheidung nach dem Ergebnis der letzten 26 Wochen, nicht nach einer
+    // einzelnen (saisonal schwachen) Woche: sonst schließt Bot D im Winter
+    // Häuser, die übers Jahr Geld verdienen.
+    const quote26 = (h: (typeof pool)[number]) => {
+      const v = (h.verlauf ?? []).slice(-26);
+      const u = v.reduce((a, x) => a + x.umsatz, 0);
+      return v.length >= 26 && u > 0 ? v.reduce((a, x) => a + x.db, 0) / u : 0;
+    };
+    const verlustIds = new Set(pool.filter((h) => process.env.D_ROLL ? quote26(h) < -0.02 : (h.kpi?.guv?.ebitda ?? 0) < 0).map((h) => h.id));
     const p = aktivesPortfolio(s)
-      .filter((x) => verlustIds.has(x.id) && x.db < 0 && x.umsatz > 0 && (!process.env.D_STRENG || x.db / x.umsatz < -0.02))
+      .filter((x) => verlustIds.has(x.id) && (process.env.D_ROLL || x.db < 0) && x.umsatz > 0 && (!process.env.D_STRENG || x.db / x.umsatz < -0.02))
       .sort((a, b) => a.db / a.umsatz - b.db / b.umsatz);
     if (process.env.D_NOCLOSE) p.length = 0;
     let budget = schliessungsBudgetBotD(s).budget;
