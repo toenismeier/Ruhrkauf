@@ -64,7 +64,7 @@
       {"id":"bloecke/b5","bauer":"west_ekz","lage":[95,549.5,84,92],"drehung":0,"variante":"80er","standort":null,"pruefsumme":"f79b44b500521d69"},
       {"id":"bloecke/b6","bauer":"west_siedlung","lage":[211,549.5,46,92],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"08c6aa3d8e062e5f"},
       {"id":"bloecke/b7","bauer":"kirche","lage":[388.5,161,48,72],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"4e36c2c890fb5318"},
-      {"id":"bloecke/b8","bauer":"center","lage":[557.5,441,144,86],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"3d4b449ceeeddc46"},
+      {"id":"bloecke/b8","bauer":"center","lage":[557.5,441,144,86],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"0cff3437a923d3f7"},
       {"id":"bloecke/b9","bauer":"park","lage":[22.5,441,50,86],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"86e96da6ed262830"},
       {"id":"kreuzungen/k0","bauer":"kreuzungen","lage":[11.25,11.25,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"be3344916f976603"},
       {"id":"kreuzungen/k1","bauer":"kreuzungen","lage":[819.25,11.25,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"a0bb32a41d171846"},
@@ -178,7 +178,7 @@
       {"id":"parzellen/p137","bauer":"stadthaus","lage":[753.99,113.5,7.01,15.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"c04d55856c57e689"},
       {"id":"parzellen/p138","bauer":"baustelle","lage":[761,113.5,17.95,15.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"869f9ed509cf65a7"},
       {"id":"parzellen/p139","bauer":"stadthaus","lage":[778.95,113.5,13.55,15.5],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"fb1b8b88bc023e14"},
-      {"id":"parzellen/p14","bauer":"slot:warenhaus","lage":[560.5,444,132,42],"drehung":0,"variante":"warenhaus","standort":"W126","pruefsumme":"7ac625f548f5ae63"},
+      {"id":"parzellen/p14","bauer":"slot:warenhaus","lage":[560.5,444,132,42],"drehung":0,"variante":6,"standort":"W126","pruefsumme":"b0c284189db8ebf2"},
       {"id":"parzellen/p140","bauer":"stadthaus","lage":[739.5,61,16,15.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"5a4098ce2c9cf278"},
       {"id":"parzellen/p141","bauer":"stadthaus","lage":[755.5,61,9.01,15.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"ed1be19a98121524"},
       {"id":"parzellen/p142","bauer":"stadthaus","lage":[764.51,61,13.12,15.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"c0b158c9978dc3a3"},
@@ -985,7 +985,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"32b8a578008bd8b0"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"d3bd39077aee2b71"}
     ],
-    "gesamt": "3c5440d474d357c4"
+    "gesamt": "11fbb3768dc8a064"
   },
   "geometrie": {
     "kacheln": [
@@ -1734,8 +1734,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "834bbed0ecdbae9b98ce5e0d1818b119220aa22ec5d8646e8b8f6f03e88619d1",
+    "stadtplan": "3d5565656bd4dd89c4be6dc76ab6560f94b1d6950a9c5ae054b732e05aa60db9",
     "geometrie": "2c5cfbb91e81299ee3eb107c63806673559b0a87b96a1c2de4f5f750d997a217",
-    "bildReferenz": "ea68e503e7fed4bcfe33024979a61fdafdb5b7a548fe8a0bf7d9ebf8c7cd7299"
+    "bildReferenz": "148f29ebce9018b953aeb8e769c6e30bb0f23b4de5682bcbe0fa2e6eef976b64"
   }
 }

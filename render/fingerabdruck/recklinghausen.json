@@ -177,7 +177,7 @@
       {"id":"parzellen/p125","bauer":"hofhaus","lage":[655.5,80.5,16.89,23],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"f6ddacce4b040102"},
       {"id":"parzellen/p126","bauer":"hofhaus","lage":[672.39,80.5,12.36,23],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"49fddadc81386c74"},
       {"id":"parzellen/p127","bauer":"hofhaus","lage":[684.75,80.5,15.75,23],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"6bdff3dd4a7e7539"},
-      {"id":"parzellen/p128","bauer":"slot:warenhaus","lage":[50.5,181,52,42],"drehung":0,"variante":"warenhaus","standort":"W089","pruefsumme":"9a9a5e57954972b7"},
+      {"id":"parzellen/p128","bauer":"slot:warenhaus","lage":[50.5,181,52,42],"drehung":0,"variante":7,"standort":"W089","pruefsumme":"5ad1972a9d9adc44"},
       {"id":"parzellen/p129","bauer":"eck","lage":[22.5,155,15,20],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"b9693fd21cb92f08"},
       {"id":"parzellen/p13","bauer":"stadthaus","lage":[254.5,318.5,7.02,13.5],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"db72018b8075b1f1"},
       {"id":"parzellen/p130","bauer":"slot:ruhr_bude","lage":[22.5,208,17,15],"drehung":0,"variante":"imbiss","standort":null,"pruefsumme":"d2dd1bce69d58dd6"},
@@ -918,7 +918,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"a2d1ad16e493df68"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"31ae4afd1d4a2cb7"}
     ],
-    "gesamt": "6f16b079be40e785"
+    "gesamt": "371adf5a3b339c96"
   },
   "geometrie": {
     "kacheln": [
@@ -1579,8 +1579,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "f15076b41b6a0e5f56bf4efb81605c95eaecdf9df096ab61fcc5d0d82efc91bd",
+    "stadtplan": "119cb093bc28e0cc4248f0a641189c0baf32b0afc9f0829b84414b2e55814497",
     "geometrie": "244fe5e1d4211b199b35f9f26a72e7f87b9ce1638e8bb35058195fa644fe240b",
-    "bildReferenz": "990d5613b3b7d7b2fcffd69e5143ffd033bdbec90e5abec2e1f125bc6eed3eae"
+    "bildReferenz": "850887054dbb99663f83537942570314293d5831de910fe1014a58d02e040b45"
   }
 }

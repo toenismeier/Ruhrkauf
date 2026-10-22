@@ -10,7 +10,7 @@ import { chance, clamp, eur, mio, neueId, waehle, melde } from './util';
 import { bestandWert, verbrauche } from './ware';
 import { PARAM } from './welt';
 import {
-  abteilungSetzen, abteilungStufe, hqEtageKuendigen, hqGebaeudeKuendigen, hqMieten, hqVerhandlungsBonus, zentraleKuerzen,
+  abteilungSetzen, abteilungStufe, abteilungFteSetzen, abteilungGehaltSetzen, hqEtageKuendigen, hqGebaeudeKuendigen, hqMieten, hqVerhandlungsBonus, zentraleKuerzen,
   type AbteilungId, type Stufe,
 } from './hq';
 import { EINKAUF_AKTIONEN, einkaufAktion, type EinkaufAktion } from './einkauf';
@@ -89,6 +89,8 @@ export type SpielerAktion =
   | { typ: 'hqGebaeudeKuendigen'; gebaeude: string }
   | { typ: 'abteilungSetzen'; abteilung: AbteilungId; gebaeude: string; etage: number }
   | { typ: 'abteilungStufe'; abteilung: AbteilungId; stufe: Stufe }
+  | { typ: 'abteilungFte'; abteilung: AbteilungId; fte: number }
+  | { typ: 'abteilungGehalt'; abteilung: AbteilungId; faktor: number }
   // Einkauf, Freigaben, Eigenmarken (src/einkauf.ts)
   | EinkaufAktion
   // O05 Ware
@@ -448,6 +450,8 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
     case 'hqGebaeudeKuendigen': return hqGebaeudeKuendigen(s, a.gebaeude);
     case 'abteilungSetzen': return abteilungSetzen(s, a.abteilung, a.gebaeude, a.etage);
     case 'abteilungStufe': return abteilungStufe(s, a.abteilung, a.stufe);
+    case 'abteilungFte': return abteilungFteSetzen(s, a.abteilung, a.fte);
+    case 'abteilungGehalt': return abteilungGehaltSetzen(s, a.abteilung, a.faktor);
 
     case 'marketingBudget': return marketingBudgetKompatibel(s, a.quote);
 

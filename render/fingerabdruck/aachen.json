@@ -374,7 +374,7 @@
       {"id":"parzellen/p29","bauer":"stadthaus","lage":[86.5,40.5,14,19],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"f5c2f12466cdccb2"},
       {"id":"parzellen/p290","bauer":"hofhaus","lage":[192,240,14.35,30],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"6e88c02c318926a6"},
       {"id":"parzellen/p291","bauer":"hofhaus","lage":[206.36,240,9.14,30],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"b16e634088633116"},
-      {"id":"parzellen/p292","bauer":"slot:warenhaus","lage":[393.5,245,57,47],"drehung":0,"variante":"warenhaus","standort":"W045","pruefsumme":"5579a31a127c3250"},
+      {"id":"parzellen/p292","bauer":"slot:warenhaus","lage":[393.5,245,57,47],"drehung":0,"variante":6,"standort":"W045","pruefsumme":"f25b65d812165f22"},
       {"id":"parzellen/p293","bauer":"eck","lage":[354.5,218,17,17],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"7fc23394bccb7c60"},
       {"id":"parzellen/p294","bauer":"eck","lage":[354.5,275,17,17],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"55d4736f892db3db"},
       {"id":"parzellen/p295","bauer":"eck","lage":[433.5,218,17,19],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"4372fcbf31c491d3"},
@@ -1092,7 +1092,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"7a0cc4c025ebde76"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"c149327001a0ef32"}
     ],
-    "gesamt": "f314cbbadcbd58fe"
+    "gesamt": "a48e4e768ade4d2c"
   },
   "geometrie": {
     "kacheln": [
@@ -1871,7 +1871,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "3b1b4874029cf76c5829fb0d5371038a487194ee9d625549b31c04274838cdfe",
+    "stadtplan": "8c28cb953a61ba1a5514c3d335d195b407749aa799d7e03806bcbeb970ed3e28",
     "geometrie": "0d8e902150f5d54ffb6d979c7653f01cfa07ef5464e6c4a4e99c29d3a7b6602b",
     "bildReferenz": "c548ba14a4b2d96889b7b0925d19aca79dfb3c17fe964b3636875fbec4fc5282"
   }

@@ -308,7 +308,7 @@
       {"id":"parzellen/p242","bauer":"slot:bay_buergerhaus","lage":[281.85,385.15,17.5,22.08],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"b15f2e03eb1e43ef"},
       {"id":"parzellen/p243","bauer":"slot:bay_buergerhaus","lage":[281.85,407.23,17.5,22.01],"drehung":0,"variante":"wasserburg","standort":null,"pruefsumme":"4546eb98166ec436"},
       {"id":"parzellen/p244","bauer":"slot:bay_buergerhaus","lage":[281.85,429.24,17.5,22.26],"drehung":0,"variante":"rosenheim","standort":null,"pruefsumme":"5cad13ae365f4a42"},
-      {"id":"parzellen/p245","bauer":"slot:warenhaus","lage":[500,435,52,37],"drehung":0,"variante":"warenhaus","standort":"W051","pruefsumme":"6e02e54a1cc4c38e"},
+      {"id":"parzellen/p245","bauer":"slot:warenhaus","lage":[500,435,52,37],"drehung":0,"variante":4,"standort":"W051","pruefsumme":"212bfaf7db7a77b9"},
       {"id":"parzellen/p246","bauer":"slot:bw_fachwerk","lage":[472,336,20,19],"drehung":0,"variante":"tuebingen","standort":null,"pruefsumme":"bcc419bdfe1902d5"},
       {"id":"parzellen/p247","bauer":"slot:bay_muenchen","lage":[472,453,19,19],"drehung":0,"variante":"neubarock","standort":null,"pruefsumme":"e70cbff9e82c87f1"},
       {"id":"parzellen/p248","bauer":"slot:bay_buergerhaus","lage":[531,336,21,19],"drehung":0,"variante":"wasserburg","standort":null,"pruefsumme":"9d74f991561f255b"},
@@ -885,7 +885,7 @@
       {"id":"strassen/s98","bauer":"haupt","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"c62842e2d5875d92"},
       {"id":"strassen/s99","bauer":"haupt","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"5fba1c95c99b5d85"}
     ],
-    "gesamt": "a89a2657f7e01323"
+    "gesamt": "9035f50c858e6874"
   },
   "geometrie": {
     "kacheln": [
@@ -1516,7 +1516,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "bf1c885fa8fc809b4beeec03624a5c263d221f176401b4ff76cace72685d6fd2",
+    "stadtplan": "17cca4445920c8ca63841980b0519c374e5e874bb28bbb7f0bda9988ece2bc16",
     "geometrie": "216f0318804da237823d29189fb75ceb416397048169c31d50f85b51975740bb",
     "bildReferenz": "27c42ff916628ff537ae841f9ab973211f7666fd07e68649746151b3b1874511"
   }

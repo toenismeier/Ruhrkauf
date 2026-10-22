@@ -176,7 +176,7 @@
       {"id":"parzellen/p156","bauer":"slot:bay_muenchen","lage":[44.5,471.94,20,16.06],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"2c3cff3ef5a8468c"},
       {"id":"parzellen/p157","bauer":"slot:bay_muenchen","lage":[22.5,455,20,16.71],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"eb9a57f27cfc446c"},
       {"id":"parzellen/p158","bauer":"slot:bay_muenchen","lage":[22.5,471.71,20,16.29],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"0cfb9e5073f16bd2"},
-      {"id":"parzellen/p159","bauer":"slot:warenhaus","lage":[116,461.5,67,47],"drehung":0,"variante":"warenhaus","standort":"W101","pruefsumme":"054b1f2c8ef840ee"},
+      {"id":"parzellen/p159","bauer":"slot:warenhaus","lage":[116,461.5,67,47],"drehung":0,"variante":6,"standort":"W101","pruefsumme":"fafcd3e1b877739d"},
       {"id":"parzellen/p16","bauer":"slot:kirche","lage":[329.84,277.9,41.4,24],"drehung":0,"variante":"hallenkirche","standort":null,"pruefsumme":"d28f2202fbf47fda"},
       {"id":"parzellen/p160","bauer":"slot:bw_fachwerk","lage":[87,434.5,22,28],"drehung":0,"variante":"tuebingen","standort":null,"pruefsumme":"b2cf53985e88796e"},
       {"id":"parzellen/p161","bauer":"slot:bw_fachwerk","lage":[87,486.5,22,22],"drehung":0,"variante":"esslingen","standort":null,"pruefsumme":"ef7c270a1d5709d6"},
@@ -492,7 +492,7 @@
       {"id":"strassen/s91","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"891bc0f8b8f912dc"},
       {"id":"strassen/s92","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"dc7d9314c9cc4e7e"}
     ],
-    "gesamt": "cd7ae66e0e01d152"
+    "gesamt": "c49e92ed7386f001"
   },
   "geometrie": {
     "kacheln": [
@@ -798,7 +798,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "c7a68ab6e6df073bc87f970be9ef71a1124b0019aea3694b6e4bd11a8c4bed66",
+    "stadtplan": "3ef9416b6d771a5dfdb42a7b556f2a7d638418f2f7f0e9a2548e505596500af7",
     "geometrie": "cb0cdde945496cddc88a9583a36d07c350b645fc8d2e943a787f8ee952c3cd91",
     "bildReferenz": "5d96c08d09540146f687087aef51659976a6b1b37338ab4afde459e3ad36e8c9"
   }

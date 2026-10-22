@@ -1,5 +1,6 @@
 // O09 E-Commerce: Panel hartwig.de, ausschließlich Engine-Abfragen und SpielerAktion.
 import { geld, fmt, esc } from './format.js';
+import { itProdukteKarten } from './it-produkte.js';
 
 const prozent = (x, n = 1) => (100 * (x || 0)).toFixed(n).replace('.', ',') + ' %';
 const zahl = (titel, wert, ton = '') => '<div class="kz ' + ton + '"><span>' + titel + '</span><b>' + wert + '</b></div>';
@@ -14,10 +15,12 @@ export function ecommerceModul(ctx) {
   function anzeigen(behalten = false) {
     if (!offen) return;
     const u = state(), vorher = behalten ? document.getElementById('pinhalt').scrollTop : 0;
-    let h = '<div class="tabs">' + [['uebersicht', 'Kennzahlen'], ['steuerung', 'Steuerung'], ['haeuser', 'Häuser']]
+    let h = '<div class="tabs">' + [['uebersicht', 'Kennzahlen'], ['steuerung', 'Steuerung'], ['haeuser', 'Häuser'], ['produkte', 'IT-Produkte']]
       .map(([id, name]) => '<button class="tab ' + (tab === id ? 'an' : '') +
         '" data-online="tab" data-wert="' + id + '">' + name + '</button>').join('') + '</div>';
-    if (tab === 'uebersicht') {
+    if (tab === 'produkte') {
+      h += itProdukteKarten(ctx.E.itProdukte(ctx.s()), 'online');
+    } else if (tab === 'uebersicht') {
       h += '<div class="raster">' + zahl('Onlineumsatz Woche', geld(u.umsatz)) +
         zahl('Anteil Konzernumsatz', prozent(u.anteil)) +
         zahl('Online-Conversion', prozent(u.conversion, 2)) +
@@ -88,6 +91,7 @@ export function ecommerceModul(ctx) {
     if (!offen || !b || !panel.contains(b) || b.tagName === 'SELECT') return;
     const id = b.dataset.id, typ = b.dataset.online;
     if (typ === 'tab') { tab = b.dataset.wert; anzeigen(); }
+    else if (typ === 'produkt') ctx.oeffneItProdukt?.(b.dataset.id);
     else if (typ === 'collect') tun({ typ: 'onlineClickCollect', an: !state().clickCollect });
     else if (typ === 'cluster') { const x = state().cluster.find((c) => c.id === id); if (x) tun({ typ: 'onlineVersandCluster', cluster: id, an: !x.aktiv }); }
     else if (typ === 'station') { const x = state().haeuser.find((h) => h.id === id); if (x) tun({ typ: 'onlineAbholstation', haus: id, an: !x.station }); }

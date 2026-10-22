@@ -228,7 +228,7 @@
       {"id":"parzellen/p204","bauer":"stadthaus","lage":[116,250.22,15,8],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"b967af49c85a3907"},
       {"id":"parzellen/p205","bauer":"stadthaus","lage":[116,258.22,15,10.78],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"9277afd05f20e32e"},
       {"id":"parzellen/p206","bauer":"hofhaus","lage":[135,237,11,30],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"51bdab4cc72ba7e4"},
-      {"id":"parzellen/p207","bauer":"slot:warenhaus","lage":[226,244,67,42],"drehung":0,"variante":"warenhaus","standort":"W111","pruefsumme":"193922ce8a419990"},
+      {"id":"parzellen/p207","bauer":"slot:warenhaus","lage":[226,244,67,42],"drehung":0,"variante":6,"standort":"W111","pruefsumme":"383fb1b638159146"},
       {"id":"parzellen/p208","bauer":"eck","lage":[197,218,15.5,20.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"4b240b7247885c6a"},
       {"id":"parzellen/p209","bauer":"eck","lage":[197,270.5,19.5,15.5],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"5360a93a1859a330"},
       {"id":"parzellen/p21","bauer":"stadthaus","lage":[337.5,270.5,7.59,15.5],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"307ae229d57df1a5"},
@@ -579,7 +579,7 @@
       {"id":"umland/4","bauer":"land","lage":[0,373.5,165,56],"drehung":0,"variante":null,"standort":null,"pruefsumme":"d0ad008d04f4af33"},
       {"id":"umland/5","bauer":"land","lage":[121,452,172,82.5],"drehung":0,"variante":null,"standort":null,"pruefsumme":"9e70a3bbc347842f"}
     ],
-    "gesamt": "580f16bf34424f59"
+    "gesamt": "a9d9475bb967d48f"
   },
   "geometrie": {
     "kacheln": [
@@ -967,7 +967,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "72b0830107aa4bf8613361f2fed584d4dff8333b61658902c690232b19e8607f",
+    "stadtplan": "d966aae6435edd5f56f3126903cc93b9445a1878e5849e95734ea734a7b7ac12",
     "geometrie": "4819837579eab8824f05200c8b3d398a34f6e0d14d796c0b67be1ff5c710bace",
     "bildReferenz": "666f0584894167836d5a832bb2c83aa08991f34f64b3ef4d8ca7592faaaac144"
   }

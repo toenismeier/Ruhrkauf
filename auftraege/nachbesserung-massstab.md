@@ -253,3 +253,11 @@ Messung `m7-wochenverlauf.ts` auf dem Merge:
 - Bot C: mittel Seeds 1–3 erreichen 104 Wochen ohne Insolvenz.
 
 Damit sind alle drei Restpunkte aus Abschnitt 19 erfüllt, ohne weitere Kalibrierung: die Ursache lag in den seither gemergten operativen Workstreams. Das Kriterium „Bot D je Seed nicht schlechter als Bot T“ (GPT-Zusatz) ist durch den Mittelwert über die Seeds ersetzt; Abschnitt 17 verlangt nur, dass Bot D besteht und besser abschneiden darf.
+
+## 21. Bot D: Schließung nach 26-Wochen-Ergebnis (Claude, 22.10.2026)
+
+Nach Engine-Formate und Q08 scheiterte M7 nur noch an „Bot D mittel: mittlere EBITDA-Quote schlechter als Bot T“ (Bot D 4,10 %, Bot T 4,69 %), schon auf main vor den Formaten. Ursache: Bot D schloss nach dem Filial-EBITDA einer einzigen Woche; im Winter liegen viele übers Jahr profitable Häuser kurz unter null. Unter Bot T liegen im ersten Jahr nur vier Häuser übers Jahr unter −2 %. Zweite Ursache: die eigene Aushilfenstaffel (16/22 %) senkte die Kaufquote stärker, als sie Personal sparte.
+
+Neu: Schließung nur bei Filial-EBITDA der letzten 26 Wochen unter −2 % v. U.; Aushilfen wie Bot T. Ohne Wirkung geprüft: Zusatzabbau Zentrale, HQ-Anpassung an das kleinere Netz, Mietverhandlung, Stadtangebote.
+
+Messung `m7-wochenverlauf.ts`: **Alle M7-Grenzwerte bestanden.** Bot D mittel 4,98 / 4,86 / 4,52 % (Mittel 4,79 %) gegen Bot T 5,00 / 4,57 / 4,50 % (Mittel 4,69 %); leicht 5,07 bis 5,51 %, schwer 3,46 bis 3,78 %, 9 von 9 ohne Insolvenz. Ausgangslage unverändert (Jan/Feb mittel −2,07 %).
