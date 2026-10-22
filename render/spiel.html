@@ -28,6 +28,8 @@
 <link rel="stylesheet" href="./src/ui/spielende.css">
 <link rel="stylesheet" href="./src/ui/statistik.css">
 <link rel="stylesheet" href="./src/ui/it-produkte.css">
+<link rel="stylesheet" href="./src/ui/marketing-q16.css">
+<link rel="stylesheet" href="./src/ui/zentrale-abteilungen.css">
 <style>
   :root { --karte: #ffffff; --grund: #f3f1ec; --text: #1f2a33; --leise: #7b8790; --rot: #d23c32; --gruen: #2f8f5b; --linie: #e7e3dc; --schatten: 0 2px 10px rgba(20, 30, 40, 0.16); --schrift: 1; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -352,6 +354,7 @@
   .startkarte .vtitel { margin: 12px 2px 6px; }
   .startkarte .ort.gross { margin-top: 0; }
   .stufen { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .stufen[hidden], .startkarte .vtitel[hidden] { display: none; }
   .stufe-karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 10px 12px; min-height: 64px; display: grid; grid-template-columns: 74px 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; text-align: left; color: var(--text); }
   .stufe-karte .sterne-stufe { grid-row: 1; } .stufe-karte b { grid-row: 2; grid-column: 1; } .stufe-karte small { grid-row: 1 / span 2; grid-column: 2; }
   .stufe-karte b { font-size: calc(15px * var(--schrift)); } .stufe-karte small { font-size: calc(11px * var(--schrift)); color: var(--leise); line-height: 1.35; }
