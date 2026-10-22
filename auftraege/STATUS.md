@@ -45,7 +45,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q28 Schuhe, Taschen, Accessoires, Wäsche (Claude-Chat) | `feat/q28-zubehoer-bilder` #70 | **Phase 1 gemergt 22.10. (d90a530), CI grün**: 58 Silhouetten (alte `alt:`-Zeichner ersetzt, Loafer/BH neu, Schuhe und Taschen Dreiviertelansicht), Blindtest 58/58 auch in 64 px | Phase 2 Artikeltypen `engine/src/sortiment/q28-zubehoer.ts` nach Merge Q11 #57 + Q27-Haken; Bedarf an Q27 (Model-Sets, `bildFuer`) im PR |
 | Q29 Home/Living, Beauty, Spielwaren (Claude-Chat) | – | **Phase 1 gemergt 22.10. (#68, fdd5eb4), CI grün; 58 Bilder (8 ersetzt, 50 neu), Blindtest 58/58** | Phase 2: ≥ 50 Artikeltypen in `engine/src/sortiment/q29-home.ts` nach Merge Q11 #57 und Q27-Haken; Bedarf an Q27: Muster `punkte`/`print` in `stoff.js`, `NAMEN`/`REGELN` in `produkt.js` auf neue Silhouetten |
 | Q26 Meldungen und Speichern | `feat/q26-meldungen-speichern` | **startet 21.10.** | `auftraege/wurf2/` |
-| Q08 Fünf Premiumhäuser | `feat/q08-premium-fuenf` | **startet 21.10.** | `auftraege/wurf1/q08-premium-fuenf.md` (Ummo E29) |
+| Q08 Fünf Premiumhäuser | main | **gemergt 22.10.** (#49, 685b42b) | 561 Häuser; P005 „Hartwig Leipziger Platz“ (Berlin, eigener Bau neben P001); P003/P004 fiktiv umbenannt. Haus-EBITDA Jahr 1 mittel +1,8 bis +6,7 %. Fingerabdrücke neu: München (P002 sechs Geschosse), Hamburg, Düsseldorf (Namen) |
 | Q06 Marktbeobachtung (Meldungen filtern) | main | **gemergt 21.10.** (#47) | – |
 | Q07 Vertriebssteuerung (Region bis Haus, Vorjahr, Startmonat, Mietverträge) | `feat/q07-vertriebssteuerung` | **startet 21.10.** | – |
 | Reise und Wochenabschluss 1 und 2 | – | gemergt | – |

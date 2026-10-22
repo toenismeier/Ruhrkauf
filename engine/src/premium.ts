@@ -1,4 +1,4 @@
-/** Vier eigenständige Hartwig-Kronjuwelen. Kein neues Format: Einkauf und Marketing bleiben Warenhaus. */
+/** Fünf eigenständige Hartwig-Kronjuwelen. Kein neues Format: Einkauf und Marketing bleiben Warenhaus. */
 import { GRUPPEN, PREMIUM_HAEUSER } from './daten';
 import type { Angebot, GameState, GruppeId, Haus } from './types';
 import { clamp, eur, melde, mio } from './util';
@@ -11,6 +11,7 @@ const PREMIUM_PROFIL = {
   P002: { qm: 30_000, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.016, mietQuote: 0.057 },
   P003: { qm: 18_000, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.060 },
   P004: { qm: 14_000, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.041, mietQuote: 0.065 },
+  P005: { qm: 20_000, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.060 },
 } as const;
 type PremiumId = keyof typeof PREMIUM_PROFIL;
 export const premiumProfil = (id?: string) => id && Object.prototype.hasOwnProperty.call(PREMIUM_PROFIL, id)
@@ -23,7 +24,7 @@ const MIX: Partial<Record<GruppeId, number>> = {
   beauty: 1.55, accessoires: 1.55, damen: 1.25, food: 1.45,
   spielwaren: 0.55, wohnen: 0.6,
 };
-const IMMOBILIE: Record<string, number> = { P001: 900_000_000, P002: 900_000_000, P003: 600_000_000, P004: 145_000_000 };
+const IMMOBILIE: Record<string, number> = { P001: 900_000_000, P002: 900_000_000, P003: 600_000_000, P004: 145_000_000, P005: 650_000_000 };
 const KAEUFER = [
   { typ: 'Luxusgruppe', name: 'Luxusgruppe Valens' },
   { typ: 'Family Office', name: 'Family Office Merian' },
@@ -83,16 +84,15 @@ function normierePremiumFlaechen(h: Haus, p: NonNullable<ReturnType<typeof premi
   }
 }
 
-/** Bestehende 1a-Häuser regelbasiert umwidmen; Haus-IDs bleiben für Spielstände und HQ erhalten. */
+/** Nur im historischen Altmodus umwidmen; sonst explizite Premium-IDs. */
 export function kennzeichnePremium(haeuser: Haus[]): void {
-  // Ab Engine-Maßstab Phase 1 existieren die vier Premiumhäuser bereits als zusätzliche Einträge.
-  // Dann keinesfalls noch vier reguläre Häuser umwidmen.
-  const vorhanden = PREMIUM_HAEUSER.every((p) => haeuser.some((h) =>
-    h.premiumSchluessel === p.id || (h.klasse === 'premium' && h.stadt === p.stadt)));
-  if (vorhanden) {
-    for (const p of PREMIUM_HAEUSER) {
-      const h = haeuser.find((x) => x.premiumSchluessel === p.id || (x.klasse === 'premium' && x.stadt === p.stadt));
-      if (!h) continue;
+  // Zwei Berliner Premiumhäuser dürfen nicht über die Stadt zusammenfallen.
+  // Szenarien mit vier Premiumhäusern dürfen außerdem kein reguläres Haus umwidmen.
+  const vorhanden = haeuser.filter((h) => h.klasse === 'premium' && h.premiumSchluessel);
+  if (vorhanden.length) {
+    for (const h of vorhanden) {
+      const p = PREMIUM_HAEUSER.find((x) => x.id === h.premiumSchluessel);
+      if (!p) throw new Error(`Unbekannter Premiumschlüssel: ${h.premiumSchluessel}`);
       h.klasse = 'premium'; h.premiumSchluessel = p.id; h.name = p.name;
       h.premiumImage ??= 80;
       // Feste Premium-Grundrisse (Fläche, Geschosse) wie im Premium-Workstream;
