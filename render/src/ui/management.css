@@ -1,0 +1,202 @@
+/* Q31 Management-Panels: Fachelemente (Orderbuch, Warenbuch, Kollektionstafel, Werbeplan, Planblatt, Sitzungstisch,
+   Aktenregal). Nur --ui-*-Tokens, damit die dunklen Q30-Tokens ohne Änderung greifen. Keine Schatten, keine Verläufe,
+   keine Symbole in Kreisen, Schrift ab 12 px. */
+.q31 { --q-text: var(--ui-text, #242424); --q-leise: var(--ui-muted, #62666a); --q-linie: var(--ui-border, #e2e1dd);
+  --q-flaeche: var(--ui-surface, #fff); --q-grund: var(--ui-bg, #f5f4f1); --q-akzent: var(--hk-akzent, var(--ui-brand, #b32632));
+  --q-plus: var(--hk-gut, #247153); --q-minus: var(--hk-schlecht, #a52d38); color: var(--q-text); }
+.q31 .zahl, .q31 .q-wert { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Großkennzahl mit Abweichung (Coffee 08, 12): Beschriftung in Versalien, Zahl groß, Abweichung darunter */
+.q-gross { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: end; padding: 14px 4px 10px; }
+.q-gross .q-label { grid-column: 1 / -1; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--q-leise); }
+.q-gross .q-haupt { font-size: 34px; line-height: 38px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.q-gross .q-neben { font-size: 14px; color: var(--q-leise); text-align: right; line-height: 18px; }
+.q-gross .q-neben b { display: block; color: var(--q-text); font-size: 16px; font-weight: 600; }
+.q-befund { font-size: 15px; line-height: 21px; padding: 2px 4px 12px; }
+.q-befund b { font-weight: 600; }
+.q-minus { color: var(--q-minus) !important; } .q-plus { color: var(--q-plus) !important; }
+
+/* Hauptaktion: eine volle Zeile, 48 px */
+.q-haupt-akt { display: block; width: 100%; min-height: 48px; border: 0; border-radius: var(--ui-radius, 10px); background: var(--q-akzent);
+  color: #fff; font: inherit; font-size: 16px; font-weight: 600; padding: 0 14px; margin: 0 0 12px; }
+.q-haupt-akt span { font-variant-numeric: tabular-nums; }
+.q-neben-akt { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid var(--q-linie); border-radius: var(--ui-radius, 10px);
+  background: transparent; color: var(--q-text); font: inherit; font-size: 14px; }
+
+/* Buch: linierte Seite mit Summenstrich (Orderbuch, Warenbuch, Werbeplan, Planblatt) */
+.q-buch { background: var(--q-flaeche); border: 1px solid var(--q-linie); border-radius: var(--ui-radius, 10px); margin: 0 0 12px; overflow: hidden; }
+.q-buch-kopf { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 12px 14px 8px; font-size: 12px;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--q-leise); }
+.q-buch-kopf b { font-size: 12px; font-weight: 600; color: var(--q-leise); }
+.q-zeile { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 14px; border-top: 1px solid var(--q-linie); align-items: center; }
+.q-zeile .q-name { font-size: 15px; line-height: 20px; min-width: 0; overflow-wrap: anywhere; }
+.q-zeile .q-name small { display: block; font-size: 12px; line-height: 16px; color: var(--q-leise); }
+.q-zeile .q-wert { font-size: 15px; text-align: right; }
+.q-zeile .q-wert small { display: block; font-size: 12px; color: var(--q-leise); }
+.q-zeile .q-knoepfe { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; padding-top: 6px; }
+.q-zeile .q-knoepfe button { min-height: 44px; min-width: 44px; padding: 0 12px; border-radius: var(--ui-radius, 10px); font: inherit; font-size: 14px;
+  border: 1px solid var(--q-linie); background: transparent; color: var(--q-text); }
+.q-zeile .q-knoepfe button.q-ja { border-color: var(--q-akzent); color: var(--q-akzent); font-weight: 600; }
+.q-summe { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 10px 14px 12px; border-top: 2px solid var(--q-text); font-weight: 600; font-size: 15px; }
+.q-summe .q-wert { text-align: right; }
+.q-leer { padding: 18px 14px; color: var(--q-leise); font-size: 15px; line-height: 21px; border-top: 1px solid var(--q-linie); }
+.q-leer b { display: block; color: var(--q-text); font-weight: 600; margin-bottom: 2px; }
+.q-mehr { display: block; width: 100%; min-height: 44px; border: 0; border-top: 1px solid var(--q-linie); background: transparent; color: var(--q-akzent); font: inherit; font-size: 15px; }
+
+/* Filterzeile: Segmentleisten kompakt nebeneinander */
+.q-filter { display: flex; gap: 8px; overflow-x: auto; padding: 0 0 10px; }
+.q-filter .seg { flex: none; margin: 0; }
+.q-filter select { flex: none; min-height: 44px; }
+
+/* Grenze und Stepper in einer Zeile */
+.q-stepzeile { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid var(--q-linie); }
+.q-stepzeile .q-name { font-size: 15px; } .q-stepzeile .q-name small { display: block; font-size: 12px; color: var(--q-leise); }
+.q-stepzeile .stepper { flex: none; }
+
+/* Orderbuch: eine Zeile je Order, Freigabe mit einem Tipp, Details nach Antippen */
+.q-zwischen { display: flex; justify-content: space-between; gap: 8px; padding: 10px 14px 6px; border-top: 1px solid var(--q-linie); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--q-leise); font-variant-numeric: tabular-nums; }
+.q-zeile.q-order { grid-template-columns: minmax(0, 1fr) auto 52px; padding: 6px 10px 6px 14px; }
+.q-zeilenknopf { all: unset; display: block; min-height: 44px; padding: 3px 0; cursor: pointer; font-size: 15px; line-height: 20px; overflow-wrap: anywhere; }
+.q-zeilenknopf small { display: block; font-size: 12px; line-height: 16px; color: var(--q-leise); }
+.q-haken { width: 52px; min-height: 44px; border: 1px solid var(--q-akzent); border-radius: var(--ui-radius, 10px); background: transparent; color: var(--q-akzent); font: inherit; font-size: 14px; font-weight: 600; }
+.q-details { grid-column: 1 / -1; font-size: 13px; line-height: 18px; color: var(--q-leise); padding-top: 2px; }
+.q-details i { font-style: normal; color: var(--q-text); font-variant-numeric: tabular-nums; }
+.q-zeile.q-auf { background: var(--q-grund); }
+
+/* Warenbuch: Gesamtzeile unter Summenstrich */
+.q-warenbuch .lzeile.q-gesamt { border-top: 2px solid var(--q-text); font-weight: 600; cursor: default; }
+.q31 .spaltenwahl { margin-bottom: 8px; }
+.q-warenbuch .lzeile .lname { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; line-height: 18px; }
+.q-warenbuch .lzeile { min-height: 44px; height: auto; }
+.q-warenbuch .lname i, .q-warenbuch .lname i.em { font-size: 12px; }
+.q-warenbuch .lkopf button { font-size: 12px; min-height: 44px; }
+.q31 .q-wert i, .q31 .q-name i { font-style: normal; }
+
+/* Kollektionstafel: Musterkarten mit Stoffprobe in Markenfarbe (gezackte Kante wie eine Musterkarte) */
+.q-muster { all: unset; box-sizing: border-box; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%;
+  min-height: 64px; padding: 10px 14px; border-top: 1px solid var(--q-linie); cursor: pointer; }
+.q-muster.q-an { background: var(--q-grund); }
+.q-muster .q-probe { width: 40px; height: 48px; background: var(--farbe, transparent); border: 1px solid var(--q-linie);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 90% 94%, 80% 100%, 70% 94%, 60% 100%, 50% 94%, 40% 100%, 30% 94%, 20% 100%, 10% 94%, 0 100%); }
+.q-muster.q-frei .q-probe { background: transparent; border: 1px dashed var(--q-leise); clip-path: none; }
+.q-muster .q-name { font-size: 16px; line-height: 20px; min-width: 0; }
+.q-muster .q-name small { display: block; font-size: 12px; line-height: 16px; color: var(--q-leise); }
+.q-muster .q-wert { text-align: right; font-size: 15px; } .q-muster .q-wert small { display: block; font-size: 12px; color: var(--q-leise); }
+.q-muster.q-frei .q-wert { font-size: 22px; color: var(--q-akzent); }
+
+/* Q31-Panels (Marker .q31-marke): Altklassen auf mindestens 12 px, Beschriftungen umbrechen statt abschneiden */
+#panel:has(.q31-marke) :is(.legende, .olief, .rfuss, .kz span, small, .zahl, .spaltenwahl span, .spaltenwahl b, .lname i, .chip, .mzeile span, .q17-hinweis, .q17-kopf small, .q24-anzahl):not(.q31 *) { font-size: 12px; }
+#panel:has(.q31-marke) :is(.kz b, .chipk, .seg button, .tab, label, .owerte span):not(.q31 *) { font-size: max(12px, 0.95em); }
+#panel:has(.q31-marke) :is(.verkauf small, .preis small, .donut small, .pname small, .sternzahl, .kats i, .seg i) { font-size: 12px; }
+#panel:has(.q31-marke) :is(.lname, .kz span, .kz b, .zeile .was, .was b, .was i) { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+#panel:has(.q31-marke) .lzeile { height: auto; min-height: 44px; }
+#panel:has(.q31-marke) .papierkorb { background: transparent; border: 1px solid var(--ui-border); border-radius: 10px; width: 44px; height: 44px; color: var(--ui-text); }
+
+/* Auswahlchips (Spaltenwahl, Markenwahl) im dunklen Look: Kontur, aktiv in Hartwig-Rot */
+#panel:has(.q31-marke) .chipk { background: transparent; color: var(--ui-text); border: 1px solid var(--ui-border); box-shadow: none; min-height: 44px; }
+#panel:has(.q31-marke) .chipk.an { background: var(--hk-akzent, #d23c32); color: #fff; border-color: #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell, #ef7a6f); }
+#panel:has(.q31-marke) .chipk b { background: transparent; color: inherit; }
+#panel:has(.q31-marke) :is(.q24-detailsknopf, .q17-linienknopf, .q24-katalogknopf) { background: transparent; color: var(--ui-text); border: 1px solid var(--ui-border); min-height: 44px; border-radius: 10px; }
+#panel:has(.q31-marke) .karte.produkt, #panel:has(.q31-marke) .pbild { background: var(--ui-surface); }
+.q31 :is(.spaltenwahl span, .spaltenwahl b, .legende) { font-size: 12px; }
+#panel:has(.q31-marke) .stepper i { font-size: 12px; }
+#panel:has(.q31-marke) input[type=range] { min-height: 44px; }
+.q31 .q-stepzeile select, .q31 .q-stepzeile input { max-width: 60%; }
+.q-zeile.q-tipp { all: unset; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; width: 100%; padding: 10px 14px; border-top: 1px solid var(--q-linie); min-height: 52px; cursor: pointer; }
+.q-zeile.q-tipp .q-name { font-size: 15px; } .q-zeile.q-tipp .q-wert { font-size: 14px; text-align: right; }
+.q-zeile.q-tipp small { display: block; font-size: 12px; color: var(--q-leise); }
+
+/* Q31 Marketing Q16-Teile im dunklen Look: Stadtwahl als Liste lesbarer Namen statt 10-px-Kacheln */
+#panel:has(.q31-marke) .mk-stadtwahl, #panel:has(.q31-marke) .mk-marktkarte, #panel:has(.q31-marke) .mk-kanalkarte { background: var(--ui-surface); border-color: var(--ui-border); color: var(--ui-text); }
+#panel:has(.q31-marke) .mk-minis button { background: transparent; border-color: var(--ui-border); color: var(--ui-text); min-width: 76px; font-size: 12px; }
+#panel:has(.q31-marke) .mk-minis button span { font-size: 12px; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; line-height: 14px; }
+#panel:has(.q31-marke) .mk-minis button.an { border-color: var(--hk-akzent, #d23c32); box-shadow: inset 0 0 0 1px var(--hk-akzent-hell, #ef7a6f); }
+#panel:has(.q31-marke) .mk-ortband > button, #panel:has(.q31-marke) .mk-teamaktionen button { background: transparent; color: var(--ui-text); border-color: var(--ui-border); }
+#panel:has(.q31-marke) .mk-ringmitte strong { font-size: 13px; }
+#panel:has(.q31-marke) :is(.mk-kanalinfo, .mk-team, .mk-budgetbox > label, .mk-legende span) { color: var(--ui-text); }
+
+/* IT: Generationenleiter, vier Sprossen von unten nach oben */
+.q-zeile.q-system { grid-template-columns: 22px minmax(0, 1fr) auto; }
+.q-leiter { display: flex; flex-direction: column-reverse; gap: 3px; width: 14px; padding: 2px 0; border-left: 2px solid var(--q-linie); border-right: 2px solid var(--q-linie); align-self: center; }
+.q-leiter i { display: block; height: 6px; margin: 0 1px; border-radius: 1px; background: var(--q-linie); }
+.q-leiter i.an { background: var(--q-text); }
+.q-zeile.q-system .q-knoepfe { grid-column: 2 / -1; }
+
+/* Q31: Management-Blätter immer in voller Höhe, auch bei kurzem Inhalt (sonst fällt das Blatt auf ein Drittel zusammen) */
+#panel.gross:has(.q31-marke) { height: min(87dvh, calc(100dvh - env(safe-area-inset-top))); }
+/* IT Neues Projekt im dunklen Look */
+#panel:has(.q31-marke) .it-vergleich > div { background: var(--ui-surface); border-color: var(--ui-border); color: var(--ui-text); }
+#panel:has(.q31-marke) .it-vergleich > div.gewaehlt { border: 2px solid var(--hk-akzent, #d23c32); }
+#panel:has(.q31-marke) .it-vergleich b { font-size: 12px; overflow-wrap: anywhere; } #panel:has(.q31-marke) .it-vergleich small { font-size: 12px; color: var(--ui-muted); }
+#panel:has(.q31-marke) .it-wahl { background: var(--ui-surface); color: var(--ui-text); font-size: 13px; min-height: 44px; }
+#panel:has(.q31-marke) .vtitel { font-size: 12px; color: var(--ui-muted); }
+#panel:has(.q31-marke) .regler .seg button { flex: 1 1 0; min-width: 0; white-space: normal; overflow-wrap: anywhere; line-height: 16px; padding: 4px 6px; }
+/* Primäraktion in Bestandsmarkup (Klasse gruen) bleibt im dunklen Look die eine rote Hauptaktion */
+#panel:has(.q31-marke) .oknoepfe button.gruen, #panel:has(.q31-marke) button.breit.gruen { background: var(--hk-akzent, #d23c32); color: #fff; border: 1px solid #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell, #ef7a6f); font-weight: 700; }
+#panel:has(.q31-marke) .mini.q-an-knopf { border-color: var(--hk-gut, #6dbf73); color: var(--hk-gut, #6dbf73); }
+#panel:has(.q31-marke) .zeile .was i { font-size: 12px; }
+
+/* Planblatt: Name, Jahresplan, Ist, Abweichung in festen Spalten */
+.q31 .q-plan { display: grid; grid-template-columns: minmax(0, 1fr) 72px 64px 58px; gap: 6px; align-items: baseline; }
+.q31 .q-plan.q-wochen { grid-template-columns: minmax(0, 1fr) 72px 72px 58px; }
+.q31 .q-plan .q-wert, .q31 .q-buch-kopf.q-plan b { text-align: right; font-size: 13px; }
+.q31 .q-zeile.q-plan .q-name { font-size: 14px; }
+.q31 .q-zeile.q-unter { padding-left: 26px; } .q31 .q-zeile.q-unter .q-name { color: var(--q-leise); font-size: 13px; }
+.q31 details.q-plan-auf > summary { list-style: none; cursor: pointer; } .q31 details.q-plan-auf > summary::-webkit-details-marker { display: none; }
+.q31 details.q-plan-auf > summary .q-name::before { content: '▸ '; color: var(--q-leise); } .q31 details.q-plan-auf[open] > summary .q-name::before { content: '▾ '; }
+.q31 details.q-buch > summary { list-style: none; cursor: pointer; min-height: 44px; }
+.q31 details.q-plan-auf > summary .q-zeile { min-height: 44px; }
+.q31 .q-buch-kopf.q-plan b { font-size: 12px; letter-spacing: 0; text-transform: none; white-space: normal; line-height: 14px; }
+
+/* Reporting: Wasserfall Vorjahr → Ist */
+.q-wf-zeile { display: grid; grid-template-columns: 112px minmax(0, 1fr) 92px; gap: 8px; align-items: center; min-height: 44px; padding: 4px 14px; border-top: 1px solid var(--q-linie); }
+.q-wf-zeile .q-name { font-size: 14px; line-height: 18px; } .q-wf-zeile .q-name small { display: block; font-size: 12px; line-height: 14px; color: var(--q-leise); }
+.q-wf-zeile .q-wert { text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; }
+.q-wf-ende .q-name, .q-wf-ende .q-wert { font-weight: 600; } .q-wf-summe { border-top: 2px solid var(--q-text); }
+.q-wf-spur { position: relative; height: 20px; }
+.q-wf-balken { position: absolute; top: 3px; height: 14px; border-radius: 3px; background: var(--q-plus); }
+.q-wf-balken.minus { background: var(--q-minus); }
+.q-wf-marke { position: absolute; top: 0; width: 2px; height: 20px; margin-left: -1px; background: var(--q-text); }
+#panel:has(.q31-marke) .o02-filter { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 12px; font-size: 12px; color: var(--ui-muted); }
+#panel:has(.q31-marke) .o02-gruppe, #panel:has(.q31-marke) .o02-unter { background: var(--ui-surface); border-color: var(--ui-border); color: var(--ui-text); }
+#panel:has(.q31-marke) :is(.o02-daten, .o02-kopf, .o02-name) { font-size: 13px; color: var(--ui-text); border-color: var(--ui-border); }
+#panel:has(.q31-marke) .o02-gruppe summary, #panel:has(.q31-marke) .o02-unter summary { min-height: 44px; display: flex; align-items: center; }
+
+/* Vorstand: Sitzungstisch, zwei Reihen Plätze an einer langen Tafel, leerer Platz als Stuhl */
+.q-tisch { display: grid; grid-template-columns: minmax(0, 1fr) 14px minmax(0, 1fr); gap: 8px; padding: 10px 10px 12px; }
+.q-tisch .q-seite { display: flex; flex-direction: column; gap: 8px; }
+.q-tisch .q-tafel { border-radius: 4px; background: #5a4636; border: 1px solid #3d2f25; box-shadow: inset 3px 0 0 #6b5442; }
+#panel:has(.q31-marke) .vkarte.q-platz { display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: auto auto; gap: 4px 8px; align-items: start; text-align: left; width: 100%; min-height: 96px;
+  background: var(--ui-surface); border: 1px solid var(--ui-border); border-radius: 10px; padding: 8px; color: var(--ui-text); box-shadow: none; }
+#panel:has(.q31-marke) .vkarte.q-platz .vbild { width: 44px; height: 44px; overflow: hidden; border-radius: 8px; }
+#panel:has(.q31-marke) .vkarte.q-platz .vbild svg { width: 44px; height: 44px; }
+#panel:has(.q31-marke) .vkarte.q-platz .vtext b { font-size: 15px; display: block; } #panel:has(.q31-marke) .vkarte.q-platz .vtext small { font-size: 12px; color: var(--ui-muted); display: block; line-height: 15px; }
+#panel:has(.q31-marke) .vkarte.q-platz .vtext em { font-style: normal; font-size: 13px; display: block; margin-top: 2px; overflow-wrap: anywhere; }
+#panel:has(.q31-marke) .vkarte.q-platz .vmini { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+#panel:has(.q31-marke) .vkarte.q-platz .vmini span { height: 5px; border-radius: 3px; background: var(--hk-zen-tief, #162026); overflow: hidden; display: block; }
+#panel:has(.q31-marke) .vkarte.q-platz .vmini i { display: block; height: 100%; background: var(--hk-gut, #6dbf73); }
+#panel:has(.q31-marke) .vkarte.q-platz .ampel { position: absolute; }
+#panel:has(.q31-marke) .vkarte.q-platz { position: relative; } #panel:has(.q31-marke) .vkarte.q-platz .ampel { top: 8px; right: 8px; }
+#panel:has(.q31-marke) .vkarte.q-platz.leer { border-style: dashed; background: transparent; }
+#panel:has(.q31-marke) .vkarte.q-platz.leer .frei { color: var(--hk-achtung, #e7b04b); }
+.q-stuhl { position: relative; display: block; width: 44px; height: 44px; border-radius: 8px; border: 1px dashed var(--q-leise); opacity: .8; }
+.q-stuhl::before, .q-stuhl::after { content: ''; position: absolute; left: 50%; height: 3px; border-radius: 2px; background: var(--q-leise); transform: translateX(-50%); }
+.q-stuhl::before { top: 12px; width: 22px; } .q-stuhl::after { top: 26px; width: 28px; }
+#panel:has(.q31-marke) .vseit span { font-size: 12px; }
+
+/* Spielstände als Aktenregal: Ordnerrücken links, Inhalt rechts, kompakte Aktionen */
+#panel:has(.q31-marke) .app-plaetze { gap: 8px; }
+#panel:has(.q31-marke) .app-platz { display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 12px; background: var(--ui-surface); border: 1px solid var(--ui-border); border-radius: 10px; padding: 10px; color: var(--ui-text); }
+#panel:has(.q31-marke) .app-platzkopf { grid-column: 2; } #panel:has(.q31-marke) .app-platzkopf span { font-size: 12px; color: var(--ui-muted); }
+#panel:has(.q31-marke) .app-platzinhalt { display: contents; }
+#panel:has(.q31-marke) .app-vorschau { grid-column: 1; grid-row: 1 / span 4; width: 64px; height: 100%; min-height: 96px; object-fit: cover; border-radius: 6px; }
+#panel:has(.q31-marke) .q-ruecken { display: flex; align-items: flex-end; justify-content: center; background: transparent; border: 1px dashed var(--ui-muted); color: var(--ui-muted); font-size: 22px; font-weight: 700; padding-bottom: 8px; }
+#panel:has(.q31-marke) .app-daten { grid-column: 2; margin: 4px 0; } #panel:has(.q31-marke) .app-daten small { font-size: 12px; color: var(--ui-muted); display: block; }
+#panel:has(.q31-marke) .app-namenswahl { grid-column: 2; font-size: 12px; color: var(--ui-muted); }
+#panel:has(.q31-marke) .app-namenswahl input { width: 100%; box-sizing: border-box; margin-top: 2px; }
+#panel:has(.q31-marke) .app-aktionen { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+#panel:has(.q31-marke) .app-aktionen button { min-height: 44px; padding: 0 12px; border-radius: 10px; background: transparent; color: var(--ui-text); border: 1px solid var(--ui-border); font: inherit; font-size: 14px; }
+#panel:has(.q31-marke) .app-aktionen button[data-app-aktion=speichern] { border-color: var(--hk-akzent, #d23c32); color: var(--hk-akzent-hell, #ef7a6f); font-weight: 700; }
+#panel:has(.q31-marke) .app-namenswahl input { background: var(--hk-zen-tief, #162026); color: var(--ui-text); border: 1px solid var(--ui-border); border-radius: 10px; min-height: 44px; font: inherit; font-size: 16px; padding: 0 10px; }
+#panel:has(.q31-marke) .app-aktionen button[data-app-aktion=loeschen] { color: var(--hk-schlecht, #ef6f62); }
+#panel:has(.q31-marke) .o02-daten { min-height: 44px; align-items: center; }

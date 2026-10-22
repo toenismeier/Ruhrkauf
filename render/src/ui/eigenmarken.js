@@ -15,7 +15,9 @@ const FARBEN = ['#8c5a7a', '#2f4a6b', '#6f8f4e', '#d9822b', '#c9483e', '#2f63b5'
 const NAMEN = { damen: ['Linnea', 'Mira Lenz', 'Johanna B.', 'Ella Sommer'], herren: ['Nordhaven', 'Carl Ostwind', 'Feldweg', 'Henrik & Co.'], unisex: ['Studio Hartwig', 'Kleeblatt', 'Hafenblau'], kinder: ['Hafenkind', 'Kai & Kalle', 'Pusteblume'] };
 const REGIONEN = ['Nord', 'Ost', 'West', 'Mitte', 'Süd'];
 const alterText = (a) => a === '70+' ? 'Best Ager 70+' : ALTER.find((x) => x[0] === a)?.[1] ?? a;
-const zielText = (z) => `${GESCHLECHT.find((g) => g[0] === z.geschlecht)?.[1] ?? ''} ${alterText(z.alter)}`;
+const ELTERN = { '18-29': 'Eltern 18 bis 29', '30-49': 'Eltern 30 bis 49', '50+': 'Großeltern' };
+// Q31: Kindermarken zielen über die Eltern; „Kinder Adults“ war missverständlich.
+const zielText = (z) => z.geschlecht === 'kinder' && ELTERN[z.alter] ? `Kinder, ${ELTERN[z.alter]}` : `${GESCHLECHT.find((g) => g[0] === z.geschlecht)?.[1] ?? ''} ${alterText(z.alter)}`;
 const preisText = (p) => PREIS.find((x) => x[0] === p)?.[1] ?? p;
 const STATUS = { aufbau: 'im Aufbau', neupositionierung: 'Neupositionierung', eingestellt: 'eingestellt' };
 const punkte = (x) => `+${(x * 100).toLocaleString('de-DE', { maximumFractionDigits: 1 })} Punkte`;
@@ -30,28 +32,46 @@ export function eigenmarkenSeite(ctx, ui, tabs) {
   ui.seite = 'eigenmarken';
   const s = ctx.s(), u = ctx.q.marken(s);
   const leistungen = new Map((typeof ctx.E?.produkte === 'function' ? ctx.E.produkte(s).marken : []).map((m) => [m.marke, m.leistung]));
-  let h = tabs;
-  h += `<div class="raster"><div class="kz"><span>Eigenmarkenanteil am Umsatz</span><b data-p="mg:anteil">${pz(u.anteilUmsatz, 1)}</b></div><div class="kz"><span>Mehrmarge zu Fremdware</span><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b></div><div class="kz"><span>Marken geführt</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace('.', ',')} sinnvollen</b></div><div class="kz"><span>Umsatz Eigenmarken 13 Wochen</span><b data-p="mg:umsatz">${geld(u.marken.reduce((a, m) => a + m.umsatz13, 0))}</b></div></div>`;
-  h += '<button class="breit gruen" data-a="emGruenden">+ Neue Eigenmarke</button>';
-  for (const m of u.marken) {
-    const veraltet = m.stilAktualitaet < 45;
-    const status = m.status !== 'aktiv' ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== undefined ? ` bis KW ${kwVon(m.bis)}` : ''}</span>` : veraltet ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
+  // Q31 Kollektionstafel. Hauptfrage: Welche Marke trägt, welche verliert? Größter Block = Tafel mit Musterkarten,
+  // nach Umsatz geordnet, Summe unter dem Strich; die Akte der gewählten Marke darunter.
+  const reihe = [...u.marken].sort((a, b) => b.umsatz13 - a.umsatz13);
+  const gesamt = u.marken.reduce((a, m) => a + m.umsatz13, 0);
+  const veraltet = reihe.filter((m) => m.status === 'aktiv' && m.stilAktualitaet < 45);
+  if (!reihe.some((m) => m.id === ui.em.auf)) ui.em.auf = reihe[0]?.id;
+  let h = tabs + '<div class="q31">';
+  h += `<div class="q-gross"><span class="q-label">Eigenmarkenanteil am Umsatz</span><span class="q-haupt" data-p="mg:anteil">${pz(u.anteilUmsatz, 1)}</span><span class="q-neben"><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b>Mehrmarge zu Fremdware</span></div>`;
+  if (!reihe.length) h += '<div class="q-befund">Hartwig führt keine Eigenmarke. Eine Marke gründest du über den freien Platz in der Tafel.</div>';
+  else if (veraltet.length) h += `<div class="q-befund"><b>${veraltet.map((m) => esc(m.name)).join(', ')}</b> ${veraltet.length === 1 ? 'wirkt' : 'wirken'} veraltet. Ohne Neupositionierung sinkt die Nachfrage weiter.</div>`;
+  else h += '<div class="q-befund">Alle aktiven Marken sind im Stil aktuell.</div>';
+  h += `<div class="q-buch q-tafel" data-summenbuch="Kollektionstafel"><div class="q-buch-kopf"><span>Kollektionstafel</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace('.', ',')} sinnvollen</b></div>`;
+  for (const m of reihe) {
+    const st = m.status !== 'aktiv' ? `${STATUS[m.status] ?? m.status}${m.bis !== undefined ? ` bis KW ${kwVon(m.bis)}` : ''}` : m.stilAktualitaet < 45 ? 'Stil veraltet' : `${m.stil}, ${preisText(m.preislage)}`;
+    h += `<button class="q-muster${ui.em.auf === m.id ? ' q-an' : ''}" data-a="emAuf" data-v="${m.id}" aria-expanded="${ui.em.auf === m.id}"><span class="q-probe" style="--farbe:${m.farbe}"></span><span class="q-name">${esc(m.name)}<small>${zielText(m.zielgruppe)} · ${m.kategorie}</small><small class="${m.status === 'aktiv' && m.stilAktualitaet < 45 ? 'q-minus' : ''}">${st}</small></span><span class="q-wert"><b data-s="u">${geld(m.umsatz13)}</b><small>${punkte(m.mehrmarge)}</small></span></button>`;
+  }
+  if (u.gefuehrt < u.kapazitaet) h += '<button class="q-muster q-frei" data-a="emGruenden"><span class="q-probe"></span><span class="q-name">Freier Platz<small>Neue Eigenmarke gründen</small></span><span class="q-wert">+</span></button>';
+  if (reihe.length) h += `<div class="q-summe"><span>Umsatz 13 Wochen gesamt</span><span class="q-wert" data-summe="u" data-p="mg:umsatz">${geld(gesamt)}</span></div>`;
+  h += '</div>';
+  if (u.gefuehrt >= u.kapazitaet) h += '<button class="q-neben-akt" data-a="emGruenden" style="margin-bottom:12px">+ Neue Eigenmarke (Kapazität voll)</button>';
+  for (const m of reihe.filter((x) => x.id === ui.em.auf)) {
+    const veraltetM = m.stilAktualitaet < 45;
+    const status = m.status !== 'aktiv' ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== undefined ? ` bis KW ${kwVon(m.bis)}` : ''}</span>` : veraltetM ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
     h += `<div class="karte emkarte"><div class="mkopf" style="background:${m.farbe}"><b>${esc(m.name)}</b><small>${zielText(m.zielgruppe)} · ${m.kategorie}${m.gewachsen ? ' · gewachsene Hartwig-Marke' : ''}</small></div>`;
-    h += teamAufschluesselung(leistungen.get(m.id));
-    h += `<div class="ochips">${status}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualität ${'★'.repeat(m.qualitaet)}${'☆'.repeat(5 - m.qualitaet)}</span><span class="chip grau">${esc(m.beschaffungName)}</span></div>`;
     h += `<div class="owerte"><div><span>Umsatz 13 Wochen</span><b data-p="m:${m.id}:umsatz">${geld(m.umsatz13)}</b></div><div><span>Rohertragsquote</span><b data-p="m:${m.id}:marge">${pz(m.rohertragsquote, 1)}</b></div><div><span>Mehrmarge</span><b data-p="m:${m.id}:mehrmarge">${punkte(m.mehrmarge)}</b></div></div>`;
+    h += `<div class="ochips">${status}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualität ${m.qualitaet} von 5</span><span class="chip grau">${esc(m.beschaffungName)}</span></div>`;
     h += `<div class="mzeile"><span>Bekanntheit</span>${balken(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
-    h += `<div class="mzeile"><span>Stil aktuell</span>${balken(m.stilAktualitaet, veraltet ? '#d23c32' : '#2f8f5b')}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
+    h += `<div class="mzeile"><span>Stil aktuell</span>${balken(m.stilAktualitaet, veraltetM ? '#d23c32' : '#2f8f5b')}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
     h += `<div class="mzeile"><span>Passung je Region</span></div>${passungZeile(m.passungRegion, `m:${m.id}:passung`)}`;
-    h += `<div class="olief">${m.wgs.filter((w) => w.anteilZiel > 0 || w.anteilIst > 0).map((w) => `${esc(w.name)} ${pz(w.anteilIst)}`).join(' · ') || 'keine Warengruppe'}</div>`;
+    h += teamAufschluesselung(leistungen.get(m.id));
+    h += `<div class="olief">${m.wgs.filter((w) => w.anteilZiel > 0 || w.anteilIst > 0).map((w) => `${esc(w.name)} ${pz(w.anteilIst)}`).join(' · ') || 'Noch in keiner Warengruppe.'}</div>`;
     if (m.hinweise?.length) h += `<div class="olief warnung">${m.hinweise.map(esc).join(' · ')}</div>`;
     if (ui.em.einstellen === m.id) h += `<div class="oknoepfe"><button class="rot" data-a="emEinstellenJa" data-v="${m.id}">Wirklich einstellen</button><button data-a="emEinstellenNein">Behalten</button></div>`;
     else {
-      h += `<div class="regler"><div class="rkopf"><b>Markenbudget je Woche</b><small>baut Bekanntheit auf</small></div><div class="stepper"><button data-a="emBudget" data-v="${m.id}" data-d="-5000">−</button><span><b data-p="m:${m.id}:budget">${geld(m.budgetWoche)}</b></span><button data-a="emBudget" data-v="${m.id}" data-d="5000">+</button></div></div>`;
+      h += `<div class="regler"><div class="rkopf"><b>Markenbudget je Woche</b><small>baut Bekanntheit auf</small></div><div class="stepper"><button data-a="emBudget" data-v="${m.id}" data-d="-5000" aria-label="Budget senken">−</button><span><b data-p="m:${m.id}:budget">${geld(m.budgetWoche)}</b></span><button data-a="emBudget" data-v="${m.id}" data-d="5000" aria-label="Budget erhöhen">+</button></div></div>`;
       h += `<div class="oknoepfe"><button data-a="emPositionieren" data-v="${m.id}"${m.status === 'aktiv' ? '' : ' disabled'}>Neu positionieren</button><button class="rot" data-a="emEinstellen" data-v="${m.id}">Einstellen</button></div>`;
     }
     h += '</div>';
   }
+  h += '</div>';
   return { titel: 'Eigenmarken', unter: `${u.gefuehrt} Marken · ${pz(u.anteilUmsatz, 1)} vom Umsatz · KW ${kwVon(s.woche)}`, html: h };
 }
 
@@ -173,6 +193,7 @@ export function eigenmarkenAktion(ctx, ui, el, ev, tun) {
       if (r?.ok) { ui.em.assistent = null; ui.seite = 'eigenmarken'; }
       return oben();
     }
+    case 'emAuf': ui.em.auf = v; ui.em.einstellen = null; return '';
     case 'emEinstellen': ui.em.einstellen = v; return '';
     case 'emEinstellenNein': ui.em.einstellen = null; return '';
     case 'emEinstellenJa': ui.em.einstellen = null; tun({ typ: 'eigenmarkeEinstellen', marke: v }); return '';
