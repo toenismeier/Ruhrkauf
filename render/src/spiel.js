@@ -785,7 +785,7 @@ function cockpitZeigen() {
     kachel('Cash', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? 'rot' : ''),
     kachel('Kreditrahmen frei', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? 'rot' : ''),
     fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : 'noch offen', !s.historie.length ? '' : fx.ebitda < 0 ? 'rot' : 'gruen')
-      : kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
+      : kachel('EBITDA 13 Wo.', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
     kachel('Umsatz · ' + auswahl, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : 'noch offen'),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
@@ -1666,7 +1666,7 @@ window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...
     const kz = (wurzel) => new Map([...wurzel.querySelectorAll('.kz')].map((k) => [titel(k.querySelector('span')), k.querySelector('b').textContent]));
     const ck = kz($('cockpit'));
     const soll = { Cash: c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), 'Kreditrahmen frei': c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
-    if (s.historie.length) Object.assign(soll, { 'EBITDA 13 Wochen': geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
+    if (s.historie.length) Object.assign(soll, { 'EBITDA 13 Wo.': geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
     for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
     if ($('kw').textContent !== `KW ${c.kw} / ${c.jahr}`) fehler.push(`KW: ${$('kw').textContent}`);
     // O02 Umsatztreiber: Browseranzeige gegen Engine und Brückensumme.

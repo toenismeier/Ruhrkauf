@@ -646,11 +646,11 @@
 </style>
 <style id="q14-gestaltung">
 :root{--ui-font-xs:12px;--ui-font-sm:14px;--ui-font-md:16px;--ui-font-lg:24px;--ui-space-1:4px;--ui-space-2:8px;--ui-space-3:12px;--ui-space-4:16px;--ui-space-5:24px;--ui-space-6:32px;--ui-bg:#f5f4f1;--ui-surface:#fff;--ui-text:#242424;--ui-muted:#62666a;--ui-border:#e2e1dd;--ui-brand:#b32632;--ui-radius:10px;--ui-shadow:0 1px 3px rgb(0 0 0 / 6%);--grund:var(--ui-bg);--karte:var(--ui-surface);--text:var(--ui-text);--leise:var(--ui-muted);--linie:var(--ui-border);--rot:var(--ui-brand);--schatten:var(--ui-shadow)}
-#cockpit{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-#cockpit .kz{border:1px solid var(--ui-border);border-radius:var(--ui-radius);padding:8px;min-width:0}
-#cockpit .kz span{font-size:12px;line-height:16px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
-#cockpit .kz b{font-size:clamp(12px,3.4vw,16px);line-height:20px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-.marke small{white-space:normal;overflow:visible;text-overflow:clip;line-height:16px}
+#cockpit{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+#cockpit .kz{border:1px solid var(--ui-border);border-radius:var(--ui-radius);padding:4px 8px;min-width:0}
+#cockpit .kz span{font-size:11px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} /* Abnahme: Cockpit bleibt zweizeilig je Kachel, sonst verdeckt es die Karte */
+#cockpit .kz b{font-size:clamp(12px,3.4vw,16px);line-height:17px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.marke small{line-height:15px} /* Q14: kurzer Untertitel passt in eine Zeile */
 #panel .karte{border-radius:var(--ui-radius);box-shadow:none}
 #panel .zeile{min-width:0;flex-wrap:wrap;row-gap:8px;padding:12px;line-height:20px}
 #panel .zeile>.was{overflow-wrap:anywhere;flex:1 1 160px}
@@ -689,7 +689,7 @@
 #panel .ek-eingabe span{display:flex;justify-content:space-between}
 #panel .ek-eingabe input[type=number]{min-height:44px;border:1px solid var(--ui-border,#d8d4cc);border-radius:10px;padding:0 12px;font-size:16px}
 #panel .ek-eingabe input[type=range]{width:100%}
-@media(max-width:390px){#panel .zeile>.was{flex-basis:100%}#cockpit{gap:4px}#cockpit .kz{padding:6px}}
+@media(max-width:390px){#panel .zeile>.was{flex-basis:100%}}
 </style>
 
 </head>
@@ -697,7 +697,7 @@
 <canvas id="karte"></canvas>
 <div class="oben">
   <div class="leiste">
-    <div class="marke"><div class="logo">H</div><div><b>Hartwig</b><small id="markeunter">Warenhaus und Hartwig Sport</small></div></div>
+    <div class="marke"><div class="logo">H</div><div><b>Hartwig</b><small id="markeunter">Warenhaus · Sport</small></div></div>
     <button id="szenarioziel" class="sz-zielchip" type="button" aria-label="Szenarioziel öffnen" hidden><span aria-hidden="true">◎</span><span id="szenarioprozent">0 %</span><span class="sz-mini"><i id="szenariofortschritt"></i></span></button>
     <button id="deutschland-direkt" aria-label="Deutschlandkarte öffnen" title="Deutschlandkarte">DE</button><div class="datum"><b id="kw">KW 1</b><small id="stufe"></small><span id="phase"></span></div>
   </div>

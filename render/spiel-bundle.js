@@ -159335,7 +159335,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "11335a1" : "Entwicklung";
+  var version = () => true ? "5ab3ae8" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld(d3) {
@@ -175118,7 +175118,7 @@
     $2("cockpit").innerHTML = [
       kachel2("Cash", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? "rot" : ""),
       kachel2("Kreditrahmen frei", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? "rot" : ""),
-      fx ? kachel2("EBITDA " + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : "noch offen", !s.historie.length ? "" : fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wochen", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
+      fx ? kachel2("EBITDA " + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : "noch offen", !s.historie.length ? "" : fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wo.", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
       kachel2("Umsatz \xB7 " + auswahl4, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : "noch offen"),
       kachel2("Vertrauen", `${c.vertrauen} / 100`, c.vertrauen < 35 ? "rot" : ""),
       kachel2("Image", `${c.image} / 100`, c.image < 35 ? "rot" : "")
@@ -176270,7 +176270,7 @@
       const kz2 = (wurzel2) => new Map([...wurzel2.querySelectorAll(".kz")].map((k3) => [titel(k3.querySelector("span")), k3.querySelector("b").textContent]));
       const ck = kz2($2("cockpit"));
       const soll = { Cash: c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash), "Kreditrahmen frei": c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
-      if (s.historie.length) Object.assign(soll, { "EBITDA 13 Wochen": geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
+      if (s.historie.length) Object.assign(soll, { "EBITDA 13 Wo.": geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
       for (const [k3, v] of Object.entries(soll)) if (ck.get(k3) !== v) fehler6.push(`Cockpit ${k3}: ${ck.get(k3)} statt ${v}`);
       if ($2("kw").textContent !== `KW ${c.kw} / ${c.jahr}`) fehler6.push(`KW: ${$2("kw").textContent}`);
       if (offenesHaus) {
