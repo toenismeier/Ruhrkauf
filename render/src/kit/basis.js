@@ -72,14 +72,14 @@ export function mat(c) {
 }
 
 // ---------- Detailstufen (LOD) ----------
-// LOD.stufe: 'nah' (Standard, alles) | 'fern' (ganze Stadt, iPhone-Übersicht). In 'fern' verwerfen alle Sammler
+// LOD.stufe: 'nah' (Detailansicht) | 'mittel' (sichtbarer Stadtbereich) | 'fern' (Bildrand/Übersicht). In 'fern' verwerfen alle Sammler
 // Kleinteile (zwei Kanten unter LOD.duenn m und keine über LOD.lang m: Fensterbänke, Rahmen, Sprossen, Geländer,
 // Masten), der Instanzer in stadt.js lässt Figuren und Straßenmöbel weg, Schrift wird höchstens LOD.schrift px groß und
 // Schilder unter LOD.schildMin m Höhe entfallen (entferneKleineSchilder). setzeLod(stufe) stellt alles um.
 export const LOD = { stufe: 'nah', duenn: 0.3, lang: 6, schrift: 24, schildMin: 1.4 };
 export function setzeLod(stufe) {
   LOD.stufe = stufe;
-  SCHRIFT_LOD.maxGroesse = stufe === 'fern' ? LOD.schrift : Infinity;
+  SCHRIFT_LOD.maxGroesse = stufe === 'nah' ? Infinity : LOD.schrift;
 }
 /** true, wenn ein Teil in der Stufe 'fern' wegfällt (Maße aus der Bounding-Box). */
 function kleinteil(g) {
@@ -89,7 +89,7 @@ function kleinteil(g) {
 }
 /** Entfernt in 'fern' Schriftflächen unter LOD.schildMin Höhe aus der Szene (nach dem Bau aufrufen). */
 export function entferneKleineSchilder(scene) {
-  if (LOD.stufe !== 'fern') return 0;
+  if (LOD.stufe === 'nah') return 0;
   const weg = [];
   scene.traverse((o) => { const pp = o.isMesh && !o.isInstancedMesh && o.geometry?.parameters; if (pp && pp.height !== undefined && pp.width !== undefined && o.material?.map && Math.min(pp.width, pp.height) * Math.max(o.scale.x, o.scale.y) < LOD.schildMin) weg.push(o); });
   for (const o of weg) { o.parent.remove(o); o.geometry.dispose(); }
@@ -111,7 +111,7 @@ export class Sammler {
     this.box(Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0), (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, farbe);
   }
   add(g, farbe) {
-    if (LOD.stufe === 'fern' && kleinteil(g)) { this.anzahl++; this.verworfen = (this.verworfen ?? 0) + 1; return; }
+    if (LOD.stufe !== 'nah' && kleinteil(g)) { this.anzahl++; this.verworfen = (this.verworfen ?? 0) + 1; return; }
     const k = (typeof farbe === 'string' ? farbe : '#' + farbe.getHexString()).toLowerCase();
     if (!this.teile.has(k)) this.teile.set(k, []);
     const gg = g.index ? g.toNonIndexed() : g;
@@ -159,7 +159,7 @@ export class KompaktSammler {
   quader(x0, y0, z0, x1, y1, z1, farbe) { this.box(Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0), (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, farbe); }
   add(g, farbe) {
     this.anzahl++;
-    if (LOD.stufe === 'fern' && kleinteil(g)) { this.verworfen++; return; }
+    if (LOD.stufe !== 'nah' && kleinteil(g)) { this.verworfen++; return; }
     const k = (typeof farbe === 'string' ? farbe : '#' + farbe.getHexString()).toLowerCase();
     const gg = g.index ? g.toNonIndexed() : g;
     if (!gg.attributes.normal) gg.computeVertexNormals();
@@ -167,7 +167,7 @@ export class KompaktSammler {
     if (!this.puffer.has(k)) this.puffer.set(k, { p: [], n: [], len: 0 });
     const b = this.puffer.get(k);
     let P = gg.attributes.position.array, N = gg.attributes.normal.array;
-    if (LOD.stufe === 'fern') [P, N] = sichtbareDreiecke(P, N);
+    if (LOD.stufe !== 'nah') [P, N] = sichtbareDreiecke(P, N);
     if (!P.length) return;
     b.p.push(P); b.n.push(N); b.len += P.length;
   }

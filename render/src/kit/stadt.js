@@ -86,7 +86,7 @@ export class Instanzer {
   }
   /** s: Zahl oder [sx, sy, sz]; farben: Array für die Slots 0, 1, 2 … */
   setze(name, x, y, z, ry = 0, s = 1, farben = null) {
-    if (LOD.stufe === 'fern' && FERN_WEG.has(name)) return;
+    if (LOD.stufe !== 'nah' && FERN_WEG.has(name)) return;
     const p = this.protos.get(name);
     if (!p) throw new Error('Prop fehlt: ' + name);
     p.inst.push([x, y, z, ry, s, farben]);

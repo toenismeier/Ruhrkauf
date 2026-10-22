@@ -604,10 +604,10 @@ function klotzBauen(k, gesammelt = false) {
   Object.assign(k, { gruppe: g, stufe: 'klotz', teile: S.anzahl, dachFlaechen });
   if (!gesammelt) jahreszeiten?.registriereDachflaechen(k.key, dachFlaechen);
 }
-function vollBauen(k) {
+function vollBauen(k, detail = detailFuer(k)) {
   const t0 = performance.now();
   const S = new KompaktSammler(), g = new THREE.Group(), b = echterBauer(), dachFlaechen = [];
-  setzeLod('fern');
+  setzeLod(detail);
   try {
     for (const p of k.parz) {
       const { dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => bauerFuer(b, p.typ)(S, g, p));
@@ -617,7 +617,7 @@ function vollBauen(k) {
   } finally { setzeLod('nah'); }
   entsorge(k);
   scene.add(g);
-  Object.assign(k, { gruppe: g, stufe: 'voll', teile: S.anzahl, dachFlaechen });
+  Object.assign(k, { gruppe: g, stufe: 'voll', detail, teile: S.anzahl, dachFlaechen });
   jahreszeiten?.registriereDachflaechen(k.key, dachFlaechen);
   return performance.now() - t0;
 }
@@ -635,16 +635,28 @@ function teileStand() {
   const hq = [...(sb?.hqs?.values() ?? [])].reduce((a, x) => a + (x.teile ?? 0), 0);
   return { teile: KA.teileGrund + voll + klotz + haeuser + hq, teileGrund: KA.teileGrund, teileVoll: voll, teileKlotz: klotz, teileHartwig: haeuser, teileHq: hq, kachelnVoll: nv };
 }
+function detailFuer(k) {
+  // Die Detailstufe hängt nur von Kamera und Kachel ab, nicht vom Häuserbestand.
+  // Am Bildrand bleiben Kleinteile in 'fern' reduziert; im sichtbaren Kern
+  // entspricht 'mittel' der bisherigen Fernansicht. Nur bei engem Zoom
+  // werden unmittelbar zentrale Kacheln in 'nah' aufgebaut.
+  if (K.halb <= 34 && sichtbar(k, 0.55)) return 'nah';
+  return sichtbar(k, 0.92) ? 'mittel' : 'fern';
+}
 /** Nächste Kachel, die voll gebaut werden soll (sichtbar zuerst, dann nach Abstand), solange das Budget reicht. */
 function naechsteKachel() {
   if (K.halb > VOLL_MAX_ZOOM) return null;
   const st = teileStand();
-  const kand = KA.liste.filter((k) => k.stufe !== 'voll').map((k) => ({ k, s: sichtbar(k), d: abstand(k) })).sort((a, b) => (b.s - a.s) || (a.d - b.d));
+  // Unsichtbare Kacheln bleiben als einfache Baukörper stehen, statt im
+  // Leerlauf die gesamte Stadt zu verfeinern. Sichtbare alte Kacheln
+  // wechseln bei Kamerabewegung bedarfsgerecht zwischen den drei LODs.
+  const kand = KA.liste.filter((k) => sichtbar(k, 1.08) &&
+    (k.stufe !== 'voll' || k.detail !== detailFuer(k)))
+    .map((k) => ({ k, d: abstand(k) })).sort((a, b) => a.d - b.d);
   const n = kand[0];
   if (!n) return null;
-  const schaetzung = n.k.parz.length * 380;
+  const schaetzung = n.k.stufe === 'voll' ? 0 : n.k.parz.length * 380;
   if (st.teile + schaetzung <= BUDGET) return n.k;
-  if (!n.s) return null;
   // sichtbare Kachel braucht Platz: fernste unsichtbare volle Kachel zurückstufen
   const weg = KA.liste.filter((k) => k.stufe === 'voll' && !sichtbar(k, 1.4)).sort((a, b) => abstand(b) - abstand(a))[0];
   if (!weg) return null;
@@ -654,8 +666,9 @@ function naechsteKachel() {
 /** Sichtbare Kacheln sofort voll bauen (beim Stadtaufbau). */
 function kachelnSichtbarBauen() {
   if (K.halb > VOLL_MAX_ZOOM) return;
-  for (const k of KA.liste.filter((q) => q.stufe !== 'voll' && sichtbar(q, 1.05)).sort((a, b) => abstand(a) - abstand(b))) {
-    if (teileStand().teile + k.parz.length * 380 > BUDGET) break;
+  for (const k of KA.liste.filter((q) => sichtbar(q, 1.05) &&
+    (q.stufe !== 'voll' || q.detail !== detailFuer(q))).sort((a, b) => abstand(a) - abstand(b))) {
+    if (teileStand().teile + (k.stufe === 'voll' ? 0 : k.parz.length * 380) > BUDGET) break;
     vollBauen(k);
   }
   zeichnen();
