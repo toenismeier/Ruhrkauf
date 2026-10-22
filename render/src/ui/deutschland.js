@@ -49,8 +49,10 @@ function zeichneDeutschland(punkte, beiStadt, { aktuell = null, modus = 'portfol
   svg.append(land);
 
   // Aktive Stadt zuletzt zeichnen; sie bleibt auch bei dichtem Ruhrgebietsnetz sichtbar.
+  // Danach große Städte über kleinen Nachbarn (Berlin über Potsdam, Köln über Leverkusen), damit sie antippbar bleiben.
+  const gewicht = (p) => (p.stadt === aktuell ? 1e6 : 0) + (GROSSE_STAEDTE.has(p.stadt) ? 1e3 : 0) + (p.anzahl ?? 0);
   const verfuegbar = punkte.filter((p) => Array.isArray(p.koordinaten) && p.koordinaten.length === 2)
-    .sort((a, b) => Number(a.stadt === aktuell) - Number(b.stadt === aktuell));
+    .sort((a, b) => gewicht(a) - gewicht(b) || a.stadt.localeCompare(b.stadt, 'de'));
   for (const punkt of verfuegbar) {
     const [lat, lon] = punkt.koordinaten, cx = x(lon), cy = y(lat);
     const aktiv = punkt.stadt === aktuell;
@@ -64,7 +66,8 @@ function zeichneDeutschland(punkte, beiStadt, { aktuell = null, modus = 'portfol
     title.textContent = name + ' · ' + punkt.anzahl + ' Häuser' + (aktiv ? ' · aktuell' : '');
     g.append(title);
     // Große transparente Zeigerfläche; die alphabetische Reiseliste ist der barrierearme Alternativzugang.
-    g.append(element('circle', { cx, cy, r: 21, fill: 'transparent', stroke: 'none' }));
+    // Zeigerfläche großer Städte 21, kleiner Städte 12 Einheiten: dichte Gebiete bleiben einzeln antippbar.
+    g.append(element('circle', { cx, cy, r: GROSSE_STAEDTE.has(name) || aktiv ? 21 : 12, fill: 'transparent', stroke: 'none' }));
     if (aktiv) g.append(element('circle', { cx, cy, r: radius + 5, fill: '#fff', stroke: '#b32632', 'stroke-width': '2', 'pointer-events': 'none' }));
     g.append(element('circle', { cx, cy, r: radius, fill: aktiv ? '#b32632' :
       modus === 'reise' ? '#365e78' : AMPEL_FARBE[punkt.amp] ?? AMPEL_FARBE.ohne,
