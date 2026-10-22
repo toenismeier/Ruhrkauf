@@ -159335,7 +159335,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "25ededf" : "Entwicklung";
+  var version = () => true ? "11335a1" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld(d3) {
@@ -159959,7 +159959,7 @@
       let h3 = tabs();
       h3 += seg("format", ui.format, [["warenhaus", "Hartwig"], ["sport", "Hartwig Sport"]]);
       const o3 = ctx.E.outletUebersicht(s2());
-      h3 += '<div class="karte"><div class="khead">Altware ins Outlet \xB7 FUNDUS</div><div class="raster">' + zahl6("Poolbestand EK", geld(o3.poolWert), "format:poolWert") + zahl6("Reichweite", dez(o3.reichweite, 1) + " Wo.", "format:reichweite") + zahl6("Abschriften", geld(o3.abschriften), "format:abschriften") + zahl6("Markenposten", geld(o3.markenposten), "format:markenposten") + '</div><label>Altwarequote <input type="range" data-a="formatQuote" min="0" max="100" step="5" value="' + Math.round(o3.altwareQuote * 100) + '"></label><label>Markenposten-Zukauf pro Woche (\u20AC) <input type="number" data-a="formatBudget" min="0" step="100000" value="' + o3.zukaufBudget + '"></label></div>';
+      h3 += '<div class="karte"><div class="khead">Altware ins Outlet \xB7 FUNDUS</div><div class="raster">' + zahl6("Poolbestand EK", geld(o3.poolWert), "format:poolWert") + zahl6("Reichweite", dez(o3.reichweite, 1) + " Wo.", "format:reichweite") + zahl6("Abschriften", geld(o3.abschriften), "format:abschriften") + zahl6("Markenposten", geld(o3.markenposten), "format:markenposten") + '</div><label class="ek-eingabe"><span>Altwarequote <b>' + Math.round(o3.altwareQuote * 100) + ' %</b></span><input type="range" data-a="formatQuote" min="0" max="100" step="5" value="' + Math.round(o3.altwareQuote * 100) + '"></label><label class="ek-eingabe"><span>Markenposten-Zukauf je Woche</span><input type="number" inputmode="numeric" data-a="formatBudget" min="0" step="100000" value="' + o3.zukaufBudget + '"></label></div>';
       const kandidaten3 = ctx.E.outletKandidaten(s2()).slice(0, 8);
       if (kandidaten3.length) {
         h3 += '<div class="karte"><div class="khead">Neue FUNDUS-Standorte \xB7 12 Wochen Vorlauf</div>';
@@ -161206,10 +161206,10 @@
       if (!stelle2) return "";
       const p2 = stelle2.person;
       let h3 = '<button data-org="zurueck" class="zurueck">\u2039 Organigramm</button><div class="karte org-profil"><h3>' + esc2(titel) + "</h3>";
-      if (p2) h3 += '<div class="vkopf"><span class="vbild gross">' + portraet(p2.portraet, 110) + "</span><div><b>" + esc2(p2.name) + "</b><small>" + geld(p2.gehalt) + " / Jahr</small>" + bar(p2.qualitaet) + "<small>Qualit\xE4t " + Math.round(p2.qualitaet * 100) + "% \xB7 Stimmung " + Math.round(p2.stimmung) + "% \xB7 Wechselwille " + Math.round(p2.wechselwille * 100) + '%</small></div></div><div class="oknoepfe"><button data-org="entlassen">Entlassen</button><button data-org="praemie">Haltepr\xE4mie 10.000 \u20AC</button></div>';
+      if (p2) h3 += '<div class="vkopf"><span class="vbild gross">' + portraet(p2.portraet, 110) + "</span><div><b>" + esc2(p2.name) + "</b><small>" + geld(p2.gehalt) + " / Jahr</small><small>Qualit\xE4t " + Math.round(p2.qualitaet * 100) + "% \xB7 Stimmung " + Math.round(p2.stimmung) + "% \xB7 Wechselwille " + Math.round(p2.wechselwille * 100) + '%</small></div></div><div class="oknoepfe"><button data-org="entlassen">Entlassen</button><button data-org="praemie">Haltepr\xE4mie 10.000 \u20AC</button></div>';
       else h3 += '<div class="olief">Vakante Leitungsstelle \u2013 berichtet unmittelbar nach oben.</div>';
       h3 += "<h4>Kandidaten</h4>";
-      for (const k3 of stelle2.kandidaten) h3 += '<div class="zeile"><span class="vbild">' + portraet(k3.portraet, 56) + '</span><span class="was"><b>' + esc2(k3.name) + "</b><small>Qualit\xE4t " + Math.round(k3.qualitaet * 100) + "% \xB7 Jahresgehalt " + geld(k3.gehalt) + "</small>" + bar(k3.qualitaet) + '</span><button data-org="besetzen" data-kandidat="' + esc2(k3.id) + '">Einstellen</button></div>';
+      for (const k3 of stelle2.kandidaten) h3 += '<div class="zeile"><span class="vbild">' + portraet(k3.portraet, 56) + '</span><span class="was"><b>' + esc2(k3.name) + "</b><small>Qualit\xE4t " + Math.round(k3.qualitaet * 100) + "% \xB7 Jahresgehalt " + geld(k3.gehalt) + '</small></span><button data-org="besetzen" data-kandidat="' + esc2(k3.id) + '">Einstellen</button></div>';
       if (ebene === "cluster") {
         const moeglich = s2().haeuser.filter((h4) => h4.status === "offen" && h4.personal.filialleiter.skill >= 0.7 && E8.hausclusterVon(s2(), h4.id)?.id === id).slice(0, 8);
         if (moeglich.length) {
@@ -161232,7 +161232,7 @@
           const bs = x2.bereiche.filter((b3) => b3.ressort === ressort.id);
           h3 += '<div class="karte"><div class="khead"><b>' + esc2(ressort.id.toUpperCase()) + " \xB7 " + esc2(ressort.name) + "</b><small>" + (ressort.person ? esc2(ressort.person.name) : '<span class="frei">unbesetzt</span>') + "</small></div>";
           for (const b3 of bs) {
-            h3 += '<div class="org-zeile"><span class="vbild">' + portraet(b3.stelle?.person?.portraet, 50) + "</span><div><b>" + esc2(b3.name) + "</b><small>" + name2(b3.stelle) + " \xB7 Stufe " + b3.hqStufe + " \xB7 " + (b3.berichtetAn === "spieler" ? "CEO" : b3.berichtetAn.toUpperCase()) + "</small>" + bar(b3.qualitaet) + "<small>" + b3.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="' + esc2(b3.id) + '">Person</button><button type="button" data-org="etage" data-id="' + esc2(b3.abteilung) + '">Etage</button><button data-org="delegation" data-id="' + esc2(b3.id) + '" aria-pressed="' + b3.delegiert + '">Delegiert ' + (b3.delegiert ? "ja" : "nein") + "</button></div></div>" + aufgabenListe(b3.aufgaben, b3.id);
+            h3 += '<div class="org-zeile"><span class="vbild">' + portraet(b3.stelle?.person?.portraet, 50) + "</span><div><b>" + esc2(b3.name) + "</b><small>" + name2(b3.stelle) + " \xB7 Stufe " + b3.hqStufe + " \xB7 " + (b3.berichtetAn === "spieler" ? "CEO" : b3.berichtetAn.toUpperCase()) + "</small><small>" + b3.offen + ' offene Vorlagen</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="bereich" data-id="' + esc2(b3.id) + '">Person</button><button type="button" data-org="etage" data-id="' + esc2(b3.abteilung) + '">Etage</button><button data-org="delegation" data-id="' + esc2(b3.id) + '" aria-pressed="' + b3.delegiert + '">Delegiert ' + (b3.delegiert ? "ja" : "nein") + "</button></div></div>" + aufgabenListe(b3.aufgaben, b3.id);
             if (b3.id === "marktbeobachtung") {
               const markt = E8.marktbeobachtungUebersicht(st2);
               h3 += '<div class="org-markt"><small>Marktbeobachtung: ' + markt.fte + " FTE \xB7 " + esc2(geld(markt.kostenWoche)) + " / Woche \xB7 Leitung " + esc2(markt.leitung) + " \xB7 " + markt.erfasst + " Rohmeldungen, " + markt.gemeldet + ' ver\xF6ffentlicht</small><div class="org-aktionen">' + [0, 1, 2, 3].map((stufe2) => '<button data-org="marktStufe" data-stufe="' + stufe2 + '" ' + (markt.stufe === stufe2 ? "disabled " : "") + 'aria-pressed="' + (markt.stufe === stufe2) + '">Stufe ' + stufe2 + "</button>").join("") + "</div></div>";
@@ -161247,7 +161247,7 @@
           h3 += '<div class="karte"><div class="khead"><b>Region ' + esc2(r3.id) + '</b><button data-org="profil" data-ebene="region" data-id="' + esc2(r3.id) + '">' + name2(r3.stelle) + "</button></div>";
           for (const c of r3.cluster) {
             const rot = !c.stelle.person, ampel = st2.woche > 0 && c.umsatz > 0 ? "\u25CF" : "\u25CB";
-            h3 += '<div class="org-zeile"><span class="org-ampel ' + (rot ? "warn" : "") + '">' + ampel + "</span><div><b>" + esc2(c.name) + "</b><small>" + c.anzahl + " H\xE4user \xB7 Umsatz/Woche " + (st2.woche === 0 ? "noch offen" : geld(c.umsatz)) + "</small>" + bar(c.qualitaet) + '</div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + (rot ? "besetzen" : "Leitung") + '</button><button data-org="delegation" data-id="' + esc2(c.id) + '" data-cluster="1" aria-pressed="' + c.stelle.delegiert + '">Delegiert ' + (c.stelle.delegiert ? "ja" : "nein") + "</button></div></div>" + aufgabenListe(c.aufgaben, c.id, true);
+            h3 += '<div class="org-zeile"><span class="org-ampel ' + (rot ? "warn" : "") + '">' + ampel + "</span><div><b>" + esc2(c.name) + "</b><small>" + c.anzahl + " H\xE4user \xB7 Umsatz/Woche " + (st2.woche === 0 ? "noch offen" : geld(c.umsatz)) + '</small></div><div class="org-aktionen"><button data-org="profil" data-ebene="cluster" data-id="' + esc2(c.id) + '">' + (rot ? "besetzen" : "Leitung") + '</button><button data-org="delegation" data-id="' + esc2(c.id) + '" data-cluster="1" aria-pressed="' + c.stelle.delegiert + '">Delegiert ' + (c.stelle.delegiert ? "ja" : "nein") + "</button></div></div>" + aufgabenListe(c.aufgaben, c.id, true);
           }
           h3 += "</div>";
         }
@@ -161262,7 +161262,7 @@
           for (const haus2 of liste2) namen.set(haus2.name, (namen.get(haus2.name) ?? 0) + 1);
           for (const haus2 of liste2) {
             const an = x2.flagships.includes(haus2.id), premium2 = haus2.klasse === "premium";
-            const zusatz = namen.get(haus2.name) > 1 ? " \xB7 " + esc2(haus2.stadt) + " (" + esc2(haus2.id) + ")" : "";
+            const zusatz = namen.get(haus2.name) > 1 ? " \xB7 " + esc2(haus2.stadt) : "";
             h3 += '<div class="zeile"><span class="was">' + esc2(haus2.name) + zusatz + (premium2 ? " \xB7 Premium" : "") + "</span><button " + (premium2 ? "disabled" : "") + ' data-org="flagship" data-haus="' + esc2(haus2.id) + '" data-an="' + !an + '">' + (premium2 ? "fest" : an ? "Flagship abw\xE4hlen" : "Flagship w\xE4hlen") + "</button></div>";
           }
           h3 += aufgabenListe(c.aufgaben, c.id, true);
@@ -161480,7 +161480,7 @@
     const einstellungen2 = () => ctx.zustand();
     const daten = () => E8.posteingang(s2());
     const wochen = (n3) => n3 === 0 ? "l\xE4uft diese Woche ab" : n3 === 1 ? "noch 1 Woche" : "noch " + n3 + " Wochen";
-    const leer3 = (t3) => '<div class="karte"><div class="zeile postleer">' + esc2(t3) + "</div></div>";
+    const leer3 = (t3) => '<div class="postleer" role="status" style="padding:24px 16px;color:var(--ui-muted,#62666a);text-align:center">' + esc2(t3) + "</div>";
     function tabs(D) {
       const aktiv6 = einstellungen2().reiter;
       return '<div class="tabs posttabs" role="tablist">' + [
@@ -161533,7 +161533,7 @@
       let html = '<label class="postfilter">Kategorie <select class="ort gross" data-po-filter aria-label="Meldungen filtern">' + kategorien.map((k3) => "<option " + (k3 === filter ? "selected " : "") + 'value="' + esc2(k3) + '">' + esc2(k3) + "</option>").join("") + '</select></label><button class="postalle" data-po-a="alleLesen">Alle als gelesen markieren</button>';
       if (!liste2.length) return html + leer3("Keine Meldungen in dieser Kategorie.");
       const gelesen2 = new Set(einstellungen2().gelesen ?? []);
-      const symbole = { Presse: "\u{1F4F0}", H\u00E4user: "\u{1F3EC}", Finanzen: "\u20AC", Personal: "\u{1F465}", Konkurrenz: "\u2197", Eigent\u00FCmer: "\u25C6", IT: "\u2699" };
+      const symbole = { Presse: "P", H\u00E4user: "H", Finanzen: "\u20AC", Personal: "M", Konkurrenz: "K", Eigent\u00FCmer: "E", IT: "IT" };
       const wettbewerb = liste2.filter((m) => m.kategorie === "Konkurrenz");
       const andere = liste2.filter((m) => m.kategorie !== "Konkurrenz");
       const eintrag2 = (m) => {
@@ -162120,7 +162120,7 @@
         const p2 = reihen[0].punkte.filter((x2) => x2.plan !== void 0).map((x2) => ({ woche: x2.woche, wert: x2.plan }));
         if (p2.length) listen.push({ name: "Plan", punkte: p2, farbe: FARBE.Plan });
       }
-      const w2 = opt.klein ? 300 : 340, h3 = opt.klein ? 90 : 184, l = 42, r3 = 10, t3 = 10, u = opt.klein ? 14 : 29;
+      const w2 = opt.klein ? 300 : 340, h3 = opt.klein ? 90 : 184, l = opt.klein ? 42 : 66, r3 = 10, t3 = 10, u = opt.klein ? 14 : 29;
       const alle = listen.flatMap((x2) => x2.punkte), xs2 = alle.map((p2) => p2.woche), ys = alle.map((p2) => p2.wert);
       if (Number.isFinite(opt.grenze)) ys.push(opt.grenze);
       const minW = Math.min(...xs2), maxW = Math.max(...xs2), breite = Math.max(1, maxW - minW);
@@ -162152,7 +162152,7 @@
     }
     function konzern() {
       const kennzahlen2 = [["umsatz", "Umsatz"], ["ebitda", "EBITDA"], ["cash", "Cash und Insolvenzgrenze"], ["stimmung", "Stakeholder-Stimmung"]];
-      let html = '<div class="stat-raster">' + kennzahlen2.slice(0, 3).map(([k3, t3]) => zahl6(t3, daten("konzern", void 0, k3).punkte.at(-1)?.wert ?? 0, k3)).join("") + "</div>";
+      let html = '<div class="stat-raster">' + kennzahlen2.slice(0, 3).map(([k3, t3]) => zahl6(k3 === "cash" ? "Cash" : t3, daten("konzern", void 0, k3).punkte.at(-1)?.wert ?? 0, k3)).join("") + "</div>";
       for (const [k3, t3] of kennzahlen2) {
         const d3 = daten("konzern", void 0, k3);
         html += diagramm(t3, [{ name: "Ist", punkte: d3.punkte }], k3, { vorjahr: true, grenze: k3 === "cash" ? -s2().kreditlinie : void 0 });
@@ -170427,7 +170427,7 @@
       kreis2(p2);
       z4.classList.remove("offen", "ziele-offen");
       z4.classList.add("faehrt");
-      z4.innerHTML = '<section class="reise-flug" role="status" aria-label="Bahnreise nach ' + esc2(ziel) + `"><div class="reise-panorama" style="background-image:url('` + bild2(ziel) + `')"></div><div class="reise-dunst"></div>` + zug3 + '<div class="reise-strecke"><div>' + esc2(kode(von)) + " <span>\u{1F686}</span> " + esc2(kode(ziel)) + "</div><small>" + esc2(von) + " \u2192 " + esc2(ziel) + "</small></div></section>";
+      z4.innerHTML = '<section class="reise-flug" role="status" aria-label="Bahnreise nach ' + esc2(ziel) + `"><div class="reise-panorama" style="background-image:url('` + bild2(ziel) + `')"></div><div class="reise-dunst"></div>` + zug3 + '<div class="reise-strecke"><div>' + esc2(kode(von)) + ' <span aria-hidden="true">\u2192</span> ' + esc2(kode(ziel)) + "</div><small>" + esc2(von) + " \u2192 " + esc2(ziel) + "</small></div></section>";
       const flug = z4.querySelector(".reise-flug");
       flug.classList.add("start");
       const vorbereitung = new Promise((resolve, reject) => {
@@ -173610,7 +173610,7 @@
       const akt = x2.verteilung.filter((c) => c.generation > x2.generation);
       if (akt.length) h3 += '<div class="zeile">Bereits modernisierte Cluster: ' + akt.length + " / " + x2.verteilung.length + "</div>";
       const bereiche = E8.SYSTEME[x2.id].bereiche;
-      h3 += '<div class="it-meta">Begrenzt: ' + esc2(bereiche.join(", ")) + "</div>";
+      h3 += '<div class="it-meta">Begrenzt: ' + esc2(bereiche.map((id) => E8.BEREICHE?.find((q2) => q2.id === id)?.name ?? id).join(", ")) + "</div>";
       h3 += '<div class="oknoepfe"><button data-it="neues" data-v="' + x2.id + '">Modernisieren</button></div></div>';
       return h3;
     }
@@ -174028,7 +174028,7 @@
     let inhalt = "";
     if (r3 === "ueberblick") {
       const tr = b3?.treiberAktuell;
-      inhalt = '<div class="karte"><div class="khead">Kunden und Standort</div>' + line("Mystery Shopping", (b3?.kundenScore ?? "\u2013") + " / 100") + line("Hauscluster", b3?.hauscluster ?? h3.region) + line("Stadtgr\xF6\xDFe", h3.cluster === "metropole" ? "Metropole" : h3.cluster === "grossstadt" ? "Gro\xDFstadt" : "Mittelstadt") + (Number.isFinite(b3?.planWoche) ? line("Umsatzplan aktuelle Woche", geld(b3.planWoche)) : "") + (tr ? line("Frequenz Vorwoche", fmt.format(Math.round(tr.frequenz))) + line("Kaufquote Vorwoche", PROZENT(tr.kaufquote)) + line("Bon Vorwoche", geld(tr.bon)) : line("Umsatztreiber", "Nach 1. Wochenabschluss verf\xFCgbar")) + "</div>" + ueberblick;
+      inhalt = '<div class="karte"><div class="khead">Kunden und Standort</div>' + line("Mystery Shopping", (b3?.kundenScore ?? "\u2013") + " / 100") + line("Region", { ost: "Ost", west: "West", nord: "Nord", sued: "S\xFCd", mitte: "Mitte" }[String(h3.region ?? "").toLowerCase()] ?? (h3.stadt || "Nicht zugeordnet")) + line("Stadtgr\xF6\xDFe", h3.cluster === "metropole" ? "Metropole" : h3.cluster === "grossstadt" ? "Gro\xDFstadt" : "Mittelstadt") + (Number.isFinite(b3?.planWoche) ? line("Umsatzplan aktuelle Woche", geld(b3.planWoche)) : "") + (tr ? line("Frequenz Vorwoche", fmt.format(Math.round(tr.frequenz))) + line("Kaufquote Vorwoche", PROZENT(tr.kaufquote)) + line("Bon Vorwoche", geld(tr.bon)) : line("Umsatztreiber", "Nach 1. Wochenabschluss verf\xFCgbar")) + "</div>" + ueberblick;
     }
     if (r3 === "leitung") {
       inhalt = '<div class="karte"><div class="khead">Hausleitung</div>' + line("Name", l?.name ?? "Nicht besetzt") + line("Gehalt j\xE4hrlich", geld(l?.gehalt ?? 0)) + line("Bonusanteil", PROZENT(l?.bonusAnteil ?? 0)) + line("Stimmung", p(l?.moral) + " / 100") + line("Wechselwille", PROZENT(l?.wechselwille ?? 0)) + line("Ehrlichkeit", PROZENT(l?.ehrlichkeit ?? 0)) + line("Stellvertretung", (l?.stellvertretung?.name ?? "\u2013") + " \xB7 " + PROZENT(l?.stellvertretung?.qualitaet ?? 0)) + Object.entries(l?.staerken ?? {}).map(([key, v]) => line(SCHWERPUNKT[key] ?? key, PROZENT(v))).join("") + '<div class="zeile">' + Object.keys(SCHWERPUNKT).map((key) => button("F\xF6rdern: " + SCHWERPUNKT[key], "hausTun('foerdern','" + id + "','" + key + "')")).join(" ") + '</div><div class="zeile">' + button("Haltepr\xE4mie 10.000 \u20AC", "hausTun('praemie','" + id + "')") + button("Zur Clusterleitung bef\xF6rdern", "hausTun('befoerdern','" + id + "')") + "</div></div>";
@@ -174068,7 +174068,7 @@
     if (r3 === "kommentare") {
       inhalt = '<div class="karte"><div class="khead">Wochenkommentierung</div>' + (b3?.kommentare?.length ? b3.kommentare.map((c) => '<div class="zeile"><span class="was"><b>KW ' + (c.woche % 52 + 1) + " \xB7 " + PROZENT(c.abweichung) + "</b><i>" + esc2(GRUENDE[c.grund] ?? c.grund) + " \xB7 " + esc2(MASS[c.massnahme] ?? c.massnahme) + "</i><small>" + esc2(c.pruefung) + "</small></span></div>").join("") : '<div class="zeile">Noch keine Abweichung unter \u22125 % mit Vorjahres- oder Planvergleich.</div>') + '<div class="zeile">' + Object.entries(MASS).map(([key, name2]) => button(name2, "hausTun('massnahme','" + id + "','" + key + "')")).join(" ") + "</div></div>";
     }
-    return '<nav class="haus-reiter">' + REITER2.map(([key, name2]) => '<button class="' + (key === r3 ? "an" : "") + `" onclick="hausReiterWahl('` + key + `')">` + name2 + "</button>").join("") + "</nav>" + inhalt;
+    return '<nav class="haus-reiter" aria-label="Hausbereiche" style="display:flex;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch;padding-bottom:8px">' + REITER2.map(([key, name2]) => '<button style="flex:0 0 auto;white-space:nowrap;min-height:44px" class="' + (key === r3 ? "an" : "") + `" onclick="hausReiterWahl('` + key + `')">` + name2 + "</button>").join("") + "</nav>" + inhalt;
   }
   function hausBeobachtungHtml(liste2) {
     return '<div class="karte"><div class="khead">Beobachtungsliste \xB7 Ausnahmen priorisiert</div>' + (liste2.length ? liste2.map((x2) => `<button class="zeile haus-sprung" onclick="hausSpringen('` + esc2(x2.id) + `')"><span class="was"><b>` + esc2(x2.name) + "</b><i>" + esc2(x2.stadt) + " \xB7 " + esc2(x2.grund) + "</i></span><span>\u2192</span></button>").join("") : '<div class="zeile">Derzeit keine auff\xE4lligen H\xE4user.</div>') + "</div>";
@@ -174081,7 +174081,7 @@
     const name2 = istOutlet ? "FUNDUS" : "Volkskauf";
     const tabs = istOutlet ? [["ueberblick", "\xDCberblick"], ["sortiment", "Sortiment"], ["etagen", "Verkaufsfl\xE4chen"]] : [["ueberblick", "\xDCberblick"], ["sortiment", "Sortiment"], ["etagen", "Etagen"]];
     const auswahl4 = tabs.some(([id]) => id === reiter) ? reiter : "ueberblick";
-    const nav = '<nav class="haus-reiter">' + tabs.map(([id, titel]) => `<button class="${id === auswahl4 ? "an" : ""}" onclick="hausReiterWahl('${id}')">${esc2(titel)}</button>`).join("") + "</nav>";
+    const nav = '<nav class="haus-reiter" aria-label="Hausbereiche" style="display:flex;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;-webkit-overflow-scrolling:touch;padding-bottom:8px">' + tabs.map(([id, titel]) => `<button style="flex:0 0 auto;white-space:nowrap;min-height:44px" class="${id === auswahl4 ? "an" : ""}" onclick="hausReiterWahl('${id}')">${esc2(titel)}</button>`).join("") + "</nav>";
     const flaechen = haus2.flaechen ?? [];
     let inhalt = "";
     if (auswahl4 === "ueberblick") {
@@ -175326,7 +175326,7 @@
     offenerWettbewerber = null;
     const h3 = d3.haus, k3 = h3.kpi;
     const z4 = sb.zustand(id);
-    const bild3 = z4 ? [z4.status, ...z4.zusatz].filter((q2) => q2 !== "offen").map((q2) => q2 === "aktion" && z4.aktion ? `Aktion ${AKTION_NAME[z4.aktion]}` : STATUS_TITEL[q2]).join(" \xB7 ") : "";
+    const bild3 = z4 ? [z4.status, ...z4.zusatz].filter((q2) => q2 !== "offen").map((q2) => q2 === "aktion" && z4.aktion ? AKTION_NAME[z4.aktion] ? `Aktion ${AKTION_NAME[z4.aktion]}` : "Aktion" : STATUS_TITEL[q2] ?? "").filter(Boolean).join(" \xB7 ") : "";
     const qm2 = h3.flaechen.reduce((a2, f11) => a2 + f11.qm, 0);
     const zahl6 = (t3, w2, ton2 = "") => `<div class="kz ${ton2}"><span>${t3}</span><b>${w2}</b></div>`;
     let html = `<div class="chips"><span class="chip ${h3.status === "offen" ? "" : "warn"}">${STATUS_HAUS[h3.status] ?? h3.status}</span>${h3.klasse === "premium" ? '<span class="chip" style="background:#fbefd2;color:#6d4b18;border:1px solid #c4a06a;font-weight:700">\u265B Premium</span>' : ""}${bild3 ? `<span class="chip">${bild3}</span>` : ""}<span class="chip grau">${h3.lage === "1a" ? "1a-Lage" : h3.lage === "b" ? "B-Lage" : h3.lage === "center" ? "Center" : h3.lage === "stadtteil" ? "Stadtteilzentrum" : "Stadtrand"}</span></div>`;
@@ -175627,7 +175627,7 @@
     const ziele = [];
     for (const g of gs) for (const e of g.etagen) if (e.gemietet) ziele.push({ v: `${g.id}|${e.nr}`, t: `${g.name.replace("Hartwig-", "")}, ${e.nr === 0 ? "EG" : e.nr + ". Etage"} (${fmt.format(e.qm - e.belegtQm)} qm frei)` });
     for (const g of [...gs].sort((a2, b3) => a2.id === gebaeudeId ? -1 : b3.id === gebaeudeId ? 1 : 0)) {
-      html += `<div class="karte"><div class="khead">${g.name}<small>${g.stadt} \xB7 ${fmt.format(g.qmGemietet)} qm gemietet \xB7 ${pz5(g.auslastung)} belegt \xB7 ${geld(g.kostenWoche)} je Woche</small>${gs.length > 1 ? knopf4("K\xFCndigen", ["kuendigenG", g.id], "rot") : ""}</div>`;
+      html += `<div class="karte"><div class="khead kopf-mit-knopf"><div>${g.name}<small>${g.stadt} \xB7 ${fmt.format(g.qmGemietet)} qm gemietet \xB7 ${pz5(g.auslastung)} belegt \xB7 ${geld(g.kostenWoche)} je Woche</small></div>${gs.length > 1 ? knopf4("K\xFCndigen", ["kuendigenG", g.id], "rot") : ""}</div>`;
       for (const e of [...g.etagen ?? []].sort((x2, y2) => y2.nr - x2.nr)) {
         const ab = (e.abteilungen ?? []).map((a2) => a2.name).join(", ");
         const gewaehlt = gWahl?.id === g.id && (hqEtageWahl?.g === g.id ? hqEtageWahl.nr === e.nr : false);
