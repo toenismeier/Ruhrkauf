@@ -12044,7 +12044,80 @@
   ];
 
   // ../engine/src/sortiment/q28-zubehoer.ts
-  var TYPEN2 = [];
+  var DS = "accessoires.damenschuhe";
+  var HS = "accessoires.herrenschuhe";
+  var KS = "kinder.schuhe";
+  var LW = "accessoires.lederwaren";
+  var SM = "accessoires.schmuck";
+  var TYPEN2 = [
+    // ── Schuhe
+    { typ: "Chunky-Sneaker", kategorie: "schuhe", pfad: ["schuhe", "Sneaker"], wgs: [DS, HS, "sportschuhe.sneaker"], saison: "ganz", preis: 89, materialien: ["Leder", "Polyester"], gruppe: G(0.4, 1, 0.5, 0.1), aufwand: 2, bild: { silhouette: "chunkysneaker" } },
+    { typ: "Kinder-Klettsneaker", kategorie: "schuhe", pfad: ["schuhe", "Kinderschuhe"], wgs: [KS], saison: "ganz", preis: 39, materialien: ["Leder", "Polyester"], gruppe: G(1, 0, 0, 0), aufwand: 1, bild: { silhouette: "lauflernschuh" } },
+    { typ: "Lauflernschuh", kategorie: "schuhe", pfad: ["schuhe", "Kinderschuhe"], wgs: [KS, "kinder.baby"], saison: "ganz", preis: 35, materialien: ["Leder"], gruppe: G(1, 0, 0, 0), aufwand: 2, bild: { silhouette: "lauflernschuh" } },
+    { typ: "Kinder-Gummistiefel", kategorie: "schuhe", pfad: ["schuhe", "Kinderschuhe"], wgs: [KS], saison: "winter", preis: 25, materialien: ["Polyester"], gruppe: G(1, 0, 0, 0), aufwand: 1, bild: { silhouette: "gummistiefel" } },
+    { typ: "Gummistiefel", kategorie: "schuhe", pfad: ["schuhe", "Stiefel und Boots"], wgs: [DS, HS], saison: "winter", preis: 39, materialien: ["Polyester"], gruppe: G(0.2, 0.6, 0.8, 0.6), aufwand: 1, bild: { silhouette: "gummistiefel" } },
+    { typ: "Kinder-Winterstiefel", kategorie: "schuhe", pfad: ["schuhe", "Kinderschuhe"], wgs: [KS], saison: "winter", preis: 49, materialien: ["Polyester", "Leder"], gruppe: G(1, 0, 0, 0), aufwand: 2, bild: { silhouette: "winterstiefel" } },
+    { typ: "Overknee-Stiefel", kategorie: "schuhe", pfad: ["schuhe", "Stiefel und Boots"], wgs: [DS], saison: "winter", preis: 149, materialien: ["Leder", "Polyester"], gruppe: G(0, 0.8, 0.6, 0.1), aufwand: 3, bild: { silhouette: "overknee" } },
+    { typ: "Schn\xFCrboots", kategorie: "schuhe", pfad: ["schuhe", "Stiefel und Boots"], wgs: [DS, HS], saison: "winter", preis: 119, materialien: ["Leder"], gruppe: G(0.2, 0.9, 0.7, 0.3), aufwand: 2, bild: { silhouette: "schnuerstiefel" } },
+    { typ: "Combat-Boots", kategorie: "schuhe", pfad: ["schuhe", "Stiefel und Boots"], wgs: [DS, "damen.young"], saison: "winter", preis: 99, materialien: ["Leder", "Polyester"], gruppe: G(0.3, 1, 0.4, 0.05), aufwand: 2, bild: { silhouette: "schnuerstiefel" } },
+    { typ: "Mule", kategorie: "schuhe", pfad: ["schuhe", "Pumps und Mules"], wgs: [DS], saison: "sommer", preis: 69, materialien: ["Leder"], gruppe: G(0, 0.6, 0.85, 0.6), aufwand: 2, bild: { silhouette: "mule" } },
+    { typ: "Pantolette", kategorie: "schuhe", pfad: ["schuhe", "Sommerschuhe"], wgs: [DS, HS], saison: "sommer", preis: 39, materialien: ["Leder", "Polyester"], gruppe: G(0.3, 0.8, 0.8, 0.7), aufwand: 1, bild: { silhouette: "sandale" } },
+    { typ: "Riemchensandale", kategorie: "schuhe", pfad: ["schuhe", "Sommerschuhe"], wgs: [DS], saison: "sommer", preis: 59, materialien: ["Leder"], gruppe: G(0.2, 0.85, 0.85, 0.6), aufwand: 1, bild: { silhouette: "sandale" } },
+    { typ: "Hausschuh", kategorie: "schuhe", pfad: ["schuhe", "Hausschuhe"], wgs: [DS, HS], saison: "winter", preis: 29, materialien: ["Merino", "Polyester"], gruppe: G(0.3, 0.4, 0.7, 0.95), aufwand: 1, bild: { silhouette: "hausschuh" } },
+    { typ: "Kinder-Hausschuh", kategorie: "schuhe", pfad: ["schuhe", "Kinderschuhe"], wgs: [KS], saison: "winter", preis: 19, materialien: ["Polyester", "Merino"], gruppe: G(1, 0, 0, 0), aufwand: 1, bild: { silhouette: "hausschuh" } },
+    { typ: "Mokassin", kategorie: "schuhe", pfad: ["schuhe", "Halbschuhe"], wgs: [DS, HS], saison: "sommer", preis: 69, materialien: ["Leder"], gruppe: G(0, 0.4, 0.8, 0.9), aufwand: 2, bild: { silhouette: "slipper" } },
+    { typ: "Bootsschuh", kategorie: "schuhe", pfad: ["schuhe", "Halbschuhe"], wgs: [HS, DS], saison: "sommer", preis: 79, materialien: ["Leder"], gruppe: G(0, 0.4, 0.85, 0.85), aufwand: 2, bild: { silhouette: "slipper" } },
+    { typ: "Derby-Schuh", kategorie: "schuhe", pfad: ["schuhe", "Halbschuhe"], wgs: [HS, "herren.business"], saison: "ganz", preis: 99, materialien: ["Leder"], gruppe: G(0, 0.5, 0.85, 0.8), aufwand: 2, bild: { silhouette: "businessschuh" } },
+    { typ: "Budapester", kategorie: "schuhe", pfad: ["schuhe", "Halbschuhe"], wgs: [HS, "herren.business"], saison: "ganz", preis: 139, materialien: ["Leder"], gruppe: G(0, 0.3, 0.8, 0.9), aufwand: 3, bild: { silhouette: "businessschuh" } },
+    { typ: "Slingpumps", kategorie: "schuhe", pfad: ["schuhe", "Pumps und Mules"], wgs: [DS], saison: "sommer", preis: 89, materialien: ["Leder"], gruppe: G(0, 0.5, 0.85, 0.6), aufwand: 2, bild: { silhouette: "pumps" } },
+    { typ: "Kinder-Ballerina", kategorie: "schuhe", pfad: ["schuhe", "Kinderschuhe"], wgs: [KS], saison: "sommer", preis: 29, materialien: ["Leder", "Polyester"], gruppe: G(1, 0, 0, 0), aufwand: 1, bild: { silhouette: "ballerina" } },
+    { typ: "Trekkingschuh", kategorie: "schuhe", pfad: ["schuhe", "Outdoor und Wandern"], wgs: [HS, DS, "outdoor.ausruestung"], saison: "ganz", preis: 109, materialien: ["Leder", "Polyester"], gruppe: G(0.3, 0.5, 0.85, 0.85), aufwand: 2, bild: { silhouette: "wanderschuh" } },
+    // ── Taschen
+    { typ: "Mini-Bag", kategorie: "accessoires", pfad: ["accessoires", "Taschen"], wgs: [LW, "damen.young"], saison: "ganz", preis: 59, materialien: ["Leder", "Polyester"], gruppe: G(0, 0.95, 0.6, 0.2), aufwand: 2, bild: { silhouette: "minibag" } },
+    { typ: "G\xFCrteltasche", kategorie: "accessoires", pfad: ["accessoires", "Taschen"], wgs: [LW, "sporttextil.freizeit"], saison: "ganz", preis: 29, materialien: ["Polyester", "Leder"], gruppe: G(0.4, 1, 0.6, 0.2), aufwand: 1, bild: { silhouette: "guerteltasche" } },
+    { typ: "Kinderrucksack", kategorie: "accessoires", pfad: ["accessoires", "Taschen"], wgs: [LW, "kinder.maedchen", "kinder.jungen"], saison: "ganz", preis: 29, materialien: ["Polyester"], gruppe: G(1, 0, 0, 0), aufwand: 1, bild: { silhouette: "kinderrucksack" } },
+    { typ: "Schultertasche", kategorie: "accessoires", pfad: ["accessoires", "Taschen"], wgs: [LW], saison: "ganz", preis: 79, materialien: ["Leder", "Polyester"], gruppe: G(0, 0.6, 0.85, 0.85), aufwand: 2, bild: { silhouette: "handtasche" } },
+    { typ: "Abendtasche", kategorie: "accessoires", pfad: ["accessoires", "Taschen"], wgs: [LW], saison: "ganz", preis: 49, materialien: ["Seide", "Leder", "Polyester"], gruppe: G(0, 0.7, 0.85, 0.75), aufwand: 2, bild: { silhouette: "clutch" } },
+    { typ: "Kabinentrolley", kategorie: "accessoires", pfad: ["accessoires", "Reisegep\xE4ck"], wgs: ["accessoires.reise"], saison: "ganz", preis: 89, materialien: ["Polyester"], gruppe: G(0.2, 0.7, 0.85, 0.85), aufwand: 3, bild: { silhouette: "reisetasche" } },
+    { typ: "Herren-Geldb\xF6rse", kategorie: "accessoires", pfad: ["accessoires", "Kleinlederwaren"], wgs: [LW], saison: "ganz", preis: 39, materialien: ["Leder"], gruppe: G(0, 0.6, 0.85, 0.85), aufwand: 1, bild: { silhouette: "portemonnaie", farbe: "braun" } },
+    { typ: "Schl\xFCsseletui", kategorie: "accessoires", pfad: ["accessoires", "Kleinlederwaren"], wgs: [LW], saison: "ganz", preis: 19, materialien: ["Leder"], gruppe: G(0, 0.5, 0.8, 0.85), aufwand: 1, bild: { silhouette: "kartenetui" } },
+    { typ: "Strandtasche", kategorie: "accessoires", pfad: ["accessoires", "Taschen"], wgs: [LW], saison: "sommer", preis: 35, materialien: ["Baumwolle", "Leinen"], gruppe: G(0.3, 0.85, 0.85, 0.7), aufwand: 1, bild: { silhouette: "shopper", muster: "streifen" } },
+    { typ: "Sporttasche", kategorie: "accessoires", pfad: ["accessoires", "Taschen"], wgs: [LW, "sport.geraete", "accessoires.reise"], saison: "ganz", preis: 45, materialien: ["Polyester"], gruppe: G(0.6, 0.85, 0.75, 0.4), aufwand: 1, bild: { silhouette: "weekender" } },
+    // ── Accessoires
+    { typ: "Sonnenbrille", kategorie: "accessoires", pfad: ["accessoires", "Sonnenbrillen"], wgs: [SM, LW], saison: "sommer", preis: 39, materialien: ["Polyester"], gruppe: G(0.2, 0.95, 0.85, 0.7), aufwand: 2, bild: { silhouette: "sonnenbrille" } },
+    { typ: "Kinder-Sonnenbrille", kategorie: "accessoires", pfad: ["accessoires", "Sonnenbrillen"], wgs: [SM, "kinder.maedchen", "kinder.jungen"], saison: "sommer", preis: 15, materialien: ["Polyester"], gruppe: G(1, 0, 0, 0), aufwand: 1, bild: { silhouette: "sonnenbrille" } },
+    { typ: "Halskette", kategorie: "accessoires", pfad: ["accessoires", "Schmuck"], wgs: [SM], saison: "ganz", preis: 39, materialien: ["Polyester"], gruppe: G(0.2, 0.85, 0.85, 0.8), aufwand: 2, bild: { silhouette: "halskette" } },
+    { typ: "Ohrringe", kategorie: "accessoires", pfad: ["accessoires", "Schmuck"], wgs: [SM], saison: "ganz", preis: 25, materialien: ["Polyester"], gruppe: G(0.2, 0.9, 0.85, 0.75), aufwand: 2, bild: { silhouette: "ohrringe" } },
+    { typ: "Armband", kategorie: "accessoires", pfad: ["accessoires", "Schmuck"], wgs: [SM], saison: "ganz", preis: 29, materialien: ["Polyester", "Leder"], gruppe: G(0.4, 0.9, 0.8, 0.7), aufwand: 1, bild: { silhouette: "armband" } },
+    { typ: "Haarreif", kategorie: "accessoires", pfad: ["accessoires", "Haarschmuck"], wgs: [SM, "kinder.maedchen"], saison: "ganz", preis: 15, materialien: ["Polyester", "Viskose"], gruppe: G(0.8, 0.9, 0.5, 0.3), aufwand: 1, bild: { silhouette: "haarreif" } },
+    { typ: "Regenschirm", kategorie: "accessoires", pfad: ["accessoires", "Schirme"], wgs: [LW], saison: "ganz", preis: 25, materialien: ["Polyester"], gruppe: G(0.4, 0.7, 0.85, 0.9), aufwand: 1, bild: { silhouette: "regenschirm" } },
+    { typ: "Fliege", kategorie: "accessoires", pfad: ["accessoires", "Krawatten und Fliegen"], wgs: ["herren.business", LW], saison: "ganz", preis: 29, materialien: ["Seide", "Polyester"], gruppe: G(0.2, 0.7, 0.7, 0.6), aufwand: 1, bild: { silhouette: "fliege" } },
+    { typ: "Einstecktuch", kategorie: "accessoires", pfad: ["accessoires", "Krawatten und Fliegen"], wgs: ["herren.business"], saison: "ganz", preis: 19, materialien: ["Seide", "Leinen"], gruppe: G(0, 0.4, 0.8, 0.85), aufwand: 1, bild: { silhouette: "seidentuch" } },
+    { typ: "Nickituch", kategorie: "accessoires", pfad: ["accessoires", "T\xFCcher und Schals"], wgs: [LW], saison: "sommer", preis: 15, materialien: ["Seide", "Viskose", "Baumwolle"], gruppe: G(0.2, 0.85, 0.7, 0.6), aufwand: 1, bild: { silhouette: "seidentuch" } },
+    { typ: "Beanie", kategorie: "accessoires", pfad: ["accessoires", "M\xFCtzen und H\xFCte"], wgs: [LW, "damen.young", "herren.casual"], saison: "winter", preis: 19, materialien: ["Merino", "Baumwolle", "Polyester"], gruppe: G(0.6, 1, 0.6, 0.3), aufwand: 1, bild: { silhouette: "beanie" } },
+    { typ: "Kinder-M\xFCtze-Schal-Set", kategorie: "accessoires", pfad: ["accessoires", "M\xFCtzen und H\xFCte"], wgs: ["kinder.maedchen", "kinder.jungen", "kinder.baby"], saison: "winter", preis: 25, materialien: ["Merino", "Baumwolle", "Polyester"], gruppe: G(1, 0, 0, 0), aufwand: 1, bild: { silhouette: "muetzeschalset" } },
+    { typ: "Strohhut", kategorie: "accessoires", pfad: ["accessoires", "M\xFCtzen und H\xFCte"], wgs: [LW], saison: "sommer", preis: 35, materialien: ["Leinen", "Baumwolle"], gruppe: G(0.3, 0.7, 0.85, 0.85), aufwand: 1, bild: { silhouette: "strohhut" } },
+    { typ: "Panamahut", kategorie: "accessoires", pfad: ["accessoires", "M\xFCtzen und H\xFCte"], wgs: [LW, "herren.casual"], saison: "sommer", preis: 59, materialien: ["Leinen"], gruppe: G(0, 0.4, 0.8, 0.9), aufwand: 2, bild: { silhouette: "strohhut", farbe: "creme" } },
+    // ── Wäsche und Nacht
+    { typ: "Slip", kategorie: "waesche", pfad: ["waesche", "Unterw\xE4sche"], wgs: ["waesche.tag"], saison: "ganz", preis: 12, materialien: ["Baumwolle", "Bio-Baumwolle", "Viskose"], gruppe: G(0.2, 0.85, 0.85, 0.8), aufwand: 1, bild: { silhouette: "slip" } },
+    { typ: "Spitzenslip", kategorie: "waesche", pfad: ["waesche", "Unterw\xE4sche"], wgs: ["waesche.tag"], saison: "ganz", preis: 19, materialien: ["Polyester", "Viskose", "Seide"], gruppe: G(0, 0.85, 0.85, 0.6), aufwand: 2, bild: { silhouette: "slip" } },
+    { typ: "Taillenslip", kategorie: "waesche", pfad: ["waesche", "Unterw\xE4sche"], wgs: ["waesche.tag", "waesche.mieder"], saison: "ganz", preis: 15, materialien: ["Baumwolle", "Bio-Baumwolle"], gruppe: G(0, 0.3, 0.7, 0.95), aufwand: 1, bild: { silhouette: "slip", farbe: "beige" } },
+    { typ: "Retropants", kategorie: "waesche", pfad: ["waesche", "Herrenw\xE4sche"], wgs: ["waesche.herren"], saison: "ganz", preis: 25, materialien: ["Baumwolle", "Bio-Baumwolle", "Viskose"], gruppe: G(0.4, 0.95, 0.85, 0.6), aufwand: 1, bild: { silhouette: "unterwaesche" } },
+    { typ: "Boxershorts", kategorie: "waesche", pfad: ["waesche", "Herrenw\xE4sche"], wgs: ["waesche.herren"], saison: "ganz", preis: 19, materialien: ["Baumwolle", "Bio-Baumwolle"], gruppe: G(0.3, 0.7, 0.85, 0.85), aufwand: 1, bild: { silhouette: "boxershorts" } },
+    { typ: "Unterhemd", kategorie: "waesche", pfad: ["waesche", "Herrenw\xE4sche"], wgs: ["waesche.herren", "waesche.tag"], saison: "ganz", preis: 15, materialien: ["Baumwolle", "Bio-Baumwolle"], gruppe: G(0.5, 0.4, 0.75, 0.95), aufwand: 1, bild: { silhouette: "unterhemd" } },
+    { typ: "Spitzen-BH", kategorie: "waesche", pfad: ["waesche", "BHs"], wgs: ["waesche.tag"], saison: "ganz", preis: 39, materialien: ["Polyester", "Viskose", "Seide"], gruppe: G(0, 0.85, 0.85, 0.6), aufwand: 2, bild: { silhouette: "bh" } },
+    { typ: "Sport-BH", kategorie: "waesche", pfad: ["waesche", "BHs"], wgs: ["waesche.tag", "sport.bekleidung"], saison: "ganz", preis: 35, materialien: ["Polyester"], gruppe: G(0.1, 0.95, 0.85, 0.5), aufwand: 2, bild: { silhouette: "sportbh" } },
+    { typ: "Shapewear-Body", kategorie: "waesche", pfad: ["waesche", "Miederwaren"], wgs: ["waesche.mieder"], saison: "ganz", preis: 49, materialien: ["Polyester", "Viskose"], gruppe: G(0, 0.3, 0.75, 0.9), aufwand: 2, bild: { silhouette: "shapewear" } },
+    { typ: "Strumpfhose", kategorie: "waesche", pfad: ["waesche", "Str\xFCmpfe"], wgs: ["waesche.struempfe"], saison: "winter", preis: 9, materialien: ["Polyester", "Baumwolle"], gruppe: G(0.2, 0.85, 0.85, 0.85), aufwand: 1, bild: { silhouette: "strumpfhose" } },
+    { typ: "Kinder-Strumpfhose", kategorie: "waesche", pfad: ["waesche", "Str\xFCmpfe"], wgs: ["waesche.struempfe", "kinder.maedchen"], saison: "winter", preis: 7, materialien: ["Baumwolle", "Bio-Baumwolle"], gruppe: G(1, 0, 0, 0), aufwand: 1, bild: { silhouette: "strumpfhose", farbe: "rosa" } },
+    { typ: "Socken-Set", kategorie: "waesche", pfad: ["waesche", "Str\xFCmpfe"], wgs: ["waesche.struempfe"], saison: "ganz", preis: 15, materialien: ["Baumwolle", "Bio-Baumwolle", "Merino"], gruppe: G(0.6, 0.8, 0.85, 0.85), aufwand: 1, bild: { silhouette: "sockenset" } },
+    { typ: "Sneakersocken", kategorie: "waesche", pfad: ["waesche", "Str\xFCmpfe"], wgs: ["waesche.struempfe", "sport.bekleidung"], saison: "sommer", preis: 9, materialien: ["Baumwolle", "Polyester"], gruppe: G(0.6, 0.95, 0.8, 0.4), aufwand: 1, bild: { silhouette: "socken", farbe: "wei\xDF" } },
+    { typ: "Kniestr\xFCmpfe", kategorie: "waesche", pfad: ["waesche", "Str\xFCmpfe"], wgs: ["waesche.struempfe"], saison: "winter", preis: 9, materialien: ["Merino", "Baumwolle"], gruppe: G(0.6, 0.5, 0.6, 0.85), aufwand: 1, bild: { silhouette: "socken" } },
+    { typ: "Nachthemd", kategorie: "waesche", pfad: ["waesche", "Nachtw\xE4sche"], wgs: ["waesche.nacht"], saison: "ganz", preis: 39, materialien: ["Baumwolle", "Viskose", "Seide"], gruppe: G(0.2, 0.2, 0.6, 0.95), aufwand: 1, bild: { silhouette: "nachthemd" } },
+    { typ: "Bademantel", kategorie: "waesche", pfad: ["waesche", "Nachtw\xE4sche"], wgs: ["waesche.nacht", "wohnen.heimtextil"], saison: "ganz", preis: 59, materialien: ["Baumwolle", "Bio-Baumwolle"], gruppe: G(0.3, 0.6, 0.85, 0.9), aufwand: 2, bild: { silhouette: "bademantel" } },
+    { typ: "Kinder-Bademantel", kategorie: "waesche", pfad: ["waesche", "Nachtw\xE4sche"], wgs: ["waesche.nacht", "kinder.maedchen", "kinder.jungen"], saison: "ganz", preis: 35, materialien: ["Baumwolle"], gruppe: G(1, 0, 0, 0), aufwand: 1, bild: { silhouette: "bademantel", farbe: "hellblau" } },
+    { typ: "Kurzpyjama", kategorie: "waesche", pfad: ["waesche", "Nachtw\xE4sche"], wgs: ["waesche.nacht"], saison: "sommer", preis: 35, materialien: ["Baumwolle", "Viskose"], gruppe: G(0.5, 0.8, 0.75, 0.7), aufwand: 1, bild: { silhouette: "pyjama" } }
+  ];
 
   // ../engine/src/sortiment/q29-home.ts
   var NT = ["Polyester"];
@@ -144631,10 +144704,10 @@
       const v = varianten.includes(p2.variante) ? p2.variante : waehle2(rng3(`${name2}:${p2.seed ?? 1}`), varianten);
       const front2 = WINKEL2[p2.front] !== void 0 ? p2.front : "+z", th = WINKEL2[front2];
       const quer2 = front2 === "+x" || front2 === "-x";
-      const LW = quer2 ? p2.d : p2.w, LD = quer2 ? p2.w : p2.d;
+      const LW2 = quer2 ? p2.d : p2.w, LD = quer2 ? p2.w : p2.d;
       const m = masse3[v] ?? masse3.alle;
-      const s2 = Math.min(1, LW / m.min[0], LD / m.min[1]);
-      const nw = Math.min(Math.max(LW / s2, m.min[0]), m.max[0]), nd = Math.min(Math.max(LD / s2, m.min[1]), m.max[1]);
+      const s2 = Math.min(1, LW2 / m.min[0], LD / m.min[1]);
+      const nw = Math.min(Math.max(LW2 / s2, m.min[0]), m.max[0]), nd = Math.min(Math.max(LD / s2, m.min[1]), m.max[1]);
       const c = Math.cos(th), sn = Math.sin(th);
       const T = new Sammler(), innen = new three_module_exports.Group(), aussen = new three_module_exports.Group();
       const erg = bau2(T, innen, { ...p2, x: 0, z: 0, w: nw, d: nd, variante: v, front: "+z", blick: [c - sn, sn + c], skala: s2 });
@@ -144646,7 +144719,7 @@
         g.translate(cx, 0.3, cz);
         S.add(g, farbe3);
       }
-      if (nw * s2 < LW - 0.5 || nd * s2 < LD - 0.5) S.quader(p2.x, 0.3, p2.z, p2.x + p2.w, 0.34, p2.z + p2.d, PFLASTER4);
+      if (nw * s2 < LW2 - 0.5 || nd * s2 < LD - 0.5) S.quader(p2.x, 0.3, p2.z, p2.x + p2.w, 0.34, p2.z + p2.d, PFLASTER4);
       innen.position.set(-nw / 2, -0.3, -nd / 2);
       aussen.add(innen);
       aussen.scale.setScalar(s2);
@@ -157639,11 +157712,11 @@
       standorte.push({ id, name: nameVon(art), art, form: formVon(art, (seed * 0.618 + k3 * 0.37) % 1), rolle: "wettbewerber", lage, grundflaecheQm: qm2, w: m.w, d: m.d });
     }
     if (region === "west" && extra.kirchStil === void 0) {
-      const KS = ["hallenkirche", "romanisch", "backsteingotik", "nachkrieg", "neugotik", "klassizismus", "barock"];
-      const start = Math.floor(seed * 0.4142 % 1 * KS.length);
+      const KS2 = ["hallenkirche", "romanisch", "backsteingotik", "nachkrieg", "neugotik", "klassizismus", "barock"];
+      const start = Math.floor(seed * 0.4142 % 1 * KS2.length);
       const vorgabe = nachbarStaedteRoh(name2).map((n4) => PLUGIN_BILD.get(n4)?.[1]?.kirchStil).filter(Boolean);
-      for (let q2 = 0; q2 < KS.length; q2++) {
-        const k3 = KS[(start + q2) % KS.length];
+      for (let q2 = 0; q2 < KS2.length; q2++) {
+        const k3 = KS2[(start + q2) % KS2.length];
         if (!nb.some((e) => e.kirche === k3) && !vorgabe.includes(k3)) {
           extra.kirchStil = k3;
           break;
@@ -159262,7 +159335,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "3fb1740" : "Entwicklung";
+  var version = () => true ? "25ededf" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld(d3) {
