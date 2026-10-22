@@ -1,13 +1,16 @@
 // O06 Planung: Planungsassistent, Abweichungsreporting, Forecast und Führungsboni.
-import { geld, esc } from './format.js';
+import { geld, esc, clusterName } from './format.js';
 
 const zahl = (x) => Number(x || 0).toLocaleString('de-DE', { maximumFractionDigits: 0 });
 const pct = (v) => (100 * v).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' %';
 const mio = (v) => (v / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' Mio. €';
 const rolle = { haus: 'Hausleitungen', hauscluster: 'Clusterleitungen', bereich: 'Bereichsleitungen' };
+const EBENE = { konzern: 'Konzern', format: 'Format', region: 'Region', hauscluster: 'Hauscluster', haus: 'Haus', warengruppe: 'Warengruppe' };
 
 export function planungModul(ctx) {
   const E = ctx.E, s = ctx.s, ui = { aktiv: false, tab: 'assistent', schritt: 1 };
+  // Q31: Hauscluster-Knoten tragen intern die Cluster-ID als Namen.
+  const nname = (n) => (n.ebene === 'hauscluster' ? clusterName(s(), n.name) : n.name);
   const vor = () => E.planungAssistent(s());
   const zeile = (text, wert) => '<div class="zeile"><span class="was">' + esc(text) + '</span><b>' + wert + '</b></div>';
   const tabs = () => '<div class="tabs">' + [['assistent','Planung'],['report','Reporting'],['forecast','Forecast'],['bonus','Boni']].map(([id, t]) =>
@@ -35,11 +38,11 @@ export function planungModul(ctx) {
       const renderNode = (id, tiefe) => {
         const n = nodes[id]; if (!n) return '';
         const hinweis = n.verdacht ? '<span class="chip warn">Sandbagging-Verdacht</span>' : '';
-        const inhalt = '<div class="zeile"><span class="was"><b>' + esc(n.name) + '</b><i>' + esc(n.ebene) + '</i></span><span>' + mio(n.umsatz) + '</span></div>' +
+        const inhalt = '<div class="zeile"><span class="was"><b>' + esc(nname(n)) + '</b><i>' + esc(EBENE[n.ebene] ?? n.ebene) + '</i></span><span>' + mio(n.umsatz) + '</span></div>' +
           (n.ebene !== 'konzern' ? '<label class="zeile"><span class="was">Ziel in Mio. €</span><input style="width:110px;max-width:45%" type="number" step="0.1" min="0" data-pl-knoten="' + esc(n.id) + '" value="' + (n.umsatz / 1e6).toFixed(1) + '"></label>' : '') +
           (n.ebene === 'hauscluster' || n.ebene === 'haus' ? '<div class="olief">Rückmeldung Leitung: ' + mio(n.rueckmeldung) + ' ' + hinweis + '</div>' : '');
         const kinder = (n.kinder || []).map((x) => renderNode(x, tiefe + 1)).join('');
-        return tiefe === 0 ? inhalt + kinder : '<details class="karte" style="margin:6px 0 6px ' + Math.min(tiefe * 8, 30) + 'px"' + (tiefe <= 2 ? ' open' : '') + '><summary>' + esc(n.name) + ' · ' + mio(n.umsatz) + (n.verdacht ? ' · !' : '') + '</summary>' + inhalt + kinder + '</details>';
+        return tiefe === 0 ? inhalt + kinder : '<details class="karte" style="margin:6px 0 6px ' + Math.min(tiefe * 8, 30) + 'px"' + (tiefe <= 2 ? ' open' : '') + '><summary>' + esc(nname(n)) + ' · ' + mio(n.umsatz) + (n.verdacht ? ' · !' : '') + '</summary>' + inhalt + kinder + '</details>';
       };
       html += renderNode('konzern', 0) + '</div>';
       html += '<div class="karte"><div class="khead">Merchandise Planning: Warengruppenziele</div>' +
@@ -70,7 +73,7 @@ export function planungModul(ctx) {
     const nodes = b.knoten.filter((n) => n.ebene === 'format' || n.ebene === 'region' || n.ebene === 'hauscluster');
     html += '<div class="karte"><div class="khead">Planabweichung nach Steuerungsebene</div><div class="olief">Plan: Jahresziel, Abweichung: kumuliertes Ist gegen zeitanteilige Jahresplanung.</div>' +
       '<div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>Einheit</th><th>Plan</th><th>Ist</th><th>Abw.</th></tr></thead><tbody>' +
-      nodes.map((n) => '<tr><td>' + esc(n.name) + '</td><td>' + mio(n.umsatz) + '</td><td>' + mio(n.ist) + '</td><td>' + pct(n.abweichung) + '</td></tr>').join('') +
+      nodes.map((n) => '<tr><td>' + esc(nname(n)) + '</td><td>' + mio(n.umsatz) + '</td><td>' + mio(n.ist) + '</td><td>' + pct(n.abweichung) + '</td></tr>').join('') +
       '</tbody></table></div></div>';
     html += '<div class="karte"><div class="khead">Letzte 26 Wochen: Umsatz und Forecast</div>' +
       '<div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>KW</th><th>Ist</th><th>Plan</th><th>Abw.</th><th>FC</th></tr></thead><tbody>' +

@@ -1,5 +1,5 @@
 // O02 Umsatztreiber. Darstellung ausschließlich aus Engine-Abfragen.
-import { geld, fmt, esc } from './format.js';
+import { geld, fmt, esc, clusterName } from './format.js';
 
 const prozent = (x) => (100 * x).toLocaleString('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' %';
 const zahl = (x, n = 1) => Number(x).toLocaleString('de-DE', { maximumFractionDigits: n, minimumFractionDigits: n });
@@ -83,11 +83,11 @@ export function reportingModul(ctx) {
             const x = treff.filter((z) => z.hauscluster === hc);
             if (unter.length === 1 && hc === id) return karten(x);
             const g = gruppen.find((gg) => gg.ebene === 'hauscluster' && gg.id === hc);
-            return '<details class="o02-unter"><summary>' + esc(hc) + ' (' + x.length + ' Häuser)</summary>' +
+            return '<details class="o02-unter"><summary>' + esc(clusterName(ctx.s(), hc)) + ' (' + x.length + ' Häuser)</summary>' +
               (g ? zeile(g) : '') + karten(x) + '</details>';
           }).join('');
         } else innen = karten(treff);
-        return '<details class="o02-gruppe"><summary>' + esc(id) + ' (' + treff.length + ' Häuser)</summary>' +
+        return '<details class="o02-gruppe"><summary>' + esc(ebene === 'hauscluster' ? clusterName(ctx.s(), id) : id) + ' (' + treff.length + ' Häuser)</summary>' +
           (gruppe ? zeile(gruppe) : '') + tabelle(innen) + '</details>';
       }).join('');
       content += abschnitte || leere;

@@ -13,3 +13,13 @@ export const pz = (x, n = 0) => `${(x * 100).toLocaleString('de-DE', { minimumFr
 export const dez = (x, n = 1) => (x ?? 0).toLocaleString('de-DE', { minimumFractionDigits: n, maximumFractionDigits: n });
 export const kwVon = (w) => (((w % 52) + 52) % 52) + 1;
 export const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+/** Q31: Interne Cluster-IDs (hc-ost-2, premium-flagships) nie anzeigen; Name aus der Organisation, sonst lesbarer Ersatz. */
+const REGION_NAME = { nord: 'Nord', ost: 'Ost', sued: 'Süd', 'süd': 'Süd', west: 'West', mitte: 'Mitte' };
+export function clusterName(s, id) {
+  if (id == null || id === '') return 'ohne Cluster';
+  const c = s?.organisation?.hauscluster?.find((x) => x.id === id);
+  if (c?.name) return c.name;
+  const m = /^hc-([a-zäöü]+)-(\d+)$/i.exec(String(id));
+  if (m) return `Cluster ${REGION_NAME[m[1].toLowerCase()] ?? m[1]} ${m[2]}`;
+  return REGION_NAME[String(id).toLowerCase()] ?? String(id);
+}

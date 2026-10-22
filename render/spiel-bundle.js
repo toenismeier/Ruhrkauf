@@ -159335,7 +159335,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "1b336a9" : "Entwicklung";
+  var version = () => true ? "6b86319" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld(d3) {
@@ -159419,6 +159419,15 @@
   var dez = (x2, n3 = 1) => (x2 ?? 0).toLocaleString("de-DE", { minimumFractionDigits: n3, maximumFractionDigits: n3 });
   var kwVon2 = (w2) => (w2 % 52 + 52) % 52 + 1;
   var esc2 = (t3) => String(t3 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  var REGION_NAME = { nord: "Nord", ost: "Ost", sued: "S\xFCd", "s\xFCd": "S\xFCd", west: "West", mitte: "Mitte" };
+  function clusterName3(s2, id) {
+    if (id == null || id === "") return "ohne Cluster";
+    const c = s2?.organisation?.hauscluster?.find((x2) => x2.id === id);
+    if (c?.name) return c.name;
+    const m = /^hc-([a-zäöü]+)-(\d+)$/i.exec(String(id));
+    if (m) return `Cluster ${REGION_NAME[m[1].toLowerCase()] ?? m[1]} ${m[2]}`;
+    return REGION_NAME[String(id).toLowerCase()] ?? String(id);
+  }
 
   // src/ui/quelle.js
   function quelle(E8) {
@@ -170842,11 +170851,11 @@
         if (u.projekt) h3 += zeile("Projekt in Umsetzung", (u.projekt.modell === "eigen" ? "Eigenes Lager" : "Dienstleister") + " ab KW " + (u.projekt.bis % 52 + 1) + " \xB7 Investition " + geld(u.projekt.investition), "");
         else h3 += '<div class="zeile"><button class="mini gruen" data-online="fulfillment" data-wert="' + (u.fulfillment === "eigen" ? "dienstleister" : "eigen") + '">' + (u.fulfillment === "eigen" ? "Zum Dienstleister wechseln" : "Eigenes Lager bauen") + "</button></div>";
         h3 += '</div><div class="karte"><div class="khead">Versand aus dem Haus je Hauscluster</div>';
-        for (const c of u.cluster) h3 += zeile(c.id, c.haeuser + " H\xE4user", schalter2("cluster", c.aktiv, 'data-id="' + esc2(c.id) + '"'));
+        for (const c of u.cluster) h3 += zeile(clusterName3(ctx.s(), c.id), c.haeuser + " H\xE4user", schalter2("cluster", c.aktiv, 'data-id="' + esc2(c.id) + '"'));
         h3 += "</div>";
       } else {
         h3 += '<div class="karte"><div class="khead">Abholstationen und Filiallogistik</div>';
-        for (const a2 of u.haeuser) h3 += '<div class="abt"><div class="zeile"><span class="was"><b>' + esc2(a2.name) + "</b><i>" + esc2(a2.stadt) + " \xB7 " + esc2(a2.cluster) + "</i></span>" + schalter2("station", a2.station, 'data-id="' + esc2(a2.id) + '"') + '</div><div class="zeile unter">Abholungen ' + fmt.format(a2.abholungen) + " \xB7 Versand " + fmt.format(a2.versand) + " \xB7 Retouren " + fmt.format(a2.retouren) + " \xB7 " + a2.instoreStunden.toFixed(1).replace(".", ",") + " Logistikstunden " + schalter2("retouren", a2.retourenAn, 'data-id="' + esc2(a2.id) + '"' + (a2.station ? "" : " disabled")) + "</div></div>";
+        for (const a2 of u.haeuser) h3 += '<div class="abt"><div class="zeile"><span class="was"><b>' + esc2(a2.name) + "</b><i>" + esc2(a2.stadt) + " \xB7 " + esc2(clusterName3(ctx.s(), a2.cluster)) + "</i></span>" + schalter2("station", a2.station, 'data-id="' + esc2(a2.id) + '"') + '</div><div class="zeile unter">Abholungen ' + fmt.format(a2.abholungen) + " \xB7 Versand " + fmt.format(a2.versand) + " \xB7 Retouren " + fmt.format(a2.retouren) + " \xB7 " + a2.instoreStunden.toFixed(1).replace(".", ",") + " Logistikstunden " + schalter2("retouren", a2.retourenAn, 'data-id="' + esc2(a2.id) + '"' + (a2.station ? "" : " disabled")) + "</div></div>";
         h3 += "</div>";
       }
       ctx.panel("Online", "hartwig.de \xB7 E-Commerce", h3, "gross");
@@ -173534,10 +173543,10 @@
               const x2 = treff.filter((z4) => z4.hauscluster === hc);
               if (unter.length === 1 && hc === id) return karten(x2);
               const g = gruppen.find((gg) => gg.ebene === "hauscluster" && gg.id === hc);
-              return '<details class="o02-unter"><summary>' + esc2(hc) + " (" + x2.length + " H\xE4user)</summary>" + (g ? zeile2(g) : "") + karten(x2) + "</details>";
+              return '<details class="o02-unter"><summary>' + esc2(clusterName3(ctx.s(), hc)) + " (" + x2.length + " H\xE4user)</summary>" + (g ? zeile2(g) : "") + karten(x2) + "</details>";
             }).join("");
           } else innen = karten(treff);
-          return '<details class="o02-gruppe"><summary>' + esc2(id) + " (" + treff.length + " H\xE4user)</summary>" + (gruppe3 ? zeile2(gruppe3) : "") + tabelle2(innen) + "</details>";
+          return '<details class="o02-gruppe"><summary>' + esc2(ebene === "hauscluster" ? clusterName3(ctx.s(), id) : id) + " (" + treff.length + " H\xE4user)</summary>" + (gruppe3 ? zeile2(gruppe3) : "") + tabelle2(innen) + "</details>";
         }).join("");
         content += abschnitte || leere;
       }
@@ -173872,8 +173881,10 @@
   var pct = (v) => (100 * v).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
   var mio3 = (v) => (v / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " Mio. \u20AC";
   var rolle2 = { haus: "Hausleitungen", hauscluster: "Clusterleitungen", bereich: "Bereichsleitungen" };
+  var EBENE = { konzern: "Konzern", format: "Format", region: "Region", hauscluster: "Hauscluster", haus: "Haus", warengruppe: "Warengruppe" };
   function planungModul(ctx) {
     const E8 = ctx.E, s2 = ctx.s, ui = { aktiv: false, tab: "assistent", schritt: 1 };
+    const nname = (n3) => n3.ebene === "hauscluster" ? clusterName3(s2(), n3.name) : n3.name;
     const vor = () => E8.planungAssistent(s2());
     const zeile3 = (text3, wert) => '<div class="zeile"><span class="was">' + esc2(text3) + "</span><b>" + wert + "</b></div>";
     const tabs = () => '<div class="tabs">' + [["assistent", "Planung"], ["report", "Reporting"], ["forecast", "Forecast"], ["bonus", "Boni"]].map(([id, t3]) => '<button class="tab ' + (ui.tab === id ? "an" : "") + '" data-pl-tab="' + id + '">' + t3 + "</button>").join("") + "</div>";
@@ -173898,9 +173909,9 @@
           const n3 = nodes[id];
           if (!n3) return "";
           const hinweis = n3.verdacht ? '<span class="chip warn">Sandbagging-Verdacht</span>' : "";
-          const inhalt2 = '<div class="zeile"><span class="was"><b>' + esc2(n3.name) + "</b><i>" + esc2(n3.ebene) + "</i></span><span>" + mio3(n3.umsatz) + "</span></div>" + (n3.ebene !== "konzern" ? '<label class="zeile"><span class="was">Ziel in Mio. \u20AC</span><input style="width:110px;max-width:45%" type="number" step="0.1" min="0" data-pl-knoten="' + esc2(n3.id) + '" value="' + (n3.umsatz / 1e6).toFixed(1) + '"></label>' : "") + (n3.ebene === "hauscluster" || n3.ebene === "haus" ? '<div class="olief">R\xFCckmeldung Leitung: ' + mio3(n3.rueckmeldung) + " " + hinweis + "</div>" : "");
+          const inhalt2 = '<div class="zeile"><span class="was"><b>' + esc2(nname(n3)) + "</b><i>" + esc2(EBENE[n3.ebene] ?? n3.ebene) + "</i></span><span>" + mio3(n3.umsatz) + "</span></div>" + (n3.ebene !== "konzern" ? '<label class="zeile"><span class="was">Ziel in Mio. \u20AC</span><input style="width:110px;max-width:45%" type="number" step="0.1" min="0" data-pl-knoten="' + esc2(n3.id) + '" value="' + (n3.umsatz / 1e6).toFixed(1) + '"></label>' : "") + (n3.ebene === "hauscluster" || n3.ebene === "haus" ? '<div class="olief">R\xFCckmeldung Leitung: ' + mio3(n3.rueckmeldung) + " " + hinweis + "</div>" : "");
           const kinder = (n3.kinder || []).map((x2) => renderNode(x2, tiefe + 1)).join("");
-          return tiefe === 0 ? inhalt2 + kinder : '<details class="karte" style="margin:6px 0 6px ' + Math.min(tiefe * 8, 30) + 'px"' + (tiefe <= 2 ? " open" : "") + "><summary>" + esc2(n3.name) + " \xB7 " + mio3(n3.umsatz) + (n3.verdacht ? " \xB7 !" : "") + "</summary>" + inhalt2 + kinder + "</details>";
+          return tiefe === 0 ? inhalt2 + kinder : '<details class="karte" style="margin:6px 0 6px ' + Math.min(tiefe * 8, 30) + 'px"' + (tiefe <= 2 ? " open" : "") + "><summary>" + esc2(nname(n3)) + " \xB7 " + mio3(n3.umsatz) + (n3.verdacht ? " \xB7 !" : "") + "</summary>" + inhalt2 + kinder + "</details>";
         };
         html += renderNode("konzern", 0) + "</div>";
         html += '<div class="karte"><div class="khead">Merchandise Planning: Warengruppenziele</div><div class="olief">Die Konzernsumme bleibt bei \xC4nderungen einzelner Warengruppen erhalten.</div>' + Object.entries(D.warengruppen || {}).map(([id, value]) => '<label class="zeile"><span class="was">' + esc2(E8.GRUPPEN?.[id]?.name || id) + '</span><input style="width:105px;max-width:42%" type="number" min="0" step="0.1" data-pl-wg="' + esc2(id) + '" value="' + (value / 1e6).toFixed(1) + '" aria-label="' + esc2(id) + ' Ziel Mio. Euro"></label>').join("") + '</div><div class="oknoepfe"><button class="gruen" data-pl-schritt="3">Weiter zum Abschluss \u2192</button></div>';
@@ -173914,7 +173925,7 @@
       if (!b3.ziele) return '<div class="karte">Kein Jahresplan vorhanden.</div>';
       let html = '<div class="raster"><div class="kz"><span>Umsatzplan ' + b3.jahr + "</span><b>" + mio3(b3.ziele.umsatz) + '</b></div><div class="kz"><span>Ist kumuliert</span><b>' + mio3(b3.ist) + '</b></div><div class="kz"><span>Plan bis heute</span><b>' + mio3(b3.planBisHeute) + '</b></div><div class="kz"><span>Abweichung zum Plan</span><b>' + mio3(b3.abweichung) + '</b></div><div class="kz"><span>Jahresforecast</span><b>' + (b3.forecasting == null ? "noch offen" : mio3(b3.forecasting)) + '</b></div><div class="kz"><span>EBITDA-Plan</span><b>' + mio3(b3.ziele.ebitda) + "</b></div></div>";
       const nodes = b3.knoten.filter((n3) => n3.ebene === "format" || n3.ebene === "region" || n3.ebene === "hauscluster");
-      html += '<div class="karte"><div class="khead">Planabweichung nach Steuerungsebene</div><div class="olief">Plan: Jahresziel, Abweichung: kumuliertes Ist gegen zeitanteilige Jahresplanung.</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>Einheit</th><th>Plan</th><th>Ist</th><th>Abw.</th></tr></thead><tbody>' + nodes.map((n3) => "<tr><td>" + esc2(n3.name) + "</td><td>" + mio3(n3.umsatz) + "</td><td>" + mio3(n3.ist) + "</td><td>" + pct(n3.abweichung) + "</td></tr>").join("") + "</tbody></table></div></div>";
+      html += '<div class="karte"><div class="khead">Planabweichung nach Steuerungsebene</div><div class="olief">Plan: Jahresziel, Abweichung: kumuliertes Ist gegen zeitanteilige Jahresplanung.</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>Einheit</th><th>Plan</th><th>Ist</th><th>Abw.</th></tr></thead><tbody>' + nodes.map((n3) => "<tr><td>" + esc2(nname(n3)) + "</td><td>" + mio3(n3.umsatz) + "</td><td>" + mio3(n3.ist) + "</td><td>" + pct(n3.abweichung) + "</td></tr>").join("") + "</tbody></table></div></div>";
       html += '<div class="karte"><div class="khead">Letzte 26 Wochen: Umsatz und Forecast</div><div style="overflow-x:auto"><table style="width:100%;font-size:12px"><thead><tr><th>KW</th><th>Ist</th><th>Plan</th><th>Abw.</th><th>FC</th></tr></thead><tbody>' + (b3.wochen || []).slice().reverse().map((w2) => "<tr><td>" + (w2.woche % 52 + 1) + "</td><td>" + mio3(w2.ist) + "</td><td>" + mio3(w2.plan) + "</td><td>" + pct(w2.abweichungQuote) + "</td><td>" + (w2.forecast == null ? "\u2013" : mio3(w2.forecast)) + "</td></tr>").join("") + "</tbody></table></div></div>";
       if (b3.warengruppen) html += '<details class="karte"><summary>Merchandise Planning: Warengruppenbudgets</summary>' + Object.entries(b3.warengruppen).map(([g, v]) => zeile3(g, mio3(v))).join("") + "</details>";
       return html;
