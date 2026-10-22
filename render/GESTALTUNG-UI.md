@@ -1,4 +1,4 @@
-# Gestaltungssystem der Spieloberfläche (Q14)
+# Gestaltungssystem der Spieloberfläche (Q14, dunkel seit Q30)
 
 Stand: 21.10.2026. Referenz: Coffee Inc 2 – ruhige Informationshierarchie, klare Zahlen, zurückhaltende Interaktion. Gilt für sämtliche Panels einschließlich Cockpit, Hausdetail, Posteingang, Organisation, Zentrale, Reise und Eigenmarken. Ausschließlich Darstellung; keine Änderung an Engine, Aktionen oder Berechnungen.
 
@@ -8,35 +8,38 @@ Stand: 21.10.2026. Referenz: Coffee Inc 2 – ruhige Informationshierarchie, kla
 3. **Mobil zuerst.** Abnahme bei 390 × 844 CSS-Pixeln; keine horizontale Seitenüberläufe. Scrollbare Reiter dürfen horizontal laufen, ohne Texte abzuschneiden. Touch-Ziele mindestens 44 × 44 px.
 4. **Eindeutige Sprache.** Interne IDs (hc-*, technische Aktionsschlüssel), `undefined`, `null` und rohe Enum-Werte niemals anzeigen. Fehlende Bezeichnungen erhalten einen verständlichen Fallback.
 
-## Design-Tokens
-Alle Werte zentral unter `render/src/ui/` als CSS-Custom-Properties bündeln, keine lokalen Sonderfarben und -abstände pro Panel.
+## Design-Tokens (Q30, dunkler Grundlook nach Coffee Inc 2, Ummo 22.10.2026)
+Alle Werte in `render/src/ui/komponenten.css` als CSS-Custom-Properties. Ein Panel schaltet den Look ein, indem sein Inhalt den Marker `bereich(name, symbol)` aus `render/src/ui/komponenten.js` enthält; der Bereich setzt Grund, Flächen und Kopfsymbol. Die hellen Q14-Werte (`--ui-bg #F5F4F1` usw.) gelten nur noch für Panels ohne Marker, bis Q30 und Q31 alles umgestellt haben, dann entfallen sie.
+
+| Bereich | Grund | Fläche | Tiefe (Kopf, Sprecher, Reiter) | Linie | Text | Leise |
+|---|---|---|---|---|---|---|
+| `haus` (Haus, Filiale, Personal, Umbau) | #2A2521 | #352F2A | #1D1916 | #4A423B | #F3EEE8 | #A89E93 |
+| `zentrale` (Zentrale, Organisation, Q31-Fachbereiche) | #1F2B32 | #29373F | #162026 | #3B4B54 | #EEF3F5 | #93A3AB |
+| `betrieb` (Posteingang, Wochenbericht, Reise, Karte, Statistik, Erfolge, Einstellungen) | #24272B | #2F3338 | #1A1C1F | #43484E | #F1F1EF | #9DA2A7 |
+| `papier` (Zeitung, Chronik) | #ECE7DC | #F6F2E9 | #DDD6C7 | #C9C0AE | #1F1D1A | #5F5A52 |
 
 | Token | Wert | Verwendung |
 |---|---|---|
-| `--ui-font-xs` | 12px/16px | Meta, Zeitstempel |
-| `--ui-font-sm` | 14px/20px | Labels, Listen |
-| `--ui-font-md` | 16px/24px | Fließtext, Bedienelemente |
-| `--ui-font-lg` | 24px/30px | Titel, Hauptkennzahlen |
-| `--ui-space-1…6` | 4, 8, 12, 16, 24, 32px | 4er-Raster |
-| `--ui-bg` | #F5F4F1 | App-Hintergrund |
-| `--ui-surface` | #FFFFFF | Oberflächen |
-| `--ui-text` | #242424 | Primärtext |
-| `--ui-muted` | #62666A | Sekundärtext |
-| `--ui-border` | #E2E1DD | Trennlinien |
-| `--ui-brand` | #B32632 | Primäraktion, kritische Warnung |
-| `--ui-positive` | #247153 | Positive Kennzahl |
-| `--ui-negative` | #A52D38 | Negative Kennzahl |
-| `--ui-radius` | 10px | Flächen, Eingaben |
-| `--ui-shadow` | 0 1px 3px rgb(0 0 0 / 6%) | Nur schwebende Ebenen |
+| `--hk-xs / sm / md / lg / xl` | 12 / 14 / 16 / 22 / 32 px | Meta / Listen / Bedienung / Titel / Großkennzahl |
+| `--hk-1 … --hk-6` | 4, 8, 12, 16, 24, 32 px | 4er-Raster |
+| `--hk-akzent` | #D23C32 (Innenkontur #EF7A6F) | Hartwig-Rot: Bedienelemente (Stepper, Schalter, Segment) und höchstens eine Primäraktion je Abschnitt; kein Coffee-Orange |
+| `--hk-gut` / `--hk-schlecht` / `--hk-achtung` | #6DBF73 / #EF6F62 / #E7B04B | Ergebnis und positive Abweichung / negative Abweichung / Engpass |
+| `--hk-serie-a` / `--hk-serie-b` | Text / #6DBF73 | Balken Umsatz / Ergebnis |
+| Grund | senkrechter Streifen 7 + 1 px, Weiß mit 2,2 % Deckung | einzig erlaubter Verlauf |
+| `--hk-radius` | 10 px | Flächen, Eingaben |
 
-Keine zweite Akzentfarbe für gewöhnliche Buttons. Kontrast mindestens WCAG AA; nicht allein durch Farbe unterscheiden.
+## Bausteine (`render/src/ui/komponenten.js`, Katalog: `node tests/komponenten-katalog.cjs` → `out/q30/komponenten.png`)
+`bereich`, `rumpf`, `sprecher` (Person sagt den Befund der Woche, keine Begrüßung; Ton `engpass`/`alarm`), `abschnitt` (Versalien), `gross` + `abweichung` (Großkennzahl mit Abweichung absolut und in %), `balken` (5 Wochen gepaart, ohne Achsen; unter zwei Punkten leerer Zustand), `tabelle` (GuV, Strich vor Summen, Null sichtbar; `pruefen: true` → Summenprüfung über `data-w`), `zeile`/`liste`, `knopf` (primär, `zweit`, `text`), `stepper`, `schalter`, `seg`, `reiterUnten` mit isometrischen `SYMBOLE`, `leer`, `hinweis` (`achtung`, `fehler`, `gut`), `marke`, `skala` (fünf Segmente mit Zahl).
+
+## Verbotene Muster als Skript
+`render/src/ui/stilpruefung.js` prüft im Browser auf berechneten Stilen: Schatten-Unschärfe > 8 px, Verläufe und Glas außer dem Streifengrund, Schrift < 12 px, Touch-Ziel < 44 px, abgeschnittene Beschriftung (Ellipse mit Überlauf), Symbol im eingefärbten Kreis, helle Cremeflächen im dunklen Look, Text `undefined`/`null`/`NaN`/`hc-`/Platzhalternamen, Summen, die sich nicht aus den angezeigten Zeilen ergeben. `node spiel-render.js --nur-panels` prüft alle Panels mit `umgestellt: true` aus `tests/q30-panelliste.cjs` und `tests/q31-panelliste.cjs` und endet mit Fehler. Aufnahmen aller Panels: `node tests/q30-panels.cjs --ordner out/q30/nachher`.
 
 ## Komponentenvertrag
 - **Panelkopf:** eine maximal zweizeilige Überschrift, optional Unterzeile; rechts höchstens eine Aktion. Bei Platzmangel Aktionen in eigene Zeile.
-- **Karte:** weiß, 1px Kontur, 12–16px Innenabstand, 8–12px Abstand zur nächsten Einheit. Nur für eigenständige Sachverhalte; verwandte Daten als Zeilen mit Trennlinie.
+- **Karte:** Fläche des Bereichs, 1px Kontur, 12–16px Innenabstand, 8–12px Abstand zur nächsten Einheit. Nur für eigenständige Sachverhalte; verwandte Daten als Zeilen mit Trennlinie.
 - **Liste:** Titel links, Wert oder Aktion rechts; rechter Bereich schrumpft nicht unter lesbare Mindestbreite. Bei schmalen Ansichten Wert unter Titel umbrechen; niemals überlappen.
 - **Reiter:** vollständige Begriffe; horizontales Scrollen mit `overflow-x:auto`, `flex-shrink:0`, sichtbarer aktiver Unterstreichung und erreichbarem Fokus. Keine künstlich verkürzten Wortfragmente.
-- **Knöpfe:** Primär rot und gefüllt, sekundär neutral mit Kontur, tertiär als Text; gleiche Höhe 44px, klarer Disabled-Zustand. Nie mehr als eine rote Primäraktion pro Abschnitt.
+- **Knöpfe:** Primär Hartwig-Rot gefüllt mit doppelter Kontur, sekundär neutral mit Kontur, tertiär als Text; gleiche Höhe 44px, klarer Disabled-Zustand. Nie mehr als eine rote Primäraktion pro Abschnitt.
 - **Kennzahlen:** tabellarische Ziffern; Zahl und Einheit zusammenhalten. Responsive Anzeige in Tsd., Mio., Mrd.; bei Engpässen Zeilenumbruch statt Ellipse. Negative Vorzeichen und Prozentpunkte eindeutig kennzeichnen.
 - **Benachrichtigungen:** unterhalb des sicheren Kopfbereichs, mit eigener Schließmöglichkeit; keine verdeckten Navigationselemente. Fehlermeldungen zusätzlich inline beim auslösenden Element.
 - **Leere Zustände:** kurzer Grund und ggf. nächste sinnvolle Aktion. Ein Verlauf mit weniger als zwei Datenpunkten zeigt „Ein Verlauf ist ab der zweiten Woche verfügbar.“ statt einer Achse KW 1 bis KW 1.

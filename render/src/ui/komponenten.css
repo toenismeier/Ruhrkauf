@@ -1,0 +1,236 @@
+/* Q30 Gemeinsame Bausteine der Spieloberfläche (dunkler Grundlook nach Coffee Inc 2, Ummo 22.10.2026).
+   Vertrag: render/GESTALTUNG-UI.md. Ein Panel schaltet den Look ein, indem sein Inhalt den Marker
+   `bereich('haus' | 'zentrale' | 'papier' | 'betrieb')` aus komponenten.js enthält. Ohne Marker bleibt das Panel
+   beim alten hellen Look (Übergang, bis Q30 und Q31 alles umgestellt haben).
+   Klassen der Bausteine beginnen mit `hk-`. Keine Schatten über 8 px Unschärfe, keine Verläufe außer dem feinen
+   senkrechten Streifengrund, keine Schrift unter 12 px, Touch-Ziele mindestens 44 px. */
+
+:root {
+  /* Schriftgrößen und Abstände (4er-Raster) */
+  --hk-xs: 12px; --hk-sm: 14px; --hk-md: 16px; --hk-lg: 22px; --hk-xl: 32px;
+  --hk-1: 4px; --hk-2: 8px; --hk-3: 12px; --hk-4: 16px; --hk-5: 24px; --hk-6: 32px;
+  --hk-radius: 10px; --hk-radius-gross: 14px;
+  /* Haus und Filiale: warm-dunkel */
+  --hk-haus-grund: #2a2521; --hk-haus-flaeche: #352f2a; --hk-haus-tief: #1d1916; --hk-haus-linie: #4a423b;
+  --hk-haus-text: #f3eee8; --hk-haus-leise: #a89e93;
+  /* Zentrale: kühl-dunkel */
+  --hk-zen-grund: #1f2b32; --hk-zen-flaeche: #29373f; --hk-zen-tief: #162026; --hk-zen-linie: #3b4b54;
+  --hk-zen-text: #eef3f5; --hk-zen-leise: #93a3ab;
+  /* Betrieb (Posteingang, Wochenbericht, Reise, Statistik …): neutral-dunkel */
+  --hk-bet-grund: #24272b; --hk-bet-flaeche: #2f3338; --hk-bet-tief: #1a1c1f; --hk-bet-linie: #43484e;
+  --hk-bet-text: #f1f1ef; --hk-bet-leise: #9da2a7;
+  /* Papier (Zeitung): hell, bleibt Papier */
+  --hk-pap-grund: #ece7dc; --hk-pap-flaeche: #f6f2e9; --hk-pap-tief: #ddd6c7; --hk-pap-linie: #c9c0ae;
+  --hk-pap-text: #1f1d1a; --hk-pap-leise: #5f5a52;
+  /* Signale, in allen Bereichen gleich */
+  --hk-akzent: #d23c32;        /* Hartwig-Rot: Bedienelemente und eine Primäraktion */
+  --hk-akzent-hell: #ef7a6f;   /* Innenkontur der Bedienelemente */
+  --hk-gut: #6dbf73;           /* Ergebnis, positive Abweichung */
+  --hk-schlecht: #ef6f62;      /* negative Abweichung */
+  --hk-achtung: #e7b04b;       /* Engpass */
+  --hk-serie-a: #f3eee8;       /* Umsatz-Balken */
+  --hk-serie-b: #6dbf73;       /* Ergebnis-Balken */
+}
+
+/* ───────────── Bereich: Tokens auf das Panel abbilden ───────────── */
+#panel:has(.hk-bereich), .hk-flaeche-demo {
+  --g: var(--hk-bet-grund); --f: var(--hk-bet-flaeche); --t: var(--hk-bet-tief); --l: var(--hk-bet-linie);
+  --tx: var(--hk-bet-text); --le: var(--hk-bet-leise);
+}
+#panel:has(.hk-bereich[data-bereich=haus]), .hk-flaeche-demo[data-bereich=haus] {
+  --g: var(--hk-haus-grund); --f: var(--hk-haus-flaeche); --t: var(--hk-haus-tief); --l: var(--hk-haus-linie);
+  --tx: var(--hk-haus-text); --le: var(--hk-haus-leise);
+}
+#panel:has(.hk-bereich[data-bereich=zentrale]), .hk-flaeche-demo[data-bereich=zentrale] {
+  --g: var(--hk-zen-grund); --f: var(--hk-zen-flaeche); --t: var(--hk-zen-tief); --l: var(--hk-zen-linie);
+  --tx: var(--hk-zen-text); --le: var(--hk-zen-leise);
+}
+#panel:has(.hk-bereich[data-bereich=papier]), .hk-flaeche-demo[data-bereich=papier] {
+  --g: var(--hk-pap-grund); --f: var(--hk-pap-flaeche); --t: var(--hk-pap-tief); --l: var(--hk-pap-linie);
+  --tx: var(--hk-pap-text); --le: var(--hk-pap-leise);
+}
+/* Alte Variablen der Bestandsklassen auf den Bereich umlenken, damit .karte, .zeile usw. mitziehen. */
+#panel:has(.hk-bereich), .hk-flaeche-demo {
+  --grund: var(--g); --karte: var(--f); --text: var(--tx); --leise: var(--le); --linie: var(--l);
+  --ui-bg: var(--g); --ui-surface: var(--f); --ui-text: var(--tx); --ui-muted: var(--le); --ui-border: var(--l);
+  --gruen: var(--hk-gut); --rot: var(--hk-akzent); --ui-brand: var(--hk-akzent);
+  color: var(--tx);
+}
+.hk-bereich { display: none; }
+
+/* Grund mit feinem senkrechtem Streifen (Helligkeitsunterschied unter 3 %) */
+#panel:has(.hk-bereich), .hk-flaeche-demo {
+  background-color: var(--g);
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 7px, rgba(255,255,255,0.022) 7px 8px);
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.35);
+}
+#panel:has(.hk-bereich[data-bereich=papier]) { background-image: none; }
+#panel:has(.hk-bereich[data-bereich=papier]), .hk-flaeche-demo[data-bereich=papier] { --hk-serie-a: #3b3832; --hk-serie-b: #3e8a45; --hk-gut: #2f7a37; --hk-schlecht: #b6362c; --hk-achtung: #9a6a12; }
+
+/* ───────────── Blattkopf ───────────── */
+#panel:has(.hk-bereich) .pkopf { background: var(--t); border-bottom: 1px solid var(--l); color: var(--tx);
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; grid-template-rows: auto auto auto; column-gap: 8px; align-items: center; padding: 6px 8px 8px; text-align: center; }
+#panel:has(.hk-bereich) .pkopf .griff { grid-column: 1 / -1; background: var(--l); margin-bottom: 4px; }
+#panel:has(.hk-bereich) #psymbol { display: block; grid-column: 1; grid-row: 2 / span 2; width: 36px; height: 36px; justify-self: center;
+  background: center / contain no-repeat var(--hk-symbol, none); }
+#panel:has(.hk-bereich) #ptitel { grid-column: 2; grid-row: 2; padding: 0; font-size: var(--hk-md); line-height: 20px; font-weight: 700; color: var(--tx); }
+#panel:has(.hk-bereich) #punter { grid-column: 2; grid-row: 3; padding: 0; margin: 0; color: var(--le); font-size: var(--hk-xs); line-height: 16px; }
+#panel:has(.hk-bereich) #pzu { position: static; grid-column: 3; grid-row: 2 / span 2; width: 44px; height: 44px; border-radius: 22px; background: transparent; color: var(--tx); font-size: 24px; }
+#psymbol { display: none; }
+#panel:has(.hk-bereich[data-symbol=haus]) { --hk-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M18 5 31 12v14l-13 7L5 26V12z' fill='%23b9b0a6'/%3E%3Cpath d='M5 12l13 7v14L5 26z' fill='%23e9e3dc'/%3E%3Cpath d='M18 19l13-7v14l-13 7z' fill='%23948a80'/%3E%3Cpath d='M5 15.5l13 7 13-7v2.4l-13 7-13-7z' fill='%23d23c32'/%3E%3Cpath d='M8 21l3 1.6v4L8 25zM13 23.7l3 1.6v4l-3-1.6z' fill='%235f574f'/%3E%3C/svg%3E"); }
+#panel:has(.hk-bereich[data-symbol=zentrale]) { --hk-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M18 2l9 5v22l-9 5-9-5V7z' fill='%23aebdc5'/%3E%3Cpath d='M9 7l9 5v22l-9-5z' fill='%23e3ecf0'/%3E%3Cpath d='M18 12l9-5v22l-9 5z' fill='%237f929c'/%3E%3Cpath d='M11 11l5 2.8v1.6L11 12.6zM11 15.5l5 2.8v1.6L11 17.1zM11 20l5 2.8v1.6L11 21.6zM11 24.5l5 2.8v1.6L11 26.1z' fill='%234d6470'/%3E%3C/svg%3E"); }
+#panel:has(.hk-bereich[data-symbol=post]) { --hk-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M4 14l14-7 14 7-14 7z' fill='%23d9c9a8'/%3E%3Cpath d='M4 14l14 7v8L4 22z' fill='%23efe3c9'/%3E%3Cpath d='M18 21l14-7v8l-14 7z' fill='%23b6a27c'/%3E%3Cpath d='M7 12.5l11 5.5 11-5.5-11-5.5z' fill='%23fbf7ee'/%3E%3Cpath d='M18 18l11-5.5v1.2L18 19.2z' fill='%23d23c32'/%3E%3C/svg%3E"); }
+#panel:has(.hk-bereich[data-symbol=zahlen]) { --hk-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M4 24l14 7 14-7-14-7z' fill='%2357616a'/%3E%3Cpath d='M8 22V14l3 1.5v8z' fill='%23e9e3dc'/%3E%3Cpath d='M11 23.5v-8l2-1v8z' fill='%23948a80'/%3E%3Cpath d='M16 26V10l3 1.5v16z' fill='%23f3eee8'/%3E%3Cpath d='M19 27.5v-16l2-1v16z' fill='%23aaa197'/%3E%3Cpath d='M24 24V17l3 1.5v7z' fill='%236dbf73'/%3E%3Cpath d='M27 25.5v-7l2-1v7z' fill='%234a8d50'/%3E%3C/svg%3E"); }
+#panel:has(.hk-bereich[data-symbol=karte]) { --hk-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M3 18l10-5 10 5 10-5v13l-10 5-10-5-10 5z' fill='%23b9c4b2'/%3E%3Cpath d='M13 13v13l10 5V18z' fill='%23d5ddcf'/%3E%3Cpath d='M18 6a5 5 0 0 1 5 5c0 4-5 9-5 9s-5-5-5-9a5 5 0 0 1 5-5z' fill='%23d23c32'/%3E%3Ccircle cx='18' cy='11' r='2' fill='%23fff'/%3E%3C/svg%3E"); }
+
+/* ───────────── Inhalt ───────────── */
+#panel:has(.hk-bereich) #pinhalt { padding: 0 0 calc(16px + env(safe-area-inset-bottom)); }
+.hk-rumpf { padding: var(--hk-3) calc(var(--hk-4) + env(safe-area-inset-right)) var(--hk-3) calc(var(--hk-4) + env(safe-area-inset-left)); }
+
+/* Sprecherzeile: eine Person sagt den Befund der Woche, keine Begrüßung */
+.hk-sprecher { position: relative; display: flex; align-items: center; gap: var(--hk-3); min-height: 64px; padding: var(--hk-2) 0 var(--hk-2) var(--hk-4);
+  background: var(--t); border-bottom: 1px solid var(--l); color: var(--tx); }
+.hk-sprecher p { flex: 1; margin: 0; font-size: var(--hk-sm); line-height: 20px; }
+.hk-sprecher p b { font-weight: 700; }
+.hk-sprecher small { display: block; color: var(--le); font-size: var(--hk-xs); line-height: 16px; margin-top: 2px; }
+.hk-sprecher .hk-person { flex: none; width: 60px; height: 64px; margin: -14px var(--hk-3) -8px 0; align-self: flex-end; overflow: hidden; }
+.hk-sprecher .hk-person svg { display: block; width: 60px; height: 72px; }
+.hk-sprecher.hk-engpass { box-shadow: inset 3px 0 0 var(--hk-achtung); }
+.hk-sprecher.hk-alarm { box-shadow: inset 3px 0 0 var(--hk-schlecht); }
+
+/* Kopfbild (isometrische Ansicht) randlos */
+.hk-kopfbild { position: relative; background: var(--t); border-bottom: 1px solid var(--l); overflow: hidden; }
+.hk-kopfbild img, .hk-kopfbild svg { display: block; width: 100%; height: auto; }
+.hk-kopfbild .hk-bildknopf { position: absolute; bottom: var(--hk-2); min-width: 44px; height: 44px; border-radius: 12px; background: rgba(20,18,16,0.82); color: #fff;
+  border: 1px solid rgba(255,255,255,0.18); font-size: var(--hk-xs); font-weight: 700; padding: 0 12px; }
+.hk-kopfbild .hk-bildknopf.links { left: var(--hk-2); } .hk-kopfbild .hk-bildknopf.rechts { right: var(--hk-2); }
+
+/* Abschnittskopf in Versalien */
+.hk-abschnitt { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: var(--hk-5) 0 var(--hk-2); font-size: var(--hk-xs); line-height: 16px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--tx); font-weight: 700; }
+.hk-abschnitt:first-child { margin-top: var(--hk-2); }
+.hk-abschnitt small { letter-spacing: 0; text-transform: none; font-weight: 400; color: var(--le); font-size: var(--hk-xs); }
+
+/* Großkennzahlen: Beschriftung in Versalien, Zahl groß, Abweichung darunter */
+.hk-gross { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); gap: var(--hk-3); margin: var(--hk-3) 0; }
+.hk-gross > div { min-width: 0; text-align: center; }
+.hk-gross > div > span { display: block; font-size: var(--hk-xs); line-height: 16px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--le); }
+.hk-gross b { display: block; font-size: clamp(22px, 7vw, var(--hk-xl)); line-height: 1.15; font-weight: 400; color: var(--tx); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.hk-gross b.gut { color: var(--hk-gut); } .hk-gross b.schlecht { color: var(--hk-schlecht); }
+.hk-gross i { display: block; font-style: normal; font-size: var(--hk-xs); line-height: 16px; color: var(--le); font-variant-numeric: tabular-nums; }
+.hk-gross i .gut { color: var(--hk-gut); } .hk-gross i .schlecht { color: var(--hk-schlecht); }
+
+/* Balken ohne Achsen: 5 Wochen, gepaart */
+.hk-balken { display: grid; grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); gap: var(--hk-2); align-items: end; height: 132px; padding: 0 var(--hk-2); margin: var(--hk-2) 0 0; }
+.hk-balken > div { height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 4px; }
+.hk-balken span { display: block; width: 12px; min-height: 2px; border-radius: 6px; background: var(--hk-serie-a); }
+.hk-balken span.b { background: var(--hk-serie-b); } .hk-balken span.neg { background: var(--hk-schlecht); }
+.hk-balken span.null { background: var(--l); }
+.hk-balkenfuss { display: grid; grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); gap: var(--hk-2); padding: 4px var(--hk-2) 0; font-size: var(--hk-xs); line-height: 16px; color: var(--le); text-align: center; }
+.hk-legende { display: flex; gap: var(--hk-4); justify-content: center; font-size: var(--hk-xs); color: var(--le); margin: var(--hk-2) 0 0; }
+.hk-legende i { display: inline-block; width: 10px; height: 10px; border-radius: 5px; margin-right: 6px; vertical-align: -1px; background: var(--hk-serie-a); }
+.hk-legende i.b { background: var(--hk-serie-b); }
+
+/* Tabelle (GuV): Zeilenbeschriftung leise, Zahlen rechts, Strich vor Summen, Null sichtbar */
+.hk-tabelle { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.hk-tabelle th { font-size: var(--hk-xs); font-weight: 400; color: var(--le); text-align: right; padding: 0 0 4px var(--hk-2); white-space: nowrap; }
+.hk-tabelle th:first-child { text-align: left; padding-left: 0; }
+.hk-tabelle td { font-size: var(--hk-sm); line-height: 20px; padding: 3px 0 3px var(--hk-2); text-align: right; color: var(--tx); white-space: nowrap; }
+.hk-tabelle td:first-child { text-align: left; padding-left: 0; color: var(--le); white-space: normal; overflow-wrap: anywhere; }
+.hk-tabelle tr.summe td { border-top: 1px solid var(--tx); font-weight: 700; color: var(--tx); padding-top: 6px; }
+.hk-tabelle tr.summe td:first-child { border-top-color: transparent; color: var(--tx); }
+.hk-tabelle td.gut { color: var(--hk-gut); } .hk-tabelle td.schlecht { color: var(--hk-schlecht); }
+
+/* Liste: Titel links, Wert rechts, bricht um statt zu überlappen */
+.hk-liste { background: var(--f); border: 1px solid var(--l); border-radius: var(--hk-radius); overflow: hidden; }
+.hk-zeile { box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--hk-3); row-gap: 4px; min-height: 48px; padding: var(--hk-2) var(--hk-3); border-top: 1px solid var(--l); color: var(--tx); text-align: left; width: 100%; background: transparent; font: inherit; }
+.hk-zeile:first-child { border-top: 0; }
+.hk-zeile > .hk-was { flex: 1 1 150px; min-width: 0; font-size: var(--hk-sm); line-height: 20px; overflow-wrap: anywhere; }
+.hk-zeile > .hk-was small { display: block; color: var(--le); font-size: var(--hk-xs); line-height: 16px; }
+.hk-zeile > .hk-wert { flex: 0 0 auto; margin-left: auto; font-size: var(--hk-sm); font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.hk-zeile > .hk-wert small { display: block; font-weight: 400; color: var(--le); font-size: var(--hk-xs); }
+.hk-zeile.hk-tippbar { cursor: pointer; } .hk-zeile.hk-tippbar:active { background: var(--t); }
+.hk-zeile .hk-pfeil { color: var(--le); flex: none; }
+.hk-wert.gut, .hk-gut { color: var(--hk-gut); } .hk-wert.schlecht, .hk-schlecht { color: var(--hk-schlecht); } .hk-achtung { color: var(--hk-achtung); }
+
+/* Karte: nur für eigenständige Sachverhalte */
+.hk-karte { background: var(--f); border: 1px solid var(--l); border-radius: var(--hk-radius); padding: var(--hk-3); margin: 0 0 var(--hk-2); }
+
+/* Knöpfe: Primär Hartwig-Rot mit doppelter Kontur, sekundär Kontur, tertiär Text */
+.hk-knopf { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 0 var(--hk-4); border-radius: 12px;
+  background: var(--hk-akzent); color: #fff; font: inherit; font-size: var(--hk-sm); font-weight: 700; border: 1px solid #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); cursor: pointer; }
+.hk-knopf.zweit { background: transparent; color: var(--tx); border: 1px solid var(--l); box-shadow: none; }
+.hk-knopf.text { background: transparent; color: var(--tx); border: 0; box-shadow: none; text-decoration: underline; text-underline-offset: 3px; padding: 0 var(--hk-2); }
+.hk-knopf.breit { display: flex; width: 100%; }
+.hk-knopf:disabled { opacity: 0.45; cursor: default; }
+.hk-knopfreihe { display: flex; flex-wrap: wrap; gap: var(--hk-2); margin: var(--hk-3) 0; }
+.hk-knopfreihe > .hk-knopf { flex: 1 1 140px; }
+
+/* Stepper [−] Wert [+] mit Unterzeile */
+.hk-stepper { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 6px; padding: 3px; border-radius: 12px; background: var(--t); border: 1px solid var(--l); }
+.hk-stepper button { width: 44px; height: 44px; border-radius: 10px; background: var(--hk-akzent); color: #fff; font-size: 22px; font-weight: 700; border: 1px solid #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+.hk-stepper output { text-align: center; font-size: var(--hk-md); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--tx); }
+.hk-stepper output small { display: block; font-size: var(--hk-xs); font-weight: 400; color: var(--le); }
+.hk-stepper button:disabled { opacity: 0.4; }
+
+/* Schalter */
+.hk-schalter { display: flex; align-items: center; gap: var(--hk-3); width: 100%; min-height: 52px; padding: var(--hk-2) var(--hk-3); background: transparent; border: 0; border-top: 1px solid var(--l); color: var(--tx); font: inherit; text-align: left; }
+.hk-schalter:first-child { border-top: 0; }
+.hk-schalter .hk-knebel { position: relative; flex: none; width: 50px; height: 30px; border-radius: 15px; background: var(--t); border: 1px solid var(--l); }
+.hk-schalter .hk-knebel::after { content: ''; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 11px; background: var(--le); transition: left .15s; }
+.hk-schalter[aria-pressed=true] .hk-knebel { background: var(--hk-akzent); border-color: #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+.hk-schalter[aria-pressed=true] .hk-knebel::after { left: 23px; background: #fff; }
+.hk-schalter span { flex: 1; font-size: var(--hk-sm); line-height: 20px; } .hk-schalter small { display: block; color: var(--le); font-size: var(--hk-xs); }
+
+/* Segmentleiste */
+.hk-seg { display: flex; gap: 2px; padding: 3px; border-radius: 12px; background: var(--t); border: 1px solid var(--l); overflow-x: auto; scrollbar-width: none; }
+.hk-seg::-webkit-scrollbar { display: none; }
+.hk-seg button { flex: 1 0 auto; min-height: 44px; padding: 0 var(--hk-3); border-radius: 9px; background: transparent; border: 0; color: var(--le); font: inherit; font-size: var(--hk-sm); font-weight: 700; white-space: nowrap; }
+.hk-seg button[aria-pressed=true] { background: var(--hk-akzent); color: #fff; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+
+/* Reiterleiste unten mit illustrierten Symbolen */
+.hk-reiter { position: sticky; bottom: 0; z-index: 3; display: flex; gap: 2px; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: var(--t); border-top: 1px solid var(--l); overflow-x: auto; scrollbar-width: none; margin-top: var(--hk-4); }
+.hk-reiter::-webkit-scrollbar { display: none; }
+.hk-reiter button { flex: 1 0 58px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 12px; background: transparent; border: 0; color: var(--le); font: inherit; font-size: var(--hk-xs); line-height: 16px; white-space: nowrap; }
+.hk-reiter button svg { width: 34px; height: 34px; display: block; }
+.hk-reiter button[aria-current=page] { background: var(--f); color: var(--tx); font-weight: 700; }
+
+/* Leerer Zustand, Hinweise, Engpass */
+.hk-leer { border: 1px dashed var(--l); border-radius: var(--hk-radius); padding: var(--hk-4); text-align: center; color: var(--le); font-size: var(--hk-sm); line-height: 20px; }
+.hk-leer b { display: block; color: var(--tx); font-size: var(--hk-sm); margin-bottom: 4px; }
+.hk-leer .hk-knopf { margin-top: var(--hk-3); }
+.hk-hinweis { display: flex; gap: var(--hk-2); align-items: flex-start; padding: var(--hk-2) var(--hk-3); border-radius: var(--hk-radius); background: var(--t); border: 1px solid var(--l); font-size: var(--hk-sm); line-height: 20px; color: var(--tx); margin: var(--hk-2) 0; }
+.hk-hinweis::before { content: ''; flex: none; width: 4px; align-self: stretch; border-radius: 2px; background: var(--le); }
+.hk-hinweis.achtung::before { background: var(--hk-achtung); } .hk-hinweis.fehler::before { background: var(--hk-schlecht); } .hk-hinweis.gut::before { background: var(--hk-gut); }
+
+/* Kleine Marke (Status), nicht als Schmuck */
+.hk-marke { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 6px; border: 1px solid var(--l); color: var(--tx); font-size: var(--hk-xs); font-weight: 700; white-space: nowrap; }
+.hk-marke.achtung { border-color: var(--hk-achtung); color: var(--hk-achtung); } .hk-marke.schlecht { border-color: var(--hk-schlecht); color: var(--hk-schlecht); } .hk-marke.gut { border-color: var(--hk-gut); color: var(--hk-gut); }
+
+/* Segmentierter Fähigkeitsbalken mit Zahl */
+.hk-skala { display: grid; grid-template-columns: minmax(80px, 34%) minmax(0, 1fr) 32px; align-items: center; gap: var(--hk-2); min-height: 28px; font-size: var(--hk-sm); }
+.hk-skala > span:first-child { color: var(--le); text-align: right; }
+.hk-skala .hk-segmente { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; height: 14px; }
+.hk-skala .hk-segmente i { border-radius: 3px; background: var(--t); border: 1px solid var(--l); }
+.hk-skala .hk-segmente i.an { background: var(--hk-gut); border-color: #3f8a45; }
+.hk-skala b { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Bestandsklassen im dunklen Look (für Panels, die sie weiter nutzen) */
+#panel:has(.hk-bereich) .karte { background: var(--f); border-color: var(--l); }
+#panel:has(.hk-bereich) .khead { border-color: var(--l); color: var(--tx); }
+#panel:has(.hk-bereich) .zeile { border-color: var(--l); }
+#panel:has(.hk-bereich) .mini, #panel:has(.hk-bereich) .oknoepfe button { background: transparent; color: var(--tx); border: 1px solid var(--l); min-height: 44px; }
+#panel:has(.hk-bereich) .chip { background: transparent; border: 1px solid var(--l); color: var(--tx); }
+#panel:has(.hk-bereich) select, #panel:has(.hk-bereich) input[type=text], #panel:has(.hk-bereich) input[type=search], #panel:has(.hk-bereich) input[type=number] {
+  background: var(--t); color: var(--tx); border: 1px solid var(--l); border-radius: 10px; min-height: 44px; font: inherit; font-size: var(--hk-md); padding: 0 10px; }
+#panel:has(.hk-bereich) .tabs, #panel:has(.hk-bereich) .seg { background: var(--t); border: 1px solid var(--l); box-shadow: none; }
+#panel:has(.hk-bereich) .tab, #panel:has(.hk-bereich) .seg button { color: var(--le); min-height: 44px; }
+#panel:has(.hk-bereich) .tab.an, #panel:has(.hk-bereich) .seg button.an { background: var(--hk-akzent); color: #fff; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+#panel:has(.hk-bereich) .stepper button { background: var(--hk-akzent); color: #fff; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+#panel:has(.hk-bereich) .breit { background: transparent; color: var(--tx); border-color: var(--l); }
+#panel:has(.hk-bereich) .breit.gruen { background: var(--hk-akzent); border-color: #8f2219; color: #fff; }
+#panel:has(.hk-bereich) .zurueck, #panel:has(.hk-bereich) .postalle, #panel:has(.hk-bereich) .postzurueck, #panel:has(.hk-bereich) .postort { color: var(--tx); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; }
+#panel:has(.hk-bereich) .lkopf, #panel:has(.hk-bereich) .lzeile.bereich { background: var(--t); border-color: var(--l); }
+#panel:has(.hk-bereich) .lzeile { border-color: var(--l); color: var(--tx); }
+#panel:has(.hk-bereich) .leise, #panel:has(.hk-bereich) .legende, #panel:has(.hk-bereich) .rfuss { color: var(--le); }
+#panel:has(.hk-bereich) .kz { background: var(--f); border-color: var(--l); }
