@@ -8,7 +8,7 @@ body.reise-aktiv .unten, body.wochen-aktiv .unten {pointer-events:none}
 #reise-overlay.faehrt .reise-panel {display:none}
 .reise-panel {height:100dvh; max-width:700px; margin:auto; display:flex; flex-direction:column; overflow:hidden; background:#f3f1ec; transform:scale(.55); opacity:.35; transition:transform 240ms ease-out,opacity 240ms ease-out}
 #reise-overlay.offen .reise-panel {transform:scale(1);opacity:1}
-.reise-kopf {background:#fff; position:relative;display:flex;flex-direction:column;flex:none; padding:0 18px 12px}
+.reise-kopf {background:var(--ui-surface,#fff); position:relative;display:flex;flex-direction:column;flex:none; padding:env(safe-area-inset-top) 18px 12px}
 .reise-kopfbild {position:relative;height:clamp(118px,22dvh,185px);overflow:hidden; background:linear-gradient(165deg,#a8c7d4 15%,#e6eceb 48%,#aab9c0 48%,#788b94 52%,#f4f4f4 53%,#e6ddd1 75%);margin:0 -18px 10px}
 .reise-kopfbild:before {content:'';position:absolute;left:15%;right:15%;top:80%;height:8px;background:#c8312c;transform:skew(-35deg)}
 .reise-kopfbild .reise-zug {position:absolute;bottom:13%;left:0;width:110%;max-height:120px;filter:drop-shadow(0 7px 4px #48545b70);animation:reise-kopf-zoom 6s ease-out forwards}
@@ -19,21 +19,44 @@ body.reise-aktiv .unten, body.wochen-aktiv .unten {pointer-events:none}
 .reise-assistent {display:flex;align-items:center;gap:16px;background:#fff;border-top:1px solid #e7e3dc;padding:11px 18px;min-height:87px}
 .reise-text {font-size: calc(15px * var(--schrift));line-height:1.42;flex:1;min-width:0}
 .reise-portraet {flex:0 0 57px;height:57px;display:grid;place-items:center;color:#fff;font-size: calc(26px * var(--schrift));font-weight:800;border-radius:50% 50% 12px 12px;background:linear-gradient(#a4b7c6 45%,#344857 46%)}
-.reise-ziele {display:flex;flex-direction:column;overflow:hidden;min-height:0;flex:1;padding:12px 17px 0;transform:translateY(30px);opacity:0;transition:transform 300ms ease-out,opacity 300ms ease-out}
+.reise-ziele {display:flex;flex-direction:column;overflow:hidden;min-height:0;flex:1;padding:12px 17px calc(8px + env(safe-area-inset-bottom));transform:translateY(30px);opacity:0;transition:transform 300ms ease-out,opacity 300ms ease-out}
 #reise-overlay.ziele-offen .reise-ziele {transform:translateY(0);opacity:1}
 .reise-ziele h2 {font-size: calc(13px * var(--schrift));letter-spacing:2px;margin:3px 0 9px}
 .reise-suche {font:inherit;width:100%;min-height:44px;border-radius:12px;border:1px solid #d4dbe0;padding:0 14px;background:#fff}
-.reise-deutschland {height:clamp(260px,34dvh,320px);flex:none;text-align:center;opacity:.8;overflow:hidden}
-.reise-deutschland svg {height:100%;width:max(50%,200px)}
-.reise-zielraster {overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:min-content;align-content:start;gap:9px;padding:0 0 calc(20px + env(safe-area-inset-bottom))}
-.reise-ziel {background:#fff;display:flex;align-items:center;min-height:74px;gap:8px;border-radius:14px;padding:8px;color:#1f2a33;text-align:left;min-width:0}
-.reise-ziel img {width:52px;height:52px;border-radius:50%;object-fit:cover;flex:none}
-.reise-ziel .reise-vorschaurahmen {position:relative;display:block;flex:0 0 52px;width:52px;height:52px;border-radius:50%;border:3px solid var(--stadtfarbe);background:var(--stadtfarbe);overflow:hidden}
-.reise-ziel .reise-vorschaurahmen img {position:absolute;inset:0;width:100%;height:100%;border-radius:inherit;object-fit:cover}
-.reise-ziel span {min-width:0;overflow:visible}.reise-ziel strong {display:block;font-size: calc(13px * var(--schrift));overflow:hidden;text-overflow:ellipsis}
-.reise-ziel small {display:block;font-size: calc(10px * var(--schrift));color:#70818d;line-height:1.35;max-height:42px;overflow:hidden}
-.reise-ziel .reise-formate {display:flex;flex-wrap:wrap;gap:2px 6px;max-height:none;overflow:visible}
-.reise-ziel .reise-format {display:inline-block;min-width:auto;overflow:visible;white-space:nowrap}
+/* Q23: Deutschlandkarte und Liste sind gleichberechtigte Ansichten; jede besitzt einen eigenen Scrollbereich. */
+.reise-zielkopf { display:flex;align-items:baseline;justify-content:space-between;gap:10px; }
+.reise-zielkopf h2 { flex:none; }
+.reise-treffer { color:var(--ui-muted,#62666a);font-size:calc(12px * var(--schrift)); }
+.reise-wechsel { flex:none;display:grid;grid-template-columns:1fr 1fr;gap:0;margin:10px 0 8px;border-bottom:1px solid var(--ui-border,#e2e1dd); }
+.reise-wechsel button { background:transparent;color:var(--ui-muted,#62666a);font-size:calc(14px * var(--schrift));font-weight:650;
+  border:0;border-bottom:3px solid transparent;border-radius:0;min-height:44px;padding:7px 5px; }
+.reise-wechsel button[aria-selected="true"] {color:var(--ui-text,#242424);border-bottom-color:var(--ui-brand,#b32632);}
+.reise-wechsel button:focus-visible,.deutschland-stadt:focus-visible {outline:2px solid var(--ui-brand,#b32632);outline-offset:2px}
+.reise-blatt { flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable; }
+.reise-blatt[hidden] { display:none!important; }
+.reise-karteblatt {background:var(--ui-surface,#fff);border:1px solid var(--ui-border,#e2e1dd);border-radius:var(--ui-radius,10px);padding:8px 10px 12px;}
+.reise-deutschland { min-height:330px;height:calc(100% - 60px);display:flex;justify-content:center;align-items:center; }
+.reise-deutschland .deutschland-svg {display:block;max-width:100%;height:100%;max-height:100%;width:auto;overflow:visible;}
+.reise-kartenhinweis {font-size:calc(12px * var(--schrift));line-height:1.4;color:var(--ui-muted,#62666a);margin:8px 3px;}
+.reise-listenblatt {padding:2px 0 18px;}
+.reise-zielraster {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:min-content;align-content:start;gap:8px;padding:0 0 18px;}
+.reise-ziel {background:var(--ui-surface,#fff);display:flex;align-items:center;min-height:78px;gap:8px;
+  border:1px solid var(--ui-border,#e2e1dd);border-radius:var(--ui-radius,10px);padding:8px;color:var(--ui-text,#242424);
+  text-align:left;min-width:0;}
+.reise-ziel:focus-visible {outline:2px solid var(--ui-brand,#b32632);outline-offset:1px}
+.reise-ziel .reise-vorschaurahmen {position:relative;display:block;flex:0 0 52px;width:52px;height:52px;
+  border-radius:8px;background:#eef1f2;overflow:hidden;}
+.reise-vorschaurahmen img,.reise-vorschaurahmen svg {display:block;width:100%;height:100%;object-fit:cover;}
+.reise-zieltext {display:block;min-width:0;flex:1;}
+.reise-ziel strong {display:block;font-size:calc(13px * var(--schrift));line-height:1.3;overflow-wrap:anywhere;}
+.reise-ziel small {display:block;font-size:calc(10px * var(--schrift));color:var(--ui-muted,#62666a);line-height:1.35;}
+.reise-ziel .reise-formate {display:flex;flex-wrap:wrap;gap:2px 5px;max-height:none;overflow:visible;}
+.reise-ziel .reise-format {display:inline-block;white-space:nowrap;}
+.reise-leer {grid-column:1/-1;padding:16px;text-align:center;font-size:calc(14px * var(--schrift));}
+@media (max-width:360px) {
+ .reise-zielraster {grid-template-columns:1fr;}
+ .reise-ziel {min-height:68px;}
+}
 .reise-flug {position:absolute;inset:0;overflow:hidden;background:#d9e2e7;opacity:0;transition:opacity 150ms ease-out}
 .reise-flug.start {opacity:1}
 .reise-panorama {position:absolute;inset:-5% -50%;background-position:center;background-size:cover;transform:translate3d(12%,0,0) scale(1.03);will-change:transform}

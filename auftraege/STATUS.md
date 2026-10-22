@@ -28,7 +28,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q10 Kamera bleibt über Haus | – | **gemergt 21.10.** (#53, 7af4959) | Hausdetail lässt oben Kartenstreifen frei (62 dvh), Kamera bleibt am Haus bei Kachelnachladen, Woche, Scroll, Resize; Mobil-Smoke Berlin 3 Häuser ≤ 40 px; Fingerabdrücke 112/112 unverändert |
 | Q11 Eigenmarken Sortiment (Bilder, Kategorien, Zielgruppen) | main | **gemergt 22.10.** (#57, 5aefc30) | Kategoriebaum und Zielgruppen; 7 neue Artikeltypen (139 gesamt). Bilder aus kit/mode (Q25-Fassung von produktbild.js), Q11-Eigenzeichner entfernt; alle 139 Typen mit eigener Silhouette, A-Linien-Rock noch auf `rock` (Q27 Phase 2). Freigabe für Q14, Q17, Q24, Q27–Q29 Phase 2 |
 | Q12 Hausbesuch Laufwege | – | **gemergt 21.10.** (#56) | Wegsuche auf Ladenbau-Belegung, 9 Etagen (Warenhaus, Sport, FUNDUS) je 60 s: 0 Kollisionen, 1,17–1,21 m/s, bildratenunabhängig; Claude-Fixes: zweiter Hausbesuch/Hauswechsel scheiterte (Kontext zerstört), Sporthaus-Etagen mit Etagenbau warfen Fehler (`etageNr`); Fingerabdrücke 112/112 unverändert |
-| Q13 Sandkasten unbegrenzt | `feat/q13-sandkasten` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q13 Sandkasten unbegrenzt | main | **gemergt 22.10.** (#55, 5db9b8b) | Sandkasten ohne Liquiditätsgrenze bei echter GuV und Kapitalfluss; FUNDUS-Eröffnung, Volkskauf-Umflaggen und Wettbewerber-Flächenumbau ebenfalls ohne Grenze (Claude) |
 | Q14 Oberfläche gesamt (Gestaltungssystem) | `feat/q14-oberflaeche-design` #51 | GPT fertig gemeldet | Q11 gemergt 22.10.: Prüfung durch QA Grafik jetzt frei |
 | Q15 Zentrale Abteilungsseiten | `feat/q15-zentrale-abteilungen` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q16 Marketing-Kanäle und Marktanteil | `feat/q16-marketing-kanaele` | **startet 21.10.** | `auftraege/wurf2/` |
@@ -37,8 +37,8 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q19 IT-Produkte als Karten | `feat/q19-it-produkte` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q20 Schwierigkeit je Szenario | `feat/q20-szenario-schwierigkeit` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q21 Warenhaus-Vielfalt je Stadt | `feat/q21-warenhaus-vielfalt` | **startet 21.10.** | `auftraege/wurf2/` |
-| Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **startet 21.10.** | `auftraege/wurf2/` |
-| Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q22 Hauspins und Premium erkennbar | `feat/q22-hauspins` | **gemergt 22.10. (#59)**: Pins am Dach, Krone und Name bei Premium, Abzeichen Aktion/Umbau/Warnung; Fingerabdruck unverändert | `auftraege/wurf2/` |
+| Q23 Reise Karte und Liste | `feat/q23-reise-karte` | **gemergt 22.10. (#61)**: Deutschlandkarte mit 16 Ländern, Liste als eigenes Blatt bis zur letzten Stadt; Claude: große Städte oben, Berlin auf 375 px antippbar; Fingerabdruck unverändert | `auftraege/wurf2/` |
 | Q24 Eigenmarken Deep Dive (nach Q11) | `feat/q24-eigenmarken-deep-dive` | **startet nach Q11; nur noch Bedienung + Teamleistung, Artikeltypen kommen aus Q27–Q29** | `auftraege/wurf2/` |
 | Q25 Produktbilder und Model (Claude) | `q25/feat/q25-produktbilder` (PR #67) | **gemergt 21.10. (97c21aa), CI grün; Model-Stil von Ummo abgenommen; 106 Silhouetten, Model je Produkt** | `auftraege/wurf2/` |
 | Q27 Mode-Bilder + Mode-Artikeltypen (Claude-Chat) | `feat/q27-mode-bilder` (PR #69) | **Phase 1 gemergt 22.10. (5e11375): 47 neue Mode-Silhouetten, Nachschärfung, Model mit Händen/Spielbein, Blindtest 100 %; lokal grün, CI nicht gestartet (GitHub-Billing: Zahlung fehlgeschlagen/Ausgabelimit). Phase 2 Artikeltypen jetzt frei (Q11 #57 gemergt 22.10.)** | `auftraege/wurf2/` |

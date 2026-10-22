@@ -5,6 +5,7 @@ import { lohnKosten } from './wirtschaft';
 import { runwayWochen } from './stakeholder';
 import { hqMoralZiel, hqRechtFaktor } from './hq';
 import { schwierigkeit } from './schwierigkeit';
+import { istSandkasten } from './sandkasten';
 
 /** Schließungen je Spielstand in der laufenden Woche (für die abnehmende Imagewirkung einer Schließungswelle). */
 const SCHLIESSUNGEN_WOCHE = new WeakMap<GameState, { woche: number; n: number }>();
@@ -291,7 +292,7 @@ export function quartalsBewertung(s: GameState): void {
     const vorjahr = s.quartale.find((x) => x.nr === q.nr - 4);
     const besser = vorjahr ? ist > vorjahr.ebitdaIst : ist > q.planStandard + 0.1 * Math.abs(q.planStandard);
     if (!besser) txt += ' Ohne sichtbare Verbesserung gegenüber dem Vorjahr gibt es kein frisches Geld.';
-    if (s.phase === 'regulaer' && besser && (runwayWochen(s) < 26 || s.cash + s.kreditlinie < 150_000_000 * volumen)) {
+    if (s.phase === 'regulaer' && !istSandkasten(s) && besser && (runwayWochen(s) < 26 || s.cash + s.kreditlinie < 150_000_000 * volumen)) {
       const kapital = eur(12_000_000 * volumen * (st.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
       s.cash += kapital;
       s.einmalErloeseWoche += kapital;

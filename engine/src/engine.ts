@@ -4,6 +4,7 @@ import { ereignisse } from './ereignisse';
 import { premiumWoche } from './premium';
 import { chronikAktualisieren, chronikInitialisieren } from './chronik';
 import { erfolgeWoche } from './erfolge';
+import { istSandkasten, liquiditaetReicht } from './sandkasten';
 import { spielendePruefen } from './spielende';
 import { umbauWoche } from './umbau';
 import { wettbewerbWoche } from './wettbewerb';
@@ -348,7 +349,7 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   s.cash += eur(einzahlung - pflicht);
   if (insolvenzgeld && s.insolvenz) s.insolvenz.altVerbindlichkeiten += eur(k.personal);
 
-  if (s.cash + s.kreditlinie < 0) {
+  if (!istSandkasten(s) && s.cash + s.kreditlinie < 0) {
     if (s.phase === 'regulaer') eroeffneInsolvenz(s, 'Zahlungsunfähigkeit: Löhne und Mieten nicht gedeckt');
     else if (s.phase === 'insolvenz') zerschlagungDurchMasseunzulaenglichkeit(s);
   }
@@ -410,7 +411,7 @@ function lieferantenZahlungen(s: GameState): void {
   const faellig = s.verbindlichkeiten.filter((v) => v.faellig <= w).sort((a, b) => a.faellig - b.faellig);
   let unbezahlt = false;
   for (const v of faellig) {
-    if (s.cash - v.wert >= -s.kreditlinie) {
+    if (liquiditaetReicht(s, v.wert)) {
       s.cash -= v.wert;
       v.wert = 0;
     } else {

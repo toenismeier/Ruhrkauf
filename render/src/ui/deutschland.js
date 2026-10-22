@@ -1,5 +1,7 @@
-// Schematische Deutschlandübersicht. Koordinaten aus der Engine, keine three.js-Szene.
+// Eine gemeinsame Deutschlandkarte für Portfolio (#23) und Reise (Q23).
+// Alle geografischen Daten sind lokal: Standorte aus der Engine, Bundesländer aus dem Katalog.
 import { KOORDINATEN } from '../../../engine/src/standorte';
+import { BUNDESLAENDER } from './deutschland-geometrie.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const element = (name, attrs = {}) => {
@@ -10,8 +12,10 @@ const element = (name, attrs = {}) => {
 const x = (lon) => 26 + ((lon - 5.5) / 9.8) * 304;
 const y = (lat) => 514 - ((lat - 47.2) / 8.1) * 484;
 export const AMPEL_FARBE = { gruen: '#248453', gelb: '#d69b24', rot: '#c43e36', ohne: '#88929a' };
+const GROSSE_STAEDTE = new Set(['Berlin', 'Hamburg', 'München', 'Köln', 'Frankfurt', 'Stuttgart',
+  'Hannover', 'Leipzig', 'Dresden', 'Bremen', 'Düsseldorf', 'Essen']);
 
-/** Liefert jede Stadt mit ihrem tatsächlichen Portfolio-Umsatz und einem gemittelten Ampelstatus. */
+/** Die Schnittstelle des Deutschlandmoduls aus PR #23 bleibt erhalten. */
 export function kartenStaedte(zeilen) {
   const gruppen = new Map();
   for (const haus of zeilen) {
@@ -19,36 +23,90 @@ export function kartenStaedte(zeilen) {
     gruppen.get(haus.stadt).push(haus);
   }
   return [...gruppen.entries()].map(([stadt, hs]) => {
-    const umsatz = hs.reduce((sum, h) => sum + h.umsatz, 0);
+    const umsatz = hs.reduce((sum, h) => sum + (Number(h.umsatz) || 0), 0);
     const steuerbar = hs.filter((h) => h.steuerbar);
-    const ebitda = steuerbar.reduce((sum, h) => sum + h.ebitda, 0);
+    const ebitda = steuerbar.reduce((sum, h) => sum + (Number(h.ebitda) || 0), 0);
     const amp = steuerbar.length ? (ebitda < 0 ? 'rot' : umsatz > 0 && ebitda / umsatz < 0.04 ? 'gelb' : 'gruen') : 'ohne';
     return { stadt, umsatz, ebitda, amp, anzahl: hs.length, koordinaten: KOORDINATEN[stadt] };
   }).sort((a, b) => a.stadt.localeCompare(b.stadt, 'de'));
 }
 
-/** SVG-Karte mit zugänglichen Stadtpunkten. Der Umriss ist bewusst schematisch. */
-export function deutschlandKarte(zeilen, beiStadt) {
-  const svg = element('svg', { viewBox: '0 0 356 542', role: 'group', 'aria-label': 'Deutschlandkarte mit Städten und ihren Ergebnissen', class: 'deutschland-svg' });
-  svg.append(element('path', {
-    d: 'M 135 21 L 185 31 L 211 54 L 240 48 L 265 86 L 277 122 L 310 158 L 290 198 L 318 242 L 307 273 L 323 320 L 294 359 L 307 407 L 279 455 L 243 473 L 236 510 L 187 527 L 157 505 L 132 512 L 104 470 L 74 456 L 55 405 L 64 358 L 42 324 L 61 293 L 47 241 L 70 207 L 61 173 L 85 144 L 79 108 L 111 79 Z',
-    fill: '#e4eaf0', stroke: '#95a7b6', 'stroke-width': '2', 'stroke-linejoin': 'round'
-  }));
-  // Einfache Orientierungsmarken statt einer externen kartografischen Abhängigkeit.
-  for (const stadt of kartenStaedte(zeilen)) {
-    if (!stadt.koordinaten) continue;
-    const [lat, lon] = stadt.koordinaten;
-    const cx = x(lon), cy = y(lat);
-    const radius = Math.min(9, Math.max(3.5, 3.5 + Math.sqrt(Math.max(0, stadt.umsatz) / 1000000) * 0.6));
-    const g = element('g', { tabindex: '0', role: 'button', 'aria-label': stadt.stadt + ', ' + stadt.anzahl + ' Häuser', 'data-stadt': stadt.stadt });
-    g.append(element('circle', { cx, cy, r: Math.max(22, radius + 4), fill: 'transparent', stroke: 'none' }));
-    g.append(element('circle', { cx, cy, r: radius, fill: AMPEL_FARBE[stadt.amp], stroke: '#fff', 'stroke-width': '1.25', 'pointer-events': 'none' }));
+/** Gemeinsamer SVG-Zeichner; keine voneinander abweichenden Reise-/Portfolio-Umrisse. */
+function zeichneDeutschland(punkte, beiStadt, { aktuell = null, modus = 'portfolio' } = {}) {
+  const svg = element('svg', {
+    viewBox: '0 0 356 542', role: 'group',
+    'aria-label': modus === 'reise' ? 'Deutschlandkarte mit auswählbaren Reisezielen' : 'Deutschlandkarte mit Städten und ihren Ergebnissen',
+    class: 'deutschland-svg'
+  });
+  // Die sechzehn Bundesländer ergeben gemeinsam eine geografisch richtige Außengrenze.
+  const land = element('g', { class: 'deutschland-laender', 'aria-hidden': 'true' });
+  for (const bundesland of BUNDESLAENDER) {
+    const pfad = element('path', { d: bundesland.d, class: 'deutschland-land',
+      fill: '#e8edf0', stroke: '#a9b6bc', 'stroke-width': '0.85', 'stroke-linejoin': 'round',
+      'fill-rule': 'evenodd' });
+    land.append(pfad);
+  }
+  svg.append(land);
+
+  // Aktive Stadt zuletzt zeichnen; sie bleibt auch bei dichtem Ruhrgebietsnetz sichtbar.
+  // Danach große Städte über kleinen Nachbarn (Berlin über Potsdam, Köln über Leverkusen), damit sie antippbar bleiben.
+  const gewicht = (p) => (p.stadt === aktuell ? 1e6 : 0) + (GROSSE_STAEDTE.has(p.stadt) ? 1e3 : 0) + (p.anzahl ?? 0);
+  const verfuegbar = punkte.filter((p) => Array.isArray(p.koordinaten) && p.koordinaten.length === 2)
+    .sort((a, b) => gewicht(a) - gewicht(b) || a.stadt.localeCompare(b.stadt, 'de'));
+  for (const punkt of verfuegbar) {
+    const [lat, lon] = punkt.koordinaten, cx = x(lon), cy = y(lat);
+    const aktiv = punkt.stadt === aktuell;
+    const radius = Math.min(9, Math.max(3.6,
+      3.6 + Math.sqrt(Math.max(0, modus === 'reise' ? punkt.anzahl : punkt.umsatz / 1000000)) * (modus === 'reise' ? 0.9 : 0.6)));
+    const name = punkt.stadt;
+    const g = element('g', { tabindex: '0', role: 'button', 'data-stadt': name,
+      class: 'deutschland-stadt' + (aktiv ? ' deutschland-aktuell' : ''),
+      'aria-label': name + ', ' + punkt.anzahl + ' ' + (punkt.anzahl === 1 ? 'Haus' : 'Häuser') + (aktiv ? ', aktueller Standort' : '') });
     const title = element('title');
-    title.textContent = stadt.stadt + ' · ' + stadt.anzahl + ' Häuser';
+    title.textContent = name + ' · ' + punkt.anzahl + ' Häuser' + (aktiv ? ' · aktuell' : '');
     g.append(title);
-    g.addEventListener('click', () => beiStadt(stadt.stadt));
-    g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); beiStadt(stadt.stadt); } });
+    // Große transparente Zeigerfläche; die alphabetische Reiseliste ist der barrierearme Alternativzugang.
+    // Zeigerfläche großer Städte 21, kleiner Städte 12 Einheiten: dichte Gebiete bleiben einzeln antippbar.
+    g.append(element('circle', { cx, cy, r: GROSSE_STAEDTE.has(name) || aktiv ? 21 : 12, fill: 'transparent', stroke: 'none' }));
+    if (aktiv) g.append(element('circle', { cx, cy, r: radius + 5, fill: '#fff', stroke: '#b32632', 'stroke-width': '2', 'pointer-events': 'none' }));
+    g.append(element('circle', { cx, cy, r: radius, fill: aktiv ? '#b32632' :
+      modus === 'reise' ? '#365e78' : AMPEL_FARBE[punkt.amp] ?? AMPEL_FARBE.ohne,
+      stroke: '#fff', 'stroke-width': '1.3', 'pointer-events': 'none' }));
+    g.addEventListener('click', () => beiStadt(name));
+    g.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); beiStadt(name); }
+    });
     svg.append(g);
   }
+
+  // Ortsnamen bewusst sparsam: Metropolen und aktueller Standort, keine Textwand im Rhein-Ruhr-Gebiet.
+  const beschriftet = [];
+  for (const punkt of [...verfuegbar].sort((a, b) =>
+    Number(b.stadt === aktuell) - Number(a.stadt === aktuell) ||
+    Number(GROSSE_STAEDTE.has(b.stadt)) - Number(GROSSE_STAEDTE.has(a.stadt)))) {
+    if (punkt.stadt !== aktuell && !GROSSE_STAEDTE.has(punkt.stadt)) continue;
+    const [lat, lon] = punkt.koordinaten, px = x(lon), py = y(lat);
+    if (beschriftet.some(([lx, ly]) => Math.abs(px - lx) < 47 && Math.abs(py - ly) < 16)) continue;
+    beschriftet.push([px, py]);
+    const tx = px > 245 ? px - 9 : px + 9;
+    const lbl = element('text', { x: tx, y: py - 9, 'font-size': '11', 'font-weight': punkt.stadt === aktuell ? '750' : '600',
+      'text-anchor': px > 245 ? 'end' : 'start', fill: '#25323d', stroke: '#f9fbfc',
+      'stroke-width': '3', 'paint-order': 'stroke', 'pointer-events': 'none' });
+    lbl.textContent = punkt.stadt;
+    svg.append(lbl);
+  }
   return svg;
+}
+
+/** Portfolio-Karte aus #23. */
+export function deutschlandKarte(zeilen, beiStadt, optionen = {}) {
+  return zeichneDeutschland(kartenStaedte(zeilen), beiStadt, optionen);
+}
+
+/** Dieselbe Karte für die Reise. Die Punkte nutzen Engine-Koordinaten, keine Regions-Hashes. */
+export function reiseDeutschlandKarte(staedte, hier, beiStadt) {
+  return zeichneDeutschland(staedte.map((c) => ({
+    stadt: c.name, anzahl: Math.max(1, c.groesse ?? 1), koordinaten: KOORDINATEN[c.name],
+    umsatz: c.umsatz ?? 0, amp: 'ohne'
+  })), beiStadt, { aktuell: hier, modus: 'reise' });
 }

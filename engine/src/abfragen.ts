@@ -6,6 +6,7 @@ import { hqRechtFaktor } from './hq';
 export { organisationUebersicht } from './organisation';
 export { marktbeobachtungUebersicht } from './marktbeobachtung';
 import { runwayWochen } from './stakeholder';
+import { istSandkasten } from './sandkasten';
 import type { GameState, Haus } from './types';
 import { eur, jahr, kw } from './util';
 import { bestandWert, kvLimit, offeneWarenverbindlichkeiten } from './ware';
@@ -209,6 +210,7 @@ export interface Cockpit {
   phase: GameState['phase'];
   cash: number;
   kreditFrei: number;
+  geldUnbegrenzt: boolean;
   runwayWochen: number;
   ebitdaWoche: number;
   ebitda13: number;
@@ -237,6 +239,7 @@ export function cockpit(s: GameState): Cockpit {
     phase: s.phase,
     cash: s.cash,
     kreditFrei: s.cash + s.kreditlinie,
+    geldUnbegrenzt: istSandkasten(s),
     runwayWochen: Math.round(runwayWochen(s)),
     ebitdaWoche: letzte?.ebitda ?? 0,
     ebitda13: h13.reduce((a, b) => a + b.ebitda, 0),
