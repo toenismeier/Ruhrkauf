@@ -1,5 +1,5 @@
 import { neuesSpiel, wocheAbspielen, fuehreAus, portfolio, hqUebersicht, ABTEILUNGEN, WG_DEF } from '../src';
-import { standort } from '../src/hq';
+import { standort, sollFte } from '../src/hq';
 import type { AbteilungId, Stufe } from '../src';
 import type { GameState } from '../src';
 import { mio } from '../src/util';
@@ -46,6 +46,10 @@ export function botWoche(s: GameState, log = false): void {
   if (w === 5) tu({ typ: 'tarif', ziel: 'sanierung', garantieWochen: 52 });
   if (w % 52 === 44) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.2 });
   if (w % 52 === 2) tu({ typ: 'aushilfen', haeuser: 'alle', quote: 0.1 });
+  if (process.env.D_HQ && w >= 13 && w % 13 === 0) {
+    for (const a of s.hq.abteilungen) if (Math.round(sollFte(s, a.id, a.stufe)) < a.fte * 0.97)
+      tu({ typ: 'abteilungStufe', abteilung: a.id, stufe: a.stufe });
+  }
   if (w % 13 === 0) { const q = s.quartale[s.quartale.length - 1]; if (q) tu({ typ: 'plan', ebitda: q.planStandard }); }
   for (const a of s.angebote.filter((x) => x.status === 'offen')) {
     if (a.typ === 'untermiete' || a.typ === 'paket' || (a.typ === 'stadt' && !process.env.D_NOSTADT)) tu({ typ: 'angebotAnnehmen', angebot: a.id });
@@ -248,7 +252,7 @@ export function botRegulaerBasis(s: GameState, log: boolean, zentralePauschal: n
     const inArbeit = pool.filter((h) => h.status !== 'offen').length;
     const verlustIds = new Set(pool.filter((h) => (h.kpi?.guv?.ebitda ?? 0) < 0).map((h) => h.id));
     const p = aktivesPortfolio(s)
-      .filter((x) => verlustIds.has(x.id) && x.db < 0 && x.umsatz > 0)
+      .filter((x) => verlustIds.has(x.id) && x.db < 0 && x.umsatz > 0 && (!process.env.D_STRENG || x.db / x.umsatz < -0.02))
       .sort((a, b) => a.db / a.umsatz - b.db / b.umsatz);
     if (process.env.D_NOCLOSE) p.length = 0;
     let budget = schliessungsBudgetBotD(s).budget;
