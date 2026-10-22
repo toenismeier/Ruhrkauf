@@ -18,6 +18,7 @@ import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import { lebenModul } from './kit/leben.js';
 import { stadtEintragAusSpiel, spielBauer } from './kit/bruecke.js';
+import { hausDachpunkt, dachpunkt, baueHauspin, pinGroessen } from './kit/hauspins.js';
 import { jahreszeitenStadt, jahreszeit } from './kit/jahreszeit.js';
 import { STATUS_TITEL } from './kit/zustaende.js';
 import { geld, fmt, esc } from './ui/format.js';
@@ -128,6 +129,7 @@ let kameraZiel = null;
 let jahreszeiten = null;
 let offenesHaus = null, offenesHq = null, offenerWettbewerber = null;
 let angebotPins = [], wettbewerbPins = [], wettbewerbPinTimer = null;
+let hausPins = [];
 let bahnhofPin = null, bahnhofOrt = null, reise = null, wochenbericht = null;
 const WB_FARBEN = { modehaus: '#795846', fastfashion: '#292b39', premium: '#9e773e',
   offprice: '#d62867', textildiscounter: '#2565b5', elektronik: '#d34532', leer_ehemals: '#777d80' };
@@ -197,6 +199,7 @@ function kameraSetzen() {
   Object.assign(sonne.shadow.camera, { left: -r, right: r, top: r, bottom: -r });
   sonne.shadow.camera.updateProjectionMatrix();
   leben.kamera();
+  pinGroessen(hausPins, K.halb, h);
   zeichnen();
   kachelnPlanen();
 }
@@ -243,6 +246,8 @@ function hausUnter(px, py) {
   if (wp?.object.userData.wbId) return 'wb:' + wp.object.userData.wbId;
   const ap = angebotPins.length ? ray.intersectObjects(angebotPins, false)[0] : null;
   if (ap?.object.userData.angebotId) return 'angebot:' + ap.object.userData.angebotId;
+  const hp = hausPins.length ? ray.intersectObjects(hausPins.map((x) => x.pin), false)[0] : null;
+  if (hp?.object.userData.hausId) return hp.object.userData.hausId;
   const t = ray.intersectObject(wurzel, true)[0];
   // FUNDUS und Volkskauf behalten die gemeinsame, leistungsfähige Stadtgeometrie.
   // Per Ray-Box-Schnitt sind ihre eigentlichen Hausvolumen trotzdem antippbar.
@@ -310,7 +315,7 @@ function raeumeSzene() {
   if (!scene) return;
   jahreszeiten?.aufraeumen();
   jahreszeiten = null;
-  angebotPins = []; bahnhofPin = null; bahnhofOrt = null;
+  angebotPins = []; hausPins = []; bahnhofPin = null; bahnhofOrt = null;
   clearInterval(wettbewerbPinTimer); wettbewerbPinTimer = null;
   for (const p of wettbewerbPins) { scene.remove(p); p.material?.map?.dispose(); p.material?.dispose(); }
   wettbewerbPins = [];
@@ -326,6 +331,27 @@ function raeumeSzene() {
   ren.renderLists.dispose();
 }
 
+/** Einheitlicher Satz Hauspins auch für die reinen Datenhäuser Volkskauf und FUNDUS. */
+function hausPinsAktualisieren() {
+  if (!scene || !sb || !s) return;
+  for (const { pin, namensschild } of hausPins) for (const obj of [pin, namensschild]) {
+    if (!obj) continue;
+    scene.remove(obj); obj.material?.map?.dispose(); obj.material?.dispose();
+  }
+  hausPins = [];
+  for (const [id, eintrag] of sb.haeuser) {
+    const haus = s.haeuser.find((h) => h.id === id);
+    if (!haus) continue;
+    const pin = baueHauspin(scene, haus, eintrag, sb.zustand(id));
+    if (pin) hausPins.push(pin);
+  }
+  for (const { haus, ...eintrag } of sb.statischeHaeuser.values()) {
+    const pin = baueHauspin(scene, haus, eintrag, null);
+    if (pin) hausPins.push(pin);
+  }
+  pinGroessen(hausPins, K.halb, canvas.clientHeight || window.innerHeight);
+}
+
 function angebotsPinsAktualisieren() {
   if (!scene || !sb || !s) return;
   for (const p of angebotPins) { scene.remove(p); p.material?.dispose(); }
@@ -334,8 +360,9 @@ function angebotsPinsAktualisieren() {
     for (const id of a.bezug?.hausIds ?? []) {
       const h = sb.haeuser.get(id);
       if (!h?.p) continue;
-      const p = h.p;
-      const pin = angebotMarker(scene, p.x + p.w / 2, Math.max(20, (h.e?.hoehe ?? 30) + 3), p.z + p.d / 2, 8);
+      const dach = hausDachpunkt(h, s.haeuser.find((e) => e.id === id));
+      if (!dach) continue;
+      const pin = angebotMarker(scene, dach.x, dach.y + 2, dach.z, 8);
       pin.userData.angebotId = a.id;
       angebotPins.push(pin);
     }
@@ -366,7 +393,9 @@ function wettbewerbPinsAktualisieren() {
     const neu = w.status === 'eroeffnung' && s.woche - (w.seit ?? 0) < 4;
     if (neu) { g.strokeStyle = '#f3c951'; g.lineWidth = 6; g.beginPath(); g.arc(48, 48, 40, 0, Math.PI * 2); g.stroke(); }
     const pin = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthTest: false }));
-    pin.position.set(p.x + p.w / 2, Math.max(20, (x.e?.hoehe ?? 28) + 5), p.z + p.d / 2);
+    const dach = dachpunkt(p, { w: x.e?.w ?? p.w, d: x.e?.d ?? p.d }, x.e?.hoehe ?? 28);
+    if (!dach) continue;
+    pin.position.set(dach.x, dach.y + 3, dach.z);
     pin.scale.set(10.5, 10.5, 1); pin.userData.wbId = w.id; pin.userData.puls = neu; pin.renderOrder = 30;
     scene.add(pin); wettbewerbPins.push(pin);
   }
@@ -458,9 +487,10 @@ function baueStadtAusSpiel(name) {
   scene.add(wurzel);
   KA.teileGrund = T.anzahl;
   kachelnAnlegen(offen);
-  // Pins: Hartwig, Sport, Wettbewerber und Zentrale wie im Katalog; freie Bürogebäude mit Schlüssel-Pin
-  const pins = { warenhaus: 'hartwig', sport: 'hartwigSport', hq: 'hartwig' };
-  setzeMarker(scene, plan, e, plan.standorte.filter((q) => !q.angebot && pins[q.rolle]).map((q) => ({ parzelle: q.parzelle, art: pins[q.rolle], groesse: 9 })));
+  // HQ behält seinen bisherigen Marker. Alle Hausformate erhalten dachgenaue Q22-Pins.
+  setzeMarker(scene, plan, e, plan.standorte.filter((q) => !q.angebot && q.rolle === 'hq')
+    .map((q) => ({ parzelle: q.parzelle, art: 'hartwig', groesse: 10 })));
+  hausPinsAktualisieren();
   for (const q of plan.standorte.filter((x) => x.angebot)) { const pz = plan.parzellen.find((x) => x.id === q.parzelle); if (pz) angebotMarker(scene, pz.x + pz.w / 2, (e.hoehen.get(pz.id) ?? 30) + 2, pz.z + pz.d / 2, 9); }
   angebotsPinsAktualisieren();
   wettbewerbPinsAktualisieren();
@@ -517,9 +547,10 @@ async function baueStadtAusSpielReise(name) {
   await kachelnKloetzeBauen();
   jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
   jahreszeiten.registriereDachflaechenMehrfach([...getrennteSchneedachFlaechen(), ...KA.liste.map((k) => [k.key, k.dachFlaechen])]);
-  // Pins: Hartwig, Sport, Wettbewerber und Zentrale wie im Katalog; freie Bürogebäude mit Schlüssel-Pin
-  const pins = { warenhaus: 'hartwig', sport: 'hartwigSport', hq: 'hartwig' };
-  setzeMarker(scene, plan, e, plan.standorte.filter((q) => !q.angebot && pins[q.rolle]).map((q) => ({ parzelle: q.parzelle, art: pins[q.rolle], groesse: 9 })));
+  // HQ behält seinen bisherigen Marker. Alle Hausformate erhalten dachgenaue Q22-Pins.
+  setzeMarker(scene, plan, e, plan.standorte.filter((q) => !q.angebot && q.rolle === 'hq')
+    .map((q) => ({ parzelle: q.parzelle, art: 'hartwig', groesse: 10 })));
+  hausPinsAktualisieren();
   for (const q of plan.standorte.filter((x) => x.angebot)) { const pz = plan.parzellen.find((x) => x.id === q.parzelle); if (pz) angebotMarker(scene, pz.x + pz.w / 2, (e.hoehen.get(pz.id) ?? 30) + 2, pz.z + pz.d / 2, 9); }
   angebotsPinsAktualisieren();
   wettbewerbPinsAktualisieren();
@@ -693,6 +724,7 @@ function grafikNachziehen() {
   // Keine Kacheln oder Stadtteile neu bauen: Farben und saisonale Gruppen umschalten.
   jahreszeiten?.aktualisiere(s);
   wettbewerbPinsAktualisieren();
+  hausPinsAktualisieren();
   if (geaendert.length) zeichnen();
   return geaendert;
 }
@@ -712,8 +744,8 @@ function cockpitZeigen() {
     .filter(([id]) => id === 'alle' || c.formate.some((x) => x.format === id && x.haeuser))
     .map(([id, name]) => '<option value="' + id + '"' + (id === cockpitFormat ? ' selected' : '') + '>' + name + '</option>').join('') + '</select>';
   $('cockpit').innerHTML = [
-    kachel('Cash', geld(c.cash), c.cash < 0 ? 'rot' : ''),
-    kachel('Kreditrahmen frei', geld(c.kreditFrei), c.kreditFrei < 2e7 ? 'rot' : ''),
+    kachel('Cash', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? 'rot' : ''),
+    kachel('Kreditrahmen frei', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? 'rot' : ''),
     fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : 'noch offen', !s.historie.length ? '' : fx.ebitda < 0 ? 'rot' : 'gruen')
       : kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
     kachel('Umsatz · ' + auswahl, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : 'noch offen'),
@@ -770,7 +802,7 @@ function woche(mitBot = false, test = false) {
   const m = { woche: s.woche, engineMs: Math.round(t1 - t0), neuBauMs: Math.round(t2 - t1), neu: geaendert };
   messung.wocheMs.push(m);
   automatischSpeichern();
-  if ($('spiel-ruhestand')) $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende;
+  if ($('spiel-ruhestand')) $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende || s.szenario?.id === 'sandkasten';
   if (s.ende) setTimeout(() => { wochenbericht?.zu(); spielende?.anzeigen(); }, 0);
   return m;
 }
@@ -886,7 +918,7 @@ function oeffneHaus(id) {
   const bild = z ? [z.status, ...z.zusatz].filter((q) => q !== 'offen').map((q) => (q === 'aktion' && z.aktion ? `Aktion ${AKTION_NAME[z.aktion]}` : STATUS_TITEL[q])).join(' · ') : '';
   const qm = h.flaechen.reduce((a, f) => a + f.qm, 0);
   const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
-  let html = `<div class="chips"><span class="chip ${h.status === 'offen' ? '' : 'warn'}">${STATUS_HAUS[h.status] ?? h.status}</span>${bild ? `<span class="chip">${bild}</span>` : ''}<span class="chip grau">${h.lage === '1a' ? '1a-Lage' : h.lage === 'b' ? 'B-Lage' : h.lage === 'center' ? 'Center' : h.lage === 'stadtteil' ? 'Stadtteilzentrum' : 'Stadtrand'}</span></div>`;
+  let html = `<div class="chips"><span class="chip ${h.status === 'offen' ? '' : 'warn'}">${STATUS_HAUS[h.status] ?? h.status}</span>${h.klasse === 'premium' ? '<span class="chip" style="background:#fbefd2;color:#6d4b18;border:1px solid #c4a06a;font-weight:700">♛ Premium</span>' : ''}${bild ? `<span class="chip">${bild}</span>` : ''}<span class="chip grau">${h.lage === '1a' ? '1a-Lage' : h.lage === 'b' ? 'B-Lage' : h.lage === 'center' ? 'Center' : h.lage === 'stadtteil' ? 'Stadtteilzentrum' : 'Stadtrand'}</span></div>`;
   html += `<div class="raster">${zahl('Umsatz Woche', geld(k?.umsatz ?? 0))}${zahl('Deckungsbeitrag', geld(k?.db ?? 0), (k?.db ?? 0) < 0 ? 'rot' : 'gruen')}${zahl('Verkaufsfläche', fmt.format(qm) + ' qm')}${zahl('Substanz', Math.round(h.substanz) + ' / 100', h.substanz < 35 ? 'rot' : '')}</div>`;
   html += st?.hausGrafik(id) ?? '';
   // O02: ausschließlich Engine-Werte, auch bei geschlossenen Häusern oder fehlendem Vorjahr.
@@ -1197,7 +1229,7 @@ $('einkauf').addEventListener('click', () => oeffneEinkauf());
 const hb = hausbesuchModul({ E, s: () => s, stadtName: () => stadtName, oeffneEinkauf, erstHaus: () => offenesHaus || s?.haeuser.find((h) => h.stadt === stadtName && h.status === 'offen')?.id, menueZu });
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
 let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null, ec = null;
-const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
+const nachAktion = () => { cockpitZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); hausPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
 vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
 org = organisationModul({ E, s: () => s, panel, meldung, nachAktion });
 // O03 IT
@@ -1258,7 +1290,7 @@ $('zeitung').addEventListener('click', () => oeffneModul(zt));
 spielende = spielendeModul({
   E, s: () => s,
   neuesSpiel: () => { schliessePanel(); menueZu(); startZeigen(); },
-  fortgesetzt: () => { cockpitZeigen(); $('spiel-ruhestand').hidden = s.woche < 260; automatischSpeichern(); },
+  fortgesetzt: () => { cockpitZeigen(); $('spiel-ruhestand').hidden = s.woche < 260 || s.szenario?.id === 'sandkasten'; automatischSpeichern(); },
   fehler: (text) => meldung(text, false),
 });
 $('spiel-bestenliste').addEventListener('click', () => { menueZu(); spielende.bestenliste(); });
@@ -1285,7 +1317,7 @@ reise = reiseModul({
     const hs = s.haeuser.filter((h) => h.stadt === d.name && h.status !== 'geschlossen');
     const zahl = (rolle) => d.standorte.filter((p) => p.rolle === rolle).length;
     const formate = [['Hartwig', hs.filter((h) => h.format === 'warenhaus').length], ['Volkskauf', hs.filter((h) => h.format === 'schwester').length], ['Sport', hs.filter((h) => h.format === 'sport').length], ['FUNDUS', hs.filter((h) => h.format === 'outlet').length]];
-    return { name: d.name, region: d.region, hauscluster: hs[0]?.hauscluster, groesse: hs.length, umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
+    return { name: d.name, region: d.region, archetyp: d.archetyp, hauscluster: hs[0]?.hauscluster, groesse: hs.length, umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
       formate: formate.filter((p) => p[1]).map(([name, anzahl]) => ({ name, anzahl })) };
   }),
   pinPunkt: bahnhofBildpunkt,
@@ -1501,6 +1533,33 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
     }
     hausReiter='ueberblick'; oeffneHaus(id);
     return { id, score:d.kundenScore, reiter:7, fehler }; },
+  hauspinListe: () => hausPins.map(({ pin }) => ({ ...pin.userData })),
+  pruefeHauspins: () => {
+    // Die Sollposition wird aus dem eigenen Hausgrundriss, der Slot-Ecke und
+    // der tatsächlich gebauten Höhe abgeleitet. Messung in CSS-Pixeln (iPhone).
+    const fehler = [], liste = [...sb.haeuser.entries()].map(([id, eintrag]) =>
+      ({ id, eintrag, haus: s.haeuser.find((h) => h.id === id) }))
+      .concat([...sb.statischeHaeuser.entries()].map(([id, { haus, ...eintrag }]) =>
+        ({ id, eintrag, haus })));
+    const [w, h] = groesse(), pinMap = new Map(hausPins.map(({ pin, namensschild }) =>
+      [pin.userData.hausId, { pin, namensschild }]));
+    let maxAbstandPx = 0;
+    for (const { id, eintrag, haus } of liste) {
+      const pin = pinMap.get(id);
+      if (!pin) { fehler.push('Pin fehlt: ' + id); continue; }
+      const dach = hausDachpunkt(eintrag, haus);
+      if (!dach) { fehler.push('Dachdaten fehlen: ' + id); continue; }
+      const aktuell = pin.pin.position.clone().project(cam);
+      const soll = new THREE.Vector3(dach.x, dach.y, dach.z).project(cam);
+      const abstand = Math.hypot((aktuell.x - soll.x) * w / 2, (aktuell.y - soll.y) * h / 2);
+      maxAbstandPx = Math.max(maxAbstandPx, abstand);
+      if (abstand > 8) fehler.push(id + ': ' + abstand.toFixed(2) + ' px von Dachmitte entfernt');
+      if (haus?.klasse === 'premium' && (!pin.namensschild || pin.pin.userData.format !== 'premium'))
+        fehler.push(id + ': Premiumpin oder Namensschild fehlt');
+    }
+    if (pinMap.size !== liste.length) fehler.push('Anzahl Pins ' + pinMap.size + ', Häuser ' + liste.length);
+    return { stadt: stadtName, geprueft: liste.length, maxAbstandPx: +maxAbstandPx.toFixed(3), fehler };
+  },
   pruefeWettbewerber: () => {
     const soll = E.wettbewerbFuerGrafik(s, stadtName);
     const gezeigt = new Set([...sb.wettbewerber.keys(), ...soll.filter((w) => w.inHartwigGebaeude && w.status !== 'geschlossen' && sb.haeuser.has(w.inHartwigGebaeude)).map((w) => w.id)]);
@@ -1516,7 +1575,7 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
     const titel = (sp) => [...sp.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').replace(/\s*·\s*$/, '').trim();
     const kz = (wurzel) => new Map([...wurzel.querySelectorAll('.kz')].map((k) => [titel(k.querySelector('span')), k.querySelector('b').textContent]));
     const ck = kz($('cockpit'));
-    const soll = { Cash: geld(c.cash), 'Kreditrahmen frei': geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
+    const soll = { Cash: c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), 'Kreditrahmen frei': c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
     if (s.historie.length) Object.assign(soll, { 'EBITDA 13 Wochen': geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
     for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
     if ($('kw').textContent !== `KW ${c.kw} / ${c.jahr}`) fehler.push(`KW: ${$('kw').textContent}`);
@@ -1647,7 +1706,7 @@ async function spielFortsetzen(platz = 'autosave') {
     window.bereit = true;
     $('lade').classList.remove('an');
     einfuehrung.spielStart(true);
-    $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende;
+    $('spiel-ruhestand').hidden = s.woche < 260 || !!s.ende || s.szenario?.id === 'sandkasten';
     if (s.ende || s.phase === 'zerschlagen') spielende.anzeigen();
     else meldung('Spielstand fortgesetzt.');
     return true;

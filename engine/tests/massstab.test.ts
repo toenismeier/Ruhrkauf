@@ -17,7 +17,7 @@ describe('Maßstab Phase 1: Standortnetz', () => {
       else expect(st[2]).not.toBe('metropole');
     }
   });
-  test('exakt 560 Häuser in 220 realen Städten, alle mit Koordinaten', () => {
+  test('exakt 561 Häuser in 220 realen Städten, alle mit Koordinaten', () => {
     expect(STAEDTE).toHaveLength(220);
     const unique = new Set(STAEDTE.map(([stadt]) => stadt));
     expect(unique.size).toBe(STAEDTE.length);
@@ -30,13 +30,13 @@ describe('Maßstab Phase 1: Standortnetz', () => {
       expect(p![1]).toBeLessThan(16);
     }
     expect(s.version).toBe(2);
-    expect(s.haeuser).toHaveLength(560);
+    expect(s.haeuser).toHaveLength(561);
     expect(s.haeuser.filter((h) => h.format === 'warenhaus' && h.klasse !== 'premium')).toHaveLength(360);
-    expect(s.haeuser.filter((h) => h.klasse === 'premium')).toHaveLength(4);
+    expect(s.haeuser.filter((h) => h.klasse === 'premium')).toHaveLength(5);
     expect(s.haeuser.filter((h) => h.format === 'sport')).toHaveLength(44);
     expect(s.haeuser.filter((h) => h.format === 'schwester')).toHaveLength(86);
     expect(s.haeuser.filter((h) => h.format === 'outlet')).toHaveLength(66);
-    expect(new Set(s.haeuser.map((h) => h.id)).size).toBe(560);
+    expect(new Set(s.haeuser.map((h) => h.id)).size).toBe(561);
   });
 
   test('Standortobergrenzen und historische Doppelstandorte', () => {
@@ -50,7 +50,7 @@ describe('Maßstab Phase 1: Standortnetz', () => {
       const sport = zaehle('sport');
       const fundus = zaehle('outlet');
       expect([hartwig, premium, volkskauf, sport, fundus]).toEqual([soll.hartwig, soll.premium, soll.volkskauf, soll.sport, soll.fundus]);
-      const max = cluster === 'metropole' ? [9, 5, 2, 2, 2, 1]
+      const max = cluster === 'metropole' ? [name === 'Berlin' ? 10 : 9, 5, 2, 2, 2, name === 'Berlin' ? 2 : 1]
         : cluster === 'grossstadt' ? [6, 3, 1, 1, 1, 0]
         : [2, 1, 1, 1, 0, 0];
       expect(hs.length).toBeLessThanOrEqual(max[0]);
@@ -78,7 +78,9 @@ describe('Maßstab Phase 1: Standortnetz', () => {
     const hartwigStaedte = new Set(alle.filter((h) => h.format === 'warenhaus').map((h) => h.stadt));
     for (const stadt of hartwigStaedte) {
       const hartwig = alle.filter((h) => h.format === 'warenhaus' && h.stadt === stadt);
-      expect(hartwig.filter((h) => h.lage === '1a')).toHaveLength(1);
+      // Berlin besitzt zwei selbständige Premium-1a-Lagen.
+      expect(hartwig.filter((h) => h.lage === '1a')).toHaveLength(
+        Math.max(1, hartwig.filter((h) => h.klasse === 'premium').length));
       expect(hartwig.filter((h) => h.lage !== '1a').every((h) => ['b', 'stadtteil', 'center'].includes(h.lage))).toBe(true);
     }
     expect(alle.filter((h) => h.format === 'schwester' && h.region === 'West').length).toBeGreaterThan(43);

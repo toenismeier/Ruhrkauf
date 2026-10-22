@@ -58,7 +58,10 @@ export const UMSATZZIELE_JAHR1 = {
   A: 8_950_000_000 * (45 * 48) / (45 * 48 + 115 * 30 + 200 * 17),
   B: 8_950_000_000 * (115 * 30) / (45 * 48 + 115 * 30 + 200 * 17),
   C: 8_950_000_000 * (200 * 17) / (45 * 48 + 115 * 30 + 200 * 17),
-  premium: 820_000_000,
+  // P005 erhöht den alten Anker um 20.000 m² × 1,52 relativ zur Leistung von P001–P004.
+  // Andere Klassen bleiben bei ihren Referenzwerten; keine Gutschrift in der GuV.
+  premium: Math.round(820_000_000 * (1 + (20_000 * 1.52) /
+    (30_000 * 1.55 * 2 + 18_000 * 1.52 + 14_000 * 1.45))),
   sport: 545_000_000,
 } as const;
 
@@ -157,7 +160,7 @@ function kalibriereStandortumsatz(haeuser: Haus[]): void {
 export const STANDARD_SZENARIO: Szenario = {
   warenhaeuser: 360,
   sporthaeuser: 44,
-  premiumhaeuser: 4,
+  premiumhaeuser: 5,
   schwesterhaeuser: 86,
   outlethaeuser: 66,
   // Liquidität analog zum 3,3-fachen Umsatz gegenüber dem alten 130er-Maßstab.
@@ -485,12 +488,16 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
       : r.nr % 2 === 0 ? 'b' : 'stadtteil';
     haeuser.push(bauHaus(h, haeuser.filter((x) => x.format === 'warenhaus').length + 1, stadt, region, cluster, kk, 'warenhaus', sz, r.nr, { hausklasse: a.has(r) ? 'A' : b.has(r) ? 'B' : 'C', lage }));
   }
-  // Premium bildet vier eigenständige Warenhäuser außerhalb der 360 regulären.
+  // Premium bildet fünf eigenständige Häuser außerhalb der 360 regulären.
+  // P005 nutzt einen separaten RNG-Strom, damit Sport, Volkskauf und andere
+  // Städte durch das neue Berliner Haus keine neuen Seed-Zahlen erhalten.
   let p = 0;
+  const p005Rng: RngHalter = { rng: (seed ^ 0xb31e1a5) >>> 0 };
   for (const premium of PREMIUM_HAEUSER) {
     if (sz.premiumDeaktiviert || p >= (sz.premiumhaeuser ?? 0)) break;
     const [stadt, region, cluster, kk] = stadtVon.get(premium.stadt)!;
-    haeuser.push(bauHaus(h, sz.warenhaeuser + ++p, stadt, region, cluster, kk, 'warenhaus', sz, 1, { premiumSchluessel: premium.schluessel, lage: '1a' }));
+    const quelle = premium.schluessel === 'P005' ? p005Rng : h;
+    haeuser.push(bauHaus(quelle, sz.warenhaeuser + ++p, stadt, region, cluster, kk, 'warenhaus', sz, 1, { premiumSchluessel: premium.schluessel, lage: '1a' }));
   }
   let si = 0;
   for (const r of sport) {

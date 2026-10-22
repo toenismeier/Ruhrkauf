@@ -270,7 +270,8 @@ export function echterBauer(o = {}) {
       return e;
     },
     'slot:premium': (S, scene, p) => {
-      const h = HAUS.get(p.standort?.id) ?? haeuser.find((q) => q.klasse === 'premium' && q.stadt === p.standort?.stadt);
+      // Zwei Premiumhäuser in Berlin: ausschließlich über die eindeutige Haus-ID suchen.
+      const h = HAUS.get(p.standort?.id);
       if (!h) return { hoehe: 0 };
       const f = fussabdruck(h), { x, z } = imSlot(p, f.w, f.d);
       p.haus = h;

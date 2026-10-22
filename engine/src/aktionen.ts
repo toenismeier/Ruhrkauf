@@ -2,6 +2,7 @@ import { BERATER, GRUPPEN, MIETER } from './daten';
 import { basisUmsatzHaus, beraterErgebnis, hausAttraktivitaet, loeseEntscheidung, offeneHaeuser, zufallsProjektname } from './ereignisse';
 import { einmalKosten, eroeffneInsolvenz, starteSchliessung } from './prozesse';
 import { runwayWochen } from './stakeholder';
+import { istSandkasten, liquiditaetReicht } from './sandkasten';
 import type {
   AktionsScope, BeraterTyp, Cluster, Flaeche, Format, GameState, GruppeId, Haus, Konzept, Untermieter,
 } from './types';
@@ -240,6 +241,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
       zeitungEinstellen(s, a.an);
       return ok(a.an ? 'Der Handelsbote ist aktiviert.' : 'Der Handelsbote ist deaktiviert.');
     case 'ruhestand':
+      if (istSandkasten(s)) return fehler('Im Sandkasten gibt es keine Wertung und kein Spielende.');
       if (s.woche < 260) return fehler('Der Ruhestand ist erst nach fünf Jahren möglich.');
       if (s.phase !== 'regulaer' || s.insolvenz) return fehler('Ein laufendes Insolvenzverfahren muss zuerst beendet sein.');
       if (s.spielendeDeaktiviert) return fehler('Spielende ist deaktiviert.');
@@ -640,7 +642,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
       }
       if (an.typ === 'sonderposten') {
         const wert = an.wert ?? 0;
-        if (s.cash + s.kreditlinie < wert) return fehler('Nicht genug Liquidität für die Vorkasse.');
+        if (!liquiditaetReicht(s, wert)) return fehler('Nicht genug Liquidität für die Vorkasse.');
         s.cash -= wert;
         const g = an.gruppe as GruppeId;
         if(an.formatZiel==='outlet'&&s.formate) s.formate.pool.push({quelle:'markenposten',wert,preisFaktor:an._passt?1.8:1.32,alter:an._passt?2:20,ladenhueter:!an._passt});
