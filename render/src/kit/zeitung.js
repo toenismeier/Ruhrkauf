@@ -148,7 +148,9 @@ function motiv(objekt, f, label) {
   const akzent = f[3];
   const schild = (wort, color = akzent) =>
     R(235, 155, 126, 44, color, ' rx="2"') + R(245, 165, 106, 24, '#fffaef') +
-    '<text x="298" y="182" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#36414b">' + XML(wort) + '</text>';
+    '<text x="298" y="182" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#36414b"' +
+    // Lange Wörter (MARKTBEWEGUNG, NEUERÖFFNUNG) auf die Schildbreite stauchen, statt über den Rand zu laufen
+    (wort.length > 9 ? ' textLength="96" lengthAdjust="spacingAndGlyphs"' : '') + '>' + XML(wort) + '</text>';
   const stapel = (x, y) => P('M' + x + ' ' + y + 'l34-12 24 10-35 13Z', '#e5be8d') +
     P('M' + x + ' ' + y + 'l23 11v28l-23-11Z', '#b68c62') +
     P('M' + (x + 23) + ' ' + (y + 11) + 'l35-13v28l-35 13Z', '#d4a779');

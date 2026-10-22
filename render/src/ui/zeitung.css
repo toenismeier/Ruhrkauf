@@ -67,11 +67,11 @@
   scrollbar-width: thin; overscroll-behavior-x: contain;
 }
 .zb-tabs button {
-  flex: 0 0 auto; min-height: 44px; padding: 9px 11px;
+  flex: 1 1 auto; min-height: 44px; padding: 9px 4px;
   border: none; border-bottom: 3px solid transparent;
   background: none; color: #59544d; cursor: pointer;
-  font: 600 13px/20px -apple-system, "DejaVu Sans", Arial, sans-serif;
-  white-space: nowrap;
+  font: 600 12.5px/20px -apple-system, "DejaVu Sans", Arial, sans-serif;
+  white-space: nowrap; /* alle sechs Reiter passen ab 375 px nebeneinander */
 }
 .zb-tabs button.aktiv { border-bottom-color: var(--zb-rot); color: #732630; font-weight: 700; }
 .zb-spalten { columns: 2 135px; column-gap: 16px; column-rule: 1px solid var(--zb-linie); }
