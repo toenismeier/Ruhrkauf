@@ -58,7 +58,12 @@ export function ausschnitt(plan, i0, j0, i1, j1, hoehe = 25) {
 // ====================================================================================
 const B = (w, h, d, x = 0, y = 0, z = 0, ry = 0) => { const g = new THREE.BoxGeometry(w, h, d); if (ry) g.rotateY(ry); return g.translate(x, y, z); };
 const C = (rt, rb, h, seg, x = 0, y = 0, z = 0) => new THREE.CylinderGeometry(rt, rb, h, seg).translate(x, y, z);
-const K = (r, x, y, z, sx = 1, sy = 1, sz = 1, det = 1) => new THREE.IcosahedronGeometry(r, det).scale(sx, sy, sz).translate(x, y, z);
+// Nur in der Fernansicht: die 80 Dreiecke der großen Baumkronen
+// werden durch ein Ikosaeder mit 20 Dreiecken ersetzt (gleiche Maße/Farbe).
+// Kleine Kronen mit bereits 20 Dreiecken bleiben unverändert.
+const K = (r, x, y, z, sx = 1, sy = 1, sz = 1, det = 1) =>
+  new THREE.IcosahedronGeometry(r, LOD.stufe === 'fern' ? 0 : det)
+    .scale(sx, sy, sz).translate(x, y, z);
 let _weiss = null;
 const weiss = () => (_weiss ??= new THREE.MeshLambertMaterial({ color: '#ffffff' }));
 
