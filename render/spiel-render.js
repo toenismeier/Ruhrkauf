@@ -825,7 +825,7 @@ async function buendeln() {
     if (report.fehler.length) throw new Error('Wettbewerber-Integration: ' + report.fehler.slice(0, 12).join('; '));
     return report;
   }
-  // Maßstab: 560 Häuser, bis zu 220 Stadtpunkte und Sammelaktion, Seed 1 / Woche 30.
+  // Maßstab: 561 Häuser, bis zu 220 Stadtpunkte und Sammelaktion, Seed 1 / Woche 30.
   async function massstabPruefen() {
     const report = { pruefungen: [], fehler: [] };
     const pruefen = (titel, bedingung, ist) => {

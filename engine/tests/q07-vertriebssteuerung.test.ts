@@ -20,7 +20,7 @@ describe('Q07: Vertriebssteuerung und Vorjahr', () => {
       expect(p?.[51].woche).toBe(-1);
       expect(p?.every((x) => Number.isFinite(x.umsatz) && Number.isFinite(x.db))).toBe(true);
     }
-    expect(s.haeuser).toHaveLength(560);
+    expect(s.haeuser).toHaveLength(561);
     expect(s.historie).toHaveLength(0);
   });
   test.each([[1,0,-52,-1], [4,13,-39,12], [7,26,-26,25], [10,39,-13,38]] as const)(
@@ -50,8 +50,8 @@ describe('Q07: Vertriebssteuerung und Vorjahr', () => {
     wocheAbspielen(s);
     const alle = vertriebUebersicht(s);
     const formate = formatCockpit(s);
-    expect(alle.gesamt.anzahl).toBe(560);
-    expect(summe(alle.formate.map((x) => x.anzahl))).toBe(560);
+    expect(alle.gesamt.anzahl).toBe(561);
+    expect(summe(alle.formate.map((x) => x.anzahl))).toBe(561);
     expect(summe(alle.formate.map((x) => x.umsatz))).toBe(alle.gesamt.umsatz);
     expect(summe(formate.map((x) => x.umsatz))).toBe(alle.gesamt.umsatz);
     expect(summe(alle.zeilen.map((x) => x.umsatz))).toBe(alle.gesamt.umsatz);

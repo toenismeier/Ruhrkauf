@@ -3,17 +3,17 @@ import { fuehreAus } from '../src/aktionen';
 import { portfolio, formatCockpit, schliessungVorschau } from '../src/abfragen';
 
 describe('Maßstab-Oberfläche: Engine als einzige Kennzahlen- und Aktionsquelle', () => {
-  test('560 Häuser in 220 Städten, fünf Formate und eindeutige Steuerbarkeit', () => {
+  test('561 Häuser in 220 Städten, fünf Formate und eindeutige Steuerbarkeit', () => {
     const s = neueWelt(1);
     const hs = portfolio(s);
-    expect(hs).toHaveLength(560);
-    expect(new Set(hs.map((h) => h.id)).size).toBe(560);
+    expect(hs).toHaveLength(561);
+    expect(new Set(hs.map((h) => h.id)).size).toBe(561);
     expect(new Set(hs.map((h) => h.stadt)).size).toBe(220);
     const formate = formatCockpit(s);
-    expect(formate.map((f) => f.anzahl)).toEqual([360, 4, 44, 86, 66]);
-    expect(formate.reduce((sum, f) => sum + f.anzahl, 0)).toBe(560);
+    expect(formate.map((f) => f.anzahl)).toEqual([360, 5, 44, 86, 66]);
+    expect(formate.reduce((sum, f) => sum + f.anzahl, 0)).toBe(561);
     // Seit engine-formate sind auch Volkskauf und FUNDUS wirtschaftlich aktiv.
-    expect(hs.filter((h) => h.steuerbar)).toHaveLength(560);
+    expect(hs.filter((h) => h.steuerbar)).toHaveLength(561);
     for (const h of hs) {
       expect(h.stadt).toBeTruthy();
       expect(h.substanz).toBeGreaterThanOrEqual(0);
