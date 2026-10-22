@@ -8,7 +8,7 @@ export { fuehreAus, type SpielerAktion, type Ergebnis } from './aktionen';
 export { organisationUebersicht, kapitalfluss, posteingang, cockpit, portfolio, formatCockpit, schliessungVorschau, hausDetail, warenwirtschaft, kreditversicherung, hqUebersicht, hqFuerGrafik, einkaufUebersicht, wgDetail, freigaben, eigenmarkenUebersicht, eigenmarkeVorschau } from './abfragen';
 export { vorstandUebersicht, vorstandProfil, kandidaten, angebotsChance, produkte, produktKatalog, trendbericht, produktVorschau } from './abfragen';
 export {
-  ABTEILUNGEN, ABTEILUNG_NAME, HQ_PARAM, HQ_TYPEN, HQ_WIRKUNG, sollFte,
+  ABTEILUNGEN, ABTEILUNG_NAME, HQ_PARAM, HQ_TYPEN, HQ_WIRKUNG, sollFte, abteilungKapazitaet, abteilungArbeitsklima,
   type AbteilungId, type Abteilung, type Hq, type HqAngebot, type HqEtage, type HqGebaeude, type HqTyp, type Stufe,
   type HqUebersicht, type HqGrafik, type HqKosten,
 } from './hq';
@@ -46,7 +46,8 @@ export {
   type CrmFrequenz, type CrmKampagne, type CrmErgebnis, type Mechanik, type Anlass, type AktionEntwurf, type MarketingAktion, type MarketingStand, type MarketingSzenario,
   type MarketingUebersicht, type MarketingVerlauf, type MarketingKosten, type KanalZeile, type KalenderVorlage,
 } from './marketing';
-export { SCHWIERIGKEIT, SCHWIERIGKEITEN, schwierigkeit, type SchwierigkeitId, type SchwierigkeitParam } from './schwierigkeit';
+export { marketingStaedte, type MarketingStadt, type MarketingStadtDaten } from './marketing-stadt';
+export { SCHWIERIGKEIT, SCHWIERIGKEITEN, SZENARIO_STUFENTEXTE, schwierigkeitenFuerSzenario, schwierigkeit, type SchwierigkeitId, type SchwierigkeitParam } from './schwierigkeit';
 
 export type { Posteingang, PostHandeln, PostMeldung, PostErledigt, PostBezug, PostKategorie } from './abfragen';
 export { wettbewerbUebersicht, wettbewerbFuerGrafik } from './abfragen';

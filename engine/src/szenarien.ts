@@ -1,6 +1,7 @@
 /** Freiwillige Szenarien. Kein Einfluss auf die Standardkalibrierung. */
 import type { GameState, Haus } from './types';
 import type { Szenario } from './welt';
+import type { SchwierigkeitId } from './schwierigkeit';
 import { eroeffneInsolvenz } from './prozesse';
 import { eur, melde } from './util';
 
@@ -11,9 +12,19 @@ export type SzenarioId = 'standard' | 'schutzschirm' | 'lockdown' | 'fusion' | '
 
 export interface SzenarioRegeln {
   schutzschirmFrist?: number;
+  /** Zusätzliche Zustimmungspunkte in der Gläubigerversammlung (nur Schutzschirm). */
+  schutzschirmZustimmung?: number;
   lockdown?: { beginn: number; dauer: number; frequenz: number; staatshilfe: number };
   fusionDoppelStaedte?: number;
+  /** Mietkosten der zusätzlichen Doppelstandorte (nur Fusion). */
+  fusionMietfaktor?: number;
+  /** Einmaliger Vertrauensaufschlag beim Betriebsrat (nur Fusion). */
+  fusionBetriebsrat?: number;
   immobilienInvestor?: boolean;
+  /** Jahresmietrendite für einen Sale-and-Leaseback (nur Investor). */
+  investorMietrendite?: number;
+  /** Eigentümer-Vertrauensverlust ohne Jahresverkauf (nur Investor). */
+  investorStrafe?: number;
   aufbruchKonkurrenz?: number;
   sandkasten?: boolean;
 }
@@ -52,10 +63,37 @@ export const SZENARIEN: readonly SzenarioKarte[] = [
   { id: 'sandkasten', name: 'Sandkasten', beschreibung: 'Unbegrenzte Mittel, kein Insolvenzrisiko und keine Wertung.', schwierigkeit: 'Frei', ziel: 'Ohne Zeitlimit experimentieren', bild: 'sandkasten', start: { szenarioRegeln: { sandkasten: true } } },
 ];
 
-export function szenarioKonfiguration(id: string): Partial<Szenario> {
+/** Sonderregeln auf leicht/schwer nur innerhalb des gewählten Szenarios abstufen.
+ * Mittel bleibt für jedes Szenario exakt die bisherige Konfiguration.
+ */
+export function szenarioKonfiguration(id: string, stufe: SchwierigkeitId = 'mittel'): Partial<Szenario> {
   const karte = SZENARIEN.find((x) => x.id === id);
   if (!SZENARIEN_AKTIV || !karte || karte.id === 'standard') return {};
-  return { ...karte.start, szenarioId: karte.id };
+  if (stufe === 'mittel' || karte.id === 'sandkasten') return { ...karte.start, szenarioId: karte.id };
+  const regeln: SzenarioRegeln = structuredClone(karte.start.szenarioRegeln ?? {});
+  switch (karte.id) {
+    case 'schutzschirm':
+      regeln.schutzschirmZustimmung = stufe === 'leicht' ? 8 : -8;
+      break;
+    case 'lockdown':
+      if (regeln.lockdown) {
+        regeln.lockdown.frequenz = stufe === 'leicht' ? 0.4 : 0.2;
+        regeln.lockdown.staatshilfe = stufe === 'leicht' ? 170_000_000 : 110_000_000;
+      }
+      break;
+    case 'fusion':
+      regeln.fusionMietfaktor = stufe === 'leicht' ? 0.8 : 1.25;
+      regeln.fusionBetriebsrat = stufe === 'leicht' ? 10 : -12;
+      break;
+    case 'investor':
+      regeln.investorMietrendite = stufe === 'leicht' ? 0.05 : 0.08;
+      regeln.investorStrafe = stufe === 'leicht' ? 6 : 16;
+      break;
+    case 'aufbruch':
+      regeln.aufbruchKonkurrenz = stufe === 'leicht' ? 0.95 : 0.78;
+      break;
+  }
+  return { ...karte.start, szenarioRegeln: regeln, szenarioId: karte.id };
 }
 
 export function szenarioName(s: GameState): string {
@@ -91,7 +129,16 @@ export function szenarioStart(s: GameState, sz: Szenario): void {
   const regeln = structuredClone(sz.szenarioRegeln ?? {});
   const lauf: SzenarioStand = { id: sz.szenarioId, regeln };
   s.szenario = lauf;
-  if (regeln.fusionDoppelStaedte) lauf.fusionHausIds = s.haeuser.filter((h) => h.fusionUrsprung === 'volkskauf').map((h) => h.id);
+  if (regeln.fusionDoppelStaedte) {
+    const doppelte = s.haeuser.filter((h) => h.fusionUrsprung === 'volkskauf');
+    lauf.fusionHausIds = doppelte.map((h) => h.id);
+    if (regeln.fusionMietfaktor !== undefined) {
+      for (const haus of doppelte) haus.miete.mieteWoche = eur(haus.miete.mieteWoche * regeln.fusionMietfaktor);
+    }
+    if (regeln.fusionBetriebsrat !== undefined) {
+      s.stakeholder.betriebsrat = Math.max(0, Math.min(100, s.stakeholder.betriebsrat + regeln.fusionBetriebsrat));
+    }
+  }
   if (regeln.immobilienInvestor) {
     lauf.immobilienVerkaeufe = [];
     lauf.wertStart = unternehmensWert(s);
@@ -127,11 +174,12 @@ export function szenarioWoche(s: GameState): void {
       text: 'Einmalige Hilfe zur Deckung laufender Kosten bei geschlossenen Innenstädten. Annehmen oder ablehnen.',
       einmalzahlung: lockdown.staatshilfe,
     });
-    melde(s, 'warnung', 'Innenstädte geschlossen: zehn Wochen mit 70 % weniger Kundenfrequenz. Die Überbrückungshilfe liegt im Posteingang.');
+    melde(s, 'warnung', 'Innenstädte geschlossen: ' + lockdown.dauer + ' Wochen mit ' +
+      Math.round((1 - lockdown.frequenz) * 100) + ' % weniger Kundenfrequenz. Die Überbrückungshilfe liegt im Posteingang.');
   }
   if (lauf.regeln.immobilienInvestor && s.woche > 0 && s.woche % 52 === 0 &&
       !(lauf.immobilienVerkaeufe ?? []).some((w) => w >= s.woche - 52 && w < s.woche)) {
-    s.stakeholder.eigentuemer = Math.max(0, s.stakeholder.eigentuemer - 10);
+    s.stakeholder.eigentuemer = Math.max(0, s.stakeholder.eigentuemer - (lauf.regeln.investorStrafe ?? 10));
     melde(s, 'eigentuemer', 'Der Investor beanstandet das vergangene Jahr: kein Immobilienverkauf.');
   }
   if (lauf.fusionHausIds?.length && s.haeuser.some((h) => h.streikBis !== undefined && h.streikBis > s.woche)) lauf.streikErlebt = true;
@@ -145,7 +193,7 @@ export function immobilieVerkaufen(s: GameState, hausId: string): string | null 
   const wert = hausWert(h);
   h.miete.vermieter = 'dritt';
   h.miete.vermieterName = 'Immobilienfonds Nord';
-  h.miete.mieteWoche = eur(h.miete.mieteWoche + wert * 0.06 / 52);
+  h.miete.mieteWoche = eur(h.miete.mieteWoche + wert * (s.szenario.regeln.investorMietrendite ?? 0.06) / 52);
   s.cash += wert;
   s.einmalErloeseWoche += wert;
   s.szenario.immobilienVerkaeufe = [...(s.szenario.immobilienVerkaeufe ?? []), s.woche];
