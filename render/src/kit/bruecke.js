@@ -19,9 +19,11 @@
 //   'slot:hq' aus hq.js (eigene Gruppe, Map hqs; aktualisiere() meldet 'hq:<id>', wenn sich Etagen ändern).
 import { THREE, Sammler, LOD, setzeLod } from './basis.js';
 import { echterBauer, fussabdruck } from './bauer.js';
+import { dachFlaechenBeimBau } from './stadt.js';
 import { warenhaus, familieVon, nachnutzung } from './warenhaus.js';
 import { sporthaus, nachnutzungSport } from './sporthaus.js';
 import { outlet } from './outlet.js';
+import { schwesterhaus } from './schwesterhaus.js';
 import { premiumhaus } from './premium.js';
 import { stadtDaten } from './staedte.js';
 import { wettbewerber as baueWettbewerber } from './wettbewerber.js';
@@ -154,11 +156,11 @@ export function stadtEintragAusSpiel(s, name) {
   if (!d) return undefined;
   const eigene = s.haeuser.filter((h) => h.stadt === name).map((h) => {
     const f = fussabdruck(h);
-    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
+    return { id: h.id, name: h.name, rolle: h.klasse === 'premium' ? 'premium' : h.format === 'sport' ? 'sport' : h.format === 'schwester' ? 'schwester' : h.format === 'outlet' ? 'outlet' : 'warenhaus', lage: h.lage, grundflaecheQm: h.grundflaecheQm, w: f.w, d: f.d };
   });
   // Die ursprünglichen Parzellen sind unabhängig vom aktuellen Spielstand. Zwei zusätzliche
   // Flächen werden von Beginn an als normaler Blockrand bebaut und erst bei Bedarf umgenutzt.
-  const alt = d.standorte.filter((q) => q.rolle === 'wettbewerber' || q.rolle === 'schwester' || q.rolle === 'outlet');
+  const alt = d.standorte.filter((q) => q.rolle === 'wettbewerber');
   const reserve = Array.from({ length: 2 }, (_, i) => ({
     id: 'KR-' + name + '-' + (i + 1), name: '', rolle: 'wettbewerber_reserve',
     lage: i === 0 ? '1a' : 'b', grundflaecheQm: 1800,
@@ -245,7 +247,11 @@ export function spielBauer(s, o = {}) {
     p.haus = h;
     return outlet(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
   };
-  const bau = (S, scene, p, h) => (h.format === 'outlet' ? baueOutlet : h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
+  const baueSchwester=(S,scene,p,h)=>{
+    const fl=fussabdruck(h),{x,z}=imSlot(p,fl.w,fl.d);p.haus=h;
+    return schwesterhaus(S,scene,h,{x,z,...bauZustand(zustand(h))});
+  };
+  const bau = (S, scene, p, h) => (h.format === 'outlet' ? baueOutlet : h.format === 'schwester' ? baueSchwester : h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
 
   const getrennt = (p, h) => {
     const gruppe = new THREE.Group();
@@ -253,11 +259,15 @@ export function spielBauer(s, o = {}) {
     const S = new Sammler();
     const alt = LOD.stufe;
     setzeLod(o.hausLod ?? 'nah');
-    let e;
-    try { e = bau(S, gruppe, p, h); S.bauen(gruppe); } finally { setzeLod(alt); }
+    let e, dachFlaechen;
+    try {
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => bau(S, gruppe, p, h)));
+      S.bauen(gruppe);
+    } finally { setzeLod(alt); }
     gruppe.traverse((m) => { m.userData.hausId = h.id; });
     (o.wurzel ?? null)?.add(gruppe);
-    haeuser.set(h.id, { p, gruppe, e, schluessel: zustand(h).schluessel });
+    haeuser.set(h.id, { p, gruppe, e, dachFlaechen, schluessel: zustand(h).schluessel });
+    o.dachFlaechenAktualisieren?.('haus:' + h.id, dachFlaechen);
     return e;
   };
   // Zentrale und freie Bürogebäude (rolle 'hq'): Slot-Bauer 'slot:hq' aus hq.js, Daten immer frisch aus o.hq()
@@ -273,11 +283,15 @@ export function spielBauer(s, o = {}) {
     gruppe.userData.hqId = p.standort.id;
     const S = new Sammler(), alt = LOD.stufe;
     setzeLod(o.hausLod ?? 'nah');
-    let e;
-    try { e = basis['slot:hq'](S, gruppe, hqDaten(p)); S.bauen(gruppe); } finally { setzeLod(alt); }
+    let e, dachFlaechen;
+    try {
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => basis['slot:hq'](S, gruppe, hqDaten(p))));
+      S.bauen(gruppe);
+    } finally { setzeLod(alt); }
     gruppe.traverse((m) => { m.userData.hqId = p.standort.id; });
     (o.wurzel ?? null)?.add(gruppe);
-    hqs.set(p.standort.id, { p, gruppe, e, teile: S.anzahl, schluessel: hqSchluessel(p) });
+    hqs.set(p.standort.id, { p, gruppe, e, dachFlaechen, teile: S.anzahl, schluessel: hqSchluessel(p) });
+    o.dachFlaechenAktualisieren?.('hq:' + p.standort.id, dachFlaechen);
     return e;
   };
   const hqs = new Map();
@@ -318,12 +332,16 @@ export function spielBauer(s, o = {}) {
     const gruppe = new THREE.Group(), S = new Sammler(), alt = LOD.stufe;
     if (x.wbId) gruppe.userData.wbId = x.wbId;
     setzeLod(o.hausLod ?? 'nah');
-    let e;
-    try { e = wbBau(S, gruppe, x.p, wbVon(x.wbId)); S.bauen(gruppe); }
+    let e, dachFlaechen;
+    try {
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, x.p, () => wbBau(S, gruppe, x.p, wbVon(x.wbId))));
+      S.bauen(gruppe);
+    }
     finally { setzeLod(alt); }
     if (x.wbId) gruppe.traverse((m) => { m.userData.wbId = x.wbId; });
     o.wurzel?.add(gruppe);
-    Object.assign(x, { gruppe, e, schluessel: wbSchluessel(wbVon(x.wbId)) });
+    Object.assign(x, { gruppe, e, dachFlaechen, schluessel: wbSchluessel(wbVon(x.wbId)) });
+    o.dachFlaechenAktualisieren?.('wb:' + (x.p.standort?.id ?? x.p.id), dachFlaechen);
     if (x.wbId) wettbewerber.set(x.wbId, x);
     return e;
   }
@@ -377,7 +395,7 @@ export function spielBauer(s, o = {}) {
   };
   const bauer = {
     ...basis, 'slot:warenhaus': slot('slot:warenhaus'), 'slot:sport': slot('slot:sport'),
-    'slot:schwester': statischerSlot('slot:schwester'), 'slot:outlet': statischerSlot('slot:outlet'),
+    'slot:schwester': slot('slot:schwester'), 'slot:outlet': slot('slot:outlet'),
     'slot:premium': slot('slot:premium'),
     'slot:hq': hqSlot, 'slot:wettbewerber': wbSlot, 'slot:wettbewerber_reserve': wbSlot,
   };

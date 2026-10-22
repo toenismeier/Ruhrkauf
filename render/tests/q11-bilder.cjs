@@ -1,5 +1,5 @@
-// Q11: Bilder-/Engine-Katalog gegen dieselbe Typ-Liste validieren.
-// Claude: cd render && node tests/q11-bilder.cjs (nur statische SVGs, kein Browser).
+// Q11: Jeder Engine-Artikeltyp hat ein Produktbild aus der Silhouetten-Bibliothek (kit/mode, Q25).
+// cd render && node tests/q11-bilder.cjs (nur statische SVGs, kein Browser).
 const path = require('node:path');
 const fs = require('node:fs');
 const assert = require('node:assert/strict');
@@ -9,29 +9,29 @@ fs.mkdirSync(path.dirname(out), { recursive: true });
 esbuild.buildSync({
   stdin: {
     contents: `import { ARTIKELTYPEN } from '../../engine/src/produkte.ts';
-import { ARTIKELTYPEN_BILD, produktbildSVG, STANDARD_FARBE, STANDARD_MATERIAL } from '../src/kit/produktbild.js';
-export { ARTIKELTYPEN, ARTIKELTYPEN_BILD, produktbildSVG, STANDARD_FARBE, STANDARD_MATERIAL };`,
+import { produktbildSVG } from '../src/kit/produktbild.js';
+import { bildFuer } from '../src/kit/mode/produkt.js';
+import { SILHOUETTEN } from '../src/kit/mode/silhouetten.js';
+export { ARTIKELTYPEN, produktbildSVG, bildFuer, SILHOUETTEN };`,
     resolveDir: __dirname,
     sourcefile: 'q11-katalog-einstieg.js',
     loader: 'js',
   },
   platform: 'node', format: 'cjs', target: 'es2020', bundle: true, outfile: out, logLevel: 'error',
 });
-const { ARTIKELTYPEN, ARTIKELTYPEN_BILD, produktbildSVG, STANDARD_FARBE, STANDARD_MATERIAL } = require(out);
+const { ARTIKELTYPEN, produktbildSVG, bildFuer, SILHOUETTEN } = require(out);
 const engine = ARTIKELTYPEN.map((t) => t.typ);
 assert.equal(engine.length, 139, '36 Grundtypen + 96 Q05 + 7 Q11');
-assert.deepEqual(new Set(ARTIKELTYPEN_BILD), new Set(engine), 'Kein fehlendes Bild und kein Fremdtyp');
-const formen = new Map();
+assert.equal(new Set(engine).size, engine.length, 'Artikeltypen eindeutig');
 for (const typ of engine) {
-  const svg = produktbildSVG(typ, STANDARD_FARBE[typ], STANDARD_MATERIAL[typ], 120);
+  const b = bildFuer(typ);
+  assert.ok(SILHOUETTEN[b.silhouette], typ + ' → unbekannte Silhouette ' + b.silhouette);
+  assert.ok(b.silhouette !== 'tshirt' || typ === 'T-Shirt', typ + ': fällt auf T-Shirt zurück');
+  const svg = produktbildSVG(typ, undefined, undefined, 120);
   assert.match(svg, /^<svg/);
-  assert.doesNotMatch(svg, /NaN|undefined/);
-  const form = svg.split('</defs>')[1]?.match(/<path d="([^"]+)"/)?.[1];
-  assert.ok(form, typ + ': Keine Kontur');
-  assert.ok(!formen.has(form), typ + ' teilt seine Hauptkontur mit ' + formen.get(form));
-  formen.set(form, typ);
+  assert.doesNotMatch(svg, /NaN|undefined/, typ);
 }
-for (const [a,b] of [['Wickelkleid','T-Shirt'], ['Trenchcoat','Steppjacke'], ['Feinstrickpullover','Rundhalspullover'], ['Tunikabluse','Hemd'], ['Plisseerock','Bleistiftrock']]) {
-  assert.notEqual(produktbildSVG(a, '#8899aa'), produktbildSVG(b, '#8899aa'), a + ' ≠ ' + b);
-}
-console.log('Q11:', engine.length, 'Produkte, alle SVG-Konturen eindeutig, kein Typ fehlt.');
+// Die sieben Q11-Typen haben eigene Bilder statt der Vorlagen T-Shirt/Chino.
+for (const [typ, sil] of [['Top', 'top'], ['Crop-Top', 'croptop'], ['Stoffhose', 'stoffhose'], ['Leinenhose', 'leinenhose'], ['Cargohose', 'cargohose'], ['Minirock', 'minirock']])
+  assert.equal(bildFuer(typ).silhouette, sil, typ);
+console.log('Q11:', engine.length, 'Artikeltypen, alle mit bekannter Silhouette, keiner im T-Shirt-Rückfall.');

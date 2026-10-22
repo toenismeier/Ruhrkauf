@@ -6,7 +6,7 @@
 // typKachelSVG(artikeltyp, groesse = 120) → Bild in Standardfarbe auf heller Kachel (Typ-Kacheln im Assistenten)
 // ARTIKELTYPEN_BILD, FARBEN_PRODUKT, MATERIALIEN_BILD, STANDARD_MATERIAL, STANDARD_FARBE, KATEGORIE_BILD
 
-import { VARIANTEN_BILD, zeichneProduktVariante } from './produktbild-varianten.js';
+import { produktSVG, bildFuer, modelFuerProdukt } from './mode/produkt.js';
 
 export const FARBEN_PRODUKT = {
   'weiß': '#f3f2ee', creme: '#efe4cc', sand: '#d8c39c', beige: '#cdb592', camel: '#b8864e', cognac: '#9a5a2e', braun: '#6a4630',
@@ -31,13 +31,12 @@ const TYPEN = {
   Kissen: ['wohnen', 'Leinen', 'senf'], Tasse: ['wohnen', 'Keramik', 'mintgrün'], Vase: ['wohnen', 'Keramik', 'flaschengrün'],
   Lippenstift: ['beauty', 'Kosmetik', 'rot'], Creme: ['beauty', 'Kosmetik', 'rosa'], Parfum: ['beauty', 'Glas', 'flieder'],
   Kinderbody: ['kinder', 'Bio-Baumwolle', 'gelb'], Kinderkleid: ['kinder', 'Baumwolle', 'koralle'], 'Plüschtier': ['spielwaren', 'Polyester', 'camel'],
-  ...VARIANTEN_BILD,
 };
 export const ARTIKELTYPEN_BILD = Object.keys(TYPEN);
 export const STANDARD_MATERIAL = Object.fromEntries(Object.entries(TYPEN).map(([k, v]) => [k, v[1]]));
 export const STANDARD_FARBE = Object.fromEntries(Object.entries(TYPEN).map(([k, v]) => [k, v[2]]));
 export const KATEGORIE_BILD = Object.fromEntries(Object.entries(TYPEN).map(([k, v]) => [k, v[0]]));
-const STRICK_TYPEN = new Set(['Kaschmirpullover', 'Strickjacke', 'Schal', 'Mütze', 'Socken', ...Object.keys(VARIANTEN_BILD).filter((t) => /Strick|Pullover|Cardigan|Sweatshirt/.test(t))]);
+const STRICK_TYPEN = new Set(['Kaschmirpullover', 'Strickjacke', 'Schal', 'Mütze', 'Socken']);
 
 // ─────────────────────────────────────────── Farbe
 function rgb(h) { h = String(h).replace('#', ''); if (h.length === 3) h = h.split('').map((c) => c + c).join(''); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
@@ -470,13 +469,24 @@ const bildVorlage = (t) => {
 };
 
 // ─────────────────────────────────────────── Öffentliche Funktionen
+// Q25: Produktbilder kommen aus der Silhouetten-Bibliothek (kit/mode). opt.bild überschreibt die Zuordnung über den Namen.
 export function produktbildSVG(artikeltyp, farbe, material, groesse = 160, opt = {}) {
+  return produktSVG(opt.bild ?? bildFuer(artikeltyp), farbe ?? undefined, material ?? undefined, groesse, opt);
+}
+
+// Q25: Model, das den Artikel trägt (Detailansicht). null bei Artikeln ohne Platz am Model (Home, Beauty, Spielwaren).
+// opt: { geschlecht: 'damen'|'herren', zielgruppe: 'kinder'|'teens'|'young'|'adults'|'bestager', groesse, bild, hintergrund }
+export function modelbildSVG(artikeltyp, farbe, material, opt = {}) {
+  return modelFuerProdukt(opt.bild ?? bildFuer(artikeltyp), farbe ?? undefined, material ?? undefined, opt);
+}
+
+// Bisherige Zeichner, weiter genutzt für Schuhe, Taschen, Wäsche, Beauty und Spielwaren (zeichner 'alt:' in silhouetten.js)
+export function altbildSVG(artikeltyp, farbe, material, groesse = 160, opt = {}) {
   const typ = bildVorlage(artikeltyp);
   const c = produktFarbe(farbe) ?? produktFarbe(STANDARD_FARBE[typ]) ?? '#b8864e';
   const mat = material ?? STANDARD_MATERIAL[typ] ?? 'Baumwolle';
   const K = kontext(c, mat, typ);
-  // Q11: Jeder zusätzliche Artikeltyp hat eine eigene Figur; keine Zuordnung auf T-Shirt/Steppjacke mehr.
-  if (!zeichneProduktVariante(K, typ)) { if (Z[typ]) Z[typ](K); else paket(K); }
+  if (typ) Z[typ](K); else paket(K);
   if (K.bio && typ) {
     K.teile.push(`<g transform="translate(84 12)"><circle r="7" fill="#e8f2df" stroke="#5c8a3e" stroke-width="0.8"/><path d="M-3.4 3 C-3.6 -2.6 0.4 -4.4 4 -4 C4.4 0 2.4 3.6 -3.4 3 Z" fill="#6ea04a"/><path d="M-3.4 3 L1.6 -1.6" stroke="#e8f2df" stroke-width="0.6"/></g>`);
   }

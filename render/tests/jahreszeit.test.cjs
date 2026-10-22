@@ -69,4 +69,34 @@ assert.deepEqual(Array.from(laub.instanceColor.array), ausgangLaub, 'Feature aus
 assert.deepEqual(Array.from(figur.instanceColor.array), ausgangFigur, 'Feature aus: Originalfarben Figuren');
 darstellung.aufraeumen();
 assert.equal(scene.children.length, 2, 'Saison-Gruppen rückstandsfrei entfernt');
-console.log('Jahreszeiten: KW-Grenzen, Aktionskalender, 40 % Schnee, deterministische Grafik, Schalter und Farben OK');
+// Q09: Schnee ist an die echten Dreiecksflächen gebunden und niemals ein
+// Rechteck auf der pauschalen Gebäudehöhe. Ohne Browser/Rendering überprüfbar.
+const dach1 = [[0, 12, 0], [0, 12, 10], [10, 12, 0]];
+const dach2 = [[20, 15, 0], [20, 18, 10], [30, 15, 0]];
+const kachelDach = [[40, 9, 0], [40, 9, 10], [50, 9, 0]];
+const dachSzene = new THREE.Scene();
+const winterDach = jahreszeitenStadt(dachSzene, plan, new Map(), spiel(3), true, [dach1, dach2]);
+const dachGruppe = dachSzene.getObjectByName('Jahreszeiten');
+const dachMesh = () => dachGruppe.getObjectByName('Schnee auf Dachflächen');
+assert.equal(dachMesh().geometry.attributes.position.count, 6, 'ein Dreieck je echte Dachfläche');
+function pruefeDachabstand(dach, ersteEcke) {
+  const g = dachMesh().geometry.attributes.position;
+  const [a, b, c] = dach;
+  const u = new THREE.Vector3(...b).sub(new THREE.Vector3(...a));
+  const v = new THREE.Vector3(...c).sub(new THREE.Vector3(...a));
+  const normale = u.cross(v).normalize();
+  for (let i = ersteEcke; i < ersteEcke + 3; i++) {
+    const p = new THREE.Vector3().fromBufferAttribute(g, i);
+    const abstand = p.clone().sub(new THREE.Vector3(...a)).dot(normale);
+    assert.ok(abstand > 0.055 && abstand < 0.075, 'Schnee maximal 0,075 m über der Dachneigung: ' + abstand);
+  }
+}
+pruefeDachabstand(dach1, 0);
+pruefeDachabstand(dach2, 3);
+winterDach.registriereDachflaechen('k1', [kachelDach]);
+assert.equal(dachMesh().geometry.attributes.position.count, 9, 'Kacheldach ergänzt, ein Mesh/Draw Call');
+winterDach.registriereDachflaechen('k1', []);
+assert.equal(dachMesh().geometry.attributes.position.count, 6, 'Kacheltausch entfernt altes Dach statt es zu duplizieren');
+winterDach.aufraeumen();
+assert.equal(dachSzene.children.length, 0, 'keine zurückbleibenden Schneemeshes');
+console.log('Jahreszeiten: KW-Grenzen, Aktionskalender, 40 % Schnee, deterministische Grafik, Schalter und Farben und dachgebundenen Schnee OK');
