@@ -130,10 +130,10 @@ export function produkteModul(ctx) {
         } else {
           c += `<div class="mitte" title="${dez(p.sterne, 1)} Sterne">${sterne(p.sterne, 24)}<span class="sternzahl">${P(`p:${p.id}:sterne`, dez(p.sterne, 1), 'span')}</span></div>`;
           const ver = `${p.veraenderung >= 0 ? '+' : '−'}${fmt.format(Math.abs(p.veraenderung))} (${p.veraenderungProzent >= 0 ? '+' : '−'}${pz(Math.abs(p.veraenderungProzent))})`;
-          c += `<div class="pmitte">${schalter(p.status === 'sortiment', `data-a="sortiment" data-v="${p.id}"`, 'Im Sortiment')}<div class="verkauf"><small>Verkauf letzte Woche</small>${P(`p:${p.id}:verkauf`, fmt.format(p.verkaufLetzteWoche), 'b')}${P(`p:${p.id}:veraenderung`, ver, 'i', p.veraenderung < 0 ? ' class="rotwert"' : '')}</div></div>`;
+          c += `<div class="pmitte">${schalter(p.status === 'sortiment', `data-a="sortiment" data-v="${p.id}"`, 'Im Sortiment')}<div class="verkauf"><small>Stück letzte Woche</small>${P(`p:${p.id}:verkauf`, fmt.format(p.verkaufLetzteWoche), 'b')}${P(`p:${p.id}:veraenderung`, ver, 'i', p.veraenderung < 0 ? ' class="rotwert"' : '')}</div></div>`;
           c += `<div class="pmitte">${donut(p.marge, P(`p:${p.id}:marge`, pz(p.marge), 'b'))}<div class="preis"><small class="rotwert">EK je Stück ${P(`p:${p.id}:ek`, euro(p.ekStueck), 'span')}</small><small>VK je Stück</small>${stepper('preis', P(`p:${p.id}:preis`, euro(p.preis)), `Normpreis ${euro(p.normpreis)}`, ` data-p2="${p.id}"`)}</div></div>`;
           const minimum = Math.round(p.normpreis * 0.4 * 100) / 100, maximum = Math.round(p.normpreis * 2.5 * 100) / 100;
-          c += `<div class="q17-preis"><label for="vk-${esc(p.id)}">Verkaufspreis (VK)</label><input id="vk-${esc(p.id)}" type="range" min="${minimum}" max="${maximum}" step="0.01" value="${p.preis}" data-a="preisSlider" data-p2="${esc(p.id)}" aria-label="VK ${esc(p.name)}"/><small>${euro(minimum)} bis ${euro(maximum)}</small></div>`;
+          c += `<div class="q17-preis"><input id="vk-${esc(p.id)}" type="range" min="${minimum}" max="${maximum}" step="0.01" value="${p.preis}" data-a="preisSlider" data-p2="${esc(p.id)}" aria-label="VK ${esc(p.name)}"/><small>${euro(minimum)} bis ${euro(maximum)}</small></div>`;
           c += `<div class="q17-einheit">${schalter(p.preisAlleHaeuser, `data-a="einheitspreis" data-v="${p.id}"`, 'Preis in allen Häusern')}</div>`;
           if (!p.preisAlleHaeuser && index === ui.k && ui.haus) {
             const haus = offeneHaeuser.find((x) => x.id === ui.haus);
