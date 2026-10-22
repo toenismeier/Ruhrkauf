@@ -71,7 +71,7 @@
       {"id":"bloecke/b6","bauer":"west_siedlung","lage":[365.5,594,86,92],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"9a2574b956007795"},
       {"id":"bloecke/b7","bauer":"kirche","lage":[271,421,72,46],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"a9990d3a9358e1b8"},
       {"id":"bloecke/b8","bauer":"markt","lage":[271,161.5,72,46],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"c068876e3b6a3bc4"},
-      {"id":"bloecke/b9","bauer":"center","lage":[115,489.5,124,82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"cbb0e803d6492b95"},
+      {"id":"bloecke/b9","bauer":"center","lage":[115,489.5,124,82],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"e65a9bed0c4d23e3"},
       {"id":"kreuzungen/k0","bauer":"kreuzungen","lage":[11.25,11.25,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"d61cdd0236b6b362"},
       {"id":"kreuzungen/k1","bauer":"kreuzungen","lage":[103.75,11.25,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"def7da97f0262513"},
       {"id":"kreuzungen/k10","bauer":"kreuzungen","lage":[103.75,85.75,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"590a4a1cf827d576"},
@@ -452,7 +452,7 @@
       {"id":"parzellen/p398","bauer":"hofhaus","lage":[189.63,249.5,11.1,29],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"60f6e60b863d224b"},
       {"id":"parzellen/p399","bauer":"hofhaus","lage":[200.73,249.5,18.77,29],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"55b72317796bf171"},
       {"id":"parzellen/p4","bauer":"slot:ruhr_siedlung","lage":[23.5,640,33,44],"drehung":0,"variante":"kreuz","standort":null,"pruefsumme":"f96ae76386f0ee77"},
-      {"id":"parzellen/p40","bauer":"slot:warenhaus","lage":[118,492.5,112,37],"drehung":0,"variante":"warenhaus","standort":"W127","pruefsumme":"4dfe6bb8bbea1e52"},
+      {"id":"parzellen/p40","bauer":"slot:warenhaus","lage":[118,492.5,112,37],"drehung":0,"variante":1,"standort":"W127","pruefsumme":"f95129107d998044"},
       {"id":"parzellen/p400","bauer":"eck","lage":[271,230,20,16],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"de8d897af1fab41e"},
       {"id":"parzellen/p401","bauer":"slot:ruhr_bude","lage":[271,278,16,20],"drehung":0,"variante":"trinkhalle","standort":null,"pruefsumme":"2b24726914b9e743"},
       {"id":"parzellen/p402","bauer":"slot:ruhr_bude","lage":[327,230,16,19],"drehung":0,"variante":"imbiss","standort":null,"pruefsumme":"f2f595f28734f2d6"},
@@ -1069,7 +1069,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"5a434b3561389319"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"ad0c1c63a4b54fbd"}
     ],
-    "gesamt": "86abff4273c75954"
+    "gesamt": "6680d7e2be1232d4"
   },
   "geometrie": {
     "kacheln": [
@@ -1372,7 +1372,7 @@
       {"id":"p398","teile":136,"dreiecke":1664,"boundingBox":[189.61,0,248.95,200.77,25.23,280.02]},
       {"id":"p399","teile":555,"dreiecke":6948,"boundingBox":[200.73,0,249.1,219.9,24.98,279.4]},
       {"id":"p4","teile":122,"dreiecke":1488,"boundingBox":[23.5,0,640,56.5,8.73,684]},
-      {"id":"p40","teile":759,"dreiecke":9646,"boundingBox":[118.7,0,493.3,233.8,25.5,533.54]},
+      {"id":"p40","teile":773,"dreiecke":9814,"boundingBox":[118.7,0,493.3,233.8,25.5,533.54]},
       {"id":"p400","teile":314,"dreiecke":3708,"boundingBox":[271,0,230,292.62,18.87,247.62]},
       {"id":"p401","teile":83,"dreiecke":1402,"boundingBox":[271,0.3,278,287,5.91,298]},
       {"id":"p402","teile":56,"dreiecke":1078,"boundingBox":[328.06,0.27,230,344.94,5.09,246]},
@@ -1857,16 +1857,16 @@
       "boundingBox": [-480,-0.6,-480,1352.5,29,1188.5]
     },
     "gesamt": {
-      "teile": 193828,
+      "teile": 193842,
       "strasse": 3421,
-      "haeuser": 190407,
+      "haeuser": 190421,
       "instanzen": 35994,
       "drawCallsInstanzen": 96
     }
   },
   "pruefsummen": {
-    "stadtplan": "ce6ef53d684afeae41ed41ec49c2e8f1b0f67960d50eb31ab7532e9b03ab4ba9",
-    "geometrie": "8e3fdeb2ab5ccc3f9abf7818e210f3119c38619ab49ff755208520c5fdf4df71",
-    "bildReferenz": "89b984228347114411827cd2f6fe43cca691e0385553e13ffdecbf3309b2f4fd"
+    "stadtplan": "6806b54384fe43e05e40eb52eccc7695f461359681785324068bf0ffcd118473",
+    "geometrie": "df8f45f0d67d1e17d0473286eb90ae9c2d32fb3ca5264eb11b9448783bb079a3",
+    "bildReferenz": "7278b39ecf063d8fcd256da62787797a1f0b990fb903777a1a05d243c451bbed"
   }
 }

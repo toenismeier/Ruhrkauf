@@ -313,7 +313,7 @@
       {"id":"parzellen/p68","bauer":"stadthaus","lage":[22.5,138.15,13.5,6.35],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"5b55d5b542b9dba3"},
       {"id":"parzellen/p69","bauer":"hofhaus","lage":[40,116.5,17,29],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"fda7376a3921ecda"},
       {"id":"parzellen/p7","bauer":"stadthaus","lage":[138.45,99,10.94,15.5],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"3573fbe03c1e971e"},
-      {"id":"parzellen/p70","bauer":"slot:warenhaus","lage":[213.5,126,52,37],"drehung":0,"variante":"warenhaus","standort":"W118","pruefsumme":"d1f0b0a1b6eabf8f"},
+      {"id":"parzellen/p70","bauer":"slot:warenhaus","lage":[213.5,126,52,37],"drehung":0,"variante":1,"standort":"W118","pruefsumme":"9147006675e0f39c"},
       {"id":"parzellen/p71","bauer":"eck","lage":[185.5,99,14,20],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"775fef6e01493d7e"},
       {"id":"parzellen/p72","bauer":"eck","lage":[185.5,149,14,14],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"e05b3c8a6c498e68"},
       {"id":"parzellen/p73","bauer":"eck","lage":[251.5,99,14,14],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"c711671f83e01005"},
@@ -457,7 +457,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"0fa862f669819f2e"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"2fd018fe78812cd6"}
     ],
-    "gesamt": "32096d001beff92e"
+    "gesamt": "3db189bb992bce3d"
   },
   "geometrie": {
     "kacheln": [
@@ -693,7 +693,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "de401c0dea45759ce5fbeaa1cb9f81a739b721cfe2139f9877c9f878fb1a22e5",
+    "stadtplan": "3a05b693384be09890f765953130138dd8ce950ae68c413d83ae05683c811b51",
     "geometrie": "724d7dee8fdddc94c931f5d7b51156ed41eb77bbc8f899292314adea2a341e89",
     "bildReferenz": "3871d3c41d3182a7ffa05d40a7a73f6fe5ab0c8eab7849055e65aa245001668b"
   }

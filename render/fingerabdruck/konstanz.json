@@ -246,7 +246,7 @@
       {"id":"parzellen/p43","bauer":"stadthaus","lage":[286.5,99.6,15.5,7.62],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"ab5e38805c6d5ac0"},
       {"id":"parzellen/p44","bauer":"stadthaus","lage":[286.5,107.22,15.5,12.28],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"3a3a14746dde869e"},
       {"id":"parzellen/p45","bauer":"hofhaus","lage":[306,90.5,19,25],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"0aa8c0ba462a8db2"},
-      {"id":"parzellen/p46","bauer":"slot:warenhaus","lage":[405.5,98,57,37],"drehung":0,"variante":"warenhaus","standort":"W100","pruefsumme":"b01b192c8a8946a2"},
+      {"id":"parzellen/p46","bauer":"slot:warenhaus","lage":[405.5,98,57,37],"drehung":0,"variante":4,"standort":"W100","pruefsumme":"fda6f4cc127d4c56"},
       {"id":"parzellen/p47","bauer":"slot:bay_muenchen","lage":[376.5,71,20,24],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"21cb6bffc056ba99"},
       {"id":"parzellen/p48","bauer":"slot:bay_muenchen","lage":[376.5,115,24,20],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"6fabc95cf903ab00"},
       {"id":"parzellen/p49","bauer":"eck","lage":[438.5,71,24,20],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"e625f023b6502f3b"},
@@ -384,7 +384,7 @@
       {"id":"umland/4","bauer":"land","lage":[0,387.5,161,60.5],"drehung":0,"variante":null,"standort":null,"pruefsumme":"3a4f67a184836bdb"},
       {"id":"umland/5","bauer":"land","lage":[0,448,344.5,68.5],"drehung":0,"variante":null,"standort":null,"pruefsumme":"5004eff033fbbbfa"}
     ],
-    "gesamt": "5b5d99c3a6dbb31f"
+    "gesamt": "19b3bc9598e3754b"
   },
   "geometrie": {
     "kacheln": [
@@ -617,8 +617,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "8e4a495dde53abe36d6af51758627fa21f11cb35af1b95713b860d1081a4485c",
+    "stadtplan": "0d227829a867e7b0f76ab65685f92eb508f02d1ddd5e0a991e7d1e627eb5731c",
     "geometrie": "19fb4c88101f5f7eef7ed4156cf735481f7701e0588a23b39c19a1256ae7827e",
-    "bildReferenz": "2b37c28908edfca74e79d3c272199d5b7bcba0d61bb0f247d0ee946b8b3f4b69"
+    "bildReferenz": "920a4b626a4006dc5eac58ef9c1dfa240a01abda17a7459a4b5e9cfa05353f5d"
   }
 }

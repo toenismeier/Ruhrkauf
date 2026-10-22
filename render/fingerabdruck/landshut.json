@@ -200,7 +200,7 @@
       {"id":"parzellen/p182","bauer":"slot:bay_buergerhaus","lage":[66.5,415,20,18],"drehung":0,"variante":"landshut","standort":null,"pruefsumme":"9e79591627385a18"},
       {"id":"parzellen/p183","bauer":"slot:bay_muenchen","lage":[22.5,418,20,15],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"1f28625820356834"},
       {"id":"parzellen/p184","bauer":"hofhaus","lage":[46.5,419,16,10],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"e823285ca84ce242"},
-      {"id":"parzellen/p185","bauer":"slot:warenhaus","lage":[137,421,52,32],"drehung":0,"variante":"warenhaus","standort":"W096","pruefsumme":"bb43216fb0c6ee71"},
+      {"id":"parzellen/p185","bauer":"slot:warenhaus","lage":[137,421,52,32],"drehung":0,"variante":5,"standort":"W096","pruefsumme":"44ce8a9a0db2e8e0"},
       {"id":"parzellen/p186","bauer":"slot:bay_buergerhaus","lage":[109,395,18.5,21.5],"drehung":0,"variante":"wasserburg","standort":null,"pruefsumme":"6a66dbd433d457b4"},
       {"id":"parzellen/p187","bauer":"slot:bay_buergerhaus","lage":[109,434.5,18.5,18.5],"drehung":0,"variante":"landshut","standort":null,"pruefsumme":"b425c682a4822696"},
       {"id":"parzellen/p188","bauer":"slot:bay_buergerhaus","lage":[170.5,395,18.5,18.5],"drehung":0,"variante":"landshut","standort":null,"pruefsumme":"da52440880c27336"},
@@ -512,7 +512,7 @@
       {"id":"strassen/s89","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"028d7664dd3fe560"},
       {"id":"strassen/s9","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"ac8035fb81451bdb"}
     ],
-    "gesamt": "0a41a596d9309698"
+    "gesamt": "26d290637ea75bc9"
   },
   "geometrie": {
     "kacheln": [
@@ -846,7 +846,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "a77a13ee2cf8e6482a3e05d9cfcca418a9ea160c79b4f730a6c898022c163f53",
+    "stadtplan": "6fe79c10b7fcc1ce5584bce63ee72db0e67a5ef5fd71868b9cffef150cd9d785",
     "geometrie": "6ae848354ea2e7a0f04f168a314c55c8d852e3bb529401df52e361e287aad3e7",
     "bildReferenz": "5c96004e348caa97b1deb77d5f7cc7fb49f757c66e13b59a0e09f898b3245c04"
   }

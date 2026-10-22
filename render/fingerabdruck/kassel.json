@@ -471,7 +471,7 @@
       {"id":"parzellen/p400","bauer":"hofhaus","lage":[153,331,17.7,17],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"087c67ef15f02059"},
       {"id":"parzellen/p401","bauer":"hofhaus","lage":[170.7,331,11.09,17],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"53a7f9ace3ce64d6"},
       {"id":"parzellen/p402","bauer":"hofhaus","lage":[181.79,331,17.21,17],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"b8d4e274d2a7928a"},
-      {"id":"parzellen/p403","bauer":"slot:warenhaus","lage":[287.5,328,62,42],"drehung":0,"variante":"warenhaus","standort":"W058","pruefsumme":"8b97447cd5347d2a"},
+      {"id":"parzellen/p403","bauer":"slot:warenhaus","lage":[287.5,328,62,42],"drehung":0,"variante":5,"standort":"W058","pruefsumme":"b1734b632227801b"},
       {"id":"parzellen/p404","bauer":"eck","lage":[243.5,288,18.5,18.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"4cad727f7f7901a5"},
       {"id":"parzellen/p405","bauer":"eck","lage":[243.5,351.5,20.5,18.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"9d4c0a5c8b4b2fee"},
       {"id":"parzellen/p406","bauer":"eck","lage":[331,288,18.5,22.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"68d4f66faa2f51e9"},
@@ -1030,7 +1030,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"337a04dcb0ed7e80"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"a38e939463a082da"}
     ],
-    "gesamt": "f092fe4ee98b65f2"
+    "gesamt": "d5260687e09e1f63"
   },
   "geometrie": {
     "kacheln": [
@@ -1830,8 +1830,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "ac41f2a10514ae95fa3849bcb0d044ca6cff563e6fcb57d697b76cb480a2e8e4",
+    "stadtplan": "12d102e389ede43ba06a73786af09dad747dad6a77df44e9ad318be14cffaa87",
     "geometrie": "7917ed438febcb5d123a96e9cf4f1070b7294a616a4a33162ab36599b75c5435",
-    "bildReferenz": "00b0a8e134cf3daac8146d60a5fc8db6b794e6a30827b46dc7875a9c62924a3f"
+    "bildReferenz": "4ba383df68aa7ff1d9c92847ea524eb5de8de5937e3145cbbc29eabfc85ecd32"
   }
 }

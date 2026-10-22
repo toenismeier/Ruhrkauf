@@ -467,7 +467,7 @@
       {"id":"parzellen/p392","bauer":"hofhaus","lage":[260.5,321,11.82,29],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"8c38981834ecc7e4"},
       {"id":"parzellen/p393","bauer":"hofhaus","lage":[272.32,321,10.27,29],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"13c1897c6ba47cd6"},
       {"id":"parzellen/p394","bauer":"hofhaus","lage":[282.59,321,17.91,29],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"b5594833180c6819"},
-      {"id":"parzellen/p395","bauer":"slot:warenhaus","lage":[384.5,354,77,52],"drehung":0,"variante":"warenhaus","standort":"W053","pruefsumme":"88404e48623a66ea"},
+      {"id":"parzellen/p395","bauer":"slot:warenhaus","lage":[384.5,354,77,52],"drehung":0,"variante":2,"standort":"W053","pruefsumme":"c3b05b78feecaf7c"},
       {"id":"parzellen/p396","bauer":"eck","lage":[355.5,298,23.5,24.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"c07061c6ca379422"},
       {"id":"parzellen/p397","bauer":"eck","lage":[355.5,378.5,23.5,27.5],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"4eb96e40a0e07896"},
       {"id":"parzellen/p398","bauer":"eck","lage":[438,298,23.5,23.5],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"322a911f0cbd2c2d"},
@@ -1163,7 +1163,7 @@
       {"id":"strassen/s98","bauer":"haupt","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"fa6e362c111b3474"},
       {"id":"strassen/s99","bauer":"haupt","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"ec8ab8b03aaefe34"}
     ],
-    "gesamt": "2802065fec16f511"
+    "gesamt": "d783a4d31a93c807"
   },
   "geometrie": {
     "kacheln": [
@@ -2076,8 +2076,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "ff66889988a772a2f7876bea15932ce61ebc6117f5e1c061633898b780ac92f2",
+    "stadtplan": "4cd1d92cd66bdb7f63eb7521ecdae6f4e1d64df8f61daa78ddf513c44bb8f707",
     "geometrie": "c883fd8ddcdf393e297c58e7e89301d283bd8e12f154bb8671352c097494d360",
-    "bildReferenz": "62e792ee42a979f4ee6493bb7b59bd7e201020d43cd23027c2cd552a43e4eca0"
+    "bildReferenz": "06de375e6e4b21bb6650236cb4e70d942beaafa08921865658cde0d1826a62af"
   }
 }

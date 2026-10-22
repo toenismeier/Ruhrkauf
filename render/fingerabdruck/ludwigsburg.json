@@ -281,7 +281,7 @@
       {"id":"parzellen/p241","bauer":"slot:bay_muenchen","lage":[22.5,453.5,20,18],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"3485727ca29a0174"},
       {"id":"parzellen/p242","bauer":"hofhaus","lage":[46.5,457.5,16,10],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"3f654888964482a0"},
       {"id":"parzellen/p243","bauer":"hofhaus","lage":[62.5,457.5,8,10],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"d387bd5e84ac1548"},
-      {"id":"parzellen/p244","bauer":"slot:warenhaus","lage":[145,459.5,52,32],"drehung":0,"variante":"warenhaus","standort":"W102","pruefsumme":"b8f572dcd9829e90"},
+      {"id":"parzellen/p244","bauer":"slot:warenhaus","lage":[145,459.5,52,32],"drehung":0,"variante":6,"standort":"W102","pruefsumme":"236870ee72250122"},
       {"id":"parzellen/p245","bauer":"slot:bay_muenchen","lage":[117,433.5,20.5,20.5],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"d9aa651541712e4f"},
       {"id":"parzellen/p246","bauer":"slot:bay_muenchen","lage":[117,471,21.5,20.5],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"fbad6c83f1eae7af"},
       {"id":"parzellen/p247","bauer":"slot:bay_muenchen","lage":[172.5,433.5,24.5,20.5],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"43709ffafe86d7ec"},
@@ -584,7 +584,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"6594f1b0e4d79276"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"e7b71ba0acb2bdb2"}
     ],
-    "gesamt": "ae42c3dcd0c0e05e"
+    "gesamt": "a99ea29e1e97a76c"
   },
   "geometrie": {
     "kacheln": [
@@ -961,8 +961,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "36548838c93fc2fca7cff0e553f7a76b2ab791bba420dd1c037d9933c6b16c27",
+    "stadtplan": "0158355e065c42fd7c0e018fc424be46e548f8caaf1fde135df7121383d8e925",
     "geometrie": "e87a5ec9085be19b4e27849fbad1861a9b21d10d0f440bdf58dd9f01355de491",
-    "bildReferenz": "0dbe6ab8c3f2a7d5198a0e37576a58d742d9eeabd9c24bd9b73a590770d325e4"
+    "bildReferenz": "4e43531de033dd3d47984311e146a90856c6b384b43d2abad42a00b288327208"
   }
 }

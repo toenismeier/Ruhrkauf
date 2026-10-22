@@ -223,7 +223,7 @@
       {"id":"parzellen/p2","bauer":"eck","lage":[465,219.5,16.5,13.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"360cac9e845049bc"},
       {"id":"parzellen/p20","bauer":"stadthaus","lage":[44.62,22.5,9.44,15],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"03d99af4bbe48894"},
       {"id":"parzellen/p200","bauer":"hofhaus","lage":[298.74,158,12.76,20],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"59929f88ecffa418"},
-      {"id":"parzellen/p201","bauer":"slot:warenhaus","lage":[390.5,165,52,32],"drehung":0,"variante":"warenhaus","standort":"W108","pruefsumme":"380bc76cf424892a"},
+      {"id":"parzellen/p201","bauer":"slot:warenhaus","lage":[390.5,165,52,32],"drehung":0,"variante":2,"standort":"W108","pruefsumme":"186e57efd134d71b"},
       {"id":"parzellen/p202","bauer":"eck","lage":[362.5,139,19.5,14.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"19715fb12747e3db"},
       {"id":"parzellen/p203","bauer":"eck","lage":[362.5,182.5,14.5,14.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"6251079d12fe3717"},
       {"id":"parzellen/p204","bauer":"eck","lage":[428,139,14.5,16.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"aaef5a12f9cd0ca6"},
@@ -793,7 +793,7 @@
       {"id":"strassen/s92","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"81edd12ccf917a34"},
       {"id":"strassen/s93","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"67cf37498c12a6d9"}
     ],
-    "gesamt": "7c96bd352ad19815"
+    "gesamt": "fc85f184527a6e44"
   },
   "geometrie": {
     "kacheln": [
@@ -1398,8 +1398,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "d50f3e88a625b1c527d0a982718aaf9be3ef4fa705925338dff4aa8ccf560bc6",
+    "stadtplan": "e9ffd59d3167a23a4a1044ba49c638d266651340cda28c6ccfc5442df477ec9e",
     "geometrie": "0610a42be8d894dbfa039327b11436211e88b9212c1e8217109fec91df327fc6",
-    "bildReferenz": "a5578589d2977d5d56c8df81ae230f03f4b56489625c60a4fcac3b86ae82321e"
+    "bildReferenz": "8e518a538451109cbb14adcd30e80f01ece796cb739d18dc9c8a2748f0cde6c1"
   }
 }

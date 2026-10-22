@@ -19,7 +19,7 @@
       {"id":"bloecke/b0","bauer":"wasser","lage":[591,0,21,606.5],"drehung":0,"variante":null,"standort":null,"pruefsumme":"dd91f43eb1ed3658"},
       {"id":"bloecke/b1","bauer":"gruenguertel","lage":[22.5,22.5,90,54],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"068229a3ed0fa7a9"},
       {"id":"bloecke/b10","bauer":"schloss","lage":[257,99,199,64],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"17725fcdcaab4cd1"},
-      {"id":"bloecke/b11","bauer":"center","lage":[257,498,114,86],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"6c54bccc3aa9934c"},
+      {"id":"bloecke/b11","bauer":"center","lage":[257,498,114,86],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"399eee876a0c1f39"},
       {"id":"bloecke/b12","bauer":"park","lage":[634.5,498,50,86],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"0c3a09a41b017f64"},
       {"id":"bloecke/b13","bauer":"bebaut","lage":[634.5,22.5,50,54],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"dc72759347fe2367"},
       {"id":"bloecke/b14","bauer":"warenhaus","lage":[135,99,90,64],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"9c3203ee8f64a408"},
@@ -701,7 +701,7 @@
       {"id":"parzellen/p64","bauer":"stadthaus","lage":[22.5,295.9,20,6.22],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"cd00f5a585c01b77"},
       {"id":"parzellen/p65","bauer":"stadthaus","lage":[22.5,302.11,20,11.89],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"4399c8a5e7aa50eb"},
       {"id":"parzellen/p66","bauer":"slot:schloss","lage":[281.5,103,150,26.88],"drehung":0,"variante":"schloss","standort":null,"pruefsumme":"1245de1405740010"},
-      {"id":"parzellen/p67","bauer":"slot:warenhaus","lage":[260,501,102,42],"drehung":0,"variante":"warenhaus","standort":"W109","pruefsumme":"da96447061525cb8"},
+      {"id":"parzellen/p67","bauer":"slot:warenhaus","lage":[260,501,102,42],"drehung":0,"variante":2,"standort":"W109","pruefsumme":"018bfb7d9c17b6ad"},
       {"id":"parzellen/p68","bauer":"eck","lage":[634.5,22.5,15,19],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"39091f8322d84699"},
       {"id":"parzellen/p69","bauer":"eck","lage":[634.5,61.5,17,15],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"7318596ec852c876"},
       {"id":"parzellen/p7","bauer":"stadthaus","lage":[191.09,185.5,13.54,16],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"3256d82e23f4afd2"},
@@ -857,7 +857,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"a315c3a83a65e5dc"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"626edccc1499a438"}
     ],
-    "gesamt": "27279563306d4f3b"
+    "gesamt": "03a5877d0b10301b"
   },
   "geometrie": {
     "kacheln": [
@@ -1476,8 +1476,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "032446706f753ff28eadca3f9760e3cf70e7c3b86e720105be882e954ef32191",
+    "stadtplan": "61d1711fc7f89e7f6812c451aae41db95a7af4be4d0842433a090faebf66d34a",
     "geometrie": "c068aad41e6ef3089b3ca8511d5a0e7dd47d2925d499233f1f923ec48efe35dd",
-    "bildReferenz": "22da8b5a26bbd0a22e9d862bd1a8dec7fa67bab51d28b92760b6b209c1342a52"
+    "bildReferenz": "ac03609a4ba06d9373e71086f801a6767f1f1b9d347b7a2e47b6ec3d5301a505"
   }
 }

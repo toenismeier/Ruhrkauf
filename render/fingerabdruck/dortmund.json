@@ -355,7 +355,7 @@
       {"id":"parzellen/p262","bauer":"stadthaus","lage":[537,216.39,18.5,17.61],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"67572ef65d7b942a"},
       {"id":"parzellen/p263","bauer":"hofhaus","lage":[559.5,192,17,19.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"f76c284b9c7a3947"},
       {"id":"parzellen/p264","bauer":"hofhaus","lage":[559.5,215.5,17,19.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"e7e438be7ea4803a"},
-      {"id":"parzellen/p265","bauer":"slot:warenhaus","lage":[650.5,220.5,57,37],"drehung":0,"variante":"warenhaus","standort":"W022","pruefsumme":"da8498a29ed5d71a"},
+      {"id":"parzellen/p265","bauer":"slot:warenhaus","lage":[650.5,220.5,57,37],"drehung":0,"variante":4,"standort":"W022","pruefsumme":"42509ca25ca8a26a"},
       {"id":"parzellen/p266","bauer":"eck","lage":[621.5,169.5,24,19],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"f6ebe83d4a90b947"},
       {"id":"parzellen/p267","bauer":"eck","lage":[621.5,238.5,21,19],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"b83379602155f306"},
       {"id":"parzellen/p268","bauer":"slot:ruhr_bude","lage":[685.5,169.5,22,19],"drehung":0,"variante":"trinkhalle","standort":null,"pruefsumme":"36523776b326f50a"},
@@ -634,7 +634,7 @@
       {"id":"parzellen/p54","bauer":"stadthaus","lage":[537,465.52,16,14.35],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"d51072e575eb454b"},
       {"id":"parzellen/p541","bauer":"slot:ruhr_innenstadt60","lage":[377,411.5,18.5,34.5],"drehung":0,"variante":"zeile","standort":null,"pruefsumme":"bd2a96f612737f2c"},
       {"id":"parzellen/p543","bauer":"slot:ruhr_innenstadt60","lage":[311.5,410.5,18.5,49],"drehung":0,"variante":"zeile","standort":null,"pruefsumme":"9517621b2063f103"},
-      {"id":"parzellen/p546","bauer":"slot:warenhaus","lage":[446,431,62,47],"drehung":0,"variante":"warenhaus","standort":"W021","pruefsumme":"f9bd84ce4f1e524c"},
+      {"id":"parzellen/p546","bauer":"slot:warenhaus","lage":[446,431,62,47],"drehung":0,"variante":1,"standort":"W021","pruefsumme":"42bd0a1b6296a4ff"},
       {"id":"parzellen/p547","bauer":"eck","lage":[418,392,19,19],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"5e19253b6049ab01"},
       {"id":"parzellen/p548","bauer":"slot:ruhr_bude","lage":[418,454,19,24],"drehung":0,"variante":"trinkhalle","standort":null,"pruefsumme":"26c3683acdbc8dd6"},
       {"id":"parzellen/p549","bauer":"slot:ruhr_bude","lage":[486,392,22,19],"drehung":0,"variante":"zeile","standort":null,"pruefsumme":"6ae4fda1ac522757"},
@@ -1169,7 +1169,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"46e75a3036d02d5a"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"e632966aedcf0050"}
     ],
-    "gesamt": "518aa1a332dbe60b"
+    "gesamt": "b69246b419a1c2a8"
   },
   "geometrie": {
     "kacheln": [
@@ -2017,7 +2017,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "f7d25ccfcebeacaf71263fb61bd430bec9b699873cebb400136e7245d8a13fd9",
+    "stadtplan": "d20173407d66f46788a308586bc843aa8f7ca2f0f8a79b821671f0f10ca023e0",
     "geometrie": "eea4a8b7c361291286025c21402522dab584e0368ab714a4074f2378399b2995",
     "bildReferenz": "64c51ad61583c793ef0c8b45bda3f913f809a4c5725980a543c900e164f638c8"
   }

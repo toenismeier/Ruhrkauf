@@ -222,9 +222,9 @@ function lageFuer(h: RngHalter, c: Cluster, f: Format): Lage {
   if (f === 'sport') return r < 0.55 ? '1a' : r < 0.85 ? 'center' : 'b';
   if (f === 'outlet') return r < 0.7 ? 'rand' : 'b';
   if (f === 'schwester') return r < 0.65 ? '1a' : r < 0.9 ? 'b' : 'center';
-  if (c === 'metropole') return r < 0.75 ? '1a' : 'center';
-  if (c === 'grossstadt') return r < 0.6 ? '1a' : r < 0.85 ? 'b' : 'center';
-  return r < 0.4 ? '1a' : r < 0.8 ? 'b' : r < 0.9 ? 'center' : 'rand';
+  if (c === 'metropole') return r < 0.57 ? '1a' : r < 0.80 ? 'b' : r < 0.94 ? 'stadtteil' : 'center';
+  if (c === 'grossstadt') return r < 0.55 ? '1a' : r < 0.78 ? 'b' : r < 0.95 ? 'stadtteil' : 'center';
+  return r < 0.4 ? '1a' : r < 0.78 ? 'b' : r < 0.93 ? 'stadtteil' : 'rand';
 }
 
 function fit(g: GruppeId, kaufkraft: number, alter: number, wettbewerb: number): number {
@@ -480,7 +480,15 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   for (const r of regulare) {
     const [stadt, region, cluster, kk] = stadtVon.get(r.stadt)!;
     const premiumInStadt = PREMIUM_HAEUSER.some((p) => p.stadt === stadt);
-    const lage: Lage = r.nr === 1 && !premiumInStadt ? '1a' : r.nr % 2 === 0 ? 'b' : 'center';
+    // Q21: Innenstadtanker (oder Premium), B-Lage, eigenständiges Stadtteilzentrum.
+    // Ein echtes Einkaufszentrum gibt es nur in Metropolen mit mindestens fünf
+    // regulären Häusern, höchstens einmal je Stadt. Keine Center-Parität mehr.
+    const lage: Lage = r.nr === 1 ? (premiumInStadt ? 'b' : '1a')
+      : r.nr === 2 ? 'b'
+      : r.nr === 3 ? 'stadtteil'
+      : r.nr === 4 ? 'b'
+      : r.nr === 5 && cluster === 'metropole' ? 'center'
+      : r.nr % 2 === 0 ? 'b' : 'stadtteil';
     haeuser.push(bauHaus(h, haeuser.filter((x) => x.format === 'warenhaus').length + 1, stadt, region, cluster, kk, 'warenhaus', sz, r.nr, { hausklasse: a.has(r) ? 'A' : b.has(r) ? 'B' : 'C', lage }));
   }
   // Premium bildet fünf eigenständige Häuser außerhalb der 360 regulären.

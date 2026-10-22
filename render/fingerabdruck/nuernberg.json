@@ -346,7 +346,7 @@
       {"id":"parzellen/p264","bauer":"eck","lage":[219,428.5,12.5,26],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"af3c98d6d764d8e8"},
       {"id":"parzellen/p265","bauer":"slot:franken_fachwerk","lage":[219,405.5,12.5,23],"drehung":0,"variante":"nuernberg","standort":null,"pruefsumme":"2a847457fb4f8213"},
       {"id":"parzellen/p266","bauer":"slot:franken_fachwerk","lage":[203.94,406.5,12.5,27],"drehung":0,"variante":"stadtmauer","standort":null,"pruefsumme":"2297b2872683ba0d"},
-      {"id":"parzellen/p267","bauer":"slot:warenhaus","lage":[298,412.5,52,42],"drehung":0,"variante":"warenhaus","standort":"W032","pruefsumme":"db79755a0a865418"},
+      {"id":"parzellen/p267","bauer":"slot:warenhaus","lage":[298,412.5,52,42],"drehung":0,"variante":4,"standort":"W032","pruefsumme":"8f0baff122dd228f"},
       {"id":"parzellen/p268","bauer":"slot:franken_fachwerk","lage":[254,380.5,21.5,22.5],"drehung":0,"variante":"nuernberg","standort":null,"pruefsumme":"96d3724e3c14047e"},
       {"id":"parzellen/p269","bauer":"slot:franken_fachwerk","lage":[254,433,26.5,21.5],"drehung":0,"variante":"nuernberg","standort":null,"pruefsumme":"ae1ea49d2a111cd1"},
       {"id":"parzellen/p27","bauer":"stadthaus","lage":[770.7,108.5,13.8,18],"drehung":0,"variante":"modern","standort":null,"pruefsumme":"6da46ff495d067c6"},
@@ -357,7 +357,7 @@
       {"id":"parzellen/p274","bauer":"stadthaus","lage":[328.5,402,21.5,10.5],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"fd1dbd803734741a"},
       {"id":"parzellen/p275","bauer":"slot:franken_fachwerk","lage":[254,403,21.5,30],"drehung":0,"variante":"bamberg","standort":null,"pruefsumme":"8b162e5357481121"},
       {"id":"parzellen/p276","bauer":"hofhaus","lage":[279.5,406,12.16,23],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"9b2d5663cd0f4dc7"},
-      {"id":"parzellen/p277","bauer":"slot:warenhaus","lage":[401.5,407.5,77,47],"drehung":0,"variante":"warenhaus","standort":"W031","pruefsumme":"69f7ad1993403037"},
+      {"id":"parzellen/p277","bauer":"slot:warenhaus","lage":[401.5,407.5,77,47],"drehung":0,"variante":7,"standort":"W031","pruefsumme":"f909f2bafd316f82"},
       {"id":"parzellen/p278","bauer":"slot:franken_fachwerk","lage":[372.5,380.5,23,22],"drehung":0,"variante":"nuernberg","standort":null,"pruefsumme":"56c2421b8233089d"},
       {"id":"parzellen/p279","bauer":"slot:franken_fachwerk","lage":[372.5,431.5,22,23],"drehung":0,"variante":"bamberg","standort":null,"pruefsumme":"bec274609a9f6740"},
       {"id":"parzellen/p28","bauer":"stadthaus","lage":[784.5,108.5,13.8,18],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"be44404bd684b64d"},
@@ -873,7 +873,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"5128aebc29fe819c"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"22adc6fa38cfddc8"}
     ],
-    "gesamt": "adde6ee11bd80a37"
+    "gesamt": "035584a9bf552715"
   },
   "geometrie": {
     "kacheln": [
@@ -1457,8 +1457,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "80fe69b1350231966ae165ba6d7290b428969d5f708a41ad022b7e2ecd5898e6",
+    "stadtplan": "760a6d6e70ca89b52928fb67d67585928f7379dc4957018c031acb1d30cd69e9",
     "geometrie": "aa2a6bb26e543157182dd211760b888500e8c2b76b390e7a5f4a8c1f970cb0fd",
-    "bildReferenz": "8737d7292a2805c0413283dc13f2c2f9892141307d5e2b585e2560e1b5b7967c"
+    "bildReferenz": "94f02cc0d8d9bb35ee9f4c4382df5824d3883b23c47aeec20087c0ab18bf3e28"
   }
 }

@@ -465,7 +465,7 @@
       {"id":"parzellen/p292","bauer":"slot:bay_muenchen","lage":[352,460,23.5,35],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"a5bb5061710a1b7f"},
       {"id":"parzellen/p293","bauer":"hofhaus","lage":[379.5,464,15.02,29],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"6c4d8914d77a05e0"},
       {"id":"parzellen/p294","bauer":"hofhaus","lage":[394.52,464,15.98,29],"drehung":0,"variante":"fachwerk","standort":null,"pruefsumme":"13b0e1b5105b1ac5"},
-      {"id":"parzellen/p295","bauer":"slot:warenhaus","lage":[533,473.5,72,47],"drehung":0,"variante":"warenhaus","standort":"W008","pruefsumme":"547984445a4b36aa"},
+      {"id":"parzellen/p295","bauer":"slot:warenhaus","lage":[533,473.5,72,47],"drehung":0,"variante":3,"standort":"W008","pruefsumme":"9e2495ebbe5ba35b"},
       {"id":"parzellen/p296","bauer":"slot:bay_muenchen","lage":[489,436.5,23.5,29.5],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"662a68caf935372e"},
       {"id":"parzellen/p297","bauer":"slot:bay_muenchen","lage":[489,495,23.5,25.5],"drehung":0,"variante":"neorenaissance","standort":null,"pruefsumme":"63d2cba63e883998"},
       {"id":"parzellen/p298","bauer":"slot:bay_muenchen","lage":[576.5,436.5,28.5,23.5],"drehung":0,"variante":"wiederaufbau","standort":null,"pruefsumme":"fb373de232a72cc4"},
@@ -668,7 +668,7 @@
       {"id":"parzellen/p476","bauer":"hofhaus","lage":[379.5,697.5,11.22,14.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"ec1e5a85a8e22de3"},
       {"id":"parzellen/p477","bauer":"hofhaus","lage":[379.5,716,13.86,14.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"eee6285d50f9111d"},
       {"id":"parzellen/p478","bauer":"hofhaus","lage":[393.36,716,17.14,14.5],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"e12e6bd1d32f0ec7"},
-      {"id":"parzellen/p479","bauer":"slot:warenhaus","lage":[533,711,72,47],"drehung":0,"variante":"warenhaus","standort":"W010","pruefsumme":"de8939ee6351aa3a"},
+      {"id":"parzellen/p479","bauer":"slot:warenhaus","lage":[533,711,72,47],"drehung":0,"variante":2,"standort":"W010","pruefsumme":"eb37c0ab59bb11eb"},
       {"id":"parzellen/p48","bauer":"stadthaus","lage":[162.14,1144,13.86,18],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"c48016451c8bd011"},
       {"id":"parzellen/p480","bauer":"slot:bay_muenchen","lage":[489,670,23.5,22.5],"drehung":0,"variante":"neubarock","standort":null,"pruefsumme":"5d0a79515f0bfb1f"},
       {"id":"parzellen/p481","bauer":"slot:bay_muenchen","lage":[489,735.5,22.5,22.5],"drehung":0,"variante":"neubarock","standort":null,"pruefsumme":"d63859a214b63d7c"},
@@ -1433,7 +1433,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"c34afc34f0c3bbfa"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"d103a09291621230"}
     ],
-    "gesamt": "06e7af815396a2dd"
+    "gesamt": "04e3b0fd42499a1d"
   },
   "geometrie": {
     "kacheln": [
@@ -2497,7 +2497,7 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "c03e527d4cdf516c8967440738f1516d520ed40ffc3260f60c78e786236b088d",
+    "stadtplan": "18f128d8e9f01161a8057fd59668518e161d5c5c81916fe7eddff959b5d5b629",
     "geometrie": "5e5ae2cf9cd5dd740c9f441769891f5fc94378282618b5804b792f74e6e10b4a",
     "bildReferenz": "92ab949953e59456020e5ae2ecfbe7d1690817eeadd073cee8689ab689f75302"
   }

@@ -174,7 +174,7 @@
       {"id":"parzellen/p140","bauer":"stadthaus","lage":[121,129.58,15,8.42],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"fb4ca9ce9fdeb380"},
       {"id":"parzellen/p141","bauer":"hofhaus","lage":[140,108,15.76,26],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"11473894c55f29f4"},
       {"id":"parzellen/p142","bauer":"hofhaus","lage":[155.76,108,16.24,26],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"e85cbe4a77fc1dd4"},
-      {"id":"parzellen/p143","bauer":"slot:warenhaus","lage":[251,116,52,37],"drehung":0,"variante":"warenhaus","standort":"W122","pruefsumme":"5d90a12c256a6fc4"},
+      {"id":"parzellen/p143","bauer":"slot:warenhaus","lage":[251,116,52,37],"drehung":0,"variante":2,"standort":"W122","pruefsumme":"9459b29e02728294"},
       {"id":"parzellen/p144","bauer":"eck","lage":[223,89,16.5,14.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"ba2e02e0991bf1a8"},
       {"id":"parzellen/p145","bauer":"eck","lage":[223,137.5,14.5,15.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"812fbc3adacdaf70"},
       {"id":"parzellen/p146","bauer":"eck","lage":[284.5,89,18.5,14.5],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"fd79e3908c6c02bc"},
@@ -725,7 +725,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"61a81749fafb6479"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"3d90d148f01002fa"}
     ],
-    "gesamt": "17e8f8e3aa874873"
+    "gesamt": "65436c61ea357463"
   },
   "geometrie": {
     "kacheln": [
@@ -1233,8 +1233,8 @@
     }
   },
   "pruefsummen": {
-    "stadtplan": "45144142bd38a8175ee4833ec34bb2bd50542ae6c2232b11867739b2481aaf21",
+    "stadtplan": "d1b888c56640465bdbdb31fb1ad7b968709ec9302a7f733ef5498b2930e7acc3",
     "geometrie": "5b57bdfa0b548772d581cf738f3d9062ea2e176e4807bacb4d61d61d1c7d8c86",
-    "bildReferenz": "e11e88dd738140bd15b47371f06d05c4b18d9abc62c9df99f4d4e72ff20486f3"
+    "bildReferenz": "42ded5c2ea52c37a04957bba94291ad9de690b48b045242bb9075240ee0a16bc"
   }
 }

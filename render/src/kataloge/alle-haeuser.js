@@ -2,6 +2,7 @@
 import { sockel, THREE } from '../kit/basis.js';
 import { zeigeKatalog } from '../kit/katalog.js';
 import { warenhaus, FAMILIEN } from '../kit/warenhaus.js';
+import { warenhausVielfalt } from '../kit/warenhaus-vielfalt.js';
 import { premiumhaus } from '../kit/premium.js';
 import haeuser from '../../haeuser.json';
 import hauserSchwester from '../../haeuser-schwester.json';
@@ -10,6 +11,7 @@ import haeuserOutlet from '../../haeuser-outlet.json';
 import { outlet, NAME_OUTLET } from '../kit/outlet.js';
 
 const stat = [];
+const varianten = warenhausVielfalt(haeuser);
 const t0 = performance.now();
 let letzteSonne = null;
 const eintraege = haeuser.map((h) => ({
@@ -21,7 +23,9 @@ const eintraege = haeuser.map((h) => ({
     letzteSonne = scene.userData.sonne;
     letzteSonne.shadow.mapSize.set(2048, 2048);
     const t = performance.now();
-    const erg = h.klasse === 'premium' ? premiumhaus(S, scene, h, { x: 0, z: 0 }) : warenhaus(S, scene, h, { x: 0, z: 0 });
+    const v = varianten.get(h.id);
+    const erg = h.klasse === 'premium' ? premiumhaus(S, scene, h, { x: 0, z: 0 })
+      : warenhaus(S, scene, { ...h, fassade: v?.fassade ?? h.fassade }, { x: 0, z: 0, familie: v?.familie });
     stat.push({ id: h.id, fam: erg.familie, teile: erg.teile, w: erg.w, d: erg.d, h: +erg.hoehe.toFixed(1), ms: +(performance.now() - t).toFixed(1) });
     sockel(S, 0, 0, erg.w, erg.d, 4);
     return new THREE.Box3(new THREE.Vector3(-4, 0, -4), new THREE.Vector3(erg.w + 4, erg.hoehe, erg.d + 4));
