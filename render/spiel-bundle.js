@@ -159335,7 +159335,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "3d52ebc" : "Entwicklung";
+  var version = () => true ? "8fdea98" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld2(d3) {
@@ -162293,7 +162293,7 @@
         html += diagramm(t3, [{ name: "Ist", punkte: d3.punkte }], k3, { vorjahr: true, grenze: k3 === "cash" ? -s2().kreditlinie : void 0 });
         if (k3 === "cash") html += '<p class="stat-hinweis">Aktuelle Insolvenzgrenze: ' + esc2(geld(-s2().kreditlinie)) + " (verf\xFCgbarer Kreditrahmen). \xC4nderungen der Kreditlinie sind historisch nicht rekonstruierbar.</p>";
       }
-      html += wasserfall();
+      html += wasserfall2();
       return html;
     }
     function formate() {
@@ -162320,7 +162320,7 @@
       if (ui.zeilen < hauser.length) html += '<button class="stat-mehr" data-st-a="mehr">Weitere H\xE4user (' + (hauser.length - ui.zeilen) + ")</button>";
       return html;
     }
-    function wasserfall() {
+    function wasserfall2() {
       const k3 = s2().historie.at(-1);
       if (!k3) return "";
       const daten2 = [
@@ -173659,6 +173659,29 @@
   function zeile2(z4, haus2 = false) {
     return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z4.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z4.ampelfarbe) + '"></span>' + esc2(z4.name) + "</div><div>" + geld(z4.umsatz) + "</div><div>" + (z4.abweichung == null ? "\u2013" : geld(z4.abweichung) + " (" + prozent5(z4.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z4.frequenz)) + "</div><div>" + prozent5(z4.kaufquote) + "</div><div>" + euro2(z4.bon) + "</div></div>";
   }
+  function wasserfall(br) {
+    if (br.status !== "ok") return '<div class="q-leer"><b>Noch keine Vorjahresbr\xFCcke.</b>' + esc2(br.status) + "</div>";
+    const schritte = [["Frequenz", br.frequenz, "Besucher"], ["Kaufquote", br.kaufquote, "K\xE4ufer je Besucher"], ["Teile je Bon", br.teile, "Boneffekt"], ["Preis je Teil", br.preis, "Boneffekt"]];
+    let lauf = br.vorher;
+    const pos = schritte.map(([n3, v, d3]) => {
+      const a2 = lauf;
+      lauf += v;
+      return { n: n3, v, d: d3, a: a2, b: lauf };
+    });
+    const werte3 = [br.vorher, br.aktuell, ...pos.flatMap((x3) => [x3.a, x3.b])];
+    const spanne = Math.max(1, Math.max(...werte3) - Math.min(...werte3));
+    const lo = Math.min(...werte3) - spanne * 0.08, hi = Math.max(...werte3) + spanne * 0.08;
+    const x2 = (w2) => ((w2 - lo) / (hi - lo) * 100).toFixed(1);
+    const vz = (w2) => (w2 > 0 ? "+" : w2 < 0 ? "\u2212" : "") + geld(Math.abs(w2));
+    const strich2 = (w2) => '<span class="q-wf-spur"><i class="q-wf-marke" style="left:' + x2(w2) + '%"></i></span>';
+    let h3 = '<div class="o02-bruecke q-wf" data-o02-diff="' + br.differenz + '" data-o02-summe="' + (br.frequenz + br.kaufquote + br.teile + br.preis) + '">';
+    h3 += '<div class="q-wf-zeile q-wf-ende"><span class="q-name">Vorjahr</span>' + strich2(br.vorher) + '<span class="q-wert">' + geld(br.vorher) + "</span></div>";
+    for (const s2 of pos) h3 += '<div class="q-wf-zeile"><span class="q-name">' + s2.n + "<small>" + s2.d + '</small></span><span class="q-wf-spur"><i class="q-wf-balken ' + (s2.v < 0 ? "minus" : "plus") + '" style="left:' + x2(Math.min(s2.a, s2.b)) + "%;width:" + Math.max(0.6, Math.abs(s2.v) / (hi - lo) * 100).toFixed(1) + '%"></i></span><span class="q-wert ' + (s2.v < 0 ? "q-minus" : "") + '">' + vz(s2.v) + "</span></div>";
+    h3 += '<div class="q-wf-zeile q-wf-ende q-wf-summe"><span class="q-name">Ist</span>' + strich2(br.aktuell) + '<span class="q-wert">' + geld(br.aktuell) + "</span></div>";
+    h3 += '<div class="legende" style="padding:8px 14px 10px">Boneffekt zusammen ' + vz(br.bon) + " \xB7 Balken im Ausschnitt " + geld(lo) + " bis " + geld(hi) + "</div>";
+    if (br.vorjahrGeschaetzt) h3 += '<div class="legende" style="padding:0 14px 10px">Vorjahreswerte teilweise aus 4-Wochen-Bl\xF6cken gesch\xE4tzt.</div>';
+    return h3 + "</div>";
+  }
   function reportingModul(ctx) {
     const E8 = ctx.E, ui = { aktiv: false, ebene: "region", format: "alle", sort: "umsatz", wochen: 1 };
     const sortiere = (werte3) => [...werte3].sort((a2, b3) => {
@@ -173673,7 +173696,7 @@
       const daten = E8.reporting(ctx.s(), ui.wochen, ui.format);
       const hs = daten.zeilen;
       const gruppen = daten.gruppen;
-      let content = '<div class="o02-filter">' + auswahl4("Ebene", "ebene", [["region", "Region"], ["hauscluster", "Hauscluster"], ["haus", "Haus"]]) + auswahl4("Format", "format", [["alle", "Alle"], ...[...new Set(ctx.s().haeuser.map((z4) => z4.format))].map((f11) => [f11, f11 === "warenhaus" ? "Hartwig" : f11 === "sport" ? "Hartwig Sport" : f11 === "fundus" ? "FUNDUS" : f11])]) + auswahl4("Zeitraum", "wochen", [[1, "1 Woche"], [4, "4 Wochen"], [13, "13 Wochen"], [52, "52 Wochen"]]) + auswahl4("Sortieren", "sort", [
+      const filter = '<div class="o02-filter">' + auswahl4("Ebene", "ebene", [["region", "Region"], ["hauscluster", "Hauscluster"], ["haus", "Haus"]]) + auswahl4("Format", "format", [["alle", "Alle"], ...[...new Set(ctx.s().haeuser.map((z4) => z4.format))].map((f11) => [f11, f11 === "warenhaus" ? "Hartwig" : f11 === "sport" ? "Hartwig Sport" : f11 === "fundus" ? "FUNDUS" : f11])]) + auswahl4("Zeitraum", "wochen", [[1, "1 Woche"], [4, "4 Wochen"], [13, "13 Wochen"], [52, "52 Wochen"]]) + auswahl4("Sortieren", "sort", [
         ["umsatz", "Umsatz"],
         ["abweichung", "Abweichung"],
         ["frequenz", "Frequenz"],
@@ -173681,7 +173704,17 @@
         ["bon", "Bon"],
         ["name", "Name"]
       ]) + "</div>";
-      content += '<div class="karte"><div class="khead">Konzernbr\xFCcke zum Vorjahr</div>' + brueckeHtml(daten.bruecke) + "</div>";
+      const B8 = daten.bruecke;
+      let content = '<div class="q31">';
+      content += B8.status === "ok" ? '<div class="q-gross"><span class="q-label">Umsatz gegen Vorjahr</span><span class="q-haupt ' + (B8.differenz < 0 ? "q-minus" : "q-plus") + '">' + (B8.differenz > 0 ? "+" : B8.differenz < 0 ? "\u2212" : "") + geld(Math.abs(B8.differenz)) + '</span><span class="q-neben"><b>' + geld(B8.aktuell) + "</b>Ist " + (ui.wochen === 1 ? "letzte Woche" : ui.wochen + " Wochen") + "</span></div>" : "";
+      if (B8.status === "ok") {
+        const g = [["Frequenz", B8.frequenz], ["Kaufquote", B8.kaufquote], ["Teile je Bon", B8.teile], ["Preis je Teil", B8.preis]].sort((a2, b3) => Math.abs(b3[1]) - Math.abs(a2[1]))[0];
+        content += '<div class="q-befund">Gr\xF6\xDFter Treiber: <b>' + g[0] + "</b> mit " + (g[1] < 0 ? "\u2212" : "+") + geld(Math.abs(g[1])) + ".</div>";
+      }
+      content += '<div class="q-buch"><div class="q-buch-kopf"><span>Konzernbr\xFCcke zum Vorjahr</span></div>' + wasserfall(B8) + "</div>";
+      const beob = daten.beobachtung.filter((o3) => hs.some((z4) => z4.id === o3.hausId));
+      content += '<div class="q-buch"><div class="q-buch-kopf"><span>Beobachtungsliste</span><b>gr\xF6\xDFte R\xFCckg\xE4nge</b></div>' + (beob.length ? beob.map((o3) => '<button class="q-zeile q-tipp o02-beobachtung" data-o02-open="' + esc2(o3.hausId) + '"><span class="q-name">' + esc2(o3.name) + "<small>" + esc2(o3.haupttreiber) + '</small></span><span class="q-wert q-minus">' + geld(o3.abweichung) + "</span></button>").join("") : '<div class="q-leer"><b>Kein Haus unter Vorjahr.</b>Sobald ein Haus zur\xFCckf\xE4llt, steht es hier.</div>') + "</div>";
+      content += "</div>" + filter;
       if (ui.ebene === "haus") content += tabelle2(karten(hs));
       else {
         const ebene = ui.ebene;
@@ -173703,8 +173736,7 @@
         }).join("");
         content += abschnitte || leere;
       }
-      content += '<div class="karte"><div class="khead">Beobachtungsliste <small>zehn gr\xF6\xDFte negative Umsatzabweichungen</small></div>' + (daten.beobachtung.length ? daten.beobachtung.filter((o3) => hs.some((z4) => z4.id === o3.hausId)).map((o3) => '<button class="zeile o02-beobachtung" data-o02-open="' + esc2(o3.hausId) + '"><span class="was"><b>' + esc2(o3.name) + "</b><small>" + esc2(o3.haupttreiber) + "</small></span><strong>" + geld(o3.abweichung) + "</strong><span>\u2192</span></button>").join("") : '<div class="zeile grau">Noch keine negativen Vorjahresabweichungen verf\xFCgbar.</div>') + "</div>";
-      ctx.panel("Reporting", "Operatives Wochenreporting \xB7 " + ui.wochen + " Woche(n)", content, "gross");
+      ctx.panel("Reporting", "Operatives Wochenreporting \xB7 " + (ui.wochen === 1 ? "1 Woche" : ui.wochen + " Wochen"), bereich("zentrale") + '<i class="q31-marke" hidden></i>' + content, "gross");
       ui.aktiv = true;
     }
     ctx.inhalt.addEventListener("change", (e) => {

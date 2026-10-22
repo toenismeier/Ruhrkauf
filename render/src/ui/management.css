@@ -147,3 +147,17 @@
 .q31 details.q-buch > summary { list-style: none; cursor: pointer; min-height: 44px; }
 .q31 details.q-plan-auf > summary .q-zeile { min-height: 44px; }
 .q31 .q-buch-kopf.q-plan b { font-size: 12px; letter-spacing: 0; text-transform: none; white-space: normal; line-height: 14px; }
+
+/* Reporting: Wasserfall Vorjahr → Ist */
+.q-wf-zeile { display: grid; grid-template-columns: 112px minmax(0, 1fr) 92px; gap: 8px; align-items: center; min-height: 44px; padding: 4px 14px; border-top: 1px solid var(--q-linie); }
+.q-wf-zeile .q-name { font-size: 14px; line-height: 18px; } .q-wf-zeile .q-name small { display: block; font-size: 12px; line-height: 14px; color: var(--q-leise); }
+.q-wf-zeile .q-wert { text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; }
+.q-wf-ende .q-name, .q-wf-ende .q-wert { font-weight: 600; } .q-wf-summe { border-top: 2px solid var(--q-text); }
+.q-wf-spur { position: relative; height: 20px; }
+.q-wf-balken { position: absolute; top: 3px; height: 14px; border-radius: 3px; background: var(--q-plus); }
+.q-wf-balken.minus { background: var(--q-minus); }
+.q-wf-marke { position: absolute; top: 0; width: 2px; height: 20px; margin-left: -1px; background: var(--q-text); }
+#panel:has(.q31-marke) .o02-filter { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 12px; font-size: 12px; color: var(--ui-muted); }
+#panel:has(.q31-marke) .o02-gruppe, #panel:has(.q31-marke) .o02-unter { background: var(--ui-surface); border-color: var(--ui-border); color: var(--ui-text); }
+#panel:has(.q31-marke) :is(.o02-daten, .o02-kopf, .o02-name) { font-size: 13px; color: var(--ui-text); border-color: var(--ui-border); }
+#panel:has(.q31-marke) .o02-gruppe summary, #panel:has(.q31-marke) .o02-unter summary { min-height: 44px; display: flex; align-items: center; }
