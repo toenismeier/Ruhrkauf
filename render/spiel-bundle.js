@@ -159335,7 +159335,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "8fdea98" : "Entwicklung";
+  var version = () => true ? "21df8bb" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld2(d3) {
@@ -161020,6 +161020,7 @@
     }, { passive: true });
   }
   var RISIKO = { gruen: "gering", gelb: "erh\xF6ht", rot: "hoch" };
+  var RESSORT_KURZ = { cfo: "Finanzen", coo: "Operations", cso: "Vertrieb", cpo: "Einkauf", cmo: "Marketing", chro: "Personal", cro: "Restrukturierung", cdo: "Digital" };
   var HALTE = [[0, "kein"], [0.25, "25 %"], [0.5, "50 %"], [1, "100 %"]];
   var ERFOLG = [[0, "kein"], [0.1, "10 %"], [0.2, "20 %"], [0.3, "30 %"]];
   function vorstandModul(ctx) {
@@ -161028,28 +161029,33 @@
     const ui = { aktiv: false, seite: "uebersicht", ressort: null, k: 0, angebot: null, entlassen: false };
     function uebersicht(P4) {
       const st2 = s2(), u = E8.vorstandUebersicht(st2);
-      let h3 = `<div class="raster">${kz("Vorstand besetzt", P4("u:besetzt", `${u.besetzt} von ${u.ressorts.length}`))}${kz("Geh\xE4lter im Jahr", P4("u:kostenJahr", geld(u.kostenJahr)))}${kz("Kosten je Woche", P4("u:kostenWoche", geld(u.kostenWoche)))}${kz("N\xE4chste Sitzung", P4("u:sitzung", wocheText(st2, u.naechsteSitzung)))}</div>`;
+      const frei6 = u.ressorts.filter((r3) => !r3.person), risiko = u.ressorts.filter((r3) => r3.person && r3.risikoAmpel === "rot");
+      let h3 = '<div class="q31">';
+      h3 += `<div class="q-gross"><span class="q-label">Vorstand besetzt</span><span class="q-haupt">${P4("u:besetzt", `${u.besetzt} von ${u.ressorts.length}`, "span")}</span><span class="q-neben"><b>${P4("u:kostenJahr", geld(u.kostenJahr), "span")}</b>Geh\xE4lter im Jahr</span></div>`;
+      h3 += `<div class="q-befund">${frei6.length ? `<b>${frei6.map((r3) => r3.kurz).join(" und ")}</b> ${frei6.length === 1 ? "fehlt" : "fehlen"}; ${frei6.length === 1 ? "das Ressort arbeitet" : "die Ressorts arbeiten"} ohne F\xFChrung schw\xE4cher.` : "Alle Ressorts sind besetzt."}${risiko.length ? ` Abwerberisiko hoch: ${risiko.map((r3) => r3.kurz).join(", ")}.` : ""} N\xE4chste Sitzung ${P4("u:sitzung", wocheText(st2, u.naechsteSitzung), "b")}, Kosten je Woche ${P4("u:kostenWoche", geld(u.kostenWoche), "b")}.</div>`;
       for (const e of u.offeneEntscheidungen) {
         const roh2 = st2.entscheidungen.find((x2) => x2.id === e.id);
-        h3 += `<div class="karte order entscheid"><div class="ohead"><b>${esc2(e.titel)}</b><i>Frist ${wocheText(st2, e.frist)}</i></div><div class="olief">${esc2(roh2?.text ?? "")}</div><div class="oknoepfe">${(roh2?.optionen ?? []).map((o3, i) => `<button class="${i === 0 ? "gruen" : ""}" data-a="entscheiden" data-v="${e.id}" data-o="${o3.id}">${esc2(o3.label)}</button>`).join("")}</div></div>`;
+        h3 += `<div class="q-buch q-vorlage"><div class="q-buch-kopf"><span>Sitzungsvorlage</span><b>Frist ${wocheText(st2, e.frist)}</b></div><div class="q-zeile"><span class="q-name"><b>${esc2(e.titel)}</b><small>${esc2(roh2?.text ?? "")}</small></span></div><div class="oknoepfe" style="padding:0 14px 12px">${(roh2?.optionen ?? []).map((o3, i) => `<button class="${i === 0 ? "gruen" : ""}" data-a="entscheiden" data-v="${e.id}" data-o="${o3.id}">${esc2(o3.label)}</button>`).join("")}</div></div>`;
       }
-      h3 += '<div class="vgitter">';
-      for (const r3 of u.ressorts) {
+      const platz = (r3) => {
         const p2 = r3.person;
-        h3 += `<button class="vkarte ${p2 ? "" : "leer"}" data-a="profil" data-v="${r3.id}"><span class="vbild">${portraet(p2?.portraet, 64)}</span><span class="vtext"><b>${r3.kurz}</b><small>${esc2(r3.titel)}</small>${p2 ? P4(`r:${r3.id}:name`, p2.name, "em") : '<em class="frei">unbesetzt</em>'}</span>`;
-        if (p2) h3 += `<span class="vmini"><span title="F\xFChrung"><i style="width:${p2.fuehrung}%"></i></span><span title="Fachwissen"><i style="width:${p2.fachwissen}%"></i></span><span title="Loyalit\xE4t"><i style="width:${p2.loyalitaet}%"></i></span></span><span class="ampel a-${r3.risikoAmpel}" title="Abwerberisiko ${RISIKO[r3.risikoAmpel]}"></span>`;
-        else h3 += '<span class="chip warn">einstellen</span>';
-        h3 += "</button>";
-      }
-      h3 += '</div><div class="legende">Balken: F\xFChrung, Fachwissen, Loyalit\xE4t \xB7 Punkt: Abwerberisiko</div>';
+        let x2 = `<button class="vkarte q-platz ${p2 ? "" : "leer"}" data-a="profil" data-v="${r3.id}"><span class="vbild">${p2 ? portraet(p2.portraet, 56) : '<span class="q-stuhl" aria-hidden="true"></span>'}</span><span class="vtext"><b>${r3.kurz}</b><small title="${esc2(r3.titel)}">${esc2(RESSORT_KURZ[r3.id] ?? r3.titel)}</small>${p2 ? P4(`r:${r3.id}:name`, p2.name, "em") : '<em class="frei">Platz frei, einstellen</em>'}</span>`;
+        if (p2) x2 += `<span class="vmini" aria-label="F\xFChrung ${p2.fuehrung}, Fachwissen ${p2.fachwissen}, Loyalit\xE4t ${p2.loyalitaet}"><span><i style="width:${p2.fuehrung}%"></i></span><span><i style="width:${p2.fachwissen}%"></i></span><span><i style="width:${p2.loyalitaet}%"></i></span></span><span class="ampel a-${r3.risikoAmpel}" title="Abwerberisiko ${RISIKO[r3.risikoAmpel]}"></span>`;
+        return x2 + "</button>";
+      };
+      const links = u.ressorts.filter((_, i) => i % 2 === 0), rechts = u.ressorts.filter((_, i) => i % 2 === 1);
+      h3 += `<div class="q-buch"><div class="q-buch-kopf"><span>Sitzungstisch</span><b>Platz antippen</b></div><div class="q-tisch"><div class="q-seite">${links.map(platz).join("")}</div><div class="q-tafel" aria-hidden="true"></div><div class="q-seite">${rechts.map(platz).join("")}</div></div>
+      <div class="legende" style="padding:0 14px 10px">Balken: F\xFChrung, Fachwissen, Loyalit\xE4t \xB7 Punkt: Abwerberisiko</div></div>`;
       const ls = u.letzteSitzung;
-      if (ls) {
-        h3 += `<div class="karte"><div class="khead">Letzte Vorstandssitzung<small>${wocheText(st2, ls.woche)}</small></div>`;
-        for (const b3 of ls.berichte) h3 += `<div class="zeile"><span class="was"><b>${E8.RESSORT_INFO?.[b3.ressort]?.kurz ?? b3.ressort}</b>${b3.name ? ` <i>${esc2(b3.name)}</i>` : ""}<em class="wirk">${esc2(b3.text)}</em></span></div>`;
-        if (ls.thema) h3 += `<div class="zeile"><span class="was"><b>Beschluss</b> <i>${esc2(ls.thema.titel)}</i><em>${esc2(ls.thema.ergebnis ?? "offen")}</em></span></div>`;
-        h3 += "</div>";
+      h3 += '<div class="q-buch"><div class="q-buch-kopf"><span>Letzte Sitzung</span><b>' + (ls ? wocheText(st2, ls.woche) : "") + "</b></div>";
+      if (!ls) h3 += '<div class="q-leer"><b>Noch keine Sitzung.</b>Der Vorstand tagt einmal im Quartal.</div>';
+      else {
+        for (const b3 of ls.berichte) h3 += `<div class="q-zeile"><span class="q-name">${E8.RESSORT_INFO?.[b3.ressort]?.kurz ?? b3.ressort}${b3.name ? ` \xB7 ${esc2(b3.name)}` : ""}<small>${esc2(b3.text)}</small></span></div>`;
+        if (ls.thema) h3 += `<div class="q-zeile"><span class="q-name">Beschluss: ${esc2(ls.thema.titel)}<small>${esc2(ls.thema.ergebnis ?? "offen")}</small></span></div>`;
       }
+      h3 += "</div>";
       for (const b3 of u.boosts) h3 += `<div class="olief">${esc2(b3.text)} wirkt bis ${wocheText(st2, b3.bis)}</div>`;
+      h3 += "</div>";
       return { titel: "Vorstand", unter: `Du bist CEO \xB7 ${u.besetzt} von ${u.ressorts.length} Ressorts besetzt \xB7 KW ${kwVon2(st2.woche)}`, html: h3 };
     }
     function profil2(P4) {
@@ -161127,7 +161133,7 @@
     function zeigen(scrollHalten = false) {
       const sc = document.getElementById("pinhalt").scrollTop;
       const { r: r3 } = rendern();
-      ctx.panel(r3.titel, r3.unter, r3.html, "gross");
+      ctx.panel(r3.titel, r3.unter, bereich("zentrale") + '<i class="q31-marke" hidden></i>' + r3.html, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? sc : 0;
       if (ui.seite === "einstellen") karussellBinden("kandidaten", ui.k, (i) => {
@@ -170148,10 +170154,12 @@
       try {
         const infos = await liste();
         const vorhanden = Object.fromEntries(infos.map((i, n3) => [PLAETZE[n3], i]));
-        root.innerHTML = PLAETZE.map((platz) => {
+        const belegt2 = PLAETZE.filter((p2) => p2 !== "autosave" && vorhanden[p2]).length, auto4 = vorhanden.autosave;
+        const kopf = start ? "" : '<div class="q31"><div class="q-gross"><span class="q-label">Zuletzt automatisch gespeichert</span><span class="q-haupt">' + (auto4 ? "Woche " + (auto4.woche + 1) : "noch nie") + '</span><span class="q-neben"><b>' + belegt2 + " von " + (PLAETZE.length - 1) + '</b>Pl\xE4tzen belegt</span></div><div class="q-befund">' + (auto4 ? esc2(auto4.stadt) + ", " + datumFormatieren(auto4.datum) + ". Der automatische Stand wird jede Woche \xFCberschrieben; f\xFCr einen festen Stand einen Platz w\xE4hlen." : "Noch kein Spielstand. Speichere auf einem der drei Pl\xE4tze.") + "</div></div>";
+        root.innerHTML = kopf + PLAETZE.map((platz) => {
           const info = vorhanden[platz];
           const name2 = info?.name ?? (platz === "autosave" ? "Automatisch" : "");
-          const vorschau2 = info?.bild ? '<img class="app-vorschau" alt="Kartenausschnitt des Spielstands" src="' + info.bild + '">' : '<div class="app-vorschau leer" aria-hidden="true">H</div>';
+          const vorschau2 = info?.bild ? '<img class="app-vorschau" alt="Kartenausschnitt des Spielstands" src="' + info.bild + '">' : '<div class="app-vorschau leer q-ruecken" aria-hidden="true"><span>' + (platz === "autosave" ? "Auto" : platz.slice(-1)) + "</span></div>";
           return '<article class="app-platz" data-platz="' + platz + '"><div class="app-platzkopf"><b>' + bezeichnung(platz) + "</b><span>" + (info ? datumFormatieren(info.datum) : "Leer") + '</span></div><div class="app-platzinhalt">' + vorschau2 + '<div class="app-daten">' + (info ? "<strong>" + esc2(info.name) + "</strong><small>" + esc2(info.stadt) + " \xB7 Woche " + (info.woche + 1) + "</small><small>" + (info.unbegrenzt || info.szenario === "sandkasten" ? "Sandkasten \xB7 unbegrenzt" : esc2(info.szenario) + " \xB7 Cash " + geld(info.cash)) + "</small>" : "<small>Hier ist noch kein Spielstand gespeichert.</small>") + "</div></div>" + (start || platz === "autosave" ? "" : '<label class="app-namenswahl">Name <input data-name maxlength="60" aria-label="Name f\xFCr ' + bezeichnung(platz) + '" value="' + esc2(name2) + '" placeholder="Spielstand benennen"></label>') + '<div class="app-aktionen">' + (!start && platz !== "autosave" ? '<button type="button" data-app-aktion="speichern">Speichern</button>' : "") + (info ? '<button type="button" data-app-aktion="laden">Laden</button><button type="button" data-app-aktion="export">Export</button>' : "") + (platz !== "autosave" ? '<button type="button" data-app-aktion="import">Import</button>' : "") + (info && platz !== "autosave" ? '<button type="button" data-app-aktion="loeschen">L\xF6schen</button>' : "") + '<input type="file" data-app-datei accept=".hartwig,application/gzip" aria-label="Spielstand importieren" hidden></div></article>';
         }).join("");
         root.dataset.start = start ? "1" : "0";
@@ -170220,7 +170228,7 @@
     }
     function oeffne() {
       if (!APP_AKTIV) return;
-      panel2("Spielst\xE4nde", "Drei benannte Pl\xE4tze und ein automatischer Spielstand", '<div id="app-plaetze" class="app-plaetze">Lade Spielst\xE4nde \u2026</div>', "gross");
+      panel2("Spielst\xE4nde", "Drei benannte Pl\xE4tze und ein automatischer Spielstand", bereich("zentrale") + '<i class="q31-marke" hidden></i><div id="app-plaetze" class="app-plaetze">Lade Spielst\xE4nde \u2026</div>', "gross");
       return zeichne($("app-plaetze"));
     }
     function startAktualisieren() {

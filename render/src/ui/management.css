@@ -161,3 +161,41 @@
 #panel:has(.q31-marke) .o02-gruppe, #panel:has(.q31-marke) .o02-unter { background: var(--ui-surface); border-color: var(--ui-border); color: var(--ui-text); }
 #panel:has(.q31-marke) :is(.o02-daten, .o02-kopf, .o02-name) { font-size: 13px; color: var(--ui-text); border-color: var(--ui-border); }
 #panel:has(.q31-marke) .o02-gruppe summary, #panel:has(.q31-marke) .o02-unter summary { min-height: 44px; display: flex; align-items: center; }
+
+/* Vorstand: Sitzungstisch, zwei Reihen Plätze an einer langen Tafel, leerer Platz als Stuhl */
+.q-tisch { display: grid; grid-template-columns: minmax(0, 1fr) 14px minmax(0, 1fr); gap: 8px; padding: 10px 10px 12px; }
+.q-tisch .q-seite { display: flex; flex-direction: column; gap: 8px; }
+.q-tisch .q-tafel { border-radius: 4px; background: #5a4636; border: 1px solid #3d2f25; box-shadow: inset 3px 0 0 #6b5442; }
+#panel:has(.q31-marke) .vkarte.q-platz { display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: auto auto; gap: 4px 8px; align-items: start; text-align: left; width: 100%; min-height: 96px;
+  background: var(--ui-surface); border: 1px solid var(--ui-border); border-radius: 10px; padding: 8px; color: var(--ui-text); box-shadow: none; }
+#panel:has(.q31-marke) .vkarte.q-platz .vbild { width: 44px; height: 44px; overflow: hidden; border-radius: 8px; }
+#panel:has(.q31-marke) .vkarte.q-platz .vbild svg { width: 44px; height: 44px; }
+#panel:has(.q31-marke) .vkarte.q-platz .vtext b { font-size: 15px; display: block; } #panel:has(.q31-marke) .vkarte.q-platz .vtext small { font-size: 12px; color: var(--ui-muted); display: block; line-height: 15px; }
+#panel:has(.q31-marke) .vkarte.q-platz .vtext em { font-style: normal; font-size: 13px; display: block; margin-top: 2px; overflow-wrap: anywhere; }
+#panel:has(.q31-marke) .vkarte.q-platz .vmini { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+#panel:has(.q31-marke) .vkarte.q-platz .vmini span { height: 5px; border-radius: 3px; background: var(--hk-zen-tief, #162026); overflow: hidden; display: block; }
+#panel:has(.q31-marke) .vkarte.q-platz .vmini i { display: block; height: 100%; background: var(--hk-gut, #6dbf73); }
+#panel:has(.q31-marke) .vkarte.q-platz .ampel { position: absolute; }
+#panel:has(.q31-marke) .vkarte.q-platz { position: relative; } #panel:has(.q31-marke) .vkarte.q-platz .ampel { top: 8px; right: 8px; }
+#panel:has(.q31-marke) .vkarte.q-platz.leer { border-style: dashed; background: transparent; }
+#panel:has(.q31-marke) .vkarte.q-platz.leer .frei { color: var(--hk-achtung, #e7b04b); }
+.q-stuhl { position: relative; display: block; width: 44px; height: 44px; border-radius: 8px; border: 1px dashed var(--q-leise); opacity: .8; }
+.q-stuhl::before, .q-stuhl::after { content: ''; position: absolute; left: 50%; height: 3px; border-radius: 2px; background: var(--q-leise); transform: translateX(-50%); }
+.q-stuhl::before { top: 12px; width: 22px; } .q-stuhl::after { top: 26px; width: 28px; }
+#panel:has(.q31-marke) .vseit span { font-size: 12px; }
+
+/* Spielstände als Aktenregal: Ordnerrücken links, Inhalt rechts, kompakte Aktionen */
+#panel:has(.q31-marke) .app-plaetze { gap: 8px; }
+#panel:has(.q31-marke) .app-platz { display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 12px; background: var(--ui-surface); border: 1px solid var(--ui-border); border-radius: 10px; padding: 10px; color: var(--ui-text); }
+#panel:has(.q31-marke) .app-platzkopf { grid-column: 2; } #panel:has(.q31-marke) .app-platzkopf span { font-size: 12px; color: var(--ui-muted); }
+#panel:has(.q31-marke) .app-platzinhalt { display: contents; }
+#panel:has(.q31-marke) .app-vorschau { grid-column: 1; grid-row: 1 / span 4; width: 64px; height: 100%; min-height: 96px; object-fit: cover; border-radius: 6px; }
+#panel:has(.q31-marke) .q-ruecken { display: flex; align-items: flex-end; justify-content: center; background: transparent; border: 1px dashed var(--ui-muted); color: var(--ui-muted); font-size: 22px; font-weight: 700; padding-bottom: 8px; }
+#panel:has(.q31-marke) .app-daten { grid-column: 2; margin: 4px 0; } #panel:has(.q31-marke) .app-daten small { font-size: 12px; color: var(--ui-muted); display: block; }
+#panel:has(.q31-marke) .app-namenswahl { grid-column: 2; font-size: 12px; color: var(--ui-muted); }
+#panel:has(.q31-marke) .app-namenswahl input { width: 100%; box-sizing: border-box; margin-top: 2px; }
+#panel:has(.q31-marke) .app-aktionen { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+#panel:has(.q31-marke) .app-aktionen button { min-height: 44px; padding: 0 12px; border-radius: 10px; background: transparent; color: var(--ui-text); border: 1px solid var(--ui-border); font: inherit; font-size: 14px; }
+#panel:has(.q31-marke) .app-aktionen button[data-app-aktion=speichern] { border-color: var(--hk-akzent, #d23c32); color: var(--hk-akzent-hell, #ef7a6f); font-weight: 700; }
+#panel:has(.q31-marke) .app-namenswahl input { background: var(--hk-zen-tief, #162026); color: var(--ui-text); border: 1px solid var(--ui-border); border-radius: 10px; min-height: 44px; font: inherit; font-size: 16px; padding: 0 10px; }
+#panel:has(.q31-marke) .app-aktionen button[data-app-aktion=loeschen] { color: var(--hk-schlecht, #ef6f62); }

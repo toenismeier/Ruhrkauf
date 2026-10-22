@@ -19,6 +19,11 @@ const EXTRA = {
     ['wg', () => window.spiel.einkauf.oeffne('wg', 'damen.kleider')],
     ['freigaben-leer', () => { const S = window.spiel.s; window.spiel.E.fuehreAus(S, { typ: 'sammelfreigabe', filter: {} }); window.spiel.einkauf.oeffne('freigaben'); }],
   ],
+  vorstand: [
+    ['profil', () => { document.querySelector('.vkarte[data-v=cpo]')?.click(); }],
+    ['einstellen', () => { window.spiel.schliessePanel(); document.getElementById('menueknopf').click(); document.getElementById('vorstand').click(); document.querySelector('.vkarte[data-v=cro]')?.click(); document.querySelector('[data-a=einstellen]')?.click(); }],
+  ],
+  spielstaende: [],
 };
 
 (async () => {

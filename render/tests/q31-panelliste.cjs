@@ -13,7 +13,7 @@ const PANELS = [
   { name: 'q31-online', vorSpiel: false, umgestellt: true, oeffne: menue('online') },
   { name: 'q31-planung', vorSpiel: false, umgestellt: true, oeffne: menue('planung') },
   { name: 'q31-reporting', vorSpiel: false, umgestellt: true, oeffne: menue('reporting') },
-  { name: 'q31-vorstand', vorSpiel: false, umgestellt: false, oeffne: menue('vorstand') },
-  { name: 'q31-spielstaende', vorSpiel: false, umgestellt: false, oeffne: menue('app-oeffnen') },
+  { name: 'q31-vorstand', vorSpiel: false, umgestellt: true, oeffne: menue('vorstand') },
+  { name: 'q31-spielstaende', vorSpiel: false, umgestellt: true, oeffne: menue('app-oeffnen') },
 ];
 module.exports = { PANELS };
