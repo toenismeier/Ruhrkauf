@@ -1,4 +1,4 @@
-// Vollständiger Zustandsatlas: vier Premiumhäuser × zwölf Grundzustände sowie Verkäufe.
+// Vollständiger Zustandsatlas: fünf Premiumhäuser × zwölf Grundzustände sowie Verkäufe.
 import { sockel, THREE } from '../kit/basis.js';
 import { zeigeKatalog } from '../kit/katalog.js';
 import { premiumhaus } from '../kit/premium.js';
@@ -6,7 +6,7 @@ import { STATI } from '../kit/zustaende.js';
 import haeuser from '../../haeuser.json';
 
 const haeuserPremium=haeuser.filter(h=>h.klasse==='premium');
-if(haeuserPremium.length!==4) throw new Error('Vier Premiumhäuser erforderlich');
+if(haeuserPremium.length!==5) throw new Error('Fünf Premiumhäuser erforderlich – Engine-Export neu erstellen');
 const sonder=[
  [{status:'offen',verkaufsprozess:true,investor:'Family Office Merian'},'Exklusiver Verkaufsprozess'],
  [{status:'offen',kaeufer:'Valens Palais',hartwig:false},'Neuer Eigentümer'],

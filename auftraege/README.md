@@ -41,7 +41,7 @@ Eigene Aufträge in `auftraege/nice/` (Übersicht in `auftraege/nice/README.md`)
 
 ## Namen und Maßstab (entschieden)
 - Hauptkette Hartwig, Sportkette Hartwig Sport, Hertie-Pendant **Volkskauf**, SchnäppchenCenter-Pendant (TK-Maxx-Prinzip) **FUNDUS**.
-- Maßstab nach Ruhrkauf: 360 Hartwig regulär plus 4 Premium, 86 Volkskauf, 44 Sport, 66 FUNDUS, gemischt auf rund 180 Städte (`engine-massstab.md`).
+- Maßstab nach Ruhrkauf: 360 Hartwig regulär plus 5 Premium, 86 Volkskauf, 44 Sport, 66 FUNDUS, gemischt auf rund 180 Städte (`engine-massstab.md`).
 
 ## Gemeinsam berührte Dateien (Parallelbetrieb)
 Premium, Outlet und Schwesterkette hängen sich an dieselben Einbaupunkte. In diesen Dateien gilt: nur ergänzen, nichts umbauen, eigene Zeilen bzw. eigener Block je Format, damit parallele Branches beim Rebase höchstens triviale Konflikte haben.
