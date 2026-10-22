@@ -638,39 +638,13 @@ function klotzBauen(k, gesammelt = false) {
   Object.assign(k, { gruppe: g, stufe: 'klotz', teile: S.anzahl, dachFlaechen });
   if (!gesammelt) jahreszeiten?.registriereDachflaechen(k.key, dachFlaechen);
 }
-/**
- * Fernbild: Hinterhäuser und hofseitige Nebengebäude dichter Blöcke werden
- * als einfache Baukörper gerendert. Außenliegende Straßenfassaden sowie
- * Hartwig-Standorte/Slots gehen weiter durch den unveränderten Hausbauer.
- * Die Parzellen und ihre Standortdaten werden nicht verändert.
- */
-function fernHofBau(S, p) {
-  const r = rng(((p.seed ?? 1) * 13 + 7) >>> 0), H = klotzHoehe(p);
-  const f = waehle(r, [...FARBEN.fassadeHell, ...FARBEN.fassadeHell,
-    ...FARBEN.fassadeWarm, ...FARBEN.fassadeKuehl,
-    ...FARBEN.backstein.slice(0, 2), ...FARBEN.putzBunt]);
-  S.quader(p.x, 0, p.z, p.x + p.w, H, p.z + p.d, f);
-  // Eine durchgehende Dachplatte wahrt die Silhouette im winzigen Randbild.
-  S.quader(p.x - 0.1, H - 0.1, p.z - 0.1,
-    p.x + p.w + 0.1, H + 0.35, p.z + p.d + 0.1, dunkler(f, 0.08));
-  return { hoehe: H + 0.35 };
-}
-
 function vollBauen(k, detail = detailFuer(k)) {
   const t0 = performance.now();
   const S = new KompaktSammler(), g = new THREE.Group(), b = echterBauer(), dachFlaechen = [];
-  // Nur Rückseiten/Höfe dichter Blöcke am Bildrand, nie Geschäftsfronten,
-  // Premiumhäuser, Standorte oder auffällige Solitärbauten vereinfachen.
-  const anzahlBlock = new Map();
-  for (const p of k.parz) anzahlBlock.set(p.block, (anzahlBlock.get(p.block) ?? 0) + 1);
   setzeLod(detail);
   try {
     for (const p of k.parz) {
-      const hof = p.hofbau || p.typ === 'hofhaus';
-      const fernHof = detail === 'fern' && !p.standort && hof
-        && (anzahlBlock.get(p.block) ?? 0) >= 3;
-      const { dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () =>
-        fernHof ? fernHofBau(S, p) : bauerFuer(b, p.typ)(S, g, p));
+      const { dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => bauerFuer(b, p.typ)(S, g, p));
       dachFlaechen.push(...dach);
     }
     S.bauen(g); entferneKleineSchilder(g);
