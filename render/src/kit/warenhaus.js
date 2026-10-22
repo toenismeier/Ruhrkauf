@@ -1148,11 +1148,11 @@ function mallFluegel(K, xm, M, dm, hm) {
       const x1 = xm + 2, x2 = xm + M - 2;
       const z1 = zm + 1, z2 = zm + dm * 0.72 - 4.2;
       for (const y of [hm + 2.8, hm + 5.4]) {
-        S.quader(x1, y, z1, x2, y + 0.32, z2, '#8e959b');
+        S.quader(x1, y, z1, x2, y + 0.32, z2, '#7e858c'); // Farben aus parkdeck/STAHL: keine zusätzlichen Draw Calls
         for (const px of [x1 + 1, x2 - 1]) for (const pz of [z1 + 1, z2 - 1])
-          S.box(0.65, 2.35, 0.65, px, y - 1.15, pz, '#aeb4b8');
+          S.box(0.65, 2.35, 0.65, px, y - 1.15, pz, STAHL);
         for (const px of [x1 + 1, x2 - 1])
-          S.box(0.24, 0.9, z2 - z1, px, y + 0.75, (z1 + z2) / 2, '#aeb4b8');
+          S.box(0.24, 0.9, z2 - z1, px, y + 0.75, (z1 + z2) / 2, STAHL);
       }
       parkdeck(K, x1, z1, x2, z2, hm + 5.72, false);
     } else parkdeck(K, xm + 1, zm + 1, xm + M - 1, zm + dm * 0.72 - 4.2, hm + 0.4, false);

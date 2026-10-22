@@ -176,7 +176,7 @@ async function arbeiter(ids, neu, gegenprobe = false) {
           }
         } else if (abweichungen.length) {
           fehler.push(name + ': ' + abweichungen.join('; '));
-          console.error('FEHLER ' + name + ': ' + abweichungen.join('; '));
+          console.error('FEHLER ' + name + ': ' + abweichungen.join('; ') + ' | ' + messung.leistung.drawCalls + ' Draw Calls, ' + messung.leistung.dreiecke + ' Render-Dreiecke');
         } else {
           console.log('OK ' + name + ': Plan, Geometrie, Bild; ' + messung.dauerMs + ' ms; ' + messung.leistung.drawCalls + ' Draw Calls, ' + messung.leistung.dreiecke + ' Render-Dreiecke; Bild ' + pixel.anteilProzent + '% / Δ=' + pixel.mittelwert);
         }
