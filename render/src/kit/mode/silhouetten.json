@@ -32,7 +32,10 @@
       "stehkragen",
       "rollkragen",
       "kapuze",
-      "wickel"
+      "wickel",
+      "offshoulder",
+      "troyer",
+      "henley"
     ],
     "passform": [
       "tailliert",
@@ -56,13 +59,40 @@
       "stufen",
       "gerade",
       "slip",
-      "etui"
+      "etui",
+      "tuell"
     ],
     "muster": [
       "uni",
       "streifen",
       "karo",
-      "blumen"
+      "blumen",
+      "punkte",
+      "blockstreifen",
+      "print"
+    ],
+    "jackenart": [
+      "blazer",
+      "sakko",
+      "mantel",
+      "trench",
+      "steppjacke",
+      "steppweste",
+      "jeansjacke",
+      "regenjacke",
+      "varsity",
+      "overshirt",
+      "parka",
+      "lederjacke",
+      "bomber",
+      "strickjacke",
+      "teddy",
+      "harrington",
+      "fieldjacket",
+      "funktion",
+      "track",
+      "strickweste",
+      "anzugweste"
     ]
   },
   "silhouetten": {
@@ -86,7 +116,8 @@
       },
       "material": "baumwolle",
       "farbe": "rosa",
-      "model": "oberteil"
+      "model": "oberteil",
+      "nur": "damen"
     },
     "boxytee": {
       "gruppe": "oberteil",
@@ -139,7 +170,8 @@
       },
       "material": "seide",
       "farbe": "creme",
-      "model": "oberteil"
+      "model": "oberteil",
+      "nur": "damen"
     },
     "croptop": {
       "gruppe": "oberteil",
@@ -151,7 +183,8 @@
       },
       "material": "rippe",
       "farbe": "schwarz",
-      "model": "oberteil"
+      "model": "oberteil",
+      "nur": "damen"
     },
     "bluse": {
       "gruppe": "oberteil",
@@ -176,7 +209,8 @@
       },
       "material": "seide",
       "farbe": "creme",
-      "model": "oberteil"
+      "model": "oberteil",
+      "nur": "damen"
     },
     "hemd": {
       "gruppe": "oberteil",
@@ -280,7 +314,8 @@
       },
       "material": "leinen",
       "farbe": "terrakotta",
-      "model": "oberteil"
+      "model": "oberteil",
+      "nur": "damen"
     },
     "wickelshirt": {
       "gruppe": "oberteil",
@@ -291,7 +326,8 @@
       },
       "material": "viskose",
       "farbe": "bordeaux",
-      "model": "oberteil"
+      "model": "oberteil",
+      "nur": "damen"
     },
     "kinderbody": {
       "gruppe": "oberteil",
@@ -300,7 +336,8 @@
       },
       "material": "baumwolle",
       "farbe": "gelb",
-      "model": "oberteil"
+      "model": null,
+      "nur": "kinder"
     },
     "jeans": {
       "gruppe": "unterteil",
@@ -465,7 +502,7 @@
         "saum": "umschlag"
       },
       "material": "baumwolle",
-      "farbe": "marine",
+      "farbe": "beige",
       "model": "hose"
     },
     "culotte": {
@@ -508,7 +545,8 @@
       },
       "material": "viskose",
       "farbe": "marine",
-      "model": "rock"
+      "model": "rock",
+      "nur": "damen"
     },
     "minirock": {
       "gruppe": "rock",
@@ -518,7 +556,8 @@
       },
       "material": "denim",
       "farbe": "jeansblau",
-      "model": "rock"
+      "model": "rock",
+      "nur": "damen"
     },
     "plisseerock": {
       "gruppe": "rock",
@@ -528,7 +567,8 @@
       },
       "material": "polyester",
       "farbe": "salbei",
-      "model": "rock"
+      "model": "rock",
+      "nur": "damen"
     },
     "plisseeminirock": {
       "gruppe": "rock",
@@ -539,7 +579,8 @@
       },
       "material": "polyester",
       "farbe": "bordeaux",
-      "model": "rock"
+      "model": "rock",
+      "nur": "damen"
     },
     "bleistiftrock": {
       "gruppe": "rock",
@@ -549,7 +590,8 @@
       },
       "material": "wolle",
       "farbe": "schwarz",
-      "model": "rock"
+      "model": "rock",
+      "nur": "damen"
     },
     "midirock": {
       "gruppe": "rock",
@@ -559,7 +601,8 @@
       },
       "material": "satin",
       "farbe": "senf",
-      "model": "rock"
+      "model": "rock",
+      "nur": "damen"
     },
     "wickelrock": {
       "gruppe": "rock",
@@ -569,7 +612,8 @@
       },
       "material": "viskose",
       "farbe": "terrakotta",
-      "model": "rock"
+      "model": "rock",
+      "nur": "damen"
     },
     "stufenrock": {
       "gruppe": "rock",
@@ -579,7 +623,8 @@
       },
       "material": "baumwolle",
       "farbe": "weiß",
-      "model": "rock"
+      "model": "rock",
+      "nur": "damen"
     },
     "kleid": {
       "gruppe": "kleid",
@@ -590,7 +635,8 @@
       },
       "material": "viskose",
       "farbe": "bordeaux",
-      "model": "kleid"
+      "model": "kleid",
+      "nur": "damen"
     },
     "etuikleid": {
       "gruppe": "kleid",
@@ -602,7 +648,8 @@
       },
       "material": "wolle",
       "farbe": "marine",
-      "model": "kleid"
+      "model": "kleid",
+      "nur": "damen"
     },
     "slipdress": {
       "gruppe": "kleid",
@@ -613,7 +660,8 @@
       },
       "material": "satin",
       "farbe": "flieder",
-      "model": "kleid"
+      "model": "kleid",
+      "nur": "damen"
     },
     "hemdblusenkleid": {
       "gruppe": "kleid",
@@ -626,7 +674,8 @@
       },
       "material": "baumwolle",
       "farbe": "hellblau",
-      "model": "kleid"
+      "model": "kleid",
+      "nur": "damen"
     },
     "maxikleid": {
       "gruppe": "kleid",
@@ -637,7 +686,8 @@
       },
       "material": "viskose",
       "farbe": "terrakotta",
-      "model": "kleid"
+      "model": "kleid",
+      "nur": "damen"
     },
     "wickelkleid": {
       "gruppe": "kleid",
@@ -649,7 +699,8 @@
       },
       "material": "viskose",
       "farbe": "flaschengruen",
-      "model": "kleid"
+      "model": "kleid",
+      "nur": "damen"
     },
     "sommerkleid": {
       "gruppe": "kleid",
@@ -661,7 +712,8 @@
       },
       "material": "baumwolle",
       "farbe": "gelb",
-      "model": "kleid"
+      "model": "kleid",
+      "nur": "damen"
     },
     "strickkleid": {
       "gruppe": "kleid",
@@ -673,7 +725,8 @@
       },
       "material": "strick",
       "farbe": "camel",
-      "model": "kleid"
+      "model": "kleid",
+      "nur": "damen"
     },
     "kinderkleid": {
       "gruppe": "kleid",
@@ -685,7 +738,9 @@
       },
       "material": "baumwolle",
       "farbe": "koralle",
-      "model": "kleid"
+      "model": "kleid",
+      "nur": "kinder",
+      "geschlecht": "damen"
     },
     "blazer": {
       "gruppe": "jacke",
@@ -773,8 +828,8 @@
       "standard": {
         "art": "bomber"
       },
-      "material": "polyester",
-      "farbe": "schwarz",
+      "material": "nylon",
+      "farbe": "olive",
       "model": "jacke"
     },
     "lederjacke": {
@@ -1069,6 +1124,465 @@
       "material": "polyester",
       "farbe": "camel",
       "model": null
+    },
+    "jumpsuit": {
+      "gruppe": "kleid",
+      "standard": {},
+      "material": "viskose",
+      "farbe": "olive",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "hosenanzug": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "blazer",
+        "hose": "weit"
+      },
+      "material": "wolle",
+      "farbe": "camel",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "puffaermelbluse": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "puff",
+        "kragen": "rund",
+        "passform": "tailliert",
+        "knopfleiste": true
+      },
+      "material": "viskose",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "offshoulder": {
+      "gruppe": "oberteil",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "corsagetop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "traeger": true
+      },
+      "material": "satin",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "twinset": {
+      "gruppe": "oberteil",
+      "standard": {},
+      "material": "merino",
+      "farbe": "altrosa",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "kimono": {
+      "gruppe": "jacke",
+      "standard": {
+        "muster": "print"
+      },
+      "material": "viskose",
+      "farbe": "petrol",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "pullunder": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "ohne",
+        "kragen": "v",
+        "rippbund": true,
+        "strick": true,
+        "armbuendchen": true,
+        "laenge": "kurz",
+        "muster": "karo",
+        "passform": "gerade"
+      },
+      "material": "merino",
+      "farbe": "marine",
+      "model": "oberteil"
+    },
+    "croppedcardigan": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "strickjacke",
+        "laenge": "crop",
+        "v": true
+      },
+      "material": "strick",
+      "farbe": "rosa",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "teddyjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "teddy"
+      },
+      "material": "teddy",
+      "farbe": "ecru",
+      "model": "jacke"
+    },
+    "poncho": {
+      "gruppe": "jacke",
+      "standard": {},
+      "material": "strick",
+      "farbe": "camel",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "tuellrock": {
+      "gruppe": "rock",
+      "standard": {
+        "laenge": "midi"
+      },
+      "material": "tuell",
+      "farbe": "altrosa",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "lederrock": {
+      "gruppe": "rock",
+      "standard": {
+        "laenge": "mini"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "paperbaghose": {
+      "gruppe": "unterteil",
+      "standard": {},
+      "material": "viskose",
+      "farbe": "sand",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "badeanzug": {
+      "gruppe": "bademode",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "marine",
+      "model": null,
+      "nur": "damen"
+    },
+    "bikini": {
+      "gruppe": "bademode",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "koralle",
+      "model": null,
+      "nur": "damen"
+    },
+    "blusenkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "muster": "punkte"
+      },
+      "material": "viskose",
+      "farbe": "flaschengruen",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "strickweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "strickweste"
+      },
+      "material": "strick",
+      "farbe": "ecru",
+      "model": "jacke"
+    },
+    "anzug": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "sakko",
+        "hose": "gerade"
+      },
+      "material": "wolle",
+      "farbe": "marine",
+      "model": "jacke",
+      "nur": "herren"
+    },
+    "sakko": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "sakko",
+        "muster": "karo"
+      },
+      "material": "wolle",
+      "farbe": "braun",
+      "model": "jacke",
+      "nur": "herren"
+    },
+    "anzugweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "anzugweste"
+      },
+      "material": "wolle",
+      "farbe": "anthrazit",
+      "model": "jacke",
+      "nur": "herren"
+    },
+    "henley": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "henley"
+      },
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": "oberteil"
+    },
+    "troyer": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "troyer",
+        "rippbund": true,
+        "strick": true
+      },
+      "material": "strick",
+      "farbe": "marine",
+      "model": "oberteil"
+    },
+    "rugbyshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "muster": "blockstreifen"
+      },
+      "material": "baumwolle",
+      "farbe": "flaschengruen",
+      "model": "oberteil"
+    },
+    "cargoshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "laenge": "bermuda",
+        "passform": "weit",
+        "cargo": true
+      },
+      "material": "baumwolle",
+      "farbe": "khaki",
+      "model": "hose"
+    },
+    "badeshorts": {
+      "gruppe": "bademode",
+      "standard": {
+        "muster": "print"
+      },
+      "material": "polyester",
+      "farbe": "petrol",
+      "model": null,
+      "nur": "herren"
+    },
+    "chinoshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "laenge": "kurz",
+        "passform": "schmal",
+        "saum": "umschlag"
+      },
+      "material": "baumwolle",
+      "farbe": "marine",
+      "model": "hose"
+    },
+    "harringtonjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "harrington"
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": "jacke"
+    },
+    "fieldjacket": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "fieldjacket"
+      },
+      "material": "baumwolle",
+      "farbe": "olive",
+      "model": "jacke"
+    },
+    "funktionsjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "funktion"
+      },
+      "material": "nylon",
+      "farbe": "petrol",
+      "model": "jacke"
+    },
+    "hemdjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "overshirt",
+        "muster": "karo"
+      },
+      "material": "wolle",
+      "farbe": "rot",
+      "model": "jacke"
+    },
+    "strampler": {
+      "gruppe": "oberteil",
+      "standard": {
+        "muster": "streifen"
+      },
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": null,
+      "nur": "kinder"
+    },
+    "langarmbody": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang"
+      },
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": null,
+      "nur": "kinder"
+    },
+    "latzkleid": {
+      "gruppe": "kleid",
+      "standard": {},
+      "material": "cord",
+      "farbe": "senf",
+      "model": "rock",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "matschhose": {
+      "gruppe": "unterteil",
+      "standard": {},
+      "material": "gummi",
+      "farbe": "rot",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "schneeanzug": {
+      "gruppe": "jacke",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "flieder",
+      "model": "jacke",
+      "nur": "kinder"
+    },
+    "schlafsack": {
+      "gruppe": "waesche",
+      "standard": {
+        "muster": "punkte"
+      },
+      "material": "baumwolle",
+      "farbe": "salbei",
+      "model": null,
+      "nur": "kinder"
+    },
+    "leggingsset": {
+      "gruppe": "oberteil",
+      "standard": {
+        "muster": "print"
+      },
+      "material": "baumwolle",
+      "farbe": "koralle",
+      "model": "oberteil",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "kinderbadeanzug": {
+      "gruppe": "bademode",
+      "standard": {
+        "rueschen": true,
+        "muster": "punkte"
+      },
+      "material": "polyester",
+      "farbe": "rosa",
+      "model": null,
+      "nur": "kinder"
+    },
+    "kapuzenjacke": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "kaenguru": true,
+        "rippbund": true,
+        "zip": true,
+        "passform": "gerade"
+      },
+      "material": "baumwolle",
+      "farbe": "koralle",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "trackjacket": {
+      "gruppe": "jacke",
+      "standard": {
+        "art": "track"
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "trackpants": {
+      "gruppe": "unterteil",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": "hose"
+    },
+    "oversizehemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "aermel": "lang",
+        "kragen": "hemd",
+        "passform": "oversize",
+        "laenge": "lang",
+        "brusttasche": true,
+        "muster": "karo"
+      },
+      "material": "baumwolle",
+      "farbe": "bordeaux",
+      "model": "oberteil"
+    },
+    "cargorock": {
+      "gruppe": "rock",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "khaki",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "minikleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "laenge": "mini",
+        "form": "gerade",
+        "aermel": "lang",
+        "kragen": "rund"
+      },
+      "material": "strick",
+      "farbe": "schwarz",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "corsage": {
+      "gruppe": "oberteil",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": "oberteil",
+      "nur": "damen"
     }
   }
 }
