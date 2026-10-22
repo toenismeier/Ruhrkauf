@@ -2,6 +2,7 @@ import { BERATER, GRUPPEN, MIETER } from './daten';
 import { basisUmsatzHaus, beraterErgebnis, hausAttraktivitaet, loeseEntscheidung, offeneHaeuser, zufallsProjektname } from './ereignisse';
 import { einmalKosten, eroeffneInsolvenz, starteSchliessung } from './prozesse';
 import { runwayWochen } from './stakeholder';
+import { istSandkasten, liquiditaetReicht } from './sandkasten';
 import type {
   AktionsScope, BeraterTyp, Cluster, Flaeche, Format, GameState, GruppeId, Haus, Konzept, Untermieter,
 } from './types';
@@ -25,6 +26,7 @@ import { hqArchivSetzen } from './hq';
 import { immobilieVerkaufen } from './szenarien';
 import { zeitungEinstellen } from './zeitung';
 import { marktbeobachtungStufe } from './marktbeobachtung';
+import { schwesterUmflaggen, outletEroeffnen } from './formate';
 import { hqAktualisiere } from './hq';
 import { spielBeenden } from './spielende';
 // O05 Ware
@@ -43,7 +45,11 @@ import { testAktion, type TestAktion } from './testwerkzeuge';
 
 export type SpielerAktion =
   | { typ: 'filialProgramm'; programm: FilialProgrammId }
-  | { typ: 'schliessen'; haus: string }
+  | { typ: 'schliessen'; haus?: string; haeuser?: string[] }
+  | { typ: 'altwareOutlet'; quote: number }
+  | { typ: 'offpriceZukauf'; budget: number }
+  | { typ: 'schwesterUmflaggen'; haus: string }
+  | { typ: 'outletEroeffnen'; stadt: string }
   | { typ: 'immobilieVerkaufen'; haus: string }
   | { typ: 'flaecheUmbauen'; haus: string; flaeche: string; konzept: Konzept; gruppe?: GruppeId }
   | { typ: 'flaecheTeilen'; haus: string; flaeche: string; qm: number }
@@ -61,7 +67,7 @@ export type SpielerAktion =
   | { typ: 'kundenkarte' }
   | { typ: 'orderLevel'; gruppe: GruppeId | 'alle'; level: number }
   | { typ: 'vorkasse'; erlaubt: boolean }
-  | { typ: 'mieteVerhandeln'; haus: string; reduktion: number; tripleNet?: boolean }
+  | { typ: 'mieteVerhandeln'; haus?: string; haeuser?: string[]; reduktion: number; tripleNet?: boolean }
   | { typ: 'angebotVerhandeln'; angebot: string; haeuser: string[] }
   | { typ: 'angebotAnnehmen'; angebot: string }
   | { typ: 'angebotUebernehmen'; angebot: string; modus: 'outlet' | 'erweiterung' }
@@ -172,6 +178,21 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
     return ok('Die nächste Geschäftswoche kann beginnen.');
   }
   if (s.ende || s.phase === 'zerschlagen') return fehler('Das Spiel ist beendet.');
+  // Sammelaktionen rufen für jede ID ausschließlich den bestehenden Engine-Aktionspfad auf.
+  // Keine UI-eigene Mutation, doppelte IDs werden nur einmal angewendet.
+  if ((a.typ === 'schliessen' || a.typ === 'mieteVerhandeln') && a.haeuser) {
+    const ids = [...new Set(a.haeuser)];
+    if (!ids.length) return fehler('Keine Häuser ausgewählt.');
+    const ergebnisse = ids.map((id) => fuehreAus(s, a.typ === 'schliessen'
+      ? { typ: 'schliessen', haus: id }
+      : { typ: 'mieteVerhandeln', haus: id, reduktion: a.reduktion, tripleNet: a.tripleNet }));
+    const gelungen = ergebnisse.filter((e) => e.ok).length;
+    return { ok: gelungen > 0 && gelungen === ids.length,
+      text: `${gelungen} von ${ids.length} Häusern bearbeitet. ${ergebnisse.filter((e) => !e.ok).slice(0, 5).map((e) => e.text).join(' · ')}` };
+  }
+  if ((a.typ === 'schliessen' || a.typ === 'mieteVerhandeln') && !a.haus)
+    return fehler('Kein Haus angegeben.');
+
   const w = s.woche;
   const inso = s.phase === 'insolvenz';
   // O03 IT
@@ -196,6 +217,20 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
   // O07 Haus
   if (HAUS_AKTIONEN.has(a.typ as HausAktion['typ'])) return hausAktion(s, a as HausAktion);
   switch (a.typ) {
+    case 'altwareOutlet':
+      if (!Number.isFinite(a.quote) || a.quote < 0 || a.quote > 1) return fehler('Altwarequote muss zwischen 0 und 100 % liegen.');
+      s.einkauf.altwareOutlet=a.quote;return ok('Altwarequote für FUNDUS aktualisiert.');
+    case 'offpriceZukauf':
+      if (!Number.isSafeInteger(a.budget) || a.budget < 0) return fehler('Wochenbudget muss ein nicht negativer ganzer Eurobetrag sein.');
+      s.einkauf.offpriceZukauf=a.budget;return ok('Markenposten-Zukaufbudget aktualisiert.');
+    case 'schwesterUmflaggen': {
+      const grund=schwesterUmflaggen(s,a.haus);
+      return grund?fehler(grund):ok('Volkskauf-Umflaggen gestartet.');
+    }
+    case 'outletEroeffnen': {
+      const grund=outletEroeffnen(s,a.stadt);
+      return grund?fehler(grund):ok('FUNDUS-Eröffnung beauftragt: 12 Wochen Vorlauf.');
+    }
     case 'filialProgramm': {
       const p = FILIAL_PROGRAMME[a.programm];
       if (!p) return fehler('Unbekanntes Filialprogramm.');
@@ -221,6 +256,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
       zeitungEinstellen(s, a.an);
       return ok(a.an ? 'Der Handelsbote ist aktiviert.' : 'Der Handelsbote ist deaktiviert.');
     case 'ruhestand':
+      if (istSandkasten(s)) return fehler('Im Sandkasten gibt es keine Wertung und kein Spielende.');
       if (s.woche < 260) return fehler('Der Ruhestand ist erst nach fünf Jahren möglich.');
       if (s.phase !== 'regulaer' || s.insolvenz) return fehler('Ein laufendes Insolvenzverfahren muss zuerst beendet sein.');
       if (s.spielendeDeaktiviert) return fehler('Spielende ist deaktiviert.');
@@ -234,7 +270,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
       return fehlerText ? fehler(fehlerText) : ok('Premium-Investition gestartet (26 Wochen).');
     }
     case 'schliessen': {
-      const h = haus(s, a.haus);
+      const h = haus(s, a.haus ?? '');
       if (!h) return fehler('Haus nicht gefunden.');
       const f = starteSchliessung(s, h);
       return f ? fehler(f) : ok(`Schließung von ${h.name} eingeleitet.`);
@@ -432,7 +468,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
       return ok(a.erlaubt ? 'Ware wird bei Bedarf gegen Vorkasse bezogen.' : 'Keine Vorkasse: Lieferungen über dem Limit entfallen.');
 
     case 'mieteVerhandeln': {
-      const h = haus(s, a.haus);
+      const h = haus(s, a.haus ?? '');
       if (!h || h.status !== 'offen') return fehler('Haus nicht offen.');
       if (h.miete.verhandeltWoche !== undefined && w - h.miete.verhandeltWoche < 26) return fehler('Mit diesem Vermieter wurde vor weniger als 26 Wochen verhandelt.');
       h.miete.verhandeltWoche = w;
@@ -591,6 +627,17 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
         melde(s, 'presse', `Neues Leben für ${h.name}: Die Stadt übernimmt das Haus.`);
         return ok(`Die Stadt übernimmt ${h.name}. Keine Restmiete, Ablöse ${mio(an.einmalzahlung ?? 0)}.`);
       }
+      if (an.typ === 'kettenverkauf') {
+        const preis=eur(an.kaufpreis??0);
+        for(const h of s.haeuser.filter(h=>h.format==='schwester')){
+          h.status='verkauft';h.personal.vollzeit=0;h.personal.teilzeit=0;h.personal.aushilfen=0;
+        }
+        if(s.formate){s.formate.volkskaufBestand=0;s.formate.schwesterZentraleWoche=0;}
+        s.cash+=preis;s.einmalErloeseWoche+=preis;
+        an.status='angenommen';an.erledigtWoche=s.woche;
+        melde(s,'presse','Volkskauf-Kette mit Ware, Personal und Mietverträgen verkauft.');
+        return ok('Kettenverkauf abgeschlossen: '+mio(preis));
+      }
       if (an.typ === 'sportverkauf') {
         const preis = an.kaufpreis ?? 0;
         for (const h of s.haeuser.filter((x) => x.format === 'sport' && x.status !== 'geschlossen')) {
@@ -610,10 +657,11 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
       }
       if (an.typ === 'sonderposten') {
         const wert = an.wert ?? 0;
-        if (s.cash + s.kreditlinie < wert) return fehler('Nicht genug Liquidität für die Vorkasse.');
+        if (!liquiditaetReicht(s, wert)) return fehler('Nicht genug Liquidität für die Vorkasse.');
         s.cash -= wert;
         const g = an.gruppe as GruppeId;
-        s.bestand.push({ gruppe: g, wert: wert * 2, alter: an._passt ? 2 : 20, saisonAnteil: GRUPPEN[g].saisonAnteil, kostenFaktor: 0.5, ladenhueter: !an._passt });
+        if(an.formatZiel==='outlet'&&s.formate) s.formate.pool.push({quelle:'markenposten',wert,preisFaktor:an._passt?1.8:1.32,alter:an._passt?2:20,ladenhueter:!an._passt});
+        else s.bestand.push({ gruppe: g, wert: wert * 2, alter: an._passt ? 2 : 20, saisonAnteil: GRUPPEN[g].saisonAnteil, kostenFaktor: 0.5, ladenhueter: !an._passt });
         an.status = 'angenommen'; an.erledigtWoche = w;
         return ok(`Sonderposten ${GRUPPEN[g].name} für ${mio(wert)} gekauft.`);
       }

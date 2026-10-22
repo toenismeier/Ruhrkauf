@@ -31,12 +31,14 @@ export function szenarienModul(ctx) {
       '<span class="sz-bild">' + szenarioBild(k.id) + '</span>' +
       '<b>' + esc(k.name) + '</b><span class="sz-level">' + esc(k.schwierigkeit) + '</span>' +
       '<small>' + esc(k.beschreibung) + '</small><span class="sz-best">' +
-      (best[k.id] !== undefined ? 'Bestwert: ' + best[k.id] + ' Wochen' : 'Noch kein Bestwert') +
+      (k.id === 'sandkasten' ? 'Cash und Kreditrahmen: unbegrenzt · Keine Wertung' :
+         best[k.id] !== undefined ? 'Bestwert: ' + best[k.id] + ' Wochen' : 'Noch kein Bestwert') +
       '</span></button>').join('');
     document.getElementById('startsetup').hidden = seite !== 'setup';
     document.getElementById('startauswahl').hidden = seite !== 'karten';
     const auswahl = ctx.E.SZENARIEN.find((k) => k.id === id) ?? ctx.E.SZENARIEN[0];
-    document.getElementById('szenario-gewaehlt').textContent = auswahl.name + ' · ' + auswahl.ziel + (id === 'sandkasten' ? ' · ohne Schwierigkeitsstufen' : '');
+    document.getElementById('szenario-gewaehlt').textContent = auswahl.name + ' · ' +
+      (auswahl.id === 'sandkasten' ? 'Cash und Kreditrahmen: unbegrenzt · ohne Schwierigkeitsstufen' : auswahl.ziel);
     ctx.stufenAktualisieren?.();
   }
   document.getElementById('startszenarien').addEventListener('click', (event) => {

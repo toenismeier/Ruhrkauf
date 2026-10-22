@@ -85,10 +85,11 @@ function infoVon(d, platz) {
   if (!d) return null;
   const s = d.spiel;
   const n = String(d.name ?? (platz === 'autosave' ? 'Automatisch' : 'Spielstand')).trim().slice(0, 60);
+  const unbegrenzt = s.szenario?.id === 'sandkasten' || s.szenario?.regeln?.sandkasten === true;
   return {
     platz, name: n || 'Spielstand', datum: d.datum, woche: s.woche,
-    szenario: String(s.szenario?.name ?? s.szenario?.id ?? s.szenario ?? s.schwierigkeit ?? 'Standard').slice(0, 80),
-    cash: s.cash, bild: bildPruefen(d.bild), stadt: d.stadt
+    szenario: unbegrenzt ? 'Sandkasten' : String(s.szenario?.name ?? s.szenario?.id ?? s.szenario ?? s.schwierigkeit ?? 'Standard').slice(0, 80),
+    unbegrenzt, cash: s.cash, bild: bildPruefen(d.bild), stadt: d.stadt
   };
 }
 
@@ -203,4 +204,23 @@ export async function importieren(datei, platz = 'platz-1') {
     await speichern(d.spiel, d.stadt, d.ui ?? {}, platz, d.name ?? 'Importiert', d.bild, d.datum);
     return infoVon(d, platz);
   } catch (e) { throw fehlerText(e); }
+}
+
+ 
+// Wiederverwendbare, benannte Filter gehören zum Gerät, nicht zum Engine-Spielstand.
+const AUSWAHL_KEY = 'portfolio-filter';
+export async function auswahlFilterLaden() {
+  const daten = await aktion('readonly', (store) => store.get(AUSWAHL_KEY));
+  return Array.isArray(daten) ? daten : [];
+}
+export async function auswahlFilterSpeichern(name, filter) {
+  const titel = String(name ?? '').trim().slice(0, 60);
+  if (!titel) throw new Error('Bitte einen Namen für die Auswahl eingeben.');
+  await queue;
+  const alt = await auswahlFilterLaden();
+  const neu = [...alt.filter((eintrag) => eintrag.name !== titel), { name: titel, filter: structuredClone(filter) }].slice(-25);
+  const naechste = aktion('readwrite', (store) => store.put(neu, AUSWAHL_KEY));
+  queue = naechste.catch(() => {});
+  await naechste;
+  return neu;
 }
