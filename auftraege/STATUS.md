@@ -33,7 +33,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q15 Zentrale Abteilungsseiten | `feat/q15-zentrale-abteilungen` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q16 Marketing-Kanäle und Marktanteil | `feat/q16-marketing-kanaele` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q17 Eigenmarken-Produktkarten (nach Q11) | `feat/q17-eigenmarken-karten` | **startet 21.10.** | `auftraege/wurf2/` |
-| Q18 Handelsbote Gestaltung | `feat/q18-handelsbote` | **startet 21.10.** | `auftraege/wurf2/` |
+| Q18 Handelsbote Gestaltung | `feat/q18-handelsbote` | **gemergt 22.10. (#60)**: Serifenkopf, sechs Rubriken, 53 isometrische Motive je Artikelart; Claude: Schildtexte gestaucht, alle Reiter auf 375 px sichtbar; Fingerabdruck unverändert | `auftraege/wurf2/` |
 | Q19 IT-Produkte als Karten | `feat/q19-it-produkte` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q20 Schwierigkeit je Szenario | `feat/q20-szenario-schwierigkeit` | **startet 21.10.** | `auftraege/wurf2/` |
 | Q21 Warenhaus-Vielfalt je Stadt | `feat/q21-warenhaus-vielfalt` | **startet 21.10.** | `auftraege/wurf2/` |
