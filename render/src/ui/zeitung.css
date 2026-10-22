@@ -1,37 +1,121 @@
-/* Der Handelsbote, bewusst unabhängig von der übrigen Spieloberfläche. */
-.zb-root { background: #f6f0e3; color: #262521; padding: 14px 12px 20px; border-radius: 8px; margin: -2px; font-family: Georgia, "Times New Roman", "DejaVu Serif", serif; }
-.zb-root * { box-sizing: border-box; }
-.zb-einstellung { display: flex; align-items: center; gap: 8px; padding: 10px 6px; font: 12px/1.4 -apple-system, Arial, sans-serif; color: #4e4b43; }
-.zb-einstellung input { width: 17px; height: 17px; flex-shrink: 0; accent-color: #8e2d2a; }
-.zb-navigation { display: flex; gap: 6px; align-items: center; justify-content: space-between; margin: 6px 0; font-family: -apple-system, Arial, sans-serif; }
-.zb-navigation button { border: 1px solid #c5bbab; background: #fffbf2; color: #473b33; border-radius: 5px; padding: 9px 8px; font-size: calc(12px * var(--schrift)); flex: 1; }
-.zb-navigation button[disabled] { opacity: 0.36; }
-.zb-zahl, .zb-wischhinweis, .zb-hinweis { text-align: center; font: 11px/1.6 -apple-system, Arial, sans-serif; color: #625c53; margin: 7px 0 13px; }
-.zb-kopf { border-top: 5px double #22201b; border-bottom: 3px double #22201b; padding: 6px 0 8px; text-align: center; }
-.zb-ausgabenzeile, .zb-datum { display: flex; justify-content: space-between; gap: 8px; text-align: left; font: 9px/1.5 Georgia, serif; letter-spacing: .08em; }
-.zb-kopf h2 { font: bold clamp(30px, 9vw, 49px)/1.1 Georgia, "Times New Roman", "DejaVu Serif", serif; letter-spacing: -.055em; margin: 3px 0 5px; color: #231e1a; }
-.zb-datum { border-top: 1px solid #3c352e; padding-top: 4px; }
-.zb-tabs { display: flex; overflow-x: auto; gap: 1px; border-bottom: 2px solid #3b352d; margin: 12px 0 15px; font-family: -apple-system, Arial, sans-serif; }
-.zb-tabs button { flex: 1 0 auto; font-size: calc(11px * var(--schrift)); text-align: center; padding: 9px 6px; background: none; border: none; color: #625a50; border-bottom: 3px solid transparent; }
-.zb-tabs button.aktiv { border-color: #9b3934; color: #712622; font-weight: 800; }
-.zb-spalten { columns: 2 135px; column-gap: 18px; column-rule: 1px solid #c7bdae; }
-.zb-artikel { break-inside: avoid; margin-bottom: 18px; border-top: 1px solid #bcb3a5; padding-top: 8px; }
-.zb-aufmacher { column-span: all; margin-bottom: 12px; border-top: 0; padding-top: 0; }
-.zb-rubrik { font: 700 9px/1.5 -apple-system, Arial, sans-serif; text-transform: uppercase; letter-spacing: .13em; color: #8d332b; }
-.zb-artikel h3 { font: bold 18px/1.13 Georgia, "Times New Roman", "DejaVu Serif", serif; margin: 4px 0 7px; letter-spacing: -.03em; overflow-wrap: anywhere; }
-.zb-aufmacher h3 { font-size: calc(29px * var(--schrift)); line-height: 1.07; }
-.zb-unter { font: italic 13px/1.34 Georgia, serif; margin: 0 0 8px; color: #585046; }
-.zb-text { font: 12px/1.55 Georgia, "DejaVu Serif", serif; margin: 7px 0 0; text-align: justify; hyphens: auto; overflow-wrap: break-word; }
-.zb-text::first-letter { font-weight: bold; }
-.zb-bild { margin: 10px 0 11px; padding: 0; }
-.zb-bild .zb-isobild { display: block; width: 100%; max-height: 210px; background: #e1e5df; border: 1px solid #aca698; }
-.zb-bild figcaption { font: 9px/1.4 Georgia, serif; color: #666158; margin-top: 3px; }
-.zb-archivtitel { font: bold 22px Georgia, serif; text-align: center; margin: 20px 0 5px; }
+/* Q18 · Der Handelsbote: redaktioneller Papiersatz nach dem Q14-Gestaltungssystem.
+   Ausnahme bewusst: Serifenschrift für Zeitungskopf/Artikel, klare Flächen ohne Schatten.
+   Die äußere Spieloberfläche nutzt die zentralen Q14-Tokens. */
+.zb-root {
+  --zb-papier: #f7f4ec;
+  --zb-schwarz: #272622;
+  --zb-linie: #c7c1b5;
+  --zb-rot: var(--ui-brand, #b32632);
+  --zb-still: var(--ui-muted, #62666a);
+  box-sizing: border-box;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 12px 24px;
+  border: 1px solid var(--ui-border, #e2e1dd);
+  background: var(--zb-papier);
+  color: var(--zb-schwarz);
+  font-family: Georgia, "Times New Roman", "DejaVu Serif", serif;
+}
+.zb-root * { box-sizing: border-box; min-width: 0; }
+.zb-einstellung {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: 6px;
+  font: 13px/1.4 -apple-system, "DejaVu Sans", Arial, sans-serif;
+  color: var(--zb-still);
+}
+.zb-einstellung input { flex: none; width: 20px; height: 20px; accent-color: var(--zb-rot); }
+.zb-navigation { display: grid; grid-template-columns: 1fr 1.18fr 1fr; gap: 5px; margin: 6px 0; }
+.zb-navigation button {
+  min-height: 44px; padding: 9px 5px;
+  border: 1px solid var(--zb-linie); border-radius: 5px;
+  background: #fffdf8; color: #3e3934;
+  font: 600 12px/18px -apple-system, "DejaVu Sans", Arial, sans-serif;
+  cursor: pointer;
+}
+.zb-navigation button:disabled { opacity: .42; cursor: default; }
+.zb-navigation button:focus-visible, .zb-tabs button:focus-visible, .zb-archivliste button:focus-visible {
+  outline: 2px solid var(--zb-rot); outline-offset: 2px;
+}
+.zb-zahl, .zb-wischhinweis, .zb-hinweis {
+  text-align: center; font: 12px/18px -apple-system, "DejaVu Sans", Arial, sans-serif;
+  color: var(--zb-still); margin: 7px 0 12px;
+}
+.zb-kopf {
+  padding: 8px 0 12px; border-top: 4px double var(--zb-schwarz);
+  border-bottom: 4px double var(--zb-schwarz); text-align: center;
+}
+.zb-ausgabenzeile, .zb-datum {
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 3px 8px;
+  text-align: left; font: 10px/16px Georgia, "DejaVu Serif", serif;
+  letter-spacing: .02em;
+}
+.zb-ausgabenzeile span:last-child, .zb-datum span:last-child { white-space: nowrap; }
+.zb-kopf h2 {
+  margin: 7px 0 9px; color: #221f1b;
+  font: 700 clamp(25px, 8.2vw, 49px)/1.08 Georgia, "DejaVu Serif", serif;
+  letter-spacing: -.055em;
+  white-space: normal; overflow-wrap: normal;
+}
+.zb-datum { padding-top: 5px; border-top: 1px solid #625b52; }
+.zb-tabs {
+  display: flex; overflow-x: auto; overflow-y: hidden; gap: 1px; max-width: 100%;
+  margin: 12px 0 14px; padding: 0 0 2px;
+  border-bottom: 1px solid #79736a;
+  scrollbar-width: thin; overscroll-behavior-x: contain;
+}
+.zb-tabs button {
+  flex: 1 1 auto; min-height: 44px; padding: 9px 4px;
+  border: none; border-bottom: 3px solid transparent;
+  background: none; color: #59544d; cursor: pointer;
+  font: 600 12.5px/20px -apple-system, "DejaVu Sans", Arial, sans-serif;
+  white-space: nowrap; /* alle sechs Reiter passen ab 375 px nebeneinander */
+}
+.zb-tabs button.aktiv { border-bottom-color: var(--zb-rot); color: #732630; font-weight: 700; }
+.zb-spalten { columns: 2 135px; column-gap: 16px; column-rule: 1px solid var(--zb-linie); }
+.zb-artikel { break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid;
+  padding-top: 9px; margin-bottom: 18px; border-top: 1px solid var(--zb-linie); }
+.zb-aufmacher { column-span: all; border-top: none; padding-top: 0; margin-bottom: 17px; }
+.zb-rubrik {
+  margin-bottom: 5px; font: 700 10px/16px -apple-system, "DejaVu Sans", Arial, sans-serif;
+  letter-spacing: .08em; text-transform: uppercase; color: #8b3030;
+}
+.zb-artikel h3 {
+  margin: 0 0 6px; overflow-wrap: break-word;
+  font: 700 18px/1.18 Georgia, "DejaVu Serif", serif; letter-spacing: -.018em;
+}
+.zb-aufmacher h3 { font-size: clamp(23px, 6.7vw, 32px); line-height: 1.1; }
+.zb-unter { margin: 0 0 8px; font: italic 13px/1.4 Georgia, "DejaVu Serif", serif; color: #514c46; }
+.zb-text {
+  margin: 8px 0 0; font: 13px/1.57 Georgia, "DejaVu Serif", serif;
+  text-align: left; overflow-wrap: break-word; hyphens: auto;
+}
+.zb-bild { margin: 8px 0 10px; width: 100%; }
+.zb-bildrahmen { position: relative; width: 100%; aspect-ratio: 420 / 260; background: #e2e6e2;
+  border: 1px solid #aaa9a2; overflow: hidden; }
+.zb-bildlade {
+  position: absolute; inset: 0; z-index: 0; display: flex; align-items: center;
+  justify-content: center; padding: 8px; text-align: center;
+  background: #dce2df;
+  font: 11px/1.4 -apple-system, "DejaVu Sans", Arial, sans-serif; color: #55656a;
+}
+.zb-isobild { display: block; width: 100%; height: 100%; position: relative; z-index: 1; }
+.zb-bild figcaption { margin-top: 4px; color: #5f5b55; font: 10px/15px Georgia, "DejaVu Serif", serif; }
+.zb-archivtitel { margin: 20px 0 6px; text-align: center; font: bold 23px Georgia, serif; }
 .zb-archivliste { display: flex; flex-direction: column; gap: 7px; }
-.zb-archivliste button { background: #fffaf0; color: #342e27; text-align: left; display: grid; gap: 5px; border: 1px solid #cbc0ac; border-radius: 4px; padding: 11px; }
-.zb-archivliste small, .zb-archivliste span { font: 10px -apple-system, Arial, sans-serif; color: #776e62; }
-.zb-archivliste strong { font: bold 17px Georgia, serif; }
-.zb-leer, .zb-keine { padding: 22px 10px; text-align: center; color: #685e50; }
+.zb-archivliste button {
+  display: grid; gap: 4px; width: 100%; min-height: 72px; padding: 12px;
+  border: 1px solid var(--zb-linie); border-radius: 5px;
+  background: #fffaf1; color: var(--zb-schwarz); text-align: left; cursor: pointer;
+}
+.zb-archivliste small, .zb-archivliste span {
+  font: 12px/18px -apple-system, "DejaVu Sans", Arial, sans-serif; color: var(--zb-still);
+}
+.zb-archivliste strong { font: 700 16px/22px Georgia, serif; overflow-wrap: break-word; }
+.zb-leer, .zb-keine { padding: 25px 10px; text-align: center; color: #5d5850; font: 13px/20px Georgia, serif; }
 .zb-leer h3 { font: bold 18px Georgia, serif; }
-@media (min-width: 650px) { .zb-root { max-width: 620px; margin: 0 auto; padding: 20px 24px; } .zb-aufmacher h3 { font-size: calc(34px * var(--schrift)); } }
+@media (max-width: 340px) { .zb-root { padding: 10px 8px 18px; } .zb-spalten { columns: 1; column-rule: none; } }
+@media (min-width: 650px) { .zb-root { max-width: 620px; margin: 0 auto; padding: 20px 24px; } }
 @media (prefers-reduced-motion: reduce) { .zb-root * { scroll-behavior: auto !important; transition: none !important; } }

@@ -30,7 +30,7 @@ export function appModul({ panel, meldung, aktuell, ladenInSpiel, vorNeuladen })
           '<div class="app-platzkopf"><b>' + bezeichnung(platz) + '</b><span>' + (info ? datumFormatieren(info.datum) : 'Leer') + '</span></div>' +
           '<div class="app-platzinhalt">' + vorschau + '<div class="app-daten">' +
           (info ? '<strong>' + esc(info.name) + '</strong><small>' + esc(info.stadt) + ' · Woche ' + (info.woche + 1) + '</small>' +
-            '<small>' + esc(info.szenario) + ' · Cash ' + geld(info.cash) + '</small>' : '<small>Hier ist noch kein Spielstand gespeichert.</small>') +
+            '<small>' + (info.unbegrenzt || info.szenario === 'sandkasten' ? 'Sandkasten · unbegrenzt' : esc(info.szenario) + ' · Cash ' + geld(info.cash)) + '</small>' : '<small>Hier ist noch kein Spielstand gespeichert.</small>') +
           '</div></div>' +
           (start || platz === 'autosave' ? '' : '<label class="app-namenswahl">Name <input data-name maxlength="60" aria-label="Name für ' + bezeichnung(platz) + '" value="' + esc(name) + '" placeholder="Spielstand benennen"></label>') +
           '<div class="app-aktionen">' +

@@ -1,12 +1,13 @@
 // N02: Spielende und Endwertung. Keine Zufallszüge und keine Wirkung auf die laufende Simulation.
 import { KONZERN_KAEUFER, PREMIUM_HAEUSER } from './daten';
 import { premiumMarktwert } from './premium';
+import { istSandkasten } from './sandkasten';
 import type { Angebot, EndArt, Endwertung, GameState, SpielendeKennzahlen } from './types';
 import { eur, melde, mio } from './util';
 
 const faktor: Record<'leicht' | 'mittel' | 'schwer', number> = { leicht: 0.8, mittel: 1, schwer: 1.3 };
 export const SPIELENDE_AKTIV = true;
-const aktiv = (s: GameState) => SPIELENDE_AKTIV && !s.spielendeDeaktiviert;
+const aktiv = (s: GameState) => SPIELENDE_AKTIV && !s.spielendeDeaktiviert && !istSandkasten(s);
 
 export function ebitdaJahr(s: GameState): number {
   return eur(s.historie.slice(-52).reduce((sum, k) => sum + k.ebitda, 0));

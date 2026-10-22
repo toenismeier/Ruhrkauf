@@ -93,12 +93,12 @@ const server = http.createServer((req, res) => {
     if (nachher) {
       const inhalt = await seite.locator('#pinhalt').innerText();
       assert.match(inhalt, /Premium & Flagships/);
-      for (const premium of ['Palais Hartwig','Hartwig am Hofgarten','Alsterhaus Hartwig','Hartwig Königsallee']) {
+      for (const premium of ['Palais Hartwig','Hartwig am Hofgarten','Hartwig am Jungfernstieg','Hartwig am Heine-Platz','Hartwig Leipziger Platz']) {
         assert.ok(inhalt.includes(premium), 'Premiumhaus fehlt: ' + premium);
       }
       assert.match(inhalt, /Umsatz\/Woche noch offen/);
       const feste = await seite.locator('#pinhalt .zeile button:disabled').count();
-      assert.equal(feste, 4, 'Vier feste Premiumhäuser');
+      assert.equal(feste, 5, 'Fünf feste Premiumhäuser');
     }
 
     await seite.evaluate(() => { window.spiel.schliessePanel(); window.spiel.reise.oeffne(); });
