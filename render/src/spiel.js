@@ -13,7 +13,7 @@ import { etage } from './kit/grundriss.js';
 import { RASTER } from './kit/innen.js';
 import { hqEtage, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './kit/hq.js';
 import { warenhaus } from './kit/warenhaus.js';
-import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer } from './kit/stadt.js';
+import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer, dachFlaechenBeimBau } from './kit/stadt.js';
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import { lebenModul } from './kit/leben.js';
@@ -124,6 +124,8 @@ ren.shadowMap.type = THREE.PCFShadowMap;
 
 const K = { x: 0, z: 0, halb: 70, min: 22, max: 240, G: null };
 let scene = null, cam = null, wurzel = null, plan = null, sb = null, s = null, stadtName = null;
+// Q10: Nur eine bewusste Hausauswahl setzt dieses Kameraziel. Gesten lösen es wieder.
+let kameraZiel = null;
 let jahreszeiten = null;
 let offenesHaus = null, offenesHq = null, offenerWettbewerber = null;
 let angebotPins = [], wettbewerbPins = [], wettbewerbPinTimer = null;
@@ -137,13 +139,60 @@ const WB_STATUS = { offen: 'Geöffnet', eroeffnung: 'Neueröffnung', raeumung: '
 
 
 function groesse() { return [canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight]; }
+/** Geometrischer Bezug des gewählten Hauses, unabhängig vom Kachelnachladen. */
+function hausKameraPunkt(id) {
+  const haus = sb?.haeuser.get(id), gruppe = haus?.gruppe;
+  if (gruppe) {
+    gruppe.updateWorldMatrix(true, true);
+    const box = new THREE.Box3().setFromObject(gruppe);
+    if (!box.isEmpty()) {
+      // setzeMarker/kartenMarker: Parzellenmitte, Bauhöhe + 4 m (Mitte des Hauspins).
+      const p = haus.p;
+      if (p) return new THREE.Vector3(p.x + p.w / 2, (haus.e?.hoehe ?? box.max.y) + 4, p.z + p.d / 2);
+      return box.getCenter(new THREE.Vector3());
+    }
+  }
+  const box = sb?.statischeHaeuser.get(id)?.bounds;
+  return box && !box.isEmpty() ? box.getCenter(new THREE.Vector3()) : null;
+}
+/** Mitte der sichtbaren Kartenfläche oberhalb des Hausdetails, nicht des vom Sheet verdeckten Canvas. */
+function hausFokusPixel(w, h) {
+  const frei = Math.max(140, h - Math.min($('panel').offsetHeight || h * 0.62, h * 0.62));
+  const oben = Math.min(70, frei * 0.35);
+  return { x: w / 2, y: (oben + frei - 12) / 2 };
+}
+function hausKameraMessung() {
+  if (!kameraZiel || !cam || kameraZiel.stadt !== stadtName) return null;
+  const punkt = hausKameraPunkt(kameraZiel.id) ?? kameraZiel.punkt;
+  const [w, h] = groesse(), ziel = hausFokusPixel(w, h), v = punkt.clone().project(cam);
+  const pin = { x: (v.x + 1) * w / 2, y: (1 - v.y) * h / 2 };
+  return { id: kameraZiel.id, stadt: stadtName, ziel, pin,
+    abweichungPx: Math.hypot(pin.x - ziel.x, pin.y - ziel.y),
+    mitte: { x: K.x, z: K.z }, halb: K.halb };
+}
 function kameraSetzen() {
   if (!scene) return;
-  const [w, h] = groesse();
-  klemmen(K, w / h);
+  const [w, h] = groesse(), aspekt = w / h;
+  klemmen(K, aspekt);
   ren.setSize(w, h, false);
   cam = isoKamera(w, h, K.halb, new THREE.Vector3(K.x, 0, K.z));
   cam.updateMatrixWorld();
+  // Nicht beim Kachelbau oder beim Wochenabschluss auf die Stadtmitte zurückspringen.
+  // Nach Resize oder Neuaufbau denselben Hauspunkt in die freie Kartenfläche projizieren.
+  if (kameraZiel && kameraZiel.stadt === stadtName && kameraZiel.id === offenesHaus) {
+    const punkt = hausKameraPunkt(kameraZiel.id) ?? kameraZiel.punkt;
+    kameraZiel.punkt = punkt.clone();
+    const v = punkt.clone().project(cam), ziel = hausFokusPixel(w, h), r = canvas.getBoundingClientRect();
+    const ist = aufBoden(r.left + (v.x + 1) * w / 2, r.top + (1 - v.y) * h / 2);
+    const soll = aufBoden(r.left + ziel.x, r.top + ziel.y);
+    if (ist && soll) {
+      K.x += ist.x - soll.x;
+      K.z += ist.z - soll.z;
+      klemmen(K, aspekt);
+      cam = isoKamera(w, h, K.halb, new THREE.Vector3(K.x, 0, K.z));
+      cam.updateMatrixWorld();
+    }
+  }
   const sonne = scene.userData.sonne, r = K.halb * 2.4;
   sonne.position.set(K.x - 40, 120, K.z + 90);
   sonne.target.position.set(K.x, 0, K.z);
@@ -217,6 +266,7 @@ function hausUnter(px, py) {
 
 /** Kamera so setzen, dass alle Hartwig-Häuser der Stadt im freien Kartenbereich (zwischen Cockpit und unterer Leiste) liegen. */
 function fokusHaeuser() {
+  kameraZiel = null; // bewusstes Fokussieren des gesamten Portfolios
   const b = new THREE.Box3();
   for (const x of sb.haeuser.values()) if (x.gruppe) b.union(new THREE.Box3().setFromObject(x.gruppe));
   if (b.isEmpty()) return;
@@ -254,7 +304,9 @@ function tippPunkt(id) {
 }
 
 // Verschieben, Wischen mit Trägheit, Pinch-Zoom, Mausrad, Antippen (ui/karte.js)
-const steuerung = karteSteuerung({ canvas, K, setzen: () => kameraSetzen(), aufBoden, tippen: (e) => { const id = hausUnter(e.clientX, e.clientY); if (id === 'bahn:hauptbahnhof') reise?.oeffne(); else if (id?.startsWith('angebot:')) oeffneModul(po, 'handeln', id.slice(8)); else if (id?.startsWith('hq:')) oeffneHq(id.slice(3)); else if (id?.startsWith('wb:')) oeffneWettbewerber(id.slice(3)); else if (id) oeffneHaus(id); } });
+const steuerung = karteSteuerung({ canvas, K, setzen: () => kameraSetzen(), aufBoden,
+  interaktion: () => { kameraZiel = null; },
+  tippen: (e) => { const id = hausUnter(e.clientX, e.clientY); if (id === 'bahn:hauptbahnhof') reise?.oeffne(); else if (id?.startsWith('angebot:')) oeffneModul(po, 'handeln', id.slice(8)); else if (id?.startsWith('hq:')) oeffneHq(id.slice(3)); else if (id?.startsWith('wb:')) oeffneWettbewerber(id.slice(3)); else if (id) oeffneHaus(id); } });
 window.addEventListener('resize', kameraSetzen);
 
 // ─────────────────────────────────────────── Stadt bauen
@@ -379,6 +431,7 @@ function bahnhofBildpunkt() {
 }
 function bahnhofFokussieren() {
   if (!bahnhofOrt) return;
+  kameraZiel = null; // bewusste Reiseaktion
   K.x = bahnhofOrt.x; K.z = bahnhofOrt.z; K.halb = 63; kameraSetzen();
 }
 
@@ -389,8 +442,19 @@ function stadtchipSetzen(name) {
   const region = E.stadtRegion(name) ?? s.haeuser.find((h) => h.stadt === name)?.region;
   $('stadtcluster').textContent = region ? 'Region ' + region : '';
 }
+/** Die separat gerenderten Häuser liegen nicht im Stadt-Sammler. */
+function getrennteSchneedachFlaechen() {
+  return [
+    ...[...sb.haeuser.entries()].map(([id, x]) => ['haus:' + id, x.dachFlaechen]),
+    ...[...sb.hqs.entries()].map(([id, x]) => ['hq:' + id, x.dachFlaechen]),
+    ...[...sb.wbSlots.values()].map((x) => ['wb:' + (x.p.standort?.id ?? x.p.id), x.dachFlaechen]),
+  ];
+}
 function baueStadtAusSpiel(name) {
   const t0 = performance.now();
+  // Ein Neuaufbau derselben Stadt (z. B. neue HQ-Fläche) ist kein Stadtwechsel.
+  const kameraVorher = scene && stadtName === name ? { x: K.x, z: K.z, halb: K.halb } : null;
+  if (stadtName !== name) kameraZiel = null;
   raeumeSzene();
   stadtName = name;
   const hqJson = hqGrafik();
@@ -401,7 +465,8 @@ function baueStadtAusSpiel(name) {
   scene = neueSzene('#4fb6c2');
   scene.userData.sonne.shadow.mapSize.set(2048, 2048);
   wurzel = new THREE.Group();
-  sb = spielBauer(s, { getrennt: true, wurzel, stadt: name, merk: merk(), hausLod: 'nah', hq: hqGrafik });
+  sb = spielBauer(s, { getrennt: true, wurzel, stadt: name, merk: merk(), hausLod: 'nah', hq: hqGrafik,
+    dachFlaechenAktualisieren: (id, dach) => jahreszeiten?.registriereDachflaechen(id, dach) });
   // Grundgerüst: Straßen, Blöcke, Wasser, Stadtrandgürtel, Sonderbauten und Hartwig; normale Stadthäuser kommen als Kacheln
   const T = new KompaktSammler();
   const offen = [];
@@ -417,7 +482,8 @@ function baueStadtAusSpiel(name) {
   setzeLod('fern');
   let e;
   try { e = baueStadt(T, scene, plan, grund, { keineStandAutos: leben.modus !== 'aus' }); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
-  jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s);
+  jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
+  jahreszeiten.registriereDachflaechenMehrfach(getrennteSchneedachFlaechen());
   scene.add(wurzel);
   KA.teileGrund = T.anzahl;
   kachelnAnlegen(offen);
@@ -431,7 +497,8 @@ function baueStadtAusSpiel(name) {
   bahnhofPinErstellen();
   K.G = plan.kameraGrenze ?? { x0: 0, z0: 0, x1: plan.breite, z1: plan.tiefe };
   const nm = nahMitte(plan, 'einkauf', 62);
-  K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : 60;
+  if (kameraVorher) Object.assign(K, kameraVorher);
+  else { K.x = nm.x; K.z = nm.z; K.halb = param.has('zoom') ? Number(param.get('zoom')) : 60; }
   K._G = null;
   kameraSetzen();
   leben.stadt(plan);
@@ -444,6 +511,7 @@ function baueStadtAusSpiel(name) {
 // Für Bahnreisen wird derselbe Szenenaufbau in Animationsbilder aufgeteilt; Detailkacheln folgen bei Ankunft.
 async function baueStadtAusSpielReise(name) {
   const t0 = performance.now();
+  kameraZiel = null; // Ankunft in einer anderen Stadt
   KA.pause = true;
   raeumeSzene();
   stadtName = name;
@@ -456,7 +524,8 @@ async function baueStadtAusSpielReise(name) {
   scene = neueSzene('#4fb6c2');
   scene.userData.sonne.shadow.mapSize.set(2048, 2048);
   wurzel = new THREE.Group();
-  sb = spielBauer(s, { getrennt: true, wurzel, stadt: name, merk: merk(), hausLod: 'nah', hq: hqGrafik });
+  sb = spielBauer(s, { getrennt: true, wurzel, stadt: name, merk: merk(), hausLod: 'nah', hq: hqGrafik,
+    dachFlaechenAktualisieren: (id, dach) => jahreszeiten?.registriereDachflaechen(id, dach) });
   // Grundgerüst: Straßen, Blöcke, Wasser, Stadtrandgürtel, Sonderbauten und Hartwig; normale Stadthäuser kommen als Kacheln
   const T = new KompaktSammler();
   const offen = [];
@@ -476,6 +545,8 @@ async function baueStadtAusSpielReise(name) {
   KA.teileGrund = T.anzahl;
   kachelnAnlegen(offen, true);
   await kachelnKloetzeBauen();
+  jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
+  jahreszeiten.registriereDachflaechenMehrfach([...getrennteSchneedachFlaechen(), ...KA.liste.map((k) => [k.key, k.dachFlaechen])]);
   // HQ behält seinen bisherigen Marker. Alle Hausformate erhalten dachgenaue Q22-Pins.
   setzeMarker(scene, plan, e, plan.standorte.filter((q) => !q.angebot && q.rolle === 'hq')
     .map((q) => ({ parzelle: q.parzelle, art: 'hartwig', groesse: 10 })));
@@ -523,7 +594,10 @@ function kachelnAnlegen(parzellen, gestuft = false) {
     k.box.expandByPoint(new THREE.Vector3(p.x, 0, p.z)).expandByPoint(new THREE.Vector3(p.x + p.w, klotzHoehe(p) + 4, p.z + p.d));
   }
   KA.liste = [...m.values()];
-  if (!gestuft) for (const k of KA.liste) klotzBauen(k);
+  if (!gestuft) {
+    for (const k of KA.liste) klotzBauen(k, true);
+    jahreszeiten?.registriereDachflaechenMehrfach(KA.liste.map((k) => [k.key, k.dachFlaechen]));
+  }
 }
 async function kachelnKloetzeBauen() {
   let t = performance.now();
@@ -536,10 +610,11 @@ async function kachelnKloetzeBauen() {
   }
 }
 function entsorge(k) { if (!k.gruppe) return; k.gruppe.parent?.remove(k.gruppe); k.gruppe.traverse((o) => o.geometry?.dispose()); k.gruppe = null; }
-function klotzBauen(k) {
+function klotzBauen(k, gesammelt = false) {
   entsorge(k);
-  const S = new KompaktSammler(), g = new THREE.Group();
+  const S = new KompaktSammler(), g = new THREE.Group(), dachFlaechen = [];
   for (const p of k.parz) {
+    const { dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => {
     const r = rng(((p.seed ?? 1) * 13 + 7) >>> 0), H = klotzHoehe(p);
     const f = waehle(r, [...FARBEN.fassadeHell, ...FARBEN.fassadeHell, ...FARBEN.fassadeWarm, ...FARBEN.fassadeKuehl, ...FARBEN.backstein.slice(0, 2), ...FARBEN.putzBunt]);
     S.quader(p.x, 0, p.z, p.x + p.w, H, p.z + p.d, f);
@@ -551,19 +626,30 @@ function klotzBauen(k) {
       dg.translate(p.x + p.w / 2, H, p.z + p.d / 2);
       S.add(dg, waehle(r, [...FARBEN.dach, ...FARBEN.ziegel]));
     } else S.quader(p.x + 0.3, H, p.z + 0.3, p.x + p.w - 0.3, H + 0.4, p.z + p.d - 0.3, waehle(r, FARBEN.dach));
+    return { hoehe: H + 5 };
+    });
+    dachFlaechen.push(...dach);
   }
   S.bauen(g);
   scene.add(g);
-  Object.assign(k, { gruppe: g, stufe: 'klotz', teile: S.anzahl });
+  Object.assign(k, { gruppe: g, stufe: 'klotz', teile: S.anzahl, dachFlaechen });
+  if (!gesammelt) jahreszeiten?.registriereDachflaechen(k.key, dachFlaechen);
 }
 function vollBauen(k) {
   const t0 = performance.now();
-  const S = new KompaktSammler(), g = new THREE.Group(), b = echterBauer();
+  const S = new KompaktSammler(), g = new THREE.Group(), b = echterBauer(), dachFlaechen = [];
   setzeLod('fern');
-  try { for (const p of k.parz) bauerFuer(b, p.typ)(S, g, p); S.bauen(g); entferneKleineSchilder(g); } finally { setzeLod('nah'); }
+  try {
+    for (const p of k.parz) {
+      const { dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => bauerFuer(b, p.typ)(S, g, p));
+      dachFlaechen.push(...dach);
+    }
+    S.bauen(g); entferneKleineSchilder(g);
+  } finally { setzeLod('nah'); }
   entsorge(k);
   scene.add(g);
-  Object.assign(k, { gruppe: g, stufe: 'voll', teile: S.anzahl });
+  Object.assign(k, { gruppe: g, stufe: 'voll', teile: S.anzahl, dachFlaechen });
+  jahreszeiten?.registriereDachflaechen(k.key, dachFlaechen);
   return performance.now() - t0;
 }
 function sichtbar(k, rand = 1.15) {
@@ -630,9 +716,7 @@ let hqIdsStadt = '';
 /** Nach Woche oder Aktion: geänderte Häuser einzeln neu bauen; kommt ein Bürogebäude dazu oder fällt weg, die Stadt neu bauen. */
 function grafikNachziehen() {
   if (hqIdsIn(hqGrafik(), stadtName) !== hqIdsStadt) {
-    const k = { x: K.x, z: K.z, halb: K.halb };
-    baueStadtAusSpiel(stadtName);
-    Object.assign(K, k); kameraSetzen();
+    baueStadtAusSpiel(stadtName); // bewahrt Kamera und Hausziel selbst
     return ['stadt'];
   }
   const geaendert = sb.aktualisiere();
@@ -644,6 +728,7 @@ function grafikNachziehen() {
   if (geaendert.length) zeichnen();
   return geaendert;
 }
+let cockpitFormat = 'alle';
 const MERK = new Map();
 function merk() { return MERK; }
 
@@ -651,14 +736,23 @@ function merk() { return MERK; }
 function cockpitZeigen() {
   const c = E.cockpit(s);
   const kachel = (titel, wert, ton = '') => `<div class="kz ${ton}"><span>${titel}</span><b>${wert}</b></div>`;
+  // Formatfilter ohne zusätzliche Zeilen: das Cockpit darf auf dem iPhone nicht wachsen
+  // (es überdeckt sonst die Karte). Auswahl im Titel der Umsatz-Kachel.
+  const FORMATNAME = { alle: 'Alle', warenhaus: 'Hartwig', sport: 'Sport', schwester: 'Volkskauf', outlet: 'FUNDUS' };
+  const fx = cockpitFormat === 'alle' ? null : c.formate.find((x) => x.format === cockpitFormat);
+  const auswahl = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME)
+    .filter(([id]) => id === 'alle' || c.formate.some((x) => x.format === id && x.haeuser))
+    .map(([id, name]) => '<option value="' + id + '"' + (id === cockpitFormat ? ' selected' : '') + '>' + name + '</option>').join('') + '</select>';
   $('cockpit').innerHTML = [
     kachel('Cash', geld(c.cash), c.cash < 0 ? 'rot' : ''),
     kachel('Kreditrahmen frei', geld(c.kreditFrei), c.kreditFrei < 2e7 ? 'rot' : ''),
-    kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
-    kachel('Umsatz Woche', s.historie.length ? geld(c.umsatzWoche) : 'noch offen'),
+    fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : 'noch offen', !s.historie.length ? '' : fx.ebitda < 0 ? 'rot' : 'gruen')
+      : kachel('EBITDA 13 Wochen', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
+    kachel('Umsatz · ' + auswahl, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : 'noch offen'),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
   ].join('');
+  $('cockpit').querySelector('[data-cockpit-format]')?.addEventListener('change', (e) => { cockpitFormat = e.target.value; cockpitZeigen(); });
   // O07 Haus: Ausnahme-Kachel im Cockpit.
   const ausnahmen = E.hausBeobachtung(s, 30).length;
   $('hausbeobachtung').textContent = ausnahmen ? ausnahmen + ' Häuser beobachten →' : 'Hausbetrieb: keine Ausnahmen';
@@ -730,6 +824,7 @@ function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu();
   $('panel').classList.toggle('gross', klasse === 'gross');
+  $('panel').classList.toggle('hausdetail', klasse === 'hausdetail');
   $('ptitel').textContent = titel;
   $('punter').textContent = unter;
   $('pinhalt').innerHTML = html;
@@ -741,28 +836,29 @@ function panel(titel, unter, html, klasse = '') {
   document.body.classList.add('panel-offen');
   if (neu) $('ptitel').focus({ preventScroll: true });
 }
-function schliessePanel() { for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
+function schliessePanel() { kameraZiel = null; for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
 const szenarienUI = szenarienModul({ E, spiel: () => s, wahl: () => startWahl, panel, meldung, nachAktion: () => { cockpitZeigen(); szenarienUI.aktualisieren(); automatischSpeichern(); } });
-/** Haus in den freien Kartenstreifen über dem Panel schieben (nur beim ersten Öffnen). */
+/** Q10: Neues Haus bewusst fokussieren; spätere Renderläufe erhalten das Ziel. */
 function hausZeigen(id) {
-  const x = sb?.haeuser.get(id);
-  if (!x?.gruppe) return;
-  x.gruppe.updateWorldMatrix(true, true);
-  x.gruppe.updateWorldMatrix(true, true);
-  const b = new THREE.Box3().setFromObject(x.gruppe), m = b.getCenter(new THREE.Vector3());
-  const r = canvas.getBoundingClientRect(), oben = 70, unten = r.height * 0.38;
-  const ziel = (oben + unten) / 2;
-  const v = m.clone().project(cam), py = (1 - v.y) / 2 * r.height, px = (v.x + 1) / 2 * r.width;
-  const a = aufBoden(r.left + px, r.top + py), c = aufBoden(r.left + r.width / 2, r.top + ziel);
-  if (!a || !c) return;
-  // passenden Zoom: Haus soll in den Streifen passen
-  const hoehe = (unten - oben) * 0.9;
-  const ecken = [];
-  for (const xx of [b.min.x, b.max.x]) for (const yy of [b.min.y, b.max.y]) for (const zz of [b.min.z, b.max.z]) ecken.push(new THREE.Vector3(xx, yy, zz).project(cam));
-  const hy = (Math.max(...ecken.map((q) => q.y)) - Math.min(...ecken.map((q) => q.y))) / 2 * r.height;
-  if (hy > hoehe) K.halb *= hy / hoehe;
-  K.x += a.x - c.x; K.z += a.z - c.z;
+  const punkt = hausKameraPunkt(id);
+  if (!punkt) return;
+  steuerung.stopp(); // auslaufende Wischträgheit darf die Hausauswahl nicht überschreiben
+  K.halb = Math.min(K.halb, 65);
+  kameraZiel = { id, stadt: stadtName, punkt: punkt.clone() };
   kameraSetzen();
+  // Das gesamte Gebäude muss in den sichtbaren Streifen über dem Sheet passen.
+  const x = sb?.haeuser.get(id);
+  const b = x?.gruppe ? new THREE.Box3().setFromObject(x.gruppe) : sb?.statischeHaeuser.get(id)?.bounds;
+  if (b && !b.isEmpty()) {
+    const [w, h] = groesse(), frei = hausFokusPixel(w, h).y * 2 - 70 + 12;
+    const ecken = [];
+    for (const xx of [b.min.x, b.max.x]) for (const yy of [b.min.y, b.max.y])
+      for (const zz of [b.min.z, b.max.z]) ecken.push(new THREE.Vector3(xx, yy, zz).project(cam));
+    const breite = (Math.max(...ecken.map(v => v.x)) - Math.min(...ecken.map(v => v.x))) * w / 2;
+    const hoehe = (Math.max(...ecken.map(v => v.y)) - Math.min(...ecken.map(v => v.y))) * h / 2;
+    const faktor = Math.max(breite / (w * 0.85), hoehe / (Math.max(70, frei - 70) * 0.85));
+    if (faktor > 1.01) { K.halb *= faktor; kameraSetzen(); }
+  }
 }
 $('pzu').addEventListener('click', schliessePanel);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('panel').classList.contains('offen')) schliessePanel(); });
@@ -785,6 +881,11 @@ window.premiumTun = (was, id) => {
   meldung(r.text, r.ok);
   if (r.ok) { grafikNachziehen(); nachAktion(); if (offenesHaus) oeffneHaus(offenesHaus); }
 };
+window.formateTun=(typ,wert)=>{
+  const aktion=typ==='schwesterUmflaggen'?{typ,haus:wert}:typ==='altwareOutlet'?{typ,quote:Number(wert)/100}:typ==='offpriceZukauf'?{typ,budget:Math.round(Number(wert))}:{typ:'outletEroeffnen',stadt:wert};
+  const r=E.fuehreAus(s,aktion);meldung(r.text,r.ok);
+  if(r.ok){grafikNachziehen();nachAktion();if(offenesHaus)oeffneHaus(offenesHaus);}
+};
 window.filialProgramm = (programm) => {
   const r = E.fuehreAus(s, { typ: 'filialProgramm', programm });
   meldung(r.text, r.ok);
@@ -803,7 +904,7 @@ function oeffneHaus(id) {
     offenesHaus = id; offenesHq = null; offenerWettbewerber = null;
     const h = statisch.haus;
     panel(h.name, h.stadt + ' · ' + (h.format === 'outlet' ? 'FUNDUS' : 'Volkskauf') +
-      ' · Baujahr ' + h.baujahr, hausStatischHtml(h, hausReiter));
+      ' · Baujahr ' + h.baujahr, hausStatischHtml(h, hausReiter), 'hausdetail');
     if (neu) hausZeigen(id);
     return;
   }
@@ -824,6 +925,17 @@ function oeffneHaus(id) {
   html += hausTreiberZeile(E, s, id);
   // O08 Umbau: Bau-Reiter mit Etagenstatus, Fristen und Umbauplanung.
   html += um?.hausKarte(id) ?? '';
+  if(h.format==='schwester'){
+    const f=E.schwesterUebersicht(s);
+    html += '<div class="karte"><div class="khead">Volkskauf · Regionalführung</div><div class="raster">'+zahl('Häuser',fmt.format(f.haeuser))+zahl('EBITDA',geld(f.ebitda))+zahl('Umbauten',fmt.format(f.umbauten))+'</div>';
+    if(h.status==='offen')html += '<button class="mini" onclick="formateTun(\'schwesterUmflaggen\',\''+id+'\')">Zu Hartwig umflaggen</button>';
+    html+='</div>';
+  }
+  if(h.format==='outlet'){
+    const f=E.outletUebersicht(s);
+    html += '<div class="karte"><div class="khead">FUNDUS · Off-Price-Markenposten</div><div class="raster">'+zahl('Bestand EK',geld(f.poolWert))+zahl('Markenposten',geld(f.markenposten))+zahl('Konzern-Altware',geld(f.altware))+zahl('Reichweite',f.reichweite.toFixed(1).replace('.',',')+' Wo.')+'</div>';
+    html += '<button class="mini" onclick="formateTun(\'altwareOutlet\',80)">Altwarequote 80 %</button></div>';
+  }
   if (h.klasse === 'premium') {
     const p = E.premiumUebersicht(s).find((q) => q.id === id);
     html += `<div class="karte"><div class="khead">Kronjuwel · Premiumsegment</div><div class="raster">${zahl('Premium-Image', Math.round(p?.image ?? 80) + ' / 100')}${zahl('Immobilien- & Marktwert', geld(p?.marktwert ?? 0))}${zahl('EBITDA-Marge (DB)', ((p?.marge ?? 0)*100).toFixed(1).replace('.', ',') + ' %')}${zahl('Aktionsschutz', p?.schutz ? 'Aktiv' : 'Aus')}</div>`;
@@ -900,7 +1012,7 @@ function oeffneHaus(id) {
   if (hausReiter === 'personal' && pe) html += pe.hausBlock(id);
   // O05 Ware
   if (hausReiter === 'ware' && d.waren) html += `<div class="karte"><div class="khead">Ware · ${esc(d.waren.hauscluster)}</div><div class="raster">${zahl('Warenverfügbarkeit', (d.waren.verfuegbarkeit * 100).toFixed(1) + ' %')}${zahl('Altwareanteil', (d.waren.altwareanteil * 100).toFixed(1) + ' %')}${zahl('Inventurdifferenz', d.waren.inventur ? geld(d.waren.inventur.differenz) : 'Noch offen')}${zahl('Flächenproduktivität', geld(d.waren.flaechenproduktivitaet) + '/qm')}</div></div>`;
-  panel(h.name, `${h.stadt} · ${h.klasse === 'premium' ? 'Premiumhaus' : h.format === 'sport' ? 'Sporthaus' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html);
+  panel(h.name, `${h.stadt} · ${h.klasse === 'premium' ? 'Premiumhaus' : h.format === 'sport' ? 'Sporthaus' : h.format === 'schwester' ? 'Volkskauf' : h.format === 'outlet' ? 'FUNDUS' : 'Warenhaus'} · Baujahr ${h.baujahr}`, html, 'hausdetail');
   if (neu) hausZeigen(id);
 }
 
@@ -1204,8 +1316,8 @@ reise = reiseModul({
   staedte: () => STADTLISTE.filter((d) => s?.haeuser.some((h) => h.stadt === d.name)).map((d) => {
     const hs = s.haeuser.filter((h) => h.stadt === d.name && h.status !== 'geschlossen');
     const zahl = (rolle) => d.standorte.filter((p) => p.rolle === rolle).length;
-    const formate = [['Hartwig', hs.filter((h) => h.format === 'warenhaus').length], ['Volkskauf', zahl('schwester')], ['Sport', hs.filter((h) => h.format === 'sport').length], ['FUNDUS', zahl('outlet')]];
-    return { name: d.name, region: d.region, hauscluster: hs[0]?.hauscluster, groesse: hs.length + zahl('schwester') + zahl('outlet'), umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
+    const formate = [['Hartwig', hs.filter((h) => h.format === 'warenhaus').length], ['Volkskauf', hs.filter((h) => h.format === 'schwester').length], ['Sport', hs.filter((h) => h.format === 'sport').length], ['FUNDUS', hs.filter((h) => h.format === 'outlet').length]];
+    return { name: d.name, region: d.region, hauscluster: hs[0]?.hauscluster, groesse: hs.length, umsatz: hs.reduce((sum, h) => sum + (h.kpi?.umsatz ?? 0), 0),
       formate: formate.filter((p) => p[1]).map(([name, anzahl]) => ({ name, anzahl })) };
   }),
   pinPunkt: bahnhofBildpunkt,
@@ -1409,6 +1521,7 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 
 window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
+  kameraHaus: hausKameraMessung, // lesender Pixelabgleich für den Mobil-Smoketest
   leben,
   reise, wochenbericht, hausbesuch: hb, oeffneHausbesuch: (id) => hb.oeffne(id), szenarien: szenarienUI, zeitung: zt, oeffneZeitung: (...a) => oeffneModul(zt, ...a), spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
@@ -1458,10 +1571,12 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
   /** Prüfung für spiel-render.js: angezeigte Werte (Cockpit, offenes HQ-Panel) gegen cockpit() und hqUebersicht(). */
   pruefeAnzeigen: () => {
     const fehler = [], c = E.cockpit(s);
-    const kz = (wurzel) => new Map([...wurzel.querySelectorAll('.kz')].map((k) => [k.querySelector('span').textContent, k.querySelector('b').textContent]));
+    // Titel ohne eingebettete Auswahl (Formatfilter im Cockpit).
+    const titel = (sp) => [...sp.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').replace(/\s*·\s*$/, '').trim();
+    const kz = (wurzel) => new Map([...wurzel.querySelectorAll('.kz')].map((k) => [titel(k.querySelector('span')), k.querySelector('b').textContent]));
     const ck = kz($('cockpit'));
     const soll = { Cash: geld(c.cash), 'Kreditrahmen frei': geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
-    if (s.historie.length) Object.assign(soll, { 'EBITDA 13 Wochen': geld(c.ebitda13), 'Umsatz Woche': geld(c.umsatzWoche) });
+    if (s.historie.length) Object.assign(soll, { 'EBITDA 13 Wochen': geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
     for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
     if ($('kw').textContent !== `KW ${c.kw} / ${c.jahr}`) fehler.push(`KW: ${$('kw').textContent}`);
     // O02 Umsatztreiber: Browseranzeige gegen Engine und Brückensumme.
@@ -1506,7 +1621,7 @@ window.spiel = { ecommerce: ec, oeffneEcommerce: () => oeffneModul(ec), chronik:
     },
     get laeuft() { return steuerung.laeuft; }, get info() { return steuerung.info; },
   },
-  kamera: (o) => { Object.assign(K, o); kameraSetzen(); }, tippPunkt, fokusHaeuser, THREE, get K() { return K; }, get sb() { return sb; }, E };
+  kamera: (o) => { kameraZiel = null; steuerung.stopp(); Object.assign(K, o); kameraSetzen(); }, tippPunkt, fokusHaeuser, THREE, get K() { return K; }, get sb() { return sb; }, E };
 // N04: eigenständige UI-Registrierung. Kein Eingriff in die Engine oder andere Module.
 const einfuehrung = einfuehrungModul();
 window.spiel.einfuehrung = einfuehrung;
