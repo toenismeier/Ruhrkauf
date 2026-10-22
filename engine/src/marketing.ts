@@ -437,7 +437,7 @@ function altersAnteile(h: Haus): Record<Altersgruppe, number> {
   return { jung: roh.jung / sum, mitte: roh.mitte / sum, aelter: roh.aelter / sum, senioren: roh.senioren / sum };
 }
 
-const LAGE_SCHAUFENSTER: Record<Haus['lage'], number> = { '1a': 1.2, b: 1, center: 0.9, rand: 0.7 };
+const LAGE_SCHAUFENSTER: Record<Haus['lage'], number> = { '1a': 1.2, b: 1, stadtteil: 0.95, center: 0.9, rand: 0.7 };
 
 function kanalRel(sc: MarketingSzenario, k: KanalId): number { return sc.kanaele[k].adstock / KANAL[k].quote; }
 

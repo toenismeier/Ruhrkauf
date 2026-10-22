@@ -336,6 +336,7 @@ export const HAUSCLUSTER_NAMEN: Record<Region, string[]> = {
 export const STANDORT_ZUSATZ: Record<Lage, string[]> = {
   '1a': ['Marktplatz', 'Hauptstraße', 'Innenstadt', 'Am Markt', 'Königstraße', 'Altstadt'],
   b: ['Bahnhofstraße', 'Am Wall', 'Neustadt', 'Ring', 'Lindenstraße'],
+  stadtteil: ['Stadtteilzentrum', 'Neue Mitte', 'Kreuzstraße', 'Am Marktplatz Süd'],
   center: ['Arkaden', 'City-Center', 'Einkaufszentrum', 'Galerie am Fluss'],
   rand: ['Gewerbepark', 'Am Stadtrand', 'Fachmarktzentrum'],
 };
