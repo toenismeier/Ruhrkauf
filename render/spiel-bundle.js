@@ -7656,6 +7656,7 @@
   var fte = (h4) => h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen;
   var aktiv3 = (h4) => h4.status === "offen" || h4.status === "raeumung" || h4.status === "schliessung_verhandlung";
   var rund = (n3) => Math.round(n3 * 10) / 10;
+  var rund4 = (n3) => Math.round(n3 * 1e4) / 1e4;
   var gruppeHauscluster = (h4, s2) => {
     const org2 = s2;
     if (org2.organisation && (h4.klasse === "premium" || org2.organisation.flagships?.includes(h4.id)))
@@ -7773,7 +7774,7 @@
         if (g === "kasse" && dezember && weihnachten === "sparsam") plan4 *= 0.88;
         const referenz = bedarf2 * bezug;
         extra += Math.max(0, (st2.faktor[g] - 1) * bedarf2) + (g === "kasse" && i === 5 ? Math.max(0, st2.samstagKasse - 1) * bedarf2 : 0);
-        return { tag: PERSONAL_TAGE[i], bedarf: rund(bedarf2), plan: rund(plan4), referenz: rund(referenz), springer: 0, deckung: bedarf2 ? plan4 / bedarf2 : 1, ausfall: ausfallTag };
+        return { tag: PERSONAL_TAGE[i], bedarf: rund4(bedarf2), plan: rund4(plan4), referenz: rund4(referenz), springer: 0, deckung: bedarf2 ? plan4 / bedarf2 : 1, ausfall: ausfallTag };
       });
       const bedarf = tage.reduce((a2, t4) => a2 + t4.bedarf, 0);
       const plan3 = tage.reduce((a2, t4) => a2 + t4.plan, 0);
@@ -159904,7 +159905,7 @@
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "a44e965" : "Entwicklung";
+  var version = () => true ? "9ae55a1" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld2(d4) {
