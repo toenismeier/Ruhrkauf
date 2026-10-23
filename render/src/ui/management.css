@@ -218,3 +218,6 @@
 #panel:has(.hk-bereich) .o02-klickbar:active { background: var(--t); }
 #panel:has(.hk-bereich) .o02-daten { font-size: 12px; border-color: var(--l); }
 #panel:has(.hk-bereich) .q-mehr { color: var(--hk-akzent-text); }
+/* Q32: lange Auswahlleisten (über fünf Optionen, z. B. Material) brechen in Zeilen um statt Wörter abzuschneiden */
+#panel:has(.q31-marke) .regler .seg.umbruch button { flex: 1 0 30%; overflow-wrap: normal; hyphens: auto; -webkit-hyphens: auto; }
+#panel:has(.q31-marke) .regler .seg button[data-a=qualitaet] { white-space: nowrap; letter-spacing: -0.1em; font-size: 12px; padding: 0 2px; }

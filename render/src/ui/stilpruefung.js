@@ -99,6 +99,7 @@
         }
         // 5. Abgeschnittene Beschriftung (Ellipse mit Überlauf)
         if (st.textOverflow === 'ellipsis' && el.scrollWidth > el.clientWidth + 1) v.add(`abgeschnitten: ${name(el)}`);
+        else if (eigenerText(el) && /hidden|clip/.test(st.overflowX) && el.scrollWidth > el.clientWidth + 1 && !el.matches('#pinhalt')) v.add(`Text abgeschnitten: ${name(el)}`); // Q32
         // 6. Symbol in eingefärbtem Kreis
         const r = el.getBoundingClientRect(), fb = rgb(st.backgroundColor);
         if (r.width <= 52 && Math.abs(r.width - r.height) < 3 && parseFloat(st.borderTopLeftRadius) >= r.width / 2 - 1 && fb && fb.a > 0.3
@@ -141,7 +142,7 @@
         // 13. Q32: unterstrichene Links und Rot ohne Gefahr
         if (eigenerText(el) && /underline/.test(st.textDecorationLine) && !el.closest('.hk-papier, [data-bereich=papier]')) v.add(`unterstrichener Link: ${name(el)}`);
         const rr = el.getBoundingClientRect();
-        if (ROT(fb) && rr.width * rr.height > 300 && !el.closest('.hk-gefahr, .hk-marke, .vbild, .hk-person, [data-gefahr], .dringend, .post-frist.ab, .logo, .ein-logo, .wb-logo, .wb-vorfallkopf > span') && !GEFAHR.test(el.textContent) && !el.matches('.hk-gefahr, [data-gefahr]')) v.add(`Rot ohne Gefahr: ${name(el)}`);
+        if (ROT(fb) && rr.width * rr.height > 300 && !el.closest('.hk-gefahr, .hk-marke, .vbild, .hk-person, [data-gefahr], .dringend, .post-frist.ab, .farben, .tfarben, .logo, .ein-logo, .wb-logo, .wb-vorfallkopf > span') && !GEFAHR.test(el.textContent) && !el.matches('.hk-gefahr, [data-gefahr]')) v.add(`Rot ohne Gefahr: ${name(el)}`);
       }
       const pi = w.querySelector('#pinhalt') ?? (w.id === 'pinhalt' ? w : null);
       const blatt = w.getBoundingClientRect().width * (w.getBoundingClientRect().height + (pi ? pi.scrollHeight - pi.clientHeight : 0));

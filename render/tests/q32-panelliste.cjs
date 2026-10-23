@@ -8,8 +8,8 @@ const NEU = menue('produkte') + klick('#pinhalt [data-a=neu]');
 const PANELS = [
   { name: 'q32-produkt-neu', oeffne: NEU + klick('#pinhalt [data-a=q24Fach][data-v=kinder]') + klick('#pinhalt [data-a=q24Ziel][data-v=teens]') + klick('#pinhalt [data-a=baumKat]') + "document.querySelector('#pinhalt .q24-anzahl')?.scrollIntoView();" },
   { name: 'q32-produkt-neu-ast', oeffne: NEU + klick('#pinhalt [data-a=baumKat]') + klick('#pinhalt [data-a=baumAst]') + "document.querySelector('#pinhalt [data-a=baumAst]')?.scrollIntoView();" },
-  { name: 'q32-produkt-ziel', oeffne: NEU + klick('#pinhalt [data-a=baumKat]') + klick('#pinhalt [data-a=baumAst]') + klick('#pinhalt [data-a=typ]:not(.voll)') },
-  { name: 'q32-produkt-konfig', oeffne: NEU + klick('#pinhalt [data-a=baumKat]') + klick('#pinhalt [data-a=baumAst]') + klick('#pinhalt [data-a=typ]:not(.voll)') + klick('#pinhalt [data-a=zielgruppe]') },
+  { name: 'q32-produkt-ziel', oeffne: NEU + klick('#pinhalt [data-a=baumKat]:not(.an)') + klick('#pinhalt [data-a=baumAst]') + klick('#pinhalt [data-a=typ]:not(.voll)') },
+  { name: 'q32-produkt-konfig', oeffne: NEU + klick('#pinhalt [data-a=baumKat]:not(.an)') + klick('#pinhalt [data-a=baumAst]') + klick('#pinhalt [data-a=typ]:not(.voll)') + klick('#pinhalt [data-a=zielgruppe]') },
   { name: 'q32-produktentwicklung', oeffne: menue('produkte'), nach: "const pi = document.getElementById('pinhalt'); pi.scrollTop = 260;" },
   { name: 'q32-cdo', oeffne: menue('vorstand') + klick('#pinhalt [data-a=profil][data-v=cdo]') + klick('#pinhalt [data-a=einstellen][data-v=cdo]') + "const pi = document.getElementById('pinhalt'); pi.scrollTop = 0;", nach: "const pi = document.getElementById('pinhalt'); pi.scrollTop = 0;" },
   { name: 'q32-cdo-angebot', oeffne: menue('vorstand') + klick('#pinhalt [data-a=profil][data-v=cdo]') + klick('#pinhalt [data-a=einstellen][data-v=cdo]') + klick('#pinhalt [data-a=kandidat][data-v="2"]'), nach: "const a = document.querySelector('#pinhalt [data-angebot]') ?? [...document.querySelectorAll('#pinhalt *')].find((e) => /^Angebot an/.test(e.textContent.trim())); a?.scrollIntoView();" },

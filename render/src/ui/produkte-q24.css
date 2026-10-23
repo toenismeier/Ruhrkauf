@@ -68,3 +68,4 @@
 #panel:has(.hk-bereich) .q24-leistungstitel { color: var(--tx); } #panel:has(.hk-bereich) .q24-leistungstitel b { color: var(--tx); }
 #panel:has(.hk-bereich) .q24-werte span { background: var(--t); color: var(--le); font-size: 12px; } #panel:has(.hk-bereich) .q24-werte b { color: var(--tx); }
 #panel:has(.hk-bereich) .q24-leistung > small { color: var(--le); }
+#panel:has(.hk-bereich) .q24-typen button span { overflow-wrap: normal; word-break: normal; hyphens: auto; -webkit-hyphens: auto; }
