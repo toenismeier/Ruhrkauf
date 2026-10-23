@@ -13657,7 +13657,7 @@
       for (const [g, v] of Object.entries(r3.eigen)) {
         const liste3 = WG_JE_BEREICH[g];
         if (!liste3) continue;
-        let F2 = 0;
+        let F3 = 0;
         const tilt = marketingWgTilt(s2, h3.id, g);
         const teile2 = tilt ? [] : void 0;
         let F0 = 0;
@@ -13678,22 +13678,22 @@
             const t4 = v.brutto * om * x2.e * Math.sqrt(A * x2.fit * produktHausFaktor(s2, x2.m, d3.id, h3)) * nAttr / st2.norm;
             if (teile2) teile2.push([ziel, x2.m.id, t4]);
             else ziel[x2.m.id] = (ziel[x2.m.id] ?? 0) + t4;
-            F2 += t4;
+            F3 += t4;
             F0 += t4 / tl;
             rest -= x2.e;
           }
           const t3 = v.brutto * om * Math.max(0, rest) * nAttr / st2.norm;
           if (teile2) teile2.push([ziel, FREMD, t3]);
           else ziel[FREMD] = (ziel[FREMD] ?? 0) + t3;
-          F2 += t3;
+          F3 += t3;
           F0 += t3 / tl;
         }
         if (teile2) {
-          const c = F2 > 0 ? F0 / F2 : 1;
+          const c = F3 > 0 ? F0 / F3 : 1;
           for (const [z4, k3, t3] of teile2) z4[k3] = (z4[k3] ?? 0) + t3 * c;
-          F2 = F0;
+          F3 = F0;
         }
-        const f11 = v.brutto > 0 ? F2 / v.brutto : 1;
+        const f11 = v.brutto > 0 ? F3 / v.brutto : 1;
         v.brutto *= f11;
         v.umsatz *= f11;
         bruttoBereich[g] = (bruttoBereich[g] ?? 0) + v.brutto;
@@ -48877,60 +48877,60 @@
     a2.abstand = s2;
     return a2;
   }
-  function gesperrt(ctx, F2, u) {
-    const s2 = ctx.sperre?.[F2.label];
+  function gesperrt(ctx, F3, u) {
+    const s2 = ctx.sperre?.[F3.label];
     if (!s2) return false;
     return s2.some(([a2, b3]) => u > a2 && u < b3);
   }
-  function fenster(F2, u, yb, fw, fh, o3 = {}) {
+  function fenster(F3, u, yb, fw, fh, o3 = {}) {
     const glas3 = o3.glas ?? FARBEN3.fenster, rahmen2 = o3.rahmen ?? RAHMEN, t0 = o3.t ?? 0;
     const h22 = fw / 2;
     if (o3.faschen) {
       const fb6 = o3.fb ?? 0.16;
-      F2.box(u - h22 - fb6, u + h22 + fb6, yb - (o3.sims ? 0.04 : fb6), yb + fh + fb6, t0 - 0.02, t0 + 0.035, o3.faschen);
+      F3.box(u - h22 - fb6, u + h22 + fb6, yb - (o3.sims ? 0.04 : fb6), yb + fh + fb6, t0 - 0.02, t0 + 0.035, o3.faschen);
       if (o3.ohren) {
-        F2.box(u - h22 - fb6 - 0.14, u - h22 - fb6 + 0.01, yb + fh - 0.2, yb + fh + fb6, t0 - 0.02, t0 + 0.035, o3.faschen);
-        F2.box(u + h22 + fb6 - 0.01, u + h22 + fb6 + 0.14, yb + fh - 0.2, yb + fh + fb6, t0 - 0.02, t0 + 0.035, o3.faschen);
+        F3.box(u - h22 - fb6 - 0.14, u - h22 - fb6 + 0.01, yb + fh - 0.2, yb + fh + fb6, t0 - 0.02, t0 + 0.035, o3.faschen);
+        F3.box(u + h22 + fb6 - 0.01, u + h22 + fb6 + 0.14, yb + fh - 0.2, yb + fh + fb6, t0 - 0.02, t0 + 0.035, o3.faschen);
       }
     }
     const rb = o3.rb ?? 0.07;
-    F2.box(u - h22 - rb, u + h22 + rb, yb - rb, yb + fh + rb, t0 - 0.02, t0 + 0.05, rahmen2);
-    F2.box(u - h22 + 0.02, u + h22 - 0.02, yb + 0.02, yb + fh - 0.02, t0 - 0.03, t0 + 0.065, glas3);
-    if (o3.reflex !== false && fh > 0.8) F2.box(u - h22 + 0.02, u + h22 - 0.02, yb + fh * (o3.kaempfer ?? 0.7), yb + fh - 0.02, t0, t0 + 0.07, heller(glas3, 0.07));
+    F3.box(u - h22 - rb, u + h22 + rb, yb - rb, yb + fh + rb, t0 - 0.02, t0 + 0.05, rahmen2);
+    F3.box(u - h22 + 0.02, u + h22 - 0.02, yb + 0.02, yb + fh - 0.02, t0 - 0.03, t0 + 0.065, glas3);
+    if (o3.reflex !== false && fh > 0.8) F3.box(u - h22 + 0.02, u + h22 - 0.02, yb + fh * (o3.kaempfer ?? 0.7), yb + fh - 0.02, t0, t0 + 0.07, heller(glas3, 0.07));
     const tk = t0 + 0.085;
     if (o3.kreuz !== false) {
-      if (fw > 0.75 && o3.kreuz !== "quer") F2.box(u - 0.04, u + 0.04, yb, yb + fh, t0, tk, rahmen2);
+      if (fw > 0.75 && o3.kreuz !== "quer") F3.box(u - 0.04, u + 0.04, yb, yb + fh, t0, tk, rahmen2);
       if (o3.kreuz !== "senkrecht") {
         const yk = yb + fh * (o3.kaempfer ?? 0.7);
-        F2.box(u - h22, u + h22, yk - 0.04, yk + 0.04, t0, tk, rahmen2);
+        F3.box(u - h22, u + h22, yk - 0.04, yk + 0.04, t0, tk, rahmen2);
       }
     }
     if (o3.sprossen) {
       const [sx, sy] = o3.sprossen;
       for (let i = 1; i < sx; i++) {
         const uu = u - h22 + fw * i / sx;
-        F2.box(uu - 0.025, uu + 0.025, yb, yb + fh, t0, tk, rahmen2);
+        F3.box(uu - 0.025, uu + 0.025, yb, yb + fh, t0, tk, rahmen2);
       }
       for (let j3 = 1; j3 < sy; j3++) {
         const yy = yb + fh * j3 / sy;
-        F2.box(u - h22, u + h22, yy - 0.025, yy + 0.025, t0, tk, rahmen2);
+        F3.box(u - h22, u + h22, yy - 0.025, yy + 0.025, t0, tk, rahmen2);
       }
     }
-    if (o3.sims) F2.box(u - h22 - 0.2, u + h22 + 0.2, yb - 0.2, yb - 0.04, t0 - 0.02, t0 + 0.2, o3.sims);
+    if (o3.sims) F3.box(u - h22 - 0.2, u + h22 + 0.2, yb - 0.2, yb - 0.04, t0 - 0.02, t0 + 0.2, o3.sims);
     if (o3.laeden) {
-      F2.box(u - h22 - fw * 0.5 - 0.08, u - h22 - 0.1, yb, yb + fh, t0, t0 + 0.07, o3.laeden);
-      F2.box(u + h22 + 0.1, u + h22 + fw * 0.5 + 0.08, yb, yb + fh, t0, t0 + 0.07, o3.laeden);
+      F3.box(u - h22 - fw * 0.5 - 0.08, u - h22 - 0.1, yb, yb + fh, t0, t0 + 0.07, o3.laeden);
+      F3.box(u + h22 + 0.1, u + h22 + fw * 0.5 + 0.08, yb, yb + fh, t0, t0 + 0.07, o3.laeden);
     }
     if (o3.gitter) {
       const yg = yb + Math.min(0.95, fh * 0.4);
-      F2.box(u - h22, u + h22, yg - 0.05, yg, t0 + 0.1, t0 + 0.15, GELAENDER);
-      for (let uu = u - h22 + 0.15; uu < u + h22 - 0.05; uu += 0.22) F2.box(uu - 0.018, uu + 0.018, yb, yg, t0 + 0.1, t0 + 0.14, GELAENDER);
+      F3.box(u - h22, u + h22, yg - 0.05, yg, t0 + 0.1, t0 + 0.15, GELAENDER);
+      for (let uu = u - h22 + 0.15; uu < u + h22 - 0.05; uu += 0.22) F3.box(uu - 0.018, uu + 0.018, yb, yg, t0 + 0.1, t0 + 0.14, GELAENDER);
     }
     const vf = o3.verdFarbe ?? o3.sims ?? ORN;
     const yt = yb + fh + (o3.faschen ? o3.fb ?? 0.16 : rb) + 0.02;
     if (o3.verd === "gerade" || o3.verd === "dreieck" || o3.verd === "bogen") {
-      F2.box(u - h22 - 0.3, u + h22 + 0.3, yt, yt + 0.2, t0, t0 + 0.28, vf);
-      F2.box(u - h22 - 0.18, u + h22 + 0.18, yt - 0.02, yt + 0.04, t0, t0 + 0.12, dunkler(vf, 0.04));
+      F3.box(u - h22 - 0.3, u + h22 + 0.3, yt, yt + 0.2, t0, t0 + 0.28, vf);
+      F3.box(u - h22 - 0.18, u + h22 + 0.18, yt - 0.02, yt + 0.04, t0, t0 + 0.12, dunkler(vf, 0.04));
       if (o3.verd === "dreieck") {
         const s2 = new three_module_exports.Shape();
         const b3 = h22 + 0.32;
@@ -48938,14 +48938,14 @@
         s2.lineTo(b3, 0);
         s2.lineTo(0, 0.62);
         s2.closePath();
-        F2.profil(s2, u, yt + 0.2, t0, t0 + 0.26, vf);
+        F3.profil(s2, u, yt + 0.2, t0, t0 + 0.26, vf);
       } else if (o3.verd === "bogen") {
         const s2 = new three_module_exports.Shape();
         const b3 = h22 + 0.32;
         s2.moveTo(-b3, 0);
         s2.lineTo(b3, 0);
         s2.quadraticCurveTo(0, 0.8, -b3, 0);
-        F2.profil(s2, u, yt + 0.2, t0, t0 + 0.26, vf);
+        F3.profil(s2, u, yt + 0.2, t0, t0 + 0.26, vf);
       }
     } else if (o3.verd === "rund") {
       const s2 = new three_module_exports.Shape();
@@ -48955,78 +48955,78 @@
       s2.lineTo(b3 - 0.16, 0);
       s2.absarc(0, 0, b3 - 0.16, 0, Math.PI, false);
       s2.closePath();
-      F2.profil(s2, u, yb + fh, t0 - 0.02, t0 + 0.1, vf, 10);
+      F3.profil(s2, u, yb + fh, t0 - 0.02, t0 + 0.1, vf, 10);
       const g = new three_module_exports.Shape();
       g.moveTo(-h22 + 0.02, 0);
       g.absarc(0, 0, h22 - 0.02, Math.PI, 0, true);
       g.closePath();
-      F2.profil(g, u, yb + fh, t0 - 0.03, t0 + 0.065, glas3, 10);
+      F3.profil(g, u, yb + fh, t0 - 0.03, t0 + 0.065, glas3, 10);
     } else if (o3.verd === "sturz") {
-      F2.box(u - h22 - 0.12, u + h22 + 0.12, yt, yt + 0.28, t0, t0 + 0.12, vf);
-      F2.box(u - 0.14, u + 0.14, yt - 0.02, yt + 0.34, t0, t0 + 0.16, vf);
+      F3.box(u - h22 - 0.12, u + h22 + 0.12, yt, yt + 0.28, t0, t0 + 0.12, vf);
+      F3.box(u - 0.14, u + 0.14, yt - 0.02, yt + 0.34, t0, t0 + 0.16, vf);
     }
   }
-  function balkon(F2, u0, u1, y2, tiefe, o3 = {}) {
+  function balkon(F3, u0, u1, y2, tiefe, o3 = {}) {
     const pl2 = o3.platte ?? ORN;
-    F2.box(u0, u1, y2 - 0.18, y2, 0, tiefe, pl2);
+    F3.box(u0, u1, y2 - 0.18, y2, 0, tiefe, pl2);
     if (o3.konsolen) {
-      F2.box(u0 + 0.15, u0 + 0.35, y2 - 0.6, y2 - 0.18, 0, tiefe - 0.15, pl2);
-      F2.box(u1 - 0.35, u1 - 0.15, y2 - 0.6, y2 - 0.18, 0, tiefe - 0.15, pl2);
+      F3.box(u0 + 0.15, u0 + 0.35, y2 - 0.6, y2 - 0.18, 0, tiefe - 0.15, pl2);
+      F3.box(u1 - 0.35, u1 - 0.15, y2 - 0.6, y2 - 0.18, 0, tiefe - 0.15, pl2);
     }
     const hr = 1, tf = tiefe - 0.04;
     if (o3.art === "platte") {
-      F2.box(u0, u1, y2 + 0.05, y2 + hr, tf - 0.06, tf, o3.farbe ?? GLAS_GELAENDER);
-      F2.box(u0 + 0.02, u0 + 0.06, y2 + 0.05, y2 + hr, 0, tf, o3.farbe ?? GLAS_GELAENDER);
-      F2.box(u1 - 0.06, u1 - 0.02, y2 + 0.05, y2 + hr, 0, tf, o3.farbe ?? GLAS_GELAENDER);
-      F2.box(u0, u1, y2 + hr - 0.04, y2 + hr + 0.02, tf - 0.08, tf + 0.02, o3.handlauf ?? GELAENDER);
+      F3.box(u0, u1, y2 + 0.05, y2 + hr, tf - 0.06, tf, o3.farbe ?? GLAS_GELAENDER);
+      F3.box(u0 + 0.02, u0 + 0.06, y2 + 0.05, y2 + hr, 0, tf, o3.farbe ?? GLAS_GELAENDER);
+      F3.box(u1 - 0.06, u1 - 0.02, y2 + 0.05, y2 + hr, 0, tf, o3.farbe ?? GLAS_GELAENDER);
+      F3.box(u0, u1, y2 + hr - 0.04, y2 + hr + 0.02, tf - 0.08, tf + 0.02, o3.handlauf ?? GELAENDER);
       return;
     }
     const gf = o3.gitterFarbe ?? GELAENDER;
-    F2.box(u0, u1, y2 + hr - 0.05, y2 + hr, tf - 0.05, tf, gf);
-    F2.box(u0, u1, y2 + 0.12, y2 + 0.16, tf - 0.04, tf, gf);
-    F2.box(u0, u0 + 0.05, y2 + hr - 0.05, y2 + hr, 0, tf, gf);
-    F2.box(u1 - 0.05, u1, y2 + hr - 0.05, y2 + hr, 0, tf, gf);
-    F2.box(u0, u0 + 0.04, y2, y2 + hr, tf - 0.04, tf, gf);
-    F2.box(u1 - 0.04, u1, y2, y2 + hr, tf - 0.04, tf, gf);
+    F3.box(u0, u1, y2 + hr - 0.05, y2 + hr, tf - 0.05, tf, gf);
+    F3.box(u0, u1, y2 + 0.12, y2 + 0.16, tf - 0.04, tf, gf);
+    F3.box(u0, u0 + 0.05, y2 + hr - 0.05, y2 + hr, 0, tf, gf);
+    F3.box(u1 - 0.05, u1, y2 + hr - 0.05, y2 + hr, 0, tf, gf);
+    F3.box(u0, u0 + 0.04, y2, y2 + hr, tf - 0.04, tf, gf);
+    F3.box(u1 - 0.04, u1, y2, y2 + hr, tf - 0.04, tf, gf);
     const sp6 = o3.abstand ?? 0.2;
-    for (let uu = u0 + sp6; uu < u1 - sp6 * 0.5; uu += sp6) F2.box(uu - 0.016, uu + 0.016, y2, y2 + hr, tf - 0.035, tf - 5e-3, gf);
-    if (o3.ornament) for (let uu = u0 + 0.5; uu < u1 - 0.3; uu += 0.6) F2.box(uu - 0.12, uu + 0.12, y2 + 0.42, y2 + 0.66, tf - 0.04, tf, gf);
+    for (let uu = u0 + sp6; uu < u1 - sp6 * 0.5; uu += sp6) F3.box(uu - 0.016, uu + 0.016, y2, y2 + hr, tf - 0.035, tf - 5e-3, gf);
+    if (o3.ornament) for (let uu = u0 + 0.5; uu < u1 - 0.3; uu += 0.6) F3.box(uu - 0.12, uu + 0.12, y2 + 0.42, y2 + 0.66, tf - 0.04, tf, gf);
   }
-  function markise2(F2, a2, b3, y2, tiefe, farbe3, streifen, tb) {
+  function markise2(F3, a2, b3, y2, tiefe, farbe3, streifen, tb) {
     const al = 0.42, D = tiefe / Math.cos(al), len = b3 - a2;
     const k3 = streifen ? Math.max(3, Math.round(len / 0.42)) : 1;
     for (let i = 0; i < k3; i++) {
       const g = new three_module_exports.BoxGeometry(len / k3, 0.05, D);
       g.rotateX(al);
       g.translate(a2 + (i + 0.5) * len / k3, y2 - Math.sin(al) * D / 2, tb + Math.cos(al) * D / 2);
-      F2.geo(g, streifen && i % 2 ? "#f4efe6" : farbe3);
+      F3.geo(g, streifen && i % 2 ? "#f4efe6" : farbe3);
     }
     const yv = y2 - Math.sin(al) * D;
-    F2.box(a2, b3, yv - 0.26, yv + 0.02, tb + tiefe - 0.04, tb + tiefe, farbe3);
-    F2.box(a2 - 0.02, a2 + 0.04, yv - 0.05, y2, tb, tb + tiefe, "#8a8f94");
-    F2.box(b3 - 0.04, b3 + 0.02, yv - 0.05, y2, tb, tb + tiefe, "#8a8f94");
+    F3.box(a2, b3, yv - 0.26, yv + 0.02, tb + tiefe - 0.04, tb + tiefe, farbe3);
+    F3.box(a2 - 0.02, a2 + 0.04, yv - 0.05, y2, tb, tb + tiefe, "#8a8f94");
+    F3.box(b3 - 0.04, b3 + 0.02, yv - 0.05, y2, tb, tb + tiefe, "#8a8f94");
   }
   function naechsterName(ctx) {
     if (!ctx.namen.length) ctx.namen = mischen(LADENNAMEN, ctx.r);
     return ctx.namen.pop();
   }
-  function ladenFront(ctx, F2, a2, b3, egH, o3) {
+  function ladenFront(ctx, F3, a2, b3, egH, o3) {
     const r3 = ctx.r, tb = o3.tb ?? 0.1, stil = o3.stil ?? "klassisch";
     const rahmen2 = o3.rahmen ?? waehle2(r3, stil === "neu" ? ["#3b4046", "#2b2f33", "#5c6168", "#d9dcdf"] : stil === "fuenfziger" ? ["#c9cdd0", "#3f4a53", "#2f5d4a", "#b0473c", "#e9e4da"] : LADENRAHMEN);
     const hell5 = new three_module_exports.Color(rahmen2).getHSL({}).l > 0.6;
     const top = stil === "fuenfziger" ? egH - 0.85 : egH - 0.45;
     const fasz = stil === "neu" ? 0.7 : stil === "fuenfziger" ? 0 : 0.62;
     const wb = b3 - a2;
-    F2.box(a2, b3, 0, top, tb, tb + 0.06, rahmen2);
+    F3.box(a2, b3, 0, top, tb, tb + 0.06, rahmen2);
     const tuerLinks = o3.tuer === "links" || o3.tuer == null && r3() < 0.5;
     const tw = o3.nurTuer ? Math.min(wb - 0.3, 1.4) : 1.15;
     let ga = a2 + 0.14, gb = b3 - 0.14;
     const yGlasO = top - fasz - 0.1;
     if (o3.tuer !== "keine") {
       const ta = o3.nurTuer ? a2 + (wb - tw) / 2 : tuerLinks ? a2 + 0.14 : b3 - 0.14 - tw;
-      F2.box(ta, ta + tw, 0.04, Math.min(2.55, yGlasO), tb, tb + 0.1, "#3c4852");
-      F2.box(ta + 0.08, ta + tw - 0.08, 0.15, Math.min(2.45, yGlasO) - 0.08, tb, tb + 0.115, "#566a79");
-      F2.box(ta + tw - 0.25, ta + tw - 0.2, 1, 1.4, tb, tb + 0.15, "#c8ccd0");
+      F3.box(ta, ta + tw, 0.04, Math.min(2.55, yGlasO), tb, tb + 0.1, "#3c4852");
+      F3.box(ta + 0.08, ta + tw - 0.08, 0.15, Math.min(2.45, yGlasO) - 0.08, tb, tb + 0.115, "#566a79");
+      F3.box(ta + tw - 0.25, ta + tw - 0.2, 1, 1.4, tb, tb + 0.15, "#c8ccd0");
       if (!o3.nurTuer) {
         if (tuerLinks) ga = ta + tw + 0.14;
         else gb = ta - 0.14;
@@ -49040,16 +49040,16 @@
       const pw = (gb - ga - (k3 - 1) * 0.1) / k3;
       for (let i = 0; i < k3; i++) {
         const p0 = ga + i * (pw + 0.1);
-        F2.box(p0, p0 + pw, yGlasU, yGlasO, tb, tb + 0.1, GLAS_LADEN);
+        F3.box(p0, p0 + pw, yGlasU, yGlasO, tb, tb + 0.1, GLAS_LADEN);
         if (stil === "alt") {
-          for (let s2 = 1; s2 < 3; s2++) F2.box(p0 + pw * s2 / 3 - 0.025, p0 + pw * s2 / 3 + 0.025, yGlasU, yGlasO, tb, tb + 0.12, rahmen2);
-          F2.box(p0, p0 + pw, yGlasU + (yGlasO - yGlasU) * 0.5 - 0.025, yGlasU + (yGlasO - yGlasU) * 0.5 + 0.025, tb, tb + 0.12, rahmen2);
+          for (let s2 = 1; s2 < 3; s2++) F3.box(p0 + pw * s2 / 3 - 0.025, p0 + pw * s2 / 3 + 0.025, yGlasU, yGlasO, tb, tb + 0.12, rahmen2);
+          F3.box(p0, p0 + pw, yGlasU + (yGlasO - yGlasU) * 0.5 - 0.025, yGlasU + (yGlasO - yGlasU) * 0.5 + 0.025, tb, tb + 0.12, rahmen2);
         } else {
           const n3 = Math.max(1, Math.floor(pw / 0.7));
           for (let j3 = 0; j3 < n3; j3++) {
             if (r3() < 0.35) continue;
             const uu = p0 + pw * (j3 + 0.5) / n3, hh = zw(r3, 0.3, 0.8);
-            F2.box(uu - 0.18, uu + 0.18, yGlasU + 0.02, yGlasU + hh, tb + 0.08, tb + 0.105, waehle2(r3, ["#e8dcc6", "#d9cbb3", "#f1ece2", "#c9b79c", "#e2c6b5"]));
+            F3.box(uu - 0.18, uu + 0.18, yGlasU + 0.02, yGlasU + hh, tb + 0.08, tb + 0.105, waehle2(r3, ["#e8dcc6", "#d9cbb3", "#f1ece2", "#c9b79c", "#e2c6b5"]));
           }
         }
       }
@@ -49058,57 +49058,57 @@
       const name2 = o3.name ?? naechsterName(ctx);
       const um2 = (a2 + b3) / 2;
       if (stil === "fuenfziger") {
-        F2.text(name2, um2, egH - 0.42, 0.42, waehle2(r3, ["#ffffff", "#f2d16b", "#e8604c", "#1f3a5f"]), tb + 1.45, wb - 0.3);
+        F3.text(name2, um2, egH - 0.42, 0.42, waehle2(r3, ["#ffffff", "#f2d16b", "#e8604c", "#1f3a5f"]), tb + 1.45, wb - 0.3);
       } else if (stil === "alt") {
-        F2.text(name2, um2, top - fasz / 2 + 0.03, 0.36, "#3b2d24", tb + 0.075, wb - 0.3);
+        F3.text(name2, um2, top - fasz / 2 + 0.03, 0.36, "#3b2d24", tb + 0.075, wb - 0.3);
       } else {
         const tafel3 = r3() < 0.45;
         if (tafel3) {
           const tf = waehle2(r3, ["#f4efe6", "#f2d16b", "#ffffff", "#d9e4e8"]);
-          F2.box(a2 + 0.25, b3 - 0.25, top - fasz + 0.04, top - 0.06, tb, tb + 0.13, tf);
-          F2.text(name2, um2, top - fasz / 2 - 0.01, 0.46, "#2a2f35", tb + 0.135, wb - 0.7);
-        } else F2.text(name2, um2, top - fasz / 2 - 0.01, 0.48, o3.leucht ? waehle2(r3, ["#ffe680", "#ff8a6b", "#9fe6ff", "#ffffff"]) : hell5 ? "#2a2f35" : "#ffffff", tb + 0.075, wb - 0.5);
+          F3.box(a2 + 0.25, b3 - 0.25, top - fasz + 0.04, top - 0.06, tb, tb + 0.13, tf);
+          F3.text(name2, um2, top - fasz / 2 - 0.01, 0.46, "#2a2f35", tb + 0.135, wb - 0.7);
+        } else F3.text(name2, um2, top - fasz / 2 - 0.01, 0.48, o3.leucht ? waehle2(r3, ["#ffe680", "#ff8a6b", "#9fe6ff", "#ffffff"]) : hell5 ? "#2a2f35" : "#ffffff", tb + 0.075, wb - 0.5);
       }
     }
-    if (o3.markise) markise2(F2, a2 + 0.08, b3 - 0.08, top - fasz - 0.02, 1.35, o3.markise, r3() < 0.55, tb + 0.06);
+    if (o3.markise) markise2(F3, a2 + 0.08, b3 - 0.08, top - fasz - 0.02, 1.35, o3.markise, r3() < 0.55, tb + 0.06);
     if (o3.leucht && stil !== "alt") {
       const u = tuerLinks ? b3 - 0.25 : a2 + 0.25, lf = waehle2(r3, ["#e8604c", "#2f6f8f", "#f2d16b", "#3f7d56", "#ffffff", "#6b4f8f"]);
-      F2.box(u - 0.07, u + 0.07, egH - 0.1, egH + 1, tb, tb + 0.95, lf);
-      F2.box(u - 0.09, u + 0.09, egH + 0.05, egH + 0.85, tb + 0.12, tb + 0.83, heller(lf, 0.12));
+      F3.box(u - 0.07, u + 0.07, egH - 0.1, egH + 1, tb, tb + 0.95, lf);
+      F3.box(u - 0.09, u + 0.09, egH + 0.05, egH + 0.85, tb + 0.12, tb + 0.83, heller(lf, 0.12));
     }
     if (o3.ausleger) {
       const u = tuerLinks ? a2 + 0.3 : b3 - 0.3, y2 = egH + 0.35;
-      F2.box(u - 0.04, u + 0.04, y2 - 0.04, y2 + 0.04, tb, tb + 1, "#2b2b2b");
+      F3.box(u - 0.04, u + 0.04, y2 - 0.04, y2 + 0.04, tb, tb + 1, "#2b2b2b");
       const g = new three_module_exports.CylinderGeometry(0.38, 0.38, 0.06, 14);
       g.rotateZ(Math.PI / 2);
       g.translate(u, y2 - 0.45, tb + 0.75);
-      F2.geo(g, waehle2(r3, ["#d39a2b", "#b0473c", "#2f6f8f", "#3f7d56"]));
+      F3.geo(g, waehle2(r3, ["#d39a2b", "#b0473c", "#2f6f8f", "#3f7d56"]));
     }
   }
-  function hausTuer(F2, a2, egH, o3) {
+  function hausTuer(F3, a2, egH, o3) {
     const tb = o3.tb ?? 0.1, holz = o3.holz ?? "#6b4f3a";
-    F2.box(a2, a2 + 1.7, 0, Math.min(egH - 0.3, 3.5), tb - 0.02, tb + 0.05, o3.portal ?? ORN);
-    F2.box(a2 + 0.22, a2 + 1.48, 0.05, 2.7, tb, tb + 0.08, holz);
-    F2.box(a2 + 0.32, a2 + 0.82, 0.9, 2.5, tb, tb + 0.1, dunkler(holz, 0.05));
-    F2.box(a2 + 0.88, a2 + 1.38, 0.9, 2.5, tb, tb + 0.1, dunkler(holz, 0.05));
-    if (egH > 3.6) F2.box(a2 + 0.22, a2 + 1.48, 2.8, Math.min(egH - 0.45, 3.35), tb, tb + 0.08, FARBEN3.fensterHell);
-    F2.box(a2 - 0.05, a2 + 1.75, 0, 0.16, 0, tb + 0.4, "#cfc9be");
+    F3.box(a2, a2 + 1.7, 0, Math.min(egH - 0.3, 3.5), tb - 0.02, tb + 0.05, o3.portal ?? ORN);
+    F3.box(a2 + 0.22, a2 + 1.48, 0.05, 2.7, tb, tb + 0.08, holz);
+    F3.box(a2 + 0.32, a2 + 0.82, 0.9, 2.5, tb, tb + 0.1, dunkler(holz, 0.05));
+    F3.box(a2 + 0.88, a2 + 1.38, 0.9, 2.5, tb, tb + 0.1, dunkler(holz, 0.05));
+    if (egH > 3.6) F3.box(a2 + 0.22, a2 + 1.48, 2.8, Math.min(egH - 0.45, 3.35), tb, tb + 0.08, FARBEN3.fensterHell);
+    F3.box(a2 - 0.05, a2 + 1.75, 0, 0.16, 0, tb + 0.4, "#cfc9be");
   }
-  function ladenzone(ctx, F2, egH, o3 = {}) {
+  function ladenzone(ctx, F3, egH, o3 = {}) {
     const r3 = ctx.r, tb = o3.tb ?? 0.1;
     const mark = () => r3() < (o3.markisen ?? 0.45) ? waehle2(r3, MARKISEN) : null;
-    if (o3.typ === "arkade" && F2.art === "haupt" && F2.L > 7) return arkade(ctx, F2, egH, o3);
-    if (F2.art === "ecke") {
-      const mitte = F2.eckIndex === Math.floor(F2.eckAnzahl / 2);
-      ladenFront(ctx, F2, 0.08, F2.L - 0.08, egH, { ...o3, nurTuer: mitte, tuer: mitte ? null : "keine", schild: mitte && F2.L > 1.8, name: ctx.eckName, markise: null, ausleger: false, leucht: false });
+    if (o3.typ === "arkade" && F3.art === "haupt" && F3.L > 7) return arkade(ctx, F3, egH, o3);
+    if (F3.art === "ecke") {
+      const mitte = F3.eckIndex === Math.floor(F3.eckAnzahl / 2);
+      ladenFront(ctx, F3, 0.08, F3.L - 0.08, egH, { ...o3, nurTuer: mitte, tuer: mitte ? null : "keine", schild: mitte && F3.L > 1.8, name: ctx.eckName, markise: null, ausleger: false, leucht: false });
       return;
     }
-    const u0 = o3.u0 ?? 0.35, u1 = o3.u1 ?? F2.L - 0.35;
+    const u0 = o3.u0 ?? 0.35, u1 = o3.u1 ?? F3.L - 0.35;
     const stuecke = [];
-    if (o3.hausTuer !== false && F2.art === "haupt" && u1 - u0 > 5.5) {
-      const lage = F2.L < 12 ? r3() < 0.5 ? 0 : 1 : waehle2(r3, [0, 1, 0.35, 0.65]);
+    if (o3.hausTuer !== false && F3.art === "haupt" && u1 - u0 > 5.5) {
+      const lage = F3.L < 12 ? r3() < 0.5 ? 0 : 1 : waehle2(r3, [0, 1, 0.35, 0.65]);
       const a2 = clamp3(u0 + (u1 - u0 - 1.7) * lage, u0, u1 - 1.7);
-      hausTuer(F2, a2, egH, o3);
+      hausTuer(F3, a2, egH, o3);
       if (a2 - u0 > 1.5) stuecke.push([u0, a2 - 0.15]);
       if (u1 - a2 - 1.7 > 1.5) stuecke.push([a2 + 1.85, u1]);
     } else stuecke.push([u0, u1]);
@@ -49116,21 +49116,21 @@
       const k3 = o3.typ === "band" ? 1 : Math.max(1, Math.round((b3 - a2) / zw(r3, 4.5, 7)));
       const sw = (b3 - a2) / k3;
       for (let i = 0; i < k3; i++) {
-        ladenFront(ctx, F2, a2 + i * sw + (i ? 0.1 : 0), a2 + (i + 1) * sw - (i < k3 - 1 ? 0.1 : 0), egH, { ...o3, markise: o3.stil === "neu" ? null : mark(), ausleger: o3.stil === "alt" && r3() < 0.6, leucht: r3() < (o3.leucht ?? 0) });
+        ladenFront(ctx, F3, a2 + i * sw + (i ? 0.1 : 0), a2 + (i + 1) * sw - (i < k3 - 1 ? 0.1 : 0), egH, { ...o3, markise: o3.stil === "neu" ? null : mark(), ausleger: o3.stil === "alt" && r3() < 0.6, leucht: r3() < (o3.leucht ?? 0) });
       }
     }
   }
-  function arkade(ctx, F2, egH, o3) {
+  function arkade(ctx, F3, egH, o3) {
     const r3 = ctx.r, tb = o3.tb ?? 0.1, wand2 = o3.arkWand ?? ORN;
-    const k3 = Math.max(2, Math.round((F2.L - 0.6) / zw(r3, 3.2, 4.2))), bw = (F2.L - 0.6) / k3;
+    const k3 = Math.max(2, Math.round((F3.L - 0.6) / zw(r3, 3.2, 4.2))), bw = (F3.L - 0.6) / k3;
     const tuer = Math.floor(r3() * k3);
     const ra = bw / 2 - 0.3, ys = egH - 0.35 - ra;
     for (let i = 0; i < k3; i++) {
       const a2 = 0.3 + i * bw, b3 = a2 + bw, m = (a2 + b3) / 2;
-      if (i === tuer) hausTuer(F2, m - 0.85, ys + ra * 0.6, { ...o3, tb });
-      else ladenFront(ctx, F2, a2 + 0.35, b3 - 0.35, ys + ra * 0.7, { ...o3, tb, schild: false, markise: null, leucht: false });
-      F2.box(a2 - 0.02, a2 + 0.3, 0, ys, tb, tb + 0.65, wand2);
-      F2.box(b3 - 0.3, b3 + 0.02, 0, ys, tb, tb + 0.65, wand2);
+      if (i === tuer) hausTuer(F3, m - 0.85, ys + ra * 0.6, { ...o3, tb });
+      else ladenFront(ctx, F3, a2 + 0.35, b3 - 0.35, ys + ra * 0.7, { ...o3, tb, schild: false, markise: null, leucht: false });
+      F3.box(a2 - 0.02, a2 + 0.3, 0, ys, tb, tb + 0.65, wand2);
+      F3.box(b3 - 0.3, b3 + 0.02, 0, ys, tb, tb + 0.65, wand2);
       const sh = new three_module_exports.Shape();
       sh.moveTo(-bw / 2, 0);
       sh.lineTo(-ra, 0);
@@ -49139,15 +49139,15 @@
       sh.lineTo(bw / 2, egH - ys);
       sh.lineTo(-bw / 2, egH - ys);
       sh.closePath();
-      F2.profil(sh, m, ys, tb, tb + 0.65, wand2, 10);
-      F2.box(m - 0.18, m + 0.18, ys + ra - 0.1, ys + ra + 0.25, tb + 0.6, tb + 0.72, dunkler(wand2, 0.05));
+      F3.profil(sh, m, ys, tb, tb + 0.65, wand2, 10);
+      F3.box(m - 0.18, m + 0.18, ys + ra - 0.1, ys + ra + 0.25, tb + 0.6, tb + 0.72, dunkler(wand2, 0.05));
       if (i !== tuer) {
         const name2 = naechsterName(ctx);
-        F2.box(m - 1, m + 1, ys + ra - 0.95, ys + ra - 0.45, tb + 0.5, tb + 0.55, waehle2(r3, ["#2f3a40", "#6b2e35", "#2f5d4a", "#f4efe6"]));
-        F2.text(name2, m, ys + ra - 0.7, 0.32, "#ffffff", tb + 0.56, 1.85);
+        F3.box(m - 1, m + 1, ys + ra - 0.95, ys + ra - 0.45, tb + 0.5, tb + 0.55, waehle2(r3, ["#2f3a40", "#6b2e35", "#2f5d4a", "#f4efe6"]));
+        F3.text(name2, m, ys + ra - 0.7, 0.32, "#ffffff", tb + 0.56, 1.85);
       }
     }
-    F2.box(0, F2.L, 0, 0.16, tb, tb + 0.7, dunkler(wand2, 0.08));
+    F3.box(0, F3.L, 0, 0.16, tb, tb + 0.7, dunkler(wand2, 0.08));
   }
   function schornstein(S, x2, z4, y0, y1, farbe3, r3) {
     const w2 = zw(r3, 0.55, 0.8), d3 = zw(r3, 0.7, 1.2);
@@ -49246,9 +49246,9 @@
   function attika(ctx, poly2, y2, h3, farbe3, kappe = "#d9dcdf", dick = 0.3) {
     const n3 = poly2.length;
     for (let i = 0; i < n3; i++) {
-      const F2 = new Fassade(ctx, poly2[i], poly2[(i + 1) % n3], { extL: true, extR: true });
-      F2.box(0, F2.L, y2, y2 + h3, -dick, 0.02, farbe3);
-      F2.box(-0.02, F2.L + 0.02, y2 + h3, y2 + h3 + 0.08, -dick - 0.04, 0.08, kappe);
+      const F3 = new Fassade(ctx, poly2[i], poly2[(i + 1) % n3], { extL: true, extR: true });
+      F3.box(0, F3.L, y2, y2 + h3, -dick, 0.02, farbe3);
+      F3.box(-0.02, F3.L + 0.02, y2 + h3, y2 + h3 + 0.08, -dick - 0.04, 0.08, kappe);
     }
   }
   function mansarde(ctx, y2, o3) {
@@ -49259,51 +49259,51 @@
     const ins2 = K3.map((k3) => dachKante(ctx, k3) ? o3.b : 0);
     S.add(prismoid(P22, y2 + o3.hu, o3.ho, ins2), o3.farbeO);
     const P32 = versetzt(P22, ins2);
-    for (const F2 of fassadenFuer(ctx, P22, K3)) if (F2.art) F2.box(-0.05, F2.L + 0.05, y2 + o3.hu - 0.06, y2 + o3.hu + 0.06, -0.05, 0.12, o3.kante ?? "#c9cdd0");
-    if (o3.gauben !== false) for (const F2 of ctx.fassaden) {
-      if (F2.art === "neben") continue;
-      const ax = F2.art === "ecke" ? F2.eckIndex === Math.floor(F2.eckAnzahl / 2) ? [F2.L / 2] : [] : o3.achsen?.get(F2) ?? achsen(F2.L, 3.2, 1.5);
+    for (const F3 of fassadenFuer(ctx, P22, K3)) if (F3.art) F3.box(-0.05, F3.L + 0.05, y2 + o3.hu - 0.06, y2 + o3.hu + 0.06, -0.05, 0.12, o3.kante ?? "#c9cdd0");
+    if (o3.gauben !== false) for (const F3 of ctx.fassaden) {
+      if (F3.art === "neben") continue;
+      const ax = F3.art === "ecke" ? F3.eckIndex === Math.floor(F3.eckAnzahl / 2) ? [F3.L / 2] : [] : o3.achsen?.get(F3) ?? achsen(F3.L, 3.2, 1.5);
       ax.forEach((u, i) => {
-        if (o3.jedeZweite && F2.art !== "ecke" && i % 2) return;
-        if (gesperrt(ctx, F2, u)) return;
-        if (ctx.sperreGauben && !ctx.sperreGauben(F2)(u)) return;
-        const randL = F2.extL && ctx.eck ? o3.a + 1.2 : 0.9, randR = F2.extR && ctx.eck ? o3.a + 1.2 : 0.9;
-        if (F2.art !== "ecke" && (u < randL || u > F2.L - randR)) return;
-        gaube(F2, u, y2, o3.hu, o3.a, o3.gaube);
+        if (o3.jedeZweite && F3.art !== "ecke" && i % 2) return;
+        if (gesperrt(ctx, F3, u)) return;
+        if (ctx.sperreGauben && !ctx.sperreGauben(F3)(u)) return;
+        const randL = F3.extL && ctx.eck ? o3.a + 1.2 : 0.9, randR = F3.extR && ctx.eck ? o3.a + 1.2 : 0.9;
+        if (F3.art !== "ecke" && (u < randL || u > F3.L - randR)) return;
+        gaube(F3, u, y2, o3.hu, o3.a, o3.gaube);
       });
     }
     dachkram(ctx, P32, y2, y2 + o3.hu + o3.ho, o3.kram);
     return y2 + o3.hu + o3.ho;
   }
-  function gaube(F2, u, y2, hu, a2, o3 = {}) {
+  function gaube(F3, u, y2, hu, a2, o3 = {}) {
     if (o3.form === "keine") return;
     const ochs = o3.form === "ochsenauge", schlepp = o3.form === "schlepp";
     const hb2 = 0.45, hd = Math.min(ochs ? 1.2 : schlepp ? 1.5 : o3.hoehe ?? 1.9, hu * 0.8), bw = ochs ? 1 : schlepp ? o3.breite ?? 2.6 : o3.breite ?? 1.35;
     if (ochs) {
       const tf2 = -a2 * hb2 / hu + 0.04, tbk2 = -a2 * (hb2 + hd) / hu - 0.6;
-      F2.box(u - bw / 2, u + bw / 2, y2 + hb2, y2 + hb2 + hd * 0.6, tbk2, tf2, o3.wand ?? ORN);
+      F3.box(u - bw / 2, u + bw / 2, y2 + hb2, y2 + hb2 + hd * 0.6, tbk2, tf2, o3.wand ?? ORN);
       const g = new three_module_exports.CylinderGeometry(bw / 2, bw / 2, tf2 - tbk2, 12);
       g.rotateX(Math.PI / 2);
       g.translate(u, y2 + hb2 + hd * 0.6, (tf2 + tbk2) / 2);
-      F2.geo(g, o3.wand ?? ORN);
+      F3.geo(g, o3.wand ?? ORN);
       const gl = new three_module_exports.CylinderGeometry(0.3, 0.3, 0.06, 12);
       gl.rotateX(Math.PI / 2);
       gl.translate(u, y2 + hb2 + hd * 0.55, tf2 + 0.02);
-      F2.geo(gl, o3.glas ?? FARBEN3.fenster);
+      F3.geo(gl, o3.glas ?? FARBEN3.fenster);
       return;
     }
     const tf = -a2 * hb2 / hu + 0.04, tbk = -a2 * (hb2 + hd) / hu - 0.6;
     const wand2 = o3.wand ?? ORN, dach3 = o3.dach ?? "#7c848c";
-    F2.box(u - bw / 2, u + bw / 2, y2 + hb2, y2 + hb2 + hd, tbk, tf, wand2);
-    F2.box(u - bw / 2 + 0.22, u + bw / 2 - 0.22, y2 + hb2 + 0.25, y2 + hb2 + hd - 0.2, tf - 0.05, tf + 0.03, o3.glas ?? FARBEN3.fenster);
-    F2.box(u - 0.03, u + 0.03, y2 + hb2 + 0.25, y2 + hb2 + hd - 0.2, tf, tf + 0.05, RAHMEN);
+    F3.box(u - bw / 2, u + bw / 2, y2 + hb2, y2 + hb2 + hd, tbk, tf, wand2);
+    F3.box(u - bw / 2 + 0.22, u + bw / 2 - 0.22, y2 + hb2 + 0.25, y2 + hb2 + hd - 0.2, tf - 0.05, tf + 0.03, o3.glas ?? FARBEN3.fenster);
+    F3.box(u - 0.03, u + 0.03, y2 + hb2 + 0.25, y2 + hb2 + hd - 0.2, tf, tf + 0.05, RAHMEN);
     const s2 = new three_module_exports.Shape(), b3 = bw / 2 + 0.12;
     if (schlepp) {
       const g = new three_module_exports.BoxGeometry(bw + 0.3, 0.14, tf - tbk + 0.4);
       g.rotateX(0.22);
       g.translate(u, y2 + hb2 + hd + 0.1, (tf + tbk) / 2);
-      F2.geo(g, dach3);
-      F2.box(u + 0.02, u + bw / 2 - 0.22, y2 + hb2 + 0.25, y2 + hb2 + hd - 0.2, tf - 0.05, tf + 0.03, o3.glas ?? FARBEN3.fenster);
+      F3.geo(g, dach3);
+      F3.box(u + 0.02, u + bw / 2 - 0.22, y2 + hb2 + 0.25, y2 + hb2 + hd - 0.2, tf - 0.05, tf + 0.03, o3.glas ?? FARBEN3.fenster);
       return;
     }
     if (o3.form === "bogen") {
@@ -49322,7 +49322,7 @@
       s2.lineTo(0, 0.75);
       s2.closePath();
     }
-    F2.profil(s2, u, y2 + hb2 + hd, tbk, tf + 0.1, dach3);
+    F3.profil(s2, u, y2 + hb2 + hd, tbk, tf + 0.1, dach3);
   }
   function satteldach(ctx, x0, z0, x1, z1, y2, h3, achse, o3 = {}) {
     const S = ctx.S, ov = o3.ueberstand ?? 0.45, ovG = o3.ortgang ?? 0.3, th = 0.22, dach3 = o3.dach, wand2 = o3.wand;
@@ -49361,8 +49361,8 @@
     ctx.S.add(prismoid(poly2, y0, y1 - y0), farbe3);
     const fac = [];
     for (let j3 = 0; j3 < seg2; j3++) {
-      const F2 = new Fassade(ctx, poly2[j3], poly2[(j3 + 1) % seg2], { art: "turm", extL: true, extR: true });
-      if (F2.nx + F2.nz > -0.15) fac.push(F2);
+      const F3 = new Fassade(ctx, poly2[j3], poly2[(j3 + 1) % seg2], { art: "turm", extL: true, extR: true });
+      if (F3.nx + F3.nz > -0.15) fac.push(F3);
     }
     return { poly: poly2, fac };
   }
@@ -49488,29 +49488,29 @@
     ctx.vermeide = v;
     return f11;
   };
-  function achsenFuer(F2, c, ecke) {
-    if (ecke) return [F2.L / 2];
-    if (c.rhythmus === "gekoppelt" && F2.L >= 8.5) {
-      const g = achsen(F2.L, c.raster * 1.8, c.rand + 0.2), out = [];
+  function achsenFuer(F3, c, ecke) {
+    if (ecke) return [F3.L / 2];
+    if (c.rhythmus === "gekoppelt" && F3.L >= 8.5) {
+      const g = achsen(F3.L, c.raster * 1.8, c.rand + 0.2), out = [];
       g.forEach((m) => out.push(m - c.fw / 2 - 0.22, m + c.fw / 2 + 0.22));
       out.abstand = c.raster;
       out.paare = g;
       return out;
     }
-    const a2 = achsen(F2.L, c.raster, c.rand);
+    const a2 = achsen(F3.L, c.raster, c.rand);
     return a2;
   }
-  function balustrade(F2, u0, u1, y2, farbe3) {
-    F2.box(u0, u1, y2, y2 + 0.18, -0.25, 0.1, farbe3);
-    F2.box(u0 - 0.03, u1 + 0.03, y2 + 0.82, y2 + 0.95, -0.28, 0.13, farbe3);
-    for (let u = u0 + 0.25; u < u1 - 0.1; u += 0.34) F2.box(u - 0.07, u + 0.07, y2 + 0.18, y2 + 0.82, -0.18, 0.04, farbe3);
-    for (let u = u0; u <= u1 + 0.01; u += Math.max(2.5, (u1 - u0) / Math.max(1, Math.round((u1 - u0) / 3.2)))) F2.box(u - 0.2, u + 0.2, y2, y2 + 0.95, -0.25, 0.12, farbe3);
+  function balustrade(F3, u0, u1, y2, farbe3) {
+    F3.box(u0, u1, y2, y2 + 0.18, -0.25, 0.1, farbe3);
+    F3.box(u0 - 0.03, u1 + 0.03, y2 + 0.82, y2 + 0.95, -0.28, 0.13, farbe3);
+    for (let u = u0 + 0.25; u < u1 - 0.1; u += 0.34) F3.box(u - 0.07, u + 0.07, y2 + 0.18, y2 + 0.82, -0.18, 0.04, farbe3);
+    for (let u = u0; u <= u1 + 0.01; u += Math.max(2.5, (u1 - u0) / Math.max(1, Math.round((u1 - u0) / 3.2)))) F3.box(u - 0.2, u + 0.2, y2, y2 + 0.95, -0.25, 0.12, farbe3);
   }
-  function loggia(F2, u0, u1, yF, gh, c) {
-    F2.box(u0, u1, yF + 0.05, yF + gh - 0.3, -0.02, 0.04, "#4d555c");
-    F2.box(u0 + 0.35, u1 - 0.35, yF + 0.15, yF + gh - 0.5, 0, 0.05, FARBEN3.fensterHell);
-    F2.box(u0, u1, yF + 0.05, yF + 1.05, 0, 0.16, c.loggiaFarbe ?? c.wand);
-    F2.box(u0 - 0.05, u1 + 0.05, yF + 1, yF + 1.1, 0, 0.2, c.orn);
+  function loggia(F3, u0, u1, yF, gh, c) {
+    F3.box(u0, u1, yF + 0.05, yF + gh - 0.3, -0.02, 0.04, "#4d555c");
+    F3.box(u0 + 0.35, u1 - 0.35, yF + 0.15, yF + gh - 0.5, 0, 0.05, FARBEN3.fensterHell);
+    F3.box(u0, u1, yF + 0.05, yF + 1.05, 0, 0.16, c.loggiaFarbe ?? c.wand);
+    F3.box(u0 - 0.05, u1 + 0.05, yF + 1, yF + 1.1, 0, 0.2, c.orn);
   }
   function putzbau(ctx, c) {
     const { S, r: r3, n: n3 } = ctx;
@@ -49519,35 +49519,35 @@
     S.add(prismoid(ctx.P, 0, H), c.wand);
     ctx.achsenJe = /* @__PURE__ */ new Map();
     ctx.risalit = /* @__PURE__ */ new Map();
-    for (const F2 of ctx.fassaden) {
-      const [s0, s1] = F2.spanne(0.1);
-      const haupt = F2.art === "haupt", ecke = F2.art === "ecke";
-      F2.box(s0, s1, 0, c.eg - 0.05, 0, 0.08, c.sockel);
-      if (c.rustika) for (let y2 = 0.9; y2 < c.eg - 0.4; y2 += 0.58) F2.box(s0, s1, y2, y2 + 0.06, 0.08, 0.1, dunkler(c.sockel, 0.07));
-      F2.box(s0, s1, 0, 0.45, 0, 0.12, dunkler(c.sockel, 0.1));
-      const ax = achsenFuer(F2, c, ecke);
-      ctx.achsenJe.set(F2, ax);
-      if (F2.art === "neben") {
-        for (const u of ax) fenster(F2, u, 1.5, c.fw, Math.min(c.eg - 2.6, 1.9), { ...c.fo(1, 0, F2), verd: null, t: 0.08 });
-      } else ladenzone(ctx, F2, c.eg, { tb: 0.1, stil: c.laden, typ: c.ladenTyp, markisen: c.markisen, leucht: c.leucht, arkWand: c.orn, portal: c.portal });
-      if (c.vordach && F2.art !== "neben" && c.ladenTyp !== "arkade") {
-        F2.box(s0 + (F2.extL ? 0 : 0.2), s1 - (F2.extR ? 0 : 0.2), c.eg - 0.78, c.eg - 0.62, 0, 1.6, "#f4f2ee");
-        F2.box(s0 + (F2.extL ? 0 : 0.2), s1 - (F2.extR ? 0 : 0.2), c.eg - 0.8, c.eg - 0.6, 1.5, 1.62, c.vordach);
+    for (const F3 of ctx.fassaden) {
+      const [s0, s1] = F3.spanne(0.1);
+      const haupt = F3.art === "haupt", ecke = F3.art === "ecke";
+      F3.box(s0, s1, 0, c.eg - 0.05, 0, 0.08, c.sockel);
+      if (c.rustika) for (let y2 = 0.9; y2 < c.eg - 0.4; y2 += 0.58) F3.box(s0, s1, y2, y2 + 0.06, 0.08, 0.1, dunkler(c.sockel, 0.07));
+      F3.box(s0, s1, 0, 0.45, 0, 0.12, dunkler(c.sockel, 0.1));
+      const ax = achsenFuer(F3, c, ecke);
+      ctx.achsenJe.set(F3, ax);
+      if (F3.art === "neben") {
+        for (const u of ax) fenster(F3, u, 1.5, c.fw, Math.min(c.eg - 2.6, 1.9), { ...c.fo(1, 0, F3), verd: null, t: 0.08 });
+      } else ladenzone(ctx, F3, c.eg, { tb: 0.1, stil: c.laden, typ: c.ladenTyp, markisen: c.markisen, leucht: c.leucht, arkWand: c.orn, portal: c.portal });
+      if (c.vordach && F3.art !== "neben" && c.ladenTyp !== "arkade") {
+        F3.box(s0 + (F3.extL ? 0 : 0.2), s1 - (F3.extR ? 0 : 0.2), c.eg - 0.78, c.eg - 0.62, 0, 1.6, "#f4f2ee");
+        F3.box(s0 + (F3.extL ? 0 : 0.2), s1 - (F3.extR ? 0 : 0.2), c.eg - 0.8, c.eg - 0.6, 1.5, 1.62, c.vordach);
       }
-      if (c.gurt) F2.box(s0, s1, c.eg - 0.12, c.eg + 0.2, 0, 0.26, c.orn);
+      if (c.gurt) F3.box(s0, s1, c.eg - 0.12, c.eg + 0.2, 0, 0.26, c.orn);
       let ris = null;
       if (haupt && c.rhythmus === "risalit" && ax.length >= 5) {
         const m = (ax.length - 1) / 2, k3 = ax.length >= 7 ? 1.5 : ax.length % 2 ? 0.5 : 1;
         const i0 = Math.ceil(m - k3), i1 = Math.floor(m + k3);
         const u0 = ax[i0] - ax.abstand / 2 + 0.15, u1 = ax[i1] + ax.abstand / 2 - 0.15;
         ris = { i0, i1, u0, u1, t: 0.32 };
-        F2.box(u0, u1, c.eg + 0.2, H - 0.05, 0, ris.t, heller(c.wand, 0.02));
-        F2.box(u0 - 0.05, u0 + 0.5, c.eg + 0.2, H - 0.3, ris.t, ris.t + 0.1, c.orn);
-        F2.box(u1 - 0.5, u1 + 0.05, c.eg + 0.2, H - 0.3, ris.t, ris.t + 0.1, c.orn);
-        ctx.risalit.set(F2, { uc: (u0 + u1) / 2, B: u1 - u0 });
+        F3.box(u0, u1, c.eg + 0.2, H - 0.05, 0, ris.t, heller(c.wand, 0.02));
+        F3.box(u0 - 0.05, u0 + 0.5, c.eg + 0.2, H - 0.3, ris.t, ris.t + 0.1, c.orn);
+        F3.box(u1 - 0.5, u1 + 0.05, c.eg + 0.2, H - 0.3, ris.t, ris.t + 0.1, c.orn);
+        ctx.risalit.set(F3, { uc: (u0 + u1) / 2, B: u1 - u0 });
       }
       let erk = null;
-      if (haupt && c.erker && !ris && !ax.paare && F2.L >= 10.5 && n3 >= 3 && ax.length >= 3) {
+      if (haupt && c.erker && !ris && !ax.paare && F3.L >= 10.5 && n3 >= 3 && ax.length >= 3) {
         const sp6 = ax.abstand, mid = (ax.length - 1) / 2;
         const im = c.erkerLage === "seite" ? Math.max(1, Math.floor(ax.length * 0.25)) : Math.floor(mid);
         const uc = c.erkerLage !== "seite" && ax.length % 2 === 0 ? (ax[im] + ax[im + 1]) / 2 : ax[im];
@@ -49576,84 +49576,84 @@
       if (c.pilaster && !ecke) {
         const pf = c.pilasterFarbe ?? c.orn;
         const ya = c.eg + 0.2, yb = H - (c.gesims === "konsolen" ? 0.75 : 0.3);
-        F2.box(0.05, 0.6, ya, yb, 0, 0.12, pf);
-        F2.box(F2.L - 0.6, F2.L - 0.05, ya, yb, 0, 0.12, pf);
+        F3.box(0.05, 0.6, ya, yb, 0, 0.12, pf);
+        F3.box(F3.L - 0.6, F3.L - 0.05, ya, yb, 0, 0.12, pf);
         if (c.pilaster === "achsen") {
           const mitten = ax.paare ? ax.paare.slice(1).map((m, i) => (m + ax.paare[i]) / 2) : ax.slice(1).map((u, i) => (u + ax[i]) / 2);
           for (const u of mitten) {
             if (erk && Math.abs(u - erk.uc) < erk.bw / 2 + 0.3) continue;
             if (ris && u > ris.u0 - 0.3 && u < ris.u1 + 0.3) continue;
-            F2.box(u - 0.22, u + 0.22, ya, yb, 0, 0.1, pf);
+            F3.box(u - 0.22, u + 0.22, ya, yb, 0, 0.1, pf);
           }
         }
       }
       for (let k3 = 1; k3 <= n3; k3++) {
         const yF = c.eg + (k3 - 1) * c.gh;
         const fh = c.fhk ? c.fhk(k3) : c.fh;
-        if (c.baender && (c.baender === "alle" || k3 === 1)) F2.box(s0, s1, yF + c.bru - 0.24, yF + c.bru - 0.1, 0, 0.12, c.orn);
-        if (c.geschossband && k3 > 1) F2.box(s0, s1, yF - 0.08, yF + 0.08, 0, 0.08, c.orn);
+        if (c.baender && (c.baender === "alle" || k3 === 1)) F3.box(s0, s1, yF + c.bru - 0.24, yF + c.bru - 0.1, 0, 0.12, c.orn);
+        if (c.geschossband && k3 > 1) F3.box(s0, s1, yF - 0.08, yF + 0.08, 0, 0.08, c.orn);
         ax.forEach((u, i) => {
-          if (gesperrt(ctx, F2, u)) return;
+          if (gesperrt(ctx, F3, u)) return;
           if (erk && k3 >= erk.k0 && k3 <= erk.k1 && Math.abs(u - erk.uc) < erk.bw / 2) return;
           if (c.treppenhaus != null && haupt && i === c.treppenhaus && ax.length >= 4) return;
           const tOff = ris && i >= ris.i0 && i <= ris.i1 ? ris.t : 0;
-          const fo = { ...c.fo(k3, i, F2), t: tOff };
-          const fw = ecke ? Math.min(c.fw, F2.L - 0.55) : c.fw;
+          const fo = { ...c.fo(k3, i, F3), t: tOff };
+          const fw = ecke ? Math.min(c.fw, F3.L - 0.55) : c.fw;
           if (balk.has(i) && (c.balkonGeschosse ?? [1, 2]).includes(k3) && k3 < n3 + (c.balkonOben ? 1 : 0)) {
             const bart = c.balkon?.art;
             if (bart === "loggia") {
-              loggia(F2, u - fw / 2 - 0.5, u + fw / 2 + 0.5, yF, c.gh, c);
+              loggia(F3, u - fw / 2 - 0.5, u + fw / 2 + 0.5, yF, c.gh, c);
               return;
             }
-            fenster(F2, u, yF + 0.12, fw, Math.min(c.gh - 0.75, fh + c.bru - 0.25), { ...fo, sims: null, verd: fo.verd === "dreieck" || fo.verd === "bogen" ? "gerade" : fo.verd });
-            balkon(tOff ? F2.versatz(tOff) : F2, u - fw / 2 - 0.45, u + fw / 2 + 0.45, yF + 0.12, c.balkonTiefe ?? 0.9, c.balkon ?? { konsolen: true, platte: c.orn });
-          } else fenster(F2, u, yF + c.bru, fw, fh, fo);
-          if (c.felder) F2.box(u - fw / 2 - 0.05, u + fw / 2 + 0.05, yF + 0.2, yF + c.bru - 0.26, tOff, tOff + 0.04, c.felder);
+            fenster(F3, u, yF + 0.12, fw, Math.min(c.gh - 0.75, fh + c.bru - 0.25), { ...fo, sims: null, verd: fo.verd === "dreieck" || fo.verd === "bogen" ? "gerade" : fo.verd });
+            balkon(tOff ? F3.versatz(tOff) : F3, u - fw / 2 - 0.45, u + fw / 2 + 0.45, yF + 0.12, c.balkonTiefe ?? 0.9, c.balkon ?? { konsolen: true, platte: c.orn });
+          } else fenster(F3, u, yF + c.bru, fw, fh, fo);
+          if (c.felder) F3.box(u - fw / 2 - 0.05, u + fw / 2 + 0.05, yF + 0.2, yF + c.bru - 0.26, tOff, tOff + 0.04, c.felder);
         });
       }
       if (c.treppenhaus != null && haupt && ax.length >= 4) {
         const u = ax[c.treppenhaus];
-        F2.box(u - 0.62, u + 0.62, c.eg + 0.4, H - 0.6, -0.02, 0.05, RAHMEN);
-        F2.box(u - 0.55, u + 0.55, c.eg + 0.47, H - 0.67, -0.03, 0.065, FARBEN3.fensterHell);
-        for (let y2 = c.eg + 0.47 + 0.55; y2 < H - 0.7; y2 += 0.55) F2.box(u - 0.55, u + 0.55, y2 - 0.025, y2 + 0.025, 0, 0.08, RAHMEN);
-        F2.box(u - 0.02, u + 0.02, c.eg + 0.47, H - 0.67, 0, 0.08, RAHMEN);
+        F3.box(u - 0.62, u + 0.62, c.eg + 0.4, H - 0.6, -0.02, 0.05, RAHMEN);
+        F3.box(u - 0.55, u + 0.55, c.eg + 0.47, H - 0.67, -0.03, 0.065, FARBEN3.fensterHell);
+        for (let y2 = c.eg + 0.47 + 0.55; y2 < H - 0.7; y2 += 0.55) F3.box(u - 0.55, u + 0.55, y2 - 0.025, y2 + 0.025, 0, 0.08, RAHMEN);
+        F3.box(u - 0.02, u + 0.02, c.eg + 0.47, H - 0.67, 0, 0.08, RAHMEN);
       }
       if (c.raster50 && !ecke) {
-        for (let k3 = 1; k3 <= n3; k3++) F2.box(s0, s1, c.eg + (k3 - 1) * c.gh - 0.1, c.eg + (k3 - 1) * c.gh + 0.1, 0, 0.14, c.raster50);
+        for (let k3 = 1; k3 <= n3; k3++) F3.box(s0, s1, c.eg + (k3 - 1) * c.gh - 0.1, c.eg + (k3 - 1) * c.gh + 0.1, 0, 0.14, c.raster50);
         for (let i = 0; i <= ax.length; i++) {
-          const u = i === 0 ? 0.15 : i === ax.length ? F2.L - 0.15 : (ax[i - 1] + ax[i]) / 2;
-          F2.box(u - 0.12, u + 0.12, c.eg, H, 0, 0.14, c.raster50);
+          const u = i === 0 ? 0.15 : i === ax.length ? F3.L - 0.15 : (ax[i - 1] + ax[i]) / 2;
+          F3.box(u - 0.12, u + 0.12, c.eg, H, 0, 0.14, c.raster50);
         }
       }
-      if (erk) erker(ctx, F2, erk, c);
-      hauptgesims(F2, s0, s1, H, c);
+      if (erk) erker(ctx, F3, erk, c);
+      hauptgesims(F3, s0, s1, H, c);
     }
     ctx.farbe = c.wand;
     return H;
   }
-  function hauptgesims(F2, s0, s1, H, c) {
-    const eL = F2.extL ? 0.45 : 0, eR = F2.extR ? 0.45 : 0;
+  function hauptgesims(F3, s0, s1, H, c) {
+    const eL = F3.extL ? 0.45 : 0, eR = F3.extR ? 0.45 : 0;
     if (c.gesims === "konsolen") {
-      F2.box(s0, s1, H - 0.78, H - 0.24, 0, 0.06, c.orn);
-      for (let u = 0.4; u < F2.L - 0.2; u += 0.72) F2.box(u - 0.1, u + 0.1, H - 0.5, H - 0.14, 0, 0.32, c.orn);
-      F2.box(s0 - eL, s1 + eR, H - 0.16, H + 0.12, 0, 0.5, c.orn);
+      F3.box(s0, s1, H - 0.78, H - 0.24, 0, 0.06, c.orn);
+      for (let u = 0.4; u < F3.L - 0.2; u += 0.72) F3.box(u - 0.1, u + 0.1, H - 0.5, H - 0.14, 0, 0.32, c.orn);
+      F3.box(s0 - eL, s1 + eR, H - 0.16, H + 0.12, 0, 0.5, c.orn);
     } else if (c.gesims === "zahnschnitt") {
-      F2.box(s0, s1, H - 0.6, H - 0.42, 0, 0.12, c.orn);
-      for (let u = 0.2; u < F2.L - 0.1; u += 0.32) F2.box(u - 0.08, u + 0.08, H - 0.42, H - 0.24, 0, 0.2, c.orn);
-      F2.box(s0 - eL, s1 + eR, H - 0.24, H + 0.1, 0, 0.42, c.orn);
+      F3.box(s0, s1, H - 0.6, H - 0.42, 0, 0.12, c.orn);
+      for (let u = 0.2; u < F3.L - 0.1; u += 0.32) F3.box(u - 0.08, u + 0.08, H - 0.42, H - 0.24, 0, 0.2, c.orn);
+      F3.box(s0 - eL, s1 + eR, H - 0.24, H + 0.1, 0, 0.42, c.orn);
     } else if (c.gesims === "einfach") {
-      F2.box(s0, s1, H - 0.5, H - 0.3, 0, 0.12, c.orn);
-      F2.box(s0 - eL * 0.9, s1 + eR * 0.9, H - 0.28, H + 0.1, 0, 0.42, c.orn);
+      F3.box(s0, s1, H - 0.5, H - 0.3, 0, 0.12, c.orn);
+      F3.box(s0 - eL * 0.9, s1 + eR * 0.9, H - 0.28, H + 0.1, 0, 0.42, c.orn);
     } else if (c.gesims === "fries") {
-      F2.box(s0, s1, H - 0.9, H - 0.35, 0, 0.05, c.orn);
-      for (let u = 0.3; u < F2.L - 0.2; u += 0.55) F2.box(u - 0.16, u + 0.16, H - 0.78, H - 0.46, 0.05, 0.08, c.fliese ?? "#5f8f7a");
-      F2.box(s0 - eL * 0.9, s1 + eR * 0.9, H - 0.32, H + 0.1, 0, 0.55, c.orn);
+      F3.box(s0, s1, H - 0.9, H - 0.35, 0, 0.05, c.orn);
+      for (let u = 0.3; u < F3.L - 0.2; u += 0.55) F3.box(u - 0.16, u + 0.16, H - 0.78, H - 0.46, 0.05, 0.08, c.fliese ?? "#5f8f7a");
+      F3.box(s0 - eL * 0.9, s1 + eR * 0.9, H - 0.32, H + 0.1, 0, 0.55, c.orn);
     } else if (c.gesims === "hohlkehle") {
-      F2.box(s0, s1, H - 0.45, H - 0.2, 0, 0.18, c.orn);
-      F2.box(s0 - eL * 0.6, s1 + eR * 0.6, H - 0.22, H + 0.08, 0, 0.36, c.orn);
-    } else F2.box(s0 - eL * 0.5, s1 + eR * 0.5, H - 0.12, H + 0.06, 0, 0.3, c.orn);
+      F3.box(s0, s1, H - 0.45, H - 0.2, 0, 0.18, c.orn);
+      F3.box(s0 - eL * 0.6, s1 + eR * 0.6, H - 0.22, H + 0.08, 0, 0.36, c.orn);
+    } else F3.box(s0 - eL * 0.5, s1 + eR * 0.5, H - 0.12, H + 0.06, 0, 0.3, c.orn);
   }
-  function erker(ctx, F2, e, c) {
+  function erker(ctx, F3, e, c) {
     const { uc, bw, k0, k1, td } = e;
     const y0 = c.eg + (k0 - 1) * c.gh, y1 = c.eg + k1 * c.gh;
     const uL = uc - bw / 2, uR = uc + bw / 2;
@@ -49661,24 +49661,24 @@
     let front2, seiten4, P4;
     if (c.erkerTyp === "polygon") {
       const kk = td * 0.8;
-      P4 = [F2.welt(uL, 0), F2.welt(uR, 0), F2.welt(uR - kk, td), F2.welt(uL + kk, td)];
+      P4 = [F3.welt(uL, 0), F3.welt(uR, 0), F3.welt(uR - kk, td), F3.welt(uL + kk, td)];
       ctx.S.add(prismoid(P4, y0, y1 - y0), wand2);
-      front2 = new Fassade(ctx, F2.welt(uL + kk, td), F2.welt(uR - kk, td), { art: "erker" });
-      seiten4 = [new Fassade(ctx, F2.welt(uR - kk, td), F2.welt(uR, 0), { art: "erker" }), new Fassade(ctx, F2.welt(uL, 0), F2.welt(uL + kk, td), { art: "erker" })];
+      front2 = new Fassade(ctx, F3.welt(uL + kk, td), F3.welt(uR - kk, td), { art: "erker" });
+      seiten4 = [new Fassade(ctx, F3.welt(uR - kk, td), F3.welt(uR, 0), { art: "erker" }), new Fassade(ctx, F3.welt(uL, 0), F3.welt(uL + kk, td), { art: "erker" })];
     } else {
-      F2.box(uL, uR, y0, y1, 0, td, wand2);
-      P4 = [F2.welt(uL, 0), F2.welt(uR, 0), F2.welt(uR, td), F2.welt(uL, td)];
-      front2 = F2.versatz(td);
-      seiten4 = [new Fassade(ctx, F2.welt(uR, td), F2.welt(uR, 0), { art: "erker" }), new Fassade(ctx, F2.welt(uL, 0), F2.welt(uL, td), { art: "erker" })];
+      F3.box(uL, uR, y0, y1, 0, td, wand2);
+      P4 = [F3.welt(uL, 0), F3.welt(uR, 0), F3.welt(uR, td), F3.welt(uL, td)];
+      front2 = F3.versatz(td);
+      seiten4 = [new Fassade(ctx, F3.welt(uR, td), F3.welt(uR, 0), { art: "erker" }), new Fassade(ctx, F3.welt(uL, 0), F3.welt(uL, td), { art: "erker" })];
     }
-    F2.box(uL + 0.15, uR - 0.15, y0 - 0.35, y0, 0, td - 0.1, c.orn);
-    F2.box(uL + 0.45, uR - 0.45, y0 - 0.7, y0 - 0.35, 0, td - 0.35, c.orn);
+    F3.box(uL + 0.15, uR - 0.15, y0 - 0.35, y0, 0, td - 0.1, c.orn);
+    F3.box(uL + 0.45, uR - 0.45, y0 - 0.7, y0 - 0.35, 0, td - 0.35, c.orn);
     const istVersatz = c.erkerTyp !== "polygon";
     const fl = istVersatz ? bw : front2.L;
     const fronts = fl > 3.4 ? [fl / 2 - fl / 4 - 0.05, fl / 2 + fl / 4 + 0.05] : [fl / 2];
     for (let k3 = k0; k3 <= k1; k3++) {
       const yF = c.eg + (k3 - 1) * c.gh, fh = c.fhk ? c.fhk(k3) : c.fh;
-      const fo = { ...c.fo(k3, 1, F2), verd: c.erkerVerd ?? "gerade", t: 0 };
+      const fo = { ...c.fo(k3, 1, F3), verd: c.erkerVerd ?? "gerade", t: 0 };
       for (const u of fronts) fenster(front2, istVersatz ? uL + u : u, yF + c.bru, Math.min(c.fw, fl / fronts.length - 0.6), fh, fo);
       for (const G3 of seiten4) fenster(G3, G3.L / 2, yF + c.bru, Math.max(0.35, G3.L - 0.45), fh, { ...fo, verd: null, kreuz: "quer", faschen: null });
       if (k3 > k0) for (const G3 of [front2, ...seiten4]) {
@@ -49689,10 +49689,10 @@
     ctx.S.add(prismoid(P4.map((p2) => p2), y1 - 0.2, 0.2), c.orn);
     if (k1 < ctx.n) {
       if (c.erkerTyp === "polygon") ctx.S.add(prismoid(P4, y1, 0.9), c.orn);
-      else balkon(F2, uL, uR, y1 + 0.02, td, { platte: c.orn, ornament: true, abstand: 0.22 });
+      else balkon(F3, uL, uR, y1 + 0.02, td, { platte: c.orn, ornament: true, abstand: 0.22 });
     } else if (c.erkerHelm) {
       if (c.erkerHelm === "spitz") {
-        const cxz = F2.welt(uc, td / 2);
+        const cxz = F3.welt(uc, td / 2);
         const poly2 = nGon(cxz[0], cxz[1], Math.min(bw, td * 2.2) / 2, 8);
         ctx.S.add(prismoid(poly2, y1, 1.6), c.wand);
         for (const G3 of rundFacetten(ctx, poly2)) fenster(G3, G3.L / 2, y1 + 0.35, Math.min(0.6, G3.L - 0.3), 0.9, { kreuz: "quer" });
@@ -49742,39 +49742,39 @@
       ctx.S.add(prismoid(p2, y1 + 0.2, hoehe * 0.7, p2.map(() => R11 * 0.97)), c.kuppel);
     } else kuppel(ctx, nGon(cx, cz, R11 * 1.02, 8), y1 + 0.2, hoehe, c.kuppel);
   }
-  function giebelFenster(F2, y2, hg, o3 = {}) {
-    const L2 = F2.L, m = L2 / 2;
+  function giebelFenster(F3, y2, hg, o3 = {}) {
+    const L2 = F3.L, m = L2 / 2;
     const breite = (yy) => L2 / 2 * (1 - (yy - y2) / hg);
     const n1 = L2 > 11 ? 3 : L2 > 7.5 ? 2 : 1;
     const fh = Math.min(1.4, hg * 0.28), yb = y2 + 0.7;
     for (let i = 0; i < n1; i++) {
       const u = m + (i - (n1 - 1) / 2) * 1.9;
-      if (Math.abs(u - m) + 0.6 < breite(yb + fh)) fenster(F2, u, yb, o3.fw ?? 0.95, fh, { kreuz: "senkrecht", sims: o3.sims, faschen: o3.faschen, rahmen: o3.rahmen, t: o3.t ?? 0 });
+      if (Math.abs(u - m) + 0.6 < breite(yb + fh)) fenster(F3, u, yb, o3.fw ?? 0.95, fh, { kreuz: "senkrecht", sims: o3.sims, faschen: o3.faschen, rahmen: o3.rahmen, t: o3.t ?? 0 });
     }
     if (hg > 4.2) {
       const y22 = y2 + hg * 0.52;
-      if (breite(y22 + 1) > 0.7) fenster(F2, m, y22, 0.7, Math.min(1, hg * 0.2), { kreuz: false, rahmen: o3.rahmen, t: o3.t ?? 0, faschen: o3.faschen });
+      if (breite(y22 + 1) > 0.7) fenster(F3, m, y22, 0.7, Math.min(1, hg * 0.2), { kreuz: false, rahmen: o3.rahmen, t: o3.t ?? 0, faschen: o3.faschen });
     }
   }
-  function zwerchhaus(ctx, F2, uc, B8, H, o3) {
+  function zwerchhaus(ctx, F3, uc, B8, H, o3) {
     const hz = o3.hz ?? 2.9, tief2 = o3.tiefe ?? 2.5, wand2 = o3.wand, dach3 = o3.dach, orn = o3.orn ?? ORN;
-    F2.box(uc - B8 / 2, uc + B8 / 2, H, H + hz, -tief2, 0.02, wand2);
+    F3.box(uc - B8 / 2, uc + B8 / 2, H, H + hz, -tief2, 0.02, wand2);
     const nf = B8 > 4.2 ? 2 : 1;
-    if (hz > 1.8) for (let i = 0; i < nf; i++) fenster(F2, uc + (i - (nf - 1) / 2) * (B8 / 2), H + 0.7, Math.min(1.2, B8 / nf - 0.8), hz - 1.4, { ...o3.fo ?? {}, verd: null, t: 0.02 });
-    F2.box(uc - B8 / 2 - 0.1, uc + B8 / 2 + 0.1, H + hz - 0.1, H + hz + 0.12, -tief2, 0.25, orn);
+    if (hz > 1.8) for (let i = 0; i < nf; i++) fenster(F3, uc + (i - (nf - 1) / 2) * (B8 / 2), H + 0.7, Math.min(1.2, B8 / nf - 0.8), hz - 1.4, { ...o3.fo ?? {}, verd: null, t: 0.02 });
+    F3.box(uc - B8 / 2 - 0.1, uc + B8 / 2 + 0.1, H + hz - 0.1, H + hz + 0.12, -tief2, 0.25, orn);
     const y2 = H + hz + 0.12;
     if (o3.form === "volute" || o3.form === "geschwungen") {
-      zwerchgiebel(ctx, F2, uc, B8, y2, Math.min(B8 * 0.85, 4.5), { wand: wand2, orn }, dach3, o3.form);
+      zwerchgiebel(ctx, F3, uc, B8, y2, Math.min(B8 * 0.85, 4.5), { wand: wand2, orn }, dach3, o3.form);
       return y2 + B8 * 0.85;
     }
     if (o3.form === "stufen") {
       const k3 = 3, G3 = B8 * 0.55;
       for (let i = 0; i < k3; i++) {
         const w2 = B8 * (1 - i / k3) / 2;
-        F2.box(uc - w2, uc + w2, y2 + i * G3 / k3, y2 + (i + 1) * G3 / k3, -0.5, 0.02, wand2);
-        F2.box(uc - w2 - 0.05, uc + w2 + 0.05, y2 + (i + 1) * G3 / k3, y2 + (i + 1) * G3 / k3 + 0.12, -0.55, 0.08, orn);
+        F3.box(uc - w2, uc + w2, y2 + i * G3 / k3, y2 + (i + 1) * G3 / k3, -0.5, 0.02, wand2);
+        F3.box(uc - w2 - 0.05, uc + w2 + 0.05, y2 + (i + 1) * G3 / k3, y2 + (i + 1) * G3 / k3 + 0.12, -0.55, 0.08, orn);
       }
-      const pr2 = [F2.welt(uc - B8 / 2, -0.4), F2.welt(uc + B8 / 2, -0.4), F2.welt(uc + B8 / 2, -tief2), F2.welt(uc - B8 / 2, -tief2)];
+      const pr2 = [F3.welt(uc - B8 / 2, -0.4), F3.welt(uc + B8 / 2, -0.4), F3.welt(uc + B8 / 2, -tief2), F3.welt(uc - B8 / 2, -tief2)];
       ctx.S.add(prismoid(pr2, y2 - 0.1, G3 * 0.85, [0, B8 / 2 - 0.01, 0, B8 / 2 - 0.01]), dach3);
       return y2 + G3;
     }
@@ -49790,7 +49790,7 @@
       s2.lineTo(0, hg);
       s2.closePath();
     }
-    F2.profil(s2, uc, y2, -tief2 - 0.5, 0.02, wand2, 12);
+    F3.profil(s2, uc, y2, -tief2 - 0.5, 0.02, wand2, 12);
     const s22 = new three_module_exports.Shape(), B22 = B8 / 2 + 0.25;
     if (o3.form === "rund") {
       s22.moveTo(-B22, 0);
@@ -49802,9 +49802,9 @@
       s22.lineTo(0, hg * (B22 / (B8 / 2)));
       s22.closePath();
     }
-    F2.profil(s22, uc, y2 - 0.12 - 0.25 * (hg / (B8 / 2)) + 0.12, -tief2 - 0.6, -0.08, dach3, 12);
-    F2.box(uc - B8 / 2 - 0.15, uc + B8 / 2 + 0.15, y2 - 0.06, y2 + 0.06, -0.1, 0.18, orn);
-    if (hg > 1.6) fenster(F2, uc, y2 + 0.35, 0.6, Math.min(0.9, hg * 0.4), { kreuz: false, verd: o3.form === "rund" ? "rund" : null, t: 0.02 });
+    F3.profil(s22, uc, y2 - 0.12 - 0.25 * (hg / (B8 / 2)) + 0.12, -tief2 - 0.6, -0.08, dach3, 12);
+    F3.box(uc - B8 / 2 - 0.15, uc + B8 / 2 + 0.15, y2 - 0.06, y2 + 0.06, -0.1, 0.18, orn);
+    if (hg > 1.6) fenster(F3, uc, y2 + 0.35, 0.6, Math.min(0.9, hg * 0.4), { kreuz: false, verd: o3.form === "rund" ? "rund" : null, t: 0.02 });
     return y2 + hg;
   }
   function dach(ctx, H, o3) {
@@ -49818,35 +49818,35 @@
     if (typ === "zelt" && Math.abs(ctx.w - ctx.d) > 5) typ = "walm";
     const y2 = H + 0.12, farbe3 = o3.farbe;
     const gb = o3.gaube ?? {};
-    const gaubenAuf = (hu, a2, F2, nur) => {
+    const gaubenAuf = (hu, a2, F3, nur) => {
       if (!gb.form || gb.form === "keine") return;
-      const ax = ctx.achsenJe?.get(F2) ?? achsen(F2.L, 3.2, 1.5);
+      const ax = ctx.achsenJe?.get(F3) ?? achsen(F3.L, 3.2, 1.5);
       const list = ax.paare ?? ax;
       list.forEach((u, i) => {
         if (gb.jedeZweite && i % 2) return;
-        if (gesperrt(ctx, F2, u)) return;
+        if (gesperrt(ctx, F3, u)) return;
         if (nur && !nur(u)) return;
-        if (u < 1.4 || u > F2.L - 1.4) return;
-        gaube(F2, u, y2, hu, a2, { wand: gb.wand, dach: dunkler(farbe3, 0.04), form: gb.form, breite: ax.paare ? 2.4 : void 0 });
+        if (u < 1.4 || u > F3.L - 1.4) return;
+        gaube(F3, u, y2, hu, a2, { wand: gb.wand, dach: dunkler(farbe3, 0.04), form: gb.form, breite: ax.paare ? 2.4 : void 0 });
       });
     };
     const zwerche = (hu, a2) => {
       if (!o3.zwerch) return 0;
       let top = 0;
-      for (const F2 of ctx.fassaden) {
-        if (F2.art !== "haupt" || F2.L < 8) continue;
-        const ri = ctx.risalit?.get(F2);
-        const uc = ri ? ri.uc : o3.zwerch.uc ?? F2.L / 2, B8 = ri ? ri.B : clamp3(o3.zwerch.B ?? F2.L * 0.3, 3.2, 6.5);
-        top = Math.max(top, zwerchhaus(ctx, F2, uc, B8, H, { ...o3.zwerch, tiefe: ((o3.zwerch.hz ?? 2.9) + 0.8) * (a2 / hu) + 0.6, dach: farbe3 }));
+      for (const F3 of ctx.fassaden) {
+        if (F3.art !== "haupt" || F3.L < 8) continue;
+        const ri = ctx.risalit?.get(F3);
+        const uc = ri ? ri.uc : o3.zwerch.uc ?? F3.L / 2, B8 = ri ? ri.B : clamp3(o3.zwerch.B ?? F3.L * 0.3, 3.2, 6.5);
+        top = Math.max(top, zwerchhaus(ctx, F3, uc, B8, H, { ...o3.zwerch, tiefe: ((o3.zwerch.hz ?? 2.9) + 0.8) * (a2 / hu) + 0.6, dach: farbe3 }));
       }
       return top;
     };
     if (typ === "mansarde") {
       const hu = o3.hu ?? zw(r3, 3, 3.6);
-      const zw0 = o3.zwerch ? (F2) => {
-        const ri = ctx.risalit?.get(F2);
-        const uc = ri ? ri.uc : o3.zwerch.uc ?? F2.L / 2;
-        const B8 = ri ? ri.B : clamp3(o3.zwerch.B ?? F2.L * 0.3, 3.2, 6.5);
+      const zw0 = o3.zwerch ? (F3) => {
+        const ri = ctx.risalit?.get(F3);
+        const uc = ri ? ri.uc : o3.zwerch.uc ?? F3.L / 2;
+        const B8 = ri ? ri.B : clamp3(o3.zwerch.B ?? F3.L * 0.3, 3.2, 6.5);
         return (u) => Math.abs(u - uc) > B8 / 2 + 0.6;
       } : null;
       if (zw0) ctx.sperreGauben = zw0;
@@ -49874,16 +49874,16 @@
       const hz = clamp3(spanDach * (o3.neigung ?? zw(r3, 0.42, 0.62)) * (quer2 ? 1.25 : 1), 2.8, quer2 ? 10 : 7.5);
       satteldach(ctx, ctx.x, ctx.z, ctx.x + ctx.w, ctx.z + ctx.d, y2, hz, achse, { dach: farbe3, wand: o3.wand, ueberstand: o3.ueberstand ?? 0.45, ortgang: quer2 ? 0.25 : sichtbar(ctx, achse === "x" ? "+x" : "+z") ? 0.3 : 0.02 });
       const gLabel = achse === "z" ? "+z" : "+x", tLabel = achse === "z" ? "+x" : "+z";
-      for (const F2 of ctx.fassaden) {
-        if (F2.label === gLabel && o3.giebelDeko !== false) giebelFenster(F2, y2, hz, o3.giebel ?? {});
-        if (F2.label === tLabel && F2.art === "haupt") {
-          const zw0 = o3.zwerch && ctx.fassaden.includes(F2) ? (() => {
-            const ri = ctx.risalit?.get(F2);
-            const uc = ri ? ri.uc : o3.zwerch.uc ?? F2.L / 2;
-            const B8 = ri ? ri.B : clamp3(o3.zwerch.B ?? F2.L * 0.3, 3.2, 6.5);
+      for (const F3 of ctx.fassaden) {
+        if (F3.label === gLabel && o3.giebelDeko !== false) giebelFenster(F3, y2, hz, o3.giebel ?? {});
+        if (F3.label === tLabel && F3.art === "haupt") {
+          const zw0 = o3.zwerch && ctx.fassaden.includes(F3) ? (() => {
+            const ri = ctx.risalit?.get(F3);
+            const uc = ri ? ri.uc : o3.zwerch.uc ?? F3.L / 2;
+            const B8 = ri ? ri.B : clamp3(o3.zwerch.B ?? F3.L * 0.3, 3.2, 6.5);
             return (u) => Math.abs(u - uc) > B8 / 2 + 0.8;
           })() : null;
-          gaubenAuf(hz, spanDach / 2, F2, zw0);
+          gaubenAuf(hz, spanDach / 2, F3, zw0);
         }
       }
       const zt2 = achse === "z" ? 0 : zwerche(hz, spanDach / 2);
@@ -49906,7 +49906,7 @@
         hz = clamp3(tiefe * (o3.neigung ?? zw(r3, 0.3, 0.45)), 2.2, 6.5);
       }
       S.add(prismoid(Pov, y2 + 0.12, hz, ins), farbe3);
-      for (const F2 of ctx.fassaden) if (F2.art === "haupt") gaubenAuf(hz, ins[K3.indexOf(F2.label)] ?? tiefe / 2, F2, (u) => u > 2.6 && u < F2.L - 2.6);
+      for (const F3 of ctx.fassaden) if (F3.art === "haupt") gaubenAuf(hz, ins[K3.indexOf(F3.label)] ?? tiefe / 2, F3, (u) => u > 2.6 && u < F3.L - 2.6);
       const zt2 = zwerche(hz, tiefe / 2);
       dachkram(ctx, versetzt(Pov, ins.map((v) => v * 0.85)), y2, y2 + hz, o3.kram);
       return Math.max(y2 + hz, zt2);
@@ -49915,15 +49915,15 @@
       const P22 = versetzt(P4, K3.map((k3) => sichtbar(ctx, k3) ? 2.2 : 0));
       attika(ctx, P4, H, 1, o3.attika ?? o3.wand, "#d9dcdf");
       S.add(prismoid(P22, H, o3.gh ?? 3), o3.wand);
-      for (const F2 of fassadenFuer(ctx, P22, K3)) achsen(F2.L, 2.8, 1).forEach((u) => fenster(F2, u, H + 0.3, 1.8, 2.1, { kreuz: "senkrecht", rahmen: o3.rahmen ?? RAHMEN }));
+      for (const F3 of fassadenFuer(ctx, P22, K3)) achsen(F3.L, 2.8, 1).forEach((u) => fenster(F3, u, H + 0.3, 1.8, 2.1, { kreuz: "senkrecht", rahmen: o3.rahmen ?? RAHMEN }));
       const P32 = versetzt(P22, K3.map((k3) => sichtbar(ctx, k3) ? -0.5 : 0));
       S.add(prismoid(P32, H + (o3.gh ?? 3), 0.25), o3.platte ?? "#f2f2ef");
       flachdachTechnik(ctx, P22, H + (o3.gh ?? 3) + 0.25, { geraete: 1, antenne: 0.4 });
       return H + (o3.gh ?? 3) + 2;
     }
-    if (o3.balustrade) for (const F2 of ctx.fassaden) {
-      const [s0, s1] = F2.spanne(0.1);
-      balustrade(F2, s0, s1, H + 0.12, o3.attika ?? ORN);
+    if (o3.balustrade) for (const F3 of ctx.fassaden) {
+      const [s0, s1] = F3.spanne(0.1);
+      balustrade(F3, s0, s1, H + 0.12, o3.attika ?? ORN);
     }
     else attika(ctx, P4, H, o3.attikaH ?? 0.7, o3.attika ?? o3.wand, "#d9dcdf");
     flachdachTechnik(ctx, P4, H + 0.1, { geraete: o3.geraete ?? 1, antenne: 0.6, aufbauFarbe: o3.wand });
@@ -50068,13 +50068,13 @@
       gaube: { form: wz(r3, [["bogen", 3], ["ochsenauge", 1.5], ["dreieck", 1]]), wand: orn, jedeZweite: true },
       kram: { schornsteine: 2 + (ctx.w > 18 ? 1 : 0), antenne: 0.4, sat: 0.2 }
     });
-    if (mitGiebel) for (const F2 of ctx.fassaden) {
-      if (F2.art !== "haupt" || F2.L < 9) continue;
-      const ax = ctx.achsenJe.get(F2);
-      const uc = erkerSeite ? ax[ax.length - 1 - Math.max(1, Math.floor(ax.length * 0.25))] : F2.L / 2;
-      if (ctx.eck && F2.label === "+z" && uc > F2.L - 4.5) continue;
-      const B8 = clamp3(erkerSeite ? F2.L * 0.32 : F2.L * 0.42, 4.2, 8.5), G3 = Math.min(top - H + 1.6, B8 * 0.95);
-      zwerchgiebel(ctx, F2, uc, B8, H, G3, c, dachF, giebelForm2);
+    if (mitGiebel) for (const F3 of ctx.fassaden) {
+      if (F3.art !== "haupt" || F3.L < 9) continue;
+      const ax = ctx.achsenJe.get(F3);
+      const uc = erkerSeite ? ax[ax.length - 1 - Math.max(1, Math.floor(ax.length * 0.25))] : F3.L / 2;
+      if (ctx.eck && F3.label === "+z" && uc > F3.L - 4.5) continue;
+      const B8 = clamp3(erkerSeite ? F3.L * 0.32 : F3.L * 0.42, 4.2, 8.5), G3 = Math.min(top - H + 1.6, B8 * 0.95);
+      zwerchgiebel(ctx, F3, uc, B8, H, G3, c, dachF, giebelForm2);
     }
     if (ctx.eck) {
       const R11 = 1.9, cx = ctx.x + ctx.w - R11 * 0.3, cz = ctx.z + ctx.d - R11 * 0.3;
@@ -50098,7 +50098,7 @@
     }
     return top;
   }
-  function zwerchgiebel(ctx, F2, uc, B8, y2, G3, c, dachF, form2 = "geschwungen") {
+  function zwerchgiebel(ctx, F3, uc, B8, y2, G3, c, dachF, form2 = "geschwungen") {
     const hb2 = B8 / 2;
     const kontur = (sx, sy) => {
       const s2 = new three_module_exports.Shape();
@@ -50141,27 +50141,27 @@
       return s2;
     };
     const tief2 = 4;
-    const poly2 = [F2.welt(uc - hb2 * 0.9, -0.3), F2.welt(uc + hb2 * 0.9, -0.3), F2.welt(uc + hb2 * 0.9, -tief2), F2.welt(uc - hb2 * 0.9, -tief2)];
+    const poly2 = [F3.welt(uc - hb2 * 0.9, -0.3), F3.welt(uc + hb2 * 0.9, -0.3), F3.welt(uc + hb2 * 0.9, -tief2), F3.welt(uc - hb2 * 0.9, -tief2)];
     ctx.S.add(prismoid(poly2, y2 + 0.1, G3 * 0.8, [0, hb2 * 0.9 - 0.01, 0, hb2 * 0.9 - 0.01]), dachF);
-    F2.profil(kontur(1.06, 1.06), uc, y2, -0.42, 0.06, c.orn, 10);
-    F2.profil(kontur(1, 1), uc, y2, -0.36, 0.14, c.wand, 10);
+    F3.profil(kontur(1.06, 1.06), uc, y2, -0.42, 0.06, c.orn, 10);
+    F3.profil(kontur(1, 1), uc, y2, -0.36, 0.14, c.wand, 10);
     const ring2 = new three_module_exports.CylinderGeometry(0.62, 0.62, 0.08, 16);
     ring2.rotateX(Math.PI / 2);
     ring2.translate(uc, y2 + G3 * 0.62, 0.17);
-    F2.geo(ring2, c.orn);
+    F3.geo(ring2, c.orn);
     const gl = new three_module_exports.CylinderGeometry(0.46, 0.46, 0.08, 16);
     gl.rotateX(Math.PI / 2);
     gl.translate(uc, y2 + G3 * 0.62, 0.2);
-    F2.geo(gl, FARBEN3.fenster);
-    if (B8 > 5) for (const s2 of [-1, 1]) fenster(F2, uc + s2 * hb2 * 0.42, y2 + 0.55, 0.8, Math.min(1.5, G3 * 0.3), { t: 0.14, kreuz: "quer", verd: "rund", verdFarbe: c.orn });
-    else fenster(F2, uc, y2 + 0.55, 1, Math.min(1.4, G3 * 0.3), { t: 0.14, verd: null });
+    F3.geo(gl, FARBEN3.fenster);
+    if (B8 > 5) for (const s2 of [-1, 1]) fenster(F3, uc + s2 * hb2 * 0.42, y2 + 0.55, 0.8, Math.min(1.5, G3 * 0.3), { t: 0.14, kreuz: "quer", verd: "rund", verdFarbe: c.orn });
+    else fenster(F3, uc, y2 + 0.55, 1, Math.min(1.4, G3 * 0.3), { t: 0.14, verd: null });
     if (form2 === "volute") for (const s2 of [-1, 1]) {
-      const p2 = F2.welt(uc + s2 * hb2 * 0.95, 0);
+      const p2 = F3.welt(uc + s2 * hb2 * 0.95, 0);
       ctx.S.box(0.3, 0.45, 0.3, p2[0], y2 + G3 * 0.1 + 0.22, p2[1], c.orn);
-      const q2 = F2.welt(uc + s2 * hb2 * 0.55, 0);
+      const q2 = F3.welt(uc + s2 * hb2 * 0.55, 0);
       ctx.S.box(0.26, 0.4, 0.26, q2[0], y2 + G3 * 0.52 + 0.2, q2[1], c.orn);
     }
-    ctx.S.box(0.08, 1, 0.08, ...pt3(F2.welt(uc, -0.1), y2 + G3 + 0.5), "#5f646b");
+    ctx.S.box(0.08, 1, 0.08, ...pt3(F3.welt(uc, -0.1), y2 + G3 + 0.5), "#5f646b");
   }
   var pt3 = (p2, y2) => [p2[0], y2, p2[1]];
   function backstein(ctx) {
@@ -50185,41 +50185,41 @@
     const fenOpt = { rahmen: rahmen2, sprossen: [waehle2(r3, [2, 3, 1]), waehle2(r3, [2, 1, 3])], kreuz: false, rb: 0.08, glas: ctx.glas };
     const deko2 = wz(r3, [["quadrat", 2], ["raute", 2], ["keine", 1]]);
     const raster4 = zw(r3, 2.3, 3.1), fwEx = zw(r3, 0.8, 1.1);
-    const backsteinGeschosse = (F2, y0, k3, ax, top2) => {
-      const [s0, s1] = F2.spanne(0.1);
+    const backsteinGeschosse = (F3, y0, k3, ax, top2) => {
+      const [s0, s1] = F3.spanne(0.1);
       const sp6 = ax.abstand;
       const piers = [];
       for (let i = 0; i <= ax.length; i++) piers.push(i === 0 ? ax[0] - sp6 / 2 : i === ax.length ? ax[ax.length - 1] + sp6 / 2 : (ax[i - 1] + ax[i]) / 2);
-      if (F2.art !== "ecke") for (const u of piers) {
-        F2.box(u - 0.32, u + 0.32, y0, top2 - 0.55, 0, 0.26, hell5);
-        F2.box(u - 0.36, u + 0.36, top2 - 0.75, top2 - 0.55, 0, 0.32, natur);
+      if (F3.art !== "ecke") for (const u of piers) {
+        F3.box(u - 0.32, u + 0.32, y0, top2 - 0.55, 0, 0.26, hell5);
+        F3.box(u - 0.36, u + 0.36, top2 - 0.75, top2 - 0.55, 0, 0.32, natur);
       }
       for (let kk = 0; kk < k3; kk++) {
         const yF = y0 + kk * gh;
         ax.forEach((u) => {
-          const fw = F2.art === "ecke" ? Math.min(F2.L - 0.6, 1.4) : sp6 - fwEx;
-          F2.box(u - fw / 2 - 0.05, u + fw / 2 + 0.05, yF + 0.15, yF + 0.95, 0, 0.07, dunkel4);
-          if (deko2 === "quadrat") F2.box(u - 0.25, u + 0.25, yF + 0.4, yF + 0.7, 0.07, 0.1, natur);
+          const fw = F3.art === "ecke" ? Math.min(F3.L - 0.6, 1.4) : sp6 - fwEx;
+          F3.box(u - fw / 2 - 0.05, u + fw / 2 + 0.05, yF + 0.15, yF + 0.95, 0, 0.07, dunkel4);
+          if (deko2 === "quadrat") F3.box(u - 0.25, u + 0.25, yF + 0.4, yF + 0.7, 0.07, 0.1, natur);
           else if (deko2 === "raute") {
             const g = new three_module_exports.BoxGeometry(0.36, 0.36, 0.04);
             g.rotateZ(Math.PI / 4);
             g.translate(u, yF + 0.55, 0.09);
-            F2.geo(g, natur);
+            F3.geo(g, natur);
           }
-          fenster(F2, u, yF + 1, fw, gh - 1.35, { ...fenOpt, sims: natur });
+          fenster(F3, u, yF + 1, fw, gh - 1.35, { ...fenOpt, sims: natur });
         });
       }
-      F2.box(s0, s1, top2 - 0.55, top2, 0, 0.36, natur);
-      F2.box(s0 - (F2.extL ? 0.3 : 0), s1 + (F2.extR ? 0.3 : 0), top2, top2 + 0.12, 0, 0.45, "#cfc9be");
+      F3.box(s0, s1, top2 - 0.55, top2, 0, 0.36, natur);
+      F3.box(s0 - (F3.extL ? 0.3 : 0), s1 + (F3.extR ? 0.3 : 0), top2, top2 + 0.12, 0, 0.45, "#cfc9be");
     };
-    for (const F2 of ctx.fassaden) {
-      const [s0, s1] = F2.spanne(0.1);
-      F2.box(s0, s1, 0, eg, 0, 0.1, egF);
-      const ax = F2.art === "ecke" ? [F2.L / 2] : achsen(F2.L, raster4, 0.75);
-      if (F2.art === "neben") ax.forEach((u) => fenster(F2, u, 1.5, ax.abstand - 1.1, eg - 2.5, { ...fenOpt, t: 0.1 }));
-      else ladenzone(ctx, F2, eg - 0.2, { tb: 0.12, stil: "klassisch", typ: r3() < 0.25 ? "band" : "einzeln", markisen: 0.3, portal: natur, holz: "#4b3a30", leucht: 0.1 });
-      F2.box(s0, s1, eg - 0.2, eg + 0.25, 0, 0.32, natur);
-      backsteinGeschosse(F2, eg + 0.25, nVoll, ax, H);
+    for (const F3 of ctx.fassaden) {
+      const [s0, s1] = F3.spanne(0.1);
+      F3.box(s0, s1, 0, eg, 0, 0.1, egF);
+      const ax = F3.art === "ecke" ? [F3.L / 2] : achsen(F3.L, raster4, 0.75);
+      if (F3.art === "neben") ax.forEach((u) => fenster(F3, u, 1.5, ax.abstand - 1.1, eg - 2.5, { ...fenOpt, t: 0.1 }));
+      else ladenzone(ctx, F3, eg - 0.2, { tb: 0.12, stil: "klassisch", typ: r3() < 0.25 ? "band" : "einzeln", markisen: 0.3, portal: natur, holz: "#4b3a30", leucht: 0.1 });
+      F3.box(s0, s1, eg - 0.2, eg + 0.25, 0, 0.32, natur);
+      backsteinGeschosse(F3, eg + 0.25, nVoll, ax, H);
     }
     let top = H + 0.12;
     if (variante2 === "giebel") {
@@ -50228,11 +50228,11 @@
       const G3 = clamp3(span * 0.62, 4.5, 10);
       const dachF = dachfarbe(ctx, { ziegel: 2, engobe: 1.5, schiefer: 1, bitumen: 0.3 });
       satteldach(ctx, ctx.x, ctx.z, ctx.x + ctx.w, ctx.z + ctx.d, H, G3 - 0.9, strZ ? "z" : "x", { dach: dachF, wand: stein, ueberstand: 0.15, ortgang: 0.05 });
-      for (const F2 of ctx.fassaden) if (F2.art === "haupt") treppengiebel(F2, H, G3, stein, natur, r3);
+      for (const F3 of ctx.fassaden) if (F3.art === "haupt") treppengiebel(F3, H, G3, stein, natur, r3);
       top = H + G3;
       dachkram(ctx, rechteck(ctx.x + ctx.w * 0.45, ctx.z + 2, ctx.x + ctx.w * 0.55, ctx.z + ctx.d - 2), H, H + G3 - 1.2, { schornsteine: 2, kaminFarbe: dunkel4, antenne: 0.3 });
     } else if (variante2 === "trauf") {
-      ctx.achsenJe = new Map(ctx.fassaden.map((F2) => [F2, achsen(F2.L, raster4, 0.75)]));
+      ctx.achsenJe = new Map(ctx.fassaden.map((F3) => [F3, achsen(F3.L, raster4, 0.75)]));
       top = dach(ctx, H, {
         typ: "sattel",
         farbe: dachfarbe(ctx, { ziegel: 2, engobe: 2, schiefer: 1 }),
@@ -50245,7 +50245,7 @@
         kram: { schornsteine: 2, kaminFarbe: dunkel4 }
       });
     } else if (variante2 === "kupferwalm") {
-      ctx.achsenJe = new Map(ctx.fassaden.map((F2) => [F2, F2.art === "ecke" ? [F2.L / 2] : achsen(F2.L, raster4, 0.75)]));
+      ctx.achsenJe = new Map(ctx.fassaden.map((F3) => [F3, F3.art === "ecke" ? [F3.L / 2] : achsen(F3.L, raster4, 0.75)]));
       top = dach(ctx, H, { typ: "walm", farbe: dachfarbe(ctx, { kupfer: 3, schiefer: 1 }), neigung: zw(r3, 0.45, 0.6), ueberstand: 0.3, traufe: natur, gaube: { form: "flach", wand: natur, jedeZweite: true }, kram: { schornsteine: 1, kaminFarbe: dunkel4 } });
     } else {
       let P4 = ctx.P, y2 = H + 0.12;
@@ -50253,7 +50253,7 @@
         const P22 = versetzt(P4, ctx.K.map((k3) => sichtbar(ctx, k3) ? 1.8 : 0));
         attika(ctx, P4, y2, 0.9, stein, natur);
         S.add(prismoid(P22, y2, gh), stein);
-        for (const F2 of fassadenFuer(ctx, P22, ctx.K)) backsteinGeschosse(F2, y2, 1, F2.art === "ecke" ? [F2.L / 2] : achsen(F2.L, raster4, 0.75), y2 + gh);
+        for (const F3 of fassadenFuer(ctx, P22, ctx.K)) backsteinGeschosse(F3, y2, 1, F3.art === "ecke" ? [F3.L / 2] : achsen(F3.L, raster4, 0.75), y2 + gh);
         P4 = P22;
         y2 += gh + 0.12;
       }
@@ -50263,23 +50263,23 @@
     }
     return top;
   }
-  function treppengiebel(F2, y2, G3, stein, natur, r3) {
-    const k3 = clamp3(Math.round(F2.L / 2.4), 4, 7);
-    const L2 = F2.L;
+  function treppengiebel(F3, y2, G3, stein, natur, r3) {
+    const k3 = clamp3(Math.round(F3.L / 2.4), 4, 7);
+    const L2 = F3.L;
     for (let i = 0; i < k3; i++) {
       const w2 = L2 * (1 - i / k3) - (i ? 0.3 : 0), y0 = y2 + i * G3 / k3, y1 = y2 + (i + 1) * G3 / k3;
-      F2.box(L2 / 2 - w2 / 2, L2 / 2 + w2 / 2, y0, y1, -0.5, 0.18, stein);
-      F2.box(L2 / 2 - w2 / 2 - 0.06, L2 / 2 + w2 / 2 + 0.06, y1, y1 + 0.14, -0.55, 0.24, natur);
+      F3.box(L2 / 2 - w2 / 2, L2 / 2 + w2 / 2, y0, y1, -0.5, 0.18, stein);
+      F3.box(L2 / 2 - w2 / 2 - 0.06, L2 / 2 + w2 / 2 + 0.06, y1, y1 + 0.14, -0.55, 0.24, natur);
       if (i < k3 - 2) {
         const nf = Math.max(1, Math.floor((w2 - 1.5) / 1.6));
         for (let j3 = 0; j3 < nf; j3++) {
           const u = L2 / 2 - (nf - 1) * 1.6 / 2 + j3 * 1.6;
-          fenster(F2, u, y0 + 0.45, 0.75, Math.min(1.3, G3 / k3 - 0.75), { t: 0.18, rahmen: "#f4f1ea", kreuz: "senkrecht" });
+          fenster(F3, u, y0 + 0.45, 0.75, Math.min(1.3, G3 / k3 - 0.75), { t: 0.18, rahmen: "#f4f1ea", kreuz: "senkrecht" });
         }
       }
-      if (i === 0) for (let j3 = 1; j3 < 4; j3++) F2.box(L2 * (j3 / 4) - 0.18, L2 * (j3 / 4) + 0.18, y0, y1, 0.18, 0.26, heller(stein, 0.04));
+      if (i === 0) for (let j3 = 1; j3 < 4; j3++) F3.box(L2 * (j3 / 4) - 0.18, L2 * (j3 / 4) + 0.18, y0, y1, 0.18, 0.26, heller(stein, 0.04));
     }
-    F2.box(L2 / 2 - 0.05, L2 / 2 + 0.05, y2 + G3 + 0.14, y2 + G3 + 1, -0.2, -0.1, "#5f646b");
+    F3.box(L2 / 2 - 0.05, L2 / 2 + 0.05, y2 + G3 + 0.14, y2 + G3 + 1, -0.2, -0.1, "#5f646b");
   }
   function fachwerk(ctx) {
     ctx.n = Math.min(ctx.n, 5);
@@ -50295,24 +50295,24 @@
     ctx.farbe = wand2;
     if (ctx.eck) ctx.eckName = waehle2(r3, ["B\xE4ckerei Krause", "Caf\xE9 Fr\xE4ulein", "Metzgerei Brandt", "B\xE4ckerei Jansen"]);
     S.add(prismoid(ctx.P, 0, eg), steinEG);
-    for (const F2 of ctx.fassaden) {
-      const [s0, s1] = F2.spanne(0.1);
-      F2.box(s0, s1, 0, 0.5, 0, 0.12, dunkler(steinEG, 0.1));
-      if (F2.art === "neben") achsen(F2.L, 2.6, 1).forEach((u) => fenster(F2, u, 1.2, 0.95, 1.3, { sprossen: [2, 3], kreuz: false }));
-      else ladenzone(ctx, F2, eg + 0.3, { tb: 0.06, stil: "alt", markisen: 0.25, holz, rahmen: art === "verschiefert" ? "#2f6b4a" : holz });
+    for (const F3 of ctx.fassaden) {
+      const [s0, s1] = F3.spanne(0.1);
+      F3.box(s0, s1, 0, 0.5, 0, 0.12, dunkler(steinEG, 0.1));
+      if (F3.art === "neben") achsen(F3.L, 2.6, 1).forEach((u) => fenster(F3, u, 1.2, 0.95, 1.3, { sprossen: [2, 3], kreuz: false }));
+      else ladenzone(ctx, F3, eg + 0.3, { tb: 0.06, stil: "alt", markisen: 0.25, holz, rahmen: art === "verschiefert" ? "#2f6b4a" : holz });
     }
     let P4 = ctx.P, y2 = eg, alte = ctx.fassaden;
     for (let k3 = 1; k3 <= n3; k3++) {
       const Pn = vk > 0.05 ? versetzt(P4, ctx.K.map((lb) => sichtbar(ctx, lb) ? -vk : 0)) : P4;
       S.add(prismoid(Pn, y2, gh), wand2);
-      if (vk > 0.05) for (const F2 of alte) for (let u = 0.25; u < F2.L - 0.1; u += 0.62) F2.box(u - 0.09, u + 0.09, y2 - 0.24, y2, 0, vk + 0.02, holz);
+      if (vk > 0.05) for (const F3 of alte) for (let u = 0.25; u < F3.L - 0.1; u += 0.62) F3.box(u - 0.09, u + 0.09, y2 - 0.24, y2, 0, vk + 0.02, holz);
       const neu = fassadenFuer(ctx, Pn, ctx.K);
-      for (const F2 of neu) {
+      for (const F3 of neu) {
         if (art === "verschiefert") {
-          const [s0, s1] = F2.spanne(0.06);
-          for (let yy = y2 + 0.3; yy < y2 + gh; yy += 0.45) F2.box(s0, s1, yy - 0.03, yy, 0, 0.04, dunkler(wand2, 0.04));
-          (F2.art === "ecke" ? [F2.L / 2] : achsen(F2.L, 2.3, 1)).forEach((u) => fenster(F2, u, y2 + 0.8, 0.95, Math.min(1.35, gh - 1.2), { sprossen: [2, 3], kreuz: false, laeden, faschen: "#f6f3ec", fb: 0.14, t: 0.04 }));
-        } else fachwerkGeschoss(F2, y2, gh, holz, laeden, r3, k3, art === "zier");
+          const [s0, s1] = F3.spanne(0.06);
+          for (let yy = y2 + 0.3; yy < y2 + gh; yy += 0.45) F3.box(s0, s1, yy - 0.03, yy, 0, 0.04, dunkler(wand2, 0.04));
+          (F3.art === "ecke" ? [F3.L / 2] : achsen(F3.L, 2.3, 1)).forEach((u) => fenster(F3, u, y2 + 0.8, 0.95, Math.min(1.35, gh - 1.2), { sprossen: [2, 3], kreuz: false, laeden, faschen: "#f6f3ec", fb: 0.14, t: 0.04 }));
+        } else fachwerkGeschoss(F3, y2, gh, holz, laeden, r3, k3, art === "zier");
       }
       P4 = Pn;
       y2 += gh;
@@ -50320,9 +50320,9 @@
     }
     const H = y2;
     ctx.H = H;
-    for (const F2 of alte) {
-      const [s0, s1] = F2.spanne(0.12);
-      F2.box(s0, s1, H - 0.02, H + 0.14, 0, 0.14, art === "verschiefert" ? "#f6f3ec" : holz);
+    for (const F3 of alte) {
+      const [s0, s1] = F3.spanne(0.12);
+      F3.box(s0, s1, H - 0.02, H + 0.14, 0, 0.14, art === "verschiefert" ? "#f6f3ec" : holz);
     }
     const xs2 = P4.map((p2) => p2[0]), zs = P4.map((p2) => p2[1]);
     const x0 = Math.min(...xs2), x1 = Math.max(...xs2), z0 = Math.min(...zs), z1 = Math.max(...zs);
@@ -50333,65 +50333,65 @@
     const dachF = art === "verschiefert" ? dachfarbe(ctx, { schiefer: 3 }) : dachfarbe(ctx, { ziegel: 3, braun: 1.5, schiefer: 1, engobe: 0.6 });
     satteldach(ctx, x0, z0, x1, z1, H + 0.12, hg, achse, { dach: dachF, wand: wand2, ueberstand: 0.55, ortgang: 0.45 });
     const gLabel = achse === "z" ? "+z" : "+x";
-    for (const F2 of alte) if (F2.label === gLabel) {
-      if (art === "verschiefert") giebelFenster(F2, H + 0.12, hg, { faschen: "#f6f3ec", t: 0.02 });
-      else giebelFachwerk(F2, H + 0.12, hg, holz, laeden, r3);
+    for (const F3 of alte) if (F3.label === gLabel) {
+      if (art === "verschiefert") giebelFenster(F3, H + 0.12, hg, { faschen: "#f6f3ec", t: 0.02 });
+      else giebelFachwerk(F3, H + 0.12, hg, holz, laeden, r3);
     }
     const tLabel = achse === "z" ? "+x" : "+z";
     const zwerch = !giebel3 && r3() < 0.45;
-    for (const F2 of alte) if (F2.label === tLabel && F2.L > 7) {
+    for (const F3 of alte) if (F3.label === tLabel && F3.L > 7) {
       const a2 = span / 2, al = Math.atan2(hg, a2);
-      if (zwerch && F2.art === "haupt") {
-        const B8 = clamp3(F2.L * 0.3, 3.2, 5);
-        F2.box(F2.L / 2 - B8 / 2, F2.L / 2 + B8 / 2, H, H + gh, -2.2, 0.02, wand2);
-        if (art !== "verschiefert") fachwerkGeschoss(new Fassade(ctx, F2.welt(F2.L / 2 - B8 / 2, 0.02), F2.welt(F2.L / 2 + B8 / 2, 0.02), { art: "zwerch", extL: false, extR: false }), H, gh, holz, laeden, r3, 2, false);
-        else fenster(F2, F2.L / 2, H + 0.8, 0.95, 1.3, { sprossen: [2, 3], kreuz: false, laeden, t: 0.04 });
-        zwerchhaus(ctx, F2, F2.L / 2, B8, H + gh - 2.9, { hz: 0.01, tiefe: 2.2, wand: wand2, dach: dachF, orn: holz, form: "dreieck" });
+      if (zwerch && F3.art === "haupt") {
+        const B8 = clamp3(F3.L * 0.3, 3.2, 5);
+        F3.box(F3.L / 2 - B8 / 2, F3.L / 2 + B8 / 2, H, H + gh, -2.2, 0.02, wand2);
+        if (art !== "verschiefert") fachwerkGeschoss(new Fassade(ctx, F3.welt(F3.L / 2 - B8 / 2, 0.02), F3.welt(F3.L / 2 + B8 / 2, 0.02), { art: "zwerch", extL: false, extR: false }), H, gh, holz, laeden, r3, 2, false);
+        else fenster(F3, F3.L / 2, H + 0.8, 0.95, 1.3, { sprossen: [2, 3], kreuz: false, laeden, t: 0.04 });
+        zwerchhaus(ctx, F3, F3.L / 2, B8, H + gh - 2.9, { hz: 0.01, tiefe: 2.2, wand: wand2, dach: dachF, orn: holz, form: "dreieck" });
       }
-      achsen(F2.L, 4.2, 2.2).forEach((u) => {
-        if (zwerch && Math.abs(u - F2.L / 2) < 3) return;
+      achsen(F3.L, 4.2, 2.2).forEach((u) => {
+        if (zwerch && Math.abs(u - F3.L / 2) < 3) return;
         const tf = -1, ys = H + 0.12 + 1 * Math.tan(al);
-        F2.box(u - 0.8, u + 0.8, ys - 0.4, ys + 1.3, -2.8, tf, wand2);
-        F2.box(u - 0.45, u + 0.45, ys - 0.1, ys + 0.95, tf - 0.05, tf + 0.03, FARBEN3.fenster);
-        F2.box(u - 0.03, u + 0.03, ys - 0.1, ys + 0.95, tf, tf + 0.06, RAHMEN);
+        F3.box(u - 0.8, u + 0.8, ys - 0.4, ys + 1.3, -2.8, tf, wand2);
+        F3.box(u - 0.45, u + 0.45, ys - 0.1, ys + 0.95, tf - 0.05, tf + 0.03, FARBEN3.fenster);
+        F3.box(u - 0.03, u + 0.03, ys - 0.1, ys + 0.95, tf, tf + 0.06, RAHMEN);
         const g = new three_module_exports.BoxGeometry(1.9, 0.14, 2.6);
         g.rotateX(0.32);
         g.translate(u, ys + 1.42, -2 + 0.1);
-        F2.geo(g, dachF);
+        F3.geo(g, dachF);
       });
     }
     const mitte = achse === "z" ? [[x0 + (x1 - x0) / 2, z0 + 2], [x0 + (x1 - x0) / 2, z1 - 3]] : [[x0 + 2, z0 + (z1 - z0) / 2], [x1 - 3, z0 + (z1 - z0) / 2]];
     dachkram(ctx, mitte, H + hg * 0.4, H + hg, { schornsteine: 1 + (r3() < 0.5 ? 1 : 0), antenne: 0.4, sat: 0.2 });
     return H + hg;
   }
-  function fachwerkGeschoss(F2, y0, h3, holz, laeden, r3, k3, zier = false) {
-    const [s0, s1] = F2.spanne(0.1);
+  function fachwerkGeschoss(F3, y0, h3, holz, laeden, r3, k3, zier = false) {
+    const [s0, s1] = F3.spanne(0.1);
     const T = 0.07, B8 = 0.2;
-    F2.box(s0, s1, y0, y0 + B8, 0, T, holz);
-    F2.box(s0, s1, y0 + h3 - B8, y0 + h3, 0, T, holz);
-    const ax = F2.art === "ecke" ? [F2.L / 2] : achsen(F2.L, zier ? zw(r3, 1.9, 2.2) : zw(r3, 2.1, 2.6), 1);
+    F3.box(s0, s1, y0, y0 + B8, 0, T, holz);
+    F3.box(s0, s1, y0 + h3 - B8, y0 + h3, 0, T, holz);
+    const ax = F3.art === "ecke" ? [F3.L / 2] : achsen(F3.L, zier ? zw(r3, 1.9, 2.2) : zw(r3, 2.1, 2.6), 1);
     const fw = 0.95, fh = Math.min(1.3, h3 - 1.2), yb = y0 + 0.8;
-    F2.box(s0, s1, yb - 0.18, yb - 0.04, 0, T, holz);
-    F2.box(s0, s1, yb + fh + 0.04, yb + fh + 0.18, 0, T, holz);
-    const posten = [0.12, F2.L - 0.12];
+    F3.box(s0, s1, yb - 0.18, yb - 0.04, 0, T, holz);
+    F3.box(s0, s1, yb + fh + 0.04, yb + fh + 0.18, 0, T, holz);
+    const posten = [0.12, F3.L - 0.12];
     ax.forEach((u) => {
       posten.push(u - fw / 2 - 0.13, u + fw / 2 + 0.13);
     });
     posten.sort((a2, b3) => a2 - b3);
-    for (const u of posten) F2.box(u - 0.1, u + 0.1, y0, y0 + h3, 0, T, holz);
+    for (const u of posten) F3.box(u - 0.1, u + 0.1, y0, y0 + h3, 0, T, holz);
     ax.forEach((u, i) => {
       const a2 = u - fw / 2 - 0.03, b3 = u + fw / 2 + 0.03, ya = y0 + B8, yc = yb - 0.18;
       if (zier || (i + k3) % 2) {
-        F2.strebe(a2, ya, b3, yc, 0.12, T, holz);
-        F2.strebe(a2, yc, b3, ya, 0.12, T, holz);
+        F3.strebe(a2, ya, b3, yc, 0.12, T, holz);
+        F3.strebe(a2, yc, b3, ya, 0.12, T, holz);
       } else {
         const m = (a2 + b3) / 2, ym = (ya + yc) / 2;
-        F2.strebe(a2, ym, m, yc, 0.1, T, holz);
-        F2.strebe(m, yc, b3, ym, 0.1, T, holz);
-        F2.strebe(b3, ym, m, ya, 0.1, T, holz);
-        F2.strebe(m, ya, a2, ym, 0.1, T, holz);
+        F3.strebe(a2, ym, m, yc, 0.1, T, holz);
+        F3.strebe(m, yc, b3, ym, 0.1, T, holz);
+        F3.strebe(b3, ym, m, ya, 0.1, T, holz);
+        F3.strebe(m, ya, a2, ym, 0.1, T, holz);
       }
-      fenster(F2, u, yb, fw, fh, { sprossen: [2, 3], kreuz: false, laeden, rb: 0.06, sims: null });
+      fenster(F3, u, yb, fw, fh, { sprossen: [2, 3], kreuz: false, laeden, rb: 0.06, sims: null });
     });
     for (let i = 0; i < posten.length - 1; i++) {
       const a2 = posten[i] + 0.1, b3 = posten[i + 1] - 0.1;
@@ -50399,21 +50399,21 @@
       if (ax.some((u) => u > a2 && u < b3)) continue;
       if (b3 - a2 > 1.3) {
         const m = (a2 + b3) / 2;
-        F2.box(m - 0.09, m + 0.09, y0, y0 + h3, 0, T, holz);
-        F2.strebe(a2, y0 + B8, m, y0 + h3 * 0.62, 0.13, T, holz);
-        F2.strebe(b3, y0 + B8, m, y0 + h3 * 0.62, 0.13, T, holz);
-      } else F2.strebe(a2, y0 + B8, b3, y0 + h3 - B8, 0.13, T, holz);
+        F3.box(m - 0.09, m + 0.09, y0, y0 + h3, 0, T, holz);
+        F3.strebe(a2, y0 + B8, m, y0 + h3 * 0.62, 0.13, T, holz);
+        F3.strebe(b3, y0 + B8, m, y0 + h3 * 0.62, 0.13, T, holz);
+      } else F3.strebe(a2, y0 + B8, b3, y0 + h3 - B8, 0.13, T, holz);
     }
   }
-  function giebelFachwerk(F2, y2, hg, holz, laeden, r3) {
-    const L2 = F2.L, T = 0.07, m = L2 / 2;
+  function giebelFachwerk(F3, y2, hg, holz, laeden, r3) {
+    const L2 = F3.L, T = 0.07, m = L2 / 2;
     const breite = (yy) => Math.max(0, L2 / 2 * (1 - (yy - y2) / hg));
     const ebenen = [y2 + 0.05];
     if (hg > 4.5) ebenen.push(y2 + hg * 0.48);
     if (hg > 7.5) ebenen.push(y2 + hg * 0.76);
     for (const ye of ebenen) {
       const b3 = breite(ye + 0.18) - 0.15;
-      if (b3 > 0.3) F2.box(m - b3, m + b3, ye, ye + 0.18, 0, T, holz);
+      if (b3 > 0.3) F3.box(m - b3, m + b3, ye, ye + 0.18, 0, T, holz);
     }
     ebenen.forEach((ye, i) => {
       const ytop = i + 1 < ebenen.length ? ebenen[i + 1] : y2 + hg;
@@ -50422,23 +50422,23 @@
       const us = nf === 2 ? [m - 1.3, m + 1.3] : [m];
       for (const u of us) {
         if (Math.abs(u - m) + 0.7 > breite(yb + fh)) continue;
-        fenster(F2, u, yb, i ? 0.6 : 0.85, fh, { sprossen: [2, 2], kreuz: false, laeden: i ? null : laeden, rb: 0.06 });
+        fenster(F3, u, yb, i ? 0.6 : 0.85, fh, { sprossen: [2, 2], kreuz: false, laeden: i ? null : laeden, rb: 0.06 });
       }
       const b0 = breite(ye) - 0.2, b1 = breite(Math.min(ytop, ye + (ytop - ye) * 0.85)) - 0.2;
       if (b0 > 1.6) {
-        F2.strebe(m - b0, ye + 0.15, m - Math.max(b1, 0.7), ye + (ytop - ye) * 0.8, 0.12, T, holz);
-        F2.strebe(m + b0, ye + 0.15, m + Math.max(b1, 0.7), ye + (ytop - ye) * 0.8, 0.12, T, holz);
+        F3.strebe(m - b0, ye + 0.15, m - Math.max(b1, 0.7), ye + (ytop - ye) * 0.8, 0.12, T, holz);
+        F3.strebe(m + b0, ye + 0.15, m + Math.max(b1, 0.7), ye + (ytop - ye) * 0.8, 0.12, T, holz);
       }
     });
-    F2.box(m - 0.09, m + 0.09, y2, y2 + hg, 0, T, holz);
+    F3.box(m - 0.09, m + 0.09, y2, y2 + hg, 0, T, holz);
     for (let du = 1.15; du < L2 / 2 - 0.4; du += 1.15) for (const sg of [-1, 1]) {
       const u = m + sg * du, yt = y2 + hg * (1 - du / (L2 / 2)) - 0.15;
       if (yt - y2 < 0.5) continue;
-      F2.box(u - 0.08, u + 0.08, y2 + 0.1, yt, 0, T * 0.9, holz);
+      F3.box(u - 0.08, u + 0.08, y2 + 0.1, yt, 0, T * 0.9, holz);
     }
-    F2.strebe(0.3, y2 + 0.2, m, y2 + hg - 0.3, 0.16, T * 1.1, holz);
-    F2.strebe(L2 - 0.3, y2 + 0.2, m, y2 + hg - 0.3, 0.16, T * 1.1, holz);
-    F2.box(m - 0.1, m + 0.1, y2 + hg - 0.6, y2 + hg + 0.3, 0.05, 0.25, holz);
+    F3.strebe(0.3, y2 + 0.2, m, y2 + hg - 0.3, 0.16, T * 1.1, holz);
+    F3.strebe(L2 - 0.3, y2 + 0.2, m, y2 + hg - 0.3, 0.16, T * 1.1, holz);
+    F3.box(m - 0.1, m + 0.1, y2 + hg - 0.6, y2 + hg + 0.3, 0.05, 0.25, holz);
   }
   function fuenfziger(ctx) {
     const { r: r3 } = ctx;
@@ -50513,76 +50513,76 @@
     S.add(prismoid(ctx.P, eg, H - eg), dunkler(platte4, 0.2));
     if (ctx.eck) ctx.eckName = waehle2(r3, ["Reiseb\xFCro Sonnenschein", "Imbiss Zur Post", "Fotostudio Blitz", "Drogerie K\xF6rner"]);
     const egF = arkade2 ? fassadenFuer(ctx, Peg, ctx.K) : ctx.fassaden;
-    for (const F2 of egF) {
-      if (F2.art === "neben") {
-        F2.box(0, F2.L, 0, eg, 0, 0.1, platte4);
+    for (const F3 of egF) {
+      if (F3.art === "neben") {
+        F3.box(0, F3.L, 0, eg, 0, 0.1, platte4);
         continue;
       }
-      F2.box(0, F2.L, 0, eg, 0, 0.05, "#4a4f55");
-      ladenzone(ctx, F2, eg - (arkade2 ? 0.2 : 0.9), { tb: 0.06, stil: "neu", typ: r3() < 0.4 ? "band" : "einzeln", hausTuer: true, markisen: 0, holz: "#4a4f55", portal: "#8a8f94", leucht: 0.45 });
+      F3.box(0, F3.L, 0, eg, 0, 0.05, "#4a4f55");
+      ladenzone(ctx, F3, eg - (arkade2 ? 0.2 : 0.9), { tb: 0.06, stil: "neu", typ: r3() < 0.4 ? "band" : "einzeln", hausTuer: true, markisen: 0, holz: "#4a4f55", portal: "#8a8f94", leucht: 0.45 });
     }
-    const baender = (F2, y0, k3, top) => {
-      const [s0, s1] = F2.spanne(0.3);
+    const baender = (F3, y0, k3, top) => {
+      const [s0, s1] = F3.spanne(0.3);
       if (variante2 === "kassette" || variante2 === "eternit") {
-        const ax = F2.art === "ecke" ? Object.assign([F2.L / 2], { abstand: F2.L }) : achsen(F2.L, variante2 === "kassette" ? 1.9 : 2.4, 0.6);
+        const ax = F3.art === "ecke" ? Object.assign([F3.L / 2], { abstand: F3.L }) : achsen(F3.L, variante2 === "kassette" ? 1.9 : 2.4, 0.6);
         for (let kk = 0; kk < k3; kk++) {
           const yF = y0 + kk * gh;
           if (variante2 === "eternit") {
-            F2.box(s0, s1, yF - 0.02, yF + gh, 0, 0.12, eternit);
-            for (let yy = yF + 0.35; yy < yF + gh; yy += 0.35) F2.box(s0, s1, yy - 0.02, yy, 0.12, 0.13, dunkler(eternit, 0.04));
+            F3.box(s0, s1, yF - 0.02, yF + gh, 0, 0.12, eternit);
+            for (let yy = yF + 0.35; yy < yF + gh; yy += 0.35) F3.box(s0, s1, yy - 0.02, yy, 0.12, 0.13, dunkler(eternit, 0.04));
           }
           ax.forEach((u) => {
             if (variante2 === "kassette") {
               const b22 = ax.abstand / 2 - 0.04;
-              F2.box(u - b22, u + b22, yF + 0.02, yF + gh - 0.02, 0, 0.5, platte4);
-              F2.box(u - b22 + 0.28, u + b22 - 0.28, yF + 0.75, yF + gh - 0.4, 0.3, 0.52, dunkler(platte4, 0.25));
-              F2.box(u - b22 + 0.32, u + b22 - 0.32, yF + 0.8, yF + gh - 0.45, 0.48, 0.54, glas3);
-            } else fenster(F2, u, yF + 0.9, 1.6, 1.45, { kreuz: "senkrecht", t: 0.13, rahmen: "#f4f2ee", glas: glas3 });
+              F3.box(u - b22, u + b22, yF + 0.02, yF + gh - 0.02, 0, 0.5, platte4);
+              F3.box(u - b22 + 0.28, u + b22 - 0.28, yF + 0.75, yF + gh - 0.4, 0.3, 0.52, dunkler(platte4, 0.25));
+              F3.box(u - b22 + 0.32, u + b22 - 0.32, yF + 0.8, yF + gh - 0.45, 0.48, 0.54, glas3);
+            } else fenster(F3, u, yF + 0.9, 1.6, 1.45, { kreuz: "senkrecht", t: 0.13, rahmen: "#f4f2ee", glas: glas3 });
           });
         }
-        F2.box(s0, s1, top - 0.4, top + 0.9, 0, variante2 === "kassette" ? 0.55 : 0.3, platte4);
-        F2.box(s0 - 0.02, s1 + 0.02, top + 0.9, top + 1, -0.05, 0.6, "#d9dcdf");
+        F3.box(s0, s1, top - 0.4, top + 0.9, 0, variante2 === "kassette" ? 0.55 : 0.3, platte4);
+        F3.box(s0 - 0.02, s1 + 0.02, top + 0.9, top + 1, -0.05, 0.6, "#d9dcdf");
         return;
       }
       for (let kk = 0; kk < k3; kk++) {
         const yF = y0 + kk * gh;
         const pb = 2.5, np = Math.max(1, Math.round((s1 - s0) / pb)), pw = (s1 - s0) / np;
-        for (let i = 0; i < np; i++) F2.box(s0 + i * pw + 0.03, s0 + (i + 1) * pw - 0.03, yF - (kk || !arkade2 ? 0.4 : 0.6), yF + 1, 0, 0.3, platte4);
+        for (let i = 0; i < np; i++) F3.box(s0 + i * pw + 0.03, s0 + (i + 1) * pw - 0.03, yF - (kk || !arkade2 ? 0.4 : 0.6), yF + 1, 0, 0.3, platte4);
         const ya = yF + 1, yb = yF + gh - 0.4;
-        F2.box(s0 + 0.1, s1 - 0.1, ya, yb, -0.02, 0.12, glas3);
+        F3.box(s0 + 0.1, s1 - 0.1, ya, yb, -0.02, 0.12, glas3);
         const st2 = variante2 === "raster" ? 1.25 : 1.3;
-        for (let u = 0.6; u < F2.L - 0.3; u += st2) {
-          if (variante2 === "raster") F2.box(u - 0.09, u + 0.09, ya, yb, 0, 0.45, platte4);
-          else F2.box(u - 0.04, u + 0.04, ya, yb, 0.1, 0.15, profil2);
+        for (let u = 0.6; u < F3.L - 0.3; u += st2) {
+          if (variante2 === "raster") F3.box(u - 0.09, u + 0.09, ya, yb, 0, 0.45, platte4);
+          else F3.box(u - 0.04, u + 0.04, ya, yb, 0.1, 0.15, profil2);
         }
-        F2.box(s0 + 0.1, s1 - 0.1, ya - 0.04, ya + 0.04, 0.1, 0.15, profil2);
-        for (let u = 0.6; u < F2.L - 1.3; u += 1.3) if (r3() < 0.07) F2.box(u + 0.05, u + 1.25, yb - zw(r3, 0.5, 1), yb, 0.13, 0.16, jal);
+        F3.box(s0 + 0.1, s1 - 0.1, ya - 0.04, ya + 0.04, 0.1, 0.15, profil2);
+        for (let u = 0.6; u < F3.L - 1.3; u += 1.3) if (r3() < 0.07) F3.box(u + 0.05, u + 1.25, yb - zw(r3, 0.5, 1), yb, 0.13, 0.16, jal);
       }
-      F2.box(s0, s1, top - 0.4, top + 0.9, 0, 0.3, platte4);
-      F2.box(s0 - 0.02, s1 + 0.02, top + 0.9, top + 1, -0.05, 0.36, "#d9dcdf");
+      F3.box(s0, s1, top - 0.4, top + 0.9, 0, 0.3, platte4);
+      F3.box(s0 - 0.02, s1 + 0.02, top + 0.9, top + 1, -0.05, 0.36, "#d9dcdf");
     };
-    for (const F2 of ctx.fassaden) {
-      baender(F2, eg, nVoll, H);
-      if (arkade2 && F2.art !== "neben") {
-        F2.box(0, F2.L, eg - 0.6, eg + 0, 0, 0.3, platte4);
-        const k3 = Math.max(1, Math.round(F2.L / 5));
+    for (const F3 of ctx.fassaden) {
+      baender(F3, eg, nVoll, H);
+      if (arkade2 && F3.art !== "neben") {
+        F3.box(0, F3.L, eg - 0.6, eg + 0, 0, 0.3, platte4);
+        const k3 = Math.max(1, Math.round(F3.L / 5));
         for (let i = 0; i <= k3; i++) {
-          const u = clamp3(F2.L * i / k3, 0.3, F2.L - 0.3);
-          if (F2.art === "ecke" && i % k3) continue;
-          F2.box(u - 0.25, u + 0.25, 0, eg - 0.6, -0.5, 0, beton);
+          const u = clamp3(F3.L * i / k3, 0.3, F3.L - 0.3);
+          if (F3.art === "ecke" && i % k3) continue;
+          F3.box(u - 0.25, u + 0.25, 0, eg - 0.6, -0.5, 0, beton);
         }
       }
-      if (!arkade2 && F2.art !== "neben") F2.box(F2.spanne(0.3)[0], F2.spanne(0.3)[1], eg - 0.95, eg - 0.35, 0, 0.6, waehle2(r3, ["#4a3b33", "#3f4a53", "#7a2f2f", platte4]));
-      if (F2.art !== "ecke" && !F2.extL) F2.box(0, 0.45, eg, H + 0.9, 0, 0.34, heller(platte4, 0.04));
+      if (!arkade2 && F3.art !== "neben") F3.box(F3.spanne(0.3)[0], F3.spanne(0.3)[1], eg - 0.95, eg - 0.35, 0, 0.6, waehle2(r3, ["#4a3b33", "#3f4a53", "#7a2f2f", platte4]));
+      if (F3.art !== "ecke" && !F3.extL) F3.box(0, 0.45, eg, H + 0.9, 0, 0.34, heller(platte4, 0.04));
     }
     let P4 = ctx.P, y2 = H + 0.9;
     if (staffel2) {
       const P22 = versetzt(P4, ctx.K.map((k3) => sichtbar(ctx, k3) ? 2.4 : 0));
       S.add(prismoid(P22, H, gh + 0.4), dunkler(platte4, 0.2));
-      for (const F2 of fassadenFuer(ctx, P22, ctx.K)) {
-        F2.box(0, F2.L, H + 0.9, H + gh - 0.1, -0.02, 0.1, glas3);
-        for (let u = 0.6; u < F2.L - 0.3; u += 1.3) F2.box(u - 0.04, u + 0.04, H + 0.9, H + gh - 0.1, 0.1, 0.15, profil2);
-        F2.box(-0.02, F2.L + 0.02, H + gh - 0.1, H + gh + 0.4, 0, 0.3, platte4);
+      for (const F3 of fassadenFuer(ctx, P22, ctx.K)) {
+        F3.box(0, F3.L, H + 0.9, H + gh - 0.1, -0.02, 0.1, glas3);
+        for (let u = 0.6; u < F3.L - 0.3; u += 1.3) F3.box(u - 0.04, u + 0.04, H + 0.9, H + gh - 0.1, 0.1, 0.15, profil2);
+        F3.box(-0.02, F3.L + 0.02, H + gh - 0.1, H + gh + 0.4, 0, 0.3, platte4);
       }
       y2 = H + gh + 0.4;
       P4 = P22;
@@ -50590,13 +50590,13 @@
     }
     flachdachTechnik(ctx, P4, staffel2 ? y2 : H, { aufbauFarbe: heller(platte4, 0.04), geraete: 2 + Math.floor(r3() * 3), antenne: 0.7 });
     if (ctx.cluster === "metropole" ? r3() < 0.4 : r3() < 0.12) {
-      const F2 = ctx.fassaden.find((f11) => f11.art === "haupt");
-      if (F2) {
+      const F3 = ctx.fassaden.find((f11) => f11.art === "haupt");
+      if (F3) {
         const name2 = waehle2(r3, ["M\xF6bel Kunz", "Elektro Lux", "Mode Engel", "Reisen Sonne", "Sport Wendt"]);
         const lf = waehle2(r3, ["#e8604c", "#ffffff", "#f2d16b", "#2f6f8f"]);
-        F2.box(F2.L * 0.2, F2.L * 0.2 + 0.08, y2, y2 + 2.2, -1.2, -1.1, "#5f646b");
-        F2.box(F2.L * 0.8 - 0.08, F2.L * 0.8, y2, y2 + 2.2, -1.2, -1.1, "#5f646b");
-        F2.text(name2, F2.L / 2, y2 + 1.5, 1.1, lf, -1.05, F2.L * 0.65);
+        F3.box(F3.L * 0.2, F3.L * 0.2 + 0.08, y2, y2 + 2.2, -1.2, -1.1, "#5f646b");
+        F3.box(F3.L * 0.8 - 0.08, F3.L * 0.8, y2, y2 + 2.2, -1.2, -1.1, "#5f646b");
+        F3.text(name2, F3.L / 2, y2 + 1.5, 1.1, lf, -1.05, F3.L * 0.65);
       }
     }
     return y2 + 3;
@@ -50624,80 +50624,80 @@
     if (ctx.eck) ctx.eckName = waehle2(r3, ["Optik Lange", "H\xF6rger\xE4te Klar", "Brillen Fuchs", "Bioladen Gr\xFCnzeug"]);
     const versatzMuster = variante2 === "weiss" || r3() < 0.4;
     const loggien = variante2 !== "glas" && r3() < 0.35;
-    const geschosse2 = (F2, y0, k3) => {
-      const [s0, s1] = F2.spanne(0.15);
+    const geschosse2 = (F3, y0, k3) => {
+      const [s0, s1] = F3.spanne(0.15);
       if (variante2 === "glas") {
-        F2.box(s0 + 0.1, s1 - 0.1, y0, y0 + k3 * gh, 0, 0.05, glas3);
-        for (let u = 0.75; u < F2.L - 0.3; u += 1.5) F2.box(u - 0.035, u + 0.035, y0, y0 + k3 * gh, 0.05, 0.14, pf2);
-        for (let kk = 0; kk <= k3; kk++) F2.box(s0, s1, y0 + kk * gh - 0.3, y0 + kk * gh + 0.12, 0, 0.18, pf);
-        if (F2.art !== "ecke") {
-          F2.box(0, 0.5, y0, y0 + k3 * gh, 0, 0.2, pf);
-          F2.box(F2.L - 0.5, F2.L, y0, y0 + k3 * gh, 0, 0.2, pf);
+        F3.box(s0 + 0.1, s1 - 0.1, y0, y0 + k3 * gh, 0, 0.05, glas3);
+        for (let u = 0.75; u < F3.L - 0.3; u += 1.5) F3.box(u - 0.035, u + 0.035, y0, y0 + k3 * gh, 0.05, 0.14, pf2);
+        for (let kk = 0; kk <= k3; kk++) F3.box(s0, s1, y0 + kk * gh - 0.3, y0 + kk * gh + 0.12, 0, 0.18, pf);
+        if (F3.art !== "ecke") {
+          F3.box(0, 0.5, y0, y0 + k3 * gh, 0, 0.2, pf);
+          F3.box(F3.L - 0.5, F3.L, y0, y0 + k3 * gh, 0, 0.2, pf);
         }
         return;
       }
       const fwBasis = variante2 === "weiss" ? null : zw(r3, 1.6, 2.3);
-      const ax = F2.art === "ecke" ? [F2.L / 2] : achsen(F2.L, zw(r3, 2.6, 3.1), 1);
+      const ax = F3.art === "ecke" ? [F3.L / 2] : achsen(F3.L, zw(r3, 2.6, 3.1), 1);
       const logIdx = loggien && ax.length >= 3 ? r3() < 0.5 ? 0 : ax.length - 1 : -1;
       for (let kk = 0; kk < k3; kk++) {
         const yF = y0 + kk * gh;
-        F2.box(s0, s1, yF - 0.2, yF + 0.3, 0, 0.16, pf);
+        F3.box(s0, s1, yF - 0.2, yF + 0.3, 0, 0.16, pf);
         const fenst = ax.map((u, i) => {
-          const fw = F2.art === "ecke" ? Math.min(1.6, F2.L - 0.6) : variante2 === "weiss" ? waehle2(r3, [1, 1.4, 2.2, 2.6]) : i === logIdx ? 2.4 : fwBasis;
-          const du = versatzMuster && F2.art !== "ecke" && i !== logIdx ? (kk % 2 ? 0.45 : -0.45) * (i % 2 ? 1 : -1) : 0;
-          return [clamp3(u + du, fw / 2 + 0.4, F2.L - fw / 2 - 0.4), fw, i === logIdx];
+          const fw = F3.art === "ecke" ? Math.min(1.6, F3.L - 0.6) : variante2 === "weiss" ? waehle2(r3, [1, 1.4, 2.2, 2.6]) : i === logIdx ? 2.4 : fwBasis;
+          const du = versatzMuster && F3.art !== "ecke" && i !== logIdx ? (kk % 2 ? 0.45 : -0.45) * (i % 2 ? 1 : -1) : 0;
+          return [clamp3(u + du, fw / 2 + 0.4, F3.L - fw / 2 - 0.4), fw, i === logIdx];
         });
         let last = s0;
         for (const [u, fw] of fenst) {
-          if (u - fw / 2 - 0.12 > last) F2.box(last + 0.02, u - fw / 2 - 0.12, yF + 0.3, yF + gh - 0.2, 0, 0.16, kk % 2 && variante2 === "platten" ? pf2 : pf);
+          if (u - fw / 2 - 0.12 > last) F3.box(last + 0.02, u - fw / 2 - 0.12, yF + 0.3, yF + gh - 0.2, 0, 0.16, kk % 2 && variante2 === "platten" ? pf2 : pf);
           last = u + fw / 2 + 0.12;
         }
-        if (s1 > last) F2.box(last + 0.02, s1, yF + 0.3, yF + gh - 0.2, 0, 0.16, kk % 2 && variante2 === "platten" ? pf2 : pf);
+        if (s1 > last) F3.box(last + 0.02, s1, yF + 0.3, yF + gh - 0.2, 0, 0.16, kk % 2 && variante2 === "platten" ? pf2 : pf);
         for (const [u, fw, log] of fenst) {
           if (log) {
-            F2.box(u - fw / 2 - 0.12, u + fw / 2 + 0.12, yF + 0.3, yF + gh - 0.2, -0.02, 0.04, "#4d555c");
-            F2.box(u - fw / 2 + 0.3, u + fw / 2 - 0.3, yF + 0.4, yF + gh - 0.35, 0, 0.05, glas3);
-            F2.box(u - fw / 2 - 0.12, u + fw / 2 + 0.12, yF + 0.3, yF + 1.3, 0.1, 0.16, GLAS_GELAENDER);
+            F3.box(u - fw / 2 - 0.12, u + fw / 2 + 0.12, yF + 0.3, yF + gh - 0.2, -0.02, 0.04, "#4d555c");
+            F3.box(u - fw / 2 + 0.3, u + fw / 2 - 0.3, yF + 0.4, yF + gh - 0.35, 0, 0.05, glas3);
+            F3.box(u - fw / 2 - 0.12, u + fw / 2 + 0.12, yF + 0.3, yF + 1.3, 0.1, 0.16, GLAS_GELAENDER);
             continue;
           }
-          F2.box(u - fw / 2 - 0.12, u + fw / 2 + 0.12, yF + 0.3, yF + gh - 0.2, 0, 0.22, rahmen2);
-          F2.box(u - fw / 2 - 0.05, u + fw / 2 + 0.05, yF + 0.33, yF + gh - 0.25, 0.15, 0.24, glas3);
-          if (fw > 1.5) F2.box(u - 0.03, u + 0.03, yF + 0.33, yF + gh - 0.25, 0.2, 0.26, rahmen2);
-          if (r3() < 0.6) F2.box(u - fw / 2, u + fw / 2, yF + 0.33, yF + 1.2, 0.26, 0.3, GLAS_GELAENDER);
-          else if (r3() < 0.3) F2.box(u - fw / 2, u + fw / 2, yF + gh - 0.25 - zw(r3, 0.3, 1.2), yF + gh - 0.25, 0.24, 0.27, "#e1e3e4");
+          F3.box(u - fw / 2 - 0.12, u + fw / 2 + 0.12, yF + 0.3, yF + gh - 0.2, 0, 0.22, rahmen2);
+          F3.box(u - fw / 2 - 0.05, u + fw / 2 + 0.05, yF + 0.33, yF + gh - 0.25, 0.15, 0.24, glas3);
+          if (fw > 1.5) F3.box(u - 0.03, u + 0.03, yF + 0.33, yF + gh - 0.25, 0.2, 0.26, rahmen2);
+          if (r3() < 0.6) F3.box(u - fw / 2, u + fw / 2, yF + 0.33, yF + 1.2, 0.26, 0.3, GLAS_GELAENDER);
+          else if (r3() < 0.3) F3.box(u - fw / 2, u + fw / 2, yF + gh - 0.25 - zw(r3, 0.3, 1.2), yF + gh - 0.25, 0.24, 0.27, "#e1e3e4");
         }
         if (variante2 === "holz") {
-          for (let u = s0 + 0.15; u < s1; u += 0.3) if (!fenst.some(([fu, fw]) => Math.abs(u - fu) < fw / 2 + 0.15)) F2.box(u - 0.05, u + 0.05, yF + 0.3, yF + gh - 0.2, 0.16, 0.2, dunkler(pf, 0.06));
+          for (let u = s0 + 0.15; u < s1; u += 0.3) if (!fenst.some(([fu, fw]) => Math.abs(u - fu) < fw / 2 + 0.15)) F3.box(u - 0.05, u + 0.05, yF + 0.3, yF + gh - 0.2, 0.16, 0.2, dunkler(pf, 0.06));
         }
       }
     };
-    for (const F2 of ctx.fassaden) {
-      const [s0, s1] = F2.spanne(0.15);
-      if (F2.art === "neben") {
-        F2.box(s0, s1, 0, eg, 0, 0.16, pf);
-        achsen(F2.L, 3, 1.2).forEach((u) => fenster(F2, u, 1, 1.6, eg - 2, { rahmen: rahmen2, glas: glas3, kreuz: false, t: 0.16 }));
+    for (const F3 of ctx.fassaden) {
+      const [s0, s1] = F3.spanne(0.15);
+      if (F3.art === "neben") {
+        F3.box(s0, s1, 0, eg, 0, 0.16, pf);
+        achsen(F3.L, 3, 1.2).forEach((u) => fenster(F3, u, 1, 1.6, eg - 2, { rahmen: rahmen2, glas: glas3, kreuz: false, t: 0.16 }));
       } else {
-        F2.box(s0, s1, 0, eg, 0, 0.04, "#2b2f33");
-        ladenzone(ctx, F2, eg + 0.2, { tb: 0.05, stil: "neu", typ: r3() < 0.4 ? "band" : "einzeln", markisen: 0, holz: "#3b4046", portal: pf, leucht: 0.2 });
-        F2.box(s0, s1, eg - 0.3, eg + 0.25, 0, 0.3, pf);
+        F3.box(s0, s1, 0, eg, 0, 0.04, "#2b2f33");
+        ladenzone(ctx, F3, eg + 0.2, { tb: 0.05, stil: "neu", typ: r3() < 0.4 ? "band" : "einzeln", markisen: 0, holz: "#3b4046", portal: pf, leucht: 0.2 });
+        F3.box(s0, s1, eg - 0.3, eg + 0.25, 0, 0.3, pf);
       }
-      geschosse2(F2, eg + 0.25, nVoll);
-      F2.box(s0, s1, H, H + 0.7, 0, 0.18, pf);
-      F2.box(s0 - 0.02, s1 + 0.02, H + 0.7, H + 0.78, -0.05, 0.22, "#c9cdd0");
+      geschosse2(F3, eg + 0.25, nVoll);
+      F3.box(s0, s1, H, H + 0.7, 0, 0.18, pf);
+      F3.box(s0 - 0.02, s1 + 0.02, H + 0.7, H + 0.78, -0.05, 0.22, "#c9cdd0");
     }
     let P4 = ctx.P, y2 = H + 0.05;
     if (staffel2) {
       const P22 = versetzt(P4, ctx.K.map((k3) => sichtbar(ctx, k3) ? 2.4 : 0));
       S.add(prismoid(P4, H, 0.06), "#b9b4aa");
       S.add(prismoid(P22, H, gh), "#6b8597");
-      for (const F2 of fassadenFuer(ctx, P22, ctx.K)) {
-        for (let u = 0.6; u < F2.L - 0.2; u += 1.5) F2.box(u - 0.04, u + 0.04, H, H + gh, 0, 0.1, "#d9dcdf");
-        F2.box(0, F2.L, H + 0.05, H + gh, -0.02, 0.04, glas3);
+      for (const F3 of fassadenFuer(ctx, P22, ctx.K)) {
+        for (let u = 0.6; u < F3.L - 0.2; u += 1.5) F3.box(u - 0.04, u + 0.04, H, H + gh, 0, 0.1, "#d9dcdf");
+        F3.box(0, F3.L, H + 0.05, H + gh, -0.02, 0.04, glas3);
       }
-      for (const F2 of ctx.fassaden) {
-        const [s0, s1] = F2.spanne(0.1);
-        F2.box(s0, s1, H + 0.7, H + 1.25, -0.1, -0.05, GLAS_GELAENDER);
-        F2.box(s0, s1, H + 1.2, H + 1.26, -0.12, -0.03, "#8a8f94");
+      for (const F3 of ctx.fassaden) {
+        const [s0, s1] = F3.spanne(0.1);
+        F3.box(s0, s1, H + 0.7, H + 1.25, -0.1, -0.05, GLAS_GELAENDER);
+        F3.box(s0, s1, H + 1.2, H + 1.26, -0.12, -0.03, "#8a8f94");
       }
       const P32 = versetzt(P22, ctx.K.map((k3) => sichtbar(ctx, k3) ? -0.7 : 0));
       S.add(prismoid(P32, H + gh, 0.3), pf === "#4a4f55" ? "#4a4f55" : "#f2f2ef");
@@ -50768,18 +50768,18 @@
       const achse = strZ ? "z" : "x";
       satteldach(ctx, ctx.x, ctx.z, ctx.x + ctx.w, ctx.z + ctx.d - (strZ ? 0 : 0), H + 0.12, G3 * 0.62, achse, { dach: dachF, wand: wand2, ueberstand: 0.35, ortgang: 0.02 });
       const gf = wz(r3, [["volute", 2], ["geschweift", 1.5], ["dreieck", 1]]);
-      for (const F2 of ctx.fassaden) if (F2.art === "haupt") {
-        if (gf === "volute") zwerchgiebelVoll(ctx, F2, H + 0.12, G3, c, r3);
-        else if (gf === "geschweift") zwerchgiebel(ctx, F2, F2.L / 2, F2.L - 0.1, H + 0.12, G3 * 0.95, c, dachF, "geschwungen");
+      for (const F3 of ctx.fassaden) if (F3.art === "haupt") {
+        if (gf === "volute") zwerchgiebelVoll(ctx, F3, H + 0.12, G3, c, r3);
+        else if (gf === "geschweift") zwerchgiebel(ctx, F3, F3.L / 2, F3.L - 0.1, H + 0.12, G3 * 0.95, c, dachF, "geschwungen");
         else {
           const sh = new three_module_exports.Shape();
-          sh.moveTo(-F2.L / 2, 0);
-          sh.lineTo(F2.L / 2, 0);
+          sh.moveTo(-F3.L / 2, 0);
+          sh.lineTo(F3.L / 2, 0);
           sh.lineTo(0, G3 * 0.62);
           sh.closePath();
-          F2.profil(sh, F2.L / 2, H + 0.12, -0.3, 0.12, wand2);
-          F2.box(0, F2.L, H + 0.05, H + 0.3, 0, 0.35, orn);
-          giebelFenster(F2, H + 0.12, G3 * 0.62, { faschen: orn, t: 0.12 });
+          F3.profil(sh, F3.L / 2, H + 0.12, -0.3, 0.12, wand2);
+          F3.box(0, F3.L, H + 0.05, H + 0.3, 0, 0.35, orn);
+          giebelFenster(F3, H + 0.12, G3 * 0.62, { faschen: orn, t: 0.12 });
         }
       }
       dachkram(ctx, achse === "z" ? [[ctx.x + ctx.w / 2, ctx.z + 2], [ctx.x + ctx.w / 2, ctx.z + ctx.d - 3]] : [[ctx.x + 2, ctx.z + ctx.d / 2], [ctx.x + ctx.w - 3, ctx.z + ctx.d / 2]], H + 1, H + G3 * 0.62, { schornsteine: 2 });
@@ -50787,19 +50787,19 @@
     }
     if (vorschuss) {
       const hv = zw(r3, 2, 3);
-      for (const F2 of ctx.fassaden) {
-        const [s0, s1] = F2.spanne(0.1);
-        F2.box(s0, s1, H, H + hv, -0.5, 0.05, wand2);
-        F2.box(s0 - 0.05, s1 + 0.05, H + hv, H + hv + 0.18, -0.55, 0.15, orn);
+      for (const F3 of ctx.fassaden) {
+        const [s0, s1] = F3.spanne(0.1);
+        F3.box(s0, s1, H, H + hv, -0.5, 0.05, wand2);
+        F3.box(s0 - 0.05, s1 + 0.05, H + hv, H + hv + 0.18, -0.55, 0.15, orn);
         if (r3() < 0.6) {
           const sh = new three_module_exports.Shape();
-          const b3 = Math.min(3, F2.L * 0.2);
+          const b3 = Math.min(3, F3.L * 0.2);
           sh.moveTo(-b3, 0);
           sh.lineTo(b3, 0);
           sh.quadraticCurveTo(0, 1.4, -b3, 0);
-          F2.profil(sh, F2.L / 2, H + hv + 0.18, -0.5, 0.1, wand2);
+          F3.profil(sh, F3.L / 2, H + hv + 0.18, -0.5, 0.1, wand2);
         }
-        achsen(F2.L, 3, 1.5).forEach((u) => fenster(F2, u, H + 0.5, 0.7, 0.7, { faschen: orn, kreuz: false, t: 0.05 }));
+        achsen(F3.L, 3, 1.5).forEach((u) => fenster(F3, u, H + 0.5, 0.7, 0.7, { faschen: orn, kreuz: false, t: 0.05 }));
       }
       ctx.S.add(prismoid(ctx.P, H + 0.1, hv - 0.6, ctx.K.map((k3) => dachKante(ctx, k3) ? ctx.d / 4 : 0)), dachF);
       return H + hv + 1;
@@ -50819,8 +50819,8 @@
       kram: { schornsteine: 2 }
     });
   }
-  function zwerchgiebelVoll(ctx, F2, y2, G3, c, r3) {
-    const L2 = F2.L - 0.1, hb2 = L2 / 2;
+  function zwerchgiebelVoll(ctx, F3, y2, G3, c, r3) {
+    const L2 = F3.L - 0.1, hb2 = L2 / 2;
     const form2 = (sx, sy) => {
       const s2 = new three_module_exports.Shape();
       s2.moveTo(-hb2 * sx, 0);
@@ -50836,21 +50836,21 @@
       s2.closePath();
       return s2;
     };
-    F2.profil(form2(1.03, 1.03), F2.L / 2, y2, -0.5, 0.08, c.orn, 10);
-    F2.profil(form2(1, 1), F2.L / 2, y2, -0.45, 0.16, c.wand, 10);
-    F2.box(F2.L / 2 - hb2 * 0.62 - 0.1, F2.L / 2 + hb2 * 0.62 + 0.1, y2 + G3 * 0.46 - 0.08, y2 + G3 * 0.46 + 0.08, -0.4, 0.26, c.orn);
+    F3.profil(form2(1.03, 1.03), F3.L / 2, y2, -0.5, 0.08, c.orn, 10);
+    F3.profil(form2(1, 1), F3.L / 2, y2, -0.45, 0.16, c.wand, 10);
+    F3.box(F3.L / 2 - hb2 * 0.62 - 0.1, F3.L / 2 + hb2 * 0.62 + 0.1, y2 + G3 * 0.46 - 0.08, y2 + G3 * 0.46 + 0.08, -0.4, 0.26, c.orn);
     for (const s2 of [-1, 1]) {
-      fenster(F2, F2.L / 2 + s2 * hb2 * 0.36, y2 + 0.55, 0.85, Math.min(1.5, G3 * 0.24), { t: 0.16, faschen: c.orn, ohren: true, verd: "bogen", verdFarbe: c.orn, kreuz: true });
+      fenster(F3, F3.L / 2 + s2 * hb2 * 0.36, y2 + 0.55, 0.85, Math.min(1.5, G3 * 0.24), { t: 0.16, faschen: c.orn, ohren: true, verd: "bogen", verdFarbe: c.orn, kreuz: true });
     }
-    fenster(F2, F2.L / 2, y2 + G3 * 0.5 + 0.3, 0.75, Math.min(1.1, G3 * 0.16), { t: 0.16, faschen: c.orn, kreuz: false, verd: "rund", verdFarbe: c.orn });
+    fenster(F3, F3.L / 2, y2 + G3 * 0.5 + 0.3, 0.75, Math.min(1.1, G3 * 0.16), { t: 0.16, faschen: c.orn, kreuz: false, verd: "rund", verdFarbe: c.orn });
     for (const s2 of [-1, 1]) {
-      const p3 = F2.welt(F2.L / 2 + s2 * hb2 * 0.92, 0);
+      const p3 = F3.welt(F3.L / 2 + s2 * hb2 * 0.92, 0);
       ctx.S.box(0.32, 0.55, 0.32, p3[0], y2 + G3 * 0.1 + 0.27, p3[1], c.orn);
-      const q2 = F2.welt(F2.L / 2 + s2 * hb2 * 0.55, 0);
+      const q2 = F3.welt(F3.L / 2 + s2 * hb2 * 0.55, 0);
       ctx.S.box(0.28, 0.5, 0.28, q2[0], y2 + G3 * 0.5 + 0.25, q2[1], c.orn);
     }
     const g = new three_module_exports.SphereGeometry(0.28, 8, 6);
-    const p2 = F2.welt(F2.L / 2, 0);
+    const p2 = F3.welt(F3.L / 2, 0);
     g.translate(p2[0], y2 + G3 * 1 + 0.3, p2[1]);
     ctx.S.add(g, c.orn);
   }
@@ -50877,43 +50877,43 @@
       P4 = versetzt(P4, ctx.K.map((k3) => k3 === ctx.strasse ? pt2 : 0));
       S.add(prismoid(Ppav, 0, 3.8), "#e9e6de");
       const Fp = fassadenFuer(ctx, Ppav, ["+z", "+x", "-z", "-x"]);
-      for (const F2 of Fp) {
-        F2.box(0, F2.L, 3, 3.8, 0, 0.35, akzent);
-        F2.box(-0.02, F2.L + 0.02, 3.8, 3.95, -0.05, 0.45, "#e9e6de");
-        if (F2.art === "haupt") {
-          ladenzone(ctx, F2, 3 + 0.45, { tb: 0.05, stil: "neu", typ: "band", hausTuer: false, markisen: 0, schild: false });
-          F2.text(waehle2(r3, ["Kaufhalle", "Gastst\xE4tte Freundschaft", "Blumen Ilse", "Friseur Chic", "Kaufhalle am Ring"]), F2.L / 2, 3.4, 0.55, "#ffffff", 0.37, F2.L * 0.8);
-        } else achsen(F2.L, 2.4, 0.8).forEach((u) => F2.box(u - 0.9, u + 0.9, 0.6, 2.7, 0, 0.06, GLAS_LADEN));
+      for (const F3 of Fp) {
+        F3.box(0, F3.L, 3, 3.8, 0, 0.35, akzent);
+        F3.box(-0.02, F3.L + 0.02, 3.8, 3.95, -0.05, 0.45, "#e9e6de");
+        if (F3.art === "haupt") {
+          ladenzone(ctx, F3, 3 + 0.45, { tb: 0.05, stil: "neu", typ: "band", hausTuer: false, markisen: 0, schild: false });
+          F3.text(waehle2(r3, ["Kaufhalle", "Gastst\xE4tte Freundschaft", "Blumen Ilse", "Friseur Chic", "Kaufhalle am Ring"]), F3.L / 2, 3.4, 0.55, "#ffffff", 0.37, F3.L * 0.8);
+        } else achsen(F3.L, 2.4, 0.8).forEach((u) => F3.box(u - 0.9, u + 0.9, 0.6, 2.7, 0, 0.06, GLAS_LADEN));
       }
       flachdachTechnik(ctx, Ppav, 3.95, { aufzug: false, geraete: 2, antenne: 0 });
     }
     S.add(prismoid(P4, 0, H), fuge);
     const frames = fassadenFuer(ctx, P4, ctx.K);
-    for (const F2 of frames) {
-      const [s0, s1] = F2.spanne(0.1);
-      if (F2.art === "neben") {
-        for (let k3 = 0; k3 < n3 + 1; k3++) F2.box(s0, s1, (k3 ? egH + (k3 - 1) * gh : 0) + 0.03, (k3 ? egH + k3 * gh : egH) - 0.03, 0, 0.18, platte4);
+    for (const F3 of frames) {
+      const [s0, s1] = F3.spanne(0.1);
+      if (F3.art === "neben") {
+        for (let k3 = 0; k3 < n3 + 1; k3++) F3.box(s0, s1, (k3 ? egH + (k3 - 1) * gh : 0) + 0.03, (k3 ? egH + k3 * gh : egH) - 0.03, 0, 0.18, platte4);
         const muster2 = r3();
-        if (muster2 < 0.5) for (let i = 0; i < 4; i++) F2.box(F2.L * 0.15 + i * F2.L * 0.18, F2.L * 0.15 + i * F2.L * 0.18 + F2.L * 0.1, egH + 0.5 + i * 1.2, H - 0.8, 0.18, 0.21, i % 2 ? akzent : heller(akzent, 0.15));
-        else for (let i = 0; i < 3; i++) F2.box(F2.L * 0.1, F2.L * 0.9, egH + n3 * gh * (0.2 + i * 0.25), egH + n3 * gh * (0.2 + i * 0.25) + 0.8, 0.18, 0.21, i === 1 ? akzent : heller(akzent, 0.12));
+        if (muster2 < 0.5) for (let i = 0; i < 4; i++) F3.box(F3.L * 0.15 + i * F3.L * 0.18, F3.L * 0.15 + i * F3.L * 0.18 + F3.L * 0.1, egH + 0.5 + i * 1.2, H - 0.8, 0.18, 0.21, i % 2 ? akzent : heller(akzent, 0.15));
+        else for (let i = 0; i < 3; i++) F3.box(F3.L * 0.1, F3.L * 0.9, egH + n3 * gh * (0.2 + i * 0.25), egH + n3 * gh * (0.2 + i * 0.25) + 0.8, 0.18, 0.21, i === 1 ? akzent : heller(akzent, 0.12));
         continue;
       }
-      const ax = achsen(F2.L, raster4, 0.15);
+      const ax = achsen(F3.L, raster4, 0.15);
       const lg = /* @__PURE__ */ new Set();
-      if (F2.art === "haupt" && ax.length >= 3 && loggiaTakt) {
+      if (F3.art === "haupt" && ax.length >= 3 && loggiaTakt) {
         for (let i = 1; i < ax.length; i += loggiaTakt) lg.add(i);
       }
       const tr = ax.length >= 4 ? Math.floor(ax.length / 2) - (lg.has(Math.floor(ax.length / 2)) ? 1 : 0) : -1;
-      if (ladenEG2 && F2.art !== "neben") {
-        F2.box(s0, s1, egH - 0.7, egH, 0, 0.35, akzent);
-        ladenzone(ctx, F2, egH - 0.6, { tb: 0.05, stil: "neu", typ: "band", markisen: 0, leucht: 0.3 });
+      if (ladenEG2 && F3.art !== "neben") {
+        F3.box(s0, s1, egH - 0.7, egH, 0, 0.35, akzent);
+        ladenzone(ctx, F3, egH - 0.6, { tb: 0.05, stil: "neu", typ: "band", markisen: 0, leucht: 0.3 });
       } else {
-        F2.box(s0, s1, 0, egH - 0.03, 0, 0.18, dunkler(platte4, 0.05));
+        F3.box(s0, s1, 0, egH - 0.03, 0, 0.18, dunkler(platte4, 0.05));
         ax.forEach((u, i) => {
           if (i === tr) {
-            F2.box(u - 0.9, u + 0.9, 0, 2.4, 0.18, 0.24, "#5a6570");
-            F2.box(u - 1.2, u + 1.2, 2.5, 2.65, 0, 1.4, "#e9e6de");
-          } else fenster(F2, u, 0.9, 1.5, 1.4, { kreuz: "senkrecht", t: 0.18, rahmen: RAHMEN });
+            F3.box(u - 0.9, u + 0.9, 0, 2.4, 0.18, 0.24, "#5a6570");
+            F3.box(u - 1.2, u + 1.2, 2.5, 2.65, 0, 1.4, "#e9e6de");
+          } else fenster(F3, u, 0.9, 1.5, 1.4, { kreuz: "senkrecht", t: 0.18, rahmen: RAHMEN });
         });
       }
       for (let k3 = 1; k3 <= n3; k3++) {
@@ -50921,30 +50921,30 @@
         ax.forEach((u, i) => {
           const a2 = u - ax.abstand / 2 + 0.03, b3 = u + ax.abstand / 2 - 0.03;
           if (lg.has(i)) {
-            F2.box(a2, b3, yF + 0.03, yF + gh - 0.03, -0.02, 0.05, "#4d555c");
-            F2.box(a2 + 0.3, b3 - 0.3, yF + 0.15, yF + gh - 0.35, 0, 0.06, FARBEN3.fensterHell);
-            F2.box(a2, b3, yF + 0.05, yF + 1, 0, 0.22, saniert ? akzent : waehle2(r3, ["#d8cdb8", "#c98b4f", "#a39e94"]));
-            F2.box(a2 - 0.03, a2 + 0.12, yF, yF + gh, 0, 0.26, platte4);
-            F2.box(b3 - 0.12, b3 + 0.03, yF, yF + gh, 0, 0.26, platte4);
-            F2.box(a2, b3, yF + gh - 0.18, yF + gh, 0, 0.26, platte4);
+            F3.box(a2, b3, yF + 0.03, yF + gh - 0.03, -0.02, 0.05, "#4d555c");
+            F3.box(a2 + 0.3, b3 - 0.3, yF + 0.15, yF + gh - 0.35, 0, 0.06, FARBEN3.fensterHell);
+            F3.box(a2, b3, yF + 0.05, yF + 1, 0, 0.22, saniert ? akzent : waehle2(r3, ["#d8cdb8", "#c98b4f", "#a39e94"]));
+            F3.box(a2 - 0.03, a2 + 0.12, yF, yF + gh, 0, 0.26, platte4);
+            F3.box(b3 - 0.12, b3 + 0.03, yF, yF + gh, 0, 0.26, platte4);
+            F3.box(a2, b3, yF + gh - 0.18, yF + gh, 0, 0.26, platte4);
             return;
           }
-          F2.box(a2, b3, yF + 0.03, yF + gh - 0.03, 0, 0.18, platte4);
+          F3.box(a2, b3, yF + 0.03, yF + gh - 0.03, 0, 0.18, platte4);
           if (i === tr) {
-            fenster(F2, u, yF + 1.4, 0.9, 0.9, { kreuz: false, t: 0.18, glas: FARBEN3.fensterHell });
+            fenster(F3, u, yF + 1.4, 0.9, 0.9, { kreuz: false, t: 0.18, glas: FARBEN3.fensterHell });
             return;
           }
           const doppelt = ax.abstand > 2.8 && (i + k3) % 3 !== 0;
-          fenster(F2, u, yF + 0.85, doppelt ? 1.8 : 1.4, 1.45, { kreuz: "senkrecht", t: 0.18, rahmen: saniert ? RAHMEN : "#d9d6cf", reflex: true });
+          fenster(F3, u, yF + 0.85, doppelt ? 1.8 : 1.4, 1.45, { kreuz: "senkrecht", t: 0.18, rahmen: saniert ? RAHMEN : "#d9d6cf", reflex: true });
         });
-        if (saniert && F2.art === "haupt" && ax.length >= 5) {
+        if (saniert && F3.art === "haupt" && ax.length >= 5) {
           const i = Math.floor(ax.length * 0.75);
           const u = ax[i];
-          if (!lg.has(i)) F2.box(u - ax.abstand / 2 + 0.03, u + ax.abstand / 2 - 0.03, yF + 0.03, yF + 0.75, 0.18, 0.2, akzent);
+          if (!lg.has(i)) F3.box(u - ax.abstand / 2 + 0.03, u + ax.abstand / 2 - 0.03, yF + 0.03, yF + 0.75, 0.18, 0.2, akzent);
         }
       }
-      F2.box(s0, s1, H, H + 0.6, 0, 0.2, platte4);
-      F2.box(s0 - 0.02, s1 + 0.02, H + 0.6, H + 0.7, -0.05, 0.25, "#d9dcdf");
+      F3.box(s0, s1, H, H + 0.6, 0, 0.2, platte4);
+      F3.box(s0 - 0.02, s1 + 0.02, H + 0.6, H + 0.7, -0.05, 0.25, "#d9dcdf");
     }
     flachdachTechnik(ctx, P4, H, { aufbauFarbe: platte4, geraete: 1, antenne: 0.8, belag: "#a9a59c" });
     return H + 3;
@@ -50963,69 +50963,69 @@
     const turmVor = r3() < 0.5, turmFarbe = r3() < 0.5 ? wand2 : waehle2(r3, [akzent, "#d9d6cf", "#b9654e"]);
     const sprosse = waehle2(r3, ["#2b2f33", "#2b2f33", "#f4f3ef", "#7a2f2f", "#2f4f6f"]);
     const treppe = r3() < 0.6;
-    for (const F2 of ctx.fassaden) {
-      const [s0, s1] = F2.spanne(0.12);
-      F2.box(s0, s1, 0, 0.6, 0, 0.1, sockelB);
-      if (F2.art === "neben") achsen(F2.L, 3, 1.2).forEach((u) => F2.box(u - 0.9, u + 0.9, 1.4, eg - 0.9, -0.02, 0.05, FARBEN3.fenster));
-      else ladenzone(ctx, F2, eg - 0.2, { tb: 0.06, stil: "neu", typ: r3() < 0.6 ? "band" : "einzeln", markisen: 0.25, holz: akzent, leucht: 0.15 });
-      const trU = treppe && F2.art === "haupt" && F2.L > 10 ? r3() < 0.5 ? 1.6 : F2.L - 1.6 : null;
+    for (const F3 of ctx.fassaden) {
+      const [s0, s1] = F3.spanne(0.12);
+      F3.box(s0, s1, 0, 0.6, 0, 0.1, sockelB);
+      if (F3.art === "neben") achsen(F3.L, 3, 1.2).forEach((u) => F3.box(u - 0.9, u + 0.9, 1.4, eg - 0.9, -0.02, 0.05, FARBEN3.fenster));
+      else ladenzone(ctx, F3, eg - 0.2, { tb: 0.06, stil: "neu", typ: r3() < 0.6 ? "band" : "einzeln", markisen: 0.25, holz: akzent, leucht: 0.15 });
+      const trU = treppe && F3.art === "haupt" && F3.L > 10 ? r3() < 0.5 ? 1.6 : F3.L - 1.6 : null;
       for (let k3 = 1; k3 <= n3; k3++) {
         const yF = eg + (k3 - 1) * gh;
-        if (variante2 === "band" || F2.art === "ecke") {
-          const a2 = F2.extL ? -0.12 : 0.6, b3 = F2.L - (F2.extR ? -0.12 : 0.6);
-          const ua = trU != null && trU < F2.L / 2 ? trU + 1 : a2, ub = trU != null && trU > F2.L / 2 ? trU - 1 : b3;
-          F2.box(ua, ub, yF + 0.95, yF + 2.25, -0.02, 0.05, FARBEN3.fenster);
-          for (let u = ua + 0.05; u <= ub; u += 1.05) F2.box(u - 0.025, u + 0.025, yF + 0.95, yF + 2.25, 0, 0.07, sprosse);
-          F2.box(ua, ub, yF + 1.75, yF + 1.79, 0, 0.07, sprosse);
-          F2.box(ua, ub, yF + 0.88, yF + 0.95, 0, 0.12, "#d9d8d2");
+        if (variante2 === "band" || F3.art === "ecke") {
+          const a2 = F3.extL ? -0.12 : 0.6, b3 = F3.L - (F3.extR ? -0.12 : 0.6);
+          const ua = trU != null && trU < F3.L / 2 ? trU + 1 : a2, ub = trU != null && trU > F3.L / 2 ? trU - 1 : b3;
+          F3.box(ua, ub, yF + 0.95, yF + 2.25, -0.02, 0.05, FARBEN3.fenster);
+          for (let u = ua + 0.05; u <= ub; u += 1.05) F3.box(u - 0.025, u + 0.025, yF + 0.95, yF + 2.25, 0, 0.07, sprosse);
+          F3.box(ua, ub, yF + 1.75, yF + 1.79, 0, 0.07, sprosse);
+          F3.box(ua, ub, yF + 0.88, yF + 0.95, 0, 0.12, "#d9d8d2");
         } else {
-          achsen(F2.L, 2.6, 1).forEach((u) => {
+          achsen(F3.L, 2.6, 1).forEach((u) => {
             if (trU != null && Math.abs(u - trU) < 1.4) return;
-            F2.box(u - 0.8, u + 0.8, yF + 0.95, yF + 2.2, -0.02, 0.05, FARBEN3.fenster);
-            F2.box(u - 0.02, u + 0.02, yF + 0.95, yF + 2.2, 0, 0.07, sprosse);
-            F2.box(u - 0.8, u + 0.8, yF + 1.7, yF + 1.74, 0, 0.07, sprosse);
+            F3.box(u - 0.8, u + 0.8, yF + 0.95, yF + 2.2, -0.02, 0.05, FARBEN3.fenster);
+            F3.box(u - 0.02, u + 0.02, yF + 0.95, yF + 2.2, 0, 0.07, sprosse);
+            F3.box(u - 0.8, u + 0.8, yF + 1.7, yF + 1.74, 0, 0.07, sprosse);
           });
         }
       }
       if (trU != null) {
-        if (turmVor) F2.box(trU - 1.1, trU + 1.1, 0, H + 1.2, 0, 0.9, turmFarbe);
+        if (turmVor) F3.box(trU - 1.1, trU + 1.1, 0, H + 1.2, 0, 0.9, turmFarbe);
         const tv = turmVor ? 0.9 : 0;
-        F2.box(trU - 0.65, trU + 0.65, eg + 0.3, H - 0.5, tv - 0.02, tv + 0.06, FARBEN3.fensterHell);
-        for (let y2 = eg + 0.3; y2 < H - 0.5; y2 += 0.6) F2.box(trU - 0.65, trU + 0.65, y2 - 0.02, y2 + 0.02, tv, tv + 0.08, sprosse);
+        F3.box(trU - 0.65, trU + 0.65, eg + 0.3, H - 0.5, tv - 0.02, tv + 0.06, FARBEN3.fensterHell);
+        for (let y2 = eg + 0.3; y2 < H - 0.5; y2 += 0.6) F3.box(trU - 0.65, trU + 0.65, y2 - 0.02, y2 + 0.02, tv, tv + 0.08, sprosse);
       }
-      if (F2.art === "haupt" && r3() < 0.6) {
-        const ua = F2.extR ? F2.L - 3.2 : F2.L - 3.4, ub = F2.extR ? F2.L + 0 : F2.L - 0.6;
+      if (F3.art === "haupt" && r3() < 0.6) {
+        const ua = F3.extR ? F3.L - 3.2 : F3.L - 3.4, ub = F3.extR ? F3.L + 0 : F3.L - 0.6;
         for (let k3 = 1; k3 <= n3; k3++) {
           const yF = eg + (k3 - 1) * gh;
-          F2.box(ua, ub, yF - 0.12, yF + 0.05, 0, 1.3, "#f6f5f1");
-          F2.box(ua, ub, yF + 0.95, yF + 1, 1.24, 1.3, akzent === "#3b4046" ? "#3b4046" : "#4a4f55");
-          F2.box(ua, ub, yF + 0.55, yF + 0.59, 1.25, 1.29, "#4a4f55");
+          F3.box(ua, ub, yF - 0.12, yF + 0.05, 0, 1.3, "#f6f5f1");
+          F3.box(ua, ub, yF + 0.95, yF + 1, 1.24, 1.3, akzent === "#3b4046" ? "#3b4046" : "#4a4f55");
+          F3.box(ua, ub, yF + 0.55, yF + 0.59, 1.25, 1.29, "#4a4f55");
         }
       }
-      F2.box(s0, s1, H - 0.05, H + 0.25, 0, 0.12, wand2);
+      F3.box(s0, s1, H - 0.05, H + 0.25, 0, 0.12, wand2);
     }
     const Pov = versetzt(ctx.P, ctx.K.map((k3) => sichtbar(ctx, k3) ? -0.5 : 0));
     S.add(prismoid(Pov, H + 0.25, 0.22), "#f6f5f1");
     if (r3() < 0.3) {
       const P22 = versetzt(ctx.P, ctx.K.map((k3) => sichtbar(ctx, k3) ? zw(r3, 2.5, 4) : 0));
       S.add(prismoid(P22, H + 0.47, gh), wand2);
-      for (const F2 of fassadenFuer(ctx, P22, ctx.K)) {
-        F2.box(0.4, F2.L * 0.7, H + 1.3, H + gh - 0.2, -0.02, 0.05, FARBEN3.fenster);
-        for (let u = 0.45; u < F2.L * 0.7; u += 1.05) F2.box(u - 0.025, u + 0.025, H + 1.3, H + gh - 0.2, 0, 0.07, sprosse);
+      for (const F3 of fassadenFuer(ctx, P22, ctx.K)) {
+        F3.box(0.4, F3.L * 0.7, H + 1.3, H + gh - 0.2, -0.02, 0.05, FARBEN3.fenster);
+        for (let u = 0.45; u < F3.L * 0.7; u += 1.05) F3.box(u - 0.025, u + 0.025, H + 1.3, H + gh - 0.2, 0, 0.07, sprosse);
       }
       S.add(prismoid(versetzt(P22, ctx.K.map((k3) => sichtbar(ctx, k3) ? -0.6 : 0)), H + 0.47 + gh, 0.2), "#f6f5f1");
-      for (const F2 of ctx.fassaden) {
-        const [s0, s1] = F2.spanne(0.1);
-        F2.box(s0, s1, H + 1.4, H + 1.45, -0.1, -0.05, "#4a4f55");
-        F2.box(s0, s1, H + 0.95, H + 0.99, -0.1, -0.05, "#4a4f55");
+      for (const F3 of ctx.fassaden) {
+        const [s0, s1] = F3.spanne(0.1);
+        F3.box(s0, s1, H + 1.4, H + 1.45, -0.1, -0.05, "#4a4f55");
+        F3.box(s0, s1, H + 0.95, H + 0.99, -0.1, -0.05, "#4a4f55");
       }
       flachdachTechnik(ctx, P22, H + 0.67 + gh, { geraete: 1, antenne: 0.3, aufzug: false });
       return H + gh + 2;
     }
     flachdachTechnik(ctx, ctx.P, H + 0.47, { geraete: 1, antenne: 0.3, aufbauFarbe: wand2 });
     if (r3() < 0.5) {
-      const F2 = ctx.fassaden.find((f11) => f11.art === "haupt");
-      if (F2) F2.box(F2.L * 0.3, F2.L * 0.3 + 3.5, H + 0.47, H + 2.9, -4, -1.2, wand2);
+      const F3 = ctx.fassaden.find((f11) => f11.art === "haupt");
+      if (F3) F3.box(F3.L * 0.3, F3.L * 0.3 + 3.5, H + 0.47, H + 2.9, -4, -1.2, wand2);
     }
     return H + 3;
   }
@@ -54874,6 +54874,50 @@
     });
     Z2.top = Math.max(Z2.top, yK + 2.2);
   }
+  var PIN_B = 5.4;
+  var PIN_H = 6.7;
+  var PIN_RAND = 0.6;
+  var bildX = (x2, z4) => (x2 - z4) * Math.SQRT1_2;
+  var bildY = (x2, y2, z4) => -0.5 * Math.SQRT1_2 * (x2 + z4) + 0.8660254 * y2;
+  function pinAnker(k3) {
+    if (!k3 || !Number.isFinite(k3.x) || !Number.isFinite(k3.z) || !Number.isFinite(k3.hoehe)) return null;
+    const welt = (seite2, u, t3 = 0) => seite2 === "+z" ? [k3.x + u, k3.z + k3.d + t3] : [k3.x + k3.w + t3, k3.z + u];
+    const schriften = [];
+    for (const seite2 of ["+z", "+x"]) {
+      const lg = k3.seiten?.[seite2]?.logo;
+      if (!lg || !Number.isFinite(lg.u) || !Number.isFinite(lg.breite)) continue;
+      const h3 = (lg.hb ?? 2) * 2.05, t3 = lg.t ?? 0.5;
+      const ecken = [];
+      for (const du of [-lg.breite / 2, lg.breite / 2]) for (const dy of [-h3 / 2, h3 / 2]) {
+        const [x3, z5] = welt(seite2, lg.u + du, t3);
+        ecken.push([bildX(x3, z5), bildY(x3, (lg.y ?? k3.hoehe) + dy, z5)]);
+      }
+      schriften.push({ x0: Math.min(...ecken.map((e2) => e2[0])), x1: Math.max(...ecken.map((e2) => e2[0])), y0: Math.min(...ecken.map((e2) => e2[1])), y1: Math.max(...ecken.map((e2) => e2[1])) });
+    }
+    const frei6 = (x3, z5) => {
+      const ax = bildX(x3, z5), ay = bildY(x3, k3.hoehe, z5);
+      return !schriften.some((r3) => ax + PIN_B / 2 + PIN_RAND > r3.x0 && ax - PIN_B / 2 - PIN_RAND < r3.x1 && ay + PIN_H + PIN_RAND > r3.y0 && ay - PIN_RAND < r3.y1);
+    };
+    const e = hauptEingang({ k: k3 });
+    const s0 = e.seite === "+x" ? "+x" : "+z";
+    const L2 = (seite2) => seite2 === "+z" ? k3.w : k3.d;
+    const u0 = Math.min(Math.max(e.u ?? L2(s0) / 2, 3), L2(s0) - 3);
+    const kand = [];
+    for (const seite2 of [s0, s0 === "+z" ? "+x" : "+z"]) {
+      for (let u = 3; u <= L2(seite2) - 3 + 1e-6; u += 1) {
+        const d3 = seite2 === s0 ? Math.abs(u - u0) : L2(s0) + Math.abs(u - (L2(seite2) - 3));
+        kand.push({ seite: seite2, u, d: d3 });
+      }
+    }
+    kand.sort((a2, b3) => a2.d - b3.d);
+    const wahl3 = kand.find((c) => frei6(...welt(c.seite, c.u))) ?? { seite: s0, u: u0 };
+    const [x2, z4] = welt(wahl3.seite, wahl3.u);
+    return { x: x2, y: k3.hoehe, z: z4, seite: wahl3.seite };
+  }
+  function hauptEingang(Z2) {
+    const e = Z2.k.eingaenge ?? [];
+    return e.find((x2) => x2.haupt) ?? e.find((x2) => x2.seite === "+z") ?? e[0] ?? { seite: "+z", u: Z2.k.w * 0.45, breite: 4 };
+  }
   function geruest(Z2, s2, u0, u1, yTop, plane = null) {
     const rohr = "#9ca3a8", brett2 = "#c79a5a", t1 = tFront(Z2.k) + 0.5, t22 = t1 + 1.1;
     const nU = Math.max(2, Math.round((u1 - u0) / 2.6)), du = (u1 - u0) / nU;
@@ -55477,7 +55521,7 @@
         figur(S, x2, zz, r3, 1.1, Z2.sportPalette ? waehle2(r3, Z2.sportPalette) : null);
       }
     }
-    return { hoehe: Z2.top, teile: S.anzahl - start };
+    return { hoehe: Z2.top, teile: S.anzahl - start, pinAnker: pinAnker(k3) };
   }
   function aktionStil(a2, st2, pr2) {
     const rb = st2.rabatt;
@@ -56630,6 +56674,224 @@
     return gebaut;
   }
 
+  // src/kit/dach-landschaft.js
+  var F = { platte: "#d3d0c9", glas: "#e8eef0", glasAlt: "#c9cfd1", blech: "#c9cdd0", dunkel: "#5f666e", solar: "#3b4046" };
+  function dachLandschaft(S, dach3, r3, o3 = {}) {
+    const { x0, z0, x1, z1, y: y2 } = dach3;
+    const W3 = x1 - x0, D = z1 - z0;
+    if (W3 < 26 || D < 20) return false;
+    const belegt2 = o3.belegt ?? [];
+    const rand = 0.8;
+    const frei6 = (x2, z4, w2, d3, abstand3 = 0.8) => x2 - w2 / 2 >= x0 + rand && x2 + w2 / 2 <= x1 - rand && z4 - d3 / 2 >= z0 + rand && z4 + d3 / 2 <= z1 - rand && !belegt2.some((q2) => Math.abs(q2.x - x2) < (q2.w + w2) / 2 + abstand3 && Math.abs(q2.z - z4) < (q2.d + d3) / 2 + abstand3) && !o3.reserviert?.(x2, z4, Math.max(w2, d3) / 2);
+    const merke2 = (art, x2, z4, w2, d3, h3) => {
+      belegt2.push({ x: x2, z: z4, w: w2, d: d3 });
+      o3.protokoll?.push({ art, x: x2, z: z4, w: w2, d: d3, h: h3, unten: y2, dach: { x0, z0, x1, z1, y: y2, steil: false } });
+    };
+    const box = (w2, h3, d3, x2, yy, z4, f11) => S.box(w2, h3, d3, x2, yy, z4, f11);
+    const fern = LOD2.stufe === "fern";
+    const langX = W3 >= D;
+    const A0 = langX ? x0 : z0, A1 = langX ? x1 : z1, B02 = langX ? z0 : x0, B12 = langX ? z1 : x1;
+    const LA = A1 - A0, LB = B12 - B02;
+    const pos = (a2, b3) => langX ? [a2, b3] : [b3, a2];
+    const mass = (la, lb) => langX ? [la, lb] : [lb, la];
+    const bj = o3.baujahr ?? 1970;
+    {
+      const anteilA = 0.35 + r3() * 0.25, anteilB = 0.45 + r3() * 0.2;
+      const la = LA * anteilA, lb = LB * anteilB;
+      const a2 = r3() < 0.5 ? A0 + rand + la / 2 : A1 - rand - la / 2, b3 = B12 - rand - lb / 2;
+      const [x2, z4] = pos(a2, b3), [w2, d3] = mass(la, lb);
+      if (!fern) box(w2, 0.05, d3, x2, y2 + 0.025, z4, F.platte);
+    }
+    const zoneHinten = B02 + LB * 0.32;
+    const pd = Math.min(11, Math.max(6, zoneHinten - B02 - rand - 1.6)), pw = Math.min(16, Math.max(8, LA * 0.2)), ph = 3.2 + r3() * 1;
+    const aP = A0 + rand + 1.2 + pw / 2 + (r3() < 0.5 ? 0 : LA * 0.12), bP = B02 + rand + 0.8 + pd / 2;
+    {
+      const [x2, z4] = pos(aP, bP), [w2, d3] = mass(pw, pd);
+      if (frei6(x2, z4, w2, d3, 0)) {
+        box(w2, ph, d3, x2, y2 + ph / 2, z4, F.blech);
+        box(w2 + 0.3, 0.22, d3 + 0.3, x2, y2 + ph + 0.11, z4, F.platte);
+        if (!fern) {
+          box(w2 * 0.7, 0.9, 0.12, x2, y2 + ph * 0.55, z4 + d3 / 2 + 0.06, F.dunkel);
+          box(0.12, 0.9, d3 * 0.6, x2 + w2 / 2 + 0.06, y2 + ph * 0.55, z4, F.dunkel);
+        }
+        merke2("technikzentrale", x2, z4, w2 + 0.3, d3 + 0.3, ph + 0.22);
+      }
+    }
+    const nVent = 3 + Math.floor(r3() * 3), kl = nVent * 2.2 + 0.6, kb = 2.8;
+    const aK = aP + pw / 2 + 2 + kl / 2, bK = B02 + rand + 0.8 + kb / 2 + r3() * Math.max(0, pd - kb - 1);
+    {
+      const [x2, z4] = pos(aK, bK), [w2, d3] = mass(kl, kb);
+      if (frei6(x2, z4, w2, d3)) {
+        box(w2, 1.5, d3, x2, y2 + 0.75, z4, F.blech);
+        for (let i = 0; i < nVent; i++) {
+          const [vx, vz] = pos(aK - kl / 2 + 0.3 + 1.1 + i * 2.2, bK);
+          if (!fern) box(1.7, 0.1, 1.7, vx, y2 + 1.55, vz, F.dunkel);
+        }
+        merke2("rueckkuehler", x2, z4, w2, d3, 1.6);
+      }
+    }
+    {
+      const aT = aP - pw / 2 - 2.6 >= A0 + rand + 2 ? aP - pw / 2 - 2.6 : aK + kl / 2 + 3, bT = B02 + rand + 0.8 + 1.9;
+      const [x2, z4] = pos(aT, bT);
+      if (frei6(x2, z4, 3.6, 3.6)) {
+        box(3.6, 3, 3.6, x2, y2 + 1.5, z4, F.platte);
+        if (!fern) box(3.8, 0.2, 3.8, x2, y2 + 3.1, z4, F.dunkel);
+        if (!fern) box(langX ? 1.1 : 0.08, 2.1, langX ? 0.08 : 1.1, x2 + (langX ? 0.6 : 1.84), y2 + 1.05, z4 + (langX ? 1.84 : 0.6), F.dunkel);
+        merke2("treppenhaus", x2, z4, 3.8, 3.8, 3.2);
+      }
+    }
+    {
+      const gl = Math.min(9, LA * 0.14), gb = Math.min(4, zoneHinten - B02 - rand - 1.2), gh = 2.2;
+      const a2 = A1 - rand - 2 - gl / 2 - r3() * LA * 0.1, b3 = B02 + rand + 0.8 + gb / 2;
+      const [x2, z4] = pos(a2, b3), [w2, d3] = mass(gl, gb);
+      if (gb > 2 && frei6(x2, z4, w2, d3)) {
+        box(w2, gh, d3, x2, y2 + gh / 2, z4, F.blech);
+        if (!fern) box(langX ? w2 * 0.8 : 0.1, 0.5, langX ? 0.1 : d3 * 0.8, x2 + (langX ? 0 : w2 / 2 + 0.05), y2 + gh * 0.6, z4 + (langX ? d3 / 2 + 0.05 : 0), F.dunkel);
+        for (const k3 of [-0.3, 0.3]) {
+          const [hx, hz] = pos(a2 + k3 * gl, b3);
+          if (!fern) box(1.2, 0.8, 1.2, hx, y2 + gh + 0.4, hz, F.blech);
+        }
+        merke2("lueftungsgeraet", x2, z4, w2, d3, gh + 0.8);
+      }
+    }
+    {
+      const bL = B02 + LB * 0.37, a0 = A0 + rand + 3, a1 = A1 - rand - 3, la = a1 - a0;
+      const [x2, z4] = pos(a0 + la / 2, bL), [w2, d3] = mass(la, 1.1);
+      if (frei6(x2, z4, w2, d3, 0.3)) {
+        box(w2, 0.9, d3, x2, y2 + 0.45, z4, F.blech);
+        for (let a2 = a0 + 3 + r3() * 3; a2 < a1 - 2; a2 += 8 + r3() * 5) {
+          const [hx, hz] = pos(a2, bL);
+          if (!fern) {
+            box(1.3, 0.7, 1.3, hx, y2 + 1.25, hz, F.blech);
+            box(1.5, 0.12, 1.5, hx, y2 + 1.66, hz, F.dunkel);
+          }
+        }
+        merke2("lueftungskanal", x2, z4, w2, d3, 1.72);
+      }
+      const [wx, wz2] = pos(a0 + la / 2, bL + 1.7), [ww, wd] = mass(la, 1.1);
+      if (frei6(wx, wz2, ww, wd, 0.1)) {
+        if (!fern) box(ww, 0.06, wd, wx, y2 + 0.03, wz2, F.platte);
+        merke2("wartungsweg", wx, wz2, ww, wd, 0.06);
+      }
+    }
+    const sheds = bj >= 1950 && bj < 1980 && r3() < 0.5;
+    const bV0 = B02 + LB * 0.47, bV1 = B12 - rand - 2.5;
+    if (sheds) {
+      const n3 = Math.max(3, Math.min(8, Math.floor((LA - 6) / 7.5)));
+      const lb = (bV1 - bV0) * (0.75 + r3() * 0.2), bM = (bV0 + bV1) / 2;
+      const schritt = (LA - 6) / n3;
+      for (let i = 0; i < n3; i++) {
+        const a2 = A0 + 3 + schritt * (i + 0.5);
+        const [x2, z4] = pos(a2, bM), [w2, d3] = mass(2.8, lb);
+        if (!frei6(x2, z4, w2, d3)) continue;
+        box(w2, 1, d3, x2, y2 + 0.5, z4, F.platte);
+        const [gx, gz2] = pos(a2 + 1.05, bM), [gw, gd] = mass(0.6, lb - 0.4);
+        box(gw, 0.8, gd, gx, y2 + 1.4, gz2, o3.alt ? F.glasAlt : F.glas);
+        merke2("shed", x2, z4, w2, d3, 1.8);
+      }
+    } else {
+      const n3 = Math.max(2, Math.min(4, Math.floor((bV1 - bV0) / 6.5)));
+      const la = (LA - 8) * (0.62 + r3() * 0.3), aM = A0 + 4 + (LA - 8 - la) * r3() + la / 2;
+      for (let i = 0; i < n3; i++) {
+        const b3 = bV0 + 1.5 + i * ((bV1 - bV0 - 3) / Math.max(1, n3 - 1));
+        const [x2, z4] = pos(aM, b3), [w2, d3] = mass(la, 2.8);
+        if (!frei6(x2, z4, w2, d3, 0.4)) continue;
+        box(w2, 0.35, d3, x2, y2 + 0.175, z4, F.dunkel);
+        const [gw, gd] = mass(la - 0.6, 2);
+        box(gw, 0.5, gd, x2, y2 + 0.6, z4, o3.alt ? F.glasAlt : F.glas);
+        merke2("lichtband", x2, z4, w2, d3, 0.85);
+        const [kx, kz2] = pos(aM + la / 2 + 1.6, b3), [kw2, kd] = mass(1.4, 1.4);
+        if (frei6(kx, kz2, kw2, kd, 0.3)) {
+          if (!fern) box(kw2, 0.55, kd, kx, y2 + 0.27, kz2, F.dunkel);
+          merke2("rwa", kx, kz2, kw2, kd, 0.55);
+        }
+      }
+    }
+    if (bj >= 1990 || r3() < 0.35) {
+      const la = Math.min(LA * 0.28, 20), reihen = 3;
+      const a2 = A0 + LA * (0.55 + r3() * 0.1);
+      for (let i = 0; i < reihen; i++) {
+        const b3 = B02 + rand + 1.6 + i * 2.5;
+        if (b3 + 1 > zoneHinten + 1) break;
+        const [x2, z4] = pos(a2, b3), [w2, d3] = mass(la, 1.8);
+        if (!frei6(x2, z4, w2, d3, 0.4)) continue;
+        box(w2, 0.14, d3, x2, y2 + 0.55, z4, F.solar);
+        const [sw, sd] = mass(la - 0.4, 0.3);
+        if (!fern) box(sw, 0.48, sd, x2, y2 + 0.24, z4, F.dunkel);
+        merke2("solar", x2, z4, w2, d3, 0.62);
+      }
+    }
+    return true;
+  }
+
+  // schriftzug-lage.json
+  var schriftzug_lage_default = {
+    W047: {
+      "+x": {
+        du: 22
+      }
+    },
+    W085: {
+      "+x": {
+        du: 22
+      }
+    },
+    W193: {
+      "+z": {
+        du: 8
+      }
+    },
+    W202: {
+      "+x": {
+        du: 4
+      }
+    },
+    W212: {
+      "+x": {
+        du: 4
+      }
+    },
+    W248: {
+      "+z": {
+        dach: true
+      },
+      "+x": {
+        dach: true
+      }
+    },
+    W256: {
+      "+z": {
+        dach: true
+      },
+      "+x": {
+        dach: true
+      }
+    },
+    W262: {
+      "+z": {
+        dach: true
+      },
+      "+x": {
+        dach: true
+      }
+    },
+    W316: {
+      "+x": {
+        du: 12
+      }
+    },
+    W330: {
+      "+z": {
+        du: -4
+      }
+    },
+    W342: {
+      "+x": {
+        du: 16
+      }
+    }
+  };
+
   // src/kit/stadt-geografie.js
   var STADT_GEOGRAFIE = Object.freeze({
     "Berlin": { "region": "ost", "typ": "metropole", "koord": [52.52, 13.4] },
@@ -57043,18 +57305,37 @@
         if (j3 >= bleib) defekt.set(i, "weg");
       });
     }
-    if (o3.kaputt) {
-      const idx = z4.map((c, i) => i).filter((i) => z4[i] !== " ");
-      const zwang = idx[Math.floor(r3() * idx.length)];
-      for (const i of idx) {
-        const x2 = i === zwang ? r3() * 0.85 : r3();
-        if (x2 < 0.13) defekt.set(i, "weg");
-        else if (x2 < 0.36) defekt.set(i, "tot");
-        else if (x2 < 0.5) defekt.set(i, "schief");
+    if (o3.abbau == null && !o3.geist) {
+      const f11 = o3.kaputt ? ausgeblichen(farbe3) : farbe3;
+      if (LOD2.stufe === "fern" && Math.max(...z4.filter((c) => c !== " ").map((c) => tex3(c, f11).seitenverhaeltnis)) * hb2 * PH < LOD2.schildMin) return total;
+      const rand = 96 / 180 * hb2 * PH;
+      let acc0 = 0;
+      const pos = z4.map((c, i) => {
+        const a2 = acc0;
+        acc0 += br[i] + gap;
+        return { a: a2, b: a2 + br[i], c };
+      });
+      const teile2 = [];
+      for (const p2 of pos) {
+        if (p2.c === " ") {
+          teile2.push(null);
+          continue;
+        }
+        const l = teile2[teile2.length - 1];
+        if (l && l.length < 2) l.push(p2);
+        else teile2.push([p2]);
       }
-      let weg = 0;
-      for (const i of idx) if (defekt.get(i) === "weg" && weg++ > 0) defekt.set(i, "tot");
-      for (const i of [idx[0], idx[idx.length - 1]]) if (defekt.get(i) === "weg") defekt.set(i, "tot");
+      for (const tl of teile2) {
+        if (!tl) continue;
+        const a2 = tl[0].a, b3 = tl[tl.length - 1].b, breite = b3 - a2, wort = tl.map((p2) => p2.c).join("\u200A");
+        const geo = new three_module_exports.PlaneGeometry(breite, hb2 * PH), uv = geo.attributes.uv, rel = rand / 2 / (breite + rand);
+        for (let i = 0; i < uv.count; i++) uv.setX(i, rel + uv.getX(i) * (1 - 2 * rel));
+        const m = new three_module_exports.Mesh(geo, texMat3(wort, f11));
+        s2.flaeche(m, um2 + s2.lese * (-total / 2 + (a2 + b3) / 2), y2, t3, 0);
+        m.userData.schriftzug = { text: text3, i: -1, n: z4.length, seite: s2.seite, wort: true };
+        K3.scene.add(m);
+      }
+      return total;
     }
     let acc2 = 0;
     z4.forEach((c, i) => {
@@ -57068,10 +57349,10 @@
         s2.q(uc + hb2 * 0.15, uc + hb2 * 0.25, y2 - hb2 * 0.3, y2 + hb2 * 0.3, t3 - 0.3, t3 - 0.05, "#6c6c6c");
         return;
       }
-      const f11 = o3.geist ?? (df === "tot" ? TOT : farbe3);
+      const f11 = o3.geist ?? (df === "tot" ? TOT : df === "blass" ? ausgeblichen(farbe3) : farbe3);
       const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(tex3(c, f11).seitenverhaeltnis * hb2 * PH, hb2 * PH), texMat3(c, f11, null, !!o3.geist));
-      const rz = df === "schief" ? (r3() < 0.5 ? -1 : 1) * zw(r3, 0.18, 0.4) : 0;
-      s2.flaeche(m, uc, y2 - (df === "schief" ? hb2 * 0.15 : 0), t3, rz);
+      s2.flaeche(m, uc, y2, t3, 0);
+      if (!o3.geist && !o3.abbau) m.userData.schriftzug = { text: text3, i, n: z4.length, seite: s2.seite };
       K3.scene.add(m);
     });
     return total;
@@ -57335,11 +57616,23 @@
   }
   function reserviert(K3, x2, z4, rad3 = 0) {
     const t3 = K3.terrasse;
+    if (K3.dachBelegt?.some((q2) => Math.abs(q2.x - x2) < q2.w / 2 + rad3 + 0.6 && Math.abs(q2.z - z4) < q2.d / 2 + rad3 + 0.6)) return true;
     return !!t3 && x2 + rad3 > t3.x0 - 0.5 && x2 - rad3 < t3.x1 + 0.5 && z4 + rad3 > t3.z0 - 0.5 && z4 - rad3 < t3.z1 + 0.5;
   }
   function lichtkuppeln2(K3, x0, z0, x1, z1, y2, ax = 6.5, az = 9) {
     const S = K3.S;
     if (x1 - x0 < 8 || z1 - z0 < 8) return;
+    K3.dachBelegt ?? (K3.dachBelegt = []);
+    const kuppeln = Math.floor((x1 - x0 - 2) / ax) * Math.floor((z1 - z0 - 2) / az);
+    if (kuppeln >= 18 && dachLandschaft(
+      S,
+      { x0, z0, x1, z1, y: y2 },
+      rng3(`${K3.haus?.id ?? ""}:dach:${Math.round(x0)}:${Math.round(z0)}`),
+      { baujahr: K3.haus?.baujahr, alt: K3.alt, belegt: K3.dachBelegt, reserviert: (x2, z4, rad3) => reserviert({ terrasse: K3.terrasse }, x2, z4, rad3), protokoll: K3.qualitaet?.daecher }
+    )) {
+      K3.dachLandschaft = true;
+      return;
+    }
     const nx = Math.floor((x1 - x0 - 2) / ax), nz = Math.floor((z1 - z0 - 2) / az);
     const ox = x0 + (x1 - x0 - (nx - 1) * ax) / 2, oz = z0 + (z1 - z0 - (nz - 1) * az) / 2;
     for (let i = 0; i < nx; i++) for (let j3 = 0; j3 < nz; j3++) {
@@ -57358,7 +57651,7 @@
       dach3.y = K3.dach.y;
     }
     dachInstallationen(K3.S, dach3, K3.r, {
-      max: o3.max,
+      max: K3.dachLandschaft ? Math.min(2, o3.max ?? 2) : o3.max,
       farbe: o3.farbe,
       reserviert: (x2, z4, rad3) => reserviert(K3, x2, z4, rad3),
       protokoll: K3.qualitaet?.daecher
@@ -57404,6 +57697,11 @@
       s2.q(u, u + zw(r3, 0.3, 0.8), Math.max(y0, y1 - zw(r3, 3, 9)), y1, t3, t3 + 0.025, dunkler(base, 0.15));
     }
   }
+  function ausgeblichen(c) {
+    const f11 = new three_module_exports.Color(c), h3 = {};
+    f11.getHSL(h3);
+    return "#" + f11.setHSL(h3.h, Math.max(0, h3.s - 0.18), Math.min(0.85, h3.l + 0.07)).getHexString();
+  }
   function verblasst(c) {
     const f11 = new three_module_exports.Color(c), h3 = {};
     f11.getHSL(h3);
@@ -57419,18 +57717,25 @@
       const z4 = K3.zonen[s2.seite];
       if (!z4) continue;
       const text3 = z4.text ?? "HARTWIG";
-      if (K3.fam !== 1 && !z4.sport && !z4.dach && !z4.wand && (K3.n === 1 || Math.min(z4.hb, z4.max / schriftBreite(text3, 1)) < Math.max(2.4, s2.L * 0.035))) {
-        const hbD = Math.min(clamp5(s2.L * 0.06, 2.2, 3.6), s2.L * 0.6 / schriftBreite(text3, 1));
+      const lage = (globalThis.Q36_LAGE ?? schriftzug_lage_default)[K3.haus?.id]?.[s2.seite];
+      if (lage?.du && !z4.sport) z4.u += lage.du;
+      if (lage?.dach && K3.fam !== 1 && !z4.sport && !z4.dach || K3.fam !== 1 && !z4.sport && !z4.dach && !z4.wand && (K3.n === 1 || Math.min(z4.hb, z4.max / schriftBreite(text3, 1)) < Math.max(2.4, s2.L * 0.035))) {
+        const maxD = Math.min(s2.L * 0.6, z4.max ?? s2.L * 0.6);
+        const hbD = Math.min(clamp5(s2.L * 0.06, 2.2, 3.6), maxD / schriftBreite(text3, 1));
         const br = schriftBreite(text3, hbD), yB = K3.Hw + 0.6;
-        for (let k3 = 0; k3 <= 4; k3++) {
+        if (LOD2.stufe !== "fern") for (let k3 = 0; k3 <= 4; k3++) {
           const uu = z4.u - br / 2 + k3 * br / 4;
           s2.q(uu - 0.07, uu + 0.07, K3.Hw, yB + hbD * 1.3, -1, -0.85, "#4a4f55");
         }
-        s2.q(z4.u - br / 2, z4.u + br / 2, yB, yB + 0.12, -1, -0.85, "#4a4f55");
-        Object.assign(z4, { y: yB + 0.15 + hbD * 0.6, t: -0.75, hb: hbD, max: s2.L * 0.6, dach: true });
+        if (LOD2.stufe !== "fern") s2.q(z4.u - br / 2, z4.u + br / 2, yB, yB + 0.12, -1, -0.85, "#4a4f55");
+        Object.assign(z4, { y: yB + 0.15 + hbD * 0.6, t: -0.75, hb: hbD, max: maxD, dach: true });
       }
       const hb2 = Math.min(z4.hb, z4.max / schriftBreite(text3, 1));
       z4.hbIst = hb2;
+      if (lage?.du && !z4.sport) {
+        const halb = schriftBreite(text3, hb2) / 2 + 0.5, L2 = K3.nutz[s2.seite] ?? s2.L;
+        z4.u = Math.min(Math.max(z4.u, halb), Math.max(halb, L2 - halb));
+      }
       if (z4.sport) {
         const br = schriftBreite(text3, hb2);
         if (!K3.ohneLogo) {
@@ -57623,7 +57928,7 @@
       if (n3 >= 2) {
         const nb = Math.max(1, Math.round(uEnd / raster4)), rStart = (Math.floor(nb / 2) - 1) * (uEnd / nb);
         const mitR = s2.seite === "+z" && risalit && rStart > 6;
-        K3.zonen[s2.seite] = { u: mitR ? rStart / 2 : uEnd / 2, y: Hw - 3.6, t: 0.75, hb: clamp5(uEnd * 0.08, 2.4, 4.4), max: mitR ? rStart - 2 : uEnd * 0.75, grund: stein };
+        K3.zonen[s2.seite] = { u: mitR ? (rStart - 1) / 2 : uEnd / 2, y: Hw - 3.6, t: 0.75, hb: clamp5(uEnd * 0.08, 2.4, 4.4), max: mitR ? rStart - 4 : uEnd * 0.75, grund: stein };
       } else K3.zonen[s2.seite] = { u: uEnd / 2, y: EG2 + 1.3, t: 0.55, hb: 1.5, max: uEnd * 0.8, grund: stein };
     }
     if (n3 >= 4) haengefahnen(K3, K3.seiten[0], [K3.seiten[0].L * 0.1, K3.seiten[0].L * 0.62], EG2 + GH * 1.7, 0.45);
@@ -57723,8 +58028,15 @@
     for (const s2 of K3.seiten) {
       const uEnd = s2.L - R11;
       const hb2 = clamp5(uEnd * 0.07, 2.2, 4.2);
-      const u = uEnd * 0.55, br = Math.min(schriftBreite("HARTWIG", hb2), uEnd * 0.8);
-      const hbIst = Math.min(hb2, uEnd * 0.8 / schriftBreite("HARTWIG", 1));
+      let u = uEnd * 0.55, maxB = uEnd * 0.8;
+      if (turm4 && s2.seite === "+z") {
+        const uT = uEnd * 0.32, a2 = [0.5, uT - 4.5], b3 = [uT + 3.5, uEnd - 0.5];
+        const seg2 = b3[1] - b3[0] >= a2[1] - a2[0] ? b3 : a2;
+        u = (seg2[0] + seg2[1]) / 2;
+        maxB = Math.min(maxB, (seg2[1] - seg2[0]) * 0.92);
+      }
+      const br = Math.min(schriftBreite("HARTWIG", hb2), maxB);
+      const hbIst = Math.min(hb2, maxB / schriftBreite("HARTWIG", 1));
       const yB = (staffel2 ? Hb + 1.15 : Hb + 1.15) + 0.3, y2 = yB + hbIst * 0.7;
       const tf = staffel2 ? -0.6 : -0.6;
       for (let k3 = 0; k3 <= 4; k3++) {
@@ -57733,7 +58045,7 @@
       }
       s2.q(u - br / 2, u + br / 2, yB, yB + 0.12, tf - 0.4, tf - 0.24, "#4a4f55");
       s2.q(u - br / 2, u + br / 2, yB + hbIst * 1.3, yB + hbIst * 1.3 + 0.12, tf - 0.4, tf - 0.24, "#4a4f55");
-      K3.zonen[s2.seite] = { u, y: y2, t: tf, hb: hb2, max: uEnd * 0.8, grund: putz2, dach: true };
+      K3.zonen[s2.seite] = { u, y: y2, t: tf, hb: hb2, max: maxB, grund: putz2, dach: true };
     }
     return Hw + 6;
   }
@@ -58024,10 +58336,10 @@
     setzeDach(K3, x0 + 2, z0 + 2, x0 + w2 - A - 1, z0 + d3 - 2, Hw + 0.55);
     lichtkuppeln2(K3, x0 + 3, z0 + 3, x0 + w2 - A - 2, z0 + d3 - 3, Hw + 0.55);
     technik2(K3, x0 + 3, z0 + 3, x0 + w2 - A - 2, z0 + d3 - 3, Hw + 0.55, { max: 6 });
-    fahnenmasten(K3, K3.seiten[0], [3, 6, 9], Hw + 0.8, -0.6);
+    fahnenmasten(K3, K3.seiten[0], [3, 6, 9], Hw + 0.8, -1.4);
     for (const s2 of K3.seiten) {
       const uE = s2.L - A;
-      if (n3 >= 2) K3.zonen[s2.seite] = { u: stil === "pomo" && s2.seite === "+z" ? uE * 0.68 : uE * 0.5, y: EG2 + (Hw - EG2) * 0.58, t: 0.6, hb: clamp5(uE * 0.075, 2, Math.min(4.5, (Hw - EG2) * 0.3)), max: stil === "pomo" && s2.seite === "+z" ? uE * 0.5 : uE * 0.78, grund: basisF };
+      if (n3 >= 2) K3.zonen[s2.seite] = { u: stil === "pomo" && s2.seite === "+z" ? uE * 0.68 : uE * 0.5, y: EG2 + (Hw - EG2) * 0.58, t: stil === "glas" ? 0.95 : 0.6, hb: clamp5(uE * 0.075, 2, Math.min(4.5, (Hw - EG2) * 0.3)), max: stil === "pomo" && s2.seite === "+z" ? uE * 0.5 : uE * 0.78, grund: basisF };
       else K3.zonen[s2.seite] = { u: uE * 0.5, y: EG2 + 1.2, t: 0.45, hb: 1.5, max: uE * 0.75, grund: basisF };
     }
     return Ha + A * 0.4;
@@ -58861,14 +59173,14 @@
       const f1 = i === 1 ? "#f4f2ec" : ROT2, f22 = i === 1 ? ROT2 : "#f4f2ec";
       if (fl.seite === "+z") {
         const fx = x2 + u, fz = z4 + d3 + T - 0.6;
-        S.quader(fx - 0.09, y2, fz - 0.09, fx + 0.09, y2 + 10.5, fz + 0.09, "#e3e5e6");
+        if (LOD2.stufe !== "fern") S.quader(fx - 0.09, y2, fz - 0.09, fx + 0.09, y2 + 10.5, fz + 0.09, "#e3e5e6");
         S.quader(fx + 0.1, y2 + 7.2, fz - 0.03, fx + 1.5, y2 + 10.2, fz + 0.03, f1);
-        S.quader(fx + 0.1, y2 + 8.4, fz - 0.035, fx + 1.5, y2 + 9, fz + 0.035, f22);
+        if (LOD2.stufe !== "fern") S.quader(fx + 0.1, y2 + 8.4, fz - 0.035, fx + 1.5, y2 + 9, fz + 0.035, f22);
       } else {
         const fz = z4 + u, fx = x2 + w2 + T - 0.6;
-        S.quader(fx - 0.09, y2, fz - 0.09, fx + 0.09, y2 + 10.5, fz + 0.09, "#e3e5e6");
+        if (LOD2.stufe !== "fern") S.quader(fx - 0.09, y2, fz - 0.09, fx + 0.09, y2 + 10.5, fz + 0.09, "#e3e5e6");
         S.quader(fx - 0.03, y2 + 7.2, fz + 0.1, fx + 0.03, y2 + 10.2, fz + 1.5, f1);
-        S.quader(fx - 0.035, y2 + 8.4, fz + 0.1, fx + 0.035, y2 + 9, fz + 1.5, f22);
+        if (LOD2.stufe !== "fern") S.quader(fx - 0.035, y2 + 8.4, fz + 0.1, fx + 0.035, y2 + 9, fz + 1.5, f22);
       }
     });
     const bank6 = (bx, bz, quer2) => {
@@ -58926,7 +59238,7 @@
     const rM = rng3(`${haus2.id}/mieter`);
     const ausDaten = flaechen.filter((f11) => f11.konzept === "untermiete").map((f11) => mieterInfo({ name: namen[Math.floor(rM() * namen.length)], etage: f11.etage }));
     const Z2 = zustandNormal({ ...opt, status: status2, seed: haus2.id }, { untermieter: ausDaten });
-    const F2 = zustandFlags(Z2);
+    const F3 = zustandFlags(Z2);
     const M2 = fam === 6 ? Math.max(40, Math.round(m.w * 0.85 / 5) * 5) : fam === 7 && haus2.lage === "center" ? Math.max(25, Math.round(m.w * 0.5 / 5) * 5) : 0;
     const K3 = {
       // Familie 5 hat zwölf, Familie 6 sechzehn Varianten (Maßstab: dichte Ruhr- und Rheinschiene ohne Kopien unter 50 km), sonst acht
@@ -58945,11 +59257,11 @@
       z0: z4,
       xm: x2,
       M: M2,
-      alt: (haus2.substanz ?? 100) < 40 || F2.alt,
-      verblichen: F2.verblichen,
-      status: F2.eg,
-      zu: F2.zu,
-      ohneLogo: F2.ohneLogo,
+      alt: (haus2.substanz ?? 100) < 40 || F3.alt,
+      verblichen: F3.verblichen,
+      status: F3.eg,
+      zu: F3.zu,
+      ohneLogo: F3.ohneLogo,
       zonen: {},
       nutz: {},
       eingaenge: [],
@@ -59022,7 +59334,7 @@
     const dek = zustandsDekor(S, scene2, koerper5, Z2, { pylon: opt.pylon, passanten: opt.passanten, abrissSeite: opt.abrissSeite });
     hoehe = Math.max(hoehe, dek.hoehe);
     if (opt.vorplatz !== false) hartwigVorplatz(S, koerper5, Z2, rng3(`${haus2.id}/vorplatz`));
-    return { hoehe, w: K3.w + M2, d: K3.d, familie: fam, teile: S.anzahl - start, status: Z2.status };
+    return { hoehe, w: K3.w + M2, d: K3.d, familie: fam, teile: S.anzahl - start, status: Z2.status, pinAnker: dek.pinAnker };
   }
 
   // src/kit/warenhaus-vielfalt.js
@@ -62384,7 +62696,7 @@
   function familie12(K3) {
     const { S, x0, z0, w: w2, d: d3, n: n3, r: r3, v } = K3;
     const H = n3 === 1 ? 7.2 : EG_S + (n3 - 1) * OG_S;
-    const T = 3.2, F2 = 3.4;
+    const T = 3.2, F3 = 3.4;
     const rahmenF = ["#e3e8ea", "#dfe3e5", "#e8eaeb"][v % 3];
     const kern = "#c9cfd2";
     S.quader(x0, 0, z0, x0 + w2 - T - 0.1, H, z0 + d3 - T - 0.1, kern);
@@ -62392,7 +62704,7 @@
     const [sz, sx] = K3.seiten;
     const atrium = n3 >= 2 ? { s: v % 2 ? sz : sx, u0: 0, u1: 0 } : null;
     for (const s2 of K3.seiten) {
-      const uE = s2.L - F2;
+      const uE = s2.L - F3;
       if (atrium && atrium.s === s2) {
         atrium.u0 = Math.max(1.2, uE * 0.12);
         atrium.u1 = Math.min(uE - 4, atrium.u0 + clamp4(uE * 0.28, 6, 10));
@@ -62438,21 +62750,21 @@
       s2.q(u0, u1, H - 0.5, H - 0.3, -T, 0, LICHT2);
       K3.glas.push({ s: s2, a: u0, b: u1, y0: 0.3, y1: H, t: 0, eg: true });
     } else {
-      const s2 = sx, uE = s2.L - F2, u0 = Math.max(1, uE * 0.15), u1 = Math.min(uE - 1, u0 + 8);
+      const s2 = sx, uE = s2.L - F3, u0 = Math.max(1, uE * 0.15), u1 = Math.min(uE - 1, u0 + 8);
       for (let k3 = 0; k3 < 2; k3++) for (let u = u0 + 1; u < u1 - 1; u += 1.8) if (!K3.zu) rad(s2, u, 2.3 + k3 * 2.1, -T + 0.25, waehle2(r3, ["#e04b3a", "#1f6fb5", "#f2c14e", "#2b2b2b", "#f1f1ee"]));
     }
     for (const s2 of K3.seiten) {
-      s2.q(s2.L - F2, s2.L, 0, H + 3.2, -F2, 0.35, K3.ohneLogo ? "#b3aaa4" : HS_ROT);
-      hsLogoSenkrecht(K3, s2, s2.L - F2 / 2, H + 2.7, 0.35, F2 * 0.72, H + 2.4);
+      s2.q(s2.L - F3, s2.L, 0, H + 3.2, -F3, 0.35, K3.ohneLogo ? "#b3aaa4" : HS_ROT);
+      hsLogoSenkrecht(K3, s2, s2.L - F3 / 2, H + 2.7, 0.35, F3 * 0.72, H + 2.4);
     }
-    const ein = sz.L - F2;
+    const ein = sz.L - F3;
     sz.q(ein * 0.62 - 3.2, ein * 0.62 + 3.2, 4, 4.35, 0, 2.6, HS_BLAU);
     sz.q(ein * 0.62 - 3.2, ein * 0.62 + 3.2, 4.12, 4.24, 2.6, 2.66, HS_ROT);
     if (n3 >= 2) {
-      const s2 = atrium.s === sz ? sx : sz, uE = s2.L - F2;
+      const s2 = atrium.s === sz ? sx : sz, uE = s2.L - F3;
       kampagne(K3, s2, uE * 0.08, uE * 0.08 + Math.min(uE * 0.4, 14), EG_S + 0.4, H - 0.4, 0.25, ["#1f6fb5", "#2f8f5b", "#2b2b2b", "#e8562a"][v % 4]);
     } else {
-      const uE = sz.L - F2;
+      const uE = sz.L - F3;
       kampagne(K3, sz, 1.5, Math.min(uE * 0.45, 22), 4.4, H - 0.3, 0.25, ["#1f6fb5", "#2f8f5b", "#2b2b2b", "#e8562a"][v % 4]);
       const lu = uE * 0.7, lh = 2.3, lb = plakatBreite("HARTWIG SPORT", lh * 0.58) + lh * 1.8;
       hsLogo(K3, sz, lu, H + 3.8, -1.4, lh, { grund: kern });
@@ -62468,8 +62780,8 @@
       S.quader(x0 + 1, yF, z0 + 1, x0 + w2 + ue, yF + 0.5, z0 + d3 + ue, "#d9dad6");
       S.quader(x0 + 1, yF + 0.12, z0 + d3 + ue, x0 + w2 + ue, yF + 0.32, z0 + d3 + ue + 0.05, HS_ROT);
       S.quader(x0 + w2 + ue, yF + 0.12, z0 + 1, x0 + w2 + ue + 0.05, yF + 0.32, z0 + d3 + ue, HS_ROT);
-      for (let x2 = x0 + 4; x2 < x0 + w2 - F2; x2 += 8) zyl2(S, x2, 0.3, z0 + d3 + ue - 0.4, 0.12, yF - 0.3, "#d9dcde", 8);
-      for (let z4 = z0 + 4; z4 < z0 + d3 - F2; z4 += 8) zyl2(S, x0 + w2 + ue - 0.4, 0.3, z4, 0.12, yF - 0.3, "#d9dcde", 8);
+      for (let x2 = x0 + 4; x2 < x0 + w2 - F3; x2 += 8) zyl2(S, x2, 0.3, z0 + d3 + ue - 0.4, 0.12, yF - 0.3, "#d9dcde", 8);
+      for (let z4 = z0 + 4; z4 < z0 + d3 - F3; z4 += 8) zyl2(S, x0 + w2 + ue - 0.4, 0.3, z4, 0.12, yF - 0.3, "#d9dcde", 8);
     }
     K3.Hw = H;
     K3.tRelief = 0.3;
@@ -62545,7 +62857,7 @@
           return;
         }
         const kaputt = K3.alt && i === 3;
-        plakat2(K3.scene, s2, c, panelU / 2, yy - (kaputt ? hb2 * 0.08 : 0), 0.5, hb2 * 1.2, kaputt ? dunkler(HS_ROT, 0.28) : HS_ROT, null, { rz: kaputt ? 0.18 : 0 });
+        plakat2(K3.scene, s2, c, panelU / 2, yy, 0.5, hb2 * 1.2, kaputt ? dunkler(HS_ROT, 0.12) : HS_ROT, null, { rz: 0 });
       });
     }
     if (n3 >= 3 && v % 2 === 0) {
@@ -63390,7 +63702,7 @@
     const rM = rng3(`${haus2.id}/mieter`);
     const ausDaten = flaechen.filter((f11) => f11.konzept === "untermiete").map((f11) => mieterInfo({ name: namen[Math.floor(rM() * namen.length)], etage: f11.etage }));
     const Z2 = zustandNormal({ ...opt, status: status2, seed: haus2.id }, { untermieter: ausDaten });
-    const F2 = zustandFlags(Z2);
+    const F3 = zustandFlags(Z2);
     const gefuehl = sportGefuehl(haus2, Z2);
     const M2 = fam === 4 ? m.w - m.bw : 0;
     const K3 = {
@@ -63407,7 +63719,7 @@
       z0: z4,
       M: M2,
       Z: Z2,
-      alt: F2.alt,
+      alt: F3.alt,
       matt: gefuehl.matt,
       erlebnis: gefuehl.erlebnis,
       erlebnisSeite: gefuehl.erlebnisSeite,
@@ -63416,14 +63728,14 @@
       abverkauf: gefuehl.abverkauf,
       rabatt: gefuehl.rabatt,
       abverkaufFenster: 0,
-      status: F2.eg,
-      zu: F2.zu,
-      ohneLogo: F2.ohneLogo,
+      status: F3.eg,
+      zu: F3.zu,
+      ohneLogo: F3.ohneLogo,
       leute: opt.passanten !== false,
       glas: [],
       logos: []
     };
-    K3.c = (c) => F2.verblichen ? "#" + new three_module_exports.Color(c).offsetHSL(0, -0.2, -0.07).getHexString() : K3.alt ? "#" + new three_module_exports.Color(c).offsetHSL(0, -0.06, -0.06).getHexString() : c;
+    K3.c = (c) => F3.verblichen ? "#" + new three_module_exports.Color(c).offsetHSL(0, -0.2, -0.07).getHexString() : K3.alt ? "#" + new three_module_exports.Color(c).offsetHSL(0, -0.06, -0.06).getHexString() : c;
     K3.seiten = seitenVon(S, K3.x0, K3.z0, K3.w, K3.d);
     const std = ["sporttextil", "sportschuhe", "outdoor", "rad", "teamsport", "wintersport"];
     K3.gruppen = (e) => {
@@ -63499,7 +63811,7 @@
     const passantenFaktor = K3.matt ? 0.5 : K3.abverkauf ? 0.8 : 0.7;
     const dek = zustandsDekor(S, scene2, koerper5, dekZustand, { pylon: opt.pylon, passanten: opt.passanten, passantenFaktor, sportPalette: ["#203e61", "#e24739", "#26a0af", "#e0ae33", "#f2f3f0", "#272d36"], abrissSeite: opt.abrissSeite, logosAbdecken: true });
     hoehe = Math.max(hoehe, dek.hoehe);
-    return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z2.status };
+    return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z2.status, pinAnker: dek.pinAnker };
   }
 
   // src/kit/innen.js
@@ -70339,7 +70651,7 @@
     const m = masseOutlet(haus2), x2 = opt.x ?? 0, z4 = opt.z ?? 0;
     const r3 = rng3(String(haus2.id) + "/outlet/" + String(haus2.fassade ?? 0));
     const Z2 = zustandNormal({ ...opt, status: opt.status ?? haus2.status ?? "offen", seed: haus2.id });
-    const F2 = zustandFlags(Z2), H = m.H, { bw, bd } = m;
+    const F3 = zustandFlags(Z2), H = m.H, { bw, bd } = m;
     const stadt = m.familie === 3, zweigeschossig = m.familie === 2;
     const paneele = ["#d9dbdd", "#c4cbd0", "#e2dfd8"];
     const farbe3 = stadt ? m.variante % 2 ? "#c3bdb5" : "#cbd0ce" : paneele[m.variante % paneele.length];
@@ -70383,12 +70695,12 @@
       S.quader(x2 + 0.3, H - 0.55, z4 + bd - 0.45, x2 + bw, H, z4 + bd, farbe3);
       S.quader(x2 + bw - 0.45, H - 0.55, z4 + 0.3, x2 + bw, H, z4 + bd, farbe3);
     }
-    if (!F2.zu) {
+    if (!F3.zu) {
       vorbereiten(S, scene2);
       innenOutlet(S, scene2, haus2, { x: x2, z: z4, status: Z2.status, innenZustand: opt.innenZustand });
     }
     for (const [i, s2] of seiten4.entries()) {
-      glasfront(S, scene2, s2, stadt ? bandY - 0.07 : zweigeschossig ? 7.65 : bandY + 0.4, !F2.zu, r3, zweigeschossig, eingang);
+      glasfront(S, scene2, s2, stadt ? bandY - 0.07 : zweigeschossig ? 7.65 : bandY + 0.4, !F3.zu, r3, zweigeschossig, eingang);
       if (stadt) {
         s2.q(0.1, s2.L - 0.1, 4.6, 4.93, 0.33, 0.56, "#e5e0d5");
         for (let u = 3; u < s2.L - 2; u += 4)
@@ -70437,7 +70749,7 @@
       S.box(bw + 3.5, 0.2, 5.3, x2 + bw / 2, 0.31, z4 + bd + 2.4, "#c9c9c5");
       for (let i = 0; i < 10; i++) S.box(0.15, 0.04, 1.6, x2 + 2 + i * (bw - 3) / 10, 0.44, z4 + bd + 3.2, "#ededed");
     }
-    if (!F2.zu && opt.passanten !== false) {
+    if (!F3.zu && opt.passanten !== false) {
       const anz3 = Z2.status === "neueroeffnung" ? 22 : 14;
       for (let i = 0; i < anz3; i++) {
         const xx = x2 + 3 + r3() * (bw - 6), zz = z4 + bd + 2.4 + r3() * (m.park ? 6 : 2.1);
@@ -70488,7 +70800,7 @@
     };
     const dekZ = werbung ? zustandNormal({ status: "offen", seed: haus2.id }) : Z2;
     const dekor = zustandsDekor(S, scene2, koerper5, dekZ, { pylon: false, passanten: false, logosAbdecken: true, abrissSeite: opt.abrissSeite });
-    return { hoehe: Math.max(H + 3.8, dekor.hoehe, m.park ? 11.6 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z2.status };
+    return { hoehe: Math.max(H + 3.8, dekor.hoehe, m.park ? 11.6 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z2.status, pinAnker: dekor.pinAnker };
   }
 
   // src/kit/schwesterhaus.js
@@ -70932,7 +71244,7 @@
     const dek = zustandsDekor(S, scene2, k3, Z2, { passanten: opt.passanten === false ? false : void 0, logosAbdecken: true, pylon: false });
     const teile2 = S.anzahl - start;
     if (teile2 > 8e3) throw new Error("Schwesterhaus " + haus2.id + ": Teilebudget " + teile2 + " > 8000");
-    return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile: teile2, status: status2 };
+    return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile: teile2, status: status2, pinAnker: dek.pinAnker };
   }
 
   // haeuser-schwester.json
@@ -83349,7 +83661,7 @@
     strassenleben(S, x2, z4, w2, d3, r3, { ...opt, insolvenz: haus2.status === "insolvenz" });
     statusBau(S, scene2, typ, x2, z4, w2, d3, H, zust, haus2, opt);
     const hoehe = H + (zust.hat("umbau") ? 20 : typ === "P003" ? 13 : typ === "P001" ? 16 : typ === "P002" ? 12 : typ === "P005" ? 10 : 6);
-    return { hoehe, w: w2, d: d3, familie: "premium", teile: S.anzahl - start, status: zust.status };
+    return { hoehe, w: w2, d: d3, familie: "premium", teile: S.anzahl - start, status: zust.status, pinAnker: { x: x2 + w2 / 2, y: H, z: z4 + d3, seite: "+z" } };
   }
 
   // haeuser.json
@@ -128683,33 +128995,33 @@
     return (p2.sicht ?? ["+z", "+x"]).map((s2) => a2[s2]);
   }
   var istSicht = (p2, s2) => (p2.sicht ?? ["+z", "+x"]).includes(s2);
-  function wp(F2, u, t3) {
-    return [F2.ox + F2.dx * u + F2.nx * t3, F2.oz + F2.dz * u + F2.nz * t3];
+  function wp(F3, u, t3) {
+    return [F3.ox + F3.dx * u + F3.nx * t3, F3.oz + F3.dz * u + F3.nz * t3];
   }
-  function fb(S, F2, u0, u1, y0, y1, t0, t1, c) {
-    const [x2, z4] = wp(F2, (u0 + u1) / 2, (t0 + t1) / 2);
-    S.box(Math.abs(u1 - u0), Math.abs(y1 - y0), Math.abs(t1 - t0), x2, (y0 + y1) / 2, z4, c, F2.ry);
+  function fb(S, F3, u0, u1, y0, y1, t0, t1, c) {
+    const [x2, z4] = wp(F3, (u0 + u1) / 2, (t0 + t1) / 2);
+    S.box(Math.abs(u1 - u0), Math.abs(y1 - y0), Math.abs(t1 - t0), x2, (y0 + y1) / 2, z4, c, F3.ry);
   }
-  function fgeo(S, F2, g, c) {
-    g.rotateY(F2.ry);
-    g.translate(F2.ox, 0, F2.oz);
+  function fgeo(S, F3, g, c) {
+    g.rotateY(F3.ry);
+    g.translate(F3.ox, 0, F3.oz);
     S.add(g, c);
   }
-  function teil(F2, u0, u1, t3 = 0) {
-    const [x2, z4] = wp(F2, u0, t3);
-    return R2(x2, z4, F2.dx, F2.dz, u1 - u0, F2.s);
+  function teil(F3, u0, u1, t3 = 0) {
+    const [x2, z4] = wp(F3, u0, t3);
+    return R2(x2, z4, F3.dx, F3.dz, u1 - u0, F3.s);
   }
-  function fform(S, F2, shape, t0, t1, c, seg2 = 6) {
+  function fform(S, F3, shape, t0, t1, c, seg2 = 6) {
     const g = new three_module_exports.ExtrudeGeometry(shape, { depth: t1 - t0, bevelEnabled: false, curveSegments: seg2 });
     g.translate(0, 0, t0);
-    fgeo(S, F2, g, c);
+    fgeo(S, F3, g, c);
   }
-  function fpoly(S, F2, pkt, t0, t1, c) {
+  function fpoly(S, F3, pkt, t0, t1, c) {
     const s2 = new three_module_exports.Shape();
     s2.moveTo(pkt[0][0], pkt[0][1]);
     for (const [u, v] of pkt.slice(1)) s2.lineTo(u, v);
     s2.lineTo(pkt[0][0], pkt[0][1]);
-    fform(S, F2, s2, t0, t1, c);
+    fform(S, F3, s2, t0, t1, c);
   }
   function bogenForm(u0, v0, u1, v1, art) {
     const s2 = new three_module_exports.Shape(), b3 = u1 - u0;
@@ -128736,12 +129048,12 @@
     return s2;
   }
   var textGecacht = (text3, farbe3, bg) => textMaterial(text3, farbe3, { groesse: 140, hintergrund: bg });
-  function ftext(scene2, F2, text3, u, y2, t3, hMax, bMax, farbe3, bg = null) {
+  function ftext(scene2, F3, text3, u, y2, t3, hMax, bMax, farbe3, bg = null) {
     const { mat: mat2, seitenverhaeltnis: a2 } = textGecacht(text3, farbe3, bg);
     const h3 = Math.min(hMax, bMax / a2);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h3 * a2, h3), mat2);
-    const [x2, z4] = wp(F2, u, t3);
-    m.rotation.y = F2.ry;
+    const [x2, z4] = wp(F3, u, t3);
+    m.rotation.y = F3.ry;
     m.position.set(x2, y2, z4);
     scene2.add(m);
     return h3 * a2;
@@ -129042,8 +129354,8 @@
       }
       box(3, 1, B8 - 2.4, L2 / 2 - 3.5, 2, rumpfF);
       if (o3.name) {
-        const F2 = R2(P4(-L2 / 2 + 10, B8 / 2 + 0.02)[0], P4(-L2 / 2 + 10, B8 / 2 + 0.02)[1], c, -s2, 10);
-        ftext(scene2, F2, o3.name, 5, y2 + 0.9, 0.03, 0.6, 9, "#f2f0ea");
+        const F3 = R2(P4(-L2 / 2 + 10, B8 / 2 + 0.02)[0], P4(-L2 / 2 + 10, B8 / 2 + 0.02)[1], c, -s2, 10);
+        ftext(scene2, F3, o3.name, 5, y2 + 0.9, 0.03, 0.6, 9, "#f2f0ea");
       }
       return;
     }
@@ -129090,20 +129402,20 @@
       box((L2 - 15) / 2 - 1.6, 0.8, B8 - 1.4, u0 + (L2 - 15) / 4, 1.6, "#2a2a2c");
     }
   }
-  function fenster3(S, F2, u, y2, b3, h3, o3 = {}) {
+  function fenster3(S, F3, u, y2, b3, h3, o3 = {}) {
     const art = o3.art ?? null, t3 = o3.t ?? 0;
-    if (o3.laibung) fform(S, F2, bogenForm(u - b3 / 2 - 0.22, y2 - 0.12, u + b3 / 2 + 0.22, y2 + h3 + (art ? 0.22 : 0.18), art), t3 - 0.02, t3 + 0.07, o3.laibung);
-    fform(S, F2, bogenForm(u - b3 / 2, y2, u + b3 / 2, y2 + h3, art), t3, t3 + 0.1, o3.glas ?? GLAS6);
-    if (o3.sims) fb(S, F2, u - b3 / 2 - 0.3, u + b3 / 2 + 0.3, y2 - 0.2, y2 - 0.04, t3 - 0.02, t3 + 0.2, o3.sims);
+    if (o3.laibung) fform(S, F3, bogenForm(u - b3 / 2 - 0.22, y2 - 0.12, u + b3 / 2 + 0.22, y2 + h3 + (art ? 0.22 : 0.18), art), t3 - 0.02, t3 + 0.07, o3.laibung);
+    fform(S, F3, bogenForm(u - b3 / 2, y2, u + b3 / 2, y2 + h3, art), t3, t3 + 0.1, o3.glas ?? GLAS6);
+    if (o3.sims) fb(S, F3, u - b3 / 2 - 0.3, u + b3 / 2 + 0.3, y2 - 0.2, y2 - 0.04, t3 - 0.02, t3 + 0.2, o3.sims);
     const [nu, nv] = o3.sprossen ?? [0, 0];
     const sc = o3.rahmen ?? "#e9e4d8";
     for (let i = 1; i <= nu; i++) {
       const uu = u - b3 / 2 + b3 * i / (nu + 1);
-      fb(S, F2, uu - 0.05, uu + 0.05, y2, y2 + h3 - (art === "rund" ? b3 / 2 * (1 - Math.sqrt(Math.max(0, 1 - Math.pow(2 * (uu - u) / b3, 2)))) : 0.02), t3 + 0.08, t3 + 0.13, sc);
+      fb(S, F3, uu - 0.05, uu + 0.05, y2, y2 + h3 - (art === "rund" ? b3 / 2 * (1 - Math.sqrt(Math.max(0, 1 - Math.pow(2 * (uu - u) / b3, 2)))) : 0.02), t3 + 0.08, t3 + 0.13, sc);
     }
     for (let k3 = 1; k3 <= nv; k3++) {
       const yy = y2 + (h3 - (art ? b3 * 0.3 : 0)) * k3 / (nv + 1);
-      fb(S, F2, u - b3 / 2, u + b3 / 2, yy - 0.05, yy + 0.05, t3 + 0.08, t3 + 0.13, sc);
+      fb(S, F3, u - b3 / 2, u + b3 / 2, yy - 0.05, yy + 0.05, t3 + 0.08, t3 + 0.13, sc);
     }
   }
   function satteldach3(S, p2, x0, z0, w2, d3, y2, h3, achse, dachF, wandF, ue = 0.45, oben = 0.3) {
@@ -129111,9 +129423,9 @@
     const g = dachProfil(L2 + 2 * ue, T + 2 * ue, h3, oben, achse);
     g.translate(x0 + w2 / 2, y2, z0 + d3 / 2);
     S.add(g, dachF);
-    if (wandF) for (const F2 of sichtbar2(p2, x0, z0, w2, d3)) {
-      const stirn = achse === "x" ? F2.s[1] === "x" : F2.s[1] === "z";
-      if (stirn) fpoly(S, F2, [[0, y2], [F2.L, y2], [F2.L / 2 + oben / 2, y2 + h3 * (1 - 2 * ue / (T + 2 * ue))], [F2.L / 2 - oben / 2, y2 + h3 * (1 - 2 * ue / (T + 2 * ue))]], -0.3, 0.02, wandF);
+    if (wandF) for (const F3 of sichtbar2(p2, x0, z0, w2, d3)) {
+      const stirn = achse === "x" ? F3.s[1] === "x" : F3.s[1] === "z";
+      if (stirn) fpoly(S, F3, [[0, y2], [F3.L, y2], [F3.L / 2 + oben / 2, y2 + h3 * (1 - 2 * ue / (T + 2 * ue))], [F3.L / 2 - oben / 2, y2 + h3 * (1 - 2 * ue / (T + 2 * ue))]], -0.3, 0.02, wandF);
     }
   }
   function flachdach2(S, x0, z0, w2, d3, y2, attika4, kappe, dachF = "#9e9b94", hA = 0.6) {
@@ -129134,9 +129446,9 @@
     S.quader(x0 - 0.25, H - 0.7, z0 - 0.25, x0 + w2 + 0.25, H - 0.35, z0 + d3 + 0.25, orn);
     S.quader(x0 - 0.15, H - 0.35, z0 - 0.15, x0 + w2 + 0.15, H, z0 + d3 + 0.15, dunkler(o3.wand, 0.04));
     const fo = o3.fenster ?? { art: "rund", b: 2.2, h: H * 0.55, y: 2.2, raster: 4.2 };
-    for (const F2 of sichtbar2(p2, x0, z0, w2, d3)) {
-      const n3 = Math.max(1, Math.floor((F2.L - 1.2) / fo.raster)), off = (F2.L - n3 * fo.raster) / 2;
-      for (let i = 0; i <= n3; i++) if (o3.lisenen !== false) fb(S, F2, off + i * fo.raster - 0.35, off + i * fo.raster + 0.35, 1.1, H - 0.7, 0, 0.22, o3.wand);
+    for (const F3 of sichtbar2(p2, x0, z0, w2, d3)) {
+      const n3 = Math.max(1, Math.floor((F3.L - 1.2) / fo.raster)), off = (F3.L - n3 * fo.raster) / 2;
+      for (let i = 0; i <= n3; i++) if (o3.lisenen !== false) fb(S, F3, off + i * fo.raster - 0.35, off + i * fo.raster + 0.35, 1.1, H - 0.7, 0, 0.22, o3.wand);
       for (let i = 0; i < n3; i++) {
         const u = off + (i + 0.5) * fo.raster;
         for (let k3 = 0; k3 < (fo.zeilen ?? 1); k3++) {
@@ -129146,10 +129458,10 @@
             const q2 = r3();
             glas3 = q2 < 0.25 ? "#2a2f33" : q2 < 0.4 ? "#8a7356" : glas3;
           }
-          fenster3(S, F2, u, y2, fo.b, fo.h, { art: fo.art, glas: glas3, laibung: orn, sprossen: fo.b > 1.6 ? [2, Math.max(1, Math.round(fo.h / 1.6))] : [1, 2], rahmen: o3.sprosse ?? "#d9d4c8" });
+          fenster3(S, F3, u, y2, fo.b, fo.h, { art: fo.art, glas: glas3, laibung: orn, sprossen: fo.b > 1.6 ? [2, Math.max(1, Math.round(fo.h / 1.6))] : [1, 2], rahmen: o3.sprosse ?? "#d9d4c8" });
         }
       }
-      if (o3.lichtband) fb(S, F2, -0.1, F2.L + 0.1, H - 0.38, H - 0.3, 0.22, 0.32, o3.lichtband);
+      if (o3.lichtband) fb(S, F3, -0.1, F3.L + 0.1, H - 0.38, H - 0.3, 0.22, 0.32, o3.lichtband);
     }
     if (o3.dachH) {
       if (o3.dachForm === "walm") {
@@ -129171,23 +129483,23 @@
     const { x0, z0, w: w2, d: d3, H } = o3, r3 = o3.r;
     S.quader(x0, 0, z0, x0 + w2, H, z0 + d3, o3.ausfachung);
     const st2 = o3.stahl, fr = o3.feld ?? 3.6;
-    for (const F2 of sichtbar2(p2, x0, z0, w2, d3)) {
-      const n3 = Math.max(1, Math.round(F2.L / fr)), du = F2.L / n3;
-      for (let i = 0; i <= n3; i++) fb(S, F2, i * du - 0.18, i * du + 0.18, 0, H, 0, 0.2, st2);
+    for (const F3 of sichtbar2(p2, x0, z0, w2, d3)) {
+      const n3 = Math.max(1, Math.round(F3.L / fr)), du = F3.L / n3;
+      for (let i = 0; i <= n3; i++) fb(S, F3, i * du - 0.18, i * du + 0.18, 0, H, 0, 0.2, st2);
       const nz = Math.max(2, Math.round(H / fr)), dv = H / nz;
-      for (let k3 = 0; k3 <= nz; k3++) fb(S, F2, -0.2, F2.L + 0.2, k3 * dv - 0.15, k3 * dv + 0.15, 0, 0.18, st2);
+      for (let k3 = 0; k3 <= nz; k3++) fb(S, F3, -0.2, F3.L + 0.2, k3 * dv - 0.15, k3 * dv + 0.15, 0, 0.18, st2);
       for (let i = 0; i < n3; i++) for (let k3 = 1; k3 < nz; k3++) {
         const q2 = hashR(i, k3, o3.salz ?? 0);
         if (q2 < (o3.fensterAnteil ?? 0.35)) {
           let glas3 = o3.glas ?? "#5d6c76";
           if (o3.zustand === "stillgelegt" && q2 < 0.1) glas3 = "#2a2f33";
-          fb(S, F2, i * du + 0.4, (i + 1) * du - 0.4, k3 * dv + 0.4, (k3 + 1) * dv - 0.4, 0, 0.08, glas3);
-          fb(S, F2, i * du + 0.4, (i + 1) * du - 0.4, k3 * dv + dv / 2 - 0.05, k3 * dv + dv / 2 + 0.05, 0, 0.12, st2);
+          fb(S, F3, i * du + 0.4, (i + 1) * du - 0.4, k3 * dv + 0.4, (k3 + 1) * dv - 0.4, 0, 0.08, glas3);
+          fb(S, F3, i * du + 0.4, (i + 1) * du - 0.4, k3 * dv + dv / 2 - 0.05, k3 * dv + dv / 2 + 0.05, 0, 0.12, st2);
         }
       }
       if (o3.lichtband) {
-        fb(S, F2, -0.2, F2.L + 0.2, H - 0.25, H - 0.1, 0.18, 0.3, o3.lichtband);
-        for (let i = 0; i <= n3; i += 2) fb(S, F2, i * du - 0.06, i * du + 0.06, 0.3, H, 0.2, 0.28, o3.lichtband);
+        fb(S, F3, -0.2, F3.L + 0.2, H - 0.25, H - 0.1, 0.18, 0.3, o3.lichtband);
+        for (let i = 0; i <= n3; i += 2) fb(S, F3, i * du - 0.06, i * du + 0.06, 0.3, H, 0.2, 0.28, o3.lichtband);
       }
     }
     flachdach2(S, x0, z0, w2, d3, H, st2, null, "#7d7a74", 0.5);
@@ -129334,15 +129646,15 @@
     if (v === "malakow") {
       const tw = 6.5, H = Hg, z4 = c.ziegel, orn = c.orn;
       S.quader(sx - tw, 0, sz - tw, sx + tw, H, sz + tw, z4);
-      for (const F2 of sichtbar2(p2, sx - tw, sz - tw, 2 * tw, 2 * tw)) {
-        for (const u of [2.8, F2.L / 2, F2.L - 2.8]) for (let k3 = 0; k3 < 4; k3++) {
+      for (const F3 of sichtbar2(p2, sx - tw, sz - tw, 2 * tw, 2 * tw)) {
+        for (const u of [2.8, F3.L / 2, F3.L - 2.8]) for (let k3 = 0; k3 < 4; k3++) {
           let glas3 = c.glas;
           if (p2.zustand === "stillgelegt" && hashR(k3, Math.round(u), 3) < 0.35) glas3 = "#2a2f33";
-          fenster3(S, F2, u, 3 + k3 * 6.4, 1.6, 3.6, { art: "rund", glas: glas3, laibung: orn, sprossen: [1, 2] });
+          fenster3(S, F3, u, 3 + k3 * 6.4, 1.6, 3.6, { art: "rund", glas: glas3, laibung: orn, sprossen: [1, 2] });
         }
-        for (let k3 = 1; k3 < 5; k3++) fb(S, F2, -0.05, F2.L + 0.05, k3 * 6.4 + 0.6, k3 * 6.4 + 0.9, 0, 0.18, orn);
-        for (let u = 0.6; u < F2.L - 0.4; u += 1) fb(S, F2, u, u + 0.5, H - 1.6, H - 1.2, 0, 0.2, orn);
-        if (c.licht) fb(S, F2, -0.1, F2.L + 0.1, H - 0.9, H - 0.75, 0.3, 0.4, c.licht);
+        for (let k3 = 1; k3 < 5; k3++) fb(S, F3, -0.05, F3.L + 0.05, k3 * 6.4 + 0.6, k3 * 6.4 + 0.9, 0, 0.18, orn);
+        for (let u = 0.6; u < F3.L - 0.4; u += 1) fb(S, F3, u, u + 0.5, H - 1.6, H - 1.2, 0, 0.2, orn);
+        if (c.licht) fb(S, F3, -0.1, F3.L + 0.1, H - 0.9, H - 0.75, 0.3, 0.4, c.licht);
       }
       S.quader(sx - tw - 0.3, H - 1.2, sz - tw - 0.3, sx + tw + 0.3, H, sz + tw + 0.3, dunkler(z4, 0.04));
       for (let i = 0; i < 8; i++) for (const [a2, b3] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
@@ -129523,13 +129835,13 @@
       lichtband: c.licht
     });
     if (istSicht(p2, "+z")) {
-      const F2 = seitenRahmen(4, lz0, lw, 12)["+z"];
-      fb(S, F2, lw / 2 - 3, lw / 2 + 3, 0, 11.5, 0, 0.6, c.ziegel);
-      fpoly(S, F2, [[lw / 2 - 3, 11.5], [lw / 2 + 3, 11.5], [lw / 2, 14]], 0, 0.6, c.ziegel);
-      fenster3(S, F2, lw / 2, 0.3, 2.2, 3.4, { art: "rund", glas: "#4a3a30", laibung: c.orn, t: 0.6 });
-      ftext(scene2, F2, name2, lw / 2, 8.4, 0.62, 0.8, 5.6, "#f4f0e4");
+      const F3 = seitenRahmen(4, lz0, lw, 12)["+z"];
+      fb(S, F3, lw / 2 - 3, lw / 2 + 3, 0, 11.5, 0, 0.6, c.ziegel);
+      fpoly(S, F3, [[lw / 2 - 3, 11.5], [lw / 2 + 3, 11.5], [lw / 2, 14]], 0, 0.6, c.ziegel);
+      fenster3(S, F3, lw / 2, 0.3, 2.2, 3.4, { art: "rund", glas: "#4a3a30", laibung: c.orn, t: 0.6 });
+      ftext(scene2, F3, name2, lw / 2, 8.4, 0.62, 0.8, 5.6, "#f4f0e4");
       if (Z2 === "museum") {
-        ftext(scene2, F2, "Industriemuseum", lw / 2, 5.4, 0.65, 0.55, 5.4, "#ffffff", "#a8392c");
+        ftext(scene2, F3, "Industriemuseum", lw / 2, 5.4, 0.65, 0.55, 5.4, "#ffffff", "#a8392c");
       }
     }
     const tx = 4 + lw + 3, tw = 10;
@@ -129602,20 +129914,20 @@
       const bx0 = 18, bx1 = Math.min(W3 - 22, bx0 + 64), bz0 = Math.round(D * 0.36), bz1 = bz0 + 13, Hb = 9;
       S.quader(bx0, 0, bz0, bx1, Hb, bz1, "#7c7068");
       S.quader(bx0 - 0.4, Hb, bz0 - 0.4, bx1 + 0.4, Hb + 0.8, bz1 + 0.4, "#9a938a");
-      for (const F2 of sichtbar2(p2, bx0, bz0, bx1 - bx0, bz1 - bz0)) {
-        const lang = F2.L > 20;
+      for (const F3 of sichtbar2(p2, bx0, bz0, bx1 - bx0, bz1 - bz0)) {
+        const lang = F3.L > 20;
         if (lang) {
-          for (let u = 0.7; u < F2.L; u += 1.45) {
-            fb(S, F2, u - 0.16, u + 0.16, 0.3, Hb + 1.4, 0, 0.45, "#2f3438");
-            fb(S, F2, u + 0.24, u + 1.2, 1.2, Hb - 1, 0, 0.18, Z2 === "aktiv" ? "#4a423e" : rost);
+          for (let u = 0.7; u < F3.L; u += 1.45) {
+            fb(S, F3, u - 0.16, u + 0.16, 0.3, Hb + 1.4, 0, 0.45, "#2f3438");
+            fb(S, F3, u + 0.24, u + 1.2, 1.2, Hb - 1, 0, 0.18, Z2 === "aktiv" ? "#4a423e" : rost);
           }
-          fb(S, F2, -0.3, F2.L + 0.3, Hb - 0.6, Hb - 0.2, 0.2, 0.6, "#3b3f44");
-          fb(S, F2, 0, F2.L, 4.6, 4.9, 0, 1.8, "#5a6168");
-          for (let u = 1; u < F2.L; u += 1.2) fb(S, F2, u - 0.03, u + 0.03, 4.9, 5.9, 1.7, 1.8, "#5a6168");
-          fb(S, F2, 0, F2.L, 5.85, 5.95, 1.7, 1.8, "#5a6168");
+          fb(S, F3, -0.3, F3.L + 0.3, Hb - 0.6, Hb - 0.2, 0.2, 0.6, "#3b3f44");
+          fb(S, F3, 0, F3.L, 4.6, 4.9, 0, 1.8, "#5a6168");
+          for (let u = 1; u < F3.L; u += 1.2) fb(S, F3, u - 0.03, u + 0.03, 4.9, 5.9, 1.7, 1.8, "#5a6168");
+          fb(S, F3, 0, F3.L, 5.85, 5.95, 1.7, 1.8, "#5a6168");
         } else {
-          fb(S, F2, 0.5, F2.L - 0.5, 0.3, Hb, 0, 0.4, c.ziegel);
-          for (let k3 = 0; k3 < 2; k3++) fenster3(S, F2, F2.L / 2, 2 + k3 * 3.5, 1.6, 2.2, { art: "segment", glas: c.glas, t: 0.4 });
+          fb(S, F3, 0.5, F3.L - 0.5, 0.3, Hb, 0, 0.4, c.ziegel);
+          for (let k3 = 0; k3 < 2; k3++) fenster3(S, F3, F3.L / 2, 2 + k3 * 3.5, 1.6, 2.2, { art: "segment", glas: c.glas, t: 0.4 });
         }
       }
       for (let x2 = bx0 + 1; x2 < bx1 - 0.5; x2 += 2.9) {
@@ -129634,9 +129946,9 @@
       }
       const lx = bx1 + 6, lz = bz1 + 4;
       S.quader(lx - 3.5, 0, lz - 3.5, lx + 3.5, 30, lz + 3.5, Z2 === "museum" ? "#c9c2b4" : "#a8a196");
-      for (const F2 of sichtbar2(p2, lx - 3.5, lz - 3.5, 7, 7)) {
-        for (let y2 = 6; y2 < 30; y2 += 6) fb(S, F2, -0.1, 7.1, y2 - 0.15, y2 + 0.15, 0, 0.15, "#8f897e");
-        fb(S, F2, 1, 6, 24, 29, 0, 0.05, "#2f3438");
+      for (const F3 of sichtbar2(p2, lx - 3.5, lz - 3.5, 7, 7)) {
+        for (let y2 = 6; y2 < 30; y2 += 6) fb(S, F3, -0.1, 7.1, y2 - 0.15, y2 + 0.15, 0, 0.15, "#8f897e");
+        fb(S, F3, 1, 6, 24, 29, 0, 0.05, "#2f3438");
       }
       S.quader(lx - 4, 30, lz - 4, lx + 4, 31, lz + 4, "#8f897e");
       if (Z2 === "aktiv") rauch(S, lx, 33, lz, r3, 5, 1.6, "#f2f3f4");
@@ -129717,7 +130029,7 @@
       stab(S, [wx0 - 4, 14, wz2 + 4.5], [hx + 7, 9.5, hz], 1.2, "#5d5650", 10);
       const mx = Math.max(6, hx - 34), mz = hz + 4;
       S.quader(mx - 4, 0, mz - 8, mx + 10, 10, mz + 8, "#a8a196");
-      for (const F2 of sichtbar2(p2, mx - 4, mz - 8, 14, 16)) for (let u = 2; u < F2.L; u += 4) fb(S, F2, u - 0.25, u + 0.25, 0.3, 10, 0, 0.3, "#8f897e");
+      for (const F3 of sichtbar2(p2, mx - 4, mz - 8, 14, 16)) for (let u = 2; u < F3.L; u += 4) fb(S, F3, u - 0.25, u + 0.25, 0.3, 10, 0, 0.3, "#8f897e");
       for (const dz of [-1.6, 1.6]) balken(S, [mx + 8, 10, mz + dz], [hx - 3, Hg + 8, hz + dz * 0.8], 0.7, 0.9, c.stahl);
       for (let k3 = 1; k3 < 6; k3++) {
         const t3 = k3 / 6, px2 = mx + 8 + (hx - 3 - mx - 8) * t3, py2 = 10 + (Hg - 2) * t3;
@@ -129726,10 +130038,10 @@
       }
       const gz0 = hz + 8, gz1 = Math.min(D - 14, hz + 22);
       S.quader(hx - 10, 0, gz0, hx + 12, 13, gz1, "#7d7a74");
-      for (const F2 of sichtbar2(p2, hx - 10, gz0, 22, gz1 - gz0)) {
-        for (let u = 0; u <= F2.L; u += 3.6) fb(S, F2, u - 0.2, u + 0.2, 0.3, 13, 0, 0.25, c.stahl);
-        fb(S, F2, 0, F2.L, 9, 11.5, 0, 0.1, c.glas);
-        fb(S, F2, 2, 8, 0.3, 6, 0, 0.12, Z2 === "aktiv" ? "#ff8a2a" : "#2f3438");
+      for (const F3 of sichtbar2(p2, hx - 10, gz0, 22, gz1 - gz0)) {
+        for (let u = 0; u <= F3.L; u += 3.6) fb(S, F3, u - 0.2, u + 0.2, 0.3, 13, 0, 0.25, c.stahl);
+        fb(S, F3, 0, F3.L, 9, 11.5, 0, 0.1, c.glas);
+        fb(S, F3, 2, 8, 0.3, 6, 0, 0.12, Z2 === "aktiv" ? "#ff8a2a" : "#2f3438");
       }
       satteldach3(S, p2, hx - 10, gz0, 22, gz1 - gz0, 13, 3, "x", c.dach, "#7d7a74");
       S.quader(hx - 3, 16, gz0 - 0.4, hx + 3, 17.5, gz1 - 0.4, "#5d5650");
@@ -129927,43 +130239,43 @@
     nenn: { pyramide: [64, 64, 110, 110], bramme: [56, 56, 110, 110], treppe: [56, 56, 110, 110], kreuz: [56, 56, 110, 110] },
     roh: haldeRoh
   });
-  function fachwerkGiebel(S, F2, u0, u1, y2, h3, holz, gefach) {
+  function fachwerkGiebel(S, F3, u0, u1, y2, h3, holz, gefach) {
     const b3 = u1 - u0, um2 = (u0 + u1) / 2;
-    fpoly(S, F2, [[u0 + 0.2, y2], [u1 - 0.2, y2], [um2, y2 + h3 - 0.3]], 0, 0.06, gefach);
-    fb(S, F2, u0, u1, y2 - 0.12, y2 + 0.12, 0.06, 0.16, holz);
+    fpoly(S, F3, [[u0 + 0.2, y2], [u1 - 0.2, y2], [um2, y2 + h3 - 0.3]], 0, 0.06, gefach);
+    fb(S, F3, u0, u1, y2 - 0.12, y2 + 0.12, 0.06, 0.16, holz);
     const n3 = Math.max(2, Math.round(b3 / 1.5));
     for (let i = 1; i < n3; i++) {
       const u = u0 + b3 * i / n3, hh = h3 * (1 - Math.abs(u - um2) / (b3 / 2)) - 0.4;
-      if (hh > 0.5) fb(S, F2, u - 0.09, u + 0.09, y2, y2 + hh, 0.06, 0.15, holz);
+      if (hh > 0.5) fb(S, F3, u - 0.09, u + 0.09, y2, y2 + hh, 0.06, 0.15, holz);
     }
     const ym = y2 + h3 * 0.45, bm = b3 * 0.55;
-    fb(S, F2, um2 - bm / 2, um2 + bm / 2, ym - 0.09, ym + 0.09, 0.06, 0.15, holz);
+    fb(S, F3, um2 - bm / 2, um2 + bm / 2, ym - 0.09, ym + 0.09, 0.06, 0.15, holz);
     const g = (a2, c) => {
       const dx = c[0] - a2[0], dy = c[1] - a2[1], L2 = wurzelSumme12(dx, dy);
       const gg = new three_module_exports.BoxGeometry(L2, 0.16, 0.1);
       gg.rotateZ(Math.atan2(dy, dx));
       gg.translate((a2[0] + c[0]) / 2, (a2[1] + c[1]) / 2, 0.12);
-      fgeo(S, F2, gg, holz);
+      fgeo(S, F3, gg, holz);
     };
     g([u0 + b3 * 0.18, y2], [u0 + b3 * 0.36, ym]);
     g([u1 - b3 * 0.18, y2], [u1 - b3 * 0.36, ym]);
     g([u0, y2], [um2, y2 + h3]);
     g([u1, y2], [um2, y2 + h3]);
-    fb(S, F2, um2 - 0.45, um2 + 0.45, ym + 0.35, ym + 1.25, 0.06, 0.14, GLAS6);
+    fb(S, F3, um2 - 0.45, um2 + 0.45, ym + 0.35, ym + 1.25, 0.06, 0.14, GLAS6);
   }
-  function siedlFenster(S, F2, u, y2, fw, fh, o3 = {}) {
-    fb(S, F2, u - fw / 2 - 0.12, u + fw / 2 + 0.12, y2 - 0.12, y2 + fh + 0.12, 0, 0.05, o3.rahmen ?? "#f4f2ec");
-    fb(S, F2, u - fw / 2, u + fw / 2, y2, y2 + fh, 0, 0.08, o3.glas ?? GLAS6);
-    fb(S, F2, u - 0.04, u + 0.04, y2, y2 + fh, 0, 0.11, o3.rahmen ?? "#f4f2ec");
-    fb(S, F2, u - fw / 2, u + fw / 2, y2 + fh * 0.62, y2 + fh * 0.62 + 0.07, 0, 0.11, o3.rahmen ?? "#f4f2ec");
-    fb(S, F2, u - fw / 2 - 0.2, u + fw / 2 + 0.2, y2 - 0.2, y2 - 0.08, 0, 0.18, o3.bank ?? "#cfc8b8");
-    if (o3.laden) for (const sg of [-1, 1]) fb(S, F2, u + sg * (fw / 2 + 0.36) - 0.28, u + sg * (fw / 2 + 0.36) + 0.28, y2, y2 + fh, 0, 0.1, o3.laden);
+  function siedlFenster(S, F3, u, y2, fw, fh, o3 = {}) {
+    fb(S, F3, u - fw / 2 - 0.12, u + fw / 2 + 0.12, y2 - 0.12, y2 + fh + 0.12, 0, 0.05, o3.rahmen ?? "#f4f2ec");
+    fb(S, F3, u - fw / 2, u + fw / 2, y2, y2 + fh, 0, 0.08, o3.glas ?? GLAS6);
+    fb(S, F3, u - 0.04, u + 0.04, y2, y2 + fh, 0, 0.11, o3.rahmen ?? "#f4f2ec");
+    fb(S, F3, u - fw / 2, u + fw / 2, y2 + fh * 0.62, y2 + fh * 0.62 + 0.07, 0, 0.11, o3.rahmen ?? "#f4f2ec");
+    fb(S, F3, u - fw / 2 - 0.2, u + fw / 2 + 0.2, y2 - 0.2, y2 - 0.08, 0, 0.18, o3.bank ?? "#cfc8b8");
+    if (o3.laden) for (const sg of [-1, 1]) fb(S, F3, u + sg * (fw / 2 + 0.36) - 0.28, u + sg * (fw / 2 + 0.36) + 0.28, y2, y2 + fh, 0, 0.1, o3.laden);
   }
-  function haustuer(S, F2, u, b3, h3, farbe3, o3 = {}) {
-    if (o3.bogen) fform(S, F2, bogenForm(u - b3 / 2 - 0.2, 0.3, u + b3 / 2 + 0.2, h3 + 0.35, "rund"), -0.02, 0.06, o3.laibung ?? "#efe9dc");
-    fform(S, F2, bogenForm(u - b3 / 2, 0.3, u + b3 / 2, h3, o3.bogen ? "rund" : null), 0, 0.1, farbe3);
-    if (!o3.bogen) fb(S, F2, u - b3 / 2 - 0.3, u + b3 / 2 + 0.3, h3 + 0.15, h3 + 0.3, 0, 0.8, o3.vordach ?? "#5a5f63");
-    fb(S, F2, u - b3 / 2 - 0.2, u + b3 / 2 + 0.2, 0.3, 0.5, 0, 0.7, "#bdb8ad");
+  function haustuer(S, F3, u, b3, h3, farbe3, o3 = {}) {
+    if (o3.bogen) fform(S, F3, bogenForm(u - b3 / 2 - 0.2, 0.3, u + b3 / 2 + 0.2, h3 + 0.35, "rund"), -0.02, 0.06, o3.laibung ?? "#efe9dc");
+    fform(S, F3, bogenForm(u - b3 / 2, 0.3, u + b3 / 2, h3, o3.bogen ? "rund" : null), 0, 0.1, farbe3);
+    if (!o3.bogen) fb(S, F3, u - b3 / 2 - 0.3, u + b3 / 2 + 0.3, h3 + 0.15, h3 + 0.3, 0, 0.8, o3.vordach ?? "#5a5f63");
+    fb(S, F3, u - b3 / 2 - 0.2, u + b3 / 2 + 0.2, 0.3, 0.5, 0, 0.7, "#bdb8ad");
   }
   function siedlerHaus(S, scene2, p2, r3, o3) {
     const { x0, z0, w: w2, d: d3, eh } = o3, H = eh;
@@ -129971,31 +130283,31 @@
     S.quader(x0 - 0.06, 0, z0 - 0.06, x0 + w2 + 0.06, 0.7, z0 + d3 + 0.06, o3.sockel ?? dunkler(o3.wand, 0.12));
     if (o3.band) S.quader(x0 - 0.08, H - 0.35, z0 - 0.08, x0 + w2 + 0.08, H - 0.15, z0 + d3 + 0.08, o3.band);
     const n3 = o3.einheiten ?? 2;
-    for (const F2 of sichtbar2(p2, x0, z0, w2, d3)) {
-      const traufe = o3.first === "x" ? F2.s[1] === "z" : F2.s[1] === "x";
-      const vorne2 = F2.s === "+z";
-      const eb = F2.L / n3;
+    for (const F3 of sichtbar2(p2, x0, z0, w2, d3)) {
+      const traufe = o3.first === "x" ? F3.s[1] === "z" : F3.s[1] === "x";
+      const vorne2 = F3.s === "+z";
+      const eb = F3.L / n3;
       for (let e = 0; e < n3; e++) {
         const a2 = e * eb, spiegel = e % 2 === 1;
-        if (vorne2 || F2.s === "-z" && o3.hinten) {
+        if (vorne2 || F3.s === "-z" && o3.hinten) {
           const tu2 = spiegel ? a2 + eb - 1.1 : a2 + 1.1;
-          haustuer(S, F2, tu2, 1, 2.4, o3.tuerF ?? "#3f6b4f", { bogen: o3.tuerBogen, laibung: o3.band });
+          haustuer(S, F3, tu2, 1, 2.4, o3.tuerF ?? "#3f6b4f", { bogen: o3.tuerBogen, laibung: o3.band });
           const fu = spiegel ? a2 + eb * 0.38 : a2 + eb * 0.62;
-          siedlFenster(S, F2, fu, 1.2, 1.2, 1.4, { laden: o3.laeden });
-          if (eb > 6) siedlFenster(S, F2, spiegel ? a2 + eb * 0.12 + 0.6 : a2 + eb * 0.88 - 0.6, 1.2, 1, 1.4, { laden: o3.laeden });
+          siedlFenster(S, F3, fu, 1.2, 1.2, 1.4, { laden: o3.laeden });
+          if (eb > 6) siedlFenster(S, F3, spiegel ? a2 + eb * 0.12 + 0.6 : a2 + eb * 0.88 - 0.6, 1.2, 1, 1.4, { laden: o3.laeden });
         } else {
           const m = eb > 5 ? 2 : 1;
-          for (let k3 = 0; k3 < m; k3++) siedlFenster(S, F2, a2 + eb * (k3 + 0.5) / m, 1.2, 1, 1.3, { laden: o3.laeden });
+          for (let k3 = 0; k3 < m; k3++) siedlFenster(S, F3, a2 + eb * (k3 + 0.5) / m, 1.2, 1, 1.3, { laden: o3.laeden });
         }
-        if (traufe && o3.og) for (let k3 = 0; k3 < 2; k3++) siedlFenster(S, F2, a2 + eb * (k3 + 0.5) / 2, H - 1.75, 0.9, 1.1, { laden: o3.laeden });
+        if (traufe && o3.og) for (let k3 = 0; k3 < 2; k3++) siedlFenster(S, F3, a2 + eb * (k3 + 0.5) / 2, H - 1.75, 0.9, 1.1, { laden: o3.laeden });
       }
       if (!traufe) {
-        const T2 = F2.L;
-        if (o3.fachwerk) fachwerkGiebel(S, F2, 0, T2, H, o3.dachH * (1 - 0.9 / (T2 + 0.9)), o3.holz ?? "#5a3a2a", o3.gefach ?? "#f1ebdc");
+        const T2 = F3.L;
+        if (o3.fachwerk) fachwerkGiebel(S, F3, 0, T2, H, o3.dachH * (1 - 0.9 / (T2 + 0.9)), o3.holz ?? "#5a3a2a", o3.gefach ?? "#f1ebdc");
         else {
-          fpoly(S, F2, [[0, H], [T2, H], [T2 / 2, H + o3.dachH * (1 - 0.9 / (T2 + 0.9))]], -0.3, 0.02, o3.oben ?? o3.wand);
-          siedlFenster(S, F2, T2 / 2, H + 0.5, 0.9, 1.1, { laden: o3.laeden });
-          if (o3.band) fb(S, F2, -0.05, T2 + 0.05, H - 0.02, H + 0.12, 0, 0.12, o3.band);
+          fpoly(S, F3, [[0, H], [T2, H], [T2 / 2, H + o3.dachH * (1 - 0.9 / (T2 + 0.9))]], -0.3, 0.02, o3.oben ?? o3.wand);
+          siedlFenster(S, F3, T2 / 2, H + 0.5, 0.9, 1.1, { laden: o3.laeden });
+          if (o3.band) fb(S, F3, -0.05, T2 + 0.05, H - 0.02, H + 0.12, 0, 0.12, o3.band);
         }
       }
     }
@@ -130115,7 +130427,7 @@
         if (gi === mitte) {
           const tx = gx + gw;
           S.quader(tx, 3.2, zv - hd + 1.5, tx + 2.4, 6.6, zv - 1.5, c.wand);
-          for (const F2 of sichtbar2(p2, tx, zv - hd + 1.5, 2.4, hd - 3)) if (F2.s === "+z") fform(S, F2, bogenForm(0.2, 0.3, 2.2, 3.4, "rund"), -0.1, 0.05, "#e3dccb");
+          for (const F3 of sichtbar2(p2, tx, zv - hd + 1.5, 2.4, hd - 3)) if (F3.s === "+z") fform(S, F3, bogenForm(0.2, 0.3, 2.2, 3.4, "rund"), -0.1, 0.05, "#e3dccb");
           const td = dachProfil(2.8, hd - 2.4, 2.2, 0.2, "z");
           td.translate(tx + 1.2, 6.6, zv - hd / 2);
           S.add(td, c.dach);
@@ -130222,49 +130534,49 @@
     }
     return a2;
   }
-  function ladenFront2(S, scene2, F2, u0, u1, egH, o3 = {}) {
+  function ladenFront2(S, scene2, F3, u0, u1, egH, o3 = {}) {
     const rahmen2 = o3.rahmen ?? "#c9cdd0", blende = o3.blende ?? "#c9483e", tief2 = o3.tief ?? -0.35, yV = egH - 1.15;
-    fb(S, F2, u0, u1, 0.3, yV, tief2 - 0.1, tief2, o3.glas ?? "#6a8494");
-    fb(S, F2, u0, u1, 0.3, 0.75, tief2, tief2 + 0.1, o3.sockel ?? "#3b3f44");
+    fb(S, F3, u0, u1, 0.3, yV, tief2 - 0.1, tief2, o3.glas ?? "#6a8494");
+    fb(S, F3, u0, u1, 0.3, 0.75, tief2, tief2 + 0.1, o3.sockel ?? "#3b3f44");
     const n3 = Math.max(1, Math.round((u1 - u0) / 2.6)), du = (u1 - u0) / n3;
-    for (let i = 0; i <= n3; i++) fb(S, F2, u0 + i * du - 0.08, u0 + i * du + 0.08, 0.3, yV, tief2, tief2 + 0.14, rahmen2);
+    for (let i = 0; i <= n3; i++) fb(S, F3, u0 + i * du - 0.08, u0 + i * du + 0.08, 0.3, yV, tief2, tief2 + 0.14, rahmen2);
     const tu2 = o3.tuer ?? u0 + du * 0.5;
-    fb(S, F2, tu2 - 0.75, tu2 + 0.75, 0.3, 2.5, tief2 + 0.05, tief2 + 0.16, "#3c4852");
+    fb(S, F3, tu2 - 0.75, tu2 + 0.75, 0.3, 2.5, tief2 + 0.05, tief2 + 0.16, "#3c4852");
     if (o3.auslage) {
       const rr3 = o3.auslage;
       for (let i = 0; i < n3; i++) {
         if (Math.abs(u0 + (i + 0.5) * du - tu2) < 0.9) continue;
-        for (let k3 = 0; k3 < 2; k3++) fb(S, F2, u0 + i * du + 0.4, u0 + (i + 1) * du - 0.4, 0.9 + k3 * 0.75, 1.25 + k3 * 0.75, tief2 - 0.5, tief2 - 0.12, waehle2(rr3, ["#e9c46a", "#c9483e", "#7f9fba", "#f4f3ef", "#3f7d56", "#d97a3a"]));
+        for (let k3 = 0; k3 < 2; k3++) fb(S, F3, u0 + i * du + 0.4, u0 + (i + 1) * du - 0.4, 0.9 + k3 * 0.75, 1.25 + k3 * 0.75, tief2 - 0.5, tief2 - 0.12, waehle2(rr3, ["#e9c46a", "#c9483e", "#7f9fba", "#f4f3ef", "#3f7d56", "#d97a3a"]));
       }
     }
     if (o3.vordach !== false) {
       const vd = o3.vordach ?? 1.9;
-      fb(S, F2, u0 - 0.05, u1 + 0.05, yV, yV + 0.28, 0, vd, o3.vordachF ?? "#e9e7e1");
-      fb(S, F2, u0 - 0.05, u1 + 0.05, yV - 0.04, yV + 0.32, vd - 0.1, vd + 0.02, o3.vordachKante ?? blende);
+      fb(S, F3, u0 - 0.05, u1 + 0.05, yV, yV + 0.28, 0, vd, o3.vordachF ?? "#e9e7e1");
+      fb(S, F3, u0 - 0.05, u1 + 0.05, yV - 0.04, yV + 0.32, vd - 0.1, vd + 0.02, o3.vordachKante ?? blende);
     }
-    fb(S, F2, u0 + 0.1, u1 - 0.1, yV + 0.36, egH - 0.05, 0, 0.16, blende);
-    if (o3.name) ftext(scene2, F2, o3.name, (u0 + u1) / 2, (yV + 0.36 + egH - 0.05) / 2, 0.18, 0.6, (u1 - u0) * 0.86, o3.schrift ?? (blende === "#f4f2ec" || blende === "#e0b23a" ? "#2b2f33" : "#ffffff"));
+    fb(S, F3, u0 + 0.1, u1 - 0.1, yV + 0.36, egH - 0.05, 0, 0.16, blende);
+    if (o3.name) ftext(scene2, F3, o3.name, (u0 + u1) / 2, (yV + 0.36 + egH - 0.05) / 2, 0.18, 0.6, (u1 - u0) * 0.86, o3.schrift ?? (blende === "#f4f2ec" || blende === "#e0b23a" ? "#2b2f33" : "#ffffff"));
   }
-  function obergeschosse(S, F2, typ, y0, n3, gh, c, r3) {
-    const L2 = F2.L, H = y0 + n3 * gh;
+  function obergeschosse(S, F3, typ, y0, n3, gh, c, r3) {
+    const L2 = F3.L, H = y0 + n3 * gh;
     if (typ === "waschbeton" || typ === "band") {
       for (let k3 = 0; k3 < n3; k3++) {
         const y2 = y0 + k3 * gh;
-        fb(S, F2, -0.05, L2 + 0.05, y2, y2 + 1.05, 0, 0.28, k3 % 2 && typ === "band" ? dunkler(c.panel, 0.03) : c.panel);
-        fb(S, F2, 0, L2, y2 + 1.05, y2 + gh, -0.25, -0.12, c.glas);
-        for (let u = 0.6; u < L2 - 0.3; u += 1.3) fb(S, F2, u - 0.05, u + 0.05, y2 + 1.05, y2 + gh, -0.25, -0.05, c.sprosse);
-        if (typ === "waschbeton") fb(S, F2, -0.05, L2 + 0.05, y2 + 1, y2 + 1.08, 0, 0.32, dunkler(c.panel, 0.08));
+        fb(S, F3, -0.05, L2 + 0.05, y2, y2 + 1.05, 0, 0.28, k3 % 2 && typ === "band" ? dunkler(c.panel, 0.03) : c.panel);
+        fb(S, F3, 0, L2, y2 + 1.05, y2 + gh, -0.25, -0.12, c.glas);
+        for (let u = 0.6; u < L2 - 0.3; u += 1.3) fb(S, F3, u - 0.05, u + 0.05, y2 + 1.05, y2 + gh, -0.25, -0.05, c.sprosse);
+        if (typ === "waschbeton") fb(S, F3, -0.05, L2 + 0.05, y2 + 1, y2 + 1.08, 0, 0.32, dunkler(c.panel, 0.08));
       }
     } else if (typ === "mosaik") {
       const ra = 2.6, na = Math.max(1, Math.floor(L2 / ra)), off = (L2 - na * ra) / 2;
-      fb(S, F2, 0, L2, y0, H, -0.2, 0.02, c.panel);
+      fb(S, F3, 0, L2, y0, H, -0.2, 0.02, c.panel);
       for (let k3 = 0; k3 < n3; k3++) {
         const y2 = y0 + k3 * gh;
         for (let i = 0; i < na; i++) {
           const u = off + i * ra;
-          for (let j3 = 0; j3 < 3; j3++) fb(S, F2, u + 0.15 + j3 * ((ra - 0.3) / 3), u + 0.15 + (j3 + 1) * ((ra - 0.3) / 3) - 0.04, y2 + 0.15, y2 + 1.05, 0, 0.1, c.mosaik[(i + j3 + k3 * 2) % c.mosaik.length]);
-          fb(S, F2, u + 0.25, u + ra - 0.25, y2 + 1.25, y2 + gh - 0.3, 0, 0.06, c.glas);
-          fb(S, F2, u + ra / 2 - 0.05, u + ra / 2 + 0.05, y2 + 1.25, y2 + gh - 0.3, 0, 0.1, c.sprosse);
+          for (let j3 = 0; j3 < 3; j3++) fb(S, F3, u + 0.15 + j3 * ((ra - 0.3) / 3), u + 0.15 + (j3 + 1) * ((ra - 0.3) / 3) - 0.04, y2 + 0.15, y2 + 1.05, 0, 0.1, c.mosaik[(i + j3 + k3 * 2) % c.mosaik.length]);
+          fb(S, F3, u + 0.25, u + ra - 0.25, y2 + 1.25, y2 + gh - 0.3, 0, 0.06, c.glas);
+          fb(S, F3, u + ra / 2 - 0.05, u + ra / 2 + 0.05, y2 + 1.25, y2 + gh - 0.3, 0, 0.1, c.sprosse);
         }
       }
     } else if (typ === "kunststoff") {
@@ -130273,7 +130585,7 @@
         const y2 = y0 + k3 * gh;
         for (let i = 0; i < na; i++) {
           const u = off + i * ra;
-          fb(S, F2, u + 0.04, u + ra - 0.04, y2 + 0.04, y2 + gh - 0.04, 0, 0.18, (i + k3) % 3 === 0 ? c.akzent : c.panel);
+          fb(S, F3, u + 0.04, u + ra - 0.04, y2 + 0.04, y2 + gh - 0.04, 0, 0.18, (i + k3) % 3 === 0 ? c.akzent : c.panel);
           const s2 = new three_module_exports.Shape(), a2 = u + 0.35, b3 = u + ra - 0.35, v0 = y2 + 0.9, v1 = y2 + gh - 0.5, rr3 = 0.32;
           s2.moveTo(a2 + rr3, v0);
           s2.lineTo(b3 - rr3, v0);
@@ -130284,20 +130596,20 @@
           s2.quadraticCurveTo(a2, v1, a2, v1 - rr3);
           s2.lineTo(a2, v0 + rr3);
           s2.quadraticCurveTo(a2, v0, a2 + rr3, v0);
-          fform(S, F2, s2, 0.1, 0.22, c.glas, 3);
+          fform(S, F3, s2, 0.1, 0.22, c.glas, 3);
         }
       }
     } else if (typ === "raster") {
-      fb(S, F2, 0, L2, y0, H, -0.35, -0.2, c.glas);
-      for (let k3 = 0; k3 <= n3; k3++) fb(S, F2, -0.05, L2 + 0.05, y0 + k3 * gh - 0.18, y0 + k3 * gh + 0.18, -0.2, 0.15, c.panel);
-      for (let k3 = 0; k3 < n3; k3++) fb(S, F2, 0, L2, y0 + k3 * gh + 0.18, y0 + k3 * gh + 0.95, -0.25, -0.1, c.bruestung ?? dunkler(c.glas, 0.04));
-      for (let u = 0; u <= L2 + 0.01; u += 1.5) fb(S, F2, u - 0.1, u + 0.1, y0, H, -0.2, 0.45, c.lisene ?? c.panel);
+      fb(S, F3, 0, L2, y0, H, -0.35, -0.2, c.glas);
+      for (let k3 = 0; k3 <= n3; k3++) fb(S, F3, -0.05, L2 + 0.05, y0 + k3 * gh - 0.18, y0 + k3 * gh + 0.18, -0.2, 0.15, c.panel);
+      for (let k3 = 0; k3 < n3; k3++) fb(S, F3, 0, L2, y0 + k3 * gh + 0.18, y0 + k3 * gh + 0.95, -0.25, -0.1, c.bruestung ?? dunkler(c.glas, 0.04));
+      for (let u = 0; u <= L2 + 0.01; u += 1.5) fb(S, F3, u - 0.1, u + 0.1, y0, H, -0.2, 0.45, c.lisene ?? c.panel);
     } else if (typ === "waben") {
-      fb(S, F2, -0.05, L2 + 0.05, y0, H, -0.1, 0.05, c.panel);
+      fb(S, F3, -0.05, L2 + 0.05, y0, H, -0.1, 0.05, c.panel);
       const s2 = 1.6, nu = Math.floor(L2 / s2), nv = Math.floor((H - y0 - 0.6) / s2), ou = (L2 - nu * s2) / 2, ov = y0 + 0.3 + (H - y0 - 0.6 - nv * s2) / 2;
       for (let i = 0; i < nu; i++) for (let k3 = 0; k3 < nv; k3++) {
         const cu = ou + (i + 0.5) * s2, cv = ov + (k3 + 0.5) * s2, h3 = s2 * 0.46;
-        fpoly(S, F2, [[cu, cv - h3], [cu + h3, cv], [cu, cv + h3], [cu - h3, cv]], 0.05, 0.3, (i + k3) % 2 ? c.wabe : dunkler(c.wabe, 0.07));
+        fpoly(S, F3, [[cu, cv - h3], [cu + h3, cv], [cu, cv + h3], [cu - h3, cv]], 0.05, 0.3, (i + k3) % 2 ? c.wabe : dunkler(c.wabe, 0.07));
       }
     }
     return H;
@@ -130306,26 +130618,26 @@
     const { x0, z0, w: w2, d: d3, n: n3 } = o3, gh = o3.gh ?? 3.1, egH = o3.egH ?? 4.4;
     const H = egH + n3 * gh;
     S.quader(x0, 0, z0, x0 + w2, H, z0 + d3, o3.koerper ?? dunkler(o3.c.panel, 0.25));
-    for (const F2 of sichtbar2(p2, x0, z0, w2, d3)) {
-      const vorne2 = F2.s === "+z";
-      obergeschosse(S, F2, F2.L < 8 && o3.typ === "waben" ? "waschbeton" : o3.typ, egH, n3, gh, o3.c, r3);
+    for (const F3 of sichtbar2(p2, x0, z0, w2, d3)) {
+      const vorne2 = F3.s === "+z";
+      obergeschosse(S, F3, F3.L < 8 && o3.typ === "waben" ? "waschbeton" : o3.typ, egH, n3, gh, o3.c, r3);
       if (vorne2) {
         const laeden = o3.laeden ?? [{ u0: 0.3, u1: w2 - 0.3, name: o3.name, blende: o3.blende }];
-        for (const l of laeden) ladenFront2(S, scene2, F2, l.u0, l.u1, egH, { name: l.name, blende: l.blende, vordach: o3.vordach, auslage: r3, rahmen: o3.ladenRahmen });
-        fb(S, F2, -0.02, F2.L + 0.02, egH + 0.25, egH + 0.5, 0, 0.3, o3.c.panel);
+        for (const l of laeden) ladenFront2(S, scene2, F3, l.u0, l.u1, egH, { name: l.name, blende: l.blende, vordach: o3.vordach, auslage: r3, rahmen: o3.ladenRahmen });
+        fb(S, F3, -0.02, F3.L + 0.02, egH + 0.25, egH + 0.5, 0, 0.3, o3.c.panel);
       } else {
-        fb(S, F2, 0, F2.L, 0.3, egH, -0.05, 0.05, o3.c.sockel ?? "#bdb8ad");
-        if (F2.L > 6 && o3.seitenLaden) ladenFront2(S, scene2, F2, 0.4, Math.min(F2.L - 0.4, 9), egH, { name: o3.seitenLaden, blende: o3.blende, vordach: 1.4 });
+        fb(S, F3, 0, F3.L, 0.3, egH, -0.05, 0.05, o3.c.sockel ?? "#bdb8ad");
+        if (F3.L > 6 && o3.seitenLaden) ladenFront2(S, scene2, F3, 0.4, Math.min(F3.L - 0.4, 9), egH, { name: o3.seitenLaden, blende: o3.blende, vordach: 1.4 });
       }
     }
     flachdach2(S, x0, z0, w2, d3, H, o3.c.attika ?? "#d9dcdf", "#a9adb0", "#9e9b94", 0.7);
     S.quader(x0 + w2 * 0.6, H, z0 + d3 * 0.2, x0 + w2 * 0.6 + Math.min(5, w2 * 0.3), H + 2.4, z0 + d3 * 0.2 + 3.6, "#c9c6bf");
     if (o3.dachReklame) {
-      const F2 = seitenRahmen(x0, z0, w2, d3)["+z"];
+      const F3 = seitenRahmen(x0, z0, w2, d3)["+z"];
       const rb = Math.min(w2 * 0.8, 16);
-      for (const u of [w2 / 2 - rb / 2 + 0.5, w2 / 2 + rb / 2 - 0.5]) fb(S, F2, u - 0.1, u + 0.1, H, H + 3.4, -2.2, -2, "#5a6168");
-      fb(S, F2, w2 / 2 - rb / 2, w2 / 2 + rb / 2, H + 1.2, H + 3.6, -2.25, -1.95, o3.dachReklameF ?? "#f4f2ec");
-      if (istSicht(p2, "+z")) ftext(scene2, F2, o3.dachReklame, w2 / 2, H + 2.4, -1.93, 1.6, rb - 0.6, o3.dachReklameT ?? "#d23c32");
+      for (const u of [w2 / 2 - rb / 2 + 0.5, w2 / 2 + rb / 2 - 0.5]) fb(S, F3, u - 0.1, u + 0.1, H, H + 3.4, -2.2, -2, "#5a6168");
+      fb(S, F3, w2 / 2 - rb / 2, w2 / 2 + rb / 2, H + 1.2, H + 3.6, -2.25, -1.95, o3.dachReklameF ?? "#f4f2ec");
+      if (istSicht(p2, "+z")) ftext(scene2, F3, o3.dachReklame, w2 / 2, H + 2.4, -1.93, 1.6, rb - 0.6, o3.dachReklameT ?? "#d23c32");
       if (istSicht(p2, "-z")) ftext(scene2, R2(x0 + w2, z0 + d3 - 2.27, -1, 0, w2, "-z"), o3.dachReklame, w2 / 2, H + 2.4, 0, 1.6, rb - 0.6, o3.dachReklameT ?? "#d23c32");
     }
     return H;
@@ -130413,10 +130725,10 @@
         seitenLaden: "Lebensmittel"
       });
       if (istSicht(p2, "+z")) {
-        const F2 = seitenRahmen(kx, 1, kw2, bd)["+z"];
-        fb(S, F2, kw2 * 0.12, kw2 * 0.88, 5.2 + 4 * 3.6 - 4.6, 5.2 + 4 * 3.6 - 0.8, 0.22, 0.45, "#f4f2ec");
-        ftext(scene2, F2, kname, kw2 / 2, 5.2 + 4 * 3.6 - 2.7, 0.47, 2.8, kw2 * 0.72, "#c9483e");
-        ftext(scene2, F2, "Alles unter einem Dach", kw2 / 2, 4.65, 0.16, 0.6, kw2 * 0.5, "#ffffff");
+        const F3 = seitenRahmen(kx, 1, kw2, bd)["+z"];
+        fb(S, F3, kw2 * 0.12, kw2 * 0.88, 5.2 + 4 * 3.6 - 4.6, 5.2 + 4 * 3.6 - 0.8, 0.22, 0.45, "#f4f2ec");
+        ftext(scene2, F3, kname, kw2 / 2, 5.2 + 4 * 3.6 - 2.7, 0.47, 2.8, kw2 * 0.72, "#c9483e");
+        ftext(scene2, F3, "Alles unter einem Dach", kw2 / 2, 4.65, 0.16, 0.6, kw2 * 0.5, "#ffffff");
       }
       const rest = [[0, kx - 0.2], [kx + kw2 + 0.2, W3]].filter(([a2, b3]) => b3 - a2 > 7);
       rest.forEach(([a2, b3], i) => {
@@ -130433,22 +130745,22 @@
       const tw = Math.min(W3 * 0.7, 46), tx = (W3 - tw) / 2, td = Math.min(13, bd * 0.6), tz = 1 + (bd - td) * 0.4, nt = 12;
       const ct = wbFarben(r3, r3() < 0.5 ? "raster" : "waschbeton");
       S.quader(tx, Hs, tz, tx + tw, Hs + nt * 2.9 + 0.4, tz + td, dunkler(ct.panel, 0.25));
-      for (const F3 of sichtbar2(p2, tx, tz, tw, td)) {
-        if (F3.L > 20) {
-          obergeschosse(S, F3, "waschbeton", Hs + 0.4, nt, 2.9, ct, r3);
-          for (let k3 = 0; k3 < nt; k3++) for (let u = 1.6; u < F3.L - 1; u += 6.2) fb(S, F3, u, u + 3.2, Hs + 0.4 + k3 * 2.9, Hs + 0.4 + k3 * 2.9 + 1.05, 0.28, 1.4, k3 % 3 === 0 ? waehle2(r3, ["#d97a3a", "#2f6f8f", "#3f7d56"]) : "#e9e5dc");
+      for (const F4 of sichtbar2(p2, tx, tz, tw, td)) {
+        if (F4.L > 20) {
+          obergeschosse(S, F4, "waschbeton", Hs + 0.4, nt, 2.9, ct, r3);
+          for (let k3 = 0; k3 < nt; k3++) for (let u = 1.6; u < F4.L - 1; u += 6.2) fb(S, F4, u, u + 3.2, Hs + 0.4 + k3 * 2.9, Hs + 0.4 + k3 * 2.9 + 1.05, 0.28, 1.4, k3 % 3 === 0 ? waehle2(r3, ["#d97a3a", "#2f6f8f", "#3f7d56"]) : "#e9e5dc");
         } else {
-          fb(S, F3, 0, F3.L, Hs, Hs + nt * 2.9 + 0.4, 0, 0.2, ct.panel);
-          for (let k3 = 0; k3 < nt; k3++) fb(S, F3, F3.L / 2 - 0.5, F3.L / 2 + 0.5, Hs + 1.4 + k3 * 2.9, Hs + 2.6 + k3 * 2.9, 0.2, 0.25, ct.glas);
+          fb(S, F4, 0, F4.L, Hs, Hs + nt * 2.9 + 0.4, 0, 0.2, ct.panel);
+          for (let k3 = 0; k3 < nt; k3++) fb(S, F4, F4.L / 2 - 0.5, F4.L / 2 + 0.5, Hs + 1.4 + k3 * 2.9, Hs + 2.6 + k3 * 2.9, 0.2, 0.25, ct.glas);
         }
       }
       H = Hs + nt * 2.9 + 0.4;
       flachdach2(S, tx, tz, tw, td, H, "#d9dcdf", "#a9adb0", "#9e9b94", 0.8);
       S.quader(tx + tw * 0.4, H, tz + 2, tx + tw * 0.4 + 6, H + 3, tz + td - 2, "#c9c6bf");
-      const rb = Math.min(tw * 0.7, 22), F2 = seitenRahmen(tx, tz, tw, td)["+z"];
-      for (const u of [tw / 2 - rb / 2 + 0.6, tw / 2 + rb / 2 - 0.6]) fb(S, F2, u - 0.12, u + 0.12, H, H + 4.2, -1.6, -1.4, "#5a6168");
-      fb(S, F2, tw / 2 - rb / 2, tw / 2 + rb / 2, H + 1.6, H + 4.4, -1.65, -1.35, "#f4f2ec");
-      if (istSicht(p2, "+z")) ftext(scene2, F2, waehle2(r3, ["Revier-Versicherung", "Hotel am Markt", "Revierbank"]), tw / 2, H + 3, -1.32, 1.8, rb - 0.8, "#1f3a5f");
+      const rb = Math.min(tw * 0.7, 22), F3 = seitenRahmen(tx, tz, tw, td)["+z"];
+      for (const u of [tw / 2 - rb / 2 + 0.6, tw / 2 + rb / 2 - 0.6]) fb(S, F3, u - 0.12, u + 0.12, H, H + 4.2, -1.6, -1.4, "#5a6168");
+      fb(S, F3, tw / 2 - rb / 2, tw / 2 + rb / 2, H + 1.6, H + 4.4, -1.65, -1.35, "#f4f2ec");
+      if (istSicht(p2, "+z")) ftext(scene2, F3, waehle2(r3, ["Revier-Versicherung", "Hotel am Markt", "Revierbank"]), tw / 2, H + 3, -1.32, 1.8, rb - 0.8, "#1f3a5f");
       if (istSicht(p2, "-z")) ftext(scene2, seitenRahmen(tx, tz + 1.4, tw, td - 1.4)["-z"], "Hotel am Markt", tw / 2, H + 3, 0.02, 1.8, rb - 0.8, "#1f3a5f");
       H += 4.4;
     } else {
@@ -130495,8 +130807,8 @@
     }
     S.quader(x2, y2 + 1, z0 - 0.15, x2 + bw, y2 + 1.25, z0 + 0.15, "#5a6168");
     S.quader(x2, y2 + h3 + 0.9, z0 - 0.15, x2 + bw, y2 + h3 + 1.15, z0 + 0.15, "#5a6168");
-    const F1 = R2(x2, z0 + 0.2, 1, 0, bw, "+z"), F2 = R2(x2 + bw, z0 - 0.2, -1, 0, bw, "-z");
-    for (const F3 of [F1, F2]) if (istSicht(p2, F3.s)) {
+    const F1 = R2(x2, z0 + 0.2, 1, 0, bw, "+z"), F22 = R2(x2 + bw, z0 - 0.2, -1, 0, bw, "-z");
+    for (const F3 of [F1, F22]) if (istSicht(p2, F3.s)) {
       ftext(scene2, F3, text3, bw / 2 + (emblem ? 2.4 : 0), y2 + 1.2 + h3 / 2, 0.02, h3 * 0.62, bw - (emblem ? 6.4 : 1.2), farbe3);
       if (emblem) {
         const [ex, ez] = wp(F3, 2.6, 0.08);
@@ -130528,19 +130840,19 @@
       H = y0 + n3 * gh;
       S.quader(sx + 1.5, 0, sz + 1.5, sx + sw - 1.5, y0, sz + sd - 1.5, "#3c4852");
       S.quader(sx, y0, sz, sx + sw, H, sz + sd, dunkler(glas3, 0.1));
-      for (const F2 of sichtbar2(p2, sx, sz, sw, sd)) {
-        if (F2.L > 20) {
+      for (const F3 of sichtbar2(p2, sx, sz, sw, sd)) {
+        if (F3.L > 20) {
           for (let k3 = 0; k3 < n3; k3++) {
             const y2 = y0 + k3 * gh;
-            fb(S, F2, 0, F2.L, y2, y2 + 1.1, 0, 0.08, bru);
-            fb(S, F2, 0, F2.L, y2 + 1.1, y2 + gh, -0.05, 0.05, glas3);
-            fb(S, F2, -0.05, F2.L + 0.05, y2 - 0.06, y2 + 0.06, 0, 0.16, alu);
+            fb(S, F3, 0, F3.L, y2, y2 + 1.1, 0, 0.08, bru);
+            fb(S, F3, 0, F3.L, y2 + 1.1, y2 + gh, -0.05, 0.05, glas3);
+            fb(S, F3, -0.05, F3.L + 0.05, y2 - 0.06, y2 + 0.06, 0, 0.16, alu);
           }
-          for (let u = 0; u <= F2.L + 0.01; u += 1.25) fb(S, F2, u - 0.06, u + 0.06, y0, H, 0, 0.22, alu);
-          for (let u = 3.5; u < F2.L - 1; u += 7) fb(S, F2, u - 0.4, u + 0.4, 0, y0, 1, 1.8, "#e2e0da");
+          for (let u = 0; u <= F3.L + 0.01; u += 1.25) fb(S, F3, u - 0.06, u + 0.06, y0, H, 0, 0.22, alu);
+          for (let u = 3.5; u < F3.L - 1; u += 7) fb(S, F3, u - 0.4, u + 0.4, 0, y0, 1, 1.8, "#e2e0da");
         } else {
-          fb(S, F2, -0.1, F2.L + 0.1, y0, H + 0.6, 0, 0.35, "#d9d2c2");
-          for (let k3 = 0; k3 < n3; k3 += 1) fb(S, F2, F2.L / 2 - 0.4, F2.L / 2 + 0.4, y0 + k3 * gh + 1.2, y0 + k3 * gh + 3, 0.35, 0.4, glas3);
+          fb(S, F3, -0.1, F3.L + 0.1, y0, H + 0.6, 0, 0.35, "#d9d2c2");
+          for (let k3 = 0; k3 < n3; k3 += 1) fb(S, F3, F3.L / 2 - 0.4, F3.L / 2 + 0.4, y0 + k3 * gh + 1.2, y0 + k3 * gh + 3, 0.35, 0.4, glas3);
         }
       }
       flachdach2(S, sx, sz, sw, sd, H, "#dfe2e4", null, "#9e9b94", 0.6);
@@ -130564,27 +130876,27 @@
       const tw = Math.min(26, Math.min(W3, D) - 12), tx = (W3 - tw) / 2, tz = Math.max(3, (D - tw) / 2 - 3), n3 = 22, gh = 3.6, y0 = 7.2;
       const beton = waehle2(r3, ["#cfcac0", "#c4bfb4", "#d6d1c6"]), bronze = waehle2(r3, ["#6b5a48", "#5a5048", "#4d4a46"]);
       S.quader(tx - 8, 0, tz - 4, tx + tw + 8, y0, tz + tw + 6, beton);
-      for (const F2 of sichtbar2(p2, tx - 8, tz - 4, tw + 16, tw + 10)) {
-        fb(S, F2, 1, F2.L - 1, 1.2, y0 - 1.2, -0.3, 0.02, bronze);
-        for (let u = 1; u < F2.L - 1; u += 3) fb(S, F2, u - 0.15, u + 0.15, 1.2, y0 - 1.2, 0, 0.2, beton);
+      for (const F3 of sichtbar2(p2, tx - 8, tz - 4, tw + 16, tw + 10)) {
+        fb(S, F3, 1, F3.L - 1, 1.2, y0 - 1.2, -0.3, 0.02, bronze);
+        for (let u = 1; u < F3.L - 1; u += 3) fb(S, F3, u - 0.15, u + 0.15, 1.2, y0 - 1.2, 0, 0.2, beton);
       }
       flachdach2(S, tx - 8, tz - 4, tw + 16, tw + 10, y0, beton, null, "#9e9b94", 0.6);
       H = y0 + n3 * gh;
       S.quader(tx, y0, tz, tx + tw, H, tz + tw, dunkler(bronze, 0.05));
-      for (const F2 of sichtbar2(p2, tx, tz, tw, tw)) {
-        for (let k3 = 0; k3 < n3; k3++) fb(S, F2, 0, F2.L, y0 + k3 * gh, y0 + k3 * gh + 1.2, 0, 0.3, k3 === n3 - 1 ? beton : bronze);
-        for (let u = 0; u <= F2.L + 0.01; u += 2.6) fb(S, F2, u - 0.35, u + 0.35, y0, H, 0, 0.6, beton);
-        fb(S, F2, -0.1, F2.L + 0.1, H - 0.2, H + 2.2, 0, 0.65, beton);
-        fb(S, F2, -0.1, F2.L + 0.1, y0 - 0.1, y0 + 0.4, 0, 0.65, beton);
+      for (const F3 of sichtbar2(p2, tx, tz, tw, tw)) {
+        for (let k3 = 0; k3 < n3; k3++) fb(S, F3, 0, F3.L, y0 + k3 * gh, y0 + k3 * gh + 1.2, 0, 0.3, k3 === n3 - 1 ? beton : bronze);
+        for (let u = 0; u <= F3.L + 0.01; u += 2.6) fb(S, F3, u - 0.35, u + 0.35, y0, H, 0, 0.6, beton);
+        fb(S, F3, -0.1, F3.L + 0.1, H - 0.2, H + 2.2, 0, 0.65, beton);
+        fb(S, F3, -0.1, F3.L + 0.1, y0 - 0.1, y0 + 0.4, 0, 0.65, beton);
       }
       flachdach2(S, tx, tz, tw, tw, H + 2.2, null, null, "#9e9b94");
       S.quader(tx + 5, H + 2.2, tz + 5, tx + tw - 5, H + 6, tz + tw - 5, beton);
       zyl5(S, 0.12, 0.12, 12, tx + tw / 2, H + 6, tz + tw / 2, "#9aa1a7", 4);
       const firma = p2.name ?? waehle2(r3, ["MONTANBANK", "EMSCHERGLAS", "WESTKOHLE"]);
-      for (const F2 of sichtbar2(p2, tx, tz, tw, tw)) ftext(scene2, F2, firma, tw / 2, H + 1, 0.68, 1.7, tw * 0.85, "#f4f2ec");
-      for (const F2 of sichtbar2(p2, tx - 8, tz - 4, tw + 16, tw + 10)) if (F2.s === "+z") {
-        fb(S, F2, F2.L / 2 - 6, F2.L / 2 + 6, y0 - 1.6, y0 - 1, 0, 5, "#e9e7e1");
-        for (const u of [F2.L / 2 - 5.5, F2.L / 2 + 5.5]) fb(S, F2, u - 0.15, u + 0.15, 0.3, y0 - 1.6, 4.6, 4.9, "#5a6168");
+      for (const F3 of sichtbar2(p2, tx, tz, tw, tw)) ftext(scene2, F3, firma, tw / 2, H + 1, 0.68, 1.7, tw * 0.85, "#f4f2ec");
+      for (const F3 of sichtbar2(p2, tx - 8, tz - 4, tw + 16, tw + 10)) if (F3.s === "+z") {
+        fb(S, F3, F3.L / 2 - 6, F3.L / 2 + 6, y0 - 1.6, y0 - 1, 0, 5, "#e9e7e1");
+        for (const u of [F3.L / 2 - 5.5, F3.L / 2 + 5.5]) fb(S, F3, u - 0.15, u + 0.15, 0.3, y0 - 1.6, 4.6, 4.9, "#5a6168");
       }
       const vz = tz + tw + 6;
       if (D - vz > 6) {
@@ -130603,34 +130915,34 @@
       S.quader(bx, 0, bz, bx + bw, H, bz + bd, kl);
       S.quader(bx - 0.15, 0, bz - 0.15, bx + bw + 0.15, y0, bz + bd + 0.15, stein);
       const tw = 12, tH = H + 14;
-      for (const F2 of sichtbar2(p2, bx, bz, bw, bd)) {
-        const ra = 2.4, na = Math.floor(F2.L / ra), off = (F2.L - na * ra) / 2;
+      for (const F3 of sichtbar2(p2, bx, bz, bw, bd)) {
+        const ra = 2.4, na = Math.floor(F3.L / ra), off = (F3.L - na * ra) / 2;
         for (let i = 0; i <= na; i++) {
           const u = off + i * ra;
-          fb(S, F2, u - 0.4, u + 0.4, y0, H, 0, 0.55, kl2);
-          fpoly(S, F2, [[u - 0.4, H], [u + 0.4, H], [u, H + 1.6]], 0, 0.55, kl2);
+          fb(S, F3, u - 0.4, u + 0.4, y0, H, 0, 0.55, kl2);
+          fpoly(S, F3, [[u - 0.4, H], [u + 0.4, H], [u, H + 1.6]], 0, 0.55, kl2);
         }
         for (let i = 0; i < na; i++) for (let k3 = 0; k3 < n3; k3++) {
           const u = off + (i + 0.5) * ra, y2 = y0 + k3 * gh;
-          fb(S, F2, u - 0.75, u + 0.75, y2 + 0.9, y2 + gh - 0.4, -0.05, 0.05, GLAS6);
-          fb(S, F2, u - 0.05, u + 0.05, y2 + 0.9, y2 + gh - 0.4, 0, 0.1, "#e9e4d8");
-          fpoly(S, F2, [[u - 0.75, y2 + 0.2], [u, y2 + 0.75], [u + 0.75, y2 + 0.2]], 0, 0.2, kl2);
+          fb(S, F3, u - 0.75, u + 0.75, y2 + 0.9, y2 + gh - 0.4, -0.05, 0.05, GLAS6);
+          fb(S, F3, u - 0.05, u + 0.05, y2 + 0.9, y2 + gh - 0.4, 0, 0.1, "#e9e4d8");
+          fpoly(S, F3, [[u - 0.75, y2 + 0.2], [u, y2 + 0.75], [u + 0.75, y2 + 0.2]], 0, 0.2, kl2);
         }
-        fb(S, F2, -0.1, F2.L + 0.1, H - 0.4, H, 0, 0.6, gold);
-        if (F2.s === "+z" && F2.L > 20) {
-          const mu = F2.L / 2;
-          for (let k3 = 0; k3 < 4; k3++) fform(S, F2, bogenForm(mu - 3.4 + k3 * 0.6, 0.3, mu + 3.4 - k3 * 0.6, 6.2 - k3 * 0.5, "spitz"), 0.6 + (3 - k3) * 0.25 - 1, 0.6 + (3 - k3) * 0.25, k3 % 2 ? kl : stein);
-          fform(S, F2, bogenForm(mu - 1.4, 0.3, mu + 1.4, 4, "spitz"), 0, 1.4, "#3a2e28");
-          ftext(scene2, F2, p2.name ?? "Bergwerksgesellschaft Emscher", mu, y0 + 3 * gh + 0.6, 0.62, 0.9, F2.L * 0.5, gold);
+        fb(S, F3, -0.1, F3.L + 0.1, H - 0.4, H, 0, 0.6, gold);
+        if (F3.s === "+z" && F3.L > 20) {
+          const mu = F3.L / 2;
+          for (let k3 = 0; k3 < 4; k3++) fform(S, F3, bogenForm(mu - 3.4 + k3 * 0.6, 0.3, mu + 3.4 - k3 * 0.6, 6.2 - k3 * 0.5, "spitz"), 0.6 + (3 - k3) * 0.25 - 1, 0.6 + (3 - k3) * 0.25, k3 % 2 ? kl : stein);
+          fform(S, F3, bogenForm(mu - 1.4, 0.3, mu + 1.4, 4, "spitz"), 0, 1.4, "#3a2e28");
+          ftext(scene2, F3, p2.name ?? "Bergwerksgesellschaft Emscher", mu, y0 + 3 * gh + 0.6, 0.62, 0.9, F3.L * 0.5, gold);
         }
       }
       const txx = bx + bw / 2 - tw / 2, tzz = bz + bd / 2 - tw / 2 + 2;
       S.quader(txx, H, tzz, txx + tw, tH, tzz + tw - 4, kl);
-      for (const F2 of sichtbar2(p2, txx, tzz, tw, tw - 4)) {
-        for (let u = 1.2; u < F2.L; u += 2) fb(S, F2, u - 0.35, u + 0.35, H, tH, 0, 0.45, kl2);
-        for (let k3 = 0; k3 < 3; k3++) fb(S, F2, 0.8, F2.L - 0.8, tH - 3 - k3 * 0.8, tH - 2.4 - k3 * 0.8, 0.45, 0.6, gold);
-        fscheibeW(S, F2, F2.L / 2, tH - 7, 0.5, 0.7, 1.6, "#f4f0e4");
-        fscheibeW(S, F2, F2.L / 2, tH - 7, 0.7, 0.8, 0.25, "#2f3438");
+      for (const F3 of sichtbar2(p2, txx, tzz, tw, tw - 4)) {
+        for (let u = 1.2; u < F3.L; u += 2) fb(S, F3, u - 0.35, u + 0.35, H, tH, 0, 0.45, kl2);
+        for (let k3 = 0; k3 < 3; k3++) fb(S, F3, 0.8, F3.L - 0.8, tH - 3 - k3 * 0.8, tH - 2.4 - k3 * 0.8, 0.45, 0.6, gold);
+        fscheibeW(S, F3, F3.L / 2, tH - 7, 0.5, 0.7, 1.6, "#f4f0e4");
+        fscheibeW(S, F3, F3.L / 2, tH - 7, 0.7, 0.8, 0.25, "#2f3438");
       }
       for (let k3 = 0; k3 < 3; k3++) S.quader(txx + 1 + k3 * 1.2, tH + k3 * 1.4, tzz + 1 + k3 * 1.2, txx + tw - 1 - k3 * 1.2, tH + (k3 + 1) * 1.4, tzz + tw - 5 - k3 * 1.2, k3 % 2 ? gold : kl);
       flachdach2(S, bx, bz, bw, bd, H, null, null, "#6b6560");
@@ -130647,11 +130959,11 @@
     }
     return { hoehe: H };
   }
-  function fscheibeW(S, F2, u, y2, t0, t1, rad3, c, seg2 = 20) {
+  function fscheibeW(S, F3, u, y2, t0, t1, rad3, c, seg2 = 20) {
     const g = new three_module_exports.CylinderGeometry(rad3, rad3, t1 - t0, seg2);
     g.rotateX(PI5 / 2);
     g.translate(u, y2, (t0 + t1) / 2);
-    fgeo(S, F2, g, c);
+    fgeo(S, F3, g, c);
   }
   var ruhrBuero = slot("slot:ruhr_buero", {
     varianten: ["glas60", "turm70", "backstein20"],
@@ -130661,13 +130973,13 @@
   function getraenkekisten(S, x2, z4, r3, y0 = 0.38) {
     for (let i = 0; i < 4; i++) for (let k3 = 0; k3 < 2 + i % 2; k3++) S.box(0.42, 0.32, 0.32, x2 + i % 2 * 0.45, y0 + 0.16 + k3 * 0.33, z4 + Math.floor(i / 2) * 0.34, waehle2(r3, ["#c9483e", "#2f5f8f", "#e0b23a", "#3f7d56"]));
   }
-  function leuchtschild(S, scene2, F2, u, y2, t3, b3, h3, text3, bg, fg, o3 = {}) {
-    fb(S, F2, u - b3 / 2, u + b3 / 2, y2 - h3 / 2, y2 + h3 / 2, t3, t3 + 0.3, bg);
+  function leuchtschild(S, scene2, F3, u, y2, t3, b3, h3, text3, bg, fg, o3 = {}) {
+    fb(S, F3, u - b3 / 2, u + b3 / 2, y2 - h3 / 2, y2 + h3 / 2, t3, t3 + 0.3, bg);
     if (o3.rand) {
-      fb(S, F2, u - b3 / 2 - 0.1, u + b3 / 2 + 0.1, y2 + h3 / 2, y2 + h3 / 2 + 0.1, t3, t3 + 0.34, o3.rand);
-      fb(S, F2, u - b3 / 2 - 0.1, u + b3 / 2 + 0.1, y2 - h3 / 2 - 0.1, y2 - h3 / 2, t3, t3 + 0.34, o3.rand);
+      fb(S, F3, u - b3 / 2 - 0.1, u + b3 / 2 + 0.1, y2 + h3 / 2, y2 + h3 / 2 + 0.1, t3, t3 + 0.34, o3.rand);
+      fb(S, F3, u - b3 / 2 - 0.1, u + b3 / 2 + 0.1, y2 - h3 / 2 - 0.1, y2 - h3 / 2, t3, t3 + 0.34, o3.rand);
     }
-    ftext(scene2, F2, text3, u, y2, t3 + 0.32, h3 * 0.7, b3 * 0.92, fg);
+    ftext(scene2, F3, text3, u, y2, t3 + 0.32, h3 * 0.7, b3 * 0.92, fg);
   }
   function fahrrad2(S, x2, z4, ry, farbe3, y0 = 0.38) {
     const c = Math.cos(ry), sn = Math.sin(ry), P4 = (u) => [x2 + c * u, z4 - sn * u];
@@ -130750,18 +131062,18 @@
       S.quader(kx, 0.3, kz2, kx + kw2, Hk, kz2 + kd, wand2);
       S.quader(kx - 0.05, 0.3, kz2 - 0.05, kx + kw2 + 0.05, 0.8, kz2 + kd + 0.05, "#8a857b");
       flachdach2(S, kx, kz2, kw2, kd, Hk, trim, null, "#7d7a74", 0.5);
-      for (const F2 of sichtbar2(p2, kx, kz2, kw2, kd)) {
-        if (F2.s === "+z" || F2.L > 5.5) {
-          fb(S, F2, 0.4, F2.L - 0.4, 1.1, 2.6, -0.1, 0.02, "#6f8696");
-          for (let k3 = 0; k3 < 3; k3++) for (let u = 0.6; u < F2.L - 0.6; u += 0.42) fb(S, F2, u, u + 0.32, 1.25 + k3 * 0.45, 1.55 + k3 * 0.45, -0.3, -0.12, waehle2(r3, ["#e0b23a", "#c9483e", "#f4f2ec", "#2f5f8f", "#3f7d56", "#d97a3a", "#7a4a8c"]));
-          fb(S, F2, 0.3, F2.L - 0.3, 1, 1.12, 0, 0.6, trim);
-          fb(S, F2, 0.2, F2.L - 0.2, 2.65, 2.75, 0, 1.6, "#e9e7e1");
-          fb(S, F2, -0.05, F2.L + 0.05, Hk - 0.4, Hk + 0.5, 0, 0.12, trim);
-          if (F2.s === "+z") ftext(scene2, F2, "Trinkhalle", F2.L / 2, Hk + 0.05, 0.14, 0.62, F2.L * 0.8, "#ffffff");
-          else ftext(scene2, F2, "Kiosk", F2.L / 2, Hk + 0.05, 0.14, 0.62, F2.L * 0.6, "#ffffff");
+      for (const F3 of sichtbar2(p2, kx, kz2, kw2, kd)) {
+        if (F3.s === "+z" || F3.L > 5.5) {
+          fb(S, F3, 0.4, F3.L - 0.4, 1.1, 2.6, -0.1, 0.02, "#6f8696");
+          for (let k3 = 0; k3 < 3; k3++) for (let u = 0.6; u < F3.L - 0.6; u += 0.42) fb(S, F3, u, u + 0.32, 1.25 + k3 * 0.45, 1.55 + k3 * 0.45, -0.3, -0.12, waehle2(r3, ["#e0b23a", "#c9483e", "#f4f2ec", "#2f5f8f", "#3f7d56", "#d97a3a", "#7a4a8c"]));
+          fb(S, F3, 0.3, F3.L - 0.3, 1, 1.12, 0, 0.6, trim);
+          fb(S, F3, 0.2, F3.L - 0.2, 2.65, 2.75, 0, 1.6, "#e9e7e1");
+          fb(S, F3, -0.05, F3.L + 0.05, Hk - 0.4, Hk + 0.5, 0, 0.12, trim);
+          if (F3.s === "+z") ftext(scene2, F3, "Trinkhalle", F3.L / 2, Hk + 0.05, 0.14, 0.62, F3.L * 0.8, "#ffffff");
+          else ftext(scene2, F3, "Kiosk", F3.L / 2, Hk + 0.05, 0.14, 0.62, F3.L * 0.6, "#ffffff");
         } else {
-          fb(S, F2, 0.6, 1.6, 0.3, 2.4, 0, 0.08, "#4a5056");
-          leuchtschild(S, scene2, F2, F2.L * 0.62, 1.9, 0, 1.6, 1.6, "Eis", "#f4f2ec", "#2f5f8f", { rand: "#c9483e" });
+          fb(S, F3, 0.6, 1.6, 0.3, 2.4, 0, 0.08, "#4a5056");
+          leuchtschild(S, scene2, F3, F3.L * 0.62, 1.9, 0, 1.6, 1.6, "Eis", "#f4f2ec", "#2f5f8f", { rand: "#c9483e" });
         }
       }
       S.box(0.1, 1, 0.1, kx + kw2 / 2, Hk + 0.8, kz2 + kd / 2, "#5a6168");
@@ -130785,19 +131097,19 @@
       S.quader(ix, 0.3, iz, ix + iw, Hi, iz + id, wand2);
       flachdach2(S, ix, iz, iw, id, Hi, farbe3, null, "#7d7a74", 0.7);
       const name2 = p2.name ?? waehle2(r3, ["Imbiss Zum P\xFCtt", "Grill-Eck", "Imbiss Gl\xFCckauf", "Pommes-Paradies"]);
-      for (const F2 of sichtbar2(p2, ix, iz, iw, id)) {
-        fb(S, F2, -0.05, F2.L + 0.05, 0.3, 0.9, 0, 0.06, "#a8a196");
-        if (F2.s === "+z") {
-          fb(S, F2, 0.6, F2.L - 2.2, 1.1, 2.7, -0.1, 0.02, "#6f8696");
-          fb(S, F2, 0.5, F2.L - 2.1, 1, 1.15, 0, 0.7, "#c9cdd0");
-          fb(S, F2, F2.L - 1.8, F2.L - 0.8, 0.3, 2.4, 0, 0.08, "#3c4852");
-          fb(S, F2, -0.1, F2.L + 0.1, 2.8, 3, 0, 1.8, farbe3);
-          leuchtschild(S, scene2, F2, F2.L / 2, Hi + 1, -1, Math.min(F2.L - 0.5, 8), 1, name2, farbe3, "#ffffff");
-          for (const u of [1.5, F2.L - 3]) fb(S, F2, u - 0.06, u + 0.06, Hi, Hi + 0.6, -1, -0.9, "#5a6168");
+      for (const F3 of sichtbar2(p2, ix, iz, iw, id)) {
+        fb(S, F3, -0.05, F3.L + 0.05, 0.3, 0.9, 0, 0.06, "#a8a196");
+        if (F3.s === "+z") {
+          fb(S, F3, 0.6, F3.L - 2.2, 1.1, 2.7, -0.1, 0.02, "#6f8696");
+          fb(S, F3, 0.5, F3.L - 2.1, 1, 1.15, 0, 0.7, "#c9cdd0");
+          fb(S, F3, F3.L - 1.8, F3.L - 0.8, 0.3, 2.4, 0, 0.08, "#3c4852");
+          fb(S, F3, -0.1, F3.L + 0.1, 2.8, 3, 0, 1.8, farbe3);
+          leuchtschild(S, scene2, F3, F3.L / 2, Hi + 1, -1, Math.min(F3.L - 0.5, 8), 1, name2, farbe3, "#ffffff");
+          for (const u of [1.5, F3.L - 3]) fb(S, F3, u - 0.06, u + 0.06, Hi, Hi + 0.6, -1, -0.9, "#5a6168");
         } else {
-          fb(S, F2, 0.6, F2.L - 0.6, 1.2, 2.6, -0.1, 0.02, "#6f8696");
-          leuchtschild(S, scene2, F2, F2.L / 2, 2.2, 0.05, F2.L - 1.2, 0.9, "Currywurst \xB7 Pommes", "#f4f2ec", "#c9483e");
-          fb(S, F2, 0.4, F2.L - 0.4, 2.8, 2.95, 0, 1, farbe3);
+          fb(S, F3, 0.6, F3.L - 0.6, 1.2, 2.6, -0.1, 0.02, "#6f8696");
+          leuchtschild(S, scene2, F3, F3.L / 2, 2.2, 0.05, F3.L - 1.2, 0.9, "Currywurst \xB7 Pommes", "#f4f2ec", "#c9483e");
+          fb(S, F3, 0.4, F3.L - 0.4, 2.8, 2.95, 0, 1, farbe3);
         }
       }
       {
@@ -130830,38 +131142,38 @@
       S.quader(0.5, 0, hz, 0.5 + hw, H, hz + hd, wand2);
       const laeden = mischListe([["Sportwetten", "#2f7d3f", "#ffffff", "#7fe08a"], ["Shisha Lounge", "#3a2a4a", "#f2a6ff", "#c45cff"], ["D\xF6ner Kebab", "#c9483e", "#ffd75a", "#ff8a2a"], ["Handy \xB7 Reparatur", "#1f4f8f", "#ffffff", "#4fc3ff"], ["Caf\xE9 Bistro", "#2b2f33", "#ffd75a", "#ffd75a"]], r3).slice(0, 3);
       laeden.sort((a2, b3) => a2[0] === "Sportwetten" ? -1 : 0);
-      for (const F2 of sichtbar2(p2, 0.5, hz, hw, hd)) {
-        const traufe = F2.s[1] === "z";
+      for (const F3 of sichtbar2(p2, 0.5, hz, hw, hd)) {
+        const traufe = F3.s[1] === "z";
         for (let k3 = 0; k3 < n3; k3++) {
           const yy = eg + k3 * gh;
-          const na = Math.max(1, Math.floor(F2.L / 3.2)), off = (F2.L - na * 3.2) / 2;
+          const na = Math.max(1, Math.floor(F3.L / 3.2)), off = (F3.L - na * 3.2) / 2;
           for (let i = 0; i < na; i++) {
             const u = off + (i + 0.5) * 3.2;
-            fb(S, F2, u - 0.65, u + 0.65, yy + 0.8, yy + 2.3, -0.05, 0.05, GLAS6);
-            fb(S, F2, u - 0.75, u + 0.75, yy + 0.7, yy + 0.8, 0, 0.18, "#f4f2ec");
-            if (traufe && F2.s === "+z" && (i + k3) % 3 === 1) {
-              fb(S, F2, u - 1.3, u + 1.3, yy, yy + 0.15, 0, 1.2, "#cfccc6");
-              fb(S, F2, u - 1.3, u + 1.3, yy + 0.15, yy + 1, 1.1, 1.2, "#8a9aa2");
-              const [sx2, sz2] = wp(F2, u + 0.9, 1);
+            fb(S, F3, u - 0.65, u + 0.65, yy + 0.8, yy + 2.3, -0.05, 0.05, GLAS6);
+            fb(S, F3, u - 0.75, u + 0.75, yy + 0.7, yy + 0.8, 0, 0.18, "#f4f2ec");
+            if (traufe && F3.s === "+z" && (i + k3) % 3 === 1) {
+              fb(S, F3, u - 1.3, u + 1.3, yy, yy + 0.15, 0, 1.2, "#cfccc6");
+              fb(S, F3, u - 1.3, u + 1.3, yy + 0.15, yy + 1, 1.1, 1.2, "#8a9aa2");
+              const [sx2, sz2] = wp(F3, u + 0.9, 1);
               const g = new three_module_exports.CylinderGeometry(0.45, 0.3, 0.12, 10);
               g.rotateX(PI5 / 2.4);
-              g.rotateY(F2.ry);
+              g.rotateY(F3.ry);
               g.translate(sx2, yy + 1.5, sz2);
               S.add(g, "#e9e7e1");
             }
           }
         }
-        if (F2.s === "+z") {
-          const lb = (F2.L - 0.6) / 3;
+        if (F3.s === "+z") {
+          const lb = (F3.L - 0.6) / 3;
           laeden.forEach(([text3, bg, fg, licht], i) => {
             const u0 = 0.3 + i * lb + 0.15, u1 = 0.3 + (i + 1) * lb - 0.15;
-            fb(S, F2, u0, u1, 0.3, eg - 1.2, -0.4, -0.3, text3.startsWith("Sport") ? "#3c4852" : text3.startsWith("Shisha") ? "#2a2230" : "#6f8696");
-            fb(S, F2, (u0 + u1) / 2 - 0.6, (u0 + u1) / 2 + 0.6, 0.3, 2.5, -0.3, -0.22, "#3c4852");
-            leuchtschild(S, scene2, F2, (u0 + u1) / 2, eg - 0.6, 0.02, u1 - u0, 0.95, text3, bg, fg, { rand: licht });
-            if (text3.startsWith("Shisha")) for (const uu of [u0 + 0.3, u1 - 0.3]) fb(S, F2, uu - 0.06, uu + 0.06, 0.6, eg - 1.2, -0.28, -0.16, licht);
+            fb(S, F3, u0, u1, 0.3, eg - 1.2, -0.4, -0.3, text3.startsWith("Sport") ? "#3c4852" : text3.startsWith("Shisha") ? "#2a2230" : "#6f8696");
+            fb(S, F3, (u0 + u1) / 2 - 0.6, (u0 + u1) / 2 + 0.6, 0.3, 2.5, -0.3, -0.22, "#3c4852");
+            leuchtschild(S, scene2, F3, (u0 + u1) / 2, eg - 0.6, 0.02, u1 - u0, 0.95, text3, bg, fg, { rand: licht });
+            if (text3.startsWith("Shisha")) for (const uu of [u0 + 0.3, u1 - 0.3]) fb(S, F3, uu - 0.06, uu + 0.06, 0.6, eg - 1.2, -0.28, -0.16, licht);
           });
-        } else fb(S, F2, 0.3, F2.L - 0.3, 0.3, 1, 0, 0.05, "#a8a196");
-        if (!traufe) fpoly(S, F2, [[0, H], [F2.L, H], [F2.L / 2, H + 3.2]], -0.3, 0.02, wand2);
+        } else fb(S, F3, 0.3, F3.L - 0.3, 0.3, 1, 0, 0.05, "#a8a196");
+        if (!traufe) fpoly(S, F3, [[0, H], [F3.L, H], [F3.L / 2, H + 3.2]], -0.3, 0.02, wand2);
       }
       satteldach3(S, p2, 0.5, hz, hw, hd, H, 3.6, "x", waehle2(r3, ["#4f565c", "#a9523c", "#5a5450"]), wand2);
       for (let i = 0; i < 2; i++) S.box(0.6, 1.4, 0.6, 3 + i * (hw - 6), H + 3.2, hz + hd / 2, "#8f4a37");
@@ -130966,15 +131278,15 @@
           fenster: { art: "segment", b: 1.4, h: 2, y: 1.8, raster: 3.4, zeilen: 3 },
           glas: GLAS6
         });
-        for (const F2 of sichtbar2(p2, 3, sz0, sw, sz1 - sz0)) if (F2.L > 20) ftext(scene2, F2, "Lagerhaus 3", F2.L / 2, 12.6, 0.3, 1.2, F2.L * 0.4, "#f4f0e4");
+        for (const F3 of sichtbar2(p2, 3, sz0, sw, sz1 - sz0)) if (F3.L > 20) ftext(scene2, F3, "Lagerhaus 3", F3.L / 2, 12.6, 0.3, 1.2, F3.L * 0.4, "#f4f0e4");
         const six = 3 + sw + 4, siw = Math.min(16, W3 - six - 12);
         if (siw > 8) {
           const sn = Math.max(2, Math.floor(siw / 5)), sr = siw / sn / 2;
           for (let i = 0; i < sn; i++) for (let k3 = 0; k3 < 2; k3++) zyl5(S, sr, sr, 30, six + sr + i * 2 * sr, 0.3, sz0 + sr + k3 * 2 * sr, "#d6d1c6", 14);
           S.quader(six, 30.3, sz0, six + siw, 36, sz0 + 4 * sr, "#cfcac0");
-          for (const F2 of sichtbar2(p2, six, sz0, siw, 4 * sr)) {
-            fb(S, F2, 1, F2.L - 1, 33, 35, 0, 0.1, GLAS6);
-            ftext(scene2, F2, "Silo", F2.L / 2, 31.4, 0.12, 1.1, F2.L * 0.5, "#5a6168");
+          for (const F3 of sichtbar2(p2, six, sz0, siw, 4 * sr)) {
+            fb(S, F3, 1, F3.L - 1, 33, 35, 0, 0.1, GLAS6);
+            ftext(scene2, F3, "Silo", F3.L / 2, 31.4, 0.12, 1.1, F3.L * 0.5, "#5a6168");
           }
           H = 37;
           balken(S, [six + siw / 2, 33, sz0 + 4 * sr], [six + siw / 2, 12, kz2 - 6], 1.6, 1.4, "#9aa1a7");
@@ -131010,7 +131322,7 @@
       }
       const hx = ox1 - 2, Ht = 18;
       for (const zz of [z0 - 2.5, z0 + kb + mm / 2, zB - 6 + 2.5 - 1]) S.quader(hx - 2, 0.6, zz - 1.6, hx + 2, Ht, zz + 1.6, "#e2ddd2");
-      for (const zz of [z0 - 2.5, z0 + kb + mm / 2]) for (const F2 of sichtbar2(p2, hx - 2, zz - 1.6, 4, 3.2)) fb(S, F2, 1, F2.L - 1, Ht - 4, Ht - 1.5, 0, 0.06, GLAS6);
+      for (const zz of [z0 - 2.5, z0 + kb + mm / 2]) for (const F3 of sichtbar2(p2, hx - 2, zz - 1.6, 4, 3.2)) fb(S, F3, 1, F3.L - 1, Ht - 4, Ht - 1.5, 0, 0.06, GLAS6);
       S.quader(hx - 2.2, Ht, z0 - 4.3, hx + 2.2, Ht + 1, zB - 6 + 2.5 + 0.8, "#c9c4b8");
       S.quader(hx - 0.8, 7.5, z0 + 0.2, hx + 0.8, 11.5, z0 + kb - 0.2, "#2f5f8f");
       S.quader(hx - 0.8, 6.5, z0 + kb + mm + 0.2, hx + 0.8, 10, z0 + kb + mm + kb2 - 0.2, "#2f5f8f");
@@ -131088,12 +131400,12 @@
     const gh = 2.9, H = decks * gh, band = o3.band ?? "#d9d6cf", akzent = o3.akzent ?? null;
     for (let k3 = 0; k3 <= decks; k3++) S.quader(x0, k3 * gh, z0, x0 + w2, k3 * gh + 0.35, z0 + d3, "#bdb9b1");
     for (let x2 = x0 + 0.4; x2 <= x0 + w2 - 0.3; x2 += 7.5) for (const z4 of [z0 + 0.4, z0 + d3 - 0.4, z0 + d3 / 2]) S.box(0.6, H, 0.6, x2, H / 2, z4, "#a9a59c");
-    for (const F2 of sichtbar2(p2, x0, z0, w2, d3)) for (let k3 = 1; k3 <= decks; k3++) {
-      fb(S, F2, -0.05, F2.L + 0.05, k3 * gh + 0.35, k3 * gh + 1.25, 0, 0.12, akzent && k3 % 2 ? akzent : band);
+    for (const F3 of sichtbar2(p2, x0, z0, w2, d3)) for (let k3 = 1; k3 <= decks; k3++) {
+      fb(S, F3, -0.05, F3.L + 0.05, k3 * gh + 0.35, k3 * gh + 1.25, 0, 0.12, akzent && k3 % 2 ? akzent : band);
       if (k3 < decks) {
-        for (let u = 3; u < F2.L - 2; u += zw(r3, 3, 6)) if (r3() < 0.6) {
-          const [ax, az] = wp(F2, u, -2.6);
-          westAuto(S, ax, az, F2.ry + PI5 / 2, waehle2(r3, ["pkw", "kombi", "kompakt"]), waehle2(r3, AUTOFARBEN2), k3 * gh + 0.35);
+        for (let u = 3; u < F3.L - 2; u += zw(r3, 3, 6)) if (r3() < 0.6) {
+          const [ax, az] = wp(F3, u, -2.6);
+          westAuto(S, ax, az, F3.ry + PI5 / 2, waehle2(r3, ["pkw", "kombi", "kompakt"]), waehle2(r3, AUTOFARBEN2), k3 * gh + 0.35);
         }
       }
     }
@@ -131113,17 +131425,17 @@
       const c = wbFarben(r3, "waschbeton");
       H = 12;
       S.quader(bx, 0, bz0, bx + bw, H, bz1, c.panel);
-      for (const F2 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) {
-        for (let y2 = 1.2; y2 < H; y2 += 2.6) fb(S, F2, -0.05, F2.L + 0.05, y2, y2 + 0.35, 0, 0.18, dunkler(c.panel, 0.08));
-        for (let u = 4; u < F2.L - 2; u += 4.8) fb(S, F2, u - 0.12, u + 0.12, 0.3, H, 0, 0.12, dunkler(c.panel, 0.05));
-        if (F2.s === "+z") {
-          const eu = F2.L / 2;
-          fb(S, F2, eu - 9, eu + 9, 0.3, 7.6, 0, 3.4, "#5f7787");
-          for (let u = eu - 9; u <= eu + 9.01; u += 2) fb(S, F2, u - 0.08, u + 0.08, 0.3, 7.6, 3.3, 3.5, "#d4d6d8");
-          fb(S, F2, eu - 11, eu + 11, 7.6, 8.4, 0, 5.4, "#e9e7e1");
-          fb(S, F2, eu - 11, eu + 11, 7.5, 8.5, 5.3, 5.5, "#d97a3a");
-          ftext(scene2, F2, name2, eu, 10, 0.2, 1.6, Math.min(F2.L * 0.6, 34), "#d97a3a");
-          for (const [u, t3] of [[F2.L * 0.15, "Lebensmittel"], [F2.L * 0.85, "M\xF6bel"]]) ladenFront2(S, scene2, F2, u - 6, u + 6, 4.6, { name: t3, blende: "#2f5f8f", vordach: 1.6 });
+      for (const F3 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) {
+        for (let y2 = 1.2; y2 < H; y2 += 2.6) fb(S, F3, -0.05, F3.L + 0.05, y2, y2 + 0.35, 0, 0.18, dunkler(c.panel, 0.08));
+        for (let u = 4; u < F3.L - 2; u += 4.8) fb(S, F3, u - 0.12, u + 0.12, 0.3, H, 0, 0.12, dunkler(c.panel, 0.05));
+        if (F3.s === "+z") {
+          const eu = F3.L / 2;
+          fb(S, F3, eu - 9, eu + 9, 0.3, 7.6, 0, 3.4, "#5f7787");
+          for (let u = eu - 9; u <= eu + 9.01; u += 2) fb(S, F3, u - 0.08, u + 0.08, 0.3, 7.6, 3.3, 3.5, "#d4d6d8");
+          fb(S, F3, eu - 11, eu + 11, 7.6, 8.4, 0, 5.4, "#e9e7e1");
+          fb(S, F3, eu - 11, eu + 11, 7.5, 8.5, 5.3, 5.5, "#d97a3a");
+          ftext(scene2, F3, name2, eu, 10, 0.2, 1.6, Math.min(F3.L * 0.6, 34), "#d97a3a");
+          for (const [u, t3] of [[F3.L * 0.15, "Lebensmittel"], [F3.L * 0.85, "M\xF6bel"]]) ladenFront2(S, scene2, F3, u - 6, u + 6, 4.6, { name: t3, blende: "#2f5f8f", vordach: 1.6 });
         }
       }
       S.quader(bx + 0.3, H, bz0 + 0.3, bx + bw - 0.3, H + 0.15, bz1 - 0.3, "#9a9f9f");
@@ -131146,22 +131458,22 @@
       const kl = waehle2(r3, ["#9b5a44", "#8f4f3c", "#a8664f"]), gruen = "#2f6f5a";
       H = 11;
       S.quader(bx, 0, bz0, bx + bw, H, bz1, kl);
-      for (const F2 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) {
-        for (let u = 0; u <= F2.L + 0.01; u += 6) fb(S, F2, u - 0.35, u + 0.35, 0.3, H + 0.6, 0, 0.4, dunkler(kl, 0.06));
-        fb(S, F2, -0.1, F2.L + 0.1, H - 0.4, H + 0.6, 0, 0.45, gruen);
-        for (let u = 3; u < F2.L - 2; u += 6) fb(S, F2, u - 1.8, u + 1.8, 5.5, 8.5, 0, 0.06, "#5f7787");
-        if (F2.s === "+z") for (const eu of [F2.L * 0.25, F2.L * 0.72]) {
-          fb(S, F2, eu - 5, eu + 5, 0.3, 6.5, 0, 4, "#6f8696");
-          for (let u = eu - 5; u <= eu + 5.01; u += 1.25) fb(S, F2, u - 0.07, u + 0.07, 0.3, 6.5, 3.9, 4.1, gruen);
-          const [px2, pz5] = wp(F2, eu, 2);
+      for (const F3 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) {
+        for (let u = 0; u <= F3.L + 0.01; u += 6) fb(S, F3, u - 0.35, u + 0.35, 0.3, H + 0.6, 0, 0.4, dunkler(kl, 0.06));
+        fb(S, F3, -0.1, F3.L + 0.1, H - 0.4, H + 0.6, 0, 0.45, gruen);
+        for (let u = 3; u < F3.L - 2; u += 6) fb(S, F3, u - 1.8, u + 1.8, 5.5, 8.5, 0, 0.06, "#5f7787");
+        if (F3.s === "+z") for (const eu of [F3.L * 0.25, F3.L * 0.72]) {
+          fb(S, F3, eu - 5, eu + 5, 0.3, 6.5, 0, 4, "#6f8696");
+          for (let u = eu - 5; u <= eu + 5.01; u += 1.25) fb(S, F3, u - 0.07, u + 0.07, 0.3, 6.5, 3.9, 4.1, gruen);
+          const [px2, pz5] = wp(F3, eu, 2);
           const py2 = new three_module_exports.ConeGeometry(7.2, 5, 4);
-          py2.rotateY(PI5 / 4 + F2.ry);
+          py2.rotateY(PI5 / 4 + F3.ry);
           py2.translate(px2, 6.5 + 2.5, pz5);
           S.add(py2, "#8fb3c2");
           const pk = new three_module_exports.ConeGeometry(7.3, 5.05, 4, 1, true);
-          pk.rotateY(PI5 / 4 + F2.ry);
+          pk.rotateY(PI5 / 4 + F3.ry);
           pk.translate(px2, 6.5 + 2.5, pz5);
-          ftext(scene2, F2, name2, F2.L * 0.5, H - 2, 0.42, 1.4, F2.L * 0.3, "#f4f0e4");
+          ftext(scene2, F3, name2, F3.L * 0.5, H - 2, 0.42, 1.4, F3.L * 0.3, "#f4f0e4");
         }
       }
       for (let x2 = bx + 4; x2 < bx + bw - 4; x2 += 10) {
@@ -131176,16 +131488,16 @@
       const panel2 = "#e4e6e8", blau = "#1f5f9f";
       H = 14;
       S.quader(bx, 0, bz0, bx + bw, H, bz1, panel2);
-      for (const F2 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) {
-        for (let u = 0; u <= F2.L + 0.01; u += 3) fb(S, F2, u - 0.05, u + 0.05, 0.3, H, 0, 0.1, "#cfd3d6");
-        fb(S, F2, -0.1, F2.L + 0.1, H - 1.6, H, 0, 0.3, blau);
-        fb(S, F2, -0.1, F2.L + 0.1, 4.8, 5.1, 0, 0.3, "#cfd3d6");
-        if (F2.s === "+z") {
-          const eu = F2.L * 0.5;
-          fb(S, F2, eu - 8, eu + 8, 0.3, H + 3, 0, 3, "#7aa2b8");
-          for (let u = eu - 8; u <= eu + 8.01; u += 1.6) fb(S, F2, u - 0.06, u + 0.06, 0.3, H + 3, 2.9, 3.1, "#e4e6e8");
-          fb(S, F2, eu - 9, eu + 9, H + 3, H + 3.6, -1, 4, "#e4e6e8");
-          for (const [u, t3] of [[F2.L * 0.18, "Elektromarkt"], [F2.L * 0.82, "Supermarkt"]]) ladenFront2(S, scene2, F2, u - 7, u + 7, 5, { name: t3, blende: waehle2(r3, ["#c9483e", "#e0b23a", "#2f6f3f"]), vordach: 1.6 });
+      for (const F3 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) {
+        for (let u = 0; u <= F3.L + 0.01; u += 3) fb(S, F3, u - 0.05, u + 0.05, 0.3, H, 0, 0.1, "#cfd3d6");
+        fb(S, F3, -0.1, F3.L + 0.1, H - 1.6, H, 0, 0.3, blau);
+        fb(S, F3, -0.1, F3.L + 0.1, 4.8, 5.1, 0, 0.3, "#cfd3d6");
+        if (F3.s === "+z") {
+          const eu = F3.L * 0.5;
+          fb(S, F3, eu - 8, eu + 8, 0.3, H + 3, 0, 3, "#7aa2b8");
+          for (let u = eu - 8; u <= eu + 8.01; u += 1.6) fb(S, F3, u - 0.06, u + 0.06, 0.3, H + 3, 2.9, 3.1, "#e4e6e8");
+          fb(S, F3, eu - 9, eu + 9, H + 3, H + 3.6, -1, 4, "#e4e6e8");
+          for (const [u, t3] of [[F3.L * 0.18, "Elektromarkt"], [F3.L * 0.82, "Supermarkt"]]) ladenFront2(S, scene2, F3, u - 7, u + 7, 5, { name: t3, blende: waehle2(r3, ["#c9483e", "#e0b23a", "#2f6f3f"]), vordach: 1.6 });
         }
       }
       flachdach2(S, bx, bz0, bw, bz1 - bz0, H, panel2, null, "#a9adb0", 0.6);
@@ -131201,13 +131513,13 @@
       }
       const tx = bx + 2, tz = bz1 - 8, tH = 28;
       S.quader(tx, 0, tz, tx + 8, tH, tz + 8, blau);
-      for (const F2 of sichtbar2(p2, tx, tz, 8, 8)) {
-        fb(S, F2, 0.8, F2.L - 0.8, tH - 6, tH - 1, 0, 0.1, "#f4f2ec");
-        ftext(scene2, F2, name2.split("-")[0], F2.L / 2, tH - 3.5, 0.12, 1.6, F2.L - 2, blau);
-        fb(S, F2, 1, F2.L - 1, 2, tH - 8, 0, 0.06, "#7aa2b8");
+      for (const F3 of sichtbar2(p2, tx, tz, 8, 8)) {
+        fb(S, F3, 0.8, F3.L - 0.8, tH - 6, tH - 1, 0, 0.1, "#f4f2ec");
+        ftext(scene2, F3, name2.split("-")[0], F3.L / 2, tH - 3.5, 0.12, 1.6, F3.L - 2, blau);
+        fb(S, F3, 1, F3.L - 1, 2, tH - 8, 0, 0.06, "#7aa2b8");
       }
       S.quader(tx - 0.5, tH, tz - 0.5, tx + 8.5, tH + 0.6, tz + 8.5, "#e4e6e8");
-      for (const F2 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) if (F2.s === "+z") ftext(scene2, F2, name2, F2.L * 0.5, H - 0.8, 0.32, 1.2, F2.L * 0.4, "#ffffff");
+      for (const F3 of sichtbar2(p2, bx, bz0, bw, bz1 - bz0)) if (F3.s === "+z") ftext(scene2, F3, name2, F3.L * 0.5, H - 0.8, 0.32, 1.2, F3.L * 0.4, "#ffffff");
       const phx = bx + bw + 3;
       H = Math.max(tH + 1, parkhaus2(S, scene2, p2, r3, phx, bz0, W3 - phx - 2, bz1 - bz0 + 10, 5, { akzent: blau }));
       vorplatzFahnen(S, r3, bx + bw * 0.3, bz1 + 3, 6, [blau, "#f4f2ec", "#e0b23a"]);
@@ -131252,18 +131564,18 @@
       const beton = waehle2(r3, ["#cfc9bc", "#c6c0b2"]), bronze = "#5d544b";
       H = 13.5;
       S.quader(ex, 0, ez0, ex + ew, H, ez1, beton);
-      for (const F2 of sichtbar2(p2, ex, ez0, ew, ed)) {
-        fb(S, F2, 0, F2.L, 5.2, 8.2, -0.2, 0.02, bronze);
-        fb(S, F2, 0, F2.L, 9, 12, -0.2, 0.02, bronze);
-        for (let u = 0; u <= F2.L + 0.01; u += 1.8) fb(S, F2, u - 0.25, u + 0.25, 4.6, H, 0, 0.35, beton);
-        fb(S, F2, 0, F2.L, 0.3, 4.2, -0.4, -0.3, "#5f7787");
-        for (let u = 0; u <= F2.L + 0.01; u += 3) fb(S, F2, u - 0.1, u + 0.1, 0.3, 4.2, -0.3, 0.05, "#cfd3d6");
-        if (F2.s === "+z") {
-          fb(S, F2, -2, F2.L + 2, 4.2, 4.8, 0, 7, "#e9e7e1");
-          fb(S, F2, -2, F2.L + 2, 4.1, 4.9, 6.9, 7.1, "#3b3f44");
-          for (let u = 2; u < F2.L; u += 9) fb(S, F2, u - 0.25, u + 0.25, 0.3, 4.2, 6.2, 6.7, "#5a6168");
-          fb(S, F2, F2.L * 0.25, F2.L * 0.75, H, H + 2.6, -0.5, -0.2, "#2f3438");
-          ftext(scene2, F2, stadt, F2.L / 2, H + 1.3, -0.18, 1.8, F2.L * 0.48, "#ffffff");
+      for (const F3 of sichtbar2(p2, ex, ez0, ew, ed)) {
+        fb(S, F3, 0, F3.L, 5.2, 8.2, -0.2, 0.02, bronze);
+        fb(S, F3, 0, F3.L, 9, 12, -0.2, 0.02, bronze);
+        for (let u = 0; u <= F3.L + 0.01; u += 1.8) fb(S, F3, u - 0.25, u + 0.25, 4.6, H, 0, 0.35, beton);
+        fb(S, F3, 0, F3.L, 0.3, 4.2, -0.4, -0.3, "#5f7787");
+        for (let u = 0; u <= F3.L + 0.01; u += 3) fb(S, F3, u - 0.1, u + 0.1, 0.3, 4.2, -0.3, 0.05, "#cfd3d6");
+        if (F3.s === "+z") {
+          fb(S, F3, -2, F3.L + 2, 4.2, 4.8, 0, 7, "#e9e7e1");
+          fb(S, F3, -2, F3.L + 2, 4.1, 4.9, 6.9, 7.1, "#3b3f44");
+          for (let u = 2; u < F3.L; u += 9) fb(S, F3, u - 0.25, u + 0.25, 0.3, 4.2, 6.2, 6.7, "#5a6168");
+          fb(S, F3, F3.L * 0.25, F3.L * 0.75, H, H + 2.6, -0.5, -0.2, "#2f3438");
+          ftext(scene2, F3, stadt, F3.L / 2, H + 1.3, -0.18, 1.8, F3.L * 0.48, "#ffffff");
         }
       }
       flachdach2(S, ex, ez0, ew, ed, H, beton, null, "#9e9b94", 0.6);
@@ -131273,13 +131585,13 @@
       S.quader(ex, 0, ez0, ex + ew * 0.25, 8, ez1, stein);
       S.quader(ex + ew * 0.75, 0, ez0, ex + ew, 8, ez1, stein);
       S.quader(ex + ew * 0.25, 0, ez0 + 1, ex + ew * 0.75, H, ez1 - 1, "#7aa2b8");
-      for (const F2 of sichtbar2(p2, ex + ew * 0.25, ez0 + 1, ew * 0.5, ed - 2)) {
-        for (let u = 0; u <= F2.L + 0.01; u += 1.2) fb(S, F2, u - 0.05, u + 0.05, 0.3, H, 0, 0.12, "#f4f2ec");
-        for (let y2 = 2.8; y2 < H; y2 += 2.6) fb(S, F2, 0, F2.L, y2 - 0.05, y2 + 0.05, 0, 0.12, "#f4f2ec");
+      for (const F3 of sichtbar2(p2, ex + ew * 0.25, ez0 + 1, ew * 0.5, ed - 2)) {
+        for (let u = 0; u <= F3.L + 0.01; u += 1.2) fb(S, F3, u - 0.05, u + 0.05, 0.3, H, 0, 0.12, "#f4f2ec");
+        for (let y2 = 2.8; y2 < H; y2 += 2.6) fb(S, F3, 0, F3.L, y2 - 0.05, y2 + 0.05, 0, 0.12, "#f4f2ec");
       }
-      for (const F2 of sichtbar2(p2, ex, ez0, ew, ed)) for (let u = 1.5; u < F2.L * 0.25 - 0.5; u += 2.4) for (const y2 of [1.5, 4.8]) {
-        fb(S, F2, u - 0.7, u + 0.7, y2, y2 + 1.9, -0.02, 0.06, GLAS6);
-        fb(S, F2, F2.L - u - 0.7, F2.L - u + 0.7, y2, y2 + 1.9, -0.02, 0.06, GLAS6);
+      for (const F3 of sichtbar2(p2, ex, ez0, ew, ed)) for (let u = 1.5; u < F3.L * 0.25 - 0.5; u += 2.4) for (const y2 of [1.5, 4.8]) {
+        fb(S, F3, u - 0.7, u + 0.7, y2, y2 + 1.9, -0.02, 0.06, GLAS6);
+        fb(S, F3, F3.L - u - 0.7, F3.L - u + 0.7, y2, y2 + 1.9, -0.02, 0.06, GLAS6);
       }
       const g = new three_module_exports.BoxGeometry(ew * 0.6, 0.35, ed + 4);
       g.rotateX(-0.06);
@@ -131288,9 +131600,9 @@
       flachdach2(S, ex, ez0, ew * 0.25, ed, 8, null, null, "#9e9b94");
       flachdach2(S, ex + ew * 0.75, ez0, ew * 0.25, ed, 8, null, null, "#9e9b94");
       if (istSicht(p2, "+z")) {
-        const F2 = seitenRahmen(ex, ez0, ew, ed)["+z"];
-        ftext(scene2, F2, stadt, ew / 2, H - 1.2, 0.15, 1.4, ew * 0.4, "#1f3a5f");
-        fb(S, F2, ew / 2 - 8, ew / 2 + 8, 3.6, 3.9, 0, 4, "#f4f2ec");
+        const F3 = seitenRahmen(ex, ez0, ew, ed)["+z"];
+        ftext(scene2, F3, stadt, ew / 2, H - 1.2, 0.15, 1.4, ew * 0.4, "#1f3a5f");
+        fb(S, F3, ew / 2 - 8, ew / 2 + 8, 3.6, 3.9, 0, 4, "#f4f2ec");
       }
     } else {
       const ziegel = waehle2(r3, BACKSTEIN2), stein = "#e3d6bb";
@@ -131300,11 +131612,11 @@
       backsteinHalle(S, scene2, p2, { x0: hx, z0: ez0 - 1, w: hw, d: ed + 2, H: 15, wand: ziegel, orn: stein, dach: waehle2(r3, SCHIEFER2), dachH: 6, achse: "z", r: r3, fenster: { art: "rund", b: 7, h: 10, y: 2.2, raster: hw - 2 }, lisenen: false });
       const tx = hx + hw + 1, tz = ez1 - 6;
       S.quader(tx, 0, tz, tx + 6, 30, tz + 6, ziegel);
-      for (const F2 of sichtbar2(p2, tx, tz, 6, 6)) {
-        fscheibeW(S, F2, 3, 25.5, 0, 0.15, 1.8, "#f4f0e4");
-        fscheibeW(S, F2, 3, 25.5, 0.15, 0.25, 0.25, "#2f3438");
-        fb(S, F2, -0.2, 6.2, 22.8, 23.3, 0, 0.3, stein);
-        fb(S, F2, 2.2, 3.8, 5, 18, 0, 0.06, GLAS6);
+      for (const F3 of sichtbar2(p2, tx, tz, 6, 6)) {
+        fscheibeW(S, F3, 3, 25.5, 0, 0.15, 1.8, "#f4f0e4");
+        fscheibeW(S, F3, 3, 25.5, 0.15, 0.25, 0.25, "#2f3438");
+        fb(S, F3, -0.2, 6.2, 22.8, 23.3, 0, 0.3, stein);
+        fb(S, F3, 2.2, 3.8, 5, 18, 0, 0.06, GLAS6);
       }
       const hm = walmdach(6.8, 6.8, 6);
       hm.translate(tx + 3, 30, tz + 3);
@@ -131386,14 +131698,14 @@
       S.quader(x0 + s2 * 0.1 - 0.1, y2 + 2.3, cz - 2, x0 + s2 * 0.1 + 0.1, y2 + 2.5, cz + 2, m);
     }
   }
-  function tribuene(S, F2, u0, u1, stufen, tiefe, hoehe, farben, o3 = {}) {
+  function tribuene(S, F3, u0, u1, stufen, tiefe, hoehe, farben, o3 = {}) {
     const st2 = tiefe / stufen, sh = hoehe / stufen;
     for (let k3 = 0; k3 < stufen; k3++) {
       const t0 = k3 * st2, y2 = (o3.y0 ?? 0.38) + k3 * sh;
-      fb(S, F2, u0, u1, 0.3, y2 + sh, t0, t0 + st2, o3.beton ?? "#c9c6bf");
+      fb(S, F3, u0, u1, 0.3, y2 + sh, t0, t0 + st2, o3.beton ?? "#c9c6bf");
       if (farben) {
         const n3 = Math.max(1, Math.round((u1 - u0) / 8)), du = (u1 - u0) / n3;
-        for (let i = 0; i < n3; i++) fb(S, F2, u0 + i * du + 0.3, u0 + (i + 1) * du - 0.3, y2 + sh, y2 + sh + 0.35, t0 + st2 * 0.1, t0 + st2 * 0.7, farben[(i + k3 + (o3.salz ?? 0)) % farben.length]);
+        for (let i = 0; i < n3; i++) fb(S, F3, u0 + i * du + 0.3, u0 + (i + 1) * du - 0.3, y2 + sh, y2 + sh + 0.35, t0 + st2 * 0.1, t0 + st2 * 0.7, farben[(i + k3 + (o3.salz ?? 0)) % farben.length]);
       }
     }
     return (o3.y0 ?? 0.38) + hoehe;
@@ -131442,9 +131754,9 @@
       for (const sz of [-1, 1]) S.quader(cx - c, 0.36, cz + sz * (ri - 0.125) - 0.125, cx + c, 0.37, cz + sz * (ri - 0.125) + 0.125, "#f1efe9");
       spielfeld(S, cx, cz, LF, BF, 0.38);
       const ex = c + rb + 0.5;
-      const F2 = seitenRahmen(cx - ex, cz - rb, 2 * ex, 2 * rb);
+      const F3 = seitenRahmen(cx - ex, cz - rb, 2 * ex, 2 * rb);
       for (const s2 of ["+z", "+x", "-x"]) {
-        const G4 = F2[s2], n3 = s2 === "+z" ? 6 : 4;
+        const G4 = F3[s2], n3 = s2 === "+z" ? 6 : 4;
         for (let k3 = 0; k3 < n3; k3++) fb(S, G4, -2 - k3 * 0.6, G4.L + 2 + k3 * 0.6, 0.3, 0.9 + k3 * 0.6, k3 * 1 + 1, k3 * 1 + 2, k3 % 2 ? "#c9c6bf" : "#d6d3cc");
         fb(S, G4, -n3 + 0, G4.L + n3, 0.3, 0.9 + n3 * 0.6, n3 + 1, n3 + 3, "#8fb873");
         if (s2 === "+z") for (let u = 4; u < G4.L; u += 9) fb(S, G4, u - 0.1, u + 0.1, 4.2, 5.4, 6.5, 6.6, "#5a6168");
@@ -131469,9 +131781,9 @@
       figuren(S, r3, 4, D - 8, W3 - 4, D - 1, 18, 0.38);
     } else if (v === "stadion70") {
       spielfeld(S, cx, cz, L2, B8, 0.38);
-      const F2 = seitenRahmen(cx - L2 / 2 - 3, cz - B8 / 2 - 3, L2 + 6, B8 + 6);
+      const F3 = seitenRahmen(cx - L2 / 2 - 3, cz - B8 / 2 - 3, L2 + 6, B8 + 6);
       const hoch = 12, tief2 = 16;
-      for (const s2 of ["+z", "+x", "-z", "-x"]) tribuene(S, F2[s2], s2[1] === "z" ? 0 : 0, F2[s2].L, 12, tief2, hoch, s2[1] === "z" ? [f1, f1, f22] : [f22, f1], { salz: s2 === "+z" ? 0 : 1 });
+      for (const s2 of ["+z", "+x", "-z", "-x"]) tribuene(S, F3[s2], s2[1] === "z" ? 0 : 0, F3[s2].L, 12, tief2, hoch, s2[1] === "z" ? [f1, f1, f22] : [f22, f1], { salz: s2 === "+z" ? 0 : 1 });
       {
         const X0 = cx - L2 / 2 - 3, X1 = cx + L2 / 2 + 3, Z0 = cz - B8 / 2 - 3, Z1 = cz + B8 / 2 + 3, n3 = 12, st2 = tief2 / n3, sh = hoch / n3;
         for (const [X5, sx] of [[X0, -1], [X1, 1]]) for (const [Zc, sz] of [[Z0, -1], [Z1, 1]]) for (let k3 = 0; k3 < n3; k3++) {
@@ -131490,7 +131802,7 @@
         }
       }
       for (const s2 of ["+z", "-z"]) {
-        const G3 = F2[s2];
+        const G3 = F3[s2];
         fb(S, G3, 4, G3.L - 4, hoch + 6, hoch + 6.6, -1, tief2 + 1, "#e9e7e1");
         fb(S, G3, 4, G3.L - 4, hoch + 5.6, hoch + 6.6, -1.3, -1, f1);
         fb(S, G3, 0, G3.L, 0.3, hoch + 6, tief2, tief2 + 0.6, "#d6d3cc");
@@ -131524,11 +131836,11 @@
       const Fi = seitenRahmen(cx - L2 / 2 - 3, cz - B8 / 2 - 3, L2 + 6, B8 + 6);
       for (const s2 of ["+z", "+x", "-z", "-x"]) tribuene(S, Fi[s2], -(s2[1] === "z" ? 12 : 12), Fi[s2].L + 12, 14, s2[1] === "z" ? (ad - B8 - 6) / 2 - 1.5 : (aw - L2 - 6) / 2 - 1.5, Ha - 5, [f1, f22, f1], { salz: s2 === "+z" ? 0 : 1 });
       for (const [x0, z0, x1, z1] of [[ax0, az0, ax0 + aw, az0 + 1.5], [ax0, az0 + ad - 1.5, ax0 + aw, az0 + ad], [ax0, az0, ax0 + 1.5, az0 + ad], [ax0 + aw - 1.5, az0, ax0 + aw, az0 + ad]]) S.quader(x0, 0, z0, x1, Ha, z1, "#d9dcdf");
-      for (const F2 of sichtbar2(p2, ax0, az0, aw, ad)) {
-        for (let k3 = 0; k3 < 4; k3++) fb(S, F2, -0.1, F2.L + 0.1, 3 + k3 * 5.5, 3 + k3 * 5.5 + 3.6, 0, 0.4, k3 % 2 ? f1 : heller(f1, 0.08));
-        for (let u = 0; u <= F2.L; u += 6) fb(S, F2, u - 0.25, u + 0.25, 0.3, Ha, 0, 0.6, "#e9e7e1");
-        fb(S, F2, 0, F2.L, 0.3, 3, -0.2, 0.02, "#5f7787");
-        if (F2.L > 60) ftext(scene2, F2, `${ver.kurz}-Arena`, F2.L / 2, Ha - 4.5, 0.65, 3.2, F2.L * 0.55, "#ffffff");
+      for (const F3 of sichtbar2(p2, ax0, az0, aw, ad)) {
+        for (let k3 = 0; k3 < 4; k3++) fb(S, F3, -0.1, F3.L + 0.1, 3 + k3 * 5.5, 3 + k3 * 5.5 + 3.6, 0, 0.4, k3 % 2 ? f1 : heller(f1, 0.08));
+        for (let u = 0; u <= F3.L; u += 6) fb(S, F3, u - 0.25, u + 0.25, 0.3, Ha, 0, 0.6, "#e9e7e1");
+        fb(S, F3, 0, F3.L, 0.3, 3, -0.2, 0.02, "#5f7787");
+        if (F3.L > 60) ftext(scene2, F3, `${ver.kurz}-Arena`, F3.L / 2, Ha - 4.5, 0.65, 3.2, F3.L * 0.55, "#ffffff");
       }
       const o0 = 4;
       for (const [x0, z0, x1, z1] of [[ax0 - 1, az0 - 1, ax0 + aw + 1, cz - B8 / 2 - o0], [ax0 - 1, cz + B8 / 2 + o0, ax0 + aw + 1, az0 + ad + 1], [ax0 - 1, cz - B8 / 2 - o0, cx - L2 / 2 - o0, cz + B8 / 2 + o0], [cx + L2 / 2 + o0, cz - B8 / 2 - o0, ax0 + aw + 1, cz + B8 / 2 + o0]]) S.quader(x0, Ha, z0, x1, Ha + 2.5, z1, "#eef0f1");
@@ -131564,7 +131876,7 @@
     "Caf\xE9 Kreuzer",
     "Hutmacher Kaiser"
   ];
-  function lochwand2(S, F2, u0, u1, y0, y1, t0, t1, c, oeffnungen2) {
+  function lochwand2(S, F3, u0, u1, y0, y1, t0, t1, c, oeffnungen2) {
     const s2 = new three_module_exports.Shape();
     s2.moveTo(u0, y0);
     s2.lineTo(u1, y0);
@@ -131572,23 +131884,23 @@
     s2.lineTo(u0, y1);
     s2.lineTo(u0, y0);
     for (const o3 of oeffnungen2) s2.holes.push(bogenForm(o3.u0, o3.v0, o3.u1, o3.v1, o3.art ?? "rund"));
-    fform(S, F2, s2, t0, t1, c, 8);
+    fform(S, F3, s2, t0, t1, c, 8);
   }
-  function stuckFenster(S, F2, u, y2, fw, fh, c, k3, r3, o3 = {}) {
-    fb(S, F2, u - fw / 2 - 0.22, u + fw / 2 + 0.22, y2 - 0.18, y2 + fh + 0.12, 0, 0.1, c.orn);
-    fb(S, F2, u - fw / 2, u + fw / 2, y2, y2 + fh, 0.02, 0.14, c.glas);
-    fb(S, F2, u - 0.04, u + 0.04, y2, y2 + fh, 0.02, 0.17, "#f6f3ec");
-    fb(S, F2, u - fw / 2, u + fw / 2, y2 + fh * 0.7, y2 + fh * 0.7 + 0.07, 0.02, 0.17, "#f6f3ec");
-    fb(S, F2, u - fw / 2 - 0.35, u + fw / 2 + 0.35, y2 - 0.32, y2 - 0.16, 0, 0.26, c.orn);
+  function stuckFenster(S, F3, u, y2, fw, fh, c, k3, r3, o3 = {}) {
+    fb(S, F3, u - fw / 2 - 0.22, u + fw / 2 + 0.22, y2 - 0.18, y2 + fh + 0.12, 0, 0.1, c.orn);
+    fb(S, F3, u - fw / 2, u + fw / 2, y2, y2 + fh, 0.02, 0.14, c.glas);
+    fb(S, F3, u - 0.04, u + 0.04, y2, y2 + fh, 0.02, 0.17, "#f6f3ec");
+    fb(S, F3, u - fw / 2, u + fw / 2, y2 + fh * 0.7, y2 + fh * 0.7 + 0.07, 0.02, 0.17, "#f6f3ec");
+    fb(S, F3, u - fw / 2 - 0.35, u + fw / 2 + 0.35, y2 - 0.32, y2 - 0.16, 0, 0.26, c.orn);
     const art = o3.verdachung ?? "gerade";
-    if (art === "dreieck") fpoly(S, F2, [[u - fw / 2 - 0.4, y2 + fh + 0.18], [u + fw / 2 + 0.4, y2 + fh + 0.18], [u, y2 + fh + 0.85]], 0, 0.28, c.orn);
-    else if (art === "segment") fform(S, F2, bogenForm(u - fw / 2 - 0.4, y2 + fh + 0.12, u + fw / 2 + 0.4, y2 + fh + 0.7, "segment"), 0, 0.26, c.orn);
-    else if (art === "gerade") fb(S, F2, u - fw / 2 - 0.4, u + fw / 2 + 0.4, y2 + fh + 0.12, y2 + fh + 0.34, 0, 0.3, c.orn);
-    if (o3.bruestung) fb(S, F2, u - fw / 2, u + fw / 2, y2 - 1, y2 - 0.4, 0, 0.12, c.orn);
+    if (art === "dreieck") fpoly(S, F3, [[u - fw / 2 - 0.4, y2 + fh + 0.18], [u + fw / 2 + 0.4, y2 + fh + 0.18], [u, y2 + fh + 0.85]], 0, 0.28, c.orn);
+    else if (art === "segment") fform(S, F3, bogenForm(u - fw / 2 - 0.4, y2 + fh + 0.12, u + fw / 2 + 0.4, y2 + fh + 0.7, "segment"), 0, 0.26, c.orn);
+    else if (art === "gerade") fb(S, F3, u - fw / 2 - 0.4, u + fw / 2 + 0.4, y2 + fh + 0.12, y2 + fh + 0.34, 0, 0.3, c.orn);
+    if (o3.bruestung) fb(S, F3, u - fw / 2, u + fw / 2, y2 - 1, y2 - 0.4, 0, 0.12, c.orn);
     if (o3.balkon) {
-      fb(S, F2, u - fw / 2 - 0.6, u + fw / 2 + 0.6, y2 - 0.3, y2 - 0.12, 0, 1, c.orn);
-      fb(S, F2, u - fw / 2 - 0.6, u + fw / 2 + 0.6, y2 + 0.65, y2 + 0.72, 0.95, 1, "#2f3438");
-      for (let q2 = u - fw / 2 - 0.5; q2 <= u + fw / 2 + 0.55; q2 += 0.25) fb(S, F2, q2 - 0.02, q2 + 0.02, y2 - 0.12, y2 + 0.7, 0.95, 0.99, "#2f3438");
+      fb(S, F3, u - fw / 2 - 0.6, u + fw / 2 + 0.6, y2 - 0.3, y2 - 0.12, 0, 1, c.orn);
+      fb(S, F3, u - fw / 2 - 0.6, u + fw / 2 + 0.6, y2 + 0.65, y2 + 0.72, 0.95, 1, "#2f3438");
+      for (let q2 = u - fw / 2 - 0.5; q2 <= u + fw / 2 + 0.55; q2 += 0.25) fb(S, F3, q2 - 0.02, q2 + 0.02, y2 - 0.12, y2 + 0.7, 0.95, 0.99, "#2f3438");
     }
   }
   function mansarde2(S, p2, x0, z0, w2, d3, H, dach3, c, gauben2, r3) {
@@ -131599,13 +131911,13 @@
     oben.translate(x0 + w2 / 2, H + 3.4, z0 + d3 / 2);
     S.add(oben, dunkler(dach3, 0.04));
     if (gauben2) {
-      for (const F2 of sichtbar2(p2, x0, z0, w2, d3)) if (F2.s[1] === "z") {
+      for (const F3 of sichtbar2(p2, x0, z0, w2, d3)) if (F3.s[1] === "z") {
         const n3 = Math.max(1, Math.round(w2 / 3.4));
         for (let i = 0; i < n3; i++) {
           const u = w2 * (i + 0.5) / n3;
-          fb(S, F2, u - 0.75, u + 0.75, H + 0.6, H + 2.6, -1.2, 0, c.orn);
-          fform(S, F2, bogenForm(u - 0.5, H + 0.8, u + 0.5, H + 2.4, "rund"), 0, 0.06, c.glas);
-          fform(S, F2, bogenForm(u - 0.85, H + 2.5, u + 0.85, H + 3.1, "segment"), -1.2, 0.08, dach3);
+          fb(S, F3, u - 0.75, u + 0.75, H + 0.6, H + 2.6, -1.2, 0, c.orn);
+          fform(S, F3, bogenForm(u - 0.5, H + 0.8, u + 0.5, H + 2.4, "rund"), 0, 0.06, c.glas);
+          fform(S, F3, bogenForm(u - 0.85, H + 2.5, u + 0.85, H + 3.1, "segment"), -1.2, 0.08, dach3);
         }
       }
     }
@@ -131616,79 +131928,79 @@
     const c = { wand: o3.wand, orn: o3.orn ?? heller(o3.wand, 0.04), glas: GLAS6, sockel: o3.sockel ?? dunkler(o3.wand, 0.1) };
     S.quader(x0, 0, z0, x0 + w2, H, z0 + d3, c.wand);
     const achsen7 = Math.max(2, Math.round(w2 / 2.6));
-    for (const F2 of sichtbar2(p2, x0, z0, w2, d3)) {
-      const front2 = F2.s === "+z" || F2.s === "-z";
+    for (const F3 of sichtbar2(p2, x0, z0, w2, d3)) {
+      const front2 = F3.s === "+z" || F3.s === "-z";
       if (!front2) {
         const bw = dunkler(c.wand, 0.12);
-        fb(S, F2, 0, F2.L, 0.3, H, 0, 0.04, bw);
+        fb(S, F3, 0, F3.L, 0.3, H, 0, 0.04, bw);
         const hn = Math.min(H - 1.2, egH + Math.max(1, n3 - 1) * gh);
-        fb(S, F2, 0.15, F2.L - 0.15, 0.3, hn, 0.04, 0.06, dunkler(c.wand, 0.2));
-        for (let y2 = 1 + gh; y2 < H - 0.4; y2 += gh) fb(S, F2, 0, F2.L, y2 - 0.05, y2 + 0.05, 0.04, 0.08, dunkler(c.wand, 0.13));
-        fb(S, F2, -0.03, F2.L + 0.03, 0.3, 1, 0, 0.12, c.sockel);
-        const uk = F2.L * zw(r3, 0.3, 0.45);
-        fb(S, F2, uk - 0.6, uk + 0.6, 1, H + 2.2, 0, 0.32, dunkler(c.wand, 0.06));
-        fb(S, F2, uk - 0.72, uk + 0.72, H + 2.2, H + 2.45, -0.1, 0.42, dunkler(c.wand, 0.2));
+        fb(S, F3, 0.15, F3.L - 0.15, 0.3, hn, 0.04, 0.06, dunkler(c.wand, 0.2));
+        for (let y2 = 1 + gh; y2 < H - 0.4; y2 += gh) fb(S, F3, 0, F3.L, y2 - 0.05, y2 + 0.05, 0.04, 0.08, dunkler(c.wand, 0.13));
+        fb(S, F3, -0.03, F3.L + 0.03, 0.3, 1, 0, 0.12, c.sockel);
+        const uk = F3.L * zw(r3, 0.3, 0.45);
+        fb(S, F3, uk - 0.6, uk + 0.6, 1, H + 2.2, 0, 0.32, dunkler(c.wand, 0.06));
+        fb(S, F3, uk - 0.72, uk + 0.72, H + 2.2, H + 2.45, -0.1, 0.42, dunkler(c.wand, 0.2));
         for (let i = 0; i < 3; i++) {
-          const u = zw(r3, 1, F2.L - 3), y2 = zw(r3, 1.5, H - 3);
-          fb(S, F2, u, u + zw(r3, 1, 2.2), y2, y2 + zw(r3, 0.6, 1.4), 0.06, 0.08, i % 2 ? heller(bw, 0.04) : dunkler(bw, 0.05));
+          const u = zw(r3, 1, F3.L - 3), y2 = zw(r3, 1.5, H - 3);
+          fb(S, F3, u, u + zw(r3, 1, 2.2), y2, y2 + zw(r3, 0.6, 1.4), 0.06, 0.08, i % 2 ? heller(bw, 0.04) : dunkler(bw, 0.05));
         }
         continue;
       }
-      const strasse3 = F2.s === "+z";
-      const ra = F2.L / achsen7;
+      const strasse3 = F3.s === "+z";
+      const ra = F3.L / achsen7;
       if (strasse3 && o3.laden) {
-        ladenFront2(S, scene2, F2, 0.4, F2.L - 0.4, egH, { name: o3.laden, blende: waehle2(r3, ["#2b2f33", "#1f3a5f", "#6b2e35", "#f4f2ec", "#3f5f4f"]), vordach: false, auslage: r3, tief: -0.3 });
-        fb(S, F2, -0.05, F2.L + 0.05, egH - 0.1, egH + 0.25, 0, 0.35, c.orn);
+        ladenFront2(S, scene2, F3, 0.4, F3.L - 0.4, egH, { name: o3.laden, blende: waehle2(r3, ["#2b2f33", "#1f3a5f", "#6b2e35", "#f4f2ec", "#3f5f4f"]), vordach: false, auslage: r3, tief: -0.3 });
+        fb(S, F3, -0.05, F3.L + 0.05, egH - 0.1, egH + 0.25, 0, 0.35, c.orn);
       } else {
-        for (let y2 = 0.9; y2 < egH - 0.3; y2 += 0.55) fb(S, F2, -0.03, F2.L + 0.03, y2, y2 + 0.06, 0, 0.12, dunkler(c.wand, 0.05));
-        fb(S, F2, -0.05, F2.L + 0.05, 0.3, 1, 0, 0.14, c.sockel);
+        for (let y2 = 0.9; y2 < egH - 0.3; y2 += 0.55) fb(S, F3, -0.03, F3.L + 0.03, y2, y2 + 0.06, 0, 0.12, dunkler(c.wand, 0.05));
+        fb(S, F3, -0.05, F3.L + 0.05, 0.3, 1, 0, 0.14, c.sockel);
         for (let i = 0; i < achsen7; i++) {
           const u = (i + 0.5) * ra;
           if (strasse3 && i === (o3.tuerAchse ?? 0)) {
-            fform(S, F2, bogenForm(u - 0.75, 0.3, u + 0.75, 3.4, "rund"), 0, 0.12, "#5a3a2a");
-            fb(S, F2, u - 1, u + 1, 0.3, 0.7, 0, 0.9, "#cfc8b8");
-          } else stuckFenster(S, F2, u, 1.6, 1.15, 2, c, 0, r3, { verdachung: null });
+            fform(S, F3, bogenForm(u - 0.75, 0.3, u + 0.75, 3.4, "rund"), 0, 0.12, "#5a3a2a");
+            fb(S, F3, u - 1, u + 1, 0.3, 0.7, 0, 0.9, "#cfc8b8");
+          } else stuckFenster(S, F3, u, 1.6, 1.15, 2, c, 0, r3, { verdachung: null });
         }
-        fb(S, F2, -0.05, F2.L + 0.05, egH - 0.1, egH + 0.25, 0, 0.3, c.orn);
+        fb(S, F3, -0.05, F3.L + 0.05, egH - 0.1, egH + 0.25, 0, 0.3, c.orn);
       }
-      const erker3 = strasse3 && o3.erker && F2.L > 7;
-      const eu0 = F2.L / 2 - 1.8, eu1 = F2.L / 2 + 1.8;
+      const erker3 = strasse3 && o3.erker && F3.L > 7;
+      const eu0 = F3.L / 2 - 1.8, eu1 = F3.L / 2 + 1.8;
       for (let k3 = 0; k3 < n3; k3++) {
         const y2 = egH + k3 * gh + 0.8;
         for (let i = 0; i < achsen7; i++) {
           const u = (i + 0.5) * ra;
           if (erker3 && u > eu0 && u < eu1 && k3 < n3 - 1) continue;
           const verd = !strasse3 ? null : k3 === 0 ? i % 2 ? "dreieck" : "segment" : k3 === 1 ? "gerade" : null;
-          stuckFenster(S, F2, u, y2, 1.15, 2.1, c, k3, r3, { verdachung: verd, balkon: strasse3 && o3.balkone && k3 === 0 && (i === 0 || i === achsen7 - 1), bruestung: strasse3 && k3 === n3 - 1 });
+          stuckFenster(S, F3, u, y2, 1.15, 2.1, c, k3, r3, { verdachung: verd, balkon: strasse3 && o3.balkone && k3 === 0 && (i === 0 || i === achsen7 - 1), bruestung: strasse3 && k3 === n3 - 1 });
         }
-        if (strasse3) fb(S, F2, -0.04, F2.L + 0.04, egH + (k3 + 1) * gh - 0.18, egH + (k3 + 1) * gh, 0, 0.2, c.orn);
+        if (strasse3) fb(S, F3, -0.04, F3.L + 0.04, egH + (k3 + 1) * gh - 0.18, egH + (k3 + 1) * gh, 0, 0.2, c.orn);
       }
       if (erker3) {
         const ey0 = egH + 0.2, ey1 = egH + (n3 - 1) * gh;
-        fb(S, F2, eu0, eu1, ey0, ey1, 0, 1, c.wand);
-        fb(S, F2, eu0 - 0.15, eu1 + 0.15, ey0 - 0.4, ey0, 0, 1.15, c.orn);
+        fb(S, F3, eu0, eu1, ey0, ey1, 0, 1, c.wand);
+        fb(S, F3, eu0 - 0.15, eu1 + 0.15, ey0 - 0.4, ey0, 0, 1.15, c.orn);
         for (let k3 = 0; k3 < n3 - 1; k3++) {
           const y2 = egH + k3 * gh + 0.8;
           for (const u of [eu0 + 0.9, eu1 - 0.9]) {
-            fb(S, F2, u - 0.6, u + 0.6, y2, y2 + 2, 1, 1.08, c.glas);
-            fb(S, F2, u - 0.75, u + 0.75, y2 + 2.05, y2 + 2.25, 1, 1.15, c.orn);
+            fb(S, F3, u - 0.6, u + 0.6, y2, y2 + 2, 1, 1.08, c.glas);
+            fb(S, F3, u - 0.75, u + 0.75, y2 + 2.05, y2 + 2.25, 1, 1.15, c.orn);
           }
-          fb(S, F2, eu0, eu1, y2 - 0.5, y2 - 0.3, 1, 1.12, c.orn);
+          fb(S, F3, eu0, eu1, y2 - 0.5, y2 - 0.3, 1, 1.12, c.orn);
         }
-        fb(S, F2, eu0 - 0.15, eu1 + 0.15, ey1, ey1 + 0.2, 0, 1.2, c.orn);
-        fb(S, F2, eu0 - 0.1, eu1 + 0.1, ey1 + 0.9, ey1 + 1, 1.1, 1.2, "#2f3438");
-        for (let q2 = eu0; q2 <= eu1; q2 += 0.3) fb(S, F2, q2 - 0.02, q2 + 0.02, ey1 + 0.2, ey1 + 0.95, 1.1, 1.18, "#2f3438");
+        fb(S, F3, eu0 - 0.15, eu1 + 0.15, ey1, ey1 + 0.2, 0, 1.2, c.orn);
+        fb(S, F3, eu0 - 0.1, eu1 + 0.1, ey1 + 0.9, ey1 + 1, 1.1, 1.2, "#2f3438");
+        for (let q2 = eu0; q2 <= eu1; q2 += 0.3) fb(S, F3, q2 - 0.02, q2 + 0.02, ey1 + 0.2, ey1 + 0.95, 1.1, 1.18, "#2f3438");
       }
-      fb(S, F2, -0.1, F2.L + 0.1, H - 0.5, H, 0, 0.55, c.orn);
-      if (strasse3) for (let u = 0.4; u < F2.L; u += 0.8) fb(S, F2, u - 0.12, u + 0.12, H - 0.85, H - 0.5, 0, 0.35, c.orn);
+      fb(S, F3, -0.1, F3.L + 0.1, H - 0.5, H, 0, 0.55, c.orn);
+      if (strasse3) for (let u = 0.4; u < F3.L; u += 0.8) fb(S, F3, u - 0.12, u + 0.12, H - 0.85, H - 0.5, 0, 0.35, c.orn);
     }
     const top = o3.dachForm === "flach" ? (flachdach2(S, x0, z0, w2, d3, H, c.orn, null), H + 0.6) : mansarde2(S, p2, x0, z0, w2, d3, H, o3.dach, c, true, r3);
     S.box(0.8, 2.4, 1.6, x0 + w2 - 0.6, top - 0.2, z0 + d3 / 2, dunkler(c.wand, 0.08));
     if (o3.zwerch && istSicht(p2, "+z")) {
-      const F2 = seitenRahmen(x0, z0, w2, d3)["+z"];
-      fb(S, F2, w2 / 2 - 1.8, w2 / 2 + 1.8, H - 0.3, H + 3.2, -1.5, 0.1, c.wand);
-      fpoly(S, F2, [[w2 / 2 - 2.1, H + 3.2], [w2 / 2 + 2.1, H + 3.2], [w2 / 2, H + 5]], -1.5, 0.2, c.orn);
-      stuckFenster(S, F2, w2 / 2, H + 0.6, 1.2, 1.9, c, 0, r3, { verdachung: null });
+      const F3 = seitenRahmen(x0, z0, w2, d3)["+z"];
+      fb(S, F3, w2 / 2 - 1.8, w2 / 2 + 1.8, H - 0.3, H + 3.2, -1.5, 0.1, c.wand);
+      fpoly(S, F3, [[w2 / 2 - 2.1, H + 3.2], [w2 / 2 + 2.1, H + 3.2], [w2 / 2, H + 5]], -1.5, 0.2, c.orn);
+      stuckFenster(S, F3, w2 / 2, H + 0.6, 1.2, 1.9, c, 0, r3, { verdachung: null });
       const zd = dachProfil(4.6, 3.6, 1.9, 0.2, "z");
       zd.translate(x0 + w2 / 2, H + 3.2, z0 + d3 - 1.4);
       S.add(zd, o3.dach);
@@ -131776,19 +132088,19 @@
       H = y0 + n3 * gh;
       S.quader(sx + 2, 0, sz + 1.5, sx + sw - 2, y0, sz + sd - 1.5, "#4e5c67");
       S.quader(sx, y0, sz, sx + sw, H, sz + sd, dunkler(glas3, 0.08));
-      for (const F2 of sichtbar2(p2, sx, sz, sw, sd)) {
-        if (F2.L > 20) {
-          fb(S, F2, 0, F2.L, y0, H, -0.1, 0.02, glas3);
-          for (let k3 = 0; k3 <= n3; k3++) fb(S, F2, -0.05, F2.L + 0.05, y0 + k3 * gh - 0.06, y0 + k3 * gh + 0.06, 0, 0.18, sprosse);
-          for (let k3 = 0; k3 < n3; k3++) fb(S, F2, 0, F2.L, y0 + k3 * gh + 0.06, y0 + k3 * gh + 0.9, -0.05, 0.08, pastell);
-          for (let u = 0; u <= F2.L + 0.01; u += 1.1) fb(S, F2, u - 0.035, u + 0.035, y0, H, 0, 0.16, sprosse);
-          for (let u = 3; u < F2.L - 1; u += 6) zyl5(S, 0.3, 0.3, y0, ...(() => {
-            const [a2, b3] = wp(F2, u, 1.2);
+      for (const F3 of sichtbar2(p2, sx, sz, sw, sd)) {
+        if (F3.L > 20) {
+          fb(S, F3, 0, F3.L, y0, H, -0.1, 0.02, glas3);
+          for (let k3 = 0; k3 <= n3; k3++) fb(S, F3, -0.05, F3.L + 0.05, y0 + k3 * gh - 0.06, y0 + k3 * gh + 0.06, 0, 0.18, sprosse);
+          for (let k3 = 0; k3 < n3; k3++) fb(S, F3, 0, F3.L, y0 + k3 * gh + 0.06, y0 + k3 * gh + 0.9, -0.05, 0.08, pastell);
+          for (let u = 0; u <= F3.L + 0.01; u += 1.1) fb(S, F3, u - 0.035, u + 0.035, y0, H, 0, 0.16, sprosse);
+          for (let u = 3; u < F3.L - 1; u += 6) zyl5(S, 0.3, 0.3, y0, ...(() => {
+            const [a2, b3] = wp(F3, u, 1.2);
             return [a2, 0, b3];
           })(), "#e9e7e1", 8);
         } else {
-          fb(S, F2, -0.15, F2.L + 0.15, y0, H + 0.4, 0, 0.3, stein);
-          for (let k3 = 0; k3 < n3; k3++) fb(S, F2, F2.L / 2 - 0.25, F2.L / 2 + 0.25, y0 + k3 * gh + 1, y0 + k3 * gh + 2.8, 0.3, 0.34, glas3);
+          fb(S, F3, -0.15, F3.L + 0.15, y0, H + 0.4, 0, 0.3, stein);
+          for (let k3 = 0; k3 < n3; k3++) fb(S, F3, F3.L / 2 - 0.25, F3.L / 2 + 0.25, y0 + k3 * gh + 1, y0 + k3 * gh + 2.8, 0.3, 0.34, glas3);
         }
       }
       S.quader(sx + 3, H, sz + 1.5, sx + sw - 3, H + 3, sz + sd - 1.5, "#6f8696");
@@ -131808,34 +132120,34 @@
       H = egH + n3 * gh;
       const wand2 = waehle2(r3, ["#efe3c8", "#e9e2d4", "#f0dccf", "#dde6dd", "#e6e0ee"]);
       S.quader(1, 0, hz, W3 - 1, H, hz + hd, wand2);
-      for (const F2 of sichtbar2(p2, 1, hz, W3 - 2, hd)) {
-        if (F2.L < 14) {
-          fb(S, F2, 0, F2.L, 0.3, H, 0, 0.04, wand2);
-          for (let k3 = 0; k3 <= n3; k3++) fb(S, F2, F2.L / 2 - 0.5, F2.L / 2 + 0.5, 1.4 + k3 * gh, 2.6 + k3 * gh, 0, 0.08, glas3);
+      for (const F3 of sichtbar2(p2, 1, hz, W3 - 2, hd)) {
+        if (F3.L < 14) {
+          fb(S, F3, 0, F3.L, 0.3, H, 0, 0.04, wand2);
+          for (let k3 = 0; k3 <= n3; k3++) fb(S, F3, F3.L / 2 - 0.5, F3.L / 2 + 0.5, 1.4 + k3 * gh, 2.6 + k3 * gh, 0, 0.08, glas3);
           continue;
         }
-        const seg2 = Math.max(1, Math.round(F2.L / 14)), sl = F2.L / seg2;
+        const seg2 = Math.max(1, Math.round(F3.L / 14)), sl = F3.L / seg2;
         for (let s2 = 0; s2 < seg2; s2++) {
           const a2 = s2 * sl, tu2 = a2 + sl / 2;
-          fb(S, F2, tu2 - 0.8, tu2 + 0.8, 1, H - 0.6, -0.02, 0.06, "#9cc0cf");
-          for (let y2 = 1.6; y2 < H - 0.6; y2 += 0.6) fb(S, F2, tu2 - 0.8, tu2 + 0.8, y2 - 0.03, y2 + 0.03, 0, 0.09, sprosse);
-          fb(S, F2, tu2 - 0.75, tu2 + 0.75, 0.3, 2.4, 0, 0.08, "#6b4a32");
-          fb(S, F2, tu2 - 1.2, tu2 + 1.2, 2.5, 2.6, 0, 1.2, sprosse);
+          fb(S, F3, tu2 - 0.8, tu2 + 0.8, 1, H - 0.6, -0.02, 0.06, "#9cc0cf");
+          for (let y2 = 1.6; y2 < H - 0.6; y2 += 0.6) fb(S, F3, tu2 - 0.8, tu2 + 0.8, y2 - 0.03, y2 + 0.03, 0, 0.09, sprosse);
+          fb(S, F3, tu2 - 0.75, tu2 + 0.75, 0.3, 2.4, 0, 0.08, "#6b4a32");
+          fb(S, F3, tu2 - 1.2, tu2 + 1.2, 2.5, 2.6, 0, 1.2, sprosse);
           for (let k3 = 0; k3 < n3 + 1; k3++) {
             const y2 = k3 === 0 ? 0.9 : egH + (k3 - 1) * gh + 0.75;
             for (const u of [a2 + sl * 0.18, a2 + sl * 0.82]) {
-              fb(S, F2, u - 0.75, u + 0.75, y2, y2 + 1.4, 0, 0.08, glas3);
-              fb(S, F2, u - 0.8, u + 0.8, y2 - 0.12, y2, 0, 0.16, sprosse);
+              fb(S, F3, u - 0.75, u + 0.75, y2, y2 + 1.4, 0, 0.08, glas3);
+              fb(S, F3, u - 0.8, u + 0.8, y2 - 0.12, y2, 0, 0.16, sprosse);
             }
-            if (k3 > 0 && F2.s === "+z") {
+            if (k3 > 0 && F3.s === "+z") {
               const bu0 = a2 + sl * 0.3, bu1 = a2 + sl * 0.44, bu2 = a2 + sl * 0.56, bu3 = a2 + sl * 0.7;
               for (const [b0, b1] of [[bu0, bu1], [bu2, bu3]]) {
-                fb(S, F2, b0, b1, y2 - 0.75, y2 - 0.62, 0, 1.3, sprosse);
-                fb(S, F2, b0, b1, y2 - 0.62, y2 + 0.15, 1.2, 1.28, k3 % 2 ? pastell : "#f6f4ee");
-                fb(S, F2, b0, b1, y2 + 0.18, y2 + 0.24, 1.22, 1.3, "#3b3f44");
-                fb(S, F2, b0 + 0.2, b1 - 0.2, y2 - 0.1, y2 + 1.7, -0.02, 0.06, glas3);
+                fb(S, F3, b0, b1, y2 - 0.75, y2 - 0.62, 0, 1.3, sprosse);
+                fb(S, F3, b0, b1, y2 - 0.62, y2 + 0.15, 1.2, 1.28, k3 % 2 ? pastell : "#f6f4ee");
+                fb(S, F3, b0, b1, y2 + 0.18, y2 + 0.24, 1.22, 1.3, "#3b3f44");
+                fb(S, F3, b0 + 0.2, b1 - 0.2, y2 - 0.1, y2 + 1.7, -0.02, 0.06, glas3);
               }
-            } else if (k3 > 0) for (const u of [a2 + sl * 0.37, a2 + sl * 0.63]) fb(S, F2, u - 0.6, u + 0.6, y2, y2 + 1.3, 0, 0.08, glas3);
+            } else if (k3 > 0) for (const u of [a2 + sl * 0.37, a2 + sl * 0.63]) fb(S, F3, u - 0.6, u + 0.6, y2, y2 + 1.3, 0, 0.08, glas3);
           }
         }
       }
@@ -131857,23 +132169,23 @@
       parts.forEach(([a2, b3], pi) => {
         const bw = b3 - a2, Hh = egH + n3 * gh, pst = waehle2(r3, ["#b9d3d8", "#e8c9a6", "#c9d9b8", "#e6d7a6", "#bcc9df"]);
         S.quader(a2, 0, hz, b3, Hh, hz + hd, stein);
-        for (const F2 of sichtbar2(p2, a2, hz, bw, hd)) {
-          if (F2.s === "+z" || F2.s === "-z") {
-            fb(S, F2, 0.8, F2.L - 0.8, egH + 0.3, Hh - 0.5, -0.3, 0, glas3);
-            for (let k3 = 0; k3 < n3; k3++) fb(S, F2, 0.8, F2.L - 0.8, egH + 0.3 + k3 * gh, egH + 0.3 + k3 * gh + 0.9, -0.25, -0.05, pst);
-            for (let k3 = 0; k3 <= n3; k3++) fb(S, F2, 0.8, F2.L - 0.8, egH + 0.3 + k3 * gh - 0.05, egH + 0.3 + k3 * gh + 0.05, -0.3, 0.05, sprosse);
-            for (let u = 0.8; u <= F2.L - 0.79; u += 1.05) fb(S, F2, u - 0.03, u + 0.03, egH + 0.3, Hh - 0.5, -0.3, 0.04, sprosse);
-            fb(S, F2, -0.05, 0.85, 0.3, Hh, 0, 0.25, stein);
-            fb(S, F2, F2.L - 0.85, F2.L + 0.05, 0.3, Hh, 0, 0.25, stein);
-            fb(S, F2, -0.05, F2.L + 0.05, Hh - 0.55, Hh, 0, 0.3, stein);
-            if (F2.s === "+z") {
-              ladenFront2(S, scene2, F2, 1, F2.L - 1, egH, { name: namen[pi], blende: "#2b2f33", vordach: 1.4, vordachF: "#f6f4ee", vordachKante: "#2b2f33", auslage: r3, tief: -0.6, rahmen: "#3b3f44" });
-              for (let u = 1; u <= F2.L - 1; u += (F2.L - 2) / 4) fb(S, F2, u - 0.08, u + 0.08, 0.3, egH - 1.15, -0.6, -0.4, "#2b2f33");
+        for (const F3 of sichtbar2(p2, a2, hz, bw, hd)) {
+          if (F3.s === "+z" || F3.s === "-z") {
+            fb(S, F3, 0.8, F3.L - 0.8, egH + 0.3, Hh - 0.5, -0.3, 0, glas3);
+            for (let k3 = 0; k3 < n3; k3++) fb(S, F3, 0.8, F3.L - 0.8, egH + 0.3 + k3 * gh, egH + 0.3 + k3 * gh + 0.9, -0.25, -0.05, pst);
+            for (let k3 = 0; k3 <= n3; k3++) fb(S, F3, 0.8, F3.L - 0.8, egH + 0.3 + k3 * gh - 0.05, egH + 0.3 + k3 * gh + 0.05, -0.3, 0.05, sprosse);
+            for (let u = 0.8; u <= F3.L - 0.79; u += 1.05) fb(S, F3, u - 0.03, u + 0.03, egH + 0.3, Hh - 0.5, -0.3, 0.04, sprosse);
+            fb(S, F3, -0.05, 0.85, 0.3, Hh, 0, 0.25, stein);
+            fb(S, F3, F3.L - 0.85, F3.L + 0.05, 0.3, Hh, 0, 0.25, stein);
+            fb(S, F3, -0.05, F3.L + 0.05, Hh - 0.55, Hh, 0, 0.3, stein);
+            if (F3.s === "+z") {
+              ladenFront2(S, scene2, F3, 1, F3.L - 1, egH, { name: namen[pi], blende: "#2b2f33", vordach: 1.4, vordachF: "#f6f4ee", vordachKante: "#2b2f33", auslage: r3, tief: -0.6, rahmen: "#3b3f44" });
+              for (let u = 1; u <= F3.L - 1; u += (F3.L - 2) / 4) fb(S, F3, u - 0.08, u + 0.08, 0.3, egH - 1.15, -0.6, -0.4, "#2b2f33");
             }
-          } else fb(S, F2, 0, F2.L, 0.3, Hh, 0, 0.05, stein);
+          } else fb(S, F3, 0, F3.L, 0.3, Hh, 0, 0.05, stein);
         }
         S.quader(a2 + 1.2, Hh, hz + 1.2, b3 - 1.2, Hh + 2.9, hz + hd - 2.4, "#7aa2b8");
-        for (const F2 of sichtbar2(p2, a2 + 1.2, hz + 1.2, bw - 2.4, hd - 3.6)) for (let u = 0; u <= F2.L + 0.01; u += 1.4) fb(S, F2, u - 0.04, u + 0.04, Hh, Hh + 2.9, 0, 0.08, sprosse);
+        for (const F3 of sichtbar2(p2, a2 + 1.2, hz + 1.2, bw - 2.4, hd - 3.6)) for (let u = 0; u <= F3.L + 0.01; u += 1.4) fb(S, F3, u - 0.04, u + 0.04, Hh, Hh + 2.9, 0, 0.08, sprosse);
         S.quader(a2 + 0.6, Hh + 2.9, hz + 0.4, b3 - 0.6, Hh + 3.1, hz + hd - 1.4, "#b4b8bb");
         S.quader(a2 + 0.6, Hh + 2.75, hz + hd - 1.5, b3 - 0.6, Hh + 3.1, hz + hd - 1.3, "#9aa1a7");
         flachdach2(S, a2, hz, bw, hd, Hh, null, null, "#a9adb0");
@@ -131906,19 +132218,19 @@
       boden2(S, 0, zm, W3, zk, "#d6cdb9", yU, 0.08);
       for (let z4 = zm + 2; z4 < zk; z4 += 2) S.quader(0, yU + 0.08, z4, W3, yU + 0.09, z4 + 0.12, fuge);
       S.quader(0, WY - 1, zm - 2.5, W3, 0.36, zm - 0.5, stein);
-      const F2 = R2(0, zm, 1, 0, W3, "+z");
+      const F3 = R2(0, zm, 1, 0, W3, "+z");
       const loecher = [];
       for (let u = 2.5; u < W3 - 5; u += 6) loecher.push({ u0: u, v0: yU + 0.08, u1: u + 4, v1: yU + 3.6, art: "rund" });
-      lochwand2(S, F2, 0, W3, yU, 0.36, -0.5, 0, stein, loecher);
+      lochwand2(S, F3, 0, W3, yU, 0.36, -0.5, 0, stein, loecher);
       for (const l of loecher) {
-        fb(S, F2, l.u0 + 0.1, l.u1 - 0.1, yU, yU + 3.5, -0.52, -0.48, waehle2(r3, ["#4a3a2e", "#5f7787", "#3b3f44", "#6b4a32"]));
-        fform(S, F2, bogenForm(l.u0 - 0.35, yU + 0.08, l.u1 + 0.35, l.v1 + 0.4, "rund"), 0, 0.1, "#e6dfcf");
-        fb(S, F2, l.u0 + 0.6, l.u1 - 0.6, yU + 2.2, yU + 2.6, 0, 0.14, waehle2(r3, ["#c9483e", "#1f4f8f", "#3f6b4f", "#2b2f33"]));
+        fb(S, F3, l.u0 + 0.1, l.u1 - 0.1, yU, yU + 3.5, -0.52, -0.48, waehle2(r3, ["#4a3a2e", "#5f7787", "#3b3f44", "#6b4a32"]));
+        fform(S, F3, bogenForm(l.u0 - 0.35, yU + 0.08, l.u1 + 0.35, l.v1 + 0.4, "rund"), 0, 0.1, "#e6dfcf");
+        fb(S, F3, l.u0 + 0.6, l.u1 - 0.6, yU + 2.2, yU + 2.6, 0, 0.14, waehle2(r3, ["#c9483e", "#1f4f8f", "#3f6b4f", "#2b2f33"]));
       }
-      fb(S, F2, -0.05, W3 + 0.05, 0, 0.45, 0, 0.2, "#e6dfcf");
+      fb(S, F3, -0.05, W3 + 0.05, 0, 0.45, 0, 0.2, "#e6dfcf");
       for (let u = 4.5; u < W3 - 4; u += 6) {
         if (r3() < 0.75) {
-          const [sx, sz] = wp(F2, u, 3.2);
+          const [sx, sz] = wp(F3, u, 3.2);
           schirmRund(S, sx, sz, yU + 0.08, waehle2(r3, ["#f4f2ec", "#c9483e", "#2f5f8f", "#e0b23a"]));
           for (const dx of [-1.2, 1.2]) zyl5(S, 0.45, 0.45, 0.06, sx + dx, yU + 0.82, sz + 0.6, "#e9e7e1", 8);
         }
@@ -131956,9 +132268,9 @@
       S.quader(px2 - 14.6, WY + 0.9, pz5 - 2.3, px2 + 14.6, WY + 1, pz5 + 2.3, "#9aa1a7");
       S.quader(px2 - 4, WY + 1, pz5 - 1.5, px2 + 4, WY + 3.6, pz5 + 1.5, "#f4f2ec");
       S.quader(px2 - 4.3, WY + 3.6, pz5 - 1.8, px2 + 4.3, WY + 3.9, pz5 + 1.8, "#1f4f8f");
-      for (const F2 of sichtbar2(p2, px2 - 4, pz5 - 1.5, 8, 3)) if (F2.L > 6) {
-        fb(S, F2, 0.6, F2.L - 0.6, WY + 1.8, WY + 3, 0, 0.06, "#6f8696");
-        ftext(scene2, F2, "Rheinschifffahrt", F2.L / 2, WY + 4.3, 0.1, 0.55, F2.L * 0.9, "#1f4f8f");
+      for (const F3 of sichtbar2(p2, px2 - 4, pz5 - 1.5, 8, 3)) if (F3.L > 6) {
+        fb(S, F3, 0.6, F3.L - 0.6, WY + 1.8, WY + 3, 0, 0.06, "#6f8696");
+        ftext(scene2, F3, "Rheinschifffahrt", F3.L / 2, WY + 4.3, 0.1, 0.55, F3.L * 0.9, "#1f4f8f");
       }
       const Lb = pz5 - 2.6 - (zk + 1), dy = 0.36 - (WY + 1);
       const g = new three_module_exports.BoxGeometry(2.6, 0.25, wurzelSumme12(Lb, dy));
@@ -132099,65 +132411,65 @@
       const Hh = egH + n3 * gh, G3 = Math.min(b3 * 1.15, 10.5);
       S.quader(x2, 0, hz, x2 + b3, Hh, hz + hd - bg, stein);
       S.quader(x2, egH, hz + hd - bg, x2 + b3, Hh, hz + hd, stein);
-      for (const F2 of sichtbar2(p2, x2, hz, b3, hd)) {
-        if (F2.s === "+z") {
+      for (const F3 of sichtbar2(p2, x2, hz, b3, hd)) {
+        if (F3.s === "+z") {
           const nb = b3 > 8.4 ? 3 : 2, bw = (b3 - 0.8) / nb;
           const loecher = [];
           for (let k3 = 0; k3 < nb; k3++) loecher.push({ u0: 0.4 + k3 * bw + 0.35, v0: 0.3, u1: 0.4 + (k3 + 1) * bw - 0.35, v1: egH - 0.5, art: "rund" });
-          lochwand2(S, F2, 0, F2.L, 0.3, egH, -0.6, 0, stein, loecher);
-          fb(S, F2, -0.02, F2.L + 0.02, egH - 0.25, egH + 0.1, 0, 0.25, orn);
-          const Fl = teil(F2, 0, F2.L, -bg);
-          ladenFront2(S, scene2, Fl, 0.6, F2.L - 0.6, egH - 0.4, { name: namen[i % namen.length], blende: waehle2(r3, ["#2b2f33", "#3f5f4f", "#6b2e35", "#1f3a5f"]), vordach: false, auslage: r3, tief: -0.2 });
+          lochwand2(S, F3, 0, F3.L, 0.3, egH, -0.6, 0, stein, loecher);
+          fb(S, F3, -0.02, F3.L + 0.02, egH - 0.25, egH + 0.1, 0, 0.25, orn);
+          const Fl = teil(F3, 0, F3.L, -bg);
+          ladenFront2(S, scene2, Fl, 0.6, F3.L - 0.6, egH - 0.4, { name: namen[i % namen.length], blende: waehle2(r3, ["#2b2f33", "#3f5f4f", "#6b2e35", "#1f3a5f"]), vordach: false, auslage: r3, tief: -0.2 });
           boden2(S, ...(() => {
-            const [a1, b1] = wp(F2, 0, -bg), [a2, b22] = wp(F2, F2.L, 0);
+            const [a1, b1] = wp(F3, 0, -bg), [a2, b22] = wp(F3, F3.L, 0);
             return [Math.min(a1, a2), Math.min(b1, b22), Math.max(a1, a2), Math.max(b1, b22)];
           })(), "#e6dfcf", 0.3, 0.1);
           const na = b3 > 8.4 ? 3 : 2;
           for (let k3 = 0; k3 < n3; k3++) {
             const y2 = egH + k3 * gh + 0.8;
             for (let a2 = 0; a2 < na; a2++) {
-              const u = F2.L * (a2 + 0.5) / na;
-              stuckFenster(S, F2, u, y2, 1.1, 2, { orn, glas: GLAS6 }, k3, r3, { verdachung: k3 === 0 ? "gerade" : null });
+              const u = F3.L * (a2 + 0.5) / na;
+              stuckFenster(S, F3, u, y2, 1.1, 2, { orn, glas: GLAS6 }, k3, r3, { verdachung: k3 === 0 ? "gerade" : null });
             }
-            fb(S, F2, -0.02, F2.L + 0.02, egH + (k3 + 1) * gh - 0.15, egH + (k3 + 1) * gh + 0.05, 0, 0.22, orn);
+            fb(S, F3, -0.02, F3.L + 0.02, egH + (k3 + 1) * gh - 0.15, egH + (k3 + 1) * gh + 0.05, 0, 0.22, orn);
           }
-          fform(S, F2, giebelForm(0, F2.L, Hh, G3, art), -0.2, 0.25, stein, 6);
+          fform(S, F3, giebelForm(0, F3.L, Hh, G3, art), -0.2, 0.25, stein, 6);
           for (const [yy, m] of [[Hh + G3 * 0.08, 3], [Hh + G3 * 0.48, 2], [Hh + G3 * 0.78, 1]]) {
-            const bb = art === "schlicht" ? F2.L * (1 - (yy - Hh) / G3) * 0.8 : F2.L * (m === 3 ? 0.9 : m === 2 ? 0.55 : 0.25);
-            fb(S, F2, F2.L / 2 - bb / 2, F2.L / 2 + bb / 2, yy - 0.1, yy + 0.06, 0.25, 0.4, orn);
+            const bb = art === "schlicht" ? F3.L * (1 - (yy - Hh) / G3) * 0.8 : F3.L * (m === 3 ? 0.9 : m === 2 ? 0.55 : 0.25);
+            fb(S, F3, F3.L / 2 - bb / 2, F3.L / 2 + bb / 2, yy - 0.1, yy + 0.06, 0.25, 0.4, orn);
             for (let a2 = 0; a2 < m; a2++) {
-              const u = F2.L / 2 + (a2 - (m - 1) / 2) * (bb / Math.max(1, m)) * 0.9;
-              if (yy + 2 < Hh + G3) fb(S, F2, u - 0.45, u + 0.45, yy + 0.4, yy + 1.9, 0.25, 0.33, GLAS6);
+              const u = F3.L / 2 + (a2 - (m - 1) / 2) * (bb / Math.max(1, m)) * 0.9;
+              if (yy + 2 < Hh + G3) fb(S, F3, u - 0.45, u + 0.45, yy + 0.4, yy + 1.9, 0.25, 0.33, GLAS6);
             }
           }
           if (art !== "schlicht") kugel2(S, ...(() => {
-            const [a1, b1] = wp(F2, F2.L / 2, 0.1);
+            const [a1, b1] = wp(F3, F3.L / 2, 0.1);
             return [a1, Hh + G3 + 0.35, b1];
           })(), 0.35, orn);
-        } else if (F2.s === "-z") {
+        } else if (F3.s === "-z") {
           const rw = dunkler(stein, 0.04), na = b3 > 8.4 ? 3 : 2;
-          fb(S, F2, 0, F2.L, 0.3, Hh, 0, 0.04, rw);
+          fb(S, F3, 0, F3.L, 0.3, Hh, 0, 0.04, rw);
           for (let k3 = 0; k3 < n3 + 1; k3++) for (let a2 = 0; a2 < na; a2++) {
-            const u = F2.L * (a2 + 0.5) / na, y2 = k3 === 0 ? 1.4 : egH + (k3 - 1) * gh + 0.8;
+            const u = F3.L * (a2 + 0.5) / na, y2 = k3 === 0 ? 1.4 : egH + (k3 - 1) * gh + 0.8;
             if (k3 === 0 && a2 === 0) {
-              fb(S, F2, u - 0.6, u + 0.6, 0.3, 2.5, 0, 0.1, "#5a3a2a");
+              fb(S, F3, u - 0.6, u + 0.6, 0.3, 2.5, 0, 0.1, "#5a3a2a");
               continue;
             }
-            fb(S, F2, u - 0.55, u + 0.55, y2, y2 + 1.8, 0, 0.1, GLAS6);
-            fb(S, F2, u - 0.65, u + 0.65, y2 - 0.15, y2, 0, 0.2, orn);
+            fb(S, F3, u - 0.55, u + 0.55, y2, y2 + 1.8, 0, 0.1, GLAS6);
+            fb(S, F3, u - 0.65, u + 0.65, y2 - 0.15, y2, 0, 0.2, orn);
           }
-          for (let k3 = 1; k3 <= n3; k3++) fb(S, F2, -0.02, F2.L + 0.02, egH + (k3 - 1) * gh - 0.1, egH + (k3 - 1) * gh + 0.05, 0, 0.15, orn);
-          fform(S, F2, giebelForm(0, F2.L, Hh, G3 * 0.66, "schlicht"), -0.2, 0.1, rw, 4);
-          fb(S, F2, F2.L / 2 - 0.5, F2.L / 2 + 0.5, Hh + 1, Hh + 2.5, 0.1, 0.16, GLAS6);
+          for (let k3 = 1; k3 <= n3; k3++) fb(S, F3, -0.02, F3.L + 0.02, egH + (k3 - 1) * gh - 0.1, egH + (k3 - 1) * gh + 0.05, 0, 0.15, orn);
+          fform(S, F3, giebelForm(0, F3.L, Hh, G3 * 0.66, "schlicht"), -0.2, 0.1, rw, 4);
+          fb(S, F3, F3.L / 2 - 0.5, F3.L / 2 + 0.5, Hh + 1, Hh + 2.5, 0.1, 0.16, GLAS6);
           if (hz > 6 && i % 2 === 0) {
-            const [ax, az] = wp(F2, F2.L * 0.7, 0);
+            const [ax, az] = wp(F3, F3.L * 0.7, 0);
             S.quader(ax - 1.8, 0.3, az - 3.5, ax + 1.8, 3.2, az, waehle2(r3, SANDSTEIN));
             const ag = new three_module_exports.BoxGeometry(4, 0.15, 4);
             ag.rotateX(-0.2);
             ag.translate(ax, 3.4, az - 1.8);
             S.add(ag, "#5a5f63");
           }
-        } else fb(S, F2, 0, F2.L, 0.3, Hh, 0, 0.03, dunkler(stein, 0.07));
+        } else fb(S, F3, 0, F3.L, 0.3, Hh, 0, 0.03, dunkler(stein, 0.07));
       }
       const dg = dachProfil(hd - 0.3, b3 - 0.1, G3 * 0.68, 0.2, "z");
       dg.translate(x2 + b3 / 2, Hh, hz + hd / 2 - 0.2);
@@ -132194,23 +132506,23 @@
     "Uhren Platzhoff",
     "Blumen W\xFClfing"
   ];
-  function strebe(S, F2, u0, y0, u1, y1, t3, c, b3 = 0.22) {
+  function strebe(S, F3, u0, y0, u1, y1, t3, c, b3 = 0.22) {
     const L2 = wurzelSumme12(u1 - u0, y1 - y0), g = new three_module_exports.BoxGeometry(L2, b3, 0.12);
     g.rotateZ(Math.atan2(y1 - y0, u1 - u0));
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, t3 + 0.06);
-    fgeo(S, F2, g, c);
+    fgeo(S, F3, g, c);
   }
-  function bergFenster(S, F2, u, y2, fb_, fh, gruen, o3 = {}) {
-    fb(S, F2, u - fb_ / 2 - 0.14, u + fb_ / 2 + 0.14, y2 - 0.14, y2 + fh + 0.14, 0, 0.08, "#f4f2ec");
-    fb(S, F2, u - fb_ / 2, u + fb_ / 2, y2, y2 + fh, 0.04, 0.12, o3.glas ?? "#4e5c67");
-    fb(S, F2, u - 0.04, u + 0.04, y2, y2 + fh, 0.04, 0.15, "#f4f2ec");
-    fb(S, F2, u - fb_ / 2, u + fb_ / 2, y2 + fh * 0.62, y2 + fh * 0.62 + 0.07, 0.04, 0.15, "#f4f2ec");
+  function bergFenster(S, F3, u, y2, fb_, fh, gruen, o3 = {}) {
+    fb(S, F3, u - fb_ / 2 - 0.14, u + fb_ / 2 + 0.14, y2 - 0.14, y2 + fh + 0.14, 0, 0.08, "#f4f2ec");
+    fb(S, F3, u - fb_ / 2, u + fb_ / 2, y2, y2 + fh, 0.04, 0.12, o3.glas ?? "#4e5c67");
+    fb(S, F3, u - 0.04, u + 0.04, y2, y2 + fh, 0.04, 0.15, "#f4f2ec");
+    fb(S, F3, u - fb_ / 2, u + fb_ / 2, y2 + fh * 0.62, y2 + fh * 0.62 + 0.07, 0.04, 0.15, "#f4f2ec");
     if (o3.laeden !== false) for (const s2 of [-1, 1]) {
       const a2 = u + s2 * (fb_ / 2 + 0.16), e = u + s2 * (fb_ / 2 + 0.16 + fb_ * 0.5);
-      fb(S, F2, Math.min(a2, e), Math.max(a2, e), y2 - 0.05, y2 + fh + 0.05, 0.02, 0.12, gruen);
-      fb(S, F2, Math.min(a2, e) + 0.06, Math.max(a2, e) - 0.06, y2 + fh * 0.5 - 0.03, y2 + fh * 0.5 + 0.03, 0.12, 0.14, dunkler(gruen, 0.08));
+      fb(S, F3, Math.min(a2, e), Math.max(a2, e), y2 - 0.05, y2 + fh + 0.05, 0.02, 0.12, gruen);
+      fb(S, F3, Math.min(a2, e) + 0.06, Math.max(a2, e) - 0.06, y2 + fh * 0.5 - 0.03, y2 + fh * 0.5 + 0.03, 0.12, 0.14, dunkler(gruen, 0.08));
     }
-    fb(S, F2, u - fb_ / 2 - 0.22, u + fb_ / 2 + 0.22, y2 - 0.24, y2 - 0.12, 0, 0.18, "#f4f2ec");
+    fb(S, F3, u - fb_ / 2 - 0.22, u + fb_ / 2 + 0.22, y2 - 0.24, y2 - 0.12, 0, 0.18, "#f4f2ec");
   }
   function bergHausRoh(S, scene2, p2) {
     const r3 = rng3(`berg:${p2.seed}:${p2.variante}`);
@@ -132226,46 +132538,46 @@
     const wand2 = v === "fachwerk" ? weiss2 : v === "putz" ? waehle2(r3, ["#f1ede2", "#ece6d6", "#f3efe6"]) : schiefer;
     S.quader(0, ys, 0, W3, Hw, D, wand2);
     if (v === "putz") S.quader(-0.02, ys + egH, -0.02, W3 + 0.02, Hw, D + 0.02, schiefer);
-    for (const F2 of sichtbar2(p2, 0, 0, W3, D)) {
-      const vorn = F2.s === "+z";
+    for (const F3 of sichtbar2(p2, 0, 0, W3, D)) {
+      const vorn = F3.s === "+z";
       if (v !== "fachwerk") {
-        for (const u of [0, F2.L - 0.22]) fb(S, F2, u, u + 0.22, ys, Hw, 0, 0.06, "#f4f2ec");
+        for (const u of [0, F3.L - 0.22]) fb(S, F3, u, u + 0.22, ys, Hw, 0, 0.06, "#f4f2ec");
         const yS = v === "putz" ? ys + egH : ys;
-        for (let y2 = yS + 0.9; y2 < Hw - 0.3; y2 += 0.95) fb(S, F2, 0.22, F2.L - 0.22, y2, y2 + 0.06, 0, 0.025, heller(schiefer, 0.05));
+        for (let y2 = yS + 0.9; y2 < Hw - 0.3; y2 += 0.95) fb(S, F3, 0.22, F3.L - 0.22, y2, y2 + 0.06, 0, 0.025, heller(schiefer, 0.05));
       }
-      fb(S, F2, -0.04, F2.L + 0.04, Hw - 0.25, Hw, 0, 0.2, "#f4f2ec");
-      const na = Math.max(1, Math.round(F2.L / 2.7));
+      fb(S, F3, -0.04, F3.L + 0.04, Hw - 0.25, Hw, 0, 0.2, "#f4f2ec");
+      const na = Math.max(1, Math.round(F3.L / 2.7));
       for (let k3 = 0; k3 < n3; k3++) {
         const yk = k3 === 0 ? ys : ys + egH + (k3 - 1) * gh;
         if (v === "fachwerk" && k3 > 0) {
           const yt = yk + gh;
-          fb(S, F2, -0.03, F2.L + 0.03, yk - 0.06, yk + 0.2, 0, 0.12, balkenF);
-          fb(S, F2, -0.03, F2.L + 0.03, yk + 0.85, yk + 1, 0, 0.12, balkenF);
+          fb(S, F3, -0.03, F3.L + 0.03, yk - 0.06, yk + 0.2, 0, 0.12, balkenF);
+          fb(S, F3, -0.03, F3.L + 0.03, yk + 0.85, yk + 1, 0, 0.12, balkenF);
           for (let a2 = 0; a2 <= na; a2++) {
-            const u = Math.min(F2.L - 0.11, Math.max(0.11, F2.L * a2 / na));
-            fb(S, F2, u - 0.11, u + 0.11, yk, yt, 0, 0.12, balkenF);
+            const u = Math.min(F3.L - 0.11, Math.max(0.11, F3.L * a2 / na));
+            fb(S, F3, u - 0.11, u + 0.11, yk, yt, 0, 0.12, balkenF);
           }
-          strebe(S, F2, 0.2, yk + 0.2, Math.min(1.3, F2.L / na - 0.6), yk + 0.85, 0, balkenF);
-          strebe(S, F2, F2.L - 0.2, yk + 0.2, F2.L - Math.min(1.3, F2.L / na - 0.6), yk + 0.85, 0, balkenF);
-          if (k3 === n3 - 1) fb(S, F2, -0.03, F2.L + 0.03, yt - 0.18, yt, 0, 0.12, balkenF);
+          strebe(S, F3, 0.2, yk + 0.2, Math.min(1.3, F3.L / na - 0.6), yk + 0.85, 0, balkenF);
+          strebe(S, F3, F3.L - 0.2, yk + 0.2, F3.L - Math.min(1.3, F3.L / na - 0.6), yk + 0.85, 0, balkenF);
+          if (k3 === n3 - 1) fb(S, F3, -0.03, F3.L + 0.03, yt - 0.18, yt, 0, 0.12, balkenF);
         }
         for (let a2 = 0; a2 < na; a2++) {
-          const u = F2.L * (a2 + 0.5) / na;
+          const u = F3.L * (a2 + 0.5) / na;
           if (k3 === 0 && vorn && laden5) continue;
           if (k3 === 0 && vorn && a2 === (na > 2 ? 1 : 0)) {
-            fb(S, F2, u - 0.7, u + 0.7, ys - 0.02, ys + 2.6, 0, 0.1, "#f4f2ec");
-            fb(S, F2, u - 0.55, u + 0.55, ys, ys + 2.1, 0.06, 0.14, gruen);
-            fb(S, F2, u - 0.55, u + 0.55, ys + 2.15, ys + 2.5, 0.06, 0.14, "#4e5c67");
-            for (let q2 = 0; q2 < 2; q2++) fb(S, F2, u - 0.9 + q2 * 0.15, u + 0.9 - q2 * 0.15, y0 + q2 * 0.22, y0 + (q2 + 1) * 0.22, 0, 0.7 - q2 * 0.3, stein);
+            fb(S, F3, u - 0.7, u + 0.7, ys - 0.02, ys + 2.6, 0, 0.1, "#f4f2ec");
+            fb(S, F3, u - 0.55, u + 0.55, ys, ys + 2.1, 0.06, 0.14, gruen);
+            fb(S, F3, u - 0.55, u + 0.55, ys + 2.15, ys + 2.5, 0.06, 0.14, "#4e5c67");
+            for (let q2 = 0; q2 < 2; q2++) fb(S, F3, u - 0.9 + q2 * 0.15, u + 0.9 - q2 * 0.15, y0 + q2 * 0.22, y0 + (q2 + 1) * 0.22, 0, 0.7 - q2 * 0.3, stein);
             continue;
           }
           const yf = yk + (k3 === 0 ? 0.75 : 0.95);
-          if (v === "fachwerk" && k3 > 0) bergFenster(S, F2, u, yk + 1.05, 0.95, 1.45, gruen, { laeden: F2.L / na > 2.4 });
-          else bergFenster(S, F2, u, yf, 0.95, 1.5, gruen, { laeden: F2.L / na > 2.4 });
+          if (v === "fachwerk" && k3 > 0) bergFenster(S, F3, u, yk + 1.05, 0.95, 1.45, gruen, { laeden: F3.L / na > 2.4 });
+          else bergFenster(S, F3, u, yf, 0.95, 1.5, gruen, { laeden: F3.L / na > 2.4 });
         }
       }
       if (vorn && laden5) {
-        ladenFront2(S, scene2, teil(F2, 0, F2.L), 0.5, F2.L - 0.5, ys + egH - y0 - 0.3, { name: waehle2(r3, BERG_LAEDEN), blende: gruen, rahmen: "#f4f2ec", vordach: false, auslage: r3, tief: -0.1 });
+        ladenFront2(S, scene2, teil(F3, 0, F3.L), 0.5, F3.L - 0.5, ys + egH - y0 - 0.3, { name: waehle2(r3, BERG_LAEDEN), blende: gruen, rahmen: "#f4f2ec", vordach: false, auslage: r3, tief: -0.1 });
       }
     }
     const dachF = waehle2(r3, ["#353c43", "#3b4249", "#30373e"]);
@@ -132293,17 +132605,17 @@
     } else {
       const h3 = Math.min(W3 * 0.75, 7.5);
       satteldach3(S, p2, 0, 0, W3, D, Hw, h3, "z", dachF, null, 0.35, 0.2);
-      for (const F2 of sichtbar2(p2, 0, 0, W3, D)) if (F2.s === "+z" || F2.s === "-z") {
-        fpoly(S, F2, [[0, Hw], [F2.L, Hw], [F2.L / 2 + 0.1, Hw + h3 - 0.2], [F2.L / 2 - 0.1, Hw + h3 - 0.2]], 0, 0.03, v === "fachwerk" ? weiss2 : schiefer);
+      for (const F3 of sichtbar2(p2, 0, 0, W3, D)) if (F3.s === "+z" || F3.s === "-z") {
+        fpoly(S, F3, [[0, Hw], [F3.L, Hw], [F3.L / 2 + 0.1, Hw + h3 - 0.2], [F3.L / 2 - 0.1, Hw + h3 - 0.2]], 0, 0.03, v === "fachwerk" ? weiss2 : schiefer);
         if (v === "fachwerk") {
-          strebe(S, F2, 0, Hw, F2.L / 2, Hw + h3 - 0.2, 0.03, balkenF);
-          strebe(S, F2, F2.L, Hw, F2.L / 2, Hw + h3 - 0.2, 0.03, balkenF);
-          fb(S, F2, F2.L / 2 - 0.1, F2.L / 2 + 0.1, Hw, Hw + h3 - 0.3, 0.03, 0.15, balkenF);
+          strebe(S, F3, 0, Hw, F3.L / 2, Hw + h3 - 0.2, 0.03, balkenF);
+          strebe(S, F3, F3.L, Hw, F3.L / 2, Hw + h3 - 0.2, 0.03, balkenF);
+          fb(S, F3, F3.L / 2 - 0.1, F3.L / 2 + 0.1, Hw, Hw + h3 - 0.3, 0.03, 0.15, balkenF);
         } else {
-          strebe(S, F2, 0, Hw, F2.L / 2, Hw + h3 - 0.15, 0.03, "#f4f2ec", 0.18);
-          strebe(S, F2, F2.L, Hw, F2.L / 2, Hw + h3 - 0.15, 0.03, "#f4f2ec", 0.18);
+          strebe(S, F3, 0, Hw, F3.L / 2, Hw + h3 - 0.15, 0.03, "#f4f2ec", 0.18);
+          strebe(S, F3, F3.L, Hw, F3.L / 2, Hw + h3 - 0.15, 0.03, "#f4f2ec", 0.18);
         }
-        bergFenster(S, F2, F2.L / 2, Hw + 0.8, 0.85, 1.25, gruen, { laeden: F2.L > 7 });
+        bergFenster(S, F3, F3.L / 2, Hw + 0.8, 0.85, 1.25, gruen, { laeden: F3.L > 7 });
       }
       H = Hw + h3;
     }
@@ -132420,43 +132732,43 @@
       const n3 = 2 + (r3() < 0.6 ? 1 : 0), putz2 = waehle2(r3, RHEIN_ALTPUTZ), orn = "#f8f5ee";
       const Hh = egH + n3 * gh, G3 = Math.min(b3 * 0.95, 7.5), art = waehle2(r3, ["treppe", "schlicht", "barock", "treppe"]);
       S.quader(x2, 0.3, hz, x2 + b3, Hh, hz + hd, putz2);
-      for (const F2 of sichtbar2(p2, x2, hz, b3, hd)) {
-        if (F2.s === "+z") {
+      for (const F3 of sichtbar2(p2, x2, hz, b3, hd)) {
+        if (F3.s === "+z") {
           const holz = brau ? waehle2(r3, ["#4a2f24", "#3d4a2f", "#5a3a28"]) : waehle2(r3, ["#2f3438", "#6b2e35", "#1f3a5f"]);
-          fb(S, F2, 0.15, F2.L - 0.15, 0.3, egH - 0.3, 0, 0.16, holz);
-          const nf = Math.max(2, Math.round(F2.L / 2.2));
+          fb(S, F3, 0.15, F3.L - 0.15, 0.3, egH - 0.3, 0, 0.16, holz);
+          const nf = Math.max(2, Math.round(F3.L / 2.2));
           for (let k3 = 0; k3 < nf; k3++) {
-            const u = F2.L * (k3 + 0.5) / nf;
+            const u = F3.L * (k3 + 0.5) / nf;
             if (k3 === Math.floor(nf / 2)) {
-              fb(S, F2, u - 0.65, u + 0.65, 0.3, 2.7, 0.1, 0.2, "#2b211b");
-              fform(S, F2, bogenForm(u - 0.65, 2.7, u + 0.65, 3.4, "rund"), 0.12, 0.2, "#e9c46a");
+              fb(S, F3, u - 0.65, u + 0.65, 0.3, 2.7, 0.1, 0.2, "#2b211b");
+              fform(S, F3, bogenForm(u - 0.65, 2.7, u + 0.65, 3.4, "rund"), 0.12, 0.2, "#e9c46a");
               continue;
             }
-            fform(S, F2, bogenForm(u - 0.7, 1.1, u + 0.7, egH - 0.8, brau ? "segment" : null), 0.12, 0.22, brau ? "#e7c27a" : "#5f7787");
-            fb(S, F2, u - 0.04, u + 0.04, 1.1, egH - 0.85, 0.2, 0.26, holz);
+            fform(S, F3, bogenForm(u - 0.7, 1.1, u + 0.7, egH - 0.8, brau ? "segment" : null), 0.12, 0.22, brau ? "#e7c27a" : "#5f7787");
+            fb(S, F3, u - 0.04, u + 0.04, 1.1, egH - 0.85, 0.2, 0.26, holz);
           }
           if (brau) {
-            fb(S, F2, 0.4, F2.L - 0.4, egH - 0.25, egH + 0.55, 0, 0.12, "#f4f2ec");
-            ftext(scene2, F2, namen[i % namen.length], F2.L / 2, egH + 0.15, 0.14, 0.55, F2.L * 0.9, "#2b211b");
-            const [ax, az] = wp(F2, 0.6, 0);
-            const [nx2, nz2] = [F2.nx, F2.nz];
+            fb(S, F3, 0.4, F3.L - 0.4, egH - 0.25, egH + 0.55, 0, 0.12, "#f4f2ec");
+            ftext(scene2, F3, namen[i % namen.length], F3.L / 2, egH + 0.15, 0.14, 0.55, F3.L * 0.9, "#2b211b");
+            const [ax, az] = wp(F3, 0.6, 0);
+            const [nx2, nz2] = [F3.nx, F3.nz];
             S.box(0.1, 0.1, 0.1, ax, egH + 1.4, az, "#2f3438");
             balken(S, [ax, egH + 1.4, az], [ax + nx2 * 1.6, egH + 1.4, az + nz2 * 1.6], 0.08, 0.08, "#2f3438");
             const sg = new three_module_exports.BoxGeometry(0.06, 0.9, 0.9);
-            sg.rotateY(F2.ry);
+            sg.rotateY(F3.ry);
             sg.translate(ax + nx2 * 1.1, egH + 0.8, az + nz2 * 1.1);
             S.add(sg, "#d9a33a");
             S.box(0.35, 0.5, 0.35, ax + nx2 * 1.7, egH + 1, az + nz2 * 1.7, "#f3e6b8");
-          } else ladenFront2(S, scene2, teil(F2, 0, F2.L), 0.3, F2.L - 0.3, egH - 0.1, { name: waehle2(r3, RHEIN_LADEN), blende: holz, vordach: false, auslage: r3, tief: -0.05 });
+          } else ladenFront2(S, scene2, teil(F3, 0, F3.L), 0.3, F3.L - 0.3, egH - 0.1, { name: waehle2(r3, RHEIN_LADEN), blende: holz, vordach: false, auslage: r3, tief: -0.05 });
           for (let k3 = 0; k3 < n3; k3++) {
-            const y2 = egH + k3 * gh + 0.75, na = F2.L > 7 ? 3 : 2;
-            for (let a2 = 0; a2 < na; a2++) stuckFenster(S, F2, F2.L * (a2 + 0.5) / na, y2, 1, 1.9, { orn, glas: GLAS6 }, k3, r3, { verdachung: k3 === 0 ? "gerade" : null });
-            fb(S, F2, -0.02, F2.L + 0.02, egH + (k3 + 1) * gh - 0.12, egH + (k3 + 1) * gh + 0.05, 0, 0.18, orn);
+            const y2 = egH + k3 * gh + 0.75, na = F3.L > 7 ? 3 : 2;
+            for (let a2 = 0; a2 < na; a2++) stuckFenster(S, F3, F3.L * (a2 + 0.5) / na, y2, 1, 1.9, { orn, glas: GLAS6 }, k3, r3, { verdachung: k3 === 0 ? "gerade" : null });
+            fb(S, F3, -0.02, F3.L + 0.02, egH + (k3 + 1) * gh - 0.12, egH + (k3 + 1) * gh + 0.05, 0, 0.18, orn);
           }
-          fform(S, F2, giebelForm(0, F2.L, Hh, G3, art), -0.2, 0.2, putz2, 6);
-          fb(S, F2, F2.L / 2 - 0.45, F2.L / 2 + 0.45, Hh + 0.9, Hh + 2.3, 0.2, 0.28, GLAS6);
-        } else if (F2.s === "+x" || F2.s === "-x") fb(S, F2, 0, F2.L, 0.3, Hh, 0, 0.03, dunkler(putz2, 0.06));
-        else fb(S, F2, 0, F2.L, 0.3, Hh, 0, 0.03, dunkler(putz2, 0.04));
+          fform(S, F3, giebelForm(0, F3.L, Hh, G3, art), -0.2, 0.2, putz2, 6);
+          fb(S, F3, F3.L / 2 - 0.45, F3.L / 2 + 0.45, Hh + 0.9, Hh + 2.3, 0.2, 0.28, GLAS6);
+        } else if (F3.s === "+x" || F3.s === "-x") fb(S, F3, 0, F3.L, 0.3, Hh, 0, 0.03, dunkler(putz2, 0.06));
+        else fb(S, F3, 0, F3.L, 0.3, Hh, 0, 0.03, dunkler(putz2, 0.04));
       }
       const dg = dachProfil(hd - 0.2, b3 - 0.1, G3 * 0.72, 0.2, "z");
       dg.translate(x2 + b3 / 2, Hh, hz + hd / 2);
@@ -132572,7 +132884,7 @@
     const cz = D / 2;
     const tx = 3, tw = 10, tH = 46;
     S.quader(tx, 0.3, cz - 5, tx + tw, tH, cz + 5, stein2);
-    for (const F2 of sichtbar2(p2, tx, cz - 5, tw, 10)) for (let k3 = 0; k3 < 4; k3++) fenster3(S, F2, F2.L / 2, 8 + k3 * 9, 1.6, 4.2, { art: "spitz", glas: GLAS6, laibung: heller(stein2, 0.05) });
+    for (const F3 of sichtbar2(p2, tx, cz - 5, tw, 10)) for (let k3 = 0; k3 < 4; k3++) fenster3(S, F3, F3.L / 2, 8 + k3 * 9, 1.6, 4.2, { art: "spitz", glas: GLAS6, laibung: heller(stein2, 0.05) });
     const sp6 = new three_module_exports.ConeGeometry(4.2, 12, 4);
     sp6.rotateY(PI5 / 4);
     sp6.translate(tx + tw / 2, tH + 6, cz);
@@ -132602,15 +132914,15 @@
     zyl5(S, 0.12, 0.12, 2.6, ox, hO + 16, cz, gold, 4);
     const cx0 = ox + rO - 1, cL = W3 - cx0 - 4, cd = 14, hC = 30;
     S.quader(cx0, 0.3, cz - cd / 2, cx0 + cL, hC, cz + cd / 2, stein2);
-    for (const F2 of sichtbar2(p2, cx0, cz - cd / 2, cL, cd)) {
-      const n3 = Math.max(2, Math.round(F2.L / 4.2));
+    for (const F3 of sichtbar2(p2, cx0, cz - cd / 2, cL, cd)) {
+      const n3 = Math.max(2, Math.round(F3.L / 4.2));
       for (let k3 = 0; k3 < n3; k3++) {
-        const u = F2.L * (k3 + 0.5) / n3;
-        fform(S, F2, bogenForm(u - 1.45, 4, u + 1.45, hC - 3, "spitz"), 0, 0.12, "#5d7f99");
-        for (let q2 = 1; q2 < 6; q2++) fb(S, F2, u - 1.45, u + 1.45, 4 + q2 * (hC - 9) / 6, 4 + q2 * (hC - 9) / 6 + 0.12, 0.1, 0.16, "#c9c4b8");
-        if (k3 > 0) fb(S, F2, F2.L * k3 / n3 - 0.5, F2.L * k3 / n3 + 0.5, 0.3, hC + 1.5, 0, 0.9, stein);
+        const u = F3.L * (k3 + 0.5) / n3;
+        fform(S, F3, bogenForm(u - 1.45, 4, u + 1.45, hC - 3, "spitz"), 0, 0.12, "#5d7f99");
+        for (let q2 = 1; q2 < 6; q2++) fb(S, F3, u - 1.45, u + 1.45, 4 + q2 * (hC - 9) / 6, 4 + q2 * (hC - 9) / 6 + 0.12, 0.1, 0.16, "#c9c4b8");
+        if (k3 > 0) fb(S, F3, F3.L * k3 / n3 - 0.5, F3.L * k3 / n3 + 0.5, 0.3, hC + 1.5, 0, 0.9, stein);
       }
-      fb(S, F2, -0.1, F2.L + 0.1, hC - 0.6, hC, 0, 0.5, stein);
+      fb(S, F3, -0.1, F3.L + 0.1, hC - 0.6, hC, 0, 0.5, stein);
     }
     const cdach = dachProfil(cL + 0.4, cd + 0.8, 12, 0.2, "x");
     cdach.translate(cx0 + cL / 2, hC, cz);
@@ -132632,16 +132944,16 @@
     const tw = Math.min(18, W3 * 0.5), td = Math.min(18, D - 6), tx = W3 - tw - 3, tz = 2, Ht = 50;
     const wand2 = "#c99f78", orn = "#e9dcc4";
     S.quader(tx, 0.3, tz, tx + tw, Ht, tz + td, wand2);
-    for (const F2 of sichtbar2(p2, tx, tz, tw, td)) {
-      for (let u = 1.4; u < F2.L - 1; u += 3.2) fb(S, F2, u - 0.35, u + 0.35, 0.3, Ht - 2, 0, 0.35, orn);
-      for (let y2 = 6; y2 < Ht - 4; y2 += 4.4) for (let u = 3; u < F2.L - 2; u += 3.2) fb(S, F2, u - 0.55, u + 0.55, y2, y2 + 1.6, 0, 0.12, "#3f4a53");
-      fb(S, F2, -0.1, F2.L + 0.1, Ht - 2, Ht, 0, 0.5, orn);
+    for (const F3 of sichtbar2(p2, tx, tz, tw, td)) {
+      for (let u = 1.4; u < F3.L - 1; u += 3.2) fb(S, F3, u - 0.35, u + 0.35, 0.3, Ht - 2, 0, 0.35, orn);
+      for (let y2 = 6; y2 < Ht - 4; y2 += 4.4) for (let u = 3; u < F3.L - 2; u += 3.2) fb(S, F3, u - 0.55, u + 0.55, y2, y2 + 1.6, 0, 0.12, "#3f4a53");
+      fb(S, F3, -0.1, F3.L + 0.1, Ht - 2, Ht, 0, 0.5, orn);
     }
     const lh = 9;
     for (const [x2, z4] of [[tx + 1, tz + 1], [tx + tw - 1, tz + 1], [tx + 1, tz + td - 1], [tx + tw - 1, tz + td - 1]]) S.box(0.5, lh, 0.5, x2, Ht + lh / 2, z4, "#3b3f44");
     S.quader(tx + 0.6, Ht + lh - 0.6, tz + 0.6, tx + tw - 0.6, Ht + lh, tz + td - 0.6, "#3b3f44");
     S.quader(tx + 1.5, Ht + 0.3, tz + 1.5, tx + tw - 1.5, Ht + lh - 1, tz + td - 1.5, "#e9c46a");
-    for (const F2 of sichtbar2(p2, tx + 1.5, tz + 1.5, tw - 3, td - 3)) ftext(scene2, F2, "BR\xC4U", F2.L / 2, Ht + lh / 2, 0.08, lh * 0.6, F2.L * 0.86, "#c9483e");
+    for (const F3 of sichtbar2(p2, tx + 1.5, tz + 1.5, tw - 3, td - 3)) ftext(scene2, F3, "BR\xC4U", F3.L / 2, Ht + lh / 2, 0.08, lh * 0.6, F3.L * 0.86, "#c9483e");
     const hw = tx - 4, hd = Math.min(Math.max(16, D * 0.42), 26);
     const bg0 = 2 + hd + 3, bg1 = D - 3, bw = W3 - 4;
     for (let x2 = 4; x2 < bw - 1; x2 += 5) for (let z4 = bg0 + 1; z4 < bg1 - 1; z4 += 5) {
@@ -132671,7 +132983,7 @@
         fenster: { art: "rund", b: 1.6, h: 2.6, y: 2, raster: 3.6, zeilen: 2 },
         glas: GLAS6
       });
-      for (const F2 of sichtbar2(p2, 2, 2, hw, hd)) if (F2.s === "+z" && F2.L > 16) ftext(scene2, F2, "Westfalia-Br\xE4u", F2.L / 2, 11.2, 0.3, 1.3, F2.L * 0.7, "#f4f0e4");
+      for (const F3 of sichtbar2(p2, 2, 2, hw, hd)) if (F3.s === "+z" && F3.L > 16) ftext(scene2, F3, "Westfalia-Br\xE4u", F3.L / 2, 11.2, 0.3, 1.3, F3.L * 0.7, "#f4f0e4");
     }
     figuren(S, r3, 1, D - 3, W3 - 1, D - 0.6, Math.round(W3 / 4), 0.36);
     return { hoehe: Ht + lh };
@@ -134006,14 +134318,14 @@
       return;
     }
     if (fam === 1) {
-      const F2 = 3.4, ende = b3 > (achse === "z" ? ra.B : ra.T) - F2 - 0.01 ? b3 - F2 : b3;
+      const F3 = 3.4, ende = b3 > (achse === "z" ? ra.B : ra.T) - F3 - 0.01 ? b3 - F3 : b3;
       box(ende - a2, 0.3, 0.3, (a2 + ende) / 2, 0.15, "#59636b");
       box(ende - a2, WH2 - 0.35, 0.04, (a2 + ende) / 2, 0.3 + (WH2 - 0.35) / 2, GLAS3);
       box(ende - a2, 0.32, 0.36, (a2 + ende) / 2, WH2 - 0.16, "#e3e8ea");
       for (let u = a2; u <= ende + 0.01; u += 1.55) if (!istTuer(u)) box(0.1, WH2, 0.14, u, WH2 / 2, "#e6ebed");
       if (ende < b3) {
-        box(F2, 1.25, 0.5, b3 - F2 / 2, 0.625, HS_ROT);
-        if (scene2 && achse === "z") wandschild(S, scene2, "H", "x", b3 - F2 / 2, 0.66, pos + 0.06, { schrift: "#ffffff", hoehe: 0.8 });
+        box(F3, 1.25, 0.5, b3 - F3 / 2, 0.625, HS_ROT);
+        if (scene2 && achse === "z") wandschild(S, scene2, "H", "x", b3 - F3 / 2, 0.66, pos + 0.06, { schrift: "#ffffff", hoehe: 0.8 });
       }
       if (eg && tuerU && tuerU[1] <= ende) {
         const m = (tuerU[0] + tuerU[1]) / 2, Lv = L2(m, -1.5);
@@ -135412,13 +135724,13 @@
     const { S, x: x2, z: z4, w: w2, d: d3, m, E: E8, r: r3 } = c;
     const st2 = SOCKEL_STIL[typ] ?? SOCKEL_STIL.nachkrieg, H = m.H;
     S.quader(x2, 0, z4, x2 + w2, H, z4 + d3, st2.wand);
-    for (const F2 of c.F) {
-      const L2 = F2.len / 2;
+    for (const F3 of c.F) {
+      const L2 = F3.len / 2;
       for (const e of E8) {
         const y0 = e.y + (e.k === 0 ? 0.2 : 0.9), y1 = e.y + e.h - 0.35;
-        q(F2, -L2 + 0.6, L2 - 0.6, y0, y1, 0, 0.05, glasVon(e, r3, st2.glas));
-        for (const u2 of achsen2(-L2 + 0.6, L2 - 0.6, e.k === 0 ? 3 : 1.8)) q(F2, u2 - 0.05, u2 + 0.05, y0, y1, 0.05, 0.12, st2.band);
-        q(F2, -L2, L2, e.y + e.h - 0.35, e.y + e.h, 0, 0.25, st2.band);
+        q(F3, -L2 + 0.6, L2 - 0.6, y0, y1, 0, 0.05, glasVon(e, r3, st2.glas));
+        for (const u2 of achsen2(-L2 + 0.6, L2 - 0.6, e.k === 0 ? 3 : 1.8)) q(F3, u2 - 0.05, u2 + 0.05, y0, y1, 0.05, 0.12, st2.band);
+        q(F3, -L2, L2, e.y + e.h - 0.35, e.y + e.h, 0, 0.25, st2.band);
       }
     }
     gesims(S, x2, z4, w2, d3, H + 0.35, 0.7, 0.15, st2.band);
@@ -135435,17 +135747,17 @@
     return { hoehe: H + 1, dachY: H + 0.8, vor: 0.3, eingang: { u, y: 4.8, t: 3.3, fahneT: 4.2 } };
   }
   function zentraleEingang(ctx, ein) {
-    const F2 = ctx.F[0];
+    const F3 = ctx.F[0];
     const u = ein.u, y2 = ein.y, t3 = ein.t ?? 0.4, sh = 0.85;
     const sb2 = sh * textMaterial("HARTWIG ZENTRALE", ROT3, { groesse: 140 }).seitenverhaeltnis / 2 + 0.2;
-    q(F2, u - sb2, u + sb2, y2 - 0.62, y2 + 0.62, t3 - 0.1, t3 + 0.05, "#ffffff");
-    q(F2, u - sb2, u + sb2, y2 - 0.72, y2 - 0.62, t3 - 0.1, t3 + 0.08, ROT3);
-    F2.schild("HARTWIG ZENTRALE", u, y2, sh, ROT3, null, t3 + 0.1);
+    q(F3, u - sb2, u + sb2, y2 - 0.62, y2 + 0.62, t3 - 0.1, t3 + 0.05, "#ffffff");
+    q(F3, u - sb2, u + sb2, y2 - 0.72, y2 - 0.62, t3 - 0.1, t3 + 0.08, ROT3);
+    F3.schild("HARTWIG ZENTRALE", u, y2, sh, ROT3, null, t3 + 0.1);
     for (let k3 = 0; k3 < 3; k3++) {
       const fu = u - 6.5 - k3 * 1.8;
-      if (fu < -F2.len / 2 + 1) break;
-      F2.box(0.12, 7.5, 0.12, fu, 0, ein.fahneT ?? 2.6, "#c9cdd0");
-      F2.box(1.1, 2.2, 0.04, fu + 0.6, 5.1, ein.fahneT ?? 2.6, k3 === 1 ? "#ffffff" : ROT3);
+      if (fu < -F3.len / 2 + 1) break;
+      F3.box(0.12, 7.5, 0.12, fu, 0, ein.fahneT ?? 2.6, "#c9cdd0");
+      F3.box(1.1, 2.2, 0.04, fu + 0.6, 5.1, ein.fahneT ?? 2.6, k3 === 1 ? "#ffffff" : ROT3);
     }
   }
   function zentraleDach(ctx, res) {
@@ -135461,16 +135773,16 @@
     schild(scene2, "HARTWIG", "+z", cx, y0 + y2 + 1.5 + hoehe / 2, zz - 0.3, hoehe, "#ffffff");
   }
   function etagenBanner(ctx, e, res) {
-    for (const F2 of ctx.F) {
-      if (F2.len < 12) continue;
-      const t3 = (F2.seite === "+x" ? res.vorX ?? res.vor ?? 0.3 : res.vor ?? 0.3) + 0.12;
-      const bw = Math.min(F2.len * 0.55, 16), bh = Math.min(e.h * 0.66, 2.6);
-      const u = F2.seite === "+z" ? -F2.len * 0.12 : F2.len * 0.05;
+    for (const F3 of ctx.F) {
+      if (F3.len < 12) continue;
+      const t3 = (F3.seite === "+x" ? res.vorX ?? res.vor ?? 0.3 : res.vor ?? 0.3) + 0.12;
+      const bw = Math.min(F3.len * 0.55, 16), bh = Math.min(e.h * 0.66, 2.6);
+      const u = F3.seite === "+z" ? -F3.len * 0.12 : F3.len * 0.05;
       const y2 = e.y + e.h * 0.5;
-      q(F2, u - bw / 2, u + bw / 2, y2 - bh / 2, y2 + bh / 2, t3, t3 + 0.08, ROT3);
-      q(F2, u - bw / 2 + 0.2, u + bw / 2 - 0.2, y2 - bh / 2 + 0.18, y2 - bh / 2 + 0.26, t3 + 0.08, t3 + 0.1, "#ffffff");
-      F2.schild("ZU VERMIETEN", u, y2 + bh * 0.12, bh * 0.5, "#ffffff", null, t3 + 0.12);
-      F2.schild(`${zahl(e.qm)} m\xB2`, u, y2 - bh * 0.27, bh * 0.25, "#ffffff", null, t3 + 0.12);
+      q(F3, u - bw / 2, u + bw / 2, y2 - bh / 2, y2 + bh / 2, t3, t3 + 0.08, ROT3);
+      q(F3, u - bw / 2 + 0.2, u + bw / 2 - 0.2, y2 - bh / 2 + 0.18, y2 - bh / 2 + 0.26, t3 + 0.08, t3 + 0.1, "#ffffff");
+      F3.schild("ZU VERMIETEN", u, y2 + bh * 0.12, bh * 0.5, "#ffffff", null, t3 + 0.12);
+      F3.schild(`${zahl(e.qm)} m\xB2`, u, y2 - bh * 0.27, bh * 0.25, "#ffffff", null, t3 + 0.12);
     }
   }
   function gebaeudeBanner(ctx, res, alle = ctx.E) {
@@ -135478,17 +135790,17 @@
     const qm2 = alle.reduce((a2, e) => a2 + e.qm, 0);
     const oben = E8[E8.length - 1], unten = E8[Math.max(1, E8.length - 3)] ?? oben;
     const y0 = Math.max(m.eg + 0.4, unten.y + 0.3), y1 = oben.y + oben.h - 0.4;
-    for (const F2 of ctx.F) {
-      const t3 = (F2.seite === "+x" ? res.vorX ?? res.vor ?? 0.3 : res.vor ?? 0.3) + 0.15;
-      const bw = Math.min(F2.len * 0.86, 30), bh = Math.min(y1 - y0 + 1.2, 9);
-      const u = F2.seite === "+z" ? -F2.len * 0.04 : 0;
+    for (const F3 of ctx.F) {
+      const t3 = (F3.seite === "+x" ? res.vorX ?? res.vor ?? 0.3 : res.vor ?? 0.3) + 0.15;
+      const bw = Math.min(F3.len * 0.86, 30), bh = Math.min(y1 - y0 + 1.2, 9);
+      const u = F3.seite === "+z" ? -F3.len * 0.04 : 0;
       const yc = (y0 + y1) / 2;
-      q(F2, u - bw / 2 - 0.35, u + bw / 2 + 0.35, yc - bh / 2 - 0.35, yc + bh / 2 + 0.35, t3, t3 + 0.08, "#ffffff");
-      q(F2, u - bw / 2, u + bw / 2, yc - bh / 2, yc + bh / 2, t3 + 0.08, t3 + 0.16, ROT3);
-      for (const s2 of [-1, 1]) F2.box(0.12, bh + 1.4, 0.12, u + s2 * (bw / 2 + 0.35), yc - bh / 2 - 0.7, t3 + 0.05, "#3a4048");
-      q(F2, u - bw / 2 + 0.4, u + bw / 2 - 0.4, yc - bh * 0.1, yc - bh * 0.1 + 0.14, t3 + 0.16, t3 + 0.18, "#ffffff");
-      F2.schild("ZU VERMIETEN", u, yc + bh * 0.2, bh * 0.36, "#ffffff", null, t3 + 0.2);
-      F2.schild(`${alle.length} Etagen \xB7 ${zahl(qm2)} m\xB2`, u, yc - bh * 0.3, bh * 0.2, "#ffffff", null, t3 + 0.2);
+      q(F3, u - bw / 2 - 0.35, u + bw / 2 + 0.35, yc - bh / 2 - 0.35, yc + bh / 2 + 0.35, t3, t3 + 0.08, "#ffffff");
+      q(F3, u - bw / 2, u + bw / 2, yc - bh / 2, yc + bh / 2, t3 + 0.08, t3 + 0.16, ROT3);
+      for (const s2 of [-1, 1]) F3.box(0.12, bh + 1.4, 0.12, u + s2 * (bw / 2 + 0.35), yc - bh / 2 - 0.7, t3 + 0.05, "#3a4048");
+      q(F3, u - bw / 2 + 0.4, u + bw / 2 - 0.4, yc - bh * 0.1, yc - bh * 0.1 + 0.14, t3 + 0.16, t3 + 0.18, "#ffffff");
+      F3.schild("ZU VERMIETEN", u, yc + bh * 0.2, bh * 0.36, "#ffffff", null, t3 + 0.2);
+      F3.schild(`${alle.length} Etagen \xB7 ${zahl(qm2)} m\xB2`, u, yc - bh * 0.3, bh * 0.2, "#ffffff", null, t3 + 0.2);
     }
   }
   function altbau(c) {
@@ -135501,33 +135813,33 @@
     gesims(S, x2, z4, w2, d3, m.eg, 0.45, 0.25, hell5);
     S.box(w2 + 0.8, 0.5, d3 + 0.8, x2 + w2 / 2, H - 0.25, z4 + d3 / 2, hell5);
     S.box(w2 + 0.5, 0.35, d3 + 0.5, x2 + w2 / 2, H - 0.9, z4 + d3 / 2, hell5);
-    for (const F2 of c.F) {
-      const L2 = F2.len / 2;
-      if (mitRustika) for (let y2 = 0.6; y2 < m.eg - 0.4; y2 += 0.65) q(F2, -L2, L2, y2, y2 + 0.06, 0, 0.05, tief2);
-      q(F2, -L2, L2, 0, 0.5, 0, 0.12, dunkler(stein, 0.16));
+    for (const F3 of c.F) {
+      const L2 = F3.len / 2;
+      if (mitRustika) for (let y2 = 0.6; y2 < m.eg - 0.4; y2 += 0.65) q(F3, -L2, L2, y2, y2 + 0.06, 0, 0.05, tief2);
+      q(F3, -L2, L2, 0, 0.5, 0, 0.12, dunkler(stein, 0.16));
       const ax = achsen2(-L2 + 1.2, L2 - 1.2, raster4);
       const E0 = E8[0];
       ax.forEach((u2, i) => {
-        if (F2.seite === "+z" && Math.abs(u2 - c.eingangU) < 2.4) return;
-        q(F2, u2 - 0.95, u2 + 0.95, 0.9, m.eg - 1, 0, 0.08, glasVon(E0, r3));
-        q(F2, u2 - 1.15, u2 + 1.15, m.eg - 1.05, m.eg - 0.75, 0, 0.14, hell5);
-        q(F2, u2 - 0.25, u2 + 0.25, m.eg - 1.1, m.eg - 0.55, 0, 0.2, hell5);
-        q(F2, u2 - 0.03, u2 + 0.03, 0.9, m.eg - 1, 0.08, 0.12, "#3b4046");
+        if (F3.seite === "+z" && Math.abs(u2 - c.eingangU) < 2.4) return;
+        q(F3, u2 - 0.95, u2 + 0.95, 0.9, m.eg - 1, 0, 0.08, glasVon(E0, r3));
+        q(F3, u2 - 1.15, u2 + 1.15, m.eg - 1.05, m.eg - 0.75, 0, 0.14, hell5);
+        q(F3, u2 - 0.25, u2 + 0.25, m.eg - 1.1, m.eg - 0.55, 0, 0.2, hell5);
+        q(F3, u2 - 0.03, u2 + 0.03, 0.9, m.eg - 1, 0.08, 0.12, "#3b4046");
       });
       for (const e of E8.slice(1)) {
         const fh = e.h * 0.58, y0 = e.y + e.h * 0.24;
         ax.forEach((u2, i) => {
-          q(F2, u2 - 0.72, u2 + 0.72, y0, y0 + fh, 0, 0.08, glasVon(e, r3));
-          q(F2, u2 - 0.9, u2 + 0.9, y0 - 0.18, y0, 0, 0.22, hell5);
-          q(F2, u2 - 0.85, u2 + 0.85, y0 + fh, y0 + fh + 0.22, 0, 0.18, hell5);
-          if (e.k === 1) q(F2, u2 - 1, u2 + 1, y0 + fh + 0.22, y0 + fh + 0.4, 0, 0.26, hell5);
-          q(F2, u2 - 0.03, u2 + 0.03, y0, y0 + fh, 0.08, 0.11, "#f3efe6");
+          q(F3, u2 - 0.72, u2 + 0.72, y0, y0 + fh, 0, 0.08, glasVon(e, r3));
+          q(F3, u2 - 0.9, u2 + 0.9, y0 - 0.18, y0, 0, 0.22, hell5);
+          q(F3, u2 - 0.85, u2 + 0.85, y0 + fh, y0 + fh + 0.22, 0, 0.18, hell5);
+          if (e.k === 1) q(F3, u2 - 1, u2 + 1, y0 + fh + 0.22, y0 + fh + 0.4, 0, 0.26, hell5);
+          q(F3, u2 - 0.03, u2 + 0.03, y0, y0 + fh, 0.08, 0.11, "#f3efe6");
         });
-        if (e.k < E8.length - 1) q(F2, -L2, L2, e.y + e.h - 0.1, e.y + e.h + 0.1, 0, 0.12, hell5);
+        if (e.k < E8.length - 1) q(F3, -L2, L2, e.y + e.h - 0.1, e.y + e.h + 0.1, 0, 0.12, hell5);
       }
       for (let i = 0; mitPilaster && i <= ax.length; i += 2) {
         const u2 = i === 0 ? ax[0] - 1.65 : i >= ax.length ? ax[ax.length - 1] + 1.65 : (ax[i - 1] + ax[i]) / 2;
-        q(F2, u2 - 0.35, u2 + 0.35, m.eg, H - 1.1, 0, 0.28, hell5);
+        q(F3, u2 - 0.35, u2 + 0.35, m.eg, H - 1.1, 0, 0.28, hell5);
       }
     }
     const Fx = c.F[1];
@@ -135569,18 +135881,18 @@
       }
     } else {
       S.box(w2 - 0.6, 0.12, d3 - 0.6, x2 + w2 / 2, H + 0.06, z4 + d3 / 2, "#9a978f");
-      for (const F2 of c.F) {
-        q(F2, -F2.len / 2, F2.len / 2, H, H + 0.15, -0.1, 0.25, hell5);
-        for (let u2 = -F2.len / 2 + 0.4; u2 < F2.len / 2; u2 += 0.5) q(F2, u2 - 0.08, u2 + 0.08, H + 0.15, H + 0.85, 0, 0.12, hell5);
-        q(F2, -F2.len / 2, F2.len / 2, H + 0.85, H + 1.05, -0.05, 0.2, hell5);
+      for (const F3 of c.F) {
+        q(F3, -F3.len / 2, F3.len / 2, H, H + 0.15, -0.1, 0.25, hell5);
+        for (let u2 = -F3.len / 2 + 0.4; u2 < F3.len / 2; u2 += 0.5) q(F3, u2 - 0.08, u2 + 0.08, H + 0.15, H + 0.85, 0, 0.12, hell5);
+        q(F3, -F3.len / 2, F3.len / 2, H + 0.85, H + 1.05, -0.05, 0.2, hell5);
       }
     }
-    if (dachArt !== "attika") for (const F2 of c.F) {
-      for (const uu of achsen2(-F2.len / 2 + 2.5, F2.len / 2 - 2.5, raster4 * 2)) {
-        F2.box(1.3, 1.6, 1.4, uu, H + 0.6, dachArt === "walm" ? -2.4 : -1.6, stein);
-        F2.box(0.8, 1, 0.06, uu, H + 0.85, dachArt === "walm" ? -1.68 : -0.88, glasVon(E8[E8.length - 1], r3));
+    if (dachArt !== "attika") for (const F3 of c.F) {
+      for (const uu of achsen2(-F3.len / 2 + 2.5, F3.len / 2 - 2.5, raster4 * 2)) {
+        F3.box(1.3, 1.6, 1.4, uu, H + 0.6, dachArt === "walm" ? -2.4 : -1.6, stein);
+        F3.box(0.8, 1, 0.06, uu, H + 0.85, dachArt === "walm" ? -1.68 : -0.88, glasVon(E8[E8.length - 1], r3));
         const gb = dachProfil(1.6, 1.7, 0.7, 0.05, "z");
-        F2.geo(gb, uu, H + 2.2, dachArt === "walm" ? -2.4 : -1.6, dunkler(dachF, 0.05));
+        F3.geo(gb, uu, H + 2.2, dachArt === "walm" ? -2.4 : -1.6, dunkler(dachF, 0.05));
       }
     }
     const ex = x2 + w2 - 2.6, ez = z4 + d3 - 2.6;
@@ -135606,13 +135918,13 @@
     const H = m.H, sprosse = waehle2(v, [1.25, 1.25, 2.5]), stelzen = v() < 0.6, stirn = waehle2(v, ["glasstein", "mosaik", "fenster"]), flugdach2 = v() < 0.65;
     const ein = stelzen ? 1.8 : 0.2;
     S.quader(x2, 0, z4, x2 + w2 - ein, m.eg, z4 + d3 - ein, "#5f6d78");
-    for (const F2 of c.F) {
-      const L22 = F2.len / 2;
+    for (const F3 of c.F) {
+      const L22 = F3.len / 2;
       const t0 = -ein;
-      q(F2, -L22, L22 - ein, 0.15, m.eg - 0.4, t0, t0 + 0.08, glasVon(E8[0], r3, "#6f8a99"));
-      for (const u2 of achsen2(-L22, L22 - ein, 2.5)) q(F2, u2 - 0.04, u2 + 0.04, 0.15, m.eg - 0.4, t0 + 0.08, t0 + 0.14, alu);
-      if (stelzen) for (const u2 of achsen2(-L22, L22, 5)) q(F2, u2 - 0.3, u2 + 0.3, 0, m.eg, -0.6, 0, "#e2ded5");
-      else q(F2, -L22, L22, m.eg - 0.6, m.eg, 0, 0.3, paneel);
+      q(F3, -L22, L22 - ein, 0.15, m.eg - 0.4, t0, t0 + 0.08, glasVon(E8[0], r3, "#6f8a99"));
+      for (const u2 of achsen2(-L22, L22 - ein, 2.5)) q(F3, u2 - 0.04, u2 + 0.04, 0.15, m.eg - 0.4, t0 + 0.08, t0 + 0.14, alu);
+      if (stelzen) for (const u2 of achsen2(-L22, L22, 5)) q(F3, u2 - 0.3, u2 + 0.3, 0, m.eg, -0.6, 0, "#e2ded5");
+      else q(F3, -L22, L22, m.eg - 0.6, m.eg, 0, 0.3, paneel);
     }
     S.quader(x2, m.eg, z4, x2 + w2, H, z4 + d3, weiss2);
     S.box(w2 + 0.3, 0.4, d3 + 0.3, x2 + w2 / 2, m.eg + 0.2, z4 + d3 / 2, "#f6f4ef");
@@ -135653,25 +135965,25 @@
     const staffel2 = E8.length >= 4 && v() < 0.75;
     const yTop = staffel2 ? E8[E8.length - 1].y : H;
     S.quader(x2, 0, z4, x2 + w2, yTop, z4 + d3, dunkelB);
-    for (const F2 of c.F) {
-      const L22 = F2.len / 2;
-      q(F2, -L22, L22, 0.1, m.eg - 0.5, 0, 0.06, glasVon(E8[0], r3, bronze));
-      for (const u2 of achsen2(-L22, L22, 3.6)) q(F2, u2 - 0.35, u2 + 0.35, 0, m.eg - 0.5, 0, 0.35, beton);
+    for (const F3 of c.F) {
+      const L22 = F3.len / 2;
+      q(F3, -L22, L22, 0.1, m.eg - 0.5, 0, 0.06, glasVon(E8[0], r3, bronze));
+      for (const u2 of achsen2(-L22, L22, 3.6)) q(F3, u2 - 0.35, u2 + 0.35, 0, m.eg - 0.5, 0, 0.35, beton);
       for (const e of E8.slice(1)) {
         if (staffel2 && e.k === E8.length - 1) continue;
-        q(F2, -L22 - 0.6, L22 + (F2.seite === "+z" ? 0.6 : 0), e.y - 0.5, e.y + 1.1, 0, 0.65, beton);
-        q(F2, -L22 - 0.6, L22 + (F2.seite === "+z" ? 0.6 : 0), e.y + 1.1, e.y + 1.18, 0, 0.7, heller(beton, 0.06));
-        q(F2, -L22, L22, e.y + 1.1, e.y + e.h - 0.5, 0, 0.06, glasVon(e, r3, bronze));
-        for (const u2 of achsen2(-L22, L22, ras70)) q(F2, u2 - 0.06, u2 + 0.06, e.y + 1.1, e.y + e.h - 0.5, 0.06, 0.14, rahmen2);
+        q(F3, -L22 - 0.6, L22 + (F3.seite === "+z" ? 0.6 : 0), e.y - 0.5, e.y + 1.1, 0, 0.65, beton);
+        q(F3, -L22 - 0.6, L22 + (F3.seite === "+z" ? 0.6 : 0), e.y + 1.1, e.y + 1.18, 0, 0.7, heller(beton, 0.06));
+        q(F3, -L22, L22, e.y + 1.1, e.y + e.h - 0.5, 0, 0.06, glasVon(e, r3, bronze));
+        for (const u2 of achsen2(-L22, L22, ras70)) q(F3, u2 - 0.06, u2 + 0.06, e.y + 1.1, e.y + e.h - 0.5, 0.06, 0.14, rahmen2);
         if (e.miet) {
           for (const u2 of achsen2(-L22, L22, ras70)) if (r3() < 0.35) {
             const g = new three_module_exports.BoxGeometry(ras70 - 0.2, 0.06, 1.1);
             g.rotateX(0.5);
-            F2.geo(g, u2, e.y + e.h - 0.75, 0.6, markF);
+            F3.geo(g, u2, e.y + e.h - 0.75, 0.6, markF);
           }
         }
       }
-      q(F2, -L22 - 0.6, L22 + (F2.seite === "+z" ? 0.6 : 0), m.eg - 0.5, m.eg + 0.4, 0, 0.65, beton);
+      q(F3, -L22 - 0.6, L22 + (F3.seite === "+z" ? 0.6 : 0), m.eg - 0.5, m.eg + 0.4, 0, 0.65, beton);
     }
     const Fz = c.F[0], L2 = Fz.len / 2;
     for (const s2 of [-1, 1].slice(0, tuerme)) {
@@ -135684,9 +135996,9 @@
       const e = E8[E8.length - 1];
       S.quader(x2, e.y, z4, x2 + w2 - 2.6, H, z4 + d3 - 2.6, beton);
       const Fs = [fassade2(S, c.scene, x2, z4, w2 - 2.6, d3 - 2.6, "+z"), fassade2(S, c.scene, x2, z4, w2 - 2.6, d3 - 2.6, "+x")];
-      for (const F2 of Fs) {
-        q(F2, -F2.len / 2, F2.len / 2, e.y + 0.4, e.y + e.h - 0.5, 0, 0.06, glasVon(e, r3, bronze));
-        for (const u2 of achsen2(-F2.len / 2, F2.len / 2, 1.8)) q(F2, u2 - 0.06, u2 + 0.06, e.y + 0.4, e.y + e.h - 0.5, 0.06, 0.14, rahmen2);
+      for (const F3 of Fs) {
+        q(F3, -F3.len / 2, F3.len / 2, e.y + 0.4, e.y + e.h - 0.5, 0, 0.06, glasVon(e, r3, bronze));
+        for (const u2 of achsen2(-F3.len / 2, F3.len / 2, 1.8)) q(F3, u2 - 0.06, u2 + 0.06, e.y + 0.4, e.y + e.h - 0.5, 0.06, 0.14, rahmen2);
       }
       S.box(w2 - 1.5, 0.12, d3 - 1.5, x2 + (w2 - 1.5) / 2, e.y + 0.06, z4 + (d3 - 1.5) / 2, "#9c8f7c");
       for (let u2 = x2 + 4; u2 < x2 + w2 - 4; u2 += 3) S.box(0.15, 0.15, 2.4, u2, H - 0.2, z4 + d3 - 1.4, rahmen2);
@@ -135710,16 +136022,16 @@
     const scheibe = waehle2(v, ["#6d93a6", "#5f8a7e", "#8a9096", "#7a6f5f", "#4f6f8f"]), pfosten = waehle2(v, ["#d6dde1", "#d6dde1", "#3a4048"]), platte4 = "#eef1f2";
     const H = m.H, gr = waehle2(v, [1.2, 1.5, 2]), schwert = v() < 0.5, krone = waehle2(v, ["lamellen", "staffel", "flach"]);
     S.quader(x2 + 0.3, 0, z4 + 0.3, x2 + w2 - 0.3, H, z4 + d3 - 0.3, "#5f7c8b");
-    for (const F2 of c.F) {
-      const L2 = F2.len / 2;
-      q(F2, -L2, L2, 0.1, m.eg - 0.3, -0.3, -0.24, glasVon(E8[0], r3, "#86a9b8"));
-      for (const u2 of achsen2(-L2, L2, 2.4)) q(F2, u2 - 0.04, u2 + 0.04, 0.1, m.eg - 0.3, -0.24, 0.12, pfosten);
+    for (const F3 of c.F) {
+      const L2 = F3.len / 2;
+      q(F3, -L2, L2, 0.1, m.eg - 0.3, -0.3, -0.24, glasVon(E8[0], r3, "#86a9b8"));
+      for (const u2 of achsen2(-L2, L2, 2.4)) q(F3, u2 - 0.04, u2 + 0.04, 0.1, m.eg - 0.3, -0.24, 0.12, pfosten);
       for (const e of E8.slice(1)) {
-        q(F2, -L2, L2, e.y, e.y + 0.35, -0.3, 0.05, platte4);
-        q(F2, -L2 + 0.2, L2 - 0.2, e.y + 0.35, e.y + e.h, -0.3, 0, glasVon(e, r3, scheibe));
-        if (e.miet) q(F2, -L2 + 0.4, L2 - 0.4, e.y + e.h - 0.45, e.y + e.h - 0.35, 0, 0.02, "#fff6d8");
-        for (const u2 of achsen2(-L2, L2, gr)) q(F2, u2 - 0.035, u2 + 0.035, e.y + 0.35, e.y + e.h, 0, 0.1, pfosten);
-        if (!schwert) for (const u2 of achsen2(-L2, L2, 6)) q(F2, u2 - 0.25, u2 + 0.25, e.y, e.y + e.h, 0, 0.5, platte4);
+        q(F3, -L2, L2, e.y, e.y + 0.35, -0.3, 0.05, platte4);
+        q(F3, -L2 + 0.2, L2 - 0.2, e.y + 0.35, e.y + e.h, -0.3, 0, glasVon(e, r3, scheibe));
+        if (e.miet) q(F3, -L2 + 0.4, L2 - 0.4, e.y + e.h - 0.45, e.y + e.h - 0.35, 0, 0.02, "#fff6d8");
+        for (const u2 of achsen2(-L2, L2, gr)) q(F3, u2 - 0.035, u2 + 0.035, e.y + 0.35, e.y + e.h, 0, 0.1, pfosten);
+        if (!schwert) for (const u2 of achsen2(-L2, L2, 6)) q(F3, u2 - 0.25, u2 + 0.25, e.y, e.y + e.h, 0, 0.5, platte4);
       }
     }
     if (schwert) {
@@ -135727,7 +136039,7 @@
       S.box(2.4, H + 4.5, 0.6, x2 + w2 - 1.2, (H + 4.5) / 2, z4 + d3 + 0.3, platte4);
     }
     if (krone === "lamellen") {
-      for (const F2 of c.F) for (let u2 = -F2.len / 2 + 0.6; u2 < F2.len / 2 - 2.4; u2 += 0.7) q(F2, u2 - 0.06, u2 + 0.06, H, H + 3.6, -0.3, 0.05, "#c9d1d6");
+      for (const F3 of c.F) for (let u2 = -F3.len / 2 + 0.6; u2 < F3.len / 2 - 2.4; u2 += 0.7) q(F3, u2 - 0.06, u2 + 0.06, H, H + 3.6, -0.3, 0.05, "#c9d1d6");
       S.quader(x2 + 0.5, H, z4 + 0.5, x2 + w2 - 0.5, H + 3.5, z4 + d3 - 0.5, "#9fa9b0");
       S.box(w2 + 0.2, 0.35, d3 + 0.2, x2 + w2 / 2, H + 3.6, z4 + d3 / 2, platte4);
     } else if (krone === "staffel") {
@@ -135754,29 +136066,29 @@
     const stein = waehle2(v, ["#a8664f", "#9e5c47", "#c9a46b", "#7d4a3a", "#b9785e"]), lisene = dunkler(stein, 0.06), band = stein === "#c9a46b" ? "#8a6440" : "#d8c8ad", stahl = waehle2(v, ["#2f3438", "#2f4a3e", "#5a2f2f"]);
     const H = m.H, achsLoft = waehle2(v, [4.5, 3.6, 5.4]), shed = v() < 0.6, schlot3 = v() < 0.7;
     S.quader(x2, 0, z4, x2 + w2, H, z4 + d3, stein);
-    for (const F2 of c.F) {
-      const L2 = F2.len / 2;
-      q(F2, -L2, L2, 0, 0.7, 0, 0.12, "#6f6a64");
+    for (const F3 of c.F) {
+      const L2 = F3.len / 2;
+      q(F3, -L2, L2, 0, 0.7, 0, 0.12, "#6f6a64");
       const ax = achsen2(-L2 + 0.4, L2 - 0.4, achsLoft);
       for (const e of E8) {
         ax.forEach((u2, i) => {
-          if (e.k === 0 && F2.seite === "+z" && Math.abs(u2 - c.eingangU) < 3) return;
+          if (e.k === 0 && F3.seite === "+z" && Math.abs(u2 - c.eingangU) < 3) return;
           const y0 = e.y + (e.k === 0 ? 0.9 : 0.7), y1 = e.y + e.h - 0.9, fw = achsLoft - 1.4;
-          q(F2, u2 - fw / 2, u2 + fw / 2, y0, y1, 0, 0.06, glasVon(e, r3, "#5d6f78"));
-          for (let k3 = 1; k3 < 4; k3++) q(F2, u2 - fw / 2 + k3 * fw / 4 - 0.04, u2 - fw / 2 + k3 * fw / 4 + 0.04, y0, y1, 0.06, 0.1, stahl);
-          for (const yy of [y0 + (y1 - y0) * 0.4, y0 + (y1 - y0) * 0.75]) q(F2, u2 - fw / 2, u2 + fw / 2, yy - 0.04, yy + 0.04, 0.06, 0.1, stahl);
-          q(F2, u2 - fw / 2 - 0.25, u2 + fw / 2 + 0.25, y1, y1 + 0.4, 0, 0.12, band);
-          q(F2, u2 - 0.25, u2 + 0.25, y1 + 0.05, y1 + 0.55, 0, 0.16, band);
-          q(F2, u2 - fw / 2 - 0.1, u2 + fw / 2 + 0.1, y0 - 0.16, y0, 0, 0.18, band);
+          q(F3, u2 - fw / 2, u2 + fw / 2, y0, y1, 0, 0.06, glasVon(e, r3, "#5d6f78"));
+          for (let k3 = 1; k3 < 4; k3++) q(F3, u2 - fw / 2 + k3 * fw / 4 - 0.04, u2 - fw / 2 + k3 * fw / 4 + 0.04, y0, y1, 0.06, 0.1, stahl);
+          for (const yy of [y0 + (y1 - y0) * 0.4, y0 + (y1 - y0) * 0.75]) q(F3, u2 - fw / 2, u2 + fw / 2, yy - 0.04, yy + 0.04, 0.06, 0.1, stahl);
+          q(F3, u2 - fw / 2 - 0.25, u2 + fw / 2 + 0.25, y1, y1 + 0.4, 0, 0.12, band);
+          q(F3, u2 - 0.25, u2 + 0.25, y1 + 0.05, y1 + 0.55, 0, 0.16, band);
+          q(F3, u2 - fw / 2 - 0.1, u2 + fw / 2 + 0.1, y0 - 0.16, y0, 0, 0.18, band);
         });
-        if (e.k > 0) q(F2, -L2, L2, e.y - 0.12, e.y + 0.12, 0, 0.1, band);
+        if (e.k > 0) q(F3, -L2, L2, e.y - 0.12, e.y + 0.12, 0, 0.1, band);
       }
       for (let i = 0; i <= ax.length; i++) {
         const u2 = i === 0 ? ax[0] - achsLoft / 2 : i === ax.length ? ax[i - 1] + achsLoft / 2 : (ax[i - 1] + ax[i]) / 2;
-        q(F2, u2 - 0.4, u2 + 0.4, 0.7, H - 0.4, 0, 0.32, lisene);
+        q(F3, u2 - 0.4, u2 + 0.4, 0.7, H - 0.4, 0, 0.32, lisene);
       }
-      for (let u2 = -L2 + 0.3; u2 < L2 - 0.2; u2 += 0.6) q(F2, u2 - 0.15, u2 + 0.15, H - 1, H - 0.75, 0, 0.22, lisene);
-      q(F2, -L2, L2, H - 0.75, H - 0.55, 0, 0.3, band);
+      for (let u2 = -L2 + 0.3; u2 < L2 - 0.2; u2 += 0.6) q(F3, u2 - 0.15, u2 + 0.15, H - 1, H - 0.75, 0, 0.22, lisene);
+      q(F3, -L2, L2, H - 0.75, H - 0.55, 0, 0.3, band);
     }
     gesims(S, x2, z4, w2, d3, H, 0.5, 0.35, lisene);
     if (shed) {
@@ -135823,15 +136135,15 @@
       const tw = T.x1 - T.x0, td = T.z1 - z4;
       S.quader(T.x0, 0, z4, T.x1, H, T.z1, "#d9dcdc");
       const Fs = [fassade2(S, c.scene, T.x0, z4, tw, td, "+z"), fassade2(S, c.scene, T.x0, z4, tw, td, "+x")];
-      for (const F2 of Fs) {
-        const L2 = F2.len / 2;
+      for (const F3 of Fs) {
+        const L2 = F3.len / 2;
         for (const e of E8) {
-          q(F2, -L2 - 0.2, L2 + 0.2, e.y - 0.05, e.y + 0.55, 0, 0.6, weiss2);
-          q(F2, -L2, L2, e.y + 0.55, e.y + e.h - 0.05, 0, 0.04, glasVon(e, r3, scheibe));
+          q(F3, -L2 - 0.2, L2 + 0.2, e.y - 0.05, e.y + 0.55, 0, 0.6, weiss2);
+          q(F3, -L2, L2, e.y + 0.55, e.y + e.h - 0.05, 0, 0.04, glasVon(e, r3, scheibe));
           const dicht = e.k % 2 ? 0.9 : 1.35;
-          for (let u2 = -L2 + 0.5; u2 < L2 - 0.3; u2 += dicht) q(F2, u2 - 0.07, u2 + 0.07, e.y + 0.55, e.y + e.h - 0.05, 0.3, 0.55, holz);
+          for (let u2 = -L2 + 0.5; u2 < L2 - 0.3; u2 += dicht) q(F3, u2 - 0.07, u2 + 0.07, e.y + 0.55, e.y + e.h - 0.05, 0.3, 0.55, holz);
         }
-        q(F2, -L2 - 0.2, L2 + 0.2, H - 0.05, H + 0.7, 0, 0.6, weiss2);
+        q(F3, -L2 - 0.2, L2 + 0.2, H - 0.05, H + 0.7, 0, 0.6, weiss2);
       }
       S.box(tw - 1, 0.12, td - 1, (T.x0 + T.x1) / 2, H + 0.06, z4 + td / 2, "#b8b2a6");
       for (let u2 = T.x0 + 2; u2 < T.x1 - 3; u2 += 3.2) S.add(new three_module_exports.BoxGeometry(2.6, 0.12, 1.6).rotateX(-0.35).translate(u2 + 1.3, H + 0.7, z4 + 3), "#2f4a6e");
@@ -137446,33 +137758,33 @@
   }
   var RZ = (x0, z0, w2, d3) => R5(x0, z0 + d3, 1, 0, w2);
   var RX = (x0, z0, w2, d3) => R5(x0 + w2, z0 + d3, 0, -1, d3);
-  function wp2(F2, u, t3) {
-    return [F2.ox + F2.dx * u + F2.nx * t3, F2.oz + F2.dz * u + F2.nz * t3];
+  function wp2(F3, u, t3) {
+    return [F3.ox + F3.dx * u + F3.nx * t3, F3.oz + F3.dz * u + F3.nz * t3];
   }
-  function fb2(S, F2, u0, u1, y0, y1, t0, t1, c) {
-    const [x2, z4] = wp2(F2, (u0 + u1) / 2, (t0 + t1) / 2);
-    S.box(Math.abs(u1 - u0), Math.abs(y1 - y0), Math.abs(t1 - t0), x2, (y0 + y1) / 2, z4, c, F2.ry);
+  function fb2(S, F3, u0, u1, y0, y1, t0, t1, c) {
+    const [x2, z4] = wp2(F3, (u0 + u1) / 2, (t0 + t1) / 2);
+    S.box(Math.abs(u1 - u0), Math.abs(y1 - y0), Math.abs(t1 - t0), x2, (y0 + y1) / 2, z4, c, F3.ry);
   }
-  function fgeo2(S, F2, g, c) {
-    g.rotateY(F2.ry);
-    g.translate(F2.ox, 0, F2.oz);
+  function fgeo2(S, F3, g, c) {
+    g.rotateY(F3.ry);
+    g.translate(F3.ox, 0, F3.oz);
     S.add(g, c);
   }
-  function endeRechts(F2, T) {
-    const [x2, z4] = wp2(F2, F2.L, 0);
-    return R5(x2, z4, -F2.nx, -F2.nz, T);
+  function endeRechts(F3, T) {
+    const [x2, z4] = wp2(F3, F3.L, 0);
+    return R5(x2, z4, -F3.nx, -F3.nz, T);
   }
-  function endeLinks(F2, T) {
-    const [x2, z4] = wp2(F2, 0, -T);
-    return R5(x2, z4, F2.nx, F2.nz, T);
+  function endeLinks(F3, T) {
+    const [x2, z4] = wp2(F3, 0, -T);
+    return R5(x2, z4, F3.nx, F3.nz, T);
   }
-  function teil2(F2, u0, u1, t3 = 0) {
-    const [x2, z4] = wp2(F2, u0, t3);
-    return R5(x2, z4, F2.dx, F2.dz, u1 - u0);
+  function teil2(F3, u0, u1, t3 = 0) {
+    const [x2, z4] = wp2(F3, u0, t3);
+    return R5(x2, z4, F3.dx, F3.dz, u1 - u0);
   }
-  function rueckseite(F2, T) {
-    const [x2, z4] = wp2(F2, F2.L, -T);
-    return R5(x2, z4, -F2.dx, -F2.dz, F2.L);
+  function rueckseite(F3, T) {
+    const [x2, z4] = wp2(F3, F3.L, -T);
+    return R5(x2, z4, -F3.dx, -F3.dz, F3.L);
   }
   var DREHUNG = { "+z": 0, "+x": PI8 / 2, "-z": PI8, "-x": -PI8 / 2 };
   var SICHTBAR = { "+z": ["+z", "+x"], "+x": ["+z", "-x"], "-z": ["-z", "-x"], "-x": ["+x", "-z"] };
@@ -137551,12 +137863,12 @@
     p2.lineTo(u0, v0);
     return p2;
   }
-  function fform2(S, F2, shape, t0, t1, c, seg2 = 6) {
+  function fform2(S, F3, shape, t0, t1, c, seg2 = 6) {
     const g = new three_module_exports.ExtrudeGeometry(shape, { depth: t1 - t0, bevelEnabled: false, curveSegments: seg2 });
     g.translate(0, 0, t0);
-    fgeo2(S, F2, g, c);
+    fgeo2(S, F3, g, c);
   }
-  function fwandPoly(S, F2, u0, u1, y0, y1, t0, t1, c, loecher = []) {
+  function fwandPoly(S, F3, u0, u1, y0, y1, t0, t1, c, loecher = []) {
     const s2 = rechteck3(u0, y0, u1, y1);
     for (const l of loecher) {
       if (l.kreis) {
@@ -137565,16 +137877,16 @@
         s2.holes.push(p2);
       } else s2.holes.push(oeffnung2(new three_module_exports.Path(), l.u0, l.v0, l.u1, l.v1, l.bogen));
     }
-    fform2(S, F2, s2, t0, t1, c);
+    fform2(S, F3, s2, t0, t1, c);
   }
-  function fwand(S, F2, u0, u1, y0, y1, t0, t1, c, loecher = []) {
+  function fwand(S, F3, u0, u1, y0, y1, t0, t1, c, loecher = []) {
     const kreise = loecher.filter((l) => l.kreis);
-    if (kreise.length) return fwandPoly(S, F2, u0, u1, y0, y1, t0, t1, c, loecher);
+    if (kreise.length) return fwandPoly(S, F3, u0, u1, y0, y1, t0, t1, c, loecher);
     const H = loecher.map((l) => ({ ...l, u0: Math.max(u0, l.u0), u1: Math.min(u1, l.u1), v0: Math.max(y0, l.v0), v1: Math.min(y1, l.v1) })).filter((l) => l.u1 - l.u0 > 0.01 && l.v1 - l.v0 > 0.01);
     const U2 = [...new Set([u0, u1, ...H.flatMap((l) => [l.u0, l.u1])].map((u) => Math.round(u * 1e3) / 1e3))].sort((x2, y2) => x2 - y2);
     let lauf = null;
     const ausgeben = () => {
-      if (lauf) for (const [a2, b3] of lauf.iv) fb2(S, F2, lauf.a, lauf.b, a2, b3, t0, t1, c);
+      if (lauf) for (const [a2, b3] of lauf.iv) fb2(S, F3, lauf.a, lauf.b, a2, b3, t0, t1, c);
     };
     for (let i = 0; i < U2.length - 1; i++) {
       const a2 = U2[i], b3 = U2[i + 1];
@@ -137621,29 +137933,29 @@
         Rr.lineTo(um2, l.v1);
         Rr.absarc(um2, vs2, b3 / 2, PI8 / 2, 0, true);
       }
-      fform2(S, F2, L2, t0, t1, c);
-      fform2(S, F2, Rr, t0, t1, c);
+      fform2(S, F3, L2, t0, t1, c);
+      fform2(S, F3, Rr, t0, t1, c);
     }
   }
-  function fpoly2(S, F2, pkt, t0, t1, c) {
+  function fpoly2(S, F3, pkt, t0, t1, c) {
     const s2 = new three_module_exports.Shape();
     s2.moveTo(pkt[0][0], pkt[0][1]);
     for (const [u, v] of pkt.slice(1)) s2.lineTo(u, v);
     s2.lineTo(pkt[0][0], pkt[0][1]);
-    fform2(S, F2, s2, t0, t1, c);
+    fform2(S, F3, s2, t0, t1, c);
   }
-  function fscheibe(S, F2, u, y2, t0, t1, rad3, c, seg2 = 20) {
+  function fscheibe(S, F3, u, y2, t0, t1, rad3, c, seg2 = 20) {
     const g = new three_module_exports.CylinderGeometry(rad3, rad3, t1 - t0, seg2);
     g.rotateX(PI8 / 2);
     g.translate(u, y2, (t0 + t1) / 2);
-    fgeo2(S, F2, g, c);
+    fgeo2(S, F3, g, c);
   }
-  function ftext2(scene2, F2, text3, u, y2, t3, hMax, bMax, farbe3, bg = null) {
+  function ftext2(scene2, F3, text3, u, y2, t3, hMax, bMax, farbe3, bg = null) {
     const { mat: mat2, seitenverhaeltnis: a2 } = textMaterial(text3, farbe3, { groesse: 140, hintergrund: bg });
     const h3 = Math.min(hMax, bMax / a2);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h3 * a2, h3), mat2);
-    const [x2, z4] = wp2(F2, u, t3);
-    m.rotation.y = F2.ry;
+    const [x2, z4] = wp2(F3, u, t3);
+    m.rotation.y = F3.ry;
     m.position.set(x2, y2, z4);
     scene2.add(m);
     return h3 * a2;
@@ -137886,11 +138198,11 @@
     S.box(1.6, 0.06, 0.06, x2, y2 + h3 - 0.2, z4, "#596066");
     S.box(0.06, 0.06, 1.2, x2, y2 + h3 - 0.7, z4, "#596066");
   }
-  function mosaik2(S, F2, u0, u1, y0, y1, t3, r3, o3 = {}) {
+  function mosaik2(S, F3, u0, u1, y0, y1, t3, r3, o3 = {}) {
     const pal = o3.palette ?? waehle2(r3, MOSAIK_FARBEN);
     const nu = o3.nu ?? Math.max(6, Math.round((u1 - u0) / 1.6)), nv = o3.nv ?? Math.max(4, Math.round((y1 - y0) / 1.6));
     const bu = (u1 - u0) / nu, bv = (y1 - y0) / nv;
-    fb2(S, F2, u0 - 0.3, u1 + 0.3, y0 - 0.3, y1 + 0.3, t3 - 0.05, t3 + 0.06, o3.rahmen ?? "#efe9dc");
+    fb2(S, F3, u0 - 0.3, u1 + 0.3, y0 - 0.3, y1 + 0.3, t3 - 0.05, t3 + 0.06, o3.rahmen ?? "#efe9dc");
     const su = zw(r3, 0.25, 0.75) * nu, sv = zw(r3, 0.55, 0.8) * nv, sr = Math.min(nu, nv) * zw(r3, 0.22, 0.32);
     const wf = zw(r3, 0.5, 1.1), ph = r3() * 6, motiv2 = o3.motiv ?? waehle2(r3, ["sonne", "b\xE4nder", "figur"]);
     for (let i = 0; i < nu; i++) for (let k3 = 0; k3 < nv; k3++) {
@@ -137905,10 +138217,10 @@
         ci = k3 < w2 ? 2 : k3 < w2 + 1.2 ? 3 : (i + k3) % 7 === 0 ? 4 : Math.floor((i + k3 * 0.5) / 3) % 2 ? 3 : 5;
         if (motiv2 === "b\xE4nder") ci = [2, 3, 0, 3, 5, 1][Math.floor((i * 0.6 + k3) / 1.5) % 6];
       }
-      fb2(S, F2, u0 + i * bu + 0.06, u0 + (i + 1) * bu - 0.06, y0 + k3 * bv + 0.06, y0 + (k3 + 1) * bv - 0.06, t3, t3 + 0.12, pal[ci]);
+      fb2(S, F3, u0 + i * bu + 0.06, u0 + (i + 1) * bu - 0.06, y0 + k3 * bv + 0.06, y0 + (k3 + 1) * bv - 0.06, t3, t3 + 0.12, pal[ci]);
     }
   }
-  function formsteinwand(S, F2, u0, u1, y0, y1, t0, t1, farbe3, art = "kreis") {
+  function formsteinwand(S, F3, u0, u1, y0, y1, t0, t1, farbe3, art = "kreis") {
     const L2 = [], st2 = 0.8;
     const nu = Math.floor((u1 - u0) / st2), nv = Math.floor((y1 - y0) / st2);
     const ou = u0 + (u1 - u0 - nu * st2) / 2, ov = y0 + (y1 - y0 - nv * st2) / 2;
@@ -137919,7 +138231,7 @@
         L2.push({ u0: cu - 0.22, u1: cu + 0.22, v0: cv - 0.22, v1: cv + 0.22 });
       } else L2.push({ u0: cu - 0.28, u1: cu - 0.04, v0: cv - 0.28, v1: cv + 0.28 }, { u0: cu + 0.04, u1: cu + 0.28, v0: cv - 0.28, v1: cv + 0.28 });
     }
-    fwandPoly(S, F2, u0, u1, y0, y1, t0, t1, farbe3, L2);
+    fwandPoly(S, F3, u0, u1, y0, y1, t0, t1, farbe3, L2);
   }
   function plattenFarben(r3, zustand) {
     if (zustand === "saniert") {
@@ -137982,56 +138294,56 @@
     if (rand > 0) push("F", rand);
     return out;
   }
-  function pFenster(S, F2, u, y2, fw, fh, fa, tv, sprosse = true) {
-    fb2(S, F2, u - fw / 2 - 0.13, u + fw / 2 + 0.13, y2 - 0.13, y2 + fh + 0.13, tv, tv + 0.035, fa.rahmen);
-    fb2(S, F2, u - fw / 2, u + fw / 2, y2, y2 + fh, tv, tv + 0.06, fa.glas);
-    if (sprosse && fw > 1.1) fb2(S, F2, u - 0.045, u + 0.045, y2, y2 + fh, tv, tv + 0.075, fa.rahmen);
+  function pFenster(S, F3, u, y2, fw, fh, fa, tv, sprosse = true) {
+    fb2(S, F3, u - fw / 2 - 0.13, u + fw / 2 + 0.13, y2 - 0.13, y2 + fh + 0.13, tv, tv + 0.035, fa.rahmen);
+    fb2(S, F3, u - fw / 2, u + fw / 2, y2, y2 + fh, tv, tv + 0.06, fa.glas);
+    if (sprosse && fw > 1.1) fb2(S, F3, u - 0.045, u + 0.045, y2, y2 + fh, tv, tv + 0.075, fa.rahmen);
   }
-  function plattenFront(S, F2, o3) {
+  function plattenFront(S, F3, o3) {
     const { n: n3, fa, cols } = o3, gh = o3.gh ?? 2.8, y0 = o3.y0 ?? 1.1;
-    const L2 = F2.L, H = y0 + n3 * gh, ti = -1.2, tv = 0.15, j3 = o3.fuge ?? 0.24, fh = o3.fh ?? 1.45;
+    const L2 = F3.L, H = y0 + n3 * gh, ti = -1.2, tv = 0.15, j3 = o3.fuge ?? 0.24, fh = o3.fh ?? 1.45;
     const dg = o3.durchgang;
     if (dg) {
-      fb2(S, F2, 0, dg[0], 0, y0, ti, 0.24, fa.sockel);
-      fb2(S, F2, dg[1], L2, 0, y0, ti, 0.24, fa.sockel);
-      fb2(S, F2, dg[0], dg[1], 0.3, y0 + gh, -o3.T + 0.5, ti, "#3a4148");
-      for (let u = dg[0]; u <= dg[1] + 0.01; u += (dg[1] - dg[0]) / 2) fb2(S, F2, u - 0.35, u + 0.35, 0, y0 + gh, -0.6, 0.1, fa.panel[0]);
-    } else if (!o3.laden) fb2(S, F2, 0, L2, 0, y0, ti, 0.24, fa.sockel);
+      fb2(S, F3, 0, dg[0], 0, y0, ti, 0.24, fa.sockel);
+      fb2(S, F3, dg[1], L2, 0, y0, ti, 0.24, fa.sockel);
+      fb2(S, F3, dg[0], dg[1], 0.3, y0 + gh, -o3.T + 0.5, ti, "#3a4148");
+      for (let u = dg[0]; u <= dg[1] + 0.01; u += (dg[1] - dg[0]) / 2) fb2(S, F3, u - 0.35, u + 0.35, 0, y0 + gh, -0.6, 0.1, fa.panel[0]);
+    } else if (!o3.laden) fb2(S, F3, 0, L2, 0, y0, ti, 0.24, fa.sockel);
     cols.forEach((c, ci) => {
       for (let k3 = 0; k3 < n3; k3++) {
         const y2 = y0 + k3 * gh;
         if (dg && k3 === 0 && c.u1 > dg[0] + 0.01 && c.u0 < dg[1] - 0.01) continue;
         if (c.typ === "L") {
-          fb2(S, F2, c.u0, c.u1, y2, y2 + 0.2, ti, tv, fa.slab);
-          fb2(S, F2, c.u0 + 0.06, c.u1 - 0.06, y2 + 0.2, y2 + 1.15, -0.02, tv, fa.bruest[(k3 + ci) % fa.bruest.length]);
-          fb2(S, F2, c.u0 + 0.45, c.u1 - 0.45, y2 + 1.15, y2 + gh - 0.3, ti - 0.02, ti + 0.05, fa.loggiaGlas);
-          if (k3 === n3 - 1) fb2(S, F2, c.u0, c.u1, y2 + gh - 0.22, y2 + gh, ti, tv, fa.panel[0]);
+          fb2(S, F3, c.u0, c.u1, y2, y2 + 0.2, ti, tv, fa.slab);
+          fb2(S, F3, c.u0 + 0.06, c.u1 - 0.06, y2 + 0.2, y2 + 1.15, -0.02, tv, fa.bruest[(k3 + ci) % fa.bruest.length]);
+          fb2(S, F3, c.u0 + 0.45, c.u1 - 0.45, y2 + 1.15, y2 + gh - 0.3, ti - 0.02, ti + 0.05, fa.loggiaGlas);
+          if (k3 === n3 - 1) fb2(S, F3, c.u0, c.u1, y2 + gh - 0.22, y2 + gh, ti, tv, fa.panel[0]);
           continue;
         }
         const ton2 = c.typ === "T" && fa.saniert && o3.treppeFarbig ? fa.akzent2 : fa.panel[hash3(ci, k3, o3.salz ?? 0) % fa.panel.length];
-        fb2(S, F2, c.u0 + j3 / 2, c.u1 - j3 / 2, y2 + j3 / 2, y2 + gh - j3 / 2, ti, tv, ton2);
+        fb2(S, F3, c.u0 + j3 / 2, c.u1 - j3 / 2, y2 + j3 / 2, y2 + gh - j3 / 2, ti, tv, ton2);
         const u = (c.u0 + c.u1) / 2;
         if (c.typ === "T") {
           if (k3 === 0 && o3.eingang !== false) {
-            fb2(S, F2, u - 0.75, u + 0.75, 0.3, 2.45, tv, tv + 0.08, fa.tuer);
-            fb2(S, F2, u - 1.4, u + 1.4, 2.55, 2.75, tv, 1.8, fa.slab);
-            fb2(S, F2, u - 1, u + 1, 0.3, 0.5, 0.2, 1.6, PFLASTER2);
-          } else pFenster(S, F2, u, y2 + gh * 0.5 - 0.1, 0.9, 1, fa, tv, false);
+            fb2(S, F3, u - 0.75, u + 0.75, 0.3, 2.45, tv, tv + 0.08, fa.tuer);
+            fb2(S, F3, u - 1.4, u + 1.4, 2.55, 2.75, tv, 1.8, fa.slab);
+            fb2(S, F3, u - 1, u + 1, 0.3, 0.5, 0.2, 1.6, PFLASTER2);
+          } else pFenster(S, F3, u, y2 + gh * 0.5 - 0.1, 0.9, 1, fa, tv, false);
           continue;
         }
         if (c.typ === "B") continue;
         const nf = c.b < 2.2 ? 0 : c.b < 4.6 ? 1 : 2;
         for (let i = 0; i < nf; i++) {
           const uu = c.u0 + c.b * (i + 0.5) / nf, fw = nf === 1 ? Math.min(o3.fw ?? 1.5, c.b - 1) : o3.fw2 ?? 1.4;
-          pFenster(S, F2, uu, y2 + 0.85, fw, fh, fa, tv);
+          pFenster(S, F3, uu, y2 + 0.85, fw, fh, fa, tv);
         }
       }
     });
     if (o3.fugenLinien !== false) {
       const fg = o3.fugeFarbe ?? dunkler(fa.panel[0], fa.saniert ? 0.08 : 0.15);
-      for (let k3 = 1; k3 < n3; k3++) fb2(S, F2, 0, L2, y0 + k3 * gh - 0.07, y0 + k3 * gh + 0.07, tv, tv + 0.025, fg);
-      fb2(S, F2, 0, L2, y0 - 0.06, y0 + 0.06, tv, tv + 0.025, fg);
-      for (let i = 1; i < cols.length; i++) fb2(S, F2, cols[i].u0 - 0.07, cols[i].u0 + 0.07, y0, H, tv, tv + 0.025, fg);
+      for (let k3 = 1; k3 < n3; k3++) fb2(S, F3, 0, L2, y0 + k3 * gh - 0.07, y0 + k3 * gh + 0.07, tv, tv + 0.025, fg);
+      fb2(S, F3, 0, L2, y0 - 0.06, y0 + 0.06, tv, tv + 0.025, fg);
+      for (let i = 1; i < cols.length; i++) fb2(S, F3, cols[i].u0 - 0.07, cols[i].u0 + 0.07, y0, H, tv, tv + 0.025, fg);
     }
     if (o3.baender) {
       const laeufe = [];
@@ -138047,10 +138359,10 @@
         if (lf.u1 - lf.u0 < 3) continue;
         for (let k3 = 1; k3 < n3; k3++) {
           const y2 = y0 + k3 * gh;
-          fb2(S, F2, lf.u0 + 0.15, lf.u1 - 0.15, y2 - 0.02, y2 + 0.16, tv, 1.45, fa.slab);
-          fb2(S, F2, lf.u0 + 0.15, lf.u1 - 0.15, y2 + 0.16, y2 + 1, 1.3, 1.45, fa.bruest[k3 % fa.bruest.length]);
-          fb2(S, F2, lf.u0 + 0.15, lf.u0 + 0.3, y2 + 0.16, y2 + gh - 0.02, tv, 1.45, fa.panel[0]);
-          fb2(S, F2, lf.u1 - 0.3, lf.u1 - 0.15, y2 + 0.16, y2 + gh - 0.02, tv, 1.45, fa.panel[0]);
+          fb2(S, F3, lf.u0 + 0.15, lf.u1 - 0.15, y2 - 0.02, y2 + 0.16, tv, 1.45, fa.slab);
+          fb2(S, F3, lf.u0 + 0.15, lf.u1 - 0.15, y2 + 0.16, y2 + 1, 1.3, 1.45, fa.bruest[k3 % fa.bruest.length]);
+          fb2(S, F3, lf.u0 + 0.15, lf.u0 + 0.3, y2 + 0.16, y2 + gh - 0.02, tv, 1.45, fa.panel[0]);
+          fb2(S, F3, lf.u1 - 0.3, lf.u1 - 0.15, y2 + 0.16, y2 + gh - 0.02, tv, 1.45, fa.panel[0]);
         }
       }
     }
@@ -138059,103 +138371,103 @@
         if (c.typ !== "F" || c.b < 4.6 || (ci + (o3.salz ?? 0)) % 2) return;
         for (let k3 = 1; k3 < n3; k3++) {
           const y2 = y0 + k3 * gh;
-          fb2(S, F2, c.u0 + 0.5, c.u1 - 0.5, y2 - 0.05, y2 + 0.14, tv, 1.7, "#efeeea");
-          fb2(S, F2, c.u0 + 0.5, c.u1 - 0.5, y2 + 0.14, y2 + 1, 1.6, 1.7, k3 % 2 ? fa.akzent : heller(fa.akzent, 0.1));
+          fb2(S, F3, c.u0 + 0.5, c.u1 - 0.5, y2 - 0.05, y2 + 0.14, tv, 1.7, "#efeeea");
+          fb2(S, F3, c.u0 + 0.5, c.u1 - 0.5, y2 + 0.14, y2 + 1, 1.6, 1.7, k3 % 2 ? fa.akzent : heller(fa.akzent, 0.1));
         }
-        fb2(S, F2, c.u0 + 0.5, c.u0 + 0.68, 0.3, H - gh + 1, 1.55, 1.72, "#8f969c");
-        fb2(S, F2, c.u1 - 0.68, c.u1 - 0.5, 0.3, H - gh + 1, 1.55, 1.72, "#8f969c");
+        fb2(S, F3, c.u0 + 0.5, c.u0 + 0.68, 0.3, H - gh + 1, 1.55, 1.72, "#8f969c");
+        fb2(S, F3, c.u1 - 0.68, c.u1 - 0.5, 0.3, H - gh + 1, 1.55, 1.72, "#8f969c");
       });
     }
-    fb2(S, F2, -0.02, L2 + 0.02, H, H + 0.55, ti, 0.2, fa.attika);
-    fb2(S, F2, -0.05, L2 + 0.05, H + 0.55, H + 0.65, ti, 0.26, fa.blech);
+    fb2(S, F3, -0.02, L2 + 0.02, H, H + 0.55, ti, 0.2, fa.attika);
+    fb2(S, F3, -0.05, L2 + 0.05, H + 0.55, H + 0.65, ti, 0.26, fa.blech);
     return H;
   }
-  function plattenGiebel(S, F2, o3) {
+  function plattenGiebel(S, F3, o3) {
     const { n: n3, fa, r: r3 } = o3, gh = o3.gh ?? 2.8, y0 = o3.y0 ?? 1.1;
-    const L2 = F2.L, H = y0 + n3 * gh, j3 = 0.17;
+    const L2 = F3.L, H = y0 + n3 * gh, j3 = 0.17;
     const nc = Math.max(2, Math.round(L2 / 3)), b3 = (L2 + 0.15) / nc;
-    fb2(S, F2, -0.15, L2, 0, y0, -0.3, 0.24, fa.sockel);
+    fb2(S, F3, -0.15, L2, 0, y0, -0.3, 0.24, fa.sockel);
     for (let k3 = 0; k3 < n3; k3++) for (let i = 0; i < nc; i++) {
       const ton2 = fa.panel[hash3(i + 31, k3, 5) % fa.panel.length];
-      fb2(S, F2, -0.15 + i * b3 + j3 / 2, -0.15 + (i + 1) * b3 - j3 / 2, y0 + k3 * gh + j3 / 2, y0 + (k3 + 1) * gh - j3 / 2, -0.3, 0.12, ton2);
+      fb2(S, F3, -0.15 + i * b3 + j3 / 2, -0.15 + (i + 1) * b3 - j3 / 2, y0 + k3 * gh + j3 / 2, y0 + (k3 + 1) * gh - j3 / 2, -0.3, 0.12, ton2);
     }
     const fg = dunkler(fa.panel[0], fa.saniert ? 0.08 : 0.15);
-    for (let k3 = 1; k3 < n3; k3++) fb2(S, F2, -0.15, L2, y0 + k3 * gh - 0.07, y0 + k3 * gh + 0.07, 0.12, 0.145, fg);
-    for (let i = 1; i < nc; i++) fb2(S, F2, -0.15 + i * b3 - 0.07, -0.15 + i * b3 + 0.07, y0, H, 0.12, 0.145, fg);
+    for (let k3 = 1; k3 < n3; k3++) fb2(S, F3, -0.15, L2, y0 + k3 * gh - 0.07, y0 + k3 * gh + 0.07, 0.12, 0.145, fg);
+    for (let i = 1; i < nc; i++) fb2(S, F3, -0.15 + i * b3 - 0.07, -0.15 + i * b3 + 0.07, y0, H, 0.12, 0.145, fg);
     const art = o3.art ?? (fa.saniert ? waehle2(r3, ["band", "stufen", "feld"]) : waehle2(r3, ["rippen", "glatt", "fenster"]));
-    if (art === "rippen") for (const f11 of [0.22, 0.5, 0.78]) fb2(S, F2, L2 * f11 - 0.25, L2 * f11 + 0.25, y0, H, 0.12, 0.32, fa.panel[1]);
+    if (art === "rippen") for (const f11 of [0.22, 0.5, 0.78]) fb2(S, F3, L2 * f11 - 0.25, L2 * f11 + 0.25, y0, H, 0.12, 0.32, fa.panel[1]);
     else if (art === "fenster") {
       const u = L2 / 2;
-      for (let k3 = 0; k3 < n3; k3++) pFenster(S, F2, u, y0 + k3 * gh + 1, 0.7, 0.9, fa, 0.12, false);
+      for (let k3 = 0; k3 < n3; k3++) pFenster(S, F3, u, y0 + k3 * gh + 1, 0.7, 0.9, fa, 0.12, false);
     } else if (art === "band") {
-      fb2(S, F2, L2 * 0.62, L2 * 0.8, y0, H, 0.12, 0.17, fa.akzent);
-      fb2(S, F2, L2 * 0.8, L2 * 0.86, y0, H, 0.12, 0.17, fa.akzent2);
+      fb2(S, F3, L2 * 0.62, L2 * 0.8, y0, H, 0.12, 0.17, fa.akzent);
+      fb2(S, F3, L2 * 0.8, L2 * 0.86, y0, H, 0.12, 0.17, fa.akzent2);
     } else if (art === "stufen") {
-      for (let k3 = 1; k3 < n3; k3 += 2) fb2(S, F2, L2 * 0.12, L2 * (0.2 + 0.6 * (k3 / n3)), y0 + k3 * gh + 0.3, y0 + (k3 + 1) * gh - 0.3, 0.12, 0.17, k3 % 4 === 1 ? fa.akzent : fa.akzent2);
+      for (let k3 = 1; k3 < n3; k3 += 2) fb2(S, F3, L2 * 0.12, L2 * (0.2 + 0.6 * (k3 / n3)), y0 + k3 * gh + 0.3, y0 + (k3 + 1) * gh - 0.3, 0.12, 0.17, k3 % 4 === 1 ? fa.akzent : fa.akzent2);
     } else if (art === "feld") {
-      fb2(S, F2, L2 * 0.15, L2 * 0.85, y0 + gh, H - gh * 0.6, 0.12, 0.16, fa.akzent2);
-      fb2(S, F2, L2 * 0.3, L2 * 0.7, y0 + gh * 2, H - gh * 1.6, 0.16, 0.2, fa.akzent);
+      fb2(S, F3, L2 * 0.15, L2 * 0.85, y0 + gh, H - gh * 0.6, 0.12, 0.16, fa.akzent2);
+      fb2(S, F3, L2 * 0.3, L2 * 0.7, y0 + gh * 2, H - gh * 1.6, 0.16, 0.2, fa.akzent);
     }
-    fb2(S, F2, -0.15, L2 + 0.05, H, H + 0.55, -0.3, 0.2, fa.attika);
-    fb2(S, F2, -0.18, L2 + 0.05, H + 0.55, H + 0.65, -0.3, 0.26, fa.blech);
+    fb2(S, F3, -0.15, L2 + 0.05, H, H + 0.55, -0.3, 0.2, fa.attika);
+    fb2(S, F3, -0.18, L2 + 0.05, H + 0.55, H + 0.65, -0.3, 0.26, fa.blech);
   }
-  function plattenBlock(S, F2, T, o3) {
-    const { fa, r: r3 } = o3, L2 = F2.L, ti = -1.2, ext = o3.ext ?? 0;
+  function plattenBlock(S, F3, T, o3) {
+    const { fa, r: r3 } = o3, L2 = F3.L, ti = -1.2, ext = o3.ext ?? 0;
     const H = (o3.y0 ?? 1.1) + o3.n * (o3.gh ?? 2.8);
     const eL = o3.giebel?.links ? 0 : ext, eR = o3.giebel?.rechts ? 0 : ext;
     const tb = o3.rueck ? -T + 1.2 : -T;
-    fb2(S, F2, -eL, L2 + eR, o3.laden ? o3.y0 : 0, H, tb, ti, fa.body);
-    fb2(S, F2, -eL, L2 + eR, H - 0.02, H + 0.12, -T, ti + 0.01, fa.dach);
-    if (!o3.rueck) fb2(S, F2, -eL, L2 + eR, H, H + 0.55, -T, -T + 0.25, fa.attika);
-    if (o3.vorn !== false) plattenFront(S, F2, { ...o3, T });
+    fb2(S, F3, -eL, L2 + eR, o3.laden ? o3.y0 : 0, H, tb, ti, fa.body);
+    fb2(S, F3, -eL, L2 + eR, H - 0.02, H + 0.12, -T, ti + 0.01, fa.dach);
+    if (!o3.rueck) fb2(S, F3, -eL, L2 + eR, H, H + 0.55, -T, -T + 0.25, fa.attika);
+    if (o3.vorn !== false) plattenFront(S, F3, { ...o3, T });
     else {
-      fb2(S, F2, -eL, L2 + eR, 0, H, ti, ti + 0.3, fa.panel[0]);
-      fb2(S, F2, -eL, L2 + eR, H, H + 0.55, ti, 0.2, fa.attika);
+      fb2(S, F3, -eL, L2 + eR, 0, H, ti, ti + 0.3, fa.panel[0]);
+      fb2(S, F3, -eL, L2 + eR, H, H + 0.55, ti, 0.2, fa.attika);
     }
     if (o3.rueck) {
-      const FR2 = rueckseite(F2, T);
+      const FR2 = rueckseite(F3, T);
       const colsR = o3.cols.map((c, i) => ({ typ: c.typ === "T" ? "F" : c.typ === "F" && c.b >= 4.6 && i % 2 === 1 ? "L" : c.typ, u0: L2 - c.u1, u1: L2 - c.u0, b: c.b })).reverse();
       plattenFront(S, FR2, { ...o3, T, cols: colsR, eingang: false, baender: o3.baender, balkone: o3.balkone && !o3.baender, durchgang: o3.durchgang ? [L2 - o3.durchgang[1], L2 - o3.durchgang[0]] : null, salz: (o3.salz ?? 0) + 3, laden: false });
       if (o3.laden) fb2(S, FR2, 0, L2, 0, o3.y0, -1.2, 0.2, fa.sockel);
     }
-    if (o3.giebel?.rechts) plattenGiebel(S, endeRechts(F2, T), o3);
-    if (o3.giebel?.links) plattenGiebel(S, endeLinks(F2, T), { ...o3, art: o3.artLinks });
+    if (o3.giebel?.rechts) plattenGiebel(S, endeRechts(F3, T), o3);
+    if (o3.giebel?.links) plattenGiebel(S, endeLinks(F3, T), { ...o3, art: o3.artLinks });
     const yd = H + 0.12;
     if (fa.saniert && o3.aufsatz) {
       const g = dachProfil(L2 - 0.4, T - 0.6, o3.aufsatz === "flach" ? 1.6 : 2.6, 0.4, "x");
       g.translate(L2 / 2, H + 0.6, -T / 2);
-      fgeo2(S, F2, g, o3.aufsatzFarbe ?? waehle2(r3, ["#8e5a48", "#7a7f85", "#9a5444"]));
+      fgeo2(S, F3, g, o3.aufsatzFarbe ?? waehle2(r3, ["#8e5a48", "#7a7f85", "#9a5444"]));
       return H + 3.2;
     }
     for (const c of o3.cols) {
       if (c.typ !== "T") continue;
       if (o3.aufzug) {
-        fb2(S, F2, c.u0 - 0.8, c.u1 + 0.8, yd, yd + 2.9, -T * 0.66, -T * 0.28, fa.attika);
-        fb2(S, F2, c.u0 - 0.9, c.u1 + 0.9, yd + 2.9, yd + 3.05, -T * 0.68, -T * 0.26, fa.blech);
-      } else fb2(S, F2, c.u0 - 0.1, c.u1 + 0.1, yd, yd + 1.3, -T * 0.55, -T * 0.3, fa.attika);
+        fb2(S, F3, c.u0 - 0.8, c.u1 + 0.8, yd, yd + 2.9, -T * 0.66, -T * 0.28, fa.attika);
+        fb2(S, F3, c.u0 - 0.9, c.u1 + 0.9, yd + 2.9, yd + 3.05, -T * 0.68, -T * 0.26, fa.blech);
+      } else fb2(S, F3, c.u0 - 0.1, c.u1 + 0.1, yd, yd + 1.3, -T * 0.55, -T * 0.3, fa.attika);
     }
     if (!fa.saniert && o3.antennen !== false) {
       const na = Math.max(2, Math.round(L2 / 7));
       for (let i = 0; i < na; i++) {
         const u = zw(r3, 1.5, L2 - 1.5), t3 = -zw(r3, 2, T - 2);
-        const [x2, z4] = wp2(F2, u, t3);
+        const [x2, z4] = wp2(F3, u, t3);
         antenne2(S, x2, yd, z4, r3);
       }
     } else if (fa.saniert && r3() < 0.6) {
       for (let i = 0; i < Math.round(L2 / 20); i++) {
         const u = zw(r3, 2, L2 - 2);
-        const [x2, z4] = wp2(F2, u, -T + 1.5);
-        S.box(0.9, 0.9, 0.12, x2, yd + 1, z4, "#e9ebec", F2.ry);
+        const [x2, z4] = wp2(F3, u, -T + 1.5);
+        S.box(0.9, 0.9, 0.12, x2, yd + 1, z4, "#e9ebec", F3.ry);
       }
     }
     return H + (o3.aufzug ? 3.2 : 1.4);
   }
-  function qBlock(S, F2, T, o3) {
-    const { fa, r: r3, n: n3 } = o3, L2 = F2.L, gh = 2.85, y0 = 0.9, H = y0 + n3 * gh;
+  function qBlock(S, F3, T, o3) {
+    const { fa, r: r3, n: n3 } = o3, L2 = F3.L, gh = 2.85, y0 = 0.9, H = y0 + n3 * gh;
     const wand2 = o3.wand, fuge = dunkler(wand2, 0.09);
-    fb2(S, F2, 0, L2, 0, H, o3.rueck ? -T + 0.35 : -T, -0.35, GLAS7);
+    fb2(S, F3, 0, L2, 0, H, o3.rueck ? -T + 0.35 : -T, -0.35, GLAS7);
     if (o3.rueck) {
-      const FR2 = rueckseite(F2, T), raster5 = 3, na2 = Math.max(3, Math.round(L2 / raster5)), rb2 = L2 / na2, Lr = [];
+      const FR2 = rueckseite(F3, T), raster5 = 3, na2 = Math.max(3, Math.round(L2 / raster5)), rb2 = L2 / na2, Lr = [];
       for (let i = 0; i < na2; i++) for (let k3 = 0; k3 < n3; k3++) {
         const u = (i + 0.5) * rb2, y2 = y0 + k3 * gh, tr2 = (na2 - 1 - i) % (o3.sektion ?? 5) === 2;
         Lr.push(tr2 ? { u0: u - 0.45, u1: u + 0.45, v0: y2 + 1.5, v1: y2 + 2.4 } : { u0: u - 0.65, u1: u + 0.65, v0: y2 + 0.9, v1: y2 + 2.35 });
@@ -138191,39 +138503,39 @@
         } else loecher.push({ u0: u - 0.65, u1: u + 0.65, v0: y2 + 0.9, v1: y2 + 2.35 });
       }
     }
-    fwand(S, F2, 0, L2, 0, H, -0.35, 0, wand2, loecher);
+    fwand(S, F3, 0, L2, 0, H, -0.35, 0, wand2, loecher);
     for (let k3 = 0; k3 < n3; k3++) {
       const y2 = y0 + k3 * gh;
-      fb2(S, F2, 0, L2, y2 + 0.85, y2 + 0.93, 0, 0.03, fuge);
-      fb2(S, F2, 0, L2, y2 + 2.4, y2 + 2.48, 0, 0.03, fuge);
+      fb2(S, F3, 0, L2, y2 + 0.85, y2 + 0.93, 0, 0.03, fuge);
+      fb2(S, F3, 0, L2, y2 + 2.4, y2 + 2.48, 0, 0.03, fuge);
     }
-    for (let i = 0; i <= na; i++) fb2(S, F2, i * rb - 0.04, i * rb + 0.04, y0, H, 0, 0.03, fuge);
-    fb2(S, F2, 0, L2, 0, y0, -0.35, 0.12, fa.sockel);
+    for (let i = 0; i <= na; i++) fb2(S, F3, i * rb - 0.04, i * rb + 0.04, y0, H, 0, 0.03, fuge);
+    fb2(S, F3, 0, L2, 0, y0, -0.35, 0.12, fa.sockel);
     for (const l of loecher) {
       if (l.v0 < 1) continue;
       const u = (l.u0 + l.u1) / 2;
-      fb2(S, F2, l.u0 - 0.08, l.u1 + 0.08, l.v0 - 0.12, l.v0, 0, 0.16, "#e9e5da");
-      if (l.u1 - l.u0 > 1.1) fb2(S, F2, u - 0.04, u + 0.04, l.v0, l.v1, -0.2, -0.12, fa.rahmen);
+      fb2(S, F3, l.u0 - 0.08, l.u1 + 0.08, l.v0 - 0.12, l.v0, 0, 0.16, "#e9e5da");
+      if (l.u1 - l.u0 > 1.1) fb2(S, F3, u - 0.04, u + 0.04, l.v0, l.v1, -0.2, -0.12, fa.rahmen);
     }
     for (const i of tr) {
       const u = (i + 0.5) * rb;
-      fb2(S, F2, u - 1.2, u + 1.2, 2.6, 2.8, 0, 1.4, fa.slab);
+      fb2(S, F3, u - 1.2, u + 1.2, 2.6, 2.8, 0, 1.4, fa.slab);
     }
     if (o3.balkone) for (let i = 1; i < na - 1; i += 3) {
       if (tr.has(i)) continue;
       const u = (i + 0.5) * rb;
       for (let k3 = 1; k3 < n3; k3++) {
         const y2 = y0 + k3 * gh;
-        fb2(S, F2, u - 1.1, u + 1.1, y2 - 0.05, y2 + 0.12, 0, 1.2, "#ecebe6");
-        fb2(S, F2, u - 1.1, u + 1.1, y2 + 0.12, y2 + 1, 1.1, 1.2, fa.saniert ? fa.akzent : "#5a6168");
+        fb2(S, F3, u - 1.1, u + 1.1, y2 - 0.05, y2 + 0.12, 0, 1.2, "#ecebe6");
+        fb2(S, F3, u - 1.1, u + 1.1, y2 + 0.12, y2 + 1, 1.1, 1.2, fa.saniert ? fa.akzent : "#5a6168");
       }
     }
     const dh = o3.dachH ?? 2.6;
-    fb2(S, F2, -0.3, L2 + 0.3, H, H + 0.25, -T - 0.3, 0.35, dunkler(wand2, 0.05));
+    fb2(S, F3, -0.3, L2 + 0.3, H, H + 0.25, -T - 0.3, 0.35, dunkler(wand2, 0.05));
     const g = dachProfil(L2 + 0.6, T + 0.9, dh, 0.25, "x");
     g.translate(L2 / 2, H + 0.25, -T / 2 + 0.05);
-    fgeo2(S, F2, g, o3.dach);
-    for (const G3 of [o3.rechts !== false ? endeRechts(F2, T) : null, o3.links ? endeLinks(F2, T) : null]) {
+    fgeo2(S, F3, g, o3.dach);
+    for (const G3 of [o3.rechts !== false ? endeRechts(F3, T) : null, o3.links ? endeLinks(F3, T) : null]) {
       if (!G3) continue;
       fb2(S, G3, -0.1, T + 0.1, 0, H + 0.25, -0.3, 0.02, wand2);
       fpoly2(S, G3, [[-0.1, H + 0.25], [T + 0.1, H + 0.25], [T / 2, H + 0.25 + dh * 0.95]], -0.2, 0.05, wand2);
@@ -138236,7 +138548,7 @@
       fb2(S, G3, 0, T, 0, y0, -0.3, 0.12, fa.sockel);
     }
     for (let i = 0; i < Math.round(L2 / 9); i++) {
-      const u = zw(r3, 2, L2 - 2), [x2, z4] = wp2(F2, u, -T * 0.5);
+      const u = zw(r3, 2, L2 - 2), [x2, z4] = wp2(F3, u, -T * 0.5);
       S.box(0.7, 1.4, 0.7, x2, H + dh * 0.85, z4, "#8a6a5a");
       if (!fa.saniert) antenne2(S, x2, H + dh * 0.85 + 0.7, z4, r3);
     }
@@ -138363,9 +138675,9 @@
         const a2 = -Phi / 2 + i * dphi, b3 = a2 + dphi;
         const Pa = [cx + Rr * Math.sin(a2), cz - Rr * Math.cos(a2)], Pb = [cx + Rr * Math.sin(b3), cz - Rr * Math.cos(b3)];
         const Ls = wurzelSumme15(Pb[0] - Pa[0], Pb[1] - Pa[1]);
-        const F2 = R5(Pa[0], Pa[1], (Pb[0] - Pa[0]) / Ls, (Pb[1] - Pa[1]) / Ls, Ls);
+        const F3 = R5(Pa[0], Pa[1], (Pb[0] - Pa[0]) / Ls, (Pb[1] - Pa[1]) / Ls, Ls);
         const cols = spalten(Ls, MUSTER.wbs70, 0);
-        H = plattenBlock(S, F2, T, { ...o3, cols, ext, salz: i, vorn: sk2.vorn, rueck: sk2.hinten, giebel: { rechts: i === m - 1 && sk2.rechts, links: i === 0 && sk2.links } });
+        H = plattenBlock(S, F3, T, { ...o3, cols, ext, salz: i, vorn: sk2.vorn, rueck: sk2.hinten, giebel: { rechts: i === m - 1 && sk2.rechts, links: i === 0 && sk2.links } });
       }
       if (sk2.hinten) wohnweg(S, r3, x0 + 2, z0 + 2, x0 + w2 - 2, zf - sag - T - 1, sk2);
       return { hoehe: H };
@@ -138390,10 +138702,10 @@
     const Lges = w2 - 6, nb = Math.max(1, Math.ceil(Lges / 90)), gap = nb > 1 ? 10 : 0, Lb = (Lges - gap * (nb - 1)) / nb;
     for (let bI = 0; bI < nb; bI++) {
       const ua = x0 + 3 + bI * (Lb + gap);
-      const F2 = R5(ua, zf, 1, 0, Lb);
+      const F3 = R5(ua, zf, 1, 0, Lb);
       if (v === "q3a") {
         const wand2 = fa.saniert ? waehle2(r3, ["#efe0b8", "#e9d2bf", "#dfe6cf", "#f1e9d8"]) : waehle2(r3, ["#cfc4ac", "#c9bfa8", "#d3cab4", "#c1b9a6"]);
-        H = qBlock(S, F2, Tz, { ...base, n: cfg.n, wand: wand2, dach: fa.saniert ? waehle2(r3, ["#9a5444", "#7a7f85"]) : waehle2(r3, ["#8f9396", "#7f8488", "#8a6a5a"]), balkone: fa.saniert || r3() < 0.4, sektion: 5, rueck: sk.hinten, links: sk.links, rechts: sk.rechts });
+        H = qBlock(S, F3, Tz, { ...base, n: cfg.n, wand: wand2, dach: fa.saniert ? waehle2(r3, ["#9a5444", "#7a7f85"]) : waehle2(r3, ["#8f9396", "#7f8488", "#8a6a5a"]), balkone: fa.saniert || r3() < 0.4, sektion: 5, rueck: sk.hinten, links: sk.links, rechts: sk.rechts });
         continue;
       }
       const cols = spalten(Lb, cfg.muster);
@@ -138402,7 +138714,7 @@
         const c2 = cols[Math.floor(cols.length / 2) + 1];
         return [c.u0, c2 ? c2.u1 : c.u1];
       })() : null;
-      H = plattenBlock(S, F2, T, {
+      H = plattenBlock(S, F3, T, {
         ...base,
         n: cfg.n,
         cols,
@@ -138453,14 +138765,14 @@
     const na = Math.max(1, Math.floor((u1 - u0 - 2 * rand) / ra)), off = u0 + (u1 - u0 - na * ra) / 2;
     return Array.from({ length: na }, (_, i) => off + (i + 0.5) * ra);
   }
-  function balustrade2(S, F2, u0, u1, y0, y1, t0, t1, farbe3, schritt = 0.32) {
+  function balustrade2(S, F3, u0, u1, y0, y1, t0, t1, farbe3, schritt = 0.32) {
     const L2 = [];
     for (let u = u0 + schritt * 0.75; u < u1 - schritt * 0.5; u += schritt) L2.push({ u0: u - schritt * 0.28, u1: u + schritt * 0.28, v0: y0 + 0.18, v1: y1 - 0.16, bogen: false });
-    fwand(S, F2, u0, u1, y0, y1, t0, t1, farbe3, L2);
+    fwand(S, F3, u0, u1, y0, y1, t0, t1, farbe3, L2);
   }
-  function magFassade(S, scene2, F2, c, r3, o3) {
+  function magFassade(S, scene2, F3, c, r3, o3) {
     const { egH, gh, n: n3, ra, wand: wand2, orn } = c, H = egH + n3 * gh;
-    const u0 = o3.u0 ?? 0, u1 = o3.u1 ?? F2.L;
+    const u0 = o3.u0 ?? 0, u1 = o3.u1 ?? F3.L;
     const ax = achsen3(u0, u1, ra, 0.8);
     const balkon2 = (i, k3) => c.balkone && k3 >= 2 && k3 <= n3 - 2 && i % 4 === 2 && i > 0 && i < ax.length - 1;
     const loecher = [];
@@ -138471,43 +138783,43 @@
         else loecher.push({ u0: u - fw, u1: u + fw, v0: balkon2(i, k3) ? y2 + 0.25 : y2 + 0.95, v1: y2 + 2.6, bogen: c.bogenOben && k3 === n3 - 1 });
       }
     });
-    fwand(S, F2, u0, u1, egH, H, -0.4, 0, wand2, loecher);
+    fwand(S, F3, u0, u1, egH, H, -0.4, 0, wand2, loecher);
     ax.forEach((u, i) => {
       for (let k3 = 0; k3 < n3; k3++) {
         const y2 = egH + k3 * gh, fw = c.fw ?? 0.72;
         if (c.faschen) {
-          fb2(S, F2, u - fw - 0.22, u - fw, y2 + (k3 ? 0.85 : 0.65), y2 + (k3 ? 2.7 : 2.15), 0, 0.08, c.faschen);
-          fb2(S, F2, u + fw, u + fw + 0.22, y2 + (k3 ? 0.85 : 0.65), y2 + (k3 ? 2.7 : 2.15), 0, 0.08, c.faschen);
+          fb2(S, F3, u - fw - 0.22, u - fw, y2 + (k3 ? 0.85 : 0.65), y2 + (k3 ? 2.7 : 2.15), 0, 0.08, c.faschen);
+          fb2(S, F3, u + fw, u + fw + 0.22, y2 + (k3 ? 0.85 : 0.65), y2 + (k3 ? 2.7 : 2.15), 0, 0.08, c.faschen);
         }
-        if (!balkon2(i, k3)) fb2(S, F2, u - fw - 0.18, u + fw + 0.18, y2 + (k3 ? 0.82 : 0.62), y2 + (k3 ? 0.95 : 0.75), 0, 0.22, orn);
-        if (k3 >= 1 && k3 <= 2) fb2(S, F2, u - fw - 0.25, u + fw + 0.25, y2 + 2.65, y2 + 2.9, 0, 0.3, orn);
-        if (k3 === 1 && c.dreieck) fpoly2(S, F2, [[u - fw - 0.25, y2 + 2.9], [u + fw + 0.25, y2 + 2.9], [u, y2 + 3.05]], 0, 0.25, orn);
+        if (!balkon2(i, k3)) fb2(S, F3, u - fw - 0.18, u + fw + 0.18, y2 + (k3 ? 0.82 : 0.62), y2 + (k3 ? 0.95 : 0.75), 0, 0.22, orn);
+        if (k3 >= 1 && k3 <= 2) fb2(S, F3, u - fw - 0.25, u + fw + 0.25, y2 + 2.65, y2 + 2.9, 0, 0.3, orn);
+        if (k3 === 1 && c.dreieck) fpoly2(S, F3, [[u - fw - 0.25, y2 + 2.9], [u + fw + 0.25, y2 + 2.9], [u, y2 + 3.05]], 0, 0.25, orn);
         if (balkon2(i, k3)) {
-          fb2(S, F2, u - 1.25, u + 1.25, y2 + 0.05, y2 + 0.27, 0, 1.15, orn);
-          balustrade2(S, F2, u - 1.2, u + 1.2, y2 + 0.27, y2 + 1.25, 0.95, 1.1, orn);
+          fb2(S, F3, u - 1.25, u + 1.25, y2 + 0.05, y2 + 0.27, 0, 1.15, orn);
+          balustrade2(S, F3, u - 1.2, u + 1.2, y2 + 0.27, y2 + 1.25, 0.95, 1.1, orn);
         }
       }
     });
     if (c.lisenen) for (let i = 0; i <= ax.length; i += 2) {
       const u = i < ax.length ? ax[i] - ra / 2 : ax[ax.length - 1] + ra / 2;
-      fb2(S, F2, u - 0.42, u + 0.42, egH + gh + 0.1, H - 0.5, 0, 0.42, orn);
-      fb2(S, F2, u - 0.58, u + 0.58, H - 0.85, H - 0.4, 0, 0.6, orn);
-      fb2(S, F2, u - 0.55, u + 0.55, egH + gh + 0.1, egH + gh + 0.45, 0, 0.5, orn);
+      fb2(S, F3, u - 0.42, u + 0.42, egH + gh + 0.1, H - 0.5, 0, 0.42, orn);
+      fb2(S, F3, u - 0.58, u + 0.58, H - 0.85, H - 0.4, 0, 0.6, orn);
+      fb2(S, F3, u - 0.55, u + 0.55, egH + gh + 0.1, egH + gh + 0.45, 0, 0.5, orn);
     }
-    fb2(S, F2, u0, u1, egH - 0.15, egH + 0.3, -0.4, 0.5, orn);
-    fb2(S, F2, u0, u1, egH + gh - 0.08, egH + gh + 0.14, -0.4, 0.25, orn);
+    fb2(S, F3, u0, u1, egH - 0.15, egH + 0.3, -0.4, 0.5, orn);
+    fb2(S, F3, u0, u1, egH + gh - 0.08, egH + gh + 0.14, -0.4, 0.25, orn);
     if (c.kranz !== false) {
-      fb2(S, F2, u0 - 0.6, u1 + 0.6, H, H + 0.7, -0.4, 0.95, orn);
-      for (let u = u0 + 0.8; u < u1 - 0.4; u += 1.65) fb2(S, F2, u - 0.13, u + 0.13, H - 0.45, H, 0, 0.75, orn);
+      fb2(S, F3, u0 - 0.6, u1 + 0.6, H, H + 0.7, -0.4, 0.95, orn);
+      for (let u = u0 + 0.8; u < u1 - 0.4; u += 1.65) fb2(S, F3, u - 0.13, u + 0.13, H - 0.45, H, 0, 0.75, orn);
     }
     return { H, ax };
   }
-  function magArkade(S, scene2, F2, c, r3, o3) {
+  function magArkade(S, scene2, F3, c, r3, o3) {
     const { egH, ra, sockel } = c, A = o3.A ?? 3.4;
-    const u0 = o3.u0 ?? 0, u1 = o3.u1 ?? F2.L;
+    const u0 = o3.u0 ?? 0, u1 = o3.u1 ?? F3.L;
     const ax = achsen3(u0, u1, ra, 0.8);
     boden3(S, ...(() => {
-      const [ax0, az0] = wp2(F2, u0, -A), [ax1, az1] = wp2(F2, u1, 0);
+      const [ax0, az0] = wp2(F3, u0, -A), [ax1, az1] = wp2(F3, u1, 0);
       return [Math.min(ax0, ax1), Math.min(az0, az1), Math.max(ax0, ax1), Math.max(az0, az1)];
     })(), PFLASTER2, 0.3, 0.07);
     if (c.arkade === "bogen") {
@@ -138516,18 +138828,18 @@
         const b3 = ra * 0.66;
         L2.push({ u0: ax[i] - b3 / 2, u1: ax[i] + b3 / 2, v0: 0.3, v1: egH - 0.55, bogen: true });
       }
-      fwand(S, F2, u0, u1, 0, egH - 0.15, -0.7, 0, sockel, L2);
-      if (c.rustika) for (let y2 = 0.9; y2 < egH - 0.6; y2 += 0.9) fb2(S, F2, u0, u1, y2 - 0.04, y2 + 0.04, 0, 0.03, dunkler(sockel, 0.08));
+      fwand(S, F3, u0, u1, 0, egH - 0.15, -0.7, 0, sockel, L2);
+      if (c.rustika) for (let y2 = 0.9; y2 < egH - 0.6; y2 += 0.9) fb2(S, F3, u0, u1, y2 - 0.04, y2 + 0.04, 0, 0.03, dunkler(sockel, 0.08));
     } else {
       for (let i = 0; i <= ax.length; i++) {
         const u = i < ax.length ? ax[i] - ra / 2 : ax[ax.length - 1] + ra / 2;
-        fb2(S, F2, u - 0.5, u + 0.5, 0.3, egH - 0.15, -0.95, 0, sockel);
-        fb2(S, F2, u - 0.62, u + 0.62, 0.3, 0.75, -1.05, 0.1, dunkler(sockel, 0.08));
-        fb2(S, F2, u - 0.62, u + 0.62, egH - 0.85, egH - 0.6, -1.05, 0.1, c.orn);
+        fb2(S, F3, u - 0.5, u + 0.5, 0.3, egH - 0.15, -0.95, 0, sockel);
+        fb2(S, F3, u - 0.62, u + 0.62, 0.3, 0.75, -1.05, 0.1, dunkler(sockel, 0.08));
+        fb2(S, F3, u - 0.62, u + 0.62, egH - 0.85, egH - 0.6, -1.05, 0.1, c.orn);
       }
-      fb2(S, F2, u0, u1, egH - 0.6, egH - 0.15, -0.95, 0.02, c.orn);
+      fb2(S, F3, u0, u1, egH - 0.6, egH - 0.15, -0.95, 0.02, c.orn);
     }
-    const FL = teil2(F2, u0, u1, -A);
+    const FL = teil2(F3, u0, u1, -A);
     for (let i = 0; i < ax.length; i++) {
       const u = ax[i] - u0;
       fb2(S, FL, u - ra / 2 + 0.25, u + ra / 2 - 0.25, 0.3, egH - 1.1, 0, 0.06, GLAS_HELL4);
@@ -138540,21 +138852,21 @@
     const { egH, gh, orn, wand: wand2 } = c;
     const H = o3.H, Ht = H + o3.extra * gh;
     S.quader(xa + 0.4, egH, za + 0.4, xa + tw - 0.4, Ht, za + tw - 0.4, GLAS7);
-    for (const F2 of [RZ(xa, za, tw, tw), RX(xa, za, tw, tw)]) {
+    for (const F3 of [RZ(xa, za, tw, tw), RX(xa, za, tw, tw)]) {
       const ax = achsen3(0, tw, tw / 3, 0.9);
       const L2 = [];
       for (let k3 = 0; k3 < o3.n + o3.extra; k3++) {
         const y4 = egH + k3 * gh;
         for (const u of ax) L2.push({ u0: u - 0.68, u1: u + 0.68, v0: y4 + 0.9, v1: y4 + 2.6, bogen: k3 >= o3.n });
       }
-      fwand(S, F2, 0, tw, egH, Ht, -0.4, 0, wand2, L2);
-      for (const l of L2) fb2(S, F2, l.u0 - 0.15, l.u1 + 0.15, l.v0 - 0.12, l.v0, 0, 0.22, orn);
-      fb2(S, F2, -0.1, 0.8, egH, Ht, 0, 0.3, orn);
-      fb2(S, F2, tw - 0.8, tw + 0.1, egH, Ht, 0, 0.3, orn);
-      fb2(S, F2, -0.3, tw + 0.3, egH - 0.15, egH + 0.3, -0.4, 0.55, orn);
-      fb2(S, F2, -0.6, tw + 0.6, H, H + 0.7, -0.4, 1, orn);
-      fb2(S, F2, -0.3, tw + 0.3, Ht - 2 * gh, Ht - 2 * gh + 0.4, -0.4, 0.6, orn);
-      balustrade2(S, F2, -0.6, tw + 0.6, H + 0.7, H + 1.8, 0.4, 0.7, orn, 0.45);
+      fwand(S, F3, 0, tw, egH, Ht, -0.4, 0, wand2, L2);
+      for (const l of L2) fb2(S, F3, l.u0 - 0.15, l.u1 + 0.15, l.v0 - 0.12, l.v0, 0, 0.22, orn);
+      fb2(S, F3, -0.1, 0.8, egH, Ht, 0, 0.3, orn);
+      fb2(S, F3, tw - 0.8, tw + 0.1, egH, Ht, 0, 0.3, orn);
+      fb2(S, F3, -0.3, tw + 0.3, egH - 0.15, egH + 0.3, -0.4, 0.55, orn);
+      fb2(S, F3, -0.6, tw + 0.6, H, H + 0.7, -0.4, 1, orn);
+      fb2(S, F3, -0.3, tw + 0.3, Ht - 2 * gh, Ht - 2 * gh + 0.4, -0.4, 0.6, orn);
+      balustrade2(S, F3, -0.6, tw + 0.6, H + 0.7, H + 1.8, 0.4, 0.7, orn, 0.45);
     }
     S.quader(xa - 0.7, Ht, za - 0.7, xa + tw + 0.7, Ht + 0.8, za + tw + 0.7, orn);
     const t22 = tw * 0.64, xb = xa + (tw - t22) / 2, zb = za + (tw - t22) / 2, h22 = 4.6, y2 = Ht + 0.8;
@@ -138587,7 +138899,7 @@
     zyl6(S, 0.1, 0.25, 5, cx, y3 + 3.2, cz, "#d8b45a", 6);
     return y3 + 8.2;
   }
-  function treppenGiebel(S, F2, u0, u1, y2, h3, wand2, orn, stufen = 4) {
+  function treppenGiebel(S, F3, u0, u1, y2, h3, wand2, orn, stufen = 4) {
     const b3 = u1 - u0, st2 = h3 / (stufen + 1), dx = b3 / (2 * (stufen + 1));
     const pk = [[u0, y2], [u1, y2]];
     for (let s2 = 0; s2 <= stufen; s2++) {
@@ -138599,29 +138911,29 @@
       pk.push([u0 + s2 * dx, y2 + (s2 + 1) * st2]);
     }
     const sauber = pk.filter((q2, i) => i === 0 || wurzelSumme15(q2[0] - pk[i - 1][0], q2[1] - pk[i - 1][1]) > 0.01);
-    fpoly2(S, F2, sauber, -0.5, 0.15, wand2);
+    fpoly2(S, F3, sauber, -0.5, 0.15, wand2);
     const m = (u0 + u1) / 2;
     for (const f11 of [-0.28, 0, 0.28]) {
       const hh = h3 * (f11 === 0 ? 0.62 : 0.42);
-      fb2(S, F2, m + f11 * b3 - 0.32, m + f11 * b3 + 0.32, y2 + 0.6, y2 + 0.6 + hh, 0.15, 0.2, orn);
+      fb2(S, F3, m + f11 * b3 - 0.32, m + f11 * b3 + 0.32, y2 + 0.6, y2 + 0.6 + hh, 0.15, 0.2, orn);
     }
-    fscheibe(S, F2, m, y2 + h3 * 0.78, 0.15, 0.22, 0.45, GLAS7, 12);
+    fscheibe(S, F3, m, y2 + h3 * 0.78, 0.15, 0.22, 0.45, GLAS7, 12);
     for (let s2 = 0; s2 <= stufen; s2++) {
-      fb2(S, F2, u1 - s2 * dx - 0.4, u1 - s2 * dx + 0.05, y2 + (s2 + 1) * st2, y2 + (s2 + 1) * st2 + 0.15, -0.5, 0.25, orn);
-      fb2(S, F2, u0 + s2 * dx - 0.05, u0 + s2 * dx + 0.4, y2 + (s2 + 1) * st2, y2 + (s2 + 1) * st2 + 0.15, -0.5, 0.25, orn);
+      fb2(S, F3, u1 - s2 * dx - 0.4, u1 - s2 * dx + 0.05, y2 + (s2 + 1) * st2, y2 + (s2 + 1) * st2 + 0.15, -0.5, 0.25, orn);
+      fb2(S, F3, u0 + s2 * dx - 0.05, u0 + s2 * dx + 0.4, y2 + (s2 + 1) * st2, y2 + (s2 + 1) * st2 + 0.15, -0.5, 0.25, orn);
     }
   }
-  function gauben(S, F2, u0, u1, H, T, dh, c, ra) {
+  function gauben(S, F3, u0, u1, H, T, dh, c, ra) {
     const neig = dh / (T / 2);
     for (const u of achsen3(u0, u1, ra * 2, 1.5)) {
       const tf = -1.4, yb = H + -tf * neig;
-      fb2(S, F2, u - 0.85, u + 0.85, H, yb + 1.7, -3.8, tf, c.wand);
-      fb2(S, F2, u - 0.45, u + 0.45, yb + 0.25, yb + 1.35, tf, tf + 0.05, GLAS7);
-      fb2(S, F2, u - 1.05, u + 1.05, yb + 1.7, yb + 1.92, -3.9, tf + 0.25, c.dach);
+      fb2(S, F3, u - 0.85, u + 0.85, H, yb + 1.7, -3.8, tf, c.wand);
+      fb2(S, F3, u - 0.45, u + 0.45, yb + 0.25, yb + 1.35, tf, tf + 0.05, GLAS7);
+      fb2(S, F3, u - 1.05, u + 1.05, yb + 1.7, yb + 1.92, -3.9, tf + 0.25, c.dach);
     }
   }
-  function magHof(S, scene2, F2, c, r3, o3 = {}) {
-    const { egH, gh, n: n3, ra } = c, H = egH + n3 * gh, L2 = F2.L;
+  function magHof(S, scene2, F3, c, r3, o3 = {}) {
+    const { egH, gh, n: n3, ra } = c, H = egH + n3 * gh, L2 = F3.L;
     const wand2 = c.hofWand ?? dunkler(c.wand, 0.03), orn = c.orn;
     const ax = achsen3(0.4, L2 - 0.4, ra, 0.6);
     const tr = (i) => i % 6 === 3;
@@ -138642,28 +138954,28 @@
         loecher.push({ u0: u - 0.62, u1: u + 0.62, v0: balkon2(i, k3) ? y2 + 0.25 : y2 + 0.95, v1: y2 + 2.45 });
       }
     });
-    fwand(S, F2, 0, L2, 0, H, -0.4, 0, wand2, loecher);
+    fwand(S, F3, 0, L2, 0, H, -0.4, 0, wand2, loecher);
     ax.forEach((u, i) => {
       if (tr(i)) {
-        fb2(S, F2, u - 1.3, u + 1.3, 2.85, 3.05, 0, 1.4, orn);
-        fb2(S, F2, u - 0.75, u + 0.75, 0.3, 2.6, -0.3, -0.22, "#6b4c36");
-        fb2(S, F2, u - 1, u + 1, 0.3, 0.5, 0, 1.2, PFLASTER2);
+        fb2(S, F3, u - 1.3, u + 1.3, 2.85, 3.05, 0, 1.4, orn);
+        fb2(S, F3, u - 0.75, u + 0.75, 0.3, 2.6, -0.3, -0.22, "#6b4c36");
+        fb2(S, F3, u - 1, u + 1, 0.3, 0.5, 0, 1.2, PFLASTER2);
         return;
       }
       for (let k3 = 0; k3 < n3; k3++) {
         const y2 = egH + k3 * gh;
-        if (!balkon2(i, k3)) fb2(S, F2, u - 0.75, u + 0.75, y2 + 0.82, y2 + 0.95, 0, 0.18, orn);
+        if (!balkon2(i, k3)) fb2(S, F3, u - 0.75, u + 0.75, y2 + 0.82, y2 + 0.95, 0, 0.18, orn);
         else {
-          fb2(S, F2, u - 1.2, u + 1.2, y2 + 0.05, y2 + 0.25, 0, 1.25, "#d9d4c8");
-          fb2(S, F2, u - 1.2, u + 1.2, y2 + 1.15, y2 + 1.22, 1.15, 1.25, STAHL3);
-          for (const du of [-1.15, -0.4, 0.4, 1.15]) fb2(S, F2, u + du - 0.03, u + du + 0.03, y2 + 0.25, y2 + 1.15, 1.17, 1.22, STAHL3);
+          fb2(S, F3, u - 1.2, u + 1.2, y2 + 0.05, y2 + 0.25, 0, 1.25, "#d9d4c8");
+          fb2(S, F3, u - 1.2, u + 1.2, y2 + 1.15, y2 + 1.22, 1.15, 1.25, STAHL3);
+          for (const du of [-1.15, -0.4, 0.4, 1.15]) fb2(S, F3, u + du - 0.03, u + du + 0.03, y2 + 0.25, y2 + 1.15, 1.17, 1.22, STAHL3);
         }
       }
     });
-    fb2(S, F2, -0.05, L2 + 0.05, 0, 0.9, -0.4, 0.12, c.sockel);
-    fb2(S, F2, -0.05, L2 + 0.05, egH - 0.12, egH + 0.12, -0.4, 0.2, orn);
-    fb2(S, F2, -0.3, L2 + 0.3, H - 0.05, H + 0.45, -0.4, 0.5, orn);
-    if (o3.schild) ftext2(scene2, F2, o3.schild, ax[0] + 2, egH - 0.5, 0.05, 0.38, 6, "#5a4a3a");
+    fb2(S, F3, -0.05, L2 + 0.05, 0, 0.9, -0.4, 0.12, c.sockel);
+    fb2(S, F3, -0.05, L2 + 0.05, egH - 0.12, egH + 0.12, -0.4, 0.2, orn);
+    fb2(S, F3, -0.3, L2 + 0.3, H - 0.05, H + 0.45, -0.4, 0.5, orn);
+    if (o3.schild) ftext2(scene2, F3, o3.schild, ax[0] + 2, egH - 0.5, 0.05, 0.38, 6, "#5a4a3a");
     return H;
   }
   function magistraleRoh(S, scene2, p2) {
@@ -138698,18 +139010,18 @@
     const tw = 10;
     const zonenZ = turm4 ? { u0: 0, u1: w2 - tw + 0.2 } : {}, zonenX = turm4 ? { u0: tw - 0.2, u1: FX.L } : {};
     let top = H + 1;
-    const fassaden = [[FZ, zonenZ, sk.vorn], [FX, zonenX, sk.rechts], [FL, {}, !!FL]].filter(([F2, , an]) => F2 && an);
-    for (const [F2, z4] of fassaden) {
-      magArkade(S, scene2, F2, c, r3, { A, salz: p2.seed + F2.L });
-      magFassade(S, scene2, F2, c, r3, z4);
+    const fassaden = [[FZ, zonenZ, sk.vorn], [FX, zonenX, sk.rechts], [FL, {}, !!FL]].filter(([F3, , an]) => F3 && an);
+    for (const [F3, z4] of fassaden) {
+      magArkade(S, scene2, F3, c, r3, { A, salz: p2.seed + F3.L });
+      magFassade(S, scene2, F3, c, r3, z4);
     }
-    const traufe = [...fassaden.map(([F2, z4]) => [F2, z4]), ...FR2 ? [[FR2, {}]] : []];
+    const traufe = [...fassaden.map(([F3, z4]) => [F3, z4]), ...FR2 ? [[FR2, {}]] : []];
     if (turm4) {
       top = Math.max(top, magTurm(S, scene2, x0 + w2 - tw + 0.6, z0 + d3 - tw + 0.6, tw, c, r3, { H, n: c.n, extra: 5, helm: r3() < 0.5 ? "kuppel" : "pyramide" }));
       if (w2 > 85) top = Math.max(top, magTurm(S, scene2, x0 + 2, z0 + d3 - tw + 0.6, tw, c, r3, { H, n: c.n, extra: 5, helm: "kuppel" }));
     }
     if (v === "berlin") {
-      for (const [F2, z4] of traufe) balustrade2(S, F2, z4.u0 ?? 0, z4.u1 ?? F2.L, H + (F2 === FR2 ? 0.45 : 0.7), H + (F2 === FR2 ? 1.4 : 1.9), 0.15, 0.45, c.orn, 0.5);
+      for (const [F3, z4] of traufe) balustrade2(S, F3, z4.u0 ?? 0, z4.u1 ?? F3.L, H + (F3 === FR2 ? 0.45 : 0.7), H + (F3 === FR2 ? 1.4 : 1.9), 0.15, 0.45, c.orn, 0.5);
       S.quader(x0 + w2 * 0.3, H, zA + 3, x0 + w2 * 0.3 + 6, H + 2.2, zA + 7, "#cfc8b8");
     } else if (v === "rostock") {
       const dh = 6.5;
@@ -138721,11 +139033,11 @@
         g2.translate(x0 + w2 - T / 2, H, z0 + (d3 - T) / 2);
         S.add(g2, c.dach);
       }
-      for (const F2 of traufe.map(([F3]) => F3).filter((F3) => F3 !== FL)) {
-        fb2(S, F2, -0.3, F2.L + 0.3, H - 0.1, H + 0.25, -0.4, 0.35, c.orn);
-        if (F2 === FR2) continue;
-        const bay = c.ra * 3, nb = Math.floor((F2.L - 2) / bay), off = (F2.L - nb * bay) / 2;
-        for (let i = 0; i < nb; i++) if ((i + (F2 === FX ? 1 : 0)) % 2 === 0 || F2.L < 20) treppenGiebel(S, F2, off + i * bay + 0.3, off + (i + 1) * bay - 0.3, H + 0.25, zw(r3, 6.5, 8), c.wand, c.orn, 3 + i % 2);
+      for (const F3 of traufe.map(([F4]) => F4).filter((F4) => F4 !== FL)) {
+        fb2(S, F3, -0.3, F3.L + 0.3, H - 0.1, H + 0.25, -0.4, 0.35, c.orn);
+        if (F3 === FR2) continue;
+        const bay = c.ra * 3, nb = Math.floor((F3.L - 2) / bay), off = (F3.L - nb * bay) / 2;
+        for (let i = 0; i < nb; i++) if ((i + (F3 === FX ? 1 : 0)) % 2 === 0 || F3.L < 20) treppenGiebel(S, F3, off + i * bay + 0.3, off + (i + 1) * bay - 0.3, H + 0.25, zw(r3, 6.5, 8), c.wand, c.orn, 3 + i % 2);
       }
       if (!fluegel2 && sk.rechts) treppenGiebel(S, endeRechts(FZ, T), 0.2, T - 0.2, H + 0.25, dh, c.wand, c.orn, 4);
       if (FL) treppenGiebel(S, endeLinks(FZ, T), 0.2, T - 0.2, H + 0.25, dh, c.wand, c.orn, 4);
@@ -138778,19 +139090,19 @@
     return skaliert(S, scene2, p2, Math.max(40, p2.w), Math.max(15, p2.d), magistraleRoh);
   }
   var magistrale = gedreht(magistraleLokal);
-  function bandFassade(S, F2, o3) {
-    const { n: n3, gh, y0 } = o3, L2 = F2.L, H = y0 + n3 * gh;
-    fb2(S, F2, 0, L2, y0, H, -1, -0.1, o3.glas ?? GLAS7);
+  function bandFassade(S, F3, o3) {
+    const { n: n3, gh, y0 } = o3, L2 = F3.L, H = y0 + n3 * gh;
+    fb2(S, F3, 0, L2, y0, H, -1, -0.1, o3.glas ?? GLAS7);
     for (let k3 = 0; k3 < n3; k3++) {
       const y2 = y0 + k3 * gh;
-      fb2(S, F2, -0.05, L2 + 0.05, y2, y2 + (o3.bru ?? 1), -0.3, 0.2, k3 % 2 && o3.bruest2 ? o3.bruest2 : o3.bruest);
-      if (o3.sims) fb2(S, F2, -0.05, L2 + 0.05, y2 + (o3.bru ?? 1), y2 + (o3.bru ?? 1) + 0.08, -0.1, 0.3, o3.sims);
+      fb2(S, F3, -0.05, L2 + 0.05, y2, y2 + (o3.bru ?? 1), -0.3, 0.2, k3 % 2 && o3.bruest2 ? o3.bruest2 : o3.bruest);
+      if (o3.sims) fb2(S, F3, -0.05, L2 + 0.05, y2 + (o3.bru ?? 1), y2 + (o3.bru ?? 1) + 0.08, -0.1, 0.3, o3.sims);
     }
-    fb2(S, F2, -0.05, L2 + 0.05, H, H + 0.8, -0.3, 0.25, o3.bruest);
+    fb2(S, F3, -0.05, L2 + 0.05, H, H + 0.8, -0.3, 0.25, o3.bruest);
     const ra = o3.raster ?? 3, nr3 = Math.max(1, Math.round(L2 / ra));
     for (let i = 0; i <= nr3; i++) {
       const u = i * L2 / nr3;
-      fb2(S, F2, u - (o3.rb ?? 0.12), u + (o3.rb ?? 0.12), y0, H, -0.1, o3.rt ?? 0.12, o3.rippe ?? o3.bruest);
+      fb2(S, F3, u - (o3.rb ?? 0.12), u + (o3.rb ?? 0.12), y0, H, -0.1, o3.rt ?? 0.12, o3.rippe ?? o3.bruest);
     }
     return H;
   }
@@ -138799,25 +139111,25 @@
     const blende = o3.blende ?? "#e9e6de", wand2 = o3.wand ?? "#d9d4c8";
     const vis = o3.sichtbar ?? ["+z", "+x"], ein = (q2) => vis.includes(q2) ? 1.6 : 0;
     S.quader(x0 + ein("-x"), 0, z0 + ein("-z"), x0 + w2 - ein("+x"), H, z0 + d3 - ein("+z"), wand2);
-    for (const F2 of vis.map((q2) => SEITE_RAHMEN[q2](x0, z0, w2, d3))) {
-      const L2 = F2.L;
-      fb2(S, F2, 0, L2, 0.3, eh - 0.6, -1.6, -1.5, GLAS_HELL4);
-      for (let u = 1.6; u < L2 - 0.5; u += 2) fb2(S, F2, u - 0.05, u + 0.05, 0.3, eh - 0.6, -1.6, -1.4, STAHL3);
-      fb2(S, F2, 0, L2, eh - 0.6, eh, -1.6, -0.2, "#3a3f44");
-      if (o3.stuetzen !== false) for (let u = 0.3; u < L2; u += 6) fb2(S, F2, u - 0.2, u + 0.2, 0.3, eh, -0.4, 0, "#d9d6cf");
+    for (const F3 of vis.map((q2) => SEITE_RAHMEN[q2](x0, z0, w2, d3))) {
+      const L2 = F3.L;
+      fb2(S, F3, 0, L2, 0.3, eh - 0.6, -1.6, -1.5, GLAS_HELL4);
+      for (let u = 1.6; u < L2 - 0.5; u += 2) fb2(S, F3, u - 0.05, u + 0.05, 0.3, eh - 0.6, -1.6, -1.4, STAHL3);
+      fb2(S, F3, 0, L2, eh - 0.6, eh, -1.6, -0.2, "#3a3f44");
+      if (o3.stuetzen !== false) for (let u = 0.3; u < L2; u += 6) fb2(S, F3, u - 0.2, u + 0.2, 0.3, eh, -0.4, 0, "#d9d6cf");
       if (g > 1) {
-        if (o3.mosaik && F2.L > 14) {
-          fb2(S, F2, 0, L2, eh, H - 0.4, -1.6, -0.05, wand2);
-          mosaik2(S, F2, 1.5, L2 - 1.5, eh + 0.6, H - 1.2, 0, r3, { nv: 4 });
+        if (o3.mosaik && F3.L > 14) {
+          fb2(S, F3, 0, L2, eh, H - 0.4, -1.6, -0.05, wand2);
+          mosaik2(S, F3, 1.5, L2 - 1.5, eh + 0.6, H - 1.2, 0, r3, { nv: 4 });
         } else {
-          for (let u = 0; u < L2 - 0.1; u += 3) fb2(S, F2, u + 0.05, Math.min(L2, u + 3) - 0.05, eh, H - 0.4, -1.6, -0.05, u / 3 % 2 ? blende : dunkler(blende, 0.04));
+          for (let u = 0; u < L2 - 0.1; u += 3) fb2(S, F3, u + 0.05, Math.min(L2, u + 3) - 0.05, eh, H - 0.4, -1.6, -0.05, u / 3 % 2 ? blende : dunkler(blende, 0.04));
         }
       }
-      fb2(S, F2, -0.6, L2 + 0.6, H - 0.4, H + 0.2, -1.6, 1.2, blende);
-      fb2(S, F2, -0.6, L2 + 0.6, H + 0.2, H + 0.32, -1.6, 1.25, "#c9cdd0");
+      fb2(S, F3, -0.6, L2 + 0.6, H - 0.4, H + 0.2, -1.6, 1.2, blende);
+      fb2(S, F3, -0.6, L2 + 0.6, H + 0.2, H + 0.32, -1.6, 1.25, "#c9cdd0");
       const namen = o3.namen ?? [];
       const nn = Math.min(namen.length, Math.max(1, Math.floor(L2 / 12)));
-      for (let i = 0; i < nn; i++) ftext2(scene2, F2, namen[(i + (F2.dx === 0 ? 2 : 0)) % namen.length], (i + 0.5) * L2 / nn, H - 0.1, 1.27, 0.5, L2 / nn - 2, o3.schrift ?? "#c8463c");
+      for (let i = 0; i < nn; i++) ftext2(scene2, F3, namen[(i + (F3.dx === 0 ? 2 : 0)) % namen.length], (i + 0.5) * L2 / nn, H - 0.1, 1.27, 0.5, L2 / nn - 2, o3.schrift ?? "#c8463c");
     }
     S.quader(x0 + 3, H + 0.2, z0 + 3, x0 + 7, H + 1.4, z0 + 6, "#c9cdd0");
     return H + 1.4;
@@ -138834,12 +139146,12 @@
     let top = 0;
     if (v === "prager") {
       const T = 14, zf = z0 + Math.max(T + 4, d3 * 0.42), L2 = w2 - 10;
-      const F2 = R5(x0 + 4, zf, 1, 0, L2);
+      const F3 = R5(x0 + 4, zf, 1, 0, L2);
       const cols = spalten(L2, [["F", 3.6], ["F", 3.6], ["F", 3.6], ["F", 3.6], ["T", 2.4]]);
       const mitte = cols[Math.floor(cols.length / 2)];
       const sk = sicht(p2);
-      top = plattenBlock(S, F2, T, { fa, r: r3, n: 12, cols, baender: true, aufzug: true, durchgang: [mitte.u0 - 4, mitte.u1 + 4], giebel: { rechts: sk.rechts, links: sk.links }, art: "glatt", salz: 2, treppeFarbig: fa.saniert, vorn: sk.vorn, rueck: sk.hinten });
-      const G3 = sk.rechts ? endeRechts(F2, T) : endeLinks(F2, T), Hs = 1.1 + 12 * 2.8;
+      top = plattenBlock(S, F3, T, { fa, r: r3, n: 12, cols, baender: true, aufzug: true, durchgang: [mitte.u0 - 4, mitte.u1 + 4], giebel: { rechts: sk.rechts, links: sk.links }, art: "glatt", salz: 2, treppeFarbig: fa.saniert, vorn: sk.vorn, rueck: sk.hinten });
+      const G3 = sk.rechts ? endeRechts(F3, T) : endeLinks(F3, T), Hs = 1.1 + 12 * 2.8;
       mosaik2(S, G3, 1.5, T - 1.5, Hs * 0.35, Hs - 3, 0.12, r3, { motiv: "sonne" });
       const px0 = x0 + w2 * 0.38, pz0 = zf + 7;
       if (z0 + d3 - 5 - pz0 > 8) top = Math.max(top, ladenpavillon(S, scene2, px0, pz0, x0 + w2 - 5 - px0, z0 + d3 - 5 - pz0, r3, { geschosse: 2, namen, mosaik: true, sichtbar: p2.sichtbar }));
@@ -138867,21 +139179,21 @@
       }
     } else if (v === "arkade") {
       const T = 12, zf = z0 + d3 - 4, L2 = w2 - 8;
-      const F2 = R5(x0 + 2, zf, 1, 0, L2);
+      const F3 = R5(x0 + 2, zf, 1, 0, L2);
       const cols = spalten(L2, MUSTER.wbs70b);
       const sk = sicht(p2);
-      top = plattenBlock(S, F2, T, { fa, r: r3, n: p2.geschosse && p2.geschosse > 5 ? Math.min(14, p2.geschosse) : 5, cols, y0: 4.6, laden: true, eingang: false, giebel: { rechts: sk.rechts, links: sk.links }, art: fa.saniert ? "feld" : "rippen", balkone: false, salz: 1, rueck: sk.hinten, aufzug: (p2.geschosse ?? 5) > 8 });
-      fb2(S, F2, 0, L2, 0, 4.6, -T, -3.6, "#3f4a53");
-      fb2(S, F2, 0, L2, 0.3, 3.6, -3.62, -3.5, GLAS_HELL4);
+      top = plattenBlock(S, F3, T, { fa, r: r3, n: p2.geschosse && p2.geschosse > 5 ? Math.min(14, p2.geschosse) : 5, cols, y0: 4.6, laden: true, eingang: false, giebel: { rechts: sk.rechts, links: sk.links }, art: fa.saniert ? "feld" : "rippen", balkone: false, salz: 1, rueck: sk.hinten, aufzug: (p2.geschosse ?? 5) > 8 });
+      fb2(S, F3, 0, L2, 0, 4.6, -T, -3.6, "#3f4a53");
+      fb2(S, F3, 0, L2, 0.3, 3.6, -3.62, -3.5, GLAS_HELL4);
       for (let u = 3; u < L2; u += 6) {
-        fb2(S, F2, u - 0.06, u + 0.06, 0.3, 3.6, -3.5, -3.4, STAHL3);
+        fb2(S, F3, u - 0.06, u + 0.06, 0.3, 3.6, -3.5, -3.4, STAHL3);
       }
-      fb2(S, F2, 0, L2, 3.6, 4.6, -3.6, -3.3, "#2f353a");
-      for (const c of cols) if (c.typ !== "L") fb2(S, F2, c.u1 - 0.35, c.u1 + 0.35, 0.3, 4.6, -0.8, 0, fa.panel[0]);
-      fb2(S, F2, 0, L2, 4, 4.6, -1.2, 0.2, fa.attika);
-      for (let i = 0; i < Math.floor(L2 / 12); i++) ftext2(scene2, teil2(F2, 0, L2, -3.3), namen[i % namen.length], 6 + i * 12, 4.1, 0.05, 0.5, 9, "#f4e9c8");
+      fb2(S, F3, 0, L2, 3.6, 4.6, -3.6, -3.3, "#2f353a");
+      for (const c of cols) if (c.typ !== "L") fb2(S, F3, c.u1 - 0.35, c.u1 + 0.35, 0.3, 4.6, -0.8, 0, fa.panel[0]);
+      fb2(S, F3, 0, L2, 4, 4.6, -1.2, 0.2, fa.attika);
+      for (let i = 0; i < Math.floor(L2 / 12); i++) ftext2(scene2, teil2(F3, 0, L2, -3.3), namen[i % namen.length], 6 + i * 12, 4.1, 0.05, 0.5, 9, "#f4e9c8");
       boden3(S, x0, zf - 3.6, x0 + w2, z0 + d3, PFLASTER2, 0.3, 0.09);
-      const G3 = endeRechts(F2, T);
+      const G3 = endeRechts(F3, T);
       formsteinwand(S, teil2(G3, 0.5, T - 0.5, 2.2), 0, T - 1, 0.36, 4, -0.15, 0.15, "#dcd6c8", waehle2(r3, ["kreis", "raute", "schlitz"]));
       mosaik2(S, G3, 1.5, T - 1.5, 6.5, top - 3, 0.12, r3, { motiv: "b\xE4nder" });
       for (let i = 0; i < 4; i++) {
@@ -138891,20 +139203,20 @@
       }
       hofGruen(S, r3, x0, z0, x0 + w2, zf - T, { spiel: false, waesche: false, maxBaeume: 5 });
       if (sk.links) {
-        const GL = endeLinks(F2, T);
+        const GL = endeLinks(F3, T);
         mosaik2(S, GL, 1.5, T - 1.5, 6.5, top - 3, 0.12, r3, { motiv: "sonne" });
       }
     } else if (v === "luecke") {
       const T = Math.min(12, d3 - 1), zf = z0 + d3, L2 = w2 - 0.4, sk = sicht(p2);
-      const F2 = R5(x0 + 0.2, zf, 1, 0, L2);
+      const F3 = R5(x0 + 0.2, zf, 1, 0, L2);
       const cols = spalten(L2, [["F", 3.6], ["L", 3], ["F", 3.6]], 0.6);
       const n3 = p2.geschosse ?? 5;
-      top = plattenBlock(S, F2, T, { fa, r: r3, n: n3, cols, y0: 4.2, laden: true, eingang: false, giebel: { rechts: sk.rechts, links: sk.links }, art: "glatt", balkone: false, salz: 4, rueck: sk.hinten, aufsatz: fa.saniert ? "flach" : false });
-      fb2(S, F2, 0, L2, 0, 4.2, -T, -2, "#3f4a53");
-      fb2(S, F2, 0.3, L2 - 0.3, 0.3, 3.4, -2.02, -1.9, GLAS_HELL4);
-      for (let u = 2.4; u < L2 - 1; u += 4.8) fb2(S, F2, u - 0.06, u + 0.06, 0.3, 3.4, -1.9, -1.8, STAHL3);
-      fb2(S, F2, 0, L2, 3.4, 4.2, -2, 0.25, fa.attika);
-      ftext2(scene2, F2, namen[0], L2 / 2, 3.8, 0.27, 0.5, L2 * 0.7, "#c8463c");
+      top = plattenBlock(S, F3, T, { fa, r: r3, n: n3, cols, y0: 4.2, laden: true, eingang: false, giebel: { rechts: sk.rechts, links: sk.links }, art: "glatt", balkone: false, salz: 4, rueck: sk.hinten, aufsatz: fa.saniert ? "flach" : false });
+      fb2(S, F3, 0, L2, 0, 4.2, -T, -2, "#3f4a53");
+      fb2(S, F3, 0.3, L2 - 0.3, 0.3, 3.4, -2.02, -1.9, GLAS_HELL4);
+      for (let u = 2.4; u < L2 - 1; u += 4.8) fb2(S, F3, u - 0.06, u + 0.06, 0.3, 3.4, -1.9, -1.8, STAHL3);
+      fb2(S, F3, 0, L2, 3.4, 4.2, -2, 0.25, fa.attika);
+      ftext2(scene2, F3, namen[0], L2 / 2, 3.8, 0.27, 0.5, L2 * 0.7, "#c8463c");
       if (d3 > T + 2) hofGruen(S, r3, x0, z0, x0 + w2, zf - T, { spiel: false, waesche: false, teppich: false, weg: false, maxBaeume: 2 });
     } else {
       const a2 = 20, px2 = x0 + w2 - a2 - 6, pz5 = z0 + 4;
@@ -138929,8 +139241,8 @@
     const v = p2.variante ?? waehle2(rng3(`pz:${p2.seed}`), ["prager", "arkade", "ensemble"]);
     return platteZentrumGedreht(S, scene2, { ...p2, variante: v });
   }
-  function freitreppe(S, F2, u0, u1, hoehe, stufen, tiefe, farbe3) {
-    for (let i = 0; i < stufen; i++) fb2(S, F2, u0, u1, 0, hoehe * (stufen - i) / stufen + 0.3, 0, tiefe * (i + 1) / stufen, i % 2 ? farbe3 : dunkler(farbe3, 0.03));
+  function freitreppe(S, F3, u0, u1, hoehe, stufen, tiefe, farbe3) {
+    for (let i = 0; i < stufen; i++) fb2(S, F3, u0, u1, 0, hoehe * (stufen - i) / stufen + 0.3, 0, tiefe * (i + 1) / stufen, i % 2 ? farbe3 : dunkler(farbe3, 0.03));
   }
   function kulturRoh(S, scene2, p2) {
     const r3 = rng3(`kh:${p2.seed}`);
@@ -138986,11 +139298,11 @@
       S.quader(bx, 0, hz1 - 1, bx + bw - 1, Hf, bz + bd - 1, "#33404a");
       S.quader(bx, Hf - 0.05, hz1 - 1, bx + bw - 1, Hf + 0.25, bz + bd - 1, "#b9b5ab");
       const FF = RZ(bx, hz1 - 1, bw, fd2 + 1), FFX = RX(bx, hz1 - 1, bw, fd2 + 1);
-      for (const F2 of [FF, FFX]) {
-        fb2(S, F2, 0, F2.L, 0.3, Hf - 1, -1, -0.92, GLAS_HELL4);
-        for (let u = 0; u <= F2.L + 0.01; u += F2.L / Math.round(F2.L / 2.4)) fb2(S, F2, u - 0.07, u + 0.07, 0.3, Hf - 1, -1, -0.8, "#d9dcdf");
-        fb2(S, F2, 0, F2.L, 4.3, 4.45, -1, -0.8, "#d9dcdf");
-        fb2(S, F2, -2.5, F2.L + 0.5, Hf - 1, Hf + 0.2, -1, 2.5, "#f1efe9");
+      for (const F3 of [FF, FFX]) {
+        fb2(S, F3, 0, F3.L, 0.3, Hf - 1, -1, -0.92, GLAS_HELL4);
+        for (let u = 0; u <= F3.L + 0.01; u += F3.L / Math.round(F3.L / 2.4)) fb2(S, F3, u - 0.07, u + 0.07, 0.3, Hf - 1, -1, -0.8, "#d9dcdf");
+        fb2(S, F3, 0, F3.L, 4.3, 4.45, -1, -0.8, "#d9dcdf");
+        fb2(S, F3, -2.5, F3.L + 0.5, Hf - 1, Hf + 0.2, -1, 2.5, "#f1efe9");
       }
       ftext2(scene2, FF, p2.name ?? "Stadthalle", bw * 0.5, Hf - 0.4, 2.55, 0.9, bw * 0.4, "#c8463c");
       freitreppe(S, R5(bx + bw * 0.25, bz + bd, 1, 0, bw * 0.5), 0, bw * 0.5, 0.6, 3, 2.4, "#d8d2c4");
@@ -139009,12 +139321,12 @@
       const fx0 = s2 < 0 ? cx - mb / 2 - fw : cx + mb / 2, fz0 = zf - fd - 2;
       S.quader(fx0, 0, fz0, fx0 + fw - (s2 > 0 ? 0.4 : 0), H1, fz0 + fd - 0.4, GLAS7);
       S.quader(fx0, H1 - 0.05, fz0, fx0 + fw - 0.2, H1 + 0.1, fz0 + fd - 0.2, "#a9a59c");
-      const F2 = RZ(fx0, fz0, fw, fd), L2 = [];
+      const F3 = RZ(fx0, fz0, fw, fd), L2 = [];
       for (const u of achsen3(0, fw, 3.2, 0.8)) for (let k4 = 0; k4 < 2; k4++) L2.push({ u0: u - 0.75, u1: u + 0.75, v0: 1.2 + k4 * 4.2, v1: 3.5 + k4 * 4.2, bogen: k4 === 0 });
-      fwand(S, F2, 0, fw, 0, H1, -0.4, 0, putz2, L2);
-      for (const l of L2) fb2(S, F2, l.u0 - 0.15, l.u1 + 0.15, l.v0 - 0.12, l.v0, 0, 0.22, orn);
-      fb2(S, F2, -0.3, fw + 0.3, 0, 0.9, -0.4, 0.2, "#c9bb9e");
-      fb2(S, F2, -0.5, fw + 0.5, H1, H1 + 0.6, -0.4, 0.7, orn);
+      fwand(S, F3, 0, fw, 0, H1, -0.4, 0, putz2, L2);
+      for (const l of L2) fb2(S, F3, l.u0 - 0.15, l.u1 + 0.15, l.v0 - 0.12, l.v0, 0, 0.22, orn);
+      fb2(S, F3, -0.3, fw + 0.3, 0, 0.9, -0.4, 0.2, "#c9bb9e");
+      fb2(S, F3, -0.5, fw + 0.5, H1, H1 + 0.6, -0.4, 0.7, orn);
       if (s2 > 0) {
         const FX = RX(fx0, fz0, fw, fd), L22 = [];
         for (const u of achsen3(0, fd, 3.2, 0.8)) for (let k4 = 0; k4 < 2; k4++) L22.push({ u0: u - 0.75, u1: u + 0.75, v0: 1.2 + k4 * 4.2, v1: 3.5 + k4 * 4.2, bogen: k4 === 0 });
@@ -139145,10 +139457,10 @@
       const sw2 = Math.min(w2 - 6, 56), sd = Math.min(d3 - 6, 40), sx = x0 + (w2 - sw2) / 2, sz = z0 + 3;
       S.quader(sx, 0, sz, sx + sw2 - 0.6, y0, sz + sd - 0.6, "#33404a");
       S.quader(sx, y0 - 0.05, sz, sx + sw2 - 0.6, y0 + 0.3, sz + sd - 0.6, "#b3afa5");
-      for (const F2 of [RZ(sx, sz, sw2, sd), RX(sx, sz, sw2, sd)]) {
-        fb2(S, F2, 0, F2.L, 0.3, y0 - 1.6, -0.6, -0.5, GLAS_HELL4);
-        for (let u = 0; u <= F2.L; u += F2.L / Math.round(F2.L / 3)) fb2(S, F2, u - 0.15, u + 0.15, 0.3, y0 - 1.6, -0.6, 0.2, "#e3e0d8");
-        fb2(S, F2, -0.3, F2.L + 0.3, y0 - 1.6, y0, -0.6, 0.4, "#e3e0d8");
+      for (const F3 of [RZ(sx, sz, sw2, sd), RX(sx, sz, sw2, sd)]) {
+        fb2(S, F3, 0, F3.L, 0.3, y0 - 1.6, -0.6, -0.5, GLAS_HELL4);
+        for (let u = 0; u <= F3.L; u += F3.L / Math.round(F3.L / 3)) fb2(S, F3, u - 0.15, u + 0.15, 0.3, y0 - 1.6, -0.6, 0.2, "#e3e0d8");
+        fb2(S, F3, -0.3, F3.L + 0.3, y0 - 1.6, y0, -0.6, 0.4, "#e3e0d8");
       }
       if (v === "rund") {
         const rr3 = 13, tx2 = sx + sw2 * 0.55, tz2 = sz + sd * 0.45;
@@ -139170,19 +139482,19 @@
       }
       const tw = Math.min(34, sw2 - 10), td = 20, tx = sx + (sw2 - tw) / 2, tz = sz + (sd - td) / 2;
       S.quader(tx, y0, tz, tx + tw - 0.4, Ht, tz + td - 0.4, "#3d4a55");
-      for (const F2 of [RZ(tx, tz, tw, td), RX(tx, tz, tw, td)]) {
-        const nr3 = Math.round(F2.L / 1.6);
+      for (const F3 of [RZ(tx, tz, tw, td), RX(tx, tz, tw, td)]) {
+        const nr3 = Math.round(F3.L / 1.6);
         for (let i = 0; i <= nr3; i++) {
-          const u = i * F2.L / nr3;
-          fb2(S, F2, u - 0.18, u + 0.18, y0, Ht - 2 * gh2, -0.4, 0.45, i % 4 === 0 ? "#f0ede6" : "#e2ded5");
+          const u = i * F3.L / nr3;
+          fb2(S, F3, u - 0.18, u + 0.18, y0, Ht - 2 * gh2, -0.4, 0.45, i % 4 === 0 ? "#f0ede6" : "#e2ded5");
         }
-        for (let k3 = 0; k3 < n4 - 2; k3++) fb2(S, F2, 0, F2.L, y0 + k3 * gh2, y0 + k3 * gh2 + 0.9, -0.4, 0.25, "#d9d5cb");
-        fb2(S, F2, -0.6, F2.L + 0.6, Ht - 2 * gh2, Ht - 2 * gh2 + 0.8, -0.4, 0.9, "#f0ede6");
-        fb2(S, F2, 1.4, F2.L - 1.4, Ht - 2 * gh2 + 0.8, Ht, -1.6, -1.5, GLAS_HELL4);
-        fb2(S, F2, -0.6, 1, Ht - 2 * gh2, Ht + 9, -1, 0.6, "#f0ede6");
-        fb2(S, F2, F2.L - 1, F2.L + 0.6, Ht - 2 * gh2, Ht + 9, -1, 0.6, "#f0ede6");
-        for (let i = 1; i < 4; i++) fb2(S, F2, i * F2.L / 4 - 0.4, i * F2.L / 4 + 0.4, Ht, Ht + 9, -1, 0.3, "#f0ede6");
-        fb2(S, F2, -0.8, F2.L + 0.8, Ht + 9, Ht + 10.4, -1.2, 0.8, "#f0ede6");
+        for (let k3 = 0; k3 < n4 - 2; k3++) fb2(S, F3, 0, F3.L, y0 + k3 * gh2, y0 + k3 * gh2 + 0.9, -0.4, 0.25, "#d9d5cb");
+        fb2(S, F3, -0.6, F3.L + 0.6, Ht - 2 * gh2, Ht - 2 * gh2 + 0.8, -0.4, 0.9, "#f0ede6");
+        fb2(S, F3, 1.4, F3.L - 1.4, Ht - 2 * gh2 + 0.8, Ht, -1.6, -1.5, GLAS_HELL4);
+        fb2(S, F3, -0.6, 1, Ht - 2 * gh2, Ht + 9, -1, 0.6, "#f0ede6");
+        fb2(S, F3, F3.L - 1, F3.L + 0.6, Ht - 2 * gh2, Ht + 9, -1, 0.6, "#f0ede6");
+        for (let i = 1; i < 4; i++) fb2(S, F3, i * F3.L / 4 - 0.4, i * F3.L / 4 + 0.4, Ht, Ht + 9, -1, 0.3, "#f0ede6");
+        fb2(S, F3, -0.8, F3.L + 0.8, Ht + 9, Ht + 10.4, -1.2, 0.8, "#f0ede6");
       }
       S.quader(tx, Ht + 9, tz, tx + 0.8, Ht + 10.4, tz + td, "#f0ede6");
       S.quader(tx, Ht + 9, tz, tx + tw, Ht + 10.4, tz + 0.8, "#f0ede6");
@@ -139197,11 +139509,11 @@
     S.quader(px2, 0, pz5, px2 + pw - 1, Hp, pz5 + pd - 1, "#33404a");
     S.quader(px2, Hp - 0.05, pz5, px2 + pw - 1, Hp + 0.3, pz5 + pd - 1, "#b3afa5");
     for (let i = 0; i < 8; i++) S.box(1.2, 0.6, 1.2, px2 + pw * 0.75 + i % 4 * 2.4, Hp + 0.6, pz5 + 4 + Math.floor(i / 4) * 3, "#d9dcdf");
-    for (const F2 of [RZ(px2, pz5, pw, pd), RX(px2, pz5, pw, pd)]) {
-      fb2(S, F2, 0, F2.L, 0.3, 4.2, -1, -0.9, GLAS_HELL4);
-      for (let u = 0; u <= F2.L + 0.01; u += F2.L / Math.round(F2.L / 2.5)) fb2(S, F2, u - 0.06, u + 0.06, 0.3, 4.2, -1, -0.8, "#c9cdd0");
-      for (let u = 0; u < F2.L; u += 3) fb2(S, F2, u + 0.05, Math.min(F2.L, u + 3) - 0.05, 4.2, Hp, -1, 0.05, u / 3 % 2 ? "#e6dfcf" : "#dcd4c2");
-      fb2(S, F2, -0.5, F2.L + 0.5, Hp, Hp + 0.6, -1, 0.6, "#f1efe9");
+    for (const F3 of [RZ(px2, pz5, pw, pd), RX(px2, pz5, pw, pd)]) {
+      fb2(S, F3, 0, F3.L, 0.3, 4.2, -1, -0.9, GLAS_HELL4);
+      for (let u = 0; u <= F3.L + 0.01; u += F3.L / Math.round(F3.L / 2.5)) fb2(S, F3, u - 0.06, u + 0.06, 0.3, 4.2, -1, -0.8, "#c9cdd0");
+      for (let u = 0; u < F3.L; u += 3) fb2(S, F3, u + 0.05, Math.min(F3.L, u + 3) - 0.05, 4.2, Hp, -1, 0.05, u / 3 % 2 ? "#e6dfcf" : "#dcd4c2");
+      fb2(S, F3, -0.5, F3.L + 0.5, Hp, Hp + 0.6, -1, 0.6, "#f1efe9");
     }
     const FPZ = RZ(px2, pz5, pw, pd);
     fb2(S, FPZ, pw * 0.15, pw * 0.45, 3.8, 4.2, 0, 6, "#f1efe9");
@@ -139278,13 +139590,13 @@
       const wand2 = (pa, pb, farbe3) => {
         for (const [q0, q1] of [[0, 0.5], [0.5, 1]]) {
           const A = [pa[0] + (pb[0] - pa[0]) * q0, pa[1] + (pb[1] - pa[1]) * q0], B8 = [pa[0] + (pb[0] - pa[0]) * q1, pa[1] + (pb[1] - pa[1]) * q1];
-          const L2 = wurzelSumme15(B8[0] - A[0], B8[1] - A[1]), F2 = R5(A[0], A[1], (B8[0] - A[0]) / L2, (B8[1] - A[1]) / L2, L2);
+          const L2 = wurzelSumme15(B8[0] - A[0], B8[1] - A[1]), F3 = R5(A[0], A[1], (B8[0] - A[0]) / L2, (B8[1] - A[1]) / L2, L2);
           const ya = h3(A[0], A[1]) - 0.35, yb = h3(B8[0], B8[1]) - 0.35;
-          fpoly2(S, F2, [[0, 0.5], [L2, 0.5], [L2, yb], [0, ya]], -0.08, 0, farbe3);
+          fpoly2(S, F3, [[0, 0.5], [L2, 0.5], [L2, yb], [0, ya]], -0.08, 0, farbe3);
           const n3 = Math.max(1, Math.round(L2 / 1.8));
           for (let i = 1; i < n3; i++) {
             const u = i * L2 / n3;
-            fb2(S, F2, u - 0.06, u + 0.06, 0.5, ya + (yb - ya) * (i / n3), -0.1, 0.05, "#e9e6de");
+            fb2(S, F3, u - 0.06, u + 0.06, 0.5, ya + (yb - ya) * (i / n3), -0.1, 0.05, "#e9e6de");
           }
         }
       };
@@ -139301,10 +139613,10 @@
     if (v === "faltdach") {
       const pw = Math.min(w2 - 8, 18), pd = Math.min(d3 - 9, 11), px2 = x0 + 3, pz5 = z0 + 3, H2 = 3.8;
       S.quader(px2 + 0.3, 0.3, pz5 + 0.3, px2 + pw - 0.3, H2, pz5 + pd - 0.3, "#3a4650");
-      for (const F2 of [RZ(px2, pz5, pw, pd), RX(px2, pz5, pw, pd)]) {
-        fb2(S, F2, 0, F2.L, 0.3, H2, -0.35, -0.28, GLAS_HELL4);
-        for (let u = 0; u <= F2.L + 0.01; u += F2.L / Math.round(F2.L / 1.8)) fb2(S, F2, u - 0.05, u + 0.05, 0.3, H2, -0.35, -0.2, "#e9e6de");
-        fb2(S, F2, 0, F2.L, 0.3, 0.9, -0.35, -0.15, "#d9d4c8");
+      for (const F3 of [RZ(px2, pz5, pw, pd), RX(px2, pz5, pw, pd)]) {
+        fb2(S, F3, 0, F3.L, 0.3, H2, -0.35, -0.28, GLAS_HELL4);
+        for (let u = 0; u <= F3.L + 0.01; u += F3.L / Math.round(F3.L / 1.8)) fb2(S, F3, u - 0.05, u + 0.05, 0.3, H2, -0.35, -0.2, "#e9e6de");
+        fb2(S, F3, 0, F3.L, 0.3, 0.9, -0.35, -0.15, "#d9d4c8");
       }
       const FZ2 = RZ(px2 - 1, pz5 - 1, pw + 2, pd + 2), nz = Math.round((pw + 2) / 3), zb = (pw + 2) / nz;
       const pk = [[0, H2]];
@@ -139336,16 +139648,16 @@
     if (v === "eisbar") {
       const uw = Math.min(w2 - 10, 20), ud = Math.min(d3 - 11, 14), ux = x0 + 4, uz = z0 + 3, h1 = 3.9, h22 = 3.6;
       S.quader(ux + 1.5, 0.3, uz + 1.5, ux + uw - 1.5, h1, uz + ud - 1.5, "#3a4650");
-      for (const F2 of [RZ(ux + 1.5, uz + 1.5, uw - 3, ud - 3), RX(ux + 1.5, uz + 1.5, uw - 3, ud - 3)]) {
-        fb2(S, F2, 0, F2.L, 0.3, h1, 0, 0.06, GLAS_HELL4);
-        for (let u = 0; u <= F2.L + 0.01; u += F2.L / Math.round(F2.L / 1.6)) fb2(S, F2, u - 0.05, u + 0.05, 0.3, h1, 0, 0.12, "#e9e6de");
+      for (const F3 of [RZ(ux + 1.5, uz + 1.5, uw - 3, ud - 3), RX(ux + 1.5, uz + 1.5, uw - 3, ud - 3)]) {
+        fb2(S, F3, 0, F3.L, 0.3, h1, 0, 0.06, GLAS_HELL4);
+        for (let u = 0; u <= F3.L + 0.01; u += F3.L / Math.round(F3.L / 1.6)) fb2(S, F3, u - 0.05, u + 0.05, 0.3, h1, 0, 0.12, "#e9e6de");
       }
       S.quader(ux, h1, uz, ux + uw, h1 + 0.5, uz + ud, "#f3f1ec");
       S.quader(ux + 0.2, h1 + 0.5, uz + 0.2, ux + uw - 0.2, h1 + h22, uz + ud - 0.2, "#3a4650");
-      for (const F2 of [RZ(ux, uz, uw, ud), RX(ux, uz, uw, ud)]) {
-        fb2(S, F2, 0.2, F2.L - 0.2, h1 + 0.5, h1 + 1.3, -0.2, 0, "#e9cfa0");
-        fb2(S, F2, 0.2, F2.L - 0.2, h1 + 1.3, h1 + h22 - 0.2, -0.2, -0.12, GLAS_GRUEN);
-        for (let u = 0.2; u <= F2.L - 0.19; u += (F2.L - 0.4) / Math.round((F2.L - 0.4) / 1.4)) fb2(S, F2, u - 0.04, u + 0.04, h1 + 1.3, h1 + h22 - 0.2, -0.2, -0.05, "#f3f1ec");
+      for (const F3 of [RZ(ux, uz, uw, ud), RX(ux, uz, uw, ud)]) {
+        fb2(S, F3, 0.2, F3.L - 0.2, h1 + 0.5, h1 + 1.3, -0.2, 0, "#e9cfa0");
+        fb2(S, F3, 0.2, F3.L - 0.2, h1 + 1.3, h1 + h22 - 0.2, -0.2, -0.12, GLAS_GRUEN);
+        for (let u = 0.2; u <= F3.L - 0.19; u += (F3.L - 0.4) / Math.round((F3.L - 0.4) / 1.4)) fb2(S, F3, u - 0.04, u + 0.04, h1 + 1.3, h1 + h22 - 0.2, -0.2, -0.05, "#f3f1ec");
       }
       S.quader(ux - 0.5, h1 + h22, uz - 0.5, ux + uw + 0.5, h1 + h22 + 0.35, uz + ud + 0.5, "#f3f1ec");
       const FT = teil2(RZ(ux, uz, uw, ud), 0, uw, -ud * 0.4);
@@ -139525,13 +139837,13 @@
     if (v === "kohle") {
       const kw2 = Math.min(30, w2 * 0.45), kd = 20, kx = x0 + 4, kz2 = z0 + 4, Hk = 18;
       S.quader(kx, 0, kz2, kx + kw2, Hk, kz2 + kd, ziegel);
-      for (const F2 of [RZ(kx, kz2, kw2, kd), RX(kx, kz2, kw2, kd)]) {
-        for (const u of achsen3(0, F2.L, 4, 1.2)) {
-          fb2(S, F2, u - 1, u + 1, 2, Hk - 3, 0, 0.06, "#56636c");
-          for (let y2 = 4; y2 < Hk - 3; y2 += 2.5) fb2(S, F2, u - 1, u + 1, y2 - 0.05, y2 + 0.05, 0, 0.1, "#d9d4c8");
-          fb2(S, F2, u - 1.4, u - 1, 0.3, Hk, 0, 0.3, "#9e5c47");
+      for (const F3 of [RZ(kx, kz2, kw2, kd), RX(kx, kz2, kw2, kd)]) {
+        for (const u of achsen3(0, F3.L, 4, 1.2)) {
+          fb2(S, F3, u - 1, u + 1, 2, Hk - 3, 0, 0.06, "#56636c");
+          for (let y2 = 4; y2 < Hk - 3; y2 += 2.5) fb2(S, F3, u - 1, u + 1, y2 - 0.05, y2 + 0.05, 0, 0.1, "#d9d4c8");
+          fb2(S, F3, u - 1.4, u - 1, 0.3, Hk, 0, 0.3, "#9e5c47");
         }
-        fb2(S, F2, -0.2, F2.L + 0.2, Hk - 1.2, Hk, -0.2, 0.3, "#9e5c47");
+        fb2(S, F3, -0.2, F3.L + 0.2, Hk - 1.2, Hk, -0.2, 0.3, "#9e5c47");
       }
       const g = dachProfil(kw2 + 0.6, kd + 0.6, 3, 2.5, "x");
       g.translate(kx + kw2 / 2, Hk, kz2 + kd / 2);
@@ -139539,7 +139851,7 @@
       S.quader(kx + kw2 * 0.3, Hk + 3, kz2 + kd * 0.4, kx + kw2 * 0.7, Hk + 5, kz2 + kd * 0.6, "#9aa1a7");
       const bxx = kx + kw2 + 2, bzz = kz2 + 2, Hb = 26;
       S.quader(bxx, 0, bzz, bxx + 10, Hb, bzz + 12, "#c7c3b8");
-      for (const F2 of [RZ(bxx, bzz, 10, 12), RX(bxx, bzz, 10, 12)]) for (let y2 = 3; y2 < Hb; y2 += 3) fb2(S, F2, -0.05, F2.L + 0.05, y2 - 0.06, y2 + 0.06, 0, 0.05, "#aaa69c");
+      for (const F3 of [RZ(bxx, bzz, 10, 12), RX(bxx, bzz, 10, 12)]) for (let y2 = 3; y2 < Hb; y2 += 3) fb2(S, F3, -0.05, F3.L + 0.05, y2 - 0.06, y2 + 0.06, 0, 0.05, "#aaa69c");
       fb2(S, RX(bxx, bzz, 10, 12), 3, 9, Hb - 5, Hb - 2, 0, 0.06, "#56636c");
       const fx = x0 + w2 - 6, fzz = z0 + d3 - 10;
       balken3(S, [fx, 1.2, fzz], [bxx + 9, Hb - 3, bzz + 10], 2.2, 2, "#9aa1a7");
@@ -139565,10 +139877,10 @@
     if (v === "gas") {
       const hw = Math.min(w2 - 16, 36), hd = Math.min(d3 - 14, 24), hx = x0 + 4, hz = z0 + 4, H2 = 14;
       S.quader(hx, 0, hz, hx + hw, H2, hz + hd, "#e9ebec");
-      for (const F2 of [RZ(hx, hz, hw, hd), RX(hx, hz, hw, hd)]) {
-        for (let u = 0.4; u < F2.L; u += 0.8) fb2(S, F2, u - 0.08, u + 0.08, 0.3, H2, 0, 0.12, "#dadddf");
-        fb2(S, F2, 0, F2.L, H2 - 3.2, H2 - 1.4, 0, 0.16, "#2f6f8f");
-        for (const u of achsen3(0, F2.L, 6, 1)) fb2(S, F2, u - 1.6, u + 1.6, 0.3, 4.2, 0, 0.2, "#9aa1a7");
+      for (const F3 of [RZ(hx, hz, hw, hd), RX(hx, hz, hw, hd)]) {
+        for (let u = 0.4; u < F3.L; u += 0.8) fb2(S, F3, u - 0.08, u + 0.08, 0.3, H2, 0, 0.12, "#dadddf");
+        fb2(S, F3, 0, F3.L, H2 - 3.2, H2 - 1.4, 0, 0.16, "#2f6f8f");
+        for (const u of achsen3(0, F3.L, 6, 1)) fb2(S, F3, u - 1.6, u + 1.6, 0.3, 4.2, 0, 0.2, "#9aa1a7");
       }
       S.quader(hx, H2, hz, hx + hw, H2 + 0.2, hz + hd, "#a9adb0");
       const sx = hx + hw + 5, sz = hz + hd * 0.5;
@@ -139596,10 +139908,10 @@
     }
     const uw = 16, ud = 12, ux = x0 + 4, uz = z0 + 4, H = 7;
     S.quader(ux, 0, uz, ux + uw, H, uz + ud, "#cfc8b8");
-    for (const F2 of [RZ(ux, uz, uw, ud), RX(ux, uz, uw, ud)]) {
-      for (let u = 0; u < F2.L; u += 3) fb2(S, F2, u + 0.06, Math.min(F2.L, u + 3) - 0.06, 0.3, H - 0.6, 0, 0.12, u / 3 % 2 ? "#cfc8b8" : "#c6bfae");
-      fb2(S, F2, 0.5, F2.L - 0.5, H - 2.2, H - 1.2, 0.12, 0.18, "#56636c");
-      fb2(S, F2, -0.1, F2.L + 0.1, H - 0.6, H, -0.1, 0.25, "#e3ded1");
+    for (const F3 of [RZ(ux, uz, uw, ud), RX(ux, uz, uw, ud)]) {
+      for (let u = 0; u < F3.L; u += 3) fb2(S, F3, u + 0.06, Math.min(F3.L, u + 3) - 0.06, 0.3, H - 0.6, 0, 0.12, u / 3 % 2 ? "#cfc8b8" : "#c6bfae");
+      fb2(S, F3, 0.5, F3.L - 0.5, H - 2.2, H - 1.2, 0.12, 0.18, "#56636c");
+      fb2(S, F3, -0.1, F3.L + 0.1, H - 0.6, H, -0.1, 0.25, "#e3ded1");
     }
     fb2(S, RZ(ux, uz, uw, ud), 2, 5, 0.3, 3.4, 0.12, 0.2, "#6b7680");
     S.quader(ux + 0.4, H, uz + 0.4, ux + uw - 0.4, H + 0.15, uz + ud - 0.4, "#9e9b94");
@@ -139617,44 +139929,44 @@
     if (p2.w >= min[0] && p2.d >= min[1]) return heizwerkRoh(S, scene2, { ...p2, variante: v });
     return skaliert(S, scene2, { ...p2, variante: v }, Math.max(min[0], p2.w), Math.max(min[1], p2.d), heizwerkRoh);
   }
-  function schulTrakt(S, scene2, F2, T, o3) {
-    const { n: n3, r: r3 } = o3, gh = 3.3, y0 = 0.9, L2 = F2.L, H = y0 + n3 * gh;
-    fb2(S, F2, 0, L2, 0, H, -T, -1, "#cfc8b8");
-    fb2(S, F2, 0, L2, H - 0.02, H + 0.12, -T, -0.95, "#9e9b94");
-    fb2(S, F2, 0, L2, H, H + 0.6, -T, -T + 0.25, "#e3ded1");
+  function schulTrakt(S, scene2, F3, T, o3) {
+    const { n: n3, r: r3 } = o3, gh = 3.3, y0 = 0.9, L2 = F3.L, H = y0 + n3 * gh;
+    fb2(S, F3, 0, L2, 0, H, -T, -1, "#cfc8b8");
+    fb2(S, F3, 0, L2, H - 0.02, H + 0.12, -T, -0.95, "#9e9b94");
+    fb2(S, F3, 0, L2, H, H + 0.6, -T, -T + 0.25, "#e3ded1");
     const farben = o3.farben;
     for (let k3 = 0; k3 < n3; k3++) {
       const y2 = y0 + k3 * gh;
-      for (let u = 0; u < L2; u += 3.6) fb2(S, F2, u + 0.06, Math.min(L2, u + 3.6) - 0.06, y2 + 0.06, y2 + 1.05, -0.3, 0.18, farben[(k3 + (o3.salz ?? 0)) % farben.length]);
-      fb2(S, F2, 0, L2, y2 + 1.05, y2 + gh, -1, -0.9, GLAS_HELL4);
-      for (let u = 0; u <= L2 + 0.01; u += 1.2) fb2(S, F2, u - 0.05, u + 0.05, y2 + 1.05, y2 + gh, -1, -0.82, "#f2f1ec");
-      fb2(S, F2, 0, L2, y2 + 2.45, y2 + 2.52, -1, -0.82, "#f2f1ec");
+      for (let u = 0; u < L2; u += 3.6) fb2(S, F3, u + 0.06, Math.min(L2, u + 3.6) - 0.06, y2 + 0.06, y2 + 1.05, -0.3, 0.18, farben[(k3 + (o3.salz ?? 0)) % farben.length]);
+      fb2(S, F3, 0, L2, y2 + 1.05, y2 + gh, -1, -0.9, GLAS_HELL4);
+      for (let u = 0; u <= L2 + 0.01; u += 1.2) fb2(S, F3, u - 0.05, u + 0.05, y2 + 1.05, y2 + gh, -1, -0.82, "#f2f1ec");
+      fb2(S, F3, 0, L2, y2 + 2.45, y2 + 2.52, -1, -0.82, "#f2f1ec");
     }
-    for (let u = 0; u <= L2 + 0.01; u += 7.2) fb2(S, F2, u - 0.15, u + 0.15, y0, H, -0.3, 0.25, "#e3ded1");
-    fb2(S, F2, 0, L2, 0, y0, -1, 0.25, "#9a958c");
-    fb2(S, F2, -0.1, L2 + 0.1, H, H + 0.6, -1, 0.25, "#e3ded1");
-    const G3 = endeRechts(F2, T);
+    for (let u = 0; u <= L2 + 0.01; u += 7.2) fb2(S, F3, u - 0.15, u + 0.15, y0, H, -0.3, 0.25, "#e3ded1");
+    fb2(S, F3, 0, L2, 0, y0, -1, 0.25, "#9a958c");
+    fb2(S, F3, -0.1, L2 + 0.1, H, H + 0.6, -1, 0.25, "#e3ded1");
+    const G3 = endeRechts(F3, T);
     if (o3.giebel !== false) {
       fb2(S, G3, -0.3, T, 0, H + 0.6, -0.2, 0.15, "#d6d0c2");
       for (let k3 = 0; k3 < n3; k3++) fb2(S, G3, T / 2 - 0.6, T / 2 + 0.6, y0 + k3 * gh + 1.2, y0 + k3 * gh + 2.6, 0.15, 0.2, GLAS7);
       mosaik2(S, G3, 1.5, T * 0.4, y0 + 1.5, H - 1.5, 0.15, r3, { motiv: "figur", nu: 4 });
     }
     const tu2 = L2 * (o3.treppe ?? 0.3);
-    fb2(S, F2, tu2 - 2.2, tu2 + 2.2, 0, H + 1.4, -0.3, 2, "#e3ded1");
-    fb2(S, F2, tu2 - 0.8, tu2 + 0.8, 1.2, H - 0.5, 1.9, 2.06, GLAS_HELL4);
-    fb2(S, F2, tu2 - 1.3, tu2 + 1.3, 0.3, 2.5, 1.95, 2.08, "#5a6570");
-    fb2(S, F2, tu2 - 2.6, tu2 + 2.6, 2.6, 2.85, 0, 4, "#f2f1ec");
-    if (o3.name) ftext2(scene2, F2, o3.name, tu2, H + 0.6, 2.1, 0.6, 4.2, "#2a3a4a");
+    fb2(S, F3, tu2 - 2.2, tu2 + 2.2, 0, H + 1.4, -0.3, 2, "#e3ded1");
+    fb2(S, F3, tu2 - 0.8, tu2 + 0.8, 1.2, H - 0.5, 1.9, 2.06, GLAS_HELL4);
+    fb2(S, F3, tu2 - 1.3, tu2 + 1.3, 0.3, 2.5, 1.95, 2.08, "#5a6570");
+    fb2(S, F3, tu2 - 2.6, tu2 + 2.6, 2.6, 2.85, 0, 4, "#f2f1ec");
+    if (o3.name) ftext2(scene2, F3, o3.name, tu2, H + 0.6, 2.1, 0.6, 4.2, "#2a3a4a");
     return H + 1.4;
   }
   function turnhalle(S, scene2, x0, z0, w2, d3, r3) {
     const H = 8;
     S.quader(x0, 0, z0, x0 + w2, H, z0 + d3, "#d6d0c2");
-    for (const F2 of [RZ(x0, z0, w2, d3), RX(x0, z0, w2, d3)]) {
-      for (let u = 0; u < F2.L; u += 3) fb2(S, F2, u + 0.06, Math.min(F2.L, u + 3) - 0.06, 0.3, H - 2.6, 0, 0.12, u / 3 % 2 ? "#d6d0c2" : "#cdc6b6");
-      fb2(S, F2, 0, F2.L, H - 2.6, H - 0.6, -0.1, 0.06, GLAS_HELL4);
-      for (let u = 0; u <= F2.L; u += 1.5) fb2(S, F2, u - 0.06, u + 0.06, H - 2.6, H - 0.6, 0, 0.12, "#f2f1ec");
-      fb2(S, F2, -0.5, F2.L + 0.5, H - 0.6, H + 0.2, -0.2, 0.6, "#f2f1ec");
+    for (const F3 of [RZ(x0, z0, w2, d3), RX(x0, z0, w2, d3)]) {
+      for (let u = 0; u < F3.L; u += 3) fb2(S, F3, u + 0.06, Math.min(F3.L, u + 3) - 0.06, 0.3, H - 2.6, 0, 0.12, u / 3 % 2 ? "#d6d0c2" : "#cdc6b6");
+      fb2(S, F3, 0, F3.L, H - 2.6, H - 0.6, -0.1, 0.06, GLAS_HELL4);
+      for (let u = 0; u <= F3.L; u += 1.5) fb2(S, F3, u - 0.06, u + 0.06, H - 2.6, H - 0.6, 0, 0.12, "#f2f1ec");
+      fb2(S, F3, -0.5, F3.L + 0.5, H - 0.6, H + 0.2, -0.2, 0.6, "#f2f1ec");
     }
     S.quader(x0 + 0.4, H, z0 + 0.4, x0 + w2 - 0.4, H + 0.15, z0 + d3 - 0.4, "#9e9b94");
     return H;
@@ -139688,11 +140000,11 @@
       const H2 = 7.4, bw = Math.min(w2 - 16, 40), bx = x0 + 4, bz = z0 + 6;
       for (const [fx, fz, fw, fd] of [[bx, bz, 14, 26], [bx + bw - 14, bz, 14, 26], [bx + 14, bz + 8, bw - 28, 10]]) {
         S.quader(fx, 0, fz, fx + fw, H2, fz + fd, "#e9e5da");
-        for (const F3 of [RZ(fx, fz, fw, fd), RX(fx, fz, fw, fd)]) for (let k3 = 0; k3 < 2; k3++) {
+        for (const F4 of [RZ(fx, fz, fw, fd), RX(fx, fz, fw, fd)]) for (let k3 = 0; k3 < 2; k3++) {
           const y2 = 0.6 + k3 * 3.3;
-          for (let u = 0; u < F3.L; u += 2.4) fb2(S, F3, u + 0.05, Math.min(F3.L, u + 2.4) - 0.05, y2, y2 + 0.9, -0.1, 0.16, farben[Math.floor(u / 2.4 + k3) % farben.length]);
-          fb2(S, F3, 0.3, F3.L - 0.3, y2 + 0.9, y2 + 2.7, -0.1, 0.06, GLAS_HELL4);
-          for (let u = 0.3; u <= F3.L - 0.29; u += 1.2) fb2(S, F3, u - 0.04, u + 0.04, y2 + 0.9, y2 + 2.7, 0, 0.1, "#f2f1ec");
+          for (let u = 0; u < F4.L; u += 2.4) fb2(S, F4, u + 0.05, Math.min(F4.L, u + 2.4) - 0.05, y2, y2 + 0.9, -0.1, 0.16, farben[Math.floor(u / 2.4 + k3) % farben.length]);
+          fb2(S, F4, 0.3, F4.L - 0.3, y2 + 0.9, y2 + 2.7, -0.1, 0.06, GLAS_HELL4);
+          for (let u = 0.3; u <= F4.L - 0.29; u += 1.2) fb2(S, F4, u - 0.04, u + 0.04, y2 + 0.9, y2 + 2.7, 0, 0.1, "#f2f1ec");
         }
         S.quader(fx - 0.4, H2, fz - 0.4, fx + fw + 0.4, H2 + 0.5, fz + fd + 0.4, "#f2f1ec");
       }
@@ -139722,8 +140034,8 @@
     }
     const T = 13, zf = z0 + Math.min(d3 - 18, Math.max(T + 4, d3 * 0.55)), L2 = Math.min(w2 - 34, 64);
     schulhof(S, r3, x0 + 2, zf + 1, x0 + w2 - 2, z0 + d3 - 2);
-    const F2 = R5(x0 + 4, zf, 1, 0, L2);
-    const H = schulTrakt(S, scene2, F2, T, { n: 4, r: r3, farben, name: name2, treppe: 0.3 });
+    const F3 = R5(x0 + 4, zf, 1, 0, L2);
+    const H = schulTrakt(S, scene2, F3, T, { n: 4, r: r3, farben, name: name2, treppe: 0.3 });
     const tx = x0 + 4 + L2 + 8, tw = Math.min(x0 + w2 - 3 - tx, 20), td = 30;
     turnhalle(S, scene2, tx, zf - td + 2, tw, td, r3);
     S.quader(x0 + 4 + L2, 0, zf - 8, tx, 3.6, zf - 4, "#e3ded1");
@@ -139750,12 +140062,12 @@
       S.quader(bx2, 0, bz2, bx2 + bw2, H2, bz2 + bd2 - rr3, "#3d5a66");
       zyl6(S, rr3, rr3, H2, bx2 + bw2 - rr3, 0, bz2 + bd2 - rr3, "#3d5a66", 20);
       const FZ2 = R5(bx2, bz2 + bd2, 1, 0, bw2 - rr3), FX = R5(bx2 + bw2, bz2 + bd2 - rr3, 0, -1, bd2 - rr3);
-      for (const F2 of [FZ2, FX]) {
-        fb2(S, F2, 0, F2.L, 0.3, y0, -0.2, 0.15, granit);
-        fb2(S, F2, 0, F2.L, y0, H2, -0.1, 0.02, glas3);
-        for (let u = 0; u <= F2.L + 0.01; u += 1.5) fb2(S, F2, u - 0.06, u + 0.06, y0, H2, 0, 0.15, alu);
-        for (let k3 = 0; k3 <= n4; k3++) fb2(S, F2, 0, F2.L, y0 + k3 * gh2 - 0.08, y0 + k3 * gh2 + 0.08, 0, 0.15, alu);
-        fb2(S, F2, 0.6, F2.L - 0.6, 0.6, y0 - 0.6, 0.15, 0.2, GLAS7);
+      for (const F3 of [FZ2, FX]) {
+        fb2(S, F3, 0, F3.L, 0.3, y0, -0.2, 0.15, granit);
+        fb2(S, F3, 0, F3.L, y0, H2, -0.1, 0.02, glas3);
+        for (let u = 0; u <= F3.L + 0.01; u += 1.5) fb2(S, F3, u - 0.06, u + 0.06, y0, H2, 0, 0.15, alu);
+        for (let k3 = 0; k3 <= n4; k3++) fb2(S, F3, 0, F3.L, y0 + k3 * gh2 - 0.08, y0 + k3 * gh2 + 0.08, 0, 0.15, alu);
+        fb2(S, F3, 0.6, F3.L - 0.6, 0.6, y0 - 0.6, 0.15, 0.2, GLAS7);
       }
       zyl6(S, rr3 + 0.05, rr3 + 0.05, H2 - y0, bx2 + bw2 - rr3, y0, bz2 + bd2 - rr3, glas3, 20);
       for (let k3 = 0; k3 <= n4; k3++) zyl6(S, rr3 + 0.15, rr3 + 0.15, 0.16, bx2 + bw2 - rr3, y0 + k3 * gh2 - 0.08, bz2 + bd2 - rr3, alu, 20, true);
@@ -139785,22 +140097,22 @@
       S.quader(bx2, 0, bz2, bx2 + bw2 - 0.3, H2, bz2 + bd2 - 0.3, GLAS7);
       S.quader(bx2 + 0.2, H2, bz2 + 0.2, bx2 + bw2 - 0.2, H2 + 0.25, bz2 + bd2 - 0.2, "#a9a59c");
       const mitte = bw2 * 0.5, pb = 9;
-      for (const F2 of [RZ(bx2, bz2, bw2, bd2), RX(bx2, bz2, bw2, bd2)]) {
+      for (const F3 of [RZ(bx2, bz2, bw2, bd2), RX(bx2, bz2, bw2, bd2)]) {
         const L2 = [];
-        const ax = achsen3(0, F2.L, 4.2, 0.6);
+        const ax = achsen3(0, F3.L, 4.2, 0.6);
         for (const u of ax) {
-          if (F2.dz === 0 && Math.abs(u - mitte) < pb / 2 + 2.4) continue;
+          if (F3.dz === 0 && Math.abs(u - mitte) < pb / 2 + 2.4) continue;
           L2.push({ u0: u - 1.6, u1: u + 1.6, v0: 0.4, v1: eg2 - 0.8, bogen: false });
           for (let k3 = 0; k3 < n4; k3++) L2.push({ u0: u - 0.9, u1: u + 0.9, v0: eg2 + k3 * gh2 + 0.8, v1: eg2 + k3 * gh2 + 3, bogen: k3 === n4 - 1 });
         }
-        if (F2.dz === 0) L2.push({ u0: mitte - pb / 2, u1: mitte + pb / 2, v0: 0.3, v1: H2 - 1.2, bogen: true });
-        fwand(S, F2, 0, F2.L, 0, H2, -0.4, 0, stein2, L2);
-        for (let y2 = 1; y2 < eg2; y2 += 1) fb2(S, F2, 0, F2.L, y2 - 0.03, y2 + 0.03, 0, 0.03, dunkler(stein2, 0.06));
-        fb2(S, F2, -0.2, F2.L + 0.2, eg2 - 0.3, eg2, -0.4, 0.35, orn);
-        fb2(S, F2, -0.4, F2.L + 0.4, H2, H2 + 0.6, -0.4, 0.6, orn);
+        if (F3.dz === 0) L2.push({ u0: mitte - pb / 2, u1: mitte + pb / 2, v0: 0.3, v1: H2 - 1.2, bogen: true });
+        fwand(S, F3, 0, F3.L, 0, H2, -0.4, 0, stein2, L2);
+        for (let y2 = 1; y2 < eg2; y2 += 1) fb2(S, F3, 0, F3.L, y2 - 0.03, y2 + 0.03, 0, 0.03, dunkler(stein2, 0.06));
+        fb2(S, F3, -0.2, F3.L + 0.2, eg2 - 0.3, eg2, -0.4, 0.35, orn);
+        fb2(S, F3, -0.4, F3.L + 0.4, H2, H2 + 0.6, -0.4, 0.6, orn);
         for (const u of ax) {
-          if (F2.dz === 0 && Math.abs(u - mitte) < pb / 2 + 2.4) continue;
-          fb2(S, F2, u - 1.8, u + 1.8, eg2 - 1.1, eg2 - 0.7, 0, 1.2, waehle2(r3, ["#2f6f8f", "#3f7d56", "#8c3b3b", "#d39a2b"]));
+          if (F3.dz === 0 && Math.abs(u - mitte) < pb / 2 + 2.4) continue;
+          fb2(S, F3, u - 1.8, u + 1.8, eg2 - 1.1, eg2 - 0.7, 0, 1.2, waehle2(r3, ["#2f6f8f", "#3f7d56", "#8c3b3b", "#d39a2b"]));
         }
       }
       const g = new three_module_exports.CylinderGeometry(pb / 2, pb / 2, bd2 + 1.5, 16, 1, false, 0, PI8);
@@ -139830,14 +140142,14 @@
     S.quader(bx, 0, bz, bx + bw - 0.6, eg, bz + bd - 0.6, GLAS7);
     S.quader(bx, eg, bz, bx + bw - 0.3, H, bz + bd - 0.3, GLAS7);
     S.quader(bx + 0.2, H, bz + 0.2, bx + bw - 0.2, H + 0.3, bz + bd - 0.2, "#a9a59c");
-    for (const F2 of [RZ(bx, bz, bw, bd), RX(bx, bz, bw, bd)]) {
+    for (const F3 of [RZ(bx, bz, bw, bd), RX(bx, bz, bw, bd)]) {
       const L2 = [];
-      for (const u of achsen3(0, F2.L, 3, 0.8)) for (let k3 = 0; k3 < n3; k3++) L2.push({ u0: u - 0.85, u1: u + 0.85, v0: eg + k3 * gh + 0.7, v1: eg + k3 * gh + 2.9 });
-      fwand(S, F2, 0, F2.L, eg, H, -0.4, 0, stein, L2);
-      fb2(S, F2, 0, F2.L, 0, eg, -0.6, -0.5, GLAS_HELL4);
-      for (let u = 0; u <= F2.L; u += 2) fb2(S, F2, u - 0.15, u + 0.15, 0.3, eg, -0.5, 0.1, "#8b8f93");
-      fb2(S, F2, -0.2, F2.L + 0.2, eg - 0.4, eg, -0.5, 0.3, "#8b8f93");
-      fb2(S, F2, -0.3, F2.L + 0.3, H, H + 0.5, -0.4, 0.4, stein);
+      for (const u of achsen3(0, F3.L, 3, 0.8)) for (let k3 = 0; k3 < n3; k3++) L2.push({ u0: u - 0.85, u1: u + 0.85, v0: eg + k3 * gh + 0.7, v1: eg + k3 * gh + 2.9 });
+      fwand(S, F3, 0, F3.L, eg, H, -0.4, 0, stein, L2);
+      fb2(S, F3, 0, F3.L, 0, eg, -0.6, -0.5, GLAS_HELL4);
+      for (let u = 0; u <= F3.L; u += 2) fb2(S, F3, u - 0.15, u + 0.15, 0.3, eg, -0.5, 0.1, "#8b8f93");
+      fb2(S, F3, -0.2, F3.L + 0.2, eg - 0.4, eg, -0.5, 0.3, "#8b8f93");
+      fb2(S, F3, -0.3, F3.L + 0.3, H, H + 0.5, -0.4, 0.4, stein);
     }
     const FZ = RZ(bx, bz, bw, bd);
     fpoly2(S, FZ, [[bw * 0.25, H + 0.5], [bw * 0.75, H + 0.5], [bw * 0.5, H + 5]], -bd + 1, 0, "#9fc3cf");
@@ -139856,32 +140168,32 @@
     if (p2.w >= min[0] && p2.d >= min[1]) return wendebauRoh(S, scene2, { ...p2, variante: v });
     return skaliert(S, scene2, { ...p2, variante: v }, Math.max(min[0], p2.w), Math.max(min[1], p2.d), wendebauRoh);
   }
-  function altFassade(S, scene2, F2, c, r3, o3) {
-    const { n: n3, eg, gh, wand: wand2, orn, zustand } = c, L2 = F2.L, H = eg + n3 * gh;
+  function altFassade(S, scene2, F3, c, r3, o3) {
+    const { n: n3, eg, gh, wand: wand2, orn, zustand } = c, L2 = F3.L, H = eg + n3 * gh;
     const ax = achsen3(0, L2, c.ra, 0.7);
     const L22 = [];
     ax.forEach((u, i) => {
       L22.push(i === Math.floor(ax.length / 2) && o3.haupt ? { u0: u - 0.9, u1: u + 0.9, v0: 0.3, v1: 3.3, bogen: true } : { u0: u - 1, u1: u + 1, v0: 0.9, v1: eg - 0.6, bogen: false });
       for (let k3 = 0; k3 < n3; k3++) L22.push({ u0: u - 0.62, u1: u + 0.62, v0: eg + k3 * gh + 0.9, v1: eg + k3 * gh + 3, bogen: k3 === 0 && c.bogen });
     });
-    fwand(S, F2, 0, L2, 0, H, -0.45, 0, wand2, L22);
+    fwand(S, F3, 0, L2, 0, H, -0.45, 0, wand2, L22);
     ax.forEach((u, i) => {
       for (let k3 = -1; k3 < n3; k3++) {
         const y2 = k3 < 0 ? 0.9 : eg + k3 * gh + 0.9, hh = k3 < 0 ? eg - 1.5 : 2.1, b3 = k3 < 0 ? 2 : 1.24;
         const h3 = hash3(i, k3, o3.salz ?? 0) % 100;
         if (zustand === "leer" && (k3 < 0 || h3 < 45)) {
-          fb2(S, F2, u - b3 / 2 + 0.05, u + b3 / 2 - 0.05, y2, y2 + hh - 0.05, -0.3, -0.22, "#8a6a4a");
-          fb2(S, F2, u - b3 / 2, u + b3 / 2, y2 + hh * 0.45, y2 + hh * 0.55, -0.22, -0.16, "#7a5a3e");
-        } else if (zustand === "leer" && h3 < 70) fb2(S, F2, u - b3 / 2 + 0.1, u + b3 / 2 - 0.1, y2 + hh * 0.5, y2 + hh - 0.1, -0.35, -0.3, "#262b30");
+          fb2(S, F3, u - b3 / 2 + 0.05, u + b3 / 2 - 0.05, y2, y2 + hh - 0.05, -0.3, -0.22, "#8a6a4a");
+          fb2(S, F3, u - b3 / 2, u + b3 / 2, y2 + hh * 0.45, y2 + hh * 0.55, -0.22, -0.16, "#7a5a3e");
+        } else if (zustand === "leer" && h3 < 70) fb2(S, F3, u - b3 / 2 + 0.1, u + b3 / 2 - 0.1, y2 + hh * 0.5, y2 + hh - 0.1, -0.35, -0.3, "#262b30");
         else if (k3 >= 0) {
-          fb2(S, F2, u - 0.04, u + 0.04, y2, y2 + hh, -0.35, -0.28, zustand === "saniert" ? "#ffffff" : "#d4cfc4");
-          fb2(S, F2, u - b3 / 2, u + b3 / 2, y2 + hh * 0.66, y2 + hh * 0.66 + 0.07, -0.35, -0.28, zustand === "saniert" ? "#ffffff" : "#d4cfc4");
+          fb2(S, F3, u - 0.04, u + 0.04, y2, y2 + hh, -0.35, -0.28, zustand === "saniert" ? "#ffffff" : "#d4cfc4");
+          fb2(S, F3, u - b3 / 2, u + b3 / 2, y2 + hh * 0.66, y2 + hh * 0.66 + 0.07, -0.35, -0.28, zustand === "saniert" ? "#ffffff" : "#d4cfc4");
         }
         if (k3 >= 0) {
           const fehlt = zustand !== "saniert" && h3 % 3 === 0;
-          fb2(S, F2, u - 0.8, u + 0.8, y2 - 0.14, y2, 0, 0.2, fehlt ? dunkler(wand2, 0.04) : orn);
-          if (!fehlt && k3 <= 1) fb2(S, F2, u - 0.85, u + 0.85, y2 + hh + 0.1, y2 + hh + 0.35, 0, 0.28, orn);
-          if (!fehlt && k3 === 1) fpoly2(S, F2, [[u - 0.85, y2 + hh + 0.35], [u + 0.85, y2 + hh + 0.35], [u, y2 + hh + 0.8]], 0, 0.22, orn);
+          fb2(S, F3, u - 0.8, u + 0.8, y2 - 0.14, y2, 0, 0.2, fehlt ? dunkler(wand2, 0.04) : orn);
+          if (!fehlt && k3 <= 1) fb2(S, F3, u - 0.85, u + 0.85, y2 + hh + 0.1, y2 + hh + 0.35, 0, 0.28, orn);
+          if (!fehlt && k3 === 1) fpoly2(S, F3, [[u - 0.85, y2 + hh + 0.35], [u + 0.85, y2 + hh + 0.35], [u, y2 + hh + 0.8]], 0, 0.22, orn);
         }
       }
     });
@@ -139891,62 +140203,62 @@
       for (let k3 = 1; k3 < n3; k3++) {
         const y2 = eg + k3 * gh + 0.75;
         if (zustand === "saniert") {
-          fb2(S, F2, u - 1.2, u + 1.2, y2 - 0.2, y2, 0, 1.2, orn);
-          fb2(S, F2, u - 1.2, u + 1.2, y2 + 0.9, y2 + 0.98, 1.1, 1.2, "#2b2f33");
-          for (let s2 = -1; s2 <= 1; s2 += 0.5) fb2(S, F2, u + s2 * 1.1 - 0.03, u + s2 * 1.1 + 0.03, y2, y2 + 0.95, 1.1, 1.18, "#2b2f33");
+          fb2(S, F3, u - 1.2, u + 1.2, y2 - 0.2, y2, 0, 1.2, orn);
+          fb2(S, F3, u - 1.2, u + 1.2, y2 + 0.9, y2 + 0.98, 1.1, 1.2, "#2b2f33");
+          for (let s2 = -1; s2 <= 1; s2 += 0.5) fb2(S, F3, u + s2 * 1.1 - 0.03, u + s2 * 1.1 + 0.03, y2, y2 + 0.95, 1.1, 1.18, "#2b2f33");
         } else {
-          fb2(S, F2, u - 1, u - 0.8, y2 - 0.5, y2, 0, 0.7, dunkler(wand2, 0.1));
-          fb2(S, F2, u + 0.8, u + 1, y2 - 0.5, y2, 0, 0.7, dunkler(wand2, 0.1));
+          fb2(S, F3, u - 1, u - 0.8, y2 - 0.5, y2, 0, 0.7, dunkler(wand2, 0.1));
+          fb2(S, F3, u + 0.8, u + 1, y2 - 0.5, y2, 0, 0.7, dunkler(wand2, 0.1));
         }
       }
     }
-    fb2(S, F2, -0.05, L2 + 0.05, 0, 0.9, -0.45, 0.15, c.sockel);
-    fb2(S, F2, -0.1, L2 + 0.1, eg - 0.25, eg + 0.1, -0.45, 0.35, orn);
-    fb2(S, F2, -0.3, L2 + 0.3, H - 0.1, H + 0.6, -0.45, 0.7, orn);
-    for (let u = 0.6; u < L2; u += 1.2) fb2(S, F2, u - 0.1, u + 0.1, H - 0.45, H - 0.1, 0, 0.55, orn);
+    fb2(S, F3, -0.05, L2 + 0.05, 0, 0.9, -0.45, 0.15, c.sockel);
+    fb2(S, F3, -0.1, L2 + 0.1, eg - 0.25, eg + 0.1, -0.45, 0.35, orn);
+    fb2(S, F3, -0.3, L2 + 0.3, H - 0.1, H + 0.6, -0.45, 0.7, orn);
+    for (let u = 0.6; u < L2; u += 1.2) fb2(S, F3, u - 0.1, u + 0.1, H - 0.45, H - 0.1, 0, 0.55, orn);
     if (zustand !== "saniert") {
       const nf = Math.round(L2 * n3 * 0.25);
       for (let i = 0; i < nf; i++) {
         const u = zw(r3, 0.3, L2 - 1.5), y2 = zw(r3, 1.2, H - 1.5), bb = zw(r3, 0.6, 2.2), hh = zw(r3, 0.5, 1.8);
-        fb2(S, F2, u, u + bb, y2, y2 + hh, 0, 0.04, r3() < 0.3 ? "#9e6550" : r3() < 0.5 ? dunkler(wand2, 0.06) : heller(wand2, 0.04));
+        fb2(S, F3, u, u + bb, y2, y2 + hh, 0, 0.04, r3() < 0.3 ? "#9e6550" : r3() < 0.5 ? dunkler(wand2, 0.06) : heller(wand2, 0.04));
       }
       for (let i = 0; i < Math.round(L2 * 0.8); i++) {
         const u = zw(r3, 0.5, L2 - 0.5), y2 = zw(r3, eg, eg + 2 * gh);
-        fb2(S, F2, u - 0.07, u + 0.07, y2 - 0.07, y2 + 0.07, 0, 0.03, "#6f6a62");
+        fb2(S, F3, u - 0.07, u + 0.07, y2 - 0.07, y2 + 0.07, 0, 0.03, "#6f6a62");
       }
     }
     if (o3.haupt && zustand === "saniert") {
-      for (let i = 0; i < ax.length; i++) if (i !== Math.floor(ax.length / 2) && i % 2 === 0) markiseF(S, F2, ax[i] - 1.1, ax[i] + 1.1, eg - 0.5, waehle2(r3, ["#c9483e", "#2f6f8f", "#3f7d56", "#d39a2b"]));
-      ftext2(scene2, F2, waehle2(r3, ["Caf\xE9 Rosengarten", "Buchladen", "B\xE4ckerei", "Blumenstube", "Weinhandlung"]), ax[0] + 1.5, eg - 0.15, 0.4, 0.4, 5, "#2a3a4a");
+      for (let i = 0; i < ax.length; i++) if (i !== Math.floor(ax.length / 2) && i % 2 === 0) markiseF(S, F3, ax[i] - 1.1, ax[i] + 1.1, eg - 0.5, waehle2(r3, ["#c9483e", "#2f6f8f", "#3f7d56", "#d39a2b"]));
+      ftext2(scene2, F3, waehle2(r3, ["Caf\xE9 Rosengarten", "Buchladen", "B\xE4ckerei", "Blumenstube", "Weinhandlung"]), ax[0] + 1.5, eg - 0.15, 0.4, 0.4, 5, "#2a3a4a");
     } else if (o3.haupt && zustand === "leer") {
-      ftext2(scene2, F2, "Zu vermieten", ax[ax.length - 1], 2, 0.05, 0.4, 2, "#c8302a", "#f4f1e8");
-      for (let i = 0; i < 5; i++) fb2(S, F2, zw(r3, 0.5, L2 - 2), zw(r3, 0.5, L2 - 2) + zw(r3, 0.6, 1.6), 0.9, 0.9 + zw(r3, 0.4, 1.4), 0.15, 0.18, waehle2(r3, ["#c8463c", "#2f6fa8", "#e8c547", "#3b8a5a"]));
+      ftext2(scene2, F3, "Zu vermieten", ax[ax.length - 1], 2, 0.05, 0.4, 2, "#c8302a", "#f4f1e8");
+      for (let i = 0; i < 5; i++) fb2(S, F3, zw(r3, 0.5, L2 - 2), zw(r3, 0.5, L2 - 2) + zw(r3, 0.6, 1.6), 0.9, 0.9 + zw(r3, 0.4, 1.4), 0.15, 0.18, waehle2(r3, ["#c8463c", "#2f6fa8", "#e8c547", "#3b8a5a"]));
     }
     return H;
   }
-  function markiseF(S, F2, u0, u1, y2, farbe3) {
+  function markiseF(S, F3, u0, u1, y2, farbe3) {
     const g = new three_module_exports.BoxGeometry(u1 - u0, 0.12, 1.5);
     g.rotateX(0.35);
     g.translate((u0 + u1) / 2, y2, 0.75);
-    fgeo2(S, F2, g, farbe3);
+    fgeo2(S, F3, g, farbe3);
   }
-  function brandwand2(S, scene2, F2, H, r3, o3 = {}) {
-    const L2 = F2.L, wand2 = o3.wand ?? "#9b958b";
-    fb2(S, F2, 0, L2, 0, H, -0.4, 0, wand2);
+  function brandwand2(S, scene2, F3, H, r3, o3 = {}) {
+    const L2 = F3.L, wand2 = o3.wand ?? "#9b958b";
+    fb2(S, F3, 0, L2, 0, H, -0.4, 0, wand2);
     const hN = H * zw(r3, 0.55, 0.8);
-    fpoly2(S, F2, [[0.4, 0.3], [L2 - 0.4, 0.3], [L2 - 0.4, hN], [L2 / 2, hN + zw(r3, 2.5, 4)], [0.4, hN]], 0, 0.04, dunkler(wand2, 0.07));
+    fpoly2(S, F3, [[0.4, 0.3], [L2 - 0.4, 0.3], [L2 - 0.4, hN], [L2 / 2, hN + zw(r3, 2.5, 4)], [0.4, hN]], 0, 0.04, dunkler(wand2, 0.07));
     const nE = Math.max(2, Math.floor(hN / 3.3));
     for (let k3 = 1; k3 < nE; k3++) for (let i = 0; i < 3; i++) {
       if (r3() < 0.45) continue;
       const u0 = 0.8 + i * (L2 - 1.6) / 3, b3 = (L2 - 1.6) / 3 - 0.4;
-      fb2(S, F2, u0, u0 + b3 * zw(r3, 0.5, 1), k3 * 3.3 + 0.6, k3 * 3.3 + zw(r3, 1.6, 2.8), 0.04, 0.07, waehle2(r3, ["#c9b7a0", "#a9b8a8", "#c4a7a7", "#b8b49a", "#9fb0bf", "#d6d0c0"]));
+      fb2(S, F3, u0, u0 + b3 * zw(r3, 0.5, 1), k3 * 3.3 + 0.6, k3 * 3.3 + zw(r3, 1.6, 2.8), 0.04, 0.07, waehle2(r3, ["#c9b7a0", "#a9b8a8", "#c4a7a7", "#b8b49a", "#9fb0bf", "#d6d0c0"]));
     }
-    for (let k3 = 1; k3 < nE; k3++) fb2(S, F2, 0.4, L2 - 0.4, k3 * 3.3 - 0.12, k3 * 3.3 + 0.12, 0.04, 0.08, dunkler(wand2, 0.12));
-    fb2(S, F2, L2 * 0.62, L2 * 0.62 + 0.8, 0.3, H, 0.04, 0.08, dunkler(wand2, 0.1));
+    for (let k3 = 1; k3 < nE; k3++) fb2(S, F3, 0.4, L2 - 0.4, k3 * 3.3 - 0.12, k3 * 3.3 + 0.12, 0.04, 0.08, dunkler(wand2, 0.12));
+    fb2(S, F3, L2 * 0.62, L2 * 0.62 + 0.8, 0.3, H, 0.04, 0.08, dunkler(wand2, 0.1));
     if (o3.reklame !== false) {
       const t3 = waehle2(r3, ["Kaffee-R\xF6sterei Lindner", "Kohlen \xB7 Briketts \xB7 Koks", "Seifenfabrik Hartmann", "M\xF6belhaus Ebert"]);
-      fb2(S, F2, L2 * 0.15, L2 * 0.85, H - 4.6, H - 1.4, 0.04, 0.06, "#b5ad9c");
-      ftext2(scene2, F2, t3, L2 / 2, H - 3, 0.1, 1.2, L2 * 0.66, "#d8cfba");
+      fb2(S, F3, L2 * 0.15, L2 * 0.85, H - 4.6, H - 1.4, 0.04, 0.06, "#b5ad9c");
+      ftext2(scene2, F3, t3, L2 / 2, H - 3, 0.1, 1.2, L2 * 0.66, "#d8cfba");
     }
   }
   function altbauRoh(S, scene2, p2) {
@@ -140023,12 +140335,12 @@
     return skaliert(S, scene2, p2, Math.max(14, p2.w), Math.max(12, p2.d), altbauRoh);
   }
   function plakatwand(S, scene2, x2, z4, b3, h3, text3, farbe3, ry = 0) {
-    const F2 = R5(x2, z4, Math.cos(ry), -Math.sin(ry), b3);
-    for (const u of [b3 * 0.2, b3 * 0.8]) fb2(S, F2, u - 0.12, u + 0.12, 0.3, 2.2, -0.3, -0.06, "#59636b");
-    fb2(S, F2, -0.1, b3 + 0.1, 2.2, 2.2 + h3, -0.12, 0, "#3f474e");
-    fb2(S, F2, 0.1, b3 - 0.1, 2.3, 2.1 + h3, 0, 0.04, farbe3);
+    const F3 = R5(x2, z4, Math.cos(ry), -Math.sin(ry), b3);
+    for (const u of [b3 * 0.2, b3 * 0.8]) fb2(S, F3, u - 0.12, u + 0.12, 0.3, 2.2, -0.3, -0.06, "#59636b");
+    fb2(S, F3, -0.1, b3 + 0.1, 2.2, 2.2 + h3, -0.12, 0, "#3f474e");
+    fb2(S, F3, 0.1, b3 - 0.1, 2.3, 2.1 + h3, 0, 0.04, farbe3);
     const sc = scene2;
-    ftext2(sc, F2, text3, b3 / 2, 2.2 + h3 / 2, 0.06, h3 * 0.32, b3 * 0.86, "#ffffff");
+    ftext2(sc, F3, text3, b3 / 2, 2.2 + h3 / 2, 0.06, h3 * 0.32, b3 * 0.86, "#ffffff");
   }
   function bracheRoh(S, scene2, p2) {
     const r3 = rng3(`br:${p2.seed}`);
@@ -140111,43 +140423,43 @@
   }
   var MESSE_NAMEN = ["Messehof", "Handelshof", "Musterhaus", "St\xE4dtisches Kaufhaus", "Messepalast", "Specks Hof", "Zentralmessehaus", "Passage am Markt", "Ringmessehaus", "Hansahaus"];
   var MESSE_FIRMEN = ["Musterlager", "Spielwaren", "Porzellan", "Glas \xB7 Keramik", "Uhren", "Optik", "Lederwaren", "Messeamt", "B\xFCrobedarf", "Pelze"];
-  function messeFassade(S, scene2, F2, c, r3, o3) {
-    const { n: n3, gh, eg, stein, orn, pfeiler } = c, L2 = F2.L, H = eg + n3 * gh;
+  function messeFassade(S, scene2, F3, c, r3, o3) {
+    const { n: n3, gh, eg, stein, orn, pfeiler } = c, L2 = F3.L, H = eg + n3 * gh;
     const ra = c.ra, na = Math.max(2, Math.round(L2 / ra)), rb = L2 / na;
     const pmitte = o3.passage ? Math.floor(na / 2) : -1;
-    fb2(S, F2, 0, L2, eg, H, -0.6, -0.45, GLAS7);
+    fb2(S, F3, 0, L2, eg, H, -0.6, -0.45, GLAS7);
     for (let i = 0; i < na; i++) {
       const u0 = i * rb, u1 = (i + 1) * rb;
       for (let k3 = 0; k3 < n3; k3++) {
         const y2 = eg + k3 * gh;
-        fb2(S, F2, u0 + 0.3, u1 - 0.3, y2, y2 + 1, -0.5, -0.2, c.bruest);
-        if (rb > 3.4) fb2(S, F2, (u0 + u1) / 2 - 0.08, (u0 + u1) / 2 + 0.08, y2 + 1, y2 + gh, -0.45, -0.3, orn);
-        fb2(S, F2, u0 + 0.3, u1 - 0.3, y2 + gh - 0.18, y2 + gh, -0.5, -0.25, orn);
+        fb2(S, F3, u0 + 0.3, u1 - 0.3, y2, y2 + 1, -0.5, -0.2, c.bruest);
+        if (rb > 3.4) fb2(S, F3, (u0 + u1) / 2 - 0.08, (u0 + u1) / 2 + 0.08, y2 + 1, y2 + gh, -0.45, -0.3, orn);
+        fb2(S, F3, u0 + 0.3, u1 - 0.3, y2 + gh - 0.18, y2 + gh, -0.5, -0.25, orn);
       }
     }
     for (let i = 0; i <= na; i++) {
       const u = i * rb, br = i === 0 || i === na ? 0.9 : 0.55;
-      fb2(S, F2, u - br, u + br, eg - 0.4, H - 0.3, -0.6, pfeiler, stein);
-      fb2(S, F2, u - br - 0.15, u + br + 0.15, H - 1.6, H - 0.3, -0.6, pfeiler + 0.15, orn);
+      fb2(S, F3, u - br, u + br, eg - 0.4, H - 0.3, -0.6, pfeiler, stein);
+      fb2(S, F3, u - br - 0.15, u + br + 0.15, H - 1.6, H - 0.3, -0.6, pfeiler + 0.15, orn);
     }
-    fb2(S, F2, 0, L2, 0, eg, -1.4, -1.3, GLAS_HELL4);
-    for (let i = 0; i <= na; i++) fb2(S, F2, i * rb - 0.6, i * rb + 0.6, 0, eg, -1.4, 0.2, stein);
+    fb2(S, F3, 0, L2, 0, eg, -1.4, -1.3, GLAS_HELL4);
+    for (let i = 0; i <= na; i++) fb2(S, F3, i * rb - 0.6, i * rb + 0.6, 0, eg, -1.4, 0.2, stein);
     for (let i = 0; i < na; i++) {
       if (i === pmitte) continue;
-      fb2(S, F2, i * rb + 0.6, (i + 1) * rb - 0.6, eg * 0.55, eg * 0.55 + 0.25, -1.3, -1.1, STAHL3);
-      fb2(S, F2, (i + 0.5) * rb - 0.05, (i + 0.5) * rb + 0.05, 0.3, eg, -1.3, -1.15, STAHL3);
+      fb2(S, F3, i * rb + 0.6, (i + 1) * rb - 0.6, eg * 0.55, eg * 0.55 + 0.25, -1.3, -1.1, STAHL3);
+      fb2(S, F3, (i + 0.5) * rb - 0.05, (i + 0.5) * rb + 0.05, 0.3, eg, -1.3, -1.15, STAHL3);
     }
-    fb2(S, F2, -0.4, L2 + 0.4, eg - 0.5, eg, -1.4, 0.6, orn);
-    fb2(S, F2, 0, L2, 0, 0.6, -1.4, 0.3, dunkler(stein, 0.12));
+    fb2(S, F3, -0.4, L2 + 0.4, eg - 0.5, eg, -1.4, 0.6, orn);
+    fb2(S, F3, 0, L2, 0, 0.6, -1.4, 0.3, dunkler(stein, 0.12));
     if (pmitte >= 0) {
       const u0 = pmitte * rb + 0.6, u1 = (pmitte + 1) * rb - 0.6, hp = eg + gh * 0.9;
-      fb2(S, F2, u0, u1, 0.3, hp, -6, -1.35, "#2b3036");
-      fwand(S, F2, u0 - 0.4, u1 + 0.4, 0.3, hp + 1.2, -0.1, 0.35, stein, [{ u0, u1, v0: 0.3, v1: hp, bogen: true }]);
-      fb2(S, F2, u0, u1, 0.3, 0.42, -6, 0.4, "#e3dccb");
-      ftext2(scene2, F2, c.name.toUpperCase(), (u0 + u1) / 2, hp + 0.7, 0.4, 0.55, u1 - u0 + 4, "#7a5a2e");
+      fb2(S, F3, u0, u1, 0.3, hp, -6, -1.35, "#2b3036");
+      fwand(S, F3, u0 - 0.4, u1 + 0.4, 0.3, hp + 1.2, -0.1, 0.35, stein, [{ u0, u1, v0: 0.3, v1: hp, bogen: true }]);
+      fb2(S, F3, u0, u1, 0.3, 0.42, -6, 0.4, "#e3dccb");
+      ftext2(scene2, F3, c.name.toUpperCase(), (u0 + u1) / 2, hp + 0.7, 0.4, 0.55, u1 - u0 + 4, "#7a5a2e");
     }
-    for (let i = 1; i < na; i += 2) if (i !== pmitte && i + 1 !== pmitte) ftext2(scene2, F2, MESSE_FIRMEN[hash3(i, o3.salz ?? 0) % MESSE_FIRMEN.length], (i + 0.5) * rb, eg - 0.25, 0.62, 0.36, rb * 0.9, "#f2e7c9", "#3a3f44");
-    fb2(S, F2, -0.6, L2 + 0.6, H - 0.3, H + 0.5, -0.6, 1, orn);
+    for (let i = 1; i < na; i += 2) if (i !== pmitte && i + 1 !== pmitte) ftext2(scene2, F3, MESSE_FIRMEN[hash3(i, o3.salz ?? 0) % MESSE_FIRMEN.length], (i + 0.5) * rb, eg - 0.25, 0.62, 0.36, rb * 0.9, "#f2e7c9", "#3a3f44");
+    fb2(S, F3, -0.6, L2 + 0.6, H - 0.3, H + 0.5, -0.6, 1, orn);
     return H;
   }
   function messehausRoh(S, scene2, p2) {
@@ -141134,21 +141446,21 @@
   function R6(ox, oz, dx, dz, L2) {
     return { ox, oz, dx, dz, nx: -dz, nz: dx, ry: Math.atan2(-dz, dx), L: L2 };
   }
-  function wp3(F2, u, t3) {
-    return [F2.ox + F2.dx * u + F2.nx * t3, F2.oz + F2.dz * u + F2.nz * t3];
+  function wp3(F3, u, t3) {
+    return [F3.ox + F3.dx * u + F3.nx * t3, F3.oz + F3.dz * u + F3.nz * t3];
   }
-  function fb3(S, F2, u0, u1, y0, y1, t0, t1, c) {
-    const [x2, z4] = wp3(F2, (u0 + u1) / 2, (t0 + t1) / 2);
-    S.box(Math.abs(u1 - u0), Math.abs(y1 - y0), Math.abs(t1 - t0), x2, (y0 + y1) / 2, z4, c, F2.ry);
+  function fb3(S, F3, u0, u1, y0, y1, t0, t1, c) {
+    const [x2, z4] = wp3(F3, (u0 + u1) / 2, (t0 + t1) / 2);
+    S.box(Math.abs(u1 - u0), Math.abs(y1 - y0), Math.abs(t1 - t0), x2, (y0 + y1) / 2, z4, c, F3.ry);
   }
-  function fgeo3(S, F2, g, c) {
-    g.rotateY(F2.ry);
-    g.translate(F2.ox, 0, F2.oz);
+  function fgeo3(S, F3, g, c) {
+    g.rotateY(F3.ry);
+    g.translate(F3.ox, 0, F3.oz);
     S.add(g, c);
   }
-  function teil3(F2, u0, u1, t3 = 0) {
-    const [x2, z4] = wp3(F2, u0, t3);
-    return R6(x2, z4, F2.dx, F2.dz, u1 - u0);
+  function teil3(F3, u0, u1, t3 = 0) {
+    const [x2, z4] = wp3(F3, u0, t3);
+    return R6(x2, z4, F3.dx, F3.dz, u1 - u0);
   }
   function seiten(x0, z0, x1, z1) {
     return { "+z": R6(x0, z1, 1, 0, x1 - x0), "+x": R6(x1, z1, 0, -1, z1 - z0), "-z": R6(x1, z0, -1, 0, x1 - x0), "-x": R6(x0, z0, 0, 1, z1 - z0) };
@@ -141248,12 +141560,12 @@
     g.translate((a2[0] + b3[0]) / 2, (a2[1] + b3[1]) / 2, (a2[2] + b3[2]) / 2);
     S.add(g, c);
   }
-  function fbalken(S, F2, u0, y0, u1, y1, br, t0, t1, c) {
+  function fbalken(S, F3, u0, y0, u1, y1, br, t0, t1, c) {
     const L2 = wurzelSumme17(u1 - u0, y1 - y0);
     const g = new three_module_exports.BoxGeometry(L2, br, t1 - t0);
     g.rotateZ(Math.atan2(y1 - y0, u1 - u0));
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
-    fgeo3(S, F2, g, c);
+    fgeo3(S, F3, g, c);
   }
   function boden4(S, x0, z0, x1, z1, c, y2 = 0.3, h3 = 0.06) {
     if (x1 > x0 + 0.01 && z1 > z0 + 0.01) S.quader(x0, y2, z0, x1, y2 + h3, z1, c);
@@ -141267,21 +141579,21 @@
     const na = Math.max(1, Math.floor((u1 - u0 - 2 * rand) / ra + 0.15)), off = u0 + (u1 - u0 - na * ra) / 2;
     return Array.from({ length: na }, (_, i) => off + (i + 0.5) * ra);
   }
-  function ftext3(scene2, F2, text3, u, y2, t3, hMax, bMax, farbe3, bg = null) {
+  function ftext3(scene2, F3, text3, u, y2, t3, hMax, bMax, farbe3, bg = null) {
     const { mat: mat2, seitenverhaeltnis: a2 } = textMaterial(text3, farbe3, { groesse: 140, hintergrund: bg });
     const h3 = Math.min(hMax, bMax / a2);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h3 * a2, h3), mat2);
-    const [x2, z4] = wp3(F2, u, t3);
-    m.rotation.y = F2.ry;
+    const [x2, z4] = wp3(F3, u, t3);
+    m.rotation.y = F3.ry;
     m.position.set(x2, y2, z4);
     scene2.add(m);
     return h3 * a2;
   }
-  function fscheibe2(S, F2, u, y2, t0, t1, rad3, c, seg2 = 16) {
+  function fscheibe2(S, F3, u, y2, t0, t1, rad3, c, seg2 = 16) {
     const g = new three_module_exports.CylinderGeometry(rad3, rad3, t1 - t0, seg2);
     g.rotateX(PI9 / 2);
     g.translate(u, y2, (t0 + t1) / 2);
-    fgeo3(S, F2, g, c);
+    fgeo3(S, F3, g, c);
   }
   function pfad2(P4, l, e = 0) {
     if (l.kreis) {
@@ -141315,11 +141627,11 @@
     const b3 = l.u1 - l.u0;
     return l.art === "spitz" ? l.v1 - b3 * 0.866 : l.art === "rund" ? l.v1 - b3 / 2 : l.art === "segment" ? l.v1 - b3 * 0.15 : l.v1;
   }
-  function formen(S, F2, shapes, t0, t1, c, seg2 = 6) {
+  function formen(S, F3, shapes, t0, t1, c, seg2 = 6) {
     if (!shapes.length) return;
     const g = new three_module_exports.ExtrudeGeometry(shapes, { depth: t1 - t0, bevelEnabled: false, curveSegments: seg2 });
     g.translate(0, 0, t0);
-    fgeo3(S, F2, g, c);
+    fgeo3(S, F3, g, c);
   }
   function umrissForm(umr) {
     const s2 = new three_module_exports.Shape();
@@ -141370,7 +141682,7 @@
     }
     return formenListe;
   }
-  function rasterWand(S, F2, umr, oeff, t0, t1, farbe3) {
+  function rasterWand(S, F3, umr, oeff, t0, t1, farbe3) {
     const [U0, V0, U1, V1] = umr;
     const vs2 = [.../* @__PURE__ */ new Set([V0, V1, ...oeff.flatMap((l) => [l.v0, l.v1]).filter((v) => v > V0 && v < V1)])].sort((a2, b3) => a2 - b3);
     const gs = [];
@@ -141391,16 +141703,16 @@
       }
       if (U1 > u) box(u, a2, U1, b3);
     }
-    if (gs.length) fgeo3(S, F2, mergeGeometries(gs), farbe3);
+    if (gs.length) fgeo3(S, F3, mergeGeometries(gs), farbe3);
   }
-  function lochwand3(S, F2, umr, oeff, farbe3, o3 = {}) {
+  function lochwand3(S, F3, umr, oeff, farbe3, o3 = {}) {
     const tw = o3.tw ?? 0.4;
-    if (typeof umr[0] === "number" && oeff.length >= 3 && oeff.every((l) => !l.kreis && !l.art)) rasterWand(S, F2, umr, oeff, -tw, o3.t1 ?? 0, farbe3);
-    else if (typeof umr[0] === "number" && oeff.length > 8) formen(S, F2, wandStreifen(umr, oeff), -tw, o3.t1 ?? 0, farbe3, o3.seg ?? 6);
+    if (typeof umr[0] === "number" && oeff.length >= 3 && oeff.every((l) => !l.kreis && !l.art)) rasterWand(S, F3, umr, oeff, -tw, o3.t1 ?? 0, farbe3);
+    else if (typeof umr[0] === "number" && oeff.length > 8) formen(S, F3, wandStreifen(umr, oeff), -tw, o3.t1 ?? 0, farbe3, o3.seg ?? 6);
     else {
       const s2 = umrissForm(umr);
       for (const l of oeff) s2.holes.push(pfad2(new three_module_exports.Path(), l));
-      formen(S, F2, [s2], -tw, o3.t1 ?? 0, farbe3, o3.seg ?? 6);
+      formen(S, F3, [s2], -tw, o3.t1 ?? 0, farbe3, o3.seg ?? 6);
     }
     const fuell = /* @__PURE__ */ new Map(), ringe = [], sprossen = [], baenke2 = [];
     const add = (c, tief2, sh) => {
@@ -141435,18 +141747,18 @@
       }
       if (o3.bank && l.typ === "fenster" && !l.kreis && l.bank !== false) baenke2.push(rform(l.u0 - 0.1, l.v0 - 0.14, l.u1 + 0.1, l.v0));
     }
-    for (const { c, tief: tief2, s: sh } of fuell.values()) formen(S, F2, sh, -tief2 - 0.06, -tief2, c, o3.seg ?? 6);
+    for (const { c, tief: tief2, s: sh } of fuell.values()) formen(S, F3, sh, -tief2 - 0.06, -tief2, c, o3.seg ?? 6);
     const gr = /* @__PURE__ */ new Map();
     for (const [c, tief2, sh] of [...ringe, ...sprossen]) {
       const k3 = c + "|" + tief2;
       if (!gr.has(k3)) gr.set(k3, { c, tief: tief2, s: [] });
       gr.get(k3).s.push(sh);
     }
-    for (const { c, tief: tief2, s: sh } of gr.values()) formen(S, F2, sh, -tief2, -tief2 + 0.07, c, Math.min(4, o3.seg ?? 6));
-    if (baenke2.length) formen(S, F2, baenke2, -0.05, 0.14, o3.bank);
+    for (const { c, tief: tief2, s: sh } of gr.values()) formen(S, F3, sh, -tief2, -tief2 + 0.07, c, Math.min(4, o3.seg ?? 6));
+    if (baenke2.length) formen(S, F3, baenke2, -0.05, 0.14, o3.bank);
   }
-  function platten(S, F2, liste3, t0, t1, c) {
-    formen(S, F2, liste3.map((q2) => q2.length === 4 && typeof q2[0] === "number" ? rform(...q2) : umrissForm(q2)), t0, t1, c);
+  function platten(S, F3, liste3, t0, t1, c) {
+    formen(S, F3, liste3.map((q2) => q2.length === 4 && typeof q2[0] === "number" ? rform(...q2) : umrissForm(q2)), t0, t1, c);
   }
   var fenster4 = (u, v, b3, h3, art = null, x2 = {}) => ({ u0: u - b3 / 2, u1: u + b3 / 2, v0: v, v1: v + h3, art, typ: "fenster", ...x2 });
   var GLAS8 = "#4b5a66";
@@ -141558,7 +141870,7 @@
     }
     return erg;
   }
-  var sieht = (p2, F2) => p2.sieht(F2.nx, F2.nz);
+  var sieht = (p2, F3) => p2.sieht(F3.nx, F3.nz);
   function baumN(S, r3, x2, z4, s2 = 1, art = "laub") {
     S.box(0.45 * s2, 2.4 * s2, 0.45 * s2, x2, 1.5 * s2, z4, "#7a5d43");
     if (art === "kegel") {
@@ -141794,8 +142106,8 @@
       const zb = o3.zwerch, gz2 = dachProfil(3.2, zb + 0.5, 1.75, 0.12, "z");
       gz2.translate(a2 + c, H + 2.7, D - 1.75);
       S.add(gz2, dach3);
-      for (const [F2, uu] of [[R6(a2, zR, 0, 1, T), 0], [R6(b3, D, 0, -1, T), 0]]) {
-        fpolyR(S, F2, [[0.1, H], [T - 0.1, H], [T / 2, H + dh - 0.35]], -0.45, -0.05, wand2);
+      for (const [F3, uu] of [[R6(a2, zR, 0, 1, T), 0], [R6(b3, D, 0, -1, T), 0]]) {
+        fpolyR(S, F3, [[0.1, H], [T - 0.1, H], [T / 2, H + dh - 0.35]], -0.45, -0.05, wand2);
       }
       const FRt = R6(b3, zR, -1, 0, bw);
       if (sieht(p2, FRt)) {
@@ -141842,19 +142154,19 @@
       fb3(S, FF, u - 1.1, u + 1.1, 0, 0.35, 0, 0.9, GRANIT);
       fb3(S, FF, u - 1.2, u + 1.2, 3.55, 3.75, 0, 0.6, orn);
     }
-    for (const [F2, an] of [[R6(a2, zR, 0, 1, T), links], [R6(b3, D, 0, -1, T), rechts]]) {
+    for (const [F3, an] of [[R6(a2, zR, 0, 1, T), links], [R6(b3, D, 0, -1, T), rechts]]) {
       if (!an) continue;
       const so = [];
       const hS = traufe ? [[0, 0], [T, 0], [T, H], [T / 2, H + T * 0.42 - 0.2], [0, H]] : [0, 0, T, H];
       for (let k3 = 0; k3 < n3; k3++) for (const u of achsen4(1, T - 1, 3.2, 0.3)) if (hash4(k3, Math.round(u * 10), o3.salz) % 3 !== 0) so.push(fenster4(u, eg + k3 * gh + 0.7, 1, 1.7, art));
       if (traufe) so.push(fenster4(T / 2, H + 0.6, 0.9, 1.5));
-      lochwand3(S, F2, hS, so, dunkler(wand2, 0.03), { rahmen: WEISS, bank: putz2 ? orn : null });
-      if (!putz2) platten(S, F2, [[0, 0, T, 0.55]], 0, 0.05, o3.band);
+      lochwand3(S, F3, hS, so, dunkler(wand2, 0.03), { rahmen: WEISS, bank: putz2 ? orn : null });
+      if (!putz2) platten(S, F3, [[0, 0, T, 0.55]], 0, 0.05, o3.band);
     }
     return traufe ? H + T * 0.42 : H + G3 + (typ === "fialen" ? 2.3 : 0);
   }
-  function fpolyR(S, F2, pk, t0, t1, c) {
-    formen(S, F2, [umrissForm(pk)], t0, t1, c);
+  function fpolyR(S, F3, pk, t0, t1, c) {
+    formen(S, F3, [umrissForm(pk)], t0, t1, c);
   }
   function giebelZeileRoh(S, scene2, p2) {
     const r3 = rng3(`ngh:${p2.seed}`);
@@ -141949,13 +142261,13 @@
     }
     return oe;
   }
-  function giebelDeckel(S, F2, u0, bw, H, G3, m, c) {
+  function giebelDeckel(S, F3, u0, bw, H, G3, m, c) {
     const nc = 2 * m + 1, cw = bw / nc, st2 = G3 / (m + 1), deck = [];
     for (let j3 = 0; j3 < nc; j3++) {
       const y2 = H + (Math.min(j3, nc - 1 - j3) + 1) * st2;
       deck.push([u0 + j3 * cw - 0.06, y2, u0 + (j3 + 1) * cw + 0.06, y2 + 0.16]);
     }
-    platten(S, F2, deck, -0.45, 0.16, c);
+    platten(S, F3, deck, -0.45, 0.16, c);
   }
   function raster2(u0, u1, ra, y0, n3, gh, b3, h3, art = null, rand = 0.5, sockel = 0.75, x2 = {}) {
     const oe = [];
@@ -141969,19 +142281,19 @@
     for (const k3 of Object.keys(sz)) if (vis[k3]) fass(sz[k3], k3);
     return { sz, vis };
   }
-  function P3(F2, u, y2, t3) {
-    const [x2, z4] = wp3(F2, u, t3);
+  function P3(F3, u, y2, t3) {
+    const [x2, z4] = wp3(F3, u, t3);
     return [x2, y2, z4];
   }
-  function markiseF2(S, F2, u0, u1, y2, farbe3, tiefe = 1.5, neig = 0.38) {
+  function markiseF2(S, F3, u0, u1, y2, farbe3, tiefe = 1.5, neig = 0.38) {
     const g = new three_module_exports.BoxGeometry(u1 - u0, 0.1, tiefe);
     g.rotateX(neig);
     g.translate((u0 + u1) / 2, y2, tiefe / 2);
-    fgeo3(S, F2, g, farbe3);
+    fgeo3(S, F3, g, farbe3);
   }
-  function streifenMarkise(S, F2, u0, u1, y2, f1, f22 = "#f4f1ea", n3 = 6, tiefe = 1.5) {
+  function streifenMarkise(S, F3, u0, u1, y2, f1, f22 = "#f4f1ea", n3 = 6, tiefe = 1.5) {
     const b3 = (u1 - u0) / n3;
-    for (let i = 0; i < n3; i++) markiseF2(S, F2, u0 + i * b3, u0 + (i + 1) * b3, y2, i % 2 ? f22 : f1, tiefe);
+    for (let i = 0; i < n3; i++) markiseF2(S, F3, u0 + i * b3, u0 + (i + 1) * b3, y2, i % 2 ? f22 : f1, tiefe);
   }
   function schirm2(S, x2, z4, y0, rad3, farbe3) {
     S.box(0.08, 2.3, 0.08, x2, y0 + 1.15, z4, "#e8e6e0");
@@ -141993,7 +142305,7 @@
     zyl7(S, 0.45, 0.45, 0.06, x2, y0 + 0.72, z4, "#e9e6de", 8);
     S.box(0.08, 0.72, 0.08, x2, y0 + 0.36, z4, "#3a3f44");
   }
-  function rumpf(S, F2, L2, B8, y0, y1, c, spitz = 0.24, heck = 0.85) {
+  function rumpf(S, F3, L2, B8, y0, y1, c, spitz = 0.24, heck = 0.85) {
     const s2 = new three_module_exports.Shape();
     s2.moveTo(-L2 / 2, -B8 / 2 * heck);
     s2.lineTo(L2 / 2 - L2 * spitz, -B8 / 2);
@@ -142004,99 +142316,99 @@
     const g = new three_module_exports.ExtrudeGeometry(s2, { depth: y1 - y0, bevelEnabled: false });
     g.rotateX(-PI9 / 2);
     g.translate(0, y0, 0);
-    fgeo3(S, F2, g, c);
+    fgeo3(S, F3, g, c);
   }
   function boot(S, scene2, x2, z4, typ, ry = 0, farbe3 = null, y0 = 0.36, name2 = null) {
-    const F2 = R6(x2, z4, Math.cos(ry), -Math.sin(ry), 0);
+    const F3 = R6(x2, z4, Math.cos(ry), -Math.sin(ry), 0);
     if (typ === "barkasse") {
       const L3 = 13, B9 = 3.6;
-      rumpf(S, F2, L3, B9, y0 - 0.3, y0 + 0.25, "#b8352c");
-      rumpf(S, F2, L3 + 0.1, B9 + 0.1, y0 + 0.25, y0 + 1, farbe3 ?? "#2d3338");
-      rumpf(S, F2, L3 - 0.6, B9 - 0.5, y0 + 1, y0 + 1.06, "#a07a52");
-      fb3(S, F2, -4.6, 2.4, y0 + 1, y0 + 2.1, -1.25, 1.25, "#efe9dc");
-      fb3(S, F2, -4.4, 2.2, y0 + 1.4, y0 + 1.95, -1.3, 1.3, GLAS8);
-      fb3(S, F2, -4.9, 2.7, y0 + 2.1, y0 + 2.25, -1.5, 1.5, "#a05a3a");
-      fb3(S, F2, 2.4, 3.6, y0 + 1, y0 + 2.6, -0.7, 0.7, "#efe9dc");
-      fb3(S, F2, 2.45, 3.55, y0 + 1.9, y0 + 2.4, -0.75, 0.75, GLAS8);
-      fb3(S, F2, -6.2, -5.2, y0 + 1, y0 + 2.2, -0.04, 0.04, "#2b2f33");
-      fb3(S, F2, -6.25, -5.25, y0 + 1.6, y0 + 2.2, 0.04, 0.9, waehle2(rng3(Math.round(x2 * 7 + z4)), ["#d23c32", "#2f6f8f", "#f2f1ec"]));
+      rumpf(S, F3, L3, B9, y0 - 0.3, y0 + 0.25, "#b8352c");
+      rumpf(S, F3, L3 + 0.1, B9 + 0.1, y0 + 0.25, y0 + 1, farbe3 ?? "#2d3338");
+      rumpf(S, F3, L3 - 0.6, B9 - 0.5, y0 + 1, y0 + 1.06, "#a07a52");
+      fb3(S, F3, -4.6, 2.4, y0 + 1, y0 + 2.1, -1.25, 1.25, "#efe9dc");
+      fb3(S, F3, -4.4, 2.2, y0 + 1.4, y0 + 1.95, -1.3, 1.3, GLAS8);
+      fb3(S, F3, -4.9, 2.7, y0 + 2.1, y0 + 2.25, -1.5, 1.5, "#a05a3a");
+      fb3(S, F3, 2.4, 3.6, y0 + 1, y0 + 2.6, -0.7, 0.7, "#efe9dc");
+      fb3(S, F3, 2.45, 3.55, y0 + 1.9, y0 + 2.4, -0.75, 0.75, GLAS8);
+      fb3(S, F3, -6.2, -5.2, y0 + 1, y0 + 2.2, -0.04, 0.04, "#2b2f33");
+      fb3(S, F3, -6.25, -5.25, y0 + 1.6, y0 + 2.2, 0.04, 0.9, waehle2(rng3(Math.round(x2 * 7 + z4)), ["#d23c32", "#2f6f8f", "#f2f1ec"]));
       return;
     }
     if (typ === "kutter") {
       const L3 = 15, B9 = 4.6, c2 = farbe3 ?? "#2f6f8f";
-      rumpf(S, F2, L3, B9, y0 - 0.3, y0 + 0.3, "#b8352c", 0.3);
-      rumpf(S, F2, L3 + 0.1, B9 + 0.1, y0 + 0.3, y0 + 1.6, c2, 0.3);
-      rumpf(S, F2, L3 - 0.5, B9 - 0.5, y0 + 1.6, y0 + 1.66, "#9a8d78", 0.3);
-      fb3(S, F2, -6, -2.6, y0 + 1.6, y0 + 4, -1.3, 1.3, "#f2efe6");
-      fb3(S, F2, -5.95, -2.65, y0 + 3, y0 + 3.7, -1.35, 1.35, GLAS8);
-      fb3(S, F2, -6.2, -2.4, y0 + 4, y0 + 4.2, -1.5, 1.5, c2);
-      stab3(S, P3(F2, 1.5, y0 + 1.6, 0), P3(F2, 1.5, y0 + 9, 0), 0.12, "#e8e6e0");
-      stab3(S, P3(F2, 1.5, y0 + 4, 0), P3(F2, 6.5, y0 + 2.4, 0), 0.08, "#e8e6e0");
-      stab3(S, P3(F2, 1.5, y0 + 8.6, 0), P3(F2, 7.3, y0 + 1.8, 0), 0.03, "#3a3f44");
-      stab3(S, P3(F2, 1.5, y0 + 8.6, 0), P3(F2, -6, y0 + 4.2, 0), 0.03, "#3a3f44");
-      fb3(S, F2, -1.5, 1, y0 + 1.66, y0 + 2.3, -1, 1, "#c9a24a");
+      rumpf(S, F3, L3, B9, y0 - 0.3, y0 + 0.3, "#b8352c", 0.3);
+      rumpf(S, F3, L3 + 0.1, B9 + 0.1, y0 + 0.3, y0 + 1.6, c2, 0.3);
+      rumpf(S, F3, L3 - 0.5, B9 - 0.5, y0 + 1.6, y0 + 1.66, "#9a8d78", 0.3);
+      fb3(S, F3, -6, -2.6, y0 + 1.6, y0 + 4, -1.3, 1.3, "#f2efe6");
+      fb3(S, F3, -5.95, -2.65, y0 + 3, y0 + 3.7, -1.35, 1.35, GLAS8);
+      fb3(S, F3, -6.2, -2.4, y0 + 4, y0 + 4.2, -1.5, 1.5, c2);
+      stab3(S, P3(F3, 1.5, y0 + 1.6, 0), P3(F3, 1.5, y0 + 9, 0), 0.12, "#e8e6e0");
+      stab3(S, P3(F3, 1.5, y0 + 4, 0), P3(F3, 6.5, y0 + 2.4, 0), 0.08, "#e8e6e0");
+      stab3(S, P3(F3, 1.5, y0 + 8.6, 0), P3(F3, 7.3, y0 + 1.8, 0), 0.03, "#3a3f44");
+      stab3(S, P3(F3, 1.5, y0 + 8.6, 0), P3(F3, -6, y0 + 4.2, 0), 0.03, "#3a3f44");
+      fb3(S, F3, -1.5, 1, y0 + 1.66, y0 + 2.3, -1, 1, "#c9a24a");
       return;
     }
     if (typ === "dampfer") {
       const L3 = 30, B9 = 7, c2 = farbe3 ?? "#1f3a5f";
-      rumpf(S, F2, L3, B9, y0 - 0.3, y0 + 0.5, c2, 0.22, 0.9);
-      rumpf(S, F2, L3 + 0.1, B9 + 0.1, y0 + 0.5, y0 + 2.1, "#f6f4ee", 0.22, 0.9);
-      rumpf(S, F2, L3 - 0.6, B9 - 0.5, y0 + 2.1, y0 + 2.16, "#b08a62", 0.22, 0.9);
-      fb3(S, F2, -13, 7.5, y0 + 2.16, y0 + 4.5, -2.9, 2.9, "#f6f4ee");
-      fb3(S, F2, -12.8, 7.3, y0 + 3, y0 + 4.1, -2.95, 2.95, GLAS8);
-      fb3(S, F2, -13.4, 8, y0 + 4.5, y0 + 4.7, -3.3, 3.3, "#e9e6de");
-      fb3(S, F2, -13.4, 8, y0 + 4.7, y0 + 5.6, 3.2, 3.3, "#e9e6de");
-      fb3(S, F2, -13.4, 8, y0 + 4.7, y0 + 5.6, -3.3, -3.2, "#e9e6de");
-      fb3(S, F2, -6, 4.5, y0 + 4.7, y0 + 6.6, -2.2, 2.2, "#f6f4ee");
-      fb3(S, F2, -5.8, 4.3, y0 + 5.3, y0 + 6.2, -2.25, 2.25, GLAS8);
-      fb3(S, F2, 4.5, 7, y0 + 4.7, y0 + 7.4, -1.6, 1.6, "#f6f4ee");
-      fb3(S, F2, 4.55, 7.05, y0 + 6.4, y0 + 7.1, -1.65, 1.65, GLAS8);
-      fb3(S, F2, -6.2, 4.7, y0 + 6.6, y0 + 6.8, -2.6, 2.6, "#e9e6de");
-      const [fx2, fz2] = wp3(F2, -1, 0);
+      rumpf(S, F3, L3, B9, y0 - 0.3, y0 + 0.5, c2, 0.22, 0.9);
+      rumpf(S, F3, L3 + 0.1, B9 + 0.1, y0 + 0.5, y0 + 2.1, "#f6f4ee", 0.22, 0.9);
+      rumpf(S, F3, L3 - 0.6, B9 - 0.5, y0 + 2.1, y0 + 2.16, "#b08a62", 0.22, 0.9);
+      fb3(S, F3, -13, 7.5, y0 + 2.16, y0 + 4.5, -2.9, 2.9, "#f6f4ee");
+      fb3(S, F3, -12.8, 7.3, y0 + 3, y0 + 4.1, -2.95, 2.95, GLAS8);
+      fb3(S, F3, -13.4, 8, y0 + 4.5, y0 + 4.7, -3.3, 3.3, "#e9e6de");
+      fb3(S, F3, -13.4, 8, y0 + 4.7, y0 + 5.6, 3.2, 3.3, "#e9e6de");
+      fb3(S, F3, -13.4, 8, y0 + 4.7, y0 + 5.6, -3.3, -3.2, "#e9e6de");
+      fb3(S, F3, -6, 4.5, y0 + 4.7, y0 + 6.6, -2.2, 2.2, "#f6f4ee");
+      fb3(S, F3, -5.8, 4.3, y0 + 5.3, y0 + 6.2, -2.25, 2.25, GLAS8);
+      fb3(S, F3, 4.5, 7, y0 + 4.7, y0 + 7.4, -1.6, 1.6, "#f6f4ee");
+      fb3(S, F3, 4.55, 7.05, y0 + 6.4, y0 + 7.1, -1.65, 1.65, GLAS8);
+      fb3(S, F3, -6.2, 4.7, y0 + 6.6, y0 + 6.8, -2.6, 2.6, "#e9e6de");
+      const [fx2, fz2] = wp3(F3, -1, 0);
       zyl7(S, 0.9, 1, 3.2, fx2, y0 + 6.8, fz2, farbe3 ?? "#d23c32", 12);
       zyl7(S, 0.92, 0.92, 0.7, fx2, y0 + 9.6, fz2, "#2b2f33", 12);
       for (let i = 0; i < 4; i++) {
-        const [sx, sz] = wp3(F2, -10 + i * 4.5, 0);
+        const [sx, sz] = wp3(F3, -10 + i * 4.5, 0);
         S.box(1.2, 0.5, 1.2, sx, y0 + 7 + 0 * i, sz, "#f2f1ec");
       }
-      stab3(S, P3(F2, 8, y0 + 7.4, 0), P3(F2, 8, y0 + 11, 0), 0.08, "#e8e6e0");
+      stab3(S, P3(F3, 8, y0 + 7.4, 0), P3(F3, 8, y0 + 11, 0), 0.08, "#e8e6e0");
       if (name2) {
-        const Fs = teil3(F2, -13, 8, 3.35);
+        const Fs = teil3(F3, -13, 8, 3.35);
         ftext3(scene2, Fs, name2, 10.5, y0 + 5.15, 0.02, 0.55, 12, "#1f3a5f");
       }
       return;
     }
     const L2 = 58, B8 = 11, c = farbe3 ?? "#2a3a4a";
-    rumpf(S, F2, L2, B8, y0 - 0.3, y0 + 1.2, "#a6342b", 0.16, 0.95);
-    rumpf(S, F2, L2 + 0.1, B8 + 0.1, y0 + 1.2, y0 + 5.2, c, 0.16, 0.95);
-    rumpf(S, F2, L2 - 1, B8 - 0.8, y0 + 5.2, y0 + 5.3, "#7d6a58", 0.16, 0.95);
-    fb3(S, F2, -28, -17, y0 + 5.3, y0 + 13.5, -4.6, 4.6, "#f2efe6");
-    fb3(S, F2, -27.8, -17.2, y0 + 12.2, y0 + 13.2, -4.65, 4.65, GLAS8);
-    for (let k3 = 0; k3 < 2; k3++) fb3(S, F2, -27.8, -17.2, y0 + 7.3 + k3 * 2.2, y0 + 8 + k3 * 2.2, -4.65, 4.65, GLAS_HELL5);
-    fb3(S, F2, -18.5, -17, y0 + 13.5, y0 + 13.7, -5.6, 5.6, "#f2efe6");
-    const [fx, fz] = wp3(F2, -24, 0);
+    rumpf(S, F3, L2, B8, y0 - 0.3, y0 + 1.2, "#a6342b", 0.16, 0.95);
+    rumpf(S, F3, L2 + 0.1, B8 + 0.1, y0 + 1.2, y0 + 5.2, c, 0.16, 0.95);
+    rumpf(S, F3, L2 - 1, B8 - 0.8, y0 + 5.2, y0 + 5.3, "#7d6a58", 0.16, 0.95);
+    fb3(S, F3, -28, -17, y0 + 5.3, y0 + 13.5, -4.6, 4.6, "#f2efe6");
+    fb3(S, F3, -27.8, -17.2, y0 + 12.2, y0 + 13.2, -4.65, 4.65, GLAS8);
+    for (let k3 = 0; k3 < 2; k3++) fb3(S, F3, -27.8, -17.2, y0 + 7.3 + k3 * 2.2, y0 + 8 + k3 * 2.2, -4.65, 4.65, GLAS_HELL5);
+    fb3(S, F3, -18.5, -17, y0 + 13.5, y0 + 13.7, -5.6, 5.6, "#f2efe6");
+    const [fx, fz] = wp3(F3, -24, 0);
     S.quader(fx - 1.4, y0 + 13.5, fz - 1.4, fx + 1.4, y0 + 17.5, fz + 1.4, "#d23c32");
     S.quader(fx - 1.45, y0 + 16.8, fz - 1.45, fx + 1.45, y0 + 17.6, fz + 1.45, "#2b2f33");
     const kc = ["#c9483e", "#2f6f8f", "#3f7d56", "#d39a2b", "#e9e6de", "#6b4f8f"];
-    for (let i = 0; i < 6; i++) for (let j3 = 0; j3 < 3; j3++) for (let k3 = 0; k3 < 2; k3++) if (hash4(i, j3, k3 + Math.round(x2)) % 4) fb3(S, F2, -13 + i * 6.4, -13 + i * 6.4 + 6, y0 + 5.3 + k3 * 2.6, y0 + 5.3 + (k3 + 1) * 2.6 - 0.05, -3.9 + j3 * 2.6, -3.9 + j3 * 2.6 + 2.5, kc[hash4(i, j3, k3) % kc.length]);
-    stab3(S, P3(F2, 24, y0 + 5.3, 0), P3(F2, 24, y0 + 12, 0), 0.2, "#e8e6e0");
+    for (let i = 0; i < 6; i++) for (let j3 = 0; j3 < 3; j3++) for (let k3 = 0; k3 < 2; k3++) if (hash4(i, j3, k3 + Math.round(x2)) % 4) fb3(S, F3, -13 + i * 6.4, -13 + i * 6.4 + 6, y0 + 5.3 + k3 * 2.6, y0 + 5.3 + (k3 + 1) * 2.6 - 0.05, -3.9 + j3 * 2.6, -3.9 + j3 * 2.6 + 2.5, kc[hash4(i, j3, k3) % kc.length]);
+    stab3(S, P3(F3, 24, y0 + 5.3, 0), P3(F3, 24, y0 + 12, 0), 0.2, "#e8e6e0");
   }
   function wippkran(S, F0, u, yK, farbe3, ausleger = 16, winkel = 0.62) {
-    const F2 = teil3(F0, u, u, 0);
-    for (const uu of [-2.7, 2.7]) for (const tt of [-3.2, 1.2]) fb3(S, F2, uu - 0.25, uu + 0.25, yK, yK + 6, tt - 0.25, tt + 0.25, farbe3);
-    for (const tt of [-3.2, 1.2]) fbalken(S, F2, -2.7, yK + 1.5, 2.7, yK + 5.5, 0.25, tt - 0.1, tt + 0.1, farbe3);
-    fb3(S, F2, -3.1, 3.1, yK + 6, yK + 6.6, -3.6, 1.6, farbe3);
-    fb3(S, F2, -1.9, 1.9, yK + 6.6, yK + 10, -3.4, 0.9, farbe3);
-    fb3(S, F2, -1.85, 1.85, yK + 8.2, yK + 9.4, 0.9, 0.96, GLAS8);
-    fb3(S, F2, 1.9, 1.96, yK + 8.2, yK + 9.4, -2.6, 0.6, GLAS8);
-    fb3(S, F2, -2, 2, yK + 10, yK + 10.3, -3.6, 1.1, dunkler(farbe3, 0.12));
-    fb3(S, F2, -1.2, 1.2, yK + 8.6, yK + 10.8, -5.2, -3.4, "#3a3f44");
+    const F3 = teil3(F0, u, u, 0);
+    for (const uu of [-2.7, 2.7]) for (const tt of [-3.2, 1.2]) fb3(S, F3, uu - 0.25, uu + 0.25, yK, yK + 6, tt - 0.25, tt + 0.25, farbe3);
+    for (const tt of [-3.2, 1.2]) fbalken(S, F3, -2.7, yK + 1.5, 2.7, yK + 5.5, 0.25, tt - 0.1, tt + 0.1, farbe3);
+    fb3(S, F3, -3.1, 3.1, yK + 6, yK + 6.6, -3.6, 1.6, farbe3);
+    fb3(S, F3, -1.9, 1.9, yK + 6.6, yK + 10, -3.4, 0.9, farbe3);
+    fb3(S, F3, -1.85, 1.85, yK + 8.2, yK + 9.4, 0.9, 0.96, GLAS8);
+    fb3(S, F3, 1.9, 1.96, yK + 8.2, yK + 9.4, -2.6, 0.6, GLAS8);
+    fb3(S, F3, -2, 2, yK + 10, yK + 10.3, -3.6, 1.1, dunkler(farbe3, 0.12));
+    fb3(S, F3, -1.2, 1.2, yK + 8.6, yK + 10.8, -5.2, -3.4, "#3a3f44");
     const tipY = yK + 8.4 + Math.sin(winkel) * ausleger, tipT = 0.6 + Math.cos(winkel) * ausleger;
-    for (const s2 of [-0.5, 0.5]) balken4(S, P3(F2, s2, yK + 8.4, 0.6), P3(F2, s2 * 0.3, tipY, tipT), 0.28, 0.5, farbe3);
-    balken4(S, P3(F2, 0, yK + 10.3, -1.2), P3(F2, 0, yK + 15.5, -0.4), 0.3, 0.3, farbe3);
-    balken4(S, P3(F2, 0, yK + 15.5, -0.4), P3(F2, 0, tipY + 0.3, tipT * 0.6), 0.12, 0.12, "#3a3f44");
-    stab3(S, P3(F2, 0, tipY, tipT), P3(F2, 0, yK + 2.5, tipT), 0.04, "#2b2f33", 4);
-    fb3(S, F2, -0.3, 0.3, yK + 2, yK + 2.6, tipT - 0.3, tipT + 0.3, "#e2b83b");
+    for (const s2 of [-0.5, 0.5]) balken4(S, P3(F3, s2, yK + 8.4, 0.6), P3(F3, s2 * 0.3, tipY, tipT), 0.28, 0.5, farbe3);
+    balken4(S, P3(F3, 0, yK + 10.3, -1.2), P3(F3, 0, yK + 15.5, -0.4), 0.3, 0.3, farbe3);
+    balken4(S, P3(F3, 0, yK + 15.5, -0.4), P3(F3, 0, tipY + 0.3, tipT * 0.6), 0.12, 0.12, "#3a3f44");
+    stab3(S, P3(F3, 0, tipY, tipT), P3(F3, 0, yK + 2.5, tipT), 0.04, "#2b2f33", 4);
+    fb3(S, F3, -0.3, 0.3, yK + 2, yK + 2.6, tipT - 0.3, tipT + 0.3, "#e2b83b");
     return tipT;
   }
   function becken(S, x0, z0, x1, z1, W3, D, wellen = 0, r3 = null) {
@@ -142108,37 +142420,37 @@
     if (z0 < 0.01) S.quader(x0, YW - 0.6, 0, x1, 0.36, m, GRANIT);
     for (let i = 0; i < wellen; i++) S.box(zw(r3, 1.5, 3.5), 0.03, 0.15, zw(r3, x0 + 2, x1 - 2), YW + 0.02, zw(r3, z0 + 2, z1 - 1.5), "#7fc4d6");
   }
-  function kaikante(S, F2, L2, yK, o3 = {}) {
-    fb3(S, F2, 0, L2, yK - 0.05, yK + 0.12, -1.2, 0.15, o3.kante ?? "#c9c4b8");
+  function kaikante(S, F3, L2, yK, o3 = {}) {
+    fb3(S, F3, 0, L2, yK - 0.05, yK + 0.12, -1.2, 0.15, o3.kante ?? "#c9c4b8");
     for (let u = 3; u < L2 - 1; u += o3.poller ?? 7) {
-      const [x2, z4] = wp3(F2, u, -0.6);
+      const [x2, z4] = wp3(F3, u, -0.6);
       poller2(S, x2, z4, yK + 0.12);
     }
     for (let u = 6; u < L2 - 3; u += 21) {
-      fb3(S, F2, u - 0.25, u + 0.25, YW, yK, 0.1, 0.2, "#6d6f70");
-      for (let y2 = YW + 0.4; y2 < yK; y2 += 0.4) fb3(S, F2, u - 0.25, u + 0.25, y2, y2 + 0.06, 0.15, 0.35, "#6d6f70");
+      fb3(S, F3, u - 0.25, u + 0.25, YW, yK, 0.1, 0.2, "#6d6f70");
+      for (let y2 = YW + 0.4; y2 < yK; y2 += 0.4) fb3(S, F3, u - 0.25, u + 0.25, y2, y2 + 0.06, 0.15, 0.35, "#6d6f70");
     }
     if (o3.rettung) for (let u = 12; u < L2 - 3; u += 26) {
-      fb3(S, F2, u - 0.06, u + 0.06, yK, yK + 1.6, -0.9, -0.8, "#e8e6e0");
-      fscheibe2(S, F2, u, yK + 1.2, -0.8, -0.65, 0.42, "#d9482e", 12);
+      fb3(S, F3, u - 0.06, u + 0.06, yK, yK + 1.6, -0.9, -0.8, "#e8e6e0");
+      fscheibe2(S, F3, u, yK + 1.2, -0.8, -0.65, 0.42, "#d9482e", 12);
     }
   }
   var KONTOR_NAMEN = ["Hanse-Kontor", "Kontorhaus Elbblick", "Reederhaus", "Kaffee-Kontor", "Seefahrerhaus", "Nordstern-Haus", "Kontorhaus M\xF6we", "Kompass-Haus"];
   var KONTOR_LAEDEN = ["Tabakwaren", "Schiffsausr\xFCster", "Kaffee-Import", "Reiseb\xFCro", "Notariat", "Feinkost", "Caf\xE9 Kontor", "Buchhandlung", "Uhren", "Bank", "Apotheke"];
-  function pfeilerWand(S, scene2, F2, o3) {
-    const L2 = F2.L, nb = Math.max(1, Math.round(L2 / o3.ra)), ra = L2 / nb, y0 = o3.y0, H = y0 + o3.n * o3.gh, att = o3.attika ?? 1;
+  function pfeilerWand(S, scene2, F3, o3) {
+    const L2 = F3.L, nb = Math.max(1, Math.round(L2 / o3.ra)), ra = L2 / nb, y0 = o3.y0, H = y0 + o3.n * o3.gh, att = o3.attika ?? 1;
     const oe = [];
     for (let k3 = 0; k3 < o3.n; k3++) for (let i = 0; i < nb; i++) oe.push({ u0: i * ra + 0.36, u1: (i + 1) * ra - 0.36, v0: y0 + k3 * o3.gh + 0.9, v1: y0 + (k3 + 1) * o3.gh - 0.32, typ: "fenster", sprosse: true });
-    lochwand3(S, F2, [0, y0, L2, H + att], oe, o3.stein, { rahmen: WEISS });
+    lochwand3(S, F3, [0, y0, L2, H + att], oe, o3.stein, { rahmen: WEISS });
     const pf = [], ak = [], spitzen = [], raute2 = [], baender = [];
     for (let i = 0; i <= nb; i++) {
       const u = Math.min(L2 - 0.24, Math.max(0.24, i * ra)), top = H + att + (o3.spitz ? 0.3 : 0.15);
       (o3.akzentAlle && i % o3.akzentAlle === 0 ? ak : pf).push([u - 0.24, y0, u + 0.24, top]);
       if (o3.spitz) spitzen.push([[u - 0.24, top], [u + 0.24, top], [u, top + 1.1]]);
     }
-    platten(S, F2, pf, 0, 0.34, o3.pfeiler);
-    if (ak.length) platten(S, F2, ak, 0, 0.4, o3.akzent);
-    if (spitzen.length) platten(S, F2, spitzen, 0, 0.34, o3.spitzFarbe ?? o3.pfeiler);
+    platten(S, F3, pf, 0, 0.34, o3.pfeiler);
+    if (ak.length) platten(S, F3, ak, 0, 0.4, o3.akzent);
+    if (spitzen.length) platten(S, F3, spitzen, 0, 0.34, o3.spitzFarbe ?? o3.pfeiler);
     for (let k3 = 0; k3 < o3.n; k3++) {
       if (o3.baender) baender.push([-0.05, y0 + k3 * o3.gh + 0.05, L2 + 0.05, y0 + k3 * o3.gh + 0.55]);
       else baender.push([0, y0 + k3 * o3.gh + 0.02, L2, y0 + k3 * o3.gh + 0.14]);
@@ -142147,21 +142459,21 @@
         raute2.push([[uc, vc - 0.24], [uc + 0.34, vc], [uc, vc + 0.24], [uc - 0.34, vc]]);
       }
     }
-    platten(S, F2, baender, 0, o3.baender ? 0.38 : 0.1, o3.baender ? o3.akzent : dunkler(o3.stein, 0.05));
-    platten(S, F2, raute2, 0, o3.baender ? 0.42 : 0.07, o3.zier);
-    platten(S, F2, [[-0.12, H + att - 0.22, L2 + 0.12, H + att + 0.12]], -0.4, 0.45, o3.kappe);
+    platten(S, F3, baender, 0, o3.baender ? 0.38 : 0.1, o3.baender ? o3.akzent : dunkler(o3.stein, 0.05));
+    platten(S, F3, raute2, 0, o3.baender ? 0.42 : 0.07, o3.zier);
+    platten(S, F3, [[-0.12, H + att - 0.22, L2 + 0.12, H + att + 0.12]], -0.4, 0.45, o3.kappe);
     return H + att;
   }
-  function kontorEG(S, scene2, F2, o3) {
-    const L2 = F2.L, nb = Math.max(1, Math.round(L2 / 5.6)), ra = L2 / nb, oe = [];
+  function kontorEG(S, scene2, F3, o3) {
+    const L2 = F3.L, nb = Math.max(1, Math.round(L2 / 5.6)), ra = L2 / nb, oe = [];
     const pi = o3.portal ? Math.floor(nb / 2) : -1;
     for (let i = 0; i < nb; i++) {
       if (i === pi) oe.push({ u0: i * ra + 1.2, u1: (i + 1) * ra - 1.2, v0: 0.3, v1: o3.eg - 0.2, art: "spitz", typ: "tuer", fuell: "#3d3328" });
       else oe.push({ u0: i * ra + 0.5, u1: (i + 1) * ra - 0.5, v0: 0.65, v1: o3.eg - 1.1, typ: "laden", fuell: GLAS_HELL5 });
     }
-    lochwand3(S, F2, [0, 0, L2, o3.eg], oe, o3.stein, { rahmen: "#2f3a40" });
-    platten(S, F2, [[-0.05, o3.eg - 0.3, L2 + 0.05, o3.eg + 0.05]], 0, 0.36, o3.gold);
-    platten(S, F2, [[0, 0, L2, 0.65]], 0, 0.06, GRANIT_D);
+    lochwand3(S, F3, [0, 0, L2, o3.eg], oe, o3.stein, { rahmen: "#2f3a40" });
+    platten(S, F3, [[-0.05, o3.eg - 0.3, L2 + 0.05, o3.eg + 0.05]], 0, 0.36, o3.gold);
+    platten(S, F3, [[0, 0, L2, 0.65]], 0, 0.06, GRANIT_D);
     if (pi >= 0) {
       const u0 = pi * ra + 1.2, u1 = (pi + 1) * ra - 1.2, um2 = (u0 + u1) / 2, b3 = u1 - u0;
       for (let s2 = 1; s2 <= 3; s2++) {
@@ -142177,16 +142489,16 @@
           q2.lineTo(u0 - e2, 0.3);
           return q2;
         })());
-        formen(S, F2, [ring2], 0, 0.12 + s2 * 0.08, s2 % 2 ? o3.zier : o3.gold);
+        formen(S, F3, [ring2], 0, 0.12 + s2 * 0.08, s2 % 2 ? o3.zier : o3.gold);
       }
       const zz = [];
       for (let u = u0 - 1.4; u < u1 + 1.3; u += 0.5) zz.push([[u, o3.eg + 0.08], [u + 0.5, o3.eg + 0.08], [u + 0.25, o3.eg + 0.5]]);
-      platten(S, F2, zz, 0, 0.3, o3.gold);
-      fb3(S, F2, um2 - 0.05, um2 + 0.05, 0.3, o3.eg - 1.6, -0.3, -0.18, "#c9a24a");
-      fb3(S, F2, u0 - 1.3, u1 + 1.3, 0.3, 0.45, 0, 0.5, GRANIT);
+      platten(S, F3, zz, 0, 0.3, o3.gold);
+      fb3(S, F3, um2 - 0.05, um2 + 0.05, 0.3, o3.eg - 1.6, -0.3, -0.18, "#c9a24a");
+      fb3(S, F3, u0 - 1.3, u1 + 1.3, 0.3, 0.45, 0, 0.5, GRANIT);
     }
-    for (let i = 0; i < nb; i++) if (i !== pi && hash4(i, o3.salz) % 2 === 0) ftext3(scene2, F2, KONTOR_LAEDEN[hash4(i, o3.salz, 3) % KONTOR_LAEDEN.length], (i + 0.5) * ra, o3.eg - 0.72, 0.05, 0.36, ra - 1.4, "#f4ead2");
-    for (let i = 0; i < nb; i++) if (i !== pi && hash4(i, o3.salz, 9) % 3 === 0) markiseF2(S, F2, i * ra + 0.5, (i + 1) * ra - 0.5, o3.eg - 1.15, waehle2(rng3(o3.salz + i), NF.markise), 0.45, 0.5);
+    for (let i = 0; i < nb; i++) if (i !== pi && hash4(i, o3.salz) % 2 === 0) ftext3(scene2, F3, KONTOR_LAEDEN[hash4(i, o3.salz, 3) % KONTOR_LAEDEN.length], (i + 0.5) * ra, o3.eg - 0.72, 0.05, 0.36, ra - 1.4, "#f4ead2");
+    for (let i = 0; i < nb; i++) if (i !== pi && hash4(i, o3.salz, 9) % 3 === 0) markiseF2(S, F3, i * ra + 0.5, (i + 1) * ra - 0.5, o3.eg - 1.15, waehle2(rng3(o3.salz + i), NF.markise), 0.45, 0.5);
   }
   var KONTOR_STIL = {
     spitz: { stein: ["#5e2d26", "#58291f", "#64302a"], akzent: "#d8c7a3", akzentAlle: 3, zier: "#c9a24a", kappe: "#c9a24a", spitz: true, baender: false, spitzFarbe: "#c9a24a" },
@@ -142217,13 +142529,13 @@
       const yb = s2 === 0 ? 0 : H0 + (s2 - 1) * gh, yt = s2 === 0 ? H0 : H0 + s2 * gh;
       prisma2(S, einruecken(pl2, 0.4), yb, yt, dunkler(stein, 0.06), s2 === 0 && hof2 ? [hof2] : []);
       prisma2(S, einruecken(pl2, 0.4), yt, yt + 0.12, s2 === st2 ? "#5f666c" : "#9aa0a3", s2 === 0 && hof2 ? [hof2] : []);
-      kanten(pl2).forEach((F2, i) => {
-        if (!sieht(p2, F2) || F2.L < 1) return;
+      kanten(pl2).forEach((F3, i) => {
+        if (!sieht(p2, F3) || F3.L < 1) return;
         if (s2 === 0) {
-          kontorEG(S, scene2, F2, { eg, stein, gold, zier: o3.akzent, portal: F2.L > 20 && i === 0, salz: p2.seed * 10 + i });
-          top = Math.max(top, pfeilerWand(S, scene2, F2, { ...o3, y0: eg, n: n3, gh }));
-          if (i === 0 && F2.L > 24) ftext3(scene2, F2, name2, F2.L / 2, H0 + 0.48, 0.47, 0.62, F2.L * 0.5, "#2a1a14");
-        } else top = Math.max(top, pfeilerWand(S, scene2, F2, { ...o3, y0: yb, n: 1, gh, attika: 0.9, akzentAlle: o3.akzentAlle ? o3.akzentAlle : 0 }));
+          kontorEG(S, scene2, F3, { eg, stein, gold, zier: o3.akzent, portal: F3.L > 20 && i === 0, salz: p2.seed * 10 + i });
+          top = Math.max(top, pfeilerWand(S, scene2, F3, { ...o3, y0: eg, n: n3, gh }));
+          if (i === 0 && F3.L > 24) ftext3(scene2, F3, name2, F3.L / 2, H0 + 0.48, 0.47, 0.62, F3.L * 0.5, "#2a1a14");
+        } else top = Math.max(top, pfeilerWand(S, scene2, F3, { ...o3, y0: yb, n: 1, gh, attika: 0.9, akzentAlle: o3.akzentAlle ? o3.akzentAlle : 0 }));
       });
     }
     const yTop = H0 + st2 * gh + 0.12;
@@ -142265,13 +142577,13 @@
       const tw = Math.min(15, W3 * 0.3, D * 0.45), x0 = W3 - tw, z0 = D - tw, nt = 6, Ht = H0 + nt * gh;
       const sq = rechteck4(x0, z0, W3, D);
       prisma2(S, einruecken(sq, 0.4), H0, Ht, dunkler(stein, 0.06));
-      kanten(sq).forEach((F2) => {
-        if (sieht(p2, F2)) pfeilerWand(S, scene2, F2, { ...o3, y0: H0 + 0.01, n: nt, gh, attika: 1.2 });
+      kanten(sq).forEach((F3) => {
+        if (sieht(p2, F3)) pfeilerWand(S, scene2, F3, { ...o3, y0: H0 + 0.01, n: nt, gh, attika: 1.2 });
       });
       const sq2 = einruecken(sq, 2), y2 = Ht + 1.2;
       prisma2(S, einruecken(sq2, 0.4), y2, y2 + gh, dunkler(stein, 0.06));
-      kanten(sq2).forEach((F2) => {
-        if (sieht(p2, F2)) pfeilerWand(S, scene2, F2, { ...o3, y0: y2, n: 1, gh, attika: 0.8, spitz: false });
+      kanten(sq2).forEach((F3) => {
+        if (sieht(p2, F3)) pfeilerWand(S, scene2, F3, { ...o3, y0: y2, n: 1, gh, attika: 0.8, spitz: false });
       });
       const cxT = x0 + tw / 2, czT = z0 + tw / 2, y3 = y2 + gh + 0.8, rk = (tw - 4) * 0.5;
       zyl7(S, rk * 0.92, rk * 0.92, 1.6, cxT, y3, czT, o3.zier, 16);
@@ -142289,15 +142601,15 @@
   function nordKontorhaus(S, scene2, p2) {
     return gedreht2(S, scene2, p2, kontorRoh, [36, 26]);
   }
-  function windenErker(S, F2, u, y2, holz, dachF) {
-    fb3(S, F2, u - 1.05, u + 1.05, y2, y2 + 2.3, 0, 1.4, holz);
-    fb3(S, F2, u - 0.85, u + 0.85, y2 + 0.5, y2 + 1.5, 1.4, 1.46, "#2b2f33");
+  function windenErker(S, F3, u, y2, holz, dachF) {
+    fb3(S, F3, u - 1.05, u + 1.05, y2, y2 + 2.3, 0, 1.4, holz);
+    fb3(S, F3, u - 0.85, u + 0.85, y2 + 0.5, y2 + 1.5, 1.4, 1.46, "#2b2f33");
     const g = dachProfil(1.9, 2.5, 1.1, 0.12, "z");
     g.translate(u, y2 + 2.3, 0.75);
-    fgeo3(S, F2, g, dachF);
-    fb3(S, F2, u - 0.12, u + 0.12, y2 - 0.3, y2, 0, 1.7, "#3a3f44");
-    fb3(S, F2, u - 0.03, u + 0.03, y2 - 4.2, y2 - 0.3, 1.55, 1.6, "#2b2f33");
-    fb3(S, F2, u - 0.25, u + 0.25, y2 - 4.5, y2 - 4.2, 1.35, 1.8, "#3a3f44");
+    fgeo3(S, F3, g, dachF);
+    fb3(S, F3, u - 0.12, u + 0.12, y2 - 0.3, y2, 0, 1.7, "#3a3f44");
+    fb3(S, F3, u - 0.03, u + 0.03, y2 - 4.2, y2 - 0.3, 1.55, 1.6, "#2b2f33");
+    fb3(S, F3, u - 0.25, u + 0.25, y2 - 4.5, y2 - 4.2, 1.35, 1.8, "#3a3f44");
   }
   function speicherRoh(S, scene2, p2) {
     const r3 = rng3(`nsp:${p2.seed}`);
@@ -142322,7 +142634,7 @@
     const nl = Math.max(1, Math.round(W3 / 17)), luken = Array.from({ length: nl }, (_, i) => (i + 0.5) * W3 / nl);
     const nahLuke = (u) => luken.some((l) => Math.abs(l - u) < 1.6);
     const fensterArt = v === "schlicht" ? "segment" : "rund";
-    const fassade3 = (F2, L2, lad, giebel3 = []) => {
+    const fassade3 = (F3, L2, lad, giebel3 = []) => {
       const oe = [];
       for (let k3 = 0; k3 < n3; k3++) for (const u of achsen4(0, L2, 2.6, 0.7)) if (!lad || !nahLuke(u)) oe.push(fenster4(u, sock + k3 * gh + 0.8, um2 ? 1.3 : 1.05, 1.6, fensterArt));
       if (lad) for (const u of luken) for (let k3 = 0; k3 < n3; k3++) oe.push({ u0: u - 0.75, u1: u + 0.75, v0: sock + k3 * gh + 0.3, v1: sock + k3 * gh + 2.5, typ: um2 ? "fenster" : "tuer", fuell: um2 ? GLAS_HELL5 : holz, art: "segment", sprosse: false });
@@ -142330,13 +142642,13 @@
       if (lad) for (const u of luken) oe.push({ u0: u - 0.9, u1: u + 0.9, v0: 0.36, v1: sock - 0.2, typ: "tuer", fuell: holz });
       for (const g of giebel3) if (g.typ !== "dreieck") oe.push(...giebelNischen(g.u0, g.u1 - g.u0, H, g.G, g.m, "spitz", dunkler(stein, 0.12), true));
       else oe.push(fenster4((g.u0 + g.u1) / 2, H + 0.6, 0.9, 1.5, "rund"));
-      lochwand3(S, F2, giebel3.length ? frontUmriss(L2, H, giebel3) : [0, 0, L2, H], oe, stein, { rahmen: rahm, glas: glas3, tuer: holz });
-      platten(S, F2, [[0, 0.3, L2, sock]], 0, 0.18, GRANIT);
+      lochwand3(S, F3, giebel3.length ? frontUmriss(L2, H, giebel3) : [0, 0, L2, H], oe, stein, { rahmen: rahm, glas: glas3, tuer: holz });
+      platten(S, F3, [[0, 0.3, L2, sock]], 0, 0.18, GRANIT);
       const bd = [];
       for (let k3 = 1; k3 < n3; k3++) bd.push([0, sock + k3 * gh + 0.12, L2, sock + k3 * gh + 0.3]);
-      platten(S, F2, bd, 0, 0.06, dunkler(stein, 0.14));
-      platten(S, F2, [[-0.05, H - 0.9, L2 + 0.05, H - 0.45], [-0.15, H - 0.2, L2 + 0.15, H + 0.12]], 0, 0.2, v === "speicherstadt" ? "#c98a63" : dunkler(stein, 0.1));
-      for (const g of giebel3) if (g.typ !== "dreieck") giebelDeckel(S, F2, g.u0, g.u1 - g.u0, H, g.G, g.m, "#d9d3c8");
+      platten(S, F3, bd, 0, 0.06, dunkler(stein, 0.14));
+      platten(S, F3, [[-0.05, H - 0.9, L2 + 0.05, H - 0.45], [-0.15, H - 0.2, L2 + 0.15, H + 0.12]], 0, 0.2, v === "speicherstadt" ? "#c98a63" : dunkler(stein, 0.1));
+      for (const g of giebel3) if (g.typ !== "dreieck") giebelDeckel(S, F3, g.u0, g.u1 - g.u0, H, g.G, g.m, "#d9d3c8");
     };
     S.quader(vis.xm ? 0.4 : 0, 0.3, vis.r ? zB + 0.4 : zB, W3 - (vis.x ? 0.4 : 0), H, zF - 0.4, dunkler(stein, 0.06));
     if (v === "giebel") {
@@ -142401,21 +142713,21 @@
       top = H + Math.max(dh, G3 + 2.5);
     }
     const dhS = v === "speicherstadt" ? T * 0.36 : 0;
-    for (const [F2, an] of [[FX, vis.x], [FXm, vis.xm]]) {
+    for (const [F3, an] of [[FX, vis.x], [FXm, vis.xm]]) {
       if (!an) continue;
       if (v === "speicherstadt") {
         const m = 3, G3 = dhS / ((2 * m + 1) / (2 * m + 2) * 0.93) + 0.2;
         const gl = [{ u0: 0, u1: T, typ: "treppe", G: G3, m }];
         const oe = raster2(0.5, T - 0.5, 2.6, sock, n3, gh, 1.05, 1.6, "rund");
         oe.push(...giebelNischen(0, T, H, G3, m, "spitz", dunkler(stein, 0.12), true));
-        lochwand3(S, F2, frontUmriss(T, H, gl), oe, stein, { rahmen: rahm, glas: glas3 });
-        giebelDeckel(S, F2, 0, T, H, G3, m, "#d9d3c8");
+        lochwand3(S, F3, frontUmriss(T, H, gl), oe, stein, { rahmen: rahm, glas: glas3 });
+        giebelDeckel(S, F3, 0, T, H, G3, m, "#d9d3c8");
       } else {
         const oe = raster2(0.5, T - 0.5, 2.8, sock, n3, gh, 1, 1.55, fensterArt);
-        lochwand3(S, F2, v === "schlicht" ? [0, 0, T, H + 1.1] : [0, 0, T, H], oe, stein, { rahmen: rahm, glas: glas3 });
+        lochwand3(S, F3, v === "schlicht" ? [0, 0, T, H + 1.1] : [0, 0, T, H], oe, stein, { rahmen: rahm, glas: glas3 });
       }
-      platten(S, F2, [[0, 0.3, T, sock]], 0, 0.18, GRANIT);
-      platten(S, F2, [[-0.1, H - 0.2, T + 0.1, H + 0.12]], 0, 0.2, dunkler(stein, 0.1));
+      platten(S, F3, [[0, 0.3, T, sock]], 0, 0.18, GRANIT);
+      platten(S, F3, [[-0.1, H - 0.2, T + 0.1, H + 0.12]], 0, 0.2, dunkler(stein, 0.1));
     }
     if (vis.r) {
       const oe = raster2(0.5, W3 - 0.5, 2.8, sock, n3, gh, 1, 1.55, fensterArt);
@@ -142448,30 +142760,30 @@
     return gedreht2(S, scene2, p2, speicherRoh, [24, 26]);
   }
   var WA_LAEDEN = ["Textilhaus M\xF6ller", "Radio Kr\xFCger", "Konditorei Witt", "Schuhhaus Brandt", "Eisdiele Venezia", "Lichtspiele", "Lederwaren", "Foto Hansen", "M\xF6bel Petersen", "Drogerie", "Optik Clau\xDFen", "Bettenhaus"];
-  function rasterFassade(S, scene2, F2, o3) {
-    const L2 = F2.L, nb = Math.max(1, Math.round(L2 / o3.ra)), ra = L2 / nb, H = o3.y0 + o3.n * o3.gh, oe = [];
+  function rasterFassade(S, scene2, F3, o3) {
+    const L2 = F3.L, nb = Math.max(1, Math.round(L2 / o3.ra)), ra = L2 / nb, H = o3.y0 + o3.n * o3.gh, oe = [];
     for (let k3 = 0; k3 < o3.n; k3++) for (let i = 0; i < nb; i++) {
       const u = (i + 0.5) * ra, y2 = o3.y0 + k3 * o3.gh;
       if (o3.balkon && i % 3 === 1 && k3 > 0) oe.push({ u0: u - ra / 2 + 0.35, u1: u + ra / 2 - 0.35, v0: y2 + 0.25, v1: y2 + o3.gh - 0.4, typ: "fenster", sprosse: true });
       else oe.push({ u0: u - ra / 2 + 0.45, u1: u + ra / 2 - 0.45, v0: y2 + 1, v1: y2 + o3.gh - 0.4, typ: "fenster" });
     }
-    lochwand3(S, F2, [0, o3.y0, L2, H + (o3.attika ?? 0.25)], oe, o3.klinker, { rahmen: WEISS, bank: o3.raster });
+    lochwand3(S, F3, [0, o3.y0, L2, H + (o3.attika ?? 0.25)], oe, o3.klinker, { rahmen: WEISS, bank: o3.raster });
     const gl = [];
     for (let i = 0; i <= nb; i++) {
       const u = Math.min(L2 - 0.15, Math.max(0.15, i * ra));
       gl.push([u - 0.15, o3.y0, u + 0.15, H + (o3.attika ?? 0.25)]);
     }
     for (let k3 = 0; k3 <= o3.n; k3++) gl.push([-0.05, o3.y0 + k3 * o3.gh - 0.12, L2 + 0.05, o3.y0 + k3 * o3.gh + 0.1]);
-    platten(S, F2, gl, 0, 0.12, o3.raster);
+    platten(S, F3, gl, 0, 0.12, o3.raster);
     if (o3.balkon) for (let k3 = 1; k3 < o3.n; k3++) for (let i = 1; i < nb; i += 3) {
       const u = (i + 0.5) * ra, y2 = o3.y0 + k3 * o3.gh;
-      fb3(S, F2, u - ra / 2 + 0.2, u + ra / 2 - 0.2, y2 + 0.05, y2 + 0.22, 0, 1.2, o3.raster);
-      fb3(S, F2, u - ra / 2 + 0.2, u + ra / 2 - 0.2, y2 + 0.22, y2 + 1.1, 1.12, 1.2, o3.bruest);
+      fb3(S, F3, u - ra / 2 + 0.2, u + ra / 2 - 0.2, y2 + 0.05, y2 + 0.22, 0, 1.2, o3.raster);
+      fb3(S, F3, u - ra / 2 + 0.2, u + ra / 2 - 0.2, y2 + 0.22, y2 + 1.1, 1.12, 1.2, o3.bruest);
     }
     return H;
   }
-  function ladenEG(S, scene2, F2, o3) {
-    const L2 = F2.L, nb = Math.max(1, Math.round(L2 / 4.2)), ra = L2 / nb, oe = [];
+  function ladenEG(S, scene2, F3, o3) {
+    const L2 = F3.L, nb = Math.max(1, Math.round(L2 / 4.2)), ra = L2 / nb, oe = [];
     for (let i = 0; i < nb; i++) {
       const u0 = i * ra + 0.2, u1 = (i + 1) * ra - 0.2;
       if (i % 4 === 2) {
@@ -142479,12 +142791,12 @@
         oe.push({ u0: u0 + 2.1, u1, v0: 0.6, v1: o3.eg - 1, typ: "laden", fuell: GLAS_HELL5 });
       } else oe.push({ u0, u1, v0: 0.6, v1: o3.eg - 1, typ: "laden", fuell: GLAS_HELL5 });
     }
-    lochwand3(S, F2, [0, 0, L2, o3.eg], oe, o3.wand, { rahmen: "#2f3a40", tw: 0.4 });
-    for (let i = 0; i <= nb; i++) fb3(S, F2, i * ra - 0.15, i * ra + 0.15, 0.3, o3.eg, 0, 0.14, o3.raster);
-    platten(S, F2, [[0, 0, L2, 0.6]], 0, 0.05, "#7d8287");
-    fb3(S, F2, -0.2, L2 + 0.2, o3.eg - 0.55, o3.eg - 0.35, 0, 1.8, WEISS);
-    fb3(S, F2, -0.2, L2 + 0.2, o3.eg - 0.7, o3.eg - 0.3, 1.7, 1.85, o3.akzent);
-    for (let i = 0; i < nb; i += 2) ftext3(scene2, teil3(F2, 0, L2, 1.86), WA_LAEDEN[(o3.salz + i) % WA_LAEDEN.length], (i + (i + 2 <= nb ? 1 : 0.5)) * ra, o3.eg - 0.02, 0, 0.5, Math.min(2, nb - i) * ra - 0.8, o3.schrift);
+    lochwand3(S, F3, [0, 0, L2, o3.eg], oe, o3.wand, { rahmen: "#2f3a40", tw: 0.4 });
+    for (let i = 0; i <= nb; i++) fb3(S, F3, i * ra - 0.15, i * ra + 0.15, 0.3, o3.eg, 0, 0.14, o3.raster);
+    platten(S, F3, [[0, 0, L2, 0.6]], 0, 0.05, "#7d8287");
+    fb3(S, F3, -0.2, L2 + 0.2, o3.eg - 0.55, o3.eg - 0.35, 0, 1.8, WEISS);
+    fb3(S, F3, -0.2, L2 + 0.2, o3.eg - 0.7, o3.eg - 0.3, 1.7, 1.85, o3.akzent);
+    for (let i = 0; i < nb; i += 2) ftext3(scene2, teil3(F3, 0, L2, 1.86), WA_LAEDEN[(o3.salz + i) % WA_LAEDEN.length], (i + (i + 2 <= nb ? 1 : 0.5)) * ra, o3.eg - 0.02, 0, 0.5, Math.min(2, nb - i) * ra - 0.8, o3.schrift);
   }
   function wiederaufbauRoh(S, scene2, p2) {
     const r3 = rng3(`nwa:${p2.seed}`);
@@ -142497,30 +142809,30 @@
     const H = eg + n3 * gh;
     let top = H;
     const o3 = { y0: eg, n: n3, gh, ra: v === "geschaeft" ? 4.2 : 3.1, klinker, raster: rast, bruest: v === "hannover" ? "#d9cfb6" : akzent, balkon: v === "hannover" };
-    koerper2(S, p2, 0, z0, W3, D, 0, H, dunkler(klinker, 0.08), (F2, s2) => {
+    koerper2(S, p2, 0, z0, W3, D, 0, H, dunkler(klinker, 0.08), (F3, s2) => {
       const front2 = s2 === "+z";
-      if (laden5 && (front2 || r3() < 0)) ladenEG(S, scene2, F2, { eg, wand: rast, raster: rast, akzent, schrift: v === "geschaeft" ? "#c9483e" : "#1f3a5f", salz: p2.seed * 3 });
-      else if (laden5) lochwand3(S, F2, [0, 0, F2.L, eg], achsen4(0, F2.L, 3.1, 0.6).map((u) => fenster4(u, 1.2, 1.8, 2.2)), klinker, { rahmen: WEISS });
+      if (laden5 && (front2 || r3() < 0)) ladenEG(S, scene2, F3, { eg, wand: rast, raster: rast, akzent, schrift: v === "geschaeft" ? "#c9483e" : "#1f3a5f", salz: p2.seed * 3 });
+      else if (laden5) lochwand3(S, F3, [0, 0, F3.L, eg], achsen4(0, F3.L, 3.1, 0.6).map((u) => fenster4(u, 1.2, 1.8, 2.2)), klinker, { rahmen: WEISS });
       if (v === "laubengang" && (front2 || s2 === "-z")) {
         const oe = [];
-        for (let k3 = 0; k3 < n3; k3++) for (const [j3, u] of achsen4(0, F2.L, 3.6, 0.5).entries()) {
+        for (let k3 = 0; k3 < n3; k3++) for (const [j3, u] of achsen4(0, F3.L, 3.6, 0.5).entries()) {
           const y2 = eg + k3 * gh;
           oe.push(j3 % 2 ? fenster4(u, y2 + 1, 1.6, 1.4) : { u0: u - 0.5, u1: u + 0.5, v0: y2 + 0.05, v1: y2 + 2.2, typ: "tuer", fuell: waehle2(rng3(k3 * 31 + j3), ["#c9483e", "#2f6f8f", "#e2b83b", "#3f7d56"]) });
         }
-        lochwand3(S, F2, [0, 0, F2.L, H + 0.3], oe, klinker, { rahmen: WEISS });
+        lochwand3(S, F3, [0, 0, F3.L, H + 0.3], oe, klinker, { rahmen: WEISS });
         for (let k3 = 1; k3 <= n3; k3++) {
           const y2 = eg + (k3 - 1) * gh;
-          fb3(S, F2, -0.3, F2.L + 0.3, y2 - 0.2, y2 + 0.02, 0, 1.7, rast);
-          const FL = teil3(F2, -0.3, F2.L + 0.3, 1.62), st2 = [];
+          fb3(S, F3, -0.3, F3.L + 0.3, y2 - 0.2, y2 + 0.02, 0, 1.7, rast);
+          const FL = teil3(F3, -0.3, F3.L + 0.3, 1.62), st2 = [];
           for (let u = 0.1; u < FL.L; u += 0.16) st2.push([u - 0.025, y2 + 0.02, u + 0.025, y2 + 1]);
           platten(S, FL, st2, -0.04, 0.04, "#3a3f44");
-          fb3(S, F2, -0.3, F2.L + 0.3, y2 + 1, y2 + 1.08, 1.5, 1.72, "#3a3f44");
-          for (let i = 0; i < Math.floor(F2.L / 3.6); i++) if (i % 3 === 1) fb3(S, F2, i * 3.6 + 0.3, i * 3.6 + 3.3, y2 + 0.3, y2 + 0.95, 1.6, 1.66, waehle2(rng3(k3 * 7 + i), ["#f2d27a", "#a9c3cf", "#e8a490"]));
+          fb3(S, F3, -0.3, F3.L + 0.3, y2 + 1, y2 + 1.08, 1.5, 1.72, "#3a3f44");
+          for (let i = 0; i < Math.floor(F3.L / 3.6); i++) if (i % 3 === 1) fb3(S, F3, i * 3.6 + 0.3, i * 3.6 + 3.3, y2 + 0.3, y2 + 0.95, 1.6, 1.66, waehle2(rng3(k3 * 7 + i), ["#f2d27a", "#a9c3cf", "#e8a490"]));
         }
-        fb3(S, F2, -0.3, F2.L + 0.3, H - 0.2, H + 0.05, 0, 1.7, rast);
-        for (let u = 0; u <= F2.L; u += 3.6 * 3) fb3(S, F2, u - 0.12, u + 0.12, 0.3, H, 1.5, 1.74, rast);
-      } else rasterFassade(S, scene2, F2, { ...o3, attika: v === "kiel" ? 0.25 : 0.6 });
-      if (front2 && v === "geschaeft") ftext3(scene2, F2, WA_LAEDEN[p2.seed * 5 % WA_LAEDEN.length], F2.L / 2, H + 1.6, 0.4, 1.4, F2.L * 0.7, "#c9483e");
+        fb3(S, F3, -0.3, F3.L + 0.3, H - 0.2, H + 0.05, 0, 1.7, rast);
+        for (let u = 0; u <= F3.L; u += 3.6 * 3) fb3(S, F3, u - 0.12, u + 0.12, 0.3, H, 1.5, 1.74, rast);
+      } else rasterFassade(S, scene2, F3, { ...o3, attika: v === "kiel" ? 0.25 : 0.6 });
+      if (front2 && v === "geschaeft") ftext3(scene2, F3, WA_LAEDEN[p2.seed * 5 % WA_LAEDEN.length], F3.L / 2, H + 1.6, 0.4, 1.4, F3.L * 0.7, "#c9483e");
     });
     if (v === "kiel" || v === "laubengang" && r3() < 0.5) {
       walm(S, -0.4, z0 - 0.4, W3 + 0.4, D + 0.4, H + 0.25, Math.min(3.2, T * 0.22), waehle2(r3, NF.ziegel), { achse: "x", kv: T * 0.5 + 0.4, kh: T * 0.5 + 0.4 });
@@ -142566,20 +142878,20 @@
   function hecke2(S, x0, z0, x1, z1, c = "#5d9450") {
     S.quader(x0, 0.3, z0, x1, 1.25, z1, c);
   }
-  function zaun2(S, F2, u0, u1, t3, c = "#f2efe6", h3 = 1) {
-    fb3(S, F2, u0, u1, 0.3 + h3 - 0.12, 0.3 + h3, t3 - 0.05, t3 + 0.05, c);
-    fb3(S, F2, u0, u1, 0.3 + h3 * 0.35, 0.3 + h3 * 0.35 + 0.1, t3 - 0.05, t3 + 0.05, c);
+  function zaun2(S, F3, u0, u1, t3, c = "#f2efe6", h3 = 1) {
+    fb3(S, F3, u0, u1, 0.3 + h3 - 0.12, 0.3 + h3, t3 - 0.05, t3 + 0.05, c);
+    fb3(S, F3, u0, u1, 0.3 + h3 * 0.35, 0.3 + h3 * 0.35 + 0.1, t3 - 0.05, t3 + 0.05, c);
     const st2 = [];
     for (let u = u0 + 0.1; u < u1; u += 0.22) st2.push([u - 0.04, 0.3, u + 0.04, 0.3 + h3 + 0.08]);
-    platten(S, teil3(F2, 0, F2.L, t3), st2, -0.03, 0.03, c);
+    platten(S, teil3(F3, 0, F3.L, t3), st2, -0.03, 0.03, c);
   }
   function schumacherRoh(S, scene2, p2, r3) {
     const W3 = p2.w, D = p2.d, T = Math.min(D - 1, 12.5), vor = Math.min(3, D - T), zv = D - vor, z0 = zv - T;
     const stein = waehle2(r3, NF.rotklinker), band = dunkler(stein, 0.06), n3 = 3 + Math.floor(r3() * 2), sock = 1.1, gh = 2.9, H = sock + n3 * gh;
     const flach = r3() < 0.5;
     const ne = Math.max(1, Math.round(W3 / 16)), eing = Array.from({ length: ne }, (_, i) => (i + 0.5) * W3 / ne);
-    const fass = (F2, s2) => {
-      const L2 = F2.L, front2 = s2 === "+z" || s2 === "-z", oe = [], logg = [];
+    const fass = (F3, s2) => {
+      const L2 = F3.L, front2 = s2 === "+z" || s2 === "-z", oe = [], logg = [];
       const ax = achsen4(0, L2, 2.7, 0.6);
       const amEing = (u) => front2 && s2 === "+z" && eing.some((e) => Math.abs(e - u) < 1.6);
       ax.forEach((u, i) => {
@@ -142597,22 +142909,22 @@
         oe.push({ u0: e - 0.75, u1: e + 0.75, v0: 0.3, v1: 3, art: "rund", typ: "tuer", fuell: waehle2(r3, NF.tuer) });
         for (let k3 = 0; k3 < n3; k3++) oe.push(fenster4(e, sock + k3 * gh + 2, 0.6, 1.6, null, { sprosse: false }));
       }
-      lochwand3(S, F2, flach ? [0, 0, L2, H + 0.9] : [0, 0, L2, H], oe, stein, { rahmen: WEISS, bank: band });
+      lochwand3(S, F3, flach ? [0, 0, L2, H + 0.9] : [0, 0, L2, H], oe, stein, { rahmen: WEISS, bank: band });
       const bd = [[0, 0, L2, 0.35]];
       for (let k3 = 1; k3 <= n3; k3++) bd.push([0, sock + k3 * gh - 0.18, L2, sock + k3 * gh - 0.04]);
-      platten(S, F2, bd, 0, 0.1, band);
+      platten(S, F3, bd, 0, 0.1, band);
       for (const [u, y2] of logg) {
-        fb3(S, F2, u - 1.1, u + 1.1, y2 + 0.2, y2 + 0.32, -1.1, 0.12, WEISS);
-        fb3(S, F2, u - 1.1, u + 1.1, y2 + 1, y2 + 1.1, -0.05, 0.08, "#3a3f44");
+        fb3(S, F3, u - 1.1, u + 1.1, y2 + 0.2, y2 + 0.32, -1.1, 0.12, WEISS);
+        fb3(S, F3, u - 1.1, u + 1.1, y2 + 1, y2 + 1.1, -0.05, 0.08, "#3a3f44");
       }
       if (front2 && s2 === "+z") for (const e of eing) {
-        platten(S, F2, [[e - 1.05, 0.3, e - 0.75, 3.3], [e + 0.75, 0.3, e + 1.05, 3.3], [e - 1.05, 3, e + 1.05, 3.3]], 0, 0.16, "#d9cdb5");
-        fb3(S, F2, e - 1.2, e + 1.2, 0.3, 0.45, 0, 1.2, GRANIT);
+        platten(S, F3, [[e - 1.05, 0.3, e - 0.75, 3.3], [e + 0.75, 0.3, e + 1.05, 3.3], [e - 1.05, 3, e + 1.05, 3.3]], 0, 0.16, "#d9cdb5");
+        fb3(S, F3, e - 1.2, e + 1.2, 0.3, 0.45, 0, 1.2, GRANIT);
       }
-      if (flach) platten(S, F2, [[-0.1, H + 0.75, L2 + 0.1, H + 0.95]], -0.4, 0.15, band);
+      if (flach) platten(S, F3, [[-0.1, H + 0.75, L2 + 0.1, H + 0.95]], -0.4, 0.15, band);
       if (front2 && s2 === "+z") for (const e of eing) {
-        platten(S, F2, [[e - 1.9, 0.35, e - 1.3, H + (flach ? 1.5 : 0.6)], [e + 1.3, 0.35, e + 1.9, H + (flach ? 1.5 : 0.6)]], 0, 0.32, dunkler(stein, 0.03));
-        if (flach) fpolyF(S, F2, [[e - 1.9, H + 1.5], [e + 1.9, H + 1.5], [e, H + 2.6]], -0.4, 0.3, stein);
+        platten(S, F3, [[e - 1.9, 0.35, e - 1.3, H + (flach ? 1.5 : 0.6)], [e + 1.3, 0.35, e + 1.9, H + (flach ? 1.5 : 0.6)]], 0, 0.32, dunkler(stein, 0.03));
+        if (flach) fpolyF(S, F3, [[e - 1.9, H + 1.5], [e + 1.9, H + 1.5], [e, H + 2.6]], -0.4, 0.3, stein);
       }
     };
     koerper2(S, p2, 0, z0, W3, zv, 0, H, dunkler(stein, 0.08), fass);
@@ -142701,8 +143013,8 @@
       }
       S.quader(x2 + b3 * 0.7, Ha + 1, z0 + T * 0.4, x2 + b3 * 0.7 + 0.7, Ha + 4.2, z0 + T * 0.4 + 0.7, dunkler(wand2, 0.25));
       if (visL || visR) {
-        const F2 = visL ? sz["-x"] : sz["+x"];
-        lochwand3(S, F2, [[0, 0], [T, 0], [T, Ha + 0.2], [T / 2 + 0.2, Ha + 3.2], [T / 2 - 0.2, Ha + 3.2], [0, Ha + 0.2]], raster2(1, T - 1, 3.2, sout, n3, gh, 1, 1.7), dunkler(wand2, 0.03), { rahmen: WEISS });
+        const F3 = visL ? sz["-x"] : sz["+x"];
+        lochwand3(S, F3, [[0, 0], [T, 0], [T, Ha + 0.2], [T / 2 + 0.2, Ha + 3.2], [T / 2 - 0.2, Ha + 3.2], [0, Ha + 0.2]], raster2(1, T - 1, 3.2, sout, n3, gh, 1, 1.7), dunkler(wand2, 0.03), { rahmen: WEISS });
       }
       if (visB) lochwand3(S, sz["-z"], [0, 0, b3, Ha], raster2(0, b3, b3 / 2, sout, n3, gh, 1.1, 1.8), dunkler(wand2, 0.05), { rahmen: WEISS });
       boden4(S, x2, zv, x2 + b3, D, RASEN23, 0.3, 0.05);
@@ -142716,15 +143028,15 @@
     if (z0 > 1.5) boden4(S, 0, 0, W3, z0, RASEN4, 0.3, 0.05);
     return { hoehe: top };
   }
-  function fpolyF(S, F2, pk, t0, t1, c) {
-    formen(S, F2, [umrissForm(pk)], t0, t1, c);
+  function fpolyF(S, F3, pk, t0, t1, c) {
+    formen(S, F3, [umrissForm(pk)], t0, t1, c);
   }
   function siedlungRoh2(S, scene2, p2, r3) {
     const W3 = p2.w, D = p2.d, vor = Math.min(4.5, D * 0.35), zv = D - vor, T = Math.min(zv, 9.5), z0 = zv - T;
     const stein = waehle2(r3, [...NF.rotklinker, ...NF.backstein]), nh = Math.max(1, Math.round(W3 / 6.2)), b3 = W3 / nh, H = 0.4 + 2 * 2.8, dh = 4.8;
     const dach3 = waehle2(r3, NF.ziegel);
-    koerper2(S, p2, 0, z0, W3, zv, 0, H, dunkler(stein, 0.08), (F2, s2) => {
-      const oe = [], L2 = F2.L;
+    koerper2(S, p2, 0, z0, W3, zv, 0, H, dunkler(stein, 0.08), (F3, s2) => {
+      const oe = [], L2 = F3.L;
       if (s2 === "+z") for (let i = 0; i < nh; i++) {
         const u0 = i * b3, sp6 = i % 2, ut = u0 + (sp6 ? b3 - 1.3 : 1.3), uf = u0 + (sp6 ? 2 : b3 - 2);
         oe.push({ u0: ut - 0.55, u1: ut + 0.55, v0: 0.3, v1: 2.5, typ: "tuer", fuell: waehle2(rng3(i + p2.seed), NF.tuer) });
@@ -142734,12 +143046,12 @@
       }
       else if (s2 === "-z") oe.push(...raster2(0, L2, 3.1, 0.4, 2, 2.8, 1.2, 1.3));
       else oe.push(fenster4(L2 / 2, 3.5, 0.9, 1.2));
-      lochwand3(S, F2, s2[1] === "x" ? [[0, 0], [L2, 0], [L2, H], [L2 / 2, H + dh - 0.3], [0, H]] : [0, 0, L2, H], oe, stein, { rahmen: WEISS, bank: dunkler(stein, 0.1) });
-      platten(S, F2, [[0, 0, L2, 0.4], [0, 2.95, L2, 3.08]], 0, 0.08, dunkler(stein, 0.1));
+      lochwand3(S, F3, s2[1] === "x" ? [[0, 0], [L2, 0], [L2, H], [L2 / 2, H + dh - 0.3], [0, H]] : [0, 0, L2, H], oe, stein, { rahmen: WEISS, bank: dunkler(stein, 0.1) });
+      platten(S, F3, [[0, 0, L2, 0.4], [0, 2.95, L2, 3.08]], 0, 0.08, dunkler(stein, 0.1));
       if (s2 === "+z") for (let i = 0; i < nh; i++) {
         const ut = i * b3 + (i % 2 ? b3 - 1.3 : 1.3);
-        fb3(S, F2, ut - 0.9, ut + 0.9, 2.65, 2.78, 0, 1, WEISS);
-        fb3(S, F2, ut - 0.7, ut + 0.7, 0.3, 0.5, 0, 0.9, GRANIT);
+        fb3(S, F3, ut - 0.9, ut + 0.9, 2.65, 2.78, 0, 1, WEISS);
+        fb3(S, F3, ut - 0.7, ut + 0.7, 0.3, 0.5, 0, 0.9, GRANIT);
       }
     });
     const g = dachProfil(W3 + 0.4, T + 1, dh, 0.15, "x");
@@ -142776,28 +143088,28 @@
   function nordReihenhaus(S, scene2, p2) {
     return gedreht2(S, scene2, p2, reihenhausRoh, [12, 12]);
   }
-  function kirchWand(S, F2, L2, Hw, o3) {
+  function kirchWand(S, F3, L2, Hw, o3) {
     const nb = Math.max(1, Math.round(L2 / o3.joch)), j3 = L2 / nb, oe = [];
     for (let i = 0; i < nb; i++) {
       const u = (i + 0.5) * j3, b3 = Math.min(o3.fb ?? 2.6, j3 - 2);
       if (b3 > 0.8 && Hw - o3.fo - 2.2 > 2) oe.push({ u0: u - b3 / 2, u1: u + b3 / 2, v0: o3.fu, v1: Hw - o3.fo, art: "spitz", typ: "fenster" });
     }
-    lochwand3(S, F2, o3.umr ?? [0, 0, L2, Hw], [...oe, ...o3.extra ?? []], o3.stein, { rahmen: "#d9d3c8", glas: o3.glas ?? "#536676" });
-    platten(S, F2, [[0, 0, L2, 1.1]], 0, 0.12, o3.sockel);
-    if (o3.fries !== false) platten(S, F2, [[0, Hw - 1.1, L2, Hw - 0.5]], 0, 0.08, o3.putz);
+    lochwand3(S, F3, o3.umr ?? [0, 0, L2, Hw], [...oe, ...o3.extra ?? []], o3.stein, { rahmen: "#d9d3c8", glas: o3.glas ?? "#536676" });
+    platten(S, F3, [[0, 0, L2, 1.1]], 0, 0.12, o3.sockel);
+    if (o3.fries !== false) platten(S, F3, [[0, Hw - 1.1, L2, Hw - 0.5]], 0, 0.08, o3.putz);
     if (o3.pfeiler !== false) for (let i = 0; i <= nb; i++) {
       const u = Math.min(L2 - 0.6, Math.max(0.6, i * j3));
-      fb3(S, F2, u - 0.6, u + 0.6, 0, Hw * 0.62, 0, 1.4, o3.stein);
-      fb3(S, F2, u - 0.55, u + 0.55, Hw * 0.62, Hw - 1, 0, 0.8, o3.stein);
-      fbalken(S, F2, u - 0.6, Hw * 0.62 + 0.3, u + 0.6, Hw * 0.62 + 0.3, 0.6, 0.6, 1.45, dunkler(o3.stein, 0.06));
+      fb3(S, F3, u - 0.6, u + 0.6, 0, Hw * 0.62, 0, 1.4, o3.stein);
+      fb3(S, F3, u - 0.55, u + 0.55, Hw * 0.62, Hw - 1, 0, 0.8, o3.stein);
+      fbalken(S, F3, u - 0.6, Hw * 0.62 + 0.3, u + 0.6, Hw * 0.62 + 0.3, 0.6, 0.6, 1.45, dunkler(o3.stein, 0.06));
     }
   }
   function turm2(S, scene2, p2, x0, z0, tw, Ht, o3) {
     const sz = seiten(x0, z0, x0 + tw, z0 + tw);
     S.quader(x0 + 0.4, 0, z0 + 0.4, x0 + tw - 0.4, Ht, z0 + tw - 0.4, dunkler(o3.stein, 0.06));
     const zonen2 = Math.max(1, Math.floor((Ht - 12) / 7.5)), zh = (Ht - 12) / zonen2;
-    for (const [s2, F2] of Object.entries(sz)) {
-      if (!sieht(p2, F2)) continue;
+    for (const [s2, F3] of Object.entries(sz)) {
+      if (!sieht(p2, F3)) continue;
       const oe = [];
       if (s2 === "+z" && o3.portal) oe.push({ u0: tw / 2 - tw * 0.18, u1: tw / 2 + tw * 0.18, v0: 0.3, v1: Math.min(8, Ht * 0.18), art: "spitz", typ: "tuer", fuell: "#4a3326" });
       const nn = tw > 9 ? 3 : 2, nw = tw / nn;
@@ -142810,19 +143122,19 @@
         }
       }
       if (zonen2 === 0 || Ht < 22) oe.push({ u0: tw / 2 - 0.5, u1: tw / 2 + 0.5, v0: Ht - 4.5, v1: Ht - 1.2, art: "spitz", typ: "fenster", fuell: "#2e3236" });
-      lochwand3(S, F2, [0, 0, tw, Ht], oe, o3.stein, { rahmen: "#d9d3c8", nische: o3.putz });
+      lochwand3(S, F3, [0, 0, tw, Ht], oe, o3.stein, { rahmen: "#d9d3c8", nische: o3.putz });
       const bd = [[0, 0, tw, 1.2]];
       for (let z4 = 0; z4 <= zonen2; z4++) bd.push([-0.1, 10 + z4 * zh - 0.3, tw + 0.1, 10 + z4 * zh + 0.1]);
-      platten(S, F2, bd, 0, 0.18, o3.sockel);
-      platten(S, F2, [[-0.15, 0, 0.55, Ht], [tw - 0.55, 0, tw + 0.15, Ht]], 0, 0.3, o3.stein);
+      platten(S, F3, bd, 0, 0.18, o3.sockel);
+      platten(S, F3, [[-0.15, 0, 0.55, Ht], [tw - 0.55, 0, tw + 0.15, Ht]], 0, 0.3, o3.stein);
       if (s2 === "+z" && o3.portal) {
         const b3 = tw * 0.18;
-        platten(S, F2, [[tw / 2 - b3 - 0.6, 0.3, tw / 2 - b3, Math.min(8, Ht * 0.18) - 1], [tw / 2 + b3, 0.3, tw / 2 + b3 + 0.6, Math.min(8, Ht * 0.18) - 1]], 0, 0.35, o3.sockel);
+        platten(S, F3, [[tw / 2 - b3 - 0.6, 0.3, tw / 2 - b3, Math.min(8, Ht * 0.18) - 1], [tw / 2 + b3, 0.3, tw / 2 + b3 + 0.6, Math.min(8, Ht * 0.18) - 1]], 0, 0.35, o3.sockel);
       }
-      if (o3.uhr && zonen2 > 1) fscheibe2(S, F2, tw / 2, 10 + (zonen2 - 1) * zh - 1.3, 0, 0.2, Math.min(1.5, tw * 0.13), "#f2efe6", 20);
+      if (o3.uhr && zonen2 > 1) fscheibe2(S, F3, tw / 2, 10 + (zonen2 - 1) * zh - 1.3, 0, 0.2, Math.min(1.5, tw * 0.13), "#f2efe6", 20);
       if (o3.wimperg) {
-        fpolyF(S, F2, [[0.2, Ht], [tw - 0.2, Ht], [tw / 2, Ht + o3.wimperg]], -0.4, 0.05, o3.stein);
-        fb3(S, F2, tw / 2 - 0.4, tw / 2 + 0.4, Ht + 0.6, Ht + o3.wimperg * 0.55, 0.05, 0.1, "#2e3236");
+        fpolyF(S, F3, [[0.2, Ht], [tw - 0.2, Ht], [tw / 2, Ht + o3.wimperg]], -0.4, 0.05, o3.stein);
+        fb3(S, F3, tw / 2 - 0.4, tw / 2 + 0.4, Ht + 0.6, Ht + o3.wimperg * 0.55, 0.05, 0.1, "#2e3236");
       }
     }
     const cx = x0 + tw / 2, cz = z0 + tw / 2;
@@ -142847,7 +143159,7 @@
       const g2 = dachProfil(tw + 0.4, tw + 0.4, o3.hs, 0.1, "x");
       g2.translate(cx, Ht, cz);
       S.add(g2, o3.dach);
-      for (const F2 of [sz["+x"], sz["-x"]]) if (sieht(p2, F2)) fpolyF(S, F2, [[0, Ht], [tw, Ht], [tw / 2, Ht + o3.hs]], -0.4, 0, o3.stein);
+      for (const F3 of [sz["+x"], sz["-x"]]) if (sieht(p2, F3)) fpolyF(S, F3, [[0, Ht], [tw, Ht], [tw / 2, Ht + o3.hs]], -0.4, 0, o3.stein);
       return Ht + o3.hs;
     }
     const g = walmdach(tw + 0.6, tw + 0.6, o3.hs);
@@ -142873,26 +143185,26 @@
     if (basilika) {
       for (const [a2, b3, sx] of [[x0, xm0, -1], [xm1, x1, 1]]) {
         S.quader(a2 + (sx < 0 ? 0.4 : 0), 0, zC, b3 - (sx > 0 ? 0.4 : 0), Hn, zT, dunkler(stein, 0.06));
-        const F2 = sx > 0 ? R6(x1, zT, 0, -1, zT - zC) : R6(x0, zC, 0, 1, zT - zC);
-        if (sieht(p2, F2)) kirchWand(S, F2, F2.L, Hn, o3);
+        const F3 = sx > 0 ? R6(x1, zT, 0, -1, zT - zC) : R6(x0, zC, 0, 1, zT - zC);
+        if (sieht(p2, F3)) kirchWand(S, F3, F3.L, Hn, o3);
         const yA = Hn + 4.2, hi = sx > 0 ? [xm1, x1 + 0.4] : [x0 - 0.4, xm0];
         huelle(S, [[[hi[0], sx > 0 ? yA : Hn, zC], [hi[1], sx > 0 ? Hn : yA, zC], [hi[1], sx > 0 ? Hn : yA, zT]], [[hi[0], sx > 0 ? yA : Hn, zC], [hi[1], sx > 0 ? Hn : yA, zT], [hi[0], sx > 0 ? yA : Hn, zT]]], [cx, 0, (zC + zT) / 2], dach3 === kupfer ? dunkler(kupfer, 0.02) : dach3);
-        if (sieht(p2, F2)) for (let i = 1; i < Math.round(F2.L / o3.joch); i++) {
-          const z4 = sx > 0 ? zT - i * (F2.L / Math.round(F2.L / o3.joch)) : zC + i * (F2.L / Math.round(F2.L / o3.joch));
+        if (sieht(p2, F3)) for (let i = 1; i < Math.round(F3.L / o3.joch); i++) {
+          const z4 = sx > 0 ? zT - i * (F3.L / Math.round(F3.L / o3.joch)) : zC + i * (F3.L / Math.round(F3.L / o3.joch));
           balken4(S, [sx > 0 ? x1 - 0.2 : x0 + 0.2, Hn + 1.5, z4], [sx > 0 ? xm1 + 0.2 : xm0 - 0.2, Hm - 4, z4], 0.7, 0.8, stein);
           S.box(1.1, 3.2, 1.1, sx > 0 ? x1 - 0.2 : x0 + 0.2, Hn + 1.4, z4, stein);
         }
       }
     }
     if (!ruine) S.quader(xm0 + 0.4, 0, zC, xm1 - 0.4, Hm, zT, dunkler(stein, 0.06));
-    for (const F2 of [R6(xm1, zT, 0, -1, Lsch - 0.4), R6(xm0, zC, 0, 1, Lsch - 0.4)]) if (sieht(p2, F2)) {
+    for (const F3 of [R6(xm1, zT, 0, -1, Lsch - 0.4), R6(xm0, zC, 0, 1, Lsch - 0.4)]) if (sieht(p2, F3)) {
       if (basilika) {
         const y0 = Hn + 4.2;
-        const nb = Math.max(1, Math.round(F2.L / o3.joch)), j3 = F2.L / nb, oe = [];
+        const nb = Math.max(1, Math.round(F3.L / o3.joch)), j3 = F3.L / nb, oe = [];
         for (let i = 0; i < nb; i++) oe.push({ u0: (i + 0.5) * j3 - 1.1, u1: (i + 0.5) * j3 + 1.1, v0: y0 + 1.5, v1: Hm - 2.2, art: "spitz", typ: "fenster" });
-        lochwand3(S, F2, [0, y0 - 0.5, F2.L, Hm], oe, stein, { rahmen: "#d9d3c8", glas: "#536676" });
-        platten(S, F2, [[0, Hm - 1.1, F2.L, Hm - 0.5]], 0, 0.08, putz2);
-      } else kirchWand(S, F2, F2.L, Hn, o3);
+        lochwand3(S, F3, [0, y0 - 0.5, F3.L, Hm], oe, stein, { rahmen: "#d9d3c8", glas: "#536676" });
+        platten(S, F3, [[0, Hm - 1.1, F3.L, Hm - 0.5]], 0, 0.08, putz2);
+      } else kirchWand(S, F3, F3.L, Hn, o3);
     }
     if (!ruine) {
       const g = dachProfil(Lsch, Wm + 0.8, hR, 0.2, "z");
@@ -142910,9 +143222,9 @@
       prisma2(S, aussen, 0, Hm, dunkler(stein, 0.06), [innen]);
       boden4(S, cx - ra + 1.5, zC, cx + ra - 1.5, zT - 1, RASEN23, 0.32, 0.05);
       const sr = rng3(`nki-ru:${p2.seed}`);
-      for (const F2 of kanten(aussen)) for (let u = 0.5; u < F2.L - 1; u += zw(sr, 2.5, 5)) {
-        const b3 = Math.min(F2.L - 0.2, u + zw(sr, 1, 3));
-        if (sr() < 0.45) fb3(S, F2, u, b3, Hm, Hm + zw(sr, 0.5, 2.2), -1, 0, stein);
+      for (const F3 of kanten(aussen)) for (let u = 0.5; u < F3.L - 1; u += zw(sr, 2.5, 5)) {
+        const b3 = Math.min(F3.L - 0.2, u + zw(sr, 1, 3));
+        if (sr() < 0.45) fb3(S, F3, u, b3, Hm, Hm + zw(sr, 0.5, 2.2), -1, 0, stein);
       }
       for (let k3 = 0; k3 < 3; k3++) baumN(S, sr, cx + zw(sr, -ra * 0.5, ra * 0.5), zw(sr, zC + 2, zT - 3), 0.9);
       for (let k3 = 0; k3 < 6; k3++) S.box(zw(sr, 0.8, 1.6), 0.5, zw(sr, 0.6, 1.2), cx + zw(sr, -ra + 2, ra - 2), 0.55, zw(sr, zC, zT - 2), dunkler(stein, 0.1), sr());
@@ -142920,8 +143232,8 @@
     const tris = [];
     for (let k3 = 0; k3 < 4; k3++) {
       const [ax, az] = chor[k3], [bx, bz] = chor[k3 + 1], L2 = wurzelSumme17(bx - ax, bz - az);
-      const F2 = R6(ax, az, (bx - ax) / L2, (bz - az) / L2, L2);
-      if (sieht(p2, F2)) kirchWand(S, F2, L2, Hm, { ...o3, joch: L2 + 1, pfeiler: false, fb: Math.min(2.6, L2 - 1.4), fries: true });
+      const F3 = R6(ax, az, (bx - ax) / L2, (bz - az) / L2, L2);
+      if (sieht(p2, F3)) kirchWand(S, F3, L2, Hm, { ...o3, joch: L2 + 1, pfeiler: false, fb: Math.min(2.6, L2 - 1.4), fries: true });
       tris.push([[ax + (ax - cx) * 0.06, Hm, az + (az - zC) * 0.06], [bx + (bx - cx) * 0.06, Hm, bz + (bz - zC) * 0.06], [cx, Hm + hR, zC]]);
       const a2 = k3 * PI9 / 4;
       if (k3 > 0) S.box(1.8, Hm * 0.7, 1.1, cx + (ra + 0.6) * Math.cos(a2), Hm * 0.35, zC - (ra + 0.6) * Math.sin(a2), stein, a2);
@@ -142941,8 +143253,8 @@
     }
     if (basilika && sieht(p2, FW)) {
       for (const [a2, b3] of [[0, xm0 - x0], [xm1 - x0, Wn]]) {
-        const F2 = teil3(FW, a2, b3);
-        lochwand3(S, F2, [[0, 0], [F2.L, 0], ...a2 === 0 ? [[F2.L, Hn + 4.2], [0, Hn]] : [[F2.L, Hn], [0, Hn + 4.2]]], [{ u0: F2.L / 2 - 1.2, u1: F2.L / 2 + 1.2, v0: o3.fu, v1: Hn - 2.2, art: "spitz", typ: "fenster" }], stein, { rahmen: "#d9d3c8", glas: "#536676" });
+        const F3 = teil3(FW, a2, b3);
+        lochwand3(S, F3, [[0, 0], [F3.L, 0], ...a2 === 0 ? [[F3.L, Hn + 4.2], [0, Hn]] : [[F3.L, Hn], [0, Hn + 4.2]]], [{ u0: F3.L / 2 - 1.2, u1: F3.L / 2 + 1.2, v0: o3.fu, v1: Hn - 2.2, art: "spitz", typ: "fenster" }], stein, { rahmen: "#d9d3c8", glas: "#536676" });
       }
     }
     let top = Hm + hR;
@@ -142960,7 +143272,7 @@
     }
     if (dorf) {
       const FZ = R6(0, D - 0.2, 1, 0, W3), FX = R6(W3 - 0.2, D, 0, -1, D);
-      for (const F2 of [FZ, FX, R6(W3, 0.2, -1, 0, W3), R6(0.2, 0, 0, 1, D)]) fb3(S, F2, 0, F2.L, 0.3, 1.2, -0.5, 0, "#a39d92");
+      for (const F3 of [FZ, FX, R6(W3, 0.2, -1, 0, W3), R6(0.2, 0, 0, 1, D)]) fb3(S, F3, 0, F3.L, 0.3, 1.2, -0.5, 0, "#a39d92");
       const sr = rng3(`nki-st:${p2.seed}`);
       for (let i = 0; i < 18; i++) {
         const x2 = zw(sr, 1.2, W3 - 1.2), z4 = zw(sr, 1.2, D - 1.2);
@@ -143106,16 +143418,16 @@
       }
     }
     if (v === "laube" && vis.f) S.quader(0.4, 0.3, D - 3.4, W3 - 0.4, 0.36, D - 0.4, "#bcb5a7");
-    for (const [F2, an] of [[FX, vis.x], [FXm, vis.xm]]) {
+    for (const [F3, an] of [[FX, vis.x], [FXm, vis.xm]]) {
       if (!an) continue;
       const oe = [...giebelNischen(0, T, H, Gend, m, "spitz", putz2, true)];
       for (const u of achsen4(0, T, 3.4, 0.8)) {
         oe.push({ u0: u - 0.75, u1: u + 0.75, v0: eg + 1, v1: H - 1.3, art: "spitz", typ: "fenster" });
         oe.push({ u0: u - 0.75, u1: u + 0.75, v0: 1.2, v1: eg - 1, art: "spitz", typ: "fenster" });
       }
-      lochwand3(S, F2, frontUmriss(T, H, [{ u0: 0, u1: T, typ: "treppe", G: Gend, m }]), oe, stein, { rahmen: "#d9d3c8", glas: glas3, nische: putz2 });
-      giebelDeckel(S, F2, 0, T, H, Gend, m, "#d9d3c8");
-      platten(S, F2, [[0, 0, T, 0.8], [0, eg - 0.4, T, eg + 0.05]], 0, 0.12, putz2);
+      lochwand3(S, F3, frontUmriss(T, H, [{ u0: 0, u1: T, typ: "treppe", G: Gend, m }]), oe, stein, { rahmen: "#d9d3c8", glas: glas3, nische: putz2 });
+      giebelDeckel(S, F3, 0, T, H, Gend, m, "#d9d3c8");
+      platten(S, F3, [[0, 0, T, 0.8], [0, eg - 0.4, T, eg + 0.05]], 0, 0.12, putz2);
       top = Math.max(top, H + Gend);
     }
     if (rueckLaube) {
@@ -143142,35 +143454,35 @@
   function nordRathaus(S, scene2, p2) {
     return gedreht2(S, scene2, p2, rathausRoh, [30, 20]);
   }
-  function bude(S, scene2, F2, u, y0, farbe3, text3) {
-    fb3(S, F2, u - 2.2, u + 2.2, y0, y0 + 2.7, -3, 0, "#f3efe6");
-    fb3(S, F2, u - 1.8, u + 1.8, y0 + 1.05, y0 + 2.15, 0, 0.05, GLAS_HELL5);
-    fb3(S, F2, u - 1.95, u + 1.95, y0 + 0.95, y0 + 1.08, 0, 0.55, "#d8d3c6");
-    streifenMarkise(S, F2, u - 2.3, u + 2.3, y0 + 2.35, farbe3, "#f4f1ea", 6, 1.4);
-    fb3(S, F2, u - 2.4, u + 2.4, y0 + 2.7, y0 + 2.9, -3.2, 0.15, farbe3);
-    fb3(S, F2, u - 2.2, u + 2.2, y0 + 2.9, y0 + 3.75, -0.12, 0.06, farbe3);
-    ftext3(scene2, F2, text3, u, y0 + 3.32, 0.08, 0.55, 4.2, "#ffffff");
+  function bude(S, scene2, F3, u, y0, farbe3, text3) {
+    fb3(S, F3, u - 2.2, u + 2.2, y0, y0 + 2.7, -3, 0, "#f3efe6");
+    fb3(S, F3, u - 1.8, u + 1.8, y0 + 1.05, y0 + 2.15, 0, 0.05, GLAS_HELL5);
+    fb3(S, F3, u - 1.95, u + 1.95, y0 + 0.95, y0 + 1.08, 0, 0.55, "#d8d3c6");
+    streifenMarkise(S, F3, u - 2.3, u + 2.3, y0 + 2.35, farbe3, "#f4f1ea", 6, 1.4);
+    fb3(S, F3, u - 2.4, u + 2.4, y0 + 2.7, y0 + 2.9, -3.2, 0.15, farbe3);
+    fb3(S, F3, u - 2.2, u + 2.2, y0 + 2.9, y0 + 3.75, -0.12, 0.06, farbe3);
+    ftext3(scene2, F3, text3, u, y0 + 3.32, 0.08, 0.55, 4.2, "#ffffff");
     for (const s2 of [-1, 1]) {
-      const [x2, z4] = wp3(F2, u + s2 * 1.4, 2.4);
+      const [x2, z4] = wp3(F3, u + s2 * 1.4, 2.4);
       tisch(S, x2, z4, y0);
     }
   }
   function schuppen(S, scene2, p2, x0, z0, x1, z1, y0, o3) {
     const H = o3.h ?? 8, wand2 = o3.wand, dh = (z1 - z0) * 0.14;
-    koerper2(S, p2, x0, z0, x1, z1, y0, y0 + H, dunkler(wand2, 0.1), (F2, s2) => {
-      const L2 = F2.L, oe = [];
+    koerper2(S, p2, x0, z0, x1, z1, y0, y0 + H, dunkler(wand2, 0.1), (F3, s2) => {
+      const L2 = F3.L, oe = [];
       if (s2[1] === "z") for (const u of achsen4(0, L2, 7, 1)) {
         oe.push({ u0: u - 2.2, u1: u + 2.2, v0: y0 + 0.02, v1: y0 + 4.6, typ: "tuer", fuell: o3.tor });
         oe.push({ u0: u - 2.2, u1: u + 2.2, v0: y0 + 5.4, v1: y0 + 6.6, typ: "fenster", sprosse: true });
       }
       else oe.push({ u0: L2 / 2 - 2.4, u1: L2 / 2 + 2.4, v0: y0 + 0.02, v1: y0 + 5, typ: "tuer", fuell: o3.tor });
-      lochwand3(S, F2, s2[1] === "x" ? [[0, y0], [L2, y0], [L2, y0 + H], [L2 / 2, y0 + H + dh - 0.15], [0, y0 + H]] : [0, y0, L2, y0 + H], oe, wand2, { rahmen: WEISS });
+      lochwand3(S, F3, s2[1] === "x" ? [[0, y0], [L2, y0], [L2, y0 + H], [L2 / 2, y0 + H + dh - 0.15], [0, y0 + H]] : [0, y0, L2, y0 + H], oe, wand2, { rahmen: WEISS });
       const rp = [];
       for (let u = 0.3; u < L2; u += 0.6) rp.push([u - 0.05, y0 + 0.2, u + 0.05, y0 + H - 0.1]);
-      platten(S, F2, rp, 0, 0.06, dunkler(wand2, 0.05));
+      platten(S, F3, rp, 0, 0.06, dunkler(wand2, 0.05));
       if (s2[1] === "z") {
-        fb3(S, F2, -0.3, L2 + 0.3, y0 + 4.8, y0 + 5, 0, 2, "#5a6168");
-        if (o3.nr) ftext3(scene2, F2, o3.nr, L2 / 2, y0 + H - 0.7, 0.08, 0.9, L2 * 0.4, "#f4f1ea");
+        fb3(S, F3, -0.3, L2 + 0.3, y0 + 4.8, y0 + 5, 0, 2, "#5a6168");
+        if (o3.nr) ftext3(scene2, F3, o3.nr, L2 / 2, y0 + H - 0.7, 0.08, 0.9, L2 * 0.4, "#f4f1ea");
       }
     });
     const g = dachProfil(x1 - x0 + 0.6, z1 - z0 + 0.8, dh, 0.2, "x");
@@ -143265,20 +143577,20 @@
         bank3(S, 9 + i * 14, zK - 3.2, 0, yK);
       }
       const ax0 = W3 * 0.12, ax1 = W3 * 0.88, az1 = zK - 6, az0 = Math.max(1.5, az1 - 9), stn = "#e3d6bb";
-      koerper2(S, p2, ax0, az0, ax1, az1, yK, yK + 7, dunkler(stn, 0.12), (F2, s2) => {
+      koerper2(S, p2, ax0, az0, ax1, az1, yK, yK + 7, dunkler(stn, 0.12), (F3, s2) => {
         const oe = [];
-        for (const u of achsen4(0, F2.L, 4.2, 0.6)) oe.push({ u0: u - 1.5, u1: u + 1.5, v0: yK + 0.05, v1: yK + 4.6, art: "rund", typ: s2 === "+z" ? "nische" : "fenster", fuell: "#6b5a4a", tief: 1.8 }, fenster4(u, yK + 5.2, 1.6, 1.2, "rund"));
-        lochwand3(S, F2, [0, yK, F2.L, yK + 7.6], oe, stn, { rahmen: WEISS });
-        platten(S, F2, [[0, yK, F2.L, yK + 0.5], [-0.1, yK + 4.9, F2.L + 0.1, yK + 5.1], [-0.2, yK + 7.3, F2.L + 0.2, yK + 7.7]], 0, 0.16, dunkler(stn, 0.08));
-        if (s2 === "+z") ftext3(scene2, F2, "Landungsbr\xFCcken", F2.L / 2, yK + 6.4, 0.2, 0.7, F2.L * 0.4, "#5a4a3a");
+        for (const u of achsen4(0, F3.L, 4.2, 0.6)) oe.push({ u0: u - 1.5, u1: u + 1.5, v0: yK + 0.05, v1: yK + 4.6, art: "rund", typ: s2 === "+z" ? "nische" : "fenster", fuell: "#6b5a4a", tief: 1.8 }, fenster4(u, yK + 5.2, 1.6, 1.2, "rund"));
+        lochwand3(S, F3, [0, yK, F3.L, yK + 7.6], oe, stn, { rahmen: WEISS });
+        platten(S, F3, [[0, yK, F3.L, yK + 0.5], [-0.1, yK + 4.9, F3.L + 0.1, yK + 5.1], [-0.2, yK + 7.3, F3.L + 0.2, yK + 7.7]], 0, 0.16, dunkler(stn, 0.08));
+        if (s2 === "+z") ftext3(scene2, F3, "Landungsbr\xFCcken", F3.L / 2, yK + 6.4, 0.2, 0.7, F3.L * 0.4, "#5a4a3a");
       });
       S.quader(ax0 + 0.4, yK + 7, az0 + 0.4, ax1 - 0.4, yK + 7.15, az1 - 0.4, "#8a9095");
       for (const [tx, kk] of [[ax0 + 3, 0], [ax1 - 3, 1], [(ax0 + ax1) / 2, 2]]) {
         const th = kk === 2 ? 15 : 11;
         S.quader(tx - 2.6, yK, az1 - 5.4, tx + 2.6, yK + th, az1 + 0.2, stn);
-        for (const F2 of seitenListe(p2, tx - 2.6, az1 - 5.4, tx + 2.6, az1 + 0.2)) {
-          lochwand3(S, F2.F, [0, yK + 7.7, 5.2, yK + th], [fenster4(2.6, yK + th - 3.4, 1.2, 2.2, "rund")], stn, { rahmen: WEISS });
-          if (kk === 2) fscheibe2(S, F2.F, 2.6, yK + 9.6, 0, 0.15, 1, "#f2efe6", 16);
+        for (const F3 of seitenListe(p2, tx - 2.6, az1 - 5.4, tx + 2.6, az1 + 0.2)) {
+          lochwand3(S, F3.F, [0, yK + 7.7, 5.2, yK + th], [fenster4(2.6, yK + th - 3.4, 1.2, 2.2, "rund")], stn, { rahmen: WEISS });
+          if (kk === 2) fscheibe2(S, F3.F, 2.6, yK + 9.6, 0, 0.15, 1, "#f2efe6", 16);
         }
         const g = new three_module_exports.SphereGeometry(2.7, 12, 6, 0, 2 * PI9, 0, PI9 / 2);
         g.scale(1, 1.3, 1);
@@ -143309,11 +143621,11 @@
       const nh = Math.max(2, Math.floor(W3 * 0.55 / 8.5));
       for (let i = 0; i < nh; i++) {
         const hx = 3 + i * 8.5, hz0 = 2, hz1 = Math.min(zK - 6, hz0 + 7), wf = waehle2(r3, ["#c9483e", "#2f6f8f", "#e2b83b", "#3f7d56", "#f2efe6"]), hw = 5.5;
-        koerper2(S, p2, hx, hz0, hx + hw, hz1, yK, yK + 3, dunkler(wf, 0.1), (F2, s2) => {
+        koerper2(S, p2, hx, hz0, hx + hw, hz1, yK, yK + 3, dunkler(wf, 0.1), (F3, s2) => {
           const st2 = [];
-          for (let u = 0.15; u < F2.L; u += 0.3) st2.push([u - 0.03, yK + 0.1, u + 0.03, yK + 2.9]);
-          lochwand3(S, F2, s2[1] === "z" ? [[0, yK], [F2.L, yK], [F2.L, yK + 3], [F2.L / 2, yK + 5.2], [0, yK + 3]] : [0, yK, F2.L, yK + 3], [s2 === "+z" ? { u0: F2.L / 2 - 0.6, u1: F2.L / 2 + 0.6, v0: yK + 0.05, v1: yK + 2.2, typ: "tuer", fuell: "#3a3f44" } : fenster4(F2.L / 2, yK + 1, 0.9, 0.9)], wf, { rahmen: WEISS });
-          platten(S, F2, st2, 0, 0.04, dunkler(wf, 0.06));
+          for (let u = 0.15; u < F3.L; u += 0.3) st2.push([u - 0.03, yK + 0.1, u + 0.03, yK + 2.9]);
+          lochwand3(S, F3, s2[1] === "z" ? [[0, yK], [F3.L, yK], [F3.L, yK + 3], [F3.L / 2, yK + 5.2], [0, yK + 3]] : [0, yK, F3.L, yK + 3], [s2 === "+z" ? { u0: F3.L / 2 - 0.6, u1: F3.L / 2 + 0.6, v0: yK + 0.05, v1: yK + 2.2, typ: "tuer", fuell: "#3a3f44" } : fenster4(F3.L / 2, yK + 1, 0.9, 0.9)], wf, { rahmen: WEISS });
+          platten(S, F3, st2, 0, 0.04, dunkler(wf, 0.06));
         });
         const g = dachProfil(hz1 - hz0 + 0.6, hw + 0.6, 2.2, 0.1, "z");
         g.translate(hx + hw / 2, yK + 3, (hz0 + hz1) / 2);
@@ -143325,12 +143637,12 @@
       }
     } else {
       const stein = waehle2(r3, NF.backstein), hx0 = 4, hx1 = W3 - 4, hz0 = 2, hz1 = Math.max(hz0 + 12, zK - 10), H = 9;
-      koerper2(S, p2, hx0, hz0, hx1, hz1, yK, yK + H, dunkler(stein, 0.08), (F2, s2) => {
-        const L2 = F2.L, oe = [];
+      koerper2(S, p2, hx0, hz0, hx1, hz1, yK, yK + H, dunkler(stein, 0.08), (F3, s2) => {
+        const L2 = F3.L, oe = [];
         for (const u of achsen4(0, L2, 5.5, 0.8)) oe.push({ u0: u - 1.8, u1: u + 1.8, v0: yK + 1, v1: yK + H - 1.2, art: "rund", typ: "fenster", sprosse: true });
-        lochwand3(S, F2, s2[1] === "x" ? [[0, yK], [L2, yK], [L2, yK + H], [L2 / 2, yK + H + 4.5], [0, yK + H]] : [0, yK, L2, yK + H], oe, stein, { rahmen: WEISS });
-        platten(S, F2, [[0, yK, L2, yK + 0.8], [-0.1, yK + H - 0.4, L2 + 0.1, yK + H + 0.05]], 0, 0.15, "#e3d6bb");
-        if (s2 === "+z") ftext3(scene2, F2, "Fischauktionshalle", L2 / 2, yK + H - 0.75, 0.2, 0.6, L2 * 0.5, "#f4ead2");
+        lochwand3(S, F3, s2[1] === "x" ? [[0, yK], [L2, yK], [L2, yK + H], [L2 / 2, yK + H + 4.5], [0, yK + H]] : [0, yK, L2, yK + H], oe, stein, { rahmen: WEISS });
+        platten(S, F3, [[0, yK, L2, yK + 0.8], [-0.1, yK + H - 0.4, L2 + 0.1, yK + H + 0.05]], 0, 0.15, "#e3d6bb");
+        if (s2 === "+z") ftext3(scene2, F3, "Fischauktionshalle", L2 / 2, yK + H - 0.75, 0.2, 0.6, L2 * 0.5, "#f4ead2");
       });
       const g = dachProfil(hx1 - hx0 + 0.6, hz1 - hz0 + 0.8, 4.5, 0.2, "x");
       g.translate((hx0 + hx1) / 2, yK + H, (hz0 + hz1) / 2);
@@ -143341,8 +143653,8 @@
       S.add(g2, waehle2(r3, NF.kupfer));
       const nst = Math.floor((W3 - 8) / 6.5);
       for (let i = 0; i < nst; i++) {
-        const F2 = R6(5 + i * 6.5, zK - 3.2, 1, 0, 5);
-        bude(S, scene2, F2, 2.5, yK, waehle2(r3, NF.markise), waehle2(r3, ["Fisch", "Aal", "Krabben", "Matjes", "R\xE4ucherfisch", "Obst"]));
+        const F3 = R6(5 + i * 6.5, zK - 3.2, 1, 0, 5);
+        bude(S, scene2, F3, 2.5, yK, waehle2(r3, NF.markise), waehle2(r3, ["Fisch", "Aal", "Krabben", "Matjes", "R\xE4ucherfisch", "Obst"]));
       }
       for (let i = 0; i < 2; i++) boot(S, scene2, W3 * (0.3 + i * 0.4), zK + 5, "kutter", 0, waehle2(r3, ["#2f6f8f", "#3f7d56", "#c9483e"]), YW + 0.06);
       top = Math.max(top, yK + H + 9);
@@ -143352,15 +143664,15 @@
   function nordHafen(S, scene2, p2) {
     return gedreht2(S, scene2, p2, hafenRoh, [32, 30]);
   }
-  function fluegel(S, F2, y2, nab, laenge2, phi, holz, gitter) {
+  function fluegel(S, F3, y2, nab, laenge2, phi, holz, gitter) {
     for (let k3 = 0; k3 < 4; k3++) {
       const a2 = phi + k3 * PI9 / 2, ca = Math.cos(a2), sa = Math.sin(a2), qa = -sa, qb = ca;
       const U2 = (s2, q2) => nab[0] + ca * s2 + qa * q2, Y = (s2, q2) => y2 + sa * s2 + qb * q2;
-      fbalken(S, F2, U2(-0.4, 0), Y(-0.4, 0), U2(laenge2, 0), Y(laenge2, 0), 0.28, -0.15, 0.15, holz);
-      for (const q2 of [0.25, 1.9]) fbalken(S, F2, U2(laenge2 * 0.2, q2), Y(laenge2 * 0.2, q2), U2(laenge2, q2), Y(laenge2, q2), 0.09, -0.06, 0.06, gitter);
-      for (let s2 = laenge2 * 0.2; s2 <= laenge2 + 0.01; s2 += laenge2 * 0.8 / 7) fbalken(S, F2, U2(s2, 0), Y(s2, 0), U2(s2, 1.9), Y(s2, 1.9), 0.08, -0.06, 0.06, gitter);
+      fbalken(S, F3, U2(-0.4, 0), Y(-0.4, 0), U2(laenge2, 0), Y(laenge2, 0), 0.28, -0.15, 0.15, holz);
+      for (const q2 of [0.25, 1.9]) fbalken(S, F3, U2(laenge2 * 0.2, q2), Y(laenge2 * 0.2, q2), U2(laenge2, q2), Y(laenge2, q2), 0.09, -0.06, 0.06, gitter);
+      for (let s2 = laenge2 * 0.2; s2 <= laenge2 + 0.01; s2 += laenge2 * 0.8 / 7) fbalken(S, F3, U2(s2, 0), Y(s2, 0), U2(s2, 1.9), Y(s2, 1.9), 0.08, -0.06, 0.06, gitter);
     }
-    fscheibe2(S, F2, nab[0], y2, -0.4, 0.3, 0.55, holz, 10);
+    fscheibe2(S, F3, nab[0], y2, -0.4, 0.3, 0.55, holz, 10);
   }
   function muehleRoh(S, scene2, p2) {
     const r3 = rng3(`nwm:${p2.seed}`);
@@ -143437,11 +143749,11 @@
       for (const s2 of seitenListe(p2, mx, 2, mx + 10, 9)) lochwand3(S, s2.F, [0, 0, s2.F.L, 3.4], achsen4(0, s2.F.L, 2.6, 0.6).map((u, i) => i === 1 && s2.k === "+z" ? { u0: u - 0.5, u1: u + 0.5, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#2f5243" } : fenster4(u, 1, 0.9, 1.2)), waehle2(r3, NF.backstein), { rahmen: WEISS });
     }
     boden4(S, cx - 1.1, cz, cx + 1.1, D, "#cbb88e", 0.3, 0.08);
-    for (const F2 of [R6(0.3, D - 0.3, 1, 0, W3 - 0.6), R6(W3 - 0.3, D - 0.3, 0, -1, D - 0.6)]) if (sieht(p2, F2)) for (let u = 0.5; u < F2.L; u += 2.5) {
-      const [x2, z4] = wp3(F2, u, 0);
+    for (const F3 of [R6(0.3, D - 0.3, 1, 0, W3 - 0.6), R6(W3 - 0.3, D - 0.3, 0, -1, D - 0.6)]) if (sieht(p2, F3)) for (let u = 0.5; u < F3.L; u += 2.5) {
+      const [x2, z4] = wp3(F3, u, 0);
       S.box(0.15, 1.1, 0.15, x2, 0.85, z4, "#7a5d43");
-      if (u + 2.5 < F2.L) {
-        const [x22, z22] = wp3(F2, u + 2.5, 0);
+      if (u + 2.5 < F3.L) {
+        const [x22, z22] = wp3(F3, u + 2.5, 0);
         balken4(S, [x2, 1.1, z4], [x22, 1.1, z22], 0.08, 0.08, "#7a5d43");
         balken4(S, [x2, 0.7, z4], [x22, 0.7, z22], 0.08, 0.08, "#7a5d43");
       }
@@ -143457,18 +143769,18 @@
   }
   function seitenListe(p2, x0, z0, x1, z1) {
     const sz = seiten(x0, z0, x1, z1);
-    return Object.entries(sz).filter(([, F2]) => sieht(p2, F2)).map(([k3, F2]) => ({ k: k3, F: F2 }));
+    return Object.entries(sz).filter(([, F3]) => sieht(p2, F3)).map(([k3, F3]) => ({ k: k3, F: F3 }));
   }
   function nordWindmuehle(S, scene2, p2) {
     return gedreht2(S, scene2, p2, muehleRoh, [24, 24]);
   }
-  function fachwerk2(S, F2, L2, y0, y1, holz, o3 = {}) {
+  function fachwerk2(S, F3, L2, y0, y1, holz, o3 = {}) {
     const st2 = [], ri = [];
     for (let u = 0; u <= L2 + 0.01; u += o3.raster ?? 1.25) st2.push([Math.min(L2 - 0.11, Math.max(0.11, u)) - 0.11, y0, Math.min(L2 - 0.11, Math.max(0.11, u)) + 0.11, y1]);
     for (const y2 of o3.riegel ?? []) ri.push([0, y2 - 0.1, L2, y2 + 0.1]);
     ri.push([0, y0, L2, y0 + 0.22], [0, y1 - 0.22, L2, y1]);
-    platten(S, F2, [...st2, ...ri], 0, 0.1, holz);
-    if (o3.streben) for (let u = 0; u + (o3.raster ?? 1.25) <= L2; u += (o3.raster ?? 1.25) * 3) fbalken(S, F2, u + 0.1, y0 + 0.2, u + (o3.raster ?? 1.25) - 0.1, y1 - 0.2, 0.16, 0, 0.1, holz);
+    platten(S, F3, [...st2, ...ri], 0, 0.1, holz);
+    if (o3.streben) for (let u = 0; u + (o3.raster ?? 1.25) <= L2; u += (o3.raster ?? 1.25) * 3) fbalken(S, F3, u + 0.1, y0 + 0.2, u + (o3.raster ?? 1.25) - 0.1, y1 - 0.2, 0.16, 0, 0.1, holz);
   }
   function bauernhausRoh(S, scene2, p2) {
     const r3 = rng3(`nbh:${p2.seed}`);
@@ -143478,11 +143790,11 @@
     let top = 0;
     if (v === "friesen") {
       const L2 = Math.min(W3 - 4, 24), B8 = Math.min(D - 6, 9), x0 = (W3 - L2) / 2, z1 = D - 4, z0 = z1 - B8, hw = 3, dh = B8 * 0.85, wand2 = "#f2eee5";
-      koerper2(S, p2, x0, z0, x0 + L2, z1, 0, hw, dunkler(wand2, 0.1), (F2, s2) => {
+      koerper2(S, p2, x0, z0, x0 + L2, z1, 0, hw, dunkler(wand2, 0.1), (F3, s2) => {
         const oe = [];
-        for (const [i, u] of achsen4(0, F2.L, 2.4, 0.8).entries()) oe.push(s2 === "+z" && i === Math.floor(F2.L / 2.4 / 2) ? { u0: u - 0.6, u1: u + 0.6, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#2f6f8f" } : fenster4(u, 0.9, 1.1, 1.3, null, { rahmen: WEISS }));
-        lochwand3(S, F2, [0, 0, F2.L, hw], oe, wand2, { rahmen: "#3f7d56", bank: WEISS });
-        platten(S, F2, [[0, 0, F2.L, 0.4]], 0, 0.06, "#a6a197");
+        for (const [i, u] of achsen4(0, F3.L, 2.4, 0.8).entries()) oe.push(s2 === "+z" && i === Math.floor(F3.L / 2.4 / 2) ? { u0: u - 0.6, u1: u + 0.6, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#2f6f8f" } : fenster4(u, 0.9, 1.1, 1.3, null, { rahmen: WEISS }));
+        lochwand3(S, F3, [0, 0, F3.L, hw], oe, wand2, { rahmen: "#3f7d56", bank: WEISS });
+        platten(S, F3, [[0, 0, F3.L, 0.4]], 0, 0.06, "#a6a197");
       });
       walm(S, x0 - 0.7, z0 - 0.7, x0 + L2 + 0.7, z1 + 0.7, hw - 0.3, dh, reet, { achse: "x", kv: B8 / 2 + 0.7, kh: B8 / 2 + 0.7 });
       const FF = R6(x0, z1, 1, 0, L2);
@@ -143493,9 +143805,9 @@
       S.add(gz2, reet);
       S.quader(x0 + L2 * 0.3, hw + dh - 1.6, (z0 + z1) / 2 - 0.4, x0 + L2 * 0.3 + 0.8, hw + dh + 0.6, (z0 + z1) / 2 + 0.4, "#f2eee5");
       S.quader(x0 + L2 * 0.2, hw + dh - 0.45, (z0 + z1) / 2 - 0.25, x0 + L2 * 0.8, hw + dh - 0.15, (z0 + z1) / 2 + 0.25, first);
-      for (const F2 of [R6(0.3, D - 0.6, 1, 0, W3 - 0.6)]) {
-        fb3(S, F2, 0, F2.L, 0.3, 1.1, -0.4, 0.4, "#9d978c");
-        for (let uu = 1; uu < F2.L; uu += 2.2) busch4(S, r3, ...wp3(F2, uu, -0.2), 0.6);
+      for (const F3 of [R6(0.3, D - 0.6, 1, 0, W3 - 0.6)]) {
+        fb3(S, F3, 0, F3.L, 0.3, 1.1, -0.4, 0.4, "#9d978c");
+        for (let uu = 1; uu < F3.L; uu += 2.2) busch4(S, r3, ...wp3(F3, uu, -0.2), 0.6);
       }
       for (let i = 0; i < 2; i++) baumN(S, r3, i ? W3 - 3 : 3, z0 - 2, 1.2);
       top = hw + dh;
@@ -143532,20 +143844,20 @@
         fbalken(S, FP, uF + 1.6, yF - 1.4, uF - 0.9, yF + 0.6, 0.25, 0, 0.12, "#e9e3d6");
       }
       for (const k3 of ["+x", "-x", "-z"]) {
-        const F2 = sz[k3];
-        if (!sieht(p2, F2)) continue;
-        const L2 = F2.L, oe = [];
+        const F3 = sz[k3];
+        if (!sieht(p2, F3)) continue;
+        const L2 = F3.L, oe = [];
         if (k3 !== "-z") {
           for (const [i, u] of achsen4(0.5, L2 - 0.5, 2.5, 0.3).entries()) oe.push(i === 3 ? { u0: u - 0.7, u1: u + 0.7, v0: 0.3, v1: 2.4, typ: "tuer", fuell: "#3c5a46" } : u < L2 * 0.45 ? fenster4(u, 1, 0.9, 1.1) : fenster4(u, 1.4, 0.7, 0.6, null, { sprosse: false }));
         } else for (const u of achsen4(0, L2, 2.6, 0.8)) oe.push(fenster4(u, 0.9, 1, 1.3));
-        lochwand3(S, F2, [0, 0, L2, hw], oe, fuell, { rahmen: WEISS, tw: 0.3 });
-        if (fach) fachwerk2(S, teil3(F2, 0, L2, 0.02), L2, 0.3, hw, holz, { riegel: [1.6], streben: k3 !== "-z" });
-        else platten(S, F2, [[0, 0, L2, 0.5]], 0, 0.06, dunkler(stein, 0.1));
+        lochwand3(S, F3, [0, 0, L2, hw], oe, fuell, { rahmen: WEISS, tw: 0.3 });
+        if (fach) fachwerk2(S, teil3(F3, 0, L2, 0.02), L2, 0.3, hw, holz, { riegel: [1.6], streben: k3 !== "-z" });
+        else platten(S, F3, [[0, 0, L2, 0.5]], 0, 0.06, dunkler(stein, 0.1));
       }
       S.quader(xh + B8 / 2 - 0.55, y0 + dh - 0.45, zb + B8 / 2, xh + B8 / 2 + 0.55, y0 + dh + 0.12, zf - 1.6, first);
       for (const sx of [-1, 1]) {
-        const F2 = sx > 0 ? sz["+x"] : sz["-x"];
-        if (!sieht(p2, F2)) continue;
+        const F3 = sx > 0 ? sz["+x"] : sz["-x"];
+        if (!sieht(p2, F3)) continue;
         const neig = Math.atan2(dh, B8 / 2 + 0.7);
         for (let i = 0; i < Math.floor(Lh / 9); i++) {
           const zc = zb + 6 + i * 9, q2 = 0.4, xr = xh + B8 / 2 + sx * (B8 / 2 + 0.7) * (1 - q2), yr = y0 + dh * q2;
@@ -143566,11 +143878,11 @@
       if (v === "hof") {
         const sx0 = xh + B8 + 6, sx1 = W3 - 2, szb = 3, szf = Math.min(zf - 6, szb + 14);
         if (sx1 - sx0 > 6) {
-          koerper2(S, p2, sx0, szb, sx1, szf, 0, 4.5, "#4a3a2c", (F2, s2) => {
+          koerper2(S, p2, sx0, szb, sx1, szf, 0, 4.5, "#4a3a2c", (F3, s2) => {
             const st2 = [];
-            for (let u = 0.2; u < F2.L; u += 0.45) st2.push([u - 0.04, 0.3, u + 0.04, 4.4]);
-            lochwand3(S, F2, [0, 0, F2.L, 4.5], s2[1] === "z" ? [{ u0: F2.L / 2 - 1.8, u1: F2.L / 2 + 1.8, v0: 0.3, v1: 3.8, typ: "tuer", fuell: "#2e2620" }] : [], "#5b4636");
-            platten(S, F2, st2, 0, 0.05, "#4a3a2c");
+            for (let u = 0.2; u < F3.L; u += 0.45) st2.push([u - 0.04, 0.3, u + 0.04, 4.4]);
+            lochwand3(S, F3, [0, 0, F3.L, 4.5], s2[1] === "z" ? [{ u0: F3.L / 2 - 1.8, u1: F3.L / 2 + 1.8, v0: 0.3, v1: 3.8, typ: "tuer", fuell: "#2e2620" }] : [], "#5b4636");
+            platten(S, F3, st2, 0, 0.05, "#4a3a2c");
           });
           const gs = dachProfil(szf - szb + 0.8, sx1 - sx0 + 0.8, (sx1 - sx0) * 0.55, 0.15, "z");
           gs.translate((sx0 + sx1) / 2, 4.5, (szb + szf) / 2);
@@ -143597,43 +143909,43 @@
     return gedreht2(S, scene2, { ...p2, variante: v }, bauernhausRoh, v === "friesen" ? [22, 16] : v === "hof" ? [34, 30] : [18, 26]);
   }
   var VILLEN = ["Villa Seeblick", "Haus M\xF6we", "Villa Strandperle", "Pension Meeresrauschen", "Haus Ostseegru\xDF", "Villa D\xFCnenruh", "Haus Seestern", "Villa Bernstein", "Pension Strandgut"];
-  function veranda(S, F2, u0, u1, y0, n3, gh, t3, holz, o3 = {}) {
+  function veranda(S, F3, u0, u1, y0, n3, gh, t3, holz, o3 = {}) {
     for (let k3 = 0; k3 < n3; k3++) {
       const y2 = y0 + k3 * gh;
-      fb3(S, F2, u0, u1, y2 - 0.15, y2 + 0.05, 0, t3, WEISS);
-      const FL = teil3(F2, u0, u1, t3 - 0.06), L2 = u1 - u0, lo = [];
+      fb3(S, F3, u0, u1, y2 - 0.15, y2 + 0.05, 0, t3, WEISS);
+      const FL = teil3(F3, u0, u1, t3 - 0.06), L2 = u1 - u0, lo = [];
       for (let u = 0.35; u < L2 - 0.2; u += 0.42) lo.push({ u0: u - 0.13, u1: u + 0.13, v0: y2 + 0.25, v1: y2 + 0.75, art: "rund", typ: "offen" });
       lochwand3(S, FL, [0, y2 + 0.05, L2, y2 + 1], lo, holz, { tw: 0.06, t1: 0 });
-      for (const u of [u0 + 0.1, (u0 + u1) / 2, u1 - 0.1]) fb3(S, F2, u - 0.09, u + 0.09, y2 + 0.05, y2 + gh - 0.15, t3 - 0.2, t3 - 0.02, holz);
+      for (const u of [u0 + 0.1, (u0 + u1) / 2, u1 - 0.1]) fb3(S, F3, u - 0.09, u + 0.09, y2 + 0.05, y2 + gh - 0.15, t3 - 0.2, t3 - 0.02, holz);
       const z4 = [];
       for (let u = u0 + 0.5; u < u1 - 0.3; u += 0.5) z4.push([[u - 0.25, y2 + gh - 0.15], [u + 0.25, y2 + gh - 0.15], [u, y2 + gh - 0.55]]);
-      platten(S, teil3(F2, 0, F2.L, t3 - 0.1), z4.map((q2) => q2.map(([a2, b3]) => [a2, b3])), -0.04, 0.04, holz);
+      platten(S, teil3(F3, 0, F3.L, t3 - 0.1), z4.map((q2) => q2.map(([a2, b3]) => [a2, b3])), -0.04, 0.04, holz);
     }
-    fb3(S, F2, u0 - 0.15, u1 + 0.15, y0 + n3 * gh - 0.15, y0 + n3 * gh + 0.05, 0, t3 + 0.2, WEISS);
+    fb3(S, F3, u0 - 0.15, u1 + 0.15, y0 + n3 * gh - 0.15, y0 + n3 * gh + 0.05, 0, t3 + 0.2, WEISS);
     if (o3.dach) {
       const g = new three_module_exports.BoxGeometry(u1 - u0 + 0.6, 0.12, t3 + 0.6);
       g.rotateX(0.35);
       g.translate((u0 + u1) / 2, y0 + n3 * gh + 0.25, (t3 + 0.6) / 2 - 0.2);
-      fgeo3(S, F2, g, o3.dach);
+      fgeo3(S, F3, g, o3.dach);
     }
   }
   function villa(S, scene2, p2, r3, x0, z0, x1, z1, o3) {
     const wand2 = o3.wand, n3 = o3.n, eg = 0.9, gh = 3.2, H = eg + n3 * gh, holz = o3.holz, dach3 = o3.dach, L2 = x1 - x0, T = z1 - z0;
-    const vis = koerper2(S, p2, x0, z0, x1, z1, 0, H, dunkler(wand2, 0.08), (F2, s2) => {
+    const vis = koerper2(S, p2, x0, z0, x1, z1, 0, H, dunkler(wand2, 0.08), (F3, s2) => {
       const oe = [], front2 = s2 === "+z";
-      for (let k3 = 0; k3 < n3; k3++) for (const [i, u] of achsen4(0, F2.L, 2.4, 0.6).entries()) oe.push(front2 && k3 === 0 && i === 1 ? { u0: u - 0.65, u1: u + 0.65, v0: eg, v1: eg + 2.6, typ: "tuer", fuell: GLAS_HELL5, art: "segment" } : fenster4(u, eg + k3 * gh + 0.55, 1.1, 2, "segment"));
-      lochwand3(S, F2, [0, 0, F2.L, H], oe, wand2, { rahmen: WEISS, bank: WEISS });
-      const bd = [[0, 0, F2.L, eg]];
-      for (let k3 = 1; k3 < n3; k3++) bd.push([-0.05, eg + k3 * gh - 0.1, F2.L + 0.05, eg + k3 * gh + 0.08]);
-      bd.push([-0.25, H - 0.3, F2.L + 0.25, H + 0.05]);
-      platten(S, F2, bd, 0, 0.15, WEISS);
-      for (let u = 0.3; u < F2.L; u += 0.6) fb3(S, F2, u - 0.08, u + 0.08, H - 0.55, H - 0.3, 0, 0.3, WEISS);
+      for (let k3 = 0; k3 < n3; k3++) for (const [i, u] of achsen4(0, F3.L, 2.4, 0.6).entries()) oe.push(front2 && k3 === 0 && i === 1 ? { u0: u - 0.65, u1: u + 0.65, v0: eg, v1: eg + 2.6, typ: "tuer", fuell: GLAS_HELL5, art: "segment" } : fenster4(u, eg + k3 * gh + 0.55, 1.1, 2, "segment"));
+      lochwand3(S, F3, [0, 0, F3.L, H], oe, wand2, { rahmen: WEISS, bank: WEISS });
+      const bd = [[0, 0, F3.L, eg]];
+      for (let k3 = 1; k3 < n3; k3++) bd.push([-0.05, eg + k3 * gh - 0.1, F3.L + 0.05, eg + k3 * gh + 0.08]);
+      bd.push([-0.25, H - 0.3, F3.L + 0.25, H + 0.05]);
+      platten(S, F3, bd, 0, 0.15, WEISS);
+      for (let u = 0.3; u < F3.L; u += 0.6) fb3(S, F3, u - 0.08, u + 0.08, H - 0.55, H - 0.3, 0, 0.3, WEISS);
       if (front2) {
-        const vb = Math.min(F2.L * 0.62, F2.L - 2), u0 = (F2.L - vb) / 2 + (o3.turm ? -F2.L * 0.12 : 0);
-        veranda(S, F2, Math.max(0.3, u0), Math.max(0.3, u0) + vb, eg, n3, gh, 2, holz, { dach: dach3 });
-        fb3(S, F2, Math.max(0.3, u0), Math.max(0.3, u0) + vb, 0, eg, 0, 2, WEISS);
-        for (let s22 = 0; s22 < 3; s22++) fb3(S, F2, F2.L / 2 - 1, F2.L / 2 + 1, 0.3, 0.3 + (s22 + 1) * 0.2, 2, 2 + (3 - s22) * 0.35, GRANIT);
-        ftext3(scene2, F2, o3.name, F2.L / 2, H - 0.75, 0.32, 0.42, F2.L * 0.6, "#2f5f8f");
+        const vb = Math.min(F3.L * 0.62, F3.L - 2), u0 = (F3.L - vb) / 2 + (o3.turm ? -F3.L * 0.12 : 0);
+        veranda(S, F3, Math.max(0.3, u0), Math.max(0.3, u0) + vb, eg, n3, gh, 2, holz, { dach: dach3 });
+        fb3(S, F3, Math.max(0.3, u0), Math.max(0.3, u0) + vb, 0, eg, 0, 2, WEISS);
+        for (let s22 = 0; s22 < 3; s22++) fb3(S, F3, F3.L / 2 - 1, F3.L / 2 + 1, 0.3, 0.3 + (s22 + 1) * 0.2, 2, 2 + (3 - s22) * 0.35, GRANIT);
+        ftext3(scene2, F3, o3.name, F3.L / 2, H - 0.75, 0.32, 0.42, F3.L * 0.6, "#2f5f8f");
       }
     });
     const dh = Math.min(L2, T) * 0.42;
@@ -143664,12 +143976,12 @@
     return top;
   }
   function strandkorb(S, x2, z4, y0, farbe3, ry = 0) {
-    const F2 = R6(x2, z4, Math.cos(ry), -Math.sin(ry), 0);
-    fb3(S, F2, -0.7, 0.7, y0, y0 + 0.75, -0.55, 0.55, "#e3d3a8");
-    fb3(S, F2, -0.7, 0.7, y0 + 0.75, y0 + 1.6, -0.55, -0.25, "#e3d3a8");
-    fb3(S, F2, -0.75, 0.75, y0 + 1.2, y0 + 1.75, -0.6, 0.15, farbe3);
-    for (const s2 of [-1, 1]) fb3(S, F2, s2 * 0.7 - 0.06, s2 * 0.7 + 0.06, y0 + 0.75, y0 + 1.25, -0.55, 0.3, "#e3d3a8");
-    fb3(S, F2, -0.72, 0.72, y0 + 1.42, y0 + 1.55, -0.62, 0.17, "#f4f1ea");
+    const F3 = R6(x2, z4, Math.cos(ry), -Math.sin(ry), 0);
+    fb3(S, F3, -0.7, 0.7, y0, y0 + 0.75, -0.55, 0.55, "#e3d3a8");
+    fb3(S, F3, -0.7, 0.7, y0 + 0.75, y0 + 1.6, -0.55, -0.25, "#e3d3a8");
+    fb3(S, F3, -0.75, 0.75, y0 + 1.2, y0 + 1.75, -0.6, 0.15, farbe3);
+    for (const s2 of [-1, 1]) fb3(S, F3, s2 * 0.7 - 0.06, s2 * 0.7 + 0.06, y0 + 0.75, y0 + 1.25, -0.55, 0.3, "#e3d3a8");
+    fb3(S, F3, -0.72, 0.72, y0 + 1.42, y0 + 1.55, -0.62, 0.17, "#f4f1ea");
   }
   function strandRoh(S, scene2, p2) {
     const r3 = rng3(`nst:${p2.seed}`);
@@ -143689,22 +144001,22 @@
     let top = 6;
     if (v === "kurhaus") {
       const L2 = Math.min(W3 - 6, 70), x0 = (W3 - L2) / 2, z0 = 2, z1 = Dv - 1, H = 0.9 + 3 * 3.6, wand2 = "#f6f4ee";
-      koerper2(S, p2, x0, z0, x0 + L2, z1, 0, H, "#d9d6cf", (F2, s2) => {
-        const oe = raster2(0, F2.L, 3, 0.9, 3, 3.6, 1.4, 2.4, "rund", 0.8, 0.5);
-        lochwand3(S, F2, [0, 0, F2.L, H + 1.2], oe, wand2, { rahmen: WEISS, bank: WEISS });
-        platten(S, F2, [[0, 0, F2.L, 0.9], [-0.2, H - 0.3, F2.L + 0.2, H + 0.1], [-0.1, 0.9 + 3.6 - 0.15, F2.L + 0.1, 0.9 + 3.6 + 0.1]], 0, 0.2, "#e9e3d6");
+      koerper2(S, p2, x0, z0, x0 + L2, z1, 0, H, "#d9d6cf", (F3, s2) => {
+        const oe = raster2(0, F3.L, 3, 0.9, 3, 3.6, 1.4, 2.4, "rund", 0.8, 0.5);
+        lochwand3(S, F3, [0, 0, F3.L, H + 1.2], oe, wand2, { rahmen: WEISS, bank: WEISS });
+        platten(S, F3, [[0, 0, F3.L, 0.9], [-0.2, H - 0.3, F3.L + 0.2, H + 0.1], [-0.1, 0.9 + 3.6 - 0.15, F3.L + 0.1, 0.9 + 3.6 + 0.1]], 0, 0.2, "#e9e3d6");
         if (s2 === "+z") {
-          const pb = Math.min(18, F2.L * 0.3), u0 = F2.L / 2 - pb / 2;
+          const pb = Math.min(18, F3.L * 0.3), u0 = F3.L / 2 - pb / 2;
           for (let i = 0; i <= 6; i++) zyl7(S, 0.45, 0.5, 9.5, ...(() => {
-            const [x2, z4] = wp3(F2, u0 + i * pb / 6, 2.4);
+            const [x2, z4] = wp3(F3, u0 + i * pb / 6, 2.4);
             return [x2, 0.9, z4];
           })(), WEISS, 10);
-          fb3(S, F2, u0 - 0.8, u0 + pb + 0.8, 10.4, 11.4, 0, 3.2, WEISS);
-          fpolyF(S, teil3(F2, u0 - 0.8, u0 + pb + 0.8, 3), [[0, 11.4], [pb + 1.6, 11.4], [pb / 2 + 0.8, 14.2]], -0.4, 0.1, WEISS);
-          fb3(S, F2, u0 - 1, u0 + pb + 1, 0.3, 0.9, 0, 4, "#e9e3d6");
-          ftext3(scene2, F2, "Kurhaus", F2.L / 2, H + 0.55, 0.3, 0.9, F2.L * 0.3, "#2f5f8f");
-          veranda(S, F2, 1.5, u0 - 2, 0.9, 2, 3.6, 2.2, "#f6f4ee", { dach: waehle2(r3, NF.schiefer) });
-          veranda(S, F2, u0 + pb + 2, F2.L - 1.5, 0.9, 2, 3.6, 2.2, "#f6f4ee", { dach: waehle2(r3, NF.schiefer) });
+          fb3(S, F3, u0 - 0.8, u0 + pb + 0.8, 10.4, 11.4, 0, 3.2, WEISS);
+          fpolyF(S, teil3(F3, u0 - 0.8, u0 + pb + 0.8, 3), [[0, 11.4], [pb + 1.6, 11.4], [pb / 2 + 0.8, 14.2]], -0.4, 0.1, WEISS);
+          fb3(S, F3, u0 - 1, u0 + pb + 1, 0.3, 0.9, 0, 4, "#e9e3d6");
+          ftext3(scene2, F3, "Kurhaus", F3.L / 2, H + 0.55, 0.3, 0.9, F3.L * 0.3, "#2f5f8f");
+          veranda(S, F3, 1.5, u0 - 2, 0.9, 2, 3.6, 2.2, "#f6f4ee", { dach: waehle2(r3, NF.schiefer) });
+          veranda(S, F3, u0 + pb + 2, F3.L - 1.5, 0.9, 2, 3.6, 2.2, "#f6f4ee", { dach: waehle2(r3, NF.schiefer) });
         }
       });
       const dachF = waehle2(r3, NF.schiefer);
@@ -144409,21 +144721,21 @@
   function R7(ox, oz, dx, dz, L2) {
     return { ox, oz, dx, dz, nx: -dz, nz: dx, ry: Math.atan2(-dz, dx), L: L2 };
   }
-  function wp4(F2, u, t3) {
-    return [F2.ox + F2.dx * u + F2.nx * t3, F2.oz + F2.dz * u + F2.nz * t3];
+  function wp4(F3, u, t3) {
+    return [F3.ox + F3.dx * u + F3.nx * t3, F3.oz + F3.dz * u + F3.nz * t3];
   }
-  function fb4(S, F2, u0, u1, y0, y1, t0, t1, c) {
-    const [x2, z4] = wp4(F2, (u0 + u1) / 2, (t0 + t1) / 2);
-    S.box(Math.abs(u1 - u0), Math.abs(y1 - y0), Math.abs(t1 - t0), x2, (y0 + y1) / 2, z4, c, F2.ry);
+  function fb4(S, F3, u0, u1, y0, y1, t0, t1, c) {
+    const [x2, z4] = wp4(F3, (u0 + u1) / 2, (t0 + t1) / 2);
+    S.box(Math.abs(u1 - u0), Math.abs(y1 - y0), Math.abs(t1 - t0), x2, (y0 + y1) / 2, z4, c, F3.ry);
   }
-  function fgeo4(S, F2, g, c) {
-    g.rotateY(F2.ry);
-    g.translate(F2.ox, 0, F2.oz);
+  function fgeo4(S, F3, g, c) {
+    g.rotateY(F3.ry);
+    g.translate(F3.ox, 0, F3.oz);
     S.add(g, c);
   }
-  function teil4(F2, u0, u1, t3 = 0) {
-    const [x2, z4] = wp4(F2, u0, t3);
-    return R7(x2, z4, F2.dx, F2.dz, u1 - u0);
+  function teil4(F3, u0, u1, t3 = 0) {
+    const [x2, z4] = wp4(F3, u0, t3);
+    return R7(x2, z4, F3.dx, F3.dz, u1 - u0);
   }
   function rechteck5(u0, v0, u1, v1) {
     const s2 = new three_module_exports.Shape();
@@ -144454,12 +144766,12 @@
     p2.lineTo(u0, v0);
     return p2;
   }
-  function fform3(S, F2, shape, t0, t1, c, seg2 = 6) {
+  function fform3(S, F3, shape, t0, t1, c, seg2 = 6) {
     const g = new three_module_exports.ExtrudeGeometry(shape, { depth: t1 - t0, bevelEnabled: false, curveSegments: seg2 });
     g.translate(0, 0, t0);
-    fgeo4(S, F2, g, c);
+    fgeo4(S, F3, g, c);
   }
-  function fwand2(S, F2, u0, u1, y0, y1, t0, t1, c, loecher = []) {
+  function fwand2(S, F3, u0, u1, y0, y1, t0, t1, c, loecher = []) {
     const s2 = rechteck5(u0, y0, u1, y1);
     for (const l of loecher) {
       if (l.kreis) {
@@ -144468,38 +144780,38 @@
         s2.holes.push(p2);
       } else s2.holes.push(oeffnung3(new three_module_exports.Path(), l.u0, l.v0, l.u1, l.v1, l.bogen));
     }
-    fform3(S, F2, s2, t0, t1, c);
+    fform3(S, F3, s2, t0, t1, c);
   }
-  function lochwand4(S, F2, u0, u1, y0, y1, farbe3, loecher, o3 = {}) {
-    fb4(S, F2, u0 + 0.02, u1 - 0.02, y0 + 0.02, y1 - 0.02, 0, o3.glasT ?? 0.04, o3.glas ?? GLAS9);
-    fwand2(S, F2, u0, u1, y0, y1, 0, o3.dick ?? 0.35, farbe3, loecher);
+  function lochwand4(S, F3, u0, u1, y0, y1, farbe3, loecher, o3 = {}) {
+    fb4(S, F3, u0 + 0.02, u1 - 0.02, y0 + 0.02, y1 - 0.02, 0, o3.glasT ?? 0.04, o3.glas ?? GLAS9);
+    fwand2(S, F3, u0, u1, y0, y1, 0, o3.dick ?? 0.35, farbe3, loecher);
   }
-  function fpoly3(S, F2, pkt, t0, t1, c) {
+  function fpoly3(S, F3, pkt, t0, t1, c) {
     const s2 = new three_module_exports.Shape();
     s2.moveTo(pkt[0][0], pkt[0][1]);
     for (const [u, v] of pkt.slice(1)) s2.lineTo(u, v);
     s2.lineTo(pkt[0][0], pkt[0][1]);
-    fform3(S, F2, s2, t0, t1, c);
+    fform3(S, F3, s2, t0, t1, c);
   }
-  function fscheibe3(S, F2, u, y2, t0, t1, rad3, c, seg2 = 20) {
+  function fscheibe3(S, F3, u, y2, t0, t1, rad3, c, seg2 = 20) {
     const g = new three_module_exports.CylinderGeometry(rad3, rad3, t1 - t0, seg2);
     g.rotateX(PI10 / 2);
     g.translate(u, y2, (t0 + t1) / 2);
-    fgeo4(S, F2, g, c);
+    fgeo4(S, F3, g, c);
   }
-  function fstrebe(S, F2, u0, y0, u1, y1, br, t0, t1, c) {
+  function fstrebe(S, F3, u0, y0, u1, y1, br, t0, t1, c) {
     const L2 = wurzelSumme19(u1 - u0, y1 - y0);
     const g = new three_module_exports.BoxGeometry(L2, br, t1 - t0);
     g.rotateZ(Math.atan2(y1 - y0, u1 - u0));
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
-    fgeo4(S, F2, g, c);
+    fgeo4(S, F3, g, c);
   }
-  function ftext4(scene2, F2, text3, u, y2, t3, hMax, bMax, farbe3, bg = null) {
+  function ftext4(scene2, F3, text3, u, y2, t3, hMax, bMax, farbe3, bg = null) {
     const { mat: mat2, seitenverhaeltnis: a2 } = textMaterial(text3, farbe3, { groesse: 140, hintergrund: bg });
     const h3 = Math.min(hMax, bMax / a2);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h3 * a2, h3), mat2);
-    const [x2, z4] = wp4(F2, u, t3);
-    m.rotation.y = F2.ry;
+    const [x2, z4] = wp4(F3, u, t3);
+    m.rotation.y = F3.ry;
     m.position.set(x2, y2, z4);
     scene2.add(m);
     return h3 * a2;
@@ -144566,7 +144878,7 @@
     const b3 = p2.blick ?? [1, 1];
     return nx * b3[0] + nz * b3[1] > 0.05;
   }
-  var sichtF = (p2, F2) => sieht2(p2, F2.nx, F2.nz);
+  var sichtF = (p2, F3) => sieht2(p2, F3.nx, F3.nz);
   function vierSeiten(x0, z0, w2, d3) {
     return {
       "+z": R7(x0, z0 + d3, 1, 0, w2),
@@ -144576,7 +144888,7 @@
     };
   }
   function seiten2(p2, x0, z0, w2, d3, nur = null) {
-    return Object.entries(vierSeiten(x0, z0, w2, d3)).filter(([k3, F2]) => (!nur || nur.includes(k3)) && sichtF(p2, F2));
+    return Object.entries(vierSeiten(x0, z0, w2, d3)).filter(([k3, F3]) => (!nur || nur.includes(k3)) && sichtF(p2, F3));
   }
   function satteldach4(S, x0, z0, x1, z1, y2, hg, achse, dachF, wandF, ue = 0.45) {
     const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
@@ -144660,22 +144972,22 @@
     S.box(quer2 ? 0.6 : 1.8, 0.12, quer2 ? 1.8 : 0.6, x2, 0.8, z4, "#8a6a4a");
     S.box(quer2 ? 0.5 : 1.6, 0.45, quer2 ? 1.6 : 0.5, x2, 0.55, z4, "#4a4f55");
   }
-  function fenster5(S, F2, u, y2, fw, fh, o3 = {}) {
+  function fenster5(S, F3, u, y2, fw, fh, o3 = {}) {
     const t3 = o3.t ?? 0;
-    if (o3.rahmen !== null) fb4(S, F2, u - fw / 2 - 0.12, u + fw / 2 + 0.12, y2 - 0.12, y2 + fh + 0.12, t3, t3 + 0.05, o3.rahmen ?? WEISS2);
-    fb4(S, F2, u - fw / 2, u + fw / 2, y2, y2 + fh, t3, t3 + 0.07, o3.glas ?? GLAS9);
+    if (o3.rahmen !== null) fb4(S, F3, u - fw / 2 - 0.12, u + fw / 2 + 0.12, y2 - 0.12, y2 + fh + 0.12, t3, t3 + 0.05, o3.rahmen ?? WEISS2);
+    fb4(S, F3, u - fw / 2, u + fw / 2, y2, y2 + fh, t3, t3 + 0.07, o3.glas ?? GLAS9);
     if (o3.kreuz) {
-      fb4(S, F2, u - 0.04, u + 0.04, y2, y2 + fh, t3, t3 + 0.1, o3.rahmen ?? WEISS2);
-      fb4(S, F2, u - fw / 2, u + fw / 2, y2 + fh * 0.62, y2 + fh * 0.62 + 0.08, t3, t3 + 0.1, o3.rahmen ?? WEISS2);
+      fb4(S, F3, u - 0.04, u + 0.04, y2, y2 + fh, t3, t3 + 0.1, o3.rahmen ?? WEISS2);
+      fb4(S, F3, u - fw / 2, u + fw / 2, y2 + fh * 0.62, y2 + fh * 0.62 + 0.08, t3, t3 + 0.1, o3.rahmen ?? WEISS2);
     }
-    if (o3.laeden) for (const s2 of [-1, 1]) fb4(S, F2, u + s2 * (fw / 2 + 0.14), u + s2 * (fw / 2 + 0.14 + fw * 0.48), y2, y2 + fh, t3, t3 + 0.09, o3.laeden);
-    if (o3.sims) fb4(S, F2, u - fw / 2 - 0.25, u + fw / 2 + 0.25, y2 - 0.2, y2 - 0.04, t3, t3 + 0.22, o3.sims);
+    if (o3.laeden) for (const s2 of [-1, 1]) fb4(S, F3, u + s2 * (fw / 2 + 0.14), u + s2 * (fw / 2 + 0.14 + fw * 0.48), y2, y2 + fh, t3, t3 + 0.09, o3.laeden);
+    if (o3.sims) fb4(S, F3, u - fw / 2 - 0.25, u + fw / 2 + 0.25, y2 - 0.2, y2 - 0.04, t3, t3 + 0.22, o3.sims);
   }
-  function logo(S, scene2, F2, u, y2, t3, h3, farbe3, text3, schrift2 = "#ffffff", bg = null) {
+  function logo(S, scene2, F3, u, y2, t3, h3, farbe3, text3, schrift2 = "#ffffff", bg = null) {
     const bank6 = BANKEN.find((b4) => b4[1] === farbe3), form2 = bank6?.[2] ?? "saeulen";
     const q2 = h3 / 2, t1 = t3 + 0.2, t22 = t3 + 0.28, P4 = "#f3f1ec";
-    fb4(S, F2, u - q2 * 1.15, u + q2 * 1.15, y2 - q2 * 0.85, y2 + q2 * 0.85, t3, t1, P4);
-    const b3 = (u0, u1, y0, y1) => fb4(S, F2, u + u0 * q2, u + u1 * q2, y2 + y0 * q2, y2 + y1 * q2, t1, t22, farbe3);
+    fb4(S, F3, u - q2 * 1.15, u + q2 * 1.15, y2 - q2 * 0.85, y2 + q2 * 0.85, t3, t1, P4);
+    const b3 = (u0, u1, y0, y1) => fb4(S, F3, u + u0 * q2, u + u1 * q2, y2 + y0 * q2, y2 + y1 * q2, t1, t22, farbe3);
     if (form2 === "saeulen") {
       b3(-0.85, 0.85, -0.65, -0.48);
       b3(-0.85, 0.85, 0.42, 0.62);
@@ -144692,10 +145004,10 @@
       b3(-0.95, 0.25, 0.3, 0.6);
       b3(-0.6, 0.6, -0.15, 0.15);
       b3(-0.25, 0.95, -0.6, -0.3);
-    } else ftext4(scene2, F2, (bank6?.[0] ?? "B").split(" ").pop()[0], u, y2, t22, h3 * 0.75, h3 * 0.9, farbe3, null);
+    } else ftext4(scene2, F3, (bank6?.[0] ?? "B").split(" ").pop()[0], u, y2, t22, h3 * 0.75, h3 * 0.9, farbe3, null);
     if (text3) {
-      const u0 = u + h3 * 0.75, bw = Math.min(text3.length * h3 * 0.45, F2.L - u0 - 0.6);
-      if (bw > 2) ftext4(scene2, F2, text3, u0 + bw / 2, y2, t3 + 0.12, h3 * 0.55, bw, schrift2, bg);
+      const u0 = u + h3 * 0.75, bw = Math.min(text3.length * h3 * 0.45, F3.L - u0 - 0.6);
+      if (bw > 2) ftext4(scene2, F3, text3, u0 + bw / 2, y2, t3 + 0.12, h3 * 0.55, bw, schrift2, bg);
     }
   }
   var WINKEL2 = { "+z": 0, "+x": PI10 / 2, "-z": PI10, "-x": -PI10 / 2 };
@@ -144742,13 +145054,13 @@
     S.quader(x0, 0, z0, x0 + w2, h3, z0 + d3, GLAS_HELL6);
     S.quader(x0 - 0.3, h3, z0 - 0.3, x0 + w2 + 0.3, h3 + 1, z0 + d3 + 0.3, stein);
     S.quader(x0 + 1, h3 + 1, z0 + 1, x0 + w2 - 1, h3 + 1.2, z0 + d3 - 1, "#b9b6ae");
-    for (const [k3, F2] of seiten2(p2, x0, z0, w2, d3)) {
-      for (const u of achsen5(0, F2.L, 3, 0)) fb4(S, F2, u - 0.15, u + 0.15, 0.3, h3, 0, 0.25, stein);
-      fb4(S, F2, 0, F2.L, h3 * 0.5 - 0.1, h3 * 0.5 + 0.1, 0, 0.2, stein);
+    for (const [k3, F3] of seiten2(p2, x0, z0, w2, d3)) {
+      for (const u of achsen5(0, F3.L, 3, 0)) fb4(S, F3, u - 0.15, u + 0.15, 0.3, h3, 0, 0.25, stein);
+      fb4(S, F3, 0, F3.L, h3 * 0.5 - 0.1, h3 * 0.5 + 0.1, 0, 0.2, stein);
       if (k3 === "+z") {
-        fb4(S, F2, F2.L / 2 - 6, F2.L / 2 + 6, 4.2, 4.6, 0, 4.5, "#e9e7e2");
-        for (const s2 of [-1, 1]) fb4(S, F2, F2.L / 2 + s2 * 5.6 - 0.15, F2.L / 2 + s2 * 5.6 + 0.15, 0.3, 4.2, 4.2, 4.5, METALL);
-        fb4(S, F2, F2.L / 2 - 2.5, F2.L / 2 + 2.5, 0.3, 3.6, 0, 0.12, DUNKEL2);
+        fb4(S, F3, F3.L / 2 - 6, F3.L / 2 + 6, 4.2, 4.6, 0, 4.5, "#e9e7e2");
+        for (const s2 of [-1, 1]) fb4(S, F3, F3.L / 2 + s2 * 5.6 - 0.15, F3.L / 2 + s2 * 5.6 + 0.15, 0.3, 4.2, 4.2, 4.5, METALL);
+        fb4(S, F3, F3.L / 2 - 2.5, F3.L / 2 + 2.5, 0.3, 3.6, 0, 0.12, DUNKEL2);
       }
     }
   }
@@ -144760,20 +145072,20 @@
     if (o3.podium !== false) podium(S, scene2, p2, x0 - 6, z0 - 4, a2 + 12, b3 + 10, pod - 1, { stein: pal === "weiss" ? "#e3e1db" : "#c9b9a3" });
     const f11 = 2.2, pts = [[x0 + f11, z0 + b3], [x0 + a2 - f11, z0 + b3], [x0 + a2, z0 + b3 - f11], [x0 + a2, z0 + f11], [x0 + a2 - f11, z0], [x0 + f11, z0], [x0, z0 + f11], [x0, z0 + b3 - f11]];
     prisma3(S, pts, 0, H, glas3);
-    for (const F2 of kanten2(pts)) {
-      if (!sichtF(p2, F2)) continue;
-      if (F2.L > 4) {
-        for (let y2 = pod + gh, i = 0; y2 < H - 2 * gh; y2 += gh, i++) fb4(S, F2, 0, F2.L, y2 - 1, y2, 0, 0.35, band);
-        for (const u of achsen5(0, F2.L, 3, 0.2)) fb4(S, F2, u - 0.2, u + 0.2, pod, H - 2 * gh, 0, 0.55, fin);
-      } else for (let y2 = pod + gh; y2 < H - 2 * gh; y2 += gh) fb4(S, F2, 0, F2.L, y2 - 1, y2, 0, 0.35, band);
-      fb4(S, F2, -0.05, F2.L + 0.05, H - 2 * gh, H, 0, 0.4, band);
+    for (const F3 of kanten2(pts)) {
+      if (!sichtF(p2, F3)) continue;
+      if (F3.L > 4) {
+        for (let y2 = pod + gh, i = 0; y2 < H - 2 * gh; y2 += gh, i++) fb4(S, F3, 0, F3.L, y2 - 1, y2, 0, 0.35, band);
+        for (const u of achsen5(0, F3.L, 3, 0.2)) fb4(S, F3, u - 0.2, u + 0.2, pod, H - 2 * gh, 0, 0.55, fin);
+      } else for (let y2 = pod + gh; y2 < H - 2 * gh; y2 += gh) fb4(S, F3, 0, F3.L, y2 - 1, y2, 0, 0.35, band);
+      fb4(S, F3, -0.05, F3.L + 0.05, H - 2 * gh, H, 0, 0.4, band);
     }
     S.quader(cx - a2 * 0.3, H, cz - b3 * 0.3, cx + a2 * 0.3, H + 4.5, cz + b3 * 0.3, band);
     S.quader(cx - a2 * 0.32, H + 4.5, cz - b3 * 0.32, cx + a2 * 0.32, H + 4.9, cz + b3 * 0.32, dunkler(band, 0.1));
     zyl8(S, 0.3, 0.5, 16, cx + a2 * 0.15, H + 4.9, cz, "#d9dcdf", 6);
     const [name2, farbe3] = o3.bank ?? waehle2(r3, BANKEN);
-    for (const [k3, F2] of seiten2(p2, x0, z0, a2, b3)) logo(S, scene2, teil4(F2, f11, F2.L - f11), (F2.L - 2 * f11) / 2, H - gh, 0.45, 4.2, farbe3, null);
-    if (o3.podium !== false) for (const [k3, F2] of seiten2(p2, x0 - 6, z0 - 4, a2 + 12, b3 + 10)) ftext4(scene2, F2, name2, F2.L / 2, pod - 1.9, 0.42, 1.6, F2.L * 0.7, "#ffffff", farbe3);
+    for (const [k3, F3] of seiten2(p2, x0, z0, a2, b3)) logo(S, scene2, teil4(F3, f11, F3.L - f11), (F3.L - 2 * f11) / 2, H - gh, 0.45, 4.2, farbe3, null);
+    if (o3.podium !== false) for (const [k3, F3] of seiten2(p2, x0 - 6, z0 - 4, a2 + 12, b3 + 10)) ftext4(scene2, F3, name2, F3.L / 2, pod - 1.9, 0.42, 1.6, F3.L * 0.7, "#ffffff", farbe3);
     return H + 21;
   }
   function turmZwilling(S, scene2, p2, r3, cx, cz, o3 = {}) {
@@ -144785,16 +145097,16 @@
       const st2 = 3 * gh, e = 1.6, Hs = ht - st2;
       S.quader(x0, 0, z0, x0 + a2, Hs, z0 + b3, glas3[i]);
       S.quader(x0 + e, Hs, z0 + e, x0 + a2 - e, ht, z0 + b3 - e, glas3[i]);
-      for (const [k3, F2] of seiten2(p2, x0, z0, a2, b3)) {
-        for (let y2 = pod + gh; y2 < Hs - 1; y2 += gh) fb4(S, F2, 0, F2.L, y2 - 0.22, y2, 0, 0.08, linie3);
-        for (const u of achsen5(1.2, F2.L - 1.2, 3, 0)) fb4(S, F2, u - 0.07, u + 0.07, pod, Hs, 0, 0.12, dunkler(glas3[i], 0.12));
-        fb4(S, F2, -0.05, 1.2, pod - 1, Hs + 0.6, 0, 0.35, stein);
-        fb4(S, F2, F2.L - 1.2, F2.L + 0.05, pod - 1, Hs + 0.6, 0, 0.35, stein);
-        fb4(S, F2, -0.05, F2.L + 0.05, Hs, Hs + 0.6, 0, 0.35, stein);
+      for (const [k3, F3] of seiten2(p2, x0, z0, a2, b3)) {
+        for (let y2 = pod + gh; y2 < Hs - 1; y2 += gh) fb4(S, F3, 0, F3.L, y2 - 0.22, y2, 0, 0.08, linie3);
+        for (const u of achsen5(1.2, F3.L - 1.2, 3, 0)) fb4(S, F3, u - 0.07, u + 0.07, pod, Hs, 0, 0.12, dunkler(glas3[i], 0.12));
+        fb4(S, F3, -0.05, 1.2, pod - 1, Hs + 0.6, 0, 0.35, stein);
+        fb4(S, F3, F3.L - 1.2, F3.L + 0.05, pod - 1, Hs + 0.6, 0, 0.35, stein);
+        fb4(S, F3, -0.05, F3.L + 0.05, Hs, Hs + 0.6, 0, 0.35, stein);
       }
-      for (const [k3, F2] of seiten2(p2, x0 + e, z0 + e, a2 - 2 * e, b3 - 2 * e)) {
-        for (let y2 = Hs + gh; y2 < ht; y2 += gh) fb4(S, F2, 0, F2.L, y2 - 0.22, y2, 0, 0.08, linie3);
-        fb4(S, F2, -0.05, F2.L + 0.05, ht - 0.5, ht, 0, 0.3, stein);
+      for (const [k3, F3] of seiten2(p2, x0 + e, z0 + e, a2 - 2 * e, b3 - 2 * e)) {
+        for (let y2 = Hs + gh; y2 < ht; y2 += gh) fb4(S, F3, 0, F3.L, y2 - 0.22, y2, 0, 0.08, linie3);
+        fb4(S, F3, -0.05, F3.L + 0.05, ht - 0.5, ht, 0, 0.3, stein);
       }
       S.quader(x0 + 4, ht, z0 + 5, x0 + a2 - 4, ht + 2.6, z0 + b3 - 5, "#c9cdd0");
     };
@@ -144803,9 +145115,9 @@
     turm4(cx + sp6 / 2, cz - b3 / 2, H2, 1);
     S.quader(cx - sp6 / 2 - 0.1, pod, cz - b3 * 0.3, cx + sp6 / 2 + 0.1, pod + 3 * gh, cz + b3 * 0.3, GLAS_HELL6);
     for (let y2 = pod + gh; y2 <= pod + 3 * gh; y2 += gh) S.quader(cx - sp6 / 2, y2 - 0.3, cz - b3 * 0.3 - 0.05, cx + sp6 / 2, y2, cz + b3 * 0.3 + 0.05, stein);
-    for (const [k3, F2] of seiten2(p2, cx - sp6 / 2 - a2, cz - b3 / 2, a2, b3, ["+z", "-z"])) logo(S, scene2, F2, F2.L / 2, H - 3 * gh - 3, 0.36, 4, farbe3, null);
-    for (const [k3, F2] of seiten2(p2, cx + sp6 / 2, cz - b3 / 2, a2, b3, ["+x", "-x"])) logo(S, scene2, F2, F2.L / 2, H2 - 3 * gh - 3, 0.36, 4, farbe3, null);
-    for (const [k3, F2] of seiten2(p2, cx - a2 - sp6 / 2 - 4, cz - b3 / 2 - 4, 2 * a2 + sp6 + 8, b3 + 8, ["+z", "-z"])) ftext4(scene2, F2, name2, F2.L / 2, pod - 2.8, 0.42, 1.6, 26, "#ffffff", farbe3);
+    for (const [k3, F3] of seiten2(p2, cx - sp6 / 2 - a2, cz - b3 / 2, a2, b3, ["+z", "-z"])) logo(S, scene2, F3, F3.L / 2, H - 3 * gh - 3, 0.36, 4, farbe3, null);
+    for (const [k3, F3] of seiten2(p2, cx + sp6 / 2, cz - b3 / 2, a2, b3, ["+x", "-x"])) logo(S, scene2, F3, F3.L / 2, H2 - 3 * gh - 3, 0.36, 4, farbe3, null);
+    for (const [k3, F3] of seiten2(p2, cx - a2 - sp6 / 2 - 4, cz - b3 / 2 - 4, 2 * a2 + sp6 + 8, b3 + 8, ["+z", "-z"])) ftext4(scene2, F3, name2, F3.L / 2, pod - 2.8, 0.42, 1.6, 26, "#ffffff", farbe3);
     return H + 3;
   }
   function turmKrone(S, scene2, p2, r3, cx, cz, o3 = {}) {
@@ -144818,22 +145130,22 @@
     if (o3.kern !== false) {
       const kb = 9, kt = a2 * 0.5, kx0 = x0 - kb + 1, kz0 = cz - kt / 2, Hk2 = Hs * 0.62;
       S.quader(kx0, 0, kz0, kx0 + kb, Hk2, kz0 + kt, hell5);
-      for (const [k3, F2] of seiten2(p2, kx0, kz0, kb, kt)) {
-        for (const u of achsen5(0, F2.L, 2.6, 0.8)) fb4(S, F2, u - 0.5, u + 0.5, pod, Hk2 - 2, 0, 0.05, glas3);
-        for (let y2 = pod + 4 * gh; y2 < Hk2 - 2; y2 += 4 * gh) fb4(S, F2, 0, F2.L, y2 - 0.4, y2, 0, 0.2, stein);
-        fb4(S, F2, -0.1, F2.L + 0.1, Hk2 - 1.2, Hk2, 0, 0.25, stein);
+      for (const [k3, F3] of seiten2(p2, kx0, kz0, kb, kt)) {
+        for (const u of achsen5(0, F3.L, 2.6, 0.8)) fb4(S, F3, u - 0.5, u + 0.5, pod, Hk2 - 2, 0, 0.05, glas3);
+        for (let y2 = pod + 4 * gh; y2 < Hk2 - 2; y2 += 4 * gh) fb4(S, F3, 0, F3.L, y2 - 0.4, y2, 0, 0.2, stein);
+        fb4(S, F3, -0.1, F3.L + 0.1, Hk2 - 1.2, Hk2, 0, 0.25, stein);
       }
       S.quader(kx0 + 2, Hk2, kz0 + 2, kx0 + kb - 2, Hk2 + 2.5, kz0 + kt - 2, "#c9cdd0");
     }
-    for (const F2 of kanten2(pts)) {
-      if (!sichtF(p2, F2)) continue;
-      if (F2.L > 10) {
-        for (const u of achsen5(0, F2.L, 2.6, 0.4)) fb4(S, F2, u - 0.85, u + 0.85, pod - 2, Hs, 0, 0.4, stein);
-        fb4(S, F2, F2.L / 2 - 2.2, F2.L / 2 + 2.2, pod - 2, Hs, 0, 0.9, hell5);
-        for (let y2 = pod + 4 * gh; y2 < Hs - 1; y2 += 4 * gh) fb4(S, F2, 0, F2.L, y2 - 0.5, y2, 0, 0.5, hell5);
+    for (const F3 of kanten2(pts)) {
+      if (!sichtF(p2, F3)) continue;
+      if (F3.L > 10) {
+        for (const u of achsen5(0, F3.L, 2.6, 0.4)) fb4(S, F3, u - 0.85, u + 0.85, pod - 2, Hs, 0, 0.4, stein);
+        fb4(S, F3, F3.L / 2 - 2.2, F3.L / 2 + 2.2, pod - 2, Hs, 0, 0.9, hell5);
+        for (let y2 = pod + 4 * gh; y2 < Hs - 1; y2 += 4 * gh) fb4(S, F3, 0, F3.L, y2 - 0.5, y2, 0, 0.5, hell5);
       } else {
-        fb4(S, F2, 0.3, F2.L - 0.3, pod - 2, Hs, 0, 0.3, stein);
-        for (let y2 = pod + gh * 2; y2 < Hs - 1; y2 += gh * 2) fb4(S, F2, 1, F2.L - 1, y2 - 1.8, y2 - 0.3, 0.3, 0.36, glas3);
+        fb4(S, F3, 0.3, F3.L - 0.3, pod - 2, Hs, 0, 0.3, stein);
+        for (let y2 = pod + gh * 2; y2 < Hs - 1; y2 += gh * 2) fb4(S, F3, 1, F3.L - 1, y2 - 1.8, y2 - 0.3, 0.3, 0.36, glas3);
       }
     }
     const rr3 = a2 * 0.42, Hk = Hs + 14;
@@ -144852,8 +145164,8 @@
     zyl8(S, rr3 * 0.56, rr3 * 0.56, 0.6, cx, Hk + 8.1, cz, stein, 16);
     zyl8(S, 0.12, 0.35, 9, cx, Hk + 8.7, cz, "#d9dcdf", 6);
     const [name2, farbe3] = o3.bank ?? BANKEN[2];
-    for (const [k3, F2] of seiten2(p2, x0 - 5, z0 - 5, a2 + 10, a2 + 10)) if (k3 === "+z" || k3 === "+x" || k3 === "-z" || k3 === "-x") ftext4(scene2, F2, name2, F2.L / 2, pod - 3.5, 0.42, 1.5, 24, "#ffffff", farbe3);
-    for (const [k3, F2] of seiten2(p2, x0, z0, a2, a2)) logo(S, scene2, teil4(F2, f11, a2 - f11, 0.9), (a2 - 2 * f11) / 2, Hs - 4, 0, 3.6, farbe3, null);
+    for (const [k3, F3] of seiten2(p2, x0 - 5, z0 - 5, a2 + 10, a2 + 10)) if (k3 === "+z" || k3 === "+x" || k3 === "-z" || k3 === "-x") ftext4(scene2, F3, name2, F3.L / 2, pod - 3.5, 0.42, 1.5, 24, "#ffffff", farbe3);
+    for (const [k3, F3] of seiten2(p2, x0, z0, a2, a2)) logo(S, scene2, teil4(F3, f11, a2 - f11, 0.9), (a2 - 2 * f11) / 2, Hs - 4, 0, 3.6, farbe3, null);
     return Hk + 18;
   }
   function turmRund(S, scene2, p2, r3, cx, cz, o3 = {}) {
@@ -144862,10 +145174,10 @@
     const kb = 16, kd = 20, kx0 = cx - rr3 * 0.2 - kb, kz0 = cz - kd / 2, Hk = H * 0.86;
     if (o3.podium !== false) podium(S, scene2, p2, cx - rr3 - kb - 2, cz - rr3 - 4, 2 * rr3 + kb + 8, 2 * rr3 + 8, pod - 1, { stein });
     S.quader(kx0, 0, kz0, kx0 + kb, Hk, kz0 + kd, stein);
-    for (const [k3, F2] of seiten2(p2, kx0, kz0, kb, kd)) {
-      for (const u of achsen5(0, F2.L, 2.4, 0.8)) fb4(S, F2, u - 0.55, u + 0.55, pod, Hk - 3, 0, 0.05, GLAS9);
-      for (let y2 = pod + 2 * gh; y2 < Hk - 3; y2 += 2 * gh) fb4(S, F2, 0, F2.L, y2 - 0.3, y2, 0, 0.12, heller(stein, 0.05));
-      fb4(S, F2, -0.1, F2.L + 0.1, Hk - 3, Hk, 0, 0.2, heller(stein, 0.05));
+    for (const [k3, F3] of seiten2(p2, kx0, kz0, kb, kd)) {
+      for (const u of achsen5(0, F3.L, 2.4, 0.8)) fb4(S, F3, u - 0.55, u + 0.55, pod, Hk - 3, 0, 0.05, GLAS9);
+      for (let y2 = pod + 2 * gh; y2 < Hk - 3; y2 += 2 * gh) fb4(S, F3, 0, F3.L, y2 - 0.3, y2, 0, 0.12, heller(stein, 0.05));
+      fb4(S, F3, -0.1, F3.L + 0.1, Hk - 3, Hk, 0, 0.2, heller(stein, 0.05));
     }
     zyl8(S, rr3, rr3, H, cx, 0, cz, glas3, 32);
     for (let y2 = pod + gh; y2 < H - 1; y2 += gh) zyl8(S, rr3 + 0.12, rr3 + 0.12, 0.26, cx, y2, cz, ring2, 32);
@@ -144879,8 +145191,8 @@
     zyl8(S, rr3 * 0.48, rr3 * 0.48, 0.34, cx, H + 2.54, cz, "#8d939a", 24);
     for (let i = 0; i < 6; i++) zyl8(S, 0.45 - i * 0.05, 0.5 - i * 0.05, 4, cx - rr3 * 0.5, H + 2.5 + i * 4, cz + rr3 * 0.3, i % 2 ? "#f2f1ec" : "#c8463c", 8);
     const [name2, farbe3] = o3.bank ?? BANKEN[1];
-    for (const [k3, F2] of seiten2(p2, kx0, kz0, kb, kd, ["+z", "-z", "-x"])) logo(S, scene2, F2, F2.L / 2 - (k3 === "-x" ? 0 : 3), Hk - 1.5, 0.2, 2.4, farbe3, null);
-    for (const [k3, F2] of seiten2(p2, cx - rr3 - kb - 2, cz - rr3 - 4, 2 * rr3 + kb + 8, 2 * rr3 + 8)) ftext4(scene2, F2, name2, F2.L / 2, pod - 2.8, 0.42, 1.4, 22, "#ffffff", farbe3);
+    for (const [k3, F3] of seiten2(p2, kx0, kz0, kb, kd, ["+z", "-z", "-x"])) logo(S, scene2, F3, F3.L / 2 - (k3 === "-x" ? 0 : 3), Hk - 1.5, 0.2, 2.4, farbe3, null);
+    for (const [k3, F3] of seiten2(p2, cx - rr3 - kb - 2, cz - rr3 - 4, 2 * rr3 + kb + 8, 2 * rr3 + 8)) ftext4(scene2, F3, name2, F3.L / 2, pod - 2.8, 0.42, 1.4, 22, "#ffffff", farbe3);
     return H + 27;
   }
   function platzUmfeld(S, r3, p2, frei6) {
@@ -144918,98 +145230,98 @@
   var HOLZ4 = ["#7a2e24", "#5b4031", "#6e4430", "#3d3633", "#8a4b32", "#4a3b33", "#6a2f2a"];
   var GEFACH = ["#f4efe2", "#efe6d0", "#f2e7c9", "#ece2d2", "#f3ead9", "#e9dcc0"];
   var LAEDEN2 = ["#3f7d56", "#2f6f8f", "#8c3b3b", "#d39a2b", "#5a6e8a", "#2f6b4a"];
-  function fwGeschoss(S, F2, y0, h3, o3) {
-    const { holz, art } = o3, T = 0.08, B8 = 0.2, L2 = F2.L;
-    fb4(S, F2, 0, L2, y0, y0 + B8, 0, T, holz);
-    fb4(S, F2, 0, L2, y0 + h3 - B8, y0 + h3, 0, T, holz);
+  function fwGeschoss(S, F3, y0, h3, o3) {
+    const { holz, art } = o3, T = 0.08, B8 = 0.2, L2 = F3.L;
+    fb4(S, F3, 0, L2, y0, y0 + B8, 0, T, holz);
+    fb4(S, F3, 0, L2, y0 + h3 - B8, y0 + h3, 0, T, holz);
     const fw = o3.fw ?? 0.9, fh = Math.min(1.3, h3 - 1.25), yb = y0 + 0.85;
     const ax = o3.achsen ?? achsen5(0, L2, o3.ra ?? 2.3, 0.9);
-    fb4(S, F2, 0, L2, yb - 0.17, yb - 0.03, 0, T, holz);
-    fb4(S, F2, 0, L2, yb + fh + 0.03, yb + fh + 0.17, 0, T, holz);
+    fb4(S, F3, 0, L2, yb - 0.17, yb - 0.03, 0, T, holz);
+    fb4(S, F3, 0, L2, yb + fh + 0.03, yb + fh + 0.17, 0, T, holz);
     const posten = [0.11, L2 - 0.11];
     for (const u of ax) posten.push(u - fw / 2 - 0.12, u + fw / 2 + 0.12);
     posten.sort((a2, b3) => a2 - b3);
-    for (const u of posten) fb4(S, F2, u - 0.1, u + 0.1, y0, y0 + h3, 0, T, holz);
+    for (const u of posten) fb4(S, F3, u - 0.1, u + 0.1, y0, y0 + h3, 0, T, holz);
     ax.forEach((u, i) => {
       const a2 = u - fw / 2 - 0.02, b3 = u + fw / 2 + 0.02, ya = y0 + B8, yc = yb - 0.17;
       if (art === "zier") {
-        fstrebe(S, F2, a2, ya, b3, yc, 0.11, 0, T, holz);
-        fstrebe(S, F2, a2, yc, b3, ya, 0.11, 0, T, holz);
+        fstrebe(S, F3, a2, ya, b3, yc, 0.11, 0, T, holz);
+        fstrebe(S, F3, a2, yc, b3, ya, 0.11, 0, T, holz);
       } else if ((i + o3.k) % 2 === 0) {
         const m = (a2 + b3) / 2;
-        fstrebe(S, F2, a2, ya, m, yc, 0.1, 0, T, holz);
-        fstrebe(S, F2, m, yc, b3, ya, 0.1, 0, T, holz);
+        fstrebe(S, F3, a2, ya, m, yc, 0.1, 0, T, holz);
+        fstrebe(S, F3, m, yc, b3, ya, 0.1, 0, T, holz);
       }
-      fenster5(S, F2, u, yb, fw, fh, { kreuz: true, laeden: o3.laeden, rahmen: WEISS2, t: 0.02 });
+      fenster5(S, F3, u, yb, fw, fh, { kreuz: true, laeden: o3.laeden, rahmen: WEISS2, t: 0.02 });
     });
     for (let i = 0; i < posten.length - 1; i++) {
       const a2 = posten[i] + 0.1, b3 = posten[i + 1] - 0.1;
       if (b3 - a2 < 0.45 || ax.some((u) => u > a2 && u < b3)) continue;
       if (b3 - a2 > 1.3) {
         const m = (a2 + b3) / 2, ym = y0 + h3 * 0.62;
-        fb4(S, F2, m - 0.1, m + 0.1, y0, y0 + h3, 0, T, holz);
-        fstrebe(S, F2, a2 + 0.05, y0 + B8, m, ym, 0.15, 0, T * 1.05, holz);
-        fstrebe(S, F2, b3 - 0.05, y0 + B8, m, ym, 0.15, 0, T * 1.05, holz);
-        fstrebe(S, F2, m, y0 + h3 * 0.74, Math.max(a2 + 0.1, m - 0.55), y0 + h3 - B8, 0.11, 0, T * 1.05, holz);
-        fstrebe(S, F2, m, y0 + h3 * 0.74, Math.min(b3 - 0.1, m + 0.55), y0 + h3 - B8, 0.11, 0, T * 1.05, holz);
+        fb4(S, F3, m - 0.1, m + 0.1, y0, y0 + h3, 0, T, holz);
+        fstrebe(S, F3, a2 + 0.05, y0 + B8, m, ym, 0.15, 0, T * 1.05, holz);
+        fstrebe(S, F3, b3 - 0.05, y0 + B8, m, ym, 0.15, 0, T * 1.05, holz);
+        fstrebe(S, F3, m, y0 + h3 * 0.74, Math.max(a2 + 0.1, m - 0.55), y0 + h3 - B8, 0.11, 0, T * 1.05, holz);
+        fstrebe(S, F3, m, y0 + h3 * 0.74, Math.min(b3 - 0.1, m + 0.55), y0 + h3 - B8, 0.11, 0, T * 1.05, holz);
         if (art === "zier" && b3 - a2 > 1.7) {
-          fstrebe(S, F2, a2, y0 + h3 - B8, m - 0.1, y0 + h3 * 0.8, 0.08, 0, T, holz);
-          fstrebe(S, F2, b3, y0 + h3 - B8, m + 0.1, y0 + h3 * 0.8, 0.08, 0, T, holz);
+          fstrebe(S, F3, a2, y0 + h3 - B8, m - 0.1, y0 + h3 * 0.8, 0.08, 0, T, holz);
+          fstrebe(S, F3, b3, y0 + h3 - B8, m + 0.1, y0 + h3 * 0.8, 0.08, 0, T, holz);
         }
-      } else fstrebe(S, F2, a2, y0 + B8, b3, y0 + h3 - B8, 0.13, 0, T, holz);
+      } else fstrebe(S, F3, a2, y0 + B8, b3, y0 + h3 - B8, 0.13, 0, T, holz);
     }
   }
-  function fwGiebel(S, F2, y2, hg, o3) {
-    const L2 = F2.L, m = L2 / 2, T = 0.08, { holz } = o3;
+  function fwGiebel(S, F3, y2, hg, o3) {
+    const L2 = F3.L, m = L2 / 2, T = 0.08, { holz } = o3;
     const breite = (yy) => Math.max(0, L2 / 2 * (1 - (yy - y2) / hg));
     if (o3.schiefer) {
-      fpoly3(S, F2, [[0.05, y2], [L2 - 0.05, y2], [m, y2 + hg - 0.1]], 0, 0.1, SCHIEFER3);
+      fpoly3(S, F3, [[0.05, y2], [L2 - 0.05, y2], [m, y2 + hg - 0.1]], 0, 0.1, SCHIEFER3);
       for (let yy = y2 + 0.6; yy < y2 + hg - 0.8; yy += 0.7) {
         const b3 = breite(yy) - 0.1;
-        fb4(S, F2, m - b3, m + b3, yy, yy + 0.05, 0.1, 0.13, SCHIEFER22);
+        fb4(S, F3, m - b3, m + b3, yy, yy + 0.05, 0.1, 0.13, SCHIEFER22);
       }
       const us2 = L2 > 7 ? [m - 1.2, m + 1.2] : [m];
-      for (const u of us2) fenster5(S, F2, u, y2 + 0.7, 0.75, 1.15, { kreuz: true, laeden: o3.laeden, t: 0.1 });
-      fenster5(S, F2, m, y2 + hg * 0.52, 0.55, 0.8, { t: 0.1 });
-      fb4(S, F2, -0.2, L2 + 0.2, y2 - 0.12, y2 + 0.06, 0, 0.16, WEISS2);
+      for (const u of us2) fenster5(S, F3, u, y2 + 0.7, 0.75, 1.15, { kreuz: true, laeden: o3.laeden, t: 0.1 });
+      fenster5(S, F3, m, y2 + hg * 0.52, 0.55, 0.8, { t: 0.1 });
+      fb4(S, F3, -0.2, L2 + 0.2, y2 - 0.12, y2 + 0.06, 0, 0.16, WEISS2);
       return;
     }
-    fb4(S, F2, 0.2, L2 - 0.2, y2, y2 + 0.18, 0, T, holz);
+    fb4(S, F3, 0.2, L2 - 0.2, y2, y2 + 0.18, 0, T, holz);
     const y22 = y2 + hg * 0.5;
-    fb4(S, F2, m - breite(y22) + 0.25, m + breite(y22) - 0.25, y22, y22 + 0.16, 0, T, holz);
-    fb4(S, F2, m - 0.09, m + 0.09, y2, y2 + hg - 0.2, 0, T, holz);
+    fb4(S, F3, m - breite(y22) + 0.25, m + breite(y22) - 0.25, y22, y22 + 0.16, 0, T, holz);
+    fb4(S, F3, m - 0.09, m + 0.09, y2, y2 + hg - 0.2, 0, T, holz);
     for (const s2 of [-1, 1]) {
       const u = m + s2 * L2 * 0.22;
-      fb4(S, F2, u - 0.08, u + 0.08, y2, y22, 0, T, holz);
-      fstrebe(S, F2, m + s2 * (L2 / 2 - 0.4), y2 + 0.2, m + s2 * 0.4, y22 - 0.05, 0.13, 0, T, holz);
+      fb4(S, F3, u - 0.08, u + 0.08, y2, y22, 0, T, holz);
+      fstrebe(S, F3, m + s2 * (L2 / 2 - 0.4), y2 + 0.2, m + s2 * 0.4, y22 - 0.05, 0.13, 0, T, holz);
     }
-    fstrebe(S, F2, 0.25, y2 + 0.15, m, y2 + hg - 0.25, 0.18, 0, T * 1.2, holz);
-    fstrebe(S, F2, L2 - 0.25, y2 + 0.15, m, y2 + hg - 0.25, 0.18, 0, T * 1.2, holz);
+    fstrebe(S, F3, 0.25, y2 + 0.15, m, y2 + hg - 0.25, 0.18, 0, T * 1.2, holz);
+    fstrebe(S, F3, L2 - 0.25, y2 + 0.15, m, y2 + hg - 0.25, 0.18, 0, T * 1.2, holz);
     const us = L2 > 7 ? [m - L2 * 0.32, m + L2 * 0.32] : [];
-    for (const u of us) if (breite(y2 + 1.6) > Math.abs(u - m) + 0.6) fenster5(S, F2, u, y2 + 0.5, 0.7, 1, { kreuz: true, t: 0.02 });
-    fenster5(S, F2, m - 0.55, y2 + 0.5, 0.6, 1, { t: 0.02 });
-    fenster5(S, F2, m + 0.55, y2 + 0.5, 0.6, 1, { t: 0.02 });
-    if (hg > 4) fenster5(S, F2, m, y22 + 0.5, 0.5, 0.75, { t: 0.02 });
+    for (const u of us) if (breite(y2 + 1.6) > Math.abs(u - m) + 0.6) fenster5(S, F3, u, y2 + 0.5, 0.7, 1, { kreuz: true, t: 0.02 });
+    fenster5(S, F3, m - 0.55, y2 + 0.5, 0.6, 1, { t: 0.02 });
+    fenster5(S, F3, m + 0.55, y2 + 0.5, 0.6, 1, { t: 0.02 });
+    if (hg > 4) fenster5(S, F3, m, y22 + 0.5, 0.5, 0.75, { t: 0.02 });
   }
-  function egZone(S, scene2, F2, eg, o3, r3) {
-    const L2 = F2.L;
-    fb4(S, F2, -0.02, L2 + 0.02, 0, 0.55, 0, 0.12, dunkler(o3.stein, 0.12));
+  function egZone(S, scene2, F3, eg, o3, r3) {
+    const L2 = F3.L;
+    fb4(S, F3, -0.02, L2 + 0.02, 0, 0.55, 0, 0.12, dunkler(o3.stein, 0.12));
     if (o3.laden) {
       const lb = Math.min(L2 - 1.6, 5.5), u0 = (L2 - lb) / 2;
-      fb4(S, F2, u0, u0 + lb, 0.4, eg - 0.7, 0, 0.06, GLAS_HELL6);
-      fb4(S, F2, u0 - 0.15, u0 + lb + 0.15, eg - 0.7, eg - 0.45, 0, 0.12, o3.laden);
-      for (const u of [u0, u0 + lb / 2, u0 + lb]) fb4(S, F2, u - 0.07, u + 0.07, 0.4, eg - 0.7, 0, 0.1, o3.laden);
-      if (o3.name) ftext4(scene2, F2, o3.name, L2 / 2, eg - 0.2, 0.14, 0.42, L2 - 0.8, "#3a2a20");
+      fb4(S, F3, u0, u0 + lb, 0.4, eg - 0.7, 0, 0.06, GLAS_HELL6);
+      fb4(S, F3, u0 - 0.15, u0 + lb + 0.15, eg - 0.7, eg - 0.45, 0, 0.12, o3.laden);
+      for (const u of [u0, u0 + lb / 2, u0 + lb]) fb4(S, F3, u - 0.07, u + 0.07, 0.4, eg - 0.7, 0, 0.1, o3.laden);
+      if (o3.name) ftext4(scene2, F3, o3.name, L2 / 2, eg - 0.2, 0.14, 0.42, L2 - 0.8, "#3a2a20");
       if (o3.markise) {
         const g = new three_module_exports.BoxGeometry(lb + 0.4, 0.12, 1.4);
         g.rotateX(0.38);
         g.translate(L2 / 2, eg - 0.75, 0.6);
-        fgeo4(S, F2, g, o3.markise);
+        fgeo4(S, F3, g, o3.markise);
       }
     } else {
-      fenster5(S, F2, L2 * 0.28, 1, 0.9, 1.3, { kreuz: true, sims: dunkler(o3.stein, 0.06) });
-      fb4(S, F2, L2 * 0.68 - 0.6, L2 * 0.68 + 0.6, 0.3, 2.5, 0, 0.08, waehle2(r3, ["#6b4c36", "#3f5a4a", "#5a3a2e"]));
-      fwand2(S, F2, L2 * 0.68 - 0.9, L2 * 0.68 + 0.9, 0.3, 2.9, 0, 0.14, dunkler(o3.stein, 0.05), [{ u0: L2 * 0.68 - 0.6, u1: L2 * 0.68 + 0.6, v0: 0.29, v1: 2.75, bogen: true }]);
+      fenster5(S, F3, L2 * 0.28, 1, 0.9, 1.3, { kreuz: true, sims: dunkler(o3.stein, 0.06) });
+      fb4(S, F3, L2 * 0.68 - 0.6, L2 * 0.68 + 0.6, 0.3, 2.5, 0, 0.08, waehle2(r3, ["#6b4c36", "#3f5a4a", "#5a3a2e"]));
+      fwand2(S, F3, L2 * 0.68 - 0.9, L2 * 0.68 + 0.9, 0.3, 2.9, 0, 0.14, dunkler(o3.stein, 0.05), [{ u0: L2 * 0.68 - 0.6, u1: L2 * 0.68 + 0.6, v0: 0.29, v1: 2.75, bogen: true }]);
     }
   }
   var LADEN_ALT = ["B\xE4ckerei Hessler", "Apfelwein Stube", "Buchhandlung Lahn", "Konditorei Weck", "Eisenwaren Rau", "Weinhaus Ohm", "Metzgerei Fink", "Caf\xE9 Rosenhof", "Antiquit\xE4ten Kuhl", "Goldschmiede Kraft", "T\xF6pferei Eder", "Drogerie Hain"];
@@ -145021,47 +145333,47 @@
     const frei6 = o3.frei ?? [];
     const sicht3 = (k3) => k3 === "+z" || k3 === "-z" || frei6.includes(k3);
     S.quader(x0, 0, z0, x0 + b3, eg, z0 + t3, stein);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3)) if (sicht3(k3)) egZone(S, scene2, F2, eg, { stein, laden: k3 === "+z" && o3.laden ? o3.laden : null, name: o3.name, markise: o3.markise }, r3);
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3)) if (sicht3(k3)) egZone(S, scene2, F3, eg, { stein, laden: k3 === "+z" && o3.laden ? o3.laden : null, name: o3.name, markise: o3.markise }, r3);
     let y2 = eg, e = 0;
     for (let k3 = 1; k3 <= n3; k3++) {
       e = k3 * vk;
       const za2 = z0 - e, zb2 = z0 + t3 + e, ganz2 = schiefer === "ganz" && k3 > 1;
       S.quader(x0, y2, za2, x0 + b3, y2 + gh, zb2, ganz2 ? SCHIEFER3 : wand2);
-      for (const [kk, F2] of seiten2(p2, x0, za2, b3, zb2 - za2)) {
+      for (const [kk, F3] of seiten2(p2, x0, za2, b3, zb2 - za2)) {
         if (!sicht3(kk)) continue;
         if (kk === "+z" || kk === "-z") {
-          for (const u of achsen5(0, F2.L, 1.2, 0.2)) fstrebe(S, F2, u, y2 - 0.6, u, y2, 0.16, -vk, 0.02, holz);
-          fb4(S, F2, 0, F2.L, y2 - 0.08, y2 + 0.04, -vk, 0.06, holz);
+          for (const u of achsen5(0, F3.L, 1.2, 0.2)) fstrebe(S, F3, u, y2 - 0.6, u, y2, 0.16, -vk, 0.02, holz);
+          fb4(S, F3, 0, F3.L, y2 - 0.08, y2 + 0.04, -vk, 0.06, holz);
         }
         if (ganz2) {
-          for (let yy = y2 + 0.4; yy < y2 + gh; yy += 0.55) fb4(S, F2, 0, F2.L, yy, yy + 0.05, 0, 0.04, SCHIEFER22);
-          for (const u of achsen5(0, F2.L, 2.3, 0.9)) fenster5(S, F2, u, y2 + 0.8, 0.9, 1.25, { kreuz: true, laeden, t: 0.04 });
-          fb4(S, F2, -0.05, F2.L + 0.05, y2 + gh - 0.15, y2 + gh, 0, 0.12, WEISS2);
-        } else fwGeschoss(S, F2, y2, gh, { holz, art, laeden, k: k3 });
+          for (let yy = y2 + 0.4; yy < y2 + gh; yy += 0.55) fb4(S, F3, 0, F3.L, yy, yy + 0.05, 0, 0.04, SCHIEFER22);
+          for (const u of achsen5(0, F3.L, 2.3, 0.9)) fenster5(S, F3, u, y2 + 0.8, 0.9, 1.25, { kreuz: true, laeden, t: 0.04 });
+          fb4(S, F3, -0.05, F3.L + 0.05, y2 + gh - 0.15, y2 + gh, 0, 0.12, WEISS2);
+        } else fwGeschoss(S, F3, y2, gh, { holz, art, laeden, k: k3 });
       }
       y2 += gh;
     }
     const H = y2, za = z0 - e, zb = z0 + t3 + e;
     const giebel3 = o3.giebel ?? b3 <= 10;
-    for (const [k3, F2] of seiten2(p2, x0, za, b3, zb - za, ["+x", "-x"])) if (!frei6.includes(k3)) fb4(S, F2, e, F2.L - e, eg, H, 0, 0.04, SCHIEFER3);
+    for (const [k3, F3] of seiten2(p2, x0, za, b3, zb - za, ["+x", "-x"])) if (!frei6.includes(k3)) fb4(S, F3, e, F3.L - e, eg, H, 0, 0.04, SCHIEFER3);
     if (giebel3) {
       const hg2 = b3 * zw(r3, 0.75, 0.9);
       satteldach4(S, x0, za, x0 + b3, zb, H, hg2, "z", dachF, schiefer ? SCHIEFER3 : wand2, 0.5);
-      for (const [k3, F2] of seiten2(p2, x0, za, b3, zb - za, ["+z", "-z"])) fwGiebel(S, F2, H, hg2, { holz, schiefer: !!schiefer, laeden });
+      for (const [k3, F3] of seiten2(p2, x0, za, b3, zb - za, ["+z", "-z"])) fwGiebel(S, F3, H, hg2, { holz, schiefer: !!schiefer, laeden });
       return H + hg2;
     }
     const hg = (zb - za) * zw(r3, 0.62, 0.75);
     satteldach4(S, x0, za, x0 + b3, zb, H, hg, "x", dachF, wand2, 0.5);
-    for (const [k3, F2] of seiten2(p2, x0, za, b3, zb - za, ["+x", "-x"])) {
-      if (frei6.includes(k3)) fwGiebel(S, F2, H, hg, { holz, schiefer: !!schiefer, laeden });
-      else fpoly3(S, F2, [[0.1, H], [F2.L - 0.1, H], [F2.L / 2, H + hg - 0.15]], 0, 0.05, SCHIEFER3);
+    for (const [k3, F3] of seiten2(p2, x0, za, b3, zb - za, ["+x", "-x"])) {
+      if (frei6.includes(k3)) fwGiebel(S, F3, H, hg, { holz, schiefer: !!schiefer, laeden });
+      else fpoly3(S, F3, [[0.1, H], [F3.L - 0.1, H], [F3.L / 2, H + hg - 0.15]], 0, 0.05, SCHIEFER3);
     }
     if (o3.zwerch !== false && b3 > 9) {
       const zb2 = 3.6, u = x0 + b3 / 2;
-      for (const [k3, F2] of seiten2(p2, x0, za, b3, zb - za, ["+z", "-z"])) {
+      for (const [k3, F3] of seiten2(p2, x0, za, b3, zb - za, ["+z", "-z"])) {
         const uF = k3 === "+z" ? u - x0 : x0 + b3 - u;
-        fb4(S, F2, uF - zb2 / 2, uF + zb2 / 2, H, H + gh, -2.6, 0, wand2);
-        const FZ = teil4(F2, uF - zb2 / 2, uF + zb2 / 2);
+        fb4(S, F3, uF - zb2 / 2, uF + zb2 / 2, H, H + gh, -2.6, 0, wand2);
+        const FZ = teil4(F3, uF - zb2 / 2, uF + zb2 / 2);
         fwGeschoss(S, FZ, H, gh, { holz, art, laeden: null, k: 0, achsen: [zb2 / 2] });
         const hz = zb2 * 0.8;
         fpoly3(S, FZ, [[0, H + gh], [zb2, H + gh], [zb2 / 2, H + gh + hz]], -3.2, 0, wand2);
@@ -145076,62 +145388,62 @@
   function steinGiebelHaus(S, scene2, p2, r3, x0, z0, b3, t3, o3) {
     const n3 = o3.n ?? 3, eg = 4.4, gh = 3.4, H = eg + n3 * gh, wand2 = o3.wand, orn = o3.orn ?? "#efe3cc";
     S.quader(x0, 0, z0, x0 + b3, H, z0 + t3, wand2);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3, ["+z", "-z"])) {
-      const nb = Math.max(2, Math.round(b3 / 3.4)), bb = F2.L / nb, L2 = [];
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3, ["+z", "-z"])) {
+      const nb = Math.max(2, Math.round(b3 / 3.4)), bb = F3.L / nb, L2 = [];
       for (let i = 0; i < nb; i++) L2.push({ u0: i * bb + 0.45, u1: (i + 1) * bb - 0.45, v0: 0.3, v1: eg - 0.4, bogen: true });
-      lochwand4(S, F2, 0, F2.L, 0, eg, o3.stein ?? "#c9a58c", L2, { glas: "#5a4f48", dick: 0.4 });
-      fb4(S, F2, -0.1, F2.L + 0.1, eg, eg + 0.35, 0, 0.45, orn);
+      lochwand4(S, F3, 0, F3.L, 0, eg, o3.stein ?? "#c9a58c", L2, { glas: "#5a4f48", dick: 0.4 });
+      fb4(S, F3, -0.1, F3.L + 0.1, eg, eg + 0.35, 0, 0.45, orn);
       const L22 = [];
-      for (let k22 = 0; k22 < n3; k22++) for (const u of achsen5(0, F2.L, 2, 0.5)) L22.push({ u0: u - 0.55, u1: u + 0.55, v0: eg + 0.9 + k22 * gh, v1: eg + 0.9 + k22 * gh + 1.9, bogen: k22 === n3 - 1 ? true : null });
-      lochwand4(S, F2, 0, F2.L, eg + 0.35, H, wand2, L22, { dick: 0.2 });
-      for (let k22 = 1; k22 < n3; k22++) fb4(S, F2, -0.05, F2.L + 0.05, eg + k22 * gh, eg + k22 * gh + 0.2, 0, 0.3, orn);
+      for (let k22 = 0; k22 < n3; k22++) for (const u of achsen5(0, F3.L, 2, 0.5)) L22.push({ u0: u - 0.55, u1: u + 0.55, v0: eg + 0.9 + k22 * gh, v1: eg + 0.9 + k22 * gh + 1.9, bogen: k22 === n3 - 1 ? true : null });
+      lochwand4(S, F3, 0, F3.L, eg + 0.35, H, wand2, L22, { dick: 0.2 });
+      for (let k22 = 1; k22 < n3; k22++) fb4(S, F3, -0.05, F3.L + 0.05, eg + k22 * gh, eg + k22 * gh + 0.2, 0, 0.3, orn);
       if (o3.balkon && k3 === "+z") {
-        fb4(S, F2, F2.L * 0.2, F2.L * 0.8, eg + 0.35, eg + 0.6, 0, 1.2, orn);
-        for (let u = F2.L * 0.2 + 0.2; u < F2.L * 0.8; u += 0.35) fb4(S, F2, u - 0.05, u + 0.05, eg + 0.6, eg + 1.5, 1.05, 1.15, "#3b3f44");
-        fb4(S, F2, F2.L * 0.2, F2.L * 0.8, eg + 1.45, eg + 1.55, 0.95, 1.2, "#3b3f44");
+        fb4(S, F3, F3.L * 0.2, F3.L * 0.8, eg + 0.35, eg + 0.6, 0, 1.2, orn);
+        for (let u = F3.L * 0.2 + 0.2; u < F3.L * 0.8; u += 0.35) fb4(S, F3, u - 0.05, u + 0.05, eg + 0.6, eg + 1.5, 1.05, 1.15, "#3b3f44");
+        fb4(S, F3, F3.L * 0.2, F3.L * 0.8, eg + 1.45, eg + 1.55, 0.95, 1.2, "#3b3f44");
       }
       if (o3.uhr && k3 === "+z") {
-        fscheibe3(S, F2, F2.L / 2, H - 1.2, 0.2, 0.3, 0.75, "#f6f1e2");
-        fscheibe3(S, F2, F2.L / 2, H - 1.2, 0.3, 0.34, 0.6, "#2b3036");
+        fscheibe3(S, F3, F3.L / 2, H - 1.2, 0.2, 0.3, 0.75, "#f6f1e2");
+        fscheibe3(S, F3, F3.L / 2, H - 1.2, 0.3, 0.34, 0.6, "#2b3036");
       }
       const st2 = 5, hg2 = b3 * 0.95, sb2 = b3 / 2 / (st2 + 0.5);
       for (let i = 0; i < st2; i++) {
-        const u0 = i * sb2, u1 = F2.L - i * sb2, yy = H + i * (hg2 / st2);
-        fb4(S, F2, u0, u1, yy, yy + hg2 / st2, -t3 / 2 + 0.6 - 1e-3 * i, 0.15, wand2);
-        fb4(S, F2, u0 - 0.1, u0 + sb2 + 0.05, yy + hg2 / st2 - 0.2, yy + hg2 / st2, -0.4, 0.3, orn);
-        fb4(S, F2, u1 - sb2 - 0.05, u1 + 0.1, yy + hg2 / st2 - 0.2, yy + hg2 / st2, -0.4, 0.3, orn);
+        const u0 = i * sb2, u1 = F3.L - i * sb2, yy = H + i * (hg2 / st2);
+        fb4(S, F3, u0, u1, yy, yy + hg2 / st2, -t3 / 2 + 0.6 - 1e-3 * i, 0.15, wand2);
+        fb4(S, F3, u0 - 0.1, u0 + sb2 + 0.05, yy + hg2 / st2 - 0.2, yy + hg2 / st2, -0.4, 0.3, orn);
+        fb4(S, F3, u1 - sb2 - 0.05, u1 + 0.1, yy + hg2 / st2 - 0.2, yy + hg2 / st2, -0.4, 0.3, orn);
       }
-      fb4(S, F2, F2.L / 2 - sb2 * 0.5, F2.L / 2 + sb2 * 0.5, H + hg2, H + hg2 + 1, -0.4, 0.3, orn);
-      lochwand4(S, teil4(F2, 0, F2.L, 0.15), F2.L / 2 - 1.4, F2.L / 2 + 1.4, H + 1, H + 3.4, wand2, [{ u0: F2.L / 2 - 1, u1: F2.L / 2 - 0.15, v0: H + 1.2, v1: H + 3, bogen: true }, { u0: F2.L / 2 + 0.15, u1: F2.L / 2 + 1, v0: H + 1.2, v1: H + 3, bogen: true }], { dick: 0.12 });
+      fb4(S, F3, F3.L / 2 - sb2 * 0.5, F3.L / 2 + sb2 * 0.5, H + hg2, H + hg2 + 1, -0.4, 0.3, orn);
+      lochwand4(S, teil4(F3, 0, F3.L, 0.15), F3.L / 2 - 1.4, F3.L / 2 + 1.4, H + 1, H + 3.4, wand2, [{ u0: F3.L / 2 - 1, u1: F3.L / 2 - 0.15, v0: H + 1.2, v1: H + 3, bogen: true }, { u0: F3.L / 2 + 0.15, u1: F3.L / 2 + 1, v0: H + 1.2, v1: H + 3, bogen: true }], { dick: 0.12 });
     }
     const hg = b3 * 0.95;
     satteldach4(S, x0 + 0.2, z0 + 0.3, x0 + b3 - 0.2, z0 + t3 - 0.3, H, hg * 0.92, "z", SCHIEFER3, wand2, 0.2);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3, ["+x", "-x"])) if (o3.frei?.includes(k3)) {
-      for (const u of achsen5(0, F2.L, 2.4, 0.8)) for (let k22 = 0; k22 < n3; k22++) fenster5(S, F2, u, eg + 0.9 + k22 * gh, 1, 1.8, { kreuz: true });
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3, ["+x", "-x"])) if (o3.frei?.includes(k3)) {
+      for (const u of achsen5(0, F3.L, 2.4, 0.8)) for (let k22 = 0; k22 < n3; k22++) fenster5(S, F3, u, eg + 0.9 + k22 * gh, 1, 1.8, { kreuz: true });
     }
     return H + hg;
   }
   function fwRathaus(S, scene2, p2, r3, x0, z0, b3, t3) {
     const holz = "#6a2f2a", wand2 = "#f4efe2", stein = "#c9a58c", eg = 4.2, gh = 2.9, n3 = 2, vk = 0.4;
     S.quader(x0, 0, z0, x0 + b3, eg, z0 + t3, stein);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3)) {
-      const nb = Math.max(2, Math.round(F2.L / 3.6)), bb = F2.L / nb, L2 = [];
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3)) {
+      const nb = Math.max(2, Math.round(F3.L / 3.6)), bb = F3.L / nb, L2 = [];
       for (let i = 0; i < nb; i++) L2.push({ u0: i * bb + 0.5, u1: (i + 1) * bb - 0.5, v0: 0.3, v1: eg - 0.5, bogen: "spitz" });
-      lochwand4(S, F2, 0, F2.L, 0, eg, stein, L2, { glas: "#4a403a", dick: 0.5 });
+      lochwand4(S, F3, 0, F3.L, 0, eg, stein, L2, { glas: "#4a403a", dick: 0.5 });
     }
     let y2 = eg;
     for (let k3 = 1; k3 <= n3; k3++) {
       const e2 = k3 * vk;
       S.quader(x0 - e2, y2, z0 - e2, x0 + b3 + e2, y2 + gh, z0 + t3 + e2, wand2);
-      for (const [kk, F2] of seiten2(p2, x0 - e2, z0 - e2, b3 + 2 * e2, t3 + 2 * e2)) {
-        for (const u of achsen5(0, F2.L, 1, 0.3)) fstrebe(S, F2, u, y2 - 0.6, u, y2, 0.18, -vk, 0.02, holz);
-        fwGeschoss(S, F2, y2, gh, { holz, art: k3 === 2 ? "zier" : "mann", laeden: null, k: k3, ra: 2.1 });
+      for (const [kk, F3] of seiten2(p2, x0 - e2, z0 - e2, b3 + 2 * e2, t3 + 2 * e2)) {
+        for (const u of achsen5(0, F3.L, 1, 0.3)) fstrebe(S, F3, u, y2 - 0.6, u, y2, 0.18, -vk, 0.02, holz);
+        fwGeschoss(S, F3, y2, gh, { holz, art: k3 === 2 ? "zier" : "mann", laeden: null, k: k3, ra: 2.1 });
       }
       y2 += gh;
     }
     const e = n3 * vk, H = y2, hg = (t3 + 2 * e) * 0.95;
     satteldach4(S, x0 - e, z0 - e, x0 + b3 + e, z0 + t3 + e, H, hg, "x", SCHIEFER3, wand2, 0.5);
-    for (const [k3, F2] of seiten2(p2, x0 - e, z0 - e, b3 + 2 * e, t3 + 2 * e, ["+x", "-x"])) fwGiebel(S, F2, H, hg, { holz });
+    for (const [k3, F3] of seiten2(p2, x0 - e, z0 - e, b3 + 2 * e, t3 + 2 * e, ["+x", "-x"])) fwGiebel(S, F3, H, hg, { holz });
     for (const s2 of [0, 1]) {
       const ex = s2 ? x0 + b3 + e : x0 - e, ez = z0 + t3 + e, rr3 = 1.3;
       zyl8(S, rr3, rr3, gh * 2 + 0.5, ex, eg + 0.2, ez, wand2, 8);
@@ -145150,7 +145462,7 @@
     }
     const cx = x0 + b3 / 2, cz = z0 + t3 / 2;
     S.quader(cx - 1.1, H + hg - 1, cz - 1.1, cx + 1.1, H + hg + 2.4, cz + 1.1, SCHIEFER3);
-    for (const [k3, F2] of seiten2(p2, cx - 1.1, cz - 1.1, 2.2, 2.2)) fwand2(S, F2, 0.2, 2, H + hg + 0.4, H + hg + 2.2, 0, 0.06, SCHIEFER22, [{ u0: 0.5, u1: 1.7, v0: H + hg + 0.6, v1: H + hg + 2, bogen: true }]);
+    for (const [k3, F3] of seiten2(p2, cx - 1.1, cz - 1.1, 2.2, 2.2)) fwand2(S, F3, 0.2, 2, H + hg + 0.4, H + hg + 2.2, 0, 0.06, SCHIEFER22, [{ u0: 0.5, u1: 1.7, v0: H + hg + 0.6, v1: H + hg + 2, bogen: true }]);
     const g = new three_module_exports.ConeGeometry(1.7, 5, 8);
     g.translate(cx, H + hg + 4.9, cz);
     S.add(g, SCHIEFER3);
@@ -145275,19 +145587,19 @@
     zyl8(S, rad3 * 0.9, rad3, h3 - 0.75, x2, y0 + 0.35, z4, c, 10);
     S.box(rad3 * 2.5, 0.4, rad3 * 2.5, x2, y0 + h3 - 0.2, z4, kap ?? c);
   }
-  function saeulenreihe(S, F2, u0, u1, n3, y0, h3, t3, rad3, c, kap) {
+  function saeulenreihe(S, F3, u0, u1, n3, y0, h3, t3, rad3, c, kap) {
     for (let i = 0; i < n3; i++) {
       const u = u0 + (n3 === 1 ? 0 : i * (u1 - u0) / (n3 - 1));
-      const [x2, z4] = wp4(F2, u, t3);
+      const [x2, z4] = wp4(F3, u, t3);
       saeule2(S, x2, y0, z4, h3, rad3, c, kap);
     }
   }
-  function dreiecksgiebel(S, F2, u0, u1, y2, h3, t0, t1, wand2, orn) {
+  function dreiecksgiebel(S, F3, u0, u1, y2, h3, t0, t1, wand2, orn) {
     const m = (u0 + u1) / 2;
-    fpoly3(S, F2, [[u0, y2], [u1, y2], [m, y2 + h3]], t0, t1, wand2);
-    fstrebe(S, F2, u0 - 0.3, y2 - 0.05, m, y2 + h3 + 0.15, 0.4, t0, t1 + 0.2, orn);
-    fstrebe(S, F2, u1 + 0.3, y2 - 0.05, m, y2 + h3 + 0.15, 0.4, t0, t1 + 0.2, orn);
-    fb4(S, F2, u0 - 0.4, u1 + 0.4, y2 - 0.4, y2, t0, t1 + 0.25, orn);
+    fpoly3(S, F3, [[u0, y2], [u1, y2], [m, y2 + h3]], t0, t1, wand2);
+    fstrebe(S, F3, u0 - 0.3, y2 - 0.05, m, y2 + h3 + 0.15, 0.4, t0, t1 + 0.2, orn);
+    fstrebe(S, F3, u1 + 0.3, y2 - 0.05, m, y2 + h3 + 0.15, 0.4, t0, t1 + 0.2, orn);
+    fb4(S, F3, u0 - 0.4, u1 + 0.4, y2 - 0.4, y2, t0, t1 + 0.25, orn);
   }
   function kuppel3(S, x2, y2, z4, rad3, o3 = {}) {
     const tamb = o3.tambour ?? rad3 * 0.5;
@@ -145335,22 +145647,22 @@
   function kurFluegel(S, scene2, p2, x0, z0, b3, t3, H, o3) {
     const { wand: wand2, orn } = o3;
     S.quader(x0, 0, z0, x0 + b3, H, z0 + t3, wand2);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3)) {
-      const ax = achsen5(0, F2.L, o3.ra ?? 4, 1.2), L2 = [];
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3)) {
+      const ax = achsen5(0, F3.L, o3.ra ?? 4, 1.2), L2 = [];
       for (const u of ax) {
         L2.push({ u0: u - 0.9, u1: u + 0.9, v0: 1.6, v1: H * 0.5, bogen: true });
         L2.push({ u0: u - 0.7, u1: u + 0.7, v0: H * 0.5 + 1.4, v1: H - 2.4 });
       }
-      lochwand4(S, F2, 0, F2.L, 0.3, H - 1.6, wand2, L2, { dick: 0.25 });
-      fb4(S, F2, -0.1, F2.L + 0.1, 0.3, 1.3, 0, 0.4, dunkler(wand2, 0.1));
-      fb4(S, F2, -0.1, F2.L + 0.1, H * 0.5 + 0.4, H * 0.5 + 0.8, 0, 0.45, orn);
+      lochwand4(S, F3, 0, F3.L, 0.3, H - 1.6, wand2, L2, { dick: 0.25 });
+      fb4(S, F3, -0.1, F3.L + 0.1, 0.3, 1.3, 0, 0.4, dunkler(wand2, 0.1));
+      fb4(S, F3, -0.1, F3.L + 0.1, H * 0.5 + 0.4, H * 0.5 + 0.8, 0, 0.45, orn);
       for (const u of ax) {
-        fb4(S, F2, u - 2 - 0.3, u - 2 + 0.3, 1.3, H - 1.6, 0, 0.4, orn);
-        fb4(S, F2, u - 1.1, u + 1.1, H * 0.5 + 1.2, H * 0.5 + 1.4, 0.25, 0.4, orn);
+        fb4(S, F3, u - 2 - 0.3, u - 2 + 0.3, 1.3, H - 1.6, 0, 0.4, orn);
+        fb4(S, F3, u - 1.1, u + 1.1, H * 0.5 + 1.2, H * 0.5 + 1.4, 0.25, 0.4, orn);
       }
-      fb4(S, F2, -0.4, F2.L + 0.4, H - 1.6, H - 0.9, 0, 0.7, orn);
-      fb4(S, F2, -0.2, F2.L + 0.2, H - 0.9, H + 0.6, -0.2, 0.15, wand2);
-      for (const u of achsen5(0, F2.L, 1, 0.4)) fb4(S, F2, u - 0.12, u + 0.12, H - 0.9, H + 0.3, 0.1, 0.3, orn);
+      fb4(S, F3, -0.4, F3.L + 0.4, H - 1.6, H - 0.9, 0, 0.7, orn);
+      fb4(S, F3, -0.2, F3.L + 0.2, H - 0.9, H + 0.6, -0.2, 0.15, wand2);
+      for (const u of achsen5(0, F3.L, 1, 0.4)) fb4(S, F3, u - 0.12, u + 0.12, H - 0.9, H + 0.3, 0.1, 0.3, orn);
     }
     S.quader(x0 + 0.5, H, z0 + 0.5, x0 + b3 - 0.5, H + 0.25, z0 + t3 - 0.5, "#a9a59c");
     if (o3.dach) walm2(S, x0 + 1, z0 + 1, x0 + b3 - 1, z0 + t3 - 1, H + 0.25, o3.dach, SCHIEFER3);
@@ -145377,7 +145689,7 @@
     }
     const FA = vierSeiten(xw, z0, 2.5, t3)[seite2 === "+x" ? "-x" : "+x"];
     if (sichtF(p2, FA)) for (const u of achsen5(0, t3, 3.6, 0.5)) fenster5(S, FA, u, 2.2, 1.2, 2.4, { rahmen: orn });
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3, ["+z", "-z"])) fb4(S, F2, 0, F2.L, H, H + 1.2, 0.3, 0.45, orn);
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3, ["+z", "-z"])) fb4(S, F3, 0, F3.L, H, H + 1.2, 0.3, 0.45, orn);
   }
   function blumenbeet(S, r3, x0, z0, x1, z1) {
     boden5(S, x0, z0, x1, z1, "#7fae5a", 0.36, 0.08);
@@ -145407,40 +145719,40 @@
     S.quader(x0, 0, z0, x0 + b3, 1.2, z0 + t3, stein);
     S.quader(x0 + 0.1, 1.2, z0 + 0.1, x0 + b3 - 0.1, H, z0 + t3 - 0.1, wand2);
     const risB = Math.min(5.5, b3 * 0.35), risU = waehle2(r3, [b3 * 0.62, b3 * 0.38]);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3)) {
-      for (let kk = 0; kk < n3; kk++) for (const u of achsen5(0, F2.L, 2.8, 0.9)) {
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3)) {
+      for (let kk = 0; kk < n3; kk++) for (const u of achsen5(0, F3.L, 2.8, 0.9)) {
         if (k3 === "+z" && Math.abs(u - risU) < risB / 2 + 0.6) continue;
         const y2 = 1.2 + kk * gh + 0.9;
-        fenster5(S, F2, u, y2, 1.05, 2.1, { kreuz: true, rahmen: orn, sims: orn });
-        if (kk === 0) dreiecksgiebel(S, F2, u - 0.8, u + 0.8, y2 + 2.35, 0.5, 0, 0.14, orn, orn);
-        else fb4(S, F2, u - 0.75, u + 0.75, y2 + 2.3, y2 + 2.55, 0, 0.2, orn);
+        fenster5(S, F3, u, y2, 1.05, 2.1, { kreuz: true, rahmen: orn, sims: orn });
+        if (kk === 0) dreiecksgiebel(S, F3, u - 0.8, u + 0.8, y2 + 2.35, 0.5, 0, 0.14, orn, orn);
+        else fb4(S, F3, u - 0.75, u + 0.75, y2 + 2.3, y2 + 2.55, 0, 0.2, orn);
       }
-      fb4(S, F2, -0.1, F2.L + 0.1, 1.2 + gh - 0.15, 1.2 + gh + 0.15, 0, 0.25, orn);
-      fb4(S, F2, -0.3, F2.L + 0.3, H - 0.5, H, 0, 0.55, orn);
-      for (let y2 = 1.4; y2 < H - 0.6; y2 += 0.9) for (const u of [0.35, F2.L - 0.35]) fb4(S, F2, u - (y2 % 1.8 < 0.9 ? 0.55 : 0.35), u + (y2 % 1.8 < 0.9 ? 0.55 : 0.35), y2, y2 + 0.6, 0, 0.12, stein);
+      fb4(S, F3, -0.1, F3.L + 0.1, 1.2 + gh - 0.15, 1.2 + gh + 0.15, 0, 0.25, orn);
+      fb4(S, F3, -0.3, F3.L + 0.3, H - 0.5, H, 0, 0.55, orn);
+      for (let y2 = 1.4; y2 < H - 0.6; y2 += 0.9) for (const u of [0.35, F3.L - 0.35]) fb4(S, F3, u - (y2 % 1.8 < 0.9 ? 0.55 : 0.35), u + (y2 % 1.8 < 0.9 ? 0.55 : 0.35), y2, y2 + 0.6, 0, 0.12, stein);
     }
     walm2(S, x0 - 0.3, z0 - 0.3, x0 + b3 + 0.3, z0 + t3 + 0.3, H, Math.min(b3, t3) * 0.38, dach3);
     const rx0 = x0 + risU - risB / 2;
     S.quader(rx0, 1.2, z0 + t3 - 1, rx0 + risB, H + 0.5, z0 + t3 + 1.2, wand2);
-    for (const [k3, F2] of seiten2(p2, rx0, z0 + t3 - 1, risB, 2.2, ["+z"])) {
-      fenster5(S, F2, risB / 2, 2, 1.6, 2.4, { kreuz: true, rahmen: orn });
-      fb4(S, F2, 0.4, risB - 0.4, 1.2 + gh - 0.1, 1.2 + gh + 0.25, 0, 1.1, orn);
-      for (let u = 0.6; u < risB - 0.5; u += 0.35) fb4(S, F2, u - 0.05, u + 0.05, 1.2 + gh + 0.25, 1.2 + gh + 1.1, 0.95, 1.05, "#3b3f44");
-      fb4(S, F2, 0.4, risB - 0.4, 1.2 + gh + 1.05, 1.2 + gh + 1.15, 0.9, 1.1, "#3b3f44");
-      fenster5(S, F2, risB / 2, 1.2 + gh + 0.9, 1.2, 2.1, { kreuz: true, rahmen: orn });
-      dreiecksgiebel(S, F2, -0.2, risB + 0.2, H + 0.5, 2.6, -1.5, 0.12, wand2, orn);
-      fscheibe3(S, F2, risB / 2, H + 1.5, 0.12, 0.2, 0.5, GLAS9);
+    for (const [k3, F3] of seiten2(p2, rx0, z0 + t3 - 1, risB, 2.2, ["+z"])) {
+      fenster5(S, F3, risB / 2, 2, 1.6, 2.4, { kreuz: true, rahmen: orn });
+      fb4(S, F3, 0.4, risB - 0.4, 1.2 + gh - 0.1, 1.2 + gh + 0.25, 0, 1.1, orn);
+      for (let u = 0.6; u < risB - 0.5; u += 0.35) fb4(S, F3, u - 0.05, u + 0.05, 1.2 + gh + 0.25, 1.2 + gh + 1.1, 0.95, 1.05, "#3b3f44");
+      fb4(S, F3, 0.4, risB - 0.4, 1.2 + gh + 1.05, 1.2 + gh + 1.15, 0.9, 1.1, "#3b3f44");
+      fenster5(S, F3, risB / 2, 1.2 + gh + 0.9, 1.2, 2.1, { kreuz: true, rahmen: orn });
+      dreiecksgiebel(S, F3, -0.2, risB + 0.2, H + 0.5, 2.6, -1.5, 0.12, wand2, orn);
+      fscheibe3(S, F3, risB / 2, H + 1.5, 0.12, 0.2, 0.5, GLAS9);
     }
     const gd = dachProfil(3, risB + 0.4, 2.6, 0.05, "z");
     gd.translate(rx0 + risB / 2, H + 0.5, z0 + t3 - 0.6);
     S.add(gd, dach3);
     const ts = 4.2, tx0 = o3.turmLinks ? x0 - 1.2 : x0 + b3 - ts + 1.2, tz0 = z0 + t3 - ts + 1.2, Ht = H + 4.2;
     S.quader(tx0, 0, tz0, tx0 + ts, Ht, tz0 + ts, wand2);
-    for (const [k3, F2] of seiten2(p2, tx0, tz0, ts, ts)) {
-      for (let kk = 0; kk < n3; kk++) fenster5(S, F2, ts / 2, 1.2 + kk * gh + 0.9, 1, 2.1, { kreuz: true, rahmen: orn, sims: orn });
-      fwand2(S, F2, 0, ts, H, Ht - 0.6, 0, 0.1, wand2, [{ u0: ts / 2 - 0.9, u1: ts / 2 - 0.15, v0: H + 0.6, v1: Ht - 1, bogen: true }, { u0: ts / 2 + 0.15, u1: ts / 2 + 0.9, v0: H + 0.6, v1: Ht - 1, bogen: true }]);
-      fb4(S, F2, ts / 2 - 1, ts / 2 + 1, H + 0.6, Ht - 1, -0.2, -0.1, GLAS9);
-      fb4(S, F2, -0.3, ts + 0.3, Ht - 0.6, Ht, 0, 0.4, orn);
+    for (const [k3, F3] of seiten2(p2, tx0, tz0, ts, ts)) {
+      for (let kk = 0; kk < n3; kk++) fenster5(S, F3, ts / 2, 1.2 + kk * gh + 0.9, 1, 2.1, { kreuz: true, rahmen: orn, sims: orn });
+      fwand2(S, F3, 0, ts, H, Ht - 0.6, 0, 0.1, wand2, [{ u0: ts / 2 - 0.9, u1: ts / 2 - 0.15, v0: H + 0.6, v1: Ht - 1, bogen: true }, { u0: ts / 2 + 0.15, u1: ts / 2 + 0.9, v0: H + 0.6, v1: Ht - 1, bogen: true }]);
+      fb4(S, F3, ts / 2 - 1, ts / 2 + 1, H + 0.6, Ht - 1, -0.2, -0.1, GLAS9);
+      fb4(S, F3, -0.3, ts + 0.3, Ht - 0.6, Ht, 0, 0.4, orn);
     }
     const helm3 = waehle2(r3, ["spitz", "zwiebel", "pyramide"]);
     if (helm3 === "zwiebel") {
@@ -145461,16 +145773,16 @@
     const vx0 = o3.turmLinks ? x0 + b3 : x0 - 3.6;
     S.quader(vx0, 0.3, z0 + 2, vx0 + 3.6, 1, z0 + t3 - 3, stein);
     S.quader(vx0 + 0.2, 1, z0 + 2.2, vx0 + 3.4, 4, z0 + t3 - 3.2, GLAS_HELL6);
-    for (const [k3, F2] of seiten2(p2, vx0 + 0.2, z0 + 2.2, 3.2, t3 - 5.4)) for (const u of achsen5(0, F2.L, 1, 0)) fb4(S, F2, u - 0.06, u + 0.06, 1, 4, 0, 0.08, WEISS2);
+    for (const [k3, F3] of seiten2(p2, vx0 + 0.2, z0 + 2.2, 3.2, t3 - 5.4)) for (const u of achsen5(0, F3.L, 1, 0)) fb4(S, F3, u - 0.06, u + 0.06, 1, 4, 0, 0.08, WEISS2);
     S.quader(vx0, 4, z0 + 2, vx0 + 3.6, 4.3, z0 + t3 - 3, WEISS2);
     return Ht + 7;
   }
   function zaun3(S, p2, x0, z0, x1, z1, farbe3 = "#3b3f44") {
-    for (const [k3, F2] of seiten2(p2, x0, z0, x1 - x0, z1 - z0)) {
-      fb4(S, F2, 0, F2.L, 0.3, 0.9, -0.3, 0, "#d8d0c0");
-      for (let u = 0.3; u < F2.L; u += 0.6) fb4(S, F2, u - 0.03, u + 0.03, 0.9, 2, -0.18, -0.12, farbe3);
-      fb4(S, F2, 0, F2.L, 1.9, 2, -0.2, -0.1, farbe3);
-      for (const u of achsen5(0, F2.L, 6, 0)) fb4(S, F2, u - 0.3, u + 0.3, 0.3, 2.2, -0.45, 0.15, "#e2dccf");
+    for (const [k3, F3] of seiten2(p2, x0, z0, x1 - x0, z1 - z0)) {
+      fb4(S, F3, 0, F3.L, 0.3, 0.9, -0.3, 0, "#d8d0c0");
+      for (let u = 0.3; u < F3.L; u += 0.6) fb4(S, F3, u - 0.03, u + 0.03, 0.9, 2, -0.18, -0.12, farbe3);
+      fb4(S, F3, 0, F3.L, 1.9, 2, -0.2, -0.1, farbe3);
+      for (const u of achsen5(0, F3.L, 6, 0)) fb4(S, F3, u - 0.3, u + 0.3, 0.3, 2.2, -0.45, 0.15, "#e2dccf");
     }
   }
   function kurstadtRoh(S, scene2, p2) {
@@ -145548,15 +145860,15 @@
     if (v === "wandelhalle") {
       const hz0 = z0 + 4, ht = 12, hb2 = w2 - 10, hx0 = x0 + 5, H = 9.5;
       S.quader(hx0, 0, hz0, hx0 + hb2, H, hz0 + ht, wand2);
-      for (const [k3, F2] of seiten2(p2, hx0, hz0, hb2, ht)) {
-        const L2 = achsen5(0, F2.L, 4.2, 1).map((u) => ({ u0: u - 1.5, u1: u + 1.5, v0: 1.2, v1: H - 1.6, bogen: true }));
-        lochwand4(S, F2, 0, F2.L, 0.3, H - 0.9, wand2, L2, { glas: GLAS_HELL6, dick: 0.3 });
+      for (const [k3, F3] of seiten2(p2, hx0, hz0, hb2, ht)) {
+        const L2 = achsen5(0, F3.L, 4.2, 1).map((u) => ({ u0: u - 1.5, u1: u + 1.5, v0: 1.2, v1: H - 1.6, bogen: true }));
+        lochwand4(S, F3, 0, F3.L, 0.3, H - 0.9, wand2, L2, { glas: GLAS_HELL6, dick: 0.3 });
         for (const l of L2) {
-          fb4(S, F2, (l.u0 + l.u1) / 2 - 0.06, (l.u0 + l.u1) / 2 + 0.06, 1.2, H - 2.6, 0.02, 0.1, WEISS2);
-          fb4(S, F2, l.u0, l.u1, 5, 5.12, 0.02, 0.1, WEISS2);
+          fb4(S, F3, (l.u0 + l.u1) / 2 - 0.06, (l.u0 + l.u1) / 2 + 0.06, 1.2, H - 2.6, 0.02, 0.1, WEISS2);
+          fb4(S, F3, l.u0, l.u1, 5, 5.12, 0.02, 0.1, WEISS2);
         }
-        for (const l of L2) fb4(S, F2, l.u1 + 0.2, l.u1 + 0.65, 0.3, H - 0.9, 0, 0.45, orn);
-        fb4(S, F2, -0.3, F2.L + 0.3, H - 0.9, H, 0, 0.6, orn);
+        for (const l of L2) fb4(S, F3, l.u1 + 0.2, l.u1 + 0.65, 0.3, H - 0.9, 0, 0.45, orn);
+        fb4(S, F3, -0.3, F3.L + 0.3, H - 0.9, H, 0, 0.6, orn);
       }
       const gd = dachProfil(hb2, ht, 3.2, 1, "x");
       gd.translate(hx0 + hb2 / 2, H, hz0 + ht / 2);
@@ -145564,11 +145876,11 @@
       S.quader(hx0 + 2, H + 3.2, hz0 + ht / 2 - 0.5, hx0 + hb2 - 2, H + 3.9, hz0 + ht / 2 + 0.5, GLAS_HELL6);
       const cx = hx0 + hb2 / 2, pb = 14;
       S.quader(cx - pb / 2, 0, hz0 - 1, cx + pb / 2, H + 4, hz0 + ht + 1.5, wand2);
-      for (const [k3, F2] of seiten2(p2, cx - pb / 2, hz0 - 1, pb, ht + 2.5)) {
-        lochwand4(S, F2, 0, F2.L, 0.3, H + 3, wand2, [{ u0: F2.L / 2 - 3, u1: F2.L / 2 + 3, v0: 0.3, v1: H + 1.5, bogen: true }], { glas: GLAS_HELL6 });
-        for (let u = F2.L / 2 - 2.4; u < F2.L / 2 + 2.5; u += 1.2) fb4(S, F2, u - 0.05, u + 0.05, 0.3, H + 0.5, 0.02, 0.1, WEISS2);
-        fb4(S, F2, -0.4, F2.L + 0.4, H + 3, H + 4, 0, 0.6, orn);
-        for (const u of [0.6, F2.L - 0.6]) fb4(S, F2, u - 0.6, u + 0.6, 0.3, H + 3, 0, 0.5, orn);
+      for (const [k3, F3] of seiten2(p2, cx - pb / 2, hz0 - 1, pb, ht + 2.5)) {
+        lochwand4(S, F3, 0, F3.L, 0.3, H + 3, wand2, [{ u0: F3.L / 2 - 3, u1: F3.L / 2 + 3, v0: 0.3, v1: H + 1.5, bogen: true }], { glas: GLAS_HELL6 });
+        for (let u = F3.L / 2 - 2.4; u < F3.L / 2 + 2.5; u += 1.2) fb4(S, F3, u - 0.05, u + 0.05, 0.3, H + 0.5, 0.02, 0.1, WEISS2);
+        fb4(S, F3, -0.4, F3.L + 0.4, H + 3, H + 4, 0, 0.6, orn);
+        for (const u of [0.6, F3.L - 0.6]) fb4(S, F3, u - 0.6, u + 0.6, 0.3, H + 3, 0, 0.5, orn);
       }
       const hk = kuppel3(S, cx, H + 4, hz0 + ht / 2 + 0.25, 6, { tambour: 2, wand: wand2, orn, hoch: 0.9 });
       const tx = x0 + w2 * 0.25, tz = z0 + d3 - 12;
@@ -145624,28 +145936,28 @@
     }
     return { hoehe: hmax };
   }
-  function bogenfries(S, F2, u0, u1, y2, c, b3 = 0.9) {
+  function bogenfries(S, F3, u0, u1, y2, c, b3 = 0.9) {
     const n3 = Math.max(1, Math.round((u1 - u0) / b3)), bb = (u1 - u0) / n3, L2 = [];
     for (let i = 0; i < n3; i++) L2.push({ u0: u0 + i * bb + 0.1, u1: u0 + (i + 1) * bb - 0.1, v0: y2 - 0.75, v1: y2 - 0.12, bogen: true });
-    fwand2(S, F2, u0, u1, y2 - 0.65, y2, 0, 0.18, c, L2);
+    fwand2(S, F3, u0, u1, y2 - 0.65, y2, 0, 0.18, c, L2);
   }
-  function zwerggalerie(S, F2, u0, u1, y0, h3, c) {
-    fb4(S, F2, u0, u1, y0, y0 + h3, -0.4, 0.02, "#3d3532");
+  function zwerggalerie(S, F3, u0, u1, y0, h3, c) {
+    fb4(S, F3, u0, u1, y0, y0 + h3, -0.4, 0.02, "#3d3532");
     const n3 = Math.max(2, Math.round((u1 - u0) / 1.1)), bb = (u1 - u0) / n3, L2 = [];
     for (let i = 0; i < n3; i++) L2.push({ u0: u0 + i * bb + 0.15, u1: u0 + (i + 1) * bb - 0.15, v0: y0 + 0.4, v1: y0 + h3 - 0.3, bogen: true });
-    fwand2(S, F2, u0, u1, y0, y0 + h3, 0, 0.25, c, L2);
-    fb4(S, F2, u0 - 0.1, u1 + 0.1, y0, y0 + 0.4, 0, 0.45, heller(c, 0.05));
+    fwand2(S, F3, u0, u1, y0, y0 + h3, 0, 0.25, c, L2);
+    fb4(S, F3, u0 - 0.1, u1 + 0.1, y0, y0 + 0.4, 0, 0.45, heller(c, 0.05));
   }
-  function romWand(S, F2, u0, u1, y0, y1, c, o3 = {}) {
+  function romWand(S, F3, u0, u1, y0, y1, c, o3 = {}) {
     const ax = achsen5(u0, u1, o3.ra ?? 4.5, 0.8), L2 = [];
     for (const u of ax) L2.push({ u0: u - (o3.fw ?? 0.8), u1: u + (o3.fw ?? 0.8), v0: y0 + (o3.fy ?? (y1 - y0) * 0.35), v1: y1 - (o3.oben ?? 1.6), bogen: true });
-    lochwand4(S, F2, u0, u1, y0, y1, c, L2, { glas: "#3d3a3c", dick: 0.4 });
+    lochwand4(S, F3, u0, u1, y0, y1, c, L2, { glas: "#3d3a3c", dick: 0.4 });
     for (let i = 0; i <= ax.length; i++) {
       const u = i === 0 ? u0 + 0.3 : i === ax.length ? u1 - 0.3 : (ax[i - 1] + ax[i]) / 2;
-      fb4(S, F2, u - 0.35, u + 0.35, y0, y1 - 0.65, 0.4, 0.65, dunkler(c, 0.03));
+      fb4(S, F3, u - 0.35, u + 0.35, y0, y1 - 0.65, 0.4, 0.65, dunkler(c, 0.03));
     }
-    bogenfries(S, teil4(F2, 0, F2.L, 0.4), u0, u1, y1, dunkler(c, 0.03));
-    fb4(S, F2, u0 - 0.2, u1 + 0.2, y1 - 0.05, y1 + 0.35, 0, 0.75, heller(c, 0.06));
+    bogenfries(S, teil4(F3, 0, F3.L, 0.4), u0, u1, y1, dunkler(c, 0.03));
+    fb4(S, F3, u0 - 0.2, u1 + 0.2, y1 - 0.05, y1 + 0.35, 0, 0.75, heller(c, 0.06));
   }
   function romTurm(S, p2, cx, cz, a2, H, o3) {
     const c = o3.stein, hell5 = heller(c, 0.06), dach3 = o3.dach;
@@ -145670,8 +145982,8 @@
         const w2 = i / 8 * 2 * PI10 + PI10 / 8, nx = Math.cos(w2), nz = Math.sin(w2);
         if (!sieht2(p2, nx, nz)) continue;
         const sl = a2 * Math.tan(PI10 / 8), rr3 = a2 / 2 * Math.cos(PI10 / 8);
-        const F2 = R7(cx + nx * rr3 + nz * sl / 2, cz + nz * rr3 - nx * sl / 2, -nz, nx, sl);
-        lochwand4(S, F2, 0.2, sl - 0.2, o3.y0 ?? H - 6, H - 0.6, c, [{ u0: sl / 2 - 0.9, u1: sl / 2 - 0.1, v0: H - 4.6, v1: H - 1.4, bogen: true }, { u0: sl / 2 + 0.1, u1: sl / 2 + 0.9, v0: H - 4.6, v1: H - 1.4, bogen: true }], { glas: "#3d3a3c", dick: 0.25 });
+        const F3 = R7(cx + nx * rr3 + nz * sl / 2, cz + nz * rr3 - nx * sl / 2, -nz, nx, sl);
+        lochwand4(S, F3, 0.2, sl - 0.2, o3.y0 ?? H - 6, H - 0.6, c, [{ u0: sl / 2 - 0.9, u1: sl / 2 - 0.1, v0: H - 4.6, v1: H - 1.4, bogen: true }, { u0: sl / 2 + 0.1, u1: sl / 2 + 0.9, v0: H - 4.6, v1: H - 1.4, bogen: true }], { glas: "#3d3a3c", dick: 0.25 });
       }
       const g2 = new three_module_exports.ConeGeometry(a2 / 2 + 0.5, o3.helmH ?? a2 * 0.9, 8);
       g2.rotateY(PI10 / 8);
@@ -145682,10 +145994,10 @@
     }
     S.quader(x0, 0, z0, x0 + a2, H, z0 + a2, c);
     const geschosse2 = o3.geschosse ?? 5, gh = (H - 4) / geschosse2;
-    for (const [k3, F2] of seiten2(p2, x0, z0, a2, a2)) {
-      fb4(S, F2, -0.05, 0.6, 0, H, 0, 0.3, dunkler(c, 0.03));
-      fb4(S, F2, a2 - 0.6, a2 + 0.05, 0, H, 0, 0.3, dunkler(c, 0.03));
-      for (let i = 1; i <= geschosse2; i++) bogenfries(S, teil4(F2, 0.6, a2 - 0.6, 0.1), 0, a2 - 1.2, 4 + i * gh, hell5, 0.8);
+    for (const [k3, F3] of seiten2(p2, x0, z0, a2, a2)) {
+      fb4(S, F3, -0.05, 0.6, 0, H, 0, 0.3, dunkler(c, 0.03));
+      fb4(S, F3, a2 - 0.6, a2 + 0.05, 0, H, 0, 0.3, dunkler(c, 0.03));
+      for (let i = 1; i <= geschosse2; i++) bogenfries(S, teil4(F3, 0.6, a2 - 0.6, 0.1), 0, a2 - 1.2, 4 + i * gh, hell5, 0.8);
       const L2 = [];
       for (let i = 1; i < geschosse2; i++) {
         const y2 = 4 + i * gh, oben = i >= geschosse2 - 2;
@@ -145695,14 +146007,14 @@
           L2.push({ u0: u - (oben ? 0.7 : 0.35), u1: u + (oben ? 0.7 : 0.35), v0: y2 + 0.6, v1: y2 + gh - 1, bogen: true });
         }
       }
-      lochwand4(S, teil4(F2, 0.6, a2 - 0.6), 0, a2 - 1.2, 4, H - 0.8, c, L2.map((l) => ({ ...l, u0: l.u0 - 0.6, u1: l.u1 - 0.6 })), { glas: "#3d3a3c", dick: 0.2 });
+      lochwand4(S, teil4(F3, 0.6, a2 - 0.6), 0, a2 - 1.2, 4, H - 0.8, c, L2.map((l) => ({ ...l, u0: l.u0 - 0.6, u1: l.u1 - 0.6 })), { glas: "#3d3a3c", dick: 0.2 });
       if (o3.giebel) {
-        fpoly3(S, F2, [[0, H], [a2, H], [a2 / 2, H + a2 * 0.55]], -a2 + 0.01, 0, c);
+        fpoly3(S, F3, [[0, H], [a2, H], [a2 / 2, H + a2 * 0.55]], -a2 + 0.01, 0, c);
       }
     }
     const helm3 = o3.helm ?? "raute";
     if (helm3 === "raute") {
-      for (const [k3, F2] of seiten2(p2, x0, z0, a2, a2)) fpoly3(S, F2, [[0, H], [a2, H], [a2 / 2, H + a2 * 0.6]], -0.3, 0, c);
+      for (const [k3, F3] of seiten2(p2, x0, z0, a2, a2)) fpoly3(S, F3, [[0, H], [a2, H], [a2 / 2, H + a2 * 0.6]], -0.3, 0, c);
       const g2 = new three_module_exports.ConeGeometry(a2 * 0.72, a2 * 1.6, 4);
       g2.translate(cx, H + a2 * 0.8, cz);
       S.add(g2, dach3);
@@ -145763,24 +146075,24 @@
     const ex = v === "kaiserdom" ? 16 : 18;
     const lx0 = x0 + ex, lx1 = x0 + w2 - ex;
     S.quader(lx0, 0, cz - ms / 2, lx1, Hm, cz + ms / 2, c);
-    for (const [k3, F2] of seiten2(p2, lx0, cz - ms / 2, lx1 - lx0, ms, ["+z", "-z"])) {
-      romWand(S, F2, 0, F2.L, Hs + 2, Hm - 2.4, c, { ra: 5, fw: 0.9, fy: 2.2, oben: 1.4 });
-      if (v === "kaiserdom") zwerggalerie(S, F2, 0, F2.L, Hm - 2.4, 2.4, c);
-      else fb4(S, F2, -0.2, F2.L + 0.2, Hm - 2.4, Hm, 0, 0.3, c);
+    for (const [k3, F3] of seiten2(p2, lx0, cz - ms / 2, lx1 - lx0, ms, ["+z", "-z"])) {
+      romWand(S, F3, 0, F3.L, Hs + 2, Hm - 2.4, c, { ra: 5, fw: 0.9, fy: 2.2, oben: 1.4 });
+      if (v === "kaiserdom") zwerggalerie(S, F3, 0, F3.L, Hm - 2.4, 2.4, c);
+      else fb4(S, F3, -0.2, F3.L + 0.2, Hm - 2.4, Hm, 0, 0.3, c);
     }
     satteldach4(S, lx0, cz - ms / 2 - 0.4, lx1, cz + ms / 2 + 0.4, Hm, 7.5, "x", dach3, c, 0.3);
     for (const s2 of [-1, 1]) {
       const zA = s2 > 0 ? cz + ms / 2 : cz - ms / 2 - sb2;
       S.quader(lx0 + 1, 0, zA, lx1 - 1, Hs, zA + sb2, c);
-      for (const [k3, F2] of seiten2(p2, lx0 + 1, zA, lx1 - lx0 - 2, sb2, [s2 > 0 ? "+z" : "-z"])) {
-        romWand(S, F2, 0, F2.L, 0.3, Hs, c, { ra: 5, fw: 0.75, fy: 4.2, oben: 2 });
-        fb4(S, F2, -0.1, F2.L + 0.1, 0.3, 1.2, 0, 0.8, dunkler(c, 0.05));
+      for (const [k3, F3] of seiten2(p2, lx0 + 1, zA, lx1 - lx0 - 2, sb2, [s2 > 0 ? "+z" : "-z"])) {
+        romWand(S, F3, 0, F3.L, 0.3, Hs, c, { ra: 5, fw: 0.75, fy: 4.2, oben: 2 });
+        fb4(S, F3, -0.1, F3.L + 0.1, 0.3, 1.2, 0, 0.8, dunkler(c, 0.05));
         if (k3 === "+z") {
-          const u = F2.L * (v === "kaiserdom" ? 0.3 : 0.5);
-          fwand2(S, F2, u - 2.6, u + 2.6, 0.3, 6.4, 0, 1, hell5, [{ u0: u - 1.6, u1: u + 1.6, v0: 0.29, v1: 5.6, bogen: true }]);
-          fb4(S, F2, u - 1.6, u + 1.6, 0.3, 4, 0.05, 0.12, "#5a3a2e");
-          fpoly3(S, F2, [[u - 3, 6.4], [u + 3, 6.4], [u, 8.4]], -0.2, 1.1, hell5);
-          for (let i = 0; i < 3; i++) fb4(S, F2, u - 3.2 - i * 0.3, u + 3.2 + i * 0.3, 0.3, 0.7 - i * 0.2, 1, 1.6 + i * 0.6, "#cfc6b4");
+          const u = F3.L * (v === "kaiserdom" ? 0.3 : 0.5);
+          fwand2(S, F3, u - 2.6, u + 2.6, 0.3, 6.4, 0, 1, hell5, [{ u0: u - 1.6, u1: u + 1.6, v0: 0.29, v1: 5.6, bogen: true }]);
+          fb4(S, F3, u - 1.6, u + 1.6, 0.3, 4, 0.05, 0.12, "#5a3a2e");
+          fpoly3(S, F3, [[u - 3, 6.4], [u + 3, 6.4], [u, 8.4]], -0.2, 1.1, hell5);
+          for (let i = 0; i < 3; i++) fb4(S, F3, u - 3.2 - i * 0.3, u + 3.2 + i * 0.3, 0.3, 0.7 - i * 0.2, 1, 1.6 + i * 0.6, "#cfc6b4");
         }
       }
       const g = new three_module_exports.BoxGeometry(lx1 - lx0 - 1.4, 0.3, sb2 + 1.2);
@@ -145792,13 +146104,13 @@
     let hmax = Hm + 8;
     if (v !== "doppelchor") {
       S.quader(qx0, 0, qz0, qx0 + qb, Hm, qz0 + qd, c);
-      for (const [k3, F2] of seiten2(p2, qx0, qz0, qb, qd)) {
+      for (const [k3, F3] of seiten2(p2, qx0, qz0, qb, qd)) {
         if (k3 === "+z" || k3 === "-z") {
-          romWand(S, F2, 0, F2.L, 0.3, Hm - 2.4, c, { ra: 5.5, fw: 1, fy: 8, oben: 3 });
-          fpoly3(S, F2, [[0, Hm - 0.5], [F2.L, Hm - 0.5], [F2.L / 2, Hm + 6.5]], -0.5, 0.4, c);
-          fscheibe3(S, F2, F2.L / 2, Hm + 1.8, 0.4, 0.6, 1.4, "#3d3a3c", 16);
-          bogenfries(S, teil4(F2, 0, F2.L, 0.4), 0, F2.L, Hm - 0.5, hell5);
-        } else romWand(S, F2, 0, F2.L, Hs + 1, Hm - 0.5, c, { ra: 5, fw: 0.8, fy: 2.5 });
+          romWand(S, F3, 0, F3.L, 0.3, Hm - 2.4, c, { ra: 5.5, fw: 1, fy: 8, oben: 3 });
+          fpoly3(S, F3, [[0, Hm - 0.5], [F3.L, Hm - 0.5], [F3.L / 2, Hm + 6.5]], -0.5, 0.4, c);
+          fscheibe3(S, F3, F3.L / 2, Hm + 1.8, 0.4, 0.6, 1.4, "#3d3a3c", 16);
+          bogenfries(S, teil4(F3, 0, F3.L, 0.4), 0, F3.L, Hm - 0.5, hell5);
+        } else romWand(S, F3, 0, F3.L, Hs + 1, Hm - 0.5, c, { ra: 5, fw: 0.8, fy: 2.5 });
       }
       satteldach4(S, qx0 - 0.3, qz0, qx0 + qb + 0.3, qz0 + qd, Hm - 0.5, 7, "z", dach3, c, 0.3);
       hmax = Math.max(hmax, romTurm(S, p2, qx0 + qb / 2, cz, 13, Hm + 9, { stein: c, dach: dach3, acht: true, helmH: v === "kaiserdom" ? 10 : 9, y0: Hm + 2 }));
@@ -145807,7 +146119,7 @@
       const xe = s2 > 0 ? lx1 : lx0;
       if (art === "apsis" || art === "doppel") {
         S.quader(s2 > 0 ? xe : xe - 6, 0, cz - ms / 2, s2 > 0 ? xe + 6 : xe, Hm - 1, cz + ms / 2, c);
-        for (const [k3, F2] of seiten2(p2, s2 > 0 ? xe : xe - 6, cz - ms / 2, 6, ms, ["+z", "-z"])) romWand(S, F2, 0, F2.L, 6, Hm - 1, c, { ra: 4, fw: 0.8, fy: 4 });
+        for (const [k3, F3] of seiten2(p2, s2 > 0 ? xe : xe - 6, cz - ms / 2, 6, ms, ["+z", "-z"])) romWand(S, F3, 0, F3.L, 6, Hm - 1, c, { ra: 4, fw: 0.8, fy: 4 });
         satteldach4(S, s2 > 0 ? xe : xe - 6, cz - ms / 2 - 0.3, s2 > 0 ? xe + 6 : xe, cz + ms / 2 + 0.3, Hm - 1, 7, "x", dach3, c, 0.3);
         apsis(S, p2, xe + s2 * 6, cz, ms / 2 - 0.5, Hm - 6, s2, c, dach3);
         const ta = art === "doppel" ? 6.5 : 8.5, th = art === "doppel" ? 36 : 44;
@@ -145816,14 +146128,14 @@
       } else if (art === "westbau") {
         const wb = 14, wx0 = s2 > 0 ? xe : xe - wb;
         S.quader(wx0, 0, cz - ms / 2 - sb2, wx0 + wb, Hm + 4, cz + ms / 2 + sb2, c);
-        for (const [k3, F2] of seiten2(p2, wx0, cz - ms / 2 - sb2, wb, ms + 2 * sb2)) {
-          romWand(S, F2, 0, F2.L, 0.3, Hm + 4, c, { ra: 6, fw: 1.1, fy: 9, oben: 3 });
+        for (const [k3, F3] of seiten2(p2, wx0, cz - ms / 2 - sb2, wb, ms + 2 * sb2)) {
+          romWand(S, F3, 0, F3.L, 0.3, Hm + 4, c, { ra: 6, fw: 1.1, fy: 9, oben: 3 });
           if (k3 === "-x" && s2 < 0 || k3 === "+x" && s2 > 0) {
-            fwand2(S, F2, F2.L / 2 - 3.6, F2.L / 2 + 3.6, 0.3, 9, 0, 1.4, hell5, [{ u0: F2.L / 2 - 2.2, u1: F2.L / 2 + 2.2, v0: 0.29, v1: 8, bogen: true }]);
-            fb4(S, F2, F2.L / 2 - 2.2, F2.L / 2 + 2.2, 0.3, 5.5, 0.05, 0.12, "#5a3a2e");
-            fscheibe3(S, F2, F2.L / 2, Hm - 2, 0.4, 0.6, 2.4, "#3d3a3c", 18);
-            fscheibe3(S, F2, F2.L / 2, Hm - 2, 0.6, 0.7, 2.6, hell5, 18);
-            fscheibe3(S, F2, F2.L / 2, Hm - 2, 0.7, 0.75, 2.2, "#3d3a3c", 18);
+            fwand2(S, F3, F3.L / 2 - 3.6, F3.L / 2 + 3.6, 0.3, 9, 0, 1.4, hell5, [{ u0: F3.L / 2 - 2.2, u1: F3.L / 2 + 2.2, v0: 0.29, v1: 8, bogen: true }]);
+            fb4(S, F3, F3.L / 2 - 2.2, F3.L / 2 + 2.2, 0.3, 5.5, 0.05, 0.12, "#5a3a2e");
+            fscheibe3(S, F3, F3.L / 2, Hm - 2, 0.4, 0.6, 2.4, "#3d3a3c", 18);
+            fscheibe3(S, F3, F3.L / 2, Hm - 2, 0.6, 0.7, 2.6, hell5, 18);
+            fscheibe3(S, F3, F3.L / 2, Hm - 2, 0.7, 0.75, 2.2, "#3d3a3c", 18);
           }
         }
         S.quader(wx0 - 0.2, Hm + 4, cz - ms / 2 - sb2 - 0.2, wx0 + wb + 0.2, Hm + 4.6, cz + ms / 2 + sb2 + 0.2, hell5);
@@ -145854,43 +146166,43 @@
     const putz2 = o3.putz ?? waehle2(r3, PASTELL), raster4 = o3.raster ?? waehle2(r3, ["#f2efe6", "#e7e3d8", "#cfcac0"]), kachel2 = o3.kachel ?? waehle2(r3, ["#7fa3b8", "#d98a6a", "#e8c547", "#8fb58a", "#c9d6dc", "#b5523f"]);
     const art = o3.art ?? waehle2(r3, ["raster", "band", "lochputz"]);
     S.quader(x0, y0, z0, x0 + b3, y0 + H, z0 + t3, putz2);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3)) {
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3)) {
       const laden5 = o3.strasse.includes(k3);
       if (laden5) {
-        fb4(S, F2, 0.2, F2.L - 0.2, y0 + 0.3, y0 + eg - 0.6, 0, 0.05, GLAS_HELL6);
-        for (const u of achsen5(0, F2.L, 3.2, 0)) fb4(S, F2, u - 0.08, u + 0.08, y0 + 0.3, y0 + eg - 0.6, 0, 0.12, "#3b4046");
-        fb4(S, F2, 0, F2.L, y0 + 0.3, y0 + 0.7, 0, 0.12, "#d8d2c4");
-        fb4(S, F2, -0.3, F2.L + 0.3, y0 + eg - 0.6, y0 + eg - 0.35, 0, 2.6, "#f4f2ec");
-        fb4(S, F2, -0.3, F2.L + 0.3, y0 + eg - 0.75, y0 + eg - 0.6, 2.4, 2.6, o3.akzent ?? "#c9483e");
+        fb4(S, F3, 0.2, F3.L - 0.2, y0 + 0.3, y0 + eg - 0.6, 0, 0.05, GLAS_HELL6);
+        for (const u of achsen5(0, F3.L, 3.2, 0)) fb4(S, F3, u - 0.08, u + 0.08, y0 + 0.3, y0 + eg - 0.6, 0, 0.12, "#3b4046");
+        fb4(S, F3, 0, F3.L, y0 + 0.3, y0 + 0.7, 0, 0.12, "#d8d2c4");
+        fb4(S, F3, -0.3, F3.L + 0.3, y0 + eg - 0.6, y0 + eg - 0.35, 0, 2.6, "#f4f2ec");
+        fb4(S, F3, -0.3, F3.L + 0.3, y0 + eg - 0.75, y0 + eg - 0.6, 2.4, 2.6, o3.akzent ?? "#c9483e");
         const name2 = o3.namen?.pop();
-        if (name2) ftext4(scene2, F2, name2, F2.L / 2, y0 + eg - 0.05, 0.12, 0.6, F2.L * 0.75, "#2a3036");
+        if (name2) ftext4(scene2, F3, name2, F3.L / 2, y0 + eg - 0.05, 0.12, 0.6, F3.L * 0.75, "#2a3036");
       } else {
-        fb4(S, F2, 0, F2.L, y0, y0 + eg, 0, 0.05, dunkler(putz2, 0.05));
-        for (const u of achsen5(0, F2.L, 3.2, 0.8)) fenster5(S, F2, u, y0 + 1.4, 1.6, 1.8, { rahmen: WEISS2 });
+        fb4(S, F3, 0, F3.L, y0, y0 + eg, 0, 0.05, dunkler(putz2, 0.05));
+        for (const u of achsen5(0, F3.L, 3.2, 0.8)) fenster5(S, F3, u, y0 + 1.4, 1.6, 1.8, { rahmen: WEISS2 });
       }
       const yo = y0 + eg;
       if (art === "raster") {
-        fb4(S, F2, 0.1, F2.L - 0.1, yo, H + y0 - 0.4, 0, 0.04, GLAS9);
-        const ax = achsen5(0, F2.L, 2, 0);
+        fb4(S, F3, 0.1, F3.L - 0.1, yo, H + y0 - 0.4, 0, 0.04, GLAS9);
+        const ax = achsen5(0, F3.L, 2, 0);
         for (let i = 0; i < n3; i++) {
           const y2 = yo + i * gh;
-          fb4(S, F2, 0, F2.L, y2, y2 + 0.22, 0, 0.3, raster4);
-          for (let j3 = 0; j3 < ax.length; j3++) if ((i + j3) % 3 === 0) fb4(S, F2, ax[j3] - 0.92, ax[j3] + 0.92, y2 + 0.22, y2 + 1, 0, 0.12, kachel2);
+          fb4(S, F3, 0, F3.L, y2, y2 + 0.22, 0, 0.3, raster4);
+          for (let j3 = 0; j3 < ax.length; j3++) if ((i + j3) % 3 === 0) fb4(S, F3, ax[j3] - 0.92, ax[j3] + 0.92, y2 + 0.22, y2 + 1, 0, 0.12, kachel2);
         }
-        for (const u of [0, ...ax.map((u2) => u2 + 1)]) fb4(S, F2, u - 0.11, u + 0.11, yo, H + y0 - 0.4, 0, 0.3, raster4);
+        for (const u of [0, ...ax.map((u2) => u2 + 1)]) fb4(S, F3, u - 0.11, u + 0.11, yo, H + y0 - 0.4, 0, 0.3, raster4);
       } else if (art === "band") {
         for (let i = 0; i < n3; i++) {
           const y2 = yo + i * gh;
-          fb4(S, F2, 0.3, F2.L - 0.3, y2 + 1, y2 + 2.4, 0, 0.05, GLAS9);
-          for (const u of achsen5(0.3, F2.L - 0.3, 1.4, 0)) fb4(S, F2, u - 0.05, u + 0.05, y2 + 1, y2 + 2.4, 0, 0.09, WEISS2);
-          fb4(S, F2, -0.05, F2.L + 0.05, y2 + 0.9, y2 + 1, 0, 0.2, raster4);
+          fb4(S, F3, 0.3, F3.L - 0.3, y2 + 1, y2 + 2.4, 0, 0.05, GLAS9);
+          for (const u of achsen5(0.3, F3.L - 0.3, 1.4, 0)) fb4(S, F3, u - 0.05, u + 0.05, y2 + 1, y2 + 2.4, 0, 0.09, WEISS2);
+          fb4(S, F3, -0.05, F3.L + 0.05, y2 + 0.9, y2 + 1, 0, 0.2, raster4);
         }
       } else {
-        for (let i = 0; i < n3; i++) for (const u of achsen5(0, F2.L, 2.6, 0.7)) fenster5(S, F2, u, yo + i * gh + 0.9, 1.3, 1.6, { rahmen: raster4, sims: null });
-        if (F2.L > 10 && o3.mosaik !== false && r3() < 0.5) {
-          const u = F2.L * 0.82;
-          fb4(S, F2, u - 1.2, u + 1.2, yo + 0.5, yo + n3 * gh - 0.5, 0, 0.12, kachel2);
-          fb4(S, F2, u - 0.9, u + 0.9, yo + 0.9, yo + n3 * gh - 0.9, 0.12, 0.16, heller(kachel2, 0.15));
+        for (let i = 0; i < n3; i++) for (const u of achsen5(0, F3.L, 2.6, 0.7)) fenster5(S, F3, u, yo + i * gh + 0.9, 1.3, 1.6, { rahmen: raster4, sims: null });
+        if (F3.L > 10 && o3.mosaik !== false && r3() < 0.5) {
+          const u = F3.L * 0.82;
+          fb4(S, F3, u - 1.2, u + 1.2, yo + 0.5, yo + n3 * gh - 0.5, 0, 0.12, kachel2);
+          fb4(S, F3, u - 0.9, u + 0.9, yo + 0.9, yo + n3 * gh - 0.9, 0.12, 0.16, heller(kachel2, 0.15));
         }
       }
     }
@@ -145898,7 +146210,7 @@
     S.quader(x0 + 0.5, y0 + H, z0 + 0.5, x0 + b3 - 0.5, y0 + H + 0.1, z0 + t3 - 0.5, "#a9a59c");
     if (o3.staffel) {
       S.quader(x0 + 1.5, y0 + H, z0 + 1.5, x0 + b3 - 1.5, y0 + H + 2.8, z0 + t3 - 2.5, raster4);
-      for (const [k3, F2] of seiten2(p2, x0 + 1.5, z0 + 1.5, b3 - 3, t3 - 4)) fb4(S, F2, 0.4, F2.L - 0.4, y0 + H + 0.6, y0 + H + 2.4, 0, 0.05, GLAS9);
+      for (const [k3, F3] of seiten2(p2, x0 + 1.5, z0 + 1.5, b3 - 3, t3 - 4)) fb4(S, F3, 0.4, F3.L - 0.4, y0 + H + 0.6, y0 + H + 2.4, 0, 0.05, GLAS9);
       S.quader(x0 + 1, y0 + H + 2.8, z0 + 1, x0 + b3 - 1, y0 + H + 3.1, z0 + t3 - 2, "#f4f2ec");
     }
     return y0 + H + (o3.staffel ? 3.1 : 0);
@@ -145962,28 +146274,28 @@
       S.quader(gx0, 0, gz0, gx0 + b3 - rr3, H, gz0 + t4, putz2);
       S.quader(gx0 + b3 - rr3, 0, gz0, gx0 + b3, H, gz0 + t4 - rr3, putz2);
       zyl8(S, rr3, rr3, H, gx0 + b3 - rr3, 0, gz0 + t4 - rr3, putz2, 20);
-      for (const [k3, F2] of [["+z", R7(gx0, gz0 + t4, 1, 0, b3 - rr3)], ["+x", R7(gx0 + b3, gz0 + t4 - rr3, 0, -1, t4 - rr3)]]) {
-        if (!sichtF(p2, F2)) continue;
-        fb4(S, F2, 0, F2.L, 0.3, eg - 0.4, -2.2, -2.15, GLAS_HELL6);
-        for (const u of achsen5(0, F2.L, 3.4, 0)) fb4(S, F2, u - 0.3, u + 0.3, 0.3, eg, -2.2, 0, raster4);
-        fb4(S, F2, 0, F2.L, eg - 0.6, eg, -2.2, 0.05, raster4);
-        fb4(S, F2, 0.1, F2.L - 0.1, eg, H - 0.4, 0, 0.04, GLAS9);
-        const ax = achsen5(0, F2.L, 1.8, 0);
+      for (const [k3, F3] of [["+z", R7(gx0, gz0 + t4, 1, 0, b3 - rr3)], ["+x", R7(gx0 + b3, gz0 + t4 - rr3, 0, -1, t4 - rr3)]]) {
+        if (!sichtF(p2, F3)) continue;
+        fb4(S, F3, 0, F3.L, 0.3, eg - 0.4, -2.2, -2.15, GLAS_HELL6);
+        for (const u of achsen5(0, F3.L, 3.4, 0)) fb4(S, F3, u - 0.3, u + 0.3, 0.3, eg, -2.2, 0, raster4);
+        fb4(S, F3, 0, F3.L, eg - 0.6, eg, -2.2, 0.05, raster4);
+        fb4(S, F3, 0.1, F3.L - 0.1, eg, H - 0.4, 0, 0.04, GLAS9);
+        const ax = achsen5(0, F3.L, 1.8, 0);
         for (let i = 0; i < n3; i++) {
           const y2 = eg + i * gh;
-          fb4(S, F2, 0, F2.L, y2, y2 + 0.25, 0, 0.3, raster4);
-          for (let j3 = 0; j3 < ax.length; j3++) fb4(S, F2, ax[j3] - 0.82, ax[j3] + 0.82, y2 + 0.25, y2 + 1, 0, 0.1, (i + j3) % 4 === 0 ? kachel2 : putz2);
+          fb4(S, F3, 0, F3.L, y2, y2 + 0.25, 0, 0.3, raster4);
+          for (let j3 = 0; j3 < ax.length; j3++) fb4(S, F3, ax[j3] - 0.82, ax[j3] + 0.82, y2 + 0.25, y2 + 1, 0, 0.1, (i + j3) % 4 === 0 ? kachel2 : putz2);
         }
-        for (const u of [0, ...ax.map((u2) => u2 + 0.9)]) fb4(S, F2, u - 0.1, u + 0.1, eg, H - 0.4, 0, 0.3, raster4);
-        ftext4(scene2, F2, namen.pop(), F2.L / 2, eg - 0.3, 0.1, 0.5, F2.L * 0.6, "#2a3036");
+        for (const u of [0, ...ax.map((u2) => u2 + 0.9)]) fb4(S, F3, u - 0.1, u + 0.1, eg, H - 0.4, 0, 0.3, raster4);
+        ftext4(scene2, F3, namen.pop(), F3.L / 2, eg - 0.3, 0.1, 0.5, F3.L * 0.6, "#2a3036");
       }
-      for (const [k3, F2] of seiten2(p2, gx0, gz0, b3, t4, ["-x", "-z"])) {
-        fb4(S, F2, 0, F2.L, 0, eg, 0, 0.05, dunkler(putz2, 0.06));
-        for (const u of achsen5(0, F2.L, 3.4, 1)) {
-          fb4(S, F2, u - 1.2, u + 1.2, 0.3, 3, 0, 0.08, GLAS_HELL6);
-          for (let i = 0; i < n3; i++) fenster5(S, F2, u, eg + i * gh + 0.9, 1.6, 1.6, { rahmen: raster4 });
+      for (const [k3, F3] of seiten2(p2, gx0, gz0, b3, t4, ["-x", "-z"])) {
+        fb4(S, F3, 0, F3.L, 0, eg, 0, 0.05, dunkler(putz2, 0.06));
+        for (const u of achsen5(0, F3.L, 3.4, 1)) {
+          fb4(S, F3, u - 1.2, u + 1.2, 0.3, 3, 0, 0.08, GLAS_HELL6);
+          for (let i = 0; i < n3; i++) fenster5(S, F3, u, eg + i * gh + 0.9, 1.6, 1.6, { rahmen: raster4 });
         }
-        for (let i = 1; i <= n3; i++) fb4(S, F2, -0.05, F2.L + 0.05, eg + i * gh - 0.15, eg + i * gh, 0, 0.15, raster4);
+        for (let i = 1; i <= n3; i++) fb4(S, F3, -0.05, F3.L + 0.05, eg + i * gh - 0.15, eg + i * gh, 0, 0.15, raster4);
       }
       for (let i = 0; i < n3; i++) {
         zyl8(S, rr3 + 0.05, rr3 + 0.05, 1.5, gx0 + b3 - rr3, eg + i * gh + 1, gz0 + t4 - rr3, GLAS9, 20);
@@ -145998,7 +146310,7 @@
       S.quader(gx0 - 0.6, H - 0.4, gz0 - 0.6, gx0 + b3 - rr3, H, gz0 + t4 + 0.6, raster4);
       S.quader(gx0 + b3 - rr3, H - 0.4, gz0 - 0.6, gx0 + b3 + 0.6, H, gz0 + t4 - rr3, raster4);
       S.quader(gx0 + 2, H, gz0 + 2, gx0 + b3 - 8, H + 3, gz0 + t4 - 3, raster4);
-      for (const [k3, F2] of seiten2(p2, gx0 + 2, gz0 + 2, b3 - 10, t4 - 5)) fb4(S, F2, 0.3, F2.L - 0.3, H + 0.4, H + 2.6, 0, 0.05, GLAS9);
+      for (const [k3, F3] of seiten2(p2, gx0 + 2, gz0 + 2, b3 - 10, t4 - 5)) fb4(S, F3, 0.3, F3.L - 0.3, H + 0.4, H + 2.6, 0, 0.05, GLAS9);
       const g4 = new three_module_exports.BoxGeometry(b3 - 6, 0.25, t4 - 2);
       g4.rotateX(-0.08);
       g4.translate(gx0 + b3 / 2 - 3, H + 3.4, gz0 + t4 / 2 - 0.5);
@@ -146035,30 +146347,30 @@
     for (let i = 0; i < 3; i++) lampe50(S, cx - 10 + i * 10, z0 + d3 - 3);
     return { hoehe: hmax };
   }
-  function gotWand(S, F2, u0, u1, y0, y1, c, o3 = {}) {
+  function gotWand(S, F3, u0, u1, y0, y1, c, o3 = {}) {
     const ax = achsen5(u0, u1, o3.ra ?? 3.6, 0.8), L2 = [], reihen = o3.reihen ?? 2, hr = (y1 - y0 - 1.2) / reihen;
     for (const u of ax) for (let k3 = 0; k3 < reihen; k3++) L2.push({ u0: u - (o3.fw ?? 0.75), u1: u + (o3.fw ?? 0.75), v0: y0 + 1 + k3 * hr, v1: y0 + (k3 + 1) * hr - 0.2, bogen: "spitz" });
-    lochwand4(S, F2, u0, u1, y0, y1, c, L2, { glas: "#3e4650", dick: 0.3 });
+    lochwand4(S, F3, u0, u1, y0, y1, c, L2, { glas: "#3e4650", dick: 0.3 });
     const hell5 = heller(c, 0.07);
     for (const l of L2) {
       const m = (l.u0 + l.u1) / 2;
-      fb4(S, F2, m - 0.06, m + 0.06, l.v0, l.v1 - (l.u1 - l.u0) * 0.5, 0.04, 0.2, hell5);
-      fb4(S, F2, l.u0, l.u1, l.v0 + (l.v1 - l.v0) * 0.55, l.v0 + (l.v1 - l.v0) * 0.55 + 0.1, 0.04, 0.2, hell5);
-      fb4(S, F2, l.u0 - 0.15, l.u1 + 0.15, l.v0 - 0.15, l.v0, 0, 0.35, hell5);
+      fb4(S, F3, m - 0.06, m + 0.06, l.v0, l.v1 - (l.u1 - l.u0) * 0.5, 0.04, 0.2, hell5);
+      fb4(S, F3, l.u0, l.u1, l.v0 + (l.v1 - l.v0) * 0.55, l.v0 + (l.v1 - l.v0) * 0.55 + 0.1, 0.04, 0.2, hell5);
+      fb4(S, F3, l.u0 - 0.15, l.u1 + 0.15, l.v0 - 0.15, l.v0, 0, 0.35, hell5);
     }
     for (let i = 0; i <= ax.length; i++) {
       const u = i === 0 ? u0 + 0.3 : i === ax.length ? u1 - 0.3 : (ax[i - 1] + ax[i]) / 2;
-      fb4(S, F2, u - 0.3, u + 0.3, y0, y1 - 1.2, 0.3, 0.9, c);
-      fb4(S, F2, u - 0.3, u + 0.3, y1 - 1.2, y1 - 0.4, 0.3, 0.6, c);
+      fb4(S, F3, u - 0.3, u + 0.3, y0, y1 - 1.2, 0.3, 0.9, c);
+      fb4(S, F3, u - 0.3, u + 0.3, y1 - 1.2, y1 - 0.4, 0.3, 0.6, c);
       if (o3.fialen) {
-        const [x2, z4] = wp4(F2, u, 0.55);
+        const [x2, z4] = wp4(F3, u, 0.55);
         const g = new three_module_exports.ConeGeometry(0.35, 2.2, 4);
         g.translate(x2, y1 + 1.1, z4);
         S.add(g, hell5);
       }
     }
-    for (let k3 = 1; k3 < reihen; k3++) fb4(S, F2, u0, u1, y0 + k3 * hr - 0.1, y0 + k3 * hr + 0.15, 0, 0.4, hell5);
-    fb4(S, F2, u0 - 0.2, u1 + 0.2, y1 - 0.4, y1, 0, 0.6, hell5);
+    for (let k3 = 1; k3 < reihen; k3++) fb4(S, F3, u0, u1, y0 + k3 * hr - 0.1, y0 + k3 * hr + 0.15, 0, 0.4, hell5);
+    fb4(S, F3, u0 - 0.2, u1 + 0.2, y1 - 0.4, y1, 0, 0.6, hell5);
   }
   function universitaetRoh(S, scene2, p2) {
     const r3 = rng3(`uni:${p2.seed}`), v = p2.variante, { x: x0, z: z0, w: w2, d: d3 } = p2;
@@ -146067,38 +146379,38 @@
       const c = waehle2(r3, ["#b5735e", "#c9b89a", "#bf8a6e"]), hell5 = heller(c, 0.07), dach3 = SCHIEFER3;
       const mx0 = x0 + 3, mz0 = z0 + 4, mb = w2 - 24, mt = 14, H2 = 15;
       S.quader(mx0, 0, mz0, mx0 + mb, H2, mz0 + mt, c);
-      for (const [k3, F3] of seiten2(p2, mx0, mz0, mb, mt, ["+z", "-z", "-x"])) gotWand(S, F3, 0, F3.L, 0.3, H2, c, { ra: 3.4, fialen: true });
+      for (const [k3, F4] of seiten2(p2, mx0, mz0, mb, mt, ["+z", "-z", "-x"])) gotWand(S, F4, 0, F4.L, 0.3, H2, c, { ra: 3.4, fialen: true });
       satteldach4(S, mx0, mz0 - 0.3, mx0 + mb, mz0 + mt + 0.3, H2, 8, "x", dach3, c, 0.3);
-      for (const [k3, F3] of seiten2(p2, mx0, mz0, mb, mt, ["+z", "-z"])) for (const u of achsen5(0, F3.L, 11, 3)) {
-        fb4(S, F3, u - 2.6, u + 2.6, H2 - 0.4, H2 + 3.4, -3, 0.35, c);
-        fpoly3(S, F3, [[u - 2.6, H2 + 3.4], [u + 2.6, H2 + 3.4], [u, H2 + 7.2]], -3, 0.35, c);
-        fstrebe(S, F3, u - 2.9, H2 + 3.2, u + 0.1, H2 + 7.4, 0.35, -3.2, 0.5, hell5);
-        fstrebe(S, F3, u + 2.9, H2 + 3.2, u - 0.1, H2 + 7.4, 0.35, -3.2, 0.5, hell5);
-        lochwand4(S, teil4(F3, 0, F3.L, 0.35), u - 1.6, u + 1.6, H2 + 0.2, H2 + 3.2, c, [{ u0: u - 1.1, u1: u - 0.15, v0: H2 + 0.5, v1: H2 + 2.9, bogen: "spitz" }, { u0: u + 0.15, u1: u + 1.1, v0: H2 + 0.5, v1: H2 + 2.9, bogen: "spitz" }], { dick: 0.1 });
+      for (const [k3, F4] of seiten2(p2, mx0, mz0, mb, mt, ["+z", "-z"])) for (const u of achsen5(0, F4.L, 11, 3)) {
+        fb4(S, F4, u - 2.6, u + 2.6, H2 - 0.4, H2 + 3.4, -3, 0.35, c);
+        fpoly3(S, F4, [[u - 2.6, H2 + 3.4], [u + 2.6, H2 + 3.4], [u, H2 + 7.2]], -3, 0.35, c);
+        fstrebe(S, F4, u - 2.9, H2 + 3.2, u + 0.1, H2 + 7.4, 0.35, -3.2, 0.5, hell5);
+        fstrebe(S, F4, u + 2.9, H2 + 3.2, u - 0.1, H2 + 7.4, 0.35, -3.2, 0.5, hell5);
+        lochwand4(S, teil4(F4, 0, F4.L, 0.35), u - 1.6, u + 1.6, H2 + 0.2, H2 + 3.2, c, [{ u0: u - 1.1, u1: u - 0.15, v0: H2 + 0.5, v1: H2 + 2.9, bogen: "spitz" }, { u0: u + 0.15, u1: u + 1.1, v0: H2 + 0.5, v1: H2 + 2.9, bogen: "spitz" }], { dick: 0.1 });
         const g3 = new three_module_exports.ConeGeometry(0.3, 1.8, 4);
-        const [gx, gz2] = wp4(F3, u, 0.2);
+        const [gx, gz2] = wp4(F4, u, 0.2);
         g3.translate(gx, H2 + 8, gz2);
         S.add(g3, hell5);
       }
       const ab2 = 16, ax02 = mx0 + mb, az02 = mz0, at2 = d3 - 9, Ha = 17;
       S.quader(ax02, 0, az02, ax02 + ab2, Ha, az02 + at2, c);
-      for (const [k3, F3] of seiten2(p2, ax02, az02, ab2, at2)) {
-        if (k3 === "+x" || k3 === "-x") gotWand(S, F3, 0, F3.L, 0.3, Ha, c, { ra: 4.4, reihen: 1, fw: 1.2, fialen: true });
+      for (const [k3, F4] of seiten2(p2, ax02, az02, ab2, at2)) {
+        if (k3 === "+x" || k3 === "-x") gotWand(S, F4, 0, F4.L, 0.3, Ha, c, { ra: 4.4, reihen: 1, fw: 1.2, fialen: true });
         else {
-          lochwand4(S, F3, 0, F3.L, 0.3, Ha, c, [{ u0: F3.L / 2 - 3, u1: F3.L / 2 + 3, v0: 6, v1: Ha - 1.4, bogen: "spitz" }, { u0: F3.L / 2 - 1.5, u1: F3.L / 2 + 1.5, v0: 0.3, v1: 4.2, bogen: "spitz" }], { glas: "#3e4650" });
-          for (const du of [-1.5, 0, 1.5]) fb4(S, F3, F3.L / 2 + du - 0.1, F3.L / 2 + du + 0.1, 6, Ha - 3.5, 0.02, 0.15, hell5);
-          fscheibe3(S, F3, F3.L / 2, Ha - 3.3, 0.05, 0.18, 1.3, hell5, 12);
-          fpoly3(S, F3, [[0, Ha], [F3.L, Ha], [F3.L / 2, Ha + 10]], -1, 0.3, c);
-          lochwand4(S, teil4(F3, 0, F3.L, 0.3), F3.L / 2 - 1.8, F3.L / 2 + 1.8, Ha + 1, Ha + 5, c, [{ u0: F3.L / 2 - 1.2, u1: F3.L / 2 + 1.2, v0: Ha + 1.3, v1: Ha + 4.6, bogen: "spitz" }], { dick: 0.1 });
-          for (const u of [0.3, F3.L - 0.3]) {
-            fb4(S, F3, u - 0.6, u + 0.6, 0, Ha + 1, 0, 0.9, c);
-            const [gx2, gz3] = wp4(F3, u, 0.45);
+          lochwand4(S, F4, 0, F4.L, 0.3, Ha, c, [{ u0: F4.L / 2 - 3, u1: F4.L / 2 + 3, v0: 6, v1: Ha - 1.4, bogen: "spitz" }, { u0: F4.L / 2 - 1.5, u1: F4.L / 2 + 1.5, v0: 0.3, v1: 4.2, bogen: "spitz" }], { glas: "#3e4650" });
+          for (const du of [-1.5, 0, 1.5]) fb4(S, F4, F4.L / 2 + du - 0.1, F4.L / 2 + du + 0.1, 6, Ha - 3.5, 0.02, 0.15, hell5);
+          fscheibe3(S, F4, F4.L / 2, Ha - 3.3, 0.05, 0.18, 1.3, hell5, 12);
+          fpoly3(S, F4, [[0, Ha], [F4.L, Ha], [F4.L / 2, Ha + 10]], -1, 0.3, c);
+          lochwand4(S, teil4(F4, 0, F4.L, 0.3), F4.L / 2 - 1.8, F4.L / 2 + 1.8, Ha + 1, Ha + 5, c, [{ u0: F4.L / 2 - 1.2, u1: F4.L / 2 + 1.2, v0: Ha + 1.3, v1: Ha + 4.6, bogen: "spitz" }], { dick: 0.1 });
+          for (const u of [0.3, F4.L - 0.3]) {
+            fb4(S, F4, u - 0.6, u + 0.6, 0, Ha + 1, 0, 0.9, c);
+            const [gx2, gz3] = wp4(F4, u, 0.45);
             const g4 = new three_module_exports.ConeGeometry(0.6, 4, 4);
             g4.translate(gx2, Ha + 3, gz3);
             S.add(g4, hell5);
           }
           const g3 = new three_module_exports.ConeGeometry(0.35, 2.4, 4);
-          const [gx, gz2] = wp4(F3, F3.L / 2, 0.15);
+          const [gx, gz2] = wp4(F4, F4.L / 2, 0.15);
           g3.translate(gx, Ha + 11.2, gz2);
           S.add(g3, hell5);
         }
@@ -146106,11 +146418,11 @@
       satteldach4(S, ax02 - 0.3, az02, ax02 + ab2 + 0.3, az02 + at2, Ha, 10, "z", dach3, c, 0.3);
       const ts = 7.5, tx0 = ax02 - ts - 1, tz0 = mz0 + mt - 2, Ht = 34;
       S.quader(tx0, 0, tz0, tx0 + ts, Ht, tz0 + ts, c);
-      for (const [k3, F3] of seiten2(p2, tx0, tz0, ts, ts)) {
-        lochwand4(S, F3, 0, ts, 0.3, Ht - 1, c, [{ u0: ts / 2 - 1.2, u1: ts / 2 + 1.2, v0: 0.3, v1: 4.2, bogen: "spitz" }, { u0: ts / 2 - 0.5, u1: ts / 2 + 0.5, v0: 8, v1: 11, bogen: "spitz" }, { u0: ts / 2 - 0.5, u1: ts / 2 + 0.5, v0: 14, v1: 17, bogen: "spitz" }, { u0: ts / 2 - 1.8, u1: ts / 2 - 0.2, v0: Ht - 8, v1: Ht - 2.5, bogen: "spitz" }, { u0: ts / 2 + 0.2, u1: ts / 2 + 1.8, v0: Ht - 8, v1: Ht - 2.5, bogen: "spitz" }], { glas: "#3e4650" });
-        fscheibe3(S, F3, ts / 2, Ht - 11, 0.35, 0.45, 1.2, "#f6f1e2");
-        fscheibe3(S, F3, ts / 2, Ht - 11, 0.45, 0.5, 1, "#2b3036");
-        for (const y2 of [6.5, 19, Ht - 1]) fb4(S, F3, -0.2, ts + 0.2, y2, y2 + 0.5, 0, 0.5, hell5);
+      for (const [k3, F4] of seiten2(p2, tx0, tz0, ts, ts)) {
+        lochwand4(S, F4, 0, ts, 0.3, Ht - 1, c, [{ u0: ts / 2 - 1.2, u1: ts / 2 + 1.2, v0: 0.3, v1: 4.2, bogen: "spitz" }, { u0: ts / 2 - 0.5, u1: ts / 2 + 0.5, v0: 8, v1: 11, bogen: "spitz" }, { u0: ts / 2 - 0.5, u1: ts / 2 + 0.5, v0: 14, v1: 17, bogen: "spitz" }, { u0: ts / 2 - 1.8, u1: ts / 2 - 0.2, v0: Ht - 8, v1: Ht - 2.5, bogen: "spitz" }, { u0: ts / 2 + 0.2, u1: ts / 2 + 1.8, v0: Ht - 8, v1: Ht - 2.5, bogen: "spitz" }], { glas: "#3e4650" });
+        fscheibe3(S, F4, ts / 2, Ht - 11, 0.35, 0.45, 1.2, "#f6f1e2");
+        fscheibe3(S, F4, ts / 2, Ht - 11, 0.45, 0.5, 1, "#2b3036");
+        for (const y2 of [6.5, 19, Ht - 1]) fb4(S, F4, -0.2, ts + 0.2, y2, y2 + 0.5, 0, 0.5, hell5);
       }
       for (const [sx, sz] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
         const g3 = new three_module_exports.ConeGeometry(0.6, 4, 4);
@@ -146128,13 +146440,13 @@
       S.box(1.6, 2.2, 1.6, x0 + w2 * 0.42, 1.4, z0 + d3 - 9, "#d8d0c0");
       zyl8(S, 0.35, 0.45, 2.2, x0 + w2 * 0.42, 2.5, z0 + d3 - 9, "#6f7d78", 8);
       S.add(new three_module_exports.SphereGeometry(0.4, 8, 6).translate(x0 + w2 * 0.42, 5, z0 + d3 - 9), "#6f7d78");
-      for (const [k3, F3] of seiten2(p2, mx0, mz0 - 0.3, mb, mt + 0.6, ["+z", "-z"])) {
-        const zw2 = achsen5(0, F3.L, 11, 3);
-        for (const u of achsen5(0, F3.L, 4.2, 2)) {
+      for (const [k3, F4] of seiten2(p2, mx0, mz0 - 0.3, mb, mt + 0.6, ["+z", "-z"])) {
+        const zw2 = achsen5(0, F4.L, 11, 3);
+        for (const u of achsen5(0, F4.L, 4.2, 2)) {
           if (zw2.some((q2) => Math.abs(q2 - u) < 4.2)) continue;
-          fb4(S, F3, u - 0.7, u + 0.7, H2 + 0.9, H2 + 2.7, -3, -1, c);
-          fb4(S, F3, u - 0.4, u + 0.4, H2 + 1.1, H2 + 2.4, -1.05, -0.95, "#3e4650");
-          fpoly3(S, teil4(F3, u - 0.85, u + 0.85, -1), [[0, H2 + 2.7], [1.7, H2 + 2.7], [0.85, H2 + 3.6]], -2.4, 0.1, dach3);
+          fb4(S, F4, u - 0.7, u + 0.7, H2 + 0.9, H2 + 2.7, -3, -1, c);
+          fb4(S, F4, u - 0.4, u + 0.4, H2 + 1.1, H2 + 2.4, -1.05, -0.95, "#3e4650");
+          fpoly3(S, teil4(F4, u - 0.85, u + 0.85, -1), [[0, H2 + 2.7], [1.7, H2 + 2.7], [0.85, H2 + 3.6]], -2.4, 0.1, dach3);
         }
       }
       const fx = mx0 + mb * 0.3;
@@ -146153,23 +146465,23 @@
       const be = waehle2(r3, ["#b9b5ad", "#c2bdb2", "#aeaaa1"]), hell5 = heller(be, 0.06), dk = "#3a434b";
       const hx0 = x0 + 4, hz0 = z0 + 4, hb2 = 34, ht = 14, n3 = 14, gh = 3.4, Hh = 4 + n3 * gh;
       S.quader(hx0, 0, hz0, hx0 + hb2, Hh, hz0 + ht, dk);
-      for (const [k3, F3] of seiten2(p2, hx0, hz0, hb2, ht)) {
-        const lang = F3.L > 20;
-        for (let i = 0; i <= n3; i++) fb4(S, F3, 0, F3.L, 4 + i * gh - 0.9, 4 + i * gh, 0, 0.45, be);
-        for (const u of achsen5(0, F3.L, lang ? 1.7 : 2.2, 0)) fb4(S, F3, u - 0.2, u + 0.2, 4, Hh - 2, 0, 0.7, be);
-        fb4(S, F3, -0.1, F3.L + 0.1, 0, 4, -1.5, -1.45, GLAS_HELL6);
-        for (const u of achsen5(0, F3.L, 4.5, 0)) fb4(S, F3, u - 0.4, u + 0.4, 0, 4, -1.5, 0.3, be);
-        fb4(S, F3, -0.2, F3.L + 0.2, Hh - 2, Hh, 0, 0.75, be);
+      for (const [k3, F4] of seiten2(p2, hx0, hz0, hb2, ht)) {
+        const lang = F4.L > 20;
+        for (let i = 0; i <= n3; i++) fb4(S, F4, 0, F4.L, 4 + i * gh - 0.9, 4 + i * gh, 0, 0.45, be);
+        for (const u of achsen5(0, F4.L, lang ? 1.7 : 2.2, 0)) fb4(S, F4, u - 0.2, u + 0.2, 4, Hh - 2, 0, 0.7, be);
+        fb4(S, F4, -0.1, F4.L + 0.1, 0, 4, -1.5, -1.45, GLAS_HELL6);
+        for (const u of achsen5(0, F4.L, 4.5, 0)) fb4(S, F4, u - 0.4, u + 0.4, 0, 4, -1.5, 0.3, be);
+        fb4(S, F4, -0.2, F4.L + 0.2, Hh - 2, Hh, 0, 0.75, be);
       }
       S.quader(hx0 + 4, Hh, hz0 + 3, hx0 + 14, Hh + 4, hz0 + ht - 3, be);
       const tx0 = x0 + 14, tz0 = z0 + 26, tb = w2 - 18, tt = d3 - 34;
       for (let k3 = 0; k3 < 3; k3++) {
         const zA = tz0, zB = tz0 + tt - k3 * 4.5, xA = tx0 + k3 * 3, y2 = k3 * 3.8;
         S.quader(xA, y2, zA, tx0 + tb, y2 + 3.8, zB, dk);
-        for (const [kk, F3] of seiten2(p2, xA, zA, tx0 + tb - xA, zB - zA)) {
-          fb4(S, F3, -0.1, F3.L + 0.1, y2 + 2.6, y2 + 3.8, 0, 0.4, be);
-          fb4(S, F3, -0.1, F3.L + 0.1, y2 + 3.8, y2 + 4.3, 0, 0.6, k3 === 2 ? be : "#7a9a5a");
-          for (const u of achsen5(0, F3.L, 3.6, 0)) fb4(S, F3, u - 0.15, u + 0.15, y2, y2 + 2.6, 0, 0.3, be);
+        for (const [kk, F4] of seiten2(p2, xA, zA, tx0 + tb - xA, zB - zA)) {
+          fb4(S, F4, -0.1, F4.L + 0.1, y2 + 2.6, y2 + 3.8, 0, 0.4, be);
+          fb4(S, F4, -0.1, F4.L + 0.1, y2 + 3.8, y2 + 4.3, 0, 0.6, k3 === 2 ? be : "#7a9a5a");
+          for (const u of achsen5(0, F4.L, 3.6, 0)) fb4(S, F4, u - 0.15, u + 0.15, y2, y2 + 2.6, 0, 0.3, be);
         }
       }
       S.quader(tx0 + 6, 11.4, tz0, tx0 + tb, 11.8, tz0 + tt - 9, be);
@@ -146179,15 +146491,15 @@
         pts.push([cx + Math.cos(a2) * ra, cz + Math.sin(a2) * ra]);
       }
       prisma3(S, pts, 0, 10, be);
-      for (const F3 of kanten2(pts)) if (sichtF(p2, F3)) {
-        fb4(S, F3, 0.3, F3.L - 0.3, 0.3, 3.2, 0, 0.05, GLAS_HELL6);
-        for (const u of achsen5(0, F3.L, 1.4, 0)) fb4(S, F3, u - 0.15, u + 0.15, 3.2, 10, 0, 0.3, hell5);
-        fb4(S, F3, -0.1, F3.L + 0.1, 9.2, 10.2, 0, 0.5, hell5);
+      for (const F4 of kanten2(pts)) if (sichtF(p2, F4)) {
+        fb4(S, F4, 0.3, F4.L - 0.3, 0.3, 3.2, 0, 0.05, GLAS_HELL6);
+        for (const u of achsen5(0, F4.L, 1.4, 0)) fb4(S, F4, u - 0.15, u + 0.15, 3.2, 10, 0, 0.3, hell5);
+        fb4(S, F4, -0.1, F4.L + 0.1, 9.2, 10.2, 0, 0.5, hell5);
       }
       zyl8(S, ra * 0.55, ra * 0.7, 2.5, cx, 10, cz, hell5, 8);
       ftext4(scene2, R7(cx - 4, cz + ra * 0.93 + 0.1, 1, 0, 8), "H\xF6rsaalzentrum", 4, 8.4, 0.5, 0.7, 7.5, "#2a3036");
       S.quader(hx0 + hb2 - 2, 7, hz0 + ht, hx0 + hb2 + 2, 10, tz0, be);
-      for (const [k3, F3] of seiten2(p2, hx0 + hb2 - 2, hz0 + ht, 4, tz0 - hz0 - ht, ["+x", "-x"])) fb4(S, F3, 0, F3.L, 8, 9.5, 0, 0.05, GLAS9);
+      for (const [k3, F4] of seiten2(p2, hx0 + hb2 - 2, hz0 + ht, 4, tz0 - hz0 - ht, ["+x", "-x"])) fb4(S, F4, 0, F4.L, 8, 9.5, 0, 0.05, GLAS9);
       for (const z4 of [hz0 + ht + 3, tz0 - 3]) S.box(0.8, 7, 0.8, hx0 + hb2, 3.65, z4, be);
       for (let i = 0; i < 5; i++) pflanzkuebel2(S, r3, x0 + 6 + i * 3.2, z0 + d3 - 4, 0.3, i % 2 === 0);
       for (let i = 0; i < 10; i++) {
@@ -146196,7 +146508,7 @@
       }
       baumreiheZ(S, r3, tz0, z0 + d3 - 4, x0 + 5, 7, 1);
       S.quader(hx0 + 2, 0, hz0 + ht, hx0 + 6.5, Hh + 2, hz0 + ht + 4, be);
-      for (const [k3, F3] of seiten2(p2, hx0 + 2, hz0 + ht, 4.5, 4)) for (let y2 = 3; y2 < Hh; y2 += 3.4) fb4(S, F3, F3.L / 2 - 0.25, F3.L / 2 + 0.25, y2, y2 + 2.2, 0, 0.05, dk);
+      for (const [k3, F4] of seiten2(p2, hx0 + 2, hz0 + ht, 4.5, 4)) for (let y2 = 3; y2 < Hh; y2 += 3.4) fb4(S, F4, F4.L / 2 - 0.25, F4.L / 2 + 0.25, y2, y2 + 2.2, 0, 0.05, dk);
       for (let i = 0; i < 3; i++) S.quader(hx0 + 17 + i * 5, Hh, hz0 + 3, hx0 + 20 + i * 5, Hh + 2.2, hz0 + 7, "#c9cdd0");
       for (let i = 0; i < 3; i++) zyl8(S, 0.8, 0.8, 0.6, hx0 + 18.5 + i * 5, Hh + 2.2, hz0 + 5, "#5d656c", 10);
       zyl8(S, 0.15, 0.2, 9, hx0 + 30, Hh, hz0 + 10, "#d9dcdf", 6);
@@ -146234,24 +146546,24 @@
     const putz2 = waehle2(r3, ["#ead7a2", "#ecdcae", "#e6cf9a"]), orn = WEISS2;
     const ab = Math.min(30, w2 - 18), at = 18, ax0 = x0 + (w2 - ab) / 2, az0 = z0 + 4, H = 13;
     S.quader(ax0, 0, az0, ax0 + ab, H, az0 + at, putz2);
-    for (const [k3, F3] of seiten2(p2, ax0, az0, ab, at)) {
-      const L2 = achsen5(0, F3.L, 3.6, 1).map((u) => ({ u0: u - 0.85, u1: u + 0.85, v0: 3.2, v1: H - 2.2, bogen: true }));
-      lochwand4(S, F3, 0, F3.L, 0.3, H - 1.2, putz2, L2, { dick: 0.25 });
-      for (const u of achsen5(0, F3.L, 3.6, 1)) {
-        fb4(S, F3, u - 1.9, u - 1.5, 1.6, H - 1.2, 0, 0.35, orn);
-        fb4(S, F3, u - 0.85, u + 0.85, 2.9, 3.15, 0, 0.35, orn);
+    for (const [k3, F4] of seiten2(p2, ax0, az0, ab, at)) {
+      const L2 = achsen5(0, F4.L, 3.6, 1).map((u) => ({ u0: u - 0.85, u1: u + 0.85, v0: 3.2, v1: H - 2.2, bogen: true }));
+      lochwand4(S, F4, 0, F4.L, 0.3, H - 1.2, putz2, L2, { dick: 0.25 });
+      for (const u of achsen5(0, F4.L, 3.6, 1)) {
+        fb4(S, F4, u - 1.9, u - 1.5, 1.6, H - 1.2, 0, 0.35, orn);
+        fb4(S, F4, u - 0.85, u + 0.85, 2.9, 3.15, 0, 0.35, orn);
       }
-      fb4(S, F3, -0.1, F3.L + 0.1, 0.3, 1.6, 0, 0.4, "#d8cba8");
-      fb4(S, F3, -0.3, F3.L + 0.3, H - 1.2, H, 0, 0.6, orn);
+      fb4(S, F4, -0.1, F4.L + 0.1, 0.3, 1.6, 0, 0.4, "#d8cba8");
+      fb4(S, F4, -0.3, F4.L + 0.3, H - 1.2, H, 0, 0.6, orn);
     }
     walm2(S, ax0 - 0.3, az0 - 0.3, ax0 + ab + 0.3, az0 + at + 0.3, H, 5, SCHIEFER3);
-    const F2 = R7(ax0 + ab / 2 - 8, az0 + at + 5.5, 1, 0, 16);
+    const F3 = R7(ax0 + ab / 2 - 8, az0 + at + 5.5, 1, 0, 16);
     S.quader(ax0 + ab / 2 - 8.5, 0.3, az0 + at, ax0 + ab / 2 + 8.5, 1.6, az0 + at + 6.5, "#e2dccf");
     for (let i = 0; i < 3; i++) S.quader(ax0 + ab / 2 - 8.5, 0.3, az0 + at + 6.5 + i * 0.5, ax0 + ab / 2 + 8.5, 1.3 - i * 0.4, az0 + at + 7 + i * 0.5, "#e2dccf");
-    saeulenreihe(S, F2, 1, 15, 4, 1.6, H - 2.8, -0.6, 0.6, WEISS2, orn);
+    saeulenreihe(S, F3, 1, 15, 4, 1.6, H - 2.8, -0.6, 0.6, WEISS2, orn);
     S.quader(ax0 + ab / 2 - 8.3, H - 1.2, az0 + at - 0.5, ax0 + ab / 2 + 8.3, H, az0 + at + 5.8, orn);
-    dreiecksgiebel(S, F2, -0.3, 16.3, H, 3.8, -6.4, 0.2, putz2, orn);
-    if (sichtF(p2, F2)) ftext4(scene2, F2, "Aula", 8, H - 0.6, 0.35, 0.8, 6, "#7a6a4a");
+    dreiecksgiebel(S, F3, -0.3, 16.3, H, 3.8, -6.4, 0.2, putz2, orn);
+    if (sichtF(p2, F3)) ftext4(scene2, F3, "Aula", 8, H - 0.6, 0.35, 0.8, 6, "#7a6a4a");
     const g = dachProfil(6.2, 16.6, 3.8, 0.1, "z");
     g.translate(ax0 + ab / 2, H, az0 + at + 2.8);
     S.add(g, SCHIEFER3);
@@ -146269,7 +146581,7 @@
     boden5(S, ax0 + ab / 2 - 2, az0 + at + 8, ax0 + ab / 2 + 2, z0 + d3, KIES4, 0.3, 0.11);
     for (const s2 of [-1, 1]) baum(S, ax0 + ab / 2 + s2 * 10, z0 + d3 - 5, r3, 1.2);
     for (const [u, hh] of [[-0.3, 0], [16.3, 0], [8, 3.8]]) {
-      const [sx, sz] = wp4(F2, u, -0.2);
+      const [sx, sz] = wp4(F3, u, -0.2);
       zyl8(S, 0.3, 0.4, 1.6, sx, H + hh, sz, WEISS2, 8);
       S.add(new three_module_exports.SphereGeometry(0.35, 8, 6).translate(sx, H + hh + 1.9, sz), WEISS2);
     }
@@ -146289,10 +146601,10 @@
     return { hoehe: H + 5 };
   }
   var ROEM_DUNKEL = ["#575049", "#4f4943", "#5e5750"];
-  function ruinenKrone(S, F2, u0, u1, y2, r3, c, t0, t1, hmax = 2.2) {
+  function ruinenKrone(S, F3, u0, u1, y2, r3, c, t0, t1, hmax = 2.2) {
     for (let u = u0; u < u1 - 0.1; ) {
       const b3 = Math.min(u1 - u, zw(r3, 0.9, 2.4)), h3 = zw(r3, 0, hmax);
-      if (h3 > 0.3) fb4(S, F2, u, u + b3, y2, y2 + h3, t0, t1, c);
+      if (h3 > 0.3) fb4(S, F3, u, u + b3, y2, y2 + h3, t0, t1, c);
       u += b3;
     }
   }
@@ -146319,7 +146631,7 @@
       const ex = 4.5, tr = 5.6;
       S.quader(cx2 - B8 / 2, 0, cz2 - T / 2, cx2 + B8 / 2, H - 2.5, cz2 + T / 2, c);
       S.quader(cx2 - B8 / 2, H - 2.5, cz2 - T / 2, cx2 + 3, H, cz2 + T / 2, c);
-      const arkaden2 = (F3, u0, u1, geschosse2, durchgang) => {
+      const arkaden2 = (F4, u0, u1, geschosse2, durchgang) => {
         const L2 = [];
         let y2 = 0;
         geschosse2.forEach((gh, k3) => {
@@ -146329,16 +146641,16 @@
         });
         return L2;
       };
-      for (const [k3, F3] of seiten2(p2, cx2 - B8 / 2, cz2 - T / 2, B8, T, ["-z", "-x", "+x"])) {
+      for (const [k3, F4] of seiten2(p2, cx2 - B8 / 2, cz2 - T / 2, B8, T, ["-z", "-x", "+x"])) {
         const geschosse2 = k3 === "-z" ? ze : ze.slice(0, 3);
-        const L2 = arkaden2(F3, 0, F3.L, geschosse2, k3 === "-z" ? [F3.L / 2 - 2.4, F3.L / 2 + 2.4] : null);
-        lochwand4(S, F3, 0, F3.L, 0, H - 2.5, c, L2, { glas: dk, dick: 0.6 });
+        const L2 = arkaden2(F4, 0, F4.L, geschosse2, k3 === "-z" ? [F4.L / 2 - 2.4, F4.L / 2 + 2.4] : null);
+        lochwand4(S, F4, 0, F4.L, 0, H - 2.5, c, L2, { glas: dk, dick: 0.6 });
         let y2 = 0;
         for (const gh of geschosse2) {
           y2 += gh;
-          fb4(S, F3, -0.1, F3.L + 0.1, y2 - 0.5, y2, 0, 0.9, hell5);
+          fb4(S, F4, -0.1, F4.L + 0.1, y2 - 0.5, y2, 0, 0.9, hell5);
         }
-        for (const u of achsen5(0, F3.L, 2.9, 0.4)) fb4(S, F3, u + 1.15, u + 1.6, ze[0], H - 3, 0.6, 0.95, c);
+        for (const u of achsen5(0, F4.L, 2.9, 0.4)) fb4(S, F4, u + 1.15, u + 1.6, ze[0], H - 3, 0.6, 0.95, c);
       }
       const FM = R7(cx2 - ex, cz2 + T / 2, 1, 0, 2 * ex);
       if (sichtF(p2, FM)) {
@@ -146365,17 +146677,17 @@
           for (let i = 0; i < 7; i++) {
             const a2 = -PI10 / 2 + (i + 0.5) / 7 * PI10, nx = Math.sin(a2), nz = Math.cos(a2);
             if (!sieht2(p2, nx, nz)) continue;
-            const F3 = R7(tx2 + nx * (tr + 0.02) + nz * 0.9, cz2 + T / 2 + nz * (tr + 0.02) - nx * 0.9, -nz, nx, 1.8);
-            fwand2(S, F3, 0, 1.8, y2 - gh + 0.5, y2 - 0.5, 0, 0.12, hell5, [{ u0: 0.35, u1: 1.45, v0: y2 - gh + 0.7, v1: y2 - 0.7, bogen: true }]);
-            fb4(S, F3, 0.36, 1.44, y2 - gh + 0.7, y2 - 1, 0, 0.06, dk);
+            const F4 = R7(tx2 + nx * (tr + 0.02) + nz * 0.9, cz2 + T / 2 + nz * (tr + 0.02) - nx * 0.9, -nz, nx, 1.8);
+            fwand2(S, F4, 0, 1.8, y2 - gh + 0.5, y2 - 0.5, 0, 0.12, hell5, [{ u0: 0.35, u1: 1.45, v0: y2 - gh + 0.7, v1: y2 - 0.7, bogen: true }]);
+            fb4(S, F4, 0.36, 1.44, y2 - gh + 0.7, y2 - 1, 0, 0.06, dk);
           }
         });
         if (s2 > 0) ruinenKrone(S, R7(tx2 - tr, cz2 + T / 2, 1, 0, 2 * tr), 0.5, 2 * tr - 0.5, Ht, r3, c, -4, 0, 1.8);
       }
       ruinenKrone(S, R7(cx2 + 3, cz2 + T / 2 - 0.2, 1, 0, B8 / 2 - 3), 0, B8 / 2 - 3, H - 2.5, r3, c, -T + 0.4, 0, 1.6);
-      for (const [k3, F3] of seiten2(p2, cx2 - B8 / 2, cz2 - T / 2, B8, T, ["-z", "-x", "+x"])) for (let i = 0; i < 10; i++) {
-        const u = zw(r3, 0.5, F3.L - 1.5), y2 = zw(r3, 1, H - 4);
-        fb4(S, F3, u, u + zw(r3, 0.6, 1.4), y2, y2 + 0.55, 0.6, 0.66, r3() < 0.5 ? hell5 : dunkler(c, 0.05));
+      for (const [k3, F4] of seiten2(p2, cx2 - B8 / 2, cz2 - T / 2, B8, T, ["-z", "-x", "+x"])) for (let i = 0; i < 10; i++) {
+        const u = zw(r3, 0.5, F4.L - 1.5), y2 = zw(r3, 1, H - 4);
+        fb4(S, F4, u, u + zw(r3, 0.6, 1.4), y2, y2 + 0.55, 0.6, 0.66, r3() < 0.5 ? hell5 : dunkler(c, 0.05));
       }
       for (const s2 of [-1, 1]) {
         const mx = s2 < 0 ? x0 + 1 : cx2 + B8 / 2 + 1;
@@ -146428,24 +146740,24 @@
       for (let i = 0; i < n3; i++) {
         const a0 = PI10 - i * PI10 / n3, a1 = PI10 - (i + 1) * PI10 / n3;
         const p0 = [cx2 + Math.cos(a0) * ra, wz2 + Math.sin(a0) * ra], p1 = [cx2 + Math.cos(a1) * ra, wz2 + Math.sin(a1) * ra];
-        const L22 = wurzelSumme19(p1[0] - p0[0], p1[1] - p0[1]), F3 = R7(p0[0], p0[1], (p1[0] - p0[0]) / L22, (p1[1] - p0[1]) / L22, L22);
+        const L22 = wurzelSumme19(p1[0] - p0[0], p1[1] - p0[1]), F4 = R7(p0[0], p0[1], (p1[0] - p0[0]) / L22, (p1[1] - p0[1]) / L22, L22);
         const Hi = H - (i > 6 ? 4 + (i - 6) * 3 : 0);
         const loch = [{ u0: L22 / 2 - 1.2, u1: L22 / 2 + 1.2, v0: 2.5, v1: 10, bogen: true }];
         if (Hi > 17) loch.push({ u0: L22 / 2 - 1, u1: L22 / 2 + 1, v0: 12.5, v1: 18, bogen: true });
-        fwand2(S, F3, -0.05, L22 + 0.05, 0, Hi, -1.2, 0, c, loch);
-        fb4(S, F3, -0.05, L22 + 0.05, 11, 11.7, -1.3, 0.1, ziegel);
-        if (Hi > 20.5) fb4(S, F3, -0.05, L22 + 0.05, 20, 20.7, -1.3, 0.1, ziegel);
-        ruinenKrone(S, F3, 0, L22, Hi, r3, c, -1.2, 0, 1.6);
+        fwand2(S, F4, -0.05, L22 + 0.05, 0, Hi, -1.2, 0, c, loch);
+        fb4(S, F4, -0.05, L22 + 0.05, 11, 11.7, -1.3, 0.1, ziegel);
+        if (Hi > 20.5) fb4(S, F4, -0.05, L22 + 0.05, 20, 20.7, -1.3, 0.1, ziegel);
+        ruinenKrone(S, F4, 0, L22, Hi, r3, c, -1.2, 0, 1.6);
       }
       for (const s2 of [-1, 1]) {
         const ax = cx2 + s2 * Math.min(22, mw / 2 - 5), rs = 5;
         for (let i = 0; i < 5; i++) {
           const a0 = PI10 - i * PI10 / 5, a1 = PI10 - (i + 1) * PI10 / 5;
           const p0 = [ax + Math.cos(a0) * rs, wz2 + Math.sin(a0) * rs], p1 = [ax + Math.cos(a1) * rs, wz2 + Math.sin(a1) * rs];
-          const L22 = wurzelSumme19(p1[0] - p0[0], p1[1] - p0[1]), F3 = R7(p0[0], p0[1], (p1[0] - p0[0]) / L22, (p1[1] - p0[1]) / L22, L22);
-          fwand2(S, F3, -0.05, L22 + 0.05, 0, 9, -1, 0, c, [{ u0: L22 / 2 - 0.7, u1: L22 / 2 + 0.7, v0: 2.5, v1: 6.5, bogen: true }]);
-          fb4(S, F3, -0.05, L22 + 0.05, 7.2, 7.8, -1.1, 0.1, ziegel);
-          ruinenKrone(S, F3, 0, L22, 9, r3, c, -1, 0, 1.5);
+          const L22 = wurzelSumme19(p1[0] - p0[0], p1[1] - p0[1]), F4 = R7(p0[0], p0[1], (p1[0] - p0[0]) / L22, (p1[1] - p0[1]) / L22, L22);
+          fwand2(S, F4, -0.05, L22 + 0.05, 0, 9, -1, 0, c, [{ u0: L22 / 2 - 0.7, u1: L22 / 2 + 0.7, v0: 2.5, v1: 6.5, bogen: true }]);
+          fb4(S, F4, -0.05, L22 + 0.05, 7.2, 7.8, -1.1, 0.1, ziegel);
+          ruinenKrone(S, F4, 0, L22, 9, r3, c, -1, 0, 1.5);
         }
       }
       boden5(S, x0 + 2, z0 + d3 - 4, x0 + w2 - 2, z0 + d3 - 2, KIES4, 0.3, 0.1);
@@ -146490,15 +146802,15 @@
       const zg = waehle2(r3, ["#9c5240", "#a35a44", "#93503f"]), hell5 = heller(zg, 0.06), dk = "#2f2a28";
       const bb = 26, bt = 46, bx0 = x0 + w2 - bb - 6, bz0 = z0 + 10, H = 30;
       S.quader(bx0, 0, bz0, bx0 + bb, H, bz0 + bt, zg);
-      for (const [k3, F3] of seiten2(p2, bx0, bz0, bb, bt)) {
-        const joch = k3 === "+x" || k3 === "-x" ? 5.1 : 6.2, ax = achsen5(0, F3.L, joch, 0.6), L2 = [], B8 = [];
+      for (const [k3, F4] of seiten2(p2, bx0, bz0, bb, bt)) {
+        const joch = k3 === "+x" || k3 === "-x" ? 5.1 : 6.2, ax = achsen5(0, F4.L, joch, 0.6), L2 = [], B8 = [];
         for (const u of ax) {
           L2.push({ u0: u - 1, u1: u + 1, v0: 4, v1: 13, bogen: true }, { u0: u - 1, u1: u + 1, v0: 16, v1: 25.5, bogen: true });
           B8.push({ u0: u - 1.9, u1: u + 1.9, v0: 1.4, v1: H - 1.8, bogen: true });
         }
-        lochwand4(S, F3, 0, F3.L, 0, H, zg, L2, { glas: dk, dick: 0.5 });
-        fwand2(S, teil4(F3, 0, F3.L, 0.5), 0, F3.L, 0, H - 0.6, 0, 0.7, hell5, B8);
-        fb4(S, F3, -0.2, F3.L + 0.2, H - 0.6, H, 0, 1.4, hell5);
+        lochwand4(S, F4, 0, F4.L, 0, H, zg, L2, { glas: dk, dick: 0.5 });
+        fwand2(S, teil4(F4, 0, F4.L, 0.5), 0, F4.L, 0, H - 0.6, 0, 0.7, hell5, B8);
+        fb4(S, F4, -0.2, F4.L + 0.2, H - 0.6, H, 0, 1.4, hell5);
         if (k3 === "+z") {
           S.quader(bx0 + 5, 0, bz0 + bt, bx0 + bb - 5, 8, bz0 + bt + 5, zg);
           for (const [k22, F22] of seiten2(p2, bx0 + 5, bz0 + bt, bb - 10, 5, ["+z", "+x"])) lochwand4(S, F22, 0, F22.L, 0, 8, zg, achsen5(0, F22.L, 3.2, 0.5).map((u) => ({ u0: u - 1, u1: u + 1, v0: 0.29, v1: 6, bogen: true })), { glas: dk });
@@ -146513,13 +146825,13 @@
       S.add(ak, "#6d7276");
       const pw = 18, px0 = x0 + 3, pz0 = z0 + 6, pt2 = Math.min(48, d3 - 14), Hp = 15, rosa = waehle2(r3, ["#e6aca2", "#e9b8a8", "#e3a596"]);
       S.quader(px0, 0, pz0, px0 + pw, Hp, pz0 + pt2, rosa);
-      for (const [k3, F3] of seiten2(p2, px0, pz0, pw, pt2)) {
-        for (let kk = 0; kk < 3; kk++) for (const u of achsen5(0, F3.L, 3, 1.2)) fenster5(S, F3, u, 1.2 + kk * 4.5, 1.2, kk === 1 ? 2.8 : 2.2, { kreuz: true, rahmen: WEISS2, sims: WEISS2 });
-        for (const u of achsen5(0, F3.L, 9, 0)) fb4(S, F3, u - 0.4, u + 0.4, 0.3, Hp - 0.8, 0, 0.3, WEISS2);
-        fb4(S, F3, -0.2, F3.L + 0.2, Hp - 0.8, Hp, 0, 0.5, WEISS2);
+      for (const [k3, F4] of seiten2(p2, px0, pz0, pw, pt2)) {
+        for (let kk = 0; kk < 3; kk++) for (const u of achsen5(0, F4.L, 3, 1.2)) fenster5(S, F4, u, 1.2 + kk * 4.5, 1.2, kk === 1 ? 2.8 : 2.2, { kreuz: true, rahmen: WEISS2, sims: WEISS2 });
+        for (const u of achsen5(0, F4.L, 9, 0)) fb4(S, F4, u - 0.4, u + 0.4, 0.3, Hp - 0.8, 0, 0.3, WEISS2);
+        fb4(S, F4, -0.2, F4.L + 0.2, Hp - 0.8, Hp, 0, 0.5, WEISS2);
         if (k3 === "+x") {
-          fb4(S, F3, F3.L / 2 - 5, F3.L / 2 + 5, 0, Hp + 1.5, 0, 1, rosa);
-          dreiecksgiebel(S, F3, F3.L / 2 - 5.3, F3.L / 2 + 5.3, Hp + 1.5, 3, 0, 1.1, rosa, WEISS2);
+          fb4(S, F4, F4.L / 2 - 5, F4.L / 2 + 5, 0, Hp + 1.5, 0, 1, rosa);
+          dreiecksgiebel(S, F4, F4.L / 2 - 5.3, F4.L / 2 + 5.3, Hp + 1.5, 3, 0, 1.1, rosa, WEISS2);
         }
       }
       S.add(dachProfil(pt2, pw, 4.5, pw * 0.45, "z").translate(px0 + pw / 2, Hp, pz0 + pt2 / 2), "#5d646b");
@@ -146537,10 +146849,10 @@
       for (let i = 0; i < 3; i++) bank4(S, bx0 + 5 + i * 8, bz0 + bt + 12);
       fahrradReihe(S, r3, bx0 - 6, bx0 - 1, bz0 + bt + 4, false);
       infotafel(S, bx0 + bb + 2, bz0 + bt + 6, PI10 / 2);
-      for (const [k3, F3] of seiten2(p2, px0, pz0, pw, pt2, ["+x", "-x"])) for (const u of achsen5(0, F3.L, 6, 2)) {
-        fb4(S, F3, u - 0.6, u + 0.6, Hp + 0.4, Hp + 2.2, -2.4, -0.6, rosa);
-        fb4(S, F3, u - 0.35, u + 0.35, Hp + 0.6, Hp + 1.9, -0.65, -0.55, GLAS9);
-        fpoly3(S, teil4(F3, u - 0.75, u + 0.75, -0.6), [[0, Hp + 2.2], [1.5, Hp + 2.2], [0.75, Hp + 2.9]], -1.8, 0.1, "#5d646b");
+      for (const [k3, F4] of seiten2(p2, px0, pz0, pw, pt2, ["+x", "-x"])) for (const u of achsen5(0, F4.L, 6, 2)) {
+        fb4(S, F4, u - 0.6, u + 0.6, Hp + 0.4, Hp + 2.2, -2.4, -0.6, rosa);
+        fb4(S, F4, u - 0.35, u + 0.35, Hp + 0.6, Hp + 1.9, -0.65, -0.55, GLAS9);
+        fpoly3(S, teil4(F4, u - 0.75, u + 0.75, -0.6), [[0, Hp + 2.2], [1.5, Hp + 2.2], [0.75, Hp + 2.9]], -1.8, 0.1, "#5d646b");
       }
       return { hoehe: H + 4.5 };
     }
@@ -146591,9 +146903,9 @@
     };
     ring2(ar[0] + 0.4, ar[1] + 0.4, 3.8, 36, "#5d656c");
     ring2(oR[0] - 0.6, oR[1] - 0.6, 3.2 + (stufen - 1) * 2.4 + 0.2, 44, "#5d656c");
-    const tx = cx + oR[0] - 1, F2 = R7(tx + 3, cz + 4, 0, -1, 8);
+    const tx = cx + oR[0] - 1, F3 = R7(tx + 3, cz + 4, 0, -1, 8);
     S.quader(tx, 0, cz - 4, tx + 3, 6, cz + 4, stein);
-    fwand2(S, F2, 0, 8, 0, 6, 0, 0.4, heller(stein, 0.05), [{ u0: 2.2, u1: 5.8, v0: -0.1, v1: 4.6, bogen: true }]);
+    fwand2(S, F3, 0, 8, 0, 6, 0, 0.4, heller(stein, 0.05), [{ u0: 2.2, u1: 5.8, v0: -0.1, v1: 4.6, bogen: true }]);
     S.quader(tx - 0.3, 6, cz - 4.3, tx + 3.3, 6.5, cz + 4.3, heller(stein, 0.05));
     S.quader(x0 + w2 - 8, 0.3, cz + 6, x0 + w2 - 4, 3, cz + 9, "#e9e6de");
     S.quader(x0 + w2 - 8.3, 3, cz + 5.7, x0 + w2 - 3.7, 3.3, cz + 9.3, "#3f5a4a");
@@ -146668,14 +146980,14 @@
   function shedhalle(S, scene2, p2, x0, z0, b3, t3, H, o3 = {}) {
     const zg = o3.ziegel ?? "#a8664f", hell5 = "#e4d8c4";
     S.quader(x0, 0, z0, x0 + b3, H, z0 + t3, zg);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3)) {
-      lochwand4(S, F2, 0, F2.L, 0.3, H - 0.6, zg, achsen5(0, F2.L, 4.2, 0.8).map((u) => ({ u0: u - 1.3, u1: u + 1.3, v0: 1.6, v1: H - 1.6, bogen: true })), { glas: "#5d6f7a", dick: 0.3 });
-      fb4(S, F2, -0.1, F2.L + 0.1, H - 0.6, H, 0, 0.4, hell5);
-      for (const u of achsen5(0, F2.L, 4.2, 0.8)) fb4(S, F2, u + 1.75, u + 2.35, 0.3, H - 0.6, 0, 0.45, dunkler(zg, 0.05));
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3)) {
+      lochwand4(S, F3, 0, F3.L, 0.3, H - 0.6, zg, achsen5(0, F3.L, 4.2, 0.8).map((u) => ({ u0: u - 1.3, u1: u + 1.3, v0: 1.6, v1: H - 1.6, bogen: true })), { glas: "#5d6f7a", dick: 0.3 });
+      fb4(S, F3, -0.1, F3.L + 0.1, H - 0.6, H, 0, 0.4, hell5);
+      for (const u of achsen5(0, F3.L, 4.2, 0.8)) fb4(S, F3, u + 1.75, u + 2.35, 0.3, H - 0.6, 0, 0.45, dunkler(zg, 0.05));
     }
     const n3 = Math.max(2, Math.round(t3 / 6)), sb2 = t3 / n3;
     for (let i = 0; i < n3; i++) {
-      const F2 = R7(x0, z0 + (i + 1) * sb2, 1, 0, b3);
+      const F3 = R7(x0, z0 + (i + 1) * sb2, 1, 0, b3);
       fpoly3(S, R7(x0 + b3, z0 + i * sb2, -1, 0, b3), [[0, 0], [0, 0], [0, 0]], 0, 0.01, zg);
       const g = new three_module_exports.BoxGeometry(b3, 0.3, sb2 * 1.05);
       g.rotateX(-0.42);
@@ -146707,7 +147019,7 @@
     const c = o3.stahl, rost = o3.rost, H = 34;
     S.quader(x2 - 11, 0, z4 - 6, x2 + 11, 9, z4 + 8, o3.halle);
     S.add(dachProfil(22, 14, 3, 0.3, "x").translate(x2, 9, z4 + 1), dunkler(o3.halle, 0.12));
-    for (const [k3, F2] of seiten2(p2, x2 - 11, z4 - 6, 22, 14)) for (const u of achsen5(0, F2.L, 3.2, 0.5)) fb4(S, F2, u - 0.8, u + 0.8, 4, 8, 0, 0.05, "#3a3634");
+    for (const [k3, F3] of seiten2(p2, x2 - 11, z4 - 6, 22, 14)) for (const u of achsen5(0, F3.L, 3.2, 0.5)) fb4(S, F3, u - 0.8, u + 0.8, 4, 8, 0, 0.05, "#3a3634");
     zyl8(S, 4.2, 5.4, 18, x2, 9, z4, rost, 14);
     zyl8(S, 3.2, 4.2, 8, x2, 27, z4, rost, 14);
     for (const [sx2, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) S.box(0.8, H, 0.8, x2 + sx2 * 6, 0.3 + H / 2, z4 + sz * 6, c);
@@ -146790,14 +147102,14 @@
         S.add(fl, "#f0a03a");
         const vx0 = x0 + w2 * 0.58, vz0 = ufer - 28, vb = 30, vt = 12;
         S.quader(vx0, 0, vz0, vx0 + vb, 14, vz0 + vt, "#e9e3d6");
-        for (const [k3, F2] of seiten2(p2, vx0, vz0, vb, vt)) {
-          for (let i = 0; i < 3; i++) fb4(S, F2, 0.5, F2.L - 0.5, 2 + i * 4, 4.2 + i * 4, 0, 0.05, GLAS9);
-          fb4(S, F2, -0.1, F2.L + 0.1, 13.4, 14, 0, 0.3, "#c9c3b6");
+        for (const [k3, F3] of seiten2(p2, vx0, vz0, vb, vt)) {
+          for (let i = 0; i < 3; i++) fb4(S, F3, 0.5, F3.L - 0.5, 2 + i * 4, 4.2 + i * 4, 0, 0.05, GLAS9);
+          fb4(S, F3, -0.1, F3.L + 0.1, 13.4, 14, 0, 0.3, "#c9c3b6");
           if (k3 === "+z") {
-            const tb = Math.min(F2.L - 3, 26), u0 = (F2.L - tb) / 2;
-            fb4(S, F2, u0, u0 + tb, 14, 17.2, -0.5, -0.3, "#2f5e52");
-            for (const u of [u0 + 1.5, u0 + tb - 1.5]) fb4(S, F2, u - 0.12, u + 0.12, 13.6, 14, -0.5, -0.3, "#4a4f55");
-            ftext4(scene2, F2, "Chemiewerk Rheinau", F2.L / 2, 15.6, -0.25, 2.3, tb - 1.2, "#ffffff");
+            const tb = Math.min(F3.L - 3, 26), u0 = (F3.L - tb) / 2;
+            fb4(S, F3, u0, u0 + tb, 14, 17.2, -0.5, -0.3, "#2f5e52");
+            for (const u of [u0 + 1.5, u0 + tb - 1.5]) fb4(S, F3, u - 0.12, u + 0.12, 13.6, 14, -0.5, -0.3, "#4a4f55");
+            ftext4(scene2, F3, "Chemiewerk Rheinau", F3.L / 2, 15.6, -0.25, 2.3, tb - 1.2, "#ffffff");
           }
         }
         for (let i = 0; i < 2; i++) S.quader(vx0 + 1 + i * 26, 14, vz0 + vt - 1, vx0 + 3 + i * 26, 18.6, vz0 + vt, "#c9c3b6");
@@ -146820,7 +147132,7 @@
       for (let x2 = x0 + 6; x2 < x0 + w2 * 0.76 - 2; x2 += 6) S.quader(x2, 0.39, z0 + 49.15, x2 + 3, 0.41, z0 + 49.35, "#f2f1ec");
       autoReihe(S, r3, x0 + w2 * 0.58, x0 + w2 * 0.8, ufer - 13.5, 0, 0.75);
       S.quader(x0 + w2 - 26, 0.3, ufer - 24, x0 + w2 - 18, 3.6, ufer - 18, "#e9e3d6");
-      for (const [k3, F2] of seiten2(p2, x0 + w2 - 26, ufer - 24, 8, 6)) fb4(S, F2, 0.6, F2.L - 0.6, 1.4, 2.8, 0, 0.05, GLAS9);
+      for (const [k3, F3] of seiten2(p2, x0 + w2 - 26, ufer - 24, 8, 6)) fb4(S, F3, 0.6, F3.L - 0.6, 1.4, 2.8, 0, 0.05, GLAS9);
       S.quader(x0 + w2 - 26.5, 3.6, ufer - 24.5, x0 + w2 - 17.5, 3.9, ufer - 17.5, "#c8463c");
       S.box(6, 0.15, 0.15, x0 + w2 - 21, 1.3, ufer - 15.5, "#c8463c");
       const ux0 = x0 + w2 - 14, uz0 = ufer - 30;
@@ -146847,7 +147159,7 @@
           S.quader(zx, 0.3, z0 + 38, zx + 5.6, 6, z0 + 45, "#c9cdd0");
           zyl8(S, 2.2, 2.4, 1.6, zx + 2.8, 6, z0 + 41.5, "#7d858c", 14);
           zyl8(S, 2, 2, 0.2, zx + 2.8, 7.5, z0 + 41.5, "#3b4046", 14);
-          for (const [k3, F2] of seiten2(p2, zx, z0 + 38, 5.6, 7, ["+z", "-z"])) for (const u of [1.2, 2.8, 4.4]) fb4(S, F2, u - 0.5, u + 0.5, 1, 5, 0, 0.05, "#7d858c");
+          for (const [k3, F3] of seiten2(p2, zx, z0 + 38, 5.6, 7, ["+z", "-z"])) for (const u of [1.2, 2.8, 4.4]) fb4(S, F3, u - 0.5, u + 0.5, 1, 5, 0, 0.05, "#7d858c");
         }
         ziegelbau(S, p2, x0 + 70, ufer - 34, 9, 10, 11, "#a8664f", {});
         gelaender(S, [x0 + 81, ufer - 28], [x0 + 111, ufer - 28], 14, "#9aa1a7", 2);
@@ -146861,7 +147173,7 @@
     hmax = Math.max(hmax, hochofen(S, p2, r3, x0 + 78, z0 + 34, o3));
     const gx0 = x0 + w2 - 36, gz0 = z0 + 8, gb = 30, gt = 16, Hg = 14, zg = denkmal2 ? "#9a5a44" : "#a8664f";
     S.quader(gx0, 0, gz0, gx0 + gb, Hg, gz0 + gt, zg);
-    for (const [k3, F2] of seiten2(p2, gx0, gz0, gb, gt)) lochwand4(S, F2, 0, F2.L, 0.3, Hg, zg, achsen5(0, F2.L, 4, 0.8).map((u) => ({ u0: u - 1.2, u1: u + 1.2, v0: 2, v1: Hg - 2, bogen: true })), { glas: "#4d5a62" });
+    for (const [k3, F3] of seiten2(p2, gx0, gz0, gb, gt)) lochwand4(S, F3, 0, F3.L, 0.3, Hg, zg, achsen5(0, F3.L, 4, 0.8).map((u) => ({ u0: u - 1.2, u1: u + 1.2, v0: 2, v1: Hg - 2, bogen: true })), { glas: "#4d5a62" });
     satteldach4(S, gx0, gz0, gx0 + gb, gz0 + gt, Hg, 4, "x", "#6d7276", zg, 0.4);
     for (let i = 0; i < 2; i++) schlot2(S, gx0 + 6 + i * 18, gz0 + gt + 6, 46, 2.2, 1.5, zg, denkmal2 ? "#c9b9a0" : "#e9e3d8");
     S.quader(x0 + 6, 0, z0 + 2, x0 + 100, 8, z0 + 10, o3.stahl);
@@ -146927,7 +147239,7 @@
       S.box(0.5, yy, 0.5, x0 + 95.2, 0.3 + yy / 2, z4, o3.stahl);
     }
     ziegelbau(S, p2, x0 + 102, z0 + 66, 32, 10, 11, denkmal2 ? "#9a5a44" : "#a8664f", {});
-    for (const [k3, F2] of seiten2(p2, x0 + 102, z0 + 66, 32, 10, ["+z"])) ftext4(scene2, F2, denkmal2 ? "Besucherzentrum" : "Saarwald H\xFCtte", 16, 11.9, 0.2, 1.4, 22, denkmal2 ? "#e8c547" : "#f2efe6", denkmal2 ? null : "#5a3a2e");
+    for (const [k3, F3] of seiten2(p2, x0 + 102, z0 + 66, 32, 10, ["+z"])) ftext4(scene2, F3, denkmal2 ? "Besucherzentrum" : "Saarwald H\xFCtte", 16, 11.9, 0.2, 1.4, 22, denkmal2 ? "#e8c547" : "#f2efe6", denkmal2 ? null : "#5a3a2e");
     for (let i = 0; i < 4; i++) {
       const sx = x0 + 74 + i * 6;
       S.quader(sx - 2, 0.6, ufer - 5.6, sx + 2, 1.4, ufer - 3.4, "#3b4046");
@@ -146966,61 +147278,61 @@
     const n3 = o3.n ?? 2, eg = 3.2, gh = 2.9, H = eg + n3 * gh, wand2 = o3.wand ?? waehle2(r3, ["#f1e6cf", "#efd9b8", "#e9e2d4", "#f0dcc8", "#e8d6a8", "#f3ece0"]);
     const stein = waehle2(r3, ["#c9b292", "#b9a283", "#a89a88"]), laeden = waehle2(r3, LAEDEN2);
     S.quader(x0, 0, z0, x0 + b3, H, z0 + t3, wand2);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3)) {
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3)) {
       const frei6 = k3 === "+z" || k3 === "-z" || o3.frei?.includes(k3);
       if (!frei6) {
-        fb4(S, F2, 0, F2.L, eg, H, 0, 0.04, SCHIEFER3);
+        fb4(S, F3, 0, F3.L, eg, H, 0, 0.04, SCHIEFER3);
         continue;
       }
-      fb4(S, F2, -0.02, F2.L + 0.02, 0, 0.7, 0, 0.12, stein);
-      const ax = achsen5(0, F2.L, 2.5, 0.9);
+      fb4(S, F3, -0.02, F3.L + 0.02, 0, 0.7, 0, 0.12, stein);
+      const ax = achsen5(0, F3.L, 2.5, 0.9);
       ax.forEach((u, i) => {
         if (i === 0 && k3 === "+z") {
-          fwand2(S, F2, u - 1.1, u + 1.1, 0.3, 2.8, 0, 0.18, stein, [{ u0: u - 0.8, u1: u + 0.8, v0: 0.29, v1: 2.5, bogen: true }]);
-          fb4(S, F2, u - 0.8, u + 0.8, 0.3, 2, 0.02, 0.08, "#5a3a2e");
-        } else fenster5(S, F2, u, 1.1, 0.9, 1.3, { kreuz: true, laeden, sims: stein });
-        for (let kk = 0; kk < n3; kk++) fenster5(S, F2, u, eg + kk * gh + 0.75, 0.9, 1.35, { kreuz: true, laeden, sims: WEISS2 });
+          fwand2(S, F3, u - 1.1, u + 1.1, 0.3, 2.8, 0, 0.18, stein, [{ u0: u - 0.8, u1: u + 0.8, v0: 0.29, v1: 2.5, bogen: true }]);
+          fb4(S, F3, u - 0.8, u + 0.8, 0.3, 2, 0.02, 0.08, "#5a3a2e");
+        } else fenster5(S, F3, u, 1.1, 0.9, 1.3, { kreuz: true, laeden, sims: stein });
+        for (let kk = 0; kk < n3; kk++) fenster5(S, F3, u, eg + kk * gh + 0.75, 0.9, 1.35, { kreuz: true, laeden, sims: WEISS2 });
       });
-      fb4(S, F2, -0.1, F2.L + 0.1, H - 0.25, H, 0, 0.3, WEISS2);
+      fb4(S, F3, -0.1, F3.L + 0.1, H - 0.25, H, 0, 0.3, WEISS2);
       if (k3 === "+z" && o3.schild) {
-        const [sx, sz] = wp4(F2, F2.L - 1, 0.8);
+        const [sx, sz] = wp4(F3, F3.L - 1, 0.8);
         S.box(0.08, 0.08, 1.5, sx, eg + 0.4, sz - 0.4, "#3b3f44");
-        ftext4(scene2, F2, o3.schild, F2.L / 2 + 0.6, eg - 0.3, 0.06, 0.5, F2.L * 0.7, "#5a2a24");
+        ftext4(scene2, F3, o3.schild, F3.L / 2 + 0.6, eg - 0.3, 0.06, 0.5, F3.L * 0.7, "#5a2a24");
       }
     }
     const hg = t3 * 0.62;
     satteldach4(S, x0, z0 - 0.2, x0 + b3, z0 + t3 + 0.2, H, hg, "x", SCHIEFER3, wand2, 0.4);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3, ["+x", "-x"])) {
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3, ["+x", "-x"])) {
       if (o3.frei?.includes(k3)) {
-        fpoly3(S, F2, [[0.1, H], [F2.L - 0.1, H], [F2.L / 2, H + hg - 0.15]], 0, 0.05, SCHIEFER3);
-        fenster5(S, F2, F2.L / 2, H + 0.6, 0.7, 1, { t: 0.05 });
-      } else fpoly3(S, F2, [[0.1, H], [F2.L - 0.1, H], [F2.L / 2, H + hg - 0.15]], 0, 0.05, SCHIEFER3);
+        fpoly3(S, F3, [[0.1, H], [F3.L - 0.1, H], [F3.L / 2, H + hg - 0.15]], 0, 0.05, SCHIEFER3);
+        fenster5(S, F3, F3.L / 2, H + 0.6, 0.7, 1, { t: 0.05 });
+      } else fpoly3(S, F3, [[0.1, H], [F3.L - 0.1, H], [F3.L / 2, H + hg - 0.15]], 0, 0.05, SCHIEFER3);
     }
-    for (const [k3, F2] of seiten2(p2, x0, z0 - 0.2, b3, t3 + 0.4, ["+z", "-z"])) for (const u of achsen5(0, F2.L, 3.6, 1.6)) {
+    for (const [k3, F3] of seiten2(p2, x0, z0 - 0.2, b3, t3 + 0.4, ["+z", "-z"])) for (const u of achsen5(0, F3.L, 3.6, 1.6)) {
       const ys = H + 0.9;
-      fb4(S, F2, u - 0.7, u + 0.7, ys - 0.5, ys + 1.2, -2.4, -0.7, wand2);
-      fb4(S, F2, u - 0.4, u + 0.4, ys - 0.2, ys + 0.9, -0.75, -0.65, GLAS9);
+      fb4(S, F3, u - 0.7, u + 0.7, ys - 0.5, ys + 1.2, -2.4, -0.7, wand2);
+      fb4(S, F3, u - 0.4, u + 0.4, ys - 0.2, ys + 0.9, -0.75, -0.65, GLAS9);
       const g = new three_module_exports.BoxGeometry(1.7, 0.12, 2.2);
       g.rotateX(0.35);
       g.translate(u, ys + 1.45, -1.5);
-      fgeo4(S, F2, g, SCHIEFER3);
+      fgeo4(S, F3, g, SCHIEFER3);
     }
     return H + hg;
   }
   function dorfkirche(S, p2, r3, x0, z0, b3, t3) {
     const wand2 = "#efe8da", H = 9;
     S.quader(x0, 0, z0, x0 + b3, H, z0 + t3, wand2);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3)) {
-      lochwand4(S, F2, 0, F2.L, 0.3, H, wand2, achsen5(0, F2.L, 3.6, 1).map((u) => ({ u0: u - 0.6, u1: u + 0.6, v0: 2.5, v1: 7.2, bogen: "spitz" })), { dick: 0.2 });
-      fb4(S, F2, -0.05, F2.L + 0.05, 0.3, 0.9, 0, 0.15, "#c9b292");
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3)) {
+      lochwand4(S, F3, 0, F3.L, 0.3, H, wand2, achsen5(0, F3.L, 3.6, 1).map((u) => ({ u0: u - 0.6, u1: u + 0.6, v0: 2.5, v1: 7.2, bogen: "spitz" })), { dick: 0.2 });
+      fb4(S, F3, -0.05, F3.L + 0.05, 0.3, 0.9, 0, 0.15, "#c9b292");
     }
     satteldach4(S, x0, z0 - 0.3, x0 + b3, z0 + t3 + 0.3, H, 6, "x", SCHIEFER3, wand2, 0.3);
     const ts = 4.6, tx0 = x0 + b3 - 1, tz0 = z0 + (t3 - ts) / 2, Ht = 19;
     S.quader(tx0, 0, tz0, tx0 + ts, Ht, tz0 + ts, wand2);
-    for (const [k3, F2] of seiten2(p2, tx0, tz0, ts, ts)) {
-      lochwand4(S, F2, 0, ts, Ht - 4, Ht, wand2, [{ u0: ts / 2 - 0.6, u1: ts / 2 + 0.6, v0: Ht - 3.5, v1: Ht - 0.6, bogen: "spitz" }], { dick: 0.15 });
-      fscheibe3(S, F2, ts / 2, Ht - 5.2, 0, 0.12, 0.7, "#2b3036");
-      fb4(S, F2, ts / 2 - 0.45, ts / 2 + 0.45, 1.5, 4, 0, 0.08, GLAS9);
+    for (const [k3, F3] of seiten2(p2, tx0, tz0, ts, ts)) {
+      lochwand4(S, F3, 0, ts, Ht - 4, Ht, wand2, [{ u0: ts / 2 - 0.6, u1: ts / 2 + 0.6, v0: Ht - 3.5, v1: Ht - 0.6, bogen: "spitz" }], { dick: 0.15 });
+      fscheibe3(S, F3, ts / 2, Ht - 5.2, 0, 0.12, 0.7, "#2b3036");
+      fb4(S, F3, ts / 2 - 0.45, ts / 2 + 0.45, 1.5, 4, 0, 0.08, GLAS9);
     }
     const g = new three_module_exports.ConeGeometry(ts * 0.72, 13, 8);
     g.rotateY(PI10 / 8);
@@ -147040,18 +147352,18 @@
       }
     } else {
       S.quader(cx - 3.2, y0, cz - 3.2, cx + 3.2, y0 + Hb, cz + 3.2, c);
-      for (const [k3, F2] of seiten2(p2, cx - 3.2, cz - 3.2, 6.4, 6.4)) {
-        ruinenKrone(S, F2, 0, 6.4, y0 + Hb, r3, c, -0.8, 0, 1.6);
-        fb4(S, F2, 2.8, 3.6, y0 + 12, y0 + 13.6, 0, 0.05, "#2f2a28");
+      for (const [k3, F3] of seiten2(p2, cx - 3.2, cz - 3.2, 6.4, 6.4)) {
+        ruinenKrone(S, F3, 0, 6.4, y0 + Hb, r3, c, -0.8, 0, 1.6);
+        fb4(S, F3, 2.8, 3.6, y0 + 12, y0 + 13.6, 0, 0.05, "#2f2a28");
       }
     }
     const mb = 22, mt = 14, mx0 = cx - 5, mz0 = cz - 4;
-    for (const [k3, F2] of Object.entries(vierSeiten(mx0, mz0, mb, mt))) {
+    for (const [k3, F3] of Object.entries(vierSeiten(mx0, mz0, mb, mt))) {
       const h3 = k3 === "-z" ? 7 : 5;
-      fb4(S, F2, 0, F2.L, y0, y0 + h3, -1.2, 0, c);
-      if (sichtF(p2, F2)) {
-        ruinenKrone(S, F2, 0, F2.L, y0 + h3, r3, c, -1.2, 0, 1.4);
-        for (const u of achsen5(0, F2.L, 6, 1)) fb4(S, F2, u - 0.15, u + 0.15, y0 + 1.5, y0 + 2.5, 0, 0.05, "#2f2a28");
+      fb4(S, F3, 0, F3.L, y0, y0 + h3, -1.2, 0, c);
+      if (sichtF(p2, F3)) {
+        ruinenKrone(S, F3, 0, F3.L, y0 + h3, r3, c, -1.2, 0, 1.4);
+        for (const u of achsen5(0, F3.L, 6, 1)) fb4(S, F3, u - 0.15, u + 0.15, y0 + 1.5, y0 + 2.5, 0, 0.05, "#2f2a28");
       }
     }
     const FP = R7(mx0 + 9, mz0 + mt - 3, 1, 0, 12);
@@ -147115,9 +147427,9 @@
       const hx0 = x0 + w2 * 0.2, hb2 = w2 * 0.6, hzv = z0 + d3 - 32, hd = 26;
       hmax = Math.max(hmax, winzerhaus(S, scene2, p2, r3, hx0, hzv, hb2, 11, { n: 2, schild: "Weingut Kellerhals", frei: ["+x", "-x"] }));
       for (const s2 of [0, 1]) hmax = Math.max(hmax, unterbau(S, scene2, p2, s2 ? "-x" : "+x", s2 ? hx0 + hb2 - 10 : hx0, hzv + 11.5, hd - 15, 10, (S2, sc2, p22) => fwHaus(S2, sc2, p22, r3, 0, 0, hd - 15, 10, { giebel: false, n: 1, zwerch: false, frei: ["+x", "-x"] })));
-      const F2 = R7(hx0 + 10, hzv + hd, 1, 0, hb2 - 20);
-      fwand2(S, F2, 0, hb2 - 20, 0, 4.2, -0.6, 0, "#c9b292", [{ u0: (hb2 - 20) / 2 - 1.8, u1: (hb2 - 20) / 2 + 1.8, v0: -0.1, v1: 3.6, bogen: true }]);
-      if (sichtF(p2, F2)) ftext4(scene2, F2, "Weingut Kellerhals", (hb2 - 20) / 2, 3.95, 0.05, 0.36, 6, "#5a2a24");
+      const F3 = R7(hx0 + 10, hzv + hd, 1, 0, hb2 - 20);
+      fwand2(S, F3, 0, hb2 - 20, 0, 4.2, -0.6, 0, "#c9b292", [{ u0: (hb2 - 20) / 2 - 1.8, u1: (hb2 - 20) / 2 + 1.8, v0: -0.1, v1: 3.6, bogen: true }]);
+      if (sichtF(p2, F3)) ftext4(scene2, F3, "Weingut Kellerhals", (hb2 - 20) / 2, 3.95, 0.05, 0.36, 6, "#5a2a24");
       for (let i2 = 0; i2 < 5; i2++) {
         const g = new three_module_exports.CylinderGeometry(0.6, 0.6, 1.5, 10);
         g.rotateZ(PI10 / 2);
@@ -147207,13 +147519,13 @@
       const gs = new three_module_exports.ExtrudeGeometry(sh, { depth: 0.2, bevelEnabled: false });
       gs.translate(cx, 0, zz - (nz > 0 ? 0.6 : -0.4));
       S.add(gs, o3.glas);
-      const F2 = R7(cx - B8 / 2, zz + (nz > 0 ? -0.3 : 0.3), nz > 0 ? 1 : -1, 0, B8);
+      const F3 = R7(cx - B8 / 2, zz + (nz > 0 ? -0.3 : 0.3), nz > 0 ? 1 : -1, 0, B8);
       for (let k3 = 1; k3 < 8; k3++) {
         const u = B8 * k3 / 8, xx = u - B8 / 2, yt = cy + Math.sqrt(Math.max(0, R0 * R0 - xx * xx));
-        fb4(S, F2, (nz > 0 ? u : B8 - u) - 0.1, (nz > 0 ? u : B8 - u) + 0.1, y0 + 1.2, yt - 0.2, 0, 0.12, o3.binderF);
+        fb4(S, F3, (nz > 0 ? u : B8 - u) - 0.1, (nz > 0 ? u : B8 - u) + 0.1, y0 + 1.2, yt - 0.2, 0, 0.12, o3.binderF);
       }
-      fb4(S, F2, 0, B8, y0 + 1, y0 + 1.4, 0, 0.3, o3.binderF);
-      fb4(S, F2, 0, B8, y0 + f11 * 0.55, y0 + f11 * 0.55 + 0.2, 0, 0.12, o3.binderF);
+      fb4(S, F3, 0, B8, y0 + 1, y0 + 1.4, 0, 0.3, o3.binderF);
+      fb4(S, F3, 0, B8, y0 + f11 * 0.55, y0 + f11 * 0.55 + 0.2, 0, 0.12, o3.binderF);
     }
   }
   function zug2(S, x2, z0, wagen2, art) {
@@ -147235,35 +147547,35 @@
   function empfangAlt(S, scene2, p2, r3, x0, z0, b3, t3, H, o3) {
     const st2 = o3.stein, orn = o3.orn, dach3 = o3.dach, cx = x0 + b3 / 2;
     S.quader(x0, 0, z0, x0 + b3, H, z0 + t3, st2);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3)) {
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3)) {
       const L2 = [];
-      for (const u of achsen5(0, F2.L, 4.2, 1)) {
-        if (k3 === "+z" && Math.abs(u - F2.L / 2) < 15) continue;
+      for (const u of achsen5(0, F3.L, 4.2, 1)) {
+        if (k3 === "+z" && Math.abs(u - F3.L / 2) < 15) continue;
         L2.push({ u0: u - 1.3, u1: u + 1.3, v0: 1.4, v1: H * 0.5 - 0.6, bogen: true }, { u0: u - 1, u1: u + 1, v0: H * 0.5 + 0.8, v1: H - 2.4 });
       }
-      lochwand4(S, F2, 0, F2.L, 0.3, H - 1.4, st2, L2, { dick: 0.3 });
-      fb4(S, F2, -0.1, F2.L + 0.1, 0.3, 1.2, 0, 0.45, dunkler(st2, 0.08));
-      fb4(S, F2, -0.1, F2.L + 0.1, H * 0.5 - 0.1, H * 0.5 + 0.3, 0, 0.45, orn);
-      fb4(S, F2, -0.4, F2.L + 0.4, H - 1.4, H - 0.5, 0, 0.7, orn);
-      for (const u of achsen5(0, F2.L, 4.2, 1)) fb4(S, F2, u + 1.8, u + 2.4, 1.2, H - 1.4, 0, 0.45, orn);
+      lochwand4(S, F3, 0, F3.L, 0.3, H - 1.4, st2, L2, { dick: 0.3 });
+      fb4(S, F3, -0.1, F3.L + 0.1, 0.3, 1.2, 0, 0.45, dunkler(st2, 0.08));
+      fb4(S, F3, -0.1, F3.L + 0.1, H * 0.5 - 0.1, H * 0.5 + 0.3, 0, 0.45, orn);
+      fb4(S, F3, -0.4, F3.L + 0.4, H - 1.4, H - 0.5, 0, 0.7, orn);
+      for (const u of achsen5(0, F3.L, 4.2, 1)) fb4(S, F3, u + 1.8, u + 2.4, 1.2, H - 1.4, 0, 0.45, orn);
     }
     S.add(dachProfil(b3, t3, 3.5, t3 * 0.45, "x").translate(cx, H, z0 + t3 / 2), dach3);
     const mb = 30, mz1 = z0 + t3 + 2, Hm = H + 9;
     S.quader(cx - mb / 2, 0, z0 - 2, cx + mb / 2, Hm, mz1, st2);
-    for (const [k3, F2] of seiten2(p2, cx - mb / 2, z0 - 2, mb, mz1 - z0 + 2)) {
+    for (const [k3, F3] of seiten2(p2, cx - mb / 2, z0 - 2, mb, mz1 - z0 + 2)) {
       if (k3 === "+z" || k3 === "-z") {
-        lochwand4(S, F2, 0, F2.L, 0.3, Hm - 2, st2, [{ u0: 5.5, u1: F2.L - 5.5, v0: 6.5, v1: Hm - 3, bogen: true }, { u0: 7, u1: 11, v0: 0.3, v1: 5.2, bogen: true }, { u0: 13, u1: 17, v0: 0.3, v1: 5.2, bogen: true }, { u0: 19, u1: 23, v0: 0.3, v1: 5.2, bogen: true }], { glas: GLAS_HELL6, dick: 0.6 });
-        for (let u = 7.5; u < F2.L - 6; u += 2.4) fb4(S, F2, u - 0.08, u + 0.08, 6.5, Hm - 4, 0.02, 0.15, "#4a525a");
-        fb4(S, F2, 5.5, F2.L - 5.5, 12, 12.2, 0.02, 0.15, "#4a525a");
-        for (const u of [1.8, F2.L - 1.8]) fb4(S, F2, u - 1.5, u + 1.5, 0, Hm - 2, 0, 0.9, orn);
-        fb4(S, F2, -0.5, F2.L + 0.5, Hm - 2, Hm, 0, 1, orn);
+        lochwand4(S, F3, 0, F3.L, 0.3, Hm - 2, st2, [{ u0: 5.5, u1: F3.L - 5.5, v0: 6.5, v1: Hm - 3, bogen: true }, { u0: 7, u1: 11, v0: 0.3, v1: 5.2, bogen: true }, { u0: 13, u1: 17, v0: 0.3, v1: 5.2, bogen: true }, { u0: 19, u1: 23, v0: 0.3, v1: 5.2, bogen: true }], { glas: GLAS_HELL6, dick: 0.6 });
+        for (let u = 7.5; u < F3.L - 6; u += 2.4) fb4(S, F3, u - 0.08, u + 0.08, 6.5, Hm - 4, 0.02, 0.15, "#4a525a");
+        fb4(S, F3, 5.5, F3.L - 5.5, 12, 12.2, 0.02, 0.15, "#4a525a");
+        for (const u of [1.8, F3.L - 1.8]) fb4(S, F3, u - 1.5, u + 1.5, 0, Hm - 2, 0, 0.9, orn);
+        fb4(S, F3, -0.5, F3.L + 0.5, Hm - 2, Hm, 0, 1, orn);
         if (k3 === "+z") {
-          fscheibe3(S, F2, F2.L / 2, Hm + 2.6, 0.2, 0.4, 1.8, "#f6f1e2", 20);
-          fscheibe3(S, F2, F2.L / 2, Hm + 2.6, 0.4, 0.45, 1.5, "#2b3036", 16);
-          ftext4(scene2, F2, o3.name ?? "Hauptbahnhof", F2.L / 2, 5.9, 1, 0.95, 18, "#3a3a36");
+          fscheibe3(S, F3, F3.L / 2, Hm + 2.6, 0.2, 0.4, 1.8, "#f6f1e2", 20);
+          fscheibe3(S, F3, F3.L / 2, Hm + 2.6, 0.4, 0.45, 1.5, "#2b3036", 16);
+          ftext4(scene2, F3, o3.name ?? "Hauptbahnhof", F3.L / 2, 5.9, 1, 0.95, 18, "#3a3a36");
         }
-        fpoly3(S, F2, [[2, Hm], [F2.L - 2, Hm], [F2.L - 6, Hm + 5], [6, Hm + 5]], -2, 0.3, st2);
-      } else fb4(S, F2, 0, F2.L, Hm * 0.5, Hm * 0.5 + 0.4, 0, 0.3, orn);
+        fpoly3(S, F3, [[2, Hm], [F3.L - 2, Hm], [F3.L - 6, Hm + 5], [6, Hm + 5]], -2, 0.3, st2);
+      } else fb4(S, F3, 0, F3.L, Hm * 0.5, Hm * 0.5 + 0.4, 0, 0.3, orn);
     }
     const fz = mz1 - 1.5;
     S.box(3.6, 1.4, 2.4, cx, Hm + 5.7, fz, orn);
@@ -147275,10 +147587,10 @@
     for (const s2 of [-1, 1]) {
       const px0 = s2 < 0 ? x0 - 2 : x0 + b3 - 10, pw = 12;
       S.quader(px0, 0, z0 - 1, px0 + pw, H + 4, z0 + t3 + 1.5, st2);
-      for (const [k3, F2] of seiten2(p2, px0, z0 - 1, pw, t3 + 2.5)) {
-        lochwand4(S, F2, 0, F2.L, 0.3, H + 3, st2, achsen5(0, F2.L, 4, 1.4).map((u) => ({ u0: u - 1, u1: u + 1, v0: 2, v1: H + 1, bogen: true })), { dick: 0.3 });
-        for (const u of [0.6, F2.L - 0.6]) fb4(S, F2, u - 0.6, u + 0.6, 0, H + 3, 0, 0.6, orn);
-        fb4(S, F2, -0.3, F2.L + 0.3, H + 3, H + 4, 0, 0.7, orn);
+      for (const [k3, F3] of seiten2(p2, px0, z0 - 1, pw, t3 + 2.5)) {
+        lochwand4(S, F3, 0, F3.L, 0.3, H + 3, st2, achsen5(0, F3.L, 4, 1.4).map((u) => ({ u0: u - 1, u1: u + 1, v0: 2, v1: H + 1, bogen: true })), { dick: 0.3 });
+        for (const u of [0.6, F3.L - 0.6]) fb4(S, F3, u - 0.6, u + 0.6, 0, H + 3, 0, 0.6, orn);
+        fb4(S, F3, -0.3, F3.L + 0.3, H + 3, H + 4, 0, 0.7, orn);
       }
       walm2(S, px0 - 0.2, z0 - 1.2, px0 + pw + 0.2, z0 + t3 + 1.7, H + 4, 5, dach3);
       zyl8(S, 0.5, 0.8, 2.5, px0 + pw / 2, H + 8.5, z0 + t3 / 2, dach3, 8);
@@ -147288,10 +147600,10 @@
   function empfang50(S, scene2, p2, r3, x0, z0, b3, t3, H, o3) {
     const be = "#e9e6de", cx = x0 + b3 / 2;
     S.quader(x0, 0, z0, x0 + b3, H, z0 + t3, GLAS_HELL6);
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3)) {
-      for (const u of achsen5(0, F2.L, 2.4, 0)) fb4(S, F2, u - 0.08, u + 0.08, 0.3, H, 0, 0.15, "#f2f1ec");
-      for (const y2 of [4.2, 8.4]) fb4(S, F2, 0, F2.L, y2, y2 + 0.2, 0, 0.15, "#f2f1ec");
-      if (k3 === "+z") ftext4(scene2, F2, o3.name ?? "Hauptbahnhof", F2.L / 2, H + 1.4, 3, 1.5, 30, "#2a3036");
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3)) {
+      for (const u of achsen5(0, F3.L, 2.4, 0)) fb4(S, F3, u - 0.08, u + 0.08, 0.3, H, 0, 0.15, "#f2f1ec");
+      for (const y2 of [4.2, 8.4]) fb4(S, F3, 0, F3.L, y2, y2 + 0.2, 0, 0.15, "#f2f1ec");
+      if (k3 === "+z") ftext4(scene2, F3, o3.name ?? "Hauptbahnhof", F3.L / 2, H + 1.4, 3, 1.5, 30, "#2a3036");
     }
     S.quader(x0 - 1, H, z0 - 1, x0 + b3 + 1, H + 0.6, z0 + t3 + 4, be);
     S.quader(x0 + 6, 4.6, z0 + t3, x0 + b3 - 6, 5, z0 + t3 + 7, be);
@@ -147299,7 +147611,7 @@
     for (const s2 of [-1, 1]) {
       const fx0 = s2 < 0 ? x0 - 14 : x0 + b3, fb22 = 14;
       S.quader(fx0, 0, z0 + 1, fx0 + fb22, H + 3, z0 + t3 - 1, "#d9d2c2");
-      for (const [k3, F2] of seiten2(p2, fx0, z0 + 1, fb22, t3 - 2)) for (let i = 0; i < 3; i++) fb4(S, F2, 0.6, F2.L - 0.6, 1.5 + i * 3.6, 3.4 + i * 3.6, 0, 0.05, GLAS9);
+      for (const [k3, F3] of seiten2(p2, fx0, z0 + 1, fb22, t3 - 2)) for (let i = 0; i < 3; i++) fb4(S, F3, 0.6, F3.L - 0.6, 1.5 + i * 3.6, 3.4 + i * 3.6, 0, 0.05, GLAS9);
       S.quader(fx0 - 0.4, H + 3, z0 + 0.6, fx0 + fb22 + 0.4, H + 3.4, z0 + t3 - 0.6, be);
     }
     const ux = x0 + b3 + 4;
@@ -147342,7 +147654,7 @@
     for (const s2 of [-1, 1]) {
       const xa = s2 < 0 ? x0 + 2 : x0 + w2 - 3.4;
       S.quader(xa, 0, hz0, xa + 1.4, 9.4, hz1, "#cdbb9e");
-      for (const [k3, F2] of seiten2(p2, xa, hz0, 1.4, hz1 - hz0, ["+x", "-x"])) lochwand4(S, F2, 0, F2.L, 0.3, 9.4, "#cdbb9e", achsen5(0, F2.L, 5, 1).map((u) => ({ u0: u - 1.4, u1: u + 1.4, v0: 1.5, v1: 7.5, bogen: true })), { glas: "#3e4650", dick: 0.25 });
+      for (const [k3, F3] of seiten2(p2, xa, hz0, 1.4, hz1 - hz0, ["+x", "-x"])) lochwand4(S, F3, 0, F3.L, 0.3, 9.4, "#cdbb9e", achsen5(0, F3.L, 5, 1).map((u) => ({ u0: u - 1.4, u1: u + 1.4, v0: 1.5, v1: 7.5, bogen: true })), { glas: "#3e4650", dick: 0.25 });
     }
     const ex0 = x0 + 4, eb = w2 - 8;
     if (v === "nachkrieg") hmax = Math.max(hmax, empfang50(S, scene2, p2, r3, ex0 + 16, ez0, eb - 32, et, 12, {}));
@@ -147372,17 +147684,17 @@
     for (const s2 of [-1, 1]) S.box(0.07, h3, 0.07, x2 + s2 * qx, y0 + h3 / 2, z4 + s2 * qz, c);
     for (let y2 = y0 + 0.6; y2 < y0 + h3; y2 += ab) S.box(0.06, 0.06, 0.55, x2, y2, z4, c, ry);
   }
-  function geruest3(S, F2, u0, u1, y0, y1, o3 = {}) {
+  function geruest3(S, F3, u0, u1, y0, y1, o3 = {}) {
     const st2 = o3.stahl ?? "#9aa1a7", holz = o3.holz ?? "#c9a36a", t0 = o3.t ?? 0.3, t1 = t0 + 1.2;
     const n3 = Math.max(1, Math.round((u1 - u0) / 2.5)), fb22 = (u1 - u0) / n3;
-    for (let i = 0; i <= n3; i++) for (const t3 of [t0, t1]) fb4(S, F2, u0 + i * fb22 - 0.05, u0 + i * fb22 + 0.05, y0, y1, t3, t3 + 0.1, st2);
+    for (let i = 0; i <= n3; i++) for (const t3 of [t0, t1]) fb4(S, F3, u0 + i * fb22 - 0.05, u0 + i * fb22 + 0.05, y0, y1, t3, t3 + 0.1, st2);
     let k3 = 0;
     for (let y2 = y0 + 2; y2 <= y1 + 0.01; y2 += 2, k3++) {
-      fb4(S, F2, u0, u1, y2 - 0.06, y2, t0, t1 + 0.1, holz);
-      fb4(S, F2, u0, u1, y2 + 1, y2 + 1.06, t1, t1 + 0.1, st2);
-      for (let i = k3 % 2; i < n3; i += 2) fstrebe(S, F2, u0 + i * fb22, y2 - 2, u0 + (i + 1) * fb22, y2, 0.06, t1, t1 + 0.08, st2);
+      fb4(S, F3, u0, u1, y2 - 0.06, y2, t0, t1 + 0.1, holz);
+      fb4(S, F3, u0, u1, y2 + 1, y2 + 1.06, t1, t1 + 0.1, st2);
+      for (let i = k3 % 2; i < n3; i += 2) fstrebe(S, F3, u0 + i * fb22, y2 - 2, u0 + (i + 1) * fb22, y2, 0.06, t1, t1 + 0.08, st2);
     }
-    if (o3.netz) fb4(S, F2, u0, u1, y0 + 2, y1, t1 + 0.12, t1 + 0.14, o3.netz);
+    if (o3.netz) fb4(S, F3, u0, u1, y0 + 2, y1, t1 + 0.12, t1 + 0.14, o3.netz);
   }
   function anlage(S, r3, x0, z0, b3, t3, ebenen = 3, o3 = {}) {
     const st2 = "#5d656c", rost = "#8d939a", gel = o3.gel ?? "#e8c547", gh = 6, H = ebenen * gh;
@@ -147452,11 +147764,11 @@
   function ziegelbau(S, p2, x0, z0, b3, t3, H, zg = "#a8664f", o3 = {}) {
     S.quader(x0, 0, z0, x0 + b3, H, z0 + t3, zg);
     const n3 = Math.max(1, Math.round((H - 1) / 3.6));
-    for (const [k3, F2] of seiten2(p2, x0, z0, b3, t3)) {
+    for (const [k3, F3] of seiten2(p2, x0, z0, b3, t3)) {
       const L2 = [];
-      for (let i = 0; i < n3; i++) for (const u of achsen5(0, F2.L, 2.8, 0.8)) L2.push({ u0: u - 0.7, u1: u + 0.7, v0: 1 + i * 3.6, v1: 2.9 + i * 3.6, bogen: o3.bogen ?? true });
-      lochwand4(S, F2, 0, F2.L, 0.3, H - 0.5, zg, L2, { glas: "#5d6f7a", dick: 0.25 });
-      fb4(S, F2, -0.1, F2.L + 0.1, H - 0.5, H, 0, 0.35, "#e4d8c4");
+      for (let i = 0; i < n3; i++) for (const u of achsen5(0, F3.L, 2.8, 0.8)) L2.push({ u0: u - 0.7, u1: u + 0.7, v0: 1 + i * 3.6, v1: 2.9 + i * 3.6, bogen: o3.bogen ?? true });
+      lochwand4(S, F3, 0, F3.L, 0.3, H - 0.5, zg, L2, { glas: "#5d6f7a", dick: 0.25 });
+      fb4(S, F3, -0.1, F3.L + 0.1, H - 0.5, H, 0, 0.35, "#e4d8c4");
     }
     if (o3.dach !== false) S.quader(x0 + 0.3, H, z0 + 0.3, x0 + b3 - 0.3, H + 0.2, z0 + t3 - 0.3, "#8d939a");
   }
@@ -147470,24 +147782,24 @@
     const pb = Math.min(58, b3 * 0.72), pt2 = 13, px2 = x0 + (b3 - pb) / 2 - 4, pz5 = z0 + 3, H = 15;
     S.quader(px2, y2, pz5, px2 + pb, y2 + H, pz5 + pt2, putz2);
     S.quader(px2 - 0.2, y2, pz5 - 0.2, px2 + pb + 0.2, y2 + 2.2, pz5 + pt2 + 0.2, stein);
-    for (const [k3, F2] of seiten2(p2, px2, pz5, pb, pt2)) {
-      for (const u of achsen5(0, F2.L, 3.4, 1.2)) {
-        fenster5(S, F2, u, y2 + 4.2, 1.2, 2.4, { kreuz: true, rahmen: stein });
-        fenster5(S, F2, u, y2 + 9.4, 1.2, 2.4, { kreuz: true, rahmen: stein });
+    for (const [k3, F3] of seiten2(p2, px2, pz5, pb, pt2)) {
+      for (const u of achsen5(0, F3.L, 3.4, 1.2)) {
+        fenster5(S, F3, u, y2 + 4.2, 1.2, 2.4, { kreuz: true, rahmen: stein });
+        fenster5(S, F3, u, y2 + 9.4, 1.2, 2.4, { kreuz: true, rahmen: stein });
       }
-      fb4(S, F2, -0.1, F2.L + 0.1, y2 + 7.6, y2 + 7.9, 0, 0.2, stein);
-      for (const u of [0.3, F2.L - 0.3]) fb4(S, F2, u - 0.5, u + 0.5, y2, y2 + H, 0, 0.1, stein);
+      fb4(S, F3, -0.1, F3.L + 0.1, y2 + 7.6, y2 + 7.9, 0, 0.2, stein);
+      for (const u of [0.3, F3.L - 0.3]) fb4(S, F3, u - 0.5, u + 0.5, y2, y2 + H, 0, 0.1, stein);
     }
     satteldach4(S, px2, pz5, px2 + pb, pz5 + pt2, y2 + H, 10, "x", dach3, putz2, 0.4);
     for (const u of [pb * 0.25, pb * 0.6]) {
-      const zx = px2 + u, F2 = R7(zx - 3, pz5 + pt2, 1, 0, 6);
+      const zx = px2 + u, F3 = R7(zx - 3, pz5 + pt2, 1, 0, 6);
       S.quader(zx - 3, y2 + H, pz5 + pt2 - 3, zx + 3, y2 + H + 4.5, pz5 + pt2, putz2);
-      fpoly3(S, F2, [[0, y2 + H + 4.5], [6, y2 + H + 4.5], [5, y2 + H + 6], [4, y2 + H + 6], [4, y2 + H + 7.4], [2, y2 + H + 7.4], [2, y2 + H + 6], [1, y2 + H + 6]], -3, 0, putz2);
-      fenster5(S, F2, 3, y2 + H + 1.4, 1.1, 2, { kreuz: true, rahmen: stein });
+      fpoly3(S, F3, [[0, y2 + H + 4.5], [6, y2 + H + 4.5], [5, y2 + H + 6], [4, y2 + H + 6], [4, y2 + H + 7.4], [2, y2 + H + 7.4], [2, y2 + H + 6], [1, y2 + H + 6]], -3, 0, putz2);
+      fenster5(S, F3, 3, y2 + H + 1.4, 1.1, 2, { kreuz: true, rahmen: stein });
     }
     const kx = px2 + pb, kb = 12, kt = Math.min(t3 - 6, 26);
     S.quader(kx, y2, pz5, kx + kb, y2 + H + 2, pz5 + kt, stein);
-    for (const [k3, F2] of seiten2(p2, kx, pz5, kb, kt, ["+x", "+z"])) for (const u of achsen5(0, F2.L, 4.2, 1.4)) fb4(S, F2, u - 0.7, u + 0.7, y2 + 4, y2 + H - 1, 0, 0.06, GLAS9);
+    for (const [k3, F3] of seiten2(p2, kx, pz5, kb, kt, ["+x", "+z"])) for (const u of achsen5(0, F3.L, 4.2, 1.4)) fb4(S, F3, u - 0.7, u + 0.7, y2 + 4, y2 + H - 1, 0, 0.06, GLAS9);
     satteldach4(S, kx, pz5, kx + kb, pz5 + kt, y2 + H + 2, 8, "z", dach3, stein, 0.4);
     S.box(1.2, 6, 1.2, kx + kb / 2, y2 + H + 13, pz5 + kt * 0.5, dach3);
     zyl8(S, 0, 0.9, 4, kx + kb / 2, y2 + H + 16, pz5 + kt * 0.5, KUPFER3, 8);
@@ -147495,9 +147807,9 @@
     zyl8(S, 3.6, 3.8, H + 12, tx, y2, tz, stein, 16);
     zyl8(S, 0, 4.4, 9, tx, y2 + H + 12, tz, dach3, 16);
     S.quader(px2 + pb * 0.42 - 3, y2, pz5 + pt2, px2 + pb * 0.42 + 3, y2 + H + 8, pz5 + pt2 + 6, putz2);
-    for (const [k3, F2] of seiten2(p2, px2 + pb * 0.42 - 3, pz5 + pt2, 6, 6)) {
-      fb4(S, F2, 1.8, 4.2, y2, y2 + 4.2, 0, 0.08, "#4a3b33");
-      fenster5(S, F2, 3, y2 + H + 2, 1, 2.2, { rahmen: stein });
+    for (const [k3, F3] of seiten2(p2, px2 + pb * 0.42 - 3, pz5 + pt2, 6, 6)) {
+      fb4(S, F3, 1.8, 4.2, y2, y2 + 4.2, 0, 0.08, "#4a3b33");
+      fenster5(S, F3, 3, y2 + H + 2, 1, 2.2, { rahmen: stein });
     }
     walm2(S, px2 + pb * 0.42 - 3.3, pz5 + pt2 - 0.3, px2 + pb * 0.42 + 3.3, pz5 + pt2 + 6.3, y2 + H + 8, 8, dach3);
     S.box(0.1, 3.4, 0.1, tx, y2 + H + 22.5, tz, "#3b3f44");
@@ -149002,26 +149314,26 @@
   function R8(ox, oz, dx, dz, L2) {
     return { ox, oz, dx, dz, nx: -dz, nz: dx, ry: Math.atan2(-dz, dx), L: L2 };
   }
-  function wp5(F2, u, t3) {
-    return [F2.ox + F2.dx * u + F2.nx * t3, F2.oz + F2.dz * u + F2.nz * t3];
+  function wp5(F3, u, t3) {
+    return [F3.ox + F3.dx * u + F3.nx * t3, F3.oz + F3.dz * u + F3.nz * t3];
   }
-  function fb5(S, F2, u0, u1, y0, y1, t0, t1, c) {
+  function fb5(S, F3, u0, u1, y0, y1, t0, t1, c) {
     if (u1 - u0 < 1e-3 || y1 - y0 < 1e-3 || t1 - t0 < 1e-3) return;
-    const [x2, z4] = wp5(F2, (u0 + u1) / 2, (t0 + t1) / 2);
-    S.box(u1 - u0, y1 - y0, t1 - t0, x2, (y0 + y1) / 2, z4, c, F2.ry);
+    const [x2, z4] = wp5(F3, (u0 + u1) / 2, (t0 + t1) / 2);
+    S.box(u1 - u0, y1 - y0, t1 - t0, x2, (y0 + y1) / 2, z4, c, F3.ry);
   }
-  function fgeo5(S, F2, g, c) {
-    g.rotateY(F2.ry);
-    g.translate(F2.ox, 0, F2.oz);
+  function fgeo5(S, F3, g, c) {
+    g.rotateY(F3.ry);
+    g.translate(F3.ox, 0, F3.oz);
     S.add(g, c);
   }
-  function teil5(F2, u0, u1, t3 = 0) {
-    const [x2, z4] = wp5(F2, u0, t3);
-    return R8(x2, z4, F2.dx, F2.dz, u1 - u0);
+  function teil5(F3, u0, u1, t3 = 0) {
+    const [x2, z4] = wp5(F3, u0, t3);
+    return R8(x2, z4, F3.dx, F3.dz, u1 - u0);
   }
-  function quer(F2, T) {
-    const [x2, z4] = wp5(F2, 0, 0);
-    return R8(x2, z4, -F2.nx, -F2.nz, T);
+  function quer(F3, T) {
+    const [x2, z4] = wp5(F3, 0, 0);
+    return R8(x2, z4, -F3.nx, -F3.nz, T);
   }
   function seiten3(x0, z0, w2, d3) {
     return { v: R8(x0, z0 + d3, 1, 0, w2), r: R8(x0 + w2, z0 + d3, 0, -1, d3), h: R8(x0 + w2, z0, -1, 0, w2), l: R8(x0, z0, 0, 1, d3) };
@@ -149055,12 +149367,12 @@
     p2.lineTo(u0, v0);
     return p2;
   }
-  function fform4(S, F2, shape, t0, t1, c, seg2 = 6) {
+  function fform4(S, F3, shape, t0, t1, c, seg2 = 6) {
     const g = new three_module_exports.ExtrudeGeometry(shape, { depth: t1 - t0, bevelEnabled: false, curveSegments: seg2 });
     g.translate(0, 0, t0);
-    fgeo5(S, F2, g, c);
+    fgeo5(S, F3, g, c);
   }
-  function fwand3(S, F2, u0, u1, y0, y1, t0, t1, c, loecher = []) {
+  function fwand3(S, F3, u0, u1, y0, y1, t0, t1, c, loecher = []) {
     const s2 = rechteck6(u0, y0, u1, y1);
     for (const l of loecher) {
       if (l.kreis) {
@@ -149069,37 +149381,37 @@
         s2.holes.push(p2);
       } else s2.holes.push(oeffnung4(new three_module_exports.Path(), l.u0, l.v0, l.u1, l.v1, l.bogen));
     }
-    fform4(S, F2, s2, t0, t1, c);
+    fform4(S, F3, s2, t0, t1, c);
   }
-  function fpoly4(S, F2, pkt, t0, t1, c) {
+  function fpoly4(S, F3, pkt, t0, t1, c) {
     const s2 = new three_module_exports.Shape();
     s2.moveTo(pkt[0][0], pkt[0][1]);
     for (const [u, v] of pkt.slice(1)) s2.lineTo(u, v);
     s2.lineTo(pkt[0][0], pkt[0][1]);
-    fform4(S, F2, s2, t0, t1, c);
+    fform4(S, F3, s2, t0, t1, c);
   }
-  function fbogen(S, F2, u, y0, b3, h3, t0, t1, c, art = true) {
-    fform4(S, F2, oeffnung4(new three_module_exports.Shape(), u - b3 / 2, y0, u + b3 / 2, y0 + h3, art), t0, t1, c, 8);
+  function fbogen(S, F3, u, y0, b3, h3, t0, t1, c, art = true) {
+    fform4(S, F3, oeffnung4(new three_module_exports.Shape(), u - b3 / 2, y0, u + b3 / 2, y0 + h3, art), t0, t1, c, 8);
   }
-  function fscheibe4(S, F2, u, y2, t0, t1, rad3, c, seg2 = 16) {
+  function fscheibe4(S, F3, u, y2, t0, t1, rad3, c, seg2 = 16) {
     const g = new three_module_exports.CylinderGeometry(rad3, rad3, t1 - t0, seg2);
     g.rotateX(PI11 / 2);
     g.translate(u, y2, (t0 + t1) / 2);
-    fgeo5(S, F2, g, c);
+    fgeo5(S, F3, g, c);
   }
-  function fdiag(S, F2, u0, y0, u1, y1, b3, t0, t1, c) {
+  function fdiag(S, F3, u0, y0, u1, y1, b3, t0, t1, c) {
     const L2 = wurzelSumme21(u1 - u0, y1 - y0);
     const g = new three_module_exports.BoxGeometry(L2, b3, t1 - t0);
     g.rotateZ(Math.atan2(y1 - y0, u1 - u0));
     g.translate((u0 + u1) / 2, (y0 + y1) / 2, (t0 + t1) / 2);
-    fgeo5(S, F2, g, c);
+    fgeo5(S, F3, g, c);
   }
-  function ftext5(scene2, F2, text3, u, y2, t3, hMax, bMax, farbe3, bg = null) {
+  function ftext5(scene2, F3, text3, u, y2, t3, hMax, bMax, farbe3, bg = null) {
     const { seitenverhaeltnis: a2, mat: mat2 } = textMaterial(text3, farbe3, { groesse: 140, hintergrund: bg });
     const h3 = Math.min(hMax, bMax / a2);
     const m = new three_module_exports.Mesh(new three_module_exports.PlaneGeometry(h3 * a2, h3), mat2);
-    const [x2, z4] = wp5(F2, u, t3);
-    m.rotation.y = F2.ry;
+    const [x2, z4] = wp5(F3, u, t3);
+    m.rotation.y = F3.ry;
     m.position.set(x2, y2, z4);
     scene2.add(m);
     return h3 * a2;
@@ -149170,36 +149482,36 @@
     S.add(konvex(f11), c1);
     walm3(S, x0 + k3, z0 + k3, x1 - k3, z1 - k3, y2 + h1, h22, c2, 0);
   }
-  function dachTrauf(S, F2, u0, u1, T, y2, h3, c, wand2, o3 = {}) {
+  function dachTrauf(S, F3, u0, u1, T, y2, h3, c, wand2, o3 = {}) {
     const ue = o3.ue ?? 0.7, us = o3.us ?? 0.45, dk = o3.dick ?? 0.34;
-    const Q = quer(F2, T), s2 = 2 * h3 / T, yE = y2 - ue * s2;
+    const Q = quer(F3, T), s2 = 2 * h3 / T, yE = y2 - ue * s2;
     fdiag(S, Q, -ue, yE, T / 2 + 0.05, y2 + h3 + 0.05 * s2, dk, u0 - us, u1 + us, c);
     fdiag(S, Q, T / 2 - 0.05, y2 + h3 + 0.05 * s2, T + ue, yE, dk, u0 - us, u1 + us, c);
     fb5(S, Q, T / 2 - 0.22, T / 2 + 0.22, y2 + h3 + 0.02, y2 + h3 + 0.26, u0 - us, u1 + us, dunkler(c, 0.07));
     if (wand2) fpoly4(S, Q, [[0, y2 - 0.02], [T, y2 - 0.02], [T / 2, y2 + h3 - 0.25]], u0 + 0.02, u1 - 0.02, wand2);
   }
-  function dachGiebel(S, F2, u0, u1, t0, t1, y2, h3, c, wand2, o3 = {}) {
+  function dachGiebel(S, F3, u0, u1, t0, t1, y2, h3, c, wand2, o3 = {}) {
     const ue = o3.ue ?? 0.5, dk = o3.dick ?? 0.34, uf = o3.uf ?? 0.6, ub = o3.ub ?? 0.5;
     const um2 = (u0 + u1) / 2, B8 = u1 - u0, s2 = 2 * h3 / B8, yE = y2 - ue * s2;
-    fdiag(S, F2, u0 - ue, yE, um2 + 0.05, y2 + h3 + 0.05 * s2, dk, t0 - ub, t1 + uf, c);
-    fdiag(S, F2, um2 - 0.05, y2 + h3 + 0.05 * s2, u1 + ue, yE, dk, t0 - ub, t1 + uf, c);
-    fb5(S, F2, um2 - 0.22, um2 + 0.22, y2 + h3 + 0.02, y2 + h3 + 0.26, t0 - ub, t1 + uf, dunkler(c, 0.07));
-    if (wand2) fpoly4(S, F2, [[u0 + 0.02, y2 - 0.02], [u1 - 0.02, y2 - 0.02], [um2, y2 + h3 - 0.25]], t0, t1, wand2);
+    fdiag(S, F3, u0 - ue, yE, um2 + 0.05, y2 + h3 + 0.05 * s2, dk, t0 - ub, t1 + uf, c);
+    fdiag(S, F3, um2 - 0.05, y2 + h3 + 0.05 * s2, u1 + ue, yE, dk, t0 - ub, t1 + uf, c);
+    fb5(S, F3, um2 - 0.22, um2 + 0.22, y2 + h3 + 0.02, y2 + h3 + 0.26, t0 - ub, t1 + uf, dunkler(c, 0.07));
+    if (wand2) fpoly4(S, F3, [[u0 + 0.02, y2 - 0.02], [u1 - 0.02, y2 - 0.02], [um2, y2 + h3 - 0.25]], t0, t1, wand2);
   }
-  function gaube2(S, F2, u, H, s2, bw, c, dachF, glas3, a2 = 1.3) {
+  function gaube2(S, F3, u, H, s2, bw, c, dachF, glas3, a2 = 1.3) {
     const yb = H + s2 * a2;
-    fb5(S, F2, u - bw / 2, u + bw / 2, yb - 0.4, yb + 1.45, -a2 - 2.4, -a2, c);
-    fb5(S, F2, u - bw / 2 + 0.25, u + bw / 2 - 0.25, yb, yb + 1.05, -a2 - 0.1, -a2 + 0.04, glas3);
-    fdiag(S, F2, u - bw / 2 - 0.2, yb + 1.3, u, yb + 1.95, 0.16, -a2 - 2.6, -a2 + 0.25, dachF);
-    fdiag(S, F2, u, yb + 1.95, u + bw / 2 + 0.2, yb + 1.3, 0.16, -a2 - 2.6, -a2 + 0.25, dachF);
+    fb5(S, F3, u - bw / 2, u + bw / 2, yb - 0.4, yb + 1.45, -a2 - 2.4, -a2, c);
+    fb5(S, F3, u - bw / 2 + 0.25, u + bw / 2 - 0.25, yb, yb + 1.05, -a2 - 0.1, -a2 + 0.04, glas3);
+    fdiag(S, F3, u - bw / 2 - 0.2, yb + 1.3, u, yb + 1.95, 0.16, -a2 - 2.6, -a2 + 0.25, dachF);
+    fdiag(S, F3, u, yb + 1.95, u + bw / 2 + 0.2, yb + 1.3, 0.16, -a2 - 2.6, -a2 + 0.25, dachF);
   }
   var DREH2 = { "+z": 0, "+x": PI11 / 2, "-z": PI11, "-x": -PI11 / 2 };
   function sicht2(p2, nx, nz) {
     const c = Math.cos(p2.dreh ?? 0), s2 = Math.sin(p2.dreh ?? 0);
     return nx * c + nz * s2 + (-nx * s2 + nz * c) > 0.05;
   }
-  var sichtF2 = (p2, F2) => sicht2(p2, F2.nx, F2.nz);
-  function ausgeblichen(c) {
+  var sichtF2 = (p2, F3) => sicht2(p2, F3.nx, F3.nz);
+  function ausgeblichen2(c) {
     const k3 = new three_module_exports.Color(c), hsl = {};
     k3.getHSL(hsl);
     k3.setHSL(hsl.h, hsl.s * 0.62, Math.min(0.92, hsl.l * 0.9 + 0.04));
@@ -149227,7 +149539,7 @@
       const tx = p2.x - Math.min(...ecken.map((e) => e[0])), tz = p2.z - Math.min(...ecken.map((e) => e[1]));
       const verw = p2.zustand === "verwittert";
       for (const [farbe3, gs] of T.teile) {
-        const f11 = verw ? ausgeblichen(farbe3) : farbe3;
+        const f11 = verw ? ausgeblichen2(farbe3) : farbe3;
         for (const g of gs) {
           if (s2 < 0.999) g.scale(s2, s2, s2);
           g.translate(ox, 0, oz);
@@ -149358,24 +149670,24 @@
     out.push(rest);
     return out;
   }
-  function fenster6(S, F2, u, y2, fw, fh, o3 = {}) {
+  function fenster6(S, F3, u, y2, fw, fh, o3 = {}) {
     const t3 = o3.t ?? 0, rah = o3.rahmen ?? ORN2;
-    if (o3.fasche) fb5(S, F2, u - fw / 2 - 0.2, u + fw / 2 + 0.2, y2 - 0.22, y2 + fh + 0.22, t3, t3 + 0.03, o3.fasche);
-    if (o3.bogen) fbogen(S, F2, u, y2, fw, fh, t3 - 0.12, t3 + 0.04, o3.glas ?? GLAS10);
-    else fb5(S, F2, u - fw / 2, u + fw / 2, y2, y2 + fh, t3 - 0.12, t3 + 0.04, o3.glas ?? GLAS10);
+    if (o3.fasche) fb5(S, F3, u - fw / 2 - 0.2, u + fw / 2 + 0.2, y2 - 0.22, y2 + fh + 0.22, t3, t3 + 0.03, o3.fasche);
+    if (o3.bogen) fbogen(S, F3, u, y2, fw, fh, t3 - 0.12, t3 + 0.04, o3.glas ?? GLAS10);
+    else fb5(S, F3, u - fw / 2, u + fw / 2, y2, y2 + fh, t3 - 0.12, t3 + 0.04, o3.glas ?? GLAS10);
     if (o3.kreuz !== false && fw > 0.75) {
-      fb5(S, F2, u - 0.045, u + 0.045, y2, y2 + fh * (o3.bogen ? 0.8 : 1), t3, t3 + 0.07, rah);
-      if (!o3.bogen) fb5(S, F2, u - fw / 2, u + fw / 2, y2 + fh * 0.66 - 0.04, y2 + fh * 0.66 + 0.04, t3, t3 + 0.07, rah);
+      fb5(S, F3, u - 0.045, u + 0.045, y2, y2 + fh * (o3.bogen ? 0.8 : 1), t3, t3 + 0.07, rah);
+      if (!o3.bogen) fb5(S, F3, u - fw / 2, u + fw / 2, y2 + fh * 0.66 - 0.04, y2 + fh * 0.66 + 0.04, t3, t3 + 0.07, rah);
     }
-    if (o3.sims !== false) fb5(S, F2, u - fw / 2 - 0.16, u + fw / 2 + 0.16, y2 - 0.16, y2, t3, t3 + 0.2, o3.simsF ?? rah);
+    if (o3.sims !== false) fb5(S, F3, u - fw / 2 - 0.16, u + fw / 2 + 0.16, y2 - 0.16, y2, t3, t3 + 0.2, o3.simsF ?? rah);
     if (o3.laeden) {
       const lb = fw * 0.52;
-      fb5(S, F2, u - fw / 2 - lb - 0.04, u - fw / 2 - 0.04, y2, y2 + fh, t3, t3 + 0.1, o3.laeden);
-      fb5(S, F2, u + fw / 2 + 0.04, u + fw / 2 + lb + 0.04, y2, y2 + fh, t3, t3 + 0.1, o3.laeden);
+      fb5(S, F3, u - fw / 2 - lb - 0.04, u - fw / 2 - 0.04, y2, y2 + fh, t3, t3 + 0.1, o3.laeden);
+      fb5(S, F3, u + fw / 2 + 0.04, u + fw / 2 + lb + 0.04, y2, y2 + fh, t3, t3 + 0.1, o3.laeden);
     }
     const oc = o3.ornF ?? rah;
-    if (o3.verdachung === "gerade") fb5(S, F2, u - fw / 2 - 0.3, u + fw / 2 + 0.3, y2 + fh + 0.12, y2 + fh + 0.34, t3, t3 + 0.26, oc);
-    else if (o3.verdachung === "dreieck") fpoly4(S, F2, [[u - fw / 2 - 0.35, y2 + fh + 0.14], [u + fw / 2 + 0.35, y2 + fh + 0.14], [u, y2 + fh + 0.78]], t3, t3 + 0.22, oc);
+    if (o3.verdachung === "gerade") fb5(S, F3, u - fw / 2 - 0.3, u + fw / 2 + 0.3, y2 + fh + 0.12, y2 + fh + 0.34, t3, t3 + 0.26, oc);
+    else if (o3.verdachung === "dreieck") fpoly4(S, F3, [[u - fw / 2 - 0.35, y2 + fh + 0.14], [u + fw / 2 + 0.35, y2 + fh + 0.14], [u, y2 + fh + 0.78]], t3, t3 + 0.22, oc);
     else if (o3.verdachung === "segment") {
       const pk = [[u - fw / 2 - 0.35, y2 + fh + 0.14]];
       for (let i = 0; i <= 6; i++) {
@@ -149383,63 +149695,63 @@
         pk.push([u + Math.cos(a2) * (fw / 2 + 0.35), y2 + fh + 0.3 + Math.sin(a2) * 0.38]);
       }
       pk.push([u + fw / 2 + 0.35, y2 + fh + 0.14]);
-      fpoly4(S, F2, pk, t3, t3 + 0.22, oc);
+      fpoly4(S, F3, pk, t3, t3 + 0.22, oc);
     }
     if (o3.blumen) {
-      fb5(S, F2, u - fw / 2, u + fw / 2, y2 - 0.5, y2 - 0.18, t3, t3 + 0.34, o3.kasten ?? "#7a5638");
-      fb5(S, F2, u - fw / 2 + 0.04, u + fw / 2 - 0.04, y2 - 0.2, y2 + 0.16, t3 + 0.03, t3 + 0.4, o3.blumen);
+      fb5(S, F3, u - fw / 2, u + fw / 2, y2 - 0.5, y2 - 0.18, t3, t3 + 0.34, o3.kasten ?? "#7a5638");
+      fb5(S, F3, u - fw / 2 + 0.04, u + fw / 2 - 0.04, y2 - 0.2, y2 + 0.16, t3 + 0.03, t3 + 0.4, o3.blumen);
     }
   }
-  function lochfassade(S, F2, u0, u1, y0, n3, gh, o3 = {}) {
+  function lochfassade(S, F3, u0, u1, y0, n3, gh, o3 = {}) {
     const ra = o3.ra ?? 3, fw = o3.fw ?? 1.25, fh = o3.fh ?? Math.min(1.9, gh * 0.58), br = o3.br ?? 0.85;
     const us = o3.achsen ?? achsen6(u0, u1, ra, o3.rand ?? 0.5);
-    for (let k3 = 0; k3 < n3; k3++) for (const u of us) fenster6(S, F2, u, y0 + k3 * gh + br, fw, fh, typeof o3.fen === "function" ? o3.fen(k3, u) : o3);
+    for (let k3 = 0; k3 < n3; k3++) for (const u of us) fenster6(S, F3, u, y0 + k3 * gh + br, fw, fh, typeof o3.fen === "function" ? o3.fen(k3, u) : o3);
     return us;
   }
-  function laden(S, scene2, F2, u0, u1, h3, r3, o3 = {}) {
+  function laden(S, scene2, F3, u0, u1, h3, r3, o3 = {}) {
     const b3 = u1 - u0;
     if (b3 < 1.8) return;
     const rah = o3.rahmen ?? waehle2(r3, LADENRAHMEN2), leer4 = o3.leer;
-    fb5(S, F2, u0, u1, 0.3, 0.72, -0.1, 0.08, rah);
-    fb5(S, F2, u0 + 0.15, u1 - 0.15, 0.72, h3 - 0.85, -0.25, 0.03, leer4 ? "#dcd8ce" : GLAS_LADEN2);
-    fb5(S, F2, u0, u1, h3 - 0.85, h3 - 0.12, -0.1, 0.1, rah);
+    fb5(S, F3, u0, u1, 0.3, 0.72, -0.1, 0.08, rah);
+    fb5(S, F3, u0 + 0.15, u1 - 0.15, 0.72, h3 - 0.85, -0.25, 0.03, leer4 ? "#dcd8ce" : GLAS_LADEN2);
+    fb5(S, F3, u0, u1, h3 - 0.85, h3 - 0.12, -0.1, 0.1, rah);
     const n3 = Math.max(1, Math.round(b3 / 2.5));
     for (let i = 0; i <= n3; i++) {
       const u = u0 + 0.12 + (b3 - 0.24) * i / n3;
-      fb5(S, F2, u - 0.09, u + 0.09, 0.72, h3 - 0.85, -0.1, 0.07, rah);
+      fb5(S, F3, u - 0.09, u + 0.09, 0.72, h3 - 0.85, -0.1, 0.07, rah);
     }
     if (o3.tuer !== false && b3 > 3) {
       const ut = u0 + b3 * (r3() < 0.5 ? 0.2 : 0.8);
-      fb5(S, F2, ut - 0.55, ut + 0.55, 0.3, h3 - 1, -0.05, 0.06, dunkler(rah, 0.06));
+      fb5(S, F3, ut - 0.55, ut + 0.55, 0.3, h3 - 1, -0.05, 0.06, dunkler(rah, 0.06));
     }
     if (leer4) {
       const sh = Math.min(h3 - 1.3, Math.max(1.4, b3 * 0.2)), ym = 0.72 + (h3 - 0.85 - 0.72) / 2;
-      fb5(S, F2, u0 + 0.2, u1 - 0.2, ym - sh / 2, ym + sh / 2, 0.03, 0.09, "#c8322a");
-      ftext5(scene2, F2, "ZU VERMIETEN", (u0 + u1) / 2, ym, 0.1, sh * 0.8, b3 * 0.94, "#ffffff");
-    } else if (o3.name !== false) ftext5(scene2, F2, o3.name ?? waehle2(r3, o3.namen ?? LAEDEN3), (u0 + u1) / 2, h3 - 0.49, 0.12, 0.42, b3 * 0.86, hell(rah) ? "#3a3f44" : "#f7f2e6");
+      fb5(S, F3, u0 + 0.2, u1 - 0.2, ym - sh / 2, ym + sh / 2, 0.03, 0.09, "#c8322a");
+      ftext5(scene2, F3, "ZU VERMIETEN", (u0 + u1) / 2, ym, 0.1, sh * 0.8, b3 * 0.94, "#ffffff");
+    } else if (o3.name !== false) ftext5(scene2, F3, o3.name ?? waehle2(r3, o3.namen ?? LAEDEN3), (u0 + u1) / 2, h3 - 0.49, 0.12, 0.42, b3 * 0.86, hell(rah) ? "#3a3f44" : "#f7f2e6");
     if (o3.markise && !leer4) {
       const g = new three_module_exports.BoxGeometry(b3 - 0.2, 0.12, 1.5);
       g.rotateX(0.38);
       g.translate((u0 + u1) / 2, h3 - 1.05, 0.72);
-      fgeo5(S, F2, g, o3.markise);
+      fgeo5(S, F3, g, o3.markise);
     }
   }
-  function leerPlane(S, scene2, p2, F2, y2, hMax = 5.5) {
-    if (p2.zustand !== "leerstand" || !sichtF2(p2, F2)) return;
-    const L2 = F2.L * 0.86, h3 = Math.min(hMax, L2 / 6.2), u0 = (F2.L - L2) / 2;
-    fb5(S, F2, u0, u0 + L2, y2, y2 + h3, 0.25, 0.35, "#c8322a");
-    fb5(S, F2, u0 + 0.25, u0 + L2 - 0.25, y2 + 0.25, y2 + 0.33, 0.35, 0.38, "#f4efe2");
-    fb5(S, F2, u0 + 0.25, u0 + L2 - 0.25, y2 + h3 - 0.33, y2 + h3 - 0.25, 0.35, 0.38, "#f4efe2");
-    for (const u of [u0 + 0.4, u0 + L2 - 0.4]) fb5(S, F2, u - 0.05, u + 0.05, y2 + h3, y2 + h3 + 0.8, 0.28, 0.33, "#3b4046");
-    ftext5(scene2, F2, "ZU VERMIETEN", F2.L / 2, y2 + h3 / 2, 0.4, h3 * 0.92, L2 * 0.96, "#ffffff");
+  function leerPlane(S, scene2, p2, F3, y2, hMax = 5.5) {
+    if (p2.zustand !== "leerstand" || !sichtF2(p2, F3)) return;
+    const L2 = F3.L * 0.86, h3 = Math.min(hMax, L2 / 6.2), u0 = (F3.L - L2) / 2;
+    fb5(S, F3, u0, u0 + L2, y2, y2 + h3, 0.25, 0.35, "#c8322a");
+    fb5(S, F3, u0 + 0.25, u0 + L2 - 0.25, y2 + 0.25, y2 + 0.33, 0.35, 0.38, "#f4efe2");
+    fb5(S, F3, u0 + 0.25, u0 + L2 - 0.25, y2 + h3 - 0.33, y2 + h3 - 0.25, 0.35, 0.38, "#f4efe2");
+    for (const u of [u0 + 0.4, u0 + L2 - 0.4]) fb5(S, F3, u - 0.05, u + 0.05, y2 + h3, y2 + h3 + 0.8, 0.28, 0.33, "#3b4046");
+    ftext5(scene2, F3, "ZU VERMIETEN", F3.L / 2, y2 + h3 / 2, 0.4, h3 * 0.92, L2 * 0.96, "#ffffff");
   }
-  function haustuer2(S, F2, u, y2, b3, h3, c, rahmen2 = ORN2, bogen3 = false) {
+  function haustuer2(S, F3, u, y2, b3, h3, c, rahmen2 = ORN2, bogen3 = false) {
     if (bogen3) {
-      fbogen(S, F2, u, y2, b3 + 0.4, h3 + 0.3, 0, 0.06, rahmen2);
-      fbogen(S, F2, u, y2, b3, h3, -0.1, 0.1, c);
+      fbogen(S, F3, u, y2, b3 + 0.4, h3 + 0.3, 0, 0.06, rahmen2);
+      fbogen(S, F3, u, y2, b3, h3, -0.1, 0.1, c);
     } else {
-      fb5(S, F2, u - b3 / 2 - 0.2, u + b3 / 2 + 0.2, y2, y2 + h3 + 0.2, 0, 0.06, rahmen2);
-      fb5(S, F2, u - b3 / 2, u + b3 / 2, y2, y2 + h3, -0.1, 0.1, c);
+      fb5(S, F3, u - b3 / 2 - 0.2, u + b3 / 2 + 0.2, y2, y2 + h3 + 0.2, 0, 0.06, rahmen2);
+      fb5(S, F3, u - b3 / 2, u + b3 / 2, y2, y2 + h3, -0.1, 0.1, c);
     }
   }
   function giebelUmriss2(u0, u1, y2, hg, art) {
@@ -149590,42 +149902,42 @@
     const A = (x1 - x0) * (z1 - z0);
     if (z1 - z0 > 5) for (let i = 0; i < Math.min(o3.baeume ?? 3, Math.floor(A / 90)); i++) baumRund2(S, zw(r3, x0 + 3, x1 - 3), zw(r3, z0 + 2.5, z1 - 2.5), r3, zw(r3, 0.6, 0.9));
   }
-  function zifferblatt(S, F2, u, y2, rad3, t3, c) {
-    fscheibe4(S, F2, u, y2, t3, t3 + 0.1, rad3 + 0.2, ORN2, 16);
-    fscheibe4(S, F2, u, y2, t3 + 0.1, t3 + 0.14, rad3, c, 16);
+  function zifferblatt(S, F3, u, y2, rad3, t3, c) {
+    fscheibe4(S, F3, u, y2, t3, t3 + 0.1, rad3 + 0.2, ORN2, 16);
+    fscheibe4(S, F3, u, y2, t3 + 0.1, t3 + 0.14, rad3, c, 16);
     for (let i = 0; i < 12; i++) {
       const a2 = i / 12 * 2 * PI11, l = i % 3 === 0 ? rad3 * 0.26 : rad3 * 0.14, cu = u + Math.cos(a2) * rad3 * 0.78, cy = y2 + Math.sin(a2) * rad3 * 0.78;
-      fb5(S, F2, cu - 0.05, cu + 0.05, cy - l / 2, cy + l / 2, t3 + 0.14, t3 + 0.18, GOLD);
+      fb5(S, F3, cu - 0.05, cu + 0.05, cy - l / 2, cy + l / 2, t3 + 0.14, t3 + 0.18, GOLD);
     }
-    fb5(S, F2, u - 0.05, u + 0.05, y2, y2 + rad3 * 0.72, t3 + 0.18, t3 + 0.22, GOLD);
-    fb5(S, F2, u, u + rad3 * 0.5, y2 - 0.05, y2 + 0.05, t3 + 0.18, t3 + 0.22, GOLD);
+    fb5(S, F3, u - 0.05, u + 0.05, y2, y2 + rad3 * 0.72, t3 + 0.18, t3 + 0.22, GOLD);
+    fb5(S, F3, u, u + rad3 * 0.5, y2 - 0.05, y2 + 0.05, t3 + 0.18, t3 + 0.22, GOLD);
   }
-  function schallarkade(S, F2, u, y2, b3, h3, orn, holz = "#5a4636") {
-    fbogen(S, F2, u, y2 - 0.2, b3 + 0.5, h3 + 0.45, 0, 0.06, orn);
-    fbogen(S, F2, u, y2, b3, h3, -0.2, 0.07, GLAS_DUNKEL);
-    fb5(S, F2, u - 0.09, u + 0.09, y2, y2 + h3 - b3 * 0.5, 0, 0.12, orn);
-    for (let i = 1; i <= 3; i++) fb5(S, F2, u - b3 / 2 + 0.05, u + b3 / 2 - 0.05, y2 + i * (h3 - b3 * 0.5) / 4, y2 + i * (h3 - b3 * 0.5) / 4 + 0.1, -0.12, -0.02, holz);
-    fb5(S, F2, u - b3 / 2 - 0.25, u + b3 / 2 + 0.25, y2 - 0.25, y2 - 0.05, 0, 0.22, orn);
+  function schallarkade(S, F3, u, y2, b3, h3, orn, holz = "#5a4636") {
+    fbogen(S, F3, u, y2 - 0.2, b3 + 0.5, h3 + 0.45, 0, 0.06, orn);
+    fbogen(S, F3, u, y2, b3, h3, -0.2, 0.07, GLAS_DUNKEL);
+    fb5(S, F3, u - 0.09, u + 0.09, y2, y2 + h3 - b3 * 0.5, 0, 0.12, orn);
+    for (let i = 1; i <= 3; i++) fb5(S, F3, u - b3 / 2 + 0.05, u + b3 / 2 - 0.05, y2 + i * (h3 - b3 * 0.5) / 4, y2 + i * (h3 - b3 * 0.5) / 4 + 0.1, -0.12, -0.02, holz);
+    fb5(S, F3, u - b3 / 2 - 0.25, u + b3 / 2 + 0.25, y2 - 0.25, y2 - 0.05, 0, 0.22, orn);
   }
-  function barockFenster(S, F2, u, y2, b3, h3, orn) {
-    fbogen(S, F2, u, y2 - 0.25, b3 + 0.6, h3 + 0.55, 0, 0.05, orn);
-    fbogen(S, F2, u, y2, b3, h3, -0.1, 0.07, GLAS_DUNKEL);
-    fb5(S, F2, u - 0.04, u + 0.04, y2, y2 + h3 - b3 * 0.5, 0.07, 0.1, orn);
-    for (const k3 of [0.33, 0.66]) fb5(S, F2, u - b3 / 2, u + b3 / 2, y2 + (h3 - b3 * 0.5) * k3 - 0.04, y2 + (h3 - b3 * 0.5) * k3 + 0.04, 0.07, 0.1, orn);
-    fb5(S, F2, u - 0.22, u + 0.22, y2 + h3 - 0.1, y2 + h3 + 0.45, 0, 0.14, orn);
-    fb5(S, F2, u - b3 / 2 - 0.3, u + b3 / 2 + 0.3, y2 - 0.42, y2 - 0.22, 0, 0.18, orn);
+  function barockFenster(S, F3, u, y2, b3, h3, orn) {
+    fbogen(S, F3, u, y2 - 0.25, b3 + 0.6, h3 + 0.55, 0, 0.05, orn);
+    fbogen(S, F3, u, y2, b3, h3, -0.1, 0.07, GLAS_DUNKEL);
+    fb5(S, F3, u - 0.04, u + 0.04, y2, y2 + h3 - b3 * 0.5, 0.07, 0.1, orn);
+    for (const k3 of [0.33, 0.66]) fb5(S, F3, u - b3 / 2, u + b3 / 2, y2 + (h3 - b3 * 0.5) * k3 - 0.04, y2 + (h3 - b3 * 0.5) * k3 + 0.04, 0.07, 0.1, orn);
+    fb5(S, F3, u - 0.22, u + 0.22, y2 + h3 - 0.1, y2 + h3 + 0.45, 0, 0.14, orn);
+    fb5(S, F3, u - b3 / 2 - 0.3, u + b3 / 2 + 0.3, y2 - 0.42, y2 - 0.22, 0, 0.18, orn);
   }
-  function gotFenster(S, F2, u, y2, b3, h3, gew, t3 = 0) {
-    fbogen(S, F2, u, y2 - 0.2, b3 + 0.6, h3 + 0.4, t3, t3 + 0.05, gew, "spitz");
-    fbogen(S, F2, u, y2, b3, h3, t3 - 0.15, t3 + 0.06, GLAS_DUNKEL, "spitz");
+  function gotFenster(S, F3, u, y2, b3, h3, gew, t3 = 0) {
+    fbogen(S, F3, u, y2 - 0.2, b3 + 0.6, h3 + 0.4, t3, t3 + 0.05, gew, "spitz");
+    fbogen(S, F3, u, y2, b3, h3, t3 - 0.15, t3 + 0.06, GLAS_DUNKEL, "spitz");
     const hs = h3 - b3 * 0.9, np = b3 > 2 ? 2 : 1;
     for (let i = 1; i <= np; i++) {
       const uu = u - b3 / 2 + i * b3 / (np + 1);
-      fb5(S, F2, uu - 0.07, uu + 0.07, y2, y2 + hs + b3 * 0.2, t3 + 0.06, t3 + 0.12, gew);
+      fb5(S, F3, uu - 0.07, uu + 0.07, y2, y2 + hs + b3 * 0.2, t3 + 0.06, t3 + 0.12, gew);
     }
-    fb5(S, F2, u - b3 / 2, u + b3 / 2, y2 + hs * 0.55, y2 + hs * 0.55 + 0.1, t3 + 0.06, t3 + 0.11, gew);
-    fscheibe4(S, F2, u, y2 + hs + b3 * 0.42, t3 + 0.06, t3 + 0.1, b3 * 0.24, gew, 10);
-    fscheibe4(S, F2, u, y2 + hs + b3 * 0.42, t3 + 0.1, t3 + 0.12, b3 * 0.14, GLAS_DUNKEL, 10);
+    fb5(S, F3, u - b3 / 2, u + b3 / 2, y2 + hs * 0.55, y2 + hs * 0.55 + 0.1, t3 + 0.06, t3 + 0.11, gew);
+    fscheibe4(S, F3, u, y2 + hs + b3 * 0.42, t3 + 0.06, t3 + 0.1, b3 * 0.24, gew, 10);
+    fscheibe4(S, F3, u, y2 + hs + b3 * 0.42, t3 + 0.1, t3 + 0.12, b3 * 0.14, GLAS_DUNKEL, 10);
   }
   function fiale(S, x2, y2, z4, h3, c) {
     const b3 = Math.max(0.5, h3 * 0.14);
@@ -149638,20 +149950,20 @@
     for (const t3 of [0.55, 0.72]) S.box(b3 * 0.7 * (1.1 - t3), 0.22, b3 * 0.7 * (1.1 - t3) + 0.5, x2, y2 + h3 * t3 + 0.1, z4, c);
     S.add(new three_module_exports.OctahedronGeometry(b3 * 0.32, 0).translate(x2, y2 + h3 + 0.1, z4), c);
   }
-  function krabben(S, F2, pkt, t3, c, abst2 = 1.8) {
+  function krabben(S, F3, pkt, t3, c, abst2 = 1.8) {
     for (let i = 0; i < pkt.length - 1; i++) {
       const [a0, a1] = pkt[i], [b0, b1] = pkt[i + 1], L2 = wurzelSumme21(b0 - a0, b1 - a1), n3 = Math.floor(L2 / abst2);
       for (let k3 = 1; k3 <= n3; k3++) {
         const q2 = k3 / (n3 + 1);
-        fb5(S, F2, a0 + (b0 - a0) * q2 - 0.22, a0 + (b0 - a0) * q2 + 0.22, a1 + (b1 - a1) * q2, a1 + (b1 - a1) * q2 + 0.4, t3 - 0.2, t3 + 0.25, c);
+        fb5(S, F3, a0 + (b0 - a0) * q2 - 0.22, a0 + (b0 - a0) * q2 + 0.22, a1 + (b1 - a1) * q2, a1 + (b1 - a1) * q2 + 0.4, t3 - 0.2, t3 + 0.25, c);
       }
     }
   }
-  function dachluke(S, F2, u, H, s2, dach3, a2 = 2.5, b3 = 1.1, rahmen2 = "#e9e4d8") {
+  function dachluke(S, F3, u, H, s2, dach3, a2 = 2.5, b3 = 1.1, rahmen2 = "#e9e4d8") {
     const y2 = H + s2 * a2;
-    fpoly4(S, F2, [[u - b3 / 2, y2 - 0.1], [u + b3 / 2, y2 - 0.1], [u, y2 + b3 * 0.8]], -a2 - 1.6, -a2, dach3);
-    fpoly4(S, F2, [[u - b3 * 0.4, y2], [u + b3 * 0.4, y2], [u, y2 + b3 * 0.62]], -a2 + 0.01, -a2 + 0.04, rahmen2);
-    fpoly4(S, F2, [[u - b3 * 0.26, y2 + 0.1], [u + b3 * 0.26, y2 + 0.1], [u, y2 + b3 * 0.46]], -a2 + 0.04, -a2 + 0.07, GLAS_DUNKEL);
+    fpoly4(S, F3, [[u - b3 / 2, y2 - 0.1], [u + b3 / 2, y2 - 0.1], [u, y2 + b3 * 0.8]], -a2 - 1.6, -a2, dach3);
+    fpoly4(S, F3, [[u - b3 * 0.4, y2], [u + b3 * 0.4, y2], [u, y2 + b3 * 0.62]], -a2 + 0.01, -a2 + 0.04, rahmen2);
+    fpoly4(S, F3, [[u - b3 * 0.26, y2 + 0.1], [u + b3 * 0.26, y2 + 0.1], [u, y2 + b3 * 0.46]], -a2 + 0.04, -a2 + 0.07, GLAS_DUNKEL);
   }
   function marktstand2(S, r3, x2, z4, farbe3) {
     S.box(3.6, 0.9, 1.8, x2, 0.75, z4, "#c99a63");
@@ -149696,7 +150008,7 @@
     const H = eg + n3 * gh;
     const arkade2 = v === "rosenheim" || v === "wasserburg" && r3() < 0.45;
     const tA = arkade2 ? 3 : 0;
-    const F2 = seiten3(x0, z0, b3, T);
+    const F3 = seiten3(x0, z0, b3, T);
     const dachF = waehle2(r3, BIBER);
     S.quader(x0, 0, z0, x0 + b3, eg, z0 + T - tA, wand2);
     S.quader(x0, eg, z0, x0 + b3, H, z0 + T, wand2);
@@ -149713,8 +150025,8 @@
     const us = Array.from({ length: nAx }, (_, i) => b3 / nAx * (i + 0.5));
     const erker3 = (v === "wasserburg" || v === "passau" || v === "rosenheim") && b3 > 8 && r3() < (v === "wasserburg" ? 0.6 : 0.35) && n3 >= 2;
     const leer4 = p2.zustand === "leerstand";
-    if (sichtF2(p2, F2.v)) {
-      const Fv = F2.v;
+    if (sichtF2(p2, F3.v)) {
+      const Fv = F3.v;
       if (arkade2) {
         const nB = Math.max(2, Math.round(b3 / 3.6)), bb = b3 / nB, holes = [];
         for (let i = 0; i < nB; i++) holes.push({ u0: i * bb + 0.5, u1: (i + 1) * bb - 0.5, v0: 0.3, v1: eg - 0.45, bogen: true });
@@ -149750,52 +150062,52 @@
       }
     }
     const nebenFen = { ...fen, laeden: null, blumen: null, verdachung: null, fasche: v === "passau" ? null : fen.fasche };
-    if (sichtF2(p2, F2.h)) {
-      lochfassade(S, F2.h, 0, b3, eg, n3, gh, { ...nebenFen, ra: 3, fw: 1, fh: 1.5 });
-      haustuer2(S, F2.h, b3 * 0.3, 0.3, 1.1, 2.3, waehle2(r3, HOLZ5), orn);
-      fenster6(S, F2.h, b3 * 0.7, 1.4, 1, 1.3, nebenFen);
+    if (sichtF2(p2, F3.h)) {
+      lochfassade(S, F3.h, 0, b3, eg, n3, gh, { ...nebenFen, ra: 3, fw: 1, fh: 1.5 });
+      haustuer2(S, F3.h, b3 * 0.3, 0.3, 1.1, 2.3, waehle2(r3, HOLZ5), orn);
+      fenster6(S, F3.h, b3 * 0.7, 1.4, 1, 1.3, nebenFen);
     }
     for (const [k3, ok6] of [["r", letzter], ["l", erster]]) {
-      if (!ok6 || !sichtF2(p2, F2[k3])) continue;
-      lochfassade(S, F2[k3], 0.5, T - 0.5, eg, n3, gh, { ...nebenFen, ra: 3.3, fw: 1, fh: 1.5 });
-      fb5(S, F2[k3], 0, T - tA, 0.3, 0.8, 0, 0.1, sockelF);
-      if (arkade2) fwand3(S, F2[k3], 0, tA, 0.3, eg, -0.5, 0, wand2, [{ u0: 0.5, u1: tA - 0.4, v0: 0.3, v1: eg - 0.45, bogen: true }]);
-      for (const u of [T * 0.35, T * 0.7]) fenster6(S, F2[k3], u, 1.3, 1, 1.6, { ...nebenFen, laeden: "#5a6168", kreuz: false });
+      if (!ok6 || !sichtF2(p2, F3[k3])) continue;
+      lochfassade(S, F3[k3], 0.5, T - 0.5, eg, n3, gh, { ...nebenFen, ra: 3.3, fw: 1, fh: 1.5 });
+      fb5(S, F3[k3], 0, T - tA, 0.3, 0.8, 0, 0.1, sockelF);
+      if (arkade2) fwand3(S, F3[k3], 0, tA, 0.3, eg, -0.5, 0, wand2, [{ u0: 0.5, u1: tA - 0.4, v0: 0.3, v1: eg - 0.45, bogen: true }]);
+      for (const u of [T * 0.35, T * 0.7]) fenster6(S, F3[k3], u, 1.3, 1, 1.6, { ...nebenFen, laeden: "#5a6168", kreuz: false });
     }
     if (v === "landshut") {
       const hg = b3 * zw(r3, 0.75, 0.95), art2 = waehle2(r3, ["geschweift", "treppe", "spitz", "geschweift", "aufsatz"]);
-      dachGiebel(S, F2.v, 0, b3, -T, -0.4, H, hg * 0.95, dachF, wand2, { ue: 0.25, uf: 0, ub: 0.4 });
-      fpoly4(S, F2.v, giebelUmriss2(0, b3, H, hg, art2), -0.5, 0, wand2);
+      dachGiebel(S, F3.v, 0, b3, -T, -0.4, H, hg * 0.95, dachF, wand2, { ue: 0.25, uf: 0, ub: 0.4 });
+      fpoly4(S, F3.v, giebelUmriss2(0, b3, H, hg, art2), -0.5, 0, wand2);
       const kap = giebelUmriss2(0, b3, H, hg, art2);
       if (art2 !== "spitz") for (let i = 1; i < kap.length - 1; i++) {
         const [a0, a1] = kap[i], [b0, b1] = kap[i + 1];
-        if (Math.abs(a1 - b1) < 0.01 && Math.abs(a0 - b0) > 0.2) fb5(S, F2.v, Math.min(a0, b0) - 0.1, Math.max(a0, b0) + 0.1, a1 - 0.05, a1 + 0.18, -0.6, 0.14, orn);
+        if (Math.abs(a1 - b1) < 0.01 && Math.abs(a0 - b0) > 0.2) fb5(S, F3.v, Math.min(a0, b0) - 0.1, Math.max(a0, b0) + 0.1, a1 - 0.05, a1 + 0.18, -0.6, 0.14, orn);
       }
-      fb5(S, F2.v, -0.05, b3 + 0.05, H - 0.15, H + 0.12, 0, 0.22, orn);
-      if (sichtF2(p2, F2.v)) {
-        for (const u of [b3 * 0.3, b3 * 0.7]) fenster6(S, F2.v, u, H + 0.9, 0.95, 1.4, { ...fen, laeden: null, blumen: null });
-        fenster6(S, F2.v, b3 / 2, H + hg * 0.52, 0.8, 1.1, { ...fen, laeden: null, blumen: null, kreuz: false });
-        if (hg > 7) fscheibe4(S, F2.v, b3 / 2, H + hg * 0.78, 0, 0.06, 0.45, GLAS10);
+      fb5(S, F3.v, -0.05, b3 + 0.05, H - 0.15, H + 0.12, 0, 0.22, orn);
+      if (sichtF2(p2, F3.v)) {
+        for (const u of [b3 * 0.3, b3 * 0.7]) fenster6(S, F3.v, u, H + 0.9, 0.95, 1.4, { ...fen, laeden: null, blumen: null });
+        fenster6(S, F3.v, b3 / 2, H + hg * 0.52, 0.8, 1.1, { ...fen, laeden: null, blumen: null, kreuz: false });
+        if (hg > 7) fscheibe4(S, F3.v, b3 / 2, H + hg * 0.78, 0, 0.06, 0.45, GLAS10);
       }
-      if (sichtF2(p2, F2.h)) fpoly4(S, F2.h, giebelUmriss2(0, b3, H, hg * 0.9, "spitz"), -0.3, 0, dunkler(wand2, 0.03));
+      if (sichtF2(p2, F3.h)) fpoly4(S, F3.h, giebelUmriss2(0, b3, H, hg * 0.9, "spitz"), -0.3, 0, dunkler(wand2, 0.03));
       return { top: H + hg, H };
     }
     const hv = v === "passau" ? zw(r3, 1.6, 2.2) : zw(r3, 1.9, 2.8);
     const art = v === "passau" ? "flach" : v === "wasserburg" ? waehle2(r3, ["zinnen", "treppe", "flach", "aufsatz"]) : waehle2(r3, ["flach", "flach", "aufsatz"]);
     const top = H + hv;
     const umriss = giebelUmriss2(0, b3, H, hv, art);
-    fpoly4(S, F2.v, umriss, -0.55, 0, wand2);
+    fpoly4(S, F3.v, umriss, -0.55, 0, wand2);
     if (v === "passau") {
-      fb5(S, F2.v, -0.1, b3 + 0.1, H - 0.1, H + 0.3, 0, 0.5, orn);
-      for (const u of achsen6(0.4, b3 - 0.4, 0.9, 0)) fb5(S, F2.v, u - 0.15, u + 0.15, H + 0.3, top - 0.25, -0.1, 0.18, orn);
-      fb5(S, F2.v, -0.05, b3 + 0.05, top - 0.25, top + 0.05, -0.6, 0.32, orn);
+      fb5(S, F3.v, -0.1, b3 + 0.1, H - 0.1, H + 0.3, 0, 0.5, orn);
+      for (const u of achsen6(0.4, b3 - 0.4, 0.9, 0)) fb5(S, F3.v, u - 0.15, u + 0.15, H + 0.3, top - 0.25, -0.1, 0.18, orn);
+      fb5(S, F3.v, -0.05, b3 + 0.05, top - 0.25, top + 0.05, -0.6, 0.32, orn);
     } else {
-      fb5(S, F2.v, -0.02, b3 + 0.02, H - 0.2, H + 0.05, 0, 0.16, orn);
+      fb5(S, F3.v, -0.02, b3 + 0.02, H - 0.2, H + 0.05, 0, 0.16, orn);
       for (let i = 0; i < umriss.length - 1; i++) {
         const [a0, a1] = umriss[i], [b0, b1] = umriss[i + 1];
-        if (Math.abs(a1 - b1) < 0.01 && Math.abs(a0 - b0) > 0.2 && a1 > H + 0.5) fb5(S, F2.v, Math.min(a0, b0) - 0.08, Math.max(a0, b0) + 0.08, a1 - 0.02, a1 + 0.16, -0.65, 0.1, orn);
+        if (Math.abs(a1 - b1) < 0.01 && Math.abs(a0 - b0) > 0.2 && a1 > H + 0.5) fb5(S, F3.v, Math.min(a0, b0) - 0.08, Math.max(a0, b0) + 0.08, a1 - 0.02, a1 + 0.16, -0.65, 0.1, orn);
       }
-      if (art === "aufsatz" && sichtF2(p2, F2.v)) fscheibe4(S, F2.v, b3 / 2, H + hv * 0.72, 0, 0.06, 0.38, GLAS10);
+      if (art === "aufsatz" && sichtF2(p2, F3.v)) fscheibe4(S, F3.v, b3 / 2, H + hv * 0.72, 0, 0.06, 0.38, GLAS10);
     }
     const fm = dunkler(wand2, 0.04);
     S.quader(x0, H, z0, x0 + 0.45, top - 0.35, z0 + T - 0.3, fm);
@@ -149805,7 +150117,7 @@
       S.quader(x0 + b3 - 0.5, top - 0.35, z0, x0 + b3 + 0.05, top - 0.2, z0 + T - 0.3, orn);
     }
     const nGr = Math.max(1, Math.round(b3 / 5.2)), bg = b3 / nGr;
-    for (let i = 0; i < nGr; i++) dachGiebel(S, F2.v, i * bg + 0.2, (i + 1) * bg - 0.2, -T, -0.6, H, Math.min(hv - 0.45, bg * 0.42), dachF, sichtF2(p2, F2.h) ? dunkler(wand2, 0.03) : null, { ue: 0, uf: 0, ub: 0.35, dick: 0.25 });
+    for (let i = 0; i < nGr; i++) dachGiebel(S, F3.v, i * bg + 0.2, (i + 1) * bg - 0.2, -T, -0.6, H, Math.min(hv - 0.45, bg * 0.42), dachF, sichtF2(p2, F3.h) ? dunkler(wand2, 0.03) : null, { ue: 0, uf: 0, ub: 0.35, dick: 0.25 });
     if (nGr > 1) for (let i = 1; i < nGr; i++) S.quader(x0 + i * bg - 0.3, H, z0, x0 + i * bg + 0.3, H + 0.25, z0 + T - 0.6, "#8f8a82");
     return { top, H };
   }
@@ -149826,7 +150138,7 @@
   }
   var MUENCHEN_V = ["neorenaissance", "neubarock", "wiederaufbau", "zeile"];
   function muenchenHaus(S, scene2, r3, stil, x0, z0, b3, T, p2, erster, letzter) {
-    const F2 = seiten3(x0, z0, b3, T), leer4 = p2.zustand === "leerstand";
+    const F3 = seiten3(x0, z0, b3, T), leer4 = p2.zustand === "leerstand";
     let wand2, orn, dachF, n3, eg, gh;
     if (stil === "neorenaissance") {
       wand2 = waehle2(r3, ["#d9c3a0", "#cdb898", "#e3d2b4", "#c9c2ad", "#bdb79f", "#d8c8b0"]);
@@ -149901,73 +150213,73 @@
       }
     };
     const erker3 = stil === "neubarock" && b3 > 11 && r3() < 0.6;
-    if (sichtF2(p2, F2.v)) {
-      ladenFront3(F2.v, b3);
-      obergeschosse2(F2.v, b3, true);
+    if (sichtF2(p2, F3.v)) {
+      ladenFront3(F3.v, b3);
+      obergeschosse2(F3.v, b3, true);
       if (erker3) {
         const e0 = b3 * 0.18, e1 = e0 + 3.2;
-        fb5(S, F2.v, e0, e1, eg + 0.4, eg + 2 * gh, 0, 1, wand2);
-        for (let k3 = 0; k3 < 2; k3++) fenster6(S, F2.v, (e0 + e1) / 2, eg + k3 * gh + 0.8, 1.6, 2, { rahmen: orn, glas: GLAS10, t: 1 });
-        fb5(S, F2.v, e0 - 0.2, e1 + 0.2, eg + 2 * gh, eg + 2 * gh + 0.3, 0, 1.3, orn);
-        fb5(S, F2.v, e0 + 0.3, e1 - 0.3, eg + 2 * gh + 0.3, eg + 2 * gh + 1.2, 0.6, 1.2, "#3b4046");
+        fb5(S, F3.v, e0, e1, eg + 0.4, eg + 2 * gh, 0, 1, wand2);
+        for (let k3 = 0; k3 < 2; k3++) fenster6(S, F3.v, (e0 + e1) / 2, eg + k3 * gh + 0.8, 1.6, 2, { rahmen: orn, glas: GLAS10, t: 1 });
+        fb5(S, F3.v, e0 - 0.2, e1 + 0.2, eg + 2 * gh, eg + 2 * gh + 0.3, 0, 1.3, orn);
+        fb5(S, F3.v, e0 + 0.3, e1 - 0.3, eg + 2 * gh + 0.3, eg + 2 * gh + 1.2, 0.6, 1.2, "#3b4046");
       }
     }
-    if (sichtF2(p2, F2.h)) lochfassade(S, F2.h, 0, b3, eg, n3, gh, { ra: 3, fw: 1.1, fh: 1.5, rahmen: "#f3efe6", glas: GLAS10, simsF: "#cfc9bd" });
-    if (sichtF2(p2, F2.h)) fb5(S, F2.h, 0, b3, 0.3, eg - 0.3, -0.1, 0.05, dunkler(wand2, 0.08));
+    if (sichtF2(p2, F3.h)) lochfassade(S, F3.h, 0, b3, eg, n3, gh, { ra: 3, fw: 1.1, fh: 1.5, rahmen: "#f3efe6", glas: GLAS10, simsF: "#cfc9bd" });
+    if (sichtF2(p2, F3.h)) fb5(S, F3.h, 0, b3, 0.3, eg - 0.3, -0.1, 0.05, dunkler(wand2, 0.08));
     for (const [k3, ok6] of [["r", letzter], ["l", erster]]) {
-      if (!ok6 || !sichtF2(p2, F2[k3])) continue;
+      if (!ok6 || !sichtF2(p2, F3[k3])) continue;
       if (stil === "wiederaufbau") {
-        ladenFront3(teil5(F2[k3], 0, 7), 7);
-        lochfassade(S, F2[k3], 0, T, eg, n3, gh, { ra: 2.6, fw: 1.1, fh: 1.5, rahmen: "#f6f4ee", glas: GLAS10, simsF: "#c9c3b6" });
-        fb5(S, F2[k3], -0.1, T + 0.1, H - 0.2, H + 0.05, 0, 0.35, "#e8e3d8");
+        ladenFront3(teil5(F3[k3], 0, 7), 7);
+        lochfassade(S, F3[k3], 0, T, eg, n3, gh, { ra: 2.6, fw: 1.1, fh: 1.5, rahmen: "#f6f4ee", glas: GLAS10, simsF: "#c9c3b6" });
+        fb5(S, F3[k3], -0.1, T + 0.1, H - 0.2, H + 0.05, 0, 0.35, "#e8e3d8");
       } else {
-        ladenFront3(teil5(F2[k3], 0, 8.4), 8.4);
-        obergeschosse2(F2[k3], T, false);
+        ladenFront3(teil5(F3[k3], 0, 8.4), 8.4);
+        obergeschosse2(F3[k3], T, false);
       }
     }
     let top = H;
     if (stil === "neubarock") {
       const h1 = 3.6, k3 = 1.1;
-      const Q = quer(F2.v, T);
+      const Q = quer(F3.v, T);
       fpoly4(S, Q, [[-0.4, H], [T + 0.4, H], [T - k3, H + h1], [k3, H + h1]], -0.05, b3 + 0.05, dachF);
       fpoly4(S, Q, [[k3, H + h1], [T - k3, H + h1], [T / 2, H + h1 + 1.6]], -0.05, b3 + 0.05, dunkler(dachF, 0.06));
       top = H + h1 + 1.6;
-      if (sichtF2(p2, F2.v)) for (const u of achsen6(0, b3, ra, 0.6)) {
-        fb5(S, F2.v, u - 0.7, u + 0.7, H + 0.4, H + 2.6, -1.4, -0.5, orn);
-        fb5(S, F2.v, u - 0.45, u + 0.45, H + 0.7, H + 2.1, -0.55, -0.46, GLAS10);
-        fbogen(S, F2.v, u, H + 2.4, 1.6, 0.8, -1.5, -0.45, dachF);
+      if (sichtF2(p2, F3.v)) for (const u of achsen6(0, b3, ra, 0.6)) {
+        fb5(S, F3.v, u - 0.7, u + 0.7, H + 0.4, H + 2.6, -1.4, -0.5, orn);
+        fb5(S, F3.v, u - 0.45, u + 0.45, H + 0.7, H + 2.1, -0.55, -0.46, GLAS10);
+        fbogen(S, F3.v, u, H + 2.4, 1.6, 0.8, -1.5, -0.45, dachF);
       }
       if (b3 > 10) {
         const gb = Math.min(7.5, b3 * 0.5), g0 = b3 / 2 - gb / 2;
-        fpoly4(S, F2.v, giebelUmriss2(g0, g0 + gb, H, 5.2, "geschweift"), -0.5, 0, wand2);
-        if (sichtF2(p2, F2.v)) {
-          fenster6(S, F2.v, b3 / 2, H + 1, 1.4, 1.9, { rahmen: orn, glas: GLAS10, fasche: orn });
-          fscheibe4(S, F2.v, b3 / 2, H + 3.9, 0, 0.06, 0.45, GLAS10);
+        fpoly4(S, F3.v, giebelUmriss2(g0, g0 + gb, H, 5.2, "geschweift"), -0.5, 0, wand2);
+        if (sichtF2(p2, F3.v)) {
+          fenster6(S, F3.v, b3 / 2, H + 1, 1.4, 1.9, { rahmen: orn, glas: GLAS10, fasche: orn });
+          fscheibe4(S, F3.v, b3 / 2, H + 3.9, 0, 0.06, 0.45, GLAS10);
         }
-        fb5(S, F2.v, g0 - 0.2, g0 + gb + 0.2, H - 0.05, H + 0.15, 0, 0.6, orn);
+        fb5(S, F3.v, g0 - 0.2, g0 + gb + 0.2, H - 0.05, H + 0.15, 0, 0.6, orn);
         top = Math.max(top, H + 5.2);
       }
     } else {
       const h3 = stil === "wiederaufbau" ? T * 0.55 : T * 0.42;
-      dachTrauf(S, F2.v, 0, b3, T, H, h3, dachF, wand2, { ue: stil === "wiederaufbau" ? 0.5 : 0.3, us: letzter || erster ? 0.3 : 0.02 });
+      dachTrauf(S, F3.v, 0, b3, T, H, h3, dachF, wand2, { ue: stil === "wiederaufbau" ? 0.5 : 0.3, us: letzter || erster ? 0.3 : 0.02 });
       top = H + h3;
       const s2 = 2 * h3 / T;
-      if (sichtF2(p2, F2.v)) {
+      if (sichtF2(p2, F3.v)) {
         if (stil === "neorenaissance" && b3 > 13 && r3() < 0.7) {
           const gb = 5.6, g0 = b3 / 2 - gb / 2, hg = 6.2;
-          fb5(S, F2.v, g0, g0 + gb, H, H + hg * 0.55, -2.2, 0, wand2);
-          fpoly4(S, F2.v, giebelUmriss2(g0, g0 + gb, H, hg, "geschweift"), -2.2, 0.08, wand2);
-          fenster6(S, F2.v, b3 / 2 - 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS10, fasche: orn });
-          fenster6(S, F2.v, b3 / 2 + 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS10, fasche: orn });
-          fscheibe4(S, F2.v, b3 / 2, H + hg * 0.68, 0.08, 0.14, 0.4, GLAS10);
-          for (const u of [g0 + 0.8, b3 - g0 - 0.8]) gaube2(S, F2.v, u < b3 / 2 ? Math.max(1.3, g0 - 1.6) : Math.min(b3 - 1.3, b3 - g0 + 1.6), H, s2, 1.5, wand2, dachF, GLAS10);
+          fb5(S, F3.v, g0, g0 + gb, H, H + hg * 0.55, -2.2, 0, wand2);
+          fpoly4(S, F3.v, giebelUmriss2(g0, g0 + gb, H, hg, "geschweift"), -2.2, 0.08, wand2);
+          fenster6(S, F3.v, b3 / 2 - 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS10, fasche: orn });
+          fenster6(S, F3.v, b3 / 2 + 1.2, H + 0.8, 0.95, 1.7, { rahmen: orn, glas: GLAS10, fasche: orn });
+          fscheibe4(S, F3.v, b3 / 2, H + hg * 0.68, 0.08, 0.14, 0.4, GLAS10);
+          for (const u of [g0 + 0.8, b3 - g0 - 0.8]) gaube2(S, F3.v, u < b3 / 2 ? Math.max(1.3, g0 - 1.6) : Math.min(b3 - 1.3, b3 - g0 + 1.6), H, s2, 1.5, wand2, dachF, GLAS10);
           top = Math.max(top, H + hg);
         } else {
           const ng = stil === "wiederaufbau" ? Math.max(1, Math.round(b3 / 3.4)) : Math.max(1, Math.round(b3 / 4.2));
-          for (let i = 0; i < ng; i++) gaube2(S, F2.v, (i + 0.5) * b3 / ng, H, s2, stil === "wiederaufbau" ? 1.3 : 1.6, stil === "wiederaufbau" ? "#ebe7de" : wand2, dachF, GLAS10, 1);
+          for (let i = 0; i < ng; i++) gaube2(S, F3.v, (i + 0.5) * b3 / ng, H, s2, stil === "wiederaufbau" ? 1.3 : 1.6, stil === "wiederaufbau" ? "#ebe7de" : wand2, dachF, GLAS10, 1);
         }
       }
-      if (letzter && stil === "neorenaissance" && sichtF2(p2, F2.r) && r3() < 0.7) {
+      if (letzter && stil === "neorenaissance" && sichtF2(p2, F3.r) && r3() < 0.7) {
         const cx = x0 + b3 - 0.2, cz = z0 + T - 0.2, rr3 = 2;
         zyl9(S, rr3, rr3, H - eg - 0.6, cx, eg + 0.6, cz, wand2, 8);
         for (let k3 = 0; k3 < n3; k3++) zyl9(S, rr3 + 0.12, rr3 + 0.12, 0.18, cx, eg + (k3 + 1) * gh - 0.1, cz, orn, 8);
@@ -150006,13 +150318,13 @@
   }
   var KIRCHE_V = ["doppelturm", "wallfahrt", "dorf", "stadtpfarr"];
   function kirchturm(S, scene2, p2, x0, z0, b3, H, c) {
-    const F2 = seiten3(x0, z0, b3, b3);
+    const F3 = seiten3(x0, z0, b3, b3);
     S.quader(x0, 0, z0, x0 + b3, H, z0 + b3, c.wand);
     const gs = [H * 0.38, H * 0.68, H - 0.4];
     for (const y2 of gs) S.quader(x0 - 0.15, y2, z0 - 0.15, x0 + b3 + 0.15, y2 + 0.35, z0 + b3 + 0.15, c.orn);
     for (const k3 of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p2, F2[k3])) continue;
-      const Fk = F2[k3];
+      if (!sichtF2(p2, F3[k3])) continue;
+      const Fk = F3[k3];
       for (const [a2, e] of [[0, 0.6], [b3 - 0.6, b3]]) {
         fb5(S, Fk, a2, e, 0.3, H, 0, 0.14, c.lisene);
         for (const y2 of gs) fb5(S, Fk, a2 - 0.08, e + 0.08, y2 - 0.45, y2, 0, 0.22, c.orn);
@@ -150052,34 +150364,34 @@
     };
   }
   function langhaus(S, scene2, p2, c, x0, x1, zb, zf, Hn, o3 = {}) {
-    const B8 = x1 - x0, L2 = zf - zb, F2 = seiten3(x0, zb, B8, L2);
+    const B8 = x1 - x0, L2 = zf - zb, F3 = seiten3(x0, zb, B8, L2);
     S.quader(x0, 0, zb, x1, Hn, zf, c.wand);
     S.quader(x0 - 0.2, Hn - 0.5, zb - 0.2, x1 + 0.2, Hn, zf + 0.2, c.orn);
     const joch = o3.joch ?? 5.2;
     for (const k3 of ["r", "l"]) {
-      if (!sichtF2(p2, F2[k3])) continue;
+      if (!sichtF2(p2, F3[k3])) continue;
       const us = achsen6(0, L2, joch, o3.randFront ?? 0.6);
       for (const u of us) {
-        barockFenster(S, F2[k3], u, Hn * 0.38, 1.7, Hn * 0.42, c.orn);
+        barockFenster(S, F3[k3], u, Hn * 0.38, 1.7, Hn * 0.42, c.orn);
         if (o3.ovale !== false) {
-          fscheibe4(S, F2[k3], u, Hn * 0.2, 0, 0.05, 0.8, c.orn);
-          fscheibe4(S, F2[k3], u, Hn * 0.2, -0.1, 0.07, 0.55, GLAS_DUNKEL);
+          fscheibe4(S, F3[k3], u, Hn * 0.2, 0, 0.05, 0.8, c.orn);
+          fscheibe4(S, F3[k3], u, Hn * 0.2, -0.1, 0.07, 0.55, GLAS_DUNKEL);
         }
       }
       for (let i = 0; i <= us.length; i++) {
         const u = i === 0 ? 0.35 : i === us.length ? L2 - 0.35 : (us[i - 1] + us[i]) / 2;
-        fb5(S, F2[k3], u - 0.4, u + 0.4, 0.3, Hn - 0.5, 0, 0.18, c.lisene);
-        fb5(S, F2[k3], u - 0.55, u + 0.55, Hn - 1.1, Hn - 0.5, 0, 0.28, c.orn);
-        fb5(S, F2[k3], u - 0.5, u + 0.5, 0.3, 1.2, 0, 0.26, dunkler(c.wand, 0.1));
+        fb5(S, F3[k3], u - 0.4, u + 0.4, 0.3, Hn - 0.5, 0, 0.18, c.lisene);
+        fb5(S, F3[k3], u - 0.55, u + 0.55, Hn - 1.1, Hn - 0.5, 0, 0.28, c.orn);
+        fb5(S, F3[k3], u - 0.5, u + 0.5, 0.3, 1.2, 0, 0.26, dunkler(c.wand, 0.1));
       }
-      fb5(S, F2[k3], 0, L2, 0.3, 0.9, 0, 0.12, dunkler(c.wand, 0.08));
+      fb5(S, F3[k3], 0, L2, 0.3, 0.9, 0, 0.12, dunkler(c.wand, 0.08));
       const s2 = 2 * B8 * (o3.neig ?? 0.62) / B8;
       if (o3.dach !== false) for (let i = 0; i < us.length; i += 2) {
-        dachluke(S, F2[k3], us[i], Hn, s2, c.dach, B8 * 0.15, 1.7);
-        if (B8 > 12) dachluke(S, F2[k3], us[i + 1] ?? us[i], Hn, s2, c.dach, B8 * 0.3, 1.2);
+        dachluke(S, F3[k3], us[i], Hn, s2, c.dach, B8 * 0.15, 1.7);
+        if (B8 > 12) dachluke(S, F3[k3], us[i + 1] ?? us[i], Hn, s2, c.dach, B8 * 0.3, 1.2);
       }
     }
-    if (o3.dach !== false) dachGiebel(S, F2.v, 0, B8, -L2, 0, Hn, B8 * (o3.neig ?? 0.62), c.dach, c.wand, { ue: 0.45, uf: 0.3, ub: 0.3 });
+    if (o3.dach !== false) dachGiebel(S, F3.v, 0, B8, -L2, 0, Hn, B8 * (o3.neig ?? 0.62), c.dach, c.wand, { ue: 0.45, uf: 0.3, ub: 0.3 });
     if (o3.dachreiter !== false && o3.dach !== false) {
       const cx = x0 + B8 / 2, cz = zb + 3, yr = Hn + B8 * (o3.neig ?? 0.62) - 0.6;
       zyl9(S, 0.9, 0.9, 2.2, cx, yr, cz, c.wand, 8);
@@ -150091,16 +150403,16 @@
       zwiebel(S, cx, yr + 2.4, cz, 0.95, 2.6, c.helm ?? KUPFER4[0], 10);
       kreuz2(S, cx, yr + 4.6, cz, 1);
     }
-    for (const k3 of ["r", "l"]) if (sichtF2(p2, F2[k3]) && L2 > 20) {
+    for (const k3 of ["r", "l"]) if (sichtF2(p2, F3[k3]) && L2 > 20) {
       const u = L2 * 0.62;
-      fb5(S, F2[k3], u - 1.6, u + 1.6, 0.3, 4.2, 0, 1.4, c.wand);
-      haustuer2(S, teil5(F2[k3], 0, L2, 1.4), u, 0.3, 1.4, 2.6, HOLZ5[0], c.orn, true);
-      dachGiebel(S, teil5(F2[k3], u - 1.6, u + 1.6, 1.4), 0, 3.2, -1.4, 0, 4.2, 1.4, c.dach, c.wand, { ue: 0.2, uf: 0.2, ub: 0 });
+      fb5(S, F3[k3], u - 1.6, u + 1.6, 0.3, 4.2, 0, 1.4, c.wand);
+      haustuer2(S, teil5(F3[k3], 0, L2, 1.4), u, 0.3, 1.4, 2.6, HOLZ5[0], c.orn, true);
+      dachGiebel(S, teil5(F3[k3], u - 1.6, u + 1.6, 1.4), 0, 3.2, -1.4, 0, 4.2, 1.4, c.dach, c.wand, { ue: 0.2, uf: 0.2, ub: 0 });
     }
-    return F2;
+    return F3;
   }
   function chorApsis(S, p2, c, xm, z1, Bc, Lc, Hc) {
-    const x0 = xm - Bc / 2, F2 = seiten3(x0, z1 - Lc, Bc, Lc);
+    const x0 = xm - Bc / 2, F3 = seiten3(x0, z1 - Lc, Bc, Lc);
     S.quader(x0, 0, z1 - Lc, x0 + Bc, Hc, z1, c.wand);
     const g = new three_module_exports.CylinderGeometry(Bc / 2, Bc / 2, Hc, 10, 1, false, PI11 / 2, PI11);
     g.translate(xm, Hc / 2, z1 - Lc);
@@ -150108,8 +150420,8 @@
     const k3 = new three_module_exports.ConeGeometry(Bc / 2 + 0.4, Bc * 0.5, 10, 1, false, PI11 / 2, PI11);
     k3.translate(xm, Hc + Bc * 0.25, z1 - Lc);
     S.add(k3, c.dach);
-    dachGiebel(S, F2.v, 0, Bc, -Lc, 0, Hc, Bc * 0.5, c.dach, null, { ue: 0.4, uf: 0, ub: 0 });
-    for (const kk of ["r", "l"]) if (sichtF2(p2, F2[kk])) fbogen(S, F2[kk], Lc / 2, Hc * 0.35, 1.5, Hc * 0.45, -0.1, 0.06, GLAS_DUNKEL);
+    dachGiebel(S, F3.v, 0, Bc, -Lc, 0, Hc, Bc * 0.5, c.dach, null, { ue: 0.4, uf: 0, ub: 0 });
+    for (const kk of ["r", "l"]) if (sichtF2(p2, F3[kk])) fbogen(S, F3[kk], Lc / 2, Hc * 0.35, 1.5, Hc * 0.45, -0.1, 0.06, GLAS_DUNKEL);
     for (let i = 0; i < 5; i++) {
       const a2 = PI11 + (i + 0.5) * (PI11 / 5), nx = Math.cos(a2), nz = Math.sin(a2);
       if (!sicht2(p2, nx, nz)) continue;
@@ -150415,11 +150727,11 @@
     const laedenF = waehle2(r3, ["#3f6b4a", "#2f5d4a", "#6b3a2e", "#466b8a"]);
     const dachF = waehle2(r3, BIBER), hz = zf - ht;
     S.quader(0.5, 0, hz, 0.5 + hb2, H, zf, wand2);
-    const F2 = seiten3(0.5, hz, hb2, ht);
+    const F3 = seiten3(0.5, hz, hb2, ht);
     const name2 = brau ? waehle2(r3, BRAEU) : waehle2(r3, WIRTSNAMEN);
     for (const k3 of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p2, F2[k3])) continue;
-      const Fk = F2[k3], L2 = Fk.L, front2 = k3 === "v";
+      if (!sichtF2(p2, F3[k3])) continue;
+      const Fk = F3[k3], L2 = Fk.L, front2 = k3 === "v";
       fb5(S, Fk, 0, L2, 0.3, 0.9, -0.1, 0.12, dunkler(wand2, 0.12));
       const us = achsen6(0, L2, brau ? 3.2 : 2.9, 0.8);
       us.forEach((u, i) => {
@@ -150440,13 +150752,13 @@
       }
     }
     if (brau) {
-      dachTrauf(S, F2.v, 0, hb2, ht, H, ht * 0.52, dachF, wand2, { ue: 0.6, us: 0.5 });
-      if (sichtF2(p2, F2.v)) for (const u of achsen6(0, hb2, 4.2, 1)) gaube2(S, F2.v, u, H, 2 * ht * 0.52 / ht, 1.7, wand2, dachF, GLAS10);
+      dachTrauf(S, F3.v, 0, hb2, ht, H, ht * 0.52, dachF, wand2, { ue: 0.6, us: 0.5 });
+      if (sichtF2(p2, F3.v)) for (const u of achsen6(0, hb2, 4.2, 1)) gaube2(S, F3.v, u, H, 2 * ht * 0.52 / ht, 1.7, wand2, dachF, GLAS10);
       S.quader(0.5 + hb2 * 0.4, H + 4, hz + ht / 2 - 0.5, 0.5 + hb2 * 0.4 + 1, H + ht * 0.52 + 1, hz + ht / 2 + 0.5, "#b9a89a");
     } else if (r3() < 0.5) {
       walm3(S, 0.5, hz, 0.5 + hb2, zf, H, ht * 0.4, dachF, 0.7);
     } else {
-      dachTrauf(S, F2.v, 0, hb2, ht, H, ht * 0.42, dachF, wand2, { ue: 0.8, us: 0.7 });
+      dachTrauf(S, F3.v, 0, hb2, ht, H, ht * 0.42, dachF, wand2, { ue: 0.8, us: 0.7 });
     }
     const bx0 = hb2 + 2.5;
     if (w2 - bx0 > 10) biergarten(S, scene2, r3, bx0, 2, w2 - 0.5, zf - 0.5);
@@ -150585,23 +150897,23 @@
     }
     return { hoehe: top };
   }
-  function fwGeschoss2(S, F2, u0, u1, y2, gh, t3, holz, us, fw, fh, art, fen) {
+  function fwGeschoss2(S, F3, u0, u1, y2, gh, t3, holz, us, fw, fh, art, fen) {
     const bh = 0.22, t1 = t3 + 0.07;
-    fb5(S, F2, u0, u1, y2, y2 + bh, t3, t1 + 0.04, holz);
-    fb5(S, F2, u0, u1, y2 + gh - bh, y2 + gh, t3, t1, holz);
+    fb5(S, F3, u0, u1, y2, y2 + bh, t3, t1 + 0.04, holz);
+    fb5(S, F3, u0, u1, y2 + gh - bh, y2 + gh, t3, t1, holz);
     const ys = y2 + 0.95;
     const pf = [u0 + 0.12, u1 - 0.12];
     for (let i = 0; i < us.length - 1; i++) pf.push((us[i] + us[i + 1]) / 2);
-    for (const u of pf) fb5(S, F2, u - 0.12, u + 0.12, y2 + bh, y2 + gh - bh, t3, t1, holz);
+    for (const u of pf) fb5(S, F3, u - 0.12, u + 0.12, y2 + bh, y2 + gh - bh, t3, t1, holz);
     for (const u of us) {
-      fb5(S, F2, u - fw / 2 - 0.26, u - fw / 2 - 0.04, y2 + bh, y2 + gh - bh, t3, t1, holz);
-      fb5(S, F2, u + fw / 2 + 0.04, u + fw / 2 + 0.26, y2 + bh, y2 + gh - bh, t3, t1, holz);
-      fb5(S, F2, u - fw / 2 - 0.1, u + fw / 2 + 0.1, ys - 0.1, ys + 0.06, t3, t1, holz);
-      fb5(S, F2, u - fw / 2 - 0.1, u + fw / 2 + 0.1, ys + fh, ys + fh + 0.16, t3, t1, holz);
-      fenster6(S, F2, u, ys + 0.06, fw, fh - 0.06, { ...fen, t: t3, sims: false });
+      fb5(S, F3, u - fw / 2 - 0.26, u - fw / 2 - 0.04, y2 + bh, y2 + gh - bh, t3, t1, holz);
+      fb5(S, F3, u + fw / 2 + 0.04, u + fw / 2 + 0.26, y2 + bh, y2 + gh - bh, t3, t1, holz);
+      fb5(S, F3, u - fw / 2 - 0.1, u + fw / 2 + 0.1, ys - 0.1, ys + 0.06, t3, t1, holz);
+      fb5(S, F3, u - fw / 2 - 0.1, u + fw / 2 + 0.1, ys + fh, ys + fh + 0.16, t3, t1, holz);
+      fenster6(S, F3, u, ys + 0.06, fw, fh - 0.06, { ...fen, t: t3, sims: false });
       if (art === "franken") {
-        fdiag(S, F2, u - fw / 2, y2 + bh, u + fw / 2, ys - 0.1, 0.16, t3, t1, holz);
-        fdiag(S, F2, u - fw / 2, ys - 0.1, u + fw / 2, y2 + bh, 0.16, t3, t1, holz);
+        fdiag(S, F3, u - fw / 2, y2 + bh, u + fw / 2, ys - 0.1, 0.16, t3, t1, holz);
+        fdiag(S, F3, u - fw / 2, ys - 0.1, u + fw / 2, y2 + bh, 0.16, t3, t1, holz);
       }
     }
     const felder = [];
@@ -150610,39 +150922,39 @@
     for (const [a2, b3] of felder) {
       const m = (a2 + b3) / 2;
       if (art === "schwaben") {
-        fdiag(S, F2, a2, y2 + bh, m, y2 + gh * 0.62, 0.17, t3, t1, holz);
-        fdiag(S, F2, b3, y2 + bh, m, y2 + gh * 0.62, 0.17, t3, t1, holz);
-        if (b3 - a2 > 1.3) fb5(S, F2, m - 0.1, m + 0.1, y2 + bh, y2 + gh - bh, t3, t1, holz);
+        fdiag(S, F3, a2, y2 + bh, m, y2 + gh * 0.62, 0.17, t3, t1, holz);
+        fdiag(S, F3, b3, y2 + bh, m, y2 + gh * 0.62, 0.17, t3, t1, holz);
+        if (b3 - a2 > 1.3) fb5(S, F3, m - 0.1, m + 0.1, y2 + bh, y2 + gh - bh, t3, t1, holz);
       } else {
-        fdiag(S, F2, a2, y2 + gh * 0.5, m, y2 + gh - bh, 0.16, t3, t1, holz);
-        fdiag(S, F2, m, y2 + gh - bh, b3, y2 + gh * 0.5, 0.16, t3, t1, holz);
-        fdiag(S, F2, a2, y2 + gh * 0.5, m, y2 + bh, 0.16, t3, t1, holz);
-        fdiag(S, F2, m, y2 + bh, b3, y2 + gh * 0.5, 0.16, t3, t1, holz);
+        fdiag(S, F3, a2, y2 + gh * 0.5, m, y2 + gh - bh, 0.16, t3, t1, holz);
+        fdiag(S, F3, m, y2 + gh - bh, b3, y2 + gh * 0.5, 0.16, t3, t1, holz);
+        fdiag(S, F3, a2, y2 + gh * 0.5, m, y2 + bh, 0.16, t3, t1, holz);
+        fdiag(S, F3, m, y2 + bh, b3, y2 + gh * 0.5, 0.16, t3, t1, holz);
       }
     }
   }
-  function fwGiebel2(S, F2, u0, u1, y2, hg, t3, holz, putz2, fen, stufen = 2) {
+  function fwGiebel2(S, F3, u0, u1, y2, hg, t3, holz, putz2, fen, stufen = 2) {
     const um2 = (u0 + u1) / 2, B8 = u1 - u0;
-    fpoly4(S, F2, [[u0, y2], [u1, y2], [um2, y2 + hg]], t3 - 0.4, t3, putz2);
+    fpoly4(S, F3, [[u0, y2], [u1, y2], [um2, y2 + hg]], t3 - 0.4, t3, putz2);
     for (let i = 0; i < stufen; i++) {
       const yy = y2 + i * hg / (stufen + 0.4), k3 = 1 - (yy - y2) / hg, bb = B8 * k3;
-      fb5(S, F2, um2 - bb / 2 + 0.1, um2 + bb / 2 - 0.1, yy, yy + 0.2, t3, t3 + 0.08, holz);
+      fb5(S, F3, um2 - bb / 2 + 0.1, um2 + bb / 2 - 0.1, yy, yy + 0.2, t3, t3 + 0.08, holz);
       const nf = Math.max(1, Math.round((bb - 1) / 2.6) - (i > 0 ? 0 : 0));
       const hh = hg / (stufen + 0.4);
       for (let j3 = 0; j3 < nf; j3++) {
         const u = um2 - ((nf - 1) / 2 - j3) * Math.min(2.6, bb / (nf + 0.5));
         if (Math.abs(u - um2) + 0.6 > bb * (1 - hh / (hg * k3)) / 2) continue;
-        fenster6(S, F2, u, yy + 0.6, 0.8, Math.min(1.2, hh * 0.55), { ...fen, t: t3, sims: false, laeden: null });
-        fb5(S, F2, u - 0.55, u - 0.37, yy + 0.2, yy + hh - 0.1, t3, t3 + 0.08, holz);
-        fb5(S, F2, u + 0.37, u + 0.55, yy + 0.2, yy + hh - 0.1, t3, t3 + 0.08, holz);
+        fenster6(S, F3, u, yy + 0.6, 0.8, Math.min(1.2, hh * 0.55), { ...fen, t: t3, sims: false, laeden: null });
+        fb5(S, F3, u - 0.55, u - 0.37, yy + 0.2, yy + hh - 0.1, t3, t3 + 0.08, holz);
+        fb5(S, F3, u + 0.37, u + 0.55, yy + 0.2, yy + hh - 0.1, t3, t3 + 0.08, holz);
       }
     }
-    fb5(S, F2, um2 - 0.1, um2 + 0.1, y2, y2 + hg - 0.3, t3, t3 + 0.08, holz);
-    fdiag(S, F2, u0 + 0.1, y2 + 0.1, um2, y2 + hg - 0.15, 0.22, t3, t3 + 0.09, holz);
-    fdiag(S, F2, um2, y2 + hg - 0.15, u1 - 0.1, y2 + 0.1, 0.22, t3, t3 + 0.09, holz);
+    fb5(S, F3, um2 - 0.1, um2 + 0.1, y2, y2 + hg - 0.3, t3, t3 + 0.08, holz);
+    fdiag(S, F3, u0 + 0.1, y2 + 0.1, um2, y2 + hg - 0.15, 0.22, t3, t3 + 0.09, holz);
+    fdiag(S, F3, um2, y2 + hg - 0.15, u1 - 0.1, y2 + 0.1, 0.22, t3, t3 + 0.09, holz);
   }
   function fachwerkHaus(S, scene2, r3, p2, x0, z0, b3, T, o3, erster, letzter) {
-    const F2 = seiten3(x0, z0, b3, T), leer4 = p2.zustand === "leerstand";
+    const F3 = seiten3(x0, z0, b3, T), leer4 = p2.zustand === "leerstand";
     const { n: n3, eg, gh } = o3, kr = o3.kr ?? 0.3;
     const H = eg + n3 * gh + kr * 0;
     const fen = { rahmen: ORN2, glas: GLAS10, laeden: o3.laedenF, blumen: o3.blumen };
@@ -150677,10 +150989,10 @@
         } else fwGeschoss2(S, Fk, front2 ? 0 : kVersatz ? kr * (k3 + 1) : 0, L2, y2, gh, t3, o3.holz, ua, 1, Math.min(1.5, gh * 0.5), o3.art, fen);
       }
     };
-    if (sichtF2(p2, F2.v)) seite2(F2.v, b3, true, false);
-    if (sichtF2(p2, F2.h)) seite2(F2.h, b3, false, false);
-    for (const [k3, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F2[k3])) {
-      seite2(F2[k3], T, false, false);
+    if (sichtF2(p2, F3.v)) seite2(F3.v, b3, true, false);
+    if (sichtF2(p2, F3.h)) seite2(F3.h, b3, false, false);
+    for (const [k3, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F3[k3])) {
+      seite2(F3[k3], T, false, false);
       for (let kk = 0; kk < n3; kk++) {
         const y2 = eg + kk * gh;
         const Fs = k3 === "r" ? R8(x0 + b3, z0 + T + kr * (kk + 1), 0, -1, kr * (kk + 1)) : R8(x0, z0 + T, 0, 1, kr * (kk + 1));
@@ -150691,24 +151003,24 @@
     let top;
     if (o3.giebelstaendig) {
       const hg = b3 * (o3.neig ?? 1);
-      dachGiebel(S, F2.v, 0, b3, -T, tTop, H, hg, o3.dach, null, { ue: 0.35, uf: 0.45, ub: 0.4 });
-      if (sichtF2(p2, F2.v)) fwGiebel2(S, F2.v, 0, b3, H, hg - 0.15, tTop + 0, o3.holz, o3.wand, fen, hg > 8 ? 3 : 2);
-      else fpoly4(S, F2.v, [[0, H], [b3, H], [b3 / 2, H + hg - 0.2]], -0.4, tTop, o3.wand);
-      if (sichtF2(p2, F2.h)) fwGiebel2(S, F2.h, 0, b3, H, hg - 0.15, 0, o3.holz, o3.wand, fen, 2);
-      else fpoly4(S, F2.h, [[0, H], [b3, H], [b3 / 2, H + hg - 0.2]], -0.4, 0, o3.wand);
-      for (const [k3, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F2[k3])) {
+      dachGiebel(S, F3.v, 0, b3, -T, tTop, H, hg, o3.dach, null, { ue: 0.35, uf: 0.45, ub: 0.4 });
+      if (sichtF2(p2, F3.v)) fwGiebel2(S, F3.v, 0, b3, H, hg - 0.15, tTop + 0, o3.holz, o3.wand, fen, hg > 8 ? 3 : 2);
+      else fpoly4(S, F3.v, [[0, H], [b3, H], [b3 / 2, H + hg - 0.2]], -0.4, tTop, o3.wand);
+      if (sichtF2(p2, F3.h)) fwGiebel2(S, F3.h, 0, b3, H, hg - 0.15, 0, o3.holz, o3.wand, fen, 2);
+      else fpoly4(S, F3.h, [[0, H], [b3, H], [b3 / 2, H + hg - 0.2]], -0.4, 0, o3.wand);
+      for (const [k3, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F3[k3])) {
         const s2 = 2 * hg / b3;
-        for (const u of achsen6(1, T - 1, 4.2, 0.5)) gaube2(S, F2[k3], u, H, s2, 1.6, o3.wand, o3.dach, GLAS10, 1);
+        for (const u of achsen6(1, T - 1, 4.2, 0.5)) gaube2(S, F3[k3], u, H, s2, 1.6, o3.wand, o3.dach, GLAS10, 1);
       }
       S.quader(x0 + b3 * 0.5 - 0.4, H + hg * 0.5, z0 + T * 0.3, x0 + b3 * 0.5 + 0.4, H + hg + 0.6, z0 + T * 0.3 + 0.8, "#a8988a");
       top = H + hg;
     } else {
       const hd = Td * (o3.neig ?? 0.62);
-      dachTrauf(S, teil5(F2.v, 0, b3, tTop), 0, b3, Td, H, hd, o3.dach, o3.wand, { ue: 0.5, us: erster || letzter ? 0.4 : 0.02 });
+      dachTrauf(S, teil5(F3.v, 0, b3, tTop), 0, b3, Td, H, hd, o3.dach, o3.wand, { ue: 0.5, us: erster || letzter ? 0.4 : 0.02 });
       const s2 = 2 * hd / Td;
       top = H + hd;
-      if (sichtF2(p2, F2.v)) {
-        const Fd = teil5(F2.v, 0, b3, tTop);
+      if (sichtF2(p2, F3.v)) {
+        const Fd = teil5(F3.v, 0, b3, tTop);
         if (o3.zwerch && b3 > 7) {
           const zb = Math.min(4.4, b3 * 0.45), z0u = b3 / 2 - zb / 2, hz = gh * 1.25;
           fb5(S, Fd, z0u, z0u + zb, H, H + hz, -2.8, 0, o3.wand);
@@ -150721,17 +151033,17 @@
         } else for (const u of achsen6(0, b3, 3.6, 0.8)) gaube2(S, Fd, u, H, s2, 1.4, o3.wand, o3.dach, GLAS10, 0.9);
         if (o3.choerlein) {
           const cu = us[Math.floor(us.length / 2)], y0 = eg + 0.3, t0 = kr;
-          fb5(S, F2.v, cu - 1.1, cu + 1.1, y0 + 0.9, y0 + gh * 0.95, t0, t0 + 0.9, o3.choerleinF ?? o3.stein);
-          fpoly4(S, F2.v, [[cu - 1, y0 + 0.9], [cu + 1, y0 + 0.9], [cu, y0 - 0.5]], t0, t0 + 0.75, o3.choerleinF ?? o3.stein);
-          fenster6(S, F2.v, cu, y0 + 1.5, 1.4, 1.3, { ...fen, t: t0 + 0.9, laeden: null, sims: false });
-          fb5(S, F2.v, cu - 1.2, cu + 1.2, y0 + gh * 0.95, y0 + gh * 0.95 + 0.2, t0 - 0.1, t0 + 1.05, heller(o3.stein, 0.08));
+          fb5(S, F3.v, cu - 1.1, cu + 1.1, y0 + 0.9, y0 + gh * 0.95, t0, t0 + 0.9, o3.choerleinF ?? o3.stein);
+          fpoly4(S, F3.v, [[cu - 1, y0 + 0.9], [cu + 1, y0 + 0.9], [cu, y0 - 0.5]], t0, t0 + 0.75, o3.choerleinF ?? o3.stein);
+          fenster6(S, F3.v, cu, y0 + 1.5, 1.4, 1.3, { ...fen, t: t0 + 0.9, laeden: null, sims: false });
+          fb5(S, F3.v, cu - 1.2, cu + 1.2, y0 + gh * 0.95, y0 + gh * 0.95 + 0.2, t0 - 0.1, t0 + 1.05, heller(o3.stein, 0.08));
           const g = new three_module_exports.ConeGeometry(1.3, 1.6, 4);
           g.rotateY(PI11 / 4);
           g.translate(cu, y0 + gh * 0.95 + 1, t0 + 0.5);
-          fgeo5(S, F2.v, g, o3.dach);
+          fgeo5(S, F3.v, g, o3.dach);
         }
       }
-      for (const [k3, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F2[k3])) {
+      for (const [k3, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F3[k3])) {
         const Fk = k3 === "r" ? R8(x0 + b3, z0 + Td, 0, -1, Td) : R8(x0, z0, 0, 1, Td);
         if (o3.art) fwGiebel2(S, Fk, 0, Td, H, hd - 0.2, 0.01, o3.holz, o3.wand, fen, 2);
       }
@@ -150781,13 +151093,13 @@
     return H;
   }
   function sandsteinHaus(S, scene2, r3, p2, x0, z0, b3, T, o3, erster, letzter) {
-    const F2 = seiten3(x0, z0, b3, T), leer4 = p2.zustand === "leerstand";
+    const F3 = seiten3(x0, z0, b3, T), leer4 = p2.zustand === "leerstand";
     const H = o3.eg + o3.n * o3.gh, st2 = o3.stein, hst = heller(st2, 0.08);
     S.quader(x0, 0, z0, x0 + b3, H, z0 + T, st2);
     const fen = { rahmen: ORN2, glas: GLAS10, fasche: hst, simsF: hst };
     for (const [k3, ok6] of [["v", true], ["h", true], ["r", letzter], ["l", erster]]) {
-      if (!ok6 || !sichtF2(p2, F2[k3])) continue;
-      const Fk = F2[k3], L2 = Fk.L;
+      if (!ok6 || !sichtF2(p2, F3[k3])) continue;
+      const Fk = F3[k3], L2 = Fk.L;
       if (k3 === "v") {
         laden(S, scene2, Fk, 0.5, L2 - 2.2, o3.eg - 0.3, r3, { leer: leer4, rahmen: waehle2(r3, ["#3f4a53", "#5a4636"]) });
         haustuer2(S, Fk, L2 - 1.3, 0.3, 1.1, 2.6, waehle2(r3, HOLZ5), hst, true);
@@ -150799,28 +151111,28 @@
       for (let i = 0; i < 6; i++) fb5(S, Fk, 0, L2, 0.3 + i * 0.6, 0.34 + i * 0.6, 0, 0.03, dunkler(st2, 0.06));
     }
     const hd = T * 0.68;
-    dachTrauf(S, F2.v, 0, b3, T, H, hd, o3.dach, st2, { ue: 0.35, us: erster || letzter ? 0.35 : 0.02 });
+    dachTrauf(S, F3.v, 0, b3, T, H, hd, o3.dach, st2, { ue: 0.35, us: erster || letzter ? 0.35 : 0.02 });
     let top = H + hd;
     const s2 = 2 * hd / T;
-    if (sichtF2(p2, F2.v)) {
+    if (sichtF2(p2, F3.v)) {
       const zb = Math.min(4.6, b3 * 0.5), zu = b3 / 2 - zb / 2, hz = 3.2;
-      fb5(S, F2.v, zu, zu + zb, H, H + hz, -3, 0, st2);
-      fpoly4(S, F2.v, giebelUmriss2(zu, zu + zb, H + hz, 3.4, "treppe"), -3, 0.02, st2);
-      fb5(S, F2.v, b3 / 2 - 0.65, b3 / 2 + 0.65, H + 0.5, H + 2.6, -0.1, 0.04, "#5a4636");
-      fb5(S, F2.v, b3 / 2 - 0.12, b3 / 2 + 0.12, H + hz + 1.4, H + hz + 1.65, 0, 1.4, HOLZ5[0]);
-      dachGiebel(S, F2.v, zu + 0.2, zu + zb - 0.2, -3.6, -0.2, H + hz, 3, o3.dach, null, { ue: 0, uf: 0, ub: 0 });
-      for (const u of [b3 * 0.15, b3 * 0.85]) if (b3 > 9) gaube2(S, F2.v, u, H, s2, 1.1, st2, o3.dach, GLAS10, 0.9);
-      for (const u of [b3 * 0.35, b3 * 0.65]) gaube2(S, F2.v, u, H, s2, 0.9, st2, o3.dach, GLAS10, 3.3);
+      fb5(S, F3.v, zu, zu + zb, H, H + hz, -3, 0, st2);
+      fpoly4(S, F3.v, giebelUmriss2(zu, zu + zb, H + hz, 3.4, "treppe"), -3, 0.02, st2);
+      fb5(S, F3.v, b3 / 2 - 0.65, b3 / 2 + 0.65, H + 0.5, H + 2.6, -0.1, 0.04, "#5a4636");
+      fb5(S, F3.v, b3 / 2 - 0.12, b3 / 2 + 0.12, H + hz + 1.4, H + hz + 1.65, 0, 1.4, HOLZ5[0]);
+      dachGiebel(S, F3.v, zu + 0.2, zu + zb - 0.2, -3.6, -0.2, H + hz, 3, o3.dach, null, { ue: 0, uf: 0, ub: 0 });
+      for (const u of [b3 * 0.15, b3 * 0.85]) if (b3 > 9) gaube2(S, F3.v, u, H, s2, 1.1, st2, o3.dach, GLAS10, 0.9);
+      for (const u of [b3 * 0.35, b3 * 0.65]) gaube2(S, F3.v, u, H, s2, 0.9, st2, o3.dach, GLAS10, 3.3);
       top = Math.max(top, H + hz + 3.4);
       if (o3.choerlein) {
         const cu = b3 * 0.3, y0 = o3.eg + 0.4;
-        fb5(S, F2.v, cu - 1, cu + 1, y0 + 0.8, y0 + o3.gh * 0.95, 0, 0.9, hst);
-        fpoly4(S, F2.v, [[cu - 0.95, y0 + 0.8], [cu + 0.95, y0 + 0.8], [cu, y0 - 0.6]], 0, 0.8, hst);
-        fenster6(S, F2.v, cu, y0 + 1.4, 1.3, 1.3, { ...fen, t: 0.9, sims: false });
+        fb5(S, F3.v, cu - 1, cu + 1, y0 + 0.8, y0 + o3.gh * 0.95, 0, 0.9, hst);
+        fpoly4(S, F3.v, [[cu - 0.95, y0 + 0.8], [cu + 0.95, y0 + 0.8], [cu, y0 - 0.6]], 0, 0.8, hst);
+        fenster6(S, F3.v, cu, y0 + 1.4, 1.3, 1.3, { ...fen, t: 0.9, sims: false });
         const g = new three_module_exports.ConeGeometry(1.25, 1.8, 4);
         g.rotateY(PI11 / 4);
         g.translate(cu, y0 + o3.gh * 0.95 + 0.9, 0.45);
-        fgeo5(S, F2.v, g, o3.dach);
+        fgeo5(S, F3.v, g, o3.dach);
       }
     }
     return { top };
@@ -150970,7 +151282,7 @@
     return top;
   }
   function voralpenhaus(S, scene2, r3, p2, x0, z0, b3, T, o3 = {}) {
-    const F2 = seiten3(x0, z0, b3, T);
+    const F3 = seiten3(x0, z0, b3, T);
     const eg = 3.1, og = 2.9, H = eg + og * (o3.n ?? 1);
     const putz2 = waehle2(r3, [WEISS3, "#f3efe4", "#f4ead6"]), holz = waehle2(r3, HOLZ5), holzH = HOLZ_HELL;
     const laedenF = waehle2(r3, ["#3f6b4a", "#2f5d4a", "#6b3a2e", "#466b8a"]);
@@ -150983,8 +151295,8 @@
     const lfarben = ["#d8a64a", "#b85a4a", "#5f8f6a", "#5a7fa8"];
     const lf = waehle2(r3, lfarben);
     for (const k3 of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p2, F2[k3])) continue;
-      const Fk = F2[k3], L2 = Fk.L, front2 = k3 === "v";
+      if (!sichtF2(p2, F3[k3])) continue;
+      const Fk = F3[k3], L2 = Fk.L, front2 = k3 === "v";
       fb5(S, Fk, 0, L2, 0.3, 0.8, -0.05, 0.1, "#c9c3b6");
       const us = achsen6(0, L2, 2.8, 0.8);
       us.forEach((u, i) => {
@@ -151019,9 +151331,9 @@
       }
     }
     const hg = b3 * 0.27;
-    dachGiebel(S, F2.v, 0, b3, -T, 0, H, hg, o3.dach ?? waehle2(r3, ["#7d6a5a", "#6f5f52", "#8b939b", "#a85440"]), holz, { ue: 1.3, uf: 1.6, ub: 1.2, dick: 0.4 });
-    for (const k3 of ["v", "h"]) if (sichtF2(p2, F2[k3])) {
-      const Fk = F2[k3];
+    dachGiebel(S, F3.v, 0, b3, -T, 0, H, hg, o3.dach ?? waehle2(r3, ["#7d6a5a", "#6f5f52", "#8b939b", "#a85440"]), holz, { ue: 1.3, uf: 1.6, ub: 1.2, dick: 0.4 });
+    for (const k3 of ["v", "h"]) if (sichtF2(p2, F3[k3])) {
+      const Fk = F3[k3];
       for (let u = 0.6; u < b3; u += 0.6) {
         const yy = H + Math.min(u, b3 - u) * (2 * hg / b3) - 0.25;
         if (yy > H + 0.1) fb5(S, Fk, u, u + 0.45, H, yy, 0, 0.04, dunkler(holz, 0.04));
@@ -151066,8 +151378,8 @@
       const b3 = Math.min(20, w2 - 6), T = Math.min(14, d3 - 10), x0 = 2, z0 = zf - T - 2.5;
       const erg = voralpenhaus(S, scene2, r3, p2, x0, z0, b3, T, { n: 2, holzOG: false });
       top = erg.top;
-      const F2 = seiten3(x0, z0, b3, T);
-      if (sichtF2(p2, F2.v)) ftext5(scene2, F2.v, waehle2(r3, ["Alpengasthof Edelwei\xDF", "Gasthof Almrausch", "Berggasthof Enzian"]), b3 / 2, 2.75, 0.12, 0.45, b3 * 0.6, "#5a3a2a");
+      const F3 = seiten3(x0, z0, b3, T);
+      if (sichtF2(p2, F3.v)) ftext5(scene2, F3.v, waehle2(r3, ["Alpengasthof Edelwei\xDF", "Gasthof Almrausch", "Berggasthof Enzian"]), b3 / 2, 2.75, 0.12, 0.45, b3 * 0.6, "#5a3a2a");
       if (w2 - b3 - 6 > 8) biergarten(S, scene2, r3, x0 + b3 + 2, 2, w2 - 1, zf - 1, { ausschank: false });
     } else {
       const zb = d3 * 0.42;
@@ -151113,15 +151425,15 @@
       if (extra.rathaus === i) Object.assign(o3, { giebelstaendig: true, n: 3, laden: false, wand: "#f3ead6", holz: "#7a3a2a", neig: 1.1, steinEG: true, stein: "#d9cdb4" });
       const erg = fachwerkHaus(S, scene2, r3, p2, xa, zf - T, b3, T, o3, i === 0, i === br.length - 1);
       if (extra.rathaus === i) {
-        const F2 = seiten3(xa, zf - T, b3, T), Hh = o3.eg + o3.n * o3.gh;
-        if (sichtF2(p2, F2.v)) {
+        const F3 = seiten3(xa, zf - T, b3, T), Hh = o3.eg + o3.n * o3.gh;
+        if (sichtF2(p2, F3.v)) {
           const nB = Math.max(2, Math.round(b3 / 3.2));
-          fwand3(S, F2.v, 0, b3, 0.3, o3.eg, 0, 0.12, o3.stein, Array.from({ length: nB }, (_, k3) => ({ u0: k3 * b3 / nB + 0.4, u1: (k3 + 1) * b3 / nB - 0.4, v0: 0.3, v1: o3.eg - 0.4, bogen: true })));
-          fb5(S, F2.v, 0.3, b3 - 0.3, 0.3, o3.eg - 0.5, -0.8, -0.7, GLAS_DUNKEL);
-          ftext5(scene2, F2.v, "Rathaus", b3 / 2, o3.eg - 0.2, 0.2, 0.42, b3 * 0.5, "#5a3a2a");
+          fwand3(S, F3.v, 0, b3, 0.3, o3.eg, 0, 0.12, o3.stein, Array.from({ length: nB }, (_, k3) => ({ u0: k3 * b3 / nB + 0.4, u1: (k3 + 1) * b3 / nB - 0.4, v0: 0.3, v1: o3.eg - 0.4, bogen: true })));
+          fb5(S, F3.v, 0.3, b3 - 0.3, 0.3, o3.eg - 0.5, -0.8, -0.7, GLAS_DUNKEL);
+          ftext5(scene2, F3.v, "Rathaus", b3 / 2, o3.eg - 0.2, 0.2, 0.42, b3 * 0.5, "#5a3a2a");
           const yu = Hh + b3 * 0.45;
-          fscheibe4(S, F2.v, b3 / 2, yu, o3.kr * o3.n + 0.1, o3.kr * o3.n + 0.25, 1.1, "#f4efe0");
-          fscheibe4(S, F2.v, b3 / 2, yu, o3.kr * o3.n + 0.25, o3.kr * o3.n + 0.3, 0.9, "#2f4f6f");
+          fscheibe4(S, F3.v, b3 / 2, yu, o3.kr * o3.n + 0.1, o3.kr * o3.n + 0.25, 1.1, "#f4efe0");
+          fscheibe4(S, F3.v, b3 / 2, yu, o3.kr * o3.n + 0.25, o3.kr * o3.n + 0.3, 0.9, "#2f4f6f");
         }
         const cx = xa + b3 / 2, cz = zf - T * 0.45, yr = Hh + b3 * 1.1 * 0.6;
         zyl9(S, 0.9, 0.9, 2.6, cx, yr, cz, "#f3ead6", 8);
@@ -151177,20 +151489,20 @@
     S.quader(x0, y2, z0, x1, y2 + 0.08, z1, oben);
     S.quader(x0, y2 - 0.05, z1 - 0.45, x1, y2 + 0.2, z1 + 0.05, heller(mauer, 0.05));
     if (!p2) return;
-    const F2 = seiten3(x0, z0, x1 - x0, z1 - z0), fu = dunkler(mauer, 0.07), kap = heller(mauer, 0.05);
+    const F3 = seiten3(x0, z0, x1 - x0, z1 - z0), fu = dunkler(mauer, 0.07), kap = heller(mauer, 0.05);
     for (const k3 of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p2, F2[k3])) continue;
-      const L2 = F2[k3].L;
-      for (let yy = 1.1; yy < y2 - 0.4; yy += 1.1) fb5(S, F2[k3], 0, L2, yy, yy + 0.06, 0, 0.03, fu);
-      for (let yy = 0.3, j3 = 0; yy < y2 - 0.6; yy += 1.1, j3++) for (let u = j3 % 2 * 1.6 + 0.8; u < L2 - 0.3; u += 3.2) fb5(S, F2[k3], u, u + 0.06, yy, Math.min(y2 - 0.2, yy + 1.1), 0, 0.03, fu);
-      if (k3 !== "v") fb5(S, F2[k3], -0.05, L2 + 0.05, y2 - 0.05, y2 + 0.2, 0, 0.12, kap);
+      if (!sichtF2(p2, F3[k3])) continue;
+      const L2 = F3[k3].L;
+      for (let yy = 1.1; yy < y2 - 0.4; yy += 1.1) fb5(S, F3[k3], 0, L2, yy, yy + 0.06, 0, 0.03, fu);
+      for (let yy = 0.3, j3 = 0; yy < y2 - 0.6; yy += 1.1, j3++) for (let u = j3 % 2 * 1.6 + 0.8; u < L2 - 0.3; u += 3.2) fb5(S, F3[k3], u, u + 0.06, yy, Math.min(y2 - 0.2, yy + 1.1), 0, 0.03, fu);
+      if (k3 !== "v") fb5(S, F3[k3], -0.05, L2 + 0.05, y2 - 0.05, y2 + 0.2, 0, 0.12, kap);
       if (y2 > 2) for (let u = 4; u < L2 - 3; u += 17) {
         const q2 = rng3(Math.round(u * 7 + y2 * 13 + k3.charCodeAt(0)));
         if (q2() < 0.4) continue;
         const h0 = y2 * zw(q2, 0.55, 0.75);
-        fb5(S, F2[k3], u, u + zw(q2, 0.8, 1.8), h0, y2 - 0.2, 0, 0.1, waehle2(q2, ["#6f9a52", "#7aa65a", "#5f8f4c"]));
+        fb5(S, F3[k3], u, u + zw(q2, 0.8, 1.8), h0, y2 - 0.2, 0, 0.1, waehle2(q2, ["#6f9a52", "#7aa65a", "#5f8f4c"]));
       }
-      if (y2 > 3.5) for (let u = 5; u < L2 - 2; u += 13) fb5(S, F2[k3], u - 0.08, u + 0.08, 0.4, 0.7, 0, 0.1, "#3b4046");
+      if (y2 > 3.5) for (let u = 5; u < L2 - 2; u += 13) fb5(S, F3[k3], u - 0.08, u + 0.08, 0.4, 0.7, 0, 0.1, "#3b4046");
     }
   }
   function staffel(S, x2, b3, zWand, yU, yO, stein = "#d8d0bf", maxLauf = 99) {
@@ -151211,15 +151523,15 @@
     S.add(new ConvexGeometry(pkt.map(([x2, y2, z4]) => new three_module_exports.Vector3(x2, y2, z4))), c);
   }
   function hanghaus(S, scene2, r3, p2, x0, z0, b3, T, o3 = {}) {
-    const F2 = seiten3(x0, z0, b3, T);
+    const F3 = seiten3(x0, z0, b3, T);
     const n3 = o3.n ?? 3, eg = 3.2, gh = 3, H = eg + (n3 - 1) * gh;
     const wand2 = o3.wand ?? waehle2(r3, ["#efe6d2", "#e8dcc8", "#f1e2c4", "#e3e6dc", "#f0d8c4", "#dfe3e6", "#f3ede0"]);
     const dachF = o3.dach ?? waehle2(r3, BIBER);
     S.quader(x0, 0, z0, x0 + b3, H, z0 + T, wand2);
     const fen = { rahmen: ORN2, glas: GLAS10, laeden: o3.laeden ?? (r3() < 0.5 ? waehle2(r3, ["#3f6b4a", "#5a6168", "#2f5d7a"]) : null), simsF: "#e9e3d6" };
     for (const k3 of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p2, F2[k3])) continue;
-      const Fk = F2[k3], L2 = Fk.L;
+      if (!sichtF2(p2, F3[k3])) continue;
+      const Fk = F3[k3], L2 = Fk.L;
       fb5(S, Fk, 0, L2, 0.3, 1, -0.05, 0.1, dunkler(wand2, 0.12));
       const us = lochfassade(S, Fk, 0, L2, 0.3, n3, gh, { ...fen, ra: 2.9, fw: 1.15, fh: 1.55, br: 1.1 });
       if (k3 === "v") {
@@ -151237,10 +151549,10 @@
       walm3(S, x0, z0, x0 + b3, z0 + T, H, Math.min(b3, T) * 0.42, dachF, 0.6);
       top = H + Math.min(b3, T) * 0.42;
     } else {
-      dachTrauf(S, F2.v, 0, b3, T, H, T * 0.45, dachF, wand2, { ue: 0.6, us: 0.5 });
+      dachTrauf(S, F3.v, 0, b3, T, H, T * 0.45, dachF, wand2, { ue: 0.6, us: 0.5 });
       top = H + T * 0.45;
     }
-    if (sichtF2(p2, F2.v) && b3 > 8) gaube2(S, F2.v, b3 / 2, H, 0.9, 1.6, wand2, dachF, GLAS10, 1.4);
+    if (sichtF2(p2, F3.v) && b3 > 8) gaube2(S, F3.v, b3 / 2, H, 0.9, 1.6, wand2, dachF, GLAS10, 1.4);
     S.quader(x0 + b3 * 0.3, H + 1, z0 + T * 0.5, x0 + b3 * 0.3 + 0.7, top + 0.4, z0 + T * 0.5 + 0.7, "#b9a89a");
     return { top };
   }
@@ -151267,7 +151579,7 @@
     S.quader(x2 + b3 / 2, y2 + 1.2, z4 - 0.35, x2 + b3 / 2 + 0.05, y2 + 1.9, z4 + 0.35, GLAS_DUNKEL);
   }
   function fuenfzigerHaus(S, scene2, r3, p2, x0, z0, b3, T, typ, erster, letzter) {
-    const F2 = seiten3(x0, z0, b3, T), leer4 = p2.zustand === "leerstand";
+    const F3 = seiten3(x0, z0, b3, T), leer4 = p2.zustand === "leerstand";
     const n3 = 4 + (r3() < 0.5 ? 1 : 0), eg = 4.6, gh = 3.2, H = eg + n3 * gh;
     const wand2 = waehle2(r3, ["#f2f0ea", "#e9e6de", "#ece3cf", "#e2e6e3", "#efe9dc"]);
     const akz = waehle2(r3, ["#7fa6b8", "#d9a35a", "#c96a54", "#8fb09a", "#e2c56b", "#6f8fb5"]);
@@ -151309,9 +151621,9 @@
       }
       if (haupt) ftext5(scene2, Fk, waehle2(r3, ["Kaufhaus W\xF6rner", "Modehaus Bleyle", "Schuh-Haug", "Radio Fischer", "M\xF6bel Kienzle", "Sport-Scheck"]), L2 / 2, H - 0.9, 0.4, 0.9, L2 * 0.7, akz);
     };
-    if (sichtF2(p2, F2.v)) front2(F2.v, b3, true);
-    if (sichtF2(p2, F2.h)) lochfassade(S, F2.h, 0, b3, eg, n3, gh, { ra: 2.6, fw: 1.2, fh: 1.5, rahmen: "#f4f3ef", glas: GLAS10, sims: false });
-    for (const [k3, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F2[k3])) front2(F2[k3], T, false);
+    if (sichtF2(p2, F3.v)) front2(F3.v, b3, true);
+    if (sichtF2(p2, F3.h)) lochfassade(S, F3.h, 0, b3, eg, n3, gh, { ra: 2.6, fw: 1.2, fh: 1.5, rahmen: "#f4f3ef", glas: GLAS10, sims: false });
+    for (const [k3, ok6] of [["r", letzter], ["l", erster]]) if (ok6 && sichtF2(p2, F3[k3])) front2(F3[k3], T, false);
     const sb2 = Math.max(6, b3 * 0.62), st0 = x0 + (b3 - sb2) * (typ === "band" ? 0.2 : 0.6), sT = T - 5.5;
     S.quader(st0, H, z0 + 2, st0 + sb2, H + 2.9, z0 + 2 + sT, "#e2e6e8");
     const Fs = seiten3(st0, z0 + 2, sb2, sT);
@@ -151328,14 +151640,14 @@
     return { top: H + 3.25 };
   }
   function villa3(S, scene2, r3, p2, x0, z0, b3, T) {
-    const F2 = seiten3(x0, z0, b3, T);
+    const F3 = seiten3(x0, z0, b3, T);
     const wand2 = waehle2(r3, ["#f1e6c8", "#efe0d6", "#e6eadf", "#f2efe6", "#e9d9c3"]), orn = ORN2, dachF = waehle2(r3, [...BIBER, ...SCHIEFER4]);
     const eg = 3.8, og = 3.4, H = eg + og;
     S.quader(x0, 0, z0, x0 + b3, H, z0 + T, wand2);
     const fen = { rahmen: orn, glas: GLAS10, fasche: orn, laeden: waehle2(r3, ["#3f6b4a", "#5a6168"]) };
     for (const k3 of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p2, F2[k3])) continue;
-      const Fk = F2[k3], L2 = Fk.L;
+      if (!sichtF2(p2, F3[k3])) continue;
+      const Fk = F3[k3], L2 = Fk.L;
       fb5(S, Fk, 0, L2, 0, 1, -0.05, 0.12, dunkler(wand2, 0.15));
       const us = achsen6(0, L2, 3.1, 0.8);
       for (const u of us) {
@@ -151358,7 +151670,7 @@
       }
     }
     walm3(S, x0, z0, x0 + b3, z0 + T, H, Math.min(b3, T) * 0.45, dachF, 0.7, 2);
-    if (sichtF2(p2, F2.v)) gaube2(S, F2.v, b3 * 0.3, H, 0.9, 1.5, wand2, dachF, GLAS10, 1.5);
+    if (sichtF2(p2, F3.v)) gaube2(S, F3.v, b3 * 0.3, H, 0.9, 1.5, wand2, dachF, GLAS10, 1.5);
     S.quader(x0 + b3 * 0.4, H + 2, z0 + T * 0.5, x0 + b3 * 0.4 + 0.8, H + Math.min(b3, T) * 0.45 + 1, z0 + T * 0.5 + 0.8, "#b9a89a");
     return { top: H + Math.min(b3, T) * 0.45 + 1 };
   }
@@ -151450,11 +151762,11 @@
   }
   function barockFluegel(S, scene2, p2, c, x0, z0, x1, z1, o3 = {}) {
     const eg = o3.eg ?? 5, gh = o3.gh ?? 4.4, n3 = o3.n ?? 2, H = eg + n3 * gh;
-    const F2 = seiten3(x0, z0, x1 - x0, z1 - z0);
+    const F3 = seiten3(x0, z0, x1 - x0, z1 - z0);
     S.quader(x0, 0, z0, x1, H, z1, c.wand);
     for (const k4 of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p2, F2[k4])) continue;
-      const Fk = F2[k4], L2 = Fk.L;
+      if (!sichtF2(p2, F3[k4])) continue;
+      const Fk = F3[k4], L2 = Fk.L;
       fb5(S, Fk, 0, L2, 0.3, eg, 0, 0.1, c.rust);
       for (let i = 1; i < 4; i++) fb5(S, Fk, 0, L2, 0.3 + i * (eg / 4), 0.36 + i * (eg / 4), 0.1, 0.14, dunkler(c.rust, 0.08));
       const us = achsen6(0, L2, o3.ra ?? 3.4, 0.9);
@@ -151488,11 +151800,11 @@
     const T = Math.min(x1 - x0, z1 - z0), h1 = Math.min(4.2, T * 0.3), k3 = h1 * 0.38;
     mansardWalm(S, x0, z0, x1, z1, H, h1, k3, Math.min(2.4, (T / 2 - k3) * 0.4), c.dach, c.dach2, 0.4);
     for (const kk of ["v", "r", "h", "l"]) {
-      if (!sichtF2(p2, F2[kk])) continue;
-      for (const u of achsen6(0, F2[kk].L, (o3.ra ?? 3.4) * 2, 1.2)) {
-        fb5(S, F2[kk], u - 0.6, u + 0.6, H + 0.3, H + 2.4, -1.6, -0.5, c.orn);
-        fb5(S, F2[kk], u - 0.4, u + 0.4, H + 0.6, H + 2, -0.55, -0.46, GLAS10);
-        fbogen(S, F2[kk], u, H + 2.2, 1.5, 0.75, -1.7, -0.4, c.dach);
+      if (!sichtF2(p2, F3[kk])) continue;
+      for (const u of achsen6(0, F3[kk].L, (o3.ra ?? 3.4) * 2, 1.2)) {
+        fb5(S, F3[kk], u - 0.6, u + 0.6, H + 0.3, H + 2.4, -1.6, -0.5, c.orn);
+        fb5(S, F3[kk], u - 0.4, u + 0.4, H + 0.6, H + 2, -0.55, -0.46, GLAS10);
+        fbogen(S, F3[kk], u, H + 2.2, 1.5, 0.75, -1.7, -0.4, c.dach);
       }
     }
     return H + h1 + 2.4;
@@ -151605,30 +151917,30 @@
         const a2 = -Phi / 2 + i * dphi, b22 = a2 + dphi;
         const Pa = [cx + Rr * Math.sin(a2), cz - Rr * Math.cos(a2)], Pb = [cx + Rr * Math.sin(b22), cz - Rr * Math.cos(b22)];
         const Ls = wurzelSumme21(Pb[0] - Pa[0], Pb[1] - Pa[1]);
-        const F2 = R8(Pa[0], Pa[1], (Pb[0] - Pa[0]) / Ls, (Pb[1] - Pa[1]) / Ls, Ls);
+        const F3 = R8(Pa[0], Pa[1], (Pb[0] - Pa[0]) / Ls, (Pb[1] - Pa[1]) / Ls, Ls);
         const wand2 = i % 2 ? c.wand : heller(c.wand, 0.02);
-        fb5(S, F2, -ext, Ls + ext, 0, H2, -T2, 0, wand2);
-        if (sichtF2(p2, F2)) {
-          fb5(S, F2, 0, Ls, 0.3, eg2, 0, 0.08, c.rust);
+        fb5(S, F3, -ext, Ls + ext, 0, H2, -T2, 0, wand2);
+        if (sichtF2(p2, F3)) {
+          fb5(S, F3, 0, Ls, 0.3, eg2, 0, 0.08, c.rust);
           for (const u of achsen6(0, Ls, 3, 0.4)) {
-            fenster6(S, F2, u, 1.2, 1.3, 2.2, { rahmen: c.orn, glas: GLAS10, bogen: true, sims: false, t: 0.08 });
-            for (let k3 = 0; k3 < n4; k3++) fenster6(S, F2, u, eg2 + k3 * gh2 + 0.8, 1.25, 1.9, { rahmen: c.orn, glas: GLAS10, fasche: c.orn, verdachung: k3 === 0 ? "gerade" : null });
+            fenster6(S, F3, u, 1.2, 1.3, 2.2, { rahmen: c.orn, glas: GLAS10, bogen: true, sims: false, t: 0.08 });
+            for (let k3 = 0; k3 < n4; k3++) fenster6(S, F3, u, eg2 + k3 * gh2 + 0.8, 1.25, 1.9, { rahmen: c.orn, glas: GLAS10, fasche: c.orn, verdachung: k3 === 0 ? "gerade" : null });
           }
-          fb5(S, F2, -ext, Ls + ext, eg2 - 0.1, eg2 + 0.15, 0, 0.25, c.orn);
-          fb5(S, F2, -ext, Ls + ext, H2 - 0.4, H2, 0, 0.5, c.orn);
-          fb5(S, F2, 0, 0.6, eg2, H2 - 0.4, 0, 0.15, c.lis);
+          fb5(S, F3, -ext, Ls + ext, eg2 - 0.1, eg2 + 0.15, 0, 0.25, c.orn);
+          fb5(S, F3, -ext, Ls + ext, H2 - 0.4, H2, 0, 0.5, c.orn);
+          fb5(S, F3, 0, 0.6, eg2, H2 - 0.4, 0, 0.15, c.lis);
         }
-        const Fr = R8(...wp5(F2, Ls, -T2), -F2.dx, -F2.dz, Ls);
+        const Fr = R8(...wp5(F3, Ls, -T2), -F3.dx, -F3.dz, Ls);
         if (sichtF2(p2, Fr)) lochfassade(S, Fr, 0, Ls, eg2, n4, gh2, { ra: 3, fw: 1.1, fh: 1.6, rahmen: c.orn, glas: GLAS10 });
-        const Q = quer(F2, T2);
+        const Q = quer(F3, T2);
         fpoly4(S, Q, [[-0.4, H2], [T2 + 0.4, H2], [T2 - 1.4, H2 + 3.6], [1.4, H2 + 3.6]], -ext, Ls + ext, c.dach);
         fpoly4(S, Q, [[1.4, H2 + 3.6], [T2 - 1.4, H2 + 3.6], [T2 / 2, H2 + 5]], -ext, Ls + ext, c.dach2);
-        if (sichtF2(p2, F2)) for (const u of achsen6(0, Ls, 4.5, 0.6)) {
-          fb5(S, F2, u - 0.55, u + 0.55, H2 + 0.3, H2 + 2.3, -1.5, -0.5, c.orn);
-          fb5(S, F2, u - 0.35, u + 0.35, H2 + 0.6, H2 + 1.9, -0.55, -0.46, GLAS10);
+        if (sichtF2(p2, F3)) for (const u of achsen6(0, Ls, 4.5, 0.6)) {
+          fb5(S, F3, u - 0.55, u + 0.55, H2 + 0.3, H2 + 2.3, -1.5, -0.5, c.orn);
+          fb5(S, F3, u - 0.35, u + 0.35, H2 + 0.6, H2 + 1.9, -0.55, -0.46, GLAS10);
         }
         top = H2 + 5;
-        const [bx, bz] = wp5(F2, Ls / 2, 4);
+        const [bx, bz] = wp5(F3, Ls / 2, 4);
         if (bz < d3 - 0.5) baumRund2(S, bx, bz, r3, 0.75);
       }
       hof(S, r3, 0, 0, w2, Math.max(1, d3 - 5 - sag - T2 - 1), { boden: RASEN6, baeume: 6 });
@@ -151643,11 +151955,11 @@
       [R8(w2, 0, -1, 0, w2), w2],
       [R8(0, T, 0, 1, d3 - 2 * T), d3 - 2 * T]
     ];
-    for (const [F2, L2] of zeilen) {
+    for (const [F3, L2] of zeilen) {
       const br = teileBreite(r3, L2, 9, 13);
       let u = 0;
       br.forEach((b3) => {
-        const Fh = teil5(F2, u, u + b3), wand2 = waehle2(r3, ["#f1e6c8", "#efe2d2", "#f2ecdf", "#e6dccb", "#efe0c0", "#e3e6dc"]);
+        const Fh = teil5(F3, u, u + b3), wand2 = waehle2(r3, ["#f1e6c8", "#efe2d2", "#f2ecdf", "#e6dccb", "#efe0c0", "#e3e6dc"]);
         fb5(S, Fh, 0, b3, 0, H, -T, 0, wand2);
         const innen = R8(...wp5(Fh, b3, -T), -Fh.dx, -Fh.dz, b3);
         for (const [Fk, haupt] of [[Fh, true], [innen, false]]) {
@@ -151705,11 +152017,11 @@
       ring2.translate(cx, y0 + h3 * t3, cz);
       S.add(ring2, st2);
     }
-    for (const { F: F2, nx, nz, kante } of oktoRahmen(cx, cz, ri * 0.88)) {
+    for (const { F: F3, nx, nz, kante } of oktoRahmen(cx, cz, ri * 0.88)) {
       if (!sicht2(p2, nx, nz)) continue;
       for (let k3 = 0; k3 < 3; k3++) {
         const t3 = 0.12 + k3 * 0.22, sc = 1 - t3;
-        fscheibe4(S, teil5(F2, kante / 2 - 0.1, kante / 2 + 0.1, -ri * 0.88 * t3), 0.1, y0 + h3 * t3 + 1.2, 0, 0.2, Math.max(0.3, kante * sc * 0.28), st2, 8);
+        fscheibe4(S, teil5(F3, kante / 2 - 0.1, kante / 2 + 0.1, -ri * 0.88 * t3), 0.1, y0 + h3 * t3 + 1.2, 0, 0.2, Math.max(0.3, kante * sc * 0.28), st2, 8);
       }
     }
     S.add(new three_module_exports.OctahedronGeometry(1, 0).translate(cx, y0 + h3 + 0.6, cz), st2);
@@ -151913,11 +152225,11 @@
     for (const [cx, cz] of [[tx0, zt0], [tx0 + tb, zt0], [tx0, zf], [tx0 + tb, zf]]) fiale(S, cx, Hq, cz, 6, st22);
     const ri = tb * 0.42;
     zyl9(S, ri / Math.cos(PI11 / 8), ri / Math.cos(PI11 / 8), Ho - Hq, xm, Hq, zt0 + tb / 2, st2, 8);
-    for (const { F: F2, nx, nz, kante } of oktoRahmen(xm, zt0 + tb / 2, ri)) {
+    for (const { F: F3, nx, nz, kante } of oktoRahmen(xm, zt0 + tb / 2, ri)) {
       if (!sicht2(p2, nx, nz)) continue;
-      gotFenster(S, F2, kante / 2, Hq + 2.5, kante * 0.5, Ho - Hq - 5, hst);
-      for (let j3 = 1; j3 <= 3; j3++) fb5(S, F2, kante * 0.27, kante * 0.73, Hq + 2.5 + j3 * (Ho - Hq - 7) / 4, Hq + 2.6 + j3 * (Ho - Hq - 7) / 4, -0.12, -0.04, "#5a4636");
-      fpoly4(S, F2, [[0, Ho - 0.5], [kante, Ho - 0.5], [kante / 2, Ho + 3.6]], -0.2, 0.25, st2);
+      gotFenster(S, F3, kante / 2, Hq + 2.5, kante * 0.5, Ho - Hq - 5, hst);
+      for (let j3 = 1; j3 <= 3; j3++) fb5(S, F3, kante * 0.27, kante * 0.73, Hq + 2.5 + j3 * (Ho - Hq - 7) / 4, Hq + 2.6 + j3 * (Ho - Hq - 7) / 4, -0.12, -0.04, "#5a4636");
+      fpoly4(S, F3, [[0, Ho - 0.5], [kante, Ho - 0.5], [kante / 2, Ho + 3.6]], -0.2, 0.25, st2);
     }
     for (let i = 0; i < 8; i++) {
       const a2 = i * PI11 / 4 + PI11 / 8, Rv = ri / Math.cos(PI11 / 8);
@@ -151975,15 +152287,15 @@
       const c = { wand: WEISS3, orn: ORN2, lisene: "#efe6cf", dach: waehle2(r3, BIBER) };
       versetzt3(S, scene2, 0, yt, 0, (T2) => {
         T2.quader(kx2 - B8 / 2, 0, kz3 - L2 / 2, kx2 + B8 / 2, Hk, kz3 + L2 / 2, c.wand);
-        const F3 = seiten3(kx2 - B8 / 2, kz3 - L2 / 2, B8, L2);
-        dachGiebel(T2, F3.v, 0, B8, -L2, 0, Hk, B8 * 0.7, c.dach, c.wand, { ue: 0.4, uf: 0.4, ub: 0.4 });
-        for (const k3 of ["v", "r", "l", "h"]) if (sichtF2(p2, F3[k3])) {
+        const F4 = seiten3(kx2 - B8 / 2, kz3 - L2 / 2, B8, L2);
+        dachGiebel(T2, F4.v, 0, B8, -L2, 0, Hk, B8 * 0.7, c.dach, c.wand, { ue: 0.4, uf: 0.4, ub: 0.4 });
+        for (const k3 of ["v", "r", "l", "h"]) if (sichtF2(p2, F4[k3])) {
           if (k3 === "v") {
-            haustuer2(T2, F3.v, B8 / 2, 0, 1.4, 2.6, HOLZ5[0], ORN2, true);
-            fscheibe4(T2, F3.v, B8 / 2, Hk + 1.6, 0, 0.08, 0.5, GLAS_DUNKEL);
+            haustuer2(T2, F4.v, B8 / 2, 0, 1.4, 2.6, HOLZ5[0], ORN2, true);
+            fscheibe4(T2, F4.v, B8 / 2, Hk + 1.6, 0, 0.08, 0.5, GLAS_DUNKEL);
           } else if (k3 !== "h") {
-            fbogen(T2, F3[k3], L2 * 0.3, 2, 1, 2.8, -0.1, 0.06, GLAS_DUNKEL);
-            fbogen(T2, F3[k3], L2 * 0.7, 2, 1, 2.8, -0.1, 0.06, GLAS_DUNKEL);
+            fbogen(T2, F4[k3], L2 * 0.3, 2, 1, 2.8, -0.1, 0.06, GLAS_DUNKEL);
+            fbogen(T2, F4[k3], L2 * 0.7, 2, 1, 2.8, -0.1, 0.06, GLAS_DUNKEL);
           }
         }
         T2.quader(kx2 - 0.8, Hk + 2.2, kz3 + L2 / 2 - 2.2, kx2 + 0.8, Hk + 4.6, kz3 + L2 / 2 - 0.6, c.wand);
@@ -152019,8 +152331,8 @@
     const T = 11, b3 = Math.min(16, w2 * 0.4);
     const o3 = { ...bwHausO(r3, "tuebingen"), giebelstaendig: false, laden: false, n: 1, eg: 3.8, gh: 3, neig: 0.75, steinEG: true, stein: mauer, zwerch: false };
     top = fachwerkHaus(S, scene2, r3, p2, 2, d3 - 2.5 - T, b3, T, o3, true, false).top;
-    const F2 = seiten3(2, d3 - 2.5 - T, b3, T);
-    if (sichtF2(p2, F2.v)) ftext5(scene2, F2.v, waehle2(r3, ["Weingut K\xF6gel", "Weingut H\xE4gele", "Weingut Sonnenhalde", "Weinbau Rapp"]), b3 / 2, 3.25, 0.12, 0.5, b3 * 0.7, "#5a3a2a");
+    const F3 = seiten3(2, d3 - 2.5 - T, b3, T);
+    if (sichtF2(p2, F3.v)) ftext5(scene2, F3.v, waehle2(r3, ["Weingut K\xF6gel", "Weingut H\xE4gele", "Weingut Sonnenhalde", "Weinbau Rapp"]), b3 / 2, 3.25, 0.12, 0.5, b3 * 0.7, "#5a3a2a");
     const kx = b3 + 6, kb = Math.min(16, w2 - kx - 2), kt = 12, kz2 = zh + 1;
     if (kb > 8) {
       S.quader(kx, 0, kz2, kx + kb, 5.2, kz2 + kt, mauer);
@@ -152134,13 +152446,13 @@
           const o3 = { ...bwHausO(r3, "tuebingen"), laden: false, n: 1 + (r3() < 0.6 ? 1 : 0), eg: 3.2, gh: 2.8, giebelstaendig: r3() < 0.7, steinEG: true, stein, kr: 0.25 };
           const erg = fachwerkHaus(T2, g2, r3, p2, xa, zq - T + 0.3, b3, T - 0.3, o3, i === 0, i === br.length - 1);
           top = Math.max(top, erg.top + Y - 0.3);
-          const F2 = seiten3(xa, zq - T + 0.3, b3, T - 0.3);
-          if (sichtF2(p2, F2.v) && r3() < 0.7) {
+          const F3 = seiten3(xa, zq - T + 0.3, b3, T - 0.3);
+          if (sichtF2(p2, F3.v) && r3() < 0.7) {
             const y2 = o3.eg + 0.1, tb = 1.4;
-            fb5(T2, F2.v, 0.4, b3 - 0.4, y2 - 0.15, y2, 0, tb + o3.kr, HOLZ5[0]);
-            fwand3(T2, F2.v, 0.4, b3 - 0.4, y2, y2 + 1, tb + o3.kr - 0.08, tb + o3.kr, HOLZ_HELL, Array.from({ length: Math.floor((b3 - 1) / 0.55) }, (_, k3) => ({ u0: 0.6 + k3 * 0.55, u1: 0.78 + k3 * 0.55, v0: y2 + 0.3, v1: y2 + 0.75 })));
-            for (const u of [0.6, b3 - 0.6]) fb5(T2, F2.v, u - 0.1, u + 0.1, -Y + 0.4, y2, tb + o3.kr - 0.3, tb + o3.kr - 0.1, HOLZ5[0]);
-            for (let u = 1; u < b3 - 0.6; u += 2.6) fb5(T2, F2.v, u, u + 0.2, y2 + 1, y2 + 1.3, tb + o3.kr - 0.2, tb + o3.kr, "#d0453a");
+            fb5(T2, F3.v, 0.4, b3 - 0.4, y2 - 0.15, y2, 0, tb + o3.kr, HOLZ5[0]);
+            fwand3(T2, F3.v, 0.4, b3 - 0.4, y2, y2 + 1, tb + o3.kr - 0.08, tb + o3.kr, HOLZ_HELL, Array.from({ length: Math.floor((b3 - 1) / 0.55) }, (_, k3) => ({ u0: 0.6 + k3 * 0.55, u1: 0.78 + k3 * 0.55, v0: y2 + 0.3, v1: y2 + 0.75 })));
+            for (const u of [0.6, b3 - 0.6]) fb5(T2, F3.v, u - 0.1, u + 0.1, -Y + 0.4, y2, tb + o3.kr - 0.3, tb + o3.kr - 0.1, HOLZ5[0]);
+            for (let u = 1; u < b3 - 0.6; u += 2.6) fb5(T2, F3.v, u, u + 0.2, y2 + 1, y2 + 1.3, tb + o3.kr - 0.2, tb + o3.kr, "#d0453a");
           }
           xa += b3;
         });
@@ -154734,7 +155046,7 @@
   var wurzelSumme24 = (...v) => Math.sqrt(v.reduce((s2, x2) => s2 + x2 * x2, 0));
   var YG = 0.32;
   var WASSER_Y = -2.2;
-  var F = {
+  var F2 = {
     asphalt: FARBEN3.asphalt,
     kopfstein: "#a39b8f",
     bord: "#bdb8ad",
@@ -154875,31 +155187,31 @@
     "bus"
   ]);
   function definiereProps(I) {
-    const glas3 = F.glas, rad3 = "#24272b", vl = "#f6f3dc", rl = "#b8352d";
+    const glas3 = F2.glas, rad3 = "#24272b", vl = "#f6f3dc", rl = "#b8352d";
     const raeder = (W3, r3, xs2) => xs2.map((x2) => [B(r3 * 2, r3 * 2, W3 + 0.08, x2, r3, 0), rad3]);
     const lichter = (L2, y2, z4) => [[B(0.06, 0.18, 0.32, L2 / 2 + 0.01, y2, z4), vl], [B(0.06, 0.18, 0.32, L2 / 2 + 0.01, y2, -z4), vl], [B(0.06, 0.16, 0.32, -L2 / 2 - 0.01, y2, z4), rl], [B(0.06, 0.16, 0.32, -L2 / 2 - 0.01, y2, -z4), rl]];
     I.def("kleinwagen", [[B(3.6, 0.72, 1.66, 0, 0.64, 0), 0], [B(2, 0.58, 1.52, -0.15, 1.28, 0), glas3], [B(1.9, 0.1, 1.56, -0.2, 1.62, 0), 0], ...raeder(1.66, 0.3, [1.15, -1.15]), ...lichter(3.6, 0.8, 0.55)]);
     I.def("limousine", [[B(4.7, 0.68, 1.8, 0, 0.64, 0), 0], [B(2.5, 0.55, 1.64, -0.3, 1.25, 0), glas3], [B(2.3, 0.1, 1.68, -0.35, 1.57, 0), 0], ...raeder(1.8, 0.33, [1.5, -1.5]), ...lichter(4.7, 0.78, 0.62)]);
-    I.def("kombi", [[B(4.8, 0.7, 1.82, 0, 0.65, 0), 0], [B(3.2, 0.55, 1.66, -0.6, 1.27, 0), glas3], [B(3.1, 0.1, 1.7, -0.65, 1.59, 0), 0], [B(2.8, 0.06, 0.06, -0.65, 1.67, 0.75), F.metall], [B(2.8, 0.06, 0.06, -0.65, 1.67, -0.75), F.metall], ...raeder(1.82, 0.33, [1.55, -1.5]), ...lichter(4.8, 0.8, 0.62)]);
+    I.def("kombi", [[B(4.8, 0.7, 1.82, 0, 0.65, 0), 0], [B(3.2, 0.55, 1.66, -0.6, 1.27, 0), glas3], [B(3.1, 0.1, 1.7, -0.65, 1.59, 0), 0], [B(2.8, 0.06, 0.06, -0.65, 1.67, 0.75), F2.metall], [B(2.8, 0.06, 0.06, -0.65, 1.67, -0.75), F2.metall], ...raeder(1.82, 0.33, [1.55, -1.5]), ...lichter(4.8, 0.8, 0.62)]);
     I.def("taxi", [[B(4.7, 0.68, 1.8, 0, 0.64, 0), "#efe7c6"], [B(2.5, 0.55, 1.64, -0.3, 1.25, 0), glas3], [B(2.3, 0.1, 1.68, -0.35, 1.57, 0), "#efe7c6"], [B(0.6, 0.24, 0.3, -0.3, 1.74, 0), "#f2d33a"], ...raeder(1.8, 0.33, [1.5, -1.5]), ...lichter(4.7, 0.78, 0.62)]);
     I.def("lieferwagen", [[B(5.6, 0.9, 2, 0, 0.8, 0), 0], [B(4.1, 1.6, 2, -0.75, 2.05, 0), 0], [B(1, 0.8, 1.92, 1.85, 1.65, 0), glas3], [B(1.1, 0.1, 1.96, 1.8, 2.1, 0), 0], ...raeder(2, 0.36, [1.9, -1.9]), ...lichter(5.6, 0.95, 0.7)]);
     I.def("bus", [[B(12, 1.25, 2.55, 0, 1, 0), 0], [B(11.7, 1.15, 2.5, 0, 2.2, 0), glas3], [B(12, 0.5, 2.55, 0, 3, 0), 0], [B(3, 0.35, 1.7, -2.5, 3.42, 0), "#c9ccd0"], [B(0.08, 1.6, 2.35, 6, 2.15, 0), glas3], [B(0.06, 0.3, 1.8, 6.04, 3, 0), "#f0b429"], ...raeder(2.55, 0.5, [3.7, -3.4]), ...lichter(12, 0.7, 0.9)]);
     const tram = [];
-    for (const x2 of [-10.1, 0, 10.1]) tram.push([B(9.8, 1.05, 2.4, x2, 0.95, 0), 0], [B(9.6, 1.15, 2.36, x2, 2.05, 0), glas3], [B(9.8, 0.55, 2.4, x2, 2.9, 0), "#f2ede2"], [B(9.2, 0.25, 2, x2, 3.3, 0), "#a4aaaf"], [B(2.4, 0.5, 2, x2, 0.25, 0), F.dunkel]);
-    tram.push([B(0.5, 2.6, 2.1, 5.05, 1.8, 0), F.dunkel], [B(0.5, 2.6, 2.1, -5.05, 1.8, 0), F.dunkel], [B(0.1, 1.1, 0.1, 0, 4, 0), F.dunkel], [B(1.6, 0.08, 0.4, 0, 4.55, 0), F.dunkel], [B(0.06, 0.3, 1.6, 15.02, 2.85, 0), "#f0b429"]);
+    for (const x2 of [-10.1, 0, 10.1]) tram.push([B(9.8, 1.05, 2.4, x2, 0.95, 0), 0], [B(9.6, 1.15, 2.36, x2, 2.05, 0), glas3], [B(9.8, 0.55, 2.4, x2, 2.9, 0), "#f2ede2"], [B(9.2, 0.25, 2, x2, 3.3, 0), "#a4aaaf"], [B(2.4, 0.5, 2, x2, 0.25, 0), F2.dunkel]);
+    tram.push([B(0.5, 2.6, 2.1, 5.05, 1.8, 0), F2.dunkel], [B(0.5, 2.6, 2.1, -5.05, 1.8, 0), F2.dunkel], [B(0.1, 1.1, 0.1, 0, 4, 0), F2.dunkel], [B(1.6, 0.08, 0.4, 0, 4.55, 0), F2.dunkel], [B(0.06, 0.3, 1.6, 15.02, 2.85, 0), "#f0b429"]);
     I.def("strassenbahn", tram);
     const tat = [];
     for (const x2 of [-7.3, 7.3]) {
       tat.push([B(14, 1.1, 2.4, x2, 0.95, 0), 0], [B(13.4, 1.15, 2.36, x2, 2.05, 0), glas3], [B(14, 0.62, 2.42, x2, 2.92, 0), "#efe6c8"], [B(13, 0.2, 2.1, x2, 3.33, 0), "#cfd3d6"]);
       tat.push([B(0.7, 2.4, 2.2, x2 + 6.85, 1.85, 0), 0], [B(0.7, 2.4, 2.2, x2 - 6.85, 1.85, 0), 0], [B(0.5, 0.06, 2.36, x2, 1.52, 0), "#efe6c8"]);
       for (const dx of [-3.4, 3.4]) tat.push([B(0.18, 1, 1.1, x2 + dx, 2, 1.19), "#3a3f44"]);
-      tat.push([B(2.6, 0.45, 2, x2 + 4, 0.25, 0), F.dunkel], [B(2.6, 0.45, 2, x2 - 4, 0.25, 0), F.dunkel], [B(0.08, 0.9, 0.08, x2, 3.85, 0), F.dunkel], [B(1.4, 0.08, 0.36, x2, 4.3, 0), F.dunkel]);
+      tat.push([B(2.6, 0.45, 2, x2 + 4, 0.25, 0), F2.dunkel], [B(2.6, 0.45, 2, x2 - 4, 0.25, 0), F2.dunkel], [B(0.08, 0.9, 0.08, x2, 3.85, 0), F2.dunkel], [B(1.4, 0.08, 0.36, x2, 4.3, 0), F2.dunkel]);
     }
-    tat.push([B(0.06, 0.32, 1.4, 14.32, 2.7, 0), "#f0b429"], [B(0.6, 2.2, 1.6, 0, 1.6, 0), F.dunkel]);
+    tat.push([B(0.06, 0.32, 1.4, 14.32, 2.7, 0), "#f0b429"], [B(0.6, 2.2, 1.6, 0, 1.6, 0), F2.dunkel]);
     I.def("tatra", tat);
-    I.def("zugwagen", [[B(26, 3, 2.9, 0, 2.2, 0), 0], [B(26.06, 0.5, 2.96, 0, 1.3, 0), "#c8322b"], [B(24, 0.85, 2.96, 0, 2.75, 0), glas3], [B(25, 0.3, 2.3, 0, 3.85, 0), "#9aa0a6"], [B(3, 0.8, 2.4, 9, 0.45, 0), F.dunkel], [B(3, 0.8, 2.4, -9, 0.45, 0), F.dunkel]]);
+    I.def("zugwagen", [[B(26, 3, 2.9, 0, 2.2, 0), 0], [B(26.06, 0.5, 2.96, 0, 1.3, 0), "#c8322b"], [B(24, 0.85, 2.96, 0, 2.75, 0), glas3], [B(25, 0.3, 2.3, 0, 3.85, 0), "#9aa0a6"], [B(3, 0.8, 2.4, 9, 0.45, 0), F2.dunkel], [B(3, 0.8, 2.4, -9, 0.45, 0), F2.dunkel]]);
     I.def("schiff", [[B(16, 1.4, 4.4, 0, 0, 0), "#f3f1ea"], [B(3.1, 1.4, 3.1, 8, 0, 0, Math.PI / 4), "#f3f1ea"], [B(16.1, 0.3, 4.46, 0, 0.35, 0), 0], [B(10, 1.5, 3.6, -1, 1.45, 0), glas3], [B(11, 0.15, 4, -1, 2.25, 0), "#f3f1ea"], [B(1.2, 0.8, 1.2, -4, 2.7, 0), 0]]);
-    const st2 = F.stamm;
+    const st2 = F2.stamm;
     I.def("linde", [[B(0.42, 3, 0.42, 0, 1.5, 0), st2], [K(2.3, 0, 4.9, 0, 1, 1.05, 1), 0], [K(1.6, 0.9, 5.9, -0.6, 1, 1, 1, 0), 0]]);
     I.def("kastanie", [[B(0.55, 3, 0.55, 0, 1.5, 0), st2], [K(2.9, 0, 5.4, 0, 1.15, 0.92, 1.15), 0], [K(1.9, -0.8, 6.6, 0.6, 1, 1, 1, 0), 0]]);
     I.def("platane", [[B(0.5, 3.8, 0.5, 0, 1.9, 0), "#a39a83"], [K(3, 0, 6.3, 0, 1.3, 0.72, 1.3), 0], [K(2, 1.3, 6.9, 0.8, 1.1, 0.8, 1.1, 0), 0]]);
@@ -154910,23 +155222,23 @@
     I.def("busch", [[K(1, 0, 0.6, 0, 1.5, 0.75, 1.5), 0]]);
     I.def("baumscheibe", [[B(1.8, 0.05, 1.8, 0, 0.025, 0), "#8a7a62"], [B(1.4, 0.06, 1.4, 0, 0.03, 0), "#6f6150"]], false);
     const m = "#5d646b";
-    I.def("laterne", [[C(0.08, 0.12, 7, 6, 0, 3.5, 0), m], [B(1.4, 0.1, 0.1, 0.65, 6.95, 0), m], [B(0.8, 0.2, 0.36, 1.3, 6.86, 0), "#3c4248"], [B(0.62, 0.05, 0.26, 1.3, 6.74, 0), F.licht]]);
-    I.def("doppellaterne", [[C(0.1, 0.14, 8, 6, 0, 4, 0), m], [B(2.8, 0.1, 0.1, 0, 7.95, 0), m], [B(0.8, 0.2, 0.36, 1.3, 7.86, 0), "#3c4248"], [B(0.8, 0.2, 0.36, -1.3, 7.86, 0), "#3c4248"], [B(0.62, 0.05, 0.26, 1.3, 7.74, 0), F.licht], [B(0.62, 0.05, 0.26, -1.3, 7.74, 0), F.licht]]);
+    I.def("laterne", [[C(0.08, 0.12, 7, 6, 0, 3.5, 0), m], [B(1.4, 0.1, 0.1, 0.65, 6.95, 0), m], [B(0.8, 0.2, 0.36, 1.3, 6.86, 0), "#3c4248"], [B(0.62, 0.05, 0.26, 1.3, 6.74, 0), F2.licht]]);
+    I.def("doppellaterne", [[C(0.1, 0.14, 8, 6, 0, 4, 0), m], [B(2.8, 0.1, 0.1, 0, 7.95, 0), m], [B(0.8, 0.2, 0.36, 1.3, 7.86, 0), "#3c4248"], [B(0.8, 0.2, 0.36, -1.3, 7.86, 0), "#3c4248"], [B(0.62, 0.05, 0.26, 1.3, 7.74, 0), F2.licht], [B(0.62, 0.05, 0.26, -1.3, 7.74, 0), F2.licht]]);
     const ag = "#2f3b35";
-    I.def("altlaterne", [[C(0.2, 0.24, 0.6, 8, 0, 0.3, 0), ag], [C(0.06, 0.09, 3.4, 6, 0, 2.3, 0), ag], [C(0.34, 0.2, 0.62, 6, 0, 4.3, 0), F.licht], [C(0.06, 0.44, 0.36, 6, 0, 4.79, 0), ag], [C(0.05, 0.05, 0.3, 4, 0, 5.1, 0), ag]]);
-    const signal = (x2, y2) => [[B(0.34, 1, 0.34, x2, y2, 0), F.dunkel], [B(0.42, 0.22, 0.22, x2, y2 + 0.3, 0), "#e04a3a"], [B(0.22, 0.22, 0.42, x2, y2 + 0.3, 0), "#e04a3a"], [B(0.42, 0.22, 0.22, x2, y2, 0), "#f0b429"], [B(0.22, 0.22, 0.42, x2, y2, 0), "#f0b429"], [B(0.42, 0.22, 0.22, x2, y2 - 0.3, 0), "#3fbf6a"], [B(0.22, 0.22, 0.42, x2, y2 - 0.3, 0), "#3fbf6a"]];
+    I.def("altlaterne", [[C(0.2, 0.24, 0.6, 8, 0, 0.3, 0), ag], [C(0.06, 0.09, 3.4, 6, 0, 2.3, 0), ag], [C(0.34, 0.2, 0.62, 6, 0, 4.3, 0), F2.licht], [C(0.06, 0.44, 0.36, 6, 0, 4.79, 0), ag], [C(0.05, 0.05, 0.3, 4, 0, 5.1, 0), ag]]);
+    const signal = (x2, y2) => [[B(0.34, 1, 0.34, x2, y2, 0), F2.dunkel], [B(0.42, 0.22, 0.22, x2, y2 + 0.3, 0), "#e04a3a"], [B(0.22, 0.22, 0.42, x2, y2 + 0.3, 0), "#e04a3a"], [B(0.42, 0.22, 0.22, x2, y2, 0), "#f0b429"], [B(0.22, 0.22, 0.42, x2, y2, 0), "#f0b429"], [B(0.42, 0.22, 0.22, x2, y2 - 0.3, 0), "#3fbf6a"], [B(0.22, 0.22, 0.42, x2, y2 - 0.3, 0), "#3fbf6a"]];
     I.def("ampel", [[C(0.07, 0.07, 3.3, 6, 0, 1.65, 0), "#3a3f44"], ...signal(0, 3.1)]);
     I.def("ampelausleger", [[C(0.1, 0.13, 5.9, 6, 0, 2.95, 0), "#3a3f44"], [B(6, 0.16, 0.16, 3, 5.7, 0), "#3a3f44"], ...signal(5.6, 5), ...signal(0, 3)]);
-    I.def("olmast", [[C(0.12, 0.16, 7.4, 6, 0, 3.7, 0), F.metall], [B(0.14, 0.14, 4.6, 0, 6.9, 0), F.metall], [B(0.1, 0.5, 0.1, 0, 6.6, 1.6), F.dunkel], [B(0.1, 0.5, 0.1, 0, 6.6, -1.6), F.dunkel]]);
-    I.def("olmastSeite", [[C(0.12, 0.16, 7.4, 6, 0, 3.7, 0), F.metall], [B(0.14, 0.14, 6, 0, 6.9, 3), F.metall]]);
-    I.def("bank", [[B(1.8, 0.08, 0.55, 0, 0.46, 0), F.holz], [B(1.8, 0.42, 0.07, 0, 0.8, -0.25), F.holz], [B(0.08, 0.46, 0.5, 0.8, 0.23, 0), F.metall], [B(0.08, 0.46, 0.5, -0.8, 0.23, 0), F.metall]]);
+    I.def("olmast", [[C(0.12, 0.16, 7.4, 6, 0, 3.7, 0), F2.metall], [B(0.14, 0.14, 4.6, 0, 6.9, 0), F2.metall], [B(0.1, 0.5, 0.1, 0, 6.6, 1.6), F2.dunkel], [B(0.1, 0.5, 0.1, 0, 6.6, -1.6), F2.dunkel]]);
+    I.def("olmastSeite", [[C(0.12, 0.16, 7.4, 6, 0, 3.7, 0), F2.metall], [B(0.14, 0.14, 6, 0, 6.9, 3), F2.metall]]);
+    I.def("bank", [[B(1.8, 0.08, 0.55, 0, 0.46, 0), F2.holz], [B(1.8, 0.42, 0.07, 0, 0.8, -0.25), F2.holz], [B(0.08, 0.46, 0.5, 0.8, 0.23, 0), F2.metall], [B(0.08, 0.46, 0.5, -0.8, 0.23, 0), F2.metall]]);
     I.def("poller", [[C(0.13, 0.13, 0.9, 6, 0, 0.45, 0), "#5c6268"], [C(0.14, 0.14, 0.12, 6, 0, 0.72, 0), "#f2f1ec"]]);
-    I.def("litfass", [[C(0.72, 0.72, 0.3, 10, 0, 0.15, 0), F.gruen], [C(0.62, 0.62, 2.6, 10, 0, 1.6, 0), 0], [C(0.64, 0.64, 0.8, 10, 0, 1.1, 0), 1], [C(0.64, 0.64, 0.7, 10, 0, 2.3, 0), 2], [C(0.1, 0.78, 0.5, 10, 0, 3.15, 0), F.gruen], [K(0.18, 0, 3.45, 0, 1, 1, 1, 0), F.gruen]]);
-    I.def("muelleimer", [[C(0.26, 0.22, 0.85, 8, 0, 0.43, 0), "#d0702f"], [C(0.28, 0.28, 0.06, 8, 0, 0.88, 0), F.dunkel]]);
+    I.def("litfass", [[C(0.72, 0.72, 0.3, 10, 0, 0.15, 0), F2.gruen], [C(0.62, 0.62, 2.6, 10, 0, 1.6, 0), 0], [C(0.64, 0.64, 0.8, 10, 0, 1.1, 0), 1], [C(0.64, 0.64, 0.7, 10, 0, 2.3, 0), 2], [C(0.1, 0.78, 0.5, 10, 0, 3.15, 0), F2.gruen], [K(0.18, 0, 3.45, 0, 1, 1, 1, 0), F2.gruen]]);
+    I.def("muelleimer", [[C(0.26, 0.22, 0.85, 8, 0, 0.43, 0), "#d0702f"], [C(0.28, 0.28, 0.06, 8, 0, 0.88, 0), F2.dunkel]]);
     const fr = [];
-    for (const x2 of [-1.5, -0.5, 0.5, 1.5]) fr.push([B(0.06, 0.8, 0.06, x2, 0.4, 0.3), F.metall], [B(0.06, 0.8, 0.06, x2, 0.4, -0.3), F.metall], [B(0.06, 0.06, 0.66, x2, 0.8, 0), F.metall]);
+    for (const x2 of [-1.5, -0.5, 0.5, 1.5]) fr.push([B(0.06, 0.8, 0.06, x2, 0.4, 0.3), F2.metall], [B(0.06, 0.8, 0.06, x2, 0.4, -0.3), F2.metall], [B(0.06, 0.06, 0.66, x2, 0.8, 0), F2.metall]);
     for (const [x2, s2] of [[-1.3, 0], [-0.3, 1], [1.7, 2]]) {
-      fr.push([B(0.05, 0.32, 1, x2, 0.62, 0), s2], [B(0.08, 0.06, 0.25, x2, 0.88, -0.3), F.dunkel], [B(0.5, 0.05, 0.05, x2, 0.96, 0.42), F.dunkel]);
+      fr.push([B(0.05, 0.32, 1, x2, 0.62, 0), s2], [B(0.08, 0.06, 0.25, x2, 0.88, -0.3), F2.dunkel], [B(0.5, 0.05, 0.05, x2, 0.96, 0.42), F2.dunkel]);
       for (const z4 of [0.48, -0.48]) fr.push([new three_module_exports.CylinderGeometry(0.33, 0.33, 0.04, 10).rotateZ(Math.PI / 2).translate(x2, 0.33, z4), rad3]);
     }
     I.def("fahrradstaender", fr);
@@ -154934,15 +155246,15 @@
     const schildH = new three_module_exports.CylinderGeometry(0.32, 0.32, 0.06, 14).rotateZ(Math.PI / 2).rotateY(-Math.PI / 4).translate(2.6, 2.75, 0.75);
     const schildH2 = new three_module_exports.CylinderGeometry(0.2, 0.2, 0.08, 10).rotateZ(Math.PI / 2).rotateY(-Math.PI / 4).translate(2.6, 2.75, 0.75);
     I.def("haltestelle", [
-      [B(0.08, 2.4, 0.08, 2, 1.2, 0.7), F.metall],
-      [B(0.08, 2.4, 0.08, -2, 1.2, 0.7), F.metall],
-      [B(0.08, 2.4, 0.08, 2, 1.2, -0.7), F.metall],
-      [B(0.08, 2.4, 0.08, -2, 1.2, -0.7), F.metall],
+      [B(0.08, 2.4, 0.08, 2, 1.2, 0.7), F2.metall],
+      [B(0.08, 2.4, 0.08, -2, 1.2, 0.7), F2.metall],
+      [B(0.08, 2.4, 0.08, 2, 1.2, -0.7), F2.metall],
+      [B(0.08, 2.4, 0.08, -2, 1.2, -0.7), F2.metall],
       [B(4.5, 0.14, 1.8, 0, 2.45, 0), "#4f5960"],
-      [B(4.1, 1.9, 0.05, 0, 1.3, -0.72), F.glasHell],
-      [B(0.05, 1.9, 1.3, -2, 1.3, -0.05), F.glasHell],
-      [B(2.2, 0.08, 0.42, 0, 0.46, -0.42), F.holz],
-      [C(0.05, 0.05, 2.8, 6, 2.6, 1.4, 0.75), F.metall],
+      [B(4.1, 1.9, 0.05, 0, 1.3, -0.72), F2.glasHell],
+      [B(0.05, 1.9, 1.3, -2, 1.3, -0.05), F2.glasHell],
+      [B(2.2, 0.08, 0.42, 0, 0.46, -0.42), F2.holz],
+      [C(0.05, 0.05, 2.8, 6, 2.6, 1.4, 0.75), F2.metall],
       [schildH, "#f2c230"],
       [schildH2, "#2f8a4e"]
     ]);
@@ -154955,10 +155267,10 @@
     I.def("marktstand", ms);
     I.def("pfosten", [[B(0.08, 1.05, 0.08, 0, 0.52, 0), "#4a5056"]]);
     I.def("schirm", [[C(0.04, 0.04, 2.3, 4, 0, 1.15, 0), "#e9e5dc"], [C(0.05, 1.6, 0.5, 8, 0, 2.4, 0), 0], [B(0.8, 0.75, 0.8, 0, 0.38, 0), "#f3efe8"]]);
-    I.def("strich", [[B(1, 0.04, 1, 0, 0.02, 0), F.markierung]], false);
-    I.def("fuge", [[B(1, 0.02, 1, 0, 0.01, 0), F.fuge]], false);
+    I.def("strich", [[B(1, 0.04, 1, 0, 0.02, 0), F2.markierung]], false);
+    I.def("fuge", [[B(1, 0.02, 1, 0, 0.01, 0), F2.fuge]], false);
     I.def("fugeDunkel", [[B(1, 0.02, 1, 0, 0.01, 0), "#8c857a"]], false);
-    I.def("schwelle", [[B(0.3, 0.12, 2.6, 0, 0.06, 0), F.schwelle]], false);
+    I.def("schwelle", [[B(0.3, 0.12, 2.6, 0, 0.06, 0), F2.schwelle]], false);
     const fig = (gehend, tasche3) => {
       const a2 = gehend ? 0.16 : 0;
       const t3 = [
@@ -154976,7 +155288,7 @@
     I.def("figur", fig(false, false));
     I.def("figurGehend", fig(true, false));
     I.def("figurTasche", fig(true, true));
-    const gl = F.glas, hell5 = "#f2efe8", tuer = "#5b4334";
+    const gl = F2.glas, hell5 = "#f2efe8", tuer = "#5b4334";
     const fz = (w2, h3, x2, y2, z4) => [B(w2, h3, 0.1, x2, y2, z4), gl];
     const fx = (w2, h3, x2, y2, z4) => [B(0.1, h3, w2, x2, y2, z4), gl];
     const efh = [
@@ -155042,8 +155354,8 @@
       [B(6, 20, 6, -11, 10, 0), 0],
       [walmPyramide(Math.SQRT1_2, 1).scale(6.6, 9, 6.6).translate(-11, 20, 0), 1],
       [B(1.4, 2.6, 0.1, -11, 1.3, 3.03), tuer],
-      [B(1.2, 1.4, 0.1, -11, 15, 3.03), F.dunkel],
-      [B(0.1, 1.4, 1.2, -7.97, 15, 0), F.dunkel]
+      [B(1.2, 1.4, 0.1, -11, 15, 3.03), F2.dunkel],
+      [B(0.1, 1.4, 1.2, -7.97, 15, 0), F2.dunkel]
     ];
     for (let x2 = -4; x2 <= 12; x2 += 4) dk.push([B(1.1, 3.4, 0.1, x2, 5, 5.53), gl], [B(1.1, 3.4, 0.1, x2, 5, -5.53), gl]);
     I.def("dorfkirche", dk);
@@ -155354,7 +155666,7 @@
     const B22 = s2.breite / 2, g = s2.gehweg, fb6 = s2.breite - 2 * g;
     const L2 = s2.bis - s2.von;
     const pflaster = s2.belag === "pflaster";
-    R11.quader(S, s2.von, s2.bis, -B22, B22, -0.6, 0, pflaster ? F.kopfstein : F.asphalt);
+    R11.quader(S, s2.von, s2.bis, -B22, B22, -0.6, 0, pflaster ? F2.kopfstein : F2.asphalt);
     if (pflaster) for (let u = s2.von + 1.5; u < s2.bis - 1; u += 2.2) {
       const [x2, z4] = R11.w(u, 0);
       I.setze("fugeDunkel", x2, 0, z4, R11.ru, [0.14, 1, fb6 - 0.4]);
@@ -155375,8 +155687,8 @@
       const m0 = s2.von + 5.2, m1 = s2.bis - 5.2, h3 = (s2.mittel || 6) / 2;
       if (s2.tram) {
         R11.quader(S, m0, m1, -h3, h3, 0, 0.12, "#8fbd7c");
-        R11.quader(S, m0, m1, -h3, -h3 + 0.25, 0, 0.22, F.bord);
-        R11.quader(S, m0, m1, h3 - 0.25, h3, 0, 0.22, F.bord);
+        R11.quader(S, m0, m1, -h3, -h3 + 0.25, 0, 0.22, F2.bord);
+        R11.quader(S, m0, m1, h3 - 0.25, h3, 0, 0.22, F2.bord);
         gleise(ctx, R11, s2.von, s2.bis);
         for (const [u, arm] of [[s2.von, "-"], [s2.bis, "+"]]) {
           const anKreuzung = ctx.plan.kreuzungen.some((k3) => {
@@ -155397,10 +155709,10 @@
           baumSetzen(I, s2.baumart, x2, 0.12, z4, r3, 0.85);
         }
       } else {
-        R11.quader(S, m0, m1, -h3, h3, 0, 0.24, F.bord);
-        R11.quader(S, m0 + 0.3, m1 - 0.3, -h3 + 0.3, h3 - 0.3, 0.24, 0.3, F.rasen);
+        R11.quader(S, m0, m1, -h3, h3, 0, 0.24, F2.bord);
+        R11.quader(S, m0 + 0.3, m1 - 0.3, -h3 + 0.3, h3 - 0.3, 0.24, 0.3, F2.rasen);
         if (h3 >= 4) {
-          R11.quader(S, m0 + 0.3, m1 - 0.3, -1.2, 1.2, 0.3, 0.33, F.weg);
+          R11.quader(S, m0 + 0.3, m1 - 0.3, -1.2, 1.2, 0.3, 0.33, F2.weg);
           for (const sg of [-1, 1]) for (let u = m0 + 4; u < m1 - 2; u += 9) {
             const [x2, z4] = R11.w(u, sg * (h3 - 1.6));
             baumSetzen(I, s2.baumart, x2, 0.3, z4, r3, 0.9);
@@ -155431,7 +155743,7 @@
     }
     if (s2.art === "magistrale" && g >= 6) for (const sg of [-1, 1]) {
       const v0 = sg * (B22 - g + 0.4), v1 = sg * (B22 - g + 3.4);
-      R11.quader(S, s2.von + 2, s2.bis - 2, Math.min(v0, v1), Math.max(v0, v1), YG, YG + 0.06, F.rasen);
+      R11.quader(S, s2.von + 2, s2.bis - 2, Math.min(v0, v1), Math.max(v0, v1), YG, YG + 0.06, F2.rasen);
       for (let u = s2.von + 6; u < s2.bis - 4; u += 9) {
         const [x2, z4] = R11.w(u, sg * (B22 - g + 1.9));
         baumSetzen(I, s2.baumart === "platane" ? "linde" : s2.baumart, x2, YG + 0.06, z4, r3, 0.9);
@@ -155477,8 +155789,8 @@
   function gleise(ctx, R11, u0, u1, y2 = 0) {
     if (u1 - u0 < 0.2) return;
     for (const t3 of [-1.6, 1.6]) {
-      for (const sp6 of [-0.72, 0.72]) R11.quader(ctx.S, u0, u1, t3 + sp6 - 0.06, t3 + sp6 + 0.06, y2, y2 + 0.18, F.schiene);
-      R11.quader(ctx.S, u0, u1, t3 - 0.04, t3 + 0.04, 6.4, 6.48, F.dunkel);
+      for (const sp6 of [-0.72, 0.72]) R11.quader(ctx.S, u0, u1, t3 + sp6 - 0.06, t3 + sp6 + 0.06, y2, y2 + 0.18, F2.schiene);
+      R11.quader(ctx.S, u0, u1, t3 - 0.04, t3 + 0.04, 6.4, 6.48, F2.dunkel);
       if (ctx.qualitaet) {
         const s2 = { achse: R11.achse, mitte: R11.mitte + t3, von: u0, bis: u1, breite: 2 };
         ctx.qualitaet.gleise.push(s2);
@@ -155529,8 +155841,8 @@
   function fussgaengerzone2(ctx, s2, R11) {
     const { S, I, r: r3 } = ctx;
     const B22 = s2.breite / 2, g = s2.gehweg;
-    R11.quader(S, s2.von, s2.bis, -B22 + g, B22 - g, -0.6, 0.29, F.pflaster);
-    R11.quader(S, s2.von + 1, s2.bis - 1, -1.6, 1.6, 0.29, 0.3, F.pflasterMitte);
+    R11.quader(S, s2.von, s2.bis, -B22 + g, B22 - g, -0.6, 0.29, F2.pflaster);
+    R11.quader(S, s2.von + 1, s2.bis - 1, -1.6, 1.6, 0.29, 0.3, F2.pflasterMitte);
     for (let u = s2.von + 1.5; u < s2.bis - 1; u += 3) {
       const [x2, z4] = R11.w(u, 0);
       I.setze("fuge", x2, 0.29, z4, R11.ru, [0.12, 1, s2.breite - 2 * g - 0.2]);
@@ -155539,8 +155851,8 @@
     const fbz = s2.breite - 2 * g;
     if (fbz >= 22) {
       const vb = fbz * 0.27;
-      R11.quader(S, s2.von + 1, s2.bis - 1, -vb - 1.6, -vb + 1.6, 0.29, 0.305, F.pflasterMitte);
-      R11.quader(S, s2.von + 1, s2.bis - 1, vb - 1.6, vb + 1.6, 0.29, 0.305, F.pflasterMitte);
+      R11.quader(S, s2.von + 1, s2.bis - 1, -vb - 1.6, -vb + 1.6, 0.29, 0.305, F2.pflasterMitte);
+      R11.quader(S, s2.von + 1, s2.bis - 1, vb - 1.6, vb + 1.6, 0.29, 0.305, F2.pflasterMitte);
       for (const sg of [-1, 1]) for (let u = s2.von + 8 + (sg > 0 ? 10 : 0); u < s2.bis - 6; u += 20, k3++) {
         const [x2, z4] = R11.w(u, sg * vb);
         baumSetzen(I, k3 % 3 === 2 ? "kugel" : waehle2(r3, ["linde", "platane"]), x2, 0.3, z4, r3, 0.9, true);
@@ -155606,21 +155918,21 @@
     R11.quader(S, s2.von, s2.bis, -B22, B22, DU, -0.1, "#b9b1a2");
     R11.quader(S, s2.von, s2.bis, -B22 - 0.12, -B22 + 0.25, DU - 0.08, H, "#9c958a");
     R11.quader(S, s2.von, s2.bis, B22 - 0.25, B22 + 0.12, DU - 0.08, H, "#9c958a");
-    for (const [u0, u1] of [[s2.von, s2.von + WL], [s2.bis - WL, s2.bis]]) R11.quader(S, u0, u1, -B22, B22, GR, DU, F.stein);
+    for (const [u0, u1] of [[s2.von, s2.von + WL], [s2.bis - WL, s2.bis]]) R11.quader(S, u0, u1, -B22, B22, GR, DU, F2.stein);
     if (L2 > 34) {
       const np = Math.round(L2 / 26) - 1;
       for (let k3 = 1; k3 <= np; k3++) {
         const u = s2.von + k3 * L2 / (np + 1);
-        R11.quader(S, u - 0.9, u + 0.9, -B22 + 1, B22 - 1, GR, DU, F.stein);
+        R11.quader(S, u - 0.9, u + 0.9, -B22 + 1, B22 - 1, GR, DU, F2.stein);
       }
     }
     const sv = s2.achse === "x" ? [-B22 - 2.2, B22] : [-B22, B22 + 2.2];
     R11.quader(S, s2.von + WL, s2.bis - WL, sv[0], sv[1], WASSER_Y + 0.01, WASSER_Y + 0.03, "#24555f");
     R11.quader(S, s2.von, s2.bis, -B22, B22, -0.1, H, "#c9c1b2");
-    R11.quader(S, s2.von, s2.bis, -B22 + g, B22 - g, H - 0.01, H + 0.01, F.asphalt);
+    R11.quader(S, s2.von, s2.bis, -B22 + g, B22 - g, H - 0.01, H + 0.01, F2.asphalt);
     for (const sg of [-1, 1]) {
-      R11.quader(S, s2.von, s2.bis, sg > 0 ? B22 - g : -B22, sg > 0 ? B22 : -B22 + g, H, YG + H, F.gehweg);
-      R11.quader(S, s2.von, s2.bis, sg > 0 ? B22 - 0.4 : -B22, sg > 0 ? B22 : -B22 + 0.4, YG + H, YG + H + 0.12, F.stein);
+      R11.quader(S, s2.von, s2.bis, sg > 0 ? B22 - g : -B22, sg > 0 ? B22 : -B22 + g, H, YG + H, F2.gehweg);
+      R11.quader(S, s2.von, s2.bis, sg > 0 ? B22 - 0.4 : -B22, sg > 0 ? B22 : -B22 + 0.4, YG + H, YG + H + 0.12, F2.stein);
       R11.quader(S, s2.von, s2.bis, sg * (B22 - 0.2) - 0.05, sg * (B22 - 0.2) + 0.05, YG + H + 1, YG + H + 1.1, "#4a5056");
       for (let u = s2.von + 0.6; u < s2.bis - 0.3; u += 2) {
         const [x2, z4] = R11.w(u, sg * (B22 - 0.2));
@@ -155658,7 +155970,7 @@
     const x0 = k3.x - k3.bx / 2, x1 = k3.x + k3.bx / 2, z0 = k3.z - k3.bz / 2, z1 = k3.z + k3.bz / 2;
     const alleArme = Object.values(k3.arme).filter(Boolean);
     const kopf = alleArme.length && alleArme.every((a2) => a2.belag === "pflaster" || a2.typ === "fussgaenger");
-    S.quader(x0, -0.6, z0, x1, k3.gepflastert ? 0.29 : 0, z1, k3.gepflastert ? F.pflaster : kopf ? F.kopfstein : F.asphalt);
+    S.quader(x0, -0.6, z0, x1, k3.gepflastert ? 0.29 : 0, z1, k3.gepflastert ? F2.pflaster : kopf ? F2.kopfstein : F2.asphalt);
     const az = k3.arme["-z"] ?? k3.arme["+z"], ax = k3.arme["-x"] ?? k3.arme["+x"];
     if (k3.gepflastert && k3.bx >= 28 && k3.bz >= 28) {
       brunnen3(S, k3.x, k3.z, 0.29, 1.1);
@@ -155762,10 +156074,10 @@
         if (L2 < 0.2) continue;
         const [mx, mz] = pkt((u0 + u1) / 2, 0);
         if (hoch) {
-          S.box(L2, 1, d3.breite, mx, Y - 0.5 - 0.01, mz, F.bord, ry);
-          S.box(L2, 0.04, d3.breite - 0.4, mx, Y - 0.02, mz, F.pflaster, ry);
-          S.box(L2, 0.06, d3.breite - 2 * g, mx, Y + 0, mz, F.asphalt, ry);
-        } else S.box(L2, 0.05, d3.breite, mx, 0.025, mz, F.asphalt, ry);
+          S.box(L2, 1, d3.breite, mx, Y - 0.5 - 0.01, mz, F2.bord, ry);
+          S.box(L2, 0.04, d3.breite - 0.4, mx, Y - 0.02, mz, F2.pflaster, ry);
+          S.box(L2, 0.06, d3.breite - 2 * g, mx, Y + 0, mz, F2.asphalt, ry);
+        } else S.box(L2, 0.05, d3.breite, mx, 0.025, mz, F2.asphalt, ry);
         for (let t3 = u0 + 2; t3 < u1 - 2; t3 += 7) {
           const [x2, z4] = pkt(t3, 0);
           I.setze("strich", x2, hoch ? Y + 0.03 : 0.05, z4, ry, [3, 1, 0.15]);
@@ -155793,10 +156105,10 @@
     }
     for (const zk of plan2.zwickel ?? []) {
       const P4 = zk.poly;
-      polyPlatte(S, P4, Y - 0.02, 1, F.bord);
+      polyPlatte(S, P4, Y - 0.02, 1, F2.bord);
       const cx = P4.reduce((a2, p2) => a2 + p2[0], 0) / P4.length, cz = P4.reduce((a2, p2) => a2 + p2[1], 0) / P4.length;
       const k3 = 0.82, inn = P4.map(([x2, z4]) => [cx + (x2 - cx) * k3, cz + (z4 - cz) * k3]);
-      polyPlatte(S, inn, Y + 0.03, 0.06, zk.art === "pflaster" ? F.pflaster : F.rasen);
+      polyPlatte(S, inn, Y + 0.03, 0.06, zk.art === "pflaster" ? F2.pflaster : F2.rasen);
       const fl = Math.abs(P4.reduce((a2, p2, i) => {
         const q2 = P4[(i + 1) % P4.length];
         return a2 + p2[0] * q2[1] - q2[0] * p2[1];
@@ -155842,8 +156154,8 @@
   function gehwegPlatte(ctx, b3) {
     const e = { "-x": b3.rand["-x"].gehweg, "+x": b3.rand["+x"].gehweg, "-z": b3.rand["-z"].gehweg, "+z": b3.rand["+z"].gehweg };
     const x0 = b3.x - e["-x"], x1 = b3.x + b3.w + e["+x"], z0 = b3.z - e["-z"], z1 = b3.z + b3.d + e["+z"];
-    platte3(ctx.S, x0, z0, x1, z1, 3, 0.3, 0.9, F.bord);
-    platte3(ctx.S, x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3, 2.7, YG, 0.05, F.gehweg);
+    platte3(ctx.S, x0, z0, x1, z1, 3, 0.3, 0.9, F2.bord);
+    platte3(ctx.S, x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3, 2.7, YG, 0.05, F2.gehweg);
   }
   function baueBlock(ctx, b3) {
     const { S, I } = ctx;
@@ -155913,14 +156225,14 @@
       return;
     }
     if (b3.art === "mall") {
-      S.quader(b3.x, 0, b3.z, b3.x + b3.w, 0.34, b3.z + b3.d, F.pflaster);
+      S.quader(b3.x, 0, b3.z, b3.x + b3.w, 0.34, b3.z + b3.d, F2.pflaster);
     }
     if (b3.art === "center" || b3.art === "fachmarkt") {
       baueCenterFlaeche(ctx, b3, r3, teile2);
     }
   }
   var BODEN_HILFE = {
-    F,
+    F: F2,
     YG,
     zw,
     waehle: waehle2,
@@ -155961,7 +156273,7 @@
     const h3 = b3.hof;
     if (!h3 || h3.w <= 4 || h3.d <= 4) return;
     const art = h3.art ?? "gruen";
-    const farbe3 = { gruen: F.hof, kies: F.kies, parkplatz: "#a3a7ab", spielplatz: F.hof, pflaster: "#cbc4b7" }[art] ?? F.hof;
+    const farbe3 = { gruen: F2.hof, kies: F2.kies, parkplatz: "#a3a7ab", spielplatz: F2.hof, pflaster: "#cbc4b7" }[art] ?? F2.hof;
     S.quader(h3.x - 1, 0, h3.z - 1, h3.x + h3.w + 1, 0.36, h3.z + h3.d + 1, farbe3);
     const hinder = teile2.filter((p2) => p2.seite === "hof" || p2.seite === "frei" || p2.typ.startsWith("slot:"));
     const frei6 = (x2, z4, rad3) => !hinder.some((p2) => imRechteck(x2, z4, p2, rad3));
@@ -156028,10 +156340,10 @@
   }
   function brunnen3(S, x2, z4, y2, gross3 = 1) {
     const g = gross3;
-    S.add(new three_module_exports.CylinderGeometry(4.2 * g, 4.4 * g, 0.8, 8).translate(x2, y2 + 0.4, z4), F.stein);
+    S.add(new three_module_exports.CylinderGeometry(4.2 * g, 4.4 * g, 0.8, 8).translate(x2, y2 + 0.4, z4), F2.stein);
     S.add(new three_module_exports.CylinderGeometry(3.7 * g, 3.7 * g, 0.82, 8).translate(x2, y2 + 0.36, z4), "#5cc0cc");
-    S.add(new three_module_exports.CylinderGeometry(0.5 * g, 0.7 * g, 2.6 * g, 8).translate(x2, y2 + 1.3 * g, z4), F.stein);
-    S.add(new three_module_exports.CylinderGeometry(1.5 * g, 0.4 * g, 0.5 * g, 8).translate(x2, y2 + 2.6 * g, z4), F.stein);
+    S.add(new three_module_exports.CylinderGeometry(0.5 * g, 0.7 * g, 2.6 * g, 8).translate(x2, y2 + 1.3 * g, z4), F2.stein);
+    S.add(new three_module_exports.CylinderGeometry(1.5 * g, 0.4 * g, 0.5 * g, 8).translate(x2, y2 + 2.6 * g, z4), F2.stein);
     S.add(new three_module_exports.CylinderGeometry(1.3 * g, 1.3 * g, 0.12, 8).translate(x2, y2 + 2.84 * g, z4), "#7fd0d9");
     S.add(new three_module_exports.CylinderGeometry(0.15 * g, 0.3 * g, 1.6 * g, 6).translate(x2, y2 + 3.6 * g, z4), "#7aa68a");
     S.add(new three_module_exports.SphereGeometry(0.4 * g, 8, 6).translate(x2, y2 + 4.5 * g, z4), "#7aa68a");
@@ -156096,7 +156408,7 @@
     const variante2 = r3();
     if (mitteFrei && variante2 < 0.4) brunnen3(S, cx, cz, y2, 0.7);
     else if (mitteFrei) {
-      S.quader(cx - 6, y2, cz - 6, cx + 6, y2 + 0.06, cz + 6, F.rasen);
+      S.quader(cx - 6, y2, cz - 6, cx + 6, y2 + 0.06, cz + 6, F2.rasen);
       for (const [dx, dz] of [[-3, -3], [3, -3], [-3, 3], [3, 3]]) baumSetzen(I, waehle2(r3, ctx.plan.baumarten ?? ["linde"]), cx + dx, y2 + 0.06, cz + dz, r3, 0.9);
     }
     platzRand(ctx, b3, P4, y2, r3, "kugel", 8);
@@ -156119,11 +156431,11 @@
     for (const s2 of offeneSeiten(b3)) {
       if (s2[1] === "z") {
         const z0 = s2 === "+z" ? P4.z + P4.d - 6 : P4.z + 1.5;
-        S.quader(P4.x + 1, y2, z0, P4.x + P4.w - 1, y2 + 0.04, z0 + 4.5, F.rasen);
+        S.quader(P4.x + 1, y2, z0, P4.x + P4.w - 1, y2 + 0.04, z0 + 4.5, F2.rasen);
         for (let x2 = P4.x + 4; x2 < P4.x + P4.w - 4; x2 += 8) if (!hinder.some((p2) => imRechteck(x2, z0 + 2.2, p2, 2))) baumSetzen(I, b3.art === "domplatz" ? "platane" : "kastanie", x2, y2 + 0.04, z0 + 2.2, r3, 0.8);
       } else {
         const x0 = s2 === "+x" ? P4.x + P4.w - 6 : P4.x + 1.5;
-        S.quader(x0, y2, P4.z + 1, x0 + 4.5, y2 + 0.04, P4.z + P4.d - 1, F.rasen);
+        S.quader(x0, y2, P4.z + 1, x0 + 4.5, y2 + 0.04, P4.z + P4.d - 1, F2.rasen);
         for (let z4 = P4.z + 4; z4 < P4.z + P4.d - 4; z4 += 8) if (!hinder.some((p2) => imRechteck(x0 + 2.2, z4, p2, 2))) baumSetzen(I, b3.art === "domplatz" ? "platane" : "kastanie", x0 + 2.2, y2 + 0.04, z4, r3, 0.8);
       }
     }
@@ -156138,7 +156450,7 @@
   function baueGruenguertel(ctx, b3, r3, hinder) {
     const { S, I } = ctx;
     const y2 = 0.36;
-    S.quader(b3.x, 0, b3.z, b3.x + b3.w, y2, b3.z + b3.d, F.rasen);
+    S.quader(b3.x, 0, b3.z, b3.x + b3.w, y2, b3.z + b3.d, F2.rasen);
     const entlangZ = (b3.achse ?? (b3.d > b3.w ? "z" : "x")) === "z";
     const lang = entlangZ ? b3.d : b3.w, kurz = entlangZ ? b3.w : b3.d;
     const W3 = (u, v2) => entlangZ ? [b3.x + v2, b3.z + u] : [b3.x + u, b3.z + v2];
@@ -156147,7 +156459,7 @@
     for (let u = 0; u < lang; u += 6) {
       v = klemm8(v + zw(r3, -1.2, 1.2), 3, kurz - 3);
       const [x2, z4] = W3(u + 3, v);
-      S.box(entlangZ ? 3 : 6.4, 0.05, entlangZ ? 6.4 : 3, x2, y2 + 0.025, z4, F.weg);
+      S.box(entlangZ ? 3 : 6.4, 0.05, entlangZ ? 6.4 : 3, x2, y2 + 0.025, z4, F2.weg);
       if (u % 18 === 0 && u > 4 && u < lang - 6) {
         const [bx, bz] = W3(u + 3, v + 2.4);
         I.setze("bank", bx, y2, bz, entlangZ ? Math.PI / 2 : Math.PI);
@@ -156157,8 +156469,8 @@
       const vw = v < kurz / 2 ? kurz * 0.75 : kurz * 0.25;
       const [gx, gz2] = W3(lang / 2, vw);
       const rl = lang * 0.32, rk = Math.min(kurz * 0.18, 5);
-      ellipse2(S, gx, gz2, entlangZ ? rk : rl, entlangZ ? rl : rk, y2 - 0.6, y2 - 0.25, F.wasser);
-      ellipsenRing(S, gx, gz2, entlangZ ? rk : rl, entlangZ ? rl : rk, 0.7, y2 - 0.3, y2 + 0.15, F.stein);
+      ellipse2(S, gx, gz2, entlangZ ? rk : rl, entlangZ ? rl : rk, y2 - 0.6, y2 - 0.25, F2.wasser);
+      ellipsenRing(S, gx, gz2, entlangZ ? rk : rl, entlangZ ? rl : rk, 0.7, y2 - 0.3, y2 + 0.15, F2.stein);
     }
     const arten = ctx.plan.baumarten ?? ["linde", "kastanie"];
     const art = waehle2(r3, arten);
@@ -156185,7 +156497,7 @@
   function baueSchlossplatz(ctx, b3, r3, hinder) {
     const { S, I } = ctx;
     const y2 = 0.34;
-    S.quader(b3.x, 0, b3.z, b3.x + b3.w, y2, b3.z + b3.d, F.rasen);
+    S.quader(b3.x, 0, b3.z, b3.x + b3.w, y2, b3.z + b3.d, F2.rasen);
     const E8 = b3.ehrenhof ?? { x: b3.x + b3.w * 0.2, z: b3.z + b3.d * 0.4, w: b3.w * 0.6, d: b3.d * 0.55 };
     pflasterFlaeche(ctx, E8, y2 + 0.01, "#e8dfcc", 6);
     const cx = E8.x + E8.w / 2, cz = E8.z + E8.d / 2;
@@ -156216,11 +156528,11 @@
     const y2 = 0.36;
     S.quader(b3.x, 0, b3.z, b3.x + b3.w, y2, b3.z + b3.d, "#8fc27f");
     const cx = b3.x + b3.w / 2, cz = b3.z + b3.d / 2;
-    S.quader(cx - 1.8, y2, b3.z + 2, cx + 1.8, y2 + 0.05, b3.z + b3.d - 2, F.weg);
-    S.quader(b3.x + 2, y2, cz - 1.8, b3.x + b3.w - 2, y2 + 0.05, cz + 1.8, F.weg);
-    ellipse2(S, cx, cz, 9, 9, y2, y2 + 0.05, F.weg);
-    ellipse2(S, cx, cz, 5.5, 5.5, y2 - 0.3, y2 + 0.02, F.wasser);
-    ellipsenRing(S, cx, cz, 5.5, 5.5, 0.6, y2 - 0.2, y2 + 0.35, F.stein);
+    S.quader(cx - 1.8, y2, b3.z + 2, cx + 1.8, y2 + 0.05, b3.z + b3.d - 2, F2.weg);
+    S.quader(b3.x + 2, y2, cz - 1.8, b3.x + b3.w - 2, y2 + 0.05, cz + 1.8, F2.weg);
+    ellipse2(S, cx, cz, 9, 9, y2, y2 + 0.05, F2.weg);
+    ellipse2(S, cx, cz, 5.5, 5.5, y2 - 0.3, y2 + 0.02, F2.wasser);
+    ellipsenRing(S, cx, cz, 5.5, 5.5, 0.6, y2 - 0.2, y2 + 0.35, F2.stein);
     for (const z4 of [b3.z + 5, b3.z + b3.d - 5]) for (let x2 = b3.x + 4; x2 < b3.x + b3.w - 3; x2 += 2.4) I.setze("busch", x2, y2, z4, 0, [0.8, 0.6, 0.8], ["#4f8a49"]);
     for (const x2 of [cx - 4, cx + 4]) for (let z4 = b3.z + 8; z4 < b3.z + b3.d - 8; z4 += 7) if (Math.abs(z4 - cz) > 10) baumSetzen(I, "kugel", x2, y2, z4, r3, 0.8);
     for (const x2 of [b3.x + 3, b3.x + b3.w - 3]) for (let z4 = b3.z + 6; z4 < b3.z + b3.d - 4; z4 += 7) baumSetzen(I, "linde", x2, y2, z4, r3, 0.85);
@@ -156397,8 +156709,8 @@
     else if (g.seite === "+x") x0 -= e;
     else if (g.seite === "-z") z1 += e;
     else z0 -= e;
-    platte3(S, x0, z0, x1, z1, 0.6, 0.3, 0.9, F.bord);
-    S.quader(x0 + 0.3, 0.3, z0 + 0.3, x1 - 0.3, 0.36, z1 - 0.3, F.rasen);
+    platte3(S, x0, z0, x1, z1, 0.6, 0.3, 0.9, F2.bord);
+    S.quader(x0 + 0.3, 0.3, z0 + 0.3, x1 - 0.3, 0.36, z1 - 0.3, F2.rasen);
     const lang = g.achse === "z" ? z1 - z0 : x1 - x0;
     for (let u = 6; u < lang - 4; u += 11) {
       const [x2, z4] = g.achse === "z" ? [(x0 + x1) / 2, z0 + u] : [x0 + u, (z0 + z1) / 2];
@@ -156409,7 +156721,7 @@
     const { S, I } = ctx;
     const gew = b3.zone === "gewerbe";
     gehwegPlatte(ctx, b3);
-    S.quader(b3.x, 0, b3.z, b3.x + b3.w, 0.34, b3.z + b3.d, gew ? "#a2a6aa" : F.rasen);
+    S.quader(b3.x, 0, b3.z, b3.x + b3.w, 0.34, b3.z + b3.d, gew ? "#a2a6aa" : F2.rasen);
     const y2 = 0.34;
     for (const f11 of b3.flaechen ?? []) {
       if (f11.art === "weg") S.quader(f11.x, y2, f11.z, f11.x + f11.w, y2 + 0.04, f11.z + f11.d, "#d3cbbb");
@@ -156529,8 +156841,8 @@
       const len = zw(r3, 70, 130);
       const dir = k3[0] === "-" ? -1 : 1, kante = (k3 === "-x" || k3 === "-z" ? 0 : entlangZ ? W3 : T) + dir * (plan2.aussen.kuesteAb ?? 0);
       const a2 = kante, e = kante + dir * len;
-      if (entlangZ) S.quader(Math.min(a2, e), WASSER_Y - 1.2, u - 3, Math.max(a2, e), 1, u + 3, F.kai);
-      else S.quader(u - 3, WASSER_Y - 1.2, Math.min(a2, e), u + 3, 1, Math.max(a2, e), F.kai);
+      if (entlangZ) S.quader(Math.min(a2, e), WASSER_Y - 1.2, u - 3, Math.max(a2, e), 1, u + 3, F2.kai);
+      else S.quader(u - 3, WASSER_Y - 1.2, Math.min(a2, e), u + 3, 1, Math.max(a2, e), F2.kai);
       const [lx, lz] = entlangZ ? [e, u] : [u, e];
       S.quader(lx - 1.4, 1, lz - 1.4, lx + 1.4, 9, lz + 1.4, "#f2f1ec");
       S.quader(lx - 1.5, 4, lz - 1.5, lx + 1.5, 5.6, lz + 1.5, "#c8322b");
@@ -156549,7 +156861,7 @@
     if (plan2.umlandArt === "see") {
       for (const [x0, z0, x1, z1] of ringe) {
         S.quader(x0, WASSER_Y - 1.5, z0, x1, WASSER_Y - 0.6, z1, "#2f6f7d");
-        S.quader(x0, WASSER_Y - 0.62, z0, x1, WASSER_Y, z1, F.wasser ?? "#3c8a9b");
+        S.quader(x0, WASSER_Y - 0.62, z0, x1, WASSER_Y, z1, F2.wasser ?? "#3c8a9b");
       }
       return;
     }
@@ -156583,7 +156895,7 @@
     for (const b3 of liste3) {
       const r3 = rng3(b3.seed + 7);
       const X0 = b3.x, X1 = b3.x + b3.w, Z0 = b3.z, Z1 = b3.z + b3.d;
-      S.quader(X0, WASSER_Y - 1.2, Z0, X1, WASSER_Y, Z1, F.wasser);
+      S.quader(X0, WASSER_Y - 1.2, Z0, X1, WASSER_Y, Z1, F2.wasser);
       const seiten4 = [
         { s: "-x", fix: X0, a: Z0, e: Z1, aussen: X0 - 0.4, entlang: "z", amRand: X0 < randX0 },
         { s: "+x", fix: X1, a: Z0, e: Z1, aussen: X1 + 0.4, entlang: "z", amRand: X1 > randX1 },
@@ -156605,8 +156917,8 @@
         const innen = sd.s[0] === "-" ? 1 : -1;
         for (const [a2, e] of intervalleMinus(sd.a, sd.e, weg)) {
           if (e - a2 < 0.5) continue;
-          if (sd.entlang === "z") S.quader(sd.s === "-x" ? X0 : X1 - 1, WASSER_Y - 1.2, a2, sd.s === "-x" ? X0 + 1 : X1, 0.35, e, F.kai);
-          else S.quader(a2, WASSER_Y - 1.2, sd.s === "-z" ? Z0 : Z1 - 1, e, 0.35, sd.s === "-z" ? Z0 + 1 : Z1, F.kai);
+          if (sd.entlang === "z") S.quader(sd.s === "-x" ? X0 : X1 - 1, WASSER_Y - 1.2, a2, sd.s === "-x" ? X0 + 1 : X1, 0.35, e, F2.kai);
+          else S.quader(a2, WASSER_Y - 1.2, sd.s === "-z" ? Z0 : Z1 - 1, e, 0.35, sd.s === "-z" ? Z0 + 1 : Z1, F2.kai);
           const gp = sd.fix + innen * 0.5;
           if (sd.entlang === "z") {
             S.quader(gp - 0.05, 1, a2 + 0.4, gp + 0.05, 1.1, e - 0.4, "#4a5056");
@@ -156625,11 +156937,11 @@
           const g = s2.gehweg, au = sd.s[0] === "-" ? -1 : 1;
           const q0 = sd.fix + au * g, q1 = sd.fix;
           if (sd.entlang === "z") {
-            platte3(S, Math.min(q0, q1), a2, Math.max(q0, q1), e, 0.6, 0.3, 0.9, F.bord);
-            platte3(S, Math.min(q0, q1) + (au > 0 ? 0 : 0.3), a2 + 0.3, Math.max(q0, q1) - (au > 0 ? 0.3 : 0), e - 0.3, 0.4, YG, 0.05, F.gehweg);
+            platte3(S, Math.min(q0, q1), a2, Math.max(q0, q1), e, 0.6, 0.3, 0.9, F2.bord);
+            platte3(S, Math.min(q0, q1) + (au > 0 ? 0 : 0.3), a2 + 0.3, Math.max(q0, q1) - (au > 0 ? 0.3 : 0), e - 0.3, 0.4, YG, 0.05, F2.gehweg);
           } else {
-            platte3(S, a2, Math.min(q0, q1), e, Math.max(q0, q1), 0.6, 0.3, 0.9, F.bord);
-            platte3(S, a2 + 0.3, Math.min(q0, q1) + (au > 0 ? 0 : 0.3), e - 0.3, Math.max(q0, q1) - (au > 0 ? 0.3 : 0), 0.4, YG, 0.05, F.gehweg);
+            platte3(S, a2, Math.min(q0, q1), e, Math.max(q0, q1), 0.6, 0.3, 0.9, F2.bord);
+            platte3(S, a2 + 0.3, Math.min(q0, q1) + (au > 0 ? 0 : 0.3), e - 0.3, Math.max(q0, q1) - (au > 0 ? 0.3 : 0), 0.4, YG, 0.05, F2.gehweg);
           }
           const mq = (q0 + q1) / 2;
           for (let u = a2 + 7; u < e - 5; u += 14) {
@@ -156660,7 +156972,7 @@
     const { S, I } = ctx;
     const y2 = 0.36;
     const x0 = b3.x, z0 = b3.z, x1 = b3.x + b3.w, z1 = b3.z + b3.d, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-    S.quader(x0, 0, z0, x1, y2, z1, F.rasen);
+    S.quader(x0, 0, z0, x1, y2, z1, F2.rasen);
     const ri = 5;
     const ring2 = new three_module_exports.Shape();
     const rr3 = (s2, a0, b0, a1, b1, rad3, loch) => {
@@ -156681,13 +156993,13 @@
     const rg2 = new three_module_exports.ExtrudeGeometry(ring2, { depth: 0.05, bevelEnabled: false, curveSegments: 6 });
     rg2.rotateX(Math.PI / 2);
     rg2.translate(0, y2 + 0.05, 0);
-    S.add(rg2, F.weg);
+    S.add(rg2, F2.weg);
     const diagonalen = [[x0, z0], [x1, z0], [x0, z1], [x1, z1]];
     for (const [ex, ez] of diagonalen) {
       const len = wurzelSumme24(cx - ex, cz - ez) - 3;
-      S.box(len, 0.05, 3, (ex + cx) / 2, y2 + 0.025, (ez + cz) / 2, F.weg, Math.atan2(-(cz - ez), cx - ex));
+      S.box(len, 0.05, 3, (ex + cx) / 2, y2 + 0.025, (ez + cz) / 2, F2.weg, Math.atan2(-(cz - ez), cx - ex));
     }
-    ellipse2(S, cx, cz, 7, 7, y2, y2 + 0.06, F.weg);
+    ellipse2(S, cx, cz, 7, 7, y2, y2 + 0.06, F2.weg);
     if (!hinder.some((p2) => imRechteck(cx, cz, p2, 4))) {
       ellipse2(S, cx, cz, 3.5, 3.5, y2, y2 + 0.5, "#c9b98f");
       baumSetzen(I, "busch", cx, y2 + 0.5, cz, r3, 1.2);
@@ -156695,8 +157007,8 @@
     const sg = b3.teich?.seite ?? 1;
     const tx = cx + sg * b3.w * 0.22, tz = cz + b3.d * 0.2;
     const trx = Math.min(b3.w * 0.16, 14), trz = Math.min(b3.d * 0.12, 10);
-    ellipse2(S, tx, tz, trx, trz, y2 - 0.6, y2 - 0.25, F.wasser);
-    ellipsenRing(S, tx, tz, trx, trz, 0.9, y2 - 0.3, y2 + 0.2, F.stein);
+    ellipse2(S, tx, tz, trx, trz, y2 - 0.6, y2 - 0.25, F2.wasser);
+    ellipsenRing(S, tx, tz, trx, trz, 0.9, y2 - 0.3, y2 + 0.2, F2.stein);
     const sx = cx - sg * b3.w * 0.22, sz = cz - b3.d * 0.22;
     S.quader(sx - 5, y2, sz - 4, sx + 5, y2 + 0.1, sz + 4, "#ead8a6");
     S.box(0.8, 2.2, 0.8, sx - 2.5, y2 + 1.1, sz - 1.5, "#d04a3f");
@@ -156818,7 +157130,7 @@
         S.quader(bx0, 1, z4 + 0.2, bx1, 1.04, z4 + 0.6, "#f2f1ec");
         S.quader(bx0, 1, z4 + 5.4, bx1, 1.04, z4 + 5.8, "#f2f1ec");
         S.quader(bx0 + 6, 4, z4 + 1, bx1 - 6, 4.25, z4 + 5, "#e9e5dc");
-        for (let x2 = bx0 + 8; x2 < bx1 - 6; x2 += 12) S.box(0.3, 3, 0.3, x2, 2.5, z4 + 3, F.metall);
+        for (let x2 = bx0 + 8; x2 < bx1 - 6; x2 += 12) S.box(0.3, 3, 0.3, x2, 2.5, z4 + 3, F2.metall);
         for (let k3 = 0; k3 < (bx1 - bx0) / 8 * ctx.dichte; k3++) figur4(I, zw(r3, bx0 + 1, bx1 - 1), 1, zw(r3, z4 + 1, z4 + 5), r3);
         z4 += 6;
       }
@@ -156827,10 +157139,10 @@
     const xa = b3.x + 1.5, xb = b3.x + b3.w - 1.5;
     const abschnitte = (gz2) => bh && b3.oben && gz2 > bh.z - 3 && gz2 < bh.z + bh.d + 3 ? [[xa, bh.x - 3], [bh.x + bh.w + 3, xb]].filter(([a2, e]) => e - a2 > 8) : [[xa, xb]];
     for (const gz2 of gleisZ) for (const [ga, gb] of abschnitte(gz2)) {
-      S.quader(ga, y2, gz2 - 1.6, gb, y2 + 0.15, gz2 + 1.6, F.schotter);
+      S.quader(ga, y2, gz2 - 1.6, gb, y2 + 0.15, gz2 + 1.6, F2.schotter);
       for (let x2 = ga + 0.5; x2 < gb; x2 += 1.1) I.setze("schwelle", x2, y2 + 0.15, gz2, 0);
-      for (const sp6 of [-0.72, 0.72]) S.quader(ga, y2 + 0.2, gz2 + sp6 - 0.06, gb, y2 + 0.36, gz2 + sp6 + 0.06, F.schiene);
-      S.quader(ga, 6.3, gz2 - 0.04, gb, 6.38, gz2 + 0.04, F.dunkel);
+      for (const sp6 of [-0.72, 0.72]) S.quader(ga, y2 + 0.2, gz2 + sp6 - 0.06, gb, y2 + 0.36, gz2 + sp6 + 0.06, F2.schiene);
+      S.quader(ga, 6.3, gz2 - 0.04, gb, 6.38, gz2 + 0.04, F2.dunkel);
       if (ctx.qualitaet) {
         const spur = { achse: ctx.spiegel ? "z" : "x", mitte: gz2, von: ga, bis: gb, breite: 3 };
         ctx.qualitaet.gleise.push(spur);
@@ -156964,7 +157276,7 @@
     const hell5 = heller(f11, 0.06);
     S.quader(x2, 0, z4, x2 + w2, H, z4 + d3, f11);
     const sicht3 = ["+z", "+x"];
-    for (const s2 of sicht3) if (p2.front.includes(s2)) laden2(S, p2, s2, eg, r3, st2 === "modern" ? F.glas : FARBEN3.laden);
+    for (const s2 of sicht3) if (p2.front.includes(s2)) laden2(S, p2, s2, eg, r3, st2 === "modern" ? F2.glas : FARBEN3.laden);
     gesims(S, x2, z4, w2, d3, eg, 0.3, 0.12, hell5);
     if (st2 === "modern") {
       for (let k3 = 0; k3 < g; k3++) {
@@ -157065,7 +157377,7 @@
     S.quader(x2 + 2, 0, z4 + 2, x2 + w2 - 2, H, z4 + d3 - 2, "#e2e5e7");
     S.quader(x2 + 2, 0.3, z4 + d3 - 2.2, x2 + w2 - 2, 5, z4 + d3 - 1.8, FARBEN3.glas);
     S.quader(x2 + w2 - 2.2, 0.3, z4 + 2, x2 + w2 - 1.8, 5, z4 + d3 - 2, FARBEN3.glas);
-    S.quader(x2 + w2 * 0.35, H, z4 + d3 * 0.3, x2 + w2 * 0.65, H + 4, z4 + d3 * 0.7, F.glasHell);
+    S.quader(x2 + w2 * 0.35, H, z4 + d3 * 0.3, x2 + w2 * 0.65, H + 4, z4 + d3 * 0.7, F2.glasHell);
     S.quader(x2 + 3, H, z4 + 3, x2 + w2 - 3, H + 0.2, z4 + d3 - 3, "#a9adb1");
     for (let u = x2 + 6; u < x2 + w2 - 6; u += 2.6) S.box(0.12, 0.05, 4.5, u, H + 0.25, z4 + 6, "#f2f1ec");
     S.box(w2 - 4, 1.2, 0.3, x2 + w2 / 2, 6, z4 + d3 - 1.8, "#2f6f8f");
@@ -157079,7 +157391,7 @@
     g.rotateZ(Math.PI / 2);
     g.scale(1, 0.55, 1);
     g.translate(x2 + w2 / 2, 9, z4 + d3 / 2);
-    S.add(g, F.glasHell);
+    S.add(g, F2.glasHell);
     S.quader(x2 + w2 * 0.85 - 4, 0, z4 + d3 * 0.5 - 4, x2 + w2 * 0.85 + 4, 28, z4 + d3 * 0.5 + 4, "#dcc9ae");
     S.add(walmPyramide(5.5, 5).translate(x2 + w2 * 0.85, 28, z4 + d3 * 0.5), FARBEN3.kupfer[0]);
     S.add(new three_module_exports.CylinderGeometry(1.6, 1.6, 0.2, 16).rotateX(Math.PI / 2).translate(x2 + w2 * 0.85, 23, z4 + d3 * 0.5 + 4.05), "#f4f1ea");
@@ -157210,7 +157522,7 @@
     g.rotateZ(Math.PI / 2);
     g.scale(1, 0.55, 1);
     g.translate(p2.x + p2.w / 2, H, p2.z + p2.d / 2);
-    S.add(g, F.glasHell);
+    S.add(g, F2.glasHell);
     for (let u = p2.x + 2; u < p2.x + p2.w - 1; u += 4) S.box(2.4, 5, 0.14, u + 1, 3.5, p2.z + p2.d - 0.33, "#5e7383");
     return { hoehe: H + p2.d * 0.25 };
   }
@@ -157295,16 +157607,16 @@
     const r3 = rng3(p2.seed);
     const quer2 = p2.w >= p2.d;
     for (let u = 1.3; u < (quer2 ? p2.w : p2.d) - 1; u += 2.6) {
-      if (quer2) S.box(0.12, 0.02, 4.4, p2.x + u, 0.35, p2.z + 3, F.markierung);
-      else S.box(4.4, 0.02, 0.12, p2.x + 3, 0.35, p2.z + u, F.markierung);
+      if (quer2) S.box(0.12, 0.02, 4.4, p2.x + u, 0.35, p2.z + 3, F2.markierung);
+      else S.box(4.4, 0.02, 0.12, p2.x + 3, 0.35, p2.z + u, F2.markierung);
       if (r3() < 0.6) {
         const c = waehle2(r3, AUTOFARBEN3);
         if (quer2) {
           S.box(1.7, 0.9, 4.2, p2.x + u + 1.3, 0.85, p2.z + 3, c);
-          S.box(1.5, 0.6, 2.2, p2.x + u + 1.3, 1.6, p2.z + 3, F.glas);
+          S.box(1.5, 0.6, 2.2, p2.x + u + 1.3, 1.6, p2.z + 3, F2.glas);
         } else {
           S.box(4.2, 0.9, 1.7, p2.x + 3, 0.85, p2.z + u + 1.3, c);
-          S.box(2.2, 0.6, 1.5, p2.x + 3, 1.6, p2.z + u + 1.3, F.glas);
+          S.box(2.2, 0.6, 1.5, p2.x + 3, 1.6, p2.z + u + 1.3, F2.glas);
         }
       }
     }
@@ -157314,7 +157626,7 @@
     const r3 = rng3(p2.seed);
     S.quader(p2.x, 0, p2.z, p2.x + p2.w, 0.36, p2.z + p2.d, "#e4ddcf");
     baum(S, p2.x + p2.w / 2, p2.z + p2.d / 2, r3, 1.1);
-    S.box(1.8, 0.45, 0.5, p2.x + p2.w / 2 + 2.5, 0.6, p2.z + p2.d / 2, F.holz);
+    S.box(1.8, 0.45, 0.5, p2.x + p2.w / 2 + 2.5, 0.6, p2.z + p2.d / 2, F2.holz);
     return { hoehe: 6 };
   }
   function phDurchgang(S, scene2, p2) {
@@ -158819,6 +159131,8 @@
     return { x: x2 + w2 / 2, y: Math.max(0, hoehe), z: z4 + d3 / 2 };
   }
   function hausDachpunkt(eintrag2, haus2) {
+    const a2 = eintrag2?.e?.pinAnker;
+    if (a2 && [a2.x, a2.y, a2.z].every(Number.isFinite)) return { x: a2.x, y: Math.max(0, a2.y), z: a2.z };
     return dachpunkt(eintrag2?.p, haus2 ? fussabdruck(haus2) : null, eintrag2?.e?.hoehe);
   }
   function hausFormat(haus2) {
@@ -158964,6 +159278,118 @@
         namensschild2.scale.set(145 * weltJePixel, 29 * weltJePixel, 1);
       }
     }
+  }
+
+  // src/kit/q36-pruefung.js
+  var SCHWARZ = new three_module_exports.MeshBasicMaterial({ color: 0 });
+  function kennMaterial(farbe3, map) {
+    if (!map) return new three_module_exports.MeshBasicMaterial({ color: farbe3, side: three_module_exports.DoubleSide });
+    return new three_module_exports.ShaderMaterial({
+      uniforms: { farbe: { value: farbe3 }, map: { value: map } },
+      side: three_module_exports.DoubleSide,
+      vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
+      fragmentShader: "uniform vec3 farbe; uniform sampler2D map; varying vec2 vUv; void main(){ if (texture2D(map, vUv).a < 0.5) discard; gl_FragColor = vec4(farbe, 1.0); }"
+    });
+  }
+  function kennfarbe(i) {
+    return new three_module_exports.Color((i >> 16 & 255) / 255, (i >> 8 & 255) / 255, (i & 255) / 255);
+  }
+  function schriftzugSichtbarkeit(ren2, scene2, cam2, w2, h3, filter = () => true) {
+    const buchstaben = [], merk2 = [];
+    scene2.traverse((o3) => {
+      if (o3.userData?.schriftzug && o3.isMesh && filter(o3)) buchstaben.push(o3);
+    });
+    if (!buchstaben.length) return [];
+    const kenn = /* @__PURE__ */ new Map();
+    buchstaben.forEach((m, k3) => kenn.set(m, k3 + 1));
+    scene2.traverse((o3) => {
+      if (o3 === scene2) return;
+      if (o3.isMesh) {
+        const k3 = kenn.get(o3);
+        merk2.push([o3, "material", o3.material]);
+        o3.material = k3 ? kennMaterial(kennfarbe(k3), o3.material?.map) : SCHWARZ;
+      } else if (o3.isSprite && o3.userData?.hausId && !o3.userData.premiumName && o3.visible) {
+        merk2.push([o3, "material", o3.material]);
+        o3.material = new three_module_exports.SpriteMaterial({ map: o3.material.map, color: 0, alphaTest: 0.5, depthTest: false, depthWrite: false });
+      } else if (o3.isSprite || o3.isLine || o3.isPoints) {
+        merk2.push([o3, "visible", o3.visible]);
+        o3.visible = false;
+      }
+    });
+    const rt = new three_module_exports.WebGLRenderTarget(w2, h3, { samples: 0 });
+    const pixel = new Uint8Array(w2 * h3 * 4);
+    const zaehle = () => {
+      ren2.setRenderTarget(rt);
+      ren2.setClearColor(0, 1);
+      ren2.clear();
+      ren2.render(scene2, cam2);
+      ren2.readRenderTargetPixels(rt, 0, 0, w2, h3, pixel);
+      ren2.setRenderTarget(null);
+      const n3 = /* @__PURE__ */ new Map();
+      for (let p2 = 0; p2 < pixel.length; p2 += 4) {
+        const k3 = pixel[p2] << 16 | pixel[p2 + 1] << 8 | pixel[p2 + 2];
+        if (k3) n3.set(k3, (n3.get(k3) ?? 0) + 1);
+      }
+      return n3;
+    };
+    const alteSchatten = ren2.shadowMap.enabled, alterHintergrund = scene2.background, alterNebel = scene2.fog;
+    ren2.shadowMap.enabled = false;
+    scene2.background = null;
+    scene2.fog = null;
+    try {
+      const ganz2 = zaehle();
+      const aus = [];
+      scene2.traverse((o3) => {
+        if ((o3.isMesh || o3.isSprite) && !kenn.has(o3) && o3.visible) {
+          aus.push(o3);
+          o3.visible = false;
+        }
+      });
+      const frei6 = zaehle();
+      for (const o3 of aus) o3.visible = true;
+      const erg = [];
+      for (const [m, k3] of kenn) {
+        const f11 = frei6.get(k3) ?? 0;
+        if (f11 < 4) continue;
+        erg.push({ hausId: m.userData.hausId, text: m.userData.schriftzug.text, seite: m.userData.schriftzug.seite, wort: !!m.userData.schriftzug.wort, i: m.userData.schriftzug.i, sichtbar: (ganz2.get(k3) ?? 0) / f11 });
+      }
+      return erg;
+    } finally {
+      for (const [o3, feld2, wert] of merk2.reverse()) {
+        if (feld2 === "material" && o3.material !== SCHWARZ) o3.material.dispose();
+        o3[feld2] = wert;
+      }
+      ren2.shadowMap.enabled = alteSchatten;
+      scene2.background = alterHintergrund;
+      scene2.fog = alterNebel;
+      rt.dispose();
+    }
+  }
+  function bewerteSchriftzug(buchstaben, grenze = 0.9) {
+    const je = /* @__PURE__ */ new Map();
+    for (const b3 of buchstaben) {
+      const k3 = b3.hausId + "|" + b3.text + " " + b3.seite;
+      if (!je.has(k3)) je.set(k3, []);
+      je.get(k3).push(b3);
+    }
+    const fehler6 = [];
+    for (const [k3, liste3] of je) {
+      const soll = [...liste3[0].text].filter((c) => c !== " ").length;
+      if (liste3[0].wort) {
+        const v = Math.min(...liste3.map((b3) => b3.sichtbar));
+        if (v < 0.97 && v > 0.1) fehler6.push(k3.replace("|", " \u201E") + "\u201C: Schriftzug nur zu " + Math.round(v * 100) + " % sichtbar");
+        continue;
+      }
+      if (liste3.length < soll) {
+        fehler6.push(k3.replace("|", " \u201E") + "\u201C: nur " + liste3.length + " von " + soll + " Buchstaben vorhanden");
+        continue;
+      }
+      const verdeckt = liste3.filter((b3) => b3.sichtbar < grenze);
+      if (!verdeckt.length) continue;
+      if (liste3.every((b3) => b3.sichtbar <= 0.1)) continue;
+      fehler6.push(k3.replace("|", " \u201E") + "\u201C: " + verdeckt.length + " von " + liste3.length + " Buchstaben verdeckt (min. " + Math.round(Math.min(...verdeckt.map((b3) => b3.sichtbar)) * 100) + " % sichtbar)");
+    }
+    return fehler6;
   }
 
   // src/kit/jahreszeit.js
@@ -159335,7 +159761,7 @@
   for (const d3 of einstellungen) meldeSchalter(d3);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o3) => typeof o3 === "object" ? { wert: o3.wert ?? o3.value, titel: o3.titel ?? o3.label ?? o3.wert } : { wert: o3, titel: o3 };
-  var version = () => true ? "acc9fea" : "Entwicklung";
+  var version = () => true ? "5aeddf7" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld2(d3) {
@@ -167317,7 +167743,7 @@
 
   // src/kit/mode/q29-beauty.js
   var GOLD3 = "#c9a24a";
-  var SCHWARZ = "#2c2b2e";
+  var SCHWARZ2 = "#2c2b2e";
   var ell3 = (cx, cy, rx, ry) => `M${f10(cx - rx)} ${f10(cy)} A${f10(rx)} ${f10(ry)} 0 1 0 ${f10(cx + rx)} ${f10(cy)} A${f10(rx)} ${f10(ry)} 0 1 0 ${f10(cx - rx)} ${f10(cy)} Z`;
   var rr = (x2, y2, w2, h3, r3) => `M${f10(x2 + r3)} ${f10(y2)} L${f10(x2 + w2 - r3)} ${f10(y2)} Q${f10(x2 + w2)} ${f10(y2)} ${f10(x2 + w2)} ${f10(y2 + r3)} L${f10(x2 + w2)} ${f10(y2 + h3 - r3)} Q${f10(x2 + w2)} ${f10(y2 + h3)} ${f10(x2 + w2 - r3)} ${f10(y2 + h3)} L${f10(x2 + r3)} ${f10(y2 + h3)} Q${f10(x2)} ${f10(y2 + h3)} ${f10(x2)} ${f10(y2 + h3 - r3)} L${f10(x2)} ${f10(y2 + r3)} Q${f10(x2)} ${f10(y2)} ${f10(x2 + r3)} ${f10(y2)} Z`;
   var BEAUTY = {
@@ -167340,7 +167766,7 @@
       t3.push(boden8(50, 86, 30, 3));
       t3.push(zylinder2(S, 50, 58, 86, 26, 7, S.c, { glanz: true, deckel: false }));
       t3.push(etikett(30, 64, 40, 16, "#f4efe4", "#3a332c"));
-      t3.push(zylinder2(S, 50, 38, 58, 27, 7.2, SCHWARZ));
+      t3.push(zylinder2(S, 50, 38, 58, 27, 7.2, SCHWARZ2));
       for (let i = 0; i < 16; i++) {
         const x2 = 24 + i * 3.4;
         t3.push(linie2(`M${f10(x2)} ${40 + Math.abs(x2 - 50) * 0.02} V${f10(57 + 5.2 * Math.sqrt(Math.max(0, 1 - ((x2 - 50) / 27) ** 2)))}`, "#000", 0.5, 0.35));
@@ -167370,7 +167796,7 @@
         t3.push(`<path d="M24 78 L76 78 L76 88 L24 88 Z" fill="#fff" opacity="0.3"/><path d="M24 78 L76 78" stroke="#8e9ea4" stroke-width="0.5"/>`);
         t3.push(etikett(38, 56, 24, 9, "#fbf8f3", "#4a4440", { r: 0.4 }));
         t3.push(form(S, rr(42, 32, 16, 8, 1), GOLD3, { licht: "metall" }));
-        t3.push(form(S, rr(38, 10, 24, 22, 2), SCHWARZ, { licht: "rund" }));
+        t3.push(form(S, rr(38, 10, 24, 22, 2), SCHWARZ2, { licht: "rund" }));
         t3.push(`<path d="M41 13 L41 29" stroke="#fff" stroke-width="1.6" opacity="0.2"/>`);
       }
     },
@@ -167379,11 +167805,11 @@
     lippenstift(S, t3) {
       t3.push(boden8(50, 88, 34, 2.6));
       t3.push(`<path d="M10 92 C30 84 54 92 78 82" stroke="${S.c}" stroke-width="4.6" fill="none" stroke-linecap="round" opacity="0.85"/>`);
-      t3.push(form(S, rr(36, 46, 22, 40, 2), SCHWARZ, { licht: "rund" }));
+      t3.push(form(S, rr(36, 46, 22, 40, 2), SCHWARZ2, { licht: "rund" }));
       t3.push(form(S, rr(38, 38, 18, 9, 0.8), GOLD3, { licht: "metall" }));
       t3.push(form(S, "M40 38 L40 18 Q40 12 47 10 L54 6 L54 38 Z", S.c, { licht: "rund", glanz: true }));
       t3.push(`<path d="M40.6 20 Q42 13 47 10 L54 6.6" stroke="#fff" stroke-width="0.7" fill="none" opacity="0.5"/>`);
-      t3.push(`<g transform="rotate(-72 74 76)">${form(S, rr(64, 66, 20, 26, 2), SCHWARZ, { licht: "rund" })}<rect x="64" y="66" width="20" height="3" fill="${GOLD3}"/></g>`);
+      t3.push(`<g transform="rotate(-72 74 76)">${form(S, rr(64, 66, 20, 26, 2), SCHWARZ2, { licht: "rund" })}<rect x="64" y="66" width="20" height="3" fill="${GOLD3}"/></g>`);
     },
     // Mascara: Hülse 12 cm Ø 1,6, Bürstchen herausgezogen schräg, Spiralbürste dicht.
     // Maß: Bürste 0,25 der Stablänge, Kappe = Griff 0,4 der Länge.
@@ -167403,7 +167829,7 @@
       const fl = rr(26, 52, 40, 36, 6);
       t3.push(`<path d="${fl}" fill="${S.c}"/>`, `<path d="${fl}" fill="${rund2(S)}"/>`, `<path d="${fl}" fill="${glanz(S)}"/>`, `<path d="${fl}" fill="none" stroke="${dunkel2(S.c, 0.4)}" stroke-width="0.6"/>`);
       t3.push(`<rect x="28" y="54" width="36" height="32" rx="5" fill="none" stroke="#fff" stroke-width="1.6" opacity="0.4"/>`);
-      t3.push(form(S, rr(36, 14, 20, 40, 2), SCHWARZ, { licht: "rund" }));
+      t3.push(form(S, rr(36, 14, 20, 40, 2), SCHWARZ2, { licht: "rund" }));
       t3.push(`<path d="M40 17 V51" stroke="#fff" stroke-width="1.4" opacity="0.18"/>`);
       t3.push(`<path d="M72 82 Q76 74 80 82 Q80 86 76 86 Q72 86 72 82 Z" fill="${S.c}"/><circle cx="74.6" cy="81" r="1" fill="#fff" opacity="0.5"/>`);
     },
@@ -167411,9 +167837,9 @@
     // Maß: Näpfchen 1/4 der Breite, Rand 1/16.
     lidschatten(S, t3) {
       t3.push(boden8(50, 86, 42, 3));
-      t3.push(form(S, "M16 14 L84 14 L80 46 L20 46 Z", SCHWARZ));
+      t3.push(form(S, "M16 14 L84 14 L80 46 L20 46 Z", SCHWARZ2));
       t3.push(`<path d="M20 17 L80 17 L77 43 L23 43 Z" fill="#c9d3d8"/><path d="M28 18 L40 18 L32 42 L24 42 Z" fill="#fff" opacity="0.35"/>`);
-      t3.push(form(S, "M12 48 L88 48 L92 84 L8 84 Z", SCHWARZ));
+      t3.push(form(S, "M12 48 L88 48 L92 84 L8 84 Z", SCHWARZ2));
       const farben = [hell3(S.c, 0.55), hell3(S.c, 0.35), hell3(S.c, 0.15), S.c, dunkel2(S.c, 0.2), mische3(S.c, GOLD3, 0.5), dunkel2(S.c, 0.4), mische3(S.c, "#6a4630", 0.5), dunkel2(S.c, 0.6)];
       farben.forEach((c, i) => {
         const r3 = Math.floor(i / 3), s2 = i % 3;
@@ -167435,7 +167861,7 @@
         t3.push(`<path d="M${x2 + 2} ${yt + 4} L${x2 + w2 - 2} ${yt + 4} L${x2 + w2 - 2} ${yb - 2} L${x2 + 2} ${yb - 2} Z" fill="${ton2}"/><path d="M${x2 + 2} ${yt + 4} L${x2 + w2 - 2} ${yt + 4} L${x2 + w2 - 2} ${yb - 2} L${x2 + 2} ${yb - 2} Z" fill="${rund2(S)}"/>`);
         t3.push(glas2(S, `M${x2} ${yt} L${x2 + w2} ${yt} L${x2 + w2} ${yb} L${x2} ${yb} Z`, { deck: 0.08 }));
         t3.push(`<rect x="${x2}" y="${yb - 5}" width="${w2}" height="5" fill="#fff" opacity="0.3"/>`);
-        t3.push(form(S, rr(x2 + w2 * 0.22, yt - 4, w2 * 0.56, 4, 0.4), GOLD3, { licht: "metall" }), form(S, rr(x2 + w2 * 0.16, yt - h3 * 0.42 - 4, w2 * 0.68, h3 * 0.42, 1), SCHWARZ, { licht: "rund" }));
+        t3.push(form(S, rr(x2 + w2 * 0.22, yt - 4, w2 * 0.56, 4, 0.4), GOLD3, { licht: "metall" }), form(S, rr(x2 + w2 * 0.16, yt - h3 * 0.42 - 4, w2 * 0.68, h3 * 0.42, 1), SCHWARZ2, { licht: "rund" }));
         t3.push(etikett(x2 + w2 * 0.18, yt + h3 * 0.5, w2 * 0.64, h3 * 0.16, "#fbf8f3", "#4a4440", { r: 0.3 }));
       };
       flasche(8, 70, 20, 30, hell3(S.c, 0.22));
@@ -167454,8 +167880,8 @@
       t3.push(boden8(46, 88, 34, 2.6));
       t3.push(zylinder2(S, 38, 44, 86, 15, 4, S.c, { glanz: true }));
       t3.push(etikett(25, 58, 26, 16, "#f6f1e6", "#3a332c"));
-      t3.push(form(S, rr(30, 36, 16, 8, 1), GOLD3, { licht: "metall" }), form(S, "M32 36 Q32 18 38 16 Q44 18 44 36 Z", SCHWARZ, { licht: "rund" }));
-      t3.push(`<g transform="rotate(-12 72 82)">`, `<rect x="56" y="80" width="30" height="3.2" rx="1.6" fill="#dfeaee" opacity="0.8" stroke="#8ea2aa" stroke-width="0.4"/>`, `<rect x="86" y="79" width="6" height="5.2" rx="1" fill="${GOLD3}"/>`, `<path d="M92 79 Q100 81.6 92 84 Z" fill="${SCHWARZ}"/>`, `</g>`);
+      t3.push(form(S, rr(30, 36, 16, 8, 1), GOLD3, { licht: "metall" }), form(S, "M32 36 Q32 18 38 16 Q44 18 44 36 Z", SCHWARZ2, { licht: "rund" }));
+      t3.push(`<g transform="rotate(-12 72 82)">`, `<rect x="56" y="80" width="30" height="3.2" rx="1.6" fill="#dfeaee" opacity="0.8" stroke="#8ea2aa" stroke-width="0.4"/>`, `<rect x="86" y="79" width="6" height="5.2" rx="1" fill="${GOLD3}"/>`, `<path d="M92 79 Q100 81.6 92 84 Z" fill="${SCHWARZ2}"/>`, `</g>`);
       t3.push(`<path d="M54 84 Q56 80 58 84 Q58 86 56 86 Q54 86 54 84 Z" fill="#f2d991" opacity="0.9"/>`);
     },
     // Tube 75 ml: steht auf dem Klappdeckel, oben flach gecrimpt mit Riffelung, Etikett.
@@ -172163,38 +172589,51 @@
       navigation = null;
       besuchZonen = [];
     }
-    function instanz(anz3, farbe3, geo) {
-      const m = new three_module_exports.InstancedMesh(geo, new three_module_exports.MeshLambertMaterial({ color: farbe3 }), Math.max(1, anz3));
+    function instanz(anz3, farbe3, geo, farben = null) {
+      const m = new three_module_exports.InstancedMesh(geo, new three_module_exports.MeshLambertMaterial({ color: farben ? "#ffffff" : farbe3 }), Math.max(1, anz3));
       m.count = anz3;
       m.frustumCulled = false;
+      if (farben) for (let i = 0; i < anz3; i++) m.setColorAt(i, new three_module_exports.Color(farben[i]));
       scene2.add(m);
       personenMesh.push(m);
       return m;
     }
+    const FIGUR_TEILE = [["beine", 0.42], ["rumpf", 1.14], ["kopf", 1.59], ["haare", 1.63]];
+    const HAUT5 = ["#f1d3b8", "#ecc8a8", "#e3b994", "#f3dcc6", "#d9ab86", "#c99474"];
+    const HAAR4 = ["#e3cc8f", "#c9b07a", "#a8875a", "#6b4a32", "#4a3426", "#9a958d", "#2e2622"];
+    const OBEN2 = ["#6f8fae", "#b9534a", "#e8e2d6", "#3f5f4f", "#d8a34a", "#7b6a8f", "#2f3a48", "#c97f6b", "#8fa38a"];
+    const UNTEN2 = ["#2f3a48", "#3d4652", "#5b5048", "#2a2d31", "#6a7680", "#7a6a58"];
     function menschen(zn, besatz) {
       besuchZonen = zn;
       besuchSeed = haus2.id + ":besuch:" + nr3 + ":" + ctx.s().woche;
       figuren3 = erstelleBesucher(navigation, zn, besatz, besuchSeed);
-      const koerper5 = new three_module_exports.BoxGeometry(0.66, 1.15, 0.42), kopf = new three_module_exports.SphereGeometry(0.37, 6, 5);
+      const geo = {
+        beine: new three_module_exports.BoxGeometry(0.3, 0.84, 0.2),
+        rumpf: new three_module_exports.BoxGeometry(0.44, 0.62, 0.25),
+        kopf: new three_module_exports.SphereGeometry(0.115, 8, 6).scale(1, 1.15, 1),
+        haare: new three_module_exports.SphereGeometry(0.122, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2)
+      };
       for (const p2 of [false, true]) {
-        const n3 = figuren3.filter((f11) => f11.personal === p2).length;
-        instanz(n3, p2 ? "#235a79" : "#ac715e", koerper5);
-        instanz(n3, p2 ? "#d5a37f" : "#edc9a4", kopf);
+        const liste3 = figuren3.filter((f11) => f11.personal === p2), n3 = liste3.length;
+        const wahl3 = (pal, k3) => liste3.map((_, i) => pal[(i * 7 + k3 * 3 + (i >> 2)) % pal.length]);
+        instanz(n3, null, geo.beine, p2 ? liste3.map(() => "#2a2d31") : wahl3(UNTEN2, 1));
+        instanz(n3, null, geo.rumpf, p2 ? liste3.map(() => "#235a79") : wahl3(OBEN2, 2));
+        instanz(n3, null, geo.kopf, wahl3(HAUT5, 3));
+        instanz(n3, null, geo.haare, wahl3(HAAR4, 4));
       }
     }
     function menschenSetzen() {
       const obj = new three_module_exports.Object3D();
       for (const personal2 of [false, true]) {
         const liste3 = figuren3.filter((p2) => p2.personal === personal2);
-        const ms = personal2 ? personenMesh.slice(2, 4) : personenMesh.slice(0, 2);
+        const ms = personal2 ? personenMesh.slice(4, 8) : personenMesh.slice(0, 4);
         liste3.forEach((p2, i) => {
-          obj.position.set(p2.x, 0.82, p2.z);
           obj.rotation.set(0, p2.richtung, 0);
-          obj.updateMatrix();
-          ms[0].setMatrixAt(i, obj.matrix);
-          obj.position.y = 1.6;
-          obj.updateMatrix();
-          ms[1].setMatrixAt(i, obj.matrix);
+          FIGUR_TEILE.forEach(([, y2], k3) => {
+            obj.position.set(p2.x, y2, p2.z);
+            obj.updateMatrix();
+            ms[k3].setMatrixAt(i, obj.matrix);
+          });
         });
         for (const m of ms) m.instanceMatrix.needsUpdate = true;
       }
@@ -172415,6 +172854,11 @@
       get aktiv() {
         return aktiv6;
       },
+      kamera: (o3) => {
+        Object.assign(K3, o3);
+        kameraSetzen2();
+      },
+      // Prüfbilder (Q36)
       setzenAktiv: (an) => {
         aktiv6 = !!an;
         if (!aktiv6) schliesse();
@@ -176809,6 +177253,48 @@
       return { id, score: d3.kundenScore, reiter: 7, fehler: fehler6 };
     },
     hauspinListe: () => hausPins.map(({ pin }) => ({ ...pin.userData })),
+    // Q36: Schriftzüge im aktuellen Kamerabild, je Buchstabe sichtbarer Anteil, und Bewertung.
+    // Eigene Kamera mit demselben Maßstab wie das iPhone-Bild (halb = halbe Bildhöhe bei 844 px), aber groß genug
+    // für das ganze Haus; Mittelpunkt ist die Kamera K.
+    pruefeSchriftzug: (hausId, halb = K2.halb, seite2 = 2e3, ohnePins = false) => {
+      const g = hausId && sb.haeuser.get(hausId)?.gruppe;
+      const ziel = g ? new three_module_exports.Box3().setFromObject(g).getCenter(new three_module_exports.Vector3()) : new three_module_exports.Vector3(K2.x, 0, K2.z);
+      const pk = isoKamera(seite2, seite2, halb * seite2 / 844, ziel);
+      pk.updateMatrixWorld();
+      const pins = ohnePins ? hausPins.flatMap(({ pin, namensschild: namensschild2 }) => [pin, namensschild2]).filter((x2) => x2 && x2.visible) : [];
+      for (const x2 of pins) x2.visible = false;
+      const buchstaben = schriftzugSichtbarkeit(
+        ren,
+        scene,
+        pk,
+        seite2,
+        seite2,
+        (o3) => !hausId || o3.userData.hausId === hausId
+      );
+      for (const x2 of pins) x2.visible = true;
+      return { stadt: stadtName, buchstaben: buchstaben.length, fehler: bewerteSchriftzug(buchstaben) };
+    },
+    // Q36-Diagnose: Bild aus derselben Prüfkamera (PNG als Data-URL).
+    schriftzugBild: (hausId, halb = K2.halb, seite2 = 1400) => {
+      const g = sb.haeuser.get(hausId)?.gruppe;
+      const ziel = g ? new three_module_exports.Box3().setFromObject(g).getCenter(new three_module_exports.Vector3()) : new three_module_exports.Vector3(K2.x, 0, K2.z);
+      const pk = isoKamera(seite2, seite2, halb * seite2 / 844, ziel);
+      pk.updateMatrixWorld();
+      const rt = new three_module_exports.WebGLRenderTarget(seite2, seite2);
+      rt.texture.colorSpace = three_module_exports.SRGBColorSpace;
+      ren.setRenderTarget(rt);
+      ren.render(scene, pk);
+      const px2 = new Uint8Array(seite2 * seite2 * 4);
+      ren.readRenderTargetPixels(rt, 0, 0, seite2, seite2, px2);
+      ren.setRenderTarget(null);
+      rt.dispose();
+      const c = document.createElement("canvas");
+      c.width = c.height = seite2;
+      const k3 = c.getContext("2d"), bild3 = k3.createImageData(seite2, seite2);
+      for (let y2 = 0; y2 < seite2; y2++) bild3.data.set(px2.subarray((seite2 - 1 - y2) * seite2 * 4, (seite2 - y2) * seite2 * 4), y2 * seite2 * 4);
+      k3.putImageData(bild3, 0, 0);
+      return c.toDataURL("image/png");
+    },
     pruefeHauspins: () => {
       const fehler6 = [], liste3 = [...sb.haeuser.entries()].map(([id, eintrag2]) => ({ id, eintrag: eintrag2, haus: s.haeuser.find((h4) => h4.id === id) })).concat([...sb.statischeHaeuser.entries()].map(([id, { haus: haus2, ...eintrag2 }]) => ({ id, eintrag: eintrag2, haus: haus2 })));
       const [w2, h3] = groesse(), pinMap = new Map(hausPins.map(({ pin, namensschild: namensschild2 }) => [pin.userData.hausId, { pin, namensschild: namensschild2 }]));

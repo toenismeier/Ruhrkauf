@@ -635,7 +635,7 @@
     "kacheln": [
       {"id":"p1","teile":59,"dreiecke":4126,"boundingBox":[418.52,-0.3,524.02,477.98,55.1,554]},
       {"id":"p10","teile":105,"dreiecke":1286,"boundingBox":[54.94,0,46.75,72.12,25.57,55.89]},
-      {"id":"p100","teile":522,"dreiecke":7054,"boundingBox":[263,0,133.5,308.11,20.55,163.7]},
+      {"id":"p100","teile":509,"dreiecke":6948,"boundingBox":[263,0,133.5,308.11,20.55,163.7]},
       {"id":"p101","teile":568,"dreiecke":9194,"boundingBox":[233.45,0,102.95,254.64,27.99,119.22]},
       {"id":"p102","teile":610,"dreiecke":8542,"boundingBox":[233.45,0,139.45,249.52,28.21,160.52]},
       {"id":"p103","teile":340,"dreiecke":4052,"boundingBox":[288.98,0,102.98,304.51,19.3,118.15]},
@@ -1048,16 +1048,16 @@
       "boundingBox": [-480,-6.2,-480,994,12.1,1070.5]
     },
     "gesamt": {
-      "teile": 152500,
+      "teile": 152492,
       "strasse": 2529,
-      "haeuser": 149971,
+      "haeuser": 149963,
       "instanzen": 25361,
       "drawCallsInstanzen": 2962
     }
   },
   "pruefsummen": {
     "stadtplan": "1e25460f05937cd0354acf4b655e513c5235c12b278395adf2ef86b336604258",
-    "geometrie": "dae6410f4654dd76eb20a06522d5281c534fdcd38dc390e95b5169da5cfe6b39",
-    "bildReferenz": "9bca934570a19cebcf0e2eca6669c792be9a837409586a6280981f8ff7158127"
+    "geometrie": "b6194327f7bc3ed893c320d9a84d46a223595ec6acfc21c6f45c736c8d358695",
+    "bildReferenz": "d09296c2d6f1b926b19311253686aa86870a5d87408b3007d512b21a4a9ff246"
   }
 }
