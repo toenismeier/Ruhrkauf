@@ -585,8 +585,9 @@ function logos(K) {
       const maxD = Math.min(s.L * 0.6, z.max ?? s.L * 0.6);
       const hbD = Math.min(clamp(s.L * 0.06, 2.2, 3.6), maxD / schriftBreite(text, 1));
       const br = schriftBreite(text, hbD), yB = K.Hw + 0.6;
-      for (let k = 0; k <= 4; k++) { const uu = z.u - br / 2 + (k * br) / 4; s.q(uu - 0.07, uu + 0.07, K.Hw, yB + hbD * 1.3, -1.0, -0.85, '#4a4f55'); }
-      s.q(z.u - br / 2, z.u + br / 2, yB, yB + 0.12, -1.0, -0.85, '#4a4f55');
+      // Fernstufe: Gerüst (dünne Pfosten, Fußschiene) entfällt, aus der Ferne nicht zu sehen.
+      if (LOD.stufe !== 'fern') for (let k = 0; k <= 4; k++) { const uu = z.u - br / 2 + (k * br) / 4; s.q(uu - 0.07, uu + 0.07, K.Hw, yB + hbD * 1.3, -1.0, -0.85, '#4a4f55'); }
+      if (LOD.stufe !== 'fern') s.q(z.u - br / 2, z.u + br / 2, yB, yB + 0.12, -1.0, -0.85, '#4a4f55');
       Object.assign(z, { y: yB + 0.15 + hbD * 0.6, t: -0.75, hb: hbD, max: maxD, dach: true });
     }
     const hb = Math.min(z.hb, z.max / schriftBreite(text, 1));
@@ -1918,14 +1919,14 @@ function hartwigVorplatz(S, k, Z, r) {
     const f1 = i === 1 ? '#f4f2ec' : ROT, f2 = i === 1 ? ROT : '#f4f2ec';
     if (fl.seite === '+z') {
       const fx = x + u, fz = z + d + T - 0.6;
-      S.quader(fx - 0.09, y, fz - 0.09, fx + 0.09, y + 10.5, fz + 0.09, '#e3e5e6');
+      if (LOD.stufe !== 'fern') S.quader(fx - 0.09, y, fz - 0.09, fx + 0.09, y + 10.5, fz + 0.09, '#e3e5e6'); // Mast 18 cm: fern unsichtbar
       S.quader(fx + 0.1, y + 7.2, fz - 0.03, fx + 1.5, y + 10.2, fz + 0.03, f1);
-      S.quader(fx + 0.1, y + 8.4, fz - 0.035, fx + 1.5, y + 9.0, fz + 0.035, f2);
+      if (LOD.stufe !== 'fern') S.quader(fx + 0.1, y + 8.4, fz - 0.035, fx + 1.5, y + 9.0, fz + 0.035, f2); // Q36: Querstreifen nur nah
     } else {
       const fz = z + u, fx = x + w + T - 0.6;
-      S.quader(fx - 0.09, y, fz - 0.09, fx + 0.09, y + 10.5, fz + 0.09, '#e3e5e6');
+      if (LOD.stufe !== 'fern') S.quader(fx - 0.09, y, fz - 0.09, fx + 0.09, y + 10.5, fz + 0.09, '#e3e5e6'); // Mast 18 cm: fern unsichtbar
       S.quader(fx - 0.03, y + 7.2, fz + 0.1, fx + 0.03, y + 10.2, fz + 1.5, f1);
-      S.quader(fx - 0.035, y + 8.4, fz + 0.1, fx + 0.035, y + 9.0, fz + 1.5, f2);
+      if (LOD.stufe !== 'fern') S.quader(fx - 0.035, y + 8.4, fz + 0.1, fx + 0.035, y + 9.0, fz + 1.5, f2); // Q36: Querstreifen nur nah
     }
   });
   // Bänke und Pflanzkübel entlang der Fronten (Eingänge bleiben frei: nur in den Randdritteln)
