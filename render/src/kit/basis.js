@@ -130,6 +130,7 @@ export class Sammler {
       m.castShadow = schatten; m.receiveShadow = true;
       scene.add(m);
     }
+    if (this.nachBauen) for (const f of this.nachBauen.splice(0)) f(scene);
   }
 }
 
@@ -207,6 +208,8 @@ export class KompaktSammler {
       const m = new THREE.Mesh(g, vertexMat()); m.castShadow = schatten; m.receiveShadow = true; scene.add(m);
     }
     this.puffer.clear();
+    // Zusatzbauten, die an diesem Sammler hängen (z. B. Figuren aus menschen.js), landen in derselben Gruppe.
+    if (this.nachBauen) for (const f of this.nachBauen.splice(0)) f(scene);
   }
 }
 

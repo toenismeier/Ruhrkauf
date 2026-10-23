@@ -3,6 +3,7 @@
 // Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
 const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng } from './basis.js';
+import { menschenGruppe, erscheinung, menschenZeit } from './menschen.js';
 
 export const STANDARD_LEBEN = 'voll'; // Bis N13 eingebunden ist: voll | wenig | aus.
 const MODI = ['voll', 'wenig', 'aus'];
@@ -108,7 +109,7 @@ function fertig(m, n) {
 export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spiel, zeichnen, sparsam = false }) {
   let modus = STANDARD_LEBEN, scene = null, plan = null, netz = null, r = rng(1);
   let autos = [], fuss = [], busse = [], bahnen = [], lkw = [], hauspunkte = [];
-  let meshes = {}, raf = 0, zuletzt = 0, letzterKontakt = 0, letzteAuswahl = -1, pause = false;
+  let meshes = {}, leute = null, uhr = 0, raf = 0, zuletzt = 0, letzterKontakt = 0, letzteAuswahl = -1, pause = false;
   let frameKosten = [], limitFaktor = 1, langsameFrames = 0, aufnahme = false;
   const farbe = (c) => new THREE.Color(c);
   const projektion = new THREE.Vector3();
@@ -127,17 +128,18 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       glas: instanzen(scene, new THREE.BoxGeometry(2.3, .8, 1.8), MAX_AUTO, 'autoglas'),
       bus: instanzen(scene, new THREE.BoxGeometry(11.5, 3.1, 2.6), MAX_BUS, 'bus'),
       tram: instanzen(scene, new THREE.BoxGeometry(19, 3.5, 2.65), MAX_BAHN, 'tram'),
-      rumpf: instanzen(scene, new THREE.CylinderGeometry(.38, .44, 1.25, 5), MAX_FUSS, 'passant'),
-      kopf: instanzen(scene, new THREE.SphereGeometry(.35, 5, 4), MAX_FUSS, 'kopf'),
-      tuete: instanzen(scene, new THREE.BoxGeometry(.43, .52, .25), MAX_FUSS, 'tuete'),
       lkw: instanzen(scene, new THREE.BoxGeometry(8.1, 3.1, 2.7), MAX_LKW, 'lieferwagen'),
     };
+    // Passanten: vorgerenderte Figuren (menschen.js), ein Draw Call
+    leute = menschenGruppe(MAX_FUSS, 'leben:passanten');
+    scene.add(leute.mesh);
   }
   function loeschen() {
     anhalten();
     if (scene) for (const m of Object.values(meshes)) {
       m.parent?.remove(m); m.geometry.dispose(); m.material.dispose();
     }
+    if (leute) { leute.mesh.parent?.remove(leute.mesh); leute.dispose(); leute = null; }
     meshes = {}; scene = null; plan = null; netz = null; autos = []; fuss = []; busse = []; bahnen = []; lkw = []; hauspunkte = [];
     zuletzt = 0; letzteAuswahl = -1;
   }
@@ -178,9 +180,11 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     }
     const weg = haus?.lane ?? waehle(wege);
     const anfang = haus ? clamp(haus.u - weg.s.von + (r() - .5) * 32, 0, laenge(weg)) : r() * laenge(weg);
-    return { weg, m: anfang, dir: r() < .5 ? -1 : 1, geschw: 0.9 + r() * .8,
-      haus, phase: 'weg', lauf: 0, tuete: false, farbe: farbe(waehle(['#be9d78', '#518c88', '#9c765c', '#4b5e7b', '#9a434c'])),
-      haut: farbe(waehle(['#efc49f', '#d3a07c', '#986843', '#78492e'])) };
+    const geschw = 0.95 + r() * .6;
+    // Querversatz auf dem Gehweg, damit nicht alle auf einer Linie laufen
+    const breit = weg.s.typ === 'fussgaenger' ? 1.6 : Math.max(0, (weg.s.gehweg ?? 3) / 2 - 0.6);
+    return { weg, m: anfang, quer: (r() * 2 - 1) * breit, dir: r() < .5 ? -1 : 1, geschw,
+      haus, phase: 'weg', lauf: 0, tuete: false, aussehen: erscheinung(r, { kinder: .07 }), ph: r() * 8, tempo: geschw / 1.25 };
   }
   function neuerWagen(lanes, art = 'auto') {
     if (!lanes.length) return null;
@@ -263,13 +267,13 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
         else if (f.phase === 'drinnen' && f.lauf >= 1 + r() * .4) {
           f.phase = 'heraus'; f.lauf = 0;
           f.tuete = r() < clamp(.24 + f.haus.gewicht * .15, .2, .83);
-          f.tuetenFarbe = farbe(formatFarbe(f.haus.h));
+          f.aussehen = { ...f.aussehen, tasche: formatFarbe(f.haus.h) };
         } else if (f.phase === 'heraus' && f.lauf >= .9) { f.phase = 'weg'; f.lauf = 0; f.haus = null; }
       }
     }
   }
   function fussPosition(f) {
-    const p = koordinate(f.weg.s, f.weg.s.von + f.m, f.weg.v);
+    const p = koordinate(f.weg.s, f.weg.s.von + f.m, f.weg.v + (f.quer ?? 0));
     if (!f.haus || f.phase === 'weg') return p;
     const t = f.phase === 'hinein' ? clamp(f.lauf / .9, 0, 1) : f.phase === 'heraus' ? 1 - clamp(f.lauf / .9, 0, 1) : 1;
     return { x: p.x + (f.haus.ein.x - p.x) * t, z: p.z + (f.haus.ein.z - p.z) * t };
@@ -293,16 +297,19 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     n = 0;
     for (const f of fuss) {
       const p = fussPosition(f);
-      if (f.phase === 'drinnen' || !sichtbar(p)) continue;
-      const winkel = f.weg.s.achse === 'z' ? -Math.PI / 2 : 0;
-      const huepfen = .035 * Math.sin(f.m * 7);
-      matrix(meshes.rumpf, n, { ...p, y: 1.05 + huepfen }, winkel, [1, 1, 1], f.farbe);
-      matrix(meshes.kopf, n, { ...p, y: 1.93 + huepfen }, 0, [1, 1, 1], f.haut);
-      const bag = f.tuete ? [1, 1, 1] : [.0001, .0001, .0001];
-      matrix(meshes.tuete, n, { x: p.x + .55, y: .67, z: p.z + .15 }, winkel, bag, f.tuetenFarbe ?? farbe(formatFarbe(f.haus?.h)));
-      n++;
+      if (f.phase === 'drinnen' || !sichtbar(p) || !leute) continue;
+      // Blickrichtung: entlang des Wegs, beim Hinein/Heraus zum bzw. vom Eingang
+      let winkel;
+      if (f.haus && f.phase !== 'weg') {
+        const w = koordinate(f.weg.s, f.weg.s.von + f.m, f.weg.v), e = f.haus.ein;
+        winkel = f.phase === 'hinein' ? Math.atan2(-(e.z - w.z), e.x - w.x) : Math.atan2(-(w.z - e.z), w.x - e.x);
+      } else {
+        const d = f.dir * (f.weg.s.achse === 'z' ? 1 : 1);
+        winkel = f.weg.s.achse === 'z' ? Math.atan2(-d, 0) : Math.atan2(0, d);
+      }
+      leute.setze(n++, p.x, .3, p.z, winkel, f.aussehen, f.tuete ? 'gehen_tasche' : 'gehen', f.ph, 1, f.tempo);
     }
-    fertig(meshes.rumpf, n); fertig(meshes.kopf, n); fertig(meshes.tuete, n);
+    if (leute) leute.fertig(n);
     n = 0;
     for (const a of lkw) {
       const t = clamp(a.fort / 4.5, 0, 1);
@@ -317,6 +324,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
   function schritt(dt) {
     const t0 = performance.now();
     aktualisiereAuswahl();
+    uhr += dt; menschenZeit(uhr);
     bewegungWagen([...autos, ...busse], dt); bewegungWagen(bahnen, dt);
     fussBewegen(dt);
     for (const a of lkw) a.fort += dt;
@@ -338,7 +346,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     const dt = zuletzt ? clamp((zeit - zuletzt) / 1000, 0, .07) : 0;
     zuletzt = zeit;
     if (zoom().halb <= 110) { schritt(dt); zeichnen(); }
-    else if (Object.values(meshes).some((m) => m.count)) { autos = []; fuss = []; busse = []; bahnen = []; zeichneInstanzen(); zeichnen(); }
+    else if (Object.values(meshes).some((m) => m.count) || leute?.mesh.geometry.instanceCount) { autos = []; fuss = []; busse = []; bahnen = []; zeichneInstanzen(); zeichnen(); }
     raf = requestAnimationFrame(takt);
   }
   function starten() { if (!raf && scene && !pause && modus !== 'aus' && !document.hidden) { zuletzt = 0; raf = requestAnimationFrame(takt); } }
@@ -378,6 +386,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     if (modus === 'aus') {
       anhalten(); autos = []; fuss = []; busse = []; bahnen = []; lkw = [];
       for (const m of Object.values(meshes)) { m.count = 0; m.instanceMatrix.needsUpdate = true; }
+      leute?.fertig(0);
       if (scene) zeichnen();
     } else { letzterKontakt = performance.now(); aktualisiereAuswahl(); zeichneInstanzen(); starten(); }
     return modus;

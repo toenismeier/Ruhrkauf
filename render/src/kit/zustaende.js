@@ -47,7 +47,8 @@
 //           raeumung · geschlossen · leer · verfall · neueroeffnung · abriss
 // Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
 const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
-import { THREE, rng, waehle, zw, heller, dunkler, textTextur, textMaterial } from './basis.js';
+import { THREE, rng, waehle, zw, heller, dunkler, textTextur, textMaterial, LOD } from './basis.js';
+import { menschenAktiv, menschenFuer } from './menschen.js';
 
 export const STATI = ['offen', 'aktion', 'untermiete', 'offprice', 'teilschliessung', 'umbau', 'raeumung', 'geschlossen', 'leer', 'verfall', 'neueroeffnung', 'abriss'];
 export const AKTIONEN = ['sale', 'jubilaeum', 'weihnachten', 'blackfriday',
@@ -261,12 +262,23 @@ function lbox(S, w, h, d, lx, ly, lz, x, z, ry, f, rz = 0) {
   lokal(S, g, x, 0, z, ry, f);
 }
 
-export function figur(S, x, z, r, sk = 1.1, oben = null) {
+export function figur(S, x, z, r, sk = 1.1, oben = null, o = {}) {
   const y = 0.3;
+  // Im Spiel: vorgerenderte Figuren (menschen.js) statt Klötzchen; Kataloge ohne Atlas behalten die Klötzchen.
+  if (menschenAktiv()) {
+    if (LOD.stufe === 'fern') return;
+    menschenFuer(S).setze(x, y, z, o.winkel ?? r() * Math.PI * 2, r, { oben: oben ?? undefined, anim: o.anim });
+    return;
+  }
   S.box(0.42 * sk, 0.85 * sk, 0.3 * sk, x, y + 0.425 * sk, z, waehle(r, HOSE));
   S.box(0.54 * sk, 0.74 * sk, 0.34 * sk, x, y + 1.22 * sk, z, oben ?? waehle(r, KLEID));
   S.box(0.28 * sk, 0.3 * sk, 0.28 * sk, x, y + 1.75 * sk, z, waehle(r, HAUT));
 }
+// Spiel-Gierwinkel (Blick nach +x bei 0) für eine Richtung (dx, dz).
+const blickWinkel = (dx, dz) => Math.atan2(-dz, dx);
+// Blick zur Fassade bzw. entlang der Fassade für eine Seite (+z: u entlang x, t entlang z; +x: u entlang z, t entlang x).
+const zurFassade = (s) => (s.seite === '+z' ? blickWinkel(0, -1) : blickWinkel(-1, 0));
+const entlang = (s, dir) => (s.seite === '+z' ? blickWinkel(dir, 0) : blickWinkel(0, dir));
 /** Menschengruppe vor einer Fassade um (u, t). */
 function menge(Z, s, u, t, anzahl, ru, rt, o = {}) {
   if (Z.leute === false) return;
@@ -274,6 +286,37 @@ function menge(Z, s, u, t, anzahl, ru, rt, o = {}) {
   anzahl = Math.round(anzahl * Math.max(0, Math.min(1, Z.passantenFaktor ?? 1)));
   const tMin = o.tMin ?? 1.0, tMax = o.tMax ?? 5.2, uMin = o.uMin ?? -2, uMax = o.uMax ?? s.L + 3;
   const pos = [];
+  const farbe = () => (o.farben ?? Z.sportPalette) ? waehle(r, o.farben ?? Z.sportPalette) : null;
+  if (menschenAktiv()) {
+    // Grüppchen statt Streuung: 1–4 Leute je Grüppchen, die meisten schauen zur Fassade, Paare reden miteinander,
+    // einzelne gehen vorbei oder kommen mit Tasche heraus.
+    for (let v = 0; pos.length < anzahl && v < anzahl * 10; v++) {
+      const a = r() * Math.PI * 2, rr = Math.sqrt(r());
+      const gu = u + Math.cos(a) * ru * rr, gt = t + Math.sin(a) * rt * rr;
+      if (gt < tMin || gt > tMax || gu < uMin || gu > uMax) continue;
+      if (pos.some(([pu, pt]) => wurzelSumme(pu - gu, pt - gt) < 1.6)) continue;
+      const n = Math.min(anzahl - pos.length, r() < 0.35 ? 1 : r() < 0.7 ? 2 : r() < 0.85 ? 3 : 4);
+      const art = n === 1 ? (r() < 0.5 ? 'vorbei' : 'schauen') : r() < 0.6 ? 'reden' : 'schauen';
+      const glieder = [];
+      for (let i = 0; i < n; i++) {
+        const w = (i / n) * Math.PI * 2 + r() * 0.6, d = n === 1 ? 0 : 0.45 + r() * 0.15;
+        const uu = gu + Math.cos(w) * d, tt = Math.max(tMin, gt + Math.sin(w) * d);
+        glieder.push([uu, tt]);
+      }
+      const mu = glieder.reduce((x, g) => x + g[0], 0) / n, mt = glieder.reduce((x, g) => x + g[1], 0) / n;
+      const dir = r() < 0.5 ? 1 : -1;
+      for (const [uu, tt] of glieder) {
+        pos.push([uu, tt]);
+        const [x, z] = s.welt(uu, tt);
+        let winkel, anim;
+        if (art === 'reden') { const [cx, cz] = s.welt(mu, mt); winkel = blickWinkel(cx - x, cz - z) + zw(r, -0.3, 0.3); anim = r() < 0.7 ? 'reden' : 'stehen'; }
+        else if (art === 'vorbei') { winkel = entlang(s, dir) + zw(r, -0.15, 0.15); anim = r() < 0.4 ? 'gehen_tasche' : 'gehen'; }
+        else { winkel = zurFassade(s) + zw(r, -0.5, 0.5); anim = r() < 0.75 ? 'stehen' : 'reden'; }
+        figur(Z.S, x, z, r, 1.1, farbe(), { winkel, anim });
+      }
+    }
+    return;
+  }
   for (let i = 0, v = 0; i < anzahl && v < anzahl * 8; v++) {
     const a = r() * Math.PI * 2, rr = Math.sqrt(r());
     const uu = u + Math.cos(a) * ru * rr, tt = t + Math.sin(a) * rt * rr;
@@ -281,16 +324,19 @@ function menge(Z, s, u, t, anzahl, ru, rt, o = {}) {
     if (pos.some(([pu, pt]) => wurzelSumme(pu - uu, pt - tt) < 0.62)) continue;
     pos.push([uu, tt]); i++;
     const [x, z] = s.welt(uu, tt);
-    figur(Z.S, x, z, r, 1.1, (o.farben ?? Z.sportPalette) ? waehle(r, o.farben ?? Z.sportPalette) : null);
+    figur(Z.S, x, z, r, 1.1, farbe());
   }
 }
 /** Schlange entlang der Fassade. */
 function schlange(Z, s, u0, u1, t) {
   if (Z.leute === false) return;
   const r = Z.r, schritt = 0.85, dir = u1 > u0 ? 1 : -1;
-  for (let u = u0; dir * (u1 - u) > 0; u += dir * schritt * zw(r, 0.85, 1.25)) {
-    const [x, z] = s.welt(u, t + zw(r, -0.2, 0.2));
-    figur(Z.S, x, z, r);
+  const aktiv = menschenAktiv();
+  for (let u = u0; dir * (u1 - u) > 0; u += dir * (aktiv ? zw(r, 0.75, 1.05) : schritt * zw(r, 0.85, 1.25))) {
+    // Leicht geschwungene Schlange; alle blicken zum Eingang (Richtung u0), ab und zu redet jemand mit dem Hintermann.
+    const tt = t + (aktiv ? 0.35 * Math.sin((u - u0) * 0.35) + zw(r, -0.12, 0.12) : zw(r, -0.2, 0.2));
+    const [x, z] = s.welt(u, tt);
+    figur(Z.S, x, z, r, 1.1, null, { winkel: entlang(s, -dir) + zw(r, -0.25, 0.25), anim: r() < 0.2 ? 'reden' : 'stehen' });
   }
 }
 function ballons(Z, x, z, y, farben, n = 5, rad = 0.75) {
@@ -1290,7 +1336,7 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
       const s = seiten[e.seite];
       menge(Z, s, e.u, (e.t ?? 0) + 2.3, e.haupt ? 7 : 4, 3.5, 1.6, { tMin: (e.t ?? 0) + 0.8 });
     }
-    for (const s of [sz, sx]) for (let i = 0; i < Math.round(4 * Math.max(0, Math.min(1, Z.passantenFaktor ?? 1))); i++) { const [x, zz] = s.welt(zw(r, 1, s.L - 1), zw(r, 2.5, 4.8)); figur(S, x, zz, r, 1.1, Z.sportPalette ? waehle(r, Z.sportPalette) : null); }
+    for (const s of [sz, sx]) for (let i = 0; i < Math.round(4 * Math.max(0, Math.min(1, Z.passantenFaktor ?? 1))); i++) { const [x, zz] = s.welt(zw(r, 1, s.L - 1), zw(r, 2.5, 4.8)); figur(S, x, zz, r, 1.1, Z.sportPalette ? waehle(r, Z.sportPalette) : null, { winkel: entlang(s, r() < 0.5 ? 1 : -1) + zw(r, -0.15, 0.15), anim: r() < 0.35 ? 'gehen_tasche' : 'gehen' }); }
   }
   return { hoehe: Z.top, teile: S.anzahl - start, pinAnker: pinAnker(k) };
 }
