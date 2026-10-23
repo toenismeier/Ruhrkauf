@@ -746,7 +746,7 @@ function familie1(K) {
     if (n >= 2) {
       const nb = Math.max(1, Math.round(uEnd / raster)), rStart = (Math.floor(nb / 2) - 1) * (uEnd / nb);
       const mitR = s.seite === '+z' && risalit && rStart > 6;
-      K.zonen[s.seite] = { u: mitR ? rStart / 2 : uEnd / 2, y: Hw - 3.6, t: 0.75, hb: clamp(uEnd * 0.08, 2.4, 4.4), max: mitR ? rStart - 2 : uEnd * 0.75, grund: stein };
+      K.zonen[s.seite] = { u: mitR ? (rStart - 1) / 2 : uEnd / 2, y: Hw - 3.6, t: 0.75, hb: clamp(uEnd * 0.08, 2.4, 4.4), max: mitR ? rStart - 4 : uEnd * 0.75, grund: stein }; // Q36: Abstand zum vorspringenden Mittelrisalit
     }
     else K.zonen[s.seite] = { u: uEnd / 2, y: EG + 1.3, t: 0.55, hb: 1.5, max: uEnd * 0.8, grund: stein };
   }
@@ -842,14 +842,21 @@ function familie2(K) {
   for (const s of K.seiten) {
     const uEnd = s.L - R;
     const hb = clamp(uEnd * 0.07, 2.2, 4.2);
-    const u = uEnd * 0.55, br = Math.min(schriftBreite('HARTWIG', hb), uEnd * 0.8);
-    const hbIst = Math.min(hb, (uEnd * 0.8) / schriftBreite('HARTWIG', 1));
+    // Q36: das gläserne Treppenhaus (+z, ragt 1,6 m vor und 3,3 m über die Traufe) verdeckt sonst den Fuß der Dachschrift.
+    let u = uEnd * 0.55, maxB = uEnd * 0.8;
+    if (turm && s.seite === '+z') {
+      const uT = uEnd * 0.32, a = [0.5, uT - 4.5], b = [uT + 3.5, uEnd - 0.5];
+      const seg = b[1] - b[0] >= a[1] - a[0] ? b : a;
+      u = (seg[0] + seg[1]) / 2; maxB = Math.min(maxB, (seg[1] - seg[0]) * 0.92);
+    }
+    const br = Math.min(schriftBreite('HARTWIG', hb), maxB);
+    const hbIst = Math.min(hb, maxB / schriftBreite('HARTWIG', 1));
     const yB = (staffel ? Hb + 1.15 : Hb + 1.15) + 0.3, y = yB + hbIst * 0.7;
     const tf = staffel ? -0.6 : -0.6;
     for (let k = 0; k <= 4; k++) { const uu = u - br / 2 + (k * br) / 4; s.q(uu - 0.08, uu + 0.08, Hb + 1.15, yB + hbIst * 1.3, tf - 0.4, tf - 0.24, '#4a4f55'); }
     s.q(u - br / 2, u + br / 2, yB, yB + 0.12, tf - 0.4, tf - 0.24, '#4a4f55');
     s.q(u - br / 2, u + br / 2, yB + hbIst * 1.3, yB + hbIst * 1.3 + 0.12, tf - 0.4, tf - 0.24, '#4a4f55');
-    K.zonen[s.seite] = { u, y, t: tf, hb, max: uEnd * 0.8, grund: putz, dach: true };
+    K.zonen[s.seite] = { u, y, t: tf, hb, max: maxB, grund: putz, dach: true };
   }
   return Hw + 6;
 }
@@ -1114,7 +1121,7 @@ function familie5(K) {
   setzeDach(K, x0 + 2, z0 + 2, x0 + w - A - 1, z0 + d - 2, Hw + 0.55);
   lichtkuppeln(K, x0 + 3, z0 + 3, x0 + w - A - 2, z0 + d - 3, Hw + 0.55);
   technik(K, x0 + 3, z0 + 3, x0 + w - A - 2, z0 + d - 3, Hw + 0.55, { max: 6 });
-  fahnenmasten(K, K.seiten[0], [3, 6, 9], Hw + 0.8, -0.6);
+  fahnenmasten(K, K.seiten[0], [3, 6, 9], Hw + 0.8, -1.4); // Q36: hinter einer Dachschrift (t −0,75), nicht davor
   for (const s of K.seiten) {
     const uE = s.L - A;
     if (n >= 2) K.zonen[s.seite] = { u: stil === 'pomo' && s.seite === '+z' ? uE * 0.68 : uE * 0.5, y: EG + (Hw - EG) * 0.58, t: stil === 'glas' ? 0.95 : 0.6, hb: clamp(uE * 0.075, 2.0, Math.min(4.5, (Hw - EG) * 0.3)), max: stil === 'pomo' && s.seite === '+z' ? uE * 0.5 : uE * 0.78, grund: basisF };
