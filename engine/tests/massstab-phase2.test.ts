@@ -42,7 +42,8 @@ describe('Maßstab Phase 2: Nachfrageanker und Liquiditätsbasis', () => {
     expect(s.kreditlinie).toBe(300_000_000);
     expect(s.kvLimitBasis).toBe(1_260_000_000);
     const basisJahr = Object.values(s.basisUmsatz).reduce((sum, u) => sum + (u ?? 0), 0) * 52;
-    const grenzeSoll = Math.round(50_000 * Math.max(1, basisJahr / 3_100_000_000) * 2 / 5_000) * 5_000;
+    // Q35: Startgrenze = 50.000 € × Volumenfaktor × 6, auf 50.000 € gerundet (rund 1 Mio. € EK).
+    const grenzeSoll = Math.round(50_000 * Math.max(1, basisJahr / 3_100_000_000) * 6 / 50_000) * 50_000;
     expect(s.einkauf.grenze).toBe(grenzeSoll);
   });
 

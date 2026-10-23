@@ -69,6 +69,7 @@ export interface PersonalCluster {
 const fte = (h: Haus): number => h.personal.vollzeit + h.personal.teilzeit + h.personal.aushilfen;
 const aktiv = (h: Haus): boolean => h.status === 'offen' || h.status === 'raeumung' || h.status === 'schliessung_verhandlung';
 const rund = (n: number) => Math.round(n * 10) / 10;
+const rund4 = (n: number) => Math.round(n * 10_000) / 10_000;
 const gruppeHauscluster = (h: Haus, s: GameState): string => {
   // O01: Premiumhäuser und vom Spieler gewählte Flagships gehören zum Sondercluster.
   const org = s as GameState & { organisation?: { flagships?: string[] } };
@@ -201,7 +202,9 @@ function dienstplan(s: GameState, h: Haus, anlieferung: number, reduzierung: boo
       if (g === 'kasse' && dezember && weihnachten === 'sparsam') plan *= 0.88;
       const referenz = bedarf * bezug;
       extra += Math.max(0, (st.faktor[g] - 1) * bedarf) + (g === 'kasse' && i === 5 ? Math.max(0, st.samstagKasse - 1) * bedarf : 0);
-      return { tag: PERSONAL_TAGE[i], bedarf: rund(bedarf), plan: rund(plan), referenz: rund(referenz), springer: 0, deckung: bedarf ? plan / bedarf : 1, ausfall: ausfallTag };
+      // Q35: Tageswerte fein runden (4 Stellen); auf 0,1 Std. gerundet verzerrte der Krankheitsausfall
+      // in sehr kleinen Häusern das Verhältnis Plan zu Referenz um bis zu 50 %.
+      return { tag: PERSONAL_TAGE[i], bedarf: rund4(bedarf), plan: rund4(plan), referenz: rund4(referenz), springer: 0, deckung: bedarf ? plan / bedarf : 1, ausfall: ausfallTag };
     });
     const bedarf = tage.reduce((a, t) => a + t.bedarf, 0);
     const plan = tage.reduce((a, t) => a + t.plan, 0);
