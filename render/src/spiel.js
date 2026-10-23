@@ -1595,6 +1595,18 @@ window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...
       (o) => !hausId || o.userData.hausId === hausId);
     return { stadt: stadtName, buchstaben: buchstaben.length, fehler: bewerteSchriftzug(buchstaben) };
   },
+  // Q36-Diagnose: Bild aus derselben Prüfkamera (PNG als Data-URL).
+  schriftzugBild: (hausId, halb = K.halb, seite = 1400) => {
+    const g = sb.haeuser.get(hausId)?.gruppe;
+    const ziel = g ? new THREE.Box3().setFromObject(g).getCenter(new THREE.Vector3()) : new THREE.Vector3(K.x, 0, K.z);
+    const pk = isoKamera(seite, seite, halb * seite / 844, ziel); pk.updateMatrixWorld();
+    const rt = new THREE.WebGLRenderTarget(seite, seite); rt.texture.colorSpace = THREE.SRGBColorSpace;
+    ren.setRenderTarget(rt); ren.render(scene, pk);
+    const px = new Uint8Array(seite * seite * 4); ren.readRenderTargetPixels(rt, 0, 0, seite, seite, px); ren.setRenderTarget(null); rt.dispose();
+    const c = document.createElement('canvas'); c.width = c.height = seite; const k = c.getContext('2d'), bild = k.createImageData(seite, seite);
+    for (let y = 0; y < seite; y++) bild.data.set(px.subarray((seite - 1 - y) * seite * 4, (seite - y) * seite * 4), y * seite * 4);
+    k.putImageData(bild, 0, 0); return c.toDataURL('image/png');
+  },
   pruefeHauspins: () => {
     // Die Sollposition wird aus dem eigenen Hausgrundriss, der Slot-Ecke und
     // der tatsächlich gebauten Höhe abgeleitet. Messung in CSS-Pixeln (iPhone).

@@ -2,7 +2,7 @@
 //  1. Schriftzug: jeder Buchstabe eines Haus-Schriftzugs ist zu mindestens 90 % sichtbar
 //     (Ausnahme: ganze Seite bewusst verdeckt, etwa Gerüstplane beim Umbau).
 //  2. Pin: Spitze sitzt auf der Dachkante über dem Eingang (Hauspin-Prüfung aus Q22 mit neuem Anker).
-// Aufruf: cd render && node pruef-q36.js [Stadt,Stadt] [--halb=60]
+// Aufruf: cd render && node pruef-q36.js [Stadt,Stadt] [--halb=60,30] [--teil=1/2] [--ohne-bundle]
 const { chromium } = require('playwright');
 const { execFileSync } = require('child_process');
 const fs = require('fs');
@@ -26,7 +26,8 @@ const path = require('path');
     await page.goto(url, { waitUntil: 'load', timeout: 0 });
     await page.waitForFunction(() => window.bereit === true, null, { timeout: 0 });
     const alle = await page.evaluate(() => [...document.querySelectorAll('#stadtwahl option')].map((e) => e.value));
-    const staedte = liste ? liste.split(',') : alle;
+    const teil = args.find((a) => a.startsWith('--teil='))?.slice(7).split('/').map(Number);
+    const staedte = (liste ? liste.split(',') : alle).filter((_, i) => !teil || i % teil[1] === teil[0] - 1);
     for (const stadt of staedte) {
       if (!alle.includes(stadt)) { bericht.fehler.push('Unbekannte Stadt: ' + stadt); continue; }
       const pins = await page.evaluate((s) => { window.spiel.stadt(s); return window.spiel.hauspinListe(); }, stadt);
@@ -43,13 +44,12 @@ const path = require('path');
       const pinPruefung = await page.evaluate(() => { window.spiel.kamera({ halb: 60 }); return window.spiel.pruefeHauspins(); });
       for (const f of pinPruefung.fehler) e.fehler.push('Pin ' + f);
       bericht.staedte.push(e);
-      for (const f of e.fehler) bericht.fehler.push(stadt + ': ' + f);
+      for (const f of e.fehler) { bericht.fehler.push(stadt + ': ' + f); console.error('Q36-Verstoß: ' + stadt + ': ' + f); }
       console.log(stadt + ';' + e.haeuser + ' Häuser;' + e.buchstaben + ' Buchstaben;' + e.fehler.length + ' Verstöße');
     }
   } finally { await browser.close(); }
   fs.mkdirSync(path.join(__dirname, 'out'), { recursive: true });
-  fs.writeFileSync(path.join(__dirname, 'out', 'q36-pruefung.json'), JSON.stringify(bericht, null, 2));
-  for (const f of bericht.fehler) console.error('Q36-Verstoß: ' + f);
+  fs.writeFileSync(path.join(__dirname, 'out', 'q36-pruefung' + (args.find((a) => a.startsWith('--teil='))?.slice(7).replace('/', '-von-') ?? '') + '.json'), JSON.stringify(bericht, null, 2));
   console.log('Q36: ' + bericht.staedte.length + ' Städte, ' + bericht.fehler.length + ' Verstöße, ' + Math.round((Date.now() - t0) / 1000) + ' s');
   if (bericht.fehler.length) process.exitCode = 1;
 })().catch((e) => { console.error(e); process.exitCode = 1; });

@@ -576,11 +576,13 @@ function logos(K) {
     if (!z) continue;
     const text = z.text ?? 'HARTWIG';
     if (K.fam !== 1 && !z.sport && !z.dach && !z.wand && (K.n === 1 || Math.min(z.hb, z.max / schriftBreite(text, 1)) < Math.max(2.4, s.L * 0.035))) { // niedrige Fassade: Dachschrift auf Gerüst
-      const hbD = Math.min(clamp(s.L * 0.06, 2.2, 3.6), (s.L * 0.6) / schriftBreite(text, 1));
+      // Q36: Dachschrift bleibt in der Logozone der Fassade (z. B. vor dem höheren Eckatrium), nie über die ganze Seitenlänge.
+      const maxD = Math.min(s.L * 0.6, z.max ?? s.L * 0.6);
+      const hbD = Math.min(clamp(s.L * 0.06, 2.2, 3.6), maxD / schriftBreite(text, 1));
       const br = schriftBreite(text, hbD), yB = K.Hw + 0.6;
       for (let k = 0; k <= 4; k++) { const uu = z.u - br / 2 + (k * br) / 4; s.q(uu - 0.07, uu + 0.07, K.Hw, yB + hbD * 1.3, -1.0, -0.85, '#4a4f55'); }
       s.q(z.u - br / 2, z.u + br / 2, yB, yB + 0.12, -1.0, -0.85, '#4a4f55');
-      Object.assign(z, { y: yB + 0.15 + hbD * 0.6, t: -0.75, hb: hbD, max: s.L * 0.6, dach: true });
+      Object.assign(z, { y: yB + 0.15 + hbD * 0.6, t: -0.75, hb: hbD, max: maxD, dach: true });
     }
     const hb = Math.min(z.hb, z.max / schriftBreite(text, 1));
     z.hbIst = hb;
@@ -1098,6 +1100,7 @@ function familie5(K) {
     } else { // Vorhangfassade mit Sonnenschutzlamellen
       s.q(0, uE, EG, Hw, 0, 0.05, '#6a8a9c');
       for (let u = 0; u <= uE; u += 1.5) s.q(u - 0.05, u + 0.05, EG, Hw, 0.05, 0.15, '#dfe4e6');
+      // Q36: Schrift steht vor den Sonnenschutzlamellen (t 0,95 > 0,8), sonst zerschneiden die Lamellen die Buchstaben.
       for (let k = 0; k < nOG; k++) { const y0 = EG + k * GH; s.q(0, uE, y0 - 0.2, y0 + 0.4, 0.05, 0.18, '#dfe4e6'); for (let j = 0; j < 3; j++) s.q(0, uE, y0 + 3.0 + j * 0.35, y0 + 3.1 + j * 0.35, 0.2, 0.8, '#c9ced2'); }
       s.q(0, uE, Hw - 0.2, Hw + 0.6, 0, 0.3, '#c9ced2');
     }
@@ -1114,7 +1117,7 @@ function familie5(K) {
   fahnenmasten(K, K.seiten[0], [3, 6, 9], Hw + 0.8, -0.6);
   for (const s of K.seiten) {
     const uE = s.L - A;
-    if (n >= 2) K.zonen[s.seite] = { u: stil === 'pomo' && s.seite === '+z' ? uE * 0.68 : uE * 0.5, y: EG + (Hw - EG) * 0.58, t: 0.6, hb: clamp(uE * 0.075, 2.0, Math.min(4.5, (Hw - EG) * 0.3)), max: stil === 'pomo' && s.seite === '+z' ? uE * 0.5 : uE * 0.78, grund: basisF };
+    if (n >= 2) K.zonen[s.seite] = { u: stil === 'pomo' && s.seite === '+z' ? uE * 0.68 : uE * 0.5, y: EG + (Hw - EG) * 0.58, t: stil === 'glas' ? 0.95 : 0.6, hb: clamp(uE * 0.075, 2.0, Math.min(4.5, (Hw - EG) * 0.3)), max: stil === 'pomo' && s.seite === '+z' ? uE * 0.5 : uE * 0.78, grund: basisF };
     else K.zonen[s.seite] = { u: uE * 0.5, y: EG + 1.2, t: 0.45, hb: 1.5, max: uE * 0.75, grund: basisF };
   }
   return Ha + A * 0.4;

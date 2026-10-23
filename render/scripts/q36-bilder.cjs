@@ -7,6 +7,7 @@ const path = require('path');
 (async () => {
   const aus = path.resolve(process.argv[2] ?? path.join(__dirname, '..', 'out', 'q36'));
   const staedte = (process.argv[3] ?? 'Aachen,Essen,Berlin,Bielefeld').split(',');
+  const nurIds = process.argv[4]?.split(',');
   fs.mkdirSync(aus, { recursive: true });
   const optionen = { headless: true, args: ['--headless=new', '--use-gl=angle', '--use-angle=swiftshader',
     '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] };
@@ -22,7 +23,7 @@ const path = require('path');
     await page.addStyleTag({ content: 'body > *:not(canvas):not(#szene):not(#bühne){visibility:hidden!important} canvas{visibility:visible!important}' });
     for (const stadt of staedte) {
       const pins = await page.evaluate((s) => { window.spiel.stadt(s); return window.spiel.hauspinListe(); }, stadt);
-      const hw = pins.filter((p) => p.format === 'warenhaus' || p.format === 'premium').slice(0, 2);
+      const hw = nurIds ? pins.filter((p) => nurIds.includes(p.hausId)) : pins.filter((p) => p.format === 'warenhaus' || p.format === 'premium').slice(0, 2);
       let i = 0;
       for (const p of hw) {
         i++;
