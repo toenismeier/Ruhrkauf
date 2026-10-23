@@ -43,7 +43,8 @@ const ganz = (r) => Math.floor(r() * 1e9);
 // ====================================================================================
 export { stadtplan, rasterPlan, LINIEN, TYPEN, REGIONEN, VIERTEL, ARCHETYPEN, LANDMARKEN, registriereArchetyp } from './stadtplan.js';
 import { TYPEN, intervalleMinus, wahlGewichtet, FLAECHEN } from './stadtplan.js';
-import './archetypen/index.js';   // registrierte Archetypen (Ost u. a.) und ihre Slot-Bauer
+import './archetypen/index.js';
+import { menschenAktiv, menschenFuer } from './menschen.js';   // registrierte Archetypen (Ost u. a.) und ihre Slot-Bauer
 
 /** Box3 um einen Zellbereich (Nennraster, für Kamera-Ausschnitte). */
 export function ausschnitt(plan, i0, j0, i1, j1, hoehe = 25) {
@@ -141,6 +142,8 @@ export class Instanzer {
         calls++;
       }
     }
+    // Zusatzbauten (Figuren aus menschen.js) – unabhängig von LOD, ein Viereck je Figur
+    if (this.nachBauen) for (const f of this.nachBauen.splice(0)) calls += f(scene) ?? 0;
     return calls;
   }
 }
@@ -301,7 +304,16 @@ const FERN_WEG = new Set(['figur', 'figurGehend', 'figurTasche', 'poller', 'muel
 const figurFarben = (r) => [waehle(r, OBERTEIL), waehle(r, HOSE), waehle(r, HAUT), waehle(r, HAAR), waehle(r, ['#c9483e', '#e8dcc6', '#2b2b2b', '#d39a2b', '#ffffff'])];
 /** Figur setzen (y = Bodenhöhe). */
 export function figur(I, x, y, z, r, ry = null) {
-  I.setze(waehle(r, ['figur', 'figurGehend', 'figurGehend', 'figurTasche']), x, y, z, ry ?? r() * Math.PI * 2, 1.15, figurFarben(r));
+  // Zufallsverbrauch bleibt wie bisher (Stadtbild und Fingerabdruck unverändert)
+  const art = waehle(r, ['figur', 'figurGehend', 'figurGehend', 'figurTasche']), w = ry ?? r() * Math.PI * 2, farben = figurFarben(r);
+  if (menschenAktiv() && I.setze) {
+    if (I._ziel) { [x, y, z, ry] = I._um(x, y, z, w); I = I._ziel; } else ry = w;
+    // Im Spiel: vorgerenderte Figur mit eigenem Zufallsstrom aus der Lage; auch in LOD 'fern' (ein Viereck je Figur)
+    const q = rng(Math.floor(x * 7.31) * 92821 + Math.floor(z * 5.17) * 68917 + 13);
+    menschenFuer(I).setze(x, y, z, ry, q, { anim: art === 'figur' ? (q() < 0.5 ? 'stehen' : 'reden') : art === 'figurTasche' ? 'gehen_tasche' : 'gehen' });
+    return;
+  }
+  I.setze(art, x, y, z, w, 1.15, farben);
 }
 export function baumSetzen(I, art, x, y, z, r, s = 1, scheibe = false) {
   I.setze(art, x, y, z, r() * Math.PI * 2, s * zw(r, 0.88, 1.1), [waehle(r, KRONE[art] ?? KRONE.linde)]);
@@ -1799,7 +1811,7 @@ function bauePark(ctx, b, r, hinder = []) {
 function baueBahnZ(ctx, b, r) {
   const { S, I } = ctx;
   const SW = { quader: (x0, y0, z0, x1, y1, z1, f) => S.quader(z0, y0, x0, z1, y1, x1, f), box: (w, h, d, x, y, z, f, ry = 0) => S.box(d, h, w, z, y, x, f, ry), add: (g, f) => S.add(g, f) };
-  const IW = { setze: (name, x, y, z, ry = 0, s = 1, farben = null) => I.setze(name, z, y, x, Math.PI / 2 - ry, s, farben) };
+  const IW = { setze: (name, x, y, z, ry = 0, s = 1, farben = null) => I.setze(name, z, y, x, Math.PI / 2 - ry, s, farben), _ziel: I, _um: (x, y, z, ry) => [z, y, x, Math.PI / 2 - ry] };
   const bh = ctx.plan.parzellen.find((p) => p.block === b.id && p.typ === 'slot:bahnhof');
   const gl = b.gleise;
   const vp = b.vorplatz;

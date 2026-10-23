@@ -173,13 +173,15 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     if (!wege.length) return null;
     const aktive = hauspunkte.filter((x) => x.gewicht && sichtbar(x.weg, 1.7));
     let haus = null;
-    if (aktive.length && r() < .8) {
+    // Nur ein Teil hat ein Haus als Ziel; die übrigen bummeln über alle sichtbaren Wege der Stadt
+    if (aktive.length && r() < .3) {
       const sum = aktive.reduce((a, b) => a + b.gewicht, 0);
       let v = r() * sum;
       haus = aktive.find((a) => (v -= a.gewicht) <= 0) ?? aktive.at(-1);
     }
     const weg = haus?.lane ?? waehle(wege);
-    const anfang = haus ? clamp(haus.u - weg.s.von + (r() - .5) * 32, 0, laenge(weg)) : r() * laenge(weg);
+    // Auch Kunden starten irgendwo auf ihrem Weg und laufen erst zum Haus (kein Pulk am Eingang)
+    const anfang = r() * laenge(weg);
     const geschw = 0.95 + r() * .6;
     // Querversatz auf dem Gehweg, damit nicht alle auf einer Linie laufen
     const breit = weg.s.typ === 'fussgaenger' ? 1.6 : Math.max(0, (weg.s.gehweg ?? 3) / 2 - 0.6);

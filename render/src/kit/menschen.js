@@ -217,7 +217,7 @@ export class MenschenSammler {
     this.liste.push([x, y, z, winkel, e, anim, r() * 8]);
   }
   get anzahl() { return this.liste.length; }
-  bauen(scene, kachel = 160) {
+  bauen(scene, kachel = 240) {
     if (!this.liste.length) return 0;
     const gruppen = new Map();
     for (const f of this.liste) {
@@ -255,7 +255,7 @@ export function menschenFuer(S) {
   if (!S._menschen) {
     const m = new MenschenSammler();
     S._menschen = m;
-    (S.nachBauen ??= []).push((ziel) => { m.bauen(ziel); S._menschen = null; });
+    (S.nachBauen ??= []).push((ziel) => { S._menschen = null; return m.bauen(ziel); });
   }
   return S._menschen;
 }

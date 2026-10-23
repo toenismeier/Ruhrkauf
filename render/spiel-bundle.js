@@ -55588,7 +55588,7 @@ void main() {
     get anzahl() {
       return this.liste.length;
     }
-    bauen(scene2, kachel2 = 160) {
+    bauen(scene2, kachel2 = 240) {
       if (!this.liste.length) return 0;
       const gruppen = /* @__PURE__ */ new Map();
       for (const f13 of this.liste) {
@@ -55627,8 +55627,8 @@ void main() {
       const m = new MenschenSammler();
       S._menschen = m;
       (S.nachBauen ?? (S.nachBauen = [])).push((ziel) => {
-        m.bauen(ziel);
         S._menschen = null;
+        return m.bauen(ziel);
       });
     }
     return S._menschen;
@@ -55873,14 +55873,21 @@ void main() {
   function figur(S, x2, z6, r4, sk = 1.1, oben = null, o4 = {}) {
     const y2 = 0.3;
     if (menschenAktiv()) {
-      if (LOD2.stufe === "fern") return;
-      menschenFuer(S).setze(x2, y2, z6, o4.winkel ?? r4() * Math.PI * 2, r4, { oben: oben ?? void 0, anim: o4.anim });
+      waehle2(r4, HOSE);
+      if (!oben) waehle2(r4, KLEID2);
+      waehle2(r4, HAUT);
+      if (o4.nurVerbrauch || LOD2.stufe === "fern") return;
+      const q2 = lageRng(x2, z6);
+      const winkel = o4.winkel ?? (o4.seite ? entlang(o4.seite, q2() < 0.5 ? 1 : -1) + (q2() - 0.5) * 0.3 : q2() * Math.PI * 2);
+      const anim = o4.anim ?? (o4.seite ? q2() < 0.35 ? "gehen_tasche" : "gehen" : "stehen");
+      menschenFuer(S).setze(x2, y2, z6, winkel, q2, { oben: oben ?? void 0, anim });
       return;
     }
     S.box(0.42 * sk, 0.85 * sk, 0.3 * sk, x2, y2 + 0.425 * sk, z6, waehle2(r4, HOSE));
     S.box(0.54 * sk, 0.74 * sk, 0.34 * sk, x2, y2 + 1.22 * sk, z6, oben ?? waehle2(r4, KLEID2));
     S.box(0.28 * sk, 0.3 * sk, 0.28 * sk, x2, y2 + 1.75 * sk, z6, waehle2(r4, HAUT));
   }
+  var lageRng = (x2, z6) => rng3(Math.floor(x2 * 7.31) * 92821 + Math.floor(z6 * 5.17) * 68917 + 29);
   var blickWinkel = (dx, dz) => Math.atan2(-dz, dx);
   var zurFassade = (s2) => s2.seite === "+z" ? blickWinkel(0, -1) : blickWinkel(-1, 0);
   var entlang = (s2, dir) => s2.seite === "+z" ? blickWinkel(dir, 0) : blickWinkel(0, dir);
@@ -55890,62 +55897,58 @@ void main() {
     anzahl2 = Math.round(anzahl2 * Math.max(0, Math.min(1, Z2.passantenFaktor ?? 1)));
     const tMin = o4.tMin ?? 1, tMax = o4.tMax ?? 5.2, uMin = o4.uMin ?? -2, uMax = o4.uMax ?? s2.L + 3;
     const pos = [];
-    const farbe3 = () => o4.farben ?? Z2.sportPalette ? waehle2(r4, o4.farben ?? Z2.sportPalette) : null;
-    if (menschenAktiv()) {
-      for (let v2 = 0; pos.length < anzahl2 && v2 < anzahl2 * 10; v2++) {
-        const a2 = r4() * Math.PI * 2, rr5 = Math.sqrt(r4());
-        const gu = u + Math.cos(a2) * ru * rr5, gt = t5 + Math.sin(a2) * rt * rr5;
-        if (gt < tMin || gt > tMax || gu < uMin || gu > uMax) continue;
-        if (pos.some(([pu, pt2]) => wurzelSumme4(pu - gu, pt2 - gt) < 1.6)) continue;
-        const n3 = Math.min(anzahl2 - pos.length, r4() < 0.35 ? 1 : r4() < 0.7 ? 2 : r4() < 0.85 ? 3 : 4);
-        const art = n3 === 1 ? r4() < 0.5 ? "vorbei" : "schauen" : r4() < 0.6 ? "reden" : "schauen";
-        const glieder = [];
-        for (let i = 0; i < n3; i++) {
-          const w2 = i / n3 * Math.PI * 2 + r4() * 0.6, d4 = n3 === 1 ? 0 : 0.45 + r4() * 0.15;
-          const uu = gu + Math.cos(w2) * d4, tt = Math.max(tMin, gt + Math.sin(w2) * d4);
-          glieder.push([uu, tt]);
-        }
-        const mu = glieder.reduce((x2, g2) => x2 + g2[0], 0) / n3, mt = glieder.reduce((x2, g2) => x2 + g2[1], 0) / n3;
-        const dir = r4() < 0.5 ? 1 : -1;
-        for (const [uu, tt] of glieder) {
-          pos.push([uu, tt]);
-          const [x2, z6] = s2.welt(uu, tt);
-          let winkel, anim;
-          if (art === "reden") {
-            const [cx, cz] = s2.welt(mu, mt);
-            winkel = blickWinkel(cx - x2, cz - z6) + zw(r4, -0.3, 0.3);
-            anim = r4() < 0.7 ? "reden" : "stehen";
-          } else if (art === "vorbei") {
-            winkel = entlang(s2, dir) + zw(r4, -0.15, 0.15);
-            anim = r4() < 0.4 ? "gehen_tasche" : "gehen";
-          } else {
-            winkel = zurFassade(s2) + zw(r4, -0.5, 0.5);
-            anim = r4() < 0.75 ? "stehen" : "reden";
-          }
-          figur(Z2.S, x2, z6, r4, 1.1, farbe3(), { winkel, anim });
-        }
-      }
-      return;
-    }
+    const aktiv7 = menschenAktiv();
     for (let i = 0, v2 = 0; i < anzahl2 && v2 < anzahl2 * 8; v2++) {
       const a2 = r4() * Math.PI * 2, rr5 = Math.sqrt(r4());
       const uu = u + Math.cos(a2) * ru * rr5, tt = t5 + Math.sin(a2) * rt * rr5;
       if (tt < tMin || tt > tMax || uu < uMin || uu > uMax) continue;
       if (pos.some(([pu, pt2]) => wurzelSumme4(pu - uu, pt2 - tt) < 0.62)) continue;
-      pos.push([uu, tt]);
+      const farbe3 = o4.farben ?? Z2.sportPalette ? waehle2(r4, o4.farben ?? Z2.sportPalette) : null;
+      pos.push([uu, tt, farbe3]);
       i++;
       const [x2, z6] = s2.welt(uu, tt);
-      figur(Z2.S, x2, z6, r4, 1.1, farbe3());
+      figur(Z2.S, x2, z6, r4, 1.1, farbe3, aktiv7 ? { nurVerbrauch: true } : {});
+    }
+    if (!aktiv7 || LOD2.stufe === "fern" || !pos.length) return;
+    const q2 = lageRng(...s2.welt(u, t5));
+    const rest = pos.filter(() => q2() < (o4.anteil ?? 0.5));
+    const frei6 = new Set(rest.map((_, i) => i));
+    for (let i = 0; i < rest.length; i++) {
+      if (!frei6.has(i)) continue;
+      frei6.delete(i);
+      const n3 = q2() < 0.4 ? 1 : q2() < 0.75 ? 2 : 3;
+      const nah = [...frei6].sort((a2, b4) => wurzelSumme4(rest[a2][0] - rest[i][0], rest[a2][1] - rest[i][1]) - wurzelSumme4(rest[b4][0] - rest[i][0], rest[b4][1] - rest[i][1])).slice(0, n3 - 1);
+      nah.forEach((k5) => frei6.delete(k5));
+      const [gu, gt] = rest[i];
+      const art = n3 === 1 ? q2() < 0.5 ? "vorbei" : "schauen" : q2() < 0.65 ? "reden" : "schauen";
+      const dir = q2() < 0.5 ? 1 : -1;
+      [i, ...nah].forEach((k5, j4) => {
+        const w2 = j4 / n3 * Math.PI * 2 + q2() * 0.5, d4 = n3 === 1 ? 0 : 0.5;
+        const uu = gu + Math.cos(w2) * d4, tt = Math.max(tMin, gt + Math.sin(w2) * d4);
+        const [x2, z6] = s2.welt(uu, tt);
+        let winkel, anim;
+        if (art === "reden") {
+          const [cx, cz] = s2.welt(gu, gt);
+          winkel = blickWinkel(cx - x2, cz - z6) + (q2() - 0.5) * 0.5;
+          anim = q2() < 0.7 ? "reden" : "stehen";
+        } else if (art === "vorbei") {
+          winkel = entlang(s2, dir) + (q2() - 0.5) * 0.3;
+          anim = q2() < 0.4 ? "gehen_tasche" : "gehen";
+        } else {
+          winkel = zurFassade(s2) + (q2() - 0.5);
+          anim = q2() < 0.75 ? "stehen" : "reden";
+        }
+        menschenFuer(Z2.S).setze(x2, 0.3, z6, winkel, q2, { oben: rest[k5][2] ?? void 0, anim });
+      });
     }
   }
   function schlange(Z2, s2, u0, u1, t5) {
     if (Z2.leute === false) return;
     const r4 = Z2.r, schritt = 0.85, dir = u1 > u0 ? 1 : -1;
-    const aktiv7 = menschenAktiv();
-    for (let u = u0; dir * (u1 - u) > 0; u += dir * (aktiv7 ? zw(r4, 0.75, 1.05) : schritt * zw(r4, 0.85, 1.25))) {
-      const tt = t5 + (aktiv7 ? 0.35 * Math.sin((u - u0) * 0.35) + zw(r4, -0.12, 0.12) : zw(r4, -0.2, 0.2));
-      const [x2, z6] = s2.welt(u, tt);
-      figur(Z2.S, x2, z6, r4, 1.1, null, { winkel: entlang(s2, -dir) + zw(r4, -0.25, 0.25), anim: r4() < 0.2 ? "reden" : "stehen" });
+    for (let u = u0; dir * (u1 - u) > 0; u += dir * schritt * zw(r4, 0.85, 1.25)) {
+      const [x2, z6] = s2.welt(u, t5 + zw(r4, -0.2, 0.2));
+      const q2 = lageRng(x2, z6);
+      figur(Z2.S, x2, z6, r4, 1.1, null, { winkel: entlang(s2, -dir) + (q2() - 0.5) * 0.5, anim: q2() < 0.2 ? "reden" : "stehen" });
     }
   }
   function ballons(Z2, x2, z6, y2, farben, n3 = 5, rad3 = 0.75) {
@@ -57014,7 +57017,7 @@ void main() {
       }
       for (const s2 of [sz, sx]) for (let i = 0; i < Math.round(4 * Math.max(0, Math.min(1, Z2.passantenFaktor ?? 1))); i++) {
         const [x2, zz] = s2.welt(zw(r4, 1, s2.L - 1), zw(r4, 2.5, 4.8));
-        figur(S, x2, zz, r4, 1.1, Z2.sportPalette ? waehle2(r4, Z2.sportPalette) : null, { winkel: entlang(s2, r4() < 0.5 ? 1 : -1) + zw(r4, -0.15, 0.15), anim: r4() < 0.35 ? "gehen_tasche" : "gehen" });
+        figur(S, x2, zz, r4, 1.1, Z2.sportPalette ? waehle2(r4, Z2.sportPalette) : null, { seite: s2 });
       }
     }
     return { hoehe: Z2.top, teile: S.anzahl - start, pinAnker: pinAnker(k5) };
@@ -156662,6 +156665,7 @@ void main() {
           calls++;
         }
       }
+      if (this.nachBauen) for (const f13 of this.nachBauen.splice(0)) calls += f13(scene2) ?? 0;
       return calls;
     }
   };
@@ -156888,7 +156892,17 @@ void main() {
   ]);
   var figurFarben = (r4) => [waehle2(r4, OBERTEIL), waehle2(r4, HOSE2), waehle2(r4, HAUT3), waehle2(r4, HAAR2), waehle2(r4, ["#c9483e", "#e8dcc6", "#2b2b2b", "#d39a2b", "#ffffff"])];
   function figur4(I, x2, y2, z6, r4, ry = null) {
-    I.setze(waehle2(r4, ["figur", "figurGehend", "figurGehend", "figurTasche"]), x2, y2, z6, ry ?? r4() * Math.PI * 2, 1.15, figurFarben(r4));
+    const art = waehle2(r4, ["figur", "figurGehend", "figurGehend", "figurTasche"]), w2 = ry ?? r4() * Math.PI * 2, farben = figurFarben(r4);
+    if (menschenAktiv() && I.setze) {
+      if (I._ziel) {
+        [x2, y2, z6, ry] = I._um(x2, y2, z6, w2);
+        I = I._ziel;
+      } else ry = w2;
+      const q2 = rng3(Math.floor(x2 * 7.31) * 92821 + Math.floor(z6 * 5.17) * 68917 + 13);
+      menschenFuer(I).setze(x2, y2, z6, ry, q2, { anim: art === "figur" ? q2() < 0.5 ? "stehen" : "reden" : art === "figurTasche" ? "gehen_tasche" : "gehen" });
+      return;
+    }
+    I.setze(art, x2, y2, z6, w2, 1.15, farben);
   }
   function baumSetzen(I, art, x2, y2, z6, r4, s2 = 1, scheibe = false) {
     I.setze(art, x2, y2, z6, r4() * Math.PI * 2, s2 * zw(r4, 0.88, 1.1), [waehle2(r4, KRONE[art] ?? KRONE.linde)]);
@@ -158560,7 +158574,7 @@ void main() {
   function baueBahnZ(ctx, b4, r4) {
     const { S, I } = ctx;
     const SW = { quader: (x0, y0, z0, x1, y1, z1, f13) => S.quader(z0, y0, x0, z1, y1, x1, f13), box: (w2, h4, d4, x2, y2, z6, f13, ry = 0) => S.box(d4, h4, w2, z6, y2, x2, f13, ry), add: (g2, f13) => S.add(g2, f13) };
-    const IW = { setze: (name2, x2, y2, z6, ry = 0, s2 = 1, farben = null) => I.setze(name2, z6, y2, x2, Math.PI / 2 - ry, s2, farben) };
+    const IW = { setze: (name2, x2, y2, z6, ry = 0, s2 = 1, farben = null) => I.setze(name2, z6, y2, x2, Math.PI / 2 - ry, s2, farben), _ziel: I, _um: (x2, y2, z6, ry) => [z6, y2, x2, Math.PI / 2 - ry] };
     const bh = ctx.plan.parzellen.find((p2) => p2.block === b4.id && p2.typ === "slot:bahnhof");
     const gl = b4.gleise;
     const vp = b4.vorplatz;
@@ -159767,13 +159781,13 @@ void main() {
       if (!wege.length) return null;
       const aktive2 = hauspunkte.filter((x2) => x2.gewicht && sichtbar4(x2.weg, 1.7));
       let haus2 = null;
-      if (aktive2.length && r4() < 0.8) {
+      if (aktive2.length && r4() < 0.3) {
         const sum2 = aktive2.reduce((a2, b4) => a2 + b4.gewicht, 0);
         let v2 = r4() * sum2;
         haus2 = aktive2.find((a2) => (v2 -= a2.gewicht) <= 0) ?? aktive2.at(-1);
       }
       const weg = haus2?.lane ?? waehle4(wege);
-      const anfang = haus2 ? clamp8(haus2.u - weg.s.von + (r4() - 0.5) * 32, 0, laenge(weg)) : r4() * laenge(weg);
+      const anfang = r4() * laenge(weg);
       const geschw = 0.95 + r4() * 0.6;
       const breit2 = weg.s.typ === "fussgaenger" ? 1.6 : Math.max(0, (weg.s.gehweg ?? 3) / 2 - 0.6);
       return {
@@ -161286,7 +161300,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "2ba5c7c" : "Entwicklung";
+  var version = () => true ? "b899161" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -180710,6 +180724,16 @@ void main() {
     },
     get plan() {
       return plan;
+    },
+    menschenStatus: () => {
+      let gruppen = 0, figuren3 = 0;
+      scene?.traverse((m) => {
+        if (m.userData?.menschen) {
+          gruppen++;
+          figuren3 += m.geometry.instanceCount;
+        }
+      });
+      return { gruppen, figuren: figuren3, info: { ...ren.info.render } };
     },
     // lesender Pixelabgleich für den Mobil-Smoketest
     leben,
