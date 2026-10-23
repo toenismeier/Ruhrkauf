@@ -4,6 +4,8 @@
 // Alles steht bündig auf der Dachfläche, hält 0,8 m Abstand zur Attika und liegt hinter den sichtbaren
 // Dachkanten (+x, +z), damit Schriftzüge auf dem Dachrand frei bleiben.
 // Nur Farben, die jedes Warenhausdach ohnehin trägt (keine zusätzlichen Draw Calls).
+import { LOD } from './basis.js';
+
 const F = { platte: '#d3d0c9', glas: '#e8eef0', glasAlt: '#c9cfd1', blech: '#c9cdd0', dunkel: '#5f666e', solar: '#3b4046' };
 
 /**
@@ -27,6 +29,7 @@ export function dachLandschaft(S, dach, r, o = {}) {
     o.protokoll?.push({ art, x, z, w, d, h, unten: y, dach: { x0, z0, x1, z1, y, steil: false } });
   };
   const box = (w, h, d, x, yy, z, f) => S.box(w, h, d, x, yy, z, f);
+  const fern = LOD.stufe === 'fern'; // Fernstufe (Gesamtansicht): Kleinteile entfallen, Zufall und Belegung bleiben gleich
   const langX = W >= D;
   // Achsen: a = Längsachse, b = Querachse. Hinten = kleine Koordinaten (vom Betrachter abgewandt).
   const A0 = langX ? x0 : z0, A1 = langX ? x1 : z1, B0 = langX ? z0 : x0, B1 = langX ? z1 : x1;
@@ -41,7 +44,7 @@ export function dachLandschaft(S, dach, r, o = {}) {
     const la = LA * anteilA, lb = LB * anteilB;
     const a = r() < 0.5 ? A0 + rand + la / 2 : A1 - rand - la / 2, b = B1 - rand - lb / 2;
     const [x, z] = pos(a, b), [w, d] = mass(la, lb);
-    box(w, 0.05, d, x, y + 0.025, z, F.platte); // flach, kein Belegungseintrag (begehbar)
+    if (!fern) box(w, 0.05, d, x, y + 0.025, z, F.platte); // flach, kein Belegungseintrag (begehbar)
   }
 
   // Querzonen: hinten Technik (bis 0,32), Kanal mit Weg (um 0,38), vorne Lichtbänder (0,48 bis 0,92).
@@ -54,8 +57,7 @@ export function dachLandschaft(S, dach, r, o = {}) {
     if (frei(x, z, w, d, 0)) {
       box(w, ph, d, x, y + ph / 2, z, F.blech);
       box(w + 0.3, 0.22, d + 0.3, x, y + ph + 0.11, z, F.platte);
-      box(w * 0.7, 0.9, 0.12, x, y + ph * 0.55, z + d / 2 + 0.06, F.dunkel);
-      box(0.12, 0.9, d * 0.6, x + w / 2 + 0.06, y + ph * 0.55, z, F.dunkel);
+      if (!fern) { box(w * 0.7, 0.9, 0.12, x, y + ph * 0.55, z + d / 2 + 0.06, F.dunkel); box(0.12, 0.9, d * 0.6, x + w / 2 + 0.06, y + ph * 0.55, z, F.dunkel); }
       merke('technikzentrale', x, z, w + 0.3, d + 0.3, ph + 0.22);
     }
   }
@@ -68,7 +70,7 @@ export function dachLandschaft(S, dach, r, o = {}) {
       box(w, 1.5, d, x, y + 0.75, z, F.blech);
       for (let i = 0; i < nVent; i++) {
         const [vx, vz] = pos(aK - kl / 2 + 0.3 + 1.1 + i * 2.2, bK);
-        box(1.7, 0.1, 1.7, vx, y + 1.55, vz, F.dunkel);
+        if (!fern) box(1.7, 0.1, 1.7, vx, y + 1.55, vz, F.dunkel);
       }
       merke('rueckkuehler', x, z, w, d, 1.6);
     }
@@ -79,8 +81,8 @@ export function dachLandschaft(S, dach, r, o = {}) {
     const [x, z] = pos(aT, bT);
     if (frei(x, z, 3.6, 3.6)) {
       box(3.6, 3.0, 3.6, x, y + 1.5, z, F.platte);
-      box(3.8, 0.2, 3.8, x, y + 3.1, z, F.dunkel);
-      box(langX ? 1.1 : 0.08, 2.1, langX ? 0.08 : 1.1, x + (langX ? 0.6 : 1.84), y + 1.05, z + (langX ? 1.84 : 0.6), F.dunkel);
+      if (!fern) box(3.8, 0.2, 3.8, x, y + 3.1, z, F.dunkel);
+      if (!fern) box(langX ? 1.1 : 0.08, 2.1, langX ? 0.08 : 1.1, x + (langX ? 0.6 : 1.84), y + 1.05, z + (langX ? 1.84 : 0.6), F.dunkel);
       merke('treppenhaus', x, z, 3.8, 3.8, 3.2);
     }
   }
@@ -91,8 +93,8 @@ export function dachLandschaft(S, dach, r, o = {}) {
     const [x, z] = pos(a, b), [w, d] = mass(gl, gb);
     if (gb > 2 && frei(x, z, w, d)) {
       box(w, gh, d, x, y + gh / 2, z, F.blech);
-      box(langX ? w * 0.8 : 0.1, 0.5, langX ? 0.1 : d * 0.8, x + (langX ? 0 : w / 2 + 0.05), y + gh * 0.6, z + (langX ? d / 2 + 0.05 : 0), F.dunkel);
-      for (const k of [-0.3, 0.3]) { const [hx, hz] = pos(a + k * gl, b); box(1.2, 0.8, 1.2, hx, y + gh + 0.4, hz, F.blech); }
+      if (!fern) box(langX ? w * 0.8 : 0.1, 0.5, langX ? 0.1 : d * 0.8, x + (langX ? 0 : w / 2 + 0.05), y + gh * 0.6, z + (langX ? d / 2 + 0.05 : 0), F.dunkel);
+      for (const k of [-0.3, 0.3]) { const [hx, hz] = pos(a + k * gl, b); if (!fern) box(1.2, 0.8, 1.2, hx, y + gh + 0.4, hz, F.blech); }
       merke('lueftungsgeraet', x, z, w, d, gh + 0.8);
     }
   }
@@ -105,13 +107,12 @@ export function dachLandschaft(S, dach, r, o = {}) {
       box(w, 0.9, d, x, y + 0.45, z, F.blech);
       for (let a = a0 + 3 + r() * 3; a < a1 - 2; a += 8 + r() * 5) {
         const [hx, hz] = pos(a, bL);
-        box(1.3, 0.7, 1.3, hx, y + 1.25, hz, F.blech);
-        box(1.5, 0.12, 1.5, hx, y + 1.66, hz, F.dunkel);
+        if (!fern) { box(1.3, 0.7, 1.3, hx, y + 1.25, hz, F.blech); box(1.5, 0.12, 1.5, hx, y + 1.66, hz, F.dunkel); }
       }
       merke('lueftungskanal', x, z, w, d, 1.72);
     }
     const [wx, wz] = pos(a0 + la / 2, bL + 1.7), [ww, wd] = mass(la, 1.1);
-    if (frei(wx, wz, ww, wd, 0.1)) { box(ww, 0.06, wd, wx, y + 0.03, wz, F.platte); merke('wartungsweg', wx, wz, ww, wd, 0.06); }
+    if (frei(wx, wz, ww, wd, 0.1)) { if (!fern) box(ww, 0.06, wd, wx, y + 0.03, wz, F.platte); merke('wartungsweg', wx, wz, ww, wd, 0.06); }
   }
 
   // 4. Lichtbänder (Sheds bei Nachkriegsbauten) im vorderen Dachteil, dazu Rauchabzugsklappen.
@@ -143,7 +144,7 @@ export function dachLandschaft(S, dach, r, o = {}) {
       merke('lichtband', x, z, w, d, 0.85);
       // Rauchabzugsklappen am Bandende
       const [kx, kz] = pos(aM + la / 2 + 1.6, b), [kw, kd] = mass(1.4, 1.4);
-      if (frei(kx, kz, kw, kd, 0.3)) { box(kw, 0.55, kd, kx, y + 0.27, kz, F.dunkel); merke('rwa', kx, kz, kw, kd, 0.55); }
+      if (frei(kx, kz, kw, kd, 0.3)) { if (!fern) box(kw, 0.55, kd, kx, y + 0.27, kz, F.dunkel); merke('rwa', kx, kz, kw, kd, 0.55); }
     }
   }
 
@@ -158,7 +159,7 @@ export function dachLandschaft(S, dach, r, o = {}) {
       if (!frei(x, z, w, d, 0.4)) continue;
       box(w, 0.14, d, x, y + 0.55, z, F.solar);
       const [sw, sd] = mass(la - 0.4, 0.3);
-      box(sw, 0.48, sd, x, y + 0.24, z, F.dunkel);
+      if (!fern) box(sw, 0.48, sd, x, y + 0.24, z, F.dunkel);
       merke('solar', x, z, w, d, 0.62);
     }
   }

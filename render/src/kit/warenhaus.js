@@ -6,7 +6,7 @@
 // export familieVon(haus), masse(haus), FAMILIEN, EG, GH
 // Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
 const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
-import { THREE, rng, waehle, zw, heller, dunkler, textTextur, textMaterial } from './basis.js';
+import { THREE, rng, waehle, zw, heller, dunkler, textTextur, textMaterial, LOD } from './basis.js';
 import { zustandNormal, zustandFlags, zustandsDekor, eigeneMieterflaechen, ladenInhalt, merke, mieterInfo } from './zustaende.js';
 import { seitenVon as seitenFremd, plakat as plakatFremd, passend as passendFremd } from './sporthelfer.js';
 import { WETTBEWERBER_FARBEN } from './wettbewerber.js';
@@ -193,22 +193,29 @@ function leuchtschrift(K, s, text, um, y, t, hb, farbe, o = {}) {
     const bleib = Math.max(1, Math.round(idx.length * o.abbau));
     idx.forEach((i, j) => { if (j >= bleib) defekt.set(i, 'weg'); });
   }
-  if (o.kaputt) {
-    // Q36: Verfall zeigt sich nur über ausgeblichene Buchstaben. Kein Buchstabe fehlt, kippt oder wird
-    // grau, damit der Schriftzug aus jeder Zoomstufe vollständig lesbar bleibt (Wurf 3: „A‿TWIG“).
-    const idx = z.map((c, i) => i).filter((i) => z[i] !== ' ');
-    const zwang = idx[Math.floor(r() * idx.length)];
-    for (const i of idx) if (i === zwang || r() < 0.35) defekt.set(i, 'blass');
-  }
   // Q36: intakter Schriftzug als eine Fläche (ein Draw Call statt einer je Buchstabe, kein Buchstabe kann fehlen).
   // Haarspatien halten die Laufweite der Einzelbuchstaben; die Fläche wird auf die gleiche Gesamtbreite gesetzt.
   if (o.abbau == null && !o.geist) {
     const f = o.kaputt ? ausgeblichen(farbe) : farbe;
-    const wort = z.join('\u200A'), rand = (96 / 180) * hb * PH;
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(total + rand, hb * PH), texMat(wort, f));
-    s.flaeche(m, um, y, t, 0);
-    m.userData.schriftzug = { text, i: -1, n: z.length, seite: s.seite, wort: true };
-    K.scene.add(m);
+    // Fernstufe: wie bisher bei Einzelbuchstaben entfällt der Schriftzug nur, wenn jeder Buchstabe unter der Schildgrenze läge.
+    if (LOD.stufe === 'fern' && Math.max(...z.filter((c) => c !== ' ').map((c) => tex(c, f).seitenverhaeltnis)) * hb * PH < LOD.schildMin) return total;
+    // Je zwei Buchstaben eine Fläche: ein Viertel der Zeichenaufrufe, Hüllkugel kaum größer als beim Einzelbuchstaben.
+    // Fläche nur so breit wie die Schrift (Textur-Rand per UV abgeschnitten).
+    const rand = (96 / 180) * hb * PH;
+    let acc0 = 0;
+    const pos = z.map((c, i) => { const a = acc0; acc0 += br[i] + gap; return { a, b: a + br[i], c }; });
+    const teile = [];
+    for (const p of pos) { if (p.c === ' ') { teile.push(null); continue; } const l = teile[teile.length - 1]; if (l && l.length < 2) l.push(p); else teile.push([p]); }
+    for (const tl of teile) {
+      if (!tl) continue;
+      const a = tl[0].a, b = tl[tl.length - 1].b, breite = b - a, wort = tl.map((p) => p.c).join('\u200A');
+      const geo = new THREE.PlaneGeometry(breite, hb * PH), uv = geo.attributes.uv, rel = (rand / 2) / (breite + rand);
+      for (let i = 0; i < uv.count; i++) uv.setX(i, rel + uv.getX(i) * (1 - 2 * rel));
+      const m = new THREE.Mesh(geo, texMat(wort, f));
+      s.flaeche(m, um + s.lese * (-total / 2 + (a + b) / 2), y, t, 0);
+      m.userData.schriftzug = { text, i: -1, n: z.length, seite: s.seite, wort: true };
+      K.scene.add(m);
+    }
     return total;
   }
   let acc = 0;
@@ -484,7 +491,9 @@ function lichtkuppeln(K, x0, z0, x1, z1, y, ax = 6.5, az = 9) {
   if (x1 - x0 < 8 || z1 - z0 < 8) return;
   // Q36: große Dächer bekommen eine gegliederte Dachlandschaft statt eines gleichförmigen Kuppelrasters.
   K.dachBelegt ??= [];
-  if (dachLandschaft(S, { x0, z0, x1, z1, y }, rng(`${K.haus?.id ?? ''}:dach:${Math.round(x0)}:${Math.round(z0)}`),
+  // Nur wo das Kuppelraster groß ist (ab 18 Kuppeln): dort ist die Dachlandschaft auch leichter als das Raster.
+  const kuppeln = Math.floor((x1 - x0 - 2) / ax) * Math.floor((z1 - z0 - 2) / az);
+  if (kuppeln >= 18 && dachLandschaft(S, { x0, z0, x1, z1, y }, rng(`${K.haus?.id ?? ''}:dach:${Math.round(x0)}:${Math.round(z0)}`),
     { baujahr: K.haus?.baujahr, alt: K.alt, belegt: K.dachBelegt, reserviert: (x, z, rad) => reserviert({ terrasse: K.terrasse }, x, z, rad), protokoll: K.qualitaet?.daecher })) {
     K.dachLandschaft = true;
     return;
