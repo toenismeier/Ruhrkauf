@@ -200,6 +200,17 @@ function leuchtschrift(K, s, text, um, y, t, hb, farbe, o = {}) {
     const zwang = idx[Math.floor(r() * idx.length)];
     for (const i of idx) if (i === zwang || r() < 0.35) defekt.set(i, 'blass');
   }
+  // Q36: intakter Schriftzug als eine Fläche (ein Draw Call statt einer je Buchstabe, kein Buchstabe kann fehlen).
+  // Haarspatien halten die Laufweite der Einzelbuchstaben; die Fläche wird auf die gleiche Gesamtbreite gesetzt.
+  if (o.abbau == null && !o.geist) {
+    const f = o.kaputt ? ausgeblichen(farbe) : farbe;
+    const wort = z.join('\u200A'), rand = (96 / 180) * hb * PH;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(total + rand, hb * PH), texMat(wort, f));
+    s.flaeche(m, um, y, t, 0);
+    m.userData.schriftzug = { text, i: -1, n: z.length, seite: s.seite, wort: true };
+    K.scene.add(m);
+    return total;
+  }
   let acc = 0;
   z.forEach((c, i) => {
     const uc = um + s.lese * (-total / 2 + acc + br[i] / 2);

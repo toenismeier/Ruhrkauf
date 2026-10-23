@@ -404,5 +404,6 @@ export function premiumhaus(S,scene,haus,opt={}) {
   strassenleben(S,x,z,w,d,r,{...opt,insolvenz:haus.status==='insolvenz'});
   statusBau(S,scene,typ,x,z,w,d,H,zust,haus,opt);
   const hoehe=H+(zust.hat('umbau')?20:typ==='P003'?13:typ==='P001'?16:typ==='P002'?12:typ==='P005'?10:6);
-  return {hoehe,w,d,familie:'premium',teile:S.anzahl-start,status:zust.status};
+  // Q36: Pin auf der Traufkante über dem platzseitigen Haupteingang (Mitte +z), nicht über der Dachmitte.
+  return {hoehe,w,d,familie:'premium',teile:S.anzahl-start,status:zust.status,pinAnker:{x:x+w/2,y:H,z:z+d,seite:'+z'}};
 }

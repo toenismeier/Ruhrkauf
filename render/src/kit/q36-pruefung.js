@@ -66,7 +66,7 @@ export function schriftzugSichtbarkeit(ren, scene, cam, w, h, filter = () => tru
     for (const [m, k] of kenn) {
       const f = frei.get(k) ?? 0;
       if (f < 4) continue; // nicht im Bild
-      erg.push({ hausId: m.userData.hausId, text: m.userData.schriftzug.text, seite: m.userData.schriftzug.seite, i: m.userData.schriftzug.i, sichtbar: (ganz.get(k) ?? 0) / f });
+      erg.push({ hausId: m.userData.hausId, text: m.userData.schriftzug.text, seite: m.userData.schriftzug.seite, wort: !!m.userData.schriftzug.wort, i: m.userData.schriftzug.i, sichtbar: (ganz.get(k) ?? 0) / f });
     }
     return erg;
   } finally {
@@ -86,6 +86,11 @@ export function bewerteSchriftzug(buchstaben, grenze = 0.9) {
   const fehler = [];
   for (const [k, liste] of je) {
     const soll = [...liste[0].text].filter((c) => c !== ' ').length;
+    if (liste[0].wort) { // ganzer Schriftzug als eine Fläche: ein verdeckter Buchstabe wären rund 1/7
+      const v = Math.min(...liste.map((b) => b.sichtbar));
+      if (v < 0.97 && v > 0.1) fehler.push(k.replace('|', ' „') + '“: Schriftzug nur zu ' + Math.round(v * 100) + ' % sichtbar');
+      continue;
+    }
     if (liste.length < soll) { fehler.push(k.replace('|', ' „') + '“: nur ' + liste.length + ' von ' + soll + ' Buchstaben vorhanden'); continue; }
     const verdeckt = liste.filter((b) => b.sichtbar < grenze);
     if (!verdeckt.length) continue;
