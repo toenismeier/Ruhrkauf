@@ -21,7 +21,7 @@ export const BAUM_KATEGORIEN = [
   { id: 'accessoires', name: 'Accessoires' },
   { id: 'home', name: 'Wohnen und Haushalt' },
   { id: 'beauty', name: 'Beauty' },
-  { id: 'kinder', name: 'Kinder und Baby' },
+  { id: 'kinder', name: 'Baby und Spielzeug' },
 ] as const;
 export type BaumKategorie = (typeof BAUM_KATEGORIEN)[number]['id'];
 

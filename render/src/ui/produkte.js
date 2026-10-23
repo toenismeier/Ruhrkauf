@@ -8,7 +8,7 @@ import { geld, fmt, pz, dez, kwVon, esc } from './format.js';
 import { bereich } from './komponenten.js';
 import { werteSammler, vergleiche, schalter, segment, regler, stepper, kz, wocheText, karussell, karussellBinden } from './vorstand.js';
 import * as PB from '../kit/produktbild.js';
-import { passendeTypen, fachSegmente, zielChips, sortimentBedienung, gruppeTrend, teamAufschluesselung } from './produkte-q24.js';
+import { passendeTypen, zielgruppenFuerFach, fachSegmente, zielChips, sortimentBedienung, gruppeTrend, teamAufschluesselung } from './produkte-q24.js';
 
 const PREISLAGE = { einstieg: 'Einstieg', mitte: 'Mitte', gehoben: 'Gehoben' };
 const STATUS = { entwicklung: 'in Entwicklung', sortiment: 'im Sortiment', pausiert: 'pausiert', ausgelistet: 'ausgelistet' };
@@ -161,6 +161,7 @@ export function produkteModul(ctx) {
   function katalog() {
     const K = merkeBilder(E.produktKatalog(s())), L = E.produkte(s()), M = aktuelleMarke(L);
     if (!M) return { titel: 'Sortiment', unter: '', html: '<div class="leise">Noch keine Marke vorhanden.</div>' };
+    if (zielgruppenFuerFach(K, ui.fach).every((x) => x.id !== ui.zielgruppe)) ui.zielgruppe = zielgruppenFuerFach(K, ui.fach)[0]?.id ?? ui.zielgruppe;
     const typen = passendeTypen(K, ui.fach, ui.zielgruppe);
     let h = '<button class="zurueck" data-a="liste">‹ Produktentwicklung</button>';
     h += markenwahl(L);
@@ -197,7 +198,7 @@ export function produkteModul(ctx) {
     if (p) h += '<div class="olief">Status: ' + esc(STATUS[p.status] ?? p.status) + ' · ' + esc(p.kategorieName) + '</div>';
     else {
       const freigegeben = M && M.kategorien.some((x) => x.id === t.kategorie && x.kapazitaet > 0)
-        && Number(t.gruppe?.[M.trendGruppe] ?? 0) > 0.15;
+        && (Array.isArray(M.entwickelbar) ? M.entwickelbar.includes(t.typ) : Number(t.gruppe?.[M.trendGruppe] ?? 0) > 0.15);
       h += freigegeben ? '<button class="breit gruen" data-a="detailPlanen">Für ' + esc(M.name) + ' entwickeln</button>'
         : '<div class="olief">Dieser Artikeltyp passt derzeit nicht zum Sortiment der gewählten Marke.</div>';
     }
@@ -209,7 +210,9 @@ export function produkteModul(ctx) {
     const st = s(), K = merkeBilder(E.produktKatalog(st)), L = E.produkte(st), M = aktuelleMarke(L), e = ui.neu;
     const markeKats = new Set(M.kategorien.filter((k) => k.kapazitaet > 0).map((k) => k.id));
     const voll = new Set(M.kategorien.filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
-    const typen = passendeTypen(K, ui.fach, ui.zielgruppe).filter((t) => markeKats.has(t.kategorie) && (t.gruppe[M.trendGruppe] ?? 0) > 0.15).sort((a, b) => Number(voll.has(a.kategorie)) - Number(voll.has(b.kategorie)));
+    const entwickelbar = Array.isArray(M.entwickelbar) ? new Set(M.entwickelbar) : null;
+    if (zielgruppenFuerFach(K, ui.fach).every((x) => x.id !== ui.zielgruppe)) { ui.zielgruppe = zielgruppenFuerFach(K, ui.fach)[0]?.id ?? ui.zielgruppe; e.zielgruppe = ui.zielgruppe; }
+    const typen = passendeTypen(K, ui.fach, ui.zielgruppe).filter((t) => markeKats.has(t.kategorie) && (entwickelbar ? entwickelbar.has(t.typ) : (t.gruppe[M.trendGruppe] ?? 0) > 0.15)).sort((a, b) => Number(voll.has(a.kategorie)) - Number(voll.has(b.kategorie)));
     if (!typen.some((t) => t.typ === e.typ)) { e.typ = (typen.find((t) => !voll.has(t.kategorie)) ?? typen[0])?.typ; }
     const T = K.typen.find((t) => t.typ === e.typ);
     if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];

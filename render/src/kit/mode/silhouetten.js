@@ -158,8 +158,9 @@ SILHOUETTEN.kinderbody.nur = 'kinder';
 import * as Q27 from './erweiterung-q27.js';
 import * as Q28 from './erweiterung-q28.js';
 import * as Q29 from './erweiterung-q29.js';
-Object.assign(SILHOUETTEN, Q27.SILHOUETTEN, Q28.SILHOUETTEN, Q29.SILHOUETTEN);
-export const ZEICHNER_ERWEITERT = { ...Q27.ZEICHNER, ...Q28.ZEICHNER, ...Q29.ZEICHNER };
+import * as Q33 from './erweiterung-q33.js';
+Object.assign(SILHOUETTEN, Q27.SILHOUETTEN, Q28.SILHOUETTEN, Q29.SILHOUETTEN, Q33.SILHOUETTEN);
+export const ZEICHNER_ERWEITERT = { ...Q27.ZEICHNER, ...Q28.ZEICHNER, ...Q29.ZEICHNER, ...Q33.ZEICHNER };
 
 export const SILHOUETTEN_IDS = Object.keys(SILHOUETTEN);
 
