@@ -7,7 +7,8 @@ import { PRODUKT_ZIELGRUPPEN, ZIELGRUPPE_PRODUKT, sortimentsBaum, type ProduktZi
 export { PRODUKT_ZIELGRUPPEN, sortimentsBaum } from './produkt-sortiment';
 export type { ProduktZielgruppe } from './produkt-sortiment';
 import { clamp, eur, melde, mio, normal, waehle, zufall, type RngHalter } from './util';
-import { WG, saisonId, saisonName, type WgId } from './einkauf';
+import { WG, FREMD, saisonId, saisonName, type WgId } from './einkauf';
+import { saisonFaktor } from './daten';
 import { BESCHAFFUNG, eigenmarkeAnteil, istVerkaufsaktiv, mehrmarge, passungWg, passungHaus, ZIELGRUPPEN_TEXT, type Eigenmarke, type EmKategorie, type Preislage, type Stil } from './eigenmarken';
 import { hqAktualisiere } from './hq';
 import { SORTIMENT_TYPEN, SORTIMENT_KORREKTUREN, type ArtikelBild, type SortimentName } from './sortiment';
@@ -931,23 +932,55 @@ export function produkte(s: GameState, marke?: string): ProdukteListe {
 
 /** Q17: zwei vergleichbare Absatzlinien derselben Warengruppen in € je Woche.
  * Eigenmarke = tatsächlich gebuchte Produktumsätze der Marke; Fremdmarke = WG-Umsatz
- * abzüglich aller Eigenmarken. Leere Wochen sind 0, keine hochgerechneten Daten. */
+ * abzüglich aller Eigenmarken.
+ * Q35: Wochen vor Spielstart stammen aus dem Vorlauf: WG-Umsatz der ersten IST-Woche
+ * (vor der ersten Woche: Basisumsatz der WG) über den Saisonfaktor des Bereichs zurückgerechnet,
+ * Eigen-/Fremdanteil wie in der ersten IST-Woche bzw. nach Markenanteil der WG. Produkte, die
+ * erst nach Spielstart eingeführt wurden, haben im Vorlauf keinen Umsatz. */
 export function produktAbsatzVerlauf(s: GameState, marke: string, kategorie?: ProduktKategorie) {
   const liste = s.produkte?.liste.filter((p) => p.marke === marke && (!kategorie || p.kategorie === kategorie)) ?? [];
   const wgs = [...new Set(liste.map((p) => p.wg))];
+  const start = s.spielStartWoche ?? 0;
+  const sf = (bereich: GruppeId, w: number) => Math.max(1e-6, saisonFaktor(bereich, ((w % 52) + 52) % 52));
+  // Vorlauf je WG: Gesamtumsatz und Eigenmarkenanteil der Marke und aller Marken.
+  const vorlaufWg = (wg: WgId, w: number) => {
+    const st = s.einkauf.wgs[wg], d = WG[wg];
+    if (!st || !d) return { u: 0, marke: 0, eigen: 0 };
+    const v = st.v, iErst = v.w.findIndex((x) => x >= start);
+    const ref = iErst >= 0 ? { u: v.u[iErst], eu: v.eu[iErst], w: v.w[iErst] } : { u: st.basisVK * sf(d.bereich, start), eu: -1, w: start };
+    const u = ref.u * sf(d.bereich, w) / sf(d.bereich, ref.w);
+    const anteilAlle = ref.eu >= 0 && ref.u > 0 ? ref.eu / ref.u : Object.entries(st.pool).filter(([m]) => m !== FREMD).reduce((a, [, x]) => a + x, 0);
+    return { u, marke: u * (st.pool[marke] ?? 0), eigen: u * anteilAlle };
+  };
+  const ausVorlauf = (p: Produkt) => p.basis || p.seit === undefined || p.seit <= start;
   const eigen: number[] = [], fremd: number[] = [], wochen: number[] = [];
+  let vorlaufWochen = 0;
   for (let i = 4; i >= 0; i--) {
-    let e = 0, f = 0;
-    for (const p of liste) e += p.umsatz[p.umsatz.length - 1 - i] ?? 0;
-    for (const wg of wgs) {
-      const v = s.einkauf.wgs[wg]?.v;
-      if (!v) continue;
-      const j = v.u.length - 1 - i;
-      f += Math.max(0, (v.u[j] ?? 0) - (v.eu[j] ?? 0));
+    const woche = s.woche - 1 - i;
+    let e = 0, f = 0, geschaetzt = false;
+    if (woche < start) {
+      geschaetzt = true;
+      for (const wg of wgs) {
+        const v = vorlaufWg(wg, woche);
+        f += Math.max(0, v.u - v.eigen);
+        const ps = liste.filter((p) => p.wg === wg && imSortiment(p));
+        const gw = ps.map((p) => (ausVorlauf(p) ? gewicht(s, p) : 0));
+        const alle = s.produkte!.liste.filter((p) => p.marke === marke && p.wg === wg && imSortiment(p)).reduce((a, p) => a + gewicht(s, p), 0) || 1;
+        e += v.marke * gw.reduce((a, b) => a + b, 0) / alle;
+      }
+    } else {
+      for (const p of liste) e += p.umsatz[p.umsatz.length - 1 - i] ?? 0;
+      for (const wg of wgs) {
+        const v = s.einkauf.wgs[wg]?.v;
+        if (!v) continue;
+        const j = v.u.length - 1 - i;
+        f += Math.max(0, (v.u[j] ?? 0) - (v.eu[j] ?? 0));
+      }
     }
-    eigen.push(Math.round(e)); fremd.push(Math.round(f)); wochen.push(s.woche - i);
+    if (geschaetzt) vorlaufWochen++;
+    eigen.push(Math.round(e)); fremd.push(Math.round(f)); wochen.push(woche);
   }
-  return { eigen, fremd, wochen, letzteEigen: eigen[4], letzteFremd: fremd[4], warengruppen: wgs.length };
+  return { eigen, fremd, wochen, letzteEigen: eigen[4], letzteFremd: fremd[4], warengruppen: wgs.length, vorlaufWochen };
 }
 
 /** Q17: Profil aus vorhandenen Markenmerkmalen; Nachhaltigkeit ist ein Orientierungsindex,

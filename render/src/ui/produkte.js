@@ -54,9 +54,9 @@ function absatzGrafik(A, P, name) {
       <path d="M15 18H303M15 54H303M15 91H303" stroke="#e5e2dd" stroke-width="1" fill="none"/>
       <polyline points="${punkte(A.fremd)}" stroke="#88939a" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
       <polyline points="${punkte(A.eigen)}" stroke="#b65a44" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-      ${A.wochen.map((w, i) => `<text x="${15 + i * 72}" y="111" text-anchor="middle" font-size="9" fill="#6c7780">KW ${kwVon(Math.max(0,w))}</text>`).join('')}
+      ${A.wochen.map((w, i) => `<text x="${15 + i * 72}" y="111" text-anchor="middle" font-size="9" fill="#6c7780">KW ${kwVon(w)}</text>`).join('')}
     </svg>` : ''}
-    <p class="q17-hinweis">${leer ? 'Noch keine Verkaufsdaten erfasst. ' : ''}Vergleich mit Fremdmarkenumsatz in denselben Warengruppen. Beträge in € pro Woche.</p>
+    <p class="q17-hinweis">${leer ? 'Noch keine Verkaufsdaten erfasst. ' : ''}${A.vorlaufWochen ? (A.vorlaufWochen === 1 ? 'Eine Woche' : A.vorlaufWochen + ' Wochen') + ' vor Spielstart aus dem Vorlauf. ' : ''}Vergleich mit Fremdmarkenumsatz in denselben Warengruppen. Beträge in € pro Woche.</p>
   </section>`;
 }
 

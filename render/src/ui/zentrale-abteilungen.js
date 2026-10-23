@@ -102,11 +102,14 @@ export function zentraleAbteilungHtml(u, grafik, organisation, id, etageWahl, et
     raeume.find((q) => q.gebaeude.id === a.gebaeudeId && q.etage.nr === a.etage) ?? raeume[0];
   const geb = (u.gebaeude ?? []).find((g) => g.id === wahl?.gebaeude.id);
   const ue = geb?.etagen.find((e) => e.nr === wahl?.etage.nr);
-  const fteEtage = wahl?.zugewiesen?.fte ?? 0;
-  const freieQm = Math.max(0, (ue?.qm ?? 0) - (ue?.belegtQm ?? 0));
-  const zugewiesenQm = ue?.abteilungen.find((x) => x.id === id)?.qm ?? 0;
-  const kapEtage = wahl ? Math.max(fteEtage, Math.floor((zugewiesenQm + freieQm) / 14)) : 0;
+  // Q35: eine Quelle (Engine abteilungPlaetze): FTE je Etage summieren sich zur Abteilung,
+  // Plätze = eigene Arbeitsplätze plus freie Plätze dieser Etage.
+  const platz = (a.plaetze ?? []).find((z) => z.gebaeudeId === wahl?.gebaeude.id && z.etage === wahl?.etage.nr);
+  const fteEtage = platz?.fte ?? wahl?.zugewiesen?.fte ?? 0;
+  const kapEtage = wahl ? (platz?.plaetze ?? fteEtage) : 0;
   const kap = Math.max(a.fte, a.kapazitaetFte ?? a.fte);
+  const etagenAnzahl = (a.plaetze ?? []).length;
+  const ohnePlatz = Math.max(0, Math.round(a.fte) - (a.plaetze ?? []).reduce((n, z) => n + z.fte, 0));
   const st = a.gehaltFaktor ?? 1;
   const klick = (...x) => `onclick="hqKlick(${x.map((v) => `'${esc(String(v))}'`).join(',')})"`;
   const gName = geb?.name ?? wahl?.gebaeude.name ?? '';
@@ -129,14 +132,15 @@ export function zentraleAbteilungHtml(u, grafik, organisation, id, etageWahl, et
   ]);
   if (!wahl) r += K.leer('Kein Büro zugewiesen. In der Zentrale eine gemietete Etage wählen.', 'Ohne Arbeitsplatz', '<button type="button" class="hk-knopf zweit" ' + klick('uebersicht') + '>Zur Zentrale</button>');
   r += K.liste([
-    K.zeile({ was: 'Arbeitsplätze der Abteilung', unter: 'alle zugewiesenen Etagen, 14 qm je FTE', wert: fmt.format(kap) }),
-    ...(wahl ? [K.zeile({ was: 'Auf dieser Etage', unter: esc(gName) + ' · ' + etText, wert: fmt.format(fteEtage) + ' von ' + fmt.format(kapEtage) })] : []),
+    // Q35: eine Quelle (Engine abteilungPlaetze). Platz im Gebäude = eigene Plätze plus freie Fläche, 14 qm je FTE.
+    K.zeile({ was: 'Platz im Gebäude', unter: (etagenAnzahl > 1 ? fmt.format(Math.round(a.fte)) + ' FTE auf ' + etagenAnzahl + ' Etagen, ' : '') + 'inkl. freier Fläche, 14 qm je FTE', wert: fmt.format(kap) }),
+    ...(wahl ? [K.zeile({ was: 'Auf dieser Etage belegt', unter: esc(gName) + ' · ' + etText + (ohnePlatz ? ' · ' + fmt.format(ohnePlatz) + ' ohne Arbeitsplatz' : ''), wert: fmt.format(fteEtage) + ' von ' + fmt.format(kapEtage) })] : []),
   ]);
   if (raeume.length > 1) r += '<div class="hk-seg q32-etagen" role="group" aria-label="Etage auswählen">' + raeume.map((q) =>
     '<button type="button" aria-pressed="' + (q === wahl) + '" ' + klick('abteilungEtage', id, q.gebaeude.id, q.etage.nr) + '>' + esc(etageName(q.etage.nr)) + '</button>').join('') + '</div>';
 
   r += K.abschnitt('Personal und Vergütung');
-  r += '<div class="q32-regler"><div><span>Besetzung</span><b>' + fmt.format(a.fte) + ' von ' + fmt.format(kap) + ' FTE</b></div><input type="range" aria-label="Besetzung der Abteilung" min="1" max="' + kap + '" step="1" value="' + a.fte +
+  r += '<div class="q32-regler"><div><span>Besetzung</span><b>' + fmt.format(Math.round(a.fte)) + ' FTE · Platz für ' + fmt.format(kap) + '</b></div><input type="range" aria-label="Besetzung der Abteilung" min="1" max="' + kap + '" step="1" value="' + a.fte +
     '" onchange="hqKlick(\'fte\',\'' + esc(a.id) + '\',this.value)" data-q15-fte="' + a.fte + '"><small>Einstellen braucht freie Bürofläche und Einarbeitung, Abbau kostet Abfindungen.</small></div>';
   r += '<div class="q32-regler"><div><span>Gehaltsniveau</span><b>' + Math.round(st * 100) + ' % des Standards</b></div><input type="range" aria-label="Gehaltsniveau der Abteilung" min="80" max="120" step="5" value="' +
     Math.round(st * 100) + '" onchange="hqKlick(\'gehalt\',\'' + esc(a.id) + '\',this.value)" data-q15-gehalt="' + st + '"></div>';

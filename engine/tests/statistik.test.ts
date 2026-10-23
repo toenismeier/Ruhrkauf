@@ -36,6 +36,8 @@ describe('N01 Statistik ohne Wirtschaftseffekt', () => {
   }, 120_000);
   test('Nicht vorhandene Formate geben keine erfundenen Daten zurück', () => {
     const s = neuesSpiel(1);
-    expect(verlauf(s, { ebene: 'format', id: 'FUNDUS', kennzahl: 'umsatz', wochen: 52 }).punkte).toEqual([]);
+    expect(verlauf(s, { ebene: 'format', id: 'Gibtsnicht', kennzahl: 'umsatz', wochen: 52 }).punkte).toEqual([]);
+    // Q35: vor der ersten Woche nur Vorlaufwerte (Q07), ausdrücklich gekennzeichnet.
+    expect(verlauf(s, { ebene: 'format', id: 'FUNDUS', kennzahl: 'umsatz', wochen: 52 }).punkte.every((p) => p.vorlauf)).toBe(true);
   });
 });

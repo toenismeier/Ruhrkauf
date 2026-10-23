@@ -207,11 +207,33 @@ export function sollFte(s: GameState, id: AbteilungId, stufe: Stufe): number {
 
 export const qmBedarf = (a: Abteilung): number => a.fte * HQ_PARAM.qmJeFte;
 /** Q15: Tatsächlich verfügbare Schreibtische in den bereits gemieteten Etagen. */
+/** Q35: eine Quelle für „Plätze je Etage“ und „FTE der Abteilung“. FTE werden nach dem Restgrößen-
+ * verfahren auf die Etagen verteilt (höchstens so viele wie eigene Plätze), damit die Summe stimmt. */
+export function abteilungPlaetze(s: GameState, a: Abteilung): { gebaeudeId: string; etage: number; fte: number; eigene: number; frei: number; plaetze: number }[] {
+  const g = gebaeude(s, a.gebaeudeId);
+  if (!g) return [];
+  const zeilen = (a.belegung ?? []).filter((b) => g.etagen.find((e) => e.nr === b.etage)?.gemietet).map((b) => {
+    const e = g.etagen.find((x) => x.nr === b.etage)!;
+    return { gebaeudeId: g.id, etage: b.etage, fte: 0, eigene: 0, roh: b.qm / HQ_PARAM.qmJeFte, frei: Math.floor(freiQm(s, g, e) / HQ_PARAM.qmJeFte + 1e-9), plaetze: 0, rest: 0 };
+  });
+  // Eigene Plätze: Summe aus der gesamten Fläche, je Etage nach Restgrößen verteilt (keine Rundungsverluste).
+  let ganz = Math.floor(zeilen.reduce((x, z) => x + z.roh, 0) + 1e-9);
+  for (const z of zeilen) { z.eigene = Math.floor(z.roh + 1e-9); z.rest = z.roh - z.eigene; ganz -= z.eigene; }
+  for (const z of [...zeilen].sort((x, y) => y.rest - x.rest || x.etage - y.etage)) { if (ganz <= 0) break; z.eigene++; ganz--; }
+  const sitze = zeilen.reduce((x, z) => x + z.eigene, 0);
+  let offen = Math.min(Math.round(a.fte), sitze);
+  for (const z of zeilen) { const anteil = sitze > 0 ? offen * z.eigene / sitze : 0; z.fte = Math.floor(anteil); z.rest = anteil - z.fte; }
+  offen -= zeilen.reduce((x, z) => x + z.fte, 0);
+  for (const z of [...zeilen].sort((x, y) => y.rest - x.rest || x.etage - y.etage)) { if (offen <= 0) break; if (z.fte < z.eigene) { z.fte++; offen--; } }
+  return zeilen.map(({ rest: _r, roh: _h, ...z }) => ({ ...z, plaetze: z.eigene + z.frei }));
+}
 export function abteilungKapazitaet(s: GameState, a: Abteilung): number {
   const g = gebaeude(s, a.gebaeudeId);
   if (!g) return a.fte;
-  const freieQm = g.etagen.reduce((x, e) => x + freiQm(s, g, e), 0);
-  return Math.max(a.fte, Math.floor((platzQm(s, a) + freieQm) / HQ_PARAM.qmJeFte));
+  // Q35: je Etage ganze Plätze zählen, damit die Summe der Etagenplätze (abteilungPlaetze) passt.
+  const frei = g.etagen.reduce((x, e) => x + Math.floor(freiQm(s, g, e) / HQ_PARAM.qmJeFte + 1e-9), 0);
+  const eigene = abteilungPlaetze(s, a).reduce((x, z) => x + z.eigene, 0);
+  return Math.max(a.fte, eigene + frei);
 }
 /** Abweichungen zur Vergütungsreferenz. Standard (Faktor 1) lässt alle Engine-Werte unverändert. */
 export function abteilungArbeitsklima(a: Abteilung): { moral: number; fluktuation: number; qualitaet: number } {
@@ -962,6 +984,8 @@ export interface HqUebersicht {
     gebaeudeId?: string; gebaeude?: string; stadt?: string; etage?: number; etagen: number[]; platzQm: number; umzugBis?: number; einarbeitungBis?: number;
     kostenWoche: number; wirkung: string;
     kapazitaetFte: number; gehaltFaktor: number; moral: number; fluktuation: number; qualitaet: number;
+    /** Q35: Arbeitsplätze je Etage. Summe fte = fte der Abteilung (sofern Platz), plaetze = eigene Plätze + freie Plätze der Etage. */
+    plaetze: { gebaeudeId: string; etage: number; fte: number; eigene: number; frei: number; plaetze: number }[];
   }[];
   angebote: {
     id: string; name: string; stadt: string; typ: HqTyp; vermieter: string; frist: number; laufzeitJahre: number;
@@ -1010,6 +1034,7 @@ export function hqUebersicht(s: GameState): HqUebersicht {
         kostenWoche: eur(a.fte * (HQ_PARAM.lohn[a.id] * (a.gehaltFaktor ?? 1) + hq.sachJeFte)), wirkung: wirkungText(s, a.id),
         kapazitaetFte: abteilungKapazitaet(s, a), gehaltFaktor: a.gehaltFaktor ?? 1,
         moral: klima.moral, fluktuation: klima.fluktuation, qualitaet: klima.qualitaet,
+        plaetze: abteilungPlaetze(s, a),
       };
     }),
     angebote: hq.angebote.map((an) => ({

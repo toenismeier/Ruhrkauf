@@ -26,7 +26,12 @@ export interface HausBetrieb {
   ausfallBis?: number;
   inventurdifferenz?: number;
   kosten: Record<KostenPosten, number>;
+  /** Q35: tatsächlicher Verbrauch zum Budget je Posten (1 = genau im Budget), je Haus verschieden. */
+  kostenIst?: Record<KostenPosten, number>;
+  kostenIstNormiert?: boolean;
   services: Record<HausService, boolean>;
+  /** Q35: Services zum Spielstart; Wirkung und Kosten zählen nur als Abweichung davon (Kalibrierung bleibt). */
+  serviceStart?: Record<HausService, boolean>;
   serviceAusnahme?: Partial<Record<HausService, boolean>>;
   standardAusnahme?: HausStandard;
   ausnahmeGrund?: string;
@@ -145,6 +150,7 @@ export function initialisiereHausbetrieb(s: GameState): void {
     l.bonusAnteil ??= 0.1;
     l.wechselwille ??= 0;
     l.stellvertretung ??= { name: 'Stellvertretung ' + h.stadt, qualitaet: clamp(l.skill * 0.85, 0, 1) };
+    const neu = !h.betrieb;
     h.betrieb ??= {
       leitungStart: l.skill, leitungGehaltStart: l.gehalt ?? 0, kosten: { energie: 1, reinigung: 1, sicherheit: 1, instandhaltung: 1, versicherung: 1 },
       services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false },
@@ -154,10 +160,55 @@ export function initialisiereHausbetrieb(s: GameState): void {
       konzessionen: {},
     };
     h.betrieb.leitungGehaltStart ??= l.gehalt ?? 0;
+    // Q35: Ausstattung und Verbrauch je Haus. Alte Spielstände (betrieb ohne serviceStart) bleiben neutral.
+    if (!h.betrieb.serviceStart) {
+      if (neu) h.betrieb.services = startServices(s, h);
+      h.betrieb.serviceStart = { ...h.betrieb.services };
+    }
+    if (neu && !h.betrieb.kostenIst) h.betrieb.kostenIst = kostenIstRoh(s, h);
     for (const f of h.flaechen.filter(x => x.konzept === 'konzession')) {
       h.betrieb.konzessionen[f.id] ??= { name: 'Partner ' + (f.gruppe ?? 'Sortiment'), quote: 0.22, bis: s.woche + 260, exklusiv: false };
     }
   }
+  normiereKostenIst(s);
+}
+const gesamtQm = (h: Haus): number => h.flaechen.reduce((a, f) => a + f.qm, 0) || h.grundflaecheQm;
+/** Q35: Services nach Format und Größe zum Start (große Warenhäuser voll, kleine mit Grundservice). */
+function startServices(s: GameState, h: Haus): Record<HausService, boolean> {
+  const x = (k: string) => hash(s.seed + ':service:' + h.id + ':' + k);
+  const qm = gesamtQm(h), gross = qm >= 14_000, mittel = qm >= 7_000;
+  // Abholstation bleibt aus: sie gehört zum Online-Kanal (O09) und wird dort als Hebel gesetzt.
+  if (h.klasse === 'premium') return { kundendienst: true, schneiderei: true, geschenkverpackung: true, abholstation: false };
+  if (h.format === 'warenhaus') return {
+    kundendienst: gross || (mittel && x('k') < 0.6), schneiderei: gross ? x('s') < 0.8 : mittel && x('s') < 0.3,
+    geschenkverpackung: mittel || x('g') < 0.5, abholstation: false,
+  };
+  if (h.format === 'sport') return { kundendienst: mittel || x('k') < 0.4, schneiderei: false, geschenkverpackung: x('g') < 0.3, abholstation: false };
+  return { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false };
+}
+/** Q35: Verbrauch je Posten vor Normierung: Baujahr (Energie, Instandhaltung), Lage (Sicherheit), Substanz, Streuung. */
+function kostenIstRoh(s: GameState, h: Haus): Record<KostenPosten, number> {
+  const x = (k: string) => hash(s.seed + ':kostenist:' + h.id + ':' + k) - 0.5;
+  const alt = h.baujahr < 1970 ? 1 : h.baujahr < 1990 ? 0.5 : h.baujahr >= 2005 ? -0.7 : 0;
+  const lage = h.lage === '1a' ? 1 : h.lage === 'rand' || h.lage === 'center' ? -0.6 : 0;
+  return {
+    energie: 1 + 0.07 * alt + 0.10 * x('e'),
+    reinigung: 1 + 0.08 * x('r'),
+    sicherheit: 1 + 0.06 * lage + 0.08 * x('s'),
+    instandhaltung: 1 + 0.0025 * (60 - h.substanz) + 0.08 * x('i'),
+    versicherung: 1 + 0.03 * x('v'),
+  };
+}
+/** Netzweit flächengewichtet auf 1 normieren: die Konzernkosten der Ausgangslage bleiben gleich. */
+function normiereKostenIst(s: GameState): void {
+  const hs = s.haeuser.filter(h => h.betrieb?.kostenIst && !h.betrieb.kostenIstNormiert);
+  if (!hs.length) return;
+  for (const p of POSTEN) {
+    const flaeche = hs.reduce((a, h) => a + gesamtQm(h), 0) || 1;
+    const mittel = hs.reduce((a, h) => a + gesamtQm(h) * h.betrieb!.kostenIst![p], 0) / flaeche;
+    for (const h of hs) h.betrieb!.kostenIst![p] = Math.round(1000 * h.betrieb!.kostenIst![p] / mittel) / 1000;
+  }
+  for (const h of hs) h.betrieb!.kostenIstNormiert = true;
 }
 function structuredStandard(): HausStandard {
   return { oeffnung: { ...STANDARD.oeffnung }, sauberkeit: 2, praesentation: 2, kasse: 2,
@@ -178,11 +229,13 @@ export function hausBetriebsFaktor(s: GameState, h: Haus): number {
   if (s.hausbetriebAbnahmeAus || !b || !istOffen(h)) return 1;
   const l = leitung(h);
   const st = hausStandard(s, h);
-  const services = hausServices(s,h);
-  const kundendienst = services.kundendienst ? 1.007 : 1;
-  const schneiderei = services.schneiderei ? 1.004 : 1;
-  const geschenk = services.geschenkverpackung && (s.woche % 52 >= 47) ? 1.014 : 1;
-  const abholung = services.abholstation ? 1.005 : 1;
+  const services = hausServices(s,h), start = b.serviceStart;
+  // Q35: nur die Abweichung zum Startzustand wirkt (Startausstattung ist in der Kalibrierung enthalten).
+  const sw = (k: HausService, f: number) => (services[k] ? f : 1) / (start?.[k] ? f : 1);
+  const kundendienst = sw('kundendienst', 1.007);
+  const schneiderei = sw('schneiderei', 1.004);
+  const geschenk = s.woche % 52 >= 47 ? sw('geschenkverpackung', 1.014) : 1;
+  const abholung = sw('abholstation', 1.005);
   const standard = 1 + 0.007 * (st.sauberkeit - 2) + 0.009 * (st.praesentation - 2) + 0.006 * (st.kasse - 2)
     + 0.002 * (10 - st.oeffnung.von) + 0.003 * (st.oeffnung.bis - 20) + 0.002 * (st.oeffnung.samstagBis - 20);
   // Der alte skill-Faktor bleibt in wirtschaft.ts: nur Änderungen an den vier neuen Stärken wirken zusätzlich.
@@ -204,8 +257,9 @@ export function hausBetriebskosten(s: GameState, h: Haus, sonstige: number): num
   // O08 Umbau: modernisierte LED- und Klimastufen senken den Energieverbrauch, der Start ist neutral.
   const etagenBau = (h as Haus & {etagenBau?: Record<string, {technik:{licht:number;klima:number}}>}).etagenBau;
   const modernisiert = etagenBau ? Object.values(etagenBau).reduce((sum,e)=>sum+Math.max(0,e.technik.licht-basisTechnik)+Math.max(0,e.technik.klima-basisTechnik),0) / Math.max(1,h.etagen.length) : 0;
-  for (const p of POSTEN) faktor += ANTEILE[p] * b.kosten[p] * (p === 'energie' ? preis * (1 - 0.07 * modernisiert) : 1);
-  const service = Object.values(hausServices(s,h)).filter(Boolean).length * 180;
+  for (const p of POSTEN) faktor += ANTEILE[p] * b.kosten[p] * (b.kostenIst?.[p] ?? 1) * (p === 'energie' ? preis * (1 - 0.07 * modernisiert) : 1);
+  const anzahl = (x?: Record<HausService, boolean>) => x ? Object.values(x).filter(Boolean).length : 0;
+  const service = (anzahl(hausServices(s,h)) - anzahl(b.serviceStart)) * 180;
   const l = leitung(h);
   const kostenLeitung = 1 - 0.035 * ((l.staerken?.kosten ?? l.skill) - b.leitungStart);
   return Math.max(0, sonstige * faktor * kostenLeitung + service);
@@ -532,6 +586,16 @@ export function hausAktion(s: GameState, a: HausAktion): { ok: boolean; text: st
   return { ok: false, text: 'Ungültige Hausaktion.' };
 }
 
+/** Q35: größte Abweichung des Verbrauchs vom Budget (Befund der Filialleitung). */
+export function kostenAbweichung(b: HausBetrieb): { posten: KostenPosten; abweichung: number } | undefined {
+  if (!b.kostenIst) return undefined;
+  let best: { posten: KostenPosten; abweichung: number } | undefined;
+  for (const p of POSTEN) {
+    const x = (b.kostenIst[p] ?? 1) - 1;
+    if (!best || Math.abs(x) * ANTEILE[p] > Math.abs(best.abweichung) * ANTEILE[best.posten]) best = { posten: p, abweichung: Math.round(x * 1000) / 1000 };
+  }
+  return best;
+}
 export function hausUebersicht(s: GameState, id: string) {
   const h = s.haeuser.find(x => x.id === id);
   if (!h) return undefined;
@@ -543,7 +607,8 @@ export function hausUebersicht(s: GameState, id: string) {
     kosten: b?.kosten, ausfallBis:b?.ausfallBis, inventurdifferenz:b?.inventurdifferenz ?? 0, energiePreis:s.hausbetrieb?.energiePreis ?? 1,
     planWoche:(s as GameState & {planung?: {jahre:{jahr:number;phasing:Record<string,number[]>}[]}}).planung?.jahre.find(j=>j.jahr===s.startJahr+Math.floor(s.woche/52))?.phasing[h.id]?.[s.woche%52] ?? h.wochenPlan,
     treiberAktuell:(h as Haus & {treiberVerlauf?:{von:number;bis:number;frequenz:number;kaufquote:number;bon:number}[]}).treiberVerlauf?.slice().reverse().find(x=>x.bis===s.woche-1),
-    kostenBasis: eur((h.kpi?.sonstige ?? 0) / Math.max(0.001, b ? Object.entries(b.kosten).reduce((a, [p, f]) => a + ANTEILE[p as KostenPosten] * f, 0) : 1)),
+    kostenBasis: eur((h.kpi?.sonstige ?? 0) / Math.max(0.001, b ? Object.entries(b.kosten).reduce((a, [p, f]) => a + ANTEILE[p as KostenPosten] * f * (b.kostenIst?.[p as KostenPosten] ?? 1), 0) : 1)),
+    kostenIst: b?.kostenIst, kostenAbweichung: b ? kostenAbweichung(b) : undefined,
     services: hausServices(s,h), gastro: b?.gastro, gastroVertragBis: b?.gastroVertragBis, gastroStoerungBis:b?.gastroStoerungBis, restaurantQm: b?.restaurantQm,
     konzessionen: b?.konzessionen, kommentar: b?.kommentare[0], kommentare: b?.kommentare ?? [],
     umfeld: s.hausbetrieb?.staedte[h.stadt], ausnahmeGrund: b?.ausnahmeGrund,

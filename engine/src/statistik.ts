@@ -1,5 +1,6 @@
 // N01: ausschließlich lesbare Zeitreihen, ohne Eingriff in die Wirtschaftssimulation.
 import type { GameState, Haus, HausKpi, WochenKpi } from './types';
+import { vorlaufKonzernWoche } from './vertrieb';
 
 export const STATISTIK_AKTIV = true; // Bis N13 Einstellungen gemergt ist.
 const GRENZE_BYTES = 2_000_000;
@@ -12,7 +13,8 @@ export interface StatistikFilter {
   kennzahl: StatistikKennzahl;
   wochen: 13 | 52 | 'alle' | number;
 }
-export interface StatistikPunkt { woche: number; wert: number; vorjahr?: number; plan?: number }
+/** vorlauf: Woche vor Spielstart aus dem Q07-Vorlauf (Vorgänger im Amt), kein eigenes IST. */
+export interface StatistikPunkt { woche: number; wert: number; vorjahr?: number; plan?: number; vorlauf?: boolean }
 export interface StatistikReihe { ebene: StatistikEbene; id?: string; kennzahl: StatistikKennzahl; punkte: StatistikPunkt[]; einheit: 'euro' | 'anzahl' | 'index'; hinweis?: string }
 
 export function statistikHaus(s: GameState, h: Haus, k: HausKpi): void {
@@ -86,10 +88,29 @@ export function verlauf(s: GameState, filter: StatistikFilter): StatistikReihe {
       werte.set(p.woche, (werte.get(p.woche) ?? 0) + p[kennzahl as 'umsatz' | 'db' | 'frequenz' | 'personalFte']);
     }
   }
+  // Q35: Wochen vor Spielstart aus dem Vorlauf ergänzen, damit kurze Verläufe nicht bei 0 beginnen.
+  const start = s.spielStartWoche ?? 0;
+  const vorlauf = new Set<number>();
+  const vonWoche = Math.max(start - 52, Number.isFinite(beginn) ? beginn - 52 : start - 52);
+  if (ebene === 'konzern' && (kennzahl === 'umsatz' || kennzahl === 'ebitda')) {
+    for (let w = vonWoche; w < start; w++) {
+      if (werte.has(w)) continue;
+      const v = vorlaufKonzernWoche(s, w);
+      if (v) { werte.set(w, kennzahl === 'umsatz' ? v.umsatz : v.ebitda); vorlauf.add(w); }
+    }
+  } else if (ebene !== 'konzern' && (kennzahl === 'umsatz' || kennzahl === 'db' || kennzahl === 'frequenz')) {
+    for (const h of passendeHaeuser(s, ebene, id)) for (const v of s.vorjahrHistorie?.[h.id] ?? []) {
+      if (v.woche < vonWoche || v.woche >= start || h.verlauf?.some((p) => p.woche === v.woche)) continue;
+      const x = kennzahl === 'umsatz' ? v.umsatz : kennzahl === 'db' ? v.db : Math.round(Math.max(0, v.umsatz) / 45);
+      werte.set(v.woche, (werte.get(v.woche) ?? 0) + x); vorlauf.add(v.woche);
+    }
+  }
+  if (vorlauf.size && !ergebnis.hinweis) ergebnis.hinweis = 'Wochen vor Spielstart aus dem Vorlauf des Vorgängers.';
   const alle = [...werte.keys()].sort((a, b) => a - b);
   for (const w of alle) {
     if (w < beginn) continue;
     const punkt: StatistikPunkt = { woche: w, wert: werte.get(w)! };
+    if (vorlauf.has(w)) punkt.vorlauf = true;
     if (werte.has(w - 52)) punkt.vorjahr = werte.get(w - 52);
     if (ebene === 'konzern' && kennzahl === 'ebitda') {
       const q = s.quartale.find(x => w >= x.start && w < x.start + 13);

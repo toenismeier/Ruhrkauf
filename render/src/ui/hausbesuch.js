@@ -65,9 +65,13 @@ export function hausbesuchBesatz(haus, etageNr) {
   const ist = Math.max(0, k.fteIst ?? ((haus.personal?.vollzeit ?? 0) + (haus.personal?.teilzeit ?? 0) + (haus.personal?.aushilfen ?? 0)));
   const fte = haus.format === 'outlet' ? Math.round(qm / 140) : ist * qm / gesamt;
   const umsatz = Math.max(0, Object.entries(k.umsatzJeGruppe ?? {}).reduce((n, [g, u]) => n + u * (fl.some((f) => f.gruppe === g) ? 1 : 0), 0));
+  // Q35: Figuren = gleichzeitig im Dienst. Eine Vollzeitkraft (40 Std.) deckt bei 60 Öffnungsstunden
+  // zwei Drittel der Woche; abzüglich Krank/Urlaub (rund 10 %) stehen Verkauf und Kasse (71 % der Stunden) auf der Fläche.
+  const imDienst = haus.format === 'outlet' ? qm / 300 : fte * (40 / 60) * 0.9 * 0.71;
   return {
     kunden: fl.length ? begrenze(Math.round(2 + umsatz / 18000 + qm / 240), 2, 36) : 0,
-    verkauf: fl.length ? begrenze(Math.round(haus.format === 'outlet' ? qm / 300 : fte / 9), haus.format === 'outlet' ? 1 : 0, 12) : 0,
+    verkauf: fl.length ? begrenze(Math.round(imDienst), haus.format === 'outlet' ? 1 : 0, 12) : 0,
+    imDienst: fl.length ? Math.max(haus.format === 'outlet' ? 1 : 0, Math.round(imDienst)) : 0,
     fte: Math.round(fte * 10) / 10,
     personalquote: (k.fteBedarf ?? 0) > 0 ? ist / k.fteBedarf : 1
   };
@@ -228,7 +232,7 @@ export function hausbesuchModul(ctx) {
     K.x = buehne.breite / 2; K.z = buehne.tiefe / 2;
     K.max = Math.max(20, Math.max(buehne.breite, buehne.tiefe) * 1.25);
     K.min = 7; K.halb = Math.min(K.max, Math.max(16, Math.max(buehne.breite, buehne.tiefe) * 0.8));
-    host.querySelector('.hb-unter').textContent = etageName(etageNr) + ' · ' + besatz.kunden + ' Kunden · ' + besatz.verkauf + ' Beschäftigte' + (haus.format === 'outlet' ? ' · Modellbetrieb' : ' · ' + Number(besatz.fte).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' FTE');
+    host.querySelector('.hb-unter').textContent = etageName(etageNr) + ' · ' + besatz.kunden + ' Kunden · ' + besatz.imDienst + ' im Dienst' + (besatz.imDienst > besatz.verkauf ? ' (' + besatz.verkauf + ' im Bild)' : '') + (haus.format === 'outlet' ? ' · Modellbetrieb' : ' von ' + Number(besatz.fte).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' FTE');
     host.querySelector('.hb-blase').hidden = true;
     host.querySelectorAll('[data-hb=etage]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.nr) === etageNr)));
     fahrt = delta ? { seit: performance.now(), start: delta > 0 ? -8 : 8, dauer: 300 } : null;

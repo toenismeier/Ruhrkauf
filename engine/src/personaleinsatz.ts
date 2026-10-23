@@ -17,7 +17,8 @@ export const PERSONAL_ANTEILE: Record<PersonalGruppe, number> = {
   logistik: 0.19, verkauf: 0.52, kasse: 0.19, verwaltung: 0.10,
 };
 export const PERSONAL_TAGE = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] as const;
-export interface PersonalTag { tag: string; bedarf: number; plan: number; referenz: number; springer: number; deckung: number }
+/** ausfall: Anteil der geplanten Stunden, der nach Krankenstand je Haus und Tag tatsächlich da ist (Q35). */
+export interface PersonalTag { tag: string; bedarf: number; plan: number; referenz: number; springer: number; deckung: number; ausfall?: number }
 export interface PersonalZeile { gruppe: PersonalGruppe; name: string; fte: number; tage: PersonalTag[]; bedarf: number; plan: number; deckung: number }
 export interface PersonalPlan {
   woche: number; gruppen: Record<PersonalGruppe, PersonalZeile>;
@@ -114,9 +115,47 @@ function ausfall(s: GameState): { krank: number; urlaub: number } {
     urlaub: kw >= 26 && kw <= 35 ? 0.14 : kw >= 51 ? 0.10 : 0.055,
   };
 }
-function dienstplan(s: GameState, h: Haus, anlieferung: number, reduzierung: boolean): PersonalPlan {
+/** Q35: reproduzierbarer Zufall je Seed, Haus und Woche; verbraucht nichts aus dem Hauptstrom. */
+function streu(t: string): number {
+  let n = 2166136261;
+  for (let i = 0; i < t.length; i++) n = Math.imul(n ^ t.charCodeAt(i), 16777619);
+  n ^= n >>> 13; n = Math.imul(n, 0x5bd1e995); n ^= n >>> 15;
+  return (n >>> 0) / 4294967296;
+}
+/** Q35: Mehrarbeit und Stundenkonten fangen kleine Ausfälle ab (3 Punkte der Planstunden). */
+export const PERSONAL_PUFFER = 0.03;
+/** Q35: Krankheitswelle je Region (Okt bis März, im Schnitt jede fünfte Woche, zwei bis drei Wochen lang). */
+export function krankheitswelle(s: GameState, region: string, woche = s.woche): number {
+  const kw = ((woche % 52) + 52) % 52;
+  if (kw > 11 && kw < 40) return 0;
+  // Welle startet in Woche b und hält 2 bis 3 Wochen.
+  for (let b = woche; b > woche - 3; b--) {
+    if (streu(s.seed + ':welle:' + region + ':' + b) < 0.075) {
+      const dauer = 2 + Math.floor(streu(s.seed + ':welledauer:' + region + ':' + b) * 2);
+      if (woche - b < dauer) return 0.025 + 0.035 * streu(s.seed + ':wellehoehe:' + region + ':' + b);
+    }
+  }
+  return 0;
+}
+/** Q35: tatsächlicher Krankenstand eines Hauses in dieser Woche. Geplant ist der Saisonwert;
+ * große Häuser und Ost etwas höher, dazu Streuung je Haus und Woche sowie regionale Wellen. */
+export function krankIst(s: GameState, h: Haus): number {
+  const plan = ausfall(s).krank;
+  const groesse = fte(h) > 160 ? 1.08 : fte(h) < 60 ? 0.94 : 1;
+  const region = h.region === 'Ost' ? 1.07 : h.region === 'Süd' ? 0.95 : 1;
+  const haus = 0.85 + 0.3 * streu(s.seed + ':krankhaus:' + h.id);
+  const woche = 0.6 + 0.8 * streu(s.seed + ':krank:' + h.id + ':' + s.woche);
+  return clamp(plan * groesse * region * haus * woche + krankheitswelle(s, h.region), 0.015, 0.22);
+}
+function dienstplan(s: GameState, h: Haus, anlieferung: number, reduzierung: boolean, wochenplanung = false): PersonalPlan {
   const st = h.personaleinsatz!;
   const aus = ausfall(s), q = qualitaet(s);
+  // Q35: geplante Stunden fallen nach dem tatsächlichen Krankenstand aus (Prognose ohne Streuung).
+  // Der Startplan bleibt die neutrale Referenz ohne Streuung (auch bei Umplanung durch Aktionen vor der
+  // ersten Woche); ab dem ersten Wochenabschluss gilt der tatsächliche Krankenstand.
+  const streut = !s.prognose && (wochenplanung || s.woche > (s.spielStartWoche ?? 0));
+  const krank = streut ? krankIst(s, h) : aus.krank;
+  const ausfallWoche = (1 - krank) / (1 - aus.krank);
   const neu = st.einarbeitungBis > s.woche;
   // Nur neu eingestellte Kräfte leisten in den ersten vier Wochen effektiv 50 %.
   // Die normale FTE-Entwicklung (Fluktuation, Einstellungen) bewertet bereits die bestehende
@@ -154,12 +193,15 @@ function dienstplan(s: GameState, h: Haus, anlieferung: number, reduzierung: boo
       const fehler = richtung * 0.19;
       const bezug = 1 + fehler * (1 - st.basisQualitaet);
       const genau = 1 + fehler * (1 - q);
-      let plan = bedarf * relativ * st.faktor[g] * genau * (1 + st.training * 0.035);
+      // Tagesstreuung des Ausfalls (Verwaltung kaum, Fläche stärker), ohne Hauptzufall.
+      const tag = !streut ? 1 : 1 + (g === 'verwaltung' ? 0.02 : 0.05) * (streu(s.seed + ':tag:' + h.id + ':' + s.woche + ':' + g + ':' + i) - 0.5) * 2;
+      const ausfallTag = clamp(ausfallWoche * tag, 0.6, 1.08);
+      let plan = bedarf * relativ * st.faktor[g] * genau * (1 + st.training * 0.035) * ausfallTag;
       if (g === 'kasse' && i === 5) plan *= st.samstagKasse;
       if (g === 'kasse' && dezember && weihnachten === 'sparsam') plan *= 0.88;
       const referenz = bedarf * bezug;
       extra += Math.max(0, (st.faktor[g] - 1) * bedarf) + (g === 'kasse' && i === 5 ? Math.max(0, st.samstagKasse - 1) * bedarf : 0);
-      return { tag: PERSONAL_TAGE[i], bedarf: rund(bedarf), plan: rund(plan), referenz: rund(referenz), springer: 0, deckung: bedarf ? plan / bedarf : 1 };
+      return { tag: PERSONAL_TAGE[i], bedarf: rund(bedarf), plan: rund(plan), referenz: rund(referenz), springer: 0, deckung: bedarf ? plan / bedarf : 1, ausfall: ausfallTag };
     });
     const bedarf = tage.reduce((a, t) => a + t.bedarf, 0);
     const plan = tage.reduce((a, t) => a + t.plan, 0);
@@ -191,12 +233,19 @@ function dienstplan(s: GameState, h: Haus, anlieferung: number, reduzierung: boo
   const aufschlag = dezember && weihnachten === 'spaet' ? 1.55 : 1;
   const zusatzkosten = eur(gebuchteAushilfenStunden * 490 / 40 * aufschlag + extra * normalLohn * 0.5 +
     weihnachtsReserve * 490 / 40);
-  const plan: PersonalPlan = { woche: s.woche, gruppen, krank: aus.krank, urlaub: aus.urlaub,
-    aushilfenStunden: rund(aushilfenStunden), zusatzkosten, verfuegbarkeit: 1,
+  // Aushilfen: fest eingeplante Aushilfskräfte (in den FTE enthalten, saisonal stärker) plus Zusatzbuchung.
+  const festeAushilfen = h.personal.aushilfen * 40 * clamp(0.6 + 0.4 * saisonFaktor('damen', s.woche), 0.5, 1.6);
+  const plan: PersonalPlan = { woche: s.woche, gruppen, krank, urlaub: aus.urlaub,
+    aushilfenStunden: Math.round(festeAushilfen + aushilfenStunden), zusatzkosten, verfuegbarkeit: 1,
     kaufquote: 1, fehlerkosten: 0, springerSaldo: 0, springerBewegungen: 0,
     einarbeitung: neu ? 0.5 : 1 };
   berechneWirkung(h, plan);
   return plan;
+}
+/** Planstunden, die für Umsatzwirkung zählen: Krankheitsausfall erst jenseits des Puffers. */
+function wirkPlan(t: PersonalTag): number {
+  const a = t.ausfall ?? 1;
+  return a < 1 ? t.plan / a * Math.min(1, a + PERSONAL_PUFFER) : t.plan;
 }
 function berechneWirkung(h: Haus, p: PersonalPlan): void {
   // Ausschließlich Unterdeckung wirkt auf Verkäufe; Überdeckung erhöht nur die Kosten.
@@ -204,7 +253,8 @@ function berechneWirkung(h: Haus, p: PersonalPlan): void {
     const t = p.gruppen[g].tage[i];
     // Gegen den unveränderten Startplan normiert. Prognosefehler in der
     // Ausgangslage bleiben sichtbar, verändern Umsatz und EBITDA aber nicht.
-    return Math.max(0, 1 - t.plan / Math.max(0.01, t.referenz));
+    // Q35: Krankheitsausfall wirkt erst jenseits des Puffers aus Mehrarbeit.
+    return Math.max(0, 1 - wirkPlan(t) / Math.max(0.01, t.referenz));
   };
   const gewicht = [0.105, 0.137, 0.147, 0.157, 0.191, 0.263];
   const verkauf = gewicht.reduce((a, w, i) => a + w * defizit('verkauf', i), 0);
@@ -220,7 +270,7 @@ function berechneWirkung(h: Haus, p: PersonalPlan): void {
     for (const t of z.tage) t.deckung = t.bedarf ? t.plan / t.bedarf : 1;
   }
 }
-function neuPlanen(s: GameState): void {
+function neuPlanen(s: GameState, wochenplanung = false): void {
   const gruppen = new Map<string, Haus[]>();
   const anlieferungen = s.bestellungen.filter((b) => b.ankunft === s.woche).reduce((a, b) => a + b.wert, 0);
   const norm = Math.max(1, s.haeuser.length * 100_000);
@@ -229,7 +279,7 @@ function neuPlanen(s: GameState): void {
 
   for (const h of s.haeuser) {
     if (!aktiv(h) || !h.personaleinsatz) continue;
-    h.personaleinsatz.plan = dienstplan(s, h, anlieferung, reduzierung);
+    h.personaleinsatz.plan = dienstplan(s, h, anlieferung, reduzierung, wochenplanung);
     // O02: Kaufquote aus der Besetzung als eigene Treiberquelle, damit Reporting und Umsatz übereinstimmen.
     if (h.treiber) setzeTreiber(s, h.id, 'personal', 'kaufquote', h.personaleinsatz.plan.kaufquote);
     const id = gruppeHauscluster(h, s);
@@ -333,7 +383,17 @@ export function personaleinsatzWoche(s: GameState): void {
       melde(s, 'warnung', h.name + ': erhöhte Fluktuation. Neue Kräfte sind vier Wochen nur halb produktiv.', { hausId: h.id, modul: 'personal' });
     }
   }
-  neuPlanen(s);
+  neuPlanen(s, true);
+  // Q35: Krankheitswelle meldet die Personalabteilung zu Beginn (Posteingang), mit den knappsten Häusern.
+  if (!s.prognose) for (const region of [...new Set(s.haeuser.filter(aktiv).map((h) => h.region))]) {
+    const welle = krankheitswelle(s, region);
+    if (!welle || krankheitswelle(s, region, s.woche - 1)) continue;
+    const hs = s.haeuser.filter((h) => aktiv(h) && h.region === region && h.personaleinsatz?.plan);
+    const deckung = (h: Haus) => Math.min(...PERSONAL_GRUPPEN.map((g) => h.personaleinsatz!.plan!.gruppen[g].deckung));
+    const knapp = [...hs].sort((a, b) => deckung(a) - deckung(b)).slice(0, 2);
+    melde(s, 'warnung', `Krankheitswelle in Region ${region}: Krankenstand rund ${Math.round(100 * (ausfall(s).krank + welle))} %. ` +
+      `Am knappsten besetzt: ${knapp.map((h) => h.name).join(', ')}. Springerpool oder Aushilfen prüfen.`, { modul: 'personal' });
+  }
   // Warnung nur bei spielerisch relevanten Engpässen, maximal einmal in acht Wochen.
   if (!s.prognose) for (const [id, hs] of gruppiereCluster(s)) {
     const kritisch = hs.filter((h) => (h.personaleinsatz?.plan?.gruppen.kasse.tage[5].deckung ?? 1) < 0.84);
@@ -378,7 +438,7 @@ export function personalVerkaufsFaktor(h: Haus, gruppe: GruppeId): number {
   if (!p) return 1;
   const beratung = GRUPPEN[gruppe]?.beratung ?? 0.5;
   const v = p.gruppen.verkauf.tage.reduce((a, t) => a +
-    (Math.max(0, 1 - t.plan / Math.max(0.01, t.referenz)) / 6), 0);
+    (Math.max(0, 1 - wirkPlan(t) / Math.max(0.01, t.referenz)) / 6), 0);
   const faktor = clamp(1 - (0.15 + 0.38 * beratung) * v, 0.65, 1) *
     clamp(p.kaufquote / Math.max(0.000001, 1 - 0.33 * v), 0.65, 1);
   // O02 wendet den globalen Kaufquotenfaktor später selbst an.

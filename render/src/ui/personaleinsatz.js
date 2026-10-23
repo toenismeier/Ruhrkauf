@@ -101,7 +101,14 @@ export function personalModul(ctx) {
       esc(c.name) + ' (' + c.haeuser.length + ')</option>').join('') + '</select></label>';
     const befund = !gewaehlt ? '<b>Keine offenen Häuser.</b>' : knapp.length
       ? '<b>' + knapp.length + ' von ' + gewaehlt.haeuser.length + ' Häusern sind unter 90 % besetzt.</b> Am knappsten: ' + esc(knapp.slice(0, 2).map((h) => h.name).join(', ')) + '.'
-      : '<b>Alle ' + gewaehlt.haeuser.length + ' Häuser sind ausreichend besetzt.</b> Kein Springer nötig.';
+      : (() => {
+        // Q35: auch ohne Engpass das knappste Haus und seinen Krankenstand nennen.
+        const min = (h) => Math.min(...GRUPPEN.map((g) => h.gruppen[g]));
+        const k = [...gewaehlt.haeuser].sort((a, b) => min(a) - min(b))[0];
+        return '<b>Alle ' + gewaehlt.haeuser.length + ' Häuser sind ausreichend besetzt.</b> ' + (k && min(k) < 0.985
+          ? 'Am knappsten: ' + esc(k.name) + ' mit ' + pct(min(k)) + ' (Krankenstand ' + pct(k.krank) + ').'
+          : 'Kein Springer nötig.');
+      })();
     ctx.panel('Personaleinsatz', 'Wochentagsplanung · vier Personalgruppen',
       K.bereich('haus', 'haus') + K.sprecher({ text: befund, unter: 'Personalplanung', ton: knapp.length ? 'engpass' : '' }) +
       K.rumpf(selector + (gewaehlt ? clusterBlock(gewaehlt) : K.leer('Keine offenen Häuser in diesem Cluster.'))), 'gross');

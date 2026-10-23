@@ -121,6 +121,31 @@ export function erzeugeVorjahrHistorie(s: GameState, nurFehlende = false): void 
   s.rng = vorherRng;
 }
 
+/** Q35: Konzernwoche vor Spielstart aus dem Vorlauf (Summe der Filialen).
+ * EBITDA = Filial-DB minus Konzernüberhang (Zentrale, Werbung netto, WKZ und übrige
+ * Konzernposten). Der Überhang stammt aus der jüngsten echten Woche; vor der ersten
+ * Woche aus den Zentralkosten. */
+export function vorlaufKonzernWoche(s: GameState, woche: number): { umsatz: number; db: number; ebitda: number } | undefined {
+  if (woche >= (s.spielStartWoche ?? 0)) return undefined;
+  let umsatz = 0, db = 0, gefunden = false;
+  for (const h of s.haeuser) {
+    const v = s.vorjahrHistorie?.[h.id]?.find((x) => x.woche === woche);
+    if (!v) continue;
+    gefunden = true; umsatz += v.umsatz; db += v.db;
+  }
+  if (!gefunden) return undefined;
+  return { umsatz: eur(umsatz), db: eur(db), ebitda: eur(db - konzernUeberhang(s, umsatz)) };
+}
+
+/** Konzernkosten oberhalb der Filial-GuV je Woche (positiv = Belastung). */
+export function konzernUeberhang(s: GameState, umsatz: number): number {
+  const k = s.historie[s.historie.length - 1];
+  if (k?.filialGuV && k.umsatz > 0) return (k.filialGuV.ebitda - k.ebitda) * umsatz / k.umsatz;
+  // Ohne IST-Woche: Werbung netto und Lieferantenerträge (WKZ, Werbeflächen) heben sich in der
+  // Ausgangslage nahezu auf; gemessen Jan/Okt-Start Seed 1: Überhang = Zentrale ± 2 %.
+  return s.zentrale?.kostenWoche ?? 0;
+}
+
 export function mietvertragEmpfehlung(h: Haus, markt: number): 'verlaengern' | 'nachverhandeln' | 'auslaufen' {
   // Keine automatische Schließung nur aufgrund einer Wochenabweichung.
   return h.kpi?.db !== undefined && h.kpi.db < 0 && markt > h.miete.mieteWoche ||

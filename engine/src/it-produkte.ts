@@ -1,5 +1,6 @@
 // Q19: IT-Produktansichten verwenden ausschließlich vorhandene Wochenwerte und Engine-Hebel.
 // Neue Produktzustände sind optional: alte Spielstände und der unveränderte Start bleiben neutral.
+import { vorlaufKonzernWoche } from './vertrieb';
 import type { GameState } from './types';
 import { clamp, eur } from './util';
 import { SYSTEME, type ItSystemId } from './it';
@@ -72,7 +73,20 @@ export function itProdukte(s: GameState) {
     const qualitaet = id === 'hartwig_app' || id === 'kundenkarte'
       ? Math.round(clamp((k?.app?.qualitaet ?? 0.35) * 3 + generation, 1, 5))
       : id === 'mobile_pay' && version === 0 ? 0 : Math.max(1, Math.min(5, generation + 1));
-    const punkte = verlauf.slice(-5).map(p => ({ woche: p.woche, wert: p[id] }));
+    // Q35: fehlende Wochen vor Spielstart aus dem Vorlauf (Kassenbons aus Vorjahresumsatz, Karte/App wie zum Start).
+    const echt = verlauf.slice(-5).map(p => ({ woche: p.woche, wert: p[id] }));
+    const punkte: { woche: number; wert: number; vorlauf?: boolean }[] = [...echt];
+    const bon = s.marketing?.stand?.verlauf?.at(0)?.bon || 41;
+    const basis = verlauf[0]?.[id] ?? alle[id];
+    for (let w = (punkte[0]?.woche ?? s.woche) - 1; punkte.length < 5; w--) {
+      const v = vorlaufKonzernWoche(s, w);
+      if (!v) break;
+      const trans = Math.round(v.umsatz / Math.max(1, bon));
+      const kasseAn = itProduktZustand(s, 'kasse').aktiv;
+      const wert = id === 'kasse' ? (kasseAn ? trans : 0)
+        : id === 'mobile_pay' ? (kasseAn && itProduktZustand(s, 'mobile_pay').aktiv ? Math.round(trans * clamp(0.04 * (ausbau?.mobil ?? 0), 0, 1)) : 0) : basis;
+      punkte.unshift({ woche: w, wert, vorlauf: true });
+    }
     const aktuell = alle[id];
     const vorher = punkte.length >= 2 ? punkte[punkte.length-2].wert : undefined;
     const aenderung = vorher === undefined ? undefined : aktuell - vorher;

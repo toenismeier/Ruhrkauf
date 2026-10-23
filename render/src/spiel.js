@@ -789,9 +789,10 @@ function cockpitZeigen() {
   $('cockpit').classList.toggle('offen', cockpitOffen);
   $('cockpit').innerHTML = [
     kachel('Cash', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? 'rot' : ''),
-    fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : 'noch offen', !s.historie.length ? '' : fx.ebitda < 0 ? 'rot' : 'gruen')
-      : kachel('EBITDA 13 Wo.', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
-    kachel('Umsatz<em> · ' + FORMATNAME[cockpitFormat] + '</em>' + auswahl, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : 'noch offen', 'mitwahl'),
+    // Q35: vor der ersten Woche Werte aus dem Vorlauf (Vorjahreswochen des Vorgängers), nicht „noch offen“.
+    fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], geld(fx.ebitda), fx.ebitda < 0 ? 'rot' : 'gruen')
+      : kachel('EBITDA 13 Wo.', geld(c.ebitda13), c.ebitda13 < 0 ? 'rot' : 'gruen'),
+    kachel('Umsatz<em> · ' + FORMATNAME[cockpitFormat] + '</em>' + auswahl, geld(fx ? fx.umsatz : c.umsatzWoche), 'mitwahl'),
     `<button type="button" class="kz-mehr" data-cockpit-mehr aria-expanded="${cockpitOffen}" aria-label="${zu ? 'Weitere Kennzahlen zeigen' : 'Weitere Kennzahlen ausblenden'}"><span aria-hidden="true">${zu ? '▾' : '▴'}</span></button>`,
     kachel('Kreditrahmen frei', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? 'rot' : ''),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
@@ -1203,10 +1204,15 @@ function oeffneHq(gebaeudeId, bleiben = false) {
   const leerEtagen = (u.gebaeude ?? []).flatMap((g) => g.etagen.filter((e) => e.gemietet && !e.abteilungen.length && !e.archiv));
   const ohnePlatz = (u.abteilungen ?? []).filter((a) => !a.gebaeudeId).length;
   const diffStart = u.kostenWoche - (u.kostenStart ?? u.kostenWoche);
-  const befund = (leerEtagen.length ? `<b>${leerEtagen.length} gemietete ${leerEtagen.length === 1 ? 'Etage steht' : 'Etagen stehen'} leer.</b> ` : '<b>Alle gemieteten Etagen sind belegt.</b> ')
+  // Q35: Befund aus derselben Quelle wie „x % belegt“ je Gebäude (qmGemietet, qmBelegt).
+  const qmMiete = (u.gebaeude ?? []).reduce((n, g) => n + (g.qmGemietet ?? 0), 0);
+  const qmFrei = Math.max(0, qmMiete - (u.gebaeude ?? []).reduce((n, g) => n + (g.qmBelegt ?? 0), 0));
+  const befund = (leerEtagen.length ? `<b>${leerEtagen.length} gemietete ${leerEtagen.length === 1 ? 'Etage steht' : 'Etagen stehen'} leer.</b> `
+    : qmMiete > 0 && qmFrei / qmMiete >= 0.02 ? `<b>${pz(1 - qmFrei / qmMiete)} der gemieteten Bürofläche sind belegt, ${fmt.format(Math.round(qmFrei))} qm stehen frei.</b> `
+    : '<b>Alle gemieteten Etagen sind voll belegt.</b> ')
     + (ohnePlatz ? `${ohnePlatz} ${ohnePlatz === 1 ? 'Abteilung hat' : 'Abteilungen haben'} keinen Platz und wirken nur mit Stufe 0. ` : '')
     + (u.restmieteWoche > 0 ? `Für alte Büros laufen noch ${geld(u.restmieteWoche)} Restmiete je Woche.` : '');
-  let html = HK.bereich('zentrale') + HK.sprecher({ text: befund, unter: 'Leitung Verwaltung', ton: leerEtagen.length || ohnePlatz ? 'engpass' : '' });
+  let html = HK.bereich('zentrale') + HK.sprecher({ text: befund, unter: 'Leitung Verwaltung', ton: leerEtagen.length || ohnePlatz || (qmMiete > 0 && qmFrei / qmMiete >= 0.15) ? 'engpass' : '' });
   let kopfbild = '';
   let rumpf = HK.gross([{ label: 'Kosten je Woche', p: 'hq:kosten', wert: geld(u.kostenWoche), unter: diffStart ? HK.abweichung(-diffStart, (diffStart > 0 ? '+' : '−') + geld(Math.abs(diffStart)) + ' zum Start', null) : 'wie zum Start' },
     { label: 'Beschäftigte', p: 'hq:fte', wert: fmt.format(Math.round(u.fte)) + ' FTE', unter: `${fmt.format((u.gebaeude ?? []).reduce((n, g) => n + (g.qmGemietet ?? 0), 0))} qm gemietet` }])

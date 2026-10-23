@@ -1,6 +1,6 @@
 import { einkaufUebersicht, eigenmarkenUebersicht, freigaben, fuehreAus, neuesSpiel, wgDetail, wocheAbspielen, GRUPPEN, WG_DEF, WG_JE_BEREICH } from '../src';
 import type { GameState, GruppeId } from '../src';
-import { kannibalisierung, margeVon, FREMD } from '../src/einkauf';
+import { kannibalisierung, margeVon, FREMD, einzelOrders, WG } from '../src/einkauf';
 import { bestandWert } from '../src/ware';
 import { botTief } from '../scripts/bot';
 
@@ -99,17 +99,21 @@ describe('Freigaben', () => {
     expect(s.einkauf.freigaben.length).toBe(0);
     fuehreAus(s, { typ: 'freigabeGrenze', euro: 0 });
     wocheAbspielen(s);
-    expect(s.einkauf.freigaben.length).toBeGreaterThan(10);
+    expect(s.einkauf.freigaben.flatMap(einzelOrders).length).toBeGreaterThan(10);
+    // Q35: gebündelt je Bereich und Ordertyp, nie zwei offene Sammelorders mit gleichem Schlüssel.
+    const keys = s.einkauf.freigaben.map((f) => `${WG[f.wg].bereich}|${f.typ}|${f.art}`);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 
   test('auto gibt nach Frist frei, verfall streicht die Order', () => {
     const s = neuesSpiel(1);
+    wocheAbspielen(s); // Q35: erste Woche disponiert der Vorgänger (alles direkt)
     fuehreAus(s, { typ: 'freigabeGrenze', euro: 0 });
     fuehreAus(s, { typ: 'wgFreigabeModus', wg: 'damen', art: 'beide', modus: 'auto' });
     fuehreAus(s, { typ: 'wgFreigabeModus', wg: 'herren', art: 'beide', modus: 'verfall' });
     wocheAbspielen(s);
-    const damen = s.einkauf.freigaben.filter((f) => f.wg.startsWith('damen.'));
-    const herren = s.einkauf.freigaben.filter((f) => f.wg.startsWith('herren.'));
+    const damen = s.einkauf.freigaben.flatMap(einzelOrders).filter((f) => f.wg.startsWith('damen.'));
+    const herren = s.einkauf.freigaben.flatMap(einzelOrders).filter((f) => f.wg.startsWith('herren.'));
     expect(damen.length).toBeGreaterThan(0);
     expect(herren.length).toBeGreaterThan(0);
     spiele(s, 4, false);
@@ -122,17 +126,20 @@ describe('Freigaben', () => {
 
   test('kürzen und freigeben, ablehnen, Sammelfreigabe mit Filter', () => {
     const s = neuesSpiel(1);
+    wocheAbspielen(s); // Q35: erste Woche disponiert der Vorgänger (alles direkt)
     fuehreAus(s, { typ: 'freigabeGrenze', euro: 0 });
     wocheAbspielen(s);
-    const f = s.einkauf.freigaben[0];
+    const f = s.einkauf.freigaben.find((x) => x.teile) ?? s.einkauf.freigaben[0];
+    const teile = einzelOrders(f).map((x) => x.id);
     const vorher = f.wert;
     expect(fuehreAus(s, { typ: 'freigabeKuerzen', id: f.id, prozent: 0.3 }).ok).toBe(true);
-    const bestellt = s.bestellungen.filter((b) => b.id.startsWith(`b${f.id}-`)).reduce((a, b) => a + b.wert, 0);
-    expect(Math.abs(bestellt - vorher * 0.7)).toBeLessThanOrEqual(f.lieferungen.length + 1);
+    const bestellt = s.bestellungen.filter((b) => teile.some((id) => b.id.startsWith(`b${id}-`))).reduce((a, b) => a + b.wert, 0);
+    expect(Math.abs(bestellt - vorher * 0.7)).toBeLessThanOrEqual(einzelOrders(f).reduce((n, x) => n + x.lieferungen.length, 0) + 1);
     const zweite = s.einkauf.freigaben[0];
+    const zweiteTeile = einzelOrders(zweite).map((x) => x.id);
     fuehreAus(s, { typ: 'freigabeAblehnen', ids: [zweite.id] });
     expect(s.einkauf.freigaben.some((x) => x.id === zweite.id)).toBe(false);
-    expect(s.bestellungen.some((b) => b.id.startsWith(`b${zweite.id}-`))).toBe(false);
+    expect(s.bestellungen.some((b) => zweiteTeile.some((id) => b.id.startsWith(`b${id}-`)))).toBe(false);
     const nDamen = freigaben(s, { bereich: 'damen' }).anzahl;
     const gesamt = s.einkauf.freigaben.length;
     fuehreAus(s, { typ: 'sammelfreigabe', filter: { bereich: 'damen' } });
@@ -142,15 +149,29 @@ describe('Freigaben', () => {
 
   test('Orderrunde: Vororder je WG nach Lieferant, Volumen im Bereich hunderter Mio. €', () => {
     const s = neuesSpiel(1);
+    fuehreAus(s, { typ: 'freigabeGrenze', euro: 50_000 });
     let vo = 0; let wert = 0; const lieferanten = new Set<string>();
     for (let i = 0; i < 8; i++) {
       wocheAbspielen(s);
-      for (const f of s.einkauf.freigaben.filter((x) => x.typ === 'vororder')) { vo++; wert += f.wert; lieferanten.add(f.lieferant); }
+      for (const f of s.einkauf.freigaben.flatMap(einzelOrders).filter((x) => x.typ === 'vororder')) { vo++; wert += f.wert; lieferanten.add(f.lieferant); }
       fuehreAus(s, { typ: 'sammelfreigabe' });
     }
     expect(vo).toBeGreaterThan(100);
     expect(wert).toBeGreaterThan(150e6);
     expect(lieferanten.size).toBeGreaterThan(30);
+  });
+
+  test('Q35: Startgrenze und Bündelung halten den Eingang spielbar (Start Oktober)', () => {
+    const s = neuesSpiel(1, { startMonat: 10 });
+    expect(s.einkauf.grenze).toBeGreaterThanOrEqual(900_000);
+    wocheAbspielen(s);
+    expect(s.einkauf.freigaben.length).toBe(0); // Vorgänger hat die erste Woche disponiert
+    const offen: number[] = [];
+    for (let i = 0; i < 26; i++) { wocheAbspielen(s); offen.push(s.einkauf.freigaben.length); }
+    expect(Math.max(...offen)).toBeLessThanOrEqual(25);
+    const mittel = offen.reduce((a, b) => a + b, 0) / offen.length;
+    expect(mittel).toBeGreaterThanOrEqual(4);
+    expect(mittel).toBeLessThanOrEqual(15);
   });
 
   test('Open to Buy kürzt Saisonorders, nicht den NOS-Nachschub; Limit in Euro', () => {
