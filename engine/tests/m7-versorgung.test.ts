@@ -27,6 +27,7 @@ describe('M7 – Versorgung und Turnaround im großen Maßstab', () => {
     expect(fuehreAus(s, { typ: 'wgFreigabeModus', wg: 'damen', art: 'saison', modus: 'verfall' }).ok).toBe(true);
     expect(WG_DEF.filter((d) => d.bereich === 'damen').every((d) => s.einkauf.wgs[d.id].st.modus.saison === 'verfall')).toBe(true);
     expect(fuehreAus(s, { typ: 'freigabeGrenze', euro: 0 }).ok).toBe(true);
+    wocheAbspielen(s); // Q35: erste Woche disponiert der Vorgänger
     wocheAbspielen(s);
     const id = s.einkauf.freigaben[0]?.id;
     expect(id).toBeDefined();

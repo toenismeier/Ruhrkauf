@@ -112,6 +112,23 @@ export interface Freigabe {
   frist: number; // letzte Woche für die Freigabe
   ueberLimit: boolean; // vom Open to Buy gekürzt
   hinweis?: string;
+  /** Q35: Sammelorder je Bereich, Art und Marke; die Teile sind die Einzelorders je WG und Lieferant. */
+  teile?: Freigabe[];
+}
+
+/** Q35: Einzelorders einer Freigabe (Sammelorder oder Einzelorder). */
+export const einzelOrders = (f: Freigabe): Freigabe[] => f.teile ?? [f];
+const alleEinzel = (s: GameState): Freigabe[] => s.einkauf.freigaben.flatMap(einzelOrders);
+/** Q35: Orders einer Marke aus Einzel- und Sammelorders entfernen; Sammelorders neu summieren. */
+export function entferneMarkeAusFreigaben(liste: Freigabe[], marke: string): Freigabe[] {
+  const out: Freigabe[] = [];
+  for (const f of liste) {
+    if (!f.teile) { if (f.marke !== marke) out.push(f); continue; }
+    const teile = f.teile.filter((e) => e.marke !== marke);
+    if (!teile.length) continue;
+    out.push(teile.length === 1 ? teile[0] : sammelorder(f.id, teile));
+  }
+  return out;
 }
 
 export interface FreigabeProtokoll { woche: number; neu: number; direkt: number; freigegeben: number; auto: number; verfallen: number; verfallenWert: number; abgelehnt: number }
@@ -312,6 +329,7 @@ export function saisonName(s: GameState, id: number): string {
 
 export const EK_PARAM = {
   grenze: 50_000,
+  grenzeFaktor: 6, // Q35: Startgrenze = grenze × Volumenfaktor × 6
   verfRef: 0.95, // NOS-Verfügbarkeit, auf die die Ausgangsnachfrage kalibriert ist
   saisonRef: 0.9875, // mittlere Saisonverfügbarkeit der Ausgangslage (Fehlmengen bei Standardsteuerung)
   servicegrad: { 0.9: { basis: 0.905, cover: 7 }, 0.95: { basis: 0.95, cover: 10 }, 0.98: { basis: 0.975, cover: 13 } } as Record<Servicegrad, { basis: number; cover: number }>,
@@ -455,7 +473,9 @@ export function erzeugeEinkauf(s: GameState): Einkauf {
   // die durch den Spieler veränderbare absolute Euro-Grenze bleibt erhalten.
   const basisJahr = Object.values(s.basisUmsatz).reduce((a, u) => a + (u ?? 0), 0) * 52;
   const volumenFaktor = Math.max(1, basisJahr / 3_100_000_000);
-  const startGrenze = Math.round(EK_PARAM.grenze * volumenFaktor * 2 / 5_000) * 5_000;
+  // Q35: Routineorders laufen automatisch; erst ab rund 1 Mio. € EK braucht es eine Freigabe.
+  // Zusammen mit der Bündelung je Bereich bleiben so etwa 5 bis 15 Freigaben in Orderwochen.
+  const startGrenze = Math.round(EK_PARAM.grenze * volumenFaktor * EK_PARAM.grenzeFaktor / 50_000) * 50_000;
   const e: Einkauf = { grenze: startGrenze, wgs: {}, freigaben: [], rng: (s.seed * 2654435761 + 97) >>> 0, zaehler: 0, protokoll: [], eigenUmsatz: [], markenKpi: {}, emJeBereich: {}, emStart: {} };
   for (const d of WG_DEF) {
     e.wgs[d.id] = {
@@ -614,7 +634,7 @@ function poolsDerWg(s: GameState, st: WgStand): string[] {
 
 function offenImLimit(s: GameState, st: WgStand, sid: number): number {
   let x = 0;
-  for (const f of s.einkauf.freigaben) if (f.wg === st.id) for (const l of f.lieferungen) if (saisonId(l.woche) === sid) x += l.wert;
+  for (const f of alleEinzel(s)) if (f.wg === st.id) for (const l of f.lieferungen) if (saisonId(l.woche) === sid) x += l.wert;
   return x;
 }
 
@@ -994,7 +1014,7 @@ function bestandPool(s: GameState, wg: WgId, art: Art, pool: string, nurNutzbar:
 function pipelinePool(s: GameState, wg: WgId, art: Art, pool: string, bis = Infinity): number {
   let x = 0;
   for (const b of s.bestellungen) if (b.wg === wg && b.art === art && (b.marke ?? FREMD) === pool && b.ankunft <= bis) x += b.wert;
-  for (const f of s.einkauf.freigaben) if (f.wg === wg && f.art === art && (f.marke ?? FREMD) === pool) for (const l of f.lieferungen) if (l.woche <= bis) x += l.wert;
+  for (const f of alleEinzel(s)) if (f.wg === wg && f.art === art && (f.marke ?? FREMD) === pool) for (const l of f.lieferungen) if (l.woche <= bis) x += l.wert;
   return x;
 }
 
@@ -1145,6 +1165,7 @@ export function einkaufDispo(s: GameState): void {
     s.einkauf.wgs[d.id].basisVK = Math.max(0, (s.basisUmsatz[d.bereich] ?? 0) * d.anteil);
   }
   const pr = protokoll(s);
+  const neuePflicht: Freigabe[] = [];
   for (const v of vorschlaege(s)) {
     let lief = v.lieferungen.filter((l) => l.wert > 0);
     // Open to Buy je Saison der Liefertermine
@@ -1179,13 +1200,54 @@ export function einkaufDispo(s: GameState): void {
       ? wert >= EK_PARAM.nosGrenzeFaktor * s.einkauf.grenze && wert > EK_PARAM.nosSonder * v.wochenBedarf
       : wert >= s.einkauf.grenze;
     pr.neu++;
-    if (pflichtig) s.einkauf.freigaben.push(f);
+    // Q35: In der ersten Spielwoche hat der Vorgänger die Orderrunde schon disponiert: alles läuft direkt.
+    if (pflichtig && w !== (s.spielStartWoche ?? 0)) neuePflicht.push(f);
     else { pr.direkt++; gebeFrei(s, f); }
+  }
+  buendeln(s, neuePflicht);
+}
+
+/** Q35: freigabepflichtige Orders je Bereich und Ordertyp zu einer Sammelorder bündeln. Neue Orders
+ * wandern in eine noch offene Sammelorder desselben Bereichs und Typs (die Frist bleibt die früheste). */
+function sammelKey(f: Freigabe): string { return `${WG[f.wg].bereich}|${f.typ}|${f.art}`; }
+function sammelorder(id: string, g: Freigabe[]): Freigabe {
+  const haupt = [...g].sort((a, b) => b.wert - a.wert)[0];
+  const woche = new Map<number, number>();
+  for (const f of g) for (const l of f.lieferungen) woche.set(l.woche, (woche.get(l.woche) ?? 0) + l.wert);
+  const lieferanten = new Set(g.map((f) => f.lieferant));
+  const wert = g.reduce((a, f) => a + f.wert, 0);
+  const wgs = new Set(g.map((f) => f.wg)).size;
+  return {
+    ...haupt, id, marke: g.every((f) => f.marke === haupt.marke) ? haupt.marke : undefined,
+    lieferant: lieferanten.size === 1 ? haupt.lieferant : `${lieferanten.size} Lieferanten`,
+    wert, lieferungen: [...woche].sort((a, b) => a[0] - b[0]).map(([w, x]) => ({ woche: w, wert: x })),
+    erwarteterAbverkauf: g.reduce((a, f) => a + f.erwarteterAbverkauf, 0),
+    reichweiteDanach: Math.round(g.reduce((a, f) => a + f.reichweiteDanach * f.wert, 0) / Math.max(1, wert) * 10) / 10,
+    erstellt: Math.min(...g.map((f) => f.erstellt)), frist: Math.min(...g.map((f) => f.frist)), ueberLimit: g.some((f) => f.ueberLimit),
+    hinweis: `${wgs} ${wgs === 1 ? 'Warengruppe' : 'Warengruppen'}, ${g.length} Orders gebündelt` + (g.some((f) => f.ueberLimit) ? ', teils vom Limit gekürzt' : ''),
+    teile: g,
+  };
+}
+function buendeln(s: GameState, liste: Freigabe[]): void {
+  const offen = new Map<string, number>();
+  s.einkauf.freigaben.forEach((f, i) => offen.set(sammelKey(f), i));
+  const gruppen = new Map<string, Freigabe[]>();
+  for (const f of liste) {
+    const k = sammelKey(f);
+    const g = gruppen.get(k); if (g) g.push(f); else gruppen.set(k, [f]);
+  }
+  for (const [k, g] of gruppen) {
+    const i = offen.get(k);
+    if (i !== undefined) {
+      const alt = s.einkauf.freigaben[i];
+      s.einkauf.freigaben[i] = sammelorder(alt.id, [...einzelOrders(alt), ...g]);
+    } else s.einkauf.freigaben.push(g.length === 1 ? g[0] : sammelorder(neueFreigabeId(s), g));
   }
 }
 
 /** Bestellt eine Order (alle Liefertermine) und bucht sie aufs Limit. */
 function gebeFrei(s: GameState, f: Freigabe): void {
+  if (f.teile) { for (const t of f.teile) gebeFrei(s, t); return; }
   const st = s.einkauf.wgs[f.wg];
   const d = WG[f.wg];
   const lid = LIEFERANTEN.find((l) => l.name === f.lieferant)?.id;
@@ -1206,10 +1268,10 @@ export function einkaufFristen(s: GameState): void {
   if (!faellig.length) return;
   s.einkauf.freigaben = s.einkauf.freigaben.filter((f) => f.frist >= w);
   let verfallen = 0; let wert = 0;
-  for (const f of faellig) {
-    const modus = s.einkauf.wgs[f.wg].st.modus[f.art];
-    if (modus === 'auto' || s.prognose) { gebeFrei(s, f); pr.auto++; }
-    else { verfallen++; wert += f.wert; pr.verfallen++; pr.verfallenWert += f.wert; }
+  for (const f of faellig) for (const e of einzelOrders(f)) {
+    const modus = s.einkauf.wgs[e.wg].st.modus[e.art];
+    if (modus === 'auto' || s.prognose) { gebeFrei(s, e); pr.auto++; }
+    else { verfallen++; wert += e.wert; pr.verfallen++; pr.verfallenWert += e.wert; }
   }
   if (verfallen) melde(s, 'warnung', `${verfallen} Orders über ${mio(wert)} sind ohne Freigabe verfallen. Die Ware fehlt in den Häusern.`);
 }
@@ -1251,7 +1313,7 @@ const auswahlText = (a: WgAuswahl, n: number): string => (a === 'alle' ? `alle $
 function passtFilter(f: Freigabe, x: FreigabeFilter | undefined): boolean {
   if (!x) return true;
   if (x.bereich && WG[f.wg].bereich !== x.bereich) return false;
-  if (x.wg && f.wg !== x.wg) return false;
+  if (x.wg && !einzelOrders(f).some((e) => e.wg === x.wg)) return false;
   if (x.art && f.art !== x.art) return false;
   if (x.typ && f.typ !== x.typ) return false;
   if (x.marke !== undefined && (f.marke ?? '') !== x.marke) return false;
@@ -1306,7 +1368,7 @@ export function einkaufAktion(s: GameState, a: EinkaufAktion, einmalKosten: (x: 
       if (!treffer.length) return fehler('Keine offene Order gefunden.');
       s.einkauf.freigaben = s.einkauf.freigaben.filter((f) => !ids.has(f.id));
       const wert = treffer.reduce((x, f) => x + f.wert, 0);
-      if (a.typ === 'freigeben') { for (const f of treffer) gebeFrei(s, f); pr.freigegeben += treffer.length; return ok(`${treffer.length} Orders über ${mio(wert)} freigegeben.`); }
+      if (a.typ === 'freigeben') { for (const f of treffer) gebeFrei(s, f); pr.freigegeben += treffer.length; return ok(`${treffer.length} ${treffer.length === 1 ? 'Freigabe' : 'Freigaben'} über ${mio(wert)} erteilt.`); }
       pr.abgelehnt += treffer.length;
       return ok(`${treffer.length} Orders über ${mio(wert)} abgelehnt.`);
     }
@@ -1314,6 +1376,10 @@ export function einkaufAktion(s: GameState, a: EinkaufAktion, einmalKosten: (x: 
       const f = s.einkauf.freigaben.find((x) => x.id === a.id);
       if (!f) return fehler('Order nicht gefunden.');
       const p = clamp(a.prozent, 0, 0.95);
+      for (const e of f.teile ?? []) {
+        e.lieferungen = e.lieferungen.map((l) => ({ woche: l.woche, wert: eur(l.wert * (1 - p)) }));
+        e.wert = e.lieferungen.reduce((x, l) => x + l.wert, 0);
+      }
       f.lieferungen = f.lieferungen.map((l) => ({ woche: l.woche, wert: eur(l.wert * (1 - p)) }));
       f.wert = f.lieferungen.reduce((x, l) => x + l.wert, 0);
       f.reichweiteDanach = Math.round(f.reichweiteDanach * (1 - p) * 10) / 10;
@@ -1449,7 +1515,7 @@ function basisWg(s: GameState, d: WgDef, bestandJe: Map<WgId, { best: number; al
   const L = limitFuer(s, st, sid, true);
   b.limit = limitWert(st, L); b.limitV = L.verbraucht;
   for (const x of s.bestellungen) if (x.wg === d.id) b.pipe += x.wert;
-  for (const f of s.einkauf.freigaben) if (f.wg === d.id) { b.offenN++; b.offenW += f.wert; }
+  for (const f of alleEinzel(s)) if (f.wg === d.id) { b.offenN++; b.offenW += f.wert; }
   for (let t = s.woche; t < s.woche + 4; t++) for (const art of ['nos', 'saison'] as Art[]) for (const pool of poolsDerWg(s, st)) b.bedarf4 += prognoseEk(s, st, art, pool, t) / (1 + st.fehler);
   b.plMarge = (st.nosAnteil * st.margeNos + (1 - st.nosAnteil) * st.margeSaison) * b.u13;
   const rel = s.woche - saisonStart(sid);
@@ -1570,14 +1636,15 @@ export function einkaufUebersicht(s: GameState, filter: EinkaufFilter = {}): Ein
   };
 }
 
-export interface FreigabeZeile extends Freigabe { wgName: string; bereich: GruppeId; bereichName: string; markeName?: string; restWochen: number; modus: FreigabeModus; ersteLieferung: number }
+export interface FreigabeZeile extends Freigabe { anzahlWg: number; wgName: string; bereich: GruppeId; bereichName: string; markeName?: string; restWochen: number; modus: FreigabeModus; ersteLieferung: number }
 
 export interface FreigabenListe { woche: number; grenze: number; anzahl: number; wert: number; liste: FreigabeZeile[]; protokoll: FreigabeProtokoll[] }
 
 function freigabeZeile(s: GameState, f: Freigabe): FreigabeZeile {
   const d = WG[f.wg];
   return {
-    ...f, lieferungen: f.lieferungen.map((l) => ({ ...l })), wgName: d.name, bereich: d.bereich, bereichName: GRUPPEN[d.bereich].name,
+    ...f, lieferungen: f.lieferungen.map((l) => ({ ...l })), teile: undefined, anzahlWg: einzelOrders(f).length,
+    wgName: f.teile ? `${GRUPPEN[d.bereich].name}: ${f.teile.length} Warengruppen` : d.name, bereich: d.bereich, bereichName: GRUPPEN[d.bereich].name,
     markeName: f.marke ? s.eigenmarken.marken.find((m) => m.id === f.marke)?.name : undefined,
     restWochen: f.frist - s.woche, modus: s.einkauf.wgs[f.wg].st.modus[f.art], ersteLieferung: f.lieferungen[0]?.woche ?? f.erstellt,
   };
@@ -1636,6 +1703,6 @@ export function wgDetail(s: GameState, wgId: WgId): WgDetail | undefined {
     eigenmarken: markenInWg(s, wgId).map((m) => ({ marke: m.id, name: m.name, farbe: m.farbe, anteilZiel: m.wgAnteile[wgId] ?? 0, anteilIst: Math.round((m.wgIst[wgId] ?? 0) * 1000) / 1000, mehrmarge: mehrmarge(m) })),
     verlauf, limits,
     bestellungen: [...best.values()].sort((a, c) => a.ankunft - c.ankunft).map((x) => ({ ...x, wert: eur(x.wert) })),
-    freigaben: s.einkauf.freigaben.filter((f) => f.wg === wgId).map((f) => freigabeZeile(s, f)),
+    freigaben: s.einkauf.freigaben.filter((f) => einzelOrders(f).some((e) => e.wg === wgId)).map((f) => freigabeZeile(s, f)),
   };
 }

@@ -40,6 +40,10 @@ assert.equal(besatz.fte, 40);
 assert.equal(besatz.personalquote, 0.8);
 assert.ok(besatz.kunden >= 2 && besatz.kunden <= 36);
 assert.ok(besatz.verkauf > 0 && besatz.verkauf <= 12);
+// Q35: Figuren = gleichzeitig im Dienst, aus denselben FTE abgeleitet (40 FTE → 17 im Dienst, 12 im Bild).
+assert.equal(besatz.imDienst, Math.round(40 * (40 / 60) * 0.9 * 0.71));
+assert.equal(besatz.verkauf, Math.min(12, besatz.imDienst));
+assert.ok(besatz.imDienst <= besatz.fte);
 assert.deepEqual(hausbesuchBesatz(haus, 0), besatz);
 assert.equal(hausbesuchBesatz({ ...haus, kpi: { ...haus.kpi, umsatzJeGruppe: { damen: 0 } } }, 0).kunden < besatz.kunden, true);
 assert.equal(hausbesuchBesatz({ ...haus, kpi: { ...haus.kpi, fteIst: 0 } }, 0).verkauf, 0);

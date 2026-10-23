@@ -93,10 +93,14 @@ function befund(h, k, b, vorjahr, vorwoche) {
   if (h.substanz < 35) funde.push({ g: 2, t: `Die Substanz ist kritisch (${Math.round(h.substanz)} von 100).`, ton: 'engpass' });
   if ((b?.kundenScore ?? 100) < 50) funde.push({ g: 1, t: `Mystery Shopping nur ${b.kundenScore} von 100.`, ton: 'engpass' });
   if (h.personal?.filialleiter?.interimBis > 0) funde.push({ g: 1, t: 'Die Hausleitung ist nur interimistisch besetzt.', ton: 'engpass' });
+  // Q35: größte Kostenabweichung zum Budget (eine Quelle: Engine kostenAbweichung).
+  const ka = b?.kostenAbweichung, kaText = ka && Math.abs(ka.abweichung) >= 0.005
+    ? `${POSTEN[ka.posten] ?? ka.posten} liegt ${p(Math.abs(ka.abweichung) * 100, 0)} % ${ka.abweichung > 0 ? 'über' : 'unter'} Budget.` : '';
+  if (ka && ka.abweichung >= 0.05) funde.push({ g: 1, t: kaText, ton: 'engpass' });
   funde.sort((a, c) => c.g - a.g);
   if (!funde.length) {
     const vj = vorjahr > 0 ? ` Umsatz ${k.umsatz >= vorjahr ? '+' : '−'}${p(Math.abs(k.umsatz / vorjahr - 1) * 100, 1)} % zum Vorjahr.` : vorwoche ? ` Umsatz ${k.umsatz >= vorwoche ? 'über' : 'unter'} Vorwoche.` : '';
-    return { text: `<b>Das Haus läuft.</b> Deckungsbeitrag positiv, Besetzung gesichert.${vj}`, ton: '', name };
+    return { text: `<b>Das Haus läuft.</b> Deckungsbeitrag positiv, Besetzung gesichert.${vj}${kaText ? ' ' + kaText : ''}`, ton: '', name };
   }
   return { text: `<b>${esc(funde[0].t)}</b>${funde[1] ? ' ' + esc(funde[1].t) : ''}`, ton: funde[0].ton, name };
 }
@@ -298,12 +302,14 @@ function partner(c, h, b) {
   return x;
 }
 
+// Q35: Verbrauch zum Budget je Posten (Engine kostenIst); 100 % Budget heißt nicht 100 % Verbrauch.
+const verbrauch = (ist) => ist == null || Math.abs(ist - 1) < 0.005 ? 'Ist im Plan' : `Ist ${ist > 1 ? '+' : '−'}${p(Math.abs(ist - 1) * 100, 0)} %`;
 function kosten(c, h, k, b) {
   const id = h.id;
   let x = K.gross([{ label: 'Betriebskosten Woche', wert: geld(k?.sonstige ?? 0) }, { label: 'Energiepreis', wert: PROZENT(b?.energiePreis ?? 1), unter: 'zum Ausgangswert' }]);
   x += K.abschnitt('Budget je Posten', '100 % = Ausgangsbudget');
   x += Object.entries(POSTEN).map(([key, name]) =>
-    `<div class="hk-regel"><span>${name}</span>${K.stepper({ wert: PROZENT(b?.kosten?.[key] ?? 1), unter: 'Budget', label: name, attrMinus: tun('kosten', id, key, -0.1), attrPlus: tun('kosten', id, key, 0.1) })}</div>`).join('');
+    `<div class="hk-regel"><span>${name}</span>${K.stepper({ wert: PROZENT(b?.kosten?.[key] ?? 1), unter: verbrauch(b?.kostenIst?.[key]), label: name, attrMinus: tun('kosten', id, key, -0.1), attrPlus: tun('kosten', id, key, 0.1) })}</div>`).join('');
   x += K.hinweis('Weniger Reinigung senkt den Kundenscore; weniger Sicherheit und Instandhaltung erhöhen Betriebsrisiken.', 'achtung');
   return x;
 }

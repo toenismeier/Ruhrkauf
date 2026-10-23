@@ -1188,93 +1188,6 @@
     };
   }
 
-  // ../engine/src/statistik.ts
-  var STATISTIK_AKTIV = true;
-  var GRENZE_BYTES = 2e6;
-  var HAUS_WOCHEN = 156;
-  function statistikHaus(s2, h4, k5) {
-    if (!STATISTIK_AKTIV || s2.statistikDeaktiviert || s2.prognose) return;
-    if (!h4.verlauf) h4.verlauf = [];
-    const w2 = k5.woche;
-    if (s2.statistik?.sparsam && w2 > 52 && h4.verlauf.length) {
-      const letzter = h4.verlauf[h4.verlauf.length - 1];
-      if (letzter.woche > 52 && letzter.woche % 4 !== 0) h4.verlauf.pop();
-    }
-    h4.verlauf.push({
-      woche: w2,
-      umsatz: Math.round(k5.umsatz),
-      db: Math.round(k5.db),
-      frequenz: Math.round(Math.max(0, k5.umsatz) / 45),
-      personalFte: Math.round(k5.fteIst)
-    });
-    while (h4.verlauf.length && w2 - h4.verlauf[0].woche >= HAUS_WOCHEN) h4.verlauf.shift();
-  }
-  function statistikWoche(s2, k5) {
-    if (!STATISTIK_AKTIV || s2.statistikDeaktiviert || s2.prognose) return;
-    if (!s2.statistik) s2.statistik = { sparsam: false, stimmung: [] };
-    const a2 = s2.stakeholder;
-    const lief = s2.lieferanten.filter((x2) => x2.aktiv);
-    const lieferanten = (lief.reduce((sum2, l) => sum2 + l.vertrauen, 0) + s2.restLieferantenVertrauen) / (lief.length + 1);
-    s2.statistik.stimmung.push({ woche: k5.woche, wert: Math.round((a2.bank + a2.kreditversicherer + lieferanten) / 3) });
-    if (s2.statistik.stimmung.length > 520) s2.statistik.stimmung.splice(0, s2.statistik.stimmung.length - 520);
-    if (k5.woche >= 52 && k5.woche % 4 === 0 && !s2.statistik.sparsam) {
-      s2.statistik.sparsam = new TextEncoder().encode(JSON.stringify(s2)).byteLength > GRENZE_BYTES;
-      if (s2.statistik.sparsam) for (const h4 of s2.haeuser) {
-        if (!h4.verlauf) continue;
-        h4.verlauf = h4.verlauf.filter((p2) => p2.woche <= 52 || p2.woche % 4 === 0 || p2.woche === k5.woche);
-      }
-    }
-  }
-  function passendeHaeuser(s2, ebene, id) {
-    if (ebene === "haus") return s2.haeuser.filter((h4) => h4.id === id);
-    if (ebene === "stadt") return s2.haeuser.filter((h4) => h4.stadt === id);
-    if (ebene === "region") return s2.haeuser.filter((h4) => h4.region === id);
-    if (ebene === "format") return s2.haeuser.filter((h4) => {
-      const format = String(h4.format);
-      if (id === "Hartwig") return format === "warenhaus" && h4.klasse !== "premium";
-      if (id === "Sport") return format === "sport";
-      if (id === "Volkskauf") return format === "volkskauf";
-      if (id === "FUNDUS") return format === "fundus" || format === "outlet";
-      if (id === "Premium") return h4.klasse === "premium";
-      return format === id;
-    });
-    return s2.haeuser;
-  }
-  function verlauf(s2, filter) {
-    const { ebene, id, kennzahl: kennzahl2 } = filter;
-    const einheit = ["umsatz", "ebitda", "cash", "db"].includes(kennzahl2) ? "euro" : kennzahl2 === "stimmung" ? "index" : "anzahl";
-    const ergebnis = { ebene, id, kennzahl: kennzahl2, punkte: [], einheit };
-    if (kennzahl2 === "frequenz") ergebnis.hinweis = "Kundenfrequenz gesch\xE4tzt aus Umsatz / 45 \u20AC; kein gemessener Besucherz\xE4hler.";
-    const letzteWoche = s2.historie.length ? s2.historie[s2.historie.length - 1].woche : s2.woche - 1;
-    const beginn = filter.wochen === "alle" ? -Infinity : letzteWoche - Math.max(1, Number(filter.wochen) || 52) + 1;
-    const werte3 = /* @__PURE__ */ new Map();
-    if (ebene === "konzern" && kennzahl2 === "stimmung") {
-      for (const p2 of s2.statistik?.stimmung ?? []) werte3.set(p2.woche, p2.wert);
-    } else if (ebene === "konzern" && ["umsatz", "ebitda", "cash", "personalFte"].includes(kennzahl2)) {
-      for (const k5 of s2.historie) {
-        const wert = kennzahl2 === "personalFte" ? k5.fte : k5[kennzahl2];
-        werte3.set(k5.woche, wert);
-      }
-    } else if (!["cash", "ebitda", "stimmung"].includes(kennzahl2)) {
-      const haeuser = passendeHaeuser(s2, ebene, id);
-      for (const h4 of haeuser) for (const p2 of h4.verlauf ?? []) {
-        werte3.set(p2.woche, (werte3.get(p2.woche) ?? 0) + p2[kennzahl2]);
-      }
-    }
-    const alle = [...werte3.keys()].sort((a2, b4) => a2 - b4);
-    for (const w2 of alle) {
-      if (w2 < beginn) continue;
-      const punkt5 = { woche: w2, wert: werte3.get(w2) };
-      if (werte3.has(w2 - 52)) punkt5.vorjahr = werte3.get(w2 - 52);
-      if (ebene === "konzern" && kennzahl2 === "ebitda") {
-        const q2 = s2.quartale.find((x2) => w2 >= x2.start && w2 < x2.start + 13);
-        if (q2) punkt5.plan = (q2.plan ?? q2.planStandard) / 13;
-      }
-      ergebnis.punkte.push(punkt5);
-    }
-    return ergebnis;
-  }
-
   // ../engine/src/produkt-sortiment.ts
   var PRODUKT_ZIELGRUPPEN = [
     { id: "kinder", name: "Kinder", alter: "10-13", trend: "kinder", preis: 0.82, kosten: 0.83 },
@@ -1620,7 +1533,7 @@
       k5.ladenhueter = true;
       rest += k5.wert;
     }
-    s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f13) => f13.marke !== id);
+    s2.einkauf.freigaben = entferneMarkeAusFreigaben(s2.einkauf.freigaben, id);
     for (const l of s2.lieferanten) if (l.aktiv) l.vertrauen = clamp(l.vertrauen + 1, 0, 100);
     melde(s2, "info", `Eigenmarke ${m.name} eingestellt.`);
     return ok(`${m.name} eingestellt. Restbestand ${mio(rest)} geht in Offprice und Abschrift.`);
@@ -2228,6 +2141,283 @@
     }
   }
 
+  // ../engine/src/prozesse.ts
+  var SCHLIESSUNGEN_WOCHE = /* @__PURE__ */ new WeakMap();
+  var abfindungJeFte = (s2) => s2.phase === "insolvenz" ? PARAM.abfindungInsolvenz : PARAM.abfindungRegulaer;
+  function einmalKosten(s2, betrag) {
+    s2.cash -= eur(betrag);
+    s2.einmalkostenWoche += eur(betrag);
+  }
+  function gesamtFte(s2) {
+    return s2.haeuser.reduce((a2, h4) => a2 + h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen, 0);
+  }
+  function fteAnteil(s2, h4) {
+    return (h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen) / Math.max(1, gesamtFte(s2));
+  }
+  function starteSchliessung(s2, h4, opts = {}) {
+    if (h4.nurDaten) return `${h4.name} wird erst mit Aktivierung seines Formats steuerbar.`;
+    if (h4.status !== "offen") return `${h4.name} ist nicht offen.`;
+    if (h4.standortgarantie) return `${h4.name} steht unter Standortgarantie aus dem Sanierungstarifvertrag.`;
+    const br = s2.stakeholder.betriebsrat;
+    const dauer = s2.phase === "insolvenz" ? 4 : Math.round((16 - 10 * br / 100) * (h4.format === "schwester" ? 0.85 : 1));
+    h4.status = "schliessung_verhandlung";
+    h4.statusBis = s2.woche + dauer;
+    if (opts.mietvertragEndetMit) h4.miete.bisWoche = Math.min(h4.miete.bisWoche, s2.woche + dauer + 6);
+    s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - 60 * fteAnteil(s2, h4), 0, 100);
+    melde(s2, "presse", `${h4.name} soll schlie\xDFen. Betriebsrat und Gesch\xE4ftsf\xFChrung verhandeln \xFCber Interessenausgleich und Sozialplan (ca. ${dauer} Wochen).`, { stadt: h4.stadt, hausId: h4.id });
+    return null;
+  }
+  function schliessungsFolgekosten(s2, h4, bisSchliessung = 0) {
+    const schliessWoche = s2.woche + Math.max(0, bisSchliessung);
+    const fte2 = h4.personal.vollzeit + h4.personal.teilzeit;
+    const sozialplan = eur(fte2 * abfindungJeFte(s2) * hqRechtFaktor(s2) * (h4.format === "schwester" ? 0.85 : 1));
+    const untermiete = h4.flaechen.reduce((a2, f13) => a2 + (f13.konzept === "untermiete" && f13.mieter ? f13.mieter.mieteWoche : 0), 0);
+    const vertragWochen = s2.phase === "insolvenz" ? 13 : h4.miete.vermieter === "eigentuemer" ? 26 : 52;
+    const restmieteWochen = Math.max(0, Math.min(vertragWochen, h4.miete.bisWoche - schliessWoche));
+    const restmieteWoche = eur(Math.max(0, h4.miete.mieteWoche - untermiete) * hqRechtFaktor(s2));
+    return {
+      sozialplan,
+      restmieteWoche,
+      restmieteWochen,
+      gesamt: sozialplan + restmieteWoche * restmieteWochen
+    };
+  }
+  function schliesseEndgueltig(s2, h4) {
+    const w2 = s2.woche;
+    const fte2 = h4.personal.vollzeit + h4.personal.teilzeit;
+    const { sozialplan, restmieteWoche, restmieteWochen } = schliessungsFolgekosten(s2, h4);
+    einmalKosten(s2, sozialplan);
+    h4.restmieteWoche = restmieteWoche;
+    h4.restmieteBis = w2 + restmieteWochen;
+    h4.status = "geschlossen";
+    h4.statusBis = void 0;
+    h4.personal.vollzeit = 0;
+    h4.personal.teilzeit = 0;
+    h4.personal.aushilfen = 0;
+    h4.flaechen = h4.flaechen.map((f13) => ({ ...f13, konzept: "leer", gruppe: void 0, mieter: void 0, lieferantId: void 0, umbauBis: void 0, umbauZiel: void 0 }));
+    const lokal3 = s2.haeuser.filter((x2) => x2 !== h4 && !x2.nurDaten && x2.stadt === h4.stadt && x2.format === h4.format && x2.status === "offen");
+    const regional = s2.haeuser.filter((x2) => x2 !== h4 && !x2.nurDaten && x2.region === h4.region && x2.format === h4.format && x2.status === "offen");
+    const nachbarn2 = lokal3.length ? lokal3 : regional;
+    const abgang = h4.kpi?.umsatz ?? 0;
+    const umsatzNachbarn = nachbarn2.reduce((a2, x2) => a2 + (x2.kpi?.umsatz ?? 0), 0);
+    if (abgang > 0 && umsatzNachbarn > 0) {
+      for (const n3 of nachbarn2) {
+        const basis4 = Math.max(1, n3.kpi?.umsatz ?? 0);
+        const anteil3 = (n3.kpi?.umsatz ?? 0) / umsatzNachbarn;
+        n3.transferBonus += 0.3 * abgang * anteil3 / basis4;
+      }
+    }
+    const st2 = s2.stakeholder;
+    st2.betriebsrat = clamp(st2.betriebsrat - (s2.phase === "insolvenz" ? 15 : 30) * (fte2 / Math.max(1, gesamtFte(s2) + fte2)), 0, 100);
+    const sw = SCHLIESSUNGEN_WOCHE.get(s2);
+    const k5 = sw && sw.woche === w2 ? sw.n : 0;
+    SCHLIESSUNGEN_WOCHE.set(s2, { woche: w2, n: k5 + 1 });
+    st2.image = clamp(st2.image - 1.5 * (h4.format === "schwester" ? 0.5 : 1) * Math.pow(schwierigkeit(s2).imageDaempfung, k5), 0, 100);
+    st2.vermieter = clamp(st2.vermieter - (h4.miete.vermieter === "dritt" ? 2 : 0), 0, 100);
+    if (h4.lage === "1a" && h4.format === "warenhaus") {
+      const arvel = s2.lieferanten.find((l) => l.id === "arvel");
+      if (arvel && arvel.aktiv) {
+        arvel.vertrauen = clamp(arvel.vertrauen - 12, 0, 100);
+        if (arvel.vertrauen < 30 && !arvel.rueckzug) {
+          arvel.rueckzug = true;
+          melde(s2, "warnung", "Maison Arvel zieht sich aus allen H\xE4usern au\xDFerhalb der 1a-Lagen zur\xFCck.");
+        }
+      }
+    }
+    melde(s2, "presse", `${h4.name} schlie\xDFt endg\xFCltig. Sozialplan ${mio(sozialplan)}, ${Math.round(fte2)} Besch\xE4ftigte betroffen.`, { stadt: h4.stadt, hausId: h4.id });
+  }
+  function prozesse(s2) {
+    const w2 = s2.woche;
+    for (const h4 of s2.haeuser) {
+      if (h4.status === "schliessung_verhandlung" && (h4.statusBis ?? 0) <= w2) {
+        h4.status = "raeumung";
+        h4.statusBis = w2 + 6;
+        melde(s2, "presse", `\u201EAlles muss raus\u201C: R\xE4umungsverkauf in ${h4.name} beginnt.`, { stadt: h4.stadt, hausId: h4.id });
+        for (const n3 of s2.haeuser) if (n3 !== h4 && n3.stadt === h4.stadt && n3.status === "offen") n3.transferBonus -= 0.04;
+      } else if (h4.status === "raeumung" && (h4.statusBis ?? 0) <= w2) {
+        for (const n3 of s2.haeuser) if (n3 !== h4 && n3.stadt === h4.stadt && n3.status === "offen") n3.transferBonus += 0.04;
+        schliesseEndgueltig(s2, h4);
+      }
+      if (h4.status === "geschlossen" || h4.status === "verkauft") continue;
+      for (const f13 of h4.flaechen) {
+        if (f13.umbauBis !== void 0 && f13.umbauBis <= w2) {
+          if (f13.umbauZiel) {
+            f13.konzept = f13.umbauZiel.konzept;
+            f13.gruppe = f13.umbauZiel.gruppe;
+            f13.mieter = f13.umbauZiel.mieter;
+            f13.lieferantId = f13.umbauZiel.lieferantId;
+          }
+          f13.umbauBis = void 0;
+          f13.umbauZiel = void 0;
+        }
+        if (f13.konzept === "untermiete" && f13.mieter && f13.mieter.bisWoche <= w2) {
+          melde(s2, "info", `Untermieter ${f13.mieter.name} in ${h4.name} zieht aus.`, { stadt: h4.stadt, hausId: h4.id });
+          f13.konzept = "leer";
+          f13.mieter = void 0;
+        }
+      }
+      h4.transferBonus *= 0.985;
+      h4.substanz = Math.max(0, h4.substanz - 0.05);
+      const p2 = h4.personal;
+      const krise = s2.phase === "insolvenz" ? 1e-3 : 0;
+      const abgang = 12e-4 + krise + Math.max(0, (40 - s2.stakeholder.betriebsrat) / 100) * 1e-3;
+      p2.vollzeit *= 1 - abgang;
+      p2.teilzeit *= 1 - abgang;
+      const fl = p2.filialleiter;
+      const zielMoral = 55 + hqMoralZiel(s2) - (s2.phase === "insolvenz" ? 15 : 0) - (h4.status === "schliessung_verhandlung" ? 25 : 0);
+      fl.moral = clamp(fl.moral + (zielMoral - fl.moral) * 0.05, 0, 100);
+    }
+    for (const l of s2.lieferanten) if (l.ausfallBis !== void 0 && l.ausfallBis <= w2) l.ausfallBis = void 0;
+    if (s2.standortgarantieBis !== void 0 && s2.standortgarantieBis <= w2) {
+      s2.standortgarantieBis = void 0;
+      for (const h4 of s2.haeuser) h4.standortgarantie = false;
+      melde(s2, "info", "Die Standortgarantie aus dem Sanierungstarifvertrag ist ausgelaufen.");
+    }
+  }
+  function eroeffneInsolvenz(s2, grund2) {
+    if (s2.phase !== "regulaer" || s2.szenario?.regeln.sandkasten) return;
+    const w2 = s2.woche;
+    let alt = 0;
+    for (const v2 of s2.verbindlichkeiten) alt += v2.wert;
+    if (s2.cash < 0) {
+      alt += -s2.cash;
+      s2.cash = 0;
+    }
+    s2.verbindlichkeiten = [];
+    s2.phase = "insolvenz";
+    s2.insolvenzenGesamt += 1;
+    s2.zahlungsstockungSeit = void 0;
+    s2.insolvenz = { seit: w2, versammlung: w2 + 20, altVerbindlichkeiten: eur(alt), insolvenzgeldBis: w2 + 12, quote: 0.1, grund: grund2 };
+    const nettoUmsatzJahr = Object.values(s2.basisUmsatz).reduce((a2, u) => a2 + (u ?? 0), 0) * 52;
+    const volumen2 = Math.max(1, nettoUmsatzJahr / 31e8);
+    s2.kreditlinie = eur(25e6 * volumen2);
+    const st2 = s2.stakeholder;
+    st2.kreditversicherer = clamp(st2.kreditversicherer - 20, 0, 100);
+    st2.bank = clamp(st2.bank - 15, 0, 100);
+    st2.image = clamp(st2.image - 15, 0, 100);
+    st2.betriebsrat = clamp(st2.betriebsrat - 5, 0, 100);
+    for (const l of s2.lieferanten) {
+      l.vertrauen = clamp(l.vertrauen - 15, 0, 100);
+      if (l.id === "hallberg" && l.aktiv) l.verspaetungen += 2;
+    }
+    s2.restLieferantenVertrauen = clamp(s2.restLieferantenVertrauen - 15, 0, 100);
+    const nr4 = s2.insolvenzenGesamt;
+    melde(s2, "insolvenz", `Insolvenzantrag gestellt (${grund2}). Altverbindlichkeiten ${mio(alt)} sind eingefroren, Insolvenzgeld deckt die L\xF6hne f\xFCr 12 Wochen.`);
+    melde(s2, "presse", nr4 === 1 ? `${s2.firma.name} ist insolvent.` : `${s2.firma.name} ist zum ${nr4}. Mal insolvent. Experten zeigen sich \u201Ewenig \xFCberrascht\u201C.`);
+  }
+  function glaeubigerversammlung(s2) {
+    const ins = s2.insolvenz;
+    if (!ins) return;
+    let planEbitda;
+    if (s2.prognose) planEbitda = s2.historie.slice(-13).reduce((a2, b4) => a2 + b4.ebitda, 0) * 4;
+    else {
+      const klon = structuredClone(s2);
+      klon.prognose = true;
+      klon.insolvenz = void 0;
+      klon.phase = "regulaer";
+      planEbitda = 0;
+      for (let i = 0; i < 52 && klon.phase === "regulaer"; i++) planEbitda += planWoche2(klon);
+    }
+    const konzernJahresumsatzStart = s2.zentrale.kostenStart / PARAM.zentraleQuote * 52;
+    const schwelle = schwierigkeit(s2).versammlungSchwelle * Math.max(1, konzernJahresumsatzStart / 33e8);
+    const planBonus = planEbitda > 0 ? 15 : planEbitda > schwelle ? 5 : -10;
+    const quoteBonus = 60 * (ins.quote - 0.1);
+    const zahlung = ins.quote * ins.altVerbindlichkeiten;
+    const st2 = s2.stakeholder;
+    const lieferanten = (s2.lieferanten.filter((l) => l.aktiv).reduce((a2, l) => a2 + l.vertrauen, 0) + s2.restLieferantenVertrauen * 2) / (s2.lieferanten.filter((l) => l.aktiv).length + 2);
+    const gruppen = [
+      ["Banken", st2.bank],
+      ["Kreditversicherer", st2.kreditversicherer],
+      ["Lieferanten", lieferanten],
+      ["Vermieter", st2.vermieter],
+      ["Arbeitnehmer", st2.betriebsrat]
+    ];
+    const schutzschirmBonus = s2.szenario?.regeln.schutzschirmZustimmung ?? 0;
+    const ja = gruppen.filter(([, v2]) => v2 + planBonus + quoteBonus + schutzschirmBonus >= 42).map(([n3]) => n3);
+    const nein = gruppen.filter(([n3]) => !ja.includes(n3)).map(([n3]) => n3);
+    const sofort = zahlung * 0.4;
+    const finanzierbar = s2.cash >= sofort;
+    if (ja.length >= 3 && finanzierbar) {
+      s2.cash -= eur(sofort);
+      s2.verbindlichkeiten.push({ id: `q1-${s2.woche}`, art: "sonstiges", wert: eur(zahlung * 0.3), faellig: s2.woche + 26 });
+      s2.verbindlichkeiten.push({ id: `q2-${s2.woche}`, art: "sonstiges", wert: eur(zahlung * 0.3), faellig: s2.woche + 52 });
+      s2.phase = "regulaer";
+      s2.insolvenz = void 0;
+      st2.kreditversicherer = Math.max(st2.kreditversicherer, 42);
+      st2.bank = Math.max(st2.bank, 38);
+      st2.image = clamp(st2.image + 6, 0, 100);
+      for (const l of s2.lieferanten) l.vertrauen = Math.max(l.vertrauen, 42);
+      s2.restLieferantenVertrauen = Math.max(s2.restLieferantenVertrauen, 45);
+      s2.kreditlinieBasis = Math.round(s2.kreditlinieBasis * 0.6);
+      s2.kreditlinie = Math.round(s2.kreditlinieBasis * 0.5);
+      melde(s2, "info", `Integrierte Planung: EBITDA der n\xE4chsten 52 Wochen ${mio(planEbitda)}.`);
+      melde(s2, "insolvenz", `Insolvenzplan angenommen (Zustimmung: ${ja.join(", ")}). Quote ${Math.round(ins.quote * 100)} % = ${mio(zahlung)}, davon ${mio(sofort)} sofort, der Rest in zwei Raten. Das Verfahren ist aufgehoben.`);
+      melde(s2, "presse", `Gl\xE4ubiger stimmen zu: ${s2.firma.name} bekommt eine weitere Chance.`);
+    } else {
+      s2.phase = "zerschlagen";
+      melde(s2, "info", `Integrierte Planung: EBITDA der n\xE4chsten 52 Wochen ${mio(planEbitda)}.`);
+      const grund2 = !finanzierbar ? `Die erste Rate der Quote (${mio(sofort)}) ist nicht finanzierbar.` : `Abgelehnt von: ${nein.join(", ")}.`;
+      melde(s2, "insolvenz", `Insolvenzplan gescheitert. ${grund2} Die Kette wird zerschlagen.`);
+      melde(s2, "presse", `Aus f\xFCr ${s2.firma.name}: Die letzten H\xE4user schlie\xDFen.`);
+    }
+  }
+  var planWoche2 = () => 0;
+  function setzePlanWoche(f13) {
+    planWoche2 = f13;
+  }
+  function zerschlagungDurchMasseunzulaenglichkeit(s2) {
+    s2.phase = "zerschlagen";
+    melde(s2, "insolvenz", "Masseunzul\xE4nglichkeit: Auch die laufenden Kosten im Verfahren sind nicht mehr gedeckt. Die Kette wird zerschlagen.");
+  }
+  function quartalsBewertung(s2) {
+    const q2 = s2.quartale[s2.quartale.length - 1];
+    if (!q2) return;
+    const ist = s2.historie.filter((k5) => k5.woche >= q2.start && k5.woche < q2.start + 13).reduce((a2, b4) => a2 + b4.ebitda, 0);
+    q2.ebitdaIst = eur(ist);
+    const plan2 = q2.plan ?? q2.planStandard;
+    const volumen2 = Math.max(1, Object.values(s2.basisUmsatz).reduce((a2, u) => a2 + (u ?? 0), 0) * 52 / 31e8);
+    const tol = Math.max(2e6 * volumen2, 0.12 * Math.abs(plan2));
+    const st2 = s2.stakeholder;
+    const ambitioniert = plan2 >= q2.planStandard;
+    if (ist >= plan2 - 0.25 * tol) {
+      st2.eigentuemer = clamp(st2.eigentuemer + 8 + (ambitioniert ? 4 : 0), 0, 100);
+      s2.eigentuemer.strikes = 0;
+      let txt = `Quartal ${q2.nr + 1}: Plan erreicht (Ist ${mio(ist)}, Plan ${mio(plan2)}).`;
+      const vorjahr2 = s2.quartale.find((x2) => x2.nr === q2.nr - 4);
+      const besser = vorjahr2 ? ist > vorjahr2.ebitdaIst : ist > q2.planStandard + 0.1 * Math.abs(q2.planStandard);
+      if (!besser) txt += " Ohne sichtbare Verbesserung gegen\xFCber dem Vorjahr gibt es kein frisches Geld.";
+      if (s2.phase === "regulaer" && !istSandkasten(s2) && besser && (runwayWochen(s2) < 26 || s2.cash + s2.kreditlinie < 15e7 * volumen2)) {
+        const kapital = eur(12e6 * volumen2 * (st2.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
+        s2.cash += kapital;
+        s2.einmalErloeseWoche += kapital;
+        s2.eigentuemer.kapitalZugefuehrt += kapital;
+        s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
+        s2.kapitalflussOffen.finanzierung += kapital;
+        txt += ` Der Eigent\xFCmer schie\xDFt ${mio(kapital)} nach.`;
+      }
+      melde(s2, "eigentuemer", txt, { modul: "vorstand" });
+    } else if (ist >= plan2 - tol) {
+      st2.eigentuemer = clamp(st2.eigentuemer - 2, 0, 100);
+      melde(s2, "eigentuemer", `Quartal ${q2.nr + 1}: Plan knapp verfehlt (Ist ${mio(ist)}, Plan ${mio(plan2)}). Kein frisches Geld, neue Frist.`, { modul: "vorstand" });
+    } else {
+      st2.eigentuemer = clamp(st2.eigentuemer - 12, 0, 100);
+      s2.eigentuemer.strikes += 1;
+      melde(s2, "eigentuemer", `Quartal ${q2.nr + 1}: Plan klar verfehlt (Ist ${mio(ist)}, Plan ${mio(plan2)}). Verwarnung ${s2.eigentuemer.strikes}/2.`, { modul: "vorstand" });
+      if (s2.eigentuemer.strikes >= 2 && s2.phase === "regulaer") {
+        if (runwayWochen(s2) < 13) {
+          s2.eigentuemer.forderung = "insolvenzantrag";
+          melde(s2, "eigentuemer", "Der Eigent\xFCmer stellt keine weiteren Mittel bereit und verlangt den Insolvenzantrag.", { modul: "vorstand" });
+          eroeffneInsolvenz(s2, "Eigent\xFCmer verweigert weitere Mittel");
+        } else {
+          melde(s2, "eigentuemer", "Der Eigent\xFCmer pr\xFCft Alternativen. Ein weiteres verfehltes Quartal beendet seine Unterst\xFCtzung.", { modul: "vorstand" });
+        }
+      }
+    }
+  }
+  function lohnSumme(s2) {
+    return s2.haeuser.reduce((a2, h4) => a2 + (h4.status === "geschlossen" ? 0 : lohnKosten(s2, h4)), 0);
+  }
+
   // ../engine/src/ware.ts
   function bestandWert(s2, g2) {
     let x2 = 0;
@@ -2310,10 +2500,3256 @@
     return gebucht;
   }
 
+  // ../engine/src/premium.ts
+  var PREMIUM_PROFIL = {
+    P001: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.012, mietQuote: 0.057 },
+    P002: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.016, mietQuote: 0.057 },
+    P003: { qm: 18e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.06 },
+    P004: { qm: 14e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.041, mietQuote: 0.065 },
+    P005: { qm: 2e4, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.06 }
+  };
+  var premiumProfil = (id) => id && Object.prototype.hasOwnProperty.call(PREMIUM_PROFIL, id) ? PREMIUM_PROFIL[id] : void 0;
+  var EURO_JE_QM_WOCHE = 40;
+  var MIX = {
+    beauty: 1.55,
+    accessoires: 1.55,
+    damen: 1.25,
+    food: 1.45,
+    spielwaren: 0.55,
+    wohnen: 0.6
+  };
+  var IMMOBILIE = { P001: 9e8, P002: 9e8, P003: 6e8, P004: 145e6, P005: 65e7 };
+  var KAEUFER = [
+    { typ: "Luxusgruppe", name: "Luxusgruppe Valens" },
+    { typ: "Family Office", name: "Family Office Merian" },
+    { typ: "Staatsfonds", name: "Staatsfonds Aurum" }
+  ];
+  function grundumsatz(h4) {
+    return Object.entries(h4.potenzial).reduce((sum2, [g2, p2]) => {
+      const qm2 = h4.flaechen.filter((f13) => f13.gruppe === g2 && f13.konzept === "eigen").reduce((a2, f13) => a2 + f13.qm, 0);
+      return sum2 + (p2 ?? 0) * (1 - Math.exp(-qm2 / Math.max(1, h4.saettigungQm[g2] ?? 1)));
+    }, 0);
+  }
+  function normierePremiumFlaechen(h4, p2) {
+    const alteEtagen = [...h4.etagen].sort((a2, b4) => a2 - b4);
+    const neueEtagen = [...p2.etagen];
+    const anzahl2 = Math.max(1, alteEtagen.length - 1);
+    for (const f13 of h4.flaechen) {
+      const index2 = Math.max(0, alteEtagen.indexOf(f13.etage));
+      f13.etage = neueEtagen[Math.round(index2 / anzahl2 * (neueEtagen.length - 1))];
+    }
+    h4.etagen = neueEtagen;
+    h4.grundflaecheQm = p2.qm / neueEtagen.length;
+    const gruppen = Object.keys(h4.potenzial);
+    const gewicht2 = gruppen.reduce((a2, g2) => a2 + GRUPPEN[g2].anteilFlaeche, 0);
+    for (const g2 of gruppen) {
+      const bereiche = h4.flaechen.filter((f13) => f13.gruppe === g2);
+      const altQm = bereiche.reduce((a2, f13) => a2 + f13.qm, 0);
+      if (!altQm) continue;
+      const zielQm = Math.round(p2.qm * GRUPPEN[g2].anteilFlaeche / gewicht2);
+      let rest2 = zielQm;
+      for (let i = 0; i < bereiche.length; i++) {
+        const f13 = bereiche[i];
+        const neuQm = i === bereiche.length - 1 ? rest2 : Math.max(1, Math.round(zielQm * f13.qm / altQm));
+        f13.qm = neuQm;
+        rest2 -= neuQm;
+      }
+    }
+    const rest = p2.qm - h4.flaechen.reduce((a2, f13) => a2 + f13.qm, 0);
+    const ausgleich = h4.flaechen.find((f13) => f13.gruppe === "damen") ?? h4.flaechen[0];
+    if (ausgleich) ausgleich.qm += rest;
+    for (const g2 of gruppen) {
+      const qm2 = h4.flaechen.filter((f13) => f13.gruppe === g2).reduce((a2, f13) => a2 + f13.qm, 0);
+      if (!qm2) continue;
+      h4.saettigungQm[g2] = qm2 * 0.75;
+      h4.potenzial[g2] = qm2 * GRUPPEN[g2].qmUmsatz * (MIX[g2] ?? 1) / (1 - Math.exp(-qm2 / h4.saettigungQm[g2]));
+    }
+  }
+  function kennzeichnePremium(haeuser) {
+    const vorhanden = haeuser.filter((h4) => h4.klasse === "premium" && h4.premiumSchluessel);
+    if (vorhanden.length) {
+      for (const h4 of vorhanden) {
+        const p2 = PREMIUM_HAEUSER.find((x2) => x2.id === h4.premiumSchluessel);
+        if (!p2) throw new Error(`Unbekannter Premiumschl\xFCssel: ${h4.premiumSchluessel}`);
+        h4.klasse = "premium";
+        h4.premiumSchluessel = p2.id;
+        h4.name = p2.name;
+        h4.premiumImage ?? (h4.premiumImage = 80);
+        const profil2 = premiumProfil(p2.id);
+        normierePremiumFlaechen(h4, profil2);
+        for (const g2 of Object.keys(h4.potenzial)) h4.potenzial[g2] = (h4.potenzial[g2] ?? 0) * profil2.produktivitaet;
+        h4.lage = "1a";
+        h4.miete.vermieter = "eigentuemer";
+        h4.miete.vermieterName = "Hartwig Immobilien";
+        h4.substanz = Math.max(78, h4.substanz);
+      }
+      return;
+    }
+    const ursprung = haeuser.reduce((a2, h4) => a2 + grundumsatz(h4), 0);
+    for (const p2 of PREMIUM_HAEUSER) {
+      const kandidaten3 = haeuser.filter((h5) => h5.format === "warenhaus" && h5.stadt === p2.stadt && h5.klasse !== "premium");
+      const h4 = [...kandidaten3].sort((a2, b4) => (b4.lage === "1a" ? 1 : 0) - (a2.lage === "1a" ? 1 : 0) || b4.grundflaecheQm * b4.etagen.length - a2.grundflaecheQm * a2.etagen.length || a2.id.localeCompare(b4.id))[0];
+      if (!h4) continue;
+      h4.name = p2.name;
+      h4.klasse = "premium";
+      h4.premiumSchluessel = p2.id;
+      h4.premiumImage = 80;
+      h4.lage = "1a";
+      const profil2 = premiumProfil(p2.id);
+      normierePremiumFlaechen(h4, profil2);
+      h4.miete.vermieter = "eigentuemer";
+      h4.miete.vermieterName = "Hartwig Immobilien";
+      const sollUmsatzWoche = profil2.qm * EURO_JE_QM_WOCHE * profil2.produktivitaet;
+      h4.miete.mieteWoche = eur(sollUmsatzWoche * profil2.mietQuote);
+      h4.miete.bisWoche = 15 * 52;
+      h4.miete.keineVerlaengerung = false;
+      const normalUmsatzWoche = profil2.qm * EURO_JE_QM_WOCHE;
+      const fte2 = 1.15 * (profil2.qm / 500 + normalUmsatzWoche / 8800);
+      h4.personal.vollzeit = fte2 * 0.5;
+      h4.personal.teilzeit = fte2 * 0.4;
+      h4.personal.aushilfen = fte2 * 0.1;
+      h4.substanz = Math.max(78, h4.substanz);
+      h4.substanzStart = h4.substanz;
+      for (const g2 of ["beauty", "accessoires"]) {
+        const f13 = h4.flaechen.find((f14) => f14.gruppe === g2 && f14.konzept === "eigen" && f14.qm > 250);
+        if (f13) {
+          const qm2 = Math.round(f13.qm * 0.07);
+          f13.qm -= qm2;
+          h4.flaechen.push({ ...f13, id: f13.id + "-luxus", qm: qm2, konzept: "konzession" });
+        }
+      }
+      const faktor2 = sollUmsatzWoche / Math.max(1, grundumsatz(h4));
+      for (const g2 of Object.keys(h4.potenzial))
+        h4.potenzial[g2] = (h4.potenzial[g2] ?? 0) * faktor2;
+    }
+    const praemie = haeuser.filter((h4) => h4.klasse === "premium").reduce((a2, h4) => a2 + grundumsatz(h4), 0);
+    const regulaer = haeuser.filter((h4) => h4.klasse !== "premium");
+    const sum2 = regulaer.reduce((a2, h4) => a2 + grundumsatz(h4), 0);
+    const kompensation = Math.max(0.5, (ursprung - praemie) / Math.max(1, sum2));
+    for (const h4 of regulaer) for (const g2 of Object.keys(h4.potenzial)) h4.potenzial[g2] = (h4.potenzial[g2] ?? 0) * kompensation;
+  }
+  function premiumImageFaktor(h4) {
+    return h4.klasse === "premium" ? clamp(0.65 + 0.35 * (h4.premiumImage ?? 80) / 80, 0.65, 1.0875) : 1;
+  }
+  function premiumWoche(s2) {
+    for (const h4 of s2.haeuser.filter((h5) => h5.klasse === "premium" && h5.status === "offen")) {
+      const inv = h4.premiumInvestition;
+      if (inv && s2.woche < inv.bis) {
+        h4.substanz = clamp(h4.substanz + inv.substanzProWoche, 0, 100);
+        h4.premiumImage = clamp((h4.premiumImage ?? 80) + inv.imageProWoche, 0, 100);
+      }
+      const aktiv6 = s2.marketing.aktionen.filter((a2) => a2.status !== "abgesagt" && a2.start <= s2.woche && s2.woche < a2.ende && !a2.kontrollHaeuser?.includes(h4.id) && (a2.scope.typ === "alle" ? s2.premiumSchuetzen === false : a2.scope.typ === "haeuser" ? a2.scope.ids.includes(h4.id) : a2.scope.typ === "format" ? a2.scope.format === "warenhaus" : a2.scope.typ === "region" ? a2.scope.region === h4.region : a2.scope.cluster === h4.cluster));
+      const imageVerlust = aktiv6.reduce((a2, x2) => a2 + Math.min(2.5, x2.rabatt * 5), 0);
+      h4.premiumImage = clamp((h4.premiumImage ?? 80) - imageVerlust + (aktiv6.length ? 0 : 0.05), 0, 100);
+    }
+  }
+  function premiumMarktwert(h4) {
+    if (h4.klasse !== "premium") return 0;
+    const rang = PREMIUM_HAEUSER.find((p2) => p2.id === h4.premiumSchluessel)?.rang ?? 3;
+    const ebitda = (h4.kpi?.db ?? 0) * 52;
+    const multiplex = rang === 1 ? 18 : rang === 2 ? 15 : 11;
+    return eur(Math.max(0, ebitda) * multiplex + (IMMOBILIE[h4.premiumSchluessel ?? ""] ?? 0) * (0.85 + 0.15 * (h4.substanz / 100)) * (0.8 + 0.2 * ((h4.premiumImage ?? 80) / 80)));
+  }
+  function premiumUebersicht(s2) {
+    return s2.haeuser.filter((h4) => h4.klasse === "premium").map((h4) => {
+      const umsatz = h4.kpi?.umsatz ?? 0, ebitda = h4.kpi?.db ?? 0;
+      return {
+        id: h4.id,
+        schluessel: h4.premiumSchluessel,
+        name: h4.name,
+        stadt: h4.stadt,
+        status: h4.status,
+        umsatz: eur(umsatz),
+        ebitda: eur(ebitda),
+        marge: umsatz > 0 ? ebitda / umsatz : 0,
+        image: h4.premiumImage ?? 80,
+        substanz: h4.substanz,
+        marktwert: premiumMarktwert(h4),
+        schutz: s2.premiumSchuetzen !== false,
+        eigentuemer: h4.premiumEigentuemer
+      };
+    });
+  }
+  function premiumInvestieren(s2, id, betrag) {
+    const h4 = s2.haeuser.find((x2) => x2.id === id && x2.klasse === "premium" && x2.status === "offen");
+    if (!h4) return "Premium-Haus nicht verf\xFCgbar.";
+    if (!Number.isSafeInteger(betrag) || betrag < 5e5 || betrag > 1e8) return "Investition von 0,5 bis 100 Mio. \u20AC w\xE4hlen.";
+    if (h4.premiumInvestition && s2.woche < h4.premiumInvestition.bis) return "Eine Premium-Investition l\xE4uft bereits. Bitte zun\xE4chst die 26 Wochen abwarten.";
+    if (!liquiditaetReicht(s2, betrag)) return "Nicht gen\xFCgend Liquidit\xE4t.";
+    s2.cash -= betrag;
+    s2.einmalkostenWoche += betrag;
+    s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
+    s2.kapitalflussOffen.investitionen -= betrag;
+    h4.premiumInvestition = {
+      bis: s2.woche + 26,
+      substanzProWoche: Math.min(30, betrag / 3e6) / 26,
+      imageProWoche: Math.min(15, betrag / 5e6) / 26
+    };
+    melde(s2, "info", `Premium-Investition in ${h4.name}: ${mio(betrag)} \xFCber 26 Wochen.`, { stadt: h4.stadt, hausId: h4.id });
+    return null;
+  }
+  function premiumAngebote(s2) {
+    if (s2.phase !== "insolvenz" || s2.prognose) return;
+    for (const h4 of s2.haeuser.filter((x2) => x2.klasse === "premium" && x2.status === "offen")) {
+      if (s2.angebote.some((a2) => a2.typ === "premiumVerkauf" && a2.wunschHaeuser?.[0] === h4.id)) continue;
+      const p2 = PREMIUM_HAEUSER.find((x2) => x2.id === h4.premiumSchluessel);
+      const kaeufer = KAEUFER[(p2?.rang ?? 3) === 1 ? h4.premiumSchluessel === "P001" ? 0 : 1 : (p2?.rang ?? 3) === 2 ? 2 : 1];
+      const kaufpreis = premiumMarktwert(h4);
+      s2.angebote.push({
+        // Eigenständige deterministische IDs: keine Veränderung des globalen ID-Zählers
+        // und kein zusätzlicher Zug aus dem gemeinsamen Ereignis-Zufallsstrom.
+        id: `premium-${h4.premiumSchluessel ?? h4.id}-${s2.woche}`,
+        typ: "premiumVerkauf",
+        woche: s2.woche,
+        frist: s2.woche + 10 + (p2?.rang ?? 3) * 3,
+        status: "offen",
+        titel: `Kaufangebot f\xFCr ${h4.name}`,
+        text: `${kaeufer.name} bietet ${mio(kaufpreis)} inklusive Immobilie. Der Verkauf entzieht Hartwig ein Kronjuwel.`,
+        kaufpreis,
+        wunschHaeuser: [h4.id],
+        premiumKaeuferTyp: kaeufer.typ,
+        premiumKaeuferName: kaeufer.name
+      });
+      melde(s2, "presse", `Ein Investor bietet f\xFCr ${h4.name}.`, { stadt: h4.stadt, hausId: h4.id });
+    }
+  }
+  function premiumVerkaufen(s2, an) {
+    if (an.typ !== "premiumVerkauf" || s2.phase !== "insolvenz") return "Premium-Verkauf nur im Insolvenzverfahren.";
+    const h4 = s2.haeuser.find((x2) => x2.id === an.wunschHaeuser?.[0] && x2.klasse === "premium" && x2.status === "offen");
+    if (!h4) return "Premium-Haus nicht verf\xFCgbar.";
+    h4.status = "verkauft";
+    h4.premiumEigentuemer = an.premiumKaeuferName ?? "Neuer Eigent\xFCmer";
+    h4.personal.vollzeit = 0;
+    h4.personal.teilzeit = 0;
+    h4.personal.aushilfen = 0;
+    s2.cash += an.kaufpreis ?? 0;
+    s2.einmalErloeseWoche += an.kaufpreis ?? 0;
+    s2.stakeholder.image = clamp(s2.stakeholder.image - 8, 0, 100);
+    s2.stakeholder.eigentuemer = clamp(s2.stakeholder.eigentuemer - 12, 0, 100);
+    an.status = "angenommen";
+    an.erledigtWoche = s2.woche;
+    melde(s2, "presse", `${h4.name} ist an ${h4.premiumEigentuemer} verkauft worden.`, { stadt: h4.stadt, hausId: h4.id });
+    return null;
+  }
+
+  // ../engine/src/zeitung.ts
+  var ZEITUNG_REITER = ["Top", "Handel", "Konzern", "Markt", "Politik"];
+  var EREIGNISSE = [
+    // Q06: Die Fachabteilung liefert ausschließlich relevante, verdichtete Marktbewegungen.
+    ["markt_ueberblick", "Handel", "konkurrenz", "Wettbewerb: die Woche im \xDCberblick", "Drei wichtige Entwicklungen und ihre Wirkung auf Hartwig.", "Die Fachabteilung ordnet die lokalen Bewegungen nach ihrer wirtschaftlichen Bedeutung ein.", "Nicht jede Rabattaktion ver\xE4ndert die Wettbewerbslage des Konzerns.", /^Wochenüberblick Wettbewerb/i],
+    ["markt_einzel", "Handel", "konkurrenz", "Eine Marktbewegung verdient Aufmerksamkeit", "Der lokale Markt ver\xE4ndert sich sp\xFCrbar.", "Betroffene H\xE4user passen die Planung an die neue Wettbewerbslage an.", "Die mittelfristige Wirkung h\xE4ngt von Lage, Sortiment und Nachfrage ab.", /^Wettbewerbsbeobachtung:/i],
+    ["konkurrenz_neu", "Handel", "konkurrenz", "Neue Konkurrenz in der Innenstadt", "Ein Anbieter investiert in Verkaufsfl\xE4che.", "Der lokale Handel stellt sich auf einen ver\xE4nderten Wettbewerb ein.", "Die kommenden Wochen d\xFCrften zeigen, wie stark sich die Kundschaft neu verteilt.", /wettbewerb.*(eröffn|neu)|konkurrenz.*(eröffn|neu)|konkurrent.*(eröffn|neu)/i],
+    ["konkurrenz_zu", "Handel", "konkurrenz", "Wettbewerber gibt Standort auf", "Die Einkaufslandschaft ver\xE4ndert sich erneut.", "Ein frei werdendes Gesch\xE4ft ver\xE4ndert die Lage in der Innenstadt.", "Die Nachnutzung d\xFCrfte von Kaufkraft und Immobilienangebot abh\xE4ngen.", /wettbewerb.*schließ|konkurrenz.*schließ|konkurrent.*schließ|wettbewerb.*aufgegeben/i],
+    ["konkurrenz_aktion", "Handel", "konkurrenz", "Preiskampf auf der Einkaufsstra\xDFe", "Aktionen erh\xF6hen den Druck auf den Handel.", "Preisnachl\xE4sse k\xF6nnen kurzfristig Frequenz anziehen.", "F\xFCr die langfristige Profitabilit\xE4t bleibt die Handelsspanne entscheidend.", /wettbewerb.*(aktion|rabatt)|konkurrenz.*(aktion|rabatt)|preiskampf/i],
+    ["konkurrenz_uebernahme", "Handel", "konkurrenz", "Kaufhausfl\xE4che wechselt den Betreiber", "Ein Wettbewerber sichert sich neue Pr\xE4senz.", "Leerst\xE4nde werden zunehmend als strategische Chance behandelt.", "Beobachter erwarten neue Konzepte an den bisherigen Standorten.", /wettbewerb.*übernehm|konkurrenz.*übernehm|nachnutzung.*wettbewerb/i],
+    ["konkurrenz_preise", "Handel", "konkurrenz", "Der Preis entscheidet nicht allein", "Der Wettbewerb sucht neue Kundengruppen.", "Standortqualit\xE4t und Sortiment bleiben zentrale Erfolgsfaktoren.", "Ein hoher Werbedruck ersetzt keine tragf\xE4hige Kalkulation.", /wettbewerb.*preis|preisdruck|konkurrenz.*preise/i],
+    ["haus_schliessung", "Konzern", "haus", "Hartwig bereitet Schlie\xDFung vor", "Besch\xE4ftigte und Eigent\xFCmer warten auf Klarheit.", "Das Unternehmen muss wirtschaftliche und soziale Folgen abw\xE4gen.", "Vor Ort beginnt die Suche nach einer tragf\xE4higen Perspektive.", /hartwig.*schließ|haus.*schließ|soll schließen|schließung.*haus/i],
+    ["haus_raeumung", "Konzern", "haus", "R\xE4umungsverkauf am Standort", "Ein Kaufhaus geht in die letzte Verkaufsphase.", "Die Restbest\xE4nde werden schrittweise abgebaut.", "F\xFCr den Standort gewinnt die k\xFCnftige Nutzung an Bedeutung.", /räumungsverkauf|räumung/i],
+    ["haus_umbau", "Konzern", "haus", "Hartwig investiert in die Fl\xE4che", "Umbauten ver\xE4ndern das Erscheinungsbild.", "Die Gesch\xE4ftsf\xFChrung setzt auf eine bessere Fl\xE4chenleistung.", "Ob die Ma\xDFnahme tr\xE4gt, zeigen erst die kommenden Wochen.", /umbau|modernisier|renovier/i],
+    ["haus_miete", "Konzern", "haus", "Mieten im Fokus der Sanierung", "Immobilienkosten werden neu bewertet.", "Hohe Fixkosten schr\xE4nken die Gestaltungsspielr\xE4ume ein.", "Verhandlungen mit Vermietern bleiben ein Schl\xFCssel der Restrukturierung.", /vermieter|mietvertrag|miete.*verhandel/i],
+    ["haus_personal", "Konzern", "haus", "Personaleinsatz auf dem Pr\xFCfstand", "Filialen reagieren auf die Ertragslage.", "Eine tragf\xE4hige Besetzung bleibt f\xFCr Beratung und Verkauf erforderlich.", "Die Interessen der Besch\xE4ftigten m\xFCssen in die Planung einflie\xDFen.", /personalabbau|personalaufbau|beschäftigte.*abbau/i],
+    ["glaeubiger", "Politik", "politik", "Gl\xE4ubiger entscheiden \xFCber Zukunft", "Im Verfahren r\xFCckt der Insolvenzplan in den Mittelpunkt.", "Die Beteiligten bewerten Finanzierung und operative Aussichten.", "Eine Einigung w\xFCrde neue Handlungsspielr\xE4ume schaffen.", /gläubigerversammlung|insolvenzplan|gläubiger.*versammlung/i],
+    ["insolvenzantrag", "Politik", "politik", "Hartwig unter Insolvenzschutz", "Die Sanierung tritt in eine kritische Phase.", "Das Verfahren soll den Gesch\xE4ftsbetrieb stabilisieren.", "F\xFCr Lieferanten und Besch\xE4ftigte kommt es auf belastbare Zusagen an.", /insolvenzantrag|schutzschirm|insolvenzverfahren/i],
+    ["insolvenz_gescheitert", "Politik", "politik", "Sanierung steht vor dem Aus", "Die Gl\xE4ubigerlage versch\xE4rft sich.", "Die Gesch\xE4ftsf\xFChrung muss die n\xE4chsten Schritte sorgf\xE4ltig pr\xFCfen.", "F\xFCr die betroffenen Standorte ist die Unsicherheit gro\xDF.", /zerschlag|masseunzulänglichkeit|insolvenz.*gescheitert/i],
+    ["betriebsrat", "Politik", "politik", "Betriebsrat verlangt Perspektiven", "Arbeitnehmervertretung und Vorstand verhandeln.", "Die Besch\xE4ftigten erwarten konkrete Antworten auf offene Fragen.", "Ein belastbarer Sozialdialog kann weitere Konflikte vermeiden.", /betriebsrat|interessenausgleich/i],
+    ["sozialplan", "Politik", "politik", "Sozialplan wird verhandelt", "Die Gespr\xE4che \xFCber Ausgleichsma\xDFnahmen laufen.", "Die Finanzierung der Regelungen bleibt ein zentraler Punkt.", "Die Parteien stehen unter erheblichem Zeitdruck.", /sozialplan|abfindung/i],
+    ["streik", "Politik", "politik", "Arbeitskampf belastet den Handel", "Besch\xE4ftigte fordern eine Einigung.", "Ausf\xE4lle treffen den Betrieb unmittelbar.", "Die Konfliktparteien m\xFCssen an den Verhandlungstisch zur\xFCckfinden.", /streik|arbeitskampf/i],
+    ["tarif", "Politik", "politik", "Tarifrunde vor neuer Entscheidung", "Die Personalpolitik steht im Blickpunkt.", "Tarifliche Vereinbarungen wirken \xFCber Jahre nach.", "Die wirtschaftliche Belastbarkeit bestimmt den Verhandlungsspielraum.", /tarif/i],
+    ["quartal", "Konzern", "haus", "Quartalszahlen pr\xE4gen die Debatte", "Umsatz und Ergebnis r\xFCcken in den Mittelpunkt.", "Die Investoren achten auf Kosten, Marge und Liquidit\xE4t.", "Ein einzelnes Quartal entscheidet jedoch noch nicht \xFCber den Trend.", /quartal|ebitda|ergebnis.*umsatz/i],
+    ["liquiditaet", "Konzern", "markt", "Liquidit\xE4t bleibt entscheidend", "Kasse und Kreditlinie bestimmen das Tempo.", "Kurzfristige Zahlungsmittel sind Voraussetzung f\xFCr jede Sanierung.", "Auch die Lieferanten verfolgen die Entwicklung aufmerksam.", /liquidität|kreditlinie|kassenbestand|zahlungsunfähig/i],
+    ["bank", "Markt", "markt", "Banken verlangen Verl\xE4sslichkeit", "Finanzierung wird zum Pr\xFCfstein.", "Kreditgeber erwarten einen nachvollziehbaren Gesch\xE4ftsplan.", "Entscheidend ist die F\xE4higkeit, Verpflichtungen fristgerecht zu bedienen.", /bank|kreditgeber/i],
+    ["lieferanten", "Markt", "markt", "Lieferanten achten auf Zahlungsziele", "Die Beschaffung bleibt unter Beobachtung.", "Vertrauen und Warenverf\xFCgbarkeit h\xE4ngen eng zusammen.", "Eine stabile Lieferkette st\xE4rkt die Verkaufsf\xE4higkeit der H\xE4user.", /lieferant|warenkredit|vorkasse/i],
+    ["vorstand", "Konzern", "haus", "Bewegung in der Konzernspitze", "Neue Aufgaben f\xFCr das Management.", "An der Unternehmensspitze werden Zust\xE4ndigkeiten neu geordnet.", "Der Handel erwartet klare Entscheidungen und nachvollziehbare Priorit\xE4ten.", /vorstand|ressort|geschäftsführung|berufen|abberufen/i],
+    ["eigenmarken", "Handel", "haus", "Eigenmarken sollen Profil sch\xE4rfen", "Der Konzern arbeitet am Sortiment.", "Eigene Marken versprechen mehr Differenzierung im Wettbewerb.", "Entscheidend bleibt die Akzeptanz bei den Kundinnen und Kunden.", /eigenmarke|marke gegründet|markenstrategie/i],
+    ["sortiment", "Handel", "haus", "Sortiment wird neu gewichtet", "Fl\xE4chen m\xFCssen wirtschaftlicher werden.", "Die Mischung aus Mode, Wohnen und Service wird regelm\xE4\xDFig \xFCberpr\xFCft.", "Die Nachfrage vor Ort liefert die wichtigsten Hinweise.", /sortiment|warengruppe|sortimentsmix/i],
+    ["marketing", "Handel", "haus", "Werbung als Hebel der Wende", "Der Handel wirbt um neue Frequenz.", "Aktionen k\xF6nnen kurzfristig die Ums\xE4tze st\xFCtzen.", "Eine nachhaltige Bindung der Kundschaft ist wichtiger als reine Rabattsignale.", /marketing|kampagne|kundenkarte|coupon/i],
+    ["verkauf", "Handel", "haus", "Kaufkraft entscheidet \xFCber Standorte", "Verkaufsfl\xE4chen geraten unter Druck.", "Die Umsatzentwicklung f\xE4llt regional unterschiedlich aus.", "Eine flexible Fl\xE4chenplanung gewinnt an Bedeutung.", /umsatzrückgang|umsatzplus|absatz|verkauf/i],
+    ["immobilie", "Markt", "markt", "Handelsimmobilien im Wandel", "In den Innenst\xE4dten entstehen neue Konzepte.", "Die Nutzung gro\xDFer Fl\xE4chen wird vielerorts \xFCberpr\xFCft.", "Mischformen aus Handel und Dienstleistung gewinnen an Gewicht.", /immobilie|leerstand|innenstadt/i],
+    ["kosten", "Konzern", "haus", "Kostendisziplin bleibt Schl\xFCssel", "Fixkosten m\xFCssen zur Nachfrage passen.", "Sanierung erfordert mehr als kurzfristige Einsparungen.", "Die Wirkung einer Ma\xDFnahme zeigt sich in der Ergebnisrechnung.", /kosten|einspar|sparprogramm/i],
+    ["ecommerce", "Handel", "markt", "Online und Fl\xE4che r\xFCcken zusammen", "Der Handel sucht neue Vertriebskan\xE4le.", "Digitale Services sollen den station\xE4ren Einkauf erg\xE4nzen.", "Die Wirtschaftlichkeit h\xE4ngt vom Kundennutzen ab.", /online|e-commerce|ecommerce|app/i],
+    ["presse", "Top", "haus", "Hartwig bleibt Gespr\xE4chsthema", "Die Entwicklungen bewegen die Branche.", "Die Marktteilnehmer verfolgen die Restrukturierung aufmerksam.", "Die n\xE4chste Bilanz wird zeigen, ob die Strategie tr\xE4gt.", /./i]
+  ].map(([id, reiter, bild4, titel, unter, kommentar, perspektive, muster3]) => ({
+    id,
+    reiter,
+    bild: bild4,
+    titel,
+    unter,
+    kommentar,
+    perspektive,
+    muster: muster3
+  }));
+  var HINTERGRUND = [
+    ["textil", "Markt", "markt", "Textilums\xE4tze bleiben umk\xE4mpft", "Die Branche sucht nach Wachstum.", "Der Verkauf von Bekleidung bleibt konjunkturabh\xE4ngig.", "Das Kaufverhalten hat sich dauerhaft ver\xE4ndert."],
+    ["frequenz", "Markt", "markt", "Innenstadtfrequenz im Wandel", "Der Handel z\xE4hlt seine Besucher.", "Die Zahl der Passanten allein erkl\xE4rt noch keine Ums\xE4tze.", "Angebot und Aufenthaltsqualit\xE4t beeinflussen den Standort."],
+    ["kaufkraft", "Markt", "markt", "Kaufkraft wird neu verteilt", "Haushalte w\xE4gen ihre Ausgaben ab.", "Waren des t\xE4glichen Bedarfs konkurrieren mit gr\xF6\xDFeren Anschaffungen.", "Der station\xE4re Handel muss auf ver\xE4nderte Priorit\xE4ten reagieren."],
+    ["mieten", "Markt", "markt", "Mietniveau unter Beobachtung", "Eigent\xFCmer und H\xE4ndler verhandeln.", "Gro\xDFe Handelsfl\xE4chen stellen die Immobilienm\xE4rkte vor Aufgaben.", "Langfristige Vertr\xE4ge brauchen tragf\xE4hige Gesch\xE4ftsmodelle."],
+    ["stadt", "Handel", "haus", "Innenstadt sucht ihren Mittelpunkt", "Warenh\xE4user bleiben wichtige Frequenzbringer.", "Die Wirkung eines gro\xDFen Gesch\xE4fts reicht \xFCber dessen eigene Fl\xE4che hinaus.", "Nachbarschaft und Gastronomie profitieren von lebendigen Stra\xDFen."],
+    ["kunden", "Handel", "haus", "Kunden w\xFCnschen Orientierung", "Service wird zum Unterscheidungsmerkmal.", "Pers\xF6nliche Beratung und eine klare Sortimentsf\xFChrung bleiben gefragt.", "Wer die W\xFCnsche vor Ort kennt, kann zielgerichteter investieren."],
+    ["logistik", "Handel", "markt", "Lieferketten werden belastbarer", "Planung soll Engp\xE4sse vermeiden.", "Best\xE4nde binden Kapital und k\xF6nnen zugleich den Umsatz absichern.", "Verl\xE4ssliche Nachlieferungen sind ein Wettbewerbsvorteil."],
+    ["saison", "Handel", "haus", "Saisonware steht im Fokus", "Eink\xE4ufer \xFCberpr\xFCfen die Planung.", "Die Bestellung von Mode erfordert lange Vorlaufzeiten.", "Ein ausgewogenes Lager verringert das Risiko von Abschriften."],
+    ["personal", "Politik", "politik", "Besch\xE4ftigung im Handel im Blick", "Fachkr\xE4fte bleiben eine Schl\xFCsselressource.", "Der Strukturwandel ver\xE4ndert die Anforderungen an die Belegschaften.", "Weiterbildung und verl\xE4ssliche Planung gewinnen an Bedeutung."],
+    ["kommunen", "Politik", "politik", "Kommunen sprechen \xFCber Innenstadt", "Stadtentwicklung und Handel sind eng verkn\xFCpft.", "Gro\xDFimmobilien pr\xE4gen das Gesicht ihrer Umgebung.", "Eine nachhaltige Nutzung ben\xF6tigt Partner aus Wirtschaft und Verwaltung."],
+    ["kredit", "Markt", "markt", "Finanzm\xE4rkte pr\xFCfen die Risiken", "Kredite sind nicht unbegrenzt verf\xFCgbar.", "Liquidit\xE4tsplanung geh\xF6rt zum Kerngesch\xE4ft einer Handelsgruppe.", "Transparenz kann das Vertrauen der Geldgeber erh\xF6hen."],
+    ["digital", "Handel", "markt", "Digitale Dienste im Gesch\xE4ft", "Kaufhaus und Smartphone wachsen zusammen.", "Digitale Informationen k\xF6nnen die Beratung erg\xE4nzen.", "Der Mehrwert muss f\xFCr Kundinnen und Kunden unmittelbar erkennbar sein."],
+    ["quartalsblick", "Konzern", "haus", "Hartwig legt Quartal hinter sich", "Die Ergebnisrechnung dient als Gradmesser.", "Umsatz und Rentabilit\xE4t m\xFCssen gemeinsam bewertet werden.", "Der Vorstand wird die Ma\xDFnahmen daran messen lassen."],
+    ["weihnachten", "Handel", "haus", "Weihnachtsgesch\xE4ft erreicht die H\xE4user", "Die letzten Wochen des Jahres z\xE4hlen besonders.", "Geschenke und Wintermode erh\xF6hen die Bedeutung der Warenverf\xFCgbarkeit.", "Gut vorbereitete Teams k\xF6nnen jetzt den Unterschied machen."],
+    ["winter", "Markt", "markt", "Winterwetter ver\xE4ndert Einkaufswege", "Saisonale Schwankungen geh\xF6ren zum Gesch\xE4ft.", "Kalte Tage beeinflussen die Nachfrage nach Bekleidung und Wohnen.", "Die Warendisposition muss sich fr\xFChzeitig darauf einstellen."],
+    ["sommer", "Handel", "haus", "Sommersaison fordert den Einzelhandel", "Sortimente werden leichter und saisonaler.", "Aktionen und Freizeitangebote ver\xE4ndern die Kundenfrequenz.", "Eine gute Planung h\xE4lt die Best\xE4nde im Gleichgewicht."]
+  ].map(([id, reiter, bild4, titel, unter, kommentar, perspektive]) => ({
+    id,
+    reiter,
+    bild: bild4,
+    titel,
+    unter,
+    kommentar,
+    perspektive
+  }));
+  var ZEITUNG_ARTIKELARTEN = [...EREIGNISSE, ...HINTERGRUND].map((x2) => x2.id);
+  function stand(s2) {
+    return s2.zeitung ?? (s2.zeitung = { aktiv: true, ausgaben: [] });
+  }
+  var zeitungAktiv = (s2) => s2.zeitung?.aktiv !== false;
+  var zeitungArchiv = (s2) => s2.zeitung?.ausgaben ?? [];
+  var zeitungAktuelle = (s2) => {
+    const aus = zeitungArchiv(s2);
+    return aus.length ? aus[aus.length - 1] : null;
+  };
+  function zeitungEinstellen(s2, aktiv6) {
+    stand(s2).aktiv = aktiv6;
+    if (!aktiv6) s2.entscheidungen = s2.entscheidungen.filter((e) => e.typ !== "interview");
+  }
+  function ausVorlage(v2, woche2, zusatz, nummer) {
+    return {
+      id: `z-${woche2}-${nummer}`,
+      art: v2.id,
+      reiter: v2.reiter,
+      titel: v2.titel,
+      unterzeile: v2.unter,
+      text: [zusatz, v2.kommentar, v2.perspektive].filter(Boolean).join(" "),
+      bild: v2.bild
+    };
+  }
+  function zeitungInterviewAntwort(s2, e, option2) {
+    if (!zeitungAktiv(s2) || e.typ !== "interview") return;
+    const wirkung = {
+      offensiv: { image: 2, betriebsrat: -2, bank: -1, kreditversicherer: -1, zitat: "Wir treiben den Umbau konsequent voran und werden unsere Ziele erreichen." },
+      sachlich: { image: 0, betriebsrat: 0, bank: 0, kreditversicherer: 0, zitat: "Wir gehen Schritt f\xFCr Schritt vor und messen jede Ma\xDFnahme an belastbaren Zahlen." },
+      ausweichend: { image: -2, betriebsrat: -1, bank: -2, kreditversicherer: -2, zitat: "Zu einzelnen Punkten m\xF6chten wir uns gegenw\xE4rtig nicht \xE4u\xDFern." }
+    }[option2];
+    if (!wirkung) return;
+    for (const feld2 of ["image", "betriebsrat", "bank", "kreditversicherer"]) {
+      s2.stakeholder[feld2] = clamp(s2.stakeholder[feld2] + wirkung[feld2], 0, 100);
+    }
+    stand(s2).naechstesZitat = { abWoche: s2.woche, text: `Im Interview sagt die Hartwig-Gesch\xE4ftsf\xFChrung: \u201E${wirkung.zitat}\u201C` };
+  }
+  function zeitungWoche(s2) {
+    if (s2.prognose || !zeitungAktiv(s2)) return;
+    const w2 = s2.woche;
+    const z6 = stand(s2);
+    if (z6.ausgaben.some((a2) => a2.woche === w2)) return;
+    const r4 = { rng: (Math.imul(s2.seed >>> 0, 2654435761) ^ Math.imul(w2 + 1, 2246822507) ^ 2708792605) >>> 0 };
+    const artikel = [];
+    const meldungen = s2.meldungen.filter((m) => m.woche === w2 && !/rund\s+0(?:[.,]0+)?\s*%/i.test(m.text) && (m.typ === "presse" || m.typ === "insolvenz" || m.typ === "eigentuemer" || /wettbewerb|konkurrenz|gläubiger|betriebsrat|schließ|vorstand|streik|quartal/i.test(m.text)));
+    for (const m of meldungen.slice().sort((a2, b4) => Number(b4.typ === "insolvenz" || /gläubigerversammlung|insolvenzplan/i.test(b4.text)) * 10 + Number(b4.text.startsWith("Wochen\xFCberblick Wettbewerb")) * 5 - (Number(a2.typ === "insolvenz" || /gläubigerversammlung|insolvenzplan/i.test(a2.text)) * 10 + Number(a2.text.startsWith("Wochen\xFCberblick Wettbewerb")) * 5)).slice(0, 4)) {
+      const v2 = EREIGNISSE.find((x2) => x2.muster.test(m.text));
+      const klartext = m.text.replace(
+        /\((premium|modehaus|fastfashion|offprice|textildiscounter|elektronik)\)/gi,
+        (_, art) => ({
+          premium: "(Premium-Warenhaus)",
+          modehaus: "(Modehaus)",
+          fastfashion: "(Modekette)",
+          offprice: "(Off-Price-Anbieter)",
+          textildiscounter: "(Textildiscounter)",
+          elektronik: "(Elektronikmarkt)"
+        })[art.toLowerCase()] ?? ""
+      );
+      artikel.push(ausVorlage(v2, w2, klartext, artikel.length));
+    }
+    if (z6.naechstesZitat && z6.naechstesZitat.abWoche <= w2) {
+      const vorlage2 = { id: "interview", reiter: "Konzern", bild: "haus", titel: "Hartwig-Vorstand im Gespr\xE4ch", unter: "Die Gesch\xE4ftsf\xFChrung bezieht Stellung.", kommentar: "Das Interview st\xF6\xDFt in der Branche auf Aufmerksamkeit.", perspektive: "Wie die angek\xFCndigten Ma\xDFnahmen greifen, wird sich in den n\xE4chsten Wochen zeigen." };
+      artikel.unshift(ausVorlage(vorlage2, w2, z6.naechstesZitat.text, 50));
+      delete z6.naechstesZitat;
+    }
+    const pflicht = w2 % 13 === 12 ? "quartalsblick" : w2 % 52 >= 45 ? "weihnachten" : w2 % 52 < 8 ? "winter" : w2 % 52 >= 22 && w2 % 52 <= 34 ? "sommer" : "";
+    if (pflicht) artikel.push(ausVorlage(HINTERGRUND.find((x2) => x2.id === pflicht), w2, "", 60));
+    const pool = HINTERGRUND.filter((x2) => x2.id !== pflicht);
+    const zielArtikel = Math.min(5, Math.max(1, artikel.length + 1));
+    while (artikel.length < zielArtikel && pool.length) {
+      const v2 = waehle(r4, pool);
+      pool.splice(pool.indexOf(v2), 1);
+      artikel.push(ausVorlage(v2, w2, "", 100 + artikel.length));
+    }
+    artikel.sort((a2, b4) => Number(b4.art === "glaeubiger" || b4.art.startsWith("insolvenz")) - Number(a2.art === "glaeubiger" || a2.art.startsWith("insolvenz")));
+    const ausgabe = {
+      woche: w2,
+      kw: kw(w2),
+      jahr: jahr(s2, w2),
+      nummer: w2 + 1,
+      aufmacher: artikel[0],
+      meldungen: artikel.slice(1, 7),
+      reiter: ZEITUNG_REITER
+    };
+    z6.ausgaben.push(ausgabe);
+    if (z6.ausgaben.length > 104) z6.ausgaben.splice(0, z6.ausgaben.length - 104);
+    if (w2 >= 8 && (w2 + 1) % 10 === 0 && !s2.entscheidungen.some((e) => e.typ === "interview")) {
+      s2.entscheidungen.push({
+        id: `zeitung-interview-${w2}`,
+        typ: "interview",
+        woche: w2,
+        frist: w2 + 2,
+        titel: "Interviewanfrage des Handelsboten",
+        text: "Die Redaktion bittet die Hartwig-Gesch\xE4ftsf\xFChrung um eine Aussage zur Entwicklung des Unternehmens. Welchen Ton w\xE4hlen Sie?",
+        optionen: [
+          { id: "offensiv", label: "Offensiv: Wir gestalten die Zukunft" },
+          { id: "sachlich", label: "Sachlich: Ma\xDFnahmen und Zahlen erkl\xE4ren" },
+          { id: "ausweichend", label: "Ausweichend: Kein Kommentar" }
+        ],
+        standard: "sachlich",
+        daten: { ausgabe: w2 + 1 }
+      });
+    }
+  }
+
+  // ../engine/src/spielende.ts
+  var faktor = { leicht: 0.8, mittel: 1, schwer: 1.3 };
+  var SPIELENDE_AKTIV = true;
+  var aktiv2 = (s2) => SPIELENDE_AKTIV && !s2.spielendeDeaktiviert && !istSandkasten(s2);
+  function ebitdaJahr(s2) {
+    return eur(s2.historie.slice(-52).reduce((sum2, k5) => sum2 + k5.ebitda, 0));
+  }
+  function immobilienWert(s2) {
+    return eur(s2.haeuser.filter((h4) => h4.klasse === "premium" && h4.status === "offen").reduce((sum2, h4) => {
+      const rang = PREMIUM_HAEUSER.find((p2) => p2.id === h4.premiumSchluessel)?.rang ?? 3;
+      const multiple = rang === 1 ? 18 : rang === 2 ? 15 : 11;
+      const operativ = Math.max(0, (h4.kpi?.db ?? 0) * 52) * multiple;
+      return sum2 + Math.max(0, premiumMarktwert(h4) - operativ);
+    }, 0));
+  }
+  function unternehmenswert(s2) {
+    return eur(Math.max(0, ebitdaJahr(s2)) * 6 + immobilienWert(s2));
+  }
+  function startwerte(s2) {
+    return {
+      haeuser: s2.spielendeStart?.haeuser ?? s2.haeuser.length,
+      fte: s2.spielendeStart?.fte ?? s2.historie[0]?.fte ?? s2.haeuser.reduce((sum2, h4) => sum2 + h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen, 0)
+    };
+  }
+  function endwertung(s2) {
+    const start = startwerte(s2);
+    const offen = s2.haeuser.filter((h4) => h4.status === "offen").length;
+    const fte2 = Math.round(s2.haeuser.reduce((sum2, h4) => sum2 + h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen, 0));
+    const geschlossen = s2.haeuser.filter((h4) => h4.status === "geschlossen" || h4.status === "raeumung" || h4.status === "schliessung_verhandlung").length;
+    const entlassen = Math.max(0, Math.round(start.fte - fte2));
+    const st2 = s2.stakeholder;
+    const stakeholder = (st2.bank + st2.kreditversicherer + st2.vermieter + st2.betriebsrat + st2.eigentuemer) / 5;
+    const teile2 = [
+      { id: "haeuser", name: "Gerettete H\xE4user", wert: offen, punkte: offen * 250 },
+      { id: "arbeitsplaetze", name: "Gerettete Arbeitspl\xE4tze (FTE)", wert: fte2, punkte: fte2 * 40 },
+      { id: "wert", name: "Unternehmenswert", wert: unternehmenswert(s2), punkte: Math.round(unternehmenswert(s2) / 1e5) },
+      { id: "image", name: "Image", wert: Math.round(st2.image), punkte: Math.round(st2.image * 200) },
+      { id: "stakeholder", name: "Stakeholder", wert: Math.round(stakeholder), punkte: Math.round(stakeholder * 150) },
+      { id: "schliessungen", name: "Schlie\xDFungen", wert: geschlossen, punkte: -geschlossen * 400 },
+      { id: "entlassungen", name: "Arbeitsplatzabbau (FTE)", wert: entlassen, punkte: -entlassen * 20 }
+    ];
+    const grundpunkte = teile2.reduce((sum2, x2) => sum2 + x2.punkte, 0);
+    const schwierigkeit2 = s2.schwierigkeit ?? "mittel";
+    const multiplikator = faktor[schwierigkeit2];
+    return { teile: teile2, grundpunkte, multiplikator, punkte: Math.max(0, Math.round(grundpunkte * multiplikator)), schwierigkeit: schwierigkeit2 };
+  }
+  function endKennzahlen(s2) {
+    const start = startwerte(s2);
+    return {
+      geretteteHaeuser: s2.haeuser.filter((h4) => h4.status === "offen").length,
+      startHaeuser: start.haeuser,
+      fte: Math.round(s2.haeuser.reduce((sum2, h4) => sum2 + h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen, 0)),
+      startFte: Math.round(start.fte),
+      ebitda52: ebitdaJahr(s2),
+      unternehmenswert: unternehmenswert(s2),
+      umsatz52: eur(s2.historie.slice(-52).reduce((sum2, x2) => sum2 + x2.umsatz, 0)),
+      image: Math.round(s2.stakeholder.image)
+    };
+  }
+  function spielBeenden(s2, art, kaeufer) {
+    if (s2.prognose || s2.ende || !aktiv2(s2)) return;
+    s2.ende = { art, woche: s2.woche, kennzahlen: endKennzahlen(s2), wertung: endwertung(s2), ...kaeufer ? { kaeufer } : {} };
+  }
+  function spielendePruefen(s2) {
+    if (!aktiv2(s2) || s2.prognose || s2.ende) return;
+    if (s2.phase === "zerschlagen") {
+      spielBeenden(s2, "zerschlagen");
+      return;
+    }
+    if (!s2.spielendeFortgesetzt && s2.woche >= 260 && s2.phase === "regulaer" && // E22/E26: Sanierung gelingt auch außergerichtlich, eine Insolvenz ist keine Voraussetzung.
+    !s2.insolvenz && s2.historie.length >= 52 && ebitdaJahr(s2) > 0) {
+      spielBeenden(s2, "saniert");
+    }
+  }
+  function konzernVerkaufAnbieten(s2) {
+    if (!aktiv2(s2) || s2.prognose || s2.ende || s2.phase !== "regulaer") return;
+    if (s2.woche < 156 || (s2.woche - 156) % 52 !== 0) return;
+    const id = "konzern-" + s2.woche;
+    if (s2.angebote.some((a2) => a2.id === id)) return;
+    const index2 = ((s2.seed + Math.floor((s2.woche - 156) / 52)) % KONZERN_KAEUFER.length + KONZERN_KAEUFER.length) % KONZERN_KAEUFER.length;
+    const k5 = KONZERN_KAEUFER[index2];
+    const kaufpreis = unternehmenswert(s2);
+    const an = {
+      id,
+      typ: "konzernVerkauf",
+      woche: s2.woche,
+      frist: s2.woche + 8,
+      titel: "\xDCbernahmeangebot f\xFCr den Hartwig-Konzern",
+      text: k5.name + " (" + k5.typ + ") bietet " + mio(kaufpreis) + ". Grundlage: sechsfaches EBITDA der letzten 52 Wochen plus Immobilienwert. Annahme beendet das Spiel.",
+      status: "offen",
+      kaufpreis,
+      konzernKaeuferTyp: k5.typ,
+      konzernKaeuferName: k5.name
+    };
+    s2.angebote.push(an);
+    melde(s2, "eigentuemer", "Ein \xDCbernahmeangebot f\xFCr den gesamten Konzern liegt vor.", { modul: "vorstand" });
+  }
+
+  // ../engine/src/filialguv.ts
+  var REFERENZ_FILIAL_GUV = [
+    { id: "umsatz", name: "Umsatz", ist: 100 },
+    { id: "wareneinsatz", name: "Wareneinsatz", ist: -58.8 },
+    { id: "bruttogewinn", name: "Bruttogewinn", ist: 41.2, vorjahr: 41.7, plan: 46.1 },
+    { id: "uebrigeErtraege", name: "\xDCbrige betriebliche Ertr\xE4ge", ist: 2.3 },
+    { id: "personal", name: "Personalaufwand", ist: -16, vorjahr: -15.6, plan: -15.6 },
+    { id: "fremdkraefte", name: "Fremdkr\xE4fte", ist: -0.7 },
+    { id: "miete", name: "Miete / Leasing", ist: -11.2 },
+    { id: "mietnebenkosten", name: "Mietnebenkosten", ist: -1.5 },
+    { id: "logistik", name: "Logistik", ist: -6.3 },
+    { id: "werbung", name: "Werbung", ist: -1.8 },
+    { id: "unterhalt", name: "Unterhalt", ist: -1.9 },
+    { id: "zahlungsverkehr", name: "Zahlungsverkehr", ist: -0.2 },
+    { id: "facilityManagement", name: "Facility Management", ist: -1.7 },
+    { id: "energie", name: "Energie", ist: -2.4 },
+    { id: "it", name: "IT", ist: -0.3 },
+    { id: "administration", name: "Administrative Kosten", ist: -0.2 },
+    { id: "uebrigeAufwendungen", name: "\xDCbrige betriebliche Aufwendungen", ist: -0.4 },
+    { id: "opex", name: "Total OPEX", ist: -42.4 },
+    { id: "ebitda", name: "EBITDA Filialebene", ist: -1.2 }
+  ];
+  var GUV_KOSTEN = [
+    "personal",
+    "fremdkraefte",
+    "miete",
+    "mietnebenkosten",
+    "logistik",
+    "werbung",
+    "unterhalt",
+    "zahlungsverkehr",
+    "facilityManagement",
+    "energie",
+    "it",
+    "administration",
+    "uebrigeAufwendungen"
+  ];
+  function leereFilialGuV() {
+    return {
+      umsatz: 0,
+      wareneinsatz: 0,
+      bruttogewinn: 0,
+      uebrigeErtraege: 0,
+      werbeflaechen: 0,
+      dienstleistungen: 0,
+      personal: 0,
+      fremdkraefte: 0,
+      miete: 0,
+      mietnebenkosten: 0,
+      logistik: 0,
+      werbung: 0,
+      unterhalt: 0,
+      zahlungsverkehr: 0,
+      facilityManagement: 0,
+      energie: 0,
+      it: 0,
+      administration: 0,
+      uebrigeAufwendungen: 0,
+      opex: 0,
+      ebitda: 0,
+      abschriften: 0
+    };
+  }
+  function guvAbschluss(g2) {
+    g2.opex = GUV_KOSTEN.reduce((x2, p2) => x2 + g2[p2], 0);
+    g2.ebitda = g2.bruttogewinn + g2.uebrigeErtraege - g2.opex;
+    return g2;
+  }
+  function guvAddiere(ziel, quelle2) {
+    for (const key of Object.keys(ziel)) ziel[key] += quelle2[key];
+  }
+  var FILIAL_PROGRAMME = {
+    sortiment: { name: "Sortiments- und Preisarchitektur", position: "bruttogewinn", vorlauf: 10, ersparnis: 0.012, investitionsQuote: 5e-4, nebenwirkung: "H\xF6here Preise k\xF6nnen die St\xFCcknachfrage d\xE4mpfen." },
+    personal: { name: "Einsatzplanung und Produktivit\xE4t", position: "personal", vorlauf: 6, ersparnis: 0.09, investitionsQuote: 3e-4, nebenwirkung: "Engere Besetzung erh\xF6ht das Risiko von Wartezeiten." },
+    fremdkraefte: { name: "Fremdpersonal-Pooling", position: "fremdkraefte", vorlauf: 4, ersparnis: 0.2, investitionsQuote: 5e-5, nebenwirkung: "In Spitzenzeiten geringere flexible Reserve." },
+    miete: { name: "Mietportfolio nachverhandeln", position: "miete", vorlauf: 20, ersparnis: 0.12, investitionsQuote: 4e-4, nebenwirkung: "Verhandlungskosten und Vermieterrisiko; keine Filialschlie\xDFung." },
+    mietnebenkosten: { name: "Fl\xE4chennutzung und Nebenkosten pr\xFCfen", position: "mietnebenkosten", vorlauf: 12, ersparnis: 0.12, investitionsQuote: 15e-5, nebenwirkung: "Fl\xE4cheneinschr\xE4nkungen w\xE4hrend der Umstellung." },
+    logistik: { name: "Logistiknetz und Filialbelieferung b\xFCndeln", position: "logistik", vorlauf: 12, ersparnis: 0.18, investitionsQuote: 7e-4, nebenwirkung: "Weniger Lieferfenster und gr\xF6\xDFere Bestelllose." },
+    werbung: { name: "Werbewirkungssteuerung", position: "werbung", vorlauf: 5, ersparnis: 0.15, investitionsQuote: 1e-4, nebenwirkung: "Geringere Werbereichweite kann Frequenz kosten." },
+    unterhalt: { name: "Pr\xE4ventive Instandhaltungsplanung", position: "unterhalt", vorlauf: 12, ersparnis: 0.18, investitionsQuote: 3e-4, nebenwirkung: "Umbau- und Wartungsfenster st\xF6ren zeitweise den Betrieb." },
+    zahlungsverkehr: { name: "Payment-Mix optimieren", position: "zahlungsverkehr", vorlauf: 6, ersparnis: 0.22, investitionsQuote: 6e-5, nebenwirkung: "Umstellung der Kassenterminals und Zahlungsarten." },
+    facilityManagement: { name: "FM-Leistungsb\xFCndel neu vergeben", position: "facilityManagement", vorlauf: 10, ersparnis: 0.2, investitionsQuote: 12e-5, nebenwirkung: "Niedrigere Reinigungs- und Servicefrequenz." },
+    energie: { name: "LED, HLK und Energiesteuerung", position: "energie", vorlauf: 18, ersparnis: 0.28, investitionsQuote: 14e-4, nebenwirkung: "Investition und tempor\xE4re Abschaltung einzelner Anlagen." },
+    it: { name: "IT-Lizenzen und Endger\xE4te konsolidieren", position: "it", vorlauf: 10, ersparnis: 0.22, investitionsQuote: 13e-5, nebenwirkung: "Migration und Schulungsbedarf." },
+    administration: { name: "Filialadministration automatisieren", position: "administration", vorlauf: 8, ersparnis: 0.22, investitionsQuote: 13e-5, nebenwirkung: "Prozessumstellung und Anlaufaufwand." },
+    uebrigeAufwendungen: { name: "Filialverbrauch und Beschaffung b\xFCndeln", position: "uebrigeAufwendungen", vorlauf: 7, ersparnis: 0.2, investitionsQuote: 1e-4, nebenwirkung: "Striktere Ausgabenfreigaben vermindern Flexibilit\xE4t." }
+  };
+  function programmErsparnis(s2, id) {
+    const p2 = s2.filialProgramme?.[id];
+    return p2 && s2.woche >= p2.wirksamAb ? FILIAL_PROGRAMME[id].ersparnis : 0;
+  }
+  function programmNachfrageFaktor(s2) {
+    return (1 - (programmErsparnis(s2, "sortiment") ? 6e-3 : 0)) * (1 - (programmErsparnis(s2, "personal") ? 4e-3 : 0)) * (1 - (programmErsparnis(s2, "werbung") ? 6e-3 : 0));
+  }
+
+  // ../engine/src/wettbewerb.ts
+  var WIRKUNGSFAKTOR = 0.035;
+  var ARTEN = ["modehaus", "fastfashion", "premium", "offprice", "textildiscounter", "elektronik", "leer_ehemals"];
+  var START_ANZAHL = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1] };
+  var START_FLAECHE = { metropole: [2600, 5200], grossstadt: [1800, 3800], mittelstadt: [1500, 2600] };
+  function zufall2(s2) {
+    let t5 = s2.wettbewerbRng = s2.wettbewerbRng + 1831565813 >>> 0;
+    t5 = Math.imul(t5 ^ t5 >>> 15, t5 | 1);
+    t5 ^= t5 + Math.imul(t5 ^ t5 >>> 7, t5 | 61);
+    return ((t5 ^ t5 >>> 14) >>> 0) / 4294967296;
+  }
+  var z = (s2, a2, b4) => a2 + (b4 - a2) * zufall2(s2);
+  var gz = (s2, a2, b4) => Math.floor(z(s2, a2, b4 + 1));
+  var chance2 = (s2, p2) => zufall2(s2) < p2;
+  var wahl = (s2, a2) => a2[Math.floor(zufall2(s2) * a2.length)];
+  function entfernung(a2, b4) {
+    const p2 = KOORDINATEN[a2], q2 = KOORDINATEN[b4];
+    if (!p2 || !q2) return Infinity;
+    const dy = (p2[0] - q2[0]) * 111;
+    const dx = (p2[1] - q2[1]) * 111 * Math.cos((p2[0] + q2[0]) / 2 * Math.PI / 180);
+    return Math.hypot(dx, dy);
+  }
+  function lageFaktor(haus2, w2) {
+    if (haus2.lage === w2.lage) return 1;
+    if (haus2.lage === "center" || w2.lage === "center") return 0.55;
+    if (haus2.lage === "rand" || w2.lage === "rand") return 0.4;
+    return 0.75;
+  }
+  function istMarktAktiv(w2) {
+    return w2.art !== "leer_ehemals" && w2.status !== "geschlossen";
+  }
+  function wertJeGruppe(w2, g2, s2) {
+    if (!istMarktAktiv(w2)) return 0;
+    const u = g2 === "offprice" ? w2.art === "offprice" ? 1 : 0 : WETTBEWERB_UEBERSCHNEIDUNG[w2.art][g2] ?? 0;
+    if (!u) return 0;
+    const sev = schwierigkeit(s2).ereignisse;
+    const eroeffnung = w2.status === "eroeffnung" ? 1 + 0.5 * sev : 1;
+    const aktion2 = (w2.aktionVon ?? Infinity) <= s2.woche && (w2.aktionBis ?? -1) > s2.woche;
+    const druck = w2.status === "raeumung" ? 0.6 : aktion2 ? w2.preisdruck : 0;
+    const abwehr = (w2.abwehrBis ?? 0) > s2.woche ? w2.abwehrFaktor ?? 1 : 1;
+    return w2.staerke * (w2.seit > 0 ? sev : 1) * u * eroeffnung * (1 + druck * sev) * abwehr;
+  }
+  function roh(s2, h4, g2) {
+    let sum2 = 0;
+    for (const w2 of s2.wettbewerber) {
+      if (w2.stadt !== h4.stadt || !istMarktAktiv(w2)) continue;
+      const lage = lageFaktor(h4, w2);
+      if (g2) sum2 += wertJeGruppe(w2, g2, s2) * lage;
+      else {
+        const gruppen = gruppenFuer(h4.format);
+        const summe2 = gruppen.reduce((a2, x2) => a2 + wertJeGruppe(w2, x2, s2), 0);
+        sum2 += lage * (gruppen.length ? summe2 / gruppen.length : 0);
+      }
+    }
+    return sum2 * WIRKUNGSFAKTOR;
+  }
+  function leerzahl(s2, stadt) {
+    return s2.wettbewerber.filter((w2) => w2.stadt === stadt && w2.art === "leer_ehemals" && w2.status !== "geschlossen").length;
+  }
+  function wettbewerbAus(s2, h4) {
+    if (s2.wettbewerbDeaktiviert) return h4.wettbewerbStart;
+    const aktuell = roh(s2, h4);
+    return clamp(h4.wettbewerbStart + (aktuell - (h4.wettbewerbRohStart ?? aktuell)), 0, 1);
+  }
+  function wettbewerbAusGruppe(s2, h4, g2) {
+    const start = h4.wettbewerbGruppeStart?.[g2] ?? h4.wettbewerbStart;
+    if (s2.wettbewerbDeaktiviert) return start;
+    const aktuell = roh(s2, h4, g2);
+    return clamp(start + (aktuell - (h4.wettbewerbRohGruppenStart?.[g2] ?? aktuell)), 0, 1);
+  }
+  function wettbewerbNachfrageFaktor(s2, h4, g2) {
+    const start = h4.wettbewerbGruppeStart?.[g2] ?? h4.wettbewerbStart;
+    return (1 - 0.25 * wettbewerbAusGruppe(s2, h4, g2)) / (1 - 0.25 * start);
+  }
+  function wettbewerbOffpriceFaktor(s2, h4) {
+    if (s2.wettbewerbDeaktiviert) return 1;
+    const start = h4.wettbewerbOffpriceStart ?? h4.wettbewerbStart;
+    const aktuell = roh(s2, h4, "offprice");
+    const neu3 = clamp(start + (aktuell - (h4.wettbewerbRohOffpriceStart ?? aktuell)), 0, 1);
+    return (1 - 0.25 * neu3) / (1 - 0.25 * start);
+  }
+  function wettbewerbFrequenzFaktor(s2, h4) {
+    if (s2.wettbewerbDeaktiviert) return 1;
+    return clamp(1 - 0.02 * (leerzahl(s2, h4.stadt) - (h4.wettbewerbLeerStart ?? 0)), 0.85, 1.08);
+  }
+  function neuerName(s2, art, stadt) {
+    const namen = WETTBEWERBER_NAMEN[art];
+    const frei6 = namen.filter((n3) => !s2.wettbewerber.some((w2) => w2.name === n3 && entfernung(stadt, w2.stadt) < 28));
+    return frei6.length ? wahl(s2, frei6) : namen[0] + " " + stadt;
+  }
+  function anlegen(s2, stadt, art, lage, qm2, seit, inHaus) {
+    const name2 = neuerName(s2, art, stadt);
+    const kette3 = name2.endsWith(" " + stadt) ? name2.slice(0, -(stadt.length + 1)) : name2;
+    const w2 = {
+      id: "C" + String(++s2.wettbewerbNaechsteId).padStart(3, "0"),
+      name: name2,
+      kette: kette3,
+      art,
+      stadt,
+      lage,
+      grundflaecheQm: qm2,
+      staerke: z(s2, 0.28, 0.85),
+      preisdruck: 0,
+      status: seit > 0 ? "eroeffnung" : "offen",
+      seit,
+      bis: seit > 0 ? seit + 4 : void 0,
+      form: gz(s2, 0, 4),
+      inHartwigGebaeude: inHaus
+    };
+    s2.wettbewerber.push(w2);
+    return w2;
+  }
+  function initialisiereWettbewerb(s2) {
+    const staedte = [...new Set(aktive(s2).map((h4) => h4.stadt))];
+    for (const stadt of staedte) {
+      const hs = aktive(s2).filter((h4) => h4.stadt === stadt);
+      const c = hs[0].cluster, [min, max] = START_ANZAHL[c], [qmMin, qmMax] = START_FLAECHE[c];
+      const n3 = gz(s2, min, max);
+      for (let i = 0; i < n3; i++) {
+        const lage = chance2(s2, c === "mittelstadt" ? 0.5 : 0.7) ? "1a" : "b";
+        const pool = lage === "1a" ? ["modehaus", "fastfashion", "premium", "leer_ehemals", "modehaus", "fastfashion"] : ["offprice", "elektronik", "textildiscounter", "leer_ehemals", "offprice"];
+        let art = wahl(s2, pool);
+        if (art === "premium" && c !== "metropole") art = "modehaus";
+        for (let j4 = 0; j4 < pool.length && s2.wettbewerber.some((w2) => w2.stadt === stadt && w2.art === art); j4++) art = wahl(s2, ARTEN);
+        const qmHartwig = Math.max(0, ...hs.filter((h4) => h4.format === "warenhaus" && h4.lage !== "center").map((h4) => h4.grundflaecheQm));
+        const qm2 = Math.min(Math.round(z(s2, qmMin, qmMax) / 100) * 100, qmHartwig ? Math.max(600, Math.round(0.8 * qmHartwig / 100) * 100) : qmMax);
+        anlegen(s2, stadt, art, lage, qm2, 0);
+      }
+    }
+    for (const h4 of aktive(s2)) wettbewerbStartwerte(s2, h4);
+  }
+  function wettbewerbStartwerte(s2, h4) {
+    h4.wettbewerbGruppeStart = Object.fromEntries(gruppenFuer(h4.format).map((g2) => [g2, h4.wettbewerbStart]));
+    h4.wettbewerbOffpriceStart = h4.wettbewerbStart;
+    h4.wettbewerbRohStart = roh(s2, h4);
+    h4.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(h4.format).map((g2) => [g2, roh(s2, h4, g2)]));
+    h4.wettbewerbLeerStart = leerzahl(s2, h4.stadt);
+    h4.wettbewerbRohOffpriceStart = roh(s2, h4, "offprice");
+  }
+  function aktive(s2) {
+    return s2.haeuser.filter((h4) => !h4.nurDaten);
+  }
+  function betroffeneHaeuser(s2, stadt) {
+    return aktive(s2).filter((h4) => h4.stadt === stadt && (h4.status === "offen" || h4.status === "schliessung_verhandlung"));
+  }
+  function eroeffnungsArt(s2, stadt) {
+    const hs = betroffeneHaeuser(s2, stadt);
+    const kandidaten3 = ARTEN.filter((a2) => a2 !== "leer_ehemals");
+    const score = (art) => hs.reduce((sum2, h4) => sum2 + gruppenFuer(h4.format).reduce((x2, g2) => {
+      const qm2 = h4.flaechen.filter((f13) => f13.gruppe === g2 && f13.konzept !== "leer").reduce((a2, f13) => a2 + f13.qm, 0);
+      return x2 + qm2 * GRUPPEN[g2].qmUmsatz * (WETTBEWERB_UEBERSCHNEIDUNG[art][g2] ?? 0);
+    }, 0), 0) / (1 + s2.wettbewerber.filter((w2) => w2.stadt === stadt && w2.art === art && istMarktAktiv(w2)).length);
+    return [...kandidaten3].sort((a2, b4) => score(b4) - score(a2))[0];
+  }
+  function neuEroeffnet(s2, stadt, art, inHaus) {
+    const hs = aktive(s2).filter((h5) => h5.stadt === stadt), c = hs[0].cluster;
+    const [qmMin, qmMax] = START_FLAECHE[c];
+    const qm2 = inHaus ? aktive(s2).find((h5) => h5.id === inHaus)?.grundflaecheQm ?? qmMin : Math.round(z(s2, qmMin, qmMax) / 100) * 100;
+    const wb = anlegen(s2, stadt, art, chance2(s2, 0.7) ? "1a" : "b", qm2, s2.woche, inHaus);
+    const h4 = betroffeneHaeuser(s2, stadt)[0];
+    const gruppe3 = h4 ? gruppenFuer(h4.format).sort((a2, b4) => (WETTBEWERB_UEBERSCHNEIDUNG[art][b4] ?? 0) - (WETTBEWERB_UEBERSCHNEIDUNG[art][a2] ?? 0))[0] : "damen";
+    const prozent6 = h4 ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h4, gruppe3)) * 100) : 0;
+    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe3].name + ": rund " + prozent6 + " %.", { stadt, modul: "wettbewerb" });
+    if ((art === "modehaus" || art === "premium") && qm2 >= 2300) {
+      neueEntscheidung(s2, {
+        typ: "wettbewerb_eroeffnung",
+        frist: s2.woche + 3,
+        titel: "Gro\xDFer\xF6ffnung " + wb.name + " in " + stadt,
+        text: "Der neue Wettbewerber wirbt aktiv Stammkunden ab. Reagieren oder den Markteintritt hinnehmen?",
+        optionen: [
+          { id: "aktion", label: "Er\xF6ffnungsaktion dagegen (Marge)" },
+          ...s2.marketing.kundenkarte ? [{ id: "mailing", label: "Stammkunden-Mailing (Budget)" }] : [],
+          { id: "nichts", label: "Nichts tun" }
+        ],
+        standard: "nichts",
+        daten: { wettbewerber: wb.id }
+      });
+    }
+    return wb;
+  }
+  function raeumung(s2, w2) {
+    w2.status = "raeumung";
+    w2.seit = s2.woche;
+    w2.bis = s2.woche + 6;
+    w2.preisdruck = 0.6;
+    melde(s2, "presse", w2.name + " schlie\xDFt in " + w2.stadt + ". Sechs Wochen R\xE4umungsverkauf; danach droht Leerstand.", { stadt: w2.stadt, modul: "wettbewerb" });
+    const hs = betroffeneHaeuser(s2, w2.stadt).filter((h4) => h4.format === "warenhaus");
+    if (hs.length) {
+      const angebot = neuesAngebot(s2, {
+        typ: "uebernahme",
+        frist: s2.woche + 8,
+        wettbewerberId: w2.id,
+        qmJeHaus: w2.grundflaecheQm,
+        mieteQmMonat: Math.round(z(s2, 7, 17) * 10) / 10,
+        titel: "Standort\xFCbernahme " + w2.name + " in " + w2.stadt,
+        text: "Freie Handelsfl\xE4che " + w2.grundflaecheQm + " qm: als Hartwig Outlet oder Erweiterung anmietbar, Umbau 200\u2013250 \u20AC/qm."
+      });
+      melde(s2, "info", "\xDCbernahmeangebot " + angebot.id + " f\xFCr " + w2.stadt + " (8 Wochen g\xFCltig).");
+    }
+  }
+  function istStadtAktion(s2, stadt) {
+    return s2.marketing.aktionen.some((a2) => a2.status !== "abgesagt" && a2.start === s2.woche && aktive(s2).some((h4) => h4.stadt === stadt && (a2.scope.typ === "alle" || a2.scope.typ === "region" && a2.scope.region === h4.region || a2.scope.typ === "cluster" && a2.scope.cluster === h4.cluster || a2.scope.typ === "format" && a2.scope.format === h4.format || a2.scope.typ === "haeuser" && a2.scope.ids.includes(h4.id))));
+  }
+  function stadtWachstum(s2, stadt) {
+    const werte3 = s2.wettbewerbStadtUmsatz[stadt] ?? [];
+    if (werte3.length < 65) return false;
+    const neu3 = werte3.slice(-13).reduce((a2, b4) => a2 + b4, 0);
+    const vorjahr2 = werte3.slice(-65, -52).reduce((a2, b4) => a2 + b4, 0);
+    return vorjahr2 > 0 && neu3 / vorjahr2 > 1.08;
+  }
+  function wettbewerbWoche(s2) {
+    if (s2.wettbewerbDeaktiviert) return;
+    const w2 = s2.woche;
+    if (!s2.prognose) for (const stadt of new Set(aktive(s2).map((h4) => h4.stadt))) {
+      const umsatz = aktive(s2).filter((h4) => h4.stadt === stadt && h4.kpi?.woche === w2 && h4.status !== "geschlossen" && h4.status !== "verkauft").reduce((a2, h4) => a2 + (h4.kpi?.umsatz ?? 0), 0);
+      const hist = s2.wettbewerbStadtUmsatz[stadt] ?? (s2.wettbewerbStadtUmsatz[stadt] = []);
+      hist.push(umsatz);
+      if (hist.length > 65) hist.shift();
+    }
+    for (const wb of s2.wettbewerber) {
+      if (wb.status === "eroeffnung" && (wb.bis ?? 0) <= w2) {
+        wb.status = "offen";
+        wb.bis = void 0;
+      }
+      if (wb.status === "raeumung" && (wb.bis ?? 0) <= w2) {
+        wb.status = "offen";
+        wb.art = "leer_ehemals";
+        wb.preisdruck = 0;
+        wb.seit = w2;
+        wb.bis = void 0;
+        const hs = betroffeneHaeuser(s2, wb.stadt);
+        for (const h4 of hs) h4.transferBonus += 0.02 / hs.length;
+        melde(s2, "info", "Ehemaliger Standort " + wb.name + " in " + wb.stadt + " steht leer; Kunden wechseln zu Hartwig.", { stadt: wb.stadt, modul: "wettbewerb" });
+      }
+      if ((wb.aktionBis ?? 0) <= w2) {
+        wb.preisdruck = 0;
+        wb.aktionVon = void 0;
+        wb.aktionBis = void 0;
+      }
+      if (wb.konterVon === w2 && wb.konterBis && wb.konterBis > w2) {
+        wb.preisdruck = wb.konterDruck ?? 0.4;
+        wb.aktionVon = w2;
+        wb.aktionBis = wb.konterBis;
+        melde(s2, "ereignis", wb.name + " kontert in " + wb.stadt + " eine Hartwig-Aktion mit " + Math.round(wb.preisdruck * 100) + " % zus\xE4tzlichem Preisdruck.", { stadt: wb.stadt, modul: "wettbewerb" });
+        wb.konterVon = void 0;
+        wb.konterBis = void 0;
+        wb.konterDruck = void 0;
+      }
+    }
+    if (!s2.prognose && !s2.wettbewerbEreignisseDeaktiviert) {
+      for (const h4 of aktive(s2).filter((h5) => h5.status === "geschlossen" && !s2.wettbewerbGeseheneSchliessungen.includes(h5.id))) {
+        s2.wettbewerbGeseheneSchliessungen.push(h4.id);
+        h4.wettbewerbSchliessungWoche = w2;
+        if (chance2(s2, 0.35)) s2.wettbewerbNachnutzungen.push({ haus: h4.id, woche: w2 + gz(s2, 26, 78) });
+      }
+      for (const n3 of s2.wettbewerbNachnutzungen.filter((n4) => n4.woche <= w2)) {
+        const h4 = aktive(s2).find((x2) => x2.id === n3.haus);
+        if (h4 && h4.status === "geschlossen") neuEroeffnet(s2, h4.stadt, wahl(s2, ["offprice", "textildiscounter", "elektronik"]), h4.id);
+      }
+      s2.wettbewerbNachnutzungen = s2.wettbewerbNachnutzungen.filter((n3) => n3.woche > w2);
+      const staedte = [...new Set(aktive(s2).map((h4) => h4.stadt))];
+      for (const stadt of staedte) {
+        const hs = aktive(s2).filter((h4) => h4.stadt === stadt);
+        const gesamtkm = hs.reduce((a2, h4) => a2 + h4.grundflaecheQm * Math.max(1, h4.etagen.length), 0);
+        const zu = hs.filter((h4) => h4.status === "geschlossen").reduce((a2, h4) => a2 + h4.grundflaecheQm * Math.max(1, h4.etagen.length), 0);
+        const kuerzlich = hs.some((h4) => h4.wettbewerbSchliessungWoche !== void 0 && w2 - h4.wettbewerbSchliessungWoche < 52);
+        const faktor2 = gesamtkm > 0 && zu / gesamtkm > 0.5 && kuerzlich ? 3 : 1;
+        const p2 = clamp(2e-3 * (hs.reduce((a2, h4) => a2 + h4.einzug.kaufkraft, 0) / hs.length) * (1 + zu / Math.max(1, gesamtkm)) * faktor2, 0, 0.05);
+        if (chance2(s2, p2)) neuEroeffnet(s2, stadt, eroeffnungsArt(s2, stadt));
+        const aktion2 = istStadtAktion(s2, stadt);
+        const wachstum = stadtWachstum(s2, stadt);
+        for (const wb of s2.wettbewerber.filter((x2) => x2.stadt === stadt && x2.status === "offen" && x2.art !== "leer_ehemals")) {
+          if (w2 > 10 && chance2(s2, 6e-4)) {
+            wb.lage = wb.lage === "1a" ? "center" : "1a";
+            wb.status = "eroeffnung";
+            wb.seit = w2;
+            wb.bis = w2 + 4;
+            melde(s2, "presse", wb.name + " verlegt seinen Standort innerhalb von " + stadt + " nach " + wb.lage + ".", { stadt, modul: "wettbewerb" });
+            continue;
+          }
+          if (hs[0].einzug.kaufkraft < 0.9) wb.staerke *= 0.998;
+          if (wb.staerke < 0.25 && hs[0].einzug.kaufkraft < 0.9 && chance2(s2, 3e-3)) {
+            raeumung(s2, wb);
+            continue;
+          }
+          if (aktion2 && chance2(s2, 0.4)) {
+            const action = s2.marketing.aktionen.find((a2) => a2.status !== "abgesagt" && a2.start === w2);
+            const ueberschnitt = !action?.bereiche?.length || action.bereiche.some((g2) => (WETTBEWERB_UEBERSCHNEIDUNG[wb.art][g2] ?? 0) > 0);
+            if (ueberschnitt) {
+              wb.konterVon = w2 + gz(s2, 1, 2);
+              wb.konterBis = wb.konterVon + Math.max(1, (action?.ende ?? w2 + 3) - w2);
+              wb.konterDruck = z(s2, 0.3, 0.6);
+            }
+          }
+          const saison2 = [1, 2, 3, 4, 26, 27, 28, 29, 30, 47, 52].includes(kw(w2)) ? 1.9 : 0.78;
+          const freq = wachstum ? 1.35 : 1;
+          if (wb.aktionBis === void 0 && chance2(s2, 6 / 52 * saison2 * freq)) {
+            wb.aktionVon = w2;
+            wb.aktionBis = w2 + gz(s2, 1, 3);
+            wb.preisdruck = z(s2, 0.1, 0.35);
+          }
+        }
+      }
+    }
+    for (const h4 of aktive(s2)) h4.einzug.wettbewerb = wettbewerbAus(s2, h4);
+  }
+  function wettbewerbUebersicht(s2, stadt) {
+    return s2.wettbewerber.filter((w2) => !stadt || w2.stadt === stadt).map((w2) => ({
+      id: w2.id,
+      name: w2.name,
+      kette: w2.kette,
+      art: w2.art,
+      stadt: w2.stadt,
+      lage: w2.lage,
+      staerke: w2.staerke,
+      status: w2.status,
+      preisdruck: w2.preisdruck,
+      seit: w2.seit,
+      inHartwigGebaeude: w2.inHartwigGebaeude,
+      rabatt: (w2.aktionVon ?? Infinity) <= s2.woche && (w2.aktionBis ?? -1) > s2.woche ? w2.preisdruck : 0,
+      wirkung: Object.fromEntries(Object.keys(WETTBEWERB_UEBERSCHNEIDUNG[w2.art]).map((g2) => {
+        const h4 = aktive(s2).find((x2) => x2.stadt === w2.stadt && gruppenFuer(x2.format).includes(g2));
+        const faktor2 = h4 ? 0.25 * WIRKUNGSFAKTOR * wertJeGruppe(w2, g2, s2) * lageFaktor(h4, w2) / (1 - 0.25 * h4.wettbewerbStart) : 0;
+        return [g2, -Math.round(faktor2 * 1e4) / 100];
+      }))
+    }));
+  }
+  function wettbewerbFuerGrafik(s2, stadt) {
+    return s2.wettbewerber.filter((w2) => w2.stadt === stadt).map((w2) => ({
+      id: w2.id,
+      name: w2.name,
+      art: w2.art,
+      form: w2.form,
+      lage: w2.lage,
+      grundflaecheQm: w2.grundflaecheQm,
+      status: w2.status,
+      inHartwigGebaeude: w2.inHartwigGebaeude,
+      seit: w2.seit,
+      rabatt: (w2.aktionVon ?? Infinity) <= s2.woche && (w2.aktionBis ?? -1) > s2.woche ? w2.preisdruck : 0
+    }));
+  }
+  function uebernehmeWettbewerber(s2, id, modus, mieteQmMonat = 11) {
+    const wb = s2.wettbewerber.find((w2) => w2.id === id);
+    if (!wb || wb.status === "geschlossen") return "Wettbewerber-Standort nicht verf\xFCgbar.";
+    const basis4 = aktive(s2).find((h4) => h4.stadt === wb.stadt && h4.format === "warenhaus" && h4.status === "offen");
+    if (!basis4) return "Kein offenes Hartwig-Warenhaus am Standort.";
+    const qm2 = wb.grundflaecheQm;
+    const kosten2 = eur(qm2 * (modus === "erweiterung" ? 250 : 200));
+    if (!liquiditaetReicht(s2, kosten2)) return "Nicht genug Liquidit\xE4t f\xFCr die Umbaukosten.";
+    s2.cash -= kosten2;
+    s2.einmalkostenWoche += kosten2;
+    if (modus === "erweiterung") {
+      const g2 = "damen";
+      const idF = basis4.id + "-wb-" + wb.id;
+      basis4.flaechen.push({ id: idF, etage: 0, qm: qm2, konzept: "eigen", gruppe: g2, umbauBis: s2.woche + 8 });
+      basis4.potenzial[g2] = (basis4.potenzial[g2] ?? 0) + qm2 * GRUPPEN[g2].qmUmsatz;
+      basis4.miete.mieteWoche += eur(qm2 * mieteQmMonat * 12 / 52);
+    } else {
+      const neu3 = structuredClone(basis4);
+      neu3.id = "O" + wb.id;
+      neu3.name = "Hartwig Outlet " + wb.stadt;
+      neu3.etagen = [0];
+      neu3.grundflaecheQm = qm2;
+      neu3.flaechen = [{ id: neu3.id + "-f1", etage: 0, qm: qm2, konzept: "offprice", umbauBis: s2.woche + 8 }];
+      neu3.potenzial = {};
+      neu3.saettigungQm = {};
+      neu3.personal.vollzeit = qm2 / 600;
+      neu3.personal.teilzeit = qm2 / 1e3;
+      neu3.personal.aushilfen = qm2 / 3e3;
+      neu3.miete = { mieteWoche: eur(qm2 * mieteQmMonat * 12 / 52), bisWoche: s2.woche + 260, netTyp: "double", vermieter: "dritt", vermieterName: wb.name, nebenkostenQmWoche: 1.2 };
+      neu3.kpi = void 0;
+      neu3.status = "offen";
+      neu3.statusBis = void 0;
+      neu3.transferBonus = 0;
+      neu3.wettbewerbStart = basis4.einzug.wettbewerb;
+      neu3.wettbewerbRohStart = roh(s2, neu3);
+      neu3.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(neu3.format).map((g2) => [g2, roh(s2, neu3, g2)]));
+      neu3.wettbewerbLeerStart = leerzahl(s2, neu3.stadt);
+      neu3.wettbewerbRohOffpriceStart = roh(s2, neu3, "offprice");
+      s2.haeuser.push(neu3);
+    }
+    wb.status = "geschlossen";
+    wb.seit = s2.woche;
+    melde(s2, "presse", "Hartwig \xFCbernimmt den Standort " + wb.name + " in " + wb.stadt + " als " + (modus === "outlet" ? "Outlet" : "Erweiterungsfl\xE4che") + ".");
+    return null;
+  }
+  function testWettbewerbEreignis(s2, art) {
+    const h4 = s2.haeuser.find((x2) => x2.status === "offen" && x2.format === "warenhaus");
+    if (!h4) return false;
+    const w2 = s2.wettbewerber.find((x2) => x2.stadt === h4.stadt && x2.status === "offen" && x2.art !== "leer_ehemals") ?? s2.wettbewerber.find((x2) => x2.status === "offen" && x2.art !== "leer_ehemals");
+    switch (art) {
+      case "eroeffnung":
+        neuEroeffnet(s2, h4.stadt, "modehaus");
+        return true;
+      case "raeumung":
+        if (!w2) return false;
+        raeumung(s2, w2);
+        return true;
+      case "aktion":
+        if (!w2) return false;
+        w2.aktionVon = s2.woche;
+        w2.aktionBis = s2.woche + 3;
+        w2.preisdruck = 0.3;
+        melde(s2, "ereignis", "Test: Rabattaktion von " + w2.name + " in " + w2.stadt + ".", { stadt: w2.stadt, modul: "wettbewerb" });
+        return true;
+      case "konter":
+        if (!w2) return false;
+        w2.konterVon = s2.woche + 1;
+        w2.konterBis = s2.woche + 4;
+        w2.konterDruck = 0.45;
+        melde(s2, "ereignis", "Test: Konteraktion von " + w2.name + " ab kommender Woche.", { stadt: w2.stadt, modul: "wettbewerb" });
+        return true;
+      case "standortwechsel":
+        if (!w2) return false;
+        w2.lage = w2.lage === "1a" ? "center" : "1a";
+        w2.status = "eroeffnung";
+        w2.seit = s2.woche;
+        w2.bis = s2.woche + 4;
+        melde(s2, "presse", "Test: " + w2.name + " verlegt den Standort in " + w2.stadt + ".", { stadt: w2.stadt, modul: "wettbewerb" });
+        return true;
+      case "nachnutzung": {
+        const geschlossen = s2.haeuser.find((x2) => x2.status === "geschlossen");
+        if (!geschlossen) return false;
+        neuEroeffnet(s2, geschlossen.stadt, "offprice", geschlossen.id);
+        return true;
+      }
+      default:
+        return false;
+    }
+  }
+
+  // ../engine/src/formate.ts
+  var VK_EK = 0.563;
+  var qm = (h4) => h4.flaechen.filter((f13) => f13.konzept !== "leer" && f13.konzept !== "untermiete").reduce((n3, f13) => n3 + f13.qm, 0);
+  var basis = (h4) => Object.entries(h4.potenzial).reduce((n3, [g2, p2]) => {
+    const fl = h4.flaechen.filter((f13) => f13.gruppe === g2).reduce((a2, f13) => a2 + f13.qm, 0);
+    return n3 + (p2 ?? 0) * (1 - Math.exp(-fl / Math.max(1, h4.saettigungQm[g2] ?? 1)));
+  }, 0);
+  var rng = (s2) => ({ rng: s2.formateRng ?? (s2.seed ^ 1223699089) >>> 0 });
+  function formateZufall(s2, p2) {
+    const h4 = rng(s2);
+    const ja = chance(h4, p2);
+    s2.formateRng = h4.rng;
+    return ja;
+  }
+  function formateZahl(s2, a2, b4) {
+    const h4 = rng(s2);
+    const n3 = zwischen(h4, a2, b4);
+    s2.formateRng = h4.rng;
+    return n3;
+  }
+  function initialisiereFormate(s2) {
+    var _a2, _b;
+    const volks = s2.haeuser.filter((h4) => h4.format === "schwester");
+    const out = s2.haeuser.filter((h4) => h4.format === "outlet");
+    let volksUmsatz = 0;
+    for (const h4 of [...volks, ...out]) {
+      h4.nurDaten = false;
+      wettbewerbStartwerte(s2, h4);
+      const umsatz = h4.format === "schwester" ? basis(h4) * 0.72 : qm(h4) * 72;
+      const quote = h4.format === "schwester" ? 0.165 : 0.115;
+      const fte2 = Math.max(3, umsatz * quote / 980);
+      h4.personal.vollzeit = fte2 * 0.48;
+      h4.personal.teilzeit = fte2 * 0.43;
+      h4.personal.aushilfen = fte2 * 0.09;
+      h4.miete.mieteWoche = eur(umsatz * (h4.format === "schwester" ? 0.121 : h4.lage === "rand" ? 0.05 : 0.08));
+      if (h4.format === "schwester") {
+        volksUmsatz += umsatz;
+        h4.einzug.alter *= 1.1;
+        h4.substanz = clamp(h4.substanz - 18, 15, 60);
+        h4.substanzStart = h4.substanz;
+        const fl = h4.personal.filialleiter;
+        if (fl.skill > 0.6) {
+          const k5 = 0.6 / fl.skill;
+          fl.skill = 0.6;
+          if (fl.staerken) for (const key of Object.keys(fl.staerken)) fl.staerken[key] *= k5;
+          if (h4.betrieb) h4.betrieb.leitungStart = fl.skill;
+        }
+        for (const g2 of Object.keys(h4.potenzial)) h4.potenzial[g2] *= 0.72;
+      }
+      h4.nebenvertrag = {
+        werbeflaecheQm: Math.round(qm(h4) * 0.055),
+        werbeEuroJeQmWoche: umsatz * 6e-3 / Math.max(1, Math.round(qm(h4) * 0.055)),
+        dienstleistungEuroJeBon: 0.7,
+        durchschnittsBonEuro: h4.format === "outlet" ? 28 : 62
+      };
+    }
+    const outletUmsatz = out.reduce((n3, h4) => n3 + qm(h4) * 72, 0);
+    const budget = eur(outletUmsatz * 0.65 / 1.7);
+    (_a2 = s2.einkauf).offpriceZukauf ?? (_a2.offpriceZukauf = budget);
+    (_b = s2.einkauf).altwareOutlet ?? (_b.altwareOutlet = 0.5);
+    s2.formate = {
+      pool: [{ quelle: "markenposten", wert: budget * 7, preisFaktor: 1.7, alter: 1 }],
+      volkskaufBestand: eur(volksUmsatz * VK_EK * 8),
+      projekte: [],
+      naechsteOutletId: 1 + Math.max(66, ...out.map((h4) => Number(h4.id.slice(1)) || 0)),
+      altwareEingang: 0,
+      zukaufWoche: 0,
+      umsatzWoche: 0,
+      abverkaufWoche: 0,
+      abschriftenWoche: 0,
+      schwesterZentraleWoche: eur(volksUmsatz * 4e-3),
+      outletQmStart: out.reduce((n3, h4) => n3 + qm(h4), 0),
+      volkskaufQmStart: volks.reduce((n3, h4) => n3 + qm(h4), 0)
+    };
+  }
+  function outletKapazitaet(s2) {
+    const f13 = s2.formate;
+    if (!f13) return 0;
+    const offen = s2.haeuser.filter((h4) => h4.format === "outlet" && !h4.nurDaten && h4.status === "offen").reduce((n3, h4) => n3 + qm(h4), 0);
+    f13.outletQmStart ?? (f13.outletQmStart = Math.max(1, offen));
+    return clamp(offen / Math.max(1, f13.outletQmStart), 0, 2);
+  }
+  function volkskaufZentraleFaktor(s2, offen) {
+    const f13 = s2.formate;
+    const jetzt = offen.reduce((n3, h4) => n3 + qm(h4), 0);
+    f13.volkskaufQmStart ?? (f13.volkskaufQmStart = Math.max(1, jetzt));
+    return 0.4 + 0.6 * clamp(jetzt / Math.max(1, f13.volkskaufQmStart), 0, 1);
+  }
+  function formateProjekteWoche(s2) {
+    const stand2 = s2.formate;
+    if (!stand2) return;
+    for (const p2 of stand2.projekte.filter((p3) => p3.bis <= s2.woche)) {
+      const h4 = s2.haeuser.find((h5) => h5.id === p2.haus);
+      if (!h4) continue;
+      if (p2.typ === "umflaggen") {
+        h4.format = "warenhaus";
+        h4.hausklasse = "C";
+        h4.name = "Hartwig " + h4.stadt;
+        for (const g2 of Object.keys(h4.potenzial)) h4.potenzial[g2] *= 1.125;
+        h4.formatIntegrationBis = s2.woche + 52;
+      } else {
+        h4.nurDaten = false;
+        wettbewerbStartwerte(s2, h4);
+      }
+      melde(s2, "info", h4.name + ": Formatprojekt abgeschlossen.", { stadt: h4.stadt, hausId: h4.id });
+    }
+    stand2.projekte = stand2.projekte.filter((p2) => p2.bis > s2.woche);
+    for (const h4 of s2.haeuser) {
+      if (h4.formatIntegrationBis === void 0 || h4.formatIntegrationBis <= s2.woche) continue;
+      for (const g2 of Object.keys(h4.potenzial)) h4.potenzial[g2] *= 1.0015;
+    }
+  }
+  function outletKandidaten(s2) {
+    return STAEDTE.filter(([stadt]) => s2.haeuser.some((h4) => h4.stadt === stadt && h4.format === "warenhaus" && h4.status === "offen") && !s2.haeuser.some((h4) => h4.stadt === stadt && h4.format === "outlet")).map(([stadt, , cluster]) => {
+      const qm2 = cluster === "metropole" ? 4500 : cluster === "grossstadt" ? 3400 : 2400;
+      const lage = cluster === "mittelstadt" ? "rand" : "b";
+      const umsatzWoche = eur(qm2 * 72);
+      return { stadt, lage, qm: qm2, mieteWoche: eur(umsatzWoche * (lage === "rand" ? 0.05 : 0.08)), investition: qm2 * 120, umsatzWoche };
+    });
+  }
+  function outletEroeffnen(s2, stadt) {
+    const k5 = outletKandidaten(s2).find((k6) => k6.stadt === stadt);
+    if (!k5) return "Kein freier geeigneter FUNDUS-Standort in dieser Stadt.";
+    if (!liquiditaetReicht(s2, k5.investition)) return "Zu wenig Liquidit\xE4t f\xFCr die Er\xF6ffnung.";
+    const muster3 = s2.haeuser.find((h4) => h4.format === "outlet");
+    if (!muster3 || !s2.formate) return "FUNDUS-Musterhaus fehlt.";
+    const id = "O" + String(s2.formate.naechsteOutletId++).padStart(3, "0");
+    const st2 = STAEDTE.find(([stadt2]) => stadt2 === k5.stadt);
+    const f13 = k5.qm / Math.max(1, qm(muster3));
+    const neu3 = {
+      ...muster3,
+      id,
+      name: "FUNDUS " + stadt,
+      stadt,
+      region: st2[1],
+      cluster: st2[2],
+      lage: k5.lage,
+      einzug: { ...muster3.einzug, kaufkraft: st2[3] },
+      nurDaten: true,
+      status: "offen",
+      etagen: [0, 1],
+      grundflaecheQm: Math.round(k5.qm / 2),
+      flaechen: muster3.flaechen.map((fl, i) => ({ ...fl, id: id + "-f" + (i + 1), qm: Math.round(fl.qm * f13), etage: i % 2 })),
+      miete: { ...muster3.miete, mieteWoche: k5.mieteWoche },
+      personal: { ...muster3.personal, filialleiter: { ...muster3.personal.filialleiter } },
+      potenzial: { ...muster3.potenzial },
+      saettigungQm: { ...muster3.saettigungQm },
+      kpi: void 0,
+      verlauf: []
+    };
+    s2.haeuser.push(neu3);
+    s2.formate.projekte.push({ haus: id, start: s2.woche, bis: s2.woche + 12, typ: "eroeffnen" });
+    s2.cash -= k5.investition;
+    s2.einmalkostenWoche += k5.investition;
+    s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
+    s2.kapitalflussOffen.investitionen -= k5.investition;
+    return null;
+  }
+  function schwesterUmflaggen(s2, id) {
+    const h4 = s2.haeuser.find((h5) => h5.id === id && h5.format === "schwester" && h5.status === "offen");
+    if (!h4) return "Offenes Volkskauf-Haus nicht gefunden.";
+    if ((s2.hq.abteilungen.find((a2) => a2.id === "immobilien")?.stufe ?? 0) < 1) return "Immobilienabteilung ab Stufe 1 erforderlich.";
+    if (s2.formate?.projekte.some((p2) => p2.haus === id)) return "Umflaggen l\xE4uft bereits.";
+    const kosten2 = eur(qm(h4) * 180);
+    if (!liquiditaetReicht(s2, kosten2)) return "Umbaukosten sind nicht gedeckt.";
+    const dauer = 20 + Number(id.slice(1)) % 11;
+    s2.cash -= kosten2;
+    s2.einmalkostenWoche += kosten2;
+    s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
+    s2.kapitalflussOffen.investitionen -= kosten2;
+    s2.formate?.projekte.push({ haus: id, start: s2.woche, bis: s2.woche + dauer, typ: "umflaggen" });
+    return null;
+  }
+  function verkauf(pool, quelle2, ziel) {
+    let rest = ziel, umsatz = 0, einsatz = 0;
+    for (const p2 of pool.filter((p3) => p3.quelle === quelle2).sort((a2, b4) => b4.alter - a2.alter)) {
+      const ek2 = Math.max(0, Math.min(p2.ladenhueter ? p2.wert * 0.06 : p2.wert, rest / Math.max(0.1, p2.preisFaktor)));
+      p2.wert -= ek2;
+      einsatz += ek2;
+      umsatz += ek2 * p2.preisFaktor;
+      rest -= ek2 * p2.preisFaktor;
+      if (rest <= 0) break;
+    }
+    return { umsatz, einsatz };
+  }
+  function formateWoche(s2) {
+    const f13 = s2.formate;
+    if (!f13) return { buchungen: [], warenZukauf: 0, abschriften: 0, marketing: 0, zentrale: 0 };
+    const aktive2 = s2.haeuser.filter((h4) => !h4.nurDaten && h4.status === "offen" && (h4.format === "schwester" || h4.format === "outlet"));
+    const out = aktive2.filter((h4) => h4.format === "outlet");
+    const volks = aktive2.filter((h4) => h4.format === "schwester");
+    const budget = out.length ? Math.max(0, eur((s2.einkauf.offpriceZukauf ?? 0) * outletKapazitaet(s2))) : 0;
+    const stufe2 = s2.hq.abteilungen.find((a2) => a2.id === "einkauf")?.stufe ?? 0;
+    const preisFaktor = clamp(0.56 + stufe2 * 0.02, 0.5, 0.7) / clamp(0.378 - stufe2 * 0.013, 0.3, 0.4);
+    if (budget) f13.pool.push({ quelle: "markenposten", wert: budget, preisFaktor, alter: 0 });
+    f13.zukaufWoche = budget;
+    let abschriften = 0;
+    for (const p2 of f13.pool) {
+      p2.alter++;
+      if (p2.alter > 30) {
+        const a2 = p2.wert * (p2.quelle === "markenposten" ? 0.015 : 0.03);
+        p2.wert -= a2;
+        abschriften += a2;
+      }
+    }
+    const nachfrage = aktive2.map((haus2) => {
+      const roh2 = simuliereHaus(s2, haus2);
+      const normal3 = haus2.format === "outlet" ? roh2.offprice * 3.65 * clamp(2 - haus2.einzug.kaufkraft, 0.8, 1.2) / Math.max(0.1, 1.6 - 0.6 * haus2.einzug.kaufkraft) : Object.values(roh2.eigen).reduce((n3, x2) => n3 + (x2?.umsatz ?? 0), 0);
+      const bau2 = f13.projekte.some((p2) => p2.haus === haus2.id && p2.typ === "umflaggen");
+      return { haus: haus2, nachfrage: normal3 * (bau2 ? 0.55 : 1) };
+    });
+    const volksNachfrage = nachfrage.filter((x2) => x2.haus.format === "schwester").reduce((n3, x2) => n3 + x2.nachfrage, 0);
+    const warenVerfuegbar = Math.min(1, f13.volkskaufBestand / Math.max(1, volksNachfrage * VK_EK));
+    let warenZukauf = budget;
+    const buchungen = [];
+    f13.abverkaufWoche = 0;
+    for (const { haus: haus2, nachfrage: n3 } of nachfrage) {
+      let umsatz = 0, ek2 = 0;
+      if (haus2.format === "schwester") {
+        umsatz = n3 * warenVerfuegbar;
+        ek2 = umsatz * VK_EK;
+        f13.volkskaufBestand -= ek2;
+      } else {
+        const marke5 = verkauf(f13.pool, "markenposten", n3 * 0.79);
+        const alt = verkauf(f13.pool, "altware", n3 * 0.21);
+        umsatz = marke5.umsatz + alt.umsatz;
+        ek2 = marke5.einsatz + alt.einsatz;
+        f13.abverkaufWoche += ek2;
+      }
+      const kpi = leereKpi(s2.woche);
+      kpi.umsatz = eur(umsatz);
+      kpi.rohertrag = eur(umsatz - ek2);
+      const fl = haus2.flaechen.filter((f14) => f14.konzept === "eigen" || f14.konzept === "offprice");
+      const qmGesamt = fl.reduce((n4, f14) => n4 + f14.qm, 0);
+      for (const f14 of fl) if (f14.gruppe) {
+        kpi.umsatzJeGruppe[f14.gruppe] = eur((kpi.umsatzJeGruppe[f14.gruppe] ?? 0) + kpi.umsatz * f14.qm / Math.max(1, qmGesamt));
+      }
+      const kosten2 = hausKosten(s2, haus2, umsatz, umsatz);
+      const neben = nebenvertragsErtraege(haus2, umsatz, s2.woche);
+      kpi.personal = eur(kosten2.personal);
+      kpi.miete = eur(kosten2.miete);
+      kpi.nebenkosten = eur(kosten2.nebenkosten);
+      kpi.sonstige = eur(kosten2.sonstige + kosten2.logistik);
+      kpi.fteIst = haus2.personal.vollzeit + haus2.personal.teilzeit + haus2.personal.aushilfen;
+      kpi.fteBedarf = kpi.fteIst;
+      const guv2 = kosten2.guv;
+      guv2.umsatz = kpi.umsatz;
+      guv2.bruttogewinn = kpi.rohertrag;
+      guv2.wareneinsatz = guv2.umsatz - guv2.bruttogewinn;
+      guv2.werbeflaechen = neben.werbeflaechen;
+      guv2.dienstleistungen = neben.dienstleistungen;
+      guv2.uebrigeErtraege = guv2.werbeflaechen + guv2.dienstleistungen;
+      guv2.werbung = eur(umsatz * (haus2.format === "outlet" ? 0.014 : 0.018));
+      for (const key of Object.keys(guv2)) guv2[key] = eur(guv2[key]);
+      guvAbschluss(guv2);
+      kpi.guv = guv2;
+      kpi.db = guv2.ebitda;
+      haus2.kpi = kpi;
+      buchungen.push({ haus: haus2, kpi, guv: guv2, kosten: kosten2, neben });
+    }
+    const vkZukauf = eur(Math.max(0, volksNachfrage * VK_EK * 6 - f13.volkskaufBestand));
+    f13.volkskaufBestand += vkZukauf;
+    warenZukauf += vkZukauf;
+    f13.pool = f13.pool.filter((p2) => p2.wert > 1);
+    f13.abschriftenWoche = eur(abschriften);
+    f13.umsatzWoche = eur(buchungen.filter((b4) => b4.haus.format === "outlet").reduce((n3, b4) => n3 + b4.kpi.umsatz, 0));
+    const outletBedarf = nachfrage.filter((x2) => x2.haus.format === "outlet").reduce((n3, x2) => n3 + x2.nachfrage, 0);
+    if (out.length && f13.umsatzWoche < outletBedarf * 0.72 && s2.woche % 4 === 0)
+      melde(s2, "warnung", "FUNDUS: Leere Fl\xE4chen, es fehlen passende Markenposten oder Altware.");
+    if (out.length && f13.pool.reduce((n3, p2) => n3 + p2.wert, 0) > Math.max(1, f13.abverkaufWoche) * 15 && s2.woche % 4 === 0)
+      melde(s2, "warnung", "FUNDUS: Waren\xFCberhang und Abschriftenrisiko.");
+    return {
+      buchungen,
+      warenZukauf: eur(warenZukauf),
+      abschriften: eur(abschriften),
+      marketing: buchungen.reduce((n3, b4) => n3 + b4.guv.werbung, 0),
+      zentrale: volks.length ? eur(f13.schwesterZentraleWoche * volkskaufZentraleFaktor(s2, volks)) : 0
+    };
+  }
+  function outletUebersicht(s2) {
+    const f13 = s2.formate;
+    const pool = f13?.pool ?? [];
+    const bestand = eur(pool.reduce((n3, p2) => n3 + p2.wert, 0));
+    const vk = f13?.abverkaufWoche ?? 0;
+    return {
+      haeuser: s2.haeuser.filter((h4) => h4.format === "outlet" && !h4.nurDaten && h4.status === "offen").length,
+      poolWert: bestand,
+      reichweite: bestand / Math.max(1, vk),
+      abverkaufsquote: vk / Math.max(1, bestand + vk),
+      abschriften: f13?.abschriftenWoche ?? 0,
+      markenposten: eur(pool.filter((p2) => p2.quelle === "markenposten").reduce((n3, p2) => n3 + p2.wert, 0)),
+      altware: eur(pool.filter((p2) => p2.quelle === "altware").reduce((n3, p2) => n3 + p2.wert, 0)),
+      zukaufBudget: s2.einkauf.offpriceZukauf ?? 0,
+      altwareQuote: s2.einkauf.altwareOutlet ?? 0.5,
+      altwareEingang: f13?.altwareEingang ?? 0,
+      umsatz: f13?.umsatzWoche ?? 0
+    };
+  }
+  function schwesterUebersicht(s2) {
+    const hs = s2.haeuser.filter((h4) => h4.format === "schwester" && h4.status === "offen");
+    return {
+      haeuser: hs.length,
+      umsatz: eur(hs.reduce((n3, h4) => n3 + (h4.kpi?.umsatz ?? 0), 0)),
+      ebitda: eur(hs.reduce((n3, h4) => n3 + (h4.kpi?.guv?.ebitda ?? 0), 0)),
+      bestand: s2.formate?.volkskaufBestand ?? 0,
+      umbauten: s2.formate?.projekte.filter((p2) => p2.typ === "umflaggen").length ?? 0
+    };
+  }
+
+  // ../engine/src/it-produkte.ts
+  var IT_PRODUKT_IDS = ["kundenkarte", "hartwig_app", "kasse", "mobile_pay"];
+  var IT_TEAM_KOSTEN_PRO_KOPF = 1400;
+  var texte = {
+    kundenkarte: {
+      name: "Hartwig Karte",
+      system: "app",
+      einheit: "aktive Karteninhaber",
+      beschreibung: [
+        "Die Hartwig Karte verbindet Einkauf und Kundenbindung in allen H\xE4usern.",
+        "Ihre Reichweite und CRM-Nutzung stammen aus den bestehenden Marketingdaten."
+      ]
+    },
+    hartwig_app: {
+      name: "Hartwig App",
+      system: "app",
+      einheit: "aktive App-Nutzer",
+      beschreibung: [
+        "Die Hartwig App b\xFCndelt Kundenkonto, Angebote und den Online-Shop.",
+        "Click & Collect und Abholstationen werden durch den bestehenden Onlinekanal gesteuert."
+      ]
+    },
+    kasse: {
+      name: "Hartwig Kasse",
+      system: "kasse",
+      einheit: "gesch\xE4tzte Transaktionen",
+      beschreibung: [
+        "Die Kasse verarbeitet Eink\xE4ufe im Filialnetz und steuert den Kassenfluss.",
+        "Modernisierung und SB-Kassen wirken \xFCber die vorhandene IT- und Filialsteuerung."
+      ]
+    },
+    mobile_pay: {
+      name: "Mobile Pay",
+      system: "kasse",
+      einheit: "modellierte mobile Transaktionen",
+      beschreibung: [
+        "Mobile Pay ist die mobile Zahlvariante der Hartwig Kasse.",
+        "Der Ausbau nutzt die vorhandene mobile Kassenstufe, keine zweite Zahlungslogik."
+      ]
+    }
+  };
+  function itProduktZustand(s2, id) {
+    return s2.it?.produkte?.[id] ?? { aktiv: true, team: 0 };
+  }
+  function werte(s2) {
+    const k5 = s2.marketing?.stand?.ist?.karte;
+    const mobileStufe = s2.it?.systeme.kasse.kasseAusbau?.mobil ?? 0;
+    const bon = s2.marketing?.stand?.verlauf?.at(-1)?.bon || 41;
+    const transaktionen = Math.max(0, Math.round((s2.historie.at(-1)?.umsatz ?? 0) / Math.max(1, bon)));
+    return {
+      kundenkarte: itProduktZustand(s2, "kundenkarte").aktiv ? Math.round((k5?.mitglieder ?? 0) * (k5?.aktivQuote ?? 0)) : 0,
+      hartwig_app: itProduktZustand(s2, "hartwig_app").aktiv ? Math.round(k5?.app?.aktiveNutzer ?? 0) : 0,
+      kasse: itProduktZustand(s2, "kasse").aktiv ? transaktionen : 0,
+      mobile_pay: itProduktZustand(s2, "kasse").aktiv && itProduktZustand(s2, "mobile_pay").aktiv ? Math.round(transaktionen * clamp(0.04 * mobileStufe, 0, 1)) : 0
+    };
+  }
+  function itProdukteWoche(s2) {
+    if (s2.prognose || !s2.it) return;
+    const punkt5 = { woche: s2.woche, ...werte(s2) };
+    const v2 = s2.it.produktVerlauf ?? (s2.it.produktVerlauf = []);
+    if (v2.at(-1)?.woche === punkt5.woche) v2[v2.length - 1] = punkt5;
+    else v2.push(punkt5);
+    if (v2.length > 52) v2.splice(0, v2.length - 52);
+  }
+  function itProdukte(s2) {
+    const alle = werte(s2), verlauf4 = s2.it?.produktVerlauf ?? [];
+    const e = s2.ecommerce;
+    const k5 = s2.marketing?.stand?.ist?.karte;
+    const ausbau = s2.it?.systeme.kasse.kasseAusbau;
+    return IT_PRODUKT_IDS.map((id) => {
+      const meta = texte[id], status2 = itProduktZustand(s2, id);
+      const system2 = s2.it?.systeme[meta.system], generation = system2?.generation ?? SYSTEME[meta.system].start;
+      const version2 = id === "mobile_pay" ? ausbau?.mobil ?? 0 : generation;
+      const qualitaet3 = id === "hartwig_app" || id === "kundenkarte" ? Math.round(clamp((k5?.app?.qualitaet ?? 0.35) * 3 + generation, 1, 5)) : id === "mobile_pay" && version2 === 0 ? 0 : Math.max(1, Math.min(5, generation + 1));
+      const echt = verlauf4.slice(-5).map((p2) => ({ woche: p2.woche, wert: p2[id] }));
+      const punkte2 = [...echt];
+      const bon = s2.marketing?.stand?.verlauf?.at(0)?.bon || 41;
+      const basis4 = verlauf4[0]?.[id] ?? alle[id];
+      for (let w2 = (punkte2[0]?.woche ?? s2.woche) - 1; punkte2.length < 5; w2--) {
+        const v2 = vorlaufKonzernWoche(s2, w2);
+        if (!v2) break;
+        const trans = Math.round(v2.umsatz / Math.max(1, bon));
+        const kasseAn = itProduktZustand(s2, "kasse").aktiv;
+        const wert = id === "kasse" ? kasseAn ? trans : 0 : id === "mobile_pay" ? kasseAn && itProduktZustand(s2, "mobile_pay").aktiv ? Math.round(trans * clamp(0.04 * (ausbau?.mobil ?? 0), 0, 1)) : 0 : basis4;
+        punkte2.unshift({ woche: w2, wert, vorlauf: true });
+      }
+      const aktuell = alle[id];
+      const vorher = punkte2.length >= 2 ? punkte2[punkte2.length - 2].wert : void 0;
+      const aenderung = vorher === void 0 ? void 0 : aktuell - vorher;
+      return {
+        id,
+        ...meta,
+        aktiv: status2.aktiv,
+        team: status2.team,
+        teamKostenWoche: status2.team * IT_TEAM_KOSTEN_PRO_KOPF,
+        kennzahl: aktuell,
+        aenderung,
+        aenderungQuote: vorher && aenderung !== void 0 ? aenderung / vorher : void 0,
+        verlauf: punkte2,
+        version: version2 + ".0",
+        generation,
+        sterne: qualitaet3,
+        systemAlter: system2?.alter ?? SYSTEME[meta.system].alter,
+        details: id === "kundenkarte" ? [
+          ["Mitglieder insgesamt", Math.round(k5?.mitglieder ?? 0)],
+          ["Umsatzanteil mit Karte", Math.round((k5?.umsatzAnteil ?? 0) * 1e3) / 10 + " %"]
+        ] : id === "hartwig_app" ? [
+          ["Downloads", Math.round(k5?.app?.downloads ?? 0)],
+          ["Click & Collect", e?.letzte ? Math.round(e.letzte.bestellungen * e.letzte.clickCollectAnteil) : 0],
+          ["Abholstationen", s2.haeuser.filter((h4) => !!e?.abholstationen?.[h4.id]).length],
+          ["Online-Shop", "hartwig.de"]
+        ] : id === "kasse" ? [
+          ["Selbstbedienungskassen", "Stufe " + (ausbau?.selbstbedienung ?? 0)],
+          ["Zahlungsverkehr", "0,2 % des Umsatzes vor Einsparprogramm"]
+        ] : [
+          ["Mobile Kasse", "Stufe " + (ausbau?.mobil ?? 0)],
+          ["Zahlungsverkehr", "\xFCber bestehende Filial-GuV"]
+        ]
+      };
+    });
+  }
+
+  // ../engine/src/it.ts
+  var IT_AKTIONEN = /* @__PURE__ */ new Set(["itProjekt", "itRolloutPlan", "itKasseAusbau", "itProduktTeam", "itProduktAktiv"]);
+  var SYSTEME = {
+    kasse: { name: "Kassensoftware", start: 2, alter: 14, kosten: 78e3, bereiche: ["store_operations", "vertriebssteuerung", "flagship_management"] },
+    warenwirtschaft: { name: "Warenwirtschaft", start: 2, alter: 10, kosten: 62e3, bereiche: ["allokation", "logistik", "einkauf_damen", "einkauf_herren_kinder", "einkauf_beauty", "einkauf_wohnen", "einkauf_food", "preis_reduzierung"] },
+    planung: { name: "Planungssystem", start: 1, alter: 17, kosten: 42e3, bereiche: ["merchandise_planning", "konzerncontrolling", "vertriebscontrolling"] },
+    personaleinsatz: { name: "Personaleinsatz-Software", start: 1, alter: 12, kosten: 25e3, bereiche: ["personaleinsatz", "store_operations"] },
+    preisschilder: { name: "Elektronische Preisschilder", start: 0, alter: 0, kosten: 0, bereiche: ["preis_reduzierung", "store_operations", "allokation"] },
+    app: { name: "App & Kundenkarte", start: 2, alter: 6, kosten: 39e3, bereiche: ["crm", "marketing"] },
+    ecommerce: { name: "E-Commerce-Plattform", start: 2, alter: 8, kosten: 6e4, bereiche: ["ecommerce"] },
+    datenplattform: { name: "Datenplattform (BI)", start: 1, alter: 11, kosten: 47e3, bereiche: ["bi_daten"] }
+  };
+  var IT_IDS = Object.keys(SYSTEME);
+  function itCluster(s2) {
+    const mitOrg = s2;
+    const o4 = mitOrg.organisation?.hauscluster.filter((c) => !c.sonder && c.hausIds.length > 0);
+    if (o4?.length) return o4.map((c) => ({ id: c.id, name: c.name, hausIds: [...c.hausIds] }));
+    const gruppen = [];
+    const regionen = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
+    for (const region of regionen) {
+      const ids = s2.haeuser.filter((h4) => h4.region === region).map((h4) => h4.id).sort();
+      for (let i = 0; i < ids.length; i += 9) gruppen.push({ id: "it-" + region + "-" + (i / 9 + 1), name: region + " " + (i / 9 + 1), hausIds: ids.slice(i, i + 9) });
+    }
+    return gruppen;
+  }
+  function initialisiereIt(s2) {
+    if (s2.it) return;
+    const systeme = {};
+    for (const id of IT_IDS) {
+      const d4 = SYSTEME[id];
+      systeme[id] = {
+        id,
+        generation: d4.start,
+        alter: d4.alter,
+        basisAlter: d4.alter,
+        kostenWoche: d4.kosten,
+        basisKosten: d4.kosten,
+        wartungGekuendigt: false,
+        installationen: {},
+        ...id === "kasse" ? { kasseAusbau: { selbstbedienung: 0, mobil: 0 } } : {}
+      };
+    }
+    s2.it = { systeme, projekte: [], naechsteId: 0, umsatzFaktoren: {}, hausCluster: {}, startprobleme: {}, meldungen: 0 };
+  }
+  var system = (s2, id) => s2.it?.systeme[id];
+  function generationInCluster(s2, id, clusterId) {
+    const x2 = system(s2, id);
+    return x2?.installationen[clusterId]?.generation ?? x2?.generation ?? SYSTEME[id].start;
+  }
+  function itAlter(s2, id, clusterId) {
+    const x2 = system(s2, id);
+    if (!x2) return SYSTEME[id].alter + s2.woche / 52;
+    const i = clusterId ? x2.installationen[clusterId] : void 0;
+    return i ? Math.max(0, (s2.woche - i.seitWoche) / 52) : x2.alter + s2.woche / 52;
+  }
+  function ausfallRisiko(generation, alter) {
+    if (generation === 0) return 0;
+    return clamp(15e-5 + Math.pow(Math.max(0, alter - 4) / 20, 2) * (5 - generation) * 2e-3, 0, 0.065);
+  }
+  function benoetigteSysteme(bereich2) {
+    const direkt = IT_IDS.filter((id) => SYSTEME[id].bereiche.includes(bereich2));
+    if (!direkt.length) {
+      if (bereich2.includes("einkauf")) return ["warenwirtschaft"];
+      if (bereich2.includes("controlling")) return ["planung", "datenplattform"];
+      if (bereich2.includes("personal")) return ["personaleinsatz"];
+    }
+    return direkt;
+  }
+  function deckelGeneration(g2) {
+    return [0.72, 0.81, 0.88, 0.95, 1][g2];
+  }
+  function itDeckel(s2, bereich2) {
+    const benoetigt = benoetigteSysteme(bereich2);
+    if (!benoetigt.length) return 1;
+    const clusters = itCluster(s2), n3 = clusters.reduce((a2, c) => a2 + c.hausIds.length, 0) || 1;
+    let min = 1;
+    for (const id of benoetigt) {
+      const d4 = SYSTEME[id];
+      let kapazitaet2 = 0;
+      for (const c of clusters) kapazitaet2 += deckelGeneration(generationInCluster(s2, id, c.id)) * c.hausIds.length / n3;
+      if (!clusters.length) kapazitaet2 = deckelGeneration(system(s2, id)?.generation ?? d4.start);
+      min = Math.min(min, kapazitaet2);
+    }
+    const bi = ["merchandise_planning", "allokation", "konzerncontrolling", "vertriebscontrolling", "bi_daten"].includes(bereich2);
+    if (bi) {
+      const g2 = clusters.length ? clusters.reduce((a2, c) => a2 + generationInCluster(s2, "datenplattform", c.id) * c.hausIds.length / n3, 0) : system(s2, "datenplattform")?.generation ?? 1;
+      min = Math.min(1, min * (1 + Math.max(0, g2 - 1) * 0.05));
+    }
+    return clamp(min, 0, 1);
+  }
+  function itDeckelGrund(s2, bereich2) {
+    const ids = benoetigteSysteme(bereich2);
+    if (!ids.length) return void 0;
+    const clusters = itCluster(s2), n3 = clusters.reduce((a2, c) => a2 + c.hausIds.length, 0) || 1;
+    const wert = ids.map((id) => ({
+      id,
+      deckel: clusters.length ? clusters.reduce((a2, c) => a2 + deckelGeneration(generationInCluster(s2, id, c.id)) * c.hausIds.length / n3, 0) : deckelGeneration(system(s2, id)?.generation ?? SYSTEME[id].start)
+    })).sort((a2, b4) => a2.deckel - b4.deckel)[0];
+    return wert && wert.deckel < 0.995 ? SYSTEME[wert.id].name + " (Generation " + (system(s2, wert.id)?.generation ?? SYSTEME[wert.id].start) + ")" : void 0;
+  }
+  function projektKosten(art, ziel, clusterCount) {
+    const millionen = { kaufen: 1.8, entwickeln: 4.2, dienstleister: 0.8 }[art];
+    return eur((millionen + ziel * 0.65) * 1e6 * (0.35 + clusterCount * 0.65 / 18));
+  }
+  function itProjektPlan(s2, id, art, ziel, anzahl2) {
+    const faktor2 = { kaufen: 1, entwickeln: 1.9, dienstleister: 0.75 }[art];
+    const konzept = Math.ceil(3 * faktor2), umsetzung = Math.ceil((6 + ziel * 3) * faktor2);
+    const rollout = Math.max(1, anzahl2);
+    return { konzept, umsetzung, rollout, gesamt: konzept + umsetzung + rollout, kosten: projektKosten(art, ziel, anzahl2) };
+  }
+  function qualitaet(s2) {
+    const o4 = s2.organisation;
+    const q2 = o4?.bereiche?.it?.person?.qualitaet;
+    const cdo = s2.vorstand?.ressorts.cdo?.person;
+    return clamp((q2 ?? 0.58) * 0.7 + (cdo ? cdo.fachwissen / 100 : 0.5) * 0.3, 0, 1);
+  }
+  function vorlage(s2, titel, text3, frist = 3) {
+    if (s2.prognose) return;
+    s2.entscheidungen.push({
+      id: "it-v-" + ++s2.it.meldungen,
+      typ: "it_meilenstein",
+      woche: s2.woche,
+      frist: s2.woche + frist,
+      titel,
+      text: text3,
+      optionen: [{ id: "bestaetigen", label: "Bericht zur Kenntnis nehmen" }, { id: "delegieren", label: "IT-Leitung weiterarbeiten lassen" }],
+      standard: "delegieren",
+      daten: { modul: "it" }
+    });
+    melde(s2, "info", titel + ": " + text3, { modul: "it" });
+  }
+  function itAktion(s2, a2) {
+    initialisiereIt(s2);
+    const it = s2.it;
+    if (a2.typ === "itProduktTeam" || a2.typ === "itProduktAktiv") {
+      if (!IT_PRODUKT_IDS.includes(a2.produkt)) return { ok: false, text: "Unbekanntes IT-Produkt." };
+      const bisher = itProduktZustand(s2, a2.produkt);
+      if (a2.typ === "itProduktTeam") {
+        if (!Number.isInteger(a2.anzahl) || ![-3, 3].includes(a2.anzahl) || bisher.team + a2.anzahl < 0 || bisher.team + a2.anzahl > 30)
+          return { ok: false, text: "Das Team kann nur in Schritten zu drei Personen zwischen 0 und 30 ver\xE4ndert werden." };
+        (it.produkte ?? (it.produkte = {}))[a2.produkt] = { ...bisher, team: bisher.team + a2.anzahl };
+        return { ok: true, text: "IT-Team um " + a2.anzahl + " Personen angepasst." };
+      }
+      if (typeof a2.an !== "boolean") return { ok: false, text: "Ung\xFCltiger Produktstatus." };
+      (it.produkte ?? (it.produkte = {}))[a2.produkt] = { ...bisher, aktiv: a2.an };
+      return { ok: true, text: "Produkt " + (a2.an ? "aktiviert." : "abgeschaltet. Die Nachfragewirkung gilt ab der n\xE4chsten Woche.") };
+    }
+    if (a2.typ === "itKasseAusbau") {
+      if (!Number.isInteger(a2.stufe) || a2.stufe < 0 || a2.stufe > 2) return { ok: false, text: "Ung\xFCltige Ausbaustufe." };
+      const x2 = it.systeme.kasse;
+      if (x2.generation < 2 || a2.art === "mobil" && x2.generation < 3) return { ok: false, text: "Kassensoftware muss zun\xE4chst modernisiert werden." };
+      if (!x2.kasseAusbau) x2.kasseAusbau = { selbstbedienung: 0, mobil: 0 };
+      if (a2.stufe <= x2.kasseAusbau[a2.art]) return { ok: false, text: "Ausbaustufe muss steigen." };
+      einmalKosten(s2, eur((a2.stufe - x2.kasseAusbau[a2.art]) * (a2.art === "mobil" ? 18e5 : 31e5)));
+      x2.kasseAusbau[a2.art] = a2.stufe;
+      return { ok: true, text: "Kassenausbau beauftragt." };
+    }
+    if (a2.typ === "itRolloutPlan") {
+      const p3 = it.projekte.find((p4) => p4.id === a2.projekt);
+      if (!p3 || p3.phase === "abgeschlossen" || p3.erledigteCluster.length) return { ok: false, text: "Rollout-Reihenfolge nicht mehr \xE4nderbar." };
+      const gueltig3 = new Set(itCluster(s2).map((c) => c.id));
+      if (!a2.clusterIds.length || new Set(a2.clusterIds).size !== a2.clusterIds.length || a2.clusterIds.some((id) => !gueltig3.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
+      if (a2.clusterIds.some((id) => generationInCluster(s2, p3.system, id) >= p3.zielGeneration)) return { ok: false, text: "Im gew\xE4hlten Cluster ist diese Generation bereits vorhanden." };
+      if (a2.clusterIds.length !== p3.clusterIds.length || a2.clusterIds.some((id) => !p3.clusterIds.includes(id))) return { ok: false, text: "Nach Projektstart kann nur die Reihenfolge, nicht der Umfang ge\xE4ndert werden." };
+      p3.clusterIds = [...a2.clusterIds];
+      p3.rolloutWochen = a2.clusterIds.length;
+      return { ok: true, text: "Rollout-Auswahl und Reihenfolge gespeichert." };
+    }
+    if (!IT_IDS.includes(a2.system)) return { ok: false, text: "Unbekanntes IT-System." };
+    if (!["kaufen", "entwickeln", "dienstleister"].includes(a2.art)) return { ok: false, text: "Unbekannte Projektart." };
+    if (!Number.isInteger(a2.zielGeneration) || a2.zielGeneration < 1 || a2.zielGeneration > 4) return { ok: false, text: "Ung\xFCltige Zielgeneration." };
+    if (a2.art === "kaufen" && a2.zielGeneration > 3 || a2.art === "dienstleister" && a2.zielGeneration !== 3) return { ok: false, text: "Diese Generation ist f\xFCr die gew\xE4hlte Projektart nicht verf\xFCgbar." };
+    if (it.projekte.some((p3) => p3.system === a2.system && p3.phase !== "abgeschlossen")) return { ok: false, text: "F\xFCr das System l\xE4uft bereits ein Projekt." };
+    const gueltig2 = new Set(itCluster(s2).map((c) => c.id));
+    const clusterIds = a2.clusterIds ? [...a2.clusterIds] : [...gueltig2];
+    if (!clusterIds.length || new Set(clusterIds).size !== clusterIds.length || clusterIds.some((id) => !gueltig2.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
+    if (clusterIds.some((id) => generationInCluster(s2, a2.system, id) >= a2.zielGeneration)) return { ok: false, text: "Zielgeneration muss in jedem gew\xE4hlten Cluster h\xF6her sein." };
+    const plan2 = itProjektPlan(s2, a2.system, a2.art, a2.zielGeneration, clusterIds.length);
+    const p2 = {
+      id: "it-p-" + ++it.naechsteId,
+      system: a2.system,
+      art: a2.art,
+      zielGeneration: a2.zielGeneration,
+      phase: "konzept",
+      phaseSeit: s2.woche,
+      phaseRest: plan2.konzept,
+      konzeptWochen: plan2.konzept,
+      umsetzungWochen: plan2.umsetzung,
+      rolloutWochen: plan2.rollout,
+      clusterIds,
+      erledigteCluster: [],
+      kostenPlan: plan2.kosten,
+      kostenIst: 0,
+      wochenBudget: eur(plan2.kosten / plan2.gesamt),
+      verzug: 0,
+      stoerungen: 0,
+      gestartet: s2.woche
+    };
+    it.projekte.push(p2);
+    vorlage(s2, "IT-Projekt beauftragt", SYSTEME[a2.system].name + ": " + a2.art + ", Generation " + a2.zielGeneration + ", " + clusterIds.length + " Cluster, Planbudget " + plan2.kosten.toLocaleString("de-DE") + " \u20AC.");
+    return { ok: true, text: "Projekt " + p2.id + " gestartet." };
+  }
+  function itZufall(s2, schluessel) {
+    return { rng: Math.imul(s2.seed ^ 1313820465, 1664525) + Math.imul(s2.woche + 1, 1013904223) + Math.imul(schluessel, 2246822519) >>> 0 };
+  }
+  function stoerung(s2, cluster, faktor2) {
+    const verluste = s2.it.umsatzFaktoren;
+    for (const id of cluster.hausIds) verluste[id] = Math.min(verluste[id] ?? 1, faktor2);
+  }
+  function upgrade(s2, p2, cluster) {
+    const x2 = s2.it.systeme[p2.system];
+    x2.installationen[cluster.id] = { generation: p2.zielGeneration, seitWoche: s2.woche };
+    s2.it.startprobleme[p2.system + ":" + cluster.id] = s2.woche + 4;
+    const r4 = itZufall(s2, 311 + p2.erledigteCluster.length);
+    const probs = 0.11 * (1 - qualitaet(s2) * 0.7);
+    const defekte = cluster.hausIds.length ? chance(r4, probs) ? 1 + Math.floor(cluster.hausIds.length * 0.18) : 0 : 0;
+    p2.stoerungen += defekte;
+    if (defekte) stoerung(s2, cluster, 0.97);
+    p2.erledigteCluster.push(cluster.id);
+    vorlage(s2, "Rollout " + SYSTEME[p2.system].name, cluster.name + " fertig, " + defekte + " St\xF6rungen, " + p2.erledigteCluster.length + "/" + p2.clusterIds.length + " Cluster umgestellt.");
+  }
+  function beende(s2, p2) {
+    p2.phase = "abgeschlossen";
+    p2.phaseRest = 0;
+    p2.beendet = s2.woche;
+    const x2 = s2.it.systeme[p2.system];
+    if (itCluster(s2).every((c) => generationInCluster(s2, p2.system, c.id) >= p2.zielGeneration)) {
+      x2.generation = p2.zielGeneration;
+      x2.alter = 0;
+      x2.wartungGekuendigt = false;
+    }
+    const faktor2 = { kaufen: 1, entwickeln: 0.75, dienstleister: 2.1 }[p2.art];
+    const betrieb2 = x2.basisKosten || (p2.system === "preisschilder" ? 22e3 : 0);
+    x2.kostenWoche = eur(betrieb2 * (1 + 0.17 * (p2.zielGeneration - SYSTEME[p2.system].start)) * faktor2);
+    vorlage(s2, "IT-Projekt abgeschlossen", SYSTEME[p2.system].name + " Generation " + p2.zielGeneration + ". Istkosten " + p2.kostenIst.toLocaleString("de-DE") + " \u20AC, Plan " + p2.kostenPlan.toLocaleString("de-DE") + " \u20AC.");
+  }
+  function itWoche(s2) {
+    initialisiereIt(s2);
+    const it = s2.it;
+    it.umsatzFaktoren = {};
+    const clusters = itCluster(s2);
+    it.hausCluster = {};
+    for (const cluster of clusters) for (const id of cluster.hausIds) it.hausCluster[id] = cluster.id;
+    const delta = IT_IDS.reduce((sum2, id) => sum2 + it.systeme[id].kostenWoche - it.systeme[id].basisKosten, 0);
+    const teamKosten = IT_PRODUKT_IDS.reduce((sum2, id) => sum2 + itProduktZustand(s2, id).team * IT_TEAM_KOSTEN_PRO_KOPF, 0);
+    s2.zentrale.kostenWoche += delta + teamKosten;
+    const q2 = qualitaet(s2);
+    for (const p2 of it.projekte) {
+      if (p2.phase === "abgeschlossen") continue;
+      const zuf = itZufall(s2, 100 + Number(p2.id.slice(5)));
+      const risiko = clamp(0.1 * (1 - q2) + 0.025 * (p2.art === "entwickeln" ? 2 : 1), 0, 0.16);
+      if (!s2.prognose && chance(zuf, risiko)) {
+        p2.verzug++;
+        p2.phaseRest++;
+        const mehr = eur(p2.wochenBudget * 0.12);
+        p2.kostenPlan += mehr;
+      }
+      const ausgabe = eur(p2.wochenBudget * (1 + (p2.verzug > 0 ? 0.09 : 0)));
+      einmalKosten(s2, ausgabe);
+      p2.kostenIst += ausgabe;
+      p2.phaseRest--;
+      if (p2.phaseRest > 0) continue;
+      if (p2.phase === "konzept") {
+        p2.phase = "umsetzung";
+        p2.phaseSeit = s2.woche + 1;
+        p2.phaseRest = p2.umsetzungWochen;
+        vorlage(s2, "IT-Konzept freigegeben", SYSTEME[p2.system].name + " geht in die Umsetzung.");
+      } else if (p2.phase === "umsetzung") {
+        p2.phase = "rollout";
+        p2.phaseSeit = s2.woche + 1;
+        p2.phaseRest = 1;
+        vorlage(s2, "Rollout beginnt", SYSTEME[p2.system].name + " wird Cluster f\xFCr Cluster umgestellt.");
+      } else if (p2.phase === "rollout") {
+        const next = clusters.find((c) => c.id === p2.clusterIds[p2.erledigteCluster.length]);
+        if (next) upgrade(s2, p2, next);
+        if (p2.erledigteCluster.length === p2.clusterIds.length) beende(s2, p2);
+        else p2.phaseRest = 1;
+      }
+    }
+    for (let i = 0; i < IT_IDS.length; i++) {
+      const id = IT_IDS[i], x2 = it.systeme[id];
+      if (x2.generation === 0 && !Object.keys(x2.installationen).length) continue;
+      for (let j4 = 0; j4 < clusters.length; j4++) {
+        const c = clusters[j4], g2 = generationInCluster(s2, id, c.id), alter = itAlter(s2, id, c.id);
+        if (g2 === 0) continue;
+        const risiko = ausfallRisiko(g2, alter) * (1 - 0.45 * q2) * (x2.wartungGekuendigt ? 2.5 : 1);
+        if (!s2.prognose && chance(itZufall(s2, 5e3 + i * 1e5 + j4), risiko)) {
+          if (id === "kasse" || id === "warenwirtschaft" || id === "ecommerce") stoerung(s2, c, id === "kasse" ? 0.65 : 0.85);
+          melde(s2, "warnung", id === "kasse" ? "Kassenausfall am Samstag in Cluster " + c.name + ". Umsatzausf\xE4lle durch gest\xF6rte Kassensysteme." : SYSTEME[id].name + ": Ausfall in Cluster " + c.name + ". Der operative Betrieb ist eingeschr\xE4nkt.", { modul: "it" });
+        }
+        if (it.startprobleme[id + ":" + c.id] > s2.woche && !s2.prognose) {
+          if (chance(itZufall(s2, 9e3 + i * 1e5 + j4), 0.22 * (1 - q2 * 0.5))) stoerung(s2, c, id === "kasse" ? 0.89 : 0.97);
+        }
+      }
+      if (x2.alter + s2.woche / 52 > 21 && !x2.wartungGekuendigt && !s2.prognose && chance(itZufall(s2, 19e3 + i), 1e-3)) {
+        x2.wartungGekuendigt = true;
+        melde(s2, "warnung", "Wartung f\xFCr " + SYSTEME[id].name + " wurde vom Lieferanten abgek\xFCndigt.", { modul: "it" });
+      }
+    }
+    if (!s2.prognose && chance(itZufall(s2, 22001), 8e-4 * (1 - 0.7 * q2) * Math.max(0.4, 1 - 0.1 * generationInCluster(s2, "datenplattform", clusters[0]?.id ?? "")))) {
+      const f13 = 1 - 0.1 * (1 - q2 * 0.6);
+      for (const c of clusters) stoerung(s2, c, f13);
+      melde(s2, "warnung", "Cyberangriff auf die Unternehmenssysteme. IT und Datenplattform begrenzen den Schaden.", { modul: "it" });
+    }
+  }
+  function itHausFaktor(s2, h4) {
+    const it = s2.it;
+    if (!it) return 1;
+    const id = it.hausCluster?.[h4.id];
+    if (!id) return it.umsatzFaktoren[h4.id] ?? 1;
+    const kasse = Math.max(0, generationInCluster(s2, "kasse", id) - SYSTEME.kasse.start);
+    const app2 = Math.max(0, generationInCluster(s2, "app", id) - SYSTEME.app.start);
+    const ware3 = Math.max(0, generationInCluster(s2, "warenwirtschaft", id) - SYSTEME.warenwirtschaft.start);
+    const kAusbau = it.systeme.kasse.kasseAusbau;
+    const aktiv6 = (produkt) => itProduktZustand(s2, produkt).aktiv;
+    const teamBonus = IT_PRODUKT_IDS.reduce((sum2, p2) => sum2 + (aktiv6(p2) ? itProduktZustand(s2, p2).team * 2e-4 : 0), 0);
+    const qualitaet3 = 1 + kasse * 5e-3 + app2 * 4e-3 + ware3 * 2e-3 + (kAusbau?.selbstbedienung ?? 0) * 2e-3 + (aktiv6("mobile_pay") ? (kAusbau?.mobil ?? 0) * 1e-3 : 0) + teamBonus;
+    const abschaltung = (aktiv6("kasse") ? 1 : 0.85) * (aktiv6("kundenkarte") ? 1 : 0.99) * (aktiv6("hartwig_app") ? 1 : 0.992);
+    return qualitaet3 * abschaltung * (it.umsatzFaktoren[h4.id] ?? 1);
+  }
+  function itUebersicht(s2) {
+    const clusters = itCluster(s2), it = s2.it;
+    const systeme = IT_IDS.map((id) => {
+      const x2 = it?.systeme[id], g2 = x2?.generation ?? SYSTEME[id].start, alter = itAlter(s2, id);
+      const verteilung = clusters.map((c) => ({
+        id: c.id,
+        name: c.name,
+        haeuser: c.hausIds.length,
+        generation: generationInCluster(s2, id, c.id),
+        startproblemeBis: it?.startprobleme[id + ":" + c.id]
+      }));
+      return {
+        id,
+        name: SYSTEME[id].name,
+        generation: g2,
+        alter,
+        kostenWoche: x2?.kostenWoche ?? SYSTEME[id].kosten,
+        risiko: ausfallRisiko(g2, alter),
+        wartungGekuendigt: x2?.wartungGekuendigt ?? false,
+        kasseAusbau: x2?.kasseAusbau,
+        verteilung
+      };
+    });
+    return {
+      woche: s2.woche,
+      qualitaet: qualitaet(s2),
+      systeme,
+      projekte: (it?.projekte ?? []).map((p2) => ({
+        ...p2,
+        fortschritt: p2.phase === "abgeschlossen" ? 1 : clamp((p2.phase === "konzept" ? p2.konzeptWochen - p2.phaseRest : p2.phase === "umsetzung" ? p2.konzeptWochen + p2.umsetzungWochen - p2.phaseRest : p2.konzeptWochen + p2.umsetzungWochen + p2.erledigteCluster.length) / (p2.konzeptWochen + p2.umsetzungWochen + p2.rolloutWochen), 0, 1)
+      })),
+      cluster: clusters.map((c) => ({ id: c.id, name: c.name, haeuser: c.hausIds.length })),
+      betriebskostenWoche: systeme.reduce((a2, x2) => a2 + x2.kostenWoche, 0)
+    };
+  }
+
+  // ../engine/src/organisation.ts
+  var b = (id, name2, ressort, abteilung2, beschreibung) => ({ id, name: name2, ressort, abteilung: abteilung2, beschreibung });
+  var BEREICHE = [
+    b("konzerncontrolling", "Konzerncontrolling", "cfo", "controlling", "GuV, Bilanz und Liquidit\xE4t"),
+    b("vertriebscontrolling", "Vertriebscontrolling", "cfo", "controlling", "Hauskennzahlen und Vertriebsanalysen"),
+    b("finanzen", "Finanzen", "cfo", "verwaltung", "Treasury und Rechnungswesen"),
+    b("recht", "Recht", "cfo", "recht", "Vertr\xE4ge und Compliance"),
+    b("einkauf_damen", "Einkauf Damen", "cpo", "einkauf", "Damenmode und W\xE4sche"),
+    b("einkauf_herren_kinder", "Einkauf Herren & Kinder", "cpo", "einkauf", "Herren- und Kindermode"),
+    b("einkauf_beauty", "Einkauf Beauty & Accessoires", "cpo", "einkauf", "Beauty und Accessoires"),
+    b("einkauf_wohnen", "Einkauf Wohnen & Spielwaren", "cpo", "einkauf", "Wohnen und Spielwaren"),
+    b("einkauf_food", "Einkauf Food", "cpo", "einkauf", "Lebensmittel und Feinkost"),
+    b("merchandise_planning", "Merchandise Planning", "cpo", "einkauf", "Sortiments- und Budgetplanung"),
+    b("allokation", "Allokation & Nachschub", "cpo", "einkauf", "Bestandsverteilung in die H\xE4user"),
+    b("preis_reduzierung", "Preis- & Reduzierungsmanagement", "cpo", "einkauf", "Preise und Abschriften"),
+    b("eigenmarken", "Eigenmarken", "cpo", "produkt", "Entwicklung und Pflege eigener Marken"),
+    b("vertriebssteuerung", "Vertriebssteuerung", "cso", "controlling", "Steuerung der Regionen"),
+    b("marktbeobachtung", "Marktbeobachtung", "cso", "controlling", "Lokale Wettbewerbsanalyse, Relevanzfilter und Wochen\xFCberblick"),
+    b("store_operations", "Store Operations", "cso", "verwaltung", "Standards im operativen Hausbetrieb"),
+    b("flagship_management", "Flagship-Management", "cso", "vm", "Premiumh\xE4user und Flaggschiffe"),
+    b("logistik", "Logistik", "coo", "logistik", "Lager und Warenverkehr"),
+    b("flaechenmanagement", "Fl\xE4chenmanagement", "coo", "immobilien", "Nutzung und Vermietung von Fl\xE4chen"),
+    b("immobilien", "Immobilien", "coo", "immobilien", "Mietvertr\xE4ge und Immobilienportfolio"),
+    b("ladenbau", "Bau & Ladenbau", "coo", "immobilien", "Modernisierung und Umbauten"),
+    b("facility", "Facility & Energie", "coo", "immobilien", "Technik und Energieversorgung"),
+    b("personaleinsatz", "Personaleinsatzplanung", "chro", "personal", "Personalbedarf und Dienstplanung"),
+    b("recruiting", "Recruiting", "chro", "personal", "Gewinnung von Mitarbeitern"),
+    b("weiterbildung", "Aus- & Weiterbildung", "chro", "personal", "Qualifikation und Entwicklung"),
+    b("arbeitsbeziehungen", "Arbeitsbeziehungen", "chro", "personal", "Sozialpartner und Tarif"),
+    b("marketing", "Marketing", "cmo", "marketing", "Kampagnen und Media"),
+    b("crm", "CRM", "cmo", "marketing", "Kundenbindung und Kundenkarte"),
+    b("vm_deko", "VM & Deko", "cmo", "vm", "Visual Merchandising und Dekoration"),
+    b("ecommerce", "E-Commerce", "cdo", "ecommerce", "Onlineshop"),
+    b("it", "IT", "cdo", "ecommerce", "Systembetrieb und Projekte"),
+    b("bi_daten", "BI & Daten", "cdo", "controlling", "Reporting und Datenplattform")
+  ];
+  var ALTE_DELEGATIONEN = {
+    "cfo.zahlungsplanung": "finanzen",
+    "cfo.bank": "konzerncontrolling",
+    "coo.filialpersonal": "store_operations",
+    "coo.personalbedarf": "store_operations",
+    "cso.filialbesetzung": "vertriebssteuerung",
+    "cso.flaechenvermietung": "flagship_management",
+    "cpo.freigaben": "merchandise_planning",
+    "cpo.dispo": "allokation",
+    "cpo.produktentwicklung": "eigenmarken",
+    "cmo.aktionskalender": "marketing",
+    "cmo.crm": "crm",
+    "cmo.kanalbudget": "marketing",
+    "chro.betriebsrat": "arbeitsbeziehungen",
+    "chro.personalplanung": "personaleinsatz",
+    "cro.schliessungen": "immobilien",
+    "cro.mietverhandlungen": "immobilien",
+    "cdo.onlinesortiment": "ecommerce"
+  };
+  var task = (id, name2, grenze) => ({ id, name: name2, ...grenze ? { grenze } : {} });
+  var ALLGEMEIN = [task("planung", "Planung und Priorit\xE4ten"), task("freigaben", "Routinefreigaben", 5e4)];
+  var AUFGABEN_NACH_BEREICH = {
+    einkauf_damen: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_herren_kinder: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_beauty: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_wohnen: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    einkauf_food: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
+    merchandise_planning: [task("limits", "Open-to-Buy-Limits", 5e4), task("vororder", "Saison-Vororder", 5e4), task("freigaben", "Bestellfreigaben", 5e4)],
+    allokation: [task("nachorder", "Nachorder"), task("disposition", "NOS-Disposition"), task("umlagerung", "Warenumlagerungen", 2e4)],
+    preis_reduzierung: [task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4), task("preise", "Preispflege")],
+    eigenmarken: [task("produkte", "Produktentwicklung", 5e4), task("positionierung", "Markenpositionierung", 1e5), task("sortiment", "Sortiment und Auslistung")],
+    personaleinsatz: [task("einsatz", "Einsatzplanung"), task("aushilfen", "Aushilfen", 1e4), task("schicht", "Schicht\xE4nderungen")],
+    recruiting: [task("einstellung", "Einstellungen", 5e4), task("angebote", "Kandidatenangebote", 1e4)],
+    arbeitsbeziehungen: [task("verhandlung", "Betriebsratsverhandlungen"), task("vereinbarung", "Betriebsvereinbarungen", 1e5)],
+    marketing: [task("aktionen", "Aktionen", 1e5), task("mailings", "Mailings", 5e4), task("budget", "Kanalbudget", 5e4)],
+    crm: [task("mailings", "CRM-Mailings", 5e4), task("segment", "Kundensegmente"), task("karte", "Kundenkarte und App", 5e4)],
+    store_operations: [task("oeffnungszeiten", "\xD6ffnungszeiten"), task("sofortmassnahmen", "Ad-hoc-Ma\xDFnahmen", 2e4), task("reparaturen", "Reparaturen", 1e4)],
+    facility: [task("reparaturen", "Reparaturen", 1e4), task("wartung", "Wartung", 5e4), task("energie", "Energieplanung")],
+    immobilien: [task("mietvertraege", "Mietvertragsverl\xE4ngerungen", 1e5), task("verhandlung", "Mietverhandlungen", 5e4), task("planung", "Portfolioplanung")]
+  };
+  var CLUSTER_AUFGABEN = [
+    task("oeffnungszeiten", "\xD6ffnungszeiten"),
+    task("sofortmassnahmen", "Ad-hoc-Ma\xDFnahmen", 2e4),
+    task("reparaturen", "Reparaturen", 1e4),
+    task("aushilfen", "Aushilfen", 1e4),
+    task("einsatz", "Personaleinsatzplanung")
+  ];
+  function delegationsAufgaben(bereich2, hauscluster2) {
+    if (hauscluster2) return CLUSTER_AUFGABEN;
+    if (!bereich2 || !BEREICHE.some((b4) => b4.id === bereich2)) return [];
+    return AUFGABEN_NACH_BEREICH[bereich2] ?? ALLGEMEIN.slice();
+  }
+  var RESSORT_TASK = {
+    "cpo.freigaben": "freigaben",
+    "cpo.dispo": "disposition",
+    "cpo.produktentwicklung": "produkte",
+    "cmo.aktionskalender": "aktionen",
+    "cmo.crm": "mailings",
+    "cmo.kanalbudget": "budget",
+    "chro.personalplanung": "einsatz",
+    "chro.betriebsrat": "verhandlung",
+    "cdo.onlinesortiment": "planung",
+    "cso.filialbesetzung": "planung",
+    "coo.personalbedarf": "einsatz",
+    "coo.filialpersonal": "einsatz",
+    "cro.mietverhandlungen": "verhandlung",
+    "cro.schliessungen": "planung",
+    "cfo.zahlungsplanung": "planung",
+    "cfo.bank": "planung"
+  };
+  var ORGANISATION_AKTIONEN = /* @__PURE__ */ new Set(["flagship", "delegation", "delegationGrenze", "organisationBesetzen", "organisationEntlassen", "organisationHaltepraemie", "organisationBefoerdern"]);
+  var REGIONEN = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
+  var hash = (str) => [...str].reduce((v2, c) => Math.imul(v2, 31) + c.charCodeAt(0) >>> 0, 2166136261);
+  var mix = (seed, text3) => hash(seed + ":" + text3);
+  function person(seed, key, n3, qualitaet3) {
+    const z6 = mix(seed, key + ":" + n3), q2 = qualitaet3 ?? 0.48 + z6 % 430 / 1e3;
+    const weiblich = z6 % 2 === 0;
+    return {
+      id: key + "-" + n3,
+      name: VORNAMEN[z6 % VORNAMEN.length] + " " + NACHNAMEN[Math.floor(z6 / 41) % NACHNAMEN.length],
+      qualitaet: Math.round(q2 * 1e3) / 1e3,
+      gehalt: eur((65e3 + q2 * 115e3) / 1e3) * 1e3,
+      stimmung: 68 + z6 % 20,
+      wechselwille: 0.08 + z6 % 26 / 100,
+      portraet: {
+        geschlecht: weiblich ? "w" : "m",
+        haar: weiblich ? "bob" : "kurz",
+        haarfarbe: z6 % 4 === 0 ? "grau" : "braun",
+        brille: z6 % 3 === 0 ? "eckig" : "keine",
+        kleidungFarbe: z6 % 2 === 0 ? "marine" : "anthrazit",
+        hautton: z6 % 5,
+        alter: 38 + z6 % 26,
+        kleidung: weiblich ? "blazer" : "anzug",
+        bart: "keiner"
+      }
+    };
+  }
+  function stelle(seed, key) {
+    const start = person(seed, key, 0, 0.65 + mix(seed, key) % 170 / 1e3);
+    return { person: start, kandidaten: [1, 2, 3].map((i) => person(seed, key, i)), delegiert: false, basis: start.qualitaet };
+  }
+  var distanz = (a2, b4) => {
+    const x2 = KOORDINATEN[a2.stadt], y2 = KOORDINATEN[b4.stadt];
+    if (!x2 || !y2) return a2.stadt === b4.stadt ? 0 : 1e7;
+    return Math.pow((x2[0] - y2[0]) * 111, 2) + Math.pow((x2[1] - y2[1]) * 70, 2);
+  };
+  var nord = (a2, b4) => (KOORDINATEN[b4.stadt]?.[0] ?? 0) - (KOORDINATEN[a2.stadt]?.[0] ?? 0) || a2.id.localeCompare(b4.id);
+  function gruppiere(haeuser) {
+    const frei6 = [...haeuser].sort(nord), ergebnis = [];
+    while (frei6.length) {
+      if (ergebnis.length && frei6.length < 6) {
+        ergebnis[ergebnis.length - 1].push(...frei6.splice(0));
+        break;
+      }
+      const start = frei6.shift(), gruppe3 = [start];
+      const gesamt = frei6.length + 1;
+      const ziel = gesamt > 12 && gesamt - 11 < 6 ? gesamt - 6 : Math.min(11, gesamt);
+      while (gruppe3.length < ziel && frei6.length) {
+        let k5 = 0;
+        for (let i = 1; i < frei6.length; i++) {
+          const d4 = Math.min(...gruppe3.map((h4) => distanz(h4, frei6[i])));
+          const alt = Math.min(...gruppe3.map((h4) => distanz(h4, frei6[k5])));
+          if (d4 < alt || d4 === alt && frei6[i].id.localeCompare(frei6[k5].id) < 0) k5 = i;
+        }
+        gruppe3.push(frei6.splice(k5, 1)[0]);
+      }
+      ergebnis.push(gruppe3);
+    }
+    return ergebnis;
+  }
+  function clusterName(gruppe3, vergeben) {
+    const zahl5 = /* @__PURE__ */ new Map();
+    for (const h4 of gruppe3) zahl5.set(h4.stadt, (zahl5.get(h4.stadt) ?? 0) + 1);
+    const staedte = [...zahl5.entries()].sort((a2, b4) => b4[1] - a2[1] || a2[0].localeCompare(b4[0], "de")).map(([st2]) => st2);
+    for (let i = 1; i < staedte.length; i++) {
+      const name2 = "Raum " + staedte[0] + " \xB7 " + staedte[i];
+      if (!vergeben.includes("Raum " + staedte[0])) break;
+      if (!vergeben.includes(name2)) return name2;
+    }
+    return vergeben.includes("Raum " + staedte[0]) ? "Raum " + staedte[0] + " " + (vergeben.length + 1) : "Raum " + staedte[0];
+  }
+  function bildeHauscluster(s2) {
+    const organisation2 = {
+      hauscluster: [],
+      geografisch: {},
+      flagships: [],
+      unruhe: {},
+      zaehler: 0,
+      bereiche: {},
+      regionalleitungen: {},
+      letzteBesetzung: {},
+      letzteVakanz: {},
+      basisKosten: 0
+    };
+    for (const bereich2 of BEREICHE) organisation2.bereiche[bereich2.id] = stelle(s2.seed, "bereich-" + bereich2.id);
+    for (const region of REGIONEN) {
+      organisation2.regionalleitungen[region] = stelle(s2.seed, "region-" + region);
+      const einheiten = gruppiere(s2.haeuser.filter((h4) => h4.region === region && h4.status === "offen"));
+      einheiten.forEach((gruppe3, i) => {
+        const id = "hc-" + region.toLocaleLowerCase("de") + "-" + (i + 1);
+        organisation2.hauscluster.push({ id, name: clusterName(gruppe3, organisation2.hauscluster.map((c) => c.name)), region, hausIds: gruppe3.map((h4) => h4.id), sonder: false, stelle: stelle(s2.seed, id) });
+        gruppe3.forEach((h4) => {
+          h4.hauscluster = id;
+          organisation2.geografisch[h4.id] = id;
+        });
+      });
+    }
+    const premium2 = s2.haeuser.filter((h4) => h4.klasse === "premium").map((h4) => h4.id);
+    organisation2.hauscluster.push({ id: "premium-flagships", name: "Premium & Flagships", hausIds: premium2, sonder: true, stelle: stelle(s2.seed, "premium-flagships") });
+    for (const r4 of Object.keys(s2.vorstand.ressorts)) organisation2.letzteBesetzung[r4] = !!s2.vorstand.ressorts[r4].person;
+    organisation2.basisKosten = leitungsKosten(organisation2);
+    s2.organisation = organisation2;
+  }
+  function leitungsKosten(o4) {
+    return [...Object.values(o4.bereiche), ...Object.values(o4.regionalleitungen), ...o4.hauscluster.map((x2) => x2.stelle)].reduce((sum2, x2) => sum2 + (x2.person?.gehalt ?? 0), 0);
+  }
+  function organisationLeitungKostenWoche(s2) {
+    return s2.organisation ? eur((leitungsKosten(s2.organisation) - s2.organisation.basisKosten) / 52) : 0;
+  }
+  function hausclusterVon(s2, hausId) {
+    const o4 = s2.organisation;
+    if (!o4) return void 0;
+    const sonder = o4.hauscluster[o4.hauscluster.length - 1];
+    const id = o4.flagships.includes(hausId) || sonder?.sonder && sonder.hausIds.includes(hausId) ? "premium-flagships" : o4.geografisch[hausId];
+    return o4.hauscluster.find((x2) => x2.id === id);
+  }
+  function clusterleitungQualitaet(s2, hcId) {
+    return clamp(s2.organisation?.hauscluster.find((x2) => x2.id === hcId)?.stelle.person?.qualitaet ?? 0.35, 0, 1);
+  }
+  function regionalleitungQualitaet(s2, region) {
+    return clamp(s2.organisation?.regionalleitungen[region]?.person?.qualitaet ?? 0.35, 0, 1);
+  }
+  function clusterBerichtetAn(s2, hcId) {
+    const cluster = s2.organisation?.hauscluster.find((x2) => x2.id === hcId);
+    if (cluster?.region && s2.organisation?.regionalleitungen[cluster.region]?.person) return cluster.region;
+    return s2.vorstand?.ressorts.cso.person ? "cso" : "spieler";
+  }
+  function berichtetAn(s2, id) {
+    const bereich2 = BEREICHE.find((x2) => x2.id === id);
+    return bereich2 && s2.vorstand?.ressorts[bereich2.ressort]?.person ? bereich2.ressort : "spieler";
+  }
+  function istDelegiert(s2, id) {
+    const bereich2 = BEREICHE.find((x2) => x2.id === id);
+    if (!bereich2) return false;
+    return !!s2.organisation?.bereiche[id]?.delegiert || Object.entries(ALTE_DELEGATIONEN).some(([k5, neu3]) => {
+      const [ressort, delegationsId] = k5.split(".");
+      return neu3 === id && !!s2.vorstand?.ressorts[ressort]?.delegation[delegationsId];
+    });
+  }
+  function istAufgabeDelegiert(s2, aufgabe, bereich2, hauscluster2) {
+    const st2 = bereich2 ? s2.organisation?.bereiche[bereich2] : s2.organisation?.hauscluster.find((c) => c.id === hauscluster2)?.stelle;
+    if (!st2 || !st2.person || !delegationsAufgaben(bereich2, hauscluster2).some((a2) => a2.id === aufgabe)) return false;
+    return st2.aufgaben?.[aufgabe] ?? (bereich2 ? istDelegiert(s2, bereich2) : !!st2.delegiert);
+  }
+  function delegationsGrenze(s2, aufgabe, bereich2, hauscluster2) {
+    const def = delegationsAufgaben(bereich2, hauscluster2).find((x2) => x2.id === aufgabe);
+    const st2 = bereich2 ? s2.organisation?.bereiche[bereich2] : s2.organisation?.hauscluster.find((x2) => x2.id === hauscluster2)?.stelle;
+    return def?.grenze ? st2?.grenzen?.[aufgabe] ?? def.grenze : void 0;
+  }
+  function bereichsQualitaet(s2, id) {
+    const def = BEREICHE.find((x2) => x2.id === id), st2 = s2.organisation?.bereiche[id];
+    if (!def || !st2) return 0;
+    const person3 = st2.person?.qualitaet ?? 0.35;
+    const hqStufe = clamp(s2.hq?.wirkung?.[def.abteilung] ?? 1, 0, 3) / 1;
+    const chef = s2.vorstand?.ressorts[def.ressort]?.person;
+    const vorstand = chef ? clamp(1 + (chef.fuehrung / 100 - 0.5) * 0.3, 0.85, 1.15) : 1;
+    return clamp(person3 * hqStufe * vorstand * itDeckel(s2, id), 0, 1);
+  }
+  function hausclusterFaktor(s2, h4) {
+    const hc = hausclusterVon(s2, h4.id), reg = s2.organisation?.regionalleitungen[h4.region];
+    if (!hc || !reg) return 1;
+    const hcQual = hc.stelle.person?.qualitaet ?? 0.35;
+    const regQual = reg.person?.qualitaet ?? 0.35;
+    return clamp(1 + 0.12 * (hcQual - hc.stelle.basis) + 0.08 * (regQual - reg.basis), 0.85, 1.15);
+  }
+  function neueVorlage(s2, v2) {
+    if (s2.prognose || !s2.organisation) return;
+    const bereich2 = v2.bereich ? BEREICHE.find((b4) => b4.id === v2.bereich) : void 0;
+    const cluster = v2.hauscluster ? s2.organisation.hauscluster.find((c) => c.id === v2.hauscluster) : void 0;
+    const chef = bereich2 ? berichtetAn(s2, bereich2.id) : cluster ? clusterBerichtetAn(s2, cluster.id) : "spieler";
+    const delegiert = v2.aufgabe ? istAufgabeDelegiert(s2, v2.aufgabe, bereich2?.id, cluster?.id) : bereich2 ? istDelegiert(s2, bereich2.id) : !!cluster?.stelle.delegiert;
+    const grenze = v2.aufgabe ? delegationsGrenze(s2, v2.aufgabe, bereich2?.id, cluster?.id) : void 0;
+    const innerhalbGrenze = grenze === void 0 || v2.betrag !== void 0 && v2.betrag <= grenze;
+    if (chef !== "spieler" && delegiert && !v2.grundsaetzlich && innerhalbGrenze) {
+      if (v2.aktion) {
+        const guete = bereich2 ? bereichsQualitaet(s2, bereich2.id) : clusterleitungQualitaet(s2, cluster.id);
+        const schwelle = mix(s2.seed, (v2.aufgabe ?? v2.titel) + ":" + s2.woche) % 1e3 / 1e3;
+        const richtig = schwelle < 0.3 + 0.65 * guete;
+        const aktion2 = richtig ? v2.aktion : v2.fehlerAktion ?? v2.aktion;
+        fuehreAus(s2, aktion2);
+      }
+      return;
+    }
+    const prefix = bereich2?.name ?? cluster?.name ?? "Organisation";
+    s2.entscheidungen.push({
+      id: "org-v-" + ++s2.organisation.zaehler,
+      typ: "organisation_vorlage",
+      woche: s2.woche,
+      frist: s2.woche + (v2.frist ?? 3),
+      titel: v2.titel,
+      text: prefix + ": " + v2.text,
+      optionen: v2.optionen ?? [{ id: "vorschlag", label: "Vorschlag der Leitung \xFCbernehmen" }, { id: "ablehnen", label: "Ablehnen" }],
+      standard: v2.standard ?? "vorschlag",
+      daten: { bereich: bereich2?.id ?? "", hauscluster: cluster?.id ?? "", aufgabe: v2.aufgabe ?? "", absender: prefix, aktion: v2.aktion ? JSON.stringify(v2.aktion) : "" }
+    });
+  }
+  function organisationVorlageEntscheidung(s2, e, option2) {
+    if (option2 !== "vorschlag" || typeof e.daten.aktion !== "string" || !e.daten.aktion) return;
+    const a2 = JSON.parse(e.daten.aktion);
+    fuehreAus(s2, a2);
+  }
+  function stelleFuer(s2, ebene, id) {
+    if (ebene === "bereich") return s2.organisation?.bereiche[id];
+    if (ebene === "region") return s2.organisation?.regionalleitungen[id];
+    return s2.organisation?.hauscluster.find((h4) => h4.id === id)?.stelle;
+  }
+  function organisationAktion(s2, a2) {
+    const o4 = s2.organisation;
+    if (!o4) return { ok: false, text: "Organisation nicht verf\xFCgbar." };
+    if (a2.typ === "flagship") {
+      const h4 = s2.haeuser.find((h5) => h5.id === a2.haus);
+      if (!h4 || h4.status !== "offen" || h4.format !== "warenhaus" || h4.klasse === "premium") return { ok: false, text: "Nur offene regul\xE4re Hartwig-Warenh\xE4user sind ausw\xE4hlbar." };
+      const erlaubt = [...s2.haeuser].filter((h5) => h5.format === "warenhaus" && h5.status === "offen" && !h5.klasse).sort((x2, y2) => y2.grundflaecheQm * y2.etagen.length - x2.grundflaecheQm * x2.etagen.length).slice(0, 12);
+      if (a2.an && !erlaubt.some((x2) => x2.id === h4.id)) return { ok: false, text: "Flagships m\xFCssen zu den gr\xF6\xDFten Warenh\xE4usern geh\xF6ren." };
+      if (a2.an === o4.flagships.includes(h4.id)) return { ok: true, text: "Keine \xC4nderung." };
+      if (a2.an && o4.flagships.length >= 12) return { ok: false, text: "H\xF6chstens zw\xF6lf Flagships m\xF6glich." };
+      o4.flagships = a2.an ? [...o4.flagships, h4.id] : o4.flagships.filter((id) => id !== h4.id);
+      const sonder = o4.hauscluster.find((x2) => x2.sonder);
+      sonder.hausIds = s2.haeuser.filter((x2) => x2.klasse === "premium" || o4.flagships.includes(x2.id)).map((x2) => x2.id);
+      h4.personal.filialleiter.moral = clamp(h4.personal.filialleiter.moral - 10, 0, 100);
+      o4.unruhe[h4.id] = { bis: s2.woche + 8, moral: 10 };
+      return { ok: true, text: a2.an ? "Flagship zugeordnet: acht Wochen Unruhe." : "Flagship wieder regional zugeordnet: acht Wochen Unruhe." };
+    }
+    if (a2.typ === "delegation" || a2.typ === "delegationGrenze") {
+      const st3 = a2.bereich ? o4.bereiche[a2.bereich] : o4.hauscluster.find((c) => c.id === a2.hauscluster)?.stelle;
+      if (!st3) return { ok: false, text: "Bereich oder Hauscluster nicht gefunden." };
+      if (a2.typ === "delegationGrenze") {
+        const def = delegationsAufgaben(a2.bereich, a2.hauscluster).find((t5) => t5.id === a2.aufgabe);
+        if (!def?.grenze || !Number.isFinite(a2.betrag) || a2.betrag < 0 || a2.betrag > 1e8)
+          return { ok: false, text: "Ung\xFCltige Betragsgrenze oder Aufgabe." };
+        (st3.grenzen ?? (st3.grenzen = {}))[a2.aufgabe] = eur(a2.betrag);
+        return { ok: true, text: "Betragsgrenze ge\xE4ndert." };
+      }
+      if (a2.aufgabe !== void 0) {
+        if (!delegationsAufgaben(a2.bereich, a2.hauscluster).some((t5) => t5.id === a2.aufgabe))
+          return { ok: false, text: "Aufgabe in diesem Bereich nicht vorhanden." };
+        if (a2.an && !st3.person) return { ok: false, text: "Ohne Leitung keine Delegation m\xF6glich." };
+        (st3.aufgaben ?? (st3.aufgaben = {}))[a2.aufgabe] = a2.an;
+        if (a2.bereich) for (const [alt, neu3] of Object.entries(ALTE_DELEGATIONEN)) {
+          if (neu3 !== a2.bereich || RESSORT_TASK[alt] !== a2.aufgabe) continue;
+          const [r4, id] = alt.split(".");
+          if (s2.vorstand?.ressorts[r4]?.delegation && DELEGATIONEN[r4].some((d4) => d4.id === id))
+            s2.vorstand.ressorts[r4].delegation[id] = a2.an;
+        }
+        return { ok: true, text: "Aufgabe " + a2.aufgabe + (a2.an ? " delegiert." : " zur Entscheidung vorgelegt.") };
+      }
+      st3.delegiert = a2.an;
+      st3.aufgaben = {};
+      if (a2.bereich) {
+        for (const [alt, neu3] of Object.entries(ALTE_DELEGATIONEN)) if (neu3 === a2.bereich) {
+          const [r4, id] = alt.split(".");
+          if (s2.vorstand?.ressorts[r4]?.delegation && DELEGATIONEN[r4].some((d4) => d4.id === id))
+            s2.vorstand.ressorts[r4].delegation[id] = a2.an;
+        }
+      }
+      return { ok: true, text: a2.bereich ? "Bereichsdelegation ge\xE4ndert." : "Clusterdelegation ge\xE4ndert." };
+    }
+    if (a2.typ === "organisationBefoerdern") {
+      const h4 = s2.haeuser.find((x2) => x2.id === a2.haus), cluster = o4.hauscluster.find((x2) => x2.id === a2.hauscluster);
+      if (!h4 || !cluster || h4.status !== "offen" || h4.personal.filialleiter.skill < 0.7 || hausclusterVon(s2, h4.id)?.id !== cluster.id) return { ok: false, text: "Nur geeignete Hausleitungen desselben Clusters k\xF6nnen bef\xF6rdert werden." };
+      const alt = h4.personal.filialleiter;
+      cluster.stelle.person = { ...person(s2.seed, "bef-" + h4.id, s2.woche, clamp(alt.skill, 0, 1)), name: alt.name };
+      h4.personal.filialleiter = { name: "Stellvertretung " + h4.stadt, skill: Math.max(0.3, alt.skill - 0.16), moral: Math.max(30, alt.moral - 4), interimBis: s2.woche + 8 };
+      return { ok: true, text: "Hausleitung zur Clusterleitung bef\xF6rdert. Stellvertretung \xFCbernimmt." };
+    }
+    const st2 = stelleFuer(s2, a2.ebene, a2.id);
+    if (!st2) return { ok: false, text: "Leitungsstelle nicht gefunden." };
+    if (a2.typ === "organisationEntlassen") {
+      if (!st2.person) return { ok: false, text: "Stelle bereits vakant." };
+      einmalKosten(s2, eur(st2.person.gehalt / 4));
+      st2.person = void 0;
+      return { ok: true, text: "Leitung entlassen. Stelle vakant." };
+    }
+    if (a2.typ === "organisationHaltepraemie") {
+      if (!st2.person || !Number.isFinite(a2.betrag) || a2.betrag < 0 || a2.betrag > 15e4) return { ok: false, text: "Ung\xFCltige Haltepr\xE4mie." };
+      einmalKosten(s2, eur(a2.betrag));
+      st2.person.stimmung = clamp(st2.person.stimmung + a2.betrag / 5e3, 0, 100);
+      st2.person.wechselwille = clamp(st2.person.wechselwille - a2.betrag / 5e5, 0, 1);
+      return { ok: true, text: "Haltepr\xE4mie ausgezahlt." };
+    }
+    const k5 = st2.kandidaten.find((p2) => p2.id === a2.kandidat);
+    if (!k5) return { ok: false, text: "Kandidat nicht gefunden." };
+    if (st2.person) einmalKosten(s2, eur(st2.person.gehalt / 4));
+    st2.person = { ...k5 };
+    st2.kandidaten = [1, 2, 3].map((n3) => person(s2.seed, a2.id + "-" + (s2.woche + 1), n3));
+    return { ok: true, text: k5.name + " \xFCbernimmt die Leitung." };
+  }
+  function routineVorschlag(bereich2, aufgabe) {
+    const wg = {
+      einkauf_damen: "damen",
+      einkauf_herren_kinder: "herren",
+      einkauf_beauty: "beauty",
+      einkauf_wohnen: "wohnen",
+      einkauf_food: "nug",
+      merchandise_planning: "alle",
+      allokation: "alle",
+      preis_reduzierung: "alle"
+    };
+    const gruppe3 = bereich2 && wg[bereich2];
+    if (gruppe3) {
+      if (aufgabe === "limits") return {
+        gut: { typ: "wgLimit", wg: gruppe3, faktor: 1.05 },
+        schlecht: { typ: "wgLimit", wg: gruppe3, faktor: 0.8 }
+      };
+      if (aufgabe === "reduzierung") return {
+        gut: { typ: "wgReduzierung", wg: gruppe3, strategie: "normal" },
+        schlecht: { typ: "wgReduzierung", wg: gruppe3, strategie: "spaet" }
+      };
+      if (aufgabe === "nachorder" || aufgabe === "disposition") return {
+        gut: { typ: "wgServicegrad", wg: gruppe3, ziel: 0.98 },
+        schlecht: { typ: "wgServicegrad", wg: gruppe3, ziel: 0.9 }
+      };
+      if (aufgabe === "vororder") return {
+        gut: { typ: "wgVororderquote", wg: gruppe3, quote: 0.6 },
+        schlecht: { typ: "wgVororderquote", wg: gruppe3, quote: 0.25 }
+      };
+      if (aufgabe === "freigaben") return {
+        gut: { typ: "sammelfreigabe" },
+        schlecht: { typ: "freigabeGrenze", euro: 0 }
+      };
+    }
+    if (bereich2 === "marketing" && aufgabe === "budget") return {
+      gut: { typ: "kanalBudget", kanal: "alle", faktor: 1.02 },
+      schlecht: { typ: "kanalBudget", kanal: "alle", faktor: 0.8 }
+    };
+    return void 0;
+  }
+  function organisationWoche(s2) {
+    const o4 = s2.organisation;
+    if (!o4 || s2.prognose) return;
+    for (const [hausId, unruhe] of Object.entries(o4.unruhe)) {
+      if (s2.woche >= unruhe.bis) {
+        const h4 = s2.haeuser.find((x2) => x2.id === hausId);
+        if (h4) h4.personal.filialleiter.moral = clamp(h4.personal.filialleiter.moral + unruhe.moral, 0, 100);
+        delete o4.unruhe[hausId];
+      }
+    }
+    if (s2.woche > 0 && s2.woche % 4 === 0) {
+      const einheiten = [
+        ...Object.entries(o4.bereiche).map(([id, st2]) => ({ st: st2, bereich: id, hauscluster: void 0 })),
+        ...o4.hauscluster.map((c) => ({ st: c.stelle, bereich: void 0, hauscluster: c.id }))
+      ];
+      for (const x2 of einheiten) for (const aufgabe of Object.keys(x2.st.aufgaben ?? {})) {
+        const def = delegationsAufgaben(x2.bereich, x2.hauscluster).find((d4) => d4.id === aufgabe);
+        if (!def) continue;
+        const vorschlag = routineVorschlag(x2.bereich, aufgabe);
+        neueVorlage(s2, {
+          bereich: x2.bereich,
+          hauscluster: x2.hauscluster,
+          aufgabe,
+          aktion: vorschlag?.gut,
+          fehlerAktion: vorschlag?.schlecht,
+          betrag: def.grenze ? Math.min(def.grenze, delegationsGrenze(s2, aufgabe, x2.bereich, x2.hauscluster) ?? def.grenze) : void 0,
+          titel: def.name + ": Routineentscheidung KW " + (s2.woche + 1),
+          text: "Die zust\xE4ndige Leitung legt ihre Entscheidung zu " + def.name + " vor.",
+          frist: 3
+        });
+      }
+    }
+    const stellen = [
+      ...Object.entries(o4.bereiche).map(([id, st2]) => ({ id, ebene: "bereich", st: st2 })),
+      ...Object.entries(o4.regionalleitungen).map(([id, st2]) => ({ id, ebene: "region", st: st2 })),
+      ...o4.hauscluster.map((c) => ({ id: c.id, ebene: "cluster", st: c.stelle }))
+    ];
+    for (const x2 of stellen) {
+      const key = x2.ebene + ":" + x2.id, vakant2 = !x2.st.person;
+      if (vakant2 && !o4.letzteVakanz[key]) {
+        const kandidat = x2.st.kandidaten[0];
+        if (kandidat) neueVorlage(s2, {
+          ...x2.ebene === "bereich" ? { bereich: x2.id } : x2.ebene === "cluster" ? { hauscluster: x2.id } : {},
+          titel: "Leitungswechsel: " + x2.id,
+          text: kandidat.name + " als Nachfolge vorschlagen (Jahresgehalt " + kandidat.gehalt + " \u20AC).",
+          frist: 3,
+          aktion: { typ: "organisationBesetzen", ebene: x2.ebene, id: x2.id, kandidat: kandidat.id }
+        });
+      }
+      o4.letzteVakanz[key] = vakant2;
+    }
+    for (const r4 of ["cpo", "cfo", "cso", "coo", "chro", "cmo", "cdo"]) {
+      const aktuell = !!s2.vorstand.ressorts[r4].person, vorher = o4.letzteBesetzung[r4];
+      if (vorher === aktuell) continue;
+      o4.letzteBesetzung[r4] = aktuell;
+      const betroffene = BEREICHE.filter((b4) => b4.ressort === r4);
+      if (!aktuell) {
+        for (const b4 of betroffene) neueVorlage(s2, {
+          bereich: b4.id,
+          titel: b4.name + ": Entscheidung ohne " + r4.toUpperCase(),
+          text: "Die Bereichsleitung legt ihren Personal- und Kapazit\xE4tsvorschlag direkt dem CEO vor.",
+          frist: 3
+        });
+      } else {
+        const einzelfrist = ": Entscheidung ohne " + r4.toUpperCase();
+        const zuvor = s2.entscheidungen.length;
+        s2.entscheidungen = s2.entscheidungen.filter((e) => !(e.typ === "organisation_vorlage" && e.titel.endsWith(einzelfrist)));
+        const gebuendelt = zuvor - s2.entscheidungen.length;
+        neueVorlage(s2, {
+          bereich: betroffene[0]?.id,
+          titel: r4.toUpperCase() + ": Vorlagen geb\xFCndelt",
+          text: betroffene.length + " Bereiche berichten wieder an den Ressortvorstand; " + gebuendelt + " Einzelvorlagen \xFCbernommen.",
+          grundsaetzlich: true,
+          frist: 3
+        });
+      }
+    }
+  }
+  function organisationUebersicht(s2) {
+    const o4 = s2.organisation;
+    return {
+      bereiche: BEREICHE.map((b4) => ({
+        ...b4,
+        stelle: o4?.bereiche[b4.id],
+        qualitaet: bereichsQualitaet(s2, b4.id),
+        berichtetAn: berichtetAn(s2, b4.id),
+        delegiert: istDelegiert(s2, b4.id),
+        aufgaben: delegationsAufgaben(b4.id).map((d4) => ({ ...d4, an: istAufgabeDelegiert(s2, d4.id, b4.id), grenze: delegationsGrenze(s2, d4.id, b4.id) })),
+        hqStufe: b4.id === "marktbeobachtung" ? s2.marktbeobachtung?.stufe ?? 0 : s2.hq.abteilungen.find((a2) => a2.id === b4.abteilung)?.stufe ?? 0,
+        offen: s2.entscheidungen.filter((e) => e.typ === "organisation_vorlage" && e.daten.bereich === b4.id).length
+      })),
+      ressorts: Object.keys(RESSORT_INFO).filter((r4) => r4 !== "cro").map((r4) => ({
+        id: r4,
+        name: RESSORT_INFO[r4].titel,
+        person: s2.vorstand.ressorts[r4].person
+      })),
+      regionen: REGIONEN.map((r4) => ({
+        id: r4,
+        stelle: o4?.regionalleitungen[r4],
+        cluster: (o4?.hauscluster.filter((c) => c.region === r4) ?? []).map((c) => ({
+          ...c,
+          anzahl: c.hausIds.length,
+          umsatz: c.hausIds.reduce((a2, id) => a2 + (s2.haeuser.find((h4) => h4.id === id)?.kpi?.umsatz ?? 0), 0),
+          qualitaet: clusterleitungQualitaet(s2, c.id),
+          berichtetAn: clusterBerichtetAn(s2, c.id),
+          aufgaben: delegationsAufgaben(void 0, c.id).map((d4) => ({ ...d4, an: istAufgabeDelegiert(s2, d4.id, void 0, c.id), grenze: delegationsGrenze(s2, d4.id, void 0, c.id) })),
+          offen: s2.entscheidungen.filter((e) => e.typ === "organisation_vorlage" && e.daten.hauscluster === c.id).length
+        }))
+      })),
+      sonder: (() => {
+        const c = o4?.hauscluster.find((c2) => c2.sonder);
+        return c ? { ...c, aufgaben: delegationsAufgaben(void 0, c.id).map((d4) => ({ ...d4, an: istAufgabeDelegiert(s2, d4.id, void 0, c.id), grenze: delegationsGrenze(s2, d4.id, void 0, c.id) })) } : void 0;
+      })(),
+      flagships: o4?.flagships ?? []
+    };
+  }
+
+  // ../engine/src/haus.ts
+  var HAUS_AKTIONEN = /* @__PURE__ */ new Set([
+    "hausLeitungErsetzen",
+    "hausLeitungFoerdern",
+    "hausHaltepraemie",
+    "hausLeitungBefordern",
+    "hausStandardSetzen",
+    "hausKostenSetzen",
+    "hausServiceSetzen",
+    "hausClusterServiceSetzen",
+    "hausGastronomie",
+    "hausKonzession",
+    "hausMassnahme",
+    "hausSonntag"
+  ]);
+  var POSTEN = ["energie", "reinigung", "sicherheit", "instandhaltung", "versicherung"];
+  var ANTEILE = { energie: 0.35, reinigung: 0.2, sicherheit: 0.15, instandhaltung: 0.2, versicherung: 0.1 };
+  var STANDARD = {
+    oeffnung: { von: 10, bis: 20, samstagBis: 20 },
+    sauberkeit: 2,
+    praesentation: 2,
+    kasse: 2,
+    services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false }
+  };
+  var NAME = ["Mara Berg", "Jonas Ritter", "Elin Werner", "Timo Falk", "Nora Lind", "Lea B\xF6ttcher"];
+  var MASSNAHME = {
+    wetter: "oeffnungszeit",
+    baustelle: "aktion",
+    ware: "umlagerung",
+    personal: "springer",
+    konkurrenz: "aktion",
+    kasse: "springer",
+    stadtereignis: "oeffnungszeit",
+    sonstiges: "aktion"
+  };
+  var GRUND_TEXT = {
+    wetter: "Wetter",
+    baustelle: "Baustelle vor dem Haus",
+    ware: "Warenverf\xFCgbarkeit",
+    personal: "Personaldeckung",
+    konkurrenz: "Konkurrenzaktion",
+    kasse: "Kassenausfall",
+    stadtereignis: "Stadtereignis",
+    sonstiges: "Sonstiges"
+  };
+  function hash2(t5) {
+    let n3 = 2166136261;
+    for (let i = 0; i < t5.length; i++) n3 = Math.imul(n3 ^ t5.charCodeAt(i), 16777619);
+    return zufall({ rng: n3 >>> 0 });
+  }
+  var leitung = (h4) => h4.personal.filialleiter;
+  var betrieb = (h4) => h4.betrieb;
+  var istOffen = (h4) => h4.status === "offen" || h4.status === "schliessung_verhandlung";
+  function hausclusterSchluessel(h4) {
+    return h4.klasse === "premium" || h4.flagship ? "premium-flagships" : String(h4.hauscluster ?? h4.region);
+  }
+  function steuerungscluster(s2, h4) {
+    const mitOrganisation = s2;
+    return mitOrganisation.organisation?.flagships.includes(h4.id) ? "premium-flagships" : hausclusterSchluessel(h4);
+  }
+  function hausStandard(s2, h4) {
+    const cluster = steuerungscluster(s2, h4);
+    if (s2.hausbetrieb && !s2.hausbetrieb.standards[cluster]) s2.hausbetrieb.standards[cluster] = structuredStandard();
+    return betrieb(h4)?.standardAusnahme ?? s2.hausbetrieb?.standards[cluster] ?? STANDARD;
+  }
+  function hausServices(s2, h4) {
+    const b4 = h4.betrieb, standard = hausStandard(s2, h4);
+    return Object.fromEntries(["kundendienst", "schneiderei", "geschenkverpackung", "abholstation"].map(
+      (key) => [key, b4?.serviceAusnahme?.[key] ?? (b4?.services[key] || standard.services?.[key] || false)]
+    ));
+  }
+  function hausKandidaten(s2, hausId) {
+    const h4 = s2.haeuser.find((x2) => x2.id === hausId);
+    if (!h4) return [];
+    return [0, 1, 2].map((i) => {
+      const x2 = hash2(s2.seed + ":" + hausId + ":kandidat:" + i + ":" + Math.floor(s2.woche / 13));
+      const staerken = { personal: 0.4 + 0.5 * x2, ware: 0.4 + 0.5 * hash2(hausId + "w" + i), kunde: 0.4 + 0.5 * hash2(hausId + "k" + i), kosten: 0.4 + 0.5 * hash2(hausId + "c" + i) };
+      return {
+        name: NAME[Math.floor(x2 * NAME.length)],
+        staerken,
+        ehrlichkeit: 0.4 + 0.6 * hash2(hausId + "e" + i),
+        gehalt: eur(85e3 + 85e3 * x2),
+        qualitaet: (staerken.personal + staerken.ware + staerken.kunde + staerken.kosten) / 4
+      };
+    });
+  }
+  function initialisiereHausbetrieb(s2) {
+    var _a2, _b, _c, _d, _e, _f, _g, _h;
+    s2.hausbetrieb ?? (s2.hausbetrieb = { standards: {}, staedte: {}, befoerderungen: [] });
+    (_a2 = s2.hausbetrieb.standards)["premium-flagships"] ?? (_a2["premium-flagships"] = structuredStandard());
+    for (const h4 of s2.haeuser) {
+      (_b = s2.hausbetrieb.standards)[_c = steuerungscluster(s2, h4)] ?? (_b[_c] = structuredStandard());
+      (_d = s2.hausbetrieb.staedte)[_e = h4.stadt] ?? (_d[_e] = { trend: 1, ereignisBis: 0, sonntage: [] });
+      const l = leitung(h4);
+      l.staerken ?? (l.staerken = { personal: l.skill, ware: l.skill, kunde: l.skill, kosten: l.skill });
+      l.ehrlichkeit ?? (l.ehrlichkeit = 0.35 + 0.6 * hash2(s2.seed + ":" + h4.id + ":ehrlich"));
+      l.gehalt ?? (l.gehalt = eur(7e4 + 1e5 * l.skill));
+      l.bonusAnteil ?? (l.bonusAnteil = 0.1);
+      l.wechselwille ?? (l.wechselwille = 0);
+      l.stellvertretung ?? (l.stellvertretung = { name: "Stellvertretung " + h4.stadt, qualitaet: clamp(l.skill * 0.85, 0, 1) });
+      const neu3 = !h4.betrieb;
+      h4.betrieb ?? (h4.betrieb = {
+        leitungStart: l.skill,
+        leitungGehaltStart: l.gehalt ?? 0,
+        kosten: { energie: 1, reinigung: 1, sicherheit: 1, instandhaltung: 1, versicherung: 1 },
+        services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false },
+        kundenScore: 0,
+        scoreWoche: -1,
+        umsatzHistorie: [],
+        kommentare: [],
+        massnahmeBis: 0,
+        massnahmeFaktor: 1,
+        gastro: "keine",
+        gastroVertragBis: 0,
+        restaurantQm: h4.format === "warenhaus" && h4.etagen.length >= 4 ? Math.min(350, Math.round(h4.grundflaecheQm * 0.06)) : 0,
+        konzessionen: {}
+      });
+      (_f = h4.betrieb).leitungGehaltStart ?? (_f.leitungGehaltStart = l.gehalt ?? 0);
+      if (!h4.betrieb.serviceStart) {
+        if (neu3) h4.betrieb.services = startServices(s2, h4);
+        h4.betrieb.serviceStart = { ...h4.betrieb.services };
+      }
+      if (neu3 && !h4.betrieb.kostenIst) h4.betrieb.kostenIst = kostenIstRoh(s2, h4);
+      for (const f13 of h4.flaechen.filter((x2) => x2.konzept === "konzession")) {
+        (_g = h4.betrieb.konzessionen)[_h = f13.id] ?? (_g[_h] = { name: "Partner " + (f13.gruppe ?? "Sortiment"), quote: 0.22, bis: s2.woche + 260, exklusiv: false });
+      }
+    }
+    normiereKostenIst(s2);
+  }
+  var gesamtQm = (h4) => h4.flaechen.reduce((a2, f13) => a2 + f13.qm, 0) || h4.grundflaecheQm;
+  function startServices(s2, h4) {
+    const x2 = (k5) => hash2(s2.seed + ":service:" + h4.id + ":" + k5);
+    const qm2 = gesamtQm(h4), gross3 = qm2 >= 14e3, mittel = qm2 >= 7e3;
+    if (h4.klasse === "premium") return { kundendienst: true, schneiderei: true, geschenkverpackung: true, abholstation: false };
+    if (h4.format === "warenhaus") return {
+      kundendienst: gross3 || mittel && x2("k") < 0.6,
+      schneiderei: gross3 ? x2("s") < 0.8 : mittel && x2("s") < 0.3,
+      geschenkverpackung: mittel || x2("g") < 0.5,
+      abholstation: false
+    };
+    if (h4.format === "sport") return { kundendienst: mittel || x2("k") < 0.4, schneiderei: false, geschenkverpackung: x2("g") < 0.3, abholstation: false };
+    return { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false };
+  }
+  function kostenIstRoh(s2, h4) {
+    const x2 = (k5) => hash2(s2.seed + ":kostenist:" + h4.id + ":" + k5) - 0.5;
+    const alt = h4.baujahr < 1970 ? 1 : h4.baujahr < 1990 ? 0.5 : h4.baujahr >= 2005 ? -0.7 : 0;
+    const lage = h4.lage === "1a" ? 1 : h4.lage === "rand" || h4.lage === "center" ? -0.6 : 0;
+    return {
+      energie: 1 + 0.07 * alt + 0.1 * x2("e"),
+      reinigung: 1 + 0.08 * x2("r"),
+      sicherheit: 1 + 0.06 * lage + 0.08 * x2("s"),
+      instandhaltung: 1 + 25e-4 * (60 - h4.substanz) + 0.08 * x2("i"),
+      versicherung: 1 + 0.03 * x2("v")
+    };
+  }
+  function normiereKostenIst(s2) {
+    const hs = s2.haeuser.filter((h4) => h4.betrieb?.kostenIst && !h4.betrieb.kostenIstNormiert);
+    if (!hs.length) return;
+    for (const p2 of POSTEN) {
+      const flaeche6 = hs.reduce((a2, h4) => a2 + gesamtQm(h4), 0) || 1;
+      const mittel = hs.reduce((a2, h4) => a2 + gesamtQm(h4) * h4.betrieb.kostenIst[p2], 0) / flaeche6;
+      for (const h4 of hs) h4.betrieb.kostenIst[p2] = Math.round(1e3 * h4.betrieb.kostenIst[p2] / mittel) / 1e3;
+    }
+    for (const h4 of hs) h4.betrieb.kostenIstNormiert = true;
+  }
+  function structuredStandard() {
+    return {
+      oeffnung: { ...STANDARD.oeffnung },
+      sauberkeit: 2,
+      praesentation: 2,
+      kasse: 2,
+      services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false }
+    };
+  }
+  function stadtFaktor(s2, h4) {
+    const u = s2.hausbetrieb?.staedte[h4.stadt];
+    if (!u) return 1;
+    let f13 = u.trend;
+    if (u.ereignisBis > s2.woche) f13 *= u.ereignis === "stadtfest" ? 1.07 : u.ereignis === "baustelle" ? 0.9 : u.ereignis === "parkhaus" ? 0.93 : u.ereignis === "oepnv" ? 0.85 : 1;
+    if (u.sonntage.includes(s2.woche)) f13 *= 1.12;
+    return f13;
+  }
+  function hausBetriebsFaktor(s2, h4) {
+    const b4 = betrieb(h4);
+    if (s2.hausbetriebAbnahmeAus || !b4 || !istOffen(h4)) return 1;
+    const l = leitung(h4);
+    const st2 = hausStandard(s2, h4);
+    const services = hausServices(s2, h4), start = b4.serviceStart;
+    const sw = (k5, f13) => (services[k5] ? f13 : 1) / (start?.[k5] ? f13 : 1);
+    const kundendienst = sw("kundendienst", 1.007);
+    const schneiderei = sw("schneiderei", 1.004);
+    const geschenk = s2.woche % 52 >= 47 ? sw("geschenkverpackung", 1.014) : 1;
+    const abholung = sw("abholstation", 1.005);
+    const standard = 1 + 7e-3 * (st2.sauberkeit - 2) + 9e-3 * (st2.praesentation - 2) + 6e-3 * (st2.kasse - 2) + 2e-3 * (10 - st2.oeffnung.von) + 3e-3 * (st2.oeffnung.bis - 20) + 2e-3 * (st2.oeffnung.samstagBis - 20);
+    const delta = (l.staerken?.kunde ?? l.skill) - b4.leitungStart;
+    const ware3 = (l.staerken?.ware ?? l.skill) - b4.leitungStart;
+    return Math.max(0.5, stadtFaktor(s2, h4) * standard * (1 + 0.06 * delta + 0.035 * ware3) * kundendienst * schneiderei * geschenk * abholung * (b4.massnahmeBis > s2.woche ? b4.massnahmeFaktor : 1) * (b4.ausfallBis !== void 0 && b4.ausfallBis > s2.woche ? 0.96 : 1) * (b4.gastro === "selbst" ? 1.015 : b4.gastro === "pacht" ? 1.006 : 1));
+  }
+  function hausBetriebskosten(s2, h4, sonstige) {
+    const b4 = betrieb(h4);
+    if (s2.hausbetriebAbnahmeAus || !b4 || !istOffen(h4)) return sonstige;
+    let faktor2 = 0;
+    const preis = s2.hausbetrieb?.energiePreis ?? 1;
+    const basisTechnik = h4.baujahr < 1970 ? 0 : h4.baujahr < 2005 ? 1 : 2;
+    const etagenBau = h4.etagenBau;
+    const modernisiert = etagenBau ? Object.values(etagenBau).reduce((sum2, e) => sum2 + Math.max(0, e.technik.licht - basisTechnik) + Math.max(0, e.technik.klima - basisTechnik), 0) / Math.max(1, h4.etagen.length) : 0;
+    for (const p2 of POSTEN) faktor2 += ANTEILE[p2] * b4.kosten[p2] * (b4.kostenIst?.[p2] ?? 1) * (p2 === "energie" ? preis * (1 - 0.07 * modernisiert) : 1);
+    const anzahl2 = (x2) => x2 ? Object.values(x2).filter(Boolean).length : 0;
+    const service = (anzahl2(hausServices(s2, h4)) - anzahl2(b4.serviceStart)) * 180;
+    const l = leitung(h4);
+    const kostenLeitung = 1 - 0.035 * ((l.staerken?.kosten ?? l.skill) - b4.leitungStart);
+    return Math.max(0, sonstige * faktor2 * kostenLeitung + service);
+  }
+  function hausKonzessionserloes(s2, h4, umsatz, quoteBasis) {
+    const fl = h4.flaechen.filter((f13) => f13.konzept === "konzession");
+    if (s2.hausbetriebAbnahmeAus || !fl.length || !h4.betrieb) return umsatz * quoteBasis;
+    const qm2 = fl.reduce((v2, f13) => v2 + f13.qm, 0) || 1;
+    const quote = fl.reduce((v2, f13) => v2 + f13.qm / qm2 * (h4.betrieb?.konzessionen[f13.id]?.quote ?? quoteBasis), 0);
+    return umsatz * quote;
+  }
+  function hausGastroErgebnis(s2, h4, umsatzBasis) {
+    const b4 = betrieb(h4);
+    if (s2.hausbetriebAbnahmeAus || !b4 || b4.gastro === "keine" || b4.restaurantQm <= 0 || !istOffen(h4)) return { umsatz: 0, rohertrag: 0, personal: 0, sonstige: 0, pacht: 0 };
+    const wochenUmsatz = eur(Math.max(0, umsatzBasis) * 0.012 + b4.restaurantQm * 32);
+    if (b4.gastro === "pacht") return { umsatz: 0, rohertrag: 0, personal: 0, sonstige: 0, pacht: eur(wochenUmsatz * 0.115) };
+    if ((b4.gastroStoerungBis ?? 0) > s2.woche) return { umsatz: 0, rohertrag: 0, personal: eur(b4.restaurantQm * 260), sonstige: eur(b4.restaurantQm * 70), pacht: 0 };
+    return {
+      umsatz: wochenUmsatz,
+      rohertrag: eur(wochenUmsatz * 0.6),
+      personal: eur(wochenUmsatz * 0.37),
+      sonstige: eur(wochenUmsatz * 0.13),
+      pacht: 0
+    };
+  }
+  function hausKundenscore(s2, h4) {
+    const b4 = betrieb(h4);
+    if (!b4) return 60;
+    const st2 = hausStandard(s2, h4), k5 = h4.kpi;
+    const personal2 = k5 && k5.fteBedarf > 0 ? clamp(k5.fteIst / k5.fteBedarf, 0, 1.1) : 1;
+    const reinigung = clamp(b4.kosten.reinigung, 0, 1.3);
+    const verfuegbarkeit = (leitung(h4).staerken?.ware ?? leitung(h4).skill) - b4.leitungStart;
+    const score = 64 + 7 * (st2.sauberkeit - 2) + 5 * (st2.praesentation - 2) + 4 * (st2.kasse - 2) + 14 * (personal2 - 1) + 22 * (reinigung - 1) + 8 * verfuegbarkeit + 0.13 * (h4.substanz - 60) + Object.values(hausServices(s2, h4)).filter(Boolean).length * 2;
+    return Math.round(clamp(score, 0, 100));
+  }
+  function realerGrund(s2, h4) {
+    const u = s2.hausbetrieb?.staedte[h4.stadt];
+    if (u?.ereignisBis && u.ereignisBis > s2.woche) {
+      if (u.ereignis === "baustelle" || u.ereignis === "parkhaus") return "baustelle";
+      if (u.ereignis === "oepnv" || u.ereignis === "stadtfest") return "stadtereignis";
+    }
+    const b4 = h4.betrieb;
+    if (h4.kpi && h4.kpi.fteBedarf > 0 && h4.kpi.fteIst / h4.kpi.fteBedarf < 0.94) return "personal";
+    if (b4 && (leitung(h4).staerken?.ware ?? leitung(h4).skill) < b4.leitungStart - 0.03) return "ware";
+    if (s2.wettbewerber.some((w2) => w2.stadt === h4.stadt && w2.status === "offen" && w2.aktionBis !== void 0 && w2.aktionBis > s2.woche)) return "konkurrenz";
+    return "sonstiges";
+  }
+  function pruefeKommentar(s2, h4, wahr, gemeldet) {
+    const q2 = s2.controllingStufe === 2 ? 0.95 : s2.controllingStufe === 1 ? 0.62 : 0.28;
+    const erkannt = wahr !== gemeldet && hash2(s2.seed + ":pr\xFCfung:" + h4.id + ":" + s2.woche) < q2;
+    return { plausibel: !erkannt, pruefung: erkannt ? "Nicht plausibel, eigentlicher Treiber: " + GRUND_TEXT[wahr] : "Plausibel" };
+  }
+  function stelleKommentar(s2, h4, vergleich, delta) {
+    if (!h4.betrieb || s2.prognose) return;
+    const wahr = realerGrund(s2, h4);
+    const ehrlich = hash2(s2.seed + ":ehrlichkeit:" + h4.id + ":" + s2.woche) < (leitung(h4).ehrlichkeit ?? 1);
+    const grund2 = ehrlich || !["ware", "personal", "kasse"].includes(wahr) ? wahr : hash2(h4.id + ":ausrede:" + s2.woche) < 0.5 ? "wetter" : "baustelle";
+    const massnahme = MASSNAHME[grund2];
+    const pruefung = pruefeKommentar(s2, h4, wahr, grund2);
+    h4.betrieb.kommentare.unshift({ woche: s2.woche, abweichung: delta, vergleich, grund: grund2, wahrerGrund: wahr, massnahme, ...pruefung });
+    h4.betrieb.kommentare.length = Math.min(h4.betrieb.kommentare.length, 26);
+    if (s2.woche - (s2.spielStartWoche ?? 0) < 52) return;
+    const organisation2 = s2.organisation;
+    const qualitaet3 = clamp(organisation2?.hauscluster.find((x2) => x2.id === steuerungscluster(s2, h4))?.stelle.person?.qualitaet ?? h4.clusterleitungQualitaet ?? 0.55, 0, 1);
+    const b0 = h4.betrieb;
+    if (b0.clusterQStart === void 0) b0.clusterQStart = qualitaet3;
+    const qRel = clamp(0.55 * qualitaet3 / Math.max(0.05, b0.clusterQStart), 0, 1);
+    if (hash2(s2.seed + ":massnahme:" + h4.id + ":" + s2.woche) < qRel) {
+      h4.betrieb.massnahmeBis = s2.woche + 3;
+      h4.betrieb.massnahmeFaktor = 1 + 6e-3 + 8e-3 * qRel;
+    }
+  }
+  function hausWoche(s2) {
+    if (!s2.hausbetrieb) initialisiereHausbetrieb(s2);
+    hausAbschluss(s2);
+    if (s2.prognose || s2.hausbetriebAbnahmeAus) return;
+    if ((s2.hausbetrieb.energieBis ?? 0) <= s2.woche) s2.hausbetrieb.energiePreis = 1;
+    if (s2.woche >= 52 && s2.woche % 13 === 0) {
+      const stand2 = s2.hausbetrieb;
+      if ((stand2.energieBis ?? 0) <= s2.woche) stand2.energiePreis = 1;
+      if (hash2(s2.seed + ":energie:" + s2.woche) < 0.12) {
+        stand2.energiePreis = hash2(s2.seed + ":energiehoehe:" + s2.woche) < 0.5 ? 0.8 : 1.2;
+        stand2.energieBis = s2.woche + 8;
+        melde(s2, "ereignis", "Energiepreis\xE4nderung im Filialnetz: " + Math.round((stand2.energiePreis - 1) * 100) + " % f\xFCr acht Wochen.", { modul: "haus" });
+      }
+    }
+    if (s2.woche >= 52) for (const [stadt, u] of Object.entries(s2.hausbetrieb.staedte)) {
+      if (u.ereignisBis <= s2.woche) {
+        u.ereignis = void 0;
+        if (hash2(s2.seed + ":stadt:" + stadt + ":" + s2.woche) < 18e-4) {
+          const typ = ["stadtfest", "baustelle", "parkhaus", "oepnv"];
+          u.ereignis = typ[Math.floor(hash2(stadt + ":art:" + s2.woche) * typ.length)];
+          u.ereignisBis = s2.woche + 1 + (u.ereignis === "baustelle" ? 4 + Math.floor(hash2(stadt + ":dauer:" + s2.woche) * 17) : 1);
+          melde(s2, "ereignis", stadt + ": " + { stadtfest: "Stadtfest", baustelle: "Baustelle vor dem Haus", parkhaus: "Parkhaus geschlossen", oepnv: "\xD6PNV-Streik" }[u.ereignis] + ".", { stadt, modul: "haus" });
+        }
+      }
+      if (s2.woche % 52 === 0) u.trend = clamp(u.trend + (hash2(s2.seed + stadt + ":trend:" + s2.woche) - 0.5) * 0.01, 0.9, 1.1);
+      u.sonntage = u.sonntage.filter((w2) => Math.floor(w2 / 52) >= Math.floor(s2.woche / 52));
+    }
+    for (const h4 of s2.haeuser) {
+      if (!istOffen(h4) || !h4.betrieb) continue;
+      const b4 = h4.betrieb;
+      if (s2.woche % 13 === 0 && s2.woche !== 0) {
+        b4.kundenScore = hausKundenscore(s2, h4);
+        b4.scoreWoche = s2.woche;
+      }
+      const delta = (h4.personal.filialleiter.staerken?.personal ?? h4.personal.filialleiter.skill) - b4.leitungStart;
+      h4.personal.filialleiter.wechselwille = clamp((h4.personal.filialleiter.wechselwille ?? 0) + Math.max(0, 45 - h4.personal.filialleiter.moral) / 500 - Math.max(0, delta) * 0.01, 0, 1);
+      if (s2.woche >= 52 && s2.woche % 13 === 0 && b4.gastro === "selbst" && hash2(s2.seed + ":gastro:" + h4.id + ":" + s2.woche) < 0.02) {
+        b4.gastroStoerungBis = s2.woche + 3;
+        melde(s2, "warnung", h4.name + ": Hygienem\xE4ngel \u2013 Restaurant drei Wochen geschlossen, Personal und Fixkosten laufen weiter.", { hausId: h4.id, stadt: h4.stadt });
+      }
+      if (b4.kosten.instandhaltung < 0.75 && s2.woche % 13 === 0) {
+        h4.substanz = clamp(h4.substanz - (0.75 - b4.kosten.instandhaltung) * 4, 0, 100);
+        if (hash2(s2.seed + ":ausfall:" + h4.id + ":" + s2.woche) < (0.75 - b4.kosten.instandhaltung) * 0.6) {
+          b4.ausfallBis = s2.woche + 3;
+          melde(s2, "warnung", h4.name + ": Rolltreppe oder Aufzug ausgefallen, Reparatur dauert drei Wochen.", { hausId: h4.id, stadt: h4.stadt });
+        }
+      }
+      if (b4.kosten.sicherheit < 0.75 && s2.woche % 13 === 0) {
+        b4.inventurdifferenz = (b4.inventurdifferenz ?? 0) + (0.75 - b4.kosten.sicherheit) * 2e-3;
+        melde(s2, "warnung", h4.name + ": erh\xF6hte Inventurdifferenz durch geringere Sicherheitsdeckung.", { hausId: h4.id, stadt: h4.stadt });
+      }
+      if (s2.woche >= 52 && s2.woche % 13 === 0 && hash2(s2.seed + ":partner:" + h4.id + ":" + s2.woche) < 3e-3) {
+        const f13 = h4.flaechen.find((x2) => x2.konzept === "eigen" && x2.qm >= 400 && ["accessoires", "beauty", "herren", "damen"].includes(x2.gruppe ?? ""));
+        if (f13) {
+          const anbieter = ["Optikhaus Lind", "Uhrenatelier Merten", "Markenstudio Falk"][Math.floor(hash2(h4.id + ":anbieter:" + s2.woche) * 3)];
+          s2.entscheidungen.push({
+            id: neueId(s2, "e"),
+            typ: "haus_konzession_neu",
+            woche: s2.woche,
+            frist: s2.woche + 8,
+            titel: "Konzessionsangebot f\xFCr " + h4.name,
+            text: anbieter + " bietet eine Konzession \xFCber 180 qm mit 22 % Umsatzmiete f\xFCr f\xFCnf Jahre. Vertragsabschluss reduziert die eigene Verkaufsfl\xE4che.",
+            optionen: [{ id: "annehmen", label: "Konzession abschlie\xDFen" }, { id: "ablehnen", label: "Ablehnen" }],
+            standard: "ablehnen",
+            daten: { haus: h4.id, flaeche: f13.id, partner: anbieter, qm: 180, quote: 0.22 }
+          });
+        }
+      }
+      if (s2.woche >= 52 && s2.woche % 52 === 0 && hash2(s2.seed + ":jahresgespraech:" + h4.id + ":" + s2.woche) < 0.025) {
+        const l = h4.personal.filialleiter;
+        s2.entscheidungen.push({
+          id: neueId(s2, "e"),
+          typ: "haus_jahresgespraech",
+          woche: s2.woche,
+          frist: s2.woche + 6,
+          titel: "Jahresgespr\xE4ch: " + l.name + " (" + h4.name + ")",
+          text: "St\xE4rken und Stimmung der Hausleitung: Personal " + Math.round((l.staerken?.personal ?? l.skill) * 100) + " %, Ware " + Math.round((l.staerken?.ware ?? l.skill) * 100) + " %, Kunde " + Math.round((l.staerken?.kunde ?? l.skill) * 100) + " %, Kosten " + Math.round((l.staerken?.kosten ?? l.skill) * 100) + " %. Wechselwille " + Math.round((l.wechselwille ?? 0) * 100) + " %.",
+          optionen: [{ id: "coaching", label: "Pers\xF6nliches Coaching (8.000 \u20AC)" }, { id: "praemie", label: "Jahresbonus (10.000 \u20AC)" }, { id: "beobachten", label: "Leistung beobachten" }],
+          standard: "beobachten",
+          daten: { haus: h4.id }
+        });
+      }
+      for (const [id, v2] of Object.entries(b4.konzessionen)) if (s2.woche === v2.bis - 8) {
+        s2.entscheidungen.push({
+          id: neueId(s2, "e"),
+          typ: "haus_konzession",
+          woche: s2.woche,
+          frist: s2.woche + 6,
+          titel: "Konzession " + h4.name,
+          text: "Vertrag mit " + v2.name + " endet. Anschlussmiete verhandeln?",
+          optionen: [{ id: "verlaengern", label: "Zu bisherigen Konditionen verl\xE4ngern" }, { id: "neu", label: "Neu verhandeln" }],
+          standard: "verlaengern",
+          daten: { haus: h4.id, flaeche: id }
+        });
+      }
+    }
+  }
+  function hausAbschluss(s2) {
+    if (!s2.hausbetrieb || s2.prognose || s2.hausbetriebAbnahmeAus) return;
+    for (const h4 of s2.haeuser) {
+      if (!istOffen(h4) || !h4.kpi || !h4.betrieb) continue;
+      const b4 = h4.betrieb, vorher = b4.umsatzHistorie.find((x2) => x2.woche === s2.woche - 52) ?? s2.vorjahrHistorie?.[h4.id]?.find((x2) => x2.woche === s2.woche - 52);
+      const geplant2 = s2.planung;
+      const jahr2 = s2.startJahr + Math.floor(s2.woche / 52);
+      const plan2 = geplant2?.jahre.find((j4) => j4.jahr === jahr2)?.phasing[h4.id]?.[s2.woche % 52] ?? h4.wochenPlan;
+      const vergleich = vorher ? "vorjahr" : plan2 !== void 0 ? "plan" : void 0;
+      const referenz = vorher?.umsatz ?? plan2;
+      if (vergleich && referenz && referenz > 0 && h4.kpi.umsatz / referenz < 0.95) stelleKommentar(s2, h4, vergleich, h4.kpi.umsatz / referenz - 1);
+      b4.umsatzHistorie.push({ woche: s2.woche, umsatz: h4.kpi.umsatz });
+      if (b4.umsatzHistorie.length > 105) b4.umsatzHistorie.shift();
+    }
+  }
+  function loeseHausVorlage(s2, typ, daten, option2) {
+    const h4 = s2.haeuser.find((x2) => x2.id === daten.haus);
+    if (!h4 || !h4.betrieb) return;
+    if (typ === "haus_jahresgespraech") {
+      const l = h4.personal.filialleiter;
+      if (option2 === "coaching" && l.staerken) {
+        s2.einmalkostenWoche += 8e3;
+        const schwaechste = Object.keys(l.staerken).sort((a2, b4) => l.staerken[a2] - l.staerken[b4])[0];
+        l.staerken[schwaechste] = clamp(l.staerken[schwaechste] + 0.055, 0, 1);
+        l.skill = Object.values(l.staerken).reduce((a2, b4) => a2 + b4, 0) / 4;
+        l.moral = clamp(l.moral + 8, 0, 100);
+      } else if (option2 === "praemie") {
+        s2.einmalkostenWoche += 1e4;
+        l.moral = clamp(l.moral + 12, 0, 100);
+        l.wechselwille = clamp((l.wechselwille ?? 0) - 0.12, 0, 1);
+      }
+      return;
+    }
+    if (typ === "haus_konzession_neu") {
+      if (option2 !== "annehmen" || h4.status !== "offen") return;
+      const alt = h4.flaechen.find((f13) => f13.id === daten.flaeche && f13.konzept === "eigen");
+      const qm2 = Number(daten.qm), quote = Number(daten.quote);
+      if (!alt || alt.qm < qm2 + 100 || !Number.isFinite(quote)) return;
+      alt.qm -= qm2;
+      const id = h4.id + "-konz-" + neueId(s2, "");
+      h4.flaechen.push({ ...alt, id, qm: qm2, konzept: "konzession" });
+      h4.betrieb.konzessionen[id] = { name: String(daten.partner), quote, bis: s2.woche + 260, exklusiv: false };
+      melde(s2, "info", h4.name + ": " + String(daten.partner) + " bezieht " + qm2 + " qm mit Umsatzmiete.", { hausId: h4.id, stadt: h4.stadt });
+      return;
+    }
+    if (typ !== "haus_konzession") return;
+    const v2 = h4.betrieb.konzessionen[String(daten.flaeche)];
+    if (!v2) return;
+    v2.quote = option2 === "neu" ? clamp(v2.quote + 0.01, 0.1, 0.35) : v2.quote;
+    v2.bis = s2.woche + 260;
+    melde(s2, "info", h4.name + ": Konzessionsvertrag mit " + v2.name + " verl\xE4ngert.", { hausId: h4.id, stadt: h4.stadt });
+  }
+  function hausAktion(s2, a2) {
+    if (!s2.hausbetrieb) initialisiereHausbetrieb(s2);
+    const h4 = "haus" in a2 ? s2.haeuser.find((x2) => x2.id === a2.haus) : void 0;
+    if ("haus" in a2 && (!h4 || !istOffen(h4))) return { ok: false, text: "Haus nicht gefunden oder geschlossen." };
+    const b4 = h4?.betrieb;
+    const l = h4?.personal.filialleiter;
+    switch (a2.typ) {
+      case "hausLeitungErsetzen": {
+        if (!h4 || !l || !b4) break;
+        const k5 = hausKandidaten(s2, h4.id)[a2.kandidat];
+        if (!k5) return { ok: false, text: "Kandidat nicht gefunden." };
+        s2.einmalkostenWoche += eur(k5.gehalt / 3);
+        h4.personal.filialleiter = {
+          name: k5.name,
+          skill: k5.qualitaet,
+          staerken: k5.staerken,
+          ehrlichkeit: k5.ehrlichkeit,
+          gehalt: k5.gehalt,
+          bonusAnteil: 0.1,
+          moral: 70,
+          wechselwille: 0,
+          stellvertretung: l.stellvertretung
+        };
+        b4.leitungStart = l.skill;
+        return { ok: true, text: "Hausleitung " + k5.name + " eingestellt." };
+      }
+      case "hausLeitungFoerdern":
+        if (!l || !l.staerken) break;
+        l.staerken[a2.staerke] = clamp(l.staerken[a2.staerke] + 0.08, 0, 1);
+        l.skill = (l.staerken.personal + l.staerken.ware + l.staerken.kunde + l.staerken.kosten) / 4;
+        s2.einmalkostenWoche += 12e3;
+        return { ok: true, text: "Weiterbildung erfolgreich: " + a2.staerke + " gest\xE4rkt." };
+      case "hausHaltepraemie":
+        if (!l || !Number.isFinite(a2.betrag) || a2.betrag < 0 || a2.betrag > 1e5) break;
+        s2.einmalkostenWoche += eur(a2.betrag);
+        l.wechselwille = clamp((l.wechselwille ?? 0) - a2.betrag / 1e5, 0, 1);
+        l.moral = clamp(l.moral + a2.betrag / 1e4, 0, 100);
+        return { ok: true, text: "Haltepr\xE4mie zugesagt." };
+      case "hausLeitungBefordern":
+        if (!h4 || !l || !b4 || l.skill < 0.6) return { ok: false, text: "Hausleitung ben\xF6tigt mindestens 60 % Kompetenz." };
+        s2.hausbetrieb.befoerderungen.push({ haus: h4.id, cluster: steuerungscluster(s2, h4), name: l.name, qualitaet: l.skill, woche: s2.woche });
+        h4.personal.filialleiter = {
+          ...l,
+          name: l.stellvertretung?.name ?? "Interim " + h4.stadt,
+          skill: l.stellvertretung?.qualitaet ?? 0.5,
+          staerken: { personal: l.stellvertretung?.qualitaet ?? 0.5, ware: l.stellvertretung?.qualitaet ?? 0.5, kunde: l.stellvertretung?.qualitaet ?? 0.5, kosten: l.stellvertretung?.qualitaet ?? 0.5 }
+        };
+        h4.personal.filialleiter.wechselwille = 0;
+        return { ok: true, text: l.name + " als Clusterleitungs-Kandidat vorgemerkt. Stellvertretung \xFCbernimmt das Haus." };
+      case "hausStandardSetzen": {
+        if (a2.haus && !a2.begruendung?.trim()) return { ok: false, text: "Einzelabweichungen ben\xF6tigen eine Begr\xFCndung." };
+        if (h4 && a2.cluster !== steuerungscluster(s2, h4)) return { ok: false, text: "Haus geh\xF6rt nicht zum angegebenen Hauscluster." };
+        const basis4 = h4 ? hausStandard(s2, h4) : s2.hausbetrieb.standards[a2.cluster];
+        if (!basis4) return { ok: false, text: "Hauscluster nicht gefunden." };
+        const n3 = Number(a2.wert);
+        if (!Number.isInteger(n3)) break;
+        const stand2 = { ...basis4, oeffnung: { ...basis4.oeffnung } };
+        if (a2.feld === "von" || a2.feld === "bis" || a2.feld === "samstagBis") {
+          if (n3 < 7 || n3 > 22) break;
+          stand2.oeffnung[a2.feld] = n3;
+          if (stand2.oeffnung.von >= stand2.oeffnung.bis || stand2.oeffnung.von >= stand2.oeffnung.samstagBis) break;
+        } else {
+          if (n3 < 1 || n3 > 3) break;
+          stand2[a2.feld] = n3;
+        }
+        if (h4) {
+          h4.betrieb.standardAusnahme = stand2;
+          h4.betrieb.ausnahmeGrund = a2.begruendung.trim();
+        } else s2.hausbetrieb.standards[a2.cluster] = stand2;
+        return { ok: true, text: "Hausstandard angepasst." };
+      }
+      case "hausKostenSetzen":
+        if (!b4 || !POSTEN.includes(a2.posten) || !Number.isFinite(a2.faktor) || a2.faktor < 0.45 || a2.faktor > 1.5) break;
+        b4.kosten[a2.posten] = Math.round(a2.faktor * 100) / 100;
+        return { ok: true, text: "Betriebskosten " + a2.posten + " angepasst." };
+      case "hausServiceSetzen":
+        if (!b4 || !(a2.service in b4.services)) break;
+        (b4.serviceAusnahme ?? (b4.serviceAusnahme = {}))[a2.service] = a2.an;
+        return { ok: true, text: "Hausausnahme f\xFCr Service " + a2.service + (a2.an ? " aktiviert." : " deaktiviert.") };
+      case "hausClusterServiceSetzen": {
+        const stand2 = s2.hausbetrieb.standards[a2.cluster];
+        if (!stand2 || !["kundendienst", "schneiderei", "geschenkverpackung", "abholstation"].includes(a2.service)) break;
+        (stand2.services ?? (stand2.services = { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false }))[a2.service] = a2.an;
+        return { ok: true, text: "Service-Standard des Hausclusters ge\xE4ndert." };
+      }
+      case "hausGastronomie":
+        if (!b4 || b4.restaurantQm <= 0) return { ok: false, text: "Keine Restaurantfl\xE4che vorhanden." };
+        if (b4.gastro !== "keine" && b4.gastroVertragBis > s2.woche) return { ok: false, text: "Wechsel erst zum Vertragsende m\xF6glich." };
+        b4.gastro = a2.modus;
+        b4.gastroVertragBis = s2.woche + 104;
+        s2.einmalkostenWoche += b4.restaurantQm * (a2.modus === "selbst" ? 520 : 100);
+        return { ok: true, text: "Gastronomie wird " + (a2.modus === "selbst" ? "selbst betrieben." : "verpachtet.") };
+      case "hausKonzession": {
+        if (!h4 || !b4 || !Number.isFinite(a2.quote) || a2.quote < 0.1 || a2.quote > 0.35 || !Number.isInteger(a2.laufzeit) || a2.laufzeit < 26 || a2.laufzeit > 520) break;
+        const f13 = h4.flaechen.find((x2) => x2.id === a2.flaeche && x2.konzept === "konzession");
+        if (!f13) return { ok: false, text: "Keine Konzessionsfl\xE4che." };
+        const bisher = b4.konzessionen[f13.id];
+        if (bisher && bisher.bis > s2.woche) return { ok: false, text: "Vertrag l\xE4uft noch." };
+        b4.konzessionen[f13.id] = { name: bisher?.name ?? "Partner " + (f13.gruppe ?? ""), quote: a2.quote, bis: s2.woche + a2.laufzeit, exklusiv: a2.exklusiv };
+        return { ok: true, text: "Konzessionsvertrag abgeschlossen." };
+      }
+      case "hausMassnahme":
+        if (!b4) break;
+        b4.massnahmeBis = s2.woche + 4;
+        b4.massnahmeFaktor = 1.012;
+        s2.einmalkostenWoche += 5e3;
+        return { ok: true, text: "Ad-hoc-Ma\xDFnahme f\xFCr vier Wochen eingeleitet." };
+      case "hausSonntag": {
+        const u = s2.hausbetrieb.staedte[a2.stadt];
+        if (!u || !Number.isInteger(a2.woche) || a2.woche < s2.woche + 2 || a2.woche >= s2.woche + 52) break;
+        const jahr2 = Math.floor(a2.woche / 52);
+        if (u.sonntage.includes(a2.woche)) return { ok: false, text: "F\xFCr diese Woche wurde bereits ein Sonntag genehmigt." };
+        if (u.sonntage.filter((w2) => Math.floor(w2 / 52) === jahr2).length >= 4) return { ok: false, text: "H\xF6chstens vier Sonntage pro Jahr." };
+        const groesse2 = s2.haeuser.find((x2) => x2.stadt === a2.stadt)?.cluster;
+        const p2 = groesse2 === "metropole" ? 0.65 : groesse2 === "grossstadt" ? 0.78 : 0.86;
+        const genehmigt = hash2(s2.seed + ":sonntag:" + a2.stadt + ":" + a2.woche) < p2;
+        if (genehmigt) u.sonntage.push(a2.woche);
+        s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - 2, 0, 100);
+        melde(s2, "info", a2.stadt + ": Antrag auf verkaufsoffenen Sonntag " + (genehmigt ? "genehmigt." : "abgelehnt. Gegenwind von Gewerkschaft und Kirche."), { stadt: a2.stadt, modul: "haus" });
+        return { ok: true, text: genehmigt ? "Sonntag genehmigt." : "Sonntag nicht genehmigt." };
+      }
+    }
+    return { ok: false, text: "Ung\xFCltige Hausaktion." };
+  }
+  function kostenAbweichung(b4) {
+    if (!b4.kostenIst) return void 0;
+    let best;
+    for (const p2 of POSTEN) {
+      const x2 = (b4.kostenIst[p2] ?? 1) - 1;
+      if (!best || Math.abs(x2) * ANTEILE[p2] > Math.abs(best.abweichung) * ANTEILE[best.posten]) best = { posten: p2, abweichung: Math.round(x2 * 1e3) / 1e3 };
+    }
+    return best;
+  }
+  function hausUebersicht(s2, id) {
+    const h4 = s2.haeuser.find((x2) => x2.id === id);
+    if (!h4) return void 0;
+    const b4 = h4.betrieb, l = h4.personal.filialleiter;
+    return {
+      id: h4.id,
+      name: h4.name,
+      hauscluster: steuerungscluster(s2, h4),
+      stadtgroesse: h4.cluster,
+      standard: hausStandard(s2, h4),
+      leitungsdaten: l,
+      kandidaten: hausKandidaten(s2, id),
+      kundenScore: hausKundenscore(s2, h4),
+      letzteMessung: b4?.scoreWoche,
+      kosten: b4?.kosten,
+      ausfallBis: b4?.ausfallBis,
+      inventurdifferenz: b4?.inventurdifferenz ?? 0,
+      energiePreis: s2.hausbetrieb?.energiePreis ?? 1,
+      planWoche: s2.planung?.jahre.find((j4) => j4.jahr === s2.startJahr + Math.floor(s2.woche / 52))?.phasing[h4.id]?.[s2.woche % 52] ?? h4.wochenPlan,
+      treiberAktuell: h4.treiberVerlauf?.slice().reverse().find((x2) => x2.bis === s2.woche - 1),
+      kostenBasis: eur((h4.kpi?.sonstige ?? 0) / Math.max(1e-3, b4 ? Object.entries(b4.kosten).reduce((a2, [p2, f13]) => a2 + ANTEILE[p2] * f13 * (b4.kostenIst?.[p2] ?? 1), 0) : 1)),
+      kostenIst: b4?.kostenIst,
+      kostenAbweichung: b4 ? kostenAbweichung(b4) : void 0,
+      services: hausServices(s2, h4),
+      gastro: b4?.gastro,
+      gastroVertragBis: b4?.gastroVertragBis,
+      gastroStoerungBis: b4?.gastroStoerungBis,
+      restaurantQm: b4?.restaurantQm,
+      konzessionen: b4?.konzessionen,
+      kommentar: b4?.kommentare[0],
+      kommentare: b4?.kommentare ?? [],
+      umfeld: s2.hausbetrieb?.staedte[h4.stadt],
+      ausnahmeGrund: b4?.ausnahmeGrund,
+      flaechen: h4.flaechen.filter((f13) => f13.konzept === "konzession" || f13.konzept === "untermiete")
+    };
+  }
+  function hausBeobachtung(s2, limit = 30) {
+    return s2.haeuser.filter((h4) => istOffen(h4) && h4.kpi).map((h4) => {
+      const b4 = h4.betrieb, c = b4?.kommentare[0], score = hausKundenscore(s2, h4);
+      let grund2 = "";
+      let gewicht2 = 0;
+      if (c && c.woche >= s2.woche - 2 && !c.plausibel) {
+        grund2 = "Kommentar nicht plausibel";
+        gewicht2 = 100;
+      } else if ((h4.personal.filialleiter.interimBis ?? 0) > s2.woche) {
+        grund2 = "Hausleitung unbesetzt";
+        gewicht2 = 90;
+      } else if (score < 50) {
+        grund2 = "Kundenscore " + score + "/100";
+        gewicht2 = 70 + (50 - score) / 10;
+      } else if (c && c.woche >= s2.woche - 2) {
+        grund2 = "Umsatzabweichung " + (c.abweichung * 100).toFixed(1) + " %";
+        gewicht2 = 50 - c.abweichung * 100;
+      }
+      return { id: h4.id, name: h4.name, stadt: h4.stadt, grund: grund2, score, gewicht: gewicht2, kommentar: c };
+    }).filter((x2) => x2.gewicht > 0).sort((a2, b4) => b4.gewicht - a2.gewicht || a2.id.localeCompare(b4.id)).slice(0, limit);
+  }
+  function hausKommentareDerWoche(s2) {
+    return s2.haeuser.flatMap((h4) => (h4.betrieb?.kommentare ?? []).filter((c) => c.woche === s2.woche - 1).map((c) => ({ id: h4.id, name: h4.name, stadt: h4.stadt, ...c })));
+  }
+  function hausKundenRanking(s2) {
+    return s2.haeuser.filter(istOffen).map((h4) => ({ id: h4.id, name: h4.name, score: hausKundenscore(s2, h4) })).sort((a2, b4) => b4.score - a2.score || a2.id.localeCompare(b4.id));
+  }
+
+  // ../engine/src/umbau.ts
+  var UMBAU_STUFEN = {
+    auffrischung: { name: "Auffrischung", qm: 60, min: 2, max: 2 },
+    ladenbau: { name: "Ladenbau neu", qm: 250, min: 4, max: 6 },
+    komplett: { name: "Komplettumbau", qm: 900, min: 16, max: 30 },
+    technik: { name: "Technik", qm: 120, min: 3, max: 8 }
+  };
+  var UMBAU_AKTIONEN = /* @__PURE__ */ new Set(["umbauPlanen"]);
+  function initialisiereUmbau(s2) {
+    s2.umbau ?? (s2.umbau = { projekte: [], budget: 0, verbraucht: 0, jahr: 0, vorlageJahr: -1, zaehler: 0 });
+    for (const h4 of s2.haeuser) {
+      h4.etagenBau ?? (h4.etagenBau = {});
+      const alt = h4.baujahr < 1995 || h4.substanz < 43 ? 1 : h4.baujahr < 2010 || h4.substanz < 70 ? 2 : 3;
+      for (const nr4 of h4.etagen) if (!h4.etagenBau[nr4]) {
+        const technik3 = h4.baujahr < 1970 ? 0 : h4.baujahr < 2005 ? 1 : 2;
+        h4.etagenBau[nr4] = {
+          substanz: h4.substanz,
+          substanzStart: h4.substanz,
+          moebelGeneration: alt,
+          moebelGenerationStart: alt,
+          technik: { klima: technik3, licht: technik3, brandschutz: Math.max(1, technik3) },
+          // Pflichttermine frühestens nach mehr als fünf Spieljahren, damit das Startspiel neutral bleibt.
+          pflichten: {
+            brandschutz: 312 + (h4.baujahr + nr4 + 99) % 104,
+            aufzug: 338 + (h4.baujahr + nr4 + 127) % 104
+          },
+          gesperrt: false,
+          modernisierungWirkung: 0
+        };
+      }
+    }
+  }
+  function flaechenQm(h4, nr4) {
+    return Math.max(1, h4.flaechen.filter((f13) => f13.etage === nr4).reduce((a2, f13) => a2 + f13.qm, 0) || h4.grundflaecheQm);
+  }
+  function umbauSchaetzung(s2, hausId, nr4, stufe2) {
+    const h4 = s2.haeuser.find((x2) => x2.id === hausId), p2 = UMBAU_STUFEN[stufe2];
+    if (!h4 || !p2 || !h4.etagen.includes(nr4)) return void 0;
+    const etagen = stufe2 === "komplett" ? [...h4.etagen] : [nr4], qm2 = etagen.reduce((v2, e) => v2 + flaechenQm(h4, e), 0);
+    const q2 = clamp(bereichsQualitaet(s2, "ladenbau"), 0, 1);
+    const kosten2 = eur(qm2 * p2.qm * (1 + 0.4 * (1 - q2)));
+    const basis4 = p2.min + (p2.max - p2.min) * Math.min(1, qm2 / Math.max(1, h4.grundflaecheQm * 5));
+    const wochen = Math.ceil(basis4 * (1 + 0.5 * (1 - q2)));
+    const plus = stufe2 === "ladenbau" ? 0.08 : stufe2 === "komplett" ? 0.1 : stufe2 === "auffrischung" ? 0.02 : 0.01;
+    return {
+      etagen,
+      qm: qm2,
+      kosten: kosten2,
+      wochen,
+      frequenz: stufe2 === "komplett" ? 0.06 : 0,
+      kaufquote: plus,
+      rendite: Math.round((h4.kpi?.umsatz ?? Object.values(h4.potenzial).reduce((a2, b4) => a2 + (b4 ?? 0), 0)) * plus * 52 / Math.max(1, kosten2) * 1e3) / 10
+    };
+  }
+  function umbauAktion(s2, a2) {
+    initialisiereUmbau(s2);
+    const h4 = s2.haeuser.find((x2) => x2.id === a2.haus), p2 = umbauSchaetzung(s2, a2.haus, a2.etage, a2.stufe);
+    if (!h4 || !p2 || h4.status !== "offen") return { ok: false, text: "Haus oder Etage nicht verf\xFCgbar." };
+    if (s2.umbau.projekte.some((x2) => x2.status === "laufend" && x2.haus === h4.id && x2.etagen.some((n3) => p2.etagen.includes(n3))))
+      return { ok: false, text: "Mindestens eine Etage befindet sich bereits im Umbau." };
+    if (h4.premiumInvestition && h4.premiumInvestition.bis > s2.woche)
+      return { ok: false, text: "Laufende Premium-Investition muss zuerst abgeschlossen werden." };
+    einmalKosten(s2, p2.kosten);
+    s2.umbau.verbraucht += p2.kosten;
+    const projekt = {
+      id: "umbau-" + ++s2.umbau.zaehler,
+      haus: h4.id,
+      etagen: p2.etagen,
+      stufe: a2.stufe,
+      start: s2.woche,
+      ende: s2.woche + p2.wochen,
+      kosten: p2.kosten,
+      qm: p2.qm,
+      status: "laufend"
+    };
+    s2.umbau.projekte.push(projekt);
+    melde(s2, "info", UMBAU_STUFEN[a2.stufe].name + " in " + h4.name + " gestartet (" + p2.etagen.length + " Etage(n), " + p2.wochen + " Wochen).", { hausId: h4.id, stadt: h4.stadt, modul: "umbau" });
+    return { ok: true, text: "Baustart " + h4.name + ": " + p2.kosten.toLocaleString("de-DE") + " \u20AC, fertig in " + p2.wochen + " Wochen." };
+  }
+  function laufend(s2, h4, w2 = s2.woche) {
+    return (s2.umbau?.projekte ?? []).filter((p2) => p2.haus === h4.id && p2.status === "laufend" && p2.start <= w2 && p2.ende > w2);
+  }
+  function umbauNachfrageFaktor(s2, h4, g2) {
+    if (!h4.etagenBau) return 1;
+    const baustellen = laufend(s2, h4), gesamt = h4.flaechen.filter((f13) => (g2 === null ? f13.konzept === "offprice" : f13.gruppe === g2 && ["eigen", "kommission", "konzession"].includes(f13.konzept)) && !h4.etagenBau?.[f13.etage]?.gesperrt);
+    const qm2 = gesamt.reduce((a2, f13) => a2 + f13.qm, 0);
+    if (!qm2) return 1;
+    let sum2 = 0;
+    for (const f13 of gesamt) {
+      const e = h4.etagenBau[f13.etage], imBau = baustellen.some((p2) => p2.etagen.includes(f13.etage));
+      const behinderung = imBau ? 0.4 : baustellen.length ? 0.95 : 1;
+      sum2 += f13.qm * behinderung * (1 + (e?.modernisierungWirkung ?? 0));
+    }
+    return sum2 / qm2;
+  }
+  function umbauFrequenzFaktor(h4) {
+    return 1 + (h4.umbauFrequenz ?? 0);
+  }
+  function umbauWoche(s2) {
+    initialisiereUmbau(s2);
+    const stand2 = s2.umbau;
+    const jahr2 = Math.floor(s2.woche / 52);
+    if (jahr2 !== stand2.jahr) {
+      stand2.jahr = jahr2;
+      stand2.verbraucht = 0;
+    }
+    for (const h4 of s2.haeuser) {
+      if (!h4.etagenBau) continue;
+      for (const nr4 of h4.etagen) {
+        const e = h4.etagenBau[nr4];
+        e.substanz = Math.max(0, e.substanz - 0.05);
+        if (e.modernisierungWirkung > 0) e.modernisierungWirkung = Math.max(0, e.modernisierungWirkung - 15e-5);
+        for (const pflicht of ["brandschutz", "aufzug"]) {
+          const frist = e.pflichten[pflicht];
+          if (!s2.prognose && s2.woche === frist - 12) melde(
+            s2,
+            "warnung",
+            "Beh\xF6rde setzt Frist: " + pflicht + " in " + h4.name + ", " + nr4 + ". Etage bis Woche " + frist + ".",
+            { hausId: h4.id, stadt: h4.stadt, modul: "umbau" }
+          );
+          if (!e.gesperrt && s2.woche > frist) {
+            e.gesperrt = true;
+            if (!s2.prognose) melde(
+              s2,
+              "warnung",
+              "Beh\xF6rdliche Sperrung: " + h4.name + ", Etage " + nr4 + ". " + pflicht + " \xFCberf\xE4llig.",
+              { hausId: h4.id, stadt: h4.stadt, modul: "umbau" }
+            );
+          }
+        }
+      }
+      if (h4.umbauFrequenz) h4.umbauFrequenz = Math.max(0, h4.umbauFrequenz - 1e-4);
+    }
+    for (const p2 of stand2.projekte) if (p2.status === "laufend" && s2.woche >= p2.ende) {
+      const h4 = s2.haeuser.find((x2) => x2.id === p2.haus);
+      if (!h4) continue;
+      for (const nr4 of p2.etagen) {
+        const e = h4.etagenBau?.[nr4];
+        if (!e) continue;
+        if (p2.stufe === "auffrischung") {
+          e.substanz = clamp(e.substanz + 10, 0, 100);
+          e.technik.licht = Math.min(2, e.technik.licht + 1);
+        }
+        if (p2.stufe === "ladenbau") e.moebelGeneration = 3;
+        if (p2.stufe === "komplett") {
+          e.substanz = 90;
+          e.moebelGeneration = 3;
+          e.technik = { klima: 2, licht: 2, brandschutz: 2 };
+          e.klimaModernisiert = true;
+        }
+        if (p2.stufe === "technik") {
+          e.technik = { klima: 2, licht: 2, brandschutz: 2 };
+          e.pflichten = { brandschutz: s2.woche + 520, aufzug: s2.woche + 520 };
+          e.gesperrt = false;
+          e.klimaModernisiert = true;
+        }
+        e.modernisierungWirkung = Math.max(
+          e.modernisierungWirkung,
+          p2.stufe === "ladenbau" ? 0.08 : p2.stufe === "komplett" ? 0.1 : p2.stufe === "auffrischung" ? 0.02 : 0.01
+        );
+      }
+      if (p2.stufe === "komplett") {
+        h4.umbauFrequenz = 0.06;
+        s2.stakeholder.image = clamp(s2.stakeholder.image + 0.8, 0, 100);
+      }
+      h4.substanz = p2.etagen.length === h4.etagen.length ? Math.round(
+        h4.etagen.reduce((a2, n3) => a2 + (h4.etagenBau?.[n3]?.substanz ?? h4.substanz), 0) / h4.etagen.length
+      ) : h4.substanz;
+      p2.status = "abgeschlossen";
+      if (!s2.prognose) melde(
+        s2,
+        "info",
+        UMBAU_STUFEN[p2.stufe].name + " abgeschlossen: " + h4.name + ".",
+        { hausId: h4.id, stadt: h4.stadt, modul: "umbau" }
+      );
+    }
+    if (!s2.prognose && s2.woche % 52 === 0 && stand2.vorlageJahr !== jahr2) {
+      stand2.vorlageJahr = jahr2;
+      const budget = s2.planung;
+      stand2.budget = budget?.modernisierungBudget ?? budget?.umbauBudget ?? 0;
+      const v2 = umbauProgramm(s2).slice(0, 5), auswahl4 = [];
+      let rest = stand2.budget;
+      for (const x2 of v2) if (x2.kosten > 0 && x2.kosten <= rest) {
+        auswahl4.push(x2);
+        rest -= x2.kosten;
+      }
+      neueVorlage(s2, {
+        bereich: "ladenbau",
+        titel: "Modernisierungsprogramm " + (s2.startJahr + jahr2),
+        text: "Bau & Ladenbau priorisiert nach j\xE4hrlicher Rendite: " + v2.map((x2) => x2.name + " " + x2.etage + " (" + x2.rendite + " %)").join(", ") + ". Budget: " + stand2.budget.toLocaleString("de-DE") + " \u20AC.",
+        frist: 4,
+        optionen: [{ id: "annehmen", label: "Modernisierungsprogramm freigeben" }, { id: "zurueckstellen", label: "Zur\xFCckstellen" }],
+        standard: "annehmen"
+      });
+      const e = s2.entscheidungen[s2.entscheidungen.length - 1];
+      if (e?.woche === s2.woche && e.typ === "organisation_vorlage" && e.daten.bereich === "ladenbau") {
+        e.daten.umbauProgramm = JSON.stringify(auswahl4.map((x2) => ({ haus: x2.haus, etage: x2.etage, stufe: x2.stufe })));
+      }
+    }
+  }
+  function umbauProgramm(s2) {
+    const v2 = [];
+    for (const h4 of s2.haeuser) if (h4.status === "offen") for (const nr4 of h4.etagen) {
+      const e = h4.etagenBau?.[nr4];
+      if (!e || e.gesperrt) continue;
+      const stufe2 = e.moebelGeneration < 3 ? "ladenbau" : "auffrischung";
+      const p2 = umbauSchaetzung(s2, h4.id, nr4, stufe2);
+      if (p2 && !s2.umbau?.projekte.some((x2) => x2.status === "laufend" && x2.haus === h4.id && x2.etagen.includes(nr4)))
+        v2.push({ haus: h4.id, name: h4.name, etage: nr4, stufe: stufe2, kosten: p2.kosten, rendite: p2.rendite });
+    }
+    return v2.sort((a2, b4) => b4.rendite - a2.rendite || a2.haus.localeCompare(b4.haus) || a2.etage - b4.etage);
+  }
+  function umbauProgrammEntscheiden(s2, programm) {
+    let liste3 = [];
+    try {
+      liste3 = JSON.parse(programm);
+    } catch {
+      return;
+    }
+    for (const a2 of liste3) umbauAktion(s2, { typ: "umbauPlanen", ...a2 });
+  }
+  function umbauUebersicht(s2) {
+    initialisiereUmbau(s2);
+    const st2 = s2.umbau;
+    return {
+      budget: st2.budget,
+      verbraucht: st2.verbraucht,
+      rest: Math.max(0, st2.budget - st2.verbraucht),
+      jahr: s2.startJahr + Math.floor(s2.woche / 52),
+      programm: umbauProgramm(s2).slice(0, 30),
+      laufend: st2.projekte.filter((x2) => x2.status === "laufend"),
+      abgeschlossen: st2.projekte.filter((x2) => x2.status === "abgeschlossen").slice(-20),
+      premiumInvestitionen: s2.haeuser.filter((x2) => x2.premiumInvestition && x2.premiumInvestition.bis > s2.woche).length
+    };
+  }
+  function umbauHaus(s2, id) {
+    initialisiereUmbau(s2);
+    const h4 = s2.haeuser.find((x2) => x2.id === id);
+    if (!h4) return void 0;
+    return h4.etagen.map((nr4) => ({
+      etage: nr4,
+      ...h4.etagenBau[nr4],
+      qm: flaechenQm(h4, nr4),
+      projekt: (s2.umbau?.projekte ?? []).find((x2) => x2.haus === id && x2.status === "laufend" && x2.etagen.includes(nr4)),
+      schaetzungen: Object.keys(UMBAU_STUFEN).map((stufe2) => ({ stufe: stufe2, ...umbauSchaetzung(s2, id, nr4, stufe2) }))
+    }));
+  }
+
   // ../engine/src/marketing.ts
   var ALTERSGRUPPEN = ["jung", "mitte", "aelter", "senioren"];
   var ALTERSGRUPPE_TEXT = { jung: "unter 30", mitte: "30 bis 49", aelter: "50 bis 64", senioren: "65 plus" };
-  var REGIONEN = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
+  var REGIONEN2 = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
   var KANAELE = [
     { id: "prospekt", name: "Prospekt und Beilage", text: "Wochenprospekt als Beilage und Haushaltsverteilung, gr\xF6\xDFter Block, tr\xE4gt die Aktionen.", quote: 0.01317, e: 0.55, adstock: 0.35, reichweite: { jung: 0.18, mitte: 0.4, aelter: 0.62, senioren: 0.75 }, marke: 0.1, aktion: 0.5, regional: true },
     { id: "anzeigen", name: "Anzeigen", text: "Tageszeitung und Magazine.", quote: 162e-5, e: 0.45, adstock: 0.4, reichweite: { jung: 0.05, mitte: 0.18, aelter: 0.42, senioren: 0.6 }, marke: 0.2, aktion: 0.1, regional: true },
@@ -2506,7 +5942,7 @@
     }
     return x2;
   }
-  function ausVorlage(s2, v2, jahrIndex, id) {
+  function ausVorlage2(s2, v2, jahrIndex, id) {
     const start = jahrIndex * 52 + v2.kw - 1;
     return {
       id,
@@ -2535,8 +5971,8 @@
     m.kalenderJahre.push(jahrIndex);
     STARTKALENDER.forEach((v2, i) => {
       const id = `k${jahrIndex}-${i + 1}`;
-      m.referenz.push(ausVorlage(s2, v2, jahrIndex, id));
-      s2.marketing.aktionen.push(ausVorlage(s2, v2, jahrIndex, id));
+      m.referenz.push(ausVorlage2(s2, v2, jahrIndex, id));
+      s2.marketing.aktionen.push(ausVorlage2(s2, v2, jahrIndex, id));
     });
   }
   function erzeugeMarketing(s2) {
@@ -2593,7 +6029,7 @@
   function regionFaktor(st2, def, r4, anteil3) {
     if (!def.regional) return 1;
     let n3 = 0;
-    for (const x2 of REGIONEN) n3 += st2.regionen[x2] * anteil3[x2];
+    for (const x2 of REGIONEN2) n3 += st2.regionen[x2] * anteil3[x2];
     return n3 > 0 ? st2.regionen[r4] / n3 : 1;
   }
   function kanalWirkung(s2, sc, h4) {
@@ -3040,7 +6476,7 @@
       reg[h4.region] += u;
       sum2 += u;
     }
-    if (sum2 > 0) for (const r4 of REGIONEN) A.regionAnteil[r4] = reg[r4] / sum2;
+    if (sum2 > 0) for (const r4 of REGIONEN2) A.regionAnteil[r4] = reg[r4] / sum2;
     m.woche = A;
     const n3 = netz(s2);
     const ratio = m.netzLetzt > 0 ? clamp(n3 / m.netzLetzt, 0, 1.5) : 1;
@@ -3322,7 +6758,7 @@
           else if (a2.faktor !== void 0) st2.quote *= Math.max(0, a2.faktor);
           st2.quote = clamp(st2.quote, 0, def.quote * 4);
           if (a2.regionen) {
-            for (const [r4, x2] of Object.entries(a2.regionen)) if (REGIONEN.includes(r4)) st2.regionen[r4] = clamp(x2, 0, 3);
+            for (const [r4, x2] of Object.entries(a2.regionen)) if (REGIONEN2.includes(r4)) st2.regionen[r4] = clamp(x2, 0, 3);
           }
         }
         const netto = marketingKosten(s2, bezug).netto;
@@ -3853,762 +7289,1439 @@
     };
   }
 
-  // ../engine/src/wettbewerb.ts
-  var WIRKUNGSFAKTOR = 0.035;
-  var ARTEN = ["modehaus", "fastfashion", "premium", "offprice", "textildiscounter", "elektronik", "leer_ehemals"];
-  var START_ANZAHL = { metropole: [3, 5], grossstadt: [1, 3], mittelstadt: [0, 1] };
-  var START_FLAECHE = { metropole: [2600, 5200], grossstadt: [1800, 3800], mittelstadt: [1500, 2600] };
-  function zufall2(s2) {
-    let t5 = s2.wettbewerbRng = s2.wettbewerbRng + 1831565813 >>> 0;
-    t5 = Math.imul(t5 ^ t5 >>> 15, t5 | 1);
-    t5 ^= t5 + Math.imul(t5 ^ t5 >>> 7, t5 | 61);
-    return ((t5 ^ t5 >>> 14) >>> 0) / 4294967296;
-  }
-  var z = (s2, a2, b4) => a2 + (b4 - a2) * zufall2(s2);
-  var gz = (s2, a2, b4) => Math.floor(z(s2, a2, b4 + 1));
-  var chance2 = (s2, p2) => zufall2(s2) < p2;
-  var wahl = (s2, a2) => a2[Math.floor(zufall2(s2) * a2.length)];
-  function entfernung(a2, b4) {
-    const p2 = KOORDINATEN[a2], q2 = KOORDINATEN[b4];
-    if (!p2 || !q2) return Infinity;
-    const dy = (p2[0] - q2[0]) * 111;
-    const dx = (p2[1] - q2[1]) * 111 * Math.cos((p2[0] + q2[0]) / 2 * Math.PI / 180);
-    return Math.hypot(dx, dy);
-  }
-  function lageFaktor(haus2, w2) {
-    if (haus2.lage === w2.lage) return 1;
-    if (haus2.lage === "center" || w2.lage === "center") return 0.55;
-    if (haus2.lage === "rand" || w2.lage === "rand") return 0.4;
-    return 0.75;
-  }
-  function istMarktAktiv(w2) {
-    return w2.art !== "leer_ehemals" && w2.status !== "geschlossen";
-  }
-  function wertJeGruppe(w2, g2, s2) {
-    if (!istMarktAktiv(w2)) return 0;
-    const u = g2 === "offprice" ? w2.art === "offprice" ? 1 : 0 : WETTBEWERB_UEBERSCHNEIDUNG[w2.art][g2] ?? 0;
-    if (!u) return 0;
-    const sev = schwierigkeit(s2).ereignisse;
-    const eroeffnung = w2.status === "eroeffnung" ? 1 + 0.5 * sev : 1;
-    const aktion2 = (w2.aktionVon ?? Infinity) <= s2.woche && (w2.aktionBis ?? -1) > s2.woche;
-    const druck = w2.status === "raeumung" ? 0.6 : aktion2 ? w2.preisdruck : 0;
-    const abwehr = (w2.abwehrBis ?? 0) > s2.woche ? w2.abwehrFaktor ?? 1 : 1;
-    return w2.staerke * (w2.seit > 0 ? sev : 1) * u * eroeffnung * (1 + druck * sev) * abwehr;
-  }
-  function roh(s2, h4, g2) {
-    let sum2 = 0;
-    for (const w2 of s2.wettbewerber) {
-      if (w2.stadt !== h4.stadt || !istMarktAktiv(w2)) continue;
-      const lage = lageFaktor(h4, w2);
-      if (g2) sum2 += wertJeGruppe(w2, g2, s2) * lage;
-      else {
-        const gruppen = gruppenFuer(h4.format);
-        const summe2 = gruppen.reduce((a2, x2) => a2 + wertJeGruppe(w2, x2, s2), 0);
-        sum2 += lage * (gruppen.length ? summe2 / gruppen.length : 0);
-      }
-    }
-    return sum2 * WIRKUNGSFAKTOR;
-  }
-  function leerzahl(s2, stadt) {
-    return s2.wettbewerber.filter((w2) => w2.stadt === stadt && w2.art === "leer_ehemals" && w2.status !== "geschlossen").length;
-  }
-  function wettbewerbAus(s2, h4) {
-    if (s2.wettbewerbDeaktiviert) return h4.wettbewerbStart;
-    const aktuell = roh(s2, h4);
-    return clamp(h4.wettbewerbStart + (aktuell - (h4.wettbewerbRohStart ?? aktuell)), 0, 1);
-  }
-  function wettbewerbAusGruppe(s2, h4, g2) {
-    const start = h4.wettbewerbGruppeStart?.[g2] ?? h4.wettbewerbStart;
-    if (s2.wettbewerbDeaktiviert) return start;
-    const aktuell = roh(s2, h4, g2);
-    return clamp(start + (aktuell - (h4.wettbewerbRohGruppenStart?.[g2] ?? aktuell)), 0, 1);
-  }
-  function wettbewerbNachfrageFaktor(s2, h4, g2) {
-    const start = h4.wettbewerbGruppeStart?.[g2] ?? h4.wettbewerbStart;
-    return (1 - 0.25 * wettbewerbAusGruppe(s2, h4, g2)) / (1 - 0.25 * start);
-  }
-  function wettbewerbOffpriceFaktor(s2, h4) {
-    if (s2.wettbewerbDeaktiviert) return 1;
-    const start = h4.wettbewerbOffpriceStart ?? h4.wettbewerbStart;
-    const aktuell = roh(s2, h4, "offprice");
-    const neu3 = clamp(start + (aktuell - (h4.wettbewerbRohOffpriceStart ?? aktuell)), 0, 1);
-    return (1 - 0.25 * neu3) / (1 - 0.25 * start);
-  }
-  function wettbewerbFrequenzFaktor(s2, h4) {
-    if (s2.wettbewerbDeaktiviert) return 1;
-    return clamp(1 - 0.02 * (leerzahl(s2, h4.stadt) - (h4.wettbewerbLeerStart ?? 0)), 0.85, 1.08);
-  }
-  function neuerName(s2, art, stadt) {
-    const namen = WETTBEWERBER_NAMEN[art];
-    const frei6 = namen.filter((n3) => !s2.wettbewerber.some((w2) => w2.name === n3 && entfernung(stadt, w2.stadt) < 28));
-    return frei6.length ? wahl(s2, frei6) : namen[0] + " " + stadt;
-  }
-  function anlegen(s2, stadt, art, lage, qm2, seit, inHaus) {
-    const name2 = neuerName(s2, art, stadt);
-    const kette3 = name2.endsWith(" " + stadt) ? name2.slice(0, -(stadt.length + 1)) : name2;
-    const w2 = {
-      id: "C" + String(++s2.wettbewerbNaechsteId).padStart(3, "0"),
-      name: name2,
-      kette: kette3,
-      art,
-      stadt,
-      lage,
-      grundflaecheQm: qm2,
-      staerke: z(s2, 0.28, 0.85),
-      preisdruck: 0,
-      status: seit > 0 ? "eroeffnung" : "offen",
-      seit,
-      bis: seit > 0 ? seit + 4 : void 0,
-      form: gz(s2, 0, 4),
-      inHartwigGebaeude: inHaus
+  // ../engine/src/treiber.ts
+  var NULL = { frequenz: 1, kaufquote: 1, bon: 1 };
+  var PREIS = {
+    damen: 43,
+    herren: 49,
+    kinder: 25,
+    beauty: 37,
+    accessoires: 53,
+    waesche: 21,
+    wohnen: 39,
+    spielwaren: 27,
+    food: 16,
+    sport: 48,
+    sportschuhe: 85,
+    sporttextil: 49,
+    outdoor: 110,
+    rad: 260,
+    wintersport: 115,
+    teamsport: 37
+  };
+  var leer = () => ({
+    von: 0,
+    bis: 0,
+    umsatz: 0,
+    frequenz: 0,
+    kaeufe: 0,
+    artikel: 0,
+    kaufquote: 0,
+    bon: 0,
+    teile: 0,
+    preis: 0
+  });
+  function komplett(von, bis, umsatz, frequenz, kaeufe, artikel) {
+    return {
+      von,
+      bis,
+      umsatz,
+      frequenz,
+      kaeufe,
+      artikel,
+      kaufquote: frequenz ? kaeufe / frequenz : 0,
+      bon: kaeufe ? umsatz / kaeufe : 0,
+      teile: kaeufe ? artikel / kaeufe : 0,
+      preis: artikel ? umsatz / artikel : 0
     };
-    s2.wettbewerber.push(w2);
-    return w2;
   }
-  function initialisiereWettbewerb(s2) {
-    const staedte = [...new Set(aktive(s2).map((h4) => h4.stadt))];
-    for (const stadt of staedte) {
-      const hs = aktive(s2).filter((h4) => h4.stadt === stadt);
-      const c = hs[0].cluster, [min, max] = START_ANZAHL[c], [qmMin, qmMax] = START_FLAECHE[c];
-      const n3 = gz(s2, min, max);
-      for (let i = 0; i < n3; i++) {
-        const lage = chance2(s2, c === "mittelstadt" ? 0.5 : 0.7) ? "1a" : "b";
-        const pool = lage === "1a" ? ["modehaus", "fastfashion", "premium", "leer_ehemals", "modehaus", "fastfashion"] : ["offprice", "elektronik", "textildiscounter", "leer_ehemals", "offprice"];
-        let art = wahl(s2, pool);
-        if (art === "premium" && c !== "metropole") art = "modehaus";
-        for (let j4 = 0; j4 < pool.length && s2.wettbewerber.some((w2) => w2.stadt === stadt && w2.art === art); j4++) art = wahl(s2, ARTEN);
-        const qmHartwig = Math.max(0, ...hs.filter((h4) => h4.format === "warenhaus" && h4.lage !== "center").map((h4) => h4.grundflaecheQm));
-        const qm2 = Math.min(Math.round(z(s2, qmMin, qmMax) / 100) * 100, qmHartwig ? Math.max(600, Math.round(0.8 * qmHartwig / 100) * 100) : qmMax);
-        anlegen(s2, stadt, art, lage, qm2, 0);
+  var hauscluster = (h4) => h4.hauscluster || h4.region;
+  function setzeTreiber(s2, hausId, quelle2, treiber, faktor2) {
+    const h4 = s2.haeuser.find((x2) => x2.id === hausId);
+    if (!h4) throw new Error("Haus nicht gefunden: " + hausId);
+    if (!quelle2.trim()) throw new Error("Treiberquelle fehlt.");
+    if (!Number.isFinite(faktor2) || faktor2 < 0 || faktor2 > 3) throw new Error("Treiberfaktor muss zwischen 0 und 3 liegen.");
+    const quellen = h4.treiberQuellen ?? (h4.treiberQuellen = {});
+    if (faktor2 === 1) {
+      if (quellen[quelle2]) {
+        delete quellen[quelle2][treiber];
+        if (!Object.keys(quellen[quelle2]).length) delete quellen[quelle2];
       }
+    } else (quellen[quelle2] ?? (quellen[quelle2] = {}))[treiber] = faktor2;
+    const produkt = { ...NULL };
+    for (const eintrag2 of Object.values(quellen)) for (const id of ["frequenz", "kaufquote", "bon"])
+      produkt[id] *= eintrag2[id] ?? 1;
+    h4.treiber = produkt;
+  }
+  function treiberFaktor(h4) {
+    if (!h4.treiberQuellen) return h4.treiber ?? NULL;
+    const produkt = { ...NULL };
+    for (const q2 of Object.values(h4.treiberQuellen)) for (const t5 of ["frequenz", "kaufquote", "bon"])
+      produkt[t5] *= q2[t5] ?? 1;
+    return produkt;
+  }
+  function wirkeTreiber(h4, roh2) {
+    const f13 = treiberFaktor(h4);
+    const faktor2 = f13.frequenz * f13.kaufquote * f13.bon;
+    if (faktor2 === 1) return roh2;
+    for (const v2 of Object.values(roh2.eigen)) if (v2) {
+      v2.brutto *= faktor2;
+      v2.umsatz *= faktor2;
     }
-    for (const h4 of aktive(s2)) wettbewerbStartwerte(s2, h4);
+    for (const g2 of Object.keys(roh2.kommission)) roh2.kommission[g2] = (roh2.kommission[g2] ?? 0) * faktor2;
+    roh2.offprice *= faktor2;
+    roh2.ohneAktion *= faktor2;
+    roh2.ohneAktionRohertrag *= faktor2;
+    return roh2;
   }
-  function wettbewerbStartwerte(s2, h4) {
-    h4.wettbewerbGruppeStart = Object.fromEntries(gruppenFuer(h4.format).map((g2) => [g2, h4.wettbewerbStart]));
-    h4.wettbewerbOffpriceStart = h4.wettbewerbStart;
-    h4.wettbewerbRohStart = roh(s2, h4);
-    h4.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(h4.format).map((g2) => [g2, roh(s2, h4, g2)]));
-    h4.wettbewerbLeerStart = leerzahl(s2, h4.stadt);
-    h4.wettbewerbRohOffpriceStart = roh(s2, h4, "offprice");
+  function frequenzBasis(s2, h4) {
+    const qm2 = h4.flaechen.filter((f13) => f13.konzept !== "leer" && f13.konzept !== "untermiete").reduce((sum2, f13) => sum2 + f13.qm, 0);
+    const lage = { "1a": 1.12, b: 0.87, stadtteil: 0.92, center: 1.07, rand: 0.79 }[h4.lage];
+    const groesse2 = { metropole: 1.16, grossstadt: 1, mittelstadt: 0.84 }[h4.cluster];
+    const saison2 = clamp(saisonFaktor("damen", s2.woche), 0.65, 1.75);
+    const marketing = marketingHausFaktor(s2, h4);
+    return Math.max(0, Math.round((Math.max(0, qm2) * 1.12 + 4400) * lage * groesse2 * clamp(h4.einzug.kaufkraft, 0.7, 1.4) * saison2 * marketing * (1 + h4.transferBonus)));
   }
-  function aktive(s2) {
-    return s2.haeuser.filter((h4) => !h4.nurDaten);
+  function kaufquoteBasis(h4) {
+    if (h4.format === "fundus") return 0.35;
+    if (h4.format === "sport") return 0.215;
+    return h4.klasse === "premium" ? 0.29 : h4.lage === "1a" ? 0.27 : h4.lage === "rand" ? 0.22 : 0.25;
   }
-  function betroffeneHaeuser(s2, stadt) {
-    return aktive(s2).filter((h4) => h4.stadt === stadt && (h4.status === "offen" || h4.status === "schliessung_verhandlung"));
+  function artikelAusMix(h4, umsatz) {
+    const gruppen = Object.entries(h4.kpi?.umsatzJeGruppe ?? {});
+    const mengen = gruppen.reduce((sum2, [g2, wert]) => sum2 + Math.max(0, wert) / (PREIS[g2] ?? 40), 0);
+    const rest = Math.max(0, umsatz - gruppen.reduce((sum2, [, v2]) => sum2 + v2, 0));
+    return umsatz > 0 ? Math.max(1e-6, mengen + rest / 18) : 0;
   }
-  function eroeffnungsArt(s2, stadt) {
-    const hs = betroffeneHaeuser(s2, stadt);
-    const kandidaten3 = ARTEN.filter((a2) => a2 !== "leer_ehemals");
-    const score = (art) => hs.reduce((sum2, h4) => sum2 + gruppenFuer(h4.format).reduce((x2, g2) => {
-      const qm2 = h4.flaechen.filter((f13) => f13.gruppe === g2 && f13.konzept !== "leer").reduce((a2, f13) => a2 + f13.qm, 0);
-      return x2 + qm2 * GRUPPEN[g2].qmUmsatz * (WETTBEWERB_UEBERSCHNEIDUNG[art][g2] ?? 0);
-    }, 0), 0) / (1 + s2.wettbewerber.filter((w2) => w2.stadt === stadt && w2.art === art && istMarktAktiv(w2)).length);
-    return [...kandidaten3].sort((a2, b4) => score(b4) - score(a2))[0];
+  function erfasseTreiber(s2) {
+    if (s2.prognose || s2.treiberErfassungAus) return;
+    for (const h4 of s2.haeuser) {
+      const umsatz = h4.kpi?.woche === s2.woche ? h4.kpi.umsatz : 0;
+      const f13 = treiberFaktor(h4);
+      const frequenz = h4.status !== "geschlossen" && h4.status !== "verkauft" ? Math.max(1, Math.round(frequenzBasis(s2, h4) * f13.frequenz)) : 0;
+      const q2 = umsatz > 0 ? clamp(kaufquoteBasis(h4) * f13.kaufquote, 0.01, 0.95) : 0;
+      const kaeufe = frequenz * q2;
+      const artikel = artikelAusMix(h4, umsatz);
+      const messung2 = komplett(s2.woche, s2.woche, umsatz, frequenz, kaeufe, artikel);
+      const verlauf4 = h4.treiberVerlauf ?? (h4.treiberVerlauf = []);
+      verlauf4.push(messung2);
+      const grenze = s2.woche - 51;
+      const erste = s2.woche - 103;
+      const zuschneiden = (p2) => {
+        if (p2.von >= erste) return p2;
+        const anteil3 = (p2.bis - erste + 1) / (p2.bis - p2.von + 1);
+        return komplett(
+          erste,
+          p2.bis,
+          p2.umsatz * anteil3,
+          p2.frequenz * anteil3,
+          p2.kaeufe * anteil3,
+          p2.artikel * anteil3
+        );
+      };
+      const alt = verlauf4.filter((p2) => p2.bis < grenze && p2.bis >= erste).map(zuschneiden);
+      const jung = verlauf4.filter((p2) => p2.bis >= grenze).map((p2) => p2.von < erste ? zuschneiden(p2) : p2);
+      const bloecke = /* @__PURE__ */ new Map();
+      for (const p2 of alt) {
+        const block = Math.floor(p2.von / 4);
+        const gruppe3 = bloecke.get(block) ?? [];
+        gruppe3.push(p2);
+        bloecke.set(block, gruppe3);
+      }
+      const archiv = [...bloecke.entries()].sort((a2, b4) => a2[0] - b4[0]).map(([, teile2]) => summiere(teile2));
+      h4.treiberVerlauf = [...archiv, ...jung];
+    }
   }
-  function neuEroeffnet(s2, stadt, art, inHaus) {
-    const hs = aktive(s2).filter((h5) => h5.stadt === stadt), c = hs[0].cluster;
-    const [qmMin, qmMax] = START_FLAECHE[c];
-    const qm2 = inHaus ? aktive(s2).find((h5) => h5.id === inHaus)?.grundflaecheQm ?? qmMin : Math.round(z(s2, qmMin, qmMax) / 100) * 100;
-    const wb = anlegen(s2, stadt, art, chance2(s2, 0.7) ? "1a" : "b", qm2, s2.woche, inHaus);
-    const h4 = betroffeneHaeuser(s2, stadt)[0];
-    const gruppe3 = h4 ? gruppenFuer(h4.format).sort((a2, b4) => (WETTBEWERB_UEBERSCHNEIDUNG[art][b4] ?? 0) - (WETTBEWERB_UEBERSCHNEIDUNG[art][a2] ?? 0))[0] : "damen";
-    const prozent6 = h4 ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h4, gruppe3)) * 100) : 0;
-    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe3].name + ": rund " + prozent6 + " %.", { stadt, modul: "wettbewerb" });
-    if ((art === "modehaus" || art === "premium") && qm2 >= 2300) {
-      neueEntscheidung(s2, {
-        typ: "wettbewerb_eroeffnung",
-        frist: s2.woche + 3,
-        titel: "Gro\xDFer\xF6ffnung " + wb.name + " in " + stadt,
-        text: "Der neue Wettbewerber wirbt aktiv Stammkunden ab. Reagieren oder den Markteintritt hinnehmen?",
-        optionen: [
-          { id: "aktion", label: "Er\xF6ffnungsaktion dagegen (Marge)" },
-          ...s2.marketing.kundenkarte ? [{ id: "mailing", label: "Stammkunden-Mailing (Budget)" }] : [],
-          { id: "nichts", label: "Nichts tun" }
-        ],
-        standard: "nichts",
-        daten: { wettbewerber: wb.id }
+  function summiere(eintraege) {
+    if (!eintraege.length) return leer();
+    return komplett(
+      Math.min(...eintraege.map((e) => e.von)),
+      Math.max(...eintraege.map((e) => e.bis)),
+      eintraege.reduce((s2, e) => s2 + e.umsatz, 0),
+      eintraege.reduce((s2, e) => s2 + e.frequenz, 0),
+      eintraege.reduce((s2, e) => s2 + e.kaeufe, 0),
+      eintraege.reduce((s2, e) => s2 + e.artikel, 0)
+    );
+  }
+  function zeitraum(s2, h4, von, bis) {
+    const start = s2.spielStartWoche ?? 0;
+    const historisch = (s2.vorjahrHistorie?.[h4.id] ?? []).map((p2) => komplett(p2.woche, p2.woche, p2.umsatz, p2.frequenz, p2.kaeufe, p2.artikel));
+    const messungen = [...historisch, ...h4.treiberVerlauf ?? []];
+    if (von < start - 52 || bis < von) return { geschaetzt: false };
+    const teile2 = [];
+    let abgedeckt2 = 0, geschaetzt = false;
+    for (const m of messungen) {
+      const gemeinsam = Math.max(0, Math.min(bis, m.bis) - Math.max(von, m.von) + 1);
+      if (!gemeinsam) continue;
+      const laenge2 = m.bis - m.von + 1, anteil3 = gemeinsam / laenge2;
+      if (anteil3 !== 1) geschaetzt = true;
+      teile2.push(komplett(
+        Math.max(von, m.von),
+        Math.min(bis, m.bis),
+        m.umsatz * anteil3,
+        m.frequenz * anteil3,
+        m.kaeufe * anteil3,
+        m.artikel * anteil3
+      ));
+      abgedeckt2 += gemeinsam;
+    }
+    if (abgedeckt2 !== bis - von + 1) return { geschaetzt };
+    const wert = summiere(teile2);
+    wert.umsatz = eur(wert.umsatz);
+    wert.preis = wert.artikel ? wert.umsatz / wert.artikel : 0;
+    wert.bon = wert.kaeufe ? wert.umsatz / wert.kaeufe : 0;
+    return { wert, geschaetzt };
+  }
+  function hausTreiber(s2, hausId, wochen = 1) {
+    const h4 = s2.haeuser.find((x2) => x2.id === hausId);
+    if (!h4) return void 0;
+    const bis = s2.woche - 1;
+    const aktuell = zeitraum(s2, h4, bis - wochen + 1, bis);
+    if (!aktuell.wert) return void 0;
+    const vorjahr2 = zeitraum(s2, h4, bis - wochen + 1 - 52, bis - 52);
+    return {
+      aktuell: aktuell.wert,
+      vorjahr: vorjahr2.wert,
+      vorjahrGeschaetzt: vorjahr2.geschaetzt,
+      abweichung: vorjahr2.wert ? aktuell.wert.umsatz - vorjahr2.wert.umsatz : void 0
+    };
+  }
+  function auswahl(s2, ebene, id, format) {
+    return s2.haeuser.filter((h4) => h4.status !== "verkauft" && (!format || format === "alle" || h4.format === format) && (ebene === "konzern" || ebene === "haus" && h4.id === id || ebene === "region" && h4.region === id || ebene === "hauscluster" && hauscluster(h4) === id));
+  }
+  function umsatzbruecke(s2, o4) {
+    const fehlend = (status2) => ({
+      status: status2,
+      vorher: 0,
+      aktuell: 0,
+      differenz: 0,
+      frequenz: 0,
+      kaufquote: 0,
+      teile: 0,
+      preis: 0,
+      bon: 0,
+      vorjahrGeschaetzt: false
+    });
+    if (o4.vergleich === "plan") return fehlend("kein Plan vorhanden");
+    const ende = s2.woche - 1, anzahl2 = Math.max(1, Math.floor(o4.wochen));
+    const alt = [], neu3 = [];
+    let geschaetzt = false;
+    for (const h4 of auswahl(s2, o4.ebene, o4.id, o4.format)) {
+      const jetzt = zeitraum(s2, h4, ende - anzahl2 + 1, ende);
+      const frueher = zeitraum(s2, h4, ende - anzahl2 + 1 - 52, ende - 52);
+      if (!jetzt.wert || !frueher.wert) continue;
+      neu3.push(jetzt.wert);
+      alt.push(frueher.wert);
+      geschaetzt || (geschaetzt = frueher.geschaetzt);
+    }
+    if (!neu3.length) return fehlend("kein Vorjahr vorhanden");
+    const v2 = summiere(alt), a2 = summiere(neu3);
+    const f13 = eur(a2.frequenz * v2.kaufquote * v2.teile * v2.preis);
+    const q2 = eur(a2.frequenz * a2.kaufquote * v2.teile * v2.preis);
+    const t5 = eur(a2.frequenz * a2.kaufquote * a2.teile * v2.preis);
+    const u = eur(a2.umsatz), vorher = eur(v2.umsatz);
+    const teile2 = t5 - q2, preis = u - t5;
+    return {
+      status: "ok",
+      vorher,
+      aktuell: u,
+      differenz: u - vorher,
+      frequenz: f13 - vorher,
+      kaufquote: q2 - f13,
+      teile: teile2,
+      preis,
+      bon: teile2 + preis,
+      vorjahrGeschaetzt: geschaetzt
+    };
+  }
+  function kennzahl(s2, h4, id) {
+    const d4 = hausTreiber(s2, h4.id);
+    if (!d4) return 0;
+    if (id === "umsatz") return d4.aktuell.umsatz;
+    if (id === "frequenz") return d4.aktuell.frequenz;
+    if (id === "kaufquote") return d4.aktuell.kaufquote;
+    if (id === "bon") return d4.aktuell.bon;
+    if (id === "abweichungVorjahr") return d4.abweichung ?? 0;
+    const qm2 = h4.flaechen.reduce((sum2, f13) => sum2 + f13.qm, 0);
+    return qm2 > 0 ? d4.aktuell.umsatz / qm2 : 0;
+  }
+  function ranking(s2, o4) {
+    const alle = s2.haeuser.filter((h4) => h4.status !== "verkauft" && h4.kpi?.woche === s2.woche - 1);
+    const vergleich = (h4) => o4.ebene === "region" ? h4.region : hauscluster(h4);
+    const gesamt = alle.map((h4) => ({ h: h4, wert: kennzahl(s2, h4, o4.kennzahl) })).sort((a2, b4) => b4.wert - a2.wert || a2.h.id.localeCompare(b4.h.id));
+    const gruppe3 = o4.ebene === "alle" || !o4.innerhalb ? gesamt : gesamt.filter((e) => vergleich(e.h) === o4.innerhalb);
+    return gruppe3.map((e, index2) => ({
+      hausId: e.h.id,
+      name: e.h.name,
+      region: e.h.region,
+      hauscluster: hauscluster(e.h),
+      format: e.h.format,
+      wert: e.wert,
+      rangGesamt: gesamt.indexOf(e) + 1,
+      rangVergleich: o4.innerhalb ? index2 + 1 : gesamt.filter((x2) => vergleich(x2.h) === vergleich(e.h)).indexOf(e) + 1
+    }));
+  }
+  function reporting(s2, wochen = 1, format = "alle") {
+    const zeilen = [];
+    for (const h4 of s2.haeuser) {
+      if (h4.status === "verkauft" || format !== "alle" && h4.format !== format) continue;
+      const d4 = hausTreiber(s2, h4.id, wochen);
+      if (!d4) continue;
+      const v2 = d4.vorjahr?.umsatz;
+      const diff = d4.abweichung;
+      const anteil3 = v2 && diff !== void 0 ? diff / Math.abs(v2) : void 0;
+      zeilen.push({
+        id: h4.id,
+        name: h4.name,
+        region: h4.region,
+        hauscluster: hauscluster(h4),
+        format: h4.format,
+        umsatz: d4.aktuell.umsatz,
+        vorjahr: v2,
+        abweichung: diff,
+        abweichungProzent: anteil3,
+        frequenz: d4.aktuell.frequenz,
+        kaufquote: d4.aktuell.kaufquote,
+        bon: d4.aktuell.bon,
+        ampelfarbe: anteil3 === void 0 ? "grau" : anteil3 < -0.05 ? "rot" : anteil3 < 0 ? "gelb" : "gruen"
       });
     }
-    return wb;
+    const gruppen = [];
+    for (const ebene of ["region", "hauscluster"]) {
+      for (const id of new Set(zeilen.map((z6) => z6[ebene]))) {
+        const aus = zeilen.filter((z6) => z6[ebene] === id);
+        const umsatz = aus.reduce((a2, z6) => a2 + z6.umsatz, 0);
+        const fre = aus.reduce((a2, z6) => a2 + z6.frequenz, 0);
+        const kaeufe = aus.reduce((a2, z6) => a2 + z6.frequenz * z6.kaufquote, 0);
+        const mitVj = aus.filter((z6) => z6.vorjahr !== void 0);
+        const vorjahr2 = mitVj.length === aus.length ? aus.reduce((a2, z6) => a2 + (z6.vorjahr ?? 0), 0) : void 0;
+        const abweichung2 = vorjahr2 !== void 0 ? umsatz - vorjahr2 : void 0;
+        const abweichungProzent = vorjahr2 && abweichung2 !== void 0 ? abweichung2 / Math.abs(vorjahr2) : void 0;
+        gruppen.push({
+          id,
+          name: id,
+          region: ebene === "region" ? id : aus[0].region,
+          hauscluster: ebene === "hauscluster" ? id : "",
+          ebene,
+          format: "alle",
+          umsatz,
+          vorjahr: vorjahr2,
+          abweichung: abweichung2,
+          abweichungProzent,
+          frequenz: fre,
+          kaufquote: fre ? kaeufe / fre : 0,
+          bon: kaeufe ? umsatz / kaeufe : 0,
+          ampelfarbe: abweichungProzent === void 0 ? "grau" : abweichungProzent < -0.05 ? "rot" : abweichungProzent < 0 ? "gelb" : "gruen"
+        });
+      }
+    }
+    const beobachtung = zeilen.filter((z6) => z6.abweichung !== void 0 && z6.abweichung < 0).sort((a2, b4) => (a2.abweichung ?? 0) - (b4.abweichung ?? 0)).slice(0, 10).map((z6) => {
+      const br = umsatzbruecke(s2, { ebene: "haus", id: z6.id, vergleich: "vorjahr", wochen });
+      const h4 = s2.haeuser.find((x2) => x2.id === z6.id);
+      const d4 = hausTreiber(s2, h4.id, wochen);
+      const effekte = [
+        { v: br.frequenz, name: "Frequenz", text: d4.vorjahr?.frequenz ? ((d4.aktuell.frequenz / d4.vorjahr.frequenz - 1) * 100).toFixed(1).replace(".", ",") + " %" : "\u2013" },
+        { v: br.kaufquote, name: "Kaufquote", text: d4.vorjahr ? ((d4.aktuell.kaufquote - d4.vorjahr.kaufquote) * 100).toFixed(1).replace(".", ",") + " Punkte" : "\u2013" },
+        { v: br.bon, name: "Bon", text: d4.vorjahr?.bon ? ((d4.aktuell.bon / d4.vorjahr.bon - 1) * 100).toFixed(1).replace(".", ",") + " %" : "\u2013" }
+      ].sort((a2, b4) => a2.v - b4.v);
+      const haupt = effekte[0];
+      return { hausId: z6.id, name: z6.name, abweichung: z6.abweichung, haupttreiber: haupt.name + " " + haupt.text };
+    });
+    return { wochen, bruecke: umsatzbruecke(s2, { ebene: "konzern", vergleich: "vorjahr", wochen, format }), zeilen, gruppen, beobachtung };
   }
-  function raeumung(s2, w2) {
-    w2.status = "raeumung";
-    w2.seit = s2.woche;
-    w2.bis = s2.woche + 6;
-    w2.preisdruck = 0.6;
-    melde(s2, "presse", w2.name + " schlie\xDFt in " + w2.stadt + ". Sechs Wochen R\xE4umungsverkauf; danach droht Leerstand.", { stadt: w2.stadt, modul: "wettbewerb" });
-    const hs = betroffeneHaeuser(s2, w2.stadt).filter((h4) => h4.format === "warenhaus");
-    if (hs.length) {
-      const angebot = neuesAngebot(s2, {
-        typ: "uebernahme",
-        frist: s2.woche + 8,
-        wettbewerberId: w2.id,
-        qmJeHaus: w2.grundflaecheQm,
-        mieteQmMonat: Math.round(z(s2, 7, 17) * 10) / 10,
-        titel: "Standort\xFCbernahme " + w2.name + " in " + w2.stadt,
-        text: "Freie Handelsfl\xE4che " + w2.grundflaecheQm + " qm: als Hartwig Outlet oder Erweiterung anmietbar, Umbau 200\u2013250 \u20AC/qm."
+
+  // ../engine/src/personaleinsatz.ts
+  var PERSONAL_GRUPPEN = ["logistik", "verkauf", "kasse", "verwaltung"];
+  var PERSONAL_NAMEN = {
+    logistik: "Instore-Logistik",
+    verkauf: "Verkauf",
+    kasse: "Kasse",
+    verwaltung: "Verwaltung"
+  };
+  var PERSONAL_ANTEILE = {
+    logistik: 0.19,
+    verkauf: 0.52,
+    kasse: 0.19,
+    verwaltung: 0.1
+  };
+  var PERSONAL_TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+  var PERSONAL_AKTIONEN = /* @__PURE__ */ new Set([
+    "personalSteuern",
+    "personalSamstagKasse",
+    "personalAushilfen",
+    "personalSpringer",
+    "personalWeiterbildung",
+    "personalWeihnachtenNachbuchen"
+  ]);
+  var fte = (h4) => h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen;
+  var aktiv3 = (h4) => h4.status === "offen" || h4.status === "raeumung" || h4.status === "schliessung_verhandlung";
+  var rund = (n3) => Math.round(n3 * 10) / 10;
+  var rund4 = (n3) => Math.round(n3 * 1e4) / 1e4;
+  var gruppeHauscluster = (h4, s2) => {
+    const org2 = s2;
+    if (org2.organisation && (h4.klasse === "premium" || org2.organisation.flagships?.includes(h4.id)))
+      return "premium-flagships";
+    return h4.hauscluster || "region-" + h4.region;
+  };
+  function clusterName2(s2, id) {
+    const org2 = s2;
+    return org2.organisation?.hauscluster.find((x2) => x2.id === id)?.name ?? id.replace("region-", "");
+  }
+  function qualitaet2(s2) {
+    const org2 = s2;
+    const st2 = org2.organisation?.bereiche?.personaleinsatz;
+    if (!st2) return 0.7;
+    const hqWirkung = s2.hq.wirkung?.personal ?? 1;
+    const chro = s2.vorstand?.ressorts?.chro?.person;
+    const fuehrung = chro ? clamp(1 + (chro.fuehrung / 100 - 0.5) * 0.3, 0.85, 1.15) : 1;
+    return clamp((st2.person?.qualitaet ?? 0.35) * hqWirkung * fuehrung, 0, 1);
+  }
+  function clusterQualitaet(s2, id) {
+    const org2 = s2;
+    return clamp(org2.organisation?.hauscluster.find((x2) => x2.id === id)?.stelle.person?.qualitaet ?? 0.65, 0, 1);
+  }
+  function profil(s2, gruppe3) {
+    const p2 = [0.105, 0.137, 0.147, 0.157, 0.191, 0.263];
+    const dezember = s2.woche % 52 >= 47 && s2.woche % 52 <= 51;
+    if (dezember) {
+      p2[0] -= 0.035;
+      p2[5] += 0.035;
+    }
+    if (gruppe3 === "kasse") {
+      p2[0] -= 0.015;
+      p2[5] += 0.015;
+    }
+    if (gruppe3 === "logistik") {
+      p2[0] += 0.065;
+      p2[5] -= 0.065;
+    }
+    if (gruppe3 === "verwaltung") {
+      p2[0] += 0.025;
+      p2[5] -= 0.065;
+      p2[1] += 0.04;
+    }
+    return p2;
+  }
+  function ausfall(s2) {
+    const kw2 = s2.woche % 52;
+    return {
+      krank: kw2 <= 8 ? 0.086 : kw2 >= 44 ? 0.067 : 0.045,
+      urlaub: kw2 >= 26 && kw2 <= 35 ? 0.14 : kw2 >= 51 ? 0.1 : 0.055
+    };
+  }
+  function streu(t5) {
+    let n3 = 2166136261;
+    for (let i = 0; i < t5.length; i++) n3 = Math.imul(n3 ^ t5.charCodeAt(i), 16777619);
+    n3 ^= n3 >>> 13;
+    n3 = Math.imul(n3, 1540483477);
+    n3 ^= n3 >>> 15;
+    return (n3 >>> 0) / 4294967296;
+  }
+  var PERSONAL_PUFFER = 0.03;
+  function krankheitswelle(s2, region, woche2 = s2.woche) {
+    const kw2 = (woche2 % 52 + 52) % 52;
+    if (kw2 > 11 && kw2 < 40) return 0;
+    for (let b4 = woche2; b4 > woche2 - 3; b4--) {
+      if (streu(s2.seed + ":welle:" + region + ":" + b4) < 0.075) {
+        const dauer = 2 + Math.floor(streu(s2.seed + ":welledauer:" + region + ":" + b4) * 2);
+        if (woche2 - b4 < dauer) return 0.025 + 0.035 * streu(s2.seed + ":wellehoehe:" + region + ":" + b4);
+      }
+    }
+    return 0;
+  }
+  function krankIst(s2, h4) {
+    const plan2 = ausfall(s2).krank;
+    const groesse2 = fte(h4) > 160 ? 1.08 : fte(h4) < 60 ? 0.94 : 1;
+    const region = h4.region === "Ost" ? 1.07 : h4.region === "S\xFCd" ? 0.95 : 1;
+    const haus2 = 0.85 + 0.3 * streu(s2.seed + ":krankhaus:" + h4.id);
+    const woche2 = 0.6 + 0.8 * streu(s2.seed + ":krank:" + h4.id + ":" + s2.woche);
+    return clamp(plan2 * groesse2 * region * haus2 * woche2 + krankheitswelle(s2, h4.region), 0.015, 0.22);
+  }
+  function dienstplan(s2, h4, anlieferung, reduzierung, wochenplanung = false) {
+    const st2 = h4.personaleinsatz;
+    const aus = ausfall(s2), q2 = qualitaet2(s2);
+    const streut = !s2.prognose && (wochenplanung || s2.woche > (s2.spielStartWoche ?? 0));
+    const krank = streut ? krankIst(s2, h4) : aus.krank;
+    const ausfallWoche = (1 - krank) / (1 - aus.krank);
+    const neu3 = st2.einarbeitungBis > s2.woche;
+    const relativ = fte(h4) > 0 ? (fte(h4) - (neu3 ? 0.5 * st2.einarbeitungFte : 0)) / fte(h4) : 1;
+    const dezember = s2.woche % 52 >= 47 && s2.woche % 52 <= 51;
+    const jahr2 = Math.floor(s2.woche / 52);
+    const weihnachten = s2.personaleinsatz?.weihnachten[jahr2] ?? "basis";
+    const saison2 = clamp(0.75 + 0.25 * saisonFaktor("damen", s2.woche), 0.7, 1.35);
+    const letzterUmsatz = h4.kpi?.umsatz ?? st2.basisUmsatz;
+    const umsatzFaktor = clamp(letzterUmsatz / Math.max(1, st2.basisUmsatz), 0.65, 1.6);
+    const messung2 = h4.treiberVerlauf?.slice(-1)[0];
+    if (!st2.basisFrequenz && messung2?.frequenz) st2.basisFrequenz = messung2.frequenz;
+    const frequenzFaktor = st2.basisFrequenz && messung2 ? clamp(messung2.frequenz / st2.basisFrequenz, 0.65, 1.6) : umsatzFaktor;
+    const logistikFaktor = clamp(1 + (anlieferung - 1) * 0.1 + h4.flaechen.filter((f13) => f13.konzept === "offprice").length * 0.03 + (reduzierung ? 0.08 : 0), 0.75, 1.4);
+    const gruppen = {};
+    let extra = 0;
+    for (const g2 of PERSONAL_GRUPPEN) {
+      const p2 = profil(s2, g2);
+      const last = g2 === "kasse" ? frequenzFaktor : g2 === "verkauf" ? 0.6 * frequenzFaktor + 0.4 * umsatzFaktor : g2 === "logistik" ? logistikFaktor : 1;
+      const basis4 = st2.basisFte * 40 * PERSONAL_ANTEILE[g2] * saison2 * last;
+      const tage = p2.map((anteil3, i) => {
+        const bedarf2 = basis4 * anteil3 / (1 - aus.krank - aus.urlaub);
+        const richtung2 = Math.sin((h4.id.length * 13 + h4.id.charCodeAt(1) * 7 + i * 11 + s2.woche % 52) * 0.41);
+        const fehler6 = richtung2 * 0.19;
+        const bezug = 1 + fehler6 * (1 - st2.basisQualitaet);
+        const genau = 1 + fehler6 * (1 - q2);
+        const tag = !streut ? 1 : 1 + (g2 === "verwaltung" ? 0.02 : 0.05) * (streu(s2.seed + ":tag:" + h4.id + ":" + s2.woche + ":" + g2 + ":" + i) - 0.5) * 2;
+        const ausfallTag = clamp(ausfallWoche * tag, 0.6, 1.08);
+        let plan4 = bedarf2 * relativ * st2.faktor[g2] * genau * (1 + st2.training * 0.035) * ausfallTag;
+        if (g2 === "kasse" && i === 5) plan4 *= st2.samstagKasse;
+        if (g2 === "kasse" && dezember && weihnachten === "sparsam") plan4 *= 0.88;
+        const referenz = bedarf2 * bezug;
+        extra += Math.max(0, (st2.faktor[g2] - 1) * bedarf2) + (g2 === "kasse" && i === 5 ? Math.max(0, st2.samstagKasse - 1) * bedarf2 : 0);
+        return { tag: PERSONAL_TAGE[i], bedarf: rund4(bedarf2), plan: rund4(plan4), referenz: rund4(referenz), springer: 0, deckung: bedarf2 ? plan4 / bedarf2 : 1, ausfall: ausfallTag };
       });
-      melde(s2, "info", "\xDCbernahmeangebot " + angebot.id + " f\xFCr " + w2.stadt + " (8 Wochen g\xFCltig).");
+      const bedarf = tage.reduce((a2, t5) => a2 + t5.bedarf, 0);
+      const plan3 = tage.reduce((a2, t5) => a2 + t5.plan, 0);
+      gruppen[g2] = {
+        gruppe: g2,
+        name: PERSONAL_NAMEN[g2],
+        fte: rund(fte(h4) * PERSONAL_ANTEILE[g2]),
+        tage,
+        bedarf: rund(bedarf),
+        plan: rund(plan3),
+        deckung: bedarf ? plan3 / bedarf : 1
+      };
+    }
+    const ahQuote = st2.aushilfenQuote;
+    const gesamt = Object.values(gruppen).reduce((a2, g2) => a2 + g2.bedarf, 0);
+    const weihnachtsReserve = dezember && weihnachten === "reserve" ? gesamt * 0.02 : 0;
+    const gebuchteAushilfenStunden = gesamt * ahQuote;
+    const aushilfenStunden = gebuchteAushilfenStunden * (dezember && weihnachten === "spaet" ? 0.65 : 1);
+    if (weihnachtsReserve > 0) {
+      gruppen.verkauf.tage[5].plan += rund(weihnachtsReserve * 0.6);
+      gruppen.kasse.tage[5].plan += rund(weihnachtsReserve * 0.4);
+    }
+    for (const g2 of ["verkauf", "kasse"]) {
+      const z6 = gruppen[g2], anteil3 = g2 === "kasse" ? 0.45 : 0.55;
+      z6.tage[4].plan += rund(aushilfenStunden * anteil3 * 0.35);
+      z6.tage[5].plan += rund(aushilfenStunden * anteil3 * 0.65);
+      z6.plan = rund(z6.tage.reduce((a2, t5) => a2 + t5.plan, 0));
+    }
+    const basisStunden = Math.max(1, st2.basisFte * 40);
+    const normalLohn = (h4.personal.vollzeit * 860 + h4.personal.teilzeit * 690 + h4.personal.aushilfen * 490) / basisStunden;
+    const aufschlag = dezember && weihnachten === "spaet" ? 1.55 : 1;
+    const zusatzkosten = eur(gebuchteAushilfenStunden * 490 / 40 * aufschlag + extra * normalLohn * 0.5 + weihnachtsReserve * 490 / 40);
+    const festeAushilfen = h4.personal.aushilfen * 40 * clamp(0.6 + 0.4 * saisonFaktor("damen", s2.woche), 0.5, 1.6);
+    const plan2 = {
+      woche: s2.woche,
+      gruppen,
+      krank,
+      urlaub: aus.urlaub,
+      aushilfenStunden: Math.round(festeAushilfen + aushilfenStunden),
+      zusatzkosten,
+      verfuegbarkeit: 1,
+      kaufquote: 1,
+      fehlerkosten: 0,
+      springerSaldo: 0,
+      springerBewegungen: 0,
+      einarbeitung: neu3 ? 0.5 : 1
+    };
+    berechneWirkung(h4, plan2);
+    return plan2;
+  }
+  function wirkPlan(t5) {
+    const a2 = t5.ausfall ?? 1;
+    return a2 < 1 ? t5.plan / a2 * Math.min(1, a2 + PERSONAL_PUFFER) : t5.plan;
+  }
+  function berechneWirkung(h4, p2) {
+    const defizit = (g2, i) => {
+      const t5 = p2.gruppen[g2].tage[i];
+      return Math.max(0, 1 - wirkPlan(t5) / Math.max(0.01, t5.referenz));
+    };
+    const gewicht2 = [0.105, 0.137, 0.147, 0.157, 0.191, 0.263];
+    const verkauf2 = gewicht2.reduce((a2, w2, i) => a2 + w2 * defizit("verkauf", i), 0);
+    const kasse = gewicht2.reduce((a2, w2, i) => a2 + w2 * defizit("kasse", i) * (i === 5 ? 1.6 : 0.38), 0);
+    const logistik = gewicht2.reduce((a2, w2, i) => a2 + w2 * defizit("logistik", i), 0);
+    const verwaltung = gewicht2.reduce((a2, w2, i) => a2 + w2 * defizit("verwaltung", i), 0);
+    p2.kaufquote = clamp(1 - 0.33 * verkauf2 - 0.4 * kasse, 0.65, 1);
+    p2.verfuegbarkeit = clamp(1 - 0.5 * logistik, 0.7, 1);
+    p2.fehlerkosten = eur((h4.kpi?.umsatz ?? 0) * 4e-3 * verwaltung);
+    for (const z6 of Object.values(p2.gruppen)) {
+      z6.plan = rund(z6.tage.reduce((a2, t5) => a2 + t5.plan, 0));
+      z6.deckung = z6.bedarf ? z6.plan / z6.bedarf : 1;
+      for (const t5 of z6.tage) t5.deckung = t5.bedarf ? t5.plan / t5.bedarf : 1;
     }
   }
-  function istStadtAktion(s2, stadt) {
-    return s2.marketing.aktionen.some((a2) => a2.status !== "abgesagt" && a2.start === s2.woche && aktive(s2).some((h4) => h4.stadt === stadt && (a2.scope.typ === "alle" || a2.scope.typ === "region" && a2.scope.region === h4.region || a2.scope.typ === "cluster" && a2.scope.cluster === h4.cluster || a2.scope.typ === "format" && a2.scope.format === h4.format || a2.scope.typ === "haeuser" && a2.scope.ids.includes(h4.id))));
-  }
-  function stadtWachstum(s2, stadt) {
-    const werte3 = s2.wettbewerbStadtUmsatz[stadt] ?? [];
-    if (werte3.length < 65) return false;
-    const neu3 = werte3.slice(-13).reduce((a2, b4) => a2 + b4, 0);
-    const vorjahr2 = werte3.slice(-65, -52).reduce((a2, b4) => a2 + b4, 0);
-    return vorjahr2 > 0 && neu3 / vorjahr2 > 1.08;
-  }
-  function wettbewerbWoche(s2) {
-    if (s2.wettbewerbDeaktiviert) return;
-    const w2 = s2.woche;
-    if (!s2.prognose) for (const stadt of new Set(aktive(s2).map((h4) => h4.stadt))) {
-      const umsatz = aktive(s2).filter((h4) => h4.stadt === stadt && h4.kpi?.woche === w2 && h4.status !== "geschlossen" && h4.status !== "verkauft").reduce((a2, h4) => a2 + (h4.kpi?.umsatz ?? 0), 0);
-      const hist = s2.wettbewerbStadtUmsatz[stadt] ?? (s2.wettbewerbStadtUmsatz[stadt] = []);
-      hist.push(umsatz);
-      if (hist.length > 65) hist.shift();
+  function neuPlanen(s2, wochenplanung = false) {
+    var _a2;
+    const gruppen = /* @__PURE__ */ new Map();
+    const anlieferungen = s2.bestellungen.filter((b4) => b4.ankunft === s2.woche).reduce((a2, b4) => a2 + b4.wert, 0);
+    const norm3 = Math.max(1, s2.haeuser.length * 1e5);
+    const anlieferung = clamp(anlieferungen / norm3, 0.5, 1.8);
+    const reduzierung = s2.marketing.aktionen.some((a2) => a2.start <= s2.woche && a2.ende > s2.woche && a2.rabatt >= 0.15);
+    for (const h4 of s2.haeuser) {
+      if (!aktiv3(h4) || !h4.personaleinsatz) continue;
+      h4.personaleinsatz.plan = dienstplan(s2, h4, anlieferung, reduzierung, wochenplanung);
+      if (h4.treiber) setzeTreiber(s2, h4.id, "personal", "kaufquote", h4.personaleinsatz.plan.kaufquote);
+      const id = gruppeHauscluster(h4, s2);
+      if (!gruppen.has(id)) gruppen.set(id, []);
+      gruppen.get(id).push(h4);
     }
-    for (const wb of s2.wettbewerber) {
-      if (wb.status === "eroeffnung" && (wb.bis ?? 0) <= w2) {
-        wb.status = "offen";
-        wb.bis = void 0;
-      }
-      if (wb.status === "raeumung" && (wb.bis ?? 0) <= w2) {
-        wb.status = "offen";
-        wb.art = "leer_ehemals";
-        wb.preisdruck = 0;
-        wb.seit = w2;
-        wb.bis = void 0;
-        const hs = betroffeneHaeuser(s2, wb.stadt);
-        for (const h4 of hs) h4.transferBonus += 0.02 / hs.length;
-        melde(s2, "info", "Ehemaliger Standort " + wb.name + " in " + wb.stadt + " steht leer; Kunden wechseln zu Hartwig.", { stadt: wb.stadt, modul: "wettbewerb" });
-      }
-      if ((wb.aktionBis ?? 0) <= w2) {
-        wb.preisdruck = 0;
-        wb.aktionVon = void 0;
-        wb.aktionBis = void 0;
-      }
-      if (wb.konterVon === w2 && wb.konterBis && wb.konterBis > w2) {
-        wb.preisdruck = wb.konterDruck ?? 0.4;
-        wb.aktionVon = w2;
-        wb.aktionBis = wb.konterBis;
-        melde(s2, "ereignis", wb.name + " kontert in " + wb.stadt + " eine Hartwig-Aktion mit " + Math.round(wb.preisdruck * 100) + " % zus\xE4tzlichem Preisdruck.", { stadt: wb.stadt, modul: "wettbewerb" });
-        wb.konterVon = void 0;
-        wb.konterBis = void 0;
-        wb.konterDruck = void 0;
-      }
-    }
-    if (!s2.prognose && !s2.wettbewerbEreignisseDeaktiviert) {
-      for (const h4 of aktive(s2).filter((h5) => h5.status === "geschlossen" && !s2.wettbewerbGeseheneSchliessungen.includes(h5.id))) {
-        s2.wettbewerbGeseheneSchliessungen.push(h4.id);
-        h4.wettbewerbSchliessungWoche = w2;
-        if (chance2(s2, 0.35)) s2.wettbewerbNachnutzungen.push({ haus: h4.id, woche: w2 + gz(s2, 26, 78) });
-      }
-      for (const n3 of s2.wettbewerbNachnutzungen.filter((n4) => n4.woche <= w2)) {
-        const h4 = aktive(s2).find((x2) => x2.id === n3.haus);
-        if (h4 && h4.status === "geschlossen") neuEroeffnet(s2, h4.stadt, wahl(s2, ["offprice", "textildiscounter", "elektronik"]), h4.id);
-      }
-      s2.wettbewerbNachnutzungen = s2.wettbewerbNachnutzungen.filter((n3) => n3.woche > w2);
-      const staedte = [...new Set(aktive(s2).map((h4) => h4.stadt))];
-      for (const stadt of staedte) {
-        const hs = aktive(s2).filter((h4) => h4.stadt === stadt);
-        const gesamtkm = hs.reduce((a2, h4) => a2 + h4.grundflaecheQm * Math.max(1, h4.etagen.length), 0);
-        const zu = hs.filter((h4) => h4.status === "geschlossen").reduce((a2, h4) => a2 + h4.grundflaecheQm * Math.max(1, h4.etagen.length), 0);
-        const kuerzlich = hs.some((h4) => h4.wettbewerbSchliessungWoche !== void 0 && w2 - h4.wettbewerbSchliessungWoche < 52);
-        const faktor2 = gesamtkm > 0 && zu / gesamtkm > 0.5 && kuerzlich ? 3 : 1;
-        const p2 = clamp(2e-3 * (hs.reduce((a2, h4) => a2 + h4.einzug.kaufkraft, 0) / hs.length) * (1 + zu / Math.max(1, gesamtkm)) * faktor2, 0, 0.05);
-        if (chance2(s2, p2)) neuEroeffnet(s2, stadt, eroeffnungsArt(s2, stadt));
-        const aktion2 = istStadtAktion(s2, stadt);
-        const wachstum = stadtWachstum(s2, stadt);
-        for (const wb of s2.wettbewerber.filter((x2) => x2.stadt === stadt && x2.status === "offen" && x2.art !== "leer_ehemals")) {
-          if (w2 > 10 && chance2(s2, 6e-4)) {
-            wb.lage = wb.lage === "1a" ? "center" : "1a";
-            wb.status = "eroeffnung";
-            wb.seit = w2;
-            wb.bis = w2 + 4;
-            melde(s2, "presse", wb.name + " verlegt seinen Standort innerhalb von " + stadt + " nach " + wb.lage + ".", { stadt, modul: "wettbewerb" });
-            continue;
-          }
-          if (hs[0].einzug.kaufkraft < 0.9) wb.staerke *= 0.998;
-          if (wb.staerke < 0.25 && hs[0].einzug.kaufkraft < 0.9 && chance2(s2, 3e-3)) {
-            raeumung(s2, wb);
-            continue;
-          }
-          if (aktion2 && chance2(s2, 0.4)) {
-            const action = s2.marketing.aktionen.find((a2) => a2.status !== "abgesagt" && a2.start === w2);
-            const ueberschnitt = !action?.bereiche?.length || action.bereiche.some((g2) => (WETTBEWERB_UEBERSCHNEIDUNG[wb.art][g2] ?? 0) > 0);
-            if (ueberschnitt) {
-              wb.konterVon = w2 + gz(s2, 1, 2);
-              wb.konterBis = wb.konterVon + Math.max(1, (action?.ende ?? w2 + 3) - w2);
-              wb.konterDruck = z(s2, 0.3, 0.6);
-            }
-          }
-          const saison2 = [1, 2, 3, 4, 26, 27, 28, 29, 30, 47, 52].includes(kw(w2)) ? 1.9 : 0.78;
-          const freq = wachstum ? 1.35 : 1;
-          if (wb.aktionBis === void 0 && chance2(s2, 6 / 52 * saison2 * freq)) {
-            wb.aktionVon = w2;
-            wb.aktionBis = w2 + gz(s2, 1, 3);
-            wb.preisdruck = z(s2, 0.1, 0.35);
-          }
+    for (const [id, hs] of gruppen) {
+      if (!s2.personaleinsatz?.springer[id] || hs.length < 2) continue;
+      const guete = clusterQualitaet(s2, id);
+      for (const g2 of ["kasse", "verkauf", "logistik"]) for (let tag = 0; tag < 6; tag++) {
+        const bedarf = (h4) => h4.personaleinsatz.plan.gruppen[g2].tage[tag].bedarf;
+        const plan2 = (h4) => h4.personaleinsatz.plan.gruppen[g2].tage[tag].plan;
+        const empfaenger = hs.filter((h4) => bedarf(h4) > plan2(h4) + 0.1).sort((a2, b4) => bedarf(b4) - plan2(b4) - (bedarf(a2) - plan2(a2)) || a2.id.localeCompare(b4.id));
+        const geber = hs.filter((h4) => plan2(h4) > bedarf(h4) + 0.1).sort((a2, b4) => a2.id.localeCompare(b4.id));
+        for (const ziel of empfaenger) for (const start of geber) {
+          if (start.id === ziel.id) continue;
+          const frei6 = plan2(start) - bedarf(start), fehlt = bedarf(ziel) - plan2(ziel);
+          const cap = 0.12 * bedarf(start) * guete;
+          const stunden = rund(Math.max(0, Math.min(frei6, fehlt, cap)));
+          if (!stunden) continue;
+          const von = start.personaleinsatz.plan, nach = ziel.personaleinsatz.plan;
+          von.gruppen[g2].tage[tag].plan -= stunden;
+          nach.gruppen[g2].tage[tag].plan += stunden;
+          von.gruppen[g2].tage[tag].springer -= stunden;
+          nach.gruppen[g2].tage[tag].springer += stunden;
+          von.springerSaldo -= stunden;
+          nach.springerSaldo += stunden;
+          von.springerBewegungen++;
+          nach.springerBewegungen++;
         }
       }
+      for (const h4 of hs) berechneWirkung(h4, h4.personaleinsatz.plan);
     }
-    for (const h4 of aktive(s2)) h4.einzug.wettbewerb = wettbewerbAus(s2, h4);
+    for (const h4 of s2.haeuser) {
+      if (!h4.personaleinsatz?.plan || !h4.treiber) continue;
+      const q2 = h4.personaleinsatz.plan.kaufquote;
+      h4.treiberQuellen ?? (h4.treiberQuellen = {});
+      if (q2 < 0.999999) ((_a2 = h4.treiberQuellen).personal ?? (_a2.personal = {})).kaufquote = q2;
+      else if (h4.treiberQuellen.personal) {
+        delete h4.treiberQuellen.personal.kaufquote;
+        if (!Object.keys(h4.treiberQuellen.personal).length) delete h4.treiberQuellen.personal;
+      }
+      const v2 = { frequenz: 1, kaufquote: 1, bon: 1 };
+      for (const x2 of Object.values(h4.treiberQuellen))
+        for (const k5 of ["frequenz", "kaufquote", "bon"]) v2[k5] *= x2[k5] ?? 1;
+      h4.treiber = v2;
+    }
   }
-  function wettbewerbUebersicht(s2, stadt) {
-    return s2.wettbewerber.filter((w2) => !stadt || w2.stadt === stadt).map((w2) => ({
-      id: w2.id,
-      name: w2.name,
-      kette: w2.kette,
-      art: w2.art,
-      stadt: w2.stadt,
-      lage: w2.lage,
-      staerke: w2.staerke,
-      status: w2.status,
-      preisdruck: w2.preisdruck,
-      seit: w2.seit,
-      inHartwigGebaeude: w2.inHartwigGebaeude,
-      rabatt: (w2.aktionVon ?? Infinity) <= s2.woche && (w2.aktionBis ?? -1) > s2.woche ? w2.preisdruck : 0,
-      wirkung: Object.fromEntries(Object.keys(WETTBEWERB_UEBERSCHNEIDUNG[w2.art]).map((g2) => {
-        const h4 = aktive(s2).find((x2) => x2.stadt === w2.stadt && gruppenFuer(x2.format).includes(g2));
-        const faktor2 = h4 ? 0.25 * WIRKUNGSFAKTOR * wertJeGruppe(w2, g2, s2) * lageFaktor(h4, w2) / (1 - 0.25 * h4.wettbewerbStart) : 0;
-        return [g2, -Math.round(faktor2 * 1e4) / 100];
-      }))
+  function initialisierePersonaleinsatz(s2) {
+    if (!s2.personaleinsatz) s2.personaleinsatz = {
+      weihnachten: {},
+      springer: {},
+      trainingInvestition: 0,
+      letzteVorlage: -1,
+      letzteWarnung: {}
+    };
+    const q2 = qualitaet2(s2);
+    for (const h4 of s2.haeuser) if (!h4.personaleinsatz) {
+      h4.personaleinsatz = {
+        basisFte: Math.max(0.1, fte(h4)),
+        basisUmsatz: Math.max(1, Object.entries(h4.potenzial).reduce((wert, [g2, P5]) => {
+          const qm2 = h4.flaechen.filter((f13) => f13.gruppe === g2 && (f13.konzept === "eigen" || f13.konzept === "kommission")).reduce((sum2, f13) => sum2 + f13.qm, 0);
+          return wert + (P5 ?? 0) * (1 - Math.exp(-qm2 / Math.max(1, h4.saettigungQm[g2] ?? 1)));
+        }, 0)),
+        basisQualitaet: q2,
+        anteile: { ...PERSONAL_ANTEILE },
+        faktor: { logistik: 1, verkauf: 1, kasse: 1, verwaltung: 1 },
+        samstagKasse: 1,
+        aushilfenQuote: 0,
+        stimmung: 70,
+        einarbeitungBis: -1,
+        einarbeitungFte: 0,
+        training: 0
+      };
+    }
+    neuPlanen(s2);
+  }
+  function personaleinsatzWoche(s2) {
+    if (!s2.personaleinsatz) initialisierePersonaleinsatz(s2);
+    const ps = s2.personaleinsatz;
+    const jahr2 = Math.floor(s2.woche / 52), kw2 = s2.woche % 52;
+    if (!s2.prognose && kw2 === 39 && ps.letzteVorlage !== jahr2) {
+      ps.letzteVorlage = jahr2;
+      s2.entscheidungen.push({
+        id: "personal-weihnachten-" + jahr2,
+        typ: "personal_weihnachten",
+        titel: "Aushilfen Weihnachten: drei Optionen",
+        text: "Dezember-Spitzen fr\xFChzeitig absichern. Entscheidung bis KW 44, danach werden Aushilfen teurer und knapper.",
+        woche: s2.woche,
+        frist: s2.woche + 4,
+        standard: "basis",
+        daten: { jahr: jahr2 },
+        optionen: [
+          { id: "reserve", label: "Reserve erh\xF6hen (zus\xE4tzliche Kosten)" },
+          { id: "basis", label: "Bedarfsgerecht planen (Empfehlung)" },
+          { id: "sparsam", label: "Sparsam planen (Risiko an der Kasse)" }
+        ]
+      });
+    }
+    for (const h4 of s2.haeuser) {
+      const st2 = h4.personaleinsatz;
+      if (!aktiv3(h4) || !st2 || s2.prognose) continue;
+      const ratio = st2.basisFte ? fte(h4) / st2.basisFte : 1;
+      if (ratio < 0.75) st2.stimmung = clamp(st2.stimmung - 0.35, 0, 100);
+      else if (ratio > 0.98) st2.stimmung = clamp(st2.stimmung + 0.08, 0, 100);
+      if (st2.stimmung < 32 && (s2.woche + h4.id.length * 7) % 17 === 0) {
+        h4.personal.teilzeit = Math.max(0, h4.personal.teilzeit * 0.98);
+        st2.einarbeitungBis = s2.woche + 4;
+        st2.einarbeitungFte = Math.max(st2.einarbeitungFte, fte(h4) * 0.02);
+        melde(s2, "warnung", h4.name + ": erh\xF6hte Fluktuation. Neue Kr\xE4fte sind vier Wochen nur halb produktiv.", { hausId: h4.id, modul: "personal" });
+      }
+    }
+    neuPlanen(s2, true);
+    if (!s2.prognose) for (const region of [...new Set(s2.haeuser.filter(aktiv3).map((h4) => h4.region))]) {
+      const welle2 = krankheitswelle(s2, region);
+      if (!welle2 || krankheitswelle(s2, region, s2.woche - 1)) continue;
+      const hs = s2.haeuser.filter((h4) => aktiv3(h4) && h4.region === region && h4.personaleinsatz?.plan);
+      const deckung = (h4) => Math.min(...PERSONAL_GRUPPEN.map((g2) => h4.personaleinsatz.plan.gruppen[g2].deckung));
+      const knapp = [...hs].sort((a2, b4) => deckung(a2) - deckung(b4)).slice(0, 2);
+      melde(s2, "warnung", `Krankheitswelle in Region ${region}: Krankenstand rund ${Math.round(100 * (ausfall(s2).krank + welle2))} %. Am knappsten besetzt: ${knapp.map((h4) => h4.name).join(", ")}. Springerpool oder Aushilfen pr\xFCfen.`, { modul: "personal" });
+    }
+    if (!s2.prognose) for (const [id, hs] of gruppiereCluster(s2)) {
+      const kritisch = hs.filter((h4) => (h4.personaleinsatz?.plan?.gruppen.kasse.tage[5].deckung ?? 1) < 0.84);
+      if (!kritisch.length || (ps.letzteWarnung[id] ?? -100) > s2.woche - 8) continue;
+      ps.letzteWarnung[id] = s2.woche;
+      s2.entscheidungen.push({
+        id: "personal-kasse-" + id + "-" + s2.woche,
+        typ: "personal_kasse",
+        titel: "Cluster " + clusterName2(s2, id) + ": Kasse samstags unterdeckt",
+        text: kritisch.length + " H\xE4user melden Kaufabbr\xFCche wegen Warteschlangen.",
+        woche: s2.woche,
+        frist: s2.woche + 2,
+        standard: "springer",
+        daten: { cluster: id },
+        optionen: [
+          { id: "springer", label: "Springerpool nutzen (Empfehlung)" },
+          { id: "aushilfen", label: "Zus\xE4tzliche Aushilfen" },
+          { id: "behalten", label: "Dienstplan beibehalten" }
+        ]
+      });
+    }
+  }
+  function gruppiereCluster(s2) {
+    const m = /* @__PURE__ */ new Map();
+    for (const h4 of s2.haeuser) if (aktiv3(h4)) {
+      const id = gruppeHauscluster(h4, s2);
+      if (!m.has(id)) m.set(id, []);
+      m.get(id).push(h4);
+    }
+    return m;
+  }
+  function loesePersonalEntscheidung(s2, typ, daten, option2) {
+    if (!s2.personaleinsatz) initialisierePersonaleinsatz(s2);
+    if (typ === "personal_weihnachten") {
+      s2.personaleinsatz.weihnachten[Number(daten.jahr)] = option2;
+    } else if (typ === "personal_kasse") {
+      const id = String(daten.cluster);
+      if (option2 === "springer") s2.personaleinsatz.springer[id] = true;
+      if (option2 === "aushilfen") {
+        for (const h4 of gruppiereCluster(s2).get(id) ?? [])
+          if (h4.personaleinsatz) h4.personaleinsatz.aushilfenQuote = Math.max(h4.personaleinsatz.aushilfenQuote, 0.08);
+      }
+    }
+    neuPlanen(s2);
+  }
+  function personalVerkaufsFaktor(h4, gruppe3) {
+    const p2 = h4.personaleinsatz?.plan;
+    if (!p2) return 1;
+    const beratung = GRUPPEN[gruppe3]?.beratung ?? 0.5;
+    const v2 = p2.gruppen.verkauf.tage.reduce((a2, t5) => a2 + Math.max(0, 1 - wirkPlan(t5) / Math.max(0.01, t5.referenz)) / 6, 0);
+    const faktor2 = clamp(1 - (0.15 + 0.38 * beratung) * v2, 0.65, 1) * clamp(p2.kaufquote / Math.max(1e-6, 1 - 0.33 * v2), 0.65, 1);
+    return h4.treiber ? faktor2 / Math.max(0.65, p2.kaufquote) : faktor2;
+  }
+  function personalOffpriceFaktor(h4) {
+    const p2 = h4.personaleinsatz?.plan;
+    return p2 ? h4.treiber ? 1 : p2.kaufquote : 1;
+  }
+  function personalZusatzkosten(h4) {
+    return h4.personaleinsatz?.plan?.zusatzkosten ?? 0;
+  }
+  function personalFehlerkosten(h4) {
+    return h4.personaleinsatz?.plan?.fehlerkosten ?? 0;
+  }
+  function personalVerfuegbarkeit(h4) {
+    return h4.personaleinsatz?.plan?.verfuegbarkeit ?? 1;
+  }
+  function auswahl2(s2, a2) {
+    if (a2.haus) return s2.haeuser.filter((h4) => h4.id === a2.haus && aktiv3(h4));
+    if (a2.hauscluster) return s2.haeuser.filter((h4) => gruppeHauscluster(h4, s2) === a2.hauscluster && aktiv3(h4));
+    return [];
+  }
+  function personalAktion(s2, a2) {
+    if (!s2.personaleinsatz) initialisierePersonaleinsatz(s2);
+    if (a2.typ === "personalSpringer") {
+      if (!gruppiereCluster(s2).has(a2.hauscluster)) return { ok: false, text: "Hauscluster nicht gefunden." };
+      s2.personaleinsatz.springer[a2.hauscluster] = a2.an;
+      neuPlanen(s2);
+      return { ok: true, text: "Springerpool " + (a2.an ? "aktiviert." : "deaktiviert.") };
+    }
+    if (a2.typ === "personalWeihnachtenNachbuchen") {
+      const kw2 = s2.woche % 52;
+      if (kw2 < 43 || kw2 > 51) return { ok: false, text: "Weihnachts-Nachbuchungen sind erst ab KW 44 m\xF6glich." };
+      if (!Number.isFinite(a2.quote) || a2.quote < 0.05 || a2.quote > 0.3)
+        return { ok: false, text: "Aushilfenquote muss zwischen 5 % und 30 % liegen." };
+      const hs2 = a2.hauscluster ? auswahl2(s2, { hauscluster: a2.hauscluster }) : s2.haeuser.filter(aktiv3);
+      if (!hs2.length) return { ok: false, text: "Keine H\xE4user ausgew\xE4hlt." };
+      s2.personaleinsatz.weihnachten[Math.floor(s2.woche / 52)] = "spaet";
+      for (const h4 of hs2) h4.personaleinsatz.aushilfenQuote = Math.max(h4.personaleinsatz.aushilfenQuote, a2.quote);
+      neuPlanen(s2);
+      return { ok: true, text: "Weihnachts-Aushilfen nachgebucht: 55 % Preisaufschlag, 35 % der Stunden nicht verf\xFCgbar." };
+    }
+    if (a2.typ === "personalWeiterbildung") {
+      if (!Number.isFinite(a2.stufe) || a2.stufe < 0 || a2.stufe > 3) return { ok: false, text: "Stufe 0 bis 3 w\xE4hlen." };
+      const hs2 = a2.hauscluster ? auswahl2(s2, { hauscluster: a2.hauscluster }) : s2.haeuser.filter(aktiv3);
+      if (!hs2.length) return { ok: false, text: "Keine H\xE4user ausgew\xE4hlt." };
+      for (const h4 of hs2) h4.personaleinsatz.training = a2.stufe;
+      s2.einmalkostenWoche += eur(hs2.length * a2.stufe * 1700);
+      neuPlanen(s2);
+      return { ok: true, text: "Weiterbildung f\xFCr " + hs2.length + " H\xE4user beauftragt." };
+    }
+    const hs = auswahl2(s2, a2);
+    if (!hs.length) return { ok: false, text: "Offenes Haus oder Hauscluster nicht gefunden." };
+    const wert = a2.typ === "personalAushilfen" ? a2.quote : a2.faktor;
+    const min = a2.typ === "personalAushilfen" ? 0 : 0.4, max = a2.typ === "personalAushilfen" ? 0.3 : 1.6;
+    if (!Number.isFinite(wert) || wert < min || wert > max)
+      return { ok: false, text: "Wert au\xDFerhalb des zul\xE4ssigen Bereichs." };
+    for (const h4 of hs) {
+      const st2 = h4.personaleinsatz;
+      if (a2.typ === "personalSteuern") st2.faktor[a2.gruppe] = wert;
+      else if (a2.typ === "personalSamstagKasse") st2.samstagKasse = wert;
+      else st2.aushilfenQuote = wert;
+    }
+    neuPlanen(s2);
+    return { ok: true, text: "Personaleinsatz in " + hs.length + " H\xE4usern angepasst." };
+  }
+  function personalHaus(s2, hausId) {
+    return s2.haeuser.find((h4) => h4.id === hausId)?.personaleinsatz?.plan;
+  }
+  function personalUebersicht(s2, cluster) {
+    return [...gruppiereCluster(s2)].filter(([id]) => !cluster || id === cluster).map(([id, hs]) => ({
+      id,
+      name: clusterName2(s2, id),
+      springerAktiv: !!s2.personaleinsatz?.springer[id],
+      bewegungen: hs.reduce((n3, h4) => n3 + (h4.personaleinsatz?.plan?.springerBewegungen ?? 0), 0),
+      haeuser: hs.map((h4) => {
+        const p2 = h4.personaleinsatz?.plan;
+        return {
+          id: h4.id,
+          name: h4.name,
+          gruppen: Object.fromEntries(PERSONAL_GRUPPEN.map((g2) => [g2, p2?.gruppen[g2].deckung ?? 1])),
+          krank: p2?.krank ?? 0,
+          aushilfen: p2?.aushilfenStunden ?? 0,
+          springer: p2?.springerSaldo ?? 0
+        };
+      })
     }));
   }
-  function wettbewerbFuerGrafik(s2, stadt) {
-    return s2.wettbewerber.filter((w2) => w2.stadt === stadt).map((w2) => ({
-      id: w2.id,
-      name: w2.name,
-      art: w2.art,
-      form: w2.form,
-      lage: w2.lage,
-      grundflaecheQm: w2.grundflaecheQm,
-      status: w2.status,
-      inHartwigGebaeude: w2.inHartwigGebaeude,
-      seit: w2.seit,
-      rabatt: (w2.aktionVon ?? Infinity) <= s2.woche && (w2.aktionBis ?? -1) > s2.woche ? w2.preisdruck : 0
-    }));
+
+  // ../engine/src/ereignisse.ts
+  function offeneHaeuser(s2, format) {
+    return s2.haeuser.filter((h4) => !h4.nurDaten && h4.status === "offen" && (!format || h4.format === format));
   }
-  function uebernehmeWettbewerber(s2, id, modus, mieteQmMonat = 11) {
-    const wb = s2.wettbewerber.find((w2) => w2.id === id);
-    if (!wb || wb.status === "geschlossen") return "Wettbewerber-Standort nicht verf\xFCgbar.";
-    const basis4 = aktive(s2).find((h4) => h4.stadt === wb.stadt && h4.format === "warenhaus" && h4.status === "offen");
-    if (!basis4) return "Kein offenes Hartwig-Warenhaus am Standort.";
-    const qm2 = wb.grundflaecheQm;
-    const kosten2 = eur(qm2 * (modus === "erweiterung" ? 250 : 200));
-    if (!liquiditaetReicht(s2, kosten2)) return "Nicht genug Liquidit\xE4t f\xFCr die Umbaukosten.";
-    s2.cash -= kosten2;
-    s2.einmalkostenWoche += kosten2;
-    if (modus === "erweiterung") {
-      const g2 = "damen";
-      const idF = basis4.id + "-wb-" + wb.id;
-      basis4.flaechen.push({ id: idF, etage: 0, qm: qm2, konzept: "eigen", gruppe: g2, umbauBis: s2.woche + 8 });
-      basis4.potenzial[g2] = (basis4.potenzial[g2] ?? 0) + qm2 * GRUPPEN[g2].qmUmsatz;
-      basis4.miete.mieteWoche += eur(qm2 * mieteQmMonat * 12 / 52);
+  function neueEntscheidung(s2, e) {
+    if (s2.prognose) return;
+    s2.entscheidungen.push({ ...e, id: neueId(s2, "e"), woche: s2.woche });
+  }
+  function neuesAngebot(s2, a2) {
+    const x2 = { ...a2, id: neueId(s2, "a"), woche: s2.woche, status: "offen" };
+    s2.angebote.push(x2);
+    return x2;
+  }
+  function basisUmsatzHaus(h4) {
+    let x2 = 0;
+    for (const [g2, P5] of Object.entries(h4.potenzial)) {
+      const qm2 = h4.flaechen.filter((f13) => f13.gruppe === g2 && (f13.konzept === "eigen" || f13.konzept === "kommission")).reduce((a2, b4) => a2 + b4.qm, 0);
+      x2 += P5 * (1 - Math.exp(-qm2 / (h4.saettigungQm[g2] ?? 1)));
+    }
+    return x2;
+  }
+  function attraktivitaet2(h4) {
+    const basis4 = 1 - 0.2 * h4.wettbewerbStart;
+    const relativ = (1 - 0.2 * h4.einzug.wettbewerb) / basis4;
+    return h4.einzug.kaufkraft * LAGE_FAKTOR[h4.lage] * CLUSTER_FAKTOR[h4.cluster] * basis4 * relativ;
+  }
+  var hausAttraktivitaet = attraktivitaet2;
+  function qmAufEtage(h4, etage2) {
+    return h4.flaechen.filter((f13) => f13.etage === etage2 && f13.konzept !== "untermiete" && f13.umbauBis === void 0).reduce((a2, b4) => a2 + b4.qm, 0);
+  }
+  function untermietAnfrage(s2) {
+    const kandidaten3 = offeneHaeuser(s2).filter((h5) => !s2.angebote.some((a2) => a2.status === "offen" && a2.typ === "untermiete" && a2.wunschHaeuser?.[0] === h5.id));
+    if (!kandidaten3.length) return;
+    const h4 = waehle(s2, kandidaten3);
+    const passende = MIETER.filter((m2) => m2.etagen.some((e) => h4.etagen.includes(e) && qmAufEtage(h4, e) >= m2.qm[0]));
+    if (!passende.length) return;
+    const m = waehle(s2, passende);
+    const etage2 = waehle(s2, m.etagen.filter((e) => h4.etagen.includes(e) && qmAufEtage(h4, e) >= m.qm[0]));
+    const qm2 = Math.floor(Math.min(qmAufEtage(h4, etage2), zwischen(s2, m.qm[0], m.qm[1])) / 50) * 50;
+    const miete = Math.round(zwischen(s2, m.mieteQmMonat[0], m.mieteQmMonat[1]) * attraktivitaet2(h4) * hqUntermietFaktor(s2) * 10) / 10;
+    const laufzeit = ganzZwischen(s2, m.laufzeit[0], m.laufzeit[1]);
+    const name2 = waehle(s2, m.namen);
+    neuesAngebot(s2, {
+      typ: "untermiete",
+      frist: s2.woche + 6,
+      mieterTyp: m.typ,
+      mieterName: name2,
+      etage: etage2,
+      qmJeHaus: qm2,
+      mieteQmMonat: miete,
+      laufzeitJahre: laufzeit,
+      umbauAnteilMieter: m.umbauAnteil,
+      wunschHaeuser: [h4.id],
+      vorschlagHaeuser: [h4.id],
+      minHaeuser: 1,
+      titel: `${name2} will in ${h4.name} einziehen`,
+      text: `${name2} fragt ${qm2} qm im ${etage2 === -1 ? "UG" : etage2 === 0 ? "EG" : etage2 + ". OG"} an: ${miete.toFixed(2)} \u20AC/qm im Monat, ${laufzeit} Jahre Laufzeit, Mieter tr\xE4gt ${Math.round(m.umbauAnteil * 100)} % des Umbaus.`
+    });
+  }
+  function paketDeal(s2) {
+    const typen = MIETER.filter((m2) => m2.typ === "discounter" || m2.typ === "fitness" || m2.typ === "drogerie");
+    const m = waehle(s2, typen);
+    const etage2 = m.etagen[0];
+    const n3 = m.typ === "fitness" ? ganzZwischen(s2, 6, 10) : ganzZwischen(s2, 8, 14);
+    const pool = offeneHaeuser(s2, "warenhaus").filter((h4) => h4.etagen.includes(etage2) && qmAufEtage(h4, etage2) >= m.qm[0]);
+    if (pool.length < n3 + 2) return;
+    const wunsch = [...pool].sort((a2, b4) => attraktivitaet2(b4) - attraktivitaet2(a2)).slice(0, n3).map((h4) => h4.id);
+    const name2 = waehle(s2, m.namen);
+    const miete = Math.round(zwischen(s2, m.mieteQmMonat[0], m.mieteQmMonat[1]) * 10) / 10;
+    const qm2 = Math.round(zwischen(s2, m.qm[0], m.qm[1]) / 50) * 50;
+    neuesAngebot(s2, {
+      typ: "paket",
+      frist: s2.woche + 6,
+      mieterTyp: m.typ,
+      mieterName: name2,
+      etage: etage2,
+      qmJeHaus: qm2,
+      mieteQmMonat: miete,
+      laufzeitJahre: ganzZwischen(s2, m.laufzeit[0], m.laufzeit[1]),
+      umbauAnteilMieter: m.umbauAnteil,
+      wunschHaeuser: wunsch,
+      vorschlagHaeuser: [...wunsch],
+      minHaeuser: Math.max(4, n3 - 2),
+      flexibilitaet: zwischen(s2, 0.05, 0.2),
+      titel: `${name2} will ${n3} Standorte`,
+      text: `${name2} m\xF6chte in ${n3} H\xE4usern jeweils rund ${qm2} qm im ${etage2 === 0 ? "Erdgeschoss" : etage2 === -1 ? "Untergeschoss" : etage2 + ". OG"} anmieten, ${miete.toFixed(2)} \u20AC/qm im Monat. Gew\xFCnscht sind nat\xFCrlich die besten Lagen.`
+    });
+    melde(s2, "ereignis", `Paketanfrage: ${name2} will ${n3} Standorte.`, { modul: "zentrale" });
+  }
+  function stadtAngebot(s2) {
+    const pool = offeneHaeuser(s2, "warenhaus").filter((h5) => h5.cluster !== "metropole" && h5.kpi && h5.kpi.db < 0);
+    if (!pool.length) return;
+    const h4 = [...pool].sort((a2, b4) => (a2.kpi?.db ?? 0) - (b4.kpi?.db ?? 0))[ganzZwischen(s2, 0, Math.min(4, pool.length - 1))];
+    const zahlung = eur(zwischen(s2, 0, 25e5));
+    neuesAngebot(s2, {
+      typ: "stadt",
+      frist: s2.woche + 8,
+      wunschHaeuser: [h4.id],
+      vorschlagHaeuser: [h4.id],
+      einmalzahlung: zahlung,
+      titel: `Stadt ${h4.stadt} will ${h4.name} \xFCbernehmen`,
+      text: `Die Stadt ${h4.stadt} w\xFCrde den Mietvertrag \xFCbernehmen und das Haus zu B\xFCrgeramt und Bibliothek umbauen. ${zahlung > 0 ? `Sie zahlt ${mio(zahlung)} Abl\xF6se.` : "Eine Abl\xF6se gibt es nicht."} Die Restmiete entf\xE4llt.`
+    });
+    melde(s2, "ereignis", `Die Stadt ${h4.stadt} interessiert sich f\xFCr ${h4.name}.`, { stadt: h4.stadt, hausId: h4.id });
+  }
+  function sportEbitdaJahr(s2) {
+    return offeneHaeuser(s2, "sport").reduce((a2, h4) => a2 + (h4.kpi?.db ?? 0), 0) * 52;
+  }
+  function sportVerkauf(s2) {
+    if (!offeneHaeuser(s2, "sport").length) return;
+    const sportBestand = gruppenFuer("sport").reduce((a2, g2) => a2 + bestandWert(s2, g2), 0);
+    const dist2 = s2.phase === "insolvenz" ? 0.6 : s2.stakeholder.kreditversicherer < 40 ? 0.8 : 1;
+    const preis = eur(Math.max(3e7, sportEbitdaJahr(s2) * zwischen(s2, 4.5, 7)) * dist2 + sportBestand * 0.7);
+    neuesAngebot(s2, {
+      typ: "sportverkauf",
+      frist: s2.woche + 8,
+      kaufpreis: preis,
+      titel: `Investor will ${s2.firma.sportName} kaufen`,
+      text: `Ein Finanzinvestor bietet ${mio(preis)} f\xFCr die komplette Sportkette inklusive Ware. Personal, Mietvertr\xE4ge und Bestand gehen mit.`
+    });
+    melde(s2, "ereignis", `Kaufangebot f\xFCr ${s2.firma.sportName}: ${mio(preis)}.`);
+  }
+  function sonderposten(s2) {
+    const g2 = waehle(s2, ["damen", "herren", "accessoires", "wohnen", "sporttextil", "outdoor", "kinder"]);
+    const wert = eur(zwischen(s2, 2e6, 9e6));
+    neuesAngebot(s2, {
+      typ: "sonderposten",
+      frist: s2.woche + 2,
+      gruppe: g2,
+      wert,
+      _passt: chance(s2, 0.6),
+      titel: `Sonderposten ${GRUPPEN[g2].name}`,
+      text: `Die Ware einer insolventen Marke wird angeboten: Verkaufswert entspricht ${mio(wert * 2)} Einstand, Preis ${mio(wert)} gegen Vorkasse. Ob sie zu den H\xE4usern passt, zeigt sich erst im Abverkauf.`
+    });
+  }
+  function instandhaltung(s2, h4) {
+    const art = waehle(s2, [["Rolltreppen", 3e5, 7e5], ["Dachsanierung", 7e5, 16e5], ["Brandschutz", 5e5, 12e5], ["Klimaanlage", 4e5, 9e5]]);
+    const kosten2 = eur(zwischen(s2, art[1], art[2]) * schwierigkeit(s2).ereignisse);
+    if (h4.miete.netTyp === "triple") {
+      neueEntscheidung(s2, {
+        typ: "instandhaltung",
+        frist: s2.woche + 3,
+        titel: `${art[0]} in ${h4.name}`,
+        text: `Triple-Net: Die Kosten von ${mio(kosten2)} tr\xE4gst du. Verschieben senkt die Substanz deutlich.`,
+        optionen: [{ id: "zahlen", label: `Zahlen (${mio(kosten2)})` }, { id: "verschieben", label: "Verschieben" }],
+        standard: "zahlen",
+        daten: { haus: h4.id, kosten: kosten2 }
+      });
     } else {
-      const neu3 = structuredClone(basis4);
-      neu3.id = "O" + wb.id;
-      neu3.name = "Hartwig Outlet " + wb.stadt;
-      neu3.etagen = [0];
-      neu3.grundflaecheQm = qm2;
-      neu3.flaechen = [{ id: neu3.id + "-f1", etage: 0, qm: qm2, konzept: "offprice", umbauBis: s2.woche + 8 }];
-      neu3.potenzial = {};
-      neu3.saettigungQm = {};
-      neu3.personal.vollzeit = qm2 / 600;
-      neu3.personal.teilzeit = qm2 / 1e3;
-      neu3.personal.aushilfen = qm2 / 3e3;
-      neu3.miete = { mieteWoche: eur(qm2 * mieteQmMonat * 12 / 52), bisWoche: s2.woche + 260, netTyp: "double", vermieter: "dritt", vermieterName: wb.name, nebenkostenQmWoche: 1.2 };
-      neu3.kpi = void 0;
-      neu3.status = "offen";
-      neu3.statusBis = void 0;
-      neu3.transferBonus = 0;
-      neu3.wettbewerbStart = basis4.einzug.wettbewerb;
-      neu3.wettbewerbRohStart = roh(s2, neu3);
-      neu3.wettbewerbRohGruppenStart = Object.fromEntries(gruppenFuer(neu3.format).map((g2) => [g2, roh(s2, neu3, g2)]));
-      neu3.wettbewerbLeerStart = leerzahl(s2, neu3.stadt);
-      neu3.wettbewerbRohOffpriceStart = roh(s2, neu3, "offprice");
-      s2.haeuser.push(neu3);
+      h4.substanz = clamp(h4.substanz + 8, 0, 100);
+      melde(s2, "info", `${art[0]} in ${h4.name}: Der Vermieter tr\xE4gt die Kosten (${h4.miete.netTyp === "net" ? "Net" : "Double-Net"}-Vertrag).`, { stadt: h4.stadt, hausId: h4.id });
     }
-    wb.status = "geschlossen";
-    wb.seit = s2.woche;
-    melde(s2, "presse", "Hartwig \xFCbernimmt den Standort " + wb.name + " in " + wb.stadt + " als " + (modus === "outlet" ? "Outlet" : "Erweiterungsfl\xE4che") + ".");
-    return null;
   }
-  function testWettbewerbEreignis(s2, art) {
-    const h4 = s2.haeuser.find((x2) => x2.status === "offen" && x2.format === "warenhaus");
-    if (!h4) return false;
-    const w2 = s2.wettbewerber.find((x2) => x2.stadt === h4.stadt && x2.status === "offen" && x2.art !== "leer_ehemals") ?? s2.wettbewerber.find((x2) => x2.status === "offen" && x2.art !== "leer_ehemals");
+  function mietende(s2, h4) {
+    const markt = eur(basisUmsatzHaus(h4) * MARKTMIETE[h4.lage] * zwischen(s2, 0.85, 1.15) * hqMietendeFaktor(s2));
+    if (h4.miete.keineVerlaengerung) {
+      melde(s2, "warnung", `Der Vermieter von ${h4.name} verl\xE4ngert nicht. Der Vertrag endet in 26 Wochen.`, { stadt: h4.stadt, hausId: h4.id });
+      return;
+    }
+    neueEntscheidung(s2, {
+      typ: "mietende",
+      frist: s2.woche + 8,
+      titel: `Mietvertrag ${h4.name} l\xE4uft aus`,
+      text: `Der Vertrag endet in 26 Wochen. Aktuell ${mio(h4.miete.mieteWoche * 52)} im Jahr, der Vermieter bietet ${mio(markt * 52)} f\xFCr weitere 5 Jahre.`,
+      optionen: [{ id: "verlaengern", label: "Verl\xE4ngern" }, { id: "nachverhandeln", label: "Nachverhandeln" }, { id: "auslaufen", label: "Auslaufen lassen und schlie\xDFen" }],
+      standard: "verlaengern",
+      daten: { haus: h4.id, markt }
+    });
+    if (istAufgabeDelegiert(s2, "mietvertraege", "immobilien") && Math.abs(markt - h4.miete.mieteWoche) * 52 <= (delegationsGrenze(s2, "mietvertraege", "immobilien") ?? Infinity)) {
+      const offen = s2.entscheidungen[s2.entscheidungen.length - 1];
+      if (offen?.typ === "mietende" && offen.daten.haus === h4.id) {
+        loeseEntscheidung(s2, offen.id, mietvertragEmpfehlung(h4, markt));
+      }
+    }
+  }
+  function jahresgespraech(s2) {
+    const termine = { hallberg: 6, arvel: 10, nordline: 14, kessler: 18, goldenthread: 22 };
+    for (const l of s2.lieferanten) {
+      if (!l.aktiv || termine[l.id] !== kw(s2.woche)) continue;
+      neueEntscheidung(s2, {
+        typ: "jahresgespraech",
+        frist: s2.woche + 2,
+        titel: `Jahresgespr\xE4ch mit ${l.name}`,
+        text: `${l.beschreibung} Vertrauen aktuell ${Math.round(l.vertrauen)}.`,
+        optionen: [
+          { id: "mengenzusage", label: "Mengenzusage gegen mehr Zuschuss" },
+          { id: "platzierung", label: "Bessere Platzierung anbieten" },
+          { id: "hart", label: "Hart auf Konditionen verhandeln" }
+        ],
+        standard: "platzierung",
+        daten: { lieferant: l.id }
+      });
+    }
+  }
+  function lieferantenEreignisse(s2) {
+    for (const l of s2.lieferanten) {
+      if (!l.aktiv) continue;
+      if (l.id === "hallberg" && (l.verspaetungen > 1.5 || s2.phase === "insolvenz") && chance(s2, l.fragilitaet)) {
+        l.aktiv = false;
+        l.ausfallBis = s2.woche + Math.max(4, Math.round(12 * schwierigkeit(s2).ereignisse));
+        melde(s2, "presse", "Hallberg & S\xF6hne meldet Insolvenz an. \u201EEin gro\xDFer Kunde hat uns mitgerissen.\u201C", { modul: "einkauf" });
+        melde(s2, "warnung", "Herrenware von Hallberg f\xE4llt f\xFCr rund 12 Wochen aus, danach \xFCbernehmen andere Lieferanten.");
+      }
+      if (l.id === "nordline" && !l.dtc && chance(s2, 3e-3)) {
+        neueEntscheidung(s2, {
+          typ: "nordline_dtc",
+          frist: s2.woche + 4,
+          titel: "Nordline stellt auf Direktvertrieb um",
+          text: "Nordline k\xFCrzt die Zuteilung f\xFCr den Handel. Gegen eine Investition in Markenfl\xE4chen bleibst du A-Partner.",
+          optionen: [{ id: "akzeptieren", label: "K\xFCrzung akzeptieren" }, { id: "investieren", label: "Markenfl\xE4chen finanzieren (3,5 Mio. \u20AC)" }],
+          standard: "akzeptieren",
+          daten: {}
+        });
+      }
+      if (l.id === "goldenthread" && chance(s2, 6e-3)) {
+        let verschoben = 0;
+        const neu3 = [];
+        for (const b4 of s2.bestellungen) {
+          if ((b4.gruppe === "damen" || b4.gruppe === "kinder") && b4.ankunft <= s2.woche + 6) {
+            const teil6 = eur(b4.wert * Math.min(0.6, 0.3 * schwierigkeit(s2).ereignisse));
+            b4.wert -= teil6;
+            verschoben += teil6;
+            neu3.push({ ...b4, id: neueId(s2, "b"), wert: teil6, ankunft: b4.ankunft + 6 });
+          }
+        }
+        s2.bestellungen.push(...neu3);
+        if (verschoben > 0) melde(s2, "warnung", `Containerstau: Eigenmarkenware von Golden Thread \xFCber ${mio(verschoben)} kommt sechs Wochen sp\xE4ter.`);
+      }
+      if (l.id === "arvel" && l.rueckzug && l.vertrauen > 60) {
+        l.rueckzug = false;
+        melde(s2, "info", "Maison Arvel kehrt in die B-Lagen zur\xFCck.");
+      }
+    }
+    jahresgespraech(s2);
+  }
+  var SATIRE = [
+    "Branchenkenner: \u201EDas Warenhaus ist tot.\u201C Zum 14. Mal in diesem Jahrzehnt.",
+    "Lokalzeitung: Rolltreppe im Haus defekt, Kunden nehmen es \u201Emit Humor\u201C.",
+    "Wirtschaftsblatt fragt: Braucht es Warenh\xE4user noch? Leser antworten mit 2.000 Kommentaren, gekauft hat keiner.",
+    "Ein Influencer filmt sich beim Einkauf in der Kurzwarenabteilung. 3 Mio. Aufrufe, Umsatz unver\xE4ndert.",
+    "Studie: Innenst\xE4dte brauchen Ankermieter. Studie zur Studie folgt.",
+    "Politik fordert Rettungsplan f\xFCr die Innenstadt. Konkrete Mittel: keine."
+  ];
+  function ereignisse(s2) {
+    if (s2.prognose) return;
+    const w2 = s2.woche;
+    if (s2.formate && offeneHaeuser(s2, "schwester").length && !s2.angebote.some((a2) => a2.status === "offen" && a2.typ === "kettenverkauf") && formateZufall(s2, s2.phase === "insolvenz" ? 0.01 : 4e-3)) {
+      const hs = offeneHaeuser(s2, "schwester");
+      const jahresumsatz = hs.reduce((n3, h4) => n3 + (h4.kpi?.umsatz ?? 0), 0) * 52;
+      const marge = hs.reduce((n3, h4) => n3 + (h4.kpi?.guv?.ebitda ?? 0), 0) / Math.max(1, jahresumsatz / 52);
+      const substanz = hs.reduce((n3, h4) => n3 + h4.substanz, 0) / hs.length;
+      const preis = eur(Math.max(1, jahresumsatz) * formateZahl(s2, 0.3, 0.6) * clamp(1 + marge, 0.8, 1.15) * (0.9 + substanz / 500));
+      neuesAngebot(s2, { typ: "kettenverkauf", frist: w2 + 8, kaufpreis: preis, titel: "Investor bietet f\xFCr Volkskauf", text: "\xDCbernahme aller H\xE4user inklusive Warenbestand, Personal und Mietvertr\xE4ge f\xFCr " + mio(preis) + "." });
+    }
+    if (s2.formate && offeneHaeuser(s2, "outlet").length && formateZufall(s2, 6e-3)) {
+      const sortimente = ["damen", "herren", "kinder", "accessoires", "wohnen", "beauty"];
+      const gruppe3 = sortimente[Math.floor(formateZahl(s2, 0, sortimente.length))];
+      const wert = eur(formateZahl(s2, 5e5, 3e6));
+      neuesAngebot(s2, { typ: "sonderposten", formatZiel: "outlet", frist: w2 + 2, gruppe: gruppe3, wert, _passt: formateZufall(s2, 0.7), titel: "Markenposten f\xFCr FUNDUS", text: "Markenposten f\xFCr " + mio(wert) + " Einstand zur sofortigen \xDCbernahme." });
+    }
+    for (const h4 of offeneHaeuser(s2, "schwester").filter((h5) => h5.substanz < 20)) {
+      if (!s2.entscheidungen.some((e) => e.typ === "instandhaltung" && e.daten?.haus === h4.id) && formateZufall(s2, 0.04)) {
+        neueEntscheidung(s2, { typ: "instandhaltung", frist: w2 + 3, titel: "Substanzmangel in " + h4.name, text: "Zwingende Instandhaltung oder weitere Substanzsch\xE4den.", optionen: [{ id: "zahlen", label: "Sanieren" }, { id: "verschieben", label: "Verschieben" }], standard: "zahlen", daten: { haus: h4.id, kosten: eur(15e4 + formateZahl(s2, 1e5, 45e4)) } });
+      }
+    }
+    premiumAngebote(s2);
+    konzernVerkaufAnbieten(s2);
+    const zyklus = 0.035 * Math.sin(2 * Math.PI * w2 / 260 + s2.makro.phase);
+    if (s2.makro.schockBis !== void 0 && s2.makro.schockBis <= w2) {
+      s2.makro.schockBis = void 0;
+      s2.makro.schockStaerke = 0;
+    }
+    if (s2.makro.schockBis === void 0 && chance(s2, 4e-3)) {
+      s2.makro.schockStaerke = zwischen(s2, 0.04, 0.08) * schwierigkeit(s2).ereignisse;
+      s2.makro.schockBis = w2 + ganzZwischen(s2, 26, 52);
+      melde(s2, "presse", waehle(s2, ["Energiepreise explodieren, Konsumklima bricht ein.", "Rezession: Verbraucher halten sich zur\xFCck.", "Zollstreit dr\xFCckt auf die Kauflaune."]));
+    }
+    s2.makro.konjunktur = 1 + zyklus - s2.makro.schockStaerke;
+    if (chance(s2, 0.3 * hqAnfrageFaktor(s2))) untermietAnfrage(s2);
+    if (!s2.angebote.some((a2) => a2.status === "offen" && a2.typ === "paket") && chance(s2, 0.025)) paketDeal(s2);
+    if (chance(s2, 8e-3)) stadtAngebot(s2);
+    if (!s2.angebote.some((a2) => a2.status === "offen" && a2.typ === "sportverkauf") && chance(s2, 6e-3)) sportVerkauf(s2);
+    if (chance(s2, 0.02)) sonderposten(s2);
+    for (const h4 of offeneHaeuser(s2)) {
+      if (chance(s2, 8e-4 * (1 + (100 - h4.substanz) / 50))) instandhaltung(s2, h4);
+      if (h4.miete.bisWoche - 26 === w2) mietende(s2, h4);
+      if (h4.miete.keineVerlaengerung && h4.miete.bisWoche - 10 === w2) starteSchliessung(s2, h4, { mietvertragEndetMit: true });
+      if (h4.miete.bisWoche === w2 && h4.status === "offen") {
+        h4.miete.bisWoche = w2 + 260;
+        h4.miete.mieteWoche = eur(basisUmsatzHaus(h4) * MARKTMIETE[h4.lage] * hqMietendeFaktor(s2));
+      }
+      const fl = h4.personal.filialleiter;
+      if (fl.moral < 40 && fl.skill > 0.6 && chance(s2, 0.02)) {
+        const kandidaten3 = s2.wettbewerber.filter((x2) => x2.stadt === h4.stadt && ["modehaus", "premium", "fastfashion"].includes(x2.art) && (x2.status === "offen" || x2.status === "eroeffnung"));
+        const interimSkill = zwischen(s2, 0.3, 0.65);
+        if (!s2.wettbewerbDeaktiviert && !s2.wettbewerbEreignisseDeaktiviert && !kandidaten3.length) continue;
+        const ziel = kandidaten3[0]?.name;
+        melde(s2, "warnung", `Filialleiter${fl.name.endsWith("a") || fl.name.endsWith("e") ? "in" : ""} ${fl.name} verl\xE4sst ${h4.name} und geht ${ziel ? "zu " + ziel : "zur Konkurrenz"}.`, { stadt: h4.stadt, hausId: h4.id });
+        h4.personal.filialleiter = {
+          name: `Interim (${fl.name.split(" ")[1]}-Nachfolge)`,
+          skill: interimSkill,
+          moral: 50,
+          interimBis: w2 + 4,
+          // O07 Haus: neue Eigenschaften auch bei Interimspersonen bewahren.
+          staerken: { personal: interimSkill, ware: interimSkill, kunde: interimSkill, kosten: interimSkill },
+          ehrlichkeit: fl.ehrlichkeit,
+          gehalt: fl.gehalt,
+          bonusAnteil: fl.bonusAnteil,
+          wechselwille: 0,
+          stellvertretung: fl.stellvertretung
+        };
+      }
+    }
+    lieferantenEreignisse(s2);
+    const ausstieg = s2.tarifAusstiegSeit !== void 0 && w2 - s2.tarifAusstiegSeit < 26;
+    const pStreik = (s2.stakeholder.betriebsrat < 25 ? 0.04 : 0) + (ausstieg ? 0.05 : 0);
+    if (pStreik > 0 && chance(s2, kw(w2) >= 47 ? pStreik * 2 : pStreik)) {
+      const betroffen = offeneHaeuser(s2).filter(() => zufall(s2) < 0.3 * schwierigkeit(s2).ereignisse);
+      const dauer = ganzZwischen(s2, 1, 2);
+      for (const h4 of betroffen) h4.streikBis = w2 + dauer;
+      s2.stakeholder.image = clamp(s2.stakeholder.image - schwierigkeit(s2).ereignisse, 0, 100);
+      melde(s2, "presse", `Verdi ruft zum Streik auf: ${betroffen.length} H\xE4user betroffen.`, { modul: "zentrale" });
+    }
+    if (chance(s2, 0.04)) melde(s2, "presse", waehle(s2, SATIRE));
+    for (const a2 of s2.angebote) if (a2.status === "offen" && a2.frist <= w2) {
+      a2.status = "verfallen";
+      a2.erledigtWoche = w2;
+    }
+    s2.angebote = s2.angebote.filter((a2) => a2.status === "offen" || w2 - (a2.erledigtWoche ?? a2.woche) < 13);
+    const faellig = s2.entscheidungen.filter((e) => e.frist <= w2);
+    for (const e of faellig) loeseEntscheidung(s2, e.id, e.standard, true);
+    for (const b4 of s2.berater) if (!b4.ergebnis && b4.ende <= w2) beraterErgebnis(s2, b4.id);
+  }
+  function beraterErgebnis(s2, id) {
+    const b4 = s2.berater.find((x2) => x2.id === id);
+    if (!b4) return;
+    const offen = offeneHaeuser(s2).filter((h4) => h4.kpi);
+    const nachDb = [...offen].sort((a2, c) => (a2.kpi?.db ?? 0) - (c.kpi?.db ?? 0));
+    const anzahl2 = Math.max(5, Math.round(offen.length * 0.15));
+    const liste3 = [];
+    for (let i = 0; i < anzahl2 && i < nachDb.length; i++) {
+      const treffer = zufall(s2) < b4._qualitaet;
+      const h4 = treffer ? nachDb[i] : waehle(s2, offen);
+      if (!liste3.includes(h4.id)) liste3.push(h4.id);
+    }
+    const folien = ganzZwischen(s2, 60, 220);
+    const fazit = b4._qualitaet > 0.7 ? "Die Empfehlungen sind konkret und mit Zahlen hinterlegt." : b4._qualitaet > 0.4 ? "Solide Analyse, an einigen Stellen erkennbar aus anderen Projekten \xFCbernommen." : "Kernaussage auf Folie 3: \u201EKosten senken, Umsatz steigern.\u201C Der Rest ist Anhang.";
+    b4.ergebnis = { empfohleneSchliessungen: liste3, folien, fazit };
+    melde(s2, "ereignis", `${b4.haus} legt das Abschlussdeck zu Projekt ${b4.projektname} vor: ${folien} Folien, ${liste3.length} Schlie\xDFungsempfehlungen. ${fazit}`);
+  }
+  function zufallsProjektname(s2) {
+    return waehle(s2, PROJEKTNAMEN);
+  }
+  function loeseEntscheidung(s2, id, option2, standardGew\u00E4hlt = false) {
+    const e = s2.entscheidungen.find((x2) => x2.id === id);
+    if (!e) return "Entscheidung nicht gefunden.";
+    if (!e.optionen.some((o4) => o4.id === option2)) return "Unbekannte Option.";
+    s2.entscheidungen = s2.entscheidungen.filter((x2) => x2.id !== id);
+    (s2.entscheidungsprotokoll ?? (s2.entscheidungsprotokoll = [])).push({
+      id: e.id,
+      typ: e.typ,
+      titel: e.titel,
+      option: option2,
+      ergebnis: e.optionen.find((o4) => o4.id === option2)?.label ?? option2,
+      woche: s2.woche,
+      standard: standardGew\u00E4hlt,
+      hausId: typeof e.daten.haus === "string" ? e.daten.haus : void 0
+    });
+    s2.entscheidungsprotokoll = s2.entscheidungsprotokoll.filter((p2) => s2.woche - p2.woche <= 52);
+    if (e.typ.startsWith("personal_")) {
+      loesePersonalEntscheidung(s2, e.typ, e.daten, option2);
+      return null;
+    }
+    if (e.typ.startsWith("vorstand_")) {
+      loeseVorstandEntscheidung(s2, e, option2);
+      return null;
+    }
+    if (e.typ === "interview") {
+      zeitungInterviewAntwort(s2, e, option2);
+      return null;
+    }
+    if (e.typ === "organisation_vorlage") {
+      organisationVorlageEntscheidung(s2, e, option2);
+      return null;
+    }
+    if (e.typ.startsWith("planung_")) {
+      planungEntscheidung(s2, e, option2);
+      return null;
+    }
+    if (e.typ.startsWith("haus_")) {
+      loeseHausVorlage(s2, e.typ, e.daten, option2);
+      return null;
+    }
+    const d4 = e.daten;
+    if (e.typ === "organisation_vorlage" && typeof d4.umbauProgramm === "string") {
+      if (option2 === "annehmen" || option2 === "vorschlag") umbauProgrammEntscheiden(s2, d4.umbauProgramm);
+      return null;
+    }
+    const haus2 = typeof d4.haus === "string" ? s2.haeuser.find((h4) => h4.id === d4.haus) : void 0;
+    switch (e.typ) {
+      case "wettbewerb_eroeffnung": {
+        const wb = s2.wettbewerber.find((x2) => x2.id === d4.wettbewerber);
+        if (!wb) return null;
+        if (option2 === "aktion") {
+          einmalKosten(s2, 18e4);
+          wb.abwehrBis = s2.woche + 4;
+          wb.abwehrFaktor = 0.55;
+          melde(s2, "info", "Er\xF6ffnungsaktion gegen " + wb.name + ": kurzfristiger Kundenschutz, geringere Marge.");
+        } else if (option2 === "mailing" && s2.marketing.kundenkarte) {
+          einmalKosten(s2, 65e3);
+          wb.abwehrBis = s2.woche + 4;
+          wb.abwehrFaktor = 0.7;
+          melde(s2, "info", "Stammkunden-Mailing gegen " + wb.name + " verschickt.");
+        }
+        return null;
+      }
+      case "instandhaltung":
+        if (!haus2) return null;
+        if (option2 === "zahlen") {
+          einmalKosten(s2, Number(d4.kosten));
+          s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
+          s2.kapitalflussOffen.investitionen -= Number(d4.kosten);
+          haus2.substanz = clamp(haus2.substanz + 10, 0, 100);
+        } else haus2.substanz = clamp(haus2.substanz - 12, 0, 100);
+        return null;
+      case "mietende": {
+        if (!haus2) return null;
+        const markt = Number(d4.markt);
+        if (option2 === "verlaengern") {
+          haus2.miete.mieteWoche = markt;
+          haus2.miete.bisWoche += 260;
+        } else if (option2 === "nachverhandeln") {
+          const p2 = 0.3 + 0.5 * (s2.stakeholder.vermieter / 100);
+          if (chance(s2, p2)) {
+            haus2.miete.mieteWoche = eur(markt * 0.88);
+            haus2.miete.bisWoche += 260;
+            melde(s2, "info", `${haus2.name}: Vermieter akzeptiert 12 % unter Angebot.`);
+          } else if (chance(s2, 0.25)) {
+            haus2.miete.keineVerlaengerung = true;
+            melde(s2, "warnung", `${haus2.name}: Der Vermieter bricht die Gespr\xE4che ab und vermietet neu.`);
+          } else {
+            haus2.miete.mieteWoche = markt;
+            haus2.miete.bisWoche += 260;
+            melde(s2, "info", `${haus2.name}: Vermieter bleibt hart, Verl\xE4ngerung zum Angebot.`);
+          }
+        } else {
+          haus2.miete.keineVerlaengerung = true;
+          starteSchliessung(s2, haus2, { mietvertragEndetMit: true });
+        }
+        return null;
+      }
+      case "jahresgespraech": {
+        const l = s2.lieferanten.find((x2) => x2.id === d4.lieferant);
+        if (!l) return null;
+        if (option2 === "mengenzusage") {
+          l.wkzQuote += 8e-3;
+          l.vertrauen = clamp(l.vertrauen + 6, 0, 100);
+          for (const g2 of Object.keys(l.gruppen)) s2.orderLevel[g2] = Math.max(s2.orderLevel[g2] ?? 1, 1.05);
+        } else if (option2 === "platzierung") l.vertrauen = clamp(l.vertrauen + 4, 0, 100);
+        else {
+          l.wkzQuote += 4e-3;
+          l.vertrauen = clamp(l.vertrauen - 8, 0, 100);
+        }
+        return null;
+      }
+      case "nordline_dtc": {
+        const l = s2.lieferanten.find((x2) => x2.id === "nordline");
+        if (!l) return null;
+        if (option2 === "investieren") {
+          einmalKosten(s2, 35e5);
+          l.vertrauen = clamp(l.vertrauen + 10, 0, 100);
+        } else {
+          l.dtc = true;
+          l.wkzQuote = Math.max(0, l.wkzQuote - 0.01);
+          melde(s2, "info", "Nordline k\xFCrzt die Zuteilung an die Sporth\xE4user.");
+        }
+        return null;
+      }
+      default:
+        return null;
+    }
+  }
+  function testAngebotErzeugen(s2, art) {
+    const vorher = s2.angebote.length;
     switch (art) {
-      case "eroeffnung":
-        neuEroeffnet(s2, h4.stadt, "modehaus");
+      case "untermiete":
+        untermietAnfrage(s2);
+        break;
+      case "paket":
+        paketDeal(s2);
+        break;
+      case "stadt":
+        stadtAngebot(s2);
+        break;
+      case "sportverkauf":
+        sportVerkauf(s2);
+        break;
+      case "sonderposten":
+        sonderposten(s2);
+        break;
+      case "premiumVerkauf": {
+        const h4 = s2.haeuser.find((x2) => x2.klasse === "premium" && x2.status === "offen");
+        if (!h4) return false;
+        neuesAngebot(s2, {
+          typ: "premiumVerkauf",
+          frist: s2.woche + 10,
+          titel: "Testangebot f\xFCr " + h4.name,
+          text: "Ein fiktiver Investor bietet f\xFCr das Premiumhaus.",
+          kaufpreis: Math.round((h4.kpi?.umsatz ?? 2e6) * 40),
+          wunschHaeuser: [h4.id],
+          premiumKaeuferTyp: "Family Office",
+          premiumKaeuferName: "Testinvestor"
+        });
+        break;
+      }
+      // Übernahmen entstehen aus Räumungen in wettbewerb.ts (testWettbewerbEreignis).
+      case "uebernahme":
+        return false;
+    }
+    return s2.angebote.length > vorher;
+  }
+  function testZufallsereignis(s2, art) {
+    const h4 = offeneHaeuser(s2).find((x2) => x2.miete.netTyp === "triple") ?? offeneHaeuser(s2)[0];
+    switch (art) {
+      case "instandhaltung":
+        if (!h4) return false;
+        instandhaltung(s2, h4);
         return true;
-      case "raeumung":
-        if (!w2) return false;
-        raeumung(s2, w2);
+      case "mietende":
+        if (!h4) return false;
+        mietende(s2, h4);
         return true;
-      case "aktion":
-        if (!w2) return false;
-        w2.aktionVon = s2.woche;
-        w2.aktionBis = s2.woche + 3;
-        w2.preisdruck = 0.3;
-        melde(s2, "ereignis", "Test: Rabattaktion von " + w2.name + " in " + w2.stadt + ".", { stadt: w2.stadt, modul: "wettbewerb" });
-        return true;
-      case "konter":
-        if (!w2) return false;
-        w2.konterVon = s2.woche + 1;
-        w2.konterBis = s2.woche + 4;
-        w2.konterDruck = 0.45;
-        melde(s2, "ereignis", "Test: Konteraktion von " + w2.name + " ab kommender Woche.", { stadt: w2.stadt, modul: "wettbewerb" });
-        return true;
-      case "standortwechsel":
-        if (!w2) return false;
-        w2.lage = w2.lage === "1a" ? "center" : "1a";
-        w2.status = "eroeffnung";
-        w2.seit = s2.woche;
-        w2.bis = s2.woche + 4;
-        melde(s2, "presse", "Test: " + w2.name + " verlegt den Standort in " + w2.stadt + ".", { stadt: w2.stadt, modul: "wettbewerb" });
-        return true;
-      case "nachnutzung": {
-        const geschlossen = s2.haeuser.find((x2) => x2.status === "geschlossen");
-        if (!geschlossen) return false;
-        neuEroeffnet(s2, geschlossen.stadt, "offprice", geschlossen.id);
+      case "jahresgespraech": {
+        const l = s2.lieferanten.find((x2) => x2.aktiv);
+        if (!l) return false;
+        neueEntscheidung(s2, {
+          typ: "jahresgespraech",
+          frist: s2.woche + 2,
+          titel: "Jahresgespr\xE4ch mit " + l.name,
+          text: l.beschreibung,
+          optionen: [{ id: "mengenzusage", label: "Mengenzusage" }, { id: "platzierung", label: "Platzierung" }, { id: "hart", label: "Hart verhandeln" }],
+          standard: "platzierung",
+          daten: { lieferant: l.id }
+        });
         return true;
       }
+      case "nordline_dtc":
+        neueEntscheidung(s2, {
+          typ: "nordline_dtc",
+          frist: s2.woche + 4,
+          titel: "Nordline stellt auf Direktvertrieb um",
+          text: "Nordline k\xFCrzt die Zuteilung f\xFCr den Handel. Gegen eine Investition in Markenfl\xE4chen bleibt Hartwig A-Partner.",
+          optionen: [
+            { id: "akzeptieren", label: "K\xFCrzung akzeptieren" },
+            { id: "investieren", label: "Markenfl\xE4chen finanzieren (3,5 Mio. \u20AC)" }
+          ],
+          standard: "akzeptieren",
+          daten: {}
+        });
+        return true;
+      case "arvel_rueckkehr": {
+        const l = s2.lieferanten.find((x2) => x2.id === "arvel");
+        if (!l) return false;
+        l.aktiv = true;
+        l.rueckzug = false;
+        melde(s2, "info", "Test: Maison Arvel kehrt in die B-Lagen zur\xFCck.");
+        return true;
+      }
+      case "lieferantenausfall": {
+        const l = s2.lieferanten.find((x2) => x2.aktiv);
+        if (!l) return false;
+        l.aktiv = false;
+        l.ausfallBis = s2.woche + 12;
+        melde(s2, "warnung", "Test: Lieferant " + l.name + " f\xE4llt 12 Wochen aus.", { modul: "einkauf" });
+        return true;
+      }
+      case "containerstau": {
+        const b4 = s2.bestellungen.find((x2) => x2.wert > 0);
+        if (!b4) return false;
+        b4.ankunft += 6;
+        melde(s2, "warnung", "Test: Containerstau verz\xF6gert " + b4.gruppe + " um 6 Wochen.", { modul: "einkauf" });
+        return true;
+      }
+      case "konjunktur":
+        s2.makro.schockStaerke = 0.08 * schwierigkeit(s2).ereignisse;
+        s2.makro.schockBis = s2.woche + 26;
+        s2.makro.konjunktur = 1 - s2.makro.schockStaerke;
+        melde(s2, "presse", "Test: Konjunkturschock trifft den Einzelhandel.");
+        return true;
+      case "streik": {
+        const hs = offeneHaeuser(s2).slice(0, 4);
+        if (!hs.length) return false;
+        for (const haus2 of hs) haus2.streikBis = s2.woche + 2;
+        melde(s2, "presse", "Test: Streik in " + hs.length + " H\xE4usern.");
+        return true;
+      }
+      case "filialleiter":
+        if (!h4) return false;
+        h4.personal.filialleiter = { name: "Interimleitung", skill: 0.35, moral: 50, interimBis: s2.woche + 4 };
+        melde(s2, "warnung", "Test: Filialleitung in " + h4.name + " ausgefallen.", { stadt: h4.stadt, hausId: h4.id });
+        return true;
+      case "presse":
+        melde(s2, "presse", SATIRE[0]);
+        return true;
       default:
         return false;
     }
-  }
-
-  // ../engine/src/premium.ts
-  var PREMIUM_PROFIL = {
-    P001: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.012, mietQuote: 0.057 },
-    P002: { qm: 3e4, etagen: [-1, 0, 1, 2, 3, 4], produktivitaet: 1.55, service: 0.016, mietQuote: 0.057 },
-    P003: { qm: 18e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.06 },
-    P004: { qm: 14e3, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.45, service: 0.041, mietQuote: 0.065 },
-    P005: { qm: 2e4, etagen: [-1, 0, 1, 2, 3], produktivitaet: 1.52, service: 0.037, mietQuote: 0.06 }
-  };
-  var premiumProfil = (id) => id && Object.prototype.hasOwnProperty.call(PREMIUM_PROFIL, id) ? PREMIUM_PROFIL[id] : void 0;
-  var EURO_JE_QM_WOCHE = 40;
-  var MIX = {
-    beauty: 1.55,
-    accessoires: 1.55,
-    damen: 1.25,
-    food: 1.45,
-    spielwaren: 0.55,
-    wohnen: 0.6
-  };
-  var IMMOBILIE = { P001: 9e8, P002: 9e8, P003: 6e8, P004: 145e6, P005: 65e7 };
-  var KAEUFER = [
-    { typ: "Luxusgruppe", name: "Luxusgruppe Valens" },
-    { typ: "Family Office", name: "Family Office Merian" },
-    { typ: "Staatsfonds", name: "Staatsfonds Aurum" }
-  ];
-  function grundumsatz(h4) {
-    return Object.entries(h4.potenzial).reduce((sum2, [g2, p2]) => {
-      const qm2 = h4.flaechen.filter((f13) => f13.gruppe === g2 && f13.konzept === "eigen").reduce((a2, f13) => a2 + f13.qm, 0);
-      return sum2 + (p2 ?? 0) * (1 - Math.exp(-qm2 / Math.max(1, h4.saettigungQm[g2] ?? 1)));
-    }, 0);
-  }
-  function normierePremiumFlaechen(h4, p2) {
-    const alteEtagen = [...h4.etagen].sort((a2, b4) => a2 - b4);
-    const neueEtagen = [...p2.etagen];
-    const anzahl2 = Math.max(1, alteEtagen.length - 1);
-    for (const f13 of h4.flaechen) {
-      const index2 = Math.max(0, alteEtagen.indexOf(f13.etage));
-      f13.etage = neueEtagen[Math.round(index2 / anzahl2 * (neueEtagen.length - 1))];
-    }
-    h4.etagen = neueEtagen;
-    h4.grundflaecheQm = p2.qm / neueEtagen.length;
-    const gruppen = Object.keys(h4.potenzial);
-    const gewicht2 = gruppen.reduce((a2, g2) => a2 + GRUPPEN[g2].anteilFlaeche, 0);
-    for (const g2 of gruppen) {
-      const bereiche = h4.flaechen.filter((f13) => f13.gruppe === g2);
-      const altQm = bereiche.reduce((a2, f13) => a2 + f13.qm, 0);
-      if (!altQm) continue;
-      const zielQm = Math.round(p2.qm * GRUPPEN[g2].anteilFlaeche / gewicht2);
-      let rest2 = zielQm;
-      for (let i = 0; i < bereiche.length; i++) {
-        const f13 = bereiche[i];
-        const neuQm = i === bereiche.length - 1 ? rest2 : Math.max(1, Math.round(zielQm * f13.qm / altQm));
-        f13.qm = neuQm;
-        rest2 -= neuQm;
-      }
-    }
-    const rest = p2.qm - h4.flaechen.reduce((a2, f13) => a2 + f13.qm, 0);
-    const ausgleich = h4.flaechen.find((f13) => f13.gruppe === "damen") ?? h4.flaechen[0];
-    if (ausgleich) ausgleich.qm += rest;
-    for (const g2 of gruppen) {
-      const qm2 = h4.flaechen.filter((f13) => f13.gruppe === g2).reduce((a2, f13) => a2 + f13.qm, 0);
-      if (!qm2) continue;
-      h4.saettigungQm[g2] = qm2 * 0.75;
-      h4.potenzial[g2] = qm2 * GRUPPEN[g2].qmUmsatz * (MIX[g2] ?? 1) / (1 - Math.exp(-qm2 / h4.saettigungQm[g2]));
-    }
-  }
-  function kennzeichnePremium(haeuser) {
-    const vorhanden = haeuser.filter((h4) => h4.klasse === "premium" && h4.premiumSchluessel);
-    if (vorhanden.length) {
-      for (const h4 of vorhanden) {
-        const p2 = PREMIUM_HAEUSER.find((x2) => x2.id === h4.premiumSchluessel);
-        if (!p2) throw new Error(`Unbekannter Premiumschl\xFCssel: ${h4.premiumSchluessel}`);
-        h4.klasse = "premium";
-        h4.premiumSchluessel = p2.id;
-        h4.name = p2.name;
-        h4.premiumImage ?? (h4.premiumImage = 80);
-        const profil2 = premiumProfil(p2.id);
-        normierePremiumFlaechen(h4, profil2);
-        for (const g2 of Object.keys(h4.potenzial)) h4.potenzial[g2] = (h4.potenzial[g2] ?? 0) * profil2.produktivitaet;
-        h4.lage = "1a";
-        h4.miete.vermieter = "eigentuemer";
-        h4.miete.vermieterName = "Hartwig Immobilien";
-        h4.substanz = Math.max(78, h4.substanz);
-      }
-      return;
-    }
-    const ursprung = haeuser.reduce((a2, h4) => a2 + grundumsatz(h4), 0);
-    for (const p2 of PREMIUM_HAEUSER) {
-      const kandidaten3 = haeuser.filter((h5) => h5.format === "warenhaus" && h5.stadt === p2.stadt && h5.klasse !== "premium");
-      const h4 = [...kandidaten3].sort((a2, b4) => (b4.lage === "1a" ? 1 : 0) - (a2.lage === "1a" ? 1 : 0) || b4.grundflaecheQm * b4.etagen.length - a2.grundflaecheQm * a2.etagen.length || a2.id.localeCompare(b4.id))[0];
-      if (!h4) continue;
-      h4.name = p2.name;
-      h4.klasse = "premium";
-      h4.premiumSchluessel = p2.id;
-      h4.premiumImage = 80;
-      h4.lage = "1a";
-      const profil2 = premiumProfil(p2.id);
-      normierePremiumFlaechen(h4, profil2);
-      h4.miete.vermieter = "eigentuemer";
-      h4.miete.vermieterName = "Hartwig Immobilien";
-      const sollUmsatzWoche = profil2.qm * EURO_JE_QM_WOCHE * profil2.produktivitaet;
-      h4.miete.mieteWoche = eur(sollUmsatzWoche * profil2.mietQuote);
-      h4.miete.bisWoche = 15 * 52;
-      h4.miete.keineVerlaengerung = false;
-      const normalUmsatzWoche = profil2.qm * EURO_JE_QM_WOCHE;
-      const fte2 = 1.15 * (profil2.qm / 500 + normalUmsatzWoche / 8800);
-      h4.personal.vollzeit = fte2 * 0.5;
-      h4.personal.teilzeit = fte2 * 0.4;
-      h4.personal.aushilfen = fte2 * 0.1;
-      h4.substanz = Math.max(78, h4.substanz);
-      h4.substanzStart = h4.substanz;
-      for (const g2 of ["beauty", "accessoires"]) {
-        const f13 = h4.flaechen.find((f14) => f14.gruppe === g2 && f14.konzept === "eigen" && f14.qm > 250);
-        if (f13) {
-          const qm2 = Math.round(f13.qm * 0.07);
-          f13.qm -= qm2;
-          h4.flaechen.push({ ...f13, id: f13.id + "-luxus", qm: qm2, konzept: "konzession" });
-        }
-      }
-      const faktor2 = sollUmsatzWoche / Math.max(1, grundumsatz(h4));
-      for (const g2 of Object.keys(h4.potenzial))
-        h4.potenzial[g2] = (h4.potenzial[g2] ?? 0) * faktor2;
-    }
-    const praemie = haeuser.filter((h4) => h4.klasse === "premium").reduce((a2, h4) => a2 + grundumsatz(h4), 0);
-    const regulaer = haeuser.filter((h4) => h4.klasse !== "premium");
-    const sum2 = regulaer.reduce((a2, h4) => a2 + grundumsatz(h4), 0);
-    const kompensation = Math.max(0.5, (ursprung - praemie) / Math.max(1, sum2));
-    for (const h4 of regulaer) for (const g2 of Object.keys(h4.potenzial)) h4.potenzial[g2] = (h4.potenzial[g2] ?? 0) * kompensation;
-  }
-  function premiumImageFaktor(h4) {
-    return h4.klasse === "premium" ? clamp(0.65 + 0.35 * (h4.premiumImage ?? 80) / 80, 0.65, 1.0875) : 1;
-  }
-  function premiumWoche(s2) {
-    for (const h4 of s2.haeuser.filter((h5) => h5.klasse === "premium" && h5.status === "offen")) {
-      const inv = h4.premiumInvestition;
-      if (inv && s2.woche < inv.bis) {
-        h4.substanz = clamp(h4.substanz + inv.substanzProWoche, 0, 100);
-        h4.premiumImage = clamp((h4.premiumImage ?? 80) + inv.imageProWoche, 0, 100);
-      }
-      const aktiv6 = s2.marketing.aktionen.filter((a2) => a2.status !== "abgesagt" && a2.start <= s2.woche && s2.woche < a2.ende && !a2.kontrollHaeuser?.includes(h4.id) && (a2.scope.typ === "alle" ? s2.premiumSchuetzen === false : a2.scope.typ === "haeuser" ? a2.scope.ids.includes(h4.id) : a2.scope.typ === "format" ? a2.scope.format === "warenhaus" : a2.scope.typ === "region" ? a2.scope.region === h4.region : a2.scope.cluster === h4.cluster));
-      const imageVerlust = aktiv6.reduce((a2, x2) => a2 + Math.min(2.5, x2.rabatt * 5), 0);
-      h4.premiumImage = clamp((h4.premiumImage ?? 80) - imageVerlust + (aktiv6.length ? 0 : 0.05), 0, 100);
-    }
-  }
-  function premiumMarktwert(h4) {
-    if (h4.klasse !== "premium") return 0;
-    const rang = PREMIUM_HAEUSER.find((p2) => p2.id === h4.premiumSchluessel)?.rang ?? 3;
-    const ebitda = (h4.kpi?.db ?? 0) * 52;
-    const multiplex = rang === 1 ? 18 : rang === 2 ? 15 : 11;
-    return eur(Math.max(0, ebitda) * multiplex + (IMMOBILIE[h4.premiumSchluessel ?? ""] ?? 0) * (0.85 + 0.15 * (h4.substanz / 100)) * (0.8 + 0.2 * ((h4.premiumImage ?? 80) / 80)));
-  }
-  function premiumUebersicht(s2) {
-    return s2.haeuser.filter((h4) => h4.klasse === "premium").map((h4) => {
-      const umsatz = h4.kpi?.umsatz ?? 0, ebitda = h4.kpi?.db ?? 0;
-      return {
-        id: h4.id,
-        schluessel: h4.premiumSchluessel,
-        name: h4.name,
-        stadt: h4.stadt,
-        status: h4.status,
-        umsatz: eur(umsatz),
-        ebitda: eur(ebitda),
-        marge: umsatz > 0 ? ebitda / umsatz : 0,
-        image: h4.premiumImage ?? 80,
-        substanz: h4.substanz,
-        marktwert: premiumMarktwert(h4),
-        schutz: s2.premiumSchuetzen !== false,
-        eigentuemer: h4.premiumEigentuemer
-      };
-    });
-  }
-  function premiumInvestieren(s2, id, betrag) {
-    const h4 = s2.haeuser.find((x2) => x2.id === id && x2.klasse === "premium" && x2.status === "offen");
-    if (!h4) return "Premium-Haus nicht verf\xFCgbar.";
-    if (!Number.isSafeInteger(betrag) || betrag < 5e5 || betrag > 1e8) return "Investition von 0,5 bis 100 Mio. \u20AC w\xE4hlen.";
-    if (h4.premiumInvestition && s2.woche < h4.premiumInvestition.bis) return "Eine Premium-Investition l\xE4uft bereits. Bitte zun\xE4chst die 26 Wochen abwarten.";
-    if (!liquiditaetReicht(s2, betrag)) return "Nicht gen\xFCgend Liquidit\xE4t.";
-    s2.cash -= betrag;
-    s2.einmalkostenWoche += betrag;
-    s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
-    s2.kapitalflussOffen.investitionen -= betrag;
-    h4.premiumInvestition = {
-      bis: s2.woche + 26,
-      substanzProWoche: Math.min(30, betrag / 3e6) / 26,
-      imageProWoche: Math.min(15, betrag / 5e6) / 26
-    };
-    melde(s2, "info", `Premium-Investition in ${h4.name}: ${mio(betrag)} \xFCber 26 Wochen.`, { stadt: h4.stadt, hausId: h4.id });
-    return null;
-  }
-  function premiumAngebote(s2) {
-    if (s2.phase !== "insolvenz" || s2.prognose) return;
-    for (const h4 of s2.haeuser.filter((x2) => x2.klasse === "premium" && x2.status === "offen")) {
-      if (s2.angebote.some((a2) => a2.typ === "premiumVerkauf" && a2.wunschHaeuser?.[0] === h4.id)) continue;
-      const p2 = PREMIUM_HAEUSER.find((x2) => x2.id === h4.premiumSchluessel);
-      const kaeufer = KAEUFER[(p2?.rang ?? 3) === 1 ? h4.premiumSchluessel === "P001" ? 0 : 1 : (p2?.rang ?? 3) === 2 ? 2 : 1];
-      const kaufpreis = premiumMarktwert(h4);
-      s2.angebote.push({
-        // Eigenständige deterministische IDs: keine Veränderung des globalen ID-Zählers
-        // und kein zusätzlicher Zug aus dem gemeinsamen Ereignis-Zufallsstrom.
-        id: `premium-${h4.premiumSchluessel ?? h4.id}-${s2.woche}`,
-        typ: "premiumVerkauf",
-        woche: s2.woche,
-        frist: s2.woche + 10 + (p2?.rang ?? 3) * 3,
-        status: "offen",
-        titel: `Kaufangebot f\xFCr ${h4.name}`,
-        text: `${kaeufer.name} bietet ${mio(kaufpreis)} inklusive Immobilie. Der Verkauf entzieht Hartwig ein Kronjuwel.`,
-        kaufpreis,
-        wunschHaeuser: [h4.id],
-        premiumKaeuferTyp: kaeufer.typ,
-        premiumKaeuferName: kaeufer.name
-      });
-      melde(s2, "presse", `Ein Investor bietet f\xFCr ${h4.name}.`, { stadt: h4.stadt, hausId: h4.id });
-    }
-  }
-  function premiumVerkaufen(s2, an) {
-    if (an.typ !== "premiumVerkauf" || s2.phase !== "insolvenz") return "Premium-Verkauf nur im Insolvenzverfahren.";
-    const h4 = s2.haeuser.find((x2) => x2.id === an.wunschHaeuser?.[0] && x2.klasse === "premium" && x2.status === "offen");
-    if (!h4) return "Premium-Haus nicht verf\xFCgbar.";
-    h4.status = "verkauft";
-    h4.premiumEigentuemer = an.premiumKaeuferName ?? "Neuer Eigent\xFCmer";
-    h4.personal.vollzeit = 0;
-    h4.personal.teilzeit = 0;
-    h4.personal.aushilfen = 0;
-    s2.cash += an.kaufpreis ?? 0;
-    s2.einmalErloeseWoche += an.kaufpreis ?? 0;
-    s2.stakeholder.image = clamp(s2.stakeholder.image - 8, 0, 100);
-    s2.stakeholder.eigentuemer = clamp(s2.stakeholder.eigentuemer - 12, 0, 100);
-    an.status = "angenommen";
-    an.erledigtWoche = s2.woche;
-    melde(s2, "presse", `${h4.name} ist an ${h4.premiumEigentuemer} verkauft worden.`, { stadt: h4.stadt, hausId: h4.id });
-    return null;
-  }
-
-  // ../engine/src/filialguv.ts
-  var REFERENZ_FILIAL_GUV = [
-    { id: "umsatz", name: "Umsatz", ist: 100 },
-    { id: "wareneinsatz", name: "Wareneinsatz", ist: -58.8 },
-    { id: "bruttogewinn", name: "Bruttogewinn", ist: 41.2, vorjahr: 41.7, plan: 46.1 },
-    { id: "uebrigeErtraege", name: "\xDCbrige betriebliche Ertr\xE4ge", ist: 2.3 },
-    { id: "personal", name: "Personalaufwand", ist: -16, vorjahr: -15.6, plan: -15.6 },
-    { id: "fremdkraefte", name: "Fremdkr\xE4fte", ist: -0.7 },
-    { id: "miete", name: "Miete / Leasing", ist: -11.2 },
-    { id: "mietnebenkosten", name: "Mietnebenkosten", ist: -1.5 },
-    { id: "logistik", name: "Logistik", ist: -6.3 },
-    { id: "werbung", name: "Werbung", ist: -1.8 },
-    { id: "unterhalt", name: "Unterhalt", ist: -1.9 },
-    { id: "zahlungsverkehr", name: "Zahlungsverkehr", ist: -0.2 },
-    { id: "facilityManagement", name: "Facility Management", ist: -1.7 },
-    { id: "energie", name: "Energie", ist: -2.4 },
-    { id: "it", name: "IT", ist: -0.3 },
-    { id: "administration", name: "Administrative Kosten", ist: -0.2 },
-    { id: "uebrigeAufwendungen", name: "\xDCbrige betriebliche Aufwendungen", ist: -0.4 },
-    { id: "opex", name: "Total OPEX", ist: -42.4 },
-    { id: "ebitda", name: "EBITDA Filialebene", ist: -1.2 }
-  ];
-  var GUV_KOSTEN = [
-    "personal",
-    "fremdkraefte",
-    "miete",
-    "mietnebenkosten",
-    "logistik",
-    "werbung",
-    "unterhalt",
-    "zahlungsverkehr",
-    "facilityManagement",
-    "energie",
-    "it",
-    "administration",
-    "uebrigeAufwendungen"
-  ];
-  function leereFilialGuV() {
-    return {
-      umsatz: 0,
-      wareneinsatz: 0,
-      bruttogewinn: 0,
-      uebrigeErtraege: 0,
-      werbeflaechen: 0,
-      dienstleistungen: 0,
-      personal: 0,
-      fremdkraefte: 0,
-      miete: 0,
-      mietnebenkosten: 0,
-      logistik: 0,
-      werbung: 0,
-      unterhalt: 0,
-      zahlungsverkehr: 0,
-      facilityManagement: 0,
-      energie: 0,
-      it: 0,
-      administration: 0,
-      uebrigeAufwendungen: 0,
-      opex: 0,
-      ebitda: 0,
-      abschriften: 0
-    };
-  }
-  function guvAbschluss(g2) {
-    g2.opex = GUV_KOSTEN.reduce((x2, p2) => x2 + g2[p2], 0);
-    g2.ebitda = g2.bruttogewinn + g2.uebrigeErtraege - g2.opex;
-    return g2;
-  }
-  function guvAddiere(ziel, quelle2) {
-    for (const key of Object.keys(ziel)) ziel[key] += quelle2[key];
-  }
-  var FILIAL_PROGRAMME = {
-    sortiment: { name: "Sortiments- und Preisarchitektur", position: "bruttogewinn", vorlauf: 10, ersparnis: 0.012, investitionsQuote: 5e-4, nebenwirkung: "H\xF6here Preise k\xF6nnen die St\xFCcknachfrage d\xE4mpfen." },
-    personal: { name: "Einsatzplanung und Produktivit\xE4t", position: "personal", vorlauf: 6, ersparnis: 0.09, investitionsQuote: 3e-4, nebenwirkung: "Engere Besetzung erh\xF6ht das Risiko von Wartezeiten." },
-    fremdkraefte: { name: "Fremdpersonal-Pooling", position: "fremdkraefte", vorlauf: 4, ersparnis: 0.2, investitionsQuote: 5e-5, nebenwirkung: "In Spitzenzeiten geringere flexible Reserve." },
-    miete: { name: "Mietportfolio nachverhandeln", position: "miete", vorlauf: 20, ersparnis: 0.12, investitionsQuote: 4e-4, nebenwirkung: "Verhandlungskosten und Vermieterrisiko; keine Filialschlie\xDFung." },
-    mietnebenkosten: { name: "Fl\xE4chennutzung und Nebenkosten pr\xFCfen", position: "mietnebenkosten", vorlauf: 12, ersparnis: 0.12, investitionsQuote: 15e-5, nebenwirkung: "Fl\xE4cheneinschr\xE4nkungen w\xE4hrend der Umstellung." },
-    logistik: { name: "Logistiknetz und Filialbelieferung b\xFCndeln", position: "logistik", vorlauf: 12, ersparnis: 0.18, investitionsQuote: 7e-4, nebenwirkung: "Weniger Lieferfenster und gr\xF6\xDFere Bestelllose." },
-    werbung: { name: "Werbewirkungssteuerung", position: "werbung", vorlauf: 5, ersparnis: 0.15, investitionsQuote: 1e-4, nebenwirkung: "Geringere Werbereichweite kann Frequenz kosten." },
-    unterhalt: { name: "Pr\xE4ventive Instandhaltungsplanung", position: "unterhalt", vorlauf: 12, ersparnis: 0.18, investitionsQuote: 3e-4, nebenwirkung: "Umbau- und Wartungsfenster st\xF6ren zeitweise den Betrieb." },
-    zahlungsverkehr: { name: "Payment-Mix optimieren", position: "zahlungsverkehr", vorlauf: 6, ersparnis: 0.22, investitionsQuote: 6e-5, nebenwirkung: "Umstellung der Kassenterminals und Zahlungsarten." },
-    facilityManagement: { name: "FM-Leistungsb\xFCndel neu vergeben", position: "facilityManagement", vorlauf: 10, ersparnis: 0.2, investitionsQuote: 12e-5, nebenwirkung: "Niedrigere Reinigungs- und Servicefrequenz." },
-    energie: { name: "LED, HLK und Energiesteuerung", position: "energie", vorlauf: 18, ersparnis: 0.28, investitionsQuote: 14e-4, nebenwirkung: "Investition und tempor\xE4re Abschaltung einzelner Anlagen." },
-    it: { name: "IT-Lizenzen und Endger\xE4te konsolidieren", position: "it", vorlauf: 10, ersparnis: 0.22, investitionsQuote: 13e-5, nebenwirkung: "Migration und Schulungsbedarf." },
-    administration: { name: "Filialadministration automatisieren", position: "administration", vorlauf: 8, ersparnis: 0.22, investitionsQuote: 13e-5, nebenwirkung: "Prozessumstellung und Anlaufaufwand." },
-    uebrigeAufwendungen: { name: "Filialverbrauch und Beschaffung b\xFCndeln", position: "uebrigeAufwendungen", vorlauf: 7, ersparnis: 0.2, investitionsQuote: 1e-4, nebenwirkung: "Striktere Ausgabenfreigaben vermindern Flexibilit\xE4t." }
-  };
-  function programmErsparnis(s2, id) {
-    const p2 = s2.filialProgramme?.[id];
-    return p2 && s2.woche >= p2.wirksamAb ? FILIAL_PROGRAMME[id].ersparnis : 0;
-  }
-  function programmNachfrageFaktor(s2) {
-    return (1 - (programmErsparnis(s2, "sortiment") ? 6e-3 : 0)) * (1 - (programmErsparnis(s2, "personal") ? 4e-3 : 0)) * (1 - (programmErsparnis(s2, "werbung") ? 6e-3 : 0));
   }
 
   // ../engine/src/ecommerce.ts
@@ -5324,1201 +9437,6 @@
     if (ziel.gescheitert) melde(s2, "warnung", "Szenarioziel verfehlt: " + ziel.text);
   }
 
-  // ../engine/src/zeitung.ts
-  var ZEITUNG_REITER = ["Top", "Handel", "Konzern", "Markt", "Politik"];
-  var EREIGNISSE = [
-    // Q06: Die Fachabteilung liefert ausschließlich relevante, verdichtete Marktbewegungen.
-    ["markt_ueberblick", "Handel", "konkurrenz", "Wettbewerb: die Woche im \xDCberblick", "Drei wichtige Entwicklungen und ihre Wirkung auf Hartwig.", "Die Fachabteilung ordnet die lokalen Bewegungen nach ihrer wirtschaftlichen Bedeutung ein.", "Nicht jede Rabattaktion ver\xE4ndert die Wettbewerbslage des Konzerns.", /^Wochenüberblick Wettbewerb/i],
-    ["markt_einzel", "Handel", "konkurrenz", "Eine Marktbewegung verdient Aufmerksamkeit", "Der lokale Markt ver\xE4ndert sich sp\xFCrbar.", "Betroffene H\xE4user passen die Planung an die neue Wettbewerbslage an.", "Die mittelfristige Wirkung h\xE4ngt von Lage, Sortiment und Nachfrage ab.", /^Wettbewerbsbeobachtung:/i],
-    ["konkurrenz_neu", "Handel", "konkurrenz", "Neue Konkurrenz in der Innenstadt", "Ein Anbieter investiert in Verkaufsfl\xE4che.", "Der lokale Handel stellt sich auf einen ver\xE4nderten Wettbewerb ein.", "Die kommenden Wochen d\xFCrften zeigen, wie stark sich die Kundschaft neu verteilt.", /wettbewerb.*(eröffn|neu)|konkurrenz.*(eröffn|neu)|konkurrent.*(eröffn|neu)/i],
-    ["konkurrenz_zu", "Handel", "konkurrenz", "Wettbewerber gibt Standort auf", "Die Einkaufslandschaft ver\xE4ndert sich erneut.", "Ein frei werdendes Gesch\xE4ft ver\xE4ndert die Lage in der Innenstadt.", "Die Nachnutzung d\xFCrfte von Kaufkraft und Immobilienangebot abh\xE4ngen.", /wettbewerb.*schließ|konkurrenz.*schließ|konkurrent.*schließ|wettbewerb.*aufgegeben/i],
-    ["konkurrenz_aktion", "Handel", "konkurrenz", "Preiskampf auf der Einkaufsstra\xDFe", "Aktionen erh\xF6hen den Druck auf den Handel.", "Preisnachl\xE4sse k\xF6nnen kurzfristig Frequenz anziehen.", "F\xFCr die langfristige Profitabilit\xE4t bleibt die Handelsspanne entscheidend.", /wettbewerb.*(aktion|rabatt)|konkurrenz.*(aktion|rabatt)|preiskampf/i],
-    ["konkurrenz_uebernahme", "Handel", "konkurrenz", "Kaufhausfl\xE4che wechselt den Betreiber", "Ein Wettbewerber sichert sich neue Pr\xE4senz.", "Leerst\xE4nde werden zunehmend als strategische Chance behandelt.", "Beobachter erwarten neue Konzepte an den bisherigen Standorten.", /wettbewerb.*übernehm|konkurrenz.*übernehm|nachnutzung.*wettbewerb/i],
-    ["konkurrenz_preise", "Handel", "konkurrenz", "Der Preis entscheidet nicht allein", "Der Wettbewerb sucht neue Kundengruppen.", "Standortqualit\xE4t und Sortiment bleiben zentrale Erfolgsfaktoren.", "Ein hoher Werbedruck ersetzt keine tragf\xE4hige Kalkulation.", /wettbewerb.*preis|preisdruck|konkurrenz.*preise/i],
-    ["haus_schliessung", "Konzern", "haus", "Hartwig bereitet Schlie\xDFung vor", "Besch\xE4ftigte und Eigent\xFCmer warten auf Klarheit.", "Das Unternehmen muss wirtschaftliche und soziale Folgen abw\xE4gen.", "Vor Ort beginnt die Suche nach einer tragf\xE4higen Perspektive.", /hartwig.*schließ|haus.*schließ|soll schließen|schließung.*haus/i],
-    ["haus_raeumung", "Konzern", "haus", "R\xE4umungsverkauf am Standort", "Ein Kaufhaus geht in die letzte Verkaufsphase.", "Die Restbest\xE4nde werden schrittweise abgebaut.", "F\xFCr den Standort gewinnt die k\xFCnftige Nutzung an Bedeutung.", /räumungsverkauf|räumung/i],
-    ["haus_umbau", "Konzern", "haus", "Hartwig investiert in die Fl\xE4che", "Umbauten ver\xE4ndern das Erscheinungsbild.", "Die Gesch\xE4ftsf\xFChrung setzt auf eine bessere Fl\xE4chenleistung.", "Ob die Ma\xDFnahme tr\xE4gt, zeigen erst die kommenden Wochen.", /umbau|modernisier|renovier/i],
-    ["haus_miete", "Konzern", "haus", "Mieten im Fokus der Sanierung", "Immobilienkosten werden neu bewertet.", "Hohe Fixkosten schr\xE4nken die Gestaltungsspielr\xE4ume ein.", "Verhandlungen mit Vermietern bleiben ein Schl\xFCssel der Restrukturierung.", /vermieter|mietvertrag|miete.*verhandel/i],
-    ["haus_personal", "Konzern", "haus", "Personaleinsatz auf dem Pr\xFCfstand", "Filialen reagieren auf die Ertragslage.", "Eine tragf\xE4hige Besetzung bleibt f\xFCr Beratung und Verkauf erforderlich.", "Die Interessen der Besch\xE4ftigten m\xFCssen in die Planung einflie\xDFen.", /personalabbau|personalaufbau|beschäftigte.*abbau/i],
-    ["glaeubiger", "Politik", "politik", "Gl\xE4ubiger entscheiden \xFCber Zukunft", "Im Verfahren r\xFCckt der Insolvenzplan in den Mittelpunkt.", "Die Beteiligten bewerten Finanzierung und operative Aussichten.", "Eine Einigung w\xFCrde neue Handlungsspielr\xE4ume schaffen.", /gläubigerversammlung|insolvenzplan|gläubiger.*versammlung/i],
-    ["insolvenzantrag", "Politik", "politik", "Hartwig unter Insolvenzschutz", "Die Sanierung tritt in eine kritische Phase.", "Das Verfahren soll den Gesch\xE4ftsbetrieb stabilisieren.", "F\xFCr Lieferanten und Besch\xE4ftigte kommt es auf belastbare Zusagen an.", /insolvenzantrag|schutzschirm|insolvenzverfahren/i],
-    ["insolvenz_gescheitert", "Politik", "politik", "Sanierung steht vor dem Aus", "Die Gl\xE4ubigerlage versch\xE4rft sich.", "Die Gesch\xE4ftsf\xFChrung muss die n\xE4chsten Schritte sorgf\xE4ltig pr\xFCfen.", "F\xFCr die betroffenen Standorte ist die Unsicherheit gro\xDF.", /zerschlag|masseunzulänglichkeit|insolvenz.*gescheitert/i],
-    ["betriebsrat", "Politik", "politik", "Betriebsrat verlangt Perspektiven", "Arbeitnehmervertretung und Vorstand verhandeln.", "Die Besch\xE4ftigten erwarten konkrete Antworten auf offene Fragen.", "Ein belastbarer Sozialdialog kann weitere Konflikte vermeiden.", /betriebsrat|interessenausgleich/i],
-    ["sozialplan", "Politik", "politik", "Sozialplan wird verhandelt", "Die Gespr\xE4che \xFCber Ausgleichsma\xDFnahmen laufen.", "Die Finanzierung der Regelungen bleibt ein zentraler Punkt.", "Die Parteien stehen unter erheblichem Zeitdruck.", /sozialplan|abfindung/i],
-    ["streik", "Politik", "politik", "Arbeitskampf belastet den Handel", "Besch\xE4ftigte fordern eine Einigung.", "Ausf\xE4lle treffen den Betrieb unmittelbar.", "Die Konfliktparteien m\xFCssen an den Verhandlungstisch zur\xFCckfinden.", /streik|arbeitskampf/i],
-    ["tarif", "Politik", "politik", "Tarifrunde vor neuer Entscheidung", "Die Personalpolitik steht im Blickpunkt.", "Tarifliche Vereinbarungen wirken \xFCber Jahre nach.", "Die wirtschaftliche Belastbarkeit bestimmt den Verhandlungsspielraum.", /tarif/i],
-    ["quartal", "Konzern", "haus", "Quartalszahlen pr\xE4gen die Debatte", "Umsatz und Ergebnis r\xFCcken in den Mittelpunkt.", "Die Investoren achten auf Kosten, Marge und Liquidit\xE4t.", "Ein einzelnes Quartal entscheidet jedoch noch nicht \xFCber den Trend.", /quartal|ebitda|ergebnis.*umsatz/i],
-    ["liquiditaet", "Konzern", "markt", "Liquidit\xE4t bleibt entscheidend", "Kasse und Kreditlinie bestimmen das Tempo.", "Kurzfristige Zahlungsmittel sind Voraussetzung f\xFCr jede Sanierung.", "Auch die Lieferanten verfolgen die Entwicklung aufmerksam.", /liquidität|kreditlinie|kassenbestand|zahlungsunfähig/i],
-    ["bank", "Markt", "markt", "Banken verlangen Verl\xE4sslichkeit", "Finanzierung wird zum Pr\xFCfstein.", "Kreditgeber erwarten einen nachvollziehbaren Gesch\xE4ftsplan.", "Entscheidend ist die F\xE4higkeit, Verpflichtungen fristgerecht zu bedienen.", /bank|kreditgeber/i],
-    ["lieferanten", "Markt", "markt", "Lieferanten achten auf Zahlungsziele", "Die Beschaffung bleibt unter Beobachtung.", "Vertrauen und Warenverf\xFCgbarkeit h\xE4ngen eng zusammen.", "Eine stabile Lieferkette st\xE4rkt die Verkaufsf\xE4higkeit der H\xE4user.", /lieferant|warenkredit|vorkasse/i],
-    ["vorstand", "Konzern", "haus", "Bewegung in der Konzernspitze", "Neue Aufgaben f\xFCr das Management.", "An der Unternehmensspitze werden Zust\xE4ndigkeiten neu geordnet.", "Der Handel erwartet klare Entscheidungen und nachvollziehbare Priorit\xE4ten.", /vorstand|ressort|geschäftsführung|berufen|abberufen/i],
-    ["eigenmarken", "Handel", "haus", "Eigenmarken sollen Profil sch\xE4rfen", "Der Konzern arbeitet am Sortiment.", "Eigene Marken versprechen mehr Differenzierung im Wettbewerb.", "Entscheidend bleibt die Akzeptanz bei den Kundinnen und Kunden.", /eigenmarke|marke gegründet|markenstrategie/i],
-    ["sortiment", "Handel", "haus", "Sortiment wird neu gewichtet", "Fl\xE4chen m\xFCssen wirtschaftlicher werden.", "Die Mischung aus Mode, Wohnen und Service wird regelm\xE4\xDFig \xFCberpr\xFCft.", "Die Nachfrage vor Ort liefert die wichtigsten Hinweise.", /sortiment|warengruppe|sortimentsmix/i],
-    ["marketing", "Handel", "haus", "Werbung als Hebel der Wende", "Der Handel wirbt um neue Frequenz.", "Aktionen k\xF6nnen kurzfristig die Ums\xE4tze st\xFCtzen.", "Eine nachhaltige Bindung der Kundschaft ist wichtiger als reine Rabattsignale.", /marketing|kampagne|kundenkarte|coupon/i],
-    ["verkauf", "Handel", "haus", "Kaufkraft entscheidet \xFCber Standorte", "Verkaufsfl\xE4chen geraten unter Druck.", "Die Umsatzentwicklung f\xE4llt regional unterschiedlich aus.", "Eine flexible Fl\xE4chenplanung gewinnt an Bedeutung.", /umsatzrückgang|umsatzplus|absatz|verkauf/i],
-    ["immobilie", "Markt", "markt", "Handelsimmobilien im Wandel", "In den Innenst\xE4dten entstehen neue Konzepte.", "Die Nutzung gro\xDFer Fl\xE4chen wird vielerorts \xFCberpr\xFCft.", "Mischformen aus Handel und Dienstleistung gewinnen an Gewicht.", /immobilie|leerstand|innenstadt/i],
-    ["kosten", "Konzern", "haus", "Kostendisziplin bleibt Schl\xFCssel", "Fixkosten m\xFCssen zur Nachfrage passen.", "Sanierung erfordert mehr als kurzfristige Einsparungen.", "Die Wirkung einer Ma\xDFnahme zeigt sich in der Ergebnisrechnung.", /kosten|einspar|sparprogramm/i],
-    ["ecommerce", "Handel", "markt", "Online und Fl\xE4che r\xFCcken zusammen", "Der Handel sucht neue Vertriebskan\xE4le.", "Digitale Services sollen den station\xE4ren Einkauf erg\xE4nzen.", "Die Wirtschaftlichkeit h\xE4ngt vom Kundennutzen ab.", /online|e-commerce|ecommerce|app/i],
-    ["presse", "Top", "haus", "Hartwig bleibt Gespr\xE4chsthema", "Die Entwicklungen bewegen die Branche.", "Die Marktteilnehmer verfolgen die Restrukturierung aufmerksam.", "Die n\xE4chste Bilanz wird zeigen, ob die Strategie tr\xE4gt.", /./i]
-  ].map(([id, reiter, bild4, titel, unter, kommentar, perspektive, muster3]) => ({
-    id,
-    reiter,
-    bild: bild4,
-    titel,
-    unter,
-    kommentar,
-    perspektive,
-    muster: muster3
-  }));
-  var HINTERGRUND = [
-    ["textil", "Markt", "markt", "Textilums\xE4tze bleiben umk\xE4mpft", "Die Branche sucht nach Wachstum.", "Der Verkauf von Bekleidung bleibt konjunkturabh\xE4ngig.", "Das Kaufverhalten hat sich dauerhaft ver\xE4ndert."],
-    ["frequenz", "Markt", "markt", "Innenstadtfrequenz im Wandel", "Der Handel z\xE4hlt seine Besucher.", "Die Zahl der Passanten allein erkl\xE4rt noch keine Ums\xE4tze.", "Angebot und Aufenthaltsqualit\xE4t beeinflussen den Standort."],
-    ["kaufkraft", "Markt", "markt", "Kaufkraft wird neu verteilt", "Haushalte w\xE4gen ihre Ausgaben ab.", "Waren des t\xE4glichen Bedarfs konkurrieren mit gr\xF6\xDFeren Anschaffungen.", "Der station\xE4re Handel muss auf ver\xE4nderte Priorit\xE4ten reagieren."],
-    ["mieten", "Markt", "markt", "Mietniveau unter Beobachtung", "Eigent\xFCmer und H\xE4ndler verhandeln.", "Gro\xDFe Handelsfl\xE4chen stellen die Immobilienm\xE4rkte vor Aufgaben.", "Langfristige Vertr\xE4ge brauchen tragf\xE4hige Gesch\xE4ftsmodelle."],
-    ["stadt", "Handel", "haus", "Innenstadt sucht ihren Mittelpunkt", "Warenh\xE4user bleiben wichtige Frequenzbringer.", "Die Wirkung eines gro\xDFen Gesch\xE4fts reicht \xFCber dessen eigene Fl\xE4che hinaus.", "Nachbarschaft und Gastronomie profitieren von lebendigen Stra\xDFen."],
-    ["kunden", "Handel", "haus", "Kunden w\xFCnschen Orientierung", "Service wird zum Unterscheidungsmerkmal.", "Pers\xF6nliche Beratung und eine klare Sortimentsf\xFChrung bleiben gefragt.", "Wer die W\xFCnsche vor Ort kennt, kann zielgerichteter investieren."],
-    ["logistik", "Handel", "markt", "Lieferketten werden belastbarer", "Planung soll Engp\xE4sse vermeiden.", "Best\xE4nde binden Kapital und k\xF6nnen zugleich den Umsatz absichern.", "Verl\xE4ssliche Nachlieferungen sind ein Wettbewerbsvorteil."],
-    ["saison", "Handel", "haus", "Saisonware steht im Fokus", "Eink\xE4ufer \xFCberpr\xFCfen die Planung.", "Die Bestellung von Mode erfordert lange Vorlaufzeiten.", "Ein ausgewogenes Lager verringert das Risiko von Abschriften."],
-    ["personal", "Politik", "politik", "Besch\xE4ftigung im Handel im Blick", "Fachkr\xE4fte bleiben eine Schl\xFCsselressource.", "Der Strukturwandel ver\xE4ndert die Anforderungen an die Belegschaften.", "Weiterbildung und verl\xE4ssliche Planung gewinnen an Bedeutung."],
-    ["kommunen", "Politik", "politik", "Kommunen sprechen \xFCber Innenstadt", "Stadtentwicklung und Handel sind eng verkn\xFCpft.", "Gro\xDFimmobilien pr\xE4gen das Gesicht ihrer Umgebung.", "Eine nachhaltige Nutzung ben\xF6tigt Partner aus Wirtschaft und Verwaltung."],
-    ["kredit", "Markt", "markt", "Finanzm\xE4rkte pr\xFCfen die Risiken", "Kredite sind nicht unbegrenzt verf\xFCgbar.", "Liquidit\xE4tsplanung geh\xF6rt zum Kerngesch\xE4ft einer Handelsgruppe.", "Transparenz kann das Vertrauen der Geldgeber erh\xF6hen."],
-    ["digital", "Handel", "markt", "Digitale Dienste im Gesch\xE4ft", "Kaufhaus und Smartphone wachsen zusammen.", "Digitale Informationen k\xF6nnen die Beratung erg\xE4nzen.", "Der Mehrwert muss f\xFCr Kundinnen und Kunden unmittelbar erkennbar sein."],
-    ["quartalsblick", "Konzern", "haus", "Hartwig legt Quartal hinter sich", "Die Ergebnisrechnung dient als Gradmesser.", "Umsatz und Rentabilit\xE4t m\xFCssen gemeinsam bewertet werden.", "Der Vorstand wird die Ma\xDFnahmen daran messen lassen."],
-    ["weihnachten", "Handel", "haus", "Weihnachtsgesch\xE4ft erreicht die H\xE4user", "Die letzten Wochen des Jahres z\xE4hlen besonders.", "Geschenke und Wintermode erh\xF6hen die Bedeutung der Warenverf\xFCgbarkeit.", "Gut vorbereitete Teams k\xF6nnen jetzt den Unterschied machen."],
-    ["winter", "Markt", "markt", "Winterwetter ver\xE4ndert Einkaufswege", "Saisonale Schwankungen geh\xF6ren zum Gesch\xE4ft.", "Kalte Tage beeinflussen die Nachfrage nach Bekleidung und Wohnen.", "Die Warendisposition muss sich fr\xFChzeitig darauf einstellen."],
-    ["sommer", "Handel", "haus", "Sommersaison fordert den Einzelhandel", "Sortimente werden leichter und saisonaler.", "Aktionen und Freizeitangebote ver\xE4ndern die Kundenfrequenz.", "Eine gute Planung h\xE4lt die Best\xE4nde im Gleichgewicht."]
-  ].map(([id, reiter, bild4, titel, unter, kommentar, perspektive]) => ({
-    id,
-    reiter,
-    bild: bild4,
-    titel,
-    unter,
-    kommentar,
-    perspektive
-  }));
-  var ZEITUNG_ARTIKELARTEN = [...EREIGNISSE, ...HINTERGRUND].map((x2) => x2.id);
-  function stand(s2) {
-    return s2.zeitung ?? (s2.zeitung = { aktiv: true, ausgaben: [] });
-  }
-  var zeitungAktiv = (s2) => s2.zeitung?.aktiv !== false;
-  var zeitungArchiv = (s2) => s2.zeitung?.ausgaben ?? [];
-  var zeitungAktuelle = (s2) => {
-    const aus = zeitungArchiv(s2);
-    return aus.length ? aus[aus.length - 1] : null;
-  };
-  function zeitungEinstellen(s2, aktiv6) {
-    stand(s2).aktiv = aktiv6;
-    if (!aktiv6) s2.entscheidungen = s2.entscheidungen.filter((e) => e.typ !== "interview");
-  }
-  function ausVorlage2(v2, woche2, zusatz, nummer) {
-    return {
-      id: `z-${woche2}-${nummer}`,
-      art: v2.id,
-      reiter: v2.reiter,
-      titel: v2.titel,
-      unterzeile: v2.unter,
-      text: [zusatz, v2.kommentar, v2.perspektive].filter(Boolean).join(" "),
-      bild: v2.bild
-    };
-  }
-  function zeitungInterviewAntwort(s2, e, option2) {
-    if (!zeitungAktiv(s2) || e.typ !== "interview") return;
-    const wirkung = {
-      offensiv: { image: 2, betriebsrat: -2, bank: -1, kreditversicherer: -1, zitat: "Wir treiben den Umbau konsequent voran und werden unsere Ziele erreichen." },
-      sachlich: { image: 0, betriebsrat: 0, bank: 0, kreditversicherer: 0, zitat: "Wir gehen Schritt f\xFCr Schritt vor und messen jede Ma\xDFnahme an belastbaren Zahlen." },
-      ausweichend: { image: -2, betriebsrat: -1, bank: -2, kreditversicherer: -2, zitat: "Zu einzelnen Punkten m\xF6chten wir uns gegenw\xE4rtig nicht \xE4u\xDFern." }
-    }[option2];
-    if (!wirkung) return;
-    for (const feld2 of ["image", "betriebsrat", "bank", "kreditversicherer"]) {
-      s2.stakeholder[feld2] = clamp(s2.stakeholder[feld2] + wirkung[feld2], 0, 100);
-    }
-    stand(s2).naechstesZitat = { abWoche: s2.woche, text: `Im Interview sagt die Hartwig-Gesch\xE4ftsf\xFChrung: \u201E${wirkung.zitat}\u201C` };
-  }
-  function zeitungWoche(s2) {
-    if (s2.prognose || !zeitungAktiv(s2)) return;
-    const w2 = s2.woche;
-    const z6 = stand(s2);
-    if (z6.ausgaben.some((a2) => a2.woche === w2)) return;
-    const r4 = { rng: (Math.imul(s2.seed >>> 0, 2654435761) ^ Math.imul(w2 + 1, 2246822507) ^ 2708792605) >>> 0 };
-    const artikel = [];
-    const meldungen = s2.meldungen.filter((m) => m.woche === w2 && !/rund\s+0(?:[.,]0+)?\s*%/i.test(m.text) && (m.typ === "presse" || m.typ === "insolvenz" || m.typ === "eigentuemer" || /wettbewerb|konkurrenz|gläubiger|betriebsrat|schließ|vorstand|streik|quartal/i.test(m.text)));
-    for (const m of meldungen.slice().sort((a2, b4) => Number(b4.typ === "insolvenz" || /gläubigerversammlung|insolvenzplan/i.test(b4.text)) * 10 + Number(b4.text.startsWith("Wochen\xFCberblick Wettbewerb")) * 5 - (Number(a2.typ === "insolvenz" || /gläubigerversammlung|insolvenzplan/i.test(a2.text)) * 10 + Number(a2.text.startsWith("Wochen\xFCberblick Wettbewerb")) * 5)).slice(0, 4)) {
-      const v2 = EREIGNISSE.find((x2) => x2.muster.test(m.text));
-      const klartext = m.text.replace(
-        /\((premium|modehaus|fastfashion|offprice|textildiscounter|elektronik)\)/gi,
-        (_, art) => ({
-          premium: "(Premium-Warenhaus)",
-          modehaus: "(Modehaus)",
-          fastfashion: "(Modekette)",
-          offprice: "(Off-Price-Anbieter)",
-          textildiscounter: "(Textildiscounter)",
-          elektronik: "(Elektronikmarkt)"
-        })[art.toLowerCase()] ?? ""
-      );
-      artikel.push(ausVorlage2(v2, w2, klartext, artikel.length));
-    }
-    if (z6.naechstesZitat && z6.naechstesZitat.abWoche <= w2) {
-      const vorlage2 = { id: "interview", reiter: "Konzern", bild: "haus", titel: "Hartwig-Vorstand im Gespr\xE4ch", unter: "Die Gesch\xE4ftsf\xFChrung bezieht Stellung.", kommentar: "Das Interview st\xF6\xDFt in der Branche auf Aufmerksamkeit.", perspektive: "Wie die angek\xFCndigten Ma\xDFnahmen greifen, wird sich in den n\xE4chsten Wochen zeigen." };
-      artikel.unshift(ausVorlage2(vorlage2, w2, z6.naechstesZitat.text, 50));
-      delete z6.naechstesZitat;
-    }
-    const pflicht = w2 % 13 === 12 ? "quartalsblick" : w2 % 52 >= 45 ? "weihnachten" : w2 % 52 < 8 ? "winter" : w2 % 52 >= 22 && w2 % 52 <= 34 ? "sommer" : "";
-    if (pflicht) artikel.push(ausVorlage2(HINTERGRUND.find((x2) => x2.id === pflicht), w2, "", 60));
-    const pool = HINTERGRUND.filter((x2) => x2.id !== pflicht);
-    const zielArtikel = Math.min(5, Math.max(1, artikel.length + 1));
-    while (artikel.length < zielArtikel && pool.length) {
-      const v2 = waehle(r4, pool);
-      pool.splice(pool.indexOf(v2), 1);
-      artikel.push(ausVorlage2(v2, w2, "", 100 + artikel.length));
-    }
-    artikel.sort((a2, b4) => Number(b4.art === "glaeubiger" || b4.art.startsWith("insolvenz")) - Number(a2.art === "glaeubiger" || a2.art.startsWith("insolvenz")));
-    const ausgabe = {
-      woche: w2,
-      kw: kw(w2),
-      jahr: jahr(s2, w2),
-      nummer: w2 + 1,
-      aufmacher: artikel[0],
-      meldungen: artikel.slice(1, 7),
-      reiter: ZEITUNG_REITER
-    };
-    z6.ausgaben.push(ausgabe);
-    if (z6.ausgaben.length > 104) z6.ausgaben.splice(0, z6.ausgaben.length - 104);
-    if (w2 >= 8 && (w2 + 1) % 10 === 0 && !s2.entscheidungen.some((e) => e.typ === "interview")) {
-      s2.entscheidungen.push({
-        id: `zeitung-interview-${w2}`,
-        typ: "interview",
-        woche: w2,
-        frist: w2 + 2,
-        titel: "Interviewanfrage des Handelsboten",
-        text: "Die Redaktion bittet die Hartwig-Gesch\xE4ftsf\xFChrung um eine Aussage zur Entwicklung des Unternehmens. Welchen Ton w\xE4hlen Sie?",
-        optionen: [
-          { id: "offensiv", label: "Offensiv: Wir gestalten die Zukunft" },
-          { id: "sachlich", label: "Sachlich: Ma\xDFnahmen und Zahlen erkl\xE4ren" },
-          { id: "ausweichend", label: "Ausweichend: Kein Kommentar" }
-        ],
-        standard: "sachlich",
-        daten: { ausgabe: w2 + 1 }
-      });
-    }
-  }
-
-  // ../engine/src/it-produkte.ts
-  var IT_PRODUKT_IDS = ["kundenkarte", "hartwig_app", "kasse", "mobile_pay"];
-  var IT_TEAM_KOSTEN_PRO_KOPF = 1400;
-  var texte = {
-    kundenkarte: {
-      name: "Hartwig Karte",
-      system: "app",
-      einheit: "aktive Karteninhaber",
-      beschreibung: [
-        "Die Hartwig Karte verbindet Einkauf und Kundenbindung in allen H\xE4usern.",
-        "Ihre Reichweite und CRM-Nutzung stammen aus den bestehenden Marketingdaten."
-      ]
-    },
-    hartwig_app: {
-      name: "Hartwig App",
-      system: "app",
-      einheit: "aktive App-Nutzer",
-      beschreibung: [
-        "Die Hartwig App b\xFCndelt Kundenkonto, Angebote und den Online-Shop.",
-        "Click & Collect und Abholstationen werden durch den bestehenden Onlinekanal gesteuert."
-      ]
-    },
-    kasse: {
-      name: "Hartwig Kasse",
-      system: "kasse",
-      einheit: "gesch\xE4tzte Transaktionen",
-      beschreibung: [
-        "Die Kasse verarbeitet Eink\xE4ufe im Filialnetz und steuert den Kassenfluss.",
-        "Modernisierung und SB-Kassen wirken \xFCber die vorhandene IT- und Filialsteuerung."
-      ]
-    },
-    mobile_pay: {
-      name: "Mobile Pay",
-      system: "kasse",
-      einheit: "modellierte mobile Transaktionen",
-      beschreibung: [
-        "Mobile Pay ist die mobile Zahlvariante der Hartwig Kasse.",
-        "Der Ausbau nutzt die vorhandene mobile Kassenstufe, keine zweite Zahlungslogik."
-      ]
-    }
-  };
-  function itProduktZustand(s2, id) {
-    return s2.it?.produkte?.[id] ?? { aktiv: true, team: 0 };
-  }
-  function werte(s2) {
-    const k5 = s2.marketing?.stand?.ist?.karte;
-    const mobileStufe = s2.it?.systeme.kasse.kasseAusbau?.mobil ?? 0;
-    const bon = s2.marketing?.stand?.verlauf?.at(-1)?.bon || 41;
-    const transaktionen = Math.max(0, Math.round((s2.historie.at(-1)?.umsatz ?? 0) / Math.max(1, bon)));
-    return {
-      kundenkarte: itProduktZustand(s2, "kundenkarte").aktiv ? Math.round((k5?.mitglieder ?? 0) * (k5?.aktivQuote ?? 0)) : 0,
-      hartwig_app: itProduktZustand(s2, "hartwig_app").aktiv ? Math.round(k5?.app?.aktiveNutzer ?? 0) : 0,
-      kasse: itProduktZustand(s2, "kasse").aktiv ? transaktionen : 0,
-      mobile_pay: itProduktZustand(s2, "kasse").aktiv && itProduktZustand(s2, "mobile_pay").aktiv ? Math.round(transaktionen * clamp(0.04 * mobileStufe, 0, 1)) : 0
-    };
-  }
-  function itProdukteWoche(s2) {
-    if (s2.prognose || !s2.it) return;
-    const punkt5 = { woche: s2.woche, ...werte(s2) };
-    const v2 = s2.it.produktVerlauf ?? (s2.it.produktVerlauf = []);
-    if (v2.at(-1)?.woche === punkt5.woche) v2[v2.length - 1] = punkt5;
-    else v2.push(punkt5);
-    if (v2.length > 52) v2.splice(0, v2.length - 52);
-  }
-  function itProdukte(s2) {
-    const alle = werte(s2), verlauf4 = s2.it?.produktVerlauf ?? [];
-    const e = s2.ecommerce;
-    const k5 = s2.marketing?.stand?.ist?.karte;
-    const ausbau = s2.it?.systeme.kasse.kasseAusbau;
-    return IT_PRODUKT_IDS.map((id) => {
-      const meta = texte[id], status2 = itProduktZustand(s2, id);
-      const system2 = s2.it?.systeme[meta.system], generation = system2?.generation ?? SYSTEME[meta.system].start;
-      const version2 = id === "mobile_pay" ? ausbau?.mobil ?? 0 : generation;
-      const qualitaet3 = id === "hartwig_app" || id === "kundenkarte" ? Math.round(clamp((k5?.app?.qualitaet ?? 0.35) * 3 + generation, 1, 5)) : id === "mobile_pay" && version2 === 0 ? 0 : Math.max(1, Math.min(5, generation + 1));
-      const punkte2 = verlauf4.slice(-5).map((p2) => ({ woche: p2.woche, wert: p2[id] }));
-      const aktuell = alle[id];
-      const vorher = punkte2.length >= 2 ? punkte2[punkte2.length - 2].wert : void 0;
-      const aenderung = vorher === void 0 ? void 0 : aktuell - vorher;
-      return {
-        id,
-        ...meta,
-        aktiv: status2.aktiv,
-        team: status2.team,
-        teamKostenWoche: status2.team * IT_TEAM_KOSTEN_PRO_KOPF,
-        kennzahl: aktuell,
-        aenderung,
-        aenderungQuote: vorher && aenderung !== void 0 ? aenderung / vorher : void 0,
-        verlauf: punkte2,
-        version: version2 + ".0",
-        generation,
-        sterne: qualitaet3,
-        systemAlter: system2?.alter ?? SYSTEME[meta.system].alter,
-        details: id === "kundenkarte" ? [
-          ["Mitglieder insgesamt", Math.round(k5?.mitglieder ?? 0)],
-          ["Umsatzanteil mit Karte", Math.round((k5?.umsatzAnteil ?? 0) * 1e3) / 10 + " %"]
-        ] : id === "hartwig_app" ? [
-          ["Downloads", Math.round(k5?.app?.downloads ?? 0)],
-          ["Click & Collect", e?.letzte ? Math.round(e.letzte.bestellungen * e.letzte.clickCollectAnteil) : 0],
-          ["Abholstationen", s2.haeuser.filter((h4) => !!e?.abholstationen?.[h4.id]).length],
-          ["Online-Shop", "hartwig.de"]
-        ] : id === "kasse" ? [
-          ["Selbstbedienungskassen", "Stufe " + (ausbau?.selbstbedienung ?? 0)],
-          ["Zahlungsverkehr", "0,2 % des Umsatzes vor Einsparprogramm"]
-        ] : [
-          ["Mobile Kasse", "Stufe " + (ausbau?.mobil ?? 0)],
-          ["Zahlungsverkehr", "\xFCber bestehende Filial-GuV"]
-        ]
-      };
-    });
-  }
-
-  // ../engine/src/it.ts
-  var IT_AKTIONEN = /* @__PURE__ */ new Set(["itProjekt", "itRolloutPlan", "itKasseAusbau", "itProduktTeam", "itProduktAktiv"]);
-  var SYSTEME = {
-    kasse: { name: "Kassensoftware", start: 2, alter: 14, kosten: 78e3, bereiche: ["store_operations", "vertriebssteuerung", "flagship_management"] },
-    warenwirtschaft: { name: "Warenwirtschaft", start: 2, alter: 10, kosten: 62e3, bereiche: ["allokation", "logistik", "einkauf_damen", "einkauf_herren_kinder", "einkauf_beauty", "einkauf_wohnen", "einkauf_food", "preis_reduzierung"] },
-    planung: { name: "Planungssystem", start: 1, alter: 17, kosten: 42e3, bereiche: ["merchandise_planning", "konzerncontrolling", "vertriebscontrolling"] },
-    personaleinsatz: { name: "Personaleinsatz-Software", start: 1, alter: 12, kosten: 25e3, bereiche: ["personaleinsatz", "store_operations"] },
-    preisschilder: { name: "Elektronische Preisschilder", start: 0, alter: 0, kosten: 0, bereiche: ["preis_reduzierung", "store_operations", "allokation"] },
-    app: { name: "App & Kundenkarte", start: 2, alter: 6, kosten: 39e3, bereiche: ["crm", "marketing"] },
-    ecommerce: { name: "E-Commerce-Plattform", start: 2, alter: 8, kosten: 6e4, bereiche: ["ecommerce"] },
-    datenplattform: { name: "Datenplattform (BI)", start: 1, alter: 11, kosten: 47e3, bereiche: ["bi_daten"] }
-  };
-  var IT_IDS = Object.keys(SYSTEME);
-  function itCluster(s2) {
-    const mitOrg = s2;
-    const o4 = mitOrg.organisation?.hauscluster.filter((c) => !c.sonder && c.hausIds.length > 0);
-    if (o4?.length) return o4.map((c) => ({ id: c.id, name: c.name, hausIds: [...c.hausIds] }));
-    const gruppen = [];
-    const regionen = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
-    for (const region of regionen) {
-      const ids = s2.haeuser.filter((h4) => h4.region === region).map((h4) => h4.id).sort();
-      for (let i = 0; i < ids.length; i += 9) gruppen.push({ id: "it-" + region + "-" + (i / 9 + 1), name: region + " " + (i / 9 + 1), hausIds: ids.slice(i, i + 9) });
-    }
-    return gruppen;
-  }
-  function initialisiereIt(s2) {
-    if (s2.it) return;
-    const systeme = {};
-    for (const id of IT_IDS) {
-      const d4 = SYSTEME[id];
-      systeme[id] = {
-        id,
-        generation: d4.start,
-        alter: d4.alter,
-        basisAlter: d4.alter,
-        kostenWoche: d4.kosten,
-        basisKosten: d4.kosten,
-        wartungGekuendigt: false,
-        installationen: {},
-        ...id === "kasse" ? { kasseAusbau: { selbstbedienung: 0, mobil: 0 } } : {}
-      };
-    }
-    s2.it = { systeme, projekte: [], naechsteId: 0, umsatzFaktoren: {}, hausCluster: {}, startprobleme: {}, meldungen: 0 };
-  }
-  var system = (s2, id) => s2.it?.systeme[id];
-  function generationInCluster(s2, id, clusterId) {
-    const x2 = system(s2, id);
-    return x2?.installationen[clusterId]?.generation ?? x2?.generation ?? SYSTEME[id].start;
-  }
-  function itAlter(s2, id, clusterId) {
-    const x2 = system(s2, id);
-    if (!x2) return SYSTEME[id].alter + s2.woche / 52;
-    const i = clusterId ? x2.installationen[clusterId] : void 0;
-    return i ? Math.max(0, (s2.woche - i.seitWoche) / 52) : x2.alter + s2.woche / 52;
-  }
-  function ausfallRisiko(generation, alter) {
-    if (generation === 0) return 0;
-    return clamp(15e-5 + Math.pow(Math.max(0, alter - 4) / 20, 2) * (5 - generation) * 2e-3, 0, 0.065);
-  }
-  function benoetigteSysteme(bereich2) {
-    const direkt = IT_IDS.filter((id) => SYSTEME[id].bereiche.includes(bereich2));
-    if (!direkt.length) {
-      if (bereich2.includes("einkauf")) return ["warenwirtschaft"];
-      if (bereich2.includes("controlling")) return ["planung", "datenplattform"];
-      if (bereich2.includes("personal")) return ["personaleinsatz"];
-    }
-    return direkt;
-  }
-  function deckelGeneration(g2) {
-    return [0.72, 0.81, 0.88, 0.95, 1][g2];
-  }
-  function itDeckel(s2, bereich2) {
-    const benoetigt = benoetigteSysteme(bereich2);
-    if (!benoetigt.length) return 1;
-    const clusters = itCluster(s2), n3 = clusters.reduce((a2, c) => a2 + c.hausIds.length, 0) || 1;
-    let min = 1;
-    for (const id of benoetigt) {
-      const d4 = SYSTEME[id];
-      let kapazitaet2 = 0;
-      for (const c of clusters) kapazitaet2 += deckelGeneration(generationInCluster(s2, id, c.id)) * c.hausIds.length / n3;
-      if (!clusters.length) kapazitaet2 = deckelGeneration(system(s2, id)?.generation ?? d4.start);
-      min = Math.min(min, kapazitaet2);
-    }
-    const bi = ["merchandise_planning", "allokation", "konzerncontrolling", "vertriebscontrolling", "bi_daten"].includes(bereich2);
-    if (bi) {
-      const g2 = clusters.length ? clusters.reduce((a2, c) => a2 + generationInCluster(s2, "datenplattform", c.id) * c.hausIds.length / n3, 0) : system(s2, "datenplattform")?.generation ?? 1;
-      min = Math.min(1, min * (1 + Math.max(0, g2 - 1) * 0.05));
-    }
-    return clamp(min, 0, 1);
-  }
-  function itDeckelGrund(s2, bereich2) {
-    const ids = benoetigteSysteme(bereich2);
-    if (!ids.length) return void 0;
-    const clusters = itCluster(s2), n3 = clusters.reduce((a2, c) => a2 + c.hausIds.length, 0) || 1;
-    const wert = ids.map((id) => ({
-      id,
-      deckel: clusters.length ? clusters.reduce((a2, c) => a2 + deckelGeneration(generationInCluster(s2, id, c.id)) * c.hausIds.length / n3, 0) : deckelGeneration(system(s2, id)?.generation ?? SYSTEME[id].start)
-    })).sort((a2, b4) => a2.deckel - b4.deckel)[0];
-    return wert && wert.deckel < 0.995 ? SYSTEME[wert.id].name + " (Generation " + (system(s2, wert.id)?.generation ?? SYSTEME[wert.id].start) + ")" : void 0;
-  }
-  function projektKosten(art, ziel, clusterCount) {
-    const millionen = { kaufen: 1.8, entwickeln: 4.2, dienstleister: 0.8 }[art];
-    return eur((millionen + ziel * 0.65) * 1e6 * (0.35 + clusterCount * 0.65 / 18));
-  }
-  function itProjektPlan(s2, id, art, ziel, anzahl2) {
-    const faktor2 = { kaufen: 1, entwickeln: 1.9, dienstleister: 0.75 }[art];
-    const konzept = Math.ceil(3 * faktor2), umsetzung = Math.ceil((6 + ziel * 3) * faktor2);
-    const rollout = Math.max(1, anzahl2);
-    return { konzept, umsetzung, rollout, gesamt: konzept + umsetzung + rollout, kosten: projektKosten(art, ziel, anzahl2) };
-  }
-  function qualitaet(s2) {
-    const o4 = s2.organisation;
-    const q2 = o4?.bereiche?.it?.person?.qualitaet;
-    const cdo = s2.vorstand?.ressorts.cdo?.person;
-    return clamp((q2 ?? 0.58) * 0.7 + (cdo ? cdo.fachwissen / 100 : 0.5) * 0.3, 0, 1);
-  }
-  function vorlage(s2, titel, text3, frist = 3) {
-    if (s2.prognose) return;
-    s2.entscheidungen.push({
-      id: "it-v-" + ++s2.it.meldungen,
-      typ: "it_meilenstein",
-      woche: s2.woche,
-      frist: s2.woche + frist,
-      titel,
-      text: text3,
-      optionen: [{ id: "bestaetigen", label: "Bericht zur Kenntnis nehmen" }, { id: "delegieren", label: "IT-Leitung weiterarbeiten lassen" }],
-      standard: "delegieren",
-      daten: { modul: "it" }
-    });
-    melde(s2, "info", titel + ": " + text3, { modul: "it" });
-  }
-  function itAktion(s2, a2) {
-    initialisiereIt(s2);
-    const it = s2.it;
-    if (a2.typ === "itProduktTeam" || a2.typ === "itProduktAktiv") {
-      if (!IT_PRODUKT_IDS.includes(a2.produkt)) return { ok: false, text: "Unbekanntes IT-Produkt." };
-      const bisher = itProduktZustand(s2, a2.produkt);
-      if (a2.typ === "itProduktTeam") {
-        if (!Number.isInteger(a2.anzahl) || ![-3, 3].includes(a2.anzahl) || bisher.team + a2.anzahl < 0 || bisher.team + a2.anzahl > 30)
-          return { ok: false, text: "Das Team kann nur in Schritten zu drei Personen zwischen 0 und 30 ver\xE4ndert werden." };
-        (it.produkte ?? (it.produkte = {}))[a2.produkt] = { ...bisher, team: bisher.team + a2.anzahl };
-        return { ok: true, text: "IT-Team um " + a2.anzahl + " Personen angepasst." };
-      }
-      if (typeof a2.an !== "boolean") return { ok: false, text: "Ung\xFCltiger Produktstatus." };
-      (it.produkte ?? (it.produkte = {}))[a2.produkt] = { ...bisher, aktiv: a2.an };
-      return { ok: true, text: "Produkt " + (a2.an ? "aktiviert." : "abgeschaltet. Die Nachfragewirkung gilt ab der n\xE4chsten Woche.") };
-    }
-    if (a2.typ === "itKasseAusbau") {
-      if (!Number.isInteger(a2.stufe) || a2.stufe < 0 || a2.stufe > 2) return { ok: false, text: "Ung\xFCltige Ausbaustufe." };
-      const x2 = it.systeme.kasse;
-      if (x2.generation < 2 || a2.art === "mobil" && x2.generation < 3) return { ok: false, text: "Kassensoftware muss zun\xE4chst modernisiert werden." };
-      if (!x2.kasseAusbau) x2.kasseAusbau = { selbstbedienung: 0, mobil: 0 };
-      if (a2.stufe <= x2.kasseAusbau[a2.art]) return { ok: false, text: "Ausbaustufe muss steigen." };
-      einmalKosten(s2, eur((a2.stufe - x2.kasseAusbau[a2.art]) * (a2.art === "mobil" ? 18e5 : 31e5)));
-      x2.kasseAusbau[a2.art] = a2.stufe;
-      return { ok: true, text: "Kassenausbau beauftragt." };
-    }
-    if (a2.typ === "itRolloutPlan") {
-      const p3 = it.projekte.find((p4) => p4.id === a2.projekt);
-      if (!p3 || p3.phase === "abgeschlossen" || p3.erledigteCluster.length) return { ok: false, text: "Rollout-Reihenfolge nicht mehr \xE4nderbar." };
-      const gueltig3 = new Set(itCluster(s2).map((c) => c.id));
-      if (!a2.clusterIds.length || new Set(a2.clusterIds).size !== a2.clusterIds.length || a2.clusterIds.some((id) => !gueltig3.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
-      if (a2.clusterIds.some((id) => generationInCluster(s2, p3.system, id) >= p3.zielGeneration)) return { ok: false, text: "Im gew\xE4hlten Cluster ist diese Generation bereits vorhanden." };
-      if (a2.clusterIds.length !== p3.clusterIds.length || a2.clusterIds.some((id) => !p3.clusterIds.includes(id))) return { ok: false, text: "Nach Projektstart kann nur die Reihenfolge, nicht der Umfang ge\xE4ndert werden." };
-      p3.clusterIds = [...a2.clusterIds];
-      p3.rolloutWochen = a2.clusterIds.length;
-      return { ok: true, text: "Rollout-Auswahl und Reihenfolge gespeichert." };
-    }
-    if (!IT_IDS.includes(a2.system)) return { ok: false, text: "Unbekanntes IT-System." };
-    if (!["kaufen", "entwickeln", "dienstleister"].includes(a2.art)) return { ok: false, text: "Unbekannte Projektart." };
-    if (!Number.isInteger(a2.zielGeneration) || a2.zielGeneration < 1 || a2.zielGeneration > 4) return { ok: false, text: "Ung\xFCltige Zielgeneration." };
-    if (a2.art === "kaufen" && a2.zielGeneration > 3 || a2.art === "dienstleister" && a2.zielGeneration !== 3) return { ok: false, text: "Diese Generation ist f\xFCr die gew\xE4hlte Projektart nicht verf\xFCgbar." };
-    if (it.projekte.some((p3) => p3.system === a2.system && p3.phase !== "abgeschlossen")) return { ok: false, text: "F\xFCr das System l\xE4uft bereits ein Projekt." };
-    const gueltig2 = new Set(itCluster(s2).map((c) => c.id));
-    const clusterIds = a2.clusterIds ? [...a2.clusterIds] : [...gueltig2];
-    if (!clusterIds.length || new Set(clusterIds).size !== clusterIds.length || clusterIds.some((id) => !gueltig2.has(id))) return { ok: false, text: "Ung\xFCltige Cluster-Auswahl." };
-    if (clusterIds.some((id) => generationInCluster(s2, a2.system, id) >= a2.zielGeneration)) return { ok: false, text: "Zielgeneration muss in jedem gew\xE4hlten Cluster h\xF6her sein." };
-    const plan2 = itProjektPlan(s2, a2.system, a2.art, a2.zielGeneration, clusterIds.length);
-    const p2 = {
-      id: "it-p-" + ++it.naechsteId,
-      system: a2.system,
-      art: a2.art,
-      zielGeneration: a2.zielGeneration,
-      phase: "konzept",
-      phaseSeit: s2.woche,
-      phaseRest: plan2.konzept,
-      konzeptWochen: plan2.konzept,
-      umsetzungWochen: plan2.umsetzung,
-      rolloutWochen: plan2.rollout,
-      clusterIds,
-      erledigteCluster: [],
-      kostenPlan: plan2.kosten,
-      kostenIst: 0,
-      wochenBudget: eur(plan2.kosten / plan2.gesamt),
-      verzug: 0,
-      stoerungen: 0,
-      gestartet: s2.woche
-    };
-    it.projekte.push(p2);
-    vorlage(s2, "IT-Projekt beauftragt", SYSTEME[a2.system].name + ": " + a2.art + ", Generation " + a2.zielGeneration + ", " + clusterIds.length + " Cluster, Planbudget " + plan2.kosten.toLocaleString("de-DE") + " \u20AC.");
-    return { ok: true, text: "Projekt " + p2.id + " gestartet." };
-  }
-  function itZufall(s2, schluessel) {
-    return { rng: Math.imul(s2.seed ^ 1313820465, 1664525) + Math.imul(s2.woche + 1, 1013904223) + Math.imul(schluessel, 2246822519) >>> 0 };
-  }
-  function stoerung(s2, cluster, faktor2) {
-    const verluste = s2.it.umsatzFaktoren;
-    for (const id of cluster.hausIds) verluste[id] = Math.min(verluste[id] ?? 1, faktor2);
-  }
-  function upgrade(s2, p2, cluster) {
-    const x2 = s2.it.systeme[p2.system];
-    x2.installationen[cluster.id] = { generation: p2.zielGeneration, seitWoche: s2.woche };
-    s2.it.startprobleme[p2.system + ":" + cluster.id] = s2.woche + 4;
-    const r4 = itZufall(s2, 311 + p2.erledigteCluster.length);
-    const probs = 0.11 * (1 - qualitaet(s2) * 0.7);
-    const defekte = cluster.hausIds.length ? chance(r4, probs) ? 1 + Math.floor(cluster.hausIds.length * 0.18) : 0 : 0;
-    p2.stoerungen += defekte;
-    if (defekte) stoerung(s2, cluster, 0.97);
-    p2.erledigteCluster.push(cluster.id);
-    vorlage(s2, "Rollout " + SYSTEME[p2.system].name, cluster.name + " fertig, " + defekte + " St\xF6rungen, " + p2.erledigteCluster.length + "/" + p2.clusterIds.length + " Cluster umgestellt.");
-  }
-  function beende(s2, p2) {
-    p2.phase = "abgeschlossen";
-    p2.phaseRest = 0;
-    p2.beendet = s2.woche;
-    const x2 = s2.it.systeme[p2.system];
-    if (itCluster(s2).every((c) => generationInCluster(s2, p2.system, c.id) >= p2.zielGeneration)) {
-      x2.generation = p2.zielGeneration;
-      x2.alter = 0;
-      x2.wartungGekuendigt = false;
-    }
-    const faktor2 = { kaufen: 1, entwickeln: 0.75, dienstleister: 2.1 }[p2.art];
-    const betrieb2 = x2.basisKosten || (p2.system === "preisschilder" ? 22e3 : 0);
-    x2.kostenWoche = eur(betrieb2 * (1 + 0.17 * (p2.zielGeneration - SYSTEME[p2.system].start)) * faktor2);
-    vorlage(s2, "IT-Projekt abgeschlossen", SYSTEME[p2.system].name + " Generation " + p2.zielGeneration + ". Istkosten " + p2.kostenIst.toLocaleString("de-DE") + " \u20AC, Plan " + p2.kostenPlan.toLocaleString("de-DE") + " \u20AC.");
-  }
-  function itWoche(s2) {
-    initialisiereIt(s2);
-    const it = s2.it;
-    it.umsatzFaktoren = {};
-    const clusters = itCluster(s2);
-    it.hausCluster = {};
-    for (const cluster of clusters) for (const id of cluster.hausIds) it.hausCluster[id] = cluster.id;
-    const delta = IT_IDS.reduce((sum2, id) => sum2 + it.systeme[id].kostenWoche - it.systeme[id].basisKosten, 0);
-    const teamKosten = IT_PRODUKT_IDS.reduce((sum2, id) => sum2 + itProduktZustand(s2, id).team * IT_TEAM_KOSTEN_PRO_KOPF, 0);
-    s2.zentrale.kostenWoche += delta + teamKosten;
-    const q2 = qualitaet(s2);
-    for (const p2 of it.projekte) {
-      if (p2.phase === "abgeschlossen") continue;
-      const zuf = itZufall(s2, 100 + Number(p2.id.slice(5)));
-      const risiko = clamp(0.1 * (1 - q2) + 0.025 * (p2.art === "entwickeln" ? 2 : 1), 0, 0.16);
-      if (!s2.prognose && chance(zuf, risiko)) {
-        p2.verzug++;
-        p2.phaseRest++;
-        const mehr = eur(p2.wochenBudget * 0.12);
-        p2.kostenPlan += mehr;
-      }
-      const ausgabe = eur(p2.wochenBudget * (1 + (p2.verzug > 0 ? 0.09 : 0)));
-      einmalKosten(s2, ausgabe);
-      p2.kostenIst += ausgabe;
-      p2.phaseRest--;
-      if (p2.phaseRest > 0) continue;
-      if (p2.phase === "konzept") {
-        p2.phase = "umsetzung";
-        p2.phaseSeit = s2.woche + 1;
-        p2.phaseRest = p2.umsetzungWochen;
-        vorlage(s2, "IT-Konzept freigegeben", SYSTEME[p2.system].name + " geht in die Umsetzung.");
-      } else if (p2.phase === "umsetzung") {
-        p2.phase = "rollout";
-        p2.phaseSeit = s2.woche + 1;
-        p2.phaseRest = 1;
-        vorlage(s2, "Rollout beginnt", SYSTEME[p2.system].name + " wird Cluster f\xFCr Cluster umgestellt.");
-      } else if (p2.phase === "rollout") {
-        const next = clusters.find((c) => c.id === p2.clusterIds[p2.erledigteCluster.length]);
-        if (next) upgrade(s2, p2, next);
-        if (p2.erledigteCluster.length === p2.clusterIds.length) beende(s2, p2);
-        else p2.phaseRest = 1;
-      }
-    }
-    for (let i = 0; i < IT_IDS.length; i++) {
-      const id = IT_IDS[i], x2 = it.systeme[id];
-      if (x2.generation === 0 && !Object.keys(x2.installationen).length) continue;
-      for (let j4 = 0; j4 < clusters.length; j4++) {
-        const c = clusters[j4], g2 = generationInCluster(s2, id, c.id), alter = itAlter(s2, id, c.id);
-        if (g2 === 0) continue;
-        const risiko = ausfallRisiko(g2, alter) * (1 - 0.45 * q2) * (x2.wartungGekuendigt ? 2.5 : 1);
-        if (!s2.prognose && chance(itZufall(s2, 5e3 + i * 1e5 + j4), risiko)) {
-          if (id === "kasse" || id === "warenwirtschaft" || id === "ecommerce") stoerung(s2, c, id === "kasse" ? 0.65 : 0.85);
-          melde(s2, "warnung", id === "kasse" ? "Kassenausfall am Samstag in Cluster " + c.name + ". Umsatzausf\xE4lle durch gest\xF6rte Kassensysteme." : SYSTEME[id].name + ": Ausfall in Cluster " + c.name + ". Der operative Betrieb ist eingeschr\xE4nkt.", { modul: "it" });
-        }
-        if (it.startprobleme[id + ":" + c.id] > s2.woche && !s2.prognose) {
-          if (chance(itZufall(s2, 9e3 + i * 1e5 + j4), 0.22 * (1 - q2 * 0.5))) stoerung(s2, c, id === "kasse" ? 0.89 : 0.97);
-        }
-      }
-      if (x2.alter + s2.woche / 52 > 21 && !x2.wartungGekuendigt && !s2.prognose && chance(itZufall(s2, 19e3 + i), 1e-3)) {
-        x2.wartungGekuendigt = true;
-        melde(s2, "warnung", "Wartung f\xFCr " + SYSTEME[id].name + " wurde vom Lieferanten abgek\xFCndigt.", { modul: "it" });
-      }
-    }
-    if (!s2.prognose && chance(itZufall(s2, 22001), 8e-4 * (1 - 0.7 * q2) * Math.max(0.4, 1 - 0.1 * generationInCluster(s2, "datenplattform", clusters[0]?.id ?? "")))) {
-      const f13 = 1 - 0.1 * (1 - q2 * 0.6);
-      for (const c of clusters) stoerung(s2, c, f13);
-      melde(s2, "warnung", "Cyberangriff auf die Unternehmenssysteme. IT und Datenplattform begrenzen den Schaden.", { modul: "it" });
-    }
-  }
-  function itHausFaktor(s2, h4) {
-    const it = s2.it;
-    if (!it) return 1;
-    const id = it.hausCluster?.[h4.id];
-    if (!id) return it.umsatzFaktoren[h4.id] ?? 1;
-    const kasse = Math.max(0, generationInCluster(s2, "kasse", id) - SYSTEME.kasse.start);
-    const app2 = Math.max(0, generationInCluster(s2, "app", id) - SYSTEME.app.start);
-    const ware3 = Math.max(0, generationInCluster(s2, "warenwirtschaft", id) - SYSTEME.warenwirtschaft.start);
-    const kAusbau = it.systeme.kasse.kasseAusbau;
-    const aktiv6 = (produkt) => itProduktZustand(s2, produkt).aktiv;
-    const teamBonus = IT_PRODUKT_IDS.reduce((sum2, p2) => sum2 + (aktiv6(p2) ? itProduktZustand(s2, p2).team * 2e-4 : 0), 0);
-    const qualitaet3 = 1 + kasse * 5e-3 + app2 * 4e-3 + ware3 * 2e-3 + (kAusbau?.selbstbedienung ?? 0) * 2e-3 + (aktiv6("mobile_pay") ? (kAusbau?.mobil ?? 0) * 1e-3 : 0) + teamBonus;
-    const abschaltung = (aktiv6("kasse") ? 1 : 0.85) * (aktiv6("kundenkarte") ? 1 : 0.99) * (aktiv6("hartwig_app") ? 1 : 0.992);
-    return qualitaet3 * abschaltung * (it.umsatzFaktoren[h4.id] ?? 1);
-  }
-  function itUebersicht(s2) {
-    const clusters = itCluster(s2), it = s2.it;
-    const systeme = IT_IDS.map((id) => {
-      const x2 = it?.systeme[id], g2 = x2?.generation ?? SYSTEME[id].start, alter = itAlter(s2, id);
-      const verteilung = clusters.map((c) => ({
-        id: c.id,
-        name: c.name,
-        haeuser: c.hausIds.length,
-        generation: generationInCluster(s2, id, c.id),
-        startproblemeBis: it?.startprobleme[id + ":" + c.id]
-      }));
-      return {
-        id,
-        name: SYSTEME[id].name,
-        generation: g2,
-        alter,
-        kostenWoche: x2?.kostenWoche ?? SYSTEME[id].kosten,
-        risiko: ausfallRisiko(g2, alter),
-        wartungGekuendigt: x2?.wartungGekuendigt ?? false,
-        kasseAusbau: x2?.kasseAusbau,
-        verteilung
-      };
-    });
-    return {
-      woche: s2.woche,
-      qualitaet: qualitaet(s2),
-      systeme,
-      projekte: (it?.projekte ?? []).map((p2) => ({
-        ...p2,
-        fortschritt: p2.phase === "abgeschlossen" ? 1 : clamp((p2.phase === "konzept" ? p2.konzeptWochen - p2.phaseRest : p2.phase === "umsetzung" ? p2.konzeptWochen + p2.umsetzungWochen - p2.phaseRest : p2.konzeptWochen + p2.umsetzungWochen + p2.erledigteCluster.length) / (p2.konzeptWochen + p2.umsetzungWochen + p2.rolloutWochen), 0, 1)
-      })),
-      cluster: clusters.map((c) => ({ id: c.id, name: c.name, haeuser: c.hausIds.length })),
-      betriebskostenWoche: systeme.reduce((a2, x2) => a2 + x2.kostenWoche, 0)
-    };
-  }
-
-  // ../engine/src/organisation.ts
-  var b = (id, name2, ressort, abteilung2, beschreibung) => ({ id, name: name2, ressort, abteilung: abteilung2, beschreibung });
-  var BEREICHE = [
-    b("konzerncontrolling", "Konzerncontrolling", "cfo", "controlling", "GuV, Bilanz und Liquidit\xE4t"),
-    b("vertriebscontrolling", "Vertriebscontrolling", "cfo", "controlling", "Hauskennzahlen und Vertriebsanalysen"),
-    b("finanzen", "Finanzen", "cfo", "verwaltung", "Treasury und Rechnungswesen"),
-    b("recht", "Recht", "cfo", "recht", "Vertr\xE4ge und Compliance"),
-    b("einkauf_damen", "Einkauf Damen", "cpo", "einkauf", "Damenmode und W\xE4sche"),
-    b("einkauf_herren_kinder", "Einkauf Herren & Kinder", "cpo", "einkauf", "Herren- und Kindermode"),
-    b("einkauf_beauty", "Einkauf Beauty & Accessoires", "cpo", "einkauf", "Beauty und Accessoires"),
-    b("einkauf_wohnen", "Einkauf Wohnen & Spielwaren", "cpo", "einkauf", "Wohnen und Spielwaren"),
-    b("einkauf_food", "Einkauf Food", "cpo", "einkauf", "Lebensmittel und Feinkost"),
-    b("merchandise_planning", "Merchandise Planning", "cpo", "einkauf", "Sortiments- und Budgetplanung"),
-    b("allokation", "Allokation & Nachschub", "cpo", "einkauf", "Bestandsverteilung in die H\xE4user"),
-    b("preis_reduzierung", "Preis- & Reduzierungsmanagement", "cpo", "einkauf", "Preise und Abschriften"),
-    b("eigenmarken", "Eigenmarken", "cpo", "produkt", "Entwicklung und Pflege eigener Marken"),
-    b("vertriebssteuerung", "Vertriebssteuerung", "cso", "controlling", "Steuerung der Regionen"),
-    b("marktbeobachtung", "Marktbeobachtung", "cso", "controlling", "Lokale Wettbewerbsanalyse, Relevanzfilter und Wochen\xFCberblick"),
-    b("store_operations", "Store Operations", "cso", "verwaltung", "Standards im operativen Hausbetrieb"),
-    b("flagship_management", "Flagship-Management", "cso", "vm", "Premiumh\xE4user und Flaggschiffe"),
-    b("logistik", "Logistik", "coo", "logistik", "Lager und Warenverkehr"),
-    b("flaechenmanagement", "Fl\xE4chenmanagement", "coo", "immobilien", "Nutzung und Vermietung von Fl\xE4chen"),
-    b("immobilien", "Immobilien", "coo", "immobilien", "Mietvertr\xE4ge und Immobilienportfolio"),
-    b("ladenbau", "Bau & Ladenbau", "coo", "immobilien", "Modernisierung und Umbauten"),
-    b("facility", "Facility & Energie", "coo", "immobilien", "Technik und Energieversorgung"),
-    b("personaleinsatz", "Personaleinsatzplanung", "chro", "personal", "Personalbedarf und Dienstplanung"),
-    b("recruiting", "Recruiting", "chro", "personal", "Gewinnung von Mitarbeitern"),
-    b("weiterbildung", "Aus- & Weiterbildung", "chro", "personal", "Qualifikation und Entwicklung"),
-    b("arbeitsbeziehungen", "Arbeitsbeziehungen", "chro", "personal", "Sozialpartner und Tarif"),
-    b("marketing", "Marketing", "cmo", "marketing", "Kampagnen und Media"),
-    b("crm", "CRM", "cmo", "marketing", "Kundenbindung und Kundenkarte"),
-    b("vm_deko", "VM & Deko", "cmo", "vm", "Visual Merchandising und Dekoration"),
-    b("ecommerce", "E-Commerce", "cdo", "ecommerce", "Onlineshop"),
-    b("it", "IT", "cdo", "ecommerce", "Systembetrieb und Projekte"),
-    b("bi_daten", "BI & Daten", "cdo", "controlling", "Reporting und Datenplattform")
-  ];
-  var ALTE_DELEGATIONEN = {
-    "cfo.zahlungsplanung": "finanzen",
-    "cfo.bank": "konzerncontrolling",
-    "coo.filialpersonal": "store_operations",
-    "coo.personalbedarf": "store_operations",
-    "cso.filialbesetzung": "vertriebssteuerung",
-    "cso.flaechenvermietung": "flagship_management",
-    "cpo.freigaben": "merchandise_planning",
-    "cpo.dispo": "allokation",
-    "cpo.produktentwicklung": "eigenmarken",
-    "cmo.aktionskalender": "marketing",
-    "cmo.crm": "crm",
-    "cmo.kanalbudget": "marketing",
-    "chro.betriebsrat": "arbeitsbeziehungen",
-    "chro.personalplanung": "personaleinsatz",
-    "cro.schliessungen": "immobilien",
-    "cro.mietverhandlungen": "immobilien",
-    "cdo.onlinesortiment": "ecommerce"
-  };
-  var task = (id, name2, grenze) => ({ id, name: name2, ...grenze ? { grenze } : {} });
-  var ALLGEMEIN = [task("planung", "Planung und Priorit\xE4ten"), task("freigaben", "Routinefreigaben", 5e4)];
-  var AUFGABEN_NACH_BEREICH = {
-    einkauf_damen: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
-    einkauf_herren_kinder: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
-    einkauf_beauty: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
-    einkauf_wohnen: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
-    einkauf_food: [task("nachorder", "Nachorder"), task("limits", "Sortimentslimits", 5e4), task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4)],
-    merchandise_planning: [task("limits", "Open-to-Buy-Limits", 5e4), task("vororder", "Saison-Vororder", 5e4), task("freigaben", "Bestellfreigaben", 5e4)],
-    allokation: [task("nachorder", "Nachorder"), task("disposition", "NOS-Disposition"), task("umlagerung", "Warenumlagerungen", 2e4)],
-    preis_reduzierung: [task("reduzierung", "Reduzierungen"), task("altware", "Altwarenabgabe an FUNDUS", 2e4), task("preise", "Preispflege")],
-    eigenmarken: [task("produkte", "Produktentwicklung", 5e4), task("positionierung", "Markenpositionierung", 1e5), task("sortiment", "Sortiment und Auslistung")],
-    personaleinsatz: [task("einsatz", "Einsatzplanung"), task("aushilfen", "Aushilfen", 1e4), task("schicht", "Schicht\xE4nderungen")],
-    recruiting: [task("einstellung", "Einstellungen", 5e4), task("angebote", "Kandidatenangebote", 1e4)],
-    arbeitsbeziehungen: [task("verhandlung", "Betriebsratsverhandlungen"), task("vereinbarung", "Betriebsvereinbarungen", 1e5)],
-    marketing: [task("aktionen", "Aktionen", 1e5), task("mailings", "Mailings", 5e4), task("budget", "Kanalbudget", 5e4)],
-    crm: [task("mailings", "CRM-Mailings", 5e4), task("segment", "Kundensegmente"), task("karte", "Kundenkarte und App", 5e4)],
-    store_operations: [task("oeffnungszeiten", "\xD6ffnungszeiten"), task("sofortmassnahmen", "Ad-hoc-Ma\xDFnahmen", 2e4), task("reparaturen", "Reparaturen", 1e4)],
-    facility: [task("reparaturen", "Reparaturen", 1e4), task("wartung", "Wartung", 5e4), task("energie", "Energieplanung")],
-    immobilien: [task("mietvertraege", "Mietvertragsverl\xE4ngerungen", 1e5), task("verhandlung", "Mietverhandlungen", 5e4), task("planung", "Portfolioplanung")]
-  };
-  var CLUSTER_AUFGABEN = [
-    task("oeffnungszeiten", "\xD6ffnungszeiten"),
-    task("sofortmassnahmen", "Ad-hoc-Ma\xDFnahmen", 2e4),
-    task("reparaturen", "Reparaturen", 1e4),
-    task("aushilfen", "Aushilfen", 1e4),
-    task("einsatz", "Personaleinsatzplanung")
-  ];
-  function delegationsAufgaben(bereich2, hauscluster2) {
-    if (hauscluster2) return CLUSTER_AUFGABEN;
-    if (!bereich2 || !BEREICHE.some((b4) => b4.id === bereich2)) return [];
-    return AUFGABEN_NACH_BEREICH[bereich2] ?? ALLGEMEIN.slice();
-  }
-  var RESSORT_TASK = {
-    "cpo.freigaben": "freigaben",
-    "cpo.dispo": "disposition",
-    "cpo.produktentwicklung": "produkte",
-    "cmo.aktionskalender": "aktionen",
-    "cmo.crm": "mailings",
-    "cmo.kanalbudget": "budget",
-    "chro.personalplanung": "einsatz",
-    "chro.betriebsrat": "verhandlung",
-    "cdo.onlinesortiment": "planung",
-    "cso.filialbesetzung": "planung",
-    "coo.personalbedarf": "einsatz",
-    "coo.filialpersonal": "einsatz",
-    "cro.mietverhandlungen": "verhandlung",
-    "cro.schliessungen": "planung",
-    "cfo.zahlungsplanung": "planung",
-    "cfo.bank": "planung"
-  };
-  var ORGANISATION_AKTIONEN = /* @__PURE__ */ new Set(["flagship", "delegation", "delegationGrenze", "organisationBesetzen", "organisationEntlassen", "organisationHaltepraemie", "organisationBefoerdern"]);
-  var REGIONEN2 = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
-  var hash = (str) => [...str].reduce((v2, c) => Math.imul(v2, 31) + c.charCodeAt(0) >>> 0, 2166136261);
-  var mix = (seed, text3) => hash(seed + ":" + text3);
-  function person(seed, key, n3, qualitaet3) {
-    const z6 = mix(seed, key + ":" + n3), q2 = qualitaet3 ?? 0.48 + z6 % 430 / 1e3;
-    const weiblich = z6 % 2 === 0;
-    return {
-      id: key + "-" + n3,
-      name: VORNAMEN[z6 % VORNAMEN.length] + " " + NACHNAMEN[Math.floor(z6 / 41) % NACHNAMEN.length],
-      qualitaet: Math.round(q2 * 1e3) / 1e3,
-      gehalt: eur((65e3 + q2 * 115e3) / 1e3) * 1e3,
-      stimmung: 68 + z6 % 20,
-      wechselwille: 0.08 + z6 % 26 / 100,
-      portraet: {
-        geschlecht: weiblich ? "w" : "m",
-        haar: weiblich ? "bob" : "kurz",
-        haarfarbe: z6 % 4 === 0 ? "grau" : "braun",
-        brille: z6 % 3 === 0 ? "eckig" : "keine",
-        kleidungFarbe: z6 % 2 === 0 ? "marine" : "anthrazit",
-        hautton: z6 % 5,
-        alter: 38 + z6 % 26,
-        kleidung: weiblich ? "blazer" : "anzug",
-        bart: "keiner"
-      }
-    };
-  }
-  function stelle(seed, key) {
-    const start = person(seed, key, 0, 0.65 + mix(seed, key) % 170 / 1e3);
-    return { person: start, kandidaten: [1, 2, 3].map((i) => person(seed, key, i)), delegiert: false, basis: start.qualitaet };
-  }
-  var distanz = (a2, b4) => {
-    const x2 = KOORDINATEN[a2.stadt], y2 = KOORDINATEN[b4.stadt];
-    if (!x2 || !y2) return a2.stadt === b4.stadt ? 0 : 1e7;
-    return Math.pow((x2[0] - y2[0]) * 111, 2) + Math.pow((x2[1] - y2[1]) * 70, 2);
-  };
-  var nord = (a2, b4) => (KOORDINATEN[b4.stadt]?.[0] ?? 0) - (KOORDINATEN[a2.stadt]?.[0] ?? 0) || a2.id.localeCompare(b4.id);
-  function gruppiere(haeuser) {
-    const frei6 = [...haeuser].sort(nord), ergebnis = [];
-    while (frei6.length) {
-      if (ergebnis.length && frei6.length < 6) {
-        ergebnis[ergebnis.length - 1].push(...frei6.splice(0));
-        break;
-      }
-      const start = frei6.shift(), gruppe3 = [start];
-      const gesamt = frei6.length + 1;
-      const ziel = gesamt > 12 && gesamt - 11 < 6 ? gesamt - 6 : Math.min(11, gesamt);
-      while (gruppe3.length < ziel && frei6.length) {
-        let k5 = 0;
-        for (let i = 1; i < frei6.length; i++) {
-          const d4 = Math.min(...gruppe3.map((h4) => distanz(h4, frei6[i])));
-          const alt = Math.min(...gruppe3.map((h4) => distanz(h4, frei6[k5])));
-          if (d4 < alt || d4 === alt && frei6[i].id.localeCompare(frei6[k5].id) < 0) k5 = i;
-        }
-        gruppe3.push(frei6.splice(k5, 1)[0]);
-      }
-      ergebnis.push(gruppe3);
-    }
-    return ergebnis;
-  }
-  function clusterName(gruppe3, vergeben) {
-    const zahl5 = /* @__PURE__ */ new Map();
-    for (const h4 of gruppe3) zahl5.set(h4.stadt, (zahl5.get(h4.stadt) ?? 0) + 1);
-    const staedte = [...zahl5.entries()].sort((a2, b4) => b4[1] - a2[1] || a2[0].localeCompare(b4[0], "de")).map(([st2]) => st2);
-    for (let i = 1; i < staedte.length; i++) {
-      const name2 = "Raum " + staedte[0] + " \xB7 " + staedte[i];
-      if (!vergeben.includes("Raum " + staedte[0])) break;
-      if (!vergeben.includes(name2)) return name2;
-    }
-    return vergeben.includes("Raum " + staedte[0]) ? "Raum " + staedte[0] + " " + (vergeben.length + 1) : "Raum " + staedte[0];
-  }
-  function bildeHauscluster(s2) {
-    const organisation2 = {
-      hauscluster: [],
-      geografisch: {},
-      flagships: [],
-      unruhe: {},
-      zaehler: 0,
-      bereiche: {},
-      regionalleitungen: {},
-      letzteBesetzung: {},
-      letzteVakanz: {},
-      basisKosten: 0
-    };
-    for (const bereich2 of BEREICHE) organisation2.bereiche[bereich2.id] = stelle(s2.seed, "bereich-" + bereich2.id);
-    for (const region of REGIONEN2) {
-      organisation2.regionalleitungen[region] = stelle(s2.seed, "region-" + region);
-      const einheiten = gruppiere(s2.haeuser.filter((h4) => h4.region === region && h4.status === "offen"));
-      einheiten.forEach((gruppe3, i) => {
-        const id = "hc-" + region.toLocaleLowerCase("de") + "-" + (i + 1);
-        organisation2.hauscluster.push({ id, name: clusterName(gruppe3, organisation2.hauscluster.map((c) => c.name)), region, hausIds: gruppe3.map((h4) => h4.id), sonder: false, stelle: stelle(s2.seed, id) });
-        gruppe3.forEach((h4) => {
-          h4.hauscluster = id;
-          organisation2.geografisch[h4.id] = id;
-        });
-      });
-    }
-    const premium2 = s2.haeuser.filter((h4) => h4.klasse === "premium").map((h4) => h4.id);
-    organisation2.hauscluster.push({ id: "premium-flagships", name: "Premium & Flagships", hausIds: premium2, sonder: true, stelle: stelle(s2.seed, "premium-flagships") });
-    for (const r4 of Object.keys(s2.vorstand.ressorts)) organisation2.letzteBesetzung[r4] = !!s2.vorstand.ressorts[r4].person;
-    organisation2.basisKosten = leitungsKosten(organisation2);
-    s2.organisation = organisation2;
-  }
-  function leitungsKosten(o4) {
-    return [...Object.values(o4.bereiche), ...Object.values(o4.regionalleitungen), ...o4.hauscluster.map((x2) => x2.stelle)].reduce((sum2, x2) => sum2 + (x2.person?.gehalt ?? 0), 0);
-  }
-  function organisationLeitungKostenWoche(s2) {
-    return s2.organisation ? eur((leitungsKosten(s2.organisation) - s2.organisation.basisKosten) / 52) : 0;
-  }
-  function hausclusterVon(s2, hausId) {
-    const o4 = s2.organisation;
-    if (!o4) return void 0;
-    const sonder = o4.hauscluster[o4.hauscluster.length - 1];
-    const id = o4.flagships.includes(hausId) || sonder?.sonder && sonder.hausIds.includes(hausId) ? "premium-flagships" : o4.geografisch[hausId];
-    return o4.hauscluster.find((x2) => x2.id === id);
-  }
-  function clusterleitungQualitaet(s2, hcId) {
-    return clamp(s2.organisation?.hauscluster.find((x2) => x2.id === hcId)?.stelle.person?.qualitaet ?? 0.35, 0, 1);
-  }
-  function regionalleitungQualitaet(s2, region) {
-    return clamp(s2.organisation?.regionalleitungen[region]?.person?.qualitaet ?? 0.35, 0, 1);
-  }
-  function clusterBerichtetAn(s2, hcId) {
-    const cluster = s2.organisation?.hauscluster.find((x2) => x2.id === hcId);
-    if (cluster?.region && s2.organisation?.regionalleitungen[cluster.region]?.person) return cluster.region;
-    return s2.vorstand?.ressorts.cso.person ? "cso" : "spieler";
-  }
-  function berichtetAn(s2, id) {
-    const bereich2 = BEREICHE.find((x2) => x2.id === id);
-    return bereich2 && s2.vorstand?.ressorts[bereich2.ressort]?.person ? bereich2.ressort : "spieler";
-  }
-  function istDelegiert(s2, id) {
-    const bereich2 = BEREICHE.find((x2) => x2.id === id);
-    if (!bereich2) return false;
-    return !!s2.organisation?.bereiche[id]?.delegiert || Object.entries(ALTE_DELEGATIONEN).some(([k5, neu3]) => {
-      const [ressort, delegationsId] = k5.split(".");
-      return neu3 === id && !!s2.vorstand?.ressorts[ressort]?.delegation[delegationsId];
-    });
-  }
-  function istAufgabeDelegiert(s2, aufgabe, bereich2, hauscluster2) {
-    const st2 = bereich2 ? s2.organisation?.bereiche[bereich2] : s2.organisation?.hauscluster.find((c) => c.id === hauscluster2)?.stelle;
-    if (!st2 || !st2.person || !delegationsAufgaben(bereich2, hauscluster2).some((a2) => a2.id === aufgabe)) return false;
-    return st2.aufgaben?.[aufgabe] ?? (bereich2 ? istDelegiert(s2, bereich2) : !!st2.delegiert);
-  }
-  function delegationsGrenze(s2, aufgabe, bereich2, hauscluster2) {
-    const def = delegationsAufgaben(bereich2, hauscluster2).find((x2) => x2.id === aufgabe);
-    const st2 = bereich2 ? s2.organisation?.bereiche[bereich2] : s2.organisation?.hauscluster.find((x2) => x2.id === hauscluster2)?.stelle;
-    return def?.grenze ? st2?.grenzen?.[aufgabe] ?? def.grenze : void 0;
-  }
-  function bereichsQualitaet(s2, id) {
-    const def = BEREICHE.find((x2) => x2.id === id), st2 = s2.organisation?.bereiche[id];
-    if (!def || !st2) return 0;
-    const person3 = st2.person?.qualitaet ?? 0.35;
-    const hqStufe = clamp(s2.hq?.wirkung?.[def.abteilung] ?? 1, 0, 3) / 1;
-    const chef = s2.vorstand?.ressorts[def.ressort]?.person;
-    const vorstand = chef ? clamp(1 + (chef.fuehrung / 100 - 0.5) * 0.3, 0.85, 1.15) : 1;
-    return clamp(person3 * hqStufe * vorstand * itDeckel(s2, id), 0, 1);
-  }
-  function hausclusterFaktor(s2, h4) {
-    const hc = hausclusterVon(s2, h4.id), reg = s2.organisation?.regionalleitungen[h4.region];
-    if (!hc || !reg) return 1;
-    const hcQual = hc.stelle.person?.qualitaet ?? 0.35;
-    const regQual = reg.person?.qualitaet ?? 0.35;
-    return clamp(1 + 0.12 * (hcQual - hc.stelle.basis) + 0.08 * (regQual - reg.basis), 0.85, 1.15);
-  }
-  function neueVorlage(s2, v2) {
-    if (s2.prognose || !s2.organisation) return;
-    const bereich2 = v2.bereich ? BEREICHE.find((b4) => b4.id === v2.bereich) : void 0;
-    const cluster = v2.hauscluster ? s2.organisation.hauscluster.find((c) => c.id === v2.hauscluster) : void 0;
-    const chef = bereich2 ? berichtetAn(s2, bereich2.id) : cluster ? clusterBerichtetAn(s2, cluster.id) : "spieler";
-    const delegiert = v2.aufgabe ? istAufgabeDelegiert(s2, v2.aufgabe, bereich2?.id, cluster?.id) : bereich2 ? istDelegiert(s2, bereich2.id) : !!cluster?.stelle.delegiert;
-    const grenze = v2.aufgabe ? delegationsGrenze(s2, v2.aufgabe, bereich2?.id, cluster?.id) : void 0;
-    const innerhalbGrenze = grenze === void 0 || v2.betrag !== void 0 && v2.betrag <= grenze;
-    if (chef !== "spieler" && delegiert && !v2.grundsaetzlich && innerhalbGrenze) {
-      if (v2.aktion) {
-        const guete = bereich2 ? bereichsQualitaet(s2, bereich2.id) : clusterleitungQualitaet(s2, cluster.id);
-        const schwelle = mix(s2.seed, (v2.aufgabe ?? v2.titel) + ":" + s2.woche) % 1e3 / 1e3;
-        const richtig = schwelle < 0.3 + 0.65 * guete;
-        const aktion2 = richtig ? v2.aktion : v2.fehlerAktion ?? v2.aktion;
-        fuehreAus(s2, aktion2);
-      }
-      return;
-    }
-    const prefix = bereich2?.name ?? cluster?.name ?? "Organisation";
-    s2.entscheidungen.push({
-      id: "org-v-" + ++s2.organisation.zaehler,
-      typ: "organisation_vorlage",
-      woche: s2.woche,
-      frist: s2.woche + (v2.frist ?? 3),
-      titel: v2.titel,
-      text: prefix + ": " + v2.text,
-      optionen: v2.optionen ?? [{ id: "vorschlag", label: "Vorschlag der Leitung \xFCbernehmen" }, { id: "ablehnen", label: "Ablehnen" }],
-      standard: v2.standard ?? "vorschlag",
-      daten: { bereich: bereich2?.id ?? "", hauscluster: cluster?.id ?? "", aufgabe: v2.aufgabe ?? "", absender: prefix, aktion: v2.aktion ? JSON.stringify(v2.aktion) : "" }
-    });
-  }
-  function organisationVorlageEntscheidung(s2, e, option2) {
-    if (option2 !== "vorschlag" || typeof e.daten.aktion !== "string" || !e.daten.aktion) return;
-    const a2 = JSON.parse(e.daten.aktion);
-    fuehreAus(s2, a2);
-  }
-  function stelleFuer(s2, ebene, id) {
-    if (ebene === "bereich") return s2.organisation?.bereiche[id];
-    if (ebene === "region") return s2.organisation?.regionalleitungen[id];
-    return s2.organisation?.hauscluster.find((h4) => h4.id === id)?.stelle;
-  }
-  function organisationAktion(s2, a2) {
-    const o4 = s2.organisation;
-    if (!o4) return { ok: false, text: "Organisation nicht verf\xFCgbar." };
-    if (a2.typ === "flagship") {
-      const h4 = s2.haeuser.find((h5) => h5.id === a2.haus);
-      if (!h4 || h4.status !== "offen" || h4.format !== "warenhaus" || h4.klasse === "premium") return { ok: false, text: "Nur offene regul\xE4re Hartwig-Warenh\xE4user sind ausw\xE4hlbar." };
-      const erlaubt = [...s2.haeuser].filter((h5) => h5.format === "warenhaus" && h5.status === "offen" && !h5.klasse).sort((x2, y2) => y2.grundflaecheQm * y2.etagen.length - x2.grundflaecheQm * x2.etagen.length).slice(0, 12);
-      if (a2.an && !erlaubt.some((x2) => x2.id === h4.id)) return { ok: false, text: "Flagships m\xFCssen zu den gr\xF6\xDFten Warenh\xE4usern geh\xF6ren." };
-      if (a2.an === o4.flagships.includes(h4.id)) return { ok: true, text: "Keine \xC4nderung." };
-      if (a2.an && o4.flagships.length >= 12) return { ok: false, text: "H\xF6chstens zw\xF6lf Flagships m\xF6glich." };
-      o4.flagships = a2.an ? [...o4.flagships, h4.id] : o4.flagships.filter((id) => id !== h4.id);
-      const sonder = o4.hauscluster.find((x2) => x2.sonder);
-      sonder.hausIds = s2.haeuser.filter((x2) => x2.klasse === "premium" || o4.flagships.includes(x2.id)).map((x2) => x2.id);
-      h4.personal.filialleiter.moral = clamp(h4.personal.filialleiter.moral - 10, 0, 100);
-      o4.unruhe[h4.id] = { bis: s2.woche + 8, moral: 10 };
-      return { ok: true, text: a2.an ? "Flagship zugeordnet: acht Wochen Unruhe." : "Flagship wieder regional zugeordnet: acht Wochen Unruhe." };
-    }
-    if (a2.typ === "delegation" || a2.typ === "delegationGrenze") {
-      const st3 = a2.bereich ? o4.bereiche[a2.bereich] : o4.hauscluster.find((c) => c.id === a2.hauscluster)?.stelle;
-      if (!st3) return { ok: false, text: "Bereich oder Hauscluster nicht gefunden." };
-      if (a2.typ === "delegationGrenze") {
-        const def = delegationsAufgaben(a2.bereich, a2.hauscluster).find((t5) => t5.id === a2.aufgabe);
-        if (!def?.grenze || !Number.isFinite(a2.betrag) || a2.betrag < 0 || a2.betrag > 1e8)
-          return { ok: false, text: "Ung\xFCltige Betragsgrenze oder Aufgabe." };
-        (st3.grenzen ?? (st3.grenzen = {}))[a2.aufgabe] = eur(a2.betrag);
-        return { ok: true, text: "Betragsgrenze ge\xE4ndert." };
-      }
-      if (a2.aufgabe !== void 0) {
-        if (!delegationsAufgaben(a2.bereich, a2.hauscluster).some((t5) => t5.id === a2.aufgabe))
-          return { ok: false, text: "Aufgabe in diesem Bereich nicht vorhanden." };
-        if (a2.an && !st3.person) return { ok: false, text: "Ohne Leitung keine Delegation m\xF6glich." };
-        (st3.aufgaben ?? (st3.aufgaben = {}))[a2.aufgabe] = a2.an;
-        if (a2.bereich) for (const [alt, neu3] of Object.entries(ALTE_DELEGATIONEN)) {
-          if (neu3 !== a2.bereich || RESSORT_TASK[alt] !== a2.aufgabe) continue;
-          const [r4, id] = alt.split(".");
-          if (s2.vorstand?.ressorts[r4]?.delegation && DELEGATIONEN[r4].some((d4) => d4.id === id))
-            s2.vorstand.ressorts[r4].delegation[id] = a2.an;
-        }
-        return { ok: true, text: "Aufgabe " + a2.aufgabe + (a2.an ? " delegiert." : " zur Entscheidung vorgelegt.") };
-      }
-      st3.delegiert = a2.an;
-      st3.aufgaben = {};
-      if (a2.bereich) {
-        for (const [alt, neu3] of Object.entries(ALTE_DELEGATIONEN)) if (neu3 === a2.bereich) {
-          const [r4, id] = alt.split(".");
-          if (s2.vorstand?.ressorts[r4]?.delegation && DELEGATIONEN[r4].some((d4) => d4.id === id))
-            s2.vorstand.ressorts[r4].delegation[id] = a2.an;
-        }
-      }
-      return { ok: true, text: a2.bereich ? "Bereichsdelegation ge\xE4ndert." : "Clusterdelegation ge\xE4ndert." };
-    }
-    if (a2.typ === "organisationBefoerdern") {
-      const h4 = s2.haeuser.find((x2) => x2.id === a2.haus), cluster = o4.hauscluster.find((x2) => x2.id === a2.hauscluster);
-      if (!h4 || !cluster || h4.status !== "offen" || h4.personal.filialleiter.skill < 0.7 || hausclusterVon(s2, h4.id)?.id !== cluster.id) return { ok: false, text: "Nur geeignete Hausleitungen desselben Clusters k\xF6nnen bef\xF6rdert werden." };
-      const alt = h4.personal.filialleiter;
-      cluster.stelle.person = { ...person(s2.seed, "bef-" + h4.id, s2.woche, clamp(alt.skill, 0, 1)), name: alt.name };
-      h4.personal.filialleiter = { name: "Stellvertretung " + h4.stadt, skill: Math.max(0.3, alt.skill - 0.16), moral: Math.max(30, alt.moral - 4), interimBis: s2.woche + 8 };
-      return { ok: true, text: "Hausleitung zur Clusterleitung bef\xF6rdert. Stellvertretung \xFCbernimmt." };
-    }
-    const st2 = stelleFuer(s2, a2.ebene, a2.id);
-    if (!st2) return { ok: false, text: "Leitungsstelle nicht gefunden." };
-    if (a2.typ === "organisationEntlassen") {
-      if (!st2.person) return { ok: false, text: "Stelle bereits vakant." };
-      einmalKosten(s2, eur(st2.person.gehalt / 4));
-      st2.person = void 0;
-      return { ok: true, text: "Leitung entlassen. Stelle vakant." };
-    }
-    if (a2.typ === "organisationHaltepraemie") {
-      if (!st2.person || !Number.isFinite(a2.betrag) || a2.betrag < 0 || a2.betrag > 15e4) return { ok: false, text: "Ung\xFCltige Haltepr\xE4mie." };
-      einmalKosten(s2, eur(a2.betrag));
-      st2.person.stimmung = clamp(st2.person.stimmung + a2.betrag / 5e3, 0, 100);
-      st2.person.wechselwille = clamp(st2.person.wechselwille - a2.betrag / 5e5, 0, 1);
-      return { ok: true, text: "Haltepr\xE4mie ausgezahlt." };
-    }
-    const k5 = st2.kandidaten.find((p2) => p2.id === a2.kandidat);
-    if (!k5) return { ok: false, text: "Kandidat nicht gefunden." };
-    if (st2.person) einmalKosten(s2, eur(st2.person.gehalt / 4));
-    st2.person = { ...k5 };
-    st2.kandidaten = [1, 2, 3].map((n3) => person(s2.seed, a2.id + "-" + (s2.woche + 1), n3));
-    return { ok: true, text: k5.name + " \xFCbernimmt die Leitung." };
-  }
-  function routineVorschlag(bereich2, aufgabe) {
-    const wg = {
-      einkauf_damen: "damen",
-      einkauf_herren_kinder: "herren",
-      einkauf_beauty: "beauty",
-      einkauf_wohnen: "wohnen",
-      einkauf_food: "nug",
-      merchandise_planning: "alle",
-      allokation: "alle",
-      preis_reduzierung: "alle"
-    };
-    const gruppe3 = bereich2 && wg[bereich2];
-    if (gruppe3) {
-      if (aufgabe === "limits") return {
-        gut: { typ: "wgLimit", wg: gruppe3, faktor: 1.05 },
-        schlecht: { typ: "wgLimit", wg: gruppe3, faktor: 0.8 }
-      };
-      if (aufgabe === "reduzierung") return {
-        gut: { typ: "wgReduzierung", wg: gruppe3, strategie: "normal" },
-        schlecht: { typ: "wgReduzierung", wg: gruppe3, strategie: "spaet" }
-      };
-      if (aufgabe === "nachorder" || aufgabe === "disposition") return {
-        gut: { typ: "wgServicegrad", wg: gruppe3, ziel: 0.98 },
-        schlecht: { typ: "wgServicegrad", wg: gruppe3, ziel: 0.9 }
-      };
-      if (aufgabe === "vororder") return {
-        gut: { typ: "wgVororderquote", wg: gruppe3, quote: 0.6 },
-        schlecht: { typ: "wgVororderquote", wg: gruppe3, quote: 0.25 }
-      };
-      if (aufgabe === "freigaben") return {
-        gut: { typ: "sammelfreigabe" },
-        schlecht: { typ: "freigabeGrenze", euro: 0 }
-      };
-    }
-    if (bereich2 === "marketing" && aufgabe === "budget") return {
-      gut: { typ: "kanalBudget", kanal: "alle", faktor: 1.02 },
-      schlecht: { typ: "kanalBudget", kanal: "alle", faktor: 0.8 }
-    };
-    return void 0;
-  }
-  function organisationWoche(s2) {
-    const o4 = s2.organisation;
-    if (!o4 || s2.prognose) return;
-    for (const [hausId, unruhe] of Object.entries(o4.unruhe)) {
-      if (s2.woche >= unruhe.bis) {
-        const h4 = s2.haeuser.find((x2) => x2.id === hausId);
-        if (h4) h4.personal.filialleiter.moral = clamp(h4.personal.filialleiter.moral + unruhe.moral, 0, 100);
-        delete o4.unruhe[hausId];
-      }
-    }
-    if (s2.woche > 0 && s2.woche % 4 === 0) {
-      const einheiten = [
-        ...Object.entries(o4.bereiche).map(([id, st2]) => ({ st: st2, bereich: id, hauscluster: void 0 })),
-        ...o4.hauscluster.map((c) => ({ st: c.stelle, bereich: void 0, hauscluster: c.id }))
-      ];
-      for (const x2 of einheiten) for (const aufgabe of Object.keys(x2.st.aufgaben ?? {})) {
-        const def = delegationsAufgaben(x2.bereich, x2.hauscluster).find((d4) => d4.id === aufgabe);
-        if (!def) continue;
-        const vorschlag = routineVorschlag(x2.bereich, aufgabe);
-        neueVorlage(s2, {
-          bereich: x2.bereich,
-          hauscluster: x2.hauscluster,
-          aufgabe,
-          aktion: vorschlag?.gut,
-          fehlerAktion: vorschlag?.schlecht,
-          betrag: def.grenze ? Math.min(def.grenze, delegationsGrenze(s2, aufgabe, x2.bereich, x2.hauscluster) ?? def.grenze) : void 0,
-          titel: def.name + ": Routineentscheidung KW " + (s2.woche + 1),
-          text: "Die zust\xE4ndige Leitung legt ihre Entscheidung zu " + def.name + " vor.",
-          frist: 3
-        });
-      }
-    }
-    const stellen = [
-      ...Object.entries(o4.bereiche).map(([id, st2]) => ({ id, ebene: "bereich", st: st2 })),
-      ...Object.entries(o4.regionalleitungen).map(([id, st2]) => ({ id, ebene: "region", st: st2 })),
-      ...o4.hauscluster.map((c) => ({ id: c.id, ebene: "cluster", st: c.stelle }))
-    ];
-    for (const x2 of stellen) {
-      const key = x2.ebene + ":" + x2.id, vakant2 = !x2.st.person;
-      if (vakant2 && !o4.letzteVakanz[key]) {
-        const kandidat = x2.st.kandidaten[0];
-        if (kandidat) neueVorlage(s2, {
-          ...x2.ebene === "bereich" ? { bereich: x2.id } : x2.ebene === "cluster" ? { hauscluster: x2.id } : {},
-          titel: "Leitungswechsel: " + x2.id,
-          text: kandidat.name + " als Nachfolge vorschlagen (Jahresgehalt " + kandidat.gehalt + " \u20AC).",
-          frist: 3,
-          aktion: { typ: "organisationBesetzen", ebene: x2.ebene, id: x2.id, kandidat: kandidat.id }
-        });
-      }
-      o4.letzteVakanz[key] = vakant2;
-    }
-    for (const r4 of ["cpo", "cfo", "cso", "coo", "chro", "cmo", "cdo"]) {
-      const aktuell = !!s2.vorstand.ressorts[r4].person, vorher = o4.letzteBesetzung[r4];
-      if (vorher === aktuell) continue;
-      o4.letzteBesetzung[r4] = aktuell;
-      const betroffene = BEREICHE.filter((b4) => b4.ressort === r4);
-      if (!aktuell) {
-        for (const b4 of betroffene) neueVorlage(s2, {
-          bereich: b4.id,
-          titel: b4.name + ": Entscheidung ohne " + r4.toUpperCase(),
-          text: "Die Bereichsleitung legt ihren Personal- und Kapazit\xE4tsvorschlag direkt dem CEO vor.",
-          frist: 3
-        });
-      } else {
-        const einzelfrist = ": Entscheidung ohne " + r4.toUpperCase();
-        const zuvor = s2.entscheidungen.length;
-        s2.entscheidungen = s2.entscheidungen.filter((e) => !(e.typ === "organisation_vorlage" && e.titel.endsWith(einzelfrist)));
-        const gebuendelt = zuvor - s2.entscheidungen.length;
-        neueVorlage(s2, {
-          bereich: betroffene[0]?.id,
-          titel: r4.toUpperCase() + ": Vorlagen geb\xFCndelt",
-          text: betroffene.length + " Bereiche berichten wieder an den Ressortvorstand; " + gebuendelt + " Einzelvorlagen \xFCbernommen.",
-          grundsaetzlich: true,
-          frist: 3
-        });
-      }
-    }
-  }
-  function organisationUebersicht(s2) {
-    const o4 = s2.organisation;
-    return {
-      bereiche: BEREICHE.map((b4) => ({
-        ...b4,
-        stelle: o4?.bereiche[b4.id],
-        qualitaet: bereichsQualitaet(s2, b4.id),
-        berichtetAn: berichtetAn(s2, b4.id),
-        delegiert: istDelegiert(s2, b4.id),
-        aufgaben: delegationsAufgaben(b4.id).map((d4) => ({ ...d4, an: istAufgabeDelegiert(s2, d4.id, b4.id), grenze: delegationsGrenze(s2, d4.id, b4.id) })),
-        hqStufe: b4.id === "marktbeobachtung" ? s2.marktbeobachtung?.stufe ?? 0 : s2.hq.abteilungen.find((a2) => a2.id === b4.abteilung)?.stufe ?? 0,
-        offen: s2.entscheidungen.filter((e) => e.typ === "organisation_vorlage" && e.daten.bereich === b4.id).length
-      })),
-      ressorts: Object.keys(RESSORT_INFO).filter((r4) => r4 !== "cro").map((r4) => ({
-        id: r4,
-        name: RESSORT_INFO[r4].titel,
-        person: s2.vorstand.ressorts[r4].person
-      })),
-      regionen: REGIONEN2.map((r4) => ({
-        id: r4,
-        stelle: o4?.regionalleitungen[r4],
-        cluster: (o4?.hauscluster.filter((c) => c.region === r4) ?? []).map((c) => ({
-          ...c,
-          anzahl: c.hausIds.length,
-          umsatz: c.hausIds.reduce((a2, id) => a2 + (s2.haeuser.find((h4) => h4.id === id)?.kpi?.umsatz ?? 0), 0),
-          qualitaet: clusterleitungQualitaet(s2, c.id),
-          berichtetAn: clusterBerichtetAn(s2, c.id),
-          aufgaben: delegationsAufgaben(void 0, c.id).map((d4) => ({ ...d4, an: istAufgabeDelegiert(s2, d4.id, void 0, c.id), grenze: delegationsGrenze(s2, d4.id, void 0, c.id) })),
-          offen: s2.entscheidungen.filter((e) => e.typ === "organisation_vorlage" && e.daten.hauscluster === c.id).length
-        }))
-      })),
-      sonder: (() => {
-        const c = o4?.hauscluster.find((c2) => c2.sonder);
-        return c ? { ...c, aufgaben: delegationsAufgaben(void 0, c.id).map((d4) => ({ ...d4, an: istAufgabeDelegiert(s2, d4.id, void 0, c.id), grenze: delegationsGrenze(s2, d4.id, void 0, c.id) })) } : void 0;
-      })(),
-      flagships: o4?.flagships ?? []
-    };
-  }
-
   // ../engine/src/marktbeobachtung.ts
   var MARKT_FTE = [0, 6, 12, 20];
   var MARKT_KOSTEN_JE_FTE = 1750;
@@ -6662,2223 +9580,6 @@
     });
     if (x2.verlauf.length > 52) x2.verlauf.splice(0, x2.verlauf.length - 52);
     if (s2.meldungen.length > 400) s2.meldungen.splice(0, s2.meldungen.length - 400);
-  }
-
-  // ../engine/src/treiber.ts
-  var NULL = { frequenz: 1, kaufquote: 1, bon: 1 };
-  var PREIS = {
-    damen: 43,
-    herren: 49,
-    kinder: 25,
-    beauty: 37,
-    accessoires: 53,
-    waesche: 21,
-    wohnen: 39,
-    spielwaren: 27,
-    food: 16,
-    sport: 48,
-    sportschuhe: 85,
-    sporttextil: 49,
-    outdoor: 110,
-    rad: 260,
-    wintersport: 115,
-    teamsport: 37
-  };
-  var leer = () => ({
-    von: 0,
-    bis: 0,
-    umsatz: 0,
-    frequenz: 0,
-    kaeufe: 0,
-    artikel: 0,
-    kaufquote: 0,
-    bon: 0,
-    teile: 0,
-    preis: 0
-  });
-  function komplett(von, bis, umsatz, frequenz, kaeufe, artikel) {
-    return {
-      von,
-      bis,
-      umsatz,
-      frequenz,
-      kaeufe,
-      artikel,
-      kaufquote: frequenz ? kaeufe / frequenz : 0,
-      bon: kaeufe ? umsatz / kaeufe : 0,
-      teile: kaeufe ? artikel / kaeufe : 0,
-      preis: artikel ? umsatz / artikel : 0
-    };
-  }
-  var hauscluster = (h4) => h4.hauscluster || h4.region;
-  function setzeTreiber(s2, hausId, quelle2, treiber, faktor2) {
-    const h4 = s2.haeuser.find((x2) => x2.id === hausId);
-    if (!h4) throw new Error("Haus nicht gefunden: " + hausId);
-    if (!quelle2.trim()) throw new Error("Treiberquelle fehlt.");
-    if (!Number.isFinite(faktor2) || faktor2 < 0 || faktor2 > 3) throw new Error("Treiberfaktor muss zwischen 0 und 3 liegen.");
-    const quellen = h4.treiberQuellen ?? (h4.treiberQuellen = {});
-    if (faktor2 === 1) {
-      if (quellen[quelle2]) {
-        delete quellen[quelle2][treiber];
-        if (!Object.keys(quellen[quelle2]).length) delete quellen[quelle2];
-      }
-    } else (quellen[quelle2] ?? (quellen[quelle2] = {}))[treiber] = faktor2;
-    const produkt = { ...NULL };
-    for (const eintrag2 of Object.values(quellen)) for (const id of ["frequenz", "kaufquote", "bon"])
-      produkt[id] *= eintrag2[id] ?? 1;
-    h4.treiber = produkt;
-  }
-  function treiberFaktor(h4) {
-    if (!h4.treiberQuellen) return h4.treiber ?? NULL;
-    const produkt = { ...NULL };
-    for (const q2 of Object.values(h4.treiberQuellen)) for (const t5 of ["frequenz", "kaufquote", "bon"])
-      produkt[t5] *= q2[t5] ?? 1;
-    return produkt;
-  }
-  function wirkeTreiber(h4, roh2) {
-    const f13 = treiberFaktor(h4);
-    const faktor2 = f13.frequenz * f13.kaufquote * f13.bon;
-    if (faktor2 === 1) return roh2;
-    for (const v2 of Object.values(roh2.eigen)) if (v2) {
-      v2.brutto *= faktor2;
-      v2.umsatz *= faktor2;
-    }
-    for (const g2 of Object.keys(roh2.kommission)) roh2.kommission[g2] = (roh2.kommission[g2] ?? 0) * faktor2;
-    roh2.offprice *= faktor2;
-    roh2.ohneAktion *= faktor2;
-    roh2.ohneAktionRohertrag *= faktor2;
-    return roh2;
-  }
-  function frequenzBasis(s2, h4) {
-    const qm2 = h4.flaechen.filter((f13) => f13.konzept !== "leer" && f13.konzept !== "untermiete").reduce((sum2, f13) => sum2 + f13.qm, 0);
-    const lage = { "1a": 1.12, b: 0.87, stadtteil: 0.92, center: 1.07, rand: 0.79 }[h4.lage];
-    const groesse2 = { metropole: 1.16, grossstadt: 1, mittelstadt: 0.84 }[h4.cluster];
-    const saison2 = clamp(saisonFaktor("damen", s2.woche), 0.65, 1.75);
-    const marketing = marketingHausFaktor(s2, h4);
-    return Math.max(0, Math.round((Math.max(0, qm2) * 1.12 + 4400) * lage * groesse2 * clamp(h4.einzug.kaufkraft, 0.7, 1.4) * saison2 * marketing * (1 + h4.transferBonus)));
-  }
-  function kaufquoteBasis(h4) {
-    if (h4.format === "fundus") return 0.35;
-    if (h4.format === "sport") return 0.215;
-    return h4.klasse === "premium" ? 0.29 : h4.lage === "1a" ? 0.27 : h4.lage === "rand" ? 0.22 : 0.25;
-  }
-  function artikelAusMix(h4, umsatz) {
-    const gruppen = Object.entries(h4.kpi?.umsatzJeGruppe ?? {});
-    const mengen = gruppen.reduce((sum2, [g2, wert]) => sum2 + Math.max(0, wert) / (PREIS[g2] ?? 40), 0);
-    const rest = Math.max(0, umsatz - gruppen.reduce((sum2, [, v2]) => sum2 + v2, 0));
-    return umsatz > 0 ? Math.max(1e-6, mengen + rest / 18) : 0;
-  }
-  function erfasseTreiber(s2) {
-    if (s2.prognose || s2.treiberErfassungAus) return;
-    for (const h4 of s2.haeuser) {
-      const umsatz = h4.kpi?.woche === s2.woche ? h4.kpi.umsatz : 0;
-      const f13 = treiberFaktor(h4);
-      const frequenz = h4.status !== "geschlossen" && h4.status !== "verkauft" ? Math.max(1, Math.round(frequenzBasis(s2, h4) * f13.frequenz)) : 0;
-      const q2 = umsatz > 0 ? clamp(kaufquoteBasis(h4) * f13.kaufquote, 0.01, 0.95) : 0;
-      const kaeufe = frequenz * q2;
-      const artikel = artikelAusMix(h4, umsatz);
-      const messung2 = komplett(s2.woche, s2.woche, umsatz, frequenz, kaeufe, artikel);
-      const verlauf4 = h4.treiberVerlauf ?? (h4.treiberVerlauf = []);
-      verlauf4.push(messung2);
-      const grenze = s2.woche - 51;
-      const erste = s2.woche - 103;
-      const zuschneiden = (p2) => {
-        if (p2.von >= erste) return p2;
-        const anteil3 = (p2.bis - erste + 1) / (p2.bis - p2.von + 1);
-        return komplett(
-          erste,
-          p2.bis,
-          p2.umsatz * anteil3,
-          p2.frequenz * anteil3,
-          p2.kaeufe * anteil3,
-          p2.artikel * anteil3
-        );
-      };
-      const alt = verlauf4.filter((p2) => p2.bis < grenze && p2.bis >= erste).map(zuschneiden);
-      const jung = verlauf4.filter((p2) => p2.bis >= grenze).map((p2) => p2.von < erste ? zuschneiden(p2) : p2);
-      const bloecke = /* @__PURE__ */ new Map();
-      for (const p2 of alt) {
-        const block = Math.floor(p2.von / 4);
-        const gruppe3 = bloecke.get(block) ?? [];
-        gruppe3.push(p2);
-        bloecke.set(block, gruppe3);
-      }
-      const archiv = [...bloecke.entries()].sort((a2, b4) => a2[0] - b4[0]).map(([, teile2]) => summiere(teile2));
-      h4.treiberVerlauf = [...archiv, ...jung];
-    }
-  }
-  function summiere(eintraege) {
-    if (!eintraege.length) return leer();
-    return komplett(
-      Math.min(...eintraege.map((e) => e.von)),
-      Math.max(...eintraege.map((e) => e.bis)),
-      eintraege.reduce((s2, e) => s2 + e.umsatz, 0),
-      eintraege.reduce((s2, e) => s2 + e.frequenz, 0),
-      eintraege.reduce((s2, e) => s2 + e.kaeufe, 0),
-      eintraege.reduce((s2, e) => s2 + e.artikel, 0)
-    );
-  }
-  function zeitraum(s2, h4, von, bis) {
-    const start = s2.spielStartWoche ?? 0;
-    const historisch = (s2.vorjahrHistorie?.[h4.id] ?? []).map((p2) => komplett(p2.woche, p2.woche, p2.umsatz, p2.frequenz, p2.kaeufe, p2.artikel));
-    const messungen = [...historisch, ...h4.treiberVerlauf ?? []];
-    if (von < start - 52 || bis < von) return { geschaetzt: false };
-    const teile2 = [];
-    let abgedeckt2 = 0, geschaetzt = false;
-    for (const m of messungen) {
-      const gemeinsam = Math.max(0, Math.min(bis, m.bis) - Math.max(von, m.von) + 1);
-      if (!gemeinsam) continue;
-      const laenge2 = m.bis - m.von + 1, anteil3 = gemeinsam / laenge2;
-      if (anteil3 !== 1) geschaetzt = true;
-      teile2.push(komplett(
-        Math.max(von, m.von),
-        Math.min(bis, m.bis),
-        m.umsatz * anteil3,
-        m.frequenz * anteil3,
-        m.kaeufe * anteil3,
-        m.artikel * anteil3
-      ));
-      abgedeckt2 += gemeinsam;
-    }
-    if (abgedeckt2 !== bis - von + 1) return { geschaetzt };
-    const wert = summiere(teile2);
-    wert.umsatz = eur(wert.umsatz);
-    wert.preis = wert.artikel ? wert.umsatz / wert.artikel : 0;
-    wert.bon = wert.kaeufe ? wert.umsatz / wert.kaeufe : 0;
-    return { wert, geschaetzt };
-  }
-  function hausTreiber(s2, hausId, wochen = 1) {
-    const h4 = s2.haeuser.find((x2) => x2.id === hausId);
-    if (!h4) return void 0;
-    const bis = s2.woche - 1;
-    const aktuell = zeitraum(s2, h4, bis - wochen + 1, bis);
-    if (!aktuell.wert) return void 0;
-    const vorjahr2 = zeitraum(s2, h4, bis - wochen + 1 - 52, bis - 52);
-    return {
-      aktuell: aktuell.wert,
-      vorjahr: vorjahr2.wert,
-      vorjahrGeschaetzt: vorjahr2.geschaetzt,
-      abweichung: vorjahr2.wert ? aktuell.wert.umsatz - vorjahr2.wert.umsatz : void 0
-    };
-  }
-  function auswahl(s2, ebene, id, format) {
-    return s2.haeuser.filter((h4) => h4.status !== "verkauft" && (!format || format === "alle" || h4.format === format) && (ebene === "konzern" || ebene === "haus" && h4.id === id || ebene === "region" && h4.region === id || ebene === "hauscluster" && hauscluster(h4) === id));
-  }
-  function umsatzbruecke(s2, o4) {
-    const fehlend = (status2) => ({
-      status: status2,
-      vorher: 0,
-      aktuell: 0,
-      differenz: 0,
-      frequenz: 0,
-      kaufquote: 0,
-      teile: 0,
-      preis: 0,
-      bon: 0,
-      vorjahrGeschaetzt: false
-    });
-    if (o4.vergleich === "plan") return fehlend("kein Plan vorhanden");
-    const ende = s2.woche - 1, anzahl2 = Math.max(1, Math.floor(o4.wochen));
-    const alt = [], neu3 = [];
-    let geschaetzt = false;
-    for (const h4 of auswahl(s2, o4.ebene, o4.id, o4.format)) {
-      const jetzt = zeitraum(s2, h4, ende - anzahl2 + 1, ende);
-      const frueher = zeitraum(s2, h4, ende - anzahl2 + 1 - 52, ende - 52);
-      if (!jetzt.wert || !frueher.wert) continue;
-      neu3.push(jetzt.wert);
-      alt.push(frueher.wert);
-      geschaetzt || (geschaetzt = frueher.geschaetzt);
-    }
-    if (!neu3.length) return fehlend("kein Vorjahr vorhanden");
-    const v2 = summiere(alt), a2 = summiere(neu3);
-    const f13 = eur(a2.frequenz * v2.kaufquote * v2.teile * v2.preis);
-    const q2 = eur(a2.frequenz * a2.kaufquote * v2.teile * v2.preis);
-    const t5 = eur(a2.frequenz * a2.kaufquote * a2.teile * v2.preis);
-    const u = eur(a2.umsatz), vorher = eur(v2.umsatz);
-    const teile2 = t5 - q2, preis = u - t5;
-    return {
-      status: "ok",
-      vorher,
-      aktuell: u,
-      differenz: u - vorher,
-      frequenz: f13 - vorher,
-      kaufquote: q2 - f13,
-      teile: teile2,
-      preis,
-      bon: teile2 + preis,
-      vorjahrGeschaetzt: geschaetzt
-    };
-  }
-  function kennzahl(s2, h4, id) {
-    const d4 = hausTreiber(s2, h4.id);
-    if (!d4) return 0;
-    if (id === "umsatz") return d4.aktuell.umsatz;
-    if (id === "frequenz") return d4.aktuell.frequenz;
-    if (id === "kaufquote") return d4.aktuell.kaufquote;
-    if (id === "bon") return d4.aktuell.bon;
-    if (id === "abweichungVorjahr") return d4.abweichung ?? 0;
-    const qm2 = h4.flaechen.reduce((sum2, f13) => sum2 + f13.qm, 0);
-    return qm2 > 0 ? d4.aktuell.umsatz / qm2 : 0;
-  }
-  function ranking(s2, o4) {
-    const alle = s2.haeuser.filter((h4) => h4.status !== "verkauft" && h4.kpi?.woche === s2.woche - 1);
-    const vergleich = (h4) => o4.ebene === "region" ? h4.region : hauscluster(h4);
-    const gesamt = alle.map((h4) => ({ h: h4, wert: kennzahl(s2, h4, o4.kennzahl) })).sort((a2, b4) => b4.wert - a2.wert || a2.h.id.localeCompare(b4.h.id));
-    const gruppe3 = o4.ebene === "alle" || !o4.innerhalb ? gesamt : gesamt.filter((e) => vergleich(e.h) === o4.innerhalb);
-    return gruppe3.map((e, index2) => ({
-      hausId: e.h.id,
-      name: e.h.name,
-      region: e.h.region,
-      hauscluster: hauscluster(e.h),
-      format: e.h.format,
-      wert: e.wert,
-      rangGesamt: gesamt.indexOf(e) + 1,
-      rangVergleich: o4.innerhalb ? index2 + 1 : gesamt.filter((x2) => vergleich(x2.h) === vergleich(e.h)).indexOf(e) + 1
-    }));
-  }
-  function reporting(s2, wochen = 1, format = "alle") {
-    const zeilen = [];
-    for (const h4 of s2.haeuser) {
-      if (h4.status === "verkauft" || format !== "alle" && h4.format !== format) continue;
-      const d4 = hausTreiber(s2, h4.id, wochen);
-      if (!d4) continue;
-      const v2 = d4.vorjahr?.umsatz;
-      const diff = d4.abweichung;
-      const anteil3 = v2 && diff !== void 0 ? diff / Math.abs(v2) : void 0;
-      zeilen.push({
-        id: h4.id,
-        name: h4.name,
-        region: h4.region,
-        hauscluster: hauscluster(h4),
-        format: h4.format,
-        umsatz: d4.aktuell.umsatz,
-        vorjahr: v2,
-        abweichung: diff,
-        abweichungProzent: anteil3,
-        frequenz: d4.aktuell.frequenz,
-        kaufquote: d4.aktuell.kaufquote,
-        bon: d4.aktuell.bon,
-        ampelfarbe: anteil3 === void 0 ? "grau" : anteil3 < -0.05 ? "rot" : anteil3 < 0 ? "gelb" : "gruen"
-      });
-    }
-    const gruppen = [];
-    for (const ebene of ["region", "hauscluster"]) {
-      for (const id of new Set(zeilen.map((z6) => z6[ebene]))) {
-        const aus = zeilen.filter((z6) => z6[ebene] === id);
-        const umsatz = aus.reduce((a2, z6) => a2 + z6.umsatz, 0);
-        const fre = aus.reduce((a2, z6) => a2 + z6.frequenz, 0);
-        const kaeufe = aus.reduce((a2, z6) => a2 + z6.frequenz * z6.kaufquote, 0);
-        const mitVj = aus.filter((z6) => z6.vorjahr !== void 0);
-        const vorjahr2 = mitVj.length === aus.length ? aus.reduce((a2, z6) => a2 + (z6.vorjahr ?? 0), 0) : void 0;
-        const abweichung2 = vorjahr2 !== void 0 ? umsatz - vorjahr2 : void 0;
-        const abweichungProzent = vorjahr2 && abweichung2 !== void 0 ? abweichung2 / Math.abs(vorjahr2) : void 0;
-        gruppen.push({
-          id,
-          name: id,
-          region: ebene === "region" ? id : aus[0].region,
-          hauscluster: ebene === "hauscluster" ? id : "",
-          ebene,
-          format: "alle",
-          umsatz,
-          vorjahr: vorjahr2,
-          abweichung: abweichung2,
-          abweichungProzent,
-          frequenz: fre,
-          kaufquote: fre ? kaeufe / fre : 0,
-          bon: kaeufe ? umsatz / kaeufe : 0,
-          ampelfarbe: abweichungProzent === void 0 ? "grau" : abweichungProzent < -0.05 ? "rot" : abweichungProzent < 0 ? "gelb" : "gruen"
-        });
-      }
-    }
-    const beobachtung = zeilen.filter((z6) => z6.abweichung !== void 0 && z6.abweichung < 0).sort((a2, b4) => (a2.abweichung ?? 0) - (b4.abweichung ?? 0)).slice(0, 10).map((z6) => {
-      const br = umsatzbruecke(s2, { ebene: "haus", id: z6.id, vergleich: "vorjahr", wochen });
-      const h4 = s2.haeuser.find((x2) => x2.id === z6.id);
-      const d4 = hausTreiber(s2, h4.id, wochen);
-      const effekte = [
-        { v: br.frequenz, name: "Frequenz", text: d4.vorjahr?.frequenz ? ((d4.aktuell.frequenz / d4.vorjahr.frequenz - 1) * 100).toFixed(1).replace(".", ",") + " %" : "\u2013" },
-        { v: br.kaufquote, name: "Kaufquote", text: d4.vorjahr ? ((d4.aktuell.kaufquote - d4.vorjahr.kaufquote) * 100).toFixed(1).replace(".", ",") + " Punkte" : "\u2013" },
-        { v: br.bon, name: "Bon", text: d4.vorjahr?.bon ? ((d4.aktuell.bon / d4.vorjahr.bon - 1) * 100).toFixed(1).replace(".", ",") + " %" : "\u2013" }
-      ].sort((a2, b4) => a2.v - b4.v);
-      const haupt = effekte[0];
-      return { hausId: z6.id, name: z6.name, abweichung: z6.abweichung, haupttreiber: haupt.name + " " + haupt.text };
-    });
-    return { wochen, bruecke: umsatzbruecke(s2, { ebene: "konzern", vergleich: "vorjahr", wochen, format }), zeilen, gruppen, beobachtung };
-  }
-
-  // ../engine/src/personaleinsatz.ts
-  var PERSONAL_GRUPPEN = ["logistik", "verkauf", "kasse", "verwaltung"];
-  var PERSONAL_NAMEN = {
-    logistik: "Instore-Logistik",
-    verkauf: "Verkauf",
-    kasse: "Kasse",
-    verwaltung: "Verwaltung"
-  };
-  var PERSONAL_ANTEILE = {
-    logistik: 0.19,
-    verkauf: 0.52,
-    kasse: 0.19,
-    verwaltung: 0.1
-  };
-  var PERSONAL_TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-  var PERSONAL_AKTIONEN = /* @__PURE__ */ new Set([
-    "personalSteuern",
-    "personalSamstagKasse",
-    "personalAushilfen",
-    "personalSpringer",
-    "personalWeiterbildung",
-    "personalWeihnachtenNachbuchen"
-  ]);
-  var fte = (h4) => h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen;
-  var aktiv2 = (h4) => h4.status === "offen" || h4.status === "raeumung" || h4.status === "schliessung_verhandlung";
-  var rund = (n3) => Math.round(n3 * 10) / 10;
-  var gruppeHauscluster = (h4, s2) => {
-    const org2 = s2;
-    if (org2.organisation && (h4.klasse === "premium" || org2.organisation.flagships?.includes(h4.id)))
-      return "premium-flagships";
-    return h4.hauscluster || "region-" + h4.region;
-  };
-  function clusterName2(s2, id) {
-    const org2 = s2;
-    return org2.organisation?.hauscluster.find((x2) => x2.id === id)?.name ?? id.replace("region-", "");
-  }
-  function qualitaet2(s2) {
-    const org2 = s2;
-    const st2 = org2.organisation?.bereiche?.personaleinsatz;
-    if (!st2) return 0.7;
-    const hqWirkung = s2.hq.wirkung?.personal ?? 1;
-    const chro = s2.vorstand?.ressorts?.chro?.person;
-    const fuehrung = chro ? clamp(1 + (chro.fuehrung / 100 - 0.5) * 0.3, 0.85, 1.15) : 1;
-    return clamp((st2.person?.qualitaet ?? 0.35) * hqWirkung * fuehrung, 0, 1);
-  }
-  function clusterQualitaet(s2, id) {
-    const org2 = s2;
-    return clamp(org2.organisation?.hauscluster.find((x2) => x2.id === id)?.stelle.person?.qualitaet ?? 0.65, 0, 1);
-  }
-  function profil(s2, gruppe3) {
-    const p2 = [0.105, 0.137, 0.147, 0.157, 0.191, 0.263];
-    const dezember = s2.woche % 52 >= 47 && s2.woche % 52 <= 51;
-    if (dezember) {
-      p2[0] -= 0.035;
-      p2[5] += 0.035;
-    }
-    if (gruppe3 === "kasse") {
-      p2[0] -= 0.015;
-      p2[5] += 0.015;
-    }
-    if (gruppe3 === "logistik") {
-      p2[0] += 0.065;
-      p2[5] -= 0.065;
-    }
-    if (gruppe3 === "verwaltung") {
-      p2[0] += 0.025;
-      p2[5] -= 0.065;
-      p2[1] += 0.04;
-    }
-    return p2;
-  }
-  function ausfall(s2) {
-    const kw2 = s2.woche % 52;
-    return {
-      krank: kw2 <= 8 ? 0.086 : kw2 >= 44 ? 0.067 : 0.045,
-      urlaub: kw2 >= 26 && kw2 <= 35 ? 0.14 : kw2 >= 51 ? 0.1 : 0.055
-    };
-  }
-  function dienstplan(s2, h4, anlieferung, reduzierung) {
-    const st2 = h4.personaleinsatz;
-    const aus = ausfall(s2), q2 = qualitaet2(s2);
-    const neu3 = st2.einarbeitungBis > s2.woche;
-    const relativ = fte(h4) > 0 ? (fte(h4) - (neu3 ? 0.5 * st2.einarbeitungFte : 0)) / fte(h4) : 1;
-    const dezember = s2.woche % 52 >= 47 && s2.woche % 52 <= 51;
-    const jahr2 = Math.floor(s2.woche / 52);
-    const weihnachten = s2.personaleinsatz?.weihnachten[jahr2] ?? "basis";
-    const saison2 = clamp(0.75 + 0.25 * saisonFaktor("damen", s2.woche), 0.7, 1.35);
-    const letzterUmsatz = h4.kpi?.umsatz ?? st2.basisUmsatz;
-    const umsatzFaktor = clamp(letzterUmsatz / Math.max(1, st2.basisUmsatz), 0.65, 1.6);
-    const messung2 = h4.treiberVerlauf?.slice(-1)[0];
-    if (!st2.basisFrequenz && messung2?.frequenz) st2.basisFrequenz = messung2.frequenz;
-    const frequenzFaktor = st2.basisFrequenz && messung2 ? clamp(messung2.frequenz / st2.basisFrequenz, 0.65, 1.6) : umsatzFaktor;
-    const logistikFaktor = clamp(1 + (anlieferung - 1) * 0.1 + h4.flaechen.filter((f13) => f13.konzept === "offprice").length * 0.03 + (reduzierung ? 0.08 : 0), 0.75, 1.4);
-    const gruppen = {};
-    let extra = 0;
-    for (const g2 of PERSONAL_GRUPPEN) {
-      const p2 = profil(s2, g2);
-      const last = g2 === "kasse" ? frequenzFaktor : g2 === "verkauf" ? 0.6 * frequenzFaktor + 0.4 * umsatzFaktor : g2 === "logistik" ? logistikFaktor : 1;
-      const basis4 = st2.basisFte * 40 * PERSONAL_ANTEILE[g2] * saison2 * last;
-      const tage = p2.map((anteil3, i) => {
-        const bedarf2 = basis4 * anteil3 / (1 - aus.krank - aus.urlaub);
-        const richtung2 = Math.sin((h4.id.length * 13 + h4.id.charCodeAt(1) * 7 + i * 11 + s2.woche % 52) * 0.41);
-        const fehler6 = richtung2 * 0.19;
-        const bezug = 1 + fehler6 * (1 - st2.basisQualitaet);
-        const genau = 1 + fehler6 * (1 - q2);
-        let plan4 = bedarf2 * relativ * st2.faktor[g2] * genau * (1 + st2.training * 0.035);
-        if (g2 === "kasse" && i === 5) plan4 *= st2.samstagKasse;
-        if (g2 === "kasse" && dezember && weihnachten === "sparsam") plan4 *= 0.88;
-        const referenz = bedarf2 * bezug;
-        extra += Math.max(0, (st2.faktor[g2] - 1) * bedarf2) + (g2 === "kasse" && i === 5 ? Math.max(0, st2.samstagKasse - 1) * bedarf2 : 0);
-        return { tag: PERSONAL_TAGE[i], bedarf: rund(bedarf2), plan: rund(plan4), referenz: rund(referenz), springer: 0, deckung: bedarf2 ? plan4 / bedarf2 : 1 };
-      });
-      const bedarf = tage.reduce((a2, t5) => a2 + t5.bedarf, 0);
-      const plan3 = tage.reduce((a2, t5) => a2 + t5.plan, 0);
-      gruppen[g2] = {
-        gruppe: g2,
-        name: PERSONAL_NAMEN[g2],
-        fte: rund(fte(h4) * PERSONAL_ANTEILE[g2]),
-        tage,
-        bedarf: rund(bedarf),
-        plan: rund(plan3),
-        deckung: bedarf ? plan3 / bedarf : 1
-      };
-    }
-    const ahQuote = st2.aushilfenQuote;
-    const gesamt = Object.values(gruppen).reduce((a2, g2) => a2 + g2.bedarf, 0);
-    const weihnachtsReserve = dezember && weihnachten === "reserve" ? gesamt * 0.02 : 0;
-    const gebuchteAushilfenStunden = gesamt * ahQuote;
-    const aushilfenStunden = gebuchteAushilfenStunden * (dezember && weihnachten === "spaet" ? 0.65 : 1);
-    if (weihnachtsReserve > 0) {
-      gruppen.verkauf.tage[5].plan += rund(weihnachtsReserve * 0.6);
-      gruppen.kasse.tage[5].plan += rund(weihnachtsReserve * 0.4);
-    }
-    for (const g2 of ["verkauf", "kasse"]) {
-      const z6 = gruppen[g2], anteil3 = g2 === "kasse" ? 0.45 : 0.55;
-      z6.tage[4].plan += rund(aushilfenStunden * anteil3 * 0.35);
-      z6.tage[5].plan += rund(aushilfenStunden * anteil3 * 0.65);
-      z6.plan = rund(z6.tage.reduce((a2, t5) => a2 + t5.plan, 0));
-    }
-    const basisStunden = Math.max(1, st2.basisFte * 40);
-    const normalLohn = (h4.personal.vollzeit * 860 + h4.personal.teilzeit * 690 + h4.personal.aushilfen * 490) / basisStunden;
-    const aufschlag = dezember && weihnachten === "spaet" ? 1.55 : 1;
-    const zusatzkosten = eur(gebuchteAushilfenStunden * 490 / 40 * aufschlag + extra * normalLohn * 0.5 + weihnachtsReserve * 490 / 40);
-    const plan2 = {
-      woche: s2.woche,
-      gruppen,
-      krank: aus.krank,
-      urlaub: aus.urlaub,
-      aushilfenStunden: rund(aushilfenStunden),
-      zusatzkosten,
-      verfuegbarkeit: 1,
-      kaufquote: 1,
-      fehlerkosten: 0,
-      springerSaldo: 0,
-      springerBewegungen: 0,
-      einarbeitung: neu3 ? 0.5 : 1
-    };
-    berechneWirkung(h4, plan2);
-    return plan2;
-  }
-  function berechneWirkung(h4, p2) {
-    const defizit = (g2, i) => {
-      const t5 = p2.gruppen[g2].tage[i];
-      return Math.max(0, 1 - t5.plan / Math.max(0.01, t5.referenz));
-    };
-    const gewicht2 = [0.105, 0.137, 0.147, 0.157, 0.191, 0.263];
-    const verkauf2 = gewicht2.reduce((a2, w2, i) => a2 + w2 * defizit("verkauf", i), 0);
-    const kasse = gewicht2.reduce((a2, w2, i) => a2 + w2 * defizit("kasse", i) * (i === 5 ? 1.6 : 0.38), 0);
-    const logistik = gewicht2.reduce((a2, w2, i) => a2 + w2 * defizit("logistik", i), 0);
-    const verwaltung = gewicht2.reduce((a2, w2, i) => a2 + w2 * defizit("verwaltung", i), 0);
-    p2.kaufquote = clamp(1 - 0.33 * verkauf2 - 0.4 * kasse, 0.65, 1);
-    p2.verfuegbarkeit = clamp(1 - 0.5 * logistik, 0.7, 1);
-    p2.fehlerkosten = eur((h4.kpi?.umsatz ?? 0) * 4e-3 * verwaltung);
-    for (const z6 of Object.values(p2.gruppen)) {
-      z6.plan = rund(z6.tage.reduce((a2, t5) => a2 + t5.plan, 0));
-      z6.deckung = z6.bedarf ? z6.plan / z6.bedarf : 1;
-      for (const t5 of z6.tage) t5.deckung = t5.bedarf ? t5.plan / t5.bedarf : 1;
-    }
-  }
-  function neuPlanen(s2) {
-    var _a2;
-    const gruppen = /* @__PURE__ */ new Map();
-    const anlieferungen = s2.bestellungen.filter((b4) => b4.ankunft === s2.woche).reduce((a2, b4) => a2 + b4.wert, 0);
-    const norm3 = Math.max(1, s2.haeuser.length * 1e5);
-    const anlieferung = clamp(anlieferungen / norm3, 0.5, 1.8);
-    const reduzierung = s2.marketing.aktionen.some((a2) => a2.start <= s2.woche && a2.ende > s2.woche && a2.rabatt >= 0.15);
-    for (const h4 of s2.haeuser) {
-      if (!aktiv2(h4) || !h4.personaleinsatz) continue;
-      h4.personaleinsatz.plan = dienstplan(s2, h4, anlieferung, reduzierung);
-      if (h4.treiber) setzeTreiber(s2, h4.id, "personal", "kaufquote", h4.personaleinsatz.plan.kaufquote);
-      const id = gruppeHauscluster(h4, s2);
-      if (!gruppen.has(id)) gruppen.set(id, []);
-      gruppen.get(id).push(h4);
-    }
-    for (const [id, hs] of gruppen) {
-      if (!s2.personaleinsatz?.springer[id] || hs.length < 2) continue;
-      const guete = clusterQualitaet(s2, id);
-      for (const g2 of ["kasse", "verkauf", "logistik"]) for (let tag = 0; tag < 6; tag++) {
-        const bedarf = (h4) => h4.personaleinsatz.plan.gruppen[g2].tage[tag].bedarf;
-        const plan2 = (h4) => h4.personaleinsatz.plan.gruppen[g2].tage[tag].plan;
-        const empfaenger = hs.filter((h4) => bedarf(h4) > plan2(h4) + 0.1).sort((a2, b4) => bedarf(b4) - plan2(b4) - (bedarf(a2) - plan2(a2)) || a2.id.localeCompare(b4.id));
-        const geber = hs.filter((h4) => plan2(h4) > bedarf(h4) + 0.1).sort((a2, b4) => a2.id.localeCompare(b4.id));
-        for (const ziel of empfaenger) for (const start of geber) {
-          if (start.id === ziel.id) continue;
-          const frei6 = plan2(start) - bedarf(start), fehlt = bedarf(ziel) - plan2(ziel);
-          const cap = 0.12 * bedarf(start) * guete;
-          const stunden = rund(Math.max(0, Math.min(frei6, fehlt, cap)));
-          if (!stunden) continue;
-          const von = start.personaleinsatz.plan, nach = ziel.personaleinsatz.plan;
-          von.gruppen[g2].tage[tag].plan -= stunden;
-          nach.gruppen[g2].tage[tag].plan += stunden;
-          von.gruppen[g2].tage[tag].springer -= stunden;
-          nach.gruppen[g2].tage[tag].springer += stunden;
-          von.springerSaldo -= stunden;
-          nach.springerSaldo += stunden;
-          von.springerBewegungen++;
-          nach.springerBewegungen++;
-        }
-      }
-      for (const h4 of hs) berechneWirkung(h4, h4.personaleinsatz.plan);
-    }
-    for (const h4 of s2.haeuser) {
-      if (!h4.personaleinsatz?.plan || !h4.treiber) continue;
-      const q2 = h4.personaleinsatz.plan.kaufquote;
-      h4.treiberQuellen ?? (h4.treiberQuellen = {});
-      if (q2 < 0.999999) ((_a2 = h4.treiberQuellen).personal ?? (_a2.personal = {})).kaufquote = q2;
-      else if (h4.treiberQuellen.personal) {
-        delete h4.treiberQuellen.personal.kaufquote;
-        if (!Object.keys(h4.treiberQuellen.personal).length) delete h4.treiberQuellen.personal;
-      }
-      const v2 = { frequenz: 1, kaufquote: 1, bon: 1 };
-      for (const x2 of Object.values(h4.treiberQuellen))
-        for (const k5 of ["frequenz", "kaufquote", "bon"]) v2[k5] *= x2[k5] ?? 1;
-      h4.treiber = v2;
-    }
-  }
-  function initialisierePersonaleinsatz(s2) {
-    if (!s2.personaleinsatz) s2.personaleinsatz = {
-      weihnachten: {},
-      springer: {},
-      trainingInvestition: 0,
-      letzteVorlage: -1,
-      letzteWarnung: {}
-    };
-    const q2 = qualitaet2(s2);
-    for (const h4 of s2.haeuser) if (!h4.personaleinsatz) {
-      h4.personaleinsatz = {
-        basisFte: Math.max(0.1, fte(h4)),
-        basisUmsatz: Math.max(1, Object.entries(h4.potenzial).reduce((wert, [g2, P5]) => {
-          const qm2 = h4.flaechen.filter((f13) => f13.gruppe === g2 && (f13.konzept === "eigen" || f13.konzept === "kommission")).reduce((sum2, f13) => sum2 + f13.qm, 0);
-          return wert + (P5 ?? 0) * (1 - Math.exp(-qm2 / Math.max(1, h4.saettigungQm[g2] ?? 1)));
-        }, 0)),
-        basisQualitaet: q2,
-        anteile: { ...PERSONAL_ANTEILE },
-        faktor: { logistik: 1, verkauf: 1, kasse: 1, verwaltung: 1 },
-        samstagKasse: 1,
-        aushilfenQuote: 0,
-        stimmung: 70,
-        einarbeitungBis: -1,
-        einarbeitungFte: 0,
-        training: 0
-      };
-    }
-    neuPlanen(s2);
-  }
-  function personaleinsatzWoche(s2) {
-    if (!s2.personaleinsatz) initialisierePersonaleinsatz(s2);
-    const ps = s2.personaleinsatz;
-    const jahr2 = Math.floor(s2.woche / 52), kw2 = s2.woche % 52;
-    if (!s2.prognose && kw2 === 39 && ps.letzteVorlage !== jahr2) {
-      ps.letzteVorlage = jahr2;
-      s2.entscheidungen.push({
-        id: "personal-weihnachten-" + jahr2,
-        typ: "personal_weihnachten",
-        titel: "Aushilfen Weihnachten: drei Optionen",
-        text: "Dezember-Spitzen fr\xFChzeitig absichern. Entscheidung bis KW 44, danach werden Aushilfen teurer und knapper.",
-        woche: s2.woche,
-        frist: s2.woche + 4,
-        standard: "basis",
-        daten: { jahr: jahr2 },
-        optionen: [
-          { id: "reserve", label: "Reserve erh\xF6hen (zus\xE4tzliche Kosten)" },
-          { id: "basis", label: "Bedarfsgerecht planen (Empfehlung)" },
-          { id: "sparsam", label: "Sparsam planen (Risiko an der Kasse)" }
-        ]
-      });
-    }
-    for (const h4 of s2.haeuser) {
-      const st2 = h4.personaleinsatz;
-      if (!aktiv2(h4) || !st2 || s2.prognose) continue;
-      const ratio = st2.basisFte ? fte(h4) / st2.basisFte : 1;
-      if (ratio < 0.75) st2.stimmung = clamp(st2.stimmung - 0.35, 0, 100);
-      else if (ratio > 0.98) st2.stimmung = clamp(st2.stimmung + 0.08, 0, 100);
-      if (st2.stimmung < 32 && (s2.woche + h4.id.length * 7) % 17 === 0) {
-        h4.personal.teilzeit = Math.max(0, h4.personal.teilzeit * 0.98);
-        st2.einarbeitungBis = s2.woche + 4;
-        st2.einarbeitungFte = Math.max(st2.einarbeitungFte, fte(h4) * 0.02);
-        melde(s2, "warnung", h4.name + ": erh\xF6hte Fluktuation. Neue Kr\xE4fte sind vier Wochen nur halb produktiv.", { hausId: h4.id, modul: "personal" });
-      }
-    }
-    neuPlanen(s2);
-    if (!s2.prognose) for (const [id, hs] of gruppiereCluster(s2)) {
-      const kritisch = hs.filter((h4) => (h4.personaleinsatz?.plan?.gruppen.kasse.tage[5].deckung ?? 1) < 0.84);
-      if (!kritisch.length || (ps.letzteWarnung[id] ?? -100) > s2.woche - 8) continue;
-      ps.letzteWarnung[id] = s2.woche;
-      s2.entscheidungen.push({
-        id: "personal-kasse-" + id + "-" + s2.woche,
-        typ: "personal_kasse",
-        titel: "Cluster " + clusterName2(s2, id) + ": Kasse samstags unterdeckt",
-        text: kritisch.length + " H\xE4user melden Kaufabbr\xFCche wegen Warteschlangen.",
-        woche: s2.woche,
-        frist: s2.woche + 2,
-        standard: "springer",
-        daten: { cluster: id },
-        optionen: [
-          { id: "springer", label: "Springerpool nutzen (Empfehlung)" },
-          { id: "aushilfen", label: "Zus\xE4tzliche Aushilfen" },
-          { id: "behalten", label: "Dienstplan beibehalten" }
-        ]
-      });
-    }
-  }
-  function gruppiereCluster(s2) {
-    const m = /* @__PURE__ */ new Map();
-    for (const h4 of s2.haeuser) if (aktiv2(h4)) {
-      const id = gruppeHauscluster(h4, s2);
-      if (!m.has(id)) m.set(id, []);
-      m.get(id).push(h4);
-    }
-    return m;
-  }
-  function loesePersonalEntscheidung(s2, typ, daten, option2) {
-    if (!s2.personaleinsatz) initialisierePersonaleinsatz(s2);
-    if (typ === "personal_weihnachten") {
-      s2.personaleinsatz.weihnachten[Number(daten.jahr)] = option2;
-    } else if (typ === "personal_kasse") {
-      const id = String(daten.cluster);
-      if (option2 === "springer") s2.personaleinsatz.springer[id] = true;
-      if (option2 === "aushilfen") {
-        for (const h4 of gruppiereCluster(s2).get(id) ?? [])
-          if (h4.personaleinsatz) h4.personaleinsatz.aushilfenQuote = Math.max(h4.personaleinsatz.aushilfenQuote, 0.08);
-      }
-    }
-    neuPlanen(s2);
-  }
-  function personalVerkaufsFaktor(h4, gruppe3) {
-    const p2 = h4.personaleinsatz?.plan;
-    if (!p2) return 1;
-    const beratung = GRUPPEN[gruppe3]?.beratung ?? 0.5;
-    const v2 = p2.gruppen.verkauf.tage.reduce((a2, t5) => a2 + Math.max(0, 1 - t5.plan / Math.max(0.01, t5.referenz)) / 6, 0);
-    const faktor2 = clamp(1 - (0.15 + 0.38 * beratung) * v2, 0.65, 1) * clamp(p2.kaufquote / Math.max(1e-6, 1 - 0.33 * v2), 0.65, 1);
-    return h4.treiber ? faktor2 / Math.max(0.65, p2.kaufquote) : faktor2;
-  }
-  function personalOffpriceFaktor(h4) {
-    const p2 = h4.personaleinsatz?.plan;
-    return p2 ? h4.treiber ? 1 : p2.kaufquote : 1;
-  }
-  function personalZusatzkosten(h4) {
-    return h4.personaleinsatz?.plan?.zusatzkosten ?? 0;
-  }
-  function personalFehlerkosten(h4) {
-    return h4.personaleinsatz?.plan?.fehlerkosten ?? 0;
-  }
-  function personalVerfuegbarkeit(h4) {
-    return h4.personaleinsatz?.plan?.verfuegbarkeit ?? 1;
-  }
-  function auswahl2(s2, a2) {
-    if (a2.haus) return s2.haeuser.filter((h4) => h4.id === a2.haus && aktiv2(h4));
-    if (a2.hauscluster) return s2.haeuser.filter((h4) => gruppeHauscluster(h4, s2) === a2.hauscluster && aktiv2(h4));
-    return [];
-  }
-  function personalAktion(s2, a2) {
-    if (!s2.personaleinsatz) initialisierePersonaleinsatz(s2);
-    if (a2.typ === "personalSpringer") {
-      if (!gruppiereCluster(s2).has(a2.hauscluster)) return { ok: false, text: "Hauscluster nicht gefunden." };
-      s2.personaleinsatz.springer[a2.hauscluster] = a2.an;
-      neuPlanen(s2);
-      return { ok: true, text: "Springerpool " + (a2.an ? "aktiviert." : "deaktiviert.") };
-    }
-    if (a2.typ === "personalWeihnachtenNachbuchen") {
-      const kw2 = s2.woche % 52;
-      if (kw2 < 43 || kw2 > 51) return { ok: false, text: "Weihnachts-Nachbuchungen sind erst ab KW 44 m\xF6glich." };
-      if (!Number.isFinite(a2.quote) || a2.quote < 0.05 || a2.quote > 0.3)
-        return { ok: false, text: "Aushilfenquote muss zwischen 5 % und 30 % liegen." };
-      const hs2 = a2.hauscluster ? auswahl2(s2, { hauscluster: a2.hauscluster }) : s2.haeuser.filter(aktiv2);
-      if (!hs2.length) return { ok: false, text: "Keine H\xE4user ausgew\xE4hlt." };
-      s2.personaleinsatz.weihnachten[Math.floor(s2.woche / 52)] = "spaet";
-      for (const h4 of hs2) h4.personaleinsatz.aushilfenQuote = Math.max(h4.personaleinsatz.aushilfenQuote, a2.quote);
-      neuPlanen(s2);
-      return { ok: true, text: "Weihnachts-Aushilfen nachgebucht: 55 % Preisaufschlag, 35 % der Stunden nicht verf\xFCgbar." };
-    }
-    if (a2.typ === "personalWeiterbildung") {
-      if (!Number.isFinite(a2.stufe) || a2.stufe < 0 || a2.stufe > 3) return { ok: false, text: "Stufe 0 bis 3 w\xE4hlen." };
-      const hs2 = a2.hauscluster ? auswahl2(s2, { hauscluster: a2.hauscluster }) : s2.haeuser.filter(aktiv2);
-      if (!hs2.length) return { ok: false, text: "Keine H\xE4user ausgew\xE4hlt." };
-      for (const h4 of hs2) h4.personaleinsatz.training = a2.stufe;
-      s2.einmalkostenWoche += eur(hs2.length * a2.stufe * 1700);
-      neuPlanen(s2);
-      return { ok: true, text: "Weiterbildung f\xFCr " + hs2.length + " H\xE4user beauftragt." };
-    }
-    const hs = auswahl2(s2, a2);
-    if (!hs.length) return { ok: false, text: "Offenes Haus oder Hauscluster nicht gefunden." };
-    const wert = a2.typ === "personalAushilfen" ? a2.quote : a2.faktor;
-    const min = a2.typ === "personalAushilfen" ? 0 : 0.4, max = a2.typ === "personalAushilfen" ? 0.3 : 1.6;
-    if (!Number.isFinite(wert) || wert < min || wert > max)
-      return { ok: false, text: "Wert au\xDFerhalb des zul\xE4ssigen Bereichs." };
-    for (const h4 of hs) {
-      const st2 = h4.personaleinsatz;
-      if (a2.typ === "personalSteuern") st2.faktor[a2.gruppe] = wert;
-      else if (a2.typ === "personalSamstagKasse") st2.samstagKasse = wert;
-      else st2.aushilfenQuote = wert;
-    }
-    neuPlanen(s2);
-    return { ok: true, text: "Personaleinsatz in " + hs.length + " H\xE4usern angepasst." };
-  }
-  function personalHaus(s2, hausId) {
-    return s2.haeuser.find((h4) => h4.id === hausId)?.personaleinsatz?.plan;
-  }
-  function personalUebersicht(s2, cluster) {
-    return [...gruppiereCluster(s2)].filter(([id]) => !cluster || id === cluster).map(([id, hs]) => ({
-      id,
-      name: clusterName2(s2, id),
-      springerAktiv: !!s2.personaleinsatz?.springer[id],
-      bewegungen: hs.reduce((n3, h4) => n3 + (h4.personaleinsatz?.plan?.springerBewegungen ?? 0), 0),
-      haeuser: hs.map((h4) => {
-        const p2 = h4.personaleinsatz?.plan;
-        return {
-          id: h4.id,
-          name: h4.name,
-          gruppen: Object.fromEntries(PERSONAL_GRUPPEN.map((g2) => [g2, p2?.gruppen[g2].deckung ?? 1])),
-          krank: p2?.krank ?? 0,
-          aushilfen: p2?.aushilfenStunden ?? 0,
-          springer: p2?.springerSaldo ?? 0
-        };
-      })
-    }));
-  }
-
-  // ../engine/src/haus.ts
-  var HAUS_AKTIONEN = /* @__PURE__ */ new Set([
-    "hausLeitungErsetzen",
-    "hausLeitungFoerdern",
-    "hausHaltepraemie",
-    "hausLeitungBefordern",
-    "hausStandardSetzen",
-    "hausKostenSetzen",
-    "hausServiceSetzen",
-    "hausClusterServiceSetzen",
-    "hausGastronomie",
-    "hausKonzession",
-    "hausMassnahme",
-    "hausSonntag"
-  ]);
-  var POSTEN = ["energie", "reinigung", "sicherheit", "instandhaltung", "versicherung"];
-  var ANTEILE = { energie: 0.35, reinigung: 0.2, sicherheit: 0.15, instandhaltung: 0.2, versicherung: 0.1 };
-  var STANDARD = {
-    oeffnung: { von: 10, bis: 20, samstagBis: 20 },
-    sauberkeit: 2,
-    praesentation: 2,
-    kasse: 2,
-    services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false }
-  };
-  var NAME = ["Mara Berg", "Jonas Ritter", "Elin Werner", "Timo Falk", "Nora Lind", "Lea B\xF6ttcher"];
-  var MASSNAHME = {
-    wetter: "oeffnungszeit",
-    baustelle: "aktion",
-    ware: "umlagerung",
-    personal: "springer",
-    konkurrenz: "aktion",
-    kasse: "springer",
-    stadtereignis: "oeffnungszeit",
-    sonstiges: "aktion"
-  };
-  var GRUND_TEXT = {
-    wetter: "Wetter",
-    baustelle: "Baustelle vor dem Haus",
-    ware: "Warenverf\xFCgbarkeit",
-    personal: "Personaldeckung",
-    konkurrenz: "Konkurrenzaktion",
-    kasse: "Kassenausfall",
-    stadtereignis: "Stadtereignis",
-    sonstiges: "Sonstiges"
-  };
-  function hash2(t5) {
-    let n3 = 2166136261;
-    for (let i = 0; i < t5.length; i++) n3 = Math.imul(n3 ^ t5.charCodeAt(i), 16777619);
-    return zufall({ rng: n3 >>> 0 });
-  }
-  var leitung = (h4) => h4.personal.filialleiter;
-  var betrieb = (h4) => h4.betrieb;
-  var istOffen = (h4) => h4.status === "offen" || h4.status === "schliessung_verhandlung";
-  function hausclusterSchluessel(h4) {
-    return h4.klasse === "premium" || h4.flagship ? "premium-flagships" : String(h4.hauscluster ?? h4.region);
-  }
-  function steuerungscluster(s2, h4) {
-    const mitOrganisation = s2;
-    return mitOrganisation.organisation?.flagships.includes(h4.id) ? "premium-flagships" : hausclusterSchluessel(h4);
-  }
-  function hausStandard(s2, h4) {
-    const cluster = steuerungscluster(s2, h4);
-    if (s2.hausbetrieb && !s2.hausbetrieb.standards[cluster]) s2.hausbetrieb.standards[cluster] = structuredStandard();
-    return betrieb(h4)?.standardAusnahme ?? s2.hausbetrieb?.standards[cluster] ?? STANDARD;
-  }
-  function hausServices(s2, h4) {
-    const b4 = h4.betrieb, standard = hausStandard(s2, h4);
-    return Object.fromEntries(["kundendienst", "schneiderei", "geschenkverpackung", "abholstation"].map(
-      (key) => [key, b4?.serviceAusnahme?.[key] ?? (b4?.services[key] || standard.services?.[key] || false)]
-    ));
-  }
-  function hausKandidaten(s2, hausId) {
-    const h4 = s2.haeuser.find((x2) => x2.id === hausId);
-    if (!h4) return [];
-    return [0, 1, 2].map((i) => {
-      const x2 = hash2(s2.seed + ":" + hausId + ":kandidat:" + i + ":" + Math.floor(s2.woche / 13));
-      const staerken = { personal: 0.4 + 0.5 * x2, ware: 0.4 + 0.5 * hash2(hausId + "w" + i), kunde: 0.4 + 0.5 * hash2(hausId + "k" + i), kosten: 0.4 + 0.5 * hash2(hausId + "c" + i) };
-      return {
-        name: NAME[Math.floor(x2 * NAME.length)],
-        staerken,
-        ehrlichkeit: 0.4 + 0.6 * hash2(hausId + "e" + i),
-        gehalt: eur(85e3 + 85e3 * x2),
-        qualitaet: (staerken.personal + staerken.ware + staerken.kunde + staerken.kosten) / 4
-      };
-    });
-  }
-  function initialisiereHausbetrieb(s2) {
-    var _a2, _b, _c, _d, _e, _f, _g, _h;
-    s2.hausbetrieb ?? (s2.hausbetrieb = { standards: {}, staedte: {}, befoerderungen: [] });
-    (_a2 = s2.hausbetrieb.standards)["premium-flagships"] ?? (_a2["premium-flagships"] = structuredStandard());
-    for (const h4 of s2.haeuser) {
-      (_b = s2.hausbetrieb.standards)[_c = steuerungscluster(s2, h4)] ?? (_b[_c] = structuredStandard());
-      (_d = s2.hausbetrieb.staedte)[_e = h4.stadt] ?? (_d[_e] = { trend: 1, ereignisBis: 0, sonntage: [] });
-      const l = leitung(h4);
-      l.staerken ?? (l.staerken = { personal: l.skill, ware: l.skill, kunde: l.skill, kosten: l.skill });
-      l.ehrlichkeit ?? (l.ehrlichkeit = 0.35 + 0.6 * hash2(s2.seed + ":" + h4.id + ":ehrlich"));
-      l.gehalt ?? (l.gehalt = eur(7e4 + 1e5 * l.skill));
-      l.bonusAnteil ?? (l.bonusAnteil = 0.1);
-      l.wechselwille ?? (l.wechselwille = 0);
-      l.stellvertretung ?? (l.stellvertretung = { name: "Stellvertretung " + h4.stadt, qualitaet: clamp(l.skill * 0.85, 0, 1) });
-      h4.betrieb ?? (h4.betrieb = {
-        leitungStart: l.skill,
-        leitungGehaltStart: l.gehalt ?? 0,
-        kosten: { energie: 1, reinigung: 1, sicherheit: 1, instandhaltung: 1, versicherung: 1 },
-        services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false },
-        kundenScore: 0,
-        scoreWoche: -1,
-        umsatzHistorie: [],
-        kommentare: [],
-        massnahmeBis: 0,
-        massnahmeFaktor: 1,
-        gastro: "keine",
-        gastroVertragBis: 0,
-        restaurantQm: h4.format === "warenhaus" && h4.etagen.length >= 4 ? Math.min(350, Math.round(h4.grundflaecheQm * 0.06)) : 0,
-        konzessionen: {}
-      });
-      (_f = h4.betrieb).leitungGehaltStart ?? (_f.leitungGehaltStart = l.gehalt ?? 0);
-      for (const f13 of h4.flaechen.filter((x2) => x2.konzept === "konzession")) {
-        (_g = h4.betrieb.konzessionen)[_h = f13.id] ?? (_g[_h] = { name: "Partner " + (f13.gruppe ?? "Sortiment"), quote: 0.22, bis: s2.woche + 260, exklusiv: false });
-      }
-    }
-  }
-  function structuredStandard() {
-    return {
-      oeffnung: { ...STANDARD.oeffnung },
-      sauberkeit: 2,
-      praesentation: 2,
-      kasse: 2,
-      services: { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false }
-    };
-  }
-  function stadtFaktor(s2, h4) {
-    const u = s2.hausbetrieb?.staedte[h4.stadt];
-    if (!u) return 1;
-    let f13 = u.trend;
-    if (u.ereignisBis > s2.woche) f13 *= u.ereignis === "stadtfest" ? 1.07 : u.ereignis === "baustelle" ? 0.9 : u.ereignis === "parkhaus" ? 0.93 : u.ereignis === "oepnv" ? 0.85 : 1;
-    if (u.sonntage.includes(s2.woche)) f13 *= 1.12;
-    return f13;
-  }
-  function hausBetriebsFaktor(s2, h4) {
-    const b4 = betrieb(h4);
-    if (s2.hausbetriebAbnahmeAus || !b4 || !istOffen(h4)) return 1;
-    const l = leitung(h4);
-    const st2 = hausStandard(s2, h4);
-    const services = hausServices(s2, h4);
-    const kundendienst = services.kundendienst ? 1.007 : 1;
-    const schneiderei = services.schneiderei ? 1.004 : 1;
-    const geschenk = services.geschenkverpackung && s2.woche % 52 >= 47 ? 1.014 : 1;
-    const abholung = services.abholstation ? 1.005 : 1;
-    const standard = 1 + 7e-3 * (st2.sauberkeit - 2) + 9e-3 * (st2.praesentation - 2) + 6e-3 * (st2.kasse - 2) + 2e-3 * (10 - st2.oeffnung.von) + 3e-3 * (st2.oeffnung.bis - 20) + 2e-3 * (st2.oeffnung.samstagBis - 20);
-    const delta = (l.staerken?.kunde ?? l.skill) - b4.leitungStart;
-    const ware3 = (l.staerken?.ware ?? l.skill) - b4.leitungStart;
-    return Math.max(0.5, stadtFaktor(s2, h4) * standard * (1 + 0.06 * delta + 0.035 * ware3) * kundendienst * schneiderei * geschenk * abholung * (b4.massnahmeBis > s2.woche ? b4.massnahmeFaktor : 1) * (b4.ausfallBis !== void 0 && b4.ausfallBis > s2.woche ? 0.96 : 1) * (b4.gastro === "selbst" ? 1.015 : b4.gastro === "pacht" ? 1.006 : 1));
-  }
-  function hausBetriebskosten(s2, h4, sonstige) {
-    const b4 = betrieb(h4);
-    if (s2.hausbetriebAbnahmeAus || !b4 || !istOffen(h4)) return sonstige;
-    let faktor2 = 0;
-    const preis = s2.hausbetrieb?.energiePreis ?? 1;
-    const basisTechnik = h4.baujahr < 1970 ? 0 : h4.baujahr < 2005 ? 1 : 2;
-    const etagenBau = h4.etagenBau;
-    const modernisiert = etagenBau ? Object.values(etagenBau).reduce((sum2, e) => sum2 + Math.max(0, e.technik.licht - basisTechnik) + Math.max(0, e.technik.klima - basisTechnik), 0) / Math.max(1, h4.etagen.length) : 0;
-    for (const p2 of POSTEN) faktor2 += ANTEILE[p2] * b4.kosten[p2] * (p2 === "energie" ? preis * (1 - 0.07 * modernisiert) : 1);
-    const service = Object.values(hausServices(s2, h4)).filter(Boolean).length * 180;
-    const l = leitung(h4);
-    const kostenLeitung = 1 - 0.035 * ((l.staerken?.kosten ?? l.skill) - b4.leitungStart);
-    return Math.max(0, sonstige * faktor2 * kostenLeitung + service);
-  }
-  function hausKonzessionserloes(s2, h4, umsatz, quoteBasis) {
-    const fl = h4.flaechen.filter((f13) => f13.konzept === "konzession");
-    if (s2.hausbetriebAbnahmeAus || !fl.length || !h4.betrieb) return umsatz * quoteBasis;
-    const qm2 = fl.reduce((v2, f13) => v2 + f13.qm, 0) || 1;
-    const quote = fl.reduce((v2, f13) => v2 + f13.qm / qm2 * (h4.betrieb?.konzessionen[f13.id]?.quote ?? quoteBasis), 0);
-    return umsatz * quote;
-  }
-  function hausGastroErgebnis(s2, h4, umsatzBasis) {
-    const b4 = betrieb(h4);
-    if (s2.hausbetriebAbnahmeAus || !b4 || b4.gastro === "keine" || b4.restaurantQm <= 0 || !istOffen(h4)) return { umsatz: 0, rohertrag: 0, personal: 0, sonstige: 0, pacht: 0 };
-    const wochenUmsatz = eur(Math.max(0, umsatzBasis) * 0.012 + b4.restaurantQm * 32);
-    if (b4.gastro === "pacht") return { umsatz: 0, rohertrag: 0, personal: 0, sonstige: 0, pacht: eur(wochenUmsatz * 0.115) };
-    if ((b4.gastroStoerungBis ?? 0) > s2.woche) return { umsatz: 0, rohertrag: 0, personal: eur(b4.restaurantQm * 260), sonstige: eur(b4.restaurantQm * 70), pacht: 0 };
-    return {
-      umsatz: wochenUmsatz,
-      rohertrag: eur(wochenUmsatz * 0.6),
-      personal: eur(wochenUmsatz * 0.37),
-      sonstige: eur(wochenUmsatz * 0.13),
-      pacht: 0
-    };
-  }
-  function hausKundenscore(s2, h4) {
-    const b4 = betrieb(h4);
-    if (!b4) return 60;
-    const st2 = hausStandard(s2, h4), k5 = h4.kpi;
-    const personal2 = k5 && k5.fteBedarf > 0 ? clamp(k5.fteIst / k5.fteBedarf, 0, 1.1) : 1;
-    const reinigung = clamp(b4.kosten.reinigung, 0, 1.3);
-    const verfuegbarkeit = (leitung(h4).staerken?.ware ?? leitung(h4).skill) - b4.leitungStart;
-    const score = 64 + 7 * (st2.sauberkeit - 2) + 5 * (st2.praesentation - 2) + 4 * (st2.kasse - 2) + 14 * (personal2 - 1) + 22 * (reinigung - 1) + 8 * verfuegbarkeit + 0.13 * (h4.substanz - 60) + Object.values(hausServices(s2, h4)).filter(Boolean).length * 2;
-    return Math.round(clamp(score, 0, 100));
-  }
-  function realerGrund(s2, h4) {
-    const u = s2.hausbetrieb?.staedte[h4.stadt];
-    if (u?.ereignisBis && u.ereignisBis > s2.woche) {
-      if (u.ereignis === "baustelle" || u.ereignis === "parkhaus") return "baustelle";
-      if (u.ereignis === "oepnv" || u.ereignis === "stadtfest") return "stadtereignis";
-    }
-    const b4 = h4.betrieb;
-    if (h4.kpi && h4.kpi.fteBedarf > 0 && h4.kpi.fteIst / h4.kpi.fteBedarf < 0.94) return "personal";
-    if (b4 && (leitung(h4).staerken?.ware ?? leitung(h4).skill) < b4.leitungStart - 0.03) return "ware";
-    if (s2.wettbewerber.some((w2) => w2.stadt === h4.stadt && w2.status === "offen" && w2.aktionBis !== void 0 && w2.aktionBis > s2.woche)) return "konkurrenz";
-    return "sonstiges";
-  }
-  function pruefeKommentar(s2, h4, wahr, gemeldet) {
-    const q2 = s2.controllingStufe === 2 ? 0.95 : s2.controllingStufe === 1 ? 0.62 : 0.28;
-    const erkannt = wahr !== gemeldet && hash2(s2.seed + ":pr\xFCfung:" + h4.id + ":" + s2.woche) < q2;
-    return { plausibel: !erkannt, pruefung: erkannt ? "Nicht plausibel, eigentlicher Treiber: " + GRUND_TEXT[wahr] : "Plausibel" };
-  }
-  function stelleKommentar(s2, h4, vergleich, delta) {
-    if (!h4.betrieb || s2.prognose) return;
-    const wahr = realerGrund(s2, h4);
-    const ehrlich = hash2(s2.seed + ":ehrlichkeit:" + h4.id + ":" + s2.woche) < (leitung(h4).ehrlichkeit ?? 1);
-    const grund2 = ehrlich || !["ware", "personal", "kasse"].includes(wahr) ? wahr : hash2(h4.id + ":ausrede:" + s2.woche) < 0.5 ? "wetter" : "baustelle";
-    const massnahme = MASSNAHME[grund2];
-    const pruefung = pruefeKommentar(s2, h4, wahr, grund2);
-    h4.betrieb.kommentare.unshift({ woche: s2.woche, abweichung: delta, vergleich, grund: grund2, wahrerGrund: wahr, massnahme, ...pruefung });
-    h4.betrieb.kommentare.length = Math.min(h4.betrieb.kommentare.length, 26);
-    if (s2.woche - (s2.spielStartWoche ?? 0) < 52) return;
-    const organisation2 = s2.organisation;
-    const qualitaet3 = clamp(organisation2?.hauscluster.find((x2) => x2.id === steuerungscluster(s2, h4))?.stelle.person?.qualitaet ?? h4.clusterleitungQualitaet ?? 0.55, 0, 1);
-    const b0 = h4.betrieb;
-    if (b0.clusterQStart === void 0) b0.clusterQStart = qualitaet3;
-    const qRel = clamp(0.55 * qualitaet3 / Math.max(0.05, b0.clusterQStart), 0, 1);
-    if (hash2(s2.seed + ":massnahme:" + h4.id + ":" + s2.woche) < qRel) {
-      h4.betrieb.massnahmeBis = s2.woche + 3;
-      h4.betrieb.massnahmeFaktor = 1 + 6e-3 + 8e-3 * qRel;
-    }
-  }
-  function hausWoche(s2) {
-    if (!s2.hausbetrieb) initialisiereHausbetrieb(s2);
-    hausAbschluss(s2);
-    if (s2.prognose || s2.hausbetriebAbnahmeAus) return;
-    if ((s2.hausbetrieb.energieBis ?? 0) <= s2.woche) s2.hausbetrieb.energiePreis = 1;
-    if (s2.woche >= 52 && s2.woche % 13 === 0) {
-      const stand2 = s2.hausbetrieb;
-      if ((stand2.energieBis ?? 0) <= s2.woche) stand2.energiePreis = 1;
-      if (hash2(s2.seed + ":energie:" + s2.woche) < 0.12) {
-        stand2.energiePreis = hash2(s2.seed + ":energiehoehe:" + s2.woche) < 0.5 ? 0.8 : 1.2;
-        stand2.energieBis = s2.woche + 8;
-        melde(s2, "ereignis", "Energiepreis\xE4nderung im Filialnetz: " + Math.round((stand2.energiePreis - 1) * 100) + " % f\xFCr acht Wochen.", { modul: "haus" });
-      }
-    }
-    if (s2.woche >= 52) for (const [stadt, u] of Object.entries(s2.hausbetrieb.staedte)) {
-      if (u.ereignisBis <= s2.woche) {
-        u.ereignis = void 0;
-        if (hash2(s2.seed + ":stadt:" + stadt + ":" + s2.woche) < 18e-4) {
-          const typ = ["stadtfest", "baustelle", "parkhaus", "oepnv"];
-          u.ereignis = typ[Math.floor(hash2(stadt + ":art:" + s2.woche) * typ.length)];
-          u.ereignisBis = s2.woche + 1 + (u.ereignis === "baustelle" ? 4 + Math.floor(hash2(stadt + ":dauer:" + s2.woche) * 17) : 1);
-          melde(s2, "ereignis", stadt + ": " + { stadtfest: "Stadtfest", baustelle: "Baustelle vor dem Haus", parkhaus: "Parkhaus geschlossen", oepnv: "\xD6PNV-Streik" }[u.ereignis] + ".", { stadt, modul: "haus" });
-        }
-      }
-      if (s2.woche % 52 === 0) u.trend = clamp(u.trend + (hash2(s2.seed + stadt + ":trend:" + s2.woche) - 0.5) * 0.01, 0.9, 1.1);
-      u.sonntage = u.sonntage.filter((w2) => Math.floor(w2 / 52) >= Math.floor(s2.woche / 52));
-    }
-    for (const h4 of s2.haeuser) {
-      if (!istOffen(h4) || !h4.betrieb) continue;
-      const b4 = h4.betrieb;
-      if (s2.woche % 13 === 0 && s2.woche !== 0) {
-        b4.kundenScore = hausKundenscore(s2, h4);
-        b4.scoreWoche = s2.woche;
-      }
-      const delta = (h4.personal.filialleiter.staerken?.personal ?? h4.personal.filialleiter.skill) - b4.leitungStart;
-      h4.personal.filialleiter.wechselwille = clamp((h4.personal.filialleiter.wechselwille ?? 0) + Math.max(0, 45 - h4.personal.filialleiter.moral) / 500 - Math.max(0, delta) * 0.01, 0, 1);
-      if (s2.woche >= 52 && s2.woche % 13 === 0 && b4.gastro === "selbst" && hash2(s2.seed + ":gastro:" + h4.id + ":" + s2.woche) < 0.02) {
-        b4.gastroStoerungBis = s2.woche + 3;
-        melde(s2, "warnung", h4.name + ": Hygienem\xE4ngel \u2013 Restaurant drei Wochen geschlossen, Personal und Fixkosten laufen weiter.", { hausId: h4.id, stadt: h4.stadt });
-      }
-      if (b4.kosten.instandhaltung < 0.75 && s2.woche % 13 === 0) {
-        h4.substanz = clamp(h4.substanz - (0.75 - b4.kosten.instandhaltung) * 4, 0, 100);
-        if (hash2(s2.seed + ":ausfall:" + h4.id + ":" + s2.woche) < (0.75 - b4.kosten.instandhaltung) * 0.6) {
-          b4.ausfallBis = s2.woche + 3;
-          melde(s2, "warnung", h4.name + ": Rolltreppe oder Aufzug ausgefallen, Reparatur dauert drei Wochen.", { hausId: h4.id, stadt: h4.stadt });
-        }
-      }
-      if (b4.kosten.sicherheit < 0.75 && s2.woche % 13 === 0) {
-        b4.inventurdifferenz = (b4.inventurdifferenz ?? 0) + (0.75 - b4.kosten.sicherheit) * 2e-3;
-        melde(s2, "warnung", h4.name + ": erh\xF6hte Inventurdifferenz durch geringere Sicherheitsdeckung.", { hausId: h4.id, stadt: h4.stadt });
-      }
-      if (s2.woche >= 52 && s2.woche % 13 === 0 && hash2(s2.seed + ":partner:" + h4.id + ":" + s2.woche) < 3e-3) {
-        const f13 = h4.flaechen.find((x2) => x2.konzept === "eigen" && x2.qm >= 400 && ["accessoires", "beauty", "herren", "damen"].includes(x2.gruppe ?? ""));
-        if (f13) {
-          const anbieter = ["Optikhaus Lind", "Uhrenatelier Merten", "Markenstudio Falk"][Math.floor(hash2(h4.id + ":anbieter:" + s2.woche) * 3)];
-          s2.entscheidungen.push({
-            id: neueId(s2, "e"),
-            typ: "haus_konzession_neu",
-            woche: s2.woche,
-            frist: s2.woche + 8,
-            titel: "Konzessionsangebot f\xFCr " + h4.name,
-            text: anbieter + " bietet eine Konzession \xFCber 180 qm mit 22 % Umsatzmiete f\xFCr f\xFCnf Jahre. Vertragsabschluss reduziert die eigene Verkaufsfl\xE4che.",
-            optionen: [{ id: "annehmen", label: "Konzession abschlie\xDFen" }, { id: "ablehnen", label: "Ablehnen" }],
-            standard: "ablehnen",
-            daten: { haus: h4.id, flaeche: f13.id, partner: anbieter, qm: 180, quote: 0.22 }
-          });
-        }
-      }
-      if (s2.woche >= 52 && s2.woche % 52 === 0 && hash2(s2.seed + ":jahresgespraech:" + h4.id + ":" + s2.woche) < 0.025) {
-        const l = h4.personal.filialleiter;
-        s2.entscheidungen.push({
-          id: neueId(s2, "e"),
-          typ: "haus_jahresgespraech",
-          woche: s2.woche,
-          frist: s2.woche + 6,
-          titel: "Jahresgespr\xE4ch: " + l.name + " (" + h4.name + ")",
-          text: "St\xE4rken und Stimmung der Hausleitung: Personal " + Math.round((l.staerken?.personal ?? l.skill) * 100) + " %, Ware " + Math.round((l.staerken?.ware ?? l.skill) * 100) + " %, Kunde " + Math.round((l.staerken?.kunde ?? l.skill) * 100) + " %, Kosten " + Math.round((l.staerken?.kosten ?? l.skill) * 100) + " %. Wechselwille " + Math.round((l.wechselwille ?? 0) * 100) + " %.",
-          optionen: [{ id: "coaching", label: "Pers\xF6nliches Coaching (8.000 \u20AC)" }, { id: "praemie", label: "Jahresbonus (10.000 \u20AC)" }, { id: "beobachten", label: "Leistung beobachten" }],
-          standard: "beobachten",
-          daten: { haus: h4.id }
-        });
-      }
-      for (const [id, v2] of Object.entries(b4.konzessionen)) if (s2.woche === v2.bis - 8) {
-        s2.entscheidungen.push({
-          id: neueId(s2, "e"),
-          typ: "haus_konzession",
-          woche: s2.woche,
-          frist: s2.woche + 6,
-          titel: "Konzession " + h4.name,
-          text: "Vertrag mit " + v2.name + " endet. Anschlussmiete verhandeln?",
-          optionen: [{ id: "verlaengern", label: "Zu bisherigen Konditionen verl\xE4ngern" }, { id: "neu", label: "Neu verhandeln" }],
-          standard: "verlaengern",
-          daten: { haus: h4.id, flaeche: id }
-        });
-      }
-    }
-  }
-  function hausAbschluss(s2) {
-    if (!s2.hausbetrieb || s2.prognose || s2.hausbetriebAbnahmeAus) return;
-    for (const h4 of s2.haeuser) {
-      if (!istOffen(h4) || !h4.kpi || !h4.betrieb) continue;
-      const b4 = h4.betrieb, vorher = b4.umsatzHistorie.find((x2) => x2.woche === s2.woche - 52) ?? s2.vorjahrHistorie?.[h4.id]?.find((x2) => x2.woche === s2.woche - 52);
-      const geplant2 = s2.planung;
-      const jahr2 = s2.startJahr + Math.floor(s2.woche / 52);
-      const plan2 = geplant2?.jahre.find((j4) => j4.jahr === jahr2)?.phasing[h4.id]?.[s2.woche % 52] ?? h4.wochenPlan;
-      const vergleich = vorher ? "vorjahr" : plan2 !== void 0 ? "plan" : void 0;
-      const referenz = vorher?.umsatz ?? plan2;
-      if (vergleich && referenz && referenz > 0 && h4.kpi.umsatz / referenz < 0.95) stelleKommentar(s2, h4, vergleich, h4.kpi.umsatz / referenz - 1);
-      b4.umsatzHistorie.push({ woche: s2.woche, umsatz: h4.kpi.umsatz });
-      if (b4.umsatzHistorie.length > 105) b4.umsatzHistorie.shift();
-    }
-  }
-  function loeseHausVorlage(s2, typ, daten, option2) {
-    const h4 = s2.haeuser.find((x2) => x2.id === daten.haus);
-    if (!h4 || !h4.betrieb) return;
-    if (typ === "haus_jahresgespraech") {
-      const l = h4.personal.filialleiter;
-      if (option2 === "coaching" && l.staerken) {
-        s2.einmalkostenWoche += 8e3;
-        const schwaechste = Object.keys(l.staerken).sort((a2, b4) => l.staerken[a2] - l.staerken[b4])[0];
-        l.staerken[schwaechste] = clamp(l.staerken[schwaechste] + 0.055, 0, 1);
-        l.skill = Object.values(l.staerken).reduce((a2, b4) => a2 + b4, 0) / 4;
-        l.moral = clamp(l.moral + 8, 0, 100);
-      } else if (option2 === "praemie") {
-        s2.einmalkostenWoche += 1e4;
-        l.moral = clamp(l.moral + 12, 0, 100);
-        l.wechselwille = clamp((l.wechselwille ?? 0) - 0.12, 0, 1);
-      }
-      return;
-    }
-    if (typ === "haus_konzession_neu") {
-      if (option2 !== "annehmen" || h4.status !== "offen") return;
-      const alt = h4.flaechen.find((f13) => f13.id === daten.flaeche && f13.konzept === "eigen");
-      const qm2 = Number(daten.qm), quote = Number(daten.quote);
-      if (!alt || alt.qm < qm2 + 100 || !Number.isFinite(quote)) return;
-      alt.qm -= qm2;
-      const id = h4.id + "-konz-" + neueId(s2, "");
-      h4.flaechen.push({ ...alt, id, qm: qm2, konzept: "konzession" });
-      h4.betrieb.konzessionen[id] = { name: String(daten.partner), quote, bis: s2.woche + 260, exklusiv: false };
-      melde(s2, "info", h4.name + ": " + String(daten.partner) + " bezieht " + qm2 + " qm mit Umsatzmiete.", { hausId: h4.id, stadt: h4.stadt });
-      return;
-    }
-    if (typ !== "haus_konzession") return;
-    const v2 = h4.betrieb.konzessionen[String(daten.flaeche)];
-    if (!v2) return;
-    v2.quote = option2 === "neu" ? clamp(v2.quote + 0.01, 0.1, 0.35) : v2.quote;
-    v2.bis = s2.woche + 260;
-    melde(s2, "info", h4.name + ": Konzessionsvertrag mit " + v2.name + " verl\xE4ngert.", { hausId: h4.id, stadt: h4.stadt });
-  }
-  function hausAktion(s2, a2) {
-    if (!s2.hausbetrieb) initialisiereHausbetrieb(s2);
-    const h4 = "haus" in a2 ? s2.haeuser.find((x2) => x2.id === a2.haus) : void 0;
-    if ("haus" in a2 && (!h4 || !istOffen(h4))) return { ok: false, text: "Haus nicht gefunden oder geschlossen." };
-    const b4 = h4?.betrieb;
-    const l = h4?.personal.filialleiter;
-    switch (a2.typ) {
-      case "hausLeitungErsetzen": {
-        if (!h4 || !l || !b4) break;
-        const k5 = hausKandidaten(s2, h4.id)[a2.kandidat];
-        if (!k5) return { ok: false, text: "Kandidat nicht gefunden." };
-        s2.einmalkostenWoche += eur(k5.gehalt / 3);
-        h4.personal.filialleiter = {
-          name: k5.name,
-          skill: k5.qualitaet,
-          staerken: k5.staerken,
-          ehrlichkeit: k5.ehrlichkeit,
-          gehalt: k5.gehalt,
-          bonusAnteil: 0.1,
-          moral: 70,
-          wechselwille: 0,
-          stellvertretung: l.stellvertretung
-        };
-        b4.leitungStart = l.skill;
-        return { ok: true, text: "Hausleitung " + k5.name + " eingestellt." };
-      }
-      case "hausLeitungFoerdern":
-        if (!l || !l.staerken) break;
-        l.staerken[a2.staerke] = clamp(l.staerken[a2.staerke] + 0.08, 0, 1);
-        l.skill = (l.staerken.personal + l.staerken.ware + l.staerken.kunde + l.staerken.kosten) / 4;
-        s2.einmalkostenWoche += 12e3;
-        return { ok: true, text: "Weiterbildung erfolgreich: " + a2.staerke + " gest\xE4rkt." };
-      case "hausHaltepraemie":
-        if (!l || !Number.isFinite(a2.betrag) || a2.betrag < 0 || a2.betrag > 1e5) break;
-        s2.einmalkostenWoche += eur(a2.betrag);
-        l.wechselwille = clamp((l.wechselwille ?? 0) - a2.betrag / 1e5, 0, 1);
-        l.moral = clamp(l.moral + a2.betrag / 1e4, 0, 100);
-        return { ok: true, text: "Haltepr\xE4mie zugesagt." };
-      case "hausLeitungBefordern":
-        if (!h4 || !l || !b4 || l.skill < 0.6) return { ok: false, text: "Hausleitung ben\xF6tigt mindestens 60 % Kompetenz." };
-        s2.hausbetrieb.befoerderungen.push({ haus: h4.id, cluster: steuerungscluster(s2, h4), name: l.name, qualitaet: l.skill, woche: s2.woche });
-        h4.personal.filialleiter = {
-          ...l,
-          name: l.stellvertretung?.name ?? "Interim " + h4.stadt,
-          skill: l.stellvertretung?.qualitaet ?? 0.5,
-          staerken: { personal: l.stellvertretung?.qualitaet ?? 0.5, ware: l.stellvertretung?.qualitaet ?? 0.5, kunde: l.stellvertretung?.qualitaet ?? 0.5, kosten: l.stellvertretung?.qualitaet ?? 0.5 }
-        };
-        h4.personal.filialleiter.wechselwille = 0;
-        return { ok: true, text: l.name + " als Clusterleitungs-Kandidat vorgemerkt. Stellvertretung \xFCbernimmt das Haus." };
-      case "hausStandardSetzen": {
-        if (a2.haus && !a2.begruendung?.trim()) return { ok: false, text: "Einzelabweichungen ben\xF6tigen eine Begr\xFCndung." };
-        if (h4 && a2.cluster !== steuerungscluster(s2, h4)) return { ok: false, text: "Haus geh\xF6rt nicht zum angegebenen Hauscluster." };
-        const basis4 = h4 ? hausStandard(s2, h4) : s2.hausbetrieb.standards[a2.cluster];
-        if (!basis4) return { ok: false, text: "Hauscluster nicht gefunden." };
-        const n3 = Number(a2.wert);
-        if (!Number.isInteger(n3)) break;
-        const stand2 = { ...basis4, oeffnung: { ...basis4.oeffnung } };
-        if (a2.feld === "von" || a2.feld === "bis" || a2.feld === "samstagBis") {
-          if (n3 < 7 || n3 > 22) break;
-          stand2.oeffnung[a2.feld] = n3;
-          if (stand2.oeffnung.von >= stand2.oeffnung.bis || stand2.oeffnung.von >= stand2.oeffnung.samstagBis) break;
-        } else {
-          if (n3 < 1 || n3 > 3) break;
-          stand2[a2.feld] = n3;
-        }
-        if (h4) {
-          h4.betrieb.standardAusnahme = stand2;
-          h4.betrieb.ausnahmeGrund = a2.begruendung.trim();
-        } else s2.hausbetrieb.standards[a2.cluster] = stand2;
-        return { ok: true, text: "Hausstandard angepasst." };
-      }
-      case "hausKostenSetzen":
-        if (!b4 || !POSTEN.includes(a2.posten) || !Number.isFinite(a2.faktor) || a2.faktor < 0.45 || a2.faktor > 1.5) break;
-        b4.kosten[a2.posten] = Math.round(a2.faktor * 100) / 100;
-        return { ok: true, text: "Betriebskosten " + a2.posten + " angepasst." };
-      case "hausServiceSetzen":
-        if (!b4 || !(a2.service in b4.services)) break;
-        (b4.serviceAusnahme ?? (b4.serviceAusnahme = {}))[a2.service] = a2.an;
-        return { ok: true, text: "Hausausnahme f\xFCr Service " + a2.service + (a2.an ? " aktiviert." : " deaktiviert.") };
-      case "hausClusterServiceSetzen": {
-        const stand2 = s2.hausbetrieb.standards[a2.cluster];
-        if (!stand2 || !["kundendienst", "schneiderei", "geschenkverpackung", "abholstation"].includes(a2.service)) break;
-        (stand2.services ?? (stand2.services = { kundendienst: false, schneiderei: false, geschenkverpackung: false, abholstation: false }))[a2.service] = a2.an;
-        return { ok: true, text: "Service-Standard des Hausclusters ge\xE4ndert." };
-      }
-      case "hausGastronomie":
-        if (!b4 || b4.restaurantQm <= 0) return { ok: false, text: "Keine Restaurantfl\xE4che vorhanden." };
-        if (b4.gastro !== "keine" && b4.gastroVertragBis > s2.woche) return { ok: false, text: "Wechsel erst zum Vertragsende m\xF6glich." };
-        b4.gastro = a2.modus;
-        b4.gastroVertragBis = s2.woche + 104;
-        s2.einmalkostenWoche += b4.restaurantQm * (a2.modus === "selbst" ? 520 : 100);
-        return { ok: true, text: "Gastronomie wird " + (a2.modus === "selbst" ? "selbst betrieben." : "verpachtet.") };
-      case "hausKonzession": {
-        if (!h4 || !b4 || !Number.isFinite(a2.quote) || a2.quote < 0.1 || a2.quote > 0.35 || !Number.isInteger(a2.laufzeit) || a2.laufzeit < 26 || a2.laufzeit > 520) break;
-        const f13 = h4.flaechen.find((x2) => x2.id === a2.flaeche && x2.konzept === "konzession");
-        if (!f13) return { ok: false, text: "Keine Konzessionsfl\xE4che." };
-        const bisher = b4.konzessionen[f13.id];
-        if (bisher && bisher.bis > s2.woche) return { ok: false, text: "Vertrag l\xE4uft noch." };
-        b4.konzessionen[f13.id] = { name: bisher?.name ?? "Partner " + (f13.gruppe ?? ""), quote: a2.quote, bis: s2.woche + a2.laufzeit, exklusiv: a2.exklusiv };
-        return { ok: true, text: "Konzessionsvertrag abgeschlossen." };
-      }
-      case "hausMassnahme":
-        if (!b4) break;
-        b4.massnahmeBis = s2.woche + 4;
-        b4.massnahmeFaktor = 1.012;
-        s2.einmalkostenWoche += 5e3;
-        return { ok: true, text: "Ad-hoc-Ma\xDFnahme f\xFCr vier Wochen eingeleitet." };
-      case "hausSonntag": {
-        const u = s2.hausbetrieb.staedte[a2.stadt];
-        if (!u || !Number.isInteger(a2.woche) || a2.woche < s2.woche + 2 || a2.woche >= s2.woche + 52) break;
-        const jahr2 = Math.floor(a2.woche / 52);
-        if (u.sonntage.includes(a2.woche)) return { ok: false, text: "F\xFCr diese Woche wurde bereits ein Sonntag genehmigt." };
-        if (u.sonntage.filter((w2) => Math.floor(w2 / 52) === jahr2).length >= 4) return { ok: false, text: "H\xF6chstens vier Sonntage pro Jahr." };
-        const groesse2 = s2.haeuser.find((x2) => x2.stadt === a2.stadt)?.cluster;
-        const p2 = groesse2 === "metropole" ? 0.65 : groesse2 === "grossstadt" ? 0.78 : 0.86;
-        const genehmigt = hash2(s2.seed + ":sonntag:" + a2.stadt + ":" + a2.woche) < p2;
-        if (genehmigt) u.sonntage.push(a2.woche);
-        s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - 2, 0, 100);
-        melde(s2, "info", a2.stadt + ": Antrag auf verkaufsoffenen Sonntag " + (genehmigt ? "genehmigt." : "abgelehnt. Gegenwind von Gewerkschaft und Kirche."), { stadt: a2.stadt, modul: "haus" });
-        return { ok: true, text: genehmigt ? "Sonntag genehmigt." : "Sonntag nicht genehmigt." };
-      }
-    }
-    return { ok: false, text: "Ung\xFCltige Hausaktion." };
-  }
-  function hausUebersicht(s2, id) {
-    const h4 = s2.haeuser.find((x2) => x2.id === id);
-    if (!h4) return void 0;
-    const b4 = h4.betrieb, l = h4.personal.filialleiter;
-    return {
-      id: h4.id,
-      name: h4.name,
-      hauscluster: steuerungscluster(s2, h4),
-      stadtgroesse: h4.cluster,
-      standard: hausStandard(s2, h4),
-      leitungsdaten: l,
-      kandidaten: hausKandidaten(s2, id),
-      kundenScore: hausKundenscore(s2, h4),
-      letzteMessung: b4?.scoreWoche,
-      kosten: b4?.kosten,
-      ausfallBis: b4?.ausfallBis,
-      inventurdifferenz: b4?.inventurdifferenz ?? 0,
-      energiePreis: s2.hausbetrieb?.energiePreis ?? 1,
-      planWoche: s2.planung?.jahre.find((j4) => j4.jahr === s2.startJahr + Math.floor(s2.woche / 52))?.phasing[h4.id]?.[s2.woche % 52] ?? h4.wochenPlan,
-      treiberAktuell: h4.treiberVerlauf?.slice().reverse().find((x2) => x2.bis === s2.woche - 1),
-      kostenBasis: eur((h4.kpi?.sonstige ?? 0) / Math.max(1e-3, b4 ? Object.entries(b4.kosten).reduce((a2, [p2, f13]) => a2 + ANTEILE[p2] * f13, 0) : 1)),
-      services: hausServices(s2, h4),
-      gastro: b4?.gastro,
-      gastroVertragBis: b4?.gastroVertragBis,
-      gastroStoerungBis: b4?.gastroStoerungBis,
-      restaurantQm: b4?.restaurantQm,
-      konzessionen: b4?.konzessionen,
-      kommentar: b4?.kommentare[0],
-      kommentare: b4?.kommentare ?? [],
-      umfeld: s2.hausbetrieb?.staedte[h4.stadt],
-      ausnahmeGrund: b4?.ausnahmeGrund,
-      flaechen: h4.flaechen.filter((f13) => f13.konzept === "konzession" || f13.konzept === "untermiete")
-    };
-  }
-  function hausBeobachtung(s2, limit = 30) {
-    return s2.haeuser.filter((h4) => istOffen(h4) && h4.kpi).map((h4) => {
-      const b4 = h4.betrieb, c = b4?.kommentare[0], score = hausKundenscore(s2, h4);
-      let grund2 = "";
-      let gewicht2 = 0;
-      if (c && c.woche >= s2.woche - 2 && !c.plausibel) {
-        grund2 = "Kommentar nicht plausibel";
-        gewicht2 = 100;
-      } else if ((h4.personal.filialleiter.interimBis ?? 0) > s2.woche) {
-        grund2 = "Hausleitung unbesetzt";
-        gewicht2 = 90;
-      } else if (score < 50) {
-        grund2 = "Kundenscore " + score + "/100";
-        gewicht2 = 70 + (50 - score) / 10;
-      } else if (c && c.woche >= s2.woche - 2) {
-        grund2 = "Umsatzabweichung " + (c.abweichung * 100).toFixed(1) + " %";
-        gewicht2 = 50 - c.abweichung * 100;
-      }
-      return { id: h4.id, name: h4.name, stadt: h4.stadt, grund: grund2, score, gewicht: gewicht2, kommentar: c };
-    }).filter((x2) => x2.gewicht > 0).sort((a2, b4) => b4.gewicht - a2.gewicht || a2.id.localeCompare(b4.id)).slice(0, limit);
-  }
-  function hausKommentareDerWoche(s2) {
-    return s2.haeuser.flatMap((h4) => (h4.betrieb?.kommentare ?? []).filter((c) => c.woche === s2.woche - 1).map((c) => ({ id: h4.id, name: h4.name, stadt: h4.stadt, ...c })));
-  }
-  function hausKundenRanking(s2) {
-    return s2.haeuser.filter(istOffen).map((h4) => ({ id: h4.id, name: h4.name, score: hausKundenscore(s2, h4) })).sort((a2, b4) => b4.score - a2.score || a2.id.localeCompare(b4.id));
-  }
-
-  // ../engine/src/umbau.ts
-  var UMBAU_STUFEN = {
-    auffrischung: { name: "Auffrischung", qm: 60, min: 2, max: 2 },
-    ladenbau: { name: "Ladenbau neu", qm: 250, min: 4, max: 6 },
-    komplett: { name: "Komplettumbau", qm: 900, min: 16, max: 30 },
-    technik: { name: "Technik", qm: 120, min: 3, max: 8 }
-  };
-  var UMBAU_AKTIONEN = /* @__PURE__ */ new Set(["umbauPlanen"]);
-  function initialisiereUmbau(s2) {
-    s2.umbau ?? (s2.umbau = { projekte: [], budget: 0, verbraucht: 0, jahr: 0, vorlageJahr: -1, zaehler: 0 });
-    for (const h4 of s2.haeuser) {
-      h4.etagenBau ?? (h4.etagenBau = {});
-      const alt = h4.baujahr < 1995 || h4.substanz < 43 ? 1 : h4.baujahr < 2010 || h4.substanz < 70 ? 2 : 3;
-      for (const nr4 of h4.etagen) if (!h4.etagenBau[nr4]) {
-        const technik3 = h4.baujahr < 1970 ? 0 : h4.baujahr < 2005 ? 1 : 2;
-        h4.etagenBau[nr4] = {
-          substanz: h4.substanz,
-          substanzStart: h4.substanz,
-          moebelGeneration: alt,
-          moebelGenerationStart: alt,
-          technik: { klima: technik3, licht: technik3, brandschutz: Math.max(1, technik3) },
-          // Pflichttermine frühestens nach mehr als fünf Spieljahren, damit das Startspiel neutral bleibt.
-          pflichten: {
-            brandschutz: 312 + (h4.baujahr + nr4 + 99) % 104,
-            aufzug: 338 + (h4.baujahr + nr4 + 127) % 104
-          },
-          gesperrt: false,
-          modernisierungWirkung: 0
-        };
-      }
-    }
-  }
-  function flaechenQm(h4, nr4) {
-    return Math.max(1, h4.flaechen.filter((f13) => f13.etage === nr4).reduce((a2, f13) => a2 + f13.qm, 0) || h4.grundflaecheQm);
-  }
-  function umbauSchaetzung(s2, hausId, nr4, stufe2) {
-    const h4 = s2.haeuser.find((x2) => x2.id === hausId), p2 = UMBAU_STUFEN[stufe2];
-    if (!h4 || !p2 || !h4.etagen.includes(nr4)) return void 0;
-    const etagen = stufe2 === "komplett" ? [...h4.etagen] : [nr4], qm2 = etagen.reduce((v2, e) => v2 + flaechenQm(h4, e), 0);
-    const q2 = clamp(bereichsQualitaet(s2, "ladenbau"), 0, 1);
-    const kosten2 = eur(qm2 * p2.qm * (1 + 0.4 * (1 - q2)));
-    const basis4 = p2.min + (p2.max - p2.min) * Math.min(1, qm2 / Math.max(1, h4.grundflaecheQm * 5));
-    const wochen = Math.ceil(basis4 * (1 + 0.5 * (1 - q2)));
-    const plus = stufe2 === "ladenbau" ? 0.08 : stufe2 === "komplett" ? 0.1 : stufe2 === "auffrischung" ? 0.02 : 0.01;
-    return {
-      etagen,
-      qm: qm2,
-      kosten: kosten2,
-      wochen,
-      frequenz: stufe2 === "komplett" ? 0.06 : 0,
-      kaufquote: plus,
-      rendite: Math.round((h4.kpi?.umsatz ?? Object.values(h4.potenzial).reduce((a2, b4) => a2 + (b4 ?? 0), 0)) * plus * 52 / Math.max(1, kosten2) * 1e3) / 10
-    };
-  }
-  function umbauAktion(s2, a2) {
-    initialisiereUmbau(s2);
-    const h4 = s2.haeuser.find((x2) => x2.id === a2.haus), p2 = umbauSchaetzung(s2, a2.haus, a2.etage, a2.stufe);
-    if (!h4 || !p2 || h4.status !== "offen") return { ok: false, text: "Haus oder Etage nicht verf\xFCgbar." };
-    if (s2.umbau.projekte.some((x2) => x2.status === "laufend" && x2.haus === h4.id && x2.etagen.some((n3) => p2.etagen.includes(n3))))
-      return { ok: false, text: "Mindestens eine Etage befindet sich bereits im Umbau." };
-    if (h4.premiumInvestition && h4.premiumInvestition.bis > s2.woche)
-      return { ok: false, text: "Laufende Premium-Investition muss zuerst abgeschlossen werden." };
-    einmalKosten(s2, p2.kosten);
-    s2.umbau.verbraucht += p2.kosten;
-    const projekt = {
-      id: "umbau-" + ++s2.umbau.zaehler,
-      haus: h4.id,
-      etagen: p2.etagen,
-      stufe: a2.stufe,
-      start: s2.woche,
-      ende: s2.woche + p2.wochen,
-      kosten: p2.kosten,
-      qm: p2.qm,
-      status: "laufend"
-    };
-    s2.umbau.projekte.push(projekt);
-    melde(s2, "info", UMBAU_STUFEN[a2.stufe].name + " in " + h4.name + " gestartet (" + p2.etagen.length + " Etage(n), " + p2.wochen + " Wochen).", { hausId: h4.id, stadt: h4.stadt, modul: "umbau" });
-    return { ok: true, text: "Baustart " + h4.name + ": " + p2.kosten.toLocaleString("de-DE") + " \u20AC, fertig in " + p2.wochen + " Wochen." };
-  }
-  function laufend(s2, h4, w2 = s2.woche) {
-    return (s2.umbau?.projekte ?? []).filter((p2) => p2.haus === h4.id && p2.status === "laufend" && p2.start <= w2 && p2.ende > w2);
-  }
-  function umbauNachfrageFaktor(s2, h4, g2) {
-    if (!h4.etagenBau) return 1;
-    const baustellen = laufend(s2, h4), gesamt = h4.flaechen.filter((f13) => (g2 === null ? f13.konzept === "offprice" : f13.gruppe === g2 && ["eigen", "kommission", "konzession"].includes(f13.konzept)) && !h4.etagenBau?.[f13.etage]?.gesperrt);
-    const qm2 = gesamt.reduce((a2, f13) => a2 + f13.qm, 0);
-    if (!qm2) return 1;
-    let sum2 = 0;
-    for (const f13 of gesamt) {
-      const e = h4.etagenBau[f13.etage], imBau = baustellen.some((p2) => p2.etagen.includes(f13.etage));
-      const behinderung = imBau ? 0.4 : baustellen.length ? 0.95 : 1;
-      sum2 += f13.qm * behinderung * (1 + (e?.modernisierungWirkung ?? 0));
-    }
-    return sum2 / qm2;
-  }
-  function umbauFrequenzFaktor(h4) {
-    return 1 + (h4.umbauFrequenz ?? 0);
-  }
-  function umbauWoche(s2) {
-    initialisiereUmbau(s2);
-    const stand2 = s2.umbau;
-    const jahr2 = Math.floor(s2.woche / 52);
-    if (jahr2 !== stand2.jahr) {
-      stand2.jahr = jahr2;
-      stand2.verbraucht = 0;
-    }
-    for (const h4 of s2.haeuser) {
-      if (!h4.etagenBau) continue;
-      for (const nr4 of h4.etagen) {
-        const e = h4.etagenBau[nr4];
-        e.substanz = Math.max(0, e.substanz - 0.05);
-        if (e.modernisierungWirkung > 0) e.modernisierungWirkung = Math.max(0, e.modernisierungWirkung - 15e-5);
-        for (const pflicht of ["brandschutz", "aufzug"]) {
-          const frist = e.pflichten[pflicht];
-          if (!s2.prognose && s2.woche === frist - 12) melde(
-            s2,
-            "warnung",
-            "Beh\xF6rde setzt Frist: " + pflicht + " in " + h4.name + ", " + nr4 + ". Etage bis Woche " + frist + ".",
-            { hausId: h4.id, stadt: h4.stadt, modul: "umbau" }
-          );
-          if (!e.gesperrt && s2.woche > frist) {
-            e.gesperrt = true;
-            if (!s2.prognose) melde(
-              s2,
-              "warnung",
-              "Beh\xF6rdliche Sperrung: " + h4.name + ", Etage " + nr4 + ". " + pflicht + " \xFCberf\xE4llig.",
-              { hausId: h4.id, stadt: h4.stadt, modul: "umbau" }
-            );
-          }
-        }
-      }
-      if (h4.umbauFrequenz) h4.umbauFrequenz = Math.max(0, h4.umbauFrequenz - 1e-4);
-    }
-    for (const p2 of stand2.projekte) if (p2.status === "laufend" && s2.woche >= p2.ende) {
-      const h4 = s2.haeuser.find((x2) => x2.id === p2.haus);
-      if (!h4) continue;
-      for (const nr4 of p2.etagen) {
-        const e = h4.etagenBau?.[nr4];
-        if (!e) continue;
-        if (p2.stufe === "auffrischung") {
-          e.substanz = clamp(e.substanz + 10, 0, 100);
-          e.technik.licht = Math.min(2, e.technik.licht + 1);
-        }
-        if (p2.stufe === "ladenbau") e.moebelGeneration = 3;
-        if (p2.stufe === "komplett") {
-          e.substanz = 90;
-          e.moebelGeneration = 3;
-          e.technik = { klima: 2, licht: 2, brandschutz: 2 };
-          e.klimaModernisiert = true;
-        }
-        if (p2.stufe === "technik") {
-          e.technik = { klima: 2, licht: 2, brandschutz: 2 };
-          e.pflichten = { brandschutz: s2.woche + 520, aufzug: s2.woche + 520 };
-          e.gesperrt = false;
-          e.klimaModernisiert = true;
-        }
-        e.modernisierungWirkung = Math.max(
-          e.modernisierungWirkung,
-          p2.stufe === "ladenbau" ? 0.08 : p2.stufe === "komplett" ? 0.1 : p2.stufe === "auffrischung" ? 0.02 : 0.01
-        );
-      }
-      if (p2.stufe === "komplett") {
-        h4.umbauFrequenz = 0.06;
-        s2.stakeholder.image = clamp(s2.stakeholder.image + 0.8, 0, 100);
-      }
-      h4.substanz = p2.etagen.length === h4.etagen.length ? Math.round(
-        h4.etagen.reduce((a2, n3) => a2 + (h4.etagenBau?.[n3]?.substanz ?? h4.substanz), 0) / h4.etagen.length
-      ) : h4.substanz;
-      p2.status = "abgeschlossen";
-      if (!s2.prognose) melde(
-        s2,
-        "info",
-        UMBAU_STUFEN[p2.stufe].name + " abgeschlossen: " + h4.name + ".",
-        { hausId: h4.id, stadt: h4.stadt, modul: "umbau" }
-      );
-    }
-    if (!s2.prognose && s2.woche % 52 === 0 && stand2.vorlageJahr !== jahr2) {
-      stand2.vorlageJahr = jahr2;
-      const budget = s2.planung;
-      stand2.budget = budget?.modernisierungBudget ?? budget?.umbauBudget ?? 0;
-      const v2 = umbauProgramm(s2).slice(0, 5), auswahl4 = [];
-      let rest = stand2.budget;
-      for (const x2 of v2) if (x2.kosten > 0 && x2.kosten <= rest) {
-        auswahl4.push(x2);
-        rest -= x2.kosten;
-      }
-      neueVorlage(s2, {
-        bereich: "ladenbau",
-        titel: "Modernisierungsprogramm " + (s2.startJahr + jahr2),
-        text: "Bau & Ladenbau priorisiert nach j\xE4hrlicher Rendite: " + v2.map((x2) => x2.name + " " + x2.etage + " (" + x2.rendite + " %)").join(", ") + ". Budget: " + stand2.budget.toLocaleString("de-DE") + " \u20AC.",
-        frist: 4,
-        optionen: [{ id: "annehmen", label: "Modernisierungsprogramm freigeben" }, { id: "zurueckstellen", label: "Zur\xFCckstellen" }],
-        standard: "annehmen"
-      });
-      const e = s2.entscheidungen[s2.entscheidungen.length - 1];
-      if (e?.woche === s2.woche && e.typ === "organisation_vorlage" && e.daten.bereich === "ladenbau") {
-        e.daten.umbauProgramm = JSON.stringify(auswahl4.map((x2) => ({ haus: x2.haus, etage: x2.etage, stufe: x2.stufe })));
-      }
-    }
-  }
-  function umbauProgramm(s2) {
-    const v2 = [];
-    for (const h4 of s2.haeuser) if (h4.status === "offen") for (const nr4 of h4.etagen) {
-      const e = h4.etagenBau?.[nr4];
-      if (!e || e.gesperrt) continue;
-      const stufe2 = e.moebelGeneration < 3 ? "ladenbau" : "auffrischung";
-      const p2 = umbauSchaetzung(s2, h4.id, nr4, stufe2);
-      if (p2 && !s2.umbau?.projekte.some((x2) => x2.status === "laufend" && x2.haus === h4.id && x2.etagen.includes(nr4)))
-        v2.push({ haus: h4.id, name: h4.name, etage: nr4, stufe: stufe2, kosten: p2.kosten, rendite: p2.rendite });
-    }
-    return v2.sort((a2, b4) => b4.rendite - a2.rendite || a2.haus.localeCompare(b4.haus) || a2.etage - b4.etage);
-  }
-  function umbauProgrammEntscheiden(s2, programm) {
-    let liste3 = [];
-    try {
-      liste3 = JSON.parse(programm);
-    } catch {
-      return;
-    }
-    for (const a2 of liste3) umbauAktion(s2, { typ: "umbauPlanen", ...a2 });
-  }
-  function umbauUebersicht(s2) {
-    initialisiereUmbau(s2);
-    const st2 = s2.umbau;
-    return {
-      budget: st2.budget,
-      verbraucht: st2.verbraucht,
-      rest: Math.max(0, st2.budget - st2.verbraucht),
-      jahr: s2.startJahr + Math.floor(s2.woche / 52),
-      programm: umbauProgramm(s2).slice(0, 30),
-      laufend: st2.projekte.filter((x2) => x2.status === "laufend"),
-      abgeschlossen: st2.projekte.filter((x2) => x2.status === "abgeschlossen").slice(-20),
-      premiumInvestitionen: s2.haeuser.filter((x2) => x2.premiumInvestition && x2.premiumInvestition.bis > s2.woche).length
-    };
-  }
-  function umbauHaus(s2, id) {
-    initialisiereUmbau(s2);
-    const h4 = s2.haeuser.find((x2) => x2.id === id);
-    if (!h4) return void 0;
-    return h4.etagen.map((nr4) => ({
-      etage: nr4,
-      ...h4.etagenBau[nr4],
-      qm: flaechenQm(h4, nr4),
-      projekt: (s2.umbau?.projekte ?? []).find((x2) => x2.haus === id && x2.status === "laufend" && x2.etagen.includes(nr4)),
-      schaetzungen: Object.keys(UMBAU_STUFEN).map((stufe2) => ({ stufe: stufe2, ...umbauSchaetzung(s2, id, nr4, stufe2) }))
-    }));
-  }
-
-  // ../engine/src/wirtschaft.ts
-  function istAktiv(h4) {
-    return h4.status === "offen" || h4.status === "schliessung_verhandlung" || h4.status === "raeumung";
-  }
-  function aktiveFlaeche(h4, w2) {
-    return h4.flaechen.filter((f13) => (f13.umbauBis === void 0 || f13.umbauBis <= w2) && !h4.etagenBau?.[f13.etage]?.gesperrt);
-  }
-  var MASSSTAB_REALISIERUNG = 1.115;
-  function lieferantenFaktor(s2, h4, g2) {
-    let f13 = 1;
-    for (const l of s2.lieferanten) {
-      const anteil3 = l.gruppen[g2];
-      if (!anteil3) continue;
-      if (l.ausfallBis !== void 0 && l.ausfallBis > s2.woche) f13 *= 1 - anteil3 * 0.8;
-      if (!l.aktiv) continue;
-      if (l.rueckzug && h4.lage !== "1a") f13 *= 1 - anteil3 * 0.6;
-      if (l.dtc) f13 *= 1 - anteil3 * 0.18;
-    }
-    return f13;
-  }
-  function hausFaktor(s2, h4) {
-    const w2 = s2.woche;
-    const makro = s2.makro.konjunktur * Math.pow(1 - TREND_LAGE[h4.lage], w2 / 52);
-    const image = (0.9 + 2e-3 * s2.stakeholder.image) / (0.9 + 2e-3 * 45);
-    const mkt = marketingHausFaktor(s2, h4);
-    const substanz = (0.85 + 15e-4 * h4.substanz) / (0.85 + 15e-4 * h4.substanzStart);
-    let mieterBonus = 0;
-    let umbau = false;
-    for (const f13 of h4.flaechen) {
-      if (f13.umbauBis !== void 0 && f13.umbauBis > w2) umbau = true;
-      else if (f13.konzept === "untermiete" && f13.mieter) mieterBonus += f13.mieter.frequenzBonus;
-    }
-    const fl = h4.personal.filialleiter;
-    const skill2 = fl.interimBis !== void 0 && fl.interimBis > w2 ? 0.3 : fl.skill;
-    const flF = (0.95 + 0.1 * skill2) / 1.05;
-    let status2 = 1;
-    if (h4.status === "schliessung_verhandlung") status2 = 0.95;
-    if (h4.status === "raeumung") status2 = 1.7;
-    const streik = h4.streikBis !== void 0 && h4.streikBis > w2 ? 0.72 : 1;
-    const rauschen2 = s2.prognose ? 1 : 1 + 0.025 * normal(s2);
-    const zentrale = hqUmsatzFaktor(s2);
-    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h4) * (1 + mieterBonus) * (1 + h4.transferBonus) * flF * status2 * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * MASSSTAB_REALISIERUNG * schwierigkeit(s2).kaufneigung * premiumImageFaktor(h4) * programmNachfrageFaktor(s2) * szenarioFrequenz(s2) * hausclusterFaktor(s2, h4) * itHausFaktor(s2, h4) * hausBetriebsFaktor(s2, h4) * umbauFrequenzFaktor(h4);
-  }
-  function saettigung(qm2, Q) {
-    return Q > 0 ? 1 - Math.exp(-qm2 / Q) : 0;
-  }
-  function simuliereHaus(s2, h4) {
-    const w2 = s2.woche;
-    const roh2 = { haus: h4, eigen: {}, kommission: {}, offprice: 0, konzessionUmsatz: 0, untermiete: 0, fteBedarf: 0, fteIst: 0, ohneAktion: 0, ohneAktionRohertrag: 0 };
-    if (!istAktiv(h4) || h4.nurDaten) return roh2;
-    const hf = hausFaktor(s2, h4);
-    const fl = aktiveFlaeche(h4, w2);
-    const raeumung2 = h4.status === "raeumung";
-    const qmEigen = {};
-    const qmKomm = {};
-    const qmKonz = {};
-    let qmOff = 0;
-    let qmVerkauf = 0;
-    for (const f13 of fl) {
-      if (f13.konzept === "eigen" && f13.gruppe) {
-        qmEigen[f13.gruppe] = (qmEigen[f13.gruppe] ?? 0) + f13.qm;
-        qmVerkauf += f13.qm;
-      } else if (f13.konzept === "kommission" && f13.gruppe) {
-        qmKomm[f13.gruppe] = (qmKomm[f13.gruppe] ?? 0) + f13.qm;
-        qmVerkauf += f13.qm;
-      } else if (f13.konzept === "konzession" && f13.gruppe) qmKonz[f13.gruppe] = (qmKonz[f13.gruppe] ?? 0) + f13.qm;
-      else if (f13.konzept === "offprice") {
-        qmOff += f13.qm;
-        qmVerkauf += f13.qm;
-      } else if (f13.konzept === "untermiete" && f13.mieter) roh2.untermiete += f13.mieter.mieteWoche;
-    }
-    const normalpreis = 1 - 0.25 * s2.marketing.gewoehnung;
-    const bruttoBasis = {};
-    let summeBasis = 0;
-    let summeBedarf = 0;
-    const alleGruppen = /* @__PURE__ */ new Set([...Object.keys(qmEigen), ...Object.keys(qmKomm)]);
-    for (const g2 of alleGruppen) {
-      const P5 = h4.potenzial[g2] ?? 0;
-      const Q = h4.saettigungQm[g2] ?? 1;
-      const qm2 = (qmEigen[g2] ?? 0) + (qmKomm[g2] ?? 0);
-      const sf = saisonFaktor(g2, w2);
-      const b4 = P5 * saettigung(qm2, Q) * sf * hf * normalpreis * lieferantenFaktor(s2, h4, g2) * wettbewerbNachfrageFaktor(s2, h4, g2) * umbauNachfrageFaktor(s2, h4, g2);
-      bruttoBasis[g2] = b4;
-      summeBasis += b4;
-      summeBedarf += b4 / Math.max(0.05, sf) * Math.sqrt(sf);
-    }
-    const offBasis = qmOff * 20 * (1.6 - 0.6 * h4.einzug.kaufkraft) * hf * saisonFaktor("damen", w2) * wettbewerbOffpriceFaktor(s2, h4) * umbauNachfrageFaktor(s2, h4, null);
-    summeBasis += offBasis;
-    summeBedarf += offBasis;
-    const p2 = h4.personal;
-    const einsatz = personalEinsatz(h4);
-    const fteIst = einsatz.fte;
-    roh2.fteIst = fteIst;
-    roh2.fteBedarf = qmVerkauf / PARAM.qmJeFte * (h4.klasse === "premium" ? 1.15 : 1) + summeBedarf / PARAM.umsatzJeFte;
-    const besetzung = roh2.fteBedarf > 0 ? Math.pow(clamp(fteIst / roh2.fteBedarf / hqBesetzungsNorm(s2), 0, 1), 0.5) : 1;
-    const ahQuote = fteIst > 0 ? einsatz.aushilfen / fteIst : 0;
-    const basisJe = {};
-    const tEJe = {};
-    for (const g2 of alleGruppen) {
-      const d4 = GRUPPEN[g2];
-      const qualitaet3 = besetzung * (1 - d4.beratung * Math.max(0, ahQuote - 0.15) * 0.6);
-      basisJe[g2] = (bruttoBasis[g2] ?? 0) * qualitaet3 * personalVerkaufsFaktor(h4, g2) * personalVerfuegbarkeit(h4);
-      const qe = qmEigen[g2] ?? 0;
-      const qk = qmKomm[g2] ?? 0;
-      tEJe[g2] = qe + qk > 0 ? qe / (qe + qk) : 0;
-    }
-    const mess = [];
-    const mw = raeumung2 ? void 0 : marketingGruppen(s2, h4, basisJe, tEJe, mess);
-    if (mess.length) roh2.aktionsMessung = mess;
-    for (const g2 of alleGruppen) {
-      const basis4 = basisJe[g2] ?? 0;
-      const e = mw?.[g2];
-      const brutto2 = basis4 * (e ? e.nachfrage : 1);
-      const umsatz = raeumung2 ? brutto2 * (1 - 0.35) : brutto2 * (e ? e.preis : 1);
-      const qe = qmEigen[g2] ?? 0;
-      const qk = qmKomm[g2] ?? 0;
-      const tE = tEJe[g2] ?? 0;
-      if (qe > 0) roh2.eigen[g2] = { brutto: brutto2 * tE, umsatz: umsatz * tE };
-      if (qk > 0) roh2.kommission[g2] = umsatz * (1 - tE);
-    }
-    roh2.offprice = offBasis * besetzung * personalOffpriceFaktor(h4) * personalVerfuegbarkeit(h4);
-    for (const [g2, qm2] of Object.entries(qmKonz)) {
-      const P5 = h4.potenzial[g2] ?? 0;
-      const Q = h4.saettigungQm[g2] ?? 1;
-      roh2.konzessionUmsatz += P5 * saettigung(qm2, Q) * saisonFaktor(g2, w2) * hf * lieferantenFaktor(s2, h4, g2) * wettbewerbNachfrageFaktor(s2, h4, g2);
-    }
-    return wirkeTreiber(h4, roh2);
-  }
-  function personalEinsatz(h4) {
-    const p2 = h4.personal;
-    const referenz = p2.umsatzReferenzWoche;
-    const vorwoche = h4.kpi?.umsatz;
-    const delta = referenz && referenz > 0 && vorwoche !== void 0 ? clamp(vorwoche / referenz - 1, -0.55, 0.35) : 0;
-    const vollzeit = p2.vollzeit;
-    const teilzeit = p2.teilzeit * (1 + delta * 0.6);
-    const aushilfen = p2.aushilfen * (1 + delta);
-    return { vollzeit, teilzeit, aushilfen, fte: vollzeit + teilzeit + aushilfen };
-  }
-  function lohnKosten(s2, h4) {
-    const p2 = personalEinsatz(h4);
-    const tarifF = s2.tarif === "sanierung" ? 0.93 : s2.tarif === "ohne" ? 0.89 : 1;
-    const leitungDelta = h4.betrieb && !s2.hausbetriebAbnahmeAus ? ((h4.personal.filialleiter.gehalt ?? h4.betrieb.leitungGehaltStart) - h4.betrieb.leitungGehaltStart) / 52 : 0;
-    return ((p2.vollzeit * PARAM.lohnVollzeit + p2.teilzeit * PARAM.lohnTeilzeit) * tarifF + p2.aushilfen * PARAM.lohnAushilfe) * (1 - programmErsparnis(s2, "personal")) + leitungDelta;
-  }
-  function nebenvertragsErtraege(h4, umsatzAmPos, woche2) {
-    const v2 = h4.nebenvertrag;
-    if (!v2 || !istAktiv(h4) || h4.nurDaten) return { werbeflaechen: 0, dienstleistungen: 0 };
-    const qmBespielt = aktiveFlaeche(h4, woche2).filter((f13) => f13.konzept === "eigen" || f13.konzept === "kommission" || f13.konzept === "offprice").reduce((sum2, f13) => sum2 + f13.qm, 0);
-    const werbeflaechen = Math.min(v2.werbeflaecheQm, qmBespielt * 0.075) * v2.werbeEuroJeQmWoche;
-    const bons = Math.floor(Math.max(0, umsatzAmPos) / v2.durchschnittsBonEuro);
-    return { werbeflaechen: eur(werbeflaechen), dienstleistungen: eur(bons * v2.dienstleistungEuroJeBon) };
-  }
-  function hausKosten(s2, h4, umsatzEigen, umsatzGesamt) {
-    const k5 = {
-      personal: 0,
-      miete: 0,
-      nebenkosten: 0,
-      sonstige: 0,
-      logistik: 0,
-      personalCash: 0,
-      guv: leereFilialGuV()
-    };
-    if (h4.status === "verkauft") return k5;
-    if (h4.status === "geschlossen") {
-      if (h4.restmieteBis !== void 0 && h4.restmieteBis > s2.woche) k5.miete = h4.restmieteWoche ?? 0;
-      return k5;
-    }
-    const guv2 = k5.guv;
-    const form2 = h4.klasse === "premium" ? 1.16 : h4.format === "outlet" ? 0.77 : h4.format === "sport" ? 0.93 : h4.format === "schwester" ? 0.94 : 1;
-    k5.personal = lohnKosten(s2, h4) + personalZusatzkosten(h4);
-    if (!s2.hausbetriebAbnahmeAus && s2.hausbetrieb?.staedte[h4.stadt]?.sonntage.includes(s2.woche)) k5.personal *= 1.18;
-    guv2.personal = k5.personal;
-    k5.miete = guv2.miete = h4.miete.mieteWoche * (1 - programmErsparnis(s2, "miete"));
-    let qmNk = 0;
-    let qmBetrieb = 0;
-    for (const f13 of h4.flaechen) {
-      if (f13.konzept === "untermiete") continue;
-      qmNk += f13.qm;
-      qmBetrieb += f13.konzept === "leer" ? f13.qm * 0.25 : f13.qm;
-    }
-    guv2.mietnebenkosten = k5.nebenkosten = (h4.miete.netTyp === "net" ? 0 : qmNk * h4.miete.nebenkostenQmWoche) * (1 - programmErsparnis(s2, "mietnebenkosten"));
-    guv2.logistik = k5.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s2) * (1 - programmErsparnis(s2, "logistik")) * (h4.format === "outlet" ? 0.9 : 1);
-    guv2.fremdkraefte = umsatzGesamt * 7e-3 * form2 * (1 - programmErsparnis(s2, "fremdkraefte"));
-    guv2.unterhalt = umsatzGesamt * 0.019 * form2 * (1 + Math.max(0, 55 - h4.substanz) / 400) * (1 - programmErsparnis(s2, "unterhalt"));
-    const mobileStufe = s2.it?.produkte?.mobile_pay?.aktiv === false ? 0 : s2.it?.systeme.kasse.kasseAusbau?.mobil ?? 0;
-    guv2.zahlungsverkehr = umsatzGesamt * 2e-3 * (1 - programmErsparnis(s2, "zahlungsverkehr")) * (1 - 0.025 * mobileStufe);
-    guv2.facilityManagement = umsatzGesamt * 0.017 * form2 * (1 - programmErsparnis(s2, "facilityManagement"));
-    guv2.energie = umsatzGesamt * 0.024 * form2 * (1 - programmErsparnis(s2, "energie"));
-    guv2.it = umsatzGesamt * 3e-3 * (1 - programmErsparnis(s2, "it"));
-    guv2.administration = umsatzGesamt * 2e-3 * (1 - programmErsparnis(s2, "administration"));
-    guv2.uebrigeAufwendungen = umsatzGesamt * 4e-3 * (1 - programmErsparnis(s2, "uebrigeAufwendungen"));
-    {
-      const zeilen = ["fremdkraefte", "unterhalt", "zahlungsverkehr", "facilityManagement", "energie", "it", "administration", "uebrigeAufwendungen"];
-      const basis4 = zeilen.reduce((sum2, z6) => sum2 + guv2[z6], 0);
-      const betrieb2 = hausBetriebskosten(s2, h4, basis4);
-      const skala2 = basis4 > 0 ? betrieb2 / basis4 : 1;
-      for (const z6 of zeilen) guv2[z6] *= skala2;
-      guv2.uebrigeAufwendungen += personalFehlerkosten(h4);
-      k5.sonstige = zeilen.reduce((sum2, z6) => sum2 + guv2[z6], 0);
-    }
-    return k5;
-  }
-  function leereKpi(w2) {
-    return { woche: w2, umsatz: 0, rohertrag: 0, konzessionserloes: 0, untermiete: 0, personal: 0, miete: 0, nebenkosten: 0, sonstige: 0, db: 0, fteBedarf: 0, fteIst: 0, umsatzJeGruppe: {} };
-  }
-  function rundeKpi(k5) {
-    const r4 = { ...k5 };
-    for (const key of ["umsatz", "rohertrag", "konzessionserloes", "untermiete", "personal", "miete", "nebenkosten", "sonstige", "db"]) r4[key] = eur(r4[key]);
-    r4.umsatzJeGruppe = Object.fromEntries(Object.entries(k5.umsatzJeGruppe).map(([g2, v2]) => [g2, eur(v2 ?? 0)]));
-    return r4;
-  }
-
-  // ../engine/src/formate.ts
-  var VK_EK = 0.563;
-  var qm = (h4) => h4.flaechen.filter((f13) => f13.konzept !== "leer" && f13.konzept !== "untermiete").reduce((n3, f13) => n3 + f13.qm, 0);
-  var basis = (h4) => Object.entries(h4.potenzial).reduce((n3, [g2, p2]) => {
-    const fl = h4.flaechen.filter((f13) => f13.gruppe === g2).reduce((a2, f13) => a2 + f13.qm, 0);
-    return n3 + (p2 ?? 0) * (1 - Math.exp(-fl / Math.max(1, h4.saettigungQm[g2] ?? 1)));
-  }, 0);
-  var rng = (s2) => ({ rng: s2.formateRng ?? (s2.seed ^ 1223699089) >>> 0 });
-  function formateZufall(s2, p2) {
-    const h4 = rng(s2);
-    const ja = chance(h4, p2);
-    s2.formateRng = h4.rng;
-    return ja;
-  }
-  function formateZahl(s2, a2, b4) {
-    const h4 = rng(s2);
-    const n3 = zwischen(h4, a2, b4);
-    s2.formateRng = h4.rng;
-    return n3;
-  }
-  function initialisiereFormate(s2) {
-    var _a2, _b;
-    const volks = s2.haeuser.filter((h4) => h4.format === "schwester");
-    const out = s2.haeuser.filter((h4) => h4.format === "outlet");
-    let volksUmsatz = 0;
-    for (const h4 of [...volks, ...out]) {
-      h4.nurDaten = false;
-      wettbewerbStartwerte(s2, h4);
-      const umsatz = h4.format === "schwester" ? basis(h4) * 0.72 : qm(h4) * 72;
-      const quote = h4.format === "schwester" ? 0.165 : 0.115;
-      const fte2 = Math.max(3, umsatz * quote / 980);
-      h4.personal.vollzeit = fte2 * 0.48;
-      h4.personal.teilzeit = fte2 * 0.43;
-      h4.personal.aushilfen = fte2 * 0.09;
-      h4.miete.mieteWoche = eur(umsatz * (h4.format === "schwester" ? 0.121 : h4.lage === "rand" ? 0.05 : 0.08));
-      if (h4.format === "schwester") {
-        volksUmsatz += umsatz;
-        h4.einzug.alter *= 1.1;
-        h4.substanz = clamp(h4.substanz - 18, 15, 60);
-        h4.substanzStart = h4.substanz;
-        const fl = h4.personal.filialleiter;
-        if (fl.skill > 0.6) {
-          const k5 = 0.6 / fl.skill;
-          fl.skill = 0.6;
-          if (fl.staerken) for (const key of Object.keys(fl.staerken)) fl.staerken[key] *= k5;
-          if (h4.betrieb) h4.betrieb.leitungStart = fl.skill;
-        }
-        for (const g2 of Object.keys(h4.potenzial)) h4.potenzial[g2] *= 0.72;
-      }
-      h4.nebenvertrag = {
-        werbeflaecheQm: Math.round(qm(h4) * 0.055),
-        werbeEuroJeQmWoche: umsatz * 6e-3 / Math.max(1, Math.round(qm(h4) * 0.055)),
-        dienstleistungEuroJeBon: 0.7,
-        durchschnittsBonEuro: h4.format === "outlet" ? 28 : 62
-      };
-    }
-    const outletUmsatz = out.reduce((n3, h4) => n3 + qm(h4) * 72, 0);
-    const budget = eur(outletUmsatz * 0.65 / 1.7);
-    (_a2 = s2.einkauf).offpriceZukauf ?? (_a2.offpriceZukauf = budget);
-    (_b = s2.einkauf).altwareOutlet ?? (_b.altwareOutlet = 0.5);
-    s2.formate = {
-      pool: [{ quelle: "markenposten", wert: budget * 7, preisFaktor: 1.7, alter: 1 }],
-      volkskaufBestand: eur(volksUmsatz * VK_EK * 8),
-      projekte: [],
-      naechsteOutletId: 1 + Math.max(66, ...out.map((h4) => Number(h4.id.slice(1)) || 0)),
-      altwareEingang: 0,
-      zukaufWoche: 0,
-      umsatzWoche: 0,
-      abverkaufWoche: 0,
-      abschriftenWoche: 0,
-      schwesterZentraleWoche: eur(volksUmsatz * 4e-3),
-      outletQmStart: out.reduce((n3, h4) => n3 + qm(h4), 0),
-      volkskaufQmStart: volks.reduce((n3, h4) => n3 + qm(h4), 0)
-    };
-  }
-  function outletKapazitaet(s2) {
-    const f13 = s2.formate;
-    if (!f13) return 0;
-    const offen = s2.haeuser.filter((h4) => h4.format === "outlet" && !h4.nurDaten && h4.status === "offen").reduce((n3, h4) => n3 + qm(h4), 0);
-    f13.outletQmStart ?? (f13.outletQmStart = Math.max(1, offen));
-    return clamp(offen / Math.max(1, f13.outletQmStart), 0, 2);
-  }
-  function volkskaufZentraleFaktor(s2, offen) {
-    const f13 = s2.formate;
-    const jetzt = offen.reduce((n3, h4) => n3 + qm(h4), 0);
-    f13.volkskaufQmStart ?? (f13.volkskaufQmStart = Math.max(1, jetzt));
-    return 0.4 + 0.6 * clamp(jetzt / Math.max(1, f13.volkskaufQmStart), 0, 1);
-  }
-  function formateProjekteWoche(s2) {
-    const stand2 = s2.formate;
-    if (!stand2) return;
-    for (const p2 of stand2.projekte.filter((p3) => p3.bis <= s2.woche)) {
-      const h4 = s2.haeuser.find((h5) => h5.id === p2.haus);
-      if (!h4) continue;
-      if (p2.typ === "umflaggen") {
-        h4.format = "warenhaus";
-        h4.hausklasse = "C";
-        h4.name = "Hartwig " + h4.stadt;
-        for (const g2 of Object.keys(h4.potenzial)) h4.potenzial[g2] *= 1.125;
-        h4.formatIntegrationBis = s2.woche + 52;
-      } else {
-        h4.nurDaten = false;
-        wettbewerbStartwerte(s2, h4);
-      }
-      melde(s2, "info", h4.name + ": Formatprojekt abgeschlossen.", { stadt: h4.stadt, hausId: h4.id });
-    }
-    stand2.projekte = stand2.projekte.filter((p2) => p2.bis > s2.woche);
-    for (const h4 of s2.haeuser) {
-      if (h4.formatIntegrationBis === void 0 || h4.formatIntegrationBis <= s2.woche) continue;
-      for (const g2 of Object.keys(h4.potenzial)) h4.potenzial[g2] *= 1.0015;
-    }
-  }
-  function outletKandidaten(s2) {
-    return STAEDTE.filter(([stadt]) => s2.haeuser.some((h4) => h4.stadt === stadt && h4.format === "warenhaus" && h4.status === "offen") && !s2.haeuser.some((h4) => h4.stadt === stadt && h4.format === "outlet")).map(([stadt, , cluster]) => {
-      const qm2 = cluster === "metropole" ? 4500 : cluster === "grossstadt" ? 3400 : 2400;
-      const lage = cluster === "mittelstadt" ? "rand" : "b";
-      const umsatzWoche = eur(qm2 * 72);
-      return { stadt, lage, qm: qm2, mieteWoche: eur(umsatzWoche * (lage === "rand" ? 0.05 : 0.08)), investition: qm2 * 120, umsatzWoche };
-    });
-  }
-  function outletEroeffnen(s2, stadt) {
-    const k5 = outletKandidaten(s2).find((k6) => k6.stadt === stadt);
-    if (!k5) return "Kein freier geeigneter FUNDUS-Standort in dieser Stadt.";
-    if (!liquiditaetReicht(s2, k5.investition)) return "Zu wenig Liquidit\xE4t f\xFCr die Er\xF6ffnung.";
-    const muster3 = s2.haeuser.find((h4) => h4.format === "outlet");
-    if (!muster3 || !s2.formate) return "FUNDUS-Musterhaus fehlt.";
-    const id = "O" + String(s2.formate.naechsteOutletId++).padStart(3, "0");
-    const st2 = STAEDTE.find(([stadt2]) => stadt2 === k5.stadt);
-    const f13 = k5.qm / Math.max(1, qm(muster3));
-    const neu3 = {
-      ...muster3,
-      id,
-      name: "FUNDUS " + stadt,
-      stadt,
-      region: st2[1],
-      cluster: st2[2],
-      lage: k5.lage,
-      einzug: { ...muster3.einzug, kaufkraft: st2[3] },
-      nurDaten: true,
-      status: "offen",
-      etagen: [0, 1],
-      grundflaecheQm: Math.round(k5.qm / 2),
-      flaechen: muster3.flaechen.map((fl, i) => ({ ...fl, id: id + "-f" + (i + 1), qm: Math.round(fl.qm * f13), etage: i % 2 })),
-      miete: { ...muster3.miete, mieteWoche: k5.mieteWoche },
-      personal: { ...muster3.personal, filialleiter: { ...muster3.personal.filialleiter } },
-      potenzial: { ...muster3.potenzial },
-      saettigungQm: { ...muster3.saettigungQm },
-      kpi: void 0,
-      verlauf: []
-    };
-    s2.haeuser.push(neu3);
-    s2.formate.projekte.push({ haus: id, start: s2.woche, bis: s2.woche + 12, typ: "eroeffnen" });
-    s2.cash -= k5.investition;
-    s2.einmalkostenWoche += k5.investition;
-    s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
-    s2.kapitalflussOffen.investitionen -= k5.investition;
-    return null;
-  }
-  function schwesterUmflaggen(s2, id) {
-    const h4 = s2.haeuser.find((h5) => h5.id === id && h5.format === "schwester" && h5.status === "offen");
-    if (!h4) return "Offenes Volkskauf-Haus nicht gefunden.";
-    if ((s2.hq.abteilungen.find((a2) => a2.id === "immobilien")?.stufe ?? 0) < 1) return "Immobilienabteilung ab Stufe 1 erforderlich.";
-    if (s2.formate?.projekte.some((p2) => p2.haus === id)) return "Umflaggen l\xE4uft bereits.";
-    const kosten2 = eur(qm(h4) * 180);
-    if (!liquiditaetReicht(s2, kosten2)) return "Umbaukosten sind nicht gedeckt.";
-    const dauer = 20 + Number(id.slice(1)) % 11;
-    s2.cash -= kosten2;
-    s2.einmalkostenWoche += kosten2;
-    s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
-    s2.kapitalflussOffen.investitionen -= kosten2;
-    s2.formate?.projekte.push({ haus: id, start: s2.woche, bis: s2.woche + dauer, typ: "umflaggen" });
-    return null;
-  }
-  function verkauf(pool, quelle2, ziel) {
-    let rest = ziel, umsatz = 0, einsatz = 0;
-    for (const p2 of pool.filter((p3) => p3.quelle === quelle2).sort((a2, b4) => b4.alter - a2.alter)) {
-      const ek2 = Math.max(0, Math.min(p2.ladenhueter ? p2.wert * 0.06 : p2.wert, rest / Math.max(0.1, p2.preisFaktor)));
-      p2.wert -= ek2;
-      einsatz += ek2;
-      umsatz += ek2 * p2.preisFaktor;
-      rest -= ek2 * p2.preisFaktor;
-      if (rest <= 0) break;
-    }
-    return { umsatz, einsatz };
-  }
-  function formateWoche(s2) {
-    const f13 = s2.formate;
-    if (!f13) return { buchungen: [], warenZukauf: 0, abschriften: 0, marketing: 0, zentrale: 0 };
-    const aktive2 = s2.haeuser.filter((h4) => !h4.nurDaten && h4.status === "offen" && (h4.format === "schwester" || h4.format === "outlet"));
-    const out = aktive2.filter((h4) => h4.format === "outlet");
-    const volks = aktive2.filter((h4) => h4.format === "schwester");
-    const budget = out.length ? Math.max(0, eur((s2.einkauf.offpriceZukauf ?? 0) * outletKapazitaet(s2))) : 0;
-    const stufe2 = s2.hq.abteilungen.find((a2) => a2.id === "einkauf")?.stufe ?? 0;
-    const preisFaktor = clamp(0.56 + stufe2 * 0.02, 0.5, 0.7) / clamp(0.378 - stufe2 * 0.013, 0.3, 0.4);
-    if (budget) f13.pool.push({ quelle: "markenposten", wert: budget, preisFaktor, alter: 0 });
-    f13.zukaufWoche = budget;
-    let abschriften = 0;
-    for (const p2 of f13.pool) {
-      p2.alter++;
-      if (p2.alter > 30) {
-        const a2 = p2.wert * (p2.quelle === "markenposten" ? 0.015 : 0.03);
-        p2.wert -= a2;
-        abschriften += a2;
-      }
-    }
-    const nachfrage = aktive2.map((haus2) => {
-      const roh2 = simuliereHaus(s2, haus2);
-      const normal3 = haus2.format === "outlet" ? roh2.offprice * 3.65 * clamp(2 - haus2.einzug.kaufkraft, 0.8, 1.2) / Math.max(0.1, 1.6 - 0.6 * haus2.einzug.kaufkraft) : Object.values(roh2.eigen).reduce((n3, x2) => n3 + (x2?.umsatz ?? 0), 0);
-      const bau2 = f13.projekte.some((p2) => p2.haus === haus2.id && p2.typ === "umflaggen");
-      return { haus: haus2, nachfrage: normal3 * (bau2 ? 0.55 : 1) };
-    });
-    const volksNachfrage = nachfrage.filter((x2) => x2.haus.format === "schwester").reduce((n3, x2) => n3 + x2.nachfrage, 0);
-    const warenVerfuegbar = Math.min(1, f13.volkskaufBestand / Math.max(1, volksNachfrage * VK_EK));
-    let warenZukauf = budget;
-    const buchungen = [];
-    f13.abverkaufWoche = 0;
-    for (const { haus: haus2, nachfrage: n3 } of nachfrage) {
-      let umsatz = 0, ek2 = 0;
-      if (haus2.format === "schwester") {
-        umsatz = n3 * warenVerfuegbar;
-        ek2 = umsatz * VK_EK;
-        f13.volkskaufBestand -= ek2;
-      } else {
-        const marke5 = verkauf(f13.pool, "markenposten", n3 * 0.79);
-        const alt = verkauf(f13.pool, "altware", n3 * 0.21);
-        umsatz = marke5.umsatz + alt.umsatz;
-        ek2 = marke5.einsatz + alt.einsatz;
-        f13.abverkaufWoche += ek2;
-      }
-      const kpi = leereKpi(s2.woche);
-      kpi.umsatz = eur(umsatz);
-      kpi.rohertrag = eur(umsatz - ek2);
-      const fl = haus2.flaechen.filter((f14) => f14.konzept === "eigen" || f14.konzept === "offprice");
-      const qmGesamt = fl.reduce((n4, f14) => n4 + f14.qm, 0);
-      for (const f14 of fl) if (f14.gruppe) {
-        kpi.umsatzJeGruppe[f14.gruppe] = eur((kpi.umsatzJeGruppe[f14.gruppe] ?? 0) + kpi.umsatz * f14.qm / Math.max(1, qmGesamt));
-      }
-      const kosten2 = hausKosten(s2, haus2, umsatz, umsatz);
-      const neben = nebenvertragsErtraege(haus2, umsatz, s2.woche);
-      kpi.personal = eur(kosten2.personal);
-      kpi.miete = eur(kosten2.miete);
-      kpi.nebenkosten = eur(kosten2.nebenkosten);
-      kpi.sonstige = eur(kosten2.sonstige + kosten2.logistik);
-      kpi.fteIst = haus2.personal.vollzeit + haus2.personal.teilzeit + haus2.personal.aushilfen;
-      kpi.fteBedarf = kpi.fteIst;
-      const guv2 = kosten2.guv;
-      guv2.umsatz = kpi.umsatz;
-      guv2.bruttogewinn = kpi.rohertrag;
-      guv2.wareneinsatz = guv2.umsatz - guv2.bruttogewinn;
-      guv2.werbeflaechen = neben.werbeflaechen;
-      guv2.dienstleistungen = neben.dienstleistungen;
-      guv2.uebrigeErtraege = guv2.werbeflaechen + guv2.dienstleistungen;
-      guv2.werbung = eur(umsatz * (haus2.format === "outlet" ? 0.014 : 0.018));
-      for (const key of Object.keys(guv2)) guv2[key] = eur(guv2[key]);
-      guvAbschluss(guv2);
-      kpi.guv = guv2;
-      kpi.db = guv2.ebitda;
-      haus2.kpi = kpi;
-      buchungen.push({ haus: haus2, kpi, guv: guv2, kosten: kosten2, neben });
-    }
-    const vkZukauf = eur(Math.max(0, volksNachfrage * VK_EK * 6 - f13.volkskaufBestand));
-    f13.volkskaufBestand += vkZukauf;
-    warenZukauf += vkZukauf;
-    f13.pool = f13.pool.filter((p2) => p2.wert > 1);
-    f13.abschriftenWoche = eur(abschriften);
-    f13.umsatzWoche = eur(buchungen.filter((b4) => b4.haus.format === "outlet").reduce((n3, b4) => n3 + b4.kpi.umsatz, 0));
-    const outletBedarf = nachfrage.filter((x2) => x2.haus.format === "outlet").reduce((n3, x2) => n3 + x2.nachfrage, 0);
-    if (out.length && f13.umsatzWoche < outletBedarf * 0.72 && s2.woche % 4 === 0)
-      melde(s2, "warnung", "FUNDUS: Leere Fl\xE4chen, es fehlen passende Markenposten oder Altware.");
-    if (out.length && f13.pool.reduce((n3, p2) => n3 + p2.wert, 0) > Math.max(1, f13.abverkaufWoche) * 15 && s2.woche % 4 === 0)
-      melde(s2, "warnung", "FUNDUS: Waren\xFCberhang und Abschriftenrisiko.");
-    return {
-      buchungen,
-      warenZukauf: eur(warenZukauf),
-      abschriften: eur(abschriften),
-      marketing: buchungen.reduce((n3, b4) => n3 + b4.guv.werbung, 0),
-      zentrale: volks.length ? eur(f13.schwesterZentraleWoche * volkskaufZentraleFaktor(s2, volks)) : 0
-    };
-  }
-  function outletUebersicht(s2) {
-    const f13 = s2.formate;
-    const pool = f13?.pool ?? [];
-    const bestand = eur(pool.reduce((n3, p2) => n3 + p2.wert, 0));
-    const vk = f13?.abverkaufWoche ?? 0;
-    return {
-      haeuser: s2.haeuser.filter((h4) => h4.format === "outlet" && !h4.nurDaten && h4.status === "offen").length,
-      poolWert: bestand,
-      reichweite: bestand / Math.max(1, vk),
-      abverkaufsquote: vk / Math.max(1, bestand + vk),
-      abschriften: f13?.abschriftenWoche ?? 0,
-      markenposten: eur(pool.filter((p2) => p2.quelle === "markenposten").reduce((n3, p2) => n3 + p2.wert, 0)),
-      altware: eur(pool.filter((p2) => p2.quelle === "altware").reduce((n3, p2) => n3 + p2.wert, 0)),
-      zukaufBudget: s2.einkauf.offpriceZukauf ?? 0,
-      altwareQuote: s2.einkauf.altwareOutlet ?? 0.5,
-      altwareEingang: f13?.altwareEingang ?? 0,
-      umsatz: f13?.umsatzWoche ?? 0
-    };
-  }
-  function schwesterUebersicht(s2) {
-    const hs = s2.haeuser.filter((h4) => h4.format === "schwester" && h4.status === "offen");
-    return {
-      haeuser: hs.length,
-      umsatz: eur(hs.reduce((n3, h4) => n3 + (h4.kpi?.umsatz ?? 0), 0)),
-      ebitda: eur(hs.reduce((n3, h4) => n3 + (h4.kpi?.guv?.ebitda ?? 0), 0)),
-      bestand: s2.formate?.volkskaufBestand ?? 0,
-      umbauten: s2.formate?.projekte.filter((p2) => p2.typ === "umflaggen").length ?? 0
-    };
-  }
-
-  // ../engine/src/spielende.ts
-  var faktor = { leicht: 0.8, mittel: 1, schwer: 1.3 };
-  var SPIELENDE_AKTIV = true;
-  var aktiv3 = (s2) => SPIELENDE_AKTIV && !s2.spielendeDeaktiviert && !istSandkasten(s2);
-  function ebitdaJahr(s2) {
-    return eur(s2.historie.slice(-52).reduce((sum2, k5) => sum2 + k5.ebitda, 0));
-  }
-  function immobilienWert(s2) {
-    return eur(s2.haeuser.filter((h4) => h4.klasse === "premium" && h4.status === "offen").reduce((sum2, h4) => {
-      const rang = PREMIUM_HAEUSER.find((p2) => p2.id === h4.premiumSchluessel)?.rang ?? 3;
-      const multiple = rang === 1 ? 18 : rang === 2 ? 15 : 11;
-      const operativ = Math.max(0, (h4.kpi?.db ?? 0) * 52) * multiple;
-      return sum2 + Math.max(0, premiumMarktwert(h4) - operativ);
-    }, 0));
-  }
-  function unternehmenswert(s2) {
-    return eur(Math.max(0, ebitdaJahr(s2)) * 6 + immobilienWert(s2));
-  }
-  function startwerte(s2) {
-    return {
-      haeuser: s2.spielendeStart?.haeuser ?? s2.haeuser.length,
-      fte: s2.spielendeStart?.fte ?? s2.historie[0]?.fte ?? s2.haeuser.reduce((sum2, h4) => sum2 + h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen, 0)
-    };
-  }
-  function endwertung(s2) {
-    const start = startwerte(s2);
-    const offen = s2.haeuser.filter((h4) => h4.status === "offen").length;
-    const fte2 = Math.round(s2.haeuser.reduce((sum2, h4) => sum2 + h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen, 0));
-    const geschlossen = s2.haeuser.filter((h4) => h4.status === "geschlossen" || h4.status === "raeumung" || h4.status === "schliessung_verhandlung").length;
-    const entlassen = Math.max(0, Math.round(start.fte - fte2));
-    const st2 = s2.stakeholder;
-    const stakeholder = (st2.bank + st2.kreditversicherer + st2.vermieter + st2.betriebsrat + st2.eigentuemer) / 5;
-    const teile2 = [
-      { id: "haeuser", name: "Gerettete H\xE4user", wert: offen, punkte: offen * 250 },
-      { id: "arbeitsplaetze", name: "Gerettete Arbeitspl\xE4tze (FTE)", wert: fte2, punkte: fte2 * 40 },
-      { id: "wert", name: "Unternehmenswert", wert: unternehmenswert(s2), punkte: Math.round(unternehmenswert(s2) / 1e5) },
-      { id: "image", name: "Image", wert: Math.round(st2.image), punkte: Math.round(st2.image * 200) },
-      { id: "stakeholder", name: "Stakeholder", wert: Math.round(stakeholder), punkte: Math.round(stakeholder * 150) },
-      { id: "schliessungen", name: "Schlie\xDFungen", wert: geschlossen, punkte: -geschlossen * 400 },
-      { id: "entlassungen", name: "Arbeitsplatzabbau (FTE)", wert: entlassen, punkte: -entlassen * 20 }
-    ];
-    const grundpunkte = teile2.reduce((sum2, x2) => sum2 + x2.punkte, 0);
-    const schwierigkeit2 = s2.schwierigkeit ?? "mittel";
-    const multiplikator = faktor[schwierigkeit2];
-    return { teile: teile2, grundpunkte, multiplikator, punkte: Math.max(0, Math.round(grundpunkte * multiplikator)), schwierigkeit: schwierigkeit2 };
-  }
-  function endKennzahlen(s2) {
-    const start = startwerte(s2);
-    return {
-      geretteteHaeuser: s2.haeuser.filter((h4) => h4.status === "offen").length,
-      startHaeuser: start.haeuser,
-      fte: Math.round(s2.haeuser.reduce((sum2, h4) => sum2 + h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen, 0)),
-      startFte: Math.round(start.fte),
-      ebitda52: ebitdaJahr(s2),
-      unternehmenswert: unternehmenswert(s2),
-      umsatz52: eur(s2.historie.slice(-52).reduce((sum2, x2) => sum2 + x2.umsatz, 0)),
-      image: Math.round(s2.stakeholder.image)
-    };
-  }
-  function spielBeenden(s2, art, kaeufer) {
-    if (s2.prognose || s2.ende || !aktiv3(s2)) return;
-    s2.ende = { art, woche: s2.woche, kennzahlen: endKennzahlen(s2), wertung: endwertung(s2), ...kaeufer ? { kaeufer } : {} };
-  }
-  function spielendePruefen(s2) {
-    if (!aktiv3(s2) || s2.prognose || s2.ende) return;
-    if (s2.phase === "zerschlagen") {
-      spielBeenden(s2, "zerschlagen");
-      return;
-    }
-    if (!s2.spielendeFortgesetzt && s2.woche >= 260 && s2.phase === "regulaer" && // E22/E26: Sanierung gelingt auch außergerichtlich, eine Insolvenz ist keine Voraussetzung.
-    !s2.insolvenz && s2.historie.length >= 52 && ebitdaJahr(s2) > 0) {
-      spielBeenden(s2, "saniert");
-    }
-  }
-  function konzernVerkaufAnbieten(s2) {
-    if (!aktiv3(s2) || s2.prognose || s2.ende || s2.phase !== "regulaer") return;
-    if (s2.woche < 156 || (s2.woche - 156) % 52 !== 0) return;
-    const id = "konzern-" + s2.woche;
-    if (s2.angebote.some((a2) => a2.id === id)) return;
-    const index2 = ((s2.seed + Math.floor((s2.woche - 156) / 52)) % KONZERN_KAEUFER.length + KONZERN_KAEUFER.length) % KONZERN_KAEUFER.length;
-    const k5 = KONZERN_KAEUFER[index2];
-    const kaufpreis = unternehmenswert(s2);
-    const an = {
-      id,
-      typ: "konzernVerkauf",
-      woche: s2.woche,
-      frist: s2.woche + 8,
-      titel: "\xDCbernahmeangebot f\xFCr den Hartwig-Konzern",
-      text: k5.name + " (" + k5.typ + ") bietet " + mio(kaufpreis) + ". Grundlage: sechsfaches EBITDA der letzten 52 Wochen plus Immobilienwert. Annahme beendet das Spiel.",
-      status: "offen",
-      kaufpreis,
-      konzernKaeuferTyp: k5.typ,
-      konzernKaeuferName: k5.name
-    };
-    s2.angebote.push(an);
-    melde(s2, "eigentuemer", "Ein \xDCbernahmeangebot f\xFCr den gesamten Konzern liegt vor.", { modul: "vorstand" });
   }
 
   // ../engine/src/testwerkzeuge.ts
@@ -9551,227 +10252,6 @@
     return result;
   }
 
-  // ../engine/src/vertrieb.ts
-  function erzeugeVorjahrHistorie(s2, nurFehlende = false) {
-    const start = s2.spielStartWoche ?? 0;
-    const vorherRng = s2.rng;
-    const historien = nurFehlende ? { ...s2.vorjahrHistorie ?? {} } : {};
-    const simulation = { ...s2, prognose: true, rng: vorherRng };
-    for (const h4 of s2.haeuser) {
-      if (nurFehlende && historien[h4.id]?.length) continue;
-      const wochen = [];
-      if (h4.nurDaten || h4.status === "verkauft") {
-        historien[h4.id] = wochen;
-        continue;
-      }
-      const qm2 = h4.flaechen.filter((f13) => f13.konzept === "eigen" || f13.konzept === "kommission" || f13.konzept === "offprice").reduce((v2, f13) => v2 + f13.qm, 0);
-      const stuetzen = [6, 19, 32, 45].map((i) => {
-        simulation.woche = start - 52 + i + 52;
-        return { i, roh: simuliereHaus(simulation, h4) };
-      });
-      for (let i = 0; i < 52; i++) {
-        const woche2 = start - 52 + i;
-        simulation.woche = woche2 + 52;
-        const st2 = stuetzen.reduce((a2, b4) => Math.abs(b4.i - i) < Math.abs(a2.i - i) ? b4 : a2);
-        const roh2 = st2.roh, wSt = start - 52 + st2.i + 52;
-        const f13 = (g2) => saisonFaktor(g2, woche2 + 52) / Math.max(1e-6, saisonFaktor(g2, wSt));
-        let eigenSt = 0, eigenJetzt = 0;
-        let umsatz = 0, rohertrag = 0, eigen = 0, artikel = 0;
-        for (const [g2, v2] of Object.entries(roh2.eigen)) {
-          const u = v2.umsatz * f13(g2);
-          eigenSt += v2.umsatz;
-          eigenJetzt += u;
-          umsatz += u;
-          eigen += u;
-          rohertrag += u * GRUPPEN[g2].marge;
-          artikel += u / 40;
-        }
-        const off = roh2.offprice * (eigenSt > 0 ? eigenJetzt / eigenSt : 1);
-        umsatz += off;
-        eigen += off;
-        rohertrag += off * 0.3;
-        artikel += off / 24;
-        for (const [g2, wert] of Object.entries(roh2.kommission)) {
-          const u = wert * f13(g2);
-          umsatz += u;
-          rohertrag += u * 0.25;
-          artikel += u / 40;
-        }
-        const kosten2 = hausKosten(simulation, h4, eigen, umsatz);
-        const konzession = roh2.konzessionUmsatz * 0.17;
-        const db = rohertrag + konzession + roh2.untermiete - kosten2.personal - kosten2.miete - kosten2.nebenkosten - kosten2.sonstige - kosten2.logistik;
-        const frequenz = umsatz > 0 ? Math.max(1, eur((qm2 * 1.12 + 4400) * 0.95)) : 0;
-        const kaeufe = frequenz * (h4.format === "outlet" ? 0.35 : h4.format === "sport" ? 0.22 : 0.25);
-        wochen.push({
-          woche: woche2,
-          umsatz: eur(umsatz),
-          db: eur(db),
-          frequenz,
-          kaeufe,
-          artikel: eur(artikel),
-          personal: eur(kosten2.personal),
-          miete: eur(kosten2.miete)
-        });
-      }
-      historien[h4.id] = wochen;
-    }
-    s2.vorjahrHistorie = historien;
-    s2.rng = vorherRng;
-  }
-  function mietvertragEmpfehlung(h4, markt) {
-    return h4.kpi?.db !== void 0 && h4.kpi.db < 0 && markt > h4.miete.mieteWoche || markt > h4.miete.mieteWoche * 1.08 ? "nachverhandeln" : "verlaengern";
-  }
-  var hausgruppe = (h4) => h4.hauscluster ?? h4.region;
-  var formatName = (format) => ({
-    alle: "Alle Formate",
-    warenhaus: "Warenhaus",
-    schwester: "Volkskauf",
-    sport: "Hartwig Sport",
-    outlet: "FUNDUS"
-  })[format];
-  function vertriebUebersicht(s2, filter = {}) {
-    const ebene = filter.ebene ?? "alle";
-    const format = filter.format ?? "alle";
-    const zeitraum2 = filter.zeitraum ?? "woche";
-    const bis = s2.woche - 1, kalender = (bis % 52 + 52) % 52;
-    const von = zeitraum2 === "vier" ? bis - 3 : zeitraum2 === "monat" ? bis - (kalender - Math.floor(Math.floor(kalender * 12 / 52) * 52 / 12)) : zeitraum2 === "quartal" ? bis - kalender % 13 : zeitraum2 === "ytd" ? bis - kalender : bis;
-    const jahrStart = bis - kalender;
-    const start = s2.spielStartWoche ?? 0;
-    const alle = s2.haeuser.filter((h4) => h4.status !== "verkauft");
-    const gruppe3 = alle.filter((h4) => format === "alle" || h4.format === format).filter((h4) => ebene === "alle" || !filter.id || ebene === "region" && h4.region === filter.id || ebene === "hauscluster" && hausgruppe(h4) === filter.id || ebene === "haus" && h4.id === filter.id);
-    const historische = (h4, w2) => {
-      if (w2 < start) return s2.vorjahrHistorie?.[h4.id]?.find((v2) => v2.woche === w2);
-      const echt = h4.verlauf?.find((v2) => v2.woche === w2);
-      if (echt) {
-        const t5 = h4.treiberVerlauf?.find((v2) => v2.von === w2 && v2.bis === w2);
-        const q2 = t5?.kaeufe ?? echt.umsatz / 45;
-        return {
-          woche: w2,
-          umsatz: echt.umsatz,
-          db: echt.db,
-          frequenz: t5?.frequenz ?? echt.frequenz,
-          kaeufe: q2,
-          artikel: t5?.artikel ?? q2 * 1.7,
-          personal: h4.kpi?.woche === w2 ? h4.kpi.personal : 0,
-          miete: h4.kpi?.woche === w2 ? h4.kpi.miete : h4.miete.mieteWoche
-        };
-      }
-      if (h4.kpi?.woche === w2) {
-        const t5 = h4.treiberVerlauf?.find((v2) => v2.von === w2 && v2.bis === w2);
-        return {
-          woche: w2,
-          umsatz: h4.kpi.umsatz,
-          db: h4.kpi.db,
-          frequenz: t5?.frequenz ?? 0,
-          kaeufe: t5?.kaeufe ?? 0,
-          artikel: t5?.artikel ?? 0,
-          personal: h4.kpi.personal,
-          miete: h4.kpi.miete
-        };
-      }
-      return void 0;
-    };
-    const summe2 = (hs) => {
-      let umsatz = 0, umsatzYtd = 0, vj = 0, ebitda = 0, vjDb = 0, plan2 = 0;
-      let fre = 0, kaeufe = 0, personal2 = 0, miete = 0;
-      let vjVorhanden = 0, aktiv6 = 0, geschaetzt = false;
-      for (const h4 of hs) {
-        if (h4.nurDaten) continue;
-        aktiv6++;
-        const bisIst = Math.max(start, von);
-        for (let w2 = bisIst; w2 <= bis; w2++) {
-          const p2 = historische(h4, w2);
-          if (!p2) continue;
-          umsatz += p2.umsatz;
-          ebitda += p2.db;
-          fre += p2.frequenz;
-          kaeufe += p2.kaeufe;
-          personal2 += p2.personal;
-          miete += p2.miete;
-          plan2 += planWoche(s2, h4.id, w2);
-        }
-        for (let w2 = Math.max(start, jahrStart); w2 <= bis; w2++) umsatzYtd += historische(h4, w2)?.umsatz ?? 0;
-        let voll2 = bis >= start;
-        for (let w2 = bisIst; w2 <= bis; w2++) {
-          const p2 = historische(h4, w2 - 52);
-          if (!p2) {
-            voll2 = false;
-            break;
-          }
-          vj += p2.umsatz;
-          vjDb += p2.db;
-          geschaetzt || (geschaetzt = !h4.treiberVerlauf?.some((v2) => v2.von === w2 - 52 && v2.bis === w2 - 52));
-        }
-        if (voll2 && von >= start) vjVorhanden++;
-      }
-      const mitVj = aktiv6 > 0 && vjVorhanden === aktiv6 && bis >= start;
-      const vorjahr2 = mitVj ? eur(vj) : void 0;
-      const abweichung2 = vorjahr2 === void 0 ? void 0 : eur(umsatz) - vorjahr2;
-      const abweichungProzent = vorjahr2 && abweichung2 !== void 0 ? abweichung2 / Math.abs(vorjahr2) : void 0;
-      const ebitdaQuote = umsatz > 0 ? ebitda / umsatz : void 0;
-      const vorjahrEbitdaQuote = vj > 0 && mitVj ? vjDb / vj : void 0;
-      return {
-        anzahl: hs.length,
-        offen: hs.filter((h4) => h4.status === "offen").length,
-        umsatz: eur(umsatz),
-        umsatzYtd: eur(umsatzYtd),
-        vorjahr: vorjahr2,
-        abweichung: abweichung2,
-        abweichungProzent,
-        ebitda: eur(ebitda),
-        ebitdaQuote,
-        vorjahrEbitda: mitVj ? eur(vjDb) : void 0,
-        vorjahrEbitdaQuote,
-        plan: eur(plan2),
-        planAbweichung: plan2 > 0 ? (umsatz - plan2) / plan2 : void 0,
-        frequenz: eur(fre),
-        kaufquote: fre > 0 ? kaeufe / fre : 0,
-        bon: kaeufe > 0 ? umsatz / kaeufe : 0,
-        personalquote: umsatz > 0 ? personal2 / umsatz : 0,
-        mietquote: umsatz > 0 ? miete / umsatz : 0,
-        ampel: !aktiv6 || !umsatz ? "ohne" : abweichungProzent === void 0 ? ebitda < 0 ? "rot" : "gelb" : abweichungProzent < -0.05 ? "rot" : abweichungProzent < 0 ? "gelb" : "gruen",
-        vorjahrGeschaetzt: mitVj && geschaetzt
-      };
-    };
-    const fmt2 = (h4) => h4.format;
-    const formate = ["warenhaus", "schwester", "sport", "outlet"].map((f13) => ({
-      id: f13,
-      name: formatName(f13),
-      ebene: "region",
-      format: f13,
-      ...summe2(gruppe3.filter((h4) => fmt2(h4) === f13))
-    }));
-    const ebenen = ebene === "alle" ? "region" : ebene === "region" ? "hauscluster" : "haus";
-    const gruppen = /* @__PURE__ */ new Map();
-    for (const h4 of gruppe3) {
-      const key = ebene === "alle" ? h4.region : ebene === "region" ? hausgruppe(h4) : h4.id;
-      const eintrag2 = gruppen.get(key) ?? [];
-      eintrag2.push(h4);
-      gruppen.set(key, eintrag2);
-    }
-    const zeilen = [...gruppen].map(([id, hs]) => ({
-      id,
-      name: ebene === "alle" ? "Region " + id : ebene === "region" ? s2.organisation?.hauscluster.find((c) => c.id === id)?.name ?? id : hs[0].name,
-      ebene: ebenen,
-      region: hs[0].region,
-      ...ebene !== "alle" && ebene !== "region" ? { stadt: hs[0].stadt, nurDaten: !!hs[0].nurDaten } : {},
-      ...summe2(hs)
-    })).sort((a2, b4) => (a2.abweichungProzent ?? Infinity) - (b4.abweichungProzent ?? Infinity) || a2.name.localeCompare(b4.name, "de"));
-    const titel = ebene === "alle" ? "Alle Regionen" : ebene === "region" ? "Region " + filter.id : ebene === "hauscluster" ? s2.organisation?.hauscluster.find((c) => c.id === filter.id)?.name ?? String(filter.id) : gruppe3[0]?.name ?? String(filter.id);
-    return {
-      ebene,
-      id: filter.id,
-      format,
-      zeitraum: zeitraum2,
-      von,
-      bis,
-      titel,
-      gesamt: summe2(gruppe3),
-      formate,
-      zeilen
-    };
-  }
-
   // ../engine/src/abfragen.ts
   function hausBezug(s2, ids = [], modul) {
     const hs = [...new Set(ids)].map((id) => s2.haeuser.find((h4) => h4.id === id)).filter((h4) => !!h4);
@@ -9937,15 +10417,36 @@
   function cockpit(s2) {
     const letzte = s2.historie[s2.historie.length - 1];
     const h13 = s2.historie.slice(-13);
+    const start = s2.spielStartWoche ?? 0;
+    let ebitda13 = h13.reduce((a2, b4) => a2 + b4.ebitda, 0), vorlaufWochen = 0;
+    for (let w2 = start - 1; w2 >= start - (13 - h13.length) && h13.length < 13; w2--) {
+      const v2 = vorlaufKonzernWoche(s2, w2);
+      if (!v2) break;
+      ebitda13 += v2.ebitda;
+      vorlaufWochen++;
+    }
+    const vorwoche = letzte ? void 0 : vorlaufKonzernWoche(s2, start - 1);
+    const vorFormat = (format) => {
+      let umsatz = 0, ebitda = 0;
+      for (const h4 of s2.haeuser) if (h4.format === format && h4.status === "offen" && !h4.nurDaten) {
+        const v2 = s2.vorjahrHistorie?.[h4.id]?.find((x2) => x2.woche === start - 1);
+        if (v2) {
+          umsatz += v2.umsatz;
+          ebitda += v2.db;
+        }
+      }
+      return { umsatz, ebitda };
+    };
     const lief = s2.lieferanten.filter((l) => l.aktiv);
     const lv = (lief.reduce((a2, l) => a2 + l.vertrauen, 0) + s2.restLieferantenVertrauen) / (lief.length + 1);
     const formate = ["warenhaus", "sport", "schwester", "outlet"].map((format) => {
       const hs = s2.haeuser.filter((h4) => h4.format === format && h4.status === "offen" && !h4.nurDaten);
+      const vj = letzte ? void 0 : vorFormat(format);
       return {
         format,
         haeuser: hs.length,
-        umsatz: eur(hs.reduce((n3, h4) => n3 + (h4.kpi?.umsatz ?? 0), 0)),
-        ebitda: eur(hs.reduce((n3, h4) => n3 + (h4.kpi?.guv?.ebitda ?? 0), 0)),
+        umsatz: eur(vj ? vj.umsatz : hs.reduce((n3, h4) => n3 + (h4.kpi?.umsatz ?? 0), 0)),
+        ebitda: eur(vj ? vj.ebitda : hs.reduce((n3, h4) => n3 + (h4.kpi?.guv?.ebitda ?? 0), 0)),
         fte: eur(hs.reduce((n3, h4) => n3 + h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen, 0))
       };
     });
@@ -9958,9 +10459,10 @@
       kreditFrei: s2.cash + s2.kreditlinie,
       geldUnbegrenzt: istSandkasten(s2),
       runwayWochen: Math.round(runwayWochen(s2)),
-      ebitdaWoche: letzte?.ebitda ?? 0,
-      ebitda13: h13.reduce((a2, b4) => a2 + b4.ebitda, 0),
-      umsatzWoche: letzte?.umsatz ?? 0,
+      ebitdaWoche: letzte?.ebitda ?? vorwoche?.ebitda ?? 0,
+      ebitda13: eur(ebitda13),
+      umsatzWoche: letzte?.umsatz ?? vorwoche?.umsatz ?? 0,
+      vorlaufWochen,
       vertrauen: Math.round((s2.stakeholder.bank + s2.stakeholder.kreditversicherer + lv) / 3),
       image: Math.round(s2.stakeholder.image),
       offeneEntscheidungen: s2.entscheidungen.length,
@@ -11075,11 +11577,47 @@
     return s2.hq.normFte[id] * HQ_PARAM.stufenFaktor[stufe2] * groessenFaktor(s2);
   }
   var qmBedarf = (a2) => a2.fte * HQ_PARAM.qmJeFte;
+  function abteilungPlaetze(s2, a2) {
+    const g2 = gebaeude(s2, a2.gebaeudeId);
+    if (!g2) return [];
+    const zeilen = (a2.belegung ?? []).filter((b4) => g2.etagen.find((e) => e.nr === b4.etage)?.gemietet).map((b4) => {
+      const e = g2.etagen.find((x2) => x2.nr === b4.etage);
+      return { gebaeudeId: g2.id, etage: b4.etage, fte: 0, eigene: 0, roh: b4.qm / HQ_PARAM.qmJeFte, frei: Math.floor(freiQm(s2, g2, e) / HQ_PARAM.qmJeFte + 1e-9), plaetze: 0, rest: 0 };
+    });
+    let ganz2 = Math.floor(zeilen.reduce((x2, z6) => x2 + z6.roh, 0) + 1e-9);
+    for (const z6 of zeilen) {
+      z6.eigene = Math.floor(z6.roh + 1e-9);
+      z6.rest = z6.roh - z6.eigene;
+      ganz2 -= z6.eigene;
+    }
+    for (const z6 of [...zeilen].sort((x2, y2) => y2.rest - x2.rest || x2.etage - y2.etage)) {
+      if (ganz2 <= 0) break;
+      z6.eigene++;
+      ganz2--;
+    }
+    const sitze = zeilen.reduce((x2, z6) => x2 + z6.eigene, 0);
+    let offen = Math.min(Math.round(a2.fte), sitze);
+    for (const z6 of zeilen) {
+      const anteil3 = sitze > 0 ? offen * z6.eigene / sitze : 0;
+      z6.fte = Math.floor(anteil3);
+      z6.rest = anteil3 - z6.fte;
+    }
+    offen -= zeilen.reduce((x2, z6) => x2 + z6.fte, 0);
+    for (const z6 of [...zeilen].sort((x2, y2) => y2.rest - x2.rest || x2.etage - y2.etage)) {
+      if (offen <= 0) break;
+      if (z6.fte < z6.eigene) {
+        z6.fte++;
+        offen--;
+      }
+    }
+    return zeilen.map(({ rest: _r, roh: _h, ...z6 }) => ({ ...z6, plaetze: z6.eigene + z6.frei }));
+  }
   function abteilungKapazitaet(s2, a2) {
     const g2 = gebaeude(s2, a2.gebaeudeId);
     if (!g2) return a2.fte;
-    const freieQm = g2.etagen.reduce((x2, e) => x2 + freiQm(s2, g2, e), 0);
-    return Math.max(a2.fte, Math.floor((platzQm(s2, a2) + freieQm) / HQ_PARAM.qmJeFte));
+    const frei6 = g2.etagen.reduce((x2, e) => x2 + Math.floor(freiQm(s2, g2, e) / HQ_PARAM.qmJeFte + 1e-9), 0);
+    const eigene = abteilungPlaetze(s2, a2).reduce((x2, z6) => x2 + z6.eigene, 0);
+    return Math.max(a2.fte, eigene + frei6);
   }
   function abteilungArbeitsklima(a2) {
     const f13 = a2.gehaltFaktor ?? 1;
@@ -11089,7 +11627,7 @@
       qualitaet: Math.round(clamp(1 + (f13 - 1) * 0.5, 0.85, 1.15) * 1e3) / 1e3
     };
   }
-  var qmAufEtage = (a2, nr4) => (a2.belegung ?? []).filter((b4) => b4.etage === nr4).reduce((x2, b4) => x2 + b4.qm, 0);
+  var qmAufEtage2 = (a2, nr4) => (a2.belegung ?? []).filter((b4) => b4.etage === nr4).reduce((x2, b4) => x2 + b4.qm, 0);
   function abteilung(s2, id) {
     const a2 = s2.hq.abteilungen.find((x2) => x2.id === id);
     if (!a2) throw new Error(`Abteilung ${id} fehlt.`);
@@ -11806,7 +12344,7 @@
             archiv: !!e.archiv,
             belegtQm: Math.round(belegt2),
             auslastung: e.qm > 0 ? belegt2 / e.qm : 0,
-            abteilungen: e.abteilungen.map((id) => ({ id, name: ABTEILUNG_NAME[id], qm: Math.round(qmAufEtage(abteilung(s2, id), e.nr)) }))
+            abteilungen: e.abteilungen.map((id) => ({ id, name: ABTEILUNG_NAME[id], qm: Math.round(qmAufEtage2(abteilung(s2, id), e.nr)) }))
           };
         });
         const qmGemietet = etagen.filter((e) => e.gemietet).reduce((x2, e) => x2 + e.qm, 0);
@@ -11852,7 +12390,8 @@
           gehaltFaktor: a2.gehaltFaktor ?? 1,
           moral: klima.moral,
           fluktuation: klima.fluktuation,
-          qualitaet: klima.qualitaet
+          qualitaet: klima.qualitaet,
+          plaetze: abteilungPlaetze(s2, a2)
         };
       }),
       angebote: hq.angebote.map((an) => ({
@@ -11888,7 +12427,7 @@
           // FTE je Etage: Anteil der Abteilung, der auf dieser Etage sitzt
           abteilungen: e.abteilungen.map((id) => {
             const a2 = abteilung(s2, id);
-            return { id, fte: Math.round(qmAufEtage(a2, e.nr) / HQ_PARAM.qmJeFte), stufe: a2.stufe };
+            return { id, fte: Math.round(qmAufEtage2(a2, e.nr) / HQ_PARAM.qmJeFte), stufe: a2.stufe };
           })
         }))
       })),
@@ -13897,21 +14436,48 @@
   function produktAbsatzVerlauf(s2, marke5, kategorie) {
     const liste3 = s2.produkte?.liste.filter((p2) => p2.marke === marke5 && (!kategorie || p2.kategorie === kategorie)) ?? [];
     const wgs = [...new Set(liste3.map((p2) => p2.wg))];
+    const start = s2.spielStartWoche ?? 0;
+    const sf = (bereich2, w2) => Math.max(1e-6, saisonFaktor(bereich2, (w2 % 52 + 52) % 52));
+    const vorlaufWg = (wg, w2) => {
+      const st2 = s2.einkauf.wgs[wg], d4 = WG[wg];
+      if (!st2 || !d4) return { u: 0, marke: 0, eigen: 0 };
+      const v2 = st2.v, iErst = v2.w.findIndex((x2) => x2 >= start);
+      const ref = iErst >= 0 ? { u: v2.u[iErst], eu: v2.eu[iErst], w: v2.w[iErst] } : { u: st2.basisVK * sf(d4.bereich, start), eu: -1, w: start };
+      const u = ref.u * sf(d4.bereich, w2) / sf(d4.bereich, ref.w);
+      const anteilAlle = ref.eu >= 0 && ref.u > 0 ? ref.eu / ref.u : Object.entries(st2.pool).filter(([m]) => m !== FREMD).reduce((a2, [, x2]) => a2 + x2, 0);
+      return { u, marke: u * (st2.pool[marke5] ?? 0), eigen: u * anteilAlle };
+    };
+    const ausVorlauf = (p2) => p2.basis || p2.seit === void 0 || p2.seit <= start;
     const eigen = [], fremd = [], wochen = [];
+    let vorlaufWochen = 0;
     for (let i = 4; i >= 0; i--) {
-      let e = 0, f13 = 0;
-      for (const p2 of liste3) e += p2.umsatz[p2.umsatz.length - 1 - i] ?? 0;
-      for (const wg of wgs) {
-        const v2 = s2.einkauf.wgs[wg]?.v;
-        if (!v2) continue;
-        const j4 = v2.u.length - 1 - i;
-        f13 += Math.max(0, (v2.u[j4] ?? 0) - (v2.eu[j4] ?? 0));
+      const woche2 = s2.woche - 1 - i;
+      let e = 0, f13 = 0, geschaetzt = false;
+      if (woche2 < start) {
+        geschaetzt = true;
+        for (const wg of wgs) {
+          const v2 = vorlaufWg(wg, woche2);
+          f13 += Math.max(0, v2.u - v2.eigen);
+          const ps = liste3.filter((p2) => p2.wg === wg && imSortiment(p2));
+          const gw = ps.map((p2) => ausVorlauf(p2) ? gewicht(s2, p2) : 0);
+          const alle = s2.produkte.liste.filter((p2) => p2.marke === marke5 && p2.wg === wg && imSortiment(p2)).reduce((a2, p2) => a2 + gewicht(s2, p2), 0) || 1;
+          e += v2.marke * gw.reduce((a2, b4) => a2 + b4, 0) / alle;
+        }
+      } else {
+        for (const p2 of liste3) e += p2.umsatz[p2.umsatz.length - 1 - i] ?? 0;
+        for (const wg of wgs) {
+          const v2 = s2.einkauf.wgs[wg]?.v;
+          if (!v2) continue;
+          const j4 = v2.u.length - 1 - i;
+          f13 += Math.max(0, (v2.u[j4] ?? 0) - (v2.eu[j4] ?? 0));
+        }
       }
+      if (geschaetzt) vorlaufWochen++;
       eigen.push(Math.round(e));
       fremd.push(Math.round(f13));
-      wochen.push(s2.woche - i);
+      wochen.push(woche2);
     }
-    return { eigen, fremd, wochen, letzteEigen: eigen[4], letzteFremd: fremd[4], warengruppen: wgs.length };
+    return { eigen, fremd, wochen, letzteEigen: eigen[4], letzteFremd: fremd[4], warengruppen: wgs.length, vorlaufWochen };
   }
   function produktLinienprofil(s2, id) {
     const m = s2.eigenmarken.marken.find((x2) => x2.id === id && x2.status !== "eingestellt");
@@ -14018,6 +14584,21 @@
   }
 
   // ../engine/src/einkauf.ts
+  var einzelOrders = (f13) => f13.teile ?? [f13];
+  var alleEinzel = (s2) => s2.einkauf.freigaben.flatMap(einzelOrders);
+  function entferneMarkeAusFreigaben(liste3, marke5) {
+    const out = [];
+    for (const f13 of liste3) {
+      if (!f13.teile) {
+        if (f13.marke !== marke5) out.push(f13);
+        continue;
+      }
+      const teile2 = f13.teile.filter((e) => e.marke !== marke5);
+      if (!teile2.length) continue;
+      out.push(teile2.length === 1 ? teile2[0] : sammelorder(f13.id, teile2));
+    }
+    return out;
+  }
   var JACKE2 = { 0: 1.3, 1: 1.1, 5: 0.5, 6: 0.4, 7: 0.6, 8: 1.2, 9: 1.6, 10: 1.5 };
   var STRICK4 = { 9: 1.4, 10: 1.4, 11: 1.3, 0: 1.2, 5: 0.5, 6: 0.5 };
   var ROH2 = {
@@ -14183,6 +14764,8 @@
   }
   var EK_PARAM = {
     grenze: 5e4,
+    grenzeFaktor: 6,
+    // Q35: Startgrenze = grenze × Volumenfaktor × 6
     verfRef: 0.95,
     // NOS-Verfügbarkeit, auf die die Ausgangsnachfrage kalibriert ist
     saisonRef: 0.9875,
@@ -14309,7 +14892,7 @@
   function erzeugeEinkauf(s2) {
     const basisJahr = Object.values(s2.basisUmsatz).reduce((a2, u) => a2 + (u ?? 0), 0) * 52;
     const volumenFaktor = Math.max(1, basisJahr / 31e8);
-    const startGrenze = Math.round(EK_PARAM.grenze * volumenFaktor * 2 / 5e3) * 5e3;
+    const startGrenze = Math.round(EK_PARAM.grenze * volumenFaktor * EK_PARAM.grenzeFaktor / 5e4) * 5e4;
     const e = { grenze: startGrenze, wgs: {}, freigaben: [], rng: s2.seed * 2654435761 + 97 >>> 0, zaehler: 0, protokoll: [], eigenUmsatz: [], markenKpi: {}, emJeBereich: {}, emStart: {} };
     for (const d4 of WG_DEF) {
       e.wgs[d4.id] = {
@@ -14468,7 +15051,7 @@
   }
   function offenImLimit(s2, st2, sid) {
     let x2 = 0;
-    for (const f13 of s2.einkauf.freigaben) if (f13.wg === st2.id) {
+    for (const f13 of alleEinzel(s2)) if (f13.wg === st2.id) {
       for (const l of f13.lieferungen) if (saisonId(l.woche) === sid) x2 += l.wert;
     }
     return x2;
@@ -14837,7 +15420,7 @@
   function pipelinePool(s2, wg, art, pool, bis = Infinity) {
     let x2 = 0;
     for (const b4 of s2.bestellungen) if (b4.wg === wg && b4.art === art && (b4.marke ?? FREMD) === pool && b4.ankunft <= bis) x2 += b4.wert;
-    for (const f13 of s2.einkauf.freigaben) if (f13.wg === wg && f13.art === art && (f13.marke ?? FREMD) === pool) {
+    for (const f13 of alleEinzel(s2)) if (f13.wg === wg && f13.art === art && (f13.marke ?? FREMD) === pool) {
       for (const l of f13.lieferungen) if (l.woche <= bis) x2 += l.wert;
     }
     return x2;
@@ -14977,6 +15560,7 @@
       s2.einkauf.wgs[d4.id].basisVK = Math.max(0, (s2.basisUmsatz[d4.bereich] ?? 0) * d4.anteil);
     }
     const pr2 = protokoll(s2);
+    const neuePflicht = [];
     for (const v2 of vorschlaege(s2)) {
       let lief = v2.lieferungen.filter((l) => l.wert > 0);
       let ueber = false;
@@ -15021,14 +15605,63 @@
       f13.reichweiteDanach = Math.round((bestandPool(s2, v2.d.id, v2.art, v2.pool, false) + pipelinePool(s2, v2.d.id, v2.art, v2.pool) + wert) / Math.max(1, ek8 / 8) * 10) / 10;
       const pflichtig = v2.typ === "nos" ? wert >= EK_PARAM.nosGrenzeFaktor * s2.einkauf.grenze && wert > EK_PARAM.nosSonder * v2.wochenBedarf : wert >= s2.einkauf.grenze;
       pr2.neu++;
-      if (pflichtig) s2.einkauf.freigaben.push(f13);
+      if (pflichtig && w2 !== (s2.spielStartWoche ?? 0)) neuePflicht.push(f13);
       else {
         pr2.direkt++;
         gebeFrei(s2, f13);
       }
     }
+    buendeln(s2, neuePflicht);
+  }
+  function sammelKey(f13) {
+    return `${WG[f13.wg].bereich}|${f13.typ}|${f13.art}`;
+  }
+  function sammelorder(id, g2) {
+    const haupt = [...g2].sort((a2, b4) => b4.wert - a2.wert)[0];
+    const woche2 = /* @__PURE__ */ new Map();
+    for (const f13 of g2) for (const l of f13.lieferungen) woche2.set(l.woche, (woche2.get(l.woche) ?? 0) + l.wert);
+    const lieferanten = new Set(g2.map((f13) => f13.lieferant));
+    const wert = g2.reduce((a2, f13) => a2 + f13.wert, 0);
+    const wgs = new Set(g2.map((f13) => f13.wg)).size;
+    return {
+      ...haupt,
+      id,
+      marke: g2.every((f13) => f13.marke === haupt.marke) ? haupt.marke : void 0,
+      lieferant: lieferanten.size === 1 ? haupt.lieferant : `${lieferanten.size} Lieferanten`,
+      wert,
+      lieferungen: [...woche2].sort((a2, b4) => a2[0] - b4[0]).map(([w2, x2]) => ({ woche: w2, wert: x2 })),
+      erwarteterAbverkauf: g2.reduce((a2, f13) => a2 + f13.erwarteterAbverkauf, 0),
+      reichweiteDanach: Math.round(g2.reduce((a2, f13) => a2 + f13.reichweiteDanach * f13.wert, 0) / Math.max(1, wert) * 10) / 10,
+      erstellt: Math.min(...g2.map((f13) => f13.erstellt)),
+      frist: Math.min(...g2.map((f13) => f13.frist)),
+      ueberLimit: g2.some((f13) => f13.ueberLimit),
+      hinweis: `${wgs} ${wgs === 1 ? "Warengruppe" : "Warengruppen"}, ${g2.length} Orders geb\xFCndelt` + (g2.some((f13) => f13.ueberLimit) ? ", teils vom Limit gek\xFCrzt" : ""),
+      teile: g2
+    };
+  }
+  function buendeln(s2, liste3) {
+    const offen = /* @__PURE__ */ new Map();
+    s2.einkauf.freigaben.forEach((f13, i) => offen.set(sammelKey(f13), i));
+    const gruppen = /* @__PURE__ */ new Map();
+    for (const f13 of liste3) {
+      const k5 = sammelKey(f13);
+      const g2 = gruppen.get(k5);
+      if (g2) g2.push(f13);
+      else gruppen.set(k5, [f13]);
+    }
+    for (const [k5, g2] of gruppen) {
+      const i = offen.get(k5);
+      if (i !== void 0) {
+        const alt = s2.einkauf.freigaben[i];
+        s2.einkauf.freigaben[i] = sammelorder(alt.id, [...einzelOrders(alt), ...g2]);
+      } else s2.einkauf.freigaben.push(g2.length === 1 ? g2[0] : sammelorder(neueFreigabeId(s2), g2));
+    }
   }
   function gebeFrei(s2, f13) {
+    if (f13.teile) {
+      for (const t5 of f13.teile) gebeFrei(s2, t5);
+      return;
+    }
     const st2 = s2.einkauf.wgs[f13.wg];
     const d4 = WG[f13.wg];
     const lid = LIEFERANTEN.find((l) => l.name === f13.lieferant)?.id;
@@ -15047,16 +15680,16 @@
     s2.einkauf.freigaben = s2.einkauf.freigaben.filter((f13) => f13.frist >= w2);
     let verfallen = 0;
     let wert = 0;
-    for (const f13 of faellig) {
-      const modus = s2.einkauf.wgs[f13.wg].st.modus[f13.art];
+    for (const f13 of faellig) for (const e of einzelOrders(f13)) {
+      const modus = s2.einkauf.wgs[e.wg].st.modus[e.art];
       if (modus === "auto" || s2.prognose) {
-        gebeFrei(s2, f13);
+        gebeFrei(s2, e);
         pr2.auto++;
       } else {
         verfallen++;
-        wert += f13.wert;
+        wert += e.wert;
         pr2.verfallen++;
-        pr2.verfallenWert += f13.wert;
+        pr2.verfallenWert += e.wert;
       }
     }
     if (verfallen) melde(s2, "warnung", `${verfallen} Orders \xFCber ${mio(wert)} sind ohne Freigabe verfallen. Die Ware fehlt in den H\xE4usern.`);
@@ -15071,7 +15704,7 @@
   function passtFilter(f13, x2) {
     if (!x2) return true;
     if (x2.bereich && WG[f13.wg].bereich !== x2.bereich) return false;
-    if (x2.wg && f13.wg !== x2.wg) return false;
+    if (x2.wg && !einzelOrders(f13).some((e) => e.wg === x2.wg)) return false;
     if (x2.art && f13.art !== x2.art) return false;
     if (x2.typ && f13.typ !== x2.typ) return false;
     if (x2.marke !== void 0 && (f13.marke ?? "") !== x2.marke) return false;
@@ -15139,7 +15772,7 @@
         if (a2.typ === "freigeben") {
           for (const f13 of treffer) gebeFrei(s2, f13);
           pr2.freigegeben += treffer.length;
-          return ok6(`${treffer.length} Orders \xFCber ${mio(wert)} freigegeben.`);
+          return ok6(`${treffer.length} ${treffer.length === 1 ? "Freigabe" : "Freigaben"} \xFCber ${mio(wert)} erteilt.`);
         }
         pr2.abgelehnt += treffer.length;
         return ok6(`${treffer.length} Orders \xFCber ${mio(wert)} abgelehnt.`);
@@ -15148,6 +15781,10 @@
         const f13 = s2.einkauf.freigaben.find((x2) => x2.id === a2.id);
         if (!f13) return fehler6("Order nicht gefunden.");
         const p2 = clamp(a2.prozent, 0, 0.95);
+        for (const e of f13.teile ?? []) {
+          e.lieferungen = e.lieferungen.map((l) => ({ woche: l.woche, wert: eur(l.wert * (1 - p2)) }));
+          e.wert = e.lieferungen.reduce((x2, l) => x2 + l.wert, 0);
+        }
         f13.lieferungen = f13.lieferungen.map((l) => ({ woche: l.woche, wert: eur(l.wert * (1 - p2)) }));
         f13.wert = f13.lieferungen.reduce((x2, l) => x2 + l.wert, 0);
         f13.reichweiteDanach = Math.round(f13.reichweiteDanach * (1 - p2) * 10) / 10;
@@ -15260,7 +15897,7 @@
     b4.limit = limitWert(st2, L3);
     b4.limitV = L3.verbraucht;
     for (const x2 of s2.bestellungen) if (x2.wg === d4.id) b4.pipe += x2.wert;
-    for (const f13 of s2.einkauf.freigaben) if (f13.wg === d4.id) {
+    for (const f13 of alleEinzel(s2)) if (f13.wg === d4.id) {
       b4.offenN++;
       b4.offenW += f13.wert;
     }
@@ -15377,7 +16014,9 @@
     return {
       ...f13,
       lieferungen: f13.lieferungen.map((l) => ({ ...l })),
-      wgName: d4.name,
+      teile: void 0,
+      anzahlWg: einzelOrders(f13).length,
+      wgName: f13.teile ? `${GRUPPEN[d4.bereich].name}: ${f13.teile.length} Warengruppen` : d4.name,
       bereich: d4.bereich,
       bereichName: GRUPPEN[d4.bereich].name,
       markeName: f13.marke ? s2.eigenmarken.marken.find((m) => m.id === f13.marke)?.name : void 0,
@@ -15439,7 +16078,7 @@
       verlauf: verlauf4,
       limits,
       bestellungen: [...best.values()].sort((a2, c) => a2.ankunft - c.ankunft).map((x2) => ({ ...x2, wert: eur(x2.wert) })),
-      freigaben: s2.einkauf.freigaben.filter((f13) => f13.wg === wgId).map((f13) => freigabeZeile(s2, f13))
+      freigaben: s2.einkauf.freigaben.filter((f13) => einzelOrders(f13).some((e) => e.wg === wgId)).map((f13) => freigabeZeile(s2, f13))
     };
   }
 
@@ -15655,8 +16294,8 @@
       s2.ware.bedarf[g2] = Object.fromEntries(Object.keys(x2).map((k5) => [k5, summe2 > 0 ? x2[k5] / summe2 : 0]));
     }
   }
-  function verbraucheCluster(s2, kohorten, wert, altMax, gruppe3, verbrauch) {
-    if (!s2.ware?.steuerungAktiv || !kohorten) return verbrauch(kohorten ?? [], wert, altMax);
+  function verbraucheCluster(s2, kohorten, wert, altMax, gruppe3, verbrauch2) {
+    if (!s2.ware?.steuerungAktiv || !kohorten) return verbrauch2(kohorten ?? [], wert, altMax);
     const soll = s2.ware.bedarf[gruppe3] ?? gewichte(s2, gruppe3);
     const ids = Object.keys(soll).sort();
     const jeCluster = /* @__PURE__ */ new Map();
@@ -15668,7 +16307,7 @@
     }
     let voll2 = 0, gebucht = 0, alt = 0;
     for (const id of ids) {
-      const r4 = verbrauch(jeCluster.get(id) ?? [], wert * soll[id], altMax * soll[id]);
+      const r4 = verbrauch2(jeCluster.get(id) ?? [], wert * soll[id], altMax * soll[id]);
       voll2 += r4.voll;
       gebucht += r4.gebucht;
       alt += r4.alt;
@@ -16507,890 +17146,564 @@
     }
   }
 
-  // ../engine/src/prozesse.ts
-  var SCHLIESSUNGEN_WOCHE = /* @__PURE__ */ new WeakMap();
-  var abfindungJeFte = (s2) => s2.phase === "insolvenz" ? PARAM.abfindungInsolvenz : PARAM.abfindungRegulaer;
-  function einmalKosten(s2, betrag) {
-    s2.cash -= eur(betrag);
-    s2.einmalkostenWoche += eur(betrag);
+  // ../engine/src/wirtschaft.ts
+  function istAktiv(h4) {
+    return h4.status === "offen" || h4.status === "schliessung_verhandlung" || h4.status === "raeumung";
   }
-  function gesamtFte(s2) {
-    return s2.haeuser.reduce((a2, h4) => a2 + h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen, 0);
+  function aktiveFlaeche(h4, w2) {
+    return h4.flaechen.filter((f13) => (f13.umbauBis === void 0 || f13.umbauBis <= w2) && !h4.etagenBau?.[f13.etage]?.gesperrt);
   }
-  function fteAnteil(s2, h4) {
-    return (h4.personal.vollzeit + h4.personal.teilzeit + h4.personal.aushilfen) / Math.max(1, gesamtFte(s2));
-  }
-  function starteSchliessung(s2, h4, opts = {}) {
-    if (h4.nurDaten) return `${h4.name} wird erst mit Aktivierung seines Formats steuerbar.`;
-    if (h4.status !== "offen") return `${h4.name} ist nicht offen.`;
-    if (h4.standortgarantie) return `${h4.name} steht unter Standortgarantie aus dem Sanierungstarifvertrag.`;
-    const br = s2.stakeholder.betriebsrat;
-    const dauer = s2.phase === "insolvenz" ? 4 : Math.round((16 - 10 * br / 100) * (h4.format === "schwester" ? 0.85 : 1));
-    h4.status = "schliessung_verhandlung";
-    h4.statusBis = s2.woche + dauer;
-    if (opts.mietvertragEndetMit) h4.miete.bisWoche = Math.min(h4.miete.bisWoche, s2.woche + dauer + 6);
-    s2.stakeholder.betriebsrat = clamp(s2.stakeholder.betriebsrat - 60 * fteAnteil(s2, h4), 0, 100);
-    melde(s2, "presse", `${h4.name} soll schlie\xDFen. Betriebsrat und Gesch\xE4ftsf\xFChrung verhandeln \xFCber Interessenausgleich und Sozialplan (ca. ${dauer} Wochen).`, { stadt: h4.stadt, hausId: h4.id });
-    return null;
-  }
-  function schliessungsFolgekosten(s2, h4, bisSchliessung = 0) {
-    const schliessWoche = s2.woche + Math.max(0, bisSchliessung);
-    const fte2 = h4.personal.vollzeit + h4.personal.teilzeit;
-    const sozialplan = eur(fte2 * abfindungJeFte(s2) * hqRechtFaktor(s2) * (h4.format === "schwester" ? 0.85 : 1));
-    const untermiete = h4.flaechen.reduce((a2, f13) => a2 + (f13.konzept === "untermiete" && f13.mieter ? f13.mieter.mieteWoche : 0), 0);
-    const vertragWochen = s2.phase === "insolvenz" ? 13 : h4.miete.vermieter === "eigentuemer" ? 26 : 52;
-    const restmieteWochen = Math.max(0, Math.min(vertragWochen, h4.miete.bisWoche - schliessWoche));
-    const restmieteWoche = eur(Math.max(0, h4.miete.mieteWoche - untermiete) * hqRechtFaktor(s2));
-    return {
-      sozialplan,
-      restmieteWoche,
-      restmieteWochen,
-      gesamt: sozialplan + restmieteWoche * restmieteWochen
-    };
-  }
-  function schliesseEndgueltig(s2, h4) {
-    const w2 = s2.woche;
-    const fte2 = h4.personal.vollzeit + h4.personal.teilzeit;
-    const { sozialplan, restmieteWoche, restmieteWochen } = schliessungsFolgekosten(s2, h4);
-    einmalKosten(s2, sozialplan);
-    h4.restmieteWoche = restmieteWoche;
-    h4.restmieteBis = w2 + restmieteWochen;
-    h4.status = "geschlossen";
-    h4.statusBis = void 0;
-    h4.personal.vollzeit = 0;
-    h4.personal.teilzeit = 0;
-    h4.personal.aushilfen = 0;
-    h4.flaechen = h4.flaechen.map((f13) => ({ ...f13, konzept: "leer", gruppe: void 0, mieter: void 0, lieferantId: void 0, umbauBis: void 0, umbauZiel: void 0 }));
-    const lokal3 = s2.haeuser.filter((x2) => x2 !== h4 && !x2.nurDaten && x2.stadt === h4.stadt && x2.format === h4.format && x2.status === "offen");
-    const regional = s2.haeuser.filter((x2) => x2 !== h4 && !x2.nurDaten && x2.region === h4.region && x2.format === h4.format && x2.status === "offen");
-    const nachbarn2 = lokal3.length ? lokal3 : regional;
-    const abgang = h4.kpi?.umsatz ?? 0;
-    const umsatzNachbarn = nachbarn2.reduce((a2, x2) => a2 + (x2.kpi?.umsatz ?? 0), 0);
-    if (abgang > 0 && umsatzNachbarn > 0) {
-      for (const n3 of nachbarn2) {
-        const basis4 = Math.max(1, n3.kpi?.umsatz ?? 0);
-        const anteil3 = (n3.kpi?.umsatz ?? 0) / umsatzNachbarn;
-        n3.transferBonus += 0.3 * abgang * anteil3 / basis4;
-      }
-    }
-    const st2 = s2.stakeholder;
-    st2.betriebsrat = clamp(st2.betriebsrat - (s2.phase === "insolvenz" ? 15 : 30) * (fte2 / Math.max(1, gesamtFte(s2) + fte2)), 0, 100);
-    const sw = SCHLIESSUNGEN_WOCHE.get(s2);
-    const k5 = sw && sw.woche === w2 ? sw.n : 0;
-    SCHLIESSUNGEN_WOCHE.set(s2, { woche: w2, n: k5 + 1 });
-    st2.image = clamp(st2.image - 1.5 * (h4.format === "schwester" ? 0.5 : 1) * Math.pow(schwierigkeit(s2).imageDaempfung, k5), 0, 100);
-    st2.vermieter = clamp(st2.vermieter - (h4.miete.vermieter === "dritt" ? 2 : 0), 0, 100);
-    if (h4.lage === "1a" && h4.format === "warenhaus") {
-      const arvel = s2.lieferanten.find((l) => l.id === "arvel");
-      if (arvel && arvel.aktiv) {
-        arvel.vertrauen = clamp(arvel.vertrauen - 12, 0, 100);
-        if (arvel.vertrauen < 30 && !arvel.rueckzug) {
-          arvel.rueckzug = true;
-          melde(s2, "warnung", "Maison Arvel zieht sich aus allen H\xE4usern au\xDFerhalb der 1a-Lagen zur\xFCck.");
-        }
-      }
-    }
-    melde(s2, "presse", `${h4.name} schlie\xDFt endg\xFCltig. Sozialplan ${mio(sozialplan)}, ${Math.round(fte2)} Besch\xE4ftigte betroffen.`, { stadt: h4.stadt, hausId: h4.id });
-  }
-  function prozesse(s2) {
-    const w2 = s2.woche;
-    for (const h4 of s2.haeuser) {
-      if (h4.status === "schliessung_verhandlung" && (h4.statusBis ?? 0) <= w2) {
-        h4.status = "raeumung";
-        h4.statusBis = w2 + 6;
-        melde(s2, "presse", `\u201EAlles muss raus\u201C: R\xE4umungsverkauf in ${h4.name} beginnt.`, { stadt: h4.stadt, hausId: h4.id });
-        for (const n3 of s2.haeuser) if (n3 !== h4 && n3.stadt === h4.stadt && n3.status === "offen") n3.transferBonus -= 0.04;
-      } else if (h4.status === "raeumung" && (h4.statusBis ?? 0) <= w2) {
-        for (const n3 of s2.haeuser) if (n3 !== h4 && n3.stadt === h4.stadt && n3.status === "offen") n3.transferBonus += 0.04;
-        schliesseEndgueltig(s2, h4);
-      }
-      if (h4.status === "geschlossen" || h4.status === "verkauft") continue;
-      for (const f13 of h4.flaechen) {
-        if (f13.umbauBis !== void 0 && f13.umbauBis <= w2) {
-          if (f13.umbauZiel) {
-            f13.konzept = f13.umbauZiel.konzept;
-            f13.gruppe = f13.umbauZiel.gruppe;
-            f13.mieter = f13.umbauZiel.mieter;
-            f13.lieferantId = f13.umbauZiel.lieferantId;
-          }
-          f13.umbauBis = void 0;
-          f13.umbauZiel = void 0;
-        }
-        if (f13.konzept === "untermiete" && f13.mieter && f13.mieter.bisWoche <= w2) {
-          melde(s2, "info", `Untermieter ${f13.mieter.name} in ${h4.name} zieht aus.`, { stadt: h4.stadt, hausId: h4.id });
-          f13.konzept = "leer";
-          f13.mieter = void 0;
-        }
-      }
-      h4.transferBonus *= 0.985;
-      h4.substanz = Math.max(0, h4.substanz - 0.05);
-      const p2 = h4.personal;
-      const krise = s2.phase === "insolvenz" ? 1e-3 : 0;
-      const abgang = 12e-4 + krise + Math.max(0, (40 - s2.stakeholder.betriebsrat) / 100) * 1e-3;
-      p2.vollzeit *= 1 - abgang;
-      p2.teilzeit *= 1 - abgang;
-      const fl = p2.filialleiter;
-      const zielMoral = 55 + hqMoralZiel(s2) - (s2.phase === "insolvenz" ? 15 : 0) - (h4.status === "schliessung_verhandlung" ? 25 : 0);
-      fl.moral = clamp(fl.moral + (zielMoral - fl.moral) * 0.05, 0, 100);
-    }
-    for (const l of s2.lieferanten) if (l.ausfallBis !== void 0 && l.ausfallBis <= w2) l.ausfallBis = void 0;
-    if (s2.standortgarantieBis !== void 0 && s2.standortgarantieBis <= w2) {
-      s2.standortgarantieBis = void 0;
-      for (const h4 of s2.haeuser) h4.standortgarantie = false;
-      melde(s2, "info", "Die Standortgarantie aus dem Sanierungstarifvertrag ist ausgelaufen.");
-    }
-  }
-  function eroeffneInsolvenz(s2, grund2) {
-    if (s2.phase !== "regulaer" || s2.szenario?.regeln.sandkasten) return;
-    const w2 = s2.woche;
-    let alt = 0;
-    for (const v2 of s2.verbindlichkeiten) alt += v2.wert;
-    if (s2.cash < 0) {
-      alt += -s2.cash;
-      s2.cash = 0;
-    }
-    s2.verbindlichkeiten = [];
-    s2.phase = "insolvenz";
-    s2.insolvenzenGesamt += 1;
-    s2.zahlungsstockungSeit = void 0;
-    s2.insolvenz = { seit: w2, versammlung: w2 + 20, altVerbindlichkeiten: eur(alt), insolvenzgeldBis: w2 + 12, quote: 0.1, grund: grund2 };
-    const nettoUmsatzJahr = Object.values(s2.basisUmsatz).reduce((a2, u) => a2 + (u ?? 0), 0) * 52;
-    const volumen2 = Math.max(1, nettoUmsatzJahr / 31e8);
-    s2.kreditlinie = eur(25e6 * volumen2);
-    const st2 = s2.stakeholder;
-    st2.kreditversicherer = clamp(st2.kreditversicherer - 20, 0, 100);
-    st2.bank = clamp(st2.bank - 15, 0, 100);
-    st2.image = clamp(st2.image - 15, 0, 100);
-    st2.betriebsrat = clamp(st2.betriebsrat - 5, 0, 100);
+  var MASSSTAB_REALISIERUNG = 1.115;
+  function lieferantenFaktor(s2, h4, g2) {
+    let f13 = 1;
     for (const l of s2.lieferanten) {
-      l.vertrauen = clamp(l.vertrauen - 15, 0, 100);
-      if (l.id === "hallberg" && l.aktiv) l.verspaetungen += 2;
+      const anteil3 = l.gruppen[g2];
+      if (!anteil3) continue;
+      if (l.ausfallBis !== void 0 && l.ausfallBis > s2.woche) f13 *= 1 - anteil3 * 0.8;
+      if (!l.aktiv) continue;
+      if (l.rueckzug && h4.lage !== "1a") f13 *= 1 - anteil3 * 0.6;
+      if (l.dtc) f13 *= 1 - anteil3 * 0.18;
     }
-    s2.restLieferantenVertrauen = clamp(s2.restLieferantenVertrauen - 15, 0, 100);
-    const nr4 = s2.insolvenzenGesamt;
-    melde(s2, "insolvenz", `Insolvenzantrag gestellt (${grund2}). Altverbindlichkeiten ${mio(alt)} sind eingefroren, Insolvenzgeld deckt die L\xF6hne f\xFCr 12 Wochen.`);
-    melde(s2, "presse", nr4 === 1 ? `${s2.firma.name} ist insolvent.` : `${s2.firma.name} ist zum ${nr4}. Mal insolvent. Experten zeigen sich \u201Ewenig \xFCberrascht\u201C.`);
+    return f13;
   }
-  function glaeubigerversammlung(s2) {
-    const ins = s2.insolvenz;
-    if (!ins) return;
-    let planEbitda;
-    if (s2.prognose) planEbitda = s2.historie.slice(-13).reduce((a2, b4) => a2 + b4.ebitda, 0) * 4;
-    else {
-      const klon = structuredClone(s2);
-      klon.prognose = true;
-      klon.insolvenz = void 0;
-      klon.phase = "regulaer";
-      planEbitda = 0;
-      for (let i = 0; i < 52 && klon.phase === "regulaer"; i++) planEbitda += planWoche2(klon);
+  function hausFaktor(s2, h4) {
+    const w2 = s2.woche;
+    const makro = s2.makro.konjunktur * Math.pow(1 - TREND_LAGE[h4.lage], w2 / 52);
+    const image = (0.9 + 2e-3 * s2.stakeholder.image) / (0.9 + 2e-3 * 45);
+    const mkt = marketingHausFaktor(s2, h4);
+    const substanz = (0.85 + 15e-4 * h4.substanz) / (0.85 + 15e-4 * h4.substanzStart);
+    let mieterBonus = 0;
+    let umbau = false;
+    for (const f13 of h4.flaechen) {
+      if (f13.umbauBis !== void 0 && f13.umbauBis > w2) umbau = true;
+      else if (f13.konzept === "untermiete" && f13.mieter) mieterBonus += f13.mieter.frequenzBonus;
     }
-    const konzernJahresumsatzStart = s2.zentrale.kostenStart / PARAM.zentraleQuote * 52;
-    const schwelle = schwierigkeit(s2).versammlungSchwelle * Math.max(1, konzernJahresumsatzStart / 33e8);
-    const planBonus = planEbitda > 0 ? 15 : planEbitda > schwelle ? 5 : -10;
-    const quoteBonus = 60 * (ins.quote - 0.1);
-    const zahlung = ins.quote * ins.altVerbindlichkeiten;
-    const st2 = s2.stakeholder;
-    const lieferanten = (s2.lieferanten.filter((l) => l.aktiv).reduce((a2, l) => a2 + l.vertrauen, 0) + s2.restLieferantenVertrauen * 2) / (s2.lieferanten.filter((l) => l.aktiv).length + 2);
-    const gruppen = [
-      ["Banken", st2.bank],
-      ["Kreditversicherer", st2.kreditversicherer],
-      ["Lieferanten", lieferanten],
-      ["Vermieter", st2.vermieter],
-      ["Arbeitnehmer", st2.betriebsrat]
-    ];
-    const schutzschirmBonus = s2.szenario?.regeln.schutzschirmZustimmung ?? 0;
-    const ja = gruppen.filter(([, v2]) => v2 + planBonus + quoteBonus + schutzschirmBonus >= 42).map(([n3]) => n3);
-    const nein = gruppen.filter(([n3]) => !ja.includes(n3)).map(([n3]) => n3);
-    const sofort = zahlung * 0.4;
-    const finanzierbar = s2.cash >= sofort;
-    if (ja.length >= 3 && finanzierbar) {
-      s2.cash -= eur(sofort);
-      s2.verbindlichkeiten.push({ id: `q1-${s2.woche}`, art: "sonstiges", wert: eur(zahlung * 0.3), faellig: s2.woche + 26 });
-      s2.verbindlichkeiten.push({ id: `q2-${s2.woche}`, art: "sonstiges", wert: eur(zahlung * 0.3), faellig: s2.woche + 52 });
-      s2.phase = "regulaer";
-      s2.insolvenz = void 0;
-      st2.kreditversicherer = Math.max(st2.kreditversicherer, 42);
-      st2.bank = Math.max(st2.bank, 38);
-      st2.image = clamp(st2.image + 6, 0, 100);
-      for (const l of s2.lieferanten) l.vertrauen = Math.max(l.vertrauen, 42);
-      s2.restLieferantenVertrauen = Math.max(s2.restLieferantenVertrauen, 45);
-      s2.kreditlinieBasis = Math.round(s2.kreditlinieBasis * 0.6);
-      s2.kreditlinie = Math.round(s2.kreditlinieBasis * 0.5);
-      melde(s2, "info", `Integrierte Planung: EBITDA der n\xE4chsten 52 Wochen ${mio(planEbitda)}.`);
-      melde(s2, "insolvenz", `Insolvenzplan angenommen (Zustimmung: ${ja.join(", ")}). Quote ${Math.round(ins.quote * 100)} % = ${mio(zahlung)}, davon ${mio(sofort)} sofort, der Rest in zwei Raten. Das Verfahren ist aufgehoben.`);
-      melde(s2, "presse", `Gl\xE4ubiger stimmen zu: ${s2.firma.name} bekommt eine weitere Chance.`);
-    } else {
-      s2.phase = "zerschlagen";
-      melde(s2, "info", `Integrierte Planung: EBITDA der n\xE4chsten 52 Wochen ${mio(planEbitda)}.`);
-      const grund2 = !finanzierbar ? `Die erste Rate der Quote (${mio(sofort)}) ist nicht finanzierbar.` : `Abgelehnt von: ${nein.join(", ")}.`;
-      melde(s2, "insolvenz", `Insolvenzplan gescheitert. ${grund2} Die Kette wird zerschlagen.`);
-      melde(s2, "presse", `Aus f\xFCr ${s2.firma.name}: Die letzten H\xE4user schlie\xDFen.`);
+    const fl = h4.personal.filialleiter;
+    const skill2 = fl.interimBis !== void 0 && fl.interimBis > w2 ? 0.3 : fl.skill;
+    const flF = (0.95 + 0.1 * skill2) / 1.05;
+    let status2 = 1;
+    if (h4.status === "schliessung_verhandlung") status2 = 0.95;
+    if (h4.status === "raeumung") status2 = 1.7;
+    const streik = h4.streikBis !== void 0 && h4.streikBis > w2 ? 0.72 : 1;
+    const rauschen2 = s2.prognose ? 1 : 1 + 0.025 * normal(s2);
+    const zentrale = hqUmsatzFaktor(s2);
+    return makro * image * mkt * substanz * wettbewerbFrequenzFaktor(s2, h4) * (1 + mieterBonus) * (1 + h4.transferBonus) * flF * status2 * streik * (umbau ? 0.97 : 1) * rauschen2 * zentrale * MASSSTAB_REALISIERUNG * schwierigkeit(s2).kaufneigung * premiumImageFaktor(h4) * programmNachfrageFaktor(s2) * szenarioFrequenz(s2) * hausclusterFaktor(s2, h4) * itHausFaktor(s2, h4) * hausBetriebsFaktor(s2, h4) * umbauFrequenzFaktor(h4);
+  }
+  function saettigung(qm2, Q) {
+    return Q > 0 ? 1 - Math.exp(-qm2 / Q) : 0;
+  }
+  function simuliereHaus(s2, h4) {
+    const w2 = s2.woche;
+    const roh2 = { haus: h4, eigen: {}, kommission: {}, offprice: 0, konzessionUmsatz: 0, untermiete: 0, fteBedarf: 0, fteIst: 0, ohneAktion: 0, ohneAktionRohertrag: 0 };
+    if (!istAktiv(h4) || h4.nurDaten) return roh2;
+    const hf = hausFaktor(s2, h4);
+    const fl = aktiveFlaeche(h4, w2);
+    const raeumung2 = h4.status === "raeumung";
+    const qmEigen = {};
+    const qmKomm = {};
+    const qmKonz = {};
+    let qmOff = 0;
+    let qmVerkauf = 0;
+    for (const f13 of fl) {
+      if (f13.konzept === "eigen" && f13.gruppe) {
+        qmEigen[f13.gruppe] = (qmEigen[f13.gruppe] ?? 0) + f13.qm;
+        qmVerkauf += f13.qm;
+      } else if (f13.konzept === "kommission" && f13.gruppe) {
+        qmKomm[f13.gruppe] = (qmKomm[f13.gruppe] ?? 0) + f13.qm;
+        qmVerkauf += f13.qm;
+      } else if (f13.konzept === "konzession" && f13.gruppe) qmKonz[f13.gruppe] = (qmKonz[f13.gruppe] ?? 0) + f13.qm;
+      else if (f13.konzept === "offprice") {
+        qmOff += f13.qm;
+        qmVerkauf += f13.qm;
+      } else if (f13.konzept === "untermiete" && f13.mieter) roh2.untermiete += f13.mieter.mieteWoche;
     }
-  }
-  var planWoche2 = () => 0;
-  function setzePlanWoche(f13) {
-    planWoche2 = f13;
-  }
-  function zerschlagungDurchMasseunzulaenglichkeit(s2) {
-    s2.phase = "zerschlagen";
-    melde(s2, "insolvenz", "Masseunzul\xE4nglichkeit: Auch die laufenden Kosten im Verfahren sind nicht mehr gedeckt. Die Kette wird zerschlagen.");
-  }
-  function quartalsBewertung(s2) {
-    const q2 = s2.quartale[s2.quartale.length - 1];
-    if (!q2) return;
-    const ist = s2.historie.filter((k5) => k5.woche >= q2.start && k5.woche < q2.start + 13).reduce((a2, b4) => a2 + b4.ebitda, 0);
-    q2.ebitdaIst = eur(ist);
-    const plan2 = q2.plan ?? q2.planStandard;
-    const volumen2 = Math.max(1, Object.values(s2.basisUmsatz).reduce((a2, u) => a2 + (u ?? 0), 0) * 52 / 31e8);
-    const tol = Math.max(2e6 * volumen2, 0.12 * Math.abs(plan2));
-    const st2 = s2.stakeholder;
-    const ambitioniert = plan2 >= q2.planStandard;
-    if (ist >= plan2 - 0.25 * tol) {
-      st2.eigentuemer = clamp(st2.eigentuemer + 8 + (ambitioniert ? 4 : 0), 0, 100);
-      s2.eigentuemer.strikes = 0;
-      let txt = `Quartal ${q2.nr + 1}: Plan erreicht (Ist ${mio(ist)}, Plan ${mio(plan2)}).`;
-      const vorjahr2 = s2.quartale.find((x2) => x2.nr === q2.nr - 4);
-      const besser = vorjahr2 ? ist > vorjahr2.ebitdaIst : ist > q2.planStandard + 0.1 * Math.abs(q2.planStandard);
-      if (!besser) txt += " Ohne sichtbare Verbesserung gegen\xFCber dem Vorjahr gibt es kein frisches Geld.";
-      if (s2.phase === "regulaer" && !istSandkasten(s2) && besser && (runwayWochen(s2) < 26 || s2.cash + s2.kreditlinie < 15e7 * volumen2)) {
-        const kapital = eur(12e6 * volumen2 * (st2.eigentuemer / 50) * (ambitioniert ? 1 : 0.5));
-        s2.cash += kapital;
-        s2.einmalErloeseWoche += kapital;
-        s2.eigentuemer.kapitalZugefuehrt += kapital;
-        s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
-        s2.kapitalflussOffen.finanzierung += kapital;
-        txt += ` Der Eigent\xFCmer schie\xDFt ${mio(kapital)} nach.`;
-      }
-      melde(s2, "eigentuemer", txt, { modul: "vorstand" });
-    } else if (ist >= plan2 - tol) {
-      st2.eigentuemer = clamp(st2.eigentuemer - 2, 0, 100);
-      melde(s2, "eigentuemer", `Quartal ${q2.nr + 1}: Plan knapp verfehlt (Ist ${mio(ist)}, Plan ${mio(plan2)}). Kein frisches Geld, neue Frist.`, { modul: "vorstand" });
-    } else {
-      st2.eigentuemer = clamp(st2.eigentuemer - 12, 0, 100);
-      s2.eigentuemer.strikes += 1;
-      melde(s2, "eigentuemer", `Quartal ${q2.nr + 1}: Plan klar verfehlt (Ist ${mio(ist)}, Plan ${mio(plan2)}). Verwarnung ${s2.eigentuemer.strikes}/2.`, { modul: "vorstand" });
-      if (s2.eigentuemer.strikes >= 2 && s2.phase === "regulaer") {
-        if (runwayWochen(s2) < 13) {
-          s2.eigentuemer.forderung = "insolvenzantrag";
-          melde(s2, "eigentuemer", "Der Eigent\xFCmer stellt keine weiteren Mittel bereit und verlangt den Insolvenzantrag.", { modul: "vorstand" });
-          eroeffneInsolvenz(s2, "Eigent\xFCmer verweigert weitere Mittel");
-        } else {
-          melde(s2, "eigentuemer", "Der Eigent\xFCmer pr\xFCft Alternativen. Ein weiteres verfehltes Quartal beendet seine Unterst\xFCtzung.", { modul: "vorstand" });
-        }
-      }
+    const normalpreis = 1 - 0.25 * s2.marketing.gewoehnung;
+    const bruttoBasis = {};
+    let summeBasis = 0;
+    let summeBedarf = 0;
+    const alleGruppen = /* @__PURE__ */ new Set([...Object.keys(qmEigen), ...Object.keys(qmKomm)]);
+    for (const g2 of alleGruppen) {
+      const P5 = h4.potenzial[g2] ?? 0;
+      const Q = h4.saettigungQm[g2] ?? 1;
+      const qm2 = (qmEigen[g2] ?? 0) + (qmKomm[g2] ?? 0);
+      const sf = saisonFaktor(g2, w2);
+      const b4 = P5 * saettigung(qm2, Q) * sf * hf * normalpreis * lieferantenFaktor(s2, h4, g2) * wettbewerbNachfrageFaktor(s2, h4, g2) * umbauNachfrageFaktor(s2, h4, g2);
+      bruttoBasis[g2] = b4;
+      summeBasis += b4;
+      summeBedarf += b4 / Math.max(0.05, sf) * Math.sqrt(sf);
     }
+    const offBasis = qmOff * 20 * (1.6 - 0.6 * h4.einzug.kaufkraft) * hf * saisonFaktor("damen", w2) * wettbewerbOffpriceFaktor(s2, h4) * umbauNachfrageFaktor(s2, h4, null);
+    summeBasis += offBasis;
+    summeBedarf += offBasis;
+    const p2 = h4.personal;
+    const einsatz = personalEinsatz(h4);
+    const fteIst = einsatz.fte;
+    roh2.fteIst = fteIst;
+    roh2.fteBedarf = qmVerkauf / PARAM.qmJeFte * (h4.klasse === "premium" ? 1.15 : 1) + summeBedarf / PARAM.umsatzJeFte;
+    const besetzung = roh2.fteBedarf > 0 ? Math.pow(clamp(fteIst / roh2.fteBedarf / hqBesetzungsNorm(s2), 0, 1), 0.5) : 1;
+    const ahQuote = fteIst > 0 ? einsatz.aushilfen / fteIst : 0;
+    const basisJe = {};
+    const tEJe = {};
+    for (const g2 of alleGruppen) {
+      const d4 = GRUPPEN[g2];
+      const qualitaet3 = besetzung * (1 - d4.beratung * Math.max(0, ahQuote - 0.15) * 0.6);
+      basisJe[g2] = (bruttoBasis[g2] ?? 0) * qualitaet3 * personalVerkaufsFaktor(h4, g2) * personalVerfuegbarkeit(h4);
+      const qe = qmEigen[g2] ?? 0;
+      const qk = qmKomm[g2] ?? 0;
+      tEJe[g2] = qe + qk > 0 ? qe / (qe + qk) : 0;
+    }
+    const mess = [];
+    const mw = raeumung2 ? void 0 : marketingGruppen(s2, h4, basisJe, tEJe, mess);
+    if (mess.length) roh2.aktionsMessung = mess;
+    for (const g2 of alleGruppen) {
+      const basis4 = basisJe[g2] ?? 0;
+      const e = mw?.[g2];
+      const brutto2 = basis4 * (e ? e.nachfrage : 1);
+      const umsatz = raeumung2 ? brutto2 * (1 - 0.35) : brutto2 * (e ? e.preis : 1);
+      const qe = qmEigen[g2] ?? 0;
+      const qk = qmKomm[g2] ?? 0;
+      const tE = tEJe[g2] ?? 0;
+      if (qe > 0) roh2.eigen[g2] = { brutto: brutto2 * tE, umsatz: umsatz * tE };
+      if (qk > 0) roh2.kommission[g2] = umsatz * (1 - tE);
+    }
+    roh2.offprice = offBasis * besetzung * personalOffpriceFaktor(h4) * personalVerfuegbarkeit(h4);
+    for (const [g2, qm2] of Object.entries(qmKonz)) {
+      const P5 = h4.potenzial[g2] ?? 0;
+      const Q = h4.saettigungQm[g2] ?? 1;
+      roh2.konzessionUmsatz += P5 * saettigung(qm2, Q) * saisonFaktor(g2, w2) * hf * lieferantenFaktor(s2, h4, g2) * wettbewerbNachfrageFaktor(s2, h4, g2);
+    }
+    return wirkeTreiber(h4, roh2);
   }
-  function lohnSumme(s2) {
-    return s2.haeuser.reduce((a2, h4) => a2 + (h4.status === "geschlossen" ? 0 : lohnKosten(s2, h4)), 0);
+  function personalEinsatz(h4) {
+    const p2 = h4.personal;
+    const referenz = p2.umsatzReferenzWoche;
+    const vorwoche = h4.kpi?.umsatz;
+    const delta = referenz && referenz > 0 && vorwoche !== void 0 ? clamp(vorwoche / referenz - 1, -0.55, 0.35) : 0;
+    const vollzeit = p2.vollzeit;
+    const teilzeit = p2.teilzeit * (1 + delta * 0.6);
+    const aushilfen = p2.aushilfen * (1 + delta);
+    return { vollzeit, teilzeit, aushilfen, fte: vollzeit + teilzeit + aushilfen };
+  }
+  function lohnKosten(s2, h4) {
+    const p2 = personalEinsatz(h4);
+    const tarifF = s2.tarif === "sanierung" ? 0.93 : s2.tarif === "ohne" ? 0.89 : 1;
+    const leitungDelta = h4.betrieb && !s2.hausbetriebAbnahmeAus ? ((h4.personal.filialleiter.gehalt ?? h4.betrieb.leitungGehaltStart) - h4.betrieb.leitungGehaltStart) / 52 : 0;
+    return ((p2.vollzeit * PARAM.lohnVollzeit + p2.teilzeit * PARAM.lohnTeilzeit) * tarifF + p2.aushilfen * PARAM.lohnAushilfe) * (1 - programmErsparnis(s2, "personal")) + leitungDelta;
+  }
+  function nebenvertragsErtraege(h4, umsatzAmPos, woche2) {
+    const v2 = h4.nebenvertrag;
+    if (!v2 || !istAktiv(h4) || h4.nurDaten) return { werbeflaechen: 0, dienstleistungen: 0 };
+    const qmBespielt = aktiveFlaeche(h4, woche2).filter((f13) => f13.konzept === "eigen" || f13.konzept === "kommission" || f13.konzept === "offprice").reduce((sum2, f13) => sum2 + f13.qm, 0);
+    const werbeflaechen = Math.min(v2.werbeflaecheQm, qmBespielt * 0.075) * v2.werbeEuroJeQmWoche;
+    const bons = Math.floor(Math.max(0, umsatzAmPos) / v2.durchschnittsBonEuro);
+    return { werbeflaechen: eur(werbeflaechen), dienstleistungen: eur(bons * v2.dienstleistungEuroJeBon) };
+  }
+  function hausKosten(s2, h4, umsatzEigen, umsatzGesamt) {
+    const k5 = {
+      personal: 0,
+      miete: 0,
+      nebenkosten: 0,
+      sonstige: 0,
+      logistik: 0,
+      personalCash: 0,
+      guv: leereFilialGuV()
+    };
+    if (h4.status === "verkauft") return k5;
+    if (h4.status === "geschlossen") {
+      if (h4.restmieteBis !== void 0 && h4.restmieteBis > s2.woche) k5.miete = h4.restmieteWoche ?? 0;
+      return k5;
+    }
+    const guv2 = k5.guv;
+    const form2 = h4.klasse === "premium" ? 1.16 : h4.format === "outlet" ? 0.77 : h4.format === "sport" ? 0.93 : h4.format === "schwester" ? 0.94 : 1;
+    k5.personal = lohnKosten(s2, h4) + personalZusatzkosten(h4);
+    if (!s2.hausbetriebAbnahmeAus && s2.hausbetrieb?.staedte[h4.stadt]?.sonntage.includes(s2.woche)) k5.personal *= 1.18;
+    guv2.personal = k5.personal;
+    k5.miete = guv2.miete = h4.miete.mieteWoche * (1 - programmErsparnis(s2, "miete"));
+    let qmNk = 0;
+    let qmBetrieb = 0;
+    for (const f13 of h4.flaechen) {
+      if (f13.konzept === "untermiete") continue;
+      qmNk += f13.qm;
+      qmBetrieb += f13.konzept === "leer" ? f13.qm * 0.25 : f13.qm;
+    }
+    guv2.mietnebenkosten = k5.nebenkosten = (h4.miete.netTyp === "net" ? 0 : qmNk * h4.miete.nebenkostenQmWoche) * (1 - programmErsparnis(s2, "mietnebenkosten"));
+    guv2.logistik = k5.logistik = PARAM.logistikQuote * umsatzEigen * hqLogistikFaktor(s2) * (1 - programmErsparnis(s2, "logistik")) * (h4.format === "outlet" ? 0.9 : 1);
+    guv2.fremdkraefte = umsatzGesamt * 7e-3 * form2 * (1 - programmErsparnis(s2, "fremdkraefte"));
+    guv2.unterhalt = umsatzGesamt * 0.019 * form2 * (1 + Math.max(0, 55 - h4.substanz) / 400) * (1 - programmErsparnis(s2, "unterhalt"));
+    const mobileStufe = s2.it?.produkte?.mobile_pay?.aktiv === false ? 0 : s2.it?.systeme.kasse.kasseAusbau?.mobil ?? 0;
+    guv2.zahlungsverkehr = umsatzGesamt * 2e-3 * (1 - programmErsparnis(s2, "zahlungsverkehr")) * (1 - 0.025 * mobileStufe);
+    guv2.facilityManagement = umsatzGesamt * 0.017 * form2 * (1 - programmErsparnis(s2, "facilityManagement"));
+    guv2.energie = umsatzGesamt * 0.024 * form2 * (1 - programmErsparnis(s2, "energie"));
+    guv2.it = umsatzGesamt * 3e-3 * (1 - programmErsparnis(s2, "it"));
+    guv2.administration = umsatzGesamt * 2e-3 * (1 - programmErsparnis(s2, "administration"));
+    guv2.uebrigeAufwendungen = umsatzGesamt * 4e-3 * (1 - programmErsparnis(s2, "uebrigeAufwendungen"));
+    {
+      const zeilen = ["fremdkraefte", "unterhalt", "zahlungsverkehr", "facilityManagement", "energie", "it", "administration", "uebrigeAufwendungen"];
+      const basis4 = zeilen.reduce((sum2, z6) => sum2 + guv2[z6], 0);
+      const betrieb2 = hausBetriebskosten(s2, h4, basis4);
+      const skala2 = basis4 > 0 ? betrieb2 / basis4 : 1;
+      for (const z6 of zeilen) guv2[z6] *= skala2;
+      guv2.uebrigeAufwendungen += personalFehlerkosten(h4);
+      k5.sonstige = zeilen.reduce((sum2, z6) => sum2 + guv2[z6], 0);
+    }
+    return k5;
+  }
+  function leereKpi(w2) {
+    return { woche: w2, umsatz: 0, rohertrag: 0, konzessionserloes: 0, untermiete: 0, personal: 0, miete: 0, nebenkosten: 0, sonstige: 0, db: 0, fteBedarf: 0, fteIst: 0, umsatzJeGruppe: {} };
+  }
+  function rundeKpi(k5) {
+    const r4 = { ...k5 };
+    for (const key of ["umsatz", "rohertrag", "konzessionserloes", "untermiete", "personal", "miete", "nebenkosten", "sonstige", "db"]) r4[key] = eur(r4[key]);
+    r4.umsatzJeGruppe = Object.fromEntries(Object.entries(k5.umsatzJeGruppe).map(([g2, v2]) => [g2, eur(v2 ?? 0)]));
+    return r4;
   }
 
-  // ../engine/src/ereignisse.ts
-  function offeneHaeuser(s2, format) {
-    return s2.haeuser.filter((h4) => !h4.nurDaten && h4.status === "offen" && (!format || h4.format === format));
-  }
-  function neueEntscheidung(s2, e) {
-    if (s2.prognose) return;
-    s2.entscheidungen.push({ ...e, id: neueId(s2, "e"), woche: s2.woche });
-  }
-  function neuesAngebot(s2, a2) {
-    const x2 = { ...a2, id: neueId(s2, "a"), woche: s2.woche, status: "offen" };
-    s2.angebote.push(x2);
-    return x2;
-  }
-  function basisUmsatzHaus(h4) {
-    let x2 = 0;
-    for (const [g2, P5] of Object.entries(h4.potenzial)) {
-      const qm2 = h4.flaechen.filter((f13) => f13.gruppe === g2 && (f13.konzept === "eigen" || f13.konzept === "kommission")).reduce((a2, b4) => a2 + b4.qm, 0);
-      x2 += P5 * (1 - Math.exp(-qm2 / (h4.saettigungQm[g2] ?? 1)));
-    }
-    return x2;
-  }
-  function attraktivitaet2(h4) {
-    const basis4 = 1 - 0.2 * h4.wettbewerbStart;
-    const relativ = (1 - 0.2 * h4.einzug.wettbewerb) / basis4;
-    return h4.einzug.kaufkraft * LAGE_FAKTOR[h4.lage] * CLUSTER_FAKTOR[h4.cluster] * basis4 * relativ;
-  }
-  var hausAttraktivitaet = attraktivitaet2;
-  function qmAufEtage2(h4, etage2) {
-    return h4.flaechen.filter((f13) => f13.etage === etage2 && f13.konzept !== "untermiete" && f13.umbauBis === void 0).reduce((a2, b4) => a2 + b4.qm, 0);
-  }
-  function untermietAnfrage(s2) {
-    const kandidaten3 = offeneHaeuser(s2).filter((h5) => !s2.angebote.some((a2) => a2.status === "offen" && a2.typ === "untermiete" && a2.wunschHaeuser?.[0] === h5.id));
-    if (!kandidaten3.length) return;
-    const h4 = waehle(s2, kandidaten3);
-    const passende = MIETER.filter((m2) => m2.etagen.some((e) => h4.etagen.includes(e) && qmAufEtage2(h4, e) >= m2.qm[0]));
-    if (!passende.length) return;
-    const m = waehle(s2, passende);
-    const etage2 = waehle(s2, m.etagen.filter((e) => h4.etagen.includes(e) && qmAufEtage2(h4, e) >= m.qm[0]));
-    const qm2 = Math.floor(Math.min(qmAufEtage2(h4, etage2), zwischen(s2, m.qm[0], m.qm[1])) / 50) * 50;
-    const miete = Math.round(zwischen(s2, m.mieteQmMonat[0], m.mieteQmMonat[1]) * attraktivitaet2(h4) * hqUntermietFaktor(s2) * 10) / 10;
-    const laufzeit = ganzZwischen(s2, m.laufzeit[0], m.laufzeit[1]);
-    const name2 = waehle(s2, m.namen);
-    neuesAngebot(s2, {
-      typ: "untermiete",
-      frist: s2.woche + 6,
-      mieterTyp: m.typ,
-      mieterName: name2,
-      etage: etage2,
-      qmJeHaus: qm2,
-      mieteQmMonat: miete,
-      laufzeitJahre: laufzeit,
-      umbauAnteilMieter: m.umbauAnteil,
-      wunschHaeuser: [h4.id],
-      vorschlagHaeuser: [h4.id],
-      minHaeuser: 1,
-      titel: `${name2} will in ${h4.name} einziehen`,
-      text: `${name2} fragt ${qm2} qm im ${etage2 === -1 ? "UG" : etage2 === 0 ? "EG" : etage2 + ". OG"} an: ${miete.toFixed(2)} \u20AC/qm im Monat, ${laufzeit} Jahre Laufzeit, Mieter tr\xE4gt ${Math.round(m.umbauAnteil * 100)} % des Umbaus.`
-    });
-  }
-  function paketDeal(s2) {
-    const typen = MIETER.filter((m2) => m2.typ === "discounter" || m2.typ === "fitness" || m2.typ === "drogerie");
-    const m = waehle(s2, typen);
-    const etage2 = m.etagen[0];
-    const n3 = m.typ === "fitness" ? ganzZwischen(s2, 6, 10) : ganzZwischen(s2, 8, 14);
-    const pool = offeneHaeuser(s2, "warenhaus").filter((h4) => h4.etagen.includes(etage2) && qmAufEtage2(h4, etage2) >= m.qm[0]);
-    if (pool.length < n3 + 2) return;
-    const wunsch = [...pool].sort((a2, b4) => attraktivitaet2(b4) - attraktivitaet2(a2)).slice(0, n3).map((h4) => h4.id);
-    const name2 = waehle(s2, m.namen);
-    const miete = Math.round(zwischen(s2, m.mieteQmMonat[0], m.mieteQmMonat[1]) * 10) / 10;
-    const qm2 = Math.round(zwischen(s2, m.qm[0], m.qm[1]) / 50) * 50;
-    neuesAngebot(s2, {
-      typ: "paket",
-      frist: s2.woche + 6,
-      mieterTyp: m.typ,
-      mieterName: name2,
-      etage: etage2,
-      qmJeHaus: qm2,
-      mieteQmMonat: miete,
-      laufzeitJahre: ganzZwischen(s2, m.laufzeit[0], m.laufzeit[1]),
-      umbauAnteilMieter: m.umbauAnteil,
-      wunschHaeuser: wunsch,
-      vorschlagHaeuser: [...wunsch],
-      minHaeuser: Math.max(4, n3 - 2),
-      flexibilitaet: zwischen(s2, 0.05, 0.2),
-      titel: `${name2} will ${n3} Standorte`,
-      text: `${name2} m\xF6chte in ${n3} H\xE4usern jeweils rund ${qm2} qm im ${etage2 === 0 ? "Erdgeschoss" : etage2 === -1 ? "Untergeschoss" : etage2 + ". OG"} anmieten, ${miete.toFixed(2)} \u20AC/qm im Monat. Gew\xFCnscht sind nat\xFCrlich die besten Lagen.`
-    });
-    melde(s2, "ereignis", `Paketanfrage: ${name2} will ${n3} Standorte.`, { modul: "zentrale" });
-  }
-  function stadtAngebot(s2) {
-    const pool = offeneHaeuser(s2, "warenhaus").filter((h5) => h5.cluster !== "metropole" && h5.kpi && h5.kpi.db < 0);
-    if (!pool.length) return;
-    const h4 = [...pool].sort((a2, b4) => (a2.kpi?.db ?? 0) - (b4.kpi?.db ?? 0))[ganzZwischen(s2, 0, Math.min(4, pool.length - 1))];
-    const zahlung = eur(zwischen(s2, 0, 25e5));
-    neuesAngebot(s2, {
-      typ: "stadt",
-      frist: s2.woche + 8,
-      wunschHaeuser: [h4.id],
-      vorschlagHaeuser: [h4.id],
-      einmalzahlung: zahlung,
-      titel: `Stadt ${h4.stadt} will ${h4.name} \xFCbernehmen`,
-      text: `Die Stadt ${h4.stadt} w\xFCrde den Mietvertrag \xFCbernehmen und das Haus zu B\xFCrgeramt und Bibliothek umbauen. ${zahlung > 0 ? `Sie zahlt ${mio(zahlung)} Abl\xF6se.` : "Eine Abl\xF6se gibt es nicht."} Die Restmiete entf\xE4llt.`
-    });
-    melde(s2, "ereignis", `Die Stadt ${h4.stadt} interessiert sich f\xFCr ${h4.name}.`, { stadt: h4.stadt, hausId: h4.id });
-  }
-  function sportEbitdaJahr(s2) {
-    return offeneHaeuser(s2, "sport").reduce((a2, h4) => a2 + (h4.kpi?.db ?? 0), 0) * 52;
-  }
-  function sportVerkauf(s2) {
-    if (!offeneHaeuser(s2, "sport").length) return;
-    const sportBestand = gruppenFuer("sport").reduce((a2, g2) => a2 + bestandWert(s2, g2), 0);
-    const dist2 = s2.phase === "insolvenz" ? 0.6 : s2.stakeholder.kreditversicherer < 40 ? 0.8 : 1;
-    const preis = eur(Math.max(3e7, sportEbitdaJahr(s2) * zwischen(s2, 4.5, 7)) * dist2 + sportBestand * 0.7);
-    neuesAngebot(s2, {
-      typ: "sportverkauf",
-      frist: s2.woche + 8,
-      kaufpreis: preis,
-      titel: `Investor will ${s2.firma.sportName} kaufen`,
-      text: `Ein Finanzinvestor bietet ${mio(preis)} f\xFCr die komplette Sportkette inklusive Ware. Personal, Mietvertr\xE4ge und Bestand gehen mit.`
-    });
-    melde(s2, "ereignis", `Kaufangebot f\xFCr ${s2.firma.sportName}: ${mio(preis)}.`);
-  }
-  function sonderposten(s2) {
-    const g2 = waehle(s2, ["damen", "herren", "accessoires", "wohnen", "sporttextil", "outdoor", "kinder"]);
-    const wert = eur(zwischen(s2, 2e6, 9e6));
-    neuesAngebot(s2, {
-      typ: "sonderposten",
-      frist: s2.woche + 2,
-      gruppe: g2,
-      wert,
-      _passt: chance(s2, 0.6),
-      titel: `Sonderposten ${GRUPPEN[g2].name}`,
-      text: `Die Ware einer insolventen Marke wird angeboten: Verkaufswert entspricht ${mio(wert * 2)} Einstand, Preis ${mio(wert)} gegen Vorkasse. Ob sie zu den H\xE4usern passt, zeigt sich erst im Abverkauf.`
-    });
-  }
-  function instandhaltung(s2, h4) {
-    const art = waehle(s2, [["Rolltreppen", 3e5, 7e5], ["Dachsanierung", 7e5, 16e5], ["Brandschutz", 5e5, 12e5], ["Klimaanlage", 4e5, 9e5]]);
-    const kosten2 = eur(zwischen(s2, art[1], art[2]) * schwierigkeit(s2).ereignisse);
-    if (h4.miete.netTyp === "triple") {
-      neueEntscheidung(s2, {
-        typ: "instandhaltung",
-        frist: s2.woche + 3,
-        titel: `${art[0]} in ${h4.name}`,
-        text: `Triple-Net: Die Kosten von ${mio(kosten2)} tr\xE4gst du. Verschieben senkt die Substanz deutlich.`,
-        optionen: [{ id: "zahlen", label: `Zahlen (${mio(kosten2)})` }, { id: "verschieben", label: "Verschieben" }],
-        standard: "zahlen",
-        daten: { haus: h4.id, kosten: kosten2 }
-      });
-    } else {
-      h4.substanz = clamp(h4.substanz + 8, 0, 100);
-      melde(s2, "info", `${art[0]} in ${h4.name}: Der Vermieter tr\xE4gt die Kosten (${h4.miete.netTyp === "net" ? "Net" : "Double-Net"}-Vertrag).`, { stadt: h4.stadt, hausId: h4.id });
-    }
-  }
-  function mietende(s2, h4) {
-    const markt = eur(basisUmsatzHaus(h4) * MARKTMIETE[h4.lage] * zwischen(s2, 0.85, 1.15) * hqMietendeFaktor(s2));
-    if (h4.miete.keineVerlaengerung) {
-      melde(s2, "warnung", `Der Vermieter von ${h4.name} verl\xE4ngert nicht. Der Vertrag endet in 26 Wochen.`, { stadt: h4.stadt, hausId: h4.id });
-      return;
-    }
-    neueEntscheidung(s2, {
-      typ: "mietende",
-      frist: s2.woche + 8,
-      titel: `Mietvertrag ${h4.name} l\xE4uft aus`,
-      text: `Der Vertrag endet in 26 Wochen. Aktuell ${mio(h4.miete.mieteWoche * 52)} im Jahr, der Vermieter bietet ${mio(markt * 52)} f\xFCr weitere 5 Jahre.`,
-      optionen: [{ id: "verlaengern", label: "Verl\xE4ngern" }, { id: "nachverhandeln", label: "Nachverhandeln" }, { id: "auslaufen", label: "Auslaufen lassen und schlie\xDFen" }],
-      standard: "verlaengern",
-      daten: { haus: h4.id, markt }
-    });
-    if (istAufgabeDelegiert(s2, "mietvertraege", "immobilien") && Math.abs(markt - h4.miete.mieteWoche) * 52 <= (delegationsGrenze(s2, "mietvertraege", "immobilien") ?? Infinity)) {
-      const offen = s2.entscheidungen[s2.entscheidungen.length - 1];
-      if (offen?.typ === "mietende" && offen.daten.haus === h4.id) {
-        loeseEntscheidung(s2, offen.id, mietvertragEmpfehlung(h4, markt));
+  // ../engine/src/vertrieb.ts
+  function erzeugeVorjahrHistorie(s2, nurFehlende = false) {
+    const start = s2.spielStartWoche ?? 0;
+    const vorherRng = s2.rng;
+    const historien = nurFehlende ? { ...s2.vorjahrHistorie ?? {} } : {};
+    const simulation = { ...s2, prognose: true, rng: vorherRng };
+    for (const h4 of s2.haeuser) {
+      if (nurFehlende && historien[h4.id]?.length) continue;
+      const wochen = [];
+      if (h4.nurDaten || h4.status === "verkauft") {
+        historien[h4.id] = wochen;
+        continue;
       }
-    }
-  }
-  function jahresgespraech(s2) {
-    const termine = { hallberg: 6, arvel: 10, nordline: 14, kessler: 18, goldenthread: 22 };
-    for (const l of s2.lieferanten) {
-      if (!l.aktiv || termine[l.id] !== kw(s2.woche)) continue;
-      neueEntscheidung(s2, {
-        typ: "jahresgespraech",
-        frist: s2.woche + 2,
-        titel: `Jahresgespr\xE4ch mit ${l.name}`,
-        text: `${l.beschreibung} Vertrauen aktuell ${Math.round(l.vertrauen)}.`,
-        optionen: [
-          { id: "mengenzusage", label: "Mengenzusage gegen mehr Zuschuss" },
-          { id: "platzierung", label: "Bessere Platzierung anbieten" },
-          { id: "hart", label: "Hart auf Konditionen verhandeln" }
-        ],
-        standard: "platzierung",
-        daten: { lieferant: l.id }
+      const qm2 = h4.flaechen.filter((f13) => f13.konzept === "eigen" || f13.konzept === "kommission" || f13.konzept === "offprice").reduce((v2, f13) => v2 + f13.qm, 0);
+      const stuetzen = [6, 19, 32, 45].map((i) => {
+        simulation.woche = start - 52 + i + 52;
+        return { i, roh: simuliereHaus(simulation, h4) };
       });
-    }
-  }
-  function lieferantenEreignisse(s2) {
-    for (const l of s2.lieferanten) {
-      if (!l.aktiv) continue;
-      if (l.id === "hallberg" && (l.verspaetungen > 1.5 || s2.phase === "insolvenz") && chance(s2, l.fragilitaet)) {
-        l.aktiv = false;
-        l.ausfallBis = s2.woche + Math.max(4, Math.round(12 * schwierigkeit(s2).ereignisse));
-        melde(s2, "presse", "Hallberg & S\xF6hne meldet Insolvenz an. \u201EEin gro\xDFer Kunde hat uns mitgerissen.\u201C", { modul: "einkauf" });
-        melde(s2, "warnung", "Herrenware von Hallberg f\xE4llt f\xFCr rund 12 Wochen aus, danach \xFCbernehmen andere Lieferanten.");
-      }
-      if (l.id === "nordline" && !l.dtc && chance(s2, 3e-3)) {
-        neueEntscheidung(s2, {
-          typ: "nordline_dtc",
-          frist: s2.woche + 4,
-          titel: "Nordline stellt auf Direktvertrieb um",
-          text: "Nordline k\xFCrzt die Zuteilung f\xFCr den Handel. Gegen eine Investition in Markenfl\xE4chen bleibst du A-Partner.",
-          optionen: [{ id: "akzeptieren", label: "K\xFCrzung akzeptieren" }, { id: "investieren", label: "Markenfl\xE4chen finanzieren (3,5 Mio. \u20AC)" }],
-          standard: "akzeptieren",
-          daten: {}
+      for (let i = 0; i < 52; i++) {
+        const woche2 = start - 52 + i;
+        simulation.woche = woche2 + 52;
+        const st2 = stuetzen.reduce((a2, b4) => Math.abs(b4.i - i) < Math.abs(a2.i - i) ? b4 : a2);
+        const roh2 = st2.roh, wSt = start - 52 + st2.i + 52;
+        const f13 = (g2) => saisonFaktor(g2, woche2 + 52) / Math.max(1e-6, saisonFaktor(g2, wSt));
+        let eigenSt = 0, eigenJetzt = 0;
+        let umsatz = 0, rohertrag = 0, eigen = 0, artikel = 0;
+        for (const [g2, v2] of Object.entries(roh2.eigen)) {
+          const u = v2.umsatz * f13(g2);
+          eigenSt += v2.umsatz;
+          eigenJetzt += u;
+          umsatz += u;
+          eigen += u;
+          rohertrag += u * GRUPPEN[g2].marge;
+          artikel += u / 40;
+        }
+        const off = roh2.offprice * (eigenSt > 0 ? eigenJetzt / eigenSt : 1);
+        umsatz += off;
+        eigen += off;
+        rohertrag += off * 0.3;
+        artikel += off / 24;
+        for (const [g2, wert] of Object.entries(roh2.kommission)) {
+          const u = wert * f13(g2);
+          umsatz += u;
+          rohertrag += u * 0.25;
+          artikel += u / 40;
+        }
+        const kosten2 = hausKosten(simulation, h4, eigen, umsatz);
+        const konzession = roh2.konzessionUmsatz * 0.17;
+        const db = rohertrag + konzession + roh2.untermiete - kosten2.personal - kosten2.miete - kosten2.nebenkosten - kosten2.sonstige - kosten2.logistik;
+        const frequenz = umsatz > 0 ? Math.max(1, eur((qm2 * 1.12 + 4400) * 0.95)) : 0;
+        const kaeufe = frequenz * (h4.format === "outlet" ? 0.35 : h4.format === "sport" ? 0.22 : 0.25);
+        wochen.push({
+          woche: woche2,
+          umsatz: eur(umsatz),
+          db: eur(db),
+          frequenz,
+          kaeufe,
+          artikel: eur(artikel),
+          personal: eur(kosten2.personal),
+          miete: eur(kosten2.miete)
         });
       }
-      if (l.id === "goldenthread" && chance(s2, 6e-3)) {
-        let verschoben = 0;
-        const neu3 = [];
-        for (const b4 of s2.bestellungen) {
-          if ((b4.gruppe === "damen" || b4.gruppe === "kinder") && b4.ankunft <= s2.woche + 6) {
-            const teil6 = eur(b4.wert * Math.min(0.6, 0.3 * schwierigkeit(s2).ereignisse));
-            b4.wert -= teil6;
-            verschoben += teil6;
-            neu3.push({ ...b4, id: neueId(s2, "b"), wert: teil6, ankunft: b4.ankunft + 6 });
-          }
-        }
-        s2.bestellungen.push(...neu3);
-        if (verschoben > 0) melde(s2, "warnung", `Containerstau: Eigenmarkenware von Golden Thread \xFCber ${mio(verschoben)} kommt sechs Wochen sp\xE4ter.`);
-      }
-      if (l.id === "arvel" && l.rueckzug && l.vertrauen > 60) {
-        l.rueckzug = false;
-        melde(s2, "info", "Maison Arvel kehrt in die B-Lagen zur\xFCck.");
-      }
+      historien[h4.id] = wochen;
     }
-    jahresgespraech(s2);
+    s2.vorjahrHistorie = historien;
+    s2.rng = vorherRng;
   }
-  var SATIRE = [
-    "Branchenkenner: \u201EDas Warenhaus ist tot.\u201C Zum 14. Mal in diesem Jahrzehnt.",
-    "Lokalzeitung: Rolltreppe im Haus defekt, Kunden nehmen es \u201Emit Humor\u201C.",
-    "Wirtschaftsblatt fragt: Braucht es Warenh\xE4user noch? Leser antworten mit 2.000 Kommentaren, gekauft hat keiner.",
-    "Ein Influencer filmt sich beim Einkauf in der Kurzwarenabteilung. 3 Mio. Aufrufe, Umsatz unver\xE4ndert.",
-    "Studie: Innenst\xE4dte brauchen Ankermieter. Studie zur Studie folgt.",
-    "Politik fordert Rettungsplan f\xFCr die Innenstadt. Konkrete Mittel: keine."
-  ];
-  function ereignisse(s2) {
-    if (s2.prognose) return;
-    const w2 = s2.woche;
-    if (s2.formate && offeneHaeuser(s2, "schwester").length && !s2.angebote.some((a2) => a2.status === "offen" && a2.typ === "kettenverkauf") && formateZufall(s2, s2.phase === "insolvenz" ? 0.01 : 4e-3)) {
-      const hs = offeneHaeuser(s2, "schwester");
-      const jahresumsatz = hs.reduce((n3, h4) => n3 + (h4.kpi?.umsatz ?? 0), 0) * 52;
-      const marge = hs.reduce((n3, h4) => n3 + (h4.kpi?.guv?.ebitda ?? 0), 0) / Math.max(1, jahresumsatz / 52);
-      const substanz = hs.reduce((n3, h4) => n3 + h4.substanz, 0) / hs.length;
-      const preis = eur(Math.max(1, jahresumsatz) * formateZahl(s2, 0.3, 0.6) * clamp(1 + marge, 0.8, 1.15) * (0.9 + substanz / 500));
-      neuesAngebot(s2, { typ: "kettenverkauf", frist: w2 + 8, kaufpreis: preis, titel: "Investor bietet f\xFCr Volkskauf", text: "\xDCbernahme aller H\xE4user inklusive Warenbestand, Personal und Mietvertr\xE4ge f\xFCr " + mio(preis) + "." });
+  function vorlaufKonzernWoche(s2, woche2) {
+    if (woche2 >= (s2.spielStartWoche ?? 0)) return void 0;
+    let umsatz = 0, db = 0, gefunden = false;
+    for (const h4 of s2.haeuser) {
+      const v2 = s2.vorjahrHistorie?.[h4.id]?.find((x2) => x2.woche === woche2);
+      if (!v2) continue;
+      gefunden = true;
+      umsatz += v2.umsatz;
+      db += v2.db;
     }
-    if (s2.formate && offeneHaeuser(s2, "outlet").length && formateZufall(s2, 6e-3)) {
-      const sortimente = ["damen", "herren", "kinder", "accessoires", "wohnen", "beauty"];
-      const gruppe3 = sortimente[Math.floor(formateZahl(s2, 0, sortimente.length))];
-      const wert = eur(formateZahl(s2, 5e5, 3e6));
-      neuesAngebot(s2, { typ: "sonderposten", formatZiel: "outlet", frist: w2 + 2, gruppe: gruppe3, wert, _passt: formateZufall(s2, 0.7), titel: "Markenposten f\xFCr FUNDUS", text: "Markenposten f\xFCr " + mio(wert) + " Einstand zur sofortigen \xDCbernahme." });
-    }
-    for (const h4 of offeneHaeuser(s2, "schwester").filter((h5) => h5.substanz < 20)) {
-      if (!s2.entscheidungen.some((e) => e.typ === "instandhaltung" && e.daten?.haus === h4.id) && formateZufall(s2, 0.04)) {
-        neueEntscheidung(s2, { typ: "instandhaltung", frist: w2 + 3, titel: "Substanzmangel in " + h4.name, text: "Zwingende Instandhaltung oder weitere Substanzsch\xE4den.", optionen: [{ id: "zahlen", label: "Sanieren" }, { id: "verschieben", label: "Verschieben" }], standard: "zahlen", daten: { haus: h4.id, kosten: eur(15e4 + formateZahl(s2, 1e5, 45e4)) } });
-      }
-    }
-    premiumAngebote(s2);
-    konzernVerkaufAnbieten(s2);
-    const zyklus = 0.035 * Math.sin(2 * Math.PI * w2 / 260 + s2.makro.phase);
-    if (s2.makro.schockBis !== void 0 && s2.makro.schockBis <= w2) {
-      s2.makro.schockBis = void 0;
-      s2.makro.schockStaerke = 0;
-    }
-    if (s2.makro.schockBis === void 0 && chance(s2, 4e-3)) {
-      s2.makro.schockStaerke = zwischen(s2, 0.04, 0.08) * schwierigkeit(s2).ereignisse;
-      s2.makro.schockBis = w2 + ganzZwischen(s2, 26, 52);
-      melde(s2, "presse", waehle(s2, ["Energiepreise explodieren, Konsumklima bricht ein.", "Rezession: Verbraucher halten sich zur\xFCck.", "Zollstreit dr\xFCckt auf die Kauflaune."]));
-    }
-    s2.makro.konjunktur = 1 + zyklus - s2.makro.schockStaerke;
-    if (chance(s2, 0.3 * hqAnfrageFaktor(s2))) untermietAnfrage(s2);
-    if (!s2.angebote.some((a2) => a2.status === "offen" && a2.typ === "paket") && chance(s2, 0.025)) paketDeal(s2);
-    if (chance(s2, 8e-3)) stadtAngebot(s2);
-    if (!s2.angebote.some((a2) => a2.status === "offen" && a2.typ === "sportverkauf") && chance(s2, 6e-3)) sportVerkauf(s2);
-    if (chance(s2, 0.02)) sonderposten(s2);
-    for (const h4 of offeneHaeuser(s2)) {
-      if (chance(s2, 8e-4 * (1 + (100 - h4.substanz) / 50))) instandhaltung(s2, h4);
-      if (h4.miete.bisWoche - 26 === w2) mietende(s2, h4);
-      if (h4.miete.keineVerlaengerung && h4.miete.bisWoche - 10 === w2) starteSchliessung(s2, h4, { mietvertragEndetMit: true });
-      if (h4.miete.bisWoche === w2 && h4.status === "offen") {
-        h4.miete.bisWoche = w2 + 260;
-        h4.miete.mieteWoche = eur(basisUmsatzHaus(h4) * MARKTMIETE[h4.lage] * hqMietendeFaktor(s2));
-      }
-      const fl = h4.personal.filialleiter;
-      if (fl.moral < 40 && fl.skill > 0.6 && chance(s2, 0.02)) {
-        const kandidaten3 = s2.wettbewerber.filter((x2) => x2.stadt === h4.stadt && ["modehaus", "premium", "fastfashion"].includes(x2.art) && (x2.status === "offen" || x2.status === "eroeffnung"));
-        const interimSkill = zwischen(s2, 0.3, 0.65);
-        if (!s2.wettbewerbDeaktiviert && !s2.wettbewerbEreignisseDeaktiviert && !kandidaten3.length) continue;
-        const ziel = kandidaten3[0]?.name;
-        melde(s2, "warnung", `Filialleiter${fl.name.endsWith("a") || fl.name.endsWith("e") ? "in" : ""} ${fl.name} verl\xE4sst ${h4.name} und geht ${ziel ? "zu " + ziel : "zur Konkurrenz"}.`, { stadt: h4.stadt, hausId: h4.id });
-        h4.personal.filialleiter = {
-          name: `Interim (${fl.name.split(" ")[1]}-Nachfolge)`,
-          skill: interimSkill,
-          moral: 50,
-          interimBis: w2 + 4,
-          // O07 Haus: neue Eigenschaften auch bei Interimspersonen bewahren.
-          staerken: { personal: interimSkill, ware: interimSkill, kunde: interimSkill, kosten: interimSkill },
-          ehrlichkeit: fl.ehrlichkeit,
-          gehalt: fl.gehalt,
-          bonusAnteil: fl.bonusAnteil,
-          wechselwille: 0,
-          stellvertretung: fl.stellvertretung
+    if (!gefunden) return void 0;
+    return { umsatz: eur(umsatz), db: eur(db), ebitda: eur(db - konzernUeberhang(s2, umsatz)) };
+  }
+  function konzernUeberhang(s2, umsatz) {
+    const k5 = s2.historie[s2.historie.length - 1];
+    if (k5?.filialGuV && k5.umsatz > 0) return (k5.filialGuV.ebitda - k5.ebitda) * umsatz / k5.umsatz;
+    return s2.zentrale?.kostenWoche ?? 0;
+  }
+  function mietvertragEmpfehlung(h4, markt) {
+    return h4.kpi?.db !== void 0 && h4.kpi.db < 0 && markt > h4.miete.mieteWoche || markt > h4.miete.mieteWoche * 1.08 ? "nachverhandeln" : "verlaengern";
+  }
+  var hausgruppe = (h4) => h4.hauscluster ?? h4.region;
+  var formatName = (format) => ({
+    alle: "Alle Formate",
+    warenhaus: "Warenhaus",
+    schwester: "Volkskauf",
+    sport: "Hartwig Sport",
+    outlet: "FUNDUS"
+  })[format];
+  function vertriebUebersicht(s2, filter = {}) {
+    const ebene = filter.ebene ?? "alle";
+    const format = filter.format ?? "alle";
+    const zeitraum2 = filter.zeitraum ?? "woche";
+    const bis = s2.woche - 1, kalender = (bis % 52 + 52) % 52;
+    const von = zeitraum2 === "vier" ? bis - 3 : zeitraum2 === "monat" ? bis - (kalender - Math.floor(Math.floor(kalender * 12 / 52) * 52 / 12)) : zeitraum2 === "quartal" ? bis - kalender % 13 : zeitraum2 === "ytd" ? bis - kalender : bis;
+    const jahrStart = bis - kalender;
+    const start = s2.spielStartWoche ?? 0;
+    const alle = s2.haeuser.filter((h4) => h4.status !== "verkauft");
+    const gruppe3 = alle.filter((h4) => format === "alle" || h4.format === format).filter((h4) => ebene === "alle" || !filter.id || ebene === "region" && h4.region === filter.id || ebene === "hauscluster" && hausgruppe(h4) === filter.id || ebene === "haus" && h4.id === filter.id);
+    const historische = (h4, w2) => {
+      if (w2 < start) return s2.vorjahrHistorie?.[h4.id]?.find((v2) => v2.woche === w2);
+      const echt = h4.verlauf?.find((v2) => v2.woche === w2);
+      if (echt) {
+        const t5 = h4.treiberVerlauf?.find((v2) => v2.von === w2 && v2.bis === w2);
+        const q2 = t5?.kaeufe ?? echt.umsatz / 45;
+        return {
+          woche: w2,
+          umsatz: echt.umsatz,
+          db: echt.db,
+          frequenz: t5?.frequenz ?? echt.frequenz,
+          kaeufe: q2,
+          artikel: t5?.artikel ?? q2 * 1.7,
+          personal: h4.kpi?.woche === w2 ? h4.kpi.personal : 0,
+          miete: h4.kpi?.woche === w2 ? h4.kpi.miete : h4.miete.mieteWoche
         };
       }
-    }
-    lieferantenEreignisse(s2);
-    const ausstieg = s2.tarifAusstiegSeit !== void 0 && w2 - s2.tarifAusstiegSeit < 26;
-    const pStreik = (s2.stakeholder.betriebsrat < 25 ? 0.04 : 0) + (ausstieg ? 0.05 : 0);
-    if (pStreik > 0 && chance(s2, kw(w2) >= 47 ? pStreik * 2 : pStreik)) {
-      const betroffen = offeneHaeuser(s2).filter(() => zufall(s2) < 0.3 * schwierigkeit(s2).ereignisse);
-      const dauer = ganzZwischen(s2, 1, 2);
-      for (const h4 of betroffen) h4.streikBis = w2 + dauer;
-      s2.stakeholder.image = clamp(s2.stakeholder.image - schwierigkeit(s2).ereignisse, 0, 100);
-      melde(s2, "presse", `Verdi ruft zum Streik auf: ${betroffen.length} H\xE4user betroffen.`, { modul: "zentrale" });
-    }
-    if (chance(s2, 0.04)) melde(s2, "presse", waehle(s2, SATIRE));
-    for (const a2 of s2.angebote) if (a2.status === "offen" && a2.frist <= w2) {
-      a2.status = "verfallen";
-      a2.erledigtWoche = w2;
-    }
-    s2.angebote = s2.angebote.filter((a2) => a2.status === "offen" || w2 - (a2.erledigtWoche ?? a2.woche) < 13);
-    const faellig = s2.entscheidungen.filter((e) => e.frist <= w2);
-    for (const e of faellig) loeseEntscheidung(s2, e.id, e.standard, true);
-    for (const b4 of s2.berater) if (!b4.ergebnis && b4.ende <= w2) beraterErgebnis(s2, b4.id);
-  }
-  function beraterErgebnis(s2, id) {
-    const b4 = s2.berater.find((x2) => x2.id === id);
-    if (!b4) return;
-    const offen = offeneHaeuser(s2).filter((h4) => h4.kpi);
-    const nachDb = [...offen].sort((a2, c) => (a2.kpi?.db ?? 0) - (c.kpi?.db ?? 0));
-    const anzahl2 = Math.max(5, Math.round(offen.length * 0.15));
-    const liste3 = [];
-    for (let i = 0; i < anzahl2 && i < nachDb.length; i++) {
-      const treffer = zufall(s2) < b4._qualitaet;
-      const h4 = treffer ? nachDb[i] : waehle(s2, offen);
-      if (!liste3.includes(h4.id)) liste3.push(h4.id);
-    }
-    const folien = ganzZwischen(s2, 60, 220);
-    const fazit = b4._qualitaet > 0.7 ? "Die Empfehlungen sind konkret und mit Zahlen hinterlegt." : b4._qualitaet > 0.4 ? "Solide Analyse, an einigen Stellen erkennbar aus anderen Projekten \xFCbernommen." : "Kernaussage auf Folie 3: \u201EKosten senken, Umsatz steigern.\u201C Der Rest ist Anhang.";
-    b4.ergebnis = { empfohleneSchliessungen: liste3, folien, fazit };
-    melde(s2, "ereignis", `${b4.haus} legt das Abschlussdeck zu Projekt ${b4.projektname} vor: ${folien} Folien, ${liste3.length} Schlie\xDFungsempfehlungen. ${fazit}`);
-  }
-  function zufallsProjektname(s2) {
-    return waehle(s2, PROJEKTNAMEN);
-  }
-  function loeseEntscheidung(s2, id, option2, standardGew\u00E4hlt = false) {
-    const e = s2.entscheidungen.find((x2) => x2.id === id);
-    if (!e) return "Entscheidung nicht gefunden.";
-    if (!e.optionen.some((o4) => o4.id === option2)) return "Unbekannte Option.";
-    s2.entscheidungen = s2.entscheidungen.filter((x2) => x2.id !== id);
-    (s2.entscheidungsprotokoll ?? (s2.entscheidungsprotokoll = [])).push({
-      id: e.id,
-      typ: e.typ,
-      titel: e.titel,
-      option: option2,
-      ergebnis: e.optionen.find((o4) => o4.id === option2)?.label ?? option2,
-      woche: s2.woche,
-      standard: standardGew\u00E4hlt,
-      hausId: typeof e.daten.haus === "string" ? e.daten.haus : void 0
-    });
-    s2.entscheidungsprotokoll = s2.entscheidungsprotokoll.filter((p2) => s2.woche - p2.woche <= 52);
-    if (e.typ.startsWith("personal_")) {
-      loesePersonalEntscheidung(s2, e.typ, e.daten, option2);
-      return null;
-    }
-    if (e.typ.startsWith("vorstand_")) {
-      loeseVorstandEntscheidung(s2, e, option2);
-      return null;
-    }
-    if (e.typ === "interview") {
-      zeitungInterviewAntwort(s2, e, option2);
-      return null;
-    }
-    if (e.typ === "organisation_vorlage") {
-      organisationVorlageEntscheidung(s2, e, option2);
-      return null;
-    }
-    if (e.typ.startsWith("planung_")) {
-      planungEntscheidung(s2, e, option2);
-      return null;
-    }
-    if (e.typ.startsWith("haus_")) {
-      loeseHausVorlage(s2, e.typ, e.daten, option2);
-      return null;
-    }
-    const d4 = e.daten;
-    if (e.typ === "organisation_vorlage" && typeof d4.umbauProgramm === "string") {
-      if (option2 === "annehmen" || option2 === "vorschlag") umbauProgrammEntscheiden(s2, d4.umbauProgramm);
-      return null;
-    }
-    const haus2 = typeof d4.haus === "string" ? s2.haeuser.find((h4) => h4.id === d4.haus) : void 0;
-    switch (e.typ) {
-      case "wettbewerb_eroeffnung": {
-        const wb = s2.wettbewerber.find((x2) => x2.id === d4.wettbewerber);
-        if (!wb) return null;
-        if (option2 === "aktion") {
-          einmalKosten(s2, 18e4);
-          wb.abwehrBis = s2.woche + 4;
-          wb.abwehrFaktor = 0.55;
-          melde(s2, "info", "Er\xF6ffnungsaktion gegen " + wb.name + ": kurzfristiger Kundenschutz, geringere Marge.");
-        } else if (option2 === "mailing" && s2.marketing.kundenkarte) {
-          einmalKosten(s2, 65e3);
-          wb.abwehrBis = s2.woche + 4;
-          wb.abwehrFaktor = 0.7;
-          melde(s2, "info", "Stammkunden-Mailing gegen " + wb.name + " verschickt.");
-        }
-        return null;
+      if (h4.kpi?.woche === w2) {
+        const t5 = h4.treiberVerlauf?.find((v2) => v2.von === w2 && v2.bis === w2);
+        return {
+          woche: w2,
+          umsatz: h4.kpi.umsatz,
+          db: h4.kpi.db,
+          frequenz: t5?.frequenz ?? 0,
+          kaeufe: t5?.kaeufe ?? 0,
+          artikel: t5?.artikel ?? 0,
+          personal: h4.kpi.personal,
+          miete: h4.kpi.miete
+        };
       }
-      case "instandhaltung":
-        if (!haus2) return null;
-        if (option2 === "zahlen") {
-          einmalKosten(s2, Number(d4.kosten));
-          s2.kapitalflussOffen ?? (s2.kapitalflussOffen = { investitionen: 0, finanzierung: 0 });
-          s2.kapitalflussOffen.investitionen -= Number(d4.kosten);
-          haus2.substanz = clamp(haus2.substanz + 10, 0, 100);
-        } else haus2.substanz = clamp(haus2.substanz - 12, 0, 100);
-        return null;
-      case "mietende": {
-        if (!haus2) return null;
-        const markt = Number(d4.markt);
-        if (option2 === "verlaengern") {
-          haus2.miete.mieteWoche = markt;
-          haus2.miete.bisWoche += 260;
-        } else if (option2 === "nachverhandeln") {
-          const p2 = 0.3 + 0.5 * (s2.stakeholder.vermieter / 100);
-          if (chance(s2, p2)) {
-            haus2.miete.mieteWoche = eur(markt * 0.88);
-            haus2.miete.bisWoche += 260;
-            melde(s2, "info", `${haus2.name}: Vermieter akzeptiert 12 % unter Angebot.`);
-          } else if (chance(s2, 0.25)) {
-            haus2.miete.keineVerlaengerung = true;
-            melde(s2, "warnung", `${haus2.name}: Der Vermieter bricht die Gespr\xE4che ab und vermietet neu.`);
-          } else {
-            haus2.miete.mieteWoche = markt;
-            haus2.miete.bisWoche += 260;
-            melde(s2, "info", `${haus2.name}: Vermieter bleibt hart, Verl\xE4ngerung zum Angebot.`);
+      return void 0;
+    };
+    const summe2 = (hs) => {
+      let umsatz = 0, umsatzYtd = 0, vj = 0, ebitda = 0, vjDb = 0, plan2 = 0;
+      let fre = 0, kaeufe = 0, personal2 = 0, miete = 0;
+      let vjVorhanden = 0, aktiv6 = 0, geschaetzt = false;
+      for (const h4 of hs) {
+        if (h4.nurDaten) continue;
+        aktiv6++;
+        const bisIst = Math.max(start, von);
+        for (let w2 = bisIst; w2 <= bis; w2++) {
+          const p2 = historische(h4, w2);
+          if (!p2) continue;
+          umsatz += p2.umsatz;
+          ebitda += p2.db;
+          fre += p2.frequenz;
+          kaeufe += p2.kaeufe;
+          personal2 += p2.personal;
+          miete += p2.miete;
+          plan2 += planWoche(s2, h4.id, w2);
+        }
+        for (let w2 = Math.max(start, jahrStart); w2 <= bis; w2++) umsatzYtd += historische(h4, w2)?.umsatz ?? 0;
+        let voll2 = bis >= start;
+        for (let w2 = bisIst; w2 <= bis; w2++) {
+          const p2 = historische(h4, w2 - 52);
+          if (!p2) {
+            voll2 = false;
+            break;
           }
-        } else {
-          haus2.miete.keineVerlaengerung = true;
-          starteSchliessung(s2, haus2, { mietvertragEndetMit: true });
+          vj += p2.umsatz;
+          vjDb += p2.db;
+          geschaetzt || (geschaetzt = !h4.treiberVerlauf?.some((v2) => v2.von === w2 - 52 && v2.bis === w2 - 52));
         }
-        return null;
+        if (voll2 && von >= start) vjVorhanden++;
       }
-      case "jahresgespraech": {
-        const l = s2.lieferanten.find((x2) => x2.id === d4.lieferant);
-        if (!l) return null;
-        if (option2 === "mengenzusage") {
-          l.wkzQuote += 8e-3;
-          l.vertrauen = clamp(l.vertrauen + 6, 0, 100);
-          for (const g2 of Object.keys(l.gruppen)) s2.orderLevel[g2] = Math.max(s2.orderLevel[g2] ?? 1, 1.05);
-        } else if (option2 === "platzierung") l.vertrauen = clamp(l.vertrauen + 4, 0, 100);
-        else {
-          l.wkzQuote += 4e-3;
-          l.vertrauen = clamp(l.vertrauen - 8, 0, 100);
-        }
-        return null;
+      const mitVj = aktiv6 > 0 && vjVorhanden === aktiv6 && bis >= start;
+      const vorjahr2 = mitVj ? eur(vj) : void 0;
+      const abweichung2 = vorjahr2 === void 0 ? void 0 : eur(umsatz) - vorjahr2;
+      const abweichungProzent = vorjahr2 && abweichung2 !== void 0 ? abweichung2 / Math.abs(vorjahr2) : void 0;
+      const ebitdaQuote = umsatz > 0 ? ebitda / umsatz : void 0;
+      const vorjahrEbitdaQuote = vj > 0 && mitVj ? vjDb / vj : void 0;
+      return {
+        anzahl: hs.length,
+        offen: hs.filter((h4) => h4.status === "offen").length,
+        umsatz: eur(umsatz),
+        umsatzYtd: eur(umsatzYtd),
+        vorjahr: vorjahr2,
+        abweichung: abweichung2,
+        abweichungProzent,
+        ebitda: eur(ebitda),
+        ebitdaQuote,
+        vorjahrEbitda: mitVj ? eur(vjDb) : void 0,
+        vorjahrEbitdaQuote,
+        plan: eur(plan2),
+        planAbweichung: plan2 > 0 ? (umsatz - plan2) / plan2 : void 0,
+        frequenz: eur(fre),
+        kaufquote: fre > 0 ? kaeufe / fre : 0,
+        bon: kaeufe > 0 ? umsatz / kaeufe : 0,
+        personalquote: umsatz > 0 ? personal2 / umsatz : 0,
+        mietquote: umsatz > 0 ? miete / umsatz : 0,
+        ampel: !aktiv6 || !umsatz ? "ohne" : abweichungProzent === void 0 ? ebitda < 0 ? "rot" : "gelb" : abweichungProzent < -0.05 ? "rot" : abweichungProzent < 0 ? "gelb" : "gruen",
+        vorjahrGeschaetzt: mitVj && geschaetzt
+      };
+    };
+    const fmt2 = (h4) => h4.format;
+    const formate = ["warenhaus", "schwester", "sport", "outlet"].map((f13) => ({
+      id: f13,
+      name: formatName(f13),
+      ebene: "region",
+      format: f13,
+      ...summe2(gruppe3.filter((h4) => fmt2(h4) === f13))
+    }));
+    const ebenen = ebene === "alle" ? "region" : ebene === "region" ? "hauscluster" : "haus";
+    const gruppen = /* @__PURE__ */ new Map();
+    for (const h4 of gruppe3) {
+      const key = ebene === "alle" ? h4.region : ebene === "region" ? hausgruppe(h4) : h4.id;
+      const eintrag2 = gruppen.get(key) ?? [];
+      eintrag2.push(h4);
+      gruppen.set(key, eintrag2);
+    }
+    const zeilen = [...gruppen].map(([id, hs]) => ({
+      id,
+      name: ebene === "alle" ? "Region " + id : ebene === "region" ? s2.organisation?.hauscluster.find((c) => c.id === id)?.name ?? id : hs[0].name,
+      ebene: ebenen,
+      region: hs[0].region,
+      ...ebene !== "alle" && ebene !== "region" ? { stadt: hs[0].stadt, nurDaten: !!hs[0].nurDaten } : {},
+      ...summe2(hs)
+    })).sort((a2, b4) => (a2.abweichungProzent ?? Infinity) - (b4.abweichungProzent ?? Infinity) || a2.name.localeCompare(b4.name, "de"));
+    const titel = ebene === "alle" ? "Alle Regionen" : ebene === "region" ? "Region " + filter.id : ebene === "hauscluster" ? s2.organisation?.hauscluster.find((c) => c.id === filter.id)?.name ?? String(filter.id) : gruppe3[0]?.name ?? String(filter.id);
+    return {
+      ebene,
+      id: filter.id,
+      format,
+      zeitraum: zeitraum2,
+      von,
+      bis,
+      titel,
+      gesamt: summe2(gruppe3),
+      formate,
+      zeilen
+    };
+  }
+
+  // ../engine/src/statistik.ts
+  var STATISTIK_AKTIV = true;
+  var GRENZE_BYTES = 2e6;
+  var HAUS_WOCHEN = 156;
+  function statistikHaus(s2, h4, k5) {
+    if (!STATISTIK_AKTIV || s2.statistikDeaktiviert || s2.prognose) return;
+    if (!h4.verlauf) h4.verlauf = [];
+    const w2 = k5.woche;
+    if (s2.statistik?.sparsam && w2 > 52 && h4.verlauf.length) {
+      const letzter = h4.verlauf[h4.verlauf.length - 1];
+      if (letzter.woche > 52 && letzter.woche % 4 !== 0) h4.verlauf.pop();
+    }
+    h4.verlauf.push({
+      woche: w2,
+      umsatz: Math.round(k5.umsatz),
+      db: Math.round(k5.db),
+      frequenz: Math.round(Math.max(0, k5.umsatz) / 45),
+      personalFte: Math.round(k5.fteIst)
+    });
+    while (h4.verlauf.length && w2 - h4.verlauf[0].woche >= HAUS_WOCHEN) h4.verlauf.shift();
+  }
+  function statistikWoche(s2, k5) {
+    if (!STATISTIK_AKTIV || s2.statistikDeaktiviert || s2.prognose) return;
+    if (!s2.statistik) s2.statistik = { sparsam: false, stimmung: [] };
+    const a2 = s2.stakeholder;
+    const lief = s2.lieferanten.filter((x2) => x2.aktiv);
+    const lieferanten = (lief.reduce((sum2, l) => sum2 + l.vertrauen, 0) + s2.restLieferantenVertrauen) / (lief.length + 1);
+    s2.statistik.stimmung.push({ woche: k5.woche, wert: Math.round((a2.bank + a2.kreditversicherer + lieferanten) / 3) });
+    if (s2.statistik.stimmung.length > 520) s2.statistik.stimmung.splice(0, s2.statistik.stimmung.length - 520);
+    if (k5.woche >= 52 && k5.woche % 4 === 0 && !s2.statistik.sparsam) {
+      s2.statistik.sparsam = new TextEncoder().encode(JSON.stringify(s2)).byteLength > GRENZE_BYTES;
+      if (s2.statistik.sparsam) for (const h4 of s2.haeuser) {
+        if (!h4.verlauf) continue;
+        h4.verlauf = h4.verlauf.filter((p2) => p2.woche <= 52 || p2.woche % 4 === 0 || p2.woche === k5.woche);
       }
-      case "nordline_dtc": {
-        const l = s2.lieferanten.find((x2) => x2.id === "nordline");
-        if (!l) return null;
-        if (option2 === "investieren") {
-          einmalKosten(s2, 35e5);
-          l.vertrauen = clamp(l.vertrauen + 10, 0, 100);
-        } else {
-          l.dtc = true;
-          l.wkzQuote = Math.max(0, l.wkzQuote - 0.01);
-          melde(s2, "info", "Nordline k\xFCrzt die Zuteilung an die Sporth\xE4user.");
-        }
-        return null;
-      }
-      default:
-        return null;
     }
   }
-  function testAngebotErzeugen(s2, art) {
-    const vorher = s2.angebote.length;
-    switch (art) {
-      case "untermiete":
-        untermietAnfrage(s2);
-        break;
-      case "paket":
-        paketDeal(s2);
-        break;
-      case "stadt":
-        stadtAngebot(s2);
-        break;
-      case "sportverkauf":
-        sportVerkauf(s2);
-        break;
-      case "sonderposten":
-        sonderposten(s2);
-        break;
-      case "premiumVerkauf": {
-        const h4 = s2.haeuser.find((x2) => x2.klasse === "premium" && x2.status === "offen");
-        if (!h4) return false;
-        neuesAngebot(s2, {
-          typ: "premiumVerkauf",
-          frist: s2.woche + 10,
-          titel: "Testangebot f\xFCr " + h4.name,
-          text: "Ein fiktiver Investor bietet f\xFCr das Premiumhaus.",
-          kaufpreis: Math.round((h4.kpi?.umsatz ?? 2e6) * 40),
-          wunschHaeuser: [h4.id],
-          premiumKaeuferTyp: "Family Office",
-          premiumKaeuferName: "Testinvestor"
-        });
-        break;
-      }
-      // Übernahmen entstehen aus Räumungen in wettbewerb.ts (testWettbewerbEreignis).
-      case "uebernahme":
-        return false;
-    }
-    return s2.angebote.length > vorher;
+  function passendeHaeuser(s2, ebene, id) {
+    if (ebene === "haus") return s2.haeuser.filter((h4) => h4.id === id);
+    if (ebene === "stadt") return s2.haeuser.filter((h4) => h4.stadt === id);
+    if (ebene === "region") return s2.haeuser.filter((h4) => h4.region === id);
+    if (ebene === "format") return s2.haeuser.filter((h4) => {
+      const format = String(h4.format);
+      if (id === "Hartwig") return format === "warenhaus" && h4.klasse !== "premium";
+      if (id === "Sport") return format === "sport";
+      if (id === "Volkskauf") return format === "volkskauf";
+      if (id === "FUNDUS") return format === "fundus" || format === "outlet";
+      if (id === "Premium") return h4.klasse === "premium";
+      return format === id;
+    });
+    return s2.haeuser;
   }
-  function testZufallsereignis(s2, art) {
-    const h4 = offeneHaeuser(s2).find((x2) => x2.miete.netTyp === "triple") ?? offeneHaeuser(s2)[0];
-    switch (art) {
-      case "instandhaltung":
-        if (!h4) return false;
-        instandhaltung(s2, h4);
-        return true;
-      case "mietende":
-        if (!h4) return false;
-        mietende(s2, h4);
-        return true;
-      case "jahresgespraech": {
-        const l = s2.lieferanten.find((x2) => x2.aktiv);
-        if (!l) return false;
-        neueEntscheidung(s2, {
-          typ: "jahresgespraech",
-          frist: s2.woche + 2,
-          titel: "Jahresgespr\xE4ch mit " + l.name,
-          text: l.beschreibung,
-          optionen: [{ id: "mengenzusage", label: "Mengenzusage" }, { id: "platzierung", label: "Platzierung" }, { id: "hart", label: "Hart verhandeln" }],
-          standard: "platzierung",
-          daten: { lieferant: l.id }
-        });
-        return true;
+  function verlauf(s2, filter) {
+    const { ebene, id, kennzahl: kennzahl2 } = filter;
+    const einheit = ["umsatz", "ebitda", "cash", "db"].includes(kennzahl2) ? "euro" : kennzahl2 === "stimmung" ? "index" : "anzahl";
+    const ergebnis = { ebene, id, kennzahl: kennzahl2, punkte: [], einheit };
+    if (kennzahl2 === "frequenz") ergebnis.hinweis = "Kundenfrequenz gesch\xE4tzt aus Umsatz / 45 \u20AC; kein gemessener Besucherz\xE4hler.";
+    const letzteWoche = s2.historie.length ? s2.historie[s2.historie.length - 1].woche : s2.woche - 1;
+    const beginn = filter.wochen === "alle" ? -Infinity : letzteWoche - Math.max(1, Number(filter.wochen) || 52) + 1;
+    const werte3 = /* @__PURE__ */ new Map();
+    if (ebene === "konzern" && kennzahl2 === "stimmung") {
+      for (const p2 of s2.statistik?.stimmung ?? []) werte3.set(p2.woche, p2.wert);
+    } else if (ebene === "konzern" && ["umsatz", "ebitda", "cash", "personalFte"].includes(kennzahl2)) {
+      for (const k5 of s2.historie) {
+        const wert = kennzahl2 === "personalFte" ? k5.fte : k5[kennzahl2];
+        werte3.set(k5.woche, wert);
       }
-      case "nordline_dtc":
-        neueEntscheidung(s2, {
-          typ: "nordline_dtc",
-          frist: s2.woche + 4,
-          titel: "Nordline stellt auf Direktvertrieb um",
-          text: "Nordline k\xFCrzt die Zuteilung f\xFCr den Handel. Gegen eine Investition in Markenfl\xE4chen bleibt Hartwig A-Partner.",
-          optionen: [
-            { id: "akzeptieren", label: "K\xFCrzung akzeptieren" },
-            { id: "investieren", label: "Markenfl\xE4chen finanzieren (3,5 Mio. \u20AC)" }
-          ],
-          standard: "akzeptieren",
-          daten: {}
-        });
-        return true;
-      case "arvel_rueckkehr": {
-        const l = s2.lieferanten.find((x2) => x2.id === "arvel");
-        if (!l) return false;
-        l.aktiv = true;
-        l.rueckzug = false;
-        melde(s2, "info", "Test: Maison Arvel kehrt in die B-Lagen zur\xFCck.");
-        return true;
+    } else if (!["cash", "ebitda", "stimmung"].includes(kennzahl2)) {
+      const haeuser = passendeHaeuser(s2, ebene, id);
+      for (const h4 of haeuser) for (const p2 of h4.verlauf ?? []) {
+        werte3.set(p2.woche, (werte3.get(p2.woche) ?? 0) + p2[kennzahl2]);
       }
-      case "lieferantenausfall": {
-        const l = s2.lieferanten.find((x2) => x2.aktiv);
-        if (!l) return false;
-        l.aktiv = false;
-        l.ausfallBis = s2.woche + 12;
-        melde(s2, "warnung", "Test: Lieferant " + l.name + " f\xE4llt 12 Wochen aus.", { modul: "einkauf" });
-        return true;
-      }
-      case "containerstau": {
-        const b4 = s2.bestellungen.find((x2) => x2.wert > 0);
-        if (!b4) return false;
-        b4.ankunft += 6;
-        melde(s2, "warnung", "Test: Containerstau verz\xF6gert " + b4.gruppe + " um 6 Wochen.", { modul: "einkauf" });
-        return true;
-      }
-      case "konjunktur":
-        s2.makro.schockStaerke = 0.08 * schwierigkeit(s2).ereignisse;
-        s2.makro.schockBis = s2.woche + 26;
-        s2.makro.konjunktur = 1 - s2.makro.schockStaerke;
-        melde(s2, "presse", "Test: Konjunkturschock trifft den Einzelhandel.");
-        return true;
-      case "streik": {
-        const hs = offeneHaeuser(s2).slice(0, 4);
-        if (!hs.length) return false;
-        for (const haus2 of hs) haus2.streikBis = s2.woche + 2;
-        melde(s2, "presse", "Test: Streik in " + hs.length + " H\xE4usern.");
-        return true;
-      }
-      case "filialleiter":
-        if (!h4) return false;
-        h4.personal.filialleiter = { name: "Interimleitung", skill: 0.35, moral: 50, interimBis: s2.woche + 4 };
-        melde(s2, "warnung", "Test: Filialleitung in " + h4.name + " ausgefallen.", { stadt: h4.stadt, hausId: h4.id });
-        return true;
-      case "presse":
-        melde(s2, "presse", SATIRE[0]);
-        return true;
-      default:
-        return false;
     }
+    const start = s2.spielStartWoche ?? 0;
+    const vorlauf = /* @__PURE__ */ new Set();
+    const vonWoche = Math.max(start - 52, Number.isFinite(beginn) ? beginn - 52 : start - 52);
+    if (ebene === "konzern" && (kennzahl2 === "umsatz" || kennzahl2 === "ebitda")) {
+      for (let w2 = vonWoche; w2 < start; w2++) {
+        if (werte3.has(w2)) continue;
+        const v2 = vorlaufKonzernWoche(s2, w2);
+        if (v2) {
+          werte3.set(w2, kennzahl2 === "umsatz" ? v2.umsatz : v2.ebitda);
+          vorlauf.add(w2);
+        }
+      }
+    } else if (ebene !== "konzern" && (kennzahl2 === "umsatz" || kennzahl2 === "db" || kennzahl2 === "frequenz")) {
+      for (const h4 of passendeHaeuser(s2, ebene, id)) for (const v2 of s2.vorjahrHistorie?.[h4.id] ?? []) {
+        if (v2.woche < vonWoche || v2.woche >= start || h4.verlauf?.some((p2) => p2.woche === v2.woche)) continue;
+        const x2 = kennzahl2 === "umsatz" ? v2.umsatz : kennzahl2 === "db" ? v2.db : Math.round(Math.max(0, v2.umsatz) / 45);
+        werte3.set(v2.woche, (werte3.get(v2.woche) ?? 0) + x2);
+        vorlauf.add(v2.woche);
+      }
+    }
+    if (vorlauf.size && !ergebnis.hinweis) ergebnis.hinweis = "Wochen vor Spielstart aus dem Vorlauf des Vorg\xE4ngers.";
+    const alle = [...werte3.keys()].sort((a2, b4) => a2 - b4);
+    for (const w2 of alle) {
+      if (w2 < beginn) continue;
+      const punkt5 = { woche: w2, wert: werte3.get(w2) };
+      if (vorlauf.has(w2)) punkt5.vorlauf = true;
+      if (werte3.has(w2 - 52)) punkt5.vorjahr = werte3.get(w2 - 52);
+      if (ebene === "konzern" && kennzahl2 === "ebitda") {
+        const q2 = s2.quartale.find((x2) => w2 >= x2.start && w2 < x2.start + 13);
+        if (q2) punkt5.plan = (q2.plan ?? q2.planStandard) / 13;
+      }
+      ergebnis.punkte.push(punkt5);
+    }
+    return ergebnis;
   }
 
   // ../engine/src/erfolge.ts
@@ -160166,7 +160479,7 @@
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "e3c7cf9" : "Entwicklung";
+  var version = () => true ? "591dff8" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld2(d4) {
@@ -162469,11 +162782,12 @@
     const wahl3 = raeume.find((q2) => q2.gebaeude.id === etageWahl?.g && q2.etage.nr === etageWahl?.nr) ?? raeume.find((q2) => q2.gebaeude.id === a2.gebaeudeId && q2.etage.nr === a2.etage) ?? raeume[0];
     const geb = (u.gebaeude ?? []).find((g2) => g2.id === wahl3?.gebaeude.id);
     const ue = geb?.etagen.find((e) => e.nr === wahl3?.etage.nr);
-    const fteEtage = wahl3?.zugewiesen?.fte ?? 0;
-    const freieQm = Math.max(0, (ue?.qm ?? 0) - (ue?.belegtQm ?? 0));
-    const zugewiesenQm = ue?.abteilungen.find((x2) => x2.id === id)?.qm ?? 0;
-    const kapEtage = wahl3 ? Math.max(fteEtage, Math.floor((zugewiesenQm + freieQm) / 14)) : 0;
+    const platz = (a2.plaetze ?? []).find((z6) => z6.gebaeudeId === wahl3?.gebaeude.id && z6.etage === wahl3?.etage.nr);
+    const fteEtage = platz?.fte ?? wahl3?.zugewiesen?.fte ?? 0;
+    const kapEtage = wahl3 ? platz?.plaetze ?? fteEtage : 0;
     const kap = Math.max(a2.fte, a2.kapazitaetFte ?? a2.fte);
+    const etagenAnzahl = (a2.plaetze ?? []).length;
+    const ohnePlatz = Math.max(0, Math.round(a2.fte) - (a2.plaetze ?? []).reduce((n3, z6) => n3 + z6.fte, 0));
     const st2 = a2.gehaltFaktor ?? 1;
     const klick = (...x2) => `onclick="hqKlick(${x2.map((v2) => `'${esc2(String(v2))}'`).join(",")})"`;
     const gName = geb?.name ?? wahl3?.gebaeude.name ?? "";
@@ -162498,12 +162812,13 @@
     ]);
     if (!wahl3) r4 += leer3("Kein B\xFCro zugewiesen. In der Zentrale eine gemietete Etage w\xE4hlen.", "Ohne Arbeitsplatz", '<button type="button" class="hk-knopf zweit" ' + klick("uebersicht") + ">Zur Zentrale</button>");
     r4 += liste([
-      zeile({ was: "Arbeitspl\xE4tze der Abteilung", unter: "alle zugewiesenen Etagen, 14 qm je FTE", wert: fmt.format(kap) }),
-      ...wahl3 ? [zeile({ was: "Auf dieser Etage", unter: esc2(gName) + " \xB7 " + etText, wert: fmt.format(fteEtage) + " von " + fmt.format(kapEtage) })] : []
+      // Q35: eine Quelle (Engine abteilungPlaetze). Platz im Gebäude = eigene Plätze plus freie Fläche, 14 qm je FTE.
+      zeile({ was: "Platz im Geb\xE4ude", unter: (etagenAnzahl > 1 ? fmt.format(Math.round(a2.fte)) + " FTE auf " + etagenAnzahl + " Etagen, " : "") + "inkl. freier Fl\xE4che, 14 qm je FTE", wert: fmt.format(kap) }),
+      ...wahl3 ? [zeile({ was: "Auf dieser Etage belegt", unter: esc2(gName) + " \xB7 " + etText + (ohnePlatz ? " \xB7 " + fmt.format(ohnePlatz) + " ohne Arbeitsplatz" : ""), wert: fmt.format(fteEtage) + " von " + fmt.format(kapEtage) })] : []
     ]);
     if (raeume.length > 1) r4 += '<div class="hk-seg q32-etagen" role="group" aria-label="Etage ausw\xE4hlen">' + raeume.map((q2) => '<button type="button" aria-pressed="' + (q2 === wahl3) + '" ' + klick("abteilungEtage", id, q2.gebaeude.id, q2.etage.nr) + ">" + esc2(etageName2(q2.etage.nr)) + "</button>").join("") + "</div>";
     r4 += abschnitt("Personal und Verg\xFCtung");
-    r4 += '<div class="q32-regler"><div><span>Besetzung</span><b>' + fmt.format(a2.fte) + " von " + fmt.format(kap) + ' FTE</b></div><input type="range" aria-label="Besetzung der Abteilung" min="1" max="' + kap + '" step="1" value="' + a2.fte + `" onchange="hqKlick('fte','` + esc2(a2.id) + `',this.value)" data-q15-fte="` + a2.fte + '"><small>Einstellen braucht freie B\xFCrofl\xE4che und Einarbeitung, Abbau kostet Abfindungen.</small></div>';
+    r4 += '<div class="q32-regler"><div><span>Besetzung</span><b>' + fmt.format(Math.round(a2.fte)) + " FTE \xB7 Platz f\xFCr " + fmt.format(kap) + '</b></div><input type="range" aria-label="Besetzung der Abteilung" min="1" max="' + kap + '" step="1" value="' + a2.fte + `" onchange="hqKlick('fte','` + esc2(a2.id) + `',this.value)" data-q15-fte="` + a2.fte + '"><small>Einstellen braucht freie B\xFCrofl\xE4che und Einarbeitung, Abbau kostet Abfindungen.</small></div>';
     r4 += '<div class="q32-regler"><div><span>Gehaltsniveau</span><b>' + Math.round(st2 * 100) + ' % des Standards</b></div><input type="range" aria-label="Gehaltsniveau der Abteilung" min="80" max="120" step="5" value="' + Math.round(st2 * 100) + `" onchange="hqKlick('gehalt','` + esc2(a2.id) + `',this.value)" data-q15-gehalt="` + st2 + '"></div>';
     r4 += liste([
       zeile({ was: "Moral", wert: a2.moral + " / 100", ton: a2.moral < 65 ? "schlecht" : "" }),
@@ -171688,9 +172003,9 @@
       <path d="M15 18H303M15 54H303M15 91H303" stroke="#e5e2dd" stroke-width="1" fill="none"/>
       <polyline points="${punkte2(A.fremd)}" stroke="#88939a" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
       <polyline points="${punkte2(A.eigen)}" stroke="#b65a44" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-      ${A.wochen.map((w2, i) => `<text x="${15 + i * 72}" y="111" text-anchor="middle" font-size="9" fill="#6c7780">KW ${kwVon2(Math.max(0, w2))}</text>`).join("")}
+      ${A.wochen.map((w2, i) => `<text x="${15 + i * 72}" y="111" text-anchor="middle" font-size="9" fill="#6c7780">KW ${kwVon2(w2)}</text>`).join("")}
     </svg>` : ""}
-    <p class="q17-hinweis">${leer4 ? "Noch keine Verkaufsdaten erfasst. " : ""}Vergleich mit Fremdmarkenumsatz in denselben Warengruppen. Betr\xE4ge in \u20AC pro Woche.</p>
+    <p class="q17-hinweis">${leer4 ? "Noch keine Verkaufsdaten erfasst. " : ""}${A.vorlaufWochen ? (A.vorlaufWochen === 1 ? "Eine Woche" : A.vorlaufWochen + " Wochen") + " vor Spielstart aus dem Vorlauf. " : ""}Vergleich mit Fremdmarkenumsatz in denselben Warengruppen. Betr\xE4ge in \u20AC pro Woche.</p>
   </section>`;
   }
   function linienProfil(m, P5) {
@@ -174065,10 +174380,12 @@
     if (h4.substanz < 35) funde.push({ g: 2, t: `Die Substanz ist kritisch (${Math.round(h4.substanz)} von 100).`, ton: "engpass" });
     if ((b4?.kundenScore ?? 100) < 50) funde.push({ g: 1, t: `Mystery Shopping nur ${b4.kundenScore} von 100.`, ton: "engpass" });
     if (h4.personal?.filialleiter?.interimBis > 0) funde.push({ g: 1, t: "Die Hausleitung ist nur interimistisch besetzt.", ton: "engpass" });
+    const ka = b4?.kostenAbweichung, kaText = ka && Math.abs(ka.abweichung) >= 5e-3 ? `${POSTEN2[ka.posten] ?? ka.posten} liegt ${p(Math.abs(ka.abweichung) * 100, 0)} % ${ka.abweichung > 0 ? "\xFCber" : "unter"} Budget.` : "";
+    if (ka && ka.abweichung >= 0.05) funde.push({ g: 1, t: kaText, ton: "engpass" });
     funde.sort((a2, c) => c.g - a2.g);
     if (!funde.length) {
       const vj = vorjahr2 > 0 ? ` Umsatz ${k5.umsatz >= vorjahr2 ? "+" : "\u2212"}${p(Math.abs(k5.umsatz / vorjahr2 - 1) * 100, 1)} % zum Vorjahr.` : vorwoche ? ` Umsatz ${k5.umsatz >= vorwoche ? "\xFCber" : "unter"} Vorwoche.` : "";
-      return { text: `<b>Das Haus l\xE4uft.</b> Deckungsbeitrag positiv, Besetzung gesichert.${vj}`, ton: "", name: name2 };
+      return { text: `<b>Das Haus l\xE4uft.</b> Deckungsbeitrag positiv, Besetzung gesichert.${vj}${kaText ? " " + kaText : ""}`, ton: "", name: name2 };
     }
     return { text: `<b>${esc2(funde[0].t)}</b>${funde[1] ? " " + esc2(funde[1].t) : ""}`, ton: funde[0].ton, name: name2 };
   }
@@ -174288,11 +174605,12 @@
     if (b4?.ausnahmeGrund) x2 += hinweis("Haus-Ausnahme: " + esc2(b4.ausnahmeGrund), "achtung");
     return x2;
   }
+  var verbrauch = (ist) => ist == null || Math.abs(ist - 1) < 5e-3 ? "Ist im Plan" : `Ist ${ist > 1 ? "+" : "\u2212"}${p(Math.abs(ist - 1) * 100, 0)} %`;
   function kosten(c, h4, k5, b4) {
     const id = h4.id;
     let x2 = gross2([{ label: "Betriebskosten Woche", wert: geld(k5?.sonstige ?? 0) }, { label: "Energiepreis", wert: PROZENT(b4?.energiePreis ?? 1), unter: "zum Ausgangswert" }]);
     x2 += abschnitt("Budget je Posten", "100 % = Ausgangsbudget");
-    x2 += Object.entries(POSTEN2).map(([key, name2]) => `<div class="hk-regel"><span>${name2}</span>${stepper({ wert: PROZENT(b4?.kosten?.[key] ?? 1), unter: "Budget", label: name2, attrMinus: tun("kosten", id, key, -0.1), attrPlus: tun("kosten", id, key, 0.1) })}</div>`).join("");
+    x2 += Object.entries(POSTEN2).map(([key, name2]) => `<div class="hk-regel"><span>${name2}</span>${stepper({ wert: PROZENT(b4?.kosten?.[key] ?? 1), unter: verbrauch(b4?.kostenIst?.[key]), label: name2, attrMinus: tun("kosten", id, key, -0.1), attrPlus: tun("kosten", id, key, 0.1) })}</div>`).join("");
     x2 += hinweis("Weniger Reinigung senkt den Kundenscore; weniger Sicherheit und Instandhaltung erh\xF6hen Betriebsrisiken.", "achtung");
     return x2;
   }
@@ -174800,9 +175118,11 @@
     const ist = Math.max(0, k5.fteIst ?? (haus2.personal?.vollzeit ?? 0) + (haus2.personal?.teilzeit ?? 0) + (haus2.personal?.aushilfen ?? 0));
     const fte2 = haus2.format === "outlet" ? Math.round(qm2 / 140) : ist * qm2 / gesamt;
     const umsatz = Math.max(0, Object.entries(k5.umsatzJeGruppe ?? {}).reduce((n3, [g2, u]) => n3 + u * (fl.some((f13) => f13.gruppe === g2) ? 1 : 0), 0));
+    const imDienst = haus2.format === "outlet" ? qm2 / 300 : fte2 * (40 / 60) * 0.9 * 0.71;
     return {
       kunden: fl.length ? begrenze(Math.round(2 + umsatz / 18e3 + qm2 / 240), 2, 36) : 0,
-      verkauf: fl.length ? begrenze(Math.round(haus2.format === "outlet" ? qm2 / 300 : fte2 / 9), haus2.format === "outlet" ? 1 : 0, 12) : 0,
+      verkauf: fl.length ? begrenze(Math.round(imDienst), haus2.format === "outlet" ? 1 : 0, 12) : 0,
+      imDienst: fl.length ? Math.max(haus2.format === "outlet" ? 1 : 0, Math.round(imDienst)) : 0,
       fte: Math.round(fte2 * 10) / 10,
       personalquote: (k5.fteBedarf ?? 0) > 0 ? ist / k5.fteBedarf : 1
     };
@@ -174987,7 +175307,7 @@
       K3.max = Math.max(20, Math.max(buehne.breite, buehne.tiefe) * 1.25);
       K3.min = 7;
       K3.halb = Math.min(K3.max, Math.max(16, Math.max(buehne.breite, buehne.tiefe) * 0.8));
-      host.querySelector(".hb-unter").textContent = etageName3(etageNr) + " \xB7 " + besatz.kunden + " Kunden \xB7 " + besatz.verkauf + " Besch\xE4ftigte" + (haus2.format === "outlet" ? " \xB7 Modellbetrieb" : " \xB7 " + Number(besatz.fte).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " FTE");
+      host.querySelector(".hb-unter").textContent = etageName3(etageNr) + " \xB7 " + besatz.kunden + " Kunden \xB7 " + besatz.imDienst + " im Dienst" + (besatz.imDienst > besatz.verkauf ? " (" + besatz.verkauf + " im Bild)" : "") + (haus2.format === "outlet" ? " \xB7 Modellbetrieb" : " von " + Number(besatz.fte).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " FTE");
       host.querySelector(".hb-blase").hidden = true;
       host.querySelectorAll("[data-hb=etage]").forEach((b4) => b4.setAttribute("aria-pressed", String(Number(b4.dataset.nr) === etageNr)));
       fahrt = delta ? { seit: performance.now(), start: delta > 0 ? -8 : 8, dauer: 300 } : null;
@@ -177527,7 +177847,11 @@
       if (gewaehlt) ui.cluster = gewaehlt.id;
       const knapp = gewaehlt ? gewaehlt.haeuser.filter((h4) => GRUPPEN2.some((g2) => h4.gruppen[g2] < 0.9)) : [];
       const selector = '<label class="pe-wahl">Hauscluster<select class="ort" data-pe="cluster" aria-label="Hauscluster w\xE4hlen">' + liste3.map((c) => '<option value="' + esc2(c.id) + '"' + (c.id === ui.cluster ? " selected" : "") + ">" + esc2(c.name) + " (" + c.haeuser.length + ")</option>").join("") + "</select></label>";
-      const befund2 = !gewaehlt ? "<b>Keine offenen H\xE4user.</b>" : knapp.length ? "<b>" + knapp.length + " von " + gewaehlt.haeuser.length + " H\xE4usern sind unter 90 % besetzt.</b> Am knappsten: " + esc2(knapp.slice(0, 2).map((h4) => h4.name).join(", ")) + "." : "<b>Alle " + gewaehlt.haeuser.length + " H\xE4user sind ausreichend besetzt.</b> Kein Springer n\xF6tig.";
+      const befund2 = !gewaehlt ? "<b>Keine offenen H\xE4user.</b>" : knapp.length ? "<b>" + knapp.length + " von " + gewaehlt.haeuser.length + " H\xE4usern sind unter 90 % besetzt.</b> Am knappsten: " + esc2(knapp.slice(0, 2).map((h4) => h4.name).join(", ")) + "." : (() => {
+        const min = (h4) => Math.min(...GRUPPEN2.map((g2) => h4.gruppen[g2]));
+        const k5 = [...gewaehlt.haeuser].sort((a2, b4) => min(a2) - min(b4))[0];
+        return "<b>Alle " + gewaehlt.haeuser.length + " H\xE4user sind ausreichend besetzt.</b> " + (k5 && min(k5) < 0.985 ? "Am knappsten: " + esc2(k5.name) + " mit " + pct2(min(k5)) + " (Krankenstand " + pct2(k5.krank) + ")." : "Kein Springer n\xF6tig.");
+      })();
       ctx.panel(
         "Personaleinsatz",
         "Wochentagsplanung \xB7 vier Personalgruppen",
@@ -178477,8 +178801,9 @@
     $2("cockpit").classList.toggle("offen", cockpitOffen);
     $2("cockpit").innerHTML = [
       kachel2("Cash", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? "rot" : ""),
-      fx ? kachel2("EBITDA " + FORMATNAME2[cockpitFormat], s.historie.length ? geld(fx.ebitda) : "noch offen", !s.historie.length ? "" : fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wo.", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
-      kachel2("Umsatz<em> \xB7 " + FORMATNAME2[cockpitFormat] + "</em>" + auswahl4, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : "noch offen", "mitwahl"),
+      // Q35: vor der ersten Woche Werte aus dem Vorlauf (Vorjahreswochen des Vorgängers), nicht „noch offen“.
+      fx ? kachel2("EBITDA " + FORMATNAME2[cockpitFormat], geld(fx.ebitda), fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wo.", geld(c.ebitda13), c.ebitda13 < 0 ? "rot" : "gruen"),
+      kachel2("Umsatz<em> \xB7 " + FORMATNAME2[cockpitFormat] + "</em>" + auswahl4, geld(fx ? fx.umsatz : c.umsatzWoche), "mitwahl"),
       `<button type="button" class="kz-mehr" data-cockpit-mehr aria-expanded="${cockpitOffen}" aria-label="${zu ? "Weitere Kennzahlen zeigen" : "Weitere Kennzahlen ausblenden"}"><span aria-hidden="true">${zu ? "\u25BE" : "\u25B4"}</span></button>`,
       kachel2("Kreditrahmen frei", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? "rot" : ""),
       kachel2("Vertrauen", `${c.vertrauen} / 100`, c.vertrauen < 35 ? "rot" : ""),
@@ -178977,8 +179302,10 @@
     const leerEtagen = (u.gebaeude ?? []).flatMap((g2) => g2.etagen.filter((e) => e.gemietet && !e.abteilungen.length && !e.archiv));
     const ohnePlatz = (u.abteilungen ?? []).filter((a2) => !a2.gebaeudeId).length;
     const diffStart = u.kostenWoche - (u.kostenStart ?? u.kostenWoche);
-    const befund2 = (leerEtagen.length ? `<b>${leerEtagen.length} gemietete ${leerEtagen.length === 1 ? "Etage steht" : "Etagen stehen"} leer.</b> ` : "<b>Alle gemieteten Etagen sind belegt.</b> ") + (ohnePlatz ? `${ohnePlatz} ${ohnePlatz === 1 ? "Abteilung hat" : "Abteilungen haben"} keinen Platz und wirken nur mit Stufe 0. ` : "") + (u.restmieteWoche > 0 ? `F\xFCr alte B\xFCros laufen noch ${geld(u.restmieteWoche)} Restmiete je Woche.` : "");
-    let html = bereich("zentrale") + sprecher({ text: befund2, unter: "Leitung Verwaltung", ton: leerEtagen.length || ohnePlatz ? "engpass" : "" });
+    const qmMiete = (u.gebaeude ?? []).reduce((n3, g2) => n3 + (g2.qmGemietet ?? 0), 0);
+    const qmFrei = Math.max(0, qmMiete - (u.gebaeude ?? []).reduce((n3, g2) => n3 + (g2.qmBelegt ?? 0), 0));
+    const befund2 = (leerEtagen.length ? `<b>${leerEtagen.length} gemietete ${leerEtagen.length === 1 ? "Etage steht" : "Etagen stehen"} leer.</b> ` : qmMiete > 0 && qmFrei / qmMiete >= 0.02 ? `<b>${pz5(1 - qmFrei / qmMiete)} der gemieteten B\xFCrofl\xE4che sind belegt, ${fmt.format(Math.round(qmFrei))} qm stehen frei.</b> ` : "<b>Alle gemieteten Etagen sind voll belegt.</b> ") + (ohnePlatz ? `${ohnePlatz} ${ohnePlatz === 1 ? "Abteilung hat" : "Abteilungen haben"} keinen Platz und wirken nur mit Stufe 0. ` : "") + (u.restmieteWoche > 0 ? `F\xFCr alte B\xFCros laufen noch ${geld(u.restmieteWoche)} Restmiete je Woche.` : "");
+    let html = bereich("zentrale") + sprecher({ text: befund2, unter: "Leitung Verwaltung", ton: leerEtagen.length || ohnePlatz || qmMiete > 0 && qmFrei / qmMiete >= 0.15 ? "engpass" : "" });
     let kopfbild = "";
     let rumpf4 = gross2([
       { label: "Kosten je Woche", p: "hq:kosten", wert: geld(u.kostenWoche), unter: diffStart ? abweichung(-diffStart, (diffStart > 0 ? "+" : "\u2212") + geld(Math.abs(diffStart)) + " zum Start", null) : "wie zum Start" },

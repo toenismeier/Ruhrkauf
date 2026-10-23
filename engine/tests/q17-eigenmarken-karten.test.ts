@@ -32,12 +32,16 @@ describe('Q17: Produktkarten und Linienprofil', () => {
     expect(produktHausFaktor(s, m, p.wg, h1)).toBe(1);
   });
 
-  test('fünf Wochen aus tatsächlich gebuchten Umsätzen, keine erfundenen Startwerte', () => {
+  test('fünf Wochen aus tatsächlich gebuchten Umsätzen; vor Spielstart aus dem Vorlauf (Q35)', () => {
     const s = neuesSpiel(1);
     const p = s.produkte.liste.find((x) => x.marke === 'em1' && x.status === 'sortiment')!;
     const anfang = produktAbsatzVerlauf(s, 'em1', p.kategorie);
-    expect(anfang.eigen).toEqual([0, 0, 0, 0, 0]);
-    expect(anfang.fremd).toEqual([0, 0, 0, 0, 0]);
+    // Q35: keine Nulllinie vor Spielstart, Werte aus dem Vorlauf und als solche gekennzeichnet.
+    expect(anfang.vorlaufWochen).toBe(5);
+    expect(anfang.eigen.every((x) => x > 0)).toBe(true);
+    expect(anfang.fremd.every((x) => x > 0)).toBe(true);
+    expect(anfang.wochen).toEqual([-5, -4, -3, -2, -1]);
+    s.woche = 5; // fünf gebuchte Wochen nach Spielstart
     p.umsatz = [10, 20, 30, 40, 50];
     s.einkauf.wgs[p.wg].v.u = [100, 100, 100, 100, 100];
     s.einkauf.wgs[p.wg].v.eu = [25, 25, 25, 25, 25];

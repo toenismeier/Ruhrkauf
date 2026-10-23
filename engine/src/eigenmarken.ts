@@ -3,7 +3,7 @@
 // Vertrag: ../EINKAUF-VERTRAG.md, Abschnitt Eigenmarken.
 import type { Cluster, GameState, GruppeId, Haus, Region } from './types';
 import { clamp, eur, melde, mio } from './util';
-import { WG, WG_DEF, type WgId } from './einkauf';
+import { WG, WG_DEF, entferneMarkeAusFreigaben, type WgId } from './einkauf';
 
 // ---------------------------------------------------------------------------------------------
 // Datenmodell
@@ -314,7 +314,7 @@ export function eigenmarkeEinstellen(s: GameState, id: string): EmErgebnis {
   m.wgAnteile = {};
   let rest = 0;
   for (const k of s.bestand) if (k.marke === id) { k.ladenhueter = true; rest += k.wert; }
-  s.einkauf.freigaben = s.einkauf.freigaben.filter((f) => f.marke !== id);
+  s.einkauf.freigaben = entferneMarkeAusFreigaben(s.einkauf.freigaben, id);
   for (const l of s.lieferanten) if (l.aktiv) l.vertrauen = clamp(l.vertrauen + 1, 0, 100);
   melde(s, 'info', `Eigenmarke ${m.name} eingestellt.`);
   return ok(`${m.name} eingestellt. Restbestand ${mio(rest)} geht in Offprice und Abschrift.`);
