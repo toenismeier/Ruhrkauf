@@ -20,7 +20,16 @@ ersetze(/<script[^>]*src="\.?\/?spiel-bundle\.js"[^>]*><\/script>/, '<script>win
 // Alle Stylesheets aus src/ui einbetten (Reise/Woche und die Module aus N01–N09).
 const cssMuster = /<link[^>]*rel="stylesheet"[^>]*href="\.\/(src\/ui\/[\w-]+\.css)"[^>]*>/g;
 if (!cssMuster.test(html)) throw new Error('Nicht gefunden: CSS');
-html = html.replace(cssMuster, (_, datei) => '<style>' + readFileSync(join(render, datei), 'utf8') + '</style>');
+// @import innerhalb der Stylesheets mit einbetten (z. B. marketing-q16.css → management.css), jede Datei nur einmal
+const eingebettet = new Set();
+const cssLesen = (datei) => {
+  if (eingebettet.has(datei)) return '';
+  eingebettet.add(datei);
+  const ordner = datei.replace(/[^/]+$/, '');
+  return readFileSync(join(render, datei), 'utf8').replace(/@import\s+url\(['"]?\.\/([\w-]+\.css)['"]?\)\s*;?/g, (_, n) => cssLesen(ordner + n));
+};
+html = html.replace(cssMuster, (_, datei) => '<style>' + cssLesen(datei) + '</style>');
+if (/@import\s+url\(['"]?\.\//.test(html)) throw new Error('Nicht eingebettet: @import');
 ersetze(/<link[^>]*rel="manifest"[^>]*>/, '', 'Manifest');
 html = html.replace(/\.\/icon\.svg/g, icon);
 
