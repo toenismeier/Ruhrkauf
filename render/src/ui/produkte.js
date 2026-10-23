@@ -212,7 +212,7 @@ export function produkteModul(ctx) {
     const voll = new Set(M.kategorien.filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
     const entwickelbar = Array.isArray(M.entwickelbar) ? new Set(M.entwickelbar) : null;
     if (zielgruppenFuerFach(K, ui.fach).every((x) => x.id !== ui.zielgruppe)) { ui.zielgruppe = zielgruppenFuerFach(K, ui.fach)[0]?.id ?? ui.zielgruppe; e.zielgruppe = ui.zielgruppe; }
-    const typen = passendeTypen(K, ui.fach, ui.zielgruppe).filter((t) => markeKats.has(t.kategorie) && (entwickelbar ? entwickelbar.has(t.typ) : (t.gruppe[M.trendGruppe] ?? 0) > 0.15)).sort((a, b) => Number(voll.has(a.kategorie)) - Number(voll.has(b.kategorie)));
+    const typen = passendeTypen(K, ui.fach, ui.zielgruppe).filter((t) => markeKats.has(t.kategorie) && (entwickelbar ? entwickelbar.has(t.typ) : true)).sort((a, b) => Number(voll.has(a.kategorie)) - Number(voll.has(b.kategorie)));
     if (!typen.some((t) => t.typ === e.typ)) { e.typ = (typen.find((t) => !voll.has(t.kategorie)) ?? typen[0])?.typ; }
     const T = K.typen.find((t) => t.typ === e.typ);
     if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];

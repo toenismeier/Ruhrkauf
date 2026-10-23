@@ -14414,7 +14414,7 @@
       const liste3 = s2.produkte.liste.filter((p2) => p2.marke === m.id && p2.status !== "ausgelistet");
       const moegliche = ARTIKELTYPEN.filter((t5) => t5.gruppe[trendGruppe(m)] > 0.15 && wgFuer(s2, m, t5)).map((t5) => t5.kategorie);
       const kats = [.../* @__PURE__ */ new Set([...liste3.map((p2) => p2.kategorie), ...moegliche])];
-      const entwickelbar = ARTIKELTYPEN.filter((t5) => t5.gruppe[trendGruppe(m)] > 0.15 && wgFuer(s2, m, t5)).map((t5) => t5.typ);
+      const entwickelbar = ARTIKELTYPEN.filter((t5) => !!wgFuer(s2, m, t5)).map((t5) => t5.typ);
       const ent = liste3.filter((p2) => p2.status === "entwicklung").length;
       const voll2 = kats.filter((k5) => belegt(s2, m.id, k5) >= kap).map((k5) => PRODUKT_KATEGORIEN[k5]);
       return {
@@ -160905,7 +160905,7 @@
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "a29013e" : "Entwicklung";
+  var version = () => true ? "19bbc4f" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld2(d4) {
@@ -172577,7 +172577,7 @@
         ui.zielgruppe = zielgruppenFuerFach(K3, ui.fach)[0]?.id ?? ui.zielgruppe;
         e.zielgruppe = ui.zielgruppe;
       }
-      const typen = passendeTypen(K3, ui.fach, ui.zielgruppe).filter((t5) => markeKats.has(t5.kategorie) && (entwickelbar ? entwickelbar.has(t5.typ) : (t5.gruppe[M2.trendGruppe] ?? 0) > 0.15)).sort((a2, b4) => Number(voll2.has(a2.kategorie)) - Number(voll2.has(b4.kategorie)));
+      const typen = passendeTypen(K3, ui.fach, ui.zielgruppe).filter((t5) => markeKats.has(t5.kategorie) && (entwickelbar ? entwickelbar.has(t5.typ) : true)).sort((a2, b4) => Number(voll2.has(a2.kategorie)) - Number(voll2.has(b4.kategorie)));
       if (!typen.some((t5) => t5.typ === e.typ)) {
         e.typ = (typen.find((t5) => !voll2.has(t5.kategorie)) ?? typen[0])?.typ;
       }

@@ -919,7 +919,7 @@ export function produkte(s: GameState, marke?: string): ProdukteListe {
     const moegliche = ARTIKELTYPEN.filter((t) => t.gruppe[trendGruppe(m)] > 0.15 && wgFuer(s,m,t)).map((t) => t.kategorie);
     const kats = [...new Set([...liste.map((p) => p.kategorie), ...moegliche])];
     // Q33: welche Artikeltypen die Marke entwickeln kann (WG passt zur Marke), damit die Auswahl nichts Unmögliches zeigt
-    const entwickelbar = ARTIKELTYPEN.filter((t) => t.gruppe[trendGruppe(m)] > 0.15 && wgFuer(s, m, t)).map((t) => t.typ);
+    const entwickelbar = ARTIKELTYPEN.filter((t) => !!wgFuer(s, m, t)).map((t) => t.typ);
     const ent = liste.filter((p) => p.status === 'entwicklung').length;
     const voll = kats.filter((k) => belegt(s, m.id, k) >= kap).map((k) => PRODUKT_KATEGORIEN[k]);
     return {
