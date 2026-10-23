@@ -1,4 +1,5 @@
-// Q22: Hauspins für die Spielkarte. Die Spitze sitzt auf der tatsächlichen Dachmitte,
+// Q22/Q36: Hauspins für die Spielkarte. Die Spitze sitzt auf der Dachkante über dem Haupteingang
+// (Fallback: Dachmitte),
 // nicht auf dem Grundstück. Keine Änderung an Stadtplan, Hausmodell oder Engine.
 import { THREE } from './basis.js';
 import { fussabdruck } from './bauer.js';
@@ -15,6 +16,9 @@ export function dachpunkt(parzelle, abmessung, hoehe) {
 }
 
 export function hausDachpunkt(eintrag, haus) {
+  // Q36: Pin sitzt auf der Dachkante über dem Haupteingang, wenn der Hausbauer ihn liefert.
+  const a = eintrag?.e?.pinAnker;
+  if (a && [a.x, a.y, a.z].every(Number.isFinite)) return { x: a.x, y: Math.max(0, a.y), z: a.z };
   return dachpunkt(eintrag?.p, haus ? fussabdruck(haus) : null, eintrag?.e?.hoehe);
 }
 

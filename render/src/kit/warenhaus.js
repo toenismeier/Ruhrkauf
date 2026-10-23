@@ -11,6 +11,7 @@ import { zustandNormal, zustandFlags, zustandsDekor, eigeneMieterflaechen, laden
 import { seitenVon as seitenFremd, plakat as plakatFremd, passend as passendFremd } from './sporthelfer.js';
 import { WETTBEWERBER_FARBEN } from './wettbewerber.js';
 import { dachInstallationen } from './dach-qualitaet.js';
+import { dachLandschaft } from './dach-landschaft.js';
 import { STADT_GEOGRAFIE } from './stadt-geografie.js';
 
 export const ROT = '#d23c32';
@@ -193,17 +194,11 @@ function leuchtschrift(K, s, text, um, y, t, hb, farbe, o = {}) {
     idx.forEach((i, j) => { if (j >= bleib) defekt.set(i, 'weg'); });
   }
   if (o.kaputt) {
+    // Q36: Verfall zeigt sich nur über ausgeblichene Buchstaben. Kein Buchstabe fehlt, kippt oder wird
+    // grau, damit der Schriftzug aus jeder Zoomstufe vollständig lesbar bleibt (Wurf 3: „A‿TWIG“).
     const idx = z.map((c, i) => i).filter((i) => z[i] !== ' ');
     const zwang = idx[Math.floor(r() * idx.length)];
-    for (const i of idx) {
-      const x = i === zwang ? r() * 0.85 : r();
-      if (x < 0.13) defekt.set(i, 'weg'); else if (x < 0.36) defekt.set(i, 'tot'); else if (x < 0.5) defekt.set(i, 'schief');
-    }
-    // C1: höchstens ein fehlender Buchstabe, sonst liest sich der Verfall als Darstellungsfehler („HA TIG“)
-    let weg = 0;
-    for (const i of idx) if (defekt.get(i) === 'weg' && weg++ > 0) defekt.set(i, 'tot');
-    // erster und letzter Buchstabe fehlen nie (sonst liest sich das Wort als abgeschnitten, „HARTWI“)
-    for (const i of [idx[0], idx[idx.length - 1]]) if (defekt.get(i) === 'weg') defekt.set(i, 'tot');
+    for (const i of idx) if (i === zwang || r() < 0.35) defekt.set(i, 'blass');
   }
   let acc = 0;
   z.forEach((c, i) => {
@@ -217,10 +212,10 @@ function leuchtschrift(K, s, text, um, y, t, hb, farbe, o = {}) {
       s.q(uc + hb * 0.15, uc + hb * 0.25, y - hb * 0.3, y + hb * 0.3, t - 0.3, t - 0.05, '#6c6c6c');
       return;
     }
-    const f = o.geist ?? (df === 'tot' ? TOT : farbe);
+    const f = o.geist ?? (df === 'tot' ? TOT : df === 'blass' ? ausgeblichen(farbe) : farbe);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(tex(c, f).seitenverhaeltnis * hb * PH, hb * PH), texMat(c, f, null, !!o.geist));
-    const rz = df === 'schief' ? (r() < 0.5 ? -1 : 1) * zw(r, 0.18, 0.4) : 0;
-    s.flaeche(m, uc, y - (df === 'schief' ? hb * 0.15 : 0), t, rz);
+    s.flaeche(m, uc, y, t, 0);
+    if (!o.geist && !o.abbau) m.userData.schriftzug = { text, i, n: z.length, seite: s.seite };
     K.scene.add(m);
   });
   return total;
@@ -469,12 +464,20 @@ function setzeDach(K, x0, z0, x1, z1, y) {
 }
 function reserviert(K, x, z, rad = 0) {
   const t = K.terrasse;
+  if (K.dachBelegt?.some((q) => Math.abs(q.x - x) < q.w / 2 + rad + 0.6 && Math.abs(q.z - z) < q.d / 2 + rad + 0.6)) return true;
   return !!t && x + rad > t.x0 - 0.5 && x - rad < t.x1 + 0.5 && z + rad > t.z0 - 0.5 && z - rad < t.z1 + 0.5;
 }
 /** Lichtkuppeln in Reihen. */
 function lichtkuppeln(K, x0, z0, x1, z1, y, ax = 6.5, az = 9) {
   const S = K.S;
   if (x1 - x0 < 8 || z1 - z0 < 8) return;
+  // Q36: große Dächer bekommen eine gegliederte Dachlandschaft statt eines gleichförmigen Kuppelrasters.
+  K.dachBelegt ??= [];
+  if (dachLandschaft(S, { x0, z0, x1, z1, y }, rng(`${K.haus?.id ?? ''}:dach:${Math.round(x0)}:${Math.round(z0)}`),
+    { baujahr: K.haus?.baujahr, alt: K.alt, belegt: K.dachBelegt, reserviert: (x, z, rad) => reserviert({ terrasse: K.terrasse }, x, z, rad), protokoll: K.qualitaet?.daecher })) {
+    K.dachLandschaft = true;
+    return;
+  }
   const nx = Math.floor((x1 - x0 - 2) / ax), nz = Math.floor((z1 - z0 - 2) / az);
   const ox = x0 + (x1 - x0 - (nx - 1) * ax) / 2, oz = z0 + (z1 - z0 - (nz - 1) * az) / 2;
   for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
@@ -493,7 +496,7 @@ function technik(K, x0, z0, x1, z1, y, o = {}) {
     dach.z1 = Math.min(z1, K.dach.z1);
     dach.y = K.dach.y;
   }
-  dachInstallationen(K.S, dach, K.r, { max: o.max, farbe: o.farbe,
+  dachInstallationen(K.S, dach, K.r, { max: K.dachLandschaft ? Math.min(2, o.max ?? 2) : o.max, farbe: o.farbe,
     reserviert: (x, z, rad) => reserviert(K, x, z, rad), protokoll: K.qualitaet?.daecher });
 }
 /** Parkdeck (Dach): Asphalt, Markierungen, Autos, Treppenhaus, P-Schild. */
@@ -541,6 +544,7 @@ function flecken(K, s, u0, u1, y0, y1, t, base, anz) {
     s.q(u, u + zw(r, 0.3, 0.8), Math.max(y0, y1 - zw(r, 3, 9)), y1, t, t + 0.025, dunkler(base, 0.15));
   }
 }
+function ausgeblichen(c) { const f = new THREE.Color(c), h = {}; f.getHSL(h); return '#' + f.setHSL(h.h, Math.max(0, h.s - 0.18), Math.min(0.85, h.l + 0.07)).getHexString(); }
 function verblasst(c) { const f = new THREE.Color(c), h = {}; f.getHSL(h); return '#' + f.setHSL(h.h, Math.max(0, h.s - 0.22), Math.max(h.l * 0.6, h.l - 0.07)).getHexString(); }
 function patinaFarbe(c) { const f = new THREE.Color(c), h = {}; f.getHSL(h); return '#' + f.setHSL(h.h, Math.max(0, h.s - 0.06), Math.max(h.l * 0.6, h.l - 0.075)).getHexString(); }
 
@@ -1987,5 +1991,5 @@ export function warenhaus(S, scene, haus, opt = {}) {
   const dek = zustandsDekor(S, scene, koerper, Z, { pylon: opt.pylon, passanten: opt.passanten, abrissSeite: opt.abrissSeite });
   hoehe = Math.max(hoehe, dek.hoehe);
   if (opt.vorplatz !== false) hartwigVorplatz(S, koerper, Z, rng(`${haus.id}/vorplatz`));
-  return { hoehe, w: K.w + M, d: K.d, familie: fam, teile: S.anzahl - start, status: Z.status };
+  return { hoehe, w: K.w + M, d: K.d, familie: fam, teile: S.anzahl - start, status: Z.status, pinAnker: dek.pinAnker };
 }

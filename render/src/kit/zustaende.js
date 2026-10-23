@@ -673,6 +673,25 @@ function hebebuehne(Z, s, u, yZiel, tZiel, buchstaben = ['R', 'T', 'W']) {
   Z.top = Math.max(Z.top, yK + 2.2);
 }
 
+/** Q36: Ankerpunkt des Hauspins auf der Dachkante über dem Haupteingang (Weltkoordinaten).
+ *  Liegt der Eingang unter dem Schriftzug, rückt der Pin seitlich daneben, damit er keinen Buchstaben verdeckt. */
+export function pinAnker(k) {
+  if (!k || !Number.isFinite(k.x) || !Number.isFinite(k.z) || !Number.isFinite(k.hoehe)) return null;
+  const e = hauptEingang({ k });
+  const seite = e.seite === '+x' ? '+x' : '+z', L = seite === '+z' ? k.w : k.d;
+  let u = Math.min(Math.max(e.u ?? L / 2, 3), L - 3);
+  const logo = k.seiten?.[seite]?.logo;
+  if (logo && Number.isFinite(logo.u) && Number.isFinite(logo.breite)) { // Pin nie über dem Schriftzug
+    const halb = logo.breite / 2 + 3;
+    if (Math.abs(u - logo.u) < halb) {
+      const links = logo.u - halb, rechts = logo.u + halb;
+      u = (links >= 3 && (u - links <= rechts - u || rechts > L - 3)) ? links : rechts <= L - 3 ? rechts : u;
+    }
+  }
+  const x = seite === '+z' ? k.x + u : k.x + k.w, z = seite === '+z' ? k.z + k.d : k.z + u;
+  return { x, y: k.hoehe, z, seite };
+}
+
 function hauptEingang(Z) {
   const e = Z.k.eingaenge ?? [];
   return e.find((x) => x.haupt) ?? e.find((x) => x.seite === '+z') ?? e[0] ?? { seite: '+z', u: Z.k.w * 0.45, breite: 4 };
@@ -1247,7 +1266,7 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
     }
     for (const s of [sz, sx]) for (let i = 0; i < Math.round(4 * Math.max(0, Math.min(1, Z.passantenFaktor ?? 1))); i++) { const [x, zz] = s.welt(zw(r, 1, s.L - 1), zw(r, 2.5, 4.8)); figur(S, x, zz, r, 1.1, Z.sportPalette ? waehle(r, Z.sportPalette) : null); }
   }
-  return { hoehe: Z.top, teile: S.anzahl - start };
+  return { hoehe: Z.top, teile: S.anzahl - start, pinAnker: pinAnker(k) };
 }
 
 // ─────────────────────────────────────────────────────────────── Ergänzung: Aktionstypen und Marketing am Haus

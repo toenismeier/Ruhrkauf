@@ -395,5 +395,5 @@ export function schwesterhaus(S, scene, haus, opt = {}) {
   const dek = zustandsDekor(S, scene, k, Z, { passanten: opt.passanten === false ? false : undefined, logosAbdecken: true, pylon: false });
   const teile = S.anzahl - start;
   if (teile > 8000) throw new Error('Schwesterhaus ' + haus.id + ': Teilebudget ' + teile + ' > 8000');
-  return { hoehe: Math.max(K.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile, status };
+  return { hoehe: Math.max(K.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile, status, pinAnker: dek.pinAnker };
 }
