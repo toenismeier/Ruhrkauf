@@ -1,6 +1,6 @@
 # Gestaltungssystem der Spieloberfläche (Q14, dunkel seit Q30)
 
-Stand: 21.10.2026. Referenz: Coffee Inc 2 – ruhige Informationshierarchie, klare Zahlen, zurückhaltende Interaktion. Gilt für sämtliche Panels einschließlich Cockpit, Hausdetail, Posteingang, Organisation, Zentrale, Reise und Eigenmarken. Ausschließlich Darstellung; keine Änderung an Engine, Aktionen oder Berechnungen.
+Stand: 21.10.2026, Farbrollen und Prüfungen Q32 vom 23.10.2026. Referenz: Coffee Inc 2 – ruhige Informationshierarchie, klare Zahlen, zurückhaltende Interaktion. Gilt für sämtliche Panels einschließlich Cockpit, Hausdetail, Posteingang, Organisation, Zentrale, Reise und Eigenmarken. Ausschließlich Darstellung; keine Änderung an Engine, Aktionen oder Berechnungen.
 
 ## Gestaltungsprinzipien
 1. **Eine Hauptaussage je Ansicht.** Titel, zentrale Kennzahl, höchstens eine hervorgehobene Primäraktion. Sekundäre Informationen als kompakte Zeilen, nicht als gleichgewichtete Kartenwand.
@@ -22,8 +22,9 @@ Alle Werte in `render/src/ui/komponenten.css` als CSS-Custom-Properties. Ein Pan
 |---|---|---|
 | `--hk-xs / sm / md / lg / xl` | 12 / 14 / 16 / 22 / 32 px | Meta / Listen / Bedienung / Titel / Großkennzahl |
 | `--hk-1 … --hk-6` | 4, 8, 12, 16, 24, 32 px | 4er-Raster |
-| `--hk-akzent` | #D23C32 (Innenkontur #EF7A6F) | Hartwig-Rot: Bedienelemente (Stepper, Schalter, Segment) und höchstens eine Primäraktion je Abschnitt; kein Coffee-Orange |
-| `--hk-gut` / `--hk-schlecht` / `--hk-achtung` | #6DBF73 / #EF6F62 / #E7B04B | Ergebnis und positive Abweichung / negative Abweichung / Engpass |
+| `--hk-akzent` | #1F6F8B (Innenkontur #5FA8BF, Außenkontur #134A5D, als Schrift #7CC3D6) | Hartwig-Petrol (Q32): Bedienelemente (Stepper, Schalter, Segment, aktiver Reiter), Zähler und höchstens eine Primäraktion je Abschnitt; kein Coffee-Orange |
+| `--hk-gefahr` | #C0362D (Kontur #8F2219) | Hartwig-Rot nur noch für Gefahr: Kündigen, Entlassen, Schließen, Ablaufendes. Das Logo bleibt rot |
+| `--hk-gut` / `--hk-schlecht` / `--hk-achtung` | #6DBF73 / #F27D72 / #E7B04B | Ergebnis und positive Abweichung / negative Abweichung / Engpass. Abweichungen färben nach Wirkung aufs Ergebnis (weniger Kosten grün); Kosten selbst nie grün |
 | `--hk-serie-a` / `--hk-serie-b` | Text / #6DBF73 | Balken Umsatz / Ergebnis |
 | Grund | senkrechter Streifen 7 + 1 px, Weiß mit 2,2 % Deckung | einzig erlaubter Verlauf |
 | `--hk-radius` | 10 px | Flächen, Eingaben |
@@ -33,15 +34,18 @@ Alle Werte in `render/src/ui/komponenten.css` als CSS-Custom-Properties. Ein Pan
 
 Ergänzt mit Q30 Teil 2: `balkenPaar` (zwei Reihen mit eigener Skala, z. B. Umsatz und Deckungsbeitrag), `.hk-flaeche[data-bereich]` für Ebenen außerhalb von `#panel` (Wochenbericht, Reise, Startkarte), `.hk-papier` für Papierflächen im Dunklen (Zeitungsausschnitt), dunkle Ankreuzfelder, `.hk-figuren` (eine Figur je 5 FTE), `.hk-regel` (Beschriftung links, Stepper rechts), `.hk-marken`. Spielspezifische Flächen über der Karte (Kopfleiste, Cockpit, untere Leiste, Menü, Erfolgsmeldung, Wochenbericht, Reise, Start, Spielende, Einführung) liegen in `render/src/ui/spiel-oberflaeche.css`.
 
+## Rand im dunklen Blatt (Q32)
+`#pinhalt` hat 16 px Seitenrand; randlos laufen nur `.hk-sprecher`, `.hk-kopfbild`, `.hk-rumpf`, `.hk-reiter` (und `.hk-randlos`). Anschnitte (`.karussell`, `.spaltenwahl`, Chipleisten) laufen genau bis zur Bildkante. Karussellkarten bestimmen ihren Index über die Kartenmitte (`karussellBinden`), damit Angebot und Detail immer zur sichtbaren Karte gehören. Das Stadt-HUD zeigt die Kennzahlen eingeklappt in einer Zeile (höchstens ein Sechstel der Bildhöhe), die Chipleiste blendet am Rand aus.
+
 ## Verbotene Muster als Skript
-`render/src/ui/stilpruefung.js` prüft im Browser auf berechneten Stilen: Schatten-Unschärfe > 8 px, Verläufe und Glas außer dem Streifengrund, Schrift < 12 px, Touch-Ziel < 44 px, abgeschnittene Beschriftung (Ellipse mit Überlauf), Symbol im eingefärbten Kreis, helle Cremeflächen im dunklen Look, Text `undefined`/`null`/`NaN`/`hc-`/Platzhalternamen, Summen, die sich nicht aus den angezeigten Zeilen ergeben. `node spiel-render.js --nur-panels` prüft alle Panels mit `umgestellt: true` aus `tests/q30-panelliste.cjs` und `tests/q31-panelliste.cjs` und endet mit Fehler. Aufnahmen aller Panels: `node tests/q30-panels.cjs --ordner out/q30/nachher`.
+`render/src/ui/stilpruefung.js` prüft im Browser auf berechneten Stilen: Schatten-Unschärfe > 8 px, Verläufe und Glas außer dem Streifengrund, Schrift < 12 px, Touch-Ziel < 44 px, abgeschnittene Beschriftung (Ellipse mit Überlauf), Symbol im eingefärbten Kreis, helle Cremeflächen im dunklen Look, Text `undefined`/`null`/`NaN`/`hc-`/Platzhalternamen, Summen, die sich nicht aus den angezeigten Zeilen ergeben. Seit Q32 zusätzlich: seitlicher Überlauf (`scrollWidth > clientWidth` je Blatt und Karussellkarte, Elemente außerhalb des Bildes), Kontrast nach WCAG AA für jeden sichtbaren Text (4,5:1, große Schrift 3:1), helle Flächen über 20 % im dunklen Blatt, Rot ohne Gefahr, Kosten in Grün, interne Kürzel (`Q05`), Dezimalpunkt (`20.5`), doppelte Titel, unterstrichene Links, Inhalt unter der Reiterleiste, Stadt-HUD (Kennzahlen über ein Sechstel, abgeschnittene Chips). Panelliste Q32: `tests/q32-panelliste.cjs`. `node spiel-render.js --nur-panels` prüft alle Panels mit `umgestellt: true` aus `tests/q30-panelliste.cjs` und `tests/q31-panelliste.cjs` und endet mit Fehler. Aufnahmen aller Panels: `node tests/q30-panels.cjs --ordner out/q30/nachher`.
 
 ## Komponentenvertrag
 - **Panelkopf:** eine maximal zweizeilige Überschrift, optional Unterzeile; rechts höchstens eine Aktion. Bei Platzmangel Aktionen in eigene Zeile.
 - **Karte:** Fläche des Bereichs, 1px Kontur, 12–16px Innenabstand, 8–12px Abstand zur nächsten Einheit. Nur für eigenständige Sachverhalte; verwandte Daten als Zeilen mit Trennlinie.
 - **Liste:** Titel links, Wert oder Aktion rechts; rechter Bereich schrumpft nicht unter lesbare Mindestbreite. Bei schmalen Ansichten Wert unter Titel umbrechen; niemals überlappen.
 - **Reiter:** vollständige Begriffe; horizontales Scrollen mit `overflow-x:auto`, `flex-shrink:0`, sichtbarer aktiver Unterstreichung und erreichbarem Fokus. Keine künstlich verkürzten Wortfragmente.
-- **Knöpfe:** Primär Hartwig-Rot gefüllt mit doppelter Kontur, sekundär neutral mit Kontur, tertiär als Text; gleiche Höhe 44px, klarer Disabled-Zustand. Nie mehr als eine rote Primäraktion pro Abschnitt.
+- **Knöpfe:** Primär Hartwig-Petrol gefüllt mit doppelter Kontur, Gefahr (`hk-knopf gefahr`) rot, sekundär neutral mit Kontur, tertiär als Petrol-Schrift ohne Unterstreichung; gleiche Höhe 44px, klarer Disabled-Zustand. Nie mehr als eine Primäraktion pro Abschnitt.
 - **Kennzahlen:** tabellarische Ziffern; Zahl und Einheit zusammenhalten. Responsive Anzeige in Tsd., Mio., Mrd.; bei Engpässen Zeilenumbruch statt Ellipse. Negative Vorzeichen und Prozentpunkte eindeutig kennzeichnen.
 - **Benachrichtigungen:** unterhalb des sicheren Kopfbereichs, mit eigener Schließmöglichkeit; keine verdeckten Navigationselemente. Fehlermeldungen zusätzlich inline beim auslösenden Element.
 - **Leere Zustände:** kurzer Grund und ggf. nächste sinnvolle Aktion. Ein Verlauf mit weniger als zwei Datenpunkten zeigt „Ein Verlauf ist ab der zweiten Woche verfügbar.“ statt einer Achse KW 1 bis KW 1.

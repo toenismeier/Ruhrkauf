@@ -23,10 +23,15 @@
   --hk-pap-grund: #ece7dc; --hk-pap-flaeche: #f6f2e9; --hk-pap-tief: #ddd6c7; --hk-pap-linie: #c9c0ae;
   --hk-pap-text: #1f1d1a; --hk-pap-leise: #5f5a52;
   /* Signale, in allen Bereichen gleich */
-  --hk-akzent: #d23c32;        /* Hartwig-Rot: Bedienelemente und eine Primäraktion */
-  --hk-akzent-hell: #ef7a6f;   /* Innenkontur der Bedienelemente */
+  /* Q32 Farbrollen: Bedienelemente und Hauptaktion in Hartwig-Petrol, Rot nur für Gefahr, Verlust und Kündigen */
+  --hk-akzent: #1f6f8b;        /* Hartwig-Petrol: Stepper, Schalter, aktiver Reiter, eine Primäraktion */
+  --hk-akzent-hell: #5fa8bf;   /* Innenkontur der Bedienelemente */
+  --hk-akzent-rand: #134a5d;   /* Außenkontur der Bedienelemente */
+  --hk-akzent-text: #7cc3d6;   /* Akzent als Schrift auf dunklem Grund (≥ 4,5:1) */
+  --hk-gefahr: #c0362d;        /* Hartwig-Rot nur noch für Gefahr: Kündigen, Entlassen, Schließen */
+  --hk-gefahr-rand: #8f2219; --hk-gefahr-hell: #e2564a;
   --hk-gut: #6dbf73;           /* Ergebnis, positive Abweichung */
-  --hk-schlecht: #ef6f62;      /* negative Abweichung */
+  --hk-schlecht: #f27d72;      /* negative Abweichung (≥ 4,5:1 auf allen Flächen) */
   --hk-achtung: #e7b04b;       /* Engpass */
   --hk-serie-a: #f3eee8;       /* Umsatz-Balken */
   --hk-serie-b: #6dbf73;       /* Ergebnis-Balken */
@@ -53,7 +58,7 @@
 #panel:has(.hk-bereich), .hk-flaeche {
   --grund: var(--g); --karte: var(--f); --text: var(--tx); --leise: var(--le); --linie: var(--l);
   --ui-bg: var(--g); --ui-surface: var(--f); --ui-text: var(--tx); --ui-muted: var(--le); --ui-border: var(--l);
-  --gruen: var(--hk-gut); --rot: var(--hk-akzent); --ui-brand: var(--hk-akzent);
+  --gruen: var(--hk-gut); --rot: var(--hk-gefahr); --ui-brand: var(--hk-akzent);
   color: var(--tx);
 }
 .hk-bereich { display: none; }
@@ -84,7 +89,16 @@
 #panel:has(.hk-bereich[data-symbol=karte]) { --hk-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath d='M3 18l10-5 10 5 10-5v13l-10 5-10-5-10 5z' fill='%23b9c4b2'/%3E%3Cpath d='M13 13v13l10 5V18z' fill='%23d5ddcf'/%3E%3Cpath d='M18 6a5 5 0 0 1 5 5c0 4-5 9-5 9s-5-5-5-9a5 5 0 0 1 5-5z' fill='%23d23c32'/%3E%3Ccircle cx='18' cy='11' r='2' fill='%23fff'/%3E%3C/svg%3E"); }
 
 /* ───────────── Inhalt ───────────── */
-#panel:has(.hk-bereich) #pinhalt { padding: 0; }
+#panel:has(.hk-bereich) #pinhalt { --rand-l: calc(var(--hk-4) + env(safe-area-inset-left)); --rand-r: calc(var(--hk-4) + env(safe-area-inset-right));
+  padding: 0 var(--rand-r) 0 var(--rand-l); overflow-x: hidden; }
+/* Q32: Ursache des seitlichen Überlaufs (Wurf 3, Bilder 07, 14, 20): Das dunkle Blatt nahm #pinhalt den Innenabstand,
+   damit Sprecher, Kopfbild und Reiter randlos laufen. Bestandsinhalt (Q31-Fachseiten, Produkte, Vorstand) stand dadurch
+   ohne Rand an der Kante, und Bestandsklassen mit -12-px-Anschnitt (.karussell, .spaltenwahl) ragten 12 px über den
+   Bildschirm; Karussellkarten wurden breiter als das Bild. Jetzt hat #pinhalt den Rand, nur die randlosen Bausteine
+   holen ihn sich zurück, und Anschnitte laufen genau bis zur Kante. */
+#panel:has(.hk-bereich) #pinhalt > :is(.hk-sprecher, .hk-kopfbild, .hk-rumpf, .hk-reiter, .zb-root, .hk-randlos) { margin-left: calc(-1 * var(--rand-l)); margin-right: calc(-1 * var(--rand-r)); }
+#panel:has(.hk-bereich) #pinhalt :is(.karussell, .spaltenwahl) { margin-left: calc(-1 * var(--rand-l)); margin-right: calc(-1 * var(--rand-r)); padding-left: var(--rand-l); padding-right: var(--rand-r); scroll-padding-inline: var(--hk-4); }
+#panel:has(.hk-bereich) .kslot { min-width: 0; } #panel:has(.hk-bereich) .kslot > * { max-width: 100%; box-sizing: border-box; min-width: 0; }
 #panel:has(.hk-bereich) #pinhalt > :last-child:not(.hk-reiter) { margin-bottom: calc(16px + env(safe-area-inset-bottom)); }
 .hk-rumpf { padding: var(--hk-3) calc(var(--hk-4) + env(safe-area-inset-right)) var(--hk-3) calc(var(--hk-4) + env(safe-area-inset-left)); }
 
@@ -157,11 +171,12 @@
 /* Karte: nur für eigenständige Sachverhalte */
 .hk-karte { background: var(--f); border: 1px solid var(--l); border-radius: var(--hk-radius); padding: var(--hk-3); margin: 0 0 var(--hk-2); }
 
-/* Knöpfe: Primär Hartwig-Rot mit doppelter Kontur, sekundär Kontur, tertiär Text */
+/* Knöpfe: Primär Hartwig-Petrol mit doppelter Kontur (Q32), Gefahr rot, sekundär Kontur, tertiär Text */
 .hk-knopf { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 0 var(--hk-4); border-radius: 12px;
-  background: var(--hk-akzent); color: #fff; font: inherit; font-size: var(--hk-sm); font-weight: 700; border: 1px solid #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); cursor: pointer; }
+  background: var(--hk-akzent); color: #fff; font: inherit; font-size: var(--hk-sm); font-weight: 700; border: 1px solid var(--hk-akzent-rand); box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); cursor: pointer; }
 .hk-knopf.zweit { background: transparent; color: var(--tx); border: 1px solid var(--l); box-shadow: none; }
-.hk-knopf.text { background: transparent; color: var(--tx); border: 0; box-shadow: none; text-decoration: underline; text-underline-offset: 3px; padding: 0 var(--hk-2); }
+.hk-knopf.text { background: transparent; color: var(--hk-akzent-text); border: 0; box-shadow: none; padding: 0 var(--hk-2); }
+.hk-knopf.gefahr, .hk-gefahr.hk-knopf { background: var(--hk-gefahr); border-color: var(--hk-gefahr-rand); box-shadow: inset 0 0 0 1px var(--hk-gefahr-hell); color: #fff; }
 .hk-knopf.breit { display: flex; width: 100%; }
 .hk-knopf:disabled { opacity: 0.45; cursor: default; }
 .hk-knopfreihe { display: flex; flex-wrap: wrap; gap: var(--hk-2); margin: var(--hk-3) 0; }
@@ -169,7 +184,7 @@
 
 /* Stepper [−] Wert [+] mit Unterzeile */
 .hk-stepper { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 6px; padding: 3px; border-radius: 12px; background: var(--t); border: 1px solid var(--l); }
-.hk-stepper button { width: 44px; height: 44px; border-radius: 10px; background: var(--hk-akzent); color: #fff; font-size: 22px; font-weight: 700; border: 1px solid #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+.hk-stepper button { width: 44px; height: 44px; border-radius: 10px; background: var(--hk-akzent); color: #fff; font-size: 22px; font-weight: 700; border: 1px solid var(--hk-akzent-rand); box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
 .hk-stepper output { text-align: center; font-size: var(--hk-md); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--tx); }
 .hk-stepper output small { display: block; font-size: var(--hk-xs); font-weight: 400; color: var(--le); }
 .hk-stepper button:disabled { opacity: 0.4; }
@@ -179,7 +194,7 @@
 .hk-schalter:first-child { border-top: 0; }
 .hk-schalter .hk-knebel { position: relative; flex: none; width: 50px; height: 30px; border-radius: 15px; background: var(--t); border: 1px solid var(--l); }
 .hk-schalter .hk-knebel::after { content: ''; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 11px; background: var(--le); transition: left .15s; }
-.hk-schalter[aria-pressed=true] .hk-knebel { background: var(--hk-akzent); border-color: #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+.hk-schalter[aria-pressed=true] .hk-knebel { background: var(--hk-akzent); border-color: var(--hk-akzent-rand); box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
 .hk-schalter[aria-pressed=true] .hk-knebel::after { left: 23px; background: #fff; }
 .hk-schalter span { flex: 1; font-size: var(--hk-sm); line-height: 20px; } .hk-schalter small { display: block; color: var(--le); font-size: var(--hk-xs); }
 
@@ -229,8 +244,8 @@
 #panel:has(.hk-bereich) .tab.an, #panel:has(.hk-bereich) .seg button.an { background: var(--hk-akzent); color: #fff; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
 #panel:has(.hk-bereich) .stepper button { background: var(--hk-akzent); color: #fff; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
 #panel:has(.hk-bereich) .breit:not(.hk-knopf) { background: transparent; color: var(--tx); border-color: var(--l); }
-#panel:has(.hk-bereich) .breit.gruen:not(.hk-knopf) { background: var(--hk-akzent); border-color: #8f2219; color: #fff; }
-#panel:has(.hk-bereich) .zurueck, #panel:has(.hk-bereich) .postalle, #panel:has(.hk-bereich) .postzurueck, #panel:has(.hk-bereich) .postort { color: var(--tx); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; }
+#panel:has(.hk-bereich) .breit.gruen:not(.hk-knopf) { background: var(--hk-akzent); border-color: var(--hk-akzent-rand); color: #fff; }
+#panel:has(.hk-bereich) .zurueck, #panel:has(.hk-bereich) .postalle, #panel:has(.hk-bereich) .postzurueck, #panel:has(.hk-bereich) .postort { color: var(--hk-akzent-text); text-decoration: none; min-height: 44px; font-weight: 700; }
 #panel:has(.hk-bereich) .lkopf, #panel:has(.hk-bereich) .lzeile.bereich { background: var(--t); border-color: var(--l); }
 #panel:has(.hk-bereich) .lzeile { border-color: var(--l); color: var(--tx); }
 #panel:has(.hk-bereich) .leise, #panel:has(.hk-bereich) .legende, #panel:has(.hk-bereich) .rfuss { color: var(--le); }
@@ -254,7 +269,6 @@
 .hk-regel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(170px, 52%); gap: var(--hk-3); align-items: center; margin: 0 0 var(--hk-2); font-size: var(--hk-sm); }
 .hk-regel > span { overflow-wrap: anywhere; }
 .hk-knopfreihe.zweispaltig > .hk-knopf { flex: 1 1 calc(50% - 8px); }
-#panel:has(.hk-bereich) #pinhalt > .hk-reiter { margin-left: 0; margin-right: 0; }
 
 /* Zwei Balkenreihen nebeneinander mit eigener Skala (z. B. Umsatz und Deckungsbeitrag, die sich um Größenordnungen unterscheiden) */
 .hk-balkenpaar { display: grid; grid-template-columns: 1fr 1fr; gap: var(--hk-3); margin: var(--hk-2) 0 0; }
@@ -268,13 +282,13 @@
 /* Ankreuzfelder im dunklen Look: 22-px-Kasten, Trefferfläche bleibt die Zeile bzw. 44 px */
 #panel:has(.hk-bereich) input[type=checkbox] { -webkit-appearance: none; appearance: none; flex: none; width: 44px; height: 44px; margin: 0; border: 0; border-radius: 6px; cursor: pointer;
   background: center / 22px 22px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Crect x='1' y='1' width='20' height='20' rx='5' fill='none' stroke='%23a4a9ae' stroke-width='1.6'/%3E%3C/svg%3E"); }
-#panel:has(.hk-bereich) input[type=checkbox]:checked { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Crect x='1' y='1' width='20' height='20' rx='5' fill='%23d23c32' stroke='%23ef7a6f' stroke-width='1.6'/%3E%3Cpath d='M6 11.5l3.2 3.2L16 8' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+#panel:has(.hk-bereich) input[type=checkbox]:checked { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Crect x='1' y='1' width='20' height='20' rx='5' fill='%231f6f8b' stroke='%235fa8bf' stroke-width='1.6'/%3E%3Cpath d='M6 11.5l3.2 3.2L16 8' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 #panel:has(.hk-bereich) input[type=checkbox]:disabled { opacity: 0.35; }
 
 /* Blatt in voller Höhe (Q31-Bedarf): bereich(name, symbol, { voll: true }) */
 #panel:has(.hk-bereich[data-hoehe=voll]) { height: min(87dvh, calc(100dvh - env(safe-area-inset-top))); }
 /* Karussell mit Seitenpunkten */
-.hk-karussell { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 calc(-1 * var(--hk-4)); padding: 4px var(--hk-4) 4px; scrollbar-width: none; }
+.hk-karussell { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 calc(-1 * var(--hk-4)); padding: 4px var(--hk-4) 4px; scroll-padding-inline: var(--hk-4); scrollbar-width: none; }
 .hk-karussell::-webkit-scrollbar { display: none; }
 .hk-karussell-karte { flex: none; width: calc(100% - 40px); scroll-snap-align: center; background: var(--f); border: 1px solid var(--l); border-radius: var(--hk-radius-gross); padding: var(--hk-3); }
 .hk-punkte { display: flex; justify-content: center; gap: 6px; margin: var(--hk-2) 0; }
@@ -285,3 +299,7 @@
 #panel:has(.hk-bereich) :is(.kfuss, .kfuss span, .owerte span, .passung i, .passung b, .q17-merkmal, .q17-merkmal b, .q17-merkmal span, .emname i, .q24-leistung > small,
   .q24-werte span, .q24-detailwerte span, .q11auswahl small, .q11kategorie small, .q11ast small, .q11zielgruppen button span, .q11fortschritt span, .lname i, .q17-kpis span,
   .q17-hinweis, .q17-preispunkt, .verkauf small, .preis small, .donut small, .sternzahl, .rkopf small, .rfuss, .typkacheln button small, .typkacheln button span, .mzeile span, .mzeile b, .legende) { font-size: 12px !important; }
+/* Q32: Zähler im Reiter als neutrale Marke (Rot nur für Gefahr) */
+#panel:has(.hk-bereich) .tab .zahl { background: var(--t); color: var(--tx); border: 1px solid var(--l); font-size: 12px; }
+#panel:has(.hk-bereich) .tab.an .zahl { background: var(--hk-akzent-rand); color: #fff; border-color: transparent; }
+.hk-knopfreihe.q32-cluster > .hk-knopf { flex: 1 1 calc(50% - 8px); font-weight: 400; }

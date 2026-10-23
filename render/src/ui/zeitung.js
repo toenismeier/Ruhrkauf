@@ -69,7 +69,7 @@ export function zeitungModul(ctx) {
     const einstellungen = '<label class="zb-einstellung"><input type="checkbox" data-z-a="schalter" ' + (aktiv() ? 'checked' : '') + '> Neue Zeitungsausgaben und Interviews aktivieren</label>' +
       (!aktiv() ? '<p class="zb-hinweis">Der Handelsbote ist ausgeschaltet. Das bisherige Archiv bleibt lesbar.</p>' : '');
     // Q30: Papier bleibt Papier; die Zeitung zuerst, die Einstellung ans Ende.
-    ctx.panel('Der Handelsbote', 'Unabhängige Wochenzeitung · Archiv', '<i class="hk-bereich" data-bereich="papier" data-symbol="post" aria-hidden="true"></i><div class="zb-root">' +
+    ctx.panel('Zeitung', 'Unabhängige Wochenzeitung · Archiv', '<i class="hk-bereich" data-bereich="papier" data-symbol="post" aria-hidden="true"></i><div class="zb-root">' +
       navigation + (ui.archiv ? archivZeigen() : a ? ausgabeZeigen(a) : leer()) +
       (!ui.archiv ? '<div class="zb-wischhinweis">Nach links oder rechts wischen, um eine andere Ausgabe zu lesen.</div>' : '') + einstellungen + '</div>', 'gross');
     ui.aktiv = true;

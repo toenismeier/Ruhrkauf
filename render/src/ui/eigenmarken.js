@@ -59,7 +59,7 @@ export function eigenmarkenSeite(ctx, ui, tabs) {
     h += `<div class="owerte"><div><span>Umsatz 13 Wochen</span><b data-p="m:${m.id}:umsatz">${geld(m.umsatz13)}</b></div><div><span>Rohertragsquote</span><b data-p="m:${m.id}:marge">${pz(m.rohertragsquote, 1)}</b></div><div><span>Mehrmarge</span><b data-p="m:${m.id}:mehrmarge">${punkte(m.mehrmarge)}</b></div></div>`;
     h += `<div class="ochips">${status}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualität ${m.qualitaet} von 5</span><span class="chip grau">${esc(m.beschaffungName)}</span></div>`;
     h += `<div class="mzeile"><span>Bekanntheit</span>${balken(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
-    h += `<div class="mzeile"><span>Stil aktuell</span>${balken(m.stilAktualitaet, veraltetM ? '#d23c32' : '#2f8f5b')}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
+    h += `<div class="mzeile"><span>Stil aktuell</span>${balken(m.stilAktualitaet, veraltetM ? 'var(--hk-schlecht, #d23c32)' : 'var(--hk-gut, #2f8f5b)')}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
     h += `<div class="mzeile"><span>Passung je Region</span></div>${passungZeile(m.passungRegion, `m:${m.id}:passung`)}`;
     h += teamAufschluesselung(leistungen.get(m.id));
     h += `<div class="olief">${m.wgs.filter((w) => w.anteilZiel > 0 || w.anteilIst > 0).map((w) => `${esc(w.name)} ${pz(w.anteilIst)}`).join(' · ') || 'Noch in keiner Warengruppe.'}</div>`;

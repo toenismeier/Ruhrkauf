@@ -646,7 +646,9 @@
 </style>
 <style id="q14-gestaltung">
 :root{--ui-font-xs:12px;--ui-font-sm:14px;--ui-font-md:16px;--ui-font-lg:24px;--ui-space-1:4px;--ui-space-2:8px;--ui-space-3:12px;--ui-space-4:16px;--ui-space-5:24px;--ui-space-6:32px;--ui-bg:#f5f4f1;--ui-surface:#fff;--ui-text:#242424;--ui-muted:#62666a;--ui-border:#e2e1dd;--ui-brand:#b32632;--ui-radius:10px;--ui-shadow:0 1px 3px rgb(0 0 0 / 6%);--grund:var(--ui-bg);--karte:var(--ui-surface);--text:var(--ui-text);--leise:var(--ui-muted);--linie:var(--ui-border);--rot:var(--ui-brand);--schatten:var(--ui-shadow)}
-#cockpit{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+#cockpit{grid-template-columns:repeat(3,minmax(0,1fr)) 44px;gap:4px} /* Q32: eingeklappt eine Zeile, Knopf rechts */
+#cockpit:not(.offen) .kz:nth-child(n+5){display:none}
+#cockpit .kz-mehr{min-width:44px;min-height:44px;border-radius:10px;padding:0;font-size:16px}
 #cockpit .kz{border:1px solid var(--ui-border);border-radius:var(--ui-radius);padding:4px 8px;min-width:0}
 #cockpit .kz span{font-size:11px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} /* Abnahme: Cockpit bleibt zweizeilig je Kachel, sonst verdeckt es die Karte */
 #cockpit .kz b{font-size:clamp(12px,3.4vw,16px);line-height:17px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
