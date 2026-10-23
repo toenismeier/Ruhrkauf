@@ -94,7 +94,7 @@
 
 /* Auswahlchips (Spaltenwahl, Markenwahl) im dunklen Look: Kontur, aktiv in Hartwig-Rot */
 #panel:has(.q31-marke) .chipk { background: transparent; color: var(--ui-text); border: 1px solid var(--ui-border); box-shadow: none; min-height: 44px; }
-#panel:has(.q31-marke) .chipk.an { background: var(--hk-akzent, #d23c32); color: #fff; border-color: #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell, #ef7a6f); }
+#panel:has(.q31-marke) .chipk.an { background: var(--hk-akzent); color: #fff; border-color: var(--hk-akzent-rand); box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
 #panel:has(.q31-marke) .chipk b { background: transparent; color: inherit; }
 #panel:has(.q31-marke) :is(.q24-detailsknopf, .q17-linienknopf, .q24-katalogknopf) { background: transparent; color: var(--ui-text); border: 1px solid var(--ui-border); min-height: 44px; border-radius: 10px; }
 #panel:has(.q31-marke) .karte.produkt, #panel:has(.q31-marke) .pbild { background: var(--ui-surface); }
@@ -110,7 +110,7 @@
 #panel:has(.q31-marke) .mk-stadtwahl, #panel:has(.q31-marke) .mk-marktkarte, #panel:has(.q31-marke) .mk-kanalkarte { background: var(--ui-surface); border-color: var(--ui-border); color: var(--ui-text); }
 #panel:has(.q31-marke) .mk-minis button { background: transparent; border-color: var(--ui-border); color: var(--ui-text); min-width: 76px; font-size: 12px; }
 #panel:has(.q31-marke) .mk-minis button span { font-size: 12px; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; line-height: 14px; }
-#panel:has(.q31-marke) .mk-minis button.an { border-color: var(--hk-akzent, #d23c32); box-shadow: inset 0 0 0 1px var(--hk-akzent-hell, #ef7a6f); }
+#panel:has(.q31-marke) .mk-minis button.an { border-color: var(--hk-akzent); box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
 #panel:has(.q31-marke) .mk-ortband > button, #panel:has(.q31-marke) .mk-teamaktionen button { background: transparent; color: var(--ui-text); border-color: var(--ui-border); }
 #panel:has(.q31-marke) .mk-ringmitte strong { font-size: 13px; }
 #panel:has(.q31-marke) :is(.mk-kanalinfo, .mk-team, .mk-budgetbox > label, .mk-legende span) { color: var(--ui-text); }
@@ -126,13 +126,13 @@
 #panel.gross:has(.q31-marke) { height: min(87dvh, calc(100dvh - env(safe-area-inset-top))); }
 /* IT Neues Projekt im dunklen Look */
 #panel:has(.q31-marke) .it-vergleich > div { background: var(--ui-surface); border-color: var(--ui-border); color: var(--ui-text); }
-#panel:has(.q31-marke) .it-vergleich > div.gewaehlt { border: 2px solid var(--hk-akzent, #d23c32); }
+#panel:has(.q31-marke) .it-vergleich > div.gewaehlt { border: 2px solid var(--hk-akzent); }
 #panel:has(.q31-marke) .it-vergleich b { font-size: 12px; overflow-wrap: anywhere; } #panel:has(.q31-marke) .it-vergleich small { font-size: 12px; color: var(--ui-muted); }
 #panel:has(.q31-marke) .it-wahl { background: var(--ui-surface); color: var(--ui-text); font-size: 13px; min-height: 44px; }
 #panel:has(.q31-marke) .vtitel { font-size: 12px; color: var(--ui-muted); }
 #panel:has(.q31-marke) .regler .seg button { flex: 1 1 0; min-width: 0; white-space: normal; overflow-wrap: anywhere; line-height: 16px; padding: 4px 6px; }
 /* Primäraktion in Bestandsmarkup (Klasse gruen) bleibt im dunklen Look die eine rote Hauptaktion */
-#panel:has(.q31-marke) .oknoepfe button.gruen, #panel:has(.q31-marke) button.breit.gruen { background: var(--hk-akzent, #d23c32); color: #fff; border: 1px solid #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell, #ef7a6f); font-weight: 700; }
+#panel:has(.q31-marke) .oknoepfe button.gruen, #panel:has(.q31-marke) button.breit.gruen { background: var(--hk-akzent); color: #fff; border: 1px solid var(--hk-akzent-rand); box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); font-weight: 700; }
 #panel:has(.q31-marke) .mini.q-an-knopf { border-color: var(--hk-gut, #6dbf73); color: var(--hk-gut, #6dbf73); }
 #panel:has(.q31-marke) .zeile .was i { font-size: 12px; }
 
@@ -196,7 +196,25 @@
 #panel:has(.q31-marke) .app-namenswahl input { width: 100%; box-sizing: border-box; margin-top: 2px; }
 #panel:has(.q31-marke) .app-aktionen { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 #panel:has(.q31-marke) .app-aktionen button { min-height: 44px; padding: 0 12px; border-radius: 10px; background: transparent; color: var(--ui-text); border: 1px solid var(--ui-border); font: inherit; font-size: 14px; }
-#panel:has(.q31-marke) .app-aktionen button[data-app-aktion=speichern] { border-color: var(--hk-akzent, #d23c32); color: var(--hk-akzent-hell, #ef7a6f); font-weight: 700; }
+#panel:has(.q31-marke) .app-aktionen button[data-app-aktion=speichern] { border-color: var(--hk-akzent); color: var(--hk-akzent-text); font-weight: 700; }
 #panel:has(.q31-marke) .app-namenswahl input { background: var(--hk-zen-tief, #162026); color: var(--ui-text); border: 1px solid var(--ui-border); border-radius: 10px; min-height: 44px; font: inherit; font-size: 16px; padding: 0 10px; }
 #panel:has(.q31-marke) .app-aktionen button[data-app-aktion=loeschen] { color: var(--hk-schlecht, #ef6f62); }
 #panel:has(.q31-marke) .o02-daten { min-height: 44px; align-items: center; }
+
+/* Q32: Farbrollen und Lesbarkeit der Bestandsklassen im dunklen Look. Verluste in --hk-schlecht (nicht Gefahrenrot),
+   Kennzeichen auf aktiver Fläche weiß, Einkaufspreis neutral. */
+#panel:has(.hk-bereich) :is(.rotwert, .owerte .rotwert) { color: var(--hk-schlecht); }
+#panel:has(.hk-bereich) .preis small.rotwert { color: var(--le); }
+#panel:has(.hk-bereich) :is(.donut small, .donut b) { color: var(--tx); }
+#panel:has(.hk-bereich) :is(.seg button.an i, .kats button.an i, .tab.an i) { color: #fff; }
+#panel:has(.hk-bereich) .q-haken { border-color: var(--hk-akzent-hell); color: var(--hk-akzent-text); }
+#panel:has(.hk-bereich) .q-minus { color: var(--hk-schlecht) !important; }
+/* Q32: Reporting-Tabelle (O02) im dunklen Look; vorher helle Kopfzeilen mit heller Schrift, sobald eine Region aufgeklappt war. */
+#panel:has(.hk-bereich) :is(.o02-gruppe, .o02-unter) { background: var(--f); border-color: var(--l); }
+#panel:has(.hk-bereich) .o02-unter > summary, #panel:has(.hk-bereich) .o02-kopf { background: var(--t); color: var(--le); }
+#panel:has(.hk-bereich) .o02-gruppe > summary { color: var(--tx); }
+#panel:has(.hk-bereich) .o02-scroll { background: var(--f); }
+#panel:has(.hk-bereich) .o02-beobachtung { background: transparent; color: var(--tx); }
+#panel:has(.hk-bereich) .o02-klickbar:active { background: var(--t); }
+#panel:has(.hk-bereich) .o02-daten { font-size: 12px; border-color: var(--l); }
+#panel:has(.hk-bereich) .q-mehr { color: var(--hk-akzent-text); }

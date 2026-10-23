@@ -63,7 +63,7 @@ export function sortimentBedienung(K, ui, typen, kachel, aktion, gesperrt = new 
       const astOffen = ui.astOffen === ast.id;
       h += '<button class="q11ast ' + (astOffen ? 'an' : '') + '" data-a="baumAst" data-v="' + esc(ast.id) +
         '" aria-expanded="' + astOffen + '"><span>' + esc(ast.name) + '</span><small>' + ast.typen.length +
-        '</small><b aria-hidden="true">' + (astOffen ? '−' : '+') + '</b></button>';
+        ' Artikel' + '</small><b aria-hidden="true">' + (astOffen ? '−' : '+') + '</b></button>';
       if (!astOffen) continue;
       h += '<div class="typkacheln q11typen q24-typen">';
       for (const typ of ast.typen) {

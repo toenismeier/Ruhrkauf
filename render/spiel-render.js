@@ -1269,11 +1269,13 @@ async function buendeln() {
     return;
   }
   // Q30/Q31: verbotene Muster (Schatten, Schrift < 12 px, Touch-Ziel < 44 px, Platzhalter, Verläufe, Summen) für alle
-  // umgestellten Panels; endet mit Fehler. Panellisten: tests/q30-panelliste.cjs, tests/q31-panelliste.cjs (falls vorhanden).
+  // umgestellten Panels; endet mit Fehler. Panellisten: tests/q30-, q31-, q32-panelliste.cjs. Q32 ergänzt Überlauf,
+  // Kontrast (WCAG AA), helle Flächen, Rot ohne Gefahr, interne Kürzel, Dezimalpunkt, doppelte Titel, Unterstreichung.
   async function stilPruefen() {
     const { panelLauf } = require('./tests/q30-stil.cjs');
-    const listen = ['./tests/q30-panelliste.cjs', './tests/q31-panelliste.cjs'].filter((f) => fs.existsSync(path.join(__dirname, f)));
-    const panels = listen.flatMap((f) => require(f).PANELS);
+    const listen = ['./tests/q30-panelliste.cjs', './tests/q31-panelliste.cjs', './tests/q32-panelliste.cjs'].filter((f) => fs.existsSync(path.join(__dirname, f)));
+    const alle = listen.flatMap((f) => require(f).PANELS);
+    const panels = [...alle.filter((x) => !/^spielende/.test(x.name)), ...alle.filter((x) => /^spielende/.test(x.name))]; // Spielende beendet den Spielstand
     await p.evaluate(() => window.spiel.schliessePanel());
     const erg = await panelLauf(p, panels);
     const schlecht = erg.filter((e) => e.fehler || e.verstoesse?.length);
