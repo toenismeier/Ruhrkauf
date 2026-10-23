@@ -154,13 +154,14 @@ for (const id of ['babytee', 'traegertop', 'croptop', 'schluppenbluse', 'tunika'
 Object.assign(SILHOUETTEN.kinderkleid, { nur: 'kinder', geschlecht: 'damen' });
 SILHOUETTEN.kinderbody.nur = 'kinder';
 
-// Erweiterungen der Bild-Chats Q27–Q29 (überschreiben gleichnamige Basiseinträge)
+// Erweiterungen der Bild-Chats Q27–Q29, Q34 (überschreiben gleichnamige Basiseinträge)
 import * as Q27 from './erweiterung-q27.js';
 import * as Q28 from './erweiterung-q28.js';
 import * as Q29 from './erweiterung-q29.js';
 import * as Q33 from './erweiterung-q33.js';
-Object.assign(SILHOUETTEN, Q27.SILHOUETTEN, Q28.SILHOUETTEN, Q29.SILHOUETTEN, Q33.SILHOUETTEN);
-export const ZEICHNER_ERWEITERT = { ...Q27.ZEICHNER, ...Q28.ZEICHNER, ...Q29.ZEICHNER, ...Q33.ZEICHNER };
+import * as Q34 from './erweiterung-q34.js';
+Object.assign(SILHOUETTEN, Q27.SILHOUETTEN, Q28.SILHOUETTEN, Q29.SILHOUETTEN, Q33.SILHOUETTEN, Q34.SILHOUETTEN);
+export const ZEICHNER_ERWEITERT = { ...Q27.ZEICHNER, ...Q28.ZEICHNER, ...Q29.ZEICHNER, ...Q33.ZEICHNER, ...Q34.ZEICHNER };
 
 export const SILHOUETTEN_IDS = Object.keys(SILHOUETTEN);
 

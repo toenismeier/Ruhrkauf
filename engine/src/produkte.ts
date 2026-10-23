@@ -10,7 +10,7 @@ import { clamp, eur, melde, mio, normal, waehle, zufall, type RngHalter } from '
 import { WG, saisonId, saisonName, type WgId } from './einkauf';
 import { BESCHAFFUNG, eigenmarkeAnteil, istVerkaufsaktiv, mehrmarge, passungWg, passungHaus, ZIELGRUPPEN_TEXT, type Eigenmarke, type EmKategorie, type Preislage, type Stil } from './eigenmarken';
 import { hqAktualisiere } from './hq';
-import { SORTIMENT_TYPEN, zielgruppenFuer, sortimentsPlatz, BILD_KORREKTUR, type ArtikelBild, type SortimentName } from './sortiment';
+import { SORTIMENT_TYPEN, SORTIMENT_KORREKTUREN, zielgruppenFuer, sortimentsPlatz, type ArtikelBild, type SortimentName } from './sortiment';
 export { SORTIMENT_TYPEN, type ArtikelBild, type SortimentTyp, type SortimentName } from './sortiment';
 
 // ---------------------------------------------------------------------------------------------
@@ -214,8 +214,8 @@ export const Q11_ARTIKELTYPEN: TypDef[] = [
 ARTIKELTYPEN.push(...Q11_ARTIKELTYPEN);
 // Q27–Q29: neue Artikeltypen der Bild-Chats (engine/src/sortiment), immer hinten angehängt.
 ARTIKELTYPEN.push(...(SORTIMENT_TYPEN as TypDef[]));
-// Q33: Kindertypen mit eigenem Bild statt des Erwachsenenbilds
-for (const t of ARTIKELTYPEN) { const b = BILD_KORREKTUR[t.typ]; if (b) t.bild = { ...b }; }
+// Q33/Q34: Bild- und Zielgruppenkorrekturen bestehender Typen (engine/src/sortiment/q33-zielgruppen.ts, q34-zielgruppen.ts)
+for (const t of ARTIKELTYPEN) { const k = SORTIMENT_KORREKTUREN[t.typ]; if (k) Object.assign(t, k); }
 export const TYP: Record<string, TypDef> = Object.fromEntries(ARTIKELTYPEN.map((t) => [t.typ, t]));
 
 /** Grundfarben je Zielgruppe (unabhängig vom Trend). */

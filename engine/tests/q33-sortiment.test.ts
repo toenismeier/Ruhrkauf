@@ -22,7 +22,7 @@ describe('Q33 Sortiment jung', () => {
   });
   test('Kinder sehen nur Kindgerechtes, Erwachsene keine Kinderartikel', () => {
     const kinder = new Set(fuer('kinder').map((t) => t.typ));
-    for (const typ of ['Schulranzen', 'Wickelbody', 'Kinder-Jeans', 'Spielball', 'Kinderteppich']) expect(kinder.has(typ)).toBe(true);
+    for (const typ of ['Schulranzen', 'Wickelbody', 'Kinder-Jeans', 'Spielball', 'Spielteppich']) expect(kinder.has(typ)).toBe(true);
     for (const typ of ['Bikini', 'Pumps', 'Kochtopf', 'Weinglas', 'Crop-Top']) expect(kinder.has(typ)).toBe(false);
     for (const z of ['adults', 'bestager']) expect(fuer(z).some((t) => t.kategorie === 'kinder' || /^Kinder/.test(t.typ) || Q33_NAMEN.includes(t.typ) && t.gruppe.mitte === 0)).toBe(false);
   });
@@ -53,6 +53,9 @@ describe('Q33 Sortiment jung', () => {
     expect(ARTIKELTYPEN.slice(-SORTIMENT_TYPEN.length).map((t) => t.typ)).toEqual(SORTIMENT_TYPEN.map((t) => t.typ));
   });
   test('bestehende Kindertypen haben eigenes Kinderbild', () => {
-    for (const typ of ['Kinder-Jeans', 'Kinder-T-Shirt', 'Kinder-Sweatshirt', 'Kinder-Pyjama']) expect(K.typen.find((t) => t.typ === typ)?.bild?.silhouette).toMatch(/^k_/);
+    const bild = (typ: string) => K.typen.find((t) => t.typ === typ)?.bild?.silhouette;
+    for (const typ of ['Kinder-T-Shirt', 'Kinder-Hoodie', 'Kinderbettwäsche', 'Kinder-Sommerkleid']) expect(bild(typ)).toMatch(/^k_/);
+    // Q34 hat einige Kindertypen selbst neu gezeichnet; dann gilt dessen Bild, nie das Erwachsenenbild
+    for (const [kind, gross] of [['Kinder-Jeans', 'Jeans'], ['Kinder-Sweatshirt', 'Sweatshirt'], ['Kinder-Pyjama', 'Pyjama']]) expect(bild(kind)).not.toBe(bild(gross) ?? 'x');
   });
 });
