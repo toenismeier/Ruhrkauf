@@ -29,8 +29,8 @@ const { chromium } = require('playwright');
     if (/Alle gemieteten Etagen sind (voll )?belegt/.test(befund) && /\b([1-8]?\d) % belegt/.test(befund)) f.push('Zentrale: „alle belegt“ neben Auslastung unter 90 %');
     // 2b: Controlling – Plätze der Etage und FTE der Abteilung aus abteilungPlaetze
     window.hqKlick('abteilung', 'controlling'); await warte(200);
-    const txt = document.querySelector('#pinhalt').textContent;
-    const m = /Auf dieser Etage belegt.*?(\d+) von (\d+)/.exec(txt);
+    const txt = document.querySelector('#pinhalt').innerText;
+    const m = /Auf dieser Etage belegt[^]*?\b(\d+) von (\d+)\b/.exec(txt);
     if (!m) f.push('Controlling: Etagenzeile fehlt');
     else {
       const a = E.hqUebersicht(S.s).abteilungen.find((x) => x.id === 'controlling');
