@@ -17,6 +17,7 @@ import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer, dachFla
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import { lebenModul } from './kit/leben.js';
+import { menschenAn, nachLaden as menschenNachLaden } from './kit/menschen.js';
 import { stadtEintragAusSpiel, spielBauer } from './kit/bruecke.js';
 import { hausDachpunkt, dachpunkt, baueHauspin, pinGroessen } from './kit/hauspins.js';
 import { schriftzugSichtbarkeit, bewerteSchriftzug } from './kit/q36-pruefung.js';
@@ -218,6 +219,9 @@ function jetztZeichnen() { const t = performance.now(); ren.render(scene, cam); 
 // N07: eigenes Animationsmodul, keine Engine-Mutation. Einstellungen via N13 nachrüstbar.
 const leben = lebenModul({ canvas, scene: () => scene, camera: () => cam, K: () => K, spiel: () => s,
   zeichnen, sparsam });
+// Stadtmenschen als vorgerenderte Figuren; sobald der Atlas geladen ist, einmal neu zeichnen.
+menschenAn(true);
+menschenNachLaden(() => { if (scene && cam) zeichnen(); });
 const lebenEinstellung = param.get('leben') ?? (() => { try { return localStorage.getItem('ruhrkauf.leben'); } catch { return null; } })();
 if (['aus', 'wenig', 'voll'].includes(lebenEinstellung)) leben.setzen(lebenEinstellung);
 $('leben-modus').value = leben.modus;
@@ -1585,7 +1589,7 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 
 window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...a) => oeffneModul(ec, ...a), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
-  kameraHaus: hausKameraMessung, // lesender Pixelabgleich für den Mobil-Smoketest
+  kameraHaus: hausKameraMessung, kameraAuf: (x, z, halb) => { K.x = x; K.z = z; K.halb = halb ?? K.halb; kameraSetzen(); leben.kamera(); zeichnen(); }, get plan() { return plan; }, menschenStatus: () => { let gruppen = 0, figuren = 0; scene?.traverse((m) => { if (m.userData?.menschen) { gruppen++; figuren += m.geometry.instanceCount; } }); return { gruppen, figuren, info: { ...ren.info.render } }; }, // lesender Pixelabgleich für den Mobil-Smoketest
   leben,
   reise, wochenbericht, hausbesuch: hb, oeffneHausbesuch: (id) => hb.oeffne(id), szenarien: szenarienUI, zeitung: zt, oeffneZeitung: (...a) => oeffneModul(zt, ...a), spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.

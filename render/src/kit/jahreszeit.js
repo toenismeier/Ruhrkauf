@@ -32,6 +32,12 @@ function maschen(scene) {
   const baeume = [], figuren = [];
   scene.traverse((m) => {
     const art = m.userData?.jahreszeitArt;
+    // Vorgerenderte Figuren (menschen.js): Oberteilfarben stehen im Instanzattribut iOben
+    if (art === 'menschen' && m.userData.menschen) {
+      const a = m.geometry.getAttribute('iOben');
+      if (a) figuren.push({ m, art, menschen: a, farben: new Float32Array(a.array) });
+      return;
+    }
     if (!m.isInstancedMesh || !art || m.userData.jahreszeitSlot !== 0 || !m.instanceColor) return;
     const entry = { m, art, farben: new Float32Array(m.instanceColor.array) };
     if (LAUB.has(art)) baeume.push(entry);
@@ -271,7 +277,16 @@ export function jahreszeitenStadt(scene, plan, hoehen, spielstand, aktiv = JAHRE
         }
         m.instanceColor.needsUpdate = true;
       }
-      for (const { m, farben } of figuren) {
+      for (const { m, farben, menschen } of figuren) {
+        if (menschen) {
+          if (an && j.name === 'sommer') {
+            const r = R(plan.seed + '/sommer/menschen');
+            const c = new THREE.Color();
+            for (let i = 0; i < menschen.count; i++) { c.set(OBERTEILE[Math.floor(r() * OBERTEILE.length)]); c.convertLinearToSRGB(); menschen.setXYZ(i, c.r, c.g, c.b); }
+          } else menschen.array.set(farben);
+          menschen.needsUpdate = true;
+          continue;
+        }
         if (an && j.name === 'sommer') {
           const r = R(plan.seed + '/sommer/figuren');
           for (let i = 0; i < m.count; i++) m.setColorAt(i, new THREE.Color(OBERTEILE[Math.floor(r() * OBERTEILE.length)]));
