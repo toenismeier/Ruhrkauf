@@ -12,6 +12,7 @@ import { seitenVon as seitenFremd, plakat as plakatFremd, passend as passendFrem
 import { WETTBEWERBER_FARBEN } from './wettbewerber.js';
 import { dachInstallationen } from './dach-qualitaet.js';
 import { dachLandschaft } from './dach-landschaft.js';
+import SCHRIFTZUG_LAGE from '../../schriftzug-lage.json';
 import { STADT_GEOGRAFIE } from './stadt-geografie.js';
 
 export const ROT = '#d23c32';
@@ -575,7 +576,11 @@ function logos(K) {
     const z = K.zonen[s.seite];
     if (!z) continue;
     const text = z.text ?? 'HARTWIG';
-    if (K.fam !== 1 && !z.sport && !z.dach && !z.wand && (K.n === 1 || Math.min(z.hb, z.max / schriftBreite(text, 1)) < Math.max(2.4, s.L * 0.035))) { // niedrige Fassade: Dachschrift auf Gerüst
+    // Q36: Lage aus der Sichtprüfung (schriftzug-lage.json): Schriftzug, den Nachbarbauten aus der Spielkamera verdecken,
+    // wandert entlang der Fassade (du, Meter) oder als Dachschrift aufs Dach (dach).
+    const lage = (globalThis.Q36_LAGE ?? SCHRIFTZUG_LAGE)[K.haus?.id]?.[s.seite];
+    if (lage?.du && !z.sport) z.u += lage.du;
+    if ((lage?.dach && K.fam !== 1 && !z.sport && !z.dach) || (K.fam !== 1 && !z.sport && !z.dach && !z.wand && (K.n === 1 || Math.min(z.hb, z.max / schriftBreite(text, 1)) < Math.max(2.4, s.L * 0.035)))) { // niedrige Fassade: Dachschrift auf Gerüst
       // Q36: Dachschrift bleibt in der Logozone der Fassade (z. B. vor dem höheren Eckatrium), nie über die ganze Seitenlänge.
       const maxD = Math.min(s.L * 0.6, z.max ?? s.L * 0.6);
       const hbD = Math.min(clamp(s.L * 0.06, 2.2, 3.6), maxD / schriftBreite(text, 1));
@@ -586,6 +591,7 @@ function logos(K) {
     }
     const hb = Math.min(z.hb, z.max / schriftBreite(text, 1));
     z.hbIst = hb;
+    if (lage?.du && !z.sport) { const halb = schriftBreite(text, hb) / 2 + 0.5, L = K.nutz[s.seite] ?? s.L; z.u = Math.min(Math.max(z.u, halb), Math.max(halb, L - halb)); }
     if (z.sport) {
       const br = schriftBreite(text, hb);
       if (!K.ohneLogo) {

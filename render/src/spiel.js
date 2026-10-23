@@ -1586,13 +1586,16 @@ window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...
   // Q36: Schriftzüge im aktuellen Kamerabild, je Buchstabe sichtbarer Anteil, und Bewertung.
   // Eigene Kamera mit demselben Maßstab wie das iPhone-Bild (halb = halbe Bildhöhe bei 844 px), aber groß genug
   // für das ganze Haus; Mittelpunkt ist die Kamera K.
-  pruefeSchriftzug: (hausId, halb = K.halb, seite = 2000) => {
+  pruefeSchriftzug: (hausId, halb = K.halb, seite = 2000, ohnePins = false) => {
     const g = hausId && sb.haeuser.get(hausId)?.gruppe;
     const ziel = g ? new THREE.Box3().setFromObject(g).getCenter(new THREE.Vector3()) : new THREE.Vector3(K.x, 0, K.z);
     const pk = isoKamera(seite, seite, halb * seite / 844, ziel);
     pk.updateMatrixWorld();
+    const pins = ohnePins ? hausPins.flatMap(({ pin, namensschild }) => [pin, namensschild]).filter((x) => x && x.visible) : [];
+    for (const x of pins) x.visible = false;
     const buchstaben = schriftzugSichtbarkeit(ren, scene, pk, seite, seite,
       (o) => !hausId || o.userData.hausId === hausId);
+    for (const x of pins) x.visible = true;
     return { stadt: stadtName, buchstaben: buchstaben.length, fehler: bewerteSchriftzug(buchstaben) };
   },
   // Q36-Diagnose: Bild aus derselben Prüfkamera (PNG als Data-URL).
