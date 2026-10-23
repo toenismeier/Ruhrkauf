@@ -2336,6 +2336,2568 @@
       "farbe": "hellblau",
       "model": null
     },
+    "k_motivshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "motiv": "dino"
+      },
+      "material": "baumwolle",
+      "farbe": "hellgrün",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_ringellongsleeve": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "dessin": "ringelbunt",
+        "rippbund": true
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_paillettenshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "motiv": "pailletten",
+        "motivS": 24
+      },
+      "material": "baumwolle",
+      "farbe": "flieder",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_tanktop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "ohne",
+        "kragen": "rund",
+        "armbuendchen": true,
+        "motiv": "sonne"
+      },
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_rueschenbluse": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "puff",
+        "kragen": "rund",
+        "rueschen": true,
+        "dessin": "bluemchen",
+        "schleife": true
+      },
+      "material": "baumwolle",
+      "farbe": "rosa",
+      "model": "oberteil",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_hemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "hemd",
+        "dessin": "autos"
+      },
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_rollkragen": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rollkragen",
+        "rippbund": true,
+        "motiv": "katze",
+        "motivY": 38
+      },
+      "material": "baumwolle",
+      "farbe": "senf",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_norweger": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "dessin": "norweger",
+        "rippbund": true,
+        "strick": true
+      },
+      "material": "strick",
+      "farbe": "rot",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_fleecepulli": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "troyer",
+        "dessin": "fleece",
+        "rippbund": true,
+        "motiv": "fuchs",
+        "motivY": 42
+      },
+      "material": "baumwolle",
+      "farbe": "senf",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_raglanshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "extras": [
+          "raglan"
+        ],
+        "motiv": "ball"
+      },
+      "material": "baumwolle",
+      "farbe": "hellgrau",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_uvshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "stehkragen",
+        "zip": true,
+        "dessin": "anker",
+        "motiv": "wal",
+        "motivY": 44
+      },
+      "material": "polyester",
+      "farbe": "hellblau",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_polo": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "polo",
+        "motiv": "anker",
+        "motivX": 59,
+        "motivY": 32,
+        "motivS": 8
+      },
+      "material": "baumwolle",
+      "farbe": "koralle",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_sweatshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "rippbund": true,
+        "motiv": "regenbogen",
+        "motivS": 22
+      },
+      "material": "baumwolle",
+      "farbe": "altrosa",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_langarmshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "motiv": "rakete"
+      },
+      "material": "baumwolle",
+      "farbe": "marine",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_tshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "motiv": "auto"
+      },
+      "material": "baumwolle",
+      "farbe": "gelb",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_hoodie": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "kaenguru": true,
+        "rippbund": true,
+        "motiv": "bagger",
+        "motivY": 34
+      },
+      "material": "baumwolle",
+      "farbe": "olive",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_tierkapuzenjacke": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "zip": true,
+        "kaenguru": true,
+        "rippbund": true,
+        "extras": [
+          "ohren"
+        ]
+      },
+      "material": "teddy",
+      "farbe": "beige",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_strickpulli": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "rippbund": true,
+        "strick": true,
+        "motiv": "herz"
+      },
+      "material": "strick",
+      "farbe": "senf",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_unterhemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "ohne",
+        "kragen": "rund",
+        "armbuendchen": true,
+        "motiv": "stern",
+        "motivS": 7,
+        "motivY": 24
+      },
+      "material": "rippe",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "kinder"
+    },
+    "k_jeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "gerade",
+        "extras": [
+          "kniepatch"
+        ],
+        "patchFarbe": "#c8372f"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_cordhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "gerade",
+        "extras": [
+          "kniepatch"
+        ],
+        "patchFarbe": "#5f8f7a"
+      },
+      "material": "cord",
+      "farbe": "senf",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_chino": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "gerade",
+        "saum": "umschlag",
+        "komfortbund": true,
+        "motiv": "stern",
+        "motivS": 6
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_thermohose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "jogger",
+        "dessin": "stepp",
+        "komfortbund": true
+      },
+      "material": "nylon",
+      "farbe": "marine",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_radler": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "leggings",
+        "laenge": "kurz",
+        "dessin": "herzen"
+      },
+      "material": "baumwolle",
+      "farbe": "rosa",
+      "model": "hose",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_bermuda": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "gerade",
+        "laenge": "bermuda",
+        "cargo": true,
+        "komfortbund": true,
+        "dessin": "dinos"
+      },
+      "material": "baumwolle",
+      "farbe": "khaki",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_latzshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "gerade",
+        "laenge": "kurz",
+        "latz": true,
+        "motiv": "blume",
+        "motivX": 50,
+        "motivY": 19,
+        "motivS": 7
+      },
+      "material": "denim",
+      "farbe": "hellerdenim",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_pumphose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "jogger",
+        "laenge": "cropped",
+        "komfortbund": true,
+        "dessin": "sterne"
+      },
+      "material": "baumwolle",
+      "farbe": "salbei",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_sweatshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "gerade",
+        "laenge": "kurz",
+        "komfortbund": true,
+        "extras": [
+          "kordel"
+        ],
+        "motiv": "blitz",
+        "motivS": 7
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_skihose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "gerade",
+        "latz": true,
+        "dessin": "stepp",
+        "extras": [
+          "kniepatch"
+        ],
+        "patchFarbe": "#2a2c30"
+      },
+      "material": "nylon",
+      "farbe": "rot",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_leggings": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "leggings",
+        "dessin": "bluemchen"
+      },
+      "material": "baumwolle",
+      "farbe": "marine",
+      "model": "hose",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_jogginghose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "jogger",
+        "extras": [
+          "kniepatch"
+        ],
+        "patchFarbe": "#f1cf4a"
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_cargohose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "weit",
+        "cargo": true,
+        "komfortbund": true,
+        "dessin": "camo"
+      },
+      "material": "baumwolle",
+      "farbe": "olive",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_jeansshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "gerade",
+        "laenge": "kurz",
+        "saum": "offen",
+        "motiv": "herz",
+        "motivS": 6
+      },
+      "material": "denim",
+      "farbe": "hellerdenim",
+      "model": "hose",
+      "nur": "kinder"
+    },
+    "k_jeansrock": {
+      "gruppe": "rock",
+      "standard": {
+        "basis": "rock",
+        "laenge": "mini",
+        "form": "a-linie",
+        "motiv": "blume",
+        "motivS": 9
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "rock",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_rueschenrock": {
+      "gruppe": "rock",
+      "standard": {
+        "basis": "rock",
+        "laenge": "mini",
+        "form": "glocke",
+        "dessin": "bluemchen",
+        "extras": [
+          "volant"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "koralle",
+      "model": "rock",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_tuellrock": {
+      "gruppe": "rock",
+      "standard": {
+        "basis": "rock",
+        "laenge": "knie",
+        "form": "glocke",
+        "extras": [
+          "schleife"
+        ]
+      },
+      "material": "tuell",
+      "farbe": "rosa",
+      "model": "rock",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_tuellkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "basis": "kleid",
+        "laenge": "knie",
+        "form": "glocke",
+        "aermel": "kurz",
+        "extras": [
+          "schleife"
+        ],
+        "schleifeFarbe": "#e8a0b4"
+      },
+      "material": "tuell",
+      "farbe": "flieder",
+      "model": "kleid",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_traegerkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "basis": "kleid",
+        "laenge": "knie",
+        "form": "a-linie",
+        "aermel": "ohne",
+        "dessin": "punkte",
+        "extras": [
+          "volant"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": "kleid",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_sweatkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "basis": "kleid",
+        "laenge": "knie",
+        "form": "gerade",
+        "aermel": "lang",
+        "motiv": "katze"
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "kleid",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_sommerkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "basis": "kleid",
+        "laenge": "knie",
+        "form": "glocke",
+        "aermel": "puff",
+        "dessin": "bluemchen",
+        "extras": [
+          "schleife"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "gelb",
+      "model": "kleid",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_strickkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "basis": "kleid",
+        "laenge": "knie",
+        "form": "a-linie",
+        "aermel": "lang",
+        "dessin": "norweger"
+      },
+      "material": "strick",
+      "farbe": "marine",
+      "model": "kleid",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_nachthemd": {
+      "gruppe": "kleid",
+      "standard": {
+        "basis": "kleid",
+        "laenge": "midi",
+        "form": "a-linie",
+        "aermel": "lang",
+        "dessin": "sterne",
+        "motiv": "einhorn"
+      },
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": "kleid",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_dirndl": {
+      "gruppe": "kleid",
+      "standard": {
+        "basis": "kleid",
+        "laenge": "knie",
+        "form": "glocke",
+        "aermel": "puff",
+        "kragen": "carree",
+        "dessin": "karo",
+        "extras": [
+          "schleife"
+        ],
+        "schleifeFarbe": "#c8372f"
+      },
+      "material": "baumwolle",
+      "farbe": "flaschengrün",
+      "model": "kleid",
+      "nur": "kinder",
+      "geschlecht": "damen"
+    },
+    "k_jeansjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "jeansjacke",
+        "motiv": "stern"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "jacke",
+      "nur": "kinder"
+    },
+    "k_daunenweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "steppweste",
+        "motiv": "fuchs",
+        "motivX": 40,
+        "motivY": 32,
+        "motivS": 9
+      },
+      "material": "nylon",
+      "farbe": "orange",
+      "model": "jacke",
+      "nur": "kinder"
+    },
+    "k_dufflecoat": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "mantel",
+        "laenge": "normal",
+        "dessin": "schotten"
+      },
+      "material": "wolle",
+      "farbe": "marine",
+      "model": "jacke",
+      "nur": "kinder"
+    },
+    "k_blouson": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "bomber",
+        "motiv": "rakete"
+      },
+      "material": "nylon",
+      "farbe": "olive",
+      "model": "jacke",
+      "nur": "kinder"
+    },
+    "k_skijacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "regenjacke",
+        "dessin": "block"
+      },
+      "material": "nylon",
+      "farbe": "rot",
+      "model": "jacke",
+      "nur": "kinder"
+    },
+    "k_steppjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "steppjacke",
+        "motiv": "wolke",
+        "motivS": 9
+      },
+      "material": "nylon",
+      "farbe": "gelb",
+      "model": "jacke",
+      "nur": "kinder"
+    },
+    "k_regenjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "regenjacke",
+        "dessin": "punkte"
+      },
+      "material": "lack",
+      "farbe": "gelb",
+      "model": "jacke",
+      "nur": "kinder"
+    },
+    "k_softshelljacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "funktion",
+        "motiv": "bagger",
+        "motivS": 9
+      },
+      "material": "polyester",
+      "farbe": "petrol",
+      "model": "jacke",
+      "nur": "kinder"
+    },
+    "k_parka": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "parka",
+        "dessin": "camo"
+      },
+      "material": "nylon",
+      "farbe": "olive",
+      "model": "jacke",
+      "nur": "kinder"
+    },
+    "k_strickjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "strickjacke",
+        "dessin": "sterne"
+      },
+      "material": "strick",
+      "farbe": "gelb",
+      "model": "jacke",
+      "nur": "kinder"
+    },
+    "t_tiedye": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy",
+        "dessin": "tiedye"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "t_printshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "oversize",
+        "motiv": "grafik",
+        "motivS": 24
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "oberteil"
+    },
+    "t_smileyshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy",
+        "motiv": "smiley",
+        "motivS": 18
+      },
+      "material": "baumwolle",
+      "farbe": "flieder",
+      "model": "oberteil"
+    },
+    "t_croplongsleeve": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "laenge": "crop",
+        "passform": "tailliert",
+        "dessin": "bretagne"
+      },
+      "material": "rippe",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "t_meshtop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "tailliert",
+        "dessin": "netzgrob"
+      },
+      "material": "polyester",
+      "farbe": "altrosa",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "t_schachpulli": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "oversize",
+        "rippbund": true,
+        "strick": true,
+        "dessin": "schach"
+      },
+      "material": "strick",
+      "farbe": "mint",
+      "model": "oberteil"
+    },
+    "t_ziphoodie": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "zip": true,
+        "kaenguru": true,
+        "rippbund": true,
+        "passform": "oversize",
+        "dessin": "block"
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "oberteil"
+    },
+    "t_tiedyehoodie": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "kaenguru": true,
+        "rippbund": true,
+        "passform": "oversize",
+        "dessin": "tiedye"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "t_cropsweat": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "laenge": "crop",
+        "passform": "oversize",
+        "rippbund": true,
+        "motiv": "herz",
+        "motivS": 8
+      },
+      "material": "baumwolle",
+      "farbe": "altrosa",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "t_collegesweat": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "rippbund": true,
+        "passform": "oversize",
+        "motiv": "college",
+        "motivS": 22
+      },
+      "material": "baumwolle",
+      "farbe": "creme",
+      "model": "oberteil"
+    },
+    "t_raglanlong": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "extras": [
+          "raglan"
+        ],
+        "raglanFarbe": "#2a2c30",
+        "motiv": "schrift",
+        "motivS": 18
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "t_trikot": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "v",
+        "passform": "oversize",
+        "extras": [
+          "trikot"
+        ],
+        "motiv": "nummer",
+        "motivS": 22
+      },
+      "material": "polyester",
+      "farbe": "rot",
+      "model": "oberteil"
+    },
+    "t_basketballtank": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "ohne",
+        "kragen": "rund",
+        "armbuendchen": true,
+        "passform": "oversize",
+        "laenge": "lang",
+        "motiv": "nummer",
+        "motivS": 22,
+        "dessin": "netz"
+      },
+      "material": "polyester",
+      "farbe": "gelb",
+      "model": "oberteil"
+    },
+    "t_bowlinghemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy",
+        "extras": [
+          "revers"
+        ],
+        "dessin": "block"
+      },
+      "material": "viskose",
+      "farbe": "creme",
+      "model": "oberteil"
+    },
+    "t_flanellhemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "hemd",
+        "passform": "oversize",
+        "brusttasche": true,
+        "dessin": "flanell"
+      },
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": "oberteil"
+    },
+    "t_cutouttop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "carree",
+        "passform": "tailliert",
+        "laenge": "kurz",
+        "extras": [
+          "cutout"
+        ]
+      },
+      "material": "rippe",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "t_neckholder": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "ohne",
+        "kragen": "v",
+        "passform": "tailliert",
+        "laenge": "crop",
+        "extras": [
+          "neckholder"
+        ],
+        "dessin": "leo"
+      },
+      "material": "viskose",
+      "farbe": "camel",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "t_bandeau": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "traeger",
+        "kragen": "carree",
+        "passform": "tailliert",
+        "laenge": "crop",
+        "extras": [
+          "raffung"
+        ]
+      },
+      "material": "rippe",
+      "farbe": "koralle",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "t_teddypulli": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "kaenguru": true,
+        "passform": "oversize",
+        "rippbund": true,
+        "dessin": "fleece"
+      },
+      "material": "teddy",
+      "farbe": "camel",
+      "model": "oberteil"
+    },
+    "t_fleecetroyer": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "troyer",
+        "passform": "oversize",
+        "dessin": "fleece",
+        "extras": [
+          "brusttaschen"
+        ]
+      },
+      "material": "polyester",
+      "farbe": "flaschengrün",
+      "model": "oberteil"
+    },
+    "t_camoshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy",
+        "dessin": "camo"
+      },
+      "material": "baumwolle",
+      "farbe": "khaki",
+      "model": "oberteil"
+    },
+    "t_ringelcrop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "laenge": "crop",
+        "passform": "tailliert",
+        "dessin": "ringelbunt"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "t_glitzertop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "traeger",
+        "kragen": "v",
+        "passform": "tailliert",
+        "dessin": "glitzer"
+      },
+      "material": "satin",
+      "farbe": "lila",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "t_parachute": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "baggy",
+        "komfortbund": true,
+        "extras": [
+          "parachute"
+        ]
+      },
+      "material": "nylon",
+      "farbe": "hellgrau",
+      "model": "hose"
+    },
+    "t_cargojeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "baggy",
+        "cargo": true,
+        "saum": "offen"
+      },
+      "material": "denim",
+      "farbe": "hellerdenim",
+      "model": "hose"
+    },
+    "t_jorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "baggy",
+        "laenge": "bermuda",
+        "saum": "offen"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "hose"
+    },
+    "t_rippedjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "schmal",
+        "ripped": true,
+        "saum": "offen",
+        "extras": [
+          "kniepatch"
+        ],
+        "patchFarbe": "#e9e4dc"
+      },
+      "material": "denim",
+      "farbe": "hellerdenim",
+      "model": "hose"
+    },
+    "t_flareleggings": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "flare",
+        "komfortbund": true
+      },
+      "material": "rippe",
+      "farbe": "schwarz",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "t_sweatshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "gerade",
+        "laenge": "kurz",
+        "komfortbund": true,
+        "extras": [
+          "kordel"
+        ],
+        "dessin": "tiedye"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "hose"
+    },
+    "t_basketballshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "weit",
+        "laenge": "bermuda",
+        "komfortbund": true,
+        "extras": [
+          "seitenband",
+          "kordel"
+        ]
+      },
+      "material": "polyester",
+      "farbe": "marine",
+      "model": "hose"
+    },
+    "t_camocargo": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "baggy",
+        "cargo": true,
+        "komfortbund": true,
+        "dessin": "camo"
+      },
+      "material": "baumwolle",
+      "farbe": "khaki",
+      "model": "hose"
+    },
+    "t_trackpants": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "weit",
+        "komfortbund": true,
+        "extras": [
+          "seitenstreifen"
+        ]
+      },
+      "material": "nylon",
+      "farbe": "schwarz",
+      "model": "hose"
+    },
+    "t_sportleggings": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "leggings",
+        "dessin": "block"
+      },
+      "material": "polyester",
+      "farbe": "lila",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "t_tennisrock": {
+      "gruppe": "rock",
+      "standard": {
+        "basis": "rock",
+        "laenge": "mini",
+        "form": "plissee"
+      },
+      "material": "polyester",
+      "farbe": "weiß",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "t_karominirock": {
+      "gruppe": "rock",
+      "standard": {
+        "basis": "rock",
+        "laenge": "mini",
+        "form": "a-linie",
+        "dessin": "schotten"
+      },
+      "material": "wolle",
+      "farbe": "rot",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "t_jeanslatzhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "weit",
+        "latz": true,
+        "saum": "umschlag"
+      },
+      "material": "denim",
+      "farbe": "hellerdenim",
+      "model": "hose"
+    },
+    "t_croppullunder": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "ohne",
+        "kragen": "v",
+        "laenge": "crop",
+        "passform": "gerade",
+        "strick": true,
+        "armbuendchen": true,
+        "dessin": "bretagne"
+      },
+      "material": "strick",
+      "farbe": "creme",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "t_longline": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "laenge": "tunika",
+        "passform": "oversize",
+        "motiv": "blitz",
+        "motivS": 10
+      },
+      "material": "baumwolle",
+      "farbe": "anthrazit",
+      "model": "oberteil"
+    },
+    "t_croppolo": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "polo",
+        "laenge": "crop",
+        "passform": "tailliert",
+        "dessin": "bretagne"
+      },
+      "material": "rippe",
+      "farbe": "marine",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "t_regenbogenpulli": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "oversize",
+        "rippbund": true,
+        "strick": true,
+        "dessin": "regenbogen"
+      },
+      "material": "strick",
+      "farbe": "creme",
+      "model": "oberteil"
+    },
+    "t_fleecejacke": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "stehkragen",
+        "zip": true,
+        "rippbund": true,
+        "dessin": "fleece",
+        "extras": [
+          "brusttaschen"
+        ]
+      },
+      "material": "polyester",
+      "farbe": "lila",
+      "model": "oberteil"
+    },
+    "t_sweatweste": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "ohne",
+        "kragen": "kapuze",
+        "zip": true,
+        "kaenguru": true,
+        "armbuendchen": true,
+        "passform": "oversize"
+      },
+      "material": "baumwolle",
+      "farbe": "olive",
+      "model": "oberteil"
+    },
+    "t_karohose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "weit",
+        "dessin": "schotten"
+      },
+      "material": "wolle",
+      "farbe": "rot",
+      "model": "hose"
+    },
+    "t_pyjamahose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "jogger",
+        "komfortbund": true,
+        "dessin": "herzen"
+      },
+      "material": "baumwolle",
+      "farbe": "rosa",
+      "model": "hose"
+    },
+    "t_radler": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "leggings",
+        "laenge": "kurz",
+        "extras": [
+          "seitenstreifen"
+        ]
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "t_leorock": {
+      "gruppe": "rock",
+      "standard": {
+        "basis": "rock",
+        "laenge": "midi",
+        "form": "gerade",
+        "dessin": "leo"
+      },
+      "material": "satin",
+      "farbe": "camel",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "t_skort": {
+      "gruppe": "rock",
+      "standard": {
+        "basis": "rock",
+        "laenge": "mini",
+        "form": "wickel",
+        "dessin": "block"
+      },
+      "material": "polyester",
+      "farbe": "salbei",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "t_jeanskleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "basis": "kleid",
+        "laenge": "knie",
+        "form": "a-linie",
+        "aermel": "kurz",
+        "kragen": "hemd"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "t_cropjeansjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "jeansjacke",
+        "laenge": "crop"
+      },
+      "material": "denim",
+      "farbe": "hellerdenim",
+      "model": "jacke"
+    },
+    "t_fleeceweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "steppweste",
+        "dessin": "fleece"
+      },
+      "material": "teddy",
+      "farbe": "ecru",
+      "model": "jacke"
+    },
+    "t_camoshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "weit",
+        "laenge": "kurz",
+        "cargo": true,
+        "dessin": "camo"
+      },
+      "material": "baumwolle",
+      "farbe": "khaki",
+      "model": "hose"
+    },
+    "t_ringelhoodie": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "kaenguru": true,
+        "rippbund": true,
+        "passform": "oversize",
+        "dessin": "bretagne"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "t_schachshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "gerade",
+        "laenge": "kurz",
+        "komfortbund": true,
+        "extras": [
+          "kordel"
+        ],
+        "dessin": "schach"
+      },
+      "material": "baumwolle",
+      "farbe": "flieder",
+      "model": "hose"
+    },
+    "t_leoshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy",
+        "dessin": "leo"
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": "oberteil"
+    },
+    "t_sternepulli": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "oversize",
+        "rippbund": true,
+        "strick": true,
+        "dessin": "sterne"
+      },
+      "material": "strick",
+      "farbe": "marine",
+      "model": "oberteil"
+    },
+    "t_herzcrop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "carree",
+        "laenge": "crop",
+        "passform": "tailliert",
+        "dessin": "herzen"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "t_tuellmini": {
+      "gruppe": "rock",
+      "standard": {
+        "basis": "rock",
+        "laenge": "mini",
+        "form": "glocke"
+      },
+      "material": "tuell",
+      "farbe": "schwarz",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "t_cargooverall": {
+      "gruppe": "unterteil",
+      "standard": {
+        "basis": "hose",
+        "passform": "baggy",
+        "latz": true,
+        "cargo": true
+      },
+      "material": "baumwolle",
+      "farbe": "olive",
+      "model": "hose"
+    },
+    "t_hoodiekleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "basis": "kleid",
+        "laenge": "knie",
+        "form": "gerade",
+        "aermel": "lang",
+        "extras": [
+          "taillenkordel"
+        ],
+        "motiv": "schrift",
+        "motivS": 16
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "t_bodycon": {
+      "gruppe": "kleid",
+      "standard": {
+        "basis": "kleid",
+        "laenge": "midi",
+        "form": "bleistift",
+        "aermel": "ohne",
+        "kragen": "carree"
+      },
+      "material": "rippe",
+      "farbe": "bordeaux",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "t_babydoll": {
+      "gruppe": "kleid",
+      "standard": {
+        "basis": "kleid",
+        "laenge": "mini",
+        "form": "glocke",
+        "aermel": "traeger",
+        "dessin": "bluemchen",
+        "extras": [
+          "volant"
+        ]
+      },
+      "material": "viskose",
+      "farbe": "hellblau",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "t_croppuffer": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "steppjacke",
+        "laenge": "crop"
+      },
+      "material": "nylon",
+      "farbe": "flieder",
+      "model": "jacke"
+    },
+    "t_windbreaker": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "regenjacke",
+        "laenge": "kurz",
+        "dessin": "block"
+      },
+      "material": "nylon",
+      "farbe": "petrol",
+      "model": "jacke"
+    },
+    "t_coachjacket": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "harrington",
+        "motiv": "schrift",
+        "motivX": 50,
+        "motivY": 34,
+        "motivS": 16
+      },
+      "material": "nylon",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "t_sherpajacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "teddy",
+        "laenge": "kurz",
+        "dessin": "block"
+      },
+      "material": "teddy",
+      "farbe": "ecru",
+      "model": "jacke"
+    },
+    "t_cropweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "steppweste",
+        "laenge": "crop"
+      },
+      "material": "nylon",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "t_kunstlederjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "lederjacke",
+        "laenge": "crop"
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "t_karojacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "overshirt",
+        "dessin": "schotten"
+      },
+      "material": "wolle",
+      "farbe": "rot",
+      "model": "jacke"
+    },
+    "t_satinbomber": {
+      "gruppe": "jacke",
+      "standard": {
+        "basis": "jacke",
+        "art": "bomber",
+        "motiv": "blitz",
+        "motivS": 8
+      },
+      "material": "satin",
+      "farbe": "flaschengrün",
+      "model": "jacke"
+    },
+    "t_skateschuh": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "sneaker",
+        "art": "sneaker",
+        "sohle": 0.085,
+        "sohleFarbe": "#f4f3ef",
+        "profil": false,
+        "kappe": "gummi",
+        "lagen": [
+          [
+            0.05,
+            0.95,
+            "#2a2c30"
+          ]
+        ],
+        "schnuerung": [
+          0.36,
+          0.66,
+          6
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "t_hightop": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "sneaker",
+        "art": "sneaker",
+        "schaft": 0.56,
+        "schaftSchnuerung": 4,
+        "schnuerung": [
+          0.3,
+          0.64,
+          6
+        ],
+        "polsterRand": true,
+        "kappe": "gummi",
+        "sohleFarbe": "#f4f3ef",
+        "profil": false
+      },
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": "schuhe"
+    },
+    "t_retrorunner": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "sneaker",
+        "art": "sneaker",
+        "zweiton": true,
+        "akzent": "#c8372f",
+        "overlays": true,
+        "sohleWelle": true,
+        "sohle": 0.1,
+        "sohleFarbe": "#ece6d8",
+        "lagen": [
+          [
+            0.1,
+            0.4,
+            "#273659"
+          ]
+        ]
+      },
+      "material": "leder",
+      "farbe": "grau",
+      "model": "schuhe"
+    },
+    "t_plateauboots": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "schnuerstiefel",
+        "art": "halb",
+        "sohle": 0.17,
+        "sohleFarbe": "#1d1b1c",
+        "schaft": 0.64
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "k_hallenschuh": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "sneaker",
+        "art": "sneaker",
+        "sohleFarbe": "#c79a5a",
+        "schnuerung": false,
+        "zunge": false,
+        "klett": 3,
+        "klettFarbe": "#273659",
+        "kappe": "gummi",
+        "kappeFarbe": "#c79a5a"
+      },
+      "material": "leder",
+      "farbe": "weiß",
+      "model": "schuhe",
+      "nur": "kinder"
+    },
+    "k_leuchtsneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "sneaker",
+        "art": "sneaker",
+        "schnuerung": false,
+        "zunge": false,
+        "klett": 2,
+        "klettFarbe": "#f4f3ef",
+        "sohle": 0.09,
+        "lagen": [
+          [
+            0,
+            0.2,
+            "#e8506a"
+          ],
+          [
+            0.2,
+            0.4,
+            "#f1cf4a"
+          ],
+          [
+            0.4,
+            0.6,
+            "#5f9a4a"
+          ],
+          [
+            0.6,
+            0.8,
+            "#4f7fae"
+          ],
+          [
+            0.8,
+            1,
+            "#9a7bd0"
+          ]
+        ]
+      },
+      "material": "leder",
+      "farbe": "rosa",
+      "model": "schuhe",
+      "nur": "kinder"
+    },
+    "k_riemchenschuh": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "ballerina",
+        "art": "halb",
+        "schleife": false,
+        "klett": 1,
+        "klettFarbe": "#7a1f1a",
+        "hoehe": "kind",
+        "breite": "breit"
+      },
+      "material": "lack",
+      "farbe": "rot",
+      "model": "schuhe",
+      "nur": "kinder"
+    },
+    "k_krabbelschuh": {
+      "gruppe": "schuhe",
+      "standard": {
+        "schuh": "lauflern",
+        "art": "sneaker",
+        "sohle": 0.02,
+        "sohleFarbe": "#8a6a4a",
+        "klett": 0,
+        "kappe": null,
+        "schaft": 0.36,
+        "polsterRand": false,
+        "gummiband": true,
+        "paar": true
+      },
+      "material": "leder",
+      "farbe": "beige",
+      "model": "schuhe",
+      "nur": "kinder"
+    },
+    "k_wickelbody": {
+      "gruppe": "oberteil",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "salbei",
+      "model": null
+    },
+    "k_erstlingsmuetze": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "creme",
+      "model": null
+    },
+    "k_laetzchen": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "frottee",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "k_schmusetuch": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "pluesch",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "k_schnullerkette": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "holz",
+      "farbe": "salbei",
+      "model": null
+    },
+    "k_rassel": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "holz",
+      "farbe": "gelb",
+      "model": null
+    },
+    "k_beissring": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "silikon",
+      "farbe": "mint",
+      "model": null
+    },
+    "k_babydecke": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "strick",
+      "farbe": "altrosa",
+      "model": null
+    },
+    "k_kapuzenhandtuch": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "frottee",
+      "farbe": "gelb",
+      "model": null
+    },
+    "k_spieluhr": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "pluesch",
+      "farbe": "flieder",
+      "model": null
+    },
+    "k_mobile": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "holz",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "k_wickeltasche": {
+      "gruppe": "tasche",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "salbei",
+      "model": null
+    },
+    "k_babyjaeckchen": {
+      "gruppe": "oberteil",
+      "standard": {},
+      "material": "strick",
+      "farbe": "creme",
+      "model": null
+    },
+    "k_ball": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "gummi",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_spielzeugauto": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "holz",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_kreisel": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "holz",
+      "farbe": "#4f7fae",
+      "model": null
+    },
+    "k_bilderbuch": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "pappe",
+      "farbe": "gelb",
+      "model": null
+    },
+    "k_buntstifte": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "holz",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_stapelturm": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "holz",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_schaukelpferd": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "holz",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_sandspielzeug": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "#4f7fae",
+      "model": null
+    },
+    "k_springseil": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_xylophon": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "holz",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_handpuppe": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "pluesch",
+      "farbe": "orange",
+      "model": null
+    },
+    "k_drachen": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "nylon",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_badeente": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "gummi",
+      "farbe": "gelb",
+      "model": null
+    },
+    "k_kuschelhase": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "pluesch",
+      "farbe": "beige",
+      "model": null
+    },
+    "k_malkasten": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "metall",
+      "farbe": "schwarz",
+      "model": null
+    },
+    "k_legespiel": {
+      "gruppe": "spielzeug",
+      "standard": {},
+      "material": "pappe",
+      "farbe": "#4f7fae",
+      "model": null
+    },
+    "k_schulranzen": {
+      "gruppe": "tasche",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "#3f6fae",
+      "model": null
+    },
+    "k_turnbeutel": {
+      "gruppe": "tasche",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_federmaeppchen": {
+      "gruppe": "tasche",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "hellgrün",
+      "model": null
+    },
+    "k_brotdose": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "hellgrün",
+      "model": null
+    },
+    "k_trinkflasche": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "edelstahl",
+      "farbe": "koralle",
+      "model": null
+    },
+    "k_bommelmuetze": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "strick",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_faeustlinge": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "strick",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "k_haarspangen": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "rosa",
+      "model": null
+    },
+    "k_kinderuhr": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "silikon",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "k_kinderschirm": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "gelb",
+      "model": null
+    },
+    "k_kindergeldboerse": {
+      "gruppe": "tasche",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "lila",
+      "model": null
+    },
+    "k_kindercap": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_schal": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "strick",
+      "farbe": "senf",
+      "model": null
+    },
+    "k_spielteppich": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "hellgrün",
+      "model": null
+    },
+    "k_nachtlicht": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "gelb",
+      "model": null
+    },
+    "k_wimpelkette": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "rosa",
+      "model": null
+    },
+    "k_kindergeschirr": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "mint",
+      "model": null
+    },
+    "k_spielkorb": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "filz",
+      "farbe": "grau",
+      "model": null
+    },
+    "k_wolkenkissen": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "k_spardose": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "keramik",
+      "farbe": "rosa",
+      "model": null
+    },
+    "k_bettwaesche": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "k_slipset": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": null
+    },
+    "k_boxershorts": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "marine",
+      "model": null
+    },
+    "k_bikini": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "koralle",
+      "model": null
+    },
+    "k_stoppersocken": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "hellgrau",
+      "model": null
+    },
+    "k_sockenset": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": null
+    },
+    "k_schlafanzug": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "k_sandale": {
+      "gruppe": "schuhe",
+      "standard": {},
+      "material": "leder",
+      "farbe": "marine",
+      "model": null
+    },
+    "k_badeschuh": {
+      "gruppe": "schuhe",
+      "standard": {},
+      "material": "gummi",
+      "farbe": "#5f9a4a",
+      "model": null
+    },
+    "k_kindershampoo": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "hellblau",
+      "model": null
+    },
+    "k_zahnputzset": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "mint",
+      "model": null
+    },
+    "t_buckethat": {
+      "gruppe": "accessoire",
+      "standard": {
+        "dessin": "schach",
+        "art": "bucket"
+      },
+      "material": "baumwolle",
+      "farbe": "creme",
+      "model": "muetze"
+    },
+    "t_bandana": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": null
+    },
+    "t_herzbrille": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "rosa",
+      "model": null
+    },
+    "t_scrunchies": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "satin",
+      "farbe": "altrosa",
+      "model": null
+    },
+    "t_stirnband": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "frottee",
+      "farbe": "weiß",
+      "model": null
+    },
+    "t_truckercap": {
+      "gruppe": "accessoire",
+      "standard": {
+        "art": "cap"
+      },
+      "material": "polyester",
+      "farbe": "weiß",
+      "model": "muetze"
+    },
+    "t_schulrucksack": {
+      "gruppe": "tasche",
+      "standard": {},
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": null
+    },
+    "t_stoffbeutel": {
+      "gruppe": "tasche",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": null
+    },
+    "t_minirucksack": {
+      "gruppe": "tasche",
+      "standard": {},
+      "material": "leder",
+      "farbe": "cognac",
+      "model": null
+    },
+    "t_handykette": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "lila",
+      "model": null
+    },
+    "t_freundschaftsarmband": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "rosa",
+      "model": null
+    },
+    "t_kreolen": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "metall",
+      "farbe": "gold",
+      "model": null
+    },
+    "t_choker": {
+      "gruppe": "accessoire",
+      "standard": {},
+      "material": "samt",
+      "farbe": "schwarz",
+      "model": null
+    },
+    "t_tennissocken": {
+      "gruppe": "waesche",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": null
+    },
+    "t_slides": {
+      "gruppe": "schuhe",
+      "standard": {
+        "art": "sneaker"
+      },
+      "material": "gummi",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "t_clogs": {
+      "gruppe": "schuhe",
+      "standard": {
+        "art": "sneaker"
+      },
+      "material": "gummi",
+      "farbe": "mint",
+      "model": "schuhe"
+    },
+    "t_lipgloss": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "glas",
+      "farbe": "rosa",
+      "model": null
+    },
+    "t_bodyspray": {
+      "gruppe": "beauty",
+      "standard": {},
+      "material": "aluminium",
+      "farbe": "lila",
+      "model": null
+    },
+    "t_lichterkette": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "gelb",
+      "model": null
+    },
+    "t_sitzsack": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "cord",
+      "farbe": "senf",
+      "model": null
+    },
+    "t_posterset": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "papier",
+      "farbe": "weiß",
+      "model": null
+    },
+    "t_pinnwand": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "kork",
+      "farbe": "camel",
+      "model": null
+    },
+    "t_wecker": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "metall",
+      "farbe": "mint",
+      "model": null
+    },
+    "t_flauschteppich": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "pluesch",
+      "farbe": "creme",
+      "model": null
+    },
+    "t_klemmleuchte": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "metall",
+      "farbe": "schwarz",
+      "model": null
+    },
+    "t_wendebettwaesche": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "baumwolle",
+      "farbe": "salbei",
+      "model": null
+    },
+    "t_neonlampe": {
+      "gruppe": "home",
+      "standard": {},
+      "material": "kunststoff",
+      "farbe": "rosa",
+      "model": null
+    },
     "schnuerschuh": {
       "gruppe": "schuhe",
       "standard": {
