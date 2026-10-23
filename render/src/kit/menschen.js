@@ -7,7 +7,7 @@ import { ATLAS_INDEX as IX, ATLAS_WEBP } from './menschen-atlas.js';
 
 const PI = Math.PI;
 // Darstellungsgröße: wie die bisherigen Stadtfiguren etwas über Lebensgröße, damit sie in der Iso-Ansicht lesbar bleiben.
-export const GROESSE = 1.3;
+export const GROESSE = 1.5;
 export const KOERPER = IX.koerper.map((k) => k.id);
 const KOERPER_NR = Object.fromEntries(KOERPER.map((k, i) => [k, i]));
 const ERWACHSEN = KOERPER.filter((k) => !k.startsWith('kind'));
