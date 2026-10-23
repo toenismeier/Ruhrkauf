@@ -19,6 +19,7 @@ import { nahMitte } from './kit/stadtrand.js';
 import { lebenModul } from './kit/leben.js';
 import { stadtEintragAusSpiel, spielBauer } from './kit/bruecke.js';
 import { hausDachpunkt, dachpunkt, baueHauspin, pinGroessen } from './kit/hauspins.js';
+import { schriftzugSichtbarkeit, bewerteSchriftzug } from './kit/q36-pruefung.js';
 import { jahreszeitenStadt, jahreszeit } from './kit/jahreszeit.js';
 import { STATUS_TITEL } from './kit/zustaende.js';
 import { geld, fmt, esc } from './ui/format.js';
@@ -1597,6 +1598,33 @@ window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...
     hausReiter='ueberblick'; oeffneHaus(id);
     return { id, score:d.kundenScore, reiter:7, fehler }; },
   hauspinListe: () => hausPins.map(({ pin }) => ({ ...pin.userData })),
+  // Q36: Schriftzüge im aktuellen Kamerabild, je Buchstabe sichtbarer Anteil, und Bewertung.
+  // Eigene Kamera mit demselben Maßstab wie das iPhone-Bild (halb = halbe Bildhöhe bei 844 px), aber groß genug
+  // für das ganze Haus; Mittelpunkt ist die Kamera K.
+  pruefeSchriftzug: (hausId, halb = K.halb, seite = 2000, ohnePins = false) => {
+    const g = hausId && sb.haeuser.get(hausId)?.gruppe;
+    const ziel = g ? new THREE.Box3().setFromObject(g).getCenter(new THREE.Vector3()) : new THREE.Vector3(K.x, 0, K.z);
+    const pk = isoKamera(seite, seite, halb * seite / 844, ziel);
+    pk.updateMatrixWorld();
+    const pins = ohnePins ? hausPins.flatMap(({ pin, namensschild }) => [pin, namensschild]).filter((x) => x && x.visible) : [];
+    for (const x of pins) x.visible = false;
+    const buchstaben = schriftzugSichtbarkeit(ren, scene, pk, seite, seite,
+      (o) => !hausId || o.userData.hausId === hausId);
+    for (const x of pins) x.visible = true;
+    return { stadt: stadtName, buchstaben: buchstaben.length, fehler: bewerteSchriftzug(buchstaben) };
+  },
+  // Q36-Diagnose: Bild aus derselben Prüfkamera (PNG als Data-URL).
+  schriftzugBild: (hausId, halb = K.halb, seite = 1400) => {
+    const g = sb.haeuser.get(hausId)?.gruppe;
+    const ziel = g ? new THREE.Box3().setFromObject(g).getCenter(new THREE.Vector3()) : new THREE.Vector3(K.x, 0, K.z);
+    const pk = isoKamera(seite, seite, halb * seite / 844, ziel); pk.updateMatrixWorld();
+    const rt = new THREE.WebGLRenderTarget(seite, seite); rt.texture.colorSpace = THREE.SRGBColorSpace;
+    ren.setRenderTarget(rt); ren.render(scene, pk);
+    const px = new Uint8Array(seite * seite * 4); ren.readRenderTargetPixels(rt, 0, 0, seite, seite, px); ren.setRenderTarget(null); rt.dispose();
+    const c = document.createElement('canvas'); c.width = c.height = seite; const k = c.getContext('2d'), bild = k.createImageData(seite, seite);
+    for (let y = 0; y < seite; y++) bild.data.set(px.subarray((seite - 1 - y) * seite * 4, (seite - y) * seite * 4), y * seite * 4);
+    k.putImageData(bild, 0, 0); return c.toDataURL('image/png');
+  },
   pruefeHauspins: () => {
     // Die Sollposition wird aus dem eigenen Hausgrundriss, der Slot-Ecke und
     // der tatsächlich gebauten Höhe abgeleitet. Messung in CSS-Pixeln (iPhone).

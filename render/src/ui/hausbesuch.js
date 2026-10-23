@@ -173,30 +173,46 @@ export function hausbesuchModul(ctx) {
     scene = null; buehne = null; figuren = []; personenMesh = []; treffer = [];
     navigation = null; besuchZonen = [];
   }
-  function instanz(anz, farbe, geo) {
-    const m = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ color: farbe }), Math.max(1, anz));
-    m.count = anz; m.frustumCulled = false; scene.add(m); personenMesh.push(m); return m;
+  function instanz(anz, farbe, geo, farben = null) {
+    const m = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ color: farben ? '#ffffff' : farbe }), Math.max(1, anz));
+    m.count = anz; m.frustumCulled = false;
+    if (farben) for (let i = 0; i < anz; i++) m.setColorAt(i, new THREE.Color(farben[i]));
+    scene.add(m); personenMesh.push(m); return m;
   }
+  // Q36: maßstabsgerechte Figuren (1,75 m, Kopf 24 cm) statt Kugelköpfen auf Kisten.
+  // Je Gruppe vier Teile: Beine, Rumpf, Kopf, Haare. Kundschaft mit eigener Kleidung, Personal einheitlich.
+  const FIGUR_TEILE = [['beine', 0.42], ['rumpf', 1.14], ['kopf', 1.59], ['haare', 1.63]];
+  const HAUT = ['#f1d3b8', '#ecc8a8', '#e3b994', '#f3dcc6', '#d9ab86', '#c99474'];
+  const HAAR = ['#e3cc8f', '#c9b07a', '#a8875a', '#6b4a32', '#4a3426', '#9a958d', '#2e2622'];
+  const OBEN = ['#6f8fae', '#b9534a', '#e8e2d6', '#3f5f4f', '#d8a34a', '#7b6a8f', '#2f3a48', '#c97f6b', '#8fa38a'];
+  const UNTEN = ['#2f3a48', '#3d4652', '#5b5048', '#2a2d31', '#6a7680', '#7a6a58'];
   function menschen(zn, besatz) {
     besuchZonen = zn;
     besuchSeed = haus.id + ':besuch:' + nr + ':' + ctx.s().woche;
     figuren = erstelleBesucher(navigation, zn, besatz, besuchSeed);
-    const koerper = new THREE.BoxGeometry(0.66, 1.15, 0.42), kopf = new THREE.SphereGeometry(0.37, 6, 5);
+    const geo = {
+      beine: new THREE.BoxGeometry(0.3, 0.84, 0.2),
+      rumpf: new THREE.BoxGeometry(0.44, 0.62, 0.25),
+      kopf: new THREE.SphereGeometry(0.115, 8, 6).scale(1, 1.15, 1),
+      haare: new THREE.SphereGeometry(0.122, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2),
+    };
     for (const p of [false, true]) {
-      const n = figuren.filter((f) => f.personal === p).length;
-      instanz(n, p ? '#235a79' : '#ac715e', koerper);
-      instanz(n, p ? '#d5a37f' : '#edc9a4', kopf);
+      const liste = figuren.filter((f) => f.personal === p), n = liste.length;
+      const wahl = (pal, k) => liste.map((_, i) => pal[(i * 7 + k * 3 + (i >> 2)) % pal.length]);
+      instanz(n, null, geo.beine, p ? liste.map(() => '#2a2d31') : wahl(UNTEN, 1));
+      instanz(n, null, geo.rumpf, p ? liste.map(() => '#235a79') : wahl(OBEN, 2));
+      instanz(n, null, geo.kopf, wahl(HAUT, 3));
+      instanz(n, null, geo.haare, wahl(HAAR, 4));
     }
   }
   function menschenSetzen() {
     const obj = new THREE.Object3D();
     for (const personal of [false, true]) {
       const liste = figuren.filter((p) => p.personal === personal);
-      const ms = personal ? personenMesh.slice(2, 4) : personenMesh.slice(0, 2);
+      const ms = personal ? personenMesh.slice(4, 8) : personenMesh.slice(0, 4);
       liste.forEach((p, i) => {
-        obj.position.set(p.x, 0.82, p.z); obj.rotation.set(0, p.richtung, 0); obj.updateMatrix();
-        ms[0].setMatrixAt(i, obj.matrix);
-        obj.position.y = 1.6; obj.updateMatrix(); ms[1].setMatrixAt(i, obj.matrix);
+        obj.rotation.set(0, p.richtung, 0);
+        FIGUR_TEILE.forEach(([, y], k) => { obj.position.set(p.x, y, p.z); obj.updateMatrix(); ms[k].setMatrixAt(i, obj.matrix); });
       });
       for (const m of ms) m.instanceMatrix.needsUpdate = true;
     }
@@ -368,5 +384,6 @@ export function hausbesuchModul(ctx) {
     renderer.render(scene, cam);
   };
   return { oeffne, schliesse, etage: etageWaehlen, status, messung, pruefung, bildschritt, get aktiv() { return aktiv; },
+    kamera: (o) => { Object.assign(K, o); kameraSetzen(); }, // Prüfbilder (Q36)
     setzenAktiv: (an) => { aktiv = !!an; if (!aktiv) schliesse(); } };
 }

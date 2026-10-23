@@ -1449,7 +1449,7 @@
       {"id":"p1005","teile":508,"dreiecke":6096,"boundingBox":[1054.5,0,1170,1092.5,35.42,1190]},
       {"id":"p1006","teile":289,"dreiecke":3468,"boundingBox":[1054.5,0,1106,1074.5,19.32,1147]},
       {"id":"p1007","teile":235,"dreiecke":2820,"boundingBox":[1090.5,0,1106,1110.5,18.3,1147]},
-      {"id":"p1008","teile":1086,"dreiecke":14436,"boundingBox":[1194.8,0,1141.8,1269.82,36.57,1196.87]},
+      {"id":"p1008","teile":997,"dreiecke":13428,"boundingBox":[1194.8,0,1141.8,1269.82,36.23,1196.87]},
       {"id":"p1009","teile":323,"dreiecke":3816,"boundingBox":[1164.98,0,1103.98,1185.36,18.91,1124.36]},
       {"id":"p101","teile":953,"dreiecke":17714,"boundingBox":[514,0,777.6,534.05,34.86,795.47]},
       {"id":"p1010","teile":407,"dreiecke":4884,"boundingBox":[1164.98,0,1171.98,1190.4,16.85,1193.4]},
@@ -1549,7 +1549,7 @@
       {"id":"p173","teile":325,"dreiecke":3904,"boundingBox":[1167,0,1059.5,1215,18.06,1079.5]},
       {"id":"p174","teile":409,"dreiecke":4908,"boundingBox":[1167,0,989.5,1187,19.32,1036.5]},
       {"id":"p177","teile":36,"dreiecke":558,"boundingBox":[1222.77,0.22,1038.3,1263,6.31,1079.5]},
-      {"id":"p178","teile":804,"dreiecke":10166,"boundingBox":[164.7,0,623.3,279.81,34.5,673.54]},
+      {"id":"p178","teile":748,"dreiecke":9554,"boundingBox":[164.7,0,623.3,279.81,34.5,673.54]},
       {"id":"p179","teile":653,"dreiecke":12510,"boundingBox":[22.45,0,22.45,45.55,29.1,45.02]},
       {"id":"p18","teile":317,"dreiecke":3794,"boundingBox":[513.98,0,63.39,532.45,22.6,77.34]},
       {"id":"p180","teile":934,"dreiecke":12628,"boundingBox":[22.45,0,97.45,51.02,35.34,120.02]},
@@ -1705,7 +1705,7 @@
       {"id":"p315","teile":645,"dreiecke":7748,"boundingBox":[968.5,0,211,1021.5,35.07,231]},
       {"id":"p316","teile":305,"dreiecke":3668,"boundingBox":[905.5,0,175,958.5,16.52,195.48]},
       {"id":"p317","teile":296,"dreiecke":3560,"boundingBox":[968.5,0,175,1021.5,16.52,195]},
-      {"id":"p318","teile":1370,"dreiecke":19432,"boundingBox":[52.66,0,296.75,143.54,42.48,352.28]},
+      {"id":"p318","teile":1308,"dreiecke":18748,"boundingBox":[52.75,0,296.75,143.54,42.48,352.28]},
       {"id":"p319","teile":482,"dreiecke":5734,"boundingBox":[22.48,0,255.48,43.51,26.24,281.1]},
       {"id":"p32","teile":659,"dreiecke":11444,"boundingBox":[530.48,0,330.4,555.54,31.57,349.02]},
       {"id":"p320","teile":488,"dreiecke":5854,"boundingBox":[22.5,0,321.5,43.8,22.57,348.8]},
@@ -1879,7 +1879,7 @@
       {"id":"p476","teile":342,"dreiecke":5510,"boundingBox":[343.28,0,416,357.84,29.07,436.02]},
       {"id":"p477","teile":216,"dreiecke":2562,"boundingBox":[357.77,0,416,374.01,29.22,434.86]},
       {"id":"p478","teile":538,"dreiecke":6426,"boundingBox":[373.67,0,415.31,394.33,30.95,436.02]},
-      {"id":"p479","teile":1093,"dreiecke":13096,"boundingBox":[636.3,0,417.8,706.25,40.62,462]},
+      {"id":"p479","teile":1030,"dreiecke":12380,"boundingBox":[636.3,0,417.8,706.25,40.62,462]},
       {"id":"p48","teile":155,"dreiecke":1878,"boundingBox":[555.46,0,394.98,576.62,28.43,404.3]},
       {"id":"p480","teile":378,"dreiecke":4516,"boundingBox":[597.48,0,369.98,622.45,17.5,389.95]},
       {"id":"p481","teile":428,"dreiecke":5136,"boundingBox":[597.48,0,438.48,618.4,16.79,459.4]},
@@ -2130,7 +2130,7 @@
       {"id":"p71","teile":229,"dreiecke":2738,"boundingBox":[513.98,0,445.51,533.21,20.61,474.32]},
       {"id":"p710","teile":1110,"dreiecke":14170,"boundingBox":[1165,0,758.5,1265,20.02,790.5]},
       {"id":"p711","teile":1999,"dreiecke":26326,"boundingBox":[1165,0,790.5,1265,37.87,850.5]},
-      {"id":"p712","teile":1491,"dreiecke":18192,"boundingBox":[68.2,0,914.7,143.17,26.47,969.86]},
+      {"id":"p712","teile":1412,"dreiecke":17304,"boundingBox":[68.2,0,914.7,143.17,27.73,969.86]},
       {"id":"p713","teile":413,"dreiecke":4922,"boundingBox":[22.48,0,872.98,43.14,26.08,897.01]},
       {"id":"p714","teile":661,"dreiecke":7960,"boundingBox":[22.5,0,944,44.12,25.82,966.62]},
       {"id":"p715","teile":493,"dreiecke":5878,"boundingBox":[112.48,0,872.98,138.98,26.28,893.48]},
@@ -2451,16 +2451,16 @@
       "boundingBox": [-480,-6.2,-480,1767.5,29,1694.5]
     },
     "gesamt": {
-      "teile": 447269,
+      "teile": 446948,
       "strasse": 6973,
-      "haeuser": 440296,
+      "haeuser": 439975,
       "instanzen": 54457,
       "drawCallsInstanzen": 6130
     }
   },
   "pruefsummen": {
     "stadtplan": "99e73687aabc0b980e97ae7638a68e398a621bf158e71fedf06fbf1ee7027dc5",
-    "geometrie": "4c109f4e1876f0b175c60cdad9042abd7665d9ef17252bdaf83a02c104be96c5",
+    "geometrie": "408cd97d1fdf2be7c1afd406cb6cceb8176c899cbcd7712e82ed9f31cb482e13",
     "bildReferenz": "5c90087aa76d95db091a647f133066e0e07bc587c0bedd1af60f33f1d74c93cf"
   }
 }

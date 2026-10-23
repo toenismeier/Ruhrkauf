@@ -296,5 +296,5 @@ export function outlet(S, scene, haus, opt = {}) {
   // Off-Price und Aktion verwenden ausschließlich den Markenclaim statt Rabatt-Plakatflächen.
   const dekZ = werbung ? zustandNormal({ status: 'offen', seed: haus.id }) : Z;
   const dekor = zustandsDekor(S, scene, koerper, dekZ, { pylon: false, passanten: false, logosAbdecken: true, abrissSeite: opt.abrissSeite });
-  return { hoehe: Math.max(H + 3.8, dekor.hoehe, m.park ? 11.6 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z.status };
+  return { hoehe: Math.max(H + 3.8, dekor.hoehe, m.park ? 11.6 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z.status, pinAnker: dekor.pinAnker };
 }

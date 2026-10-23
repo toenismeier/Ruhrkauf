@@ -673,6 +673,51 @@ function hebebuehne(Z, s, u, yZiel, tZiel, buchstaben = ['R', 'T', 'W']) {
   Z.top = Math.max(Z.top, yK + 2.2);
 }
 
+/** Q36: Ankerpunkt des Hauspins auf der Dachkante über dem Haupteingang (Weltkoordinaten).
+ *  Der Pin (Standardkamera: rund 5,4 m breit, 6,7 m hoch über dem Anker) darf keinen Schriftzug überdecken:
+ *  gesucht wird die Stelle auf einer sichtbaren Dachkante, die dem Eingang am nächsten liegt und deren Pinfläche
+ *  im Bild keinen Schriftzug schneidet. */
+const PIN_B = 5.4, PIN_H = 6.7, PIN_RAND = 0.6;
+const bildX = (x, z) => (x - z) * Math.SQRT1_2;
+const bildY = (x, y, z) => -0.5 * Math.SQRT1_2 * (x + z) + 0.8660254 * y;
+export function pinAnker(k) {
+  if (!k || !Number.isFinite(k.x) || !Number.isFinite(k.z) || !Number.isFinite(k.hoehe)) return null;
+  const welt = (seite, u, t = 0) => (seite === '+z' ? [k.x + u, k.z + k.d + t] : [k.x + k.w + t, k.z + u]);
+  // Schriftzüge als Bildrechtecke
+  const schriften = [];
+  for (const seite of ['+z', '+x']) {
+    const lg = k.seiten?.[seite]?.logo;
+    if (!lg || !Number.isFinite(lg.u) || !Number.isFinite(lg.breite)) continue;
+    const h = (lg.hb ?? 2) * 2.05, t = lg.t ?? 0.5;
+    const ecken = [];
+    for (const du of [-lg.breite / 2, lg.breite / 2]) for (const dy of [-h / 2, h / 2]) {
+      const [x, z] = welt(seite, lg.u + du, t);
+      ecken.push([bildX(x, z), bildY(x, (lg.y ?? k.hoehe) + dy, z)]);
+    }
+    schriften.push({ x0: Math.min(...ecken.map((e) => e[0])), x1: Math.max(...ecken.map((e) => e[0])), y0: Math.min(...ecken.map((e) => e[1])), y1: Math.max(...ecken.map((e) => e[1])) });
+  }
+  const frei = (x, z) => {
+    const ax = bildX(x, z), ay = bildY(x, k.hoehe, z);
+    return !schriften.some((r) => ax + PIN_B / 2 + PIN_RAND > r.x0 && ax - PIN_B / 2 - PIN_RAND < r.x1 && ay + PIN_H + PIN_RAND > r.y0 && ay - PIN_RAND < r.y1);
+  };
+  const e = hauptEingang({ k });
+  const s0 = e.seite === '+x' ? '+x' : '+z';
+  const L = (seite) => (seite === '+z' ? k.w : k.d);
+  const u0 = Math.min(Math.max(e.u ?? L(s0) / 2, 3), L(s0) - 3);
+  // Kandidaten: erst die Eingangsseite, dann die andere sichtbare Seite; je nach Abstand zum Eingang sortiert.
+  const kand = [];
+  for (const seite of [s0, s0 === '+z' ? '+x' : '+z']) {
+    for (let u = 3; u <= L(seite) - 3 + 1e-6; u += 1) {
+      const d = seite === s0 ? Math.abs(u - u0) : L(s0) + Math.abs(u - (L(seite) - 3));
+      kand.push({ seite, u, d });
+    }
+  }
+  kand.sort((a, b) => a.d - b.d);
+  const wahl = kand.find((c) => frei(...welt(c.seite, c.u))) ?? { seite: s0, u: u0 };
+  const [x, z] = welt(wahl.seite, wahl.u);
+  return { x, y: k.hoehe, z, seite: wahl.seite };
+}
+
 function hauptEingang(Z) {
   const e = Z.k.eingaenge ?? [];
   return e.find((x) => x.haupt) ?? e.find((x) => x.seite === '+z') ?? e[0] ?? { seite: '+z', u: Z.k.w * 0.45, breite: 4 };
@@ -1247,7 +1292,7 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
     }
     for (const s of [sz, sx]) for (let i = 0; i < Math.round(4 * Math.max(0, Math.min(1, Z.passantenFaktor ?? 1))); i++) { const [x, zz] = s.welt(zw(r, 1, s.L - 1), zw(r, 2.5, 4.8)); figur(S, x, zz, r, 1.1, Z.sportPalette ? waehle(r, Z.sportPalette) : null); }
   }
-  return { hoehe: Z.top, teile: S.anzahl - start };
+  return { hoehe: Z.top, teile: S.anzahl - start, pinAnker: pinAnker(k) };
 }
 
 // ─────────────────────────────────────────────────────────────── Ergänzung: Aktionstypen und Marketing am Haus

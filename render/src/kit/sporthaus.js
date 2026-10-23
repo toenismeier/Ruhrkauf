@@ -546,7 +546,7 @@ function familie2(K) {
       const yy = y1 + (n >= 3 ? 0 : 1.5) - 0.6 - hb * (i + 0.5);
       if (K.ohneLogo) { s.q(panelU / 2 - hb * 0.35, panelU / 2 + hb * 0.35, yy - hb * 0.4, yy + hb * 0.4, 0.45, 0.48, '#e2e0d8'); return; }
       const kaputt = K.alt && i === 3;
-      plakat(K.scene, s, c, panelU / 2, yy - (kaputt ? hb * 0.08 : 0), 0.5, hb * 1.2, kaputt ? dunkler(HS_ROT, 0.28) : HS_ROT, null, { rz: kaputt ? 0.18 : 0 });
+      plakat(K.scene, s, c, panelU / 2, yy, 0.5, hb * 1.2, kaputt ? dunkler(HS_ROT, 0.12) : HS_ROT, null, { rz: 0 }); // Q36: nie gekippt
     });
   }
   // Treppenhaus-Glasstreifen auf +z bei 3 Etagen
@@ -1435,5 +1435,5 @@ export function sporthaus(S, scene, haus, opt = {}) {
   const passantenFaktor = K.matt ? 0.5 : K.abverkauf ? 0.8 : 0.7;
   const dek = zustandsDekor(S, scene, koerper, dekZustand, { pylon: opt.pylon, passanten: opt.passanten, passantenFaktor, sportPalette: ['#203e61', '#e24739', '#26a0af', '#e0ae33', '#f2f3f0', '#272d36'], abrissSeite: opt.abrissSeite, logosAbdecken: true });
   hoehe = Math.max(hoehe, dek.hoehe);
-  return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z.status };
+  return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z.status, pinAnker: dek.pinAnker };
 }
