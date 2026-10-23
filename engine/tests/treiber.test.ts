@@ -18,7 +18,9 @@ describe('O02 Umsatztreiber', () => {
     expect(neu.historie).toEqual(alt.historie);
     for (let i = 0; i < neu.haeuser.length; i++) {
       expect(neu.haeuser[i].kpi).toEqual(alt.haeuser[i].kpi);
-      expect(neu.haeuser[i].treiber).toEqual({ frequenz: 1, kaufquote: 1, bon: 1 });
+      // Q35: Personaleinsatz streut ab der ersten Woche (Kaufquote aus der Besetzung);
+      // die neutrale Testquelle darf daran nichts ändern.
+      expect(neu.haeuser[i].treiber).toEqual(alt.haeuser[i].treiber);
     }
   });
 

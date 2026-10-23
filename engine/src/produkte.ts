@@ -3,14 +3,15 @@
 // und Marge der Marke in ihren Warengruppen (relativ zum Start, damit die Ausgangslage unverändert bleibt).
 // Vertrag: ../VORSTAND-MARKETING-VERTRAG.md, Abschnitt 3.
 import type { GameState, GruppeId, Haus } from './types';
-import { PRODUKT_ZIELGRUPPEN, ZIELGRUPPE_PRODUKT, sortimentsBaum, type ProduktZielgruppe, type BaumAst, type BaumKategorie } from './produkt-sortiment';
+import { PRODUKT_ZIELGRUPPEN, ZIELGRUPPE_PRODUKT, sortimentsBaum, sortimentsPfad, type ProduktZielgruppe, type BaumAst, type BaumKategorie } from './produkt-sortiment';
 export { PRODUKT_ZIELGRUPPEN, sortimentsBaum } from './produkt-sortiment';
 export type { ProduktZielgruppe } from './produkt-sortiment';
 import { clamp, eur, melde, mio, normal, waehle, zufall, type RngHalter } from './util';
-import { WG, saisonId, saisonName, type WgId } from './einkauf';
+import { WG, FREMD, saisonId, saisonName, type WgId } from './einkauf';
+import { saisonFaktor } from './daten';
 import { BESCHAFFUNG, eigenmarkeAnteil, istVerkaufsaktiv, mehrmarge, passungWg, passungHaus, ZIELGRUPPEN_TEXT, type Eigenmarke, type EmKategorie, type Preislage, type Stil } from './eigenmarken';
 import { hqAktualisiere } from './hq';
-import { SORTIMENT_TYPEN, type ArtikelBild, type SortimentName } from './sortiment';
+import { SORTIMENT_TYPEN, SORTIMENT_KORREKTUREN, zielgruppenFuer, sortimentsPlatz, type ArtikelBild, type SortimentName } from './sortiment';
 export { SORTIMENT_TYPEN, type ArtikelBild, type SortimentTyp, type SortimentName } from './sortiment';
 
 // ---------------------------------------------------------------------------------------------
@@ -214,6 +215,8 @@ export const Q11_ARTIKELTYPEN: TypDef[] = [
 ARTIKELTYPEN.push(...Q11_ARTIKELTYPEN);
 // Q27–Q29: neue Artikeltypen der Bild-Chats (engine/src/sortiment), immer hinten angehängt.
 ARTIKELTYPEN.push(...(SORTIMENT_TYPEN as TypDef[]));
+// Q33/Q34: Bild- und Zielgruppenkorrekturen bestehender Typen (engine/src/sortiment/q33-zielgruppen.ts, q34-zielgruppen.ts)
+for (const t of ARTIKELTYPEN) { const k = SORTIMENT_KORREKTUREN[t.typ]; if (k) Object.assign(t, k); }
 export const TYP: Record<string, TypDef> = Object.fromEntries(ARTIKELTYPEN.map((t) => [t.typ, t]));
 
 /** Grundfarben je Zielgruppe (unabhängig vom Trend). */
@@ -879,6 +882,8 @@ export interface ProduktKarte {
 export interface MarkenProdukte {
   marke: string; name: string; farbe: string; zielgruppe: string; trendGruppe: TrendGruppe;
   kategorien: { id: ProduktKategorie; name: string; kapazitaet: number; belegt: number }[];
+  /** Q33: Artikeltypen, die diese Marke entwickeln kann. */
+  entwickelbar: string[];
   leistung: MarkenLeistung;
   produkte: ProduktKarte[]; inEntwicklung: number; hinweis: string;
 }
@@ -913,12 +918,15 @@ export function produkte(s: GameState, marke?: string): ProdukteListe {
     // Keine Kategorie durch ein anfangs leeres Sortiment künstlich sperren.
     const moegliche = ARTIKELTYPEN.filter((t) => t.gruppe[trendGruppe(m)] > 0.15 && wgFuer(s,m,t)).map((t) => t.kategorie);
     const kats = [...new Set([...liste.map((p) => p.kategorie), ...moegliche])];
+    // Q33: welche Artikeltypen die Marke entwickeln kann (WG passt zur Marke), damit die Auswahl nichts Unmögliches zeigt
+    const entwickelbar = ARTIKELTYPEN.filter((t) => t.gruppe[trendGruppe(m)] > 0.15 && wgFuer(s, m, t)).map((t) => t.typ);
     const ent = liste.filter((p) => p.status === 'entwicklung').length;
     const voll = kats.filter((k) => belegt(s, m.id, k) >= kap).map((k) => PRODUKT_KATEGORIEN[k]);
     return {
       marke: m.id, name: m.name, farbe: m.farbe, zielgruppe: `${ZIELGRUPPEN_TEXT[m.zielgruppe.alter]}, ${m.zielgruppe.geschlecht.charAt(0).toUpperCase() + m.zielgruppe.geschlecht.slice(1)}`, trendGruppe: trendGruppe(m),
       leistung: markenLeistung(s, m.id),
       kategorien: kats.map((k) => ({ id: k, name: PRODUKT_KATEGORIEN[k], kapazitaet: kap, belegt: belegt(s, m.id, k) })),
+      entwickelbar,
       produkte: liste.map((p) => produktKarte(s, p)), inEntwicklung: ent,
       hinweis: ent ? `Wir entwickeln gerade ${ent === 1 ? 'ein neues Produkt' : `${ent} neue Produkte`}.` : voll.length ? `Kapazität erreicht bei ${voll.join(', ')}. Für Neues bitte erst auslisten.` : 'Wir entwickeln gerade keine neuen Produkte. Zeit zu investieren.',
     };
@@ -929,23 +937,55 @@ export function produkte(s: GameState, marke?: string): ProdukteListe {
 
 /** Q17: zwei vergleichbare Absatzlinien derselben Warengruppen in € je Woche.
  * Eigenmarke = tatsächlich gebuchte Produktumsätze der Marke; Fremdmarke = WG-Umsatz
- * abzüglich aller Eigenmarken. Leere Wochen sind 0, keine hochgerechneten Daten. */
+ * abzüglich aller Eigenmarken.
+ * Q35: Wochen vor Spielstart stammen aus dem Vorlauf: WG-Umsatz der ersten IST-Woche
+ * (vor der ersten Woche: Basisumsatz der WG) über den Saisonfaktor des Bereichs zurückgerechnet,
+ * Eigen-/Fremdanteil wie in der ersten IST-Woche bzw. nach Markenanteil der WG. Produkte, die
+ * erst nach Spielstart eingeführt wurden, haben im Vorlauf keinen Umsatz. */
 export function produktAbsatzVerlauf(s: GameState, marke: string, kategorie?: ProduktKategorie) {
   const liste = s.produkte?.liste.filter((p) => p.marke === marke && (!kategorie || p.kategorie === kategorie)) ?? [];
   const wgs = [...new Set(liste.map((p) => p.wg))];
+  const start = s.spielStartWoche ?? 0;
+  const sf = (bereich: GruppeId, w: number) => Math.max(1e-6, saisonFaktor(bereich, ((w % 52) + 52) % 52));
+  // Vorlauf je WG: Gesamtumsatz und Eigenmarkenanteil der Marke und aller Marken.
+  const vorlaufWg = (wg: WgId, w: number) => {
+    const st = s.einkauf.wgs[wg], d = WG[wg];
+    if (!st || !d) return { u: 0, marke: 0, eigen: 0 };
+    const v = st.v, iErst = v.w.findIndex((x) => x >= start);
+    const ref = iErst >= 0 ? { u: v.u[iErst], eu: v.eu[iErst], w: v.w[iErst] } : { u: st.basisVK * sf(d.bereich, start), eu: -1, w: start };
+    const u = ref.u * sf(d.bereich, w) / sf(d.bereich, ref.w);
+    const anteilAlle = ref.eu >= 0 && ref.u > 0 ? ref.eu / ref.u : Object.entries(st.pool).filter(([m]) => m !== FREMD).reduce((a, [, x]) => a + x, 0);
+    return { u, marke: u * (st.pool[marke] ?? 0), eigen: u * anteilAlle };
+  };
+  const ausVorlauf = (p: Produkt) => p.basis || p.seit === undefined || p.seit <= start;
   const eigen: number[] = [], fremd: number[] = [], wochen: number[] = [];
+  let vorlaufWochen = 0;
   for (let i = 4; i >= 0; i--) {
-    let e = 0, f = 0;
-    for (const p of liste) e += p.umsatz[p.umsatz.length - 1 - i] ?? 0;
-    for (const wg of wgs) {
-      const v = s.einkauf.wgs[wg]?.v;
-      if (!v) continue;
-      const j = v.u.length - 1 - i;
-      f += Math.max(0, (v.u[j] ?? 0) - (v.eu[j] ?? 0));
+    const woche = s.woche - 1 - i;
+    let e = 0, f = 0, geschaetzt = false;
+    if (woche < start) {
+      geschaetzt = true;
+      for (const wg of wgs) {
+        const v = vorlaufWg(wg, woche);
+        f += Math.max(0, v.u - v.eigen);
+        const ps = liste.filter((p) => p.wg === wg && imSortiment(p));
+        const gw = ps.map((p) => (ausVorlauf(p) ? gewicht(s, p) : 0));
+        const alle = s.produkte!.liste.filter((p) => p.marke === marke && p.wg === wg && imSortiment(p)).reduce((a, p) => a + gewicht(s, p), 0) || 1;
+        e += v.marke * gw.reduce((a, b) => a + b, 0) / alle;
+      }
+    } else {
+      for (const p of liste) e += p.umsatz[p.umsatz.length - 1 - i] ?? 0;
+      for (const wg of wgs) {
+        const v = s.einkauf.wgs[wg]?.v;
+        if (!v) continue;
+        const j = v.u.length - 1 - i;
+        f += Math.max(0, (v.u[j] ?? 0) - (v.eu[j] ?? 0));
+      }
     }
-    eigen.push(Math.round(e)); fremd.push(Math.round(f)); wochen.push(s.woche - i);
+    if (geschaetzt) vorlaufWochen++;
+    eigen.push(Math.round(e)); fremd.push(Math.round(f)); wochen.push(woche);
   }
-  return { eigen, fremd, wochen, letzteEigen: eigen[4], letzteFremd: fremd[4], warengruppen: wgs.length };
+  return { eigen, fremd, wochen, letzteEigen: eigen[4], letzteFremd: fremd[4], warengruppen: wgs.length, vorlaufWochen };
 }
 
 /** Q17: Profil aus vorhandenen Markenmerkmalen; Nachhaltigkeit ist ein Orientierungsindex,
@@ -973,7 +1013,7 @@ export interface ProduktKatalog {
   zielgruppen: typeof PRODUKT_ZIELGRUPPEN;
   sparten: { id: Produktsparte; name: string; typen: ArtikelTyp[] }[];
   kategorien: { id: ProduktKategorie; name: string }[];
-  typen: { typ: ArtikelTyp; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preisMitte: number; materialien: Material[]; aufwand: number; gruppe: Record<TrendGruppe, number>; bild?: ArtikelBild }[];
+  typen: { typ: ArtikelTyp; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preisMitte: number; materialien: Material[]; aufwand: number; gruppe: Record<TrendGruppe, number>; bild?: ArtikelBild; zielgruppen: ProduktZielgruppe[] }[];
   farben: { name: Farbe; hex: string }[];
   materialien: { name: Material; preis: number; kosten: number; wertig: number }[];
   preislagen: { id: Preislage; faktor: number }[];
@@ -983,14 +1023,14 @@ export interface ProduktKatalog {
 
 export function produktKatalog(_s: GameState): ProduktKatalog {
   return {
-    version: 2, baum: sortimentsBaum(ARTIKELTYPEN), zielgruppen: PRODUKT_ZIELGRUPPEN,
+    version: 2, baum: sortimentsBaum(ARTIKELTYPEN.map((t) => ({ ...t, pfad: sortimentsPlatz(t, sortimentsPfad) }))), zielgruppen: PRODUKT_ZIELGRUPPEN,
     sparten: (Object.keys(ZUSATZ_ARTIKEL) as Produktsparte[]).map((id) => ({
       id, name: ({ damen:'Bekleidung Damen', herren:'Bekleidung Herren', kinder:'Bekleidung Kinder',
         schuhe:'Schuhe', accessoires:'Accessoires', heimtextil:'Heimtextil', haushalt:'Haushalt', beauty:'Beauty' })[id],
       typen: [...ZUSATZ_ARTIKEL[id]],
     })),
     kategorien: (Object.keys(PRODUKT_KATEGORIEN) as ProduktKategorie[]).map((id) => ({ id, name: PRODUKT_KATEGORIEN[id] })),
-    typen: ARTIKELTYPEN.map((t) => ({ ...t, preisMitte: t.preis, wgs: [...t.wgs], materialien: [...t.materialien], gruppe: { ...t.gruppe }, ...(t.bild ? { bild: { ...t.bild } } : {}) })),
+    typen: ARTIKELTYPEN.map((t) => ({ ...t, preisMitte: t.preis, wgs: [...t.wgs], materialien: [...t.materialien], gruppe: { ...t.gruppe }, zielgruppen: zielgruppenFuer(t), ...(t.bild ? { bild: { ...t.bild } } : {}) })),
     farben: FARBLISTE.map((f) => ({ name: f, hex: FARBEN[f] })),
     materialien: MATERIALLISTE.map((m) => ({ name: m, ...MATERIALIEN[m] })),
     preislagen: (Object.keys(PREISLAGE_FAKTOR) as Preislage[]).map((id) => ({ id, faktor: PREISLAGE_FAKTOR[id] })),

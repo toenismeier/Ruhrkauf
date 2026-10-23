@@ -15,7 +15,9 @@ describe('Q19 IT-Produkte', () => {
       expect(p.version).toMatch(/^\d+\.0$/);
       expect(p.sterne).toBeGreaterThanOrEqual(0);
       expect(p.sterne).toBeLessThanOrEqual(5);
-      expect(p.verlauf).toHaveLength(0);
+      // Q35: vor der ersten Woche fünf Vorlaufwochen statt leerer Kurve, als Vorlauf markiert.
+      expect(p.verlauf).toHaveLength(5);
+      expect(p.verlauf.every((x: { vorlauf?: boolean }) => x.vorlauf)).toBe(true);
     }
     expect(itProduktTeamKosten(s)).toBe(0);
     itWoche(s);
@@ -79,6 +81,6 @@ describe('Q19 IT-Produkte', () => {
     delete s.it!.produktVerlauf;
     expect(itProdukte(s)).toHaveLength(4);
     expect(itProdukte(s).every(p=>p.aktiv && p.team===0)).toBe(true);
-    expect(itProdukte(s).every(p=>p.verlauf.length===0)).toBe(true);
+    expect(itProdukte(s).every(p=>p.verlauf.every((x: { vorlauf?: boolean }) => x.vorlauf))).toBe(true);
   });
 });

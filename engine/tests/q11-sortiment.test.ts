@@ -1,6 +1,7 @@
 import { fuehreAus, neuesSpiel, produktKatalog, produktVorschau, produkte } from '../src';
 import { ARTIKELTYPEN, produktHausFaktor, produktNachfrageFaktor, produktMargeDelta } from '../src/produkte';
-import { PRODUKT_ZIELGRUPPEN, sortimentsBaum } from '../src/produkt-sortiment';
+import { PRODUKT_ZIELGRUPPEN, sortimentsBaum, sortimentsPfad } from '../src/produkt-sortiment';
+import { sortimentsPlatz } from '../src/sortiment';
 
 describe('Q11: Eigenmarken und Kategoriebaum Version 2', () => {
   test('alle Artikeltypen genau einmal im aufklappbaren Baum', () => {
@@ -12,7 +13,7 @@ describe('Q11: Eigenmarken und Kategoriebaum Version 2', () => {
     expect(new Set(eintraege).size).toBe(k.typen.length);
     expect(new Set(eintraege)).toEqual(new Set(k.typen.map((t) => t.typ)));
     expect(k.baum.map((a) => a.name)).toEqual(expect.arrayContaining([
-      'Oberteile', 'Unterteile', 'Kleider', 'Jacken und Mäntel', 'Accessoires', 'Kinder und Baby',
+      'Oberteile', 'Unterteile', 'Kleider', 'Jacken und Mäntel', 'Accessoires', 'Baby und Spielzeug',
     ]));
     for (const typ of ['Wickelkleid','A-Linien-Kleid','Tunikabluse','Oversize-Bluse','Feinstrickpullover',
       'Longcardigan','Trenchcoat','Bouclé-Jacke','Top','Crop-Top','Stoffhose','Leinenhose','Cargohose',
@@ -22,7 +23,8 @@ describe('Q11: Eigenmarken und Kategoriebaum Version 2', () => {
     expect(pfad('Crop-Top')).toBe('oberteile');
     expect(pfad('Leinenhose')).toBe('unterteile');
     expect(pfad('Plüschtier')).toBe('kinder');
-    expect(sortimentsBaum(ARTIKELTYPEN)).toEqual(k.baum);
+    // Q33: Kinderartikel nach Art einsortiert (sortimentsPlatz), Baby und Spielzeug als eigener Ast
+    expect(sortimentsBaum(ARTIKELTYPEN.map((t) => ({ ...t, pfad: sortimentsPlatz(t, sortimentsPfad) })))).toEqual(k.baum);
   });
 
   test('fünf Zielgruppen mit nachvollziehbarer Preislage und Kosten, Version bleibt 2', () => {

@@ -22,7 +22,7 @@
 #cockpit .kz b { color: var(--ob-text); font-size: clamp(13px, 3.6vw, 16px) !important; font-weight: 600; }
 #cockpit .kz:first-child b { font-size: clamp(14px, 4vw, 17px) !important; font-weight: 700; }
 #cockpit .kz.rot b { color: #ef6f62 !important; } #cockpit .kz.gruen b { color: #6dbf73 !important; }
-#cockpit .kz.mitwahl { position: relative; } #cockpit .kz em { font-style: normal; color: #ef7a6f; }
+#cockpit .kz.mitwahl { position: relative; } #cockpit .kz em { font-style: normal; color: var(--hk-akzent-text); }
 #cockpit .kz .kzwahl { position: absolute; inset: 0; width: 100%; height: 100% !important; opacity: 0; font-size: 16px !important; }
 #cockpit .kz .kzwahl option { color: #111; }
 #hausbeobachtung { border-radius: 10px !important; min-height: 44px; padding: 0 12px !important; font-size: 13px !important; margin: 2px 0 !important; pointer-events: auto; }
@@ -31,9 +31,10 @@
 .chipstadt #stadtname { font-size: 15px !important; } .chipstadt #stadtcluster { color: var(--ob-leise) !important; font-size: 12px !important; }
 .chipstadt i { color: var(--ob-leise) !important; }
 .knopf { border-radius: 14px !important; height: 50px !important; }
-#weiter { background: #d23c32 !important; border: 1px solid #8f2219 !important; box-shadow: inset 0 0 0 1px #ef7a6f, var(--ob-schatten) !important; color: #fff !important; font-size: 15px; padding: 0 18px; }
-.knopf.rund { width: 50px !important; } .knopf.rund.an { background: #d23c32 !important; }
-.badge { box-shadow: none !important; border: 2px solid #1d1f22; font-size: 12px !important; min-width: 22px; height: 22px; }
+#weiter { background: var(--hk-akzent) !important; border: 1px solid var(--hk-akzent-rand) !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell), var(--ob-schatten) !important; color: #fff !important; font-size: 15px; padding: 0 18px; }
+.knopf.rund { width: 50px !important; } .knopf.rund.an { background: var(--hk-akzent) !important; }
+.badge { box-shadow: none !important; border: 2px solid #1d1f22; font-size: 12px !important; min-width: 22px; height: 22px; background: var(--hk-akzent) !important; }
+.badge.dringend { background: var(--hk-gefahr) !important; } /* Q32: Zähler in Petrol, Rot nur für Ablaufendes */
 #stadt-chips button { border-radius: 10px !important; min-height: 44px !important; font-size: 12px !important; color: var(--ob-text) !important; }
 #wochenstreifen { background: var(--ob-flaeche); border: 1px solid var(--ob-rand); box-shadow: var(--ob-schatten); font-size: 14px; }
 #meldung { background: #1d1f22; border: 1px solid var(--ob-rand); box-shadow: var(--ob-schatten); font-size: 14px; top: calc(70px + env(safe-area-inset-top)); }
@@ -58,7 +59,7 @@
 .menuekarte .postfilter { color: #f1f1ef; font-size: 14px !important; }
 .menuekarte select { background: #1a1c1f !important; color: #f1f1ef !important; border: 1px solid #43484e !important; min-height: 44px; font-size: 16px !important; }
 .menuekarte .ein-optionen { color: #f1f1ef; font-size: 14px !important; min-height: 44px; }
-.menuekarte .ein-optionen input { width: 22px; height: 22px; accent-color: #d23c32; }
+.menuekarte .ein-optionen input { width: 22px; height: 22px; accent-color: var(--hk-akzent); }
 
 /* ───────────── Posteingang als Hauspost (Q30) ───────────── */
 #panel .posttabs { margin: 0 0 var(--hk-3); }
@@ -66,7 +67,7 @@
 .postmappe { position: relative; margin-top: 14px; background: var(--f); border: 1px solid var(--l); border-radius: 0 10px 10px 10px; box-shadow: 0 1px 0 var(--t); }
 .postmappe .post-reiter { position: absolute; left: -1px; top: -26px; height: 26px; display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: 8px 8px 0 0;
   background: #a8916a; color: #1f1d1a; font-size: 12px; font-weight: 700; max-width: calc(100% + 2px); white-space: nowrap; }
-.postmappe .post-frist { padding: 0 6px; border-radius: 4px; background: rgba(0,0,0,0.12); font-weight: 700; }
+.postmappe .post-frist { padding: 0 6px; border-radius: 4px; background: transparent; border: 1px solid currentColor; font-weight: 700; }
 .postmappe .post-frist.bald { background: #e7b04b; color: #1f1d1a; } .postmappe .post-frist.ab { background: #b8382d; color: #fff; }
 .postmappe .postkopf { padding: 14px 14px 4px !important; }
 .postmappe h3 { margin: 0 0 4px !important; font-size: 16px !important; line-height: 22px !important; color: var(--tx); }
@@ -74,7 +75,7 @@
 .postmappe .postwert b { font-size: 22px !important; font-weight: 400; font-variant-numeric: tabular-nums; color: var(--tx); }
 .postmappe .postwert span { font-size: 12px !important; color: var(--le); }
 .postmappe .postdetail { padding: 0 14px !important; font-size: 14px !important; color: var(--tx) !important; }
-.postmappe .postdetail summary { min-height: 44px !important; color: var(--tx) !important; text-decoration: underline; text-underline-offset: 3px; font-weight: 400 !important; }
+.postmappe .postdetail summary { min-height: 44px !important; color: var(--hk-akzent-text) !important; font-weight: 700 !important; }
 .postmappe .poststandard { margin: 4px 14px 10px !important; padding: 8px 10px !important; background: var(--t) !important; border: 1px solid var(--l); border-radius: 8px !important; color: var(--le) !important; font-size: 13px !important; }
 .postmappe .postaktionen { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 14px 14px !important; }
 .postmappe .postaktionen .hk-knopf { flex: 1 1 130px; min-height: 44px; }
@@ -83,14 +84,14 @@
 .post-miete-zeile { display: grid; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--l); font-size: 14px; }
 .post-miete-zeile small { display: block; color: var(--le); font-size: 12px; line-height: 17px; }
 .post-miete-zeile label { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; }
-.post-miete-zeile input[type=checkbox] { width: 22px; height: 22px; accent-color: #d23c32; }
+.post-miete-zeile input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--hk-akzent); }
 .post-miete-zeile select { width: 100%; }
 .post-filterzeile { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
 .post-filterzeile .postfilter { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 12px !important; color: var(--le); margin: 0 !important; }
 .post-filterzeile select { width: 100%; }
 .postliste .postmeldung { display: flex; flex-direction: column; border-top: 1px solid var(--l); border-left: 3px solid transparent !important; margin: 0 !important; background: transparent; }
 .postliste .postmeldung:first-child { border-top: 0; }
-.postliste .postmeldung.ungelesen { border-left-color: #d23c32 !important; }
+.postliste .postmeldung.ungelesen { border-left-color: var(--hk-akzent-text) !important; }
 .postliste .postmeldung > button:first-child { background: transparent; color: var(--tx); padding: 10px 12px !important; min-height: 48px; }
 .postliste .postmeldung.ungelesen .postnachricht > span { font-weight: 700; }
 .postliste .postnachricht small { color: var(--le) !important; font-size: 12px !important; }
@@ -102,7 +103,7 @@
 .post-konkurrenz .postmeldung > button:first-child { background: transparent; color: var(--tx); padding: 10px 12px; min-height: 48px; width: 100%; text-align: left; }
 .posthausliste .posthaus { border-color: var(--l) !important; color: var(--tx); font-size: 14px !important; }
 .posthausliste .posthaus small { color: var(--le) !important; font-size: 12px !important; }
-.postmappe .postaktionen .hk-knopf, .post-miete-zeile .hk-knopf { background: var(--hk-akzent); color: #fff; border: 1px solid #8f2219; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); font-size: 14px; font-weight: 700; border-radius: 12px; }
+.postmappe .postaktionen .hk-knopf, .post-miete-zeile .hk-knopf { background: var(--hk-akzent); color: #fff; border: 1px solid var(--hk-akzent-rand); box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); font-size: 14px; font-weight: 700; border-radius: 12px; }
 .postmappe .postaktionen .hk-knopf.zweit, .post-miete-zeile .hk-knopf.zweit { background: transparent; color: var(--tx); border: 1px solid var(--l); box-shadow: none; }
 .post-miete-zeile { grid-template-columns: 1fr !important; }
 .post-miete-zeile > div:last-child { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
@@ -164,7 +165,7 @@ body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(s
 #panel .org-zeile b { font-size: 14px; } #panel .org-zeile small { display: block; font-size: 12px; color: var(--le); line-height: 17px; }
 #panel .org-zeile .frei, #panel .khead .frei { color: var(--hk-achtung); font-weight: 700; }
 #panel .org-aktionen button, #panel .khead button { min-height: 44px; padding: 0 12px; background: transparent; color: var(--tx); border: 1px solid var(--l); border-radius: 10px; font-size: 14px; font-weight: 600; }
-#panel .org-aktionen button[aria-pressed="true"] { background: var(--hk-akzent); border-color: #8f2219; color: #fff; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+#panel .org-aktionen button[aria-pressed="true"] { background: var(--hk-akzent); border-color: var(--hk-akzent-rand); color: #fff; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
 #panel .khead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; font-size: 14px; }
 #panel .khead small { color: var(--le); font-size: 12px; margin: 0; }
 #panel .org-aufgaben { border-left-color: var(--l); margin-left: 24px; }
@@ -172,7 +173,7 @@ body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(s
 #panel .org-aufgabe { border-color: var(--l); }
 #panel .org-aufgabe > span:first-child { font-size: 14px; color: var(--tx); }
 #panel .org-aufgabe button { min-height: 44px; min-width: 44px; padding: 0 10px; background: transparent; color: var(--tx); border: 1px solid var(--l); border-radius: 10px; font-size: 13px; }
-#panel .org-aufgabe button[aria-pressed="true"] { background: var(--hk-akzent); color: #fff; border-color: #8f2219; }
+#panel .org-aufgabe button[aria-pressed="true"] { background: var(--hk-akzent); color: #fff; border-color: var(--hk-akzent-rand); }
 #panel .org-grenze { font-size: 13px; color: var(--tx); }
 #panel .org-markt small { color: var(--le); font-size: 12px; }
 #panel .org-profil h3, #panel .org-profil h4 { color: var(--tx); font-size: 14px; margin: 12px; }
@@ -195,9 +196,9 @@ body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(s
 #panel .zeile .qm, #panel .zeile .uq { color: var(--le); font-size: 13px; }
 #panel .zeile .was i { color: var(--le); font-size: 12px; }
 #panel .zeile.gewaehlt { background: var(--t); box-shadow: inset 3px 0 0 var(--hk-akzent); }
-#panel .mini.text { border: 0 !important; text-decoration: underline; text-underline-offset: 3px; }
-#panel .mini.rot { border-color: #b8382d !important; color: #ef6f62 !important; }
-#panel .mini.gruen { background: var(--hk-akzent) !important; color: #fff !important; border-color: #8f2219 !important; }
+#panel .mini.text { border: 0 !important; color: var(--hk-akzent-text) !important; font-weight: 700; }
+#panel .mini.rot { border-color: var(--hk-schlecht) !important; color: var(--hk-schlecht) !important; } /* Q32: Kündigen ist Gefahr */
+#panel .mini.gruen { background: var(--hk-akzent) !important; color: #fff !important; border-color: var(--hk-akzent-rand) !important; }
 #panel .stufe b { color: var(--tx); font-size: 15px; }
 #panel .ort { background: var(--t); color: var(--tx); border-color: var(--l); min-height: 44px; font-size: 16px; }
 #panel .zeile.grau { color: var(--le); }
@@ -232,7 +233,7 @@ body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(s
 .wochen-x { background: transparent !important; color: var(--tx) !important; width: 44px !important; height: 44px !important; }
 .wochen-warnung { background: var(--t) !important; color: var(--tx) !important; border-left: 3px solid var(--hk-schlecht); font-size: 14px !important; }
 .wochen-knopfreihe button { background: transparent !important; color: var(--tx) !important; border: 1px solid var(--l) !important; }
-.wochen-knopfreihe button.prim { background: var(--hk-akzent) !important; color: #fff !important; border-color: #8f2219 !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+.wochen-knopfreihe button.prim { background: var(--hk-akzent) !important; color: #fff !important; border-color: var(--hk-akzent-rand) !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
 .wb-bericht.hk-flaeche { background-color: var(--g); }
 .wb-bericht > header { border-color: var(--l); background: var(--t); }
 .wb-logo { border-radius: 8px; }
@@ -253,7 +254,7 @@ body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(s
 .wb-vorfall.hk-flaeche { background: var(--f) !important; color: var(--tx) !important; border-top: 1px solid var(--l); }
 .wb-vorfallkopf small, .wb-vorfallfuss small, .wb-rest { color: var(--le) !important; font-size: 12px !important; }
 .wb-vorfallfuss button { background: transparent !important; color: var(--tx) !important; border: 1px solid var(--l) !important; }
-.wb-vorfallfuss button[data-wa=ansehen] { background: var(--hk-akzent) !important; color: #fff !important; border-color: #8f2219 !important; }
+.wb-vorfallfuss button[data-wa=ansehen] { background: var(--hk-akzent) !important; color: #fff !important; border-color: var(--hk-akzent-rand) !important; }
 
 /* ───────────── Reise (Q30): Bahnsteig bei Nacht statt Prospektweiß ───────────── */
 .reise-panel.hk-flaeche { background-color: var(--g); }
@@ -303,7 +304,7 @@ body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(s
 .startkarte .ort, .startkarte select, .startseed input { background: var(--t) !important; color: var(--tx) !important; border-color: var(--l) !important; font-size: 16px !important; min-height: 44px; }
 .startseed, .startmonat { color: var(--le) !important; font-size: 12px !important; }
 .startkarte .breit { background: transparent !important; color: var(--tx) !important; border-color: var(--l) !important; }
-.startkarte .breit.gruen { background: var(--hk-akzent) !important; color: #fff !important; border-color: #8f2219 !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
+.startkarte .breit.gruen { background: var(--hk-akzent) !important; color: #fff !important; border-color: var(--hk-akzent-rand) !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
 #fortsetzen { border-color: var(--hk-gut) !important; color: var(--hk-gut) !important; }
 .startkarte .app-platz { background: var(--f); border-color: var(--l); color: var(--tx); }
 .startkarte .app-platzkopf span, .startkarte .app-daten small { font-size: 12px !important; color: var(--le); }
@@ -320,7 +321,7 @@ body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(s
 .ein-kopf b { font-size: 14px !important; }
 .ein-kopf button { background: transparent !important; color: #f1f1ef !important; min-width: 44px !important; height: 44px !important; }
 .ein-portraet { background: #1a1c1f !important; border-radius: 10px !important; }
-.ein-fuss button, .ein-antworten button { background: #d23c32 !important; color: #fff !important; box-shadow: inset 0 0 0 1px #ef7a6f; font-size: 14px !important; }
+.ein-fuss button, .ein-antworten button { background: var(--hk-akzent) !important; color: #fff !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); font-size: 14px !important; }
 .ein-fuss button.ein-ueberspringen, .ein-antworten button:not(:first-child) { background: transparent !important; color: #f1f1ef !important; border: 1px solid #43484e; box-shadow: none; font-size: 13px !important; }
 .ein-ring { box-shadow: 0 0 0 1px #fff9 !important; }
 
@@ -331,7 +332,18 @@ body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(s
 #spielende-overlay .se-ergebnis { background: #24272b !important; border-color: #43484e !important; }
 #spielende-overlay .se-karte, #spielende-overlay .se-kpi { background: #24272b !important; border-color: #43484e !important; }
 #spielende-overlay .se-zeile { border-color: #43484e !important; font-size: 14px !important; }
-#spielende-overlay button.se-knopf:not(.se-sek) { background: #d23c32 !important; color: #fff !important; box-shadow: inset 0 0 0 1px #ef7a6f; }
+#spielende-overlay button.se-knopf:not(.se-sek) { background: var(--hk-akzent) !important; color: #fff !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
 #spielende-overlay button.se-knopf.se-sek { background: transparent !important; border-color: #43484e !important; }
 #spielende-overlay .se-legende { font-size: 12px !important; }
 #spielende-overlay small { font-size: 12px !important; }
+/* Q32: Kennzahlen höchstens ein Sechstel der Bildhöhe (Wurf 3, Bilder 15–17: zwei Kachelzeilen plus Beobachtung
+   verdeckten ein Drittel der Stadt). Eingeklappt eine Zeile, der Knopf rechts klappt die zweite Zeile auf. */
+#cockpit { grid-template-columns: repeat(3, minmax(0, 1fr)) 44px !important; }
+#cockpit .kz-mehr { min-width: 44px; min-height: 44px; border-radius: 10px; background: var(--ob-flaeche); color: var(--ob-text); border: 1px solid var(--ob-rand); box-shadow: var(--ob-schatten); font-size: 16px; padding: 0; }
+#cockpit:not(.offen) .kz:nth-child(n+5) { display: none; }
+#cockpit .kz:nth-child(n+5) { grid-column: auto; }
+/* Chipleiste: läuft weich aus statt Chips hart abzuschneiden */
+#stadt-chips { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 28px), transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 28px), transparent 100%); padding: 0 24px 0 14px; scroll-padding-inline: 14px; }
+#cockpit .kz { padding: 5px 7px !important; min-width: 0; }
+#cockpit .kz b, #cockpit .kz:first-child b { white-space: nowrap !important; font-size: clamp(12px, 3.6vw, 14px) !important; letter-spacing: -0.01em; overflow-wrap: normal !important; }
+#cockpit .kz b { display: block; overflow: hidden; }

@@ -15,6 +15,8 @@ async function panelLauf(p, panels, { ordner = null, alle = false, nur = null, l
     await p.waitForFunction('window.spiel.kachelnRuhig()', null, { timeout: 0, polling: 200 });
     await p.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
     await p.waitForTimeout(250);
+    // Q32: Ein- und Ausblendungen abwarten, sonst misst die Kontrastprüfung halb durchsichtige Schrift.
+    await p.evaluate(() => Promise.race([Promise.all(document.getAnimations().filter((x) => x.effect?.getComputedTiming?.().iterations !== Infinity).map((x) => x.finished.catch(() => {}))), new Promise((r) => setTimeout(r, 1500))]));
   };
   const ergebnis = [];
   let gespielt = false;

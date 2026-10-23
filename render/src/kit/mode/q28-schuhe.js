@@ -62,6 +62,48 @@ const ARTEN = {
   wanderschuh: { spitze: 'rund', hoehe: 'hoch', sohle: 0.09, sohleFarbe: '#2e2a27', schaft: 0.58, schnuerung: [0.3, 0.68, 4], schaftSchnuerung: 3, haken: true, profil: true, grob: true, kappe: 'gummi', kappeFarbe: '#55493f', zweiton: true, akzent: '#e8833a', senkel: '#c8372f', lasche: true, polsterRand: true, lagen: [[0.55, 0.75, '#e8833a']] },
   gummistiefel: { spitze: 'rund', hoehe: 'kind', breite: 'breit', sohle: 0.06, sohleFarbe: '#3a3532', schaft: 0.9, glaenzend: true, griffe: true, profil: true, grob: true, schaftWeite: 1.1 },
   lauflern: { spitze: 'rund', hoehe: 'kind', breite: 'breit', sohle: 0.07, sohleFarbe: '#e8d9bf', schaft: 0.5, klett: 2, klettFarbe: '#273659', polsterRand: true, hoeher: 1.2, breiter: 1.12, kappe: 'gummi', kappeFarbe: '#e8d9bf', schaftWeite: 1.16, paar: true },
+  // ── Q34: jede Schuhart ein eigener Leisten (Befund Wurf 3, Bild 04)
+  //   Schnürschuh (sportlicher Derby): offene Schnürung 5 Ösen, Profilsohle 0,07, Rist 0,26.
+  schnuerschuh: { spitze: 'rund', hoehe: 'flach', sohle: 0.07, sohleFarbe: '#c9a978', xo: 0.38, kHinten: 0.24, kSeite: 0.18, schnuerung: [0.38, 0.6, 5], zunge: true, profil: true, polster: true, kappe: 'leder', fersenlasche: true },
+  //   Derby: offene Schnürung (Quartiere auf dem Blatt), eckige Spitze, Rahmennaht, Absatz 0,05 (≈ 2,5 cm).
+  derby: { spitze: 'eckig', hoehe: 'flach', sohle: 0.03, sohleFarbe: '#2a1d16', absatz: 0.05, absatzForm: 'block', xo: 0.36, kHinten: 0.23, kSeite: 0.17, schnuerung: [0.36, 0.56, 4], zunge: true, quartier: true, rahmennaht: true },
+  //   Budapester: Flügelkappe (W-Form) mit Lochreihen, geschlossene Schnürung 5 Ösen.
+  budapester: { spitze: 'eckig', hoehe: 'flach', sohle: 0.032, sohleFarbe: '#2a1d16', absatz: 0.05, absatzForm: 'block', xo: 0.38, kHinten: 0.23, kSeite: 0.17, schnuerung: [0.4, 0.55, 5], schnuerEng: true, zunge: false, fluegelkappe: true, brogue: true, rahmennaht: true },
+  //   Mokassin: weich, ohne Absatz, Mokassinnaht, Lederschleife mit Quasten auf dem Rist.
+  mokassin: { spitze: 'rund', hoehe: 'flach', sohle: 0.022, sohleFarbe: '#b98a5c', xo: 0.46, kHinten: 0.18, kSeite: 0.13, mokassin: true, quaste: true, einfass: true, breiter: 1.04 },
+  //   Bootsschuh: Mokassinnaht, zwei Ösenpaare, Lederband rundum, weiße Rillensohle 0,05.
+  bootsschuh: { spitze: 'rund', hoehe: 'flach', sohle: 0.05, sohleFarbe: '#f4f3ef', xo: 0.42, kHinten: 0.22, kSeite: 0.16, mokassin: true, kragenband: true, schnuerung: [0.44, 0.52, 2], zunge: false, profil: true },
+  //   Monk: Querriemen mit Schnalle außen, eckig, Absatz 0,05.
+  monk: { spitze: 'eckig', hoehe: 'flach', sohle: 0.03, sohleFarbe: '#2a1d16', absatz: 0.05, absatzForm: 'block', xo: 0.4, kHinten: 0.23, kSeite: 0.17, monk: true, kappenNaht: true, rahmennaht: true },
+  //   Quastenloafer: wie Loafer, statt Riegel zwei Quasten.
+  quastenloafer: { spitze: 'rund', hoehe: 'flach', sohle: 0.03, sohleFarbe: '#3a2a20', absatz: 0.05, absatzForm: 'block', xo: 0.42, kHinten: 0.22, kSeite: 0.15, mokassin: true, quaste: true, rahmennaht: true },
+  //   Slip-on: Sneakersohle, Gummizug seitlich, ohne Schnürung.
+  slipon: { spitze: 'rund', hoehe: 'sneaker', sohle: 0.07, sohleFarbe: '#f4f3ef', xo: 0.48, kHinten: 0.24, kSeite: 0.18, gummizug: true, kappe: 'gummi', profil: true, seitenStreifen: true },
+  //   Komfortschuh: Weite H (breiter 1,1), zwei Klettriemen, Wechselfußbett, Sohle 0,06, Absatz 0,03.
+  komfort: { spitze: 'rund', hoehe: 'hoch', breite: 'breit', sohle: 0.06, sohleFarbe: '#e1d6c4', absatz: 0.03, absatzForm: 'keil', xo: 0.42, kHinten: 0.26, kSeite: 0.2, klett: 2, klettSchlaufe: true, polster: true, breiter: 1.06 },
+  //   Clog: hinten offen, Holzsohle 0,14, Nietenreihe am Rand.
+  clog: { spitze: 'rund', hoehe: 'hoch', breite: 'breit', sohle: 0.14, sohleFarbe: '#c79a62', jute: false, xo: 0.6, kHinten: 0, kSeite: 0, offen: 0.5, nieten: true, holz: true },
+  //   Pantoffel: Hausschuh hinten offen, Filz, Fellrand.
+  pantoffel: { spitze: 'rund', hoehe: 'flach', sohle: 0.04, sohleFarbe: '#5a4a3c', xo: 0.62, kHinten: 0, kSeite: 0, offen: 0.5, fell: true, breiter: 1.08, filz: true },
+  //   Haferlschuh: seitliche Schnürung außen, derbe Zwienaht, Profilsohle.
+  haferl: { spitze: 'rund', hoehe: 'hoch', sohle: 0.07, sohleFarbe: '#2e241c', absatz: 0.04, absatzForm: 'block', xo: 0.4, kHinten: 0.26, kSeite: 0.2, seitenSchnuerung: true, profil: true, grob: true, rahmennaht: true, zwienaht: true },
+  //   Slingpumps: Fersenriemen statt Hinterkappe, Absatz 0,22 (≈ 5,5 cm).
+  slingpumps: { spitze: 'spitz', hoehe: 'pumps', sohle: 0.018, sohleFarbe: '#1d1b1c', absatz: 0.22, absatzForm: 'block', xo: 0.62, kHinten: 0, kSeite: 0.08, offen: 0.22, fersenriemen: true },
+  //   Kitten-Heel: niedriger Pfennigabsatz 0,17 (≈ 4,5 cm), spitz, Zierschnalle.
+  kitten: { spitze: 'spitz', hoehe: 'pumps', sohle: 0.018, sohleFarbe: '#1d1b1c', absatz: 0.17, absatzForm: 'stiletto', xo: 0.64, kHinten: 0.2, kSeite: 0.1, zierschnalle: true },
+  //   Stiefelette: Schaft 0,5, Blockabsatz 0,2 (≈ 5 cm), Reißverschluss innen.
+  stiefelette: { spitze: 'spitz', hoehe: 'pumps', sohle: 0.02, sohleFarbe: '#1d1b1c', absatz: 0.2, absatzForm: 'block', schaft: 0.5, schaftWeite: 0.9, reissverschluss: true, oberkanteGerade: true },
+  //   Trekkingschuh: halbhoch ohne Schaft, Gummikappe, grobe Sohle, Schnürhaken.
+  trekking: { spitze: 'rund', hoehe: 'hoch', sohle: 0.08, sohleFarbe: '#2e2a27', xo: 0.34, kHinten: 0.3, kSeite: 0.24, schnuerung: [0.34, 0.66, 5], zunge: true, haken: true, profil: true, grob: true, kappe: 'gummi', kappeFarbe: '#55493f', seitenpanel: true, akzent: '#3d7a6a', senkel: '#e8833a', polster: true },
+  //   Combat-Boots: Schaft 0,75, 8 Ösenpaare, Plateau-Profilsohle 0,1.
+  combat: { spitze: 'rund', hoehe: 'hoch', sohle: 0.1, sohleFarbe: '#1d1b1c', schaft: 0.78, schnuerung: [0.24, 0.6, 6], schaftSchnuerung: 6, profil: true, grob: true, lasche: true, rahmennaht: true, zweiton: false, sohleWelle: false, plateauLinie: true },
+  //   Gummistiefel Erwachsene: Schaft 1,15 (≈ 35 cm), schmal, Schnalle oben, ohne Griffe.
+  gummistiefelhoch: { spitze: 'rund', hoehe: 'hoch', sohle: 0.06, sohleFarbe: '#2a2624', schaft: 1.15, schaftWeite: 1.0, glaenzend: true, profil: true, grob: true, schnalleOben: true },
+  //   Kinder: Klettsneaker (zwei Klettriemen auf Sneakerleisten, Paar), Spangenschuh, Kinderhausschuh, Kinderwinterstiefel.
+  klettsneaker: { spitze: 'rund', hoehe: 'kind', breite: 'breit', sohle: 0.07, sohleFarbe: '#f4f3ef', xo: 0.36, kHinten: 0.3, kSeite: 0.24, klett: 2, klettSchlaufe: true, klettFarbe: '#c8372f', kappe: 'gummi', profil: true, seitenpanel: true, paar: true },
+  spangenschuh: { spitze: 'rund', hoehe: 'kind', breite: 'breit', sohle: 0.035, sohleFarbe: '#3a2e26', absatz: 0.02, absatzForm: 'block', xo: 0.62, kHinten: 0.2, kSeite: 0.1, spange: true, einfass: true, paar: true },
+  kinderhausschuh: { spitze: 'rund', hoehe: 'kind', breite: 'breit', sohle: 0.05, sohleFarbe: '#9a8a78', xo: 0.46, kHinten: 0.3, kSeite: 0.22, klett: 1, klettFarbe: '#f1cf4a', fell: true, gesicht: true, breiter: 1.06 },
+  kinderwinterstiefel: { spitze: 'rund', hoehe: 'kind', breite: 'breit', sohle: 0.08, sohleFarbe: '#3a332e', schaft: 0.62, fellRand: true, fellBreit: true, profil: true, grob: true, klett: 2, klettFarbe: '#273659', steppung: true, schaftWeite: 1.12, breiter: 1.1, paar: true },
 };
 
 // Leisten und Hilfsfunktionen
@@ -504,6 +546,121 @@ function zeichneSchuh(S, t, p0, { pos, groesse = 1, kam = {} } = {}) {
       }
     }
   }
+  // ── Q34-Details
+  const naht = (pts, op = 0.85) => polylinie(K, pts, hell(S.c, 0.38), 0.4, { dash: '0.7 0.55', op });
+  if (p.quartier) {
+    // Derby: Quartiere liegen auf dem Blatt; Kante vom Kragen schräg nach vorn bis vor die erste Öse
+    for (const s of [1, -1]) {
+      const kante = glatt3([SP(L.xo - 0.04, s * (L.sK(L.xo - 0.04) + 0.02)), SP(L.xo + 0.08, s * 0.62), SP(p.schnuerung[1] + 0.05, s * 0.42), SP(p.schnuerung[1] + 0.07, s * 0.2)], 3);
+      g.push(polylinie(K, kante, dunkel(S.c, 0.5), 0.75, { op: 0.9 }), naht(kante.map(([x, y, z]) => [x - 0.012, y, z])));
+    }
+  }
+  if (p.fluegelkappe) {
+    // W-förmige Flügelkappe: Spitze auf dem Rist bei 0,8, Flügel laufen seitlich bis 0,58 zurück
+    const fl = [];
+    for (let j = 0; j <= 24; j++) {
+      const s = -1 + 2 * j / 24, a = Math.abs(s);
+      const x = a < 0.35 ? 0.8 - 0.05 * Math.cos((a / 0.35) * Math.PI / 2) : lerp(0.78, 0.6, glatt01((a - 0.35) / 0.65));
+      fl.push(SP(x, s));
+    }
+    g.push(polylinie(K, fl, dunkel(S.c, 0.5), 0.7, { op: 0.95 }));
+    if (p.brogue) {
+      // Lochreihen entlang der Kappe und der Hinterkappe, Medaillon in der Spitze
+      const dot = (q, r = 0.42) => { const [x, y] = K.P(q); return `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" fill="${dunkel(S.c, 0.62)}"/>`; };
+      for (let j = 0; j <= 24; j += 1) { const [x, y, z] = fl[j]; g.push(dot([x - 0.022, y, z])); }
+      for (const [x, s] of [[0.92, 0], [0.9, 0.12], [0.9, -0.12], [0.94, 0.08], [0.94, -0.08], [0.88, 0]]) g.push(dot(SP(x, s), 0.36));
+      for (let i = 0; i <= 8; i++) { const x = lerp(0.04, 0.3, i / 8); g.push(dot(SP(x, lerp(0.5, 0.86, i / 8)), 0.36)); }
+    }
+  }
+  if (p.quaste) {
+    // Zierband quer über den Rist, zwei Quasten hängen nach vorn
+    const xa = L.xo + 0.03;
+    const band = []; for (let j = 0; j <= 12; j++) band.push(SP(xa, -0.7 + 1.4 * j / 12));
+    g.push(polylinie(K, band, dunkel(S.c, 0.45), 1.3, { op: 0.95 }));
+    for (const s of [0.18, -0.12]) {
+      const a = SP(xa + 0.01, s), b = [a[0] + 0.1, a[1] + 0.02, a[2] - 0.01];
+      g.push(polylinie(K, [a, b], dunkel(S.c, 0.45), 0.8));
+      const [bx, by] = K.P(b);
+      g.push(`<path d="M${f(bx - 1.3)} ${f(by - 0.6)} L${f(bx + 1.3)} ${f(by - 0.6)} L${f(bx + 2)} ${f(by + 3.6)} L${f(bx - 2)} ${f(by + 3.6)} Z" fill="${dunkel(S.c, 0.25)}" stroke="${dunkel(S.c, 0.55)}" stroke-width="0.4"/>`,
+        `<path d="M${f(bx - 1)} ${f(by + 1)} V${f(by + 3.4)} M${f(bx)} ${f(by + 1)} V${f(by + 3.4)} M${f(bx + 1)} ${f(by + 1)} V${f(by + 3.4)}" stroke="${dunkel(S.c, 0.55)}" stroke-width="0.3"/>`);
+    }
+  }
+  if (p.monk) {
+    // Querriemen von innen nach außen über den Rist, Schnalle auf der Außenseite
+    const xa = L.xo + 0.02, xb = L.xo + 0.1, n = 14;
+    const ka = [], kb = [];
+    for (let j = 0; j <= n; j++) { const s = -0.5 + 1.42 * j / n; ka.push(SP(xa, s)); kb.push(SP(xb + 0.02 * (j / n), s)); }
+    g.push(flaecheP(K, [...ka, ...[...kb].reverse()], dunkel(S.c, 0.12), { stroke: dunkel(S.c, 0.55), w: 0.5 }));
+    g.push(naht(ka.map(([x, y, z]) => [x + 0.01, y, z + 0.002])));
+    const m = SP((xa + xb) / 2 + 0.01, 0.78);
+    const [mx, my] = K.P(m);
+    g.push(`<rect x="${f(mx - 2.4)}" y="${f(my - 3)}" width="4.8" height="6" rx="0.8" fill="none" stroke="#c9ced3" stroke-width="1.1"/><path d="M${f(mx)} ${f(my - 3)} V${f(my + 3)}" stroke="#a7adb3" stroke-width="0.7"/>`);
+  }
+  if (p.gummizug) {
+    // Slip-on: Gummizug-Dreiecke an beiden Seiten des Einstiegs
+    for (const s of [1, -1]) {
+      const a = SP(L.xo - 0.02, s * (L.sK(L.xo - 0.02) + 0.01)), b = SP(L.xo + 0.08, s * 0.5), c = SP(L.xo - 0.1, s * (L.sK(L.xo - 0.1) + 0.01));
+      g.push(flaecheP(K, [c, a, b], dunkel(S.c, 0.6), { stroke: dunkel(S.c, 0.7), w: 0.4 }));
+      for (const t of [0.3, 0.55, 0.8]) g.push(polylinie(K, [[lerp(c[0], a[0], t), lerp(c[1], a[1], t), lerp(c[2], a[2], t)], b], dunkel(S.c, 0.75), 0.3));
+    }
+  }
+  if (p.seitenStreifen) {
+    // umlaufender Kontraststreifen über der Sohle (Vulkanisiert)
+    g.push(polylinie(K, sohlenLinie(L, 0.62, 1.056), '#c8372f', 0.9, { op: 0.9 }), polylinie(K, sohlenLinie(L, 0.38, 1.056), '#273659', 0.7, { op: 0.8 }));
+  }
+  if (p.nieten) {
+    // Clog: Nietenreihe entlang der Oberkante der Holzsohle und Lederkante
+    for (let i = 0; i <= 16; i++) {
+      const x = lerp(0.48, 0.98, i / 16), [px, py] = K.P([x, L.y0(x) + L.w(x) * 0.98, L.zs(x) + 0.02]);
+      g.push(`<circle cx="${f(px)}" cy="${f(py)}" r="0.55" fill="#d8c48a" stroke="#8a7440" stroke-width="0.25"/>`);
+    }
+  }
+  if (p.holz) for (let i = 1; i < 5; i++) g.push(polylinie(K, sohlenLinie(L, i / 5, 1.055), dunkel(p.sohleFarbe, 0.18), 0.35, { op: 0.7 }));
+  if (p.seitenSchnuerung) {
+    // Haferl: Schnürung seitlich außen
+    const pts = [];
+    for (let i = 0; i < 5; i++) { const x = lerp(0.42, 0.62, i / 4); pts.push([SP(x, 0.32), SP(x, 0.6)]); }
+    const lasche = [...pts.map(([a]) => a), ...pts.map(([, b]) => b).reverse()];
+    g.push(flaecheP(K, lasche, dunkel(S.c, 0.14), { op: 0.75 }));
+    g.push(schnuer(K, pts, p, S));
+  }
+  if (p.zwienaht) g.push(polylinie(K, sohlenLinie(L, 1.0, 1.04), hell(S.c, 0.5), 0.8, { dash: '1.1 0.7', op: 0.9 }));
+  if (p.fersenriemen) {
+    // Slingpumps: dünner Riemen um die Ferse auf Höhe 0,17, Schnalle außen
+    const r = [];
+    for (let j = 0; j <= 18; j++) { const s = -1 + 2 * j / 18; r.push(L.pt(0.05 + 0.13 * Math.abs(s), s, 0.17)); }
+    g.push(polylinie(K, r, dunkel(S.c, 0.4), 1.6), polylinie(K, r, S.c, 0.9));
+    const [bx, by] = K.P(r[15]);
+    g.push(`<rect x="${f(bx - 1.2)}" y="${f(by - 1.4)}" width="2.4" height="2.8" rx="0.4" fill="none" stroke="#c9a24a" stroke-width="0.7"/>`);
+  }
+  if (p.zierschnalle) {
+    const m = SP(L.xo + 0.04, 0);
+    const [mx, my] = K.P(m);
+    g.push(`<rect x="${f(mx - 3.2)}" y="${f(my - 1.8)}" width="6.4" height="3.6" rx="0.6" fill="${dunkel(S.c, 0.1)}" stroke="#c9a24a" stroke-width="1"/>`);
+  }
+  if (p.schnalleOben && schaft) {
+    // Gummistiefel: Riemen mit Schnalle an der Schaftoberkante außen
+    const r = schaft.ringe.at(-2), a = r[4], b = r[8];
+    g.push(polylinie(K, [a, r[5], r[6], r[7], b], dunkel(S.c, 0.3), 2.2));
+    const [bx, by] = K.P(r[6]);
+    g.push(`<rect x="${f(bx - 1.6)}" y="${f(by - 2)}" width="3.2" height="4" rx="0.5" fill="none" stroke="#c9ced3" stroke-width="0.9"/>`);
+  }
+  if (p.spange) {
+    // Spangenschuh: Riemchen über den Rist mit Knopf außen
+    const xs0 = L.xo - 0.06, band = [], band2 = [];
+    for (let j = 0; j <= 14; j++) { const s = -1 + 2 * j / 14; band.push(L.pt(xs0, s, L.H(xs0) + 0.01)); band2.push(L.pt(xs0 + 0.07, s, L.H(xs0 + 0.07) + 0.01)); }
+    g.push(flaecheP(K, [...band, ...band2.reverse()], dunkel(S.c, 0.12), { stroke: dunkel(S.c, 0.5), w: 0.5 }));
+    const [bx, by] = K.P(L.pt(xs0 + 0.035, 0.85, L.H(xs0) * 0.7));
+    g.push(`<circle cx="${f(bx)}" cy="${f(by)}" r="1.4" fill="#f4f3ef" stroke="${dunkel(S.c, 0.5)}" stroke-width="0.4"/>`);
+  }
+  if (p.gesicht) {
+    // Kinderhausschuh: Tiergesicht (Augen, Nase, Ohren) auf der Kappe
+    const auge = (s) => { const [x, y] = K.P(SP(0.84, s)); return `<circle cx="${f(x)}" cy="${f(y)}" r="1.2" fill="#2a2c30"/><circle cx="${f(x - 0.4)}" cy="${f(y - 0.4)}" r="0.4" fill="#fff"/>`; };
+    g.push(auge(0.3), auge(-0.25));
+    const [nx, ny] = K.P(SP(0.93, 0));
+    g.push(`<ellipse cx="${f(nx)}" cy="${f(ny)}" rx="1.8" ry="1.3" fill="#d96a6a"/>`);
+    for (const s of [0.5, -0.45]) { const [ox, oy] = K.P(L.pt(0.72, s, L.H(0.72) + 0.05)); g.push(`<path d="M${f(ox - 2.2)} ${f(oy + 1.5)} L${f(ox)} ${f(oy - 3.4)} L${f(ox + 2.2)} ${f(oy + 1.5)} Z" fill="${dunkel(S.c, 0.12)}" stroke="${dunkel(S.c, 0.45)}" stroke-width="0.4"/>`); }
+  }
   if (p.noppen) for (let i = 0; i < 9; i++) { const x = 0.08 + i * 0.1; const a = [x, L.y0(x) + L.w(x) * 1.05 + 0.006, L.zb(x) + 0.004]; g.push(flaecheP(K, [a, [x + 0.03, a[1], a[2]], [x + 0.03, a[1], a[2] + 0.025], [x, a[1], a[2] + 0.025]], dunkel(SO.c, 0.25))); }
   // Glanzlicht auf dem Rist
   const glanz = glatt3([SP(0.62, 0.42), SP(0.76, 0.42), SP(0.9, 0.5)], 2);
@@ -553,7 +710,7 @@ function zeichneSandale(S, t, p) {
   const L = leisten({ spitze: 'rund', hoehe: 'flach', sohle: 0.06, absatz: 0 });
   const probe = kamera({ mass: 1, x0: 0, y0: 0 });
   const pts = [];
-  for (let i = 0; i <= 20; i++) { const x = i / 20; pts.push([x, L.w(x) * 1.1, 0], [x, -L.w(x) * 1.1, 0], [x, L.w(x) * 1.1, 0.22]); }
+  for (let i = 0; i <= 20; i++) { const x = i / 20; pts.push([x, L.w(x) * 1.1, 0], [x, -L.w(x) * 1.1, 0], [x, L.w(x) * 1.1, p.form === 'keil' ? 0.4 : 0.22]); }
   const q = pts.map(probe.P);
   const minX = Math.min(...q.map((v) => v[0])), maxX = Math.max(...q.map((v) => v[0])), minY = Math.min(...q.map((v) => v[1])), maxY = Math.max(...q.map((v) => v[1]));
   const mass = Math.min(84 / (maxX - minX), 64 / (maxY - minY));
@@ -566,7 +723,10 @@ function zeichneSandale(S, t, p) {
   for (let i = 0; i <= 40; i++) rand.push([i / 40, 1]);
   for (let i = 39; i >= 1; i--) rand.push([i / 40, -1]);
   const ws = (x) => L.w(x) * 1.08 + 0.01;
-  const h = (x) => 0.06 + 0.012 * (1 - x);
+  // Q34: Formen. sandale (zwei Riemen mit Schnalle), pantolette (ein breiter Riemen, Fußbett mit Zehensteg),
+  // riemchen (drei dünne Riemchen + Fersenriemen), keil (Keilsohle 0,16 hinten), zehentrenner (Y-Riemen)
+  const form = p.form ?? 'sandale';
+  const h = form === 'keil' ? (x) => 0.05 + 0.3 * Math.pow(1 - x, 1.2) : (x) => 0.06 + 0.012 * (1 - x);
   const unten = rand.map(([x, s]) => [x, L.y0(x) + s * ws(x), 0]);
   const oben = rand.map(([x, s]) => [x, L.y0(x) + s * ws(x), h(x)]);
   g.push(koerper(SO, projiziere(K, netz([unten, oben], { zu: true, innen: (i, j) => [rand[j][0], 0, 0.03] }))));
@@ -584,10 +744,41 @@ function zeichneSandale(S, t, p) {
     }
     return { v: netz([r1, r2], { innen: () => [x, 0, h(x)] }), r1, r2 };
   };
-  const vorn = riemen(0.74, 0.1, 0.13), mitte = riemen(0.5, 0.09, 0.17);
-  for (const r of [mitte, vorn]) {
+  if (form === 'keil') for (let i = 1; i < 6; i++) g.push(polylinie(K, sohlenLinie({ ...L, zb: () => 0, zs: h, w: (x) => L.w(x) * 1.08 }, i / 6, 1.0), dunkel(SO.c, 0.3), 0.35, { op: 0.6 }));
+  if (form === 'pantolette') {
+    const r = riemen(0.6, 0.26, 0.16);
+    g.push(koerper(S, projiziere(K, r.v)));
+    g.push(polylinie(K, r.r1.map(([x, y, z]) => [x + 0.015, y, z + 0.004]), hell(S.c, 0.35), 0.45, { dash: '0.8 0.6' }), polylinie(K, r.r2.map(([x, y, z]) => [x - 0.015, y, z + 0.004]), hell(S.c, 0.35), 0.45, { dash: '0.8 0.6' }));
+    t.push(...g); return;
+  }
+  if (form === 'zehentrenner') {
+    const steg = [0.86, 0, h(0.86)], li = [0.56, ws(0.56) * 0.98, h(0.56)], re = [0.56, -ws(0.56) * 0.98, h(0.56)], top = [0.68, 0, h(0.68) + 0.12];
+    for (const e of [li, re]) g.push(polylinie(K, [top, e], dunkel(S.c, 0.4), 3), polylinie(K, [top, e], S.c, 2.1));
+    g.push(polylinie(K, [steg, top], dunkel(S.c, 0.4), 2), polylinie(K, [steg, top], S.c, 1.3));
+    const [bx, by] = K.P(top); g.push(`<circle cx="${f(bx)}" cy="${f(by)}" r="1.5" fill="#c9a24a"/>`);
+    t.push(...g); return;
+  }
+  if (form === 'keil') {
+    // Keilsandalette: breites Kreuzband vorn, Knöchelriemen mit Schnalle
+    const a = riemen(0.66, 0.16, 0.15);
+    g.push(koerper(S, projiziere(K, a.v)));
+    g.push(polylinie(K, a.r1.map(([x, y, z]) => [x + 0.012, y, z + 0.004]), hell(S.c, 0.35), 0.45, { dash: '0.8 0.6' }));
+    const fr = []; for (let j = 0; j <= 20; j++) { const w = -Math.PI / 2 + Math.PI * j / 20, c = Math.cos(w); fr.push([0.3 - 0.32 * c, Math.sin(w) * ws(0.12) * 1.02, h(0.2) + 0.12 * Math.pow(c, 0.6)]); }
+    g.push(polylinie(K, fr, dunkel(S.c, 0.4), 2.4), polylinie(K, fr, S.c, 1.6));
+    const [bx, by] = K.P(fr[15]); g.push(`<rect x="${f(bx - 1.3)}" y="${f(by - 1.5)}" width="2.6" height="3" rx="0.4" fill="none" stroke="#c9a24a" stroke-width="0.8"/>`);
+    t.push(...g); return;
+  }
+  const liste = form === 'riemchen' ? [riemen(0.83, 0.035, 0.09), riemen(0.68, 0.035, 0.14), riemen(0.5, 0.035, 0.17)] : [riemen(0.5, 0.09, 0.17), riemen(0.74, 0.1, 0.13)];
+  if (form === 'riemchen') {
+    // Fersenriemen: Bogen hinter der Ferse
+    // setzt seitlich bei x 0,24 am Fußbett an und läuft 0,1 hoch um die Ferse
+    const fr = []; for (let j = 0; j <= 20; j++) { const a = -Math.PI / 2 + Math.PI * j / 20, c = Math.cos(a); fr.push([0.24 - 0.26 * c, Math.sin(a) * ws(0.12) * 1.02, h(0.1) + 0.02 + 0.1 * Math.pow(c, 0.6)]); }
+    g.push(polylinie(K, fr, dunkel(S.c, 0.4), 2.2), polylinie(K, fr, S.c, 1.4));
+  }
+  for (const r of liste) {
     g.push(koerper(S, projiziere(K, r.v)));
     g.push(polylinie(K, r.r1.map(([x, y, z]) => [x + 0.012, y, z + 0.004]), hell(S.c, 0.35), 0.4, { dash: '0.8 0.6' }), polylinie(K, r.r2.map(([x, y, z]) => [x - 0.012, y, z + 0.004]), hell(S.c, 0.35), 0.4, { dash: '0.8 0.6' }));
+    if (form === 'riemchen') continue;
     // Schnalle außen
     const a = r.r1[13], b = r.r2[13];
     const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];

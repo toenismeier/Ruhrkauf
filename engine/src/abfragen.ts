@@ -14,7 +14,7 @@ import { wettbewerbUebersicht, wettbewerbFuerGrafik } from './wettbewerb';
 import { ecommerceHaus } from './ecommerce';
 import { planungBericht, planWoche } from './planung';
 export { vertriebUebersicht } from './vertrieb';
-import { mietvertragEmpfehlung } from './vertrieb';
+import { mietvertragEmpfehlung, vorlaufKonzernWoche } from './vertrieb';
 
 
 /** Reine, deterministische Projektion des Spielstands für den zentralen Posteingang. */
@@ -215,6 +215,8 @@ export interface Cockpit {
   ebitdaWoche: number;
   ebitda13: number;
   umsatzWoche: number;
+  /** Q35: Anzahl der Wochen in ebitda13/umsatzWoche, die aus dem Vorlauf vor Spielstart stammen. */
+  vorlaufWochen: number;
   vertrauen: number; // Mittel aus Bank, Kreditversicherer, Lieferanten
   image: number;
   offeneEntscheidungen: number;
@@ -224,12 +226,30 @@ export interface Cockpit {
 export function cockpit(s: GameState): Cockpit {
   const letzte = s.historie[s.historie.length - 1];
   const h13 = s.historie.slice(-13);
+  // Q35: fehlende Wochen der letzten 13 aus dem Vorlauf vor Spielstart (Q07), nicht „noch offen“.
+  const start = s.spielStartWoche ?? 0;
+  let ebitda13 = h13.reduce((a, b) => a + b.ebitda, 0), vorlaufWochen = 0;
+  for (let w = start - 1; w >= start - (13 - h13.length) && h13.length < 13; w--) {
+    const v = vorlaufKonzernWoche(s, w);
+    if (!v) break;
+    ebitda13 += v.ebitda; vorlaufWochen++;
+  }
+  const vorwoche = letzte ? undefined : vorlaufKonzernWoche(s, start - 1);
+  const vorFormat = (format: Haus['format']) => {
+    let umsatz = 0, ebitda = 0;
+    for (const h of s.haeuser) if (h.format === format && h.status === 'offen' && !h.nurDaten) {
+      const v = s.vorjahrHistorie?.[h.id]?.find((x) => x.woche === start - 1);
+      if (v) { umsatz += v.umsatz; ebitda += v.db; }
+    }
+    return { umsatz, ebitda };
+  };
   const lief = s.lieferanten.filter((l) => l.aktiv);
   const lv = (lief.reduce((a, l) => a + l.vertrauen, 0) + s.restLieferantenVertrauen) / (lief.length + 1);
   const formate=(['warenhaus','sport','schwester','outlet'] as Haus['format'][]).map(format=>{
     const hs=s.haeuser.filter(h=>h.format===format&&h.status==='offen'&&!h.nurDaten);
-    return {format,haeuser:hs.length,umsatz:eur(hs.reduce((n,h)=>n+(h.kpi?.umsatz??0),0)),
-      ebitda:eur(hs.reduce((n,h)=>n+(h.kpi?.guv?.ebitda??0),0)),
+    const vj = letzte ? undefined : vorFormat(format);
+    return {format,haeuser:hs.length,umsatz:eur(vj ? vj.umsatz : hs.reduce((n,h)=>n+(h.kpi?.umsatz??0),0)),
+      ebitda:eur(vj ? vj.ebitda : hs.reduce((n,h)=>n+(h.kpi?.guv?.ebitda??0),0)),
       fte:eur(hs.reduce((n,h)=>n+h.personal.vollzeit+h.personal.teilzeit+h.personal.aushilfen,0))};
   });
   return {
@@ -241,9 +261,10 @@ export function cockpit(s: GameState): Cockpit {
     kreditFrei: s.cash + s.kreditlinie,
     geldUnbegrenzt: istSandkasten(s),
     runwayWochen: Math.round(runwayWochen(s)),
-    ebitdaWoche: letzte?.ebitda ?? 0,
-    ebitda13: h13.reduce((a, b) => a + b.ebitda, 0),
-    umsatzWoche: letzte?.umsatz ?? 0,
+    ebitdaWoche: letzte?.ebitda ?? vorwoche?.ebitda ?? 0,
+    ebitda13: eur(ebitda13),
+    umsatzWoche: letzte?.umsatz ?? vorwoche?.umsatz ?? 0,
+    vorlaufWochen: vorlaufWochen,
     vertrauen: Math.round((s.stakeholder.bank + s.stakeholder.kreditversicherer + lv) / 3),
     image: Math.round(s.stakeholder.image),
     offeneEntscheidungen: s.entscheidungen.length,

@@ -23,15 +23,18 @@ function faecherFuer(t) {
 export function passendeTypen(K, fach, gruppe) {
   return (K.typen ?? []).filter((t) => {
     if (!faecherFuer(t).has(fach)) return false;
-    if (fach === 'home') return true;
-    // Neue Sortimentsmodule dürfen explizite Zielgruppen liefern; Q11 liefert Trend-Gewichte.
+    // Q33: der Katalog liefert je Typ die passenden Zielgruppen (auch für Home); ohne Angabe gelten die Trend-Gewichte.
     if (Array.isArray(t.zielgruppen)) return t.zielgruppen.includes(gruppe);
+    if (fach === 'home') return true;
     const gewichte = t.gruppe ?? {};
     return Number(gewichte[gruppeTrend(gruppe)] ?? 0) >= 0.4;
   });
 }
+// Q33: unter dem Reiter Kinder nur Kinder und Teens & Tweens
+export const zielgruppenFuerFach = (K, fach) => (K.zielgruppen ?? []).filter((x) => fach !== 'kinder' || x.id === 'kinder' || x.id === 'teens');
 export function zielChips(K, ui) {
-  const z = K.zielgruppen ?? [];
+  const z = zielgruppenFuerFach(K, ui.fach);
+  if (z.length && !z.some((x) => x.id === ui.zielgruppe)) ui.zielgruppe = z[0].id;
   return '<div class="q24-chips" aria-label="Zielgruppe">' + z.map((x) =>
     '<button data-a="q24Ziel" data-v="' + esc(x.id) + '" aria-pressed="' + (ui.zielgruppe === x.id) +
     '" class="' + (ui.zielgruppe === x.id ? 'an' : '') + '">' + esc(x.name) + '</button>').join('') + '</div>';
@@ -63,7 +66,7 @@ export function sortimentBedienung(K, ui, typen, kachel, aktion, gesperrt = new 
       const astOffen = ui.astOffen === ast.id;
       h += '<button class="q11ast ' + (astOffen ? 'an' : '') + '" data-a="baumAst" data-v="' + esc(ast.id) +
         '" aria-expanded="' + astOffen + '"><span>' + esc(ast.name) + '</span><small>' + ast.typen.length +
-        '</small><b aria-hidden="true">' + (astOffen ? '−' : '+') + '</b></button>';
+        ' Artikel' + '</small><b aria-hidden="true">' + (astOffen ? '−' : '+') + '</b></button>';
       if (!astOffen) continue;
       h += '<div class="typkacheln q11typen q24-typen">';
       for (const typ of ast.typen) {

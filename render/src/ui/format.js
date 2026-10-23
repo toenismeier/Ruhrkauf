@@ -11,6 +11,8 @@ export function geld(x) {
 }
 export const pz = (x, n = 0) => `${(x * 100).toLocaleString('de-DE', { minimumFractionDigits: n, maximumFractionDigits: n })} %`;
 export const dez = (x, n = 1) => (x ?? 0).toLocaleString('de-DE', { minimumFractionDigits: n, maximumFractionDigits: n });
+/** Q32: Engine-Texte mit Dezimalpunkt („-6.1 %“) für die Anzeige auf Dezimalkomma und echtes Minus stellen. */
+export const deutscheZahlen = (t) => String(t ?? '').replace(/(^|[^\d.,])-(?=\d)/g, '$1−').replace(/(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.])/g, '$1,$2');
 export const kwVon = (w) => (((w % 52) + 52) % 52) + 1;
 export const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 /** Q31: Interne Cluster-IDs (hc-ost-2, premium-flagships) nie anzeigen; Name aus der Organisation, sonst lesbarer Ersatz. */

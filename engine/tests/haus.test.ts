@@ -35,8 +35,16 @@ describe('O07 Haus als Betrieb', () => {
       expect(l.ehrlichkeit).toBeLessThanOrEqual(1);
       expect(Number.isInteger(l.gehalt)).toBe(true);
       expect(hausBetriebsFaktor(s, h)).toBeCloseTo(1, 12);
-      expect(hausBetriebskosten(s,h,100_000)).toBeCloseTo(100_000, 6);
+      // Q35: Verbrauch je Haus weicht vom Budget ab, netzweit flächengewichtet neutral.
+      expect(hausBetriebskosten(s,h,100_000)).toBeGreaterThan(80_000);
+      expect(hausBetriebskosten(s,h,100_000)).toBeLessThan(120_000);
     }
+    const offen = s.haeuser.filter(h => h.betrieb?.kostenIst);
+    const gq = (h: typeof offen[number]) => h.flaechen.reduce((a,f)=>a+f.qm,0) || h.grundflaecheQm;
+    const qm = offen.reduce((a,h)=>a+gq(h),0);
+    const mittel = offen.reduce((a,h)=>a+gq(h)*Object.entries(h.betrieb!.kostenIst!).reduce((x,[p,f])=>x+({energie:0.35,reinigung:0.2,sicherheit:0.15,instandhaltung:0.2,versicherung:0.1} as Record<string,number>)[p]*f,0),0)/qm;
+    expect(mittel).toBeCloseTo(1, 3);
+    expect(new Set(offen.map(h=>JSON.stringify(h.betrieb!.kostenIst))).size).toBeGreaterThan(offen.length*0.9);
   });
   test('Initialisierung alter Spielstände idempotent', () => {
     const s = neuesSpiel(2);
