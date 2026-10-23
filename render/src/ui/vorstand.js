@@ -46,14 +46,17 @@ export const karussell = (id, karten, idx, act) => `<div class="karussell" data-
 export function karussellBinden(id, idx, beiWechsel) {
   const k = document.querySelector(`#pinhalt .karussell[data-k="${id}"]`);
   if (!k) return;
-  const slot = k.querySelector('.kslot');
-  const breite = () => (slot ? slot.getBoundingClientRect().width + 12 : 1);
-  k.scrollLeft = idx * breite();
+  // Q32: Karte über ihre Mitte bestimmen (die Karten rasten mittig ein; die alte Rechnung scrollLeft / Breite lag
+  // bei der letzten Karte und bei Randabständen daneben, sodass das Angebot zu einer anderen Karte gehörte).
+  const slots = [...k.querySelectorAll('.kslot')];
+  const mitte = (el) => { const r = el.getBoundingClientRect(); return r.left - k.getBoundingClientRect().left + k.scrollLeft + r.width / 2; };
+  const aktuell = () => { const m = k.scrollLeft + k.clientWidth / 2; let best = 0; slots.forEach((el, i) => { if (Math.abs(mitte(el) - m) < Math.abs(mitte(slots[best]) - m)) best = i; }); return best; };
+  if (slots[idx]) k.scrollLeft = Math.max(0, mitte(slots[idx]) - k.clientWidth / 2);
   let t = null;
   k.addEventListener('scroll', () => {
     clearTimeout(t);
     // nur, solange dieses Karussell noch angezeigt wird (sonst öffnete ein später Scroll-Abschluss das alte Panel wieder)
-    t = setTimeout(() => { if (!k.isConnected) return; const i = Math.round(k.scrollLeft / breite()); if (i !== idx) beiWechsel(i); }, 140);
+    t = setTimeout(() => { if (!k.isConnected) return; const i = aktuell(); if (i !== idx) beiWechsel(i); }, 140);
   }, { passive: true });
 }
 

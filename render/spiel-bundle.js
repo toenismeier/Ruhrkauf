@@ -160166,7 +160166,7 @@
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "bb93b24" : "Entwicklung";
+  var version = () => true ? "e3c7cf9" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv6 = false;
     function feld2(d4) {
@@ -160248,6 +160248,7 @@
   }
   var pz3 = (x2, n3 = 0) => `${(x2 * 100).toLocaleString("de-DE", { minimumFractionDigits: n3, maximumFractionDigits: n3 })} %`;
   var dez = (x2, n3 = 1) => (x2 ?? 0).toLocaleString("de-DE", { minimumFractionDigits: n3, maximumFractionDigits: n3 });
+  var deutscheZahlen = (t5) => String(t5 ?? "").replace(/(^|[^\d.,])-(?=\d)/g, "$1\u2212").replace(/(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.])/g, "$1,$2");
   var kwVon2 = (w2) => (w2 % 52 + 52) % 52 + 1;
   var esc2 = (t5) => String(t5 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var REGION_NAME = { nord: "Nord", ost: "Ost", sued: "S\xFCd", "s\xFCd": "S\xFCd", west: "West", mitte: "Mitte" };
@@ -160451,7 +160452,7 @@
       if (!offen) continue;
       for (const ast3 of kat.unterkategorien) {
         const astOffen = ui.astOffen === ast3.id;
-        h4 += '<button class="q11ast ' + (astOffen ? "an" : "") + '" data-a="baumAst" data-v="' + esc2(ast3.id) + '" aria-expanded="' + astOffen + '"><span>' + esc2(ast3.name) + "</span><small>" + ast3.typen.length + '</small><b aria-hidden="true">' + (astOffen ? "\u2212" : "+") + "</b></button>";
+        h4 += '<button class="q11ast ' + (astOffen ? "an" : "") + '" data-a="baumAst" data-v="' + esc2(ast3.id) + '" aria-expanded="' + astOffen + '"><span>' + esc2(ast3.name) + "</span><small>" + ast3.typen.length + ' Artikel</small><b aria-hidden="true">' + (astOffen ? "\u2212" : "+") + "</b></button>";
         if (!astOffen) continue;
         h4 += '<div class="typkacheln q11typen q24-typen">';
         for (const typ of ast3.typen) {
@@ -160530,7 +160531,7 @@
       h4 += `<div class="owerte"><div><span>Umsatz 13 Wochen</span><b data-p="m:${m.id}:umsatz">${geld(m.umsatz13)}</b></div><div><span>Rohertragsquote</span><b data-p="m:${m.id}:marge">${pz3(m.rohertragsquote, 1)}</b></div><div><span>Mehrmarge</span><b data-p="m:${m.id}:mehrmarge">${punkte(m.mehrmarge)}</b></div></div>`;
       h4 += `<div class="ochips">${status2}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualit\xE4t ${m.qualitaet} von 5</span><span class="chip grau">${esc2(m.beschaffungName)}</span></div>`;
       h4 += `<div class="mzeile"><span>Bekanntheit</span>${balken6(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
-      h4 += `<div class="mzeile"><span>Stil aktuell</span>${balken6(m.stilAktualitaet, veraltetM ? "#d23c32" : "#2f8f5b")}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
+      h4 += `<div class="mzeile"><span>Stil aktuell</span>${balken6(m.stilAktualitaet, veraltetM ? "var(--hk-schlecht, #d23c32)" : "var(--hk-gut, #2f8f5b)")}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
       h4 += `<div class="mzeile"><span>Passung je Region</span></div>${passungZeile(m.passungRegion, `m:${m.id}:passung`)}`;
       h4 += teamAufschluesselung(leistungen.get(m.id));
       h4 += `<div class="olief">${m.wgs.filter((w2) => w2.anteilZiel > 0 || w2.anteilIst > 0).map((w2) => `${esc2(w2.name)} ${pz3(w2.anteilIst)}`).join(" \xB7 ") || "Noch in keiner Warengruppe."}</div>`;
@@ -161891,15 +161892,26 @@
   function karussellBinden(id, idx, beiWechsel) {
     const k5 = document.querySelector(`#pinhalt .karussell[data-k="${id}"]`);
     if (!k5) return;
-    const slot4 = k5.querySelector(".kslot");
-    const breite = () => slot4 ? slot4.getBoundingClientRect().width + 12 : 1;
-    k5.scrollLeft = idx * breite();
+    const slots = [...k5.querySelectorAll(".kslot")];
+    const mitte = (el2) => {
+      const r4 = el2.getBoundingClientRect();
+      return r4.left - k5.getBoundingClientRect().left + k5.scrollLeft + r4.width / 2;
+    };
+    const aktuell = () => {
+      const m = k5.scrollLeft + k5.clientWidth / 2;
+      let best = 0;
+      slots.forEach((el2, i) => {
+        if (Math.abs(mitte(el2) - m) < Math.abs(mitte(slots[best]) - m)) best = i;
+      });
+      return best;
+    };
+    if (slots[idx]) k5.scrollLeft = Math.max(0, mitte(slots[idx]) - k5.clientWidth / 2);
     let t5 = null;
     k5.addEventListener("scroll", () => {
       clearTimeout(t5);
       t5 = setTimeout(() => {
         if (!k5.isConnected) return;
-        const i = Math.round(k5.scrollLeft / breite());
+        const i = aktuell();
         if (i !== idx) beiWechsel(i);
       }, 140);
     }, { passive: true });
@@ -162389,7 +162401,6 @@
   ];
   var prozent2 = (q2) => Math.round(q2 * 100) + " %";
   var etageName2 = (n3) => n3 === 0 ? "Erdgeschoss" : n3 + ". Etage";
-  var balken7 = (label, wert) => '<div class="q15-balken"><div><span>' + esc2(label) + "</span><b>" + Math.round(wert) + ' / 100</b></div><div class="q15-balken-bahn"><i style="width:' + Math.min(100, Math.max(0, wert)) + '%"></i></div></div>';
   function iso(x2, y2, schritt) {
     return [180 + (x2 - y2) * schritt, 24 + (x2 + y2) * schritt * 0.52];
   }
@@ -162408,7 +162419,7 @@
     const p2 = (x2, y2) => iso(x2, y2, schritt);
     let svg2 = '<svg class="q15-etagenbild" role="img" aria-label="' + esc2(name2) + ": isometrische B\xFCroetage mit " + besetzt + " besetzten und " + (plaetze - besetzt) + ' freien Arbeitspl\xE4tzen" viewBox="0 0 360 225" xmlns="http://www.w3.org/2000/svg">';
     const basis4 = [p2(0, 0), p2(spalten2 + 0.2, 0), p2(spalten2 + 0.2, reihen + 0.2), p2(0, reihen + 0.2)];
-    svg2 += '<path d="M' + basis4.map((q2) => punkt2(...q2)).join("L") + 'Z" fill="#D7D4CA" stroke="#8D979B" stroke-width="2"/>';
+    svg2 += '<path d="M' + basis4.map((q2) => punkt2(...q2)).join("L") + 'Z" fill="#3b4b54" stroke="#5a6c76" stroke-width="2"/>';
     svg2 += polygon([p2(0.1, 0.1), p2(spalten2 * 0.34, 0.1), p2(spalten2 * 0.34, 0.45), p2(0.1, 0.45)], "#DDE9E9", "#849A9B");
     svg2 += polygon([p2(spalten2 * 0.64, 0.1), p2(spalten2 - 0.1, 0.1), p2(spalten2 - 0.1, 0.45), p2(spalten2 * 0.64, 0.45)], "#E6EEEE", "#849A9B");
     for (let i = 0; i < plaetze; i++) {
@@ -162448,9 +162459,9 @@
       unterbesetzt(a2, fte2) ? "Die Arbeit ist kaum zu schaffen." : ueberbesetzt(a2, fte2) ? "Mir fehlt manchmal eine richtige Aufgabe." : "Die Aufgaben sind gut verteilt."
     ];
   }
-  function zentraleAbteilungHtml(u, grafik, organisation2, id, etageWahl) {
+  function zentraleAbteilungHtml(u, grafik, organisation2, id, etageWahl, etagenBild2 = null) {
     const a2 = (u.abteilungen ?? []).find((x2) => x2.id === id);
-    if (!a2) return { titel: "Abteilung nicht gefunden", unter: "", html: "<p>Diese Abteilung ist nicht verf\xFCgbar.</p>" };
+    if (!a2) return { titel: "Abteilung nicht gefunden", unter: "", html: bereich("zentrale") + rumpf2(leer3("Diese Abteilung ist nicht verf\xFCgbar.")) };
     const teams = (organisation2?.bereiche ?? []).filter((b4) => b4.abteilung === a2.id);
     const team = teams.find((b4) => b4.stelle?.person) ?? teams[0];
     const leitung3 = team?.stelle?.person;
@@ -162464,42 +162475,79 @@
     const kapEtage = wahl3 ? Math.max(fteEtage, Math.floor((zugewiesenQm + freieQm) / 14)) : 0;
     const kap = Math.max(a2.fte, a2.kapazitaetFte ?? a2.fte);
     const st2 = a2.gehaltFaktor ?? 1;
-    const stufeWahl = '<div class="q15-stufe" aria-label="Abteilungsstufe"><span>Ausbau:</span>' + [0, 1, 2, 3].map((n3) => '<button type="button" class="' + (n3 === a2.stufe ? "an" : "") + `" onclick="hqKlick('stufe','` + esc2(a2.id) + "','" + n3 + `')" aria-pressed="` + (n3 === a2.stufe) + '">' + n3 + "</button>").join("") + "</div>";
-    let h4 = `<div class="q15-seite"><button class="q15-zurueck" type="button" onclick="hqKlick('uebersicht')">\u2039 Zentrale und Geb\xE4ude</button>`;
-    h4 += '<section class="q15-kopf"><div><span class="q15-meta">' + esc2(a2.stadt ?? u.sitz) + " \xB7 " + esc2(wahl3 ? etageName2(wahl3.etage.nr) : "ohne Etage") + "</span><h2>" + esc2(a2.name) + '</h2></div><b class="q15-zaehler">' + fmt.format(Math.round(a2.fte)) + " / " + fmt.format(kap) + "<small>FTE / Arbeitspl\xE4tze</small></b></section>";
-    h4 += '<section class="q15-szene"><div class="q15-szenekopf"><b>' + esc2(geb?.name ?? "Noch keine gemietete Etage") + "</b><small>" + (wahl3 ? esc2(etageName2(wahl3.etage.nr)) + " \xB7 " + fteEtage + " / " + kapEtage + " Pl\xE4tze" : "Erst Arbeitspl\xE4tze zuweisen") + "</small></div>" + (wahl3 ? abteilungsEtageSvg(fteEtage, kapEtage, a2.name) : '<div class="q15-leer">Kein B\xFCro zugewiesen. W\xE4hlen Sie einen Standort in der Zentralen\xFCbersicht.</div>') + "</section>";
-    if (raeume.length > 1) h4 += '<nav class="q15-etagenwahl" aria-label="Etage ausw\xE4hlen">' + raeume.map((q2) => '<button type="button" class="' + (q2 === wahl3 ? "an" : "") + `" onclick="hqKlick('abteilungEtage','` + esc2(id) + "','" + esc2(q2.gebaeude.id) + "','" + q2.etage.nr + `')">` + esc2(etageName2(q2.etage.nr)) + "</button>").join("") + "</nav>";
-    h4 += '<section class="q15-leitung"><div class="q15-portrait" aria-hidden="true">' + (leitung3 ? esc2(leitung3.name.split(" ").map((w2) => w2[0]).slice(0, 2).join("")) : "\u2013") + "</div><div><small>" + esc2(team?.name ?? "Bereichsleitung") + "</small><b>" + esc2(leitung3?.name ?? "Leitung unbesetzt") + "</b><p>\u201E" + esc2(spruch(a2, a2.fte, kap)) + "\u201C</p></div></section>";
-    h4 += '<section class="q15-steuerung"><h3>Personal und Verg\xFCtung</h3><div class="q15-reglerkopf"><b>Besetzung</b><b>' + a2.fte + " / " + kap + ' FTE</b></div><input type="range" aria-label="Besetzung der Abteilung" min="1" max="' + kap + '" step="1" value="' + a2.fte + `" onchange="hqKlick('fte','` + esc2(a2.id) + `',this.value)" data-q15-fte="` + a2.fte + '"><small>Zus\xE4tzliche Einstellungen ben\xF6tigen freie B\xFCrofl\xE4che und Einarbeitung. Stellenabbau verursacht Abfindungen.</small>';
-    h4 += '<div class="q15-reglerkopf"><b>Gehaltsniveau</b><b>' + Math.round(st2 * 100) + ' % des Standards</b></div><input type="range" aria-label="Gehaltsniveau der Abteilung" min="80" max="120" step="5" value="' + Math.round(st2 * 100) + `" onchange="hqKlick('gehalt','` + esc2(a2.id) + `',this.value)" data-q15-gehalt="` + st2 + '"><div class="q15-werte"><span>Moral <b>' + a2.moral + " / 100</b></span><span>Fluktuationsrisiko <b>" + prozent2(a2.fluktuation) + " p. a.</b></span><span>Qualit\xE4tsfaktor <b>" + prozent2(a2.qualitaet) + "</b></span></div>" + stufeWahl + '<div class="q15-hinweis">Personalkosten je Woche: <b>' + geld(a2.kostenWoche) + "</b></div></section>";
-    h4 += '<section class="q15-team"><h3>Stimmen aus dem Team</h3><div class="q15-stimmen">' + stimmungsTexte(a2, a2.fte, kap).map((satz) => '<div class="q15-stimme"><span class="q15-avatar" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="7.5" r="3"/><path d="M5.5 21v-4c0-3.5 2.5-5.5 6.5-5.5s6.5 2 6.5 5.5v4"/></svg></span><p>' + esc2(satz) + "</p></div>").join("") + "</div></section>";
-    h4 += '<section class="q15-fuehrung"><h3>Leitung</h3>' + (leitung3 ? balken7("Fachliche Kompetenz", leitung3.qualitaet * 100) + balken7("Stimmung", leitung3.stimmung) : "<p>Die Leitungsstelle ist vakant. Besetzen Sie diese \xFCber Organisation.</p>") + `<button type="button" class="q15-sekundaer" onclick="hqKlick('organisation')">Leitung und Kandidaten in Organisation</button></section>`;
-    h4 += '<section class="q15-delegation"><h3>Delegation je Aufgabe</h3><small>Die Fachbereiche nutzen die bestehende Organisation (Q05).</small>';
-    if (!teams.length) h4 += "<p>Keine Einzelaufgaben f\xFCr diese Abteilung hinterlegt.</p>";
+    const klick = (...x2) => `onclick="hqKlick(${x2.map((v2) => `'${esc2(String(v2))}'`).join(",")})"`;
+    const gName = geb?.name ?? wahl3?.gebaeude.name ?? "";
+    const etText = wahl3 ? etageName2(wahl3.etage.nr) : "ohne Etage";
+    const ton2 = unterbesetzt(a2, a2.fte) ? "engpass" : a2.moral < 65 || a2.fluktuation > 0.08 ? "engpass" : "";
+    const leitungBild = leitung3?.portraet ? portraetSVG(leitung3.portraet, 72) : "";
+    let h4 = bereich("zentrale", "zentrale");
+    h4 += sprecher({ text: "<b>" + esc2(spruch(a2, a2.fte, kap)) + "</b>", unter: (leitung3?.name ?? "Leitung unbesetzt") + " \xB7 " + (team?.name ?? "Bereichsleitung"), person: leitungBild, ton: ton2 });
+    const bild4 = wahl3 && etagenBild2 ? etagenBild2(wahl3.gebaeude.id, wahl3.etage.nr) : null;
+    if (bild4) h4 += '<div class="hk-kopfbild schnitt"><img src="' + bild4 + '" alt="Etagenschnitt ' + esc2(gName) + ", " + esc2(etText) + '"><span class="hk-bildtitel">' + esc2(gName) + " \xB7 " + esc2(etText) + "</span></div>";
+    else if (wahl3) h4 += '<div class="hk-kopfbild schnitt">' + abteilungsEtageSvg(fteEtage, kapEtage, a2.name) + '<span class="hk-bildtitel">' + esc2(gName) + " \xB7 " + esc2(etText) + "</span></div>";
+    let r4 = '<button class="zurueck" type="button" ' + klick("uebersicht") + ">\u2039 Zentrale</button>";
+    const bedarf = a2.sollFte > 0 ? a2.sollFte : null;
+    r4 += gross2([
+      {
+        label: "Besch\xE4ftigte",
+        wert: fmt.format(Math.round(a2.fte)) + " FTE",
+        ton: unterbesetzt(a2, a2.fte) ? "schlecht" : "",
+        unter: bedarf ? (unterbesetzt(a2, a2.fte) ? '<span class="schlecht">' : "<span>") + "Bedarf Stufe " + a2.stufe + ": " + fmt.format(Math.round(bedarf)) + " FTE</span>" : "Stufe " + a2.stufe
+      },
+      { label: "Personalkosten je Woche", wert: geld(a2.kostenWoche), unter: Math.round(st2 * 100) + " % des Gehaltsstandards" }
+    ]);
+    if (!wahl3) r4 += leer3("Kein B\xFCro zugewiesen. In der Zentrale eine gemietete Etage w\xE4hlen.", "Ohne Arbeitsplatz", '<button type="button" class="hk-knopf zweit" ' + klick("uebersicht") + ">Zur Zentrale</button>");
+    r4 += liste([
+      zeile({ was: "Arbeitspl\xE4tze der Abteilung", unter: "alle zugewiesenen Etagen, 14 qm je FTE", wert: fmt.format(kap) }),
+      ...wahl3 ? [zeile({ was: "Auf dieser Etage", unter: esc2(gName) + " \xB7 " + etText, wert: fmt.format(fteEtage) + " von " + fmt.format(kapEtage) })] : []
+    ]);
+    if (raeume.length > 1) r4 += '<div class="hk-seg q32-etagen" role="group" aria-label="Etage ausw\xE4hlen">' + raeume.map((q2) => '<button type="button" aria-pressed="' + (q2 === wahl3) + '" ' + klick("abteilungEtage", id, q2.gebaeude.id, q2.etage.nr) + ">" + esc2(etageName2(q2.etage.nr)) + "</button>").join("") + "</div>";
+    r4 += abschnitt("Personal und Verg\xFCtung");
+    r4 += '<div class="q32-regler"><div><span>Besetzung</span><b>' + fmt.format(a2.fte) + " von " + fmt.format(kap) + ' FTE</b></div><input type="range" aria-label="Besetzung der Abteilung" min="1" max="' + kap + '" step="1" value="' + a2.fte + `" onchange="hqKlick('fte','` + esc2(a2.id) + `',this.value)" data-q15-fte="` + a2.fte + '"><small>Einstellen braucht freie B\xFCrofl\xE4che und Einarbeitung, Abbau kostet Abfindungen.</small></div>';
+    r4 += '<div class="q32-regler"><div><span>Gehaltsniveau</span><b>' + Math.round(st2 * 100) + ' % des Standards</b></div><input type="range" aria-label="Gehaltsniveau der Abteilung" min="80" max="120" step="5" value="' + Math.round(st2 * 100) + `" onchange="hqKlick('gehalt','` + esc2(a2.id) + `',this.value)" data-q15-gehalt="` + st2 + '"></div>';
+    r4 += liste([
+      zeile({ was: "Moral", wert: a2.moral + " / 100", ton: a2.moral < 65 ? "schlecht" : "" }),
+      zeile({ was: "Fluktuationsrisiko", wert: prozent2(a2.fluktuation) + " p. a.", ton: a2.fluktuation > 0.08 ? "schlecht" : "" }),
+      zeile({ was: "Qualit\xE4tsfaktor", wert: prozent2(a2.qualitaet) })
+    ]);
+    r4 += abschnitt("Ausbaustufe", "wirkt auf die Fachbereiche");
+    r4 += seg([0, 1, 2, 3].map((n3) => [n3, "Stufe " + n3]), a2.stufe, (n3) => klick("stufe", a2.id, n3));
+    r4 += abschnitt("Stimmen aus dem Team");
+    r4 += '<div class="q32-stimmen">' + stimmungsTexte(a2, a2.fte, kap).map((satz, i) => '<div class="q32-stimme"><span class="q32-figur" aria-hidden="true">' + portraetSVG(zufallsMerkmale(a2.id + ":stimme:" + i), 56) + "</span><p>\u201E" + esc2(satz) + "\u201C</p></div>").join("") + "</div>";
+    r4 += abschnitt("Leitung");
+    if (leitung3) {
+      r4 += '<div class="hk-person-karte"><span class="hk-portraet">' + portraetSVG(leitung3.portraet ?? zufallsMerkmale(a2.id), 104) + "</span><div><b>" + esc2(leitung3.name) + "</b><small>" + esc2(team?.name ?? "Bereichsleitung") + "</small></div></div>";
+      r4 += '<div class="q32-skalen">' + skala("Fachwissen", leitung3.qualitaet * 100) + skala("Stimmung", leitung3.stimmung) + "</div>";
+    } else r4 += leer3("Die Leitungsstelle ist frei. Die Abteilung arbeitet ohne F\xFChrung schw\xE4cher.", "Leitung unbesetzt");
+    r4 += '<div class="hk-knopfreihe"><button type="button" class="hk-knopf zweit breit" ' + klick("organisation") + ">Leitung und Kandidaten in Organisation</button></div>";
+    r4 += abschnitt("Delegation je Aufgabe");
+    if (!teams.length) r4 += leer3("F\xFCr diese Abteilung sind keine Einzelaufgaben hinterlegt.");
     for (const bereich2 of teams) {
-      h4 += "<details><summary><b>" + esc2(bereich2.name) + "</b><span>" + (bereich2.aufgaben?.length ?? 0) + " Aufgaben</span></summary>";
+      r4 += '<div class="hk-liste q32-delegation"><div class="hk-zeile"><span class="hk-was"><b>' + esc2(bereich2.name) + '</b></span><span class="hk-wert">' + (bereich2.aufgaben?.length ?? 0) + " Aufgaben</span></div>";
       for (const aufgabe of bereich2.aufgaben ?? []) {
-        h4 += '<div class="q15-aufgabe"><span>' + esc2(aufgabe.name) + (aufgabe.grenze === void 0 ? "" : "<small>Grenze " + geld(aufgabe.grenze) + "</small>") + '</span><button type="button" aria-pressed="' + !!aufgabe.an + `" onclick="hqKlick('aufgabe','` + esc2(bereich2.id) + "','" + esc2(aufgabe.id) + "','" + !aufgabe.an + `')">` + (aufgabe.an ? "Delegiert" : "Beim CEO") + "</button></div>";
+        r4 += schalter({
+          text: aufgabe.name,
+          unter: aufgabe.grenze === void 0 ? aufgabe.an ? "delegiert" : "entscheidest du" : "Grenze " + geld(aufgabe.grenze) + (aufgabe.an ? " \xB7 delegiert" : " \xB7 entscheidest du"),
+          an: !!aufgabe.an,
+          attr: `onclick="hqKlick('aufgabe','` + esc2(bereich2.id) + "','" + esc2(aufgabe.id) + "','" + !aufgabe.an + `')"`
+        });
       }
-      h4 += "</details>";
+      r4 += "</div>";
     }
-    h4 += '</section><div class="q15-navgebaeude">';
     const gebaeudeGruppen = (u.gebaeude ?? []).map((g2) => ({
       name: g2.name,
       ids: REIHENFOLGE.filter((id0) => (u.abteilungen ?? []).some((x2) => x2.id === id0 && x2.gebaeudeId === g2.id))
     })).filter((g2) => g2.ids.length);
     const ohneBuero = REIHENFOLGE.filter((id0) => (u.abteilungen ?? []).some((x2) => x2.id === id0 && !x2.gebaeudeId));
     if (ohneBuero.length) gebaeudeGruppen.push({ name: "Ohne zugewiesenes B\xFCro", ids: ohneBuero });
+    r4 += abschnitt("Weitere Abteilungen");
     for (const gruppe3 of gebaeudeGruppen) {
-      h4 += '<div class="q15-navtitel">' + esc2(gruppe3.name) + "</div>";
-      h4 += '<nav class="q15-navigation" aria-label="Abteilungen in ' + esc2(gruppe3.name) + '">';
-      for (const id0 of gruppe3.ids) {
-        h4 += '<button type="button" class="' + (id0 === id ? "an" : "") + '" aria-current="' + (id0 === id ? "page" : "false") + `" onclick="hqKlick('abteilung','` + id0 + `')">` + TITEL[id0] + "</button>";
-      }
-      h4 += `<button type="button" onclick="hqKlick('uebersicht')">Etage hinzuf\xFCgen</button></nav>`;
+      r4 += '<div class="q32-navtitel">' + esc2(gruppe3.name) + '</div><div class="hk-seg q32-nav" role="group" aria-label="Abteilungen in ' + esc2(gruppe3.name) + '">';
+      for (const id0 of gruppe3.ids) r4 += '<button type="button" aria-pressed="' + (id0 === id) + '"' + (id0 === id ? ' aria-current="page"' : "") + " " + klick("abteilung", id0) + ">" + TITEL[id0] + "</button>";
+      r4 += "</div>";
     }
-    h4 += "</div></div>";
-    return { titel: a2.name, unter: (a2.stadt ?? u.sitz) + " \xB7 " + (wahl3 ? etageName2(wahl3.etage.nr) : "ohne Etage"), html: h4 };
+    h4 += rumpf2(r4);
+    return { titel: a2.name, unter: (a2.stadt ?? u.sitz) + " \xB7 " + etText, html: h4 };
   }
 
   // src/ui/posteingang.js
@@ -163016,7 +163064,7 @@
       const n3 = ui.index + 1;
       const navigation = '<div class="zb-navigation"><button data-z-a="vor" ' + (ui.index <= 0 || ui.archiv ? "disabled" : "") + ' aria-label="\xC4ltere Ausgabe">\u2039 \xC4lter</button><button data-z-a="archiv" aria-pressed="' + ui.archiv + '">' + (ui.archiv ? "Zur Zeitung" : "Archiv (" + aus.length + ")") + '</button><button data-z-a="naechste" ' + (ui.index >= aus.length - 1 || ui.archiv ? "disabled" : "") + ' aria-label="Neuere Ausgabe">Neuer \u203A</button></div><div class="zb-zahl" aria-live="polite">Ausgabe ' + (aus.length ? n3 : 0) + " von " + aus.length + "</div>";
       const einstellungen2 = '<label class="zb-einstellung"><input type="checkbox" data-z-a="schalter" ' + (aktiv6() ? "checked" : "") + "> Neue Zeitungsausgaben und Interviews aktivieren</label>" + (!aktiv6() ? '<p class="zb-hinweis">Der Handelsbote ist ausgeschaltet. Das bisherige Archiv bleibt lesbar.</p>' : "");
-      ctx.panel("Der Handelsbote", "Unabh\xE4ngige Wochenzeitung \xB7 Archiv", '<i class="hk-bereich" data-bereich="papier" data-symbol="post" aria-hidden="true"></i><div class="zb-root">' + navigation + (ui.archiv ? archivZeigen() : a2 ? ausgabeZeigen(a2) : leer4()) + (!ui.archiv ? '<div class="zb-wischhinweis">Nach links oder rechts wischen, um eine andere Ausgabe zu lesen.</div>' : "") + einstellungen2 + "</div>", "gross");
+      ctx.panel("Zeitung", "Unabh\xE4ngige Wochenzeitung \xB7 Archiv", '<i class="hk-bereich" data-bereich="papier" data-symbol="post" aria-hidden="true"></i><div class="zb-root">' + navigation + (ui.archiv ? archivZeigen() : a2 ? ausgabeZeigen(a2) : leer4()) + (!ui.archiv ? '<div class="zb-wischhinweis">Nach links oder rechts wischen, um eine andere Ausgabe zu lesen.</div>' : "") + einstellungen2 + "</div>", "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = vorher;
     }
@@ -163576,7 +163624,7 @@
       h4 += `<div class="regler"><small class="rfuss">Kosten je Woche: Punkte ${P5("ka:k:punkte", geld(k5.kostenWoche.punkte), "i")}, Stufen ${geld(k5.kostenWoche.stufen)}, Betrieb ${geld(k5.kostenWoche.betrieb)}, Daten ${geld(k5.kostenWoche.daten)}, Anmeldung ${geld(k5.kostenWoche.anmeldung)}, zusammen ${P5("ka:k:summe", geld(k5.kostenWoche.summe), "i")}</small></div></div>`;
       h4 += `<div class="karte emkarte"><div class="mkopf" style="background:#8c5a7a"><b>${esc2(a2.name)}</b><small>${a2.relaunchBis !== void 0 && a2.relaunchBis > s2().woche ? `Relaunch bis ${wocheText(s2(), a2.relaunchBis)}` : "Coupons, Punkte, Push"}</small></div>`;
       h4 += `<div class="owerte"><div><span>Downloads</span>${P5("ap:downloads", fmt.format(a2.downloads))}</div><div><span>aktive Nutzer</span>${P5("ap:aktiv", fmt.format(a2.aktiveNutzer))}</div><div><span>Push erlaubt</span>${P5("ap:push", pz3(a2.pushQuote))}</div></div>`;
-      h4 += `<div class="mzeile"><span>App-Qualit\xE4t</span><span class="mbalken"><span style="width:${(a2.qualitaet * 100).toFixed(0)}%;background:${a2.qualitaet < 0.3 ? "#d23c32" : "#2f8f5b"}"></span></span>${P5("ap:qualitaet", String(Math.round(a2.qualitaet * 100)))}</div>`;
+      h4 += `<div class="mzeile"><span>App-Qualit\xE4t</span><span class="mbalken"><span style="width:${(a2.qualitaet * 100).toFixed(0)}%;background:${a2.qualitaet < 0.3 ? "var(--hk-schlecht, #d23c32)" : "var(--hk-gut, #2f8f5b)"}"></span></span>${P5("ap:qualitaet", String(Math.round(a2.qualitaet * 100)))}</div>`;
       h4 += regler("App-Budget je Woche", stepper2("appBudget", P5("ap:budget", geld(a2.budgetWoche))), "Pflege und Werbung f\xFCr Downloads");
       h4 += schalter2(a2.appCoupons, 'data-a="appCoupons"', "Aktions-Coupons in der App", "holt Nutzer in die App");
       h4 += `<div class="oknoepfe"><button data-a="relaunch"${a2.relaunchBis !== void 0 && a2.relaunchBis > s2().woche ? " disabled" : ""}>App-Relaunch beauftragen</button></div></div>`;
@@ -163611,7 +163659,7 @@
     }
     function zeitleiste(K3, P5) {
       const W3 = 340, L3 = 6, B8 = (W3 - L3 * 2) / 52, zeilen = [];
-      const balken8 = [];
+      const balken7 = [];
       for (const a2 of K3.eintraege) {
         const von = Math.max(0, a2.start - (K3.jahr - s2().startJahr) * 52), bis = Math.min(52, a2.ende - (K3.jahr - s2().startJahr) * 52);
         let z6 = zeilen.findIndex((e) => e <= von);
@@ -163620,7 +163668,7 @@
           zeilen.push(0);
         }
         zeilen[z6] = bis + 0.4;
-        balken8.push({ a: a2, von, bis, z: z6 });
+        balken7.push({ a: a2, von, bis, z: z6 });
       }
       const RH = 26, H = 24 + Math.max(1, zeilen.length) * RH + 18;
       let g2 = `<svg class="zeitleiste" viewBox="0 0 ${W3} ${H}" width="100%">`;
@@ -163628,7 +163676,7 @@
         const x2 = L3 + m * 52 / 12 * B8;
         g2 += `<line x1="${x2}" x2="${x2}" y1="16" y2="${H}" stroke="var(--ui-border, #ece8e1)"/><text x="${x2 + 2}" y="12" font-size="12" fill="var(--ui-muted, #7b8790)">${MONATE[m].slice(0, 1)}</text>`;
       }
-      for (const { a: a2, von, bis, z: z6 } of balken8) {
+      for (const { a: a2, von, bis, z: z6 } of balken7) {
         const x2 = L3 + von * B8, w2 = Math.max(3, (bis - von) * B8 - 1), y2 = 20 + z6 * RH;
         g2 += `<g data-a="aktion" data-v="${a2.id}" class="klickbar"><rect x="${x2}" y="${y2}" width="${w2}" height="${RH - 4}" rx="4" fill="${STATUS_FARBE[a2.status]}"${a2.status === "abgesagt" ? ' stroke="#b9b2a6" stroke-dasharray="2 2"' : ""}/>${w2 > 6.5 * a2.name.length + 8 ? `<text x="${x2 + 4}" y="${y2 + 15}" font-size="12" font-weight="700" fill="#14202a">${esc2(a2.name)}</text>` : ""}</g>`;
       }
@@ -174225,7 +174273,7 @@
     x2 += [["von", "\xD6ffnung ab"], ["bis", "\xD6ffnung bis"], ["samstagBis", "Samstag bis"]].map(([feld2, titel]) => `<div class="hk-regel"><span>${titel}</span>${stepper({ wert: `${p(std?.oeffnung?.[feld2])} Uhr`, label: titel, attrMinus: tun("stunden", id, feld2, -1), attrPlus: tun("stunden", id, feld2, 1) })}</div>`).join("");
     x2 += abschnitt("Services");
     const services = Object.entries(b4?.services ?? {});
-    x2 += services.length ? liste(services.map(([key, an]) => schalter({ text: SERVICE[key] ?? key, unter: an ? "in diesem Haus aktiv" : "in diesem Haus aus", an, attr: tun("service", id, key, String(!an)) }))) + `<div class="hk-knopfreihe">${services.map(([key, an]) => knopf(`${SERVICE[key] ?? key} clusterweit ${an ? "aus" : "an"}`, tun("clusterservice", id, key, String(!an)), "text")).join("")}</div>` : leer3("Keine Services hinterlegt.");
+    x2 += services.length ? liste(services.map(([key, an]) => schalter({ text: SERVICE[key] ?? key, unter: an ? "in diesem Haus aktiv" : "in diesem Haus aus", an, attr: tun("service", id, key, String(!an)) }))) + abschnitt("Services im ganzen Hauscluster") + `<div class="hk-knopfreihe q32-cluster">${services.map(([key, an]) => knopf(`${SERVICE[key] ?? key} ${an ? "\xFCberall aus" : "\xFCberall an"}`, tun("clusterservice", id, key, String(!an)), "zweit")).join("")}</div>` : leer3("Keine Services hinterlegt.");
     x2 += abschnitt("Gastronomie", p(b4?.restaurantQm) + " qm Restaurantfl\xE4che");
     x2 += seg([["selbst", "Selbst betreiben"], ["pacht", "Verpachten"]], b4?.gastro ?? "", (w2) => tun("gastro", id, w2));
     x2 += liste([zeile({ was: "Betriebsform", wert: b4?.gastro === "selbst" ? "Eigenbetrieb" : b4?.gastro === "pacht" ? "Verpachtet" : "Noch keine" }), zeile({ was: "Vertrag bis", wert: b4?.gastroVertragBis != null ? "KW " + (b4.gastroVertragBis % 52 + 1) : "ohne Vertrag" })]);
@@ -174257,7 +174305,7 @@
     return x2;
   }
   function hausBeobachtungHtml(liste3) {
-    return bereich("betrieb", "haus") + rumpf2(abschnitt("Ausnahmen priorisiert", `${liste3.length} H\xE4user`) + (liste3.length ? liste(liste3.map((x2) => zeile({ was: esc2(x2.name), unter: esc2(x2.stadt) + " \xB7 " + esc2(x2.grund), tippbar: true, attr: `onclick="hausSpringen('${esc2(x2.id)}')"` }))) : leer3("Derzeit keine auff\xE4lligen H\xE4user.")));
+    return bereich("betrieb", "haus") + rumpf2(abschnitt("Ausnahmen priorisiert", `${liste3.length} H\xE4user`) + (liste3.length ? liste(liste3.map((x2) => zeile({ was: esc2(x2.name), unter: esc2(x2.stadt) + " \xB7 " + esc2(deutscheZahlen(x2.grund)), tippbar: true, attr: `onclick="hausSpringen('${esc2(x2.id)}')"` }))) : leer3("Derzeit keine auff\xE4lligen H\xE4user.")));
   }
   function hausReportingHtml(kommentare2, ranking2) {
     return bereich("betrieb", "zahlen") + rumpf2(abschnitt("Kommentare der Woche", `${kommentare2.length}`) + (kommentare2.length ? liste(kommentare2.map((x2) => zeile({ was: esc2(x2.name), unter: esc2(GRUENDE[x2.grund] ?? x2.grund) + " / " + esc2(MASS[x2.massnahme] ?? x2.massnahme) + " \xB7 " + esc2(x2.pruefung), wert: PROZENT(x2.abweichung), ton: "schlecht", tippbar: true, attr: `onclick="hausSpringen('${esc2(x2.id)}')"` }))) : leer3("Noch keine kommentierungspflichtigen Abweichungen.")) + abschnitt("Mystery Shopping", "beste 20") + liste(ranking2.slice(0, 20).map((x2, i) => zeile({ was: `${i + 1}. ${esc2(x2.name)}`, wert: `${x2.score} / 100`, tippbar: true, attr: `onclick="hausSpringen('${esc2(x2.id)}')"` }))));
@@ -174770,15 +174818,19 @@
     const css = document.createElement("style");
     css.textContent = [
       ".hb{position:fixed;inset:0;z-index:30;background:#2a2521;color:#f3eee8;display:flex;flex-direction:column;font-family:system-ui,sans-serif;}",
-      ".hb[hidden]{display:none!important}.hb header{height:auto;min-height:65px;padding:calc(9px + env(safe-area-inset-top)) 12px 8px;box-sizing:content-box;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#1d1916;border-bottom:1px solid #4a423b;z-index:2;}",
-      ".hb header strong{font-size:15px}.hb small{display:block;color:#a89e93;font-size:12px}.hb select{display:block;max-width:210px;min-height:44px;background:#352f2a;color:#f3eee8;border:1px solid #4a423b;border-radius:8px;margin-top:5px;padding:5px;font-size:16px;}.hb button{font:inherit;cursor:pointer;min-height:44px;border:1px solid #4a423b;border-radius:10px;background:#352f2a;color:#f3eee8;padding:7px 12px;}",
+      // Q32: Kopf wie das dunkle Blatt (Symbol links, Name mittig, Schließen rechts); der Hausname steht nur einmal, im Auswahlfeld.
+      ".hb[hidden]{display:none!important}.hb header{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;column-gap:8px;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 8px 8px;background:#1d1916;border-bottom:1px solid #4a423b;z-index:2;text-align:center;}",
+      '.hb header .hb-symbol{width:36px;height:36px;justify-self:center;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 36 36%27%3E%3Cpath d=%27M18 5 31 12v14l-13 7L5 26V12z%27 fill=%27%23b9b0a6%27/%3E%3Cpath d=%27M5 12l13 7v14L5 26z%27 fill=%27%23e9e3dc%27/%3E%3Cpath d=%27M18 19l13-7v14l-13 7z%27 fill=%27%23948a80%27/%3E%3Cpath d=%27M5 15.5l13 7 13-7v2.4l-13 7-13-7z%27 fill=%27%23d23c32%27/%3E%3C/svg%3E")}',
+      ".hb header .hb-mitte{min-width:0}.hb header strong{display:block;font-size:12px;line-height:16px;font-weight:400;color:#a89e93;letter-spacing:.06em;text-transform:uppercase}.hb small{display:block;color:#a89e93;font-size:12px;line-height:16px}",
+      ".hb select{display:block;width:100%;max-width:280px;margin:2px auto;min-height:44px;background:#352f2a;color:#f3eee8;border:1px solid #4a423b;border-radius:10px;padding:0 10px;font-size:16px;font-weight:700;text-align:center;text-align-last:center}",
+      ".hb button{font:inherit;cursor:pointer;min-height:44px;border:1px solid #4a423b;border-radius:10px;background:#352f2a;color:#f3eee8;padding:7px 12px;}.hb header .hb-zu{width:44px;height:44px;padding:0;border:0;border-radius:22px;background:transparent;font-size:24px;line-height:1}",
       ".hb .hb-bild{flex:1;position:relative;min-height:0;touch-action:none;}.hb canvas{width:100%;height:100%;display:block;touch-action:none;}",
       ".hb .hb-etagen{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column-reverse;gap:7px;z-index:2;}",
-      ".hb .hb-etagen button{min-width:52px;box-shadow:0 2px 6px #0006}.hb .hb-etagen button[aria-pressed=true]{background:#d23c32;border-color:#8f2219;color:#fff;box-shadow:inset 0 0 0 1px #ef7a6f;}",
+      ".hb .hb-etagen button{min-width:52px;box-shadow:0 2px 6px #0006}.hb .hb-etagen button[aria-pressed=true]{background:var(--hk-akzent);border-color:var(--hk-akzent-rand);color:#fff;box-shadow:inset 0 0 0 1px var(--hk-akzent-hell);}",
       ".hb .hb-blase{position:absolute;left:12px;right:71px;bottom:17px;z-index:3;background:#352f2a;color:#f3eee8;border:1px solid #4a423b;border-radius:12px;padding:13px 14px;box-shadow:0 2px 6px #0007;font-size:14px;line-height:1.4;max-width:400px;}",
       ".hb .hb-blase[hidden]{display:none}.hb .hb-blase b{display:block;margin-bottom:3px}.hb .hb-blase p{margin:4px 0}.hb .hb-blase svg{width:64px;height:64px;float:left;margin-right:10px;}",
       ".hb footer{display:flex;justify-content:space-between;align-items:center;gap:9px;padding:9px 13px calc(9px + env(safe-area-inset-bottom));background:#1d1916;border-top:1px solid #4a423b;font-size:12px;}",
-      ".hb .hb-info{background:#d23c32;border-color:#8f2219;color:#fff;box-shadow:inset 0 0 0 1px #ef7a6f}.hb .hb-hinweis{color:#a89e93;max-width:230px}.hb .hb-fehler{padding:20px;text-align:center;}"
+      ".hb .hb-info{background:var(--hk-akzent);border-color:var(--hk-akzent-rand);color:#fff;box-shadow:inset 0 0 0 1px var(--hk-akzent-hell)}.hb .hb-hinweis{color:#a89e93;max-width:230px}.hb .hb-fehler{padding:20px;text-align:center;}"
     ].join("");
     wurzel2.append(css);
   }
@@ -174804,7 +174856,7 @@
       host.setAttribute("aria-modal", "true");
       host.setAttribute("aria-label", "Hausbesuch");
       stilEinbauen(host);
-      host.insertAdjacentHTML("beforeend", '<header><div><strong class="hb-titel">Hausbesuch</strong><select class="hb-hauswahl" aria-label="Filiale ausw\xE4hlen"></select><small class="hb-unter"></small></div><button type="button" data-hb="zu">Schlie\xDFen</button></header><div class="hb-bild"><canvas aria-label="Interaktiver Etagenrundgang"></canvas><nav class="hb-etagen" aria-label="Etagen"></nav><div class="hb-blase" aria-live="polite" hidden></div></div><footer><button type="button" class="hb-info" data-hb="leitung">Filialleitung</button><span class="hb-hinweis">Wischen: bewegen \xB7 Zwei Finger: zoomen \xB7 Tippen: sprechen oder einkaufen</span></footer>');
+      host.insertAdjacentHTML("beforeend", '<header><span class="hb-symbol" aria-hidden="true"></span><div class="hb-mitte"><strong class="hb-titel">Hausbesuch</strong><select class="hb-hauswahl" aria-label="Filiale ausw\xE4hlen"></select><small class="hb-unter"></small></div><button type="button" class="hb-zu" data-hb="zu" aria-label="Schlie\xDFen">\xD7</button></header><div class="hb-bild"><canvas aria-label="Interaktiver Etagenrundgang"></canvas><nav class="hb-etagen" aria-label="Etagen"></nav><div class="hb-blase" aria-live="polite" hidden></div></div><footer><button type="button" class="hb-info" data-hb="leitung">Filialleitung</button><span class="hb-hinweis">Wischen: bewegen \xB7 Zwei Finger: zoomen \xB7 Tippen: sprechen oder einkaufen</span></footer>');
       document.body.append(host);
       bild4 = host.querySelector(".hb-bild");
       canvas2 = host.querySelector("canvas");
@@ -174935,7 +174987,7 @@
       K3.max = Math.max(20, Math.max(buehne.breite, buehne.tiefe) * 1.25);
       K3.min = 7;
       K3.halb = Math.min(K3.max, Math.max(16, Math.max(buehne.breite, buehne.tiefe) * 0.8));
-      host.querySelector(".hb-unter").textContent = etageName3(etageNr) + " \xB7 " + besatz.kunden + " Kunden \xB7 " + besatz.verkauf + " Besch\xE4ftigte" + (haus2.format === "outlet" ? " \xB7 Modellbetrieb" : " \xB7 " + besatz.fte + " FTE");
+      host.querySelector(".hb-unter").textContent = etageName3(etageNr) + " \xB7 " + besatz.kunden + " Kunden \xB7 " + besatz.verkauf + " Besch\xE4ftigte" + (haus2.format === "outlet" ? " \xB7 Modellbetrieb" : " \xB7 " + Number(besatz.fte).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " FTE");
       host.querySelector(".hb-blase").hidden = true;
       host.querySelectorAll("[data-hb=etage]").forEach((b4) => b4.setAttribute("aria-pressed", String(Number(b4.dataset.nr) === etageNr)));
       fahrt = delta ? { seit: performance.now(), start: delta > 0 ? -8 : 8, dauer: 300 } : null;
@@ -175045,7 +175097,7 @@
       haus2 = h4;
       const angebot = h4.etagen.includes(0) ? 0 : h4.etagen[0];
       nr4 = angebot;
-      host.querySelector(".hb-titel").textContent = h4.name + " \xB7 Hausbesuch";
+      host.querySelector(".hb-titel").textContent = "Hausbesuch";
       const kandidaten3 = [...s2.haeuser.filter((q2) => q2.stadt === ctx.stadtName() && q2.status !== "verkauft"), ...haeuser_outlet_default.filter((q2) => q2.stadt === ctx.stadtName())];
       host.querySelector(".hb-hauswahl").innerHTML = kandidaten3.map((q2) => '<option value="' + sicher(q2.id) + '"' + (q2.id === h4.id ? " selected" : "") + ">" + sicher(q2.name) + "</option>").join("");
       host.querySelector(".hb-etagen").innerHTML = [...h4.etagen].sort((a2, b4) => a2 - b4).map((n3) => '<button type="button" data-hb="etage" data-nr="' + n3 + '" aria-pressed="' + (n3 === nr4) + '">' + etageName3(n3) + "</button>").join("");
@@ -176963,7 +177015,7 @@
     function zeile4(t5, wert) {
       return '<div class="zeile"><span class="was">' + esc2(t5) + '</span><b class="uq" style="min-width:90px">' + esc2(String(wert)) + "</b></div>";
     }
-    function balken8(w2) {
+    function balken7(w2) {
       return '<div class="it-fortschritt"><i style="width:' + Math.max(0, Math.min(100, Math.round(w2 * 100))) + '%"></i></div>';
     }
     function reiter() {
@@ -177002,7 +177054,7 @@
     }
     function projektKarte(p2, d4) {
       let h4 = '<div class="karte"><div class="khead">' + esc2(E9.SYSTEME[p2.system].name) + "<small>Generation " + p2.zielGeneration + " \xB7 " + esc2(artName[p2.art]) + "</small></div>";
-      h4 += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent6(p2.fortschritt) + "</b></div>" + balken8(p2.fortschritt);
+      h4 += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent6(p2.fortschritt) + "</b></div>" + balken7(p2.fortschritt);
       h4 += zeile4("Kosten Ist / Plan", geld(p2.kostenIst) + " / " + geld(p2.kostenPlan));
       h4 += zeile4("Mehrwochen durch Verzug", p2.verzug);
       h4 += zeile4("Rollout", p2.erledigteCluster.length + " / " + p2.clusterIds.length + " Cluster");
@@ -177458,7 +177510,7 @@
     }
     function clusterBlock(c) {
       const haus2 = ui.haus && c.haeuser.some((h4) => h4.id === ui.haus) ? ui.haus : null;
-      let out = '<div class="karte"><div class="khead">' + esc2(c.name) + '</div><div class="zeile"><span>' + c.haeuser.length + " H\xE4user \xB7 Springerbewegungen</span><b>" + c.bewegungen + '</b></div><div class="hk-knopfreihe"><button type="button" class="hk-knopf zweit"' + steuer("springer", { "data-cluster": c.id, "data-an": c.springerAktiv ? "0" : "1" }) + ">" + (c.springerAktiv ? "Springerpool deaktivieren" : "Springerpool aktivieren") + '</button><button type="button" class="hk-knopf zweit"' + steuer("weiterbildung", { "data-cluster": c.id }) + ">Weiterbildung Stufe +1</button>" + (ctx.s().woche % 52 >= 43 ? '<button type="button" class="hk-knopf zweit"' + steuer("weihnachten", { "data-cluster": c.id }) + ">Weihnachts-Aushilfen nachbuchen</button>" : "") + "</div></div>";
+      let out = '<div class="karte"><div class="khead">Springer und Weiterbildung</div><div class="zeile"><span>' + c.haeuser.length + " H\xE4user \xB7 Springerbewegungen</span><b>" + c.bewegungen + '</b></div><div class="hk-knopfreihe"><button type="button" class="hk-knopf zweit"' + steuer("springer", { "data-cluster": c.id, "data-an": c.springerAktiv ? "0" : "1" }) + ">" + (c.springerAktiv ? "Springerpool deaktivieren" : "Springerpool aktivieren") + '</button><button type="button" class="hk-knopf zweit"' + steuer("weiterbildung", { "data-cluster": c.id }) + ">Weiterbildung Stufe +1</button>" + (ctx.s().woche % 52 >= 43 ? '<button type="button" class="hk-knopf zweit"' + steuer("weihnachten", { "data-cluster": c.id }) + ">Weihnachts-Aushilfen nachbuchen</button>" : "") + "</div></div>";
       out += '<div class="karte pe-uebersicht"><div class="pe-tabellenkopf"><span>Haus</span><span>Logistik</span><span>Verkauf</span><span>Kasse</span><span>Verwaltung</span></div>';
       for (const h4 of c.haeuser) {
         out += '<button class="pe-tabellenzeile"' + steuer("haus", { "data-haus": h4.id }) + "><b>" + esc2(h4.name) + '</b><span class="pe-deckungen">' + GRUPPEN2.map((g2) => '<span style="color:' + farbe2(h4.gruppen[g2]) + '">' + pct2(h4.gruppen[g2]) + "</span>").join("") + "</span><small>Krank " + pct2(h4.krank) + " \xB7 Aushilfen " + fmt.format(h4.aushilfen) + " Std. \xB7 Springer " + fmt.format(h4.springer) + " Std.</small></button>";
@@ -177479,7 +177531,7 @@
       ctx.panel(
         "Personaleinsatz",
         "Wochentagsplanung \xB7 vier Personalgruppen",
-        bereich("haus", "haus") + sprecher({ text: befund2, unter: "Personalplanung " + (gewaehlt?.name ?? ""), ton: knapp.length ? "engpass" : "" }) + rumpf2(selector + (gewaehlt ? clusterBlock(gewaehlt) : leer3("Keine offenen H\xE4user in diesem Cluster."))),
+        bereich("haus", "haus") + sprecher({ text: befund2, unter: "Personalplanung", ton: knapp.length ? "engpass" : "" }) + rumpf2(selector + (gewaehlt ? clusterBlock(gewaehlt) : leer3("Keine offenen H\xE4user in diesem Cluster."))),
         "gross"
       );
       ui.aktiv = true;
@@ -178386,6 +178438,7 @@
     if (geaendert.length) zeichnen();
     return geaendert;
   }
+  var cockpitOffen = false;
   var cockpitFormat = "alle";
   var MERK = /* @__PURE__ */ new Map();
   function merk() {
@@ -178420,14 +178473,29 @@
     const FORMATNAME2 = { alle: "Alle", warenhaus: "Hartwig", sport: "Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
     const fx = cockpitFormat === "alle" ? null : c.formate.find((x2) => x2.format === cockpitFormat);
     const auswahl4 = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME2).filter(([id]) => id === "alle" || c.formate.some((x2) => x2.format === id && x2.haeuser)).map(([id, name2]) => '<option value="' + id + '"' + (id === cockpitFormat ? " selected" : "") + ">" + name2 + "</option>").join("") + "</select>";
+    const zu = !cockpitOffen;
+    $2("cockpit").classList.toggle("offen", cockpitOffen);
     $2("cockpit").innerHTML = [
       kachel2("Cash", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? "rot" : ""),
-      kachel2("Kreditrahmen frei", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? "rot" : ""),
       fx ? kachel2("EBITDA " + FORMATNAME2[cockpitFormat], s.historie.length ? geld(fx.ebitda) : "noch offen", !s.historie.length ? "" : fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wo.", s.historie.length ? geld(c.ebitda13) : "noch offen", !s.historie.length ? "" : c.ebitda13 < 0 ? "rot" : "gruen"),
       kachel2("Umsatz<em> \xB7 " + FORMATNAME2[cockpitFormat] + "</em>" + auswahl4, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : "noch offen", "mitwahl"),
+      `<button type="button" class="kz-mehr" data-cockpit-mehr aria-expanded="${cockpitOffen}" aria-label="${zu ? "Weitere Kennzahlen zeigen" : "Weitere Kennzahlen ausblenden"}"><span aria-hidden="true">${zu ? "\u25BE" : "\u25B4"}</span></button>`,
+      kachel2("Kreditrahmen frei", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? "rot" : ""),
       kachel2("Vertrauen", `${c.vertrauen} / 100`, c.vertrauen < 35 ? "rot" : ""),
       kachel2("Image", `${c.image} / 100`, c.image < 35 ? "rot" : "")
     ].join("");
+    $2("cockpit").querySelector("[data-cockpit-mehr]")?.addEventListener("click", () => {
+      cockpitOffen = !cockpitOffen;
+      cockpitZeigen();
+    });
+    for (const w2 of $2("cockpit").querySelectorAll(".kz b")) {
+      w2.style.fontSize = "";
+      let g2 = parseFloat(getComputedStyle(w2).fontSize);
+      while (w2.scrollWidth > w2.clientWidth + 0.5 && g2 > 12) {
+        g2 -= 0.5;
+        w2.style.setProperty("font-size", g2 + "px", "important");
+      }
+    }
     $2("cockpit").querySelector("[data-cockpit-format]")?.addEventListener("change", (e) => {
       cockpitFormat = e.target.value;
       cockpitZeigen();
@@ -178894,7 +178962,10 @@
     offenesHq = gebaeudeId ?? true;
     const u = hqUebersicht(s), j4 = hqGrafik();
     if (hqAbteilung && u.abteilungen.some((a2) => a2.id === hqAbteilung)) {
-      const r4 = zentraleAbteilungHtml(u, j4, organisationUebersicht(s), hqAbteilung, hqEtageWahl);
+      const r4 = zentraleAbteilungHtml(u, j4, organisationUebersicht(s), hqAbteilung, hqEtageWahl, (gid, nr4) => {
+        const gj = j4?.gebaeude?.find((q2) => q2.id === gid);
+        return gj ? etagenBild(gj, nr4) : null;
+      });
       const sc2 = $2("pinhalt").scrollTop;
       panel(r4.titel, r4.unter, r4.html, "gross");
       if (bleiben) $2("pinhalt").scrollTop = sc2;
@@ -178910,7 +178981,7 @@
     let html = bereich("zentrale") + sprecher({ text: befund2, unter: "Leitung Verwaltung", ton: leerEtagen.length || ohnePlatz ? "engpass" : "" });
     let kopfbild = "";
     let rumpf4 = gross2([
-      { label: "Kosten je Woche", p: "hq:kosten", wert: geld(u.kostenWoche), ton: diffStart > 0 ? "schlecht" : diffStart < 0 ? "gut" : "", unter: diffStart ? abweichung(-diffStart, (diffStart > 0 ? "+" : "\u2212") + geld(Math.abs(diffStart)) + " zum Start", null) : "wie zum Start" },
+      { label: "Kosten je Woche", p: "hq:kosten", wert: geld(u.kostenWoche), unter: diffStart ? abweichung(-diffStart, (diffStart > 0 ? "+" : "\u2212") + geld(Math.abs(diffStart)) + " zum Start", null) : "wie zum Start" },
       { label: "Besch\xE4ftigte", p: "hq:fte", wert: fmt.format(Math.round(u.fte)) + " FTE", unter: `${fmt.format((u.gebaeude ?? []).reduce((n3, g2) => n3 + (g2.qmGemietet ?? 0), 0))} qm gemietet` }
     ]) + liste([zeile({ was: "davon B\xFCromiete und Nebenkosten", wert: geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)) }), zeile({ was: "Restmiete alter B\xFCros", wert: geld(u.restmieteWoche ?? 0), ton: u.restmieteWoche > 0 ? "schlecht" : "" })]);
     const gs = u.gebaeude ?? [];
@@ -178920,11 +178991,11 @@
       const gj = j4?.gebaeude?.find((q2) => q2.id === gWahl.id);
       if (gj) {
         const e = gWahl.etagen.find((q2) => q2.nr === nr4);
-        kopfbild = `<div class="hk-kopfbild schnitt"><img src="${etagenBild(gj, nr4)}" alt="Etagenschnitt ${esc2(gWahl.name)}, ${nr4 === 0 ? "Erdgeschoss" : `${nr4}. Etage`}"><span class="hk-bildtitel">${esc2(gWahl.name.replace("Hartwig-", ""))} \xB7 ${nr4 === 0 ? "EG" : `${nr4}. Etage`} \xB7 ${esc2((e?.abteilungen ?? []).map((a2) => a2.name).join(", ") || (e?.gemietet ? "gemietet, frei" : "nicht gemietet"))}</span></div>`;
+        kopfbild = `<div class="hk-kopfbild schnitt"><img src="${etagenBild(gj, nr4)}" alt="Etagenschnitt ${esc2(gWahl.name)}, ${nr4 === 0 ? "Erdgeschoss" : `${nr4}. Etage`}"><span class="hk-bildtitel">${esc2(gWahl.name)} \xB7 ${nr4 === 0 ? "EG" : `${nr4}. Etage`} \xB7 ${esc2((e?.abteilungen ?? []).map((a2) => a2.name).join(", ") || (e?.gemietet ? "gemietet, frei" : "nicht gemietet"))}</span></div>`;
       }
     }
     const ziele = [];
-    for (const g2 of gs) for (const e of g2.etagen) if (e.gemietet) ziele.push({ v: `${g2.id}|${e.nr}`, t: `${g2.name.replace("Hartwig-", "")}, ${e.nr === 0 ? "EG" : e.nr + ". Etage"} (${fmt.format(e.qm - e.belegtQm)} qm frei)` });
+    for (const g2 of gs) for (const e of g2.etagen) if (e.gemietet) ziele.push({ v: `${g2.id}|${e.nr}`, t: `${g2.name}, ${e.nr === 0 ? "EG" : e.nr + ". Etage"} (${fmt.format(e.qm - e.belegtQm)} qm frei)` });
     for (const g2 of [...gs].sort((a2, b4) => a2.id === gebaeudeId ? -1 : b4.id === gebaeudeId ? 1 : 0)) {
       rumpf4 += `<div class="karte"><div class="khead kopf-mit-knopf"><div>${g2.name}<small>${g2.stadt} \xB7 ${fmt.format(g2.qmGemietet)} qm gemietet \xB7 ${pz5(g2.auslastung)} belegt \xB7 ${geld(g2.kostenWoche)} je Woche</small></div>${gs.length > 1 ? knopf5("K\xFCndigen", ["kuendigenG", g2.id], "rot") : ""}</div>`;
       for (const e of [...g2.etagen ?? []].sort((x2, y2) => y2.nr - x2.nr)) {

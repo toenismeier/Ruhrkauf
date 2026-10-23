@@ -732,6 +732,7 @@ function grafikNachziehen() {
   if (geaendert.length) zeichnen();
   return geaendert;
 }
+let cockpitOffen = false; // Q32: Kennzahlenkacheln eingeklappt
 let cockpitFormat = 'alle';
 const MERK = new Map();
 function merk() { return MERK; }
@@ -782,15 +783,23 @@ function cockpitZeigen() {
   const auswahl = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME)
     .filter(([id]) => id === 'alle' || c.formate.some((x) => x.format === id && x.haeuser))
     .map(([id, name]) => '<option value="' + id + '"' + (id === cockpitFormat ? ' selected' : '') + '>' + name + '</option>').join('') + '</select>';
+  // Q32: höchstens ein Sechstel der Höhe. Eingeklappt eine Zeile (Cash, EBITDA, Umsatz), der Knopf rechts klappt
+  // Kreditrahmen, Vertrauen und Image als zweite Zeile auf.
+  const zu = !cockpitOffen;
+  $('cockpit').classList.toggle('offen', cockpitOffen);
   $('cockpit').innerHTML = [
     kachel('Cash', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? 'rot' : ''),
-    kachel('Kreditrahmen frei', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? 'rot' : ''),
     fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], s.historie.length ? geld(fx.ebitda) : 'noch offen', !s.historie.length ? '' : fx.ebitda < 0 ? 'rot' : 'gruen')
       : kachel('EBITDA 13 Wo.', s.historie.length ? geld(c.ebitda13) : 'noch offen', !s.historie.length ? '' : c.ebitda13 < 0 ? 'rot' : 'gruen'),
     kachel('Umsatz<em> · ' + FORMATNAME[cockpitFormat] + '</em>' + auswahl, s.historie.length ? geld(fx ? fx.umsatz : c.umsatzWoche) : 'noch offen', 'mitwahl'),
+    `<button type="button" class="kz-mehr" data-cockpit-mehr aria-expanded="${cockpitOffen}" aria-label="${zu ? 'Weitere Kennzahlen zeigen' : 'Weitere Kennzahlen ausblenden'}"><span aria-hidden="true">${zu ? '▾' : '▴'}</span></button>`,
+    kachel('Kreditrahmen frei', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? 'rot' : ''),
     kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
     kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
   ].join('');
+  $('cockpit').querySelector('[data-cockpit-mehr]')?.addEventListener('click', () => { cockpitOffen = !cockpitOffen; cockpitZeigen(); });
+  // Lange Beträge (z. B. −140,7 Mio. €) passen sich der Kachel an statt umzubrechen; nie unter 12 px.
+  for (const w of $('cockpit').querySelectorAll('.kz b')) { w.style.fontSize = ''; let g = parseFloat(getComputedStyle(w).fontSize); while (w.scrollWidth > w.clientWidth + 0.5 && g > 12) { g -= 0.5; w.style.setProperty('font-size', g + 'px', 'important'); } }
   $('cockpit').querySelector('[data-cockpit-format]')?.addEventListener('change', (e) => { cockpitFormat = e.target.value; cockpitZeigen(); });
   // O07 Haus: Ausnahme-Kachel im Cockpit.
   const ausnahmen = E.hausBeobachtung(s, 30).length;
@@ -1181,7 +1190,7 @@ function oeffneHq(gebaeudeId, bleiben = false) {
   offenesHaus = null; offenesHq = gebaeudeId ?? true;
   const u = E.hqUebersicht(s), j = hqGrafik();
   if (hqAbteilung && u.abteilungen.some((a) => a.id === hqAbteilung)) {
-    const r = zentraleAbteilungHtml(u, j, E.organisationUebersicht(s), hqAbteilung, hqEtageWahl);
+    const r = zentraleAbteilungHtml(u, j, E.organisationUebersicht(s), hqAbteilung, hqEtageWahl, (gid, nr) => { const gj = j?.gebaeude?.find((q) => q.id === gid); return gj ? etagenBild(gj, nr) : null; });
     const sc = $('pinhalt').scrollTop;
     panel(r.titel, r.unter, r.html, 'gross');
     if (bleiben) $('pinhalt').scrollTop = sc;
@@ -1199,7 +1208,7 @@ function oeffneHq(gebaeudeId, bleiben = false) {
     + (u.restmieteWoche > 0 ? `Für alte Büros laufen noch ${geld(u.restmieteWoche)} Restmiete je Woche.` : '');
   let html = HK.bereich('zentrale') + HK.sprecher({ text: befund, unter: 'Leitung Verwaltung', ton: leerEtagen.length || ohnePlatz ? 'engpass' : '' });
   let kopfbild = '';
-  let rumpf = HK.gross([{ label: 'Kosten je Woche', p: 'hq:kosten', wert: geld(u.kostenWoche), ton: diffStart > 0 ? 'schlecht' : diffStart < 0 ? 'gut' : '', unter: diffStart ? HK.abweichung(-diffStart, (diffStart > 0 ? '+' : '−') + geld(Math.abs(diffStart)) + ' zum Start', null) : 'wie zum Start' },
+  let rumpf = HK.gross([{ label: 'Kosten je Woche', p: 'hq:kosten', wert: geld(u.kostenWoche), unter: diffStart ? HK.abweichung(-diffStart, (diffStart > 0 ? '+' : '−') + geld(Math.abs(diffStart)) + ' zum Start', null) : 'wie zum Start' },
     { label: 'Beschäftigte', p: 'hq:fte', wert: fmt.format(Math.round(u.fte)) + ' FTE', unter: `${fmt.format((u.gebaeude ?? []).reduce((n, g) => n + (g.qmGemietet ?? 0), 0))} qm gemietet` }])
     + HK.liste([HK.zeile({ was: 'davon Büromiete und Nebenkosten', wert: geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)) }), HK.zeile({ was: 'Restmiete alter Büros', wert: geld(u.restmieteWoche ?? 0), ton: u.restmieteWoche > 0 ? 'schlecht' : '' })]);
   // 3D-Schnitt der gewählten Etage (Standard: erste belegte Etage des gewählten bzw. ersten Gebäudes)
@@ -1210,11 +1219,11 @@ function oeffneHq(gebaeudeId, bleiben = false) {
     const gj = j?.gebaeude?.find((q) => q.id === gWahl.id);
     if (gj) {
       const e = gWahl.etagen.find((q) => q.nr === nr);
-      kopfbild = `<div class="hk-kopfbild schnitt"><img src="${etagenBild(gj, nr)}" alt="Etagenschnitt ${esc(gWahl.name)}, ${nr === 0 ? 'Erdgeschoss' : `${nr}. Etage`}"><span class="hk-bildtitel">${esc(gWahl.name.replace('Hartwig-', ''))} · ${nr === 0 ? 'EG' : `${nr}. Etage`} · ${esc((e?.abteilungen ?? []).map((a) => a.name).join(', ') || (e?.gemietet ? 'gemietet, frei' : 'nicht gemietet'))}</span></div>`;
+      kopfbild = `<div class="hk-kopfbild schnitt"><img src="${etagenBild(gj, nr)}" alt="Etagenschnitt ${esc(gWahl.name)}, ${nr === 0 ? 'Erdgeschoss' : `${nr}. Etage`}"><span class="hk-bildtitel">${esc(gWahl.name)} · ${nr === 0 ? 'EG' : `${nr}. Etage`} · ${esc((e?.abteilungen ?? []).map((a) => a.name).join(', ') || (e?.gemietet ? 'gemietet, frei' : 'nicht gemietet'))}</span></div>`;
     }
   }
   const ziele = [];
-  for (const g of gs) for (const e of g.etagen) if (e.gemietet) ziele.push({ v: `${g.id}|${e.nr}`, t: `${g.name.replace('Hartwig-', '')}, ${e.nr === 0 ? 'EG' : e.nr + '. Etage'} (${fmt.format(e.qm - e.belegtQm)} qm frei)` });
+  for (const g of gs) for (const e of g.etagen) if (e.gemietet) ziele.push({ v: `${g.id}|${e.nr}`, t: `${g.name}, ${e.nr === 0 ? 'EG' : e.nr + '. Etage'} (${fmt.format(e.qm - e.belegtQm)} qm frei)` });
   for (const g of [...gs].sort((a, b) => (a.id === gebaeudeId ? -1 : b.id === gebaeudeId ? 1 : 0))) {
     rumpf += `<div class="karte"><div class="khead kopf-mit-knopf"><div>${g.name}<small>${g.stadt} · ${fmt.format(g.qmGemietet)} qm gemietet · ${pz(g.auslastung)} belegt · ${geld(g.kostenWoche)} je Woche</small></div>${gs.length > 1 ? knopf('Kündigen', ['kuendigenG', g.id], 'rot') : ''}</div>`;
     for (const e of [...(g.etagen ?? [])].sort((x, y) => y.nr - x.nr)) {

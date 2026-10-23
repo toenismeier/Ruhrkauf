@@ -67,7 +67,7 @@ export function personalModul(ctx) {
   function clusterBlock(c) {
     const haus = ui.haus && c.haeuser.some((h) => h.id === ui.haus)
       ? ui.haus : null;
-    let out = '<div class="karte"><div class="khead">' + esc(c.name) + '</div>' +
+    let out = '<div class="karte"><div class="khead">Springer und Weiterbildung</div>' + // Q32: Clustername steht schon im Auswahlfeld
       '<div class="zeile"><span>' + c.haeuser.length + ' Häuser · Springerbewegungen</span><b>' +
       c.bewegungen + '</b></div>' +
       '<div class="hk-knopfreihe"><button type="button" class="hk-knopf zweit"' + steuer('springer', { 'data-cluster': c.id, 'data-an': c.springerAktiv ? '0' : '1' }) +
@@ -103,7 +103,7 @@ export function personalModul(ctx) {
       ? '<b>' + knapp.length + ' von ' + gewaehlt.haeuser.length + ' Häusern sind unter 90 % besetzt.</b> Am knappsten: ' + esc(knapp.slice(0, 2).map((h) => h.name).join(', ')) + '.'
       : '<b>Alle ' + gewaehlt.haeuser.length + ' Häuser sind ausreichend besetzt.</b> Kein Springer nötig.';
     ctx.panel('Personaleinsatz', 'Wochentagsplanung · vier Personalgruppen',
-      K.bereich('haus', 'haus') + K.sprecher({ text: befund, unter: 'Personalplanung ' + (gewaehlt?.name ?? ''), ton: knapp.length ? 'engpass' : '' }) +
+      K.bereich('haus', 'haus') + K.sprecher({ text: befund, unter: 'Personalplanung', ton: knapp.length ? 'engpass' : '' }) +
       K.rumpf(selector + (gewaehlt ? clusterBlock(gewaehlt) : K.leer('Keine offenen Häuser in diesem Cluster.'))), 'gross');
     ui.aktiv = true;
     if (scrollHalten) document.getElementById('pinhalt').scrollTop = vorher;

@@ -2,7 +2,7 @@
 // Oben spricht die Filialleitung den Befund, darunter Umsatz und Deckungsbeitrag mit Abweichung zur Vorwoche und zum
 // Vorjahr, fünf Wochen als Balken. Was nur ein Warenhaus hat: der Etagenschnitt. Reiterleiste unten wie Coffee Inc.
 // Alle Zahlen kommen aus der Engine (hausDetail, hausUebersicht, verlauf, hausTreiber); hier wird nur dargestellt.
-import { esc, fmt, geld } from './format.js';
+import { esc, fmt, geld, deutscheZahlen } from './format.js';
 import * as K from './komponenten.js';
 import { portraetSVG, zufallsMerkmale } from '../kit/portraet.js';
 
@@ -281,7 +281,8 @@ function partner(c, h, b) {
   x += K.abschnitt('Services');
   const services = Object.entries(b?.services ?? {});
   x += services.length ? K.liste(services.map(([key, an]) => K.schalter({ text: SERVICE[key] ?? key, unter: an ? 'in diesem Haus aktiv' : 'in diesem Haus aus', an, attr: tun('service', id, key, String(!an)) })))
-    + `<div class="hk-knopfreihe">${services.map(([key, an]) => K.knopf(`${SERVICE[key] ?? key} clusterweit ${an ? 'aus' : 'an'}`, tun('clusterservice', id, key, String(!an)), 'text')).join('')}</div>` : K.leer('Keine Services hinterlegt.');
+    + K.abschnitt('Services im ganzen Hauscluster') // Q32: eigene Knöpfe statt verwaister unterstrichener Links
+    + `<div class="hk-knopfreihe q32-cluster">${services.map(([key, an]) => K.knopf(`${SERVICE[key] ?? key} ${an ? 'überall aus' : 'überall an'}`, tun('clusterservice', id, key, String(!an)), 'zweit')).join('')}</div>` : K.leer('Keine Services hinterlegt.');
   x += K.abschnitt('Gastronomie', p(b?.restaurantQm) + ' qm Restaurantfläche');
   x += K.seg([['selbst', 'Selbst betreiben'], ['pacht', 'Verpachten']], b?.gastro ?? '', (w) => tun('gastro', id, w));
   x += K.liste([K.zeile({ was: 'Betriebsform', wert: b?.gastro === 'selbst' ? 'Eigenbetrieb' : b?.gastro === 'pacht' ? 'Verpachtet' : 'Noch keine' }), K.zeile({ was: 'Vertrag bis', wert: b?.gastroVertragBis != null ? 'KW ' + ((b.gastroVertragBis % 52) + 1) : 'ohne Vertrag' })]);
@@ -319,7 +320,7 @@ function kommentare(c, h, b) {
 
 export function hausBeobachtungHtml(liste) {
   return K.bereich('betrieb', 'haus') + K.rumpf(K.abschnitt('Ausnahmen priorisiert', `${liste.length} Häuser`) + (liste.length
-    ? K.liste(liste.map((x) => K.zeile({ was: esc(x.name), unter: esc(x.stadt) + ' · ' + esc(x.grund), tippbar: true, attr: `onclick="hausSpringen('${esc(x.id)}')"` })))
+    ? K.liste(liste.map((x) => K.zeile({ was: esc(x.name), unter: esc(x.stadt) + ' · ' + esc(deutscheZahlen(x.grund)), tippbar: true, attr: `onclick="hausSpringen('${esc(x.id)}')"` })))
     : K.leer('Derzeit keine auffälligen Häuser.')));
 }
 export function hausReportingHtml(kommentare, ranking) {
