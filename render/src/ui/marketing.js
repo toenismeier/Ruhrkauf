@@ -15,7 +15,7 @@ const MONATE = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 const ANGEBOT = [['coupon', 'Coupon'], ['punkte', 'Punkte'], ['zugabe', 'Zugabe'], ['info', 'Info']];
 const FREQUENZ = [['einmalig', 'einmalig'], ['woechentlich', 'wöchentlich'], ['zweiwoechentlich', 'alle 14 Tage'], ['monatlich', 'monatlich'], ['quartal', 'je Quartal']];
 const KANAL = [['mail', 'Mail'], ['push', 'Push'], ['brief', 'Brief']];
-const REITER = [['uebersicht', 'Überblick', 'zahlen'], ['kanaele', 'Kanäle', 'marketing'], ['stadt', 'Städte', 'zentrale'], ['karte', 'Karte', 'kommentare'], ['crm', 'CRM', 'post'], ['kalender', 'Kalender', 'etagen']];
+const REITER = [['uebersicht', 'Überblick', 'reporting'], ['kanaele', 'Kanäle', 'marketing'], ['stadt', 'Städte', 'staedte'], ['karte', 'Karte', 'kundenkarte'], ['crm', 'CRM', 'crm'], ['kalender', 'Kalender', 'kalender']];
 const SICHT = { uebersicht: 'Überblick', kanaele: 'Kanäle', stadt: 'Städte', karte: 'Karte und App', crm: 'CRM-Versand', kalender: 'Aktionskalender', aktion: 'Aktion' };
 /** Kanalmotiv aus dem Kit ohne hellen Bildgrund. */
 const motiv = (id) => kanalBildSVG(id).replace(/<rect width="190" height="160" rx="8" fill="#f0eee9"\/><rect y="140" width="190" height="20" fill="#e2dfd8"\/>/, '');

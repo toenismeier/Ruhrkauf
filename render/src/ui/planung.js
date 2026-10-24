@@ -12,7 +12,7 @@ const m1 = (v) => (v < 0 ? '−' : '') + (Math.abs(v) / 1e6).toLocaleString('de-
 const rolle = { haus: 'Hausleitungen', hauscluster: 'Clusterleitungen', bereich: 'Bereichsleitungen' };
 const FORMATNAME = { warenhaus: 'Hartwig', sport: 'Hartwig Sport', schwester: 'Volkskauf', outlet: 'FUNDUS' };
 const EBENE = { konzern: 'Konzern', format: 'Format', region: 'Region', hauscluster: 'Hauscluster', haus: 'Haus', warengruppe: 'Warengruppe' };
-const REITER = [['assistent', 'Planung', 'leitung'], ['report', 'Reporting', 'zahlen'], ['forecast', 'Forecast', 'finanzen'], ['bonus', 'Boni', 'personal']];
+const REITER = [['assistent', 'Planung', 'planung'], ['report', 'Reporting', 'reporting'], ['forecast', 'Forecast', 'forecast'], ['bonus', 'Boni', 'boni']];
 const tonV = (v) => (v < 0 ? 'schlecht' : '');
 
 export function planungModul(ctx) {

@@ -1218,3 +1218,8 @@ body.spielende-aktiv { overflow: hidden; }
 .hw-boden > .hw-rumpf > .hw-gross:first-child { margin-top: 0; padding-top: 18px; }
 /* Startbildschirm: Stand des Pakets (Ummo 24.10.2026). */
 .hw-g6-stand { margin: 6px 0 0; font: var(--hw-t-klein); color: var(--leise); font-variant-numeric: tabular-nums; }
+/* P4: gerenderte Illustrationen in Reitern und Menü (render/illustrationen). */
+.hw-ill { display: block; object-fit: contain; }
+.hw-reiter > button > .hw-ill { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); width: 40px; height: 34px; }
+[data-sym] > .hw-ill { width: 100%; height: 100%; }
+.hw-kanalbild { width: 100%; height: 100%; object-fit: contain; }

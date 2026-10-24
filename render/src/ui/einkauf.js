@@ -28,8 +28,8 @@ const DETAIL_EXTRA = [['umsatzWoche', 'Umsatz letzte Woche', 'eur'], ['bestandEk
 /** Ampel als Farbe des Werts (kein Punkt, keine Pille): Rot handeln, Gelb beobachten, Grün ohne Farbe. */
 const TON = { rot: 'schlecht', gelb: 'achtung' };
 /** Reiterleiste unten (Einkauf-Bereiche). */
-const REITER = [['uebersicht', 'Übersicht', 'zahlen'], ['freigaben', 'Freigaben', 'post'], ['eigenmarken', 'Marken', 'sortiment'],
-  ['merchandise', 'Saison', 'ware'], ['allokation', 'Allokation', 'etagen'], ['reduzierungKalender', 'Reduzierung', 'kosten']];
+const REITER = [['uebersicht', 'Übersicht', 'ware'], ['freigaben', 'Freigaben', 'freigaben'], ['eigenmarken', 'Marken', 'marken'],
+  ['merchandise', 'Saison', 'saison'], ['allokation', 'Allokation', 'allokation'], ['reduzierungKalender', 'Reduzierung', 'reduzierung']];
 
 export function einkaufModul(ctx) {
   const { q } = ctx;
