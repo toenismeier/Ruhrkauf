@@ -2186,6 +2186,8 @@ body.spielende-aktiv { overflow: hidden; }
 .hw-app .app-namenswahl input { display: block; width: 100%; height: 40px; margin-top: 6px; padding: 0 12px; border: 0; border-radius: var(--hw-radius); background: var(--feld); color: var(--text); font: var(--hw-t-text); text-transform: none; box-shadow: inset 0 0 0 1.33px var(--feldlinie); }
 /* Boden unter dem Fenster: erste Kennzahl nicht direkt an der Kante. */
 .hw-boden > .hw-rumpf > .hw-gross:first-child { margin-top: 0; padding-top: 18px; }
+/* Startbildschirm: Stand des Pakets (Ummo 24.10.2026). */
+.hw-g6-stand { margin: 6px 0 0; font: var(--hw-t-klein); color: var(--leise); font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -2277,7 +2279,7 @@ body.spielende-aktiv { overflow: hidden; }
 <div id="start" class="hw hw-g6" data-bereich="betrieb">
   <div class="hw-grund"></div>
   <div class="hw-g6-start">
-    <header class="hw-g6-startkopf"><span class="hw-g6-logo" data-sym="logo"></span><h1>Hartwig</h1><p>Warenhaus und Hartwig Sport · Turnaround</p></header>
+    <header class="hw-g6-startkopf"><span class="hw-g6-logo" data-sym="logo"></span><h1>Hartwig</h1><p>Warenhaus und Hartwig Sport · Turnaround</p><p id="startstand" class="hw-g6-stand"></p></header>
     <div class="hw-sprecher hw-g6-startsprecher" role="note"><div class="hw-sprecher-text"><span>Übernimm die Warenhausgruppe. Wähle zuerst eine Ausgangslage, danach Schwierigkeit und Startstadt.</span></div></div>
     <div id="startauswahl">
       <div class="hw-rumpf hw-g6-fortsetzen"><button id="fortsetzen" class="hw-knopf breit" type="button" hidden>Fortsetzen</button></div>
@@ -163699,7 +163701,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "1e2f2be" : "Entwicklung";
+  var version = () => true ? "17847cb" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -183981,6 +183983,14 @@ void main() {
     const gewaehlt = stufen.find((x2) => x2.id === startWahl.schwierigkeit) ?? stufen[0];
     stufenWahl.innerHTML = stufen.length ? seg(stufen.map((x2) => [x2.id, x2.name]), gewaehlt.id, (id) => `data-v="${esc(id)}"`) + `<p class="hw-lese hw-g6-stufentext">${esc(gewaehlt.beschreibung)}</p>` : "";
   }
+  (() => {
+    const el2 = $2("startstand");
+    if (!el2) return;
+    const iso = true ? "2026-10-24T19:35:49.220Z" : null;
+    const v2 = true ? "17847cb" : "Entwicklung";
+    const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
+    el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
+  })();
   function startZeigen() {
     $2("startstadt").innerHTML = STADTLISTE.map((q3) => `<option${q3.name === startWahl.stadt ? " selected" : ""}>${q3.name}</option>`).join("");
     $2("startseed").value = startWahl.seed;

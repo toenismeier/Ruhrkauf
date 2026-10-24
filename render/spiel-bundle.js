@@ -161393,7 +161393,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "1e2f2be" : "Entwicklung";
+  var version = () => true ? "17847cb" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -181675,6 +181675,14 @@ void main() {
     const gewaehlt = stufen.find((x2) => x2.id === startWahl.schwierigkeit) ?? stufen[0];
     stufenWahl.innerHTML = stufen.length ? seg(stufen.map((x2) => [x2.id, x2.name]), gewaehlt.id, (id) => `data-v="${esc(id)}"`) + `<p class="hw-lese hw-g6-stufentext">${esc(gewaehlt.beschreibung)}</p>` : "";
   }
+  (() => {
+    const el2 = $2("startstand");
+    if (!el2) return;
+    const iso = true ? "2026-10-24T19:35:49.220Z" : null;
+    const v2 = true ? "17847cb" : "Entwicklung";
+    const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
+    el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
+  })();
   function startZeigen() {
     $2("startstadt").innerHTML = STADTLISTE.map((q3) => `<option${q3.name === startWahl.stadt ? " selected" : ""}>${q3.name}</option>`).join("");
     $2("startseed").value = startWahl.seed;
