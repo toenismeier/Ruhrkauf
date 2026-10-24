@@ -1596,9 +1596,9 @@
     return n3 ? a2 / n3 : 0;
   }
   function markenKarte(s2, m) {
-    const kz2 = s2.einkauf.markenKpi[m.id] ?? { u: [], r: [] };
-    const u13 = kz2.u.slice(-13).reduce((a2, b4) => a2 + b4, 0);
-    const r13 = kz2.r.slice(-13).reduce((a2, b4) => a2 + b4, 0);
+    const kz = s2.einkauf.markenKpi[m.id] ?? { u: [], r: [] };
+    const u13 = kz.u.slice(-13).reduce((a2, b4) => a2 + b4, 0);
+    const r13 = kz.r.slice(-13).reduce((a2, b4) => a2 + b4, 0);
     const gesamt13 = s2.einkauf.eigenUmsatz.slice(-13).reduce((a2, b4) => a2 + b4, 0);
     const p2 = passungSchnitt(s2, m);
     const hinweise = [];
@@ -5865,10 +5865,10 @@
   var leerErgebnis = () => ({ sendungen: 0, versendet: 0, geoeffnet: 0, eingeloest: 0, umsatzEingeloest: 0, mehrumsatz: 0, mitnahme: 0, rabattkosten: 0, versandkosten: 0, abmeldungen: 0 });
   var regionen1 = () => ({ Nord: 1, Ost: 1, West: 1, Mitte: 1, S\u00FCd: 1 });
   function startKampagnen() {
-    const k5 = (id, name2, segment2, kanal, angebot, frequenz, start = 0) => ({
+    const k5 = (id, name2, segment, kanal, angebot, frequenz, start = 0) => ({
       id,
       name: name2,
-      segment: segment2,
+      segment,
       kanal,
       angebot,
       frequenz,
@@ -15382,12 +15382,12 @@
     e.eigenUmsatz.push(eur(gesamt));
     if (e.eigenUmsatz.length > 52) e.eigenUmsatz.splice(0, e.eigenUmsatz.length - 52);
     for (const m of s2.eigenmarken.marken) {
-      const kz2 = (_b = e.markenKpi)[_c = m.id] ?? (_b[_c] = { u: [], r: [] });
-      kz2.u.push(eur(markenU[m.id] ?? 0));
-      kz2.r.push(eur(markenR[m.id] ?? 0));
-      if (kz2.u.length > 52) {
-        kz2.u.splice(0, kz2.u.length - 52);
-        kz2.r.splice(0, kz2.r.length - 52);
+      const kz = (_b = e.markenKpi)[_c = m.id] ?? (_b[_c] = { u: [], r: [] });
+      kz.u.push(eur(markenU[m.id] ?? 0));
+      kz.r.push(eur(markenR[m.id] ?? 0));
+      if (kz.u.length > 52) {
+        kz.u.splice(0, kz.u.length - 52);
+        kz.r.splice(0, kz.r.length - 52);
       }
     }
     return markenU;
@@ -40081,9 +40081,9 @@
       normals.push(0, 0, 1);
       uvs.push(0.5, 0.5);
       for (let s2 = 0, i = 3; s2 <= segments; s2++, i += 3) {
-        const segment2 = thetaStart + s2 / segments * thetaLength;
-        vertex2.x = radius * Math.cos(segment2);
-        vertex2.y = radius * Math.sin(segment2);
+        const segment = thetaStart + s2 / segments * thetaLength;
+        vertex2.x = radius * Math.cos(segment);
+        vertex2.y = radius * Math.sin(segment);
         vertices.push(vertex2.x, vertex2.y, vertex2.z);
         normals.push(0, 0, 1);
         uv.x = (vertices[i] / radius + 1) / 2;
@@ -41756,9 +41756,9 @@
       const uv = new Vector2();
       for (let j4 = 0; j4 <= phiSegments; j4++) {
         for (let i = 0; i <= thetaSegments; i++) {
-          const segment2 = thetaStart + i / thetaSegments * thetaLength;
-          vertex2.x = radius * Math.cos(segment2);
-          vertex2.y = radius * Math.sin(segment2);
+          const segment = thetaStart + i / thetaSegments * thetaLength;
+          vertex2.x = radius * Math.cos(segment);
+          vertex2.y = radius * Math.sin(segment);
           vertices.push(vertex2.x, vertex2.y, vertex2.z);
           normals.push(0, 0, 1);
           uv.x = (vertex2.x / outerRadius + 1) / 2;
@@ -41770,11 +41770,11 @@
       for (let j4 = 0; j4 < phiSegments; j4++) {
         const thetaSegmentLevel = j4 * (thetaSegments + 1);
         for (let i = 0; i < thetaSegments; i++) {
-          const segment2 = i + thetaSegmentLevel;
-          const a2 = segment2;
-          const b4 = segment2 + thetaSegments + 1;
-          const c = segment2 + thetaSegments + 2;
-          const d4 = segment2 + 1;
+          const segment = i + thetaSegmentLevel;
+          const a2 = segment;
+          const b4 = segment + thetaSegments + 1;
+          const c = segment + thetaSegments + 2;
+          const d4 = segment + 1;
           indices.push(a2, b4, d4);
           indices.push(b4, c, d4);
         }
@@ -51291,10 +51291,10 @@
     ctx.S.add(prismoid(poly2, y2 + 0.1, G3 * 0.8, [0, hb2 * 0.9 - 0.01, 0, hb2 * 0.9 - 0.01]), dachF);
     F3.profil(kontur(1.06, 1.06), uc, y2, -0.42, 0.06, c.orn, 10);
     F3.profil(kontur(1, 1), uc, y2, -0.36, 0.14, c.wand, 10);
-    const ring3 = new three_module_exports.CylinderGeometry(0.62, 0.62, 0.08, 16);
-    ring3.rotateX(Math.PI / 2);
-    ring3.translate(uc, y2 + G3 * 0.62, 0.17);
-    F3.geo(ring3, c.orn);
+    const ring4 = new three_module_exports.CylinderGeometry(0.62, 0.62, 0.08, 16);
+    ring4.rotateX(Math.PI / 2);
+    ring4.translate(uc, y2 + G3 * 0.62, 0.17);
+    F3.geo(ring4, c.orn);
     const gl = new three_module_exports.CylinderGeometry(0.46, 0.46, 0.08, 16);
     gl.rotateX(Math.PI / 2);
     gl.translate(uc, y2 + G3 * 0.62, 0.2);
@@ -53835,14 +53835,14 @@
       if (moeglich.length) nimmZelle(e, moeglich[0], "1a");
       else zuB.push(e);
     }
-    const kx = kF - 0.5, kz2 = lF - 0.5;
+    const kx = kF - 0.5, kz = lF - 0.5;
     for (const e of [...innen.filter((x2) => x2.lage === "b"), ...zuB, ...innen.filter((x2) => x2.lage === "stadtteil")]) {
       const l = [];
       for (let i = 0; i < nx; i++) for (let j4 = 0; j4 < nz; j4++) {
         if (!zelleFrei(E9, i, j4) || !zulassig(e, i, j4) || i === kF - 1 || i === kF || j4 === lF - 1 || j4 === lF) continue;
-        const dd = wurzelSumme3(i + 0.5 - kx, j4 + 0.5 - kz2);
+        const dd = wurzelSumme3(i + 0.5 - kx, j4 + 0.5 - kz);
         if (dd < (e.lage === "stadtteil" ? 2.5 : 1.2) || dd > (e.lage === "stadtteil" ? 6.5 : 4)) continue;
-        if (e.lage === "stadtteil" && Math.max(Math.abs(i - kx), Math.abs(j4 - kz2)) <= 1.5) continue;
+        if (e.lage === "stadtteil" && Math.max(Math.abs(i - kx), Math.abs(j4 - kz)) <= 1.5) continue;
         const anHaupt = istHaupt(E9.zTyp[i + 1]) || istHaupt(E9.xTyp[j4 + 1]) || istHaupt(E9.zTyp[i]) || istHaupt(E9.xTyp[j4]);
         const nachbar = [...E9.einkaufZellen].some((s2) => {
           const [a2, b4] = s2.split(",").map(Number);
@@ -53855,7 +53855,7 @@
       else {
         const ausweich = [];
         for (let i = 0; i < nx; i++) for (let j4 = 0; j4 < nz; j4++)
-          if (zelleFrei(E9, i, j4) && zulassig(e, i, j4) && !(e.lage === "stadtteil" && Math.max(Math.abs(i - kx), Math.abs(j4 - kz2)) <= 1.5)) ausweich.push({ i, j: j4, ecke: "+x+z" });
+          if (zelleFrei(E9, i, j4) && zulassig(e, i, j4) && !(e.lage === "stadtteil" && Math.max(Math.abs(i - kx), Math.abs(j4 - kz)) <= 1.5)) ausweich.push({ i, j: j4, ecke: "+x+z" });
         if (ausweich.length) {
           const ab = (q2) => Math.abs(q2.i - kF) + Math.abs(q2.j - lF);
           ausweich.sort(e.lage === "stadtteil" ? (a2, b4) => Math.abs(ab(a2) - 4.5) - Math.abs(ab(b4) - 4.5) : (a2, b4) => ab(a2) - ab(b4));
@@ -56768,8 +56768,8 @@ void main() {
       const [cx2, cz2] = sx.welt(Lx * 0.2 + 6.4, 3.3);
       container(Z2, cx2, cz2, Math.PI / 2, "#5b8f5a");
       const ku = Math.min(4, sx.L / 2);
-      const [kx, kz2] = sx.welt(ku, 3.2);
-      Z2.top = Math.max(Z2.top, kran(Z2, kx, kz2, k5.hoehe + 9, Math.min(32, k5.w * 0.6), Math.PI * 0.92));
+      const [kx, kz] = sx.welt(ku, 3.2);
+      Z2.top = Math.max(Z2.top, kran(Z2, kx, kz, k5.hoehe + 9, Math.min(32, k5.w * 0.6), Math.PI * 0.92));
       const he = haupt(), s2 = seiten4[he.seite];
       aufsteller(Z2, s2, he.u + (he.breite ?? 4) / 2 + 1, 2.2, "Ge\xF6ffnet", "#ffffff", "#3f7d56");
     }
@@ -58299,10 +58299,10 @@ void main() {
         const [gw, gd] = mass(la - 0.6, 2);
         box(gw, 0.5, gd, x2, y2 + 0.6, z6, o4.alt ? F.glasAlt : F.glas);
         merke3("lichtband", x2, z6, w2, d4, 0.85);
-        const [kx, kz2] = pos(aM + la / 2 + 1.6, b4), [kw2, kd] = mass(1.4, 1.4);
-        if (frei6(kx, kz2, kw2, kd, 0.3)) {
-          if (!fern) box(kw2, 0.55, kd, kx, y2 + 0.27, kz2, F.dunkel);
-          merke3("rwa", kx, kz2, kw2, kd, 0.55);
+        const [kx, kz] = pos(aM + la / 2 + 1.6, b4), [kw2, kd] = mass(1.4, 1.4);
+        if (frei6(kx, kz, kw2, kd, 0.3)) {
+          if (!fern) box(kw2, 0.55, kd, kx, y2 + 0.27, kz, F.dunkel);
+          merke3("rwa", kx, kz, kw2, kd, 0.55);
         }
       }
     }
@@ -59482,30 +59482,30 @@ void main() {
         s2.q(u - 2.4, u + 2.4, Hb + 3, Hb + 3.3, -0.2, 1.6, heller(putz2, 0.04));
       }
     }
-    const ring3 = (rad3, y0, y1, f13) => viertelzylinder2(S, cx, cz, rad3, y0, y1, f13, 16);
-    ring3(R11 - rueck, 0.55, 4.3, GLAS_TUER);
-    ring3(R11 + 0.06, 0, 0.55, "#3b3f44");
-    ring3(R11 + 0.04, 4.3, EG2, putz2);
+    const ring4 = (rad3, y0, y1, f13) => viertelzylinder2(S, cx, cz, rad3, y0, y1, f13, 16);
+    ring4(R11 - rueck, 0.55, 4.3, GLAS_TUER);
+    ring4(R11 + 0.06, 0, 0.55, "#3b3f44");
+    ring4(R11 + 0.04, 4.3, EG2, putz2);
     for (let k5 = 0; k5 <= 5; k5++) {
       const a2 = k5 / 5 * Math.PI / 2;
       S.box(0.12, 3.8, 0.12, cx + Math.sin(a2) * (R11 - rueck + 0.06), 2.4, cz + Math.cos(a2) * (R11 - rueck + 0.06), RAHMEN3);
     }
-    ring3(R11 + 2.4, 4.6, 4.84, "#f4f1ea");
-    ring3(R11 + 2.44, 4.67, 4.77, ROT2);
+    ring4(R11 + 2.4, 4.6, 4.84, "#f4f1ea");
+    ring4(R11 + 2.44, 4.67, 4.77, ROT2);
     for (let k5 = 0; k5 < nOG; k5++) {
       const y0 = EG2 + k5 * GH;
-      ring3(R11 + 0.22, y0, y0 + 1.75, brF);
-      ring3(R11 + 0.32, y0 + 1.75, y0 + 1.9, heller(putz2, 0.03));
-      ring3(R11 + 0.05, y0 + 1.9, y0 + GH - 0.3, GLAS2);
-      ring3(R11 + 0.1, y0 + GH - 0.3, y0 + GH, brF);
+      ring4(R11 + 0.22, y0, y0 + 1.75, brF);
+      ring4(R11 + 0.32, y0 + 1.75, y0 + 1.9, heller(putz2, 0.03));
+      ring4(R11 + 0.05, y0 + 1.9, y0 + GH - 0.3, GLAS2);
+      ring4(R11 + 0.1, y0 + GH - 0.3, y0 + GH, brF);
       for (let j4 = 1; j4 < 8; j4++) {
         const a2 = j4 / 8 * Math.PI / 2;
         S.box(0.1, GH - 2.2, 0.1, cx + Math.sin(a2) * (R11 + 0.07), y0 + 1.9 + (GH - 2.2) / 2, cz + Math.cos(a2) * (R11 + 0.07), "#e9eef0");
       }
     }
-    ring3(R11 + 0.12, Hb, Hb + 1, brF);
-    ring3(R11 + 0.25, Hb + 1, Hb + 1.15, heller(putz2, 0.04));
-    ring3(R11 - 0.25, Hb + 0.9, Hb + 1.17, KIES3);
+    ring4(R11 + 0.12, Hb, Hb + 1, brF);
+    ring4(R11 + 0.25, Hb + 1, Hb + 1.15, heller(putz2, 0.04));
+    ring4(R11 - 0.25, Hb + 0.9, Hb + 1.17, KIES3);
     S.quader(x0, Hb, z0, x0 + w2 - 0.3, Hb + 0.9, z0 + d4 - 0.3, KIES3);
     if (staffel2) {
       const sw = w2 - Math.max(6, w2 * 0.18), sd = d4 - Math.max(6, d4 * 0.2);
@@ -60175,26 +60175,26 @@ void main() {
       s2.q(0, uEnd, gy0 - 0.2, gy0, 0, 0.6, "#3a3f44");
     }
     if (rund3) {
-      const ring3 = (rad3, y0, y1, f13) => viertelzylinder2(S, cx, cz, rad3, y0, y1, f13, 16);
-      ring3(R11 - rueck, 0.55, 4.3, GLAS_TUER);
-      ring3(R11 + 0.06, 0, 0.55, "#3b3f44");
-      ring3(R11 + 0.04, 4.3, EG2, egRahmen);
+      const ring4 = (rad3, y0, y1, f13) => viertelzylinder2(S, cx, cz, rad3, y0, y1, f13, 16);
+      ring4(R11 - rueck, 0.55, 4.3, GLAS_TUER);
+      ring4(R11 + 0.06, 0, 0.55, "#3b3f44");
+      ring4(R11 + 0.04, 4.3, EG2, egRahmen);
       for (let k5 = 0; k5 <= 6; k5++) {
         const t5 = k5 / 6 * Math.PI / 2;
         S.box(0.12, 3.8, 0.12, cx + Math.sin(t5) * (R11 - rueck + 0.06), 2.4, cz + Math.cos(t5) * (R11 - rueck + 0.06), egRahmen);
       }
-      ring3(R11 + 2.3, 4.65, 4.89, san ? "#a9c6d3" : K3.p("#d9dbd8"));
-      ring3(R11 + 2.34, 4.72, 4.82, ROT2);
-      ring3(R11 + 0.08, EG2, yA, "#2e3338");
+      ring4(R11 + 2.3, 4.65, 4.89, san ? "#a9c6d3" : K3.p("#d9dbd8"));
+      ring4(R11 + 2.34, 4.72, 4.82, ROT2);
+      ring4(R11 + 0.08, EG2, yA, "#2e3338");
       if (san) {
-        ring3(R11 + 0.1, yA, gy0, "#6f93a6");
+        ring4(R11 + 0.1, yA, gy0, "#6f93a6");
         for (let k5 = 0; k5 <= 8; k5++) {
           const t5 = k5 / 8 * Math.PI / 2;
           S.box(0.12, gy0 - yA, 0.12, cx + Math.sin(t5) * (R11 + 0.16), (yA + gy0) / 2, cz + Math.cos(t5) * (R11 + 0.16), "#e6eaec");
         }
-        for (let y2 = EG2 + GH; y2 < gy0; y2 += GH) ring3(R11 + 0.22, y2 - 0.2, y2 + 0.05, "#e6eaec");
+        for (let y2 = EG2 + GH; y2 < gy0; y2 += GH) ring4(R11 + 0.22, y2 - 0.2, y2 + 0.05, "#e6eaec");
       } else rautenBogen(K3, cx, cz, R11, yA, gy0, a2, b4, h4, fleck);
-      ring3(R11 + 0.6, gy0 - 0.2, gy0, "#3a3f44");
+      ring4(R11 + 0.6, gy0 - 0.2, gy0, "#3a3f44");
     }
     if (rund3) rundKoerper(S, x0, z0, w2, d4, R11, gy0, gy1, gesF, ov);
     else S.quader(x0, gy0, z0, x0 + w2 + ov, gy1, z0 + d4 + ov, gesF);
@@ -60691,9 +60691,9 @@ void main() {
         S.quader(bx - 0.9, y2 + 0.45, bz - 0.25, bx + 0.9, y2 + 0.9, bz - 0.15, "#8a6a4a");
       }
     };
-    const kuebel = (kx, kz2) => {
-      S.quader(kx - 0.55, y2, kz2 - 0.55, kx + 0.55, y2 + 0.7, kz2 + 0.55, "#6b7177");
-      S.quader(kx - 0.45, y2 + 0.7, kz2 - 0.45, kx + 0.45, y2 + 1.15, kz2 + 0.45, waehle2(r4, ["#d96a8a", ROT2, "#7cb369"]));
+    const kuebel = (kx, kz) => {
+      S.quader(kx - 0.55, y2, kz - 0.55, kx + 0.55, y2 + 0.7, kz + 0.55, "#6b7177");
+      S.quader(kx - 0.45, y2 + 0.7, kz - 0.45, kx + 0.45, y2 + 1.15, kz + 0.45, waehle2(r4, ["#d96a8a", ROT2, "#7cb369"]));
     };
     for (const f13 of [0.12, 0.28]) {
       bank6(x2 + w2 * f13, z6 + d4 + T - 1, false);
@@ -64842,26 +64842,26 @@ void main() {
       for (let x2 = tx0; x2 < tx1; x2 += 3.5) kuebelbaum(S, r4, x2, yb, tz0 - 1.2, 0.55);
     }
     {
-      const kw2 = 3.6, kx = x0 + w2 - kw2 - 0.4, kz2 = z0 + d4 - kw2 - 0.4, kh = H + 11;
-      S.quader(kx, 0.3, kz2, kx + kw2, kh, kz2 + kw2, "#8f979c");
-      for (const s2 of seitenVon(S, kx, kz2, kw2, kw2)) {
+      const kw2 = 3.6, kx = x0 + w2 - kw2 - 0.4, kz = z0 + d4 - kw2 - 0.4, kh = H + 11;
+      S.quader(kx, 0.3, kz, kx + kw2, kh, kz + kw2, "#8f979c");
+      for (const s2 of seitenVon(S, kx, kz, kw2, kw2)) {
         for (let i = 0; i < 42; i++) {
           const u = zw(r4, 0.2, kw2 - 0.5), y2 = zw(r4, H + 0.8, kh - 0.6);
           s2.q(u, u + 0.3, y2, y2 + 0.25, 0, 0.18, waehle2(r4, BUNT));
         }
         s2.q(0, kw2, H + 0.3, H + 0.55, 0, 0.15, "#5f676e");
       }
-      S.quader(kx - 0.3, kh, kz2 - 0.3, kx + kw2 + 0.3, kh + 0.25, kz2 + kw2 + 0.3, "#5f676e");
-      S.quader(kx - 0.3, kh + 0.25, kz2 + kw2 + 0.2, kx + kw2 + 0.3, kh + 1.3, kz2 + kw2 + 0.3, "#d9dcde");
-      S.quader(kx + kw2 + 0.2, kh + 0.25, kz2 - 0.3, kx + kw2 + 0.3, kh + 1.3, kz2 + kw2 + 0.3, "#d9dcde");
+      S.quader(kx - 0.3, kh, kz - 0.3, kx + kw2 + 0.3, kh + 0.25, kz + kw2 + 0.3, "#5f676e");
+      S.quader(kx - 0.3, kh + 0.25, kz + kw2 + 0.2, kx + kw2 + 0.3, kh + 1.3, kz + kw2 + 0.3, "#d9dcde");
+      S.quader(kx + kw2 + 0.2, kh + 0.25, kz - 0.3, kx + kw2 + 0.3, kh + 1.3, kz + kw2 + 0.3, "#d9dcde");
       if (!K3.zu) {
-        const sx2 = new Seite2(S, kx, kz2, kw2, kw2, "+z");
+        const sx2 = new Seite2(S, kx, kz, kw2, kw2, "+z");
         sx2.q(1.5, 2, kh - 3.5, kh - 2.6, 0.2, 0.5, "#e04b3a");
         sx2.q(1.73, 1.77, kh - 2.6, kh, 0.3, 0.34, "#f2f1ec");
       }
-      zyl2(S, kx + kw2 / 2, kh + 0.25, kz2 + kw2 / 2, 0.08, 5, "#d9dcde", 6);
+      zyl2(S, kx + kw2 / 2, kh + 0.25, kz + kw2 / 2, 0.08, 5, "#d9dcde", 6);
       if (!K3.ohneLogo) {
-        S.box(2, 1.2, 0.05, kx + kw2 / 2 + 1.05, kh + 4.4, kz2 + kw2 / 2, HS_ROT);
+        S.box(2, 1.2, 0.05, kx + kw2 / 2 + 1.05, kh + 4.4, kz + kw2 / 2, HS_ROT);
       }
     }
     return H + 14;
@@ -72636,10 +72636,10 @@ void main() {
     const px2 = K3.x + K3.w * 0.18, zz = K3.z + K3.d + 2;
     for (let i = 0; i < 2; i++) {
       const u = px2 + i * 1;
-      const ring3 = new three_module_exports.TorusGeometry(0.52, 0.07, 5, 9, Math.PI);
-      ring3.rotateY(Math.PI / 2);
-      ring3.translate(u, 0.65, zz);
-      S.add(ring3, "#767e7d");
+      const ring4 = new three_module_exports.TorusGeometry(0.52, 0.07, 5, 9, Math.PI);
+      ring4.rotateY(Math.PI / 2);
+      ring4.translate(u, 0.65, zz);
+      S.add(ring4, "#767e7d");
     }
     if (K3.variante % 2 === 0) {
       const bx = K3.x + K3.w * 0.68, bz = zz + 0.3;
@@ -131010,10 +131010,10 @@ void main() {
     return ((h4 ^ h4 >>> 16) >>> 0) / 4294967296;
   }
   function seilscheibe(S, cx, cy, cz, rad3, achse, c) {
-    const ring3 = new three_module_exports.TorusGeometry(rad3, 0.22, 4, 18);
-    if (achse === "x") ring3.rotateY(PI6 / 2);
-    ring3.translate(cx, cy, cz);
-    S.add(ring3, c);
+    const ring4 = new three_module_exports.TorusGeometry(rad3, 0.22, 4, 18);
+    if (achse === "x") ring4.rotateY(PI6 / 2);
+    ring4.translate(cx, cy, cz);
+    S.add(ring4, c);
     for (let i = 0; i < 3; i++) {
       const g2 = new three_module_exports.BoxGeometry(2 * rad3 - 0.2, 0.14, 0.14);
       g2.rotateZ(i * PI6 / 3);
@@ -131493,10 +131493,10 @@ void main() {
       zyl5(S, 6.5, 7, 10, hx, 0, hz, rost, 14);
       zyl5(S, 5, 6.5, 22, hx, 10, hz, dunkler(rost, 0.04), 14);
       zyl5(S, 9.5, 9.5, 0.6, hx, 12, hz, "#4a4f55", 16);
-      const ring3 = new three_module_exports.TorusGeometry(7.6, 0.8, 6, 18);
-      ring3.rotateX(PI6 / 2);
-      ring3.translate(hx, 9.5, hz);
-      S.add(ring3, "#5d5650");
+      const ring4 = new three_module_exports.TorusGeometry(7.6, 0.8, 6, 18);
+      ring4.rotateX(PI6 / 2);
+      ring4.translate(hx, 9.5, hz);
+      S.add(ring4, "#5d5650");
       for (const y2 of [20, Hg]) zyl5(S, 9, 9, 0.5, hx, y2, hz, "#4a4f55", 16);
       gitterturm(S, hx - 8, hz - 8, hx + 8, hz + 8, 0.3, Hg, c.stahl, 6, 0.8);
       S.quader(hx - 4, Hg + 0.5, hz - 4, hx + 4, Hg + 9, hz + 4, dunkler(rost, 0.02));
@@ -131672,13 +131672,13 @@ void main() {
       for (const e of ecken) stab(S, e, spitze3, 0.32, c, 6);
       for (let i = 0; i < 4; i++) stab(S, ecken[i], ecken[(i + 1) % 4], 0.3, c, 6);
       for (const t5 of [0.33, 0.62]) {
-        const ring3 = ecken.map((e) => [e[0] + (spitze3[0] - e[0]) * t5, e[1] + (spitze3[1] - e[1]) * t5, e[2] + (spitze3[2] - e[2]) * t5]);
+        const ring4 = ecken.map((e) => [e[0] + (spitze3[0] - e[0]) * t5, e[1] + (spitze3[1] - e[1]) * t5, e[2] + (spitze3[2] - e[2]) * t5]);
         for (let i = 0; i < 4; i++) {
-          stab(S, ring3[i], ring3[(i + 1) % 4], 0.22, c, 6);
-          stab(S, ecken[i], ring3[(i + 1) % 4], 0.14, c, 4);
+          stab(S, ring4[i], ring4[(i + 1) % 4], 0.22, c, 6);
+          stab(S, ecken[i], ring4[(i + 1) % 4], 0.14, c, 4);
         }
         const s2 = b4 * (1 - t5) * 0.6;
-        S.quader(cx - s2 / 2, ring3[0][1] - 0.15, cz - s2 / 2, cx + s2 / 2, ring3[0][1], cz + s2 / 2, "#9aa1a7");
+        S.quader(cx - s2 / 2, ring4[0][1] - 0.15, cz - s2 / 2, cx + s2 / 2, ring4[0][1], cz + s2 / 2, "#9aa1a7");
       }
       balken(S, [cx - b4 * 0.3, y2 + 0.3, cz + b4 * 0.1], [cx + b4 * 0.15, y2 + st0 + Hp * 0.33, cz + b4 * 0.1], 1, 0.3, "#7d858c");
       balken(S, [cx + b4 * 0.15, y2 + st0 + Hp * 0.33, cz - b4 * 0.1], [cx - b4 * 0.08, y2 + st0 + Hp * 0.62, cz - b4 * 0.1], 0.9, 0.3, "#7d858c");
@@ -132556,12 +132556,12 @@ void main() {
     const y2 = 0.38;
     let H = 4;
     if (v2 === "trinkhalle") {
-      const kw2 = Math.min(6.4, W3 * 0.42), kd = 4.6, kx = W3 * 0.22, kz2 = D * 0.3, Hk = 3.2;
+      const kw2 = Math.min(6.4, W3 * 0.42), kd = 4.6, kx = W3 * 0.22, kz = D * 0.3, Hk = 3.2;
       const wand2 = waehle2(r4, ["#efe6d2", "#e7ddc6", "#dfe6dc"]), trim = waehle2(r4, ["#3f6b4f", "#2f5f8f", "#8c3b3b"]);
-      S.quader(kx, 0.3, kz2, kx + kw2, Hk, kz2 + kd, wand2);
-      S.quader(kx - 0.05, 0.3, kz2 - 0.05, kx + kw2 + 0.05, 0.8, kz2 + kd + 0.05, "#8a857b");
-      flachdach2(S, kx, kz2, kw2, kd, Hk, trim, null, "#7d7a74", 0.5);
-      for (const F3 of sichtbar2(p2, kx, kz2, kw2, kd)) {
+      S.quader(kx, 0.3, kz, kx + kw2, Hk, kz + kd, wand2);
+      S.quader(kx - 0.05, 0.3, kz - 0.05, kx + kw2 + 0.05, 0.8, kz + kd + 0.05, "#8a857b");
+      flachdach2(S, kx, kz, kw2, kd, Hk, trim, null, "#7d7a74", 0.5);
+      for (const F3 of sichtbar2(p2, kx, kz, kw2, kd)) {
         if (F3.s === "+z" || F3.L > 5.5) {
           fb(S, F3, 0.4, F3.L - 0.4, 1.1, 2.6, -0.1, 0.02, "#6f8696");
           for (let k5 = 0; k5 < 3; k5++) for (let u = 0.6; u < F3.L - 0.6; u += 0.42) fb(S, F3, u, u + 0.32, 1.25 + k5 * 0.45, 1.55 + k5 * 0.45, -0.3, -0.12, waehle2(r4, ["#e0b23a", "#c9483e", "#f4f2ec", "#2f5f8f", "#3f7d56", "#d97a3a", "#7a4a8c"]));
@@ -132575,17 +132575,17 @@ void main() {
           leuchtschild(S, scene2, F3, F3.L * 0.62, 1.9, 0, 1.6, 1.6, "Eis", "#f4f2ec", "#2f5f8f", { rand: "#c9483e" });
         }
       }
-      S.box(0.1, 1, 0.1, kx + kw2 / 2, Hk + 0.8, kz2 + kd / 2, "#5a6168");
-      getraenkekisten(S, kx + kw2 + 0.6, kz2 + 0.6, r4, y2);
-      S.box(0.5, 1.1, 0.5, kx - 0.7, y2 + 0.55, kz2 + kd + 0.5, "#c9483e");
-      zyl5(S, 0.45, 0.45, 0.06, kx + kw2 + 2.2, y2 + 1.05, kz2 + kd + 1.8, "#d9dcdf", 10);
-      zyl5(S, 0.06, 0.06, 1.05, kx + kw2 + 2.2, y2, kz2 + kd + 1.8, "#9aa1a7", 4);
-      zyl5(S, 0.45, 0.45, 0.06, kx - 2, y2 + 1.05, kz2 + kd + 2.2, "#d9dcdf", 10);
-      zyl5(S, 0.06, 0.06, 1.05, kx - 2, y2, kz2 + kd + 2.2, "#9aa1a7", 4);
-      figuren(S, r4, kx - 1, kz2 + kd + 0.8, kx + kw2 + 2, kz2 + kd + 3, 5, y2);
+      S.box(0.1, 1, 0.1, kx + kw2 / 2, Hk + 0.8, kz + kd / 2, "#5a6168");
+      getraenkekisten(S, kx + kw2 + 0.6, kz + 0.6, r4, y2);
+      S.box(0.5, 1.1, 0.5, kx - 0.7, y2 + 0.55, kz + kd + 0.5, "#c9483e");
+      zyl5(S, 0.45, 0.45, 0.06, kx + kw2 + 2.2, y2 + 1.05, kz + kd + 1.8, "#d9dcdf", 10);
+      zyl5(S, 0.06, 0.06, 1.05, kx + kw2 + 2.2, y2, kz + kd + 1.8, "#9aa1a7", 4);
+      zyl5(S, 0.45, 0.45, 0.06, kx - 2, y2 + 1.05, kz + kd + 2.2, "#d9dcdf", 10);
+      zyl5(S, 0.06, 0.06, 1.05, kx - 2, y2, kz + kd + 2.2, "#9aa1a7", 4);
+      figuren(S, r4, kx - 1, kz + kd + 0.8, kx + kw2 + 2, kz + kd + 3, 5, y2);
       baumRund(S, W3 * 0.82, D * 0.22, r4, 1, y2);
       bank2(S, W3 * 0.82, D * 0.22 + 2.4, 0, y2);
-      kioskUmfeld(S, scene2, p2, r4, W3, D, y2, { sitz: [W3 * 0.8, D * 0.62], raeder: [1.2, D - 2.4], aufsteller: [kx + kw2 * 0.3, kz2 + kd + 1.4, "Lotto \xB7 Toto"], zeitung: [kx + kw2 + 0.6, kz2 + kd + 0.6], muell: [W3 * 0.66, D * 0.5] });
+      kioskUmfeld(S, scene2, p2, r4, W3, D, y2, { sitz: [W3 * 0.8, D * 0.62], raeder: [1.2, D - 2.4], aufsteller: [kx + kw2 * 0.3, kz + kd + 1.4, "Lotto \xB7 Toto"], zeitung: [kx + kw2 + 0.6, kz + kd + 0.6], muell: [W3 * 0.66, D * 0.5] });
       westAuto(S, W3 * 0.62, D - 1.3, 0, "kombi", waehle2(r4, AUTOFARBEN2), y2);
       hecke(S, 0.4, 0.4, W3 - 0.4, 1.3, 1, y2);
       pflanzkuebel(S, 1.4, D * 0.5, r4, y2);
@@ -132748,19 +132748,19 @@ void main() {
     const { w: W3, d: D } = p2, v2 = p2.variante, WY = p2.wasserY ?? WEST_WASSER_Y;
     let H = 20;
     if (v2 === "hafen") {
-      const kz2 = D - Math.round(D * 0.46);
-      wasser(S, 0, kz2, W3, D, WY);
-      kaimauer(S, 0, kz2, W3, kz2 + 1, WY);
-      boden2(S, 0, 0, W3, kz2, "#bdb6a8", 0.3, 0.06);
-      boden2(S, 0, kz2 - 4, W3, kz2, PFLASTER, 0.3, 0.08);
-      for (let x2 = 3; x2 < W3; x2 += 8) poller(S, x2, kz2 - 0.6);
-      for (const zz of [kz2 - 1.6, kz2 - 9.6]) S.quader(0, 0.36, zz - 0.08, W3, 0.48, zz + 0.08, "#6b6f73");
+      const kz = D - Math.round(D * 0.46);
+      wasser(S, 0, kz, W3, D, WY);
+      kaimauer(S, 0, kz, W3, kz + 1, WY);
+      boden2(S, 0, 0, W3, kz, "#bdb6a8", 0.3, 0.06);
+      boden2(S, 0, kz - 4, W3, kz, PFLASTER, 0.3, 0.08);
+      for (let x2 = 3; x2 < W3; x2 += 8) poller(S, x2, kz - 0.6);
+      for (const zz of [kz - 1.6, kz - 9.6]) S.quader(0, 0.36, zz - 0.08, W3, 0.48, zz + 0.08, "#6b6f73");
       const kf = waehle2(r4, ["#e0b23a", "#2f6f8f", "#c9483e"]);
       const nk = Math.max(1, Math.floor(W3 / 34));
-      for (let i = 0; i < nk; i++) portalkran(S, W3 * ((i + 0.5) / nk) + zw(r4, -3, 3), kz2 - 5.6, r4, kf, zw(r4, -0.15, 0.2), 1);
-      westSchiff(S, scene2, W3 * 0.35, kz2 + 6.5, WY, PI6, "binnen", { ladung: "kohle", laenge: Math.min(56, W3 * 0.55), name: waehle2(r4, ["Emscherland", "Gl\xFCckauf", "Ruhrort", "Sophie"]) });
-      if (W3 > 70 && D - kz2 > 22) westSchiff(S, scene2, W3 * 0.72, kz2 + 16, WY, 0, "binnen", { ladung: "container", laenge: Math.min(50, W3 * 0.4) });
-      const sz0 = 3, sz1 = kz2 - 13, sw = Math.min(40, W3 * 0.5);
+      for (let i = 0; i < nk; i++) portalkran(S, W3 * ((i + 0.5) / nk) + zw(r4, -3, 3), kz - 5.6, r4, kf, zw(r4, -0.15, 0.2), 1);
+      westSchiff(S, scene2, W3 * 0.35, kz + 6.5, WY, PI6, "binnen", { ladung: "kohle", laenge: Math.min(56, W3 * 0.55), name: waehle2(r4, ["Emscherland", "Gl\xFCckauf", "Ruhrort", "Sophie"]) });
+      if (W3 > 70 && D - kz > 22) westSchiff(S, scene2, W3 * 0.72, kz + 16, WY, 0, "binnen", { ladung: "container", laenge: Math.min(50, W3 * 0.4) });
+      const sz0 = 3, sz1 = kz - 13, sw = Math.min(40, W3 * 0.5);
       if (sz1 - sz0 > 8) {
         backsteinHalle(S, scene2, p2, {
           x0: 3,
@@ -132788,12 +132788,12 @@ void main() {
             ftext(scene2, F3, "Silo", F3.L / 2, 31.4, 0.12, 1.1, F3.L * 0.5, "#5a6168");
           }
           H = 37;
-          balken(S, [six + siw / 2, 33, sz0 + 4 * sr], [six + siw / 2, 12, kz2 - 6], 1.6, 1.4, "#9aa1a7");
+          balken(S, [six + siw / 2, 33, sz0 + 4 * sr], [six + siw / 2, 12, kz - 6], 1.6, 1.4, "#9aa1a7");
         }
       }
       const cf = ["#c8463c", "#2f6f8f", "#e0b23a", "#3f7d56", "#7a7f85", "#d97a3a"];
-      for (let i = 0; i < 6; i++) for (let k5 = 0; k5 < 1 + (i % 3 === 0 ? 1 : 0); k5++) S.box(6, 2.5, 2.4, W3 - 6, 1.55 + k5 * 2.55, kz2 - 12 - i * 2.6, cf[(i * 2 + k5) % cf.length]);
-      westAuto(S, W3 * 0.5, kz2 - 13, 0, "lkw", "#4f7a8c");
+      for (let i = 0; i < 6; i++) for (let k5 = 0; k5 < 1 + (i % 3 === 0 ? 1 : 0); k5++) S.box(6, 2.5, 2.4, W3 - 6, 1.55 + k5 * 2.55, kz - 12 - i * 2.6, cf[(i * 2 + k5) % cf.length]);
+      westAuto(S, W3 * 0.5, kz - 13, 0, "lkw", "#4f7a8c");
     } else if (v2 === "schleuse") {
       const zc = Math.round(D * 0.45), kb = 12, kb2 = 8, mm = 3, z0 = zc - (kb + kb2 + mm) / 2, ox0 = W3 * 0.28, ox1 = W3 * 0.78;
       const WO = WY + 0.6, WU = WY - 1.6;
@@ -133005,10 +133005,10 @@ void main() {
       tg.translate(bx + bw / 2, H, (bz0 + bz1) / 2);
       S.add(tg, "#9cc0cf");
       for (let x2 = bx + 9; x2 < bx + bw - 8; x2 += 4) {
-        const ring3 = new three_module_exports.TorusGeometry(5.05, 0.12, 4, 12, PI6);
-        ring3.rotateY(PI6 / 2);
-        ring3.translate(x2, H, (bz0 + bz1) / 2);
-        S.add(ring3, "#e4e6e8");
+        const ring4 = new three_module_exports.TorusGeometry(5.05, 0.12, 4, 12, PI6);
+        ring4.rotateY(PI6 / 2);
+        ring4.translate(x2, H, (bz0 + bz1) / 2);
+        S.add(ring4, "#e4e6e8");
       }
       const tx = bx + 2, tz = bz1 - 8, tH = 28;
       S.quader(tx, 0, tz, tx + 8, tH, tz + 8, blau);
@@ -133183,10 +133183,10 @@ void main() {
     S.quader(cx - L3 / 2, yy, cz - B8 / 2, cx - L3 / 2 + t5, yy + 0.02, cz + B8 / 2, m);
     S.quader(cx + L3 / 2 - t5, yy, cz - B8 / 2, cx + L3 / 2, yy + 0.02, cz + B8 / 2, m);
     S.quader(cx - t5 / 2, yy, cz - B8 / 2, cx + t5 / 2, yy + 0.02, cz + B8 / 2, m);
-    const ring3 = new three_module_exports.TorusGeometry(B8 * 0.13, 0.12, 3, 24);
-    ring3.rotateX(PI6 / 2);
-    ring3.translate(cx, yy + 0.02, cz);
-    S.add(ring3, m);
+    const ring4 = new three_module_exports.TorusGeometry(B8 * 0.13, 0.12, 3, 24);
+    ring4.rotateX(PI6 / 2);
+    ring4.translate(cx, yy + 0.02, cz);
+    S.add(ring4, m);
     for (const s2 of [-1, 1]) {
       const x0 = cx + s2 * L3 / 2, x1 = cx + s2 * (L3 / 2 - L3 * 0.15), bz = B8 * 0.4;
       S.quader(Math.min(x0, x1), yy, cz - bz / 2, Math.max(x0, x1), yy + 0.02, cz - bz / 2 + t5, m);
@@ -133236,7 +133236,7 @@ void main() {
       const c = Math.max(4, LF / 2 - Math.sqrt(Math.max(0, ri * ri - (BF / 2 + 0.5) ** 2)));
       const BAHN = "#b8553f";
       for (const sz of [-1, 1]) S.quader(cx - c, 0.3, cz + (sz < 0 ? -rb : ri), cx + c, 0.36, cz + (sz < 0 ? -ri : rb), BAHN);
-      const ring3 = (r0, r1, f13, y2) => {
+      const ring4 = (r0, r1, f13, y2) => {
         for (const sx of [-1, 1]) {
           const g2 = new three_module_exports.RingGeometry(r0, r1, 28, 1, sx > 0 ? -PI6 / 2 : PI6 / 2, PI6);
           g2.rotateX(-PI6 / 2);
@@ -133244,10 +133244,10 @@ void main() {
           S.add(g2, f13);
         }
       };
-      ring3(ri, rb, BAHN, 0.36);
-      ring3(ri - 0.25, ri, "#f1efe9", 0.37);
+      ring4(ri, rb, BAHN, 0.36);
+      ring4(ri - 0.25, ri, "#f1efe9", 0.37);
       for (const rr5 of [ri + tr / 3, ri + 2 * tr / 3]) {
-        ring3(rr5 - 0.06, rr5 + 0.06, "#e9d6cf", 0.37);
+        ring4(rr5 - 0.06, rr5 + 0.06, "#e9d6cf", 0.37);
         for (const sz of [-1, 1]) S.quader(cx - c, 0.36, cz + sz * rr5 - 0.06, cx + c, 0.37, cz + sz * rr5 + 0.06, "#e9d6cf");
       }
       for (const sz of [-1, 1]) S.quader(cx - c, 0.36, cz + sz * (ri - 0.125) - 0.125, cx + c, 0.37, cz + sz * (ri - 0.125) + 0.125, "#f1efe9");
@@ -134118,8 +134118,8 @@ void main() {
       }
       H = Hw + h4;
     }
-    const kx = W3 * zw(r4, 0.25, 0.75), kz2 = D * 0.4;
-    S.quader(kx - 0.4, Hw, kz2 - 0.4, kx + 0.4, H + 0.8, kz2 + 0.4, "#5a5f63");
+    const kx = W3 * zw(r4, 0.25, 0.75), kz = D * 0.4;
+    S.quader(kx - 0.4, Hw, kz - 0.4, kx + 0.4, H + 0.8, kz + 0.4, "#5a5f63");
     return { hoehe: H, stil: "bergisch", farbe: wand2, geschosse: n3 };
   }
   var bergHaus = slot("slot:berg_haus", {
@@ -134830,9 +134830,9 @@ void main() {
         if (m.geometry) m.geometry.dispose();
       });
     }
-    for (const [kz2, gs] of tmp2.teile) {
-      if (!S.teile.has(kz2)) S.teile.set(kz2, []);
-      S.teile.get(kz2).push(...gs);
+    for (const [kz, gs] of tmp2.teile) {
+      if (!S.teile.has(kz)) S.teile.set(kz, []);
+      S.teile.get(kz).push(...gs);
     }
     S.anzahl += tmp2.anzahl;
     while (gruppe3.children.length) scene2.add(gruppe3.children[0]);
@@ -135516,10 +135516,10 @@ void main() {
       puppe3(lokal2(S, cx, 0.4, cz, 0), Math.sin(a2) * Rz * 0.64, Math.cos(a2) * Rz * 0.64, r4, "sport", pal, a2 + PI7);
     }
     puppe3(lokal2(S, cx, 0.7, cz, 0), 0, 0, r4, "sport", pal, PI7 * 1.25);
-    const ring3 = new three_module_exports.TorusGeometry(Rz * 0.7, 0.07, 4, 24);
-    ring3.rotateX(PI7 / 2);
-    ring3.translate(cx, WH2 - 0.5, cz);
-    S.add(ring3, "#f7e9c8");
+    const ring4 = new three_module_exports.TorusGeometry(Rz * 0.7, 0.07, 4, 24);
+    ring4.rotateX(PI7 / 2);
+    ring4.translate(cx, WH2 - 0.5, cz);
+    S.add(ring4, "#f7e9c8");
     if (scene2) haengeschild(S, scene2, "Neue Saison", cx - Rz * 0.2, 3.4, cz - Rz * 0.9, { farbe: F6AKZ[ra.v], hoehe: 0.6 });
     ra.belegt.push([cx - Rz, cz - Rz, B8, T]);
     frei6.push([cx - Rz - 0.5, cz + 0.5], [cx + 0.5, cz - Rz - 0.4]);
@@ -136245,12 +136245,12 @@ void main() {
     const setz = (i, j4, t5) => {
       if (i >= 0 && j4 >= 0 && i < nx && j4 < nz && !typ[i][j4]) typ[i][j4] = t5;
     };
-    const kx = Math.max(1, Math.min(nx - 3, Math.floor(nx / 2) - 1)), kz2 = Math.max(1, Math.min(nz - 2, Math.floor(nz / 2) - 1));
-    for (let i = kx; i < kx + 2; i++) for (let j4 = kz2; j4 < kz2 + 2; j4++) typ[i][j4] = "kern";
-    const ring3 = haus2.kette !== "schwester" && nx >= 8 && nz >= 7;
-    if (ring3) for (let i = kx - 1; i <= kx + 2; i++) for (let j4 = kz2 - 1; j4 <= kz2 + 1; j4++) setz(i, j4, "halle");
-    const gz2 = Math.min(nz - 1, kz2 + 2), gx = kx;
-    if (gz2 > kz2 + 1) for (let i = 0; i < nx; i++) setz(i, gz2, "gang");
+    const kx = Math.max(1, Math.min(nx - 3, Math.floor(nx / 2) - 1)), kz = Math.max(1, Math.min(nz - 2, Math.floor(nz / 2) - 1));
+    for (let i = kx; i < kx + 2; i++) for (let j4 = kz; j4 < kz + 2; j4++) typ[i][j4] = "kern";
+    const ring4 = haus2.kette !== "schwester" && nx >= 8 && nz >= 7;
+    if (ring4) for (let i = kx - 1; i <= kx + 2; i++) for (let j4 = kz - 1; j4 <= kz + 1; j4++) setz(i, j4, "halle");
+    const gz2 = Math.min(nz - 1, kz + 2), gx = kx;
+    if (gz2 > kz + 1) for (let i = 0; i < nx; i++) setz(i, gz2, "gang");
     for (let j4 = gz2 + 1; j4 < nz; j4++) setz(gx, j4, "gang");
     if (nz >= 5) {
       setz(0, 0, "treppe");
@@ -136263,9 +136263,9 @@ void main() {
       setz(nx - 1, 1, "treppe2");
     }
     if (nx >= 8) setz(nx - 2, 0, "wc");
-    if (ring3) typ[kx - 1][kz2] = "aufzug";
-    else setz(kx - 1, kz2, "aufzug");
-    const bl = ring3 ? [[0, kx - 1, 0, gz2], [kx + 3, nx, 0, gz2], [0, gx, gz2 + 1, nz], [gx + 1, nx, gz2 + 1, nz]] : [[0, kx, 0, gz2], [kx + 2, nx, 0, gz2], [0, gx, gz2 + 1, nz], [gx + 1, nx, gz2 + 1, nz]];
+    if (ring4) typ[kx - 1][kz] = "aufzug";
+    else setz(kx - 1, kz, "aufzug");
+    const bl = ring4 ? [[0, kx - 1, 0, gz2], [kx + 3, nx, 0, gz2], [0, gx, gz2 + 1, nz], [gx + 1, nx, gz2 + 1, nz]] : [[0, kx, 0, gz2], [kx + 2, nx, 0, gz2], [0, gx, gz2 + 1, nz], [gx + 1, nx, gz2 + 1, nz]];
     for (const [a2, b4, c, e] of bl) {
       const w2 = b4 - a2, tief2 = e - c;
       if (w2 < 6 || w2 * tief2 < 20) continue;
@@ -136275,7 +136275,7 @@ void main() {
         for (let j4 = c; j4 < e; j4++) setz(i, j4, "neben");
       }
     }
-    return { B: B8, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring: ring3, schwester: haus2.kette === "schwester" };
+    return { B: B8, T, nx, nz, typ, kx, kz, gx, gz: gz2, ring: ring4, schwester: haus2.kette === "schwester" };
   }
   function unterteilen(fl, etageNr) {
     const out = [];
@@ -136296,9 +136296,9 @@ void main() {
     return out;
   }
   function zonen(haus2, etageNr, ra) {
-    const { nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring: ring3 } = ra;
+    const { nx, nz, typ, kx, kz, gx, gz: gz2, ring: ring4 } = ra;
     let fl = unterteilen(haus2.flaechen.filter((f13) => f13.etage === etageNr && f13.qm >= 10), etageNr);
-    const blocks = ring3 ? [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 3, nx, 0, gz2, -1], [kx - 1, kx + 3, 0, kz2 - 1, -1], [0, kx - 1, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]] : [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 2, nx, 0, gz2, -1], [kx, kx + 2, 0, kz2, -1], [0, kx, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]];
+    const blocks = ring4 ? [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 3, nx, 0, gz2, -1], [kx - 1, kx + 3, 0, kz - 1, -1], [0, kx - 1, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]] : [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 2, nx, 0, gz2, -1], [kx, kx + 2, 0, kz, -1], [0, kx, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]];
     const vergeben = Array.from({ length: nx }, () => Array(nz).fill(false));
     let spuren = [];
     for (const [a2, b4, c, e, dir] of blocks) {
@@ -136442,7 +136442,7 @@ void main() {
     return { box, breite: B8, tiefe: T, zonen: zn, anzahl: tmp2.anzahl, dichte: d4, kunden, leer: kk.leer, navigation: kk.navigation };
   }
   function bauen2(S, scene2, haus2, etageNr, ra, zn, k5) {
-    const { B: B8, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring: ring3 } = ra;
+    const { B: B8, T, nx, nz, typ, kx, kz, gx, gz: gz2, ring: ring4 } = ra;
     const { ax0, az0, ax1, az1, drin, d: d4 } = k5;
     const hid = (haus2.id ?? "H").split("").reduce((a2, c) => a2 * 31 + c.charCodeAt(0), 7) >>> 0;
     const r4 = rng3(hid + etageNr * 101);
@@ -136464,8 +136464,8 @@ void main() {
     const platte4 = (x0, z0, x1, z1) => {
       if (x1 > x0 && z1 > z0) S.box(x1 - x0, 0.5, z1 - z0, (x0 + x1) / 2, -0.25, (z0 + z1) / 2, "#59626a");
     };
-    const kz0 = kz2 * R4 + 5.5, kz1 = kz2 * R4 + 8.7, kx0 = kx * R4 + 0.9, kx1 = kx * R4 + 9.3;
-    const kernDrin = drin(kx, kz2) && drin(kx + 1, kz2 + 1);
+    const kz0 = kz * R4 + 5.5, kz1 = kz * R4 + 8.7, kx0 = kx * R4 + 0.9, kx1 = kx * R4 + 9.3;
+    const kernDrin = drin(kx, kz) && drin(kx + 1, kz + 1);
     if (hatUnten && kernDrin && !ra.schwester) {
       platte4(ax0, az0, ax1, kz0);
       platte4(ax0, kz1, ax1, az1);
@@ -136542,9 +136542,9 @@ void main() {
       }
     }
     if (kernDrin && !ra.schwester) {
-      rolltreppenKern(S, kx * R4, kz2 * R4, { auf: hatOben, ab: hatUnten, dichte: d4 });
+      rolltreppenKern(S, kx * R4, kz * R4, { auf: hatOben, ab: hatUnten, dichte: d4 });
       if (!hatUnten) {
-        const L3 = lokal2(S, kx * R4 + 5, 0.06, kz2 * R4 + 7.3, 0);
+        const L3 = lokal2(S, kx * R4 + 5, 0.06, kz * R4 + 7.3, 0);
         L3.zyl(2.2, 2.2, 0.25, 0, 0, 0, "#ffffff", 16);
         L3.zyl(2.25, 2.25, 0.04, 0, 0.25, 0, "#d23c32", 16);
         for (let q2 = 0; q2 < 4; q2++) {
@@ -136559,13 +136559,13 @@ void main() {
           L3.box(0.7, 0.7, 0.7, s2, 0, 1.5, "#ece6dc");
           L3.kugel(0.5, s2, 1.15, 1.5, "#5f9a56");
         }
-        belegt2.push([kx * R4 + 2.5, kz2 * R4 + 5.2, kx * R4 + 7.5, kz2 * R4 + 9.5]);
+        belegt2.push([kx * R4 + 2.5, kz * R4 + 5.2, kx * R4 + 7.5, kz * R4 + 9.5]);
       }
     } else if (!ra.schwester) {
-      for (let i = kx; i < kx + 2; i++) for (let j4 = kz2; j4 < kz2 + 2; j4++) if (drin(i, j4)) gangZelle2(S, scene2, "halle", i, j4, ra, eg, d4, freiGang, rng3(i + j4));
+      for (let i = kx; i < kx + 2; i++) for (let j4 = kz; j4 < kz + 2; j4++) if (drin(i, j4)) gangZelle2(S, scene2, "halle", i, j4, ra, eg, d4, freiGang, rng3(i + j4));
     }
     if (kernDrin && ra.schwester) {
-      const x0 = kx * R4, z0 = kz2 * R4;
+      const x0 = kx * R4, z0 = kz * R4;
       const stufen = 12, schritt = 3 / stufen;
       S.box(9.5, 0.16, 9.5, x0 + 5, 0.08, z0 + 5, SCHWESTER_BODEN.a);
       for (let j4 = 0; j4 < stufen; j4++) {
@@ -136629,20 +136629,20 @@ void main() {
         S.box(1.8, 0.1, 0.7, ix, WANDHOEHE - 0.12, iz, "#e1dfd4");
         S.box(1.45, 0.045, 0.5, ix, WANDHOEHE - 0.18, iz, "#f2eee0");
       }
-      const kx2 = ax1 - 5, kz3 = az1 - 5.2;
-      S.box(2.6, 0.88, 0.85, kx2, 0.52, kz3, "#968f83");
-      S.box(2.8, 0.12, 0.92, kx2, 1.02, kz3, "#b6ada0");
-      S.box(0.8, 0.25, 0.42, kx2 - 0.6, 1.19, kz3, "#48565b");
-      S.box(0.3, 0.18, 0.35, kx2 + 0.55, 1.2, kz3, "#d9d0bd");
+      const kx2 = ax1 - 5, kz2 = az1 - 5.2;
+      S.box(2.6, 0.88, 0.85, kx2, 0.52, kz2, "#968f83");
+      S.box(2.8, 0.12, 0.92, kx2, 1.02, kz2, "#b6ada0");
+      S.box(0.8, 0.25, 0.42, kx2 - 0.6, 1.19, kz2, "#48565b");
+      S.box(0.3, 0.18, 0.35, kx2 + 0.55, 1.2, kz2, "#d9d0bd");
     }
-    const kassen = ra.schwester ? [{ x: B8 - 5, z: T - 3.4 }] : !eg && ring3 ? [{ x: (kx + 2.5) * R4, z: (kz2 - 1) * R4 + 4.7 }] : [];
+    const kassen = ra.schwester ? [{ x: B8 - 5, z: T - 3.4 }] : !eg && ring4 ? [{ x: (kx + 2.5) * R4, z: (kz - 1) * R4 + 4.7 }] : [];
     k5.navigation = { hindernisse: belegt2.map(([x0, z0, x1, z1]) => ({ x: x0, z: z0, w: x1 - x0, d: z1 - z0 })), kassen };
     const pool = freiZone.concat(freiGang);
     const n3 = Math.min(k5.kunden, pool.length);
     for (let q2 = 0; q2 < n3; q2++) {
       const idx = Math.floor(r4() * pool.length);
       const [fx, fz] = pool.splice(idx, 1)[0];
-      figur2(S, fx + zw(r4, -0.2, 0.2), fz + zw(r4, -0.2, 0.2), q2 * 7 + etageNr * 1e3 + 3, r4() < 0.1 ? "kind" : "kunde", { ry: Math.atan2(kx * R4 + 5 - fx, kz2 * R4 + 5 - fz) + zw(r4, -1.2, 1.2) });
+      figur2(S, fx + zw(r4, -0.2, 0.2), fz + zw(r4, -0.2, 0.2), q2 * 7 + etageNr * 1e3 + 3, r4() < 0.1 ? "kind" : "kunde", { ry: Math.atan2(kx * R4 + 5 - fx, kz * R4 + 5 - fz) + zw(r4, -1.2, 1.2) });
     }
   }
   function aktionswand(S, scene2, L3, art, r4, d4) {
@@ -136701,7 +136701,7 @@ void main() {
     }
   }
   function gangZelle2(S, scene2, t5, i, j4, ra, eg, d4, frei6, r4) {
-    const { nx, nz, kx, kz: kz2, gx, gz: gz2, ring: ring3 } = ra;
+    const { nx, nz, kx, kz, gx, gz: gz2, ring: ring4 } = ra;
     const typ = (a2, b4) => ra.typ[a2]?.[b4];
     const x2 = i * R4, z6 = j4 * R4;
     boden(S, x2, z6, R4, R4, 0, ra.schwester ? SCHWESTER_BODEN : t5 === "halle" ? HALLE : GANG, d4);
@@ -136717,7 +136717,7 @@ void main() {
       ra.belegt.push([x2, z6, x2 + 0.9, z6 + R4]);
     }
     if (t5 === "halle") {
-      const ecke = (i === kx - 1 || i === kx + 2) && j4 === kz2 - 1;
+      const ecke = (i === kx - 1 || i === kx + 2) && j4 === kz - 1;
       if (ecke && i === kx + 2) {
         if (eg) {
           infoCounter(S, x2 + 2.5, z6 + 2.4, i * 7 + j4);
@@ -136744,7 +136744,7 @@ void main() {
         if (r4() < 0.7) figur2(S, x2 + 2, z6 + 1.2, i * 13 + j4, "kunde", { y: 0.06, ry: 0, pose: "sitzen" });
         return;
       }
-      if (j4 === kz2 - 1 && (i === kx || i === kx + 1) && d4 > 0.3) {
+      if (j4 === kz - 1 && (i === kx || i === kx + 1) && d4 > 0.3) {
         const L3 = lokal2(S, x2 + 2.5, 0.06, z6 + 1.6, 0);
         L3.box(3.4, 0.3, 1.6, 0, 0, 0, "#ffffff");
         L3.box(3.46, 0.04, 1.66, 0, 0.3, 0, "#d23c32");
@@ -136759,7 +136759,7 @@ void main() {
         ra.belegt.push([x2 + 0.8, z6 + 0.6, x2 + 4.2, z6 + 2.4]);
         return;
       }
-      if (i === kx + 2 && j4 === kz2 + 1 && d4 > 0.3) {
+      if (i === kx + 2 && j4 === kz + 1 && d4 > 0.3) {
         const L3 = lokal2(S, x2 + 3.9, 0.06, z6 + 2.5, Math.PI / 2);
         L3.box(3, 0.62, 0.9, 0, 0, 0, "#ffffff");
         L3.box(3.06, 0.05, 0.96, 0, 0.62, 0, "#d23c32");
@@ -136767,7 +136767,7 @@ void main() {
         ra.belegt.push([x2 + 3.4, z6 + 1, x2 + 4.4, z6 + 4]);
         return;
       }
-      if (i === kx - 1 && j4 === kz2 + 1) {
+      if (i === kx - 1 && j4 === kz + 1) {
         const L3 = lokal2(S, x2 + 1.2, 0.06, z6 + 2.5, Math.PI / 2);
         L3.box(2.4, 0.45, 0.55, 0, 0, 0, "#b98d61");
         L3.box(2.4, 0.08, 0.55, 0, 0.45, 0, "#9c7650");
@@ -136778,7 +136778,7 @@ void main() {
         ra.belegt.push([x2 + 0.6, z6 + 0.6, x2 + 1.8, z6 + 4.4]);
         return;
       }
-      if (i === kx + 2 && j4 === kz2) {
+      if (i === kx + 2 && j4 === kz) {
         ra.belegt.push([x2, z6 + 1, x2 + 2.5, z6 + 4]);
         const L3 = lokal2(S, x2 + 3.8, 0.06, z6 + 4.2, Math.PI / 2);
         L3.box(0.5, 2.2, 0.25, 0, 0, 0, "#2a3540");
@@ -136813,7 +136813,7 @@ void main() {
       }
       frei6.length = Math.max(0, frei6.length - 2);
     }
-    if (i === gx && j4 === gz2 && !ring3) {
+    if (i === gx && j4 === gz2 && !ring4) {
       const L3 = lokal2(S, x2 + 2.5, 0.06, z6 + 2.5, 0);
       L3.zyl(0.9, 0.9, 0.5, 0, 0, 0, "#ece6dc", 10);
       L3.kugel(0.8, 0, 1.2, 0, "#5f9a56");
@@ -137001,8 +137001,8 @@ void main() {
     const { ax0, az0, ax1, az1, d: d4 } = k5;
     const B8 = ax1 - ax0, T = az1 - az0, cx = (ax0 + ax1) / 2, cz = (az0 + az1) / 2;
     const gold = "#b8955a", dunkel4 = "#284139", stein = "#eee3d1";
-    const ring3 = Math.min(B8, T) > 18;
-    if (ring3) {
+    const ring4 = Math.min(B8, T) > 18;
+    if (ring4) {
       for (const dx of [-1, 1]) for (const dz of [-1, 1]) S.box(0.55, 3.8, 0.55, cx + dx * 5.2, 1.9, cz + dz * 5.2, gold);
       for (const dz of [-1, 1]) S.box(10.5, 0.22, 0.3, cx, 3.65, cz + dz * 5.2, gold);
       for (const dx of [-1, 1]) S.box(0.3, 0.22, 10.5, cx + dx * 5.2, 3.65, cz, gold);
@@ -141135,11 +141135,11 @@ void main() {
         S.box(1.6, 0.7, 0.9, bx2, 0.65, pz6 + pd + 1.2, "#8a6a4a");
         for (let k5 = 0; k5 < 3; k5++) S.box(0.4, 0.35, 0.4, bx2 - 0.5 + k5 * 0.5, 1.15, pz6 + pd + 1.2, ["#e46b8a", "#f2c14e", "#e8604c", "#b06bc4"][(i + k5) % 4]);
       }
-      const kx = x0 + w2 - 9, kz2 = z0 + d4 - 8;
-      S.quader(kx, 0.3, kz2, kx + 5, 3, kz2 + 4, "#e9e6de");
-      fb2(S, RZ(kx, kz2, 5, 4), 0.4, 4.6, 1, 2.5, 0, 0.06, GLAS_HELL4);
-      S.quader(kx - 0.6, 3, kz2 - 0.6, kx + 5.6, 3.35, kz2 + 4.8, "#c8463c");
-      ftext2(scene2, RZ(kx, kz2, 5, 4), "Zeitungen", 2.5, 2.75, 0.85, 0.35, 4.6, "#2a3a4a");
+      const kx = x0 + w2 - 9, kz = z0 + d4 - 8;
+      S.quader(kx, 0.3, kz, kx + 5, 3, kz + 4, "#e9e6de");
+      fb2(S, RZ(kx, kz, 5, 4), 0.4, 4.6, 1, 2.5, 0, 0.06, GLAS_HELL4);
+      S.quader(kx - 0.6, 3, kz - 0.6, kx + 5.6, 3.35, kz + 4.8, "#c8463c");
+      ftext2(scene2, RZ(kx, kz, 5, 4), "Zeitungen", 2.5, 2.75, 0.85, 0.35, 4.6, "#2a3a4a");
       brunnen(S, x0 + w2 - 7, pz6 + 4, 2.6, { duesen: 4 });
       for (let i = 0; i < 2; i++) baum(S, x0 + w2 - 4 - i * 6, z0 + 3, r4, 1);
       return { hoehe: H2 + 1.6 };
@@ -141334,9 +141334,9 @@ void main() {
     boden3(S, x0, z0, x0 + w2, z0 + d4, "#b3afa5", 0.3, 0.05);
     const ziegel = "#a8664f";
     if (v2 === "kohle") {
-      const kw2 = Math.min(30, w2 * 0.45), kd = 20, kx = x0 + 4, kz2 = z0 + 4, Hk = 18;
-      S.quader(kx, 0, kz2, kx + kw2, Hk, kz2 + kd, ziegel);
-      for (const F3 of [RZ(kx, kz2, kw2, kd), RX(kx, kz2, kw2, kd)]) {
+      const kw2 = Math.min(30, w2 * 0.45), kd = 20, kx = x0 + 4, kz = z0 + 4, Hk = 18;
+      S.quader(kx, 0, kz, kx + kw2, Hk, kz + kd, ziegel);
+      for (const F3 of [RZ(kx, kz, kw2, kd), RX(kx, kz, kw2, kd)]) {
         for (const u of achsen3(0, F3.L, 4, 1.2)) {
           fb2(S, F3, u - 1, u + 1, 2, Hk - 3, 0, 0.06, "#56636c");
           for (let y2 = 4; y2 < Hk - 3; y2 += 2.5) fb2(S, F3, u - 1, u + 1, y2 - 0.05, y2 + 0.05, 0, 0.1, "#d9d4c8");
@@ -141345,10 +141345,10 @@ void main() {
         fb2(S, F3, -0.2, F3.L + 0.2, Hk - 1.2, Hk, -0.2, 0.3, "#9e5c47");
       }
       const g2 = dachProfil(kw2 + 0.6, kd + 0.6, 3, 2.5, "x");
-      g2.translate(kx + kw2 / 2, Hk, kz2 + kd / 2);
+      g2.translate(kx + kw2 / 2, Hk, kz + kd / 2);
       S.add(g2, "#7d8287");
-      S.quader(kx + kw2 * 0.3, Hk + 3, kz2 + kd * 0.4, kx + kw2 * 0.7, Hk + 5, kz2 + kd * 0.6, "#9aa1a7");
-      const bxx = kx + kw2 + 2, bzz = kz2 + 2, Hb = 26;
+      S.quader(kx + kw2 * 0.3, Hk + 3, kz + kd * 0.4, kx + kw2 * 0.7, Hk + 5, kz + kd * 0.6, "#9aa1a7");
+      const bxx = kx + kw2 + 2, bzz = kz + 2, Hb = 26;
       S.quader(bxx, 0, bzz, bxx + 10, Hb, bzz + 12, "#c7c3b8");
       for (const F3 of [RZ(bxx, bzz, 10, 12), RX(bxx, bzz, 10, 12)]) for (let y2 = 3; y2 < Hb; y2 += 3) fb2(S, F3, -0.05, F3.L + 0.05, y2 - 0.06, y2 + 0.06, 0, 0.05, "#aaa69c");
       fb2(S, RX(bxx, bzz, 10, 12), 3, 9, Hb - 5, Hb - 2, 0, 0.06, "#56636c");
@@ -141366,7 +141366,7 @@ void main() {
       const hg2 = new three_module_exports.ConeGeometry(5, 3.5, 6);
       hg2.translate(fx - 12, 2.05, fzz + 4);
       S.add(hg2, "#353638");
-      schornstein2(S, kx + kw2 * 0.5, kz2 + 2 + kd + 4 < z0 + d4 - 12 ? kz2 + kd + 4 : kz2 - 0.5 + 3, 80, 3.6, 2.2, ziegel, { leiter: true });
+      schornstein2(S, kx + kw2 * 0.5, kz + 2 + kd + 4 < z0 + d4 - 12 ? kz + kd + 4 : kz - 0.5 + 3, 80, 3.6, 2.2, ziegel, { leiter: true });
       fernwaerme(S, [[x0 + 2, z0 + d4 - 2.5], [x0 + w2 - 18, z0 + d4 - 2.5]], 3.2);
       dehnbogen(S, x0 + w2 - 18, z0 + d4 - 2.5, 8, 3.2, 4.5);
       fernwaerme(S, [[x0 + w2 - 10, z0 + d4 - 2.5], [x0 + w2 - 2, z0 + d4 - 2.5]], 3.2);
@@ -141621,9 +141621,9 @@ void main() {
       S.add(g2, "#9fc3cf");
       for (let i = 0; i <= 6; i++) {
         const t5 = bz2 + 0.2 + i * (bd2 + 1) / 6;
-        const ring3 = new three_module_exports.TorusGeometry(pb / 2 + 0.05, 0.12, 4, 16, PI9);
-        ring3.translate(bx2 + mitte, H2 + 0.2, t5);
-        S.add(ring3, "#e9ecee");
+        const ring4 = new three_module_exports.TorusGeometry(pb / 2 + 0.05, 0.12, 4, 16, PI9);
+        ring4.translate(bx2 + mitte, H2 + 0.2, t5);
+        S.add(ring4, "#e9ecee");
       }
       const FZ2 = RZ(bx2, bz2, bw2, bd2);
       ftext2(scene2, FZ2, p2.name ?? "Markt-Passage", mitte, H2 - 0.6, 0.65, 1, pb * 2.2, "#1f3a5f");
@@ -141884,15 +141884,15 @@ void main() {
       S.add(g2, "#8fbf6a");
     }
     if (v2 === "kiosk") {
-      const kx = x0 + w2 - 8, kz2 = z0 + d4 - 7;
-      S.quader(kx, 0.3, kz2, kx + 5.5, 3, kz2 + 4, "#f2efe6");
-      fb2(S, RZ(kx, kz2, 5.5, 4), 0.5, 5, 1.2, 2.4, 0, 0.06, GLAS_HELL4);
-      fb2(S, RZ(kx, kz2, 5.5, 4), 0.4, 5.1, 1.1, 1.2, 0, 0.6, "#d8d3c6");
-      S.quader(kx - 0.5, 3, kz2 - 0.4, kx + 6, 3.3, kz2 + 5.2, "#c8463c");
-      ftext2(scene2, RZ(kx, kz2, 5.5, 4), "Imbiss \xB7 Bratwurst", 2.75, 2.75, 1.25, 0.32, 5.2, "#ffffff", "#c8463c");
+      const kx = x0 + w2 - 8, kz = z0 + d4 - 7;
+      S.quader(kx, 0.3, kz, kx + 5.5, 3, kz + 4, "#f2efe6");
+      fb2(S, RZ(kx, kz, 5.5, 4), 0.5, 5, 1.2, 2.4, 0, 0.06, GLAS_HELL4);
+      fb2(S, RZ(kx, kz, 5.5, 4), 0.4, 5.1, 1.1, 1.2, 0, 0.6, "#d8d3c6");
+      S.quader(kx - 0.5, 3, kz - 0.4, kx + 6, 3.3, kz + 5.2, "#c8463c");
+      ftext2(scene2, RZ(kx, kz, 5.5, 4), "Imbiss \xB7 Bratwurst", 2.75, 2.75, 1.25, 0.32, 5.2, "#ffffff", "#c8463c");
       for (let i = 0; i < 2; i++) {
-        S.box(0.7, 1.1, 0.7, kx + 1.2 + i * 2.6, 0.85, kz2 + 6, "#e9e6de");
-        schirm(S, kx + 1.2 + i * 2.6, kz2 + 6, 1.2, "#e8c547");
+        S.box(0.7, 1.1, 0.7, kx + 1.2 + i * 2.6, 0.85, kz + 6, "#e9e6de");
+        schirm(S, kx + 1.2 + i * 2.6, kz + 6, 1.2, "#e8c547");
       }
     }
     if (v2 === "bauzaun") {
@@ -143227,9 +143227,9 @@ void main() {
       const rahmen2 = l.rahmen ?? o4.rahmen;
       if ((l.typ === "fenster" || l.typ === "laden") && rahmen2 && LOD2.stufe !== "fern") {
         const k5 = l.kreis ? 0.09 : Math.min(0.12, (l.u1 - l.u0) * 0.12);
-        const ring3 = pfad3(new three_module_exports.Shape(), l, 0);
-        ring3.holes.push(pfad3(new three_module_exports.Path(), l.kreis ? { kreis: [l.kreis[0], l.kreis[1], l.kreis[2] - k5] } : { ...l, u0: l.u0 + k5, u1: l.u1 - k5, v0: l.v0 + k5, v1: l.v1 - k5 }));
-        ringe.push([rahmen2, tief2, ring3]);
+        const ring4 = pfad3(new three_module_exports.Shape(), l, 0);
+        ring4.holes.push(pfad3(new three_module_exports.Path(), l.kreis ? { kreis: [l.kreis[0], l.kreis[1], l.kreis[2] - k5] } : { ...l, u0: l.u0 + k5, u1: l.u1 - k5, v0: l.v0 + k5, v1: l.v1 - k5 }));
+        ringe.push([rahmen2, tief2, ring4]);
         const sp6 = l.sprosse ?? o4.sprosse ?? true;
         if (sp6 && !l.kreis) {
           const b4 = l.u1 - l.u0, um2 = (l.u0 + l.u1) / 2, vk = kaempfer(l);
@@ -143976,8 +143976,8 @@ void main() {
     if (pi >= 0) {
       const u0 = pi * ra + 1.2, u1 = (pi + 1) * ra - 1.2, um2 = (u0 + u1) / 2, b4 = u1 - u0;
       for (let s2 = 1; s2 <= 3; s2++) {
-        const e = s2 * 0.32, ring3 = umrissForm([[u0 - e, 0.3], [u1 + e, 0.3], [u1 + e, o4.eg - 0.2 - b4 * 0.866 + e * 0.6], [um2, o4.eg - 0.2 + e * 1.1], [u0 - e, o4.eg - 0.2 - b4 * 0.866 + e * 0.6]]);
-        ring3.holes.push((() => {
+        const e = s2 * 0.32, ring4 = umrissForm([[u0 - e, 0.3], [u1 + e, 0.3], [u1 + e, o4.eg - 0.2 - b4 * 0.866 + e * 0.6], [um2, o4.eg - 0.2 + e * 1.1], [u0 - e, o4.eg - 0.2 - b4 * 0.866 + e * 0.6]]);
+        ring4.holes.push((() => {
           const q2 = new three_module_exports.Path();
           const e2 = e - 0.32;
           q2.moveTo(u0 - e2, 0.3);
@@ -143988,7 +143988,7 @@ void main() {
           q2.lineTo(u0 - e2, 0.3);
           return q2;
         })());
-        formen(S, F3, [ring3], 0, 0.12 + s2 * 0.08, s2 % 2 ? o4.zier : o4.gold);
+        formen(S, F3, [ring4], 0, 0.12 + s2 * 0.08, s2 % 2 ? o4.zier : o4.gold);
       }
       const zz = [];
       for (let u = u0 - 1.4; u < u1 + 1.3; u += 0.5) zz.push([[u, o4.eg + 0.08], [u + 0.5, o4.eg + 0.08], [u + 0.25, o4.eg + 0.5]]);
@@ -146669,7 +146669,7 @@ void main() {
   }
   function turmRund(S, scene2, p2, r4, cx, cz, o4 = {}) {
     const rr5 = o4.rad ?? 14, n3 = o4.n ?? 52, gh = 3.6, pod = 7, H = pod + n3 * gh;
-    const glas3 = waehle2(r4, ["#5f8f9a", "#5d7f99", "#6a8fa6"]), ring3 = "#c9d6dc", stein = "#d6d0c4";
+    const glas3 = waehle2(r4, ["#5f8f9a", "#5d7f99", "#6a8fa6"]), ring4 = "#c9d6dc", stein = "#d6d0c4";
     const kb = 16, kd = 20, kx0 = cx - rr5 * 0.2 - kb, kz0 = cz - kd / 2, Hk = H * 0.86;
     if (o4.podium !== false) podium(S, scene2, p2, cx - rr5 - kb - 2, cz - rr5 - 4, 2 * rr5 + kb + 8, 2 * rr5 + 8, pod - 1, { stein });
     S.quader(kx0, 0, kz0, kx0 + kb, Hk, kz0 + kd, stein);
@@ -146679,12 +146679,12 @@ void main() {
       fb4(S, F3, -0.1, F3.L + 0.1, Hk - 3, Hk, 0, 0.2, heller(stein, 0.05));
     }
     zyl8(S, rr5, rr5, H, cx, 0, cz, glas3, 32);
-    for (let y2 = pod + gh; y2 < H - 1; y2 += gh) zyl8(S, rr5 + 0.12, rr5 + 0.12, 0.26, cx, y2, cz, ring3, 32);
+    for (let y2 = pod + gh; y2 < H - 1; y2 += gh) zyl8(S, rr5 + 0.12, rr5 + 0.12, 0.26, cx, y2, cz, ring4, 32);
     for (let i = 0; i < 24; i++) {
       const w2 = i / 24 * 2 * PI11, nx = Math.cos(w2), nz = Math.sin(w2);
       if (sieht2(p2, nx, nz)) S.box(0.18, H - pod, 0.18, cx + nx * (rr5 + 0.1), pod + (H - pod) / 2, cz + nz * (rr5 + 0.1), dunkler(glas3, 0.1), -w2);
     }
-    zyl8(S, rr5 + 0.4, rr5 + 0.4, 2.5, cx, H, cz, ring3, 32);
+    zyl8(S, rr5 + 0.4, rr5 + 0.4, 2.5, cx, H, cz, ring4, 32);
     zyl8(S, rr5 * 0.7, rr5 * 0.7, 0.3, cx, H + 2.5, cz, "#8d939a", 24);
     zyl8(S, rr5 * 0.55, rr5 * 0.55, 0.32, cx, H + 2.52, cz, "#e8e5dc", 24);
     zyl8(S, rr5 * 0.48, rr5 * 0.48, 0.34, cx, H + 2.54, cz, "#8d939a", 24);
@@ -148169,9 +148169,9 @@ void main() {
         ze.forEach((gh, k5) => {
           y2 += gh;
           if (y2 > Ht + 0.1) return;
-          const ring4 = new three_module_exports.CylinderGeometry(tr + 0.35, tr + 0.35, 0.5, 14, 1, false, -PI11 / 2, PI11);
-          ring4.translate(tx2, y2 - 0.25, cz2 + T / 2);
-          S.add(ring4, hell5);
+          const ring5 = new three_module_exports.CylinderGeometry(tr + 0.35, tr + 0.35, 0.5, 14, 1, false, -PI11 / 2, PI11);
+          ring5.translate(tx2, y2 - 0.25, cz2 + T / 2);
+          S.add(ring5, hell5);
           if (k5 === 0) return;
           for (let i = 0; i < 7; i++) {
             const a2 = -PI11 / 2 + (i + 0.5) / 7 * PI11, nx = Math.sin(a2), nz = Math.cos(a2);
@@ -148391,7 +148391,7 @@ void main() {
     S.quader(cx - 1.3, 0.3, cz - 6.5, cx + 1.3, 0.43, cz + 6.5, "#3d3833");
     for (let i = -4; i <= 4; i++) if (i) S.box(0.5, 0.8, 0.5, cx + i * 2.2, 0.75, cz + 1, "#b9ae97");
     for (let i = 0; i < 5; i++) S.box(2.4, 0.1, 0.35, cx - 9 + i * 0.5, 0.5, cz - 0.6 + i * 0.4, "#9a7a52");
-    const ring3 = (rx, rz, y2, n3, c) => {
+    const ring4 = (rx, rz, y2, n3, c) => {
       for (let i = 0; i < n3; i++) {
         const a0 = i / n3 * 2 * PI11, a1 = (i + 1) / n3 * 2 * PI11;
         if (Math.abs(Math.sin(a0)) < Math.sin(spalt) + 0.05 || Math.abs(Math.sin(a1)) < Math.sin(spalt) + 0.05) continue;
@@ -148400,8 +148400,8 @@ void main() {
         balken5(S, [pa[0], y2 + 1.1, pa[1]], [pb[0], y2 + 1.1, pb[1]], 0.08, 0.08, c);
       }
     };
-    ring3(ar[0] + 0.4, ar[1] + 0.4, 3.8, 36, "#5d656c");
-    ring3(oR[0] - 0.6, oR[1] - 0.6, 3.2 + (stufen - 1) * 2.4 + 0.2, 44, "#5d656c");
+    ring4(ar[0] + 0.4, ar[1] + 0.4, 3.8, 36, "#5d656c");
+    ring4(oR[0] - 0.6, oR[1] - 0.6, 3.2 + (stufen - 1) * 2.4 + 0.2, 44, "#5d656c");
     const tx = cx + oR[0] - 1, F3 = R7(tx + 3, cz + 4, 0, -1, 8);
     S.quader(tx, 0, cz - 4, tx + 3, 6, cz + 4, stein);
     fwand2(S, F3, 0, 8, 0, 6, 0, 0.4, heller(stein, 0.05), [{ u0: 2.2, u1: 5.8, v0: -0.1, v1: 4.6, bogen: true }]);
@@ -148424,9 +148424,9 @@ void main() {
       const a0 = i / seg2 * PI11 * 1.4 - PI11 * 0.2, a1 = (i + 1) / seg2 * PI11 * 1.4 - PI11 * 0.2, rr5 = rad3 + 0.6;
       balken5(S, [x2 + Math.cos(a0) * rr5, 0.3 + i * h4 / seg2, z6 + Math.sin(a0) * rr5], [x2 + Math.cos(a1) * rr5, 0.3 + (i + 1) * h4 / seg2, z6 + Math.sin(a1) * rr5], 0.8, 0.12, "#c8463c");
     }
-    const ring3 = new three_module_exports.CylinderGeometry(rad3 + 0.05, rad3 + 0.05, 1, 20, 1, true);
-    ring3.translate(x2, h4 + 0.8, z6);
-    S.add(ring3, "#e8c547");
+    const ring4 = new three_module_exports.CylinderGeometry(rad3 + 0.05, rad3 + 0.05, 1, 20, 1, true);
+    ring4.translate(x2, h4 + 0.8, z6);
+    S.add(ring4, "#e8c547");
   }
   function kugeltank(S, x2, z6, rad3, c = "#eef0ef") {
     for (let i = 0; i < 6; i++) {
@@ -152176,11 +152176,11 @@ void main() {
       zyl9(S, 2, 2.4, 3.2, sx + sb2 / 2, sH + 2.2, sz + st2 / 2, kup, 8);
       zwiebel(S, sx + sb2 / 2, sH + 5.4, sz + st2 / 2, 1.9, 3.6, kup, 10);
       if (sichtF2(p2, Fs.v)) ftext5(scene2, Fs.v, waehle2(r4, ["Brauerei Wei\xDFbr\xE4u", "Brauerei Moosbr\xE4u", "Brauerei Hollerer", "Klosterbrauerei"]), sb2 / 2, 13.6, 0.1, 1, sb2 * 0.86, "#f4efe2");
-      const kx = sx + sb2 + 4, kz2 = sz + 3;
-      zyl9(S, 1.9, 1.9, 4, kx, 0, kz2, klinker, 8);
-      zyl9(S, 1, 1.5, 30, kx, 4, kz2, klinker, 12);
-      for (const y2 of [12, 22, 32]) zyl9(S, 1.25 - (y2 - 4) * 0.016, 1.3 - (y2 - 4) * 0.016, 0.5, kx, y2, kz2, "#8a4a36", 12);
-      zyl9(S, 1.12, 1.05, 1.2, kx, 33.6, kz2, "#5a3a2e", 12);
+      const kx = sx + sb2 + 4, kz = sz + 3;
+      zyl9(S, 1.9, 1.9, 4, kx, 0, kz, klinker, 8);
+      zyl9(S, 1, 1.5, 30, kx, 4, kz, klinker, 12);
+      for (const y2 of [12, 22, 32]) zyl9(S, 1.25 - (y2 - 4) * 0.016, 1.3 - (y2 - 4) * 0.016, 0.5, kx, y2, kz, "#8a4a36", 12);
+      zyl9(S, 1.12, 1.05, 1.2, kx, 33.6, kz, "#5a3a2e", 12);
       for (let i = 0; i < 2; i++) {
         zyl9(S, 2.2, 2.2, 13, sx + sb2 + 4 + i * 5, 0.3, sz - 6, "#c9cdd0", 12);
         const g2 = new three_module_exports.ConeGeometry(2.25, 1.4, 12);
@@ -153511,10 +153511,10 @@ void main() {
     }
     for (let k5 = 1; k5 <= 4; k5++) {
       const t5 = k5 / 5, rr5 = Rv * (1 - t5) * 0.98;
-      const ring3 = new three_module_exports.CylinderGeometry(rr5, rr5, 0.4, 8, 1, true);
-      ring3.rotateY(PI12 / 8);
-      ring3.translate(cx, y0 + h4 * t5, cz);
-      S.add(ring3, st2);
+      const ring4 = new three_module_exports.CylinderGeometry(rr5, rr5, 0.4, 8, 1, true);
+      ring4.rotateY(PI12 / 8);
+      ring4.translate(cx, y0 + h4 * t5, cz);
+      S.add(ring4, st2);
     }
     for (const { F: F3, nx, nz, kante } of oktoRahmen(cx, cz, ri * 0.88)) {
       if (!sicht2(p2, nx, nz)) continue;
@@ -153782,11 +153782,11 @@ void main() {
     }
     const yt = 0.3 + Htop;
     if (v2 === "kapelle") {
-      const kx2 = Math.min(w2 * 0.62, w2 - 15), kz3 = dz * 0.5, B8 = 6, L3 = 9, Hk = 6;
+      const kx2 = Math.min(w2 * 0.62, w2 - 15), kz2 = dz * 0.5, B8 = 6, L3 = 9, Hk = 6;
       const c = { wand: WEISS3, orn: ORN2, lisene: "#efe6cf", dach: waehle2(r4, BIBER) };
       versetzt3(S, scene2, 0, yt, 0, (T2) => {
-        T2.quader(kx2 - B8 / 2, 0, kz3 - L3 / 2, kx2 + B8 / 2, Hk, kz3 + L3 / 2, c.wand);
-        const F4 = seiten3(kx2 - B8 / 2, kz3 - L3 / 2, B8, L3);
+        T2.quader(kx2 - B8 / 2, 0, kz2 - L3 / 2, kx2 + B8 / 2, Hk, kz2 + L3 / 2, c.wand);
+        const F4 = seiten3(kx2 - B8 / 2, kz2 - L3 / 2, B8, L3);
         dachGiebel(T2, F4.v, 0, B8, -L3, 0, Hk, B8 * 0.7, c.dach, c.wand, { ue: 0.4, uf: 0.4, ub: 0.4 });
         for (const k5 of ["v", "r", "l", "h"]) if (sichtF2(p2, F4[k5])) {
           if (k5 === "v") {
@@ -153797,12 +153797,12 @@ void main() {
             fbogen(T2, F4[k5], L3 * 0.7, 2, 1, 2.8, -0.1, 0.06, GLAS_DUNKEL);
           }
         }
-        T2.quader(kx2 - 0.8, Hk + 2.2, kz3 + L3 / 2 - 2.2, kx2 + 0.8, Hk + 4.6, kz3 + L3 / 2 - 0.6, c.wand);
-        zwiebel(T2, kx2, Hk + 4.6, kz3 + L3 / 2 - 1.4, 0.9, 2.4, waehle2(r4, KUPFER4), 10);
-        kreuz2(T2, kx2, Hk + 6.7, kz3 + L3 / 2 - 1.4, 1);
-        baumRund2(T2, kx2 - B8 / 2 - 4, kz3, r4, 1.1, LAUB, 0.08);
-        baumRund2(T2, kx2 + B8 / 2 + 3.5, kz3 - 2, r4, 0.9, LAUB, 0.08);
-        for (let x2 = 2; x2 < w2 - 2; x2 += 3.5) if (Math.abs(x2 - kx2) > B8 / 2 + 5) busch6(T2, x2, kz3 + zw(r4, -2, 2), r4, 0.8, 0.08);
+        T2.quader(kx2 - 0.8, Hk + 2.2, kz2 + L3 / 2 - 2.2, kx2 + 0.8, Hk + 4.6, kz2 + L3 / 2 - 0.6, c.wand);
+        zwiebel(T2, kx2, Hk + 4.6, kz2 + L3 / 2 - 1.4, 0.9, 2.4, waehle2(r4, KUPFER4), 10);
+        kreuz2(T2, kx2, Hk + 6.7, kz2 + L3 / 2 - 1.4, 1);
+        baumRund2(T2, kx2 - B8 / 2 - 4, kz2, r4, 1.1, LAUB, 0.08);
+        baumRund2(T2, kx2 + B8 / 2 + 3.5, kz2 - 2, r4, 0.9, LAUB, 0.08);
+        for (let x2 = 2; x2 < w2 - 2; x2 += 3.5) if (Math.abs(x2 - kx2) > B8 / 2 + 5) busch6(T2, x2, kz2 + zw(r4, -2, 2), r4, 0.8, 0.08);
         return null;
       });
       return { hoehe: yt + Hk + 7 };
@@ -153832,19 +153832,19 @@ void main() {
     top = fachwerkHaus(S, scene2, r4, p2, 2, d4 - 2.5 - T, b4, T, o4, true, false).top;
     const F3 = seiten3(2, d4 - 2.5 - T, b4, T);
     if (sichtF2(p2, F3.v)) ftext5(scene2, F3.v, waehle2(r4, ["Weingut K\xF6gel", "Weingut H\xE4gele", "Weingut Sonnenhalde", "Weinbau Rapp"]), b4 / 2, 3.25, 0.12, 0.5, b4 * 0.7, "#5a3a2a");
-    const kx = b4 + 6, kb = Math.min(16, w2 - kx - 2), kt = 12, kz2 = zh + 1;
+    const kx = b4 + 6, kb = Math.min(16, w2 - kx - 2), kt = 12, kz = zh + 1;
     if (kb > 8) {
-      S.quader(kx, 0, kz2, kx + kb, 5.2, kz2 + kt, mauer);
-      const Fk = seiten3(kx, kz2, kb, kt);
+      S.quader(kx, 0, kz, kx + kb, 5.2, kz + kt, mauer);
+      const Fk = seiten3(kx, kz, kb, kt);
       for (const k5 of ["v", "r"]) if (sichtF2(p2, Fk[k5])) {
         fbogen(S, Fk[k5], Fk[k5].L / 2, 0.3, 3.4, 4.2, -0.1, 0.08, "#6b4a32");
         fbogen(S, Fk[k5], Fk[k5].L / 2, 0.3, 4, 4.6, 0, 0.06, heller(mauer, 0.06));
       }
-      walm3(S, kx, kz2, kx + kb, kz2 + kt, 5.2, kt * 0.55, waehle2(r4, BIBER), 0.5);
+      walm3(S, kx, kz, kx + kb, kz + kt, 5.2, kt * 0.55, waehle2(r4, BIBER), 0.5);
       for (let i = 0; i < 5; i++) {
         const g3 = new three_module_exports.CylinderGeometry(0.6, 0.6, 1.2, 10);
         g3.rotateX(PI12 / 2);
-        g3.translate(kx + 1 + i * 1.3, 0.9, kz2 + kt + 1.2);
+        g3.translate(kx + 1 + i * 1.3, 0.9, kz + kt + 1.2);
         S.add(g3, "#8a5a3a");
       }
       top = Math.max(top, 5.2 + kt * 0.55);
@@ -153967,15 +153967,15 @@ void main() {
       S.quader(w2 - 9, 0, zq - 0.3, w2 - 5, Y, zq + 0.1, stein);
       return { hoehe: top };
     }
-    const kx = w2 * 0.72, kz2 = zq - 4.5;
-    zyl9(S, 3.4, 3.6, 6.5, kx, Y, kz2, stein, 12);
+    const kx = w2 * 0.72, kz = zq - 4.5;
+    zyl9(S, 3.4, 3.6, 6.5, kx, Y, kz, stein, 12);
     const g2 = new three_module_exports.ConeGeometry(4.1, 3.4, 12);
-    g2.translate(kx, Y + 6.5 + 1.7, kz2);
+    g2.translate(kx, Y + 6.5 + 1.7, kz);
     S.add(g2, waehle2(r4, BIBER));
-    balken0(S, [kx, Y + 6, kz2 + 2.5], [kx + 0.5, Y + 9.5, kz2 + 8.5], "#6b4a32");
-    stab5(S, [kx + 0.5, Y + 9.5, kz2 + 8.5], [kx + 0.5, Y + 3, kz2 + 8.5], 0.05, "#3b4046", 4);
-    S.box(0.8, 0.6, 0.8, kx + 0.5, Y + 2.7, kz2 + 8.5, "#8a5a3a");
-    const Fk = R8(kx - 1.5, kz2 + 3.5, 1, 0, 3);
+    balken0(S, [kx, Y + 6, kz + 2.5], [kx + 0.5, Y + 9.5, kz + 8.5], "#6b4a32");
+    stab5(S, [kx + 0.5, Y + 9.5, kz + 8.5], [kx + 0.5, Y + 3, kz + 8.5], 0.05, "#3b4046", 4);
+    S.box(0.8, 0.6, 0.8, kx + 0.5, Y + 2.7, kz + 8.5, "#8a5a3a");
+    const Fk = R8(kx - 1.5, kz + 3.5, 1, 0, 3);
     if (sichtF2(p2, Fk)) {
       fbogen(S, Fk, 1.5, Y, 1.4, 2.4, -0.2, 0.1, "#5a4636");
       fenster6(S, Fk, 1.5, Y + 4, 0.8, 1, { rahmen: ORN2, glas: GLAS10, sims: false });
@@ -154303,9 +154303,9 @@ void main() {
     korb.translate(cx, y2 + H + 1, cz);
     S.add(korb, "#cfccc4");
     for (let k5 = 0; k5 < 3; k5++) {
-      const ring3 = new three_module_exports.CylinderGeometry(5.7, 5.7, 0.9, 16);
-      ring3.translate(cx, y2 + H - 1.6 + k5 * 2.6, cz);
-      S.add(ring3, "#3f4850");
+      const ring4 = new three_module_exports.CylinderGeometry(5.7, 5.7, 0.9, 16);
+      ring4.translate(cx, y2 + H - 1.6 + k5 * 2.6, cz);
+      S.add(ring4, "#3f4850");
     }
     const ant = new three_module_exports.CylinderGeometry(0.7, 1.2, 38, 8);
     ant.translate(cx, y2 + H + 24, cz);
@@ -155932,8 +155932,8 @@ void main() {
       return k5;
     };
     if (t5 === "ruhr") {
-      const kz2 = (E9.ruhrKonzern ?? []).find((q2) => q2.i === b4.i0 && q2.j === b4.j0);
-      if (kz2 && !einkauf) konzernEinbetten(ctx, kz2.variante);
+      const kz = (E9.ruhrKonzern ?? []).find((q2) => q2.i === b4.i0 && q2.j === b4.j0);
+      if (kz && !einkauf) konzernEinbetten(ctx, kz.variante);
       if (einkauf || v2 === "ruhr60") {
         for (let q2 = 0; q2 < (einkauf ? 4 : 2); q2++) {
           const hoch = (E9.ruhrHoch ?? 0) < (E9.o.kern60 ? 3 : 1) && rb() < 0.3;
@@ -157018,9 +157018,9 @@ void main() {
     for (const s2 of plan2.strassen) (s2.bruecke ? baueBruecke : baueSegment)(ctx, s2);
     for (const k5 of plan2.kreuzungen) baueKreuzung(ctx, k5);
     for (const b4 of plan2.bloecke) baueBlock(ctx, b4);
-    const ring3 = plan2.aussen && o4.aussenring !== 0;
-    baueWasserAlle(ctx, [...plan2.bloecke.filter((b4) => b4.art === "wasser"), ...ring3 ? plan2.aussen.wasser : []]);
-    if (ring3) baueStadtrand(ctx);
+    const ring4 = plan2.aussen && o4.aussenring !== 0;
+    baueWasserAlle(ctx, [...plan2.bloecke.filter((b4) => b4.art === "wasser"), ...ring4 ? plan2.aussen.wasser : []]);
+    if (ring4) baueStadtrand(ctx);
     else {
       for (const u of plan2.umland ?? []) baueUmland(ctx, u);
       baueAussenring(ctx, o4.aussenring ?? 420);
@@ -157089,9 +157089,9 @@ void main() {
       baueBlock(ctx, b4);
       await bildFreigeben();
     }
-    const ring3 = plan2.aussen && o4.aussenring !== 0;
-    baueWasserAlle(ctx, [...plan2.bloecke.filter((b4) => b4.art === "wasser"), ...ring3 ? plan2.aussen.wasser : []]);
-    if (ring3) baueStadtrand(ctx);
+    const ring4 = plan2.aussen && o4.aussenring !== 0;
+    baueWasserAlle(ctx, [...plan2.bloecke.filter((b4) => b4.art === "wasser"), ...ring4 ? plan2.aussen.wasser : []]);
+    if (ring4) baueStadtrand(ctx);
     else {
       for (const u of plan2.umland ?? []) baueUmland(ctx, u);
       baueAussenring(ctx, o4.aussenring ?? 420);
@@ -157378,8 +157378,8 @@ void main() {
           R11.quader(S, u - 1.8, u + 1.8, -1.6, 1.6, 0.3, 2.9, waehle2(r4, ["#2f6f8f", "#3f7d56", "#8c3b3b"]));
           R11.quader(S, u - 2.4, u + 2.4, -2.2, 2.2, 2.9, 3.2, "#e9e5dc");
         } else for (const du of [-2.4, 0, 2.4]) {
-          const [kx, kz2] = R11.w(u + du, 0);
-          I.setze("kuebel", kx, 0.3, kz2, 0, 1, [waehle2(r4, ["#d96a8a", "#e0b23c", "#7cb369"])]);
+          const [kx, kz] = R11.w(u + du, 0);
+          I.setze("kuebel", kx, 0.3, kz, 0, 1, [waehle2(r4, ["#d96a8a", "#e0b23c", "#7cb369"])]);
         }
       }
     } else for (let u = s2.von + 10; u < s2.bis - 8; u += 22, k5++) {
@@ -157388,8 +157388,8 @@ void main() {
       const [bx, bz] = R11.w(u + 4, 0);
       I.setze("bank", bx, 0.3, bz, R11.ru + (k5 % 2 ? 0 : Math.PI));
       if (k5 % 2 === 0) {
-        const [kx, kz2] = R11.w(u + 8, 0.9);
-        I.setze("kuebel", kx, 0.3, kz2, 0, 1, [waehle2(r4, ["#d96a8a", "#e0b23c", "#7cb369"])]);
+        const [kx, kz] = R11.w(u + 8, 0.9);
+        I.setze("kuebel", kx, 0.3, kz, 0, 1, [waehle2(r4, ["#d96a8a", "#e0b23c", "#7cb369"])]);
       }
     }
     for (const sg of [-1, 1]) for (let u = s2.von + 5 + (sg > 0 ? 9 : 0); u < s2.bis - 4; u += 18) {
@@ -158161,7 +158161,7 @@ void main() {
     const A = plan2.aussen, R11 = A.R, W3 = plan2.breite, T = plan2.tiefe;
     const rc = { ...ctx, dichte: ctx.dichte * 0.35, r: rng3(plan2.seed * 41 + 9) };
     const loecher = A.wasser.map((w2) => [w2.x, w2.z, w2.x + w2.w, w2.z + w2.d]);
-    for (const ring3 of [[-R11, -R11, W3 + R11, 0], [-R11, T, W3 + R11, T + R11], [-R11, 0, 0, T], [W3, 0, W3 + R11, T]]) for (const [x0, z0, x1, z1] of rechteckMinus(ring3, loecher)) S.quader(x0, -0.6, z0, x1, -0.08, z1, "#a7cb8f");
+    for (const ring4 of [[-R11, -R11, W3 + R11, 0], [-R11, T, W3 + R11, T + R11], [-R11, 0, 0, T], [W3, 0, W3 + R11, T]]) for (const [x0, z0, x1, z1] of rechteckMinus(ring4, loecher)) S.quader(x0, -0.6, z0, x1, -0.08, z1, "#a7cb8f");
     if (plan2.berge) baueBerge(rc, plan2.berge);
     for (const s2 of A.strassen) (s2.bruecke ? baueBruecke : baueSegment)(rc, s2);
     for (const k5 of A.kreuzungen) baueKreuzung(rc, k5);
@@ -158484,7 +158484,7 @@ void main() {
     const x0 = b4.x, z0 = b4.z, x1 = b4.x + b4.w, z1 = b4.z + b4.d, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     S.quader(x0, 0, z0, x1, y2, z1, F2.rasen);
     const ri = 5;
-    const ring3 = new three_module_exports.Shape();
+    const ring4 = new three_module_exports.Shape();
     const rr5 = (s2, a0, b0, a1, b1, rad3, loch) => {
       const p2 = loch ? new three_module_exports.Path() : s2;
       p2.moveTo(a0 + rad3, b0);
@@ -158498,9 +158498,9 @@ void main() {
       p2.quadraticCurveTo(a0, b0, a0 + rad3, b0);
       if (loch) s2.holes.push(p2);
     };
-    rr5(ring3, x0 + ri, z0 + ri, x1 - ri, z1 - ri, 8, false);
-    rr5(ring3, x0 + ri + 3, z0 + ri + 3, x1 - ri - 3, z1 - ri - 3, 6, true);
-    const rg2 = new three_module_exports.ExtrudeGeometry(ring3, { depth: 0.05, bevelEnabled: false, curveSegments: 6 });
+    rr5(ring4, x0 + ri, z0 + ri, x1 - ri, z1 - ri, 8, false);
+    rr5(ring4, x0 + ri + 3, z0 + ri + 3, x1 - ri - 3, z1 - ri - 3, 6, true);
+    const rg2 = new three_module_exports.ExtrudeGeometry(ring4, { depth: 0.05, bevelEnabled: false, curveSegments: 6 });
     rg2.rotateX(Math.PI / 2);
     rg2.translate(0, y2 + 0.05, 0);
     S.add(rg2, F2.weg);
@@ -161300,7 +161300,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "32b37c9" : "Entwicklung";
+  var version = () => true ? "9c0e30d" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -161928,10 +161928,10 @@ void main() {
     const diffStart = u.kostenWoche - (u.kostenStart ?? u.kostenWoche);
     const qmMiete = gs.reduce((n3, g2) => n3 + (g2.qmGemietet ?? 0), 0);
     const qmFrei = Math.max(0, qmMiete - gs.reduce((n3, g2) => n3 + (g2.qmBelegt ?? 0), 0));
-    const befund2 = (leerEtagen.length ? `<b>${leerEtagen.length} gemietete ${leerEtagen.length === 1 ? "Etage steht" : "Etagen stehen"} leer.</b> ` : qmMiete > 0 && qmFrei / qmMiete >= 0.02 ? `<b>${prozent2(1 - qmFrei / qmMiete)} der gemieteten B\xFCrofl\xE4che sind belegt, ${fmt.format(Math.round(qmFrei))} qm stehen frei.</b> ` : "<b>Alle gemieteten Etagen sind voll belegt.</b> ") + (ohnePlatz ? `${ohnePlatz} ${ohnePlatz === 1 ? "Abteilung hat" : "Abteilungen haben"} keinen Platz und wirken nur mit Stufe 0. ` : "") + (u.restmieteWoche > 0 ? `F\xFCr alte B\xFCros laufen noch ${geld(u.restmieteWoche)} Restmiete je Woche.` : "");
+    const befund3 = (leerEtagen.length ? `<b>${leerEtagen.length} gemietete ${leerEtagen.length === 1 ? "Etage steht" : "Etagen stehen"} leer.</b> ` : qmMiete > 0 && qmFrei / qmMiete >= 0.02 ? `<b>${prozent2(1 - qmFrei / qmMiete)} der gemieteten B\xFCrofl\xE4che sind belegt, ${fmt.format(Math.round(qmFrei))} qm stehen frei.</b> ` : "<b>Alle gemieteten Etagen sind voll belegt.</b> ") + (ohnePlatz ? `${ohnePlatz} ${ohnePlatz === 1 ? "Abteilung hat" : "Abteilungen haben"} keinen Platz und wirken nur mit Stufe 0. ` : "") + (u.restmieteWoche > 0 ? `F\xFCr alte B\xFCros laufen noch ${geld(u.restmieteWoche)} Restmiete je Woche.` : "");
     const verwaltung = (organisation2?.bereiche ?? []).find((b4) => b4.abteilung === "verwaltung" && b4.stelle?.person)?.stelle.person;
     let h4 = bereich("zentrale", "zentrale") + G4 + sprecher({
-      text: befund2,
+      text: befund3,
       unter: (verwaltung ? verwaltung.name + " \xB7 " : "") + "Leitung Verwaltung",
       person: verwaltung?.portraet ? portraetSVG(verwaltung.portraet, 72) : "",
       ton: leerEtagen.length || ohnePlatz || qmMiete > 0 && qmFrei / qmMiete >= 0.15 ? "engpass" : ""
@@ -162199,40 +162199,7 @@ void main() {
     }
     return { werte: n3, fehler: fehler6 };
   }
-  var schalter2 = (an, attr, text3, unter = "") => `<button class="schalter ${an ? "an" : ""}" ${attr} role="switch" aria-checked="${an}"><span class="knebel"></span><span class="stext">${text3}${unter ? `<small>${unter}</small>` : ""}</span></button>`;
-  var segment = (act, wert, optionen, extra = "") => `<div class="seg${optionen.length > 5 || optionen.reduce((a2, [, t5]) => a2 + String(t5).length, 0) > 30 ? " umbruch" : ""}">${optionen.map(([v2, t5]) => `<button class="${String(v2) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v2}"${extra}>${t5}</button>`).join("")}</div>`;
-  var regler = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
-  var stepper2 = (act, wertHtml, unter = "", extra = "") => `<div class="stepper"><button data-a="${act}" data-v="-1"${extra} aria-label="weniger">\u2212</button><span>${wertHtml}${unter ? `<br><i>${unter}</i>` : ""}</span><button data-a="${act}" data-v="1"${extra} aria-label="mehr">+</button></div>`;
-  var kz = (titel, inhalt, ton3 = "") => `<div class="kz ${ton3}"><span>${titel}</span>${inhalt}</div>`;
   var wocheText = (s2, w2) => `KW ${kwVon2(w2)} / ${s2.startJahr + Math.floor(w2 / 52)}`;
-  var karussell2 = (id, karten, idx, act) => `<div class="karussell" data-k="${id}">${karten.map((k5, i) => `<div class="kslot" data-i="${i}">${k5}</div>`).join("")}</div><div class="punkte">${karten.map((_, i) => `<button class="${i === idx ? "an" : ""}" data-a="${act}" data-v="${i}" aria-label="Karte ${i + 1}"></button>`).join("")}</div>`;
-  function karussellBinden(id, idx, beiWechsel) {
-    const k5 = document.querySelector(`#pinhalt .karussell[data-k="${id}"]`);
-    if (!k5) return;
-    const slots = [...k5.querySelectorAll(".kslot")];
-    const mitte = (el2) => {
-      const r4 = el2.getBoundingClientRect();
-      return r4.left - k5.getBoundingClientRect().left + k5.scrollLeft + r4.width / 2;
-    };
-    const aktuell = () => {
-      const m = k5.scrollLeft + k5.clientWidth / 2;
-      let best = 0;
-      slots.forEach((el2, i) => {
-        if (Math.abs(mitte(el2) - m) < Math.abs(mitte(slots[best]) - m)) best = i;
-      });
-      return best;
-    };
-    if (slots[idx]) k5.scrollLeft = Math.max(0, mitte(slots[idx]) - k5.clientWidth / 2);
-    let t5 = null;
-    k5.addEventListener("scroll", () => {
-      clearTimeout(t5);
-      t5 = setTimeout(() => {
-        if (!k5.isConnected) return;
-        const i = aktuell();
-        if (i !== idx) beiWechsel(i);
-      }, 140);
-    }, { passive: true });
-  }
   var RISIKO = { gruen: "gering", gelb: "erh\xF6ht", rot: "hoch" };
   var HALTE = [[0, "kein"], [0.25, "25 %"], [0.5, "50 %"], [1, "100 %"]];
   var ERFOLG = [[0, "kein"], [0.1, "10 %"], [0.2, "20 %"], [0.3, "30 %"]];
@@ -162585,10 +162552,15 @@ void main() {
     });
   }
   var zielgruppenFuerFach = (K3, fach) => (K3.zielgruppen ?? []).filter((x2) => fach !== "kinder" || x2.id === "kinder" || x2.id === "teens");
+  var farbpunkt = (hex4, g2 = 14) => `<svg class="hw-g1-punkt" viewBox="0 0 20 20" width="${g2}" height="${g2}" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="${esc2(hex4)}" stroke="rgba(255,255,255,.35)" stroke-width="1.2"/></svg>`;
+  var chips = (optionen, aktiv7, attr, label = "", aus = false, reihe2 = false) => `<div class="hw-g1-chips${reihe2 ? " reihe" : ""}" role="group"${label ? ` aria-label="${esc2(label)}"` : ""}>${optionen.map(([w2, t5]) => `<button type="button" class="hw-g1-chip" aria-pressed="${String(w2) === String(aktiv7)}" ${attr(w2)}${aus ? " disabled" : ""}>${t5}</button>`).join("")}</div>`;
   function zielChips(K3, ui) {
     const z6 = zielgruppenFuerFach(K3, ui.fach);
     if (z6.length && !z6.some((x2) => x2.id === ui.zielgruppe)) ui.zielgruppe = z6[0].id;
-    return '<div class="q24-chips" aria-label="Zielgruppe">' + z6.map((x2) => '<button data-a="q24Ziel" data-v="' + esc2(x2.id) + '" aria-pressed="' + (ui.zielgruppe === x2.id) + '" class="' + (ui.zielgruppe === x2.id ? "an" : "") + '">' + esc2(x2.name) + "</button>").join("") + "</div>";
+    return `<span class="hw-marke hw-feldname">Zielgruppe</span>` + chips(z6.map((x2) => [x2.id, esc2(x2.name)]), ui.zielgruppe, (w2) => `data-a="q24Ziel" data-v="${esc2(w2)}"`, "Zielgruppe");
+  }
+  function fachSegmente(ui) {
+    return `<div class="hw-g1-fach">${seg(FAECHER, ui.fach, (w2) => `data-a="q24Fach" data-v="${w2}"`).replace('role="group"', 'role="group" aria-label="Abteilung"')}</div>`;
   }
   function sortimentBedienung(K3, ui, typen, kachel3, aktion2, gesperrt2 = /* @__PURE__ */ new Set()) {
     const erlaubt = new Set(typen.map((t5) => t5.typ));
@@ -162604,44 +162576,30 @@ void main() {
       name: "Weitere Artikel",
       unterkategorien: [{ id: "weitere-typen", name: "Neu im Sortiment", typen: fehlend.map((t5) => t5.typ) }]
     }];
-    if (!baum2.length) return '<div class="olief">Keine passenden Artikeltypen. Bitte Abteilung oder Zielgruppe wechseln.</div>';
-    if (!baum2.some((b4) => b4.id === ui.baumOffen)) {
-      ui.baumOffen = baum2[0].id;
-      ui.astOffen = baum2[0].unterkategorien[0].id;
-    }
-    let h4 = '<div class="q11baum q24-baum">';
+    if (!baum2.length) return leer3("Bitte Abteilung oder Zielgruppe wechseln.", "Keine passenden Artikeltypen");
+    if (!baum2.some((b4) => b4.id === ui.baumOffen)) ui.baumOffen = baum2[0].id;
+    let h4 = '<div class="hw-g1-baum">';
     for (const kat of baum2) {
       const offen = ui.baumOffen === kat.id;
       const zahl5 = kat.unterkategorien.reduce((n3, a2) => n3 + a2.typen.length, 0);
-      h4 += '<button class="q11kategorie ' + (offen ? "an" : "") + '" data-a="baumKat" data-v="' + esc2(kat.id) + '" aria-expanded="' + offen + '"><span>' + esc2(kat.name) + "</span><small>" + zahl5 + ' Artikel</small><b aria-hidden="true">' + (offen ? "\u2212" : "+") + "</b></button>";
+      h4 += `<button type="button" class="hw-g1-kat${offen ? " an" : ""}" data-a="baumKat" data-v="${esc2(kat.id)}" aria-expanded="${offen}"><span>${esc2(kat.name)}</span><small>${zahl5} Artikel</small><i aria-hidden="true">${offen ? "\u2212" : "+"}</i></button>`;
       if (!offen) continue;
       for (const ast3 of kat.unterkategorien) {
-        const astOffen = ui.astOffen === ast3.id;
-        h4 += '<button class="q11ast ' + (astOffen ? "an" : "") + '" data-a="baumAst" data-v="' + esc2(ast3.id) + '" aria-expanded="' + astOffen + '"><span>' + esc2(ast3.name) + "</span><small>" + ast3.typen.length + ' Artikel</small><b aria-hidden="true">' + (astOffen ? "\u2212" : "+") + "</b></button>";
-        if (!astOffen) continue;
-        h4 += '<div class="typkacheln q11typen q24-typen">';
+        if (kat.unterkategorien.length > 1 || ast3.name !== kat.name) h4 += `<span class="hw-marke hw-g1-ast">${esc2(ast3.name)}</span>`;
+        h4 += '<div class="hw-g1-kacheln">';
         for (const typ of ast3.typen) {
           const t5 = index2.get(typ), voll2 = gesperrt2.has(t5.kategorie);
-          h4 += '<button class="' + (voll2 ? "voll" : "") + '" data-a="' + aktion2 + '" data-v="' + esc2(typ) + '" aria-label="' + esc2(typ) + ' ansehen">' + kachel3(typ, 76) + "<span>" + esc2(typ) + "</span>" + (voll2 ? "<small>Kapazit\xE4t erreicht</small>" : "") + "</button>";
+          h4 += `<button type="button" class="hw-g1-kachel hw-kontur${voll2 ? " voll" : ""}" data-a="${aktion2}" data-v="${esc2(typ)}" aria-label="${esc2(typ)}${voll2 ? ", Kapazit\xE4t erreicht" : ""}"><span class="hw-g1-kachelbild" aria-hidden="true">${kachel3(typ, 64)}</span><span class="hw-g1-kachelname">${esc2(typ)}</span>${voll2 ? "<small>Platz voll</small>" : ""}</button>`;
         }
         h4 += "</div>";
       }
     }
     return h4 + "</div>";
   }
-  function fachSegmente(ui) {
-    return '<div class="q24-seg" role="group" aria-label="Abteilung">' + FAECHER.map(([id, name2]) => '<button data-a="q24Fach" data-v="' + id + '" aria-pressed="' + (ui.fach === id) + '" class="' + (ui.fach === id ? "an" : "") + '">' + name2 + "</button>").join("") + "</div>";
-  }
   function teamAufschluesselung(l) {
     if (!l) return "";
-    const werte3 = [
-      ["Team", l.team],
-      ["Zielgruppe", l.zielgruppe],
-      ["Trend", l.trend],
-      ["Lieferant", l.lieferant],
-      ["HQ", l.hq]
-    ];
-    return '<div class="q24-leistung"><div class="q24-leistungstitel">Teamleistung je Marke <b>' + l.wert + ' / 100</b></div><div class="q24-werte">' + werte3.map(([name2, wert]) => "<span>" + name2 + " <b>" + wert + "</b></span>").join("") + "</div><small>Designteam: " + l.teamgroesse + " Designer \xB7 Erfahrung in der Kategorie " + l.kategorieErfahrung + " / 100</small></div>";
+    const werte3 = [["Team", l.team], ["Zielgruppe", l.zielgruppe], ["Trend", l.trend], ["Lieferant", l.lieferant], ["HQ", l.hq]];
+    return abschnitt("Teamleistung", `${l.wert} / 100`) + `<div class="hw-g1-skalen">${werte3.map(([name2, wert]) => skala(name2, Number(wert) || 0)).join("")}</div>` + liste([zeile({ was: "Designteam", wert: `${l.teamgroesse} Designer` }), zeile({ was: "Erfahrung in der Kategorie", wert: `${l.kategorieErfahrung} / 100` })]);
   }
 
   // src/ui/eigenmarken.js
@@ -162660,12 +162618,12 @@ void main() {
   var preisText = (p2) => PREIS2.find((x2) => x2[0] === p2)?.[1] ?? p2;
   var STATUS = { aufbau: "im Aufbau", neupositionierung: "Neupositionierung", eingestellt: "eingestellt" };
   var punkte = (x2) => `+${(x2 * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Punkte`;
-  function balken7(wert, farbe2 = "#2f63b5") {
-    return `<span class="mbalken"><span style="width:${Math.max(0, Math.min(100, wert)).toFixed(0)}%;background:${farbe2}"></span></span>`;
+  var BESCHAFFUNG_TEXT = { fernost: "lange Wege, h\xF6chste Marge", nahost: "mittlerer Vorlauf", europa: "schnell, kleine Mengen" };
+  var skalaP = (name2, wert, p2) => skala(name2, wert).replace(/<b>(\d+)<\/b><\/div>$/, `<b${p2 ? ` data-p="${esc2(p2)}"` : ""}>$1</b></div>`);
+  function passung(p2, p0) {
+    return `<div class="hw-g1-skalen">${REGIONEN4.filter((r4) => p2[r4] !== void 0).map((r4) => skalaP(r4, p2[r4], p0 ? `${p0}:${r4}` : "")).join("")}</div>`;
   }
-  function passungZeile(p2, p0) {
-    return `<div class="passung">${REGIONEN4.filter((r4) => p2[r4] !== void 0).map((r4) => `<div><span class="psaeule"><span style="height:${p2[r4]}%"></span></span><b${p0 ? ` data-p="${p0}:${r4}"` : ""}>${p2[r4]}</b><i>${r4}</i></div>`).join("")}</div>`;
-  }
+  var befund = (text3, ton3 = "") => sprecher({ text: text3, unter: "Eigenmarken \xB7 Einkauf", ton: ton3 });
   function eigenmarkenSeite(ctx, ui, tabs) {
     if (ui.seite === "gruenden" && ui.em.assistent) return assistent(ctx, ui, tabs);
     ui.seite = "eigenmarken";
@@ -162675,41 +162633,52 @@ void main() {
     const gesamt = u.marken.reduce((a2, m) => a2 + m.umsatz13, 0);
     const veraltet = reihe2.filter((m) => m.status === "aktiv" && m.stilAktualitaet < 45);
     if (!reihe2.some((m) => m.id === ui.em.auf)) ui.em.auf = reihe2[0]?.id;
-    let h4 = tabs + '<div class="q31">';
-    h4 += `<div class="q-gross"><span class="q-label">Eigenmarkenanteil am Umsatz</span><span class="q-haupt" data-p="mg:anteil">${pz3(u.anteilUmsatz, 1)}</span><span class="q-neben"><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b>Mehrmarge zu Fremdware</span></div>`;
-    if (!reihe2.length) h4 += '<div class="q-befund">Hartwig f\xFChrt keine Eigenmarke. Eine Marke gr\xFCndest du \xFCber den freien Platz in der Tafel.</div>';
-    else if (veraltet.length) h4 += `<div class="q-befund"><b>${veraltet.map((m) => esc2(m.name)).join(", ")}</b> ${veraltet.length === 1 ? "wirkt" : "wirken"} veraltet. Ohne Neupositionierung sinkt die Nachfrage weiter.</div>`;
-    else h4 += '<div class="q-befund">Alle aktiven Marken sind im Stil aktuell.</div>';
-    h4 += `<div class="q-buch q-tafel" data-summenbuch="Kollektionstafel"><div class="q-buch-kopf"><span>Kollektionstafel</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace(".", ",")} sinnvollen</b></div>`;
-    for (const m of reihe2) {
-      const st2 = m.status !== "aktiv" ? `${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}` : m.stilAktualitaet < 45 ? "Stil veraltet" : `${m.stil}, ${preisText(m.preislage)}`;
-      h4 += `<button class="q-muster${ui.em.auf === m.id ? " q-an" : ""}" data-a="emAuf" data-v="${m.id}" aria-expanded="${ui.em.auf === m.id}"><span class="q-probe" style="--farbe:${m.farbe}"></span><span class="q-name">${esc2(m.name)}<small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie}</small><small class="${m.status === "aktiv" && m.stilAktualitaet < 45 ? "q-minus" : ""}">${st2}</small></span><span class="q-wert"><b data-s="u">${geld(m.umsatz13)}</b><small>${punkte(m.mehrmarge)}</small></span></button>`;
-    }
-    if (u.gefuehrt < u.kapazitaet) h4 += '<button class="q-muster q-frei" data-a="emGruenden"><span class="q-probe"></span><span class="q-name">Freier Platz<small>Neue Eigenmarke gr\xFCnden</small></span><span class="q-wert">+</span></button>';
-    if (reihe2.length) h4 += `<div class="q-summe"><span>Umsatz 13 Wochen gesamt</span><span class="q-wert" data-summe="u" data-p="mg:umsatz">${geld(gesamt)}</span></div>`;
-    h4 += "</div>";
-    if (u.gefuehrt >= u.kapazitaet) h4 += '<button class="q-neben-akt" data-a="emGruenden" style="margin-bottom:12px">+ Neue Eigenmarke (Kapazit\xE4t voll)</button>';
-    for (const m of reihe2.filter((x2) => x2.id === ui.em.auf)) {
+    let h4 = !reihe2.length ? befund("Hartwig f\xFChrt keine Eigenmarke. Gr\xFCnde eine \xFCber den freien Platz.") : veraltet.length ? befund(`${esc2(veraltet.map((m) => m.name).join(" und "))} ${veraltet.length === 1 ? "wirkt" : "wirken"} veraltet. Ohne Neupositionierung sinkt die Nachfrage.`, "engpass") : befund("Alle aktiven Marken sind im Stil aktuell.");
+    h4 += tabs;
+    let x2 = gross2([{ label: "Anteil am Umsatz", wert: pz3(u.anteilUmsatz, 1), p: "mg:anteil" }, { label: "Mehrmarge", wert: punkte(u.mehrmargeSchnitt), p: "mg:marge", ton: "gut", unter: "zu Fremdware" }]);
+    x2 += '<div data-summenbuch="Kollektionstafel">';
+    x2 += `<h3 class="hw-abschnitt">Kollektionstafel<small data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace(".", ",")} sinnvollen</small></h3>`;
+    x2 += liste([
+      ...reihe2.map((m) => {
+        const st2 = m.status !== "aktiv" ? `${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}` : m.stilAktualitaet < 45 ? '<span class="hw-schlecht">Stil veraltet</span>' : `${esc2(m.stil)}, ${preisText(m.preislage)}`;
+        return zeile({ was: `${farbpunkt(m.farbe)} ${esc2(m.name)}`, unter: `${esc2(zielText(m.zielgruppe))} \xB7 ${esc2(m.kategorie)} \xB7 ${st2}`, wert: `<span data-s="u">${geld(m.umsatz13)}</span>`, wertUnter: punkte(m.mehrmarge), tippbar: true, attr: `data-a="emAuf" data-v="${esc2(m.id)}" aria-expanded="${ui.em.auf === m.id}"${ui.em.auf === m.id ? ' aria-current="true"' : ""}` });
+      }),
+      ...u.gefuehrt < u.kapazitaet ? [zeile({ was: "Freier Platz", unter: "Neue Eigenmarke gr\xFCnden", tippbar: true, attr: 'data-a="emGruenden"' })] : []
+    ]);
+    if (reihe2.length) x2 += `<div class="hw-g1-summe"><span>Umsatz 13 Wochen gesamt</span><b data-summe="u" data-p="mg:umsatz">${geld(gesamt)}</b></div>`;
+    x2 += "</div>";
+    if (u.gefuehrt >= u.kapazitaet) x2 += knoepfe(knopf("Neue Eigenmarke gr\xFCnden", 'data-a="emGruenden"', "zweit")) + '<p class="hw-lese hw-g1-notiz">Die Kapazit\xE4t ist voll: jede weitere Marke kostet Wirkung.</p>';
+    for (const m of reihe2.filter((y2) => y2.id === ui.em.auf)) {
       const veraltetM = m.stilAktualitaet < 45;
-      const status2 = m.status !== "aktiv" ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}</span>` : veraltetM ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
-      h4 += `<div class="karte emkarte"><div class="mkopf" style="background:${m.farbe}"><b>${esc2(m.name)}</b><small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie}${m.gewachsen ? " \xB7 gewachsene Hartwig-Marke" : ""}</small></div>`;
-      h4 += `<div class="owerte"><div><span>Umsatz 13 Wochen</span><b data-p="m:${m.id}:umsatz">${geld(m.umsatz13)}</b></div><div><span>Rohertragsquote</span><b data-p="m:${m.id}:marge">${pz3(m.rohertragsquote, 1)}</b></div><div><span>Mehrmarge</span><b data-p="m:${m.id}:mehrmarge">${punkte(m.mehrmarge)}</b></div></div>`;
-      h4 += `<div class="ochips">${status2}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualit\xE4t ${m.qualitaet} von 5</span><span class="chip grau">${esc2(m.beschaffungName)}</span></div>`;
-      h4 += `<div class="mzeile"><span>Bekanntheit</span>${balken7(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
-      h4 += `<div class="mzeile"><span>Stil aktuell</span>${balken7(m.stilAktualitaet, veraltetM ? "var(--hk-schlecht, #d23c32)" : "var(--hk-gut, #2f8f5b)")}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
-      h4 += `<div class="mzeile"><span>Passung je Region</span></div>${passungZeile(m.passungRegion, `m:${m.id}:passung`)}`;
-      h4 += teamAufschluesselung(leistungen.get(m.id));
-      h4 += `<div class="olief">${m.wgs.filter((w2) => w2.anteilZiel > 0 || w2.anteilIst > 0).map((w2) => `${esc2(w2.name)} ${pz3(w2.anteilIst)}`).join(" \xB7 ") || "Noch in keiner Warengruppe."}</div>`;
-      if (m.hinweise?.length) h4 += `<div class="olief warnung">${m.hinweise.map(esc2).join(" \xB7 ")}</div>`;
-      if (ui.em.einstellen === m.id) h4 += `<div class="oknoepfe"><button class="rot" data-a="emEinstellenJa" data-v="${m.id}">Wirklich einstellen</button><button data-a="emEinstellenNein">Behalten</button></div>`;
-      else {
-        h4 += `<div class="regler"><div class="rkopf"><b>Markenbudget je Woche</b><small>baut Bekanntheit auf</small></div><div class="stepper"><button data-a="emBudget" data-v="${m.id}" data-d="-5000" aria-label="Budget senken">\u2212</button><span><b data-p="m:${m.id}:budget">${geld(m.budgetWoche)}</b></span><button data-a="emBudget" data-v="${m.id}" data-d="5000" aria-label="Budget erh\xF6hen">+</button></div></div>`;
-        h4 += `<div class="oknoepfe"><button data-a="emPositionieren" data-v="${m.id}"${m.status === "aktiv" ? "" : " disabled"}>Neu positionieren</button><button class="rot" data-a="emEinstellen" data-v="${m.id}">Einstellen</button></div>`;
+      x2 += `<h3 class="hw-abschnitt hw-g1-akte"><span>${farbpunkt(m.farbe, 16)} ${esc2(m.name)}</span><small>${esc2(zielText(m.zielgruppe))} \xB7 ${esc2(m.kategorie)}</small></h3>`;
+      const marken2 = [
+        m.status !== "aktiv" ? marke4(`${STATUS[m.status] ?? m.status}${m.bis !== void 0 ? ` bis KW ${kwVon2(m.bis)}` : ""}`) : veraltetM ? marke4("Stil veraltet", "schlecht") : marke4("aktiv", "gut"),
+        marke4(preisText(m.preislage)),
+        marke4(m.stil),
+        marke4(`Qualit\xE4t ${m.qualitaet} von 5`),
+        marke4(m.beschaffungName)
+      ];
+      if (m.gewachsen) marken2.push(marke4("gewachsene Hartwig-Marke"));
+      x2 += `<div class="hw-statusreihe">${marken2.join("")}</div>`;
+      x2 += gross2([{ label: "Umsatz 13 Wochen", wert: geld(m.umsatz13), p: `m:${m.id}:umsatz` }, { label: "Rohertragsquote", wert: pz3(m.rohertragsquote, 1), p: `m:${m.id}:marge`, unter: `Mehrmarge <span data-p="m:${esc2(m.id)}:mehrmarge">${punkte(m.mehrmarge)}</span>` }]);
+      x2 += abschnitt("Marke");
+      x2 += `<div class="hw-g1-skalen">${skalaP("Bekanntheit", m.bekanntheit, `m:${m.id}:bekanntheit`)}${skalaP("Stil aktuell", m.stilAktualitaet, `m:${m.id}:aktualitaet`)}</div>`;
+      x2 += abschnitt("Passung je Region") + passung(m.passungRegion, `m:${m.id}:passung`);
+      x2 += teamAufschluesselung(leistungen.get(m.id));
+      const wgs = m.wgs.filter((w2) => w2.anteilZiel > 0 || w2.anteilIst > 0);
+      x2 += abschnitt("Warengruppen", "Anteil der Marke");
+      x2 += wgs.length ? liste(wgs.map((w2) => zeile({ was: esc2(w2.name), wert: pz3(w2.anteilIst) }))) : leer3("Noch in keiner Warengruppe.");
+      for (const t5 of m.hinweise ?? []) x2 += hinweis(esc2(t5), "achtung");
+      if (ui.em.einstellen === m.id) {
+        x2 += hinweis(`${esc2(m.name)} wirklich einstellen? Die Ware l\xE4uft ab.`, "fehler");
+        x2 += `<div class="hw-knoepfe zweispaltig">${knopf("Einstellen der Marke", `data-a="emEinstellenJa" data-v="${esc2(m.id)}" data-gefahr`, "gefahr")}${knopf("Behalten", 'data-a="emEinstellenNein"', "zweit")}</div>`;
+      } else {
+        x2 += abschnitt("Markenbudget je Woche", "baut Bekanntheit auf");
+        x2 += stepper({ wert: geld(m.budgetWoche), label: "Markenbudget je Woche", attrMinus: `data-a="emBudget" data-v="${esc2(m.id)}" data-d="-5000"`, attrPlus: `data-a="emBudget" data-v="${esc2(m.id)}" data-d="5000"`, minusAus: m.budgetWoche <= 0 }).replace("<output>", `<output data-p="m:${esc2(m.id)}:budget">`);
+        x2 += `<div class="hw-knoepfe zweispaltig">${knopf("Neu positionieren", `data-a="emPositionieren" data-v="${esc2(m.id)}"`, "zweit", m.status !== "aktiv")}${knopf("Einstellen der Marke", `data-a="emEinstellen" data-v="${esc2(m.id)}" data-gefahr`, "gefahr")}</div>`;
       }
-      h4 += "</div>";
     }
-    h4 += "</div>";
-    return { titel: "Eigenmarken", unter: `${u.gefuehrt} Marken \xB7 ${pz3(u.anteilUmsatz, 1)} vom Umsatz \xB7 KW ${kwVon2(s2.woche)}`, html: h4 };
+    return { titel: "Eigenmarken", unter: `${u.gefuehrt} Marken \xB7 ${pz3(u.anteilUmsatz, 1)} vom Umsatz \xB7 KW ${kwVon2(s2.woche)}`, html: `<div class="hw-g1">${h4}${rumpf2(x2)}</div>` };
   }
   var SCHRITTE = ["Zielgruppe", "Sortiment", "Profil", "Beschaffung", "Name"];
   var nameFuer = (s2, g2) => {
@@ -162725,51 +162694,62 @@ void main() {
   }
   function assistent(ctx, ui, tabs) {
     const s2 = ctx.s(), A = ui.em.assistent, m = A.daten, u = ctx.q.marken(s2);
-    const seg2 = (act, wert, opt, sperre2 = false) => `<div class="seg umbruch">${opt.map(([v3, t5]) => `<button class="${String(v3) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v3}"${sperre2 ? " disabled" : ""}>${t5}</button>`).join("")}</div>`;
-    const feld2 = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
     const v2 = ctx.q.vorschau(s2, m);
-    let h4 = tabs;
-    h4 += `<button class="zurueck" data-a="emAbbrechen">\u2039 Eigenmarken</button>`;
-    h4 += `<div class="schritte">${SCHRITTE.map((t5, i) => `<button class="${i === A.schritt ? "an" : i < A.schritt ? "fertig" : ""}" data-a="emSchritt" data-v="${i}"><b>${i + 1}</b>${t5}</button>`).join("")}</div>`;
-    h4 += '<div class="karte steuerung">';
-    if (A.schritt === 0) {
-      if (!A.id) h4 += feld2("Vorlage", `<div class="seg umbruch">${ctx.q.vorlagen().map((x2, i) => `<button class="${A.vorlage === i ? "an" : ""}" data-a="emVorlage" data-v="${i}">${esc2(x2.titel)}</button>`).join("")}</div>`, "f\xFCllt alle Schritte vor");
-      h4 += feld2("Alter", seg2("emAlter", m.zielgruppe.alter, alterOptionen(m.zielgruppe.alter)));
-      h4 += feld2("Geschlecht", seg2("emGeschlecht", m.zielgruppe.geschlecht, GESCHLECHT));
-    } else if (A.schritt === 1) {
-      h4 += feld2("Kategorie", seg2("emKategorie", m.kategorie, KATEGORIE2.map((k5) => [k5, k5]), !!A.id), A.id ? "bleibt bei Neupositionierung" : "");
-      const liste3 = [...v2.passendeWgs].sort((a2, b4) => b4.passung - a2.passung);
-      const inh = liste3.length ? liste3.map((w2) => {
-        const a2 = m.wgAnteile[w2.wg];
-        return `<button class="wgwahl ${a2 ? "an" : ""}" data-a="emWg" data-v="${w2.wg}"><span>${esc2(w2.name)} <i>${esc2(ctx.E.GRUPPEN[w2.bereich]?.name ?? w2.bereich)} \xB7 ${w2.passung >= 1 ? "passt sehr gut" : w2.passung >= 0.7 ? "passt gut" : "passt bedingt"}</i></span><b>${a2 ? pz3(a2) : "+"}</b></button>`;
-      }).join("") : '<div class="leise">Keine Warengruppe passt zu Zielgruppe und Kategorie.</div>';
-      h4 += feld2("Warengruppen", `<div class="wgliste">${inh}</div>`, "Antippen: 15, 25, 40 % oder aus");
-    } else if (A.schritt === 2) {
-      h4 += feld2("Preislage", seg2("emPreis", m.preislage, PREIS2));
-      h4 += feld2("Stil", seg2("emStil", m.stil, STIL3), "trendig veraltet schneller");
-      h4 += feld2("Qualit\xE4t", seg2("emQualitaet", m.qualitaet, [1, 2, 3, 4, 5].map((x2) => [x2, "\u2605".repeat(x2)])));
-    } else if (A.schritt === 3) {
-      const B8 = ctx.q.beschaffung();
-      h4 += feld2("Beschaffung", `<div class="wahlkarten">${Object.entries(B8).map(([k5, b4]) => `<button class="${m.beschaffung === k5 ? "an" : ""}" data-a="emBeschaffung" data-v="${k5}"><b>${esc2(b4.name)}</b><small>${b4.vorlauf} Wochen Vorlauf, Mindestabnahme ${geld(b4.mindestabnahme)}, ${punkte(b4.mehrmarge)} Marge</small></button>`).join("")}</div>`);
-      h4 += feld2("Markenbudget je Woche", `<div class="stepper"><button data-a="emBudgetNeu" data-v="-5000">\u2212</button><span><b>${geld(m.budgetWoche)}</b></span><button data-a="emBudgetNeu" data-v="5000">+</button></div>`, "baut Bekanntheit auf");
-    } else {
-      h4 += feld2("Name", `<input class="ort gross" data-a="emName" maxlength="22" value="${esc2(m.name)}">`);
-      if (!A.id) h4 += feld2("Farbe", `<div class="farben">${FARBEN6.map((f13) => `<button class="${m.farbe === f13 ? "an" : ""}" style="background:${f13}" data-a="emFarbe" data-v="${f13}" aria-label="Farbe ${f13}"></button>`).join("")}</div>`, "f\xFCr Shop und Karte");
-    }
-    h4 += "</div>";
     const nWg = Object.values(m.wgAnteile).filter((a2) => a2 > 0).length;
     const kosten2 = A.id ? u.kosten.neupositionierung : v2.kosten;
-    h4 += `<div class="karte vorschau"><div class="mkopf" style="background:${m.farbe}"><b>${esc2(m.name)}</b><small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie} \xB7 ${preisText(m.preislage)} \xB7 ${m.stil}</small></div>`;
-    h4 += `<div class="owerte"><div><span>${A.id ? "Kosten" : "Einmalkosten"}</span><b data-p="v:kosten">${geld(kosten2)}</b></div><div><span>${A.id ? "Umstellung" : "Erste Ware in"}</span><b data-p="v:aufbau">${A.id ? u.kosten.neupositionierungWochen : v2.aufbauWochen} Wochen</b></div><div><span>Mehrmarge</span><b data-p="v:marge">${punkte(v2.mehrmarge)}</b></div></div>`;
-    h4 += `<div class="mzeile"><span>Passung je Region</span></div>${passungZeile(v2.passungRegion, "v:passung")}`;
-    h4 += `<div class="olief">${nWg} Warengruppen \xB7 Mindestabnahme ${geld(v2.mindestabnahme)} je Order${v2.kapazitaetFrei > 0 ? ` \xB7 Platz f\xFCr ${String(v2.kapazitaetFrei).replace(".", ",")} weitere Marken` : ""}</div>`;
-    if (v2.kapazitaetFrei <= 0 && !A.id) h4 += '<div class="olief warnung">Der Einkauf ist mit den bestehenden Marken ausgelastet: jede weitere Marke kostet Wirkung, mehr Platz bringt eine h\xF6here Stufe der Abteilung Einkauf im HQ.</div>';
-    if (!v2.ok && v2.fehler && !A.id) h4 += `<div class="olief warnung">${esc2(v2.fehler)}</div>`;
-    h4 += "</div>";
-    const letzte = A.schritt === SCHRITTE.length - 1;
     const gesperrt2 = !A.id && (!nWg || !v2.ok);
-    h4 += `<div class="oknoepfe unten2">${A.schritt > 0 ? '<button data-a="emZurueck">Zur\xFCck</button>' : ""}${letzte ? `<button class="gruen" data-a="emFertig"${gesperrt2 ? " disabled" : ""}>${A.id ? "Neu positionieren" : "Marke gr\xFCnden"}</button>` : '<button class="gruen" data-a="emWeiter">Weiter</button>'}</div>`;
-    return { titel: A.id ? "Neu positionieren" : "Marke gr\xFCnden", unter: `Schritt ${A.schritt + 1} von ${SCHRITTE.length}: ${SCHRITTE[A.schritt]}`, html: h4 };
+    const satz = !A.id && v2.kapazitaetFrei <= 0 ? "Der Einkauf ist ausgelastet: jede weitere Marke kostet Wirkung." : !A.id && !v2.ok && v2.fehler ? esc2(v2.fehler) : `${esc2(m.name)} f\xFCr ${esc2(zielText(m.zielgruppe))}: ${punkte(v2.mehrmarge)} Mehrmarge erwartet.`;
+    let h4 = befund(satz, !A.id && (v2.kapazitaetFrei <= 0 || !v2.ok) ? "engpass" : "") + tabs;
+    h4 += `<div class="hw-g1-oben">${knopf("\u2039 Eigenmarken", 'data-a="emAbbrechen"', "text")}</div>`;
+    let x2 = `<ol class="hw-g1-schritte fuenf">${SCHRITTE.map((t5, i) => `<li class="${i === A.schritt ? "an" : i < A.schritt ? "fertig" : ""}"${i === A.schritt ? ' aria-current="step"' : ""}><button type="button" data-a="emSchritt" data-v="${i}"><i>${i + 1}</i>${t5}</button></li>`).join("")}</ol>`;
+    const wahl3 = (act, wert, opt, sperre2 = false) => chips(opt.map(([w2, t5]) => [w2, esc2(String(t5))]), wert, (w2) => `data-a="${act}" data-v="${esc2(String(w2))}"`, "", sperre2);
+    if (A.schritt === 0) {
+      if (!A.id) {
+        x2 += abschnitt("Vorlage", "f\xFCllt alle Schritte vor");
+        x2 += `<div class="hw-g1-typen">${ctx.q.vorlagen().map((y2, i) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${A.vorlage === i}" data-a="emVorlage" data-v="${i}"><b>${esc2(y2.titel)}</b><small>${esc2(y2.entwurf.kategorie)} \xB7 ${esc2(preisText(y2.entwurf.preislage))}</small></button>`).join("")}</div>`;
+      }
+      x2 += abschnitt("Alter") + wahl3("emAlter", m.zielgruppe.alter, alterOptionen(m.zielgruppe.alter));
+      x2 += abschnitt("Geschlecht") + wahl3("emGeschlecht", m.zielgruppe.geschlecht, GESCHLECHT);
+    } else if (A.schritt === 1) {
+      x2 += abschnitt("Kategorie", A.id ? "bleibt bei Neupositionierung" : "") + wahl3("emKategorie", m.kategorie, KATEGORIE2.map((k5) => [k5, k5]), !!A.id);
+      const liste3 = [...v2.passendeWgs].sort((a2, b4) => b4.passung - a2.passung);
+      x2 += abschnitt("Warengruppen", "Antippen: 15, 25, 40 % oder aus");
+      x2 += liste3.length ? liste(liste3.map((w2) => {
+        const a2 = m.wgAnteile[w2.wg];
+        return zeile({ was: esc2(w2.name), unter: `${esc2(ctx.E.GRUPPEN[w2.bereich]?.name ?? w2.bereich)} \xB7 ${w2.passung >= 1 ? "passt sehr gut" : w2.passung >= 0.7 ? "passt gut" : "passt bedingt"}`, wert: a2 ? pz3(a2) : "aus", ton: a2 ? "gut" : "", tippbar: true, attr: `data-a="emWg" data-v="${esc2(w2.wg)}" aria-pressed="${!!a2}"` });
+      })) : leer3("Keine Warengruppe passt zu Zielgruppe und Kategorie.");
+    } else if (A.schritt === 2) {
+      x2 += abschnitt("Preislage");
+      x2 += `<div class="hw-g1-typen drei">${PREIS2.map(([w2, t5], i) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${m.preislage === w2}" data-a="emPreis" data-v="${w2}"><b>${t5}</b><small>${"\u20AC".repeat(i + 1)}</small></button>`).join("")}</div>`;
+      x2 += abschnitt("Stil", "trendig veraltet schneller") + wahl3("emStil", m.stil, STIL3);
+      x2 += abschnitt("Qualit\xE4t", `${m.qualitaet} von 5`);
+      x2 += `<div class="hw-g1-qualitaet">${stepper({ wert: `${m.qualitaet} von 5`, label: "Qualit\xE4t", attrMinus: `data-a="emQualitaet" data-v="${m.qualitaet - 1}"`, attrPlus: `data-a="emQualitaet" data-v="${m.qualitaet + 1}"`, minusAus: m.qualitaet <= 1, plusAus: m.qualitaet >= 5 })}</div>`;
+    } else if (A.schritt === 3) {
+      const B8 = ctx.q.beschaffung();
+      x2 += abschnitt("Beschaffung");
+      x2 += `<div class="hw-g1-typen eins">${Object.entries(B8).map(([k5, b4]) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${m.beschaffung === k5}" data-a="emBeschaffung" data-v="${k5}"><b>${esc2(b4.name)}</b><small>${b4.vorlauf} Wochen Vorlauf \xB7 Mindestabnahme ${geld(b4.mindestabnahme)} \xB7 ${punkte(b4.mehrmarge)} Marge</small><small>${esc2(BESCHAFFUNG_TEXT[k5] ?? "")}</small></button>`).join("")}</div>`;
+      x2 += abschnitt("Markenbudget je Woche", "baut Bekanntheit auf");
+      x2 += stepper({ wert: geld(m.budgetWoche), label: "Markenbudget je Woche", attrMinus: 'data-a="emBudgetNeu" data-v="-5000"', attrPlus: 'data-a="emBudgetNeu" data-v="5000"', minusAus: m.budgetWoche <= 0 });
+    } else {
+      x2 += abschnitt("Name");
+      x2 += `<input class="hw-g1-eingabe" data-a="emName" maxlength="22" value="${esc2(m.name)}" aria-label="Name der Marke">`;
+      if (!A.id) x2 += abschnitt("Farbe", "f\xFCr Shop und Karte") + `<div class="hw-g1-farben" role="group" aria-label="Markenfarbe">${FARBEN6.map((f13) => `<button type="button" class="hw-g1-farbknopf" aria-pressed="${m.farbe === f13}" data-a="emFarbe" data-v="${f13}" aria-label="Farbe ${f13}">${farbpunkt(f13, 30)}</button>`).join("")}</div>`;
+    }
+    x2 += `<h3 class="hw-abschnitt">Vorschau<small>${farbpunkt(m.farbe)} ${esc2(m.name)}</small></h3>`;
+    x2 += `<p class="hw-lese hw-g1-notiz">${esc2(zielText(m.zielgruppe))} \xB7 ${esc2(m.kategorie)} \xB7 ${preisText(m.preislage)} \xB7 ${esc2(m.stil)}</p>`;
+    x2 += gross2([{ label: A.id ? "Kosten" : "Einmalkosten", wert: geld(kosten2), p: "v:kosten" }, { label: "Mehrmarge", wert: punkte(v2.mehrmarge), p: "v:marge", ton: "gut" }]);
+    x2 += liste([
+      zeile({ was: A.id ? "Umstellung" : "Erste Ware in", wert: `<span data-p="v:aufbau">${A.id ? u.kosten.neupositionierungWochen : v2.aufbauWochen} Wochen</span>` }),
+      zeile({ was: "Warengruppen", wert: String(nWg) }),
+      zeile({ was: "Mindestabnahme je Order", wert: geld(v2.mindestabnahme) }),
+      ...v2.kapazitaetFrei > 0 ? [zeile({ was: "Platz f\xFCr weitere Marken", wert: String(v2.kapazitaetFrei).replace(".", ",") })] : []
+    ]);
+    x2 += abschnitt("Passung je Region") + passung(v2.passungRegion, "v:passung");
+    if (v2.kapazitaetFrei <= 0 && !A.id) x2 += hinweis("Der Einkauf ist mit den bestehenden Marken ausgelastet: mehr Platz bringt eine h\xF6here Stufe der Abteilung Einkauf im HQ.", "achtung");
+    if (!v2.ok && v2.fehler && !A.id) x2 += hinweis(esc2(v2.fehler), "fehler");
+    const letzte = A.schritt === SCHRITTE.length - 1;
+    x2 += `<div class="hw-knoepfe zweispaltig">${A.schritt > 0 ? knopf("Zur\xFCck", 'data-a="emZurueck"', "zweit") : knopf("Abbrechen", 'data-a="emAbbrechen"', "zweit")}${letzte ? knopf(A.id ? "Neu positionieren" : "Marke gr\xFCnden", 'data-a="emFertig"', "", gesperrt2) : knopf("Weiter", 'data-a="emWeiter"')}</div>`;
+    return { titel: A.id ? "Neu positionieren" : "Marke gr\xFCnden", unter: `Schritt ${A.schritt + 1} von ${SCHRITTE.length}: ${SCHRITTE[A.schritt]}`, html: `<div class="hw-g1">${h4}${rumpf2(x2)}</div>` };
   }
   function eigenmarkenAktion(ctx, ui, el2, ev, tun2) {
     const a2 = el2.dataset.a, v2 = el2.dataset.v, s2 = ctx.s();
@@ -163163,8 +163143,8 @@ void main() {
       }
       const k5 = d4.kennzahlen, st2 = d4.steuerung, a2 = d4.ampeln;
       const rote = q2.spalten().filter((c) => a2[c.id] === "rot").map((c) => c.name);
-      const befund2 = a2.reichweite === "rot" ? `<b>Die Reichweite von ${esc2(text3("reichweite", k5))} steht auf Rot.</b> Limit, Vororder und Reduzierung pr\xFCfen.` : rote.length ? `<b>${rote.length === 1 ? "Eine Kennzahl steht" : rote.length + " Kennzahlen stehen"} auf Rot:</b> ${esc2(rote.slice(0, 3).join(", "))}.` : `<b>${esc2(d4.name)} liegt im Ziel.</b> Bestand und Abverkauf passen zusammen.`;
-      let h4 = tabs() + cpo(befund2, a2.reichweite === "rot" || rote.length ? "engpass" : "");
+      const befund3 = a2.reichweite === "rot" ? `<b>Die Reichweite von ${esc2(text3("reichweite", k5))} steht auf Rot.</b> Limit, Vororder und Reduzierung pr\xFCfen.` : rote.length ? `<b>${rote.length === 1 ? "Eine Kennzahl steht" : rote.length + " Kennzahlen stehen"} auf Rot:</b> ${esc2(rote.slice(0, 3).join(", "))}.` : `<b>${esc2(d4.name)} liegt im Ziel.</b> Bestand und Abverkauf passen zusammen.`;
+      let h4 = tabs() + cpo(befund3, a2.reichweite === "rot" || rote.length ? "engpass" : "");
       let x2 = '<div class="hw-g2-oben">' + knopf(`\u2039 ${d4.bereichName}`, `data-a="seite" data-v="uebersicht" aria-label="Zur\xFCck zur \xDCbersicht ${esc2(d4.bereichName)}"`, "text") + "</div>";
       x2 += gross2([
         { label: "Reichweite", wert: text3("reichweite", k5), p: "d:reichweite", ton: TON[a2.reichweite], unter: AMPEL_TEXT[a2.reichweite] ?? "ohne Ampel" },
@@ -163223,8 +163203,8 @@ void main() {
       const bereiche = [...new Map(alle.liste.map((o4) => [o4.bereich, o4.bereichName])).entries()];
       const summe2 = l.reduce((a2, o4) => a2 + o4.wert, 0);
       const dringend = l.filter((o4) => o4.restWochen <= 0), verfall = dringend.filter((o4) => o4.modus !== "auto");
-      const befund2 = !alle.anzahl ? `<b>Keine Order wartet.</b> Orders bis ${geld(alle.grenze)} EK gehen ohne dich durch.` : verfall.length ? `<b>${verfall.length} ${verfall.length === 1 ? "Saisonorder verf\xE4llt" : "Saisonorders verfallen"} diese Woche.</b> Ohne Freigabe fehlt die Ware in der Saison.` : dringend.length ? `<b>${dringend.length} ${dringend.length === 1 ? "Order l\xE4uft" : "Orders laufen"} diese Woche ab.</b> Danach ${dringend.length === 1 ? "geht sie" : "gehen sie"} automatisch durch.` : `<b>${alle.anzahl} ${alle.anzahl === 1 ? "Order wartet" : "Orders warten"}.</b> Diese Woche l\xE4uft keine Frist ab.`;
-      let h4 = tabs() + cpo(befund2, verfall.length ? "alarm" : dringend.length ? "engpass" : "");
+      const befund3 = !alle.anzahl ? `<b>Keine Order wartet.</b> Orders bis ${geld(alle.grenze)} EK gehen ohne dich durch.` : verfall.length ? `<b>${verfall.length} ${verfall.length === 1 ? "Saisonorder verf\xE4llt" : "Saisonorders verfallen"} diese Woche.</b> Ohne Freigabe fehlt die Ware in der Saison.` : dringend.length ? `<b>${dringend.length} ${dringend.length === 1 ? "Order l\xE4uft" : "Orders laufen"} diese Woche ab.</b> Danach ${dringend.length === 1 ? "geht sie" : "gehen sie"} automatisch durch.` : `<b>${alle.anzahl} ${alle.anzahl === 1 ? "Order wartet" : "Orders warten"}.</b> Diese Woche l\xE4uft keine Frist ab.`;
+      let h4 = tabs() + cpo(befund3, verfall.length ? "alarm" : dringend.length ? "engpass" : "");
       let x2 = gross2([
         { label: "Wartet auf Freigabe", wert: geld(summe2), p: "sammel", unter: `${l.length} ${l.length === 1 ? "Order" : "Orders"} \xB7 ${dringend.length} f\xE4llig` },
         { label: "Freigabegrenze", wert: geld(alle.grenze), p: "grenze", unter: "dar\xFCber entscheidest du" }
@@ -163270,8 +163250,7 @@ void main() {
     function zeigen(scrollHalten = false) {
       const sc = document.getElementById("pinhalt").scrollTop;
       const r4 = ui.seite === "wg" ? wgSeite() : ui.seite === "freigaben" ? freigabenSeite() : ui.seite === "eigenmarken" || ui.seite === "gruenden" ? eigenmarkenSeite(ctx, ui, tabs()) : ["merchandise", "allokation", "reduzierungKalender"].includes(ui.seite) ? warenSeite(ctx, ui, tabs()) : uebersicht();
-      const alt = ui.seite === "eigenmarken" || ui.seite === "gruenden" ? '<i class="q31-marke" hidden></i>' : "";
-      ctx.panel(r4.titel, r4.unter, bereich("zentrale") + alt + r4.html, "gross");
+      ctx.panel(r4.titel, r4.unter, bereich("zentrale") + r4.html, "gross");
       ui.aktiv = true;
       if (scrollHalten) document.getElementById("pinhalt").scrollTop = sc;
       badge();
@@ -164006,7 +163985,7 @@ void main() {
         (v2) => 'data-po-a="tab" data-v="' + v2 + '"'
       ).replace('class="hw-segment"', 'class="hw-segment eng" aria-label="Posteingang"');
     }
-    function befund2(D) {
+    function befund3(D) {
       const ab = D.handeln.filter((x2) => x2.restWochen === 0).length, n3 = D.handeln.length;
       if (!n3) return sprecher({ text: "<b>Nichts liegt zur Entscheidung.</b> Neue Vorg\xE4nge kommen mit dem Wochenabschluss.", unter: "Sekretariat", person: SEKRETARIAT });
       const summe2 = D.handeln.reduce((a2, p2) => a2 + (p2.wert?.betrag ?? 0), 0);
@@ -164113,7 +164092,7 @@ void main() {
     function zeigen(scrollHalten = false) {
       const vorher = document.getElementById("pinhalt").scrollTop, D = daten();
       const seite2 = einstellungen2().reiter === "meldungen" ? meldungen(D) : einstellungen2().reiter === "erledigt" ? erledigt(D) : handeln(D);
-      const inhalt2 = bereich("betrieb", "post") + befund2(D) + '<div class="hw-g5">' + rumpf2(tabs(D) + seite2) + "</div>";
+      const inhalt2 = bereich("betrieb", "post") + befund3(D) + '<div class="hw-g5">' + rumpf2(tabs(D) + seite2) + "</div>";
       ctx.panel("Posteingang", (D.handeln.length === 1 ? "1 Vorgang" : D.handeln.length + " Vorg\xE4nge") + " offen \xB7 KW " + kwVon2(s2().woche), inhalt2, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? vorher : 0;
@@ -165078,8 +165057,8 @@ void main() {
       h4 += u.laufend.length || u.naechste.length ? liste([...u.laufend, ...u.naechste].map(aktionZeile)) : leer3("Im Kalender planst du die n\xE4chste.", "Keine Aktion geplant.");
       for (const x2 of u.hinweise) h4 += hinweis(esc2(x2), "achtung");
       h4 += knoepfe(knopf("Neue Eigenmarke gr\xFCnden", 'data-a="eigenmarkeGruenden"', "zweit breit"));
-      const befund2 = delta == null ? `Werbung netto ${geld(u.wocheNetto)} je Woche, ${pz3(u.werbequoteNetto, 1)} vom Umsatz.` : `${delta >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(Math.round(delta)))} Kunden zur Vorwoche bei ${geld(u.wocheNetto)} Werbung netto.`;
-      return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 KW ${u.kw} / ${u.jahr}`, befund: u.rabattquote13 > 0.08 ? `Die Rabattquote liegt bei ${pz3(u.rabattquote13, 1)}. Kunden gew\xF6hnen sich an Preisaktionen.` : befund2, ton: u.rabattquote13 > 0.08 ? "engpass" : "", html: rumpf2(h4) };
+      const befund3 = delta == null ? `Werbung netto ${geld(u.wocheNetto)} je Woche, ${pz3(u.werbequoteNetto, 1)} vom Umsatz.` : `${delta >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(Math.round(delta)))} Kunden zur Vorwoche bei ${geld(u.wocheNetto)} Werbung netto.`;
+      return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 KW ${u.kw} / ${u.jahr}`, befund: u.rabattquote13 > 0.08 ? `Die Rabattquote liegt bei ${pz3(u.rabattquote13, 1)}. Kunden gew\xF6hnen sich an Preisaktionen.` : befund3, ton: u.rabattquote13 > 0.08 ? "engpass" : "", html: rumpf2(h4) };
     }
     function kanaele2(P5) {
       const r4 = kanaeleAnsicht(E9, s2, ui, P5);
@@ -165182,12 +165161,12 @@ void main() {
       ]);
       h4 += abschnitt("Kundenbindung", "Kachel antippen");
       h4 += kachelRaster(KACHELN.map((x2, i) => kachel({ bild: x2.bild, titel: x2.titel, stufe: x2.stufe, wert: x2.wert, einheit: x2.einheit ?? "je Woche", an: i === g2, attr: `data-a="kachel" data-v="${i}" aria-label="${esc2(x2.titel)} einstellen"` })), g2, g2 >= 0 ? KACHELN[g2].steuer() : "");
-      const befund2 = k5.datenqualitaet < 0.5 ? `Die Kartendaten sind l\xFCckenhaft (Qualit\xE4t ${Math.round(k5.datenqualitaet * 100)}). CRM trifft schlechter.` : `${fmt.format(k5.mitglieder)} Mitglieder bringen ${pz3(k5.umsatzAnteil, 1)} vom Umsatz.`;
-      return { titel: "Hartwig Karte und App", unter: `${pz3(k5.umsatzAnteil, 1)} vom Umsatz mit Karte`, befund: befund2, ton: k5.datenqualitaet < 0.5 ? "engpass" : "", html: rumpf2(h4) };
+      const befund3 = k5.datenqualitaet < 0.5 ? `Die Kartendaten sind l\xFCckenhaft (Qualit\xE4t ${Math.round(k5.datenqualitaet * 100)}). CRM trifft schlechter.` : `${fmt.format(k5.mitglieder)} Mitglieder bringen ${pz3(k5.umsatzAnteil, 1)} vom Umsatz.`;
+      return { titel: "Hartwig Karte und App", unter: `${pz3(k5.umsatzAnteil, 1)} vom Umsatz mit Karte`, befund: befund3, ton: k5.datenqualitaet < 0.5 ? "engpass" : "", html: rumpf2(h4) };
     }
     function crm(P5) {
       const c = E9.crmKampagnen(s2()), B8 = ui.crm;
-      const segment2 = c.segmente[B8.seg] ?? c.segmente[0];
+      const segment = c.segmente[B8.seg] ?? c.segmente[0];
       let h4 = gross2([
         { label: "per Mail", wert: merke2(P5, "c:mail", fmt.format(c.pools.mail)), p: "c:mail" },
         { label: "per Push", wert: merke2(P5, "c:push", fmt.format(c.pools.push)), p: "c:push" },
@@ -165195,7 +165174,7 @@ void main() {
       ]);
       h4 += skalaGross("Erm\xFCdung Mail", (c.ermuedung.mail ?? 0) * 100, P5("c:ermuedung", pz3(c.ermuedung.mail ?? 0), "b", ` class="hw-skala-wert${(c.ermuedung.mail ?? 0) > 0.5 ? " hw-schlecht" : ""}"`));
       h4 += abschnitt("Neue Kampagne");
-      h4 += feld("Segment", stepper({ wert: segment2?.text ?? "Alle", unter: segment2 ? `${fmt.format(segment2.groesse)} Mitglieder` : "", label: "Segment w\xE4hlen", attrMinus: 'data-a="crmSeg" data-v="-1"', attrPlus: 'data-a="crmSeg" data-v="1"' }));
+      h4 += feld("Segment", stepper({ wert: segment?.text ?? "Alle", unter: segment ? `${fmt.format(segment.groesse)} Mitglieder` : "", label: "Segment w\xE4hlen", attrMinus: 'data-a="crmSeg" data-v="-1"', attrPlus: 'data-a="crmSeg" data-v="1"' }));
       h4 += '<div class="hw-abstand"></div>' + feld("Kanal", seg(KANAL2, B8.kanal, (w2) => `data-a="crmKanal" data-v="${w2}"`));
       h4 += '<div class="hw-abstand"></div>' + feld("Angebot", seg(ANGEBOT, B8.angebot, (w2) => `data-a="crmAngebot" data-v="${w2}"`));
       if (B8.angebot === "coupon") h4 += '<div class="hw-abstand"></div>' + feld("Coupon", seg([[0.1, "10 %"], [0.15, "15 %"], [0.2, "20 %"], [0.25, "25 %"]], B8.prozent, (w2) => `data-a="crmProzent" data-v="${w2}"`)) + '<div class="hw-abstand"></div>' + feld("Mindestbon", seg([[0, "ohne"], [40, "ab 40 \u20AC"], [80, "ab 80 \u20AC"]], B8.mindestbon, (w2) => `data-a="crmMindestbon" data-v="${w2}"`));
@@ -165224,7 +165203,7 @@ void main() {
       return { titel: "CRM-Kampagnen", unter: `${aktiv7} aktiv \xB7 Datenqualit\xE4t ${Math.round(c.datenqualitaet * 100)}`, befund: (c.ermuedung.mail ?? 0) > 0.5 ? `Mail-Erm\xFCdung ${pz3(c.ermuedung.mail)}: \xD6ffnungen sinken, Abmeldungen steigen.` : `${aktiv7} Kampagnen laufen. Per Mail erreichen wir ${fmt.format(c.pools.mail)} Mitglieder.`, ton: (c.ermuedung.mail ?? 0) > 0.5 ? "engpass" : "", html: rumpf2(h4) };
     }
     function zeitleiste(Kal) {
-      const W3 = 350, L3 = 2, B8 = (W3 - L3 * 2) / 52, zeilen = [], balken8 = [];
+      const W3 = 350, L3 = 2, B8 = (W3 - L3 * 2) / 52, zeilen = [], balken7 = [];
       for (const a2 of Kal.eintraege) {
         const von = Math.max(0, a2.start - (Kal.jahr - s2().startJahr) * 52), bis = Math.min(52, a2.ende - (Kal.jahr - s2().startJahr) * 52);
         let z6 = zeilen.findIndex((e) => e <= von);
@@ -165233,7 +165212,7 @@ void main() {
           zeilen.push(0);
         }
         zeilen[z6] = bis + 0.4;
-        balken8.push({ a: a2, von, bis, z: z6 });
+        balken7.push({ a: a2, von, bis, z: z6 });
       }
       const RH = 24, H = 22 + Math.max(1, zeilen.length) * RH + 16;
       let g2 = `<svg class="hw-g3-zeitleiste" viewBox="0 0 ${W3} ${H}" role="img" aria-label="Aktionen im Jahr ${Kal.jahr}">`;
@@ -165241,7 +165220,7 @@ void main() {
         const x2 = L3 + m * 52 / 12 * B8;
         g2 += `<line x1="${x2.toFixed(1)}" x2="${x2.toFixed(1)}" y1="16" y2="${H}" class="hw-g3-linie"/><text x="${(x2 + 3).toFixed(1)}" y="11" class="hw-g3-monat">${MONATE[m]}</text>`;
       }
-      for (const { a: a2, von, bis, z: z6 } of balken8) {
+      for (const { a: a2, von, bis, z: z6 } of balken7) {
         const x2 = L3 + von * B8, w2 = Math.max(3, (bis - von) * B8 - 1), y2 = 20 + z6 * RH;
         g2 += `<rect x="${x2.toFixed(1)}" y="${y2}" width="${w2.toFixed(1)}" height="${RH - 6}" rx="5" class="hw-g3-akt-${a2.status}"/>`;
       }
@@ -167709,10 +167688,10 @@ void main() {
       merk2(lat.flat());
       merk2(med.flat());
       teile2.push({ art: "ober", v: [...netz2(lat, { innen: innenO(lat) }), ...netz2(med, { innen: innenO(med) })] });
-      const ring3 = [];
-      for (const x2 of [...X5].filter((x3) => x3 <= L3.xo).reverse()) ring3.push(L3.pt(x2, L3.sK(x2)));
-      for (const x2 of X5.filter((x3) => x3 <= L3.xo)) ring3.push(L3.pt(x2, -L3.sK(x2)));
-      teile2.push({ art: "einstieg", ring: ring3 });
+      const ring4 = [];
+      for (const x2 of [...X5].filter((x3) => x3 <= L3.xo).reverse()) ring4.push(L3.pt(x2, L3.sK(x2)));
+      for (const x2 of X5.filter((x3) => x3 <= L3.xo)) ring4.push(L3.pt(x2, -L3.sK(x2)));
+      teile2.push({ art: "einstieg", ring: ring4 });
     }
     if (p2.schaft) {
       const ringe = [], weite = p2.schaftWeite ?? 1;
@@ -168209,8 +168188,8 @@ void main() {
     g2.push(`<path d="M${f6(m[0])} ${f6(m[1])} l-2 6 M${f6(m[0])} ${f6(m[1])} l1.4 6.6" stroke="${farbe2}" stroke-width="0.8" fill="none"/>`);
     return g2.join("");
   }
-  function fellRand(K3, ring3, farbe2, w2 = 2.4) {
-    const q2 = ring3.map(K3.P);
+  function fellRand(K3, ring4, farbe2, w2 = 2.4) {
+    const q2 = ring4.map(K3.P);
     const d4 = "M" + q2.map((v2) => `${f6(v2[0])} ${f6(v2[1])}`).join(" L");
     return `<path d="${d4}" fill="none" stroke="${dunkel2(farbe2, 0.15)}" stroke-width="${w2 + 0.8}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d4}" fill="none" stroke="${farbe2}" stroke-width="${w2}" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.2 0.5"/>`;
   }
@@ -173210,81 +173189,70 @@ void main() {
     const hg = opt.hintergrund ? `<rect width="100" height="100" fill="${opt.hintergrund}"/>` : "";
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}"><defs>${K3.defs.join("")}</defs>${hg}${K3.teile.join("")}</svg>`;
   }
-  function typKachelSVG(artikeltyp, groesse2 = 120, opt = {}) {
-    const innen = produktbildSVG(artikeltyp, STANDARD_FARBE[artikeltyp], STANDARD_MATERIAL[artikeltyp], 100, opt).replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${groesse2}" height="${groesse2}"><rect x="1" y="1" width="98" height="98" rx="9" fill="#5a8396" stroke="#a9c7d4" stroke-width="1.6"/><g transform="translate(14 8) scale(0.72)">${innen}</g></svg>`;
-  }
 
   // src/ui/produkte.js
   var PREISLAGE = { einstieg: "Einstieg", mitte: "Mitte", gehoben: "Gehoben" };
   var STATUS3 = { entwicklung: "in Entwicklung", sortiment: "im Sortiment", pausiert: "pausiert", ausgelistet: "ausgelistet" };
+  var ZIEL_TEXT = { kinder: "Kinderbekleidung", teens: "Junge Mode", young: "Trendorientiert", adults: "Beruf und Alltag", bestager: "Klassik und Komfort" };
   var euro = (x2) => `${dez(x2, 2)} \u20AC`;
   var BILD2 = /* @__PURE__ */ new Map();
-  var merkeBilder = (K3) => {
-    for (const t5 of K3.typen ?? []) if (t5.bild) BILD2.set(t5.typ, t5.bild);
-    return K3;
+  var merkeBilder = (Kat) => {
+    for (const t5 of Kat.typen ?? []) if (t5.bild) BILD2.set(t5.typ, t5.bild);
+    return Kat;
   };
   var bildOpt = (typ, b4) => {
     const x2 = b4 ?? BILD2.get(typ);
     return x2 ? { bild: x2 } : {};
   };
-  var bild2 = (typ, farbe2, material3, g2 = 150, b4) => typeof produktbildSVG === "function" ? produktbildSVG(typ, farbe2, material3, g2, bildOpt(typ, b4)) : `<svg viewBox="0 0 100 100" width="${g2}" height="${g2}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc2(typ)}</text></svg>`;
+  var bild2 = (typ, farbe2, material3, g2 = 150, b4) => typeof produktbildSVG === "function" ? produktbildSVG(typ, farbe2, material3, g2, bildOpt(typ, b4)) : `<svg viewBox="0 0 100 100" width="${g2}" height="${g2}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#4a5a62"/></svg>`;
   var ZG_MODEL = { kinder: "kinder", jung: "young", mitte: "adults", reif: "bestager" };
   var geschlechtVon = (wg) => /^herren|kinder\.jungen/.test(String(wg ?? "")) ? "herren" : "damen";
   var modelBild = (typ, farbe2, material3, wg, trendGruppe2, g2 = 150, b4) => typeof modelbildSVG === "function" ? modelbildSVG(typ, farbe2, material3, { geschlecht: geschlechtVon(wg), zielgruppe: ZG_MODEL[trendGruppe2] ?? "young", groesse: g2, hintergrund: null, ...bildOpt(typ, b4) }) : null;
-  var kachel2 = (typ, g2 = 76) => typeof typKachelSVG === "function" ? typKachelSVG(typ, g2, bildOpt(typ)) : bild2(typ, void 0, void 0, g2);
+  var kachel2 = (typ, g2 = 64) => bild2(typ, STANDARD_FARBE?.[typ], STANDARD_MATERIAL?.[typ], g2);
   var sternNr = 0;
-  function sterne(x2, g2 = 18) {
-    let h4 = '<span class="sterne">';
+  function sterne(x2, label) {
+    let h4 = `<div class="hw-sterne" role="img" aria-label="${esc2(label)}">`;
     for (let i = 0; i < 5; i++) {
-      const f13 = Math.max(0, Math.min(1, x2 - i)), id = `st${sternNr++}`;
-      h4 += `<svg viewBox="0 0 24 24" width="${g2}" height="${g2}"><defs><linearGradient id="${id}"><stop offset="${f13}" stop-color="#f0b429"/><stop offset="${f13}" stop-color="#d9d4cb"/></linearGradient></defs><path d="M12 2.2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17.1l-6.1 3.5 1.5-6.8L2.2 9.2l6.9-.7z" fill="url(#${id})"/></svg>`;
+      const f13 = Math.max(0, Math.min(1, x2 - i)), id = `g1st${sternNr++}`;
+      h4 += `<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="${id}"><stop offset="${f13}" stop-color="var(--stern)"/><stop offset="${f13}" stop-color="#4a4644"/></linearGradient></defs><path fill="url(#${id})" d="M12 1.5l3.2 6.8 7.3.9-5.4 5 1.4 7.3L12 17.9l-6.5 3.6 1.4-7.3-5.4-5 7.3-.9z"/></svg>`;
     }
-    return h4 + "</span>";
+    return h4 + "</div>";
   }
-  function donut(marge, p2) {
-    const r4 = 26, u = 2 * Math.PI * r4, m = Math.max(0, Math.min(1, marge));
-    return `<div class="donut"><svg viewBox="0 0 64 64" width="84" height="84"><circle cx="32" cy="32" r="${r4}" fill="none" stroke="#d2603a" stroke-width="9"/><circle cx="32" cy="32" r="${r4}" fill="none" stroke="#efc27a" stroke-width="9" stroke-dasharray="${(u * m).toFixed(1)} ${u.toFixed(1)}" transform="rotate(-90 32 32)"/></svg><span><small>Marge</small>${p2}</span></div>`;
+  function ring3(marge, wertHtml) {
+    const r4 = 33.5, u = 2 * Math.PI * r4, ek2 = Math.max(0, Math.min(1, 1 - marge));
+    return `<div class="hw-ring"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="${r4}" fill="none" stroke="var(--ring-a)" stroke-width="13"/><circle cx="40" cy="40" r="${r4}" fill="none" stroke="var(--ring-b)" stroke-width="13" stroke-dasharray="${(u * ek2).toFixed(1)} ${u.toFixed(1)}" transform="rotate(-90 40 40)"/></svg><span>Marge${wertHtml}</span></div>`;
   }
   var preisSchritt = (p2) => p2 < 20 ? 1 : p2 < 100 ? 5 : 10;
+  var PAPIERKORB = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg>';
   function absatzGrafik(A, P5, name2) {
-    const hoch = Math.max(1, ...A.eigen, ...A.fremd);
-    const punkte2 = (werte3) => werte3.map((wert, i) => `${15 + i * 72},${91 - 73 * wert / hoch}`).join(" ");
+    let h4 = abschnitt("Absatz", "5 Wochen \xB7 " + name2);
+    h4 += `<div class="hw-g1-serien"><div><span class="hw-marke">Eigenmarke</span>${P5("a:eigen", geld(A.letzteEigen), "b", ' class="hw-g1-serie-a"')}<small>Umsatz letzte Woche</small></div><div><span class="hw-marke">Fremdmarken</span>${P5("a:fremd", geld(A.letzteFremd), "b", ' class="hw-g1-serie-b"')}<small>gleiche Warengruppen</small></div></div>`;
     const leer4 = !A.eigen.some((v2) => v2 > 0) && !A.fremd.some((v2) => v2 > 0);
-    return `<section class="q17-absatz karte" aria-label="Umsatzentwicklung der letzten f\xFCnf Wochen">
-    <div class="q17-kopf"><b>Absatz\xFCbersicht</b><small>5 Wochen \xB7 ${esc2(name2)}</small></div>
-    <div class="q17-kpis">
-      <div><small><i class="q17-punkt eigen"></i>Eigenmarke</small><b>${P5("a:eigen", geld(A.letzteEigen))}</b><span>Umsatz letzte Woche</span></div>
-      <div><small><i class="q17-punkt fremd"></i>Fremdmarken</small><b>${P5("a:fremd", geld(A.letzteFremd))}</b><span>Umsatz letzte Woche</span></div>
-    </div>
-    ${A.warengruppen ? `<svg class="q17-linien" viewBox="0 0 320 117" role="img" aria-label="Eigenmarke und Fremdmarken: f\xFCnf Wochen im Vergleich">
-      <path d="M15 18H303M15 54H303M15 91H303" stroke="#e5e2dd" stroke-width="1" fill="none"/>
-      <polyline points="${punkte2(A.fremd)}" stroke="#88939a" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-      <polyline points="${punkte2(A.eigen)}" stroke="#b65a44" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-      ${A.wochen.map((w2, i) => `<text x="${15 + i * 72}" y="111" text-anchor="middle" font-size="9" fill="#6c7780">KW ${kwVon2(w2)}</text>`).join("")}
-    </svg>` : ""}
-    <p class="q17-hinweis">${leer4 ? "Noch keine Verkaufsdaten erfasst. " : ""}${A.vorlaufWochen ? (A.vorlaufWochen === 1 ? "Eine Woche" : A.vorlaufWochen + " Wochen") + " vor Spielstart aus dem Vorlauf. " : ""}Vergleich mit Fremdmarkenumsatz in denselben Warengruppen. Betr\xE4ge in \u20AC pro Woche.</p>
-  </section>`;
+    if (A.warengruppen && !leer4) {
+      const hoch = Math.max(1, ...A.eigen, ...A.fremd), x2 = (i) => 18 + i * 76, y2 = (w2) => 92 - 76 * w2 / hoch;
+      const linie3 = (werte3, k5) => `<polyline class="${k5}" points="${werte3.map((w2, i) => `${x2(i)},${y2(w2).toFixed(1)}`).join(" ")}"/>` + werte3.map((w2, i) => `<circle class="${k5}" cx="${x2(i)}" cy="${y2(w2).toFixed(1)}" r="${i === werte3.length - 1 ? 6.5 : 4.5}"/>`).join("");
+      h4 += `<svg class="hw-g1-linien" viewBox="0 0 340 104" role="img" aria-label="Eigenmarke und Fremdmarken: f\xFCnf Wochen im Vergleich">${linie3(A.fremd, "b")}${linie3(A.eigen, "a")}</svg>`;
+      h4 += `<div class="hw-balkenfuss hw-g1-wochen">${A.wochen.map((w2) => `<span>KW ${kwVon2(w2)}</span>`).join("")}</div>`;
+    } else h4 += leer3("Noch keine Verkaufsdaten erfasst.");
+    if (A.vorlaufWochen) h4 += `<p class="hw-lese hw-g1-notiz">${A.vorlaufWochen === 1 ? "Eine Woche" : A.vorlaufWochen + " Wochen"} vor Spielstart aus dem Vorlauf.</p>`;
+    return h4;
   }
   function linienProfil(m, P5) {
     if (!m) return "";
     const achsen7 = [["Qualit\xE4t", "qualitaet"], ["Modegrad", "modegrad"], ["Preislage", "preislage"], ["Nachhaltigkeit", "nachhaltigkeit"]];
-    return `<section class="karte q17-profil" aria-label="Linienprofil">
-    <div class="q17-kopf"><b>Linienprofil</b><small>${esc2(m.stil)}</small></div>
-    <div class="q17-profil-inhalt">
-      ${achsen7.map(([titel, feld2]) => `<div class="q17-merkmal"><span>${titel}</span><span class="q17-balken"><i style="width:${m[feld2]}%"></i></span><b>${P5("lp:" + feld2, String(m[feld2]))}</b></div>`).join("")}
-      <div class="q17-preispunkt"><span>\xD8 Verkaufspreis im Sortiment</span><b>${P5("lp:preispunkt", euro(m.preispunkt))}</b></div>
-    </div>
-    <p class="q17-hinweis">Nachhaltigkeit ist ein Orientierungswert aus Beschaffung und Materialmix, keine \xD6kobilanz.</p>
-    <button class="q17-linienknopf" data-a="linienVerwalten">Linien verwalten \u203A</button>
-  </section>`;
+    return abschnitt("Linienprofil", m.stil) + `<div class="hw-g1-skalen">${achsen7.map(([titel, feld2]) => skala(titel, m[feld2]).replace(/<b>\d+<\/b>/, P5("lp:" + feld2, String(m[feld2])))).join("")}</div>` + liste([zeile({ was: "\xD8 Verkaufspreis im Sortiment", wert: P5("lp:preispunkt", euro(m.preispunkt), "span") })]) + `<p class="hw-lese hw-g1-notiz">Nachhaltigkeit ist ein Orientierungswert aus Beschaffung und Materialmix, keine \xD6kobilanz.</p>` + knoepfe(knopf("Linien verwalten", 'data-a="linienVerwalten"', "zweit"));
   }
   function produkteModul(ctx) {
     const E9 = ctx.E, s2 = () => ctx.s();
     const da = typeof E9.produkte === "function";
     const ui = { aktiv: false, seite: "liste", marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: /* @__PURE__ */ new Set(), haus: null, fach: null, zielgruppe: null, detail: null };
+    function sprecher2(text3, ton3 = "") {
+      const cpo = typeof E9.vorstandProfil === "function" ? E9.vorstandProfil(s2(), "cpo") : null;
+      const p2 = cpo?.person;
+      return sprecher({ text: text3, unter: p2 ? `${p2.name} \xB7 Einkaufsvorstand` : "Produktentwicklung", person: p2 ? portraet(p2.portraet, 72) : "", ton: ton3 });
+    }
     function markenwahl(L3) {
-      return `<div class="spaltenwahl">${L3.marken.map((m) => `<button class="chipk ${m.marke === ui.marke ? "an" : ""}" data-a="marke" data-v="${m.marke}"><b style="background:${m.farbe}"></b>${esc2(m.name)}</button>`).join("")}</div>`;
+      return chips(L3.marken.map((m) => [m.marke, `${farbpunkt(m.farbe)}${esc2(m.name)}`]), ui.marke, (w2) => `data-a="marke" data-v="${esc2(w2)}"`, "Eigenmarke", false, true);
     }
     function aktuelleMarke(L3) {
       if (!L3.marken.length) return null;
@@ -173299,209 +173267,241 @@ void main() {
       ui.baumOffen = null;
       ui.astOffen = null;
     }
+    function produktKarte2(st2, M2, p2, index2, P5, offeneHaeuser2) {
+      const ent = p2.status === "entwicklung";
+      const mb = ui.model.has(p2.id) ? modelBild(p2.typ, p2.farbe, p2.material, p2.wg, M2.trendGruppe, 120, p2.bild) : null;
+      let c = `<button type="button" class="hw-g1-bild" data-a="bildwechsel" data-v="${esc2(p2.id)}" aria-label="${ui.model.has(p2.id) ? "Produkt zeigen" : "Am Model zeigen"}">${mb ?? bild2(p2.typ, p2.farbe, p2.material, 110, p2.bild)}</button>`;
+      if (!ent) c += `<button type="button" class="hw-g1-papierkorb" data-a="auslisten" data-v="${esc2(p2.id)}" aria-label="Produkt auslisten">${PAPIERKORB}</button>`;
+      c += `<div class="hw-karte-titel hw-g1-titel">${P5(`p:${p2.id}:name`, p2.name, "span")}</div>`;
+      c += `<div class="hw-g1-unter">${esc2(p2.typ)} \xB7 ${esc2(p2.zielgruppeName ?? "Markenzielgruppe")} \xB7 ${esc2(PREISLAGE[p2.preislage] ?? p2.preislage)}</div>`;
+      if (ent) {
+        c += sterne(0, "noch keine Bewertung");
+        c += `<div class="hw-g1-entwicklung"><span class="hw-marke">In Entwicklung</span><div class="hw-g1-fortschritt" role="progressbar" aria-valuenow="${Math.round(p2.fortschritt * 100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${(p2.fortschritt * 100).toFixed(0)}%"></i></div><div class="hw-g1-zeile2"><span>${P5(`p:${p2.id}:fortschritt`, pz3(p2.fortschritt), "span")}</span><span>${P5(`p:${p2.id}:fertig`, `fertig ${wocheText(st2, p2.fertigWoche)}`, "span")}</span></div><p class="hw-lese">${geld(p2.budgetWoche)} je Woche \xFCber ${p2.dauer} Wochen</p></div>`;
+        return c;
+      }
+      c += `<div class="hw-g1-sternzeile">${sterne(p2.sterne, `${dez(p2.sterne, 1)} von 5 Sternen`)}${P5(`p:${p2.id}:sterne`, dez(p2.sterne, 1), "span", ' class="hw-g1-sternzahl"')}</div>`;
+      const ver = `${p2.veraenderung >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(p2.veraenderung))} (${p2.veraenderungProzent >= 0 ? "+" : "\u2212"}${pz3(Math.abs(p2.veraenderungProzent), 1)})`;
+      c += `<div class="hw-g1-mitte"><div class="hw-g1-schalter">${schalter({ text: "Im Sortiment", an: p2.status === "sortiment", attr: `data-a="sortiment" data-v="${esc2(p2.id)}"` })}</div><div class="hw-g1-verkauf"><span class="hw-marke">St\xFCck Vorwoche</span>${P5(`p:${p2.id}:verkauf`, fmt.format(p2.verkaufLetzteWoche), "b", ' class="hw-zahl"')}${P5(`p:${p2.id}:veraenderung`, ver, "span", ` class="hw-abw${p2.veraenderung < 0 ? " hw-schlecht" : p2.veraenderung > 0 ? " hw-gut" : ""}"`)}</div></div>`;
+      c += `<div class="hw-g1-preisblock"><div class="hw-g1-ringspalte"><span class="hw-g1-ek">EK ${P5(`p:${p2.id}:ek`, euro(p2.ekStueck), "span")}</span>${ring3(p2.marge, P5(`p:${p2.id}:marge`, pz3(p2.marge), "b"))}</div><div class="hw-g1-preis"><span class="hw-marke">Preis</span>${stepper({ wert: euro(p2.preis), label: "Verkaufspreis", attrMinus: `data-a="preis" data-v="-1" data-p2="${esc2(p2.id)}"`, attrPlus: `data-a="preis" data-v="1" data-p2="${esc2(p2.id)}"`, gross: false }).replace("<output>", `<output data-p="p:${esc2(p2.id)}:preis">`)}<span class="hw-abw">Normpreis ${euro(p2.normpreis)}</span></div></div>`;
+      P5(`p:${p2.id}:preis`, euro(p2.preis));
+      if (ui.auslisten === p2.id) c += `<div class="hw-g1-frage"><p class="hw-lese">${esc2(p2.name)} wirklich auslisten?</p>${knoepfe(knopf("Auslisten", `data-a="auslistenJa" data-v="${esc2(p2.id)}" data-gefahr`, "gefahr"), knopf("Behalten", 'data-a="auslistenNein"', "zweit"))}</div>`;
+      return c;
+    }
     function liste3(P5) {
       const st2 = s2(), L3 = E9.produkte(st2), M2 = aktuelleMarke(L3);
-      let h4 = "";
-      if (!M2) return { titel: "Produktentwicklung", unter: "keine Eigenmarke", html: '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Keine Eigenmarke vorhanden.</b>Produkte entstehen immer unter einer Eigenmarke. Gr\xFCnde zuerst eine Marke.</div></div><button class="q-haupt-akt" data-a="eigenmarkeGruenden">Eigenmarke gr\xFCnden</button></div>' };
-      h4 += markenwahl(L3);
+      if (!M2) return { titel: "Produktentwicklung", unter: "keine Eigenmarke", html: sprecher2("Ohne Eigenmarke k\xF6nnen wir keine Produkte entwickeln.") + rumpf2(leer3("Produkte entstehen immer unter einer Eigenmarke. Gr\xFCnde zuerst eine Marke.", "Keine Eigenmarke vorhanden") + knoepfe(knopf("Eigenmarke gr\xFCnden", 'data-a="eigenmarkeGruenden"', "breit"))) };
       const kats = M2.kategorien.filter((k6) => k6.kapazitaet > 0 || k6.belegt > 0);
       if (!kats.some((k6) => k6.id === ui.kategorie)) ui.kategorie = (kats.find((k6) => M2.produkte.some((p2) => p2.kategorie === k6.id && p2.status !== "ausgelistet")) ?? kats[0])?.id ?? null;
-      h4 += `<div class="seg umbruch kats">${kats.map((k6) => `<button class="${k6.id === ui.kategorie ? "an" : ""}" data-a="kategorie" data-v="${k6.id}">${esc2(k6.name)} ${P5(`l:kat:${k6.id}`, `${k6.belegt} / ${k6.kapazitaet}`, "i")}</button>`).join("")}</div>`;
       const offeneHaeuser2 = st2.haeuser.filter((haus2) => haus2.status === "offen");
       if (!offeneHaeuser2.some((haus2) => haus2.id === ui.haus)) ui.haus = offeneHaeuser2[0]?.id ?? null;
       const prod = M2.produkte.filter((p2) => p2.kategorie === ui.kategorie && p2.status !== "ausgelistet");
       ui.k = Math.min(ui.k, Math.max(0, prod.length - 1));
-      if (M2.hinweis) h4 += `<div class="olief warnung">${esc2(M2.hinweis)}</div>`;
-      if (!prod.length) h4 += '<div class="karte"><div class="zeile grau">In dieser Kategorie gibt es noch kein Produkt.</div></div>';
-      else {
-        const karten = prod.map((p2, index2) => {
-          const ent = p2.status === "entwicklung";
-          const mb = ui.model.has(p2.id) ? modelBild(p2.typ, p2.farbe, p2.material, p2.wg, M2.trendGruppe, 190, p2.bild) : null;
-          let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p2.id}" role="button" aria-label="Produkt oder Model zeigen" >${mb ?? bild2(p2.typ, p2.farbe, p2.material, 150, p2.bild)}</div>`;
-          if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p2.id}" aria-label="Produkt l\xF6schen"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
-          c += `<button class="q24-detailsknopf" data-a="detailProdukt" data-v="${esc2(p2.id)}">Produktdetails und Model ansehen</button>`;
-          c += `<div class="pname">${P5(`p:${p2.id}:name`, p2.name, "b")}<small>${esc2(p2.typ)} \xB7 ${esc2(p2.zielgruppeName ?? "Markenzielgruppe")} \xB7 ${esc2(p2.farbe)} \xB7 ${esc2(p2.material)} \xB7 ${PREISLAGE[p2.preislage] ?? p2.preislage}</small></div>`;
-          if (ent) {
-            c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P5(`p:${p2.id}:fertig`, `fertig ${wocheText(st2, p2.fertigWoche)}`, "small")}</div><div class="balken"><span style="width:${(p2.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P5(`p:${p2.id}:fortschritt`, pz3(p2.fortschritt), "i")} \xB7 ${geld(p2.budgetWoche)} je Woche \xFCber ${p2.dauer} Wochen</small></div>`;
-          } else {
-            c += `<div class="mitte" title="${dez(p2.sterne, 1)} Sterne">${sterne(p2.sterne, 24)}<span class="sternzahl">${P5(`p:${p2.id}:sterne`, dez(p2.sterne, 1), "span")}</span></div>`;
-            const ver = `${p2.veraenderung >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(p2.veraenderung))} (${p2.veraenderungProzent >= 0 ? "+" : "\u2212"}${pz3(Math.abs(p2.veraenderungProzent), 1)})`;
-            c += `<div class="pmitte">${schalter2(p2.status === "sortiment", `data-a="sortiment" data-v="${p2.id}"`, "Im Sortiment")}<div class="verkauf"><small>St\xFCck letzte Woche</small>${P5(`p:${p2.id}:verkauf`, fmt.format(p2.verkaufLetzteWoche), "b")}${P5(`p:${p2.id}:veraenderung`, ver, "i", p2.veraenderung < 0 ? ' class="rotwert"' : "")}</div></div>`;
-            c += `<div class="pmitte">${donut(p2.marge, P5(`p:${p2.id}:marge`, pz3(p2.marge), "b"))}<div class="preis"><small class="rotwert">EK je St\xFCck ${P5(`p:${p2.id}:ek`, euro(p2.ekStueck), "span")}</small><small>VK je St\xFCck</small>${stepper2("preis", P5(`p:${p2.id}:preis`, euro(p2.preis)), `Normpreis ${euro(p2.normpreis)}`, ` data-p2="${p2.id}"`)}</div></div>`;
-            const minimum = Math.round(p2.normpreis * 0.4 * 100) / 100, maximum = Math.round(p2.normpreis * 2.5 * 100) / 100;
-            c += `<div class="q17-preis"><input id="vk-${esc2(p2.id)}" type="range" min="${minimum}" max="${maximum}" step="0.01" value="${p2.preis}" data-a="preisSlider" data-p2="${esc2(p2.id)}" aria-label="VK ${esc2(p2.name)}"/><small>${euro(minimum)} bis ${euro(maximum)}</small></div>`;
-            c += `<div class="q17-einheit">${schalter2(p2.preisAlleHaeuser, `data-a="einheitspreis" data-v="${p2.id}"`, "Preis in allen H\xE4usern")}</div>`;
-            if (!p2.preisAlleHaeuser && index2 === ui.k && ui.haus) {
-              const haus2 = offeneHaeuser2.find((x2) => x2.id === ui.haus);
-              const hp = p2.hauspreise[ui.haus] ?? p2.preis;
-              c += `<div class="q17-hauspreis"><label for="hauspreis-${esc2(p2.id)}">Filialpreis f\xFCr ${esc2(haus2?.stadt ?? ui.haus)}</label><select id="hauspreis-${esc2(p2.id)}" data-a="hausWahl" aria-label="Haus w\xE4hlen">${offeneHaeuser2.map((x2) => `<option value="${esc2(x2.id)}"${x2.id === ui.haus ? " selected" : ""}>${esc2(x2.stadt)} \xB7 ${esc2(x2.name)}</option>`).join("")}</select>${stepper2("hauspreis", P5(`p:${p2.id}:hauspreis:${ui.haus}`, euro(hp)), `Einheitspreis ${euro(p2.preis)}`, ` data-p2="${p2.id}"`)}<small>Abweichung nur f\xFCr dieses Haus. Einheitspreis wieder einschalten, um alle Abweichungen zu l\xF6schen.</small></div>`;
-            }
-            if (ui.auslisten === p2.id) c += `<div class="oknoepfe"><button class="rot" data-a="auslistenJa" data-v="${p2.id}">Wirklich auslisten</button><button data-a="auslistenNein">Behalten</button></div>`;
-          }
-          return c + "</div>";
-        });
-        h4 += karussell2("produkte", karten, ui.k, "pkarte");
-      }
-      const k5 = M2.kategorien.find((x2) => x2.id === ui.kategorie);
+      const k5 = M2.kategorien.find((x3) => x3.id === ui.kategorie);
       const voll2 = k5 && k5.belegt >= k5.kapazitaet;
-      h4 += `<div class="oknoepfe unten2"><button class="gruen" data-a="neu">+ Neues Produkt</button><button data-a="trend">Trendbericht</button></div>`;
-      if (voll2 && !M2.hinweis) h4 += `<div class="olief warnung">Kapazit\xE4t in ${esc2(k5.name)} erreicht: f\xFCr ein neues Produkt erst eines auslisten.</div>`;
-      h4 += absatzGrafik(E9.produktAbsatzVerlauf(st2, M2.marke, ui.kategorie), P5, kats.find((k6) => k6.id === ui.kategorie)?.name ?? M2.name);
-      h4 += linienProfil(E9.produktLinienprofil(st2, M2.marke), P5);
-      h4 += teamAufschluesselung(M2.leistung);
-      h4 += `<div class="raster">${kz("HQ-Team (Basis)", P5("l:team", `${Math.round(L3.team * 100)} / 100`))}${kz("Kosten je Woche", P5("l:kosten", geld(L3.kostenWoche)))}</div>`;
-      h4 += '<button class="breit q24-katalogknopf" data-a="katalog">Sortiment durchsuchen: Damen, Herren, Kinder, Home</button>';
-      h4 += '<button class="q-neben-akt" data-a="eigenmarkeGruenden" style="margin:4px 0 12px">+ Neue Eigenmarke</button>';
-      return { titel: "Produktentwicklung", unter: `${esc2(M2.name)} \xB7 ${esc2(M2.zielgruppe)} \xB7 ${M2.inEntwicklung} in Entwicklung \xB7 KW ${kwVon2(st2.woche)}`, html: h4 };
+      let h4 = sprecher2(esc2(M2.hinweis ?? `${M2.name} f\xFChrt ${prod.length} Produkte in ${k5?.name ?? "dieser Kategorie"}.`), voll2 && !M2.inEntwicklung ? "engpass" : "");
+      h4 += `<div class="hw-g1-wahlen">${markenwahl(L3)}${chips(kats.map((x3) => [x3.id, `${esc2(x3.name)} <small>${P5(`l:kat:${x3.id}`, `${x3.belegt} / ${x3.kapazitaet}`, "span")}</small>`]), ui.kategorie, (w2) => `data-a="kategorie" data-v="${esc2(w2)}"`, "Kategorie", false, true)}</div>`;
+      if (!prod.length) h4 += rumpf2(leer3("Starte ein neues Produkt in dieser Kategorie.", "Noch kein Produkt"));
+      else {
+        const karten = prod.map((p2, index2) => produktKarte2(st2, M2, p2, index2, P5, offeneHaeuser2));
+        h4 += `<div class="hw-g1-karussell" data-k="produkte">${karussell(karten, { aktiv: ui.k, label: "Produkte" })}</div>`;
+      }
+      const pk = prod[ui.k];
+      let x2 = "";
+      if (pk && pk.status !== "entwicklung") {
+        x2 += schalter({ text: "Preis in allen H\xE4usern gleich", unter: pk.preisAlleHaeuser ? "Einheitspreis f\xFCr " + pk.name : "Abweichende Hauspreise erlaubt", an: pk.preisAlleHaeuser, attr: `data-a="einheitspreis" data-v="${esc2(pk.id)}"` });
+        if (!pk.preisAlleHaeuser && ui.haus) {
+          const haus2 = offeneHaeuser2.find((y2) => y2.id === ui.haus), hp = pk.hauspreise[ui.haus] ?? pk.preis;
+          x2 += `<label class="hw-marke hw-feldname" for="hauspreis-${esc2(pk.id)}">Haus</label><select class="hw-g1-wahl" id="hauspreis-${esc2(pk.id)}" data-a="hausWahl">${offeneHaeuser2.map((y2) => `<option value="${esc2(y2.id)}"${y2.id === ui.haus ? " selected" : ""}>${esc2(y2.stadt)} \xB7 ${esc2(y2.name)}</option>`).join("")}</select>`;
+          x2 += feld(`Hauspreis ${haus2?.stadt ?? ""}`, stepper({ wert: euro(hp), unter: `Einheitspreis ${euro(pk.preis)}`, label: "Hauspreis", attrMinus: `data-a="hauspreis" data-v="-1" data-p2="${esc2(pk.id)}"`, attrPlus: `data-a="hauspreis" data-v="1" data-p2="${esc2(pk.id)}"` }).replace("<output>", `<output data-p="p:${esc2(pk.id)}:hauspreis:${esc2(ui.haus)}">`));
+          P5(`p:${pk.id}:hauspreis:${ui.haus}`, euro(hp) + `Einheitspreis ${euro(pk.preis)}`);
+        }
+      }
+      x2 += knoepfe(knopf("Neues Produkt", 'data-a="neu"', "breit"));
+      if (voll2 && !M2.hinweis) x2 += hinweis(`Kapazit\xE4t in ${esc2(k5.name)} erreicht: f\xFCr ein neues Produkt erst eines auslisten.`, "achtung");
+      x2 += knoepfe(knopf("Trendbericht", 'data-a="trend"', "zweit"), knopf("Sortiment durchsuchen", 'data-a="katalog"', "zweit"));
+      x2 += absatzGrafik(E9.produktAbsatzVerlauf(st2, M2.marke, ui.kategorie), P5, kats.find((y2) => y2.id === ui.kategorie)?.name ?? M2.name);
+      x2 += linienProfil(E9.produktLinienprofil(st2, M2.marke), P5);
+      x2 += teamAufschluesselung(M2.leistung);
+      x2 += abschnitt("Produktentwicklung im HQ");
+      x2 += liste([zeile({ was: "HQ-Team (Basis)", wert: P5("l:team", `${Math.round(L3.team * 100)} / 100`, "span") }), zeile({ was: "Kosten je Woche", wert: P5("l:kosten", geld(L3.kostenWoche), "span") })]);
+      x2 += knoepfe(knopf("Neue Eigenmarke gr\xFCnden", 'data-a="eigenmarkeGruenden"', "zweit"));
+      h4 += rumpf2(x2);
+      return { titel: "Produktentwicklung", unter: `${M2.name} \xB7 ${M2.zielgruppe} \xB7 KW ${kwVon2(st2.woche)}`, html: h4 };
     }
     function katalog() {
-      const K3 = merkeBilder(E9.produktKatalog(s2())), L3 = E9.produkte(s2()), M2 = aktuelleMarke(L3);
-      if (!M2) return { titel: "Sortiment", unter: "", html: '<div class="leise">Noch keine Marke vorhanden.</div>' };
-      if (zielgruppenFuerFach(K3, ui.fach).every((x2) => x2.id !== ui.zielgruppe)) ui.zielgruppe = zielgruppenFuerFach(K3, ui.fach)[0]?.id ?? ui.zielgruppe;
-      const typen = passendeTypen(K3, ui.fach, ui.zielgruppe);
-      let h4 = '<button class="zurueck" data-a="liste">\u2039 Produktentwicklung</button>';
-      h4 += markenwahl(L3);
-      h4 += fachSegmente(ui) + zielChips(K3, ui);
-      h4 += '<div class="q24-anzahl">' + typen.length + " Artikeltypen \xB7 Kategorie \xF6ffnen und Artikel ausw\xE4hlen</div>";
-      h4 += sortimentBedienung(K3, ui, typen, kachel2, "detailTyp");
-      return { titel: "Sortiment", unter: esc2(M2.name) + " \xB7 " + typen.length + " passende Typen", html: h4 };
+      const Kat = merkeBilder(E9.produktKatalog(s2())), L3 = E9.produkte(s2()), M2 = aktuelleMarke(L3);
+      if (!M2) return { titel: "Sortiment", unter: "", html: rumpf2(leer3("Noch keine Marke vorhanden.")) };
+      if (zielgruppenFuerFach(Kat, ui.fach).every((x2) => x2.id !== ui.zielgruppe)) ui.zielgruppe = zielgruppenFuerFach(Kat, ui.fach)[0]?.id ?? ui.zielgruppe;
+      const typen = passendeTypen(Kat, ui.fach, ui.zielgruppe);
+      let h4 = sprecher2(`${typen.length} Artikeltypen passen zu dieser Auswahl.`);
+      h4 += `<div class="hw-g1-oben">${knopf("\u2039 Produktentwicklung", 'data-a="liste"', "text")}</div>`;
+      h4 += `<div class="hw-g1-wahlen">${markenwahl(L3)}</div>` + fachSegmente(ui) + rumpf2(zielChips(Kat, ui) + sortimentBedienung(Kat, ui, typen, kachel2, "detailTyp"));
+      return { titel: "Sortiment", unter: `${M2.name} \xB7 ${typen.length} passende Typen`, html: h4 };
     }
     function detail2() {
-      const st2 = s2(), K3 = merkeBilder(E9.produktKatalog(st2)), L3 = E9.produkte(st2), M2 = aktuelleMarke(L3), d4 = ui.detail;
-      const p2 = d4?.produktId ? M2?.produkte.find((x2) => x2.id === d4.produktId) : null;
-      const t5 = K3.typen.find((x2) => x2.typ === (p2?.typ ?? d4?.typ));
+      const st2 = s2(), Kat = merkeBilder(E9.produktKatalog(st2)), L3 = E9.produkte(st2), M2 = aktuelleMarke(L3), d4 = ui.detail;
+      const p2 = d4?.produktId ? M2?.produkte.find((x3) => x3.id === d4.produktId) : null;
+      const t5 = Kat.typen.find((x3) => x3.typ === (p2?.typ ?? d4?.typ));
       if (!t5) {
         ui.seite = "katalog";
         return katalog();
       }
       const typ = p2?.typ ?? t5.typ;
       const material3 = p2?.material ?? t5.materialien[0];
-      const farbe2 = p2?.farbe ?? (K3.farben.find((x2) => x2.name === "marine")?.name ?? K3.farben[0]?.name ?? "marine");
+      const farbe2 = p2?.farbe ?? (Kat.farben.find((x3) => x3.name === "marine")?.name ?? Kat.farben[0]?.name ?? "marine");
       const markenGruppe = M2?.trendGruppe === "kinder" ? "kinder" : M2?.trendGruppe === "reif" ? "bestager" : M2?.trendGruppe === "jung" ? "young" : "adults";
       const gruppe3 = p2 ? p2.zielgruppe ?? markenGruppe : ui.zielgruppe;
-      const wg = p2?.wg ?? t5.wgs.find((x2) => x2.startsWith(ui.fach === "home" ? "wohnen." : ui.fach + ".")) ?? t5.wgs[0];
-      const model = modelBild(typ, farbe2, material3, wg, gruppeTrend(gruppe3), 230);
-      const name2 = K3.zielgruppen.find((x2) => x2.id === gruppe3)?.name ?? gruppe3;
+      const wg = p2?.wg ?? t5.wgs.find((x3) => x3.startsWith(ui.fach === "home" ? "wohnen." : ui.fach + ".")) ?? t5.wgs[0];
+      const model = modelBild(typ, farbe2, material3, wg, gruppeTrend(gruppe3), 200);
+      const name2 = Kat.zielgruppen.find((x3) => x3.id === gruppe3)?.name ?? gruppe3;
       const preis = p2?.preis ?? t5.preisMitte;
       const zurueck = d4?.quelle === "liste" ? "liste" : "katalog";
-      let h4 = '<button class="zurueck" data-a="detailZurueck" data-v="' + zurueck + '">\u2039 Zur\xFCck</button>';
-      h4 += '<div class="karte q24-detail"><div class="q24-detailbild">' + (model ?? bild2(typ, farbe2, material3, 220)) + "</div>";
-      h4 += "<h3>" + esc2(p2?.name ?? typ) + '</h3><div class="q24-detailwerte">';
-      h4 += "<div><span>Artikeltyp</span><b>" + esc2(typ) + "</b></div>";
-      h4 += "<div><span>Material</span><b>" + esc2(material3) + "</b></div>";
-      h4 += "<div><span>Farbe</span><b>" + esc2(farbe2) + "</b></div>";
-      h4 += "<div><span>" + (p2 ? "Verkaufspreis" : "Basispreis, ca.") + "</span><b>" + euro(preis) + "</b></div>";
-      h4 += "<div><span>Zielgruppe</span><b>" + esc2(name2) + "</b></div>";
-      h4 += "</div>";
-      if (p2) h4 += '<div class="olief">Status: ' + esc2(STATUS3[p2.status] ?? p2.status) + " \xB7 " + esc2(p2.kategorieName) + "</div>";
-      else {
-        const freigegeben = M2 && M2.kategorien.some((x2) => x2.id === t5.kategorie && x2.kapazitaet > 0) && (Array.isArray(M2.entwickelbar) ? M2.entwickelbar.includes(t5.typ) : Number(t5.gruppe?.[M2.trendGruppe] ?? 0) > 0.15);
-        h4 += freigegeben ? '<button class="breit gruen" data-a="detailPlanen">F\xFCr ' + esc2(M2.name) + " entwickeln</button>" : '<div class="olief">Dieser Artikeltyp passt derzeit nicht zum Sortiment der gew\xE4hlten Marke.</div>';
-      }
-      return { titel: "Produktdetails", unter: esc2(M2?.name ?? "") + " \xB7 " + esc2(typ), html: h4 + "</div>" };
+      const freigegeben = !p2 && M2 && M2.kategorien.some((x3) => x3.id === t5.kategorie && x3.kapazitaet > 0) && (Array.isArray(M2.entwickelbar) ? M2.entwickelbar.includes(t5.typ) : Number(t5.gruppe?.[M2.trendGruppe] ?? 0) > 0.15);
+      let h4 = sprecher2(p2 ? `${esc2(p2.name)} ist ${esc2(STATUS3[p2.status] ?? p2.status)}.` : freigegeben ? `${esc2(typ)} passt zu ${esc2(M2.name)}.` : `${esc2(typ)} passt derzeit nicht zu ${esc2(M2?.name ?? "dieser Marke")}.`);
+      h4 += `<div class="hw-g1-oben">${knopf("\u2039 Zur\xFCck", `data-a="detailZurueck" data-v="${zurueck}"`, "text")}</div>`;
+      let x2 = `<div class="hw-g1-detailbild" aria-hidden="true">${model ?? bild2(typ, farbe2, material3, 200)}</div>`;
+      x2 += abschnitt(p2?.name ?? typ);
+      x2 += liste([
+        zeile({ was: "Artikeltyp", wert: esc2(typ) }),
+        zeile({ was: "Material", wert: esc2(material3) }),
+        zeile({ was: "Farbe", wert: esc2(farbe2) }),
+        zeile({ was: p2 ? "Verkaufspreis" : "Basispreis, ca.", wert: euro(preis) }),
+        zeile({ was: "Zielgruppe", wert: esc2(name2) }),
+        ...p2 ? [zeile({ was: "Status", wert: esc2(STATUS3[p2.status] ?? p2.status) }), zeile({ was: "Kategorie", wert: esc2(p2.kategorieName) })] : []
+      ]);
+      if (!p2) x2 += freigegeben ? knoepfe(knopf(`F\xFCr ${M2.name} entwickeln`, 'data-a="detailPlanen"', "breit")) : hinweis("Dieser Artikeltyp passt derzeit nicht zum Sortiment der gew\xE4hlten Marke.", "achtung");
+      return { titel: "Produktdetails", unter: `${M2?.name ?? ""} \xB7 ${typ}`, html: h4 + rumpf2(x2) };
+    }
+    function schritte() {
+      const n3 = ["Artikel", "Zielgruppe", "Entwicklung"];
+      return `<ol class="hw-g1-schritte">${n3.map((t5, i) => `<li${i === ui.neuSchritt ? ' aria-current="step"' : ""} class="${i < ui.neuSchritt ? "fertig" : i === ui.neuSchritt ? "an" : ""}"><i>${i + 1}</i>${t5}</li>`).join("")}</ol>`;
     }
     function neu3(P5) {
-      const st2 = s2(), K3 = merkeBilder(E9.produktKatalog(st2)), L3 = E9.produkte(st2), M2 = aktuelleMarke(L3), e = ui.neu;
+      const st2 = s2(), Kat = merkeBilder(E9.produktKatalog(st2)), L3 = E9.produkte(st2), M2 = aktuelleMarke(L3), e = ui.neu;
       const markeKats = new Set(M2.kategorien.filter((k5) => k5.kapazitaet > 0).map((k5) => k5.id));
       const voll2 = new Set(M2.kategorien.filter((k5) => k5.belegt >= k5.kapazitaet).map((k5) => k5.id));
       const entwickelbar = Array.isArray(M2.entwickelbar) ? new Set(M2.entwickelbar) : null;
-      if (zielgruppenFuerFach(K3, ui.fach).every((x2) => x2.id !== ui.zielgruppe)) {
-        ui.zielgruppe = zielgruppenFuerFach(K3, ui.fach)[0]?.id ?? ui.zielgruppe;
+      if (zielgruppenFuerFach(Kat, ui.fach).every((x3) => x3.id !== ui.zielgruppe)) {
+        ui.zielgruppe = zielgruppenFuerFach(Kat, ui.fach)[0]?.id ?? ui.zielgruppe;
         e.zielgruppe = ui.zielgruppe;
       }
-      const typen = passendeTypen(K3, ui.fach, ui.zielgruppe).filter((t5) => markeKats.has(t5.kategorie) && (entwickelbar ? entwickelbar.has(t5.typ) : true)).sort((a2, b4) => Number(voll2.has(a2.kategorie)) - Number(voll2.has(b4.kategorie)));
+      const typen = passendeTypen(Kat, ui.fach, ui.zielgruppe).filter((t5) => markeKats.has(t5.kategorie) && (entwickelbar ? entwickelbar.has(t5.typ) : true)).sort((a2, b4) => Number(voll2.has(a2.kategorie)) - Number(voll2.has(b4.kategorie)));
       if (!typen.some((t5) => t5.typ === e.typ)) {
         e.typ = (typen.find((t5) => !voll2.has(t5.kategorie)) ?? typen[0])?.typ;
       }
-      const T = K3.typen.find((t5) => t5.typ === e.typ);
+      const T = Kat.typen.find((t5) => t5.typ === e.typ);
       if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];
-      let h4 = `<button class="zurueck" data-a="liste">\u2039 ${esc2(M2.name)}</button>`;
-      h4 += markenwahl(L3);
       if (!typen.length && ui.neuSchritt !== 0) ui.neuSchritt = 0;
-      const typenIds = new Set(typen.map((t5) => t5.typ));
-      const baum2 = (K3.baum ?? []).map((kat) => ({
-        ...kat,
-        unterkategorien: kat.unterkategorien.map((ast3) => ({
-          ...ast3,
-          typen: ast3.typen.filter((typ) => typenIds.has(typ))
-        })).filter((ast3) => ast3.typen.length)
-      })).filter((kat) => kat.unterkategorien.length);
-      const pfad5 = baum2.flatMap((k5) => k5.unterkategorien.map((a2) => ({ k: k5, a: a2 }))).find((x2) => x2.a.typen.includes(e.typ));
-      h4 += '<div class="q11fortschritt"><span class="' + (ui.neuSchritt === 0 ? "an" : "fertig") + '">1 Kategorie und Artikel</span><span class="' + (ui.neuSchritt === 1 ? "an" : ui.neuSchritt > 1 ? "fertig" : "") + '">2 Zielgruppe</span><span class="' + (ui.neuSchritt === 2 ? "an" : "") + '">3 Entwicklung</span></div>';
+      const pfad5 = (Kat.baum ?? []).flatMap((k5) => k5.unterkategorien.map((a2) => ({ k: k5, a: a2 }))).find((x3) => x3.a.typen.includes(e.typ));
+      const oben = (aktion2, text3) => `<div class="hw-g1-oben">${knopf(text3, `data-a="${aktion2}"`, "text")}</div>`;
       if (ui.neuSchritt === 0) {
-        h4 += '<div class="vtitel">Sortiment w\xE4hlen</div>';
-        h4 += fachSegmente(ui) + zielChips(K3, ui);
-        h4 += '<div class="q24-anzahl">' + typen.length + " Artikeltypen f\xFCr " + esc2(M2.name) + "</div>";
-        h4 += sortimentBedienung(K3, ui, typen, kachel2, "typ", voll2);
-        return { titel: "Neues Produkt", unter: esc2(M2.name) + " \xB7 Kategorie und Artikeltyp", html: h4 };
+        let h5 = sprecher2(typen.length ? `W\xE4hle den Artikel: ${typen.length} Typen passen zu ${esc2(M2.name)}.` : `F\xFCr ${esc2(M2.name)} passt hier kein Artikeltyp.`);
+        h5 += oben("liste", `\u2039 ${M2.name}`) + `<div class="hw-rumpf">${schritte()}</div>`;
+        h5 += `<div class="hw-g1-wahlen">${markenwahl(L3)}</div>` + fachSegmente(ui) + rumpf2(zielChips(Kat, ui) + sortimentBedienung(Kat, ui, typen, kachel2, "typ", voll2));
+        return { titel: "Neues Produkt", unter: `${M2.name} \xB7 Artikel w\xE4hlen`, html: h5 };
       }
       if (ui.neuSchritt === 1) {
-        h4 += '<button class="zurueck" data-a="neuZurTyp">\u2039 Artikeltyp \xE4ndern</button>';
-        h4 += `<div class="q11auswahl"><b>${esc2(e.typ)}</b><small>${esc2(pfad5?.k.name ?? "")} / ${esc2(pfad5?.a.name ?? "")}</small>${bild2(e.typ, e.farbe, e.material, 96)}</div>`;
-        h4 += '<div class="vtitel">Zielgruppe w\xE4hlen</div><p class="leise">Die Altersgruppe beeinflusst Preislage, Passform, regionale Nachfrage und Marge. Bisherige Produkte bleiben unver\xE4ndert.</p>';
-        h4 += '<div class="q11zielgruppen">';
-        for (const z6 of K3.zielgruppen) h4 += `<button class="${e.zielgruppe === z6.id ? "an" : ""}" data-a="zielgruppe" data-v="${z6.id}"><b>${esc2(z6.name)}</b><span>${z6.id === "kinder" ? "Kinderbekleidung" : z6.id === "teens" ? "Junge Mode" : z6.id === "young" ? "Trendorientiert" : z6.id === "adults" ? "Beruf und Alltag" : "Klassik und Komfort"}</span></button>`;
-        h4 += "</div>";
-        return { titel: "Neues Produkt", unter: `${esc2(M2.name)} \xB7 Zielgruppe`, html: h4 };
+        let h5 = sprecher2(`${esc2(e.typ)} gew\xE4hlt. F\xFCr wen entwickeln wir?`);
+        h5 += oben("neuZurTyp", "\u2039 Artikel \xE4ndern") + `<div class="hw-rumpf">${schritte()}</div>`;
+        let x3 = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild2(e.typ, e.farbe, e.material, 72)}</span><span><b>${esc2(e.typ)}</b><small>${esc2(pfad5?.k.name ?? "")}${pfad5?.a.name && pfad5.a.name !== pfad5.k.name ? " \xB7 " + esc2(pfad5.a.name) : ""}</small></span></div>`;
+        x3 += abschnitt("Zielgruppe");
+        x3 += `<p class="hw-lese hw-g1-notiz">Die Altersgruppe wirkt auf Preislage, Passform, regionale Nachfrage und Marge. Bisherige Produkte bleiben unver\xE4ndert.</p>`;
+        x3 += `<div class="hw-g1-typen">${Kat.zielgruppen.map((z6) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${e.zielgruppe === z6.id}" data-a="zielgruppe" data-v="${esc2(z6.id)}"><b>${esc2(z6.name)}</b><small>${esc2(ZIEL_TEXT[z6.id] ?? "")}</small></button>`).join("")}</div>`;
+        return { titel: "Neues Produkt", unter: `${M2.name} \xB7 Zielgruppe`, html: h5 + rumpf2(x3) };
       }
-      h4 += '<button class="zurueck" data-a="neuZurZiel">\u2039 Zielgruppe \xE4ndern</button>';
-      h4 += `<div class="q11gewaehlt"><b>${esc2(e.typ)}</b><span>${esc2(K3.zielgruppen.find((z6) => z6.id === e.zielgruppe)?.name ?? "")} \xB7 ${esc2(pfad5?.k.name ?? "")}</span></div>`;
       const v2 = E9.produktVorschau(st2, { marke: M2.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche });
-      if (v2.kapazitaetFrei <= 0) h4 += `<div class="olief warnung">Kapazit\xE4t erreicht: in dieser Kategorie ist bei ${esc2(M2.name)} kein Platz mehr. F\xFCr Neues bitte erst ein Produkt auslisten.</div>`;
-      h4 += '<div class="vtitel">Produkt konfigurieren</div><div class="karte steuerung">';
-      h4 += regler("Farbe", `<div class="farben klein">${K3.farben.map((f13) => `<button class="${f13.name === e.farbe ? "an" : ""}" style="background:${f13.hex}" data-a="farbe" data-v="${esc2(f13.name)}" aria-label="${esc2(f13.name)}"></button>`).join("")}</div>`, esc2(e.farbe));
-      h4 += regler("Material", segment("material", e.material, (T?.materialien ?? []).map((m) => [m, m])));
-      h4 += regler("Preislage", segment("preislage", e.preislage, K3.preislagen.map((p2) => [p2.id, PREISLAGE[p2.id] ?? p2.id])));
-      h4 += regler("Qualit\xE4t", segment("qualitaet", e.qualitaet, [1, 2, 3, 4, 5].map((x2) => [x2, "\u2605".repeat(x2)])));
-      h4 += regler("Entwicklungsdauer", segment("dauer", e.dauer, K3.dauer.map((d4) => [d4, String(d4)])), "Wochen");
-      h4 += regler("Budget je Woche", stepper2("budget", P5("n:budget", geld(e.budgetWoche))), `Schritt ${geld(K3.budgetSchritt)}`);
-      h4 += "</div>";
-      const wgV = K3.typen.find((t5) => t5.typ === e.typ)?.wgs?.find((w2) => !/^kinder/.test(w2) || M2.trendGruppe === "kinder");
-      const mbV = modelBild(e.typ, e.farbe, e.material, wgV, M2.trendGruppe, 150);
-      h4 += `<div class="karte vorschau produkt"><div class="pbild" >${bild2(e.typ, e.farbe, e.material, 132)}${mbV ?? ""}</div><div class="pname">${P5("n:name", v2.name ?? e.typ, "b")}<small>${v2.wgName ? `${esc2(v2.wgName)} \xB7 ` : ""}Einf\xFChrung ${esc2(v2.saisonEinfuehrung)}</small></div>`;
-      h4 += `<div class="mitte">${sterne(v2.sterneErwartet, 22)}<span class="sternzahl">${P5("n:sterne", `${dez(v2.sterneVon, 1)} bis ${dez(v2.sterneBis, 1)}`, "span")}</span></div>`;
-      h4 += `<div class="owerte"><div><span>Normpreis</span>${P5("n:preis", euro(v2.normpreis))}</div><div><span>EK je St\xFCck</span>${P5("n:ek", euro(v2.ekStueck))}</div><div><span>Marge</span>${P5("n:marge", pz3(v2.marge))}</div><div><span>Entwicklung</span>${P5("n:kosten", geld(v2.kosten))}</div><div><span>Fertig</span>${P5("n:fertig", wocheText(st2, v2.fertigWoche))}</div><div><span>Platz frei</span>${P5("n:frei", String(v2.kapazitaetFrei))}</div></div>`;
-      h4 += `<p class="leise">Passform zur Zielgruppe: <b>${P5("n:passform", pz3(v2.passform), "span")}</b> \xB7 wirkt auf die Produktbewertung und damit auf die Nachfrage.</p>`;
-      if (v2.teile) h4 += `<div class="passung">${[["zielgruppe", "Zielgruppe"], ["trend", "Trend"], ["preisQualitaet", "Preis"], ["entwicklung", "Aufwand"], ["team", "Team"]].map(([k5, t5]) => `<div><span class="psaeule"><span style="height:${(v2.teile[k5] * 100).toFixed(0)}%"></span></span><b>${Math.round(v2.teile[k5] * 100)}</b><i>${t5}</i></div>`).join("")}</div>`;
-      for (const x2 of v2.hinweise) h4 += `<div class="olief">${esc2(x2)}</div>`;
-      if (v2.fehler) h4 += `<div class="olief warnung">${esc2(v2.fehler)}</div>`;
-      h4 += `</div><div class="oknoepfe unten2"><button class="gruen" data-a="entwickeln"${v2.ok ? "" : " disabled"}>Entwicklung starten \xB7 ${geld(v2.kosten)}</button></div>`;
-      return { titel: "Neues Produkt", unter: `${esc2(M2.name)} \xB7 ${esc2(M2.zielgruppe)}`, html: h4 };
+      const zg = Kat.zielgruppen.find((z6) => z6.id === e.zielgruppe)?.name ?? "";
+      let h4 = sprecher2(v2.ok ? `Erwartet ${dez(v2.sterneVon, 1)} bis ${dez(v2.sterneBis, 1)} Sterne, fertig ${esc2(wocheText(st2, v2.fertigWoche))}.` : esc2(v2.fehler ?? "Der Entwurf ist noch nicht vollst\xE4ndig."), v2.ok ? "" : "engpass");
+      h4 += oben("neuZurZiel", "\u2039 Zielgruppe \xE4ndern") + `<div class="hw-rumpf">${schritte()}</div>`;
+      let x2 = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild2(e.typ, e.farbe, e.material, 72)}</span><span><b>${esc2(e.typ)}</b><small>${esc2(zg)} \xB7 ${esc2(pfad5?.k.name ?? "")}</small></span></div>`;
+      if (v2.kapazitaetFrei <= 0) x2 += hinweis(`Kapazit\xE4t erreicht: in dieser Kategorie ist bei ${esc2(M2.name)} kein Platz mehr. F\xFCr Neues erst ein Produkt auslisten.`, "achtung");
+      x2 += abschnitt("Farbe", e.farbe);
+      x2 += `<div class="hw-g1-farben" role="group" aria-label="Farbe">${Kat.farben.map((f13) => `<button type="button" class="hw-g1-farbknopf" aria-pressed="${f13.name === e.farbe}" data-a="farbe" data-v="${esc2(f13.name)}" aria-label="${esc2(f13.name)}">${farbpunkt(f13.hex, 30)}</button>`).join("")}</div>`;
+      x2 += abschnitt("Material");
+      x2 += chips((T?.materialien ?? []).map((m) => [m, esc2(m)]), e.material, (w2) => `data-a="material" data-v="${esc2(w2)}"`, "Material");
+      x2 += abschnitt("Preislage");
+      x2 += `<div class="hw-g1-typen drei">${Kat.preislagen.map((p2) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${e.preislage === p2.id}" data-a="preislage" data-v="${esc2(p2.id)}"><b>${esc2(PREISLAGE[p2.id] ?? p2.id)}</b><small>${"\u20AC".repeat(p2.id === "einstieg" ? 1 : p2.id === "mitte" ? 2 : 3)}</small></button>`).join("")}</div>`;
+      x2 += abschnitt("Qualit\xE4t", `${e.qualitaet} von 5`);
+      x2 += `<div class="hw-g1-qualitaet">${stepper({ wert: `${e.qualitaet} von 5`, label: "Qualit\xE4t", attrMinus: `data-a="qualitaet" data-v="${e.qualitaet - 1}"`, attrPlus: `data-a="qualitaet" data-v="${e.qualitaet + 1}"`, minusAus: e.qualitaet <= 1, plusAus: e.qualitaet >= 5 })}</div>`;
+      x2 += abschnitt("Entwicklungsdauer", "Wochen");
+      x2 += `<div class="hw-g1-dauer">${seg(Kat.dauer.map((d4) => [d4, String(d4)]), e.dauer, (w2) => `data-a="dauer" data-v="${w2}"`)}</div>`;
+      x2 += abschnitt("Budget je Woche", `Schritt ${geld(Kat.budgetSchritt)}`);
+      x2 += stepper({ wert: geld(e.budgetWoche), unter: `${geld(v2.kosten)} gesamt`, label: "Budget je Woche", attrMinus: 'data-a="budget" data-v="-1"', attrPlus: 'data-a="budget" data-v="1"', minusAus: e.budgetWoche <= Kat.budgetSchritt }).replace("<output>", '<output data-p="n:budget">');
+      P5("n:budget", geld(e.budgetWoche) + `${geld(v2.kosten)} gesamt`);
+      x2 += abschnitt("Vorschau", `Einf\xFChrung ${v2.saisonEinfuehrung}`);
+      const wgV = Kat.typen.find((t5) => t5.typ === e.typ)?.wgs?.find((w2) => !/^kinder/.test(w2) || M2.trendGruppe === "kinder");
+      const mbV = modelBild(e.typ, e.farbe, e.material, wgV, M2.trendGruppe, 110);
+      let c = `<div class="hw-g1-bild hw-g1-vorschaubild" aria-hidden="true">${bild2(e.typ, e.farbe, e.material, 110)}${mbV ?? ""}</div>`;
+      c += `<div class="hw-karte-titel hw-g1-titel">${P5("n:name", v2.name ?? e.typ, "span")}</div>`;
+      c += `<div class="hw-g1-unter">${v2.wgName ? esc2(v2.wgName) : esc2(e.typ)}</div>`;
+      c += `<div class="hw-g1-sternzeile">${sterne(v2.sterneErwartet, `erwartet ${dez(v2.sterneErwartet, 1)} Sterne`)}${P5("n:sterne", `${dez(v2.sterneVon, 1)} bis ${dez(v2.sterneBis, 1)}`, "span", ' class="hw-g1-sternzahl"')}</div>`;
+      c += `<div class="hw-g1-preisblock"><div class="hw-g1-ringspalte"><span class="hw-g1-ek">EK ${P5("n:ek", euro(v2.ekStueck), "span")}</span>${ring3(v2.marge, P5("n:marge", pz3(v2.marge), "b"))}</div><div class="hw-g1-preis"><span class="hw-marke">Normpreis</span>${P5("n:preis", euro(v2.normpreis), "b", ' class="hw-zahl"')}<span class="hw-abw">Passform ${P5("n:passform", pz3(v2.passform), "span")}</span></div></div>`;
+      x2 += `<article class="hw-karte hw-kontur hw-g1-vorschau">${c}</article>`;
+      x2 += liste([zeile({ was: "Entwicklung", wert: P5("n:kosten", geld(v2.kosten), "span") }), zeile({ was: "Fertig", wert: P5("n:fertig", wocheText(st2, v2.fertigWoche), "span") }), zeile({ was: "Platz frei in der Kategorie", wert: P5("n:frei", String(v2.kapazitaetFrei), "span") })]);
+      if (v2.teile) x2 += abschnitt("Bewertung") + `<div class="hw-g1-skalen">${[["zielgruppe", "Zielgruppe"], ["trend", "Trend"], ["preisQualitaet", "Preis"], ["entwicklung", "Aufwand"], ["team", "Team"]].map(([k5, t5]) => skala(t5, v2.teile[k5] * 100)).join("")}</div>`;
+      for (const y2 of v2.hinweise) x2 += hinweis(esc2(y2));
+      if (v2.fehler) x2 += hinweis(esc2(v2.fehler), "fehler");
+      x2 += knoepfe(knopf(`Entwicklung starten \xB7 ${geld(v2.kosten)}`, 'data-a="entwickeln"', "breit", !v2.ok));
+      return { titel: "Neues Produkt", unter: `${M2.name} \xB7 ${M2.zielgruppe}`, html: h4 + rumpf2(x2) };
     }
     function trend(P5) {
-      const st2 = s2(), T = E9.trendbericht(st2), K3 = merkeBilder(E9.produktKatalog(st2)), hex4 = new Map(K3.farben.map((f13) => [f13.name, f13.hex]));
-      let h4 = '<button class="zurueck" data-a="liste">\u2039 Produkte</button>';
-      h4 += `<div class="olief">${esc2(T.hinweis)}</div>`;
+      const st2 = s2(), T = E9.trendbericht(st2), Kat = merkeBilder(E9.produktKatalog(st2)), hex4 = new Map(Kat.farben.map((f13) => [f13.name, f13.hex]));
+      let h4 = sprecher2(esc2(T.hinweis));
+      h4 += `<div class="hw-g1-oben">${knopf("\u2039 Produkte", 'data-a="liste"', "text")}</div>`;
+      let x2 = "";
       for (const [titel, S, pre] of [["Laufende Saison", T.aktuell, "a"], ["N\xE4chste Saison", T.naechste, "n"]]) {
-        h4 += `<div class="karte"><div class="khead">${titel}<small>${P5(`t:${pre}:name`, S.name, "span")}</small></div>`;
-        for (const z6 of T.zielgruppen) {
+        x2 += `<h3 class="hw-abschnitt">${esc2(titel)}<small>${P5(`t:${pre}:name`, S.name, "span")}</small></h3>`;
+        x2 += liste(T.zielgruppen.filter((z6) => S.gruppen[z6.id]).map((z6) => {
           const g2 = S.gruppen[z6.id];
-          if (!g2) continue;
-          h4 += `<div class="trend"><b>${esc2(z6.name)}</b><div class="tfarben">${g2.farben.map((f13) => `<span style="background:${hex4.get(f13) ?? "#ccc"}" title="${esc2(f13)}"></span><i>${esc2(f13)}</i>`).join("")}</div><div class="olief">Artikel: ${g2.artikel.map(esc2).join(", ")} \xB7 Material: ${g2.materialien.map(esc2).join(", ")}${g2.out?.length ? ` \xB7 out: ${g2.out.map(esc2).join(", ")}` : ""}</div></div>`;
-        }
-        h4 += "</div>";
+          return `<div class="hw-zeile hw-g1-trend"><span class="hw-was">${esc2(z6.name)}<small>${g2.artikel.map(esc2).join(", ")}</small><small>Material: ${g2.materialien.map(esc2).join(", ")}${g2.out?.length ? ` \xB7 nicht mehr gefragt: ${g2.out.map(esc2).join(", ")}` : ""}</small></span><span class="hw-g1-trendfarben">${g2.farben.map((f13) => farbpunkt(hex4.get(f13) ?? "#888", 16)).join("")}</span></div>`;
+        }));
       }
-      return { titel: "Trendbericht", unter: `Messe \xB7 ${esc2(T.aktuell.name)} und ${esc2(T.naechste.name)}`, html: h4 };
+      return { titel: "Trendbericht", unter: `Messe \xB7 ${T.naechste.name}`, html: h4 + rumpf2(x2) };
     }
     function rendern() {
       const S = werteSammler();
       sternNr = 0;
-      if (!da) return { S, r: { titel: "Produkte", unter: "", html: '<div class="leise">Die Engine liefert noch keine Produkte.</div>' } };
+      if (!da) return { S, r: { titel: "Produkte", unter: "", html: rumpf2(leer3("Die Engine liefert noch keine Produkte.")) } };
       const r4 = ui.seite === "neu" && ui.neu ? neu3(S.P) : ui.seite === "trend" ? trend(S.P) : ui.seite === "katalog" ? katalog() : ui.seite === "detail" ? detail2() : liste3(S.P);
       return { S, r: r4 };
     }
     function zeigen(scrollHalten = false) {
       const sc = document.getElementById("pinhalt").scrollTop;
       const { r: r4 } = rendern();
-      ctx.panel(r4.titel, r4.unter, bereich("zentrale") + '<i class="q31-marke" hidden></i>' + r4.html, "gross");
+      ctx.panel(r4.titel, r4.unter, bereich("zentrale", "ware") + `<div class="hw-g1">${r4.html}</div>`, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? sc : 0;
-      if (ui.seite === "liste") karussellBinden("produkte", ui.k, (i) => {
-        if (!ui.aktiv) return;
-        ui.k = i;
-        ui.auslisten = null;
-        zeigen(true);
-      });
+      if (ui.seite === "liste") karussellBinden();
+    }
+    function karussellBinden() {
+      const k5 = document.querySelector("#pinhalt .hw-g1-karussell .hw-karussell");
+      if (!k5) return;
+      const karten = [...k5.children];
+      const mitte = (el2) => el2.offsetLeft + el2.offsetWidth / 2;
+      const aktuell = () => {
+        const m = k5.scrollLeft + k5.clientWidth / 2;
+        let best = 0;
+        karten.forEach((el2, i) => {
+          if (Math.abs(mitte(el2) - m) < Math.abs(mitte(karten[best]) - m)) best = i;
+        });
+        return best;
+      };
+      if (karten[ui.k]) k5.scrollLeft = Math.max(0, mitte(karten[ui.k]) - k5.clientWidth / 2);
+      k5.nextElementSibling?.querySelectorAll("i").forEach((p2, i) => p2.classList.toggle("an", i === ui.k));
+      let t5 = null;
+      k5.addEventListener("scroll", () => {
+        clearTimeout(t5);
+        k5.nextElementSibling?.querySelectorAll("i").forEach((p2, i) => p2.classList.toggle("an", i === aktuell()));
+        t5 = setTimeout(() => {
+          if (!k5.isConnected || !ui.aktiv) return;
+          const i = aktuell();
+          if (i !== ui.k) {
+            ui.k = i;
+            ui.auslisten = null;
+            zeigen(true);
+          }
+        }, 160);
+      }, { passive: true });
     }
     function tun2(aktion2) {
       const r4 = E9.fuehreAus(s2(), aktion2);
@@ -173512,9 +173512,9 @@ void main() {
     const neuerEntwurf3 = () => {
       const st2 = s2(), T = E9.trendbericht(st2), L3 = E9.produkte(st2), M2 = aktuelleMarke(L3);
       const g2 = T.naechste.gruppen[M2?.trendGruppe] ?? T.aktuell.gruppen[M2?.trendGruppe];
-      const K3 = merkeBilder(E9.produktKatalog(st2)), voll2 = new Set((M2?.kategorien ?? []).filter((k5) => k5.belegt >= k5.kapazitaet).map((k5) => k5.id));
+      const Kat = merkeBilder(E9.produktKatalog(st2)), voll2 = new Set((M2?.kategorien ?? []).filter((k5) => k5.belegt >= k5.kapazitaet).map((k5) => k5.id));
       const frei6 = (typ) => {
-        const t5 = K3.typen.find((x2) => x2.typ === typ);
+        const t5 = Kat.typen.find((x2) => x2.typ === typ);
         return t5 && !voll2.has(t5.kategorie) && M2.kategorien.some((k5) => k5.id === t5.kategorie && k5.kapazitaet > 0);
       };
       return { typ: g2?.artikel?.find(frei6) ?? g2?.artikel?.[0], farbe: g2?.farben?.[0] ?? "marine", material: g2?.materialien?.[0] ?? "Baumwolle", preislage: "mitte", qualitaet: 3, dauer: 12, budgetWoche: 2e4 };
@@ -173627,9 +173627,6 @@ void main() {
           tun2({ typ: "produktPreis", produkt: id, preis: Math.max(1, Math.round((p2.preis + Number(v2) * d4) / d4) * d4 - (d4 >= 5 ? 0.01 : 0)) });
           return zeigen(true);
         }
-        case "preisSlider":
-          tun2({ typ: "produktPreis", produkt: el2.dataset.p2, preis: Number(el2.value) });
-          return zeigen(true);
         case "einheitspreis": {
           const p2 = karte(v2);
           tun2({ typ: "produktPreisAlleHaeuser", produkt: v2, an: !p2.preisAlleHaeuser });
@@ -173675,14 +173672,14 @@ void main() {
           ui.neu.preislage = v2;
           return zeigen(true);
         case "qualitaet":
-          ui.neu.qualitaet = Number(v2);
+          ui.neu.qualitaet = Math.max(1, Math.min(5, Number(v2)));
           return zeigen(true);
         case "dauer":
           ui.neu.dauer = Number(v2);
           return zeigen(true);
         case "budget": {
-          const K3 = merkeBilder(E9.produktKatalog(st2));
-          ui.neu.budgetWoche = Math.max(K3.budgetSchritt, ui.neu.budgetWoche + Number(v2) * K3.budgetSchritt);
+          const Kat = merkeBilder(E9.produktKatalog(st2));
+          ui.neu.budgetWoche = Math.max(Kat.budgetSchritt, ui.neu.budgetWoche + Number(v2) * Kat.budgetSchritt);
           return zeigen(true);
         }
         case "entwickeln": {
@@ -173709,7 +173706,7 @@ void main() {
     });
     inhalt.addEventListener("change", (ev) => {
       if (!ui.aktiv) return;
-      const el2 = ev.target.closest('input[data-a="preisSlider"], select[data-a="hausWahl"]');
+      const el2 = ev.target.closest('select[data-a="hausWahl"]');
       if (el2 && !el2.disabled) klick2(el2);
     });
     return {
@@ -175231,7 +175228,7 @@ void main() {
         rolle: person3?.name ?? "Vorstand"
       };
     }
-    function befund2(b4) {
+    function befund3(b4) {
       const e = b4.ebitda < 0 ? `<b>EBITDA ${esc2(geld(b4.ebitda))}.</b>` : `<b>EBITDA plus ${esc2(geld(b4.ebitda))}.</b>`;
       const cash = b4.cashNetto >= 0 ? ` Die Kasse w\xE4chst um ${esc2(geld(b4.cashNetto))}.` : ` Die Kasse verliert ${esc2(geld(-b4.cashNetto))}.`;
       return e + cash;
@@ -175243,7 +175240,7 @@ void main() {
       const m = bericht2.meldungen, ausgabe = ctx.zeitung?.(), titel = ausgabe?.aufmacher?.titel ?? m[0]?.text ?? "Hartwig startet in eine neue Gesch\xE4ftswoche";
       const delta = (wert, vorher) => vorher == null ? "keine Vergleichswoche" : abweichung(wert - vorher, (wert - vorher >= 0 ? "+" : "\u2212") + geld(Math.abs(wert - vorher)), vorher ? (wert - vorher) / Math.abs(vorher) : null) + " zur Vorwoche";
       const cfo = ctx.person?.("cfo");
-      const sprecher2 = sprecher({ text: befund2(bericht2), unter: (cfo?.name ?? "Finanzen") + " \xB7 Finanzvorstand", person: cfo?.portraet ? portraetSVG(cfo.portraet, 72) : ASSISTENTIN2, ton: bericht2.ebitda < 0 ? "engpass" : "" });
+      const sprecher2 = sprecher({ text: befund3(bericht2), unter: (cfo?.name ?? "Finanzen") + " \xB7 Finanzvorstand", person: cfo?.portraet ? portraetSVG(cfo.portraet, 72) : ASSISTENTIN2, ton: bericht2.ebitda < 0 ? "engpass" : "" });
       const f13 = bericht2.kapitalfluss, z6 = (name2, v2) => ({ name: name2, werte: [eur3(v2)], roh: [Math.round(v2)], ton: [v2 < 0 ? "schlecht" : ""] });
       const kapital = '<div data-wb="cash" data-summen-name="Kapitalfluss">' + tabelle({
         titel: "Kapitalfluss der Woche",
@@ -175472,8 +175469,8 @@ void main() {
         }));
       }
       h4 += '<p class="hw-lese hw-g3-notiz">Digitalvorstand und IT-Leitung beeinflussen das Risiko von Verz\xF6gerungen und St\xF6rungen.</p>';
-      const befund2 = top && top.risiko >= 2e-3 ? `${esc2(top.name)} f\xE4llt mit ${risikoText(top.risiko)} je Woche am ehesten aus.` : `Alle ${d4.systeme.length} Systeme laufen stabil.`;
-      return { befund: befund2 + (alt.length ? ` ${alt.length} ${alt.length === 1 ? "System ist" : "Systeme sind"} veraltet.` : ""), ton: top && top.risiko >= 0.01 ? "engpass" : "", html: h4 };
+      const befund3 = top && top.risiko >= 2e-3 ? `${esc2(top.name)} f\xE4llt mit ${risikoText(top.risiko)} je Woche am ehesten aus.` : `Alle ${d4.systeme.length} Systeme laufen stabil.`;
+      return { befund: befund3 + (alt.length ? ` ${alt.length} ${alt.length === 1 ? "System ist" : "Systeme sind"} veraltet.` : ""), ton: top && top.risiko >= 0.01 ? "engpass" : "", html: h4 };
     }
     function projekt(p2, d4) {
       const alle = new Map(d4.cluster.map((c) => [c.id, c]));
@@ -175751,8 +175748,8 @@ void main() {
         ...gr.map(([g2, x2]) => zeile({ was: esc2(ctx.E.GRUPPEN[g2]?.name ?? g2), wert: `<span data-s="u">${geld(x2)}</span>` })),
         summe2("Summe", `<span data-summe="u">${geld(gr.reduce((a2, [, x2]) => a2 + x2, 0))}</span>`)
       ])}</div>` : leer3("Noch kein Onlineumsatz.");
-      const befund2 = !u.bestellungen ? "Diese Woche gab es keine Onlinebestellung." : u.deckungsbeitrag < 0 ? `hartwig.de verliert ${geld(-u.deckungsbeitrag)} diese Woche. ${prozent6(u.retourenquote)} der Ware kommt zur\xFCck.` : `hartwig.de verdient ${geld(u.deckungsbeitrag)} bei ${fmt.format(u.bestellungen)} Bestellungen.`;
-      return { befund: befund2, ton: u.deckungsbeitrag < 0 ? "alarm" : "", html: rumpf2(h4) };
+      const befund3 = !u.bestellungen ? "Diese Woche gab es keine Onlinebestellung." : u.deckungsbeitrag < 0 ? `hartwig.de verliert ${geld(-u.deckungsbeitrag)} diese Woche. ${prozent6(u.retourenquote)} der Ware kommt zur\xFCck.` : `hartwig.de verdient ${geld(u.deckungsbeitrag)} bei ${fmt.format(u.bestellungen)} Bestellungen.`;
+      return { befund: befund3, ton: u.deckungsbeitrag < 0 ? "alarm" : "", html: rumpf2(h4) };
     }
     function steuerung2(u) {
       let h4 = abschnitt("Online-Sortiment und Service");
@@ -175971,7 +175968,7 @@ void main() {
     svg2 += poly2([pt2(0, 0, top), pt2(W3, 0, top), pt2(W3, D, top), pt2(0, D, top)], "#4a423b") + poly2([pt2(0, 0, top), pt2(W3, 0, top), pt2(W3, 0, top + 3), pt2(0, 0, top + 3)], "#d23c32");
     return `<svg class="hw-etagenschnitt" viewBox="0 0 ${breite} ${hoehe.toFixed(0)}" role="img" aria-label="Etagenschnitt mit ${n3} Etagen">${svg2}</svg>`;
   }
-  function befund(h4, k5, b4, vorjahr2, vorwoche) {
+  function befund2(h4, k5, b4, vorjahr2, vorwoche) {
     const name2 = h4.personal?.filialleiter?.name ?? "Filialleitung";
     if (h4.status !== "offen") return { text: `<b>${esc2(STATUS_HAUS2[h4.status] ?? "Nicht ge\xF6ffnet")}.</b> Das Haus erwirtschaftet in diesem Zustand keinen regul\xE4ren Umsatz.`, ton: "alarm", name: name2 };
     if (!k5) return { text: "<b>Die erste Woche l\xE4uft noch.</b> Zahlen gibt es nach dem ersten Wochenabschluss.", ton: "", name: name2 };
@@ -175997,7 +175994,7 @@ void main() {
     const r4 = REITER6.some((x2) => x2[0] === reiter) ? reiter : "ueberblick";
     const uPunkte = c.verlaufU?.punkte ?? [], dPunkte = c.verlaufD?.punkte ?? [];
     const vorwoche = uPunkte.length > 1 ? uPunkte[uPunkte.length - 2].wert : null, vorwocheDb = dPunkte.length > 1 ? dPunkte[dPunkte.length - 2].wert : null;
-    const bf = befund(h4, k5, b4, c.vorjahr, vorwoche);
+    const bf = befund2(h4, k5, b4, c.vorjahr, vorwoche);
     let html = bereich("haus") + sprecher({ text: bf.text, unter: bf.name + " \xB7 Filialleitung", person: filialleitungBild(h4, 72), ton: bf.ton });
     let inhalt = "";
     if (r4 === "ueberblick") inhalt = ueberblick(c, h4, k5, vorwoche, vorwocheDb, uPunkte, dPunkte);
@@ -177907,11 +177904,11 @@ void main() {
       const x1 = b4 ? Math.min(w2, b4.right + 7) : w2 * 0.5;
       const y0 = b4 ? Math.max(0, b4.top - 7) : h4 * 0.47;
       const y1 = b4 ? Math.min(h4, b4.bottom + 7) : h4 * 0.47;
-      const maske = root.querySelector(".ein-maske"), ring3 = root.querySelector(".ein-ring");
-      if (!maske || !ring3) return;
+      const maske = root.querySelector(".ein-maske"), ring4 = root.querySelector(".ein-ring");
+      if (!maske || !ring4) return;
       maske.style.clipPath = b4 ? "polygon(evenodd, 0px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 0px, " + x0 + "px " + y0 + "px, " + x0 + "px " + y1 + "px, " + x1 + "px " + y1 + "px, " + x1 + "px " + y0 + "px, " + x0 + "px " + y0 + "px)" : "";
-      ring3.hidden = !b4;
-      if (b4) Object.assign(ring3.style, {
+      ring4.hidden = !b4;
+      if (b4) Object.assign(ring4.style, {
         left: x0 + "px",
         top: y0 + "px",
         width: Math.max(1, x1 - x0) + "px",
@@ -178969,9 +178966,9 @@ void main() {
       const e = D.entwurf;
       if (!e || e.stand !== "offen") return cfo("<b>Keine Planungsrunde offen.</b> Die n\xE4chste l\xE4uft in KW 40 bis 44.") + rumpf2(abschnitt("Jahresplanung") + leer3("Den laufenden Jahresplan zeigt der Reiter Reporting.", "Keine Planungsrunde offen.") + knoepfe(knopf("Zum Reporting", 'data-pl-tab="report"', "zweit breit")));
       let x2 = '<div class="hw-g2-oben">' + seg([[1, "1. Ziel"], [2, "2. Verteilung"], [3, "3. Abschluss"]], ui.schritt, (v2) => `data-pl-schritt="${v2}"`) + "</div>";
-      let befund2 = "";
+      let befund3 = "";
       if (ui.schritt === 1) {
-        befund2 = `<b>Planungsrunde ${e.jahr} ist offen.</b> Mein Vorschlag ist aus Vorjahr und Trend abgeleitet.`;
+        befund3 = `<b>Planungsrunde ${e.jahr} ist offen.</b> Mein Vorschlag ist aus Vorjahr und Trend abgeleitet.`;
         const basis4 = D.vorschlag;
         x2 += gross2([
           { label: `Umsatzziel ${e.jahr}`, wert: mio3(e.ziele.umsatz), unter: `Vorschlag ${mio3(basis4.umsatz)}` },
@@ -178993,7 +178990,7 @@ void main() {
       } else if (ui.schritt === 2) {
         const nodes = Object.fromEntries(D.knoten.map((n3) => [n3.id, n3]));
         const verdacht = D.knoten.filter((n3) => n3.verdacht).length;
-        befund2 = verdacht ? `<b>${verdacht} ${verdacht === 1 ? "R\xFCckmeldung wirkt" : "R\xFCckmeldungen wirken"} zu vorsichtig.</b> Verdacht auf Sandbagging.` : "<b>Die R\xFCckmeldungen der Leitungen liegen im Rahmen.</b>";
+        befund3 = verdacht ? `<b>${verdacht} ${verdacht === 1 ? "R\xFCckmeldung wirkt" : "R\xFCckmeldungen wirken"} zu vorsichtig.</b> Verdacht auf Sandbagging.` : "<b>Die R\xFCckmeldungen der Leitungen liegen im Rahmen.</b>";
         x2 += gross2([{ label: "Konzernumsatz", wert: mio3(nodes.konzern?.umsatz ?? e.ziele.umsatz), unter: "verteilt auf Formate" }, { label: "Sandbagging", wert: String(verdacht), ton: verdacht ? "schlecht" : "", unter: verdacht === 1 ? "Verdachtsfall" : "Verdachtsf\xE4lle" }]);
         const zeilen = [];
         const knoten = (id, tiefe) => {
@@ -179014,7 +179011,7 @@ void main() {
         x2 += buch({ titel: "Warengruppe", spalten: ["Ziel Mio. \u20AC"], breite: 96, zeilen: Object.entries(D.warengruppen || {}).map(([id, value]) => `<div class="hw-g2-eingabe"><span class="hw-g2-name"><span>${esc2(E9.GRUPPEN?.[id]?.name || id)}</span></span><input class="hw-g2-auswahl hw-kontur" type="number" min="0" step="0.1" inputmode="decimal" data-pl-wg="${esc2(id)}" value="${(value / 1e6).toFixed(1)}" aria-label="${esc2(E9.GRUPPEN?.[id]?.name || id)} Ziel in Mio. Euro"></div>`) });
         x2 += knoepfe(knopf("Weiter zum Abschluss", 'data-pl-schritt="3"', "breit"));
       } else {
-        befund2 = `<b>Jahresplan ${e.jahr} wartet auf deinen Beschluss.</b> Ohne Aktion gilt nach Fristablauf mein Vorschlag.`;
+        befund3 = `<b>Jahresplan ${e.jahr} wartet auf deinen Beschluss.</b> Ohne Aktion gilt nach Fristablauf mein Vorschlag.`;
         x2 += gross2([{ label: "Konzernumsatz", wert: mio3(e.ziele.umsatz) }, { label: "EBITDA-Ziel", wert: mio3(e.ziele.ebitda), ton: e.ziele.ebitda < 0 ? "schlecht" : "" }]);
         x2 += abschnitt(`Jahresplan ${e.jahr}`);
         x2 += tabelle({ zeilen: [{ name: "Konzernumsatz", werte: [mio3(e.ziele.umsatz)] }, { name: "EBITDA-Ziel", werte: [mio3(e.ziele.ebitda)], ton: [tonV(e.ziele.ebitda)] }, { name: "Investitionsbudget", werte: [mio3(e.ziele.investitionen)] }] });
@@ -179022,13 +179019,13 @@ void main() {
         x2 += knoepfe(knopf("Angepasste Planung beschlie\xDFen", 'data-pl-abschluss="spieler"', "breit"));
         x2 += knoepfe(knopf("Controlling-Vorschlag \xFCbernehmen", 'data-pl-abschluss="controlling"', "zweit breit"));
       }
-      return cfo(befund2) + rumpf2(x2);
+      return cfo(befund3) + rumpf2(x2);
     }
     function bericht2(D) {
       const b4 = D.bericht;
       if (!b4.ziele) return cfo("<b>Es gibt noch keinen Jahresplan.</b> Die Planungsrunde l\xE4uft in KW 40 bis 44.") + rumpf2(abschnitt("Planblatt") + leer3("Bis zur ersten Planungsrunde gibt es nichts zu vergleichen.", "Kein Jahresplan vorhanden."));
       const q2 = b4.planBisHeute ? b4.abweichung / b4.planBisHeute : 0;
-      const befund2 = `<b>Wir liegen ${mio3(Math.abs(b4.abweichung))} ${b4.abweichung >= 0 ? "\xFCber" : "unter"} Plan.</b> ` + (b4.forecasting == null ? "Der erste Jahresforecast entsteht nach KW 13." : `Forecast ${mio3(b4.forecasting)}.`);
+      const befund3 = `<b>Wir liegen ${mio3(Math.abs(b4.abweichung))} ${b4.abweichung >= 0 ? "\xFCber" : "unter"} Plan.</b> ` + (b4.forecasting == null ? "Der erste Jahresforecast entsteht nach KW 13." : `Forecast ${mio3(b4.forecasting)}.`);
       let x2 = gross2([
         { label: "Abweichung zum Plan", wert: (b4.abweichung > 0 ? "+" : "") + mio3(b4.abweichung), ton: b4.abweichung < 0 ? "schlecht" : "gut", unter: `${pctV(q2)} bis heute` },
         { label: "Ist kumuliert", wert: mio3(b4.ist), unter: `Plan ${mio3(b4.planBisHeute)}` }
@@ -179061,13 +179058,13 @@ void main() {
         x2 += abschnitt("Warengruppenbudgets", `${Object.keys(b4.warengruppen).length} Gruppen`);
         x2 += ui.wgAuf ? tabelle({ zeilen: Object.entries(b4.warengruppen).map(([g2, v2]) => ({ name: E9.GRUPPEN?.[g2]?.name ?? g2, werte: [mio3(v2)] })) }) + knoepfe(knopf("Weniger zeigen", 'data-pl-wgauf="0"', "text")) : knoepfe(knopf("Budgets je Warengruppe zeigen", 'data-pl-wgauf="1"', "zweit breit"));
       }
-      return cfo(befund2, b4.abweichung < 0 ? "engpass" : "") + rumpf2(x2);
+      return cfo(befund3, b4.abweichung < 0 ? "engpass" : "") + rumpf2(x2);
     }
     function forecasts(D) {
       const L3 = D.bericht.forecasts || [];
       const offen = L3.find((f13) => f13.status === "offen");
       let x2 = "";
-      const befund2 = offen ? `<b>Der Forecast ${esc2(offen.bezeichnung)} ist zur Freigabe offen.</b> Eigent\xFCmer und Bank warten.` : L3.length ? `<b>Alle Forecasts sind abgegeben.</b> 3+9 in KW 13, 6+6 in KW 26, 9+3 in KW 39.` : "<b>Noch kein Forecast.</b> Der erste Forecast (3+9) entsteht nach KW 13.";
+      const befund3 = offen ? `<b>Der Forecast ${esc2(offen.bezeichnung)} ist zur Freigabe offen.</b> Eigent\xFCmer und Bank warten.` : L3.length ? `<b>Alle Forecasts sind abgegeben.</b> 3+9 in KW 13, 6+6 in KW 26, 9+3 in KW 39.` : "<b>Noch kein Forecast.</b> Der erste Forecast (3+9) entsteht nach KW 13.";
       if (offen) {
         x2 += gross2([{ label: "Jahresumsatz", wert: mio3(offen.ziele.umsatz) }, { label: "EBITDA", wert: mio3(offen.ziele.ebitda), ton: offen.ziele.ebitda < 0 ? "schlecht" : "" }]);
         x2 += abschnitt(`${offen.bezeichnung} anpassen`, "Mio. \u20AC");
@@ -179084,7 +179081,7 @@ void main() {
         x2 += liste(D.bericht.vertrauen.slice(-8).map((v2) => zeile({ was: `KW ${v2.woche % 52 + 1}`, unter: `Abweichung ${pct(v2.abweichung)}`, wert: (v2.delta > 0 ? "+" : v2.delta < 0 ? "\u2212" : "") + Math.abs(v2.delta), ton: v2.delta < 0 ? "schlecht" : v2.delta > 0 ? "gut" : "" })));
       }
       x2 += fuss("3+9 in KW 13, 6+6 in KW 26 und 9+3 in KW 39. Der Forecast kann vor der Abgabe an Eigent\xFCmer und Bank angepasst werden.");
-      return cfo(befund2, offen ? "engpass" : "") + rumpf2(x2);
+      return cfo(befund3, offen ? "engpass" : "") + rumpf2(x2);
     }
     function boni(D) {
       const q2 = D.bericht.quoten || {};
@@ -179101,8 +179098,8 @@ void main() {
       }).join("") + "</div>";
       x2 += fuss("Abrechnung im Jahresabschluss, Auszahlung im Februar des Folgejahres als Personalaufwand.");
       x2 += liste3.length ? tabelle({ titel: "Bonusjahre", spalten: ["Summe", "Posten"], zeilen: liste3.map((b4) => ({ name: `${b4.jahr} \xB7 ${b4.bezahlt ? "ausgezahlt" : "f\xE4llig im Februar"}`, werte: [geld(b4.betrag), String(b4.details.length)] })) }) : abschnitt("Bonusjahre") + leer3("Das erste Bonusjahr wird im Jahresabschluss abgerechnet.");
-      const befund2 = faellig ? `<b>Im Februar zahlen wir ${geld(faellig.betrag)} F\xFChrungsboni aus.</b>` : "<b>Kein Bonus ist f\xE4llig.</b> Abgerechnet wird im Jahresabschluss.";
-      return cfo(befund2) + rumpf2(x2);
+      const befund3 = faellig ? `<b>Im Februar zahlen wir ${geld(faellig.betrag)} F\xFChrungsboni aus.</b>` : "<b>Kein Bonus ist f\xE4llig.</b> Abgerechnet wird im Jahresabschluss.";
+      return cfo(befund3) + rumpf2(x2);
     }
     function zeigen(halten = false) {
       const position = document.getElementById("pinhalt").scrollTop, D = vor();
@@ -179207,7 +179204,7 @@ void main() {
       if (r4.ok) ctx.nachAktion();
       return r4.ok;
     };
-    function regler2(name2, art, id, g2, wert, min, max, hinweis2) {
+    function regler(name2, art, id, g2, wert, min, max, hinweis2) {
       const v2 = Math.round(wert * 100);
       return feld(name2, stepper({
         wert: v2 + " %",
@@ -179236,8 +179233,8 @@ void main() {
         zeile({ was: "Springerbewegungen", wert: fmt.format(p2.springerSaldo) + " Std." })
       ]);
       out += abschnitt("Deckung KW " + (p2.woche % 52 + 1), "Plan zu Bedarf");
-      const kz2 = (g2) => ({ label: KURZ3[g2], wert: pct2(p2.gruppen[g2].deckung), ton: ton(p2.gruppen[g2].deckung) === "schlecht" ? "schlecht" : "" });
-      out += gross2(GRUPPEN3.slice(0, 2).map(kz2)) + gross2(GRUPPEN3.slice(2).map(kz2));
+      const kz = (g2) => ({ label: KURZ3[g2], wert: pct2(p2.gruppen[g2].deckung), ton: ton(p2.gruppen[g2].deckung) === "schlecht" ? "schlecht" : "" });
+      out += gross2(GRUPPEN3.slice(0, 2).map(kz)) + gross2(GRUPPEN3.slice(2).map(kz));
       for (const g2 of GRUPPEN3) {
         const x2 = p2.gruppen[g2];
         out += abschnitt(NAME3[g2], fmt.format(x2.plan) + " von " + fmt.format(x2.bedarf) + " Std.");
@@ -179245,7 +179242,7 @@ void main() {
       }
       out += `<div class="hw-legende"><span><i></i>Bedarf</span><span><i class="b"></i>Plan</span></div>`;
       out += abschnitt("Einsatz \xFCbersteuern", "100 % = Vorschlag");
-      out += '<div class="hw-felder">' + GRUPPEN3.map((g2) => regler2(KURZ3[g2], "gruppe", id, g2, st2.faktor[g2], 40, 160, "Einsatz")).join("") + regler2("Kasse Samstag", "samstag", id, "", st2.samstagKasse, 40, 160, "Einsatz") + regler2("Aushilfen", "aushilfen", id, "", st2.aushilfenQuote, 0, 30, "Fr und Sa") + "</div>";
+      out += '<div class="hw-felder">' + GRUPPEN3.map((g2) => regler(KURZ3[g2], "gruppe", id, g2, st2.faktor[g2], 40, 160, "Einsatz")).join("") + regler("Kasse Samstag", "samstag", id, "", st2.samstagKasse, 40, 160, "Einsatz") + regler("Aushilfen", "aushilfen", id, "", st2.aushilfenQuote, 0, 30, "Fr und Sa") + "</div>";
       out += `<p class="hw-lese hw-leise hw-unterzeile">Weniger Kasse am Samstag f\xFChrt zu Wartezeiten und Kaufabbr\xFCchen. Aushilfen verst\xE4rken Freitag und Samstag und kosten zus\xE4tzlich.</p>`;
       return out;
     }
@@ -179285,7 +179282,7 @@ void main() {
       const gewaehlt = liste3.find((c) => c.id === ui.cluster) ?? liste3[0];
       if (gewaehlt) ui.cluster = gewaehlt.id;
       const knapp = gewaehlt ? gewaehlt.haeuser.filter((h4) => GRUPPEN3.some((g2) => h4.gruppen[g2] < 0.9)) : [];
-      const befund2 = !gewaehlt ? "<b>Keine offenen H\xE4user.</b>" : knapp.length ? "<b>" + knapp.length + " von " + gewaehlt.haeuser.length + " H\xE4usern sind unter 90 % besetzt.</b> Am knappsten: " + esc2(knapp.slice(0, 2).map((h4) => h4.name).join(", ")) + "." : (() => {
+      const befund3 = !gewaehlt ? "<b>Keine offenen H\xE4user.</b>" : knapp.length ? "<b>" + knapp.length + " von " + gewaehlt.haeuser.length + " H\xE4usern sind unter 90 % besetzt.</b> Am knappsten: " + esc2(knapp.slice(0, 2).map((h4) => h4.name).join(", ")) + "." : (() => {
         const min = (h4) => Math.min(...GRUPPEN3.map((g2) => h4.gruppen[g2]));
         const k5 = [...gewaehlt.haeuser].sort((a2, b4) => min(a2) - min(b4))[0];
         return "<b>Alle " + gewaehlt.haeuser.length + " H\xE4user sind ausreichend besetzt.</b> " + (k5 && min(k5) < 0.985 ? "Am knappsten: " + esc2(k5.name) + " mit " + pct2(min(k5)) + " (Krankenstand " + pct2(k5.krank) + ")." : "Kein Springer n\xF6tig.");
@@ -179305,7 +179302,7 @@ void main() {
       ctx.panel(
         "Personaleinsatz",
         "Wochentagsplanung \xB7 vier Personalgruppen",
-        bereich("haus", "haus") + '<i class="hw-g4" aria-hidden="true"></i>' + sprecher({ text: befund2, unter: "Personalplanung", ton: knapp.length ? "engpass" : "" }) + rumpf2(r4),
+        bereich("haus", "haus") + '<i class="hw-g4" aria-hidden="true"></i>' + sprecher({ text: befund3, unter: "Personalplanung", ton: knapp.length ? "engpass" : "" }) + rumpf2(r4),
         "gross"
       );
       ui.aktiv = true;
@@ -181456,8 +181453,8 @@ void main() {
     pruefeAnzeigen: () => {
       const fehler6 = [], c = cockpit(s);
       const titel = (sp6) => [...sp6.childNodes].filter((n3) => n3.nodeType === 3).map((n3) => n3.textContent).join("").replace(/\s*·\s*$/, "").trim();
-      const kz2 = (wurzel2) => new Map([...wurzel2.querySelectorAll(".kz")].map((k5) => [titel(k5.querySelector("span")), k5.querySelector("b").textContent]));
-      const ck = kz2($2("cockpit"));
+      const kz = (wurzel2) => new Map([...wurzel2.querySelectorAll(".kz")].map((k5) => [titel(k5.querySelector("span")), k5.querySelector("b").textContent]));
+      const ck = kz($2("cockpit"));
       const soll = { Cash: c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash), "Kreditrahmen frei": c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
       if (s.historie.length) Object.assign(soll, { "EBITDA 13 Wo.": geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
       for (const [k5, v2] of Object.entries(soll)) if (ck.get(k5) !== v2) fehler6.push(`Cockpit ${k5}: ${ck.get(k5)} statt ${v2}`);

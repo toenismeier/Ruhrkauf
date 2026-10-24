@@ -1,9 +1,12 @@
-// Eigenmarken-Seite im Einkauf-Panel: Markenkarten (Zielgruppe, Positionierung, Bekanntheit, Marge, Umsatz, Passung je Region)
-// und Assistent "Marke gründen" bzw. "Neu positionieren" in fünf Schritten. Daten über quelle.js aus
-// eigenmarkenUebersicht und eigenmarkeVorschau, Aktionen eigenmarkeGruenden, eigenmarkeNeupositionieren, eigenmarkeSetzen,
-// eigenmarkeAnteil, eigenmarkeEinstellen.
+// Eigenmarken-Seite im Einkauf-Panel (E47, Gestaltungssystem UI-NEU.md): oben der Eigenmarkenanteil als Großkennzahl,
+// darunter die Kollektionstafel (Marken nach Umsatz, Summe unter dem Strich), dann die Akte der gewählten Marke mit
+// Skalen (Bekanntheit, Stil, Passung je Region), Teamleistung, Markenbudget und Entscheidungen. Assistent „Marke gründen“
+// bzw. „Neu positionieren“ in fünf Schritten wie Coffee 01 bis 08 (Kacheln, Chips, Stepper, Vorschau).
+// Daten über quelle.js aus eigenmarkenUebersicht und eigenmarkeVorschau, Aktionen eigenmarkeGruenden,
+// eigenmarkeNeupositionieren, eigenmarkeSetzen, eigenmarkeAnteil, eigenmarkeEinstellen.
 import { geld, pz, kwVon, esc } from './format.js';
-import { teamAufschluesselung } from './produkte-q24.js';
+import * as K from './komponenten.js';
+import { teamAufschluesselung, chips, farbpunkt } from './produkte-q24.js';
 
 const ALTER = [['10-13', 'Kinder'], ['13-17', 'Teens & Tweens'], ['18-29', 'Young Adults'], ['30-49', 'Adults'], ['50+', 'Best Ager']];
 const alterOptionen = (aktuell) => aktuell === '70+' ? [...ALTER, ['70+', 'Best Ager 70+']] : ALTER;
@@ -21,58 +24,69 @@ const zielText = (z) => z.geschlecht === 'kinder' && ELTERN[z.alter] ? `Kinder, 
 const preisText = (p) => PREIS.find((x) => x[0] === p)?.[1] ?? p;
 const STATUS = { aufbau: 'im Aufbau', neupositionierung: 'Neupositionierung', eingestellt: 'eingestellt' };
 const punkte = (x) => `+${(x * 100).toLocaleString('de-DE', { maximumFractionDigits: 1 })} Punkte`;
+const BESCHAFFUNG_TEXT = { fernost: 'lange Wege, höchste Marge', nahost: 'mittlerer Vorlauf', europa: 'schnell, kleine Mengen' };
 
-function balken(wert, farbe = '#2f63b5') { return `<span class="mbalken"><span style="width:${Math.max(0, Math.min(100, wert)).toFixed(0)}%;background:${farbe}"></span></span>`; }
-function passungZeile(p, p0) {
-  return `<div class="passung">${REGIONEN.filter((r) => p[r] !== undefined).map((r) => `<div><span class="psaeule"><span style="height:${p[r]}%"></span></span><b${p0 ? ` data-p="${p0}:${r}"` : ''}>${p[r]}</b><i>${r}</i></div>`).join('')}</div>`;
+/** Skala mit geprüfter Zahl (data-p an der Zahl rechts). */
+const skalaP = (name, wert, p) => K.skala(name, wert).replace(/<b>(\d+)<\/b><\/div>$/, `<b${p ? ` data-p="${esc(p)}"` : ''}>$1</b></div>`);
+function passung(p, p0) {
+  return `<div class="hw-g1-skalen">${REGIONEN.filter((r) => p[r] !== undefined).map((r) => skalaP(r, p[r], p0 ? `${p0}:${r}` : '')).join('')}</div>`;
 }
+/** Sprecher: Befund zur Kollektion in einem Satz. */
+const befund = (text, ton = '') => K.sprecher({ text, unter: 'Eigenmarken · Einkauf', ton });
 
 export function eigenmarkenSeite(ctx, ui, tabs) {
   if (ui.seite === 'gruenden' && ui.em.assistent) return assistent(ctx, ui, tabs);
   ui.seite = 'eigenmarken';
   const s = ctx.s(), u = ctx.q.marken(s);
   const leistungen = new Map((typeof ctx.E?.produkte === 'function' ? ctx.E.produkte(s).marken : []).map((m) => [m.marke, m.leistung]));
-  // Q31 Kollektionstafel. Hauptfrage: Welche Marke trägt, welche verliert? Größter Block = Tafel mit Musterkarten,
-  // nach Umsatz geordnet, Summe unter dem Strich; die Akte der gewählten Marke darunter.
+  // Hauptfrage: Welche Marke trägt, welche verliert? Kollektionstafel nach Umsatz, Summe unter dem Strich; Akte der gewählten Marke darunter.
   const reihe = [...u.marken].sort((a, b) => b.umsatz13 - a.umsatz13);
   const gesamt = u.marken.reduce((a, m) => a + m.umsatz13, 0);
   const veraltet = reihe.filter((m) => m.status === 'aktiv' && m.stilAktualitaet < 45);
   if (!reihe.some((m) => m.id === ui.em.auf)) ui.em.auf = reihe[0]?.id;
-  let h = tabs + '<div class="q31">';
-  h += `<div class="q-gross"><span class="q-label">Eigenmarkenanteil am Umsatz</span><span class="q-haupt" data-p="mg:anteil">${pz(u.anteilUmsatz, 1)}</span><span class="q-neben"><b data-p="mg:marge">${punkte(u.mehrmargeSchnitt)}</b>Mehrmarge zu Fremdware</span></div>`;
-  if (!reihe.length) h += '<div class="q-befund">Hartwig führt keine Eigenmarke. Eine Marke gründest du über den freien Platz in der Tafel.</div>';
-  else if (veraltet.length) h += `<div class="q-befund"><b>${veraltet.map((m) => esc(m.name)).join(', ')}</b> ${veraltet.length === 1 ? 'wirkt' : 'wirken'} veraltet. Ohne Neupositionierung sinkt die Nachfrage weiter.</div>`;
-  else h += '<div class="q-befund">Alle aktiven Marken sind im Stil aktuell.</div>';
-  h += `<div class="q-buch q-tafel" data-summenbuch="Kollektionstafel"><div class="q-buch-kopf"><span>Kollektionstafel</span><b data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace('.', ',')} sinnvollen</b></div>`;
-  for (const m of reihe) {
-    const st = m.status !== 'aktiv' ? `${STATUS[m.status] ?? m.status}${m.bis !== undefined ? ` bis KW ${kwVon(m.bis)}` : ''}` : m.stilAktualitaet < 45 ? 'Stil veraltet' : `${m.stil}, ${preisText(m.preislage)}`;
-    h += `<button class="q-muster${ui.em.auf === m.id ? ' q-an' : ''}" data-a="emAuf" data-v="${m.id}" aria-expanded="${ui.em.auf === m.id}"><span class="q-probe" style="--farbe:${m.farbe}"></span><span class="q-name">${esc(m.name)}<small>${zielText(m.zielgruppe)} · ${m.kategorie}</small><small class="${m.status === 'aktiv' && m.stilAktualitaet < 45 ? 'q-minus' : ''}">${st}</small></span><span class="q-wert"><b data-s="u">${geld(m.umsatz13)}</b><small>${punkte(m.mehrmarge)}</small></span></button>`;
-  }
-  if (u.gefuehrt < u.kapazitaet) h += '<button class="q-muster q-frei" data-a="emGruenden"><span class="q-probe"></span><span class="q-name">Freier Platz<small>Neue Eigenmarke gründen</small></span><span class="q-wert">+</span></button>';
-  if (reihe.length) h += `<div class="q-summe"><span>Umsatz 13 Wochen gesamt</span><span class="q-wert" data-summe="u" data-p="mg:umsatz">${geld(gesamt)}</span></div>`;
-  h += '</div>';
-  if (u.gefuehrt >= u.kapazitaet) h += '<button class="q-neben-akt" data-a="emGruenden" style="margin-bottom:12px">+ Neue Eigenmarke (Kapazität voll)</button>';
-  for (const m of reihe.filter((x) => x.id === ui.em.auf)) {
+  let h = !reihe.length ? befund('Hartwig führt keine Eigenmarke. Gründe eine über den freien Platz.')
+    : veraltet.length ? befund(`${esc(veraltet.map((m) => m.name).join(' und '))} ${veraltet.length === 1 ? 'wirkt' : 'wirken'} veraltet. Ohne Neupositionierung sinkt die Nachfrage.`, 'engpass')
+      : befund('Alle aktiven Marken sind im Stil aktuell.');
+  h += tabs;
+  let x = K.gross([{ label: 'Anteil am Umsatz', wert: pz(u.anteilUmsatz, 1), p: 'mg:anteil' }, { label: 'Mehrmarge', wert: punkte(u.mehrmargeSchnitt), p: 'mg:marge', ton: 'gut', unter: 'zu Fremdware' }]);
+  x += '<div data-summenbuch="Kollektionstafel">';
+  x += `<h3 class="hw-abschnitt">Kollektionstafel<small data-p="mg:gefuehrt">${u.gefuehrt} von ${String(u.kapazitaet).replace('.', ',')} sinnvollen</small></h3>`;
+  x += K.liste([
+    ...reihe.map((m) => {
+      const st = m.status !== 'aktiv' ? `${STATUS[m.status] ?? m.status}${m.bis !== undefined ? ` bis KW ${kwVon(m.bis)}` : ''}` : m.stilAktualitaet < 45 ? '<span class="hw-schlecht">Stil veraltet</span>' : `${esc(m.stil)}, ${preisText(m.preislage)}`;
+      return K.zeile({ was: `${farbpunkt(m.farbe)} ${esc(m.name)}`, unter: `${esc(zielText(m.zielgruppe))} · ${esc(m.kategorie)} · ${st}`, wert: `<span data-s="u">${geld(m.umsatz13)}</span>`, wertUnter: punkte(m.mehrmarge), tippbar: true, attr: `data-a="emAuf" data-v="${esc(m.id)}" aria-expanded="${ui.em.auf === m.id}"${ui.em.auf === m.id ? ' aria-current="true"' : ''}` });
+    }),
+    ...(u.gefuehrt < u.kapazitaet ? [K.zeile({ was: 'Freier Platz', unter: 'Neue Eigenmarke gründen', tippbar: true, attr: 'data-a="emGruenden"' })] : []),
+  ]);
+  if (reihe.length) x += `<div class="hw-g1-summe"><span>Umsatz 13 Wochen gesamt</span><b data-summe="u" data-p="mg:umsatz">${geld(gesamt)}</b></div>`;
+  x += '</div>';
+  if (u.gefuehrt >= u.kapazitaet) x += K.knoepfe(K.knopf('Neue Eigenmarke gründen', 'data-a="emGruenden"', 'zweit')) + '<p class="hw-lese hw-g1-notiz">Die Kapazität ist voll: jede weitere Marke kostet Wirkung.</p>';
+  for (const m of reihe.filter((y) => y.id === ui.em.auf)) {
     const veraltetM = m.stilAktualitaet < 45;
-    const status = m.status !== 'aktiv' ? `<span class="chip grau">${STATUS[m.status] ?? m.status}${m.bis !== undefined ? ` bis KW ${kwVon(m.bis)}` : ''}</span>` : veraltetM ? '<span class="chip warn">Stil veraltet</span>' : '<span class="chip">aktiv</span>';
-    h += `<div class="karte emkarte"><div class="mkopf" style="background:${m.farbe}"><b>${esc(m.name)}</b><small>${zielText(m.zielgruppe)} · ${m.kategorie}${m.gewachsen ? ' · gewachsene Hartwig-Marke' : ''}</small></div>`;
-    h += `<div class="owerte"><div><span>Umsatz 13 Wochen</span><b data-p="m:${m.id}:umsatz">${geld(m.umsatz13)}</b></div><div><span>Rohertragsquote</span><b data-p="m:${m.id}:marge">${pz(m.rohertragsquote, 1)}</b></div><div><span>Mehrmarge</span><b data-p="m:${m.id}:mehrmarge">${punkte(m.mehrmarge)}</b></div></div>`;
-    h += `<div class="ochips">${status}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualität ${m.qualitaet} von 5</span><span class="chip grau">${esc(m.beschaffungName)}</span></div>`;
-    h += `<div class="mzeile"><span>Bekanntheit</span>${balken(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
-    h += `<div class="mzeile"><span>Stil aktuell</span>${balken(m.stilAktualitaet, veraltetM ? 'var(--hk-schlecht, #d23c32)' : 'var(--hk-gut, #2f8f5b)')}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
-    h += `<div class="mzeile"><span>Passung je Region</span></div>${passungZeile(m.passungRegion, `m:${m.id}:passung`)}`;
-    h += teamAufschluesselung(leistungen.get(m.id));
-    h += `<div class="olief">${m.wgs.filter((w) => w.anteilZiel > 0 || w.anteilIst > 0).map((w) => `${esc(w.name)} ${pz(w.anteilIst)}`).join(' · ') || 'Noch in keiner Warengruppe.'}</div>`;
-    if (m.hinweise?.length) h += `<div class="olief warnung">${m.hinweise.map(esc).join(' · ')}</div>`;
-    if (ui.em.einstellen === m.id) h += `<div class="oknoepfe"><button class="rot" data-a="emEinstellenJa" data-v="${m.id}">Wirklich einstellen</button><button data-a="emEinstellenNein">Behalten</button></div>`;
-    else {
-      h += `<div class="regler"><div class="rkopf"><b>Markenbudget je Woche</b><small>baut Bekanntheit auf</small></div><div class="stepper"><button data-a="emBudget" data-v="${m.id}" data-d="-5000" aria-label="Budget senken">−</button><span><b data-p="m:${m.id}:budget">${geld(m.budgetWoche)}</b></span><button data-a="emBudget" data-v="${m.id}" data-d="5000" aria-label="Budget erhöhen">+</button></div></div>`;
-      h += `<div class="oknoepfe"><button data-a="emPositionieren" data-v="${m.id}"${m.status === 'aktiv' ? '' : ' disabled'}>Neu positionieren</button><button class="rot" data-a="emEinstellen" data-v="${m.id}">Einstellen</button></div>`;
+    x += `<h3 class="hw-abschnitt hw-g1-akte"><span>${farbpunkt(m.farbe, 16)} ${esc(m.name)}</span><small>${esc(zielText(m.zielgruppe))} · ${esc(m.kategorie)}</small></h3>`;
+    const marken = [m.status !== 'aktiv' ? K.marke(`${STATUS[m.status] ?? m.status}${m.bis !== undefined ? ` bis KW ${kwVon(m.bis)}` : ''}`) : veraltetM ? K.marke('Stil veraltet', 'schlecht') : K.marke('aktiv', 'gut'),
+      K.marke(preisText(m.preislage)), K.marke(m.stil), K.marke(`Qualität ${m.qualitaet} von 5`), K.marke(m.beschaffungName)];
+    if (m.gewachsen) marken.push(K.marke('gewachsene Hartwig-Marke'));
+    x += `<div class="hw-statusreihe">${marken.join('')}</div>`;
+    x += K.gross([{ label: 'Umsatz 13 Wochen', wert: geld(m.umsatz13), p: `m:${m.id}:umsatz` }, { label: 'Rohertragsquote', wert: pz(m.rohertragsquote, 1), p: `m:${m.id}:marge`, unter: `Mehrmarge <span data-p="m:${esc(m.id)}:mehrmarge">${punkte(m.mehrmarge)}</span>` }]);
+    x += K.abschnitt('Marke');
+    x += `<div class="hw-g1-skalen">${skalaP('Bekanntheit', m.bekanntheit, `m:${m.id}:bekanntheit`)}${skalaP('Stil aktuell', m.stilAktualitaet, `m:${m.id}:aktualitaet`)}</div>`;
+    x += K.abschnitt('Passung je Region') + passung(m.passungRegion, `m:${m.id}:passung`);
+    x += teamAufschluesselung(leistungen.get(m.id));
+    const wgs = m.wgs.filter((w) => w.anteilZiel > 0 || w.anteilIst > 0);
+    x += K.abschnitt('Warengruppen', 'Anteil der Marke');
+    x += wgs.length ? K.liste(wgs.map((w) => K.zeile({ was: esc(w.name), wert: pz(w.anteilIst) }))) : K.leer('Noch in keiner Warengruppe.');
+    for (const t of m.hinweise ?? []) x += K.hinweis(esc(t), 'achtung');
+    if (ui.em.einstellen === m.id) {
+      x += K.hinweis(`${esc(m.name)} wirklich einstellen? Die Ware läuft ab.`, 'fehler');
+      x += `<div class="hw-knoepfe zweispaltig">${K.knopf('Einstellen der Marke', `data-a="emEinstellenJa" data-v="${esc(m.id)}" data-gefahr`, 'gefahr')}${K.knopf('Behalten', 'data-a="emEinstellenNein"', 'zweit')}</div>`;
+    } else {
+      x += K.abschnitt('Markenbudget je Woche', 'baut Bekanntheit auf');
+      x += K.stepper({ wert: geld(m.budgetWoche), label: 'Markenbudget je Woche', attrMinus: `data-a="emBudget" data-v="${esc(m.id)}" data-d="-5000"`, attrPlus: `data-a="emBudget" data-v="${esc(m.id)}" data-d="5000"`, minusAus: m.budgetWoche <= 0 }).replace('<output>', `<output data-p="m:${esc(m.id)}:budget">`);
+      x += `<div class="hw-knoepfe zweispaltig">${K.knopf('Neu positionieren', `data-a="emPositionieren" data-v="${esc(m.id)}"`, 'zweit', m.status !== 'aktiv')}${K.knopf('Einstellen der Marke', `data-a="emEinstellen" data-v="${esc(m.id)}" data-gefahr`, 'gefahr')}</div>`;
     }
-    h += '</div>';
   }
-  h += '</div>';
-  return { titel: 'Eigenmarken', unter: `${u.gefuehrt} Marken · ${pz(u.anteilUmsatz, 1)} vom Umsatz · KW ${kwVon(s.woche)}`, html: h };
+  return { titel: 'Eigenmarken', unter: `${u.gefuehrt} Marken · ${pz(u.anteilUmsatz, 1)} vom Umsatz · KW ${kwVon(s.woche)}`, html: `<div class="hw-g1">${h}${K.rumpf(x)}</div>` };
 }
 
 const SCHRITTE = ['Zielgruppe', 'Sortiment', 'Profil', 'Beschaffung', 'Name'];
@@ -88,49 +102,60 @@ function wgVorschlag(ctx, s, e) {
 
 function assistent(ctx, ui, tabs) {
   const s = ctx.s(), A = ui.em.assistent, m = A.daten, u = ctx.q.marken(s);
-  const seg = (act, wert, opt, sperre = false) => `<div class="seg umbruch">${opt.map(([v, t]) => `<button class="${String(v) === String(wert) ? 'an' : ''}" data-a="${act}" data-v="${v}"${sperre ? ' disabled' : ''}>${t}</button>`).join('')}</div>`;
-  const feld = (titel, inhalt, hilfe = '') => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ''}</div>${inhalt}</div>`;
   const v = ctx.q.vorschau(s, m);
-  let h = tabs;
-  h += `<button class="zurueck" data-a="emAbbrechen">‹ Eigenmarken</button>`;
-  h += `<div class="schritte">${SCHRITTE.map((t, i) => `<button class="${i === A.schritt ? 'an' : i < A.schritt ? 'fertig' : ''}" data-a="emSchritt" data-v="${i}"><b>${i + 1}</b>${t}</button>`).join('')}</div>`;
-  h += '<div class="karte steuerung">';
-  if (A.schritt === 0) {
-    if (!A.id) h += feld('Vorlage', `<div class="seg umbruch">${ctx.q.vorlagen().map((x, i) => `<button class="${A.vorlage === i ? 'an' : ''}" data-a="emVorlage" data-v="${i}">${esc(x.titel)}</button>`).join('')}</div>`, 'füllt alle Schritte vor');
-    h += feld('Alter', seg('emAlter', m.zielgruppe.alter, alterOptionen(m.zielgruppe.alter)));
-    h += feld('Geschlecht', seg('emGeschlecht', m.zielgruppe.geschlecht, GESCHLECHT));
-  } else if (A.schritt === 1) {
-    h += feld('Kategorie', seg('emKategorie', m.kategorie, KATEGORIE.map((k) => [k, k]), !!A.id), A.id ? 'bleibt bei Neupositionierung' : '');
-    const liste = [...v.passendeWgs].sort((a, b) => b.passung - a.passung);
-    const inh = liste.length ? liste.map((w) => { const a = m.wgAnteile[w.wg]; return `<button class="wgwahl ${a ? 'an' : ''}" data-a="emWg" data-v="${w.wg}"><span>${esc(w.name)} <i>${esc(ctx.E.GRUPPEN[w.bereich]?.name ?? w.bereich)} · ${w.passung >= 1 ? 'passt sehr gut' : w.passung >= 0.7 ? 'passt gut' : 'passt bedingt'}</i></span><b>${a ? pz(a) : '+'}</b></button>`; }).join('') : '<div class="leise">Keine Warengruppe passt zu Zielgruppe und Kategorie.</div>';
-    h += feld('Warengruppen', `<div class="wgliste">${inh}</div>`, 'Antippen: 15, 25, 40 % oder aus');
-  } else if (A.schritt === 2) {
-    h += feld('Preislage', seg('emPreis', m.preislage, PREIS));
-    h += feld('Stil', seg('emStil', m.stil, STIL), 'trendig veraltet schneller');
-    h += feld('Qualität', seg('emQualitaet', m.qualitaet, [1, 2, 3, 4, 5].map((x) => [x, '★'.repeat(x)])));
-  } else if (A.schritt === 3) {
-    const B = ctx.q.beschaffung();
-    h += feld('Beschaffung', `<div class="wahlkarten">${Object.entries(B).map(([k, b]) => `<button class="${m.beschaffung === k ? 'an' : ''}" data-a="emBeschaffung" data-v="${k}"><b>${esc(b.name)}</b><small>${b.vorlauf} Wochen Vorlauf, Mindestabnahme ${geld(b.mindestabnahme)}, ${punkte(b.mehrmarge)} Marge</small></button>`).join('')}</div>`);
-    h += feld('Markenbudget je Woche', `<div class="stepper"><button data-a="emBudgetNeu" data-v="-5000">−</button><span><b>${geld(m.budgetWoche)}</b></span><button data-a="emBudgetNeu" data-v="5000">+</button></div>`, 'baut Bekanntheit auf');
-  } else {
-    h += feld('Name', `<input class="ort gross" data-a="emName" maxlength="22" value="${esc(m.name)}">`);
-    if (!A.id) h += feld('Farbe', `<div class="farben">${FARBEN.map((f) => `<button class="${m.farbe === f ? 'an' : ''}" style="background:${f}" data-a="emFarbe" data-v="${f}" aria-label="Farbe ${f}"></button>`).join('')}</div>`, 'für Shop und Karte');
-  }
-  h += '</div>';
-  // Vorschau aus der Engine
   const nWg = Object.values(m.wgAnteile).filter((a) => a > 0).length;
   const kosten = A.id ? u.kosten.neupositionierung : v.kosten;
-  h += `<div class="karte vorschau"><div class="mkopf" style="background:${m.farbe}"><b>${esc(m.name)}</b><small>${zielText(m.zielgruppe)} · ${m.kategorie} · ${preisText(m.preislage)} · ${m.stil}</small></div>`;
-  h += `<div class="owerte"><div><span>${A.id ? 'Kosten' : 'Einmalkosten'}</span><b data-p="v:kosten">${geld(kosten)}</b></div><div><span>${A.id ? 'Umstellung' : 'Erste Ware in'}</span><b data-p="v:aufbau">${A.id ? u.kosten.neupositionierungWochen : v.aufbauWochen} Wochen</b></div><div><span>Mehrmarge</span><b data-p="v:marge">${punkte(v.mehrmarge)}</b></div></div>`;
-  h += `<div class="mzeile"><span>Passung je Region</span></div>${passungZeile(v.passungRegion, 'v:passung')}`;
-  h += `<div class="olief">${nWg} Warengruppen · Mindestabnahme ${geld(v.mindestabnahme)} je Order${v.kapazitaetFrei > 0 ? ` · Platz für ${String(v.kapazitaetFrei).replace('.', ',')} weitere Marken` : ''}</div>`;
-  if (v.kapazitaetFrei <= 0 && !A.id) h += '<div class="olief warnung">Der Einkauf ist mit den bestehenden Marken ausgelastet: jede weitere Marke kostet Wirkung, mehr Platz bringt eine höhere Stufe der Abteilung Einkauf im HQ.</div>';
-  if (!v.ok && v.fehler && !A.id) h += `<div class="olief warnung">${esc(v.fehler)}</div>`;
-  h += '</div>';
-  const letzte = A.schritt === SCHRITTE.length - 1;
   const gesperrt = !A.id && (!nWg || !v.ok);
-  h += `<div class="oknoepfe unten2">${A.schritt > 0 ? '<button data-a="emZurueck">Zurück</button>' : ''}${letzte ? `<button class="gruen" data-a="emFertig"${gesperrt ? ' disabled' : ''}>${A.id ? 'Neu positionieren' : 'Marke gründen'}</button>` : '<button class="gruen" data-a="emWeiter">Weiter</button>'}</div>`;
-  return { titel: A.id ? 'Neu positionieren' : 'Marke gründen', unter: `Schritt ${A.schritt + 1} von ${SCHRITTE.length}: ${SCHRITTE[A.schritt]}`, html: h };
+  const satz = !A.id && v.kapazitaetFrei <= 0 ? 'Der Einkauf ist ausgelastet: jede weitere Marke kostet Wirkung.'
+    : !A.id && !v.ok && v.fehler ? esc(v.fehler)
+      : `${esc(m.name)} für ${esc(zielText(m.zielgruppe))}: ${punkte(v.mehrmarge)} Mehrmarge erwartet.`;
+  let h = befund(satz, !A.id && (v.kapazitaetFrei <= 0 || !v.ok) ? 'engpass' : '') + tabs;
+  h += `<div class="hw-g1-oben">${K.knopf('‹ Eigenmarken', 'data-a="emAbbrechen"', 'text')}</div>`;
+  let x = `<ol class="hw-g1-schritte fuenf">${SCHRITTE.map((t, i) => `<li class="${i === A.schritt ? 'an' : i < A.schritt ? 'fertig' : ''}"${i === A.schritt ? ' aria-current="step"' : ''}><button type="button" data-a="emSchritt" data-v="${i}"><i>${i + 1}</i>${t}</button></li>`).join('')}</ol>`;
+  const wahl = (act, wert, opt, sperre = false) => chips(opt.map(([w, t]) => [w, esc(String(t))]), wert, (w) => `data-a="${act}" data-v="${esc(String(w))}"`, '', sperre);
+  if (A.schritt === 0) {
+    if (!A.id) {
+      x += K.abschnitt('Vorlage', 'füllt alle Schritte vor');
+      x += `<div class="hw-g1-typen">${ctx.q.vorlagen().map((y, i) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${A.vorlage === i}" data-a="emVorlage" data-v="${i}"><b>${esc(y.titel)}</b><small>${esc(y.entwurf.kategorie)} · ${esc(preisText(y.entwurf.preislage))}</small></button>`).join('')}</div>`;
+    }
+    x += K.abschnitt('Alter') + wahl('emAlter', m.zielgruppe.alter, alterOptionen(m.zielgruppe.alter));
+    x += K.abschnitt('Geschlecht') + wahl('emGeschlecht', m.zielgruppe.geschlecht, GESCHLECHT);
+  } else if (A.schritt === 1) {
+    x += K.abschnitt('Kategorie', A.id ? 'bleibt bei Neupositionierung' : '') + wahl('emKategorie', m.kategorie, KATEGORIE.map((k) => [k, k]), !!A.id);
+    const liste = [...v.passendeWgs].sort((a, b) => b.passung - a.passung);
+    x += K.abschnitt('Warengruppen', 'Antippen: 15, 25, 40 % oder aus');
+    x += liste.length ? K.liste(liste.map((w) => { const a = m.wgAnteile[w.wg]; return K.zeile({ was: esc(w.name), unter: `${esc(ctx.E.GRUPPEN[w.bereich]?.name ?? w.bereich)} · ${w.passung >= 1 ? 'passt sehr gut' : w.passung >= 0.7 ? 'passt gut' : 'passt bedingt'}`, wert: a ? pz(a) : 'aus', ton: a ? 'gut' : '', tippbar: true, attr: `data-a="emWg" data-v="${esc(w.wg)}" aria-pressed="${!!a}"` }); }))
+      : K.leer('Keine Warengruppe passt zu Zielgruppe und Kategorie.');
+  } else if (A.schritt === 2) {
+    x += K.abschnitt('Preislage');
+    x += `<div class="hw-g1-typen drei">${PREIS.map(([w, t], i) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${m.preislage === w}" data-a="emPreis" data-v="${w}"><b>${t}</b><small>${'€'.repeat(i + 1)}</small></button>`).join('')}</div>`;
+    x += K.abschnitt('Stil', 'trendig veraltet schneller') + wahl('emStil', m.stil, STIL);
+    x += K.abschnitt('Qualität', `${m.qualitaet} von 5`);
+    x += `<div class="hw-g1-qualitaet">${K.stepper({ wert: `${m.qualitaet} von 5`, label: 'Qualität', attrMinus: `data-a="emQualitaet" data-v="${m.qualitaet - 1}"`, attrPlus: `data-a="emQualitaet" data-v="${m.qualitaet + 1}"`, minusAus: m.qualitaet <= 1, plusAus: m.qualitaet >= 5 })}</div>`;
+  } else if (A.schritt === 3) {
+    const B = ctx.q.beschaffung();
+    x += K.abschnitt('Beschaffung');
+    x += `<div class="hw-g1-typen eins">${Object.entries(B).map(([k, b]) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${m.beschaffung === k}" data-a="emBeschaffung" data-v="${k}"><b>${esc(b.name)}</b><small>${b.vorlauf} Wochen Vorlauf · Mindestabnahme ${geld(b.mindestabnahme)} · ${punkte(b.mehrmarge)} Marge</small><small>${esc(BESCHAFFUNG_TEXT[k] ?? '')}</small></button>`).join('')}</div>`;
+    x += K.abschnitt('Markenbudget je Woche', 'baut Bekanntheit auf');
+    x += K.stepper({ wert: geld(m.budgetWoche), label: 'Markenbudget je Woche', attrMinus: 'data-a="emBudgetNeu" data-v="-5000"', attrPlus: 'data-a="emBudgetNeu" data-v="5000"', minusAus: m.budgetWoche <= 0 });
+  } else {
+    x += K.abschnitt('Name');
+    x += `<input class="hw-g1-eingabe" data-a="emName" maxlength="22" value="${esc(m.name)}" aria-label="Name der Marke">`;
+    if (!A.id) x += K.abschnitt('Farbe', 'für Shop und Karte') + `<div class="hw-g1-farben" role="group" aria-label="Markenfarbe">${FARBEN.map((f) => `<button type="button" class="hw-g1-farbknopf" aria-pressed="${m.farbe === f}" data-a="emFarbe" data-v="${f}" aria-label="Farbe ${f}">${farbpunkt(f, 30)}</button>`).join('')}</div>`;
+  }
+  // Vorschau aus der Engine
+  x += `<h3 class="hw-abschnitt">Vorschau<small>${farbpunkt(m.farbe)} ${esc(m.name)}</small></h3>`;
+  x += `<p class="hw-lese hw-g1-notiz">${esc(zielText(m.zielgruppe))} · ${esc(m.kategorie)} · ${preisText(m.preislage)} · ${esc(m.stil)}</p>`;
+  x += K.gross([{ label: A.id ? 'Kosten' : 'Einmalkosten', wert: geld(kosten), p: 'v:kosten' }, { label: 'Mehrmarge', wert: punkte(v.mehrmarge), p: 'v:marge', ton: 'gut' }]);
+  x += K.liste([K.zeile({ was: A.id ? 'Umstellung' : 'Erste Ware in', wert: `<span data-p="v:aufbau">${A.id ? u.kosten.neupositionierungWochen : v.aufbauWochen} Wochen</span>` }),
+    K.zeile({ was: 'Warengruppen', wert: String(nWg) }), K.zeile({ was: 'Mindestabnahme je Order', wert: geld(v.mindestabnahme) }),
+    ...(v.kapazitaetFrei > 0 ? [K.zeile({ was: 'Platz für weitere Marken', wert: String(v.kapazitaetFrei).replace('.', ',') })] : [])]);
+  x += K.abschnitt('Passung je Region') + passung(v.passungRegion, 'v:passung');
+  if (v.kapazitaetFrei <= 0 && !A.id) x += K.hinweis('Der Einkauf ist mit den bestehenden Marken ausgelastet: mehr Platz bringt eine höhere Stufe der Abteilung Einkauf im HQ.', 'achtung');
+  if (!v.ok && v.fehler && !A.id) x += K.hinweis(esc(v.fehler), 'fehler');
+  const letzte = A.schritt === SCHRITTE.length - 1;
+  x += `<div class="hw-knoepfe zweispaltig">${A.schritt > 0 ? K.knopf('Zurück', 'data-a="emZurueck"', 'zweit') : K.knopf('Abbrechen', 'data-a="emAbbrechen"', 'zweit')}${letzte ? K.knopf(A.id ? 'Neu positionieren' : 'Marke gründen', 'data-a="emFertig"', '', gesperrt) : K.knopf('Weiter', 'data-a="emWeiter"')}</div>`;
+  return { titel: A.id ? 'Neu positionieren' : 'Marke gründen', unter: `Schritt ${A.schritt + 1} von ${SCHRITTE.length}: ${SCHRITTE[A.schritt]}`, html: `<div class="hw-g1">${h}${K.rumpf(x)}</div>` };
 }
 
 /** Rückgabe: 'nichts' (keine Neuzeichnung), 'oben' (neu zeichnen, nach oben), sonst neu zeichnen mit gleicher Position. */

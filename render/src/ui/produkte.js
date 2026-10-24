@@ -1,77 +1,72 @@
-// Produktentwicklung für Eigenmarken (VORSTAND-MARKETING-VERTRAG.md, Abschnitt 5) im Stil von Coffee Inc 2:
-// Markenwahl, Kategorien, Produktkarten-Karussell mit Bild, Sternen, Verkäufen letzte Woche, Margen-Donut, Preis +/-,
-// Sortiment an/aus und Auslisten; Assistent "Neues Produkt" mit Typ-Kacheln, Farbe, Material, Preislage, Qualität,
-// Dauer 4/8/12/24/48 Wochen und Budget je Woche samt Vorschau; Trendbericht der Messe.
+// Produktentwicklung für Eigenmarken (VORSTAND-MARKETING-VERTRAG.md, Abschnitt 5), E47 im Gestaltungssystem (UI-NEU.md):
+// Coffee 26 und 07 (Produktkarten-Karussell mit Bild über der Karte, Sterne, Schalter „Im Sortiment“, Verkäufe Vorwoche,
+// Margenring, Preis-Stepper, Seitenpunkte) und Coffee 01 bis 08 (Assistent „Neues Produkt“: Segment, Zielgruppen,
+// Kategorien mit Kachelraster, dann Preislage, Dauer, Budget, Vorschau). Trendbericht der Messe.
 // Daten: produkte, produktKatalog, trendbericht, produktVorschau; Aktionen produktEntwickeln, produktPreis,
-// produktAuslisten, produktSortiment. Prüfung wie im Vorstand.
+// produktAuslisten, produktSortiment. Prüfung wie im Vorstand (data-p gegen frische Abfrage).
 import { geld, fmt, pz, dez, kwVon, esc } from './format.js';
-import { bereich } from './komponenten.js';
-import { werteSammler, vergleiche, schalter, segment, regler, stepper, kz, wocheText, karussell, karussellBinden } from './vorstand.js';
+import * as K from './komponenten.js';
+import { werteSammler, vergleiche, wocheText, portraet } from './vorstand.js';
 import * as PB from '../kit/produktbild.js';
-import { passendeTypen, zielgruppenFuerFach, fachSegmente, zielChips, sortimentBedienung, gruppeTrend, teamAufschluesselung } from './produkte-q24.js';
+import { passendeTypen, zielgruppenFuerFach, fachSegmente, zielChips, sortimentBedienung, gruppeTrend, teamAufschluesselung, chips, farbpunkt } from './produkte-q24.js';
 
 const PREISLAGE = { einstieg: 'Einstieg', mitte: 'Mitte', gehoben: 'Gehoben' };
 const STATUS = { entwicklung: 'in Entwicklung', sortiment: 'im Sortiment', pausiert: 'pausiert', ausgelistet: 'ausgelistet' };
+const ZIEL_TEXT = { kinder: 'Kinderbekleidung', teens: 'Junge Mode', young: 'Trendorientiert', adults: 'Beruf und Alltag', bestager: 'Klassik und Komfort' };
 const euro = (x) => `${dez(x, 2)} €`;
 // Q27: Bild je Artikeltyp aus dem Katalog (Silhouette + Parameter, engine/src/sortiment); ohne Eintrag leitet die Grafik es aus dem Namen ab
 const BILD = new Map();
-const merkeBilder = (K) => { for (const t of K.typen ?? []) if (t.bild) BILD.set(t.typ, t.bild); return K; };
+const merkeBilder = (Kat) => { for (const t of Kat.typen ?? []) if (t.bild) BILD.set(t.typ, t.bild); return Kat; };
 const bildOpt = (typ, b) => { const x = b ?? BILD.get(typ); return x ? { bild: x } : {}; };
-const bild = (typ, farbe, material, g = 150, b) => (typeof PB.produktbildSVG === 'function' ? PB.produktbildSVG(typ, farbe, material, g, bildOpt(typ, b)) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#d8d2c6"/><text x="50" y="56" font-size="9" text-anchor="middle" fill="#7b8790">${esc(typ)}</text></svg>`);
-// Q25: Model-Ansicht (Antippen des Bildes wechselt Produkt ↔ Model)
+const bild = (typ, farbe, material, g = 150, b) => (typeof PB.produktbildSVG === 'function' ? PB.produktbildSVG(typ, farbe, material, g, bildOpt(typ, b)) : `<svg viewBox="0 0 100 100" width="${g}" height="${g}"><rect x="22" y="22" width="56" height="56" rx="10" fill="#4a5a62"/></svg>`);
+// Q25: Model-Ansicht (Antippen des Bildes wechselt Produkt und Model)
 const ZG_MODEL = { kinder: 'kinder', jung: 'young', mitte: 'adults', reif: 'bestager' };
 const geschlechtVon = (wg) => (/^herren|kinder\.jungen/.test(String(wg ?? '')) ? 'herren' : 'damen');
 const modelBild = (typ, farbe, material, wg, trendGruppe, g = 150, b) => (typeof PB.modelbildSVG === 'function' ? PB.modelbildSVG(typ, farbe, material, { geschlecht: geschlechtVon(wg), zielgruppe: ZG_MODEL[trendGruppe] ?? 'young', groesse: g, hintergrund: null, ...bildOpt(typ, b) }) : null);
-const kachel = (typ, g = 76) => (typeof PB.typKachelSVG === 'function' ? PB.typKachelSVG(typ, g, bildOpt(typ)) : bild(typ, undefined, undefined, g));
+// Kachelbild ohne eigene Kachelfläche (die Kachel ist die Karte), Standardfarbe und Material des Typs.
+const kachel = (typ, g = 64) => bild(typ, PB.STANDARD_FARBE?.[typ], PB.STANDARD_MATERIAL?.[typ], g);
 let sternNr = 0;
-/** Fünf Sterne mit halben Schritten. */
-function sterne(x, g = 18) {
-  let h = '<span class="sterne">';
+/** Fünf Sterne mit halben Schritten (Coffee 26: gelb, leer dunkelgrau). */
+function sterne(x, label) {
+  let h = `<div class="hw-sterne" role="img" aria-label="${esc(label)}">`;
   for (let i = 0; i < 5; i++) {
-    const f = Math.max(0, Math.min(1, x - i)), id = `st${sternNr++}`;
-    h += `<svg viewBox="0 0 24 24" width="${g}" height="${g}"><defs><linearGradient id="${id}"><stop offset="${f}" stop-color="#f0b429"/><stop offset="${f}" stop-color="#d9d4cb"/></linearGradient></defs><path d="M12 2.2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17.1l-6.1 3.5 1.5-6.8L2.2 9.2l6.9-.7z" fill="url(#${id})"/></svg>`;
+    const f = Math.max(0, Math.min(1, x - i)), id = `g1st${sternNr++}`;
+    h += `<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="${id}"><stop offset="${f}" stop-color="var(--stern)"/><stop offset="${f}" stop-color="#4a4644"/></linearGradient></defs><path fill="url(#${id})" d="M12 1.5l3.2 6.8 7.3.9-5.4 5 1.4 7.3L12 17.9l-6.5 3.6 1.4-7.3-5.4-5 7.3-.9z"/></svg>`;
   }
-  return h + '</span>';
+  return h + '</div>';
 }
-/** Margen-Donut: Anteil Marge orange, Einstand rot. */
-function donut(marge, p) {
-  const r = 26, u = 2 * Math.PI * r, m = Math.max(0, Math.min(1, marge));
-  return `<div class="donut"><svg viewBox="0 0 64 64" width="84" height="84"><circle cx="32" cy="32" r="${r}" fill="none" stroke="#d2603a" stroke-width="9"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="#efc27a" stroke-width="9" stroke-dasharray="${(u * m).toFixed(1)} ${u.toFixed(1)}" transform="rotate(-90 32 32)"/></svg><span><small>Marge</small>${p}</span></div>`;
+/** Margenring (Coffee 26): Marge hell, Einstand dunkel, Wert in der Mitte. */
+function ring(marge, wertHtml) {
+  const r = 33.5, u = 2 * Math.PI * r, ek = Math.max(0, Math.min(1, 1 - marge));
+  return `<div class="hw-ring"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="${r}" fill="none" stroke="var(--ring-a)" stroke-width="13"/><circle cx="40" cy="40" r="${r}" fill="none" stroke="var(--ring-b)" stroke-width="13" stroke-dasharray="${(u * ek).toFixed(1)} ${u.toFixed(1)}" transform="rotate(-90 40 40)"/></svg><span>Marge${wertHtml}</span></div>`;
 }
 const preisSchritt = (p) => (p < 20 ? 1 : p < 100 ? 5 : 10);
+const PAPIERKORB = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg>';
 
+/** Absatz Eigenmarke und Fremdmarken (Coffee 08): zwei Kennzahlen in Serienfarbe, darunter fünf Wochen als Linien. */
 function absatzGrafik(A, P, name) {
-  const hoch = Math.max(1, ...A.eigen, ...A.fremd);
-  const punkte = (werte) => werte.map((wert, i) => `${15 + i * 72},${91 - 73 * wert / hoch}`).join(' ');
+  let h = K.abschnitt('Absatz', '5 Wochen · ' + name);
+  h += `<div class="hw-g1-serien"><div><span class="hw-marke">Eigenmarke</span>${P('a:eigen', geld(A.letzteEigen), 'b', ' class="hw-g1-serie-a"')}<small>Umsatz letzte Woche</small></div><div><span class="hw-marke">Fremdmarken</span>${P('a:fremd', geld(A.letzteFremd), 'b', ' class="hw-g1-serie-b"')}<small>gleiche Warengruppen</small></div></div>`;
   const leer = !A.eigen.some((v) => v > 0) && !A.fremd.some((v) => v > 0);
-  return `<section class="q17-absatz karte" aria-label="Umsatzentwicklung der letzten fünf Wochen">
-    <div class="q17-kopf"><b>Absatzübersicht</b><small>5 Wochen · ${esc(name)}</small></div>
-    <div class="q17-kpis">
-      <div><small><i class="q17-punkt eigen"></i>Eigenmarke</small><b>${P('a:eigen', geld(A.letzteEigen))}</b><span>Umsatz letzte Woche</span></div>
-      <div><small><i class="q17-punkt fremd"></i>Fremdmarken</small><b>${P('a:fremd', geld(A.letzteFremd))}</b><span>Umsatz letzte Woche</span></div>
-    </div>
-    ${A.warengruppen ? `<svg class="q17-linien" viewBox="0 0 320 117" role="img" aria-label="Eigenmarke und Fremdmarken: fünf Wochen im Vergleich">
-      <path d="M15 18H303M15 54H303M15 91H303" stroke="#e5e2dd" stroke-width="1" fill="none"/>
-      <polyline points="${punkte(A.fremd)}" stroke="#88939a" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-      <polyline points="${punkte(A.eigen)}" stroke="#b65a44" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-      ${A.wochen.map((w, i) => `<text x="${15 + i * 72}" y="111" text-anchor="middle" font-size="9" fill="#6c7780">KW ${kwVon(w)}</text>`).join('')}
-    </svg>` : ''}
-    <p class="q17-hinweis">${leer ? 'Noch keine Verkaufsdaten erfasst. ' : ''}${A.vorlaufWochen ? (A.vorlaufWochen === 1 ? 'Eine Woche' : A.vorlaufWochen + ' Wochen') + ' vor Spielstart aus dem Vorlauf. ' : ''}Vergleich mit Fremdmarkenumsatz in denselben Warengruppen. Beträge in € pro Woche.</p>
-  </section>`;
+  if (A.warengruppen && !leer) {
+    const hoch = Math.max(1, ...A.eigen, ...A.fremd), x = (i) => 18 + i * 76, y = (w) => 92 - 76 * w / hoch;
+    const linie = (werte, k) => `<polyline class="${k}" points="${werte.map((w, i) => `${x(i)},${y(w).toFixed(1)}`).join(' ')}"/>` + werte.map((w, i) => `<circle class="${k}" cx="${x(i)}" cy="${y(w).toFixed(1)}" r="${i === werte.length - 1 ? 6.5 : 4.5}"/>`).join('');
+    h += `<svg class="hw-g1-linien" viewBox="0 0 340 104" role="img" aria-label="Eigenmarke und Fremdmarken: fünf Wochen im Vergleich">${linie(A.fremd, 'b')}${linie(A.eigen, 'a')}</svg>`;
+    h += `<div class="hw-balkenfuss hw-g1-wochen">${A.wochen.map((w) => `<span>KW ${kwVon(w)}</span>`).join('')}</div>`;
+  } else h += K.leer('Noch keine Verkaufsdaten erfasst.');
+  if (A.vorlaufWochen) h += `<p class="hw-lese hw-g1-notiz">${A.vorlaufWochen === 1 ? 'Eine Woche' : A.vorlaufWochen + ' Wochen'} vor Spielstart aus dem Vorlauf.</p>`;
+  return h;
 }
 
+/** Linienprofil der Marke als Fähigkeitsskalen (Coffee 28). */
 function linienProfil(m, P) {
   if (!m) return '';
   const achsen = [['Qualität', 'qualitaet'], ['Modegrad', 'modegrad'], ['Preislage', 'preislage'], ['Nachhaltigkeit', 'nachhaltigkeit']];
-  return `<section class="karte q17-profil" aria-label="Linienprofil">
-    <div class="q17-kopf"><b>Linienprofil</b><small>${esc(m.stil)}</small></div>
-    <div class="q17-profil-inhalt">
-      ${achsen.map(([titel, feld]) => `<div class="q17-merkmal"><span>${titel}</span><span class="q17-balken"><i style="width:${m[feld]}%"></i></span><b>${P('lp:' + feld, String(m[feld]))}</b></div>`).join('')}
-      <div class="q17-preispunkt"><span>Ø Verkaufspreis im Sortiment</span><b>${P('lp:preispunkt', euro(m.preispunkt))}</b></div>
-    </div>
-    <p class="q17-hinweis">Nachhaltigkeit ist ein Orientierungswert aus Beschaffung und Materialmix, keine Ökobilanz.</p>
-    <button class="q17-linienknopf" data-a="linienVerwalten">Linien verwalten ›</button>
-  </section>`;
+  return K.abschnitt('Linienprofil', m.stil)
+    + `<div class="hw-g1-skalen">${achsen.map(([titel, feld]) => K.skala(titel, m[feld]).replace(/<b>\d+<\/b>/, P('lp:' + feld, String(m[feld])))).join('')}</div>`
+    + K.liste([K.zeile({ was: 'Ø Verkaufspreis im Sortiment', wert: P('lp:preispunkt', euro(m.preispunkt), 'span') })])
+    + `<p class="hw-lese hw-g1-notiz">Nachhaltigkeit ist ein Orientierungswert aus Beschaffung und Materialmix, keine Ökobilanz.</p>`
+    + K.knoepfe(K.knopf('Linien verwalten', 'data-a="linienVerwalten"', 'zweit'));
 }
 
 export function produkteModul(ctx) {
@@ -79,8 +74,14 @@ export function produkteModul(ctx) {
   const da = typeof E.produkte === 'function';
   const ui = { aktiv: false, seite: 'liste', marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: new Set(), haus: null, fach: null, zielgruppe: null, detail: null };
 
+  // Sprecher: der Einkaufsvorstand (CPO) sagt den Befund; ohne Besetzung ohne Figur.
+  function sprecher(text, ton = '') {
+    const cpo = typeof E.vorstandProfil === 'function' ? E.vorstandProfil(s(), 'cpo') : null;
+    const p = cpo?.person;
+    return K.sprecher({ text, unter: p ? `${p.name} · Einkaufsvorstand` : 'Produktentwicklung', person: p ? portraet(p.portraet, 72) : '', ton });
+  }
   function markenwahl(L) {
-    return `<div class="spaltenwahl">${L.marken.map((m) => `<button class="chipk ${m.marke === ui.marke ? 'an' : ''}" data-a="marke" data-v="${m.marke}"><b style="background:${m.farbe}"></b>${esc(m.name)}</button>`).join('')}</div>`;
+    return chips(L.marken.map((m) => [m.marke, `${farbpunkt(m.farbe)}${esc(m.name)}`]), ui.marke, (w) => `data-a="marke" data-v="${esc(w)}"`, 'Eigenmarke', false, true);
   }
   function aktuelleMarke(L) {
     if (!L.marken.length) return null;
@@ -97,209 +98,236 @@ export function produkteModul(ctx) {
     ui.baumOffen = null; ui.astOffen = null;
   }
 
+  // ─────────────────────────── Produktkarte (Coffee 26)
+  function produktKarte(st, M, p, index, P, offeneHaeuser) {
+    const ent = p.status === 'entwicklung';
+    const mb = ui.model.has(p.id) ? modelBild(p.typ, p.farbe, p.material, p.wg, M.trendGruppe, 120, p.bild) : null;
+    let c = `<button type="button" class="hw-g1-bild" data-a="bildwechsel" data-v="${esc(p.id)}" aria-label="${ui.model.has(p.id) ? 'Produkt zeigen' : 'Am Model zeigen'}">${mb ?? bild(p.typ, p.farbe, p.material, 110, p.bild)}</button>`;
+    if (!ent) c += `<button type="button" class="hw-g1-papierkorb" data-a="auslisten" data-v="${esc(p.id)}" aria-label="Produkt auslisten">${PAPIERKORB}</button>`;
+    c += `<div class="hw-karte-titel hw-g1-titel">${P(`p:${p.id}:name`, p.name, 'span')}</div>`;
+    c += `<div class="hw-g1-unter">${esc(p.typ)} · ${esc(p.zielgruppeName ?? 'Markenzielgruppe')} · ${esc(PREISLAGE[p.preislage] ?? p.preislage)}</div>`;
+    if (ent) {
+      c += sterne(0, 'noch keine Bewertung');
+      c += `<div class="hw-g1-entwicklung"><span class="hw-marke">In Entwicklung</span><div class="hw-g1-fortschritt" role="progressbar" aria-valuenow="${Math.round(p.fortschritt * 100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${(p.fortschritt * 100).toFixed(0)}%"></i></div>`
+        + `<div class="hw-g1-zeile2"><span>${P(`p:${p.id}:fortschritt`, pz(p.fortschritt), 'span')}</span><span>${P(`p:${p.id}:fertig`, `fertig ${wocheText(st, p.fertigWoche)}`, 'span')}</span></div>`
+        + `<p class="hw-lese">${geld(p.budgetWoche)} je Woche über ${p.dauer} Wochen</p></div>`;
+      return c;
+    }
+    c += `<div class="hw-g1-sternzeile">${sterne(p.sterne, `${dez(p.sterne, 1)} von 5 Sternen`)}${P(`p:${p.id}:sterne`, dez(p.sterne, 1), 'span', ' class="hw-g1-sternzahl"')}</div>`;
+    const ver = `${p.veraenderung >= 0 ? '+' : '−'}${fmt.format(Math.abs(p.veraenderung))} (${p.veraenderungProzent >= 0 ? '+' : '−'}${pz(Math.abs(p.veraenderungProzent), 1)})`;
+    c += `<div class="hw-g1-mitte"><div class="hw-g1-schalter">${K.schalter({ text: 'Im Sortiment', an: p.status === 'sortiment', attr: `data-a="sortiment" data-v="${esc(p.id)}"` })}</div>`
+      + `<div class="hw-g1-verkauf"><span class="hw-marke">Stück Vorwoche</span>${P(`p:${p.id}:verkauf`, fmt.format(p.verkaufLetzteWoche), 'b', ' class="hw-zahl"')}${P(`p:${p.id}:veraenderung`, ver, 'span', ` class="hw-abw${p.veraenderung < 0 ? ' hw-schlecht' : p.veraenderung > 0 ? ' hw-gut' : ''}"`)}</div></div>`;
+    c += `<div class="hw-g1-preisblock"><div class="hw-g1-ringspalte"><span class="hw-g1-ek">EK ${P(`p:${p.id}:ek`, euro(p.ekStueck), 'span')}</span>${ring(p.marge, P(`p:${p.id}:marge`, pz(p.marge), 'b'))}</div>`
+      + `<div class="hw-g1-preis"><span class="hw-marke">Preis</span>${K.stepper({ wert: euro(p.preis), label: 'Verkaufspreis', attrMinus: `data-a="preis" data-v="-1" data-p2="${esc(p.id)}"`, attrPlus: `data-a="preis" data-v="1" data-p2="${esc(p.id)}"`, gross: false }).replace('<output>', `<output data-p="p:${esc(p.id)}:preis">`)}<span class="hw-abw">Normpreis ${euro(p.normpreis)}</span></div></div>`;
+    P(`p:${p.id}:preis`, euro(p.preis));
+    if (ui.auslisten === p.id) c += `<div class="hw-g1-frage"><p class="hw-lese">${esc(p.name)} wirklich auslisten?</p>${K.knoepfe(K.knopf('Auslisten', `data-a="auslistenJa" data-v="${esc(p.id)}" data-gefahr`, 'gefahr'), K.knopf('Behalten', 'data-a="auslistenNein"', 'zweit'))}</div>`;
+    return c;
+  }
+
   // ─────────────────────────── Produktliste
   function liste(P) {
     const st = s(), L = E.produkte(st), M = aktuelleMarke(L);
-    let h = '';
-    if (!M) return { titel: 'Produktentwicklung', unter: 'keine Eigenmarke', html: '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Keine Eigenmarke vorhanden.</b>Produkte entstehen immer unter einer Eigenmarke. Gründe zuerst eine Marke.</div></div><button class="q-haupt-akt" data-a="eigenmarkeGruenden">Eigenmarke gründen</button></div>' };
-    // Q31 Kollektionsstange. Hauptfrage: Was läuft im Sortiment, was entsteht? Marke und Kategorie wählen,
-    // darunter sofort das Produktkarussell und die Hauptaktion; Absatz, Profil und Team folgen kleiner.
-    h += markenwahl(L);
+    if (!M) return { titel: 'Produktentwicklung', unter: 'keine Eigenmarke', html: sprecher('Ohne Eigenmarke können wir keine Produkte entwickeln.') + K.rumpf(K.leer('Produkte entstehen immer unter einer Eigenmarke. Gründe zuerst eine Marke.', 'Keine Eigenmarke vorhanden') + K.knoepfe(K.knopf('Eigenmarke gründen', 'data-a="eigenmarkeGruenden"', 'breit'))) };
     const kats = M.kategorien.filter((k) => k.kapazitaet > 0 || k.belegt > 0);
     if (!kats.some((k) => k.id === ui.kategorie)) ui.kategorie = (kats.find((k) => M.produkte.some((p) => p.kategorie === k.id && p.status !== 'ausgelistet')) ?? kats[0])?.id ?? null;
-    h += `<div class="seg umbruch kats">${kats.map((k) => `<button class="${k.id === ui.kategorie ? 'an' : ''}" data-a="kategorie" data-v="${k.id}">${esc(k.name)} ${P(`l:kat:${k.id}`, `${k.belegt} / ${k.kapazitaet}`, 'i')}</button>`).join('')}</div>`;
     const offeneHaeuser = st.haeuser.filter((haus) => haus.status === 'offen');
     if (!offeneHaeuser.some((haus) => haus.id === ui.haus)) ui.haus = offeneHaeuser[0]?.id ?? null;
     const prod = M.produkte.filter((p) => p.kategorie === ui.kategorie && p.status !== 'ausgelistet');
     ui.k = Math.min(ui.k, Math.max(0, prod.length - 1));
-    if (M.hinweis) h += `<div class="olief warnung">${esc(M.hinweis)}</div>`;
-    if (!prod.length) h += '<div class="karte"><div class="zeile grau">In dieser Kategorie gibt es noch kein Produkt.</div></div>';
-    else {
-      const karten = prod.map((p, index) => {
-        const ent = p.status === 'entwicklung';
-        const mb = ui.model.has(p.id) ? modelBild(p.typ, p.farbe, p.material, p.wg, M.trendGruppe, 190, p.bild) : null;
-        let c = `<div class="karte produkt"><div class="pbild" data-a="bildwechsel" data-v="${p.id}" role="button" aria-label="Produkt oder Model zeigen" >${mb ?? bild(p.typ, p.farbe, p.material, 150, p.bild)}</div>`;
-        if (!ent) c += `<button class="papierkorb" data-a="auslisten" data-v="${p.id}" aria-label="Produkt löschen"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></svg></button>`;
-        c += `<button class="q24-detailsknopf" data-a="detailProdukt" data-v="${esc(p.id)}">Produktdetails und Model ansehen</button>`;
-        c += `<div class="pname">${P(`p:${p.id}:name`, p.name, 'b')}<small>${esc(p.typ)} · ${esc(p.zielgruppeName ?? 'Markenzielgruppe')} · ${esc(p.farbe)} · ${esc(p.material)} · ${PREISLAGE[p.preislage] ?? p.preislage}</small></div>`;
-        if (ent) {
-          c += `<div class="mitte">${sterne(0)}</div><div class="regler"><div class="rkopf"><b>In Entwicklung</b>${P(`p:${p.id}:fertig`, `fertig ${wocheText(st, p.fertigWoche)}`, 'small')}</div><div class="balken"><span style="width:${(p.fortschritt * 100).toFixed(0)}%"></span></div><small class="rfuss">${P(`p:${p.id}:fortschritt`, pz(p.fortschritt), 'i')} · ${geld(p.budgetWoche)} je Woche über ${p.dauer} Wochen</small></div>`;
-        } else {
-          c += `<div class="mitte" title="${dez(p.sterne, 1)} Sterne">${sterne(p.sterne, 24)}<span class="sternzahl">${P(`p:${p.id}:sterne`, dez(p.sterne, 1), 'span')}</span></div>`;
-          const ver = `${p.veraenderung >= 0 ? '+' : '−'}${fmt.format(Math.abs(p.veraenderung))} (${p.veraenderungProzent >= 0 ? '+' : '−'}${pz(Math.abs(p.veraenderungProzent), 1)})`;
-          c += `<div class="pmitte">${schalter(p.status === 'sortiment', `data-a="sortiment" data-v="${p.id}"`, 'Im Sortiment')}<div class="verkauf"><small>Stück letzte Woche</small>${P(`p:${p.id}:verkauf`, fmt.format(p.verkaufLetzteWoche), 'b')}${P(`p:${p.id}:veraenderung`, ver, 'i', p.veraenderung < 0 ? ' class="rotwert"' : '')}</div></div>`;
-          c += `<div class="pmitte">${donut(p.marge, P(`p:${p.id}:marge`, pz(p.marge), 'b'))}<div class="preis"><small class="rotwert">EK je Stück ${P(`p:${p.id}:ek`, euro(p.ekStueck), 'span')}</small><small>VK je Stück</small>${stepper('preis', P(`p:${p.id}:preis`, euro(p.preis)), `Normpreis ${euro(p.normpreis)}`, ` data-p2="${p.id}"`)}</div></div>`;
-          const minimum = Math.round(p.normpreis * 0.4 * 100) / 100, maximum = Math.round(p.normpreis * 2.5 * 100) / 100;
-          c += `<div class="q17-preis"><input id="vk-${esc(p.id)}" type="range" min="${minimum}" max="${maximum}" step="0.01" value="${p.preis}" data-a="preisSlider" data-p2="${esc(p.id)}" aria-label="VK ${esc(p.name)}"/><small>${euro(minimum)} bis ${euro(maximum)}</small></div>`;
-          c += `<div class="q17-einheit">${schalter(p.preisAlleHaeuser, `data-a="einheitspreis" data-v="${p.id}"`, 'Preis in allen Häusern')}</div>`;
-          if (!p.preisAlleHaeuser && index === ui.k && ui.haus) {
-            const haus = offeneHaeuser.find((x) => x.id === ui.haus);
-            const hp = p.hauspreise[ui.haus] ?? p.preis;
-            c += `<div class="q17-hauspreis"><label for="hauspreis-${esc(p.id)}">Filialpreis für ${esc(haus?.stadt ?? ui.haus)}</label><select id="hauspreis-${esc(p.id)}" data-a="hausWahl" aria-label="Haus wählen">${offeneHaeuser.map((x) => `<option value="${esc(x.id)}"${x.id === ui.haus ? ' selected' : ''}>${esc(x.stadt)} · ${esc(x.name)}</option>`).join('')}</select>${stepper('hauspreis', P(`p:${p.id}:hauspreis:${ui.haus}`, euro(hp)), `Einheitspreis ${euro(p.preis)}`, ` data-p2="${p.id}"`)}<small>Abweichung nur für dieses Haus. Einheitspreis wieder einschalten, um alle Abweichungen zu löschen.</small></div>`;
-          }
-          if (ui.auslisten === p.id) c += `<div class="oknoepfe"><button class="rot" data-a="auslistenJa" data-v="${p.id}">Wirklich auslisten</button><button data-a="auslistenNein">Behalten</button></div>`;
-        }
-        return c + '</div>';
-      });
-      h += karussell('produkte', karten, ui.k, 'pkarte');
-    }
     const k = M.kategorien.find((x) => x.id === ui.kategorie);
     const voll = k && k.belegt >= k.kapazitaet;
-    h += `<div class="oknoepfe unten2"><button class="gruen" data-a="neu">+ Neues Produkt</button><button data-a="trend">Trendbericht</button></div>`;
-    if (voll && !M.hinweis) h += `<div class="olief warnung">Kapazität in ${esc(k.name)} erreicht: für ein neues Produkt erst eines auslisten.</div>`;
-    h += absatzGrafik(E.produktAbsatzVerlauf(st, M.marke, ui.kategorie), P, kats.find((k) => k.id === ui.kategorie)?.name ?? M.name);
-    h += linienProfil(E.produktLinienprofil(st, M.marke), P);
-    h += teamAufschluesselung(M.leistung);
-    h += `<div class="raster">${kz('HQ-Team (Basis)', P('l:team', `${Math.round(L.team * 100)} / 100`))}${kz('Kosten je Woche', P('l:kosten', geld(L.kostenWoche)))}</div>`;
-    h += '<button class="breit q24-katalogknopf" data-a="katalog">Sortiment durchsuchen: Damen, Herren, Kinder, Home</button>';
-    h += '<button class="q-neben-akt" data-a="eigenmarkeGruenden" style="margin:4px 0 12px">+ Neue Eigenmarke</button>';
-    return { titel: 'Produktentwicklung', unter: `${esc(M.name)} · ${esc(M.zielgruppe)} · ${M.inEntwicklung} in Entwicklung · KW ${kwVon(st.woche)}`, html: h };
+    let h = sprecher(esc(M.hinweis ?? `${M.name} führt ${prod.length} Produkte in ${k?.name ?? 'dieser Kategorie'}.`), voll && !M.inEntwicklung ? 'engpass' : '');
+    h += `<div class="hw-g1-wahlen">${markenwahl(L)}${chips(kats.map((x) => [x.id, `${esc(x.name)} <small>${P(`l:kat:${x.id}`, `${x.belegt} / ${x.kapazitaet}`, 'span')}</small>`]), ui.kategorie, (w) => `data-a="kategorie" data-v="${esc(w)}"`, 'Kategorie', false, true)}</div>`;
+    if (!prod.length) h += K.rumpf(K.leer('Starte ein neues Produkt in dieser Kategorie.', 'Noch kein Produkt'));
+    else {
+      const karten = prod.map((p, index) => produktKarte(st, M, p, index, P, offeneHaeuser));
+      h += `<div class="hw-g1-karussell" data-k="produkte">${K.karussell(karten, { aktiv: ui.k, label: 'Produkte' })}</div>`;
+    }
+    // Preis je Haus (Coffee 07: „Force the prices to all stores“), gilt für das Produkt der aktiven Karte.
+    const pk = prod[ui.k];
+    let x = '';
+    if (pk && pk.status !== 'entwicklung') {
+      x += K.schalter({ text: 'Preis in allen Häusern gleich', unter: pk.preisAlleHaeuser ? 'Einheitspreis für ' + pk.name : 'Abweichende Hauspreise erlaubt', an: pk.preisAlleHaeuser, attr: `data-a="einheitspreis" data-v="${esc(pk.id)}"` });
+      if (!pk.preisAlleHaeuser && ui.haus) {
+        const haus = offeneHaeuser.find((y) => y.id === ui.haus), hp = pk.hauspreise[ui.haus] ?? pk.preis;
+        x += `<label class="hw-marke hw-feldname" for="hauspreis-${esc(pk.id)}">Haus</label><select class="hw-g1-wahl" id="hauspreis-${esc(pk.id)}" data-a="hausWahl">${offeneHaeuser.map((y) => `<option value="${esc(y.id)}"${y.id === ui.haus ? ' selected' : ''}>${esc(y.stadt)} · ${esc(y.name)}</option>`).join('')}</select>`;
+        x += K.feld(`Hauspreis ${haus?.stadt ?? ''}`, K.stepper({ wert: euro(hp), unter: `Einheitspreis ${euro(pk.preis)}`, label: 'Hauspreis', attrMinus: `data-a="hauspreis" data-v="-1" data-p2="${esc(pk.id)}"`, attrPlus: `data-a="hauspreis" data-v="1" data-p2="${esc(pk.id)}"` }).replace('<output>', `<output data-p="p:${esc(pk.id)}:hauspreis:${esc(ui.haus)}">`));
+        P(`p:${pk.id}:hauspreis:${ui.haus}`, euro(hp) + `Einheitspreis ${euro(pk.preis)}`);
+      }
+    }
+    x += K.knoepfe(K.knopf('Neues Produkt', 'data-a="neu"', 'breit'));
+    if (voll && !M.hinweis) x += K.hinweis(`Kapazität in ${esc(k.name)} erreicht: für ein neues Produkt erst eines auslisten.`, 'achtung');
+    x += K.knoepfe(K.knopf('Trendbericht', 'data-a="trend"', 'zweit'), K.knopf('Sortiment durchsuchen', 'data-a="katalog"', 'zweit'));
+    x += absatzGrafik(E.produktAbsatzVerlauf(st, M.marke, ui.kategorie), P, kats.find((y) => y.id === ui.kategorie)?.name ?? M.name);
+    x += linienProfil(E.produktLinienprofil(st, M.marke), P);
+    x += teamAufschluesselung(M.leistung);
+    x += K.abschnitt('Produktentwicklung im HQ');
+    x += K.liste([K.zeile({ was: 'HQ-Team (Basis)', wert: P('l:team', `${Math.round(L.team * 100)} / 100`, 'span') }), K.zeile({ was: 'Kosten je Woche', wert: P('l:kosten', geld(L.kostenWoche), 'span') })]);
+    x += K.knoepfe(K.knopf('Neue Eigenmarke gründen', 'data-a="eigenmarkeGruenden"', 'zweit'));
+    h += K.rumpf(x);
+    return { titel: 'Produktentwicklung', unter: `${M.name} · ${M.zielgruppe} · KW ${kwVon(st.woche)}`, html: h };
   }
-
 
   // Q24: Alle Typen stammen ausschließlich aus produktKatalog (auch spätere Q27-Q29-Typen).
   function katalog() {
-    const K = merkeBilder(E.produktKatalog(s())), L = E.produkte(s()), M = aktuelleMarke(L);
-    if (!M) return { titel: 'Sortiment', unter: '', html: '<div class="leise">Noch keine Marke vorhanden.</div>' };
-    if (zielgruppenFuerFach(K, ui.fach).every((x) => x.id !== ui.zielgruppe)) ui.zielgruppe = zielgruppenFuerFach(K, ui.fach)[0]?.id ?? ui.zielgruppe;
-    const typen = passendeTypen(K, ui.fach, ui.zielgruppe);
-    let h = '<button class="zurueck" data-a="liste">‹ Produktentwicklung</button>';
-    h += markenwahl(L);
-    h += fachSegmente(ui) + zielChips(K, ui);
-    h += '<div class="q24-anzahl">' + typen.length + ' Artikeltypen · Kategorie öffnen und Artikel auswählen</div>';
-    h += sortimentBedienung(K, ui, typen, kachel, 'detailTyp');
-    return { titel: 'Sortiment', unter: esc(M.name) + ' · ' + typen.length + ' passende Typen', html: h };
+    const Kat = merkeBilder(E.produktKatalog(s())), L = E.produkte(s()), M = aktuelleMarke(L);
+    if (!M) return { titel: 'Sortiment', unter: '', html: K.rumpf(K.leer('Noch keine Marke vorhanden.')) };
+    if (zielgruppenFuerFach(Kat, ui.fach).every((x) => x.id !== ui.zielgruppe)) ui.zielgruppe = zielgruppenFuerFach(Kat, ui.fach)[0]?.id ?? ui.zielgruppe;
+    const typen = passendeTypen(Kat, ui.fach, ui.zielgruppe);
+    let h = sprecher(`${typen.length} Artikeltypen passen zu dieser Auswahl.`);
+    h += `<div class="hw-g1-oben">${K.knopf('‹ Produktentwicklung', 'data-a="liste"', 'text')}</div>`;
+    h += `<div class="hw-g1-wahlen">${markenwahl(L)}</div>` + fachSegmente(ui) + K.rumpf(zielChips(Kat, ui) + sortimentBedienung(Kat, ui, typen, kachel, 'detailTyp'));
+    return { titel: 'Sortiment', unter: `${M.name} · ${typen.length} passende Typen`, html: h };
   }
 
   function detail() {
-    const st = s(), K = merkeBilder(E.produktKatalog(st)), L = E.produkte(st), M = aktuelleMarke(L), d = ui.detail;
+    const st = s(), Kat = merkeBilder(E.produktKatalog(st)), L = E.produkte(st), M = aktuelleMarke(L), d = ui.detail;
     const p = d?.produktId ? M?.produkte.find((x) => x.id === d.produktId) : null;
-    const t = K.typen.find((x) => x.typ === (p?.typ ?? d?.typ));
+    const t = Kat.typen.find((x) => x.typ === (p?.typ ?? d?.typ));
     if (!t) { ui.seite = 'katalog'; return katalog(); }
     const typ = p?.typ ?? t.typ;
     const material = p?.material ?? t.materialien[0];
-    const farbe = p?.farbe ?? (K.farben.find((x) => x.name === 'marine')?.name ?? K.farben[0]?.name ?? 'marine');
+    const farbe = p?.farbe ?? (Kat.farben.find((x) => x.name === 'marine')?.name ?? Kat.farben[0]?.name ?? 'marine');
     const markenGruppe = M?.trendGruppe === 'kinder' ? 'kinder' : M?.trendGruppe === 'reif' ? 'bestager' : M?.trendGruppe === 'jung' ? 'young' : 'adults';
     const gruppe = p ? (p.zielgruppe ?? markenGruppe) : ui.zielgruppe;
     const wg = p?.wg ?? t.wgs.find((x) => x.startsWith(ui.fach === 'home' ? 'wohnen.' : ui.fach + '.')) ?? t.wgs[0];
-    const model = modelBild(typ, farbe, material, wg, gruppeTrend(gruppe), 230);
-    const name = K.zielgruppen.find((x) => x.id === gruppe)?.name ?? gruppe;
+    const model = modelBild(typ, farbe, material, wg, gruppeTrend(gruppe), 200);
+    const name = Kat.zielgruppen.find((x) => x.id === gruppe)?.name ?? gruppe;
     const preis = p?.preis ?? t.preisMitte;
     const zurueck = d?.quelle === 'liste' ? 'liste' : 'katalog';
-    let h = '<button class="zurueck" data-a="detailZurueck" data-v="' + zurueck + '">‹ Zurück</button>';
-    h += '<div class="karte q24-detail"><div class="q24-detailbild">' + (model ?? bild(typ, farbe, material, 220)) + '</div>';
-    h += '<h3>' + esc(p?.name ?? typ) + '</h3><div class="q24-detailwerte">';
-    h += '<div><span>Artikeltyp</span><b>' + esc(typ) + '</b></div>';
-    h += '<div><span>Material</span><b>' + esc(material) + '</b></div>';
-    h += '<div><span>Farbe</span><b>' + esc(farbe) + '</b></div>';
-    h += '<div><span>' + (p ? 'Verkaufspreis' : 'Basispreis, ca.') + '</span><b>' + euro(preis) + '</b></div>';
-    h += '<div><span>Zielgruppe</span><b>' + esc(name) + '</b></div>';
-    h += '</div>';
-    if (p) h += '<div class="olief">Status: ' + esc(STATUS[p.status] ?? p.status) + ' · ' + esc(p.kategorieName) + '</div>';
-    else {
-      const freigegeben = M && M.kategorien.some((x) => x.id === t.kategorie && x.kapazitaet > 0)
-        && (Array.isArray(M.entwickelbar) ? M.entwickelbar.includes(t.typ) : Number(t.gruppe?.[M.trendGruppe] ?? 0) > 0.15);
-      h += freigegeben ? '<button class="breit gruen" data-a="detailPlanen">Für ' + esc(M.name) + ' entwickeln</button>'
-        : '<div class="olief">Dieser Artikeltyp passt derzeit nicht zum Sortiment der gewählten Marke.</div>';
-    }
-    return { titel: 'Produktdetails', unter: esc(M?.name ?? '') + ' · ' + esc(typ), html: h + '</div>' };
+    const freigegeben = !p && M && M.kategorien.some((x) => x.id === t.kategorie && x.kapazitaet > 0)
+      && (Array.isArray(M.entwickelbar) ? M.entwickelbar.includes(t.typ) : Number(t.gruppe?.[M.trendGruppe] ?? 0) > 0.15);
+    let h = sprecher(p ? `${esc(p.name)} ist ${esc(STATUS[p.status] ?? p.status)}.` : freigegeben ? `${esc(typ)} passt zu ${esc(M.name)}.` : `${esc(typ)} passt derzeit nicht zu ${esc(M?.name ?? 'dieser Marke')}.`);
+    h += `<div class="hw-g1-oben">${K.knopf('‹ Zurück', `data-a="detailZurueck" data-v="${zurueck}"`, 'text')}</div>`;
+    let x = `<div class="hw-g1-detailbild" aria-hidden="true">${model ?? bild(typ, farbe, material, 200)}</div>`;
+    x += K.abschnitt(p?.name ?? typ);
+    x += K.liste([K.zeile({ was: 'Artikeltyp', wert: esc(typ) }), K.zeile({ was: 'Material', wert: esc(material) }), K.zeile({ was: 'Farbe', wert: esc(farbe) }),
+      K.zeile({ was: p ? 'Verkaufspreis' : 'Basispreis, ca.', wert: euro(preis) }), K.zeile({ was: 'Zielgruppe', wert: esc(name) }),
+      ...(p ? [K.zeile({ was: 'Status', wert: esc(STATUS[p.status] ?? p.status) }), K.zeile({ was: 'Kategorie', wert: esc(p.kategorieName) })] : [])]);
+    if (!p) x += freigegeben ? K.knoepfe(K.knopf(`Für ${M.name} entwickeln`, 'data-a="detailPlanen"', 'breit')) : K.hinweis('Dieser Artikeltyp passt derzeit nicht zum Sortiment der gewählten Marke.', 'achtung');
+    return { titel: 'Produktdetails', unter: `${M?.name ?? ''} · ${typ}`, html: h + K.rumpf(x) };
   }
 
-  // ─────────────────────────── Neues Produkt
+  /** Schrittanzeige des Assistenten: drei nummerierte Schritte mit Namen, der aktive als Akzent. */
+  function schritte() {
+    const n = ['Artikel', 'Zielgruppe', 'Entwicklung'];
+    return `<ol class="hw-g1-schritte">${n.map((t, i) => `<li${i === ui.neuSchritt ? ' aria-current="step"' : ''} class="${i < ui.neuSchritt ? 'fertig' : i === ui.neuSchritt ? 'an' : ''}"><i>${i + 1}</i>${t}</li>`).join('')}</ol>`;
+  }
+
+  // ─────────────────────────── Neues Produkt (Coffee 01 bis 08)
   function neu(P) {
-    const st = s(), K = merkeBilder(E.produktKatalog(st)), L = E.produkte(st), M = aktuelleMarke(L), e = ui.neu;
+    const st = s(), Kat = merkeBilder(E.produktKatalog(st)), L = E.produkte(st), M = aktuelleMarke(L), e = ui.neu;
     const markeKats = new Set(M.kategorien.filter((k) => k.kapazitaet > 0).map((k) => k.id));
     const voll = new Set(M.kategorien.filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
     const entwickelbar = Array.isArray(M.entwickelbar) ? new Set(M.entwickelbar) : null;
-    if (zielgruppenFuerFach(K, ui.fach).every((x) => x.id !== ui.zielgruppe)) { ui.zielgruppe = zielgruppenFuerFach(K, ui.fach)[0]?.id ?? ui.zielgruppe; e.zielgruppe = ui.zielgruppe; }
-    const typen = passendeTypen(K, ui.fach, ui.zielgruppe).filter((t) => markeKats.has(t.kategorie) && (entwickelbar ? entwickelbar.has(t.typ) : true)).sort((a, b) => Number(voll.has(a.kategorie)) - Number(voll.has(b.kategorie)));
+    if (zielgruppenFuerFach(Kat, ui.fach).every((x) => x.id !== ui.zielgruppe)) { ui.zielgruppe = zielgruppenFuerFach(Kat, ui.fach)[0]?.id ?? ui.zielgruppe; e.zielgruppe = ui.zielgruppe; }
+    const typen = passendeTypen(Kat, ui.fach, ui.zielgruppe).filter((t) => markeKats.has(t.kategorie) && (entwickelbar ? entwickelbar.has(t.typ) : true)).sort((a, b) => Number(voll.has(a.kategorie)) - Number(voll.has(b.kategorie)));
     if (!typen.some((t) => t.typ === e.typ)) { e.typ = (typen.find((t) => !voll.has(t.kategorie)) ?? typen[0])?.typ; }
-    const T = K.typen.find((t) => t.typ === e.typ);
+    const T = Kat.typen.find((t) => t.typ === e.typ);
     if (T && !T.materialien.includes(e.material)) e.material = T.materialien[0];
-    let h = `<button class="zurueck" data-a="liste">‹ ${esc(M.name)}</button>`;
-    h += markenwahl(L);
     if (!typen.length && ui.neuSchritt !== 0) ui.neuSchritt = 0;
+    const pfad = (Kat.baum ?? []).flatMap((k) => k.unterkategorien.map((a) => ({ k, a }))).find((x) => x.a.typen.includes(e.typ));
+    const oben = (aktion, text) => `<div class="hw-g1-oben">${K.knopf(text, `data-a="${aktion}"`, 'text')}</div>`;
 
-    const typenIds = new Set(typen.map((t) => t.typ));
-    const baum = (K.baum ?? []).map((kat) => ({
-      ...kat, unterkategorien: kat.unterkategorien.map((ast) => ({
-        ...ast, typen: ast.typen.filter((typ) => typenIds.has(typ)),
-      })).filter((ast) => ast.typen.length),
-    })).filter((kat) => kat.unterkategorien.length);
-    const pfad = baum.flatMap((k) => k.unterkategorien.map((a) => ({ k, a }))).find((x) => x.a.typen.includes(e.typ));
-    h += '<div class="q11fortschritt"><span class="' + (ui.neuSchritt === 0 ? 'an' : 'fertig') + '">1 Kategorie und Artikel</span><span class="' + (ui.neuSchritt === 1 ? 'an' : ui.neuSchritt > 1 ? 'fertig' : '') + '">2 Zielgruppe</span><span class="' + (ui.neuSchritt === 2 ? 'an' : '') + '">3 Entwicklung</span></div>';
     if (ui.neuSchritt === 0) {
-      h += '<div class="vtitel">Sortiment wählen</div>';
-      h += fachSegmente(ui) + zielChips(K, ui);
-      h += '<div class="q24-anzahl">' + typen.length + ' Artikeltypen für ' + esc(M.name) + '</div>';
-      h += sortimentBedienung(K, ui, typen, kachel, 'typ', voll);
-      return { titel: 'Neues Produkt', unter: esc(M.name) + ' · Kategorie und Artikeltyp', html: h };
+      let h = sprecher(typen.length ? `Wähle den Artikel: ${typen.length} Typen passen zu ${esc(M.name)}.` : `Für ${esc(M.name)} passt hier kein Artikeltyp.`);
+      h += oben('liste', `‹ ${M.name}`) + `<div class="hw-rumpf">${schritte()}</div>`;
+      h += `<div class="hw-g1-wahlen">${markenwahl(L)}</div>` + fachSegmente(ui) + K.rumpf(zielChips(Kat, ui) + sortimentBedienung(Kat, ui, typen, kachel, 'typ', voll));
+      return { titel: 'Neues Produkt', unter: `${M.name} · Artikel wählen`, html: h };
     }
     if (ui.neuSchritt === 1) {
-      h += '<button class="zurueck" data-a="neuZurTyp">‹ Artikeltyp ändern</button>';
-      h += `<div class="q11auswahl"><b>${esc(e.typ)}</b><small>${esc(pfad?.k.name ?? '')} / ${esc(pfad?.a.name ?? '')}</small>${bild(e.typ, e.farbe, e.material, 96)}</div>`;
-      h += '<div class="vtitel">Zielgruppe wählen</div><p class="leise">Die Altersgruppe beeinflusst Preislage, Passform, regionale Nachfrage und Marge. Bisherige Produkte bleiben unverändert.</p>';
-      h += '<div class="q11zielgruppen">';
-      for (const z of K.zielgruppen) h += `<button class="${e.zielgruppe === z.id ? 'an' : ''}" data-a="zielgruppe" data-v="${z.id}"><b>${esc(z.name)}</b><span>${z.id === 'kinder' ? 'Kinderbekleidung' : z.id === 'teens' ? 'Junge Mode' : z.id === 'young' ? 'Trendorientiert' : z.id === 'adults' ? 'Beruf und Alltag' : 'Klassik und Komfort'}</span></button>`;
-      h += '</div>';
-      return { titel: 'Neues Produkt', unter: `${esc(M.name)} · Zielgruppe`, html: h };
+      let h = sprecher(`${esc(e.typ)} gewählt. Für wen entwickeln wir?`);
+      h += oben('neuZurTyp', '‹ Artikel ändern') + `<div class="hw-rumpf">${schritte()}</div>`;
+      let x = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild(e.typ, e.farbe, e.material, 72)}</span><span><b>${esc(e.typ)}</b><small>${esc(pfad?.k.name ?? '')}${pfad?.a.name && pfad.a.name !== pfad.k.name ? ' · ' + esc(pfad.a.name) : ''}</small></span></div>`;
+      x += K.abschnitt('Zielgruppe');
+      x += `<p class="hw-lese hw-g1-notiz">Die Altersgruppe wirkt auf Preislage, Passform, regionale Nachfrage und Marge. Bisherige Produkte bleiben unverändert.</p>`;
+      x += `<div class="hw-g1-typen">${Kat.zielgruppen.map((z) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${e.zielgruppe === z.id}" data-a="zielgruppe" data-v="${esc(z.id)}"><b>${esc(z.name)}</b><small>${esc(ZIEL_TEXT[z.id] ?? '')}</small></button>`).join('')}</div>`;
+      return { titel: 'Neues Produkt', unter: `${M.name} · Zielgruppe`, html: h + K.rumpf(x) };
     }
-    h += '<button class="zurueck" data-a="neuZurZiel">‹ Zielgruppe ändern</button>';
-    h += `<div class="q11gewaehlt"><b>${esc(e.typ)}</b><span>${esc(K.zielgruppen.find((z) => z.id === e.zielgruppe)?.name ?? '')} · ${esc(pfad?.k.name ?? '')}</span></div>`;
     const v = E.produktVorschau(st, { marke: M.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche });
-    if (v.kapazitaetFrei <= 0) h += `<div class="olief warnung">Kapazität erreicht: in dieser Kategorie ist bei ${esc(M.name)} kein Platz mehr. Für Neues bitte erst ein Produkt auslisten.</div>`;
-    h += '<div class="vtitel">Produkt konfigurieren</div><div class="karte steuerung">';
-    h += regler('Farbe', `<div class="farben klein">${K.farben.map((f) => `<button class="${f.name === e.farbe ? 'an' : ''}" style="background:${f.hex}" data-a="farbe" data-v="${esc(f.name)}" aria-label="${esc(f.name)}"></button>`).join('')}</div>`, esc(e.farbe));
-    h += regler('Material', segment('material', e.material, (T?.materialien ?? []).map((m) => [m, m])));
-    h += regler('Preislage', segment('preislage', e.preislage, K.preislagen.map((p) => [p.id, PREISLAGE[p.id] ?? p.id])));
-    h += regler('Qualität', segment('qualitaet', e.qualitaet, [1, 2, 3, 4, 5].map((x) => [x, '★'.repeat(x)])));
-    h += regler('Entwicklungsdauer', segment('dauer', e.dauer, K.dauer.map((d) => [d, String(d)])), 'Wochen');
-    h += regler('Budget je Woche', stepper('budget', P('n:budget', geld(e.budgetWoche))), `Schritt ${geld(K.budgetSchritt)}`);
-    h += '</div>';
-    const wgV = K.typen.find((t) => t.typ === e.typ)?.wgs?.find((w) => !/^kinder/.test(w) || M.trendGruppe === 'kinder');
-    const mbV = modelBild(e.typ, e.farbe, e.material, wgV, M.trendGruppe, 150);
-    h += `<div class="karte vorschau produkt"><div class="pbild" >${bild(e.typ, e.farbe, e.material, 132)}${mbV ?? ''}</div><div class="pname">${P('n:name', v.name ?? e.typ, 'b')}<small>${v.wgName ? `${esc(v.wgName)} · ` : ''}Einführung ${esc(v.saisonEinfuehrung)}</small></div>`;
-    h += `<div class="mitte">${sterne(v.sterneErwartet, 22)}<span class="sternzahl">${P('n:sterne', `${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)}`, 'span')}</span></div>`;
-    h += `<div class="owerte"><div><span>Normpreis</span>${P('n:preis', euro(v.normpreis))}</div><div><span>EK je Stück</span>${P('n:ek', euro(v.ekStueck))}</div><div><span>Marge</span>${P('n:marge', pz(v.marge))}</div><div><span>Entwicklung</span>${P('n:kosten', geld(v.kosten))}</div><div><span>Fertig</span>${P('n:fertig', wocheText(st, v.fertigWoche))}</div><div><span>Platz frei</span>${P('n:frei', String(v.kapazitaetFrei))}</div></div>`;
-    h += `<p class="leise">Passform zur Zielgruppe: <b>${P('n:passform', pz(v.passform), 'span')}</b> · wirkt auf die Produktbewertung und damit auf die Nachfrage.</p>`;
-    if (v.teile) h += `<div class="passung">${[['zielgruppe', 'Zielgruppe'], ['trend', 'Trend'], ['preisQualitaet', 'Preis'], ['entwicklung', 'Aufwand'], ['team', 'Team']].map(([k, t]) => `<div><span class="psaeule"><span style="height:${(v.teile[k] * 100).toFixed(0)}%"></span></span><b>${Math.round(v.teile[k] * 100)}</b><i>${t}</i></div>`).join('')}</div>`;
-    for (const x of v.hinweise) h += `<div class="olief">${esc(x)}</div>`;
-    if (v.fehler) h += `<div class="olief warnung">${esc(v.fehler)}</div>`;
-    h += `</div><div class="oknoepfe unten2"><button class="gruen" data-a="entwickeln"${v.ok ? '' : ' disabled'}>Entwicklung starten · ${geld(v.kosten)}</button></div>`;
-    return { titel: 'Neues Produkt', unter: `${esc(M.name)} · ${esc(M.zielgruppe)}`, html: h };
+    const zg = Kat.zielgruppen.find((z) => z.id === e.zielgruppe)?.name ?? '';
+    let h = sprecher(v.ok ? `Erwartet ${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)} Sterne, fertig ${esc(wocheText(st, v.fertigWoche))}.` : esc(v.fehler ?? 'Der Entwurf ist noch nicht vollständig.'), v.ok ? '' : 'engpass');
+    h += oben('neuZurZiel', '‹ Zielgruppe ändern') + `<div class="hw-rumpf">${schritte()}</div>`;
+    let x = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild(e.typ, e.farbe, e.material, 72)}</span><span><b>${esc(e.typ)}</b><small>${esc(zg)} · ${esc(pfad?.k.name ?? '')}</small></span></div>`;
+    if (v.kapazitaetFrei <= 0) x += K.hinweis(`Kapazität erreicht: in dieser Kategorie ist bei ${esc(M.name)} kein Platz mehr. Für Neues erst ein Produkt auslisten.`, 'achtung');
+    x += K.abschnitt('Farbe', e.farbe);
+    x += `<div class="hw-g1-farben" role="group" aria-label="Farbe">${Kat.farben.map((f) => `<button type="button" class="hw-g1-farbknopf" aria-pressed="${f.name === e.farbe}" data-a="farbe" data-v="${esc(f.name)}" aria-label="${esc(f.name)}">${farbpunkt(f.hex, 30)}</button>`).join('')}</div>`;
+    x += K.abschnitt('Material');
+    x += chips((T?.materialien ?? []).map((m) => [m, esc(m)]), e.material, (w) => `data-a="material" data-v="${esc(w)}"`, 'Material');
+    x += K.abschnitt('Preislage');
+    x += `<div class="hw-g1-typen drei">${Kat.preislagen.map((p) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${e.preislage === p.id}" data-a="preislage" data-v="${esc(p.id)}"><b>${esc(PREISLAGE[p.id] ?? p.id)}</b><small>${'€'.repeat(p.id === 'einstieg' ? 1 : p.id === 'mitte' ? 2 : 3)}</small></button>`).join('')}</div>`;
+    x += K.abschnitt('Qualität', `${e.qualitaet} von 5`);
+    x += `<div class="hw-g1-qualitaet">${K.stepper({ wert: `${e.qualitaet} von 5`, label: 'Qualität', attrMinus: `data-a="qualitaet" data-v="${e.qualitaet - 1}"`, attrPlus: `data-a="qualitaet" data-v="${e.qualitaet + 1}"`, minusAus: e.qualitaet <= 1, plusAus: e.qualitaet >= 5 })}</div>`;
+    x += K.abschnitt('Entwicklungsdauer', 'Wochen');
+    x += `<div class="hw-g1-dauer">${K.seg(Kat.dauer.map((d) => [d, String(d)]), e.dauer, (w) => `data-a="dauer" data-v="${w}"`)}</div>`;
+    x += K.abschnitt('Budget je Woche', `Schritt ${geld(Kat.budgetSchritt)}`);
+    x += K.stepper({ wert: geld(e.budgetWoche), unter: `${geld(v.kosten)} gesamt`, label: 'Budget je Woche', attrMinus: 'data-a="budget" data-v="-1"', attrPlus: 'data-a="budget" data-v="1"', minusAus: e.budgetWoche <= Kat.budgetSchritt }).replace('<output>', '<output data-p="n:budget">');
+    P('n:budget', geld(e.budgetWoche) + `${geld(v.kosten)} gesamt`);
+    // Vorschau als Produktkarte (Coffee 26)
+    x += K.abschnitt('Vorschau', `Einführung ${v.saisonEinfuehrung}`);
+    const wgV = Kat.typen.find((t) => t.typ === e.typ)?.wgs?.find((w) => !/^kinder/.test(w) || M.trendGruppe === 'kinder');
+    const mbV = modelBild(e.typ, e.farbe, e.material, wgV, M.trendGruppe, 110);
+    let c = `<div class="hw-g1-bild hw-g1-vorschaubild" aria-hidden="true">${bild(e.typ, e.farbe, e.material, 110)}${mbV ?? ''}</div>`;
+    c += `<div class="hw-karte-titel hw-g1-titel">${P('n:name', v.name ?? e.typ, 'span')}</div>`;
+    c += `<div class="hw-g1-unter">${v.wgName ? esc(v.wgName) : esc(e.typ)}</div>`;
+    c += `<div class="hw-g1-sternzeile">${sterne(v.sterneErwartet, `erwartet ${dez(v.sterneErwartet, 1)} Sterne`)}${P('n:sterne', `${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)}`, 'span', ' class="hw-g1-sternzahl"')}</div>`;
+    c += `<div class="hw-g1-preisblock"><div class="hw-g1-ringspalte"><span class="hw-g1-ek">EK ${P('n:ek', euro(v.ekStueck), 'span')}</span>${ring(v.marge, P('n:marge', pz(v.marge), 'b'))}</div>`
+      + `<div class="hw-g1-preis"><span class="hw-marke">Normpreis</span>${P('n:preis', euro(v.normpreis), 'b', ' class="hw-zahl"')}<span class="hw-abw">Passform ${P('n:passform', pz(v.passform), 'span')}</span></div></div>`;
+    x += `<article class="hw-karte hw-kontur hw-g1-vorschau">${c}</article>`;
+    x += K.liste([K.zeile({ was: 'Entwicklung', wert: P('n:kosten', geld(v.kosten), 'span') }), K.zeile({ was: 'Fertig', wert: P('n:fertig', wocheText(st, v.fertigWoche), 'span') }), K.zeile({ was: 'Platz frei in der Kategorie', wert: P('n:frei', String(v.kapazitaetFrei), 'span') })]);
+    if (v.teile) x += K.abschnitt('Bewertung') + `<div class="hw-g1-skalen">${[['zielgruppe', 'Zielgruppe'], ['trend', 'Trend'], ['preisQualitaet', 'Preis'], ['entwicklung', 'Aufwand'], ['team', 'Team']].map(([k, t]) => K.skala(t, v.teile[k] * 100)).join('')}</div>`;
+    for (const y of v.hinweise) x += K.hinweis(esc(y));
+    if (v.fehler) x += K.hinweis(esc(v.fehler), 'fehler');
+    x += K.knoepfe(K.knopf(`Entwicklung starten · ${geld(v.kosten)}`, 'data-a="entwickeln"', 'breit', !v.ok));
+    return { titel: 'Neues Produkt', unter: `${M.name} · ${M.zielgruppe}`, html: h + K.rumpf(x) };
   }
 
   // ─────────────────────────── Trendbericht
   function trend(P) {
-    const st = s(), T = E.trendbericht(st), K = merkeBilder(E.produktKatalog(st)), hex = new Map(K.farben.map((f) => [f.name, f.hex]));
-    let h = '<button class="zurueck" data-a="liste">‹ Produkte</button>';
-    h += `<div class="olief">${esc(T.hinweis)}</div>`;
+    const st = s(), T = E.trendbericht(st), Kat = merkeBilder(E.produktKatalog(st)), hex = new Map(Kat.farben.map((f) => [f.name, f.hex]));
+    let h = sprecher(esc(T.hinweis));
+    h += `<div class="hw-g1-oben">${K.knopf('‹ Produkte', 'data-a="liste"', 'text')}</div>`;
+    let x = '';
     for (const [titel, S, pre] of [['Laufende Saison', T.aktuell, 'a'], ['Nächste Saison', T.naechste, 'n']]) {
-      h += `<div class="karte"><div class="khead">${titel}<small>${P(`t:${pre}:name`, S.name, 'span')}</small></div>`;
-      for (const z of T.zielgruppen) {
+      x += `<h3 class="hw-abschnitt">${esc(titel)}<small>${P(`t:${pre}:name`, S.name, 'span')}</small></h3>`;
+      x += K.liste(T.zielgruppen.filter((z) => S.gruppen[z.id]).map((z) => {
         const g = S.gruppen[z.id];
-        if (!g) continue;
-        h += `<div class="trend"><b>${esc(z.name)}</b><div class="tfarben">${g.farben.map((f) => `<span style="background:${hex.get(f) ?? '#ccc'}" title="${esc(f)}"></span><i>${esc(f)}</i>`).join('')}</div><div class="olief">Artikel: ${g.artikel.map(esc).join(', ')} · Material: ${g.materialien.map(esc).join(', ')}${g.out?.length ? ` · out: ${g.out.map(esc).join(', ')}` : ''}</div></div>`;
-      }
-      h += '</div>';
+        return `<div class="hw-zeile hw-g1-trend"><span class="hw-was">${esc(z.name)}<small>${g.artikel.map(esc).join(', ')}</small><small>Material: ${g.materialien.map(esc).join(', ')}${g.out?.length ? ` · nicht mehr gefragt: ${g.out.map(esc).join(', ')}` : ''}</small></span><span class="hw-g1-trendfarben">${g.farben.map((f) => farbpunkt(hex.get(f) ?? '#888', 16)).join('')}</span></div>`;
+      }));
     }
-    return { titel: 'Trendbericht', unter: `Messe · ${esc(T.aktuell.name)} und ${esc(T.naechste.name)}`, html: h };
+    return { titel: 'Trendbericht', unter: `Messe · ${T.naechste.name}`, html: h + K.rumpf(x) };
   }
 
   function rendern() {
     const S = werteSammler();
     sternNr = 0;
-    if (!da) return { S, r: { titel: 'Produkte', unter: '', html: '<div class="leise">Die Engine liefert noch keine Produkte.</div>' } };
+    if (!da) return { S, r: { titel: 'Produkte', unter: '', html: K.rumpf(K.leer('Die Engine liefert noch keine Produkte.')) } };
     const r = ui.seite === 'neu' && ui.neu ? neu(S.P) : ui.seite === 'trend' ? trend(S.P) : ui.seite === 'katalog' ? katalog() : ui.seite === 'detail' ? detail() : liste(S.P);
     return { S, r };
   }
   function zeigen(scrollHalten = false) {
     const sc = document.getElementById('pinhalt').scrollTop;
     const { r } = rendern();
-    ctx.panel(r.titel, r.unter, bereich('zentrale') + '<i class="q31-marke" hidden></i>' + r.html, 'gross'); // Q31: dunkler Zentrale-Look (Q30-Bausteine)
+    ctx.panel(r.titel, r.unter, K.bereich('zentrale', 'ware') + `<div class="hw-g1">${r.html}</div>`, 'gross');
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = scrollHalten ? sc : 0;
-    if (ui.seite === 'liste') karussellBinden('produkte', ui.k, (i) => { if (!ui.aktiv) return; ui.k = i; ui.auslisten = null; zeigen(true); });
+    if (ui.seite === 'liste') karussellBinden();
+  }
+  /** Karussell auf die aktive Karte stellen, beim Wischen die Karte merken (für Hauspreis und Prüfung). */
+  function karussellBinden() {
+    const k = document.querySelector('#pinhalt .hw-g1-karussell .hw-karussell');
+    if (!k) return;
+    const karten = [...k.children];
+    const mitte = (el) => el.offsetLeft + el.offsetWidth / 2;
+    const aktuell = () => { const m = k.scrollLeft + k.clientWidth / 2; let best = 0; karten.forEach((el, i) => { if (Math.abs(mitte(el) - m) < Math.abs(mitte(karten[best]) - m)) best = i; }); return best; };
+    if (karten[ui.k]) k.scrollLeft = Math.max(0, mitte(karten[ui.k]) - k.clientWidth / 2);
+    k.nextElementSibling?.querySelectorAll('i').forEach((p, i) => p.classList.toggle('an', i === ui.k));
+    let t = null;
+    k.addEventListener('scroll', () => {
+      clearTimeout(t);
+      k.nextElementSibling?.querySelectorAll('i').forEach((p, i) => p.classList.toggle('an', i === aktuell()));
+      t = setTimeout(() => { if (!k.isConnected || !ui.aktiv) return; const i = aktuell(); if (i !== ui.k) { ui.k = i; ui.auslisten = null; zeigen(true); } }, 160);
+    }, { passive: true });
   }
   function tun(aktion) {
     const r = E.fuehreAus(s(), aktion);
@@ -310,8 +338,8 @@ export function produkteModul(ctx) {
   const neuerEntwurf = () => {
     const st = s(), T = E.trendbericht(st), L = E.produkte(st), M = aktuelleMarke(L);
     const g = T.naechste.gruppen[M?.trendGruppe] ?? T.aktuell.gruppen[M?.trendGruppe];
-    const K = merkeBilder(E.produktKatalog(st)), voll = new Set((M?.kategorien ?? []).filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
-    const frei = (typ) => { const t = K.typen.find((x) => x.typ === typ); return t && !voll.has(t.kategorie) && M.kategorien.some((k) => k.id === t.kategorie && k.kapazitaet > 0); };
+    const Kat = merkeBilder(E.produktKatalog(st)), voll = new Set((M?.kategorien ?? []).filter((k) => k.belegt >= k.kapazitaet).map((k) => k.id));
+    const frei = (typ) => { const t = Kat.typen.find((x) => x.typ === typ); return t && !voll.has(t.kategorie) && M.kategorien.some((k) => k.id === t.kategorie && k.kapazitaet > 0); };
     return { typ: g?.artikel?.find(frei) ?? g?.artikel?.[0], farbe: g?.farben?.[0] ?? 'marine', material: g?.materialien?.[0] ?? 'Baumwolle', preislage: 'mitte', qualitaet: 3, dauer: 12, budgetWoche: 20000 };
   };
   function klick(el) {
@@ -340,7 +368,6 @@ export function produkteModul(ctx) {
       case 'zielgruppe': ui.neu.zielgruppe = v; ui.neuSchritt = 2; return zeigen();
       case 'sortiment': { const p = karte(v); tun({ typ: 'produktSortiment', produkt: v, an: p.status !== 'sortiment' }); return zeigen(true); }
       case 'preis': { const id = el.dataset.p2, p = karte(id), d = preisSchritt(p.preis); tun({ typ: 'produktPreis', produkt: id, preis: Math.max(1, Math.round((p.preis + Number(v) * d) / d) * d - (d >= 5 ? 0.01 : 0)) }); return zeigen(true); }
-      case 'preisSlider': tun({ typ: 'produktPreis', produkt: el.dataset.p2, preis: Number(el.value) }); return zeigen(true);
       case 'einheitspreis': { const p = karte(v); tun({ typ: 'produktPreisAlleHaeuser', produkt: v, an: !p.preisAlleHaeuser }); return zeigen(true); }
       case 'hausWahl': ui.haus = el.value; return zeigen(true);
       case 'hauspreis': { const p = karte(el.dataset.p2), d = preisSchritt(p.hauspreise[ui.haus] ?? p.preis), alt = p.hauspreise[ui.haus] ?? p.preis; tun({ typ: 'produktHauspreis', produkt: p.id, haus: ui.haus, preis: Math.max(1, Math.round((alt + Number(v) * d) / d) * d - (d >= 5 ? 0.01 : 0)) }); return zeigen(true); }
@@ -353,9 +380,9 @@ export function produkteModul(ctx) {
       case 'farbe': ui.neu.farbe = v; return zeigen(true);
       case 'material': ui.neu.material = v; return zeigen(true);
       case 'preislage': ui.neu.preislage = v; return zeigen(true);
-      case 'qualitaet': ui.neu.qualitaet = Number(v); return zeigen(true);
+      case 'qualitaet': ui.neu.qualitaet = Math.max(1, Math.min(5, Number(v))); return zeigen(true);
       case 'dauer': ui.neu.dauer = Number(v); return zeigen(true);
-      case 'budget': { const K = merkeBilder(E.produktKatalog(st)); ui.neu.budgetWoche = Math.max(K.budgetSchritt, ui.neu.budgetWoche + Number(v) * K.budgetSchritt); return zeigen(true); }
+      case 'budget': { const Kat = merkeBilder(E.produktKatalog(st)); ui.neu.budgetWoche = Math.max(Kat.budgetSchritt, ui.neu.budgetWoche + Number(v) * Kat.budgetSchritt); return zeigen(true); }
       case 'entwickeln': {
         const e = ui.neu, r = tun({ typ: 'produktEntwickeln', entwurf: { marke: ui.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche } });
         if (r?.ok) { ui.seite = 'liste'; const p = E.produkte(s()).marken.find((m) => m.marke === ui.marke)?.produkte.filter((x) => x.status === 'entwicklung').pop(); if (p) { ui.kategorie = p.kategorie; const l = E.produkte(s()).marken.find((m) => m.marke === ui.marke).produkte.filter((x) => x.kategorie === p.kategorie && x.status !== 'ausgelistet'); ui.k = l.findIndex((x) => x.id === p.id); } }
@@ -366,7 +393,7 @@ export function produkteModul(ctx) {
   }
   const inhalt = document.getElementById('pinhalt');
   inhalt.addEventListener('click', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('[data-a]'); if (el && !el.disabled && el.tagName !== 'INPUT' && el.tagName !== 'SELECT') klick(el); });
-  inhalt.addEventListener('change', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('input[data-a="preisSlider"], select[data-a="hausWahl"]'); if (el && !el.disabled) klick(el); });
+  inhalt.addEventListener('change', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('select[data-a="hausWahl"]'); if (el && !el.disabled) klick(el); });
 
   return {
     ui, da,

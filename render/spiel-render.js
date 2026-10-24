@@ -476,13 +476,13 @@ async function buendeln() {
       await tippe(`[data-a=preis][data-v="1"][data-p2="${pk.id}"]`);
       const pk1 = await ev((id) => window.spiel.E.produkte(window.spiel.s).marken.flatMap((m) => m.produkte).find((x) => x.id === id), pk.id);
       soll('Preis +', pk1.preis > pk.preis, `${pk.name}: ${pk.preis} → ${pk1.preis} €`);
-      await tippe(`.schalter[data-v="${pk.id}"]`);
+      await tippe(`[data-a=sortiment][data-v="${pk.id}"]`);
       const st1 = await ev((id) => window.spiel.E.produkte(window.spiel.s).marken.flatMap((m) => m.produkte).find((x) => x.id === id).status, pk.id);
-      await tippe(`.schalter[data-v="${pk.id}"]`);
+      await tippe(`[data-a=sortiment][data-v="${pk.id}"]`);
       const st2 = await ev((id) => window.spiel.E.produkte(window.spiel.s).marken.flatMap((m) => m.produkte).find((x) => x.id === id).status, pk.id);
       soll('Sortiment aus und wieder an', st1 !== 'sortiment' && st2 === 'sortiment', `${pk.status} → ${st1} → ${st2}`);
     } else soll('Produktkarte vorhanden', false, 'keine Produktkarte im Sortiment');
-    await tippe('.punkte button[data-v="1"]');
+    await ev(() => { const k = document.querySelector("#pinhalt .hw-g1-karussell .hw-karussell"); if (k && k.children[1]) k.scrollLeft = k.children[1].offsetLeft - (k.clientWidth - k.children[1].offsetWidth) / 2; }); await p.waitForTimeout(400);
     await pruef('produkte', 'Liste Karte 2');
     await oben();
     await bild('produkte.png');
@@ -502,7 +502,8 @@ async function buendeln() {
     soll('Q11: Freier Artikel im Kategoriebaum', !!q11Pfad, JSON.stringify(q11Pfad));
     if (q11Pfad) {
       await tippe(`[data-a=baumKat][data-v="${q11Pfad.kategorie}"]`);
-      await tippe(`[data-a=baumAst][data-v="${q11Pfad.unterkategorie}"]`);
+      // G1: Unterkategorien stehen offen als Abschnitte unter der Kategorie, kein eigener Klick nötig.
+      soll("Q11: Artikel in der Unterkategorie sichtbar", await ev((t) => !!document.querySelector(`#pinhalt [data-a=typ][data-v="${t}"]`), q11Pfad.typ), q11Pfad.unterkategorie);
       await oben();
       await bild('q11-kategorie-artikel.png');
       await tippe(`[data-a=typ][data-v="${q11Pfad.typ}"]`);
@@ -516,7 +517,7 @@ async function buendeln() {
     await pruef('produkte', 'Neues Produkt');
     await oben();
     await bild('produkt-entwickeln.png');
-    await zu('.karte.vorschau');
+    await zu(".hw-g1-vorschau");
     await bild('produkt-entwickeln-vorschau.png');
     const entwurf = await ev(() => ({ ...window.spiel.produkte.ui.neu, marke: window.spiel.produkte.ui.marke }));
     const vors = await ev((e) => window.spiel.E.produktVorschau(window.spiel.s, e), entwurf);
@@ -529,7 +530,7 @@ async function buendeln() {
     await tippe('[data-a=trend]');
     await pruef('produkte', 'Trendbericht');
     // ── Folgewoche: Wirkung und Anzeige nach Woche weiter
-    await tippe('.zurueck');
+    await tippe("[data-a=liste]");
     const fw0 = await ev(() => { const s = window.spiel.s, E = window.spiel.E; const neu = E.produkte(s).marken.flatMap((m) => m.produkte).filter((x) => x.status === 'entwicklung').sort((a, b) => a.start - b.start).pop(); return { woche: s.woche, neu: neu && { id: neu.id, f: neu.fortschritt } }; });
     await ev(() => window.spiel.woche(false));
     await pruef('produkte', 'Folgewoche');
