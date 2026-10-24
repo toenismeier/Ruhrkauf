@@ -101,22 +101,30 @@ async function buendeln() {
     // Übersicht: Knopf antippen, Bereich Damen ist offen, Spalte Reichweite wählen, nach Reichweite sortieren
     await tippe('#menueknopf');
     await tippe('#einkauf');
-    await tippe('.chipk', 'Reichweite');
-    await tippe('.lkopf button', 'Reichweite');
+    // E47 (G2): Spalte über das Auswahlfeld wählen, Sortieren über den Spaltenkopf im Buch.
+    await ev(() => { const el = document.querySelector('#pinhalt [data-a=spalteWahl][data-i="1"]'); el.value = 'reichweite'; el.dispatchEvent(new Event('change', { bubbles: true })); });
+    await p.waitForTimeout(150);
+    await tippe('.hw-g2-sort', 'Reichweite');
     await pruef('Übersicht');
     await ev(() => { document.getElementById('pinhalt').scrollTop = 0; });
     await bild('einkauf-uebersicht.png');
     // WG-Detail: Kleider antippen, Servicegrad 98 % setzen
-    await tippe('.lzeile.wgz', 'Kleider');
+    await tippe('[data-a=wg]', 'Kleider');
     await pruef('WG-Detail');
     await tippe('[data-a=servicegrad][data-v="0.98"]');
     await pruef('WG-Detail nach Regler');
-    await ev(() => { const k = document.querySelector('.kurve'), pi = document.getElementById('pinhalt'); pi.scrollTop += k.getBoundingClientRect().top - pi.getBoundingClientRect().top - 66; });
+    await ev(() => { const k = document.querySelector('#pinhalt .hw-balkenfeld'), pi = document.getElementById('pinhalt'); pi.scrollTop += k.getBoundingClientRect().top - pi.getBoundingClientRect().top - 66; });
     await bild('einkauf-wg.png');
     const sg = await ev(() => window.spiel.E.wgDetail(window.spiel.s, 'damen.kleider').steuerung.servicegrad);
     pruefSoll('Regler Servicegrad', sg === 0.98, `Servicegrad Kleider ${sg}`);
-    // Freigaben
-    await tippe('.tab', 'Freigaben');
+    // E47 (G2): Regler NOS-Ziel über den Stepper (+5 Punkte)
+    const nos0 = await ev(() => window.spiel.E.wgDetail(window.spiel.s, 'damen.kleider').steuerung.nosZiel);
+    await tippe('[data-a=regelSchritt][data-f=nosZiel][data-v="5"]');
+    const nos1 = await ev(() => window.spiel.E.wgDetail(window.spiel.s, 'damen.kleider').steuerung.nosZiel);
+    pruefSoll('Regler NOS-Ziel', Math.abs(nos1 - Math.min(0.95, nos0 + 0.05)) < 0.006, `NOS-Ziel ${nos0} → ${nos1}`);
+    await pruef('WG-Detail nach NOS-Regler');
+    // Freigaben (Reiterleiste unten, liegt in #preiter)
+    await tippe('#preiter [data-a=seite]', 'Freigaben');
     await pruef('Freigaben');
     await ev(() => { document.getElementById('meldung').className = ''; });
     await bild('einkauf-freigaben.png');
@@ -151,9 +159,9 @@ async function buendeln() {
     pruefSoll('Sammelfreigabe NOS', nosDanach === 0, `${nos} NOS-Orders freigegeben, offen ${nosDanach}`);
     await pruef('Freigaben nach Aktionen');
     // O05 Ware: Merchandise, Allokation und Reduzierung öffnen sich und zeigen Engine-Werte.
-    for (const reiter of ['Merchandise', 'Allokation', 'Reduzierung']) { await tippe('.tab', reiter); await pruef(reiter); }
+    for (const reiter of ['Saison', 'Allokation', 'Reduzierung']) { await tippe('#preiter [data-a=seite]', reiter); await pruef(reiter); }
     // Eigenmarken und Gründen über den Assistenten (Vorlage Young Adults)
-    await tippe('.tab', 'Eigenmarken');
+    await tippe('#preiter [data-a=seite]', 'Marken');
     await pruef('Eigenmarken');
     await ev(() => { document.getElementById('meldung').className = ''; });
     await bild('eigenmarken.png');

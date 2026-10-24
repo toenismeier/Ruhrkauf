@@ -1,10 +1,12 @@
 // Einkauf-Panel (EINKAUF-VERTRAG.md, Abschnitt Prototyp): Übersicht nach Bereich mit Warengruppen, Spaltenwahl, Sortierung
-// und Ampeln; WG-Detail mit Kurven über 26 Wochen und allen Reglern; Freigabe-Eingang mit Einzel- und Sammelfreigabe.
-// Die Eigenmarken-Seite liegt in eigenmarken.js. Alle Zahlen kommen über quelle.js aus den Engine-Abfragen
-// (einkaufUebersicht, wgDetail, freigaben). Jeder angezeigte Wert trägt data-p; pruefe() rechnet ihn aus einer frischen
-// Abfrage nach (0 Abweichungen erwartet).
+// und Ampeln; WG-Detail mit Verlauf und allen Reglern; Freigabe-Eingang mit Einzel- und Sammelfreigabe.
+// E47 (G2): Blatt wie Coffee 17 bis 22. Oben spricht der Einkaufsvorstand den Befund, darunter Großkennzahlen, Balken und
+// das Buch mit Strich vor der Summe; Reiterleiste unten. Die Eigenmarken-Seite liegt in eigenmarken.js, die Ware in ware.js.
+// Alle Zahlen kommen über quelle.js aus den Engine-Abfragen (einkaufUebersicht, wgDetail, freigaben). Jeder angezeigte
+// Wert trägt data-p; pruefe() rechnet ihn aus einer frischen Abfrage nach (0 Abweichungen erwartet).
 import { geld, fmt, pz, dez, kwVon, esc } from './format.js';
-import { bereich } from './komponenten.js';
+import * as K from './komponenten.js';
+import * as B from './g2-buch.js';
 import { eigenmarkenSeite, eigenmarkenAktion, eigenmarkenErwartet, neuerEntwurf } from './eigenmarken.js';
 // O05 Ware
 import { warenSeite, warenAktion, wareErwartet } from './ware.js';
@@ -23,6 +25,11 @@ const ART = { nos: 'NOS', saison: 'Saison' };
 const TYP = { nos: 'NOS-Nachschub', vororder: 'Vororder', nachorder: 'Nachorder' };
 /** Kennzahlen im WG-Detail über den 8 Standardspalten hinaus. */
 const DETAIL_EXTRA = [['umsatzWoche', 'Umsatz letzte Woche', 'eur'], ['bestandEk', 'Bestand EK', 'eur'], ['offeneOrders', 'Offene Orders', 'eur'], ['abschriften', 'Abschriften 13 Wochen', 'eur'], ['reduzierungsquote', 'Reduzierungsquote', 'prozent'], ['entgangenerUmsatz', 'Fehlmengen 13 Wochen', 'eur'], ['eigenmarkenAnteil', 'Eigenmarkenanteil', 'prozent'], ['eigenmarkenMarge', 'Eigenmarkenmarge', 'prozent']];
+/** Ampel als Farbe des Werts (kein Punkt, keine Pille): Rot handeln, Gelb beobachten, Grün ohne Farbe. */
+const TON = { rot: 'schlecht', gelb: 'achtung' };
+/** Reiterleiste unten (Einkauf-Bereiche). */
+const REITER = [['uebersicht', 'Übersicht', 'zahlen'], ['freigaben', 'Freigaben', 'post'], ['eigenmarken', 'Marken', 'sortiment'],
+  ['merchandise', 'Saison', 'ware'], ['allokation', 'Allokation', 'etagen'], ['reduzierungKalender', 'Reduzierung', 'kosten']];
 
 export function einkaufModul(ctx) {
   const { q } = ctx;
@@ -35,15 +42,16 @@ export function einkaufModul(ctx) {
   const text = (id, k) => formatiere(SP().get(id)?.format ?? 'eur', k[id] ?? 0);
 
   // ─────────────────────────── Bausteine
-  const dot = (a) => (a ? `<span class="ampel a-${a}" title="${AMPEL_TEXT[a]}"></span>` : '<span class="ampel ohne"></span>');
-  const seg = (act, wert, optionen, extra = '') => `<div class="seg">${optionen.map(([v, t]) => `<button class="${String(v) === String(wert) ? 'an' : ''}" data-a="${act}" data-v="${v}"${extra}>${t}</button>`).join('')}</div>`;
-  const zahl = (titel, inhalt, p, ton = '', a) => `<div class="kz ${ton}"><span>${titel}</span><b><i data-p="${p}">${inhalt}</i>${a ? dot(a) : ''}</b></div>`;
+  const zelle = (t, p, a) => ({ t, p, ton: TON[a] });
   function tabs() {
+    const an = ui.seite === 'wg' ? 'uebersicht' : ui.seite === 'gruenden' ? 'eigenmarken' : ui.seite;
     const n = q.freigaben(s()).anzahl;
-    const an = (id) => ui.seite === id || (id === 'uebersicht' && ui.seite === 'wg') || (id === 'eigenmarken' && ui.seite === 'gruenden');
-    const t = (id, inhalt) => `<button class="tab ${an(id) ? 'an' : ''}" data-a="seite" data-v="${id}">${inhalt}</button>`;
-    return `<div class="tabs">${t('uebersicht', 'Übersicht')}${t('freigaben', `Freigaben${n ? ` <span class="zahl" data-p="badge">${n}</span>` : ''}`)}${t('eigenmarken', 'Eigenmarken')}${t('merchandise', 'Merchandise')}${t('allokation', 'Allokation')}${t('reduzierungKalender', 'Reduzierung')}</div>`;
+    const reiter = REITER.map(([id, name, sym]) => [id, id === 'freigaben' && n ? `${name} ${n}` : name, sym]);
+    return B.G2 + K.reiterUnten(reiter, an, (id) => `data-a="seite" data-v="${id}"${id === 'freigaben' ? ` aria-label="Freigaben, ${n} offen"` : ''}`);
   }
+  const cpo = (text, ton = '') => B.vorstandSprecher(s(), 'cpo', 'Einkaufsvorstand', text, ton);
+  /** Prozent-Stepper in 5er-Schritten für Regler (NOS-Ziel, Vororder, Eigenmarkenanteil). */
+  const prozentStepper = (feld, wert, min, max, label) => K.stepper({ wert: `${wert} %`, label, attrMinus: `data-a="regelSchritt" data-f="${feld}" data-v="-5"`, attrPlus: `data-a="regelSchritt" data-f="${feld}" data-v="5"`, minusAus: wert <= min, plusAus: wert >= max });
 
   // ─────────────────────────── Übersicht
   function sortiere(liste) {
@@ -51,65 +59,49 @@ export function einkaufModul(ctx) {
     return [...liste].sort((a, b) => (key === 'name' ? a.name.localeCompare(b.name, 'de') * dir : ((a.kennzahlen[key] ?? 0) - (b.kennzahlen[key] ?? 0)) * dir));
   }
   function uebersicht() {
-    // Q31 Warenbuch. Hauptfrage: Wo läuft die Ware aus dem Ruder? Größter Block = Bereichsbuch mit Ampeln und Gesamtzeile.
+    // Hauptfrage: Wo läuft die Ware aus dem Ruder? Oben Rohertrag und Limit, darunter das Warenbuch, Ampel als Farbe des Werts.
     const u = q.uebersicht(s(), { format: ui.format }), g = u.summe.kennzahlen, ga = u.summe.ampeln;
-    let h = tabs();
-    h += '<div class="q31">';
-    h += seg('format', ui.format, [['warenhaus', 'Hartwig'], ['sport', 'Hartwig Sport']]);
     const rot = u.bereiche.filter((b) => Object.values(b.ampeln).includes('rot'));
-    h += `<div class="q-gross"><span class="q-label">Rohertragsquote 13 Wochen</span><span class="q-haupt" data-p="g:rohertragsquote">${text('rohertragsquote', g)}</span>
-      <span class="q-neben"><b class="${g.limitFrei < 0 ? 'q-minus' : ''}" data-p="g:limitFrei">${text('limitFrei', g)}</b>Limit frei</span></div>`;
-    h += rot.length
-      ? `<div class="q-befund"><b>${rot.length} von ${u.bereiche.length} Bereichen</b> stehen auf Rot: ${rot.slice(0, 3).map((b) => esc(b.name)).join(', ')}${rot.length > 3 ? ' und weitere' : ''}.</div>`
-      : `<div class="q-befund">Kein Bereich auf Rot. Umsatz letzte Woche <b data-p="g:umsatzWoche">${geld(g.umsatzWoche)}</b>, Bestand EK <b data-p="g:bestandEk">${geld(g.bestandEk)}</b>.</div>`;
-    const spalten = [...q.spalten()].sort((a, b) => b.standard - a.standard);
-    h += `<div class="spaltenwahl"><span>Spalten</span>${spalten.map((c) => { const i = ui.spalten.indexOf(c.id); return `<button class="chipk ${i >= 0 ? 'an' : ''}" data-a="spalte" data-v="${c.id}">${i >= 0 ? `<b>${i + 1}</b>` : ''}${c.name}</button>`; }).join('')}</div>`;
-    const kopf = (key, t, klasse) => `<button class="${klasse} ${ui.sort.key === key ? 'an' : ''}" data-a="sort" data-v="${key}">${t}${ui.sort.key === key ? (ui.sort.dir < 0 ? ' ▼' : ' ▲') : ''}</button>`;
-    h += `<div class="karte liste q-warenbuch"><div class="lkopf">${kopf('name', 'Bereich und WG', 'lname')}${ui.spalten.map((k) => kopf(k, KOPF[k] ?? SP().get(k)?.name, 'lwert')).join('')}</div>`;
-    const werte = (k, a, p) => ui.spalten.map((c) => `<span class="lwert"><i data-p="${p}:${c}">${text(c, k)}</i>${dot(a[c])}</span>`).join('');
+    let h = tabs() + cpo(rot.length
+      ? `<b>${rot.length} von ${u.bereiche.length} Bereichen stehen auf Rot:</b> ${rot.slice(0, 3).map((b) => esc(b.name)).join(', ')}${rot.length > 3 ? ' und weitere' : ''}.`
+      : `<b>Kein Bereich steht auf Rot.</b> ${esc(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen}.`, rot.length ? 'engpass' : '');
+    let x = '<div class="hw-g2-oben">' + K.seg([['warenhaus', 'Hartwig'], ['sport', 'Hartwig Sport']], ui.format, (v) => `data-a="format" data-v="${v}"`) + '</div>';
+    x += K.gross([
+      { label: 'Rohertrag 13 Wochen', wert: text('rohertragsquote', g), p: 'g:rohertragsquote', ton: TON[ga.rohertragsquote], unter: `Umsatz Woche <span data-p="g:umsatzWoche">${geld(g.umsatzWoche)}</span>` },
+      { label: 'Limit frei', wert: text('limitFrei', g), p: 'g:limitFrei', ton: g.limitFrei < 0 ? 'schlecht' : '', unter: `Bestand EK <span data-p="g:bestandEk">${geld(g.bestandEk)}</span>` },
+    ]);
+    const pfeil = (key) => (ui.sort.key === key ? (ui.sort.dir < 0 ? ' ▼' : ' ▲') : '');
+    const werte = (k, a, p) => ui.spalten.map((c) => zelle(text(c, k), `${p}:${c}`, a[c]));
+    const zeilen = [];
     for (const b of sortiere(u.bereiche)) {
       const auf = ui.offen.has(b.bereich);
-      h += `<div class="lzeile bereich" data-a="bereich" data-v="${b.bereich}"><span class="lname"><span class="pfeil">${auf ? '▾' : '▸'}</span>${esc(b.name)} <i>${b.wgs.length} WG</i></span>${werte(b.kennzahlen, b.ampeln, `b:${b.bereich}`)}</div>`;
-      if (auf) for (const w of sortiere(b.wgs)) h += `<div class="lzeile wgz" data-a="wg" data-v="${w.id}"><span class="lname">${w.eigenmarken.length ? '<i class="em" title="mit Eigenmarke">EM</i>' : ''}${esc(w.name)}</span>${werte(w.kennzahlen, w.ampeln, `w:${w.id}`)}</div>`;
+      zeilen.push(B.reihe({ name: esc(b.name), unter: `${b.wgs.length} Warengruppen`, werte: werte(b.kennzahlen, b.ampeln, `b:${b.bereich}`), art: 'bereich', pfeil: auf ? '▾' : '▸', attr: `data-a="bereich" data-v="${b.bereich}" aria-expanded="${auf}"` }));
+      if (auf) for (const w of sortiere(b.wgs)) zeilen.push(B.reihe({ name: esc(w.name), unter: w.eigenmarken.length ? 'mit Eigenmarke' : '', werte: werte(w.kennzahlen, w.ampeln, `w:${w.id}`), art: 'unter', attr: `data-a="wg" data-v="${w.id}"` }));
     }
-    h += `<div class="lzeile q-gesamt"><span class="lname">${ui.format === 'sport' ? 'Hartwig Sport' : 'Hartwig'} gesamt</span>${ui.spalten.map((c) => `<span class="lwert"><i data-p="g:${c}">${text(c, g)}</i>${dot(ga[c])}</span>`).join('')}</div>`;
-    h += '</div>';
-    const gen = { grob: 'grob (Controlling schwach besetzt)', normal: 'normal', exakt: 'exakt' }[u.genauigkeit] ?? u.genauigkeit;
-    h += `<div class="legende">${dot('gruen')} im Ziel ${dot('gelb')} beobachten ${dot('rot')} handeln · EM = mit Eigenmarke<br>${esc(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen} · Genauigkeit ${gen}</div>`;
+    zeilen.push(B.reihe({ name: `${ui.format === 'sport' ? 'Hartwig Sport' : 'Hartwig'} gesamt`, werte: ui.spalten.map((c) => zelle(text(c, g), `g:${c}`, ga[c])), art: 'summe' }));
+    x += B.buch({ titel: 'Bereich' + pfeil('name'), titelAttr: 'data-a="sort" data-v="name"', spalten: ui.spalten.map((c) => ({ t: (KOPF[c] ?? SP().get(c)?.name) + pfeil(c), attr: `data-a="sort" data-v="${c}"` })), zeilen, breite: 98 });
+    const gen = { grob: 'grob, das Controlling ist schwach besetzt', normal: 'normal', exakt: 'exakt' }[u.genauigkeit] ?? u.genauigkeit;
+    x += B.fuss(`Rot heißt handeln, Gelb beobachten. Spaltenkopf antippen sortiert. Genauigkeit der Zahlen: ${esc(gen)}.`);
+    const spalten = [...q.spalten()].sort((a, b) => b.standard - a.standard).map((c) => [c.id, c.name]);
+    x += B.felder(K.feld('Spalte links', B.auswahl(spalten, ui.spalten[0], 'data-a="spalteWahl" data-i="0"', 'Spalte links')),
+      K.feld('Spalte rechts', B.auswahl(spalten, ui.spalten[1], 'data-a="spalteWahl" data-i="1"', 'Spalte rechts')));
+    // FUNDUS: Altware aus den Häusern
     const o = ctx.E.outletUebersicht(s());
-    h += `<div class="q-buch"><div class="q-buch-kopf"><span>Altware ins Outlet · FUNDUS</span></div>
-      <div class="q-zeile"><span class="q-name">Poolbestand EK<small>Reichweite <i data-p="format:reichweite">${dez(o.reichweite, 1)} Wo.</i></small></span><span class="q-wert" data-p="format:poolWert">${geld(o.poolWert)}</span></div>
-      <div class="q-zeile"><span class="q-name">Abschriften</span><span class="q-wert" data-p="format:abschriften">${geld(o.abschriften)}</span></div>
-      <div class="q-zeile"><span class="q-name">Markenposten</span><span class="q-wert" data-p="format:markenposten">${geld(o.markenposten)}</span></div>
-      <label class="ek-eingabe" style="padding:10px 14px;border-top:1px solid var(--q-linie)"><span>Altwarequote <b>${Math.round(o.altwareQuote * 100)} %</b></span><input type="range" data-a="formatQuote" min="0" max="100" step="5" value="${Math.round(o.altwareQuote * 100)}"></label>
-      <div class="q-stepzeile"><span class="q-name">Markenposten-Zukauf<small>je Woche</small></span><div class="stepper"><button data-a="formatBudgetSchritt" data-v="-500000" aria-label="weniger Zukauf">−</button><span><b>${geld(o.zukaufBudget)}</b></span><button data-a="formatBudgetSchritt" data-v="500000" aria-label="mehr Zukauf">+</button></div></div></div>`;
+    x += K.abschnitt('Altware ins Outlet', 'FUNDUS');
+    x += K.liste([
+      K.zeile({ was: 'Poolbestand EK', unter: `Reichweite <span data-p="format:reichweite">${dez(o.reichweite, 1)} Wo.</span>`, wert: `<span data-p="format:poolWert">${geld(o.poolWert)}</span>` }),
+      K.zeile({ was: 'Abschriften', wert: `<span data-p="format:abschriften">${geld(o.abschriften)}</span>` }),
+      K.zeile({ was: 'Markenposten', wert: `<span data-p="format:markenposten">${geld(o.markenposten)}</span>` })]);
+    x += B.felder(
+      K.feld('Altwarequote', K.stepper({ wert: `${Math.round(o.altwareQuote * 100)} %`, label: 'Altwarequote', attrMinus: 'data-a="formatQuoteSchritt" data-v="-5"', attrPlus: 'data-a="formatQuoteSchritt" data-v="5"', minusAus: o.altwareQuote <= 0, plusAus: o.altwareQuote >= 1 })),
+      K.feld('Zukauf je Woche', K.stepper({ wert: geld(o.zukaufBudget), label: 'Markenposten-Zukauf je Woche', attrMinus: 'data-a="formatBudgetSchritt" data-v="-500000"', attrPlus: 'data-a="formatBudgetSchritt" data-v="500000"', minusAus: o.zukaufBudget <= 0 })));
     const kandidaten = ctx.E.outletKandidaten(s()).slice(0, 8);
     if (kandidaten.length) {
-      h += '<div class="q-buch"><div class="q-buch-kopf"><span>Neue FUNDUS-Standorte</span><b>12 Wochen Vorlauf</b></div>';
-      for (const k of kandidaten) h += `<div class="q-zeile"><span class="q-name">${esc(k.stadt)}<small>${fmt.format(k.qm)} qm · Miete ${geld(k.mieteWoche)} je Woche</small></span><span class="q-wert">${geld(k.investition)}<small>Investition</small></span><span class="q-knoepfe"><button onclick="formateTun('outletEroeffnen','${esc(k.stadt)}')">In ${esc(k.stadt)} eröffnen</button></span></div>`;
-      h += '</div>';
+      x += K.abschnitt('Neue FUNDUS-Standorte', '12 Wochen Vorlauf');
+      x += K.liste(kandidaten.map((k) => `<div class="hw-zeile"><span class="hw-was">${esc(k.stadt)}<small>${fmt.format(k.qm)} qm · Miete ${geld(k.mieteWoche)} je Woche · Investition ${geld(k.investition)}</small></span>${K.knopf('Eröffnen', `onclick="formateTun('outletEroeffnen','${esc(k.stadt)}')" aria-label="FUNDUS in ${esc(k.stadt)} eröffnen"`, 'zweit')}</div>`));
     }
-    h += '</div>';
+    h += K.rumpf(x);
     return { titel: 'Einkauf', unter: `${u.bereiche.length} Bereiche · ${u.bereiche.reduce((a, b) => a + b.wgs.length, 0)} Warengruppen · KW ${kwVon(s().woche)}`, html: h };
-  }
-
-  // ─────────────────────────── Kurven (eine Reihe je Karte, Finger zeigt Woche und Wert)
-  function kurve(titel, wochen, werte, fmtW, p, farbe) {
-    const W = 340, H = 64, n = werte.length;
-    if (n < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p}">${n ? fmtW(werte[0]) : 'noch keine Daten'}</b></div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
-    const min = Math.min(...werte), max = Math.max(...werte);
-    const lo = min - (max - min) * 0.1, hi = max + (max - min) * 0.1 || max + 1;
-    const X = (i) => 4 + (i / (n - 1)) * (W - 8), Y = (v) => H - 4 - ((v - lo) / (hi - lo || 1)) * (H - 10);
-    const pts = werte.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
-    const daten = esc(JSON.stringify(werte.map((v, i) => [kwVon(wochen[i]), fmtW(v)])));
-    return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p}">${fmtW(werte[n - 1])}</b><small class="khover"></small></div>
-      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" data-reihe="${daten}" data-x0="4" data-dx="${(W - 8) / (n - 1)}">
-        <line x1="0" x2="${W}" y1="${H - 4}" y2="${H - 4}" stroke="#e7e3dc" stroke-width="1"/>
-        <polygon points="4,${H - 4} ${pts} ${X(n - 1).toFixed(1)},${H - 4}" fill="${farbe}" opacity="0.10"/>
-        <polyline points="${pts}" fill="none" stroke="${farbe}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
-        <circle cx="${X(n - 1).toFixed(1)}" cy="${Y(werte[n - 1]).toFixed(1)}" r="4" fill="${farbe}" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/>
-        <line class="kreuz" x1="0" x2="0" y1="0" y2="${H}" stroke="#7b8790" stroke-width="1" vector-effect="non-scaling-stroke" opacity="0"/>
-      </svg><div class="kfuss"><span>KW ${kwVon(wochen[0])}</span><span>min ${fmtW(min)} · max ${fmtW(max)}</span><span>KW ${kwVon(wochen[n - 1])}</span></div></div>`;
   }
 
   // ─────────────────────────── WG-Detail
@@ -117,45 +109,55 @@ export function einkaufModul(ctx) {
     const d = q.wg(s(), ui.wg);
     if (!d) { ui.seite = 'uebersicht'; return uebersicht(); }
     const k = d.kennzahlen, st = d.steuerung, a = d.ampeln;
-    let h = tabs();
-    h += `<button class="zurueck" data-a="seite" data-v="uebersicht">‹ Übersicht ${esc(d.bereichName)}</button>`;
-    // Q31: Hauptfrage „Passt der Bestand zum Abverkauf?“ – Reichweite groß, alle übrigen Kennzahlen als Buchzeilen.
+    // Hauptfrage: Passt der Bestand zum Abverkauf? Reichweite groß, Verlauf als Balken, Kennzahlen als Buch, Regler darunter.
+    const rote = q.spalten().filter((c) => a[c.id] === 'rot').map((c) => c.name);
+    const befund = a.reichweite === 'rot' ? `<b>Die Reichweite von ${esc(text('reichweite', k))} steht auf Rot.</b> Limit, Vororder und Reduzierung prüfen.`
+      : rote.length ? `<b>${rote.length === 1 ? 'Eine Kennzahl steht' : rote.length + ' Kennzahlen stehen'} auf Rot:</b> ${esc(rote.slice(0, 3).join(', '))}.`
+        : `<b>${esc(d.name)} liegt im Ziel.</b> Bestand und Abverkauf passen zusammen.`;
+    let h = tabs() + cpo(befund, a.reichweite === 'rot' || rote.length ? 'engpass' : '');
+    let x = '<div class="hw-g2-oben">' + K.knopf(`‹ ${d.bereichName}`, `data-a="seite" data-v="uebersicht" aria-label="Zurück zur Übersicht ${esc(d.bereichName)}"`, 'text') + '</div>';
+    x += K.gross([
+      { label: 'Reichweite', wert: text('reichweite', k), p: 'd:reichweite', ton: TON[a.reichweite], unter: AMPEL_TEXT[a.reichweite] ?? 'ohne Ampel' },
+      { label: 'Umsatz letzte Woche', wert: formatiere('eur', k.umsatzWoche), p: 'd:umsatzWoche', unter: `13 Wochen ${esc(text('umsatz', k))}` },
+    ]);
+    const v = d.verlauf, n = v.woche.length, von = Math.max(0, n - 5);
+    const punkte = (r) => v.woche.slice(von).map((w, i) => ({ label: String(kwVon(w)), wert: r[von + i] }));
+    const kw = punkte(v.umsatz).map((z) => z.label);
+    x += K.balkenPaar([
+      { titel: kw.length ? `Umsatz KW ${kw[0]} bis ${kw[kw.length - 1]}` : 'Umsatz je Woche', serie: 'a', punkte: punkte(v.umsatz) },
+      { titel: 'Bestand EK', serie: 'b', punkte: punkte(v.bestand) }]);
     const rw = q.spalten().find((c) => c.id === 'reichweite');
-    h += '<div class="q31">';
-    h += `<div class="q-gross"><span class="q-label">Reichweite</span><span class="q-haupt" data-p="d:reichweite">${text('reichweite', k)}</span><span class="q-neben"><b data-p="d:umsatzWoche">${formatiere('eur', k.umsatzWoche)}</b>Umsatz letzte Woche</span></div>`;
-    const buchZeile = (name, wert, p, amp) => `<div class="q-zeile"><span class="q-name">${name}</span><span class="q-wert"><i data-p="${p}">${wert}</i>${amp ? dot(amp) : ''}</span></div>`;
-    h += '<div class="q-buch"><div class="q-buch-kopf"><span>Kennzahlen</span><b>Ampel</b></div>';
-    h += q.spalten().filter((c) => c.standard && c !== rw).map((c) => buchZeile(c.name, text(c.id, k), `d:${c.id}`, a[c.id])).join('');
-    h += DETAIL_EXTRA.filter(([id]) => id !== 'umsatzWoche').map(([id, tt, f]) => buchZeile(tt, id === 'eigenmarkenMarge' && !k.eigenmarkenAnteil ? 'keine' : formatiere(f, k[id]), `d:${id}`, a[id])).join('');
-    h += '</div></div>';
-    const v = d.verlauf;
-    h += kurve('Bestand EK', v.woche, v.bestand, geld, 'k:bestand', '#2f63b5');
-    h += kurve('Umsatz je Woche', v.woche, v.umsatz, geld, 'k:umsatz', '#2f8f5b');
-    h += kurve('Reichweite in Wochen', v.woche, v.reichweite, (x) => `${dez(x, 1)} Wo.`, 'k:reichweite', '#c27b0e');
-    // Regler
-    const regler = (titel, inhalt, hilfe = '') => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ''}</div>${inhalt}</div>`;
-    const schieber = (feld, wert, min, max, schritt) => `<div class="schieber"><input type="range" min="${min}" max="${max}" step="${schritt}" value="${wert}" data-a="regel" data-f="${feld}"><output>${wert} %</output></div>`;
-    h += '<div class="karte steuerung"><div class="khead">Steuerung</div>';
-    const genutzt = k.limit > 0 ? Math.min(1, k.limitVerbraucht / k.limit) : 0;
-    const naechste = d.limits[1];
-    h += regler('Limit je Saison (Open to Buy)', `<div class="stepper"><button data-a="limit" data-v="-0.05">−</button><span><b data-p="d:limitFaktor">${pz(st.limitFaktor)}</b> · <i data-p="d:limit">${geld(k.limit)}</i></span><button data-a="limit" data-v="0.05">+</button></div><div class="balken"><span style="width:${(genutzt * 100).toFixed(1)}%"></span></div><small class="rfuss">${esc(d.limits[0]?.name ?? '')}: verbraucht <i data-p="d:limitVerbraucht">${geld(k.limitVerbraucht)}</i>, frei <i data-p="d:limitFrei2">${geld(k.limitFrei)}</i>${naechste ? `<br>${esc(naechste.name)}: Limit ${geld(naechste.limit)}, verbraucht ${geld(naechste.verbraucht)}` : ''}</small>`, 'Faktor auf den Saisonplan');
-    h += regler('NOS-Anteil Ziel', schieber('nosZiel', Math.round(st.nosZiel * 100), 0, 95, 1), `heute ${pz(st.nosAnteil)}, Rest Saisonware`);
-    h += regler('NOS-Servicegrad', seg('servicegrad', st.servicegrad, [[0.9, '90 %'], [0.95, '95 %'], [0.98, '98 %']]), 'mehr Sicherheitsbestand');
-    h += regler('Vororderquote', schieber('vororderquote', Math.round(st.vororderquote * 100), 20, 100, 5), 'Rest als Nachorder alle 4 Wochen');
-    h += regler('Reduzierung', seg('reduzierung', st.reduzierung, [['frueh', 'früh'], ['normal', 'normal'], ['spaet', 'spät']]), 'früh: weniger Altware, mehr Abschrift');
-    h += regler('Ohne Freigabe nach Frist', `<div class="zweier"><span>NOS</span>${seg('modus', st.modus.nos, [['auto', 'automatisch'], ['verfall', 'verfällt']], ' data-f="nos"')}</div><div class="zweier"><span>Saison</span>${seg('modus', st.modus.saison, [['auto', 'automatisch'], ['verfall', 'verfällt']], ' data-f="saison"')}</div>`);
+    const zeilen = q.spalten().filter((c) => c.standard && c !== rw).map((c) => B.reihe({ name: esc(c.name), werte: [zelle(text(c.id, k), `d:${c.id}`, a[c.id])] }))
+      .concat(DETAIL_EXTRA.filter(([id]) => id !== 'umsatzWoche').map(([id, tt, f]) => B.reihe({ name: esc(tt), werte: [zelle(id === 'eigenmarkenMarge' && !k.eigenmarkenAnteil ? 'keine' : formatiere(f, k[id]), `d:${id}`, a[id])] })));
+    x += B.buch({ titel: 'Kennzahlen', spalten: ['Wert'], zeilen, breite: 110 });
+    x += B.fuss('Rot heißt handeln, Gelb beobachten.');
+    // Steuerung
+    const L0 = d.limits[0], L1 = d.limits[1];
+    x += K.abschnitt('Limit je Saison', 'Open to Buy');
+    x += K.feld('Faktor auf den Saisonplan', K.stepper({ wert: pz(st.limitFaktor), unter: geld(k.limit), label: 'Limitfaktor', attrMinus: 'data-a="limit" data-v="-0.05"', attrPlus: 'data-a="limit" data-v="0.05"' }));
+    x += K.liste([
+      K.zeile({ was: esc(L0?.name ?? 'Laufende Saison'), unter: `verbraucht <span data-p="d:limitVerbraucht">${geld(k.limitVerbraucht)}</span>`, wert: `<span data-p="d:limit">${geld(k.limit)}</span>`, wertUnter: `frei <span data-p="d:limitFrei2">${geld(k.limitFrei)}</span>` }),
+      ...(L1 ? [K.zeile({ was: esc(L1.name), unter: `verbraucht ${geld(L1.verbraucht)}`, wert: geld(L1.limit), wertUnter: `frei ${geld(L1.frei)}` })] : [])]);
+    x += K.abschnitt('Nachschub und Saison');
+    x += B.felder(K.feld('NOS-Anteil Ziel', prozentStepper('nosZiel', Math.round(st.nosZiel * 100), 0, 95, 'NOS-Anteil Ziel')),
+      K.feld('Vororderquote', prozentStepper('vororderquote', Math.round(st.vororderquote * 100), 20, 100, 'Vororderquote')));
+    x += B.fuss(`NOS heute ${pz(st.nosAnteil)}, Rest Saisonware. Was nicht vorgeordert wird, kommt alle 4 Wochen als Nachorder.`);
+    x += K.feld('NOS-Servicegrad', K.seg([[0.9, '90 %'], [0.95, '95 %'], [0.98, '98 %']], st.servicegrad, (w) => `data-a="servicegrad" data-v="${w}"`));
+    x += '<div class="hw-abstand"></div>' + K.feld('Reduzierung', K.seg([['frueh', 'früh'], ['normal', 'normal'], ['spaet', 'spät']], st.reduzierung, (w) => `data-a="reduzierung" data-v="${w}"`));
+    x += B.fuss('Höherer Servicegrad heißt mehr Sicherheitsbestand. Frühe Reduzierung senkt Altware und erhöht die Abschrift.');
+    x += K.abschnitt('Ohne Freigabe nach Frist');
+    x += K.feld('NOS', K.seg([['auto', 'automatisch'], ['verfall', 'verfällt']], st.modus.nos, (w) => `data-a="modus" data-f="nos" data-v="${w}"`));
+    x += '<div class="hw-abstand"></div>' + K.feld('Saison', K.seg([['auto', 'automatisch'], ['verfall', 'verfällt']], st.modus.saison, (w) => `data-a="modus" data-f="saison" data-v="${w}"`));
     if (d.stammdaten.eigenmarkenfaehig) {
-      const alle = q.marken(s()).marken;
-      const drin = d.eigenmarken, ids = new Set(drin.map((m) => m.marke));
+      const alle = q.marken(s()).marken, drin = d.eigenmarken, ids = new Set(drin.map((m) => m.marke));
       const rest = alle.filter((m) => !ids.has(m.id) && m.status !== 'eingestellt');
-      let inh = drin.map((m) => `<div class="emzeile"><span class="emfarbe" style="background:${m.farbe}"></span><span class="emname">${esc(m.name)}<i>ist ${pz(m.anteilIst)}</i></span>${schieber('em:' + m.marke, Math.round(m.anteilZiel * 100), 0, 60, 5)}</div>`).join('');
-      if (!drin.length) inh += '<div class="leise">Noch keine Eigenmarke in dieser Warengruppe.</div>';
-      if (rest.length) inh += `<select class="ort gross" data-a="emNeu"><option value="">Eigenmarke aufnehmen …</option>${rest.map((m) => `<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select>`;
-      h += regler('Eigenmarkenanteile', inh, 'Ziel, Anteil am WG-Volumen');
+      x += K.abschnitt('Eigenmarkenanteile', 'Ziel am WG-Volumen');
+      x += drin.length ? '<div class="hw-felder">' + drin.map((m) => K.feld(`${m.name}, ist ${pz(m.anteilIst)}`, prozentStepper('em:' + m.marke, Math.round(m.anteilZiel * 100), 0, 60, `Anteil ${m.name}`))).join('') + '</div>' : K.leer('Noch keine Eigenmarke in dieser Warengruppe.');
+      if (rest.length) x += '<div class="hw-abstand"></div>' + K.feld('Eigenmarke aufnehmen', B.auswahl([['', 'Marke wählen'], ...rest.map((m) => [m.id, m.name])], '', 'data-a="emNeu"', 'Eigenmarke aufnehmen'));
     }
-    h += `<div class="regler"><small class="rfuss">Lieferant ${esc(d.lieferant)} · Vorlauf Vororder ${d.stammdaten.vorlaufVor}, Nachorder ${d.stammdaten.vorlaufNach}, NOS ${d.stammdaten.vorlaufNos} Wochen · Mindestabnahme ${geld(d.stammdaten.mindestabnahme)} je Saisonorder</small></div>`;
-    h += '</div>';
-    if (d.freigaben?.length) h += `<button class="breit" data-a="seite" data-v="freigaben" data-bereich="${d.bereich}">${d.freigaben.length} offene Freigaben dieser Warengruppe</button>`;
+    x += B.fuss(`Lieferant ${esc(d.lieferant)} · Vorlauf Vororder ${d.stammdaten.vorlaufVor}, Nachorder ${d.stammdaten.vorlaufNach}, NOS ${d.stammdaten.vorlaufNos} Wochen · Mindestabnahme ${geld(d.stammdaten.mindestabnahme)} je Saisonorder.`);
+    if (d.freigaben?.length) x += K.knoepfe(K.knopf(`${d.freigaben.length} offene ${d.freigaben.length === 1 ? 'Freigabe' : 'Freigaben'} ansehen`, `data-a="seite" data-v="freigaben" data-bereich="${d.bereich}"`, 'zweit breit'));
+    h += K.rumpf(x);
     return { titel: d.name, unter: `${d.bereichName} · Warengruppe · KW ${kwVon(s().woche)}`, html: h };
   }
 
@@ -165,62 +167,68 @@ export function einkaufModul(ctx) {
     const l = q.freigaben(s(), engineFilter()).liste;
     return ui.filter.wert === 'gross' ? l.filter((o) => o.wert > 100000) : l;
   }
+  const fristText = (o) => (o.restWochen <= 0 ? 'Frist diese Woche' : o.restWochen === 1 ? 'Frist nächste Woche' : 'Frist später');
   function freigabenSeite() {
-    // Q31 Orderbuch. Hauptfrage: Was muss ich diese Woche freigeben? Größter Block = Summe der wartenden Orders,
-    // eine Hauptaktion (alle freigeben), darunter das Buch mit Summenstrich.
+    // Hauptfrage: Was muss ich diese Woche freigeben? Summe groß, eine Hauptaktion, darunter das Orderbuch mit Summenstrich.
+    // Je Vorgang genau eine Aktion (Frei); Kürzen und Ablehnen erst nach Antippen der Zeile.
     const alle = q.freigaben(s()), l = gefiltert();
     const bereiche = [...new Map(alle.liste.map((o) => [o.bereich, o.bereichName])).entries()];
     const summe = l.reduce((a, o) => a + o.wert, 0);
     const dringend = l.filter((o) => o.restWochen <= 0), verfall = dringend.filter((o) => o.modus !== 'auto');
-    let h = tabs();
-    h += '<div class="q31">';
-    h += `<div class="q-gross"><span class="q-label">Wartet auf deine Freigabe</span><span class="q-haupt" data-p="sammel">${geld(summe)}</span>
-      <span class="q-neben"><b>${l.length} ${l.length === 1 ? 'Order' : 'Orders'}</b>${dringend.length} fällig</span></div>`;
-    if (!alle.anzahl) h += `<div class="q-befund">Keine Order wartet. Orders bis <b>${geld(alle.grenze)}</b> EK gehen ohne dich durch.</div>`;
-    else if (verfall.length) h += `<div class="q-befund"><b>${verfall.length} ${verfall.length === 1 ? 'Saisonorder verfällt' : 'Saisonorders verfallen'}</b> diese Woche ohne Freigabe, zusammen ${geld(verfall.reduce((a, o) => a + o.wert, 0))} EK. Die Ware fehlt dann in der Saison.</div>`;
-    else if (dringend.length) h += `<div class="q-befund"><b>${dringend.length}</b> ${dringend.length === 1 ? 'Order läuft' : 'Orders laufen'} diese Woche ab und ${dringend.length === 1 ? 'geht' : 'gehen'} danach automatisch durch.</div>`;
-    if (l.length) h += `<button class="q-haupt-akt" data-a="sammel">Alle ${l.length} freigeben · <span>${geld(summe)}</span></button>`;
-    h += `<div class="q-filter"><select class="ort" data-a="filterBereich" aria-label="Bereich"><option value="">Alle Bereiche (${alle.anzahl})</option>${bereiche.map(([b, n]) => `<option value="${b}"${ui.filter.bereich === b ? ' selected' : ''}>${esc(n)} (${alle.liste.filter((o) => o.bereich === b).length})</option>`).join('')}</select>`;
-    h += seg('filterArt', ui.filter.art, [['', 'Alle'], ['nos', 'NOS'], ['saison', 'Saison']]);
-    h += seg('filterWert', ui.filter.wert, [['', 'Jeder Wert'], ['klein', 'bis 100 Tsd. €'], ['gross', 'über 100 Tsd. €']]) + '</div>';
-    h += `<div class="q-buch"><div class="q-stepzeile" style="border-top:0"><span class="q-name">Freigabegrenze<small>Orders darüber brauchen dich</small></span><div class="stepper"><button data-a="grenze" data-v="-10000" aria-label="Grenze senken">−</button><span><b data-p="grenze">${geld(alle.grenze)}</b></span><button data-a="grenze" data-v="10000" aria-label="Grenze erhöhen">+</button></div></div></div>`;
-    h += `<div class="q-buch" data-summenbuch="Orderbuch"><div class="q-buch-kopf"><span>Orderbuch KW ${kwVon(s().woche)}</span><b>Wert EK</b></div>`;
-    if (!l.length) h += `<div class="q-leer"><b>${alle.anzahl ? 'Keine Order passt zum Filter.' : 'Das Orderbuch ist leer.'}</b>${alle.anzahl ? `${alle.anzahl} Orders warten in anderen Bereichen oder Wertklassen.` : 'Neue Orders kommen mit der nächsten Orderrunde oder Nachorder.'}</div>`;
+    const befund = !alle.anzahl ? `<b>Keine Order wartet.</b> Orders bis ${geld(alle.grenze)} EK gehen ohne dich durch.`
+      : verfall.length ? `<b>${verfall.length} ${verfall.length === 1 ? 'Saisonorder verfällt' : 'Saisonorders verfallen'} diese Woche.</b> Ohne Freigabe fehlt die Ware in der Saison.`
+        : dringend.length ? `<b>${dringend.length} ${dringend.length === 1 ? 'Order läuft' : 'Orders laufen'} diese Woche ab.</b> Danach ${dringend.length === 1 ? 'geht sie' : 'gehen sie'} automatisch durch.`
+          : `<b>${alle.anzahl} ${alle.anzahl === 1 ? 'Order wartet' : 'Orders warten'}.</b> Diese Woche läuft keine Frist ab.`;
+    let h = tabs() + cpo(befund, verfall.length ? 'alarm' : dringend.length ? 'engpass' : '');
+    let x = K.gross([
+      { label: 'Wartet auf Freigabe', wert: geld(summe), p: 'sammel', unter: `${l.length} ${l.length === 1 ? 'Order' : 'Orders'} · ${dringend.length} fällig` },
+      { label: 'Freigabegrenze', wert: geld(alle.grenze), p: 'grenze', unter: 'darüber entscheidest du' },
+    ]);
+    if (l.length) x += K.knoepfe(K.knopf(`Alle ${l.length} freigeben`, 'data-a="sammel"', 'breit'));
+    x += K.abschnitt('Filter');
+    x += K.feld('Bereich', B.auswahl([['', `Alle Bereiche (${alle.anzahl})`], ...bereiche.map(([b, nm]) => [b, `${nm} (${alle.liste.filter((o) => o.bereich === b).length})`])], ui.filter.bereich, 'data-a="filterBereich"', 'Bereich'));
+    x += '<div class="hw-abstand"></div>' + K.seg([['', 'Alle'], ['nos', 'NOS'], ['saison', 'Saison']], ui.filter.art, (v) => `data-a="filterArt" data-v="${v}"`);
+    x += '<div class="hw-abstand"></div>' + K.seg([['', 'Jeder Wert'], ['klein', 'bis 100 Tsd.'], ['gross', 'darüber']], ui.filter.wert, (v) => `data-a="filterWert" data-v="${v}"`);
+    const zeilen = [];
     const zeigeN = ui.mehrOrders ? l.length : Math.min(l.length, 25);
     let gruppe = null;
     for (const o of l.slice(0, zeigeN)) {
-      const g = o.restWochen <= 0 ? 'Frist diese Woche' : o.restWochen === 1 ? 'Frist nächste Woche' : 'Frist später';
-      if (g !== gruppe) { gruppe = g; const n = l.filter((x) => (x.restWochen <= 0 ? 'Frist diese Woche' : x.restWochen === 1 ? 'Frist nächste Woche' : 'Frist später') === g); h += `<div class="q-zwischen"><span>${g}</span><span>${n.length} · ${geld(n.reduce((a, x) => a + x.wert, 0))}</span></div>`; }
+      const g = fristText(o);
+      if (g !== gruppe) { gruppe = g; const n = l.filter((y) => fristText(y) === g); zeilen.push(B.reihe({ name: g, werte: [`${n.length} · ${geld(n.reduce((a, y) => a + y.wert, 0))}`], art: 'bereich' })); }
       const auf = ui.orderAuf === o.id || ui.kuerzen === o.id;
-      h += `<div class="q-zeile q-order${auf ? ' q-auf' : ''}"><button class="q-name q-zeilenknopf" data-a="orderAuf" data-v="${o.id}" aria-expanded="${auf}">${esc(o.wgName)}<small>${esc(o.lieferant)} · ${TYP[o.typ] ?? ART[o.art]}${o.markeName ? ` · ${esc(o.markeName)}` : ''}${o.ueberLimit ? ' · gekürzt' : ''}</small></button>
-        <span class="q-wert"><b data-s="w" data-p="f:${o.id}:wert">${geld(o.wert)}</b><small>${o.modus === 'auto' ? 'sonst automatisch' : 'sonst verfällt sie'}</small></span>
-        <button class="q-haken" data-a="frei" data-v="${o.id}" aria-label="${esc(o.wgName)} freigeben">Frei</button>`;
+      const frist = o.modus === 'auto' ? 'sonst automatisch' : `<span class="${o.restWochen <= 0 ? 'hw-schlecht' : ''}">sonst verfällt sie</span>`;
+      let v = B.reihe({ name: esc(o.wgName), unter: `${esc(o.lieferant)} · ${TYP[o.typ] ?? ART[o.art]}${o.markeName ? ` · ${esc(o.markeName)}` : ''}${o.ueberLimit ? ' · gekürzt' : ''} · ${frist}`, werte: [{ t: geld(o.wert), s: 'w', p: `f:${o.id}:wert` }], attr: `data-a="orderAuf" data-v="${o.id}" aria-expanded="${auf}"` })
+        + K.knopf('Frei', `data-a="frei" data-v="${o.id}" aria-label="${esc(o.wgName)} freigeben"`, 'zweit');
       if (auf) {
-        h += `<span class="q-details">Abverkauf 8 Wochen <i data-p="f:${o.id}:abverkauf">${geld(o.erwarteterAbverkauf)}</i> · Reichweite danach <i data-p="f:${o.id}:reichweite">${dez(o.reichweiteDanach, 1)} Wo.</i> · erste Lieferung KW ${kwVon(o.ersteLieferung)}${o.lieferungen.length > 1 ? ` in ${o.lieferungen.length} Teilen` : ''}${o.hinweis ? ` · ${esc(o.hinweis)}` : ''}</span>`;
-        if (ui.kuerzen === o.id) h += `<span class="q-knoepfe">${[10, 25, 50].map((p) => `<button data-a="kuerzen" data-v="${o.id}" data-p2="${p}">−${p} % und frei</button>`).join('')}<button data-a="kuerzenZu">Zurück</button></span>`;
-        else h += `<span class="q-knoepfe"><button data-a="kuerzenAuf" data-v="${o.id}">Kürzen</button><button data-a="ablehnen" data-v="${o.id}">Ablehnen</button></span>`;
+        v += `<p class="hw-g2-details">Abverkauf 8 Wochen <span data-p="f:${o.id}:abverkauf">${geld(o.erwarteterAbverkauf)}</span> · Reichweite danach <span data-p="f:${o.id}:reichweite">${dez(o.reichweiteDanach, 1)} Wo.</span> · erste Lieferung KW ${kwVon(o.ersteLieferung)}${o.lieferungen.length > 1 ? ` in ${o.lieferungen.length} Teilen` : ''}${o.hinweis ? ` · ${esc(o.hinweis)}` : ''}</p>`;
+        v += ui.kuerzen === o.id
+          ? `<div class="hw-knoepfe hw-g2-aktionen">${[10, 25, 50].map((p) => K.knopf(`−${p} % und frei`, `data-a="kuerzen" data-v="${o.id}" data-p2="${p}"`, 'zweit')).join('')}${K.knopf('Zurück', 'data-a="kuerzenZu"', 'text')}</div>`
+          : `<div class="hw-knoepfe hw-g2-aktionen">${K.knopf('Kürzen', `data-a="kuerzenAuf" data-v="${o.id}"`, 'zweit')}${K.knopf('Ablehnen', `data-a="ablehnen" data-v="${o.id}"`, 'zweit')}</div>`;
       }
-      h += '</div>';
+      zeilen.push(`<div class="hw-g2-vorgang${auf ? ' auf' : ''}">${v}</div>`);
     }
-    if (zeigeN < l.length) { const rest = l.slice(zeigeN); h += `<div class="q-zeile"><span class="q-name">Weitere ${rest.length} Orders<small>kleinere Werte</small></span><span class="q-wert"><b data-s="w">${geld(rest.reduce((a, o) => a + o.wert, 0))}</b></span></div><button class="q-mehr" data-a="mehrOrders">Alle ${l.length} Orders zeigen</button>`; }
-    if (l.length) h += `<div class="q-summe"><span>Summe ${l.length} ${l.length === 1 ? 'Order' : 'Orders'}</span><span class="q-wert" data-summe="w" data-p="sammel">${geld(summe)}</span></div>`;
-    h += '</div>';
+    if (zeigeN < l.length) { const rest = l.slice(zeigeN); zeilen.push(B.reihe({ name: `Weitere ${rest.length} Orders`, unter: 'kleinere Werte', werte: [{ t: geld(rest.reduce((a, o) => a + o.wert, 0)), s: 'w' }] })); }
+    if (l.length) zeilen.push(B.reihe({ name: `Summe ${l.length} ${l.length === 1 ? 'Order' : 'Orders'}`, werte: [{ t: geld(summe), summe: 'w', p: 'sammel' }], art: 'summe' }));
+    x += l.length ? B.buch({ titel: `Orderbuch KW ${kwVon(s().woche)}`, spalten: ['Wert EK'], zeilen, breite: 96, attr: 'data-summenbuch="Orderbuch"' })
+      : K.abschnitt(`Orderbuch KW ${kwVon(s().woche)}`) + K.leer(alle.anzahl ? `${alle.anzahl} Orders warten in anderen Bereichen oder Wertklassen.` : 'Neue Orders kommen mit der nächsten Orderrunde oder Nachorder.', alle.anzahl ? 'Keine Order passt zum Filter.' : 'Das Orderbuch ist leer.');
+    if (zeigeN < l.length) x += K.knoepfe(K.knopf(`Alle ${l.length} Orders zeigen`, 'data-a="mehrOrders"', 'zweit breit'));
+    x += K.abschnitt('Freigabegrenze', 'Orders darüber brauchen dich');
+    x += K.stepper({ wert: geld(alle.grenze), label: 'Freigabegrenze', attrMinus: 'data-a="grenze" data-v="-10000"', attrPlus: 'data-a="grenze" data-v="10000"', minusAus: alle.grenze <= 0 });
     const p = alle.protokoll[alle.protokoll.length - 1];
-    if (p) h += `<div class="legende">Letzte Woche: ${p.neu} neue Orders, ${p.direkt} direkt unter der Grenze, ${p.freigegeben} freigegeben, ${p.auto} automatisch, ${p.verfallen} verfallen${p.verfallenWert ? ` (${geld(p.verfallenWert)})` : ''}, ${p.abgelehnt} abgelehnt</div>`;
-    h += '</div>';
+    if (p) x += B.fuss(`Letzte Woche: ${p.neu} neue Orders, ${p.direkt} direkt unter der Grenze, ${p.freigegeben} freigegeben, ${p.auto} automatisch, ${p.verfallen} verfallen${p.verfallenWert ? ` (${geld(p.verfallenWert)})` : ''}, ${p.abgelehnt} abgelehnt.`);
+    h += K.rumpf(x);
     return { titel: 'Freigaben', unter: `${alle.anzahl} Orders offen · ${geld(alle.wert)} EK · KW ${kwVon(s().woche)}`, html: h };
   }
 
   // ─────────────────────────── Steuerung
   function zeigen(scrollHalten = false) {
     const sc = document.getElementById('pinhalt').scrollTop;
-    const r = ui.seite === 'wg' ? wgSeite() : ui.seite === 'freigaben' ? freigabenSeite() : ui.seite === 'eigenmarken' || ui.seite === 'gruenden' ? eigenmarkenSeite(ctx, ui, tabs()) : ['merchandise','allokation','reduzierungKalender'].includes(ui.seite) ? warenSeite(ctx, ui, tabs()) : uebersicht();
-    ctx.panel(r.titel, r.unter, bereich('zentrale') + '<i class="q31-marke" hidden></i>' + r.html, 'gross'); // Q31: dunkler Zentrale-Look (Q30-Bausteine)
+    const r = ui.seite === 'wg' ? wgSeite() : ui.seite === 'freigaben' ? freigabenSeite() : ui.seite === 'eigenmarken' || ui.seite === 'gruenden' ? eigenmarkenSeite(ctx, ui, tabs()) : ['merchandise', 'allokation', 'reduzierungKalender'].includes(ui.seite) ? warenSeite(ctx, ui, tabs()) : uebersicht();
+    // Die Eigenmarken-Seite (eigenmarken.js, Bereich G1) nutzt bis zu ihrer Umstellung noch die Q31-Altregeln.
+    const alt = ui.seite === 'eigenmarken' || ui.seite === 'gruenden' ? '<i class="q31-marke" hidden></i>' : '';
+    ctx.panel(r.titel, r.unter, K.bereich('zentrale') + alt + r.html, 'gross');
     ui.aktiv = true;
     if (scrollHalten) document.getElementById('pinhalt').scrollTop = sc;
-    // Aktiven Reiter in der wischbaren Leiste sichtbar halten, ohne den Panelinhalt zu verschieben.
-    const leiste = document.querySelector('#pinhalt .tabs'), an = leiste?.querySelector('.tab.an');
-    if (leiste && an) leiste.scrollLeft = an.offsetLeft - (leiste.clientWidth - an.offsetWidth) / 2;
     badge();
   }
   function badge() {
@@ -234,19 +242,28 @@ export function einkaufModul(ctx) {
     zeigen(scroll);
     return r;
   }
+  /** Regler in 5er-Schritten: neuer Anteil aus dem aktuellen Engine-Wert (gleiche Aktionen wie zuvor die Schieber). */
+  function regelSchritt(f, delta) {
+    const d = q.wg(s(), ui.wg);
+    if (!d) return;
+    const grenze = (x, lo, hi) => Math.max(lo, Math.min(hi, Math.round(x * 100 + delta))) / 100;
+    if (f.startsWith('em:')) { const m = d.eigenmarken.find((y) => y.marke === f.slice(3)); if (m) tun({ typ: 'eigenmarkeAnteil', marke: m.marke, wg: ui.wg, anteil: grenze(m.anteilZiel, 0, 60) }); }
+    else if (f === 'nosZiel') tun({ typ: 'wgNosZiel', wg: ui.wg, anteil: grenze(d.steuerung.nosZiel, 0, 95) });
+    else if (f === 'vororderquote') tun({ typ: 'wgVororderquote', wg: ui.wg, quote: grenze(d.steuerung.vororderquote, 20, 100) });
+  }
   function klick(el, ev) {
     const a = el.dataset.a, v = el.dataset.v;
     if (a.startsWith('em')) { const r = eigenmarkenAktion(ctx, ui, el, ev, tun); if (r !== 'nichts') zeigen(r !== 'oben'); return; }
     // O05 Ware
-    if (a.startsWith('ware')) { warenAktion(ctx, ui, el, tun); return; }
+    if (a.startsWith('ware')) { if (warenAktion(ctx, ui, el, tun) === 'zeigen') zeigen(true); return; }
     switch (a) {
       case 'seite': ui.seite = v; ui.kuerzen = null; if (el.dataset.bereich) ui.filter = { bereich: el.dataset.bereich, art: '', wert: '' }; zeigen(); document.getElementById('pinhalt').scrollTop = 0; return;
       case 'format': ui.format = v; zeigen(true); return;
-      case 'spalte': if (!ui.spalten.includes(v)) ui.spalten = [ui.spalten[1], v]; zeigen(true); return;
       case 'sort': ui.sort = ui.sort.key === v ? { key: v, dir: -ui.sort.dir } : { key: v, dir: v === 'name' ? 1 : -1 }; zeigen(true); return;
       case 'bereich': if (ui.offen.has(v)) ui.offen.delete(v); else ui.offen.add(v); zeigen(true); return;
       case 'wg': ui.wg = v; ui.seite = 'wg'; zeigen(); document.getElementById('pinhalt').scrollTop = 0; return;
       case 'limit': { const d = q.wg(s(), ui.wg); tun({ typ: 'wgLimit', wg: ui.wg, faktor: Math.round((d.steuerung.limitFaktor + Number(v)) * 100) / 100 }); return; }
+      case 'regelSchritt': regelSchritt(el.dataset.f, Number(v)); return;
       case 'servicegrad': tun({ typ: 'wgServicegrad', wg: ui.wg, ziel: Number(v) }); return;
       case 'reduzierung': tun({ typ: 'wgReduzierung', wg: ui.wg, strategie: v }); return;
       case 'modus': tun({ typ: 'wgFreigabeModus', wg: ui.wg, art: el.dataset.f, modus: v }); return;
@@ -258,6 +275,7 @@ export function einkaufModul(ctx) {
       case 'ablehnen': tun({ typ: 'freigabeAblehnen', ids: [v] }); return;
       case 'kuerzenAuf': ui.kuerzen = v; zeigen(true); return;
       case 'kuerzenZu': ui.kuerzen = null; zeigen(true); return;
+      case 'formatQuoteSchritt': { const o = ctx.E.outletUebersicht(s()); tun({ typ: 'altwareOutlet', quote: Math.max(0, Math.min(100, Math.round(o.altwareQuote * 100) + Number(v))) / 100 }); return; }
       case 'formatBudgetSchritt': { const o = ctx.E.outletUebersicht(s()); tun({ typ: 'offpriceZukauf', budget: Math.max(0, o.zukaufBudget + Number(v)) }); return; }
       case 'mehrOrders': ui.mehrOrders = true; zeigen(true); return;
       case 'orderAuf': ui.orderAuf = ui.orderAuf === v ? null : v; ui.kuerzen = null; zeigen(true); return;
@@ -269,30 +287,19 @@ export function einkaufModul(ctx) {
     const a = el.dataset.a;
     if (a.startsWith('em')) { const r = eigenmarkenAktion(ctx, ui, el, null, tun); if (r !== 'nichts') zeigen(true); return; }
     // O05 Ware
-    if (a.startsWith('ware')) { (ui.ware ??= {})[({ wareVon:'von', wareNach:'nach', wareGruppe:'gruppe', wareWert:'wert' })[a]] = a === 'wareWert' ? Number(el.value) : el.value; return; }
+    if (a.startsWith('ware')) { (ui.ware ??= {})[({ wareVon: 'von', wareNach: 'nach', wareGruppe: 'gruppe', wareWert: 'wert' })[a]] = a === 'wareWert' ? Number(el.value) : el.value; return; }
     if (a === 'filterBereich') { ui.filter.bereich = el.value; zeigen(true); return; }
-    if(a==='formatQuote'){tun({typ:'altwareOutlet',quote:Number(el.value)/100});return;}
-    if(a==='formatBudget'){tun({typ:'offpriceZukauf',budget:Math.round(Number(el.value))});return;}
-    if (a === 'regel' && el.type === 'range') {
-      const f = el.dataset.f, x = Number(el.value) / 100;
-      if (f.startsWith('em:')) tun({ typ: 'eigenmarkeAnteil', marke: f.slice(3), wg: ui.wg, anteil: x });
-      else if (f === 'nosZiel') tun({ typ: 'wgNosZiel', wg: ui.wg, anteil: x });
-      else if (f === 'vororderquote') tun({ typ: 'wgVororderquote', wg: ui.wg, quote: x });
+    if (a === 'spalteWahl') {
+      const i = Number(el.dataset.i), neu = [...ui.spalten];
+      if (neu[1 - i] === el.value) neu[1 - i] = neu[i]; // gleiche Spalte zweimal: die beiden tauschen
+      neu[i] = el.value; ui.spalten = neu; zeigen(true); return;
     }
   }
-  const inhalt = document.getElementById('pinhalt');
+  const inhalt = document.getElementById('pinhalt'), leiste = document.getElementById('preiter');
   inhalt.addEventListener('click', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('[data-a]'); if (!el || el.tagName === 'SELECT' || el.tagName === 'INPUT') return; klick(el, ev); });
+  // E47: Die Reiterleiste liegt außerhalb von #pinhalt (huelleOrdnen hebt sie in #preiter).
+  leiste?.addEventListener('click', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('[data-a="seite"]'); if (el) klick(el, ev); });
   inhalt.addEventListener('change', (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('[data-a]'); if (el) wechsel(el); });
-  inhalt.addEventListener('input', (ev) => { if (!ui.aktiv) return; const el = ev.target; if (el.type === 'range') { const o = el.parentElement.querySelector('output'); if (o) o.textContent = `${el.value} %`; } });
-  inhalt.addEventListener('pointermove', (ev) => {
-    const svg = ev.target.closest?.('svg[data-reihe]');
-    if (!svg) return;
-    const r = svg.getBoundingClientRect(), reihe = JSON.parse(svg.dataset.reihe), vbW = svg.viewBox.baseVal.width;
-    const x = ((ev.clientX - r.left) / r.width) * vbW, i = Math.max(0, Math.min(reihe.length - 1, Math.round((x - Number(svg.dataset.x0)) / Number(svg.dataset.dx))));
-    const l = svg.querySelector('.kreuz'), px = Number(svg.dataset.x0) + i * Number(svg.dataset.dx);
-    l.setAttribute('x1', px); l.setAttribute('x2', px); l.setAttribute('opacity', 1);
-    svg.parentElement.querySelector('.khover').textContent = `KW ${reihe[i][0]}: ${reihe[i][1]}`;
-  });
 
   /** Prüfung: jeden angezeigten Wert (data-p) aus einer frischen Engine-Abfrage nachrechnen. */
   function pruefe() {
@@ -305,9 +312,9 @@ export function einkaufModul(ctx) {
     const ex = new Map(DETAIL_EXTRA.map(([id, , f]) => [id, f]));
     const soll = (p) => {
       const t = p.split(':');
-      if(t[0]==='format'){
-        const x=ctx.E.outletUebersicht(s());
-        return t[1]==='reichweite'?dez(x.reichweite,1)+' Wo.':geld(x[t[1]]);
+      if (t[0] === 'format') {
+        const x = ctx.E.outletUebersicht(s());
+        return t[1] === 'reichweite' ? dez(x.reichweite, 1) + ' Wo.' : geld(x[t[1]]);
       }
       if (t[0] === 'g') return text(t[1], u.summe.kennzahlen);
       if (t[0] === 'b') return text(t[2], bs.get(t[1]).kennzahlen);
@@ -324,11 +331,10 @@ export function einkaufModul(ctx) {
         if (t[1] === 'eigenmarkenMarge' && !k.eigenmarkenAnteil) return 'keine';
         return ex.has(t[1]) ? formatiere(ex.get(t[1]), k[t[1]]) : text(t[1], k);
       }
-      if (t[0] === 'k') { const r = d.verlauf[t[1]], l = r[r.length - 1]; return r.length === 0 ? 'noch keine Daten' : t[1] === 'reichweite' ? `${dez(l, 1)} Wo.` : geld(l); }
       if (t[0] === 'ware') return wareErwartet(s(), ctx.E, t);
       return eigenmarkenErwartet(ctx, t, ui);
     };
-    for (const el of document.querySelectorAll('#pinhalt [data-p]')) {
+    for (const el of document.querySelectorAll('#pinhalt [data-p], #psprecher [data-p]')) {
       n++;
       let e;
       try { e = soll(el.dataset.p); } catch (x) { e = `Fehler ${x.message}`; }
