@@ -929,7 +929,10 @@ function huelleOrdnen() {
   const p = $('panel'), inhalt = $('pinhalt');
   const marker = inhalt.querySelector('.hk-bereich');
   p.dataset.bereich = marker?.dataset.bereich ?? 'betrieb';
-  $('psymbol').innerHTML = SYM[marker?.dataset.symbol] ?? HK.SYMBOLE.zentrale;
+  // P4: Kopfsymbol als Illustration (Name des Bereichs auf ein Motiv), sonst altes Symbol.
+  const KOPF = { haus: 'haus', zentrale: 'zentrale', betrieb: 'menue', papier: 'zeitung', karte: 'deutschland', kommentare: 'notizen', zahlen: 'reporting', post: 'post', personal: 'personal', etagen: 'etagen', umbau: 'umbau', kosten: 'kosten', leitung: 'leitung', sortiment: 'sortiment', ware: 'ware', marketing: 'marketing', finanzen: 'finanzen', warenhaus: 'haus' };
+  const sym = marker?.dataset.symbol;
+  $('psymbol').innerHTML = HK.illustration(KOPF[sym] ?? sym) || SYM[sym] || HK.SYMBOLE.zentrale;
   for (const [slot, sel, klasse] of [['psprecher', ':scope > .hw-sprecher, :scope > * > .hw-sprecher', 'mit-sprecher'], ['preiter', '.hw-reiter', 'mit-reiter']]) {
     const el = inhalt.querySelector(sel), ziel = $(slot);
     if (el) ziel.replaceChildren(el); else ziel.replaceChildren();

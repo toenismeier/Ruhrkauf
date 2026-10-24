@@ -8,8 +8,8 @@ import { portraetSVG, zufallsMerkmale } from '../kit/portraet.js';
 
 const PROZENT = (x) => (Number(x) * 100).toFixed(1).replace('.', ',').replace('-', '−') + ' %';
 const p = (n, stell = 0) => Number(n ?? 0).toFixed(stell).replace('.', ',').replace('-', '−');
-const REITER = [['ueberblick', 'Haus', 'ueberblick'], ['leitung', 'Leitung', 'leitung'], ['personal', 'Personal', 'personal'], ['ware', 'Ware', 'sortiment'],
-  ['partner', 'Fläche', 'etagen'], ['kosten', 'Kosten', 'kosten'], ['kommentare', 'Notizen', 'kommentare']];
+const REITER = [['ueberblick', 'Haus', 'haus'], ['leitung', 'Leitung', 'leitung'], ['personal', 'Personal', 'personal'], ['ware', 'Ware', 'sortiment'],
+  ['partner', 'Fläche', 'flaeche'], ['kosten', 'Kosten', 'kosten'], ['kommentare', 'Notizen', 'notizen']];
 const SCHWERPUNKT = { personal: 'Personal', ware: 'Ware', kunde: 'Kunde', kosten: 'Kosten' };
 const SERVICE = { kundendienst: 'Kundendienst', schneiderei: 'Änderungsschneiderei', geschenkverpackung: 'Geschenkverpackung', abholstation: 'Abholstation' };
 const POSTEN = { energie: 'Energie', reinigung: 'Reinigung', sicherheit: 'Sicherheit', instandhaltung: 'Instandhaltung', versicherung: 'Versicherung' };

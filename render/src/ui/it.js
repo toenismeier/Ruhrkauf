@@ -5,7 +5,7 @@ import { itProdukteKarten, itProduktDetail } from './it-produkte.js';
 import { skalaGross } from './marketing-q16.js';
 import { portraetSVG, zufallsMerkmale } from '../kit/portraet.js';
 
-const REITER = [['systeme', 'Systeme', 'zentrale'], ['produkte', 'Produkte', 'post'], ['projekte', 'Projekte', 'umbau'], ['neu', 'Neu', 'leitung']];
+const REITER = [['systeme', 'Systeme', 'systeme'], ['produkte', 'Produkte', 'it'], ['projekte', 'Projekte', 'projekte'], ['neu', 'Neu', 'neu']];
 const ARTEN = [['kaufen', 'Standardsoftware'], ['entwickeln', 'Eigenentwicklung'], ['dienstleister', 'Dienstleister']];
 const PHASEN = { konzept: 'Konzept', umsetzung: 'Umsetzung', rollout: 'Rollout', abgeschlossen: 'Abgeschlossen' };
 const prozent = (x) => Math.round(x * 100) + ' %';

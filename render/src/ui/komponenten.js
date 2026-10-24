@@ -2,6 +2,7 @@
 // Alle Funktionen liefern HTML-Text. Texte werden maskiert, Zahlen kommen fertig formatiert oder als Rohwert (data-w),
 // damit die Summenprüfung (stilpruefung.js) Summen gegen die angezeigten Zeilen nachrechnen kann.
 import { esc } from './format.js';
+import { ILLUSTRATIONEN } from './illustrationen-daten.js';
 
 /** Marker, der den dunklen Look und das Kopfsymbol des Panels einschaltet. bereich: haus | zentrale | betrieb | papier. */
 export const bereich = (name, symbol = name, { voll = false } = {}) => `<i class="hk-bereich hw-marker" data-bereich="${esc(name)}" data-symbol="${esc(symbol)}"${voll ? ' data-hoehe="voll"' : ''} aria-hidden="true"></i>`;
@@ -146,4 +147,10 @@ export const SYMBOLE = {
 };
 
 /** Reiterleiste unten. reiter: [[id, Name, Symbolname]], attr(id) liefert Attribute. */
-export const reiterUnten = (reiter, aktiv, attr) => `<nav class="hw-reiter" aria-label="Bereiche">${reiter.map(([id, name, sym]) => `<button type="button" ${attr(id)}${id === aktiv ? ' aria-current="page"' : ''}>${SYMBOLE[sym ?? id] ?? ''}<span>${esc(name)}</span></button>`).join('')}</nav>`;
+/** Gerenderte Illustration (render/illustrationen) als Bild; leer, wenn es das Motiv noch nicht gibt. */
+export const illustration = (name, klasse = 'hw-ill') => { const i = ILLUSTRATIONEN[name]; return i ? `<img class="${klasse}" src="${i.u}" width="${i.b}" height="${i.h}" alt="" decoding="async">` : ''; };
+/** Symbol für Reiter und Menü: Illustration, sonst das alte Code-Symbol. */
+export const symbol = (name, rueckfall = name) => illustration(name) || SYMBOLE[name] || SYMBOLE[rueckfall] || '';
+const RUECKFALL = { haus: 'ueberblick', flaeche: 'etagen', notizen: 'kommentare', vorstand: 'leitung', organisation: 'personal', reporting: 'zahlen', systeme: 'zentrale', it: 'post', projekte: 'umbau', neu: 'leitung',
+  planung: 'leitung', forecast: 'finanzen', boni: 'personal', online: 'leitung', allokation: 'etagen', freigaben: 'post', marken: 'sortiment', saison: 'ware', reduzierung: 'kosten', staedte: 'zentrale', kundenkarte: 'kommentare', crm: 'post', kalender: 'etagen' };
+export const reiterUnten = (reiter, aktiv, attr) => `<nav class="hw-reiter" aria-label="Bereiche">${reiter.map(([id, name, sym]) => `<button type="button" ${attr(id)}${id === aktiv ? ' aria-current="page"' : ''}>${symbol(sym ?? id, RUECKFALL[sym ?? id])}<span>${esc(name)}</span></button>`).join('')}</nav>`;
