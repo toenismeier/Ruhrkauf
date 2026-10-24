@@ -1,92 +1,65 @@
-// Q19: ein gemeinsames Produktkarten-Modul für IT und Online, ohne UI-seitige Berechnung von KPIs.
+// Q19, E47: digitale Produkte für IT und Online (Coffee 12–14). Keine UI-seitige Berechnung von KPIs.
 import { esc } from './format.js';
+import * as K from './komponenten.js';
+import { kanalBildSVG } from '../kit/marketing-bilder.js';
 
 const zahl = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
-const anzahl = n => zahl.format(Number(n) || 0);
-const iconPfad = {
-  kundenkarte: '<rect x="7" y="15" width="104" height="65" rx="8"/><path d="M8 35h102M20 52h30M20 63h42"/><circle cx="91" cy="61" r="9"/>',
-  hartwig_app: '<rect x="31" y="7" width="59" height="84" rx="11"/><path d="M52 16h17M57 82h8"/><rect x="42" y="29" width="37" height="31" rx="4"/><path d="M50 39h21M50 46h15M50 53h11"/>',
-  kasse: '<path d="M18 43h85v40H18zM26 43V22h68v21M26 62h68M37 72h30"/><rect x="36" y="13" width="49" height="21" rx="3"/><path d="M47 22h27M82 72h8"/>',
-  mobile_pay: '<rect x="43" y="7" width="39" height="83" rx="8"/><path d="M57 18h12M60 80h5M53 48h19M53 56h11M20 33q-12 15 0 29M29 40q-6 8 0 15M98 33q12 15 0 29M89 40q6 8 0 15"/>',
-};
-export const itIllustration = (id) => '<svg class="itp-bild" viewBox="0 0 120 100" role="img" aria-label="' +
-  esc(({ kundenkarte:'Kundenkarte',hartwig_app:'Smartphone-App',kasse:'Kassenterminal',mobile_pay:'Mobiles Bezahlen' })[id] ?? 'IT-Produkt') +
-  '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (iconPfad[id] ?? '') + '</svg>';
+const anzahl = (n) => zahl.format(Number(n) || 0);
+/** Version deutsch („2,0“), nie mit Dezimalpunkt. */
+const version = (v) => String(v ?? '').replace('.', ',');
+const motiv = (id) => kanalBildSVG(id).replace(/<rect width="190" height="160" rx="8" fill="#f0eee9"\/><rect y="140" width="190" height="20" fill="#e2dfd8"\/>/, '');
+/** Illustration je Produkt: vorerst Kit-Motive und isometrische Symbole (eigene IT-Illustrationen folgen). */
+export const itIllustration = (id) => ({ kundenkarte: K.SYMBOLE.kommentare, hartwig_app: motiv('social'), kasse: K.SYMBOLE.kosten, mobile_pay: motiv('online') })[id] ?? K.SYMBOLE.zentrale;
 
-function sterne(n) {
-  return '<span class="itp-sterne" aria-label="' + n + ' von 5 Qualitätssternen">' +
-    Array.from({ length: 5 }, (_, i) => '<svg viewBox="0 0 24 24" aria-hidden="true" class="' + (i<n ? 'voll' : '') +
-      '"><path d="m12 2 3.15 6.38 7.04 1.02-5.09 4.96 1.2 7.01L12 18.07l-6.3 3.3 1.2-7.01-5.09-4.96 7.04-1.02Z"/></svg>').join('') + '</span>';
-}
+const STERN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m12 2 3.15 6.38 7.04 1.02-5.09 4.96 1.2 7.01L12 18.07l-6.3 3.3 1.2-7.01-5.09-4.96 7.04-1.02Z"/></svg>';
+const sterne = (n) => `<span class="hw-sterne hw-g3-sterne" role="img" aria-label="${n} von 5 Qualitätssternen">${Array.from({ length: 5 }, (_, i) => `<i class="${i < n ? '' : 'aus'}">${STERN}</i>`).join('')}</span>`;
 // Version 0.0 = noch nicht eingeführt (z. B. Mobile Pay ohne mobile Kassenstufe): nicht als „Aktiv“ ausweisen.
-const status = p => { const neu = p.aktiv && p.version === '0.0';
-  return '<span class="itp-status ' + (p.aktiv && !neu ? '' : 'aus') + '">' + (neu ? 'Noch nicht eingeführt' : p.aktiv ? 'Aktiv' : 'Abgeschaltet') + '</span>'; };
-const formatAenderung = p => {
-  if (p.aenderung === undefined) return '<span class="itp-delta">Ab der zweiten Woche vergleichbar</span>';
-  const d = p.aenderung, zeichen = d > 0 ? '+' : d < 0 ? '−' : '±';
-  const quote = p.aenderungQuote === undefined ? '' : ' (' + (p.aenderungQuote > 0 ? '+' : '') + (p.aenderungQuote * 100).toFixed(1).replace('.',',') + ' %)';
-  return '<span class="itp-delta ' + (d > 0 ? 'positiv' : d < 0 ? 'negativ' : '') + '">' +
-    zeichen + anzahl(Math.abs(d)) + ' zur Vorwoche' + quote + '</span>';
-};
+const status = (p) => { const neu = p.aktiv && p.version === '0.0'; return K.marke(neu ? 'Noch nicht eingeführt' : p.aktiv ? 'Aktiv' : 'Abgeschaltet', neu ? 'achtung' : p.aktiv ? 'gut' : 'schlecht'); };
+const aenderung = (p) => p.aenderung === undefined ? 'ab der zweiten Woche vergleichbar'
+  : K.abweichung(p.aenderung, `${p.aenderung > 0 ? '+' : p.aenderung < 0 ? '−' : '±'}${anzahl(Math.abs(p.aenderung))}`, p.aenderungQuote ?? null);
+
+/** Linienverlauf wie Coffee 12: Punkte, letzter Punkt groß, Wochen darunter. */
 function kurve(p) {
   const v = p.verlauf;
-  if (v.length < 2) return '<p class="itp-leer">Ein Verlauf ist ab der zweiten Woche verfügbar.</p>';
-  const min = Math.min(...v.map(x => x.wert)), max = Math.max(...v.map(x => x.wert));
-  const breite = 300, hoehe = 90, rand = 9;
-  const punkte = v.map((x,i) => {
-    const px = rand + i * (breite - 2*rand) / (v.length - 1);
-    const py = min === max ? hoehe/2 : hoehe-rand-(x.wert-min)/(max-min)*(hoehe-2*rand);
-    return { px, py };
-  });
-  const str = punkte.map(({px,py})=>px.toFixed(1)+','+py.toFixed(1)).join(' ');
-  const labels = v.map(x => '<span><b>KW ' + ((x.woche % 52)+1) + '</b>' + anzahl(x.wert) + '</span>').join('');
-  return '<div class="itp-verlauf"><svg viewBox="0 0 300 90" aria-hidden="true" preserveAspectRatio="none">' +
-    '<path d="M9 45H291" class="itp-raster"/><polyline points="' + str + '" class="itp-linie"/>' +
-    punkte.map(({px,py})=>'<circle cx="'+px+'" cy="'+py+'" r="3.5" class="itp-punkt"/>').join('') + '</svg>' +
-    '<div class="itp-achse" aria-label="Wochenwerte">' + labels + '</div></div>';
+  if (v.length < 2) return K.leer('Ein Verlauf ist ab der zweiten Woche verfügbar.');
+  const min = Math.min(...v.map((x) => x.wert)), max = Math.max(...v.map((x) => x.wert));
+  const B = 350, H = 110, R = 14;
+  const pt = v.map((x, i) => [R + (i * (B - 2 * R)) / (v.length - 1), min === max ? H / 2 : H - R - ((x.wert - min) / (max - min)) * (H - 2 * R)]);
+  return `<div class="hw-g3-kurve"><svg viewBox="0 0 ${B} ${H}" role="img" aria-label="Verlauf ${esc(p.einheit)} über ${v.length} Wochen"><polyline points="${pt.map(([x, y]) => x.toFixed(1) + ',' + y.toFixed(1)).join(' ')}"/>`
+    + pt.map(([x, y], i) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${i === pt.length - 1 ? 8 : 5.5}"${i === pt.length - 1 ? ' class="letzter"' : ''}/>`).join('') + '</svg>'
+    + `<div class="hw-balkenfuss">${v.map((x) => `<span>KW ${(x.woche % 52 + 52) % 52 + 1}</span>`).join('')}</div></div>`;
 }
-export function itProdukteKarten(produkte, quelle='it') {
-  return '<div class="itp-intro">Vier digitale Produkte von Hartwig. Die Kennzahlen stammen aus Marketing, Filialumsatz und E-Commerce.</div>' +
-    '<div class="itp-karten">' + produkte.map(p =>
-      '<button type="button" class="itp-karte" data-' + quelle + '="produkt" data-' + (quelle==='it'?'v':'id') + '="' + esc(p.id) +
-      '" aria-label="' + esc(p.name) + ' öffnen">' +
-      '<span class="itp-visual">' + itIllustration(p.id) + '</span>' +
-      '<span class="itp-karteinhalt"><span class="itp-kartenkopf"><b>' + esc(p.name) + '</b>' + status(p) + '</span>' +
-      '<span class="itp-kurz">' + esc(p.beschreibung[0]) + '</span>' +
-      '<strong class="itp-kartenzahl">' + anzahl(p.kennzahl) + '</strong><span class="itp-einheit">' + esc(p.einheit) + '</span>' +
-      '<span class="itp-kartenfuss">Version ' + esc(p.version) + ' · Team ' + anzahl(p.team) + ' <span aria-hidden="true">→</span></span></span></button>'
-    ).join('') + '</div>';
+
+/** Produkte als Karussell (Coffee 05/26): Illustration, Name, Status, Kennzahl; Antippen öffnet die Detailseite. */
+export function itProdukteKarten(produkte, quelle = 'it') {
+  const karten = produkte.map((p) => `<button type="button" class="hw-g3-produkt" data-${quelle}="produkt" data-${quelle === 'it' ? 'v' : 'id'}="${esc(p.id)}" aria-label="${esc(p.name)} öffnen">`
+    + `<span class="hw-g3-bild" aria-hidden="true">${itIllustration(p.id)}</span><span class="hw-karte-titel">${esc(p.name)}</span><span class="hw-g3-mitte">${status(p)}</span>`
+    + `<span class="hw-lese hw-g3-text">${esc(p.beschreibung[0])}</span>`
+    + `<span class="hw-marke">${esc(p.einheit)}</span><b class="hw-zahl">${anzahl(p.kennzahl)}</b><span class="hw-abw">${aenderung(p)}</span>`
+    + `<span class="hw-g3-fuss"><span>Version ${version(p.version)}</span>${sterne(p.sterne)}<span>Team ${anzahl(p.team)}</span></span></button>`);
+  return K.rumpf(K.abschnitt('Digitale Produkte', `${produkte.length} Produkte, antippen`)) + K.karussell(karten, { label: 'Digitale Produkte' })
+    + K.rumpf('<p class="hw-lese hw-g3-notiz">Die Kennzahlen stammen aus Marketing, Filialumsatz und E-Commerce.</p>');
 }
-export function itProduktDetail(p, bestaetigen=false) {
-  const beschreibung = p.beschreibung.map(t=>'<p>'+esc(t)+'</p>').join('');
-  const teamHinweis = 'Zusätzliche IT-Mitarbeiter erhöhen die laufenden Kosten um 1.400 € je Person und Woche.';
-  return '<div class="itp-detail"><button type="button" class="itp-zurueck" data-it="zurueck">← Alle Produkte</button>' +
-    '<div class="itp-hero"><div class="itp-heroillustration">' + itIllustration(p.id) + '</div>' +
-    '<div class="itp-herotext"><span class="itp-ueber">DIGITALES PRODUKT</span><h3>' + esc(p.name) + '</h3>' + status(p) + '</div></div>' +
-    '<div class="itp-beschreibung">' + beschreibung + '</div>' +
-    '<section class="itp-abschnitt"><div class="itp-abschnittkopf"><h4>Letzte Woche</h4><span>' + esc(p.einheit) + '</span></div>' +
-    '<div class="itp-hauptzahl">' + anzahl(p.kennzahl) + '</div>' + formatAenderung(p) + kurve(p) + '</section>' +
-    '<section class="itp-abschnitt"><h4>Version und Qualität</h4>' +
-    '<div class="itp-datenzeile"><span>Installierte Version</span><b>' + esc(p.version) + '</b></div>' +
-    '<div class="itp-datenzeile"><span>Qualität</span>' + sterne(p.sterne) + '</div>' +
-    '<div class="itp-datenzeile"><span>Systemgeneration</span><b>' + p.generation + ' von 4</b></div>' +
-    '<button type="button" class="itp-taste sekund" data-it="modernisieren" data-v="' + esc(p.id) + '">Version modernisieren</button></section>' +
-    '<section class="itp-abschnitt"><h4>Zugewiesenes Team</h4>' +
-    '<div class="itp-team"><strong>' + anzahl(p.team) + '</strong><span>Personen</span>' +
-    '<button type="button" class="itp-taste sekund" data-it="team" data-n="-3" data-v="' + esc(p.id) +
-    '"' + (p.team < 3 ? ' disabled' : '') + ' aria-label="Drei Personen abziehen">−3</button>' +
-    '<button type="button" class="itp-taste primaer" data-it="team" data-n="3" data-v="' + esc(p.id) +
-    '"' + (p.team >= 30 ? ' disabled' : '') + '>+3</button></div>' +
-    '<p class="itp-hinweis">' + teamHinweis + ' Aktuell: ' + anzahl(p.teamKostenWoche) + ' € pro Woche.</p></section>' +
-    '<section class="itp-abschnitt"><h4>Produktkennzahlen</h4>' +
-    p.details.map(([t,v])=>'<div class="itp-datenzeile"><span>'+esc(t)+'</span><b>'+esc(typeof v==='number'?anzahl(v):String(v))+'</b></div>').join('') +
-    '</section>' +
-    '<section class="itp-abschnitt itp-gefahr"><h4>Betrieb</h4>' +
-    (bestaetigen ? '<p>Produkt wirklich abschalten? Die Auswirkung auf die Filialnachfrage wird ab der nächsten Woche berücksichtigt.</p>' +
-      '<div class="itp-aktionen"><button type="button" class="itp-taste sekund" data-it="abbrechen">Abbrechen</button>' +
-      '<button type="button" class="itp-taste warnung" data-it="aktiv" data-v="' + esc(p.id) + '">Abschalten bestätigen</button></div>' :
-      '<p>' + (p.aktiv ? 'Bei Abschaltung wird der Betrieb dieses Produkts eingeschränkt.' : 'Das Produkt ist abgeschaltet und kann wieder aktiviert werden.') + '</p>' +
-      '<button type="button" class="itp-taste ' + (p.aktiv?'sekund':'primaer') + '" data-it="' + (p.aktiv?'abschalten':'aktiv') +
-        '" data-v="' + esc(p.id) + '">' + (p.aktiv?'Abschalten':'Wieder aktivieren') + '</button>') +
-    '</section></div>';
+
+/** Detailseite wie Coffee 12–14: Titel, Illustration und Text, Kennzahl mit Abweichung, Verlauf, Versionskarte, Team, Betrieb. */
+export function itProduktDetail(p, bestaetigen = false) {
+  let h = `<h3 class="hw-g3-produkttitel">${esc(p.name)}</h3><div class="hw-g3-vorstellung"><span class="hw-g3-bild" aria-hidden="true">${itIllustration(p.id)}</span><div>${p.beschreibung.map((t) => `<p class="hw-lese">${esc(t)}</p>`).join('')}</div></div>`;
+  h += K.gross([{ label: p.einheit, wert: anzahl(p.kennzahl), unter: aenderung(p) }]);
+  h += kurve(p);
+  h += `<section class="hw-g3-version hw-kontur"><span class="hw-marke">Installierte Version</span><div class="hw-g3-versionzeile"><b class="hw-zahl">${version(p.version)}</b>${sterne(p.sterne)}</div>`
+    + `<div class="hw-g3-mitte">${status(p)}<span class="hw-feldunter">Systemgeneration ${p.generation} von 4</span></div>`
+    + K.knoepfe(K.knopf('Version modernisieren', `data-it="modernisieren" data-v="${esc(p.id)}"`, 'zweit')) + '</section>';
+  h += K.abschnitt('Zugewiesenes Team', `${anzahl(p.teamKostenWoche)} € je Woche`);
+  h += K.feld('Personen im Produktteam', K.stepper({ wert: `${anzahl(p.team)} Personen`, unter: 'je Schritt drei Personen', label: 'Produktteam',
+    attrMinus: `data-it="team" data-n="-3" data-v="${esc(p.id)}"`, attrPlus: `data-it="team" data-n="3" data-v="${esc(p.id)}"`, minusAus: p.team < 3, plusAus: p.team >= 30 }));
+  h += '<p class="hw-lese hw-g3-notiz">Jede zusätzliche Person kostet 1.400 € je Woche.</p>';
+  h += K.abschnitt('Produktkennzahlen');
+  h += K.liste(p.details.map(([t, v]) => K.zeile({ was: esc(t), wert: esc(typeof v === 'number' ? anzahl(v) : String(v)) })));
+  h += K.abschnitt('Betrieb');
+  if (bestaetigen) h += K.hinweis('Produkt wirklich abschalten? Die Wirkung auf die Filialnachfrage zählt ab der nächsten Woche.', 'achtung')
+    + K.knoepfe(K.knopf('Abbrechen', 'data-it="abbrechen"', 'zweit'), K.knopf('Abschalten bestätigen', `data-it="aktiv" data-v="${esc(p.id)}" data-gefahr`, 'gefahr'));
+  else h += `<p class="hw-lese hw-g3-notiz">${p.aktiv ? 'Bei Abschaltung wird der Betrieb dieses Produkts eingeschränkt.' : 'Das Produkt ist abgeschaltet und kann wieder aktiviert werden.'}</p>`
+    + K.knoepfe(p.aktiv ? K.knopf('Abschalten', `data-it="abschalten" data-v="${esc(p.id)}" data-gefahr`, 'gefahr') : K.knopf('Wieder aktivieren', `data-it="aktiv" data-v="${esc(p.id)}"`));
+  h += K.knoepfe(K.knopf('Alle Produkte', 'data-it="zurueck"', 'text'));
+  return K.rumpf(h);
 }
