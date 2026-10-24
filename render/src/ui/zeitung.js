@@ -2,6 +2,7 @@
 // Sämtliche Inhalte und Entscheidungen stammen aus engine/src/zeitung.ts.
 import { esc } from './format.js';
 import { zeitungsBild } from '../kit/zeitung.js';
+import * as K from './komponenten.js';
 
 // Die Engine-Rubrik "Konzern" wird lesefreundlich als "Wirtschaft" angezeigt.
 // "Region" ist eine zusätzliche redaktionelle Sicht auf bestehende Standortmeldungen,
@@ -24,26 +25,26 @@ export function zeitungModul(ctx) {
   const ausgabe = () => ausgaben()[ui.index] ?? null;
 
   function leer() {
-    return '<div class="zb-leer"><h3>Das Archiv ist noch leer.</h3><p>Die erste Ausgabe erscheint nach dem nächsten Wochenabschluss.</p></div>';
+    return K.leer('Die erste Ausgabe erscheint nach dem nächsten Wochenabschluss.', 'Das Archiv ist noch leer.');
   }
   function kopf(a) {
-    return '<header class="zb-kopf"><div class="zb-ausgabenzeile"><span>HANDEL · WIRTSCHAFT · GESELLSCHAFT</span><span>NR. ' + a.nummer + '</span></div>' +
+    return '<header class="zb-kopf"><div class="zb-ausgabenzeile hw-marke"><span>Handel · Wirtschaft · Gesellschaft</span><span>Nr. ' + a.nummer + '</span></div>' +
       '<h2>Der Handelsbote</h2><div class="zb-datum"><span>KW ' + a.kw + ' / ' + a.jahr + '</span><span>Wochenzeitung für den Handel</span></div></header>';
   }
   function artikel(a, aufmacher = false) {
     const illustr = zeitungsBild(a.art, a.bild, ui.index);
     return '<article data-art="' + esc(a.art || 'presse') + '" class="zb-artikel ' + (aufmacher ? 'zb-aufmacher' : '') + '">' +
-      '<div class="zb-rubrik">' + esc(rubrik(a)) + '</div>' +
+      '<div class="zb-rubrik hw-marke">' + esc(rubrik(a)) + '</div>' +
       '<h3>' + esc(a.titel) + '</h3><p class="zb-unter">' + esc(a.unterzeile) + '</p>' +
       '<figure class="zb-bild"><div class="zb-bildrahmen">' +
       '<div class="zb-bildlade" aria-hidden="true">Illustration wird vorbereitet …</div>' + illustr + '</div>' +
-      '<figcaption>Illustration: Redaktion Der Handelsbote</figcaption></figure>' +
-      '<p class="zb-text">' + esc(a.text) + '</p></article>';
+      '<figcaption class="hw-lese">Illustration: Redaktion Der Handelsbote</figcaption></figure>' +
+      '<p class="zb-text hw-lese">' + esc(a.text) + '</p></article>';
   }
   function ausgabeZeigen(a) {
     const alle = [a.aufmacher, ...a.meldungen];
     const gewaehlt = alle.filter((x) => passt(x, ui.reiter));
-    const inhalt = gewaehlt.length ? gewaehlt.map((x, i) => artikel(x, i === 0)).join('') : '<p class="zb-keine">In dieser Rubrik liegen in dieser Woche keine Artikel vor.</p>';
+    const inhalt = gewaehlt.length ? gewaehlt.map((x, i) => artikel(x, i === 0)).join('') : K.leer('In dieser Rubrik liegen in dieser Woche keine Artikel vor.');
     return kopf(a) +
       '<nav class="zb-tabs" role="tablist" aria-label="Zeitungsrubriken">' + REITER.map((v) =>
         '<button type="button" role="tab" aria-selected="' + (ui.reiter === v) + '" data-z-a="tab" data-v="' + v + '" class="' + (ui.reiter === v ? 'aktiv' : '') + '">' + v + '</button>').join('') +
@@ -51,10 +52,8 @@ export function zeitungModul(ctx) {
   }
   function archivZeigen() {
     const aus = sortiert();
-    return '<h3 class="zb-archivtitel">Alle Ausgaben</h3><p class="zb-hinweis">Die letzten 104 Wochen bleiben im Spielstand erhalten.</p>' +
-      '<div class="zb-archivliste">' + aus.map((a) =>
-        '<button data-z-a="ausgabe" data-v="' + a.woche + '"><small>NR. ' + a.nummer + ' · KW ' + a.kw + ' / ' + a.jahr + '</small>' +
-        '<strong>' + esc(a.aufmacher.titel) + '</strong><span>' + (a.meldungen.length + 1) + ' Artikel</span></button>').join('') + '</div>';
+    return K.abschnitt('Alle Ausgaben', 'die letzten 104 Wochen') + '<div class="zb-archivliste">' + K.liste(aus.map((a) =>
+      K.zeile({ was: esc(a.aufmacher.titel), unter: 'Nr. ' + a.nummer + ' · KW ' + a.kw + ' / ' + a.jahr, wert: String(a.meldungen.length + 1), wertUnter: 'Artikel', tippbar: true, attr: 'data-z-a="ausgabe" data-v="' + a.woche + '"' }))) + '</div>';
   }
   function anzeigen(halten = false) {
     const vorher = halten ? document.getElementById('pinhalt')?.scrollTop ?? 0 : 0;
@@ -62,16 +61,14 @@ export function zeitungModul(ctx) {
     if (ui.index < 0 || ui.index >= aus.length) ui.index = aus.length - 1;
     const a = ausgabe();
     const n = ui.index + 1;
-    const navigation = '<div class="zb-navigation"><button data-z-a="vor" ' + (ui.index <= 0 || ui.archiv ? 'disabled' : '') + ' aria-label="Ältere Ausgabe">‹ Älter</button>' +
-      '<button data-z-a="archiv" aria-pressed="' + ui.archiv + '">' + (ui.archiv ? 'Zur Zeitung' : 'Archiv (' + aus.length + ')') + '</button>' +
-      '<button data-z-a="naechste" ' + (ui.index >= aus.length - 1 || ui.archiv ? 'disabled' : '') + ' aria-label="Neuere Ausgabe">Neuer ›</button></div>' +
-      '<div class="zb-zahl" aria-live="polite">Ausgabe ' + (aus.length ? n : 0) + ' von ' + aus.length + '</div>';
-    const einstellungen = '<label class="zb-einstellung"><input type="checkbox" data-z-a="schalter" ' + (aktiv() ? 'checked' : '') + '> Neue Zeitungsausgaben und Interviews aktivieren</label>' +
-      (!aktiv() ? '<p class="zb-hinweis">Der Handelsbote ist ausgeschaltet. Das bisherige Archiv bleibt lesbar.</p>' : '');
-    // Q30: Papier bleibt Papier; die Zeitung zuerst, die Einstellung ans Ende.
-    ctx.panel('Zeitung', 'Unabhängige Wochenzeitung · Archiv', '<i class="hk-bereich" data-bereich="papier" data-symbol="post" aria-hidden="true"></i><div class="zb-root">' +
-      navigation + (ui.archiv ? archivZeigen() : a ? ausgabeZeigen(a) : leer()) +
-      (!ui.archiv ? '<div class="zb-wischhinweis">Nach links oder rechts wischen, um eine andere Ausgabe zu lesen.</div>' : '') + einstellungen + '</div>', 'gross');
+    // G6 (E47): Blattrahmen dunkel wie Coffee 10, die Zeitung selbst bleibt Papier (bereich 'papier').
+    const navigation = '<div class="zb-navigation">' + K.knopf('‹ Älter', 'data-z-a="vor" aria-label="Ältere Ausgabe"', 'zweit', ui.index <= 0 || ui.archiv)
+      + K.knopf(ui.archiv ? 'Zur Zeitung' : 'Archiv ' + aus.length, 'data-z-a="archiv" aria-pressed="' + ui.archiv + '"', 'zweit')
+      + K.knopf('Neuer ›', 'data-z-a="naechste" aria-label="Neuere Ausgabe"', 'zweit', ui.index >= aus.length - 1 || ui.archiv) + '</div>'
+      + '<div class="zb-zahl hw-lese" aria-live="polite">Ausgabe ' + (aus.length ? n : 0) + ' von ' + aus.length + (!ui.archiv && aus.length > 1 ? ' · wischen für andere Ausgaben' : '') + '</div>';
+    const einstellungen = K.schalter({ text: 'Neue Ausgaben und Interviews', unter: aktiv() ? 'Der Handelsbote erscheint jede Woche.' : 'Ausgeschaltet. Das bisherige Archiv bleibt lesbar.', an: aktiv(), attr: 'data-z-a="schalter"' });
+    ctx.panel('Zeitung', 'Unabhängige Wochenzeitung · Archiv', K.bereich('papier', 'zeitung') + '<div class="hw-boden"><div class="zb-root">' +
+      navigation + (ui.archiv ? archivZeigen() : a ? ausgabeZeigen(a) : leer()) + einstellungen + '</div></div>', 'gross');
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = vorher;
   }
@@ -87,20 +84,19 @@ export function zeitungModul(ctx) {
     if (aktion === 'vor') { ui.index = Math.max(0, ui.index - 1); ui.reiter = 'Top'; return anzeigen(); }
     if (aktion === 'naechste') { ui.index = Math.min(ausgaben().length - 1, ui.index + 1); ui.reiter = 'Top'; return anzeigen(); }
     if (aktion === 'archiv') { ui.archiv = !ui.archiv; return anzeigen(); }
+    if (aktion === 'schalter') {
+      const ergebnis = ctx.E.fuehreAus(ctx.s(), { typ: 'zeitungAktiv', an: !aktiv() });
+      ctx.meldung(ergebnis.text, ergebnis.ok);
+      ctx.nachAktion();
+      return anzeigen(true);
+    }
     if (aktion === 'ausgabe') { ui.index = ausgaben().findIndex((x) => x.woche === Number(el.dataset.v)); ui.archiv = false; ui.reiter = 'Top'; return anzeigen(); }
   }
   const ziel = document.getElementById('pinhalt');
   ziel.addEventListener('click', (e) => {
     if (!ui.aktiv) return;
     const el = e.target.closest('[data-z-a]');
-    if (el && el.tagName !== 'INPUT' && !el.disabled) klicken(el);
-  });
-  ziel.addEventListener('change', (e) => {
-    if (!ui.aktiv || e.target.dataset.zA !== 'schalter') return;
-    const ergebnis = ctx.E.fuehreAus(ctx.s(), { typ: 'zeitungAktiv', an: e.target.checked });
-    ctx.meldung(ergebnis.text, ergebnis.ok);
-    ctx.nachAktion();
-    anzeigen(true);
+    if (el && !el.disabled) klicken(el);
   });
   let start = null;
   ziel.addEventListener('touchstart', (e) => {

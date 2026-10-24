@@ -20,42 +20,18 @@
 <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1284x2778.png">
 <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1320x2868.png">
 <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./startbilder/start-1206x2622.png">
-<link rel="stylesheet" href="./src/ui/zeitung.css">
 <link rel="stylesheet" href="./src/ui/produkte-q11.css">
 <link rel="stylesheet" href="./src/ui/produkte-q24.css">
-<link rel="stylesheet" href="./src/ui/einfuehrung.css">
-<link rel="stylesheet" href="./src/ui/erfolge.css">
-<link rel="stylesheet" href="./src/ui/spielende.css">
 <link rel="stylesheet" href="./src/ui/management.css">
 <style>
   :root { --karte: #ffffff; --grund: #f3f1ec; --text: #1f2a33; --leise: #7b8790; --rot: #d23c32; --gruen: #2f8f5b; --linie: #e7e3dc; --schatten: 0 2px 10px rgba(20, 30, 40, 0.16); --schrift: 1; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: #4fb6c2; font-family: -apple-system, "SF Pro Text", "DejaVu Sans", Arial, sans-serif; color: var(--text); }
   #karte { position: fixed; inset: 0; width: 100vw; height: 100dvh; display: block; touch-action: none; }
-  .oben { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-  .leiste { display: flex; gap: 8px; align-items: center; }
-  .marke { pointer-events: auto; background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 8px 12px; display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
-  .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--rot); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: calc(17px * var(--schrift)); flex: none; }
-  .marke b { display: block; font-size: calc(14px * var(--schrift)); }
-  .marke small { color: var(--leise); font-size: calc(11px * var(--schrift)); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .marke > div:last-child { min-width: 0; }
-  .datum { pointer-events: auto; background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 8px 12px; text-align: right; flex: none; }
-  .datum b { display: block; font-size: calc(14px * var(--schrift)); }
-  #stufe { display: block; color: var(--leise); font-size: calc(11px * var(--schrift)); }
-  #phase { color: var(--rot); font-size: calc(11px * var(--schrift)); font-weight: 700; }
-  #cockpit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; pointer-events: auto; }
   .kz { background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 6px 9px; min-width: 0; }
   .kz span { display: block; color: var(--leise); font-size: calc(10px * var(--schrift)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .kz .kzwahl { font: inherit; font-size: calc(10px * var(--schrift)); color: var(--rot, #d23c32); background: transparent; border: 0; padding: 0; margin: 0; height: 1.3em; line-height: 1; -webkit-appearance: none; appearance: none; }
-  .kz span:has(.kzwahl) { text-overflow: clip; }
   .kz b { display: block; font-size: calc(13.5px * var(--schrift)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
   .kz.rot b { color: var(--rot); } .kz.gruen b { color: var(--gruen); }
-  .unten { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
-  #postdirekt { min-width: 46px; position: relative; font-size: calc(21px * var(--schrift)); padding: 0 9px; }
-  #postbadge.dringend, #postmenubadge.dringend { background: #a92120; }
-  #wochenstreifen { position: fixed; bottom: calc(74px + env(safe-area-inset-bottom)); left: calc(12px + env(safe-area-inset-left)); right: calc(12px + env(safe-area-inset-right)); z-index: 3; background: #1f2a33; color: #fff; border-radius: 13px; min-height: 48px; padding: 10px 14px; font-size: calc(13px * var(--schrift)); font-weight: 700; box-shadow: var(--schatten); display: none; text-align: left; }
-  #wochenstreifen.an { display: block; }
-  body.panel-offen #wochenstreifen { display: none; }
   .postkarte .postkopf { padding: 12px 12px 6px; }
   .postkopf h3 { font-size: calc(15px * var(--schrift)); margin: 5px 0; line-height: 1.3; }
   .posttyp, .posterledigt small { font-size: calc(11px * var(--schrift)); font-weight: 700; color: var(--leise); display: block; }
@@ -85,16 +61,7 @@
   .posthinweis { font-size: calc(12px * var(--schrift)); line-height: 1.4; }
   #postwarnungswahl { margin: 12px 16px 2px; display: flex; gap: 8px; align-items: center; font-size: calc(12px * var(--schrift)); color: var(--text); }
   #postwarnungswahl input { width: 20px; height: 20px; }
-  .chipstadt { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); padding: 4px 10px; min-height: 46px; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; align-content: center; gap: 1px 5px; flex: 1; min-width: 0; position: relative; }
-  .chipstadt #stadtname { grid-column: 1; grid-row: 1; display: block; font-weight: 700; font-size: clamp(10px, 2.8vw, 14px); line-height: 1.1; white-space: nowrap; overflow: visible; text-align: left; }
-  .chipstadt #stadtcluster { grid-column: 1; grid-row: 2; font-size: calc(9px * var(--schrift)); font-weight: normal; text-align: left; }
-  .chipstadt i { grid-column: 2; grid-row: 1 / span 2; color: var(--leise); font-style: normal; font-size: calc(12px * var(--schrift)); }
-  .chipstadt select { position: absolute; inset: 0; opacity: 0; font-size: calc(16px * var(--schrift)); }
   button { font: inherit; border: 0; cursor: pointer; }
-  .knopf { background: var(--karte); border-radius: 16px; box-shadow: var(--schatten); height: 46px; padding: 0 14px; font-weight: 700; font-size: calc(14px * var(--schrift)); color: var(--text); }
-  #weiter { background: var(--rot); color: #fff; }
-  #weiter:disabled { opacity: 0.6; }
-  .botwahl { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--karte); border-radius: 12px; box-shadow: var(--schatten); padding: 5px 9px; font-size: calc(11px * var(--schrift)); color: var(--leise); display: none; gap: 5px; align-items: center; }
   #panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 62vh; background: var(--grund); border-radius: 22px 22px 0 0; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); transform: translateY(105%); transition: transform 0.22s ease; display: flex; flex-direction: column; }
   #panel.offen { transform: none; }
   .pkopf { padding: 8px 16px 10px; background: var(--karte); border-radius: 22px 22px 0 0; border-bottom: 1px solid var(--linie); position: relative; }
@@ -122,7 +89,6 @@
   .uq { width: 64px; text-align: right; font-size: calc(12px * var(--schrift)); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .dot { width: 9px; height: 9px; border-radius: 5px; flex: none; background: var(--rot); }
   .k-kommission, .k-konzession { background: #2f63b5; } .k-untermiete { background: #e8751a; } .k-offprice { background: #f5b400; } .k-leer { background: #c9c4bb; }
-  body.panel-offen #cockpit, body.panel-offen .botwahl { display: none; }
   .mini { background: #eeebe5; color: var(--text); border-radius: 9px; padding: 5px 10px; font-size: calc(12px * var(--schrift)); font-weight: 700; flex: none; }
   .mini.rot { background: #fbe3e1; color: var(--rot); } .mini.gruen { background: var(--gruen); color: #fff; }
   .khead .mini { float: right; margin-top: -2px; }
@@ -133,14 +99,8 @@
   .wirk { color: var(--leise) !important; }
   .klickbar { cursor: pointer; } .zeile.gewaehlt { background: #fdf3e6; }
   .schnitt img { display: block; width: 100%; background: #26313a; }
-  #meldung { position: fixed; left: calc(16px + env(safe-area-inset-left)); right: calc(16px + env(safe-area-inset-right)); top: calc(16px + env(safe-area-inset-top)); background: var(--text); color: #fff; border-radius: 14px; padding: 10px 14px; font-size: calc(13px * var(--schrift)); box-shadow: var(--schatten); opacity: 0; transform: translateY(-8px); transition: all 0.2s; pointer-events: none; z-index: 100; }
-  #meldung.an { opacity: 1; transform: none; pointer-events: auto; cursor: pointer; } #meldung.rot { background: var(--rot); }
-  #lade { position: fixed; inset: 0; display: none; place-items: center; background: rgba(79, 182, 194, 0.55); font-weight: 700; color: #fff; font-size: calc(16px * var(--schrift)); }
-  #lade.an { display: grid; }
   /* Einkauf und Eigenmarken */
   #panel.gross { max-height: 87vh; }
-  .knopf.mitbadge { position: relative; }
-  #ekbadge { position: absolute; top: -6px; right: -6px; min-width: 21px; height: 21px; border-radius: 11px; background: var(--rot); color: #fff; font-size: calc(11.5px * var(--schrift)); font-weight: 800; display: grid; place-items: center; padding: 0 5px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
   .tabs { position: sticky; top: -12px; z-index: 2; display: flex; gap: 4px; background: #e6e2da; border-radius: 14px; padding: 4px; margin: -2px 0 10px; box-shadow: 0 6px 8px -6px rgba(20,30,40,.18); }
   .tab { flex: 1; min-height: 40px; border-radius: 11px; background: transparent; font-size: calc(13.5px * var(--schrift)); font-weight: 700; color: var(--leise); display: flex; align-items: center; justify-content: center; gap: 6px; }
   .tab.an { background: var(--karte); color: var(--text); box-shadow: 0 1px 4px rgba(20,30,40,.12); }
@@ -239,22 +199,6 @@
   .lname i.em { font-size: calc(9.5px * var(--schrift)); font-weight: 800; color: #8c5a7a; background: #f3e8ef; border-radius: 5px; padding: 1px 4px; margin: 0 5px 0 0; vertical-align: 1px; }
   .vorschau .owerte { padding-top: 8px; }
   .haus3d img { display: block; width: 100%; background: #26313a; }
-  /* Menü wie Coffee Inc */
-  .knopf.rund { width: 46px; padding: 0; display: grid; place-items: center; flex: none; }
-  .knopf.rund.an { background: var(--text); color: #fff; }
-  .burger { display: flex; flex-direction: column; gap: 4px; } .burger i { display: block; width: 20px; height: 2.5px; border-radius: 2px; background: currentColor; }
-  .badge { position: absolute; top: -6px; right: -6px; min-width: 21px; height: 21px; border-radius: 11px; background: var(--rot); color: #fff; font-size: calc(11.5px * var(--schrift)); font-weight: 800; display: grid; place-items: center; padding: 0 5px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
-  #menue { position: fixed; inset: 0; background: rgba(20, 30, 40, 0.28); opacity: 0; pointer-events: none; transition: opacity 0.18s; z-index: 4; }
-  #menue.offen { opacity: 1; pointer-events: auto; }
-  .menuekarte { position: absolute; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(72px + env(safe-area-inset-bottom)); background: var(--grund); border-radius: 20px; box-shadow: 0 -4px 24px rgba(20, 30, 40, 0.25); padding: 12px; max-height: calc(100dvh - 100px); overflow-y: auto; overscroll-behavior: contain; transform: translateY(12px); transition: transform 0.18s; }
-  #menue.offen .menuekarte { transform: none; }
-  .menuetitel { font-weight: 800; font-size: calc(15px * var(--schrift)); margin: 2px 4px 10px; }
-  .kacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .mkachel { position: relative; background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; min-height: 104px; padding: 10px 6px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text); text-align: center; }
-  .mkachel svg { color: var(--rot); margin-bottom: 2px; } .mkachel b { font-size: calc(13.5px * var(--schrift)); } .mkachel small { font-size: calc(10.5px * var(--schrift)); color: var(--leise); line-height: 1.25; }
-  .mkachel:active { background: #fdf3e6; }
-  .mkachel .badge { top: 6px; right: 6px; }
-  body.panel-offen .unten { display: none; }
   /* O03 IT: Systemlandkarte und Rollout */
   .it-werte { display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:10px 12px;font-size: calc(12px * var(--schrift)); }
   .it-werte span {display:flex;flex-direction:column;gap:4px;}
@@ -358,46 +302,10 @@
   .q17-hauspreis select {width:100%;min-height:44px;border:1px solid var(--linie);border-radius:8px;background:var(--karte);color:var(--text);padding:6px 8px;font:inherit;font-size:calc(12px * var(--schrift));}
   .q17-hauspreis .stepper {margin:0;}
 
-  /* Szenarioauswahl und Zielanzeige: selbst erzeugte Kit-Grafik. */
-  .sz-karten { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px; }
-  .sz-karte { text-align:left; display:flex; flex-direction:column;gap:4px; padding:7px;background:var(--karte);color:var(--text);border:1px solid var(--linie);border-radius:12px;min-width:0; }
-  .sz-karte.ausgewaehlt,.sz-karte:focus-visible { outline:2px solid #337d89; }
-  .sz-karte b { font-size: calc(12px * var(--schrift)); } .sz-karte small { font-size: calc(10.5px * var(--schrift));line-height:1.28;color:var(--leise); }
-  .sz-level { font-size: calc(10px * var(--schrift)); font-weight:700; color:#477983; } .sz-best { font-size: calc(10px * var(--schrift));color:var(--leise);margin-top:auto; }
-  .sz-bild { display:block;width:100%;aspect-ratio:2 / 1;overflow:hidden;border-radius:7px; }
-  .sz-bild svg { width:100%;height:100%;display:block; }
-  .sz-zielchip { background:#eef4ed;color:#294e56;border:1px solid #abc7c7;border-radius:10px;padding:5px;min-width:53px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size: calc(10px * var(--schrift));font-weight:800; }
-  .sz-zielchip .sz-mini { width:44px;height:4px;border-radius:3px;background:#c6d9d6;overflow:hidden; }
-  .sz-zielchip .sz-mini i { display:block;height:100%;background:#4e968e; }
-  .sz-balken { height:10px;border-radius:10px;background:#d5dedb;overflow:hidden; }
-  .sz-balken span { display:block;height:100%;background:#4d918d; }
-  .sz-zieltitel { font-size: calc(19px * var(--schrift));font-weight:800; }
-  #startsetup[hidden], #startauswahl[hidden], #szenarioziel[hidden] { display:none!important; }
-  @media (max-width:365px) { .sz-karte small {font-size: calc(10px * var(--schrift));} .sz-zielchip {min-width:44px;} }
-  /* Startbildschirm */
-  #start { position: fixed; inset: 0; z-index: 6; display: none; overflow-y: auto; background: radial-gradient(circle at 30% 20%, #6fc7d1, #3c9fac 70%); padding: calc(24px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
-  #start.an { display: grid; place-items: center; }
-  .startkarte { width: 100%; max-width: 420px; background: var(--grund); border-radius: 22px; box-shadow: 0 8px 32px rgba(20, 30, 40, 0.3); padding: 18px 16px 14px; }
-  .startkopf { display: flex; align-items: center; gap: 12px; } .startkopf b { display: block; font-size: calc(24px * var(--schrift)); font-weight: 800; } .startkopf small { color: var(--leise); font-size: calc(12px * var(--schrift)); }
-  .logo.gross { width: 54px; height: 54px; border-radius: 15px; font-size: calc(30px * var(--schrift)); }
-  .startintro { font-size: calc(13.5px * var(--schrift)); line-height: 1.45; color: #34414b; margin: 12px 2px 6px; }
-  .startkarte .vtitel { margin: 12px 2px 6px; }
-  .startkarte .ort.gross { margin-top: 0; }
-  .stufen { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-  .stufen[hidden], .startkarte .vtitel[hidden] { display: none; }
-  .stufe-karte { background: var(--karte); border: 1px solid var(--linie); border-radius: 14px; padding: 10px 12px; min-height: 64px; display: grid; grid-template-columns: 74px 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; text-align: left; color: var(--text); }
-  .stufe-karte .sterne-stufe { grid-row: 1; } .stufe-karte b { grid-row: 2; grid-column: 1; } .stufe-karte small { grid-row: 1 / span 2; grid-column: 2; }
-  .stufe-karte b { font-size: calc(15px * var(--schrift)); } .stufe-karte small { font-size: calc(11px * var(--schrift)); color: var(--leise); line-height: 1.35; }
-  .stufe-karte.an { border: 2px solid var(--rot); padding: 9px 11px; background: #fff8f6; }
-  .sterne-stufe { color: var(--rot); font-size: calc(11px * var(--schrift)); letter-spacing: 2px; }
   .breit[hidden] { display: none; }
-  #fortsetzen { margin-top: 9px; border-color: #2f8f5b; color: #2f8f5b; }
-  #speicherhinweis { color: var(--rot); font-size: calc(12px * var(--schrift)); line-height: 1.4; margin-top: 8px; }
   #panel, #panel.gross { max-height: min(87dvh, calc(100dvh - env(safe-area-inset-top))); }
   /* Q10: Hausdetail lässt einen sichtbaren Streifen für das fokussierte Gebäude frei. */
   #panel.hausdetail { max-height: 62dvh; }
-  .startseed { display: flex; justify-content: center; align-items: center; gap: 6px; font-size: calc(11px * var(--schrift)); color: var(--leise); }
-  .startseed input { width: 64px; font: inherit; font-size: calc(12px * var(--schrift)); border: 1px solid var(--linie); border-radius: 8px; padding: 3px 6px; background: #faf9f6; color: var(--leise); text-align: center; }
   .wbdirekt { display: flex; width: 100%; align-items: center; justify-content: space-between;
     font: inherit; color: inherit; text-align: left; background: transparent; border: 0;
     border-top: 1px solid var(--linie); cursor: pointer; padding: 11px 8px; }
@@ -405,16 +313,6 @@
   .wbdirekt i, .wbdirekt small { font-size: calc(12px * var(--schrift)); color: var(--leise); font-style: normal; }
   .wbdirekt:focus-visible { outline: 2px solid var(--rot); outline-offset: -2px; }
 
-  /* Maßstab: formatbezogenes Cockpit und direkt erreichbare 220-Städte-Karte */
-  #deutschland-direkt { min-width: 46px; height: 46px; padding: 0 8px; pointer-events: auto; background: var(--karte); box-shadow: var(--schatten); border-radius: 14px; font-size: 12px; font-weight: 800; }
-  /* Q07: Häuserleiste über der unteren Leiste, damit die Kartenmitte frei bleibt (Cockpit wächst nicht). */
-  #stadt-chips { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(80px + env(safe-area-inset-bottom)); display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; }
-  body.panel-offen #stadt-chips { display: none; }
-  #stadt-chips button { min-height: 36px !important; }
-  #stadt-chips button { flex: none; min-height: 44px; padding: 5px 10px; border-radius: 10px; background: var(--karte); color: var(--text); box-shadow: var(--schatten); font-size: 11px; font-weight: 700; }
-  #stadt-chips .volkskauf { border-bottom: 3px solid #2363b0; } #stadt-chips .fundus { border-bottom: 3px solid #d69b24; }
-  #stadt-chips .sport { border-bottom: 3px solid #35895b; } #stadt-chips .premium { border-bottom: 3px solid #a47a34; }
-  #stadt-chips .hartwig { border-bottom: 3px solid var(--rot); }
   .pp-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
   .pp-tab { flex: 1; border-radius: 12px; background: #e3dfd7; min-height: 44px; font-weight: 800; font-size: 13px; }
   .pp-tab.an { background: var(--text); color: white; }
@@ -458,20 +356,6 @@
   #panel .pkopf { padding-right: 64px; }
 
 
-  /* N12 Chronik: lesbare, mobile Zeitleiste und historische Fassadenmotive */
-  .chronik { display: grid; gap: 12px; padding-bottom: 24px; }
-  .chronik h2 { font-size: calc(17px * var(--schrift)); margin: 12px 4px 4px; }
-  .chronik .karte p { line-height: 1.45; font-size: calc(13px * var(--schrift)); }
-  .chronik-linie { border-left: 3px solid #a65a4e; margin-left: 54px; }
-  .chronik-station { display: grid; grid-template-columns: 52px minmax(0,1fr); position: relative; margin-left: -54px; margin-bottom: 12px; gap: 10px; }
-  .chronik-jahr { font-size: calc(12px * var(--schrift)); font-weight: 800; color: #813b31; text-align: right; padding-top: 14px; }
-  .chronik-inhalt { border: 1px solid var(--linie); border-radius: 12px; padding: 10px; background: var(--karte); min-width: 0; }
-  .chronik-inhalt h3 { font-size: calc(14px * var(--schrift)); margin: 0 0 9px; }
-  .chronik-inhalt p { font-size: calc(12px * var(--schrift)); line-height: 1.5; margin: 8px 0; }
-  .chronik-inhalt small, .chronik-spiel small, .chronik-spiel span { color: var(--leise); font-size: calc(11px * var(--schrift)); }
-  .chronik-motiv { width: 100%; max-height: 210px; object-fit: contain; border-radius: 8px; background: #3b444d; filter: saturate(.55) sepia(.14); }
-  .chronik-spiel { padding: 12px; background: var(--karte); border: 1px solid var(--linie); border-left: 4px solid #a65a4e; border-radius: 10px; }
-  .chronik-spiel p { font-size: calc(13px * var(--schrift)); line-height: 1.5; margin: 5px 0; }
 
   /* N11: Speicherverwaltung und Aktualisierung */
   .app-plaetze { display: grid; gap: 10px; margin: 8px 0 12px; }
@@ -490,10 +374,6 @@
   .app-aktionen button { background: #eeebe5; color: var(--text); min-height: 44px; padding: 6px 10px; border-radius: 9px; font-size: calc(12px * var(--schrift)); font-weight: 750; }
   .app-aktionen button:first-child { background: #e4f2ea; color: var(--gruen); }
   .app-aktionen button:disabled { opacity: 0.5; }
-  #app-plaetze-start { margin-top: 12px; max-height: 46dvh; overflow-y: auto; overscroll-behavior: contain; }
-  #app-plaetze-start .app-platz { padding: 9px; }
-  #app-update { position: fixed; z-index: 9; left: calc(14px + env(safe-area-inset-left)); right: calc(14px + env(safe-area-inset-right)); top: calc(12px + env(safe-area-inset-top)); border-radius: 14px; box-shadow: var(--schatten); background: var(--text); color: white; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: calc(13px * var(--schrift)); }
-  #app-update button { background: white; color: var(--text); padding: 10px 12px; border-radius: 8px; font-weight: 800; }
 /* O01 Organisation */
 .org-tabs{display:flex;gap:8px;margin-bottom:12px}.org-tabs button{flex:1;padding:12px;border:1px solid #c3cbd1;border-radius:9px;background:#f4f6f7;color:#2b4049}.org-tabs button.an{background:#243e50;color:#fff}.org-zeile{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid #e5e8eb;padding:10px 0}.org-zeile>div:nth-child(2){flex:1;min-width:0}.org-zeile small,.org-profil small{display:block;color:#667781;font-size: calc(11px * var(--schrift))}.org-aktionen{display:grid;gap:4px;max-width:100px}.org-aktionen button{font-size: calc(10px * var(--schrift));padding:6px}.org-balken{display:block;height:6px;border-radius:6px;background:#e0e6e9;overflow:hidden;margin:6px 0}.org-balken i{display:block;height:100%;background:#498875}.org-ampel{color:#5b9b68}.org-ampel.warn,.org-profil .frei{color:#b43336}.org-profil .vkopf{display:flex;gap:10px;align-items:center}.org-profil .vkopf>div{flex:1}
   /* O02 Umsatztreiber */
@@ -536,7 +416,6 @@
   .haus-reiter button { border:1px solid var(--linie); background:var(--karte); border-radius:10px; color:var(--text); padding:8px 11px; white-space:nowrap; font:600 12px inherit; }
   .haus-reiter button.an { background:var(--text); color:white; }
   .haus-sprung { width:100%; background:transparent; border:0; border-bottom:1px solid var(--linie); text-align:left; color:inherit; cursor:pointer; }
-  #hausbeobachtung { align-self:flex-start; margin:4px 10px; font-size: calc(12px * var(--schrift)); border:1px solid var(--linie); padding:5px 9px; border-radius:10px; background:var(--karte); color:var(--text); }
 /* Q05: Aufgabensteuerung für die hochformatige iPhone-Ansicht. */
 .org-aufgaben { margin: 0 0 14px 56px; border-left: 2px solid #e5e8eb; padding: 2px 0 2px 10px; }
 .org-aufgaben > small { display: block; color: #65747a; margin: 6px 0 9px; }
@@ -573,13 +452,6 @@
   /* Programmatischer Fokus für Screenreader (tabindex -1) ohne sichtbaren Rahmen */
   [tabindex="-1"]:focus { outline: none; }
   .punkte button::after { left: calc(50% - 4px); top: calc(50% - 4px); }
-  .einst-gruppe .khead { margin: 0; }
-  .einst-zeile { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 13px 12px; min-height: 60px; border-top: 1px solid var(--linie); font-size: calc(13px * var(--schrift)); line-height: 1.35; }
-  .einst-zeile > span { flex: 1; min-width: 0; font-weight: 650; }
-  .einst-zeile select { min-height: 44px; min-width: 120px; max-width: 55%; font: inherit; border: 1px solid var(--linie); border-radius: 10px; background: #faf9f6; padding: 6px; color: var(--text); }
-  .einst-zeile input[type="checkbox"] { width: 28px; height: 28px; flex: none; accent-color: var(--gruen); }
-  .einst-zeile input[type="range"] { flex: 1; min-width: 100px; min-height: 44px; accent-color: var(--rot); }
-  .einst-info { padding: 9px 12px; margin: 0; font-size: calc(12px * var(--schrift)); line-height: 1.5; }
   body.farbschwach { --rot: #c07821; --gruen: #245ea8; }
   body.farbschwach .kz.rot b::before, body.farbschwach .rotwert::before, body.farbschwach .chip.warn::before { content: "▼ "; color: #c07821; }
   body.farbschwach .kz.gruen b::before, body.farbschwach .gruenwert::before { content: "▲ "; color: #245ea8; }
@@ -595,8 +467,6 @@
   :root[data-animation="aus"] *, :root[data-animation="aus"] *::before, :root[data-animation="aus"] *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 
   /* N14: Testwerkzeuge bleiben ohne Entsperrung vollständig verborgen. */
-  .datum.testfehler { position: relative; }
-  .datum.testfehler::after { content: ''; position: absolute; right: 1px; top: 1px; width: 8px; height: 8px; border-radius: 50%; background: #c52b35; box-shadow: 0 0 0 2px #fff; }
   .testwerkzeuge { display: flex; flex-direction: column; gap: 10px; padding: 10px 0 30px; }
   .testwerkzeuge .karte { padding: 12px; }
   .testwerkzeuge h3 { font-size: calc(14px * var(--schrift)); margin: 8px 0; }
@@ -634,7 +504,6 @@
   .vtr-ampel {font-weight:700;}.vtr-ampel.rot{color:var(--rot);}.vtr-ampel.gruen{color:var(--gruen);}.vtr-ampel.gelb{color:#986800;}.vtr-ampel.ohne{color:var(--leise);}
   .vtr-portfolio {width:100%;padding:12px;border:1px solid var(--linie);border-radius:8px;background:transparent;}
   .vtr-leitungen {margin-top:15px;}
-  .startmonat {display:flex;justify-content:center;align-items:center;gap:8px;margin:12px 0;}
   .post-miete-zeile {border-top:1px solid var(--linie);display:grid;grid-template-columns:minmax(80px,2fr) minmax(85px,1fr);gap:8px;padding:12px 0;}
   .post-miete-zeile select {min-height:44px;width:100%;}
   .post-miete-fuss {display:flex;gap:8px;flex-wrap:wrap;padding:10px 0;}
@@ -642,14 +511,6 @@
 </style>
 <style id="q14-gestaltung">
 :root{--ui-font-xs:12px;--ui-font-sm:14px;--ui-font-md:16px;--ui-font-lg:24px;--ui-space-1:4px;--ui-space-2:8px;--ui-space-3:12px;--ui-space-4:16px;--ui-space-5:24px;--ui-space-6:32px;--ui-bg:#f5f4f1;--ui-surface:#fff;--ui-text:#242424;--ui-muted:#62666a;--ui-border:#e2e1dd;--ui-brand:#b32632;--ui-radius:10px;--ui-shadow:0 1px 3px rgb(0 0 0 / 6%);--grund:var(--ui-bg);--karte:var(--ui-surface);--text:var(--ui-text);--leise:var(--ui-muted);--linie:var(--ui-border);--rot:var(--ui-brand);--schatten:var(--ui-shadow)}
-#cockpit{grid-template-columns:repeat(3,minmax(0,1fr)) 44px;gap:4px} /* Q32: eingeklappt eine Zeile, Knopf rechts */
-#cockpit:not(.offen) .kz:nth-child(n+5){display:none}
-#cockpit .kz-mehr{min-width:44px;min-height:44px;border-radius:10px;padding:0;font-size:16px}
-#cockpit .kz{border:1px solid var(--ui-border);border-radius:var(--ui-radius);padding:4px 8px;min-width:0}
-#cockpit .kz span{font-size:11px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} /* Abnahme: Cockpit bleibt zweizeilig je Kachel, sonst verdeckt es die Karte */
-#cockpit .kz b{font-size:clamp(12px,3.4vw,16px);line-height:17px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-.marke small{line-height:15px}
-@media(max-width:420px){.marke small{display:none}} /* Q14: auf dem iPhone nur Logo und Name statt abgeschnittenem Untertitel */
 #panel .karte{border-radius:var(--ui-radius);box-shadow:none}
 #panel .zeile{min-width:0;flex-wrap:wrap;row-gap:8px;padding:12px;line-height:20px}
 #panel .zeile>.was{overflow-wrap:anywhere;flex:1 1 160px}
@@ -695,77 +556,79 @@
 </head>
 <body>
 <canvas id="karte"></canvas>
-<div class="oben">
-  <div class="leiste">
-    <div class="marke"><div class="logo">H</div><div><b>Hartwig</b><small id="markeunter">Warenhaus · Sport</small></div></div>
-    <button id="szenarioziel" class="sz-zielchip" type="button" aria-label="Szenarioziel öffnen" hidden><span aria-hidden="true">◎</span><span id="szenarioprozent">0 %</span><span class="sz-mini"><i id="szenariofortschritt"></i></span></button>
-    <button id="deutschland-direkt" aria-label="Deutschlandkarte öffnen" title="Deutschlandkarte">DE</button><div class="datum"><b id="kw">KW 1</b><small id="stufe"></small><span id="phase"></span></div>
+<!-- G6 (E47): Kartenoberfläche wie Coffee 15. Oben Firma mit Kasse und Kalenderwoche, darunter eine eingeklappte
+     Kennzahlenzeile; unten Ebenen, Stadt, Menü und darüber die Hauptaktion. Aussehen: hartwig.css, Abschnitt G6. -->
+<div class="oben hw-g6 hw-g6-hud">
+  <div class="hw-g6-leiste">
+    <div class="hw-g6-glas hw-g6-firma"><span class="hw-g6-logo" data-sym="logo"></span><span class="hw-g6-firmatext"><span class="hw-g6-firmaname">Hartwig</span><b id="kasse" class="hw-g6-kasse"></b></span></div>
+    <button id="szenarioziel" class="hw-g6-glas hw-g6-ziel" type="button" aria-label="Szenarioziel öffnen" hidden><span id="szenarioprozent">0 %</span><span class="hw-g6-zielbalken"><i id="szenariofortschritt"></i></span></button>
+    <div class="hw-g6-glas hw-g6-datum datum"><b id="kw">KW 1</b><small><span id="stufe"></span><span id="phase"></span></small></div>
   </div>
-  <div id="cockpit"></div>
-  <!-- O07 Haus: Beobachtungsliste auf dem Startbildschirm -->
-  <button id="hausbeobachtung" type="button">Hausbetrieb · Beobachtung</button>
+  <div id="cockpit" class="hw-g6-cockpit" aria-label="Kennzahlen"></div>
 </div>
-<label class="botwahl"><input type="checkbox" id="bot"> Bot-Strategie C</label>
-<div id="stadt-chips" aria-label="Häuser und Wettbewerber der Stadt"></div>
-<div class="unten">
-  <button type="button" class="chipstadt" id="stadt-reise" aria-label="Reise ab Hauptbahnhof öffnen"><span id="stadtname">Essen</span><small id="stadtcluster"></small><i>🚆</i></button>
-  <button class="knopf" id="weiter">Woche weiter</button>
-  <button class="knopf mitbadge" id="postdirekt" aria-label="Posteingang öffnen" title="Posteingang">✉<span id="postbadge" class="badge" style="display:none">0</span></button>
-  <button class="knopf rund mitbadge" id="menueknopf" aria-label="Menü"><span class="burger"><i></i><i></i><i></i></span><span id="menuebadge" class="badge" style="display:none">0</span></button>
-</div>
-<div id="menue" inert>
-  <div class="menuekarte" data-bereich="betrieb">
-    <div class="menuetitel">Hartwig steuern</div>
-    <div class="menue-gross">
-      <button class="mgross mitbadge" id="posteingang"><span class="msym" data-sym="post"></span><b>Posteingang</b><small>Entscheidungen und Meldungen</small><span id="postmenubadge" class="badge" style="display:none">0</span></button>
-      <button class="mgross" id="haeuser"><span class="msym" data-sym="ueberblick"></span><b>Häuser</b><small>Portfolio und Sammelaktionen</small></button>
-      <button class="mgross" id="hq"><span class="msym" data-sym="zentrale"></span><b>Zentrale</b><small>Gebäude und Abteilungen</small></button>
-      <button class="mgross" id="statistik" type="button"><span class="msym" data-sym="zahlen"></span><b>Zahlen</b><small>Verläufe und Vergleiche</small></button>
-    </div>
-    <h3 class="menue-gruppe">Häuser und Städte</h3>
-    <div class="menue-liste">
-      <button class="mzeile" id="deutschland"><b>Deutschland</b></button>
-      <button class="mzeile" id="beobachtung"><b>Beobachtungsliste</b></button>
-      <button class="mzeile" id="haus-reporting"><b>Kommentare</b></button>
-      <button class="mzeile" id="reporting" type="button"><b>Reporting</b></button>
-      <button class="mzeile" id="hausbesuch" type="button"><b>Hausbesuch</b></button>
-      <button class="mzeile" id="modernisierung"><b>Modernisierung</b></button>
-      <button class="mzeile" id="personaleinsatz"><b>Personaleinsatz</b></button>
-    </div>
-    <h3 class="menue-gruppe">Zentrale und Vorstand</h3>
-    <div class="menue-liste">
-      <button class="mzeile mitbadge" id="vorstand"><b>Vorstand</b><span id="vsbadge" class="badge" style="display:none">0</span></button>
-      <button class="mzeile" id="organisation"><b>Organisation</b></button>
-      <button class="mzeile mitbadge" id="einkauf"><b>Einkauf</b><span id="ekbadge" class="badge" style="display:none">0</span></button>
-      <button class="mzeile" id="produkte"><b>Produkte</b></button>
-      <button class="mzeile" id="marketing"><b>Marketing</b></button>
-      <button class="mzeile" id="online"><b>Online</b></button>
-      <button class="mzeile" id="it" type="button"><b>IT</b></button>
-      <button class="mzeile" id="planung" type="button"><b>Planung</b></button>
-    </div>
-    <h3 class="menue-gruppe">Spiel</h3>
-    <div class="menue-liste">
-      <button class="mzeile" id="zeitung" type="button"><b>Handelsbote</b></button>
-      <button class="mzeile" id="chronik" type="button"><b>Chronik</b></button>
-      <button class="mzeile" id="erfolge" type="button"><b>Erfolge</b></button>
-      <button class="mzeile" id="spiel-bestenliste" type="button"><b>Bestenliste</b></button>
-      <button class="mzeile" id="spiel-speichern" type="button"><b>Speichern</b></button>
-      <button class="mzeile" id="app-oeffnen" type="button"><b>Spielstände</b></button>
-      <button class="mzeile" id="einstellungen" type="button" aria-label="Einstellungen"><b>Einstellungen</b></button>
-      <button class="mzeile" id="ton" type="button" aria-label="Klang und Haptik einstellen"><b>Klang</b></button>
-      <button class="mzeile" id="einfuehrung-neustart" type="button" aria-label="Einführung erneut starten"><b>Einführung</b></button>
-      <button class="mzeile" id="performance" type="button"><b>Performance</b></button>
-      <button class="mzeile" id="spiel-ruhestand" type="button" hidden><b>Ruhestand</b></button>
-      <button class="mzeile" id="werkzeuge" type="button" hidden style="display:none"><b>Testwerkzeuge</b></button>
-    </div>
-    <h3 class="menue-gruppe">Darstellung</h3>
-    <label class="postfilter" for="leben-modus" style="margin:10px 14px 8px">Leben in der Stadt
-      <select id="leben-modus" class="ort gross" aria-label="Leben in der Stadt"><option value="voll">Voll</option><option value="wenig">Wenig</option><option value="aus">Aus</option></select>
-    </label>
-    <div class="ein-optionen"><label for="einfuehrung-tipps"><input id="einfuehrung-tipps" type="checkbox" checked> Kontext-Tipps nach der Einführung</label></div>
-    <label class="postfilter" for="stadtwahl" style="margin:10px 14px 5px">Stadt direkt wählen (ohne Reise)</label>
-    <select id="stadtwahl" class="ort gross" aria-label="Stadt direkt wählen" style="margin:0 14px 14px;width:calc(100% - 28px)"></select>
+<label class="hw-g6 hw-g6-bot"><input type="checkbox" id="bot"> Bot-Strategie C</label>
+<div class="unten hw-g6 hw-g6-hud">
+  <div class="hw-g6-aktion">
+    <button class="hw-g6-glas hw-g6-rund" id="postdirekt" type="button" aria-label="Posteingang öffnen" title="Posteingang"><span class="hw-g6-sym" data-sym="post"></span><span id="postbadge" class="hw-g6-badge"></span></button>
+    <button class="hw-knopf hw-g6-weiter" id="weiter" type="button">Woche weiter</button>
   </div>
+  <div class="hw-g6-fuss">
+    <button class="hw-g6-glas hw-g6-rund" id="ebenenknopf" type="button" aria-label="Ebenen und Häuser der Stadt" aria-expanded="false"><span class="hw-g6-sym" data-sym="ebenen"></span></button>
+    <button type="button" class="hw-g6-glas hw-g6-stadt" id="stadt-reise" aria-label="Reise ab Hauptbahnhof öffnen"><span class="hw-g6-flagge" aria-hidden="true"><i></i><i></i><i></i></span><span class="hw-g6-stadttext"><span id="stadtname">Essen</span><small id="stadtcluster"></small></span></button>
+    <button class="hw-g6-glas hw-g6-rund" id="menueknopf" type="button" aria-label="Menü" aria-expanded="false"><span class="hw-g6-burger" aria-hidden="true"><i></i><i></i><i></i></span><span id="menuebadge" class="hw-g6-badge"></span></button>
+  </div>
+</div>
+<div id="ebenen" class="hw-g6 hw-g6-schicht hw-g6-links" inert>
+  <section class="hw hw-g6-blatt" data-bereich="betrieb" aria-label="Ebenen"><div id="ebenen-inhalt" class="hw-g6-blattinhalt"></div></section>
+</div>
+<div id="menue" class="hw-g6 hw-g6-schicht hw-g6-rechts" inert>
+  <nav class="hw hw-g6-blatt" data-bereich="betrieb" aria-label="Menü"><div class="hw-g6-blattinhalt">
+    <h2 class="hw-g6-blatttitel">Hartwig steuern</h2>
+    <h3 class="hw-abschnitt">Häuser und Städte</h3>
+    <div class="hw-g6-menueliste">
+      <button class="hw-g6-mzeile" id="posteingang" type="button"><span class="hw-g6-sym" data-sym="post"></span><span>Posteingang</span><span id="postmenubadge" class="hw-g6-badge"></span></button>
+      <button class="hw-g6-mzeile" id="haeuser" type="button"><span class="hw-g6-sym" data-sym="warenhaus"></span><span>Häuser</span></button>
+      <button class="hw-g6-mzeile" id="deutschland" type="button"><span class="hw-g6-sym" data-sym="karte"></span><span>Deutschland</span></button>
+      <button class="hw-g6-mzeile" id="beobachtung" type="button"><span class="hw-g6-sym" data-sym="liste"></span><span>Beobachtungsliste</span></button>
+      <button class="hw-g6-mzeile" id="haus-reporting" type="button"><span class="hw-g6-sym" data-sym="kommentare"></span><span>Kommentare</span></button>
+      <button class="hw-g6-mzeile" id="reporting" type="button"><span class="hw-g6-sym" data-sym="zahlen"></span><span>Reporting</span></button>
+      <button class="hw-g6-mzeile" id="hausbesuch" type="button"><span class="hw-g6-sym" data-sym="etagen"></span><span>Hausbesuch</span></button>
+      <button class="hw-g6-mzeile" id="modernisierung" type="button"><span class="hw-g6-sym" data-sym="umbau"></span><span>Modernisierung</span></button>
+      <button class="hw-g6-mzeile" id="personaleinsatz" type="button"><span class="hw-g6-sym" data-sym="personal"></span><span>Personaleinsatz</span></button>
+    </div>
+    <h3 class="hw-abschnitt">Zentrale und Vorstand</h3>
+    <div class="hw-g6-menueliste">
+      <button class="hw-g6-mzeile" id="hq" type="button"><span class="hw-g6-sym" data-sym="zentrale"></span><span>Zentrale</span></button>
+      <button class="hw-g6-mzeile" id="vorstand" type="button"><span class="hw-g6-sym" data-sym="leitung"></span><span>Vorstand</span><span id="vsbadge" class="hw-g6-badge"></span></button>
+      <button class="hw-g6-mzeile" id="organisation" type="button"><span class="hw-g6-sym" data-sym="organisation"></span><span>Organisation</span></button>
+      <button class="hw-g6-mzeile" id="einkauf" type="button"><span class="hw-g6-sym" data-sym="ware"></span><span>Einkauf</span><span id="ekbadge" class="hw-g6-badge"></span></button>
+      <button class="hw-g6-mzeile" id="produkte" type="button"><span class="hw-g6-sym" data-sym="sortiment"></span><span>Produkte</span></button>
+      <button class="hw-g6-mzeile" id="marketing" type="button"><span class="hw-g6-sym" data-sym="marketing"></span><span>Marketing</span></button>
+      <button class="hw-g6-mzeile" id="online" type="button"><span class="hw-g6-sym" data-sym="online"></span><span>Online</span></button>
+      <button class="hw-g6-mzeile" id="it" type="button"><span class="hw-g6-sym" data-sym="it"></span><span>IT</span></button>
+      <button class="hw-g6-mzeile" id="planung" type="button"><span class="hw-g6-sym" data-sym="planung"></span><span>Planung</span></button>
+      <button class="hw-g6-mzeile" id="statistik" type="button"><span class="hw-g6-sym" data-sym="messung"></span><span>Zahlen</span></button>
+    </div>
+    <h3 class="hw-abschnitt">Spiel</h3>
+    <div class="hw-g6-menueliste">
+      <button class="hw-g6-mzeile" id="zeitung" type="button"><span class="hw-g6-sym" data-sym="zeitung"></span><span>Handelsbote</span></button>
+      <button class="hw-g6-mzeile" id="chronik" type="button"><span class="hw-g6-sym" data-sym="chronik"></span><span>Chronik</span></button>
+      <button class="hw-g6-mzeile" id="erfolge" type="button"><span class="hw-g6-sym" data-sym="pokal"></span><span>Erfolge</span></button>
+      <button class="hw-g6-mzeile" id="spiel-bestenliste" type="button"><span class="hw-g6-sym" data-sym="podest"></span><span>Bestenliste</span></button>
+      <button class="hw-g6-mzeile" id="spiel-speichern" type="button"><span class="hw-g6-sym" data-sym="speichern"></span><span>Speichern</span></button>
+      <button class="hw-g6-mzeile" id="app-oeffnen" type="button"><span class="hw-g6-sym" data-sym="spielstaende"></span><span>Spielstände</span></button>
+      <button class="hw-g6-mzeile" id="einstellungen" type="button"><span class="hw-g6-sym" data-sym="einstellungen"></span><span>Einstellungen</span></button>
+      <button class="hw-g6-mzeile" id="ton" type="button" aria-label="Klang und Haptik einstellen"><span class="hw-g6-sym" data-sym="klang"></span><span>Klang</span></button>
+      <button class="hw-g6-mzeile" id="einfuehrung-neustart" type="button" aria-label="Einführung erneut starten"><span class="hw-g6-sym" data-sym="einfuehrung"></span><span>Einführung</span></button>
+      <button class="hw-g6-mzeile" id="performance" type="button"><span class="hw-g6-sym" data-sym="messung"></span><span>Performance</span></button>
+      <button class="hw-g6-mzeile" id="spiel-ruhestand" type="button" hidden><span class="hw-g6-sym" data-sym="ruhestand"></span><span>Ruhestand</span></button>
+      <button class="hw-g6-mzeile" id="werkzeuge" type="button" hidden><span class="hw-g6-sym" data-sym="werkzeuge"></span><span>Testwerkzeuge</span></button>
+    </div>
+    <h3 class="hw-abschnitt">Darstellung</h3>
+    <label class="hw-g6-feldzeile" for="leben-modus"><span>Leben in der Stadt</span><select id="leben-modus" class="hw-g6-wahl" aria-label="Leben in der Stadt"><option value="voll">Voll</option><option value="wenig">Wenig</option><option value="aus">Aus</option></select></label>
+    <label class="hw-g6-feldzeile" for="einfuehrung-tipps"><span>Kontext-Tipps nach der Einführung</span><input id="einfuehrung-tipps" class="hw-g6-haken" type="checkbox" checked></label>
+    <label class="hw-g6-feldzeile" for="stadtwahl"><span>Stadt ohne Reise wählen</span><select id="stadtwahl" class="hw-g6-wahl" aria-label="Stadt direkt wählen"></select></label>
+  </div></nav>
 </div>
 <div id="panel" class="hw" data-bereich="betrieb" role="dialog" aria-modal="true" aria-labelledby="ptitel" aria-describedby="punter" aria-hidden="true" inert>
   <div class="hw-grund"></div>
@@ -774,32 +637,36 @@
   <div id="pinhalt" class="hw-inhalt"></div>
   <div id="preiter" hidden></div>
 </div>
-<button id="wochenstreifen" type="button" aria-live="polite"></button>
-<div id="meldung"></div>
-<div id="lade" class="an">Stadt wird gebaut …</div>
-<div id="start">
-  <div class="startkarte hk-flaeche" data-bereich="betrieb">
-    <div class="startkopf"><div class="logo gross">H</div><div><b>Hartwig</b><small>Warenhaus und Hartwig Sport · Turnaround</small></div></div>
-    <p class="startintro">Übernimm die Warenhausgruppe und wähle eine Ausgangslage. Danach legst du Schwierigkeit und Startstadt fest.</p>
+<button id="wochenstreifen" class="hw-g6 hw-g6-streifen" type="button" aria-live="polite"></button>
+<div id="meldung" class="hw-g6"></div>
+<div id="lade" class="hw-g6 an"><span class="hw-g6-logo" data-sym="logo"></span><span>Stadt wird gebaut …</span></div>
+<div id="start" class="hw hw-g6" data-bereich="betrieb">
+  <div class="hw-grund"></div>
+  <div class="hw-g6-start">
+    <header class="hw-g6-startkopf"><span class="hw-g6-logo" data-sym="logo"></span><h1>Hartwig</h1><p>Warenhaus und Hartwig Sport · Turnaround</p></header>
+    <div class="hw-sprecher hw-g6-startsprecher" role="note"><div class="hw-sprecher-text"><span>Übernimm die Warenhausgruppe. Wähle zuerst eine Ausgangslage, danach Schwierigkeit und Startstadt.</span></div></div>
     <div id="startauswahl">
-      <div class="vtitel">Szenario wählen</div>
-      <div id="startszenarien" class="sz-karten" aria-label="Szenarien"></div>
-      <button id="fortsetzen" class="breit" type="button" hidden>Fortsetzen</button>
+      <div class="hw-rumpf hw-g6-fortsetzen"><button id="fortsetzen" class="hw-knopf breit" type="button" hidden>Fortsetzen</button></div>
+      <div class="hw-rumpf"><h3 class="hw-abschnitt">Neues Spiel<small>Szenario wischen und wählen</small></h3></div>
+      <div id="startszenarien" aria-label="Szenarien"></div>
     </div>
-    <div id="startsetup" hidden>
-      <button id="szenario-zurueck" type="button" class="breit">← Szenario wechseln</button>
-      <p id="szenario-gewaehlt" class="startintro"></p>
-      <div class="vtitel">Schwierigkeit</div>
-      <div id="startstufen" class="stufen"></div>
-      <div class="vtitel">Startstadt</div>
-      <select id="startstadt" class="ort gross" aria-label="Startstadt"></select>
-       <label class="startmonat">Startmonat <select id="startmonat" class="ort gross" aria-label="Startmonat"><option value="1">Januar</option><option value="4">April</option><option value="7">Juli</option><option value="10">Oktober</option></select></label>
-      <label class="startseed">Seed <input id="startseed" type="number" min="1" step="1" inputmode="numeric"></label>
-      <button id="startknopf" class="breit gruen">Neues Spiel starten</button>
+    <div id="startsetup" class="hw-rumpf" hidden>
+      <button id="szenario-zurueck" type="button" class="hw-knopf text">‹ Szenario wechseln</button>
+      <p id="szenario-gewaehlt" class="hw-g6-gewaehlt"></p>
+      <h3 class="hw-abschnitt">Schwierigkeit</h3>
+      <div id="startstufen"></div>
+      <div class="hw-felder">
+        <label class="hw-feld"><span class="hw-marke hw-feldname">Startstadt</span><select id="startstadt" class="hw-g6-wahl" aria-label="Startstadt"></select></label>
+        <label class="hw-feld"><span class="hw-marke hw-feldname">Startmonat</span><select id="startmonat" class="hw-g6-wahl" aria-label="Startmonat"><option value="1">Januar</option><option value="4">April</option><option value="7">Juli</option><option value="10">Oktober</option></select></label>
+        <label class="hw-feld"><span class="hw-marke hw-feldname">Seed</span><input id="startseed" class="hw-g6-wahl" type="number" min="1" step="1" inputmode="numeric"></label>
+      </div>
+      <div class="hw-knoepfe"><button id="startknopf" class="hw-knopf breit" type="button">Neues Spiel starten</button></div>
     </div>
-    <div id="speicherhinweis" role="status"></div>
-    <div class="vtitel">Gespeicherte Partien</div>
-    <div id="app-plaetze-start" class="app-plaetze" aria-label="Gespeicherte Spielstände"></div>
+    <div class="hw-rumpf">
+      <div id="speicherhinweis" class="hw-g6-speicherhinweis" role="status"></div>
+      <h3 class="hw-abschnitt">Gespeicherte Partien</h3>
+      <div id="app-plaetze-start" class="app-plaetze" aria-label="Gespeicherte Spielstände"></div>
+    </div>
   </div>
 </div>
 <script src="spiel-bundle.js"></script>

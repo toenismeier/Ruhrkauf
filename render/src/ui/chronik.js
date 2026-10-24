@@ -1,5 +1,8 @@
 // Konzernchronik: rein lesende Darstellung der Engine-Daten und der Fassaden aus dem Kit.
+// G6 (E47): dunkles Blatt wie die übrigen Archive. Oben, was unter Ihrer Führung geschah; darunter die Geschichte als
+// Karussell (Coffee 05): je Station eine Karte mit Fassade, Jahr und Text.
 import { esc } from './format.js';
+import * as K from './komponenten.js';
 
 export function chronikModul({ E, s, panel, bild }) {
   const jahreswoche = (w) => `${s().startJahr + Math.floor(w / 52)} · KW ${String(w % 52 + 1).padStart(2, '0')}`;
@@ -13,24 +16,21 @@ export function chronikModul({ E, s, panel, bild }) {
   }
   function oeffne() {
     const d = E.chronikUebersicht(s());
-    const stationen = d.geschichte.map((x, i) => {
+    const stationen = d.geschichte.map((x) => {
       const url = fassade(x.familie);
-      return `<article class="chronik-station">
-        <div class="chronik-jahr">${x.jahr}</div>
-        <div class="chronik-inhalt">
-          <h3>${esc(x.titel)}</h3>
-          ${url ? `<img class="chronik-motiv" loading="lazy" src="${url}" alt="Historische Hartwig-Fassade, Bautyp ${x.familie}">` : ''}
-          <p>${esc(x.text)}</p><small>Motiv: ${esc(x.motiv)}</small>
-        </div>
-      </article>`;
-    }).join('');
-    const spiel = d.spiel.map(x => `<article class="chronik-spiel"><small>${jahreswoche(x.woche)} · ${esc(x.art)}</small><p>${esc(x.text)}</p><span>Bezug: ${esc(x.bezug)}</span></article>`).join('');
-    // Q30: Archiv auf Papier. Zuerst, was unter Ihrer Führung geschah, dann die Geschichte als Zeitstrahl.
+      return `<div class="chronik-station">${url ? `<img class="chronik-motiv" loading="lazy" src="${url}" alt="Historische Hartwig-Fassade, Bautyp ${x.familie}">` : ''}`
+        + `<span class="hw-marke hw-g6-jahr">${x.jahr}</span><h3 class="hw-karte-titel">${esc(x.titel)}</h3>`
+        + `<p class="hw-lese">${esc(x.text)}</p><p class="hw-lese hw-g6-motiv">Motiv: ${esc(x.motiv)}</p></div>`;
+    });
+    const spiel = d.spiel.map((x) => K.zeile({ was: esc(x.text), unter: esc(jahreswoche(x.woche) + ' · ' + x.art + ' · Bezug: ' + x.bezug) }));
+    const erste = d.geschichte[0];
+    const befund = d.spiel.length ? `Unter Ihrer Führung sind ${d.spiel.length} Einträge dazugekommen.` : `Hartwig blickt auf ${erste ? s().startJahr + Math.floor(s().woche / 52) - erste.jahr : 0} Jahre zurück. Ihr Kapitel beginnt jetzt.`;
     panel('Konzernchronik', `${d.geschichte.length} Stationen · ${d.spiel.length} Spielereignisse`,
-      `<i class="hk-bereich" data-bereich="papier" data-symbol="kommentare" aria-hidden="true"></i><div class="hk-rumpf chronik">
-      <h3 class="hk-abschnitt">Unter Ihrer Führung<small>${d.spiel.length} Einträge</small></h3>${spiel || '<div class="hk-leer"><b>Noch keine Einträge</b>Entscheidungen und Quartalsrekorde erscheinen hier im Spielverlauf.</div>'}
-      <h3 class="hk-abschnitt">Hartwig seit ${d.geschichte[0]?.jahr ?? ''}<small>${d.geschichte.length} Stationen</small></h3><div class="chronik-linie">${stationen}</div>
-      </div>`, 'gross');
+      K.bereich('betrieb', 'chronik') + K.sprecher({ text: esc(befund) }) + '<div class="hw-boden">' + K.rumpf(
+        K.abschnitt('Unter Ihrer Führung', `${d.spiel.length} Einträge`)
+        + (spiel.length ? K.liste(spiel) : K.leer('Entscheidungen und Quartalsrekorde erscheinen hier im Spielverlauf.', 'Noch keine Einträge'))
+        + K.abschnitt(`Hartwig seit ${erste?.jahr ?? ''}`, `${d.geschichte.length} Stationen`))
+      + `<div class="hw-g6-chronik">${K.karussell(stationen, { label: 'Stationen der Konzerngeschichte' })}</div></div>`, 'gross');
   }
   return { oeffne, zu() {}, pruefe: () => E.chronikUebersicht(s()) };
 }

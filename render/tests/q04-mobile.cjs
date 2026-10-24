@@ -44,7 +44,7 @@ const server = http.createServer((req, res) => {
     await seite.goto(start, { waitUntil: 'load' });
     await seite.locator('#start.an').waitFor();
     // N09: zuerst Szenario wählen, danach Start; N04-Einführungsfrage schließen.
-    await seite.locator('.sz-karte[data-szenario=standard]').click();
+    await seite.locator('[data-szenario=standard]').click();
     await seite.locator('#startknopf').click();
     await seite.waitForFunction(() => window.bereit === true && window.spiel?.s?.haeuser?.length);
     await seite.waitForTimeout(800);
@@ -54,7 +54,7 @@ const server = http.createServer((req, res) => {
 
     await bild('02-bot-stadtchip-essen');
     if (nachher) {
-      assert.equal(await seite.locator('.botwahl').isVisible(), false, 'Bot darf im regulären Spiel nicht sichtbar sein');
+      assert.equal(await seite.locator('.hw-g6-bot').isVisible(), false, 'Bot darf im regulären Spiel nicht sichtbar sein');
     }
     await seite.evaluate(() => window.spiel.oeffneHaus('O001'));
     await bild('01-fundus-haus');
@@ -117,7 +117,7 @@ const server = http.createServer((req, res) => {
       const dev = await kontext.newPage();
       await dev.goto(start + '&dev=1', { waitUntil: 'load' });
       await dev.locator('#start.an').waitFor();
-      assert.equal(await dev.locator('.botwahl').isVisible(), true, '?dev=1 muss Bot sichtbar machen');
+      assert.equal(await dev.locator('.hw-g6-bot').isVisible(), true, '?dev=1 muss Bot sichtbar machen');
       await dev.close();
       assert.deepEqual(fehler, [], 'Keine JavaScript-Laufzeitfehler');
     }

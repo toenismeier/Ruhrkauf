@@ -1,4 +1,5 @@
 // Geräteweite Einstellungen für alle Nice-to-have-Module. Keine Engine- oder Spielstanddaten.
+import * as K from './komponenten.js';
 const SPEICHER = 'hartwig.einstellungen.v1';
 const definitionen = new Map();
 let werte = null;
@@ -85,12 +86,21 @@ const version = () => typeof __HARTWIG_VERSION__ !== 'undefined' ? __HARTWIG_VER
 
 export function einstellungenModul(ctx) {
   let aktiv = false;
+  // G6 (E47): Schalter als Schalterzeile (Coffee 28), Auswahl als Segmentleiste (Coffee 26), Regler als Stepper.
   function feld(d) {
     const v = einstellung(d.schluessel), id = 'einst-' + d.schluessel;
-    if (d.art === 'schalter') return '<label class="einst-zeile einst-schalter" for="' + id + '"><span>' + esc(d.titel) + '</span><input id="' + id + '" type="checkbox" data-einstellung="' + d.schluessel + '" ' + (v ? 'checked' : '') + ' aria-label="' + esc(d.titel) + '"></label>';
-    if (d.art === 'auswahl') return '<label class="einst-zeile" for="' + id + '"><span>' + esc(d.titel) + '</span><select id="' + id + '" data-einstellung="' + d.schluessel + '" aria-label="' + esc(d.titel) + '">' + d.optionen.map((o) => { const p = option(o); return '<option value="' + esc(p.wert) + '" ' + (p.wert === v ? 'selected' : '') + '>' + esc(p.titel) + '</option>'; }).join('') + '</select></label>';
-    const o = d.optionen ?? {};
-    return '<label class="einst-zeile" for="' + id + '"><span>' + esc(d.titel) + ': <output id="' + id + '-wert">' + esc(v) + '</output></span><input id="' + id + '" type="range" data-einstellung="' + d.schluessel + '" min="' + esc(o.min ?? 0) + '" max="' + esc(o.max ?? 100) + '" step="' + esc(o.schritt ?? o.step ?? 1) + '" value="' + esc(v) + '" aria-label="' + esc(d.titel) + '"></label>';
+    if (d.art === 'schalter') return K.schalter({ text: d.titel, an: v === true, attr: 'id="' + id + '" data-einstellung="' + d.schluessel + '" data-wert="' + (v ? 'false' : 'true') + '"' });
+    if (d.art === 'auswahl') {
+      const opt = d.optionen.map(option);
+      // Lange Beschriftungen (Zahlenformat, Wochenbericht) zeigen im Segment nur den Namen, die Erklärung darunter.
+      const kurz = opt.map((p) => [p.wert, String(p.titel).split(' · ')[0]]);
+      const lang = String(opt.find((p) => p.wert === v)?.titel ?? '');
+      return K.feld(d.titel, K.seg(kurz, v, (w) => 'data-einstellung="' + d.schluessel + '" data-wert="' + esc(w) + '"')
+        + (lang.includes(' · ') ? '<small class="hw-feldunter">' + esc(lang) + '</small>' : ''));
+    }
+    const o = d.optionen ?? {}, schritt = Number(o.schritt ?? o.step ?? 1), min = Number(o.min ?? 0), max = Number(o.max ?? 100);
+    return K.feld(d.titel, K.stepper({ wert: String(v), label: d.titel, minusAus: v <= min, plusAus: v >= max,
+      attrMinus: 'data-einstellung="' + d.schluessel + '" data-wert="' + (v - schritt) + '"', attrPlus: 'data-einstellung="' + d.schluessel + '" data-wert="' + (v + schritt) + '"' }));
   }
   function zeigen(halten = false) {
     const scroll = halten ? document.getElementById('pinhalt').scrollTop : 0;
@@ -99,26 +109,23 @@ export function einstellungenModul(ctx) {
       if (!gruppen.has(d.gruppe)) gruppen.set(d.gruppe, []);
       gruppen.get(d.gruppe).push(feld(d));
     }
-    // Q30: dunkler Grundlook, Gruppen als Abschnitte mit Zeilen
-    const html = '<i class="hk-bereich" data-bereich="betrieb" data-symbol="zahlen" aria-hidden="true"></i><div class="hk-rumpf">' + [...gruppen.entries()].map(([name, zeilen]) => '<h3 class="hk-abschnitt">' + esc(name) + '</h3><section class="hk-liste einst-gruppe">' + zeilen.join('') + '</section>').join('') +
-      '<h3 class="hk-abschnitt">Über</h3><section class="hk-liste einst-gruppe"><div class="einst-info">Version <strong>' + esc(version()) + '</strong></div><p class="einst-info">Alle Namen sind frei erfunden.</p><p class="einst-info">Stadtplan Essen: Kartendaten © OpenStreetMap-Mitwirkende (ODbL). Quelle: OpenStreetMap, 20.10.2026.</p><p class="einst-info">Die Einstellungen gelten geräteweit und gehören nicht zum Spielstand.</p></section></div>';
+    const html = K.bereich('betrieb', 'einstellungen') + '<div class="hw-boden">' + K.rumpf([...gruppen.entries()].map(([name, zeilen]) => K.abschnitt(name) + '<div class="hw-g6-einstellungen">' + zeilen.join('') + '</div>').join('')
+      + K.abschnitt('Über') + K.liste([K.zeile({ was: 'Version', wert: esc(version()) }), K.zeile({ was: 'Alle Namen sind frei erfunden.' }),
+        K.zeile({ was: 'Stadtplan Essen', unter: 'Kartendaten © OpenStreetMap-Mitwirkende (ODbL). Quelle: OpenStreetMap, 20.10.2026.' }),
+        K.zeile({ was: 'Geltung', unter: 'Die Einstellungen gelten geräteweit und gehören nicht zum Spielstand.' })])) + '</div>';
     ctx.panel('Einstellungen', 'Darstellung, Bedienung und Spiel', html, 'gross');
     aktiv = true;
     document.getElementById('pinhalt').scrollTop = scroll;
   }
   const inhalt = document.getElementById('pinhalt');
-  inhalt.addEventListener('change', (e) => {
-    if (!aktiv || !e.target.matches('[data-einstellung]')) return;
-    const d = definitionen.get(e.target.dataset.einstellung);
+  inhalt.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-einstellung][data-wert]');
+    if (!aktiv || !el || el.disabled) return;
+    const d = definitionen.get(el.dataset.einstellung);
     if (!d) return;
-    setzeEinstellung(d.schluessel, d.art === 'schalter' ? e.target.checked : e.target.value);
-    if (d.art !== 'regler') zeigen(true);
-  });
-  inhalt.addEventListener('input', (e) => {
-    if (!aktiv || !e.target.matches('input[type="range"][data-einstellung]')) return;
-    const wert = setzeEinstellung(e.target.dataset.einstellung, Number(e.target.value));
-    const output = document.getElementById(e.target.id + '-wert');
-    if (output) output.textContent = wert;
+    const roh = el.dataset.wert;
+    setzeEinstellung(d.schluessel, d.art === 'schalter' ? roh === 'true' : d.art === 'regler' ? Number(roh) : roh);
+    zeigen(true);
   });
   window.addEventListener('einstellung-registriert', () => { if (aktiv) zeigen(true); });
   anwendenDarstellung();

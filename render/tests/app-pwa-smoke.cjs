@@ -58,7 +58,7 @@ const server = http.createServer((req, res) => {
     assert.equal(await page.evaluate(async () => (await fetch('./app-icon-180.png')).ok), true);
 
     // N09: zuerst Szenario wählen, danach Schwierigkeit und Start.
-    await page.locator('.sz-karte[data-szenario=standard]').click();
+    await page.locator('[data-szenario=standard]').click();
     await page.locator('#startknopf').click();
     await page.waitForFunction(() => window.bereit && window.spiel?.s?.haeuser?.length > 0);
     // N04: Die Einführungsfrage beim ersten Start schließen, damit die Spielstände bedienbar sind.
@@ -131,7 +131,7 @@ const server = http.createServer((req, res) => {
     await page.reload({ waitUntil: 'load' });
     await page.locator('#start.an').waitFor();
     assert.equal(await page.evaluate(() => navigator.onLine), false);
-    assert.equal(await page.locator('.sz-karte[data-szenario=standard]').isVisible(), true);
+    assert.equal(await page.locator('[data-szenario=standard]').isVisible(), true);
     await page.locator('#start [data-platz="platz-1"] [data-app-aktion="laden"]').click();
     await page.waitForFunction(() => window.bereit && window.spiel?.s?.woche === 1);
     assert.equal(await page.evaluate(() => window.spiel.s.cash), soll.cash);
