@@ -36,6 +36,8 @@ if (/@import\s+url\(['"]?\.\//.test(html)) throw new Error('Nicht eingebettet: @
 if (/url\(['"]?schrift\//.test(html)) throw new Error('Nicht eingebettet: Schrift');
 ersetze(/<link[^>]*rel="manifest"[^>]*>/, '', 'Manifest');
 html = html.replace(/\.\/icon\.svg/g, icon);
+// In der WebView gibt es kein Tab-Symbol und keinen Homescreen-Start: Verweise auf PNG-Dateien entfernen, sonst lädt der Browser sie nach.
+html = html.replace(/<link rel="(?:icon|apple-touch-icon|apple-touch-startup-image)"[^>]*>\n?/g, '');
 
 writeFileSync(ziel, html);
 console.log('spiel/spiel.html', (statSync(ziel).size / 1048576).toFixed(1), 'MB');
