@@ -6,7 +6,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
+const mime = { '.css': 'text/css; charset=utf-8', '.ttf': 'font/ttf', '.png': 'image/png', '.json': 'application/json', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 const server = http.createServer((req, res) => {
   const pathname = decodeURIComponent((req.url ?? '/').split('?')[0]);
   const file = path.resolve(root, '.' + (pathname === '/' ? '/spiel.html' : pathname));

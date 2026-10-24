@@ -161300,7 +161300,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "6cc8f11" : "Entwicklung";
+  var version = () => true ? "6b5d6b7" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld3(d4) {
@@ -179065,7 +179065,7 @@ void main() {
     for (const v2 of kand) {
       v2.project(cam);
       const px2 = r4.left + (v2.x + 1) / 2 * r4.width, py2 = r4.top + (1 - v2.y) / 2 * r4.height;
-      if (px2 > 10 && px2 < r4.width - 10 && py2 > 160 && py2 < r4.height - 120 && hausUnter(px2, py2) === id) return { x: px2, y: py2 };
+      if (px2 > 10 && px2 < r4.width - 10 && py2 > 160 && py2 < r4.height - 120 && document.elementFromPoint(px2, py2) === canvas && hausUnter(px2, py2) === id) return { x: px2, y: py2 };
     }
     return null;
   }

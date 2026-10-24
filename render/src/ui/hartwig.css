@@ -309,6 +309,11 @@
 .hw-figuren i.an::before, .hw-figuren i.an::after { background: var(--text); opacity: 1; }
 #panel.hw #pinhalt.hw-inhalt { padding-left: 0; padding-right: 0; padding-top: 0; }
 
+/* Gemeinsame Korrekturen (Hülle): Titel aus der Skala trotz alter Id-Regeln, Blattgrund für Kontrastprüfung. */
+#panel.hw #ptitel.hw-kopf-titel { font: var(--hw-t-kopf); color: var(--text); padding: 0; }
+#panel.hw #punter.hw-kopf-unter { font: var(--hw-t-kopf2); letter-spacing: -.5px; margin: 0; }
+#panel.hw:not(.mit-fenster) { background: var(--grund); }
+
 /* ═════════ Abschnitte je Bereich: jeder Bereich ergänzt nur hier (Konfliktvermeidung beim Zusammenführen) ═════════ */
 /* ── G1 Eigenmarken und Produktentwicklung ── */
 /* ── G2 Einkauf, Ware, Planung, Vertrieb ── */

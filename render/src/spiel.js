@@ -315,7 +315,7 @@ function tippPunkt(id) {
   for (const v of kand) {
     v.project(cam);
     const px = r.left + (v.x + 1) / 2 * r.width, py = r.top + (1 - v.y) / 2 * r.height;
-    if (px > 10 && px < r.width - 10 && py > 160 && py < r.height - 120 && hausUnter(px, py) === id) return { x: px, y: py };
+    if (px > 10 && px < r.width - 10 && py > 160 && py < r.height - 120 && document.elementFromPoint(px, py) === canvas && hausUnter(px, py) === id) return { x: px, y: py };
   }
   return null;
 }
