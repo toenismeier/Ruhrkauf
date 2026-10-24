@@ -825,7 +825,7 @@ for i in range(4):
     for k in range(7): n.kasten(WB / 2 - 0.003, -WD / 2 + 0.1 + k * 0.2, z + 0.2, 0.012, 0.025, 0.16, '#e1e5ea')
 zt = 0.6 + 4 * 0.36
 brüstung(n, WB, WD, zt, 0.33, BLAU, dunkler(BLAU, 0.8), '#a9a39a')
-n.tafel(-0.12, -WD / 2 - 0.022, zt + 0.04, 1.3, 1.3 / 6.15, FL + 'a-volkskauf.png')
+n.tafel(-0.12, -WD / 2 - 0.022, zt + 0.04, 1.3, 1.3 / 6.15, FL + 'a-konkurrenz.png')
 # Glas-Eckturm
 ex, ey, er = WB / 2 - 0.05, -WD / 2 + 0.05, 0.36
 n.walze(ex, ey, 0, er, zt + 0.5, GLAS, ecken=40)
