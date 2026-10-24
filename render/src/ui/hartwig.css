@@ -317,6 +317,80 @@
 /* ═════════ Abschnitte je Bereich: jeder Bereich ergänzt nur hier (Konfliktvermeidung beim Zusammenführen) ═════════ */
 /* ── G1 Eigenmarken und Produktentwicklung ── */
 /* ── G2 Einkauf, Ware, Planung, Vertrieb ── */
+/* Blatt: Marker .hw-g2 (g2-buch.js). Kopf und Reiter aus der Skala, Grund mit Streifen hinter dem Inhalt (Kontrast),
+   Reiterleiste mit bis zu sechs gleich breiten Plätzen. */
+#panel:has(.hw-g2) #ptitel { font: var(--hw-t-kopf); }
+#panel:has(.hw-g2) #punter { font: var(--hw-t-kopf2); font-size: 12px; color: var(--leise); }
+#panel:has(.hw-g2) > .hw-inhalt { background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+#panel:has(.hw-g2) #preiter > .hw-reiter { padding: 0 6px; }
+#panel:has(.hw-g2) #preiter > .hw-reiter > button { flex: 1 1 0; min-width: 0; max-width: 80px; font-size: 10.4px; }
+#panel:has(.hw-g2) #preiter > .hw-reiter > button[aria-current='page'] { margin: 0; flex-basis: 0; }
+#panel:has(.hw-g2) #preiter > .hw-reiter > button > span { letter-spacing: 0; }
+#panel:has(.hw-g2) .hw-rumpf .hw-segment { margin: 0; }
+#panel:has(.hw-g2) .hw-rumpf > .hw-gross:first-child { margin-top: 22px; }
+.hw-g2-oben { margin: 18px 0 0; }
+.hw-g2-oben > .hw-knopf.text { min-height: 44px; padding: 0; }
+.hw-g2-oben + .hw-gross { margin-top: 22px; }
+.hw-gross .hw-abw .hw-schlecht, .hw-gross .hw-abw .hw-gut { font: inherit; }
+
+/* Buch wie die Coffee-GuV: Kopf in Versalien, Beschriftung dünn grau, Zahlen weiß rechts in festen Spalten, Strich vor Summen. */
+.hw-g2-buch { margin: 24px 0 0; font: 400 12.3px/18px var(--hw-schrift); font-variant-numeric: tabular-nums; }
+.hw-g2-reihe { display: flex; align-items: center; gap: 0 10px; width: 100%; min-height: 30px; margin: 0; padding: 5px 0; border: 0; background: none; color: var(--text); font: inherit; text-align: left; }
+button.hw-g2-reihe { min-height: 44px; }
+.hw-g2-reihe.kopf { align-items: flex-end; padding: 0 0 6px; }
+.hw-g2-reihe.kopf .hw-g2-name { color: var(--text); font: 400 14.2px/1.2 var(--hw-schrift); text-transform: uppercase; }
+.hw-g2-reihe.kopf .hw-g2-w { color: var(--leise); font-size: 12px; white-space: normal; line-height: 1.2; }
+.hw-g2-name { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 6px; color: var(--marke); font-weight: 300; overflow-wrap: anywhere; }
+.hw-g2-name small { display: block; margin-top: 1px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-g2-w { flex: 0 0 var(--sw, 84px); text-align: right; white-space: nowrap; color: var(--text); }
+.hw-g2-w.hw-achtung { color: var(--stern); }
+.hw-g2-w.hw-leise { color: var(--leise); }
+.hw-g2-auf { flex: 0 0 10px; font-style: normal; color: var(--leise); }
+.hw-g2-sort { min-height: 44px; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: right; }
+.hw-g2-name.hw-g2-sort { text-align: left; align-items: flex-end; padding-bottom: 0; }
+.hw-g2-reihe.kopf .hw-g2-sort { display: flex; align-items: flex-end; justify-content: flex-end; padding-bottom: 1px; }
+.hw-g2-reihe.kopf .hw-g2-name.hw-g2-sort { justify-content: flex-start; }
+.hw-g2-reihe.bereich { margin-top: 8px; }
+.hw-g2-reihe.bereich .hw-g2-name { color: var(--text); font-weight: 400; }
+.hw-g2-reihe.unter .hw-g2-name { padding-left: 16px; }
+.hw-g2-reihe.summe { margin-top: 4px; }
+.hw-g2-reihe.summe .hw-g2-name { color: var(--text); font-weight: 400; }
+.hw-g2-reihe.summe .hw-g2-w { box-shadow: inset 0 1px 0 0 var(--text); padding-top: 5px; margin-top: -5px; }
+.hw-g2-fuss { margin: 10px 0 0; font: var(--hw-t-lese); line-height: 14px; color: var(--leise); }
+
+/* Vorgang (Freigabe): Zeile links, genau eine Aktion rechts; Details und Nebenaktionen erst nach Antippen. */
+.hw-g2-vorgang { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 10px; border-top: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-g2-vorgang > .hw-knopf { min-width: 60px; }
+.hw-g2-vorgang > .hw-g2-details, .hw-g2-vorgang > .hw-knoepfe { grid-column: 1 / -1; }
+.hw-g2-vorgang .hw-g2-name { color: var(--text); font-weight: 400; }
+.hw-g2-details { margin: 0; font: var(--hw-t-lese); line-height: 14px; color: var(--leise); }
+.hw-g2-aktionen { margin: 8px 0 12px; }
+.hw-g2-ausklapp { padding: 2px 0 12px; }
+
+/* Eingabezeile im Buch (Planung: Ziele je Knoten und Warengruppe). */
+.hw-g2-eingabe { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 4px 0; border-top: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-g2-eingabe .hw-g2-name { color: var(--text); font-weight: 400; }
+.hw-g2-eingabe > .hw-g2-auswahl { flex: 0 0 var(--sw, 96px); width: var(--sw, 96px); text-align: right; }
+.hw-g2-eingabe.tiefe-2 .hw-g2-name { padding-left: 12px; } .hw-g2-eingabe.tiefe-3 .hw-g2-name { padding-left: 24px; } .hw-g2-eingabe.tiefe-4 .hw-g2-name { padding-left: 36px; }
+
+/* Auswahl- und Zahlenfeld mit Doppelkontur wie der Stepper. */
+#panel.hw .hw-g2-auswahl { display: block; width: 100%; height: 44px; min-height: 44px; margin: 0; padding: 0 12px; border: 0; --f: var(--feld); --l: var(--feldlinie); color: var(--text); font: var(--hw-t-text); font-size: 13.5px; -webkit-appearance: none; appearance: none; }
+#panel.hw select.hw-g2-auswahl { padding-right: 32px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23ffffff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 12px 8px; }
+#panel.hw .hw-g2-auswahl option { background: var(--feld); color: var(--text); }
+
+/* Primärknopf voll gefüllt (die Altregel .breit im dunklen Blatt nahm ihm die Fläche). */
+#panel:has(.hw-g2) .hw-knopf.breit, #panel .hw-g2-vertrieb .hw-knopf.breit { background: var(--f); border: 0; margin-bottom: 0; color: #fff; }
+#panel:has(.hw-g2) .hw-knopf.zweit.breit, #panel .hw-g2-vertrieb .hw-knopf.zweit.breit { color: var(--text); }
+#panel:has(.hw-g2) .hw-rumpf .hw-tabelle { margin-top: 24px; }
+#panel:has(.hw-g2) .hw-legende + .hw-tabelle, #panel:has(.hw-g2) .hw-balkenfeld + .hw-tabelle { margin-top: 30px; }
+.hw-g2-fuss + .hw-feld, .hw-g2-fuss + .hw-segment { margin-top: 18px; }
+.hw-g2-reihe.kopf .hw-g2-w { white-space: nowrap; }
+.hw-g2-reihe.kopf .hw-g2-name { overflow-wrap: normal; }
+
+/* Vertriebssteuerung im Organisationsblatt: eigener Rand und Grund (das Blatt der Organisation setzt keinen). */
+.hw-g2-vertrieb { padding: 0 var(--hw-rand) 8px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+.hw-g2-vertrieb > .hw-knoepfe:first-child { margin-top: 0; padding-top: 12px; }
+.hw-g2-vertrieb .hw-knopf.text { min-height: 44px; padding: 0; }
 /* ── G3 Marketing, E-Commerce, IT ── */
 /* Marker <i class="hw-g3"> im Inhalt. Kopftitel und Reiter auf die Skala (komponenten.css setzt 16 px bzw. 10 px). */
 /* komponenten.css lenkt --grund, --karte, --text, --leise am #panel auf die hellere Q30-Palette um; hier wieder die Hartwig-Zentralewerte. */
