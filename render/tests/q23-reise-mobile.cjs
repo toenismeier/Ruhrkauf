@@ -37,13 +37,13 @@ async function pruefen(browser, url, breite, hoehe) {
 
     await page.locator('#stadt-reise').click();
     await page.locator('#reise-overlay.ziele-offen').waitFor();
-    const karte = page.locator('.reise-deutschland .deutschland-svg');
+    const karte = page.locator('.hw-reise-karte .hw-deutschland');
     assert.equal(await karte.count(), 1, 'Die Reise benutzt genau eine gemeinsame Deutschlandkarte');
-    assert.equal(await page.locator('.deutschland-laender path').count(), 16, '16 Bundesländer mit echten Grenzverläufen');
+    assert.equal(await page.locator('.hw-dl-laender path').count(), 16, '16 Bundesländer mit echten Grenzverläufen');
     const info = await page.evaluate(() => window.spiel.reise.pruefe());
     assert.ok(info.kartenPunkte >= 10, 'Echte Städtekoordinaten aus der Engine');
     assert.equal(info.stadt, 'Essen', 'Essen ist als aktueller Standort hinterlegt');
-    assert.equal(await page.locator('.deutschland-aktuell[data-stadt="Essen"]').count(), 1,
+    assert.equal(await page.locator('.hw-dl-aktuell[data-stadt="Essen"]').count(), 1,
       'Der aktuelle Standort wird auf der Karte hervorgehoben');
     if (breite === 390) {
       fs.mkdirSync(path.join(root, 'out'), { recursive: true });
@@ -63,9 +63,9 @@ async function pruefen(browser, url, breite, hoehe) {
     const ziel = await letzter.getAttribute('data-reiseziel');
     await letzter.scrollIntoViewIfNeeded();
     const sichtbar = await letzter.evaluate((el) => {
-      const ziel = el.getBoundingClientRect(), rand = el.closest('.reise-listenblatt').getBoundingClientRect();
+      const ziel = el.getBoundingClientRect(), rand = el.closest('.hw-inhalt').getBoundingClientRect();
       return { oben: ziel.top, unten: ziel.bottom, randOben: rand.top, randUnten: rand.bottom,
-        scroll: el.closest('.reise-listenblatt').scrollTop };
+        scroll: el.closest('.hw-inhalt').scrollTop };
     });
     assert.ok(sichtbar.oben >= sichtbar.randOben - 2 && sichtbar.unten <= sichtbar.randUnten + 2,
       'Letzte Stadt ist vollständig im sichtbaren Listenbereich: ' + JSON.stringify(sichtbar));
@@ -85,7 +85,7 @@ async function pruefen(browser, url, breite, hoehe) {
       await page.locator('#reise-overlay.ziele-offen').waitFor();
       const von = (await page.evaluate(() => window.spiel.reise.pruefe())).stadt;
       const karteZiel = von === 'Berlin' ? 'Hamburg' : 'Berlin';
-      await page.locator('.reise-deutschland [data-stadt="' + karteZiel + '"]').click();
+      await page.locator('.hw-reise-karte [data-stadt="' + karteZiel + '"]').click();
       await page.waitForFunction((name) =>
         !window.spiel.reise.aktiv() && window.spiel.reise.pruefe().stadt === name,
         karteZiel, { timeout: 120000 });

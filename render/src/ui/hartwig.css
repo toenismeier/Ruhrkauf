@@ -315,4 +315,175 @@
 /* ── G3 Marketing, E-Commerce, IT ── */
 /* ── G4 Zentrale, Organisation, Vorstand, Personaleinsatz, Reporting ── */
 /* ── G5 Posteingang, Wochenbericht, Portfolio, Reise, Umbau, Statistik ── */
+/* Blattkopf im Spielblatt: Titel aus der Skala (überschreibt die alte Größe aus spiel.html/komponenten.css). */
+#panel.hw:has(.hw-g5) #ptitel.hw-kopf-titel { font: var(--hw-t-kopf); color: var(--text); padding: 0; }
+/* Grund des Inhalts: gleiche Streifen wie .hw-grund, damit Text einen echten Hintergrund hat (Kontrastprüfung). */
+.hw-g5 { min-height: 100%; background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); padding-bottom: 8px; }
+.hw-g5 > .hw-rumpf > .hw-segment:first-child { margin-top: 18px; }
+.hw-g5 .hw-segment { margin: 0; }
+.hw-g5 .hw-segment + .hw-segment, .hw-g5 .hw-segment + .hw-feld, .hw-g5 .hw-feld + .hw-feld { margin-top: 12px; }
+.hw-g5 .hw-feld { margin-top: 18px; }
+/* Enge Segmentleiste für viele oder lange Teile: Text regulär, Teile so breit wie ihr Wort. */
+.hw-segment.eng > button { flex: 1 1 auto; padding: 0 7px; gap: 0; font-size: 11.85px; text-transform: none; letter-spacing: 0; white-space: nowrap; min-width: 0; }
+.hw-text { margin: 10px 0 0; font: var(--hw-t-lese); color: var(--leise); }
+.hw-g5 .hw-text + .hw-segment, .hw-g5 #pp-ampel + .hw-segment { margin-top: 18px; }
+.hw-g5 .hw-knoepfe .hw-knopf.text { min-height: 44px; }
+/* Suchfeld (Feldfarben wie Stepper-Mitte). */
+.hw-suche { display: block; width: 100%; height: 44px; margin: 14px 0 0; padding: 0 16px; border: 0; border-radius: var(--hw-radius); background: var(--feld); color: var(--text); font: var(--hw-t-text); font-size: 15px;
+  box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--feld), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--feldlinie); -webkit-appearance: none; appearance: none; }
+.hw-suche::placeholder { color: var(--leise); }
+.hw-suche:focus { outline: 2px solid var(--akzent-linie); outline-offset: 1px; }
+
+/* Posteingang: Vorgang als Listenzeile mit einer Hauptaktion. */
+.hw-vorgang { padding: 0 0 12px; border-bottom: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-vorgang:last-child { border-bottom: 0; }
+.hw-vorgang > .hw-zeile { border-bottom: 0; }
+.hw-vorgang .hw-knoepfe { margin-top: 2px; align-items: center; }
+.hw-vorgang .hw-lese { margin: 0 0 10px; color: var(--leise); }
+.hw-vorgang .hw-segment { margin: 4px 0 10px; }
+.hw-vorgang .hw-schalterzeile { margin: 0 0 6px; }
+.hw-vorgang-miete { padding: 6px 0 4px; border-top: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-ungelesen .hw-was { font-weight: 600; }
+
+/* Wochenabschluss und Reise: eigenes Vollbild-Blatt außerhalb von #panel (gleiche Lagen wie #panel.hw). */
+#reise-overlay, #wochen-overlay { position: fixed; inset: 0; z-index: 10; pointer-events: auto; }
+#reise-overlay[hidden], #wochen-overlay[hidden], #wochenstreifen[hidden] { display: none !important; }
+body.reise-aktiv .unten, body.wochen-aktiv .unten { pointer-events: none; }
+.chipstadt { color: var(--text); text-align: left; }
+.hw-blatt { position: absolute; inset: 0; width: auto; height: auto; }
+.hw-blatt [hidden] { display: none !important; }
+.hw-blatt > .hw-kopf { height: calc(50px + env(safe-area-inset-top)); }
+.hw-blatt .hw-kopf-symbol { top: calc(env(safe-area-inset-top) + 4.7px); }
+.hw-blatt .hw-kopf-symbol svg, .hw-blatt .hw-sprecher-figur svg { width: 100%; height: 100%; }
+.hw-blatt .hw-kopf-titel { top: calc(env(safe-area-inset-top) + 9px); margin: 0; }
+.hw-blatt .hw-kopf-unter { top: calc(env(safe-area-inset-top) + 25.5px); }
+.hw-blatt .hw-zu { top: calc(env(safe-area-inset-top) + 8px); font-size: 0; min-width: 44px; min-height: 44px; width: 44px; height: 44px; right: 8px; }
+.hw-blatt .hw-zu::before, .hw-blatt .hw-zu::after { top: 21px; left: 12px; right: 12px; }
+.hw-blatt > .hw-sprecher { top: calc(50px + env(safe-area-inset-top)); }
+.hw-blatt .hw-sprecher-unter { display: block; font: var(--hw-t-klein); color: var(--leise); margin-top: 2px; }
+.hw-blatt > .hw-inhalt { top: calc(130px + env(safe-area-inset-top)); bottom: 0; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+
+/* Wochenfrage: Karte mitten auf abgedunkeltem Grund. */
+.hw-wb-maske { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(12,20,28,0); transition: background-color 200ms ease-out; }
+#wochen-overlay.sichtbar .hw-wb-maske { background: rgba(12,20,28,.60); }
+.hw.hw-wb-frage { width: min(100%, 360px); height: auto; padding: 22px 20px 20px; --f: var(--grund); --l: var(--kartenlinie); opacity: 0; transform: scale(.96); transition: opacity 200ms ease-out, transform 200ms ease-out; }
+#wochen-overlay.sichtbar .hw-wb-frage { opacity: 1; transform: none; }
+.hw-wb-frage .hw-zu { top: 8px; right: 8px; width: 44px; height: 44px; }
+.hw-wb-frage .hw-zu::before, .hw-wb-frage .hw-zu::after { top: 21px; left: 12px; right: 12px; }
+.hw-wb-frage h2 { margin: 0 44px 14px 0; font: var(--hw-t-kopf); }
+.hw-wb-frageinhalt { display: flex; align-items: flex-end; gap: 14px; justify-content: space-between; }
+.hw-wb-frageinhalt p { margin: 0 0 12px; font: var(--hw-t-text); }
+.hw-wb-gesicht { flex: none; width: 64px; height: 80px; overflow: hidden; }
+.hw-wb-gesicht svg { width: 100%; height: 100%; }
+.hw-wb-frage .hw-hinweis { margin: 14px 0 0; }
+.hw-wb-frage .hw-knoepfe { margin-top: 18px; }
+/* Wochenbericht im Vollbild. */
+.hw-wb { opacity: 0; transition: opacity 380ms ease-out; }
+#wochen-overlay.sichtbar .hw-wb { opacity: 1; }
+.hw-wb .hw-gross .hw-abw { opacity: 0; transition: opacity 200ms; }
+#wochen-overlay.gezaehlt .hw-wb .hw-gross .hw-abw { opacity: 1; }
+.hw-wb .hw-band .hw-abschnitt:first-child { margin-top: 4px; }
+#wb-vorfall { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+#wb-vorfall.offen { pointer-events: auto; }
+.hw-wb-vorfallmaske { position: absolute; inset: 0; display: flex; align-items: flex-end; background: rgba(5,9,10,0); transition: background-color 150ms; }
+#wb-vorfall.offen .hw-wb-vorfallmaske { background: rgba(5,9,10,.7); }
+.hw-wb-vorfall { width: 100%; max-height: 85%; overflow: auto; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); background: var(--kopf); border-radius: var(--hw-radius) var(--hw-radius) 0 0;
+  box-shadow: inset 0 1px 0 0 var(--kartenlinie); transform: translateY(110%); transition: transform 200ms ease-out; }
+#wb-vorfall.offen .hw-wb-vorfall { transform: none; }
+.hw-wb-vorfallkopf { display: flex; gap: 14px; align-items: flex-end; justify-content: space-between; }
+.hw-wb-vorfallkopf .hw-marke { display: block; margin-bottom: 6px; }
+.hw-wb-vorfallkopf h3 { margin: 0 0 4px; font: var(--hw-t-titel); }
+.hw-wb-tippt { min-height: 48px; margin: 14px 0 0; font: var(--hw-t-text); font-weight: 400; }
+.hw-wb-vorfallfuss { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+.hw-wb-vorfallfuss small { margin-right: auto; font: var(--hw-t-klein); color: var(--leise); }
+
+/* Säulen über einen Zeitraum (Statistik): je Woche eine Säule, Nulllinie, optional Grenze. Höhe 120 px. */
+.hw-saeulen { position: relative; display: flex; align-items: stretch; gap: 1px; height: 120px; margin: 4px 0 0; touch-action: pan-y; user-select: none; cursor: crosshair; }
+.hw-saeulen { justify-content: space-between; }
+.hw-saeulen > span { position: relative; flex: 0 1 15px; min-width: 0; }
+.hw-saeulen > span > i { position: absolute; left: 0; right: 0; background: var(--text); border-radius: 2px 2px 0 0; }
+.hw-saeulen > span > i.neg { background: var(--schlecht); border-radius: 0 0 2px 2px; }
+.hw-saeulen > span > i.vorlauf { opacity: .45; }
+.hw-saeulen.b > span > i:not(.neg) { background: var(--gut); }
+.hw-saeulen.zeigt > span:not(.an) > i { opacity: .35; }
+.hw-saeulen-null { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--kartenlinie); pointer-events: none; }
+.hw-saeulen-grenze { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px dashed var(--schlecht); pointer-events: none; }
+.hw-saeulen-fuss { display: flex; justify-content: space-between; margin-top: 7px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-stat-wert { min-height: 24px; margin: 8px 0 0; font: var(--hw-t-klein); color: var(--leise); }
+/* Waagrechte Anteilsbalken (Formate, Regionen): Name, Balken, Wert. */
+.hw-anteile { display: grid; grid-template-columns: auto 1fr auto; gap: 10px 12px; align-items: center; margin: 4px 0 0; font: var(--hw-t-text); font-weight: 400; }
+.hw-anteile > b { font-weight: 400; text-align: right; font-variant-numeric: tabular-nums; }
+.hw-anteile > i { position: relative; height: 14px; border-radius: 7px; background: var(--skala-grund); overflow: hidden; }
+.hw-anteile > i > i { position: absolute; top: 2px; bottom: 2px; left: 2px; border-radius: 5px; background: var(--text); }
+.hw-anteile > i > i.b { background: var(--gut); }
+.hw-anteile > i > i.neg { background: var(--schlecht); }
+
+/* Portfolio: virtuelle Liste (feste Zeilenhöhe 58 px), Auswahlkästchen, Ampelpunkt, Karte. */
+#pp-spacer { position: relative; }
+.hw-pp-scroll { position: relative; height: 406px; margin: 4px 0 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.hw-pp-zeile, .hw-pp-gruppe { position: absolute; left: 0; right: 0; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-pp-gruppe { align-items: flex-end; padding-bottom: 8px; font: var(--hw-t-marke); color: var(--marke); text-transform: uppercase; }
+/* Auswahlkästchen 22 px mit Kontur, Tippfläche 44 px (transparenter Rand). */
+#panel.hw input[type=checkbox].hw-pp-wahl { flex: none; width: 44px; height: 44px; margin: 0 0 0 -11px; border: 11px solid transparent; border-radius: 17px; -webkit-appearance: none; appearance: none;
+  background: var(--feld); background-clip: padding-box; box-shadow: none; outline: 1.5px solid var(--feldlinie); outline-offset: -12.5px; }
+#panel.hw input[type=checkbox].hw-pp-wahl:checked { background: center / 14px 14px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2.5 7.3l3 3L11.5 4' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"), var(--akzent);
+  background-clip: padding-box; outline-color: var(--akzent-linie); }
+#panel.hw input[type=checkbox].hw-pp-wahl:disabled { opacity: .35; }
+/* Breiter Primärknopf: alte Regel .breit (spiel.html, komponenten.css) nimmt Fläche und Rand; hier zurückholen. */
+#panel.hw .hw-g5 .hw-knopf.breit, .hw-blatt .hw-knopf.breit { background: var(--f); margin: 0; border: 0; min-height: 44px; border-radius: var(--hw-radius); color: #fff; }
+#panel.hw .hw-g5 .hw-knopf.zweit.breit, .hw-blatt .hw-knopf.zweit.breit { color: var(--text); }
+.hw-blatt .hw-segment { margin: 0; }
+.hw-pp-name { flex: 1; min-width: 0; min-height: 44px; padding: 0; border: 0; background: none; color: var(--text); font: var(--hw-t-text); font-weight: 400; text-align: left; }
+.hw-pp-name b, .hw-pp-name small { display: block; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.hw-pp-name b { font-weight: 400; }
+.hw-pp-name small { margin-top: 2px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-pp-zeile .hw-wert { display: flex; align-items: center; gap: 7px; }
+.hw-ampel { display: inline-block; flex: none; width: 8px; height: 8px; border-radius: 4px; background: var(--punkt); }
+.hw-ampel.gruen { background: #4caf50; } .hw-ampel.gelb { background: #e0a526; } .hw-ampel.rot { background: #e0574c; } .hw-ampel.ohne { background: var(--punkt); }
+.hw-g5 .hw-legende { flex-wrap: wrap; gap: 6px 16px; }
+.hw-g5 .hw-legende .hw-ampel { margin-right: 6px; vertical-align: 0; }
+.hw-pp-karte { margin: 18px -8px 0; }
+.hw-deutschland { display: block; width: 100%; height: auto; overflow: visible; }
+.hw-dl-land { fill: var(--zweit); stroke: var(--zweit-linie); }
+.hw-dl-punkt { stroke: var(--grund); }
+.hw-dl-ring { fill: none; stroke: var(--akzent-linie); }
+.hw-dl-name { fill: var(--leise); stroke: var(--grund); }
+.hw-dl-name.gross { fill: var(--text); }
+.hw-deutschland .hw-dl-stadt { cursor: pointer; outline-offset: -2px; }
+.hw-deutschland .hw-dl-stadt:focus-visible circle:last-of-type { stroke: var(--akzent-linie); stroke-width: 3; }
+
+/* Reise: Kreis öffnet sich am Bahnhof, Blatt mit Karte oder Liste; Fahrt als Bildfolge. */
+#reise-overlay { background: #262a2e; clip-path: circle(0px at var(--rx,50%) var(--ry,65%)); transition: clip-path 240ms ease-out; }
+#reise-overlay.offen, #reise-overlay.faehrt { clip-path: circle(var(--rr,150vmax) at var(--rx,50%) var(--ry,65%)); }
+#reise-overlay.faehrt { transition: clip-path 150ms ease-in; }
+#reise-overlay.faehrt .hw-reise { display: none; }
+.hw-reise { transform: scale(.55); opacity: .35; transition: transform 240ms ease-out, opacity 240ms ease-out; }
+#reise-overlay.offen .hw-reise { transform: none; opacity: 1; }
+.hw-reise-ziele { transform: translateY(30px); opacity: 0; transition: transform 300ms ease-out, opacity 300ms ease-out; }
+#reise-overlay.ziele-offen .hw-reise-ziele { transform: none; opacity: 1; }
+.hw-reise-karte { margin: 14px -8px 0; }
+#reise-blatt-liste .hw-was { display: flex; align-items: center; gap: 12px; }
+.hw-reise-bild { flex: none; display: block; width: 40px; height: 40px; overflow: hidden; border-radius: 8px; background: var(--tief); }
+.hw-reise-bild img, .hw-reise-bild svg { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hw-reise-name { min-width: 0; }
+.hw-reise-name small { display: flex; flex-wrap: wrap; gap: 0 8px; }
+.hw-reise-format { white-space: nowrap; }
+.hw-reise-flug { position: absolute; inset: 0; overflow: hidden; background: #262a2e; opacity: 0; transition: opacity 150ms ease-out; }
+.hw-reise-flug.start { opacity: 1; }
+.hw-reise-panorama { position: absolute; inset: -5% -50%; background-position: center; background-size: cover; transform: translate3d(12%,0,0) scale(1.03); will-change: transform; }
+.hw-reise-flug.bewegt .hw-reise-panorama { transform: translate3d(-12%,0,0) scale(1.03); transition: transform 4400ms cubic-bezier(.38,.04,.62,.96); }
+.hw-reise-dunst { position: absolute; inset: 0; background: rgba(26,28,31,.25); pointer-events: none; }
+.hw-reise-flug > .hw-reise-zug { position: absolute; left: -86%; top: 24%; width: 72%; height: auto; transform: translate3d(0,0,0); will-change: transform; }
+.hw-reise-flug.bewegt > .hw-reise-zug { transform: translate3d(250vw,45vh,0); transition: transform 2800ms linear 550ms; }
+.hw-reise-strecke { position: absolute; left: 10%; right: 10%; bottom: calc(14% + env(safe-area-inset-bottom)); text-align: center; color: #fff; }
+.hw-reise-strecke b { display: block; font: var(--hw-t-zahl); letter-spacing: 2px; }
+.hw-reise-strecke small { display: block; margin-top: 6px; font: var(--hw-t-text); }
+.hw-reise-flug.ankunft { transform: scale(.8); opacity: .35; transition: transform 400ms ease-in, opacity 400ms ease-in; }
+#reise-overlay.faehrt:has(.hw-reise-flug.ankunft) { clip-path: circle(0px at var(--rx,50%) var(--ry,65%)); transition: clip-path 400ms ease-in; }
+@media (prefers-reduced-motion: reduce) {
+  #reise-overlay, #reise-overlay.faehrt { transition: opacity 150ms !important; clip-path: none !important; }
+  .hw-reise, .hw-reise-ziele, .hw-reise-flug, .hw-reise-flug.ankunft, .hw-reise-panorama, .hw-reise-flug > .hw-reise-zug { transition: none !important; animation: none !important; transform: none !important; }
+  .hw-reise-flug > .hw-reise-zug { left: 15% !important; top: 35% !important; }
+  .hw-wb, .hw-wb-maske, .hw-wb-frage, .hw-wb-vorfall { transition-duration: 150ms !important; }
+}
 /* ── G6 Kartenoberfläche, Start, Menü, Einführung, Erfolge, Einstellungen, Chronik, Zeitung, Spielende ── */

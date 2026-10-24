@@ -969,9 +969,9 @@
       }
     }
   }
-  function entscheidung(s2, typ, titel, text3, optionen3, standard, frist, daten) {
+  function entscheidung(s2, typ, titel, text3, optionen2, standard, frist, daten) {
     if (s2.entscheidungen.some((e) => e.typ === typ && e.daten.jahr === daten.jahr && e.daten.quartal === daten.quartal)) return;
-    s2.entscheidungen.push({ id: neueId(s2, "pl"), typ, titel, text: text3, woche: s2.woche, frist, optionen: optionen3, standard, daten });
+    s2.entscheidungen.push({ id: neueId(s2, "pl"), typ, titel, text: text3, woche: s2.woche, frist, optionen: optionen2, standard, daten });
   }
   function forecastErstellen(s2, q2) {
     const p2 = planJahr(s2);
@@ -3264,8 +3264,8 @@
     const wb = anlegen(s2, stadt, art, chance2(s2, 0.7) ? "1a" : "b", qm2, s2.woche, inHaus);
     const h4 = betroffeneHaeuser(s2, stadt)[0];
     const gruppe3 = h4 ? gruppenFuer(h4.format).sort((a2, b4) => (WETTBEWERB_UEBERSCHNEIDUNG[art][b4] ?? 0) - (WETTBEWERB_UEBERSCHNEIDUNG[art][a2] ?? 0))[0] : "damen";
-    const prozent6 = h4 ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h4, gruppe3)) * 100) : 0;
-    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe3].name + ": rund " + prozent6 + " %.", { stadt, modul: "wettbewerb" });
+    const prozent8 = h4 ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h4, gruppe3)) * 100) : 0;
+    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe3].name + ": rund " + prozent8 + " %.", { stadt, modul: "wettbewerb" });
     if ((art === "modehaus" || art === "premium") && qm2 >= 2300) {
       neueEntscheidung(s2, {
         typ: "wettbewerb_eroeffnung",
@@ -12260,8 +12260,8 @@
     const klima = abteilungArbeitsklima(a2);
     return ok5(`${ABTEILUNG_NAME[id]}: Gehalt ${Math.round(a2.gehaltFaktor * 100)} % des Standards. Moral ${klima.moral}/100, Fluktuationsrisiko ${Math.round(klima.fluktuation * 1e3) / 10} % im Jahr.`);
   }
-  function zentraleKuerzen(s2, prozent6) {
-    const p2 = clamp(prozent6, 0, 0.3);
+  function zentraleKuerzen(s2, prozent8) {
+    const p2 = clamp(prozent8, 0, 0.3);
     let fte2 = 0;
     for (const a2 of s2.hq.abteilungen) {
       const weg = Math.round(a2.fte * p2);
@@ -52416,7 +52416,7 @@
     const welt = (u, q2) => quer2 ? [q2, u] : [u, q2];
     const kr = (u) => 7 * Math.sin(u / 85);
     const reben = [], wege = [], mauern = [];
-    const band = (ziel, u0, u1, q2, breite, hoch, schritt = 6) => {
+    const band2 = (ziel, u0, u1, q2, breite, hoch, schritt = 6) => {
       for (let u = u0; u < u1 - 0.1; u += schritt) {
         const ua = u, ub = Math.min(u1, u + schritt);
         const qa = q2 + kr(ua), qb = q2 + kr(ub);
@@ -52442,8 +52442,8 @@
         }
       }
     };
-    for (let q2 = Q0 + 2; q2 < Q1 - 1; q2 += 3.6) band(reben, U0, U1, q2, 1.1, 1);
-    for (let q2 = Q0 + 20; q2 < Q1 - 10; q2 += 44) band(mauern, U0, U1, q2, 0.9, 0.7);
+    for (let q2 = Q0 + 2; q2 < Q1 - 1; q2 += 3.6) band2(reben, U0, U1, q2, 1.1, 1);
+    for (let q2 = Q0 + 20; q2 < Q1 - 10; q2 += 44) band2(mauern, U0, U1, q2, 0.9, 0.7);
     for (let u = U0 + 30; u < U1 - 10; u += 64) for (let q2 = Q0; q2 < Q1 - 0.1; q2 += 6) {
       const qa = q2, qb = Math.min(Q1, q2 + 6);
       const [ax, az] = welt(u + kr(u) * 0, qa), [bx, bz] = welt(u, qb);
@@ -54078,8 +54078,8 @@
           if (best && Math.abs(best.x - x2.x) > 0.01 && Math.abs(best.x - x2.x) < (best.L.breite + x2.L.breite) / 2 + 10) {
             const alt = x2.x;
             x2.x = best.x;
-            const eng = g2.some((y2) => y2 !== x2 && (y2.art === "strasse" || y2.art === "rand" || y2.art === "virtuell") && Math.abs(y2.x - x2.x) - (y2.L.breite + x2.L.breite) / 2 < 12);
-            if (eng) x2.x = alt;
+            const eng2 = g2.some((y2) => y2 !== x2 && (y2.art === "strasse" || y2.art === "rand" || y2.art === "virtuell") && Math.abs(y2.x - x2.x) - (y2.L.breite + x2.L.breite) / 2 < 12);
+            if (eng2) x2.x = alt;
           }
         }
         g2.sort((a2, b4) => a2.x - b4.x);
@@ -54484,11 +54484,11 @@
         const W3 = Math.min(b4.d - 24, zw(rb, 64, 92)), D = Math.min(b4.w - 30, zw(rb, 22, 28));
         const cz = b4.bahnhofLinie !== void 0 ? xL[b4.bahnhofLinie].z : b4.z + b4.d / 2;
         const plus = b4.seite !== "-x";
-        const band = Math.min(E9.typ === "mittelstadt" ? 16 : 26, Math.max(12, b4.w - D - 8));
-        const xB = plus ? b4.x + 2 + band + 1 : b4.x + b4.w - 2 - band - 1 - D;
+        const band2 = Math.min(E9.typ === "mittelstadt" ? 16 : 26, Math.max(12, b4.w - D - 8));
+        const xB = plus ? b4.x + 2 + band2 + 1 : b4.x + b4.w - 2 - band2 - 1 - D;
         neueParzelle(ctx, "slot:bahnhof", xB, klemm(cz - W3 / 2, b4.z + 4, b4.z + b4.d - W3 - 4), D, W3, plus ? ["+x", "-x"] : ["-x", "+x"], "frei", { klasse: 4 });
         b4.oben = plus;
-        b4.gleise = plus ? { x0: b4.x + 2, x1: b4.x + 2 + band, achse: "z" } : { x0: b4.x + b4.w - 2 - band, x1: b4.x + b4.w - 2, achse: "z" };
+        b4.gleise = plus ? { x0: b4.x + 2, x1: b4.x + 2 + band2, achse: "z" } : { x0: b4.x + b4.w - 2 - band2, x1: b4.x + b4.w - 2, achse: "z" };
         b4.vorplatz = plus ? { x: xB, z: b4.z, w: b4.x + b4.w - xB, d: b4.d } : { x: b4.x, z: b4.z, w: xB + D - b4.x, d: b4.d };
         if (b4.vorplatz.w < 3) b4.vorplatz = null;
         else {
@@ -54498,12 +54498,12 @@
       } else if (b4.art === "bahn") {
         const gross3 = b4.gross && (E9.typ === "metropole" || b4.essenHbf) && b4.w >= 140;
         const W3 = gross3 ? Math.min(b4.w - 24, zw(rb, 130, 150)) : Math.min(b4.w - 24, zw(rb, 64, 92)), D0 = gross3 ? 34 : zw(rb, 22, 28);
-        const band = b4.band ?? Math.min(E9.typ === "mittelstadt" ? 16 : 26, Math.max(12, b4.d - D0 - 8)), D = Math.min(D0, b4.d - band - 4);
+        const band2 = b4.band ?? Math.min(E9.typ === "mittelstadt" ? 16 : 26, Math.max(12, b4.d - D0 - 8)), D = Math.min(D0, b4.d - band2 - 4);
         const cx = b4.bahnhofLinie !== void 0 ? zL[b4.bahnhofLinie].x : b4.x + b4.w / 2;
-        const zB = b4.oben ? b4.z + 2 + band + 1 : b4.z + b4.d - 2 - band - 1 - D;
+        const zB = b4.oben ? b4.z + 2 + band2 + 1 : b4.z + b4.d - 2 - band2 - 1 - D;
         const bahnhofX = klemm(cx - W3 / 2, b4.x + 4, b4.x + b4.w - W3 - 4), bahnhofW = W3;
         neueParzelle(ctx, "slot:bahnhof", bahnhofX, zB, W3, D, b4.oben ? ["+z", "-z"] : ["-z", "+z"], "frei", { klasse: 4, ...b4.bahnhofExtra ?? {} });
-        b4.gleise = b4.oben ? { z0: b4.z + 2, z1: b4.z + 2 + band, achse: "x" } : { z0: b4.z + b4.d - 2 - band, z1: b4.z + b4.d - 2, achse: "x" };
+        b4.gleise = b4.oben ? { z0: b4.z + 2, z1: b4.z + 2 + band2, achse: "x" } : { z0: b4.z + b4.d - 2 - band2, z1: b4.z + b4.d - 2, achse: "x" };
         const rest = b4.oben ? b4.z + b4.d - zB - D : zB - b4.z;
         const haus2 = rest > 36 ? Math.min(18, rest - 24) : 0;
         if (haus2 >= 12) {
@@ -54785,11 +54785,11 @@
     for (const s2 of ["+z", "-z", "+x", "-x"]) {
       if (!t5[s2]) continue;
       const entlangX = s2[1] === "z";
-      const band = s2 === "+z" ? [z1 - t5[s2], z1] : s2 === "-z" ? [z0, z0 + t5[s2]] : s2 === "+x" ? [x1 - t5[s2], x1] : [x0, x0 + t5[s2]];
+      const band2 = s2 === "+z" ? [z1 - t5[s2], z1] : s2 === "-z" ? [z0, z0 + t5[s2]] : s2 === "+x" ? [x1 - t5[s2], x1] : [x0, x0 + t5[s2]];
       const weg = [];
       for (const sl of slots) {
         const q0 = entlangX ? sl.z : sl.x, q1 = entlangX ? sl.z + sl.d : sl.x + sl.w;
-        if (q1 > band[0] + 0.01 && q0 < band[1] - 0.01) weg.push(entlangX ? [sl.x, sl.x + sl.w] : [sl.z, sl.z + sl.d]);
+        if (q1 > band2[0] + 0.01 && q0 < band2[1] - 0.01) weg.push(entlangX ? [sl.x, sl.x + sl.w] : [sl.z, sl.z + sl.d]);
       }
       for (const [a2, e] of intervalleMinus(lauf[s2][0], lauf[s2][1], weg)) {
         if (e - a2 < 3.5) continue;
@@ -54797,8 +54797,8 @@
         for (const w2 of teileLaenge(e - a2, ctx.parz[0], ctx.parz[1], rb)) {
           const front2 = [frontUm[s2] ?? s2];
           const ex = frontUm[s2] ? { strasse: ["platz"] } : {};
-          if (entlangX) neueParzelle(ctx, "stadthaus", u, band[0], w2, t5[s2], front2, s2, ex);
-          else neueParzelle(ctx, "stadthaus", band[0], u, t5[s2], w2, front2, s2, ex);
+          if (entlangX) neueParzelle(ctx, "stadthaus", u, band2[0], w2, t5[s2], front2, s2, ex);
+          else neueParzelle(ctx, "stadthaus", band2[0], u, t5[s2], w2, front2, s2, ex);
           u += w2;
         }
       }
@@ -57608,7 +57608,7 @@ void main() {
     const w2 = K3.w;
     const park = d4 >= 34 ? 13 : 0, db = d4 - park;
     const H = 5.6, D = 1.3;
-    const band = ["#1f63b5", "#d92b2b", "#ef7d00", "#2e8b57"][v2 % 4];
+    const band2 = ["#1f63b5", "#d92b2b", "#ef7d00", "#2e8b57"][v2 % 4];
     S.quader(x0, 0, z0, x0 + w2 - D, H - 1.2, z0 + db - D, "#5a5f64");
     const wandF = REGION[K3.reg]?.wand ?? "#e4e3df";
     S.quader(x0, H - 1.2, z0, x0 + w2, H, z0 + db, wandF);
@@ -57625,18 +57625,18 @@ void main() {
         if (K3.leer) brett(K3, s2, a2, b4, y0, y1, -0.2);
         else if (!ein) {
           const t5 = waehle2(r4, ["T-SHIRTS 2,99 \u20AC", "JEANS 9,99 \u20AC", "ALLES F\xDCR KIDS", "SOCKEN 5 PAAR"]);
-          plakat2(scene2, s2, t5, (a2 + b4) / 2, (y0 + y1) / 2, -D + 0.02, passend(t5, b4 - a2 - 0.6, 0.6), "#ffffff", band);
+          plakat2(scene2, s2, t5, (a2 + b4) / 2, (y0 + y1) / 2, -D + 0.02, passend(t5, b4 - a2 - 0.6, 0.6), "#ffffff", band2);
         }
       });
       wand(s2, 0, s2.L, 0, H - 1.2, -D, 0, oe, wandF);
       if (K3.reg === "nord") for (let y2 = 0.85; y2 < H - 1.7; y2 += 0.5) for (const [a2, b4] of [[0, oe[0]?.a ?? s2.L], ...oe.map((g2, i) => [g2.b, oe[i + 1]?.a ?? s2.L])]) s2.q(a2, b4, y2 - 0.02, y2 + 0.02, 0, 0.02, dunkler(wandF, 0.06));
       s2.q(0, s2.L, 0, 0.35, 0, 0.12, "#8a8f93");
-      s2.q(0, s2.L, H - 1.6, H + 1.4, 0, 0.3, band);
+      s2.q(0, s2.L, H - 1.6, H + 1.4, 0, 0.3, band2);
       const yb0 = s2.seite === "+z" && K3.vorbauH ? Math.max(H - 1.6, K3.vorbauH) : H - 1.6, yb1 = H + 1.4;
       if (yb1 - yb0 >= 1.6) plakat2(scene2, s2, K3.name, s2.L * 0.4, (yb0 + yb1) / 2, 0.32, passend(K3.name, s2.L * 0.55, Math.min(2.2, yb1 - yb0 - 0.4)), "#ffffff");
       if (yb1 - yb0 >= 1.6) {
         s2.q(s2.L * 0.82 - 1.2, s2.L * 0.82 + 1.2, H - 1.5, H + 1.3, 0.3, 0.4, "#f6d32d");
-        plakat2(scene2, s2, "%", s2.L * 0.82, H - 0.1, 0.42, 2.2, band);
+        plakat2(scene2, s2, "%", s2.L * 0.82, H - 0.1, 0.42, 2.2, band2);
       }
     }
     const sz = seiten4[0];
@@ -57645,7 +57645,7 @@ void main() {
     if (e) {
       sz.q(e[0], e[1], 0.3, 3.3, 0, 2, GLAS_HELL);
       sz.q(e[0] + 0.15, e[1] - 0.15, 0.3, 2.6, 2, 2.06, K3.leer ? "#8a8f93" : GLAS_D);
-      sz.q(e[0] - 0.6, e[1] + 0.6, 3.3, 3.6, -0.2, 2.6, band);
+      sz.q(e[0] - 0.6, e[1] + 0.6, 3.3, 3.6, -0.2, 2.6, band2);
       if (!K3.leer) {
         for (const du of [-2.2, e[1] - e[0] + 2.2]) {
           const u = e[0] + du;
@@ -57654,7 +57654,7 @@ void main() {
           sz.q(u + 0.84, u + 0.9, 0.3, 1.76, 1.6, 1.66, "#7c848b");
           for (let k5 = 0; k5 < 5; k5++) sz.q(u - 0.75 + k5 * 0.32, u - 0.5 + k5 * 0.32, 0.9, 1.68, 1.4, 1.86, waehle2(r4, KLEID3));
         }
-        sz.kipp(0.8, 1.1, 0.06, e[1] + 4.2, 0.85, 3, band, 0, 0.2);
+        sz.kipp(0.8, 1.1, 0.06, e[1] + 4.2, 0.85, 3, band2, 0, 0.2);
         if (K3.leute) for (let i = 0; i < 3; i++) mensch(S, r4, x0 + zw(r4, e[0] - 3, e[1] + 3), 0.3, z0 + db + zw(r4, 1, 2.6));
       }
     }
@@ -57670,13 +57670,13 @@ void main() {
       parkreihe(S, r4, x0 + 1, x0 + w2 - 1, zp + 7.5, 5, 0.33, K3.leer ? 0.05 : 0.5);
       for (let x2 = x0 + 3; x2 < x0 + w2 - 1; x2 += 6) busch(S, r4, x2, 0.33, z0 + d4 - 0.6, 0.7);
       const px2 = x0 + w2 - 2, pz5 = z0 + d4 - 2, ph = 8;
-      S.box(1.6, ph, 0.7, px2, ph / 2, pz5, band);
+      S.box(1.6, ph, 0.7, px2, ph / 2, pz5, band2);
       const sp6 = new Seite2(S, px2 - 0.8, pz5 - 0.35, 1.6, 0.7, "+z");
       if (!K3.leer) {
         const pn = passend(K3.name, 1.4, 0.5);
         plakat2(scene2, sp6, K3.name, 0.8, ph - 0.7, 0.03, pn, "#ffffff");
         sp6.q(0.1, 1.5, ph - 3.6, ph - 1.4, 0, 0.04, "#f6d32d");
-        plakat2(scene2, sp6, "%", 0.8, ph - 2.5, 0.06, 1.6, band);
+        plakat2(scene2, sp6, "%", 0.8, ph - 2.5, 0.06, 1.6, band2);
       }
     }
     return H + 1;
@@ -59753,7 +59753,7 @@ void main() {
     const stil = ["pomo", "glas", "pomo", "stein", "glas", "stein", "pomo", "glas", "stein", "glas", "pomo", "stein"][v2];
     const basisF = K3.c(v2 >= 8 ? ["#c99a82", "#d8c39f", "#9aa1a6", "#d6a98c"][v2 - 8] : { pomo: ["#eadfce", "#e6dccf", "#efe4d2"][v2 % 3], stein: "#dcd9d2", glas: "#d5dcdf" }[stil]);
     const akzent = K3.c(["#3f8f8e", "#c46a55", "#2f6f8f", "#7a5aa0"][v2 % 4]);
-    const band = K3.c(["#d9a48f", "#c7b8a3", "#a9bfc9"][v2 % 3]);
+    const band2 = K3.c(["#d9a48f", "#c7b8a3", "#a9bfc9"][v2 % 3]);
     const A = clamp5(Math.min(w2, d4) * 0.32, 8, 18);
     const rueck = 0.7, ei = rueck + 0.1;
     K3.tRelief = 0.35;
@@ -59767,7 +59767,7 @@ void main() {
     for (const s2 of K3.seiten) {
       const uE = s2.L - A;
       K3.nutz[s2.seite] = uE;
-      erdgeschoss(K3, s2, { u1: uE, raster: 5, pfeiler: "#59636b", pb: 0.4, sockel: "#6b7177", sturz: stil === "pomo" ? band : dunkler(basisF, 0.04), glas: "#557286", tuer: "schiebe" });
+      erdgeschoss(K3, s2, { u1: uE, raster: 5, pfeiler: "#59636b", pb: 0.4, sockel: "#6b7177", sturz: stil === "pomo" ? band2 : dunkler(basisF, 0.04), glas: "#557286", tuer: "schiebe" });
       vordach(K3, s2, { stil: "glas", tiefe: 2.6, y: 4.6, u1: uE + 0.5, ecke: false });
       s2.q(uE, s2.L, 0.3, Ha - 0.3, 0, 0.05, "#6f93a6");
       for (let y2 = EG2; y2 < Hw; y2 += GH) s2.q(uE + 0.2, s2.L - 0.2, y2 - 0.3, y2 + 0.1, 0.05, 0.08, "#e1e6e8");
@@ -59787,7 +59787,7 @@ void main() {
       if (stil === "pomo") {
         for (let k5 = 0; k5 < nOG; k5++) {
           const y0 = EG2 + k5 * GH;
-          s2.q(0, uE, y0, y0 + 1, 0, 0.12, band);
+          s2.q(0, uE, y0, y0 + 1, 0, 0.12, band2);
           for (let u = 1.6; u < uE - 1; u += 3.2) {
             s2.q(u - 0.95, u + 0.95, y0 + 1.6, y0 + 3.5, 0, 0.18, akzent);
             s2.q(u - 0.75, u + 0.75, y0 + 1.8, y0 + 3.3, 0.18, 0.22, GLAS2);
@@ -59798,7 +59798,7 @@ void main() {
         s2.q(0, uE, Hw + 0.6, Hw + 0.9, 0, 0.25, akzent);
         if (s2.seite === "+z") {
           giebel(s2, uE * 0.3, Hw + 0.9, 0.25, 9, 3.2, 0.5, akzent);
-          giebel(s2, uE * 0.3, Hw + 1.3, 0.55, 6.5, 2.1, 0.1, band);
+          giebel(s2, uE * 0.3, Hw + 1.3, 0.55, 6.5, 2.1, 0.1, band2);
         }
         for (const uu of [uE * 0.3 - 4.5, uE * 0.3 + 4.5]) if (s2.seite === "+z") {
           const [x2, z6] = s2.welt(uu, 1.2);
@@ -60144,7 +60144,7 @@ void main() {
     const a2 = clamp5(Math.sqrt(Ltot * Hf / 6e3), 0.75, 1.6), b4 = a2 * 1.12, h4 = a2 * 0.5;
     const r4 = K3.r;
     const fleck = () => !san && r4() < 0.1 ? dunkler(alu, zw(r4, 0.03, 0.08)) : alu;
-    const band = san && n3 >= 3 ? [EG2 + 0.9, EG2 + GH - 0.5] : null;
+    const band2 = san && n3 >= 3 ? [EG2 + 0.9, EG2 + GH - 0.5] : null;
     K3.raster = 2 * a2;
     K3.fensterBand = false;
     for (const s2 of K3.seiten) {
@@ -60156,13 +60156,13 @@ void main() {
       const bandU1 = uN * 0.78;
       rautenFeld(s2, 0, uN, yA, gy0, a2, b4, h4, alu, {
         farbe: () => fleck(),
-        skip: band ? (u, y2) => u < bandU1 + a2 && y2 + b4 > band[0] && y2 - b4 < band[1] : null
+        skip: band2 ? (u, y2) => u < bandU1 + a2 && y2 + b4 > band2[0] && y2 - b4 < band2[1] : null
       });
-      if (band) {
-        s2.q(0, bandU1, band[0], band[1], 0, 0.1, GLAS_HELL2);
-        for (let u = 0; u <= bandU1; u += 1.6) s2.q(u - 0.06, u + 0.06, band[0], band[1], 0.1, 0.2, "#e3e7e9");
-        s2.q(0, bandU1, band[0] - 0.15, band[0], 0, 0.45, "#e3e7e9");
-        s2.q(0, bandU1, band[1], band[1] + 0.15, 0, 0.45, "#e3e7e9");
+      if (band2) {
+        s2.q(0, bandU1, band2[0], band2[1], 0, 0.1, GLAS_HELL2);
+        for (let u = 0; u <= bandU1; u += 1.6) s2.q(u - 0.06, u + 0.06, band2[0], band2[1], 0.1, 0.2, "#e3e7e9");
+        s2.q(0, bandU1, band2[0] - 0.15, band2[0], 0, 0.45, "#e3e7e9");
+        s2.q(0, bandU1, band2[1], band2[1] + 0.15, 0, 0.45, "#e3e7e9");
       }
       if (Gk) {
         s2.q(uN, s2.L, EG2, gy0, 0, 0.1, "#6f93a6");
@@ -60210,8 +60210,8 @@ void main() {
     technik2(K3, x0 + 3, z0 + 3, dx1 - 1, dz1 - 1, yD + 0.06, { max: 5, farbe: "#c4c6c4" });
     for (const s2 of K3.seiten) {
       const uN = K3.nutz[s2.seite];
-      const yL = band ? (band[1] + gy0) / 2 + 0.2 : yA + (gy0 - yA) * 0.55;
-      K3.zonen[s2.seite] = n3 >= 2 ? { u: uN * 0.5, y: yL, t: h4 + 0.18, hb: clamp5(uN * 0.075, 2, Math.min(4.5, (band ? gy0 - band[1] : gy0 - yA) * 0.34)), max: uN * 0.72, grund: alu, wand: true } : { u: uN * 0.5, y: (yA + gy0) / 2, t: h4 + 0.18, hb: Math.min(1.3, (gy0 - yA) * 0.45), max: uN * 0.7, grund: alu, wand: true };
+      const yL = band2 ? (band2[1] + gy0) / 2 + 0.2 : yA + (gy0 - yA) * 0.55;
+      K3.zonen[s2.seite] = n3 >= 2 ? { u: uN * 0.5, y: yL, t: h4 + 0.18, hb: clamp5(uN * 0.075, 2, Math.min(4.5, (band2 ? gy0 - band2[1] : gy0 - yA) * 0.34)), max: uN * 0.72, grund: alu, wand: true } : { u: uN * 0.5, y: (yA + gy0) / 2, t: h4 + 0.18, hb: Math.min(1.3, (gy0 - yA) * 0.45), max: uN * 0.7, grund: alu, wand: true };
     }
     return gy1 + 6;
   }
@@ -61443,9 +61443,9 @@ void main() {
     const tT = c.turm === "west" || c.turm === "doppel" ? tB : 0;
     let zA = z6 + 0.8, zB = z6 + d4 - 0.8;
     if (c.turm === "seitlich") zB = z6 + d4 - tB * 0.6;
-    const cz = (zA + zB) / 2, band = zB - zA;
-    const nb = c.schiff === "halle" ? band : c.schiff === "saal" ? Math.min(band, Math.max(6, band * (c.saalB ?? 0.72))) : Math.max(6, band * 0.44);
-    const sb2 = c.schiff === "basilika" ? (band - nb) / 2 : 0;
+    const cz = (zA + zB) / 2, band2 = zB - zA;
+    const nb = c.schiff === "halle" ? band2 : c.schiff === "saal" ? Math.min(band2, Math.max(6, band2 * (c.saalB ?? 0.72))) : Math.max(6, band2 * 0.44);
+    const sb2 = c.schiff === "basilika" ? (band2 - nb) / 2 : 0;
     const nz0 = cz - nb / 2, nz1 = cz + nb / 2, az0 = nz0 - sb2, az1 = nz1 + sb2;
     const rc = c.chor === "gerade" ? 0 : nb * 0.45;
     const nx0 = x2 + rc + 0.3, fx = x2 + w2 - tT, nx1 = fx + (tT ? 0.4 : 0);
@@ -63683,14 +63683,14 @@ void main() {
   function konkurrenzZentra(S, scene2, p2) {
     const { x: x2, z: z6 } = p2, r4 = rng3(`zentra:${p2.seed}`);
     const w2 = p2.w ?? 46, d4 = p2.d ?? 36, G3 = 5, eg = 5.5, gh = 3.8, H = eg + (G3 - 1) * gh;
-    const weiss2 = "#f2f0ea", navy = KONKURRENZ.zentra.farbe, band = "#45525c", R11 = Math.min(12, d4 * 0.35);
+    const weiss2 = "#f2f0ea", navy = KONKURRENZ.zentra.farbe, band2 = "#45525c", R11 = Math.min(12, d4 * 0.35);
     S.quader(x2, 0, z6, x2 + w2 - R11, H, z6 + d4, weiss2);
     S.quader(x2 + w2 - R11, 0, z6, x2 + w2, H, z6 + d4 - R11, weiss2);
     const ec2 = new three_module_exports.CylinderGeometry(R11, R11, H, 16, 1, false, 0, PI2 / 2);
     ec2.translate(x2 + w2 - R11, H / 2, z6 + d4 - R11);
     S.add(ec2, weiss2);
     for (let k5 = 0; k5 < G3; k5++) {
-      const y0 = k5 === 0 ? 0.3 : eg + (k5 - 1) * gh + 1, y1 = k5 === 0 ? eg - 1 : y0 + 1.9, c = k5 === 0 ? "#56707f" : band;
+      const y0 = k5 === 0 ? 0.3 : eg + (k5 - 1) * gh + 1, y1 = k5 === 0 ? eg - 1 : y0 + 1.9, c = k5 === 0 ? "#56707f" : band2;
       S.quader(x2 + 1, y0, z6 + d4, x2 + w2 - R11, y1, z6 + d4 + 0.12, c);
       S.quader(x2 + w2, y0, z6 + 1, x2 + w2 + 0.12, y1, z6 + d4 - R11, c);
       const g2 = new three_module_exports.CylinderGeometry(R11 + 0.1, R11 + 0.1, y1 - y0, 16, 1, true, 0, PI2 / 2);
@@ -63704,7 +63704,7 @@ void main() {
     S.quader(x2 + w2, eg - 0.85, z6, x2 + w2 + 2.4, eg - 0.35, z6 + d4 - R11, navy);
     const sx = x2 + w2 * 0.3;
     S.quader(sx - 3, 0, z6 + d4 - 4, sx + 3, H + 7, z6 + d4 + 0.5, weiss2);
-    for (let y2 = 2; y2 < H + 5; y2 += 1.4) S.quader(sx - 0.6, y2, z6 + d4 + 0.5, sx + 0.6, y2 + 0.8, z6 + d4 + 0.58, band);
+    for (let y2 = 2; y2 < H + 5; y2 += 1.4) S.quader(sx - 0.6, y2, z6 + d4 + 0.5, sx + 0.6, y2 + 0.8, z6 + d4 + 0.58, band2);
     S.quader(sx - 3.2, H + 3, z6 + d4 + 0.5, sx + 3.2, H + 7, z6 + d4 + 0.65, navy);
     schildPasst(scene2, "ZENTRA", "+z", sx, H + 5, z6 + d4 + 0.5, 2.2, 5.6, "#ffffff");
     schildPasst(scene2, "Zentra Kaufhaus", "+x", z6 + (d4 - R11) / 2, H - 1.5, x2 + w2, 1.6, d4 - R11 - 3, navy);
@@ -130859,9 +130859,9 @@ void main() {
       return;
     }
     if (typ === "ausflug") {
-      const rf = o4.rumpf ?? "#f4f2ec", band = o4.band ?? "#1f4f8f";
+      const rf = o4.rumpf ?? "#f4f2ec", band2 = o4.band ?? "#1f4f8f";
       rumpf4(L3, B8, -0.6, 1.3, rf, 0.22);
-      rumpf4(L3 - 0.1, B8 + 0.05, 0.9, 1.25, band, 0.22);
+      rumpf4(L3 - 0.1, B8 + 0.05, 0.9, 1.25, band2, 0.22);
       box(L3 * 0.7, 2.3, B8 - 0.8, -L3 * 0.05, 2.45, rf);
       box(L3 * 0.7 + 0.04, 1.2, B8 - 0.76, -L3 * 0.05, 2.5, "#3c4852");
       for (let u = -L3 * 0.38; u < L3 * 0.3; u += 1.6) box(0.12, 1.2, B8 - 0.72, u, 2.5, rf);
@@ -130873,7 +130873,7 @@ void main() {
       box(L3 * 0.5, 0.7, 0.06, -L3 * 0.14, 6.2, "#e9e7e1", -B8 / 2 + 0.65);
       box(3.2, 1.6, 3.6, L3 * 0.08, 6.6, rf);
       box(3.25, 0.7, 3.65, L3 * 0.08, 6.8, "#3c4852");
-      box(1.4, 1.6, 1.4, -L3 * 0.3, 6.5, band);
+      box(1.4, 1.6, 1.4, -L3 * 0.3, 6.5, band2);
       box(1.5, 0.3, 1.5, -L3 * 0.3, 7.4, "#2b2f33");
       const rs = rng3(Math.floor(Math.abs(x2 * 7 + z6 * 3)));
       for (let i = 0; i < 10; i++) {
@@ -130886,7 +130886,7 @@ void main() {
       }
       if (o4.name) {
         const [nx, nz] = P5(-L3 / 2 + 3, B8 / 2 - 0.35);
-        ftext(scene2, R2(nx, nz, c, -s2, L3), o4.name, L3 * 0.38, y2 + 4.75, 0.07, 0.75, L3 * 0.38, band);
+        ftext(scene2, R2(nx, nz, c, -s2, L3), o4.name, L3 * 0.38, y2 + 4.75, 0.07, 0.75, L3 * 0.38, band2);
       }
       return;
     }
@@ -132896,11 +132896,11 @@ void main() {
     roh: kanalRoh
   });
   function parkhaus2(S, scene2, p2, r4, x0, z0, w2, d4, decks, o4 = {}) {
-    const gh = 2.9, H = decks * gh, band = o4.band ?? "#d9d6cf", akzent = o4.akzent ?? null;
+    const gh = 2.9, H = decks * gh, band2 = o4.band ?? "#d9d6cf", akzent = o4.akzent ?? null;
     for (let k5 = 0; k5 <= decks; k5++) S.quader(x0, k5 * gh, z0, x0 + w2, k5 * gh + 0.35, z0 + d4, "#bdb9b1");
     for (let x2 = x0 + 0.4; x2 <= x0 + w2 - 0.3; x2 += 7.5) for (const z6 of [z0 + 0.4, z0 + d4 - 0.4, z0 + d4 / 2]) S.box(0.6, H, 0.6, x2, H / 2, z6, "#a9a59c");
     for (const F3 of sichtbar2(p2, x0, z0, w2, d4)) for (let k5 = 1; k5 <= decks; k5++) {
-      fb(S, F3, -0.05, F3.L + 0.05, k5 * gh + 0.35, k5 * gh + 1.25, 0, 0.12, akzent && k5 % 2 ? akzent : band);
+      fb(S, F3, -0.05, F3.L + 0.05, k5 * gh + 0.35, k5 * gh + 1.25, 0, 0.12, akzent && k5 % 2 ? akzent : band2);
       if (k5 < decks) {
         for (let u = 3; u < F3.L - 2; u += zw(r4, 3, 6)) if (r4() < 0.6) {
           const [ax, az] = wp(F3, u, -2.6);
@@ -132908,7 +132908,7 @@ void main() {
         }
       }
     }
-    fb(S, seitenRahmen(x0, z0, w2, d4)["+z"], 0, 0.1, 0, 0.1, 0, 0.1, band);
+    fb(S, seitenRahmen(x0, z0, w2, d4)["+z"], 0, 0.1, 0, 0.1, 0, 0.1, band2);
     for (let x2 = x0 + 2; x2 < x0 + w2 - 2; x2 += 2.7) if (r4() < 0.55) westAuto(S, x2, z0 + 3 + (r4() < 0.5 ? 0 : d4 - 6), PI6 / 2, waehle2(r4, ["pkw", "kombi", "kompakt"]), waehle2(r4, AUTOFARBEN2), H + 0.35);
     for (let x2 = x0 + 4; x2 < x0 + w2; x2 += 14) laterne2(S, x2, z0 + d4 / 2, 5, H + 0.35, "mast");
     return H + 1.3;
@@ -134316,14 +134316,14 @@ void main() {
       }
     } else if (v2 === "kranhaus") {
       const tw = Math.min(16, W3 * 0.28), td = Math.min(16, D - 8), z0 = (D - td) / 2, Ht = 58, Ha = 16;
-      const glas3 = "#5d7383", band = "#e9e7e2";
+      const glas3 = "#5d7383", band2 = "#e9e7e2";
       S.quader(2, 0.3, z0, 2 + tw, Ht, z0 + td, glas3);
       for (let y2 = 4; y2 < Ht - 1; y2 += 3.4) {
-        S.quader(1.9, y2, z0 - 0.1, 2 + tw + 0.1, y2 + 0.5, z0 + td + 0.1, band);
+        S.quader(1.9, y2, z0 - 0.1, 2 + tw + 0.1, y2 + 0.5, z0 + td + 0.1, band2);
       }
       const xa1 = W3 - 2;
       S.quader(2 + tw, Ht - Ha, z0, xa1, Ht, z0 + td, glas3);
-      for (let y2 = Ht - Ha + 0.8; y2 < Ht; y2 += 3.4) S.quader(2 + tw, y2, z0 - 0.1, xa1 + 0.1, y2 + 0.5, z0 + td + 0.1, band);
+      for (let y2 = Ht - Ha + 0.8; y2 < Ht; y2 += 3.4) S.quader(2 + tw, y2, z0 - 0.1, xa1 + 0.1, y2 + 0.5, z0 + td + 0.1, band2);
       S.quader(2 + tw, Ht - Ha - 1.2, z0 - 0.3, xa1 + 0.3, Ht - Ha, z0 + td + 0.3, "#c9ccd0");
       S.quader(1.6, Ht, z0 - 0.4, xa1 + 0.4, Ht + 1, z0 + td + 0.4, "#c9ccd0");
       for (const zz of [z0 + 1, z0 + td - 1]) balken(S, [xa1 - 18, 0.3, zz], [xa1 - 3, Ht - Ha - 1.2, zz], 1.4, 1.4, "#b8433a");
@@ -135986,7 +135986,7 @@ void main() {
     }
   }
   function mallFront(S, scene2, achse, a2, b4, pos, ra, r4, d4, box, L3, istTuer, deko2, artAn) {
-    const rahmen2 = [HS_BLAU, "#f4f3ef", "#1f2328", HS_BLAU][ra.v % 4], band = rahmen2 === HS_BLAU ? "#f4f3ef" : HS_BLAU;
+    const rahmen2 = [HS_BLAU, "#f4f3ef", "#1f2328", HS_BLAU][ra.v % 4], band2 = rahmen2 === HS_BLAU ? "#f4f3ef" : HS_BLAU;
     const eg = ra.e === 0;
     const tuerOffen = (m) => istTuer(m) || !eg && achse === "z" && Math.abs(m - (ra.gx * R3 + 2.5)) < 1;
     box(b4 - a2, 0.08, 0.6, (a2 + b4) / 2, 0.04, "#cfd3d6");
@@ -136019,11 +136019,11 @@ void main() {
         if (achse === "z") {
           S.box(hh * 1.3, hh * 1.3, 0.1, u - 3.6, y2, pos + 0.1, HS_ROT);
           wandschild(S, scene2, "H", "x", u - 3.6, y2, pos + 0.16, { schrift: "#ffffff", hoehe: hh });
-          wandschild(S, scene2, "HARTWIG SPORT", "x", u + 0.4, y2, Lq.z, { schrift: band, hoehe: hh * 0.8 });
+          wandschild(S, scene2, "HARTWIG SPORT", "x", u + 0.4, y2, Lq.z, { schrift: band2, hoehe: hh * 0.8 });
         } else {
           S.box(0.1, hh * 1.3, hh * 1.3, pos + 0.1, y2, u - 3.6, HS_ROT);
           wandschild(S, scene2, "H", "z", u - 3.6, y2, pos + 0.16, { schrift: "#ffffff", hoehe: hh });
-          wandschild(S, scene2, "HARTWIG SPORT", "z", u + 0.4, y2, Lq.x, { schrift: band, hoehe: hh * 0.8 });
+          wandschild(S, scene2, "HARTWIG SPORT", "z", u + 0.4, y2, Lq.x, { schrift: band2, hoehe: hh * 0.8 });
         }
       }
     }
@@ -137562,7 +137562,7 @@ void main() {
   function loft(c) {
     const { S, x: x2, z: z6, w: w2, d: d4, m, E: E9, r: r4 } = c;
     const v2 = c.v;
-    const stein = waehle2(v2, ["#a8664f", "#9e5c47", "#c9a46b", "#7d4a3a", "#b9785e"]), lisene = dunkler(stein, 0.06), band = stein === "#c9a46b" ? "#8a6440" : "#d8c8ad", stahl = waehle2(v2, ["#2f3438", "#2f4a3e", "#5a2f2f"]);
+    const stein = waehle2(v2, ["#a8664f", "#9e5c47", "#c9a46b", "#7d4a3a", "#b9785e"]), lisene = dunkler(stein, 0.06), band2 = stein === "#c9a46b" ? "#8a6440" : "#d8c8ad", stahl = waehle2(v2, ["#2f3438", "#2f4a3e", "#5a2f2f"]);
     const H = m.H, achsLoft = waehle2(v2, [4.5, 3.6, 5.4]), shed = v2() < 0.6, schlot3 = v2() < 0.7;
     S.quader(x2, 0, z6, x2 + w2, H, z6 + d4, stein);
     for (const F3 of c.F) {
@@ -137576,18 +137576,18 @@ void main() {
           q(F3, u2 - fw / 2, u2 + fw / 2, y0, y1, 0, 0.06, glasVon(e, r4, "#5d6f78"));
           for (let k5 = 1; k5 < 4; k5++) q(F3, u2 - fw / 2 + k5 * fw / 4 - 0.04, u2 - fw / 2 + k5 * fw / 4 + 0.04, y0, y1, 0.06, 0.1, stahl);
           for (const yy of [y0 + (y1 - y0) * 0.4, y0 + (y1 - y0) * 0.75]) q(F3, u2 - fw / 2, u2 + fw / 2, yy - 0.04, yy + 0.04, 0.06, 0.1, stahl);
-          q(F3, u2 - fw / 2 - 0.25, u2 + fw / 2 + 0.25, y1, y1 + 0.4, 0, 0.12, band);
-          q(F3, u2 - 0.25, u2 + 0.25, y1 + 0.05, y1 + 0.55, 0, 0.16, band);
-          q(F3, u2 - fw / 2 - 0.1, u2 + fw / 2 + 0.1, y0 - 0.16, y0, 0, 0.18, band);
+          q(F3, u2 - fw / 2 - 0.25, u2 + fw / 2 + 0.25, y1, y1 + 0.4, 0, 0.12, band2);
+          q(F3, u2 - 0.25, u2 + 0.25, y1 + 0.05, y1 + 0.55, 0, 0.16, band2);
+          q(F3, u2 - fw / 2 - 0.1, u2 + fw / 2 + 0.1, y0 - 0.16, y0, 0, 0.18, band2);
         });
-        if (e.k > 0) q(F3, -L22, L22, e.y - 0.12, e.y + 0.12, 0, 0.1, band);
+        if (e.k > 0) q(F3, -L22, L22, e.y - 0.12, e.y + 0.12, 0, 0.1, band2);
       }
       for (let i = 0; i <= ax.length; i++) {
         const u2 = i === 0 ? ax[0] - achsLoft / 2 : i === ax.length ? ax[i - 1] + achsLoft / 2 : (ax[i - 1] + ax[i]) / 2;
         q(F3, u2 - 0.4, u2 + 0.4, 0.7, H - 0.4, 0, 0.32, lisene);
       }
       for (let u2 = -L22 + 0.3; u2 < L22 - 0.2; u2 += 0.6) q(F3, u2 - 0.15, u2 + 0.15, H - 1, H - 0.75, 0, 0.22, lisene);
-      q(F3, -L22, L22, H - 0.75, H - 0.55, 0, 0.3, band);
+      q(F3, -L22, L22, H - 0.75, H - 0.55, 0, 0.3, band2);
     }
     gesims(S, x2, z6, w2, d4, H, 0.5, 0.35, lisene);
     if (shed) {
@@ -137613,7 +137613,7 @@ void main() {
     }
     if (schlot3) {
       S.add(new three_module_exports.CylinderGeometry(0.9, 1.3, H + 15, 10).translate(x2 + 3, (H + 15) / 2, z6 + 3), stein);
-      for (const y2 of [H + 6, H + 12, H + 14.6]) S.add(new three_module_exports.CylinderGeometry(1.1, 1.1, 0.4, 10).translate(x2 + 3, y2, z6 + 3), band);
+      for (const y2 of [H + 6, H + 12, H + 14.6]) S.add(new three_module_exports.CylinderGeometry(1.1, 1.1, 0.4, 10).translate(x2 + 3, y2, z6 + 3), band2);
     }
     const Fz = c.F[0], u = c.eingangU;
     q(c.Fe, u - 2.2, u + 2.2, 0, 3.8, 0, 0.08, "#2f4a3e");
@@ -139572,12 +139572,12 @@ void main() {
       box(0.1, 1.2, 2.2, 5.72, 2.1, "#2f3a42");
     } else if (typ === "tram" || typ === "tram2") {
       const wagen2 = typ === "tram2" ? [7.6, -7.6] : [0];
-      const unten = farbe3 ?? "#efe2b8", band = "#c8463c";
+      const unten = farbe3 ?? "#efe2b8", band2 = "#c8463c";
       for (const o4 of wagen2) {
         const L3 = 14.6;
         box(L3 - 1.6, 0.25, 2.2, o4, 0.45, "#2b2f33");
         box(L3 - 1.8, 1.25, 2.4, o4, 1.2, unten);
-        box(L3 - 1.9, 0.26, 2.44, o4, 1.2, band);
+        box(L3 - 1.9, 0.26, 2.44, o4, 1.2, band2);
         box(L3 - 2.2, 1, 2.38, o4, 2.32, "#3c4852");
         box(L3 - 2, 0.5, 2.36, o4, 3.07, unten);
         for (const e of [-1, 1]) {
@@ -140908,10 +140908,10 @@ void main() {
       kg.scale(1, 0.93, 1);
       kg.translate(cx, yk, cz);
       S.add(kg, "#c9cfd4");
-      const band = new three_module_exports.SphereGeometry(rk + 0.12, 18, 3, 0, 2 * PI9, PI9 * 0.44, PI9 * 0.12);
-      band.scale(1, 0.93, 1);
-      band.translate(cx, yk, cz);
-      S.add(band, "#34424d");
+      const band2 = new three_module_exports.SphereGeometry(rk + 0.12, 18, 3, 0, 2 * PI9, PI9 * 0.44, PI9 * 0.12);
+      band2.scale(1, 0.93, 1);
+      band2.translate(cx, yk, cz);
+      S.add(band2, "#34424d");
       for (const t5 of [0.3, 0.62, 0.72]) {
         const rr5 = Math.sin(t5 * PI9) * (rk + 0.15), yy = Math.cos(t5 * PI9) * rk * 0.93;
         zyl6(S, rr5, rr5, 0.25, cx, yk + yy, cz, "#e9ecee", 18, true);
@@ -144386,7 +144386,7 @@ void main() {
   }
   function schumacherRoh(S, scene2, p2, r4) {
     const W3 = p2.w, D = p2.d, T = Math.min(D - 1, 12.5), vor = Math.min(3, D - T), zv = D - vor, z0 = zv - T;
-    const stein = waehle2(r4, NF.rotklinker), band = dunkler(stein, 0.06), n3 = 3 + Math.floor(r4() * 2), sock = 1.1, gh = 2.9, H = sock + n3 * gh;
+    const stein = waehle2(r4, NF.rotklinker), band2 = dunkler(stein, 0.06), n3 = 3 + Math.floor(r4() * 2), sock = 1.1, gh = 2.9, H = sock + n3 * gh;
     const flach = r4() < 0.5;
     const ne = Math.max(1, Math.round(W3 / 16)), eing = Array.from({ length: ne }, (_, i) => (i + 0.5) * W3 / ne);
     const fass = (F3, s2) => {
@@ -144408,10 +144408,10 @@ void main() {
         oe.push({ u0: e - 0.75, u1: e + 0.75, v0: 0.3, v1: 3, art: "rund", typ: "tuer", fuell: waehle2(r4, NF.tuer) });
         for (let k5 = 0; k5 < n3; k5++) oe.push(fenster4(e, sock + k5 * gh + 2, 0.6, 1.6, null, { sprosse: false }));
       }
-      lochwand3(S, F3, flach ? [0, 0, L3, H + 0.9] : [0, 0, L3, H], oe, stein, { rahmen: WEISS, bank: band });
+      lochwand3(S, F3, flach ? [0, 0, L3, H + 0.9] : [0, 0, L3, H], oe, stein, { rahmen: WEISS, bank: band2 });
       const bd = [[0, 0, L3, 0.35]];
       for (let k5 = 1; k5 <= n3; k5++) bd.push([0, sock + k5 * gh - 0.18, L3, sock + k5 * gh - 0.04]);
-      platten(S, F3, bd, 0, 0.1, band);
+      platten(S, F3, bd, 0, 0.1, band2);
       for (const [u, y2] of logg) {
         fb3(S, F3, u - 1.1, u + 1.1, y2 + 0.2, y2 + 0.32, -1.1, 0.12, WEISS);
         fb3(S, F3, u - 1.1, u + 1.1, y2 + 1, y2 + 1.1, -0.05, 0.08, "#3a3f44");
@@ -144420,7 +144420,7 @@ void main() {
         platten(S, F3, [[e - 1.05, 0.3, e - 0.75, 3.3], [e + 0.75, 0.3, e + 1.05, 3.3], [e - 1.05, 3, e + 1.05, 3.3]], 0, 0.16, "#d9cdb5");
         fb3(S, F3, e - 1.2, e + 1.2, 0.3, 0.45, 0, 1.2, GRANIT);
       }
-      if (flach) platten(S, F3, [[-0.1, H + 0.75, L3 + 0.1, H + 0.95]], -0.4, 0.15, band);
+      if (flach) platten(S, F3, [[-0.1, H + 0.75, L3 + 0.1, H + 0.95]], -0.4, 0.15, band2);
       if (front2 && s2 === "+z") for (const e of eing) {
         platten(S, F3, [[e - 1.9, 0.35, e - 1.3, H + (flach ? 1.5 : 0.6)], [e + 1.3, 0.35, e + 1.9, H + (flach ? 1.5 : 0.6)]], 0, 0.32, dunkler(stein, 0.03));
         if (flach) fpolyF(S, F3, [[e - 1.9, H + 1.5], [e + 1.9, H + 1.5], [e, H + 2.6]], -0.4, 0.3, stein);
@@ -144437,7 +144437,7 @@ void main() {
         S.box(0.9, 0.9, 0.06, x2, H + 1.3, zv - 1.18, GLAS8);
         S.quader(x2 - 0.85, H + 2.1, zv - 2.8, x2 + 0.85, H + 2.25, zv - 1, "#8c3b2b");
       }
-      for (let x2 = 8; x2 < W3 - 4; x2 += 16) S.quader(x2, H + dh * 0.5, z0 + T / 2 - 0.5, x2 + 0.9, H + dh + 0.8, z0 + T / 2 + 0.4, band);
+      for (let x2 = 8; x2 < W3 - 4; x2 += 16) S.quader(x2, H + dh * 0.5, z0 + T / 2 - 0.5, x2 + 0.9, H + dh + 0.8, z0 + T / 2 + 0.4, band2);
       top = H + dh;
     }
     if (vor > 1) {
@@ -146566,7 +146566,7 @@ void main() {
   function turmRaster(S, scene2, p2, r4, cx, cz, o4 = {}) {
     const a2 = o4.a ?? 28, b4 = o4.b ?? 24, n3 = o4.n ?? 34, gh = 3.6, pod = 8;
     const pal = o4.pal ?? waehle2(r4, ["weiss", "bronze"]);
-    const glas3 = pal === "weiss" ? "#3f4c57" : "#4a4a45", band = pal === "weiss" ? "#ecebe6" : "#7a6650", fin = pal === "weiss" ? "#e2e1dc" : "#6b5a48";
+    const glas3 = pal === "weiss" ? "#3f4c57" : "#4a4a45", band2 = pal === "weiss" ? "#ecebe6" : "#7a6650", fin = pal === "weiss" ? "#e2e1dc" : "#6b5a48";
     const x0 = cx - a2 / 2, z0 = cz - b4 / 2, H = pod + n3 * gh;
     if (o4.podium !== false) podium(S, scene2, p2, x0 - 6, z0 - 4, a2 + 12, b4 + 10, pod - 1, { stein: pal === "weiss" ? "#e3e1db" : "#c9b9a3" });
     const f13 = 2.2, pts = [[x0 + f13, z0 + b4], [x0 + a2 - f13, z0 + b4], [x0 + a2, z0 + b4 - f13], [x0 + a2, z0 + f13], [x0 + a2 - f13, z0], [x0 + f13, z0], [x0, z0 + f13], [x0, z0 + b4 - f13]];
@@ -146574,13 +146574,13 @@ void main() {
     for (const F3 of kanten2(pts)) {
       if (!sichtF(p2, F3)) continue;
       if (F3.L > 4) {
-        for (let y2 = pod + gh, i = 0; y2 < H - 2 * gh; y2 += gh, i++) fb4(S, F3, 0, F3.L, y2 - 1, y2, 0, 0.35, band);
+        for (let y2 = pod + gh, i = 0; y2 < H - 2 * gh; y2 += gh, i++) fb4(S, F3, 0, F3.L, y2 - 1, y2, 0, 0.35, band2);
         for (const u of achsen5(0, F3.L, 3, 0.2)) fb4(S, F3, u - 0.2, u + 0.2, pod, H - 2 * gh, 0, 0.55, fin);
-      } else for (let y2 = pod + gh; y2 < H - 2 * gh; y2 += gh) fb4(S, F3, 0, F3.L, y2 - 1, y2, 0, 0.35, band);
-      fb4(S, F3, -0.05, F3.L + 0.05, H - 2 * gh, H, 0, 0.4, band);
+      } else for (let y2 = pod + gh; y2 < H - 2 * gh; y2 += gh) fb4(S, F3, 0, F3.L, y2 - 1, y2, 0, 0.35, band2);
+      fb4(S, F3, -0.05, F3.L + 0.05, H - 2 * gh, H, 0, 0.4, band2);
     }
-    S.quader(cx - a2 * 0.3, H, cz - b4 * 0.3, cx + a2 * 0.3, H + 4.5, cz + b4 * 0.3, band);
-    S.quader(cx - a2 * 0.32, H + 4.5, cz - b4 * 0.32, cx + a2 * 0.32, H + 4.9, cz + b4 * 0.32, dunkler(band, 0.1));
+    S.quader(cx - a2 * 0.3, H, cz - b4 * 0.3, cx + a2 * 0.3, H + 4.5, cz + b4 * 0.3, band2);
+    S.quader(cx - a2 * 0.32, H + 4.5, cz - b4 * 0.32, cx + a2 * 0.32, H + 4.9, cz + b4 * 0.32, dunkler(band2, 0.1));
     zyl8(S, 0.3, 0.5, 16, cx + a2 * 0.15, H + 4.9, cz, "#d9dcdf", 6);
     const [name2, farbe3] = o4.bank ?? waehle2(r4, BANKEN);
     for (const [k5, F3] of seiten2(p2, x0, z0, a2, b4)) logo(S, scene2, teil4(F3, f13, F3.L - f13), (F3.L - 2 * f13) / 2, H - gh, 0.45, 4.2, farbe3, null);
@@ -161243,11 +161243,11 @@ void main() {
     }
     return d4.standard;
   }
-  function meldeSchalter({ schluessel, titel, gruppe: gruppe3, art = "schalter", optionen: optionen3, standard }) {
+  function meldeSchalter({ schluessel, titel, gruppe: gruppe3, art = "schalter", optionen: optionen2, standard }) {
     if (!/^[a-zA-Z0-9_-]+$/.test(schluessel ?? "") || !titel || !gruppe3 || !["schalter", "auswahl", "regler"].includes(art))
       throw new Error("Ung\xFCltige Einstellungsdefinition.");
     if (definitionen2.has(schluessel)) return;
-    const d4 = { schluessel, titel, gruppe: gruppe3, art, optionen: optionen3, standard };
+    const d4 = { schluessel, titel, gruppe: gruppe3, art, optionen: optionen2, standard };
     if (art === "schalter" && typeof standard !== "boolean") throw new Error("Schalter ben\xF6tigen einen booleschen Standardwert.");
     if (art === "auswahl" && !optionenVon(d4).includes(standard)) throw new Error("Auswahlstandard fehlt in Optionen.");
     definitionen2.set(schluessel, d4);
@@ -161300,7 +161300,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "6cc8f11" : "Entwicklung";
+  var version = () => true ? "6b5d6b7" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld3(d4) {
@@ -161432,6 +161432,7 @@ void main() {
   // src/ui/komponenten.js
   var bereich = (name2, symbol2 = name2, { voll: voll2 = false } = {}) => `<i class="hk-bereich hw-marker" data-bereich="${esc2(name2)}" data-symbol="${esc2(symbol2)}"${voll2 ? ' data-hoehe="voll"' : ""} aria-hidden="true"></i>`;
   var rumpf2 = (html) => `<div class="hw-rumpf">${html}</div>`;
+  var band = (html) => `<section class="hw-band">${html}</section>`;
   function sprecher({ text: text3, unter = "", person: person3 = "", ton: ton2 = "" }) {
     return `<div class="hw-sprecher"${ton2 ? ` data-ton="${esc2(ton2)}"` : ""} role="note"><div class="hw-sprecher-text"><span>${text3}${unter ? `<small class="hw-sprecher-unter">${esc2(unter)}</small>` : ""}</span></div>${person3 ? `<span class="hw-sprecher-figur" aria-hidden="true">${person3}</span>` : ""}<div class="hw-griff" aria-hidden="true"></div></div>`;
   }
@@ -161470,7 +161471,7 @@ void main() {
   var stepper = ({ wert, unter = "", attrMinus = "", attrPlus = "", minusAus = false, plusAus = false, label = "", gross: gross3 = true }) => `<div class="hw-stepper hw-kontur${gross3 ? " gross" : ""}"${label ? ` role="group" aria-label="${esc2(label)}"` : ""}><button type="button" class="hw-kontur" aria-label="weniger" ${attrMinus}${minusAus ? " disabled" : ""}></button><output>${esc2(wert)}${unter ? `<small>${esc2(unter)}</small>` : ""}</output><button type="button" class="hw-kontur plus" aria-label="mehr" ${attrPlus}${plusAus ? " disabled" : ""}></button></div>`;
   var feld = (name2, html) => `<div class="hw-feld"><span class="hw-marke hw-feldname">${esc2(name2)}</span>${html}</div>`;
   var schalter = ({ text: text3, unter = "", an, attr = "" }) => `<button type="button" class="hw-schalterzeile" aria-pressed="${an ? "true" : "false"}" ${attr}><span class="hw-schalter hw-kontur" role="presentation" aria-checked="${an ? "true" : "false"}"></span><span>${esc2(text3)}${unter ? `<small>${esc2(unter)}</small>` : ""}</span></button>`;
-  var seg = (optionen3, aktiv7, attr) => `<div class="hw-segment" role="group">${optionen3.map(([w2, t5]) => `<button type="button" aria-pressed="${w2 === aktiv7}" ${attr(w2)}>${esc2(t5)}</button>`).join("")}</div>`;
+  var seg = (optionen2, aktiv7, attr) => `<div class="hw-segment" role="group">${optionen2.map(([w2, t5]) => `<button type="button" aria-pressed="${w2 === aktiv7}" ${attr(w2)}>${esc2(t5)}</button>`).join("")}</div>`;
   var leer3 = (grund2, titel = "", aktion2 = "") => `<div class="hw-leer">${titel ? `<b>${esc2(titel)}</b>` : ""}${esc2(grund2)}${aktion2}</div>`;
   var hinweis = (html, ton2 = "") => `<div class="hw-hinweis ${ton2}" role="${ton2 === "fehler" ? "alert" : "note"}">${html}</div>`;
   var marke4 = (text3, ton2 = "") => `<span class="hw-status ${ton2}">${esc2(text3)}</span>`;
@@ -162039,7 +162040,7 @@ void main() {
     const SP = () => new Map(q2.spalten().map((c) => [c.id, c]));
     const text3 = (id, k5) => formatiere(SP().get(id)?.format ?? "eur", k5[id] ?? 0);
     const dot = (a2) => a2 ? `<span class="ampel a-${a2}" title="${AMPEL_TEXT[a2]}"></span>` : '<span class="ampel ohne"></span>';
-    const seg2 = (act, wert, optionen3, extra = "") => `<div class="seg">${optionen3.map(([v2, t5]) => `<button class="${String(v2) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v2}"${extra}>${t5}</button>`).join("")}</div>`;
+    const seg2 = (act, wert, optionen2, extra = "") => `<div class="seg">${optionen2.map(([v2, t5]) => `<button class="${String(v2) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v2}"${extra}>${t5}</button>`).join("")}</div>`;
     const zahl5 = (titel, inhalt2, p2, ton2 = "", a2) => `<div class="kz ${ton2}"><span>${titel}</span><b><i data-p="${p2}">${inhalt2}</i>${a2 ? dot(a2) : ""}</b></div>`;
     function tabs() {
       const n3 = q2.freigaben(s2()).anzahl;
@@ -163016,7 +163017,7 @@ void main() {
     return { werte: n3, fehler: fehler6 };
   }
   var schalter2 = (an, attr, text3, unter = "") => `<button class="schalter ${an ? "an" : ""}" ${attr} role="switch" aria-checked="${an}"><span class="knebel"></span><span class="stext">${text3}${unter ? `<small>${unter}</small>` : ""}</span></button>`;
-  var segment = (act, wert, optionen3, extra = "") => `<div class="seg${optionen3.length > 5 || optionen3.reduce((a2, [, t5]) => a2 + String(t5).length, 0) > 30 ? " umbruch" : ""}">${optionen3.map(([v2, t5]) => `<button class="${String(v2) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v2}"${extra}>${t5}</button>`).join("")}</div>`;
+  var segment = (act, wert, optionen2, extra = "") => `<div class="seg${optionen2.length > 5 || optionen2.reduce((a2, [, t5]) => a2 + String(t5).length, 0) > 30 ? " umbruch" : ""}">${optionen2.map(([v2, t5]) => `<button class="${String(v2) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v2}"${extra}>${t5}</button>`).join("")}</div>`;
   var regler = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
   var stepper2 = (act, wertHtml, unter = "", extra = "") => `<div class="stepper"><button data-a="${act}" data-v="-1"${extra} aria-label="weniger">\u2212</button><span>${wertHtml}${unter ? `<br><i>${unter}</i>` : ""}</span><button data-a="${act}" data-v="1"${extra} aria-label="mehr">+</button></div>`;
   var faehigkeit = (name2, wert, p2) => `<div class="faehig"><span>${name2}</span><span class="fbalken"><span style="width:${Math.max(0, Math.min(100, wert))}%"></span><i></i><i></i><i></i><i></i></span>${p2}</div>`;
@@ -163298,7 +163299,7 @@ void main() {
   var PERIODEN = [["woche", "Woche"], ["vier", "4 Wochen"], ["monat", "Monat"], ["quartal", "Quartal"], ["ytd", "YTD"]];
   function vertriebModul(ctx) {
     const ui = { ebene: "alle", id: void 0, format: "alle", zeitraum: "woche", sort: "schlecht" };
-    const optionen3 = (key, values) => '<select data-vtr-wahl="' + key + '" aria-label="' + key + '">' + values.map(([value, text3]) => '<option value="' + esc2(value) + '"' + (value === ui[key] ? " selected" : "") + ">" + esc2(text3) + "</option>").join("") + "</select>";
+    const optionen2 = (key, values) => '<select data-vtr-wahl="' + key + '" aria-label="' + key + '">' + values.map(([value, text3]) => '<option value="' + esc2(value) + '"' + (value === ui[key] ? " selected" : "") + ">" + esc2(text3) + "</option>").join("") + "</select>";
     const kpi = (titel, wert, hinweis2 = "") => '<div class="vtr-kpi"><small>' + esc2(titel) + "</small><strong>" + esc2(wert) + "</strong><small>" + esc2(hinweis2) + "</small></div>";
     function zeile4(z6, aktion2 = false) {
       const vj = z6.abweichung === void 0 ? "Vorjahr noch nicht verf\xFCgbar" : (z6.abweichung >= 0 ? "+" : "") + geld(z6.abweichung) + " / " + pz4(z6.abweichungProzent);
@@ -163307,7 +163308,7 @@ void main() {
     }
     function darstellen() {
       const d4 = ctx.E.vertriebUebersicht(ctx.s(), ui);
-      let h4 = '<div class="vtr-filter"><label>Format ' + optionen3("format", FORMATE2) + "</label><label>Zeitraum " + optionen3("zeitraum", PERIODEN) + "</label><label>Sortierung " + optionen3("sort", [["schlecht", "Schw\xE4chste zuerst"], ["gut", "St\xE4rkste zuerst"], ["umsatz", "Umsatz absteigend"]]) + "</label></div>";
+      let h4 = '<div class="vtr-filter"><label>Format ' + optionen2("format", FORMATE2) + "</label><label>Zeitraum " + optionen2("zeitraum", PERIODEN) + "</label><label>Sortierung " + optionen2("sort", [["schlecht", "Schw\xE4chste zuerst"], ["gut", "St\xE4rkste zuerst"], ["umsatz", "Umsatz absteigend"]]) + "</label></div>";
       h4 += '<div class="vtr-pfad"><button data-vtr="oben" data-ebene="alle">Alle Regionen</button>';
       if (ui.ebene !== "alle") {
         const haus2 = ctx.s().haeuser.find((x2) => x2.id === ui.id || x2.hauscluster === ui.id);
@@ -163688,60 +163689,78 @@ void main() {
 
   // src/ui/posteingang.js
   var SEKRETARIAT = portraetSVG({ geschlecht: "w", alter: 36, haar: "bob", haarfarbe: "braun", hautton: "rosig", kleidung: "blazer", kleidungFarbe: "marine", seed: 821 }, 72);
+  var MIET_OPTIONEN = [["verlaengern", "Verl\xE4ngern"], ["nachverhandeln", "Nachverhandeln"], ["auslaufen", "Auslaufen lassen"]];
+  var RUBRIKEN = ["Presse", "H\xE4user", "Finanzen", "Personal", "Konkurrenz", "Eigent\xFCmer", "IT"];
   function posteingangModul(ctx) {
     const E9 = ctx.E, s2 = ctx.s;
-    const ui = { aktiv: false, filter: "Alle", verhandlung: null, ziel: null, mietAuswahl: /* @__PURE__ */ new Map() };
+    const ui = { aktiv: false, filter: "Alle", verhandlung: null, ziel: null, mietAuswahl: /* @__PURE__ */ new Map(), konkurrenzOffen: false };
     const einstellungen2 = () => ctx.zustand();
     const daten = () => E9.posteingang(s2());
-    const wochen = (n3) => n3 === 0 ? "l\xE4uft diese Woche ab" : n3 === 1 ? "noch 1 Woche" : "noch " + n3 + " Wochen";
-    const leer4 = (t5, titel = "") => '<div class="postleer" role="status">' + leer3(t5, titel) + "</div>";
+    const frist = (n3) => n3 === 0 ? "l\xE4uft ab" : n3 === 1 ? "noch 1 Woche" : "noch " + n3 + " Wochen";
+    const leer4 = (t5, titel = "") => leer3(t5, titel);
     function tabs(D) {
       const aktiv7 = einstellungen2().reiter;
       const ungelesen = D.meldungen.filter((m) => !(einstellungen2().gelesen ?? []).includes(m.id)).length;
-      return '<div class="hk-seg posttabs" role="tablist">' + [
-        ["handeln", "Zu tun", D.handeln.length],
-        ["meldungen", "Meldungen", ungelesen],
-        ["erledigt", "Erledigt", 0]
-      ].map(([v2, t5, n3]) => '<button role="tab" type="button" aria-selected="' + (aktiv7 === v2) + '" aria-pressed="' + (aktiv7 === v2) + '" class="tab ' + (aktiv7 === v2 ? "an" : "") + '" data-po-a="tab" data-v="' + v2 + '">' + t5 + (n3 ? " \xB7 " + n3 : "") + "</button>").join("") + "</div>";
+      return seg(
+        [["handeln", "Zu tun" + (D.handeln.length ? " \xB7 " + D.handeln.length : "")], ["meldungen", "Meldungen" + (ungelesen ? " \xB7 " + ungelesen : "")], ["erledigt", "Erledigt"]],
+        aktiv7,
+        (v2) => 'data-po-a="tab" data-v="' + v2 + '"'
+      ).replace('class="hw-segment"', 'class="hw-segment eng" aria-label="Posteingang"');
     }
     function befund2(D) {
       const ab = D.handeln.filter((x2) => x2.restWochen === 0).length, n3 = D.handeln.length;
       if (!n3) return sprecher({ text: "<b>Nichts liegt zur Entscheidung.</b> Neue Vorg\xE4nge kommen mit dem Wochenabschluss.", unter: "Sekretariat", person: SEKRETARIAT });
       const summe2 = D.handeln.reduce((a2, p2) => a2 + (p2.wert?.betrag ?? 0), 0);
+      const kopf = ab ? ab + (ab === 1 ? " Vorgang l\xE4uft" : " Vorg\xE4nge laufen") + " diese Woche ab." : n3 + (n3 === 1 ? " Vorgang wartet" : " Vorg\xE4nge warten") + " auf Sie.";
       return sprecher({
-        text: "<b>" + (ab ? ab + (ab === 1 ? " Vorgang l\xE4uft" : " Vorg\xE4nge laufen") + " diese Woche ab." : n3 + (n3 === 1 ? " Vorgang wartet" : " Vorg\xE4nge warten") + " auf Sie.") + "</b>" + (ab && n3 > ab ? " Dazu " + (n3 - ab) + " weitere." : "") + (summe2 ? " Es geht um " + esc2(geld(summe2)) + "." : "") + " Ohne Entscheidung gilt der Standard.",
+        text: "<b>" + kopf + "</b>" + (ab && n3 > ab ? " " + (n3 - ab) + " weitere warten." : "") + (summe2 ? " Es geht um " + esc2(geld(summe2)) + "." : ""),
         unter: "Sekretariat",
         person: SEKRETARIAT,
         ton: ab ? "alarm" : "engpass"
       });
     }
-    const mietenOptionen = [
-      ["verlaengern", "Verl\xE4ngern"],
-      ["nachverhandeln", "Nachverhandeln"],
-      ["auslaufen", "Auslaufen lassen / schlie\xDFen"]
-    ];
-    function mietvertragKarte(p2) {
-      const aus = p2.mietvertraege ?? [];
-      const reihen = aus.map((m) => {
-        if (!ui.mietAuswahl.has(m.entscheidungId))
-          ui.mietAuswahl.set(m.entscheidungId, { aktiv: true, option: m.empfehlung });
+    const kopfzeile = (p2) => zeile({
+      was: esc2(p2.titel),
+      unter: '<span class="' + (p2.restWochen === 0 ? "hw-schlecht" : p2.dringend ? "hw-achtung" : "") + '">' + (p2.restWochen === 0 ? "L\xE4uft diese Woche ab" : "Frist KW " + kwVon2(p2.frist) + ", " + frist(p2.restWochen)) + "</span> \xB7 " + (p2.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 ohne Entscheidung: " + esc2(p2.standard),
+      wert: p2.wert ? esc2(geld(p2.wert.betrag)) : p2.restWochen === 0 ? "Diese Woche" : "KW " + kwVon2(p2.frist),
+      wertUnter: p2.wert ? esc2(p2.wert.einheit) : frist(p2.restWochen),
+      ton: p2.wert ? "" : p2.restWochen === 0 ? "schlecht" : p2.dringend ? "achtung" : ""
+    });
+    function mietvertrag(p2) {
+      const reihen = (p2.mietvertraege ?? []).map((m) => {
+        if (!ui.mietAuswahl.has(m.entscheidungId)) ui.mietAuswahl.set(m.entscheidungId, { aktiv: true, option: m.empfehlung });
         const wahl3 = ui.mietAuswahl.get(m.entscheidungId);
-        const qual = (v2) => v2 === void 0 ? "\u2014" : (100 * v2).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " %";
-        return '<div class="post-miete-zeile" data-miet-id="' + esc2(m.entscheidungId) + '"><div><label><input type="checkbox" data-po-miet-check="' + esc2(m.entscheidungId) + '"' + (wahl3.aktiv ? " checked" : "") + "><b>" + esc2(m.haus) + "</b></label><small>" + esc2(m.stadt) + " \xB7 " + esc2(m.region) + " \xB7 " + esc2(m.format) + " \xB7 Restlaufzeit " + m.restlaufzeit + " Wochen</small><small>Vermieter: " + esc2(m.vermieter) + "</small><small>Miete p.a. " + esc2(geld(m.istMiete)) + " \u2192 " + esc2(geld(m.angebotMiete)) + " \xB7 Quote " + qual(m.mietquoteIst) + " \u2192 " + qual(m.mietquoteNeu) + "</small><small>Haus-DB: " + (m.ebitdaHaus === void 0 ? "Keine Buchung" : esc2(geld(m.ebitdaHaus))) + "</small><small>Empfehlung Immobilien: " + esc2(mietenOptionen.find((x2) => x2[0] === m.empfehlung)?.[1] || m.empfehlung) + '</small></div><div><label>Entscheidung<select data-po-miet-option="' + esc2(m.entscheidungId) + '">' + mietenOptionen.map(([value, text3]) => '<option value="' + value + '"' + (wahl3.option === value ? " selected" : "") + ">" + esc2(text3) + "</option>").join("") + '</select></label><button type="button" class="hk-knopf zweit" data-po-a="mieteEinzel" data-id="' + esc2(m.entscheidungId) + '">Entscheiden</button></div></div>';
+        const quote = (v2) => v2 === void 0 ? "ohne Umsatz" : (100 * v2).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " %";
+        const empfehlung = MIET_OPTIONEN.find((x2) => x2[0] === m.empfehlung)?.[1] ?? m.empfehlung;
+        return '<div class="hw-vorgang-miete" data-miet-id="' + esc2(m.entscheidungId) + '">' + schalter({
+          text: m.haus,
+          unter: m.stadt + " \xB7 " + m.format + " \xB7 Restlaufzeit " + m.restlaufzeit + " Wochen \xB7 Vermieter " + m.vermieter,
+          an: wahl3.aktiv,
+          attr: 'data-po-a="mietCheck" data-id="' + esc2(m.entscheidungId) + '"'
+        }) + liste([
+          zeile({ was: "Miete im Jahr", unter: "Quote " + quote(m.mietquoteIst) + " auf " + quote(m.mietquoteNeu), wert: esc2(geld(m.angebotMiete)), wertUnter: "bisher " + esc2(geld(m.istMiete)) }),
+          zeile({ was: "Haus-Deckungsbeitrag", unter: "Empfehlung Immobilien: " + esc2(empfehlung), wert: m.ebitdaHaus === void 0 ? "keine Buchung" : esc2(geld(m.ebitdaHaus)), ton: (m.ebitdaHaus ?? 0) < 0 ? "schlecht" : "" })
+        ]) + seg(MIET_OPTIONEN, wahl3.option, (v2) => 'data-po-a="mietOption" data-id="' + esc2(m.entscheidungId) + '" data-v="' + v2 + '"').replace('class="hw-segment"', 'class="hw-segment eng" aria-label="Entscheidung ' + esc2(m.haus) + '"') + knoepfe(knopf("Nur dieses Haus entscheiden", 'data-po-a="mieteEinzel" data-id="' + esc2(m.entscheidungId) + '"', "zweit")) + "</div>";
       }).join("");
-      return '<article class="postkarte postmappe" data-post-id="' + esc2(p2.id) + '"><div class="post-reiter"><span>Immobilien \xB7 KW ' + kwVon2(p2.woche) + '</span><span class="post-frist ' + (p2.restWochen === 0 ? "ab" : p2.dringend ? "bald" : "") + '">' + wochen(p2.restWochen) + '</span></div><div class="postkopf"><h3>' + esc2(p2.titel) + '</h3><p class="posthinweis">' + esc2(p2.text) + "</p></div>" + reihen + '<div class="postaktionen"><button type="button" class="hk-knopf" data-po-a="mieteAuswahl" data-id="' + esc2(p2.id) + '">Auswahl entscheiden</button><button type="button" class="hk-knopf zweit" data-po-a="mieteEmpfehlungen" data-id="' + esc2(p2.id) + '">Empfehlungen \xFCbernehmen</button></div></article>';
+      return '<div class="hw-vorgang" data-post-id="' + esc2(p2.id) + '">' + kopfzeile(p2) + '<p class="hw-lese">' + esc2(p2.text) + "</p>" + knoepfe(knopf("Auswahl entscheiden", 'data-po-a="mieteAuswahl" data-id="' + esc2(p2.id) + '"'), knopf("Empfehlungen \xFCbernehmen", 'data-po-a="mieteEmpfehlungen" data-id="' + esc2(p2.id) + '"', "zweit")) + reihen + "</div>";
+    }
+    function vorgang(p2) {
+      if (p2.typ === "mietvertraege") return mietvertrag(p2);
+      const prim = p2.optionen.find((o4) => o4.label === p2.standard)?.id ?? p2.optionen.find((o4) => o4.id === "annehmen")?.id ?? p2.optionen[0]?.id;
+      const knoepfe2 = [...p2.optionen].sort((a2, b4) => Number(b4.id === prim) - Number(a2.id === prim)).map((o4) => knopf(o4.label.replace(/\s*\(Empfehlung\)/, ""), 'data-po-a="option" data-id="' + esc2(p2.id) + '" data-v="' + esc2(o4.id) + '"', o4.id === prim ? "" : "text"));
+      const ort = p2.bezug && (p2.bezug.hausIds?.length || p2.bezug.stadt || p2.bezug.modul) ? knopf("Zum Ort", 'data-po-a="ort" data-id="' + esc2(p2.id) + '"', "text") : "";
+      return '<div class="hw-vorgang" data-post-id="' + esc2(p2.id) + '">' + kopfzeile(p2) + '<p class="hw-lese">' + esc2(p2.text) + "</p>" + knoepfe(...knoepfe2, ort) + "</div>";
     }
     function handeln(D) {
       if (ui.verhandlung) return verhandeln();
-      if (!D.handeln.length) return leer4("Keine offenen Angebote oder Entscheidungen.", "Mappe leer");
-      return [...D.handeln].sort((a2, b4) => a2.restWochen - b4.restWochen || Number(b4.dringend) - Number(a2.dringend)).map((p2) => {
-        if (p2.typ === "mietvertraege") return mietvertragKarte(p2);
-        const frist = '<span class="post-frist ' + (p2.restWochen === 0 ? "ab" : p2.dringend ? "bald" : "") + '">' + wochen(p2.restWochen) + "</span>";
-        const wert = p2.wert ? '<div class="postwert"><b>' + esc2(geld(p2.wert.betrag)) + "</b><span>" + esc2(p2.wert.einheit) + "</span></div>" : "";
-        const prim = p2.optionen.find((o4) => o4.id === "annehmen")?.id;
-        const buttons = p2.optionen.map((o4) => '<button type="button" class="hk-knopf ' + (o4.id === prim ? "" : "zweit") + '" data-po-a="option" data-id="' + esc2(p2.id) + '" data-v="' + esc2(o4.id) + '">' + esc2(o4.label) + "</button>").join("");
-        const ort = p2.bezug && (p2.bezug.hausIds?.length || p2.bezug.stadt || p2.bezug.modul) ? '<button type="button" class="hk-knopf text postort" data-po-a="ort" data-id="' + esc2(p2.id) + '">Zum Ort</button>' : "";
-        return '<article class="postkarte postmappe" data-post-id="' + esc2(p2.id) + '"><div class="post-reiter"><span>' + (p2.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p2.woche) + "</span>" + frist + '</div><div class="postkopf"><h3>' + esc2(p2.titel) + "</h3>" + wert + '</div><details class="postdetail"><summary>Worum es geht</summary><p>' + esc2(p2.text) + '</p></details><p class="poststandard">Ohne Entscheidung: ' + esc2(p2.standard) + '</p><div class="postaktionen">' + buttons + "</div>" + (ort ? '<div class="postfuss">' + ort + "</div>" : "") + "</article>";
+      if (!D.handeln.length) return abschnitt("Zu entscheiden") + leer4("Keine offenen Angebote oder Entscheidungen.", "Mappe leer");
+      const sortiert = [...D.handeln].sort((a2, b4) => a2.restWochen - b4.restWochen || Number(b4.dringend) - Number(a2.dringend));
+      const gruppen = [["L\xE4uft diese Woche ab", (p2) => p2.restWochen === 0], ["N\xE4chste Woche", (p2) => p2.restWochen === 1], ["Sp\xE4ter", (p2) => p2.restWochen > 1]];
+      return gruppen.map(([titel, passt2]) => {
+        const liste3 = sortiert.filter(passt2);
+        if (!liste3.length) return "";
+        const summe2 = liste3.reduce((a2, p2) => a2 + (p2.wert?.betrag ?? 0), 0);
+        return abschnitt(titel, liste3.length + (liste3.length === 1 ? " Vorgang" : " Vorg\xE4nge") + (summe2 ? " \xB7 " + geld(summe2) : "")) + liste3.map(vorgang).join("");
       }).join("");
     }
     function verhandeln() {
@@ -163750,34 +163769,52 @@ void main() {
         ui.verhandlung = null;
         return leer4("Das Angebot ist nicht mehr offen.");
       }
-      const hauser = s2().haeuser.filter((h4) => h4.status === "offen" && h4.etagen.includes(a2.etage ?? 0)).sort((x2, y2) => x2.stadt.localeCompare(y2.stadt) || x2.name.localeCompare(y2.name));
-      return '<button type="button" class="hk-knopf text postzurueck" data-po-a="zurueck">Zur\xFCck zu den Angeboten</button><div class="postmappe"><div class="postkopf"><div class="posttyp">Paketangebot verhandeln</div><h3>' + esc2(a2.titel) + '</h3><p class="posthinweis">Mindestens ' + (a2.minHaeuser ?? 1) + ' Standorte ausw\xE4hlen. Die Engine pr\xFCft anschlie\xDFend die Verhandlungsposition.</p></div><div class="posthausliste">' + hauser.map((h4) => '<label class="posthaus"><input data-po-haus="' + esc2(h4.id) + '" type="checkbox" ' + (ui.verhandlung.haeuser.has(h4.id) ? "checked" : "") + "><span>" + esc2(h4.name) + "<small>" + esc2(h4.stadt) + "</small></span></label>").join("") + '</div><div class="postaktionen"><button type="button" data-po-a="verhandeln" class="hk-knopf">Auswahl verhandeln (' + ui.verhandlung.haeuser.size + ")</button></div></div>";
+      const haeuser = s2().haeuser.filter((h4) => h4.status === "offen" && h4.etagen.includes(a2.etage ?? 0)).sort((x2, y2) => x2.stadt.localeCompare(y2.stadt) || x2.name.localeCompare(y2.name));
+      return knoepfe(knopf("Zur\xFCck zu den Vorg\xE4ngen", 'data-po-a="zurueck"', "text")) + abschnitt("Paketangebot verhandeln", "mindestens " + (a2.minHaeuser ?? 1) + " Standorte") + liste([zeile({ was: esc2(a2.titel), unter: "Die Engine pr\xFCft nach der Auswahl die Verhandlungsposition.", wert: String(ui.verhandlung.haeuser.size), wertUnter: "ausgew\xE4hlt" })]) + knoepfe(knopf("Auswahl verhandeln (" + ui.verhandlung.haeuser.size + ")", 'data-po-a="verhandeln"', "breit")) + abschnitt("Standorte", haeuser.length + " H\xE4user") + haeuser.map((h4) => schalter({ text: h4.name, unter: h4.stadt, an: ui.verhandlung.haeuser.has(h4.id), attr: 'data-po-a="haus" data-id="' + esc2(h4.id) + '"' })).join("");
     }
     function meldungen(D) {
-      const filter = ui.filter;
+      const filter = ui.filter, gelesen2 = new Set(einstellungen2().gelesen ?? []);
+      const vorhanden = RUBRIKEN.filter((k5) => D.meldungen.some((m) => m.kategorie === k5) || k5 === filter);
+      const alle = ["Alle", ...vorhanden], je = alle.length <= 5 ? alle.length : Math.ceil(alle.length / 2);
+      const reihen = [alle.slice(0, je), alle.slice(je)].filter((r4) => r4.length);
+      let html = reihen.map((r4) => seg(r4.map((k5) => [k5, k5]), filter, (v2) => 'data-po-a="filter" data-v="' + esc2(v2) + '"').replace('class="hw-segment"', 'class="hw-segment eng" aria-label="Rubrik"')).join("");
       const liste3 = D.meldungen.filter((m) => filter === "Alle" || m.kategorie === filter);
-      const kategorien = ["Alle", "Presse", "H\xE4user", "Finanzen", "Personal", "Konkurrenz", "Eigent\xFCmer", "IT"];
-      let html = '<div class="post-filterzeile"><label class="postfilter">Rubrik <select data-po-filter aria-label="Meldungen filtern">' + kategorien.map((k5) => "<option " + (k5 === filter ? "selected " : "") + 'value="' + esc2(k5) + '">' + esc2(k5) + "</option>").join("") + '</select></label><button type="button" class="hk-knopf text postalle" data-po-a="alleLesen">Alle gelesen</button></div>';
-      if (!liste3.length) return html + leer4("Keine Meldungen in dieser Rubrik.");
-      const gelesen2 = new Set(einstellungen2().gelesen ?? []);
-      const wettbewerb = liste3.filter((m) => m.kategorie === "Konkurrenz");
-      const andere = liste3.filter((m) => m.kategorie !== "Konkurrenz");
+      const neu3 = liste3.filter((m) => !gelesen2.has(m.id)).length;
+      if (!liste3.length) return html + abschnitt("Meldungen") + leer4("Keine Meldungen in dieser Rubrik.");
       const eintrag2 = (m) => {
         const bezug = m.bezug && (m.bezug.stadt || m.bezug.modul || m.bezug.hausIds?.length);
-        const info = '<span class="postnachricht"><small><b>' + esc2(m.kategorie) + "</b> \xB7 KW " + kwVon2(m.woche) + (gelesen2.has(m.id) ? "" : " \xB7 neu") + "</small><span>" + esc2(m.text) + "</span></span>";
-        return '<div class="postmeldung ' + (gelesen2.has(m.id) ? "" : "ungelesen") + '" data-post-id="' + esc2(m.id) + '"><button type="button" data-po-a="lesen" data-id="' + esc2(m.id) + '">' + info + "</button>" + (bezug ? '<button type="button" class="hk-knopf text postort" data-po-a="sprung" data-id="' + esc2(m.id) + '">Zum Ort</button>' : "") + "</div>";
+        const ungelesen = !gelesen2.has(m.id);
+        return '<div class="' + (ungelesen ? "hw-ungelesen" : "") + '" data-post-id="' + esc2(m.id) + '">' + zeile({
+          was: esc2(m.text),
+          unter: esc2(m.kategorie) + " \xB7 KW " + kwVon2(m.woche) + (bezug ? " \xB7 zum Ort tippen" : ""),
+          wert: ungelesen ? marke4("Neu", "achtung") : "",
+          tippbar: !!bezug || ungelesen,
+          attr: 'data-po-a="' + (bezug ? "sprung" : "lesen") + '" data-id="' + esc2(m.id) + '"'
+        }) + "</div>";
       };
-      const regul\u00E4r = andere.length ? '<div class="hk-liste postliste">' + andere.map(eintrag2).join("") + "</div>" : "";
-      const rubrik2 = wettbewerb.length ? '<details class="post-konkurrenz" ' + (filter === "Konkurrenz" ? "open" : "") + "><summary>Konkurrenz \xB7 " + wettbewerb.length + " Meldung" + (wettbewerb.length === 1 ? "" : "en") + ' (anzeigen)</summary><div class="post-konkurrenz-inhalt">' + wettbewerb.map(eintrag2).join("") + "</div></details>" : "";
-      return html + regul\u00E4r + rubrik2;
+      const wettbewerb = liste3.filter((m) => m.kategorie === "Konkurrenz"), andere = liste3.filter((m) => m.kategorie !== "Konkurrenz");
+      html += abschnitt(filter === "Alle" ? "Hauspost" : filter, liste3.length + " Meldungen" + (neu3 ? " \xB7 " + neu3 + " neu" : ""));
+      if (neu3) html += knoepfe(knopf("Alle als gelesen markieren", 'data-po-a="alleLesen"', "text"));
+      if (andere.length) html += '<div class="hw-liste">' + andere.map(eintrag2).join("") + "</div>";
+      if (wettbewerb.length) {
+        const offen = ui.konkurrenzOffen || filter === "Konkurrenz";
+        if (filter !== "Konkurrenz") html += abschnitt("Konkurrenz", wettbewerb.length + " Meldungen");
+        html += offen ? '<div class="hw-liste">' + wettbewerb.map(eintrag2).join("") + "</div>" : knoepfe(knopf("Konkurrenzmeldungen anzeigen", 'data-po-a="konkurrenz"', "zweit breit"));
+      }
+      return html;
     }
     function erledigt(D) {
-      if (!D.erledigt.length) return leer4("In den letzten 13 Wochen wurde noch nichts erledigt.");
-      return '<div class="hk-liste">' + D.erledigt.map((p2) => '<div class="hk-zeile posterledigt" data-post-id="' + esc2(p2.id) + '"><span class="hk-was">' + esc2(p2.titel) + "<small>" + (p2.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p2.woche) + " \xB7 " + esc2(p2.ergebnis) + (p2.standard ? " \xB7 automatisch bei Fristablauf" : "") + "</small></span></div>").join("") + "</div>";
+      if (!D.erledigt.length) return abschnitt("Erledigt") + leer4("In den letzten 13 Wochen wurde noch nichts erledigt.");
+      return abschnitt("Erledigt", "letzte 13 Wochen") + liste(D.erledigt.map((p2) => '<div data-post-id="' + esc2(p2.id) + '">' + zeile({
+        was: esc2(p2.titel),
+        unter: (p2.art === "angebot" ? "Angebot" : "Entscheidung") + " \xB7 KW " + kwVon2(p2.woche) + (p2.standard ? " \xB7 automatisch bei Fristablauf" : ""),
+        wert: esc2(p2.ergebnis)
+      }) + "</div>"));
     }
     function zeigen(scrollHalten = false) {
       const vorher = document.getElementById("pinhalt").scrollTop, D = daten();
-      const inhalt2 = bereich("betrieb", "post") + befund2(D) + rumpf2(tabs(D) + '<div class="postinhalt">' + (einstellungen2().reiter === "meldungen" ? meldungen(D) : einstellungen2().reiter === "erledigt" ? erledigt(D) : handeln(D)) + "</div>");
+      const seite2 = einstellungen2().reiter === "meldungen" ? meldungen(D) : einstellungen2().reiter === "erledigt" ? erledigt(D) : handeln(D);
+      const inhalt2 = bereich("betrieb", "post") + befund2(D) + '<div class="hw-g5">' + rumpf2(tabs(D) + seite2) + "</div>";
       ctx.panel("Posteingang", (D.handeln.length === 1 ? "1 Vorgang" : D.handeln.length + " Vorg\xE4nge") + " offen \xB7 KW " + kwVon2(s2().woche), inhalt2, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = scrollHalten ? vorher : 0;
@@ -163811,6 +163848,16 @@ void main() {
     }
     function klicken(el2) {
       const a2 = el2.dataset.poA, id = el2.dataset.id, v2 = el2.dataset.v;
+      if (a2 === "mietCheck") {
+        const alt = ui.mietAuswahl.get(id);
+        if (alt) alt.aktiv = !alt.aktiv;
+        return zeigen(true);
+      }
+      if (a2 === "mietOption") {
+        const alt = ui.mietAuswahl.get(id);
+        if (alt) alt.option = v2;
+        return zeigen(true);
+      }
       if (["mieteEinzel", "mieteAuswahl", "mieteEmpfehlungen"].includes(a2)) {
         const alle = daten().handeln.flatMap((x2) => x2.mietvertraege ?? []);
         const gruppe3 = a2 === "mieteEinzel" ? alle.filter((x2) => x2.entscheidungId === id) : daten().handeln.find((x2) => x2.id === id)?.mietvertraege ?? [];
@@ -163835,6 +163882,14 @@ void main() {
         ctx.nachZustand();
         return zeigen();
       }
+      if (a2 === "filter") {
+        ui.filter = v2;
+        return zeigen(true);
+      }
+      if (a2 === "konkurrenz") {
+        ui.konkurrenzOffen = true;
+        return zeigen(true);
+      }
       if (a2 === "alleLesen") {
         for (const m of daten().meldungen) gelesen(m.id);
         return zeigen(true);
@@ -163858,6 +163913,11 @@ void main() {
         ui.verhandlung = null;
         return zeigen();
       }
+      if (a2 === "haus" && ui.verhandlung) {
+        if (ui.verhandlung.haeuser.has(id)) ui.verhandlung.haeuser.delete(id);
+        else ui.verhandlung.haeuser.add(id);
+        return zeigen(true);
+      }
       if (a2 === "option" && v2 === "verhandeln") {
         const an = s2().angebote.find((x2) => x2.id === id);
         if (an?.typ === "paket") ui.verhandlung = { id, haeuser: new Set(an.vorschlagHaeuser ?? an.wunschHaeuser ?? []) };
@@ -163879,30 +163939,6 @@ void main() {
       const el2 = event.target.closest("[data-po-a]");
       if (el2 && !el2.disabled) klicken(el2);
     });
-    inhalt.addEventListener("change", (event) => {
-      if (!ui.aktiv) return;
-      if (event.target.matches("[data-po-miet-check]")) {
-        const id = event.target.dataset.poMietCheck;
-        const old = ui.mietAuswahl.get(id);
-        if (old) old.aktiv = event.target.checked;
-        return;
-      }
-      if (event.target.matches("[data-po-miet-option]")) {
-        const id = event.target.dataset.poMietOption;
-        const old = ui.mietAuswahl.get(id);
-        if (old) old.option = event.target.value;
-        return;
-      }
-      if (event.target.matches("[data-po-filter]")) {
-        ui.filter = event.target.value;
-        zeigen();
-      }
-      if (event.target.matches("[data-po-haus]") && ui.verhandlung) {
-        if (event.target.checked) ui.verhandlung.haeuser.add(event.target.dataset.poHaus);
-        else ui.verhandlung.haeuser.delete(event.target.dataset.poHaus);
-        zeigen(true);
-      }
-    });
     return {
       ui,
       oeffne: (reiter = einstellungen2().reiter, ziel = null) => {
@@ -163920,7 +163956,7 @@ void main() {
         if (ui.aktiv) zeigen(true);
       },
       badge,
-      pruefe: () => ({ soll: daten().handeln.length, badge: Number(document.getElementById("postbadge")?.textContent ?? 0), karten: document.querySelectorAll(".postkarte").length, seite: einstellungen2().reiter })
+      pruefe: () => ({ soll: daten().handeln.length, badge: Number(document.getElementById("postbadge")?.textContent ?? 0), karten: document.querySelectorAll("#pinhalt .hw-vorgang").length, seite: einstellungen2().reiter })
     };
   }
 
@@ -164285,119 +164321,90 @@ void main() {
   }
 
   // src/ui/statistik.js
-  var FARBE = {
-    Hartwig: "#ef6b60",
-    Volkskauf: "#b88ccb",
-    Sport: "#6dbf73",
-    FUNDUS: "#d6a35a",
-    Nord: "#7fb0d6",
-    Ost: "#b88ccb",
-    West: "#ef6b60",
-    Mitte: "#d6a35a",
-    S\u00FCd: "#6dbf73",
-    Ist: "#f1f1ef",
-    Vorjahr: "#9da2a7",
-    Plan: "#6dbf73"
-  };
-  var KENNZAHL = {
-    umsatz: "Umsatz",
-    ebitda: "EBITDA",
-    cash: "Cash",
-    db: "Deckungsbeitrag",
-    frequenz: "Kundenfrequenz (Sch\xE4tzung)",
-    personalFte: "Personal (FTE)",
-    stimmung: "Stakeholder-Stimmung"
-  };
   var GELD = /* @__PURE__ */ new Set(["umsatz", "ebitda", "cash", "db"]);
-  var xAchse = (w2) => "KW " + (w2 % 52 + 1);
+  var BESTAND = /* @__PURE__ */ new Set(["cash", "stimmung", "personalFte"]);
+  var xAchse = (w2) => "KW " + ((w2 % 52 + 52) % 52 + 1);
+  var mitJahr = (w2, start) => xAchse(w2) + "/" + (start + Math.floor(w2 / 52));
+  var prozent3 = (x2) => Number.isFinite(x2) ? (x2 * 100).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).replace("-", "\u2212") + " %" : "ohne Umsatz";
   function statistikModul(ctx) {
     const { E: E9 } = ctx, s2 = ctx.s;
-    const ui = { aktiv: false, seite: "konzern", kennzahl: "umsatz", wochen: 52, typ: "linie", zeilen: 25 };
+    const ui = { aktiv: false, seite: "konzern", kennzahl: "umsatz", wochen: 52, typ: "balken", zeilen: 25 };
     const charts = /* @__PURE__ */ new Map();
     let naechsteId = 0, ausstehend = false, zeiger = null;
     const daten = (ebene, id, kennzahl2 = ui.kennzahl, wochen = ui.wochen) => E9.verlauf(s2(), { ebene, id, kennzahl: kennzahl2, wochen });
     const wert = (n3, k5) => GELD.has(k5) ? geld(n3) : fmt.format(Math.round(n3));
-    const knopf5 = (a2, v2, label, an) => '<button type="button" class="stat-wahl' + (an ? " an" : "") + '" aria-pressed="' + !!an + '" data-st-a="' + a2 + '" data-v="' + esc2(v2) + '">' + esc2(label) + "</button>";
-    const tabs = () => '<nav class="hk-seg stat-auswahl" aria-label="Statistikseiten">' + [["konzern", "Konzern"], ["formate", "Formate"], ["regionen", "Regionen"], ["rangliste", "H\xE4user"]].map(([id, t5]) => knopf5("seite", id, t5, ui.seite === id)).join("") + "</nav>";
-    const zeiten = () => '<div class="hk-seg stat-auswahl" aria-label="Zeitraum">' + [[13, "13 Wochen"], [52, "52 Wochen"], ["alle", "Alle"]].map(([id, t5]) => knopf5("wochen", id, t5, String(ui.wochen) === String(id))).join("") + "</div>";
-    const typen = () => '<div class="hk-seg stat-auswahl" aria-label="Darstellung">' + [["linie", "Verlauf"], ["balken", "Wochen"], ["quartal", "Quartale"]].map(([id, t5]) => knopf5("typ", id, t5, ui.typ === id)).join("") + "</div>";
-    const zahl5 = (t5, n3, k5) => '<div class="kz"><span>' + esc2(t5) + "</span><b>" + esc2(wert(n3, k5)) + "</b></div>";
+    const seg2 = (a2, optionen2, aktiv7, label) => seg(optionen2, String(aktiv7), (v2) => 'data-st-a="' + a2 + '" data-v="' + esc2(v2) + '"').replace('class="hw-segment"', 'class="hw-segment eng" aria-label="' + esc2(label) + '"');
+    const kopf = () => seg([["konzern", "Konzern"], ["formate", "Formate"], ["regionen", "Regionen"], ["rangliste", "H\xE4user"]], ui.seite, (v2) => 'data-st-a="seite" data-v="' + v2 + '"').replace('class="hw-segment"', 'class="hw-segment eng" aria-label="Statistikseiten"') + seg2("wochen", [["13", "13 Wochen"], ["52", "52 Wochen"], ["alle", "Alle Wochen"]], ui.wochen, "Zeitraum") + (ui.seite === "konzern" ? seg2("typ", [["balken", "Wochen"], ["quartal", "Quartale"]], ui.typ, "Darstellung") : "");
     function gruppieren(punkte2, kennzahl2) {
-      if (ui.typ !== "quartal") return ui.typ === "balken" ? punkte2.slice(-13) : punkte2;
+      if (ui.typ !== "quartal") return punkte2;
       const summen = /* @__PURE__ */ new Map();
       for (const p2 of punkte2) {
         const start = Math.floor(p2.woche / 13) * 13;
         let a2 = summen.get(start);
         if (!a2) {
-          a2 = { woche: start, wert: 0 };
+          a2 = { woche: start, wert: 0, quartal: true };
           summen.set(start, a2);
         }
-        if (kennzahl2 === "cash" || kennzahl2 === "stimmung" || kennzahl2 === "personalFte") a2.wert = p2.wert;
+        if (BESTAND.has(kennzahl2)) a2.wert = p2.wert;
         else a2.wert += p2.wert;
       }
       return [...summen.values()];
     }
-    function diagramm(titel, reihen, kennzahl2, opt = {}) {
-      const listen = reihen.filter((r5) => r5?.punkte?.length).map((r5) => ({ name: r5.name, punkte: gruppieren(r5.punkte, kennzahl2), farbe: r5.farbe ?? FARBE[r5.name] ?? "#d23c32" })).filter((r5) => r5.punkte.length);
-      if (!listen.length) return '<article class="karte stat-karte"><div class="stat-titel">' + esc2(titel) + '</div><p class="stat-leer">F\xFCr diese Auswahl sind noch keine Verlaufsdaten verf\xFCgbar.</p></article>';
-      if (opt.vorjahr && ui.typ === "linie" && reihen.length === 1) {
-        const a2 = reihen[0].punkte.filter((p3) => p3.vorjahr !== void 0).map((p3) => ({ woche: p3.woche, wert: p3.vorjahr }));
-        if (a2.length) listen.push({ name: "Vorjahr", punkte: a2, farbe: FARBE.Vorjahr });
-        const p2 = reihen[0].punkte.filter((x2) => x2.plan !== void 0).map((x2) => ({ woche: x2.woche, wert: x2.plan }));
-        if (p2.length) listen.push({ name: "Plan", punkte: p2, farbe: FARBE.Plan });
-      }
-      const w2 = opt.klein ? 300 : 340, h4 = opt.klein ? 90 : 184, l = opt.klein ? 42 : 78, r4 = 10, t5 = 10, u = opt.klein ? 14 : 29;
-      const alle = listen.flatMap((x2) => x2.punkte), xs2 = alle.map((p2) => p2.woche), ys = alle.map((p2) => p2.wert);
-      if (Number.isFinite(opt.grenze)) ys.push(opt.grenze);
-      const minW = Math.min(...xs2), maxW = Math.max(...xs2), breite = Math.max(1, maxW - minW);
-      let minY = Math.min(...ys), maxY = Math.max(...ys);
-      if (ui.typ !== "linie" && !opt.klein) {
-        minY = Math.min(minY, 0);
-        maxY = Math.max(maxY, 0);
-      }
-      if (minY === maxY) {
-        minY -= Math.max(1, Math.abs(minY) * 0.1);
-        maxY += Math.max(1, Math.abs(maxY) * 0.1);
-      }
-      const px2 = (woche2) => l + (woche2 - minW) / breite * (w2 - r4 - l);
-      const py2 = (v2) => t5 + (maxY - v2) / (maxY - minY) * (h4 - u - t5);
-      const grenzlinie = Number.isFinite(opt.grenze) ? '<line x1="' + l + '" x2="' + (w2 - r4) + '" y1="' + py2(opt.grenze).toFixed(2) + '" y2="' + py2(opt.grenze).toFixed(2) + '" stroke="#d23c32" stroke-width="1.5" stroke-dasharray="4 4"/><title>Insolvenzgrenze: ' + esc2(geld(opt.grenze)) + "</title>" : "";
-      const kurven = listen.map((r5, ri) => {
-        if (ui.typ === "linie" || opt.klein) {
-          const punkte2 = r5.punkte.map((p2, i) => (i ? "L" : "M") + px2(p2.woche).toFixed(2) + "," + py2(p2.wert).toFixed(2)).join(" ");
-          return '<path d="' + punkte2 + '" fill="none" stroke="' + r5.farbe + '" stroke-width="' + (opt.klein ? 1.7 : 2.6) + '" stroke-linecap="round" stroke-linejoin="round"' + (r5.name === "Vorjahr" || r5.name === "Plan" ? ' stroke-dasharray="5 4"' : "") + "/>";
-        }
-        const bw = Math.max(2, Math.min(24, (w2 - r5 - l) / Math.max(1, r5.punkte.length) / (listen.length + 0.5)));
-        return r5.punkte.map((p2) => '<rect x="' + (px2(p2.woche) + (ri - listen.length / 2) * bw).toFixed(1) + '" y="' + py2(Math.max(0, p2.wert)).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(1, Math.abs(py2(p2.wert) - py2(0))).toFixed(1) + '" fill="' + r5.farbe + '"/>').join("");
-      }).join("");
+    function saeulen(titel, punkteRoh, kennzahl2, opt = {}) {
+      const punkte2 = gruppieren(punkteRoh ?? [], kennzahl2);
+      if (!punkte2.length) return abschnitt(titel) + leer3("F\xFCr diese Auswahl sind noch keine Verlaufsdaten verf\xFCgbar.");
+      const werte3 = punkte2.map((p2) => p2.wert);
+      if (Number.isFinite(opt.grenze)) werte3.push(opt.grenze);
+      const min = Math.min(0, ...werte3), max = Math.max(0, ...werte3), spanne = Math.max(1, max - min);
+      const pos = (v2) => ((v2 - min) / spanne * 100).toFixed(2);
       const id = ++naechsteId;
-      charts.set(id, { reihen: listen, minW, maxW, x: l, breite: w2 - r4 - l, kennzahl: kennzahl2 });
-      const achsen7 = opt.klein ? "" : '<line x1="' + l + '" x2="' + (w2 - r4) + '" y1="' + (h4 - u) + '" y2="' + (h4 - u) + '" stroke="var(--l, #43484e)"/>' + [0, 0.5, 1].map((f13) => '<text x="2" y="' + (py2(maxY - (maxY - minY) * f13) + 3).toFixed(1) + '" class="stat-achse">' + esc2(wert(maxY - (maxY - minY) * f13, kennzahl2)) + "</text>").join("") + '<text x="' + l + '" y="' + (h4 - 4) + '" class="stat-achse">' + xAchse(minW) + '</text><text x="' + (w2 - r4) + '" y="' + (h4 - 4) + '" text-anchor="end" class="stat-achse">' + xAchse(maxW) + "</text>";
-      const legende = listen.length > 1 ? '<div class="stat-legende">' + listen.map((x2) => '<span><i style="background:' + x2.farbe + '"></i>' + esc2(x2.name) + "</span>").join("") + "</div>" : "";
-      return '<article class="karte stat-karte"><div class="stat-titel">' + esc2(titel) + "</div>" + legende + '<svg role="img" aria-label="' + esc2(titel) + ': Werte durch Antippen oder Ziehen anzeigen" class="stat-diagramm" data-st-chart="' + id + '" data-st-ende="' + esc2(String(reihen[0]?.punkte?.at(-1)?.wert ?? 0)) + '" viewBox="0 0 ' + w2 + " " + h4 + '" preserveAspectRatio="none">' + achsen7 + grenzlinie + kurven + '<line class="stat-cross" x1="' + l + '" x2="' + l + '" y1="' + t5 + '" y2="' + (h4 - u) + '" stroke="var(--tx, #f1f1ef)" stroke-dasharray="3 3" visibility="hidden"/></svg>' + (opt.klein ? "" : '<div class="stat-wert" aria-live="polite">Punkt antippen oder \xFCber den Verlauf ziehen</div>') + "</article>";
+      charts.set(id, { punkte: punkte2, kennzahl: kennzahl2 });
+      const null0 = pos(0);
+      const s1 = punkte2.map((p2) => {
+        const hoehe = Math.max(0.6, Math.abs(p2.wert) / spanne * 100).toFixed(2);
+        return '<span><i class="' + (p2.wert < 0 ? "neg" : "") + (p2.vorlauf ? " vorlauf" : "") + '" style="bottom:' + (p2.wert < 0 ? pos(p2.wert) : null0) + "%;height:" + hoehe + '%" data-w="' + Math.round(p2.wert) + '"></i></span>';
+      }).join("");
+      const grenze = Number.isFinite(opt.grenze) ? '<i class="hw-saeulen-grenze" style="bottom:' + pos(opt.grenze) + '%" title="Insolvenzgrenze"></i>' : "";
+      const letzte = punkte2.at(-1);
+      return abschnitt(titel, wert(letzte.wert, kennzahl2)) + '<div class="hw-saeulen' + (opt.serie === "b" ? " b" : "") + '" role="img" aria-label="' + esc2(titel) + ': Werte durch Antippen oder Ziehen anzeigen" data-st-chart="' + id + '" data-st-ende="' + esc2(String(punkteRoh.at(-1)?.wert ?? 0)) + '">' + s1 + '<i class="hw-saeulen-null" style="bottom:' + null0 + '%"></i>' + grenze + '</div><div class="hw-saeulen-fuss"><span>' + (letzte.quartal ? "ab " : "") + mitJahr(punkte2[0].woche, s2().startJahr) + "</span><span>" + (letzte.quartal ? "ab " : "") + mitJahr(letzte.woche, s2().startJahr) + '</span></div><div class="hw-stat-wert" aria-live="polite">' + esc2(ablesen(punkte2, punkte2.length - 1, kennzahl2)) + "</div>";
+    }
+    function ablesen(punkte2, i, kennzahl2) {
+      const p2 = punkte2[i];
+      if (!p2) return "";
+      return (p2.quartal ? "Quartal ab " : "") + xAchse(p2.woche) + " \xB7 Ist " + wert(p2.wert, kennzahl2) + (p2.vorjahr !== void 0 && !p2.quartal ? " \xB7 Vorjahr " + wert(p2.vorjahr, kennzahl2) : "") + (p2.plan !== void 0 && !p2.quartal ? " \xB7 Plan " + wert(p2.plan, kennzahl2) : "") + (p2.vorlauf ? " \xB7 Vorlauf" : "");
     }
     function konzern() {
-      const kennzahlen2 = [["umsatz", "Umsatz"], ["ebitda", "EBITDA"], ["cash", "Cash und Insolvenzgrenze"], ["stimmung", "Stakeholder-Stimmung"]];
       const gk = (k5, t5) => {
         const pk = daten("konzern", void 0, k5, 2).punkte, a2 = pk.at(-1)?.wert ?? 0, v2 = pk.length > 1 ? pk.at(-2).wert : null;
         return { label: t5, wert: wert(a2, k5), ton: k5 === "ebitda" ? a2 < 0 ? "schlecht" : "gut" : "", unter: v2 == null ? "keine Vorwoche" : abweichung(a2 - v2, (a2 >= v2 ? "+" : "\u2212") + geld(Math.abs(a2 - v2)), v2 ? (a2 - v2) / Math.abs(v2) : null) };
       };
-      let html = gross2([gk("umsatz", "Umsatz Woche"), gk("ebitda", "EBITDA Woche")]) + gross2([gk("cash", "Cash")]);
-      for (const [k5, t5] of kennzahlen2) {
-        const d4 = daten("konzern", void 0, k5);
-        html += diagramm(t5, [{ name: "Ist", punkte: d4.punkte }], k5, { vorjahr: true, grenze: k5 === "cash" ? -s2().kreditlinie : void 0 });
-        if (k5 === "cash") html += '<p class="stat-hinweis">Aktuelle Insolvenzgrenze: ' + esc2(geld(-s2().kreditlinie)) + " (verf\xFCgbarer Kreditrahmen). \xC4nderungen der Kreditlinie sind historisch nicht rekonstruierbar.</p>";
+      let html = gross2([gk("umsatz", "Umsatz Woche"), gk("ebitda", "EBITDA Woche")]);
+      for (const [k5, t5, serie] of [["umsatz", "Umsatz", "a"], ["ebitda", "EBITDA", "b"], ["cash", "Cash", "a"], ["stimmung", "Stakeholder-Stimmung", "a"]]) {
+        html += saeulen(t5, daten("konzern", void 0, k5).punkte, k5, { serie, grenze: k5 === "cash" ? -s2().kreditlinie : void 0 });
+        if (k5 === "cash") html += '<p class="hw-text">Gestrichelt: Insolvenzgrenze ' + esc2(geld(-s2().kreditlinie)) + " (verf\xFCgbarer Kreditrahmen). \xC4nderungen der Kreditlinie sind historisch nicht rekonstruierbar.</p>";
       }
-      html += wasserfall2();
-      return html;
+      return html + bruecke();
+    }
+    const imZeitraum = (punkte2, k5) => BESTAND.has(k5) ? punkte2.at(-1)?.wert ?? 0 : punkte2.reduce((a2, p2) => a2 + p2.wert, 0);
+    function vergleich(ebene, ids, titel) {
+      const zeilen = ids.map((name2) => ({ name: name2, umsatz: Math.round(imZeitraum(daten(ebene, name2, "umsatz").punkte, "umsatz")), db: Math.round(imZeitraum(daten(ebene, name2, "db").punkte, "db")) }));
+      const summeU = zeilen.reduce((a2, z6) => a2 + z6.umsatz, 0), summeD = zeilen.reduce((a2, z6) => a2 + z6.db, 0);
+      const maxU = Math.max(1, ...zeilen.map((z6) => Math.abs(z6.umsatz))), maxD = Math.max(1, ...zeilen.map((z6) => Math.abs(z6.db)));
+      const zeitraum2 = ui.wochen === "alle" ? "alle Wochen" : ui.wochen + " Wochen";
+      const anteile = (feld3, max, serie) => '<div class="hw-anteile">' + zeilen.map((z6) => "<span>" + esc2(z6.name) + '</span><i><i class="' + serie + (z6[feld3] < 0 ? " neg" : "") + '" style="width:calc(' + (Math.abs(z6[feld3]) / max * 100).toFixed(1) + '% - 4px)"></i></i><b>' + esc2(geld(z6[feld3])) + "</b>").join("") + "</div>";
+      return abschnitt("Umsatz nach " + titel, zeitraum2) + anteile("umsatz", maxU, "") + abschnitt("Deckungsbeitrag nach " + titel, zeitraum2) + anteile("db", maxD, "b") + '<div class="hw-abstand"></div><div data-summen-name="' + esc2(titel) + '">' + tabelle({
+        titel,
+        spalten: ["Umsatz", "DB", "Quote"],
+        pruefen: true,
+        zeilen: zeilen.map((z6) => ({ name: z6.name, werte: [geld(z6.umsatz), geld(z6.db), z6.umsatz ? prozent3(z6.db / z6.umsatz) : "ohne Umsatz"], roh: [z6.umsatz, z6.db, null], ton: ["", z6.db < 0 ? "schlecht" : "", ""] })),
+        summe: { name: "Summe", werte: [geld(summeU), geld(summeD), summeU ? prozent3(summeD / summeU) : "ohne Umsatz"], roh: [summeU, summeD, null] }
+      }) + "</div>";
     }
     function formate() {
-      const ids = ["Hartwig", "Volkskauf", "Sport", "FUNDUS"];
-      return '<p class="stat-hinweis">Vier Formate im Vergleich. Noch nicht simulierte Formate bleiben ohne Werte.</p>' + ["umsatz", "db"].map((k5) => diagramm(KENNZAHL[k5] + " nach Format", ids.map((name2) => ({ name: name2, punkte: daten("format", name2, k5).punkte })), k5)).join("");
+      return vergleich("format", ["Hartwig", "Volkskauf", "Sport", "FUNDUS"], "Format") + '<p class="hw-text">Noch nicht simulierte Formate bleiben ohne Werte.</p>';
     }
     function regionen() {
-      const ids = ["Nord", "Ost", "West", "Mitte", "S\xFCd"];
-      return ["umsatz", "db"].map((k5) => diagramm(KENNZAHL[k5] + " nach Region", ids.map((name2) => ({ name: name2, punkte: daten("region", name2, k5).punkte })), k5)).join("");
+      return vergleich("region", ["Nord", "Ost", "West", "Mitte", "S\xFCd"], "Region");
     }
     function rangliste2() {
       const hauser = s2().haeuser.filter((h4) => h4.verlauf?.length).map((h4) => {
@@ -164407,67 +164414,55 @@ void main() {
         return { h: h4, p: p2, marge };
       }).sort((a2, b4) => b4.marge - a2.marge || a2.h.name.localeCompare(b4.h.name));
       if (!hauser.length) return leer3("Nach der ersten Woche erscheinen die Ranglisten.");
-      let html = '<p class="stat-hinweis">EBITDA-Marge je Haus: Deckungsbeitrag mit proportional zum Umsatz verteilten Zusch\xFCssen, Abschriften und Zentralkosten. Unternehmensweit identische Verteilungsschl\xFCssel, gesch\xE4tzte Hauszuordnung. H\xE4user ohne Umsatz am Ende.</p>';
-      for (const [i, x2] of hauser.slice(0, ui.zeilen).entries()) {
-        const d4 = daten("haus", x2.h.id, "db", 52);
-        html += '<div class="karte stat-haus"><button data-st-a="haus" data-v="' + esc2(x2.h.id) + '" class="stat-hauskopf"><b>' + (i + 1) + ". " + esc2(x2.h.name) + "</b><span>" + (Number.isFinite(x2.marge) ? (x2.marge * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " %" : "ohne Umsatz") + "</span></button><small>" + esc2(x2.h.stadt + " \xB7 " + x2.h.region) + "</small>" + diagramm("52 Wochen", [{ name: "Ist", punkte: d4.punkte }], "db", { klein: true }) + "</div>";
-      }
-      if (ui.zeilen < hauser.length) html += '<button class="stat-mehr" data-st-a="mehr">Weitere H\xE4user (' + (hauser.length - ui.zeilen) + ")</button>";
-      return html;
+      const verteilt = hauser.filter((x2) => Number.isFinite(x2.marge));
+      const positiv = verteilt.filter((x2) => x2.marge >= 0).length;
+      let html = gross2([{ label: "H\xE4user positiv", wert: fmt.format(positiv), ton: "gut" }, { label: "H\xE4user negativ", wert: fmt.format(verteilt.length - positiv), ton: verteilt.length - positiv ? "schlecht" : "" }]);
+      html += abschnitt("Rangliste EBITDA-Marge", hauser.length + " H\xE4user");
+      html += liste(hauser.slice(0, ui.zeilen).map((x2, i) => zeile({
+        was: i + 1 + ". " + esc2(x2.h.name),
+        unter: esc2(x2.h.stadt + " \xB7 " + x2.h.region) + " \xB7 Umsatz " + esc2(geld(x2.p.umsatz)),
+        wert: prozent3(x2.marge),
+        ton: x2.marge < 0 ? "schlecht" : "gut",
+        tippbar: true,
+        attr: 'data-st-a="haus" data-v="' + esc2(x2.h.id) + '"'
+      })));
+      if (ui.zeilen < hauser.length) html += knoepfe(knopf("Weitere H\xE4user (" + (hauser.length - ui.zeilen) + ")", 'data-st-a="mehr"', "zweit breit"));
+      return html + '<p class="hw-text">EBITDA-Marge je Haus: Deckungsbeitrag mit proportional zum Umsatz verteilten Zusch\xFCssen, Abschriften und Zentralkosten. Unternehmensweit identische Verteilungsschl\xFCssel, gesch\xE4tzte Hauszuordnung. H\xE4user ohne Umsatz am Ende.</p>';
     }
-    function wasserfall2() {
+    function bruecke() {
       const k5 = s2().historie.at(-1);
       if (!k5) return "";
-      const daten2 = [
-        ["Rohertrag", k5.rohertrag],
-        ["Konzession, Mieten, WKZ", k5.konzession + k5.untermiete + k5.wkz],
-        ["Personal", -k5.personal],
-        ["Miete", -k5.miete],
-        ["Nebenkosten", -k5.nebenkosten],
-        ["Sonstiges + Logistik", -k5.sonstige - k5.logistik],
-        ["Zentrale", -k5.zentrale],
-        ["Marketing", -k5.marketing],
-        ["Beratung", -k5.beratung]
+      const z6 = (name2, v2) => ({ name: name2, werte: [geld(v2)], roh: [Math.round(v2)], ton: [v2 < 0 ? "schlecht" : ""] });
+      const zeilen = [
+        z6("Rohertrag", k5.rohertrag),
+        z6("Konzession, Mieten, WKZ", k5.konzession + k5.untermiete + k5.wkz),
+        z6("Werbefl\xE4chen, Dienstleistungen", (k5.werbeflaechen ?? 0) + (k5.dienstleistungen ?? 0)),
+        z6("Personal", -k5.personal),
+        z6("Miete", -k5.miete),
+        z6("Nebenkosten", -k5.nebenkosten),
+        z6("Sonstiges und Logistik", -k5.sonstige - k5.logistik),
+        z6("Zentrale", -k5.zentrale),
+        z6("Marketing", -k5.marketing),
+        z6("Beratung", -k5.beratung)
       ];
-      const positionen = [0];
-      let summe2 = 0;
-      for (const [, v2] of daten2) {
-        summe2 += v2;
-        positionen.push(summe2);
-      }
-      positionen.push(k5.ebitda);
-      const minimum = Math.min(0, ...positionen), maximum = Math.max(1, ...positionen), spanne = Math.max(1, maximum - minimum);
-      const y2 = (v2) => 124 - (v2 - minimum) / spanne * 106;
-      const bars = daten2.map(([name2, v2], i) => {
-        const oben = Math.min(y2(positionen[i]), y2(positionen[i + 1])), hoehe = Math.max(1, Math.abs(y2(positionen[i]) - y2(positionen[i + 1])));
-        return '<rect data-st-wf="' + i + '" x="' + (10 + i * 33) + '" y="' + oben.toFixed(1) + '" width="23" height="' + hoehe.toFixed(1) + '" fill="' + (v2 < 0 ? "#ef6f62" : "#6dbf73") + '"><title>' + esc2(name2 + ": " + geld(v2)) + "</title></rect>";
-      }).join("");
-      const endOben = Math.min(y2(k5.ebitda), y2(0)), endHoehe = Math.max(1, Math.abs(y2(k5.ebitda) - y2(0)));
-      const ende = '<rect data-st-wf="9" x="307" y="' + endOben.toFixed(1) + '" width="25" height="' + endHoehe.toFixed(1) + '" fill="var(--tx, #f1f1ef)"><title>EBITDA: ' + esc2(geld(k5.ebitda)) + "</title></rect>";
-      return '<article class="karte stat-karte"><div class="stat-titel">EBITDA-Br\xFCcke \xB7 letzte Woche</div><svg role="img" aria-label="EBITDA-Wasserfall" viewBox="0 0 342 140">' + bars + ende + '<line x1="6" y1="' + y2(0).toFixed(1) + '" x2="338" y2="' + y2(0).toFixed(1) + '" stroke="#8296a3"/></svg><div class="stat-wert">Rohertrag bis EBITDA: Balken antippen \xB7 ' + esc2(geld(k5.ebitda)) + "</div></article>";
+      const summe2 = zeilen.reduce((a2, r4) => a2 + r4.roh[0], 0);
+      return band('<div data-summen-name="EBITDA-Br\xFCcke">' + tabelle({ titel: "EBITDA-Br\xFCcke", spalten: [xAchse(k5.woche)], zeilen, summe: z6("EBITDA", k5.ebitda), pruefen: Math.abs(summe2 - k5.ebitda) <= zeilen.length }) + "</div>");
     }
     function zeigen(halten = false) {
       const vorher = document.getElementById("pinhalt").scrollTop;
       charts.clear();
-      const steuer2 = ui.seite === "konzern" ? konzern() : ui.seite === "formate" ? formate() : ui.seite === "regionen" ? regionen() : rangliste2();
-      const html = bereich("betrieb", "zahlen") + rumpf2(tabs() + '<div class="stat-zeile">' + zeiten() + (ui.seite !== "rangliste" ? typen() : "") + "</div>" + steuer2);
+      const inhalt2 = ui.seite === "konzern" ? konzern() : ui.seite === "formate" ? formate() : ui.seite === "regionen" ? regionen() : rangliste2();
+      const teile2 = inhalt2.split('<section class="hw-band">');
+      const html = bereich("betrieb", "zahlen") + '<div class="hw-g5">' + rumpf2(kopf() + teile2[0]) + (teile2[1] ? '<section class="hw-band">' + teile2[1] : "") + "</div>";
       ctx.panel("Zahlen", "Verl\xE4ufe und Vergleich \xB7 KW " + (s2().woche % 52 + 1), html, "gross");
       ui.aktiv = true;
       if (halten) document.getElementById("pinhalt").scrollTop = vorher;
     }
     function hausGrafik(id) {
-      const d4 = daten("haus", id, "umsatz", 52), b4 = daten("haus", id, "db", 52);
-      return '<div class="stat-hausdetail">' + diagramm("Letzte 52 Wochen \xB7 Umsatz", [{ name: "Ist", punkte: d4.punkte }], "umsatz", { vorjahr: true }) + diagramm("Letzte 52 Wochen \xB7 Deckungsbeitrag", [{ name: "Ist", punkte: b4.punkte }], "db") + "</div>";
+      return saeulen("Umsatz \xB7 letzte 52 Wochen", daten("haus", id, "umsatz", 52).punkte, "umsatz") + saeulen("Deckungsbeitrag \xB7 letzte 52 Wochen", daten("haus", id, "db", 52).punkte, "db", { serie: "b" });
     }
     const inhalt = document.getElementById("pinhalt");
     inhalt.addEventListener("click", (e) => {
-      const wf = e.target.closest?.("[data-st-wf]");
-      if (wf && ui.aktiv) {
-        const t5 = wf.querySelector("title")?.textContent;
-        const info = wf.closest(".stat-karte")?.querySelector(".stat-wert");
-        if (t5 && info) info.textContent = t5;
-        return;
-      }
       const b4 = e.target.closest("[data-st-a]");
       if (!b4 || !ui.aktiv) return;
       const a2 = b4.dataset.stA, v2 = b4.dataset.v;
@@ -164481,37 +164476,19 @@ void main() {
         ctx.oeffneHaus(v2);
         return;
       } else return;
-      zeigen();
+      zeigen(a2 !== "seite");
     });
     function tip(e) {
-      const svg2 = e.target.closest?.("[data-st-chart]");
-      if (!svg2) return;
-      const info = charts.get(Number(svg2.dataset.stChart));
+      const feld3 = e.target.closest?.("[data-st-chart]");
+      if (!feld3) return;
+      const info = charts.get(Number(feld3.dataset.stChart));
       if (!info) return;
-      const box = svg2.getBoundingClientRect();
-      const xpos = (e.clientX - box.left) / box.width * svg2.viewBox.baseVal.width;
-      const week = info.minW + Math.min(1, Math.max(0, (xpos - info.x) / info.breite)) * (info.maxW - info.minW);
-      let best = null, dist2 = Infinity;
-      for (const r4 of info.reihen) for (const p2 of r4.punkte) {
-        const d4 = Math.abs(p2.woche - week);
-        if (d4 < dist2) {
-          dist2 = d4;
-          best = p2;
-        }
-      }
-      if (!best) return;
-      const xx = info.x + (best.woche - info.minW) / Math.max(1, info.maxW - info.minW) * info.breite;
-      const cross = svg2.querySelector(".stat-cross");
-      if (cross) {
-        cross.setAttribute("x1", xx);
-        cross.setAttribute("x2", xx);
-        cross.setAttribute("visibility", "visible");
-      }
-      const boxwert = svg2.parentElement.querySelector(".stat-wert");
-      if (boxwert) boxwert.textContent = xAchse(best.woche) + " \xB7 " + info.reihen.map((r4) => {
-        const p2 = r4.punkte.reduce((a2, b4) => Math.abs(b4.woche - best.woche) < Math.abs(a2.woche - best.woche) ? b4 : a2, r4.punkte[0]);
-        return r4.name + ": " + wert(p2.wert, info.kennzahl);
-      }).join(" \xB7 ");
+      const box = feld3.getBoundingClientRect();
+      const i = Math.max(0, Math.min(info.punkte.length - 1, Math.floor((e.clientX - box.left) / box.width * info.punkte.length)));
+      feld3.classList.add("zeigt");
+      [...feld3.children].forEach((sp6, k5) => sp6.classList?.toggle("an", k5 === i));
+      const ausgabe = feld3.nextElementSibling?.nextElementSibling;
+      if (ausgabe?.classList.contains("hw-stat-wert")) ausgabe.textContent = ablesen(info.punkte, i, info.kennzahl);
     }
     inhalt.addEventListener("pointerdown", (e) => {
       if (e.target.closest?.("[data-st-chart]")) {
@@ -164550,7 +164527,7 @@ void main() {
           const soll = k5 === "umsatz" ? c.umsatzWoche : k5 === "ebitda" ? c.ebitdaWoche : k5 === "stimmung" ? c.vertrauen : c.cash;
           if (p2 && p2.wert !== soll) fehler6.push(k5 + ": " + p2.wert + " statt " + soll);
         }
-        return { fehler: fehler6, diagramme: inhalt.querySelectorAll(".stat-diagramm").length };
+        return { fehler: fehler6, diagramme: inhalt.querySelectorAll("[data-st-chart]").length };
       }
     };
   }
@@ -165143,49 +165120,84 @@ void main() {
 
   // src/ui/umbau.js
   var ETAGE = (nr4) => nr4 === -1 ? "UG" : nr4 === 0 ? "EG" : nr4 + ". OG";
+  var ETAGE_LANG = (nr4) => nr4 === -1 ? "Untergeschoss" : nr4 === 0 ? "Erdgeschoss" : nr4 + ". Obergeschoss";
   var BEZEICHNUNG = { auffrischung: "Auffrischung", ladenbau: "Ladenbau neu", komplett: "Komplettumbau", technik: "Technik" };
+  var KURZ = { auffrischung: "Auffrischen", ladenbau: "Ladenbau", komplett: "Komplett", technik: "Technik" };
+  var prozent4 = (x2, n3 = 1) => (Number(x2) || 0).toLocaleString("de-DE", { minimumFractionDigits: n3, maximumFractionDigits: n3 }) + " %";
   function umbauModul(ctx) {
     const E9 = ctx.E, s2 = () => ctx.s();
     const ui = { aktiv: false, haus: null, etage: 0, stufe: "auffrischung" };
     const zustand = () => E9.umbauUebersicht(s2());
     const kw2 = (w2) => "KW " + (w2 % 52 + 1) + "/" + (s2().startJahr + Math.floor(w2 / 52));
+    function etagenZeile(id, e, aktuell = null) {
+      const pf2 = e.pflichten, t5 = e.technik, frist = Math.min(pf2.brandschutz, pf2.aufzug), bald = frist - s2().woche < 13;
+      const status2 = e.gesperrt ? '<span class="hw-schlecht">beh\xF6rdlich gesperrt</span>' : e.projekt ? '<span class="hw-achtung">Baustelle bis ' + kw2(e.projekt.ende) + "</span>" : bald ? '<span class="hw-achtung">Pr\xFCffrist ' + kw2(frist) + "</span>" : "Pr\xFCffrist " + kw2(frist);
+      return zeile({
+        was: ETAGE_LANG(e.etage) + (aktuell === e.etage ? " \xB7 gew\xE4hlt" : ""),
+        unter: "M\xF6bel Generation " + e.moebelGeneration + " \xB7 Klima " + t5.klima + " \xB7 Licht " + t5.licht + " \xB7 Brandschutz " + t5.brandschutz + " von 2 \xB7 " + status2,
+        wert: Math.round(e.substanz) + " / 100",
+        wertUnter: "Substanz",
+        ton: e.substanz < 35 ? "schlecht" : e.substanz < 55 ? "achtung" : "",
+        tippbar: true,
+        attr: 'data-umbau="planen" data-id="' + esc2(id) + '" data-etage="' + e.etage + '" data-umbau-etage="' + e.etage + '" aria-label="' + esc2(ETAGE_LANG(e.etage)) + ' umbauen planen"'
+      });
+    }
     function hausKarte(id) {
       if (typeof E9.umbauHaus !== "function") return "";
       const etagen = [...E9.umbauHaus(s2(), id) ?? []].sort((a2, b4) => b4.etage - a2.etage);
-      const zeilen = etagen.map((e) => {
-        const pf2 = e.pflichten, t5 = e.technik, frist = Math.min(pf2.brandschutz, pf2.aufzug), bald = frist - s2().woche < 13;
-        const status2 = e.gesperrt ? '<span class="hk-schlecht">Beh\xF6rdlich gesperrt</span>' : e.projekt ? '<span class="hk-achtung">Baustelle bis ' + kw2(e.projekt.ende) + "</span>" : "";
-        return '<div class="hk-zeile" data-umbau-etage="' + e.etage + '"><span class="hk-was">' + ETAGE(e.etage) + ' \xB7 Substanz <span class="' + (e.substanz < 35 ? "hk-schlecht" : "") + '">' + Math.round(e.substanz) + "</span><small>M\xF6bel Generation " + e.moebelGeneration + " \xB7 Klima " + t5.klima + "/2 \xB7 Licht " + t5.licht + "/2 \xB7 Brandschutz " + t5.brandschutz + '/2</small><small class="' + (bald ? "hk-achtung" : "") + '">Pr\xFCffrist Brandschutz ' + kw2(pf2.brandschutz) + " \xB7 Aufzug " + kw2(pf2.aufzug) + "</small>" + (status2 ? "<small>" + status2 + "</small>" : "") + '</span><button type="button" class="hk-knopf zweit" data-umbau="planen" data-id="' + esc2(id) + '" data-etage="' + e.etage + '">Planen</button></div>';
-      });
-      return '<h3 class="hk-abschnitt">Bau und Technik<small>' + etagen.length + ' Etagen</small></h3><div class="hk-liste" data-umbau-karte="' + esc2(id) + '">' + zeilen.join("") + '</div><div class="hk-knopfreihe"><button type="button" class="hk-knopf text" data-umbau="modernisierung">Konzernprogramm Modernisierung</button></div>';
+      const schwach = etagen.filter((e) => e.substanz < 35).length;
+      return abschnitt("Bau und Technik", schwach ? schwach + (schwach === 1 ? " Etage kritisch" : " Etagen kritisch") : etagen.length + " Etagen") + '<div data-umbau-karte="' + esc2(id) + '">' + liste(etagen.map((e) => etagenZeile(id, e))) + "</div>" + knoepfe(knopf("Konzernprogramm Modernisierung", 'data-umbau="modernisierung"', "text"));
+    }
+    function planen2() {
+      const h4 = s2().haeuser.find((x3) => x3.id === ui.haus);
+      const p2 = E9.umbauSchaetzung(s2(), ui.haus, ui.etage, ui.stufe);
+      const laeuft2 = (s2().umbau?.projekte ?? []).some((x3) => x3.status === "laufend" && x3.haus === ui.haus && x3.etagen.includes(ui.etage));
+      const rest = zustand().rest, kosten2 = p2?.kosten ?? 0;
+      let x2 = seg(Object.entries(KURZ), ui.stufe, (id) => 'data-umbau="stufewahl" data-v="' + id + '"').replace('class="hw-segment"', 'class="hw-segment eng" aria-label="Umbaustufe"');
+      x2 += gross2([
+        { label: "Kosten", wert: geld(kosten2), ton: kosten2 > rest ? "schlecht" : "", unter: "Budgetrest " + esc2(geld(rest)) },
+        { label: "Kaufquote", wert: "+" + Math.round((p2?.kaufquote ?? 0) * 100) + " %", ton: "gut", unter: "nach Fertigstellung" }
+      ]);
+      x2 += abschnitt(BEZEICHNUNG[ui.stufe], (p2?.etagen?.length ?? 1) > 1 ? p2.etagen.length + " Etagen" : ETAGE_LANG(ui.etage));
+      x2 += liste([
+        zeile({ was: "Fl\xE4che", wert: fmt.format(p2?.qm ?? 0) + " qm" }),
+        zeile({ was: "Bauzeit", wert: (p2?.wochen ?? 0) + " Wochen", wertUnter: "Etage in der Zeit gesperrt" }),
+        zeile({ was: "Frequenz", wert: "+" + Math.round((p2?.frequenz ?? 0) * 100) + " %" }),
+        zeile({ was: "Jahrespotenzial", wert: prozent4(p2?.rendite ?? 0), wertUnter: "auf die Kosten", ton: "gut" })
+      ]);
+      if (ui.stufe === "komplett") x2 += hinweis("Ein Komplettumbau betrifft das gesamte Haus.", "achtung");
+      if (laeuft2) x2 += hinweis("Auf dieser Etage l\xE4uft bereits eine Baustelle.", "achtung");
+      else if (kosten2 > rest) x2 += hinweis("Die Kosten \xFCbersteigen das freie Baubudget.", "achtung");
+      x2 += knoepfe(knopf("Umbau starten", 'data-umbau="starten"', "breit", laeuft2));
+      const etagen = typeof E9.umbauHaus === "function" ? [...E9.umbauHaus(s2(), ui.haus) ?? []].sort((a2, b4) => b4.etage - a2.etage) : [];
+      if (etagen.length) x2 += abschnitt("Etagen im Haus", "antippen zum Wechseln") + liste(etagen.map((e) => etagenZeile(ui.haus, e, ui.etage)));
+      x2 += knoepfe(knopf("Zum Konzernprogramm", 'data-umbau="modernisierung"', "text"));
+      ctx.panel("Umbau planen", (h4?.name ?? "Haus") + " \xB7 " + ETAGE(ui.etage), bereich("haus", "umbau") + '<div class="hw-g5">' + rumpf2(x2) + "</div>");
     }
     function anzeigen() {
-      const B8 = '<i class="hk-bereich" data-bereich="haus" data-symbol="haus" aria-hidden="true"></i>';
       if (ui.haus) {
-        const h4 = s2().haeuser.find((x2) => x2.id === ui.haus);
-        const p2 = E9.umbauSchaetzung(s2(), ui.haus, ui.etage, ui.stufe);
-        const aktiv7 = (s2().umbau?.projekte ?? []).some((x2) => x2.status === "laufend" && x2.haus === ui.haus && x2.etagen.includes(ui.etage));
-        const rest = zustand().rest;
-        let html2 = B8 + '<div class="hk-rumpf"><h3 class="hk-abschnitt">' + esc2(h4?.name ?? "Haus") + " \xB7 " + ETAGE(ui.etage) + "</h3>";
-        html2 += '<div class="hk-seg" role="group" aria-label="Umbaustufe">' + Object.entries(BEZEICHNUNG).map(([id, name2]) => '<button type="button" aria-pressed="' + (id === ui.stufe) + '" data-umbau="stufewahl" data-v="' + id + '">' + name2 + "</button>").join("") + "</div>";
-        html2 += '<div class="hk-gross" style="--n:2"><div><span>Kosten</span><b class="' + ((p2?.kosten ?? 0) > rest ? "schlecht" : "") + '">' + geld(p2?.kosten ?? 0) + "</b><i>Budgetrest " + geld(rest) + '</i></div><div><span>Kaufquote</span><b class="gut">+' + Math.round((p2?.kaufquote ?? 0) * 100) + " %</b><i>nach Fertigstellung</i></div></div>";
-        html2 += '<div class="hk-liste"><div class="hk-zeile"><span class="hk-was">Fl\xE4che</span><span class="hk-wert">' + fmt.format(p2?.qm ?? 0) + ' qm</span></div><div class="hk-zeile"><span class="hk-was">Bauzeit</span><span class="hk-wert">' + (p2?.wochen ?? 0) + " Wochen</span></div></div>";
-        if (ui.stufe === "komplett") html2 += '<div class="hk-hinweis achtung"><span>Ein Komplettumbau betrifft das gesamte Haus.</span></div>';
-        if (aktiv7) html2 += '<div class="hk-hinweis achtung"><span>Auf dieser Etage l\xE4uft bereits eine Baustelle.</span></div>';
-        html2 += '<div class="hk-knopfreihe"><button type="button" class="hk-knopf breit" data-umbau="starten" ' + (aktiv7 ? "disabled" : "") + ">Umbau starten</button></div>";
-        html2 += '<div class="hk-knopfreihe"><button type="button" class="hk-knopf text" data-umbau="modernisierung">Zum Konzernprogramm</button></div></div>';
-        ctx.panel("Umbau planen", esc2(h4?.stadt ?? ""), html2);
+        planen2();
         ui.aktiv = true;
         return;
       }
       const u = zustand();
-      let html = B8 + '<div class="hk-rumpf"><div class="hk-gross" style="--n:2"><div><span>Budget frei</span><b class="' + (u.rest < 0 ? "schlecht" : "") + '">' + geld(u.rest) + "</b><i>von " + geld(u.budget) + " \xB7 verbraucht " + geld(u.verbraucht) + "</i></div><div><span>Baustellen</span><b>" + u.laufend.length + "</b><i>" + u.premiumInvestitionen + " Premium-Investitionen</i></div></div>";
-      html += '<h3 class="hk-abschnitt">Vorschl\xE4ge Bau und Ladenbau<small>nach Rendite</small></h3>';
-      html += u.programm.length ? '<div class="hk-liste">' + u.programm.slice(0, 20).map((v2) => '<button type="button" class="hk-zeile hk-tippbar" data-umbau="planen" data-id="' + esc2(v2.haus) + '" data-etage="' + v2.etage + '"><span class="hk-was">' + esc2(v2.name) + " \xB7 " + ETAGE(v2.etage) + "<small>" + BEZEICHNUNG[v2.stufe] + " \xB7 " + geld(v2.kosten) + '</small></span><span class="hk-wert gut">' + v2.rendite.toFixed(1).replace(".", ",") + " %<small>Jahrespotenzial</small></span></button>").join("") + "</div>" : '<div class="hk-leer">Bau und Ladenbau haben keine lohnenden Vorschl\xE4ge.</div>';
-      html += '<h3 class="hk-abschnitt">Laufende Baustellen<small>' + u.laufend.length + "</small></h3>";
-      html += u.laufend.length ? '<div class="hk-liste">' + u.laufend.map((p2) => '<div class="hk-zeile"><span class="hk-was">' + esc2(s2().haeuser.find((x2) => x2.id === p2.haus)?.name ?? p2.haus) + "<small>" + BEZEICHNUNG[p2.stufe] + " \xB7 bis " + kw2(p2.ende) + '</small></span><span class="hk-wert">' + geld(p2.kosten) + "</span></div>").join("") + "</div>" : '<div class="hk-leer">Keine laufenden Umbauten.</div>';
-      html += "</div>";
-      ctx.panel("Modernisierung", "Programm " + u.jahr + " \xB7 Bau und Ladenbau", html, "gross");
+      let x2 = gross2([
+        { label: "Budget frei", wert: geld(u.rest), ton: u.rest <= 0 ? "schlecht" : "", unter: "von " + esc2(geld(u.budget)) + "<br>verbraucht " + esc2(geld(u.verbraucht)) },
+        { label: "Baustellen", wert: String(u.laufend.length), unter: u.premiumInvestitionen + " Premium-Investitionen" }
+      ]);
+      x2 += abschnitt("Vorschl\xE4ge Bau und Ladenbau", "nach Rendite");
+      x2 += u.programm.length ? liste(u.programm.slice(0, 20).map((v2) => zeile({
+        was: esc2(v2.name) + " \xB7 " + ETAGE(v2.etage),
+        unter: BEZEICHNUNG[v2.stufe] + " \xB7 " + esc2(geld(v2.kosten)),
+        wert: prozent4(v2.rendite),
+        wertUnter: "Jahrespotenzial",
+        ton: "gut",
+        tippbar: true,
+        attr: 'data-umbau="planen" data-id="' + esc2(v2.haus) + '" data-etage="' + v2.etage + '"'
+      }))) : leer3("Bau und Ladenbau haben keine lohnenden Vorschl\xE4ge.");
+      x2 += abschnitt("Laufende Baustellen", String(u.laufend.length));
+      x2 += u.laufend.length ? liste(u.laufend.map((p2) => zeile({ was: esc2(s2().haeuser.find((h4) => h4.id === p2.haus)?.name ?? p2.haus), unter: BEZEICHNUNG[p2.stufe] + " \xB7 " + p2.etagen.map(ETAGE).join(", ") + " \xB7 bis " + kw2(p2.ende), wert: esc2(geld(p2.kosten)) }))) : leer3("Keine laufenden Umbauten.");
+      ctx.panel("Modernisierung", "Programm " + u.jahr + " \xB7 Bau und Ladenbau", bereich("haus", "umbau") + '<div class="hw-g5">' + rumpf2(x2) + "</div>", "gross");
       ui.aktiv = true;
     }
     function tun2(a2) {
@@ -165196,7 +165208,7 @@ void main() {
     }
     document.getElementById("pinhalt").addEventListener("click", (ev) => {
       const el2 = ev.target.closest("button[data-umbau]");
-      if (!el2) return;
+      if (!el2 || el2.disabled) return;
       const art = el2.dataset.umbau;
       if (art === "modernisierung") {
         ui.haus = null;
@@ -165224,11 +165236,6 @@ void main() {
         tun2({ typ: "umbauPlanen", haus: ui.haus, etage: ui.etage, stufe: ui.stufe });
         return;
       }
-    });
-    document.getElementById("pinhalt").addEventListener("change", (ev) => {
-      if (!ui.aktiv || ev.target?.dataset.umbau !== "stufe") return;
-      ui.stufe = ev.target.value;
-      anzeigen();
     });
     return { oeffne: (haus2 = null, etage2 = 0) => {
       ui.haus = haus2;
@@ -166881,7 +166888,7 @@ void main() {
   var j = (art, material3, farbe3, p2 = {}, x2 = {}) => ({ gruppe: "jacke", zeichner: "jacke", p: { art, ...p2 }, material: material3, farbe: farbe3, model: "jacke", ...x2 });
   var z2 = (gruppe3, name2, material3, farbe3, model, p2 = {}, x2 = {}) => ({ gruppe: gruppe3, zeichner: "z:" + name2, p: p2, material: material3, farbe: farbe3, model, ...x2 });
   var gleich = (farbe3, material3, ...teile2) => teile2.map((t5) => ({ farbe: farbe3, material: material3, ...t5 }));
-  var KURZ = { zoom: [1.38, 50, 33] };
+  var KURZ2 = { zoom: [1.38, 50, 33] };
   var SILHOUETTEN = {
     // ─────────── Ersatz bestehender
     kinderbody: z2("oberteil", "kinderbody", "baumwolle", "gelb", null, { aermel: "kurz" }, { nur: "kinder" }),
@@ -166912,7 +166919,7 @@ void main() {
     troyer: o({ aermel: "lang", kragen: "troyer", rippbund: true, strick: true }, "strick", "marine"),
     rugbyshirt: z2("oberteil", "rugby", "baumwolle", "flaschengruen", "oberteil", { muster: "blockstreifen" }, { modelTeile: (p2, f13, m) => [{ teil: "oberteil", aermel: "lang", kragen: true, knopfleiste: false, rippbund: true, farbe: f13, material: m, muster: p2.muster }] }),
     cargoshorts: h({ laenge: "bermuda", passform: "weit", cargo: true }, "baumwolle", "khaki"),
-    badeshorts: z2("bademode", "badeshorts", "polyester", "petrol", null, { muster: "print" }, { nur: "herren", ...KURZ }),
+    badeshorts: z2("bademode", "badeshorts", "polyester", "petrol", null, { muster: "print" }, { nur: "herren", ...KURZ2 }),
     chinoshorts: h({ laenge: "kurz", passform: "schmal", saum: "umschlag" }, "baumwolle", "marine"),
     harringtonjacke: j("harrington", "baumwolle", "sand"),
     fieldjacket: j("fieldjacket", "baumwolle", "olive"),
@@ -167392,8 +167399,8 @@ void main() {
       g2.push(polylinie(K3, top, dunkel2(S.c, 0.35), 0.9, { zu: true, op: 0.85 }));
       if (p2.fellRand) {
         const r4 = schaft.ringe.at(-1), r22 = schaft.ringe.at(-2);
-        const band = r4.map(([x2, y2, z6], j4) => [x2, y2 * 1.06, z6 - 0.02]);
-        g2.push(fellRand(K3, band.concat([band[0]]), "#efe7d6", p2.fellBreit ? 5 : 2.6));
+        const band2 = r4.map(([x2, y2, z6], j4) => [x2, y2 * 1.06, z6 - 0.02]);
+        g2.push(fellRand(K3, band2.concat([band2[0]]), "#efe7d6", p2.fellBreit ? 5 : 2.6));
         g2.push(flaecheP(K3, top, dunkel2("#efe7d6", 0.25)));
       }
       if (p2.polsterRand) {
@@ -167584,10 +167591,10 @@ void main() {
     if (p2.klett) {
       for (let i = 0; i < p2.klett; i++) {
         const x2 = 0.4 + i * 0.15;
-        const band = [];
-        for (let j4 = 0; j4 <= 10; j4++) band.push(SP(x2, -0.55 + 1.5 * j4 / 10));
-        for (let j4 = 10; j4 >= 0; j4--) band.push(SP(x2 + 0.1, -0.55 + 1.5 * j4 / 10));
-        g2.push(flaecheP(K3, band, p2.klettFarbe ?? dunkel2(S.c, 0.18), { stroke: dunkel2(S.c, 0.45), w: 0.5 }));
+        const band2 = [];
+        for (let j4 = 0; j4 <= 10; j4++) band2.push(SP(x2, -0.55 + 1.5 * j4 / 10));
+        for (let j4 = 10; j4 >= 0; j4--) band2.push(SP(x2 + 0.1, -0.55 + 1.5 * j4 / 10));
+        g2.push(flaecheP(K3, band2, p2.klettFarbe ?? dunkel2(S.c, 0.18), { stroke: dunkel2(S.c, 0.45), w: 0.5 }));
         g2.push(polylinie(K3, [SP(x2 + 0.015, 0.92), SP(x2 + 0.015, -0.4)], hell3(S.c, 0.3), 0.4, { dash: "0.6 0.5", op: 0.8 }));
         if (p2.klettSchlaufe) {
           const a2 = SP(x2, 0.95), b4 = SP(x2 + 0.1, 0.95);
@@ -167630,9 +167637,9 @@ void main() {
     }
     if (p2.quaste) {
       const xa = L3.xo + 0.03;
-      const band = [];
-      for (let j4 = 0; j4 <= 12; j4++) band.push(SP(xa, -0.7 + 1.4 * j4 / 12));
-      g2.push(polylinie(K3, band, dunkel2(S.c, 0.45), 1.3, { op: 0.95 }));
+      const band2 = [];
+      for (let j4 = 0; j4 <= 12; j4++) band2.push(SP(xa, -0.7 + 1.4 * j4 / 12));
+      g2.push(polylinie(K3, band2, dunkel2(S.c, 0.45), 1.3, { op: 0.95 }));
       for (const s2 of [0.18, -0.12]) {
         const a2 = SP(xa + 0.01, s2), b4 = [a2[0] + 0.1, a2[1] + 0.02, a2[2] - 0.01];
         g2.push(polylinie(K3, [a2, b4], dunkel2(S.c, 0.45), 0.8));
@@ -167707,13 +167714,13 @@ void main() {
       g2.push(`<rect x="${f6(bx - 1.6)}" y="${f6(by - 2)}" width="3.2" height="4" rx="0.5" fill="none" stroke="#c9ced3" stroke-width="0.9"/>`);
     }
     if (p2.spange) {
-      const xs0 = L3.xo - 0.06, band = [], band2 = [];
+      const xs0 = L3.xo - 0.06, band2 = [], band22 = [];
       for (let j4 = 0; j4 <= 14; j4++) {
         const s2 = -1 + 2 * j4 / 14;
-        band.push(L3.pt(xs0, s2, L3.H(xs0) + 0.01));
-        band2.push(L3.pt(xs0 + 0.07, s2, L3.H(xs0 + 0.07) + 0.01));
+        band2.push(L3.pt(xs0, s2, L3.H(xs0) + 0.01));
+        band22.push(L3.pt(xs0 + 0.07, s2, L3.H(xs0 + 0.07) + 0.01));
       }
-      g2.push(flaecheP(K3, [...band, ...band2.reverse()], dunkel2(S.c, 0.12), { stroke: dunkel2(S.c, 0.5), w: 0.5 }));
+      g2.push(flaecheP(K3, [...band2, ...band22.reverse()], dunkel2(S.c, 0.12), { stroke: dunkel2(S.c, 0.5), w: 0.5 }));
       const [bx, by] = K3.P(L3.pt(xs0 + 0.035, 0.85, L3.H(xs0) * 0.7));
       g2.push(`<circle cx="${f6(bx)}" cy="${f6(by)}" r="1.4" fill="#f4f3ef" stroke="${dunkel2(S.c, 0.5)}" stroke-width="0.4"/>`);
     }
@@ -168293,9 +168300,9 @@ void main() {
       t5.push(flaeche5(S, glatt2(kopf, true, 0.45)));
       t5.push(`<path d="M50 31 Q49 40 50 46" stroke="${dunkel2(S.c, 0.35)}" stroke-width="0.8" fill="none"/><path d="M36 33 Q44 37 50 46 Q56 37 64 33" stroke="${dunkel2(S.c, 0.25)}" stroke-width="0.6" fill="none" opacity="0.6"/>`);
       for (let y2 = 34; y2 < 60; y2 += 2.6) t5.push(linie2(`M${f8(31.5 - (y2 - 34) * 0.02)} ${y2} Q50 ${y2 + 2.2} ${f8(68.5 + (y2 - 34) * 0.02)} ${y2}`, dunkel2(S.c, 0.2), 0.45, 0.5));
-      const band = p2.band ?? "#3a2a20";
-      t5.push(`<path d="M30.4 56 Q50 59.6 69.6 56 L69.9 64 Q50 67.6 30.1 64 Z" fill="${band}"/><path d="M30.4 56 Q50 59.6 69.6 56" stroke="${hell3(band, 0.3)}" stroke-width="0.5" fill="none"/>`);
-      t5.push(`<path d="M62 58 l6 -2 l1 6 l-6 0.6 Z" fill="${dunkel2(band, 0.2)}"/>`);
+      const band2 = p2.band ?? "#3a2a20";
+      t5.push(`<path d="M30.4 56 Q50 59.6 69.6 56 L69.9 64 Q50 67.6 30.1 64 Z" fill="${band2}"/><path d="M30.4 56 Q50 59.6 69.6 56" stroke="${hell3(band2, 0.3)}" stroke-width="0.5" fill="none"/>`);
+      t5.push(`<path d="M62 58 l6 -2 l1 6 l-6 0.6 Z" fill="${dunkel2(band2, 0.2)}"/>`);
     },
     // Sonnenbrille: Gesamtbreite 14, Glas 5,4 × 4,6, Steg 1,8; leicht von vorn oben, Bügel nach hinten
     sonnenbrille(S, t5, p2) {
@@ -168566,8 +168573,8 @@ void main() {
         t5.push(`<circle cx="${X4(s2, 71.4)}" cy="34" r="1.3" fill="none" stroke="#b9bec3" stroke-width="0.7"/>`);
       }
       for (const s2 of [1, -1]) {
-        const band = [[X4(s2, 82), 48, E6], [X4(s2, 97), 52, E6], [X4(s2, 97), 67, E6], [X4(s2, 70), 72, E6]];
-        t5.push(flaeche5(S, glatt2(band, true, 0.2), { ton: -0.05 }));
+        const band2 = [[X4(s2, 82), 48, E6], [X4(s2, 97), 52, E6], [X4(s2, 97), 67, E6], [X4(s2, 70), 72, E6]];
+        t5.push(flaeche5(S, glatt2(band2, true, 0.2), { ton: -0.05 }));
         t5.push(linie2(`M${X4(s2, 96)} 52.6 L${X4(s2, 96)} 66.4`, dunkel2(S.c, 0.4), 1, 0.7));
         for (const y2 of [56, 59.6, 63.2]) t5.push(`<circle cx="${X4(s2, 94.6)}" cy="${y2}" r="0.6" fill="${dunkel2(S.c, 0.5)}"/>`);
         t5.push(naht(`M${X4(s2, 80)} 70 L${X4(s2, 96)} 65.8`, S, 0.6));
@@ -171088,10 +171095,10 @@ void main() {
     armbanduhr(S, t5, p2) {
       const damen2 = p2.art === "damen";
       t5.push(boden8(50, 88, 26, 2.6));
-      const band = damen2 ? SILBER2 : S.c;
-      t5.push(`<ellipse cx="50" cy="68" rx="${damen2 ? 20 : 24}" ry="${damen2 ? 18 : 20}" fill="none" stroke="${dunkel2(band, 0.35)}" stroke-width="${damen2 ? 7 : 10}"/>`);
-      t5.push(`<ellipse cx="50" cy="68" rx="${damen2 ? 20 : 24}" ry="${damen2 ? 18 : 20}" fill="none" stroke="${band}" stroke-width="${damen2 ? 5.6 : 8.4}"${damen2 ? ' stroke-dasharray="2.2 0.7"' : ""}/>`);
-      if (!damen2) for (let i = 0; i < 6; i++) t5.push(`<circle cx="${f10(50 + 24 * Math.cos(Math.PI * (0.25 + i * 0.1)))}" cy="${f10(68 + 20 * Math.sin(Math.PI * (0.25 + i * 0.1)))}" r="0.8" fill="${dunkel2(band, 0.55)}"/>`);
+      const band2 = damen2 ? SILBER2 : S.c;
+      t5.push(`<ellipse cx="50" cy="68" rx="${damen2 ? 20 : 24}" ry="${damen2 ? 18 : 20}" fill="none" stroke="${dunkel2(band2, 0.35)}" stroke-width="${damen2 ? 7 : 10}"/>`);
+      t5.push(`<ellipse cx="50" cy="68" rx="${damen2 ? 20 : 24}" ry="${damen2 ? 18 : 20}" fill="none" stroke="${band2}" stroke-width="${damen2 ? 5.6 : 8.4}"${damen2 ? ' stroke-dasharray="2.2 0.7"' : ""}/>`);
+      if (!damen2) for (let i = 0; i < 6; i++) t5.push(`<circle cx="${f10(50 + 24 * Math.cos(Math.PI * (0.25 + i * 0.1)))}" cy="${f10(68 + 20 * Math.sin(Math.PI * (0.25 + i * 0.1)))}" r="0.8" fill="${dunkel2(band2, 0.55)}"/>`);
       const r4 = damen2 ? 15 : 19, cy = damen2 ? 44 : 42;
       t5.push(`<circle cx="50" cy="${cy}" r="${r4 + 2.6}" fill="${metallVerlauf2(S, damen2 ? GOLD4 : SILBER2)}" stroke="${dunkel2(damen2 ? GOLD4 : SILBER2, 0.45)}" stroke-width="0.5"/>`);
       t5.push(`<rect x="${50 + r4 + 1.6}" y="${cy - 2}" width="3.2" height="4" rx="0.8" fill="${damen2 ? GOLD4 : SILBER2}" stroke="${dunkel2(SILBER2, 0.4)}" stroke-width="0.4"/>`);
@@ -171156,15 +171163,15 @@ void main() {
       const kopf = [[27, 64, E7], [26, 40], [30, 26], [40, 20], [50, 22], [60, 20], [70, 26], [74, 40], [73, 64, E7]];
       t5.push(flaeche5(S, glatt2(kopf, true, 0.45)));
       t5.push(`<path d="M50 23 Q48 32 50 40" stroke="${dunkel2(S.c, 0.4)}" stroke-width="1" fill="none"/><path d="M32 28 Q36 22 44 21" stroke="#fff" stroke-width="1.4" opacity="0.18" fill="none"/>`);
-      const band = p2.band ?? dunkel2(S.c, 0.55);
-      t5.push(`<path d="M26.4 52 Q50 56 73.6 52 L73.4 62.6 Q50 66.6 26.6 62.6 Z" fill="${band}"/><path d="M26.4 52 Q50 56 73.6 52" stroke="${hell3(band, 0.3)}" stroke-width="0.5" fill="none"/>`);
-      t5.push(`<path d="M30 54 l-4 1 l1 6 l4 -1 Z" fill="${dunkel2(band, 0.3)}"/>`);
+      const band2 = p2.band ?? dunkel2(S.c, 0.55);
+      t5.push(`<path d="M26.4 52 Q50 56 73.6 52 L73.4 62.6 Q50 66.6 26.6 62.6 Z" fill="${band2}"/><path d="M26.4 52 Q50 56 73.6 52" stroke="${hell3(band2, 0.3)}" stroke-width="0.5" fill="none"/>`);
+      t5.push(`<path d="M30 54 l-4 1 l1 6 l4 -1 Z" fill="${dunkel2(band2, 0.3)}"/>`);
     },
     // Hosenträger (Y-Form): Breite 3,5, Länge 110, vier Clips, Lederrücken
     hosentraeger(S, t5, p2) {
       t5.push(boden8(50, 92, 30, 2.4));
-      const band = (d4) => `<path d="${d4}" stroke="${dunkel2(S.c, 0.35)}" stroke-width="7.2" fill="none" stroke-linecap="butt"/><path d="${d4}" stroke="${S.c}" stroke-width="6" fill="none"/>${S.tex ? `<path d="${d4}" stroke="${S.tex}" stroke-width="6" fill="none"/>` : ""}<path d="${d4}" stroke="${hell3(S.c, 0.35)}" stroke-width="0.4" fill="none" stroke-dasharray="1 0.8" transform="translate(-2 0)"/>`;
-      t5.push(band("M50 26 L50 50 Q50 64 34 86"), band("M50 50 Q50 64 66 86"), band("M50 26 Q38 40 22 84"), band("M50 26 Q62 40 78 84"));
+      const band2 = (d4) => `<path d="${d4}" stroke="${dunkel2(S.c, 0.35)}" stroke-width="7.2" fill="none" stroke-linecap="butt"/><path d="${d4}" stroke="${S.c}" stroke-width="6" fill="none"/>${S.tex ? `<path d="${d4}" stroke="${S.tex}" stroke-width="6" fill="none"/>` : ""}<path d="${d4}" stroke="${hell3(S.c, 0.35)}" stroke-width="0.4" fill="none" stroke-dasharray="1 0.8" transform="translate(-2 0)"/>`;
+      t5.push(band2("M50 26 L50 50 Q50 64 34 86"), band2("M50 50 Q50 64 66 86"), band2("M50 26 Q38 40 22 84"), band2("M50 26 Q62 40 78 84"));
       t5.push(`<path d="M42 20 L58 20 L60 30 L50 34 L40 30 Z" fill="#6a4630" stroke="#3a2a20" stroke-width="0.6"/><path d="M44 22.4 L56 22.4" stroke="#c7ad86" stroke-width="0.4" stroke-dasharray="0.8 0.6"/>`);
       for (const [x2, y2] of [[22, 84], [34, 86], [66, 86], [78, 84]]) t5.push(`<rect x="${x2 - 4}" y="${y2 - 1}" width="8" height="8" rx="1" fill="${metallVerlauf2(S, SILBER2)}" stroke="${dunkel2(SILBER2, 0.5)}" stroke-width="0.5"/><path d="M${x2 - 2.6} ${y2 + 5} L${x2 + 2.6} ${y2 + 5}" stroke="${dunkel2(SILBER2, 0.5)}" stroke-width="0.6"/>`);
     },
@@ -172528,9 +172535,9 @@ void main() {
   };
   Z["Unterw\xE4sche"] = (K3) => {
     K3.form("M18 30 L82 30 C80 44 70 56 61 72 L39 72 C30 56 20 44 18 30 Z");
-    const band = helligkeit3(K3.c) > 0.6 ? "#3a4150" : "#eceae4";
-    K3.form("M17 22 L83 22 L82.4 31 L17.6 31 Z", { farbe: band, muster: false });
-    K3.strich("M17.4 25 L82.6 25 M17.4 28 L82.6 28", helligkeit3(band) > 0.5 ? "#c4c1ba" : "#262a33", 0.5);
+    const band2 = helligkeit3(K3.c) > 0.6 ? "#3a4150" : "#eceae4";
+    K3.form("M17 22 L83 22 L82.4 31 L17.6 31 Z", { farbe: band2, muster: false });
+    K3.strich("M17.4 25 L82.6 25 M17.4 28 L82.6 28", helligkeit3(band2) > 0.5 ? "#c4c1ba" : "#262a33", 0.5);
     K3.strich("M39 72 L61 72", K3.cK, 1.2);
     K3.strich("M23 42 C30 46 34 54 38 66", K3.cD, 0.6);
     K3.strich("M77 42 C70 46 66 54 62 66", K3.cD, 0.6);
@@ -172618,12 +172625,12 @@ void main() {
     K3.strich("M28 37.6 C40 40 66 40 78 37.6", dunkel3(K3.c, 0.25), 0.6);
   };
   Z.Handtuch = (K3) => {
-    const band = helligkeit3(K3.c) > 0.7 ? dunkel3(K3.c, 0.18) : hell4(K3.c, 0.5);
+    const band2 = helligkeit3(K3.c) > 0.7 ? dunkel3(K3.c, 0.18) : hell4(K3.c, 0.5);
     const lage = (y2, f13) => {
       K3.form(`M16 ${y2} L78 ${y2} C84 ${y2} 86 ${y2 + 3} 86 ${y2 + 8} C86 ${y2 + 13} 84 ${y2 + 16} 78 ${y2 + 16} L16 ${y2 + 16} Z`, { farbe: f13 });
       K3.form(`M16 ${y2} L26 ${y2 - 8} L86 ${y2 - 8} C90 ${y2 - 8} 92 ${y2 - 5} 90 ${y2 - 1} L86 ${y2 + 2} C84 ${y2} 82 ${y2} 78 ${y2} Z`, { farbe: hell4(f13, 0.12) });
-      K3.flaeche(`M58 ${y2 + 0.3} L64 ${y2 + 0.3} L64 ${y2 + 15.7} L58 ${y2 + 15.7} Z`, band);
-      K3.flaeche(`M66 ${y2 + 0.3} L68 ${y2 + 0.3} L68 ${y2 + 15.7} L66 ${y2 + 15.7} Z`, band);
+      K3.flaeche(`M58 ${y2 + 0.3} L64 ${y2 + 0.3} L64 ${y2 + 15.7} L58 ${y2 + 15.7} Z`, band2);
+      K3.flaeche(`M66 ${y2 + 0.3} L68 ${y2 + 0.3} L68 ${y2 + 15.7} L66 ${y2 + 15.7} Z`, band2);
     };
     lage(70, K3.cD);
     lage(52, K3.c);
@@ -173737,7 +173744,7 @@ void main() {
   };
   var x = (lon) => 26 + (lon - 5.5) / 9.8 * 304;
   var y = (lat) => 514 - (lat - 47.2) / 8.1 * 484;
-  var AMPEL_FARBE = { gruen: "#248453", gelb: "#d69b24", rot: "#c43e36", ohne: "#88929a" };
+  var AMPEL_FARBE = { gruen: "#4caf50", gelb: "#e0a526", rot: "#e0574c", ohne: "#8c9295" };
   var GROSSE_STAEDTE = /* @__PURE__ */ new Set([
     "Berlin",
     "Hamburg",
@@ -173771,50 +173778,41 @@ void main() {
       viewBox: "0 0 356 542",
       role: "group",
       "aria-label": modus === "reise" ? "Deutschlandkarte mit ausw\xE4hlbaren Reisezielen" : "Deutschlandkarte mit St\xE4dten und ihren Ergebnissen",
-      class: "deutschland-svg"
+      class: "hw-deutschland"
     });
-    const land = element("g", { class: "deutschland-laender", "aria-hidden": "true" });
+    const land = element("g", { class: "hw-dl-laender", "aria-hidden": "true" });
     for (const bundesland of BUNDESLAENDER) {
-      const pfad5 = element("path", {
-        d: bundesland.d,
-        class: "deutschland-land",
-        fill: "#e8edf0",
-        stroke: "#a9b6bc",
-        "stroke-width": "0.85",
-        "stroke-linejoin": "round",
-        "fill-rule": "evenodd"
-      });
-      land.append(pfad5);
+      land.append(element("path", { d: bundesland.d, class: "hw-dl-land", "stroke-width": "0.85", "stroke-linejoin": "round", "fill-rule": "evenodd" }));
     }
     svg2.append(land);
     const gewicht2 = (p2) => (p2.stadt === aktuell ? 1e6 : 0) + (GROSSE_STAEDTE.has(p2.stadt) ? 1e3 : 0) + (p2.anzahl ?? 0);
     const verfuegbar2 = punkte2.filter((p2) => Array.isArray(p2.koordinaten) && p2.koordinaten.length === 2).sort((a2, b4) => gewicht2(a2) - gewicht2(b4) || a2.stadt.localeCompare(b4.stadt, "de"));
+    const radius = (p2) => Math.min(9, Math.max(
+      3.6,
+      3.6 + Math.sqrt(Math.max(0, modus === "reise" ? p2.anzahl : p2.umsatz / 1e6)) * (modus === "reise" ? 0.9 : 0.6)
+    ));
     for (const punkt5 of verfuegbar2) {
       const [lat, lon] = punkt5.koordinaten, cx = x(lon), cy = y(lat);
-      const aktiv7 = punkt5.stadt === aktuell;
-      const radius = Math.min(9, Math.max(
-        3.6,
-        3.6 + Math.sqrt(Math.max(0, modus === "reise" ? punkt5.anzahl : punkt5.umsatz / 1e6)) * (modus === "reise" ? 0.9 : 0.6)
-      ));
+      const aktiv7 = punkt5.stadt === aktuell, r4 = radius(punkt5);
       const name2 = punkt5.stadt;
       const g2 = element("g", {
         tabindex: "0",
         role: "button",
         "data-stadt": name2,
-        class: "deutschland-stadt" + (aktiv7 ? " deutschland-aktuell" : ""),
+        class: "hw-dl-stadt" + (aktiv7 ? " hw-dl-aktuell" : ""),
         "aria-label": name2 + ", " + punkt5.anzahl + " " + (punkt5.anzahl === 1 ? "Haus" : "H\xE4user") + (aktiv7 ? ", aktueller Standort" : "")
       });
       const title = element("title");
       title.textContent = name2 + " \xB7 " + punkt5.anzahl + " H\xE4user" + (aktiv7 ? " \xB7 aktuell" : "");
       g2.append(title);
       g2.append(element("circle", { cx, cy, r: GROSSE_STAEDTE.has(name2) || aktiv7 ? 21 : 12, fill: "transparent", stroke: "none" }));
-      if (aktiv7) g2.append(element("circle", { cx, cy, r: radius + 5, fill: "#fff", stroke: "#b32632", "stroke-width": "2", "pointer-events": "none" }));
+      if (aktiv7) g2.append(element("circle", { cx, cy, r: r4 + 5, class: "hw-dl-ring", "stroke-width": "2", "pointer-events": "none" }));
       g2.append(element("circle", {
         cx,
         cy,
-        r: radius,
-        fill: aktiv7 ? "#b32632" : modus === "reise" ? "#365e78" : AMPEL_FARBE[punkt5.amp] ?? AMPEL_FARBE.ohne,
-        stroke: "#fff",
+        r: r4,
+        class: "hw-dl-punkt" + (aktiv7 ? " an" : ""),
+        fill: aktiv7 ? "#5fa8bf" : modus === "reise" ? "#e5e1db" : AMPEL_FARBE[punkt5.amp] ?? AMPEL_FARBE.ohne,
         "stroke-width": "1.3",
         "pointer-events": "none"
       }));
@@ -173827,32 +173825,45 @@ void main() {
       });
       svg2.append(g2);
     }
-    const beschriftet = [];
-    for (const punkt5 of [...verfuegbar2].sort((a2, b4) => Number(b4.stadt === aktuell) - Number(a2.stadt === aktuell) || Number(GROSSE_STAEDTE.has(b4.stadt)) - Number(GROSSE_STAEDTE.has(a2.stadt)))) {
-      if (punkt5.stadt !== aktuell && !GROSSE_STAEDTE.has(punkt5.stadt)) continue;
-      const [lat, lon] = punkt5.koordinaten, px2 = x(lon), py2 = y(lat);
-      if (beschriftet.some(([lx, ly]) => Math.abs(px2 - lx) < 47 && Math.abs(py2 - ly) < 16)) continue;
-      beschriftet.push([px2, py2]);
-      const tx = px2 > 245 ? px2 - 9 : px2 + 9;
-      const lbl = element("text", {
-        x: tx,
-        y: py2 - 9,
-        "font-size": "11",
-        "font-weight": punkt5.stadt === aktuell ? "750" : "600",
-        "text-anchor": px2 > 245 ? "end" : "start",
-        fill: "#25323d",
-        stroke: "#f9fbfc",
-        "stroke-width": "3",
-        "paint-order": "stroke",
-        "pointer-events": "none"
-      });
-      lbl.textContent = punkt5.stadt;
-      svg2.append(lbl);
+    const punktKasten = verfuegbar2.map((p2) => {
+      const r4 = radius(p2), px2 = x(p2.koordinaten[1]), py2 = y(p2.koordinaten[0]);
+      return { x0: px2 - r4, x1: px2 + r4, y0: py2 - r4, y1: py2 + r4 };
+    });
+    const kasten2 = [];
+    const trifft3 = (k5, liste3) => liste3.some((b4) => k5.x0 < b4.x1 && k5.x1 > b4.x0 && k5.y0 < b4.y1 && k5.y1 > b4.y0);
+    const frei6 = (k5, gross3) => !trifft3(k5, kasten2) && (gross3 || !trifft3(k5, punktKasten));
+    const reihenfolge = [...verfuegbar2].sort((a2, b4) => Number(b4.stadt === aktuell) - Number(a2.stadt === aktuell) || Number(GROSSE_STAEDTE.has(b4.stadt)) - Number(GROSSE_STAEDTE.has(a2.stadt)) || gewicht2(b4) - gewicht2(a2));
+    for (const punkt5 of reihenfolge) {
+      const gross3 = punkt5.stadt === aktuell || GROSSE_STAEDTE.has(punkt5.stadt);
+      if (!gross3 && modus !== "reise") continue;
+      const [lat, lon] = punkt5.koordinaten, px2 = x(lon), py2 = y(lat), r4 = radius(punkt5);
+      const fs = gross3 ? 11 : 9.5, breite = punkt5.stadt.length * fs * 0.56;
+      const lagen = [[px2 + r4 + 3, py2 + fs * 0.35, "start"], [px2 - r4 - 3, py2 + fs * 0.35, "end"], [px2, py2 - r4 - 3, "middle"], [px2, py2 + r4 + fs, "middle"]];
+      for (const [tx, ty, anker] of lagen) {
+        const x0 = anker === "start" ? tx : anker === "end" ? tx - breite : tx - breite / 2;
+        const k5 = { x0: x0 - 1, x1: x0 + breite + 1, y0: ty - fs * 0.85, y1: ty + fs * 0.25 };
+        if (k5.x0 < 0 || k5.x1 > 356 || !frei6(k5, gross3)) continue;
+        kasten2.push(k5);
+        const lbl = element("text", {
+          x: tx.toFixed(1),
+          y: ty.toFixed(1),
+          "font-size": fs,
+          "font-weight": punkt5.stadt === aktuell ? "700" : gross3 ? "600" : "400",
+          "text-anchor": anker,
+          class: "hw-dl-name" + (gross3 ? " gross" : ""),
+          "stroke-width": "3",
+          "paint-order": "stroke",
+          "pointer-events": "none"
+        });
+        lbl.textContent = punkt5.stadt;
+        svg2.append(lbl);
+        break;
+      }
     }
     return svg2;
   }
-  function deutschlandKarte(zeilen, beiStadt, optionen3 = {}) {
-    return zeichneDeutschland(kartenStaedte(zeilen), beiStadt, optionen3);
+  function deutschlandKarte(zeilen, beiStadt, optionen2 = {}) {
+    return zeichneDeutschland(kartenStaedte(zeilen), beiStadt, optionen2);
   }
   function reiseDeutschlandKarte(staedte, hier, beiStadt) {
     return zeichneDeutschland(staedte.map((c) => ({
@@ -173872,20 +173883,21 @@ void main() {
     ["volkskauf", "Volkskauf"],
     ["fundus", "FUNDUS"]
   ];
-  var TITEL2 = Object.fromEntries(FORMATE3);
+  var FORMAT_KURZ = { hartwig: "Hartwig", premium: "Premium", sport: "Sport", volkskauf: "Volkskauf", fundus: "FUNDUS" };
   var HOEHE2 = 58;
   var FELDER = [
     ["umsatz", "Umsatz"],
-    ["ebitda", "EBITDA/DB"],
+    ["ebitda", "EBITDA"],
     ["marge", "Marge"],
-    ["mietquote", "Miete / Umsatz"],
+    ["mietquote", "Miete"],
     ["substanz", "Substanz"],
-    ["restlaufzeitMiete", "Mietrestlaufzeit"],
+    ["restlaufzeitMiete", "Laufzeit"],
     ["status", "Status"]
   ];
+  var AMPEL = [["alle", "Alle"], ["gruen", "Positiv"], ["gelb", "Knapp"], ["rot", "Negativ"], ["ohne", "Ohne Daten"]];
   var START3 = () => ({ format: "alle", region: "alle", klasse: "alle", ampel: "alle", suche: "" });
-  var optionen2 = (werte3, aktuell) => werte3.map(([wert, titel]) => '<option value="' + esc2(wert) + '"' + (aktuell === wert ? " selected" : "") + ">" + esc2(titel) + "</option>").join("");
   var statusName = { offen: "Offen", schliessung_verhandlung: "Verhandlung", raeumung: "R\xE4umung", geschlossen: "Geschlossen", verkauft: "Verkauft" };
+  var eng = (html, label) => html.replace('class="hw-segment"', 'class="hw-segment eng" aria-label="' + esc2(label) + '"');
   function portfolioFiltern(zeilen, filter) {
     const suche = String(filter.suche ?? "").trim().toLocaleLowerCase("de");
     return zeilen.filter((h4) => (filter.format === "alle" || h4.formatKey === filter.format) && (filter.region === "alle" || h4.region === filter.region) && (filter.klasse === "alle" || h4.klasse === filter.klasse) && (filter.ampel === "alle" || h4.ampel === filter.ampel) && (!suche || (h4.stadt + " " + h4.name + " " + h4.id).toLocaleLowerCase("de").includes(suche)));
@@ -173905,6 +173917,7 @@ void main() {
       filter: START3(),
       sort: "umsatz",
       absteigend: true,
+      mehr: false,
       ausgewaehlt: /* @__PURE__ */ new Set(),
       vorschau: null,
       gespeicherte: [],
@@ -173918,19 +173931,34 @@ void main() {
       return [...ui.ausgewaehlt].filter((id) => aktiv7.has(id));
     };
     function kopf() {
-      const aktiv7 = Object.entries(ui.filter).filter(([k5, v2]) => k5 !== "suche" && v2 !== "alle").length + (ui.filter.suche ? 1 : 0);
-      return bereich("betrieb", "karte") + '<div class="hk-rumpf">' + seg([["karte", "Deutschland"], ["liste", "H\xE4user"]], ui.seite, (v2) => 'class="pp-tab" data-pp="seite" data-v="' + v2 + '"') + '<div id="pp-ampel"></div><details class="pp-filterbox"' + (aktiv7 ? " open" : "") + "><summary>Filter" + (aktiv7 ? " \xB7 " + aktiv7 + " aktiv" : "") + '</summary><div class="pp-filter"><label>Format<select data-pp-filter="format">' + optionen2([["alle", "Alle"], ...FORMATE3], ui.filter.format) + '</select></label><label>Region<select data-pp-filter="region">' + optionen2([["alle", "Alle"], ...["West", "Nord", "S\xFCd", "Mitte", "Ost"].map((v2) => [v2, v2])], ui.filter.region) + '</select></label><label>Hausklasse<select data-pp-filter="klasse">' + optionen2([["alle", "Alle"], ...["A", "B", "C", "Premium"].map((v2) => [v2, v2])], ui.filter.klasse) + '</select></label><label>Ampel<select data-pp-filter="ampel">' + optionen2([["alle", "Alle"], ["gruen", "Gr\xFCn"], ["gelb", "Gelb"], ["rot", "Rot"], ["ohne", "Ohne Daten"]], ui.filter.ampel) + '</select></label></div><label class="pp-suchlabel">Stadt oder Haus suchen<input id="pp-suche" type="search" placeholder="Stadt, Name oder Haus-ID" value="' + esc2(ui.filter.suche) + '" autocomplete="off" /></label><div class="pp-speichern"><button type="button" class="hk-knopf zweit" data-pp="merken">Filter speichern</button><select data-pp="gespeichert" aria-label="Gespeicherte Auswahl laden">' + optionen2([["", "Gespeicherte Auswahl \u2026"], ...ui.gespeicherte.map((q2) => [q2.name, q2.name])], "") + '</select></div></details><div id="pp-inhalt"></div></div>';
+      const f13 = ui.filter;
+      const filterSeg = (feld3, optionen2, label) => eng(seg(optionen2, f13[feld3], (v2) => 'data-pp-filter="' + feld3 + '" data-v="' + esc2(v2) + '"'), label);
+      let x2 = seg([["karte", "Deutschland"], ["liste", "H\xE4user"]], ui.seite, (v2) => 'data-pp="seite" data-v="' + v2 + '"');
+      x2 += '<div id="pp-ampel"></div>';
+      x2 += filterSeg("format", [["alle", "Alle"], ...FORMATE3.map(([k5]) => [k5, FORMAT_KURZ[k5]])], "Format");
+      x2 += filterSeg("ampel", AMPEL, "Ergebnisampel");
+      const weitere = ["region", "klasse"].filter((k5) => f13[k5] !== "alle").length + (f13.suche ? 1 : 0);
+      x2 += knoepfe(knopf(ui.mehr ? "Weniger Filter" : "Region, Klasse und Suche" + (weitere ? " \xB7 " + weitere + " aktiv" : ""), 'data-pp="mehr"', "text"));
+      if (ui.mehr) {
+        x2 += filterSeg("region", [["alle", "Alle"], ...["West", "Nord", "S\xFCd", "Mitte", "Ost"].map((v2) => [v2, v2])], "Region");
+        x2 += filterSeg("klasse", [["alle", "Alle"], ...["A", "B", "C", "Premium"].map((v2) => [v2, v2 === "Premium" ? v2 : "Klasse " + v2])], "Hausklasse");
+        x2 += '<input id="pp-suche" class="hw-suche" type="search" placeholder="Stadt, Name oder Haus-ID" aria-label="Stadt oder Haus suchen" value="' + esc2(f13.suche) + '" autocomplete="off" />';
+        x2 += knoepfe(knopf("Filter speichern", 'data-pp="merken"', "zweit"), ...ui.gespeicherte.slice(-4).map((q2) => knopf(q2.name, 'data-pp="gespeichert" data-v="' + esc2(q2.name) + '"', "zweit")));
+      }
+      return bereich("betrieb", "karte") + '<div class="hw-g5">' + rumpf2(x2 + '<div id="pp-inhalt"></div>') + "</div>";
     }
     function ampelKopf(hs) {
       const n3 = (a2) => hs.filter((h4) => h4.ampel === a2).length;
       const el2 = wurzel2.querySelector("#pp-ampel");
-      if (el2) el2.innerHTML = gross2([{ label: "Positiv", wert: fmt.format(n3("gruen")), ton: "gut" }, { label: "Knapp", wert: fmt.format(n3("gelb")) }, { label: "Negativ", wert: fmt.format(n3("rot")), ton: n3("rot") ? "schlecht" : "" }]) + '<p class="pp-hinweis">H\xE4user nach Ergebnisampel \xB7 ' + fmt.format(n3("ohne")) + " ohne Daten (geschlossen oder noch nicht simuliert)</p>";
+      if (el2) el2.innerHTML = gross2([{ label: "Positiv", wert: fmt.format(n3("gruen")), ton: "gut" }, { label: "Knapp", wert: fmt.format(n3("gelb")) }, { label: "Negativ", wert: fmt.format(n3("rot")), ton: n3("rot") ? "schlecht" : "" }]) + '<p class="hw-text">H\xE4user nach Ergebnisampel \xB7 ' + fmt.format(n3("ohne")) + " ohne Daten (geschlossen oder noch nicht simuliert)</p>";
     }
     function oeffne(seite2 = ui.seite) {
       ui.seite = seite2;
       ui.vorschau = null;
+      const vorher = wurzel2.scrollTop, offen = ui.aktiv;
       ctx.panel(seite2 === "karte" ? "Deutschland" : "H\xE4user", "Portfolio \xB7 alle Formate", kopf(), "gross");
       ui.aktiv = true;
+      if (offen) wurzel2.scrollTop = vorher;
       anzeigen();
     }
     function inhalt() {
@@ -173943,7 +173971,7 @@ void main() {
       ampelKopf(hs);
       if (ui.seite === "karte") {
         const alle = kartenStaedte(hs), koord = alle.filter((x2) => x2.koordinaten).length;
-        ziel.innerHTML = '<div id="pp-karte" class="pp-karte"></div><div class="pp-legende"><span><i class="g"></i>Positiv</span><span><i class="y"></i>Knapp</span><span><i class="r"></i>Negativ</span><span><i class="o"></i>Ohne Daten</span></div><p class="pp-hinweis">' + fmt.format(alle.length) + " St\xE4dte \xB7 " + fmt.format(hs.length) + " H\xE4user \xB7 " + koord + " Kartenpunkte. Punktgr\xF6\xDFe: Wochenumsatz. Stadt antippen \xF6ffnet sie.</p>";
+        ziel.innerHTML = '<div id="pp-karte" class="hw-pp-karte"></div><div class="hw-legende" aria-label="Legende">' + AMPEL.slice(1).map(([k5, t5]) => '<span><i class="hw-ampel ' + k5 + '"></i>' + t5 + "</span>").join("") + '</div><p class="hw-text">' + fmt.format(alle.length) + " St\xE4dte \xB7 " + fmt.format(hs.length) + " H\xE4user \xB7 " + koord + " Kartenpunkte. Punktgr\xF6\xDFe: Wochenumsatz. Stadt antippen \xF6ffnet sie.</p>";
         ziel.querySelector("#pp-karte").append(deutschlandKarte(hs, ctx.sprungStadt));
         return;
       }
@@ -173956,8 +173984,12 @@ void main() {
         }
       }
       ui.eintraege = sortierte;
-      const anzahl2 = aktionsIds().length;
-      ziel.innerHTML = '<div class="pp-info">' + fmt.format(hs.length) + " von " + fmt.format(zeilen().length) + " H\xE4usern \xB7 " + anzahl2 + ' ausgew\xE4hlt</div><div class="pp-sort"><label>Sortieren nach <select data-pp="sort">' + optionen2(FELDER, ui.sort) + '</select></label><button type="button" class="hk-knopf zweit" data-pp="richtung">' + (ui.absteigend ? "Absteigend \u2193" : "Aufsteigend \u2191") + '</button></div><div class="pp-auswahl"><button type="button" class="hk-knopf zweit" data-pp="alle">Gefilterte ausw\xE4hlen</button><button type="button" class="hk-knopf zweit" data-pp="leeren">Auswahl l\xF6schen</button></div><div id="pp-scroll" class="pp-scroll" role="list" aria-label="Hausportfolio"><div id="pp-spacer" style="height:' + sortierte.length * HOEHE2 + 'px;position:relative"></div></div><div class="pp-aktionen"><b>Sammelaktionen \xB7 ' + anzahl2 + ' steuerbare H\xE4user</b><div class="pp-aktionraster"><button type="button" class="hk-knopf zweit" data-pp="schliessen"' + (!anzahl2 ? " disabled" : "") + '>Schlie\xDFen</button><button type="button" class="hk-knopf zweit" data-pp="abbau"' + (!anzahl2 ? " disabled" : "") + '>Personal \u22125 %</button><button type="button" class="hk-knopf zweit" data-pp="aufbau"' + (!anzahl2 ? " disabled" : "") + '>Personal +5 %</button><button type="button" class="hk-knopf zweit" data-pp="aushilfen"' + (!anzahl2 ? " disabled" : "") + '>Aushilfen 10 %</button><button type="button" class="hk-knopf zweit" data-pp="miete"' + (!anzahl2 ? " disabled" : "") + '>Miete \u22125 % verhandeln</button><button type="button" class="hk-knopf zweit" data-pp="marketing"' + (!anzahl2 ? " disabled" : "") + ">Marketing 15 % Rabatt</button></div></div>" + (ui.vorschau ? '<div class="pp-vorschau" role="status"><b>Schlie\xDFungsvorschau f\xFCr ' + ui.vorschau.anzahl + " H\xE4user</b><p>Sozialplan ca. " + geld(ui.vorschau.sozialplan) + ", Restmiete ca. " + geld(ui.vorschau.restmiete) + ", gesamt ca. <b>" + geld(ui.vorschau.gesamt) + "</b>.</p><p>" + esc2(ui.vorschau.hinweis) + '</p><div class="hk-knopfreihe"><button type="button" class="hk-knopf" data-pp="schliessen-ja">Schlie\xDFungen einleiten</button><button type="button" class="hk-knopf zweit" data-pp="schliessen-nein">Abbrechen</button></div></div>' : "");
+      const anzahl2 = aktionsIds().length, aus = !anzahl2;
+      const sortSeg = (teil6) => eng(seg(teil6, ui.sort, (v2) => 'data-pp="sort" data-v="' + v2 + '"'), "Sortieren nach");
+      ziel.innerHTML = abschnitt("H\xE4user", fmt.format(hs.length) + " von " + fmt.format(zeilen().length) + " \xB7 " + anzahl2 + " ausgew\xE4hlt") + sortSeg(FELDER.slice(0, 4)) + sortSeg(FELDER.slice(4)) + knoepfe(knopf(ui.absteigend ? "Absteigend" : "Aufsteigend", 'data-pp="richtung"', "zweit"), knopf("Alle w\xE4hlen", 'data-pp="alle"', "zweit"), knopf("Leeren", 'data-pp="leeren"', "text")) + '<div id="pp-scroll" class="hw-pp-scroll" role="list" aria-label="Hausportfolio"><div id="pp-spacer" style="height:' + sortierte.length * HOEHE2 + 'px"></div></div>' + abschnitt("Sammelaktionen", anzahl2 + " steuerbare H\xE4user") + '<div class="hw-knoepfe zweispaltig">' + knopf("Personal \u22125 %", 'data-pp="abbau"', "zweit", aus) + knopf("Personal +5 %", 'data-pp="aufbau"', "zweit", aus) + knopf("Aushilfen 10 %", 'data-pp="aushilfen"', "zweit", aus) + knopf("Miete \u22125 % verhandeln", 'data-pp="miete"', "zweit", aus) + knopf("Marketing 15 % Rabatt", 'data-pp="marketing"', "zweit", aus) + knopf("Schlie\xDFen", 'data-pp="schliessen"', "gefahr", aus) + "</div>" + (ui.vorschau ? abschnitt("Schlie\xDFungsvorschau", ui.vorschau.anzahl + " H\xE4user") + tabelle({
+        zeilen: [{ name: "Sozialplan", werte: ["ca. " + geld(ui.vorschau.sozialplan)] }, { name: "Restmiete", werte: ["ca. " + geld(ui.vorschau.restmiete)] }],
+        summe: { name: "Gesamt", werte: ["ca. " + geld(ui.vorschau.gesamt)] }
+      }) + hinweis(esc2(ui.vorschau.hinweis), "achtung") + knoepfe(knopf("Schlie\xDFungen einleiten", 'data-pp="schliessen-ja"', "gefahr"), knopf("Abbrechen", 'data-pp="schliessen-nein"', "zweit")) : "");
       const scroll = ziel.querySelector("#pp-scroll");
       scroll.scrollTop = altScroll;
       scroll.addEventListener("scroll", zeilenZeichnen, { passive: true });
@@ -173970,10 +174002,11 @@ void main() {
       const ende = Math.min(ui.eintraege.length, start + Math.ceil((scroll.clientHeight || 360) / HOEHE2) + 7);
       spacer.innerHTML = ui.eintraege.slice(start, ende).map((eintrag2, j4) => {
         const pos = (start + j4) * HOEHE2;
-        if (eintrag2.gruppe) return '<div class="pp-gruppe" style="top:' + pos + "px;height:" + HOEHE2 + 'px">' + esc2(eintrag2.gruppe) + " \xB7 " + eintrag2.anzahl + "</div>";
+        if (eintrag2.gruppe) return '<div class="hw-pp-gruppe" style="top:' + pos + "px;height:" + HOEHE2 + 'px">' + esc2(eintrag2.gruppe) + " \xB7 " + eintrag2.anzahl + "</div>";
         const h4 = eintrag2.haus;
-        const wert = ui.sort === "marge" || ui.sort === "mietquote" ? pz3(h4[ui.sort], 1) : ui.sort === "substanz" ? Math.round(h4.substanz) + "/100" : ui.sort === "restlaufzeitMiete" ? Math.round(h4.restlaufzeitMiete) + " Wochen" : ui.sort === "status" ? statusName[h4.status] ?? h4.status : geld(h4[ui.sort] ?? 0);
-        return '<div class="pp-haus" role="listitem" data-haus="' + esc2(h4.id) + '" data-wert="' + esc2(h4[ui.sort] ?? "") + '" style="top:' + pos + "px;height:" + HOEHE2 + 'px"><input type="checkbox" data-pp-id="' + esc2(h4.id) + '" aria-label="' + esc2(h4.name) + ' ausw\xE4hlen"' + (ui.ausgewaehlt.has(h4.id) ? " checked" : "") + (!h4.steuerbar ? " disabled" : "") + ' /><button data-pp="haus" data-id="' + esc2(h4.id) + '" class="pp-hausname"><b>' + esc2(h4.name) + "</b><small>" + esc2(h4.stadt) + " \xB7 " + (h4.klasse || "\u2014") + " \xB7 " + esc2(statusName[h4.status] ?? h4.status) + (!h4.steuerbar && h4.status === "offen" ? " \xB7 nur Daten" : "") + '</small></button><span class="pp-zahl"><i class="ampel a-' + h4.ampel + '"></i><strong>' + esc2(wert) + "</strong></span></div>";
+        const wert = ui.sort === "marge" || ui.sort === "mietquote" ? pz3(h4[ui.sort], 1) : ui.sort === "substanz" ? Math.round(h4.substanz) + " / 100" : ui.sort === "restlaufzeitMiete" ? Math.round(h4.restlaufzeitMiete) + " Wochen" : ui.sort === "status" ? statusName[h4.status] ?? h4.status : geld(h4[ui.sort] ?? 0);
+        const ton2 = (ui.sort === "ebitda" || ui.sort === "marge") && (h4[ui.sort] ?? 0) < 0 ? " schlecht" : "";
+        return '<div class="hw-pp-zeile" role="listitem" data-haus="' + esc2(h4.id) + '" data-wert="' + esc2(h4[ui.sort] ?? "") + '" style="top:' + pos + "px;height:" + HOEHE2 + 'px"><input type="checkbox" class="hw-pp-wahl" data-pp-id="' + esc2(h4.id) + '" aria-label="' + esc2(h4.name) + ' ausw\xE4hlen"' + (ui.ausgewaehlt.has(h4.id) ? " checked" : "") + (!h4.steuerbar ? " disabled" : "") + ' /><button type="button" data-pp="haus" data-id="' + esc2(h4.id) + '" class="hw-pp-name"><b>' + esc2(h4.name) + "</b><small>" + esc2(h4.stadt) + (h4.klasse ? " \xB7 " + esc2(h4.klasse === "Premium" ? "Premium" : "Klasse " + h4.klasse) : "") + " \xB7 " + esc2(statusName[h4.status] ?? h4.status) + (!h4.steuerbar && h4.status === "offen" ? " \xB7 nur Daten" : "") + '</small></button><span class="hw-wert' + ton2 + '"><i class="hw-ampel ' + esc2(h4.ampel) + '" aria-label="Ampel ' + esc2(AMPEL.find((a2) => a2[0] === h4.ampel)?.[1] ?? "") + '"></i>' + esc2(wert) + "</span></div>";
       }).join("");
     }
     function filterSetzen(format) {
@@ -174000,11 +174033,28 @@ void main() {
     }
     wurzel2.addEventListener("click", (e) => {
       if (!ui.aktiv) return;
+      const f13 = e.target.closest("[data-pp-filter]");
+      if (f13) {
+        ui.filter[f13.dataset.ppFilter] = f13.dataset.v;
+        ui.vorschau = null;
+        oeffne(ui.seite);
+        return;
+      }
       const knopf5 = e.target.closest("[data-pp]");
-      if (!knopf5) return;
+      if (!knopf5 || knopf5.disabled) return;
       const typ = knopf5.dataset.pp;
       if (typ === "seite") {
         oeffne(knopf5.dataset.v);
+        return;
+      }
+      if (typ === "mehr") {
+        ui.mehr = !ui.mehr;
+        oeffne(ui.seite);
+        return;
+      }
+      if (typ === "sort") {
+        ui.sort = knopf5.dataset.v;
+        anzeigen();
         return;
       }
       if (typ === "richtung") {
@@ -174025,6 +174075,14 @@ void main() {
       }
       if (typ === "haus") {
         ctx.sprungHaus(knopf5.dataset.id);
+        return;
+      }
+      if (typ === "gespeichert") {
+        const v2 = ui.gespeicherte.find((x2) => x2.name === knopf5.dataset.v);
+        if (v2) {
+          ui.filter = { ...START3(), ...v2.filter };
+          oeffne(ui.seite);
+        }
         return;
       }
       if (typ === "merken") {
@@ -174055,24 +174113,11 @@ void main() {
     });
     wurzel2.addEventListener("change", (e) => {
       if (!ui.aktiv) return;
-      if (e.target.matches("[data-pp-filter]")) {
-        ui.filter[e.target.dataset.ppFilter] = e.target.value;
-        ui.vorschau = null;
-        anzeigen();
-      } else if (e.target.matches("[data-pp-id]")) {
+      if (e.target.matches("[data-pp-id]")) {
         if (e.target.checked) ui.ausgewaehlt.add(e.target.dataset.ppId);
         else ui.ausgewaehlt.delete(e.target.dataset.ppId);
         ui.vorschau = null;
         anzeigen();
-      } else if (e.target.matches('[data-pp="sort"]')) {
-        ui.sort = e.target.value;
-        anzeigen();
-      } else if (e.target.matches('[data-pp="gespeichert"]') && e.target.value) {
-        const v2 = ui.gespeicherte.find((x2) => x2.name === e.target.value);
-        if (v2) {
-          ui.filter = { ...START3(), ...v2.filter };
-          oeffne(ui.seite);
-        }
       }
     });
     wurzel2.addEventListener("input", (e) => {
@@ -174098,7 +174143,7 @@ void main() {
         quelle: zeilen().length,
         anzeige: gefiltert().length,
         punkte: kartenStaedte(gefiltert()).length,
-        domZeilen: inhalt()?.querySelectorAll(".pp-haus").length ?? 0,
+        domZeilen: inhalt()?.querySelectorAll(".hw-pp-zeile").length ?? 0,
         auswahl: aktionsIds().length,
         fehler: zeilen().filter((h4) => !h4.stadt || !h4.id || !h4.formatKey).map((h4) => h4.id)
       }),
@@ -174376,7 +174421,7 @@ void main() {
   }
 
   // src/ui/reise.js
-  var ASSISTENTIN = portraetSVG({ geschlecht: "w", alter: 36, haar: "bob", haarfarbe: "braun", hautton: "rosig", kleidung: "blazer", kleidungFarbe: "marine", seed: 821 }, 110);
+  var ASSISTENTIN = portraetSVG({ geschlecht: "w", alter: 36, haar: "bob", haarfarbe: "braun", hautton: "rosig", kleidung: "blazer", kleidungFarbe: "marine", seed: 821 }, 72);
   var REISE_ZEIT = Object.freeze({
     kreisAuf: 240,
     panelSteht: 260,
@@ -174415,11 +174460,11 @@ void main() {
   var typBild = (name2) => /Hamburg|Bremen|Kiel|Lübeck|Rostock|Bremerhaven|Wismar|Wilhelmshaven/i.test(name2) ? "hafen" : /Köln|Dresden|Heidelberg|Bamberg|Erfurt|Münster|Aachen/i.test(name2) ? "altstadt" : "ruhr";
   var bild3 = (name2) => "./bilder/reise-" + typBild(name2) + ".jpg";
   var vorschauen = /* @__PURE__ */ new Map();
-  function stadtVorschau(c) {
+  var stadtVorschau = (c) => {
     const data = vorschauen.get(c.name);
-    return '<span class="reise-vorschaurahmen">' + (data ? '<img src="' + data + '" alt="" loading="lazy">' : stadtSymbolSVG2(c)) + "</span>";
-  }
-  var zug3 = '<svg class="reise-zug" viewBox="0 0 780 180" aria-hidden="true"><path d="M42 85 Q72 37 153 32 L598 32 Q693 37 748 106 L754 134 Q747 148 717 151 L82 151 Q43 142 42 115Z" fill="#f7f8f9" stroke="#a5b1ba" stroke-width="5"/><path d="M44 118 L748 118" stroke="#cf392e" stroke-width="17"/><path d="M75 76 Q102 43 170 45 L222 45 L222 88 L62 88Z M246 45 H350 V88 H246Z M373 45 H475 V88 H373Z M497 45 H601 V88 H497Z M621 53 Q685 66 712 95 H621Z" fill="#263d50"/><path d="M76 150 L711 150" stroke="#59636c" stroke-width="7"/></svg>';
+    return '<span class="hw-reise-bild" aria-hidden="true">' + (data ? '<img src="' + data + '" alt="" loading="lazy">' : stadtSymbolSVG2(c)) + "</span>";
+  };
+  var zug3 = (klasse) => '<svg class="' + klasse + '" viewBox="0 0 780 180" aria-hidden="true"><path d="M42 85 Q72 37 153 32 L598 32 Q693 37 748 106 L754 134 Q747 148 717 151 L82 151 Q43 142 42 115Z" fill="#f7f8f9" stroke="#a5b1ba" stroke-width="5"/><path d="M44 118 L748 118" stroke="#cf392e" stroke-width="17"/><path d="M75 76 Q102 43 170 45 L222 45 L222 88 L62 88Z M246 45 H350 V88 H246Z M373 45 H475 V88 H373Z M497 45 H601 V88 H497Z M621 53 Q685 66 712 95 H621Z" fill="#263d50"/><path d="M76 150 L711 150" stroke="#59636c" stroke-width="7"/></svg>';
   function reiseModul(ctx) {
     const z6 = document.createElement("div");
     z6.id = "reise-overlay";
@@ -174458,11 +174503,16 @@ void main() {
         if (ia !== -1 || ib !== -1) return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
         return (b4.umsatz ?? 0) - (a2.umsatz ?? 0) || a2.name.localeCompare(b4.name, "de");
       });
-      const liste3 = z6.querySelector(".reise-zielraster");
+      const liste3 = z6.querySelector("#reise-zielliste");
       if (!liste3) return;
-      liste3.innerHTML = sortiert.map((c) => '<button class="reise-ziel" data-reiseziel="' + esc2(c.name) + '" aria-label="Nach ' + esc2(c.name) + ' reisen">' + stadtVorschau(c) + '<span class="reise-zieltext"><strong>' + esc2(c.name) + '</strong><small class="reise-formate">' + (Array.isArray(c.formate) ? c.formate.map((f13) => '<span class="reise-format">' + esc2(f13.name) + "&nbsp;" + esc2(String(f13.anzahl)) + "</span>").join("") : esc2(c.formate ?? "")) + "</small></span></button>").join("");
-      if (!sortiert.length) liste3.innerHTML = '<p class="reise-leer">Keine Stadt passt zur Suche. Ein Teil des Namens reicht, zum Beispiel \u201EM\xFCh\u201C f\xFCr M\xFClheim.</p>';
-      const treffer = z6.querySelector(".reise-treffer");
+      liste3.innerHTML = sortiert.length ? liste(sortiert.map((c) => zeile({
+        was: stadtVorschau(c) + '<span class="hw-reise-name">' + esc2(c.name) + "<small>" + (Array.isArray(c.formate) ? c.formate.map((f13) => '<span class="hw-reise-format">' + esc2(f13.name) + "&nbsp;" + esc2(String(f13.anzahl)) + "</span>").join("") : esc2(c.formate ?? "")) + "</small></span>",
+        wert: c.umsatz ? esc2(geld(c.umsatz)) : "",
+        wertUnter: c.umsatz ? "Umsatz Woche" : "",
+        tippbar: true,
+        attr: 'data-reiseziel="' + esc2(c.name) + '" aria-label="Nach ' + esc2(c.name) + ' reisen"'
+      }))) : leer3("Ein Teil des Namens reicht, zum Beispiel \u201EM\xFCh\u201C f\xFCr M\xFClheim.", "Keine Stadt passt zur Suche");
+      const treffer = z6.querySelector("[data-reise-treffer]");
       if (treffer) treffer.textContent = sortiert.length + " " + (sortiert.length === 1 ? "Reiseziel" : "Reiseziele");
     }
     function ansichtSetzen(name2) {
@@ -174470,7 +174520,7 @@ void main() {
       for (const art of ["karte", "liste"]) {
         const an = art === name2;
         z6.querySelector("#reise-blatt-" + art)?.toggleAttribute("hidden", !an);
-        z6.querySelector("#reise-tab-" + art)?.setAttribute("aria-selected", String(an));
+        z6.querySelector("#reise-tab-" + art)?.setAttribute("aria-pressed", String(an));
       }
       z6.dataset.ansicht = name2;
     }
@@ -174504,37 +174554,20 @@ void main() {
       const ausschnitt = ctx.vorschau?.();
       if (ausschnitt) vorschauen.set(hier, ausschnitt);
       z6.hidden = false;
-      z6.innerHTML = `<section class="reise-panel hk-flaeche" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Reiseziele">
-      <header class="reise-kopf"><div class="reise-kopfbild">${zug3}</div>
-        <button class="reise-zu" aria-label="Schlie\xDFen" data-reisezu>\xD7</button>
-        <span class="reise-bahnhof">Hauptbahnhof ${esc2(hier)}</span><strong>${esc2(hier)}</strong></header>
-      <div class="reise-assistent"><div class="reise-text" aria-live="polite"></div>
-        <div class="reise-portraet" aria-hidden="true">${ASSISTENTIN}</div></div>
-      <div class="reise-ziele"><div class="reise-zielkopf"><h2>REISEZIELE</h2><small class="reise-treffer"></small></div>
-        <input class="reise-suche" type="search" placeholder="Stadt suchen \u2026" aria-label="Reiseziel suchen">
-        <div class="reise-wechsel" role="tablist" aria-label="Reiseziele anzeigen">
-          <button type="button" role="tab" id="reise-tab-karte" aria-controls="reise-blatt-karte" aria-selected="true" data-reiseansicht="karte">Deutschlandkarte</button>
-          <button type="button" role="tab" id="reise-tab-liste" aria-controls="reise-blatt-liste" aria-selected="false" data-reiseansicht="liste">St\xE4dteliste</button>
-        </div>
-        <div class="reise-blatt reise-karteblatt" id="reise-blatt-karte" role="tabpanel" aria-labelledby="reise-tab-karte">
-          <div class="reise-deutschland"></div>
-          <p class="reise-kartenhinweis">Rot: aktueller Standort. Die Punktgr\xF6\xDFe zeigt die Zahl der H\xE4user. Stadt antippen, um zu reisen.</p>
-        </div>
-        <div class="reise-blatt reise-listenblatt" id="reise-blatt-liste" role="tabpanel" aria-labelledby="reise-tab-liste" hidden>
-          <div class="reise-zielraster"></div>
-        </div>
-      </div></section>`;
-      z6.querySelector(".reise-deutschland").append(
+      const seg2 = seg([["karte", "Karte"], ["liste", "St\xE4dteliste"]], "karte", (v2) => 'id="reise-tab-' + v2 + '" aria-controls="reise-blatt-' + v2 + '" data-reiseansicht="' + v2 + '"').replace('class="hw-segment"', 'class="hw-segment" aria-label="Reiseziele anzeigen"');
+      z6.innerHTML = '<section class="hw hw-blatt hw-reise" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Reiseziele"><div class="hw-grund"></div><header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">' + SYMBOLE.zentrale + '</span><h2 class="hw-kopf-titel">Hauptbahnhof ' + esc2(hier) + '</h2><div class="hw-kopf-unter" data-reise-treffer></div><button type="button" class="hw-zu" aria-label="Schlie\xDFen" data-reisezu></button></header>' + sprecher({ text: '<span class="reise-text" aria-live="polite"></span>', unter: "Sekretariat", person: ASSISTENTIN }) + '<div class="hw-inhalt"><div class="hw-reise-ziele">' + rumpf2('<input class="hw-suche" data-reisesuche type="search" placeholder="Stadt suchen" aria-label="Reiseziel suchen"><div class="hw-abstand"></div>' + seg2 + '<div id="reise-blatt-karte" class="hw-reise-blatt"><div class="hw-reise-karte"></div><p class="hw-text">Markiert: aktueller Standort. Die Punktgr\xF6\xDFe zeigt die Zahl der H\xE4user. Stadt antippen, um zu reisen.</p></div><div id="reise-blatt-liste" class="hw-reise-blatt" hidden>' + abschnitt("Reiseziele", "zuletzt besucht, dann nach Umsatz") + '<div id="reise-zielliste"></div></div>') + "</div></div></section>";
+      z6.querySelector(".hw-reise-karte").append(
         reiseDeutschlandKarte(ctx.staedte(), hier, (stadt) => {
           if (stadt !== hier) fahren(stadt);
         })
       );
       document.body.classList.add("reise-aktiv");
-      z6.querySelector(".reise-suche").addEventListener("input", (e) => {
+      z6.querySelector("[data-reisesuche]").addEventListener("input", (e) => {
         ziele(e.target.value);
         if (e.target.value) ansichtSetzen("liste");
       });
       ziele();
+      z6.dataset.ansicht = "karte";
       requestAnimationFrame(() => {
         if (meins === token) z6.classList.add("offen");
       });
@@ -174542,7 +174575,7 @@ void main() {
       setTimeout(() => {
         if (meins !== token) return;
         messen2("Panel offen");
-        schreibe(z6.querySelector(".reise-text"), "Willkommen am Hauptbahnhof " + hier + ". Wohin soll es gehen?", REISE_ZEIT.text, meins);
+        schreibe(z6.querySelector(".reise-text"), "Wohin soll es gehen? Der Zug steht bereit.", REISE_ZEIT.text, meins);
       }, animate ? REISE_ZEIT.kreisAuf + REISE_ZEIT.panelSteht : 0);
       setTimeout(() => {
         if (meins === token) {
@@ -174560,8 +174593,8 @@ void main() {
       kreis4(p2);
       z6.classList.remove("offen", "ziele-offen");
       z6.classList.add("faehrt");
-      z6.innerHTML = '<section class="reise-flug" role="status" aria-label="Bahnreise nach ' + esc2(ziel) + `"><div class="reise-panorama" style="background-image:url('` + bild3(ziel) + `')"></div><div class="reise-dunst"></div>` + zug3 + '<div class="reise-strecke"><div>' + esc2(kode(von)) + ' <span aria-hidden="true">\u2192</span> ' + esc2(kode(ziel)) + "</div><small>" + esc2(von) + " \u2192 " + esc2(ziel) + "</small></div></section>";
-      const flug = z6.querySelector(".reise-flug");
+      z6.innerHTML = '<section class="hw-reise-flug" role="status" aria-label="Bahnreise nach ' + esc2(ziel) + `"><div class="hw-reise-panorama" style="background-image:url('` + bild3(ziel) + `')"></div><div class="hw-reise-dunst"></div>` + zug3("hw-reise-zug") + '<div class="hw-reise-strecke"><b>' + esc2(kode(von)) + ' <span aria-hidden="true">\u203A</span> ' + esc2(kode(ziel)) + "</b><small>" + esc2(von) + " nach " + esc2(ziel) + "</small></div></section>";
+      const flug = z6.querySelector(".hw-reise-flug");
       flug.classList.add("start");
       const vorbereitung = new Promise((resolve, reject) => {
         setTimeout(async () => {
@@ -174620,7 +174653,7 @@ void main() {
       aktiv: aktiv7,
       schritte: [...protokoll2],
       zielAnzahl: z6.querySelectorAll("[data-reiseziel]").length,
-      kartenPunkte: z6.querySelectorAll(".deutschland-stadt").length,
+      kartenPunkte: z6.querySelectorAll(".hw-dl-stadt").length,
       ansicht: z6.dataset.ansicht ?? "karte"
     }), fahren };
   }
@@ -174643,12 +174676,13 @@ void main() {
     vorfallAus: 200,
     reduziert: 150
   });
-  var eur3 = (n3) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n3 ?? 0)) + " \u20AC";
+  var eur3 = (n3) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n3 ?? 0)).replace("-", "\u2212") + " \u20AC";
   var kurve3 = (t5) => 1 - (1 - t5) ** 2;
   var reduziert = () => effektiveAnimation() !== "voll";
   var ohneAnimation2 = () => new URLSearchParams(location.search).has("ohne-animation");
   var warten2 = (ms) => new Promise((r4) => setTimeout(r4, ms));
   var KATEGORIE3 = ["Presse", "Konkurrenz"];
+  var blattKopf = (symbol2, titel, unter, zu) => `<div class="hw-grund"></div><header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">${SYMBOLE[symbol2] ?? ""}</span><h2 class="hw-kopf-titel" tabindex="-1">${esc2(titel)}</h2><div class="hw-kopf-unter">${esc2(unter)}</div>${zu}</header>`;
   function wochenberichtModul(ctx) {
     const node = document.createElement("div");
     node.id = "wochen-overlay";
@@ -174678,12 +174712,12 @@ void main() {
     }
     function fragDialog() {
       const warnungen = ctx.posteingang().handeln.filter((x2) => x2.restWochen === 0);
-      node.innerHTML = '<section class="wochen-maske" role="dialog" aria-modal="true" aria-label="Woche abschlie\xDFen"><div class="wochen-frage hk-flaeche" data-bereich="betrieb"><button class="wochen-x" data-wa="nein" aria-label="Schlie\xDFen">\xD7</button><h2 tabindex="-1">Woche abschlie\xDFen?</h2><div class="wochen-frageinhalt"><p>Sind Sie mit dieser Woche fertig?</p><span class="wochen-gesicht">' + ASSISTENTIN2 + "</span></div>" + (ctx.warnen() && warnungen.length ? '<p class="wochen-warnung">' + warnungen.length + " Vorg\xE4nge laufen ab. Der Standard wird gew\xE4hlt beziehungsweise das Angebot verf\xE4llt.</p>" : "") + '<div class="wochen-knopfreihe"><button data-wa="nein">Nein</button><button class="prim" data-wa="ja">Ja</button></div></div></section>';
+      node.innerHTML = '<section class="hw-wb-maske" role="dialog" aria-modal="true" aria-label="Woche abschlie\xDFen"><div class="hw hw-kontur hw-wb-frage" data-bereich="betrieb"><button type="button" class="hw-zu" data-wa="nein" aria-label="Schlie\xDFen"></button><h2 tabindex="-1">Woche abschlie\xDFen?</h2><div class="hw-wb-frageinhalt"><p>Die Engine rechnet die Woche f\xFCr alle H\xE4user ab. Danach folgt der Wochenbericht.</p><span class="hw-wb-gesicht" aria-hidden="true">' + ASSISTENTIN2 + "</span></div>" + (ctx.warnen() && warnungen.length ? hinweis(warnungen.length + (warnungen.length === 1 ? " Vorgang l\xE4uft" : " Vorg\xE4nge laufen") + " ab. Ohne Entscheidung gilt der Standard, Angebote verfallen.", "achtung") : "") + knoepfe(knopf("Nein", 'data-wa="nein"', "zweit"), knopf("Ja, abschlie\xDFen", 'data-wa="ja"')) + "</div></section>";
       node.hidden = false;
       node.className = "frage-ein";
       document.body.classList.add("wochen-aktiv");
       status2 = "frage";
-      node.querySelector(".wochen-frage h2")?.focus({ preventScroll: true });
+      node.querySelector(".hw-wb-frage h2")?.focus({ preventScroll: true });
       requestAnimationFrame(() => node.classList.add("sichtbar"));
     }
     function oeffne() {
@@ -174743,7 +174777,8 @@ void main() {
         erfolge: ctx.erfolge?.() ?? [],
         woche: ctx.wocheNr(),
         letzte: jetzt,
-        kapitalfluss: fluss2
+        kapitalfluss: fluss2,
+        verlauf: ver.slice(-5).map((k5) => ({ label: String(kwVon2(k5.woche)), a: k5.umsatz, b: k5.ebitda }))
       };
       markieren("Engine abgeschlossen");
       if (modus() === "aus") {
@@ -174766,43 +174801,63 @@ void main() {
         rolle: person3?.name ?? "Vorstand"
       };
     }
-    function zeile4(name2, wert, k5 = "") {
-      return '<div class="wb-zeile ' + k5 + '"><span>' + esc2(name2) + "</span><strong>" + esc2(wert) + "</strong></div>";
+    function befund2(b4) {
+      const e = b4.ebitda < 0 ? `<b>EBITDA ${esc2(geld(b4.ebitda))}.</b>` : `<b>EBITDA plus ${esc2(geld(b4.ebitda))}.</b>`;
+      const cash = b4.cashNetto >= 0 ? ` Die Kasse w\xE4chst um ${esc2(geld(b4.cashNetto))}.` : ` Die Kasse verliert ${esc2(geld(-b4.cashNetto))}.`;
+      return e + cash;
     }
     function berichtZeigen(meins) {
       if (meins !== token) return;
       status2 = "zaehlen";
       vorfall = 0;
       const m = bericht2.meldungen, ausgabe = ctx.zeitung?.(), titel = ausgabe?.aufmacher?.titel ?? m[0]?.text ?? "Hartwig startet in eine neue Gesch\xE4ftswoche";
-      const delta = (wert, vorher) => vorher == null ? "Noch keine Vergleichswoche" : eur3(wert - vorher) + " (" + (vorher === 0 ? "\u2013" : new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 }).format((wert - vorher) / Math.abs(vorher) * 100) + " %") + ")";
-      const uDelta = delta(bericht2.umsatz, bericht2.umsatzVor);
-      const eDelta = delta(bericht2.ebitda, bericht2.ebitdaVor);
-      const nachricht = (a2, platz) => a2 ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? "hafen" : "altstadt") + '.jpg)"></div><span>' + esc2(a2.text) + "</span></div>" : "";
-      node.innerHTML = '<section class="wb-bericht hk-flaeche" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2 tabindex="-1">KW ' + bericht2.kw + ' \xB7 Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schlie\xDFen">\xD7</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht2.umsatz + '">0 \u20AC</strong><span id="wb-umsatz-delta">' + esc2(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht2.ebitda + '">0 \u20AC</strong><span id="wb-ebitda-delta">' + esc2(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash">' + (() => {
-        const f13 = bericht2.kapitalfluss, z6 = (name2, v2) => ({ name: name2, werte: [eur3(v2)], roh: [Math.round(v2)], ton: [v2 < 0 ? "schlecht" : ""] });
-        return tabelle({
-          titel: "Kapitalfluss der Woche",
-          zeilen: [z6("Cash operativ", f13.operativ), z6("Investitionen", f13.investitionen), z6("Finanzierung", f13.finanzierung), z6("Sonstiges", f13.sonstiges)],
-          summe: z6("Cash netto", f13.netto),
-          pruefen: Math.abs(f13.operativ + f13.investitionen + f13.finanzierung + f13.sonstiges - f13.netto) < 2
-        }) + zeile4("Cash-Bestand", eur3(f13.bestand), "wb-summe");
-      })() + "</div>" + (bericht2.phase === "insolvenz" ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur3(bericht2.kredite) + " \xB7 Liquidit\xE4tsreichweite: " + bericht2.runway + " Wochen</span></div>" : "") + '<div class="wb-zeitung hk-papier"><div class="wb-zeitungskopf"><small>KW ' + bericht2.kw + " / " + bericht2.jahr + '</small><h3>Der Handelsbote</h3><nav>Top \xB7 Handel \xB7 Konzern \xB7 Markt \xB7 Politik</nav></div><div class="wb-titelbild">' + (ausgabe ? zeitungsBild(ausgabe.aufmacher.bild, ausgabe.nummer) : "") + "</div><h4>" + esc2(titel) + '</h4><button type="button" class="wb-zeitung-lesen" data-wa="zeitung">Ausgabe lesen und Archiv \xF6ffnen</button>' + nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? "<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>" : "") + (bericht2.erfolge.length ? '<div class="wb-erfolge"><strong>Neu: ' + bericht2.erfolge.map((e) => esc2(e.titel)).join(", ") + "</strong></div>" : "") + '</div></div><div id="wb-vorfall"></div></section>';
+      const delta = (wert, vorher) => vorher == null ? "keine Vergleichswoche" : abweichung(wert - vorher, (wert - vorher >= 0 ? "+" : "\u2212") + geld(Math.abs(wert - vorher)), vorher ? (wert - vorher) / Math.abs(vorher) : null) + " zur Vorwoche";
+      const cfo = ctx.person?.("cfo");
+      const sprecher2 = sprecher({ text: befund2(bericht2), unter: (cfo?.name ?? "Finanzen") + " \xB7 Finanzvorstand", person: cfo?.portraet ? portraetSVG(cfo.portraet, 72) : ASSISTENTIN2, ton: bericht2.ebitda < 0 ? "engpass" : "" });
+      const f13 = bericht2.kapitalfluss, z6 = (name2, v2) => ({ name: name2, werte: [eur3(v2)], roh: [Math.round(v2)], ton: [v2 < 0 ? "schlecht" : ""] });
+      const kapital = '<div data-wb="cash" data-summen-name="Kapitalfluss">' + tabelle({
+        titel: "Kapitalfluss der Woche",
+        spalten: ["KW " + bericht2.kw],
+        zeilen: [z6("Cash operativ", f13.operativ), z6("Investitionen", f13.investitionen), z6("Finanzierung", f13.finanzierung), z6("Sonstiges", f13.sonstiges)],
+        summe: z6("Cash netto", f13.netto),
+        pruefen: Math.abs(f13.operativ + f13.investitionen + f13.finanzierung + f13.sonstiges - f13.netto) < 2
+      }) + '<div class="hw-abstand"></div>' + tabelle({ zeilen: [{ name: "Cash-Bestand", werte: [eur3(f13.bestand)], ton: [f13.bestand < 0 ? "schlecht" : ""] }] }) + "</div>";
+      const insolvenz = bericht2.phase === "insolvenz" ? abschnitt("Insolvenzbarometer") + liste([zeile({ was: "Freier Kreditrahmen", wert: esc2(eur3(bericht2.kredite)), ton: bericht2.kredite < 0 ? "schlecht" : "" }), zeile({ was: "Liquidit\xE4tsreichweite", wert: bericht2.runway + " Wochen", ton: "achtung" })]) : "";
+      const presse = '<div data-wb="zeitung">' + abschnitt("Der Handelsbote", "KW " + bericht2.kw + " / " + bericht2.jahr) + liste([
+        zeile({ was: esc2(titel), unter: "Aufmacher", tippbar: true, attr: 'data-wa="zeitung" aria-label="Ausgabe lesen und Archiv \xF6ffnen"' }),
+        ...m.slice(1, 3).map((a2) => zeile({ was: esc2(a2.text), unter: esc2(a2.kategorie) }))
+      ]) + (!m.length ? leer3("Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.") : "") + "</div>";
+      const erfolge = bericht2.erfolge.length ? '<div data-wb="erfolge">' + abschnitt("Neu freigeschaltet", bericht2.erfolge.length + (bericht2.erfolge.length === 1 ? " Erfolg" : " Erfolge")) + liste(bericht2.erfolge.map((e) => zeile({ was: "Neu: " + esc2(e.titel), unter: esc2(e.beschreibung ?? "") }))) + "</div>" : "";
+      const inhalt = rumpf2(gross2([
+        { label: "Umsatz der Woche", wert: "0 \u20AC", p: "wb:umsatz", unter: delta(bericht2.umsatz, bericht2.umsatzVor) },
+        { label: "EBITDA der Woche", wert: "0 \u20AC", p: "wb:ebitda", ton: bericht2.ebitda < 0 ? "schlecht" : "gut", unter: delta(bericht2.ebitda, bericht2.ebitdaVor) }
+      ]) + balkenPaar([
+        { titel: "Umsatz", serie: "a", punkte: bericht2.verlauf.map((p2) => ({ label: p2.label, wert: p2.a })) },
+        { titel: "EBITDA", serie: "b", punkte: bericht2.verlauf.map((p2) => ({ label: p2.label, wert: p2.b })) }
+      ])) + band(kapital + insolvenz) + rumpf2(presse + erfolge + knoepfe(knopf("Zur\xFCck zur Stadt", 'data-wa="schliessen"', "breit")));
+      node.innerHTML = '<section class="hw hw-blatt hw-wb" data-bereich="zentrale" data-wb="bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis">' + blattKopf("zahlen", "Wochenergebnis", "KW " + bericht2.kw + " / " + bericht2.jahr, '<button type="button" class="hw-zu" data-wa="schliessen" aria-label="Bericht schlie\xDFen"></button>') + sprecher2 + '<div class="hw-inhalt">' + inhalt + '</div><div id="wb-vorfall"></div></section>';
+      for (const [p2, id, wert] of [["wb:umsatz", "wb-umsatz", bericht2.umsatz], ["wb:ebitda", "wb-ebitda", bericht2.ebitda]]) {
+        const el2 = node.querySelector(`[data-p="${p2}"]`);
+        if (el2) {
+          el2.id = id;
+          el2.dataset.wert = wert;
+        }
+      }
       node.hidden = false;
       node.className = "bericht-ein";
       document.body.classList.add("wochen-aktiv");
       requestAnimationFrame(() => node.classList.add("sichtbar"));
-      node.querySelector(".wb-bericht h2")?.focus({ preventScroll: true });
+      node.querySelector(".hw-wb h2")?.focus({ preventScroll: true });
       const originalDauer = dauer();
       const zaehlBeginn = performance.now() + (originalDauer ? WOCHEN_ZEIT.berichtEin : 0);
       let abgeschlossen = false;
       function zahlen(t5 = performance.now(), sprung = false) {
-        const f13 = sprung || !originalDauer ? 1 : kurve3(Math.max(0, Math.min(1, (t5 - zaehlBeginn) / originalDauer)));
+        const f14 = sprung || !originalDauer ? 1 : kurve3(Math.max(0, Math.min(1, (t5 - zaehlBeginn) / originalDauer)));
         const u = node.querySelector("#wb-umsatz"), e = node.querySelector("#wb-ebitda");
         if (!u || !e || meins !== token) return;
-        u.textContent = eur3(bericht2.umsatz * f13);
-        e.textContent = eur3(bericht2.ebitda * f13);
-        e.classList.toggle("negativ", bericht2.ebitda < 0);
-        if (f13 < 1) zaehlRaf = requestAnimationFrame(zahlen);
+        u.textContent = eur3(bericht2.umsatz * f14);
+        e.textContent = eur3(bericht2.ebitda * f14);
+        if (f14 < 1) zaehlRaf = requestAnimationFrame(zahlen);
         else if (!abgeschlossen) {
           abgeschlossen = true;
           node.classList.add("gezaehlt");
@@ -174813,7 +174868,7 @@ void main() {
           }, schnell() ? 0 : 200);
         }
       }
-      node.querySelector(".wb-bericht").addEventListener("click", (e) => {
+      node.querySelector(".hw-wb").addEventListener("click", (e) => {
         if (status2 === "zaehlen" && !e.target.closest("[data-wa]")) {
           cancelAnimationFrame(zaehlRaf);
           zahlen(performance.now(), true);
@@ -174829,10 +174884,10 @@ void main() {
       markieren("Vorfall " + (vorfall + 1));
       const feld3 = node.querySelector("#wb-vorfall"), meins = token;
       const verantwortlich = portraetZumVorgang(m);
-      feld3.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall hk-flaeche" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc2(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + '</div></div><h4 tabindex="-1">' + esc2(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + '</small><button data-wa="spaeter" hidden>Sp\xE4ter</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + " weitere im Posteingang</p>" : "") + "</section></div>";
-      feld3.querySelector(".wb-vorfall h4")?.focus({ preventScroll: true });
+      feld3.innerHTML = '<div class="hw-wb-vorfallmaske"><section class="hw-wb-vorfall" data-wb="vorfall" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="hw-wb-vorfallkopf"><div><span class="hw-marke">Vorfall \xB7 ' + esc2(verantwortlich.rolle) + '</span><h3 tabindex="-1">' + esc2(m.titel) + '</h3></div><div class="hw-wb-gesicht" data-wb="gesicht" aria-hidden="true">' + verantwortlich.bild + '</div></div><p class="hw-wb-tippt" aria-live="polite"></p><div class="hw-wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + (alle.length > 3 ? " \xB7 " + (alle.length - 3) + " weitere im Posteingang" : "") + "</small>" + knopf("Sp\xE4ter", 'data-wa="spaeter" hidden', "zweit") + knopf("Ansehen", 'data-wa="ansehen" hidden') + "</div></section></div>";
+      feld3.querySelector(".hw-wb-vorfall h3")?.focus({ preventScroll: true });
       requestAnimationFrame(() => feld3.classList.add("offen"));
-      const text3 = m.text ?? "", el2 = feld3.querySelector(".wb-tippt"), beginn = performance.now();
+      const text3 = m.text ?? "", el2 = feld3.querySelector(".hw-wb-tippt"), beginn = performance.now();
       function tick(t5) {
         if (meins !== token || status2 !== "vorfall") return;
         const n3 = schnell() ? text3.length : Math.floor((t5 - beginn) / 1e3 * 70);
@@ -174840,8 +174895,7 @@ void main() {
         if (el2.textContent.length !== text3.length && t5 - beginn < WOCHEN_ZEIT.vorfallText) requestAnimationFrame(tick);
         else {
           el2.textContent = text3;
-          feld3.querySelector(".wb-vorfallfuss small").hidden = true;
-          for (const b4 of feld3.querySelectorAll(".wb-vorfallfuss button")) b4.hidden = false;
+          for (const b4 of feld3.querySelectorAll(".hw-wb-vorfallfuss button")) b4.hidden = false;
         }
       }
       requestAnimationFrame(tick);
@@ -174878,7 +174932,7 @@ void main() {
           if (status2 === "bericht") abbruch();
           else if (status2 === "zaehlen") {
             cancelAnimationFrame(zaehlRaf);
-            node.querySelector(".wb-kennzahlen")?.click();
+            node.querySelector(".hw-wb .hw-gross")?.click();
           }
           break;
         case "zeitung":
@@ -174949,7 +175003,7 @@ void main() {
   }
 
   // src/ui/ecommerce.js
-  var prozent3 = (x2, n3 = 1) => (100 * (x2 || 0)).toFixed(n3).replace(".", ",") + " %";
+  var prozent5 = (x2, n3 = 1) => (100 * (x2 || 0)).toFixed(n3).replace(".", ",") + " %";
   var zeile2 = (label, detail2, aktion2) => '<div class="zeile"><span class="was"><b>' + esc2(label) + "</b><i>" + esc2(detail2) + "</i></span>" + aktion2 + "</div>";
   var schalter3 = (akt, wert, parameter = "") => '<button class="mini ' + (wert ? "gruen" : "") + '" data-online="' + akt + '" ' + parameter + ">" + (wert ? "Ein" : "Aus") + "</button>";
   var knopfText = (akt, an, text3, id) => '<button class="mini' + (an ? " q-an-knopf" : "") + '" data-online="' + akt + '" data-id="' + esc2(id) + '" aria-pressed="' + !!an + '">' + text3 + "</button>";
@@ -174967,8 +175021,8 @@ void main() {
         const vz = (x2) => (x2 < 0 ? "\u2212" : x2 > 0 ? "+" : "") + geld(Math.abs(x2));
         h4 += '<div class="q31">';
         h4 += '<div class="q-gross"><span class="q-label">Deckungsbeitrag online</span><span class="q-haupt ' + (u.deckungsbeitrag < 0 ? "q-minus" : "") + '">' + geld(u.deckungsbeitrag) + '</span><span class="q-neben"><b>' + geld(u.umsatz) + "</b>Onlineumsatz Woche</span></div>";
-        h4 += '<div class="q-befund">' + (u.bestellungen ? (u.deckungsbeitrag < 0 ? '<b class="q-minus">hartwig.de verliert Geld.</b> ' : "") + "<b>" + fmt.format(u.bestellungen) + "</b> Bestellungen zu je <b>" + geld(u.kostenJeBestellung) + "</b> Kosten, " + prozent3(u.retourenquote) + " gehen zur\xFCck." : "Diese Woche gab es keine Onlinebestellung.") + "</div>";
-        h4 += '<div class="q-buch q-paketschein"><div class="q-buch-kopf"><span>Paketschein KW ' + (ctx.s().woche % 52 + 1) + '</span><b>hartwig.de</b></div><div class="q-zeile"><span class="q-name">Anteil am Konzernumsatz</span><span class="q-wert">' + prozent3(u.anteil) + '</span></div><div class="q-zeile"><span class="q-name">Online-Conversion</span><span class="q-wert">' + prozent3(u.conversion, 2) + '</span></div><div class="q-zeile"><span class="q-name">Retourenquote</span><span class="q-wert">' + prozent3(u.retourenquote) + '</span></div><div class="q-zeile"><span class="q-name">Click & Collect<small>Anteil der Bestellungen</small></span><span class="q-wert">' + prozent3(u.clickCollectAnteil) + "</span></div></div>";
+        h4 += '<div class="q-befund">' + (u.bestellungen ? (u.deckungsbeitrag < 0 ? '<b class="q-minus">hartwig.de verliert Geld.</b> ' : "") + "<b>" + fmt.format(u.bestellungen) + "</b> Bestellungen zu je <b>" + geld(u.kostenJeBestellung) + "</b> Kosten, " + prozent5(u.retourenquote) + " gehen zur\xFCck." : "Diese Woche gab es keine Onlinebestellung.") + "</div>";
+        h4 += '<div class="q-buch q-paketschein"><div class="q-buch-kopf"><span>Paketschein KW ' + (ctx.s().woche % 52 + 1) + '</span><b>hartwig.de</b></div><div class="q-zeile"><span class="q-name">Anteil am Konzernumsatz</span><span class="q-wert">' + prozent5(u.anteil) + '</span></div><div class="q-zeile"><span class="q-name">Online-Conversion</span><span class="q-wert">' + prozent5(u.conversion, 2) + '</span></div><div class="q-zeile"><span class="q-name">Retourenquote</span><span class="q-wert">' + prozent5(u.retourenquote) + '</span></div><div class="q-zeile"><span class="q-name">Click & Collect<small>Anteil der Bestellungen</small></span><span class="q-wert">' + prozent5(u.clickCollectAnteil) + "</span></div></div>";
         h4 += '<div class="q-buch" data-summenbuch="Umsatzbr\xFCcke Online"><div class="q-buch-kopf"><span>Umsatzbr\xFCcke Online</span><b>Woche</b></div><div class="q-zeile"><span class="q-name">Onlinewachstum gegen\xFCber Basis<small>Basis 8 % ist im Konzernumsatz schon enthalten</small></span><span class="q-wert" data-s="e">' + vz(wachstum) + '</span></div><div class="q-zeile"><span class="q-name">Mitk\xE4ufe bei Abholung im Haus</span><span class="q-wert" data-s="e">' + vz(mitkauf) + '</span></div><div class="q-zeile"><span class="q-name">Kannibalisierung in den H\xE4usern</span><span class="q-wert" data-s="e">' + vz(-u.kannibalisierung) + '</span></div><div class="q-summe"><span>Effekt auf den Konzernumsatz</span><span data-summe="e" class="q-wert ' + (u.onlineEffekt < 0 ? "q-minus" : "") + '">' + vz(u.onlineEffekt) + "</span></div></div>";
         const v2 = u.verlauf.slice(-26);
         if (v2.length < 2) h4 += '<div class="q-buch"><div class="q-leer">Ein Verlauf ist ab der zweiten Woche verf\xFCgbar.</div></div>';
@@ -174980,12 +175034,12 @@ void main() {
         h4 += '<div class="q-buch" data-summenbuch="Warengruppen online"><div class="q-buch-kopf"><span>Warengruppen online</span><b>Umsatz</b></div>' + (gr.length ? gr.map(([g2, umsatz]) => '<div class="q-zeile"><span class="q-name">' + esc2(ctx.E.GRUPPEN[g2]?.name ?? g2) + '</span><span class="q-wert" data-s="u">' + geld(umsatz) + "</span></div>").join("") + '<div class="q-summe"><span>Summe</span><span class="q-wert" data-summe="u">' + geld(gr.reduce((a2, [, x2]) => a2 + x2, 0)) + "</span></div>" : '<div class="q-leer">Noch kein Onlineumsatz.</div>') + "</div>";
         h4 += "</div>";
       } else if (tab === "steuerung") {
-        const optionen3 = (id, werte3, aktuell, format) => '<div class="zeile"><span class="was">' + id + '</span><select class="ort" data-online="strategie" data-feld="' + format + '">' + werte3.map(([v2, t5]) => '<option value="' + v2 + '"' + (String(v2) === String(aktuell) ? " selected" : "") + ">" + t5 + "</option>").join("") + "</select></div>";
+        const optionen2 = (id, werte3, aktuell, format) => '<div class="zeile"><span class="was">' + id + '</span><select class="ort" data-online="strategie" data-feld="' + format + '">' + werte3.map(([v2, t5]) => '<option value="' + v2 + '"' + (String(v2) === String(aktuell) ? " selected" : "") + ">" + t5 + "</option>").join("") + "</select></div>";
         h4 += '<div class="karte"><div class="khead">Online-Sortiment und Service</div>';
-        h4 += optionen3("Sortimentsbreite", [[0.45, "45 %"], [0.65, "65 %"], [0.8, "80 %"], [1, "100 %"]], u.sortimentsbreite, "sortimentsbreite");
-        h4 += optionen3("Verf\xFCgbarkeit", [[0.7, "70 %"], [0.88, "88 %"], [0.95, "95 %"], [1, "100 %"]], u.verfuegbarkeit, "verfuegbarkeit");
-        h4 += optionen3("Lieferzeit", [[1, "1 Tag"], [2, "2 Tage"], [3, "3 Tage"], [5, "5 Tage"], [7, "7 Tage"]], u.lieferTage, "lieferTage");
-        h4 += optionen3("Preisniveau", [[0.9, "\u221210 %"], [1, "Standard"], [1.1, "+10 %"], [1.2, "+20 %"]], u.preisFaktor, "preisFaktor");
+        h4 += optionen2("Sortimentsbreite", [[0.45, "45 %"], [0.65, "65 %"], [0.8, "80 %"], [1, "100 %"]], u.sortimentsbreite, "sortimentsbreite");
+        h4 += optionen2("Verf\xFCgbarkeit", [[0.7, "70 %"], [0.88, "88 %"], [0.95, "95 %"], [1, "100 %"]], u.verfuegbarkeit, "verfuegbarkeit");
+        h4 += optionen2("Lieferzeit", [[1, "1 Tag"], [2, "2 Tage"], [3, "3 Tage"], [5, "5 Tage"], [7, "7 Tage"]], u.lieferTage, "lieferTage");
+        h4 += optionen2("Preisniveau", [[0.9, "\u221210 %"], [1, "Standard"], [1.1, "+10 %"], [1.2, "+20 %"]], u.preisFaktor, "preisFaktor");
         h4 += zeile2("Click & Collect", "Abholung nur in H\xE4usern mit Abholstation", schalter3("collect", u.clickCollect)) + "</div>";
         h4 += '<div class="karte"><div class="khead">Fulfillment</div>' + zeile2("Aktuelles Modell", u.fulfillment === "eigen" ? "Eigenes Lager, niedrigere Paketkosten und Fixkosten" : "Dienstleister, variable Paketkosten", "");
         if (u.projekt) h4 += zeile2("Projekt in Umsetzung", (u.projekt.modell === "eigen" ? "Eigenes Lager" : "Dienstleister") + " ab KW " + (u.projekt.bis % 52 + 1) + " \xB7 Investition " + geld(u.projekt.investition), "");
@@ -175129,7 +175183,7 @@ void main() {
     return m;
   }
   var filialleitungBild = (h4, groesse2 = 72) => portraetSVG(personMerkmale(h4.personal?.filialleiter?.name, "filialleitung:" + h4.id), groesse2);
-  var FARBE2 = {
+  var FARBE = {
     damen: "#c87482",
     herren: "#6f8fb8",
     kinder: "#d9ad55",
@@ -175156,7 +175210,7 @@ void main() {
     if (f13.konzept === "leer") return KONZEPTFARBE.leer;
     if (f13.konzept === "untermiete") return KONZEPTFARBE.untermiete;
     const g2 = String(f13.gruppe ?? "").toLowerCase();
-    return FARBE2[g2] ?? FARBE2[g2.split(/[ &]/)[0]] ?? KONZEPTFARBE[f13.konzept] ?? "#8a8178";
+    return FARBE[g2] ?? FARBE[g2.split(/[ &]/)[0]] ?? KONZEPTFARBE[f13.konzept] ?? "#8a8178";
   }
   function etagenschnitt(etagen, { breite = 358 } = {}) {
     const liste3 = [...etagen].sort((a2, b4) => b4.etage - a2.etage);
@@ -176354,7 +176408,7 @@ void main() {
 
   // src/ui/szenarien.js
   var SPEICHERSCHLUESSEL = "ruhrkauf-szenarien-bestwerte-v1";
-  var prozent4 = (w2) => Math.max(0, Math.min(100, Math.round(100 * w2)));
+  var prozent6 = (w2) => Math.max(0, Math.min(100, Math.round(100 * w2)));
   var leseBestwerte = () => {
     try {
       return JSON.parse(localStorage.getItem(SPEICHERSCHLUESSEL) || "{}");
@@ -176406,8 +176460,8 @@ void main() {
       }
       const ziel = ctx.E.szenarioZiel(spiel2);
       zielknopf.hidden = false;
-      document.getElementById("szenarioprozent").textContent = ziel.wertung ? prozent4(ziel.fortschritt) + " %" : "\u221E";
-      document.getElementById("szenariofortschritt").style.width = (ziel.wertung ? prozent4(ziel.fortschritt) : 100) + "%";
+      document.getElementById("szenarioprozent").textContent = ziel.wertung ? prozent6(ziel.fortschritt) + " %" : "\u221E";
+      document.getElementById("szenariofortschritt").style.width = (ziel.wertung ? prozent6(ziel.fortschritt) : 100) + "%";
       zielknopf.setAttribute("aria-label", ziel.name + ": " + ziel.details + ". Szenarioziel \xF6ffnen");
       zielknopf.title = ziel.name + " \xB7 " + ziel.text;
       if (ziel.erreicht && ziel.wertung && letzterSieg !== spiel2) {
@@ -176419,7 +176473,7 @@ void main() {
       const s2 = ctx.spiel();
       if (!s2) return;
       const z6 = ctx.E.szenarioZiel(s2);
-      let inhalt = '<article class="karte sz-zielinfo"><div class="sz-zieltitel">' + esc2(z6.name) + "</div><p>" + esc2(z6.text) + '</p><div class="sz-balken"><span style="width:' + prozent4(z6.fortschritt) + '%"></span></div><p><b>' + (z6.wertung ? prozent4(z6.fortschritt) + " % erreicht" : "Keine Wertung") + "</b> \xB7 " + esc2(z6.details) + "</p><p>" + (z6.erreicht ? "Ziel erreicht" : z6.gescheitert ? "Ziel verfehlt" : z6.wertung ? "Herausforderung l\xE4uft" : "Freies Spiel") + "</p></article>";
+      let inhalt = '<article class="karte sz-zielinfo"><div class="sz-zieltitel">' + esc2(z6.name) + "</div><p>" + esc2(z6.text) + '</p><div class="sz-balken"><span style="width:' + prozent6(z6.fortschritt) + '%"></span></div><p><b>' + (z6.wertung ? prozent6(z6.fortschritt) + " % erreicht" : "Keine Wertung") + "</b> \xB7 " + esc2(z6.details) + "</p><p>" + (z6.erreicht ? "Ziel erreicht" : z6.gescheitert ? "Ziel verfehlt" : z6.wertung ? "Herausforderung l\xE4uft" : "Freies Spiel") + "</p></article>";
       if (z6.id === "investor") {
         const eigene = s2.haeuser.filter((h4) => h4.status === "offen" && h4.miete.vermieter === "eigentuemer").slice(0, 16);
         inhalt += "<h3>Immobilienverkauf mit R\xFCckmietung</h3><p>Der Investor verlangt mindestens einen Verkauf pro Gesch\xE4ftsjahr. Ein Verkauf erh\xF6ht die laufende Miete.</p>" + (eigene.map((h4) => '<button class="breit" type="button" data-sz-verkauf="' + esc2(h4.id) + '">' + esc2(h4.name) + " verkaufen \xB7 " + geld(Math.max(5e6, h4.grundflaecheQm * 4500)) + "</button>").join("") || "<p>Keine verk\xE4uflichen Immobilien vorhanden.</p>");
@@ -178036,11 +178090,11 @@ void main() {
   }
 
   // src/ui/reporting.js
-  var prozent5 = (x2) => (100 * x2).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
+  var prozent7 = (x2) => (100 * x2).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
   var zahl4 = (x2, n3 = 1) => Number(x2).toLocaleString("de-DE", { maximumFractionDigits: n3, minimumFractionDigits: n3 });
   var euro2 = (x2) => zahl4(x2, 2) + " \u20AC";
   function zeile3(z6, haus2 = false) {
-    return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z6.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z6.ampelfarbe) + '"></span>' + esc2(z6.name) + "</div><div>" + geld(z6.umsatz) + "</div><div>" + (z6.abweichung == null ? "\u2013" : geld(z6.abweichung) + " (" + prozent5(z6.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z6.frequenz)) + "</div><div>" + prozent5(z6.kaufquote) + "</div><div>" + euro2(z6.bon) + "</div></div>";
+    return '<div class="o02-daten ' + (haus2 ? "o02-klickbar" : "") + '" ' + (haus2 ? 'data-o02-open="' + esc2(z6.id) + '" role="button" tabindex="0"' : "") + '><div class="o02-name"><span class="o02-ampel ' + esc2(z6.ampelfarbe) + '"></span>' + esc2(z6.name) + "</div><div>" + geld(z6.umsatz) + "</div><div>" + (z6.abweichung == null ? "\u2013" : geld(z6.abweichung) + " (" + prozent7(z6.abweichungProzent ?? 0) + ")") + "</div><div>" + fmt.format(Math.round(z6.frequenz)) + "</div><div>" + prozent7(z6.kaufquote) + "</div><div>" + euro2(z6.bon) + "</div></div>";
   }
   function wasserfall(br) {
     if (br.status !== "ok") return '<div class="q-leer"><b>Noch keine Vorjahresbr\xFCcke.</b>' + esc2(br.status) + "</div>";
@@ -178074,7 +178128,7 @@ void main() {
     const karten = (werte3) => sortiere(werte3).map((z6) => zeile3(z6, true)).join("");
     const leere = '<div class="zeile grau">Keine H\xE4user im gew\xE4hlten Filter.</div>';
     const tabelle3 = (inhalt) => '<div class="o02-scroll"><div class="o02-tab"><div class="o02-daten o02-kopf"><b>Einheit</b><b>Umsatz</b><b>Abw. VJ</b><b>Frequenz</b><b>Kaufquote</b><b>Bon</b></div>' + (inhalt || leere) + "</div></div>";
-    const auswahl4 = (name2, key, optionen3) => "<label>" + name2 + '<select data-o02-wahl="' + key + '" class="ort">' + optionen3.map(([wert, titel]) => '<option value="' + esc2(wert) + '" ' + (String(ui[key]) === String(wert) ? "selected" : "") + ">" + esc2(titel) + "</option>").join("") + "</select></label>";
+    const auswahl4 = (name2, key, optionen2) => "<label>" + name2 + '<select data-o02-wahl="' + key + '" class="ort">' + optionen2.map(([wert, titel]) => '<option value="' + esc2(wert) + '" ' + (String(ui[key]) === String(wert) ? "selected" : "") + ">" + esc2(titel) + "</option>").join("") + "</select></label>";
     function anzeigen() {
       const daten = E9.reporting(ctx.s(), ui.wochen, ui.format);
       for (const g2 of daten.gruppen) if (g2.ebene === "hauscluster") g2.name = clusterName3(ctx.s(), g2.id);
@@ -178164,10 +178218,10 @@ void main() {
   function itModul(ctx) {
     const { E: E9 } = ctx, s2 = () => ctx.s();
     const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, projekt: null, produkt: null, bestaetigung: false };
-    const optionen3 = ["kaufen", "entwickeln", "dienstleister"];
+    const optionen2 = ["kaufen", "entwickeln", "dienstleister"];
     const artName = { kaufen: "Standard\xADsoftware", entwickeln: "Eigen\xADentwicklung", dienstleister: "Dienst\xADleister" };
     const phasen = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
-    const prozent6 = (x2) => Math.round(x2 * 100) + " %";
+    const prozent8 = (x2) => Math.round(x2 * 100) + " %";
     function daten() {
       return E9.itUebersicht(s2());
     }
@@ -178213,7 +178267,7 @@ void main() {
     }
     function projektKarte(p2, d4) {
       let h4 = '<div class="karte"><div class="khead">' + esc2(E9.SYSTEME[p2.system].name) + "<small>Generation " + p2.zielGeneration + " \xB7 " + esc2(artName[p2.art]) + "</small></div>";
-      h4 += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent6(p2.fortschritt) + "</b></div>" + balken8(p2.fortschritt);
+      h4 += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent8(p2.fortschritt) + "</b></div>" + balken8(p2.fortschritt);
       h4 += zeile4("Kosten Ist / Plan", geld(p2.kostenIst) + " / " + geld(p2.kostenPlan));
       h4 += zeile4("Mehrwochen durch Verzug", p2.verzug);
       h4 += zeile4("Rollout", p2.erledigteCluster.length + " / " + p2.clusterIds.length + " Cluster");
@@ -178253,9 +178307,9 @@ void main() {
       const plan2 = E9.itProjektPlan(s2(), ui.system, ui.art, ui.generation, ausgew.length);
       let h4 = '<div class="karte"><div class="khead">Projekt konfigurieren</div>';
       h4 += '<div class="regler"><b>System</b><select class="ort gross" data-it-change="system">' + d4.systeme.map((x2) => '<option value="' + x2.id + '" ' + (x2.id === ui.system ? "selected" : "") + ">" + esc2(x2.name) + "</option>").join("") + "</select></div>";
-      h4 += '<div class="regler"><b>Realisierung</b><div class="seg">' + optionen3.map((a2) => '<button data-it="art" data-v="' + a2 + '" class="' + (ui.art === a2 ? "an" : "") + '">' + artName[a2] + "</button>").join("") + "</div></div>";
+      h4 += '<div class="regler"><b>Realisierung</b><div class="seg">' + optionen2.map((a2) => '<button data-it="art" data-v="' + a2 + '" class="' + (ui.art === a2 ? "an" : "") + '">' + artName[a2] + "</button>").join("") + "</div></div>";
       h4 += '<div class="regler"><b>Zielgeneration</b><div class="seg">' + [1, 2, 3, 4].map((g2) => '<button data-it="generation" data-v="' + g2 + '" ' + (ui.generation === g2 ? 'class="an"' : "") + " " + (ui.art !== "entwickeln" && g2 === 4 || ui.art === "dienstleister" && g2 !== 3 ? "disabled" : "") + ">" + g2 + "</button>").join("") + "</div></div>";
-      h4 += '<div class="it-vergleich">' + optionen3.map((art) => {
+      h4 += '<div class="it-vergleich">' + optionen2.map((art) => {
         const g2 = art === "dienstleister" ? 3 : Math.min(ui.generation, art === "entwickeln" ? 4 : 3);
         const x2 = E9.itProjektPlan(s2(), ui.system, art, g2, ausgew.length);
         return '<div class="' + (ui.art === art ? "gewaehlt" : "") + '"><b>' + artName[art] + "</b><small>" + x2.gesamt + " Wo.</small><small>" + geld(x2.kosten) + "</small><small>" + (art === "entwickeln" ? "hohes" : art === "kaufen" ? "geringes" : "mittleres") + " Risiko</small></div>";

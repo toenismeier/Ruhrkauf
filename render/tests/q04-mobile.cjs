@@ -102,12 +102,12 @@ const server = http.createServer((req, res) => {
     }
 
     await seite.evaluate(() => { window.spiel.schliessePanel(); window.spiel.reise.oeffne(); });
-    await seite.locator('.reise-zielraster .reise-ziel').first().waitFor();
+    await seite.locator('#reise-zielliste [data-reiseziel]').first().waitFor({ state: 'attached' });
     await bild('07-reise');
     if (nachher) {
-      const w = await seite.locator('.reise-deutschland svg').evaluate(el => el.getBoundingClientRect().width);
+      const w = await seite.locator('.hw-reise-karte svg').evaluate(el => el.getBoundingClientRect().width);
       assert.ok(w >= 195, 'Deutschlandkarte muss mindestens die halbe Breite bei 390 Pixel haben: ' + w);
-      const formate = await seite.locator('.reise-format').all();
+      const formate = await seite.locator('.hw-reise-format').all();
       assert.ok(formate.length, 'Formatmengen müssen einzeln markiert sein');
       for (const el of formate) assert.equal(await el.evaluate(x => getComputedStyle(x).whiteSpace), 'nowrap');
     }

@@ -1,10 +1,10 @@
 // N11: Versionsabhängige, bewusst kleine Offline-Shell.
 // Spielstände liegen ausschließlich in IndexedDB und werden niemals vom Service Worker gecacht.
 // Bei jeder Veröffentlichung, die die Shell ändert, diese Versionskennung erhöhen.
-const CACHE = 'hartwig-shell-n11-v2';
+const CACHE = 'hartwig-shell-n11-v3';
 const SHELL = [
   './spiel.html', './spiel-bundle.js', './manifest.webmanifest',
-  './app-icon-180.png', './app-icon-512.png', './src/ui/reise-woche.css'
+  './app-icon-180.png', './app-icon-512.png', './src/ui/hartwig.css'
 ];
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)));

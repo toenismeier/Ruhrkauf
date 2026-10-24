@@ -33,13 +33,13 @@ const path = require('node:path');
     await page.locator('[data-wa="ja"]').click();
     await toastSichtbar;
     await page.screenshot({ path: path.join(bilder, 'erfolge-toast.png') });
-    await page.waitForSelector('.wb-bericht');
-    const bericht = await page.locator('.wb-erfolge').innerText();
+    await page.waitForSelector('[data-wb="bericht"]');
+    const bericht = await page.locator('[data-wb="erfolge"]').innerText();
     if (!bericht.includes('Halbes Jahr')) throw new Error('Wochenergebnis ohne neuen Erfolg: ' + bericht);
     await page.screenshot({ path: path.join(bilder, 'erfolge-wochenbericht.png') });
 
     // Toast der echten Freischaltung fotografieren; keine fiktiven Format-Daten injizieren.
-    await page.evaluate(() => document.querySelector('#wochen-overlay .wb-schliessen')?.click());
+    await page.evaluate(() => document.querySelector('#wochen-overlay .hw-kopf [data-wa="schliessen"]')?.click());
     if (fehler.length) throw new Error('Browserfehler: ' + fehler.join('; '));
     console.log('N03 Erfolge: 30 Einträge, Freischaltbericht und Toast geprüft. Bilder in ' + bilder);
   } finally {
