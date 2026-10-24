@@ -316,6 +316,184 @@
 
 /* ═════════ Abschnitte je Bereich: jeder Bereich ergänzt nur hier (Konfliktvermeidung beim Zusammenführen) ═════════ */
 /* ── G1 Eigenmarken und Produktentwicklung ── */
+/* Hülle: Altregeln (spiel.html, komponenten.css, management.css) greifen nicht in G1-Bausteine. */
+/* Eigener Streifengrund wie .hw-boden: Text hat damit einen messbaren Hintergrund (Kontrastprüfung). */
+.hw-g1 { min-height: 100%; padding-bottom: 28px; color: var(--text); background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+/* Blattkopf in diesen Panels nach der Skala (komponenten.css setzt sonst 16 px). */
+#panel.hw:has(.hw-g1) #ptitel { font: var(--hw-t-kopf); }
+#panel.hw:has(.hw-g1) #punter { font: var(--hw-t-kopf2); letter-spacing: -.5px; }
+.hw-g1 .hw-ring > span b { font-size: 12.3px; }
+/* komponenten.css lenkt per #panel:has(.hk-bereich) --grund, --karte, --text, --leise auf die alten hk-Töne um
+   (Karte heller als der Grund). In G1 gelten wieder die Zentrale-Werte von oben: Karte dunkler als der Grund wie Coffee. */
+#panel.hw .hw-g1 { --grund: #213741; --karte: #0d161a; --text: #fff; --leise: #a6a7a7; }
+/* Primärknopf: Altregel .breit:not(.hk-knopf) nimmt sonst die Fläche. */
+#panel.hw .hw-g1 .hw-knopf { background: var(--f); border: 0; margin: 0; }
+#panel.hw .hw-g1 .hw-knopf.text { background: none; }
+/* Blatt im Vollbild auch im Einkauf-Panel (management.css begrenzt Q31-Panels auf 87 dvh). */
+#panel.hw.gross:has(.hw-g1) { height: auto; }
+/* Streifengrund bis ganz unten: kein dunkler Rest unter dem Inhalt. */
+#panel.hw:has(.hw-g1) > .hw-inhalt { padding-bottom: 0; }
+#panel.hw .hw-inhalt > .hw-g1:last-child { margin-bottom: 0; padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+/* Auswahlreihen (Marke, Kategorie): eine wischbare Zeile bis an den Rand, 20 px Einzug. */
+.hw-g1-wahlen { display: grid; gap: 8px; margin: 14px 0 0; }
+.hw-g1-chips.reihe { flex-wrap: nowrap; overflow-x: auto; padding: 0 var(--hw-rand); scroll-padding: 0 var(--hw-rand); scrollbar-width: none; }
+.hw-g1-chips.reihe::-webkit-scrollbar { display: none; }
+.hw-g1-chips.reihe > .hw-g1-chip { flex: none; white-space: nowrap; }
+.hw-g1 .hw-rumpf { padding: 0 var(--hw-rand); }
+.hw-g1 button { font: inherit; cursor: pointer; }
+.hw-g1 .hw-knopf { font: var(--hw-t-text); font-size: 13.5px; }
+.hw-g1 .hw-knopf.text { min-height: 44px; font-size: 13.5px; }
+.hw-g1 .hw-knopf.zweit, .hw-g1 .hw-knopf.gefahr { color: var(--text); }
+.hw-g1 .hw-knopf.gefahr { color: #fff; }
+.hw-g1 .hw-zeile small, .hw-g1 .hw-abschnitt small { font-size: 10.4px; }
+.hw-g1 .hw-abschnitt small { font: var(--hw-t-marke); color: var(--leise); }
+.hw-g1 .hw-zeile[aria-current='true'] { box-shadow: inset 3px 0 0 var(--akzent-linie); padding-left: 10px; }
+.hw-g1 .hw-zeile .hw-was small { color: var(--leise); }
+.hw-g1 .hw-marke, .hw-g1 .hw-feldname { color: var(--leise); }
+.hw-g1 .hw-feldname { margin-top: 14px; }
+.hw-g1 .hw-lese { color: var(--leise); }
+.hw-g1-notiz { margin: 8px 0 0; }
+.hw-g1 .hw-knoepfe .hw-knopf { flex: 1 1 auto; }
+.hw-g1 .hw-knoepfe.zweispaltig { margin-top: 18px; }
+.hw-g1 .hw-stepper { margin-top: 2px; }
+.hw-g1 .hw-stepper > output { color: var(--text); }
+.hw-g1 .hw-stepper > button { min-height: 0; }
+.hw-g1 .hw-stepper.gross > button { min-height: 44px; }
+.hw-g1 .hw-status { font-size: 11.8px; }
+.hw-g1 .hw-statusreihe { margin: 4px 0 0; }
+/* Rücksprung oben links (Textknopf), ohne Leerzeile darunter. */
+.hw-g1-oben { padding: 6px calc(var(--hw-rand) - 4px) 0; }
+.hw-g1-oben .hw-knopf { color: var(--akzent-linie); }
+/* Farbpunkte (Markenfarbe, Trendfarben) als SVG, keine farbigen Flächen. */
+.hw-g1-punkt { display: inline-block; vertical-align: -2px; flex: none; }
+/* Chipleiste: umbrechend, 44 px hoch, aktiv als Akzentfläche mit Doppelkontur (Coffee 26 Segment), sonst neutrale Zweitfläche. */
+.hw-g1-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.hw-g1-chip { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 0; border-radius: var(--hw-radius); color: var(--text); font: var(--hw-t-text); font-size: 13.5px;
+  --f: var(--zweit); --l: var(--zweit-linie); background: var(--f); box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--f), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--l); }
+.hw-g1-chip[aria-pressed='true'] { --f: var(--akzent); --l: var(--akzent-linie); color: #fff; }
+.hw-g1-chip small { font: var(--hw-t-klein); font-size: 10.4px; color: var(--leise); }
+.hw-g1-chip[aria-pressed='true'] small { color: #fff; }
+.hw-g1-chip:disabled { opacity: .45; }
+/* Abteilung als Segment über die volle Breite (Coffee 26 HOT / COLD / FOOD). */
+.hw-g1-fach { margin: 14px 0 0; }
+.hw-g1-fach .hw-segment > button { min-height: 44px; }
+/* Sortiment: Kategorie als Abschnittskopf zum Antippen, darunter Kachelraster. */
+.hw-g1-baum { margin: 14px 0 0; }
+.hw-g1-kat { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); background: none; color: var(--text); text-align: left;
+  font: 400 14.6px/1.2 var(--hw-schrift); text-transform: uppercase; letter-spacing: .01em; }
+.hw-g1-kat span { flex: 1; min-width: 0; }
+.hw-g1-kat small { font: var(--hw-t-marke); color: var(--leise); text-transform: none; }
+.hw-g1-kat i { flex: none; width: 20px; text-align: center; font-style: normal; font: 400 19px/1 var(--hw-schrift); color: var(--akzent-linie); }
+.hw-g1-kat[aria-expanded='true'] { border-bottom-color: transparent; }
+.hw-g1-ast { display: block; margin: 12px 0 8px; }
+.hw-g1-kacheln { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 14px; }
+.hw-g1-kachel { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 112px; padding: 8px 6px 10px; border: 0; color: var(--text); --f: var(--karte); --l: var(--kartenlinie); }
+.hw-g1-kachel.voll { --f: var(--tief); --l: var(--zweit-linie); }
+.hw-g1-kachel.voll .hw-g1-kachelbild { opacity: .55; }
+.hw-g1-kachelbild { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; }
+.hw-g1-kachelbild svg { width: 64px; height: 64px; }
+.hw-g1-kachelname { font: var(--hw-t-text); font-size: 11.85px; line-height: 1.2; text-align: center; overflow-wrap: anywhere; hyphens: auto; -webkit-hyphens: auto; color: var(--text); }
+.hw-g1-kachel small { font: var(--hw-t-klein); color: var(--stern); }
+/* Schritte des Assistenten: drei bzw. fünf Punkte mit Namen, aktiv als Akzent. */
+.hw-g1-schritte { display: flex; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+.hw-g1-schritte li { flex: 1; display: flex; align-items: center; gap: 6px; min-width: 0; min-height: 28px; color: var(--leise); font: var(--hw-t-klein); font-size: 10.4px; }
+.hw-g1-schritte li i { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 6px; font-style: normal; background: var(--feld); box-shadow: inset 0 0 0 1px var(--feldlinie); color: var(--leise); }
+.hw-g1-schritte li.an { color: var(--text); }
+.hw-g1-schritte li.an i { background: var(--akzent); box-shadow: inset 0 0 0 1px var(--akzent-linie); color: #fff; }
+.hw-g1-schritte li.fertig i { background: var(--zweit); color: var(--text); }
+.hw-g1-schritte button { display: flex; align-items: center; gap: 6px; width: 100%; min-height: 44px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; }
+.hw-g1-schritte.fuenf li { gap: 4px; }
+.hw-g1-schritte.fuenf button { flex-direction: column; align-items: center; gap: 3px; text-align: center; }
+/* Gewählter Artikel: Bild links, Name und Pfad rechts, kein Kasten. */
+.hw-g1-gewaehlt { display: flex; align-items: center; gap: 14px; margin: 16px 0 0; }
+.hw-g1-gewaehltbild svg { width: 72px; height: 72px; display: block; }
+.hw-g1-gewaehlt b { display: block; font: var(--hw-t-titel); }
+.hw-g1-gewaehlt small { display: block; margin-top: 3px; font: var(--hw-t-klein); color: var(--leise); }
+/* Typ-Kacheln (Coffee 01 bis 08: Zielgruppe, Preislage, Vorlage, Beschaffung): zweispaltig, aktiv mit Akzentkontur. */
+.hw-g1-typen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.hw-g1-typen.drei { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.hw-g1-typen.eins { grid-template-columns: 1fr; }
+.hw-g1-typ { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; min-height: 64px; padding: 12px 14px; border: 0; color: var(--text); text-align: left; --f: var(--karte); --l: var(--kartenlinie); }
+.hw-g1-typ b { font: var(--hw-t-text); font-size: 13.5px; }
+.hw-g1-typ small { font: var(--hw-t-klein); color: var(--leise); }
+.hw-g1-typ[aria-pressed='true'] { --f: var(--akzent-aktiv); --l: var(--akzent-linie); }
+.hw-g1-typ[aria-pressed='true'] small { color: #fff; }
+/* Farbwahl: runde Farbpunkte 44 × 44, aktiv mit heller Kontur. */
+.hw-g1-farben { display: flex; flex-wrap: wrap; gap: 4px; }
+.hw-g1-farbknopf { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: var(--hw-radius); background: none; }
+.hw-g1-farbknopf[aria-pressed='true'] { box-shadow: inset 0 0 0 2px var(--text); }
+.hw-g1-qualitaet .hw-stepper, .hw-g1 .hw-feld .hw-stepper { width: 100%; }
+.hw-g1-dauer .hw-segment { margin: 0; }
+.hw-g1-dauer .hw-segment > button { min-height: 44px; }
+.hw-g1-eingabe { display: block; width: 100%; min-height: 44px; padding: 0 14px; border: 0; border-radius: var(--hw-radius); background: var(--feld); box-shadow: inset 0 0 0 1px var(--feldlinie); color: var(--text); font: var(--hw-t-titel); font-size: 15px; }
+.hw-g1-wahl { display: block; width: 100%; min-height: 44px; padding: 0 12px; border: 0; border-radius: var(--hw-radius); background: var(--feld); box-shadow: inset 0 0 0 1px var(--feldlinie); color: var(--text); font: var(--hw-t-text); font-size: 13.5px; }
+/* Produktkarussell (Coffee 26): Bild ragt 46 px über die Karte; Karte 300 px, Nachbar schaut heraus. */
+.hw-g1-karussell { margin: 14px 0 0; }
+.hw-g1-karussell .hw-karussell { padding: 52px 45px 4px; scroll-padding: 0 45px; }
+.hw-g1-karussell .hw-karte { flex-basis: 300px; padding: 70px 22px 20px; }
+.hw-g1-karussell .hw-punkte { margin: 14px 0 0; }
+.hw-g1-bild { position: absolute; left: 50%; top: -52px; transform: translateX(-50%); display: flex; align-items: flex-end; justify-content: center; width: 124px; height: 116px; padding: 0; border: 0; background: none; }
+.hw-g1-bild svg { width: 110px; height: 110px; display: block; }
+.hw-g1-papierkorb { position: absolute; right: 8px; top: 8px; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; background: none; color: var(--text); }
+.hw-g1-titel { margin: 0 6px; }
+.hw-g1-unter { margin: 4px 0 0; text-align: center; font: var(--hw-t-klein); color: var(--leise); }
+.hw-g1-sternzeile { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 0; }
+.hw-g1 .hw-sterne svg { width: 23px; height: 23px; }
+.hw-g1-sternzahl { font: var(--hw-t-klein); color: var(--leise); }
+.hw-g1-mitte { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 8px; margin: 22px 0 0; }
+.hw-g1-schalter .hw-schalterzeile { margin: 0; min-height: 44px; gap: 10px; font-weight: 400; }
+.hw-g1-verkauf { text-align: right; }
+.hw-g1-verkauf .hw-marke, .hw-g1-verkauf .hw-zahl, .hw-g1-verkauf .hw-abw { display: block; }
+.hw-g1-verkauf .hw-zahl { margin-top: 5px; }
+.hw-g1-verkauf .hw-abw { margin-top: 3px; color: var(--text); }
+.hw-g1-verkauf .hw-abw.hw-gut { color: var(--gut); } .hw-g1-verkauf .hw-abw.hw-schlecht { color: var(--schlecht); }
+.hw-g1-preisblock { display: grid; grid-template-columns: 80px 1fr; align-items: end; gap: 0 22px; margin: 16px 0 0; }
+.hw-g1-ringspalte { display: flex; flex-direction: column; gap: 6px; }
+.hw-g1-ek { font: var(--hw-t-klein); color: #f08a66; white-space: nowrap; }
+.hw-g1-preis .hw-marke { display: block; margin-bottom: 8px; }
+.hw-g1-preis .hw-stepper { width: 100%; height: 44px; }
+.hw-g1-preis .hw-stepper > button { flex-basis: 40px; min-height: 44px; }
+.hw-g1-preis .hw-stepper > button::before { top: 20.7px; left: 13px; right: 13px; }
+.hw-g1-preis .hw-stepper > button.plus::after { top: 15px; height: 14px; left: 18.7px; }
+.hw-g1-preis .hw-stepper > output { font-size: 15.25px; }
+.hw-g1-preis .hw-zahl { display: block; }
+.hw-g1-preis .hw-abw { display: block; margin-top: 4px; color: var(--leise); }
+.hw-g1-frage { margin: 14px 0 0; }
+.hw-g1-entwicklung { margin: 20px 0 0; }
+.hw-g1-fortschritt { height: 14px; margin: 8px 0 6px; border-radius: 7px; background: var(--skala-grund); padding: 2px; box-shadow: inset 0 0 0 1px var(--kartenlinie); }
+.hw-g1-fortschritt i { display: block; height: 100%; border-radius: 5px; background: var(--skala); }
+.hw-g1-zeile2 { display: flex; justify-content: space-between; font: var(--hw-t-klein); color: var(--text); }
+.hw-g1-vorschau { position: relative; margin: 52px 0 0; padding: 70px 22px 20px; }
+.hw-g1-vorschaubild { pointer-events: none; }
+.hw-g1-vorschaubild svg + svg { display: none; }
+/* Fähigkeitsskalen in Spalte: Name links fest, Skala, Zahl. */
+.hw-g1-skalen { display: grid; gap: 8px; margin: 4px 0 0; }
+.hw-g1-skalen .hw-faehigkeit { grid-template-columns: 112px 1fr 30px; gap: 10px; height: 22px; }
+.hw-g1-skalen .hw-faehigkeit > span:first-child { text-align: left; color: var(--leise); }
+.hw-g1-skalen .hw-faehigkeit .hw-skala-balken { width: auto; }
+.hw-g1-skalen .hw-faehigkeit b { text-align: right; }
+/* Absatz (Coffee 08): zwei Serien in eigener Farbe, Linien mit großem Endpunkt. */
+.hw-g1-serien { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: right; }
+.hw-g1-serien .hw-marke { display: block; }
+.hw-g1-serien b { display: block; margin-top: 6px; font: var(--hw-t-wert); }
+.hw-g1-serien small { display: block; margin-top: 3px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-g1-serie-a { color: var(--ring-a); } .hw-g1-serie-b { color: #7fc8d6; }
+.hw-g1-linien { display: block; width: 100%; height: auto; margin: 16px 0 0; }
+.hw-g1-linien polyline { fill: none; stroke-width: 2.6; stroke-linejoin: round; stroke-linecap: round; }
+.hw-g1-linien .a { stroke: var(--ring-a); fill: var(--ring-a); } .hw-g1-linien polyline.a { fill: none; }
+.hw-g1-linien .b { stroke: #7fc8d6; fill: #7fc8d6; } .hw-g1-linien polyline.b { fill: none; }
+.hw-g1-wochen span { flex: 0 0 52px; }
+/* Summenzeile der Kollektionstafel: Strich darüber wie Coffee-GuV. */
+.hw-g1-summe { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0 0; box-shadow: inset 0 1px 0 0 var(--text); font: var(--hw-t-text); }
+.hw-g1-summe b { font-weight: 500; }
+.hw-g1-akte { margin-top: 30px; }
+.hw-g1-akte > span { display: inline-flex; align-items: center; gap: 8px; }
+/* Trendbericht: Farbpunkte rechts in der Zeile. */
+.hw-g1-trendfarben { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; max-width: 90px; }
+.hw-g1-trend .hw-was small + small { margin-top: 2px; }
+/* Produktdetail: Bild frei auf dem Grund, mittig. */
+.hw-g1-detailbild { display: flex; justify-content: center; margin: 16px 0 0; }
+.hw-g1-detailbild svg { width: 200px; height: auto; max-height: 240px; }
 /* ── G2 Einkauf, Ware, Planung, Vertrieb ── */
 /* Blatt: Marker .hw-g2 (g2-buch.js). Kopf und Reiter aus der Skala, Grund mit Streifen hinter dem Inhalt (Kontrast),
    Reiterleiste mit bis zu sechs gleich breiten Plätzen. */

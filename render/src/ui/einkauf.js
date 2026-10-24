@@ -224,9 +224,7 @@ export function einkaufModul(ctx) {
   function zeigen(scrollHalten = false) {
     const sc = document.getElementById('pinhalt').scrollTop;
     const r = ui.seite === 'wg' ? wgSeite() : ui.seite === 'freigaben' ? freigabenSeite() : ui.seite === 'eigenmarken' || ui.seite === 'gruenden' ? eigenmarkenSeite(ctx, ui, tabs()) : ['merchandise', 'allokation', 'reduzierungKalender'].includes(ui.seite) ? warenSeite(ctx, ui, tabs()) : uebersicht();
-    // Die Eigenmarken-Seite (eigenmarken.js, Bereich G1) nutzt bis zu ihrer Umstellung noch die Q31-Altregeln.
-    const alt = ui.seite === 'eigenmarken' || ui.seite === 'gruenden' ? '<i class="q31-marke" hidden></i>' : '';
-    ctx.panel(r.titel, r.unter, K.bereich('zentrale') + alt + r.html, 'gross');
+    ctx.panel(r.titel, r.unter, K.bereich('zentrale') + r.html, 'gross');
     ui.aktiv = true;
     if (scrollHalten) document.getElementById('pinhalt').scrollTop = sc;
     badge();
