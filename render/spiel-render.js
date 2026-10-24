@@ -48,7 +48,7 @@ async function buendeln() {
     entryPoints: [path.join(__dirname, 'src', 'spiel.js')], bundle: true, outfile: path.join(__dirname, 'spiel-bundle.js'),
     loader: { '.json': 'json' }, logLevel: 'error', format: 'iife', target: 'es2020', plugins: [ersatzPlugin],
     // scripts/bot.ts prüft require.main === module (nur für den Aufruf in Node)
-    define: { 'require.main': 'null', module: 'undefined', __HARTWIG_VERSION__: JSON.stringify(gitVersion()) },
+    define: { 'require.main': 'null', module: 'undefined', __HARTWIG_VERSION__: JSON.stringify(gitVersion()), __HARTWIG_STAND__: JSON.stringify(new Date().toISOString()) },
   });
 }
 

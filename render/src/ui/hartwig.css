@@ -1216,3 +1216,5 @@ body.spielende-aktiv { overflow: hidden; }
 .hw-app .app-namenswahl input { display: block; width: 100%; height: 40px; margin-top: 6px; padding: 0 12px; border: 0; border-radius: var(--hw-radius); background: var(--feld); color: var(--text); font: var(--hw-t-text); text-transform: none; box-shadow: inset 0 0 0 1.33px var(--feldlinie); }
 /* Boden unter dem Fenster: erste Kennzahl nicht direkt an der Kante. */
 .hw-boden > .hw-rumpf > .hw-gross:first-child { margin-top: 0; padding-top: 18px; }
+/* Startbildschirm: Stand des Pakets (Ummo 24.10.2026). */
+.hw-g6-stand { margin: 6px 0 0; font: var(--hw-t-klein); color: var(--leise); font-variant-numeric: tabular-nums; }

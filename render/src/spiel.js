@@ -1722,6 +1722,14 @@ function zeichneStufen() {
   stufenWahl.innerHTML = stufen.length ? HK.seg(stufen.map((x) => [x.id, x.name]), gewaehlt.id, (id) => `data-v="${esc(id)}"`)
     + `<p class="hw-lese hw-g6-stufentext">${esc(gewaehlt.beschreibung)}</p>` : '';
 }
+/** Letztes Update auf dem Startbildschirm: Bauzeit des Pakets in deutscher Zeit plus Commit. */
+(() => {
+  const el = $('startstand'); if (!el) return;
+  const iso = typeof __HARTWIG_STAND__ !== 'undefined' ? __HARTWIG_STAND__ : null;
+  const v = typeof __HARTWIG_VERSION__ !== 'undefined' ? __HARTWIG_VERSION__ : 'Entwicklung';
+  const zeit = iso ? new Date(iso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Entwicklungsstand';
+  el.textContent = 'Letztes Update ' + zeit + ' Uhr · ' + v;
+})();
 function startZeigen() {
   $('startstadt').innerHTML = STADTLISTE.map((q) => `<option${q.name === startWahl.stadt ? ' selected' : ''}>${q.name}</option>`).join('');
   $('startseed').value = startWahl.seed;
