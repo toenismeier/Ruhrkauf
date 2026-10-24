@@ -369,10 +369,10 @@ async function buendeln() {
     const besetzt = await ev(() => window.spiel.E.vorstandUebersicht(window.spiel.s).ressorts.map((r) => ({ id: r.id, besetzt: r.besetzt })));
     soll('Vorstand: Start mit unbesetztem CRO und CDO', besetzt.filter((r) => !r.besetzt).map((r) => r.id).sort().join(',') === 'cdo,cro', besetzt.filter((r) => !r.besetzt).map((r) => r.id).join(', '));
     // Profil CPO: Delegation, Gehalt, Erfolgsbonus
-    await tippe('.vkarte[data-v=cpo]');
+    await tippe('#pinhalt [data-a=profil][data-v=cpo]');
     await pruef('vorstand', 'Profil CPO');
     const vor = await ev(() => window.spiel.E.vorstandProfil(window.spiel.s, 'cpo'));
-    await tippe('.schalter[data-v=produktentwicklung]');
+    await tippe('#pinhalt [data-a=delegation][data-v=produktentwicklung]');
     await tippe('[data-a=gehalt][data-v="1"]');
     await tippe('[data-a=erfolgsbonus][data-v="0.2"]');
     const nach = await ev(() => window.spiel.E.vorstandProfil(window.spiel.s, 'cpo'));
@@ -382,21 +382,21 @@ async function buendeln() {
     await pruef('vorstand', 'Profil CPO nach Aktionen');
     await oben();
     await bild('vorstand-profil.png');
-    await zu('.karte.steuerung');
+    await zu('[data-vorstand=verguetung]');
     await bild('vorstand-verguetung.png');
     // Einstellen CRO: Karussell, Angebot, Annahmechance
-    await tippe('.zurueck');
-    await tippe('.vkarte[data-v=cro]');
+    await tippe('[data-a=seite][data-v=uebersicht]');
+    await tippe('#pinhalt [data-a=profil][data-v=cro]');
     await tippe('[data-a=einstellen]');
-    await tippe('.punkte button[data-v="1"]');
+    await ev(() => { const k = document.querySelector('#pinhalt .hw-karussell'); k.scrollLeft = k.children[1].offsetLeft + k.children[1].offsetWidth / 2 - k.clientWidth / 2; }); await p.waitForTimeout(500);
     await tippe('[data-a=angebotGehalt][data-v="1"]');
     await tippe('[data-a=angebotGehalt][data-v="1"]');
     await tippe('[data-a=angebotHalte][data-v="0.25"]');
     await pruef('vorstand', 'Einstellen CRO');
-    const ang = await ev(() => { const v = window.spiel.vorstand.ui, A = v.angebot, L = window.spiel.E.kandidaten(window.spiel.s, 'cro'), k = L.kandidaten.find((x) => x.id === A.id); return { A, k: { name: k.name, forderung: k.gehaltsforderung }, idx: v.k, chance: window.spiel.E.angebotsChance(window.spiel.s, 'cro', A.id, A.gehalt, Math.round(A.gehalt * A.halte), A.erfolg), angezeigt: document.querySelector('[data-p="a:chance"]').textContent, karussell: Math.round(document.querySelector('.karussell').scrollLeft) }; });
+    const ang = await ev(() => { const v = window.spiel.vorstand.ui, A = v.angebot, L = window.spiel.E.kandidaten(window.spiel.s, 'cro'), k = L.kandidaten.find((x) => x.id === A.id); return { A, k: { name: k.name, forderung: k.gehaltsforderung }, idx: v.k, chance: window.spiel.E.angebotsChance(window.spiel.s, 'cro', A.id, A.gehalt, Math.round(A.gehalt * A.halte), A.erfolg), angezeigt: document.querySelector('[data-p="a:chance"]').textContent, karussell: Math.round(document.querySelector('.hw-karussell').scrollLeft) }; });
     soll('Karussell auf Kandidat 2', ang.idx === 1 && ang.karussell > 100, `Index ${ang.idx}, scrollLeft ${ang.karussell}`);
     soll('Angebot über Forderung', ang.A.gehalt === ang.k.forderung + 20000, `${ang.k.name}: ${ang.A.gehalt} bei Forderung ${ang.k.forderung}, Chance ${ang.angezeigt}`);
-    await ev(() => { const k = document.querySelector('.karussell'), pi = document.getElementById('pinhalt'); pi.scrollTop += k.getBoundingClientRect().top - pi.getBoundingClientRect().top - 60; document.getElementById('meldung').className = ''; });
+    await ev(() => { const k = document.querySelector('.hw-karussell'), pi = document.getElementById('pinhalt'); pi.scrollTop += k.getBoundingClientRect().top - pi.getBoundingClientRect().top - 60; document.getElementById('meldung').className = ''; });
     await bild('vorstand-einstellen.png');
     await tippe('[data-a=anbieten]');
     const nachAngebot = await ev((name) => { const r = window.spiel.E.vorstandUebersicht(window.spiel.s).ressorts.find((x) => x.id === 'cro'); return { besetzt: r.besetzt, name: r.person?.name, meldung: document.getElementById('meldung').textContent, gehalt: r.person?.gehalt }; }, ang.k.name);
