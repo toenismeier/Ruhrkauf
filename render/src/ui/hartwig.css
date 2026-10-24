@@ -308,3 +308,11 @@
 .hw-figuren i::after { content: ''; position: absolute; left: 1px; top: 8px; width: 10px; height: 18px; border-radius: 4px 4px 2px 2px; background: var(--leise); opacity: .35; }
 .hw-figuren i.an::before, .hw-figuren i.an::after { background: var(--text); opacity: 1; }
 #panel.hw #pinhalt.hw-inhalt { padding-left: 0; padding-right: 0; padding-top: 0; }
+
+/* ═════════ Abschnitte je Bereich: jeder Bereich ergänzt nur hier (Konfliktvermeidung beim Zusammenführen) ═════════ */
+/* ── G1 Eigenmarken und Produktentwicklung ── */
+/* ── G2 Einkauf, Ware, Planung, Vertrieb ── */
+/* ── G3 Marketing, E-Commerce, IT ── */
+/* ── G4 Zentrale, Organisation, Vorstand, Personaleinsatz, Reporting ── */
+/* ── G5 Posteingang, Wochenbericht, Portfolio, Reise, Umbau, Statistik ── */
+/* ── G6 Kartenoberfläche, Start, Menü, Einführung, Erfolge, Einstellungen, Chronik, Zeitung, Spielende ── */

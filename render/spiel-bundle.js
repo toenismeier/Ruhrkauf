@@ -2837,8 +2837,8 @@
       ausweichend: { image: -2, betriebsrat: -1, bank: -2, kreditversicherer: -2, zitat: "Zu einzelnen Punkten m\xF6chten wir uns gegenw\xE4rtig nicht \xE4u\xDFern." }
     }[option2];
     if (!wirkung) return;
-    for (const feld2 of ["image", "betriebsrat", "bank", "kreditversicherer"]) {
-      s2.stakeholder[feld2] = clamp(s2.stakeholder[feld2] + wirkung[feld2], 0, 100);
+    for (const feld3 of ["image", "betriebsrat", "bank", "kreditversicherer"]) {
+      s2.stakeholder[feld3] = clamp(s2.stakeholder[feld3] + wirkung[feld3], 0, 100);
     }
     stand(s2).naechstesZitat = { abWoche: s2.woche, text: `Im Interview sagt die Hartwig-Gesch\xE4ftsf\xFChrung: \u201E${wirkung.zitat}\u201C` };
   }
@@ -15842,12 +15842,12 @@
     { id: "eigenmarkenMarge", name: "Eigenmarkenmarge", format: "prozent", standard: false }
   ];
   var leer2 = () => ({ u13: 0, uW: 0, r13: 0, best: 0, e52: 0, bSum52: 0, n52: 0, e13: 0, bSum13: 0, n13: 0, ab13: 0, fehl13: 0, nosZ: 0, nosN: 0, eu13: 0, er13: 0, alt: 0, sEin: 0, sAb: 0, limit: 0, limitV: 0, pipe: 0, offenN: 0, offenW: 0, bedarf4: 0, plMarge: 0, sollAbverkauf: 0 });
-  function rauschen(s2, wg, feld2, woche2 = s2.woche) {
+  function rauschen(s2, wg, feld3, woche2 = s2.woche) {
     const stufe2 = s2.hq?.wirkung.controlling ?? 1;
     const r4 = stufe2 >= 2.5 ? 0 : [0.12, 0.04, 0][s2.controllingStufe];
     if (r4 === 0) return 1;
     let h4 = 2166136261;
-    const t5 = `${wg}|${woche2}|${feld2}`;
+    const t5 = `${wg}|${woche2}|${feld3}`;
     for (let i = 0; i < t5.length; i++) {
       h4 ^= t5.charCodeAt(i);
       h4 = Math.imul(h4, 16777619);
@@ -53976,13 +53976,13 @@
       return nx - 1;
     };
     const flaechen = E9.flaechen.map((f13, n3) => ({ ...f13, nr: n3 }));
-    const feld2 = [];
+    const feld3 = [];
     for (let i = 0; i < nx; i++) {
-      feld2.push([]);
-      for (let j4 = 0; j4 < nz; j4++) feld2[i].push(null);
+      feld3.push([]);
+      for (let j4 = 0; j4 < nz; j4++) feld3[i].push(null);
     }
-    for (const f13 of flaechen) for (let i = f13.i0; i <= f13.i1; i++) for (let j4 = f13.j0; j4 <= f13.j1; j4++) if (i >= 0 && j4 >= 0 && i < nx && j4 < nz) feld2[i][j4] = f13;
-    const zelle2 = (i, j4) => i < 0 || j4 < 0 || i >= nx || j4 >= nz ? { f: null, akt: false } : { f: feld2[i][j4], akt: !!(feld2[i][j4] && feld2[i][j4].art !== "wasser") || E9.aktiv(i, j4) };
+    for (const f13 of flaechen) for (let i = f13.i0; i <= f13.i1; i++) for (let j4 = f13.j0; j4 <= f13.j1; j4++) if (i >= 0 && j4 >= 0 && i < nx && j4 < nz) feld3[i][j4] = f13;
+    const zelle2 = (i, j4) => i < 0 || j4 < 0 || i >= nx || j4 >= nz ? { f: null, akt: false } : { f: feld3[i][j4], akt: !!(feld3[i][j4] && feld3[i][j4].art !== "wasser") || E9.aktiv(i, j4) };
     const istWasser = (c) => !!(c.f && c.f.art === "wasser");
     const land = (c) => c.akt && !istWasser(c);
     const viertelVon = (i, j4) => E9.viertel ? E9.viertel(i, j4) : (() => {
@@ -54158,18 +54158,18 @@
       }
       knoten.sort((a2, b4) => a2.x - b4.x);
       if (l === 0 || l === nz) {
-        const jr = l === 0 ? 0 : nz - 1, fq = feld2[0]?.[jr];
-        if (fq && fq.art === "wasser" && fq.quer && !fq.keineBruecke && feld2[nx - 1]?.[jr] === fq) {
+        const jr = l === 0 ? 0 : nz - 1, fq = feld3[0]?.[jr];
+        if (fq && fq.art === "wasser" && fq.quer && !fq.keineBruecke && feld3[nx - 1]?.[jr] === fq) {
           if (!knoten.length || knoten[0].x - knoten[0].bw / 2 > 1) knoten.unshift({ x: 0, bw: 0, gw: 0, oben: null, unten: null, virt: true });
           if (knoten[knoten.length - 1].x + knoten[knoten.length - 1].bw / 2 < breite - 1) knoten.push({ x: breite, bw: 0, gw: 0, oben: null, unten: null, virt: true });
         }
       } else if (knoten.length) {
         const istW = (i, j4) => {
-          const f13 = feld2[i]?.[j4];
+          const f13 = feld3[i]?.[j4];
           return !!(f13 && f13.art === "wasser" && !f13.quer);
         };
         const istQ = (i, j4) => {
-          const f13 = feld2[i]?.[j4];
+          const f13 = feld3[i]?.[j4];
           return !!(f13 && f13.art === "wasser" && f13.quer);
         };
         const rand = (i) => istW(i, l - 1) !== istW(i, l) || istQ(i, l - 1) !== istQ(i, l);
@@ -69333,8 +69333,8 @@ void main() {
   }
   function oberfries(L3, w2, r4, ctx, k5) {
     if (ctx.A.rahmen) return;
-    const feld2 = ctx.marke?.kopf ?? ctx.A.schild.farbe, sf = ctx.marke?.schrift ?? ctx.A.schild.schrift;
-    L3.box(w2 + 0.12, 0.72, 0.14, 0, 3.86, 0.24, feld2);
+    const feld3 = ctx.marke?.kopf ?? ctx.A.schild.farbe, sf = ctx.marke?.schrift ?? ctx.A.schild.schrift;
+    L3.box(w2 + 0.12, 0.72, 0.14, 0, 3.86, 0.24, feld3);
     if (ctx.scene && k5 % 2 === 0 && w2 > 2.4) schrift(L3, ctx.marke?.name ?? ctx.A.name, 0, 4.22, 0.32, 0.42, sf);
     return;
     const f13 = ctx.marke?.wand ?? ctx.A.korpus ?? "#ece6dc";
@@ -131027,9 +131027,9 @@ void main() {
     n3.translate(cx, cy, cz);
     S.add(n3, "#2f3438");
   }
-  function gitterturm(S, x0, z0, x1, z1, y0, y1, c, feld2 = 5, dick = 0.6) {
+  function gitterturm(S, x0, z0, x1, z1, y0, y1, c, feld3 = 5, dick = 0.6) {
     for (const [x2, z6] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) S.box(dick, y1 - y0, dick, x2, (y0 + y1) / 2, z6, c);
-    const n3 = Math.max(1, Math.round((y1 - y0) / feld2)), dy = (y1 - y0) / n3;
+    const n3 = Math.max(1, Math.round((y1 - y0) / feld3)), dy = (y1 - y0) / n3;
     for (let k5 = 0; k5 <= n3; k5++) {
       const y2 = y0 + k5 * dy;
       S.box(x1 - x0, 0.35, 0.35, (x0 + x1) / 2, y2, z0, c);
@@ -160876,9 +160876,9 @@ void main() {
       }
       return erg;
     } finally {
-      for (const [o4, feld2, wert] of merk2.reverse()) {
-        if (feld2 === "material" && o4.material !== SCHWARZ) o4.material.dispose();
-        o4[feld2] = wert;
+      for (const [o4, feld3, wert] of merk2.reverse()) {
+        if (feld3 === "material" && o4.material !== SCHWARZ) o4.material.dispose();
+        o4[feld3] = wert;
       }
       ren2.shadowMap.enabled = alteSchatten;
       scene2.background = alterHintergrund;
@@ -161300,10 +161300,10 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "a5f8df3" : "Entwicklung";
+  var version = () => true ? "6cc8f11" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
-    function feld2(d4) {
+    function feld3(d4) {
       const v2 = einstellung(d4.schluessel), id = "einst-" + d4.schluessel;
       if (d4.art === "schalter") return '<label class="einst-zeile einst-schalter" for="' + id + '"><span>' + esc(d4.titel) + '</span><input id="' + id + '" type="checkbox" data-einstellung="' + d4.schluessel + '" ' + (v2 ? "checked" : "") + ' aria-label="' + esc(d4.titel) + '"></label>';
       if (d4.art === "auswahl") return '<label class="einst-zeile" for="' + id + '"><span>' + esc(d4.titel) + '</span><select id="' + id + '" data-einstellung="' + d4.schluessel + '" aria-label="' + esc(d4.titel) + '">' + d4.optionen.map((o5) => {
@@ -161318,7 +161318,7 @@ void main() {
       const gruppen = /* @__PURE__ */ new Map();
       for (const d4 of definitionen2.values()) {
         if (!gruppen.has(d4.gruppe)) gruppen.set(d4.gruppe, []);
-        gruppen.get(d4.gruppe).push(feld2(d4));
+        gruppen.get(d4.gruppe).push(feld3(d4));
       }
       const html = '<i class="hk-bereich" data-bereich="betrieb" data-symbol="zahlen" aria-hidden="true"></i><div class="hk-rumpf">' + [...gruppen.entries()].map(([name2, zeilen]) => '<h3 class="hk-abschnitt">' + esc(name2) + '</h3><section class="hk-liste einst-gruppe">' + zeilen.join("") + "</section>").join("") + '<h3 class="hk-abschnitt">\xDCber</h3><section class="hk-liste einst-gruppe"><div class="einst-info">Version <strong>' + esc(version()) + '</strong></div><p class="einst-info">Alle Namen sind frei erfunden.</p><p class="einst-info">Stadtplan Essen: Kartendaten \xA9 OpenStreetMap-Mitwirkende (ODbL). Quelle: OpenStreetMap, 20.10.2026.</p><p class="einst-info">Die Einstellungen gelten ger\xE4teweit und geh\xF6ren nicht zum Spielstand.</p></section></div>';
       ctx.panel("Einstellungen", "Darstellung, Bedienung und Spiel", html, "gross");
@@ -161356,8 +161356,8 @@ void main() {
   }
   function aktiviereBarrierefreiheit() {
     function beschriften(wurzel2 = document) {
-      const knoepfe = [...wurzel2.matches?.("button") ? [wurzel2] : [], ...wurzel2.querySelectorAll("button")];
-      for (const b4 of knoepfe) {
+      const knoepfe2 = [...wurzel2.matches?.("button") ? [wurzel2] : [], ...wurzel2.querySelectorAll("button")];
+      for (const b4 of knoepfe2) {
         if (b4.hasAttribute("aria-label")) continue;
         const text3 = (b4.textContent ?? "").replace(/\s+/g, " ").trim();
         const label = text3 === "\xD7" ? "Schlie\xDFen" : text3 === "+" ? "Erh\xF6hen" : text3 === "\u2212" || text3 === "-" ? "Verringern" : text3 || b4.getAttribute("title") || b4.id.replace(/[-_]/g, " ") || "Schaltfl\xE4che";
@@ -161430,53 +161430,53 @@ void main() {
   }
 
   // src/ui/komponenten.js
-  var bereich = (name2, symbol2 = name2, { voll: voll2 = false } = {}) => `<i class="hk-bereich" data-bereich="${esc2(name2)}" data-symbol="${esc2(symbol2)}"${voll2 ? ' data-hoehe="voll"' : ""} aria-hidden="true"></i>`;
-  var rumpf2 = (html) => `<div class="hk-rumpf">${html}</div>`;
+  var bereich = (name2, symbol2 = name2, { voll: voll2 = false } = {}) => `<i class="hk-bereich hw-marker" data-bereich="${esc2(name2)}" data-symbol="${esc2(symbol2)}"${voll2 ? ' data-hoehe="voll"' : ""} aria-hidden="true"></i>`;
+  var rumpf2 = (html) => `<div class="hw-rumpf">${html}</div>`;
   function sprecher({ text: text3, unter = "", person: person3 = "", ton: ton2 = "" }) {
-    return `<div class="hk-sprecher${ton2 ? " hk-" + ton2 : ""}" role="note"><p>${text3}${unter ? `<small>${esc2(unter)}</small>` : ""}</p>${person3 ? `<span class="hk-person" aria-hidden="true">${person3}</span>` : ""}</div>`;
+    return `<div class="hw-sprecher"${ton2 ? ` data-ton="${esc2(ton2)}"` : ""} role="note"><div class="hw-sprecher-text"><span>${text3}${unter ? `<small class="hw-sprecher-unter">${esc2(unter)}</small>` : ""}</span></div>${person3 ? `<span class="hw-sprecher-figur" aria-hidden="true">${person3}</span>` : ""}<div class="hw-griff" aria-hidden="true"></div></div>`;
   }
-  var abschnitt = (titel, rechts = "") => `<h3 class="hk-abschnitt">${esc2(titel)}${rechts ? `<small>${esc2(rechts)}</small>` : ""}</h3>`;
+  var abschnitt = (titel, rechts = "") => `<h3 class="hw-abschnitt">${esc2(titel)}${rechts ? `<small>${esc2(rechts)}</small>` : ""}</h3>`;
   function abweichung(roh2, text3, quote = null, umgekehrt = false) {
     if (roh2 == null) return "<span>keine Vergleichswoche</span>";
     const gut = umgekehrt ? roh2 < 0 : roh2 > 0, schlecht = umgekehrt ? roh2 > 0 : roh2 < 0;
     const q2 = quote == null || !Number.isFinite(quote) ? "" : ` (${quote > 0 ? "+" : quote < 0 ? "\u2212" : "\xB1"}${Math.abs(quote * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} %)`;
-    return `<span class="${gut ? "gut" : schlecht ? "schlecht" : ""}">${esc2(text3)}${q2}</span>`;
+    return `<span class="${gut ? "hw-gut" : schlecht ? "hw-schlecht" : ""}">${esc2(text3)}${q2}</span>`;
   }
   function gross2(werte3) {
-    return `<div class="hk-gross" style="--n:${werte3.length}">${werte3.map((w2) => `<div><span>${esc2(w2.label)}</span><b class="${w2.ton ?? ""}"${w2.p ? ` data-p="${esc2(w2.p)}"` : ""}>${esc2(w2.wert)}</b>${w2.unter ? `<i>${w2.unter}</i>` : ""}</div>`).join("")}</div>`;
+    return `<div class="hw-gross" style="--n:${werte3.length}">${werte3.map((w2) => `<div><span class="hw-marke">${esc2(w2.label)}</span><b class="hw-zahl${w2.ton ? " hw-" + w2.ton : ""}"${w2.p ? ` data-p="${esc2(w2.p)}"` : ""}>${esc2(w2.wert)}</b>${w2.unter ? `<span class="hw-abw">${w2.unter}</span>` : ""}</div>`).join("")}</div>`;
+  }
+  function balken6(reihen, legende = []) {
+    if (reihen.length < 2) return leer3("Ein Verlauf ist ab der zweiten Woche verf\xFCgbar.");
+    const max = Math.max(1, ...reihen.flatMap((r4) => [Math.abs(r4.a ?? 0), Math.abs(r4.b ?? 0)]));
+    const h4 = (v2) => `${Math.max(2, Math.round(Math.abs(v2) / max * 100))}%`;
+    const saeule3 = (v2, k5) => v2 == null ? "" : `<i class="${k5}${v2 < 0 ? " neg" : ""}${v2 === 0 ? " null" : ""}" style="height:${h4(v2)}" data-w="${Math.round(v2)}"></i>`;
+    return `<div class="hw-balkenfeld"><div class="hw-balken" style="--hoehe:100px" role="img" aria-label="${esc2(legende.join(" und "))}">${reihen.map((r4) => `<div>${saeule3(r4.a, "a")}${saeule3(r4.b, "b")}</div>`).join("")}</div><div class="hw-balkenfuss">${reihen.map((r4) => `<span>${esc2(r4.label)}</span>`).join("")}</div>` + (legende.length ? `<div class="hw-legende">${legende.map((l, i) => `<span><i class="${i ? "b" : ""}"></i>${esc2(l)}</span>`).join("")}</div>` : "") + "</div>";
   }
   function balkenPaar(reihen) {
-    const eine = (r4) => {
-      const w2 = r4.punkte.map((q2) => q2.wert ?? 0);
-      if (w2.length < 2) return `<div><h4>${esc2(r4.titel)}</h4>${leer3("Ab der zweiten Woche.")}</div>`;
-      const pos = Math.max(0, ...w2), neg = Math.max(0, ...w2.map((v2) => -v2)), ges = pos + neg || 1;
-      const oben = pos / ges * 100, unten = neg / ges * 100;
-      const saeule3 = (v2) => `<div style="display:flex;flex-direction:column;height:100%"><div style="height:${oben}%;display:flex;align-items:flex-end;justify-content:center">${v2 > 0 ? `<span class="${r4.serie}" style="height:${Math.max(3, v2 / ges * 100 / (oben / 100))}%" data-w="${Math.round(v2)}"></span>` : ""}</div><div style="height:${unten}%;display:flex;align-items:flex-start;justify-content:center">${v2 < 0 ? `<span class="${r4.serie} neg" style="height:${Math.max(3, -v2 / ges * 100 / (unten / 100))}%" data-w="${Math.round(v2)}"></span>` : ""}</div>${v2 === 0 ? '<span class="null" style="height:2px;align-self:center" data-w="0"></span>' : ""}</div>`;
-      const von = r4.punkte[0].label, bis = r4.punkte[r4.punkte.length - 1].label;
-      return `<div><h4>${esc2(r4.titel)}</h4><div class="hk-balken mitnull" style="--n:${w2.length}" role="img" aria-label="${esc2(r4.titel)} ${esc2(von)} bis ${esc2(bis)}">${neg ? `<i class="null-linie" style="top:${oben}%"></i>` : ""}${w2.map(saeule3).join("")}</div><div class="hk-balkenfuss" style="--n:${w2.length}">${r4.punkte.map((q2) => `<span>${esc2(q2.label)}</span>`).join("")}</div></div>`;
-    };
-    return `<div class="hk-balkenpaar">${reihen.map(eine).join("")}</div>`;
+    return reihen.map((r4) => abschnitt(r4.titel) + (r4.punkte.length < 2 ? leer3("Ab der zweiten Woche.") : balken6(r4.punkte.map((q2) => r4.serie === "b" ? { label: q2.label, a: null, b: q2.wert } : { label: q2.label, a: q2.wert, b: null })))).join("");
   }
   function tabelle({ titel = "", spalten: spalten2 = [], zeilen, summe: summe2 = null, pruefen: pruefen2 = false }) {
     const zelle2 = (t5, roh2, ton2) => `<td class="${ton2 ?? ""}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${esc2(t5)}</td>`;
     const zeile4 = (z6, k5 = "") => `<tr${k5 ? ` class="${k5}"` : ""}><td>${esc2(z6.name)}</td>${z6.werte.map((w2, i) => zelle2(w2, z6.roh?.[i], z6.ton?.[i])).join("")}</tr>`;
-    return `${titel ? abschnitt(titel) : ""}<table class="hk-tabelle"${pruefen2 ? ' data-summen="1"' : ""}>${spalten2.length ? `<thead><tr><th></th>${spalten2.map((s2) => `<th>${esc2(s2)}</th>`).join("")}</tr></thead>` : ""}<tbody>${zeilen.map((z6) => zeile4(z6)).join("")}${summe2 ? zeile4(summe2, "summe") : ""}</tbody></table>`;
+    return `<table class="hw-tabelle"${pruefen2 ? ' data-summen="1"' : ""}>${titel || spalten2.length ? `<thead><tr><th>${esc2(titel)}</th>${spalten2.map((x2) => `<th>${esc2(x2)}</th>`).join("")}</tr></thead>` : ""}<tbody>${zeilen.map((z6) => zeile4(z6)).join("")}${summe2 ? zeile4(summe2, "summe") : ""}</tbody></table>`;
   }
   function zeile({ was, unter = "", wert = "", wertUnter = "", ton: ton2 = "", attr = "", tippbar = false, roh: roh2 = null }) {
     const tag = tippbar ? "button" : "div";
-    return `<${tag} class="hk-zeile${tippbar ? " hk-tippbar" : ""}"${tippbar ? ' type="button"' : ""} ${attr}><span class="hk-was">${was}${unter ? `<small>${unter}</small>` : ""}</span>${wert !== "" ? `<span class="hk-wert ${ton2}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${wert}${wertUnter ? `<small>${wertUnter}</small>` : ""}</span>` : ""}${tippbar ? '<span class="hk-pfeil" aria-hidden="true">\u203A</span>' : ""}</${tag}>`;
+    return `<${tag} class="hw-zeile"${tippbar ? ' type="button"' : ""} ${attr}><span class="hw-was">${was}${unter ? `<small>${unter}</small>` : ""}</span>${wert !== "" ? `<span class="hw-wert ${ton2}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${wert}${wertUnter ? `<small>${wertUnter}</small>` : ""}</span>` : ""}${tippbar ? '<span class="hw-pfeil" aria-hidden="true">\u203A</span>' : ""}</${tag}>`;
   }
-  var liste = (zeilen) => `<div class="hk-liste">${zeilen.join("")}</div>`;
-  var knopf = (text3, attr = "", art = "", aus = false) => `<button type="button" class="hk-knopf ${art}" ${attr}${aus ? " disabled" : ""}>${esc2(text3)}</button>`;
-  var stepper = ({ wert, unter = "", attrMinus = "", attrPlus = "", minusAus = false, plusAus = false, label = "" }) => `<div class="hk-stepper"${label ? ` role="group" aria-label="${esc2(label)}"` : ""}><button type="button" aria-label="weniger" ${attrMinus}${minusAus ? " disabled" : ""}>\u2212</button><output>${esc2(wert)}${unter ? `<small>${esc2(unter)}</small>` : ""}</output><button type="button" aria-label="mehr" ${attrPlus}${plusAus ? " disabled" : ""}>+</button></div>`;
-  var schalter = ({ text: text3, unter = "", an, attr = "" }) => `<button type="button" class="hk-schalter" aria-pressed="${an ? "true" : "false"}" ${attr}><span class="hk-knebel" aria-hidden="true"></span><span>${esc2(text3)}${unter ? `<small>${esc2(unter)}</small>` : ""}</span></button>`;
-  var seg = (optionen3, aktiv7, attr) => `<div class="hk-seg" role="group">${optionen3.map(([w2, t5]) => `<button type="button" aria-pressed="${w2 === aktiv7}" ${attr(w2)}>${esc2(t5)}</button>`).join("")}</div>`;
-  var leer3 = (grund2, titel = "", aktion2 = "") => `<div class="hk-leer">${titel ? `<b>${esc2(titel)}</b>` : ""}${esc2(grund2)}${aktion2}</div>`;
-  var hinweis = (html, ton2 = "") => `<div class="hk-hinweis ${ton2}" role="${ton2 === "fehler" ? "alert" : "note"}"><span>${html}</span></div>`;
-  var marke4 = (text3, ton2 = "") => `<span class="hk-marke ${ton2}">${esc2(text3)}</span>`;
+  var liste = (zeilen) => `<div class="hw-liste">${zeilen.join("")}</div>`;
+  var knopf = (text3, attr = "", art = "", aus = false) => `<button type="button" class="hw-knopf ${art}" ${attr}${aus ? " disabled" : ""}>${esc2(text3)}</button>`;
+  var knoepfe = (...k5) => `<div class="hw-knoepfe">${k5.join("")}</div>`;
+  var stepper = ({ wert, unter = "", attrMinus = "", attrPlus = "", minusAus = false, plusAus = false, label = "", gross: gross3 = true }) => `<div class="hw-stepper hw-kontur${gross3 ? " gross" : ""}"${label ? ` role="group" aria-label="${esc2(label)}"` : ""}><button type="button" class="hw-kontur" aria-label="weniger" ${attrMinus}${minusAus ? " disabled" : ""}></button><output>${esc2(wert)}${unter ? `<small>${esc2(unter)}</small>` : ""}</output><button type="button" class="hw-kontur plus" aria-label="mehr" ${attrPlus}${plusAus ? " disabled" : ""}></button></div>`;
+  var feld = (name2, html) => `<div class="hw-feld"><span class="hw-marke hw-feldname">${esc2(name2)}</span>${html}</div>`;
+  var schalter = ({ text: text3, unter = "", an, attr = "" }) => `<button type="button" class="hw-schalterzeile" aria-pressed="${an ? "true" : "false"}" ${attr}><span class="hw-schalter hw-kontur" role="presentation" aria-checked="${an ? "true" : "false"}"></span><span>${esc2(text3)}${unter ? `<small>${esc2(unter)}</small>` : ""}</span></button>`;
+  var seg = (optionen3, aktiv7, attr) => `<div class="hw-segment" role="group">${optionen3.map(([w2, t5]) => `<button type="button" aria-pressed="${w2 === aktiv7}" ${attr(w2)}>${esc2(t5)}</button>`).join("")}</div>`;
+  var leer3 = (grund2, titel = "", aktion2 = "") => `<div class="hw-leer">${titel ? `<b>${esc2(titel)}</b>` : ""}${esc2(grund2)}${aktion2}</div>`;
+  var hinweis = (html, ton2 = "") => `<div class="hw-hinweis ${ton2}" role="${ton2 === "fehler" ? "alert" : "note"}">${html}</div>`;
+  var marke4 = (text3, ton2 = "") => `<span class="hw-status ${ton2}">${esc2(text3)}</span>`;
   function skala(name2, wert) {
-    const n3 = Math.round(Math.max(0, Math.min(100, wert)) / 20);
-    return `<div class="hk-skala"><span>${esc2(name2)}</span><span class="hk-segmente" aria-hidden="true">${[0, 1, 2, 3, 4].map((i) => `<i class="${i < n3 ? "an" : ""}"></i>`).join("")}</span><b>${Math.round(wert)}</b></div>`;
+    const n3 = Math.max(0, Math.min(100, wert)) / 20;
+    return `<div class="hw-faehigkeit"><span>${esc2(name2)}</span><span class="hw-skala-balken" aria-hidden="true">${[0, 1, 2, 3, 4].map((i) => `<i style="--a:${Math.max(0, Math.min(1, n3 - i)).toFixed(2)}"></i>`).join("")}</span><b>${Math.round(wert)}</b></div>`;
   }
   var C30 = Math.cos(Math.PI / 6);
   var pt = (x2, y2, z6, s2 = 2.9, ox = 16, oy = 19) => [ox + (x2 - y2) * C30 * s2, oy + (x2 + y2) * 0.5 * s2 - z6 * s2];
@@ -161515,7 +161515,7 @@ void main() {
     zentrale: svg(quader(-2.5, -2.5, 0, 5, 5, 10, WEISS4) + quader(-2.5, 2.45, 2, 5, 0.1, 1, BLAU) + quader(-2.5, 2.45, 4.5, 5, 0.1, 1, BLAU) + quader(-2.5, 2.45, 7, 5, 0.1, 1, BLAU) + quader(-2.5, -2.5, 10, 5, 5, 0.6, ROT4)),
     zahlen: svg(quader(-4, -1, 0, 2, 2, 3, WEISS4) + quader(-1, -1, 0, 2, 2, 6, WEISS4) + quader(2, -1, 0, 2, 2, 4.4, GRUEN))
   };
-  var reiterUnten = (reiter, aktiv7, attr) => `<nav class="hk-reiter" aria-label="Bereiche">${reiter.map(([id, name2, sym3]) => `<button type="button" ${attr(id)}${id === aktiv7 ? ' aria-current="page"' : ""}>${SYMBOLE[sym3 ?? id] ?? ""}<span>${esc2(name2)}</span></button>`).join("")}</nav>`;
+  var reiterUnten = (reiter, aktiv7, attr) => `<nav class="hw-reiter" aria-label="Bereiche">${reiter.map(([id, name2, sym3]) => `<button type="button" ${attr(id)}${id === aktiv7 ? ' aria-current="page"' : ""}>${SYMBOLE[sym3 ?? id] ?? ""}<span>${esc2(name2)}</span></button>`).join("")}</nav>`;
 
   // src/ui/produkte-q24.js
   var FAECHER = [["damen", "Damen"], ["herren", "Herren"], ["kinder", "Kinder"], ["home", "Home"]];
@@ -161629,7 +161629,7 @@ void main() {
   var preisText = (p2) => PREIS2.find((x2) => x2[0] === p2)?.[1] ?? p2;
   var STATUS = { aufbau: "im Aufbau", neupositionierung: "Neupositionierung", eingestellt: "eingestellt" };
   var punkte = (x2) => `+${(x2 * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Punkte`;
-  function balken6(wert, farbe3 = "#2f63b5") {
+  function balken7(wert, farbe3 = "#2f63b5") {
     return `<span class="mbalken"><span style="width:${Math.max(0, Math.min(100, wert)).toFixed(0)}%;background:${farbe3}"></span></span>`;
   }
   function passungZeile(p2, p0) {
@@ -161664,8 +161664,8 @@ void main() {
       h4 += `<div class="karte emkarte"><div class="mkopf" style="background:${m.farbe}"><b>${esc2(m.name)}</b><small>${zielText(m.zielgruppe)} \xB7 ${m.kategorie}${m.gewachsen ? " \xB7 gewachsene Hartwig-Marke" : ""}</small></div>`;
       h4 += `<div class="owerte"><div><span>Umsatz 13 Wochen</span><b data-p="m:${m.id}:umsatz">${geld(m.umsatz13)}</b></div><div><span>Rohertragsquote</span><b data-p="m:${m.id}:marge">${pz3(m.rohertragsquote, 1)}</b></div><div><span>Mehrmarge</span><b data-p="m:${m.id}:mehrmarge">${punkte(m.mehrmarge)}</b></div></div>`;
       h4 += `<div class="ochips">${status2}<span class="chip grau">${preisText(m.preislage)}</span><span class="chip grau">${m.stil}</span><span class="chip grau">Qualit\xE4t ${m.qualitaet} von 5</span><span class="chip grau">${esc2(m.beschaffungName)}</span></div>`;
-      h4 += `<div class="mzeile"><span>Bekanntheit</span>${balken6(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
-      h4 += `<div class="mzeile"><span>Stil aktuell</span>${balken6(m.stilAktualitaet, veraltetM ? "var(--hk-schlecht, #d23c32)" : "var(--hk-gut, #2f8f5b)")}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
+      h4 += `<div class="mzeile"><span>Bekanntheit</span>${balken7(m.bekanntheit)}<b data-p="m:${m.id}:bekanntheit">${Math.round(m.bekanntheit)}</b></div>`;
+      h4 += `<div class="mzeile"><span>Stil aktuell</span>${balken7(m.stilAktualitaet, veraltetM ? "var(--hk-schlecht, #d23c32)" : "var(--hk-gut, #2f8f5b)")}<b data-p="m:${m.id}:aktualitaet">${Math.round(m.stilAktualitaet)}</b></div>`;
       h4 += `<div class="mzeile"><span>Passung je Region</span></div>${passungZeile(m.passungRegion, `m:${m.id}:passung`)}`;
       h4 += teamAufschluesselung(leistungen.get(m.id));
       h4 += `<div class="olief">${m.wgs.filter((w2) => w2.anteilZiel > 0 || w2.anteilIst > 0).map((w2) => `${esc2(w2.name)} ${pz3(w2.anteilIst)}`).join(" \xB7 ") || "Noch in keiner Warengruppe."}</div>`;
@@ -161695,35 +161695,35 @@ void main() {
   function assistent(ctx, ui, tabs) {
     const s2 = ctx.s(), A = ui.em.assistent, m = A.daten, u = ctx.q.marken(s2);
     const seg2 = (act, wert, opt, sperre2 = false) => `<div class="seg umbruch">${opt.map(([v3, t5]) => `<button class="${String(v3) === String(wert) ? "an" : ""}" data-a="${act}" data-v="${v3}"${sperre2 ? " disabled" : ""}>${t5}</button>`).join("")}</div>`;
-    const feld2 = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
+    const feld3 = (titel, inhalt, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt}</div>`;
     const v2 = ctx.q.vorschau(s2, m);
     let h4 = tabs;
     h4 += `<button class="zurueck" data-a="emAbbrechen">\u2039 Eigenmarken</button>`;
     h4 += `<div class="schritte">${SCHRITTE.map((t5, i) => `<button class="${i === A.schritt ? "an" : i < A.schritt ? "fertig" : ""}" data-a="emSchritt" data-v="${i}"><b>${i + 1}</b>${t5}</button>`).join("")}</div>`;
     h4 += '<div class="karte steuerung">';
     if (A.schritt === 0) {
-      if (!A.id) h4 += feld2("Vorlage", `<div class="seg umbruch">${ctx.q.vorlagen().map((x2, i) => `<button class="${A.vorlage === i ? "an" : ""}" data-a="emVorlage" data-v="${i}">${esc2(x2.titel)}</button>`).join("")}</div>`, "f\xFCllt alle Schritte vor");
-      h4 += feld2("Alter", seg2("emAlter", m.zielgruppe.alter, alterOptionen(m.zielgruppe.alter)));
-      h4 += feld2("Geschlecht", seg2("emGeschlecht", m.zielgruppe.geschlecht, GESCHLECHT));
+      if (!A.id) h4 += feld3("Vorlage", `<div class="seg umbruch">${ctx.q.vorlagen().map((x2, i) => `<button class="${A.vorlage === i ? "an" : ""}" data-a="emVorlage" data-v="${i}">${esc2(x2.titel)}</button>`).join("")}</div>`, "f\xFCllt alle Schritte vor");
+      h4 += feld3("Alter", seg2("emAlter", m.zielgruppe.alter, alterOptionen(m.zielgruppe.alter)));
+      h4 += feld3("Geschlecht", seg2("emGeschlecht", m.zielgruppe.geschlecht, GESCHLECHT));
     } else if (A.schritt === 1) {
-      h4 += feld2("Kategorie", seg2("emKategorie", m.kategorie, KATEGORIE2.map((k5) => [k5, k5]), !!A.id), A.id ? "bleibt bei Neupositionierung" : "");
+      h4 += feld3("Kategorie", seg2("emKategorie", m.kategorie, KATEGORIE2.map((k5) => [k5, k5]), !!A.id), A.id ? "bleibt bei Neupositionierung" : "");
       const liste3 = [...v2.passendeWgs].sort((a2, b4) => b4.passung - a2.passung);
       const inh = liste3.length ? liste3.map((w2) => {
         const a2 = m.wgAnteile[w2.wg];
         return `<button class="wgwahl ${a2 ? "an" : ""}" data-a="emWg" data-v="${w2.wg}"><span>${esc2(w2.name)} <i>${esc2(ctx.E.GRUPPEN[w2.bereich]?.name ?? w2.bereich)} \xB7 ${w2.passung >= 1 ? "passt sehr gut" : w2.passung >= 0.7 ? "passt gut" : "passt bedingt"}</i></span><b>${a2 ? pz3(a2) : "+"}</b></button>`;
       }).join("") : '<div class="leise">Keine Warengruppe passt zu Zielgruppe und Kategorie.</div>';
-      h4 += feld2("Warengruppen", `<div class="wgliste">${inh}</div>`, "Antippen: 15, 25, 40 % oder aus");
+      h4 += feld3("Warengruppen", `<div class="wgliste">${inh}</div>`, "Antippen: 15, 25, 40 % oder aus");
     } else if (A.schritt === 2) {
-      h4 += feld2("Preislage", seg2("emPreis", m.preislage, PREIS2));
-      h4 += feld2("Stil", seg2("emStil", m.stil, STIL3), "trendig veraltet schneller");
-      h4 += feld2("Qualit\xE4t", seg2("emQualitaet", m.qualitaet, [1, 2, 3, 4, 5].map((x2) => [x2, "\u2605".repeat(x2)])));
+      h4 += feld3("Preislage", seg2("emPreis", m.preislage, PREIS2));
+      h4 += feld3("Stil", seg2("emStil", m.stil, STIL3), "trendig veraltet schneller");
+      h4 += feld3("Qualit\xE4t", seg2("emQualitaet", m.qualitaet, [1, 2, 3, 4, 5].map((x2) => [x2, "\u2605".repeat(x2)])));
     } else if (A.schritt === 3) {
       const B8 = ctx.q.beschaffung();
-      h4 += feld2("Beschaffung", `<div class="wahlkarten">${Object.entries(B8).map(([k5, b4]) => `<button class="${m.beschaffung === k5 ? "an" : ""}" data-a="emBeschaffung" data-v="${k5}"><b>${esc2(b4.name)}</b><small>${b4.vorlauf} Wochen Vorlauf, Mindestabnahme ${geld(b4.mindestabnahme)}, ${punkte(b4.mehrmarge)} Marge</small></button>`).join("")}</div>`);
-      h4 += feld2("Markenbudget je Woche", `<div class="stepper"><button data-a="emBudgetNeu" data-v="-5000">\u2212</button><span><b>${geld(m.budgetWoche)}</b></span><button data-a="emBudgetNeu" data-v="5000">+</button></div>`, "baut Bekanntheit auf");
+      h4 += feld3("Beschaffung", `<div class="wahlkarten">${Object.entries(B8).map(([k5, b4]) => `<button class="${m.beschaffung === k5 ? "an" : ""}" data-a="emBeschaffung" data-v="${k5}"><b>${esc2(b4.name)}</b><small>${b4.vorlauf} Wochen Vorlauf, Mindestabnahme ${geld(b4.mindestabnahme)}, ${punkte(b4.mehrmarge)} Marge</small></button>`).join("")}</div>`);
+      h4 += feld3("Markenbudget je Woche", `<div class="stepper"><button data-a="emBudgetNeu" data-v="-5000">\u2212</button><span><b>${geld(m.budgetWoche)}</b></span><button data-a="emBudgetNeu" data-v="5000">+</button></div>`, "baut Bekanntheit auf");
     } else {
-      h4 += feld2("Name", `<input class="ort gross" data-a="emName" maxlength="22" value="${esc2(m.name)}">`);
-      if (!A.id) h4 += feld2("Farbe", `<div class="farben">${FARBEN6.map((f13) => `<button class="${m.farbe === f13 ? "an" : ""}" style="background:${f13}" data-a="emFarbe" data-v="${f13}" aria-label="Farbe ${f13}"></button>`).join("")}</div>`, "f\xFCr Shop und Karte");
+      h4 += feld3("Name", `<input class="ort gross" data-a="emName" maxlength="22" value="${esc2(m.name)}">`);
+      if (!A.id) h4 += feld3("Farbe", `<div class="farben">${FARBEN6.map((f13) => `<button class="${m.farbe === f13 ? "an" : ""}" style="background:${f13}" data-a="emFarbe" data-v="${f13}" aria-label="Farbe ${f13}"></button>`).join("")}</div>`, "f\xFCr Shop und Karte");
     }
     h4 += "</div>";
     const nWg = Object.values(m.wgAnteile).filter((a2) => a2 > 0).length;
@@ -161902,7 +161902,7 @@ void main() {
   var knopf2 = (a2, v2, text3, extra = "") => `<button class="q-neben-akt" data-a="${a2}" data-v="${esc2(String(v2))}" ${extra}>${text3}</button>`;
   var optionen = (werte3, auswahl4) => werte3.map(([id, name2]) => `<option value="${esc2(id)}" ${id === auswahl4 ? "selected" : ""}>${esc2(name2)}</option>`).join("");
   var teile = (n3) => fmt.format(Math.round(n3));
-  var feld = (titel, inhalt) => `<label class="q-stepzeile"><span class="q-name">${titel}</span>${inhalt}</label>`;
+  var feld2 = (titel, inhalt) => `<label class="q-stepzeile"><span class="q-name">${titel}</span>${inhalt}</label>`;
   function warenSeite(ctx, ui, tabs) {
     const d4 = ctx.E.warenUebersicht(ctx.s());
     const w2 = ui.ware ?? (ui.ware = { von: d4.cluster[0]?.id ?? "", nach: d4.cluster[1]?.id ?? "", gruppe: "damen", wert: 5e4, pp: 10 });
@@ -161936,8 +161936,8 @@ void main() {
       }
       html += "</div>";
       html += `<div class="q-buch"><div class="q-buch-kopf"><span>Umlagerung</span><b>1 bis 2 Wochen</b></div>
-      ${feld("Von", `<select data-a="wareVon">${optionen(cluster, w2.von)}</select>`)}${feld("Nach", `<select data-a="wareNach">${optionen(cluster, w2.nach)}</select>`)}
-      ${feld("Bereich", `<select data-a="wareGruppe">${optionen(gruppen, w2.gruppe)}</select>`)}${feld("EK-Wert", `<input data-a="wareWert" type="number" inputmode="numeric" min="1" step="10000" value="${w2.wert}">`)}
+      ${feld2("Von", `<select data-a="wareVon">${optionen(cluster, w2.von)}</select>`)}${feld2("Nach", `<select data-a="wareNach">${optionen(cluster, w2.nach)}</select>`)}
+      ${feld2("Bereich", `<select data-a="wareGruppe">${optionen(gruppen, w2.gruppe)}</select>`)}${feld2("EK-Wert", `<input data-a="wareWert" type="number" inputmode="numeric" min="1" step="10000" value="${w2.wert}">`)}
       <div class="q-stepzeile">${knopf2("wareUmlagern", "ja", "Umlagerung beauftragen")}</div></div>`;
       if (d4.umlagerungen.length) {
         html += '<div class="q-buch"><div class="q-buch-kopf"><span>Unterwegs</span><b>Wert EK</b></div>';
@@ -161963,7 +161963,7 @@ void main() {
     }
     html += "</div>";
     html += `<div class="q-buch"><div class="q-buch-kopf"><span>Lokaler Spielraum</span><b>h\xF6chstens 10 Punkte</b></div>
-    ${feld("Hauscluster", `<select data-a="wareVon">${optionen(cluster, w2.von)}</select>`)}${feld("Bereich", `<select data-a="wareGruppe">${optionen(gruppen, w2.gruppe)}</select>`)}
+    ${feld2("Hauscluster", `<select data-a="wareVon">${optionen(cluster, w2.von)}</select>`)}${feld2("Bereich", `<select data-a="wareGruppe">${optionen(gruppen, w2.gruppe)}</select>`)}
     <div class="q-zeile"><span class="q-knoepfe" style="padding:0">${knopf2("wareLokal10", "ja", "10 Punkte nachreduzieren")}${knopf2("wareLokal0", "ja", "Zur\xFCcknehmen")}${knopf2("wareZentralCluster", "ja", "Cluster zentral steuern")}</span></div>
     ${global ? '<div class="q-leer">Bei zentraler Durchsetzung ist der lokale Spielraum gesperrt.</div>' : ""}</div>`;
     html += "</div>";
@@ -162132,7 +162132,7 @@ void main() {
       h4 += kurve5("Umsatz je Woche", v2.woche, v2.umsatz, geld, "k:umsatz", "#2f8f5b");
       h4 += kurve5("Reichweite in Wochen", v2.woche, v2.reichweite, (x2) => `${dez(x2, 1)} Wo.`, "k:reichweite", "#c27b0e");
       const regler2 = (titel, inhalt2, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt2}</div>`;
-      const schieber = (feld2, wert, min, max, schritt) => `<div class="schieber"><input type="range" min="${min}" max="${max}" step="${schritt}" value="${wert}" data-a="regel" data-f="${feld2}"><output>${wert} %</output></div>`;
+      const schieber = (feld3, wert, min, max, schritt) => `<div class="schieber"><input type="range" min="${min}" max="${max}" step="${schritt}" value="${wert}" data-a="regel" data-f="${feld3}"><output>${wert} %</output></div>`;
       h4 += '<div class="karte steuerung"><div class="khead">Steuerung</div>';
       const genutzt = k5.limit > 0 ? Math.min(1, k5.limitVerbraucht / k5.limit) : 0;
       const naechste = d4.limits[1];
@@ -162863,7 +162863,7 @@ void main() {
     const kragenHemd = (f13, s2) => {
       out.push(P2("M44.2 55 L47.6 62.4 L50.6 57.6 L45.6 53.4 Z", f13), P2("M57.2 54.6 L53.6 62.2 L50.8 57.6 L55.8 53 Z", s2));
     };
-    const knoepfe = (x2, ys, f13) => ys.forEach((y2) => out.push(`<circle cx="${x2}" cy="${y2}" r="0.75" fill="${f13}"/>`));
+    const knoepfe2 = (x2, ys, f13) => ys.forEach((y2) => out.push(`<circle cx="${x2}" cy="${y2}" r="0.75" fill="${f13}"/>`));
     switch (m.kleidung) {
       case "anzug": {
         koerper5();
@@ -162873,7 +162873,7 @@ void main() {
         out.push(P2("M49.4 58.8 L51.8 58.8 L52.6 75.6 L50.6 79.4 L48.6 75.6 Z", kraw), P2("M49 57.6 L52.2 57.6 L51.8 60 L49.4 60 Z", dunkel(kraw, 0.2)));
         kragenHemd(weiss2, weissS);
         revers(80, c);
-        knoepfe(51.6, [84, 92], cK);
+        knoepfe2(51.6, [84, 92], cK);
         if (r4() < 0.5) out.push(P2("M63 70.4 L68.4 69.4 L68.6 71 L63.2 72 Z", hell2(c, 0.25)));
         break;
       }
@@ -162885,7 +162885,7 @@ void main() {
         if (m.kleidung === "blazer" && m.geschlecht === "m") kragenHemd(weiss2, weissS);
         if (m.kleidung === "kostuem") out.push(P2(`M45.4 56.8 C48 59.8 53.2 59.8 56.4 56.4 L50.6 ${tief2} Z`, unter));
         revers(tief2, c);
-        knoepfe(51.6, [tief2 + 6, tief2 + 14].filter((y2) => y2 < 98), cK);
+        knoepfe2(51.6, [tief2 + 6, tief2 + 14].filter((y2) => y2 < 98), cK);
         out.push(P2("M62.4 76 L69 75 L69.2 76.4 L62.6 77.4 Z", cR));
         break;
       }
@@ -162894,7 +162894,7 @@ void main() {
         kragenHemd(hell2(c, 0.3), dunkel(c, 0.05));
         out.push(P2("M45.6 56.8 C48 59.4 53 59.4 56 56.4 L50.6 60.6 Z", dunkel(c, 0.12)));
         out.push(`<path d="M50.6 60 L50.4 100" stroke="${cR}" stroke-width="0.6"/>`);
-        knoepfe(51.6, [66, 74, 82, 90, 98], cR);
+        knoepfe2(51.6, [66, 74, 82, 90, 98], cR);
         out.push(P2("M30.6 69.4 L39.6 68.6 L40 78.6 C37 79.8 33.6 79.8 31 79 Z", dunkel(c, 0.06)), `<path d="M30.6 69.4 L39.6 68.6" stroke="${cR}" stroke-width="0.6"/>`);
         break;
       }
@@ -162914,7 +162914,7 @@ void main() {
         koerper5();
         out.push(P2("M44.2 56.2 L50.6 66 L57.2 55.8 C53.6 58.6 48 58.6 44.2 56.2 Z", HAUTTOENE[m.hautton][0]));
         out.push(P2("M43.6 55 C42 58.6 43.6 62.4 47.6 63.2 L50.6 66 L44.6 55.6 Z", hell2(c, 0.22)), P2("M57.6 54.6 C59.4 58 58 62 54 63 L50.6 66 L56.8 55.4 Z", dunkel(c, 0.06)));
-        knoepfe(50.8, [72, 80, 88, 96], dunkel(c, 0.25));
+        knoepfe2(50.8, [72, 80, 88, 96], dunkel(c, 0.25));
         break;
       }
       case "strick":
@@ -162924,7 +162924,7 @@ void main() {
         out.push(P2("M44.2 56.2 C48 58.6 53.6 58.6 57.2 55.8 L55 86 L50.4 100 L46.4 100 Z", top));
         out.push(P2("M43.2 55.6 L37.8 60.6 L45.6 86 L47 100 L50.4 100 L46.6 86 Z", hell2(c, 0.18)));
         out.push(P2("M57.6 55.2 L62 59.2 L55.6 86 L52.6 100 L50.6 100 L54.6 86 Z", dunkel(c, 0.06)));
-        knoepfe(47.4, [70, 78, 86, 94], dunkel(c, 0.5));
+        knoepfe2(47.4, [70, 78, 86, 94], dunkel(c, 0.5));
         if (m.geschlecht === "m") kragenHemd(hellStoff ? "#4a5263" : weiss2, hellStoff ? "#3a4150" : weissS);
         break;
       }
@@ -164795,7 +164795,7 @@ void main() {
     }
     function zeitleiste(K3, P5) {
       const W3 = 340, L3 = 6, B8 = (W3 - L3 * 2) / 52, zeilen = [];
-      const balken7 = [];
+      const balken8 = [];
       for (const a2 of K3.eintraege) {
         const von = Math.max(0, a2.start - (K3.jahr - s2().startJahr) * 52), bis = Math.min(52, a2.ende - (K3.jahr - s2().startJahr) * 52);
         let z6 = zeilen.findIndex((e) => e <= von);
@@ -164804,7 +164804,7 @@ void main() {
           zeilen.push(0);
         }
         zeilen[z6] = bis + 0.4;
-        balken7.push({ a: a2, von, bis, z: z6 });
+        balken8.push({ a: a2, von, bis, z: z6 });
       }
       const RH = 26, H = 24 + Math.max(1, zeilen.length) * RH + 18;
       let g2 = `<svg class="zeitleiste" viewBox="0 0 ${W3} ${H}" width="100%">`;
@@ -164812,7 +164812,7 @@ void main() {
         const x2 = L3 + m * 52 / 12 * B8;
         g2 += `<line x1="${x2}" x2="${x2}" y1="16" y2="${H}" stroke="var(--ui-border, #ece8e1)"/><text x="${x2 + 2}" y="12" font-size="12" fill="var(--ui-muted, #7b8790)">${MONATE[m].slice(0, 1)}</text>`;
       }
-      for (const { a: a2, von, bis, z: z6 } of balken7) {
+      for (const { a: a2, von, bis, z: z6 } of balken8) {
         const x2 = L3 + von * B8, w2 = Math.max(3, (bis - von) * B8 - 1), y2 = 20 + z6 * RH;
         g2 += `<g data-a="aktion" data-v="${a2.id}" class="klickbar"><rect x="${x2}" y="${y2}" width="${w2}" height="${RH - 4}" rx="4" fill="${STATUS_FARBE[a2.status]}"${a2.status === "abgesagt" ? ' stroke="#b9b2a6" stroke-dasharray="2 2"' : ""}/>${w2 > 6.5 * a2.name.length + 8 ? `<text x="${x2 + 4}" y="${y2 + 15}" font-size="12" font-weight="700" fill="#14202a">${esc2(a2.name)}</text>` : ""}</g>`;
       }
@@ -172835,7 +172835,7 @@ void main() {
     return `<section class="karte q17-profil" aria-label="Linienprofil">
     <div class="q17-kopf"><b>Linienprofil</b><small>${esc2(m.stil)}</small></div>
     <div class="q17-profil-inhalt">
-      ${achsen7.map(([titel, feld2]) => `<div class="q17-merkmal"><span>${titel}</span><span class="q17-balken"><i style="width:${m[feld2]}%"></i></span><b>${P5("lp:" + feld2, String(m[feld2]))}</b></div>`).join("")}
+      ${achsen7.map(([titel, feld3]) => `<div class="q17-merkmal"><span>${titel}</span><span class="q17-balken"><i style="width:${m[feld3]}%"></i></span><b>${P5("lp:" + feld3, String(m[feld3]))}</b></div>`).join("")}
       <div class="q17-preispunkt"><span>\xD8 Verkaufspreis im Sortiment</span><b>${P5("lp:preispunkt", euro(m.preispunkt))}</b></div>
     </div>
     <p class="q17-hinweis">Nachhaltigkeit ist ein Orientierungswert aus Beschaffung und Materialmix, keine \xD6kobilanz.</p>
@@ -173890,10 +173890,10 @@ void main() {
     const suche = String(filter.suche ?? "").trim().toLocaleLowerCase("de");
     return zeilen.filter((h4) => (filter.format === "alle" || h4.formatKey === filter.format) && (filter.region === "alle" || h4.region === filter.region) && (filter.klasse === "alle" || h4.klasse === filter.klasse) && (filter.ampel === "alle" || h4.ampel === filter.ampel) && (!suche || (h4.stadt + " " + h4.name + " " + h4.id).toLocaleLowerCase("de").includes(suche)));
   }
-  function portfolioSortieren(zeilen, feld2 = "umsatz", absteigend = true) {
+  function portfolioSortieren(zeilen, feld3 = "umsatz", absteigend = true) {
     const vorzeichen = absteigend ? -1 : 1;
     return [...zeilen].sort((a2, b4) => {
-      const aa = a2[feld2], bb = b4[feld2];
+      const aa = a2[feld3], bb = b4[feld3];
       const vergleich = typeof aa === "number" && typeof bb === "number" ? aa - bb : String(aa ?? "").localeCompare(String(bb ?? ""), "de");
       return vergleich * vorzeichen || a2.stadt.localeCompare(b4.stadt, "de") || a2.id.localeCompare(b4.id, "de");
     });
@@ -174827,12 +174827,12 @@ void main() {
       if (!m || !node.querySelector("#wb-vorfall")) return;
       status2 = "vorfall";
       markieren("Vorfall " + (vorfall + 1));
-      const feld2 = node.querySelector("#wb-vorfall"), meins = token;
+      const feld3 = node.querySelector("#wb-vorfall"), meins = token;
       const verantwortlich = portraetZumVorgang(m);
-      feld2.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall hk-flaeche" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc2(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + '</div></div><h4 tabindex="-1">' + esc2(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + '</small><button data-wa="spaeter" hidden>Sp\xE4ter</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + " weitere im Posteingang</p>" : "") + "</section></div>";
-      feld2.querySelector(".wb-vorfall h4")?.focus({ preventScroll: true });
-      requestAnimationFrame(() => feld2.classList.add("offen"));
-      const text3 = m.text ?? "", el2 = feld2.querySelector(".wb-tippt"), beginn = performance.now();
+      feld3.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall hk-flaeche" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc2(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + '</div></div><h4 tabindex="-1">' + esc2(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + " von " + lauf.length + '</small><button data-wa="spaeter" hidden>Sp\xE4ter</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + " weitere im Posteingang</p>" : "") + "</section></div>";
+      feld3.querySelector(".wb-vorfall h4")?.focus({ preventScroll: true });
+      requestAnimationFrame(() => feld3.classList.add("offen"));
+      const text3 = m.text ?? "", el2 = feld3.querySelector(".wb-tippt"), beginn = performance.now();
       function tick(t5) {
         if (meins !== token || status2 !== "vorfall") return;
         const n3 = schnell() ? text3.length : Math.floor((t5 - beginn) / 1e3 * 70);
@@ -174840,19 +174840,19 @@ void main() {
         if (el2.textContent.length !== text3.length && t5 - beginn < WOCHEN_ZEIT.vorfallText) requestAnimationFrame(tick);
         else {
           el2.textContent = text3;
-          feld2.querySelector(".wb-vorfallfuss small").hidden = true;
-          for (const b4 of feld2.querySelectorAll(".wb-vorfallfuss button")) b4.hidden = false;
+          feld3.querySelector(".wb-vorfallfuss small").hidden = true;
+          for (const b4 of feld3.querySelectorAll(".wb-vorfallfuss button")) b4.hidden = false;
         }
       }
       requestAnimationFrame(tick);
     }
     function vorfallWeiter(ansehen) {
       const item2 = bericht2.vorgaenge[vorfall], t5 = token;
-      const feld2 = node.querySelector("#wb-vorfall");
-      feld2?.classList.remove("offen");
+      const feld3 = node.querySelector("#wb-vorfall");
+      feld3?.classList.remove("offen");
       setTimeout(() => {
         if (t5 !== token) return;
-        feld2.innerHTML = "";
+        feld3.innerHTML = "";
         vorfall++;
         status2 = "bericht";
         if (ansehen) {
@@ -175187,7 +175187,7 @@ void main() {
     });
     const top = n3 * H;
     svg2 += poly2([pt2(0, 0, top), pt2(W3, 0, top), pt2(W3, D, top), pt2(0, D, top)], "#4a423b") + poly2([pt2(0, 0, top), pt2(W3, 0, top), pt2(W3, 0, top + 3), pt2(0, 0, top + 3)], "#d23c32");
-    return `<svg class="hk-etagenschnitt" viewBox="0 0 ${breite} ${hoehe.toFixed(0)}" role="img" aria-label="Etagenschnitt mit ${n3} Etagen">${svg2}</svg>`;
+    return `<svg class="hw-etagenschnitt" viewBox="0 0 ${breite} ${hoehe.toFixed(0)}" role="img" aria-label="Etagenschnitt mit ${n3} Etagen">${svg2}</svg>`;
   }
   function befund(h4, k5, b4, vorjahr2, vorwoche) {
     const name2 = h4.personal?.filialleiter?.name ?? "Filialleitung";
@@ -175206,9 +175206,9 @@ void main() {
     funde.sort((a2, c) => c.g - a2.g);
     if (!funde.length) {
       const vj = vorjahr2 > 0 ? ` Umsatz ${k5.umsatz >= vorjahr2 ? "+" : "\u2212"}${p(Math.abs(k5.umsatz / vorjahr2 - 1) * 100, 1)} % zum Vorjahr.` : vorwoche ? ` Umsatz ${k5.umsatz >= vorwoche ? "\xFCber" : "unter"} Vorwoche.` : "";
-      return { text: `<b>Das Haus l\xE4uft.</b> Deckungsbeitrag positiv, Besetzung gesichert.${vj}${kaText ? " " + kaText : ""}`, ton: "", name: name2 };
+      return { text: `Das Haus l\xE4uft.${vj}`, ton: "", name: name2 };
     }
-    return { text: `<b>${esc2(funde[0].t)}</b>${funde[1] ? " " + esc2(funde[1].t) : ""}`, ton: funde[0].ton, name: name2 };
+    return { text: esc2(funde[0].t), ton: funde[0].ton, name: name2 };
   }
   function hausDetailHtml(c) {
     const { d: d4, b: b4, reiter } = c, h4 = d4.haus, k5 = h4.kpi, id = h4.id;
@@ -175225,8 +175225,9 @@ void main() {
     if (r4 === "partner") inhalt = partner(c, h4, b4);
     if (r4 === "kosten") inhalt = kosten(c, h4, k5, b4);
     if (r4 === "kommentare") inhalt = kommentare(c, h4, b4);
-    html += rumpf2(inhalt);
-    html += reiterUnten(REITER2, r4, (key) => `class="haus-reiter-knopf" data-reiter="${key}" onclick="hausReiterWahl('${key}')"`).replace('class="hk-reiter"', 'class="hk-reiter haus-reiter"');
+    if (r4 === "ueberblick") html += `<div class="hw-fenster"><button type="button" class="hw-bildknopf hw-kontur" data-hausbesuch="${esc2(id)}" aria-label="Haus besuchen">${SYMBOLE.etagen}</button></div><div class="hw-boden">${rumpf2(inhalt)}</div>`;
+    else html += rumpf2(inhalt);
+    html += reiterUnten(REITER2, r4, (key) => `class="haus-reiter-knopf" data-reiter="${key}" onclick="hausReiterWahl('${key}')"`).replace('class="hw-reiter"', 'class="hw-reiter haus-reiter"');
     return html;
   }
   function ueberblick(c, h4, k5, vorwoche, vorwocheDb, uPunkte, dPunkte) {
@@ -175250,14 +175251,14 @@ void main() {
     if (h4.klasse === "premium") marken2.push(marke4("Premiumhaus", "achtung"));
     if (c.zustand) marken2.push(marke4(c.zustand, "achtung"));
     marken2.push(marke4(LAGE[h4.lage] ?? "Lage offen"));
-    x2 += `<div class="hk-marken">${marken2.join("")}</div>`;
-    x2 += `<div class="hk-knopfreihe">${knopf("Haus besuchen", `data-hausbesuch="${esc2(id)}"`, "zweit")}${(() => {
+    x2 += `<div class="hw-statusreihe">${marken2.join("")}</div>`;
+    x2 += `<div class="hw-knoepfe">${(() => {
       const et = typeof E9.umbauHaus === "function" ? [...E9.umbauHaus(s2, id) ?? []].sort((a2, z6) => a2.substanz - z6.substanz)[0] : null;
       return et ? knopf("Umbau planen", `data-umbau="planen" data-id="${esc2(id)}" data-etage="${et.etage}"`, "zweit") : "";
     })()}</div>`;
     const qm2 = h4.flaechen.reduce((a2, f13) => a2 + f13.qm, 0);
     x2 += abschnitt("Etagen", fmt.format(qm2) + " qm Verkaufsfl\xE4che");
-    x2 += `<div class="hk-schnitt">${etagenschnitt(d4.etagen)}</div>`;
+    x2 += `<div class="hw-etagen">${etagenschnitt(d4.etagen)}</div>`;
     if (c.innen) x2 += c.innen;
     x2 += liste([...d4.etagen].sort((a2, e) => e.etage - a2.etage).map((e) => {
       const eqm = e.flaechen.reduce((a2, f13) => a2 + f13.qm, 0);
@@ -175265,7 +175266,7 @@ void main() {
       const namen = e.flaechen.map((f13) => f13.konzept === "untermiete" ? f13.mieter ?? "Untermieter" : f13.konzept === "leer" ? "Leerfl\xE4che" : f13.gruppe).filter(Boolean);
       const umbau = e.flaechen.some((f13) => f13.umbauBis !== void 0 && f13.umbauBis > s2.woche);
       return zeile({
-        was: `${etageLang(e.etage)}${umbau ? ' \xB7 <span class="hk-achtung">Umbau</span>' : ""}`,
+        was: `${etageLang(e.etage)}${umbau ? ' \xB7 <span class="hw-achtung">Umbau</span>' : ""}`,
         unter: esc2([...new Set(namen)].join(", ") || "keine Fl\xE4che") + " \xB7 " + fmt.format(eqm) + " qm",
         wert: umsatzQm ? fmt.format(Math.round(umsatzQm)) + " \u20AC" : "0 \u20AC",
         wertUnter: "je qm",
@@ -175286,7 +175287,7 @@ void main() {
         { label: "Frequenz", wert: fmt.format(Math.round(a2.frequenz)), unter: d1(a2.frequenz, v2?.frequenz) },
         { label: "Kaufquote", wert: PROZENT(a2.kaufquote), unter: d1(a2.kaufquote, v2?.kaufquote) },
         { label: "Bon", wert: geld(a2.bon), unter: d1(a2.bon, v2?.bon) }
-      ]).replace('class="hk-gross"', 'class="hk-gross klein"')}</div>`;
+      ])}</div>`;
     } else x2 += abschnitt("Umsatztreiber") + leer3("Frequenz, Kaufquote und Bon gibt es nach dem ersten Wochenabschluss.");
     if (d4.guv) x2 += guv(E9, d4.guv);
     x2 += abschnitt("Kunden und Standort");
@@ -175318,7 +175319,7 @@ void main() {
     x2 += liste(Object.entries(E9.FILIAL_PROGRAMME).map(([programm, def]) => {
       const st2 = d4.programme?.[programm];
       const status2 = st2 ? s2.woche < st2.wirksamAb ? "Anlauf bis KW " + ((st2.wirksamAb + 1 - 1) % 52 + 1) : "Wirksam" : def.vorlauf + " Wochen Vorlauf";
-      return `<div class="hk-zeile"><span class="hk-was">${esc2(def.name)}<small>${esc2(status2)} \xB7 ${esc2(def.nebenwirkung)}</small></span>${st2 ? marke4(s2.woche < st2.wirksamAb ? "Anlauf" : "Wirksam", "gut") : knopf("Starten", `onclick="filialProgramm('${programm}')"`, "zweit")}</div>`;
+      return `<div class="hw-zeile"><span class="hw-was">${esc2(def.name)}<small>${esc2(status2)} \xB7 ${esc2(def.nebenwirkung)}</small></span>${st2 ? marke4(s2.woche < st2.wirksamAb ? "Anlauf" : "Wirksam", "gut") : knopf("Starten", `onclick="filialProgramm('${programm}')"`, "zweit")}</div>`;
     }));
     return x2;
   }
@@ -175332,7 +175333,7 @@ void main() {
     const z6 = (id, name2, v2) => ({ name: name2, werte: [geld(v2), q2(v2), ref(id)], roh: [Math.round(v2), null, null], ton: [v2 < 0 ? "schlecht" : "", "", ""] });
     const sp6 = ["Woche", "Anteil", "Referenz"];
     const t1 = tabelle({
-      titel: "Filial-GuV",
+      titel: "Ertrag",
       spalten: sp6,
       zeilen: [z6("umsatz", "Umsatz", g2.umsatz), z6("wareneinsatz", "Wareneinsatz", -g2.wareneinsatz)],
       summe: z6("bruttogewinn", "Bruttogewinn", g2.bruttogewinn),
@@ -175340,34 +175341,33 @@ void main() {
     });
     const kosten2 = E9.GUV_KOSTEN.map((id) => z6(id, E9.REFERENZ_FILIAL_GUV.find((r4) => r4.id === id)?.name ?? id, -g2[id]));
     const t22 = tabelle({
+      titel: "Kosten",
       spalten: sp6,
       zeilen: [z6("bruttogewinn", "Bruttogewinn", g2.bruttogewinn), z6("uebrigeErtraege", "\xDCbrige betriebliche Ertr\xE4ge", g2.uebrigeErtraege), ...kosten2],
       summe: z6("ebitda", "EBITDA Filialebene", g2.ebitda),
       pruefen: true
     });
-    return `<div data-summen-name="Filial-GuV">${t1}<div style="height:12px"></div>${t22}</div>` + hinweis("Ohne Zentrale. Referenz: Anteil am Umsatz laut Vorgabe; Einzel-OPEX liegt 44,6 % unter Vorgabe, Total OPEX 42,4 %. Keine Ausgleichsbuchung.");
+    return abschnitt("Filial-GuV") + `<div data-summen-name="Filial-GuV">${t1}<div class="hw-abstand"></div>${t22}</div>` + hinweis("Ohne Zentrale. Referenz: Anteil am Umsatz laut Vorgabe; Einzel-OPEX liegt 44,6 % unter Vorgabe, Total OPEX 42,4 %. Keine Ausgleichsbuchung.");
   }
   function leitung2(c, h4, b4) {
     const l = b4?.leitungsdaten, id = h4.id;
-    let x2 = `<div class="hk-person-karte"><span class="hk-portraet">${filialleitungBild(h4, 104)}</span><div><b>${esc2(l?.name ?? "Nicht besetzt")}</b><small>Filialleitung ${esc2(h4.name)}</small><small>${geld(l?.gehalt ?? 0)} im Jahr \xB7 Bonus ${PROZENT(l?.bonusAnteil ?? 0)}</small>${l?.interimBis ? `<small class="hk-achtung">Interim bis KW ${l.interimBis % 52 + 1}</small>` : ""}</div></div>`;
-    x2 += abschnitt("F\xE4higkeiten");
-    x2 += Object.entries(l?.staerken ?? {}).map(([key, v2]) => skala(SCHWERPUNKT[key] ?? key, v2 * 100)).join("");
-    x2 += skala("Stimmung", l?.moral ?? 0) + skala("Ehrlichkeit", (l?.ehrlichkeit ?? 0) * 100);
+    let x2 = abschnitt("Filialleitung");
+    x2 += `<div class="hw-person"><div class="hw-portraet hw-kontur">${filialleitungBild(h4, 104)}</div><div class="hw-person-daten"><h3 class="hw-person-name">${esc2(l?.name ?? "Nicht besetzt")}</h3><span class="hw-marke">F\xE4higkeiten</span>${Object.entries(l?.staerken ?? {}).map(([key, v2]) => skala(SCHWERPUNKT[key] ?? key, v2 * 100)).join("")}${skala("Stimmung", l?.moral ?? 0)}${skala("Ehrlichkeit", (l?.ehrlichkeit ?? 0) * 100)}</div></div>`;
+    x2 += `<div class="hw-felder"><div class="hw-feld"><span class="hw-marke hw-feldname">Jahresgehalt</span><b class="hw-feldwert">${geld(l?.gehalt ?? 0)}</b><small class="hw-feldunter">Bonus ${PROZENT(l?.bonusAnteil ?? 0)}</small></div><div class="hw-feld"><span class="hw-marke hw-feldname">${l?.interimBis ? "Interim bis" : "Stellvertretung"}</span><b class="hw-feldwert">${l?.interimBis ? "KW " + (l.interimBis % 52 + 1) : esc2(l?.stellvertretung?.name ?? "nicht benannt")}</b><small class="hw-feldunter">${l?.interimBis ? "" : "Qualit\xE4t " + PROZENT(l?.stellvertretung?.qualitaet ?? 0)}</small></div></div>`;
     if ((l?.wechselwille ?? 0) > 0.3) x2 += hinweis(`Wechselwille ${PROZENT(l.wechselwille)}: Eine Haltepr\xE4mie senkt das Risiko.`, "achtung");
     else x2 += hinweis(`Wechselwille ${PROZENT(l?.wechselwille ?? 0)}.`);
-    x2 += liste([zeile({ was: "Stellvertretung", unter: l?.stellvertretung?.name ?? "nicht benannt", wert: PROZENT(l?.stellvertretung?.qualitaet ?? 0), wertUnter: "Qualit\xE4t" })]);
     x2 += abschnitt("F\xF6rdern", "eine St\xE4rke je Woche");
-    x2 += `<div class="hk-knopfreihe zweispaltig">${Object.keys(SCHWERPUNKT).map((key) => knopf(SCHWERPUNKT[key], tun("foerdern", id, key), "zweit")).join("")}</div>`;
-    x2 += `<div class="hk-knopfreihe">${knopf("Haltepr\xE4mie 10.000 \u20AC", tun("praemie", id), "zweit")}${knopf("Zur Clusterleitung bef\xF6rdern", tun("befoerdern", id), "zweit")}</div>`;
+    x2 += `<div class="hw-knoepfe zweispaltig">${Object.keys(SCHWERPUNKT).map((key) => knopf(SCHWERPUNKT[key], tun("foerdern", id, key), "zweit")).join("")}</div>`;
+    x2 += `<div class="hw-knoepfe zweispaltig">${knopf("Haltepr\xE4mie 10.000 \u20AC", tun("praemie", id), "zweit")}${knopf("Zur Clusterleitung bef\xF6rdern", tun("befoerdern", id), "zweit")}</div>`;
     x2 += abschnitt("Kandidaten \xFCber die Clusterleitung", `${b4?.kandidaten?.length ?? 0} Personen`);
-    x2 += b4?.kandidaten?.length ? liste(b4.kandidaten.map((k5, i) => `<div class="hk-zeile"><span class="hk-was">${esc2(k5.name)}<small>Kompetenz ${PROZENT(k5.qualitaet)} \xB7 ${geld(k5.gehalt)} im Jahr</small></span>${knopf("Einstellen", tun("ersetzen", id, "", i), "zweit")}</div>`)) : leer3("Die Clusterleitung hat gerade niemanden vorgeschlagen.");
+    x2 += b4?.kandidaten?.length ? liste(b4.kandidaten.map((k5, i) => `<div class="hw-zeile"><span class="hw-was">${esc2(k5.name)}<small>Kompetenz ${PROZENT(k5.qualitaet)} \xB7 ${geld(k5.gehalt)} im Jahr</small></span>${knopf("Einstellen", tun("ersetzen", id, "", i), "zweit")}</div>`)) : leer3("Die Clusterleitung hat gerade niemanden vorgeschlagen.");
     return x2;
   }
   function personal(c, h4, k5) {
     const v2 = h4.personal, ist = k5?.fteIst ?? 0, bedarf = k5?.fteBedarf ?? 0;
     let x2 = gross2([{ label: "Besetzt", wert: p(ist, 1) + " FTE", ton: bedarf && ist / bedarf < 0.92 ? "schlecht" : "" }, { label: "Bedarf", wert: p(bedarf, 1) + " FTE", unter: bedarf ? ist >= bedarf ? "gedeckt" : `<span class="schlecht">${p(bedarf - ist, 1)} FTE fehlen</span>` : "kein Bedarf ermittelt" }]);
     const slots = Math.max(1, Math.min(30, Math.round(bedarf / 5))), voll2 = Math.min(slots, Math.round(ist / 5));
-    x2 += `<div class="hk-figuren" role="img" aria-label="${voll2} von ${slots} Figuren besetzt, je 5 FTE">${Array.from({ length: slots }, (_, i) => `<i class="${i < voll2 ? "an" : ""}"></i>`).join("")}</div>`;
+    x2 += `<div class="hw-figuren" role="img" aria-label="${voll2} von ${slots} Figuren besetzt, je 5 FTE">${Array.from({ length: slots }, (_, i) => `<i class="${i < voll2 ? "an" : ""}"></i>`).join("")}</div>`;
     const summe2 = v2.vollzeit + v2.teilzeit + v2.aushilfen;
     x2 += tabelle({
       titel: "Vertr\xE4ge",
@@ -175406,18 +175406,18 @@ void main() {
   function partner(c, h4, b4) {
     const id = h4.id, std = b4?.standard;
     let x2 = abschnitt("Hausstandards", "Stufe 1 bis 3");
-    x2 += [["sauberkeit", "Sauberkeit"], ["praesentation", "Warenpr\xE4sentation"], ["kasse", "Kassenstandard"]].map(([key, name2]) => `<div class="hk-regel"><span>${name2}</span>${stepper({ wert: `Stufe ${p(std?.[key])}`, label: name2, attrMinus: tun("standard", id, key, -1), attrPlus: tun("standard", id, key, 1), minusAus: (std?.[key] ?? 1) <= 1, plusAus: (std?.[key] ?? 3) >= 3 })}</div>`).join("");
+    x2 += [["sauberkeit", "Sauberkeit"], ["praesentation", "Warenpr\xE4sentation"], ["kasse", "Kassenstandard"]].map(([key, name2]) => feld(name2, stepper({ wert: `Stufe ${p(std?.[key])}`, label: name2, attrMinus: tun("standard", id, key, -1), attrPlus: tun("standard", id, key, 1), minusAus: (std?.[key] ?? 1) <= 1, plusAus: (std?.[key] ?? 3) >= 3 }))).join("") + "</div>";
     x2 += abschnitt("\xD6ffnungszeiten", "gilt f\xFCr den Hauscluster");
-    x2 += [["von", "\xD6ffnung ab"], ["bis", "\xD6ffnung bis"], ["samstagBis", "Samstag bis"]].map(([feld2, titel]) => `<div class="hk-regel"><span>${titel}</span>${stepper({ wert: `${p(std?.oeffnung?.[feld2])} Uhr`, label: titel, attrMinus: tun("stunden", id, feld2, -1), attrPlus: tun("stunden", id, feld2, 1) })}</div>`).join("");
+    x2 += '<div class="hw-felder">' + [["von", "\xD6ffnung ab"], ["bis", "\xD6ffnung bis"], ["samstagBis", "Samstag bis"]].map(([feld3, titel]) => feld(titel, stepper({ wert: `${p(std?.oeffnung?.[feld3])} Uhr`, label: titel, attrMinus: tun("stunden", id, feld3, -1), attrPlus: tun("stunden", id, feld3, 1) }))).join("") + "</div>";
     x2 += abschnitt("Services");
     const services = Object.entries(b4?.services ?? {});
-    x2 += services.length ? liste(services.map(([key, an]) => schalter({ text: SERVICE[key] ?? key, unter: an ? "in diesem Haus aktiv" : "in diesem Haus aus", an, attr: tun("service", id, key, String(!an)) }))) + abschnitt("Services im ganzen Hauscluster") + `<div class="hk-knopfreihe q32-cluster">${services.map(([key, an]) => knopf(`${SERVICE[key] ?? key} ${an ? "\xFCberall aus" : "\xFCberall an"}`, tun("clusterservice", id, key, String(!an)), "zweit")).join("")}</div>` : leer3("Keine Services hinterlegt.");
+    x2 += services.length ? liste(services.map(([key, an]) => schalter({ text: SERVICE[key] ?? key, unter: an ? "in diesem Haus aktiv" : "in diesem Haus aus", an, attr: tun("service", id, key, String(!an)) }))) + abschnitt("Services im ganzen Hauscluster") + `<div class="hw-knoepfe zweispaltig q32-cluster">${services.map(([key, an]) => knopf(`${SERVICE[key] ?? key} ${an ? "\xFCberall aus" : "\xFCberall an"}`, tun("clusterservice", id, key, String(!an)), "zweit")).join("")}</div>` : leer3("Keine Services hinterlegt.");
     x2 += abschnitt("Gastronomie", p(b4?.restaurantQm) + " qm Restaurantfl\xE4che");
     x2 += seg([["selbst", "Selbst betreiben"], ["pacht", "Verpachten"]], b4?.gastro ?? "", (w2) => tun("gastro", id, w2));
     x2 += liste([zeile({ was: "Betriebsform", wert: b4?.gastro === "selbst" ? "Eigenbetrieb" : b4?.gastro === "pacht" ? "Verpachtet" : "Noch keine" }), zeile({ was: "Vertrag bis", wert: b4?.gastroVertragBis != null ? "KW " + (b4.gastroVertragBis % 52 + 1) : "ohne Vertrag" })]);
     x2 += abschnitt("Stadt und Sonntagsverkauf");
     x2 += liste([zeile({ was: "Umfeld", wert: esc2(b4?.umfeld?.ereignis ?? "Regul\xE4r") }), zeile({ was: "Innenstadtfrequenz", wert: PROZENT(b4?.umfeld?.trend ?? 1) })]);
-    x2 += `<div class="hk-knopfreihe">${knopf("Verkaufsoffenen Sonntag beantragen", tun("sonntag", id), "zweit")}</div>`;
+    x2 += knoepfe(knopf("Verkaufsoffenen Sonntag beantragen", tun("sonntag", id), "zweit breit"));
     const partnerZeilen = (b4?.flaechen ?? []).map((f13) => {
       const info = b4?.konzessionen?.[f13.id];
       return zeile({ was: (f13.konzept === "konzession" ? "Konzession " : "Untermiete ") + esc2(f13.gruppe ?? f13.mieter?.name ?? "ohne Namen"), wert: fmt.format(Math.round(f13.qm)) + " qm", wertUnter: info ? PROZENT(info.quote) + " Umsatzmiete" : "" });
@@ -175431,7 +175431,7 @@ void main() {
     const id = h4.id;
     let x2 = gross2([{ label: "Betriebskosten Woche", wert: geld(k5?.sonstige ?? 0) }, { label: "Energiepreis", wert: PROZENT(b4?.energiePreis ?? 1), unter: "zum Ausgangswert" }]);
     x2 += abschnitt("Budget je Posten", "100 % = Ausgangsbudget");
-    x2 += Object.entries(POSTEN2).map(([key, name2]) => `<div class="hk-regel"><span>${name2}</span>${stepper({ wert: PROZENT(b4?.kosten?.[key] ?? 1), unter: verbrauch(b4?.kostenIst?.[key]), label: name2, attrMinus: tun("kosten", id, key, -0.1), attrPlus: tun("kosten", id, key, 0.1) })}</div>`).join("");
+    x2 += '<div class="hw-felder">' + Object.entries(POSTEN2).map(([key, name2]) => feld(name2, stepper({ wert: PROZENT(b4?.kosten?.[key] ?? 1), unter: verbrauch(b4?.kostenIst?.[key]), label: name2, attrMinus: tun("kosten", id, key, -0.1), attrPlus: tun("kosten", id, key, 0.1) }))).join("") + "</div>";
     x2 += hinweis("Weniger Reinigung senkt den Kundenscore; weniger Sicherheit und Instandhaltung erh\xF6hen Betriebsrisiken.", "achtung");
     return x2;
   }
@@ -175440,7 +175440,7 @@ void main() {
     let x2 = abschnitt("Wochenkommentierung", "Abweichungen unter \u22125 %");
     x2 += b4?.kommentare?.length ? liste(b4.kommentare.map((q2) => zeile({ was: `KW ${q2.woche % 52 + 1} \xB7 ${esc2(GRUENDE[q2.grund] ?? q2.grund)}`, unter: esc2(MASS[q2.massnahme] ?? q2.massnahme) + " \xB7 " + esc2(q2.pruefung), wert: PROZENT(q2.abweichung), ton: q2.abweichung < 0 ? "schlecht" : "" }))) : leer3("Noch keine Abweichung unter \u22125 % zum Vorjahr oder Plan.");
     x2 += abschnitt("Ma\xDFnahme vor Ort");
-    x2 += `<div class="hk-knopfreihe zweispaltig">${Object.entries(MASS).map(([key, name2]) => knopf(name2, tun("massnahme", id, key), "zweit")).join("")}</div>`;
+    x2 += `<div class="hw-knoepfe zweispaltig">${Object.entries(MASS).map(([key, name2]) => knopf(name2, tun("massnahme", id, key), "zweit")).join("")}</div>`;
     return x2;
   }
   function hausBeobachtungHtml(liste3) {
@@ -175473,7 +175473,7 @@ void main() {
       const etagen = [...new Set(flaechen.map((f13) => f13.etage))].sort((a2, b4) => b4 - a2);
       x2 = etagen.map((nr4) => abschnitt(etageLang(nr4)) + liste(flaechen.filter((f13) => f13.etage === nr4).map((f13) => zeile({ was: esc2(f13.gruppe ?? f13.konzept), wert: fmt.format(f13.qm) + " qm" })))).join("");
     }
-    return bereich("haus") + sprecher({ text: `<b>${name2}-Standort.</b> F\xFCr dieses Format liegen noch keine Wochenzahlen vor.` }) + rumpf2(x2) + reiterUnten(tabs, auswahl4, (id) => `onclick="hausReiterWahl('${id}')"`).replace('class="hk-reiter"', 'class="hk-reiter haus-reiter"');
+    return bereich("haus") + sprecher({ text: `<b>${name2}-Standort.</b> F\xFCr dieses Format liegen noch keine Wochenzahlen vor.` }) + rumpf2(x2) + reiterUnten(tabs, auswahl4, (id) => `onclick="hausReiterWahl('${id}')"`).replace('class="hw-reiter"', 'class="hw-reiter haus-reiter"');
   }
 
   // src/ui/hausbesuch-navigation.js
@@ -176814,11 +176814,11 @@ void main() {
       haptik("tippen");
     }
     function oeffne() {
-      const feld2 = (d4) => {
+      const feld3 = (d4) => {
         const v2 = tonEinstellung(d4.schluessel), id = "ton-" + d4.schluessel;
         return '<label class="zeile" for="' + id + '" style="display:flex;align-items:center;gap:12px;min-height:48px"><span style="flex:1">' + d4.titel + (d4.art === "regler" ? ': <output id="' + id + '-wert">' + v2 + " %</output>" : "") + "</span>" + (d4.art === "schalter" ? '<input id="' + id + '" data-ton="' + d4.schluessel + '" type="checkbox" ' + (v2 ? "checked " : "") + 'aria-label="' + d4.titel + '">' : '<input id="' + id + '" data-ton="' + d4.schluessel + '" type="range" min="0" max="100" step="5" value="' + v2 + '" aria-label="' + d4.titel + '">') + "</label>";
       };
-      ctx.panel?.("Klang & Haptik", "Synthetische Kl\xE4nge \xB7 ger\xE4teweit", '<div class="karte">' + TON_SCHALTER.map(feld2).join("") + '</div><div class="karte"><p class="leise">Musik ist standardm\xE4\xDFig ausgeschaltet. Der iPhone-Stummschalter schaltet Web Audio nicht zuverl\xE4ssig stumm. Zum vollst\xE4ndigen Stummschalten die Regler hier ausschalten.</p><p class="leise">Haptik steht nicht auf allen Ger\xE4ten zur Verf\xFCgung.</p><button class="breit" data-ton-probe="erfolg">Klang testen</button></div>', "gross");
+      ctx.panel?.("Klang & Haptik", "Synthetische Kl\xE4nge \xB7 ger\xE4teweit", '<div class="karte">' + TON_SCHALTER.map(feld3).join("") + '</div><div class="karte"><p class="leise">Musik ist standardm\xE4\xDFig ausgeschaltet. Der iPhone-Stummschalter schaltet Web Audio nicht zuverl\xE4ssig stumm. Zum vollst\xE4ndigen Stummschalten die Regler hier ausschalten.</p><p class="leise">Haptik steht nicht auf allen Ger\xE4ten zur Verf\xFCgung.</p><button class="breit" data-ton-probe="erfolg">Klang testen</button></div>', "gross");
       uiAktiv = true;
     }
     function aendern(e) {
@@ -177791,13 +177791,13 @@ void main() {
       } catch (_) {
       }
     }
-    const feld2 = document.createElement("textarea");
-    feld2.value = text3;
-    feld2.style.cssText = "position:fixed;left:-9999px;top:0";
-    document.body.appendChild(feld2);
-    feld2.select();
+    const feld3 = document.createElement("textarea");
+    feld3.value = text3;
+    feld3.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(feld3);
+    feld3.select();
     const ok6 = document.execCommand("copy");
-    feld2.remove();
+    feld3.remove();
     if (!ok6) throw new Error("Kopieren nicht erlaubt. Bitte den Text im Berichtsfeld manuell kopieren.");
   }
   function werkzeugeModul(ctx) {
@@ -177881,11 +177881,11 @@ void main() {
     function zeigen(scroll = false) {
       if (!freigeschaltet || !ctx.s()) return;
       const sc = scroll ? inhalt.scrollTop : 0, s2 = ctx.s();
-      const stakeholder = Object.entries(s2.stakeholder).map(([feld2, wert]) => '<label class="test-eingabe">' + esc2(feld2) + ' <input type="number" min="0" max="100" step="1" data-test-stake="' + esc2(feld2) + '" value="' + Math.round(wert) + '"></label>').join("");
+      const stakeholder = Object.entries(s2.stakeholder).map(([feld3, wert]) => '<label class="test-eingabe">' + esc2(feld3) + ' <input type="number" min="0" max="100" step="1" data-test-stake="' + esc2(feld3) + '" value="' + Math.round(wert) + '"></label>').join("");
       const angebot = ctx.E.TEST_EREIGNISSE.filter((e) => e.id.startsWith("angebot:"));
       const ereignis = ctx.E.TEST_EREIGNISSE.filter((e) => !e.id.startsWith("angebot:"));
-      const knoepfe = (list) => list.map((e) => '<button type="button" data-test-ereignis="' + esc2(e.id) + '">' + esc2(e.name) + "</button>").join("");
-      const html = '<div class="testwerkzeuge"><div class="karte"><h3>Teststeuerung</h3><p class="leise">Nur f\xFCr Tests. \xC4nderungen markieren den Spielstand dauerhaft als Testspiel.</p><label><input id="test-bot" type="checkbox"' + (document.getElementById("test-bot")?.checked ? " checked" : "") + '> Bot C f\xFCr den Zeitsprung einsetzen</label><div class="test-tasten">' + [1, 4, 13, 52].map((n3) => '<button type="button" data-test-wochen="' + n3 + '">' + n3 + " Woche" + (n3 > 1 ? "n" : "") + "</button>").join("") + '</div><progress id="test-fortschritt" max="1" value="0" hidden></progress><div id="test-status" role="status"></div><label class="test-eingabe">Cash (\u20AC) <input id="test-cash" type="number" step="1" value="' + s2.cash + '"></label><button type="button" data-test-a="cash">Cash setzen</button> <button type="button" class="rot" data-test-a="insolvenz">Insolvenz er\xF6ffnen</button><h3>Stakeholder</h3><div class="test-felder">' + stakeholder + '</div><label class="test-eingabe">Schwierigkeit <select id="test-schwierigkeit">' + ["leicht", "mittel", "schwer"].map((v2) => '<option value="' + v2 + '"' + ((s2.schwierigkeit ?? "mittel") === v2 ? " selected" : "") + ">" + v2 + "</option>").join("") + '</select></label><button type="button" data-test-a="schwierigkeit">Schwierigkeit setzen</button></div><div class="karte"><h3>Angebote ausl\xF6sen</h3><div class="test-tasten">' + knoepfe(angebot) + '</div><h3>Ereignisse ausl\xF6sen</h3><div class="test-tasten">' + knoepfe(ereignis) + '</div></div><div class="karte"><h3>Live-Messung (letzte 2 Sekunden)</h3>' + zeigeMetrik("Bildrate Mittel", "fpsMittel", " FPS") + zeigeMetrik("Schlechteste Bildrate", "fpsSchlechteste", " FPS") + zeigeMetrik("Szenenteile", "teile", "") + zeigeMetrik("Engine letzte Woche", "engineMs", " ms") + zeigeMetrik("JS-Speicher", "speicherMiB", " MiB") + '</div><div class="karte"><h3>Fehlerbericht</h3><p class="leise">Enth\xE4lt den vollst\xE4ndigen Spielstand und Ger\xE4teinformationen. Nur an vertrauensw\xFCrdige Empf\xE4nger weitergeben.</p><button type="button" data-test-a="kopieren">Bericht kopieren</button> <button type="button" data-test-a="laden">Bericht laden</button><textarea id="test-bericht" rows="4" placeholder="Komprimierten Fehlerbericht hier einf\xFCgen" spellcheck="false"></textarea><small>' + fehler6.length + " Konsolenfehler gespeichert, 20 im Bericht</small></div></div>";
+      const knoepfe2 = (list) => list.map((e) => '<button type="button" data-test-ereignis="' + esc2(e.id) + '">' + esc2(e.name) + "</button>").join("");
+      const html = '<div class="testwerkzeuge"><div class="karte"><h3>Teststeuerung</h3><p class="leise">Nur f\xFCr Tests. \xC4nderungen markieren den Spielstand dauerhaft als Testspiel.</p><label><input id="test-bot" type="checkbox"' + (document.getElementById("test-bot")?.checked ? " checked" : "") + '> Bot C f\xFCr den Zeitsprung einsetzen</label><div class="test-tasten">' + [1, 4, 13, 52].map((n3) => '<button type="button" data-test-wochen="' + n3 + '">' + n3 + " Woche" + (n3 > 1 ? "n" : "") + "</button>").join("") + '</div><progress id="test-fortschritt" max="1" value="0" hidden></progress><div id="test-status" role="status"></div><label class="test-eingabe">Cash (\u20AC) <input id="test-cash" type="number" step="1" value="' + s2.cash + '"></label><button type="button" data-test-a="cash">Cash setzen</button> <button type="button" class="rot" data-test-a="insolvenz">Insolvenz er\xF6ffnen</button><h3>Stakeholder</h3><div class="test-felder">' + stakeholder + '</div><label class="test-eingabe">Schwierigkeit <select id="test-schwierigkeit">' + ["leicht", "mittel", "schwer"].map((v2) => '<option value="' + v2 + '"' + ((s2.schwierigkeit ?? "mittel") === v2 ? " selected" : "") + ">" + v2 + "</option>").join("") + '</select></label><button type="button" data-test-a="schwierigkeit">Schwierigkeit setzen</button></div><div class="karte"><h3>Angebote ausl\xF6sen</h3><div class="test-tasten">' + knoepfe2(angebot) + '</div><h3>Ereignisse ausl\xF6sen</h3><div class="test-tasten">' + knoepfe2(ereignis) + '</div></div><div class="karte"><h3>Live-Messung (letzte 2 Sekunden)</h3>' + zeigeMetrik("Bildrate Mittel", "fpsMittel", " FPS") + zeigeMetrik("Schlechteste Bildrate", "fpsSchlechteste", " FPS") + zeigeMetrik("Szenenteile", "teile", "") + zeigeMetrik("Engine letzte Woche", "engineMs", " ms") + zeigeMetrik("JS-Speicher", "speicherMiB", " MiB") + '</div><div class="karte"><h3>Fehlerbericht</h3><p class="leise">Enth\xE4lt den vollst\xE4ndigen Spielstand und Ger\xE4teinformationen. Nur an vertrauensw\xFCrdige Empf\xE4nger weitergeben.</p><button type="button" data-test-a="kopieren">Bericht kopieren</button> <button type="button" data-test-a="laden">Bericht laden</button><textarea id="test-bericht" rows="4" placeholder="Komprimierten Fehlerbericht hier einf\xFCgen" spellcheck="false"></textarea><small>' + fehler6.length + " Konsolenfehler gespeichert, 20 im Bericht</small></div></div>";
       ctx.panel("Testwerkzeuge", "Seed " + s2.seed + " \xB7 Woche " + s2.woche + " \xB7 Version " + s2.version, html, "gross");
       aktiv7 = true;
       inhalt.scrollTop = sc;
@@ -177965,8 +177965,8 @@ void main() {
     async function berichtKopieren() {
       const bericht2 = await erstelleBericht();
       berichteingabe = bericht2;
-      const feld2 = document.getElementById("test-bericht");
-      if (feld2) feld2.value = bericht2;
+      const feld3 = document.getElementById("test-bericht");
+      if (feld3) feld3.value = bericht2;
       await kopiereText(bericht2);
       ctx.meldung("Fehlerbericht kopiert (" + bericht2.length + " Zeichen).");
       return bericht2;
@@ -177988,9 +177988,9 @@ void main() {
     });
     inhalt.addEventListener("change", (e) => {
       if (!aktiv7) return;
-      const feld2 = e.target.dataset.testStake;
-      if (feld2 && e.target.validity.valid && e.target.value !== "")
-        sende({ typ: "testStakeholder", feld: feld2, wert: Number(e.target.value) });
+      const feld3 = e.target.dataset.testStake;
+      if (feld3 && e.target.validity.valid && e.target.value !== "")
+        sende({ typ: "testStakeholder", feld: feld3, wert: Number(e.target.value) });
     });
     inhalt.addEventListener("click", async (e) => {
       if (!aktiv7 || beschaeftigt) return;
@@ -178174,7 +178174,7 @@ void main() {
     function zeile4(t5, wert) {
       return '<div class="zeile"><span class="was">' + esc2(t5) + '</span><b class="uq" style="min-width:90px">' + esc2(String(wert)) + "</b></div>";
     }
-    function balken7(w2) {
+    function balken8(w2) {
       return '<div class="it-fortschritt"><i style="width:' + Math.max(0, Math.min(100, Math.round(w2 * 100))) + '%"></i></div>';
     }
     function reiter() {
@@ -178213,7 +178213,7 @@ void main() {
     }
     function projektKarte(p2, d4) {
       let h4 = '<div class="karte"><div class="khead">' + esc2(E9.SYSTEME[p2.system].name) + "<small>Generation " + p2.zielGeneration + " \xB7 " + esc2(artName[p2.art]) + "</small></div>";
-      h4 += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent6(p2.fortschritt) + "</b></div>" + balken7(p2.fortschritt);
+      h4 += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent6(p2.fortschritt) + "</b></div>" + balken8(p2.fortschritt);
       h4 += zeile4("Kosten Ist / Plan", geld(p2.kostenIst) + " / " + geld(p2.kostenPlan));
       h4 += zeile4("Mehrwochen durch Verzug", p2.verzug);
       h4 += zeile4("Rollout", p2.erledigteCluster.length + " / " + p2.clusterIds.length + " Cluster");
@@ -178887,6 +178887,11 @@ void main() {
     return box && !box.isEmpty() ? box.getCenter(new three_module_exports.Vector3()) : null;
   }
   function hausFokusPixel(w2, h4) {
+    const f13 = document.querySelector("#panel.offen .hw-fenster");
+    if (f13) {
+      const r4 = f13.getBoundingClientRect(), pr2 = $2("panel").getBoundingClientRect(), c = canvas.getBoundingClientRect();
+      return { x: r4.left - c.left + r4.width / 2, y: r4.top - pr2.top - c.top + r4.height * 0.55, hoehe: r4.height };
+    }
     const frei6 = Math.max(140, h4 - Math.min($2("panel").offsetHeight || h4 * 0.62, h4 * 0.62));
     const oben = Math.min(70, frei6 * 0.35);
     return { x: w2 / 2, y: (oben + frei6 - 12) / 2 };
@@ -179748,6 +179753,7 @@ void main() {
     $2("ptitel").textContent = titel;
     $2("punter").textContent = unter;
     $2("pinhalt").innerHTML = html;
+    huelleOrdnen();
     const neu3 = !$2("panel").classList.contains("offen");
     if (neu3) vorherigerFokus = document.activeElement;
     $2("panel").inert = false;
@@ -179756,6 +179762,23 @@ void main() {
     document.body.classList.add("panel-offen");
     if (neu3) $2("ptitel").focus({ preventScroll: true });
   }
+  function huelleOrdnen() {
+    const p2 = $2("panel"), inhalt = $2("pinhalt");
+    const marker2 = inhalt.querySelector(".hk-bereich");
+    p2.dataset.bereich = marker2?.dataset.bereich ?? "betrieb";
+    $2("psymbol").innerHTML = SYMBOLE[marker2?.dataset.symbol] ?? SYMBOLE.zentrale;
+    for (const [slot4, sel, klasse] of [["psprecher", ":scope > .hw-sprecher, :scope > * > .hw-sprecher", "mit-sprecher"], ["preiter", ".hw-reiter", "mit-reiter"]]) {
+      const el2 = inhalt.querySelector(sel), ziel = $2(slot4);
+      if (el2) ziel.replaceChildren(el2);
+      else ziel.replaceChildren();
+      ziel.hidden = !el2;
+      p2.classList.toggle(klasse, !!el2);
+    }
+    p2.classList.toggle("mit-fenster", !!inhalt.querySelector(".hw-fenster"));
+    huellenBeobachter.takeRecords();
+  }
+  var huellenBeobachter = new MutationObserver(() => huelleOrdnen());
+  huellenBeobachter.observe($2("pinhalt"), { childList: true });
   function schliessePanel() {
     kameraZiel = null;
     for (const m of module2()) m.zu();
@@ -179786,7 +179809,7 @@ void main() {
     const x2 = sb?.haeuser.get(id);
     const b4 = x2?.gruppe ? new three_module_exports.Box3().setFromObject(x2.gruppe) : sb?.statischeHaeuser.get(id)?.bounds;
     if (b4 && !b4.isEmpty()) {
-      const [w2, h4] = groesse(), frei6 = hausFokusPixel(w2, h4).y * 2 - 70 + 12;
+      const [w2, h4] = groesse(), fp = hausFokusPixel(w2, h4), frei6 = fp.hoehe ? fp.hoehe + 58 : fp.y * 2 - 70 + 12;
       const ecken = [];
       for (const xx of [b4.min.x, b4.max.x]) for (const yy of [b4.min.y, b4.max.y])
         for (const zz of [b4.min.z, b4.max.z]) ecken.push(new three_module_exports.Vector3(xx, yy, zz).project(cam));

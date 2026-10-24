@@ -1,3 +1,5 @@
+// E47: zulässige Schriftgrößen der Oberfläche (hartwig.css, aus Coffee 2 vermessen).
+const SKALA = [9.6, 10.2, 10.4, 10.6, 11.6, 11.8, 11.85, 12, 12.3, 12.4, 13.2, 13.5, 13.95, 14.2, 14.4, 14.6, 15, 15.25, 17.5, 18.3, 19, 24.75];
 // Q30 Stilprüfung: verbotene Muster als Skript (GESTALTUNG-UI.md). Läuft im Browser auf berechneten Stilen.
 // Wird von tests/q30-panels.cjs und spiel-render.js --nur-panels in die Seite geladen (nicht im Spiel gebündelt).
 // window.hartwigStilpruefung(selektor) → Liste von Verstößen als Text (leer = bestanden).
@@ -87,8 +89,11 @@
           if (!streifen) v.add(`Verlauf: ${name(el)}`);
         }
         if (/blur/.test(st.backdropFilter || st.webkitBackdropFilter || '')) v.add(`Glas (backdrop-filter): ${name(el)}`);
-        // 3. Schrift unter 12 px
-        if (eigenerText(el) && parseFloat(st.fontSize) < 11.95) v.add(`Schrift ${parseFloat(st.fontSize)} px: ${name(el)}`);
+        // 3. E47: Schriftgröße nur aus der vermessenen Skala (hartwig.css), keine freien Größen; nie unter 9,5 px.
+        if (eigenerText(el)) {
+          const gr = parseFloat(st.fontSize), imBlatt = !!el.closest?.('#panel.hw');
+          if (gr < 9.5 || (imBlatt && !SKALA.some((x) => Math.abs(x - gr) < 0.06))) v.add(`Schrift ${gr} px nicht aus der Skala: ${name(el)}`);
+        }
         // 4. Touch-Ziel unter 44 px
         if (el.matches(TIPPBAR) && !el.disabled) {
           const r = el.getBoundingClientRect();
