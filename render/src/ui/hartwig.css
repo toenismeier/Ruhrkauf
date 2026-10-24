@@ -339,6 +339,7 @@ button.hw-g2-reihe { min-height: 44px; }
 .hw-g2-name small { display: block; margin-top: 1px; font: var(--hw-t-klein); color: var(--leise); }
 .hw-g2-w { flex: 0 0 var(--sw, 84px); text-align: right; white-space: nowrap; color: var(--text); }
 .hw-g2-w.hw-achtung { color: var(--stern); }
+.hw-g2-w.hw-leise { color: var(--leise); }
 .hw-g2-auf { flex: 0 0 10px; font-style: normal; color: var(--leise); }
 .hw-g2-sort { min-height: 44px; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: right; }
 .hw-g2-name.hw-g2-sort { text-align: left; align-items: flex-end; padding-bottom: 0; }

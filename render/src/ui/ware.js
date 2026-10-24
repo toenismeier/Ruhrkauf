@@ -89,7 +89,7 @@ export function warenSeite(ctx, ui, tabs) {
   const reihen = [...d.kalender].sort((a, b) => b.stufe - a.stufe || b.abverkauf - a.abverkauf);
   x += B.buch({ titel: 'Warengruppe', spalten: ['Abverkauf', 'Stufe'], breite: 80, zeilen: reihen.map((k) => B.reihe({
     name: esc(k.name), unter: `Reduzierung ${esc(STRATEGIE[k.strategie] ?? k.strategie)}`,
-    werte: [{ t: proz(k.abverkauf), p: `ware:kal:${k.wg}` }, { t: STUFE(k), ton: k.stufe === 1 ? 'schlecht' : k.stufe > 0 ? 'achtung' : '' }] })) });
+    werte: [{ t: proz(k.abverkauf), p: `ware:kal:${k.wg}` }, { t: STUFE(k), ton: k.stufe === 1 ? 'schlecht' : k.stufe > 0 ? 'achtung' : 'leise' }] })) });
   x += B.fuss('Stufen −20 %, −30 %, −50 %, dann Räumung, jeweils beim Überschreiten der Abverkaufsstufe. Mid-Season-Sales laufen über den Aktionskalender.');
   x += K.abschnitt('Lokaler Spielraum', 'höchstens 10 Punkte');
   x += B.felder(K.feld('Hauscluster', B.auswahl(cluster, w.von, 'data-a="wareVon"', 'Hauscluster')), K.feld('Bereich', B.auswahl(gruppen, w.gruppe, 'data-a="wareGruppe"', 'Bereich')));

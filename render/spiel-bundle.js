@@ -161300,7 +161300,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "6b5d6b7" : "Entwicklung";
+  var version = () => true ? "a07be8d" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -162641,7 +162641,7 @@ void main() {
     x2 += buch({ titel: "Warengruppe", spalten: ["Abverkauf", "Stufe"], breite: 80, zeilen: reihen.map((k5) => reihe({
       name: esc2(k5.name),
       unter: `Reduzierung ${esc2(STRATEGIE[k5.strategie] ?? k5.strategie)}`,
-      werte: [{ t: proz(k5.abverkauf), p: `ware:kal:${k5.wg}` }, { t: STUFE(k5), ton: k5.stufe === 1 ? "schlecht" : k5.stufe > 0 ? "achtung" : "" }]
+      werte: [{ t: proz(k5.abverkauf), p: `ware:kal:${k5.wg}` }, { t: STUFE(k5), ton: k5.stufe === 1 ? "schlecht" : k5.stufe > 0 ? "achtung" : "leise" }]
     })) });
     x2 += fuss("Stufen \u221220 %, \u221230 %, \u221250 %, dann R\xE4umung, jeweils beim \xDCberschreiten der Abverkaufsstufe. Mid-Season-Sales laufen \xFCber den Aktionskalender.");
     x2 += abschnitt("Lokaler Spielraum", "h\xF6chstens 10 Punkte");
