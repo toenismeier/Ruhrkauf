@@ -30,7 +30,7 @@ import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
 import { vorstandModul } from './ui/vorstand.js';
 // O01 Organisation
 import { organisationModul } from './ui/organisation.js';
-import { zentraleAbteilungHtml } from './ui/zentrale-abteilungen.js';
+import { zentraleAbteilungHtml, zentraleHtml } from './ui/zentrale-abteilungen.js';
 import { posteingangModul } from './ui/posteingang.js';
 import { zeitungModul } from './ui/zeitung.js';
 import { statistikModul } from './ui/statistik.js';
@@ -61,12 +61,13 @@ import { planungModul } from './ui/planung.js';
 // O07 Haus
 import { hausDetailHtml, hausBeobachtungHtml, hausReportingHtml, hausStatischHtml } from './ui/haus.js';
 import * as HK from './ui/komponenten.js';
+import { symboleEinsetzen, FORMAT_SYMBOL, SYM } from './ui/kartenoberflaeche.js';
 // O04 Personal
 import { personalModul } from './ui/personaleinsatz.js';
 
 const param = new URLSearchParams(location.search);
 // Test- und Entwicklungssteuerung ist außerhalb von ?dev=1 unsichtbar.
-if (param.get('dev') === '1') document.querySelector('.botwahl')?.style.setProperty('display', 'flex');
+if (param.get('dev') === '1') document.querySelector('.hw-g6-bot')?.classList.add('an');
 const $ = (id) => document.getElementById(id);
 const messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
 let speicherTimer = null;
@@ -117,12 +118,15 @@ const STATUS_HAUS = { offen: 'Offen', schliessung_verhandlung: 'Schließung in V
 
 // ─────────────────────────────────────────── Szene und Kamera
 const canvas = $('karte');
-// Sparsames Profil fuer kleine Touch-Geraete: weniger Framebuffer-Pixel, kein teurer Schattenpass.
-// Fuer A/B-Vergleiche kann ?grafik=hoch bzw. ?grafik=sparsam gesetzt werden.
+// Bildschärfe (E47): auch auf dem iPhone volle Kantenglättung und Pixeldichte 2. Das Telefon spart nur am
+// Schattenpass und an den Figuren (leben.js), nie an der Schärfe. ?grafik=sparsam bleibt als Notprofil,
+// ?grafik=hoch schaltet auch auf Touchgeräten die Schatten ein.
 const touchMobil = (navigator.maxTouchPoints > 0 && window.innerWidth <= 650) || /iPhone|iPod|Android/i.test(navigator.userAgent);
-const sparsam = param.get('grafik') === 'sparsam' || (touchMobil && param.get('grafik') !== 'hoch');
-const ren = new THREE.WebGLRenderer({ canvas, antialias: !sparsam, preserveDrawingBuffer: true });
-ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, sparsam ? 1.25 : 2));
+const notprofil = param.get('grafik') === 'sparsam';
+const sparsam = notprofil || (touchMobil && param.get('grafik') !== 'hoch');
+const PIXELDICHTE = Math.min(window.devicePixelRatio || 1, notprofil ? 1.25 : 2);
+const ren = new THREE.WebGLRenderer({ canvas, antialias: !notprofil, preserveDrawingBuffer: true });
+ren.setPixelRatio(PIXELDICHTE);
 ren.outputColorSpace = THREE.SRGBColorSpace;
 ren.shadowMap.enabled = !sparsam;
 ren.shadowMap.type = THREE.PCFShadowMap;
@@ -162,6 +166,12 @@ function hausKameraPunkt(id) {
 }
 /** Mitte der sichtbaren Kartenfläche oberhalb des Hausdetails, nicht des vom Sheet verdeckten Canvas. */
 function hausFokusPixel(w, h) {
+  // E47: Im Blatt mit Fenster liegt das Haus mittig im Fenster.
+  const f = document.querySelector('#panel.offen .hw-fenster');
+  if (f) { // Lage relativ zum Blatt, damit die Einblendbewegung (transform) nicht mitzählt; das Blatt endet oben bei 0.
+    const r = f.getBoundingClientRect(), pr = $('panel').getBoundingClientRect(), c = canvas.getBoundingClientRect();
+    return { x: r.left - c.left + r.width / 2, y: r.top - pr.top - c.top + r.height * 0.55, hoehe: r.height };
+  }
   const frei = Math.max(140, h - Math.min($('panel').offsetHeight || h * 0.62, h * 0.62));
   const oben = Math.min(70, frei * 0.35);
   return { x: w / 2, y: (oben + frei - 12) / 2 };
@@ -306,7 +316,7 @@ function tippPunkt(id) {
   for (const v of kand) {
     v.project(cam);
     const px = r.left + (v.x + 1) / 2 * r.width, py = r.top + (1 - v.y) / 2 * r.height;
-    if (px > 10 && px < r.width - 10 && py > 160 && py < r.height - 120 && hausUnter(px, py) === id) return { x: px, y: py };
+    if (px > 10 && px < r.width - 10 && py > 160 && py < r.height - 120 && document.elementFromPoint(px, py) === canvas && hausUnter(px, py) === id) return { x: px, y: py };
   }
   return null;
 }
@@ -445,8 +455,8 @@ function bahnhofFokussieren() {
 
 function stadtchipSetzen(name) {
   $('stadtname').textContent = name;
-  // Lange Namen (Mönchengladbach) ohne Umbruch: Schrift stufenweise verkleinern.
-  $('stadtname').style.fontSize = name.length > 13 ? '11px' : name.length > 10 ? '12.5px' : '';
+  // Lange Namen (Mönchengladbach) ohne Umbruch: Stufe der Schriftskala in hartwig.css (G6) wählen.
+  $('stadtname').dataset.laenge = name.length > 13 ? 'lang' : name.length > 10 ? 'mittel' : '';
   const region = E.stadtRegion(name) ?? s.haeuser.find((h) => h.stadt === name)?.region;
   $('stadtcluster').textContent = region ? 'Region ' + region : '';
 }
@@ -743,22 +753,44 @@ const MERK = new Map();
 function merk() { return MERK; }
 
 // ─────────────────────────────────────────── Cockpit
-/** Schnelle Stadtnavigation über alle eigenen Häuser und die Konkurrenz. */
+/** G6 (Coffee 16): Ebenenliste links. Häuser der Stadt nach Format mit isometrischem Symbol, dazu die Konkurrenz
+ *  und die Beobachtungsliste. Ersetzt die Häuserleiste über der Karte (Q07), damit die Stadt frei bleibt. */
+const EBENEN_STATUS = { offen: 'Geöffnet', schliessung_verhandlung: 'Schließung in Verhandlung', raeumung: 'Räumungsverkauf', geschlossen: 'Geschlossen', verkauft: 'Verkauft' };
+const EBENEN_FORMATE = [['hartwig', 'Hartwig'], ['premium', 'Premium'], ['sport', 'Hartwig Sport'], ['volkskauf', 'Volkskauf'], ['fundus', 'FUNDUS']];
 function stadtChipsZeigen() {
   if (!s || !stadtName) return;
   const hs = E.portfolio(s).filter((h) => h.stadt === stadtName);
   const konkurrenz = E.wettbewerbFuerGrafik(s, stadtName).filter((w) => w.status !== 'geschlossen');
-  $('stadt-chips').innerHTML = hs.map((h) => '<button class="' + h.formatKey +
-    '" data-stadthaus="' + esc(h.id) + '" title="' + esc(h.name) + '">' +
-    esc(h.name) + '</button>').join('') +
-    konkurrenz.map((w) => '<button data-stadtwb="' + esc(w.id) + '" title="Wettbewerber: ' +
-    esc(w.name) + '">Konkurrenz: ' + esc(w.name) + '</button>').join('');
+  const ausnahmen = E.hausBeobachtung(s, 30).length;
+  const kopf = (sym, name, n) => `<h3 class="hw-g6-ebene"><span class="hw-g6-sym" data-sym="${sym}"></span><span>${esc(name)}</span><small>${n}</small></h3>`;
+  let h = `<h2 class="hw-g6-blatttitel">${esc(stadtName)}</h2>`;
+  h += HK.liste([HK.zeile({ was: 'Beobachtungsliste', unter: ausnahmen ? ausnahmen + ' Häuser mit Ausnahmen' : 'keine Ausnahmen im Hausbetrieb', tippbar: true, attr: 'data-ebene-beobachtung' })]);
+  for (const [key, name] of EBENEN_FORMATE) {
+    const liste = hs.filter((x) => x.formatKey === key);
+    if (!liste.length) continue;
+    h += kopf(FORMAT_SYMBOL[key], name, liste.length) + HK.liste(liste.map((x) => HK.zeile({ was: esc(x.name),
+      unter: esc(EBENEN_STATUS[x.status] ?? x.status) + (x.status === 'offen' ? ' · Umsatz ' + geld(x.umsatz) : ''), tippbar: true, attr: `data-stadthaus="${esc(x.id)}"` })));
+  }
+  if (!hs.length) h += HK.leer('In dieser Stadt betreibt der Konzern kein Haus.');
+  h += kopf('wettbewerber', 'Konkurrenz', konkurrenz.length) + (konkurrenz.length
+    ? HK.liste(konkurrenz.map((w) => HK.zeile({ was: esc(w.name), unter: esc(WB_ART[w.art] ?? w.art) + ' · ' + esc(WB_STATUS[w.status] ?? w.status), tippbar: true, attr: `data-stadtwb="${esc(w.id)}"` })))
+    : HK.leer('Keine Wettbewerber in dieser Stadt.'));
+  $('ebenen-inhalt').innerHTML = h;
+  symboleEinsetzen($('ebenen-inhalt'));
 }
-$('stadt-chips').addEventListener('click', (e) => {
+$('ebenen-inhalt').addEventListener('click', (e) => {
   const h = e.target.closest('[data-stadthaus]'), w = e.target.closest('[data-stadtwb]');
-  if (h) oeffneHaus(h.dataset.stadthaus);
-  else if (w) oeffneWettbewerber(w.dataset.stadtwb);
+  if (h) { ebenenZu(); oeffneHaus(h.dataset.stadthaus); }
+  else if (w) { ebenenZu(); oeffneWettbewerber(w.dataset.stadtwb); }
+  else if (e.target.closest('[data-ebene-beobachtung]')) { ebenenZu(); oeffneBeobachtung(); }
 });
+function ebenenZu() { $('ebenen').classList.remove('offen'); $('ebenen').inert = true; $('ebenenknopf').setAttribute('aria-expanded', 'false'); }
+$('ebenenknopf').addEventListener('click', () => {
+  const o = !$('ebenen').classList.contains('offen');
+  if (o) { schliessePanel(); menueZu(); stadtChipsZeigen(); }
+  $('ebenen').classList.toggle('offen', o); $('ebenen').inert = !o; $('ebenenknopf').setAttribute('aria-expanded', String(o));
+});
+$('ebenen').addEventListener('click', (e) => { if (e.target === $('ebenen')) ebenenZu(); });
 /** Orte ohne bereits neu erzeugte Render-JSON bleiben über die Portfolio-Daten nutzbar. */
 function portfolioStadtOeffnen(name, id) {
   if (STADTLISTE.some((stadt) => stadt.name === name)) {
@@ -780,12 +812,15 @@ function portfolioStadtOeffnen(name, id) {
 
 function cockpitZeigen() {
   const c = E.cockpit(s);
-  const kachel = (titel, wert, ton = '') => `<div class="kz ${ton}"><span>${titel}</span><b>${wert}</b></div>`;
+  // G6 (Coffee 15): Kasse steht in der Firmenpille oben links, die übrigen Kennzahlen in einer eingeklappten Zeile.
+  $('kasse').textContent = c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash);
+  $('kasse').classList.toggle('hw-schlecht', !c.geldUnbegrenzt && c.cash < 0);
+  const kachel = (titel, wert, ton = '') => `<div class="hw-g6-kz${ton ? ' hw-' + ton : ''}"><span class="hw-marke">${titel}</span><b>${wert}</b></div>`;
   // Formatfilter ohne zusätzliche Zeilen: das Cockpit darf auf dem iPhone nicht wachsen
   // (es überdeckt sonst die Karte). Auswahl im Titel der Umsatz-Kachel.
   const FORMATNAME = { alle: 'Alle', warenhaus: 'Hartwig', sport: 'Sport', schwester: 'Volkskauf', outlet: 'FUNDUS' };
   const fx = cockpitFormat === 'alle' ? null : c.formate.find((x) => x.format === cockpitFormat);
-  const auswahl = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME)
+  const auswahl = '<select class="hw-g6-kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME)
     .filter(([id]) => id === 'alle' || c.formate.some((x) => x.format === id && x.haeuser))
     .map(([id, name]) => '<option value="' + id + '"' + (id === cockpitFormat ? ' selected' : '') + '>' + name + '</option>').join('') + '</select>';
   // Q32: höchstens ein Sechstel der Höhe. Eingeklappt eine Zeile (Cash, EBITDA, Umsatz), der Knopf rechts klappt
@@ -793,26 +828,21 @@ function cockpitZeigen() {
   const zu = !cockpitOffen;
   $('cockpit').classList.toggle('offen', cockpitOffen);
   $('cockpit').innerHTML = [
-    kachel('Cash', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? 'rot' : ''),
     // Q35: vor der ersten Woche Werte aus dem Vorlauf (Vorjahreswochen des Vorgängers), nicht „noch offen“.
-    fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], geld(fx.ebitda), fx.ebitda < 0 ? 'rot' : 'gruen')
-      : kachel('EBITDA 13 Wo.', geld(c.ebitda13), c.ebitda13 < 0 ? 'rot' : 'gruen'),
-    kachel('Umsatz<em> · ' + FORMATNAME[cockpitFormat] + '</em>' + auswahl, geld(fx ? fx.umsatz : c.umsatzWoche), 'mitwahl'),
-    `<button type="button" class="kz-mehr" data-cockpit-mehr aria-expanded="${cockpitOffen}" aria-label="${zu ? 'Weitere Kennzahlen zeigen' : 'Weitere Kennzahlen ausblenden'}"><span aria-hidden="true">${zu ? '▾' : '▴'}</span></button>`,
-    kachel('Kreditrahmen frei', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? 'rot' : ''),
-    kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
-    kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
+    fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], geld(fx.ebitda), fx.ebitda < 0 ? 'schlecht' : 'gut')
+      : kachel('EBITDA 13 Wo.', geld(c.ebitda13), c.ebitda13 < 0 ? 'schlecht' : 'gut'),
+    kachel('Umsatz<em> · ' + FORMATNAME[cockpitFormat] + '</em>' + auswahl, geld(fx ? fx.umsatz : c.umsatzWoche)),
+    `<button type="button" class="hw-g6-mehr" data-cockpit-mehr aria-expanded="${cockpitOffen}" aria-label="${zu ? 'Weitere Kennzahlen zeigen' : 'Weitere Kennzahlen ausblenden'}"></button>`,
+    kachel('Kredit frei', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? 'schlecht' : ''),
+    kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'schlecht' : ''),
+    kachel('Image', `${c.image} / 100`, c.image < 35 ? 'schlecht' : ''),
   ].join('');
   $('cockpit').querySelector('[data-cockpit-mehr]')?.addEventListener('click', () => { cockpitOffen = !cockpitOffen; cockpitZeigen(); });
-  // Lange Beträge (z. B. −140,7 Mio. €) passen sich der Kachel an statt umzubrechen; nie unter 12 px.
-  for (const w of $('cockpit').querySelectorAll('.kz b')) { w.style.fontSize = ''; let g = parseFloat(getComputedStyle(w).fontSize); while (w.scrollWidth > w.clientWidth + 0.5 && g > 12) { g -= 0.5; w.style.setProperty('font-size', g + 'px', 'important'); } }
   $('cockpit').querySelector('[data-cockpit-format]')?.addEventListener('change', (e) => { cockpitFormat = e.target.value; cockpitZeigen(); });
-  // O07 Haus: Ausnahme-Kachel im Cockpit.
-  const ausnahmen = E.hausBeobachtung(s, 30).length;
-  $('hausbeobachtung').textContent = ausnahmen ? ausnahmen + ' Häuser beobachten →' : 'Hausbetrieb: keine Ausnahmen';
   $('kw').textContent = `KW ${c.kw} / ${c.jahr}`;
   $('phase').textContent = [c.phase === 'insolvenz' ? 'Insolvenzverfahren' : c.phase === 'zerschlagen' ? 'Zerschlagen' : '', s.testGenutzt ? 'Testspiel' : ''].filter(Boolean).join(' · ');
-  $('phase').style.display = c.phase === 'regulaer' && !s.testGenutzt ? 'none' : '';
+  $('phase').hidden = c.phase === 'regulaer' && !s.testGenutzt;
+  if ($('ebenen').classList.contains('offen')) stadtChipsZeigen();
 }
 
 // ─────────────────────────────────────────── Woche weiter
@@ -878,12 +908,13 @@ let ch = null;
 const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt, ch, ec, pp].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
-  menueZu();
+  menueZu(); ebenenZu();
   $('panel').classList.toggle('gross', klasse === 'gross');
   $('panel').classList.toggle('hausdetail', klasse === 'hausdetail');
   $('ptitel').textContent = titel;
   $('punter').textContent = unter;
   $('pinhalt').innerHTML = html;
+  huelleOrdnen();
   const neu = !$('panel').classList.contains('offen');
   if (neu) vorherigerFokus = document.activeElement;
   $('panel').inert = false;
@@ -892,6 +923,23 @@ function panel(titel, unter, html, klasse = '') {
   document.body.classList.add('panel-offen');
   if (neu) $('ptitel').focus({ preventScroll: true });
 }
+/** E47: Bereich, Kopfsymbol, Sprecher und Reiterleiste aus dem Inhalt in die festen Lagen des Blatts heben.
+ *  Läuft nach jedem Neuzeichnen von #pinhalt; ein Inhalt ohne Sprecher oder Reiter leert die jeweilige Lage. */
+function huelleOrdnen() {
+  const p = $('panel'), inhalt = $('pinhalt');
+  const marker = inhalt.querySelector('.hk-bereich');
+  p.dataset.bereich = marker?.dataset.bereich ?? 'betrieb';
+  $('psymbol').innerHTML = SYM[marker?.dataset.symbol] ?? HK.SYMBOLE.zentrale;
+  for (const [slot, sel, klasse] of [['psprecher', ':scope > .hw-sprecher, :scope > * > .hw-sprecher', 'mit-sprecher'], ['preiter', '.hw-reiter', 'mit-reiter']]) {
+    const el = inhalt.querySelector(sel), ziel = $(slot);
+    if (el) ziel.replaceChildren(el); else ziel.replaceChildren();
+    ziel.hidden = !el; p.classList.toggle(klasse, !!el);
+  }
+  p.classList.toggle('mit-fenster', !!inhalt.querySelector('.hw-fenster'));
+  huellenBeobachter.takeRecords(); // eigene Umhängungen nicht erneut auswerten
+}
+const huellenBeobachter = new MutationObserver(() => huelleOrdnen());
+huellenBeobachter.observe($('pinhalt'), { childList: true });
 function schliessePanel() { kameraZiel = null; for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; hqAbteilung = null; hqEtageWahl = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
 const szenarienUI = szenarienModul({ E, spiel: () => s, wahl: () => startWahl, panel, meldung, stufenAktualisieren: zeichneStufen, nachAktion: () => { cockpitZeigen(); szenarienUI.aktualisieren(); automatischSpeichern(); } });
 /** Q10: Neues Haus bewusst fokussieren; spätere Renderläufe erhalten das Ziel. */
@@ -906,7 +954,7 @@ function hausZeigen(id) {
   const x = sb?.haeuser.get(id);
   const b = x?.gruppe ? new THREE.Box3().setFromObject(x.gruppe) : sb?.statischeHaeuser.get(id)?.bounds;
   if (b && !b.isEmpty()) {
-    const [w, h] = groesse(), frei = hausFokusPixel(w, h).y * 2 - 70 + 12;
+    const [w, h] = groesse(), fp = hausFokusPixel(w, h), frei = fp.hoehe ? fp.hoehe + 58 : fp.y * 2 - 70 + 12;
     const ecken = [];
     for (const xx of [b.min.x, b.max.x]) for (const yy of [b.min.y, b.max.y])
       for (const zz of [b.min.z, b.max.z]) ecken.push(new THREE.Vector3(xx, yy, zz).project(cam));
@@ -917,8 +965,8 @@ function hausZeigen(id) {
   }
 }
 $('pzu').addEventListener('click', schliessePanel);
-// Q30: isometrische Symbole der großen Menüeinstiege
-document.querySelectorAll('.msym[data-sym]').forEach((el) => { el.innerHTML = HK.SYMBOLE[el.dataset.sym] ?? ''; });
+// G6: isometrische Symbole der Kartenoberfläche, des Menüs und des Starts
+symboleEinsetzen();
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('panel').classList.contains('offen')) schliessePanel(); });
 
 // O07 Haus
@@ -1066,9 +1114,9 @@ function oeffneWettbewerber(id) {
   // Q30: Hauptfrage „Wie stark kostet mich dieser Wettbewerber, und in welchen Sortimenten?“
   const summe = wirkung.reduce((x, [, v]) => x + Number(v), 0), staerkste = wirkung[0];
   const aktion = w.status === 'raeumung' ? 'Räumungsverkauf bis 70 %' : w.rabatt ? Math.round(w.rabatt * 100) + ' % Rabatt' : w.status === 'eroeffnung' ? 'Neueröffnung' : 'keine';
-  let html = HK.bereich('betrieb', 'karte') + HK.sprecher({ text: staerkste && staerkste[1] < 0 ? `<b>${esc(w.name)} kostet uns am meisten in ${esc(E.GRUPPEN[staerkste[0]]?.name ?? staerkste[0])} (${Number(staerkste[1]).toFixed(2).replace('.', ',').replace('-', '−')} %).</b> Aktion: ${esc(aktion)}.` : `<b>${esc(w.name)} wirkt derzeit kaum auf Hartwig.</b> Aktion: ${esc(aktion)}.`,
+  let html = HK.bereich('betrieb', 'karte') + HK.sprecher({ text: staerkste && staerkste[1] < 0 ? `${esc(w.name)} kostet uns am meisten in ${esc(E.GRUPPEN[staerkste[0]]?.name ?? staerkste[0])} (${Number(staerkste[1]).toFixed(2).replace('.', ',').replace('-', '−')} %). Aktion: ${esc(aktion)}.` : `${esc(w.name)} wirkt derzeit kaum auf Hartwig. Aktion: ${esc(aktion)}.`,
     unter: 'Marktbeobachtung', ton: w.rabatt || w.status === 'eroeffnung' ? 'engpass' : '' });
-  let rumpf = HK.gross([{ label: 'Wettbewerbsstärke', wert: Math.round(u.staerke * 100) + ' / 100', ton: u.staerke > 0.6 ? 'schlecht' : '' }, { label: 'Grundfläche', wert: fmt.format(w.grundflaecheQm) + ' qm' }]);
+  let rumpf = HK.gross([{ label: 'Stärke', wert: Math.round(u.staerke * 100) + ' / 100', ton: u.staerke > 0.6 ? 'schlecht' : '' }, { label: 'Grundfläche', wert: fmt.format(w.grundflaecheQm) + ' qm' }]);
   rumpf += HK.liste([HK.zeile({ was: 'Art', wert: esc(WB_ART[w.art] ?? w.art) }), HK.zeile({ was: 'Status', wert: esc(WB_STATUS[w.status] ?? w.status), wertUnter: esc(start) })]);
   if (w.inHartwigGebaeude) rumpf += HK.hinweis('Nachnutzung eines ehemaligen Hartwig-Standorts.', 'achtung');
   rumpf += wirkung.length ? HK.tabelle({ titel: 'Wirkung auf Hartwig nach Warengruppe', spalten: ['Umsatz'], zeilen: wirkung.map(([g, v]) => ({ name: E.GRUPPEN[g]?.name ?? g, werte: [Number(v).toFixed(2).replace('.', ',').replace('-', '−') + ' %'], ton: [v < 0 ? 'schlecht' : ''] })),
@@ -1089,14 +1137,13 @@ $('pinhalt').addEventListener('click', (e) => {
 });
 
 // ─────────────────────────────────────────── Zentrale (HQ)
-const STUFE_FARBE = ['#c9c4bb', '#e0b23c', '#2f8f5b', '#2f63b5'];
 let hqAbteilung = null; // Q15: gewählte Seite der Fachabteilung
 let hqEtageWahl = null;   // { g: Gebäude-Id, nr } für den 3D-Schnitt
 let hqRen = null;
 /** Etagenschnitt aus hq.js als Bild (eigener kleiner Renderer, damit die Karte unberührt bleibt). */
 function schnittBild(baue, w = 720, h = 420) {
   if (!hqRen) {
-    hqRen = new THREE.WebGLRenderer({ canvas: document.createElement('canvas'), antialias: !sparsam, preserveDrawingBuffer: true });
+    hqRen = new THREE.WebGLRenderer({ canvas: document.createElement('canvas'), antialias: !notprofil, preserveDrawingBuffer: true });
     hqRen.setPixelRatio(1); hqRen.outputColorSpace = THREE.SRGBColorSpace; hqRen.shadowMap.enabled = !sparsam; hqRen.shadowMap.type = THREE.PCFShadowMap;
   }
   hqRen.setSize(w, h, false);
@@ -1182,6 +1229,8 @@ window.hqKlick = (art, a, b, c) => {
   if (art === 'gehalt') return hqTun({ typ: 'abteilungGehalt', abteilung: a, faktor: Number(b) / 100 });
   if (art === 'aufgabe') return hqTun({ typ: 'delegation', bereich: a, aufgabe: b, an: c === 'true' });
   if (art === 'organisation') { offenesHq = null; return oeffneModul(org); }
+  // E47: Reiterleiste der Zentrale (Zentrale, Vorstand, Organisation, Reporting)
+  if (art === 'reiter') { hqAbteilung = null; hqEtageWahl = null; if (a === 'vorstand') return oeffneModul(vs); if (a === 'organisation') return oeffneModul(org); if (a === 'reporting') return oeffneModul(rg); return oeffneHq(); }
   if (art === 'mieten') { const an = E.hqUebersicht(s).angebote.find((q) => q.id === a); hqTun({ typ: 'hqMieten', angebot: a, etagen: an.etagen.map((e) => e.nr) }); }
   if (art === 'kuendigenE') hqTun({ typ: 'hqEtageKuendigen', gebaeude: a, etage: Number(b) });
   if (art === 'archiv') hqTun({ typ: 'hqArchivSetzen', gebaeude: a, etage: Number(b), aktiv: c === 'true' });
@@ -1195,77 +1244,12 @@ function oeffneHq(gebaeudeId, bleiben = false) {
   if (typeof E.hqUebersicht !== 'function') return;
   offenesHaus = null; offenesHq = gebaeudeId ?? true;
   const u = E.hqUebersicht(s), j = hqGrafik();
-  if (hqAbteilung && u.abteilungen.some((a) => a.id === hqAbteilung)) {
-    const r = zentraleAbteilungHtml(u, j, E.organisationUebersicht(s), hqAbteilung, hqEtageWahl, (gid, nr) => { const gj = j?.gebaeude?.find((q) => q.id === gid); return gj ? etagenBild(gj, nr) : null; });
-    const sc = $('pinhalt').scrollTop;
-    panel(r.titel, r.unter, r.html, 'gross');
-    if (bleiben) $('pinhalt').scrollTop = sc;
-    return;
-  }
-  const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
-  const pz = (x) => `${Math.round((x ?? 0) * 100)} %`;
-  const knopf = (text, args, art = '') => `<button class="mini ${art}" onclick="event.stopPropagation();hqKlick(${args.map((x) => `'${x}'`).join(',')})">${text}</button>`;
-  // Q30: Hauptfrage „Was kostet die Zentrale, und wo zahle ich für leere Fläche?“
-  const leerEtagen = (u.gebaeude ?? []).flatMap((g) => g.etagen.filter((e) => e.gemietet && !e.abteilungen.length && !e.archiv));
-  const ohnePlatz = (u.abteilungen ?? []).filter((a) => !a.gebaeudeId).length;
-  const diffStart = u.kostenWoche - (u.kostenStart ?? u.kostenWoche);
-  // Q35: Befund aus derselben Quelle wie „x % belegt“ je Gebäude (qmGemietet, qmBelegt).
-  const qmMiete = (u.gebaeude ?? []).reduce((n, g) => n + (g.qmGemietet ?? 0), 0);
-  const qmFrei = Math.max(0, qmMiete - (u.gebaeude ?? []).reduce((n, g) => n + (g.qmBelegt ?? 0), 0));
-  const befund = (leerEtagen.length ? `<b>${leerEtagen.length} gemietete ${leerEtagen.length === 1 ? 'Etage steht' : 'Etagen stehen'} leer.</b> `
-    : qmMiete > 0 && qmFrei / qmMiete >= 0.02 ? `<b>${pz(1 - qmFrei / qmMiete)} der gemieteten Bürofläche sind belegt, ${fmt.format(Math.round(qmFrei))} qm stehen frei.</b> `
-    : '<b>Alle gemieteten Etagen sind voll belegt.</b> ')
-    + (ohnePlatz ? `${ohnePlatz} ${ohnePlatz === 1 ? 'Abteilung hat' : 'Abteilungen haben'} keinen Platz und wirken nur mit Stufe 0. ` : '')
-    + (u.restmieteWoche > 0 ? `Für alte Büros laufen noch ${geld(u.restmieteWoche)} Restmiete je Woche.` : '');
-  let html = HK.bereich('zentrale') + HK.sprecher({ text: befund, unter: 'Leitung Verwaltung', ton: leerEtagen.length || ohnePlatz || (qmMiete > 0 && qmFrei / qmMiete >= 0.15) ? 'engpass' : '' });
-  let kopfbild = '';
-  let rumpf = HK.gross([{ label: 'Kosten je Woche', p: 'hq:kosten', wert: geld(u.kostenWoche), unter: diffStart ? HK.abweichung(-diffStart, (diffStart > 0 ? '+' : '−') + geld(Math.abs(diffStart)) + ' zum Start', null) : 'wie zum Start' },
-    { label: 'Beschäftigte', p: 'hq:fte', wert: fmt.format(Math.round(u.fte)) + ' FTE', unter: `${fmt.format((u.gebaeude ?? []).reduce((n, g) => n + (g.qmGemietet ?? 0), 0))} qm gemietet` }])
-    + HK.liste([HK.zeile({ was: 'davon Büromiete und Nebenkosten', wert: geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)) }), HK.zeile({ was: 'Restmiete alter Büros', wert: geld(u.restmieteWoche ?? 0), ton: u.restmieteWoche > 0 ? 'schlecht' : '' })]);
-  // 3D-Schnitt der gewählten Etage (Standard: erste belegte Etage des gewählten bzw. ersten Gebäudes)
-  const gs = u.gebaeude ?? [];
-  const gWahl = gs.find((g) => g.id === hqEtageWahl?.g) ?? gs.find((g) => g.id === gebaeudeId) ?? gs[0];
-  if (gWahl) {
-    const nr = hqEtageWahl?.g === gWahl.id ? hqEtageWahl.nr : (gWahl.etagen.find((e) => e.abteilungen.length) ?? gWahl.etagen[0]).nr;
-    const gj = j?.gebaeude?.find((q) => q.id === gWahl.id);
-    if (gj) {
-      const e = gWahl.etagen.find((q) => q.nr === nr);
-      kopfbild = `<div class="hk-kopfbild schnitt"><img src="${etagenBild(gj, nr)}" alt="Etagenschnitt ${esc(gWahl.name)}, ${nr === 0 ? 'Erdgeschoss' : `${nr}. Etage`}"><span class="hk-bildtitel">${esc(gWahl.name)} · ${nr === 0 ? 'EG' : `${nr}. Etage`} · ${esc((e?.abteilungen ?? []).map((a) => a.name).join(', ') || (e?.gemietet ? 'gemietet, frei' : 'nicht gemietet'))}</span></div>`;
-    }
-  }
-  const ziele = [];
-  for (const g of gs) for (const e of g.etagen) if (e.gemietet) ziele.push({ v: `${g.id}|${e.nr}`, t: `${g.name}, ${e.nr === 0 ? 'EG' : e.nr + '. Etage'} (${fmt.format(e.qm - e.belegtQm)} qm frei)` });
-  for (const g of [...gs].sort((a, b) => (a.id === gebaeudeId ? -1 : b.id === gebaeudeId ? 1 : 0))) {
-    rumpf += `<div class="karte"><div class="khead kopf-mit-knopf"><div>${g.name}<small>${g.stadt} · ${fmt.format(g.qmGemietet)} qm gemietet · ${pz(g.auslastung)} belegt · ${geld(g.kostenWoche)} je Woche</small></div>${gs.length > 1 ? knopf('Kündigen', ['kuendigenG', g.id], 'rot') : ''}</div>`;
-    for (const e of [...(g.etagen ?? [])].sort((x, y) => y.nr - x.nr)) {
-      const ab = (e.abteilungen ?? []).map((a) => a.name).join(', ');
-      const gewaehlt = gWahl?.id === g.id && (hqEtageWahl?.g === g.id ? hqEtageWahl.nr === e.nr : false);
-      rumpf += `<div class="zeile klickbar ${e.gemietet ? '' : 'grau'} ${gewaehlt ? 'gewaehlt' : ''}" onclick="hqKlick('${e.archiv ? 'archivOeffnen' : 'etage'}','${g.id}','${e.nr}')"><span class="dot ${e.archiv ? 'k-eigen' : e.gemietet ? (ab ? 'k-eigen' : 'k-untermiete') : 'k-leer'}"></span><span class="was">${e.nr === 0 ? 'Erdgeschoss' : `${e.nr}. Etage`}${ab ? ` <i>${ab}</i>` : e.gemietet ? ' <i>gemietet, frei</i>' : ' <i>nicht gemietet</i>'}${e.archiv ? ' <b>Archiv</b>' : ''}</span><span class="qm">${fmt.format(e.qm)} qm</span><span class="uq">${e.gemietet ? pz(e.auslastung) : ''}</span>${e.gemietet ? knopf(e.archiv ? 'Archiv auflösen' : 'Archiv einrichten', ['archiv', g.id, e.nr, !e.archiv], 'text') : ''}${e.archiv ? knopf('Chronik ansehen', ['archivOeffnen']) : ''}${e.gemietet && !ab && !e.archiv ? knopf('Kündigen', ['kuendigenE', g.id, e.nr], 'rot') : ''}</div>`;
-    }
-    rumpf += '</div>';
-  }
-  if (u.abteilungen?.length) {
-    rumpf += '<div class="karte"><div class="khead">Abteilungen</div>';
-    for (const a of u.abteilungen) {
-      const um = a.umzugBis !== undefined && a.umzugBis > s.woche ? ` · Umzug bis KW ${(a.umzugBis % 52) + 1}` : '';
-      const ort = a.gebaeudeId ? `${a.gebaeudeId}|${a.etage}` : '';
-      const wahl = `<select class="ort" onchange="hqKlick('setzen','${a.id}',this.value)">${ort ? '' : '<option selected>ohne Platz</option>'}${ziele.map((z) => `<option value="${z.v}"${z.v === ort ? ' selected' : ''}>${z.t}</option>`).join('')}</select>`;
-      rumpf += `<div class="abt"><div class="zeile"><span class="dot" style="background:${HQ_ABT[a.id]?.farbe ?? STUFE_FARBE[a.stufe]}"></span><span class="was"><b>${a.name}</b> <i>${fmt.format(Math.round(a.fte))} von ${fmt.format(a.sollFte)} FTE · ${geld(a.kostenWoche)} je Woche${um}</i><em class="wirk">${a.wirkung ?? ''}</em></span><span class="stufe">${knopf('Öffnen', ['abteilung', a.id])}${knopf('−', ['stufe', a.id, a.stufe - 1])}<b>${a.stufe}</b>${knopf('+', ['stufe', a.id, a.stufe + 1])}</span></div><div class="zeile unter">${wahl}</div></div>`;
-    }
-    rumpf += '</div>';
-  }
-  if (u.angebote?.length) {
-    rumpf += '<div class="karte"><div class="khead">Freie Bürogebäude</div>';
-    for (const a of u.angebote) {
-      const qm = a.etagen.reduce((x, e) => x + e.qm, 0), k = a.etagen.reduce((x, e) => x + e.kostenWoche, 0);
-      rumpf += `<div class="zeile"><span class="dot k-leer"></span><span class="was">${a.name} <i>${a.stadt} · ${a.etagen.length} Etagen · ${fmt.format(qm)} qm · ${geld(k)} je Woche · Frist KW ${(a.frist % 52) + 1}</i></span>${knopf('Mieten', ['mieten', a.id], 'gruen')}</div>`;
-    }
-    rumpf += '</div>';
-  }
-  html += kopfbild + HK.rumpf(rumpf);
-  const weitere = (u.staedte ?? []).filter((q) => q !== u.sitz);
+  const bild = (gid, nr) => { const gj = j?.gebaeude?.find((q) => q.id === gid); return gj ? etagenBild(gj, nr) : null; };
+  const r = hqAbteilung && u.abteilungen.some((a) => a.id === hqAbteilung)
+    ? zentraleAbteilungHtml(u, j, E.organisationUebersicht(s), hqAbteilung, hqEtageWahl, bild)
+    : zentraleHtml({ u, organisation: E.organisationUebersicht(s), historie: s.historie, woche: s.woche, gebaeudeId, etageWahl: hqEtageWahl, etagenBild: bild });
   const sc = $('pinhalt').scrollTop;
-  panel('Zentrale', `Sitz ${u.sitz}${weitere.length ? ` · auch in ${weitere.join(', ')}` : ''} · ${gs.length} Gebäude`, html);
+  panel(r.titel, r.unter, r.html, 'gross');
   if (bleiben) $('pinhalt').scrollTop = sc;
 }
 
@@ -1449,7 +1433,6 @@ pp = portfolioModul({ E, s: () => s, panel, meldung, nachAktion,
   },
 });
 $('deutschland').addEventListener('click', () => oeffneModul(pp, 'karte'));
-$('deutschland-direkt').addEventListener('click', () => oeffneModul(pp, 'karte'));
 $('haeuser').addEventListener('click', () => oeffneModul(pp, 'liste'));
 $('cockpit').addEventListener('click', (e) => {
   const b = e.target.closest('[data-format]');
@@ -1474,19 +1457,18 @@ $('erfolge').addEventListener('click', () => oeffneModul(er));
 // O07 Haus
 $('beobachtung').addEventListener('click', oeffneBeobachtung);
 $('haus-reporting').addEventListener('click', oeffneHausReporting);
-$('hausbeobachtung').addEventListener('click', oeffneBeobachtung);
 $('postdirekt').addEventListener('click', () => oeffneModul(po));
 $('wochenstreifen').addEventListener('click', () => { $('wochenstreifen').classList.remove('an'); oeffneModul(po); });
 $('einstellungen').addEventListener('click', () => oeffneModul(es));
 // Menü wie Coffee Inc: Knopf unten rechts öffnet die Kacheln Zentrale, Einkauf, Vorstand, Marketing, Produkte
-function menueZu() { $('menue').classList.remove('offen'); $('menue').inert = true; $('menueknopf').classList.remove('an'); }
-$('menueknopf').addEventListener('click', () => { const o = !$('menue').classList.contains('offen'); if (o) { schliessePanel(); } $('menue').classList.toggle('offen', o); $('menue').inert = !o; $('menueknopf').classList.toggle('an', o); });
+function menueZu() { $('menue').classList.remove('offen'); $('menue').inert = true; $('menueknopf').setAttribute('aria-expanded', 'false'); }
+$('menueknopf').addEventListener('click', () => { const o = !$('menue').classList.contains('offen'); if (o) { schliessePanel(); ebenenZu(); } $('menue').classList.toggle('offen', o); $('menue').inert = !o; $('menueknopf').setAttribute('aria-expanded', String(o)); });
 $('menue').addEventListener('click', (e) => { if (e.target === $('menue')) menueZu(); });
 function menueBadge() {
   const n = (s ? E.freigaben(s).anzahl : 0), v = vs?.badge() ?? 0, b = $('menuebadge');
   const p = po?.badge() ?? 0;
-  b.textContent = n + p; b.style.display = n + p ? '' : 'none';
-  const vb = $('vsbadge'); vb.textContent = v; vb.style.display = v ? '' : 'none';
+  b.textContent = n + p || ''; // G6: leerer Zähler blendet sich über :empty aus (hartwig.css)
+  $('vsbadge').textContent = v || '';
 }
 $('spiel-speichern').addEventListener('click', async () => {
   menueZu();
@@ -1510,7 +1492,7 @@ async function diagnoseZeigen() {
   leben.pause(true);
   try {
     const daten = { renderer: ren, scene: () => scene, camera: () => cam, anzahl: 45,
-      info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height, grafikprofil: sparsam ? 'sparsam' : 'hoch' }) };
+      info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height, grafikprofil: notprofil ? 'sparsam' : sparsam ? 'scharf' : 'hoch', pixeldichte: PIXELDICHTE }) };
     leben.setzen('aus');
     const ohne = await performanceMessen(daten);
     leben.setzen(vorherLeben);
@@ -1585,7 +1567,7 @@ $('weiter').addEventListener('click', () => {
     setTimeout(() => { try { woche(true); } finally { $('weiter').disabled = false; } }, 10);
   } else wochenbericht.oeffne();
 });
-if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
+if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').hidden = true;
 
 window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...a) => oeffneModul(ec, ...a), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
@@ -1668,9 +1650,10 @@ window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...
     const fehler = [], c = E.cockpit(s);
     // Titel ohne eingebettete Auswahl (Formatfilter im Cockpit).
     const titel = (sp) => [...sp.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').replace(/\s*·\s*$/, '').trim();
-    const kz = (wurzel) => new Map([...wurzel.querySelectorAll('.kz')].map((k) => [titel(k.querySelector('span')), k.querySelector('b').textContent]));
+    const kz = (wurzel) => new Map([...wurzel.querySelectorAll('.hw-g6-kz')].map((k) => [titel(k.querySelector('span')), k.querySelector('b').textContent]));
     const ck = kz($('cockpit'));
-    const soll = { Cash: c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), 'Kreditrahmen frei': c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
+    ck.set('Cash', $('kasse').textContent); // G6: Kasse steht in der Firmenpille
+    const soll = { Cash: c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), 'Kredit frei': c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
     if (s.historie.length) Object.assign(soll, { 'EBITDA 13 Wo.': geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
     for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
     if ($('kw').textContent !== `KW ${c.kw} / ${c.jahr}`) fehler.push(`KW: ${$('kw').textContent}`);
@@ -1734,9 +1717,10 @@ function zeichneStufen() {
   stufenWahl.hidden = stufen.length === 0;
   stufenWahl.previousElementSibling.hidden = stufen.length === 0;
   if (!stufen.length) startWahl.schwierigkeit = 'mittel';
-  stufenWahl.innerHTML = stufen.map((x, index) =>
-    `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? 'an' : ''}" data-v="${x.id}"><span class="sterne-stufe">${'●'.repeat(index + 1)}${'○'.repeat(stufen.length - index - 1)}</span><b>${x.name}</b><small>${esc(x.beschreibung)}</small></button>`
-  ).join('');
+  // G6: Segmentleiste wie Coffee 26, darunter der Satz zur gewählten Stufe.
+  const gewaehlt = stufen.find((x) => x.id === startWahl.schwierigkeit) ?? stufen[0];
+  stufenWahl.innerHTML = stufen.length ? HK.seg(stufen.map((x) => [x.id, x.name]), gewaehlt.id, (id) => `data-v="${esc(id)}"`)
+    + `<p class="hw-lese hw-g6-stufentext">${esc(gewaehlt.beschreibung)}</p>` : '';
 }
 function startZeigen() {
   $('startstadt').innerHTML = STADTLISTE.map((q) => `<option${q.name === startWahl.stadt ? ' selected' : ''}>${q.name}</option>`).join('');

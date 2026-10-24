@@ -1,0 +1,1218 @@
+/* Hartwig-Oberfläche (E47). Einzige Stildatei der Spieloberfläche.
+   Maße aus Coffee Inc 2 vermessen (Vorlagen 05, 20, 26 bei 402 × 874, 3-fach), Werte in CSS-Pixeln.
+   Bereiche setzen nur Farben; Abstände, Größen und Konturen sind überall gleich. */
+
+/* Schrift: Figtree (OFL 1.1, Lizenz in schrift/OFL.txt), Ummo 24.10.2026. Gleiche Datei auf dem iPhone und im Prüfbild. */
+@font-face { font-family: 'Hartwig Grotesk'; src: url('schrift/figtree.ttf') format('truetype'); font-weight: 300 900; font-display: block; }
+
+:root {
+  --hw-schrift: 'Hartwig Grotesk', -apple-system, sans-serif;
+  /* Typografie: Größe / Gewicht. Kalibriert über Tintenhöhen der Vorlage. */
+  --hw-t-titel: 500 var(--hw-gr-titel, 17.5px)/1.15 var(--hw-schrift);      /* Produktname, Kartentitel */
+  --hw-t-kopf: 600 var(--hw-gr-kopf, 14.4px)/1.2 var(--hw-schrift);         /* Blattkopf Zeile 1 */
+  --hw-t-kopf2: 400 var(--hw-gr-kopf2, 13.2px)/1.2 var(--hw-schrift);       /* Blattkopf Zeile 2 */
+  --hw-t-text: 500 var(--hw-gr-text, 11.85px)/1.3 var(--hw-schrift);         /* Sprecher, Bedienbeschriftung */
+  --hw-t-lese: 400 var(--hw-gr-lese, 10.6px)/12px var(--hw-schrift);      /* Fließtext in Karten */
+  --hw-t-marke: 300 var(--hw-gr-marke, 11.8px)/1.2 var(--hw-schrift);       /* VERSALIEN-Beschriftung, dünn */
+  --hw-t-zahl: 400 var(--hw-gr-zahl, 24.75px)/1 var(--hw-schrift);           /* Großkennzahl */
+  --hw-t-wert: 400 var(--hw-gr-wert, 18.3px)/1 var(--hw-schrift);        /* Wert neben Skala */
+  --hw-t-klein: 400 var(--hw-gr-klein, 10.4px)/1.2 var(--hw-schrift);     /* Abweichung, Reiter */
+  --hw-kontur-abstand: 2.33px;  /* Abstand der hellen Innenkontur zur Kante */
+  --hw-kontur: 1.33px;          /* Breite der Innenkontur */
+  --hw-radius: 12px;
+  --hw-rand: 20px;
+}
+
+/* Farben je Bereich. `coffee-*` nur für den Bildabgleich mit der Vorlage. */
+.hw[data-bereich='coffee-haus'] { --grund: #312924; --kopf: #221c19; --tief: #0e0c0a; --karte: #120f0d; --kartenlinie: #595756; --text: #fff; --leise: #bfbebd; --marke: #a5a3a1; --akzent: #95410a; --akzent-linie: #b57a53; --akzent-aktiv: #682d07; --akzent-aktiv-linie: #956c51; --feld: #080606; --feldlinie: #515150; --zweit: #2c2725; --zweit-linie: #6b6663; --skala: #63b958; --skala-grund: #0e0c0a; --punkt: #8c8885; --stern: #ffac0b; --hinweis: #e5562a; --ring-a: #efbf73; --ring-b: #c9441b; --gut: #66bb6a; --schlecht: #f27d72; }
+.hw[data-bereich='coffee-zentrale'] { --grund: #213741; --kopf: #17262d; --tief: #0d161a; --karte: #0d161a; --kartenlinie: #555c5e; --text: #fff; --leise: #a6a7a7; --marke: #9aa3a7; --akzent: #4f7e90; --akzent-linie: #83a4b1; --akzent-aktiv: #335a6a; --akzent-aktiv-linie: #6f93a2; --feld: #05090a; --feldlinie: #4c5356; --zweit: #252d31; --zweit-linie: #666c6f; --skala: #63b958; --skala-grund: #0d161a; --punkt: #8c9295; --stern: #ffac0b; --hinweis: #e5562a; --ring-a: #66bb6a; --ring-b: #2f6b33; --gut: #66bb6a; --schlecht: #f27d72; }
+
+.hw { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--grund); color: var(--text); font: var(--hw-t-text); -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+.hw *, .hw *::before, .hw *::after { box-sizing: border-box; }
+/* Grund: feine senkrechte Streifen wie die Vorlage (einzige Textur). */
+.hw-grund { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+
+/* Blattkopf: Symbol links, Titel und Adresse mittig, Schließen rechts. Höhe inkl. Statusleiste 112 px. */
+.hw-kopf { position: absolute; left: 0; right: 0; top: 0; height: 112px; background: var(--kopf); z-index: 3; }
+.hw-kopf-symbol { position: absolute; left: 10px; top: 66.7px; width: 36.7px; height: 36.7px; object-fit: contain; }
+.hw-kopf-titel { position: absolute; left: 60px; right: 60px; top: 71px; text-align: center; font: var(--hw-t-kopf); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hw-kopf-unter { position: absolute; left: 60px; right: 60px; top: 87.5px; text-align: center; font: var(--hw-t-kopf2); color: var(--leise); letter-spacing: -.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hw-zu { position: absolute; right: 13px; top: 70px; width: 34px; height: 34px; border: 0; background: none; padding: 0; color: var(--text); }
+.hw-zu::before, .hw-zu::after { content: ''; position: absolute; left: 7.5px; right: 7.5px; top: 16px; height: 2.2px; border-radius: 2px; background: currentColor; transform: rotate(45deg); }
+.hw-zu::after { transform: rotate(-45deg); }
+
+/* Sprecherzeile: Person sagt den Befund. 80 px hoch, mit Griff unten. */
+.hw-sprecher { position: absolute; left: 0; right: 0; top: 112px; height: 80px; background: var(--tief); z-index: 2; }
+.hw-sprecher-text { position: absolute; left: var(--hw-rand); right: 76px; top: 0; bottom: 0; display: flex; align-items: center; padding-top: 2px; font: var(--hw-t-text); letter-spacing: .45px; }
+.hw-sprecher-figur { position: absolute; right: 15px; bottom: 0; width: 53.3px; height: 75.3px; object-fit: contain; object-position: bottom; }
+.hw-griff { position: absolute; left: 50%; top: 72px; width: 80px; height: 4px; margin-left: -40px; border-radius: 2px; background: var(--kartenlinie); opacity: .75; }
+
+/* Inhalt zwischen Sprecher und Reiterleiste. */
+.hw-inhalt { position: absolute; left: 0; right: 0; top: 192px; bottom: 104px; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+
+/* Doppelkontur: Fläche, dann helle Linie 2,33 px innen. Für Karten, Segmente, Stepper, Schalter. */
+.hw-kontur { background: var(--f); box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--f), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--l); border-radius: var(--hw-radius); }
+
+/* Segmentleiste mit Symbol je Teil. 44 px hoch, volle Breite mit Rand. */
+.hw-segment { position: relative; display: flex; height: 44px; margin: 0 var(--hw-rand); --f: var(--akzent); --l: var(--akzent-linie); }
+.hw-segment > button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px; border: 0; padding: 0; background: none; color: var(--text); font: var(--hw-t-text); font-size: var(--hw-gr-segment, 13.95px); letter-spacing: .02em; text-transform: uppercase; }
+.hw-segment > button img { height: 25px; width: auto; }
+/* Aktiver Teil: nur dunklere Fläche innerhalb der durchlaufenden Kontur (Kontur liegt als ::after darüber). */
+.hw-segment > button[aria-pressed='true'] { background: var(--akzent-aktiv); }
+.hw-segment > button:first-child { border-radius: var(--hw-radius) 0 0 var(--hw-radius); }
+.hw-segment > button:last-child { border-radius: 0 var(--hw-radius) var(--hw-radius) 0; }
+.hw-segment::after { content: ''; position: absolute; inset: 0; border-radius: var(--hw-radius); pointer-events: none;
+  box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--akzent), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--akzent-linie); }
+
+/* Karussell: Karte 300 px, Nachbar schaut 21 px daneben heraus. */
+.hw-karussell { position: relative; display: flex; gap: 21px; padding: 0 51px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.hw-karussell::-webkit-scrollbar { display: none; }
+.hw-karte { position: relative; flex: 0 0 300px; scroll-snap-align: center; --f: var(--karte); --l: var(--kartenlinie); }
+.hw-karte-bild { position: absolute; left: 50%; transform: translateX(-50%); top: -45px; height: 81.7px; width: auto; }
+.hw-karte-titel { text-align: center; font: var(--hw-t-titel); letter-spacing: .48px; }
+.hw-sterne { display: flex; justify-content: center; gap: 3.3px; color: var(--stern); }
+.hw-sterne svg { width: 23px; height: 23px; }
+.hw-sterne { gap: 0; }
+
+/* Schalter 48 × 32. */
+.hw-schalter { position: relative; width: 48px; height: 32px; border: 0; padding: 0; --f: var(--akzent); --l: var(--akzent-linie); border-radius: 10px; }
+.hw-schalter::after { content: ''; position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border-radius: 6px; background: #fff; }
+.hw-schalter[aria-checked='false'] { --f: var(--feld); --l: var(--feldlinie); }
+.hw-schalter[aria-checked='false']::after { right: auto; left: 6px; background: var(--leise); }
+
+/* Beschriftung in Versalien, dünn und grau; Großkennzahl; Abweichung. */
+.hw-marke { font: var(--hw-t-marke); color: var(--marke); text-transform: uppercase; letter-spacing: -.005em; }
+.hw-zahl { font: var(--hw-t-zahl); }
+.hw-abw { font: var(--hw-t-klein); }
+
+/* Ring für Anteile, 80 px. */
+.hw-ring { position: relative; width: 80px; height: 80px; }
+.hw-ring > svg { position: absolute; inset: 0; }
+.hw-ring > span { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font: var(--hw-t-klein); color: var(--ring-a); line-height: 1.15; }
+.hw-ring > span b { font-weight: 500; font-size: 12.5px; }
+
+/* Stepper [−] Wert [+]: 144 × 32, Knöpfe 32 breit. */
+.hw-stepper { position: relative; display: flex; width: 144px; height: 32px; --f: var(--feld); --l: var(--feldlinie); }
+.hw-stepper > button { position: relative; flex: 0 0 32px; border: 0; padding: 0; --f: var(--akzent); --l: var(--akzent-linie); color: #fff; }
+.hw-stepper > button:first-child { border-radius: var(--hw-radius) 0 0 var(--hw-radius); }
+.hw-stepper > button:last-child { border-radius: 0 var(--hw-radius) var(--hw-radius) 0; }
+.hw-stepper > button::before { content: ''; position: absolute; left: 10.7px; right: 7.3px; top: 14.8px; height: 2.6px; border-radius: 1px; background: currentColor; }
+.hw-stepper > button.plus::after { content: ''; position: absolute; left: 14.4px; top: 9.4px; width: 2.6px; height: 13.6px; border-radius: 1px; background: currentColor; }
+.hw-stepper > button.plus::before { left: 7.6px; right: 10.4px; }
+.hw-stepper > output { flex: 1; display: flex; padding-top: 2px; align-items: center; justify-content: center; font: var(--hw-t-text); font-size: var(--hw-gr-stepper, 15.25px); }
+
+/* Seitenpunkte unter Karussells. */
+.hw-punkte { display: flex; justify-content: center; align-items: center; gap: 9.9px; }
+.hw-punkte i { width: 7.3px; height: 7.3px; border-radius: 50%; background: var(--punkt); }
+.hw-punkte i.an { background: #fff; }
+.hw-punkte i.klein { width: 5.3px; height: 5.3px; }
+.hw-punkte i.kleiner { width: 3.3px; height: 3.3px; }
+
+/* Reiterleiste unten: Illustration plus Wort, Schlitze zu 80 px, aktiver Reiter als Fläche. */
+.hw-reiter { position: absolute; left: 0; right: 0; bottom: 0; height: 104px; background: var(--kopf); display: flex; padding: 0 10px; z-index: 3; }
+.hw-reiter > button { position: relative; flex: 0 0 80px; height: 59px; border: 0; padding: 0; background: none; color: var(--text); font: var(--hw-t-klein); font-size: var(--hw-gr-reiter, 10px); }
+.hw-reiter > button img { position: absolute; left: 50%; transform: translateX(-50%); top: 6.7px; height: 31.7px; width: auto; }
+.hw-reiter > button span { position: absolute; left: 0; right: 0; top: 42.6px; letter-spacing: .35px; text-align: center; white-space: nowrap; }
+.hw-reiter > button[aria-selected='true'] { background: var(--grund); border-radius: 0 0 10px 10px; margin: 0 8px; flex-basis: 64px; }
+
+/* Kopfbild: isometrische Szene des Ortes (Etage, Haus), 308 px hoch, Inhalt fährt beim Scrollen darüber. */
+.hw-kopfbild { position: relative; height: 308px; margin-bottom: 0; }
+.hw-kopfbild > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* Runder Bildknopf 44 × 44 mit Doppelkontur (Personal, Ansicht wechseln). */
+.hw-bildknopf { position: absolute; width: 44px; height: 44px; border: 0; padding: 0; --f: var(--akzent); --l: var(--akzent-linie); border-radius: 10px; }
+.hw-bildknopf img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 31.7px; height: auto; }
+
+/* Zwei Großkennzahlen nebeneinander, je Spalte rechtsbündig (Spaltenkanten 190 und 381 px). */
+.hw-paar { display: grid; grid-template-columns: 170px 191.3px; padding-left: 20px; }
+.hw-paar > div { text-align: right; }
+.hw-paar .hw-marke { display: block; }
+.hw-paar .hw-zahl { display: block; margin-top: 7.2px; }
+.hw-paar .hw-abw { display: block; margin-top: 3.6px; }
+.hw-gut { color: var(--gut); }
+.hw-schlecht { color: var(--schlecht); }
+
+/* Balken ohne Achsen: je Woche ein Paar (Umsatz hell, Ergebnis grün), 15 px breit, 4 px Abstand, Wochen im 78-px-Raster. */
+.hw-balken { position: relative; display: flex; gap: 44px; padding-left: 28px; align-items: flex-end; height: var(--hoehe, 114px); }
+.hw-balken > div { display: flex; gap: 4px; align-items: flex-end; height: 100%; }
+.hw-balken i { display: block; width: 15px; border-radius: 7.5px 7.5px 0 0; background: var(--text); }
+.hw-balken i.b, .hw-balken i + i { background: var(--gut); }
+.hw-balken i.a { background: var(--text); }
+
+/* Skala in fünf Segmenten, 24 px hoch, dunkler Rand 2 px, Trennfugen 1,3 px; Wert rechts daneben. */
+.hw-skala { display: flex; align-items: center; gap: 0; padding: 0 var(--hw-rand); }
+.hw-skala-balken { position: relative; flex: 0 0 307.3px; height: 24px; border-radius: 12px; background: var(--skala-grund); padding: 2px; display: flex; gap: 1.3px; }
+.hw-skala-balken i { flex: 1; background: var(--skala); }
+.hw-skala-balken i:first-child { border-radius: 10px 0 0 10px; }
+.hw-skala-balken i:last-child { border-radius: 0 10px 10px 0; }
+.hw-skala-balken i.aus { background: none; }
+.hw-skala-wert { flex: 1; text-align: right; font: var(--hw-t-wert); }
+
+/* Zweitknopf neutral mit Doppelkontur. */
+.hw-knopf-zweit { position: relative; height: 32px; border: 0; padding: 0 14px; --f: var(--zweit); --l: var(--zweit-linie); color: var(--text); font: var(--hw-t-text); display: inline-flex; align-items: center; justify-content: center; gap: 14px; }
+.hw-knopf-zweit img { height: 18.3px; }
+.hw-lese { font: var(--hw-t-lese); }
+.hw-rund { width: 38.7px; height: 38.7px; border-radius: 50%; object-fit: cover; }
+.hw-stepper.breit { width: 259px; }
+
+/* ───────── Hartwig-Farben je Bereich (Struktur aus Coffee, Akzent Hartwig-Petrol statt Coffee-Orange, E42) ───────── */
+.hw[data-bereich='haus'] { --grund: #312924; --kopf: #221c19; --tief: #0e0c0a; --karte: #120f0d; --kartenlinie: #595756; --text: #fff; --leise: #bfbebd; --marke: #a5a3a1;
+  --akzent: #1f6f8b; --akzent-linie: #5fa8bf; --akzent-aktiv: #134a5d; --akzent-aktiv-linie: #3f8aa3; --feld: #080606; --feldlinie: #515150;
+  --zweit: #2c2725; --zweit-linie: #6b6663; --skala: #63b958; --skala-grund: #0e0c0a; --punkt: #8c8885; --stern: #ffac0b; --hinweis: #e5562a;
+  --ring-a: #efbf73; --ring-b: #c9441b; --gut: #66bb6a; --schlecht: #f27d72; --gefahr: #c0362d; --gefahr-linie: #e2786f; }
+.hw[data-bereich='zentrale'], .hw[data-bereich='betrieb'] { --grund: #213741; --kopf: #17262d; --tief: #0d161a; --karte: #0d161a; --kartenlinie: #555c5e; --text: #fff; --leise: #a6a7a7; --marke: #9aa3a7;
+  --akzent: #1f6f8b; --akzent-linie: #5fa8bf; --akzent-aktiv: #134a5d; --akzent-aktiv-linie: #3f8aa3; --feld: #05090a; --feldlinie: #4c5356;
+  --zweit: #252d31; --zweit-linie: #666c6f; --skala: #63b958; --skala-grund: #0d161a; --punkt: #8c9295; --stern: #ffac0b; --hinweis: #e5562a;
+  --ring-a: #66bb6a; --ring-b: #2f6b33; --gut: #66bb6a; --schlecht: #f27d72; --gefahr: #c0362d; --gefahr-linie: #e2786f; }
+.hw[data-bereich='betrieb'] { --grund: #262a2e; --kopf: #1a1d20; --tief: #0f1113; --karte: #111315; --kartenlinie: #575b5f; --zweit: #2b2f33; --zweit-linie: #686d71; }
+.hw[data-bereich='papier'] { --grund: #ece7dc; --kopf: #ddd6c7; --tief: #d2cab8; --karte: #f6f2e9; --kartenlinie: #b9b09d; --text: #1f1d1a; --leise: #5f5a52; --marke: #6d675e;
+  --akzent: #1f6f8b; --akzent-linie: #5fa8bf; --akzent-aktiv: #134a5d; --akzent-aktiv-linie: #3f8aa3; --feld: #fffdf8; --feldlinie: #b9b09d;
+  --zweit: #e4ddcf; --zweit-linie: #b9b09d; --punkt: #a39c90; --gut: #2e7d32; --schlecht: #b3261e; --gefahr: #b3261e; --gefahr-linie: #d9776f; }
+.hw[data-bereich='papier'] .hw-grund { background: var(--grund); }
+
+/* ───────── Spielblatt #panel: ganzer Bildschirm wie Coffee, Kopf / Sprecher / Inhalt / Reiter in festen Lagen ───────── */
+#panel.hw { background: none; position: fixed; inset: 0; width: auto; height: auto; z-index: 20; transform: translateY(100%); transition: transform .22s ease; display: block; border-radius: 0; box-shadow: none; max-height: none; }
+#panel.hw.offen { transform: none; }
+#panel.hw .hw-kopf { height: calc(50px + env(safe-area-inset-top)); top: 0; }
+#panel.hw .hw-kopf-symbol { top: calc(env(safe-area-inset-top) + 4.7px); }
+#panel.hw .hw-kopf-symbol svg { width: 100%; height: 100%; }
+#panel.hw .hw-kopf-titel { top: calc(env(safe-area-inset-top) + 9px); margin: 0; }
+#panel.hw .hw-kopf-unter { top: calc(env(safe-area-inset-top) + 25.5px); }
+#panel.hw .hw-zu { top: calc(env(safe-area-inset-top) + 8px); font-size: 0; color: var(--text); }
+#psprecher > .hw-sprecher { top: calc(50px + env(safe-area-inset-top)); }
+#panel.hw > .hw-inhalt { top: calc(50px + env(safe-area-inset-top)); bottom: 0; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+#panel.hw.mit-sprecher > .hw-inhalt { top: calc(130px + env(safe-area-inset-top)); }
+#panel.hw.mit-reiter > .hw-inhalt { bottom: calc(59px + env(safe-area-inset-bottom)); padding-bottom: 24px; }
+#preiter > .hw-reiter { height: calc(59px + env(safe-area-inset-bottom)); justify-content: center; }
+#preiter > .hw-reiter > button svg { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); width: 34px; height: 34px; }
+#preiter > .hw-reiter > button[aria-current='page'] { background: var(--grund); border-radius: 0 0 10px 10px; margin: 0 8px; flex-basis: 64px; }
+
+/* ───────── Bausteine für Spielinhalte (komponenten.js), vermessen an Coffee 21, 22, 28, 31 ───────── */
+.hw-rumpf { padding: 0 var(--hw-rand); }
+.hw-band { background: var(--kopf); padding: 18px var(--hw-rand) 24px; margin-top: 24px; }
+/* Abschnittskopf: Versalien weiß regulär (Coffee „STORE INCOME STATEMENT“), Ergänzung leise rechts. */
+.hw-abschnitt { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 26px 0 12px; font: 400 14.6px/1.2 var(--hw-schrift); text-transform: uppercase; letter-spacing: .01em; color: var(--text); }
+.hw-abschnitt small { font: var(--hw-t-marke); color: var(--marke); text-transform: none; }
+.hw-abschnitt:first-child { margin-top: 18px; }
+/* Beschriftung über einem Bedienelement (MANAGER SINCE, ANNUAL SALARY). */
+.hw-feldname { display: block; margin: 0 0 8px; }
+/* Großkennzahlen: n Spalten, je Spalte rechtsbündig. */
+.hw-gross { display: grid; grid-template-columns: repeat(var(--n, 2), 1fr); gap: 0 12px; margin: 24px 0 0; }
+.hw-gross > div { text-align: right; min-width: 0; }
+.hw-gross .hw-marke { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hw-gross .hw-zahl { display: block; margin-top: 7.2px; white-space: nowrap; }
+.hw-gross[style*='--n:3'] .hw-zahl, .hw-gross[style*='--n:4'] .hw-zahl { font-size: 18.3px; }
+.hw-gross .hw-abw { display: block; margin-top: 3.6px; }
+/* Balken mit Wochenbeschriftung (Coffee 22). */
+.hw-balkenfeld { margin: 26px 0 0; }
+.hw-balkenfeld .hw-balken { padding-left: 0; justify-content: space-between; gap: 0; }
+.hw-balkenfeld .hw-balken > div { flex: 0 0 34px; justify-content: center; }
+.hw-balken i.neg { background: var(--schlecht); }
+.hw-balken i.null { opacity: .5; }
+.hw-balkenfuss { display: flex; justify-content: space-between; margin-top: 7px; font: var(--hw-t-klein); font-size: 12.4px; }
+.hw-balkenfuss span { flex: 0 0 34px; text-align: center; white-space: nowrap; }
+.hw-legende { display: flex; gap: 16px; margin-top: 10px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-legende i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; background: var(--text); margin-right: 6px; vertical-align: -1px; }
+.hw-legende i.b { background: var(--gut); }
+/* Tabelle (GuV): Kopf in Versalien weiß, Zeilen 22 px, Beschriftung dünn grau, Zahlen weiß rechts, Strich vor Summe. */
+.hw-tabelle { width: 100%; border-collapse: collapse; font: 400 12.3px/22px var(--hw-schrift); font-variant-numeric: tabular-nums; }
+.hw-tabelle th { font: 400 14.2px/1.2 var(--hw-schrift); text-align: right; padding: 0 0 12px; color: var(--text); white-space: nowrap; }
+.hw-tabelle th:first-child { text-align: left; text-transform: uppercase; }
+.hw-tabelle td { padding: 0; text-align: right; color: var(--text); white-space: nowrap; }
+.hw-tabelle td:first-child { text-align: left; color: var(--marke); font-weight: 300; white-space: normal; padding-right: 12px; }
+.hw-tabelle td + td { padding-left: 14px; }
+.hw-tabelle tr.summe td { box-shadow: inset 0 1px 0 0 var(--text); }
+.hw-tabelle tr.summe td:first-child { box-shadow: none; }
+.hw-tabelle td.gut { color: var(--gut); } .hw-tabelle td.schlecht { color: var(--schlecht); }
+/* Listenzeile: Beschriftung links, Wert rechts, Trennlinie fein. */
+.hw-liste { margin: 0; }
+.hw-zeile { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 8px 0; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); background: none; color: var(--text); font: var(--hw-t-text); font-weight: 400; text-align: left; }
+.hw-zeile:last-child { border-bottom: 0; }
+.hw-was { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.hw-was small, .hw-wert small { display: block; margin-top: 2px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-wert { flex: none; text-align: right; font-variant-numeric: tabular-nums; max-width: 55%; }
+.hw-wert.gut { color: var(--gut); } .hw-wert.schlecht { color: var(--schlecht); } .hw-wert.achtung { color: var(--stern); }
+.hw-pfeil { flex: none; color: var(--leise); font-size: 18px; }
+/* Knöpfe: primär Akzent mit Doppelkontur, Zweit neutral, Gefahr rot, Text als Akzentschrift. 44 px Mindesthöhe. */
+.hw-knopf { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border: 0; --f: var(--akzent); --l: var(--akzent-linie); background: var(--f); box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--f), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--l); border-radius: var(--hw-radius); color: #fff; font: var(--hw-t-text); font-size: 13.5px; }
+.hw-knopf.zweit { --f: var(--zweit); --l: var(--zweit-linie); color: var(--text); }
+.hw-knopf.gefahr { --f: var(--gefahr); --l: var(--gefahr-linie); }
+.hw-knopf.text { background: none; box-shadow: none; color: var(--akzent-linie); padding: 0 4px; }
+.hw-knopf.breit { display: flex; width: 100%; }
+.hw-knopf:disabled { opacity: .45; }
+.hw-knoepfe { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+/* Großer Stepper frei auf dem Grund (Coffee 28, 31): 44 px hoch, Knöpfe 33 px, Unterzeile im Feld. */
+.hw-stepper.gross { width: 100%; height: 44px; }
+.hw-stepper.gross > button { flex-basis: 33.3px; }
+.hw-stepper.gross > button::before { top: 20.7px; left: 9.3px; right: 9.3px; }
+.hw-stepper.gross > button.plus::after { top: 13.3px; height: 16px; left: 15.4px; }
+.hw-stepper.gross > button.plus::before { left: 9.3px; right: 9.3px; }
+.hw-stepper > output { flex-direction: column; line-height: 1.05; }
+.hw-stepper > output small { font: var(--hw-t-klein); font-size: 9.6px; color: var(--leise); margin-top: 1px; }
+.hw-stepper > button:disabled { --f: var(--zweit); --l: var(--zweit-linie); color: var(--leise); }
+/* Schalterzeile: Schalter links, Beschriftung rechts (Delegation). */
+.hw-schalterzeile { display: flex; align-items: center; gap: 15px; width: 100%; min-height: 40px; margin: 7.5px 0; padding: 0; border: 0; background: none; color: var(--text); font: var(--hw-t-text); text-align: left; }
+.hw-schalterzeile .hw-schalter { flex: none; }
+.hw-schalterzeile small { display: block; font: var(--hw-t-klein); color: var(--leise); margin-top: 2px; }
+/* Fähigkeit: Name rechtsbündig, Skala 120 × 14 in fünf Segmenten, Zahl (Coffee 28). */
+.hw-faehigkeit { display: grid; grid-template-columns: auto 120px 28px; align-items: center; gap: 5px; height: 18.7px; font: var(--hw-t-text); font-weight: 400; font-size: 11.6px; }
+.hw-faehigkeit > span:first-child { text-align: right; }
+.hw-faehigkeit .hw-skala-balken { flex: none; width: 120px; height: 14px; border-radius: 7px; padding: 2px; background: var(--skala-grund); }
+.hw-faehigkeit .hw-skala-balken i:first-child { border-radius: 5px 0 0 5px; } .hw-faehigkeit .hw-skala-balken i:last-child { border-radius: 0 5px 5px 0; }
+.hw-faehigkeit b { font-weight: 400; }
+.hw-faehigkeit .hw-skala-balken i { background: linear-gradient(90deg, var(--skala) calc(var(--a, 1) * 100%), transparent 0); }
+/* Leerer Zustand, Hinweis, Statusmarke. */
+.hw-leer { padding: 18px 0; color: var(--leise); font: var(--hw-t-text); font-weight: 400; }
+.hw-leer b { display: block; color: var(--text); font-weight: 500; margin-bottom: 4px; }
+.hw-hinweis { margin: 12px 0; padding: 10px 14px; border-radius: var(--hw-radius); background: var(--tief); color: var(--text); font: var(--hw-t-text); font-weight: 400; box-shadow: inset 3px 0 0 var(--akzent-linie); }
+.hw-hinweis.achtung { box-shadow: inset 3px 0 0 var(--stern); } .hw-hinweis.fehler { box-shadow: inset 3px 0 0 var(--schlecht); } .hw-hinweis.gut { box-shadow: inset 3px 0 0 var(--gut); }
+.hw-status { display: inline-block; margin: 0 8px 6px 0; font: var(--hw-t-marke); text-transform: uppercase; color: var(--marke); }
+.hw-status.gut { color: var(--gut); } .hw-status.schlecht, .hw-status.warn { color: var(--schlecht); } .hw-status.achtung { color: var(--stern); }
+/* Porträtrahmen 119 × 160 (Coffee 28). */
+.hw-portraet { position: relative; width: 119px; height: 160px; --f: var(--karte); --l: var(--kartenlinie); overflow: hidden; }
+.hw-portraet svg, .hw-portraet img { position: absolute; left: 8px; right: 8px; bottom: 6px; width: calc(100% - 16px); height: auto; }
+#psprecher .hw-sprecher-figur svg { width: 100%; height: 100%; }
+#psprecher .hw-sprecher-unter { display: block; font: var(--hw-t-klein); color: var(--leise); margin-top: 2px; }
+#psprecher .hw-sprecher[data-ton='alarm'] .hw-sprecher-text { color: #ffd6d1; }
+#preiter > .hw-reiter > button > span { top: 40px; }
+.hw-marker { display: none; }
+#panel.hw #pzu.hw-zu { position: absolute; left: auto; right: 13px; width: 34px; height: 34px; border-radius: 0; background: none; padding: 0; box-shadow: none; }
+
+/* ───────── Hausdetail und gemeinsame Ergänzungen ───────── */
+.hw .gut, .hw-gut { color: var(--gut); } .hw .schlecht, .hw-schlecht { color: var(--schlecht); } .hw-achtung { color: var(--stern); }
+.hw-abstand { height: 16px; }
+.hw-statusreihe { margin: 18px 0 0; }
+.hw-knoepfe.zweispaltig { display: grid; grid-template-columns: 1fr 1fr; }
+.hw-knoepfe .hw-knopf { min-width: 0; }
+.hw-felder { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 15px; margin-top: 6px; }
+.hw-feld { min-width: 0; }
+.hw-feldwert { display: block; font: var(--hw-t-titel); font-weight: 400; font-size: 15px; }
+.hw-feldunter { display: block; font: var(--hw-t-klein); color: var(--leise); margin-top: 2px; }
+.hw-person { display: grid; grid-template-columns: 119px 1fr; gap: 0 14px; align-items: start; margin-bottom: 22px; }
+.hw-person-name { margin: 2px 0 14px; font: var(--hw-t-titel); font-size: 19px; font-weight: 500; }
+.hw-person-daten .hw-marke { display: block; margin-bottom: 8px; }
+.hw-person-daten .hw-faehigkeit { grid-template-columns: 1fr 104px 22px; }
+.hw-person-daten .hw-faehigkeit .hw-skala-balken { width: 104px; }
+.hw-etagen { margin: 6px 0 4px; }
+.hw-etagenschnitt { display: block; width: 100%; height: auto; }
+/* Fenster auf die Stadt (Hausdetail): Blattgrund ausgespart, darunter beginnt der Boden mit Streifen. */
+#panel.hw.mit-fenster > .hw-grund { display: none; }
+#panel.hw.mit-fenster > .hw-inhalt { background: none; }
+.hw-fenster { position: relative; height: 270px; pointer-events: none; }
+.hw-fenster .hw-bildknopf { pointer-events: auto; right: 20px; bottom: 14px; }
+.hw-fenster .hw-bildknopf svg { position: absolute; inset: 7px; width: 30px; height: 30px; }
+.hw-boden { min-height: 100%; padding-bottom: 24px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+/* Figuren nach Besetzung (Coffee 30): eine Figur je 5 FTE. */
+.hw-figuren { display: flex; flex-wrap: wrap; gap: 6px 4px; margin: 18px 0 6px; }
+.hw-figuren i { position: relative; width: 12px; height: 26px; }
+.hw-figuren i::before { content: ''; position: absolute; left: 3px; top: 0; width: 6px; height: 6px; border-radius: 50%; background: var(--leise); opacity: .35; }
+.hw-figuren i::after { content: ''; position: absolute; left: 1px; top: 8px; width: 10px; height: 18px; border-radius: 4px 4px 2px 2px; background: var(--leise); opacity: .35; }
+.hw-figuren i.an::before, .hw-figuren i.an::after { background: var(--text); opacity: 1; }
+#panel.hw #pinhalt.hw-inhalt { padding-left: 0; padding-right: 0; padding-top: 0; }
+
+/* Gemeinsame Korrekturen (Hülle): Titel aus der Skala trotz alter Id-Regeln, Blattgrund für Kontrastprüfung. */
+#panel.hw #ptitel.hw-kopf-titel { font: var(--hw-t-kopf); color: var(--text); padding: 0; }
+#panel.hw #punter.hw-kopf-unter { font: var(--hw-t-kopf2); letter-spacing: -.5px; margin: 0; }
+#panel.hw:not(.mit-fenster) { background: var(--grund); }
+
+/* ═════════ Abschnitte je Bereich: jeder Bereich ergänzt nur hier (Konfliktvermeidung beim Zusammenführen) ═════════ */
+/* ── G1 Eigenmarken und Produktentwicklung ── */
+/* Hülle: Altregeln (spiel.html, komponenten.css, management.css) greifen nicht in G1-Bausteine. */
+/* Eigener Streifengrund wie .hw-boden: Text hat damit einen messbaren Hintergrund (Kontrastprüfung). */
+.hw-g1 { min-height: 100%; padding-bottom: 28px; color: var(--text); background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+/* Blattkopf in diesen Panels nach der Skala (komponenten.css setzt sonst 16 px). */
+#panel.hw:has(.hw-g1) #ptitel { font: var(--hw-t-kopf); }
+#panel.hw:has(.hw-g1) #punter { font: var(--hw-t-kopf2); letter-spacing: -.5px; }
+.hw-g1 .hw-ring > span b { font-size: 12.3px; }
+/* komponenten.css lenkt per #panel:has(.hk-bereich) --grund, --karte, --text, --leise auf die alten hk-Töne um
+   (Karte heller als der Grund). In G1 gelten wieder die Zentrale-Werte von oben: Karte dunkler als der Grund wie Coffee. */
+#panel.hw .hw-g1 { --grund: #213741; --karte: #0d161a; --text: #fff; --leise: #a6a7a7; }
+/* Primärknopf: Altregel .breit:not(.hk-knopf) nimmt sonst die Fläche. */
+#panel.hw .hw-g1 .hw-knopf { background: var(--f); border: 0; margin: 0; }
+#panel.hw .hw-g1 .hw-knopf.text { background: none; }
+/* Blatt im Vollbild auch im Einkauf-Panel (management.css begrenzt Q31-Panels auf 87 dvh). */
+#panel.hw.gross:has(.hw-g1) { height: auto; }
+/* Streifengrund bis ganz unten: kein dunkler Rest unter dem Inhalt. */
+#panel.hw:has(.hw-g1) > .hw-inhalt { padding-bottom: 0; }
+#panel.hw .hw-inhalt > .hw-g1:last-child { margin-bottom: 0; padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+/* Auswahlreihen (Marke, Kategorie): eine wischbare Zeile bis an den Rand, 20 px Einzug. */
+.hw-g1-wahlen { display: grid; gap: 8px; margin: 14px 0 0; }
+.hw-g1-chips.reihe { flex-wrap: nowrap; overflow-x: auto; padding: 0 var(--hw-rand); scroll-padding: 0 var(--hw-rand); scrollbar-width: none; }
+.hw-g1-chips.reihe::-webkit-scrollbar { display: none; }
+.hw-g1-chips.reihe > .hw-g1-chip { flex: none; white-space: nowrap; }
+.hw-g1 .hw-rumpf { padding: 0 var(--hw-rand); }
+.hw-g1 button { font: inherit; cursor: pointer; }
+.hw-g1 .hw-knopf { font: var(--hw-t-text); font-size: 13.5px; }
+.hw-g1 .hw-knopf.text { min-height: 44px; font-size: 13.5px; }
+.hw-g1 .hw-knopf.zweit, .hw-g1 .hw-knopf.gefahr { color: var(--text); }
+.hw-g1 .hw-knopf.gefahr { color: #fff; }
+.hw-g1 .hw-zeile small, .hw-g1 .hw-abschnitt small { font-size: 10.4px; }
+.hw-g1 .hw-abschnitt small { font: var(--hw-t-marke); color: var(--leise); }
+.hw-g1 .hw-zeile[aria-current='true'] { box-shadow: inset 3px 0 0 var(--akzent-linie); padding-left: 10px; }
+.hw-g1 .hw-zeile .hw-was small { color: var(--leise); }
+.hw-g1 .hw-marke, .hw-g1 .hw-feldname { color: var(--leise); }
+.hw-g1 .hw-feldname { margin-top: 14px; }
+.hw-g1 .hw-lese { color: var(--leise); }
+.hw-g1-notiz { margin: 8px 0 0; }
+.hw-g1 .hw-knoepfe .hw-knopf { flex: 1 1 auto; }
+.hw-g1 .hw-knoepfe.zweispaltig { margin-top: 18px; }
+.hw-g1 .hw-stepper { margin-top: 2px; }
+.hw-g1 .hw-stepper > output { color: var(--text); }
+.hw-g1 .hw-stepper > button { min-height: 0; }
+.hw-g1 .hw-stepper.gross > button { min-height: 44px; }
+.hw-g1 .hw-status { font-size: 11.8px; }
+.hw-g1 .hw-statusreihe { margin: 4px 0 0; }
+/* Rücksprung oben links (Textknopf), ohne Leerzeile darunter. */
+.hw-g1-oben { padding: 6px calc(var(--hw-rand) - 4px) 0; }
+.hw-g1-oben .hw-knopf { color: var(--akzent-linie); }
+/* Farbpunkte (Markenfarbe, Trendfarben) als SVG, keine farbigen Flächen. */
+.hw-g1-punkt { display: inline-block; vertical-align: -2px; flex: none; }
+/* Chipleiste: umbrechend, 44 px hoch, aktiv als Akzentfläche mit Doppelkontur (Coffee 26 Segment), sonst neutrale Zweitfläche. */
+.hw-g1-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.hw-g1-chip { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 0; border-radius: var(--hw-radius); color: var(--text); font: var(--hw-t-text); font-size: 13.5px;
+  --f: var(--zweit); --l: var(--zweit-linie); background: var(--f); box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--f), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--l); }
+.hw-g1-chip[aria-pressed='true'] { --f: var(--akzent); --l: var(--akzent-linie); color: #fff; }
+.hw-g1-chip small { font: var(--hw-t-klein); font-size: 10.4px; color: var(--leise); }
+.hw-g1-chip[aria-pressed='true'] small { color: #fff; }
+.hw-g1-chip:disabled { opacity: .45; }
+/* Abteilung als Segment über die volle Breite (Coffee 26 HOT / COLD / FOOD). */
+.hw-g1-fach { margin: 14px 0 0; }
+.hw-g1-fach .hw-segment > button { min-height: 44px; }
+/* Sortiment: Kategorie als Abschnittskopf zum Antippen, darunter Kachelraster. */
+.hw-g1-baum { margin: 14px 0 0; }
+.hw-g1-kat { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); background: none; color: var(--text); text-align: left;
+  font: 400 14.6px/1.2 var(--hw-schrift); text-transform: uppercase; letter-spacing: .01em; }
+.hw-g1-kat span { flex: 1; min-width: 0; }
+.hw-g1-kat small { font: var(--hw-t-marke); color: var(--leise); text-transform: none; }
+.hw-g1-kat i { flex: none; width: 20px; text-align: center; font-style: normal; font: 400 19px/1 var(--hw-schrift); color: var(--akzent-linie); }
+.hw-g1-kat[aria-expanded='true'] { border-bottom-color: transparent; }
+.hw-g1-ast { display: block; margin: 12px 0 8px; }
+.hw-g1-kacheln { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 14px; }
+.hw-g1-kachel { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 112px; padding: 8px 6px 10px; border: 0; color: var(--text); --f: var(--karte); --l: var(--kartenlinie); }
+.hw-g1-kachel.voll { --f: var(--tief); --l: var(--zweit-linie); }
+.hw-g1-kachel.voll .hw-g1-kachelbild { opacity: .55; }
+.hw-g1-kachelbild { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; }
+.hw-g1-kachelbild svg { width: 64px; height: 64px; }
+.hw-g1-kachelname { font: var(--hw-t-text); font-size: 11.85px; line-height: 1.2; text-align: center; overflow-wrap: anywhere; hyphens: auto; -webkit-hyphens: auto; color: var(--text); }
+.hw-g1-kachel small { font: var(--hw-t-klein); color: var(--stern); }
+/* Schritte des Assistenten: drei bzw. fünf Punkte mit Namen, aktiv als Akzent. */
+.hw-g1-schritte { display: flex; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+.hw-g1-schritte li { flex: 1; display: flex; align-items: center; gap: 6px; min-width: 0; min-height: 28px; color: var(--leise); font: var(--hw-t-klein); font-size: 10.4px; }
+.hw-g1-schritte li i { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 6px; font-style: normal; background: var(--feld); box-shadow: inset 0 0 0 1px var(--feldlinie); color: var(--leise); }
+.hw-g1-schritte li.an { color: var(--text); }
+.hw-g1-schritte li.an i { background: var(--akzent); box-shadow: inset 0 0 0 1px var(--akzent-linie); color: #fff; }
+.hw-g1-schritte li.fertig i { background: var(--zweit); color: var(--text); }
+.hw-g1-schritte button { display: flex; align-items: center; gap: 6px; width: 100%; min-height: 44px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; }
+.hw-g1-schritte.fuenf li { gap: 4px; }
+.hw-g1-schritte.fuenf button { flex-direction: column; align-items: center; gap: 3px; text-align: center; }
+/* Gewählter Artikel: Bild links, Name und Pfad rechts, kein Kasten. */
+.hw-g1-gewaehlt { display: flex; align-items: center; gap: 14px; margin: 16px 0 0; }
+.hw-g1-gewaehltbild svg { width: 72px; height: 72px; display: block; }
+.hw-g1-gewaehlt b { display: block; font: var(--hw-t-titel); }
+.hw-g1-gewaehlt small { display: block; margin-top: 3px; font: var(--hw-t-klein); color: var(--leise); }
+/* Typ-Kacheln (Coffee 01 bis 08: Zielgruppe, Preislage, Vorlage, Beschaffung): zweispaltig, aktiv mit Akzentkontur. */
+.hw-g1-typen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.hw-g1-typen.drei { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.hw-g1-typen.eins { grid-template-columns: 1fr; }
+.hw-g1-typ { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; min-height: 64px; padding: 12px 14px; border: 0; color: var(--text); text-align: left; --f: var(--karte); --l: var(--kartenlinie); }
+.hw-g1-typ b { font: var(--hw-t-text); font-size: 13.5px; }
+.hw-g1-typ small { font: var(--hw-t-klein); color: var(--leise); }
+.hw-g1-typ[aria-pressed='true'] { --f: var(--akzent-aktiv); --l: var(--akzent-linie); }
+.hw-g1-typ[aria-pressed='true'] small { color: #fff; }
+/* Farbwahl: runde Farbpunkte 44 × 44, aktiv mit heller Kontur. */
+.hw-g1-farben { display: flex; flex-wrap: wrap; gap: 4px; }
+.hw-g1-farbknopf { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: var(--hw-radius); background: none; }
+.hw-g1-farbknopf[aria-pressed='true'] { box-shadow: inset 0 0 0 2px var(--text); }
+.hw-g1-qualitaet .hw-stepper, .hw-g1 .hw-feld .hw-stepper { width: 100%; }
+.hw-g1-dauer .hw-segment { margin: 0; }
+.hw-g1-dauer .hw-segment > button { min-height: 44px; }
+.hw-g1-eingabe { display: block; width: 100%; min-height: 44px; padding: 0 14px; border: 0; border-radius: var(--hw-radius); background: var(--feld); box-shadow: inset 0 0 0 1px var(--feldlinie); color: var(--text); font: var(--hw-t-titel); font-size: 15px; }
+.hw-g1-wahl { display: block; width: 100%; min-height: 44px; padding: 0 12px; border: 0; border-radius: var(--hw-radius); background: var(--feld); box-shadow: inset 0 0 0 1px var(--feldlinie); color: var(--text); font: var(--hw-t-text); font-size: 13.5px; }
+/* Produktkarussell (Coffee 26): Bild ragt 46 px über die Karte; Karte 300 px, Nachbar schaut heraus. */
+.hw-g1-karussell { margin: 14px 0 0; }
+.hw-g1-karussell .hw-karussell { padding: 52px 45px 4px; scroll-padding: 0 45px; }
+.hw-g1-karussell .hw-karte { flex-basis: 300px; padding: 70px 22px 20px; }
+.hw-g1-karussell .hw-punkte { margin: 14px 0 0; }
+.hw-g1-bild { position: absolute; left: 50%; top: -52px; transform: translateX(-50%); display: flex; align-items: flex-end; justify-content: center; width: 124px; height: 116px; padding: 0; border: 0; background: none; }
+.hw-g1-bild svg { width: 110px; height: 110px; display: block; }
+.hw-g1-papierkorb { position: absolute; right: 8px; top: 8px; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; background: none; color: var(--text); }
+.hw-g1-titel { margin: 0 6px; }
+.hw-g1-unter { margin: 4px 0 0; text-align: center; font: var(--hw-t-klein); color: var(--leise); }
+.hw-g1-sternzeile { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 0; }
+.hw-g1 .hw-sterne svg { width: 23px; height: 23px; }
+.hw-g1-sternzahl { font: var(--hw-t-klein); color: var(--leise); }
+.hw-g1-mitte { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 8px; margin: 22px 0 0; }
+.hw-g1-schalter .hw-schalterzeile { margin: 0; min-height: 44px; gap: 10px; font-weight: 400; }
+.hw-g1-verkauf { text-align: right; }
+.hw-g1-verkauf .hw-marke, .hw-g1-verkauf .hw-zahl, .hw-g1-verkauf .hw-abw { display: block; }
+.hw-g1-verkauf .hw-zahl { margin-top: 5px; }
+.hw-g1-verkauf .hw-abw { margin-top: 3px; color: var(--text); }
+.hw-g1-verkauf .hw-abw.hw-gut { color: var(--gut); } .hw-g1-verkauf .hw-abw.hw-schlecht { color: var(--schlecht); }
+.hw-g1-preisblock { display: grid; grid-template-columns: 80px 1fr; align-items: end; gap: 0 22px; margin: 16px 0 0; }
+.hw-g1-ringspalte { display: flex; flex-direction: column; gap: 6px; }
+.hw-g1-ek { font: var(--hw-t-klein); color: #f08a66; white-space: nowrap; }
+.hw-g1-preis .hw-marke { display: block; margin-bottom: 8px; }
+.hw-g1-preis .hw-stepper { width: 100%; height: 44px; }
+.hw-g1-preis .hw-stepper > button { flex-basis: 40px; min-height: 44px; }
+.hw-g1-preis .hw-stepper > button::before { top: 20.7px; left: 13px; right: 13px; }
+.hw-g1-preis .hw-stepper > button.plus::after { top: 15px; height: 14px; left: 18.7px; }
+.hw-g1-preis .hw-stepper > output { font-size: 15.25px; }
+.hw-g1-preis .hw-zahl { display: block; }
+.hw-g1-preis .hw-abw { display: block; margin-top: 4px; color: var(--leise); }
+.hw-g1-frage { margin: 14px 0 0; }
+.hw-g1-entwicklung { margin: 20px 0 0; }
+.hw-g1-fortschritt { height: 14px; margin: 8px 0 6px; border-radius: 7px; background: var(--skala-grund); padding: 2px; box-shadow: inset 0 0 0 1px var(--kartenlinie); }
+.hw-g1-fortschritt i { display: block; height: 100%; border-radius: 5px; background: var(--skala); }
+.hw-g1-zeile2 { display: flex; justify-content: space-between; font: var(--hw-t-klein); color: var(--text); }
+.hw-g1-vorschau { position: relative; margin: 52px 0 0; padding: 70px 22px 20px; }
+.hw-g1-vorschaubild { pointer-events: none; }
+.hw-g1-vorschaubild svg + svg { display: none; }
+/* Fähigkeitsskalen in Spalte: Name links fest, Skala, Zahl. */
+.hw-g1-skalen { display: grid; gap: 8px; margin: 4px 0 0; }
+.hw-g1-skalen .hw-faehigkeit { grid-template-columns: 112px 1fr 30px; gap: 10px; height: 22px; }
+.hw-g1-skalen .hw-faehigkeit > span:first-child { text-align: left; color: var(--leise); }
+.hw-g1-skalen .hw-faehigkeit .hw-skala-balken { width: auto; }
+.hw-g1-skalen .hw-faehigkeit b { text-align: right; }
+/* Absatz (Coffee 08): zwei Serien in eigener Farbe, Linien mit großem Endpunkt. */
+.hw-g1-serien { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: right; }
+.hw-g1-serien .hw-marke { display: block; }
+.hw-g1-serien b { display: block; margin-top: 6px; font: var(--hw-t-wert); }
+.hw-g1-serien small { display: block; margin-top: 3px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-g1-serie-a { color: var(--ring-a); } .hw-g1-serie-b { color: #7fc8d6; }
+.hw-g1-linien { display: block; width: 100%; height: auto; margin: 16px 0 0; }
+.hw-g1-linien polyline { fill: none; stroke-width: 2.6; stroke-linejoin: round; stroke-linecap: round; }
+.hw-g1-linien .a { stroke: var(--ring-a); fill: var(--ring-a); } .hw-g1-linien polyline.a { fill: none; }
+.hw-g1-linien .b { stroke: #7fc8d6; fill: #7fc8d6; } .hw-g1-linien polyline.b { fill: none; }
+.hw-g1-wochen span { flex: 0 0 52px; }
+/* Summenzeile der Kollektionstafel: Strich darüber wie Coffee-GuV. */
+.hw-g1-summe { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0 0; box-shadow: inset 0 1px 0 0 var(--text); font: var(--hw-t-text); }
+.hw-g1-summe b { font-weight: 500; }
+.hw-g1-akte { margin-top: 30px; }
+.hw-g1-akte > span { display: inline-flex; align-items: center; gap: 8px; }
+/* Trendbericht: Farbpunkte rechts in der Zeile. */
+.hw-g1-trendfarben { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; max-width: 90px; }
+.hw-g1-trend .hw-was small + small { margin-top: 2px; }
+/* Produktdetail: Bild frei auf dem Grund, mittig. */
+.hw-g1-detailbild { display: flex; justify-content: center; margin: 16px 0 0; }
+.hw-g1-detailbild svg { width: 200px; height: auto; max-height: 240px; }
+/* ── G2 Einkauf, Ware, Planung, Vertrieb ── */
+/* Blatt: Marker .hw-g2 (g2-buch.js). Kopf und Reiter aus der Skala, Grund mit Streifen hinter dem Inhalt (Kontrast),
+   Reiterleiste mit bis zu sechs gleich breiten Plätzen. */
+#panel:has(.hw-g2) #ptitel { font: var(--hw-t-kopf); }
+#panel:has(.hw-g2) #punter { font: var(--hw-t-kopf2); font-size: 12px; color: var(--leise); }
+#panel:has(.hw-g2) > .hw-inhalt { background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+#panel:has(.hw-g2) #preiter > .hw-reiter { padding: 0 6px; }
+#panel:has(.hw-g2) #preiter > .hw-reiter > button { flex: 1 1 0; min-width: 0; max-width: 80px; font-size: 10.4px; }
+#panel:has(.hw-g2) #preiter > .hw-reiter > button[aria-current='page'] { margin: 0; flex-basis: 0; }
+#panel:has(.hw-g2) #preiter > .hw-reiter > button > span { letter-spacing: 0; }
+#panel:has(.hw-g2) .hw-rumpf .hw-segment { margin: 0; }
+#panel:has(.hw-g2) .hw-rumpf > .hw-gross:first-child { margin-top: 22px; }
+.hw-g2-oben { margin: 18px 0 0; }
+.hw-g2-oben > .hw-knopf.text { min-height: 44px; padding: 0; }
+.hw-g2-oben + .hw-gross { margin-top: 22px; }
+.hw-gross .hw-abw .hw-schlecht, .hw-gross .hw-abw .hw-gut { font: inherit; }
+
+/* Buch wie die Coffee-GuV: Kopf in Versalien, Beschriftung dünn grau, Zahlen weiß rechts in festen Spalten, Strich vor Summen. */
+.hw-g2-buch { margin: 24px 0 0; font: 400 12.3px/18px var(--hw-schrift); font-variant-numeric: tabular-nums; }
+.hw-g2-reihe { display: flex; align-items: center; gap: 0 10px; width: 100%; min-height: 30px; margin: 0; padding: 5px 0; border: 0; background: none; color: var(--text); font: inherit; text-align: left; }
+button.hw-g2-reihe { min-height: 44px; }
+.hw-g2-reihe.kopf { align-items: flex-end; padding: 0 0 6px; }
+.hw-g2-reihe.kopf .hw-g2-name { color: var(--text); font: 400 14.2px/1.2 var(--hw-schrift); text-transform: uppercase; }
+.hw-g2-reihe.kopf .hw-g2-w { color: var(--leise); font-size: 12px; white-space: normal; line-height: 1.2; }
+.hw-g2-name { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 6px; color: var(--marke); font-weight: 300; overflow-wrap: anywhere; }
+.hw-g2-name small { display: block; margin-top: 1px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-g2-w { flex: 0 0 var(--sw, 84px); text-align: right; white-space: nowrap; color: var(--text); }
+.hw-g2-w.hw-achtung { color: var(--stern); }
+.hw-g2-w.hw-leise { color: var(--leise); }
+.hw-g2-auf { flex: 0 0 10px; font-style: normal; color: var(--leise); }
+.hw-g2-sort { min-height: 44px; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: right; }
+.hw-g2-name.hw-g2-sort { text-align: left; align-items: flex-end; padding-bottom: 0; }
+.hw-g2-reihe.kopf .hw-g2-sort { display: flex; align-items: flex-end; justify-content: flex-end; padding-bottom: 1px; }
+.hw-g2-reihe.kopf .hw-g2-name.hw-g2-sort { justify-content: flex-start; }
+.hw-g2-reihe.bereich { margin-top: 8px; }
+.hw-g2-reihe.bereich .hw-g2-name { color: var(--text); font-weight: 400; }
+.hw-g2-reihe.unter .hw-g2-name { padding-left: 16px; }
+.hw-g2-reihe.summe { margin-top: 4px; }
+.hw-g2-reihe.summe .hw-g2-name { color: var(--text); font-weight: 400; }
+.hw-g2-reihe.summe .hw-g2-w { box-shadow: inset 0 1px 0 0 var(--text); padding-top: 5px; margin-top: -5px; }
+.hw-g2-fuss { margin: 10px 0 0; font: var(--hw-t-lese); line-height: 14px; color: var(--leise); }
+
+/* Vorgang (Freigabe): Zeile links, genau eine Aktion rechts; Details und Nebenaktionen erst nach Antippen. */
+.hw-g2-vorgang { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 10px; border-top: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-g2-vorgang > .hw-knopf { min-width: 60px; }
+.hw-g2-vorgang > .hw-g2-details, .hw-g2-vorgang > .hw-knoepfe { grid-column: 1 / -1; }
+.hw-g2-vorgang .hw-g2-name { color: var(--text); font-weight: 400; }
+.hw-g2-details { margin: 0; font: var(--hw-t-lese); line-height: 14px; color: var(--leise); }
+.hw-g2-aktionen { margin: 8px 0 12px; }
+.hw-g2-ausklapp { padding: 2px 0 12px; }
+
+/* Eingabezeile im Buch (Planung: Ziele je Knoten und Warengruppe). */
+.hw-g2-eingabe { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 4px 0; border-top: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-g2-eingabe .hw-g2-name { color: var(--text); font-weight: 400; }
+.hw-g2-eingabe > .hw-g2-auswahl { flex: 0 0 var(--sw, 96px); width: var(--sw, 96px); text-align: right; }
+.hw-g2-eingabe.tiefe-2 .hw-g2-name { padding-left: 12px; } .hw-g2-eingabe.tiefe-3 .hw-g2-name { padding-left: 24px; } .hw-g2-eingabe.tiefe-4 .hw-g2-name { padding-left: 36px; }
+
+/* Auswahl- und Zahlenfeld mit Doppelkontur wie der Stepper. */
+#panel.hw .hw-g2-auswahl { display: block; width: 100%; height: 44px; min-height: 44px; margin: 0; padding: 0 12px; border: 0; --f: var(--feld); --l: var(--feldlinie); color: var(--text); font: var(--hw-t-text); font-size: 13.5px; -webkit-appearance: none; appearance: none; }
+#panel.hw select.hw-g2-auswahl { padding-right: 32px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23ffffff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 12px 8px; }
+#panel.hw .hw-g2-auswahl option { background: var(--feld); color: var(--text); }
+
+/* Primärknopf voll gefüllt (die Altregel .breit im dunklen Blatt nahm ihm die Fläche). */
+#panel:has(.hw-g2) .hw-knopf.breit, #panel .hw-g2-vertrieb .hw-knopf.breit { background: var(--f); border: 0; margin-bottom: 0; color: #fff; }
+#panel:has(.hw-g2) .hw-knopf.zweit.breit, #panel .hw-g2-vertrieb .hw-knopf.zweit.breit { color: var(--text); }
+#panel:has(.hw-g2) .hw-rumpf .hw-tabelle { margin-top: 24px; }
+#panel:has(.hw-g2) .hw-legende + .hw-tabelle, #panel:has(.hw-g2) .hw-balkenfeld + .hw-tabelle { margin-top: 30px; }
+.hw-g2-fuss + .hw-feld, .hw-g2-fuss + .hw-segment { margin-top: 18px; }
+.hw-g2-reihe.kopf .hw-g2-w { white-space: nowrap; }
+.hw-g2-reihe.kopf .hw-g2-name { overflow-wrap: normal; }
+
+/* Vertriebssteuerung im Organisationsblatt: eigener Rand und Grund (das Blatt der Organisation setzt keinen). */
+.hw-g2-vertrieb { padding: 0 var(--hw-rand) 8px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+.hw-g2-vertrieb > .hw-knoepfe:first-child { margin-top: 0; padding-top: 12px; }
+.hw-g2-vertrieb .hw-knopf.text { min-height: 44px; padding: 0; }
+/* ── G3 Marketing, E-Commerce, IT ── */
+/* Marker <i class="hw-g3"> im Inhalt. Kopftitel und Reiter auf die Skala (komponenten.css setzt 16 px bzw. 10 px). */
+/* komponenten.css lenkt --grund, --karte, --text, --leise am #panel auf die hellere Q30-Palette um; hier wieder die Hartwig-Zentralewerte. */
+#panel:has(.hw-g3) { --grund: #213741; --karte: #0d161a; --text: #fff; --leise: #a6a7a7; color: var(--text); }
+#panel:has(.hw-g3) #ptitel.hw-kopf-titel { font: var(--hw-t-kopf); }
+#panel:has(.hw-g3) #preiter > .hw-reiter { padding: 0 6px; }
+#panel:has(.hw-g3) #preiter > .hw-reiter > button { flex: 1 1 0; min-width: 0; max-width: 80px; margin: 0; font-size: 10.4px; }
+#panel:has(.hw-g3) #preiter > .hw-reiter > button[aria-current='page'] { flex: 1 1 0; margin: 0 2px; }
+#panel:has(.hw-g3) > .hw-inhalt { background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+#panel:has(.hw-g3) .hw-rumpf .hw-segment { margin: 0; }
+#panel:has(.hw-g3) .hw-rumpf > .hw-segment:first-child, #panel:has(.hw-g3) .hw-rumpf > .hw-feld:first-child, #panel:has(.hw-g3) .hw-rumpf > .hw-g3-produkttitel:first-child { margin-top: 18px; }
+#panel:has(.hw-g3) .hw-rumpf > .hw-gross:first-child { margin-top: 18px; }
+#panel:has(.hw-g3) .hw-karussell { margin-top: 4px; padding-top: 2px; padding-bottom: 2px; }
+#panel:has(.hw-g3) .hw-karussell + .hw-punkte { margin-top: 15px; }
+.hw-g3-notiz { margin: 10px 0 0; color: var(--leise); }
+.hw-g3-leise { margin: 14px 0 0; color: var(--leise); }
+.hw-g3-abstand { margin-top: 16px; }
+/* Summenzeile im Buch: Strich darüber, Zahl weiß (Coffee 22). */
+.hw-zeile.hw-g3-summe { box-shadow: inset 0 1px 0 0 var(--text); font-weight: 500; }
+/* Große Skala im Rumpf (Coffee 05): fünf Segmente, Wert rechts. */
+.hw-g3-skalaname { display: block; margin: 18px 0 8px; }
+.hw-g3-skala { padding: 0; }
+.hw-g3-skala .hw-skala-balken { flex: 1 1 auto; }
+.hw-g3-skala .hw-skala-wert { flex: 0 0 auto; min-width: 60px; margin-left: 14px; }
+
+/* Kanalkarte im Karussell (Coffee 05): Illustration oben, Titel, Text, Verantwortlich, Wochenbudget. */
+.hw-g3-kanal { display: flex; flex-direction: column; height: 100%; padding: 14px 18px 20px; }
+.hw-g3-bild { display: flex; justify-content: center; align-items: flex-end; height: 132px; margin-bottom: 10px; }
+.hw-g3-bild > svg { height: 100%; width: auto; max-width: 100%; }
+.hw-g3-links { text-align: left; }
+.hw-g3-text { margin: 10px 0 0; flex: 1 0 auto; }
+.hw-g3-team { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 16px 0 14px; }
+.hw-g3-team .hw-marke, .hw-g3-wert { display: block; }
+.hw-g3-wert { margin-top: 3px; font: var(--hw-t-text); }
+.hw-g3-teamknoepfe { display: flex; gap: 8px; flex: none; align-items: center; }
+.hw-g3-teamknoepfe .hw-knopf { padding: 0 14px; }
+.hw-g3-kanal .hw-feld + .hw-feld { margin-top: 12px; }
+
+/* Kacheln zweispaltig (Coffee 23–24): Illustration, Titel mittig, Stufe links, Betrag rechts, „je Woche“. */
+.hw-g3-kacheln { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.hw-g3-kachel { position: relative; display: grid; grid-template-rows: 92px auto auto auto; min-width: 0; padding: 14px 14px 16px; border: 0; color: var(--text); text-align: center;
+  --f: var(--karte); --l: var(--kartenlinie); background: var(--f); box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--f), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--l); border-radius: var(--hw-radius); }
+.hw-g3-kachel[aria-pressed='true'] { --l: var(--akzent-linie); }
+.hw-g3-kachelbild { display: flex; justify-content: center; align-items: center; height: 92px; }
+.hw-g3-kachelbild > svg { height: 84px; width: auto; max-width: 100%; }
+.hw-g3-kacheltitel { margin-top: 10px; font: var(--hw-t-titel); font-size: 15px; }
+.hw-g3-kachelwert { margin-top: 10px; text-align: right; font: var(--hw-t-wert); white-space: nowrap; }
+.hw-g3-kachelfuss { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; margin-top: 3px; font: var(--hw-t-text); font-size: 11.6px; text-align: left; }
+.hw-g3-kachelfuss small { flex: none; font: var(--hw-t-text); font-size: 11.6px; color: var(--leise); }
+.hw-g3-steuer { grid-column: 1 / -1; padding: 4px 0 6px; }
+.hw-g3-steuer .hw-schalterzeile { margin-top: 0; }
+
+/* Marktanteil (Coffee 25): Ring links, Legende rechts. */
+.hw-g3-markt { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: center; }
+.hw-g3-ring { width: 150px; height: 150px; }
+.hw-g3-ring text { font: 400 11px var(--hw-schrift); fill: var(--tief); }
+.hw-g3-ring-hartwig { stroke: var(--gut); background: var(--gut); }
+.hw-g3-ring-volkskauf { stroke: #8fd18f; background: #8fd18f; }
+.hw-g3-ring-fundus { stroke: #c9e6c4; background: #c9e6c4; }
+.hw-g3-ring-wettbewerber { stroke: #ffffff; background: #ffffff; }
+.hw-g3-farbe { display: inline-block; width: 9px; height: 9px; margin-right: 8px; border-radius: 2px; vertical-align: 0; }
+.hw-g3-markt .hw-zeile { min-height: 36px; padding: 6px 0; font-size: 11.85px; }
+
+/* Aktionskalender: Jahresleiste mit Balken je Aktion. */
+.hw-g3-zeitleiste { display: block; width: 100%; height: auto; }
+.hw-g3-linie { stroke: var(--kartenlinie); stroke-width: 1; opacity: .6; }
+.hw-g3-monat { font: 400 10px var(--hw-schrift); fill: var(--leise); }
+.hw-g3-jetzt { stroke: var(--stern); stroke-width: 1.6; }
+rect.hw-g3-akt-geplant { fill: var(--akzent-linie); } rect.hw-g3-akt-laufend { fill: var(--gut); } rect.hw-g3-akt-beendet { fill: var(--punkt); }
+rect.hw-g3-akt-abgesagt { fill: none; stroke: var(--punkt); stroke-dasharray: 2 2; }
+.hw-legende i.hw-g3-akt-geplant { background: var(--akzent-linie); } .hw-legende i.hw-g3-akt-laufend { background: var(--gut); } .hw-legende i.hw-g3-akt-beendet { background: var(--punkt); }
+
+/* Digitale Produkte: Karte im Karussell, Detail wie Coffee 12–14. */
+.hw-g3-produkt { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; padding: 14px 18px 20px; border: 0; background: none; color: var(--text); text-align: center; }
+.hw-g3-produkt .hw-g3-text { margin: 8px 0 14px; flex: 1 0 auto; }
+.hw-g3-produkt .hw-zahl { margin-top: 6px; }
+.hw-g3-produkt .hw-abw { margin-top: 4px; }
+.hw-g3-mitte { display: flex; gap: 10px; align-items: baseline; justify-content: center; margin-top: 8px; }
+.hw-g3-mitte .hw-status { margin: 0; }
+.hw-g3-fuss { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 16px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-g3-sterne { gap: 1px; }
+.hw-g3-sterne i { display: block; width: 14px; height: 14px; }
+.hw-g3-sterne svg { display: block; width: 14px; height: 14px; }
+.hw-g3-sterne i.aus { color: var(--punkt); opacity: .55; }
+.hw-g3-produkttitel { margin: 18px 0 0; font: var(--hw-t-titel); font-size: 19px; }
+.hw-g3-vorstellung { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: center; margin-top: 14px; }
+.hw-g3-vorstellung .hw-g3-bild { height: 120px; margin: 0; }
+.hw-g3-vorstellung p { margin: 0 0 6px; }
+.hw-g3-kurve { margin-top: 18px; }
+.hw-g3-kurve svg { display: block; width: 100%; height: auto; overflow: visible; }
+.hw-g3-kurve polyline { fill: none; stroke: var(--gut); stroke-width: 2.6; stroke-linejoin: round; }
+.hw-g3-kurve circle { fill: var(--gut); }
+.hw-g3-kurve circle.letzter { stroke: color-mix(in srgb, var(--gut) 35%, transparent); stroke-width: 6; }
+.hw-g3-kurve .hw-balkenfuss span { flex: 0 0 auto; }
+.hw-g3-version { margin-top: 24px; padding: 18px 22px 18px; --f: var(--karte); --l: var(--kartenlinie); }
+.hw-g3-version .hw-marke { display: block; }
+.hw-g3-versionzeile { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+.hw-g3-version .hw-g3-mitte { justify-content: flex-start; }
+.hw-g3-version .hw-g3-sterne i, .hw-g3-version .hw-g3-sterne svg { width: 20px; height: 20px; }
+
+/* Online: Hauszeile mit Knöpfen rechts. */
+.hw-g3-haus .hw-g3-teamknoepfe { flex-direction: column; align-items: flex-end; gap: 6px; }
+.hw-g3-haus .hw-status { margin: 0; }
+/* ── G4 Zentrale, Organisation, Vorstand, Personaleinsatz, Reporting ── */
+/* Marker .hw-g4 im Inhalt: Blattgrund liegt auf dem Inhalt selbst (Kontrastprüfung sieht den Grund), Kopf und Reiter aus der Skala. */
+#panel.hw > .hw-inhalt:has(> .hw-g4) { background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+#panel.hw:has(.hw-g4) #ptitel { font: var(--hw-t-kopf); }
+#panel.hw:has(.hw-g4) #preiter .hw-reiter > button { font: var(--hw-t-klein); }
+.hw-g4 { display: none; }
+/* Kopfbild der Zentrale: Etagenschnitt, Bildknopf unten links (Coffee 20), Bildzeile darunter leise. */
+.hw-kopfbild .hw-bildknopf-links { left: var(--hw-rand); bottom: 14px; }
+.hw-kopfbild .hw-bildknopf svg { position: absolute; inset: 7px; width: 30px; height: 30px; }
+.hw-bildzeile { margin: 6px var(--hw-rand) 0; font: var(--hw-t-klein); color: var(--leise); }
+.hw-leise { color: var(--leise); }
+.hw-unterkopf { margin: -4px 0 6px; }
+#panel:has(.hw-g4) .hw-rumpf .hw-segment { margin: 0; }
+.hw-unterzeile { margin: 10px 0 0; }
+.hw-auswahl { margin: 10px 0 0; }
+.hw-gruppe { display: block; margin: 14px 0 2px; }
+.hw-skalen { display: grid; gap: 6px; margin: 16px 0 6px; }
+.hw-skalen .hw-faehigkeit { grid-template-columns: 1fr 120px 28px; }
+.hw-zeile[aria-current='true'] .hw-was { color: var(--akzent-linie); }
+/* Kleine Kit-Figur in Listenzeilen (Teamstimmen, Kandidaten, Vorstandsplätze). */
+.hw-figur { flex: none; position: relative; width: 38.7px; height: 44px; overflow: hidden; }
+.hw-figur svg { position: absolute; left: -5px; bottom: -6px; width: 50px; height: 50px; }
+.hw-figur.leer::after { content: ''; position: absolute; left: 9px; right: 9px; bottom: 6px; height: 24px; border-radius: 6px 6px 2px 2px; box-shadow: inset 0 0 0 1.3px var(--kartenlinie); }
+/* Wasserfall im Reporting: Spur zwischen Beschriftung und Wert, schwebende Balken (Plus grün, Minus rot), Summe mit Strich. */
+.hw-wf .hw-was { flex: 0 0 104px; }
+.hw-wf-spur { position: relative; flex: 1; height: 14px; }
+.hw-wf-spur i { position: absolute; top: 0; height: 14px; }
+.hw-wf-marke { width: 2px; margin-left: -1px; background: var(--text); }
+.hw-wf-balken { border-radius: 3px; background: var(--gut); }
+.hw-wf-balken.minus { background: var(--schlecht); }
+.hw-wf .hw-wert { flex: 0 0 92px; }
+.hw-wf .hw-wf-summe { box-shadow: inset 0 1px 0 0 var(--text); }
+/* Sitzungsvorlage, Freigabegrenze, Kandidatenkarte im Karussell (Coffee 26 Rahmen, Coffee 28 Inhalt). */
+.hw-vorlage { margin: 0 0 4px; font: var(--hw-t-text); font-weight: 500; }
+.hw-grenze { margin: 4px 0 10px 63px; }
+.hw-kandidat { padding: 18px 16px 16px; }
+.hw-kandidat-kopf { display: grid; grid-template-columns: 80px 1fr; gap: 12px; align-items: center; }
+.hw-kandidat-kopf .hw-portraet { width: 80px; height: 104px; }
+.hw-kandidat-kopf .hw-person-name { margin: 0 0 6px; }
+.hw-kandidat .hw-skalen .hw-faehigkeit { grid-template-columns: 1fr 120px 28px; }
+#panel:has(.hw-g4) .hw-karussell { margin-top: 8px; }
+#panel:has(.hw-g4) .hw-punkte { margin-top: 12px; }
+#panel:has(.hw-g4) .hw-karte { height: auto; }
+
+/* ── G5 Posteingang, Wochenbericht, Portfolio, Reise, Umbau, Statistik ── */
+/* Blattkopf im Spielblatt: Titel aus der Skala (überschreibt die alte Größe aus spiel.html/komponenten.css). */
+#panel.hw:has(.hw-g5) #ptitel.hw-kopf-titel { font: var(--hw-t-kopf); color: var(--text); padding: 0; }
+/* Grund des Inhalts: gleiche Streifen wie .hw-grund, damit Text einen echten Hintergrund hat (Kontrastprüfung). */
+.hw-g5 { min-height: 100%; background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); padding-bottom: 8px; }
+.hw-g5 > .hw-rumpf > .hw-segment:first-child { margin-top: 18px; }
+.hw-g5 .hw-segment { margin: 0; }
+.hw-g5 .hw-segment + .hw-segment, .hw-g5 .hw-segment + .hw-feld, .hw-g5 .hw-feld + .hw-feld { margin-top: 12px; }
+.hw-g5 .hw-feld { margin-top: 18px; }
+/* Enge Segmentleiste für viele oder lange Teile: Text regulär, Teile so breit wie ihr Wort. */
+.hw-segment.eng > button { flex: 1 1 auto; padding: 0 7px; gap: 0; font-size: 11.85px; text-transform: none; letter-spacing: 0; white-space: nowrap; min-width: 0; }
+.hw-text { margin: 10px 0 0; font: var(--hw-t-lese); color: var(--leise); }
+.hw-g5 .hw-text + .hw-segment, .hw-g5 #pp-ampel + .hw-segment { margin-top: 18px; }
+.hw-g5 .hw-knoepfe .hw-knopf.text { min-height: 44px; }
+/* Suchfeld (Feldfarben wie Stepper-Mitte). */
+.hw-suche { display: block; width: 100%; height: 44px; margin: 14px 0 0; padding: 0 16px; border: 0; border-radius: var(--hw-radius); background: var(--feld); color: var(--text); font: var(--hw-t-text); font-size: 15px;
+  box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--feld), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--feldlinie); -webkit-appearance: none; appearance: none; }
+.hw-suche::placeholder { color: var(--leise); }
+.hw-suche:focus { outline: 2px solid var(--akzent-linie); outline-offset: 1px; }
+
+/* Posteingang: Vorgang als Listenzeile mit einer Hauptaktion. */
+.hw-vorgang { padding: 0 0 12px; border-bottom: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-vorgang:last-child { border-bottom: 0; }
+.hw-vorgang > .hw-zeile { border-bottom: 0; }
+.hw-vorgang .hw-knoepfe { margin-top: 2px; align-items: center; }
+.hw-vorgang .hw-lese { margin: 0 0 10px; color: var(--leise); }
+.hw-vorgang .hw-segment { margin: 4px 0 10px; }
+.hw-vorgang .hw-schalterzeile { margin: 0 0 6px; }
+.hw-vorgang-miete { padding: 6px 0 4px; border-top: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-ungelesen .hw-was { font-weight: 600; }
+
+/* Wochenabschluss und Reise: eigenes Vollbild-Blatt außerhalb von #panel (gleiche Lagen wie #panel.hw). */
+#reise-overlay, #wochen-overlay { position: fixed; inset: 0; z-index: 10; pointer-events: auto; }
+#reise-overlay[hidden], #wochen-overlay[hidden], #wochenstreifen[hidden] { display: none !important; }
+body.reise-aktiv .unten, body.wochen-aktiv .unten { pointer-events: none; }
+.chipstadt { color: var(--text); text-align: left; }
+.hw-blatt { position: absolute; inset: 0; width: auto; height: auto; }
+.hw-blatt [hidden] { display: none !important; }
+.hw-blatt > .hw-kopf { height: calc(50px + env(safe-area-inset-top)); }
+.hw-blatt .hw-kopf-symbol { top: calc(env(safe-area-inset-top) + 4.7px); }
+.hw-blatt .hw-kopf-symbol svg, .hw-blatt .hw-sprecher-figur svg { width: 100%; height: 100%; }
+.hw-blatt .hw-kopf-titel { top: calc(env(safe-area-inset-top) + 9px); margin: 0; }
+.hw-blatt .hw-kopf-unter { top: calc(env(safe-area-inset-top) + 25.5px); }
+.hw-blatt .hw-zu { top: calc(env(safe-area-inset-top) + 8px); font-size: 0; min-width: 44px; min-height: 44px; width: 44px; height: 44px; right: 8px; }
+.hw-blatt .hw-zu::before, .hw-blatt .hw-zu::after { top: 21px; left: 12px; right: 12px; }
+.hw-blatt > .hw-sprecher { top: calc(50px + env(safe-area-inset-top)); }
+.hw-blatt .hw-sprecher-unter { display: block; font: var(--hw-t-klein); color: var(--leise); margin-top: 2px; }
+.hw-blatt > .hw-inhalt { top: calc(130px + env(safe-area-inset-top)); bottom: 0; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+
+/* Wochenfrage: Karte mitten auf abgedunkeltem Grund. */
+.hw-wb-maske { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(12,20,28,0); transition: background-color 200ms ease-out; }
+#wochen-overlay.sichtbar .hw-wb-maske { background: rgba(12,20,28,.60); }
+.hw.hw-wb-frage { width: min(100%, 360px); height: auto; padding: 22px 20px 20px; --f: var(--grund); --l: var(--kartenlinie); opacity: 0; transform: scale(.96); transition: opacity 200ms ease-out, transform 200ms ease-out; }
+#wochen-overlay.sichtbar .hw-wb-frage { opacity: 1; transform: none; }
+.hw-wb-frage .hw-zu { top: 8px; right: 8px; width: 44px; height: 44px; }
+.hw-wb-frage .hw-zu::before, .hw-wb-frage .hw-zu::after { top: 21px; left: 12px; right: 12px; }
+.hw-wb-frage h2 { margin: 0 44px 14px 0; font: var(--hw-t-kopf); }
+.hw-wb-frageinhalt { display: flex; align-items: flex-end; gap: 14px; justify-content: space-between; }
+.hw-wb-frageinhalt p { margin: 0 0 12px; font: var(--hw-t-text); }
+.hw-wb-gesicht { flex: none; width: 64px; height: 80px; overflow: hidden; }
+.hw-wb-gesicht svg { width: 100%; height: 100%; }
+.hw-wb-frage .hw-hinweis { margin: 14px 0 0; }
+.hw-wb-frage .hw-knoepfe { margin-top: 18px; }
+/* Wochenbericht im Vollbild. */
+.hw-wb { opacity: 0; transition: opacity 380ms ease-out; }
+#wochen-overlay.sichtbar .hw-wb { opacity: 1; }
+.hw-wb .hw-gross .hw-abw { opacity: 0; transition: opacity 200ms; }
+#wochen-overlay.gezaehlt .hw-wb .hw-gross .hw-abw { opacity: 1; }
+.hw-wb .hw-band .hw-abschnitt:first-child { margin-top: 4px; }
+#wb-vorfall { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+#wb-vorfall.offen { pointer-events: auto; }
+.hw-wb-vorfallmaske { position: absolute; inset: 0; display: flex; align-items: flex-end; background: rgba(5,9,10,0); transition: background-color 150ms; }
+#wb-vorfall.offen .hw-wb-vorfallmaske { background: rgba(5,9,10,.7); }
+.hw-wb-vorfall { width: 100%; max-height: 85%; overflow: auto; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); background: var(--kopf); border-radius: var(--hw-radius) var(--hw-radius) 0 0;
+  box-shadow: inset 0 1px 0 0 var(--kartenlinie); transform: translateY(110%); transition: transform 200ms ease-out; }
+#wb-vorfall.offen .hw-wb-vorfall { transform: none; }
+.hw-wb-vorfallkopf { display: flex; gap: 14px; align-items: flex-end; justify-content: space-between; }
+.hw-wb-vorfallkopf .hw-marke { display: block; margin-bottom: 6px; }
+.hw-wb-vorfallkopf h3 { margin: 0 0 4px; font: var(--hw-t-titel); }
+.hw-wb-tippt { min-height: 48px; margin: 14px 0 0; font: var(--hw-t-text); font-weight: 400; }
+.hw-wb-vorfallfuss { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+.hw-wb-vorfallfuss small { margin-right: auto; font: var(--hw-t-klein); color: var(--leise); }
+
+/* Säulen über einen Zeitraum (Statistik): je Woche eine Säule, Nulllinie, optional Grenze. Höhe 120 px. */
+.hw-saeulen { position: relative; display: flex; align-items: stretch; gap: 1px; height: 120px; margin: 4px 0 0; touch-action: pan-y; user-select: none; cursor: crosshair; }
+.hw-saeulen { justify-content: space-between; }
+.hw-saeulen > span { position: relative; flex: 0 1 15px; min-width: 0; }
+.hw-saeulen > span > i { position: absolute; left: 0; right: 0; background: var(--text); border-radius: 2px 2px 0 0; }
+.hw-saeulen > span > i.neg { background: var(--schlecht); border-radius: 0 0 2px 2px; }
+.hw-saeulen > span > i.vorlauf { opacity: .45; }
+.hw-saeulen.b > span > i:not(.neg) { background: var(--gut); }
+.hw-saeulen.zeigt > span:not(.an) > i { opacity: .35; }
+.hw-saeulen-null { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--kartenlinie); pointer-events: none; }
+.hw-saeulen-grenze { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px dashed var(--schlecht); pointer-events: none; }
+.hw-saeulen-fuss { display: flex; justify-content: space-between; margin-top: 7px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-stat-wert { min-height: 24px; margin: 8px 0 0; font: var(--hw-t-klein); color: var(--leise); }
+/* Waagrechte Anteilsbalken (Formate, Regionen): Name, Balken, Wert. */
+.hw-anteile { display: grid; grid-template-columns: auto 1fr auto; gap: 10px 12px; align-items: center; margin: 4px 0 0; font: var(--hw-t-text); font-weight: 400; }
+.hw-anteile > b { font-weight: 400; text-align: right; font-variant-numeric: tabular-nums; }
+.hw-anteile > i { position: relative; height: 14px; border-radius: 7px; background: var(--skala-grund); overflow: hidden; }
+.hw-anteile > i > i { position: absolute; top: 2px; bottom: 2px; left: 2px; border-radius: 5px; background: var(--text); }
+.hw-anteile > i > i.b { background: var(--gut); }
+.hw-anteile > i > i.neg { background: var(--schlecht); }
+
+/* Portfolio: virtuelle Liste (feste Zeilenhöhe 58 px), Auswahlkästchen, Ampelpunkt, Karte. */
+#pp-spacer { position: relative; }
+.hw-pp-scroll { position: relative; height: 406px; margin: 4px 0 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.hw-pp-zeile, .hw-pp-gruppe { position: absolute; left: 0; right: 0; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-pp-gruppe { align-items: flex-end; padding-bottom: 8px; font: var(--hw-t-marke); color: var(--marke); text-transform: uppercase; }
+/* Auswahlkästchen 22 px mit Kontur, Tippfläche 44 px (transparenter Rand). */
+#panel.hw input[type=checkbox].hw-pp-wahl { flex: none; width: 44px; height: 44px; margin: 0 0 0 -11px; border: 11px solid transparent; border-radius: 17px; -webkit-appearance: none; appearance: none;
+  background: var(--feld); background-clip: padding-box; box-shadow: none; outline: 1.5px solid var(--feldlinie); outline-offset: -12.5px; }
+#panel.hw input[type=checkbox].hw-pp-wahl:checked { background: center / 14px 14px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2.5 7.3l3 3L11.5 4' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"), var(--akzent);
+  background-clip: padding-box; outline-color: var(--akzent-linie); }
+#panel.hw input[type=checkbox].hw-pp-wahl:disabled { opacity: .35; }
+/* Breiter Primärknopf: alte Regel .breit (spiel.html, komponenten.css) nimmt Fläche und Rand; hier zurückholen. */
+#panel.hw .hw-g5 .hw-knopf.breit, .hw-blatt .hw-knopf.breit { background: var(--f); margin: 0; border: 0; min-height: 44px; border-radius: var(--hw-radius); color: #fff; }
+#panel.hw .hw-g5 .hw-knopf.zweit.breit, .hw-blatt .hw-knopf.zweit.breit { color: var(--text); }
+.hw-blatt .hw-segment { margin: 0; }
+.hw-pp-name { flex: 1; min-width: 0; min-height: 44px; padding: 0; border: 0; background: none; color: var(--text); font: var(--hw-t-text); font-weight: 400; text-align: left; }
+.hw-pp-name b, .hw-pp-name small { display: block; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.hw-pp-name b { font-weight: 400; }
+.hw-pp-name small { margin-top: 2px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-pp-zeile .hw-wert { display: flex; align-items: center; gap: 7px; }
+.hw-ampel { display: inline-block; flex: none; width: 8px; height: 8px; border-radius: 4px; background: var(--punkt); }
+.hw-ampel.gruen { background: #4caf50; } .hw-ampel.gelb { background: #e0a526; } .hw-ampel.rot { background: #e0574c; } .hw-ampel.ohne { background: var(--punkt); }
+.hw-g5 .hw-legende { flex-wrap: wrap; gap: 6px 16px; }
+.hw-g5 .hw-legende .hw-ampel { margin-right: 6px; vertical-align: 0; }
+.hw-pp-karte { margin: 18px -8px 0; }
+.hw-deutschland { display: block; width: 100%; height: auto; overflow: visible; }
+.hw-dl-land { fill: var(--zweit); stroke: var(--zweit-linie); }
+.hw-dl-punkt { stroke: var(--grund); }
+.hw-dl-ring { fill: none; stroke: var(--akzent-linie); }
+.hw-dl-name { fill: var(--leise); stroke: var(--grund); }
+.hw-dl-name.gross { fill: var(--text); }
+.hw-deutschland .hw-dl-stadt { cursor: pointer; outline-offset: -2px; }
+.hw-deutschland .hw-dl-stadt:focus-visible circle:last-of-type { stroke: var(--akzent-linie); stroke-width: 3; }
+
+/* Reise: Kreis öffnet sich am Bahnhof, Blatt mit Karte oder Liste; Fahrt als Bildfolge. */
+#reise-overlay { background: #262a2e; clip-path: circle(0px at var(--rx,50%) var(--ry,65%)); transition: clip-path 240ms ease-out; }
+#reise-overlay.offen, #reise-overlay.faehrt { clip-path: circle(var(--rr,150vmax) at var(--rx,50%) var(--ry,65%)); }
+#reise-overlay.faehrt { transition: clip-path 150ms ease-in; }
+#reise-overlay.faehrt .hw-reise { display: none; }
+.hw-reise { transform: scale(.55); opacity: .35; transition: transform 240ms ease-out, opacity 240ms ease-out; }
+#reise-overlay.offen .hw-reise { transform: none; opacity: 1; }
+.hw-reise-ziele { transform: translateY(30px); opacity: 0; transition: transform 300ms ease-out, opacity 300ms ease-out; }
+#reise-overlay.ziele-offen .hw-reise-ziele { transform: none; opacity: 1; }
+.hw-reise-karte { margin: 14px -8px 0; }
+#reise-blatt-liste .hw-was { display: flex; align-items: center; gap: 12px; }
+.hw-reise-bild { flex: none; display: block; width: 40px; height: 40px; overflow: hidden; border-radius: 8px; background: var(--tief); }
+.hw-reise-bild img, .hw-reise-bild svg { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hw-reise-name { min-width: 0; }
+.hw-reise-name small { display: flex; flex-wrap: wrap; gap: 0 8px; }
+.hw-reise-format { white-space: nowrap; }
+.hw-reise-flug { position: absolute; inset: 0; overflow: hidden; background: #262a2e; opacity: 0; transition: opacity 150ms ease-out; }
+.hw-reise-flug.start { opacity: 1; }
+.hw-reise-panorama { position: absolute; inset: -5% -50%; background-position: center; background-size: cover; transform: translate3d(12%,0,0) scale(1.03); will-change: transform; }
+.hw-reise-flug.bewegt .hw-reise-panorama { transform: translate3d(-12%,0,0) scale(1.03); transition: transform 4400ms cubic-bezier(.38,.04,.62,.96); }
+.hw-reise-dunst { position: absolute; inset: 0; background: rgba(26,28,31,.25); pointer-events: none; }
+.hw-reise-flug > .hw-reise-zug { position: absolute; left: -86%; top: 24%; width: 72%; height: auto; transform: translate3d(0,0,0); will-change: transform; }
+.hw-reise-flug.bewegt > .hw-reise-zug { transform: translate3d(250vw,45vh,0); transition: transform 2800ms linear 550ms; }
+.hw-reise-strecke { position: absolute; left: 10%; right: 10%; bottom: calc(14% + env(safe-area-inset-bottom)); text-align: center; color: #fff; }
+.hw-reise-strecke b { display: block; font: var(--hw-t-zahl); letter-spacing: 2px; }
+.hw-reise-strecke small { display: block; margin-top: 6px; font: var(--hw-t-text); }
+.hw-reise-flug.ankunft { transform: scale(.8); opacity: .35; transition: transform 400ms ease-in, opacity 400ms ease-in; }
+#reise-overlay.faehrt:has(.hw-reise-flug.ankunft) { clip-path: circle(0px at var(--rx,50%) var(--ry,65%)); transition: clip-path 400ms ease-in; }
+@media (prefers-reduced-motion: reduce) {
+  #reise-overlay, #reise-overlay.faehrt { transition: opacity 150ms !important; clip-path: none !important; }
+  .hw-reise, .hw-reise-ziele, .hw-reise-flug, .hw-reise-flug.ankunft, .hw-reise-panorama, .hw-reise-flug > .hw-reise-zug { transition: none !important; animation: none !important; transform: none !important; }
+  .hw-reise-flug > .hw-reise-zug { left: 15% !important; top: 35% !important; }
+  .hw-wb, .hw-wb-maske, .hw-wb-frage, .hw-wb-vorfall { transition-duration: 150ms !important; }
+}
+/* ── G6 Kartenoberfläche, Start, Menü, Einführung, Erfolge, Einstellungen, Chronik, Zeitung, Spielende ── */
+/* Blattkopf: Titel und Unterzeile aus der Schriftskala (die alte Hülle in spiel.html setzte 16 bis 17 px). */
+#panel.hw #ptitel.hw-kopf-titel { font: var(--hw-t-kopf); padding: 0; overflow-wrap: normal; }
+#panel.hw #punter.hw-kopf-unter { font: var(--hw-t-kopf2); padding: 0; margin: 0; color: var(--leise); overflow-wrap: normal; }
+/* Farben der Flächen außerhalb des Blatts (Kartenoberfläche, Menü, Start, Meldungen): wie Bereich „betrieb“. */
+.hw-g6 { --grund: #262a2e; --kopf: #1a1d20; --tief: #0f1113; --karte: #111315; --kartenlinie: #575b5f; --text: #fff; --leise: #a6a7a7; --marke: #9aa3a7;
+  --akzent: #1f6f8b; --akzent-linie: #5fa8bf; --akzent-aktiv: #134a5d; --akzent-aktiv-linie: #3f8aa3; --feld: #05090a; --feldlinie: #4c5356;
+  --zweit: #2b2f33; --zweit-linie: #686d71; --skala: #63b958; --skala-grund: #0f1113; --punkt: #8c9295; --stern: #ffac0b;
+  --gut: #66bb6a; --schlecht: #f27d72; --gefahr: #c0362d; --gefahr-linie: #e2786f;
+  --glas: rgba(24, 26, 29, 0.8); --glas-linie: rgba(255, 255, 255, 0.24); --glas-rand: rgba(0, 0, 0, 0.55);
+  font: var(--hw-t-text); color: var(--text); -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+.hw-g6 button { font-family: var(--hw-schrift); }
+/* Glas-Pille (Coffee 15): dunkel halbtransparent, dunkle Außenkante, helle Innenlinie. Ohne Unschärfe (Stilprüfung). */
+.hw-g6-glas { background: var(--glas); border: 1px solid var(--glas-rand); border-radius: var(--hw-radius); color: var(--text);
+  box-shadow: inset 0 0 0 1.33px rgba(0, 0, 0, 0.35), inset 0 0 0 2.66px var(--glas-linie); pointer-events: auto; }
+.hw-g6-logo { display: inline-block; flex: none; width: 28px; height: 28px; }
+.hw-g6-logo svg { display: block; width: 100%; height: 100%; }
+.hw-g6-sym { display: inline-block; flex: none; width: 28px; height: 28px; }
+.hw-g6-sym svg { display: block; width: 100%; height: 100%; }
+.hw-g6-badge { position: absolute; top: -7px; right: -7px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; display: grid; place-items: center;
+  background: var(--akzent); color: #fff; font: 500 10.4px/1 var(--hw-schrift); box-shadow: 0 0 0 2px var(--kopf); pointer-events: none; }
+.hw-g6-badge:empty { display: none; }
+.hw-g6-badge.dringend { background: var(--gefahr); }
+
+/* Kopfleiste: Firma mit Kasse links, Szenarioziel, Kalenderwoche rechts; darunter eine eingeklappte Kennzahlenzeile. */
+.hw-g6-hud { position: fixed; z-index: 3; pointer-events: none; }
+.oben.hw-g6 { left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 8px; }
+.hw-g6-leiste { display: flex; gap: 8px; align-items: stretch; }
+.hw-g6-firma { display: flex; align-items: center; gap: 10px; min-width: 0; max-width: 62%; height: 46px; padding: 0 16px 0 10px; }
+.hw-g6-firmatext { display: flex; flex-direction: column; min-width: 0; }
+.hw-g6-firmaname { font: var(--hw-t-marke); color: var(--leise); line-height: 14px; }
+.hw-g6-kasse { font: 500 15.25px/19px var(--hw-schrift); white-space: nowrap; }
+.hw-g6-kasse.hw-schlecht { color: var(--schlecht); }
+.hw-g6-ziel { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; width: 58px; padding: 0; font: 500 12.3px/1 var(--hw-schrift); }
+.hw-g6-ziel[hidden] { display: none; }
+.hw-g6-zielbalken { width: 34px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.18); overflow: hidden; }
+.hw-g6-zielbalken i { display: block; height: 100%; background: var(--skala); }
+.hw-g6-datum { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; height: 46px; padding: 0 16px; }
+.hw-g6-datum b { font: 500 15.25px/19px var(--hw-schrift); white-space: nowrap; }
+.hw-g6-datum small { display: flex; gap: 6px; font: var(--hw-t-klein); color: var(--leise); line-height: 13px; }
+.hw-g6-datum #phase { color: var(--schlecht); }
+.hw-g6-datum #phase[hidden] { display: none; }
+.hw-g6-datum.testfehler { position: relative; }
+.hw-g6-datum.testfehler::after { content: ''; position: absolute; right: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--gefahr); }
+/* Kennzahlen: eingeklappt EBITDA und Umsatz in einer Zeile, der Pfeil klappt Kredit, Vertrauen und Image auf. */
+.hw-g6-cockpit { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)) 44px; align-items: center; min-height: 44px; padding: 0 0 0 6px; pointer-events: auto;
+  background: var(--glas); border: 1px solid var(--glas-rand); border-radius: var(--hw-radius); box-shadow: inset 0 0 0 1.33px rgba(0, 0, 0, 0.35), inset 0 0 0 2.66px var(--glas-linie); }
+.hw-g6-kz { grid-column: span 3; min-width: 0; padding: 5px 10px; position: relative; }
+.hw-g6-kz:nth-child(n+4) { grid-column: span 2; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.hw-g6-kz:nth-child(2) { box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.1); }
+.hw-g6-cockpit:not(.offen) .hw-g6-kz:nth-child(n+4) { display: none; }
+.hw-g6-kz .hw-marke { display: block; font-size: 10.4px; line-height: 13px; white-space: nowrap; overflow: hidden; }
+.hw-g6-kz .hw-marke em { font-style: normal; color: var(--akzent-linie); }
+.hw-g6-kz b { display: block; font: 500 13.5px/17px var(--hw-schrift); white-space: nowrap; overflow: hidden; }
+.hw-g6-kz.hw-gut b { color: var(--gut); } .hw-g6-kz.hw-schlecht b { color: var(--schlecht); }
+.hw-g6-kzwahl { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 16px; border: 0; }
+.hw-g6-mehr { grid-column: 7; grid-row: 1; align-self: stretch; position: relative; width: 44px; min-height: 44px; border: 0; padding: 0; background: none; color: var(--text); }
+.hw-g6-mehr::before { content: ''; position: absolute; left: 17px; top: 15px; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
+.hw-g6-mehr[aria-expanded='true']::before { top: 20px; transform: rotate(-135deg); }
+
+/* Untere Leiste (Coffee 15): Ebenen links, Stadt mittig, Menü rechts; darüber die Hauptaktion „Woche weiter“ und die Post. */
+.unten.hw-g6 { left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px; }
+.hw-g6-aktion, .hw-g6-fuss { display: grid; grid-template-columns: 46px minmax(0, 1fr) 46px; align-items: center; gap: 10px; }
+.hw-g6-rund { position: relative; width: 46px; height: 46px; padding: 0; display: grid; place-items: center; }
+.hw-g6-rund .hw-g6-sym { width: 30px; height: 30px; }
+.hw-g6-rund[aria-expanded='true'] { background: var(--akzent); box-shadow: inset 0 0 0 2.33px var(--akzent), inset 0 0 0 3.66px var(--akzent-linie); }
+#postdirekt { grid-column: 3; grid-row: 1; }
+.hw-g6-weiter { grid-column: 2; grid-row: 1; justify-self: center; min-width: 200px; height: 46px; padding: 0 28px; pointer-events: auto; font-size: 15.25px; font-weight: 600; letter-spacing: .02em; }
+.hw-g6-weiter:disabled { opacity: .6; }
+.hw-g6-burger { display: flex; flex-direction: column; gap: 4.5px; }
+.hw-g6-burger i { display: block; width: 20px; height: 2.6px; border-radius: 2px; background: currentColor; }
+.hw-g6-stadt { justify-self: center; display: flex; align-items: center; gap: 14px; min-width: 150px; max-width: 100%; height: 46px; padding: 0 22px 0 14px; text-align: left; }
+.hw-g6-flagge { display: flex; flex-direction: column; flex: none; width: 26px; height: 18px; border-radius: 3px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25); }
+.hw-g6-flagge i { flex: 1; background: #1b1b1b; } .hw-g6-flagge i + i { background: #dd2d24; } .hw-g6-flagge i + i + i { background: #ffce00; }
+.hw-g6-stadttext { display: flex; flex-direction: column; min-width: 0; }
+#stadtname { font: 500 15.25px/18px var(--hw-schrift); white-space: nowrap; overflow: visible; }
+#stadtname[data-laenge='mittel'] { font-size: 13.5px; } #stadtname[data-laenge='lang'] { font-size: 12.3px; }
+#stadtcluster { font: var(--hw-t-klein); color: var(--leise); line-height: 13px; white-space: nowrap; }
+#stadtcluster:empty { display: none; }
+body.panel-offen .hw-g6-hud, body.panel-offen #wochenstreifen, body.panel-offen .hw-g6-bot { display: none; }
+.hw-g6-bot { position: fixed; display: none; right: calc(12px + env(safe-area-inset-right)); bottom: calc(124px + env(safe-area-inset-bottom)); align-items: center; gap: 6px; padding: 6px 10px;
+  border-radius: var(--hw-radius); background: var(--glas); font: var(--hw-t-klein); color: var(--leise); }
+.hw-g6-bot.an { display: flex; }
+
+/* Ebenen (Coffee 16) und Menü: dunkles Blatt von der Seite, Liste mit isometrischen Symbolen. */
+.hw-g6-schicht { position: fixed; inset: 0; z-index: 5; background: rgba(0, 0, 0, 0.45); opacity: 0; pointer-events: none; transition: opacity .18s; }
+.hw-g6-schicht.offen { opacity: 1; pointer-events: auto; }
+.hw-g6-schicht > .hw-g6-blatt { position: absolute; top: 0; bottom: 0; width: min(340px, 88vw); height: auto; overflow-y: auto; overscroll-behavior: contain; transition: transform .2s ease; }
+.hw-g6-links > .hw-g6-blatt { left: 0; transform: translateX(-100%); border-radius: 0 var(--hw-radius) var(--hw-radius) 0; }
+.hw-g6-rechts > .hw-g6-blatt { right: 0; transform: translateX(100%); border-radius: var(--hw-radius) 0 0 var(--hw-radius); }
+.hw-g6-schicht.offen > .hw-g6-blatt { transform: none; }
+.hw-g6-blatt { background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+.hw-g6-blattinhalt { position: relative; padding: calc(18px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom)); }
+.hw-g6-blatttitel { margin: 4px 0 6px; font: var(--hw-t-kopf); }
+.hw-g6-menueliste { display: flex; flex-direction: column; }
+.hw-g6-mzeile { position: relative; display: flex; align-items: center; gap: 16px; width: 100%; min-height: 46px; padding: 6px 0; border: 0; background: none; color: var(--text); text-align: left;
+  font: 400 14.4px/1.2 var(--hw-schrift); border-bottom: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-g6-mzeile:last-child { border-bottom: 0; }
+.hw-g6-mzeile[hidden] { display: none; }
+.hw-g6-mzeile .hw-g6-sym { width: 32px; height: 32px; }
+.hw-g6-mzeile:active { background: var(--tief); }
+.hw-g6-mzeile .hw-g6-badge { position: static; margin-left: auto; box-shadow: none; }
+.hw-g6-feldzeile { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 52px; font: 400 13.5px/1.25 var(--hw-schrift); color: var(--text);
+  border-bottom: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-g6-feldzeile:last-child { border-bottom: 0; }
+.hw-g6-feldzeile .hw-g6-wahl { flex: 0 0 52%; }
+.hw-g6-haken { flex: none; width: 24px; height: 24px; margin: 0 10px 0 0; accent-color: var(--akzent); }
+.hw-g6-wahl { display: block; width: 100%; height: 44px; padding: 0 30px 0 12px; border: 0; border-radius: var(--hw-radius); -webkit-appearance: none; appearance: none;
+  background: var(--feld) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23a6a7a7' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center / 11px 8px;
+  box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--feld), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--feldlinie); color: var(--text); font: 400 13.95px/1 var(--hw-schrift); }
+input.hw-g6-wahl { background-image: none; padding-right: 12px; }
+.hw-g6-ebene { display: flex; align-items: center; gap: 14px; margin: 24px 0 4px; font: 400 14.6px/1.2 var(--hw-schrift); text-transform: uppercase; }
+.hw-g6-ebene .hw-g6-sym { width: 32px; height: 32px; }
+.hw-g6-ebene small { margin-left: auto; font: var(--hw-t-marke); color: var(--marke); }
+
+/* Meldung, Wochenstreifen, Ladeanzeige, Erfolgs- und Kontexthinweis, App-Aktualisierung. */
+#meldung { position: fixed; z-index: 100; left: calc(16px + env(safe-area-inset-left)); right: calc(16px + env(safe-area-inset-right)); top: calc(118px + env(safe-area-inset-top));
+  max-width: 420px; margin: 0 auto; padding: 11px 16px; border-radius: var(--hw-radius); background: rgba(15, 17, 19, 0.92); border: 1px solid var(--glas-rand);
+  box-shadow: inset 0 0 0 1.33px rgba(0, 0, 0, 0.35), inset 0 0 0 2.66px var(--glas-linie); font: 400 12.3px/1.35 var(--hw-schrift);
+  opacity: 0; transform: translateY(-8px); transition: opacity .2s, transform .2s; pointer-events: none; }
+#meldung.an { opacity: 1; transform: none; pointer-events: auto; cursor: pointer; }
+#meldung.rot { box-shadow: inset 4px 0 0 var(--gefahr), inset 0 0 0 2.66px var(--glas-linie); }
+body.panel-offen #meldung { top: auto; bottom: calc(20px + env(safe-area-inset-bottom)); }
+.hw-g6-streifen { position: fixed; z-index: 3; display: none; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(124px + env(safe-area-inset-bottom));
+  min-height: 44px; padding: 10px 16px; border: 1px solid var(--glas-rand); border-radius: var(--hw-radius); background: var(--glas); color: var(--text); text-align: left;
+  box-shadow: inset 0 0 0 1.33px rgba(0, 0, 0, 0.35), inset 0 0 0 2.66px var(--glas-linie); font: 500 12.3px/1.3 var(--hw-schrift); }
+.hw-g6-streifen.an { display: block; }
+#lade { position: fixed; inset: 0; z-index: 7; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: var(--grund); font: 400 13.95px/1.2 var(--hw-schrift); color: var(--leise); }
+#lade.an { display: flex; }
+#lade .hw-g6-logo { width: 56px; height: 56px; }
+#erfolge-toast { position: fixed; z-index: 13; left: calc(16px + env(safe-area-inset-left)); right: calc(16px + env(safe-area-inset-right)); bottom: calc(124px + env(safe-area-inset-bottom)); max-width: 420px; margin: 0 auto;
+  display: flex; align-items: center; gap: 14px; padding: 8px 16px 8px 10px; border: 1px solid var(--glas-rand); border-radius: var(--hw-radius); background: rgba(15, 17, 19, 0.92);
+  box-shadow: inset 0 0 0 1.33px rgba(0, 0, 0, 0.35), inset 0 0 0 2.66px var(--glas-linie); opacity: 0; transform: translateY(12px); transition: opacity .18s, transform .18s; pointer-events: none; }
+#erfolge-toast[hidden] { display: none; }
+#erfolge-toast.sichtbar { opacity: 1; transform: none; }
+body.panel-offen #erfolge-toast { bottom: auto; top: calc(8px + env(safe-area-inset-top)); }
+#erfolge-toast .erfolge-toast-bild { flex: none; perspective: 450px; }
+#erfolge-toast .erfolge-bild { display: block; width: 40px; height: 40px; }
+#erfolge-toast.sichtbar .erfolge-bild { animation: hw-g6-drehung 600ms ease-in-out 1; }
+#erfolge-toast small { display: block; color: var(--stern); }
+#erfolge-toast strong { display: block; font: 500 13.95px/1.3 var(--hw-schrift); }
+#erfolge-toast span { display: none; }
+@keyframes hw-g6-drehung { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+#ein-kontext { position: fixed; z-index: 17; left: calc(16px + env(safe-area-inset-left)); right: calc(16px + env(safe-area-inset-right)); bottom: calc(124px + env(safe-area-inset-bottom)); max-width: 420px; margin: 0 auto;
+  padding: 12px 16px; border-radius: var(--hw-radius); background: rgba(15, 17, 19, 0.92); box-shadow: inset 4px 0 0 var(--akzent-linie); font: 400 12.3px/1.45 var(--hw-schrift); pointer-events: none; }
+#ein-kontext[hidden] { display: none; }
+#app-update { position: fixed; z-index: 9; left: calc(14px + env(safe-area-inset-left)); right: calc(14px + env(safe-area-inset-right)); top: calc(12px + env(safe-area-inset-top));
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 6px 6px 16px; border-radius: var(--hw-radius); background: #1a1d20; color: #fff;
+  box-shadow: inset 0 0 0 2.66px rgba(255, 255, 255, 0.24); font: 400 12.3px/1.3 var(--hw-schrift); }
+#app-update button { height: 44px; padding: 0 16px; border: 0; border-radius: var(--hw-radius); background: #1f6f8b; color: #fff; font: 500 13.5px/1 var(--hw-schrift);
+  box-shadow: inset 0 0 0 2.33px #1f6f8b, inset 0 0 0 3.66px #5fa8bf; }
+
+/* Start: dunkles Blatt mit Firmenkopf, Sprecherzeile, Szenarien im Karussell (Coffee 05, 26). */
+#start { position: fixed; inset: 0; z-index: 6; display: none; width: auto; height: auto; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
+#start.an { display: block; }
+#start > .hw-grund { position: fixed; }
+.hw-g6-start { position: relative; max-width: 440px; margin: 0 auto; padding: calc(28px + env(safe-area-inset-top)) 0 calc(28px + env(safe-area-inset-bottom)); }
+.hw-g6-startkopf { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 20px 18px; }
+.hw-g6-startkopf .hw-g6-logo { width: 64px; height: 64px; margin-bottom: 12px; }
+.hw-g6-startkopf h1 { margin: 0; font: 600 24.75px/1.1 var(--hw-schrift); letter-spacing: .01em; }
+.hw-g6-startkopf p { margin: 6px 0 0; font: var(--hw-t-kopf2); color: var(--leise); }
+.hw-g6 .hw-sprecher, #spielende-overlay .hw-sprecher { position: relative; top: auto; height: auto; min-height: 64px; display: flex; align-items: center; z-index: 0; }
+.hw-g6 .hw-sprecher-text, #spielende-overlay .hw-sprecher-text { position: static; padding: 14px var(--hw-rand); }
+.hw-g6 .hw-sprecher .hw-griff, #spielende-overlay .hw-griff { display: none; }
+#startszenarien { margin-top: 4px; }
+#startszenarien .hw-karussell { padding-top: 4px; padding-bottom: 4px; }
+#startszenarien .hw-karte { display: flex; flex-direction: column; padding: 12px 12px 14px; }
+#startszenarien .hw-punkte { margin: 14px 0 4px; }
+.hw-g6-szbild { aspect-ratio: 2 / 1; border-radius: 8px; overflow: hidden; }
+.hw-g6-szbild svg { display: block; width: 100%; height: 100%; }
+#startszenarien .hw-karte-titel { margin: 14px 0 4px; }
+.hw-g6-szmarken { text-align: center; }
+.hw-g6-szmarken .hw-status { margin: 0; }
+.hw-g6-sztext { margin: 8px 6px 0; text-align: center; color: var(--leise); min-height: 36px; }
+.hw-g6-szbest { margin: 6px 0 14px; text-align: center; color: var(--marke); }
+#startszenarien .hw-karte .hw-knopf { margin-top: auto; }
+#startauswahl[hidden], #startsetup[hidden], #fortsetzen[hidden] { display: none; }
+.hw-g6-fortsetzen { padding-top: 22px; }
+.hw-g6-fortsetzen:has(> #fortsetzen[hidden]) { display: none; }
+#startsetup { padding-top: 6px; }
+.hw-g6-gewaehlt { margin: 8px 0 0; font: var(--hw-t-lese); color: var(--leise); }
+.hw-g6-gewaehlt b { display: block; margin-bottom: 4px; font: var(--hw-t-titel); color: var(--text); }
+#startstufen .hw-segment { margin: 0; }
+#startstufen[hidden] { display: none; }
+.hw-g6-stufentext { margin: 10px 0 0; color: var(--leise); }
+#startsetup .hw-felder { margin-top: 24px; }
+#startsetup .hw-feld:first-child { grid-column: 1 / -1; }
+.hw-g6-speicherhinweis { color: var(--schlecht); font: var(--hw-t-lese); }
+.hw-g6-speicherhinweis:empty { display: none; }
+#start .app-plaetze, .hw-app .app-plaetze { display: flex; flex-direction: column; gap: 12px; }
+#start .app-platz, .hw-app .app-platz { padding: 14px; border: 0; border-radius: var(--hw-radius); background: var(--karte); color: var(--text);
+  box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--karte), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--kartenlinie); }
+#start .app-platzkopf, .hw-app .app-platzkopf { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+#start .app-platzkopf b, .hw-app .app-platzkopf b { font: var(--hw-t-kopf); } #start .app-platzkopf span, .hw-app .app-platzkopf span { font: var(--hw-t-klein); color: var(--leise); }
+#start .app-platzinhalt, .hw-app .app-platzinhalt { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+#start .app-vorschau, .hw-app .app-vorschau { flex: none; width: 96px; height: 56px; border-radius: 8px; object-fit: cover; background: var(--tief); color: var(--leise); display: grid; place-items: center; font: var(--hw-t-text); }
+#start .app-daten, .hw-app .app-daten { min-width: 0; }
+#start .app-daten strong, .hw-app .app-daten strong { display: block; font: 500 13.5px/1.3 var(--hw-schrift); }
+#start .app-daten small, .hw-app .app-daten small { display: block; font: var(--hw-t-klein); color: var(--leise); }
+#start .app-aktionen, .hw-app .app-aktionen { display: flex; flex-wrap: wrap; gap: 8px; }
+#start .app-aktionen button, .hw-app .app-aktionen button { flex: 1 1 auto; height: 44px; padding: 0 14px; border: 0; border-radius: var(--hw-radius); background: var(--zweit); color: var(--text); font: 400 12.3px/1 var(--hw-schrift);
+  box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--zweit), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--zweit-linie); }
+#start .app-aktionen button[data-app-aktion='laden'], .hw-app .app-aktionen button[data-app-aktion='laden'] { background: var(--akzent); color: #fff; box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--akzent), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--akzent-linie); }
+
+/* Einführung: Vorstandsassistentin als dunkles Blatt mit Sprecherzeile. */
+#einfuehrung-root { position: fixed; inset: 0; z-index: 18; pointer-events: none; }
+#einfuehrung-root[hidden] { display: none; }
+.ein-maske, .ein-fragemaske { position: fixed; inset: 0; background: rgba(8, 10, 12, 0.66); pointer-events: auto; }
+.ein-maske { touch-action: none; }
+.ein-ring { position: fixed; border: 3px solid var(--stern); border-radius: var(--hw-radius); pointer-events: none; animation: hw-g6-puls 1.2s ease-in-out infinite; }
+.ein-ring[hidden] { display: none; }
+@keyframes hw-g6-puls { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+#einfuehrung-root .ein-sheet.hw { position: absolute; left: 0; right: 0; bottom: 0; width: min(100%, 560px); height: auto; max-height: 48dvh; margin: 0 auto; overflow-y: auto; pointer-events: auto;
+  background: var(--kopf); border-radius: var(--hw-radius) var(--hw-radius) 0 0; padding: 14px 20px calc(16px + env(safe-area-inset-bottom)); }
+#einfuehrung-root .ein-sheet.ein-oben { top: calc(60px + env(safe-area-inset-top)); bottom: auto; max-height: 38dvh; border-radius: var(--hw-radius); padding-bottom: 14px; }
+.ein-kopf { display: flex; align-items: center; gap: 12px; }
+.ein-kopf > div { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.ein-kopf b { font: var(--hw-t-kopf); } .ein-kopf small { font: var(--hw-t-klein); color: var(--leise); }
+.ein-logo { flex: none; width: 32px; height: 32px; } .ein-logo svg { display: block; width: 100%; height: 100%; }
+.ein-kopf .hw-zu { position: relative; top: auto; right: auto; flex: none; width: 44px; height: 44px; }
+.ein-kopf .hw-zu::before, .ein-kopf .hw-zu::after { top: 21px; left: 12px; right: 12px; }
+.ein-inhalt { display: flex; gap: 14px; align-items: flex-end; margin-top: 4px; }
+.ein-text { flex: 1; min-width: 0; min-height: 54px; margin: 6px 0; font: 400 13.5px/1.45 var(--hw-schrift); letter-spacing: .2px; white-space: pre-wrap; cursor: pointer; }
+.ein-portraet { flex: none; width: 60px; height: 82px; overflow: hidden; }
+.ein-portraet svg { display: block; width: 100%; height: 100%; }
+.ein-fuss { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.ein-fuss .hw-knopf { min-width: 120px; }
+#einfuehrung-root .ein-frage.hw { position: absolute; left: 16px; right: 16px; top: 50%; width: auto; max-width: 440px; height: auto; margin: 0 auto; transform: translateY(-50%); padding: 20px; pointer-events: auto;
+  background: var(--kopf); border-radius: var(--hw-radius); box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--kopf), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--kartenlinie); }
+.ein-frage .ein-inhalt p { flex: 1; margin: 0; font: var(--hw-t-text); line-height: 1.45; color: var(--leise); }
+.ein-frage .ein-inhalt b { display: block; margin-bottom: 8px; font: var(--hw-t-titel); color: var(--text); }
+.ein-frage .ein-inhalt span { display: block; }
+.ein-antworten { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+.ein-antworten .hw-knopf { padding: 0 8px; }
+@media (prefers-reduced-motion: reduce) { .ein-ring, #erfolge-toast.sichtbar .erfolge-bild { animation: none; } }
+
+/* Einstellungen, Erfolge, Chronik im Blatt. */
+.hw-g6-einstellungen > .hw-feld { margin: 0 0 18px; }
+.hw-g6-einstellungen .hw-segment, .hw-g6-filter .hw-segment { margin: 0; }
+.hw-g6-einstellungen .hw-feldunter { margin-top: 8px; }
+.hw-g6-einstellungen .hw-stepper.gross { width: 200px; }
+.hw-g6-filter { margin: 0 0 8px; }
+.hw-g6-filter .hw-segment > button { flex: 1 1 auto; padding: 0 4px; gap: 0; font-size: 11.6px; text-transform: none; letter-spacing: 0; }
+.hw-g6-vitrine { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 6px; padding: 16px 8px 12px; border-radius: var(--hw-radius); background: var(--tief); }
+.hw-g6-vitrine figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.hw-g6-vitrine img { width: 52px; height: 52px; }
+.hw-g6-vitrine figcaption { text-align: center; color: var(--leise); overflow-wrap: anywhere; }
+.hw-g6-erfolge .hw-faehigkeit { grid-template-columns: minmax(0, 1fr) 120px 34px; margin-top: 10px; }
+.hw-g6-erfolge .hw-faehigkeit > span:first-child { white-space: nowrap; overflow: hidden; }
+.hw-g6-hinweistext { margin: 2px 0 0; color: var(--leise); text-align: right; padding-right: 39px; }
+.hw-g6-erfolge .erfolge-karte .erfolge-bild { flex: none; width: 40px; height: 40px; object-fit: contain; }
+.hw-g6-erfolge .erfolge-karte.gesperrt .erfolge-bild { filter: grayscale(1); opacity: .35; }
+.hw-g6-erfolge .erfolge-geheim { flex: none; width: 40px; height: 40px; border-radius: 8px; border: 2px dashed var(--kartenlinie); }
+.hw-g6-chronik { margin: 4px 0 8px; }
+.hw-g6-chronik .hw-karte { padding: 12px 14px 16px; }
+.hw-g6-chronik .chronik-motiv { display: block; width: 100%; height: 170px; object-fit: contain; border-radius: 8px; background: var(--tief); }
+.hw-g6-jahr { display: block; margin: 14px 0 2px; text-align: center; }
+.hw-g6-chronik .hw-karte-titel { margin: 0 0 8px; }
+.hw-g6-chronik .hw-lese { margin: 0; color: var(--leise); }
+.hw-g6-chronik .hw-g6-motiv { margin-top: 8px; color: var(--marke); }
+.hw-g6-chronik .hw-punkte { margin: 14px 0 0; }
+
+/* Zeitung: Papier im hellen Bereich, Figtree und Schriftskala, Spalten wie Coffee 10. */
+.zb-root { padding: 8px var(--hw-rand) 24px; color: var(--text); }
+.zb-root * { min-width: 0; }
+.zb-navigation { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 8px; }
+.zb-navigation .hw-knopf { padding: 0 6px; font-size: 12.3px; }
+.zb-zahl { margin: 8px 0 14px; text-align: center; color: var(--leise); }
+.zb-kopf { padding: 12px 0 10px; border-top: 3px double var(--text); border-bottom: 3px double var(--text); text-align: center; }
+.zb-ausgabenzeile, .zb-datum { display: flex; justify-content: space-between; gap: 8px; font: var(--hw-t-klein); }
+.zb-ausgabenzeile { color: var(--marke); }
+.zb-kopf h2 { margin: 8px 0 10px; font: 700 24.75px/1.05 var(--hw-schrift); letter-spacing: -.01em; text-transform: uppercase; }
+.zb-datum { padding-top: 6px; border-top: 1px solid var(--kartenlinie); }
+.zb-tabs { display: flex; overflow-x: auto; scrollbar-width: none; margin: 12px 0 16px; border-bottom: 1.33px solid var(--text); }
+.zb-tabs::-webkit-scrollbar { display: none; }
+.zb-tabs button { flex: 1 0 auto; min-height: 44px; padding: 0 8px; border: 0; background: none; color: var(--leise); font: 400 14.4px/1 var(--hw-schrift); }
+.zb-tabs button.aktiv { color: var(--text); font-weight: 600; box-shadow: inset 0 -3px 0 var(--akzent); }
+.zb-spalten { columns: 2 140px; column-gap: 18px; column-rule: 1px solid var(--kartenlinie); }
+.zb-artikel { break-inside: avoid; padding-top: 12px; margin-bottom: 16px; border-top: 1px solid var(--kartenlinie); }
+.zb-aufmacher { column-span: all; padding-top: 0; border-top: 0; }
+.zb-rubrik { margin-bottom: 4px; color: #8b3030; }
+.zb-artikel h3 { margin: 0 0 6px; font: 600 15px/1.2 var(--hw-schrift); overflow-wrap: break-word; hyphens: auto; }
+.zb-aufmacher h3 { font-size: 19px; line-height: 1.15; }
+.zb-unter { margin: 0 0 8px; font: italic 400 12.3px/1.4 var(--hw-schrift); color: var(--leise); }
+.zb-bild { margin: 8px 0 8px; }
+.zb-bildrahmen { position: relative; aspect-ratio: 420 / 260; overflow: hidden; border-radius: 4px; background: #dcd6c9; }
+.zb-bildlade { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: var(--hw-t-klein); color: var(--leise); }
+.zb-isobild { position: relative; z-index: 1; display: block; width: 100%; height: 100%; }
+.zb-bild figcaption { margin-top: 4px; color: var(--marke); }
+.zb-text { margin: 6px 0 0; font-size: 12.3px; line-height: 1.5; hyphens: auto; overflow-wrap: break-word; }
+.zb-archivliste { margin-bottom: 8px; }
+.zb-root > .hw-schalterzeile { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--kartenlinie); }
+@media (max-width: 340px) { .zb-spalten { columns: 1; column-rule: none; } }
+
+/* Spielende: Endszene mit Zeitung, Bilanz als dunkles Blatt. */
+body.spielende-aktiv { overflow: hidden; }
+#spielende-overlay { position: fixed; inset: 0; z-index: 25; width: auto; height: auto; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
+#spielende-overlay[hidden] { display: none; }
+#spielende-overlay > .hw-grund { position: fixed; }
+#spielende-overlay .se-wrap { position: relative; display: flex; flex-direction: column; max-width: 520px; min-height: 100dvh; margin: 0 auto; padding: calc(16px + env(safe-area-inset-top)) 0 calc(24px + env(safe-area-inset-bottom)); }
+#spielende-overlay .se-kopf { display: flex; align-items: center; gap: 12px; padding: 0 var(--hw-rand) 14px; }
+#spielende-overlay .se-szene { margin: auto var(--hw-rand); }
+#spielende-overlay .se-bild { border-radius: var(--hw-radius); overflow: hidden; }
+#spielende-overlay .se-illustration { display: block; width: 100%; height: auto; }
+#spielende-overlay .se-zeitung { position: relative; margin: -18px 14px 0; padding: 14px 16px 16px; border-radius: 4px; background: #f6f2e9; color: #1f1d1a; border-top: 3px double #1f1d1a; }
+#spielende-overlay .se-zeitung small { display: block; padding-bottom: 6px; border-bottom: 1px solid #b9b09d; color: #5f5a52; }
+#spielende-overlay .se-zeitung h1 { margin: 10px 0 6px; font: 700 24.75px/1.1 var(--hw-schrift); }
+#spielende-overlay .se-zeitung p { margin: 0; font-size: 12.3px; line-height: 1.45; color: #3b3832; }
+#spielende-overlay .se-fuss { padding: 22px var(--hw-rand) 0; }
+#spielende-overlay .se-ergebnis { margin-top: 18px; }
+#spielende-overlay .se-ergebnis .hw-zahl { color: var(--stern); }
+#spielende-overlay .se-bilanz .hw-gross + .hw-gross { margin-top: 18px; }
+#spielende-overlay .se-bilanz .hw-knoepfe { margin-top: 24px; }
+@media (prefers-reduced-motion: reduce) { #spielende-overlay *, #spielende-overlay *::before { animation: none !important; transition: none !important; } }
+/* Großkennzahlen dürfen nie seitlich überlaufen: lange Werte schrumpfen. */
+.hw-gross .hw-zahl { overflow-wrap: anywhere; }
+.hw-gross > div { overflow: hidden; }
+/* Tabellenkopf links darf umbrechen, sonst schiebt ein langer Titel die Tabelle aus dem Blatt. */
+.hw-tabelle { table-layout: auto; max-width: 100%; }
+.hw-tabelle th:first-child { white-space: normal; }
+/* Spielstände im Blatt: Platzkarten wie auf dem Start, Name als dunkles Feld. */
+.hw-app { display: grid; gap: 12px; }
+.hw-app-befund { color: var(--leise); margin: 14px 0 0; }
+.hw-app .app-platz { box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--karte), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--kartenlinie); }
+.hw-app .app-namenswahl { display: block; margin: 0 0 10px; font: var(--hw-t-marke); text-transform: uppercase; color: var(--marke); }
+.hw-app .app-namenswahl input { display: block; width: 100%; height: 40px; margin-top: 6px; padding: 0 12px; border: 0; border-radius: var(--hw-radius); background: var(--feld); color: var(--text); font: var(--hw-t-text); text-transform: none; box-shadow: inset 0 0 0 1.33px var(--feldlinie); }
+/* Boden unter dem Fenster: erste Kennzahl nicht direkt an der Kante. */
+.hw-boden > .hw-rumpf > .hw-gross:first-child { margin-top: 0; padding-top: 18px; }

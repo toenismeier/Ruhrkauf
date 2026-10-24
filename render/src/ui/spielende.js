@@ -1,8 +1,10 @@
 // N02: Endszene, Bilanz und lokale Bestenliste. Spielregeln bleiben in der Engine.
 import { esc } from './format.js';
 import { spielendeSzene } from '../kit/spielende.js';
+import * as K from './komponenten.js';
+import { LOGO } from './kartenoberflaeche.js';
 
-const zahl = (n) => new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(Math.round(n ?? 0));
+const zahl = (n) => new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(Math.round(n ?? 0) || 0);
 const geld = (n) => zahl(n) + ' €';
 const ART = {
   zerschlagen: {
@@ -54,32 +56,18 @@ function aufzeichnen(s, e) {
 }
 function rangliste(schwierigkeit) {
   const liste = lesen(schwierigkeit);
-  if (!liste.length) return '<p class="se-unter">Hier erscheinen die zehn besten Ergebnisse dieser Schwierigkeitsstufe.</p>';
-  return '<table class="se-tabelle"><thead><tr><th>Rang</th><th>Datum / Seed</th><th>Ende</th><th>Punkte</th></tr></thead><tbody>' +
-    liste.map((x,i) => '<tr><td>'+(i+1)+'.</td><td>'+esc(x.datum)+'<small> · '+zahl(x.seed)+'</small></td><td>'+
-      esc(ART[x.art]?.titel || x.art)+(x.testspiel ? ' <small>(Test)</small>' : '')+'</td><td>'+zahl(x.punkte)+'</td></tr>').join('')+
-    '</tbody></table>';
+  if (!liste.length) return K.leer('Hier erscheinen die zehn besten Ergebnisse dieser Schwierigkeitsstufe.');
+  return K.liste(liste.map((x,i) => K.zeile({ was: (i+1) + '. ' + esc(ART[x.art]?.titel || x.art) + (x.testspiel ? ' (Test)' : ''),
+    unter: esc(x.datum) + ' · Seed ' + zahl(x.seed), wert: zahl(x.punkte), wertUnter: 'Punkte' })));
 }
 // Verlaufsdaten nur aus der Engine-Historie (N01 kann diesen Bereich später ersetzen).
 function verlauf(historie) {
   if (!Array.isArray(historie) || historie.length < 2) return '';
-  const serien = [
-    { key: 'umsatz', farbe: '#eacb91' },
-    { key: 'ebitda', farbe: '#79c2bb' },
-  ];
-  const werte = historie.filter((k,i) => i % 13 === 12 || i === historie.length - 1);
+  // G6: je Jahr die letzte Woche (Coffee 22: Balken ohne Achsen, Umsatz hell, Ergebnis grün).
+  const werte = historie.filter((k,i) => i % 52 === 51 || i === historie.length - 1).slice(-5);
   if (werte.length < 2) return '';
-  const unten = 95, oben = 9, links = 16, rechts = 594;
-  const alle = werte.flatMap(k => [schonen(k.umsatz), schonen(k.ebitda)]);
-  const min = Math.min(0, ...alle), max = Math.max(1, ...alle), span = Math.max(1, max-min);
-  const px = i => links + (rechts-links)*i/(werte.length-1);
-  const py = n => unten - (schonen(n)-min)/span*(unten-oben);
-  const nullinie = py(0);
-  const pfade = serien.map(serie => '<path fill="none" stroke="'+serie.farbe+'" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round" d="' +
-    werte.map((k,i) => (i?'L':'M')+px(i).toFixed(1)+','+py(k[serie.key]).toFixed(1)).join(' ') + '"/>').join('');
-  return '<h2>Umsatz und EBITDA im Verlauf</h2><div class="se-karte"><svg class="se-chart" viewBox="0 0 610 112" role="img" aria-label="Verlauf von Umsatz und EBITDA, quartalsweise">' +
-    '<path d="M'+links+' '+nullinie.toFixed(1)+'h'+(rechts-links)+'" stroke="#718087" stroke-width="1" stroke-dasharray="5 5"/>'+
-    pfade+'</svg><div class="se-legende"><span>Umsatz je Woche</span><span>EBITDA je Woche</span></div></div>';
+  return K.abschnitt('Umsatz und EBITDA', 'Wochenwert je Jahr') + K.balken(werte.map((k, i) => ({ label: 'J' + (historie.indexOf(k) >= 0 ? Math.floor(historie.indexOf(k) / 52) + 1 : i + 1),
+    a: schonen(k.umsatz), b: schonen(k.ebitda) })), ['Umsatz je Woche', 'EBITDA je Woche']);
 }
 function entscheidungen(s) {
   // Nur zeigen, wenn ein Entscheidungsprotokoll die tatsächliche EBITDA-Wirkung enthält.
@@ -89,13 +77,14 @@ function entscheidungen(s) {
   if (!bewertet.length) return '';
   const sortiert = [...bewertet].sort((a,b) => b.ebitdaWirkung - a.ebitdaWirkung);
   const gut = sortiert[0], schlecht = sortiert[sortiert.length-1];
-  return '<h2>Entscheidungen mit der größten Wirkung</h2><div class="se-karte">' +
-    (gut ? '<div class="se-zeile"><span>Beste: '+esc(gut.titel || gut.typ || 'Entscheidung')+'</span><strong>'+geld(gut.ebitdaWirkung)+'</strong></div>' : '')+
-    (schlecht && schlecht !== gut ? '<div class="se-zeile"><span>Schlechteste: '+esc(schlecht.titel || schlecht.typ || 'Entscheidung')+'</span><strong>'+geld(schlecht.ebitdaWirkung)+'</strong></div>' : '')+'</div>';
+  return K.abschnitt('Entscheidungen mit der größten Wirkung') + K.liste([
+    gut ? K.zeile({ was: 'Beste: ' + esc(gut.titel || gut.typ || 'Entscheidung'), wert: geld(gut.ebitdaWirkung), ton: gut.ebitdaWirkung < 0 ? 'schlecht' : 'gut' }) : '',
+    schlecht && schlecht !== gut ? K.zeile({ was: 'Schlechteste: ' + esc(schlecht.titel || schlecht.typ || 'Entscheidung'), wert: geld(schlecht.ebitdaWirkung), ton: schlecht.ebitdaWirkung < 0 ? 'schlecht' : '' }) : '']);
 }
 export function spielendeModul(ctx) {
   const node = document.createElement('div');
   node.id = 'spielende-overlay'; node.hidden = true;
+  node.className = 'hw hw-g6'; node.dataset.bereich = 'betrieb';
   node.setAttribute('role', 'dialog'); node.setAttribute('aria-modal', 'true'); node.setAttribute('aria-label', 'Spielende und Bilanz');
   document.body.append(node);
   let ansicht = 'zu', gespeicherterSchluessel = '', zaehlRaf = 0, bilanziert = false;
@@ -121,7 +110,7 @@ export function spielendeModul(ctx) {
     document.body.classList.remove('spielende-aktiv');
   }
   function rahmen(titel, inhalt) {
-    node.innerHTML = '<div class="se-wrap"><header class="se-kopf"><span>HARTWIG · KONZERNBILANZ</span><b>H</b></header>'+
+    node.innerHTML = '<div class="hw-grund"></div><div class="se-wrap"><header class="se-kopf"><span class="hw-g6-logo">' + LOGO + '</span><span class="hw-marke">Hartwig · ' + esc(titel) + '</span></header>'+
       inhalt+'</div>';
     node.hidden = false; document.body.classList.add('spielende-aktiv');
   }
@@ -129,23 +118,24 @@ export function spielendeModul(ctx) {
     const s = stand(), e = s?.ende;
     if (!e) return;
     const a = ART[e.art] || ART.zerschlagen, w = e.wertung, k = e.kennzahlen;
-    const teile = w.teile.map(t=>'<div class="se-zeile"><span>'+esc(t.name)+'</span><strong class="'+(t.punkte<0?'se-minus':'')+'" data-se-wert="'+t.punkte+'">'+zahl(t.punkte)+'</strong></div>').join('');
-    const kenn = [
-      ['Gerettete Häuser', k.geretteteHaeuser+' / '+k.startHaeuser],
-      ['Beschäftigte (FTE)',zahl(k.fte)+' / '+zahl(k.startFte)],
-      ['EBITDA, 52 Wochen',geld(k.ebitda52)],
-      ['Konzernwert',geld(k.unternehmenswert)],
-    ].map(([name,value])=>'<div class="se-kpi"><small>'+esc(name)+'</small><b>'+esc(value)+'</b></div>').join('');
-    rahmen('Bilanz','<div class="se-bilanz"><h1>Ihre Bilanz</h1><p class="se-unter">'+esc(a.titel)+' · Woche '+zahl(e.woche)+
-      ' · '+esc(SCHWIERIGKEIT[w.schwierigkeit] || w.schwierigkeit)+'</p>'+
-      '<div class="se-ergebnis"><small>GESAMTPUNKTZAHL</small><strong data-se-wert="'+w.punkte+'">0</strong><small>Grundpunkte '+
-      zahl(w.grundpunkte)+' × '+new Intl.NumberFormat('de-DE',{maximumFractionDigits:1}).format(w.multiplikator)+'</small></div>'+
-      '<div class="se-karte">'+teile+'</div><h2>Unternehmen nach dem Spiel</h2><div class="se-kpis">'+kenn+'</div>'+
+    // G6 (E47): Hauptfrage zuerst (Gesamtpunktzahl), dann Zusammensetzung als Tabelle mit Summe, dann das Unternehmen.
+    const teile = K.tabelle({ titel: 'Punkte', spalten: ['Wert', 'Punkte'], zeilen: w.teile.map((t) => ({ name: t.name, werte: [zahl(t.wert), zahl(t.punkte)], roh: [null, t.punkte], ton: ['', t.punkte < 0 ? 'schlecht' : ''] })),
+      summe: { name: 'Grundpunkte', werte: ['', zahl(w.grundpunkte)], roh: [null, w.grundpunkte] }, pruefen: true });
+    const stufe = esc(SCHWIERIGKEIT[w.schwierigkeit] || w.schwierigkeit);
+    rahmen('Konzernbilanz', K.sprecher({ text: esc(a.titel) + '. Woche ' + zahl(e.woche) + ', Stufe ' + stufe + '.' }) + K.rumpf('<div class="se-bilanz">' +
+      K.gross([{ label: 'Gesamtpunktzahl', wert: '0', p: 'se:punkte', unter: 'Grundpunkte ' + zahl(w.grundpunkte) + ' × ' + new Intl.NumberFormat('de-DE',{maximumFractionDigits:1}).format(w.multiplikator) }])
+        .replace('class="hw-gross"', 'class="hw-gross se-ergebnis"').replace('data-p="se:punkte"', 'data-se-wert="' + w.punkte + '"') +
+      K.abschnitt('Zusammensetzung') + teile +
+      K.abschnitt('Unternehmen nach dem Spiel') +
+      K.liste([K.zeile({ was: 'Gerettete Häuser', wert: k.geretteteHaeuser + ' / ' + k.startHaeuser, wertUnter: 'zum Start' }),
+        K.zeile({ was: 'Beschäftigte (FTE)', wert: zahl(k.fte) + ' / ' + zahl(k.startFte), wertUnter: 'zum Start' }),
+        K.zeile({ was: 'EBITDA, 52 Wochen', wert: geld(k.ebitda52), ton: k.ebitda52 < 0 ? 'schlecht' : 'gut' }),
+        K.zeile({ was: 'Konzernwert', wert: geld(k.unternehmenswert) })]) +
       verlauf(s.historie)+entscheidungen(s)+
-      '<h2>Bestenliste · '+esc(SCHWIERIGKEIT[w.schwierigkeit] || w.schwierigkeit)+'</h2><div class="se-karte">'+rangliste(w.schwierigkeit)+'</div>'+
-      '<div class="se-aktionen"><button class="se-knopf" data-se="neu">Neues Spiel</button>'+
-      (['saniert','ruhestand'].includes(e.art)?'<button class="se-knopf se-sek" data-se="weiter">Weiterspielen</button>':'')+
-      '</div></div>');
+      K.abschnitt('Bestenliste', stufe) + rangliste(w.schwierigkeit) +
+      K.knoepfe(K.knopf('Neues Spiel', 'data-se="neu"', 'breit') +
+      (['saniert','ruhestand'].includes(e.art) ? K.knopf('Weiterspielen', 'data-se="weiter"', 'zweit breit') : '')) +
+      '</div>'));
     ansicht='bilanz'; bilanziert=true; zahlenAnimieren();
   }
   function anzeigen() {
@@ -161,17 +151,17 @@ export function spielendeModul(ctx) {
     }
     if (!node.hidden && ansicht === 'szene') return true;
     const a = ART[e.art] || ART.zerschlagen;
-    rahmen(a.titel,'<div class="se-szene"><div class="se-bild">'+spielendeSzene(e.art,e.kaeufer)+
-      '</div><div class="se-zeitung"><small>DER HANDELSBOTE · SONDERAUSGABE · WOCHE '+zahl(e.woche)+'</small>'+
-      '<h1>'+esc(a.schlagzeile)+'</h1><p>'+esc(a.zeile)+'</p></div></div>'+
-      '<button class="se-knopf" data-se="bilanz">Zur Abschlussbilanz</button>');
+    rahmen('Konzernbilanz','<div class="se-szene"><div class="se-bild">'+spielendeSzene(e.art,e.kaeufer)+
+      '</div><div class="se-zeitung" data-bereich="papier"><small class="hw-marke">Der Handelsbote · Sonderausgabe · Woche '+zahl(e.woche)+'</small>'+
+      '<h1>'+esc(a.schlagzeile)+'</h1><p class="hw-lese">'+esc(a.zeile)+'</p></div></div>'+
+      '<div class="se-fuss">' + K.knopf('Zur Abschlussbilanz', 'data-se="bilanz"', 'breit') + '</div>');
     ansicht='szene'; return true;
   }
   function bestenliste() {
     if (!stand()) return;
-    rahmen('Bestenliste','<div class="se-bilanz"><h1>Bestenliste</h1><p class="se-unter">Die zehn besten Ergebnisse je Schwierigkeitsstufe bleiben auf diesem Gerät gespeichert.</p>'+
-      ['leicht','mittel','schwer'].map(id=>'<h2>'+esc(SCHWIERIGKEIT[id])+'</h2><div class="se-karte">'+rangliste(id)+'</div>').join('')+
-      '<button class="se-knopf se-sek" data-se="schliessen">Zurück zum Spiel</button></div>');
+    rahmen('Bestenliste', K.sprecher({ text: 'Die zehn besten Ergebnisse je Schwierigkeitsstufe bleiben auf diesem Gerät gespeichert.' }) + K.rumpf('<div class="se-bilanz">'+
+      ['leicht','mittel','schwer'].map(id => K.abschnitt(SCHWIERIGKEIT[id]) + rangliste(id)).join('')+
+      K.knoepfe(K.knopf('Zurück zum Spiel', 'data-se="schliessen"', 'zweit breit')) + '</div>'));
     ansicht='rangliste';
   }
   node.addEventListener('click', e => {

@@ -6,7 +6,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
+const mime = { '.css': 'text/css; charset=utf-8', '.ttf': 'font/ttf', '.png': 'image/png', '.json': 'application/json', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 const server = http.createServer((req, res) => {
   const pathname = decodeURIComponent((req.url ?? '/').split('?')[0]);
   const file = path.resolve(root, '.' + (pathname === '/' ? '/spiel.html' : pathname));
@@ -35,9 +35,9 @@ const server = http.createServer((req, res) => {
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(url, { waitUntil: 'load' });
     await page.locator('#start.an').waitFor();
-    assert.equal(await page.locator('.stufe-karte').count(), 3, 'Startbildschirm hat drei Schwierigkeitsgrade');
+    assert.equal(await page.locator('#startstufen [data-v]').count(), 3, 'Startbildschirm hat drei Schwierigkeitsgrade');
     // N09: zuerst Szenario wählen, danach Schwierigkeit und Start.
-    await page.locator('.sz-karte[data-szenario=standard]').click();
+    await page.locator('[data-szenario=standard]').click();
     await page.locator('#startknopf').click();
     await page.waitForFunction(() => window.bereit === true && window.spiel?.s?.haeuser?.length > 0);
     const vorher = await page.evaluate(() => {
@@ -60,20 +60,19 @@ const server = http.createServer((req, res) => {
     const mapStatus = await page.evaluate(() => {
       const p = window.spiel.portfolio.pruefe(), hs = window.spiel.E.portfolio(window.spiel.s);
       return { ...p, staedte: new Set(hs.map((h) => h.stadt)).size,
-        pins: document.querySelectorAll('.deutschland-svg g[data-stadt]').length };
+        pins: document.querySelectorAll('.hw-deutschland g[data-stadt]').length };
     });
     assert.equal(mapStatus.pins, mapStatus.staedte, 'Karte besitzt einen Punkt je Engine-Stadt');
     assert.deepEqual(mapStatus.fehler, [], 'Karte nutzt gültige Engine-Attribute');
-    await page.locator('.deutschland-svg g[data-stadt]').first().evaluate((element) => element.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    await page.locator('.hw-deutschland g[data-stadt]').first().evaluate((element) => element.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     assert.ok(await page.evaluate(() => document.getElementById('ptitel').textContent.length > 0), 'Stadt über Kartenpunkt geöffnet');
     await page.evaluate(() => window.spiel.oeffnePortfolio('liste'));
-    const rowsBefore = await page.locator('#pp-scroll .pp-haus').count();
+    const rowsBefore = await page.locator('#pp-scroll .hw-pp-zeile').count();
     await page.locator('#pp-scroll').evaluate((el) => { el.scrollTop = 1800; el.dispatchEvent(new Event('scroll')); });
-    const rowsAfter = await page.locator('#pp-scroll .pp-haus').count();
+    const rowsAfter = await page.locator('#pp-scroll .hw-pp-zeile').count();
     assert.ok(rowsBefore > 0 && rowsBefore < 36 && rowsAfter > 0 && rowsAfter < 36, 'Portfolio listet nur sichtbare Häuser');
-    // Q30: Filter liegen in einer aufklappbaren Leiste
-    if (!(await page.locator('.pp-filterbox[open]').count())) await page.locator('.pp-filterbox > summary').click();
-    await page.locator('[data-pp-filter="format"]').selectOption('sport');
+    // E47: Filter sind Segmentleisten
+    await page.locator('[data-pp-filter="format"][data-v="sport"]').click();
     const sportAuswahl = await page.evaluate(() => {
       const hs = window.spiel.E.portfolio(window.spiel.s).filter((h) => h.formatKey === 'sport' && h.steuerbar);
       return hs.map((h) => h.id);
@@ -141,7 +140,9 @@ const server = http.createServer((req, res) => {
     const diag = status.diag;
     assert.ok(diag.fps > 0 && Number.isFinite(diag.frameP95Ms), 'Performance-Messung liefert echte Frames');
     assert.ok(diag.drawCalls > 0, 'Die Stadt wurde tatsaechlich gerendert');
-    assert.equal(diag.grafikprofil, 'sparsam', 'Mobiles Geraet verwendet das sparsame Grafikprofil');
+    // E47: Telefon spart am Schattenpass, nie an der Schärfe (Kantenglättung, Pixeldichte 2).
+    assert.equal(diag.grafikprofil, 'scharf', 'Mobiles Gerät verwendet das scharfe Profil ohne Schattenpass');
+    assert.equal(diag.pixeldichte, 2, 'Mobiles Gerät rendert mit Pixeldichte 2');
     assert.deepEqual(errors, [], 'Keine JavaScript-Laufzeitfehler');
     fs.mkdirSync(path.join(root, 'out'), { recursive: true });
     await page.screenshot({ path: path.join(root, 'out', 'mobil-smoke.png') });

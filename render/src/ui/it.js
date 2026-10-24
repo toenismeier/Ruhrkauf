@@ -1,213 +1,197 @@
-// O03 IT: Systemlandkarte, Projektvergleich, Meilensteine und clusterweiser Rollout.
+// O03 IT (E47 nach Coffee 12–14): Systemlandkarte, digitale Produkte, Projekte mit Rollout, neues Projekt.
 import { esc, geld } from './format.js';
+import * as K from './komponenten.js';
 import { itProdukteKarten, itProduktDetail } from './it-produkte.js';
-import { bereich } from './komponenten.js';
+import { skalaGross } from './marketing-q16.js';
+import { portraetSVG, zufallsMerkmale } from '../kit/portraet.js';
+
+const REITER = [['systeme', 'Systeme', 'zentrale'], ['produkte', 'Produkte', 'post'], ['projekte', 'Projekte', 'umbau'], ['neu', 'Neu', 'leitung']];
+const ARTEN = [['kaufen', 'Standardsoftware'], ['entwickeln', 'Eigenentwicklung'], ['dienstleister', 'Dienstleister']];
+const PHASEN = { konzept: 'Konzept', umsetzung: 'Umsetzung', rollout: 'Rollout', abgeschlossen: 'Abgeschlossen' };
+const prozent = (x) => Math.round(x * 100) + ' %';
+const risikoText = (x) => (x * 100).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %';
+
+/** Sprecher aus dem Digitalressort (CDO), sonst die Bereichsleitung IT. */
+export function digitalSprecher(E, s, text, ton = '', bereich = 'IT') {
+  const p = E.vorstandUebersicht?.(s)?.ressorts?.find((x) => x.id === 'cdo')?.person;
+  return K.sprecher({ text, ton, unter: p ? `${p.name} · Digitalvorstand` : `Bereichsleitung ${bereich}`, person: portraetSVG(p?.portraet ?? zufallsMerkmale('bereich:' + bereich), 72) });
+}
 
 export function itModul(ctx) {
-  const { E }=ctx, s=()=>ctx.s();
-  const ui={ aktiv:false, reiter:'systeme', system:'kasse', art:'kaufen', generation:3, auswahl:null, projekt:null, produkt:null, bestaetigung:false };
-  const optionen=['kaufen','entwickeln','dienstleister'];
-  const artName={kaufen:'Standard\u00adsoftware',entwickeln:'Eigen\u00adentwicklung',dienstleister:'Dienst\u00adleister'}; // Q31: weiche Trennstellen, sonst Wortbruch im Segment
-  const phasen={konzept:'Konzept',umsetzung:'Umsetzung',rollout:'Rollout',abgeschlossen:'Abgeschlossen'};
-  const prozent=x=>Math.round(x*100)+' %';
-  function daten(){return E.itUebersicht(s());}
-  function zeile(t,wert){return '<div class="zeile"><span class="was">'+esc(t)+'</span><b class="uq" style="min-width:90px">'+esc(String(wert))+'</b></div>';}
-  function balken(w){return '<div class="it-fortschritt"><i style="width:'+Math.max(0,Math.min(100,Math.round(w*100)))+'%"></i></div>';}
-  function reiter(){
-    return '<div class="tabs">'+[['systeme','Systeme'],['produkte','Produkte'],['projekte','Projekte'],['neu','Neues Projekt']].map(x=>
-      '<button type="button" class="tab '+(ui.reiter===x[0]?'an':'')+'" data-it="reiter" data-v="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>';
-  }
-  // Q31 Generationenleiter. Hauptfrage: Welches System droht auszufallen? Größter Block = höchstes Ausfallrisiko,
-  // darunter alle Systeme nach Risiko als Leiter (Generation 1 bis 4), Modernisieren mit einem Tipp je System.
-  const risikoText=x=>(x*100).toLocaleString('de-DE',{maximumFractionDigits:1})+' %';
-  function leiter(g){return '<span class="q-leiter" aria-label="Generation '+g+' von 4">'+[1,2,3,4].map(i=>'<i class="'+(i<=g?'an':'')+'"></i>').join('')+'</span>';}
-  function systemZeile(x){
-    const ton=x.risiko>=0.01?'q-minus':'';
-    const bereiche=E.SYSTEME[x.id].bereiche.map(id=>E.BEREICHE?.find(q=>q.id===id)?.name??id);
-    const akt=x.verteilung.filter(c=>c.generation>x.generation).length;
-    let h='<div class="q-zeile q-system">'+leiter(x.generation)+'<span class="q-name">'+esc(x.name)+(x.generation>0?'<small>Generation '+x.generation+' von 4 · '+Math.floor(x.alter)+' Jahre · '+geld(x.kostenWoche)+' je Woche</small>':'<small>Noch nicht eingeführt, keine laufenden Kosten</small>')+
-      (x.wartungGekuendigt?'<small class="q-minus">Wartung durch den Anbieter beendet</small>':'')+(akt?'<small>'+akt+' von '+x.verteilung.length+' Clustern schon modernisiert</small>':'')+
-      '<small>Bremst: '+esc(bereiche.slice(0,3).join(', '))+(bereiche.length>3?' und '+(bereiche.length-3)+' weitere':'')+'</small></span>'+
-      '<span class="q-wert"><b class="'+ton+'">'+risikoText(x.risiko)+'</b><small>Ausfall je Woche</small></span>'+
-      '<span class="q-knoepfe"><button data-it="neues" data-v="'+x.id+'">Modernisieren</button></span></div>';
-    return h;
-  }
-  function systeme(d){
-    const reihe=[...d.systeme].sort((a,b)=>b.risiko-a.risiko||a.generation-b.generation);
-    const top=reihe[0];
-    let h='<div class="q31">';
-    h+='<div class="q-gross"><span class="q-label">Höchstes Ausfallrisiko</span><span class="q-haupt '+(top&&top.risiko>=0.01?'q-minus':'')+'">'+(top?risikoText(top.risiko):'0 %')+'</span><span class="q-neben"><b>'+geld(d.betriebskostenWoche)+'</b>IT-Betrieb je Woche</span></div>';
-    const alt=reihe.filter(x=>x.generation<=1||x.wartungGekuendigt);
-    h+='<div class="q-befund">'+(top&&top.risiko>=0.002?'<b>'+esc(top.name)+'</b> fällt mit '+risikoText(top.risiko)+' je Woche am ehesten aus.':'Alle '+d.systeme.length+' Systeme laufen stabil.')+(alt.length?' '+alt.length+' '+(alt.length===1?'System ist':'Systeme sind')+' veraltet oder ohne Wartung.':'')+'</div>';
-    h+='<div class="q-buch"><div class="q-buch-kopf"><span>Systemlandkarte</span><b>nach Risiko</b></div>'+reihe.map(systemZeile).join('')+'</div>';
-    const k=d.systeme.find(x=>x.id==='kasse');
-    if(k && k.generation>=2) {
-      h+='<div class="q-buch"><div class="q-buch-kopf"><span>Kassenausbau</span><b>Stufe von 2</b></div>';
-      for(const art of ['selbstbedienung','mobil']){
-        const stufe=k.kasseAusbau?.[art]??0;
-        h+='<div class="q-zeile"><span class="q-name">'+(art==='mobil'?'Mobile Kasse':'Selbstbedienungskassen')+'</span><span class="q-wert">'+stufe+' von 2</span>'+(stufe<2?'<span class="q-knoepfe"><button data-it="kasseAusbau" data-v="'+art+'">Stufe '+(stufe+1)+' beauftragen</button></span>':'')+'</div>';
-      }
-      h+='</div>';
+  const { E } = ctx, s = () => ctx.s();
+  const ui = { aktiv: false, reiter: 'systeme', system: 'kasse', art: 'kaufen', generation: 3, auswahl: null, produkt: null, bestaetigung: false };
+  const daten = () => E.itUebersicht(s());
+  /** Erlaubte Zielgenerationen je Realisierung (gleiche Regeln wie bisher). */
+  const erlaubt = (art) => art === 'dienstleister' ? [3] : art === 'kaufen' ? [1, 2, 3] : [1, 2, 3, 4];
+
+  function systeme(d) {
+    const reihe = [...d.systeme].sort((a, b) => b.risiko - a.risiko || a.generation - b.generation);
+    const top = reihe[0], alt = reihe.filter((x) => x.generation <= 1 || x.wartungGekuendigt);
+    let h = K.gross([{ label: 'Höchstes Ausfallrisiko', wert: top ? risikoText(top.risiko) : '0 %', ton: top && top.risiko >= 0.01 ? 'schlecht' : '', unter: top ? esc(top.name) + ' je Woche' : '' },
+      { label: 'IT-Betrieb je Woche', wert: geld(d.betriebskostenWoche), unter: `${d.systeme.length} Systeme` }]);
+    h += K.abschnitt('Systemlandkarte', 'nach Risiko');
+    h += K.liste(reihe.map((x) => {
+      const bereiche = E.SYSTEME[x.id].bereiche.map((id) => E.BEREICHE?.find((q) => q.id === id)?.name ?? id);
+      const akt = x.verteilung.filter((c) => c.generation > x.generation).length;
+      const unter = (x.generation > 0 ? `Generation ${x.generation} von 4 · ${Math.floor(x.alter)} Jahre · ${geld(x.kostenWoche)} je Woche` : 'Noch nicht eingeführt, keine laufenden Kosten')
+        + (x.wartungGekuendigt ? '<br><span class="hw-schlecht">Wartung durch den Anbieter beendet</span>' : '') + (akt ? `<br>${akt} von ${x.verteilung.length} Clustern schon modernisiert` : '')
+        + `<br>Bremst: ${esc(bereiche.slice(0, 3).join(', '))}${bereiche.length > 3 ? ` und ${bereiche.length - 3} weitere` : ''}`;
+      return K.zeile({ was: esc(x.name), unter, wert: risikoText(x.risiko), wertUnter: 'Ausfall je Woche', ton: x.risiko >= 0.01 ? 'schlecht' : '', tippbar: true, attr: `data-it="neues" data-v="${esc(x.id)}" aria-label="${esc(x.name)} modernisieren"` });
+    }));
+    const k = d.systeme.find((x) => x.id === 'kasse');
+    if (k && k.generation >= 2) {
+      h += K.abschnitt('Kassenausbau', 'Stufe von 2');
+      h += K.liste(['selbstbedienung', 'mobil'].map((art) => {
+        const stufe = k.kasseAusbau?.[art] ?? 0;
+        return `<div class="hw-zeile"><span class="hw-was">${art === 'mobil' ? 'Mobile Kasse' : 'Selbstbedienungskassen'}<small>Stufe ${stufe} von 2</small></span>${stufe < 2 ? K.knopf(`Stufe ${stufe + 1} beauftragen`, `data-it="kasseAusbau" data-v="${art}"`, 'zweit') : K.marke('ausgebaut', 'gut')}</div>`;
+      }));
     }
-    h+='<div class="legende">CDO und IT-Leitung beeinflussen das Risiko von Verzögerungen und Störungen.</div></div>';
-    return h;
+    h += '<p class="hw-lese hw-g3-notiz">Digitalvorstand und IT-Leitung beeinflussen das Risiko von Verzögerungen und Störungen.</p>';
+    const befund = top && top.risiko >= 0.002 ? `${esc(top.name)} fällt mit ${risikoText(top.risiko)} je Woche am ehesten aus.` : `Alle ${d.systeme.length} Systeme laufen stabil.`;
+    return { befund: befund + (alt.length ? ` ${alt.length} ${alt.length === 1 ? 'System ist' : 'Systeme sind'} veraltet.` : ''), ton: top && top.risiko >= 0.01 ? 'engpass' : '', html: h };
   }
-  function projektKarte(p,d) {
-    let h='<div class="karte"><div class="khead">'+esc(E.SYSTEME[p.system].name)+'<small>Generation '+p.zielGeneration+' · '+esc(artName[p.art])+'</small></div>';
-    h+='<div class="it-werte"><b>'+esc(phasen[p.phase])+'</b><b>'+prozent(p.fortschritt)+'</b></div>'+balken(p.fortschritt);
-    h+=zeile('Kosten Ist / Plan',geld(p.kostenIst)+' / '+geld(p.kostenPlan));
-    h+=zeile('Mehrwochen durch Verzug',p.verzug);
-    h+=zeile('Rollout',p.erledigteCluster.length+' / '+p.clusterIds.length+' Cluster');
-    const alle=new Map(d.cluster.map(c=>[c.id,c]));
-    if(p.phase==='rollout'||p.phase==='umsetzung'||p.phase==='konzept'){
-      const ausgabe=p.clusterIds.map((id,i)=>{
-        const c=alle.get(id),fertig=p.erledigteCluster.includes(id);
-        return '<div class="it-cluster '+(fertig?'fertig':'')+'"><span>'+(fertig?'✓ ':'')+esc(c?.name??id)+'</span>'+
-          (fertig?'<b>Generation '+p.zielGeneration+'</b>':'<b>geplant</b>')+
-          (!fertig&&p.erledigteCluster.length===0?
-            '<div class="it-pfeile"><button data-it="hoch" data-p="'+p.id+'" data-i="'+i+'" '+(i===0?'disabled':'')+'>↑</button><button data-it="runter" data-p="'+p.id+'" data-i="'+i+'" '+(i===p.clusterIds.length-1?'disabled':'')+'>↓</button></div>':'')+'</div>';
-      });
-      h+='<details class="it-details"><summary>Rollout-Reihenfolge und Clusterkarte</summary>'+ausgabe.join('')+'</details>';
+
+  function projekt(p, d) {
+    const alle = new Map(d.cluster.map((c) => [c.id, c]));
+    let h = K.abschnitt(E.SYSTEME[p.system].name, `Generation ${p.zielGeneration} · ${ARTEN.find(([a]) => a === p.art)?.[1] ?? p.art}`);
+    h += skalaGross(`${PHASEN[p.phase]}, Fortschritt`, p.fortschritt * 100, `<b class="hw-skala-wert">${prozent(p.fortschritt)}</b>`);
+    h += K.liste([K.zeile({ was: 'Kosten Ist / Plan', wert: `${geld(p.kostenIst)} / ${geld(p.kostenPlan)}`, ton: p.kostenIst > p.kostenPlan ? 'schlecht' : '' }),
+      K.zeile({ was: 'Mehrwochen durch Verzug', wert: String(p.verzug), ton: p.verzug > 0 ? 'schlecht' : '' }), K.zeile({ was: 'Rollout', wert: `${p.erledigteCluster.length} / ${p.clusterIds.length} Cluster` })]);
+    if (p.phase !== 'abgeschlossen') {
+      const ordnen = p.erledigteCluster.length === 0;
+      h += `<span class="hw-marke hw-feldname hw-g3-abstand">Rollout-Reihenfolge${ordnen ? ', vor dem ersten Cluster änderbar' : ''}</span>`;
+      h += K.liste(p.clusterIds.map((id, i) => {
+        const c = alle.get(id), fertig = p.erledigteCluster.includes(id);
+        const knoepfe = !fertig && ordnen ? `<span class="hw-g3-teamknoepfe">${K.knopf('früher', `data-it="hoch" data-p="${esc(p.id)}" data-i="${i}" aria-label="${esc(c?.name ?? id)} früher"`, 'zweit', i === 0)}${K.knopf('später', `data-it="runter" data-p="${esc(p.id)}" data-i="${i}" aria-label="${esc(c?.name ?? id)} später"`, 'zweit', i === p.clusterIds.length - 1)}</span>` : K.marke(fertig ? `Generation ${p.zielGeneration}` : 'geplant', fertig ? 'gut' : '');
+        return `<div class="hw-zeile"><span class="hw-was">${i + 1}. ${esc(c?.name ?? id)}</span>${knoepfe}</div>`;
+      }));
     }
-    return h+'</div>';
-  }
-  function projekte(d){
-    let h='<div class="olief">Projekte durchlaufen Konzept, Umsetzung und einen sequenziellen Rollout. Vier Wochen nach jedem Wechsel sind lokale Startprobleme möglich.</div>';
-    const aktiv=d.projekte.filter(x=>x.phase!=='abgeschlossen');
-    if(!aktiv.length)h+='<div class="karte"><div class="zeile">Keine laufenden Projekte.</div></div>';
-    h+=aktiv.map(p=>projektKarte(p,d)).join('');
-    const alt=d.projekte.filter(x=>x.phase==='abgeschlossen').slice(-8).reverse();
-    if(alt.length)h+='<div class="vtitel">Abgeschlossene Projekte</div>'+alt.map(p=>projektKarte(p,d)).join('');
-    h+='<div class="oknoepfe"><button data-it="reiter" data-v="neu">Neues Projekt planen</button></div>';
     return h;
   }
-  function auswahl(d){
-    if(!ui.auswahl){
-      const sys=d.systeme.find(x=>x.id===ui.system);
-      ui.auswahl=new Set(d.cluster.filter(c=>(sys?.verteilung.find(v=>v.id===c.id)?.generation??0)<ui.generation).map(c=>c.id));
+  function projekte(d) {
+    const aktiv = d.projekte.filter((x) => x.phase !== 'abgeschlossen'), alt = d.projekte.filter((x) => x.phase === 'abgeschlossen').slice(-8).reverse();
+    let h = K.gross([{ label: 'Laufende Projekte', wert: String(aktiv.length) }, { label: 'Planbudget offen', wert: geld(aktiv.reduce((a, p) => a + Math.max(0, p.kostenPlan - p.kostenIst), 0)) }]);
+    h += '<p class="hw-lese hw-g3-notiz">Projekte durchlaufen Konzept, Umsetzung und einen Rollout Cluster für Cluster. Vier Wochen nach jedem Wechsel sind lokale Startprobleme möglich.</p>';
+    h += aktiv.length ? aktiv.map((p) => projekt(p, d)).join('') : K.abschnitt('Laufende Projekte') + K.leer('Über „Neu“ beauftragst du das erste Projekt.', 'Keine laufenden Projekte.');
+    if (alt.length) h += K.abschnitt('Abgeschlossene Projekte') + K.liste(alt.map((p) => K.zeile({ was: esc(E.SYSTEME[p.system].name), unter: `Generation ${p.zielGeneration} · ${ARTEN.find(([a]) => a === p.art)?.[1] ?? p.art}`, wert: geld(p.kostenIst), wertUnter: p.verzug ? `${p.verzug} Wochen Verzug` : 'im Plan' })));
+    h += K.knoepfe(K.knopf('Neues Projekt planen', 'data-it="reiter" data-v="neu"', 'zweit breit'));
+    const spaet = aktiv.filter((p) => p.verzug > 0);
+    return { befund: aktiv.length ? `${aktiv.length} Projekte laufen${spaet.length ? `, ${spaet.length} davon mit Verzug` : ', alle im Plan'}.` : 'Gerade läuft kein IT-Projekt.', ton: spaet.length ? 'engpass' : '', html: h };
+  }
+
+  function auswahl(d) {
+    if (!ui.auswahl) {
+      const sys = d.systeme.find((x) => x.id === ui.system);
+      ui.auswahl = new Set(d.cluster.filter((c) => (sys?.verteilung.find((v) => v.id === c.id)?.generation ?? 0) < ui.generation).map((c) => c.id));
     }
     return ui.auswahl;
   }
-  function neu(d){
-    const sys=d.systeme.find(x=>x.id===ui.system)??d.systeme[0];
-    const ids=auswahl(d);
-    const verfuegbar=d.cluster.filter(c=>c.generation===undefined||sys.verteilung.find(v=>v.id===c.id)?.generation<ui.generation);
-    const ausgew=d.cluster.filter(c=>ids.has(c.id));
-    const zulaessig=ui.art==='entwickeln'?ui.generation>=1:ui.generation===3||ui.art==='kaufen'&&ui.generation<=3;
-    const plan=E.itProjektPlan(s(),ui.system,ui.art,ui.generation,ausgew.length);
-    let h='<div class="karte"><div class="khead">Projekt konfigurieren</div>';
-    h+='<div class="regler"><b>System</b><select class="ort gross" data-it-change="system">'+d.systeme.map(x=>
-      '<option value="'+x.id+'" '+(x.id===ui.system?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
-    h+='<div class="regler"><b>Realisierung</b><div class="seg">'+optionen.map(a=>
-      '<button data-it="art" data-v="'+a+'" class="'+(ui.art===a?'an':'')+'">'+artName[a]+'</button>').join('')+'</div></div>';
-    h+='<div class="regler"><b>Zielgeneration</b><div class="seg">'+[1,2,3,4].map(g=>
-      '<button data-it="generation" data-v="'+g+'" '+(ui.generation===g?'class="an"':'')+' '+(ui.art!=='entwickeln'&&g===4||ui.art==='dienstleister'&&g!==3?'disabled':'')+'>'+g+'</button>').join('')+'</div></div>';
-    h+='<div class="it-vergleich">'+optionen.map(art=>{
-      const g=art==='dienstleister'?3:Math.min(ui.generation,art==='entwickeln'?4:3);
-      const x=E.itProjektPlan(s(),ui.system,art,g,ausgew.length);
-      return '<div class="'+(ui.art===art?'gewaehlt':'')+'"><b>'+artName[art]+'</b><small>'+x.gesamt+' Wo.</small><small>'+geld(x.kosten)+'</small><small>'+ (art==='entwickeln'?'hohes':art==='kaufen'?'geringes':'mittleres')+' Risiko</small></div>';
-    }).join('')+'</div>';
-    h+='<div class="vtitel">Rollout-Cluster ('+ausgew.length+' / '+d.cluster.length+')</div>';
-    h+='<div class="oknoepfe"><button data-it="alle">Alle wählen</button><button data-it="keine">Keine wählen</button></div>';
-    h+='<div class="it-clusterauswahl">'+d.cluster.map(c=>{
-      const g=sys.verteilung.find(v=>v.id===c.id)?.generation??sys.generation;
-      return '<label class="it-wahl"><input type="checkbox" data-it-cluster="'+esc(c.id)+'" '+(ids.has(c.id)?'checked':'')+' '+(g>=ui.generation?'disabled':'')+'><span>'+esc(c.name)+'</span><small>Generation '+g+'</small></label>';
-    }).join('')+'</div>';
-    h+=zeile('Geplante Laufzeit',plan.gesamt+' Wochen');
-    h+=zeile('Planbudget',geld(plan.kosten));
-    h+='<div class="oknoepfe"><button class="gruen" data-it="start" '+(!ausgew.length||!zulaessig||ausgew.some(c=>(sys.verteilung.find(v=>v.id===c.id)?.generation??sys.generation)>=ui.generation)?'disabled':'')+'>Projekt beauftragen</button></div>';
-    h+='</div>';
-    return h;
+  function neu(d) {
+    const sys = d.systeme.find((x) => x.id === ui.system) ?? d.systeme[0];
+    const ids = auswahl(d), ausgew = d.cluster.filter((c) => ids.has(c.id));
+    const gen = (c) => sys.verteilung.find((v) => v.id === c.id)?.generation ?? sys.generation;
+    const zulaessig = erlaubt(ui.art).includes(ui.generation);
+    const plan = E.itProjektPlan(s(), ui.system, ui.art, ui.generation, ausgew.length);
+    const gens = erlaubt(ui.art);
+    let h = K.feld('System', K.stepper({ wert: sys.name, unter: `heute Generation ${sys.generation} von 4`, label: 'System wählen', attrMinus: 'data-it="system" data-v="-1"', attrPlus: 'data-it="system" data-v="1"' }));
+    h += '<div class="hw-abstand"></div>' + K.feld('Realisierung', K.stepper({ wert: ARTEN.find(([a]) => a === ui.art)[1], label: 'Realisierung wählen', attrMinus: 'data-it="art" data-v="-1"', attrPlus: 'data-it="art" data-v="1"' }));
+    h += '<div class="hw-abstand"></div>' + K.feld('Zielgeneration', K.stepper({ wert: `Generation ${ui.generation}`, unter: `möglich ${gens.join(', ')}`, label: 'Zielgeneration', attrMinus: 'data-it="generation" data-v="-1"', attrPlus: 'data-it="generation" data-v="1"', minusAus: ui.generation <= gens[0], plusAus: ui.generation >= gens[gens.length - 1] }));
+    h += K.abschnitt('Vergleich', `${ausgew.length} Cluster`);
+    h += K.tabelle({ titel: 'Realisierung', spalten: ['Wochen', 'Kosten', 'Risiko'], zeilen: ARTEN.map(([art, name]) => {
+      const g = art === 'dienstleister' ? 3 : Math.min(ui.generation, art === 'entwickeln' ? 4 : 3);
+      const x = E.itProjektPlan(s(), ui.system, art, g, ausgew.length);
+      return { name: name + (art === ui.art ? ' (gewählt)' : ''), werte: [String(x.gesamt), geld(x.kosten), art === 'entwickeln' ? 'hoch' : art === 'kaufen' ? 'gering' : 'mittel'] };
+    }) });
+    h += K.abschnitt('Rollout-Cluster', `${ausgew.length} von ${d.cluster.length}`);
+    h += `<div class="hw-knoepfe zweispaltig">${K.knopf('Alle wählen', 'data-it="alle"', 'zweit')}${K.knopf('Keine wählen', 'data-it="keine"', 'zweit')}</div>`;
+    h += K.liste(d.cluster.map((c) => gen(c) >= ui.generation
+      ? K.zeile({ was: esc(c.name), unter: `schon Generation ${gen(c)}`, wert: 'erledigt' })
+      : K.schalter({ text: c.name, unter: `heute Generation ${gen(c)}`, an: ids.has(c.id), attr: `data-it="cluster" data-v="${esc(c.id)}"` })));
+    h += K.abschnitt('Plan');
+    h += K.liste([K.zeile({ was: 'Geplante Laufzeit', wert: `${plan.gesamt} Wochen` }), K.zeile({ was: 'Planbudget', wert: geld(plan.kosten) })]);
+    h += K.knoepfe(K.knopf('Projekt beauftragen', 'data-it="start"', 'breit', !ausgew.length || !zulaessig || ausgew.some((c) => gen(c) >= ui.generation)));
+    return { befund: `${esc(sys.name)} auf Generation ${ui.generation}: ${plan.gesamt} Wochen, ${geld(plan.kosten)}.`, html: h };
   }
-  function produkte(){
-    const k=E.itProdukte(s());
-    const p=k.find(x=>x.id===ui.produkt);
-    return p ? itProduktDetail(p,ui.bestaetigung) : itProdukteKarten(k);
+
+  function produkte() {
+    const k = E.itProdukte(s()), p = k.find((x) => x.id === ui.produkt);
+    if (p) return { befund: `${esc(p.name)}: ${new Intl.NumberFormat('de-DE').format(p.kennzahl)} ${esc(p.einheit)} letzte Woche.`, html: itProduktDetail(p, ui.bestaetigung), roh: true };
+    const aus = k.filter((x) => !x.aktiv || x.version === '0.0');
+    return { befund: aus.length ? `${aus.map((x) => esc(x.name)).join(' und ')} ${aus.length === 1 ? 'läuft' : 'laufen'} noch nicht.` : 'Alle vier digitalen Produkte laufen.', html: itProdukteKarten(k), roh: true };
   }
-  function zeichnen(){
-    if(!ui.aktiv)return;
-    const d=daten(),seiten={systeme:'Systemlandkarte',produkte:'Digitale Produkte',projekte:'IT-Projekte',neu:'Neues IT-Projekt'};
-    ctx.panel('IT · '+seiten[ui.reiter], 'CDO / Bereich IT · '+d.projekte.filter(x=>x.phase!=='abgeschlossen').length+' aktive Projekte',bereich('zentrale')+'<i class="q31-marke" hidden></i>'+reiter()+
-      (ui.reiter==='systeme'?systeme(d):ui.reiter==='produkte'?produkte():ui.reiter==='projekte'?projekte(d):neu(d)),'gross');
-    ui.aktiv=true;
+  function zeichnen() {
+    if (!ui.aktiv) return;
+    const d = daten(), titel = { systeme: 'Systemlandkarte', produkte: 'Digitale Produkte', projekte: 'IT-Projekte', neu: 'Neues IT-Projekt' };
+    const r = ui.reiter === 'systeme' ? systeme(d) : ui.reiter === 'produkte' ? produkte() : ui.reiter === 'projekte' ? projekte(d) : neu(d);
+    const aktiv = d.projekte.filter((x) => x.phase !== 'abgeschlossen').length;
+    ctx.panel('IT · ' + titel[ui.reiter], `Bereich IT · ${aktiv} aktive Projekte`, K.bereich('zentrale', 'zahlen') + digitalSprecher(E, s(), r.befund, r.ton) + '<i class="hw-g3" hidden></i>'
+      + (r.roh ? r.html : K.rumpf(r.html)) + K.reiterUnten(REITER, ui.reiter, (id) => `data-it="reiter" data-v="${id}"`), 'gross');
+    ui.aktiv = true;
   }
-  function aktion(a){
-    const result=E.fuehreAus(s(),a);
-    ctx.meldung(result.text,!result.ok);
-    if(result.ok){ctx.nachAktion?.();zeichnen();}
-  }
-  // Unerwünschte globale Selektoren vermeiden: nur aktives IT-Panel verarbeitet Eingaben.
-  function bearbeiten(el){
-    const v=el.dataset.v, d=daten();
-    switch(el.dataset.it){
-      case 'reiter':ui.reiter=v;ui.auswahl=null;ui.produkt=null;ui.bestaetigung=false;break;
-      case 'produkt':ui.reiter='produkte';ui.produkt=v;ui.bestaetigung=false;break;
-      case 'zurueck':ui.produkt=null;ui.bestaetigung=false;break;
-      case 'abschalten':ui.bestaetigung=true;break;
-      case 'abbrechen':ui.bestaetigung=false;break;
-      case 'team':{
-        const r=E.fuehreAus(s(),{typ:'itProduktTeam',produkt:v,anzahl:Number(el.dataset.n)});
-        ctx.meldung(r.text,!r.ok);if(r.ok)ctx.nachAktion?.();break;
+  function melde(r) { ctx.meldung(r.text, !r.ok); if (r.ok) ctx.nachAktion?.(); return r; }
+  function bearbeiten(el) {
+    const v = el.dataset.v, d = daten();
+    switch (el.dataset.it) {
+      case 'reiter': ui.reiter = v; ui.auswahl = null; ui.produkt = null; ui.bestaetigung = false; document.getElementById('pinhalt').scrollTop = 0; break;
+      case 'produkt': ui.reiter = 'produkte'; ui.produkt = v; ui.bestaetigung = false; break;
+      case 'zurueck': ui.produkt = null; ui.bestaetigung = false; break;
+      case 'abschalten': ui.bestaetigung = true; break;
+      case 'abbrechen': ui.bestaetigung = false; break;
+      case 'team': melde(E.fuehreAus(s(), { typ: 'itProduktTeam', produkt: v, anzahl: Number(el.dataset.n) })); break;
+      case 'aktiv': {
+        const p = E.itProdukte(s()).find((x) => x.id === v); if (!p) return;
+        melde(E.fuehreAus(s(), { typ: 'itProduktAktiv', produkt: v, an: !p.aktiv })); ui.bestaetigung = false; break;
       }
-      case 'aktiv':{
-        const p=E.itProdukte(s()).find(x=>x.id===v);if(!p)return;
-        const r=E.fuehreAus(s(),{typ:'itProduktAktiv',produkt:v,an:!p.aktiv});
-        ctx.meldung(r.text,!r.ok);if(r.ok)ctx.nachAktion?.();
-        ui.bestaetigung=false;break;
-      }
-      case 'modernisieren':{
-        const p=E.itProdukte(s()).find(x=>x.id===v);if(!p)return;
-        if(v==='mobile_pay'){
-          const k=d.systeme.find(x=>x.id==='kasse'),stufe=k?.kasseAusbau?.mobil??0;
-          if(k?.generation>=3){
-            if(stufe>=2){ctx.meldung('Mobile Kasse ist bereits vollständig ausgebaut.',false);break;}
-            const r=E.fuehreAus(s(),{typ:'itKasseAusbau',art:'mobil',stufe:stufe+1});
-            ctx.meldung(r.text,!r.ok);if(r.ok)ctx.nachAktion?.();break;
+      case 'modernisieren': {
+        const p = E.itProdukte(s()).find((x) => x.id === v); if (!p) return;
+        if (v === 'mobile_pay') {
+          const k = d.systeme.find((x) => x.id === 'kasse'), stufe = k?.kasseAusbau?.mobil ?? 0;
+          if (k?.generation >= 3) {
+            if (stufe >= 2) { ctx.meldung('Mobile Kasse ist bereits vollständig ausgebaut.', false); break; }
+            melde(E.fuehreAus(s(), { typ: 'itKasseAusbau', art: 'mobil', stufe: stufe + 1 })); break;
           }
         }
-        ui.reiter='neu';ui.system=p.system;ui.generation=Math.max(3,p.generation+1);
-        ui.auswahl=null;ui.produkt=null;break;
+        ui.reiter = 'neu'; ui.system = p.system; ui.generation = Math.max(3, p.generation + 1); ui.auswahl = null; ui.produkt = null; break;
       }
-      case 'neues':ui.reiter='neu';ui.system=v;ui.auswahl=null;ui.generation=3;break;
-      case 'art':ui.art=v;if(v==='dienstleister')ui.generation=3;else if(v==='kaufen'&&ui.generation>3)ui.generation=3;break;
-      case 'generation':ui.generation=Number(v);ui.auswahl=null;break;
-      case 'alle':ui.auswahl=new Set(d.cluster.filter(c=>(d.systeme.find(x=>x.id===ui.system)?.verteilung.find(x=>x.id===c.id)?.generation??0)<ui.generation).map(c=>c.id));break;
-      case 'keine':ui.auswahl=new Set();break;
-      case 'start':{
-        const clusterIds=d.cluster.filter(c=>auswahl(d).has(c.id)).map(c=>c.id);
-        const result=E.fuehreAus(s(),{typ:'itProjekt',system:ui.system,art:ui.art,zielGeneration:ui.generation,clusterIds});
-        ctx.meldung(result.text,!result.ok);if(result.ok){ctx.nachAktion?.();ui.reiter='projekte';}break;
+      case 'neues': ui.reiter = 'neu'; ui.system = v; ui.auswahl = null; ui.generation = 3; break;
+      case 'system': { const i = d.systeme.findIndex((x) => x.id === ui.system); ui.system = d.systeme[(i + Number(v) + d.systeme.length) % d.systeme.length].id; ui.auswahl = null; ui.generation = 3; break; }
+      case 'art': {
+        const i = ARTEN.findIndex(([a]) => a === ui.art); ui.art = ARTEN[(i + Number(v) + ARTEN.length) % ARTEN.length][0];
+        if (ui.art === 'dienstleister') ui.generation = 3; else if (ui.art === 'kaufen' && ui.generation > 3) ui.generation = 3;
+        ui.auswahl = null; break;
       }
-      case 'hoch':case 'runter':{
-        const p=d.projekte.find(x=>x.id===el.dataset.p);if(!p)return;
-        const i=Number(el.dataset.i),j=i+(el.dataset.it==='hoch'?-1:1);
-        if(j<0||j>=p.clusterIds.length)return;
-        const ids=[...p.clusterIds];[ids[i],ids[j]]=[ids[j],ids[i]];
-        const result=E.fuehreAus(s(),{typ:'itRolloutPlan',projekt:p.id,clusterIds:ids});
-        ctx.meldung(result.text,!result.ok);if(result.ok)ctx.nachAktion?.();
-        break;
+      case 'generation': { const g = erlaubt(ui.art), i = g.indexOf(ui.generation); ui.generation = g[Math.max(0, Math.min(g.length - 1, (i < 0 ? 0 : i) + Number(v)))]; ui.auswahl = null; break; }
+      case 'cluster': { const ids = auswahl(d); if (ids.has(v)) ids.delete(v); else ids.add(v); break; }
+      case 'alle': ui.auswahl = new Set(d.cluster.filter((c) => (d.systeme.find((x) => x.id === ui.system)?.verteilung.find((x) => x.id === c.id)?.generation ?? 0) < ui.generation).map((c) => c.id)); break;
+      case 'keine': ui.auswahl = new Set(); break;
+      case 'start': {
+        const clusterIds = d.cluster.filter((c) => auswahl(d).has(c.id)).map((c) => c.id);
+        const r = melde(E.fuehreAus(s(), { typ: 'itProjekt', system: ui.system, art: ui.art, zielGeneration: ui.generation, clusterIds }));
+        if (r.ok) ui.reiter = 'projekte'; break;
       }
-      case 'kasseAusbau':{
-        const x=d.systeme.find(x=>x.id==='kasse'),stufe=(x.kasseAusbau?.[v]??0)+1;
-        const result=E.fuehreAus(s(),{typ:'itKasseAusbau',art:v,stufe});
-        ctx.meldung(result.text,!result.ok);if(result.ok)ctx.nachAktion?.();break;
+      case 'hoch': case 'runter': {
+        const p = d.projekte.find((x) => x.id === el.dataset.p); if (!p) return;
+        const i = Number(el.dataset.i), j = i + (el.dataset.it === 'hoch' ? -1 : 1);
+        if (j < 0 || j >= p.clusterIds.length) return;
+        const ids = [...p.clusterIds]; [ids[i], ids[j]] = [ids[j], ids[i]];
+        melde(E.fuehreAus(s(), { typ: 'itRolloutPlan', projekt: p.id, clusterIds: ids })); break;
       }
-      default:return;
+      case 'kasseAusbau': {
+        const x = d.systeme.find((q) => q.id === 'kasse'), stufe = (x.kasseAusbau?.[v] ?? 0) + 1;
+        melde(E.fuehreAus(s(), { typ: 'itKasseAusbau', art: v, stufe })); break;
+      }
+      default: return;
     }
+    const pi = document.getElementById('pinhalt'), sc = pi.scrollTop;
     zeichnen();
+    if (!['reiter', 'produkt', 'zurueck', 'neues', 'modernisieren'].includes(el.dataset.it)) pi.scrollTop = sc; else pi.scrollTop = 0;
   }
-  const inhalt=document.getElementById('pinhalt');
-  inhalt.addEventListener('click',ev=>{
-    if(!ui.aktiv)return;
-    const el=ev.target.closest('[data-it]');if(el&&!el.disabled)bearbeiten(el);
-  });
-  inhalt.addEventListener('change',ev=>{
-    if(!ui.aktiv)return;
-    const el=ev.target;
-    if(el.dataset.itChange==='system'){ui.system=el.value;ui.auswahl=null;ui.generation=3;zeichnen();}
-    if(el.dataset.itCluster){const ids=auswahl(daten());if(el.checked)ids.add(el.dataset.itCluster);else ids.delete(el.dataset.itCluster);zeichnen();}
-  });
-  return {oeffne:(seite='systeme',produkt=null)=>{ui.aktiv=true;ui.reiter=seite;ui.produkt=seite==='produkte'?produkt:null;ui.bestaetigung=false;ui.auswahl=null;zeichnen();},
-    zu:()=>{ui.aktiv=false;},aktiv:()=>ui.aktiv,
-    pruefe:()=>({seite:ui.reiter,systeme:daten().systeme.length,projekte:daten().projekte.length})};
+  const auf = (ev) => { if (!ui.aktiv) return; const el = ev.target.closest('[data-it]'); if (el && !el.disabled) bearbeiten(el); };
+  document.getElementById('pinhalt').addEventListener('click', auf);
+  document.getElementById('preiter').addEventListener('click', auf);
+  return {
+    oeffne: (seite = 'systeme', produkt = null) => { ui.aktiv = true; ui.reiter = seite; ui.produkt = seite === 'produkte' ? produkt : null; ui.bestaetigung = false; ui.auswahl = null; zeichnen(); document.getElementById('pinhalt').scrollTop = 0; },
+    zu: () => { ui.aktiv = false; }, aktiv: () => ui.aktiv,
+    pruefe: () => ({ seite: ui.reiter, systeme: daten().systeme.length, projekte: daten().projekte.length }),
+  };
 }

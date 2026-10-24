@@ -1,151 +1,122 @@
 // O02 Umsatztreiber. Darstellung ausschließlich aus Engine-Abfragen.
-import { geld, fmt, esc, clusterName } from './format.js';
-import { bereich } from './komponenten.js';
+// E47: Großkennzahl Abweichung zum Vorjahr, Wasserfall als Liste mit schwebenden Balken, Filter als Segmentleisten,
+// Regionen und Hauscluster als aufklappbare Listen, Häuser tippbar (öffnet das Haus).
+import { geld, fmt, esc, clusterName, deutscheZahlen } from './format.js';
+import * as K from './komponenten.js';
+import { zentraleReiter, G4 } from './zentrale-abteilungen.js';
 
 const prozent = (x) => (100 * x).toLocaleString('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' %';
 const zahl = (x, n = 1) => Number(x).toLocaleString('de-DE', { maximumFractionDigits: n, minimumFractionDigits: n });
 const euro = (x) => zahl(x, 2) + ' €';
-const abweichung = (wert, basis) => basis == null ? 'Kein Vorjahr' : (wert >= basis ? '↑ ' : '↓ ') + prozent(basis ? (wert / basis - 1) : 0);
-const punkt = (wert, basis) => basis == null ? 'Kein Vorjahr' : (wert >= basis ? '↑ ' : '↓ ') + zahl((wert - basis) * 100) + ' Punkte';
-function brueckeHtml(br) {
-  if (br.status !== 'ok') return '<div class="o02-hinweis">' + esc(br.status) + '</div>';
-  const eintraege = [['Frequenz', br.frequenz], ['Kaufquote', br.kaufquote], ['Teile', br.teile], ['Preis', br.preis]];
-  const maximal = Math.max(1, ...eintraege.map((x) => Math.abs(x[1])));
-  const zeilen = eintraege.map(([name, wert]) => '<div class="o02-effekt"><span>' + name + '</span><div class="o02-steg"><i class="' +
-    (wert < 0 ? 'minus' : 'plus') + '" style="width:' + Math.max(1, Math.round(Math.abs(wert) / maximal * 100)) + '%"></i></div><b>' + esc(geld(wert)) + '</b></div>').join('');
-  return '<div class="o02-bruecke" data-o02-diff="' + br.differenz + '" data-o02-summe="' +
-    (br.frequenz + br.kaufquote + br.teile + br.preis) + '"><div class="o02-end"><b>Vorjahr ' + geld(br.vorher) +
-    '</b><b>Ist ' + geld(br.aktuell) + '</b></div>' + zeilen + '<div class="o02-end"><b>Abweichung ' +
-    geld(br.differenz) + '</b><span>Boneffekt ' + geld(br.bon) + '</span></div>' +
-    (br.vorjahrGeschaetzt ? '<small>Vorjahreswerte teilweise aus 4-Wochen-Blöcken geschätzt.</small>' : '') + '</div>';
-}
+const vp = (q) => (q > 0 ? '+' : q < 0 ? '−' : '') + prozent(Math.abs(q));
+const vz = (w) => (w > 0 ? '+' : w < 0 ? '−' : '') + geld(Math.abs(w));
+const abweichung = (wert, basis) => basis == null ? 'kein Vorjahr' : (wert >= basis ? '+' : '−') + prozent(basis ? Math.abs(wert / basis - 1) : 0);
+const punkt = (wert, basis) => basis == null ? 'kein Vorjahr' : (wert >= basis ? '+' : '−') + zahl(Math.abs(wert - basis) * 100) + ' Punkte';
+
+/** Umsatztreiber eines Hauses (Frequenz × Kaufquote × Bon) mit Brücke zur Vorjahreswoche. */
 export function hausTreiberZeile(E, s, id) {
   const d = E.hausTreiber(s, id);
-  if (!d) return '<div class="karte o02-haus"><div class="khead">Umsatztreiber</div><div class="zeile grau">Noch keine abgeschlossene Woche</div></div>';
+  if (!d) return K.abschnitt('Umsatztreiber') + K.leer('Noch keine abgeschlossene Woche.');
   const a = d.aktuell, v = d.vorjahr;
   const br = E.umsatzbruecke(s, { ebene: 'haus', id, vergleich: 'vorjahr', wochen: 1 });
-  const kpi = (name, wert, delta) => '<div class="o02-treib"><span>' + name + '</span><b>' + esc(wert) + '</b><small>' + esc(delta) + '</small></div>';
-  return '<div class="karte o02-haus" data-o02-haus="' + esc(id) + '" data-o02-umsatz="' + a.umsatz +
-    '" data-o02-frequenz="' + a.frequenz + '" data-o02-kaufquote="' + a.kaufquote +
-    '" data-o02-bon="' + a.bon + '"><div class="khead">Umsatztreiber <small>Frequenz × Kaufquote × Bon</small></div>' +
-    '<div class="o02-drei">' +
-    kpi('Frequenz', fmt.format(Math.round(a.frequenz)), abweichung(a.frequenz, v?.frequenz)) +
-    kpi('Kaufquote', prozent(a.kaufquote), punkt(a.kaufquote, v?.kaufquote)) +
-    kpi('Durchschnittsbon', euro(a.bon), abweichung(a.bon, v?.bon)) +
-    '</div><div class="o02-fuss">Ø ' + zahl(a.teile, 2) + ' Teile je Bon · ' + euro(a.preis) + ' je Teil</div>' +
-    '<div class="o02-wasserfall"><b>Umsatzbrücke zur Vorjahreswoche</b>' + brueckeHtml(br) + '</div></div>';
+  return K.abschnitt('Umsatztreiber', 'Frequenz × Kaufquote × Bon')
+    + `<div class="o02-haus" data-o02-haus="${esc(id)}" data-o02-umsatz="${a.umsatz}" data-o02-frequenz="${a.frequenz}" data-o02-kaufquote="${a.kaufquote}" data-o02-bon="${a.bon}">`
+    + K.gross([{ label: 'Frequenz', wert: fmt.format(Math.round(a.frequenz)), unter: abweichung(a.frequenz, v?.frequenz) },
+      { label: 'Kaufquote', wert: prozent(a.kaufquote), unter: punkt(a.kaufquote, v?.kaufquote) }, { label: 'Bon', wert: euro(a.bon), unter: abweichung(a.bon, v?.bon) }])
+    + `<p class="hw-lese hw-leise hw-unterzeile">Ø ${zahl(a.teile, 2)} Teile je Bon · ${euro(a.preis)} je Teil</p>`
+    + K.abschnitt('Brücke zur Vorjahreswoche') + wasserfall(br) + '</div>';
 }
-function zeile(z, haus = false) {
-  return '<div class="o02-daten ' + (haus ? 'o02-klickbar' : '') + '" ' +
-    (haus ? 'data-o02-open="' + esc(z.id) + '" role="button" tabindex="0"' : '') + '>' +
-    '<div class="o02-name"><span class="o02-ampel ' + esc(z.ampelfarbe) + '"></span>' +
-    esc(z.name) + '</div><div>' + geld(z.umsatz) + '</div><div>' +
-    (z.abweichung == null ? '–' : geld(z.abweichung) + ' (' + prozent(z.abweichungProzent ?? 0) + ')') +
-    '</div><div>' + fmt.format(Math.round(z.frequenz)) + '</div><div>' + prozent(z.kaufquote) +
-    '</div><div>' + euro(z.bon) + '</div></div>';
-}
-/** Q31 Wasserfall Vorjahr → Ist: schwebende Balken auf gemeinsamer Skala (Ausschnitt um die Veränderung), Summe = Abweichung. */
+
+/** Wasserfall Vorjahr → Ist: schwebende Balken auf gemeinsamer Skala (Ausschnitt um die Veränderung), Summe = Abweichung. */
 function wasserfall(br) {
-  if (br.status !== 'ok') return '<div class="q-leer"><b>Noch keine Vorjahresbrücke.</b>' + esc(br.status) + '</div>';
+  if (br.status !== 'ok') return K.leer(br.status, 'Noch keine Vorjahresbrücke');
   const schritte = [['Frequenz', br.frequenz, 'Besucher'], ['Kaufquote', br.kaufquote, 'Käufer je Besucher'], ['Teile je Bon', br.teile, 'Boneffekt'], ['Preis je Teil', br.preis, 'Boneffekt']];
   let lauf = br.vorher; const pos = schritte.map(([n, v, d]) => { const a = lauf; lauf += v; return { n, v, d, a, b: lauf }; });
   const werte = [br.vorher, br.aktuell, ...pos.flatMap((x) => [x.a, x.b])];
   const spanne = Math.max(1, Math.max(...werte) - Math.min(...werte));
   const lo = Math.min(...werte) - spanne * 0.08, hi = Math.max(...werte) + spanne * 0.08;
   const x = (w) => ((w - lo) / (hi - lo) * 100).toFixed(1);
-  const vz = (w) => (w > 0 ? '+' : w < 0 ? '−' : '') + geld(Math.abs(w));
-  const strich = (w) => '<span class="q-wf-spur"><i class="q-wf-marke" style="left:' + x(w) + '%"></i></span>';
-  let h = '<div class="o02-bruecke q-wf" data-summenbuch="Konzernbrücke" data-o02-diff="' + br.differenz + '" data-o02-summe="' + (br.frequenz + br.kaufquote + br.teile + br.preis) + '">';
-  h += '<div class="q-wf-zeile q-wf-ende"><span class="q-name">Vorjahr</span>' + strich(br.vorher) + '<span class="q-wert" data-s="e">' + geld(br.vorher) + '</span></div>';
-  for (const s of pos) h += '<div class="q-wf-zeile"><span class="q-name">' + s.n + '<small>' + s.d + '</small></span><span class="q-wf-spur"><i class="q-wf-balken ' + (s.v < 0 ? 'minus' : 'plus') + '" style="left:' + x(Math.min(s.a, s.b)) + '%;width:' + Math.max(0.6, Math.abs(s.v) / (hi - lo) * 100).toFixed(1) + '%"></i></span><span data-s="e" class="q-wert ' + (s.v < 0 ? 'q-minus' : '') + '">' + vz(s.v) + '</span></div>';
-  h += '<div class="q-wf-zeile q-wf-ende q-wf-summe"><span class="q-name">Ist</span>' + strich(br.aktuell) + '<span class="q-wert" data-summe="e">' + geld(br.aktuell) + '</span></div>';
-  h += '<div class="legende" style="padding:8px 14px 10px">Boneffekt zusammen ' + vz(br.bon) + ' · Balken im Ausschnitt ' + geld(lo) + ' bis ' + geld(hi) + '</div>';
-  if (br.vorjahrGeschaetzt) h += '<div class="legende" style="padding:0 14px 10px">Vorjahreswerte teilweise aus 4-Wochen-Blöcken geschätzt.</div>';
-  return h + '</div>';
+  const strich = (w) => `<span class="hw-wf-spur" aria-hidden="true"><i class="hw-wf-marke" style="left:${x(w)}%"></i></span>`;
+  let h = `<div class="hw-liste hw-wf" data-summenbuch="Konzernbrücke" data-o02-diff="${br.differenz}" data-o02-summe="${br.frequenz + br.kaufquote + br.teile + br.preis}">`;
+  h += `<div class="hw-zeile"><span class="hw-was">Vorjahr</span>${strich(br.vorher)}<span class="hw-wert" data-s="e">${geld(br.vorher)}</span></div>`;
+  for (const s of pos) h += `<div class="hw-zeile"><span class="hw-was">${s.n}<small>${s.d}</small></span><span class="hw-wf-spur" aria-hidden="true"><i class="hw-wf-balken${s.v < 0 ? ' minus' : ''}" style="left:${x(Math.min(s.a, s.b))}%;width:${Math.max(0.6, Math.abs(s.v) / (hi - lo) * 100).toFixed(1)}%"></i></span><span class="hw-wert${s.v < 0 ? ' schlecht' : ''}" data-s="e">${vz(s.v)}</span></div>`;
+  h += `<div class="hw-zeile hw-wf-summe"><span class="hw-was">Ist</span>${strich(br.aktuell)}<span class="hw-wert" data-summe="e">${geld(br.aktuell)}</span></div></div>`;
+  h += `<p class="hw-lese hw-leise hw-unterzeile">Boneffekt zusammen ${vz(br.bon)} · Balken im Ausschnitt ${geld(lo)} bis ${geld(hi)}${br.vorjahrGeschaetzt ? ' · Vorjahr teilweise aus 4-Wochen-Blöcken geschätzt' : ''}</p>`;
+  return h;
 }
+
+const FORMATNAME = (f) => f === 'alle' ? 'Alle Formate' : f === 'warenhaus' ? 'Hartwig' : f === 'sport' ? 'Hartwig Sport' : f === 'fundus' || f === 'outlet' ? 'FUNDUS' : f === 'schwester' || f === 'volkskauf' ? 'Volkskauf' : f;
+const SORT = [['umsatz', 'Umsatz'], ['abweichung', 'Abweichung'], ['frequenz', 'Frequenz'], ['kaufquote', 'Kaufquote'], ['bon', 'Bon'], ['name', 'Name']];
+
 export function reportingModul(ctx) {
-  const E = ctx.E, ui = { aktiv: false, ebene: 'region', format: 'alle', sort: 'umsatz', wochen: 1 };
+  const E = ctx.E, ui = { aktiv: false, ebene: 'region', format: 'alle', sort: 'umsatz', wochen: 1, offen: null };
   const sortiere = (werte) => [...werte].sort((a, b) => {
     const av = a[ui.sort], bv = b[ui.sort];
     return (ui.sort === 'name' ? String(av).localeCompare(String(bv), 'de') :
       (Number(bv ?? -1e15) - Number(av ?? -1e15))) || a.name.localeCompare(b.name, 'de');
   });
-  const karten = (werte) => sortiere(werte).map((z) => zeile(z, true)).join('');
-  const leere = '<div class="zeile grau">Keine Häuser im gewählten Filter.</div>';
-  const tabelle = (inhalt) => '<div class="o02-scroll"><div class="o02-tab"><div class="o02-daten o02-kopf"><b>Einheit</b><b>Umsatz</b>' +
-    '<b>Abw. VJ</b><b>Frequenz</b><b>Kaufquote</b><b>Bon</b></div>' + (inhalt || leere) + '</div></div>';
-  const auswahl = (name, key, optionen) => '<label>' + name + '<select data-o02-wahl="' + key + '" class="ort">' +
-    optionen.map(([wert, titel]) => '<option value="' + esc(wert) + '" ' + (String(ui[key]) === String(wert) ? 'selected' : '') +
-      '>' + esc(titel) + '</option>').join('') + '</select></label>';
-  function anzeigen() {
-    const daten = E.reporting(ctx.s(), ui.wochen, ui.format);
+  /** Zeile je Haus oder Gruppe: Umsatz rechts, Abweichung zum Vorjahr darunter. */
+  const zeile = (z, attr, tippbar = true) => K.zeile({ was: esc(z.name), unter: `Frequenz ${fmt.format(Math.round(z.frequenz))} · Kaufquote ${prozent(z.kaufquote)} · Bon ${euro(z.bon)}`,
+    wert: geld(z.umsatz), wertUnter: z.abweichung == null ? 'kein Vorjahr' : `${vz(z.abweichung)} (${vp(z.abweichungProzent ?? 0)})`,
+    ton: z.ampelfarbe === 'rot' ? 'schlecht' : z.ampelfarbe === 'gelb' ? 'achtung' : '', tippbar, attr });
+  const haeuser = (liste) => K.liste(sortiere(liste).map((z) => zeile(z, `data-o02-open="${esc(z.id)}"`)));
+  function anzeigen(scrollHalten = false) {
+    const vorher = ctx.inhalt.scrollTop;
+    const st = ctx.s(), daten = E.reporting(st, ui.wochen, ui.format);
     // Q31: Gruppenzeilen der Hauscluster tragen intern die Cluster-ID als Namen
-    for (const g of daten.gruppen) if (g.ebene === 'hauscluster') g.name = clusterName(ctx.s(), g.id);
-    const hs = daten.zeilen;
-    const gruppen = daten.gruppen;
-    const filter = '<div class="o02-filter">' +
-      auswahl('Ebene', 'ebene', [['region', 'Region'], ['hauscluster', 'Hauscluster'], ['haus', 'Haus']]) +
-      auswahl('Format', 'format', [['alle', 'Alle'], ...[...new Set(ctx.s().haeuser.map((z) => z.format))].map((f) =>
-        [f, f === 'warenhaus' ? 'Hartwig' : f === 'sport' ? 'Hartwig Sport' : f === 'fundus' ? 'FUNDUS' : f])]) +
-      auswahl('Zeitraum', 'wochen', [[1, '1 Woche'], [4, '4 Wochen'], [13, '13 Wochen'], [52, '52 Wochen']]) +
-      auswahl('Sortieren', 'sort', [['umsatz', 'Umsatz'], ['abweichung', 'Abweichung'], ['frequenz', 'Frequenz'],
-        ['kaufquote', 'Kaufquote'], ['bon', 'Bon'], ['name', 'Name']]) + '</div>';
-    // Q31: Hauptfrage „Was treibt den Umsatz gegen Vorjahr?“ – Abweichung groß, Wasserfall, dann Beobachtungsliste (Hauptaufgabe: Haus öffnen).
-    const B = daten.bruecke;
-    let content = '<div class="q31">';
-    content += B.status === 'ok' ? '<div class="q-gross"><span class="q-label">Umsatz gegen Vorjahr</span><span class="q-haupt ' + (B.differenz < 0 ? 'q-minus' : 'q-plus') + '">' + (B.differenz > 0 ? '+' : B.differenz < 0 ? '−' : '') + geld(Math.abs(B.differenz)) + '</span><span class="q-neben"><b>' + geld(B.aktuell) + '</b>Ist ' + (ui.wochen === 1 ? 'letzte Woche' : ui.wochen + ' Wochen') + '</span></div>' : '';
-    if (B.status === 'ok') { const g = [['Frequenz', B.frequenz], ['Kaufquote', B.kaufquote], ['Teile je Bon', B.teile], ['Preis je Teil', B.preis]].sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))[0]; content += '<div class="q-befund">Größter Treiber: <b>' + g[0] + '</b> mit ' + (g[1] < 0 ? '−' : '+') + geld(Math.abs(g[1])) + '.</div>'; }
-    content += '<div class="q-buch"><div class="q-buch-kopf"><span>Konzernbrücke zum Vorjahr</span></div>' + wasserfall(B) + '</div>';
+    for (const g of daten.gruppen) if (g.ebene === 'hauscluster') g.name = clusterName(st, g.id);
+    const hs = daten.zeilen, gruppen = daten.gruppen, B = daten.bruecke;
+    // Q31: Hauptfrage „Was treibt den Umsatz gegen Vorjahr?“
+    const treiber = B.status === 'ok' ? [['Frequenz', B.frequenz], ['Kaufquote', B.kaufquote], ['Teile je Bon', B.teile], ['Preis je Teil', B.preis]].sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))[0] : null;
+    let h = K.bereich('zentrale', 'zahlen') + G4 + K.sprecher({ text: treiber ? `Größter Treiber gegen Vorjahr: <b>${treiber[0]}</b> mit ${vz(treiber[1])}.` : '<b>Noch kein Vorjahresvergleich.</b> Die Brücke folgt nach dem ersten Wochenabschluss.', unter: 'Konzerncontrolling' });
+    let r = '';
+    if (B.status === 'ok') r += K.gross([{ label: 'Umsatz gegen Vorjahr', wert: vz(B.differenz), ton: B.differenz < 0 ? 'schlecht' : B.differenz > 0 ? 'gut' : '', unter: B.vorher ? vp(B.differenz / B.vorher) + ' zum Vorjahr' : '' },
+      { label: 'Ist ' + (ui.wochen === 1 ? 'letzte Woche' : ui.wochen + ' Wochen'), wert: geld(B.aktuell), unter: 'Vorjahr ' + geld(B.vorher) }]);
+    r += `<div class="hw-abstand"></div>` + K.seg([[1, '1 Woche'], [4, '4 Wo.'], [13, '13 Wo.'], [52, '52 Wo.']], ui.wochen, (w) => `data-o02-setze="wochen" data-wert="${w}"`);
+    r += K.abschnitt('Konzernbrücke zum Vorjahr') + wasserfall(B);
     const beob = daten.beobachtung.filter((o) => hs.some((z) => z.id === o.hausId));
-    content += '<div class="q-buch"><div class="q-buch-kopf"><span>Beobachtungsliste</span><b>größte Rückgänge</b></div>' +
-      (beob.length ? beob.map((o) => '<button class="q-zeile q-tipp o02-beobachtung" data-o02-open="' + esc(o.hausId) + '"><span class="q-name">' + esc(o.name) + '<small>' + esc(o.haupttreiber) + '</small></span><span class="q-wert q-minus">' + geld(o.abweichung) + '</span></button>').join('')
-        : '<div class="q-leer"><b>Kein Haus unter Vorjahr.</b>Sobald ein Haus zurückfällt, steht es hier.</div>') + '</div>';
-    content += '</div>' + filter;
-
-    if (ui.ebene === 'haus') content += tabelle(karten(hs));
+    r += K.abschnitt('Beobachtungsliste', 'größte Rückgänge');
+    r += beob.length ? K.liste(beob.map((o) => K.zeile({ was: esc(o.name), unter: esc(deutscheZahlen(o.haupttreiber)), wert: geld(o.abweichung), ton: 'schlecht', tippbar: true, attr: `data-o02-open="${esc(o.hausId)}"` })))
+      : K.leer('Sobald ein Haus zurückfällt, steht es hier.', 'Kein Haus unter Vorjahr');
+    // Filter und Gliederung
+    const formate = ['alle', ...new Set(st.haeuser.map((z) => z.format))];
+    r += K.abschnitt('Häuser im Vergleich', hs.length + ' Häuser');
+    r += K.seg([['region', 'Region'], ['hauscluster', 'Cluster'], ['haus', 'Haus']], ui.ebene, (w) => `data-o02-setze="ebene" data-wert="${w}"`);
+    r += K.liste([K.zeile({ was: 'Format', wert: esc(FORMATNAME(ui.format)), tippbar: true, attr: `data-o02-zyklus="format" data-werte="${esc(formate.join('|'))}"` }),
+      K.zeile({ was: 'Sortiert nach', wert: SORT.find((x) => x[0] === ui.sort)[1], tippbar: true, attr: `data-o02-zyklus="sort" data-werte="${SORT.map((x) => x[0]).join('|')}"` })]);
+    if (!hs.length) r += K.leer('Keine Häuser im gewählten Filter.');
+    else if (ui.ebene === 'haus') r += haeuser(hs);
     else {
       const ebene = ui.ebene;
-      const ids = [...new Set(hs.map((z) => z[ebene]))];
-      const abschnitte = ids.sort((a, b) => a.localeCompare(b, 'de')).map((id) => {
-        const gruppe = gruppen.find((g) => g.ebene === ebene && g.id === id);
-        const treff = hs.filter((z) => z[ebene] === id);
-        let innen = '';
+      const ids = [...new Set(hs.map((z) => z[ebene]))].sort((a, b) => String(a).localeCompare(String(b), 'de'));
+      for (const id of ids) {
+        const treff = hs.filter((z) => z[ebene] === id), g = gruppen.find((q) => q.ebene === ebene && q.id === id);
+        const name = ebene === 'hauscluster' ? clusterName(st, id) : 'Region ' + id, offen = ui.offen === ebene + ':' + id;
+        r += K.liste([zeile({ ...(g ?? treff[0]), name: `${name} · ${treff.length} Häuser` }, `data-o02-auf="${esc(ebene + ':' + id)}" aria-expanded="${offen}"`)]);
+        if (!offen) continue;
         if (ebene === 'region') {
           const unter = [...new Set(treff.map((z) => z.hauscluster))];
-          innen = unter.map((hc) => {
-            const x = treff.filter((z) => z.hauscluster === hc);
-            if (unter.length === 1 && hc === id) return karten(x);
-            const g = gruppen.find((gg) => gg.ebene === 'hauscluster' && gg.id === hc);
-            return '<details class="o02-unter"><summary>' + esc(clusterName(ctx.s(), hc)) + ' (' + x.length + ' Häuser)</summary>' +
-              (g ? zeile(g) : '') + karten(x) + '</details>';
-          }).join('');
-        } else innen = karten(treff);
-        return '<details class="o02-gruppe"><summary>' + esc(ebene === 'hauscluster' ? clusterName(ctx.s(), id) : id) + ' (' + treff.length + ' Häuser)</summary>' +
-          (gruppe ? zeile(gruppe) : '') + tabelle(innen) + '</details>';
-      }).join('');
-      content += abschnitte || leere;
+          for (const hc of unter) r += (unter.length > 1 ? `<p class="hw-marke hw-gruppe">${esc(clusterName(st, hc))}</p>` : '') + haeuser(treff.filter((z) => z.hauscluster === hc));
+        } else r += haeuser(treff);
+      }
     }
-    ctx.panel('Reporting', 'Operatives Wochenreporting · ' + (ui.wochen === 1 ? '1 Woche' : ui.wochen + ' Wochen'), bereich('zentrale') + '<i class="q31-marke" hidden></i>' + content, 'gross');
+    h += K.rumpf(r) + zentraleReiter('reporting');
+    ctx.panel('Reporting', 'Operatives Wochenreporting · ' + (ui.wochen === 1 ? '1 Woche' : ui.wochen + ' Wochen'), h, 'gross');
     ui.aktiv = true;
+    if (scrollHalten) ctx.inhalt.scrollTop = vorher;
   }
-  ctx.inhalt.addEventListener('change', (e) => {
-    if (!ui.aktiv || !e.target?.dataset?.o02Wahl) return;
-    const key = e.target.dataset.o02Wahl;
-    if (!Object.prototype.hasOwnProperty.call(ui, key)) return;
-    ui[key] = key === 'wochen' ? Number(e.target.value) : e.target.value;
-    anzeigen();
-  });
   ctx.inhalt.addEventListener('click', (e) => {
     if (!ui.aktiv) return;
+    const s = e.target.closest('[data-o02-setze]');
+    if (s) { const k = s.dataset.o02Setze; ui[k] = k === 'wochen' ? Number(s.dataset.wert) : s.dataset.wert; if (k === 'ebene') ui.offen = null; anzeigen(true); return; }
+    const z = e.target.closest('[data-o02-zyklus]');
+    if (z) { const k = z.dataset.o02Zyklus, w = z.dataset.werte.split('|'); ui[k] = w[(w.indexOf(String(ui[k])) + 1) % w.length]; anzeigen(true); return; }
+    const a = e.target.closest('[data-o02-auf]');
+    if (a) { ui.offen = ui.offen === a.dataset.o02Auf ? null : a.dataset.o02Auf; anzeigen(true); return; }
     const el = e.target.closest('[data-o02-open]');
     if (el) { ui.aktiv = false; ctx.hausOeffnen(el.dataset.o02Open); }
   });
-  ctx.inhalt.addEventListener('keydown', (e) => {
-    if (!ui.aktiv || (e.key !== 'Enter' && e.key !== ' ')) return;
-    const el = e.target.closest('[data-o02-open]');
-    if (el) { e.preventDefault(); ui.aktiv = false; ctx.hausOeffnen(el.dataset.o02Open); }
-  });
-  return { oeffne: anzeigen, zu: () => { ui.aktiv = false; }, aktiv: () => ui.aktiv,
-    pruefe: () => { const b = ctx.inhalt.querySelector('.o02-bruecke');
+  return { oeffne: () => anzeigen(), zu: () => { ui.aktiv = false; }, aktiv: () => ui.aktiv,
+    pruefe: () => { const b = ctx.inhalt.querySelector('[data-o02-diff]');
       return !b || Number(b.dataset.o02Diff) === Number(b.dataset.o02Summe); } };
 }

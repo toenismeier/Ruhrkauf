@@ -30,13 +30,16 @@ const assert = require('node:assert/strict');
     const pruefeLayout = async () => {
       const result = await page.evaluate(() => {
         const root = document.getElementById('pinhalt');
-        const felder = [...root.querySelectorAll('.itp-karte,.itp-abschnitt,.itp-taste,.itp-hero')];
+        const felder = [...root.querySelectorAll('.hw-g3-produkt,.hw-g3-version,.hw-knopf,.hw-g3-vorstellung')];
         const panel = root.getBoundingClientRect();
         return { ueberlauf:feldernRechts(), seitenbreite:panel.width,
           fragwuerdig:/\b(undefined|null|hc-\d+)\b/i.test(root.textContent),
-          knoepfe:[...root.querySelectorAll('.itp-taste:not([disabled])')].filter(b=>b.getBoundingClientRect().height<44).length };
+          knoepfe:[...root.querySelectorAll('.hw-knopf:not([disabled])')].filter(b=>b.getBoundingClientRect().height<44).length };
         function feldernRechts() { return felder.filter(e=>{
           const box=e.getBoundingClientRect();
+          // E47: Karten im Karussell schauen gewollt seitlich heraus; dort zählt nur, dass die Karte in ihren Rahmen passt.
+          const karte=e.closest('.hw-karte');
+          if(karte) return e.scrollWidth>karte.clientWidth+1;
           return box.right>panel.right+1 || box.left<panel.left-1;
         }).map(e=>e.className); }
       });
@@ -54,28 +57,28 @@ const assert = require('node:assert/strict');
     const ids = ['kundenkarte','hartwig_app','kasse','mobile_pay'];
     for(let i=0;i<ids.length;i++){
       await page.evaluate(id => window.spiel.oeffneIt('produkte',id),ids[i]);
-      const title = await page.locator('.itp-herotext h3').innerText();
+      const title = await page.locator('.hw-g3-produkttitel').innerText();
       assert.ok(title.length>2, ids[i]+' ohne Produkttitel');
-      assert.equal(await page.locator('.itp-achse span').count(),5,'5 Wochenpunkte müssen gezeigt werden');
-      assert.equal(await page.locator('.itp-sterne svg').count(),5,'Qualitätssterne fehlen');
+      assert.equal(await page.locator('.hw-g3-kurve .hw-balkenfuss span').count(),5,'5 Wochenpunkte müssen gezeigt werden');
+      assert.equal(await page.locator('.hw-g3-version .hw-g3-sterne svg').count(),5,'Qualitätssterne fehlen');
       await pruefeLayout();
       await bild(String(i+2).padStart(2,'0')+'-'+ids[i]);
     }
     // Reale Teamsteuerung und Abschaltbestätigung (kein Fake-Schalter).
     await page.evaluate(() => window.spiel.oeffneIt('produkte','hartwig_app'));
     await page.locator('[data-it="team"][data-n="3"]').click();
-    assert.equal(await page.locator('.itp-team strong').innerText(),'3');
+    assert.match(await page.locator('[aria-label="Produktteam"] output').innerText(),/^3 Personen/);
     await page.locator('[data-it="abschalten"]').click();
     assert.equal(await page.locator('[data-it="aktiv"]').innerText(),'Abschalten bestätigen');
     await page.locator('[data-it="aktiv"]').click();
-    assert.match(await page.locator('.itp-herotext').innerText(),/Abgeschaltet/);
+    assert.match(await page.locator('.hw-g3-version').innerText(),/Abgeschaltet/i);
     await page.locator('[data-it="aktiv"]').click();
-    assert.match(await page.locator('.itp-herotext').innerText(),/Aktiv/);
+    assert.match(await page.locator('.hw-g3-version').innerText(),/Aktiv/i);
     // O09: Einstieg aus E-Commerce öffnet die gleiche IT-Produktseite.
     await page.evaluate(() => window.spiel.oeffneEcommerce('produkte'));
     assert.equal(await page.locator('[data-online="produkt"]').count(),4);
     await page.locator('[data-online="produkt"][data-id="hartwig_app"]').click();
-    assert.match(await page.locator('.itp-herotext h3').innerText(),/Hartwig App/);
+    assert.match(await page.locator('.hw-g3-produkttitel').innerText(),/Hartwig App/);
     assert.deepEqual(errors, [], 'Browserfehler');
     console.log('Q19: vier Produktseiten, fünf Wochenpunkte, Team, Abschalten und Online-Navigation geprüft. Bilder: '+ziel);
   } finally { await browser.close(); }

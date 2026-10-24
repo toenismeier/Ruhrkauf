@@ -31,7 +31,7 @@ const PANELS = [
   { name: 'umbau-planen', vorSpiel: false, oeffne: HAUS + " window.spiel.oeffneHausReiter(h.id, 'ueberblick'); await new Promise((r) => setTimeout(r, 100)); document.querySelector('#pinhalt [data-umbau=planen]').click();" },
   { name: 'hausbesuch', vorSpiel: false, oeffne: HAUS + " window.spiel.oeffneHausbesuch(h.id); await new Promise((r) => setTimeout(r, 2500));", wurzel: '.hb', nach: "" },
   { name: 'einfuehrung', vorSpiel: false, oeffne: "document.getElementById('einfuehrung-neustart').click(); await new Promise((r) => setTimeout(r, 400));", wurzel: '.ein-sheet' },
-  { name: 'wochenfrage', vorSpiel: false, oeffne: "window.spiel.wochenbericht.oeffne();", wurzel: '#wochenbericht, .wochen-maske' },
+  { name: 'wochenfrage', vorSpiel: false, oeffne: "window.spiel.wochenbericht.oeffne();", wurzel: '#wochenbericht, .hw-wb-maske' },
   { name: 'wochenbericht', vorSpiel: false, oeffne: "window.spiel.wochenbericht.oeffne(); await new Promise((r) => setTimeout(r, 200)); document.querySelector('[data-wa=ja]')?.click(); for (let i = 0; i < 60 && !['bericht','vorfall'].includes(window.spiel.wochenbericht.status); i++) await new Promise((r) => setTimeout(r, 200)); await new Promise((r) => setTimeout(r, 1500));", wurzel: 'body' },
   // Zuletzt, weil es den Spielstand beendet:
   { name: 'spielende', vorSpiel: false, oeffne: "const s = window.spiel.s; s.woche = 260; window.spiel.E.spielBeenden(s, 'saniert'); window.spiel.zeigeSpielende(); await new Promise((r) => setTimeout(r, 1200));", wurzel: '#spielende-overlay' },

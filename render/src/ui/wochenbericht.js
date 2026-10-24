@@ -1,9 +1,10 @@
 // Wochenabschluss ausschließlich aus Engine-Abfragen: auftraege/spiel-reise-und-wochenabschluss.md
-import { esc } from './format.js';
+// E47: Bericht wie Coffee-Finanzen (Coffee 21, 22): Befund der Finanzchefin, zwei Großkennzahlen, fünf Wochen als Balken,
+// Kapitalfluss als GuV-Tabelle im Band, darunter Presse und Erfolge. Eigenes Vollbild-Blatt über der Stadt.
+import { esc, geld, kwVon } from './format.js';
 import * as K from './komponenten.js';
 import { effektiveAnimation } from './einstellungen.js';
 import { portraetSVG } from '../kit/portraet.js';
-import { zeitungsBild } from '../kit/zeitung.js';
 const ASSISTENTIN = portraetSVG({ geschlecht: 'w', alter: 36, haar: 'bob', haarfarbe: 'braun', hautton: 'rosig', kleidung: 'blazer', kleidungFarbe: 'marine', seed: 821 }, 110);
 const BANK = portraetSVG({ geschlecht: 'm', alter: 56, haar: 'seitenscheitel', haarfarbe: 'grau', hautton: 'hell', kleidung: 'anzug', seed: 236 }, 110);
 const BETRIEBSRAT = portraetSVG({ geschlecht: 'w', alter: 49, haar: 'halblang', haarfarbe: 'dunkelbraun', kleidung: 'bluse', seed: 922 }, 110);
@@ -14,12 +15,14 @@ export const WOCHEN_ZEIT = Object.freeze({
   zaehlStart: 900, zaehlen: 11000, vorfallEin: 150, vorfallText: 1500,
   vorfallAus: 200, reduziert: 150,
 });
-const eur = (n) => new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(Math.round(n ?? 0)) + ' €';
+const eur = (n) => new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(Math.round(n ?? 0)).replace('-', '−') + ' €';
 const kurve = (t) => 1 - (1 - t) ** 2;
 const reduziert = () => effektiveAnimation() !== 'voll';
 const ohneAnimation = () => new URLSearchParams(location.search).has('ohne-animation');
 const warten = (ms) => new Promise((r) => setTimeout(r, ms));
 const KATEGORIE = ['Presse', 'Konkurrenz'];
+/** Kopf eines Vollbild-Blatts (gleiche Lagen wie #panel.hw). */
+const blattKopf = (symbol, titel, unter, zu) => `<div class="hw-grund"></div><header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">${K.SYMBOLE[symbol] ?? ''}</span><h2 class="hw-kopf-titel" tabindex="-1">${esc(titel)}</h2><div class="hw-kopf-unter">${esc(unter)}</div>${zu}</header>`;
 export function wochenberichtModul(ctx) {
   const node = document.createElement('div'); node.id = 'wochen-overlay'; node.hidden = true; document.body.append(node);
   let status = 'zu', token = 0, bericht = null, vorfall = 0, start = 0, bestaetigt = null, zaehlRaf = 0;
@@ -35,9 +38,13 @@ export function wochenberichtModul(ctx) {
   function abbruch() { if (status !== 'rechnen') aufraeumen(); }
   function fragDialog() {
     const warnungen = ctx.posteingang().handeln.filter((x) => x.restWochen === 0);
-    node.innerHTML = '<section class="wochen-maske" role="dialog" aria-modal="true" aria-label="Woche abschließen"><div class="wochen-frage hk-flaeche" data-bereich="betrieb"><button class="wochen-x" data-wa="nein" aria-label="Schließen">×</button><h2 tabindex="-1">Woche abschließen?</h2><div class="wochen-frageinhalt"><p>Sind Sie mit dieser Woche fertig?</p><span class="wochen-gesicht">' + ASSISTENTIN + '</span></div>' + (ctx.warnen() && warnungen.length ? '<p class="wochen-warnung">' + warnungen.length + ' Vorgänge laufen ab. Der Standard wird gewählt beziehungsweise das Angebot verfällt.</p>' : '') + '<div class="wochen-knopfreihe"><button data-wa="nein">Nein</button><button class="prim" data-wa="ja">Ja</button></div></div></section>';
+    node.innerHTML = '<section class="hw-wb-maske" role="dialog" aria-modal="true" aria-label="Woche abschließen"><div class="hw hw-kontur hw-wb-frage" data-bereich="betrieb">'
+      + '<button type="button" class="hw-zu" data-wa="nein" aria-label="Schließen"></button><h2 tabindex="-1">Woche abschließen?</h2>'
+      + '<div class="hw-wb-frageinhalt"><p>Die Engine rechnet die Woche für alle Häuser ab. Danach folgt der Wochenbericht.</p><span class="hw-wb-gesicht" aria-hidden="true">' + ASSISTENTIN + '</span></div>'
+      + (ctx.warnen() && warnungen.length ? K.hinweis(warnungen.length + (warnungen.length === 1 ? ' Vorgang läuft' : ' Vorgänge laufen') + ' ab. Ohne Entscheidung gilt der Standard, Angebote verfallen.', 'achtung') : '')
+      + K.knoepfe(K.knopf('Nein', 'data-wa="nein"', 'zweit'), K.knopf('Ja, abschließen', 'data-wa="ja"')) + '</div></section>';
     node.hidden = false; node.className = 'frage-ein'; document.body.classList.add('wochen-aktiv'); status = 'frage';
-    node.querySelector('.wochen-frage h2')?.focus({ preventScroll: true });
+    node.querySelector('.hw-wb-frage h2')?.focus({ preventScroll: true });
     requestAnimationFrame(() => node.classList.add('sichtbar'));
   }
   function oeffne() {
@@ -76,6 +83,7 @@ export function wochenberichtModul(ctx) {
       ebitdaVor: vergangen?.ebitda ?? null, cashNetto: fluss.netto, cash: c.cash,
       phase: c.phase, kredite: c.kreditFrei, runway: c.runwayWochen,
       meldungen, vorgaenge, erfolge: ctx.erfolge?.() ?? [], woche: ctx.wocheNr(), letzte: jetzt, kapitalfluss: fluss,
+      verlauf: ver.slice(-5).map((k) => ({ label: String(kwVon(k.woche)), a: k.umsatz, b: k.ebitda })),
     };
     markieren('Engine abgeschlossen');
     if (modus() === 'aus') { aufraeumen(); return; }
@@ -99,28 +107,46 @@ export function wochenberichtModul(ctx) {
     return { bild: person?.portraet ? portraetSVG(person.portraet, 110) : ASSISTENTIN,
       rolle: person?.name ?? 'Vorstand' };
   }
-  function zeile(name, wert, k = '') { return '<div class="wb-zeile ' + k + '"><span>' + esc(name) + '</span><strong>' + esc(wert) + '</strong></div>'; }
+  /** Befund der Finanzleitung in einem Satz: EBITDA und was sich am Cash getan hat. */
+  function befund(b) {
+    const e = b.ebitda < 0 ? `<b>EBITDA ${esc(geld(b.ebitda))}.</b>` : `<b>EBITDA plus ${esc(geld(b.ebitda))}.</b>`;
+    const cash = b.cashNetto >= 0 ? ` Die Kasse wächst um ${esc(geld(b.cashNetto))}.` : ` Die Kasse verliert ${esc(geld(-b.cashNetto))}.`;
+    return e + cash;
+  }
   function berichtZeigen(meins) {
     if (meins !== token) return;
     status = 'zaehlen'; vorfall = 0;
     const m = bericht.meldungen, ausgabe = ctx.zeitung?.(), titel = ausgabe?.aufmacher?.titel ?? m[0]?.text ?? 'Hartwig startet in eine neue Geschäftswoche';
-    const delta = (wert, vorher) => vorher == null ? 'Noch keine Vergleichswoche'
-      : eur(wert - vorher) + ' (' + (vorher === 0 ? '–' : new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 }).format((wert - vorher) / Math.abs(vorher) * 100) + ' %') + ')';
-    const uDelta = delta(bericht.umsatz, bericht.umsatzVor);
-    const eDelta = delta(bericht.ebitda, bericht.ebitdaVor);
-    const nachricht = (a, platz) => a ? '<div class="wb-meldung"><div class="wb-foto" aria-hidden="true" style="background-image:url(./bilder/reise-' + (platz === 1 ? 'hafen' : 'altstadt') + '.jpg)"></div><span>' + esc(a.text) + '</span></div>' : '';
-    node.innerHTML = '<section class="wb-bericht hk-flaeche" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Wochenergebnis"><header><span class="wb-logo">H</span><h2 tabindex="-1">KW ' + bericht.kw + ' · Wochenergebnis</h2><button class="wochen-x wb-schliessen" data-wa="schliessen" aria-label="Bericht schließen">×</button></header><div class="wb-scroll"><div class="wb-kennzahlen"><article><small>UMSATZ DER WOCHE</small><strong id="wb-umsatz" data-wert="' + bericht.umsatz + '">0 €</strong><span id="wb-umsatz-delta">' + esc(uDelta) + ' zur Vorwoche</span></article><article><small>EBITDA DER WOCHE</small><strong id="wb-ebitda" data-wert="' + bericht.ebitda + '">0 €</strong><span id="wb-ebitda-delta">' + esc(eDelta) + ' zur Vorwoche</span></article></div><div class="wb-cash">' +
-      (() => { const f = bericht.kapitalfluss, z = (name, v) => ({ name, werte: [eur(v)], roh: [Math.round(v)], ton: [v < 0 ? 'schlecht' : ''] });
-        return K.tabelle({ titel: 'Kapitalfluss der Woche', zeilen: [z('Cash operativ', f.operativ), z('Investitionen', f.investitionen), z('Finanzierung', f.finanzierung), z('Sonstiges', f.sonstiges)],
-          summe: z('Cash netto', f.netto), pruefen: Math.abs(f.operativ + f.investitionen + f.finanzierung + f.sonstiges - f.netto) < 2 }) + zeile('Cash-Bestand', eur(f.bestand), 'wb-summe'); })() + '</div>' +
-      (bericht.phase === 'insolvenz' ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur(bericht.kredite) + ' · Liquiditätsreichweite: ' + bericht.runway + ' Wochen</span></div>' : '') +
-      '<div class="wb-zeitung hk-papier"><div class="wb-zeitungskopf"><small>KW ' + bericht.kw + ' / ' + bericht.jahr + '</small><h3>Der Handelsbote</h3><nav>Top · Handel · Konzern · Markt · Politik</nav></div><div class="wb-titelbild">' + (ausgabe ? zeitungsBild(ausgabe.aufmacher.bild, ausgabe.nummer) : '') + '</div><h4>' + esc(titel) + '</h4><button type="button" class="wb-zeitung-lesen" data-wa="zeitung">Ausgabe lesen und Archiv öffnen</button>' +
-      nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? '<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>' : '') +
-      (bericht.erfolge.length ? '<div class="wb-erfolge"><strong>Neu: ' + bericht.erfolge.map(e => esc(e.titel)).join(', ') + '</strong></div>' : '') +
-      '</div></div><div id="wb-vorfall"></div></section>';
+    const delta = (wert, vorher) => vorher == null ? 'keine Vergleichswoche'
+      : K.abweichung(wert - vorher, (wert - vorher >= 0 ? '+' : '−') + geld(Math.abs(wert - vorher)), vorher ? (wert - vorher) / Math.abs(vorher) : null) + ' zur Vorwoche';
+    const cfo = ctx.person?.('cfo');
+    const sprecher = K.sprecher({ text: befund(bericht), unter: (cfo?.name ?? 'Finanzen') + ' · Finanzvorstand', person: cfo?.portraet ? portraetSVG(cfo.portraet, 72) : ASSISTENTIN, ton: bericht.ebitda < 0 ? 'engpass' : '' });
+    const f = bericht.kapitalfluss, z = (name, v) => ({ name, werte: [eur(v)], roh: [Math.round(v)], ton: [v < 0 ? 'schlecht' : ''] });
+    const kapital = '<div data-wb="cash" data-summen-name="Kapitalfluss">' + K.tabelle({ titel: 'Kapitalfluss der Woche', spalten: ['KW ' + bericht.kw], zeilen: [z('Cash operativ', f.operativ), z('Investitionen', f.investitionen), z('Finanzierung', f.finanzierung), z('Sonstiges', f.sonstiges)],
+      summe: z('Cash netto', f.netto), pruefen: Math.abs(f.operativ + f.investitionen + f.finanzierung + f.sonstiges - f.netto) < 2 })
+      + '<div class="hw-abstand"></div>' + K.tabelle({ zeilen: [{ name: 'Cash-Bestand', werte: [eur(f.bestand)], ton: [f.bestand < 0 ? 'schlecht' : ''] }] }) + '</div>';
+    const insolvenz = bericht.phase === 'insolvenz' ? K.abschnitt('Insolvenzbarometer') + K.liste([K.zeile({ was: 'Freier Kreditrahmen', wert: esc(eur(bericht.kredite)), ton: bericht.kredite < 0 ? 'schlecht' : '' }), K.zeile({ was: 'Liquiditätsreichweite', wert: bericht.runway + ' Wochen', ton: 'achtung' })]) : '';
+    const presse = '<div data-wb="zeitung">' + K.abschnitt('Der Handelsbote', 'KW ' + bericht.kw + ' / ' + bericht.jahr)
+      + K.liste([K.zeile({ was: esc(titel), unter: 'Aufmacher', tippbar: true, attr: 'data-wa="zeitung" aria-label="Ausgabe lesen und Archiv öffnen"' }),
+        ...m.slice(1, 3).map((a) => K.zeile({ was: esc(a.text), unter: esc(a.kategorie) }))])
+      + (!m.length ? K.leer('Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.') : '') + '</div>';
+    const erfolge = bericht.erfolge.length ? '<div data-wb="erfolge">' + K.abschnitt('Neu freigeschaltet', bericht.erfolge.length + (bericht.erfolge.length === 1 ? ' Erfolg' : ' Erfolge'))
+      + K.liste(bericht.erfolge.map((e) => K.zeile({ was: 'Neu: ' + esc(e.titel), unter: esc(e.beschreibung ?? '') }))) + '</div>' : '';
+    const inhalt = K.rumpf(K.gross([{ label: 'Umsatz der Woche', wert: '0 €', p: 'wb:umsatz', unter: delta(bericht.umsatz, bericht.umsatzVor) },
+      { label: 'EBITDA der Woche', wert: '0 €', p: 'wb:ebitda', ton: bericht.ebitda < 0 ? 'schlecht' : 'gut', unter: delta(bericht.ebitda, bericht.ebitdaVor) }])
+      // Umsatz und EBITDA je mit eigener Skala (EBITDA ist um zwei Größenordnungen kleiner als der Umsatz).
+      + K.balkenPaar([{ titel: 'Umsatz', serie: 'a', punkte: bericht.verlauf.map((p) => ({ label: p.label, wert: p.a })) },
+        { titel: 'EBITDA', serie: 'b', punkte: bericht.verlauf.map((p) => ({ label: p.label, wert: p.b })) }]))
+      + K.band(kapital + insolvenz) + K.rumpf(presse + erfolge + K.knoepfe(K.knopf('Zurück zur Stadt', 'data-wa="schliessen"', 'breit')));
+    node.innerHTML = '<section class="hw hw-blatt hw-wb" data-bereich="zentrale" data-wb="bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis">'
+      + blattKopf('zahlen', 'Wochenergebnis', 'KW ' + bericht.kw + ' / ' + bericht.jahr, '<button type="button" class="hw-zu" data-wa="schliessen" aria-label="Bericht schließen"></button>')
+      + sprecher + '<div class="hw-inhalt">' + inhalt + '</div><div id="wb-vorfall"></div></section>';
+    for (const [p, id, wert] of [['wb:umsatz', 'wb-umsatz', bericht.umsatz], ['wb:ebitda', 'wb-ebitda', bericht.ebitda]]) {
+      const el = node.querySelector(`[data-p="${p}"]`); if (el) { el.id = id; el.dataset.wert = wert; }
+    }
     node.hidden = false; node.className = 'bericht-ein'; document.body.classList.add('wochen-aktiv');
     requestAnimationFrame(() => node.classList.add('sichtbar'));
-    node.querySelector('.wb-bericht h2')?.focus({ preventScroll: true });
+    node.querySelector('.hw-wb h2')?.focus({ preventScroll: true });
     const originalDauer = dauer();
     const zaehlBeginn = performance.now() + (originalDauer ? WOCHEN_ZEIT.berichtEin : 0);
     let abgeschlossen = false;
@@ -129,11 +155,10 @@ export function wochenberichtModul(ctx) {
       const u = node.querySelector('#wb-umsatz'), e = node.querySelector('#wb-ebitda');
       if (!u || !e || meins !== token) return;
       u.textContent = eur(bericht.umsatz * f); e.textContent = eur(bericht.ebitda * f);
-      e.classList.toggle('negativ', bericht.ebitda < 0);
       if (f < 1) zaehlRaf = requestAnimationFrame(zahlen);
       else if (!abgeschlossen) { abgeschlossen = true; node.classList.add('gezaehlt'); status = 'bericht'; markieren('Zählung beendet'); if (bericht.vorgaenge.length) setTimeout(() => { if (meins === token) vorfallZeigen(); }, schnell() ? 0 : 200); }
     }
-    node.querySelector('.wb-bericht').addEventListener('click', (e) => { if (status === 'zaehlen' && !e.target.closest('[data-wa]')) { cancelAnimationFrame(zaehlRaf); zahlen(performance.now(), true); } });
+    node.querySelector('.hw-wb').addEventListener('click', (e) => { if (status === 'zaehlen' && !e.target.closest('[data-wa]')) { cancelAnimationFrame(zaehlRaf); zahlen(performance.now(), true); } });
     if (originalDauer) zaehlRaf = requestAnimationFrame(zahlen); else zahlen(performance.now(), true);
   }
   function vorfallZeigen() {
@@ -142,16 +167,19 @@ export function wochenberichtModul(ctx) {
     status = 'vorfall'; markieren('Vorfall ' + (vorfall + 1));
     const feld = node.querySelector('#wb-vorfall'), meins = token;
     const verantwortlich = portraetZumVorgang(m);
-    feld.innerHTML = '<div class="wb-vorfallmaske"><section class="wb-vorfall hk-flaeche" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Vorfall"><div class="wb-vorfallkopf"><span>H</span><div><small>' + esc(verantwortlich.rolle) + '</small><h3>VORFALL</h3></div><div class="wb-gesicht">' + verantwortlich.bild + '</div></div><h4 tabindex="-1">' + esc(m.titel) + '</h4><p class="wb-tippt" aria-live="polite"></p><div class="wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + ' von ' + lauf.length + '</small><button data-wa="spaeter" hidden>Später</button><button data-wa="ansehen" hidden>Ansehen</button></div>' + (alle.length > 3 ? '<p class="wb-rest">+' + (alle.length - 3) + ' weitere im Posteingang</p>' : '') + '</section></div>';
-    feld.querySelector('.wb-vorfall h4')?.focus({ preventScroll: true });
+    feld.innerHTML = '<div class="hw-wb-vorfallmaske"><section class="hw-wb-vorfall" data-wb="vorfall" role="dialog" aria-modal="true" aria-label="Vorfall">'
+      + '<div class="hw-wb-vorfallkopf"><div><span class="hw-marke">Vorfall · ' + esc(verantwortlich.rolle) + '</span><h3 tabindex="-1">' + esc(m.titel) + '</h3></div><div class="hw-wb-gesicht" data-wb="gesicht" aria-hidden="true">' + verantwortlich.bild + '</div></div>'
+      + '<p class="hw-wb-tippt" aria-live="polite"></p><div class="hw-wb-vorfallfuss"><small>Vorgang ' + (vorfall + 1) + ' von ' + lauf.length + (alle.length > 3 ? ' · ' + (alle.length - 3) + ' weitere im Posteingang' : '') + '</small>'
+      + K.knopf('Später', 'data-wa="spaeter" hidden', 'zweit') + K.knopf('Ansehen', 'data-wa="ansehen" hidden') + '</div></section></div>';
+    feld.querySelector('.hw-wb-vorfall h3')?.focus({ preventScroll: true });
     requestAnimationFrame(() => feld.classList.add('offen'));
-    const text = m.text ?? '', el = feld.querySelector('.wb-tippt'), beginn = performance.now();
+    const text = m.text ?? '', el = feld.querySelector('.hw-wb-tippt'), beginn = performance.now();
     function tick(t) {
       if (meins !== token || status !== 'vorfall') return;
       const n = schnell() ? text.length : Math.floor((t - beginn) / 1000 * 70);
       el.textContent = text.slice(0, n);
       if (el.textContent.length !== text.length && t - beginn < WOCHEN_ZEIT.vorfallText) requestAnimationFrame(tick);
-      else { el.textContent = text; feld.querySelector('.wb-vorfallfuss small').hidden = true; for (const b of feld.querySelectorAll('.wb-vorfallfuss button')) b.hidden = false; }
+      else { el.textContent = text; for (const b of feld.querySelectorAll('.hw-wb-vorfallfuss button')) b.hidden = false; }
     }
     requestAnimationFrame(tick);
   }
@@ -172,7 +200,7 @@ export function wochenberichtModul(ctx) {
     switch (b.dataset.wa) {
       case 'nein': abbruch(); break;
       case 'ja': berechnen(true); break;
-      case 'schliessen': if (status === 'bericht') abbruch(); else if (status === 'zaehlen') { cancelAnimationFrame(zaehlRaf); node.querySelector('.wb-kennzahlen')?.click(); } break;
+      case 'schliessen': if (status === 'bericht') abbruch(); else if (status === 'zaehlen') { cancelAnimationFrame(zaehlRaf); node.querySelector('.hw-wb .hw-gross')?.click(); } break;
       case 'zeitung': if (status === 'bericht' || status === 'zaehlen') { abbruch(); ctx.oeffneZeitung?.(); } break;
       case 'spaeter': vorfallWeiter(false); break;
       case 'ansehen': vorfallWeiter(true); break;

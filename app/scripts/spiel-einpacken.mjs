@@ -26,10 +26,14 @@ const cssLesen = (datei) => {
   if (eingebettet.has(datei)) return '';
   eingebettet.add(datei);
   const ordner = datei.replace(/[^/]+$/, '');
-  return readFileSync(join(render, datei), 'utf8').replace(/@import\s+url\(['"]?\.\/([\w-]+\.css)['"]?\)\s*;?/g, (_, n) => cssLesen(ordner + n));
+  return readFileSync(join(render, datei), 'utf8')
+    .replace(/@import\s+url\(['"]?\.\/([\w-]+\.css)['"]?\)\s*;?/g, (_, n) => cssLesen(ordner + n))
+    // E47: Schrift als data-URL, damit die App ohne Nachladen dieselbe Schrift zeigt wie das Prüfbild.
+    .replace(/url\(['"]?(schrift\/[\w.-]+\.ttf)['"]?\)/g, (_, n) => `url(data:font/ttf;base64,${readFileSync(join(render, ordner + n)).toString('base64')})`);
 };
 html = html.replace(cssMuster, (_, datei) => '<style>' + cssLesen(datei) + '</style>');
 if (/@import\s+url\(['"]?\.\//.test(html)) throw new Error('Nicht eingebettet: @import');
+if (/url\(['"]?schrift\//.test(html)) throw new Error('Nicht eingebettet: Schrift');
 ersetze(/<link[^>]*rel="manifest"[^>]*>/, '', 'Manifest');
 html = html.replace(/\.\/icon\.svg/g, icon);
 

@@ -3,116 +3,131 @@ import { geld, esc, kwVon } from './format.js';
 import * as K from './komponenten.js';
 import { portraetSVG } from '../kit/portraet.js';
 
-// Q30: Posteingang als Hauspost. Hauptfrage: Was muss ich diese Woche entscheiden, und was läuft ab?
-// Vorgänge sind Umlaufmappen mit Reiter (Art, Frist), sortiert nach Frist; Meldungen sind Hauspost-Zeilen.
+// E47: Posteingang als verdichtete Liste. Hauptfrage: Was muss ich diese Woche entscheiden, und was läuft ab?
+// Vorgänge nach Frist gruppiert (diese Woche, nächste Woche, später); je Vorgang Titel, Frist, Betrag, eine Hauptaktion.
 const SEKRETARIAT = portraetSVG({ geschlecht: 'w', alter: 36, haar: 'bob', haarfarbe: 'braun', hautton: 'rosig', kleidung: 'blazer', kleidungFarbe: 'marine', seed: 821 }, 72);
+const MIET_OPTIONEN = [['verlaengern', 'Verlängern'], ['nachverhandeln', 'Nachverhandeln'], ['auslaufen', 'Auslaufen lassen']];
+const RUBRIKEN = ['Presse', 'Häuser', 'Finanzen', 'Personal', 'Konkurrenz', 'Eigentümer', 'IT'];
 
 // Zentraler Posteingang: reine Engine-Abfragen und bestehende Spieleraktionen.
 export function posteingangModul(ctx) {
   const E = ctx.E, s = ctx.s;
-  const ui = { aktiv: false, filter: 'Alle', verhandlung: null, ziel: null, mietAuswahl: new Map() };
+  const ui = { aktiv: false, filter: 'Alle', verhandlung: null, ziel: null, mietAuswahl: new Map(), konkurrenzOffen: false };
   const einstellungen = () => ctx.zustand();
   const daten = () => E.posteingang(s());
-  const wochen = (n) => n === 0 ? 'läuft diese Woche ab' : n === 1 ? 'noch 1 Woche' : 'noch ' + n + ' Wochen';
-  const leer = (t, titel = '') => '<div class="postleer" role="status">' + K.leer(t, titel) + '</div>';
+  const frist = (n) => n === 0 ? 'läuft ab' : n === 1 ? 'noch 1 Woche' : 'noch ' + n + ' Wochen';
+  const leer = (t, titel = '') => K.leer(t, titel);
 
   function tabs(D) {
     const aktiv = einstellungen().reiter;
     const ungelesen = D.meldungen.filter((m) => !(einstellungen().gelesen ?? []).includes(m.id)).length;
-    return '<div class="hk-seg posttabs" role="tablist">' + [
-      ['handeln', 'Zu tun', D.handeln.length], ['meldungen', 'Meldungen', ungelesen], ['erledigt', 'Erledigt', 0],
-    ].map(([v, t, n]) => '<button role="tab" type="button" aria-selected="' + (aktiv === v) + '" aria-pressed="' + (aktiv === v) + '" class="tab ' + (aktiv === v ? 'an' : '') + '" data-po-a="tab" data-v="' + v + '">' + t + (n ? ' · ' + n : '') + '</button>').join('') + '</div>';
+    return K.seg([['handeln', 'Zu tun' + (D.handeln.length ? ' · ' + D.handeln.length : '')], ['meldungen', 'Meldungen' + (ungelesen ? ' · ' + ungelesen : '')], ['erledigt', 'Erledigt']],
+      aktiv, (v) => 'data-po-a="tab" data-v="' + v + '"').replace('class="hw-segment"', 'class="hw-segment eng" aria-label="Posteingang"');
   }
   function befund(D) {
     const ab = D.handeln.filter((x) => x.restWochen === 0).length, n = D.handeln.length;
     if (!n) return K.sprecher({ text: '<b>Nichts liegt zur Entscheidung.</b> Neue Vorgänge kommen mit dem Wochenabschluss.', unter: 'Sekretariat', person: SEKRETARIAT });
     const summe = D.handeln.reduce((a, p) => a + (p.wert?.betrag ?? 0), 0);
-    return K.sprecher({ text: '<b>' + (ab ? ab + (ab === 1 ? ' Vorgang läuft' : ' Vorgänge laufen') + ' diese Woche ab.' : n + (n === 1 ? ' Vorgang wartet' : ' Vorgänge warten') + ' auf Sie.') + '</b>' + (ab && n > ab ? ' Dazu ' + (n - ab) + ' weitere.' : '') + (summe ? ' Es geht um ' + esc(geld(summe)) + '.' : '') + ' Ohne Entscheidung gilt der Standard.',
+    const kopf = ab ? ab + (ab === 1 ? ' Vorgang läuft' : ' Vorgänge laufen') + ' diese Woche ab.' : n + (n === 1 ? ' Vorgang wartet' : ' Vorgänge warten') + ' auf Sie.';
+    return K.sprecher({ text: '<b>' + kopf + '</b>' + (ab && n > ab ? ' ' + (n - ab) + ' weitere warten.' : '') + (summe ? ' Es geht um ' + esc(geld(summe)) + '.' : ''),
       unter: 'Sekretariat', person: SEKRETARIAT, ton: ab ? 'alarm' : 'engpass' });
   }
-  const mietenOptionen = [
-    ['verlaengern','Verlängern'], ['nachverhandeln','Nachverhandeln'], ['auslaufen','Auslaufen lassen / schließen'],
-  ];
-  function mietvertragKarte(p) {
-    const aus = p.mietvertraege ?? [];
-    const reihen = aus.map((m) => {
-      if (!ui.mietAuswahl.has(m.entscheidungId))
-        ui.mietAuswahl.set(m.entscheidungId, { aktiv: true, option: m.empfehlung });
+  // Wert rechts: Betrag (neutral) oder, ohne Betrag, die Frist mit Ton. Frist steht immer in der Unterzeile.
+  const kopfzeile = (p) => K.zeile({ was: esc(p.titel),
+    unter: '<span class="' + (p.restWochen === 0 ? 'hw-schlecht' : p.dringend ? 'hw-achtung' : '') + '">' + (p.restWochen === 0 ? 'Läuft diese Woche ab' : 'Frist KW ' + kwVon(p.frist) + ', ' + frist(p.restWochen)) + '</span>'
+      + ' · ' + (p.art === 'angebot' ? 'Angebot' : 'Entscheidung') + ' · ohne Entscheidung: ' + esc(p.standard),
+    wert: p.wert ? esc(geld(p.wert.betrag)) : (p.restWochen === 0 ? 'Diese Woche' : 'KW ' + kwVon(p.frist)), wertUnter: p.wert ? esc(p.wert.einheit) : frist(p.restWochen),
+    ton: p.wert ? '' : p.restWochen === 0 ? 'schlecht' : p.dringend ? 'achtung' : '' });
+
+  function mietvertrag(p) {
+    const reihen = (p.mietvertraege ?? []).map((m) => {
+      if (!ui.mietAuswahl.has(m.entscheidungId)) ui.mietAuswahl.set(m.entscheidungId, { aktiv: true, option: m.empfehlung });
       const wahl = ui.mietAuswahl.get(m.entscheidungId);
-      const qual = (v) => v === undefined ? '—' : (100 * v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %';
-      return '<div class="post-miete-zeile" data-miet-id="' + esc(m.entscheidungId) + '"><div>' +
-        '<label><input type="checkbox" data-po-miet-check="' + esc(m.entscheidungId) + '"' +
-        (wahl.aktiv ? ' checked' : '') + '><b>' + esc(m.haus) + '</b></label>' +
-        '<small>' + esc(m.stadt) + ' · ' + esc(m.region) + ' · ' + esc(m.format) +
-        ' · Restlaufzeit ' + m.restlaufzeit + ' Wochen</small>' +
-        '<small>Vermieter: ' + esc(m.vermieter) + '</small>' +
-        '<small>Miete p.a. ' + esc(geld(m.istMiete)) + ' → ' + esc(geld(m.angebotMiete)) +
-        ' · Quote ' + qual(m.mietquoteIst) + ' → ' + qual(m.mietquoteNeu) + '</small>' +
-        '<small>Haus-DB: ' + (m.ebitdaHaus === undefined ? 'Keine Buchung' : esc(geld(m.ebitdaHaus))) + '</small>' +
-        '<small>Empfehlung Immobilien: ' + esc(mietenOptionen.find((x) => x[0] === m.empfehlung)?.[1] || m.empfehlung) + '</small></div>' +
-        '<div><label>Entscheidung<select data-po-miet-option="' + esc(m.entscheidungId) + '">' +
-          mietenOptionen.map(([value, text]) => '<option value="' + value + '"' +
-            (wahl.option === value ? ' selected' : '') + '>' + esc(text) + '</option>').join('') +
-          '</select></label><button type="button" class="hk-knopf zweit" data-po-a="mieteEinzel" data-id="' + esc(m.entscheidungId) +
-          '">Entscheiden</button></div></div>';
+      const quote = (v) => v === undefined ? 'ohne Umsatz' : (100 * v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %';
+      const empfehlung = MIET_OPTIONEN.find((x) => x[0] === m.empfehlung)?.[1] ?? m.empfehlung;
+      return '<div class="hw-vorgang-miete" data-miet-id="' + esc(m.entscheidungId) + '">'
+        + K.schalter({ text: m.haus, unter: m.stadt + ' · ' + m.format + ' · Restlaufzeit ' + m.restlaufzeit + ' Wochen · Vermieter ' + m.vermieter, an: wahl.aktiv,
+          attr: 'data-po-a="mietCheck" data-id="' + esc(m.entscheidungId) + '"' })
+        + K.liste([
+          K.zeile({ was: 'Miete im Jahr', unter: 'Quote ' + quote(m.mietquoteIst) + ' auf ' + quote(m.mietquoteNeu), wert: esc(geld(m.angebotMiete)), wertUnter: 'bisher ' + esc(geld(m.istMiete)) }),
+          K.zeile({ was: 'Haus-Deckungsbeitrag', unter: 'Empfehlung Immobilien: ' + esc(empfehlung), wert: m.ebitdaHaus === undefined ? 'keine Buchung' : esc(geld(m.ebitdaHaus)), ton: (m.ebitdaHaus ?? 0) < 0 ? 'schlecht' : '' })])
+        + K.seg(MIET_OPTIONEN, wahl.option, (v) => 'data-po-a="mietOption" data-id="' + esc(m.entscheidungId) + '" data-v="' + v + '"').replace('class="hw-segment"', 'class="hw-segment eng" aria-label="Entscheidung ' + esc(m.haus) + '"')
+        + K.knoepfe(K.knopf('Nur dieses Haus entscheiden', 'data-po-a="mieteEinzel" data-id="' + esc(m.entscheidungId) + '"', 'zweit')) + '</div>';
     }).join('');
-    return '<article class="postkarte postmappe" data-post-id="' + esc(p.id) + '">' +
-      '<div class="post-reiter"><span>Immobilien · KW ' + kwVon(p.woche) + '</span><span class="post-frist ' + (p.restWochen === 0 ? 'ab' : p.dringend ? 'bald' : '') + '">' + wochen(p.restWochen) + '</span></div>' +
-      '<div class="postkopf"><h3>' + esc(p.titel) + '</h3><p class="posthinweis">' + esc(p.text) + '</p></div>' + reihen +
-      '<div class="postaktionen"><button type="button" class="hk-knopf" data-po-a="mieteAuswahl" data-id="' + esc(p.id) +
-      '">Auswahl entscheiden</button>' +
-      '<button type="button" class="hk-knopf zweit" data-po-a="mieteEmpfehlungen" data-id="' + esc(p.id) +
-      '">Empfehlungen übernehmen</button></div></article>';
+    return '<div class="hw-vorgang" data-post-id="' + esc(p.id) + '">' + kopfzeile(p) + '<p class="hw-lese">' + esc(p.text) + '</p>'
+      + K.knoepfe(K.knopf('Auswahl entscheiden', 'data-po-a="mieteAuswahl" data-id="' + esc(p.id) + '"'), K.knopf('Empfehlungen übernehmen', 'data-po-a="mieteEmpfehlungen" data-id="' + esc(p.id) + '"', 'zweit'))
+      + reihen + '</div>';
+  }
+  function vorgang(p) {
+    if (p.typ === 'mietvertraege') return mietvertrag(p);
+    // Eine Hauptaktion: die Standardwahl (Empfehlung) bzw. Annehmen; die übrigen Wege leise daneben.
+    const prim = p.optionen.find((o) => o.label === p.standard)?.id ?? p.optionen.find((o) => o.id === 'annehmen')?.id ?? p.optionen[0]?.id;
+    const knoepfe = [...p.optionen].sort((a, b) => Number(b.id === prim) - Number(a.id === prim))
+      .map((o) => K.knopf(o.label.replace(/\s*\(Empfehlung\)/, ''), 'data-po-a="option" data-id="' + esc(p.id) + '" data-v="' + esc(o.id) + '"', o.id === prim ? '' : 'text'));
+    const ort = p.bezug && (p.bezug.hausIds?.length || p.bezug.stadt || p.bezug.modul) ? K.knopf('Zum Ort', 'data-po-a="ort" data-id="' + esc(p.id) + '"', 'text') : '';
+    return '<div class="hw-vorgang" data-post-id="' + esc(p.id) + '">' + kopfzeile(p) + '<p class="hw-lese">' + esc(p.text) + '</p>' + K.knoepfe(...knoepfe, ort) + '</div>';
   }
   function handeln(D) {
     if (ui.verhandlung) return verhandeln();
-    if (!D.handeln.length) return leer('Keine offenen Angebote oder Entscheidungen.', 'Mappe leer');
-    return [...D.handeln].sort((a, b) => a.restWochen - b.restWochen || Number(b.dringend) - Number(a.dringend)).map((p) => {
-      if (p.typ === 'mietvertraege') return mietvertragKarte(p);
-      const frist = '<span class="post-frist ' + (p.restWochen === 0 ? 'ab' : p.dringend ? 'bald' : '') + '">' + wochen(p.restWochen) + '</span>';
-      const wert = p.wert ? '<div class="postwert"><b>' + esc(geld(p.wert.betrag)) + '</b><span>' + esc(p.wert.einheit) + '</span></div>' : '';
-      const prim = p.optionen.find((o) => o.id === 'annehmen')?.id;
-      const buttons = p.optionen.map((o) => '<button type="button" class="hk-knopf ' + (o.id === prim ? '' : 'zweit') + '" data-po-a="option" data-id="' + esc(p.id) + '" data-v="' + esc(o.id) + '">' + esc(o.label) + '</button>').join('');
-      const ort = p.bezug && (p.bezug.hausIds?.length || p.bezug.stadt || p.bezug.modul) ? '<button type="button" class="hk-knopf text postort" data-po-a="ort" data-id="' + esc(p.id) + '">Zum Ort</button>' : '';
-      return '<article class="postkarte postmappe" data-post-id="' + esc(p.id) + '"><div class="post-reiter"><span>' + (p.art === 'angebot' ? 'Angebot' : 'Entscheidung') + ' · KW ' + kwVon(p.woche) + '</span>' + frist + '</div><div class="postkopf"><h3>' + esc(p.titel) + '</h3>' + wert + '</div><details class="postdetail"><summary>Worum es geht</summary><p>' + esc(p.text) + '</p></details><p class="poststandard">Ohne Entscheidung: ' + esc(p.standard) + '</p><div class="postaktionen">' + buttons + '</div>' + (ort ? '<div class="postfuss">' + ort + '</div>' : '') + '</article>';
+    if (!D.handeln.length) return K.abschnitt('Zu entscheiden') + leer('Keine offenen Angebote oder Entscheidungen.', 'Mappe leer');
+    const sortiert = [...D.handeln].sort((a, b) => a.restWochen - b.restWochen || Number(b.dringend) - Number(a.dringend));
+    const gruppen = [['Läuft diese Woche ab', (p) => p.restWochen === 0], ['Nächste Woche', (p) => p.restWochen === 1], ['Später', (p) => p.restWochen > 1]];
+    return gruppen.map(([titel, passt]) => {
+      const liste = sortiert.filter(passt);
+      if (!liste.length) return '';
+      const summe = liste.reduce((a, p) => a + (p.wert?.betrag ?? 0), 0);
+      return K.abschnitt(titel, liste.length + (liste.length === 1 ? ' Vorgang' : ' Vorgänge') + (summe ? ' · ' + geld(summe) : '')) + liste.map(vorgang).join('');
     }).join('');
   }
   function verhandeln() {
     const a = s().angebote.find((x) => x.id === ui.verhandlung.id && x.status === 'offen');
     if (!a) { ui.verhandlung = null; return leer('Das Angebot ist nicht mehr offen.'); }
-    const hauser = s().haeuser.filter((h) => h.status === 'offen' && h.etagen.includes(a.etage ?? 0)).sort((x, y) => x.stadt.localeCompare(y.stadt) || x.name.localeCompare(y.name));
-    return '<button type="button" class="hk-knopf text postzurueck" data-po-a="zurueck">Zurück zu den Angeboten</button><div class="postmappe"><div class="postkopf"><div class="posttyp">Paketangebot verhandeln</div><h3>' + esc(a.titel) + '</h3><p class="posthinweis">Mindestens ' + (a.minHaeuser ?? 1) + ' Standorte auswählen. Die Engine prüft anschließend die Verhandlungsposition.</p></div><div class="posthausliste">' + hauser.map((h) => '<label class="posthaus"><input data-po-haus="' + esc(h.id) + '" type="checkbox" ' + (ui.verhandlung.haeuser.has(h.id) ? 'checked' : '') + '><span>' + esc(h.name) + '<small>' + esc(h.stadt) + '</small></span></label>').join('') +  '</div><div class="postaktionen"><button type="button" data-po-a="verhandeln" class="hk-knopf">Auswahl verhandeln (' + ui.verhandlung.haeuser.size + ')</button></div></div>';
+    const haeuser = s().haeuser.filter((h) => h.status === 'offen' && h.etagen.includes(a.etage ?? 0)).sort((x, y) => x.stadt.localeCompare(y.stadt) || x.name.localeCompare(y.name));
+    return K.knoepfe(K.knopf('Zurück zu den Vorgängen', 'data-po-a="zurueck"', 'text'))
+      + K.abschnitt('Paketangebot verhandeln', 'mindestens ' + (a.minHaeuser ?? 1) + ' Standorte')
+      + K.liste([K.zeile({ was: esc(a.titel), unter: 'Die Engine prüft nach der Auswahl die Verhandlungsposition.', wert: String(ui.verhandlung.haeuser.size), wertUnter: 'ausgewählt' })])
+      + K.knoepfe(K.knopf('Auswahl verhandeln (' + ui.verhandlung.haeuser.size + ')', 'data-po-a="verhandeln"', 'breit'))
+      + K.abschnitt('Standorte', haeuser.length + ' Häuser')
+      + haeuser.map((h) => K.schalter({ text: h.name, unter: h.stadt, an: ui.verhandlung.haeuser.has(h.id), attr: 'data-po-a="haus" data-id="' + esc(h.id) + '"' })).join('');
   }
   function meldungen(D) {
-    const filter = ui.filter;
+    const filter = ui.filter, gelesen = new Set(einstellungen().gelesen ?? []);
+    const vorhanden = RUBRIKEN.filter((k) => D.meldungen.some((m) => m.kategorie === k) || k === filter);
+    const alle = ['Alle', ...vorhanden], je = alle.length <= 5 ? alle.length : Math.ceil(alle.length / 2);
+    const reihen = [alle.slice(0, je), alle.slice(je)].filter((r) => r.length);
+    let html = reihen.map((r) => K.seg(r.map((k) => [k, k]), filter, (v) => 'data-po-a="filter" data-v="' + esc(v) + '"').replace('class="hw-segment"', 'class="hw-segment eng" aria-label="Rubrik"')).join('');
     const liste = D.meldungen.filter((m) => filter === 'Alle' || m.kategorie === filter);
-    const kategorien = ['Alle', 'Presse', 'Häuser', 'Finanzen', 'Personal', 'Konkurrenz', 'Eigentümer', 'IT'];
-    let html = '<div class="post-filterzeile"><label class="postfilter">Rubrik <select data-po-filter aria-label="Meldungen filtern">' + kategorien.map((k) => '<option ' + (k === filter ? 'selected ' : '') + 'value="' + esc(k) + '">' + esc(k) + '</option>').join('') + '</select></label><button type="button" class="hk-knopf text postalle" data-po-a="alleLesen">Alle gelesen</button></div>';
-    if (!liste.length) return html + leer('Keine Meldungen in dieser Rubrik.');
-    const gelesen = new Set(einstellungen().gelesen ?? []);
-    // Q06: Wettbewerb ist eine eigene, im Standard geschlossene Sammelrubrik.
-    const wettbewerb = liste.filter((m) => m.kategorie === 'Konkurrenz');
-    const andere = liste.filter((m) => m.kategorie !== 'Konkurrenz');
+    const neu = liste.filter((m) => !gelesen.has(m.id)).length;
+    if (!liste.length) return html + K.abschnitt('Meldungen') + leer('Keine Meldungen in dieser Rubrik.');
     const eintrag = (m) => {
       const bezug = m.bezug && (m.bezug.stadt || m.bezug.modul || m.bezug.hausIds?.length);
-      const info = '<span class="postnachricht"><small><b>' + esc(m.kategorie) + '</b> · KW ' + kwVon(m.woche) + (gelesen.has(m.id) ? '' : ' · neu') + '</small><span>' + esc(m.text) + '</span></span>';
-      return '<div class="postmeldung ' + (gelesen.has(m.id) ? '' : 'ungelesen') + '" data-post-id="' + esc(m.id) + '"><button type="button" data-po-a="lesen" data-id="' + esc(m.id) + '">' + info + '</button>' + (bezug ? '<button type="button" class="hk-knopf text postort" data-po-a="sprung" data-id="' + esc(m.id) + '">Zum Ort</button>' : '') + '</div>';
+      const ungelesen = !gelesen.has(m.id);
+      return '<div class="' + (ungelesen ? 'hw-ungelesen' : '') + '" data-post-id="' + esc(m.id) + '">' + K.zeile({ was: esc(m.text),
+        unter: esc(m.kategorie) + ' · KW ' + kwVon(m.woche) + (bezug ? ' · zum Ort tippen' : ''), wert: ungelesen ? K.marke('Neu', 'achtung') : '',
+        tippbar: !!bezug || ungelesen, attr: 'data-po-a="' + (bezug ? 'sprung' : 'lesen') + '" data-id="' + esc(m.id) + '"' }) + '</div>';
     };
-    const regulär = andere.length ? '<div class="hk-liste postliste">' + andere.map(eintrag).join('') + '</div>' : '';
-    const rubrik = wettbewerb.length
-      ? '<details class="post-konkurrenz" ' + (filter === 'Konkurrenz' ? 'open' : '') +
-        '><summary>Konkurrenz · ' + wettbewerb.length + ' Meldung' + (wettbewerb.length === 1 ? '' : 'en') +
-        ' (anzeigen)</summary><div class="post-konkurrenz-inhalt">' + wettbewerb.map(eintrag).join('') + '</div></details>'
-      : '';
-    return html + regulär + rubrik;
+    // Q06: Wettbewerb ist eine eigene, im Standard eingeklappte Sammelrubrik.
+    const wettbewerb = liste.filter((m) => m.kategorie === 'Konkurrenz'), andere = liste.filter((m) => m.kategorie !== 'Konkurrenz');
+    html += K.abschnitt(filter === 'Alle' ? 'Hauspost' : filter, liste.length + ' Meldungen' + (neu ? ' · ' + neu + ' neu' : ''));
+    if (neu) html += K.knoepfe(K.knopf('Alle als gelesen markieren', 'data-po-a="alleLesen"', 'text'));
+    if (andere.length) html += '<div class="hw-liste">' + andere.map(eintrag).join('') + '</div>';
+    if (wettbewerb.length) {
+      const offen = ui.konkurrenzOffen || filter === 'Konkurrenz';
+      if (filter !== 'Konkurrenz') html += K.abschnitt('Konkurrenz', wettbewerb.length + ' Meldungen');
+      html += offen ? '<div class="hw-liste">' + wettbewerb.map(eintrag).join('') + '</div>'
+        : K.knoepfe(K.knopf('Konkurrenzmeldungen anzeigen', 'data-po-a="konkurrenz"', 'zweit breit'));
+    }
+    return html;
   }
   function erledigt(D) {
-    if (!D.erledigt.length) return leer('In den letzten 13 Wochen wurde noch nichts erledigt.');
-    return '<div class="hk-liste">' + D.erledigt.map((p) => '<div class="hk-zeile posterledigt" data-post-id="' + esc(p.id) + '"><span class="hk-was">' + esc(p.titel) + '<small>' + (p.art === 'angebot' ? 'Angebot' : 'Entscheidung') + ' · KW ' + kwVon(p.woche) + ' · ' + esc(p.ergebnis) + (p.standard ? ' · automatisch bei Fristablauf' : '') + '</small></span></div>').join('') + '</div>';
+    if (!D.erledigt.length) return K.abschnitt('Erledigt') + leer('In den letzten 13 Wochen wurde noch nichts erledigt.');
+    return K.abschnitt('Erledigt', 'letzte 13 Wochen') + K.liste(D.erledigt.map((p) => '<div data-post-id="' + esc(p.id) + '">' + K.zeile({ was: esc(p.titel),
+      unter: (p.art === 'angebot' ? 'Angebot' : 'Entscheidung') + ' · KW ' + kwVon(p.woche) + (p.standard ? ' · automatisch bei Fristablauf' : ''), wert: esc(p.ergebnis) }) + '</div>'));
   }
   function zeigen(scrollHalten = false) {
     const vorher = document.getElementById('pinhalt').scrollTop, D = daten();
-    const inhalt = K.bereich('betrieb', 'post') + befund(D) + K.rumpf(tabs(D) + '<div class="postinhalt">' + (einstellungen().reiter === 'meldungen' ? meldungen(D) : einstellungen().reiter === 'erledigt' ? erledigt(D) : handeln(D)) + '</div>');
+    const seite = einstellungen().reiter === 'meldungen' ? meldungen(D) : einstellungen().reiter === 'erledigt' ? erledigt(D) : handeln(D);
+    const inhalt = K.bereich('betrieb', 'post') + befund(D) + '<div class="hw-g5">' + K.rumpf(tabs(D) + seite) + '</div>';
     ctx.panel('Posteingang', (D.handeln.length === 1 ? '1 Vorgang' : D.handeln.length + ' Vorgänge') + ' offen · KW ' + kwVon(s().woche), inhalt, 'gross');
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = scrollHalten ? vorher : 0;
@@ -143,7 +158,9 @@ export function posteingangModul(ctx) {
   }
   function klicken(el) {
     const a = el.dataset.poA, id = el.dataset.id, v = el.dataset.v;
-    if (['mieteEinzel','mieteAuswahl','mieteEmpfehlungen'].includes(a)) {
+    if (a === 'mietCheck') { const alt = ui.mietAuswahl.get(id); if (alt) alt.aktiv = !alt.aktiv; return zeigen(true); }
+    if (a === 'mietOption') { const alt = ui.mietAuswahl.get(id); if (alt) alt.option = v; return zeigen(true); }
+    if (['mieteEinzel', 'mieteAuswahl', 'mieteEmpfehlungen'].includes(a)) {
       const alle = daten().handeln.flatMap((x) => x.mietvertraege ?? []);
       const gruppe = a === 'mieteEinzel' ? alle.filter((x) => x.entscheidungId === id) :
         (daten().handeln.find((x) => x.id === id)?.mietvertraege ?? []);
@@ -162,11 +179,17 @@ export function posteingangModul(ctx) {
       return zeigen(true);
     }
     if (a === 'tab') { einstellungen().reiter = v; ui.verhandlung = null; ctx.nachZustand(); return zeigen(); }
+    if (a === 'filter') { ui.filter = v; return zeigen(true); }
+    if (a === 'konkurrenz') { ui.konkurrenzOffen = true; return zeigen(true); }
     if (a === 'alleLesen') { for (const m of daten().meldungen) gelesen(m.id); return zeigen(true); }
     if (a === 'lesen') { gelesen(id); return zeigen(true); }
     if (a === 'sprung') { gelesen(id); const m = daten().meldungen.find((x) => x.id === id); if (m?.bezug) ctx.springe(m.bezug); return; }
     if (a === 'ort') { const p = daten().handeln.find((x) => x.id === id); if (p?.bezug) ctx.springe(p.bezug); return; }
     if (a === 'zurueck') { ui.verhandlung = null; return zeigen(); }
+    if (a === 'haus' && ui.verhandlung) {
+      if (ui.verhandlung.haeuser.has(id)) ui.verhandlung.haeuser.delete(id); else ui.verhandlung.haeuser.add(id);
+      return zeigen(true);
+    }
     if (a === 'option' && v === 'verhandeln') {
       const an = s().angebote.find((x) => x.id === id);
       if (an?.typ === 'paket') ui.verhandlung = { id, haeuser: new Set(an.vorschlagHaeuser ?? an.wunschHaeuser ?? []) };
@@ -188,32 +211,11 @@ export function posteingangModul(ctx) {
     const el = event.target.closest('[data-po-a]');
     if (el && !el.disabled) klicken(el);
   });
-  inhalt.addEventListener('change', (event) => {
-    if (!ui.aktiv) return;
-    if (event.target.matches('[data-po-miet-check]')) {
-      const id = event.target.dataset.poMietCheck;
-      const old = ui.mietAuswahl.get(id);
-      if (old) old.aktiv = event.target.checked;
-      return;
-    }
-    if (event.target.matches('[data-po-miet-option]')) {
-      const id = event.target.dataset.poMietOption;
-      const old = ui.mietAuswahl.get(id);
-      if (old) old.option = event.target.value;
-      return;
-    }
-    if (event.target.matches('[data-po-filter]')) { ui.filter = event.target.value; zeigen(); }
-    if (event.target.matches('[data-po-haus]') && ui.verhandlung) {
-      if (event.target.checked) ui.verhandlung.haeuser.add(event.target.dataset.poHaus);
-      else ui.verhandlung.haeuser.delete(event.target.dataset.poHaus);
-      zeigen(true);
-    }
-  });
   return {
     ui, oeffne: (reiter = einstellungen().reiter, ziel = null) => {
       einstellungen().reiter = reiter; ui.verhandlung = null; ui.ziel = ziel; ctx.nachZustand(); zeigen();
     },
     zu: () => { ui.aktiv = false; }, aktiv: () => ui.aktiv, neuZeichnen: () => { if (ui.aktiv) zeigen(true); },
-    badge, pruefe: () => ({ soll: daten().handeln.length, badge: Number(document.getElementById('postbadge')?.textContent ?? 0), karten: document.querySelectorAll('.postkarte').length, seite: einstellungen().reiter }),
+    badge, pruefe: () => ({ soll: daten().handeln.length, badge: Number(document.getElementById('postbadge')?.textContent ?? 0), karten: document.querySelectorAll('#pinhalt .hw-vorgang').length, seite: einstellungen().reiter }),
   };
 }

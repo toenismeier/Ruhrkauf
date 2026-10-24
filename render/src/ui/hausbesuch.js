@@ -352,8 +352,8 @@ export function hausbesuchModul(ctx) {
     // Ein Renderer für die ganze Sitzung: Nach forceContextLoss() bekäme dieselbe Canvas keinen
     // neuen Kontext mehr, ein zweiter Hausbesuch oder ein Hauswechsel scheiterte dann.
     if (!renderer) {
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.3));
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); // E47: Schärfe vor Sparen
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.shadowMap.enabled = false;
     }

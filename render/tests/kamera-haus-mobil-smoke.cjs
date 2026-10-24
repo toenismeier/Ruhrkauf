@@ -6,7 +6,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml' };
+const mime = { '.css': 'text/css; charset=utf-8', '.ttf': 'font/ttf', '.png': 'image/png', '.json': 'application/json', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml' };
 const server = http.createServer((req, res) => {
   const pathname = decodeURIComponent((req.url || '/').split('?')[0]);
   const file = path.resolve(root, '.' + (pathname === '/' ? '/spiel.html' : pathname));
@@ -39,6 +39,10 @@ const snapshot = () => {
     await page.goto('http://127.0.0.1:' + server.address().port + '/spiel.html?stadt=Berlin&seed=1',
       { waitUntil: 'load' });
     await page.waitForFunction(() => window.bereit === true && window.spiel?.sb?.haeuser?.size >= 3);
+    // Seit die Stildateien im Testserver ankommen (E47), liegt die Einführungsfrage wirklich über der Karte.
+    await page.evaluate(() => document.querySelector('[data-ein="spaeter"]')?.click());
+    // Der Test prüft die Kamerabindung, nicht die Kartenleisten: Leisten über der Karte für die Berührungen ausblenden.
+    await page.addStyleTag({ content: 'body:not(.panel-offen) :is(.oben,#cockpit,#stadt-chips,.unten,#wochenstreifen,.botwahl){visibility:hidden!important}' });
 
     const ids = await page.evaluate(() => [...window.spiel.sb.haeuser.keys()].filter(id => {
       const x = window.spiel.sb.haeuser.get(id); return x?.p && x?.gruppe;
@@ -46,6 +50,8 @@ const snapshot = () => {
     assert.equal(ids.length, 3, 'Berlin benötigt mindestens drei klickbare Hartwig-Häuser');
     assert.equal(new Set(ids).size, 3, 'Drei verschiedene Häuser');
     for (const [i, id] of ids.entries()) {
+      // E47: Das Hausblatt füllt den Bildschirm wie bei Coffee; vor dem nächsten Haus wird es geschlossen.
+      await page.evaluate(() => window.spiel.schliessePanel());
       // Nur die Ausgangsposition herstellen. Die eigentliche Auswahl erfolgt per Touch-Event.
       const p = await page.evaluate(id => {
         const x = window.spiel.sb.haeuser.get(id);

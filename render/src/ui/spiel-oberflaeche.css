@@ -1,65 +1,6 @@
-/* Q30: Spieloberfläche über der Karte (Kopfleiste, Cockpit, untere Leiste, Häuserleiste, Menü, Meldungen) im dunklen
-   Grundlook. Flächen sind dunkel und deckend (kein Glas), Schatten höchstens 8 px Unschärfe. Tokens: komponenten.css. */
-:root {
-  --ob-flaeche: rgba(29, 31, 34, 0.94); --ob-rand: rgba(255, 255, 255, 0.12); --ob-text: #f1f1ef; --ob-leise: #a4a9ae;
-  --ob-schatten: 0 2px 6px rgba(0, 0, 0, 0.28);
-}
-/* Kopfleiste */
-.marke, .datum, #deutschland-direkt, .sz-zielchip, #hausbeobachtung, .kz, .chipstadt, .knopf, #stadt-chips button {
-  background: var(--ob-flaeche) !important; color: var(--ob-text) !important; border: 1px solid var(--ob-rand) !important; box-shadow: var(--ob-schatten) !important; }
-.marke { border-radius: 14px; padding: 6px 10px; min-height: 48px; }
-.marke b { font-size: 15px; letter-spacing: 0.01em; }
-.logo { border-radius: 8px; }
-.datum { border-radius: 14px; min-height: 48px; padding: 6px 12px; }
-.datum b { font-size: 15px; } #stufe { color: var(--ob-leise); font-size: 12px; } #phase { font-size: 12px; color: #ef6f62; }
-#deutschland-direkt { border-radius: 14px; min-width: 48px; height: 48px; font-size: 13px; letter-spacing: 0.04em; }
-.sz-zielchip { min-height: 48px; min-width: 52px; border-radius: 14px; font-size: 12px; }
-.sz-zielchip .sz-mini { background: rgba(255,255,255,0.14); } .sz-zielchip .sz-mini i { background: #6dbf73; }
-/* Cockpit: Kasse zuerst, als Zahl, nicht als Schmuck */
-#cockpit { gap: 4px !important; }
-#cockpit .kz { border-radius: 10px !important; padding: 5px 9px !important; }
-#cockpit .kz span { color: var(--ob-leise) !important; font-size: 12px !important; line-height: 15px !important; }
-#cockpit .kz b { color: var(--ob-text); font-size: clamp(13px, 3.6vw, 16px) !important; font-weight: 600; }
-#cockpit .kz:first-child b { font-size: clamp(14px, 4vw, 17px) !important; font-weight: 700; }
-#cockpit .kz.rot b { color: #ef6f62 !important; } #cockpit .kz.gruen b { color: #6dbf73 !important; }
-#cockpit .kz.mitwahl { position: relative; } #cockpit .kz em { font-style: normal; color: var(--hk-akzent-text); }
-#cockpit .kz .kzwahl { position: absolute; inset: 0; width: 100%; height: 100% !important; opacity: 0; font-size: 16px !important; }
-#cockpit .kz .kzwahl option { color: #111; }
-#hausbeobachtung { border-radius: 10px !important; min-height: 44px; padding: 0 12px !important; font-size: 13px !important; margin: 2px 0 !important; pointer-events: auto; }
-/* Untere Leiste */
-.chipstadt { border-radius: 14px !important; min-height: 50px !important; }
-.chipstadt #stadtname { font-size: 15px !important; } .chipstadt #stadtcluster { color: var(--ob-leise) !important; font-size: 12px !important; }
-.chipstadt i { color: var(--ob-leise) !important; }
-.knopf { border-radius: 14px !important; height: 50px !important; }
-#weiter { background: var(--hk-akzent) !important; border: 1px solid var(--hk-akzent-rand) !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell), var(--ob-schatten) !important; color: #fff !important; font-size: 15px; padding: 0 18px; }
-.knopf.rund { width: 50px !important; } .knopf.rund.an { background: var(--hk-akzent) !important; }
-.badge { box-shadow: none !important; border: 2px solid #1d1f22; font-size: 12px !important; min-width: 22px; height: 22px; background: var(--hk-akzent) !important; }
-.badge.dringend { background: var(--hk-gefahr) !important; } /* Q32: Zähler in Petrol, Rot nur für Ablaufendes */
-#stadt-chips button { border-radius: 10px !important; min-height: 44px !important; font-size: 12px !important; color: var(--ob-text) !important; }
-#wochenstreifen { background: var(--ob-flaeche); border: 1px solid var(--ob-rand); box-shadow: var(--ob-schatten); font-size: 14px; }
-#meldung { background: #1d1f22; border: 1px solid var(--ob-rand); box-shadow: var(--ob-schatten); font-size: 14px; top: calc(70px + env(safe-area-inset-top)); }
-#meldung.rot { background: #6b1f19; border-color: #ef6f62; }
-
-/* Menü: Rangfolge statt Kachelwand. Vier große Einstiege, darunter Gruppen als Zeilen. */
-#menue { background: rgba(10, 12, 14, 0.5); }
-.menuekarte { background-color: #24272b !important; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 7px, rgba(255,255,255,0.022) 7px 8px) !important;
-  color: #f1f1ef; border: 1px solid #43484e; box-shadow: 0 -2px 8px rgba(0,0,0,0.35) !important; padding: 12px 12px 4px !important; }
-.menuetitel { color: #f1f1ef; font-size: 16px !important; margin: 2px 4px 10px !important; }
-.menue-gross { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.mgross { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 8px; align-items: center; min-height: 64px; padding: 8px 10px;
-  background: #2f3338; border: 1px solid #43484e; border-radius: 12px; color: #f1f1ef; text-align: left; }
-.mgross .msym { grid-row: 1 / span 2; width: 44px; height: 44px; } .mgross .msym svg { width: 44px; height: 44px; display: block; }
-.mgross b { font-size: 15px; line-height: 20px; } .mgross small { font-size: 12px; line-height: 16px; color: #9da2a7; }
-.mgross .badge, .mgross #postmenubadge { top: 2px; left: 38px; right: auto; }
-.menue-gruppe { margin: 16px 4px 6px; font-size: 12px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: #9da2a7; font-weight: 700; }
-.menue-liste { display: grid; grid-template-columns: 1fr 1fr; gap: 0 8px; border-top: 1px solid #43484e; }
-.mzeile { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding: 0 6px; background: transparent; border: 0; border-bottom: 1px solid #43484e; color: #f1f1ef; text-align: left; }
-.mzeile b { font-size: 14px; font-weight: 600; } .mzeile .badge, .mzeile #ekbadge, .mzeile #vsbadge { position: static !important; margin-left: 6px; }
-.mzeile:active, .mgross:active { background: #1a1c1f; }
-.menuekarte .postfilter { color: #f1f1ef; font-size: 14px !important; }
-.menuekarte select { background: #1a1c1f !important; color: #f1f1ef !important; border: 1px solid #43484e !important; min-height: 44px; font-size: 16px !important; }
-.menuekarte .ein-optionen { color: #f1f1ef; font-size: 14px !important; min-height: 44px; }
-.menuekarte .ein-optionen input { width: 22px; height: 22px; accent-color: var(--hk-akzent); }
+/* Q30: Restbestand für Panels anderer Bereiche (Posteingang, Deutschland, Organisation, Zentrale, Personaleinsatz,
+   Wochenbericht, Reise). Kartenoberfläche, Menü, Start, Einführung, Erfolge, Einstellungen, Chronik und Spielende
+   stehen seit G6 (E47) in hartwig.css. */
 
 /* ───────────── Posteingang als Hauspost (Q30) ───────────── */
 #panel .posttabs { margin: 0 0 var(--hk-3); }
@@ -108,29 +49,6 @@
 .post-miete-zeile { grid-template-columns: 1fr !important; }
 .post-miete-zeile > div:last-child { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
 .post-miete-zeile > div:last-child label { flex-direction: column; align-items: stretch; gap: 4px; font-size: 12px; color: var(--le); }
-/* Erfolgsmeldung: nie über Panelkopf oder Inhalt; bei offenem Blatt oben über dem Kartenstreifen */
-#erfolge-toast { box-shadow: var(--ob-schatten) !important; background: #1d1f22 !important; border: 1px solid var(--ob-rand); }
-#erfolge-toast small { font-size: 12px !important; }
-body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(safe-area-inset-top)); } /* über Kopfleiste, nie über dem Blatt (auch bei 87 dvh) */
-
-/* ───────────── Einstellungen (Q30) ───────────── */
-.einst-gruppe .einst-zeile:first-child { border-top: 0; }
-#panel .einst-zeile { font-size: 14px; border-color: var(--l); color: var(--tx); }
-#panel .einst-zeile select { background: var(--t); color: var(--tx); border-color: var(--l); font-size: 16px; max-width: 58%; }
-#panel .einst-zeile input[type="checkbox"] { accent-color: var(--hk-akzent); }
-#panel .einst-info { color: var(--le); font-size: 12px; border-top: 1px solid var(--l); }
-#panel .einst-info:first-child { border-top: 0; color: var(--tx); font-size: 14px; }
-
-/* ───────────── Chronik auf Papier (Q30) ───────────── */
-#panel .chronik { display: block; }
-#panel .chronik-linie { border-left: 3px solid #8a3a30; margin-left: 58px; }
-#panel .chronik-station { grid-template-columns: 54px minmax(0,1fr); margin-left: -58px; }
-#panel .chronik-jahr { font-size: 14px; color: #8a3a30; font-family: Georgia, "Times New Roman", serif; }
-#panel .chronik-inhalt { background: var(--f); border-color: var(--l); border-radius: 4px; }
-#panel .chronik-inhalt h3 { font-size: 16px; font-family: Georgia, "Times New Roman", serif; color: var(--tx); }
-#panel .chronik-inhalt p, #panel .chronik-spiel p { font-size: 14px; color: var(--tx); }
-#panel .chronik-inhalt small, #panel .chronik-spiel small, #panel .chronik-spiel span { font-size: 12px; color: var(--le); }
-#panel .chronik-spiel { background: var(--f); border-color: var(--l); border-left: 4px solid #8a3a30; border-radius: 4px; margin-bottom: 8px; }
 
 /* ───────────── Deutschland und Häuser (Q30) ───────────── */
 #panel .pp-filterbox { margin: 8px 0; background: var(--f); border: 1px solid var(--l); border-radius: 10px; padding: 0 10px; }
@@ -203,7 +121,6 @@ body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(s
 #panel .ort { background: var(--t); color: var(--tx); border-color: var(--l); min-height: 44px; font-size: 16px; }
 #panel .zeile.grau { color: var(--le); }
 #panel .dot.k-leer { background: #5d5650; }
-.menuekarte .ein-optionen label { min-height: 44px; }
 #panel .was em { font-size: 12px; }
 
 /* ───────────── Personaleinsatz (Q30) ───────────── */
@@ -287,63 +204,3 @@ body.panel-offen #erfolge-toast { bottom: auto !important; top: calc(6px + env(s
 .reise-flug > .reise-zug { filter: none !important; }
 #wb-vorfall { z-index: 20; } /* Titelbild der Zeitung lag über dem Vorfall-Blatt */
 
-/* ───────────── Startbildschirm und Szenarien (Q30) ───────────── */
-#start { background-color: #1a1c1f !important; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0) 0 7px, rgba(255,255,255,0.022) 7px 8px) !important; }
-.startkarte.hk-flaeche { background-color: var(--g) !important; border: 1px solid var(--l); box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; }
-.startkopf small { color: var(--le) !important; font-size: 12px !important; }
-.startintro { color: var(--tx) !important; font-size: 14px !important; }
-.startkarte .vtitel { color: var(--tx) !important; font-size: 12px !important; letter-spacing: 0.08em; font-weight: 700; }
-.sz-karte { background: var(--f) !important; border-color: var(--l) !important; color: var(--tx) !important; }
-.sz-karte.ausgewaehlt, .sz-karte:focus-visible { outline: 2px solid var(--hk-akzent) !important; }
-.sz-karte b { font-size: 14px !important; } .sz-karte small, .sz-best { font-size: 12px !important; color: var(--le) !important; }
-.sz-level { font-size: 12px !important; color: #e7b04b !important; }
-.stufe-karte { background: var(--f) !important; border-color: var(--l) !important; color: var(--tx) !important; }
-.stufe-karte small { font-size: 12px !important; color: var(--le) !important; }
-.stufe-karte.an { border: 2px solid var(--hk-akzent) !important; background: var(--t) !important; }
-.sterne-stufe { color: var(--hk-akzent-hell) !important; font-size: 12px !important; }
-.startkarte .ort, .startkarte select, .startseed input { background: var(--t) !important; color: var(--tx) !important; border-color: var(--l) !important; font-size: 16px !important; min-height: 44px; }
-.startseed, .startmonat { color: var(--le) !important; font-size: 12px !important; }
-.startkarte .breit { background: transparent !important; color: var(--tx) !important; border-color: var(--l) !important; }
-.startkarte .breit.gruen { background: var(--hk-akzent) !important; color: #fff !important; border-color: var(--hk-akzent-rand) !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
-#fortsetzen { border-color: var(--hk-gut) !important; color: var(--hk-gut) !important; }
-.startkarte .app-platz { background: var(--f); border-color: var(--l); color: var(--tx); }
-.startkarte .app-platzkopf span, .startkarte .app-daten small { font-size: 12px !important; color: var(--le); }
-.startkarte .app-daten strong { font-size: 14px !important; }
-#speicherhinweis { font-size: 13px !important; color: #ef6f62 !important; }
-.startkarte .app-aktionen button { background: transparent !important; color: var(--tx) !important; border: 1px solid var(--l); font-size: 13px !important; }
-.startkarte .app-aktionen button:first-child { border-color: var(--hk-gut); color: var(--hk-gut) !important; }
-.startkarte .app-namenswahl { color: var(--le); font-size: 12px !important; }
-.startkarte .app-namenswahl input { background: var(--t); color: var(--tx); border-color: var(--l); }
-
-/* ───────────── Einführung (Q30): Vorstandsassistentin im dunklen Blatt ───────────── */
-.ein-sheet, .ein-frage { background: #24272b !important; color: #f1f1ef !important; border: 1px solid #43484e; box-shadow: 0 -2px 8px rgba(0,0,0,0.4) !important; }
-.ein-kopf small, .ein-fuss span { font-size: 12px !important; color: #9da2a7 !important; }
-.ein-kopf b { font-size: 14px !important; }
-.ein-kopf button { background: transparent !important; color: #f1f1ef !important; min-width: 44px !important; height: 44px !important; }
-.ein-portraet { background: #1a1c1f !important; border-radius: 10px !important; }
-.ein-fuss button, .ein-antworten button { background: var(--hk-akzent) !important; color: #fff !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); font-size: 14px !important; }
-.ein-fuss button.ein-ueberspringen, .ein-antworten button:not(:first-child) { background: transparent !important; color: #f1f1ef !important; border: 1px solid #43484e; box-shadow: none; font-size: 13px !important; }
-.ein-ring { box-shadow: 0 0 0 1px #fff9 !important; }
-
-/* ───────────── Spielende (Q30): ohne Verläufe und schwere Schatten, Schrift ab 12 px ───────────── */
-#spielende-overlay { background-color: #1a1c1f !important; }
-#spielende-overlay .se-bild, #spielende-overlay .se-zeitung { box-shadow: 0 2px 8px rgba(0,0,0,0.45) !important; }
-#spielende-overlay .se-zeitung small, #spielende-overlay .se-ergebnis small, #spielende-overlay .se-kpi small { font-size: 12px !important; }
-#spielende-overlay .se-ergebnis { background: #24272b !important; border-color: #43484e !important; }
-#spielende-overlay .se-karte, #spielende-overlay .se-kpi { background: #24272b !important; border-color: #43484e !important; }
-#spielende-overlay .se-zeile { border-color: #43484e !important; font-size: 14px !important; }
-#spielende-overlay button.se-knopf:not(.se-sek) { background: var(--hk-akzent) !important; color: #fff !important; box-shadow: inset 0 0 0 1px var(--hk-akzent-hell); }
-#spielende-overlay button.se-knopf.se-sek { background: transparent !important; border-color: #43484e !important; }
-#spielende-overlay .se-legende { font-size: 12px !important; }
-#spielende-overlay small { font-size: 12px !important; }
-/* Q32: Kennzahlen höchstens ein Sechstel der Bildhöhe (Wurf 3, Bilder 15–17: zwei Kachelzeilen plus Beobachtung
-   verdeckten ein Drittel der Stadt). Eingeklappt eine Zeile, der Knopf rechts klappt die zweite Zeile auf. */
-#cockpit { grid-template-columns: repeat(3, minmax(0, 1fr)) 44px !important; }
-#cockpit .kz-mehr { min-width: 44px; min-height: 44px; border-radius: 10px; background: var(--ob-flaeche); color: var(--ob-text); border: 1px solid var(--ob-rand); box-shadow: var(--ob-schatten); font-size: 16px; padding: 0; }
-#cockpit:not(.offen) .kz:nth-child(n+5) { display: none; }
-#cockpit .kz:nth-child(n+5) { grid-column: auto; }
-/* Chipleiste: läuft weich aus statt Chips hart abzuschneiden */
-#stadt-chips { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 28px), transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 28px), transparent 100%); padding: 0 24px 0 14px; scroll-padding-inline: 14px; }
-#cockpit .kz { padding: 5px 7px !important; min-width: 0; }
-#cockpit .kz b, #cockpit .kz:first-child b { white-space: nowrap !important; font-size: clamp(12px, 3.6vw, 14px) !important; letter-spacing: -0.01em; overflow-wrap: normal !important; }
-#cockpit .kz b { display: block; overflow: hidden; }
