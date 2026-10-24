@@ -1,113 +1,109 @@
-// Q30 Gemeinsame Bausteine der Spieloberfläche. Vertrag: render/GESTALTUNG-UI.md, Aussehen: komponenten.css.
+// Bausteine der Spieloberfläche (E47). Aussehen ausschließlich in hartwig.css, Maße aus Coffee 2 vermessen (render/ui-referenz).
 // Alle Funktionen liefern HTML-Text. Texte werden maskiert, Zahlen kommen fertig formatiert oder als Rohwert (data-w),
 // damit die Summenprüfung (stilpruefung.js) Summen gegen die angezeigten Zeilen nachrechnen kann.
 import { esc } from './format.js';
 
 /** Marker, der den dunklen Look und das Kopfsymbol des Panels einschaltet. bereich: haus | zentrale | betrieb | papier. */
-export const bereich = (name, symbol = name, { voll = false } = {}) => `<i class="hk-bereich" data-bereich="${esc(name)}" data-symbol="${esc(symbol)}"${voll ? ' data-hoehe="voll"' : ''} aria-hidden="true"></i>`;
+export const bereich = (name, symbol = name, { voll = false } = {}) => `<i class="hk-bereich hw-marker" data-bereich="${esc(name)}" data-symbol="${esc(symbol)}"${voll ? ' data-hoehe="voll"' : ''} aria-hidden="true"></i>`;
 
-/** Karussell gleichartiger Karten mit Seitenpunkten; die Nachbarkarte schaut an der Kante heraus.
- *  karten: fertiges HTML je Karte. Die Punkte springen per Wischen mit (scroll-snap); `aktiv` setzt die Startkarte. */
+/** Karussell gleichartiger Karten mit Seitenpunkten (Coffee 05, 26): Karte 300 px, Nachbar schaut heraus.
+ *  karten: fertiges HTML je Karte (Inhalt der Karte, Rahmen setzt das Karussell). */
 export function karussell(karten, { aktiv = 0, label = 'Karten' } = {}) {
   if (!karten.length) return leer('Keine Einträge vorhanden.');
-  return `<div class="hk-karussell" role="group" aria-label="${esc(label)}" data-aktiv="${aktiv}" onscroll="const i=Math.round(this.scrollLeft/(this.firstElementChild.offsetWidth+12));this.nextElementSibling.querySelectorAll('i').forEach((p,k)=>p.classList.toggle('an',k===i))">${karten.map((k) => `<div class="hk-karussell-karte">${k}</div>`).join('')}</div>`
-    + `<div class="hk-punkte" aria-hidden="true">${karten.map((_, i) => `<i class="${i === aktiv ? 'an' : ''}"></i>`).join('')}</div>`;
+  return `<div class="hw-karussell hw-randlos" role="group" aria-label="${esc(label)}" data-aktiv="${aktiv}" onscroll="const i=Math.round(this.scrollLeft/(this.firstElementChild.offsetWidth+21));this.nextElementSibling.querySelectorAll('i').forEach((p,k)=>p.classList.toggle('an',k===i))">${karten.map((k) => `<article class="hw-karte hw-kontur">${k}</article>`).join('')}</div>`
+    + `<div class="hw-punkte" aria-hidden="true">${karten.map((_, i) => `<i class="${i === aktiv ? 'an' : ''}"></i>`).join('')}</div>`;
 }
 
-/** Innenrand für Inhalt unterhalb randloser Elemente (Kopfbild, Sprecher). */
-export const rumpf = (html) => `<div class="hk-rumpf">${html}</div>`;
+/** Innenrand für Inhalt (20 px wie Coffee). */
+export const rumpf = (html) => `<div class="hw-rumpf">${html}</div>`;
+/** Dunkles Band über die volle Breite (Coffee 22: GuV unter den Balken). */
+export const band = (html) => `<section class="hw-band">${html}</section>`;
 
-/** Sprecherzeile: eine Person sagt den Befund. ton: '' | 'engpass' | 'alarm'. person: fertiges SVG (Porträt). */
+/** Sprecherzeile: eine Person sagt den Befund der Woche (nie eine Begrüßung). Die Hülle hebt sie unter den Kopf.
+ *  ton: '' | 'engpass' | 'alarm'. person: fertiges SVG (Porträt). */
 export function sprecher({ text, unter = '', person = '', ton = '' }) {
-  return `<div class="hk-sprecher${ton ? ' hk-' + ton : ''}" role="note"><p>${text}${unter ? `<small>${esc(unter)}</small>` : ''}</p>${person ? `<span class="hk-person" aria-hidden="true">${person}</span>` : ''}</div>`;
+  return `<div class="hw-sprecher"${ton ? ` data-ton="${esc(ton)}"` : ''} role="note"><div class="hw-sprecher-text"><span>${text}${unter ? `<small class="hw-sprecher-unter">${esc(unter)}</small>` : ''}</span></div>${person ? `<span class="hw-sprecher-figur" aria-hidden="true">${person}</span>` : ''}<div class="hw-griff" aria-hidden="true"></div></div>`;
 }
 
 /** Abschnittskopf in Versalien, rechts optional eine leise Ergänzung. */
-export const abschnitt = (titel, rechts = '') => `<h3 class="hk-abschnitt">${esc(titel)}${rechts ? `<small>${esc(rechts)}</small>` : ''}</h3>`;
+export const abschnitt = (titel, rechts = '') => `<h3 class="hw-abschnitt">${esc(titel)}${rechts ? `<small>${esc(rechts)}</small>` : ''}</h3>`;
 
-/** Abweichung als Text mit Ton: delta(+1234, '+1.234 €', 0.05) → „+1.234 € (+5 %)“ grün. */
+/** Abweichung als Text mit Ton: abweichung(+1234, '+1.234 €', 0.05) → „+1.234 € (+5 %)“. Ton nur bei klarer Wirkung. */
 export function abweichung(roh, text, quote = null, umgekehrt = false) {
   if (roh == null) return '<span>keine Vergleichswoche</span>';
   const gut = umgekehrt ? roh < 0 : roh > 0, schlecht = umgekehrt ? roh > 0 : roh < 0;
   const q = quote == null || !Number.isFinite(quote) ? '' : ` (${quote > 0 ? '+' : quote < 0 ? '−' : '±'}${Math.abs(quote * 100).toLocaleString('de-DE', { maximumFractionDigits: 1 })} %)`;
-  return `<span class="${gut ? 'gut' : schlecht ? 'schlecht' : ''}">${esc(text)}${q}</span>`;
+  return `<span class="${gut ? 'hw-gut' : schlecht ? 'hw-schlecht' : ''}">${esc(text)}${q}</span>`;
 }
 
-/** Großkennzahlen. werte: [{ label, wert, ton?: 'gut'|'schlecht', unter?: HTML, p?: data-p }] */
+/** Großkennzahlen (Coffee 20, 22). werte: [{ label, wert, ton?: 'gut'|'schlecht', unter?: HTML, p?: data-p }] */
 export function gross(werte) {
-  return `<div class="hk-gross" style="--n:${werte.length}">${werte.map((w) => `<div><span>${esc(w.label)}</span><b class="${w.ton ?? ''}"${w.p ? ` data-p="${esc(w.p)}"` : ''}>${esc(w.wert)}</b>${w.unter ? `<i>${w.unter}</i>` : ''}</div>`).join('')}</div>`;
+  return `<div class="hw-gross" style="--n:${werte.length}">${werte.map((w) => `<div><span class="hw-marke">${esc(w.label)}</span><b class="hw-zahl${w.ton ? ' hw-' + w.ton : ''}"${w.p ? ` data-p="${esc(w.p)}"` : ''}>${esc(w.wert)}</b>${w.unter ? `<span class="hw-abw">${w.unter}</span>` : ''}</div>`).join('')}</div>`;
 }
 
-/** Gepaarte Balken ohne Achsen. reihen: [{ label, a, b }] (Rohwerte), legende: [Name a, Name b]. b darf fehlen. */
+/** Gepaarte Balken ohne Achsen mit Wochen darunter (Coffee 22). reihen: [{ label, a, b }] (Rohwerte), legende: [Name a, Name b]. */
 export function balken(reihen, legende = []) {
   if (reihen.length < 2) return leer('Ein Verlauf ist ab der zweiten Woche verfügbar.');
   const max = Math.max(1, ...reihen.flatMap((r) => [Math.abs(r.a ?? 0), Math.abs(r.b ?? 0)]));
   const h = (v) => `${Math.max(2, Math.round((Math.abs(v) / max) * 100))}%`;
-  const saeule = (v, k) => v == null ? '' : `<span class="${k}${v < 0 ? ' neg' : ''}${v === 0 ? ' null' : ''}" style="height:${h(v)}" data-w="${Math.round(v)}"></span>`;
-  return `<div class="hk-balken" style="--n:${reihen.length}" role="img" aria-label="${esc(legende.join(' und '))}">${reihen.map((r) => `<div>${saeule(r.a, 'a')}${saeule(r.b, 'b')}</div>`).join('')}</div>`
-    + `<div class="hk-balkenfuss" style="--n:${reihen.length}">${reihen.map((r) => `<span>${esc(r.label)}</span>`).join('')}</div>`
-    + (legende.length ? `<div class="hk-legende">${legende.map((l, i) => `<span><i class="${i ? 'b' : ''}"></i>${esc(l)}</span>`).join('')}</div>` : '');
+  const saeule = (v, k) => v == null ? '' : `<i class="${k}${v < 0 ? ' neg' : ''}${v === 0 ? ' null' : ''}" style="height:${h(v)}" data-w="${Math.round(v)}"></i>`;
+  return `<div class="hw-balkenfeld"><div class="hw-balken" style="--hoehe:100px" role="img" aria-label="${esc(legende.join(' und '))}">${reihen.map((r) => `<div>${saeule(r.a, 'a')}${saeule(r.b, 'b')}</div>`).join('')}</div>`
+    + `<div class="hw-balkenfuss">${reihen.map((r) => `<span>${esc(r.label)}</span>`).join('')}</div>`
+    + (legende.length ? `<div class="hw-legende">${legende.map((l, i) => `<span><i class="${i ? 'b' : ''}"></i>${esc(l)}</span>`).join('')}</div>` : '') + '</div>';
 }
 
-/** Zwei kleine Balkenreihen mit eigener Skala nebeneinander. reihen: [{ titel, serie: 'a'|'b', punkte: [{ label, wert }] }].
- *  Negative Werte hängen unter einer Nulllinie (rot). Unter zwei Punkten: leerer Zustand. */
+/** Zwei Balkenreihen mit eigener Skala untereinander. reihen: [{ titel, serie: 'a'|'b', punkte: [{ label, wert }] }]. */
 export function balkenPaar(reihen) {
-  const eine = (r) => {
-    const w = r.punkte.map((q) => q.wert ?? 0);
-    if (w.length < 2) return `<div><h4>${esc(r.titel)}</h4>${leer('Ab der zweiten Woche.')}</div>`;
-    const pos = Math.max(0, ...w), neg = Math.max(0, ...w.map((v) => -v)), ges = pos + neg || 1;
-    const oben = pos / ges * 100, unten = neg / ges * 100;
-    const saeule = (v) => `<div style="display:flex;flex-direction:column;height:100%"><div style="height:${oben}%;display:flex;align-items:flex-end;justify-content:center">${v > 0 ? `<span class="${r.serie}" style="height:${Math.max(3, v / ges * 100 / (oben / 100) )}%" data-w="${Math.round(v)}"></span>` : ''}</div>`
-      + `<div style="height:${unten}%;display:flex;align-items:flex-start;justify-content:center">${v < 0 ? `<span class="${r.serie} neg" style="height:${Math.max(3, -v / ges * 100 / (unten / 100))}%" data-w="${Math.round(v)}"></span>` : ''}</div>${v === 0 ? '<span class="null" style="height:2px;align-self:center" data-w="0"></span>' : ''}</div>`;
-    const von = r.punkte[0].label, bis = r.punkte[r.punkte.length - 1].label;
-    return `<div><h4>${esc(r.titel)}</h4><div class="hk-balken mitnull" style="--n:${w.length}" role="img" aria-label="${esc(r.titel)} ${esc(von)} bis ${esc(bis)}">${neg ? `<i class="null-linie" style="top:${oben}%"></i>` : ''}${w.map(saeule).join('')}</div>`
-      + `<div class="hk-balkenfuss" style="--n:${w.length}">${r.punkte.map((q) => `<span>${esc(q.label)}</span>`).join('')}</div></div>`;
-  };
-  return `<div class="hk-balkenpaar">${reihen.map(eine).join('')}</div>`;
+  return reihen.map((r) => abschnitt(r.titel) + (r.punkte.length < 2 ? leer('Ab der zweiten Woche.')
+    : balken(r.punkte.map((q) => r.serie === 'b' ? { label: q.label, a: null, b: q.wert } : { label: q.label, a: q.wert, b: null })))).join('');
 }
 
-/** Tabelle (GuV). spalten: Kopf rechts (z. B. ['KW 8', 'KW 9']); zeilen: [{ name, werte: [Text], roh?: [Zahl], ton?: [..] }];
- *  summe: { name, werte, roh }. Mit `pruefen: true` muss summe.roh[i] = Σ zeilen.roh[i] gelten (Summenprüfung). */
+/** Tabelle (GuV, Coffee 17–22). spalten: Kopf rechts; zeilen: [{ name, werte: [Text], roh?: [Zahl], ton?: [..] }];
+ *  summe: { name, werte, roh } mit Strich darüber. Mit `pruefen: true` muss summe.roh[i] = Σ zeilen.roh[i] gelten. */
 export function tabelle({ titel = '', spalten = [], zeilen, summe = null, pruefen = false }) {
   const zelle = (t, roh, ton) => `<td class="${ton ?? ''}"${roh != null ? ` data-w="${roh}"` : ''}>${esc(t)}</td>`;
   const zeile = (z, k = '') => `<tr${k ? ` class="${k}"` : ''}><td>${esc(z.name)}</td>${z.werte.map((w, i) => zelle(w, z.roh?.[i], z.ton?.[i])).join('')}</tr>`;
-  return `${titel ? abschnitt(titel) : ''}<table class="hk-tabelle"${pruefen ? ' data-summen="1"' : ''}>${spalten.length ? `<thead><tr><th></th>${spalten.map((s) => `<th>${esc(s)}</th>`).join('')}</tr></thead>` : ''}<tbody>${zeilen.map((z) => zeile(z)).join('')}${summe ? zeile(summe, 'summe') : ''}</tbody></table>`;
+  return `<table class="hw-tabelle"${pruefen ? ' data-summen="1"' : ''}>${(titel || spalten.length) ? `<thead><tr><th>${esc(titel)}</th>${spalten.map((x) => `<th>${esc(x)}</th>`).join('')}</tr></thead>` : ''}<tbody>${zeilen.map((z) => zeile(z)).join('')}${summe ? zeile(summe, 'summe') : ''}</tbody></table>`;
 }
 
 /** Listenzeile. attr: zusätzliche Attribute (z. B. data-a), tippbar: als Knopf. */
 export function zeile({ was, unter = '', wert = '', wertUnter = '', ton = '', attr = '', tippbar = false, roh = null }) {
   const tag = tippbar ? 'button' : 'div';
-  return `<${tag} class="hk-zeile${tippbar ? ' hk-tippbar' : ''}"${tippbar ? ' type="button"' : ''} ${attr}><span class="hk-was">${was}${unter ? `<small>${unter}</small>` : ''}</span>${wert !== '' ? `<span class="hk-wert ${ton}"${roh != null ? ` data-w="${roh}"` : ''}>${wert}${wertUnter ? `<small>${wertUnter}</small>` : ''}</span>` : ''}${tippbar ? '<span class="hk-pfeil" aria-hidden="true">›</span>' : ''}</${tag}>`;
+  return `<${tag} class="hw-zeile"${tippbar ? ' type="button"' : ''} ${attr}><span class="hw-was">${was}${unter ? `<small>${unter}</small>` : ''}</span>${wert !== '' ? `<span class="hw-wert ${ton}"${roh != null ? ` data-w="${roh}"` : ''}>${wert}${wertUnter ? `<small>${wertUnter}</small>` : ''}</span>` : ''}${tippbar ? '<span class="hw-pfeil" aria-hidden="true">›</span>' : ''}</${tag}>`;
 }
-export const liste = (zeilen) => `<div class="hk-liste">${zeilen.join('')}</div>`;
+export const liste = (zeilen) => `<div class="hw-liste">${zeilen.join('')}</div>`;
 
-/** Knopf. art: '' (primär, höchstens einer je Abschnitt) | 'zweit' | 'text'. */
-export const knopf = (text, attr = '', art = '', aus = false) => `<button type="button" class="hk-knopf ${art}" ${attr}${aus ? ' disabled' : ''}>${esc(text)}</button>`;
+/** Knopf. art: '' (primär, höchstens einer je Abschnitt) | 'zweit' | 'text' | 'gefahr'; mit ' breit' volle Breite. */
+export const knopf = (text, attr = '', art = '', aus = false) => `<button type="button" class="hw-knopf ${art}" ${attr}${aus ? ' disabled' : ''}>${esc(text)}</button>`;
+export const knoepfe = (...k) => `<div class="hw-knoepfe">${k.join('')}</div>`;
 
-/** Stepper [−] Wert [+]. attrMinus/attrPlus: Attribute der Knöpfe. */
-export const stepper = ({ wert, unter = '', attrMinus = '', attrPlus = '', minusAus = false, plusAus = false, label = '' }) =>
-  `<div class="hk-stepper"${label ? ` role="group" aria-label="${esc(label)}"` : ''}><button type="button" aria-label="weniger" ${attrMinus}${minusAus ? ' disabled' : ''}>−</button><output>${esc(wert)}${unter ? `<small>${esc(unter)}</small>` : ''}</output><button type="button" aria-label="mehr" ${attrPlus}${plusAus ? ' disabled' : ''}>+</button></div>`;
+/** Stepper [−] Wert [+]. gross: frei auf dem Grund (44 px), sonst in Karten (32 px). */
+export const stepper = ({ wert, unter = '', attrMinus = '', attrPlus = '', minusAus = false, plusAus = false, label = '', gross = true }) =>
+  `<div class="hw-stepper hw-kontur${gross ? ' gross' : ''}"${label ? ` role="group" aria-label="${esc(label)}"` : ''}><button type="button" class="hw-kontur" aria-label="weniger" ${attrMinus}${minusAus ? ' disabled' : ''}></button><output>${esc(wert)}${unter ? `<small>${esc(unter)}</small>` : ''}</output><button type="button" class="hw-kontur plus" aria-label="mehr" ${attrPlus}${plusAus ? ' disabled' : ''}></button></div>`;
 
-/** Schalter mit Beschriftung. */
+/** Beschriftetes Bedienfeld (Versalien darüber), z. B. feld('Jahresgehalt', stepper({...})). */
+export const feld = (name, html) => `<div class="hw-feld"><span class="hw-marke hw-feldname">${esc(name)}</span>${html}</div>`;
+
+/** Schalterzeile (Coffee 28 Delegation): Schalter links, Beschriftung rechts. */
 export const schalter = ({ text, unter = '', an, attr = '' }) =>
-  `<button type="button" class="hk-schalter" aria-pressed="${an ? 'true' : 'false'}" ${attr}><span class="hk-knebel" aria-hidden="true"></span><span>${esc(text)}${unter ? `<small>${esc(unter)}</small>` : ''}</span></button>`;
+  `<button type="button" class="hw-schalterzeile" aria-pressed="${an ? 'true' : 'false'}" ${attr}><span class="hw-schalter hw-kontur" role="presentation" aria-checked="${an ? 'true' : 'false'}"></span><span>${esc(text)}${unter ? `<small>${esc(unter)}</small>` : ''}</span></button>`;
 
-/** Segmentleiste. optionen: [[wert, text]], attr(wert) liefert Attribute. */
-export const seg = (optionen, aktiv, attr) => `<div class="hk-seg" role="group">${optionen.map(([w, t]) => `<button type="button" aria-pressed="${w === aktiv}" ${attr(w)}>${esc(t)}</button>`).join('')}</div>`;
+/** Segmentleiste (Coffee 26). optionen: [[wert, text]], attr(wert) liefert Attribute. */
+export const seg = (optionen, aktiv, attr) => `<div class="hw-segment" role="group">${optionen.map(([w, t]) => `<button type="button" aria-pressed="${w === aktiv}" ${attr(w)}>${esc(t)}</button>`).join('')}</div>`;
 
 /** Leerer Zustand mit Grund und optional nächster Aktion. */
-export const leer = (grund, titel = '', aktion = '') => `<div class="hk-leer">${titel ? `<b>${esc(titel)}</b>` : ''}${esc(grund)}${aktion}</div>`;
+export const leer = (grund, titel = '', aktion = '') => `<div class="hw-leer">${titel ? `<b>${esc(titel)}</b>` : ''}${esc(grund)}${aktion}</div>`;
 
 /** Hinweis im Fluss. ton: '' | 'achtung' | 'fehler' | 'gut'. */
-export const hinweis = (html, ton = '') => `<div class="hk-hinweis ${ton}" role="${ton === 'fehler' ? 'alert' : 'note'}"><span>${html}</span></div>`;
+export const hinweis = (html, ton = '') => `<div class="hw-hinweis ${ton}" role="${ton === 'fehler' ? 'alert' : 'note'}">${html}</div>`;
 
-/** Statusmarke. */
-export const marke = (text, ton = '') => `<span class="hk-marke ${ton}">${esc(text)}</span>`;
+/** Statusmarke als leise Versalie (kein Pillenhaufen). */
+export const marke = (text, ton = '') => `<span class="hw-status ${ton}">${esc(text)}</span>`;
 
-/** Fähigkeit als fünf Segmente mit Zahl (0 bis 100). */
+/** Fähigkeit: Name, fünf Segmente, Zahl (Coffee 28). */
 export function skala(name, wert) {
-  const n = Math.round(Math.max(0, Math.min(100, wert)) / 20);
-  return `<div class="hk-skala"><span>${esc(name)}</span><span class="hk-segmente" aria-hidden="true">${[0, 1, 2, 3, 4].map((i) => `<i class="${i < n ? 'an' : ''}"></i>`).join('')}</span><b>${Math.round(wert)}</b></div>`;
+  const n = Math.max(0, Math.min(100, wert)) / 20;
+  return `<div class="hw-faehigkeit"><span>${esc(name)}</span><span class="hw-skala-balken" aria-hidden="true">${[0, 1, 2, 3, 4].map((i) => `<i style="--a:${Math.max(0, Math.min(1, n - i)).toFixed(2)}"></i>`).join('')}</span><b>${Math.round(wert)}</b></div>`;
 }
 
 // ───────────── Isometrische Reitersymbole (eigener Satz, wie die Stadt: drei Flächen, Licht von links) ─────────────
@@ -150,4 +146,4 @@ export const SYMBOLE = {
 };
 
 /** Reiterleiste unten. reiter: [[id, Name, Symbolname]], attr(id) liefert Attribute. */
-export const reiterUnten = (reiter, aktiv, attr) => `<nav class="hk-reiter" aria-label="Bereiche">${reiter.map(([id, name, sym]) => `<button type="button" ${attr(id)}${id === aktiv ? ' aria-current="page"' : ''}>${SYMBOLE[sym ?? id] ?? ''}<span>${esc(name)}</span></button>`).join('')}</nav>`;
+export const reiterUnten = (reiter, aktiv, attr) => `<nav class="hw-reiter" aria-label="Bereiche">${reiter.map(([id, name, sym]) => `<button type="button" ${attr(id)}${id === aktiv ? ' aria-current="page"' : ''}>${SYMBOLE[sym ?? id] ?? ''}<span>${esc(name)}</span></button>`).join('')}</nav>`;

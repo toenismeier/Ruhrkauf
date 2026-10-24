@@ -696,6 +696,7 @@
 </style>
 <link rel="stylesheet" href="./src/ui/komponenten.css">
 <link rel="stylesheet" href="./src/ui/spiel-oberflaeche.css">
+<link rel="stylesheet" href="./src/ui/hartwig.css">
 </head>
 <body>
 <canvas id="karte"></canvas>
@@ -771,9 +772,12 @@
     <select id="stadtwahl" class="ort gross" aria-label="Stadt direkt wählen" style="margin:0 14px 14px;width:calc(100% - 28px)"></select>
   </div>
 </div>
-<div id="panel" role="dialog" aria-modal="true" aria-labelledby="ptitel" aria-describedby="punter" aria-hidden="true" inert>
-  <div class="pkopf"><div class="griff"></div><span id="psymbol" aria-hidden="true"></span><h2 id="ptitel" tabindex="-1"></h2><div id="punter"></div><button id="pzu" aria-label="Schließen">×</button></div>
-  <div id="pinhalt"></div>
+<div id="panel" class="hw" data-bereich="betrieb" role="dialog" aria-modal="true" aria-labelledby="ptitel" aria-describedby="punter" aria-hidden="true" inert>
+  <div class="hw-grund"></div>
+  <header class="hw-kopf"><span id="psymbol" class="hw-kopf-symbol" aria-hidden="true"></span><h2 id="ptitel" class="hw-kopf-titel" tabindex="-1"></h2><div id="punter" class="hw-kopf-unter"></div><button id="pzu" class="hw-zu" aria-label="Schließen"></button></header>
+  <div id="psprecher" hidden></div>
+  <div id="pinhalt" class="hw-inhalt"></div>
+  <div id="preiter" hidden></div>
 </div>
 <button id="wochenstreifen" type="button" aria-live="polite"></button>
 <div id="meldung"></div>

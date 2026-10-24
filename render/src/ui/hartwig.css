@@ -135,7 +135,8 @@
 .hw-balken { position: relative; display: flex; gap: 44px; padding-left: 28px; align-items: flex-end; height: var(--hoehe, 114px); }
 .hw-balken > div { display: flex; gap: 4px; align-items: flex-end; height: 100%; }
 .hw-balken i { display: block; width: 15px; border-radius: 7.5px 7.5px 0 0; background: var(--text); }
-.hw-balken i + i { background: var(--gut); }
+.hw-balken i.b, .hw-balken i + i { background: var(--gut); }
+.hw-balken i.a { background: var(--text); }
 
 /* Skala in fünf Segmenten, 24 px hoch, dunkler Rand 2 px, Trennfugen 1,3 px; Wert rechts daneben. */
 .hw-skala { display: flex; align-items: center; gap: 0; padding: 0 var(--hw-rand); }
@@ -152,3 +153,158 @@
 .hw-lese { font: var(--hw-t-lese); }
 .hw-rund { width: 38.7px; height: 38.7px; border-radius: 50%; object-fit: cover; }
 .hw-stepper.breit { width: 259px; }
+
+/* ───────── Hartwig-Farben je Bereich (Struktur aus Coffee, Akzent Hartwig-Petrol statt Coffee-Orange, E42) ───────── */
+.hw[data-bereich='haus'] { --grund: #312924; --kopf: #221c19; --tief: #0e0c0a; --karte: #120f0d; --kartenlinie: #595756; --text: #fff; --leise: #bfbebd; --marke: #a5a3a1;
+  --akzent: #1f6f8b; --akzent-linie: #5fa8bf; --akzent-aktiv: #134a5d; --akzent-aktiv-linie: #3f8aa3; --feld: #080606; --feldlinie: #515150;
+  --zweit: #2c2725; --zweit-linie: #6b6663; --skala: #63b958; --skala-grund: #0e0c0a; --punkt: #8c8885; --stern: #ffac0b; --hinweis: #e5562a;
+  --ring-a: #efbf73; --ring-b: #c9441b; --gut: #66bb6a; --schlecht: #f27d72; --gefahr: #c0362d; --gefahr-linie: #e2786f; }
+.hw[data-bereich='zentrale'], .hw[data-bereich='betrieb'] { --grund: #213741; --kopf: #17262d; --tief: #0d161a; --karte: #0d161a; --kartenlinie: #555c5e; --text: #fff; --leise: #a6a7a7; --marke: #9aa3a7;
+  --akzent: #1f6f8b; --akzent-linie: #5fa8bf; --akzent-aktiv: #134a5d; --akzent-aktiv-linie: #3f8aa3; --feld: #05090a; --feldlinie: #4c5356;
+  --zweit: #252d31; --zweit-linie: #666c6f; --skala: #63b958; --skala-grund: #0d161a; --punkt: #8c9295; --stern: #ffac0b; --hinweis: #e5562a;
+  --ring-a: #66bb6a; --ring-b: #2f6b33; --gut: #66bb6a; --schlecht: #f27d72; --gefahr: #c0362d; --gefahr-linie: #e2786f; }
+.hw[data-bereich='betrieb'] { --grund: #262a2e; --kopf: #1a1d20; --tief: #0f1113; --karte: #111315; --kartenlinie: #575b5f; --zweit: #2b2f33; --zweit-linie: #686d71; }
+.hw[data-bereich='papier'] { --grund: #ece7dc; --kopf: #ddd6c7; --tief: #d2cab8; --karte: #f6f2e9; --kartenlinie: #b9b09d; --text: #1f1d1a; --leise: #5f5a52; --marke: #6d675e;
+  --akzent: #1f6f8b; --akzent-linie: #5fa8bf; --akzent-aktiv: #134a5d; --akzent-aktiv-linie: #3f8aa3; --feld: #fffdf8; --feldlinie: #b9b09d;
+  --zweit: #e4ddcf; --zweit-linie: #b9b09d; --punkt: #a39c90; --gut: #2e7d32; --schlecht: #b3261e; --gefahr: #b3261e; --gefahr-linie: #d9776f; }
+.hw[data-bereich='papier'] .hw-grund { background: var(--grund); }
+
+/* ───────── Spielblatt #panel: ganzer Bildschirm wie Coffee, Kopf / Sprecher / Inhalt / Reiter in festen Lagen ───────── */
+#panel.hw { background: none; position: fixed; inset: 0; width: auto; height: auto; z-index: 20; transform: translateY(100%); transition: transform .22s ease; display: block; border-radius: 0; box-shadow: none; max-height: none; }
+#panel.hw.offen { transform: none; }
+#panel.hw .hw-kopf { height: calc(50px + env(safe-area-inset-top)); top: 0; }
+#panel.hw .hw-kopf-symbol { top: calc(env(safe-area-inset-top) + 4.7px); }
+#panel.hw .hw-kopf-symbol svg { width: 100%; height: 100%; }
+#panel.hw .hw-kopf-titel { top: calc(env(safe-area-inset-top) + 9px); margin: 0; }
+#panel.hw .hw-kopf-unter { top: calc(env(safe-area-inset-top) + 25.5px); }
+#panel.hw .hw-zu { top: calc(env(safe-area-inset-top) + 8px); font-size: 0; color: var(--text); }
+#psprecher > .hw-sprecher { top: calc(50px + env(safe-area-inset-top)); }
+#panel.hw > .hw-inhalt { top: calc(50px + env(safe-area-inset-top)); bottom: 0; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+#panel.hw.mit-sprecher > .hw-inhalt { top: calc(130px + env(safe-area-inset-top)); }
+#panel.hw.mit-reiter > .hw-inhalt { bottom: calc(59px + env(safe-area-inset-bottom)); padding-bottom: 24px; }
+#preiter > .hw-reiter { height: calc(59px + env(safe-area-inset-bottom)); justify-content: center; }
+#preiter > .hw-reiter > button svg { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); width: 34px; height: 34px; }
+#preiter > .hw-reiter > button[aria-current='page'] { background: var(--grund); border-radius: 0 0 10px 10px; margin: 0 8px; flex-basis: 64px; }
+
+/* ───────── Bausteine für Spielinhalte (komponenten.js), vermessen an Coffee 21, 22, 28, 31 ───────── */
+.hw-rumpf { padding: 0 var(--hw-rand); }
+.hw-band { background: var(--kopf); padding: 18px var(--hw-rand) 24px; margin-top: 24px; }
+/* Abschnittskopf: Versalien weiß regulär (Coffee „STORE INCOME STATEMENT“), Ergänzung leise rechts. */
+.hw-abschnitt { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 26px 0 12px; font: 400 14.6px/1.2 var(--hw-schrift); text-transform: uppercase; letter-spacing: .01em; color: var(--text); }
+.hw-abschnitt small { font: var(--hw-t-marke); color: var(--marke); text-transform: none; }
+.hw-abschnitt:first-child { margin-top: 18px; }
+/* Beschriftung über einem Bedienelement (MANAGER SINCE, ANNUAL SALARY). */
+.hw-feldname { display: block; margin: 0 0 8px; }
+/* Großkennzahlen: n Spalten, je Spalte rechtsbündig. */
+.hw-gross { display: grid; grid-template-columns: repeat(var(--n, 2), 1fr); gap: 0 12px; margin: 24px 0 0; }
+.hw-gross > div { text-align: right; min-width: 0; }
+.hw-gross .hw-marke { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hw-gross .hw-zahl { display: block; margin-top: 7.2px; white-space: nowrap; }
+.hw-gross[style*='--n:3'] .hw-zahl, .hw-gross[style*='--n:4'] .hw-zahl { font-size: 18.3px; }
+.hw-gross .hw-abw { display: block; margin-top: 3.6px; }
+/* Balken mit Wochenbeschriftung (Coffee 22). */
+.hw-balkenfeld { margin: 26px 0 0; }
+.hw-balkenfeld .hw-balken { padding-left: 0; justify-content: space-between; gap: 0; }
+.hw-balkenfeld .hw-balken > div { flex: 0 0 34px; justify-content: center; }
+.hw-balken i.neg { background: var(--schlecht); }
+.hw-balken i.null { opacity: .5; }
+.hw-balkenfuss { display: flex; justify-content: space-between; margin-top: 7px; font: var(--hw-t-klein); font-size: 12.4px; }
+.hw-balkenfuss span { flex: 0 0 34px; text-align: center; white-space: nowrap; }
+.hw-legende { display: flex; gap: 16px; margin-top: 10px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-legende i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; background: var(--text); margin-right: 6px; vertical-align: -1px; }
+.hw-legende i.b { background: var(--gut); }
+/* Tabelle (GuV): Kopf in Versalien weiß, Zeilen 22 px, Beschriftung dünn grau, Zahlen weiß rechts, Strich vor Summe. */
+.hw-tabelle { width: 100%; border-collapse: collapse; font: 400 12.3px/22px var(--hw-schrift); font-variant-numeric: tabular-nums; }
+.hw-tabelle th { font: 400 14.2px/1.2 var(--hw-schrift); text-align: right; padding: 0 0 12px; color: var(--text); white-space: nowrap; }
+.hw-tabelle th:first-child { text-align: left; text-transform: uppercase; }
+.hw-tabelle td { padding: 0; text-align: right; color: var(--text); white-space: nowrap; }
+.hw-tabelle td:first-child { text-align: left; color: var(--marke); font-weight: 300; white-space: normal; padding-right: 12px; }
+.hw-tabelle td + td { padding-left: 14px; }
+.hw-tabelle tr.summe td { box-shadow: inset 0 1px 0 0 var(--text); }
+.hw-tabelle tr.summe td:first-child { box-shadow: none; }
+.hw-tabelle td.gut { color: var(--gut); } .hw-tabelle td.schlecht { color: var(--schlecht); }
+/* Listenzeile: Beschriftung links, Wert rechts, Trennlinie fein. */
+.hw-liste { margin: 0; }
+.hw-zeile { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 8px 0; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); background: none; color: var(--text); font: var(--hw-t-text); font-weight: 400; text-align: left; }
+.hw-zeile:last-child { border-bottom: 0; }
+.hw-was { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.hw-was small, .hw-wert small { display: block; margin-top: 2px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-wert { flex: none; text-align: right; font-variant-numeric: tabular-nums; max-width: 55%; }
+.hw-wert.gut { color: var(--gut); } .hw-wert.schlecht { color: var(--schlecht); } .hw-wert.achtung { color: var(--stern); }
+.hw-pfeil { flex: none; color: var(--leise); font-size: 18px; }
+/* Knöpfe: primär Akzent mit Doppelkontur, Zweit neutral, Gefahr rot, Text als Akzentschrift. 44 px Mindesthöhe. */
+.hw-knopf { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border: 0; --f: var(--akzent); --l: var(--akzent-linie); background: var(--f); box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--f), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--l); border-radius: var(--hw-radius); color: #fff; font: var(--hw-t-text); font-size: 13.5px; }
+.hw-knopf.zweit { --f: var(--zweit); --l: var(--zweit-linie); color: var(--text); }
+.hw-knopf.gefahr { --f: var(--gefahr); --l: var(--gefahr-linie); }
+.hw-knopf.text { background: none; box-shadow: none; color: var(--akzent-linie); padding: 0 4px; }
+.hw-knopf.breit { display: flex; width: 100%; }
+.hw-knopf:disabled { opacity: .45; }
+.hw-knoepfe { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+/* Großer Stepper frei auf dem Grund (Coffee 28, 31): 44 px hoch, Knöpfe 33 px, Unterzeile im Feld. */
+.hw-stepper.gross { width: 100%; height: 44px; }
+.hw-stepper.gross > button { flex-basis: 33.3px; }
+.hw-stepper.gross > button::before { top: 20.7px; left: 9.3px; right: 9.3px; }
+.hw-stepper.gross > button.plus::after { top: 13.3px; height: 16px; left: 15.4px; }
+.hw-stepper.gross > button.plus::before { left: 9.3px; right: 9.3px; }
+.hw-stepper > output { flex-direction: column; line-height: 1.05; }
+.hw-stepper > output small { font: var(--hw-t-klein); font-size: 9.6px; color: var(--leise); margin-top: 1px; }
+.hw-stepper > button:disabled { --f: var(--zweit); --l: var(--zweit-linie); color: var(--leise); }
+/* Schalterzeile: Schalter links, Beschriftung rechts (Delegation). */
+.hw-schalterzeile { display: flex; align-items: center; gap: 15px; width: 100%; min-height: 40px; margin: 7.5px 0; padding: 0; border: 0; background: none; color: var(--text); font: var(--hw-t-text); text-align: left; }
+.hw-schalterzeile .hw-schalter { flex: none; }
+.hw-schalterzeile small { display: block; font: var(--hw-t-klein); color: var(--leise); margin-top: 2px; }
+/* Fähigkeit: Name rechtsbündig, Skala 120 × 14 in fünf Segmenten, Zahl (Coffee 28). */
+.hw-faehigkeit { display: grid; grid-template-columns: auto 120px 28px; align-items: center; gap: 5px; height: 18.7px; font: var(--hw-t-text); font-weight: 400; font-size: 11.6px; }
+.hw-faehigkeit > span:first-child { text-align: right; }
+.hw-faehigkeit .hw-skala-balken { flex: none; width: 120px; height: 14px; border-radius: 7px; padding: 2px; background: var(--skala-grund); }
+.hw-faehigkeit .hw-skala-balken i:first-child { border-radius: 5px 0 0 5px; } .hw-faehigkeit .hw-skala-balken i:last-child { border-radius: 0 5px 5px 0; }
+.hw-faehigkeit b { font-weight: 400; }
+.hw-faehigkeit .hw-skala-balken i { background: linear-gradient(90deg, var(--skala) calc(var(--a, 1) * 100%), transparent 0); }
+/* Leerer Zustand, Hinweis, Statusmarke. */
+.hw-leer { padding: 18px 0; color: var(--leise); font: var(--hw-t-text); font-weight: 400; }
+.hw-leer b { display: block; color: var(--text); font-weight: 500; margin-bottom: 4px; }
+.hw-hinweis { margin: 12px 0; padding: 10px 14px; border-radius: var(--hw-radius); background: var(--tief); color: var(--text); font: var(--hw-t-text); font-weight: 400; box-shadow: inset 3px 0 0 var(--akzent-linie); }
+.hw-hinweis.achtung { box-shadow: inset 3px 0 0 var(--stern); } .hw-hinweis.fehler { box-shadow: inset 3px 0 0 var(--schlecht); } .hw-hinweis.gut { box-shadow: inset 3px 0 0 var(--gut); }
+.hw-status { display: inline-block; margin: 0 8px 6px 0; font: var(--hw-t-marke); text-transform: uppercase; color: var(--marke); }
+.hw-status.gut { color: var(--gut); } .hw-status.schlecht, .hw-status.warn { color: var(--schlecht); } .hw-status.achtung { color: var(--stern); }
+/* Porträtrahmen 119 × 160 (Coffee 28). */
+.hw-portraet { position: relative; width: 119px; height: 160px; --f: var(--karte); --l: var(--kartenlinie); overflow: hidden; }
+.hw-portraet svg, .hw-portraet img { position: absolute; left: 8px; right: 8px; bottom: 6px; width: calc(100% - 16px); height: auto; }
+#psprecher .hw-sprecher-figur svg { width: 100%; height: 100%; }
+#psprecher .hw-sprecher-unter { display: block; font: var(--hw-t-klein); color: var(--leise); margin-top: 2px; }
+#psprecher .hw-sprecher[data-ton='alarm'] .hw-sprecher-text { color: #ffd6d1; }
+#preiter > .hw-reiter > button > span { top: 40px; }
+.hw-marker { display: none; }
+#panel.hw #pzu.hw-zu { position: absolute; left: auto; right: 13px; width: 34px; height: 34px; border-radius: 0; background: none; padding: 0; box-shadow: none; }
+
+/* ───────── Hausdetail und gemeinsame Ergänzungen ───────── */
+.hw .gut, .hw-gut { color: var(--gut); } .hw .schlecht, .hw-schlecht { color: var(--schlecht); } .hw-achtung { color: var(--stern); }
+.hw-abstand { height: 16px; }
+.hw-statusreihe { margin: 18px 0 0; }
+.hw-knoepfe.zweispaltig { display: grid; grid-template-columns: 1fr 1fr; }
+.hw-knoepfe .hw-knopf { min-width: 0; }
+.hw-felder { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 15px; margin-top: 6px; }
+.hw-feld { min-width: 0; }
+.hw-feldwert { display: block; font: var(--hw-t-titel); font-weight: 400; font-size: 15px; }
+.hw-feldunter { display: block; font: var(--hw-t-klein); color: var(--leise); margin-top: 2px; }
+.hw-person { display: grid; grid-template-columns: 119px 1fr; gap: 0 14px; align-items: start; margin-bottom: 22px; }
+.hw-person-name { margin: 2px 0 14px; font: var(--hw-t-titel); font-size: 19px; font-weight: 500; }
+.hw-person-daten .hw-marke { display: block; margin-bottom: 8px; }
+.hw-person-daten .hw-faehigkeit { grid-template-columns: 1fr 104px 22px; }
+.hw-person-daten .hw-faehigkeit .hw-skala-balken { width: 104px; }
+.hw-etagen { margin: 6px 0 4px; }
+.hw-etagenschnitt { display: block; width: 100%; height: auto; }
+/* Fenster auf die Stadt (Hausdetail): Blattgrund ausgespart, darunter beginnt der Boden mit Streifen. */
+#panel.hw.mit-fenster > .hw-grund { display: none; }
+#panel.hw.mit-fenster > .hw-inhalt { background: none; }
+.hw-fenster { position: relative; height: 270px; pointer-events: none; }
+.hw-fenster .hw-bildknopf { pointer-events: auto; right: 20px; bottom: 14px; }
+.hw-fenster .hw-bildknopf svg { position: absolute; inset: 7px; width: 30px; height: 30px; }
+.hw-boden { min-height: 100%; padding-bottom: 24px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+/* Figuren nach Besetzung (Coffee 30): eine Figur je 5 FTE. */
+.hw-figuren { display: flex; flex-wrap: wrap; gap: 6px 4px; margin: 18px 0 6px; }
+.hw-figuren i { position: relative; width: 12px; height: 26px; }
+.hw-figuren i::before { content: ''; position: absolute; left: 3px; top: 0; width: 6px; height: 6px; border-radius: 50%; background: var(--leise); opacity: .35; }
+.hw-figuren i::after { content: ''; position: absolute; left: 1px; top: 8px; width: 10px; height: 18px; border-radius: 4px 4px 2px 2px; background: var(--leise); opacity: .35; }
+.hw-figuren i.an::before, .hw-figuren i.an::after { background: var(--text); opacity: 1; }
+#panel.hw #pinhalt.hw-inhalt { padding-left: 0; padding-right: 0; padding-top: 0; }

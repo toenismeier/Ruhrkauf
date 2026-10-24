@@ -165,6 +165,12 @@ function hausKameraPunkt(id) {
 }
 /** Mitte der sichtbaren Kartenfläche oberhalb des Hausdetails, nicht des vom Sheet verdeckten Canvas. */
 function hausFokusPixel(w, h) {
+  // E47: Im Blatt mit Fenster liegt das Haus mittig im Fenster.
+  const f = document.querySelector('#panel.offen .hw-fenster');
+  if (f) { // Lage relativ zum Blatt, damit die Einblendbewegung (transform) nicht mitzählt; das Blatt endet oben bei 0.
+    const r = f.getBoundingClientRect(), pr = $('panel').getBoundingClientRect(), c = canvas.getBoundingClientRect();
+    return { x: r.left - c.left + r.width / 2, y: r.top - pr.top - c.top + r.height * 0.55, hoehe: r.height };
+  }
   const frei = Math.max(140, h - Math.min($('panel').offsetHeight || h * 0.62, h * 0.62));
   const oben = Math.min(70, frei * 0.35);
   return { x: w / 2, y: (oben + frei - 12) / 2 };
@@ -887,6 +893,7 @@ function panel(titel, unter, html, klasse = '') {
   $('ptitel').textContent = titel;
   $('punter').textContent = unter;
   $('pinhalt').innerHTML = html;
+  huelleOrdnen();
   const neu = !$('panel').classList.contains('offen');
   if (neu) vorherigerFokus = document.activeElement;
   $('panel').inert = false;
@@ -895,6 +902,23 @@ function panel(titel, unter, html, klasse = '') {
   document.body.classList.add('panel-offen');
   if (neu) $('ptitel').focus({ preventScroll: true });
 }
+/** E47: Bereich, Kopfsymbol, Sprecher und Reiterleiste aus dem Inhalt in die festen Lagen des Blatts heben.
+ *  Läuft nach jedem Neuzeichnen von #pinhalt; ein Inhalt ohne Sprecher oder Reiter leert die jeweilige Lage. */
+function huelleOrdnen() {
+  const p = $('panel'), inhalt = $('pinhalt');
+  const marker = inhalt.querySelector('.hk-bereich');
+  p.dataset.bereich = marker?.dataset.bereich ?? 'betrieb';
+  $('psymbol').innerHTML = HK.SYMBOLE[marker?.dataset.symbol] ?? HK.SYMBOLE.zentrale;
+  for (const [slot, sel, klasse] of [['psprecher', ':scope > .hw-sprecher, :scope > * > .hw-sprecher', 'mit-sprecher'], ['preiter', '.hw-reiter', 'mit-reiter']]) {
+    const el = inhalt.querySelector(sel), ziel = $(slot);
+    if (el) ziel.replaceChildren(el); else ziel.replaceChildren();
+    ziel.hidden = !el; p.classList.toggle(klasse, !!el);
+  }
+  p.classList.toggle('mit-fenster', !!inhalt.querySelector('.hw-fenster'));
+  huellenBeobachter.takeRecords(); // eigene Umhängungen nicht erneut auswerten
+}
+const huellenBeobachter = new MutationObserver(() => huelleOrdnen());
+huellenBeobachter.observe($('pinhalt'), { childList: true });
 function schliessePanel() { kameraZiel = null; for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; hqAbteilung = null; hqEtageWahl = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
 const szenarienUI = szenarienModul({ E, spiel: () => s, wahl: () => startWahl, panel, meldung, stufenAktualisieren: zeichneStufen, nachAktion: () => { cockpitZeigen(); szenarienUI.aktualisieren(); automatischSpeichern(); } });
 /** Q10: Neues Haus bewusst fokussieren; spätere Renderläufe erhalten das Ziel. */
@@ -909,7 +933,7 @@ function hausZeigen(id) {
   const x = sb?.haeuser.get(id);
   const b = x?.gruppe ? new THREE.Box3().setFromObject(x.gruppe) : sb?.statischeHaeuser.get(id)?.bounds;
   if (b && !b.isEmpty()) {
-    const [w, h] = groesse(), frei = hausFokusPixel(w, h).y * 2 - 70 + 12;
+    const [w, h] = groesse(), fp = hausFokusPixel(w, h), frei = fp.hoehe ? fp.hoehe + 58 : fp.y * 2 - 70 + 12;
     const ecken = [];
     for (const xx of [b.min.x, b.max.x]) for (const yy of [b.min.y, b.max.y])
       for (const zz of [b.min.z, b.max.z]) ecken.push(new THREE.Vector3(xx, yy, zz).project(cam));

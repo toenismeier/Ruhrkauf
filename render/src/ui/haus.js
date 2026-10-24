@@ -77,7 +77,7 @@ export function etagenschnitt(etagen, { breite = 358 } = {}) {
   // Dach
   const top = n * H;
   svg += poly([pt(0, 0, top), pt(W, 0, top), pt(W, D, top), pt(0, D, top)], '#4a423b') + poly([pt(0, 0, top), pt(W, 0, top), pt(W, 0, top + 3), pt(0, 0, top + 3)], '#d23c32');
-  return `<svg class="hk-etagenschnitt" viewBox="0 0 ${breite} ${hoehe.toFixed(0)}" role="img" aria-label="Etagenschnitt mit ${n} Etagen">${svg}</svg>`;
+  return `<svg class="hw-etagenschnitt" viewBox="0 0 ${breite} ${hoehe.toFixed(0)}" role="img" aria-label="Etagenschnitt mit ${n} Etagen">${svg}</svg>`;
 }
 
 // ───────────── Befund der Filialleitung
@@ -100,9 +100,9 @@ function befund(h, k, b, vorjahr, vorwoche) {
   funde.sort((a, c) => c.g - a.g);
   if (!funde.length) {
     const vj = vorjahr > 0 ? ` Umsatz ${k.umsatz >= vorjahr ? '+' : '−'}${p(Math.abs(k.umsatz / vorjahr - 1) * 100, 1)} % zum Vorjahr.` : vorwoche ? ` Umsatz ${k.umsatz >= vorwoche ? 'über' : 'unter'} Vorwoche.` : '';
-    return { text: `<b>Das Haus läuft.</b> Deckungsbeitrag positiv, Besetzung gesichert.${vj}${kaText ? ' ' + kaText : ''}`, ton: '', name };
+    return { text: `Das Haus läuft.${vj}`, ton: '', name };
   }
-  return { text: `<b>${esc(funde[0].t)}</b>${funde[1] ? ' ' + esc(funde[1].t) : ''}`, ton: funde[0].ton, name };
+  return { text: esc(funde[0].t), ton: funde[0].ton, name }; // E47: ein Befund, ein Satz (Coffee-Sprecherzeile)
 }
 
 /** Komplettes Hausdetail. c = { E, s, d, b, reiter, zustand, verlaufU, verlaufD, vorjahr, treiber, umbauKarte, personalBlock, innen, shops, wbArt, wbStatus } */
@@ -121,8 +121,10 @@ export function hausDetailHtml(c) {
   if (r === 'partner') inhalt = partner(c, h, b);
   if (r === 'kosten') inhalt = kosten(c, h, k, b);
   if (r === 'kommentare') inhalt = kommentare(c, h, b);
-  html += K.rumpf(inhalt);
-  html += K.reiterUnten(REITER, r, (key) => `class="haus-reiter-knopf" data-reiter="${key}" onclick="hausReiterWahl('${key}')"`).replace('class="hk-reiter"', 'class="hk-reiter haus-reiter"');
+  // E47: Überblick zeigt oben ein Fenster auf das Haus in der Stadt (Kamera fokussiert es), wie das Ladenbild bei Coffee.
+  if (r === 'ueberblick') html += `<div class="hw-fenster"><button type="button" class="hw-bildknopf hw-kontur" data-hausbesuch="${esc(id)}" aria-label="Haus besuchen">${K.SYMBOLE.etagen}</button></div><div class="hw-boden">${K.rumpf(inhalt)}</div>`;
+  else html += K.rumpf(inhalt);
+  html += K.reiterUnten(REITER, r, (key) => `class="haus-reiter-knopf" data-reiter="${key}" onclick="hausReiterWahl('${key}')"`).replace('class="hw-reiter"', 'class="hw-reiter haus-reiter"');
   return html;
 }
 
@@ -148,19 +150,19 @@ function ueberblick(c, h, k, vorwoche, vorwocheDb, uPunkte, dPunkte) {
   if (h.klasse === 'premium') marken.push(K.marke('Premiumhaus', 'achtung'));
   if (c.zustand) marken.push(K.marke(c.zustand, 'achtung'));
   marken.push(K.marke(LAGE[h.lage] ?? 'Lage offen'));
-  x += `<div class="hk-marken">${marken.join('')}</div>`;
-  x += `<div class="hk-knopfreihe">${K.knopf('Haus besuchen', `data-hausbesuch="${esc(id)}"`, 'zweit')}${(() => { const et = typeof E.umbauHaus === 'function' ? [...(E.umbauHaus(s, id) ?? [])].sort((a, z) => a.substanz - z.substanz)[0] : null; return et ? K.knopf('Umbau planen', `data-umbau="planen" data-id="${esc(id)}" data-etage="${et.etage}"`, 'zweit') : ''; })()}</div>`;
+  x += `<div class="hw-statusreihe">${marken.join('')}</div>`;
+  x += `<div class="hw-knoepfe">${(() => { const et = typeof E.umbauHaus === 'function' ? [...(E.umbauHaus(s, id) ?? [])].sort((a, z) => a.substanz - z.substanz)[0] : null; return et ? K.knopf('Umbau planen', `data-umbau="planen" data-id="${esc(id)}" data-etage="${et.etage}"`, 'zweit') : ''; })()}</div>`;
   // Etagen: der Schnitt durch das Haus
   const qm = h.flaechen.reduce((a, f) => a + f.qm, 0);
   x += K.abschnitt('Etagen', fmt.format(qm) + ' qm Verkaufsfläche');
-  x += `<div class="hk-schnitt">${etagenschnitt(d.etagen)}</div>`;
+  x += `<div class="hw-etagen">${etagenschnitt(d.etagen)}</div>`;
   if (c.innen) x += c.innen;
   x += K.liste([...d.etagen].sort((a, e) => e.etage - a.etage).map((e) => {
     const eqm = e.flaechen.reduce((a, f) => a + f.qm, 0);
     const umsatzQm = eqm ? e.flaechen.reduce((a, f) => a + (f.umsatzQm ?? 0) * f.qm, 0) / eqm : 0;
     const namen = e.flaechen.map((f) => f.konzept === 'untermiete' ? (f.mieter ?? 'Untermieter') : f.konzept === 'leer' ? 'Leerfläche' : f.gruppe).filter(Boolean);
     const umbau = e.flaechen.some((f) => f.umbauBis !== undefined && f.umbauBis > s.woche);
-    return K.zeile({ was: `${etageLang(e.etage)}${umbau ? ' · <span class="hk-achtung">Umbau</span>' : ''}`, unter: esc([...new Set(namen)].join(', ') || 'keine Fläche') + ' · ' + fmt.format(eqm) + ' qm',
+    return K.zeile({ was: `${etageLang(e.etage)}${umbau ? ' · <span class="hw-achtung">Umbau</span>' : ''}`, unter: esc([...new Set(namen)].join(', ') || 'keine Fläche') + ' · ' + fmt.format(eqm) + ' qm',
       wert: umsatzQm ? fmt.format(Math.round(umsatzQm)) + ' €' : '0 €', wertUnter: 'je qm', tippbar: true, attr: `onclick="hausKlick('etage','${esc(id)}',${e.etage})" aria-label="${esc(etageLang(e.etage))} von innen ansehen"` });
   }));
   // Umsatztreiber
@@ -172,7 +174,7 @@ function ueberblick(c, h, k, vorwoche, vorwocheDb, uPunkte, dPunkte) {
     x += `<div class="o02-haus" data-o02-haus="${esc(id)}" data-o02-umsatz="${a.umsatz}" data-o02-frequenz="${a.frequenz}" data-o02-kaufquote="${a.kaufquote}" data-o02-bon="${a.bon}">${K.gross([
       { label: 'Frequenz', wert: fmt.format(Math.round(a.frequenz)), unter: d1(a.frequenz, v?.frequenz) },
       { label: 'Kaufquote', wert: PROZENT(a.kaufquote), unter: d1(a.kaufquote, v?.kaufquote) },
-      { label: 'Bon', wert: geld(a.bon), unter: d1(a.bon, v?.bon) }]).replace('class="hk-gross"', 'class="hk-gross klein"')}</div>`;
+      { label: 'Bon', wert: geld(a.bon), unter: d1(a.bon, v?.bon) }])}</div>`;
   } else x += K.abschnitt('Umsatztreiber') + K.leer('Frequenz, Kaufquote und Bon gibt es nach dem ersten Wochenabschluss.');
   // Filial-GuV
   if (d.guv) x += guv(E, d.guv);
@@ -206,7 +208,7 @@ function ueberblick(c, h, k, vorwoche, vorwocheDb, uPunkte, dPunkte) {
   x += K.liste(Object.entries(E.FILIAL_PROGRAMME).map(([programm, def]) => {
     const st = d.programme?.[programm];
     const status = st ? (s.woche < st.wirksamAb ? 'Anlauf bis KW ' + (((st.wirksamAb + 1) - 1) % 52 + 1) : 'Wirksam') : def.vorlauf + ' Wochen Vorlauf';
-    return `<div class="hk-zeile"><span class="hk-was">${esc(def.name)}<small>${esc(status)} · ${esc(def.nebenwirkung)}</small></span>${st ? K.marke(s.woche < st.wirksamAb ? 'Anlauf' : 'Wirksam', 'gut') : K.knopf('Starten', `onclick="filialProgramm('${programm}')"`, 'zweit')}</div>`;
+    return `<div class="hw-zeile"><span class="hw-was">${esc(def.name)}<small>${esc(status)} · ${esc(def.nebenwirkung)}</small></span>${st ? K.marke(s.woche < st.wirksamAb ? 'Anlauf' : 'Wirksam', 'gut') : K.knopf('Starten', `onclick="filialProgramm('${programm}')"`, 'zweit')}</div>`;
   }));
   return x;
 }
@@ -217,29 +219,29 @@ function guv(E, g) {
   const ref = (id) => { const r = E.REFERENZ_FILIAL_GUV.find((z) => z.id === id); return r ? p(r.ist, 1) + ' %' : ''; };
   const z = (id, name, v) => ({ name, werte: [geld(v), q(v), ref(id)], roh: [Math.round(v), null, null], ton: [v < 0 ? 'schlecht' : '', '', ''] });
   const sp = ['Woche', 'Anteil', 'Referenz'];
-  const t1 = K.tabelle({ titel: 'Filial-GuV', spalten: sp, zeilen: [z('umsatz', 'Umsatz', g.umsatz), z('wareneinsatz', 'Wareneinsatz', -g.wareneinsatz)],
+  const t1 = K.tabelle({ titel: 'Ertrag', spalten: sp, zeilen: [z('umsatz', 'Umsatz', g.umsatz), z('wareneinsatz', 'Wareneinsatz', -g.wareneinsatz)],
     summe: z('bruttogewinn', 'Bruttogewinn', g.bruttogewinn), pruefen: Math.abs(g.umsatz - g.wareneinsatz - g.bruttogewinn) < 1 });
   const kosten = E.GUV_KOSTEN.map((id) => z(id, E.REFERENZ_FILIAL_GUV.find((r) => r.id === id)?.name ?? id, -g[id]));
-  const t2 = K.tabelle({ spalten: sp, zeilen: [z('bruttogewinn', 'Bruttogewinn', g.bruttogewinn), z('uebrigeErtraege', 'Übrige betriebliche Erträge', g.uebrigeErtraege), ...kosten],
+  const t2 = K.tabelle({ titel: 'Kosten', spalten: sp, zeilen: [z('bruttogewinn', 'Bruttogewinn', g.bruttogewinn), z('uebrigeErtraege', 'Übrige betriebliche Erträge', g.uebrigeErtraege), ...kosten],
     summe: z('ebitda', 'EBITDA Filialebene', g.ebitda), pruefen: true });
-  return `<div data-summen-name="Filial-GuV">${t1}<div style="height:12px"></div>${t2}</div>` + K.hinweis('Ohne Zentrale. Referenz: Anteil am Umsatz laut Vorgabe; Einzel-OPEX liegt 44,6 % unter Vorgabe, Total OPEX 42,4 %. Keine Ausgleichsbuchung.');
+  return K.abschnitt('Filial-GuV') + `<div data-summen-name="Filial-GuV">${t1}<div class="hw-abstand"></div>${t2}</div>` + K.hinweis('Ohne Zentrale. Referenz: Anteil am Umsatz laut Vorgabe; Einzel-OPEX liegt 44,6 % unter Vorgabe, Total OPEX 42,4 %. Keine Ausgleichsbuchung.');
 }
 
 function leitung(c, h, b) {
   const l = b?.leitungsdaten, id = h.id;
-  let x = `<div class="hk-person-karte"><span class="hk-portraet">${filialleitungBild(h, 104)}</span><div><b>${esc(l?.name ?? 'Nicht besetzt')}</b><small>Filialleitung ${esc(h.name)}</small>`
-    + `<small>${geld(l?.gehalt ?? 0)} im Jahr · Bonus ${PROZENT(l?.bonusAnteil ?? 0)}</small>${l?.interimBis ? `<small class="hk-achtung">Interim bis KW ${(l.interimBis % 52) + 1}</small>` : ''}</div></div>`;
-  x += K.abschnitt('Fähigkeiten');
-  x += Object.entries(l?.staerken ?? {}).map(([key, v]) => K.skala(SCHWERPUNKT[key] ?? key, v * 100)).join('');
-  x += K.skala('Stimmung', l?.moral ?? 0) + K.skala('Ehrlichkeit', (l?.ehrlichkeit ?? 0) * 100);
+  // E47: Personenblock wie Coffee 28 – Porträtrahmen links, Name und Fähigkeiten rechts.
+  let x = K.abschnitt('Filialleitung');
+  x += `<div class="hw-person"><div class="hw-portraet hw-kontur">${filialleitungBild(h, 104)}</div><div class="hw-person-daten"><h3 class="hw-person-name">${esc(l?.name ?? 'Nicht besetzt')}</h3>`
+    + `<span class="hw-marke">Fähigkeiten</span>${Object.entries(l?.staerken ?? {}).map(([key, v]) => K.skala(SCHWERPUNKT[key] ?? key, v * 100)).join('')}${K.skala('Stimmung', l?.moral ?? 0)}${K.skala('Ehrlichkeit', (l?.ehrlichkeit ?? 0) * 100)}</div></div>`;
+  x += `<div class="hw-felder"><div class="hw-feld"><span class="hw-marke hw-feldname">Jahresgehalt</span><b class="hw-feldwert">${geld(l?.gehalt ?? 0)}</b><small class="hw-feldunter">Bonus ${PROZENT(l?.bonusAnteil ?? 0)}</small></div>`
+    + `<div class="hw-feld"><span class="hw-marke hw-feldname">${l?.interimBis ? 'Interim bis' : 'Stellvertretung'}</span><b class="hw-feldwert">${l?.interimBis ? 'KW ' + ((l.interimBis % 52) + 1) : esc(l?.stellvertretung?.name ?? 'nicht benannt')}</b><small class="hw-feldunter">${l?.interimBis ? '' : 'Qualität ' + PROZENT(l?.stellvertretung?.qualitaet ?? 0)}</small></div></div>`;
   if ((l?.wechselwille ?? 0) > 0.3) x += K.hinweis(`Wechselwille ${PROZENT(l.wechselwille)}: Eine Halteprämie senkt das Risiko.`, 'achtung');
   else x += K.hinweis(`Wechselwille ${PROZENT(l?.wechselwille ?? 0)}.`);
-  x += K.liste([K.zeile({ was: 'Stellvertretung', unter: l?.stellvertretung?.name ?? 'nicht benannt', wert: PROZENT(l?.stellvertretung?.qualitaet ?? 0), wertUnter: 'Qualität' })]);
   x += K.abschnitt('Fördern', 'eine Stärke je Woche');
-  x += `<div class="hk-knopfreihe zweispaltig">${Object.keys(SCHWERPUNKT).map((key) => K.knopf(SCHWERPUNKT[key], tun('foerdern', id, key), 'zweit')).join('')}</div>`;
-  x += `<div class="hk-knopfreihe">${K.knopf('Halteprämie 10.000 €', tun('praemie', id), 'zweit')}${K.knopf('Zur Clusterleitung befördern', tun('befoerdern', id), 'zweit')}</div>`;
+  x += `<div class="hw-knoepfe zweispaltig">${Object.keys(SCHWERPUNKT).map((key) => K.knopf(SCHWERPUNKT[key], tun('foerdern', id, key), 'zweit')).join('')}</div>`;
+  x += `<div class="hw-knoepfe zweispaltig">${K.knopf('Halteprämie 10.000 €', tun('praemie', id), 'zweit')}${K.knopf('Zur Clusterleitung befördern', tun('befoerdern', id), 'zweit')}</div>`;
   x += K.abschnitt('Kandidaten über die Clusterleitung', `${b?.kandidaten?.length ?? 0} Personen`);
-  x += b?.kandidaten?.length ? K.liste(b.kandidaten.map((k, i) => `<div class="hk-zeile"><span class="hk-was">${esc(k.name)}<small>Kompetenz ${PROZENT(k.qualitaet)} · ${geld(k.gehalt)} im Jahr</small></span>${K.knopf('Einstellen', tun('ersetzen', id, '', i), 'zweit')}</div>`))
+  x += b?.kandidaten?.length ? K.liste(b.kandidaten.map((k, i) => `<div class="hw-zeile"><span class="hw-was">${esc(k.name)}<small>Kompetenz ${PROZENT(k.qualitaet)} · ${geld(k.gehalt)} im Jahr</small></span>${K.knopf('Einstellen', tun('ersetzen', id, '', i), 'zweit')}</div>`))
     : K.leer('Die Clusterleitung hat gerade niemanden vorgeschlagen.');
   return x;
 }
@@ -249,7 +251,7 @@ function personal(c, h, k) {
   let x = K.gross([{ label: 'Besetzt', wert: p(ist, 1) + ' FTE', ton: bedarf && ist / bedarf < 0.92 ? 'schlecht' : '' }, { label: 'Bedarf', wert: p(bedarf, 1) + ' FTE', unter: bedarf ? (ist >= bedarf ? 'gedeckt' : `<span class="schlecht">${p(bedarf - ist, 1)} FTE fehlen</span>`) : 'kein Bedarf ermittelt' }]);
   // Figuren zählen sichtbar: eine Figur je 5 FTE Bedarf, gefüllt so weit besetzt
   const slots = Math.max(1, Math.min(30, Math.round(bedarf / 5))), voll = Math.min(slots, Math.round(ist / 5));
-  x += `<div class="hk-figuren" role="img" aria-label="${voll} von ${slots} Figuren besetzt, je 5 FTE">${Array.from({ length: slots }, (_, i) => `<i class="${i < voll ? 'an' : ''}"></i>`).join('')}</div>`;
+  x += `<div class="hw-figuren" role="img" aria-label="${voll} von ${slots} Figuren besetzt, je 5 FTE">${Array.from({ length: slots }, (_, i) => `<i class="${i < voll ? 'an' : ''}"></i>`).join('')}</div>`;
   const summe = v.vollzeit + v.teilzeit + v.aushilfen;
   x += K.tabelle({ titel: 'Verträge', spalten: ['FTE'], zeilen: [
     { name: 'Vollzeit', werte: [p(v.vollzeit, 1)], roh: [Math.round(v.vollzeit * 10)] }, { name: 'Teilzeit', werte: [p(v.teilzeit, 1)], roh: [Math.round(v.teilzeit * 10)] },
@@ -278,21 +280,21 @@ function partner(c, h, b) {
   const id = h.id, std = b?.standard;
   let x = K.abschnitt('Hausstandards', 'Stufe 1 bis 3');
   x += [['sauberkeit', 'Sauberkeit'], ['praesentation', 'Warenpräsentation'], ['kasse', 'Kassenstandard']].map(([key, name]) =>
-    `<div class="hk-regel"><span>${name}</span>${K.stepper({ wert: `Stufe ${p(std?.[key])}`, label: name, attrMinus: tun('standard', id, key, -1), attrPlus: tun('standard', id, key, 1), minusAus: (std?.[key] ?? 1) <= 1, plusAus: (std?.[key] ?? 3) >= 3 })}</div>`).join('');
+    K.feld(name, K.stepper({ wert: `Stufe ${p(std?.[key])}`, label: name, attrMinus: tun('standard', id, key, -1), attrPlus: tun('standard', id, key, 1), minusAus: (std?.[key] ?? 1) <= 1, plusAus: (std?.[key] ?? 3) >= 3 }))).join('') + '</div>';
   x += K.abschnitt('Öffnungszeiten', 'gilt für den Hauscluster');
-  x += [['von', 'Öffnung ab'], ['bis', 'Öffnung bis'], ['samstagBis', 'Samstag bis']].map(([feld, titel]) =>
-    `<div class="hk-regel"><span>${titel}</span>${K.stepper({ wert: `${p(std?.oeffnung?.[feld])} Uhr`, label: titel, attrMinus: tun('stunden', id, feld, -1), attrPlus: tun('stunden', id, feld, 1) })}</div>`).join('');
+  x += '<div class="hw-felder">' + [['von', 'Öffnung ab'], ['bis', 'Öffnung bis'], ['samstagBis', 'Samstag bis']].map(([feld, titel]) =>
+    K.feld(titel, K.stepper({ wert: `${p(std?.oeffnung?.[feld])} Uhr`, label: titel, attrMinus: tun('stunden', id, feld, -1), attrPlus: tun('stunden', id, feld, 1) }))).join('') + '</div>';
   x += K.abschnitt('Services');
   const services = Object.entries(b?.services ?? {});
   x += services.length ? K.liste(services.map(([key, an]) => K.schalter({ text: SERVICE[key] ?? key, unter: an ? 'in diesem Haus aktiv' : 'in diesem Haus aus', an, attr: tun('service', id, key, String(!an)) })))
     + K.abschnitt('Services im ganzen Hauscluster') // Q32: eigene Knöpfe statt verwaister unterstrichener Links
-    + `<div class="hk-knopfreihe q32-cluster">${services.map(([key, an]) => K.knopf(`${SERVICE[key] ?? key} ${an ? 'überall aus' : 'überall an'}`, tun('clusterservice', id, key, String(!an)), 'zweit')).join('')}</div>` : K.leer('Keine Services hinterlegt.');
+    + `<div class="hw-knoepfe zweispaltig q32-cluster">${services.map(([key, an]) => K.knopf(`${SERVICE[key] ?? key} ${an ? 'überall aus' : 'überall an'}`, tun('clusterservice', id, key, String(!an)), 'zweit')).join('')}</div>` : K.leer('Keine Services hinterlegt.');
   x += K.abschnitt('Gastronomie', p(b?.restaurantQm) + ' qm Restaurantfläche');
   x += K.seg([['selbst', 'Selbst betreiben'], ['pacht', 'Verpachten']], b?.gastro ?? '', (w) => tun('gastro', id, w));
   x += K.liste([K.zeile({ was: 'Betriebsform', wert: b?.gastro === 'selbst' ? 'Eigenbetrieb' : b?.gastro === 'pacht' ? 'Verpachtet' : 'Noch keine' }), K.zeile({ was: 'Vertrag bis', wert: b?.gastroVertragBis != null ? 'KW ' + ((b.gastroVertragBis % 52) + 1) : 'ohne Vertrag' })]);
   x += K.abschnitt('Stadt und Sonntagsverkauf');
   x += K.liste([K.zeile({ was: 'Umfeld', wert: esc(b?.umfeld?.ereignis ?? 'Regulär') }), K.zeile({ was: 'Innenstadtfrequenz', wert: PROZENT(b?.umfeld?.trend ?? 1) })]);
-  x += `<div class="hk-knopfreihe">${K.knopf('Verkaufsoffenen Sonntag beantragen', tun('sonntag', id), 'zweit')}</div>`;
+  x += K.knoepfe(K.knopf('Verkaufsoffenen Sonntag beantragen', tun('sonntag', id), 'zweit breit'));
   const partnerZeilen = (b?.flaechen ?? []).map((f) => {
     const info = b?.konzessionen?.[f.id];
     return K.zeile({ was: (f.konzept === 'konzession' ? 'Konzession ' : 'Untermiete ') + esc(f.gruppe ?? f.mieter?.name ?? 'ohne Namen'), wert: fmt.format(Math.round(f.qm)) + ' qm', wertUnter: info ? PROZENT(info.quote) + ' Umsatzmiete' : '' });
@@ -308,8 +310,8 @@ function kosten(c, h, k, b) {
   const id = h.id;
   let x = K.gross([{ label: 'Betriebskosten Woche', wert: geld(k?.sonstige ?? 0) }, { label: 'Energiepreis', wert: PROZENT(b?.energiePreis ?? 1), unter: 'zum Ausgangswert' }]);
   x += K.abschnitt('Budget je Posten', '100 % = Ausgangsbudget');
-  x += Object.entries(POSTEN).map(([key, name]) =>
-    `<div class="hk-regel"><span>${name}</span>${K.stepper({ wert: PROZENT(b?.kosten?.[key] ?? 1), unter: verbrauch(b?.kostenIst?.[key]), label: name, attrMinus: tun('kosten', id, key, -0.1), attrPlus: tun('kosten', id, key, 0.1) })}</div>`).join('');
+  x += '<div class="hw-felder">' + Object.entries(POSTEN).map(([key, name]) =>
+    K.feld(name, K.stepper({ wert: PROZENT(b?.kosten?.[key] ?? 1), unter: verbrauch(b?.kostenIst?.[key]), label: name, attrMinus: tun('kosten', id, key, -0.1), attrPlus: tun('kosten', id, key, 0.1) }))).join('') + '</div>';
   x += K.hinweis('Weniger Reinigung senkt den Kundenscore; weniger Sicherheit und Instandhaltung erhöhen Betriebsrisiken.', 'achtung');
   return x;
 }
@@ -320,7 +322,7 @@ function kommentare(c, h, b) {
   x += b?.kommentare?.length ? K.liste(b.kommentare.map((q) => K.zeile({ was: `KW ${(q.woche % 52) + 1} · ${esc(GRUENDE[q.grund] ?? q.grund)}`, unter: esc(MASS[q.massnahme] ?? q.massnahme) + ' · ' + esc(q.pruefung), wert: PROZENT(q.abweichung), ton: q.abweichung < 0 ? 'schlecht' : '' })))
     : K.leer('Noch keine Abweichung unter −5 % zum Vorjahr oder Plan.');
   x += K.abschnitt('Maßnahme vor Ort');
-  x += `<div class="hk-knopfreihe zweispaltig">${Object.entries(MASS).map(([key, name]) => K.knopf(name, tun('massnahme', id, key), 'zweit')).join('')}</div>`;
+  x += `<div class="hw-knoepfe zweispaltig">${Object.entries(MASS).map(([key, name]) => K.knopf(name, tun('massnahme', id, key), 'zweit')).join('')}</div>`;
   return x;
 }
 
@@ -359,5 +361,5 @@ export function hausStatischHtml(haus, reiter = 'ueberblick') {
     x = etagen.map((nr) => K.abschnitt(etageLang(nr)) + K.liste(flaechen.filter((f) => f.etage === nr).map((f) => K.zeile({ was: esc(f.gruppe ?? f.konzept), wert: fmt.format(f.qm) + ' qm' })))).join('');
   }
   return K.bereich('haus') + K.sprecher({ text: `<b>${name}-Standort.</b> Für dieses Format liegen noch keine Wochenzahlen vor.` }) + K.rumpf(x)
-    + K.reiterUnten(tabs, auswahl, (id) => `onclick="hausReiterWahl('${id}')"`).replace('class="hk-reiter"', 'class="hk-reiter haus-reiter"');
+    + K.reiterUnten(tabs, auswahl, (id) => `onclick="hausReiterWahl('${id}')"`).replace('class="hw-reiter"', 'class="hw-reiter haus-reiter"');
 }
