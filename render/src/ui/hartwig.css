@@ -1077,20 +1077,20 @@ body.panel-offen #erfolge-toast { bottom: auto; top: calc(8px + env(safe-area-in
 #startsetup .hw-feld:first-child { grid-column: 1 / -1; }
 .hw-g6-speicherhinweis { color: var(--schlecht); font: var(--hw-t-lese); }
 .hw-g6-speicherhinweis:empty { display: none; }
-#start .app-plaetze { display: flex; flex-direction: column; gap: 12px; }
-#start .app-platz { padding: 14px; border: 0; border-radius: var(--hw-radius); background: var(--karte); color: var(--text);
+#start .app-plaetze, .hw-app .app-plaetze { display: flex; flex-direction: column; gap: 12px; }
+#start .app-platz, .hw-app .app-platz { padding: 14px; border: 0; border-radius: var(--hw-radius); background: var(--karte); color: var(--text);
   box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--karte), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--kartenlinie); }
-#start .app-platzkopf { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-#start .app-platzkopf b { font: var(--hw-t-kopf); } #start .app-platzkopf span { font: var(--hw-t-klein); color: var(--leise); }
-#start .app-platzinhalt { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
-#start .app-vorschau { flex: none; width: 96px; height: 56px; border-radius: 8px; object-fit: cover; background: var(--tief); color: var(--leise); display: grid; place-items: center; font: var(--hw-t-text); }
-#start .app-daten { min-width: 0; }
-#start .app-daten strong { display: block; font: 500 13.5px/1.3 var(--hw-schrift); }
-#start .app-daten small { display: block; font: var(--hw-t-klein); color: var(--leise); }
-#start .app-aktionen { display: flex; flex-wrap: wrap; gap: 8px; }
-#start .app-aktionen button { flex: 1 1 auto; height: 44px; padding: 0 14px; border: 0; border-radius: var(--hw-radius); background: var(--zweit); color: var(--text); font: 400 12.3px/1 var(--hw-schrift);
+#start .app-platzkopf, .hw-app .app-platzkopf { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+#start .app-platzkopf b, .hw-app .app-platzkopf b { font: var(--hw-t-kopf); } #start .app-platzkopf span, .hw-app .app-platzkopf span { font: var(--hw-t-klein); color: var(--leise); }
+#start .app-platzinhalt, .hw-app .app-platzinhalt { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+#start .app-vorschau, .hw-app .app-vorschau { flex: none; width: 96px; height: 56px; border-radius: 8px; object-fit: cover; background: var(--tief); color: var(--leise); display: grid; place-items: center; font: var(--hw-t-text); }
+#start .app-daten, .hw-app .app-daten { min-width: 0; }
+#start .app-daten strong, .hw-app .app-daten strong { display: block; font: 500 13.5px/1.3 var(--hw-schrift); }
+#start .app-daten small, .hw-app .app-daten small { display: block; font: var(--hw-t-klein); color: var(--leise); }
+#start .app-aktionen, .hw-app .app-aktionen { display: flex; flex-wrap: wrap; gap: 8px; }
+#start .app-aktionen button, .hw-app .app-aktionen button { flex: 1 1 auto; height: 44px; padding: 0 14px; border: 0; border-radius: var(--hw-radius); background: var(--zweit); color: var(--text); font: 400 12.3px/1 var(--hw-schrift);
   box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--zweit), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--zweit-linie); }
-#start .app-aktionen button[data-app-aktion='laden'] { background: var(--akzent); color: #fff; box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--akzent), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--akzent-linie); }
+#start .app-aktionen button[data-app-aktion='laden'], .hw-app .app-aktionen button[data-app-aktion='laden'] { background: var(--akzent); color: #fff; box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--akzent), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--akzent-linie); }
 
 /* Einführung: Vorstandsassistentin als dunkles Blatt mit Sprecherzeile. */
 #einfuehrung-root { position: fixed; inset: 0; z-index: 18; pointer-events: none; }
@@ -1202,3 +1202,17 @@ body.spielende-aktiv { overflow: hidden; }
 #spielende-overlay .se-bilanz .hw-gross + .hw-gross { margin-top: 18px; }
 #spielende-overlay .se-bilanz .hw-knoepfe { margin-top: 24px; }
 @media (prefers-reduced-motion: reduce) { #spielende-overlay *, #spielende-overlay *::before { animation: none !important; transition: none !important; } }
+/* Großkennzahlen dürfen nie seitlich überlaufen: lange Werte schrumpfen. */
+.hw-gross .hw-zahl { overflow-wrap: anywhere; }
+.hw-gross > div { overflow: hidden; }
+/* Tabellenkopf links darf umbrechen, sonst schiebt ein langer Titel die Tabelle aus dem Blatt. */
+.hw-tabelle { table-layout: auto; max-width: 100%; }
+.hw-tabelle th:first-child { white-space: normal; }
+/* Spielstände im Blatt: Platzkarten wie auf dem Start, Name als dunkles Feld. */
+.hw-app { display: grid; gap: 12px; }
+.hw-app-befund { color: var(--leise); margin: 14px 0 0; }
+.hw-app .app-platz { box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--karte), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--kartenlinie); }
+.hw-app .app-namenswahl { display: block; margin: 0 0 10px; font: var(--hw-t-marke); text-transform: uppercase; color: var(--marke); }
+.hw-app .app-namenswahl input { display: block; width: 100%; height: 40px; margin-top: 6px; padding: 0 12px; border: 0; border-radius: var(--hw-radius); background: var(--feld); color: var(--text); font: var(--hw-t-text); text-transform: none; box-shadow: inset 0 0 0 1.33px var(--feldlinie); }
+/* Boden unter dem Fenster: erste Kennzahl nicht direkt an der Kante. */
+.hw-boden > .hw-rumpf > .hw-gross:first-child { margin-top: 0; padding-top: 18px; }

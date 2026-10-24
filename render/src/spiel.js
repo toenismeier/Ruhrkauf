@@ -1114,9 +1114,9 @@ function oeffneWettbewerber(id) {
   // Q30: Hauptfrage „Wie stark kostet mich dieser Wettbewerber, und in welchen Sortimenten?“
   const summe = wirkung.reduce((x, [, v]) => x + Number(v), 0), staerkste = wirkung[0];
   const aktion = w.status === 'raeumung' ? 'Räumungsverkauf bis 70 %' : w.rabatt ? Math.round(w.rabatt * 100) + ' % Rabatt' : w.status === 'eroeffnung' ? 'Neueröffnung' : 'keine';
-  let html = HK.bereich('betrieb', 'karte') + HK.sprecher({ text: staerkste && staerkste[1] < 0 ? `<b>${esc(w.name)} kostet uns am meisten in ${esc(E.GRUPPEN[staerkste[0]]?.name ?? staerkste[0])} (${Number(staerkste[1]).toFixed(2).replace('.', ',').replace('-', '−')} %).</b> Aktion: ${esc(aktion)}.` : `<b>${esc(w.name)} wirkt derzeit kaum auf Hartwig.</b> Aktion: ${esc(aktion)}.`,
+  let html = HK.bereich('betrieb', 'karte') + HK.sprecher({ text: staerkste && staerkste[1] < 0 ? `${esc(w.name)} kostet uns am meisten in ${esc(E.GRUPPEN[staerkste[0]]?.name ?? staerkste[0])} (${Number(staerkste[1]).toFixed(2).replace('.', ',').replace('-', '−')} %). Aktion: ${esc(aktion)}.` : `${esc(w.name)} wirkt derzeit kaum auf Hartwig. Aktion: ${esc(aktion)}.`,
     unter: 'Marktbeobachtung', ton: w.rabatt || w.status === 'eroeffnung' ? 'engpass' : '' });
-  let rumpf = HK.gross([{ label: 'Wettbewerbsstärke', wert: Math.round(u.staerke * 100) + ' / 100', ton: u.staerke > 0.6 ? 'schlecht' : '' }, { label: 'Grundfläche', wert: fmt.format(w.grundflaecheQm) + ' qm' }]);
+  let rumpf = HK.gross([{ label: 'Stärke', wert: Math.round(u.staerke * 100) + ' / 100', ton: u.staerke > 0.6 ? 'schlecht' : '' }, { label: 'Grundfläche', wert: fmt.format(w.grundflaecheQm) + ' qm' }]);
   rumpf += HK.liste([HK.zeile({ was: 'Art', wert: esc(WB_ART[w.art] ?? w.art) }), HK.zeile({ was: 'Status', wert: esc(WB_STATUS[w.status] ?? w.status), wertUnter: esc(start) })]);
   if (w.inHartwigGebaeude) rumpf += HK.hinweis('Nachnutzung eines ehemaligen Hartwig-Standorts.', 'achtung');
   rumpf += wirkung.length ? HK.tabelle({ titel: 'Wirkung auf Hartwig nach Warengruppe', spalten: ['Umsatz'], zeilen: wirkung.map(([g, v]) => ({ name: E.GRUPPEN[g]?.name ?? g, werte: [Number(v).toFixed(2).replace('.', ',').replace('-', '−') + ' %'], ton: [v < 0 ? 'schlecht' : ''] })),

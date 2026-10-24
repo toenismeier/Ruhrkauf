@@ -30,7 +30,7 @@ window.fertig = true;`;
   const out = path.join(wurzel, 'out', 'q30');
   fs.mkdirSync(out, { recursive: true });
   await esbuild.build({ stdin: { contents: eintrag, resolveDir: wurzel, loader: 'js' }, bundle: true, outfile: path.join(out, 'katalog.js'), format: 'iife', logLevel: 'error' });
-  fs.writeFileSync(path.join(out, 'katalog.html'), '<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../../src/ui/komponenten.css"><style>*{box-sizing:border-box}body{margin:0;background:#111;font-family:-apple-system,"DejaVu Sans",Arial,sans-serif}</style><body></body><script src="katalog.js"></script>');
+  fs.writeFileSync(path.join(out, 'katalog.html'), '<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../../src/ui/hartwig.css"><style>*{box-sizing:border-box}body{margin:0;background:#111;font-family:-apple-system,"DejaVu Sans",Arial,sans-serif}</style><body></body><script src="katalog.js"></script>');
   const b = await chromium.launch({ headless: true });
   const p = await b.newPage({ viewport: { width: 1640, height: 900 }, deviceScaleFactor: 2 });
   p.on('pageerror', (e) => console.log('FEHLER', e.message));

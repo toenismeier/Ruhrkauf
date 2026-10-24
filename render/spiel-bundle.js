@@ -161393,7 +161393,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "bb3f2fc" : "Entwicklung";
+  var version = () => true ? "80c2be0" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -174610,7 +174610,7 @@ void main() {
         const infos = await liste2();
         const vorhanden = Object.fromEntries(infos.map((i, n3) => [PLAETZE[n3], i]));
         const belegt2 = PLAETZE.filter((p2) => p2 !== "autosave" && vorhanden[p2]).length, auto4 = vorhanden.autosave;
-        const kopf = start ? "" : '<div class="q31"><div class="q-gross"><span class="q-label">Zuletzt automatisch gespeichert</span><span class="q-haupt">' + (auto4 ? "Woche " + (auto4.woche + 1) : "noch nie") + '</span><span class="q-neben"><b>' + belegt2 + " von " + (PLAETZE.length - 1) + '</b>Pl\xE4tzen belegt</span></div><div class="q-befund">' + (auto4 ? esc(auto4.stadt) + ", " + datumFormatieren(auto4.datum) + ". Der automatische Stand wird jede Woche \xFCberschrieben; f\xFCr einen festen Stand einen Platz w\xE4hlen." : "Noch kein Spielstand. Speichere auf einem der drei Pl\xE4tze.") + "</div></div>";
+        const kopf = start ? "" : gross2([{ label: "Automatisch gespeichert", wert: auto4 ? "Woche " + (auto4.woche + 1) : "noch nie" }, { label: "Pl\xE4tze belegt", wert: belegt2 + " von " + (PLAETZE.length - 1) }]) + '<p class="hw-lese hw-app-befund">' + (auto4 ? esc(auto4.stadt) + ", " + datumFormatieren(auto4.datum) + ". Der automatische Stand wird jede Woche \xFCberschrieben; f\xFCr einen festen Stand einen Platz w\xE4hlen." : "Noch kein Spielstand. Speichere auf einem der drei Pl\xE4tze.") + "</p>" + abschnitt("Pl\xE4tze");
         root.innerHTML = kopf + PLAETZE.map((platz) => {
           const info = vorhanden[platz];
           const name2 = info?.name ?? (platz === "autosave" ? "Automatisch" : "");
@@ -174683,7 +174683,7 @@ void main() {
     }
     function oeffne() {
       if (!APP_AKTIV) return;
-      panel2("Spielst\xE4nde", "Drei benannte Pl\xE4tze und ein automatischer Spielstand", bereich("zentrale") + '<i class="q31-marke" hidden></i><div id="app-plaetze" class="app-plaetze">Lade Spielst\xE4nde \u2026</div>', "gross");
+      panel2("Spielst\xE4nde", "Drei Pl\xE4tze und ein automatischer Stand", bereich("betrieb", "post") + sprecher({ text: "Hier sichern und laden Sie Ihre Partien.", unter: "Sekretariat" }) + '<div class="hw-rumpf"><div id="app-plaetze" class="app-plaetze hw-app">Lade Spielst\xE4nde \u2026</div></div>', "gross");
       return zeichne($("app-plaetze"));
     }
     function startAktualisieren() {
@@ -180742,11 +180742,11 @@ void main() {
     const summe2 = wirkung.reduce((x2, [, v2]) => x2 + Number(v2), 0), staerkste = wirkung[0];
     const aktion2 = w2.status === "raeumung" ? "R\xE4umungsverkauf bis 70 %" : w2.rabatt ? Math.round(w2.rabatt * 100) + " % Rabatt" : w2.status === "eroeffnung" ? "Neuer\xF6ffnung" : "keine";
     let html = bereich("betrieb", "karte") + sprecher({
-      text: staerkste && staerkste[1] < 0 ? `<b>${esc(w2.name)} kostet uns am meisten in ${esc(GRUPPEN[staerkste[0]]?.name ?? staerkste[0])} (${Number(staerkste[1]).toFixed(2).replace(".", ",").replace("-", "\u2212")} %).</b> Aktion: ${esc(aktion2)}.` : `<b>${esc(w2.name)} wirkt derzeit kaum auf Hartwig.</b> Aktion: ${esc(aktion2)}.`,
+      text: staerkste && staerkste[1] < 0 ? `${esc(w2.name)} kostet uns am meisten in ${esc(GRUPPEN[staerkste[0]]?.name ?? staerkste[0])} (${Number(staerkste[1]).toFixed(2).replace(".", ",").replace("-", "\u2212")} %). Aktion: ${esc(aktion2)}.` : `${esc(w2.name)} wirkt derzeit kaum auf Hartwig. Aktion: ${esc(aktion2)}.`,
       unter: "Marktbeobachtung",
       ton: w2.rabatt || w2.status === "eroeffnung" ? "engpass" : ""
     });
-    let rumpf4 = gross2([{ label: "Wettbewerbsst\xE4rke", wert: Math.round(u.staerke * 100) + " / 100", ton: u.staerke > 0.6 ? "schlecht" : "" }, { label: "Grundfl\xE4che", wert: fmt.format(w2.grundflaecheQm) + " qm" }]);
+    let rumpf4 = gross2([{ label: "St\xE4rke", wert: Math.round(u.staerke * 100) + " / 100", ton: u.staerke > 0.6 ? "schlecht" : "" }, { label: "Grundfl\xE4che", wert: fmt.format(w2.grundflaecheQm) + " qm" }]);
     rumpf4 += liste([zeile({ was: "Art", wert: esc(WB_ART[w2.art] ?? w2.art) }), zeile({ was: "Status", wert: esc(WB_STATUS[w2.status] ?? w2.status), wertUnter: esc(start) })]);
     if (w2.inHartwigGebaeude) rumpf4 += hinweis("Nachnutzung eines ehemaligen Hartwig-Standorts.", "achtung");
     rumpf4 += wirkung.length ? tabelle({
