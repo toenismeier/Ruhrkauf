@@ -654,12 +654,12 @@ async function buendeln() {
     const pruefe = (ok, msg) => { if (!ok) fehler.push(msg); console.log((ok ? 'OK: ' : 'FEHLER: ') + msg); };
     await p.evaluate(() => window.spiel.neuesSpiel(1, 'Essen'));
     await p.locator('#stadt-reise').click();
-    await p.waitForSelector('#reise-overlay:not([hidden]) .reise-panel');
+    await p.waitForSelector('#reise-overlay:not([hidden]) .hw-reise');
     await p.screenshot({ path: path.join(ordnerReise, '00-hauptbahnhof.png') });
     await p.screenshot({ path: path.join(abnahme, '04-reiseziele.png') });
-    const zielBilder = await p.locator('.reise-vorschaurahmen').count();
+    const zielBilder = await p.locator('.hw-reise-bild').count();
     pruefe(zielBilder > 0, 'Reiseziele enthalten eigene Vorschaurahmen');
-    await p.locator('.reise-suche').fill('Düsseldorf');
+    await p.locator('[data-reisesuche]').fill('Düsseldorf');
     const gefiltert = await p.locator('[data-reiseziel]').count();
     pruefe(gefiltert === 1, 'Reisesuche filtert Düsseldorf');
     await p.screenshot({ path: path.join(ordnerReise, '01-zielwahl.png') });
@@ -683,10 +683,10 @@ async function buendeln() {
     await p.screenshot({ path: path.join(ordnerReise, '99-angekommen.png') });
     // Nach der ersten Reise muss der Cache einen echten Stadtbildausschnitt statt generischem Motiv enthalten.
     await p.locator('#stadt-reise').click();
-    await p.waitForSelector('#reise-overlay:not([hidden]) .reise-panel');
+    await p.waitForSelector('#reise-overlay:not([hidden]) .hw-reise');
     const erstesZiel = await p.locator('[data-reiseziel]').first().getAttribute('data-reiseziel');
     pruefe(erstesZiel === 'Essen', 'Zuletzt besuchte Stadt steht vor umsatzsortierten Reisezielen');
-    const cached = await p.locator('[data-reiseziel="Essen"] .reise-vorschaurahmen img').getAttribute('src');
+    const cached = await p.locator('[data-reiseziel="Essen"] .hw-reise-bild img').getAttribute('src');
     pruefe(cached?.startsWith('data:image/jpeg;base64,'), 'Bereiste Stadt nutzt gecachten 96x96-Kartenausschnitt');
     await p.screenshot({ path: path.join(abnahme, '05-stadtvorschau.png') });
     await p.locator('[data-reisezu]').click();
@@ -705,16 +705,16 @@ async function buendeln() {
     });
     pruefe(!!testWoche, 'Engine-Testwoche mit mindestens einem neuen Vorgang gefunden');
     await p.locator('#weiter').click();
-    await p.waitForSelector('#wochen-overlay:not([hidden]) .wochen-frage');
+    await p.waitForSelector('#wochen-overlay:not([hidden]) .hw-wb-frage');
     await p.waitForTimeout(300);
     const dialogDarstellung = await p.evaluate(() => {
-      const maske = getComputedStyle(document.querySelector('.wochen-maske'));
-      const karte = getComputedStyle(document.querySelector('.wochen-frage'));
+      const maske = getComputedStyle(document.querySelector('.hw-wb-maske'));
+      const karte = getComputedStyle(document.querySelector('.hw-wb-frage'));
       return { maske: maske.backgroundColor, karte: karte.backgroundColor, opacity: Number(karte.opacity) };
     });
     pruefe(/rgba?\(12, 20, 28, (?:0\.6|0\.60)\)/.test(dialogDarstellung.maske),
       'Hintergrund um 60 Prozent abgedunkelt: ' + dialogDarstellung.maske);
-    pruefe(dialogDarstellung.karte === 'rgb(248, 247, 244)' && dialogDarstellung.opacity > .95,
+    pruefe(/^rgb\(/.test(dialogDarstellung.karte) && dialogDarstellung.opacity > .95,
       'Bestätigungskarte deckend: ' + JSON.stringify(dialogDarstellung));
     await p.screenshot({ path: path.join(ordnerWoche, '00-bestaetigung.png') });
     await p.screenshot({ path: path.join(abnahme, '01-bestaetigung.png') });
@@ -731,9 +731,9 @@ async function buendeln() {
       soll: window.spiel.E.cockpit(window.spiel.s),
       aktuell: document.getElementById('wb-umsatz')?.dataset.wert,
       ebitda: document.getElementById('wb-ebitda')?.dataset.wert,
-      zeitung: document.querySelector('.wb-zeitung')?.textContent,
+      zeitung: document.querySelector('[data-wb="zeitung"]')?.textContent,
       kapitalfluss: window.spiel.E.kapitalfluss(window.spiel.s),
-      kapitalflussText: document.querySelector('.wb-cash')?.textContent }));
+      kapitalflussText: document.querySelector('[data-wb="cash"]')?.textContent }));
     zeiten.wochenbericht = w.zeiten;
     if (animationen) { const fertig = w.zeiten.find((x) => x.ereignis === 'Zählung beendet');
       pruefe(!!fertig && Math.abs(fertig.jaMs - 11860) <= 1186, 'Wochenbericht bis Zählerende 11.860 ms ±10 %'); }
@@ -752,10 +752,10 @@ async function buendeln() {
     await p.screenshot({ path: path.join(ordnerWoche, '99-wochenbericht.png') });
     await p.screenshot({ path: path.join(abnahme, '02-kapitalfluss.png') });
     if (w.bericht?.vorgaenge > 0) {
-      await p.waitForSelector('#wb-vorfall.offen .wb-vorfall');
+      await p.waitForSelector('#wb-vorfall.offen [data-wb="vorfall"]');
       await p.screenshot({ path: path.join(ordnerWoche, '100-vorfall.png') });
       await p.screenshot({ path: path.join(abnahme, '03-vorfall-portraet.png') });
-      pruefe(await p.locator('#wb-vorfall.offen .wb-gesicht svg').count() === 1, 'Zuständiges Porträt als SVG (kein Buchstabe)');
+      pruefe(await p.locator('#wb-vorfall.offen [data-wb="gesicht"] svg').count() === 1, 'Zuständiges Porträt als SVG (kein Buchstabe)');
       pruefe(true, 'Neuer Engine-Vorgang als Bottom-Sheet');
       // Alle Vorfälle verlassen, damit der Wochenstreifen nach Schließen des Berichts prüfbar ist.
       for (let i = 0; i < Math.min(3, w.bericht.vorgaenge); i++) {
@@ -767,8 +767,8 @@ async function buendeln() {
       console.warn('Kein neuer Vorgang in dieser Testwoche; Vorfall-Test nicht abgedeckt.');
       fehler.push('Vorfalldialog nicht überprüft: keine neuen Vorgänge aus der Engine');
     }
-    if (await p.locator('.wb-schliessen:visible').count()) {
-      await p.locator('.wb-schliessen').click();
+    if (await p.locator('.hw-wb .hw-kopf [data-wa="schliessen"]:visible').count()) {
+      await p.locator('.hw-wb .hw-kopf [data-wa="schliessen"]').click();
       const streifen = await p.locator('#wochenstreifen').evaluate((el) =>
         ({ sichtbar: !!el.offsetWidth && !!el.offsetHeight, text: el.textContent }));
       pruefe(!streifen.sichtbar, 'Im normalen Spiel erscheint kein Wochenstreifen nach dem Bericht');
@@ -851,7 +851,7 @@ async function buendeln() {
       const s = window.spiel.s, hs = window.spiel.E.portfolio(s);
       return { woche: s.woche, hauser: hs.length,
         staedte: new Set(hs.map((h) => h.stadt)).size,
-        pins: document.querySelectorAll('.deutschland-svg g[data-stadt]').length,
+        pins: document.querySelectorAll('.hw-deutschland g[data-stadt]').length,
         ohne: hs.filter((h) => !h.steuerbar).length,
         fehler: window.spiel.portfolio.pruefe().fehler };
     });
@@ -859,8 +859,8 @@ async function buendeln() {
     pruefen('Jede Engine-Stadt erhält Kartenpunkt', karte.pins === karte.staedte, karte);
     pruefen('Karte ohne fehlende Hausattribute', !karte.fehler.length, karte.fehler);
     await p.screenshot({ path: path.join(bilder, 'deutschland.png') });
-    const stadt = await p.locator('.deutschland-svg g[data-stadt]').first().getAttribute('data-stadt');
-    await p.locator('.deutschland-svg g[data-stadt]').first().evaluate((el) => el.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    const stadt = await p.locator('.hw-deutschland g[data-stadt]').first().getAttribute('data-stadt');
+    await p.locator('.hw-deutschland g[data-stadt]').first().evaluate((el) => el.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     pruefen('Stadtauswahl per Kartenpunkt', await p.evaluate((name) => document.getElementById('stadtname').textContent === name ||
       document.getElementById('ptitel').textContent === name, stadt), stadt);
     await p.evaluate(() => window.spiel.oeffnePortfolio('liste'));
@@ -868,7 +868,7 @@ async function buendeln() {
       const hs = window.spiel.E.portfolio(window.spiel.s);
       const d = window.spiel.portfolio.pruefe();
       return { alle: hs.length, daten: d.anzeige, imDom: d.domZeilen,
-        spalten: [...document.querySelectorAll('[data-pp="sort"] option')].map((x) => x.value) };
+        spalten: [...document.querySelectorAll('[data-pp="sort"]')].map((x) => x.dataset.v) };
     });
     pruefen('Portfolio zeigt alle Engine-Häuser', liste.alle === liste.daten, liste);
     pruefen('Nur sichtbare Listenzeilen im DOM', liste.imDom > 0 && liste.imDom <= 35, liste);
@@ -877,8 +877,7 @@ async function buendeln() {
     // Premium und Sport haben weniger als 50 Häuser, daher min(50, Formatbestand).
     for (const format of ['hartwig', 'premium', 'sport', 'volkskauf', 'fundus']) {
       const check = await p.evaluate((key) => {
-        const select = document.querySelector('[data-pp-filter="format"]');
-        select.value = key; select.dispatchEvent(new Event('change', { bubbles: true }));
+        document.querySelector('[data-pp-filter="format"][data-v="' + key + '"]').click();
         const s = window.spiel.s, hs = window.spiel.E.portfolio(s).filter((h) => h.formatKey === key)
           .sort((a, b) => b.umsatz - a.umsatz || a.stadt.localeCompare(b.stadt, 'de') || a.id.localeCompare(b.id, 'de'));
         const scroll = document.getElementById('pp-scroll');
@@ -895,8 +894,7 @@ async function buendeln() {
       pruefen('Portfolio-Stichprobe ' + format, !check.fehlt.length && check.geprueft > 0, check);
     }
     await p.evaluate(() => {
-      document.querySelector('[data-pp-filter="format"]').value = 'alle';
-      document.querySelector('[data-pp-filter="format"]').dispatchEvent(new Event('change', { bubbles: true }));
+      document.querySelector('[data-pp-filter="format"][data-v="alle"]').click();
       document.getElementById('pp-scroll').scrollTop = 0;
     });
     await p.screenshot({ path: path.join(bilder, 'portfolio-liste.png') });
@@ -1033,14 +1031,14 @@ async function buendeln() {
       await schritt(12);
       await klick('#pzu'); await klick('#weiter'); await klick('[data-wa="ja"]');
       await schritt(13);
-      await p.waitForSelector('#wochen-overlay .wb-bericht');
+      await p.waitForSelector('#wochen-overlay [data-wb="bericht"]');
       await klick('[data-ein="weiter"]');
       await schritt(14);
-      for (let i = 0; i < 4 && await p.locator('#wb-vorfall .wb-vorfall').count(); i++) {
+      for (let i = 0; i < 4 && await p.locator('#wb-vorfall [data-wb="vorfall"]').count(); i++) {
         await p.locator('#wb-vorfall [data-wa="spaeter"]').click();
         await p.waitForTimeout(30);
       }
-      if (await p.locator('#wochen-overlay .wb-bericht').count()) await klick('#wochen-overlay [data-wa="schliessen"]');
+      if (await p.locator('#wochen-overlay [data-wb="bericht"]').count()) await klick('#wochen-overlay .hw-kopf [data-wa="schliessen"]');
       await klick('#stadt-reise');
       await p.waitForSelector('[data-reiseziel="Düsseldorf"]');
       await klick('[data-reiseziel="Düsseldorf"]');
@@ -1100,13 +1098,13 @@ async function buendeln() {
       const kontrolle = await p.evaluate(() => {
         const s=window.spiel.s, E=window.spiel.E, k=E.cockpit(s), liste=[];
         if (window.spiel.statistik.ui.seite === 'konzern') {
-          const graphen=[...document.querySelectorAll('.stat-diagramm')];
+          const graphen=[...document.querySelectorAll('[data-st-chart]')];
           for (const [i,[name,soll]] of [['Umsatz',k.umsatzWoche],['EBITDA',k.ebitdaWoche],['Cash',k.cash]].entries()) {
             const ist=Number(graphen[i]?.dataset.stEnde);
             if (!Number.isFinite(ist)||ist!==soll) liste.push(name+': Endpunkt '+ist+' statt '+soll);
           }
         }
-        return { seite:window.spiel.statistik.ui.seite, diagramme:document.querySelectorAll('.stat-diagramm').length,
+        return { seite:window.spiel.statistik.ui.seite, diagramme:document.querySelectorAll('[data-st-chart]').length,
           fehler:liste.concat(window.spiel.statistik.pruefe().fehler) };
       });
       bericht.reihen += kontrolle.diagramme;
@@ -1119,7 +1117,7 @@ async function buendeln() {
       await p.evaluate(id=>window.spiel.oeffneHaus(id),hausId);
       // Q30: Hausdetail zeigt Umsatz und Deckungsbeitrag als zwei Balkenreihen (5 Wochen, je eigene Skala).
       const test = await p.evaluate((id) => {
-        const reihen = [...document.querySelectorAll('#pinhalt .hk-balkenpaar .hk-balken')];
+        const reihen = [...document.querySelectorAll('#pinhalt .hw-balkenfeld .hw-balken')];
         const letzterBalken = reihen[0] ? [...reihen[0].querySelectorAll('[data-w]')].at(-1)?.dataset.w : null;
         return { diagramme: reihen.length, balken: letzterBalken == null ? null : Number(letzterBalken),
           letztes: window.spiel.E.verlauf(window.spiel.s, { ebene: 'haus', id, kennzahl: 'umsatz', wochen: 5 }).punkte.at(-1)?.wert };

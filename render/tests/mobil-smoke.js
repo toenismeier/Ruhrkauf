@@ -60,20 +60,19 @@ const server = http.createServer((req, res) => {
     const mapStatus = await page.evaluate(() => {
       const p = window.spiel.portfolio.pruefe(), hs = window.spiel.E.portfolio(window.spiel.s);
       return { ...p, staedte: new Set(hs.map((h) => h.stadt)).size,
-        pins: document.querySelectorAll('.deutschland-svg g[data-stadt]').length };
+        pins: document.querySelectorAll('.hw-deutschland g[data-stadt]').length };
     });
     assert.equal(mapStatus.pins, mapStatus.staedte, 'Karte besitzt einen Punkt je Engine-Stadt');
     assert.deepEqual(mapStatus.fehler, [], 'Karte nutzt gültige Engine-Attribute');
-    await page.locator('.deutschland-svg g[data-stadt]').first().evaluate((element) => element.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    await page.locator('.hw-deutschland g[data-stadt]').first().evaluate((element) => element.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     assert.ok(await page.evaluate(() => document.getElementById('ptitel').textContent.length > 0), 'Stadt über Kartenpunkt geöffnet');
     await page.evaluate(() => window.spiel.oeffnePortfolio('liste'));
-    const rowsBefore = await page.locator('#pp-scroll .pp-haus').count();
+    const rowsBefore = await page.locator('#pp-scroll .hw-pp-zeile').count();
     await page.locator('#pp-scroll').evaluate((el) => { el.scrollTop = 1800; el.dispatchEvent(new Event('scroll')); });
-    const rowsAfter = await page.locator('#pp-scroll .pp-haus').count();
+    const rowsAfter = await page.locator('#pp-scroll .hw-pp-zeile').count();
     assert.ok(rowsBefore > 0 && rowsBefore < 36 && rowsAfter > 0 && rowsAfter < 36, 'Portfolio listet nur sichtbare Häuser');
-    // Q30: Filter liegen in einer aufklappbaren Leiste
-    if (!(await page.locator('.pp-filterbox[open]').count())) await page.locator('.pp-filterbox > summary').click();
-    await page.locator('[data-pp-filter="format"]').selectOption('sport');
+    // E47: Filter sind Segmentleisten
+    await page.locator('[data-pp-filter="format"][data-v="sport"]').click();
     const sportAuswahl = await page.evaluate(() => {
       const hs = window.spiel.E.portfolio(window.spiel.s).filter((h) => h.formatKey === 'sport' && h.steuerbar);
       return hs.map((h) => h.id);

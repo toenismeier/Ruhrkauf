@@ -5,7 +5,7 @@ Auftrag: `auftraege/spiel-reise-und-wochenabschluss.md`.
 
 ## Implementiert
 
-- Eigene UI-Module `src/ui/reise.js` und `src/ui/wochenbericht.js`, Gestaltung in `src/ui/reise-woche.css`; Engine-Berechnung verbleibt in der Engine.
+- Eigene UI-Module `src/ui/reise.js` und `src/ui/wochenbericht.js`, Gestaltung in `src/ui/hartwig.css` (Abschnitt G5); Engine-Berechnung verbleibt in der Engine.
 - Bahnhofs-Pin über `slot:bahnhof`, Bahnhofspanel mit Kit-Porträt, Schreibmaschinentext, Suchfeld, Formatanzahlen und schematischer Deutschlandkarte mit einem Punkt pro Reisestadt; zuletzt besuchte Ziele werden im UI-Spielstand gespeichert und zuerst sortiert.
 - Stadtwechsel mit ICE-SVG, dreifach wiederverwendeten, vorgerenderten Kit-Motiven, Parallaxe, Streckenleiste und kreisförmigem Ein-/Ausblenden. Aufbau der Zielstadt beginnt innerhalb des Übergangs; der Bahnhof wird vor der Schlussblende fokussiert.
 - Der bisherige Stadt-Selektor ist weiterhin im Menü als direkte Wahl verfügbar.
