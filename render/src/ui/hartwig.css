@@ -318,6 +318,108 @@
 /* ── G1 Eigenmarken und Produktentwicklung ── */
 /* ── G2 Einkauf, Ware, Planung, Vertrieb ── */
 /* ── G3 Marketing, E-Commerce, IT ── */
+/* Marker <i class="hw-g3"> im Inhalt. Kopftitel und Reiter auf die Skala (komponenten.css setzt 16 px bzw. 10 px). */
+/* komponenten.css lenkt --grund, --karte, --text, --leise am #panel auf die hellere Q30-Palette um; hier wieder die Hartwig-Zentralewerte. */
+#panel:has(.hw-g3) { --grund: #213741; --karte: #0d161a; --text: #fff; --leise: #a6a7a7; color: var(--text); }
+#panel:has(.hw-g3) #ptitel.hw-kopf-titel { font: var(--hw-t-kopf); }
+#panel:has(.hw-g3) #preiter > .hw-reiter { padding: 0 6px; }
+#panel:has(.hw-g3) #preiter > .hw-reiter > button { flex: 1 1 0; min-width: 0; max-width: 80px; margin: 0; font-size: 10.4px; }
+#panel:has(.hw-g3) #preiter > .hw-reiter > button[aria-current='page'] { flex: 1 1 0; margin: 0 2px; }
+#panel:has(.hw-g3) > .hw-inhalt { background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+#panel:has(.hw-g3) .hw-rumpf .hw-segment { margin: 0; }
+#panel:has(.hw-g3) .hw-rumpf > .hw-segment:first-child, #panel:has(.hw-g3) .hw-rumpf > .hw-feld:first-child, #panel:has(.hw-g3) .hw-rumpf > .hw-g3-produkttitel:first-child { margin-top: 18px; }
+#panel:has(.hw-g3) .hw-rumpf > .hw-gross:first-child { margin-top: 18px; }
+#panel:has(.hw-g3) .hw-karussell { margin-top: 4px; padding-top: 2px; padding-bottom: 2px; }
+#panel:has(.hw-g3) .hw-karussell + .hw-punkte { margin-top: 15px; }
+.hw-g3-notiz { margin: 10px 0 0; color: var(--leise); }
+.hw-g3-leise { margin: 14px 0 0; color: var(--leise); }
+.hw-g3-abstand { margin-top: 16px; }
+/* Summenzeile im Buch: Strich darüber, Zahl weiß (Coffee 22). */
+.hw-zeile.hw-g3-summe { box-shadow: inset 0 1px 0 0 var(--text); font-weight: 500; }
+/* Große Skala im Rumpf (Coffee 05): fünf Segmente, Wert rechts. */
+.hw-g3-skalaname { display: block; margin: 18px 0 8px; }
+.hw-g3-skala { padding: 0; }
+.hw-g3-skala .hw-skala-balken { flex: 1 1 auto; }
+.hw-g3-skala .hw-skala-wert { flex: 0 0 auto; min-width: 60px; margin-left: 14px; }
+
+/* Kanalkarte im Karussell (Coffee 05): Illustration oben, Titel, Text, Verantwortlich, Wochenbudget. */
+.hw-g3-kanal { display: flex; flex-direction: column; height: 100%; padding: 14px 18px 20px; }
+.hw-g3-bild { display: flex; justify-content: center; align-items: flex-end; height: 132px; margin-bottom: 10px; }
+.hw-g3-bild > svg { height: 100%; width: auto; max-width: 100%; }
+.hw-g3-links { text-align: left; }
+.hw-g3-text { margin: 10px 0 0; flex: 1 0 auto; }
+.hw-g3-team { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 16px 0 14px; }
+.hw-g3-team .hw-marke, .hw-g3-wert { display: block; }
+.hw-g3-wert { margin-top: 3px; font: var(--hw-t-text); }
+.hw-g3-teamknoepfe { display: flex; gap: 8px; flex: none; align-items: center; }
+.hw-g3-teamknoepfe .hw-knopf { padding: 0 14px; }
+.hw-g3-kanal .hw-feld + .hw-feld { margin-top: 12px; }
+
+/* Kacheln zweispaltig (Coffee 23–24): Illustration, Titel mittig, Stufe links, Betrag rechts, „je Woche“. */
+.hw-g3-kacheln { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.hw-g3-kachel { position: relative; display: grid; grid-template-rows: 92px auto auto auto; min-width: 0; padding: 14px 14px 16px; border: 0; color: var(--text); text-align: center;
+  --f: var(--karte); --l: var(--kartenlinie); background: var(--f); box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--f), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--l); border-radius: var(--hw-radius); }
+.hw-g3-kachel[aria-pressed='true'] { --l: var(--akzent-linie); }
+.hw-g3-kachelbild { display: flex; justify-content: center; align-items: center; height: 92px; }
+.hw-g3-kachelbild > svg { height: 84px; width: auto; max-width: 100%; }
+.hw-g3-kacheltitel { margin-top: 10px; font: var(--hw-t-titel); font-size: 15px; }
+.hw-g3-kachelwert { margin-top: 10px; text-align: right; font: var(--hw-t-wert); white-space: nowrap; }
+.hw-g3-kachelfuss { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; margin-top: 3px; font: var(--hw-t-text); font-size: 11.6px; text-align: left; }
+.hw-g3-kachelfuss small { flex: none; font: var(--hw-t-text); font-size: 11.6px; color: var(--leise); }
+.hw-g3-steuer { grid-column: 1 / -1; padding: 4px 0 6px; }
+.hw-g3-steuer .hw-schalterzeile { margin-top: 0; }
+
+/* Marktanteil (Coffee 25): Ring links, Legende rechts. */
+.hw-g3-markt { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: center; }
+.hw-g3-ring { width: 150px; height: 150px; }
+.hw-g3-ring text { font: 400 11px var(--hw-schrift); fill: var(--tief); }
+.hw-g3-ring-hartwig { stroke: var(--gut); background: var(--gut); }
+.hw-g3-ring-volkskauf { stroke: #8fd18f; background: #8fd18f; }
+.hw-g3-ring-fundus { stroke: #c9e6c4; background: #c9e6c4; }
+.hw-g3-ring-wettbewerber { stroke: #ffffff; background: #ffffff; }
+.hw-g3-farbe { display: inline-block; width: 9px; height: 9px; margin-right: 8px; border-radius: 2px; vertical-align: 0; }
+.hw-g3-markt .hw-zeile { min-height: 36px; padding: 6px 0; font-size: 11.85px; }
+
+/* Aktionskalender: Jahresleiste mit Balken je Aktion. */
+.hw-g3-zeitleiste { display: block; width: 100%; height: auto; }
+.hw-g3-linie { stroke: var(--kartenlinie); stroke-width: 1; opacity: .6; }
+.hw-g3-monat { font: 400 10px var(--hw-schrift); fill: var(--leise); }
+.hw-g3-jetzt { stroke: var(--stern); stroke-width: 1.6; }
+rect.hw-g3-akt-geplant { fill: var(--akzent-linie); } rect.hw-g3-akt-laufend { fill: var(--gut); } rect.hw-g3-akt-beendet { fill: var(--punkt); }
+rect.hw-g3-akt-abgesagt { fill: none; stroke: var(--punkt); stroke-dasharray: 2 2; }
+.hw-legende i.hw-g3-akt-geplant { background: var(--akzent-linie); } .hw-legende i.hw-g3-akt-laufend { background: var(--gut); } .hw-legende i.hw-g3-akt-beendet { background: var(--punkt); }
+
+/* Digitale Produkte: Karte im Karussell, Detail wie Coffee 12–14. */
+.hw-g3-produkt { display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; padding: 14px 18px 20px; border: 0; background: none; color: var(--text); text-align: center; }
+.hw-g3-produkt .hw-g3-text { margin: 8px 0 14px; flex: 1 0 auto; }
+.hw-g3-produkt .hw-zahl { margin-top: 6px; }
+.hw-g3-produkt .hw-abw { margin-top: 4px; }
+.hw-g3-mitte { display: flex; gap: 10px; align-items: baseline; justify-content: center; margin-top: 8px; }
+.hw-g3-mitte .hw-status { margin: 0; }
+.hw-g3-fuss { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 16px; font: var(--hw-t-klein); color: var(--leise); }
+.hw-g3-sterne { gap: 1px; }
+.hw-g3-sterne i { display: block; width: 14px; height: 14px; }
+.hw-g3-sterne svg { display: block; width: 14px; height: 14px; }
+.hw-g3-sterne i.aus { color: var(--punkt); opacity: .55; }
+.hw-g3-produkttitel { margin: 18px 0 0; font: var(--hw-t-titel); font-size: 19px; }
+.hw-g3-vorstellung { display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: center; margin-top: 14px; }
+.hw-g3-vorstellung .hw-g3-bild { height: 120px; margin: 0; }
+.hw-g3-vorstellung p { margin: 0 0 6px; }
+.hw-g3-kurve { margin-top: 18px; }
+.hw-g3-kurve svg { display: block; width: 100%; height: auto; overflow: visible; }
+.hw-g3-kurve polyline { fill: none; stroke: var(--gut); stroke-width: 2.6; stroke-linejoin: round; }
+.hw-g3-kurve circle { fill: var(--gut); }
+.hw-g3-kurve circle.letzter { stroke: color-mix(in srgb, var(--gut) 35%, transparent); stroke-width: 6; }
+.hw-g3-kurve .hw-balkenfuss span { flex: 0 0 auto; }
+.hw-g3-version { margin-top: 24px; padding: 18px 22px 18px; --f: var(--karte); --l: var(--kartenlinie); }
+.hw-g3-version .hw-marke { display: block; }
+.hw-g3-versionzeile { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+.hw-g3-version .hw-g3-mitte { justify-content: flex-start; }
+.hw-g3-version .hw-g3-sterne i, .hw-g3-version .hw-g3-sterne svg { width: 20px; height: 20px; }
+
+/* Online: Hauszeile mit Knöpfen rechts. */
+.hw-g3-haus .hw-g3-teamknoepfe { flex-direction: column; align-items: flex-end; gap: 6px; }
+.hw-g3-haus .hw-status { margin: 0; }
 /* ── G4 Zentrale, Organisation, Vorstand, Personaleinsatz, Reporting ── */
 /* Marker .hw-g4 im Inhalt: Blattgrund liegt auf dem Inhalt selbst (Kontrastprüfung sieht den Grund), Kopf und Reiter aus der Skala. */
 #panel.hw > .hw-inhalt:has(> .hw-g4) { background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }

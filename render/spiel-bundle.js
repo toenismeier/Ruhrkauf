@@ -3264,8 +3264,8 @@
     const wb = anlegen(s2, stadt, art, chance2(s2, 0.7) ? "1a" : "b", qm2, s2.woche, inHaus);
     const h4 = betroffeneHaeuser(s2, stadt)[0];
     const gruppe3 = h4 ? gruppenFuer(h4.format).sort((a2, b4) => (WETTBEWERB_UEBERSCHNEIDUNG[art][b4] ?? 0) - (WETTBEWERB_UEBERSCHNEIDUNG[art][a2] ?? 0))[0] : "damen";
-    const prozent6 = h4 ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h4, gruppe3)) * 100) : 0;
-    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe3].name + ": rund " + prozent6 + " %.", { stadt, modul: "wettbewerb" });
+    const prozent7 = h4 ? Math.round(Math.max(0, 1 - wettbewerbNachfrageFaktor(s2, h4, gruppe3)) * 100) : 0;
+    melde(s2, "presse", wb.name + " (" + art + ") er\xF6ffnet in " + stadt + (inHaus ? " im ehemaligen " + inHaus : "") + ". Erwarteter Nachfrager\xFCckgang " + GRUPPEN[gruppe3].name + ": rund " + prozent7 + " %.", { stadt, modul: "wettbewerb" });
     if ((art === "modehaus" || art === "premium") && qm2 >= 2300) {
       neueEntscheidung(s2, {
         typ: "wettbewerb_eroeffnung",
@@ -3915,8 +3915,8 @@
     return IT_PRODUKT_IDS.map((id) => {
       const meta = texte[id], status2 = itProduktZustand(s2, id);
       const system2 = s2.it?.systeme[meta.system], generation = system2?.generation ?? SYSTEME[meta.system].start;
-      const version2 = id === "mobile_pay" ? ausbau?.mobil ?? 0 : generation;
-      const qualitaet3 = id === "hartwig_app" || id === "kundenkarte" ? Math.round(clamp((k5?.app?.qualitaet ?? 0.35) * 3 + generation, 1, 5)) : id === "mobile_pay" && version2 === 0 ? 0 : Math.max(1, Math.min(5, generation + 1));
+      const version3 = id === "mobile_pay" ? ausbau?.mobil ?? 0 : generation;
+      const qualitaet3 = id === "hartwig_app" || id === "kundenkarte" ? Math.round(clamp((k5?.app?.qualitaet ?? 0.35) * 3 + generation, 1, 5)) : id === "mobile_pay" && version3 === 0 ? 0 : Math.max(1, Math.min(5, generation + 1));
       const echt = verlauf4.slice(-5).map((p2) => ({ woche: p2.woche, wert: p2[id] }));
       const punkte2 = [...echt];
       const bon = s2.marketing?.stand?.verlauf?.at(0)?.bon || 41;
@@ -3931,7 +3931,7 @@
       }
       const aktuell = alle[id];
       const vorher = punkte2.length >= 2 ? punkte2[punkte2.length - 2].wert : void 0;
-      const aenderung = vorher === void 0 ? void 0 : aktuell - vorher;
+      const aenderung2 = vorher === void 0 ? void 0 : aktuell - vorher;
       return {
         id,
         ...meta,
@@ -3939,10 +3939,10 @@
         team: status2.team,
         teamKostenWoche: status2.team * IT_TEAM_KOSTEN_PRO_KOPF,
         kennzahl: aktuell,
-        aenderung,
-        aenderungQuote: vorher && aenderung !== void 0 ? aenderung / vorher : void 0,
+        aenderung: aenderung2,
+        aenderungQuote: vorher && aenderung2 !== void 0 ? aenderung2 / vorher : void 0,
         verlauf: punkte2,
-        version: version2 + ".0",
+        version: version3 + ".0",
         generation,
         sterne: qualitaet3,
         systemAlter: system2?.alter ?? SYSTEME[meta.system].alter,
@@ -6220,8 +6220,8 @@
       const crmDP = (cP.d._ ?? 0) + (cP.d[g2] ?? 0);
       const nennerU = 1 + ep.u + kanniP + crmUP + ukP;
       const nennerD = 1 - ep.d - crmDP - dkP;
-      const vz2 = (1 - (m.ist.vorzug[g2] ?? 0)) / (1 - (m.plan.vorzug[g2] ?? 0));
-      const nachfrage = (1 + ei.u + kanniI + crmUI + ukI) / nennerU * vz2;
+      const vz3 = (1 - (m.ist.vorzug[g2] ?? 0)) / (1 - (m.plan.vorzug[g2] ?? 0));
+      const nachfrage = (1 + ei.u + kanniI + crmUI + ukI) / nennerU * vz3;
       const preis = (1 - ei.d - crmDI - dkI) / nennerD;
       out[g2] = { nachfrage, preis };
       if (ei.alle.some((v2) => v2.uWg !== void 0) || ep.alle.some((v2) => v2.uWg !== void 0)) {
@@ -6244,7 +6244,7 @@
       }
       const sieger = ei.sieger ?? (kanniI < 0 ? staerkste : void 0);
       if (sieger && !s2.prognose) {
-        const nOhne = (1 + crmUI + ukI) / nennerU * vz2;
+        const nOhne = (1 + crmUI + ukI) / nennerU * vz3;
         const pOhne = (1 - crmDI - dkI) / nennerD;
         mess.push({ id: sieger.a.id, g: g2, tE: tE[g2] ?? 1, bruttoMit: b4 * nachfrage, umsatzMit: b4 * nachfrage * preis, bruttoOhne: b4 * nOhne, umsatzOhne: b4 * nOhne * pOhne, mitnahme: b4 * nOhne * (pOhne - (1 - ei.d - crmDI - dkI) / nennerD), kanni: !ei.sieger });
       }
@@ -8382,7 +8382,7 @@
     }
     premiumAngebote(s2);
     konzernVerkaufAnbieten(s2);
-    const zyklus = 0.035 * Math.sin(2 * Math.PI * w2 / 260 + s2.makro.phase);
+    const zyklus2 = 0.035 * Math.sin(2 * Math.PI * w2 / 260 + s2.makro.phase);
     if (s2.makro.schockBis !== void 0 && s2.makro.schockBis <= w2) {
       s2.makro.schockBis = void 0;
       s2.makro.schockStaerke = 0;
@@ -8392,7 +8392,7 @@
       s2.makro.schockBis = w2 + ganzZwischen(s2, 26, 52);
       melde(s2, "presse", waehle(s2, ["Energiepreise explodieren, Konsumklima bricht ein.", "Rezession: Verbraucher halten sich zur\xFCck.", "Zollstreit dr\xFCckt auf die Kauflaune."]));
     }
-    s2.makro.konjunktur = 1 + zyklus - s2.makro.schockStaerke;
+    s2.makro.konjunktur = 1 + zyklus2 - s2.makro.schockStaerke;
     if (chance(s2, 0.3 * hqAnfrageFaktor(s2))) untermietAnfrage(s2);
     if (!s2.angebote.some((a2) => a2.status === "offen" && a2.typ === "paket") && chance(s2, 0.025)) paketDeal(s2);
     if (chance(s2, 8e-3)) stadtAngebot(s2);
@@ -9505,12 +9505,12 @@
       const gruppen = gruppenFuer(h4.format);
       const ueberschneidung = gruppen.length ? gruppen.reduce((n3, g2) => n3 + (WETTBEWERB_UEBERSCHNEIDUNG[w2.art][g2] ?? 0), 0) / gruppen.length : 0;
       const druck = preiskampf ? Math.max(0, w2.preisdruck) / (1 + Math.max(0, w2.preisdruck)) : 1;
-      const aenderung = 0.25 * 0.035 * w2.staerke * ueberschneidung * naehe * druck * (umzug ? 0.5 : 1) / Math.max(0.75, 1 - 0.25 * h4.wettbewerbStart);
-      if (aenderung <= 0) continue;
+      const aenderung2 = 0.25 * 0.035 * w2.staerke * ueberschneidung * naehe * druck * (umzug ? 0.5 : 1) / Math.max(0.75, 1 - 0.25 * h4.wettbewerbStart);
+      if (aenderung2 <= 0) continue;
       const umsatz = eigenerUmsatz(h4);
-      betrag += umsatz * aenderung;
+      betrag += umsatz * aenderung2;
       umsatzBetroffen += umsatz;
-      if (km === 0) lokalerEffekt = Math.max(lokalerEffekt, aenderung);
+      if (km === 0) lokalerEffekt = Math.max(lokalerEffekt, aenderung2);
     }
     if (betrag < 100 || lokalerEffekt < 3e-4 || umsatzBetroffen <= 0) return null;
     const umsatzAnteil = umsatzBetroffen / gesamtUmsatz;
@@ -12260,8 +12260,8 @@
     const klima = abteilungArbeitsklima(a2);
     return ok5(`${ABTEILUNG_NAME[id]}: Gehalt ${Math.round(a2.gehaltFaktor * 100)} % des Standards. Moral ${klima.moral}/100, Fluktuationsrisiko ${Math.round(klima.fluktuation * 1e3) / 10} % im Jahr.`);
   }
-  function zentraleKuerzen(s2, prozent6) {
-    const p2 = clamp(prozent6, 0, 0.3);
+  function zentraleKuerzen(s2, prozent7) {
+    const p2 = clamp(prozent7, 0, 0.3);
     let fte2 = 0;
     for (const a2 of s2.hq.abteilungen) {
       const weg = Math.round(a2.fte * p2);
@@ -14703,8 +14703,8 @@
       for (const r4 of liste3) {
         const [kurz, name2, anteil3, nos, md, vv, vn, vnos, mk2, em, lief, sai, extra] = r4;
         const m = G3.marge + md;
-        const kurve5 = G3.saison.map((x2, i) => x2 * (sai?.[i] ?? 1));
-        const mittel = kurve5.reduce((a2, b4) => a2 + b4, 0) / 12;
+        const kurve4 = G3.saison.map((x2, i) => x2 * (sai?.[i] ?? 1));
+        const mittel = kurve4.reduce((a2, b4) => a2 + b4, 0) / 12;
         out.push({
           id: `${g2}.${kurz}`,
           name: name2,
@@ -14716,7 +14716,7 @@
           vorlaufVor: vv,
           vorlaufNach: vn,
           vorlaufNos: vnos,
-          saison: kurve5.map((x2) => x2 / mittel),
+          saison: kurve4.map((x2) => x2 / mittel),
           mindestabnahme: mk2 * 1e3,
           eigenmarkenfaehig: em !== "",
           kategorie: em || void 0,
@@ -16855,7 +16855,7 @@
     if (netTyp === "triple") mietQuote -= 0.012;
     const fteBedarf = vkQm / PARAM.qmJeFte + basisUmsatz / PARAM.umsatzJeFte;
     const fteIst = nurDaten ? 0 : fteBedarf * zwischen(h4, 1, 1.22);
-    const vz2 = fteIst * zwischen(h4, 0.42, 0.58);
+    const vz3 = fteIst * zwischen(h4, 0.42, 0.58);
     const ah = fteIst * zwischen(h4, 0.06, 0.14);
     const substanzBasis = Math.round(zwischen(h4, 30, 90));
     const substanz = f13 === "outlet" ? clamp(substanzBasis, 40, 85) : substanzBasis;
@@ -16897,8 +16897,8 @@
         nebenkostenQmWoche: netTyp === "net" ? 0 : zwischen(h4, PARAM.nebenkostenQm[0], PARAM.nebenkostenQm[1])
       },
       personal: {
-        vollzeit: vz2,
-        teilzeit: fteIst - vz2 - ah,
+        vollzeit: vz3,
+        teilzeit: fteIst - vz3 - ah,
         aushilfen: ah,
         filialleiter: { name: name(h4), skill: zwischen(h4, 0.3, 0.9), moral: zwischen(h4, 45, 75) }
       },
@@ -21379,14 +21379,14 @@
       return this;
     }
     applyQuaternion(q2) {
-      const vx = this.x, vy = this.y, vz2 = this.z;
+      const vx = this.x, vy = this.y, vz3 = this.z;
       const qx = q2.x, qy = q2.y, qz = q2.z, qw = q2.w;
-      const tx = 2 * (qy * vz2 - qz * vy);
-      const ty = 2 * (qz * vx - qx * vz2);
+      const tx = 2 * (qy * vz3 - qz * vy);
+      const ty = 2 * (qz * vx - qx * vz3);
       const tz = 2 * (qx * vy - qy * vx);
       this.x = vx + qw * tx + qy * tz - qz * ty;
       this.y = vy + qw * ty + qz * tx - qx * tz;
-      this.z = vz2 + qw * tz + qx * ty - qy * tx;
+      this.z = vz3 + qw * tz + qx * ty - qy * tx;
       return this;
     }
     project(camera) {
@@ -29504,10 +29504,10 @@
       const indices = [];
       const geometryIndex = geometry.index;
       const geometryPosition = geometry.attributes.position;
-      let version2 = 0;
+      let version3 = 0;
       if (geometryIndex !== null) {
         const array = geometryIndex.array;
-        version2 = geometryIndex.version;
+        version3 = geometryIndex.version;
         for (let i = 0, l = array.length; i < l; i += 3) {
           const a2 = array[i + 0];
           const b4 = array[i + 1];
@@ -29516,7 +29516,7 @@
         }
       } else if (geometryPosition !== void 0) {
         const array = geometryPosition.array;
-        version2 = geometryPosition.version;
+        version3 = geometryPosition.version;
         for (let i = 0, l = array.length / 3 - 1; i < l; i += 3) {
           const a2 = i + 0;
           const b4 = i + 1;
@@ -29527,7 +29527,7 @@
         return;
       }
       const attribute = new (arrayNeedsUint32(indices) ? Uint32BufferAttribute : Uint16BufferAttribute)(indices, 1);
-      attribute.version = version2;
+      attribute.version = version3;
       const previousAttribute = wireframeAttributes.get(geometry);
       if (previousAttribute) attributes.remove(previousAttribute);
       wireframeAttributes.set(geometry, attribute);
@@ -32761,14 +32761,14 @@
     let currentPolygonOffsetUnits = null;
     const maxTextures = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
     let lineWidthAvailable = false;
-    let version2 = 0;
+    let version3 = 0;
     const glVersion = gl.getParameter(gl.VERSION);
     if (glVersion.indexOf("WebGL") !== -1) {
-      version2 = parseFloat(/^WebGL (\d)/.exec(glVersion)[1]);
-      lineWidthAvailable = version2 >= 1;
+      version3 = parseFloat(/^WebGL (\d)/.exec(glVersion)[1]);
+      lineWidthAvailable = version3 >= 1;
     } else if (glVersion.indexOf("OpenGL ES") !== -1) {
-      version2 = parseFloat(/^OpenGL ES (\d)/.exec(glVersion)[1]);
-      lineWidthAvailable = version2 >= 2;
+      version3 = parseFloat(/^OpenGL ES (\d)/.exec(glVersion)[1]);
+      lineWidthAvailable = version3 >= 2;
     }
     let currentTextureSlot = null;
     let currentBoundTextures = {};
@@ -51291,10 +51291,10 @@
     ctx.S.add(prismoid(poly2, y2 + 0.1, G3 * 0.8, [0, hb2 * 0.9 - 0.01, 0, hb2 * 0.9 - 0.01]), dachF);
     F3.profil(kontur(1.06, 1.06), uc, y2, -0.42, 0.06, c.orn, 10);
     F3.profil(kontur(1, 1), uc, y2, -0.36, 0.14, c.wand, 10);
-    const ring2 = new three_module_exports.CylinderGeometry(0.62, 0.62, 0.08, 16);
-    ring2.rotateX(Math.PI / 2);
-    ring2.translate(uc, y2 + G3 * 0.62, 0.17);
-    F3.geo(ring2, c.orn);
+    const ring3 = new three_module_exports.CylinderGeometry(0.62, 0.62, 0.08, 16);
+    ring3.rotateX(Math.PI / 2);
+    ring3.translate(uc, y2 + G3 * 0.62, 0.17);
+    F3.geo(ring3, c.orn);
     const gl = new three_module_exports.CylinderGeometry(0.46, 0.46, 0.08, 16);
     gl.rotateX(Math.PI / 2);
     gl.translate(uc, y2 + G3 * 0.62, 0.2);
@@ -52387,8 +52387,8 @@
     const gruppen = /* @__PURE__ */ new Map();
     const tri = (a2, b4, c) => {
       const yc = (a2[1] + b4[1] + c[1]) / 3;
-      const ux = b4[0] - a2[0], uy = b4[1] - a2[1], uz = b4[2] - a2[2], vx = c[0] - a2[0], vy = c[1] - a2[1], vz2 = c[2] - a2[2];
-      const nxx = uy * vz2 - uz * vy, nyy = uz * vx - ux * vz2, nzz = ux * vy - uy * vx, L3 = wurzelSumme2(nxx, nyy, nzz) || 1;
+      const ux = b4[0] - a2[0], uy = b4[1] - a2[1], uz = b4[2] - a2[2], vx = c[0] - a2[0], vy = c[1] - a2[1], vz3 = c[2] - a2[2];
+      const nxx = uy * vz3 - uz * vy, nyy = uz * vx - ux * vz3, nzz = ux * vy - uy * vx, L3 = wurzelSumme2(nxx, nyy, nzz) || 1;
       const f13 = farbe2((a2[0] + b4[0] + c[0]) / 3, yc, (a2[2] + b4[2] + c[2]) / 3, 1 - Math.abs(nyy) / L3);
       if (!gruppen.has(f13)) gruppen.set(f13, { p: [], n: [] });
       const G3 = gruppen.get(f13);
@@ -55588,11 +55588,11 @@ void main() {
     get anzahl() {
       return this.liste.length;
     }
-    bauen(scene2, kachel2 = 240) {
+    bauen(scene2, kachel3 = 240) {
       if (!this.liste.length) return 0;
       const gruppen = /* @__PURE__ */ new Map();
       for (const f13 of this.liste) {
-        const k5 = Math.floor(f13[0] / kachel2) + ":" + Math.floor(f13[2] / kachel2);
+        const k5 = Math.floor(f13[0] / kachel3) + ":" + Math.floor(f13[2] / kachel3);
         if (!gruppen.has(k5)) gruppen.set(k5, []);
         gruppen.get(k5).push(f13);
       }
@@ -57865,31 +57865,31 @@ void main() {
     K3.leer = true;
     const n3 = geschosse(K3, 3, 5);
     const H = EG + (n3 - 1) * OG, D = 1.6;
-    const kachel2 = (REGION[K3.reg]?.stein ?? ["#d9d1bf", "#cfc7b6", "#d4cfc4", "#c9bfab"])[v2 % 4];
-    const schmutz = dunkler(kachel2, 0.08);
+    const kachel3 = (REGION[K3.reg]?.stein ?? ["#d9d1bf", "#cfc7b6", "#d4cfc4", "#c9bfab"])[v2 % 4];
+    const schmutz = dunkler(kachel3, 0.08);
     S.quader(x0, 0, z0, x0 + w2 - D, EG, z0 + d4 - D, "#4a4540");
-    S.quader(x0, EG, z0, x0 + w2, H, z0 + d4, kachel2);
+    S.quader(x0, EG, z0, x0 + w2, H, z0 + d4, kachel3);
     for (const s2 of K3.seiten) {
-      ladenzone2(K3, s2, { raster: 5, pb: 0.8, D, pfeiler: dunkler(kachel2, 0.05), sturz: kachel2, art: "mode", gTop: 4 });
+      ladenzone2(K3, s2, { raster: 5, pb: 0.8, D, pfeiler: dunkler(kachel3, 0.05), sturz: kachel3, art: "mode", gTop: 4 });
       s2.q(0, s2.L, 4.2, 4.6, 0, 2.4, "#8f8a82");
       s2.q(0, s2.L, 4.6, 4.75, 2.3, 2.4, "#7a2b2b");
-      if (K3.reg) regionHaut(K3, s2, 0, s2.L, EG, H, 0, kachel2);
+      if (K3.reg) regionHaut(K3, s2, 0, s2.L, EG, H, 0, kachel3);
       if (!K3.reg || K3.reg === "sued") {
         for (let u = 1.2; u < s2.L; u += 1.2) s2.q(u - 0.03, u + 0.03, EG, H, 0, 0.05, schmutz);
         for (let y2 = EG + 1.2; y2 < H; y2 += 1.2) s2.q(0, s2.L, y2 - 0.03, y2 + 0.03, 0, 0.05, schmutz);
       }
       for (let i = 0; i < 9; i++) {
         const u = zw(r4, 0, s2.L - 1);
-        s2.q(u, u + zw(r4, 0.3, 1), Math.max(EG, H - zw(r4, 3, 10)), H, 0.05, 0.07, dunkler(kachel2, zw(r4, 0.1, 0.18)));
+        s2.q(u, u + zw(r4, 0.3, 1), Math.max(EG, H - zw(r4, 3, 10)), H, 0.05, 0.07, dunkler(kachel3, zw(r4, 0.1, 0.18)));
       }
       if (n3 >= 3) {
         const y0 = EG + OG * 0.4;
         for (const [a2, b4] of buchten(1, s2.L - 1, 2.4, 0.4)) s2.q(a2, b4, y0, y0 + 1.6, -0.05, 0.03, r4() < 0.2 ? "#1c2228" : r4() < 0.5 ? "#6a767e" : GLAS);
       }
-      s2.q(0, s2.L, H - 0.1, H + 0.6, 0, 0.3, dunkler(kachel2, 0.04));
+      s2.q(0, s2.L, H - 0.1, H + 0.6, 0, 0.3, dunkler(kachel3, 0.04));
       const yL = EG + (H - EG) * (n3 >= 3 ? 0.68 : 0.5);
       const ph = passend(K3.name, s2.L * 0.7, Math.min(3.2, (H - EG) * 0.4));
-      plakat2(scene2, s2, K3.name, s2.L * 0.5, yL, 0.07, ph, dunkler(kachel2, 0.2), null, { lit: true });
+      plakat2(scene2, s2, K3.name, s2.L * 0.5, yL, 0.07, ph, dunkler(kachel3, 0.2), null, { lit: true });
       for (let k5 = 0; k5 < 6; k5++) s2.q(s2.L * 0.5 - plakatBreite(K3.name, ph) * 0.42 + k5 * plakatBreite(K3.name, ph) * 0.17, s2.L * 0.5 - plakatBreite(K3.name, ph) * 0.42 + k5 * plakatBreite(K3.name, ph) * 0.17 + 0.12, yL - ph * 0.3, yL - ph * 0.2, 0.05, 0.25, "#6c6c6c");
     }
     {
@@ -58182,7 +58182,7 @@ void main() {
     const belegt2 = o4.belegt ?? [];
     const rand = 0.8;
     const frei6 = (x2, z6, w2, d4, abstand3 = 0.8) => x2 - w2 / 2 >= x0 + rand && x2 + w2 / 2 <= x1 - rand && z6 - d4 / 2 >= z0 + rand && z6 + d4 / 2 <= z1 - rand && !belegt2.some((q2) => Math.abs(q2.x - x2) < (q2.w + w2) / 2 + abstand3 && Math.abs(q2.z - z6) < (q2.d + d4) / 2 + abstand3) && !o4.reserviert?.(x2, z6, Math.max(w2, d4) / 2);
-    const merke2 = (art, x2, z6, w2, d4, h4) => {
+    const merke3 = (art, x2, z6, w2, d4, h4) => {
       belegt2.push({ x: x2, z: z6, w: w2, d: d4 });
       o4.protokoll?.push({ art, x: x2, z: z6, w: w2, d: d4, h: h4, unten: y2, dach: { x0, z0, x1, z1, y: y2, steil: false } });
     };
@@ -58213,7 +58213,7 @@ void main() {
           box(w2 * 0.7, 0.9, 0.12, x2, y2 + ph * 0.55, z6 + d4 / 2 + 0.06, F.dunkel);
           box(0.12, 0.9, d4 * 0.6, x2 + w2 / 2 + 0.06, y2 + ph * 0.55, z6, F.dunkel);
         }
-        merke2("technikzentrale", x2, z6, w2 + 0.3, d4 + 0.3, ph + 0.22);
+        merke3("technikzentrale", x2, z6, w2 + 0.3, d4 + 0.3, ph + 0.22);
       }
     }
     const nVent = 3 + Math.floor(r4() * 3), kl2 = nVent * 2.2 + 0.6, kb = 2.8;
@@ -58223,10 +58223,10 @@ void main() {
       if (frei6(x2, z6, w2, d4)) {
         box(w2, 1.5, d4, x2, y2 + 0.75, z6, F.blech);
         for (let i = 0; i < nVent; i++) {
-          const [vx, vz2] = pos(aK - kl2 / 2 + 0.3 + 1.1 + i * 2.2, bK);
-          if (!fern) box(1.7, 0.1, 1.7, vx, y2 + 1.55, vz2, F.dunkel);
+          const [vx, vz3] = pos(aK - kl2 / 2 + 0.3 + 1.1 + i * 2.2, bK);
+          if (!fern) box(1.7, 0.1, 1.7, vx, y2 + 1.55, vz3, F.dunkel);
         }
-        merke2("rueckkuehler", x2, z6, w2, d4, 1.6);
+        merke3("rueckkuehler", x2, z6, w2, d4, 1.6);
       }
     }
     {
@@ -58236,7 +58236,7 @@ void main() {
         box(3.6, 3, 3.6, x2, y2 + 1.5, z6, F.platte);
         if (!fern) box(3.8, 0.2, 3.8, x2, y2 + 3.1, z6, F.dunkel);
         if (!fern) box(langX ? 1.1 : 0.08, 2.1, langX ? 0.08 : 1.1, x2 + (langX ? 0.6 : 1.84), y2 + 1.05, z6 + (langX ? 1.84 : 0.6), F.dunkel);
-        merke2("treppenhaus", x2, z6, 3.8, 3.8, 3.2);
+        merke3("treppenhaus", x2, z6, 3.8, 3.8, 3.2);
       }
     }
     {
@@ -58250,7 +58250,7 @@ void main() {
           const [hx, hz] = pos(a2 + k5 * gl, b4);
           if (!fern) box(1.2, 0.8, 1.2, hx, y2 + gh + 0.4, hz, F.blech);
         }
-        merke2("lueftungsgeraet", x2, z6, w2, d4, gh + 0.8);
+        merke3("lueftungsgeraet", x2, z6, w2, d4, gh + 0.8);
       }
     }
     {
@@ -58265,12 +58265,12 @@ void main() {
             box(1.5, 0.12, 1.5, hx, y2 + 1.66, hz, F.dunkel);
           }
         }
-        merke2("lueftungskanal", x2, z6, w2, d4, 1.72);
+        merke3("lueftungskanal", x2, z6, w2, d4, 1.72);
       }
       const [wx, wz2] = pos(a0 + la / 2, bL + 1.7), [ww, wd] = mass(la, 1.1);
       if (frei6(wx, wz2, ww, wd, 0.1)) {
         if (!fern) box(ww, 0.06, wd, wx, y2 + 0.03, wz2, F.platte);
-        merke2("wartungsweg", wx, wz2, ww, wd, 0.06);
+        merke3("wartungsweg", wx, wz2, ww, wd, 0.06);
       }
     }
     const sheds = bj >= 1950 && bj < 1980 && r4() < 0.5;
@@ -58286,7 +58286,7 @@ void main() {
         box(w2, 1, d4, x2, y2 + 0.5, z6, F.platte);
         const [gx, gz2] = pos(a2 + 1.05, bM), [gw, gd] = mass(0.6, lb - 0.4);
         box(gw, 0.8, gd, gx, y2 + 1.4, gz2, o4.alt ? F.glasAlt : F.glas);
-        merke2("shed", x2, z6, w2, d4, 1.8);
+        merke3("shed", x2, z6, w2, d4, 1.8);
       }
     } else {
       const n3 = Math.max(2, Math.min(4, Math.floor((bV1 - bV0) / 6.5)));
@@ -58298,11 +58298,11 @@ void main() {
         box(w2, 0.35, d4, x2, y2 + 0.175, z6, F.dunkel);
         const [gw, gd] = mass(la - 0.6, 2);
         box(gw, 0.5, gd, x2, y2 + 0.6, z6, o4.alt ? F.glasAlt : F.glas);
-        merke2("lichtband", x2, z6, w2, d4, 0.85);
+        merke3("lichtband", x2, z6, w2, d4, 0.85);
         const [kx, kz2] = pos(aM + la / 2 + 1.6, b4), [kw2, kd] = mass(1.4, 1.4);
         if (frei6(kx, kz2, kw2, kd, 0.3)) {
           if (!fern) box(kw2, 0.55, kd, kx, y2 + 0.27, kz2, F.dunkel);
-          merke2("rwa", kx, kz2, kw2, kd, 0.55);
+          merke3("rwa", kx, kz2, kw2, kd, 0.55);
         }
       }
     }
@@ -58317,7 +58317,7 @@ void main() {
         box(w2, 0.14, d4, x2, y2 + 0.55, z6, F.solar);
         const [sw, sd] = mass(la - 0.4, 0.3);
         if (!fern) box(sw, 0.48, sd, x2, y2 + 0.24, z6, F.dunkel);
-        merke2("solar", x2, z6, w2, d4, 0.62);
+        merke3("solar", x2, z6, w2, d4, 0.62);
       }
     }
     return true;
@@ -59482,30 +59482,30 @@ void main() {
         s2.q(u - 2.4, u + 2.4, Hb + 3, Hb + 3.3, -0.2, 1.6, heller(putz2, 0.04));
       }
     }
-    const ring2 = (rad3, y0, y1, f13) => viertelzylinder2(S, cx, cz, rad3, y0, y1, f13, 16);
-    ring2(R11 - rueck, 0.55, 4.3, GLAS_TUER);
-    ring2(R11 + 0.06, 0, 0.55, "#3b3f44");
-    ring2(R11 + 0.04, 4.3, EG2, putz2);
+    const ring3 = (rad3, y0, y1, f13) => viertelzylinder2(S, cx, cz, rad3, y0, y1, f13, 16);
+    ring3(R11 - rueck, 0.55, 4.3, GLAS_TUER);
+    ring3(R11 + 0.06, 0, 0.55, "#3b3f44");
+    ring3(R11 + 0.04, 4.3, EG2, putz2);
     for (let k5 = 0; k5 <= 5; k5++) {
       const a2 = k5 / 5 * Math.PI / 2;
       S.box(0.12, 3.8, 0.12, cx + Math.sin(a2) * (R11 - rueck + 0.06), 2.4, cz + Math.cos(a2) * (R11 - rueck + 0.06), RAHMEN3);
     }
-    ring2(R11 + 2.4, 4.6, 4.84, "#f4f1ea");
-    ring2(R11 + 2.44, 4.67, 4.77, ROT2);
+    ring3(R11 + 2.4, 4.6, 4.84, "#f4f1ea");
+    ring3(R11 + 2.44, 4.67, 4.77, ROT2);
     for (let k5 = 0; k5 < nOG; k5++) {
       const y0 = EG2 + k5 * GH;
-      ring2(R11 + 0.22, y0, y0 + 1.75, brF);
-      ring2(R11 + 0.32, y0 + 1.75, y0 + 1.9, heller(putz2, 0.03));
-      ring2(R11 + 0.05, y0 + 1.9, y0 + GH - 0.3, GLAS2);
-      ring2(R11 + 0.1, y0 + GH - 0.3, y0 + GH, brF);
+      ring3(R11 + 0.22, y0, y0 + 1.75, brF);
+      ring3(R11 + 0.32, y0 + 1.75, y0 + 1.9, heller(putz2, 0.03));
+      ring3(R11 + 0.05, y0 + 1.9, y0 + GH - 0.3, GLAS2);
+      ring3(R11 + 0.1, y0 + GH - 0.3, y0 + GH, brF);
       for (let j4 = 1; j4 < 8; j4++) {
         const a2 = j4 / 8 * Math.PI / 2;
         S.box(0.1, GH - 2.2, 0.1, cx + Math.sin(a2) * (R11 + 0.07), y0 + 1.9 + (GH - 2.2) / 2, cz + Math.cos(a2) * (R11 + 0.07), "#e9eef0");
       }
     }
-    ring2(R11 + 0.12, Hb, Hb + 1, brF);
-    ring2(R11 + 0.25, Hb + 1, Hb + 1.15, heller(putz2, 0.04));
-    ring2(R11 - 0.25, Hb + 0.9, Hb + 1.17, KIES3);
+    ring3(R11 + 0.12, Hb, Hb + 1, brF);
+    ring3(R11 + 0.25, Hb + 1, Hb + 1.15, heller(putz2, 0.04));
+    ring3(R11 - 0.25, Hb + 0.9, Hb + 1.17, KIES3);
     S.quader(x0, Hb, z0, x0 + w2 - 0.3, Hb + 0.9, z0 + d4 - 0.3, KIES3);
     if (staffel2) {
       const sw = w2 - Math.max(6, w2 * 0.18), sd = d4 - Math.max(6, d4 * 0.2);
@@ -60175,26 +60175,26 @@ void main() {
       s2.q(0, uEnd, gy0 - 0.2, gy0, 0, 0.6, "#3a3f44");
     }
     if (rund3) {
-      const ring2 = (rad3, y0, y1, f13) => viertelzylinder2(S, cx, cz, rad3, y0, y1, f13, 16);
-      ring2(R11 - rueck, 0.55, 4.3, GLAS_TUER);
-      ring2(R11 + 0.06, 0, 0.55, "#3b3f44");
-      ring2(R11 + 0.04, 4.3, EG2, egRahmen);
+      const ring3 = (rad3, y0, y1, f13) => viertelzylinder2(S, cx, cz, rad3, y0, y1, f13, 16);
+      ring3(R11 - rueck, 0.55, 4.3, GLAS_TUER);
+      ring3(R11 + 0.06, 0, 0.55, "#3b3f44");
+      ring3(R11 + 0.04, 4.3, EG2, egRahmen);
       for (let k5 = 0; k5 <= 6; k5++) {
         const t5 = k5 / 6 * Math.PI / 2;
         S.box(0.12, 3.8, 0.12, cx + Math.sin(t5) * (R11 - rueck + 0.06), 2.4, cz + Math.cos(t5) * (R11 - rueck + 0.06), egRahmen);
       }
-      ring2(R11 + 2.3, 4.65, 4.89, san ? "#a9c6d3" : K3.p("#d9dbd8"));
-      ring2(R11 + 2.34, 4.72, 4.82, ROT2);
-      ring2(R11 + 0.08, EG2, yA, "#2e3338");
+      ring3(R11 + 2.3, 4.65, 4.89, san ? "#a9c6d3" : K3.p("#d9dbd8"));
+      ring3(R11 + 2.34, 4.72, 4.82, ROT2);
+      ring3(R11 + 0.08, EG2, yA, "#2e3338");
       if (san) {
-        ring2(R11 + 0.1, yA, gy0, "#6f93a6");
+        ring3(R11 + 0.1, yA, gy0, "#6f93a6");
         for (let k5 = 0; k5 <= 8; k5++) {
           const t5 = k5 / 8 * Math.PI / 2;
           S.box(0.12, gy0 - yA, 0.12, cx + Math.sin(t5) * (R11 + 0.16), (yA + gy0) / 2, cz + Math.cos(t5) * (R11 + 0.16), "#e6eaec");
         }
-        for (let y2 = EG2 + GH; y2 < gy0; y2 += GH) ring2(R11 + 0.22, y2 - 0.2, y2 + 0.05, "#e6eaec");
+        for (let y2 = EG2 + GH; y2 < gy0; y2 += GH) ring3(R11 + 0.22, y2 - 0.2, y2 + 0.05, "#e6eaec");
       } else rautenBogen(K3, cx, cz, R11, yA, gy0, a2, b4, h4, fleck);
-      ring2(R11 + 0.6, gy0 - 0.2, gy0, "#3a3f44");
+      ring3(R11 + 0.6, gy0 - 0.2, gy0, "#3a3f44");
     }
     if (rund3) rundKoerper(S, x0, z0, w2, d4, R11, gy0, gy1, gesF, ov);
     else S.quader(x0, gy0, z0, x0 + w2 + ov, gy1, z0 + d4 + ov, gesF);
@@ -60303,10 +60303,10 @@ void main() {
     }
     return Hw + HA + 6;
   }
-  function mosaikMotiv(motiv3, W3, H, P5) {
+  function mosaikMotiv(motiv5, W3, H, P5) {
     const m = Math.min(W3, H);
     const kreis4 = (X5, Y, cx, cy, r4) => wurzelSumme5(X5 - cx, Y - cy) < r4;
-    if (motiv3 === 0) return (X5, Y) => {
+    if (motiv5 === 0) return (X5, Y) => {
       const sx = 0.7 * W3, sy = 0.72 * H, sr = 0.17 * m, dS = wurzelSumme5(X5 - sx, Y - sy);
       if (dS < sr * 0.62) return P5.gelb;
       if (dS < sr) return P5.orange;
@@ -60323,7 +60323,7 @@ void main() {
       if (Math.abs(Y - (0.32 * H + Math.sin(X5 / W3 * Math.PI * 3) * 0.05 * H)) < 0.035 * H + 0.1) return P5.weiss;
       return Y > 0.45 * H ? P5.blau : P5.blauH;
     };
-    if (motiv3 === 1) return (X5, Y) => {
+    if (motiv5 === 1) return (X5, Y) => {
       const cx = 0.62 * W3, cy = 0.6 * H;
       if (kreis4(X5, Y, cx, cy, 0.06 * m)) return P5.rot;
       for (const wi of [0, Math.PI / 3, -Math.PI / 3]) {
@@ -60357,7 +60357,7 @@ void main() {
       return Y > 0.8 * H ? P5.blauH : P5.creme;
     };
   }
-  function mosaik(K3, s2, u0, u1, y0, y1, motiv3, t5) {
+  function mosaik(K3, s2, u0, u1, y0, y1, motiv5, t5) {
     const san = K3.saniert;
     const P0 = {
       gelb: "#f2c14e",
@@ -60382,7 +60382,7 @@ void main() {
     const W3 = u1 - u0, H = y1 - y0;
     const m = clamp5(Math.min(W3 / 24, H / 18), 0.55, 1);
     const nc = Math.floor(W3 / m), nr4 = Math.floor(H / m), mu = W3 / nc, my = H / nr4;
-    const f13 = mosaikMotiv(motiv3, W3, H, P5);
+    const f13 = mosaikMotiv(motiv5, W3, H, P5);
     for (let j4 = 0; j4 < nr4; j4++) {
       let start = 0, col = null;
       for (let i = 0; i <= nc; i++) {
@@ -60461,7 +60461,7 @@ void main() {
     const schaleF = K3.p(san ? "#7f8c95" : "#8a8478");
     const mosSeite = v2 % 2 ? "+z" : "+x";
     const dachTyp = ["hypar", "falt", "platte"][v2 % 3];
-    const motiv3 = Math.floor(v2 / 2) % 3;
+    const motiv5 = Math.floor(v2 / 2) % 3;
     const rueck = 0.7, ei = rueck + 0.1;
     const HB = n3 >= 3 ? 4.2 : n3 === 2 ? 3.2 : 2.2;
     K3.tRelief = 0.3;
@@ -60499,7 +60499,7 @@ void main() {
         if (mos) {
           s2.q(uC, s2.L, EG2, Hw, 0, 0.2, blende);
           s2.q(uC - 0.3, uC, EG2, Hw, 0, 0.32, prof);
-          mosaik(K3, s2, uC + 0.5, s2.L - 0.5, EG2 + 0.5, Hw - 0.4, motiv3, 0.2);
+          mosaik(K3, s2, uC + 0.5, s2.L - 0.5, EG2 + 0.5, Hw - 0.4, motiv5, 0.2);
           s2.q(uC, s2.L, EG2, EG2 + 0.3, 0, 0.5, heller(blende, 0.03));
         }
       }
@@ -62473,7 +62473,7 @@ void main() {
     const m = KONKURRENZ[marke5];
     if (marke5 === "kaufstadt" || marke5 === "ostermann") {
       const w3 = p2.w ?? 52, d5 = p2.d ?? 40, G3 = p2.geschosse ?? 4, eg = 6, gh = 4.6, H2 = eg + G3 * gh;
-      const kachel2 = marke5 === "kaufstadt" ? "#eef0f1" : "#e9e3d6", fuge = marke5 === "kaufstadt" ? "#c3cbd2" : "#cfc6b5";
+      const kachel3 = marke5 === "kaufstadt" ? "#eef0f1" : "#e9e3d6", fuge = marke5 === "kaufstadt" ? "#c3cbd2" : "#cfc6b5";
       S.quader(x2, 0, z6, x2 + w3 - 1.4, eg, z6 + d5 - 1.4, "#4b5965");
       S.quader(x2, eg, z6, x2 + w3, H2, z6 + d5, fuge);
       const k5 = 2;
@@ -62484,13 +62484,13 @@ void main() {
           const u = u0 + off + (i + 0.5) * k5, y2 = eg + 0.4 + (j4 + 0.5) * k5;
           const tief2 = (i + j4) % 2 ? 0.45 : 0.25;
           if (marke5 === "ostermann") {
-            if (seite2 === "+z") S.box(1.2, 1.7, tief2, u, y2, f13 + tief2 / 2, kachel2);
-            else S.box(tief2, 1.7, 1.2, f13 + tief2 / 2, y2, u, kachel2);
+            if (seite2 === "+z") S.box(1.2, 1.7, tief2, u, y2, f13 + tief2 / 2, kachel3);
+            else S.box(tief2, 1.7, 1.2, f13 + tief2 / 2, y2, u, kachel3);
           } else {
             const g2 = new three_module_exports.CylinderGeometry(k5 * 0.52, k5 * 0.52, tief2, 6);
             g2.rotateX(PI2 / 2);
             g2.rotateZ(PI2 / 6);
-            S.add(aufSeite(g2, seite2, u + (j4 % 2 ? k5 / 2 : 0) * 0, y2, f13 + tief2 / 2), kachel2);
+            S.add(aufSeite(g2, seite2, u + (j4 % 2 ? k5 / 2 : 0) * 0, y2, f13 + tief2 / 2), kachel3);
           }
         }
         if (seite2 === "+z") S.quader(x2, H2 - 1.2, z6 + d5, x2 + w3, H2 - 0.3, z6 + d5 + 0.1, "#56707f");
@@ -72636,10 +72636,10 @@ void main() {
     const px2 = K3.x + K3.w * 0.18, zz = K3.z + K3.d + 2;
     for (let i = 0; i < 2; i++) {
       const u = px2 + i * 1;
-      const ring2 = new three_module_exports.TorusGeometry(0.52, 0.07, 5, 9, Math.PI);
-      ring2.rotateY(Math.PI / 2);
-      ring2.translate(u, 0.65, zz);
-      S.add(ring2, "#767e7d");
+      const ring3 = new three_module_exports.TorusGeometry(0.52, 0.07, 5, 9, Math.PI);
+      ring3.rotateY(Math.PI / 2);
+      ring3.translate(u, 0.65, zz);
+      S.add(ring3, "#767e7d");
     }
     if (K3.variante % 2 === 0) {
       const bx = K3.x + K3.w * 0.68, bz = zz + 0.3;
@@ -131010,10 +131010,10 @@ void main() {
     return ((h4 ^ h4 >>> 16) >>> 0) / 4294967296;
   }
   function seilscheibe(S, cx, cy, cz, rad3, achse, c) {
-    const ring2 = new three_module_exports.TorusGeometry(rad3, 0.22, 4, 18);
-    if (achse === "x") ring2.rotateY(PI6 / 2);
-    ring2.translate(cx, cy, cz);
-    S.add(ring2, c);
+    const ring3 = new three_module_exports.TorusGeometry(rad3, 0.22, 4, 18);
+    if (achse === "x") ring3.rotateY(PI6 / 2);
+    ring3.translate(cx, cy, cz);
+    S.add(ring3, c);
     for (let i = 0; i < 3; i++) {
       const g2 = new three_module_exports.BoxGeometry(2 * rad3 - 0.2, 0.14, 0.14);
       g2.rotateZ(i * PI6 / 3);
@@ -131478,14 +131478,14 @@ void main() {
         stab(S, [bx0, Hb + 0.9, bz1 + 0.5], [bx1, Hb + 0.9, bz1 + 0.5], 0.12, LICHT_ROT, 4);
         stab(S, [bx1 + 0.5, Hb + 0.9, bz0], [bx1 + 0.5, Hb + 0.9, bz1], 0.12, LICHT_ROT, 4);
       }
-      const vz2 = bz1 + 8;
+      const vz3 = bz1 + 8;
       if (Z2 === "museum") {
-        boden2(S, 2, vz2, W3 - 2, D - 2, PFLASTER, 0.3, 0.08);
-        figuren(S, r4, 8, vz2 + 2, W3 - 8, D - 4, 20, 0.38);
+        boden2(S, 2, vz3, W3 - 2, D - 2, PFLASTER, 0.3, 0.08);
+        figuren(S, r4, 8, vz3 + 2, W3 - 8, D - 4, 20, 0.38);
         for (let i = 0; i < 6; i++) birke(S, 6 + i * ((W3 - 12) / 5), D - 4, r4, 1);
       } else zaun(S, 1, D - 2, W3 - 1, D - 2);
-      if (D - vz2 > 14) parkplatz2(S, r4, W3 * 0.55, vz2 + 3, W3 - 4, D - 4, { dichte: Z2 === "stillgelegt" ? 0.05 : 0.6 });
-      gelaendeZustand(S, r4, c, Z2, [[4, vz2 + 2, W3 * 0.5, D - 4], [bx1 + 11, 2, W3 - 2, bz1]]);
+      if (D - vz3 > 14) parkplatz2(S, r4, W3 * 0.55, vz3 + 3, W3 - 4, D - 4, { dichte: Z2 === "stillgelegt" ? 0.05 : 0.6 });
+      gelaendeZustand(S, r4, c, Z2, [[4, vz3 + 2, W3 * 0.5, D - 4], [bx1 + 11, 2, W3 - 2, bz1]]);
       return { hoehe: 66 };
     }
     if (v2 === "huette") {
@@ -131493,10 +131493,10 @@ void main() {
       zyl5(S, 6.5, 7, 10, hx, 0, hz, rost, 14);
       zyl5(S, 5, 6.5, 22, hx, 10, hz, dunkler(rost, 0.04), 14);
       zyl5(S, 9.5, 9.5, 0.6, hx, 12, hz, "#4a4f55", 16);
-      const ring2 = new three_module_exports.TorusGeometry(7.6, 0.8, 6, 18);
-      ring2.rotateX(PI6 / 2);
-      ring2.translate(hx, 9.5, hz);
-      S.add(ring2, "#5d5650");
+      const ring3 = new three_module_exports.TorusGeometry(7.6, 0.8, 6, 18);
+      ring3.rotateX(PI6 / 2);
+      ring3.translate(hx, 9.5, hz);
+      S.add(ring3, "#5d5650");
       for (const y2 of [20, Hg]) zyl5(S, 9, 9, 0.5, hx, y2, hz, "#4a4f55", 16);
       gitterturm(S, hx - 8, hz - 8, hx + 8, hz + 8, 0.3, Hg, c.stahl, 6, 0.8);
       S.quader(hx - 4, Hg + 0.5, hz - 4, hx + 4, Hg + 9, hz + 4, dunkler(rost, 0.02));
@@ -131672,13 +131672,13 @@ void main() {
       for (const e of ecken) stab(S, e, spitze3, 0.32, c, 6);
       for (let i = 0; i < 4; i++) stab(S, ecken[i], ecken[(i + 1) % 4], 0.3, c, 6);
       for (const t5 of [0.33, 0.62]) {
-        const ring2 = ecken.map((e) => [e[0] + (spitze3[0] - e[0]) * t5, e[1] + (spitze3[1] - e[1]) * t5, e[2] + (spitze3[2] - e[2]) * t5]);
+        const ring3 = ecken.map((e) => [e[0] + (spitze3[0] - e[0]) * t5, e[1] + (spitze3[1] - e[1]) * t5, e[2] + (spitze3[2] - e[2]) * t5]);
         for (let i = 0; i < 4; i++) {
-          stab(S, ring2[i], ring2[(i + 1) % 4], 0.22, c, 6);
-          stab(S, ecken[i], ring2[(i + 1) % 4], 0.14, c, 4);
+          stab(S, ring3[i], ring3[(i + 1) % 4], 0.22, c, 6);
+          stab(S, ecken[i], ring3[(i + 1) % 4], 0.14, c, 4);
         }
         const s2 = b4 * (1 - t5) * 0.6;
-        S.quader(cx - s2 / 2, ring2[0][1] - 0.15, cz - s2 / 2, cx + s2 / 2, ring2[0][1], cz + s2 / 2, "#9aa1a7");
+        S.quader(cx - s2 / 2, ring3[0][1] - 0.15, cz - s2 / 2, cx + s2 / 2, ring3[0][1], cz + s2 / 2, "#9aa1a7");
       }
       balken(S, [cx - b4 * 0.3, y2 + 0.3, cz + b4 * 0.1], [cx + b4 * 0.15, y2 + st0 + Hp * 0.33, cz + b4 * 0.1], 1, 0.3, "#7d858c");
       balken(S, [cx + b4 * 0.15, y2 + st0 + Hp * 0.33, cz - b4 * 0.1], [cx - b4 * 0.08, y2 + st0 + Hp * 0.62, cz - b4 * 0.1], 0.9, 0.3, "#7d858c");
@@ -132397,13 +132397,13 @@ void main() {
         fb(S, F3, F3.L / 2 - 6, F3.L / 2 + 6, y0 - 1.6, y0 - 1, 0, 5, "#e9e7e1");
         for (const u of [F3.L / 2 - 5.5, F3.L / 2 + 5.5]) fb(S, F3, u - 0.15, u + 0.15, 0.3, y0 - 1.6, 4.6, 4.9, "#5a6168");
       }
-      const vz2 = tz + tw + 6;
-      if (D - vz2 > 6) {
-        boden2(S, 3, vz2 + 1, W3 - 3, D - 1, "#d9d2c2", 0.3, 0.1);
-        zyl5(S, 3.4, 3.4, 0.5, W3 * 0.25, 0.35, (vz2 + D) / 2, "#cfc8b8", 16);
-        zyl5(S, 3, 3, 0.52, W3 * 0.25, 0.36, (vz2 + D) / 2, FARBEN3.wasser, 16);
-        vorplatzFahnen(S, r4, W3 * 0.62, vz2 + 2.5, 5, ["#1f3a5f", "#f4f2ec", "#e0b23a"]);
-        figuren(S, r4, 4, vz2 + 1, W3 - 4, D - 1, 12, 0.4);
+      const vz3 = tz + tw + 6;
+      if (D - vz3 > 6) {
+        boden2(S, 3, vz3 + 1, W3 - 3, D - 1, "#d9d2c2", 0.3, 0.1);
+        zyl5(S, 3.4, 3.4, 0.5, W3 * 0.25, 0.35, (vz3 + D) / 2, "#cfc8b8", 16);
+        zyl5(S, 3, 3, 0.52, W3 * 0.25, 0.36, (vz3 + D) / 2, FARBEN3.wasser, 16);
+        vorplatzFahnen(S, r4, W3 * 0.62, vz3 + 2.5, 5, ["#1f3a5f", "#f4f2ec", "#e0b23a"]);
+        figuren(S, r4, 4, vz3 + 1, W3 - 4, D - 1, 12, 0.4);
       }
       parkplatz2(S, r4, 1, 1, W3 - 1, Math.max(2, tz - 5), { dichte: 0.8 });
       H += 18;
@@ -132445,13 +132445,13 @@ void main() {
       }
       for (let k5 = 0; k5 < 3; k5++) S.quader(txx + 1 + k5 * 1.2, tH + k5 * 1.4, tzz + 1 + k5 * 1.2, txx + tw - 1 - k5 * 1.2, tH + (k5 + 1) * 1.4, tzz + tw - 5 - k5 * 1.2, k5 % 2 ? gold : kl2);
       flachdach2(S, bx, bz, bw, bd, H, null, null, "#6b6560");
-      const vz2 = bz + bd;
-      if (D - vz2 > 4) {
-        boden2(S, bx, vz2 + 1, bx + bw, D - 1, stein, 0.3, 0.08);
-        boden2(S, bx + 3, vz2 + 2, bx + bw / 2 - 3, D - 2, RASEN, 0.3, 0.1);
-        boden2(S, bx + bw / 2 + 3, vz2 + 2, bx + bw - 3, D - 2, RASEN, 0.3, 0.1);
-        for (const xx of [bx + 5, bx + bw / 2 - 5, bx + bw / 2 + 5, bx + bw - 5]) baumRund(S, xx, (vz2 + D) / 2, r4, 0.9);
-        for (const xx of [bx + bw / 2 - 2.6, bx + bw / 2 + 2.6]) laterne2(S, xx, vz2 + 2, 4, 0.38, "alt");
+      const vz3 = bz + bd;
+      if (D - vz3 > 4) {
+        boden2(S, bx, vz3 + 1, bx + bw, D - 1, stein, 0.3, 0.08);
+        boden2(S, bx + 3, vz3 + 2, bx + bw / 2 - 3, D - 2, RASEN, 0.3, 0.1);
+        boden2(S, bx + bw / 2 + 3, vz3 + 2, bx + bw - 3, D - 2, RASEN, 0.3, 0.1);
+        for (const xx of [bx + 5, bx + bw / 2 - 5, bx + bw / 2 + 5, bx + bw - 5]) baumRund(S, xx, (vz3 + D) / 2, r4, 0.9);
+        for (const xx of [bx + bw / 2 - 2.6, bx + bw / 2 + 2.6]) laterne2(S, xx, vz3 + 2, 4, 0.38, "alt");
       }
       if (bz > 8) parkplatz2(S, r4, 2, 1, W3 - 2, bz - 1, { dichte: 0.6 });
       H = tH + 4.2;
@@ -133005,10 +133005,10 @@ void main() {
       tg.translate(bx + bw / 2, H, (bz0 + bz1) / 2);
       S.add(tg, "#9cc0cf");
       for (let x2 = bx + 9; x2 < bx + bw - 8; x2 += 4) {
-        const ring2 = new three_module_exports.TorusGeometry(5.05, 0.12, 4, 12, PI6);
-        ring2.rotateY(PI6 / 2);
-        ring2.translate(x2, H, (bz0 + bz1) / 2);
-        S.add(ring2, "#e4e6e8");
+        const ring3 = new three_module_exports.TorusGeometry(5.05, 0.12, 4, 12, PI6);
+        ring3.rotateY(PI6 / 2);
+        ring3.translate(x2, H, (bz0 + bz1) / 2);
+        S.add(ring3, "#e4e6e8");
       }
       const tx = bx + 2, tz = bz1 - 8, tH = 28;
       S.quader(tx, 0, tz, tx + 8, tH, tz + 8, blau);
@@ -133183,10 +133183,10 @@ void main() {
     S.quader(cx - L3 / 2, yy, cz - B8 / 2, cx - L3 / 2 + t5, yy + 0.02, cz + B8 / 2, m);
     S.quader(cx + L3 / 2 - t5, yy, cz - B8 / 2, cx + L3 / 2, yy + 0.02, cz + B8 / 2, m);
     S.quader(cx - t5 / 2, yy, cz - B8 / 2, cx + t5 / 2, yy + 0.02, cz + B8 / 2, m);
-    const ring2 = new three_module_exports.TorusGeometry(B8 * 0.13, 0.12, 3, 24);
-    ring2.rotateX(PI6 / 2);
-    ring2.translate(cx, yy + 0.02, cz);
-    S.add(ring2, m);
+    const ring3 = new three_module_exports.TorusGeometry(B8 * 0.13, 0.12, 3, 24);
+    ring3.rotateX(PI6 / 2);
+    ring3.translate(cx, yy + 0.02, cz);
+    S.add(ring3, m);
     for (const s2 of [-1, 1]) {
       const x0 = cx + s2 * L3 / 2, x1 = cx + s2 * (L3 / 2 - L3 * 0.15), bz = B8 * 0.4;
       S.quader(Math.min(x0, x1), yy, cz - bz / 2, Math.max(x0, x1), yy + 0.02, cz - bz / 2 + t5, m);
@@ -133236,7 +133236,7 @@ void main() {
       const c = Math.max(4, LF / 2 - Math.sqrt(Math.max(0, ri * ri - (BF / 2 + 0.5) ** 2)));
       const BAHN = "#b8553f";
       for (const sz of [-1, 1]) S.quader(cx - c, 0.3, cz + (sz < 0 ? -rb : ri), cx + c, 0.36, cz + (sz < 0 ? -ri : rb), BAHN);
-      const ring2 = (r0, r1, f13, y2) => {
+      const ring3 = (r0, r1, f13, y2) => {
         for (const sx of [-1, 1]) {
           const g2 = new three_module_exports.RingGeometry(r0, r1, 28, 1, sx > 0 ? -PI6 / 2 : PI6 / 2, PI6);
           g2.rotateX(-PI6 / 2);
@@ -133244,10 +133244,10 @@ void main() {
           S.add(g2, f13);
         }
       };
-      ring2(ri, rb, BAHN, 0.36);
-      ring2(ri - 0.25, ri, "#f1efe9", 0.37);
+      ring3(ri, rb, BAHN, 0.36);
+      ring3(ri - 0.25, ri, "#f1efe9", 0.37);
       for (const rr5 of [ri + tr / 3, ri + 2 * tr / 3]) {
-        ring2(rr5 - 0.06, rr5 + 0.06, "#e9d6cf", 0.37);
+        ring3(rr5 - 0.06, rr5 + 0.06, "#e9d6cf", 0.37);
         for (const sz of [-1, 1]) S.quader(cx - c, 0.36, cz + sz * rr5 - 0.06, cx + c, 0.37, cz + sz * rr5 + 0.06, "#e9d6cf");
       }
       for (const sz of [-1, 1]) S.quader(cx - c, 0.36, cz + sz * (ri - 0.125) - 0.125, cx + c, 0.37, cz + sz * (ri - 0.125) + 0.125, "#f1efe9");
@@ -135516,10 +135516,10 @@ void main() {
       puppe3(lokal2(S, cx, 0.4, cz, 0), Math.sin(a2) * Rz * 0.64, Math.cos(a2) * Rz * 0.64, r4, "sport", pal, a2 + PI7);
     }
     puppe3(lokal2(S, cx, 0.7, cz, 0), 0, 0, r4, "sport", pal, PI7 * 1.25);
-    const ring2 = new three_module_exports.TorusGeometry(Rz * 0.7, 0.07, 4, 24);
-    ring2.rotateX(PI7 / 2);
-    ring2.translate(cx, WH2 - 0.5, cz);
-    S.add(ring2, "#f7e9c8");
+    const ring3 = new three_module_exports.TorusGeometry(Rz * 0.7, 0.07, 4, 24);
+    ring3.rotateX(PI7 / 2);
+    ring3.translate(cx, WH2 - 0.5, cz);
+    S.add(ring3, "#f7e9c8");
     if (scene2) haengeschild(S, scene2, "Neue Saison", cx - Rz * 0.2, 3.4, cz - Rz * 0.9, { farbe: F6AKZ[ra.v], hoehe: 0.6 });
     ra.belegt.push([cx - Rz, cz - Rz, B8, T]);
     frei6.push([cx - Rz - 0.5, cz + 0.5], [cx + 0.5, cz - Rz - 0.4]);
@@ -136247,8 +136247,8 @@ void main() {
     };
     const kx = Math.max(1, Math.min(nx - 3, Math.floor(nx / 2) - 1)), kz2 = Math.max(1, Math.min(nz - 2, Math.floor(nz / 2) - 1));
     for (let i = kx; i < kx + 2; i++) for (let j4 = kz2; j4 < kz2 + 2; j4++) typ[i][j4] = "kern";
-    const ring2 = haus2.kette !== "schwester" && nx >= 8 && nz >= 7;
-    if (ring2) for (let i = kx - 1; i <= kx + 2; i++) for (let j4 = kz2 - 1; j4 <= kz2 + 1; j4++) setz(i, j4, "halle");
+    const ring3 = haus2.kette !== "schwester" && nx >= 8 && nz >= 7;
+    if (ring3) for (let i = kx - 1; i <= kx + 2; i++) for (let j4 = kz2 - 1; j4 <= kz2 + 1; j4++) setz(i, j4, "halle");
     const gz2 = Math.min(nz - 1, kz2 + 2), gx = kx;
     if (gz2 > kz2 + 1) for (let i = 0; i < nx; i++) setz(i, gz2, "gang");
     for (let j4 = gz2 + 1; j4 < nz; j4++) setz(gx, j4, "gang");
@@ -136263,9 +136263,9 @@ void main() {
       setz(nx - 1, 1, "treppe2");
     }
     if (nx >= 8) setz(nx - 2, 0, "wc");
-    if (ring2) typ[kx - 1][kz2] = "aufzug";
+    if (ring3) typ[kx - 1][kz2] = "aufzug";
     else setz(kx - 1, kz2, "aufzug");
-    const bl = ring2 ? [[0, kx - 1, 0, gz2], [kx + 3, nx, 0, gz2], [0, gx, gz2 + 1, nz], [gx + 1, nx, gz2 + 1, nz]] : [[0, kx, 0, gz2], [kx + 2, nx, 0, gz2], [0, gx, gz2 + 1, nz], [gx + 1, nx, gz2 + 1, nz]];
+    const bl = ring3 ? [[0, kx - 1, 0, gz2], [kx + 3, nx, 0, gz2], [0, gx, gz2 + 1, nz], [gx + 1, nx, gz2 + 1, nz]] : [[0, kx, 0, gz2], [kx + 2, nx, 0, gz2], [0, gx, gz2 + 1, nz], [gx + 1, nx, gz2 + 1, nz]];
     for (const [a2, b4, c, e] of bl) {
       const w2 = b4 - a2, tief2 = e - c;
       if (w2 < 6 || w2 * tief2 < 20) continue;
@@ -136275,7 +136275,7 @@ void main() {
         for (let j4 = c; j4 < e; j4++) setz(i, j4, "neben");
       }
     }
-    return { B: B8, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring: ring2, schwester: haus2.kette === "schwester" };
+    return { B: B8, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring: ring3, schwester: haus2.kette === "schwester" };
   }
   function unterteilen(fl, etageNr) {
     const out = [];
@@ -136296,9 +136296,9 @@ void main() {
     return out;
   }
   function zonen(haus2, etageNr, ra) {
-    const { nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring: ring2 } = ra;
+    const { nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring: ring3 } = ra;
     let fl = unterteilen(haus2.flaechen.filter((f13) => f13.etage === etageNr && f13.qm >= 10), etageNr);
-    const blocks = ring2 ? [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 3, nx, 0, gz2, -1], [kx - 1, kx + 3, 0, kz2 - 1, -1], [0, kx - 1, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]] : [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 2, nx, 0, gz2, -1], [kx, kx + 2, 0, kz2, -1], [0, kx, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]];
+    const blocks = ring3 ? [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 3, nx, 0, gz2, -1], [kx - 1, kx + 3, 0, kz2 - 1, -1], [0, kx - 1, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]] : [[gx + 1, nx, gz2 + 1, nz, 1], [kx + 2, nx, 0, gz2, -1], [kx, kx + 2, 0, kz2, -1], [0, kx, 0, gz2, -1], [0, gx, gz2 + 1, nz, 1]];
     const vergeben = Array.from({ length: nx }, () => Array(nz).fill(false));
     let spuren = [];
     for (const [a2, b4, c, e, dir] of blocks) {
@@ -136393,9 +136393,9 @@ void main() {
       const w2 = Math.min(B8, a2.w ?? 30), d5 = Math.min(T, a2.d ?? 25);
       const anker = a2.anker ?? "eingang";
       const vx = anker === "ecke" ? B8 - w2 : anker === "kern" ? (ra.kx + 1) * R4 - w2 / 2 : ra.gx * R4 - 10;
-      const vz2 = anker === "kern" ? (ra.kz + 1) * R4 - d5 / 2 : T - d5;
+      const vz3 = anker === "kern" ? (ra.kz + 1) * R4 - d5 / 2 : T - d5;
       ax0 = Math.max(0, Math.min(B8 - w2, Math.round((a2.x ?? vx) / R4) * R4));
-      az0 = Math.max(0, Math.min(T - d5, Math.round((a2.z ?? vz2) / R4) * R4));
+      az0 = Math.max(0, Math.min(T - d5, Math.round((a2.z ?? vz3) / R4) * R4));
       ax1 = ax0 + w2;
       az1 = az0 + d5;
     }
@@ -136442,7 +136442,7 @@ void main() {
     return { box, breite: B8, tiefe: T, zonen: zn, anzahl: tmp2.anzahl, dichte: d4, kunden, leer: kk.leer, navigation: kk.navigation };
   }
   function bauen2(S, scene2, haus2, etageNr, ra, zn, k5) {
-    const { B: B8, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring: ring2 } = ra;
+    const { B: B8, T, nx, nz, typ, kx, kz: kz2, gx, gz: gz2, ring: ring3 } = ra;
     const { ax0, az0, ax1, az1, drin, d: d4 } = k5;
     const hid = (haus2.id ?? "H").split("").reduce((a2, c) => a2 * 31 + c.charCodeAt(0), 7) >>> 0;
     const r4 = rng3(hid + etageNr * 101);
@@ -136635,7 +136635,7 @@ void main() {
       S.box(0.8, 0.25, 0.42, kx2 - 0.6, 1.19, kz3, "#48565b");
       S.box(0.3, 0.18, 0.35, kx2 + 0.55, 1.2, kz3, "#d9d0bd");
     }
-    const kassen = ra.schwester ? [{ x: B8 - 5, z: T - 3.4 }] : !eg && ring2 ? [{ x: (kx + 2.5) * R4, z: (kz2 - 1) * R4 + 4.7 }] : [];
+    const kassen = ra.schwester ? [{ x: B8 - 5, z: T - 3.4 }] : !eg && ring3 ? [{ x: (kx + 2.5) * R4, z: (kz2 - 1) * R4 + 4.7 }] : [];
     k5.navigation = { hindernisse: belegt2.map(([x0, z0, x1, z1]) => ({ x: x0, z: z0, w: x1 - x0, d: z1 - z0 })), kassen };
     const pool = freiZone.concat(freiGang);
     const n3 = Math.min(k5.kunden, pool.length);
@@ -136701,7 +136701,7 @@ void main() {
     }
   }
   function gangZelle2(S, scene2, t5, i, j4, ra, eg, d4, frei6, r4) {
-    const { nx, nz, kx, kz: kz2, gx, gz: gz2, ring: ring2 } = ra;
+    const { nx, nz, kx, kz: kz2, gx, gz: gz2, ring: ring3 } = ra;
     const typ = (a2, b4) => ra.typ[a2]?.[b4];
     const x2 = i * R4, z6 = j4 * R4;
     boden(S, x2, z6, R4, R4, 0, ra.schwester ? SCHWESTER_BODEN : t5 === "halle" ? HALLE : GANG, d4);
@@ -136813,7 +136813,7 @@ void main() {
       }
       frei6.length = Math.max(0, frei6.length - 2);
     }
-    if (i === gx && j4 === gz2 && !ring2) {
+    if (i === gx && j4 === gz2 && !ring3) {
       const L3 = lokal2(S, x2 + 2.5, 0.06, z6 + 2.5, 0);
       L3.zyl(0.9, 0.9, 0.5, 0, 0, 0, "#ece6dc", 10);
       L3.kugel(0.8, 0, 1.2, 0, "#5f9a56");
@@ -137001,8 +137001,8 @@ void main() {
     const { ax0, az0, ax1, az1, d: d4 } = k5;
     const B8 = ax1 - ax0, T = az1 - az0, cx = (ax0 + ax1) / 2, cz = (az0 + az1) / 2;
     const gold = "#b8955a", dunkel4 = "#284139", stein = "#eee3d1";
-    const ring2 = Math.min(B8, T) > 18;
-    if (ring2) {
+    const ring3 = Math.min(B8, T) > 18;
+    if (ring3) {
       for (const dx of [-1, 1]) for (const dz of [-1, 1]) S.box(0.55, 3.8, 0.55, cx + dx * 5.2, 1.9, cz + dz * 5.2, gold);
       for (const dz of [-1, 1]) S.box(10.5, 0.22, 0.3, cx, 3.65, cz + dz * 5.2, gold);
       for (const dx of [-1, 1]) S.box(0.3, 0.22, 10.5, cx + dx * 5.2, 3.65, cz, gold);
@@ -139703,18 +139703,18 @@ void main() {
     const bu = (u1 - u0) / nu, bv = (y1 - y0) / nv;
     fb2(S, F3, u0 - 0.3, u1 + 0.3, y0 - 0.3, y1 + 0.3, t5 - 0.05, t5 + 0.06, o4.rahmen ?? "#efe9dc");
     const su = zw(r4, 0.25, 0.75) * nu, sv = zw(r4, 0.55, 0.8) * nv, sr = Math.min(nu, nv) * zw(r4, 0.22, 0.32);
-    const wf = zw(r4, 0.5, 1.1), ph = r4() * 6, motiv3 = o4.motiv ?? waehle2(r4, ["sonne", "b\xE4nder", "figur"]);
+    const wf = zw(r4, 0.5, 1.1), ph = r4() * 6, motiv5 = o4.motiv ?? waehle2(r4, ["sonne", "b\xE4nder", "figur"]);
     for (let i = 0; i < nu; i++) for (let k5 = 0; k5 < nv; k5++) {
       const dx = i + 0.5 - su, dy = k5 + 0.5 - sv, dist2 = wurzelSumme15(dx, dy);
       let ci;
-      if (motiv3 === "sonne" && dist2 < sr) ci = dist2 < sr * 0.55 ? 1 : 0;
-      else if (motiv3 === "sonne" && dist2 < sr * 1.5 && Math.floor(Math.atan2(dy, dx) * 4 / PI9 + 8) % 2 === 0) ci = 1;
-      else if (motiv3 === "figur" && Math.abs(dx) < 1.2 && k5 < nv * 0.75) ci = k5 > nv * 0.6 ? 0 : 5;
-      else if (motiv3 === "figur" && Math.abs(dx + 0.5 * (k5 - nv * 0.45)) < 0.8 && k5 > nv * 0.35 && k5 < nv * 0.6) ci = 5;
+      if (motiv5 === "sonne" && dist2 < sr) ci = dist2 < sr * 0.55 ? 1 : 0;
+      else if (motiv5 === "sonne" && dist2 < sr * 1.5 && Math.floor(Math.atan2(dy, dx) * 4 / PI9 + 8) % 2 === 0) ci = 1;
+      else if (motiv5 === "figur" && Math.abs(dx) < 1.2 && k5 < nv * 0.75) ci = k5 > nv * 0.6 ? 0 : 5;
+      else if (motiv5 === "figur" && Math.abs(dx + 0.5 * (k5 - nv * 0.45)) < 0.8 && k5 > nv * 0.35 && k5 < nv * 0.6) ci = 5;
       else {
         const w2 = Math.sin(i * wf + ph) * nv * 0.12 + nv * 0.3;
         ci = k5 < w2 ? 2 : k5 < w2 + 1.2 ? 3 : (i + k5) % 7 === 0 ? 4 : Math.floor((i + k5 * 0.5) / 3) % 2 ? 3 : 5;
-        if (motiv3 === "b\xE4nder") ci = [2, 3, 0, 3, 5, 1][Math.floor((i * 0.6 + k5) / 1.5) % 6];
+        if (motiv5 === "b\xE4nder") ci = [2, 3, 0, 3, 5, 1][Math.floor((i * 0.6 + k5) / 1.5) % 6];
       }
       fb2(S, F3, u0 + i * bu + 0.06, u0 + (i + 1) * bu - 0.06, y0 + k5 * bv + 0.06, y0 + (k5 + 1) * bv - 0.06, t5, t5 + 0.12, pal[ci]);
     }
@@ -141621,9 +141621,9 @@ void main() {
       S.add(g2, "#9fc3cf");
       for (let i = 0; i <= 6; i++) {
         const t5 = bz2 + 0.2 + i * (bd2 + 1) / 6;
-        const ring2 = new three_module_exports.TorusGeometry(pb / 2 + 0.05, 0.12, 4, 16, PI9);
-        ring2.translate(bx2 + mitte, H2 + 0.2, t5);
-        S.add(ring2, "#e9ecee");
+        const ring3 = new three_module_exports.TorusGeometry(pb / 2 + 0.05, 0.12, 4, 16, PI9);
+        ring3.translate(bx2 + mitte, H2 + 0.2, t5);
+        S.add(ring3, "#e9ecee");
       }
       const FZ2 = RZ(bx2, bz2, bw2, bd2);
       ftext2(scene2, FZ2, p2.name ?? "Markt-Passage", mitte, H2 - 0.6, 0.65, 1, pb * 2.2, "#1f3a5f");
@@ -142518,7 +142518,7 @@ void main() {
     };
     const gewichte2 = [["wbs70_6", 3], ["p2", 1.4], ["q3a", klein ? 1.6 : 0.6], ["wbs70_11", metro ? 2 : klein ? 0.2 : 0.9], ["scheibe", metro ? 1 : 0.25]];
     const geschosse2 = (v2) => /11|scheibe/.test(v2) ? 11 : v2 === "q3a" ? 5 : 6;
-    const zeile3 = (x2, z6, w2, d4, front2, vWunsch) => {
+    const zeile2 = (x2, z6, w2, d4, front2, vWunsch) => {
       const entlangX = front2[1] === "z", L3 = entlangX ? w2 : d4;
       if (L3 < 26) return;
       const v2 = vWunsch ?? wahlGewichtet2(rb, gewichte2.filter(([q2]) => q2 !== "scheibe" || L3 >= 60));
@@ -142540,7 +142540,7 @@ void main() {
       const [typ, aw, ad, variante2, g2] = MA;
       setze(typ, X1 - aw, Z1 - ad, aw, ad, ["+z", "+x"], { variante: variante2, geschosse: g2 });
       const rw = X1 - X0 - aw - 4;
-      if (rw >= 30) zeile3(X0, Z1 - TD, rw, TD, "+z");
+      if (rw >= 30) zeile2(X0, Z1 - TD, rw, TD, "+z");
       else if (rw >= 14) b4.spiel.push({ x: X0, z: Z1 - ad, w: rw, d: ad });
       b4.wege.push({ x: X0, z: Z1 - ad - 4, w: X1 - X0, d: 2.4 });
       Z1 = Z1 - ad - 5;
@@ -142560,11 +142560,11 @@ void main() {
     })();
     b4.layout = lay;
     if (lay === "hof") {
-      zeile3(X0, Z0, W3, TD, "-z");
-      zeile3(X0, Z1 - TD, W3, TD, "+z");
+      zeile2(X0, Z0, W3, TD, "-z");
+      zeile2(X0, Z1 - TD, W3, TD, "+z");
       const zi0 = Z0 + TD + 5, zi1 = Z1 - TD - 5;
-      zeile3(X0, zi0, TD, zi1 - zi0, "-x");
-      zeile3(X1 - TD, zi0, TD, zi1 - zi0, "+x");
+      zeile2(X0, zi0, TD, zi1 - zi0, "-x");
+      zeile2(X1 - TD, zi0, TD, zi1 - zi0, "+x");
       const hof2 = { x: X0 + TD + 2, z: Z0 + TD + 2, w: W3 - 2 * TD - 4, d: D - 2 * TD - 4 };
       b4.spiel.push({ x: hof2.x + hof2.w * 0.3, z: hof2.z + hof2.d * 0.3, w: Math.min(16, hof2.w * 0.4), d: Math.min(12, hof2.d * 0.4) });
       b4.wege.push({ x: X0, z: Z0 + TD + 1, w: W3, d: 2.4 }, { x: X0 + TD + 1, z: Z0, w: 2.4, d: D });
@@ -142573,7 +142573,7 @@ void main() {
       let x2 = X0, k5 = 0;
       while (X1 - x2 >= TD) {
         const front2 = k5 % 2 === 0 ? "+x" : "-x";
-        zeile3(x2, Z0, TD, D, front2);
+        zeile2(x2, Z0, TD, D, front2);
         x2 += TD;
         if (k5 % 2 === 0 && X1 - x2 >= A2 + TD) {
           b4.parkplaetze.push({ x: x2 + 2, z: Z0 + 4, w: A2 - 4, d: Math.min(D - 8, 60) });
@@ -142590,7 +142590,7 @@ void main() {
       let z6 = Z1, k5 = 0;
       while (z6 - Z0 >= TD) {
         const front2 = k5 % 2 === 0 ? "+z" : "-z";
-        zeile3(X0, z6 - TD, W3, TD, front2);
+        zeile2(X0, z6 - TD, W3, TD, front2);
         z6 -= TD;
         if (k5 % 2 === 0 && z6 - Z0 >= A2 + TD) {
           b4.parkplaetze.push({ x: X0 + 4, z: z6 - A2 + 2, w: Math.min(W3 - 8, 70), d: A2 - 4 });
@@ -142603,12 +142603,12 @@ void main() {
         k5++;
       }
     } else if (lay === "winkel") {
-      zeile3(X0, Z1 - TD, W3, TD, "+z");
-      zeile3(X1 - TD, Z0, TD, D - TD - 4, "+x");
+      zeile2(X0, Z1 - TD, W3, TD, "+z");
+      zeile2(X1 - TD, Z0, TD, D - TD - 4, "+x");
       const iw = W3 - TD - 4, id = D - TD - 4;
       b4.wege.push({ x: X0, z: Z1 - TD - 3.4, w: W3 - TD, d: 2.4 });
       if (iw >= 36 && id >= 34 && rb() < 0.6) setze("slot:platte_wohn", X0, Z0, Math.min(36, iw), Math.min(34, id), ["-z"], { variante: metro ? "ph16" : "wuerfel", zustand: zustand(), geschosse: metro ? 16 : 6 });
-      else if (id >= 26) zeile3(X0, Z0, iw, TD, "-z");
+      else if (id >= 26) zeile2(X0, Z0, iw, TD, "-z");
       b4.parkplaetze.push({ x: X0 + Math.min(40, iw * 0.55), z: Z0 + 2, w: Math.max(10, iw - Math.min(40, iw * 0.55) - 2), d: Math.min(16, id - 4) });
       b4.spiel.push({ x: X0 + iw * 0.35, z: Z0 + id * 0.6, w: Math.min(14, iw * 0.3), d: Math.min(10, id * 0.3) });
     } else if (lay === "punkt") {
@@ -142616,12 +142616,12 @@ void main() {
       if (D > W3 * 1.25 && W3 >= TD + 40) {
         const n3 = Math.max(1, Math.floor((D + 10) / 40));
         for (let k5 = 0; k5 < n3; k5++) setze("slot:platte_wohn", X1 - 34, Z0 + k5 * (D / n3), 34, Math.min(34, D / n3 - 4), ["+x"], { variante: vp2, zustand: zustand(), geschosse: gp });
-        zeile3(X0, Z0, TD, D, "-x", metro ? "wbs70_11" : void 0);
+        zeile2(X0, Z0, TD, D, "-x", metro ? "wbs70_11" : void 0);
         b4.parkplaetze.push({ x: X0 + TD + 3, z: Z0 + 4, w: Math.max(6, Math.min(14, W3 - TD - 40)), d: Math.min(D - 8, 60) });
       } else {
         const n3 = Math.max(1, Math.floor((W3 + 10) / 40));
         for (let k5 = 0; k5 < n3; k5++) setze("slot:platte_wohn", X0 + k5 * (W3 / n3), Z1 - 34, Math.min(34, W3 / n3 - 4), 34, ["+z"], { variante: vp2, zustand: zustand(), geschosse: gp });
-        zeile3(X0, Z0, W3, TD, "-z", metro ? "wbs70_11" : void 0);
+        zeile2(X0, Z0, W3, TD, "-z", metro ? "wbs70_11" : void 0);
         b4.parkplaetze.push({ x: X0 + 4, z: Z0 + TD + 3, w: Math.min(W3 - 8, 60), d: Math.max(6, Math.min(14, D - TD - 40)) });
       }
     } else if (lay === "doppelwinkel") {
@@ -142637,14 +142637,14 @@ void main() {
       else if (f13 === "+x") setze("slot:platte_wohn", X1 - Dk, Z0, Dk, D, [f13], { variante: "kurve", zustand: zustand() });
       else setze("slot:platte_wohn", X0, Z0, Dk, D, [f13], { variante: "kurve", zustand: zustand() });
       if (rest >= TD + 6) {
-        if (f13 === "+z") zeile3(X0, Z0, W3, TD, "-z");
-        else if (f13 === "-z") zeile3(X0, Z1 - TD, W3, TD, "+z");
-        else if (f13 === "+x") zeile3(X0, Z0, TD, D, "-x");
-        else zeile3(X1 - TD, Z0, TD, D, "+x");
+        if (f13 === "+z") zeile2(X0, Z0, W3, TD, "-z");
+        else if (f13 === "-z") zeile2(X0, Z1 - TD, W3, TD, "+z");
+        else if (f13 === "+x") zeile2(X0, Z0, TD, D, "-x");
+        else zeile2(X1 - TD, Z0, TD, D, "+x");
       }
     } else {
-      zeile3(X0, Z1 - TD, W3, TD, "+z");
-      if (D >= 2 * TD + 10) zeile3(X0, Z0, W3, TD, "-z");
+      zeile2(X0, Z1 - TD, W3, TD, "+z");
+      if (D >= 2 * TD + 10) zeile2(X0, Z0, W3, TD, "-z");
       else if (D - TD >= 12) {
         b4.parkplaetze.push({ x: X0 + 2, z: Z0 + 1, w: Math.min(W3 * 0.55, 50), d: Math.min(14, D - TD - 3) });
         if (W3 > 60) b4.spiel.push({ x: X0 + W3 * 0.68, z: Z0 + 2, w: Math.min(14, W3 * 0.25), d: Math.min(10, D - TD - 4) });
@@ -143227,9 +143227,9 @@ void main() {
       const rahmen2 = l.rahmen ?? o4.rahmen;
       if ((l.typ === "fenster" || l.typ === "laden") && rahmen2 && LOD2.stufe !== "fern") {
         const k5 = l.kreis ? 0.09 : Math.min(0.12, (l.u1 - l.u0) * 0.12);
-        const ring2 = pfad3(new three_module_exports.Shape(), l, 0);
-        ring2.holes.push(pfad3(new three_module_exports.Path(), l.kreis ? { kreis: [l.kreis[0], l.kreis[1], l.kreis[2] - k5] } : { ...l, u0: l.u0 + k5, u1: l.u1 - k5, v0: l.v0 + k5, v1: l.v1 - k5 }));
-        ringe.push([rahmen2, tief2, ring2]);
+        const ring3 = pfad3(new three_module_exports.Shape(), l, 0);
+        ring3.holes.push(pfad3(new three_module_exports.Path(), l.kreis ? { kreis: [l.kreis[0], l.kreis[1], l.kreis[2] - k5] } : { ...l, u0: l.u0 + k5, u1: l.u1 - k5, v0: l.v0 + k5, v1: l.v1 - k5 }));
+        ringe.push([rahmen2, tief2, ring3]);
         const sp6 = l.sprosse ?? o4.sprosse ?? true;
         if (sp6 && !l.kreis) {
           const b4 = l.u1 - l.u0, um2 = (l.u0 + l.u1) / 2, vk = kaempfer(l);
@@ -143976,8 +143976,8 @@ void main() {
     if (pi >= 0) {
       const u0 = pi * ra + 1.2, u1 = (pi + 1) * ra - 1.2, um2 = (u0 + u1) / 2, b4 = u1 - u0;
       for (let s2 = 1; s2 <= 3; s2++) {
-        const e = s2 * 0.32, ring2 = umrissForm([[u0 - e, 0.3], [u1 + e, 0.3], [u1 + e, o4.eg - 0.2 - b4 * 0.866 + e * 0.6], [um2, o4.eg - 0.2 + e * 1.1], [u0 - e, o4.eg - 0.2 - b4 * 0.866 + e * 0.6]]);
-        ring2.holes.push((() => {
+        const e = s2 * 0.32, ring3 = umrissForm([[u0 - e, 0.3], [u1 + e, 0.3], [u1 + e, o4.eg - 0.2 - b4 * 0.866 + e * 0.6], [um2, o4.eg - 0.2 + e * 1.1], [u0 - e, o4.eg - 0.2 - b4 * 0.866 + e * 0.6]]);
+        ring3.holes.push((() => {
           const q2 = new three_module_exports.Path();
           const e2 = e - 0.32;
           q2.moveTo(u0 - e2, 0.3);
@@ -143988,7 +143988,7 @@ void main() {
           q2.lineTo(u0 - e2, 0.3);
           return q2;
         })());
-        formen(S, F3, [ring2], 0, 0.12 + s2 * 0.08, s2 % 2 ? o4.zier : o4.gold);
+        formen(S, F3, [ring3], 0, 0.12 + s2 * 0.08, s2 % 2 ? o4.zier : o4.gold);
       }
       const zz = [];
       for (let u = u0 - 1.4; u < u1 + 1.3; u += 0.5) zz.push([[u, o4.eg + 0.08], [u + 0.5, o4.eg + 0.08], [u + 0.25, o4.eg + 0.5]]);
@@ -145973,9 +145973,9 @@ void main() {
     const g2 = (a2, b4) => Math.round(a2 + (b4 - a2) * r4()) + (metro ? 1 : 0) - (klein && b4 > 3 ? 1 : 0);
     const haus2 = (stil, geschosse2) => ({ stil, geschosse: Math.max(2, Math.min(7, geschosse2)), region: "Nord" });
     if (hof2) return haus2(r4() < 0.7 ? "backstein" : "fuenfziger", 2);
-    const zeile3 = !eck && p2.front?.length === 1 && T >= 10;
+    const zeile2 = !eck && p2.front?.length === 1 && T >= 10;
     if (art === "giebel" || art === "fachwerk") {
-      if (zeile3 && L3 >= 6.5) {
+      if (zeile2 && L3 >= 6.5) {
         if (art === "fachwerk" && r4() < 0.55) return haus2("fachwerk", g2(2, 3));
         return nordBau(p2, "slot:nord_giebelhaus", art === "fachwerk" ? "pastell" : r4() < 0.18 ? "pastell" : p2.giebelV, "nordgiebel", 3, { laden: p2.nordEinkauf ? 0.85 : void 0 });
       }
@@ -145987,18 +145987,18 @@ void main() {
     }
     if (art === "wiederaufbau") {
       if (eck) return haus2(r4() < 0.8 ? "backstein" : "fuenfziger", g2(4, 5));
-      if (zeile3 && L3 >= 12 && r4() < 0.9) {
+      if (zeile2 && L3 >= 12 && r4() < 0.9) {
         const v2 = p2.nordEinkauf && r4() < 0.6 ? "geschaeft" : waehle2(r4, p2.waV ?? ["kiel", "hannover"]);
         return nordBau(p2, "slot:nord_wiederaufbau", v2, "nordwa", 4);
       }
       return haus2(wahlGewichtet3(r4, [["backstein", 3], ["fuenfziger", 0.8], ["wiederaufbau", 0.5]]), g2(3, 5));
     }
     if (art === "klinker") {
-      if (zeile3 && L3 >= 10 && r4() < 0.8) return nordBau(p2, "slot:nord_reihenhaus", waehle2(r4, p2.reihenV ?? ["schumacher"]), "nordklinker", 3);
+      if (zeile2 && L3 >= 10 && r4() < 0.8) return nordBau(p2, "slot:nord_reihenhaus", waehle2(r4, p2.reihenV ?? ["schumacher"]), "nordklinker", 3);
       if (eck) return haus2(r4() < 0.7 ? "backstein" : "gruenderzeit", g2(3, 5));
       return haus2(wahlGewichtet3(r4, [["backstein", 3], ["gruenderzeit", 1.4], ["jugendstil", 0.5], ["fuenfziger", 0.6]]), g2(3, 5));
     }
-    if (zeile3 && L3 >= 10 && r4() < 0.75) return nordBau(p2, "slot:nord_reihenhaus", r4() < 0.6 ? "siedlung" : waehle2(r4, p2.reihenV ?? ["schumacher"]), "nordklinker", 2);
+    if (zeile2 && L3 >= 10 && r4() < 0.75) return nordBau(p2, "slot:nord_reihenhaus", r4() < 0.6 ? "siedlung" : waehle2(r4, p2.reihenV ?? ["schumacher"]), "nordklinker", 2);
     return haus2(wahlGewichtet3(r4, [["backstein", 2.2], ["fuenfziger", 1.2], ["siebziger", 0.5], ["neubau", 0.6], ["wiederaufbau", 0.6]]), g2(2, 4));
   }
   registriereStilProfil("nord", (p2) => nordStil(p2));
@@ -146669,7 +146669,7 @@ void main() {
   }
   function turmRund(S, scene2, p2, r4, cx, cz, o4 = {}) {
     const rr5 = o4.rad ?? 14, n3 = o4.n ?? 52, gh = 3.6, pod = 7, H = pod + n3 * gh;
-    const glas3 = waehle2(r4, ["#5f8f9a", "#5d7f99", "#6a8fa6"]), ring2 = "#c9d6dc", stein = "#d6d0c4";
+    const glas3 = waehle2(r4, ["#5f8f9a", "#5d7f99", "#6a8fa6"]), ring3 = "#c9d6dc", stein = "#d6d0c4";
     const kb = 16, kd = 20, kx0 = cx - rr5 * 0.2 - kb, kz0 = cz - kd / 2, Hk = H * 0.86;
     if (o4.podium !== false) podium(S, scene2, p2, cx - rr5 - kb - 2, cz - rr5 - 4, 2 * rr5 + kb + 8, 2 * rr5 + 8, pod - 1, { stein });
     S.quader(kx0, 0, kz0, kx0 + kb, Hk, kz0 + kd, stein);
@@ -146679,12 +146679,12 @@ void main() {
       fb4(S, F3, -0.1, F3.L + 0.1, Hk - 3, Hk, 0, 0.2, heller(stein, 0.05));
     }
     zyl8(S, rr5, rr5, H, cx, 0, cz, glas3, 32);
-    for (let y2 = pod + gh; y2 < H - 1; y2 += gh) zyl8(S, rr5 + 0.12, rr5 + 0.12, 0.26, cx, y2, cz, ring2, 32);
+    for (let y2 = pod + gh; y2 < H - 1; y2 += gh) zyl8(S, rr5 + 0.12, rr5 + 0.12, 0.26, cx, y2, cz, ring3, 32);
     for (let i = 0; i < 24; i++) {
       const w2 = i / 24 * 2 * PI11, nx = Math.cos(w2), nz = Math.sin(w2);
       if (sieht2(p2, nx, nz)) S.box(0.18, H - pod, 0.18, cx + nx * (rr5 + 0.1), pod + (H - pod) / 2, cz + nz * (rr5 + 0.1), dunkler(glas3, 0.1), -w2);
     }
-    zyl8(S, rr5 + 0.4, rr5 + 0.4, 2.5, cx, H, cz, ring2, 32);
+    zyl8(S, rr5 + 0.4, rr5 + 0.4, 2.5, cx, H, cz, ring3, 32);
     zyl8(S, rr5 * 0.7, rr5 * 0.7, 0.3, cx, H + 2.5, cz, "#8d939a", 24);
     zyl8(S, rr5 * 0.55, rr5 * 0.55, 0.32, cx, H + 2.52, cz, "#e8e5dc", 24);
     zyl8(S, rr5 * 0.48, rr5 * 0.48, 0.34, cx, H + 2.54, cz, "#8d939a", 24);
@@ -147423,9 +147423,9 @@ void main() {
     let hmax = 0;
     for (let i = 0; i < n3; i++) {
       const gx0 = x0 + 2 + i * bb, vb = Math.min(15, bb - 9), vt = Math.min(13, d4 - 18);
-      const vx = gx0 + (bb - vb) / 2 + (i % 2 ? 1.5 : -0.5), vz2 = z0 + 5;
-      hmax = Math.max(hmax, villa2(S, scene2, p2, r4, vx, vz2, vb, vt, { turmLinks: i % 2 === 1 }));
-      boden5(S, vx + vb / 2 - 1.5, vz2 + vt + 1.2, vx + vb / 2 + 1.5, z0 + d4 - 1, KIES4, 0.3, 0.1);
+      const vx = gx0 + (bb - vb) / 2 + (i % 2 ? 1.5 : -0.5), vz3 = z0 + 5;
+      hmax = Math.max(hmax, villa2(S, scene2, p2, r4, vx, vz3, vb, vt, { turmLinks: i % 2 === 1 }));
+      boden5(S, vx + vb / 2 - 1.5, vz3 + vt + 1.2, vx + vb / 2 + 1.5, z0 + d4 - 1, KIES4, 0.3, 0.1);
       zaun3(S, p2, gx0 + 0.5, z0 + 1, gx0 + bb - 0.5, z0 + d4 - 1);
       for (let k5 = 0; k5 < 4; k5++) {
         const tx = gx0 + (k5 % 2 ? bb - 3 : 3), tz = z0 + d4 - 6 - Math.floor(k5 / 2) * (d4 * 0.5);
@@ -147662,7 +147662,7 @@ void main() {
   var LADEN50 = ["Moden Kessler", "Schuhhaus Brede", "Radio Lindner", "Caf\xE9 Lohmann", "Juwelier Sauer", "Foto Kr\xE4mer", "Str\xFCmpfe Weidner", "Lederwaren Fuhr", "B\xFCcherstube Holl", "Eiscaf\xE9 Venezia", "Drogerie Albers", "Tabak Henkel", "Optik Brill", "Uhren Engel", "Schallplatten Ton", "Konditorei Lenz"];
   function bau50(S, scene2, p2, r4, x0, z0, b4, t5, o4) {
     const n3 = o4.n ?? 3, eg = 4.2, gh = 3.1, H = eg + n3 * gh, y0 = o4.y0 ?? 0;
-    const putz2 = o4.putz ?? waehle2(r4, PASTELL), raster4 = o4.raster ?? waehle2(r4, ["#f2efe6", "#e7e3d8", "#cfcac0"]), kachel2 = o4.kachel ?? waehle2(r4, ["#7fa3b8", "#d98a6a", "#e8c547", "#8fb58a", "#c9d6dc", "#b5523f"]);
+    const putz2 = o4.putz ?? waehle2(r4, PASTELL), raster4 = o4.raster ?? waehle2(r4, ["#f2efe6", "#e7e3d8", "#cfcac0"]), kachel3 = o4.kachel ?? waehle2(r4, ["#7fa3b8", "#d98a6a", "#e8c547", "#8fb58a", "#c9d6dc", "#b5523f"]);
     const art = o4.art ?? waehle2(r4, ["raster", "band", "lochputz"]);
     S.quader(x0, y0, z0, x0 + b4, y0 + H, z0 + t5, putz2);
     for (const [k5, F3] of seiten2(p2, x0, z0, b4, t5)) {
@@ -147686,7 +147686,7 @@ void main() {
         for (let i = 0; i < n3; i++) {
           const y2 = yo2 + i * gh;
           fb4(S, F3, 0, F3.L, y2, y2 + 0.22, 0, 0.3, raster4);
-          for (let j4 = 0; j4 < ax.length; j4++) if ((i + j4) % 3 === 0) fb4(S, F3, ax[j4] - 0.92, ax[j4] + 0.92, y2 + 0.22, y2 + 1, 0, 0.12, kachel2);
+          for (let j4 = 0; j4 < ax.length; j4++) if ((i + j4) % 3 === 0) fb4(S, F3, ax[j4] - 0.92, ax[j4] + 0.92, y2 + 0.22, y2 + 1, 0, 0.12, kachel3);
         }
         for (const u of [0, ...ax.map((u2) => u2 + 1)]) fb4(S, F3, u - 0.11, u + 0.11, yo2, H + y0 - 0.4, 0, 0.3, raster4);
       } else if (art === "band") {
@@ -147700,8 +147700,8 @@ void main() {
         for (let i = 0; i < n3; i++) for (const u of achsen5(0, F3.L, 2.6, 0.7)) fenster5(S, F3, u, yo2 + i * gh + 0.9, 1.3, 1.6, { rahmen: raster4, sims: null });
         if (F3.L > 10 && o4.mosaik !== false && r4() < 0.5) {
           const u = F3.L * 0.82;
-          fb4(S, F3, u - 1.2, u + 1.2, yo2 + 0.5, yo2 + n3 * gh - 0.5, 0, 0.12, kachel2);
-          fb4(S, F3, u - 0.9, u + 0.9, yo2 + 0.9, yo2 + n3 * gh - 0.9, 0.12, 0.16, heller(kachel2, 0.15));
+          fb4(S, F3, u - 1.2, u + 1.2, yo2 + 0.5, yo2 + n3 * gh - 0.5, 0, 0.12, kachel3);
+          fb4(S, F3, u - 0.9, u + 0.9, yo2 + 0.9, yo2 + n3 * gh - 0.9, 0.12, 0.16, heller(kachel3, 0.15));
         }
       }
     }
@@ -147768,7 +147768,7 @@ void main() {
     }
     if (v2 === "geschaeftshaus") {
       const b4 = Math.min(w2 - 16, 34), t6 = Math.min(d4 - 8, 18), gx0 = x0 + 2, gz0 = z0 + 2, eg = 4.6, gh = 3.2, n3 = 4, H = eg + n3 * gh;
-      const putz2 = waehle2(r4, ["#efe6cf", "#e9e3d6", "#e2cfa8"]), raster4 = "#f4f2ec", kachel2 = waehle2(r4, ["#7fa3b8", "#d98a6a", "#8fb58a"]);
+      const putz2 = waehle2(r4, ["#efe6cf", "#e9e3d6", "#e2cfa8"]), raster4 = "#f4f2ec", kachel3 = waehle2(r4, ["#7fa3b8", "#d98a6a", "#8fb58a"]);
       const rr5 = 6;
       S.quader(gx0, 0, gz0, gx0 + b4 - rr5, H, gz0 + t6, putz2);
       S.quader(gx0 + b4 - rr5, 0, gz0, gx0 + b4, H, gz0 + t6 - rr5, putz2);
@@ -147783,7 +147783,7 @@ void main() {
         for (let i = 0; i < n3; i++) {
           const y2 = eg + i * gh;
           fb4(S, F3, 0, F3.L, y2, y2 + 0.25, 0, 0.3, raster4);
-          for (let j4 = 0; j4 < ax.length; j4++) fb4(S, F3, ax[j4] - 0.82, ax[j4] + 0.82, y2 + 0.25, y2 + 1, 0, 0.1, (i + j4) % 4 === 0 ? kachel2 : putz2);
+          for (let j4 = 0; j4 < ax.length; j4++) fb4(S, F3, ax[j4] - 0.82, ax[j4] + 0.82, y2 + 0.25, y2 + 1, 0, 0.1, (i + j4) % 4 === 0 ? kachel3 : putz2);
         }
         for (const u of [0, ...ax.map((u2) => u2 + 0.9)]) fb4(S, F3, u - 0.1, u + 0.1, eg, H - 0.4, 0, 0.3, raster4);
         ftext4(scene2, F3, namen.pop(), F3.L / 2, eg - 0.3, 0.1, 0.5, F3.L * 0.6, "#2a3036");
@@ -148169,9 +148169,9 @@ void main() {
         ze.forEach((gh, k5) => {
           y2 += gh;
           if (y2 > Ht + 0.1) return;
-          const ring3 = new three_module_exports.CylinderGeometry(tr + 0.35, tr + 0.35, 0.5, 14, 1, false, -PI11 / 2, PI11);
-          ring3.translate(tx2, y2 - 0.25, cz2 + T / 2);
-          S.add(ring3, hell5);
+          const ring4 = new three_module_exports.CylinderGeometry(tr + 0.35, tr + 0.35, 0.5, 14, 1, false, -PI11 / 2, PI11);
+          ring4.translate(tx2, y2 - 0.25, cz2 + T / 2);
+          S.add(ring4, hell5);
           if (k5 === 0) return;
           for (let i = 0; i < 7; i++) {
             const a2 = -PI11 / 2 + (i + 0.5) / 7 * PI11, nx = Math.sin(a2), nz = Math.cos(a2);
@@ -148391,7 +148391,7 @@ void main() {
     S.quader(cx - 1.3, 0.3, cz - 6.5, cx + 1.3, 0.43, cz + 6.5, "#3d3833");
     for (let i = -4; i <= 4; i++) if (i) S.box(0.5, 0.8, 0.5, cx + i * 2.2, 0.75, cz + 1, "#b9ae97");
     for (let i = 0; i < 5; i++) S.box(2.4, 0.1, 0.35, cx - 9 + i * 0.5, 0.5, cz - 0.6 + i * 0.4, "#9a7a52");
-    const ring2 = (rx, rz, y2, n3, c) => {
+    const ring3 = (rx, rz, y2, n3, c) => {
       for (let i = 0; i < n3; i++) {
         const a0 = i / n3 * 2 * PI11, a1 = (i + 1) / n3 * 2 * PI11;
         if (Math.abs(Math.sin(a0)) < Math.sin(spalt) + 0.05 || Math.abs(Math.sin(a1)) < Math.sin(spalt) + 0.05) continue;
@@ -148400,8 +148400,8 @@ void main() {
         balken5(S, [pa[0], y2 + 1.1, pa[1]], [pb[0], y2 + 1.1, pb[1]], 0.08, 0.08, c);
       }
     };
-    ring2(ar[0] + 0.4, ar[1] + 0.4, 3.8, 36, "#5d656c");
-    ring2(oR[0] - 0.6, oR[1] - 0.6, 3.2 + (stufen - 1) * 2.4 + 0.2, 44, "#5d656c");
+    ring3(ar[0] + 0.4, ar[1] + 0.4, 3.8, 36, "#5d656c");
+    ring3(oR[0] - 0.6, oR[1] - 0.6, 3.2 + (stufen - 1) * 2.4 + 0.2, 44, "#5d656c");
     const tx = cx + oR[0] - 1, F3 = R7(tx + 3, cz + 4, 0, -1, 8);
     S.quader(tx, 0, cz - 4, tx + 3, 6, cz + 4, stein);
     fwand2(S, F3, 0, 8, 0, 6, 0, 0.4, heller(stein, 0.05), [{ u0: 2.2, u1: 5.8, v0: -0.1, v1: 4.6, bogen: true }]);
@@ -148424,9 +148424,9 @@ void main() {
       const a0 = i / seg2 * PI11 * 1.4 - PI11 * 0.2, a1 = (i + 1) / seg2 * PI11 * 1.4 - PI11 * 0.2, rr5 = rad3 + 0.6;
       balken5(S, [x2 + Math.cos(a0) * rr5, 0.3 + i * h4 / seg2, z6 + Math.sin(a0) * rr5], [x2 + Math.cos(a1) * rr5, 0.3 + (i + 1) * h4 / seg2, z6 + Math.sin(a1) * rr5], 0.8, 0.12, "#c8463c");
     }
-    const ring2 = new three_module_exports.CylinderGeometry(rad3 + 0.05, rad3 + 0.05, 1, 20, 1, true);
-    ring2.translate(x2, h4 + 0.8, z6);
-    S.add(ring2, "#e8c547");
+    const ring3 = new three_module_exports.CylinderGeometry(rad3 + 0.05, rad3 + 0.05, 1, 20, 1, true);
+    ring3.translate(x2, h4 + 0.8, z6);
+    S.add(ring3, "#e8c547");
   }
   function kugeltank(S, x2, z6, rad3, c = "#eef0ef") {
     for (let i = 0; i < 6; i++) {
@@ -151623,7 +151623,7 @@ void main() {
   function buergerRoh(S, scene2, p2) {
     const r4 = rng3(`bb:${p2.seed}`);
     const v2 = p2.variante ?? waehle2(r4, BUERGER_V);
-    const { w: w2, d: d4 } = p2, vz2 = 2.4, zf = d4 - vz2, T = Math.min(14, zf - 1);
+    const { w: w2, d: d4 } = p2, vz3 = 2.4, zf = d4 - vz3, T = Math.min(14, zf - 1);
     boden6(S, 0, zf, w2, d4, PFLASTER5, 0.3, 0.06);
     hof(S, r4, 0, 0, w2, zf - T);
     const br = teileBreite(r4, w2, v2 === "passau" ? 8.5 : 7.2, v2 === "passau" ? 12 : 10.5);
@@ -151798,7 +151798,7 @@ void main() {
   function muenchenRoh(S, scene2, p2) {
     const r4 = rng3(`mu:${p2.seed}`);
     const v2 = p2.variante ?? waehle2(r4, MUENCHEN_V);
-    const { w: w2, d: d4 } = p2, vz2 = 3.2, zf = d4 - vz2, T = Math.min(17, zf - 1);
+    const { w: w2, d: d4 } = p2, vz3 = 3.2, zf = d4 - vz3, T = Math.min(17, zf - 1);
     boden6(S, 0, zf, w2, d4, "#d6d0c2", 0.3, 0.06);
     hof(S, r4, 0, 0, w2, zf - T);
     const br = teileBreite(r4, w2, 11, 17);
@@ -152736,17 +152736,17 @@ void main() {
   function berg(S, r4, x2, z6, rad3, H, o4 = {}) {
     const g0 = new three_module_exports.ConeGeometry(rad3, H, o4.seg ?? 9, 5);
     const pos = g0.getAttribute("position");
-    const key = (vx, vy, vz2) => `${vx.toFixed(2)},${vy.toFixed(2)},${vz2.toFixed(2)}`;
+    const key = (vx, vy, vz3) => `${vx.toFixed(2)},${vy.toFixed(2)},${vz3.toFixed(2)}`;
     const versatz = /* @__PURE__ */ new Map();
     for (let i = 0; i < pos.count; i++) {
-      const vx = pos.getX(i), vy = pos.getY(i), vz2 = pos.getZ(i), k5 = key(vx, vy, vz2);
+      const vx = pos.getX(i), vy = pos.getY(i), vz3 = pos.getZ(i), k5 = key(vx, vy, vz3);
       if (!versatz.has(k5)) {
         const t5 = (vy + H / 2) / H;
         const j4 = t5 > 0.98 ? 0 : rad3 * 0.2 * (1 - t5);
         versatz.set(k5, [zw(r4, -j4, j4), t5 > 0.98 || t5 < 0.02 ? 0 : zw(r4, -H * 0.06, H * 0.06), zw(r4, -j4, j4)]);
       }
       const [ax, ay, az] = versatz.get(k5);
-      pos.setXYZ(i, vx + ax, vy + ay, vz2 + az);
+      pos.setXYZ(i, vx + ax, vy + ay, vz3 + az);
     }
     const g2 = g0.toNonIndexed();
     const P5 = g2.getAttribute("position").array;
@@ -153502,19 +153502,19 @@ void main() {
     S.add(g2, dunkel4);
     const spitze3 = [cx, y0 + h4, cz];
     for (let i = 0; i < 8; i++) {
-      const a2 = i * PI12 / 4 + PI12 / 8, vx = cx + Math.cos(a2) * Rv, vz2 = cz + Math.sin(a2) * Rv;
-      stab5(S, [vx, y0, vz2], spitze3, 0.32, st2, 4);
+      const a2 = i * PI12 / 4 + PI12 / 8, vx = cx + Math.cos(a2) * Rv, vz3 = cz + Math.sin(a2) * Rv;
+      stab5(S, [vx, y0, vz3], spitze3, 0.32, st2, 4);
       if (sicht2(p2, Math.cos(a2), Math.sin(a2))) for (let k5 = 1; k5 < 7; k5++) {
         const t5 = k5 / 7;
-        S.box(0.55, 0.55, 0.55, vx + (cx - vx) * t5 + Math.cos(a2) * 0.3, y0 + h4 * t5, vz2 + (cz - vz2) * t5 + Math.sin(a2) * 0.3, st2);
+        S.box(0.55, 0.55, 0.55, vx + (cx - vx) * t5 + Math.cos(a2) * 0.3, y0 + h4 * t5, vz3 + (cz - vz3) * t5 + Math.sin(a2) * 0.3, st2);
       }
     }
     for (let k5 = 1; k5 <= 4; k5++) {
       const t5 = k5 / 5, rr5 = Rv * (1 - t5) * 0.98;
-      const ring2 = new three_module_exports.CylinderGeometry(rr5, rr5, 0.4, 8, 1, true);
-      ring2.rotateY(PI12 / 8);
-      ring2.translate(cx, y0 + h4 * t5, cz);
-      S.add(ring2, st2);
+      const ring3 = new three_module_exports.CylinderGeometry(rr5, rr5, 0.4, 8, 1, true);
+      ring3.rotateY(PI12 / 8);
+      ring3.translate(cx, y0 + h4 * t5, cz);
+      S.add(ring3, st2);
     }
     for (const { F: F3, nx, nz, kante } of oktoRahmen(cx, cz, ri * 0.88)) {
       if (!sicht2(p2, nx, nz)) continue;
@@ -154303,9 +154303,9 @@ void main() {
     korb.translate(cx, y2 + H + 1, cz);
     S.add(korb, "#cfccc4");
     for (let k5 = 0; k5 < 3; k5++) {
-      const ring2 = new three_module_exports.CylinderGeometry(5.7, 5.7, 0.9, 16);
-      ring2.translate(cx, y2 + H - 1.6 + k5 * 2.6, cz);
-      S.add(ring2, "#3f4850");
+      const ring3 = new three_module_exports.CylinderGeometry(5.7, 5.7, 0.9, 16);
+      ring3.translate(cx, y2 + H - 1.6 + k5 * 2.6, cz);
+      S.add(ring3, "#3f4850");
     }
     const ant = new three_module_exports.CylinderGeometry(0.7, 1.2, 38, 8);
     ant.translate(cx, y2 + H + 24, cz);
@@ -154735,8 +154735,8 @@ void main() {
       }
     }
     const naheStrahl = (x2, z6) => strahlen.some(({ dx, dz }) => {
-      const vx = x2 - C3.x, vz2 = z6 - C3.z, t5 = vx * dx + vz2 * dz;
-      return t5 > 0 && Math.abs(vx * dz - vz2 * dx) < (teil6 === "wald" ? 5 : 3.8);
+      const vx = x2 - C3.x, vz3 = z6 - C3.z, t5 = vx * dx + vz3 * dz;
+      return t5 > 0 && Math.abs(vx * dz - vz3 * dx) < (teil6 === "wald" ? 5 : 3.8);
     });
     const n3 = Math.round(b4.w * b4.d / (teil6 === "wald" ? 34 : teil6 === "platz" ? 160 : 400));
     for (let k5 = 0; k5 < n3; k5++) {
@@ -156933,8 +156933,8 @@ void main() {
         for (let i = 0; i + 2 < n3; i += 3) {
           const A = punkt4(i), B8 = punkt4(i + 1), C3 = punkt4(i + 2);
           const ux = B8[0] - A[0], uy = B8[1] - A[1], uz = B8[2] - A[2];
-          const vx = C3[0] - A[0], vy = C3[1] - A[1], vz2 = C3[2] - A[2];
-          const nx = uy * vz2 - uz * vy, ny = uz * vx - ux * vz2, nz = ux * vy - uy * vx;
+          const vx = C3[0] - A[0], vy = C3[1] - A[1], vz3 = C3[2] - A[2];
+          const nx = uy * vz3 - uz * vy, ny = uz * vx - ux * vz3, nz = ux * vy - uy * vx;
           const norm3 = Math.hypot(nx, ny, nz), flaeche6 = ny / 2;
           const y2 = (A[1] + B8[1] + C3[1]) / 3;
           if (norm3 < 1e-6 || ny / norm3 < 0.3 || flaeche6 < mindestFlaeche || y2 < 6) continue;
@@ -156977,8 +156977,8 @@ void main() {
     for (const ecken of dreiecke) {
       const [a2, b4, c] = ecken;
       const ux = b4[0] - a2[0], uy = b4[1] - a2[1], uz = b4[2] - a2[2];
-      const vx = c[0] - a2[0], vy = c[1] - a2[1], vz2 = c[2] - a2[2];
-      let nx = uy * vz2 - uz * vy, ny = uz * vx - ux * vz2, nz = ux * vy - uy * vx;
+      const vx = c[0] - a2[0], vy = c[1] - a2[1], vz3 = c[2] - a2[2];
+      let nx = uy * vz3 - uz * vy, ny = uz * vx - ux * vz3, nz = ux * vy - uy * vx;
       const n3 = Math.hypot(nx, ny, nz) || 1;
       nx /= n3;
       ny /= n3;
@@ -157018,9 +157018,9 @@ void main() {
     for (const s2 of plan2.strassen) (s2.bruecke ? baueBruecke : baueSegment)(ctx, s2);
     for (const k5 of plan2.kreuzungen) baueKreuzung(ctx, k5);
     for (const b4 of plan2.bloecke) baueBlock(ctx, b4);
-    const ring2 = plan2.aussen && o4.aussenring !== 0;
-    baueWasserAlle(ctx, [...plan2.bloecke.filter((b4) => b4.art === "wasser"), ...ring2 ? plan2.aussen.wasser : []]);
-    if (ring2) baueStadtrand(ctx);
+    const ring3 = plan2.aussen && o4.aussenring !== 0;
+    baueWasserAlle(ctx, [...plan2.bloecke.filter((b4) => b4.art === "wasser"), ...ring3 ? plan2.aussen.wasser : []]);
+    if (ring3) baueStadtrand(ctx);
     else {
       for (const u of plan2.umland ?? []) baueUmland(ctx, u);
       baueAussenring(ctx, o4.aussenring ?? 420);
@@ -157089,9 +157089,9 @@ void main() {
       baueBlock(ctx, b4);
       await bildFreigeben();
     }
-    const ring2 = plan2.aussen && o4.aussenring !== 0;
-    baueWasserAlle(ctx, [...plan2.bloecke.filter((b4) => b4.art === "wasser"), ...ring2 ? plan2.aussen.wasser : []]);
-    if (ring2) baueStadtrand(ctx);
+    const ring3 = plan2.aussen && o4.aussenring !== 0;
+    baueWasserAlle(ctx, [...plan2.bloecke.filter((b4) => b4.art === "wasser"), ...ring3 ? plan2.aussen.wasser : []]);
+    if (ring3) baueStadtrand(ctx);
     else {
       for (const u of plan2.umland ?? []) baueUmland(ctx, u);
       baueAussenring(ctx, o4.aussenring ?? 420);
@@ -157558,8 +157558,8 @@ void main() {
     const Y = 0.41;
     const D = plan2.diagonalen ?? [];
     const aufDiag = (x2, z6, rand = 0.3) => D.some((d4) => {
-      const vx = x2 - d4.C.x, vz2 = z6 - d4.C.z, t5 = vx * d4.dx + vz2 * d4.dz;
-      return t5 > d4.t0 - 1 && t5 < d4.t1 + 1 && Math.abs(vx * d4.dz - vz2 * d4.dx) < d4.breite / 2 + rand;
+      const vx = x2 - d4.C.x, vz3 = z6 - d4.C.z, t5 = vx * d4.dx + vz3 * d4.dz;
+      return t5 > d4.t0 - 1 && t5 < d4.t1 + 1 && Math.abs(vx * d4.dz - vz3 * d4.dx) < d4.breite / 2 + rand;
     });
     for (const p2 of I.protos.values()) p2.inst = p2.inst.filter(([x2, , z6]) => !aufDiag(x2, z6));
     I.n = [...I.protos.values()].reduce((a2, p2) => a2 + p2.inst.length, 0);
@@ -158095,8 +158095,8 @@ void main() {
     S.quader(b4.x, 0, b4.z, b4.x + b4.w, y2, b4.z + b4.d, "#94c486");
     const laubenFarben = ["#c9a77c", "#8fa9b5", "#d9c49a", "#b56b4f", "#e8e4dc", "#7c9a6a", "#cfc4ae"];
     const daech = ["#b4583f", "#56636c", "#6f6a5c", "#807d78", "#8a6a4a"];
-    let zeile3 = 0;
-    for (let z6 = b4.z + 2; z6 + 11 < endeZ; zeile3++) {
+    let zeile2 = 0;
+    for (let z6 = b4.z + 2; z6 + 11 < endeZ; zeile2++) {
       const tiefe = zw(r4, 12.5, 18.5), nZ = Math.min(tiefe, endeZ - z6), wegB = zw(r4, 2, 3.1);
       const wegZ = z6 + nZ;
       if (wegZ + wegB < b4.z + b4.d - 1) S.quader(b4.x + 1, y2, wegZ, endeX + 1, y2 + 0.05, wegZ + wegB, "#d9c4a8");
@@ -158124,7 +158124,7 @@ void main() {
           for (let k5 = 0; k5 < obst; k5++) baumSetzen(I, waehle2(r4, ["kugel", "linde", "birke"]), x2 + 2.2 + r4() * Math.min(2, breite * 0.2), y2 + 0.04, z6 + nZ - 2.6 - k5 * 3, r4, zw(r4, 0.5, 0.7));
           if (wild) for (let k5 = 0; k5 < 3; k5++) I.setze("busch", x2 + zw(r4, 1, breite - 1), y2 + 0.04, z6 + zw(r4, 1, nZ - 1), 0, [0.6, 0.6, 0.6], [waehle2(r4, KRONE.busch)]);
           for (let u = 0; u < breite - 0.8; u += zw(r4, 2.6, 4.6)) I.setze("busch", x2 + u, y2, z6 + 0.15, 0, [0.38, 0.4, 0.38], ["#5b8f5a"]);
-          if (ctx.qualitaet) ctx.qualitaet.gruppen.push({ x: cx, z: cz, muster: "garten/" + typ + "/" + Math.round(breite) + "/" + beetAnzahl + "/" + Number(wild) + "/" + zeile3 % 3 });
+          if (ctx.qualitaet) ctx.qualitaet.gruppen.push({ x: cx, z: cz, muster: "garten/" + typ + "/" + Math.round(breite) + "/" + beetAnzahl + "/" + Number(wild) + "/" + zeile2 % 3 });
         }
         x2 += breite + zw(r4, 0.5, 1.6);
       }
@@ -158161,7 +158161,7 @@ void main() {
     const A = plan2.aussen, R11 = A.R, W3 = plan2.breite, T = plan2.tiefe;
     const rc = { ...ctx, dichte: ctx.dichte * 0.35, r: rng3(plan2.seed * 41 + 9) };
     const loecher = A.wasser.map((w2) => [w2.x, w2.z, w2.x + w2.w, w2.z + w2.d]);
-    for (const ring2 of [[-R11, -R11, W3 + R11, 0], [-R11, T, W3 + R11, T + R11], [-R11, 0, 0, T], [W3, 0, W3 + R11, T]]) for (const [x0, z0, x1, z1] of rechteckMinus(ring2, loecher)) S.quader(x0, -0.6, z0, x1, -0.08, z1, "#a7cb8f");
+    for (const ring3 of [[-R11, -R11, W3 + R11, 0], [-R11, T, W3 + R11, T + R11], [-R11, 0, 0, T], [W3, 0, W3 + R11, T]]) for (const [x0, z0, x1, z1] of rechteckMinus(ring3, loecher)) S.quader(x0, -0.6, z0, x1, -0.08, z1, "#a7cb8f");
     if (plan2.berge) baueBerge(rc, plan2.berge);
     for (const s2 of A.strassen) (s2.bruecke ? baueBruecke : baueSegment)(rc, s2);
     for (const k5 of A.kreuzungen) baueKreuzung(rc, k5);
@@ -158484,7 +158484,7 @@ void main() {
     const x0 = b4.x, z0 = b4.z, x1 = b4.x + b4.w, z1 = b4.z + b4.d, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     S.quader(x0, 0, z0, x1, y2, z1, F2.rasen);
     const ri = 5;
-    const ring2 = new three_module_exports.Shape();
+    const ring3 = new three_module_exports.Shape();
     const rr5 = (s2, a0, b0, a1, b1, rad3, loch) => {
       const p2 = loch ? new three_module_exports.Path() : s2;
       p2.moveTo(a0 + rad3, b0);
@@ -158498,9 +158498,9 @@ void main() {
       p2.quadraticCurveTo(a0, b0, a0 + rad3, b0);
       if (loch) s2.holes.push(p2);
     };
-    rr5(ring2, x0 + ri, z0 + ri, x1 - ri, z1 - ri, 8, false);
-    rr5(ring2, x0 + ri + 3, z0 + ri + 3, x1 - ri - 3, z1 - ri - 3, 6, true);
-    const rg2 = new three_module_exports.ExtrudeGeometry(ring2, { depth: 0.05, bevelEnabled: false, curveSegments: 6 });
+    rr5(ring3, x0 + ri, z0 + ri, x1 - ri, z1 - ri, 8, false);
+    rr5(ring3, x0 + ri + 3, z0 + ri + 3, x1 - ri - 3, z1 - ri - 3, 6, true);
+    const rg2 = new three_module_exports.ExtrudeGeometry(ring3, { depth: 0.05, bevelEnabled: false, curveSegments: 6 });
     rg2.rotateX(Math.PI / 2);
     rg2.translate(0, y2 + 0.05, 0);
     S.add(rg2, F2.weg);
@@ -161062,8 +161062,8 @@ void main() {
       if (!Array.isArray(ecken) || ecken.length !== 3) continue;
       const [a2, b4, c] = ecken;
       const ux = b4[0] - a2[0], uy = b4[1] - a2[1], uz = b4[2] - a2[2];
-      const vx = c[0] - a2[0], vy = c[1] - a2[1], vz2 = c[2] - a2[2];
-      const nx = uy * vz2 - uz * vy, ny = uz * vx - ux * vz2, nz = ux * vy - uy * vx;
+      const vx = c[0] - a2[0], vy = c[1] - a2[1], vz3 = c[2] - a2[2];
+      const nx = uy * vz3 - uz * vy, ny = uz * vx - ux * vz3, nz = ux * vy - uy * vx;
       const norm3 = Math.hypot(nx, ny, nz);
       if (!Number.isFinite(norm3) || norm3 < 1e-6 || ny <= 0) continue;
       for (const v2 of ecken) punkte2.push(
@@ -161300,7 +161300,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "6b5d6b7" : "Entwicklung";
+  var version = () => true ? "cc95aa4" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld3(d4) {
@@ -161461,8 +161461,8 @@ void main() {
   }
   function tabelle({ titel = "", spalten: spalten2 = [], zeilen, summe: summe2 = null, pruefen: pruefen2 = false }) {
     const zelle2 = (t5, roh2, ton3) => `<td class="${ton3 ?? ""}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${esc2(t5)}</td>`;
-    const zeile3 = (z6, k5 = "") => `<tr${k5 ? ` class="${k5}"` : ""}><td>${esc2(z6.name)}</td>${z6.werte.map((w2, i) => zelle2(w2, z6.roh?.[i], z6.ton?.[i])).join("")}</tr>`;
-    return `<table class="hw-tabelle"${pruefen2 ? ' data-summen="1"' : ""}>${titel || spalten2.length ? `<thead><tr><th>${esc2(titel)}</th>${spalten2.map((x2) => `<th>${esc2(x2)}</th>`).join("")}</tr></thead>` : ""}<tbody>${zeilen.map((z6) => zeile3(z6)).join("")}${summe2 ? zeile3(summe2, "summe") : ""}</tbody></table>`;
+    const zeile2 = (z6, k5 = "") => `<tr${k5 ? ` class="${k5}"` : ""}><td>${esc2(z6.name)}</td>${z6.werte.map((w2, i) => zelle2(w2, z6.roh?.[i], z6.ton?.[i])).join("")}</tr>`;
+    return `<table class="hw-tabelle"${pruefen2 ? ' data-summen="1"' : ""}>${titel || spalten2.length ? `<thead><tr><th>${esc2(titel)}</th>${spalten2.map((x2) => `<th>${esc2(x2)}</th>`).join("")}</tr></thead>` : ""}<tbody>${zeilen.map((z6) => zeile2(z6)).join("")}${summe2 ? zeile2(summe2, "summe") : ""}</tbody></table>`;
   }
   function zeile({ was, unter = "", wert = "", wertUnter = "", ton: ton3 = "", attr = "", tippbar = false, roh: roh2 = null }) {
     const tag = tippbar ? "button" : "div";
@@ -161563,7 +161563,7 @@ void main() {
     if (z6.length && !z6.some((x2) => x2.id === ui.zielgruppe)) ui.zielgruppe = z6[0].id;
     return '<div class="q24-chips" aria-label="Zielgruppe">' + z6.map((x2) => '<button data-a="q24Ziel" data-v="' + esc2(x2.id) + '" aria-pressed="' + (ui.zielgruppe === x2.id) + '" class="' + (ui.zielgruppe === x2.id ? "an" : "") + '">' + esc2(x2.name) + "</button>").join("") + "</div>";
   }
-  function sortimentBedienung(K3, ui, typen, kachel2, aktion2, gesperrt2 = /* @__PURE__ */ new Set()) {
+  function sortimentBedienung(K3, ui, typen, kachel3, aktion2, gesperrt2 = /* @__PURE__ */ new Set()) {
     const erlaubt = new Set(typen.map((t5) => t5.typ));
     const index2 = new Map(typen.map((t5) => [t5.typ, t5]));
     let baum2 = (K3.baum ?? []).map((kat) => ({
@@ -161595,7 +161595,7 @@ void main() {
         h4 += '<div class="typkacheln q11typen q24-typen">';
         for (const typ of ast3.typen) {
           const t5 = index2.get(typ), voll2 = gesperrt2.has(t5.kategorie);
-          h4 += '<button class="' + (voll2 ? "voll" : "") + '" data-a="' + aktion2 + '" data-v="' + esc2(typ) + '" aria-label="' + esc2(typ) + ' ansehen">' + kachel2(typ, 76) + "<span>" + esc2(typ) + "</span>" + (voll2 ? "<small>Kapazit\xE4t erreicht</small>" : "") + "</button>";
+          h4 += '<button class="' + (voll2 ? "voll" : "") + '" data-a="' + aktion2 + '" data-v="' + esc2(typ) + '" aria-label="' + esc2(typ) + ' ansehen">' + kachel3(typ, 76) + "<span>" + esc2(typ) + "</span>" + (voll2 ? "<small>Kapazit\xE4t erreicht</small>" : "") + "</button>";
         }
         h4 += "</div>";
       }
@@ -162097,7 +162097,7 @@ void main() {
       h4 += "</div>";
       return { titel: "Einkauf", unter: `${u.bereiche.length} Bereiche \xB7 ${u.bereiche.reduce((a2, b4) => a2 + b4.wgs.length, 0)} Warengruppen \xB7 KW ${kwVon2(s2().woche)}`, html: h4 };
     }
-    function kurve5(titel, wochen, werte3, fmtW, p2, farbe2) {
+    function kurve4(titel, wochen, werte3, fmtW, p2, farbe2) {
       const W3 = 340, H = 64, n3 = werte3.length;
       if (n3 < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span><b data-p="${p2}">${n3 ? fmtW(werte3[0]) : "noch keine Daten"}</b></div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
       const min = Math.min(...werte3), max = Math.max(...werte3);
@@ -162132,9 +162132,9 @@ void main() {
       h4 += DETAIL_EXTRA.filter(([id]) => id !== "umsatzWoche").map(([id, tt, f13]) => buchZeile(tt, id === "eigenmarkenMarge" && !k5.eigenmarkenAnteil ? "keine" : formatiere(f13, k5[id]), `d:${id}`, a2[id])).join("");
       h4 += "</div></div>";
       const v2 = d4.verlauf;
-      h4 += kurve5("Bestand EK", v2.woche, v2.bestand, geld, "k:bestand", "#2f63b5");
-      h4 += kurve5("Umsatz je Woche", v2.woche, v2.umsatz, geld, "k:umsatz", "#2f8f5b");
-      h4 += kurve5("Reichweite in Wochen", v2.woche, v2.reichweite, (x2) => `${dez(x2, 1)} Wo.`, "k:reichweite", "#c27b0e");
+      h4 += kurve4("Bestand EK", v2.woche, v2.bestand, geld, "k:bestand", "#2f63b5");
+      h4 += kurve4("Umsatz je Woche", v2.woche, v2.umsatz, geld, "k:umsatz", "#2f8f5b");
+      h4 += kurve4("Reichweite in Wochen", v2.woche, v2.reichweite, (x2) => `${dez(x2, 1)} Wo.`, "k:reichweite", "#c27b0e");
       const regler2 = (titel, inhalt2, hilfe = "") => `<div class="regler"><div class="rkopf"><b>${titel}</b>${hilfe ? `<small>${hilfe}</small>` : ""}</div>${inhalt2}</div>`;
       const schieber = (feld3, wert, min, max, schritt) => `<div class="schieber"><input type="range" min="${min}" max="${max}" step="${schritt}" value="${wert}" data-a="regel" data-f="${feld3}"><output>${wert} %</output></div>`;
       h4 += '<div class="karte steuerung"><div class="khead">Steuerung</div>';
@@ -162607,10 +162607,10 @@ void main() {
         spur = [];
       }
     };
-    function schwung(vx, vz2) {
+    function schwung(vx, vz3) {
       stopp();
-      if (Math.hypot(vx, vz2) * 16 < K3.halb * 2e-3) return;
-      lauf = { vx, vz: vz2, t: performance.now(), id: 0 };
+      if (Math.hypot(vx, vz3) * 16 < K3.halb * 2e-3) return;
+      lauf = { vx, vz: vz3, t: performance.now(), id: 0 };
       info.schwung++;
       const schritt = (t5) => {
         if (!lauf) return;
@@ -163665,7 +163665,7 @@ void main() {
     const ui = { ebene: "alle", id: void 0, format: "alle", zeitraum: "woche", sort: "schlecht" };
     const optionen3 = (key, values) => '<select data-vtr-wahl="' + key + '" aria-label="' + key + '">' + values.map(([value, text3]) => '<option value="' + esc2(value) + '"' + (value === ui[key] ? " selected" : "") + ">" + esc2(text3) + "</option>").join("") + "</select>";
     const kpi = (titel, wert, hinweis2 = "") => '<div class="vtr-kpi"><small>' + esc2(titel) + "</small><strong>" + esc2(wert) + "</strong><small>" + esc2(hinweis2) + "</small></div>";
-    function zeile3(z6, aktion2 = false) {
+    function zeile2(z6, aktion2 = false) {
       const vj = z6.abweichung === void 0 ? "Vorjahr noch nicht verf\xFCgbar" : (z6.abweichung >= 0 ? "+" : "") + geld(z6.abweichung) + " / " + pz4(z6.abweichungProzent);
       const knopf5 = aktion2 ? '<button data-vtr="tiefer" data-ebene="' + z6.ebene + '" data-id="' + esc2(z6.id) + '" aria-label="' + esc2(z6.name) + ' \xF6ffnen">' : "<div>";
       return '<div class="vtr-zeile">' + knopf5 + "<b>" + esc2(z6.name) + "</b><small>" + esc2(z6.stadt ? z6.stadt + " \xB7 " : "") + n(z6.anzahl) + " H\xE4user" + (z6.nurDaten ? " \xB7 noch ohne Wirtschaft" : "") + "</small>" + (aktion2 ? "</button>" : "</div>") + '<div class="vtr-zahlen"><span><b>' + geld(z6.umsatz) + "</b><small>Umsatz</small></span><span><b>" + pz4(z6.ebitdaQuote) + "</b><small>Haus-DB-Quote</small></span><span><b>" + esc2(vj) + '</b><small>Vorjahr</small></span><span class="vtr-ampel ' + z6.ampel + '">' + (z6.ampel === "rot" ? "Schwach" : z6.ampel === "gruen" ? "Gut" : z6.ampel === "gelb" ? "Beobachten" : "Ohne Daten") + '</span></div><details class="vtr-details"><summary>Weitere Kennzahlen</summary><div>Umsatz YTD: ' + geld(z6.umsatzYtd) + " \xB7 Haus-DB: " + geld(z6.ebitda) + " (VJ " + (z6.vorjahrEbitda === void 0 ? "\u2014" : geld(z6.vorjahrEbitda)) + ") \xB7 Marge VJ: " + pz4(z6.vorjahrEbitdaQuote) + " \xB7 Planabweichung: " + pz4(z6.planAbweichung) + " \xB7 Frequenz: " + n(z6.frequenz) + " \xB7 Kaufquote: " + pz4(z6.kaufquote) + " \xB7 Bon: " + geld(z6.bon) + " \xB7 Personalquote: " + pz4(z6.personalquote) + " \xB7 Mietquote: " + pz4(z6.mietquote) + "</div></details></div>";
@@ -163687,11 +163687,11 @@ void main() {
         "Vorjahr",
         d4.gesamt.vorjahr === void 0 ? "Noch nicht verf\xFCgbar" : geld(d4.gesamt.vorjahr),
         d4.gesamt.abweichung === void 0 ? "" : (d4.gesamt.abweichung >= 0 ? "+" : "") + geld(d4.gesamt.abweichung) + " / " + pz4(d4.gesamt.abweichungProzent)
-      ) + kpi("Haus-DB", geld(d4.gesamt.ebitda), pz4(d4.gesamt.ebitdaQuote) + " \xB7 Vorjahr " + pz4(d4.gesamt.vorjahrEbitdaQuote)) + kpi("Plan (O06)", geld(d4.gesamt.plan), "Abweichung " + pz4(d4.gesamt.planAbweichung)) + kpi("Frequenz", n(d4.gesamt.frequenz), "Kaufquote " + pz4(d4.gesamt.kaufquote)) + kpi("Durchschnittsbon", geld(d4.gesamt.bon), "Personal " + pz4(d4.gesamt.personalquote) + " \xB7 Miete " + pz4(d4.gesamt.mietquote)) + '</div><h4>Formate</h4><div class="vtr-liste">' + d4.formate.filter((z6) => ui.format === "alle" || z6.format === ui.format).map((z6) => zeile3(z6)).join("") + "</div>";
+      ) + kpi("Haus-DB", geld(d4.gesamt.ebitda), pz4(d4.gesamt.ebitdaQuote) + " \xB7 Vorjahr " + pz4(d4.gesamt.vorjahrEbitdaQuote)) + kpi("Plan (O06)", geld(d4.gesamt.plan), "Abweichung " + pz4(d4.gesamt.planAbweichung)) + kpi("Frequenz", n(d4.gesamt.frequenz), "Kaufquote " + pz4(d4.gesamt.kaufquote)) + kpi("Durchschnittsbon", geld(d4.gesamt.bon), "Personal " + pz4(d4.gesamt.personalquote) + " \xB7 Miete " + pz4(d4.gesamt.mietquote)) + '</div><h4>Formate</h4><div class="vtr-liste">' + d4.formate.filter((z6) => ui.format === "alle" || z6.format === ui.format).map((z6) => zeile2(z6)).join("") + "</div>";
       let sortiert = [...d4.zeilen];
       if (ui.sort === "umsatz") sortiert.sort((a2, b4) => b4.umsatz - a2.umsatz || a2.name.localeCompare(b4.name, "de"));
       if (ui.sort === "gut") sortiert.sort((a2, b4) => (b4.abweichungProzent ?? -Infinity) - (a2.abweichungProzent ?? -Infinity));
-      h4 += "<h4>" + (ui.ebene === "alle" ? "Regionen" : ui.ebene === "region" ? "Hauscluster" : "H\xE4user") + " \xB7 " + sortiert.length + '</h4><div class="vtr-liste">' + (sortiert.length ? sortiert.map((z6) => zeile3(z6, true)).join("") : "<p>Keine Standorte im Filter.</p>") + '</div><button class="vtr-portfolio" data-vtr="portfolio">Portfolio und Sammelaktionen \xF6ffnen</button>';
+      h4 += "<h4>" + (ui.ebene === "alle" ? "Regionen" : ui.ebene === "region" ? "Hauscluster" : "H\xE4user") + " \xB7 " + sortiert.length + '</h4><div class="vtr-liste">' + (sortiert.length ? sortiert.map((z6) => zeile2(z6, true)).join("") : "<p>Keine Standorte im Filter.</p>") + '</div><button class="vtr-portfolio" data-vtr="portfolio">Portfolio und Sammelaktionen \xF6ffnen</button>';
       return h4;
     }
     function klick2(el2) {
@@ -164850,19 +164850,12 @@ void main() {
     };
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 160" role="img" aria-label="Hartwig-Werbemotiv: ${id}"><rect width="190" height="160" rx="8" fill="#f0eee9"/><rect y="140" width="190" height="20" fill="#e2dfd8"/>${gegenstand[id] ?? gegenstand.prospekt}</svg>`;
   };
-  var stadtSymbolSVG = function bildStadt(name2) {
-    const n3 = String(name2).toLowerCase();
-    const turm4 = '<rect x="46" y="20" width="7" height="46" fill="#59636a"/><circle cx="49.5" cy="24" r="9" fill="#b32632"/><path d="M49 6v9" stroke="#59636a" stroke-width="3"/>';
-    const dom = '<path d="M18 74V40l8-10 7 10v34h8V40l8-10 7 10v34h10" fill="#9aa19e"/><path d="M20 38l6-25 6 25M43 38l6-25 6 25" fill="none" stroke="#59636a" stroke-width="4"/>';
-    const skyline = '<rect x="13" y="42" width="12" height="31" fill="#7f8b8e"/><rect x="30" y="26" width="14" height="47" fill="#65767e"/><rect x="48" y="34" width="17" height="39" fill="#a1a8a5"/><rect x="69" y="20" width="15" height="53" fill="#6c7c80"/>';
-    const rathaus2 = '<path d="M15 72V40h69v32M32 40V28h36v12M44 28V15h12v13" fill="#a4aaaa"/><path d="M47 15l3-9 3 9" fill="#b32632"/><path d="M24 51h8M42 51h8M60 51h8M24 62h8M60 62h8" stroke="#fff" stroke-width="4"/>';
-    const zeche = '<path d="M21 73L38 18H64L81 73M19 73h64M34 37h34M28 54h47" stroke="#677579" stroke-width="5" fill="none"/><rect x="40" y="22" width="22" height="9" fill="#b32632"/>';
-    const hafen = '<path d="M10 72h80M25 72V29l25-14 25 14v43M36 72V39h27v33" stroke="#68767d" stroke-width="4" fill="none"/><path d="M18 74q8-6 16 0t16 0t16 0t16 0" fill="none" stroke="#a1b8be" stroke-width="4"/>';
-    const motif = n3.includes("k\xF6ln") ? dom : n3.includes("berlin") || n3.includes("stuttgart") || n3.includes("d\xFCsseldorf") ? turm4 : n3.includes("essen") || n3.includes("bochum") ? zeche : n3.includes("hamburg") || n3.includes("bremen") ? hafen : n3.includes("hannover") || n3.includes("m\xFCnchen") || n3.includes("dresden") ? rathaus2 : skyline;
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 85" role="img" aria-label="Stadtzeichen ${String(name2).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;")}"><path d="M3 76h94" stroke="#59636a" stroke-width="3"/>${motif}</svg>`;
-  };
 
   // src/ui/marketing-q16.js
+  var merke2 = (P5, k5, t5) => {
+    P5(k5, t5);
+    return t5;
+  };
   function ortDaten(E9, spiel2, ui) {
     const daten = E9.marketingStaedte(spiel2());
     const regionen = ["alle", ...new Set(daten.staedte.map((x2) => x2.region))];
@@ -164871,69 +164864,126 @@ void main() {
     const stadt = auswahl4[index2];
     return { daten, regionen, auswahl: auswahl4, stadt, index: index2 };
   }
-  function stadtWahl(E9, spiel2, ui) {
+  var kachel = ({ bild: bild4, titel, stufe: stufe2 = "", wert = "", einheit = "je Woche", attr = "", an = false }) => `<button type="button" class="hw-g3-kachel${an ? " an" : ""}" aria-pressed="${an}" ${attr}><span class="hw-g3-kachelbild" aria-hidden="true">${bild4}</span><span class="hw-g3-kacheltitel">${esc2(titel)}</span><span class="hw-g3-kachelwert">${wert}</span><span class="hw-g3-kachelfuss"><span>${esc2(stufe2)}</span><small>${esc2(einheit)}</small></span></button>`;
+  function kachelRaster(kacheln, gewaehlt = -1, steuer2 = "") {
+    let h4 = "";
+    kacheln.forEach((k5, i) => {
+      h4 += k5;
+      if (steuer2 && gewaehlt >= 0 && (i === (gewaehlt | 1) || i === kacheln.length - 1 && i < (gewaehlt | 1))) h4 += `<div class="hw-g3-steuer">${steuer2}</div>`;
+    });
+    return `<div class="hw-g3-kacheln">${h4}</div>`;
+  }
+  var skalaGross = (label, wert, wertHtml) => `<span class="hw-marke hw-g3-skalaname">${esc2(label)}</span><div class="hw-skala hw-g3-skala" role="img" aria-label="${esc2(label)}: ${Math.round(wert)} von 100"><div class="hw-skala-balken">${[0, 1, 2, 3, 4].map((i) => `<i class="${i < Math.round(wert / 20) ? "" : "aus"}"></i>`).join("")}</div>${wertHtml}</div>`;
+  var kanalBild = (id) => kanalBildSVG(id).replace(/<rect width="190" height="160" rx="8" fill="#f0eee9"\/><rect y="140" width="190" height="20" fill="#e2dfd8"\/>/, "");
+  function stadtWahl(E9, spiel2, ui, mitRegion = true) {
     const { regionen, auswahl: auswahl4, stadt, index: index2 } = ortDaten(E9, spiel2, ui);
-    const reg = regionen.map((r4) => `<option value="${esc2(r4)}"${r4 === ui.region ? " selected" : ""}>${r4 === "alle" ? "Alle Regionen" : "Region " + esc2(r4)}</option>`).join("");
-    const ort = auswahl4.map((x2) => `<option value="${esc2(x2.stadt)}"${x2.stadt === stadt?.stadt ? " selected" : ""}>${esc2(x2.stadt)}</option>`).join("");
-    const v2 = Math.max(0, index2 - 3), sicht3 = auswahl4.slice(v2, v2 + 7);
-    return `<div class="mk-stadtwahl"><div class="mk-stadtfilter"><label>Region<select data-a="stadtRegionChoose" aria-label="Region ausw\xE4hlen">${reg}</select></label><label>Stadt<select data-a="stadtChoose" aria-label="Stadt ausw\xE4hlen">${ort}</select></label></div><div class="mk-ortband"><button data-a="stadtShift" data-v="-1" aria-label="Vorherige Stadt" ${auswahl4.length < 2 ? "disabled" : ""}>\u2039</button><div class="mk-minis" aria-label="St\xE4dteauswahl">${sicht3.map((x2) => `<button data-a="stadtSymbol" data-v="${esc2(x2.stadt)}" class="${x2.stadt === stadt?.stadt ? "an" : ""}" aria-label="Stadt ${esc2(x2.stadt)}" aria-pressed="${x2.stadt === stadt?.stadt}">${stadtSymbolSVG(x2.stadt)}<span>${esc2(x2.stadt)}</span></button>`).join("")}</div><button data-a="stadtShift" data-v="1" aria-label="N\xE4chste Stadt" ${auswahl4.length < 2 ? "disabled" : ""}>\u203A</button></div></div>`;
+    const reg = mitRegion ? seg(regionen.map((r4) => [r4, r4 === "alle" ? "Alle" : r4]), ui.region, (w2) => `data-a="region" data-v="${esc2(w2)}"`) + '<div class="hw-abstand"></div>' : "";
+    return reg + feld("Stadt", stepper({
+      wert: stadt?.stadt ?? "keine Stadt",
+      unter: stadt ? `Region ${stadt.region} \xB7 ${index2 + 1} von ${auswahl4.length}` : "",
+      label: "Stadt wechseln",
+      attrMinus: 'data-a="stadtShift" data-v="-1"',
+      attrPlus: 'data-a="stadtShift" data-v="1"',
+      minusAus: auswahl4.length < 2,
+      plusAus: auswahl4.length < 2
+    }));
+  }
+  var GRUPPEN2 = [["hartwig", "Hartwig mit Sport"], ["volkskauf", "Volkskauf"], ["fundus", "FUNDUS"], ["wettbewerber", "Wettbewerber"]];
+  var FORMAT = { warenhaus: "Hartwig Warenhaus", sport: "Hartwig Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
+  var STATUS_HAUS = { offen: "ge\xF6ffnet", schliessung_verhandlung: "Schlie\xDFung in Verhandlung", raeumung: "R\xE4umungsverkauf", geschlossen: "geschlossen", verkauft: "verkauft" };
+  function ring(werte3) {
+    const R11 = 54, W3 = 30, U2 = 2 * Math.PI * R11;
+    let start = 0, seg2 = "", text3 = "";
+    for (const [k5] of GRUPPEN2) {
+      const a2 = Math.max(0, werte3[k5] ?? 0);
+      if (a2 <= 0) continue;
+      seg2 += `<circle class="hw-g3-ring-${k5}" cx="75" cy="75" r="${R11}" fill="none" stroke-width="${W3}" stroke-dasharray="${(U2 * a2).toFixed(2)} ${(U2 * (1 - a2)).toFixed(2)}" stroke-dashoffset="${(-U2 * start).toFixed(2)}" transform="rotate(-90 75 75)"/>`;
+      if (a2 >= 0.06) {
+        const w2 = (start + a2 / 2) * 2 * Math.PI - Math.PI / 2;
+        text3 += `<text x="${(75 + R11 * Math.cos(w2)).toFixed(1)}" y="${(75 + R11 * Math.sin(w2) + 3.5).toFixed(1)}" text-anchor="middle">${Math.round(a2 * 100)} %</text>`;
+      }
+      start += a2;
+    }
+    return `<svg class="hw-g3-ring" viewBox="0 0 150 150" aria-hidden="true">${seg2}${text3}</svg>`;
   }
   function stadtAnsicht(E9, spiel2, ui, P5) {
     const { stadt } = ortDaten(E9, spiel2, ui);
     let h4 = stadtWahl(E9, spiel2, ui);
-    if (!stadt) return { titel: "Marktanteile", unter: "Keine Standorte in dieser Region", html: h4 + '<p class="mk-hinweis">Keine Stadt verf\xFCgbar.</p>' };
-    const farben = { hartwig: "#B32632", volkskauf: "#6c7980", fundus: "#b68b47", wettbewerber: "#a6a6a3" };
-    const texte2 = { hartwig: "Hartwig einschlie\xDFlich Sport", volkskauf: "Volkskauf", fundus: "FUNDUS", wettbewerber: "Wettbewerber" };
-    const werte3 = stadt.marktanteile, umfang = 2 * Math.PI * 78;
-    let offset = 0;
-    const ring2 = Object.keys(farben).map((k5) => {
-      const a2 = Math.max(0, werte3[k5]), laenge2 = umfang * a2, start = offset;
-      offset += laenge2;
-      return `<circle cx="105" cy="105" r="78" fill="none" stroke="${farben[k5]}" stroke-width="24" stroke-dasharray="${laenge2} ${umfang - laenge2}" stroke-dashoffset="${-start}" transform="rotate(-90 105 105)"/>`;
-    }).join("");
-    h4 += `<section class="mk-marktkarte"><h3>Marktanteil in ${esc2(stadt.stadt)}</h3><p>Indikative Marktposition auf Basis der Standorte und Wettbewerber.</p><div class="mk-ringwrap"><svg viewBox="0 0 210 210" role="img" aria-label="Gesch\xE4tzter Marktanteil in ${esc2(stadt.stadt)}">${ring2}</svg><div class="mk-ringmitte">${stadtSymbolSVG(stadt.stadt)}<strong>${esc2(stadt.stadt)}</strong></div></div><div class="mk-legende">${Object.keys(farben).map((k5) => `<div class="mk-lzeile"><span style="--farbe:${farben[k5]}">${texte2[k5]}</span>${P5(`ms:${stadt.stadt}:${k5}`, pz3(werte3[k5], 1))}</div>`).join("")}</div><p class="mk-hinweis">${stadt.wettbewerberAnzahl} modellierte Wettbewerber. Der \xFCbrige lokale Handel ist im Wettbewerbsanteil ber\xFCcksichtigt.</p></section>`;
-    h4 += `<section class="mk-marktkarte"><h3>Markenbekanntheit</h3><p>Hartwig in ${esc2(stadt.stadt)}</p><div class="mk-bekannt-zahl">${P5(`bek:${stadt.stadt}`, `${stadt.markenbekanntheit} / 100`)}</div><div class="mk-bekannt-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${stadt.markenbekanntheit}" aria-label="Markenbekanntheit"><span style="width:${stadt.markenbekanntheit}%"></span></div><p class="mk-hinweis">Modellsch\xE4tzung aus Konzernimage, Marketingdruck und Standortpr\xE4senz. Ohne Eingriffe neutral zum Konzernwert.</p></section>`;
-    return { titel: "Marktanteile", unter: `${stadt.stadt} \xB7 Region ${stadt.region} \xB7 ${stadt.haeuserAktiv} aktive H\xE4user`, html: h4 };
+    if (!stadt) return { befund: "In dieser Region liegt keine Stadt mit Hartwig-Standort.", html: rumpf2(h4 + leer3("Keine Stadt verf\xFCgbar.")) };
+    const w2 = stadt.marktanteile;
+    h4 += abschnitt(`Marktanteil in ${stadt.stadt}`);
+    h4 += `<div class="hw-g3-markt">${ring(w2)}${liste(GRUPPEN2.map(([k5, t5]) => zeile({ was: `<i class="hw-g3-farbe hw-g3-ring-${k5}" aria-hidden="true"></i>${esc2(t5)}`, wert: P5(`ms:${stadt.stadt}:${k5}`, pz3(w2[k5], 1), "span") })))}</div>`;
+    h4 += `<p class="hw-lese hw-g3-notiz">${stadt.wettbewerberAnzahl} modellierte Wettbewerber. Der \xFCbrige lokale Handel steckt im Wettbewerbsanteil.</p>`;
+    h4 += abschnitt("Markenbekanntheit", `Hartwig in ${stadt.stadt}`);
+    h4 += skalaGross(`Markenbekanntheit in ${stadt.stadt}`, stadt.markenbekanntheit, P5(`bek:${stadt.stadt}`, `${stadt.markenbekanntheit} / 100`, "b", ' class="hw-skala-wert"'));
+    h4 += '<p class="hw-lese hw-g3-notiz">Modellsch\xE4tzung aus Konzernimage, Marketingdruck und Standortpr\xE4senz. Ohne Eingriffe neutral zum Konzernwert.</p>';
+    const haeuser = spiel2().haeuser.filter((x2) => x2.stadt === stadt.stadt);
+    h4 += abschnitt("Eigene H\xE4user in der Stadt", `${stadt.haeuserAktiv} aktiv`);
+    h4 += haeuser.length ? liste(haeuser.map((x2) => zeile({ was: esc2(x2.name), unter: esc2(FORMAT[x2.format] ?? "Hartwig"), wert: esc2(STATUS_HAUS[x2.status] ?? "unbekannt"), ton: x2.status === "offen" ? "" : "schlecht" }))) : leer3("Kein eigenes Haus in dieser Stadt.");
+    const fuehrend = w2.hartwig >= Math.max(w2.volkskauf, w2.fundus, w2.wettbewerber);
+    return {
+      befund: `In ${esc2(stadt.stadt)} h\xE4lt Hartwig ${pz3(w2.hartwig, 1)} Marktanteil${fuehrend ? " und f\xFChrt den Markt" : ""}. Bekanntheit ${stadt.markenbekanntheit} von 100.`,
+      html: rumpf2(h4)
+    };
   }
   function kanaeleAnsicht(E9, spiel2, ui, P5) {
     const { stadt, daten } = ortDaten(E9, spiel2, ui);
-    let h4 = stadtWahl(E9, spiel2, ui);
     const k5 = daten.kanaele, q2 = E9.marketingUebersicht(spiel2());
-    h4 += `<div class="mk-marktkarte"><h3>Werbebudget</h3><div class="mk-kanalinfo"><span>Kan\xE4le je Woche</span>${P5("kn:summe", geld(k5.summeWoche))}</div><div class="mk-kanalinfo"><span>Werbequote netto</span>${P5("kn:netto", pz3(q2.werbequoteNetto, 1))}</div><p class="mk-hinweis">Budgets und Werbequote gelten konzernweit. Regionale Kan\xE4le k\xF6nnen je Region verst\xE4rkt werden.</p></div>`;
-    h4 += `<div class="mk-kanalinfo"><strong>Kan\xE4le</strong><span>${k5.kanaele.length} Karten \xB7 horizontal wischen</span></div><div class="mk-kanalreihe" role="region" aria-label="Marketingkan\xE4le" tabindex="0">`;
-    for (const c of k5.kanaele) {
+    const uebrig = daten.kapazitaet.verfuegbar - daten.kapazitaet.zugeordnet;
+    const region = stadt?.region;
+    let oben = stadtWahl(E9, spiel2, ui, false);
+    if (stadt) oben += '<div class="hw-abstand"></div>' + skalaGross(`Markenbekanntheit in ${stadt.stadt}`, stadt.markenbekanntheit, P5(`bek:${stadt.stadt}`, `${stadt.markenbekanntheit} / 100`, "b", ' class="hw-skala-wert"'));
+    oben += abschnitt("Kan\xE4le", `${k5.kanaele.length} Karten, wischen`);
+    const karten = k5.kanaele.map((c) => {
       const [beschreibung, betreuung] = MARKETING_KANAL_INFO[c.id] ?? [c.text, "Inhouse"];
       const team = daten.kapazitaet.teams[c.id] ?? 0;
-      const uebrig = daten.kapazitaet.verfuegbar - daten.kapazitaet.zugeordnet;
       const max = Math.max(1, c.startBudgetWoche * 4);
-      const region = stadt?.region;
       const faktor2 = region ? c.regionen[region] ?? 1 : 1;
-      h4 += `<article class="mk-kanalkarte" data-kanal="${esc2(c.id)}"><figure>${kanalBildSVG(c.id)}</figure><h3>${esc2(c.name)}</h3><p class="mk-text">${esc2(beschreibung)}</p><div class="mk-team"><span>Betreut von <strong>${esc2(betreuung)}</strong></span><div class="mk-teamaktionen"><button data-a="teamAendern" data-k="${esc2(c.id)}" data-v="-1" aria-label="${esc2(c.name)}: Team minus eins" ${team ? "" : "disabled"}>\u2212</button><span>${P5(`kn:${c.id}:team`, team)}</span><button data-a="teamAendern" data-k="${esc2(c.id)}" data-v="1" aria-label="${esc2(c.name)}: Team plus eins" ${uebrig > 0 ? "" : "disabled"}>+1</button></div></div><div class="mk-budgetbox"><label for="mk-budget-${esc2(c.id)}">Wochenbudget <output>${P5(`kn:${c.id}:woche`, geld(c.budgetWoche))}</output></label><input id="mk-budget-${esc2(c.id)}" type="range" min="0" max="${max}" step="100" value="${c.budgetWoche}" data-a="kanalBudgetSlider" data-k="${esc2(c.id)}" aria-label="Wochenbudget ${esc2(c.name)}"><small>Standard: ${geld(c.startBudgetWoche)} / Woche \xB7 maximal das Vierfache</small></div>`;
-      if (c.regional && region) h4 += `<div class="mk-budgetbox"><label for="mk-region-${esc2(c.id)}">Ausspielung Region ${esc2(region)} <output>${faktor2.toFixed(1).replace(".", ",")} \xD7</output></label><input id="mk-region-${esc2(c.id)}" type="range" min="0" max="3" step="0.1" value="${faktor2}" data-a="kanalRegionSlider" data-k="${esc2(c.id)}" data-region="${esc2(region)}" aria-label="Regionale Ausspielung ${esc2(c.name)}"><small>0 \xD7 bis 3 \xD7 \xB7 bestehende regionale Kanalsteuerung</small></div>`;
-      else h4 += '<p class="mk-hinweis">Bundesweite Kanalsteuerung</p>';
-      h4 += "</article>";
-    }
-    h4 += `</div><p class="mk-kanalzaehler">Zugeordnete Marketing-FTE: ${P5("kn:teamSum", daten.kapazitaet.zugeordnet)} von ${P5("kn:fte", daten.kapazitaet.verfuegbar)}. Die Teamzuordnung ist organisatorisch; die Wirkung folgt unver\xE4ndert aus Kanalbudgets und Marketingabteilung.</p>`;
-    return { titel: "Marketingkan\xE4le", unter: `${stadt?.stadt ?? "Alle St\xE4dte"} \xB7 ${geld(k5.summeWoche)} / Woche \xB7 Nettoquote ${pz3(q2.werbequoteNetto, 1)}`, html: h4 };
+      merke2(P5, `kn:${c.id}:woche`, geld(c.budgetWoche));
+      let x2 = `<div class="hw-g3-kanal"><span class="hw-g3-bild">${kanalBild(c.id)}</span><div class="hw-karte-titel hw-g3-links">${esc2(c.name)}</div><span class="hw-feldunter">${c.regional ? "regional steuerbar" : "bundesweit"}</span><p class="hw-lese hw-g3-text">${esc2(beschreibung)}</p><div class="hw-g3-team"><div><span class="hw-marke">Verantwortlich</span><span class="hw-g3-wert">${esc2(betreuung)} \xB7 Team ${P5(`kn:${c.id}:team`, team, "span")}</span></div><div class="hw-g3-teamknoepfe">${knopf("\u22121", `data-a="teamAendern" data-k="${esc2(c.id)}" data-v="-1" aria-label="${esc2(c.name)}: Team minus eins"`, "zweit", !team)}${knopf("+1", `data-a="teamAendern" data-k="${esc2(c.id)}" data-v="1" aria-label="${esc2(c.name)}: Team plus eins"`, "zweit", uebrig <= 0)}</div></div>` + feld("Wochenbudget", stepper({
+        wert: geld(c.budgetWoche),
+        unter: `Standard ${geld(c.startBudgetWoche)}`,
+        label: `Wochenbudget ${c.name}`,
+        attrMinus: `data-a="kanalBudget" data-k="${esc2(c.id)}" data-v="-1"`,
+        attrPlus: `data-a="kanalBudget" data-k="${esc2(c.id)}" data-v="1"`,
+        minusAus: c.budgetWoche <= 0,
+        plusAus: c.budgetWoche * 1.1 > max
+      }));
+      if (c.regional && region) x2 += feld(`Ausspielung Region ${region}`, stepper({
+        wert: `${dez(faktor2, 1)} \xD7`,
+        unter: "0 \xD7 bis 3 \xD7",
+        label: `Regionale Ausspielung ${c.name}`,
+        attrMinus: `data-a="kanalRegion" data-k="${esc2(c.id)}" data-region="${esc2(region)}" data-v="-1"`,
+        attrPlus: `data-a="kanalRegion" data-k="${esc2(c.id)}" data-region="${esc2(region)}" data-v="1"`,
+        minusAus: faktor2 <= 0,
+        plusAus: faktor2 >= 3
+      }));
+      else x2 += '<p class="hw-lese hw-g3-leise">Bundesweite Kanalsteuerung</p>';
+      return x2 + "</div>";
+    });
+    let unten = abschnitt("Werbebudget", "konzernweit");
+    unten += gross2([{ label: "Kan\xE4le je Woche", wert: merke2(P5, "kn:summe", geld(k5.summeWoche)), p: "kn:summe" }, { label: "Werbequote netto", wert: merke2(P5, "kn:netto", pz3(q2.werbequoteNetto, 1)), p: "kn:netto" }]);
+    unten += `<p class="hw-lese hw-g3-notiz">Zugeordnete Marketing-FTE: ${P5("kn:teamSum", daten.kapazitaet.zugeordnet, "span")} von ${P5("kn:fte", daten.kapazitaet.verfuegbar, "span")}. Die Teamzuordnung ist organisatorisch; die Wirkung folgt aus Kanalbudgets und Marketingabteilung.</p>`;
+    const teuer = [...k5.kanaele].sort((a2, b4) => b4.budgetWoche - a2.budgetWoche)[0];
+    return {
+      befund: `Die Kan\xE4le kosten ${geld(k5.summeWoche)} je Woche.${teuer ? ` Gr\xF6\xDFter Posten: ${esc2(teuer.name)}.` : ""}`,
+      html: rumpf2(oben) + karussell(karten, { label: "Marketingkan\xE4le" }) + rumpf2(unten)
+    };
   }
 
   // src/ui/marketing.js
   var STATUS2 = { geplant: "geplant", laufend: "l\xE4uft", beendet: "beendet", abgesagt: "abgesagt", aktiv: "aktiv", gestoppt: "gestoppt" };
-  var STATUS_FARBE = { geplant: "#6f9cbd", laufend: "#6dbf73", beendet: "#5d6b73", abgesagt: "#3b4b54" };
-  var MONATE = ["Jan", "Feb", "M\xE4r", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
-  var ANGEBOT = [["coupon", "Coupon"], ["punkte", "Mehrfachpunkte"], ["zugabe", "Gratiszugabe"], ["info", "nur Info"]];
-  var FREQUENZ = [["einmalig", "einmalig"], ["woechentlich", "w\xF6chentlich"], ["zweiwoechentlich", "14-t\xE4gig"], ["monatlich", "monatlich"], ["quartal", "Quartal"]];
+  var MONATE = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  var ANGEBOT = [["coupon", "Coupon"], ["punkte", "Punkte"], ["zugabe", "Zugabe"], ["info", "Info"]];
+  var FREQUENZ = [["einmalig", "einmalig"], ["woechentlich", "w\xF6chentlich"], ["zweiwoechentlich", "alle 14 Tage"], ["monatlich", "monatlich"], ["quartal", "je Quartal"]];
   var KANAL2 = [["mail", "Mail"], ["push", "Push"], ["brief", "Brief"]];
-  function kurve2(titel, werte3, fmtW, p2, P5, farbe2) {
-    const W3 = 340, H = 56, n3 = werte3.length;
-    if (n3 < 2) return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P5(p2, n3 ? fmtW(werte3[0]) : "noch keine Daten")}</div><div class="kfuss"><span>Verlauf ab der zweiten Woche</span></div></div>`;
-    let min = Math.min(...werte3), max = Math.max(...werte3);
-    const flach = max - min < 1e-9 * Math.max(1, Math.abs(max));
-    const lo = flach ? min - 1 : min - (max - min) * 0.1, hi = flach ? max + 1 : max + (max - min) * 0.1;
-    const X5 = (i) => 4 + i / (n3 - 1) * (W3 - 8), Y = (v2) => H - 4 - (v2 - lo) / (hi - lo || 1) * (H - 10);
-    const pts = werte3.map((v2, i) => `${X5(i).toFixed(1)},${Y(v2).toFixed(1)}`).join(" ");
-    return `<div class="karte kurve"><div class="kkopf"><span>${titel}</span>${P5(p2, fmtW(werte3[n3 - 1]))}</div><svg viewBox="0 0 ${W3} ${H}" preserveAspectRatio="none"><polygon points="4,${H - 4} ${pts} ${X5(n3 - 1).toFixed(1)},${H - 4}" fill="${farbe2}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${farbe2}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="kfuss"><span>vor ${n3} Wochen</span><span>min ${fmtW(min)} \xB7 max ${fmtW(max)}</span><span>jetzt</span></div></div>`;
-  }
+  var REITER2 = [["uebersicht", "\xDCberblick", "zahlen"], ["kanaele", "Kan\xE4le", "marketing"], ["stadt", "St\xE4dte", "zentrale"], ["karte", "Karte", "kommentare"], ["crm", "CRM", "post"], ["kalender", "Kalender", "etagen"]];
+  var SICHT3 = { uebersicht: "\xDCberblick", kanaele: "Kan\xE4le", stadt: "St\xE4dte", karte: "Karte und App", crm: "CRM-Versand", kalender: "Aktionskalender", aktion: "Aktion" };
+  var motiv2 = (id) => kanalBildSVG(id).replace(/<rect width="190" height="160" rx="8" fill="#f0eee9"\/><rect y="140" width="190" height="20" fill="#e2dfd8"\/>/, "");
+  var zyklus = (liste3, aktuell, d4) => {
+    const i = Math.max(0, liste3.findIndex(([v2]) => String(v2) === String(aktuell)));
+    return liste3[(i + d4 + liste3.length) % liste3.length][0];
+  };
   function marketingModul(ctx) {
     const E9 = ctx.E, s2 = () => ctx.s();
     const da = typeof E9.marketingUebersicht === "function";
@@ -164943,103 +164993,206 @@ void main() {
       jahr: null,
       aktion: null,
       planen: null,
-      kanal: null,
       stadt: null,
       region: "alle",
-      kanalScroll: 0,
+      kachel: -1,
+      rollout: null,
       crm: { seg: 0, kanal: "mail", angebot: "coupon", prozent: 0.15, mindestbon: 40, faktor: 3, wert: 10, frequenz: "monatlich", wochen: 13, kontrolle: true }
     };
-    const tabs = () => `<div class="tabs">${[["uebersicht", "\xDCbersicht"], ["kanaele", "Kan\xE4le"], ["stadt", "St\xE4dte"], ["karte", "Karte"], ["crm", "CRM"], ["kalender", "Kalender"]].map(([id, t5]) => `<button class="tab ${ui.seite === id || id === "kalender" && ui.seite === "aktion" ? "an" : ""}" data-a="seite" data-v="${id}">${t5}</button>`).join("")}</div>`;
+    function sprecher2(text3, ton3 = "") {
+      const r4 = E9.vorstandUebersicht?.(s2())?.ressorts?.find((x2) => x2.id === "cmo");
+      const p2 = r4?.person;
+      return sprecher({ text: text3, ton: ton3, unter: p2 ? `${p2.name} \xB7 Marketingvorstand` : "Bereichsleitung Marketing", person: portraetSVG(p2?.portraet ?? zufallsMerkmale("bereich:marketing"), 72) });
+    }
     function uebersicht(P5) {
-      const st2 = s2(), u = E9.marketingUebersicht(st2);
+      const u = E9.marketingUebersicht(s2());
       const tsd = (x2) => Math.round(x2 / 1e3), tsdText = (n3) => `${fmt.format(n3)} Tsd. \u20AC`;
-      let h4 = tabs() + '<div class="q31">';
-      const v2 = u.verlauf.slice(-26), vor = v2.length > 1 ? v2[v2.length - 2].kunden : null;
+      const v2 = u.verlauf, vor = v2.length > 1 ? v2[v2.length - 2].kunden : null;
       const delta = vor == null ? null : u.frequenzWoche - vor;
-      h4 += `<div class="q-gross"><span class="q-label">Kundschaft je Woche</span><span class="q-haupt">${P5("u:frequenz", fmt.format(Math.round(u.frequenzWoche)), "span")}</span><span class="q-neben"><b>${P5("u:bon", geld(u.bon), "span")}</b>Durchschnittsbon</span></div>`;
-      h4 += `<div class="q-befund">${delta == null ? "Ein Vergleich ist ab der zweiten Woche verf\xFCgbar." : `<b class="${delta < 0 ? "q-minus" : "q-plus"}">${delta >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(Math.round(delta)))}</b> Kunden gegen\xFCber der Vorwoche bei ${P5("u:netto", geld(u.wocheNetto), "b")} Werbung netto.`}${u.rabattquote13 > 0.08 ? ` Die Rabattquote liegt mit ${pz3(u.rabattquote13, 1)} hoch, Kunden gew\xF6hnen sich an Preisaktionen.` : ""}</div>`;
+      let h4 = gross2([
+        {
+          label: "Kundschaft je Woche",
+          wert: merke2(P5, "u:frequenz", fmt.format(Math.round(u.frequenzWoche))),
+          p: "u:frequenz",
+          unter: delta == null ? "erste Woche" : abweichung(delta, `${delta >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(Math.round(delta)))} zur Vorwoche`)
+        },
+        { label: "Durchschnittsbon", wert: merke2(P5, "u:bon", geld(u.bon)), p: "u:bon", unter: `Werbung netto ${P5("u:netto", geld(u.wocheNetto), "span")}` }
+      ]);
+      const letzte = v2.slice(-5);
+      h4 += abschnitt("Kundschaft", letzte.length ? `KW ${kwVon2(letzte[0].woche)} bis ${kwVon2(letzte[letzte.length - 1].woche)}` : "");
+      h4 += balken6(letzte.map((x2) => ({ label: String(kwVon2(x2.woche)), a: x2.kunden, b: null })));
       const zeilen = [["kanaele", "Kan\xE4le", "Prospekt, Anzeigen, Plakat, Radio, TV, Online, Social"], ["karte", "Hartwig Karte", "Punkte, Stufen, Betrieb, Daten"], ["app", "Hartwig App", "Pflege und Werbung"], ["crm", "CRM-Versand", "Mail, Push, Brief"]].map(([k5, t5, d4]) => ({ k: k5, t: t5, d: d4, n: tsd(u.bloecke[k5]) }));
       const brutto2 = zeilen.reduce((a2, z6) => a2 + z6.n, 0), beteiligung = tsd(u.wocheBeteiligung);
-      h4 += '<div class="q-buch" data-summenbuch="Werbebudget"><div class="q-buch-kopf"><span>Werbebudget je Woche</span><b>Tsd. \u20AC</b></div>';
-      for (const z6 of zeilen) h4 += `<div class="q-zeile"><span class="q-name">${z6.t}<small>${z6.d}</small></span><span class="q-wert">${P5(`u:block:${z6.k}`, tsdText(z6.n), "span", ' data-s="e"')}</span></div>`;
-      h4 += `<div class="q-summe"><span>Brutto</span><span class="q-wert">${P5("u:brutto", tsdText(brutto2), "span", ' data-summe="e"')}</span></div>`;
-      h4 += `<div class="q-zeile"><span class="q-name">Lieferantenbeteiligung<small>Werbekostenzusch\xFCsse</small></span><span class="q-wert">${P5("u:beteiligung", `\u2212${tsdText(beteiligung)}`, "span", ' data-s="e"')}</span></div>`;
-      h4 += `<div class="q-summe"><span>Netto</span><span class="q-wert">${P5("u:nettoTsd", tsdText(brutto2 - beteiligung), "span", ' data-summe="e"')}</span></div></div>`;
-      const kzz = (n3, w2, p2, ton3 = "") => `<div class="q-zeile"><span class="q-name">${n3}</span><span class="q-wert ${ton3}">${P5(p2, w2, "span")}</span></div>`;
-      h4 += '<div class="q-buch"><div class="q-buch-kopf"><span>Marke und Kundschaft</span></div>';
-      h4 += kzz("Werbequote netto", pz3(u.werbequoteNetto, 1), "u:quote") + kzz("Markenst\xE4rke", `${Math.round(u.markenstaerke)} / 100`, "u:marke") + kzz("Image", `${Math.round(u.image)} / 100`, "u:image");
-      h4 += kzz("Umsatz mit Karte", pz3(u.kartenanteil, 1), "u:karte") + kzz("Rabattquote 13 Wochen", pz3(u.rabattquote13, 1), "u:rabatt", u.rabattquote13 > 0.08 ? "q-minus" : "") + "</div>";
-      h4 += kurve2("Kundschaft je Woche", v2.map((x2) => x2.kunden), (x2) => fmt.format(Math.round(x2)), "k:kunden", P5, "#6f9cbd");
-      h4 += kurve2("Markenst\xE4rke", v2.map((x2) => x2.marke), (x2) => dez(x2, 1), "k:marke", P5, "#c08aa8");
-      const zeile3 = (a2) => `<button class="q-zeile q-tipp" data-a="aktion" data-v="${a2.id}"><span class="q-name">${esc2(a2.name)}<small>${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""}</small></span><span class="q-wert">KW ${a2.startKw}${a2.endeKw !== a2.startKw ? ` bis ${a2.endeKw}` : ""}<small>${STATUS2[a2.status] ?? a2.status}</small></span></button>`;
-      h4 += '<div class="q-buch"><div class="q-buch-kopf"><span>Aktionen</span><b>l\xE4uft und als N\xE4chstes</b></div>';
-      if (!u.laufend.length && !u.naechste.length) h4 += '<div class="q-leer"><b>Keine Aktion geplant.</b>Im Kalender planst du die n\xE4chste.</div>';
-      h4 += u.laufend.map(zeile3).join("") + u.naechste.map(zeile3).join("") + "</div>";
-      for (const x2 of u.hinweise) h4 += `<div class="olief warnung">${esc2(x2)}</div>`;
-      h4 += '<button class="q-neben-akt" data-a="eigenmarkeGruenden" style="margin:4px 0 12px">+ Neue Eigenmarke</button>';
-      h4 += "</div>";
-      return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 ${u.kampagnenAktiv} CRM-Kampagnen aktiv \xB7 KW ${u.kw} / ${u.jahr}`, html: h4 };
+      const summe2 = (was, html) => zeile({ was, wert: html }).replace('class="hw-zeile"', 'class="hw-zeile hw-g3-summe"');
+      h4 += abschnitt("Werbebudget je Woche", "Tsd. \u20AC");
+      h4 += `<div data-summenbuch="Werbebudget">${liste([
+        ...zeilen.map((z6) => zeile({ was: z6.t, unter: z6.d, wert: P5(`u:block:${z6.k}`, tsdText(z6.n), "span", ' data-s="e"') })),
+        summe2("Brutto", P5("u:brutto", tsdText(brutto2), "span", ' data-summe="e"')),
+        zeile({ was: "Lieferantenbeteiligung", unter: "Werbekostenzusch\xFCsse", wert: P5("u:beteiligung", `\u2212${tsdText(beteiligung)}`, "span", ' data-s="e"') }),
+        summe2("Netto", P5("u:nettoTsd", tsdText(brutto2 - beteiligung), "span", ' data-summe="e"'))
+      ])}</div>`;
+      h4 += abschnitt("Marke und Kundschaft");
+      h4 += skalaGross("Markenst\xE4rke", u.markenstaerke, P5("u:marke", `${Math.round(u.markenstaerke)}`, "b", ' class="hw-skala-wert"'));
+      h4 += liste([
+        zeile({ was: "Werbequote netto", wert: P5("u:quote", pz3(u.werbequoteNetto, 1), "span") }),
+        zeile({ was: "Image", wert: P5("u:image", `${Math.round(u.image)} / 100`, "span") }),
+        zeile({ was: "Umsatz mit Karte", wert: P5("u:karte", pz3(u.kartenanteil, 1), "span") }),
+        zeile({ was: "Rabattquote 13 Wochen", wert: P5("u:rabatt", pz3(u.rabattquote13, 1), "span"), ton: u.rabattquote13 > 0.08 ? "schlecht" : "" })
+      ]);
+      const aktionZeile = (a2) => zeile({ was: esc2(a2.name), unter: esc2(a2.mechanikText) + (a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""), wert: `KW ${a2.startKw}${a2.endeKw !== a2.startKw ? ` bis ${a2.endeKw}` : ""}`, wertUnter: STATUS2[a2.status] ?? a2.status, tippbar: true, attr: `data-a="aktion" data-v="${esc2(a2.id)}"` });
+      h4 += abschnitt("Aktionen", "l\xE4uft und als N\xE4chstes");
+      h4 += u.laufend.length || u.naechste.length ? liste([...u.laufend, ...u.naechste].map(aktionZeile)) : leer3("Im Kalender planst du die n\xE4chste.", "Keine Aktion geplant.");
+      for (const x2 of u.hinweise) h4 += hinweis(esc2(x2), "achtung");
+      h4 += knoepfe(knopf("Neue Eigenmarke gr\xFCnden", 'data-a="eigenmarkeGruenden"', "zweit breit"));
+      const befund2 = delta == null ? `Werbung netto ${geld(u.wocheNetto)} je Woche, ${pz3(u.werbequoteNetto, 1)} vom Umsatz.` : `${delta >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(Math.round(delta)))} Kunden zur Vorwoche bei ${geld(u.wocheNetto)} Werbung netto.`;
+      return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 KW ${u.kw} / ${u.jahr}`, befund: u.rabattquote13 > 0.08 ? `Die Rabattquote liegt bei ${pz3(u.rabattquote13, 1)}. Kunden gew\xF6hnen sich an Preisaktionen.` : befund2, ton: u.rabattquote13 > 0.08 ? "engpass" : "", html: rumpf2(h4) };
     }
-    const mitReitern = (r4) => ({ ...r4, html: tabs() + r4.html });
     function kanaele2(P5) {
-      return mitReitern(kanaeleAnsicht(E9, s2, ui, P5));
+      const r4 = kanaeleAnsicht(E9, s2, ui, P5);
+      return { titel: "Marketingkan\xE4le", unter: "Wochenbudget je Kanal", ...r4 };
     }
     function staedte(P5) {
-      return mitReitern(stadtAnsicht(E9, s2, ui, P5));
+      const r4 = stadtAnsicht(E9, s2, ui, P5);
+      return { titel: "Marktanteile", unter: "St\xE4dte und Markenbekanntheit", ...r4 };
     }
     function karte(P5) {
-      const k5 = E9.kundenkarte(s2()), a2 = k5.app;
-      let h4 = tabs();
-      h4 += `<div class="karte emkarte"><div class="mkopf" style="background:#d23c32"><b>${esc2(k5.name)}</b><small>${esc2(k5.punkteText)}${k5.stufen ? " \xB7 Stufen Silber und Gold" : ""}</small></div>`;
-      h4 += `<div class="owerte"><div><span>Mitglieder</span>${P5("ka:mitglieder", fmt.format(k5.mitglieder))}</div><div><span>aktiv</span>${P5("ka:aktiv", pz3(k5.aktivQuote))}</div><div><span>Umsatzanteil</span>${P5("ka:anteil", pz3(k5.umsatzAnteil, 1))}</div><div><span>neu je Woche</span>${P5("ka:neu", fmt.format(k5.neuWoche))}</div><div><span>Abg\xE4nge je Woche</span>${P5("ka:ab", fmt.format(k5.abgaengeWoche))}</div><div><span>Mail-Einwilligung</span>${P5("ka:mail", pz3(k5.mailQuote))}</div></div>`;
-      h4 += `<div class="mzeile"><span>Datenqualit\xE4t</span><span class="mbalken"><span style="width:${(k5.datenqualitaet * 100).toFixed(0)}%;background:#2f63b5"></span></span>${P5("ka:daten", String(Math.round(k5.datenqualitaet * 100)))}</div><div class="olief">Bessere Daten machen CRM-Kampagnen treffsicherer.</div></div>`;
-      h4 += '<div class="karte steuerung"><div class="khead">Vorteile</div>';
-      h4 += regler("Punkte", segment("punkte", k5.punkteSatz, [[25e-4, "1 je 4 \u20AC"], [5e-3, "1 je 2 \u20AC"], [0.01, "1 je 1 \u20AC"]]), "1 Punkt = 1 Cent");
-      h4 += schalter2(k5.stufen, 'data-a="stufen"', "Statusstufen Silber und Gold", "bindet Top-Kunden, Einf\xFChrung kostet einmalig");
-      h4 += regler("Kartenrabatt", segment("kartenrabatt", k5.kartenrabatt, [[0, "kein"], [0.02, "2 %"], [0.03, "3 %"], [0.05, "5 %"]]), "dauerhaft auf Kartenk\xE4ufe");
-      h4 += regler("Anmeldepr\xE4mie f\xFCr 8 Wochen", segment("praemie", k5.anmeldeBis !== void 0 && k5.anmeldeBis > s2().woche ? k5.anmeldepraemie : 0, [[0, "keine"], [5, "5 \u20AC"], [10, "10 \u20AC"], [20, "20 \u20AC"]]), k5.anmeldeBis !== void 0 && k5.anmeldeBis > s2().woche ? `l\xE4uft bis ${wocheText(s2(), k5.anmeldeBis)}` : "Willkommensgutschein");
-      h4 += regler("Datenpflege je Woche", stepper2("daten", P5("ka:datenBudget", geld(k5.datenBudgetWoche))), "Adressen, Dubletten, Einwilligungen");
-      h4 += `<div class="regler"><small class="rfuss">Kosten je Woche: Punkte ${P5("ka:k:punkte", geld(k5.kostenWoche.punkte), "i")}, Stufen ${geld(k5.kostenWoche.stufen)}, Betrieb ${geld(k5.kostenWoche.betrieb)}, Daten ${geld(k5.kostenWoche.daten)}, Anmeldung ${geld(k5.kostenWoche.anmeldung)}, zusammen ${P5("ka:k:summe", geld(k5.kostenWoche.summe), "i")}</small></div></div>`;
-      h4 += `<div class="karte emkarte"><div class="mkopf" style="background:#8c5a7a"><b>${esc2(a2.name)}</b><small>${a2.relaunchBis !== void 0 && a2.relaunchBis > s2().woche ? `Relaunch bis ${wocheText(s2(), a2.relaunchBis)}` : "Coupons, Punkte, Push"}</small></div>`;
-      h4 += `<div class="owerte"><div><span>Downloads</span>${P5("ap:downloads", fmt.format(a2.downloads))}</div><div><span>aktive Nutzer</span>${P5("ap:aktiv", fmt.format(a2.aktiveNutzer))}</div><div><span>Push erlaubt</span>${P5("ap:push", pz3(a2.pushQuote))}</div></div>`;
-      h4 += `<div class="mzeile"><span>App-Qualit\xE4t</span><span class="mbalken"><span style="width:${(a2.qualitaet * 100).toFixed(0)}%;background:${a2.qualitaet < 0.3 ? "var(--hk-schlecht, #d23c32)" : "var(--hk-gut, #2f8f5b)"}"></span></span>${P5("ap:qualitaet", String(Math.round(a2.qualitaet * 100)))}</div>`;
-      h4 += regler("App-Budget je Woche", stepper2("appBudget", P5("ap:budget", geld(a2.budgetWoche))), "Pflege und Werbung f\xFCr Downloads");
-      h4 += schalter2(a2.appCoupons, 'data-a="appCoupons"', "Aktions-Coupons in der App", "holt Nutzer in die App");
-      h4 += `<div class="oknoepfe"><button data-a="relaunch"${a2.relaunchBis !== void 0 && a2.relaunchBis > s2().woche ? " disabled" : ""}>App-Relaunch beauftragen</button></div></div>`;
-      return { titel: "Hartwig Karte und App", unter: `${fmt.format(k5.mitglieder)} Mitglieder \xB7 ${pz3(k5.umsatzAnteil, 1)} vom Umsatz`, html: h4 };
+      const st2 = s2(), k5 = E9.kundenkarte(st2), a2 = k5.app;
+      const praemieLaeuft = k5.anmeldeBis !== void 0 && k5.anmeldeBis > st2.woche, relaunch = a2.relaunchBis !== void 0 && a2.relaunchBis > st2.woche;
+      const geldP = (key, x2) => x2 > 0 ? P5(key, geld(x2), "span") : P5(key, "0 \u20AC", "span");
+      const KACHELN = [
+        {
+          id: "punkte",
+          bild: SYMBOLE.kommentare,
+          titel: "Punkteprogramm",
+          stufe: k5.punkteSatz >= 0.01 ? "1 je 1 \u20AC" : k5.punkteSatz >= 5e-3 ? "1 je 2 \u20AC" : "1 je 4 \u20AC",
+          wert: geldP("ka:k:punkte", k5.kostenWoche.punkte),
+          an: true,
+          steuer: () => feld("Punkte je Euro", seg([[25e-4, "1 je 4 \u20AC"], [5e-3, "1 je 2 \u20AC"], [0.01, "1 je 1 \u20AC"]], k5.punkteSatz, (w2) => `data-a="punkte" data-v="${w2}"`)) + '<p class="hw-lese hw-g3-notiz">1 Punkt ist 1 Cent wert.</p>'
+        },
+        {
+          id: "stufen",
+          bild: SYMBOLE.etagen,
+          titel: "Silber und Gold",
+          stufe: k5.stufen ? "An" : "Aus",
+          wert: k5.stufen ? geld(k5.kostenWoche.stufen) : "0 \u20AC",
+          an: k5.stufen,
+          steuer: () => schalter({ text: "Statusstufen Silber und Gold", unter: "bindet Top-Kunden, Einf\xFChrung kostet einmalig", an: k5.stufen, attr: 'data-a="stufen"' })
+        },
+        {
+          id: "rabatt",
+          bild: SYMBOLE.kosten,
+          titel: "Kartenrabatt",
+          stufe: k5.kartenrabatt ? pz3(k5.kartenrabatt) : "kein",
+          wert: k5.kartenrabatt ? pz3(k5.kartenrabatt) : "0 %",
+          einheit: "auf Kartenk\xE4ufe",
+          an: k5.kartenrabatt > 0,
+          steuer: () => feld("Dauerhafter Rabatt", seg([[0, "kein"], [0.02, "2 %"], [0.03, "3 %"], [0.05, "5 %"]], k5.kartenrabatt, (w2) => `data-a="kartenrabatt" data-v="${w2}"`))
+        },
+        {
+          id: "praemie",
+          bild: SYMBOLE.post,
+          titel: "Anmeldepr\xE4mie",
+          stufe: praemieLaeuft ? `bis ${wocheText(st2, k5.anmeldeBis)}` : "keine",
+          wert: praemieLaeuft ? geld(k5.kostenWoche.anmeldung) : "0 \u20AC",
+          an: praemieLaeuft,
+          steuer: () => feld("Willkommensgutschein f\xFCr 8 Wochen", seg([[0, "keine"], [5, "5 \u20AC"], [10, "10 \u20AC"], [20, "20 \u20AC"]], praemieLaeuft ? k5.anmeldepraemie : 0, (w2) => `data-a="praemie" data-v="${w2}"`))
+        },
+        {
+          id: "daten",
+          bild: SYMBOLE.zahlen,
+          titel: "Datenpflege",
+          stufe: `Qualit\xE4t ${Math.round(k5.datenqualitaet * 100)}`,
+          wert: P5("ka:datenBudget", geld(k5.datenBudgetWoche), "span"),
+          an: k5.datenBudgetWoche > 0,
+          steuer: () => feld("Datenpflege je Woche", stepper({ wert: geld(k5.datenBudgetWoche), unter: "Adressen, Dubletten, Einwilligungen", label: "Datenpflege", attrMinus: 'data-a="daten" data-v="-1"', attrPlus: 'data-a="daten" data-v="1"', minusAus: k5.datenBudgetWoche <= 0 })) + skalaGross("Datenqualit\xE4t", k5.datenqualitaet * 100, P5("ka:daten", String(Math.round(k5.datenqualitaet * 100)), "b", ' class="hw-skala-wert"')) + '<p class="hw-lese hw-g3-notiz">Bessere Daten machen CRM-Kampagnen treffsicherer.</p>'
+        },
+        {
+          id: "betrieb",
+          bild: SYMBOLE.personal,
+          titel: "Kartenbetrieb",
+          stufe: `${fmt.format(k5.mitglieder)} Mitglieder`,
+          wert: geld(k5.kostenWoche.betrieb),
+          an: true,
+          steuer: () => liste([
+            zeile({ was: "Mitglieder", wert: P5("ka:mitglieder", fmt.format(k5.mitglieder), "span") }),
+            zeile({ was: "davon aktiv", wert: P5("ka:aktiv", pz3(k5.aktivQuote), "span") }),
+            zeile({ was: "neu je Woche", wert: P5("ka:neu", fmt.format(k5.neuWoche), "span") }),
+            zeile({ was: "Abg\xE4nge je Woche", wert: P5("ka:ab", fmt.format(k5.abgaengeWoche), "span") }),
+            zeile({ was: "Mail-Einwilligung", wert: P5("ka:mail", pz3(k5.mailQuote), "span") })
+          ])
+        },
+        {
+          id: "app",
+          bild: motiv2("social"),
+          titel: "Hartwig App",
+          stufe: relaunch ? "Relaunch l\xE4uft" : `Qualit\xE4t ${Math.round(a2.qualitaet * 100)}`,
+          wert: P5("ap:budget", geld(a2.budgetWoche), "span"),
+          an: a2.budgetWoche > 0,
+          steuer: () => feld("App-Budget je Woche", stepper({ wert: geld(a2.budgetWoche), unter: "Pflege und Werbung f\xFCr Downloads", label: "App-Budget", attrMinus: 'data-a="appBudget" data-v="-1"', attrPlus: 'data-a="appBudget" data-v="1"', minusAus: a2.budgetWoche <= 0 })) + skalaGross("App-Qualit\xE4t", a2.qualitaet * 100, P5("ap:qualitaet", String(Math.round(a2.qualitaet * 100)), "b", ` class="hw-skala-wert${a2.qualitaet < 0.3 ? " hw-schlecht" : ""}"`)) + liste([zeile({ was: "Downloads", wert: P5("ap:downloads", fmt.format(a2.downloads), "span") }), zeile({ was: "aktive Nutzer", wert: P5("ap:aktiv", fmt.format(a2.aktiveNutzer), "span") }), zeile({ was: "Push erlaubt", wert: P5("ap:push", pz3(a2.pushQuote), "span") })]) + knoepfe(knopf(relaunch ? `Relaunch bis ${wocheText(st2, a2.relaunchBis)}` : "App-Relaunch beauftragen", 'data-a="relaunch"', "zweit breit", relaunch))
+        },
+        {
+          id: "coupons",
+          bild: motiv2("online"),
+          titel: "App-Coupons",
+          stufe: a2.appCoupons ? "An" : "Aus",
+          wert: a2.appCoupons ? "An" : "Aus",
+          einheit: "bei Aktionen",
+          an: a2.appCoupons,
+          steuer: () => schalter({ text: "Aktions-Coupons in der App", unter: "holt Nutzer in die App", an: a2.appCoupons, attr: 'data-a="appCoupons"' })
+        }
+      ];
+      const g2 = ui.kachel >= 0 && ui.kachel < KACHELN.length ? ui.kachel : -1;
+      let h4 = gross2([
+        { label: "Kosten Karte je Woche", wert: merke2(P5, "ka:k:summe", geld(k5.kostenWoche.summe)), p: "ka:k:summe", unter: `Umsatzanteil ${P5("ka:anteil", pz3(k5.umsatzAnteil, 1), "span")}` },
+        { label: "App je Woche", wert: geld(a2.kostenWoche), unter: `${fmt.format(a2.aktiveNutzer)} aktive Nutzer` }
+      ]);
+      h4 += abschnitt("Kundenbindung", "Kachel antippen");
+      h4 += kachelRaster(KACHELN.map((x2, i) => kachel({ bild: x2.bild, titel: x2.titel, stufe: x2.stufe, wert: x2.wert, einheit: x2.einheit ?? "je Woche", an: i === g2, attr: `data-a="kachel" data-v="${i}" aria-label="${esc2(x2.titel)} einstellen"` })), g2, g2 >= 0 ? KACHELN[g2].steuer() : "");
+      const befund2 = k5.datenqualitaet < 0.5 ? `Die Kartendaten sind l\xFCckenhaft (Qualit\xE4t ${Math.round(k5.datenqualitaet * 100)}). CRM trifft schlechter.` : `${fmt.format(k5.mitglieder)} Mitglieder bringen ${pz3(k5.umsatzAnteil, 1)} vom Umsatz.`;
+      return { titel: "Hartwig Karte und App", unter: `${pz3(k5.umsatzAnteil, 1)} vom Umsatz mit Karte`, befund: befund2, ton: k5.datenqualitaet < 0.5 ? "engpass" : "", html: rumpf2(h4) };
     }
     function crm(P5) {
       const c = E9.crmKampagnen(s2()), B8 = ui.crm;
-      let h4 = tabs();
-      h4 += `<div class="raster">${kz("Erreichbar per Mail", P5("c:mail", fmt.format(c.pools.mail)))}${kz("Erreichbar per Push", P5("c:push", fmt.format(c.pools.push)))}${kz("Erreichbar per Brief", P5("c:brief", fmt.format(c.pools.brief)))}${kz("Erm\xFCdung Mail", P5("c:ermuedung", pz3(c.ermuedung.mail ?? 0)), (c.ermuedung.mail ?? 0) > 0.5 ? "rot" : "")}</div>`;
-      h4 += '<div class="karte steuerung"><div class="khead">Neue Kampagne</div>';
-      h4 += regler("Segment", `<select class="ort gross" data-a="crmSeg">${c.segmente.map((x2, i) => `<option value="${i}"${i === B8.seg ? " selected" : ""}>${esc2(x2.text)} (${fmt.format(x2.groesse)})</option>`).join("")}</select>`);
-      h4 += regler("Kanal", segment("crmKanal", B8.kanal, KANAL2));
-      h4 += regler("Angebot", segment("crmAngebot", B8.angebot, ANGEBOT));
-      if (B8.angebot === "coupon") h4 += `<div class="regler">${segment("crmProzent", B8.prozent, [[0.1, "10 %"], [0.15, "15 %"], [0.2, "20 %"], [0.25, "25 %"]])}<div style="height:6px"></div>${segment("crmMindestbon", B8.mindestbon, [[0, "ohne Mindestbon"], [40, "ab 40 \u20AC"], [80, "ab 80 \u20AC"]])}</div>`;
-      if (B8.angebot === "punkte") h4 += `<div class="regler">${segment("crmFaktor", B8.faktor, [[2, "2-fach"], [3, "3-fach"], [5, "5-fach"], [10, "10-fach"]])}</div>`;
-      if (B8.angebot === "zugabe") h4 += `<div class="regler">${segment("crmWert", B8.wert, [[5, "5 \u20AC"], [10, "10 \u20AC"], [20, "20 \u20AC"]])}</div>`;
-      h4 += regler("Frequenz", segment("crmFrequenz", B8.frequenz, FREQUENZ));
-      if (B8.frequenz !== "einmalig") h4 += regler("Laufzeit", segment("crmWochen", B8.wochen, [[4, "4 Wo."], [8, "8 Wo."], [13, "13 Wo."], [26, "26 Wo."]]));
-      h4 += schalter2(B8.kontrolle, 'data-a="crmKontrolle"', "Kontrollgruppe (10 % ohne Versand)", "macht die Auswertung genauer");
-      h4 += '<div class="oknoepfe"><button class="gruen" data-a="crmStart">Kampagne starten</button></div></div>';
+      const segment2 = c.segmente[B8.seg] ?? c.segmente[0];
+      let h4 = gross2([
+        { label: "per Mail", wert: merke2(P5, "c:mail", fmt.format(c.pools.mail)), p: "c:mail" },
+        { label: "per Push", wert: merke2(P5, "c:push", fmt.format(c.pools.push)), p: "c:push" },
+        { label: "per Brief", wert: merke2(P5, "c:brief", fmt.format(c.pools.brief)), p: "c:brief" }
+      ]);
+      h4 += skalaGross("Erm\xFCdung Mail", (c.ermuedung.mail ?? 0) * 100, P5("c:ermuedung", pz3(c.ermuedung.mail ?? 0), "b", ` class="hw-skala-wert${(c.ermuedung.mail ?? 0) > 0.5 ? " hw-schlecht" : ""}"`));
+      h4 += abschnitt("Neue Kampagne");
+      h4 += feld("Segment", stepper({ wert: segment2?.text ?? "Alle", unter: segment2 ? `${fmt.format(segment2.groesse)} Mitglieder` : "", label: "Segment w\xE4hlen", attrMinus: 'data-a="crmSeg" data-v="-1"', attrPlus: 'data-a="crmSeg" data-v="1"' }));
+      h4 += '<div class="hw-abstand"></div>' + feld("Kanal", seg(KANAL2, B8.kanal, (w2) => `data-a="crmKanal" data-v="${w2}"`));
+      h4 += '<div class="hw-abstand"></div>' + feld("Angebot", seg(ANGEBOT, B8.angebot, (w2) => `data-a="crmAngebot" data-v="${w2}"`));
+      if (B8.angebot === "coupon") h4 += '<div class="hw-abstand"></div>' + feld("Coupon", seg([[0.1, "10 %"], [0.15, "15 %"], [0.2, "20 %"], [0.25, "25 %"]], B8.prozent, (w2) => `data-a="crmProzent" data-v="${w2}"`)) + '<div class="hw-abstand"></div>' + feld("Mindestbon", seg([[0, "ohne"], [40, "ab 40 \u20AC"], [80, "ab 80 \u20AC"]], B8.mindestbon, (w2) => `data-a="crmMindestbon" data-v="${w2}"`));
+      if (B8.angebot === "punkte") h4 += '<div class="hw-abstand"></div>' + feld("Mehrfachpunkte", seg([[2, "2-fach"], [3, "3-fach"], [5, "5-fach"], [10, "10-fach"]], B8.faktor, (w2) => `data-a="crmFaktor" data-v="${w2}"`));
+      if (B8.angebot === "zugabe") h4 += '<div class="hw-abstand"></div>' + feld("Gratiszugabe", seg([[5, "5 \u20AC"], [10, "10 \u20AC"], [20, "20 \u20AC"]], B8.wert, (w2) => `data-a="crmWert" data-v="${w2}"`));
+      h4 += '<div class="hw-abstand"></div>' + feld("Frequenz", stepper({ wert: FREQUENZ.find(([v2]) => v2 === B8.frequenz)?.[1] ?? B8.frequenz, label: "Frequenz", attrMinus: 'data-a="crmFrequenz" data-v="-1"', attrPlus: 'data-a="crmFrequenz" data-v="1"' }));
+      if (B8.frequenz !== "einmalig") h4 += '<div class="hw-abstand"></div>' + feld("Laufzeit", seg([[4, "4 Wo."], [8, "8 Wo."], [13, "13 Wo."], [26, "26 Wo."]], B8.wochen, (w2) => `data-a="crmWochen" data-v="${w2}"`));
+      h4 += schalter({ text: "Kontrollgruppe, 10 % ohne Versand", unter: "macht die Auswertung genauer", an: B8.kontrolle, attr: 'data-a="crmKontrolle"' });
+      h4 += knoepfe(knopf("Kampagne starten", 'data-a="crmStart"', "breit"));
       const liste3 = [...c.kampagnen].sort((a2, b4) => (a2.status === "aktiv" ? -1 : 0) - (b4.status === "aktiv" ? -1 : 0) || b4.start - a2.start);
       for (const k5 of liste3) {
-        h4 += `<div class="karte order"><div class="ohead"><b>${esc2(k5.name)}</b><i>${esc2(k5.segmentText)} \xB7 ${k5.kanalText} \xB7 ${esc2(k5.angebotText)} \xB7 ${esc2(k5.frequenzText)}</i></div>`;
-        h4 += `<div class="ochips"><span class="chip ${k5.status === "aktiv" ? "" : "grau"}">${STATUS2[k5.status] ?? k5.status}</span>${k5.standard ? '<span class="chip grau">Grundprogramm</span>' : ""}${k5.kontrollgruppe ? '<span class="chip blau">mit Kontrollgruppe</span>' : ""}${k5.naechsterVersand !== void 0 ? `<span class="chip grau">n\xE4chster Versand KW ${kwVon2(k5.naechsterVersand)}</span>` : ""}</div>`;
         const z6 = k5.summe;
-        h4 += `<div class="owerte"><div><span>Versendet</span>${P5(`c:${k5.id}:versendet`, fmt.format(z6.versendet))}</div><div><span>\xD6ffnung</span>${P5(`c:${k5.id}:oeffnung`, pz3(z6.oeffnungsrate, 1))}</div><div><span>Einl\xF6sung</span>${P5(`c:${k5.id}:einloesung`, pz3(z6.einloesequote, 1))}</div></div>`;
-        if (k5.auswertung) h4 += `<div class="owerte"><div><span>Mehrumsatz</span>${P5(`c:${k5.id}:mehr`, `${geld(k5.auswertung.mehrumsatzVon)} bis ${geld(k5.auswertung.mehrumsatzBis)}`)}</div><div><span>Ergebnis</span>${P5(`c:${k5.id}:ergebnis`, geld(k5.auswertung.ergebnis), "b", k5.auswertung.ergebnis < 0 ? ' class="rotwert"' : "")}</div><div><span>Abmeldungen</span>${P5(`c:${k5.id}:ab`, fmt.format(z6.abmeldungen))}</div></div><div class="olief">${esc2(k5.auswertung.hinweis)}</div>`;
-        if (k5.status === "aktiv" || k5.status === "geplant") h4 += `<div class="oknoepfe"><button class="rot" data-a="crmStopp" data-v="${k5.id}">Stoppen</button></div>`;
-        h4 += "</div>";
+        h4 += abschnitt(k5.name, STATUS2[k5.status] ?? k5.status);
+        h4 += `<p class="hw-lese hw-g3-notiz">${esc2(k5.segmentText)} \xB7 ${esc2(k5.kanalText)} \xB7 ${esc2(k5.angebotText)} \xB7 ${esc2(k5.frequenzText)}${k5.standard ? " \xB7 Grundprogramm" : ""}${k5.kontrollgruppe ? " \xB7 mit Kontrollgruppe" : ""}${k5.naechsterVersand !== void 0 ? ` \xB7 n\xE4chster Versand KW ${kwVon2(k5.naechsterVersand)}` : ""}</p>`;
+        const zeilen = [zeile({ was: "Versendet", wert: P5(`c:${k5.id}:versendet`, fmt.format(z6.versendet), "span") }), zeile({ was: "\xD6ffnung", wert: P5(`c:${k5.id}:oeffnung`, pz3(z6.oeffnungsrate, 1), "span") }), zeile({ was: "Einl\xF6sung", wert: P5(`c:${k5.id}:einloesung`, pz3(z6.einloesequote, 1), "span") })];
+        if (k5.auswertung) zeilen.push(
+          zeile({ was: "Mehrumsatz", wert: P5(`c:${k5.id}:mehr`, `${geld(k5.auswertung.mehrumsatzVon)} bis ${geld(k5.auswertung.mehrumsatzBis)}`, "span") }),
+          zeile({ was: "Ergebnis", wert: P5(`c:${k5.id}:ergebnis`, geld(k5.auswertung.ergebnis), "span"), ton: k5.auswertung.ergebnis < 0 ? "schlecht" : "gut" }),
+          zeile({ was: "Abmeldungen", wert: P5(`c:${k5.id}:ab`, fmt.format(z6.abmeldungen), "span") })
+        );
+        h4 += liste(zeilen);
+        if (k5.auswertung) h4 += hinweis(esc2(k5.auswertung.hinweis));
+        if (k5.status === "aktiv" || k5.status === "geplant") h4 += knoepfe(knopf("Kampagne stoppen", `data-a="crmStopp" data-v="${esc2(k5.id)}"`, "zweit"));
       }
-      return { titel: "CRM-Kampagnen", unter: `${c.kampagnen.filter((k5) => k5.status === "aktiv").length} aktiv \xB7 Datenqualit\xE4t ${Math.round(c.datenqualitaet * 100)}`, html: h4 };
+      const aktiv7 = c.kampagnen.filter((k5) => k5.status === "aktiv").length;
+      return { titel: "CRM-Kampagnen", unter: `${aktiv7} aktiv \xB7 Datenqualit\xE4t ${Math.round(c.datenqualitaet * 100)}`, befund: (c.ermuedung.mail ?? 0) > 0.5 ? `Mail-Erm\xFCdung ${pz3(c.ermuedung.mail)}: \xD6ffnungen sinken, Abmeldungen steigen.` : `${aktiv7} Kampagnen laufen. Per Mail erreichen wir ${fmt.format(c.pools.mail)} Mitglieder.`, ton: (c.ermuedung.mail ?? 0) > 0.5 ? "engpass" : "", html: rumpf2(h4) };
     }
-    function zeitleiste(K3, P5) {
-      const W3 = 340, L3 = 6, B8 = (W3 - L3 * 2) / 52, zeilen = [];
-      const balken8 = [];
-      for (const a2 of K3.eintraege) {
-        const von = Math.max(0, a2.start - (K3.jahr - s2().startJahr) * 52), bis = Math.min(52, a2.ende - (K3.jahr - s2().startJahr) * 52);
+    function zeitleiste(Kal) {
+      const W3 = 350, L3 = 2, B8 = (W3 - L3 * 2) / 52, zeilen = [], balken8 = [];
+      for (const a2 of Kal.eintraege) {
+        const von = Math.max(0, a2.start - (Kal.jahr - s2().startJahr) * 52), bis = Math.min(52, a2.ende - (Kal.jahr - s2().startJahr) * 52);
         let z6 = zeilen.findIndex((e) => e <= von);
         if (z6 < 0) {
           z6 = zeilen.length;
@@ -165048,90 +165201,109 @@ void main() {
         zeilen[z6] = bis + 0.4;
         balken8.push({ a: a2, von, bis, z: z6 });
       }
-      const RH = 26, H = 24 + Math.max(1, zeilen.length) * RH + 18;
-      let g2 = `<svg class="zeitleiste" viewBox="0 0 ${W3} ${H}" width="100%">`;
+      const RH = 24, H = 22 + Math.max(1, zeilen.length) * RH + 16;
+      let g2 = `<svg class="hw-g3-zeitleiste" viewBox="0 0 ${W3} ${H}" role="img" aria-label="Aktionen im Jahr ${Kal.jahr}">`;
       for (let m = 0; m < 12; m++) {
         const x2 = L3 + m * 52 / 12 * B8;
-        g2 += `<line x1="${x2}" x2="${x2}" y1="16" y2="${H}" stroke="var(--ui-border, #ece8e1)"/><text x="${x2 + 2}" y="12" font-size="12" fill="var(--ui-muted, #7b8790)">${MONATE[m].slice(0, 1)}</text>`;
+        g2 += `<line x1="${x2.toFixed(1)}" x2="${x2.toFixed(1)}" y1="16" y2="${H}" class="hw-g3-linie"/><text x="${(x2 + 3).toFixed(1)}" y="11" class="hw-g3-monat">${MONATE[m]}</text>`;
       }
       for (const { a: a2, von, bis, z: z6 } of balken8) {
         const x2 = L3 + von * B8, w2 = Math.max(3, (bis - von) * B8 - 1), y2 = 20 + z6 * RH;
-        g2 += `<g data-a="aktion" data-v="${a2.id}" class="klickbar"><rect x="${x2}" y="${y2}" width="${w2}" height="${RH - 4}" rx="4" fill="${STATUS_FARBE[a2.status]}"${a2.status === "abgesagt" ? ' stroke="#b9b2a6" stroke-dasharray="2 2"' : ""}/>${w2 > 6.5 * a2.name.length + 8 ? `<text x="${x2 + 4}" y="${y2 + 15}" font-size="12" font-weight="700" fill="#14202a">${esc2(a2.name)}</text>` : ""}</g>`;
+        g2 += `<rect x="${x2.toFixed(1)}" y="${y2}" width="${w2.toFixed(1)}" height="${RH - 6}" rx="5" class="hw-g3-akt-${a2.status}"/>`;
       }
-      const jetzt = s2().woche - (K3.jahr - s2().startJahr) * 52;
+      const jetzt = s2().woche - (Kal.jahr - s2().startJahr) * 52;
       if (jetzt >= 0 && jetzt < 52) {
         const x2 = L3 + (jetzt + 0.5) * B8;
-        g2 += `<line x1="${x2}" x2="${x2}" y1="14" y2="${H}" stroke="#d23c32" stroke-width="1.5"/><text x="${Math.min(W3 - 40, x2 + 3)}" y="${H - 3}" font-size="12" fill="#ef6f62" font-weight="700">KW ${K3.kw}</text>`;
+        g2 += `<line x1="${x2.toFixed(1)}" x2="${x2.toFixed(1)}" y1="14" y2="${H}" class="hw-g3-jetzt"/>`;
       }
       return g2 + "</svg>";
     }
     function kalender(P5) {
       const st2 = s2(), jahr0 = st2.startJahr + Math.floor(st2.woche / 52);
       ui.jahr ?? (ui.jahr = jahr0);
-      const K3 = E9.aktionskalender(st2, ui.jahr);
-      let h4 = tabs();
-      h4 += segment("jahr", ui.jahr, [[jahr0, String(jahr0)], [jahr0 + 1, String(jahr0 + 1)]]);
-      h4 += '<div class="q31">';
-      h4 += `<div class="q-buch q-kalender"><div class="q-buch-kopf"><span>Kampagnenkalender ${K3.jahr}</span><b>Balken antippen</b></div><div style="padding:4px 8px 8px">${zeitleiste(K3, P5)}</div>
-      <div class="legende" style="padding:0 14px 10px">${["geplant", "laufend", "beendet"].map((x2) => `<span class="ampel" style="background:${STATUS_FARBE[x2]}"></span> ${STATUS2[x2]}`).join("  ")}</div></div>`;
-      h4 += '<button class="q-haupt-akt" data-a="planen">+ Aktion planen</button>';
-      if (ui.planen) h4 += planenKarte(K3);
-      h4 += '<div class="q-buch"><div class="q-buch-kopf"><span>Aktionsbuch</span><b>Wochen \xB7 Status</b></div>';
-      for (const a2 of K3.eintraege) h4 += `<button class="zeile q-zeile q-tipp" data-a="aktion" data-v="${a2.id}"><span class="q-name">${esc2(a2.name)}<small>${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""} \xB7 ${esc2(a2.scopeText)}</small></span><span class="q-wert">KW ${a2.startKw}${a2.wochen > 1 ? ` bis ${a2.endeKw}` : ""}<small>${P5(`kal:${a2.id}:status`, STATUS2[a2.status], "span")}</small></span></button>`;
-      if (!K3.eintraege.length) h4 += '<div class="q-leer"><b>Keine Aktion in diesem Jahr.</b>Plane die erste \xFCber den Knopf oben.</div>';
-      h4 += "</div></div>";
-      for (const r4 of K3.raeumungen) h4 += `<div class="olief">${esc2(r4.name)}: ${esc2(r4.text)}</div>`;
-      return { titel: "Aktionskalender", unter: `${K3.jahr} \xB7 ${K3.eintraege.filter((a2) => a2.status !== "abgesagt").length} Aktionen \xB7 KW ${K3.kw}`, html: h4 };
+      const Kal = E9.aktionskalender(st2, ui.jahr);
+      let h4 = seg([[jahr0, String(jahr0)], [jahr0 + 1, String(jahr0 + 1)]], ui.jahr, (w2) => `data-a="jahr" data-v="${w2}"`);
+      h4 += abschnitt(`Kampagnenkalender ${Kal.jahr}`, `KW ${Kal.kw}`);
+      h4 += zeitleiste(Kal);
+      h4 += `<div class="hw-legende">${["geplant", "laufend", "beendet"].map((x2) => `<span><i class="hw-g3-akt-${x2}"></i>${STATUS2[x2]}</span>`).join("")}</div>`;
+      h4 += knoepfe(knopf(ui.planen ? "Planung schlie\xDFen" : "Aktion planen", 'data-a="planen"', ui.planen ? "zweit breit" : "breit"));
+      if (ui.planen) h4 += planen2(Kal);
+      h4 += abschnitt("Aktionsbuch", "Wochen \xB7 Status");
+      h4 += Kal.eintraege.length ? liste(Kal.eintraege.map((a2) => zeile({
+        was: esc2(a2.name),
+        unter: `${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""} \xB7 ${esc2(a2.scopeText)}`,
+        wert: `KW ${a2.startKw}${a2.wochen > 1 ? ` bis ${a2.endeKw}` : ""}`,
+        wertUnter: P5(`kal:${a2.id}:status`, STATUS2[a2.status], "span"),
+        tippbar: true,
+        attr: `data-a="aktion" data-v="${esc2(a2.id)}"`
+      }))) : leer3("Plane die erste \xFCber den Knopf oben.", "Keine Aktion in diesem Jahr.");
+      for (const r4 of Kal.raeumungen) h4 += hinweis(`${esc2(r4.name)}: ${esc2(r4.text)}`);
+      const n3 = Kal.eintraege.filter((a2) => a2.status !== "abgesagt").length, laeuft2 = Kal.eintraege.find((a2) => a2.status === "laufend");
+      return { titel: "Aktionskalender", unter: `${Kal.jahr} \xB7 ${n3} Aktionen`, befund: laeuft2 ? `${esc2(laeuft2.name)} l\xE4uft bis KW ${laeuft2.endeKw}. ${n3} Aktionen im Jahr ${Kal.jahr}.` : `Gerade l\xE4uft keine Aktion. ${n3} Aktionen im Jahr ${Kal.jahr}.`, html: rumpf2(h4) };
     }
-    function planenKarte(K3) {
-      const p2 = ui.planen, an = K3.anlaesse.find((x2) => x2.id === p2.anlass);
-      let h4 = '<div class="karte steuerung"><div class="khead">Neue Aktion</div>';
-      h4 += regler("Anlass", `<select class="ort gross" data-a="planAnlass">${K3.anlaesse.filter((x2) => x2.id !== "raeumung").map((x2) => `<option value="${x2.id}"${x2.id === p2.anlass ? " selected" : ""}>${esc2(x2.name)} (KW ${x2.kw})</option>`).join("")}</select>`);
-      h4 += regler("Mechanik", `<select class="ort gross" data-a="planMechanik">${K3.mechaniken.map((m) => `<option value="${m.id}"${m.id === p2.mechanik ? " selected" : ""}>${esc2(m.text)}</option>`).join("")}</select>`, an?.bereiche ? `Bereiche: ${an.bereiche.length}` : "");
-      if (!["punkte", "staffel"].includes(p2.mechanik)) h4 += regler("Rabatt", segment("planRabatt", p2.rabatt, [[0.1, "10 %"], [0.15, "15 %"], [0.2, "20 %"], [0.3, "30 %"], [0.4, "40 %"]]));
-      if (p2.mechanik === "punkte") h4 += regler("Punkte", segment("planPunkte", p2.punkteFaktor, [[3, "3-fach"], [5, "5-fach"], [10, "10-fach"]]));
-      h4 += regler("Start", stepper2("planKw", `<b>KW ${p2.kw} / ${p2.jahr}</b>`), "Kalenderwoche");
-      h4 += regler("Dauer", segment("planWochen", p2.wochen, [[1, "1 Woche"], [2, "2 Wochen"], [3, "3 Wochen"], [4, "4 Wochen"]]));
-      h4 += regler("Sonderwerbung", segment("planWerbung", p2.sonderwerbung, [[0, "keine"], [25e4, "250 Tsd. \u20AC"], [75e4, "750 Tsd. \u20AC"], [15e5, "1,5 Mio. \u20AC"]]), "Beilage, Spots");
-      h4 += schalter2(p2.kontrolle, 'data-a="planKontrolle"', "5 Kontrollh\xE4user ohne Aktion", "genauere Auswertung, etwas weniger Umsatz");
-      h4 += '<div class="oknoepfe"><button class="gruen" data-a="planFertig">Aktion einplanen</button><button class="leise" data-a="planZu">Abbrechen</button></div></div>';
+    function planen2(Kal) {
+      const p2 = ui.planen, anl = Kal.anlaesse.filter((x2) => x2.id !== "raeumung"), an = anl.find((x2) => x2.id === p2.anlass);
+      const mech2 = Kal.mechaniken.find((m) => m.id === p2.mechanik);
+      let h4 = abschnitt("Neue Aktion");
+      h4 += feld("Anlass", stepper({ wert: an?.name ?? p2.anlass, unter: an ? `\xFCblich KW ${an.kw}${an.bereiche ? ` \xB7 ${an.bereiche.length} Bereiche` : ""}` : "", label: "Anlass", attrMinus: 'data-a="planAnlass" data-v="-1"', attrPlus: 'data-a="planAnlass" data-v="1"' }));
+      h4 += '<div class="hw-abstand"></div>' + feld("Mechanik", stepper({ wert: mech2?.text ?? p2.mechanik, label: "Mechanik", attrMinus: 'data-a="planMechanik" data-v="-1"', attrPlus: 'data-a="planMechanik" data-v="1"' }));
+      if (!["punkte", "staffel"].includes(p2.mechanik)) h4 += '<div class="hw-abstand"></div>' + feld("Rabatt", seg([[0.1, "10 %"], [0.15, "15 %"], [0.2, "20 %"], [0.3, "30 %"], [0.4, "40 %"]], p2.rabatt, (w2) => `data-a="planRabatt" data-v="${w2}"`));
+      if (p2.mechanik === "punkte") h4 += '<div class="hw-abstand"></div>' + feld("Punkte", seg([[3, "3-fach"], [5, "5-fach"], [10, "10-fach"]], p2.punkteFaktor, (w2) => `data-a="planPunkte" data-v="${w2}"`));
+      h4 += '<div class="hw-abstand"></div>' + feld("Start", stepper({ wert: `KW ${p2.kw} / ${p2.jahr}`, label: "Startwoche", attrMinus: 'data-a="planKw" data-v="-1"', attrPlus: 'data-a="planKw" data-v="1"' }));
+      h4 += '<div class="hw-abstand"></div>' + feld("Dauer", seg([[1, "1 Wo."], [2, "2 Wo."], [3, "3 Wo."], [4, "4 Wo."]], p2.wochen, (w2) => `data-a="planWochen" data-v="${w2}"`));
+      h4 += '<div class="hw-abstand"></div>' + feld("Sonderwerbung", seg([[0, "keine"], [25e4, "250 Tsd."], [75e4, "750 Tsd."], [15e5, "1,5 Mio."]], p2.sonderwerbung, (w2) => `data-a="planWerbung" data-v="${w2}"`));
+      h4 += schalter({ text: "5 Kontrollh\xE4user ohne Aktion", unter: "genauere Auswertung, etwas weniger Umsatz", an: p2.kontrolle, attr: 'data-a="planKontrolle"' });
+      h4 += knoepfe(knopf("Aktion einplanen", 'data-a="planFertig"'), knopf("Abbrechen", 'data-a="planZu"', "zweit"));
       return h4;
     }
     function aktion2(P5) {
-      const st2 = s2(), a2 = E9.aktionsAuswertung(st2, ui.aktion);
+      const a2 = E9.aktionsAuswertung(s2(), ui.aktion);
       if (!a2) {
         ui.seite = "kalender";
         return kalender(P5);
       }
-      let h4 = tabs() + '<button class="zurueck" data-a="seite" data-v="kalender">\u2039 Kalender</button>';
-      h4 += `<div class="karte order"><div class="ohead"><b>${esc2(a2.name)}</b><i>${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""}${a2.bereicheText?.length ? ` auf ${a2.bereicheText.map(esc2).join(", ")}` : ""}</i></div>`;
-      h4 += `<div class="ochips"><span class="chip ${a2.status === "laufend" ? "" : "grau"}">${STATUS2[a2.status]}</span><span class="chip grau">KW ${a2.startKw}${a2.wochen > 1 ? ` bis ${a2.endeKw}` : ""} / ${a2.jahr}</span><span class="chip grau">${esc2(a2.scopeText)}</span>${a2.sonderwerbung ? `<span class="chip blau">Sonderwerbung ${geld(a2.sonderwerbung)}</span>` : ""}</div>`;
-      if (!a2.gemessen) h4 += `<div class="olief">${esc2(a2.text)}</div>`;
+      let h4 = abschnitt(a2.name, STATUS2[a2.status]);
+      h4 += `<p class="hw-lese hw-g3-notiz">${esc2(a2.mechanikText)}${a2.rabatt ? ` ${pz3(a2.rabatt)}` : ""}${a2.bereicheText?.length ? ` auf ${a2.bereicheText.map(esc2).join(", ")}` : ""}</p>`;
+      h4 += liste([
+        zeile({ was: "Zeitraum", wert: `KW ${a2.startKw}${a2.wochen > 1 ? ` bis ${a2.endeKw}` : ""} / ${a2.jahr}` }),
+        zeile({ was: "Geltung", wert: esc2(a2.scopeText) }),
+        zeile({ was: "Sonderwerbung", wert: a2.sonderwerbung ? geld(a2.sonderwerbung) : "keine" })
+      ]);
+      if (!a2.gemessen) h4 += hinweis(esc2(a2.text));
       else {
-        h4 += `<div class="owerte"><div><span>Mehrumsatz</span>${P5("a:mehr", `${geld(a2.mehrumsatzVon)} bis ${geld(a2.mehrumsatzBis)}`)}</div><div><span>Rohertragseffekt</span>${P5("a:roh", `${geld(a2.rohertragseffektVon)} bis ${geld(a2.rohertragseffektBis)}`)}</div><div><span>Ergebnis</span>${P5("a:ergebnis", geld(a2.ergebnis), "b", a2.ergebnis < 0 ? ' class="rotwert"' : "")}</div></div>`;
-        h4 += `<div class="owerte"><div><span>Rabattkosten</span>${P5("a:rabatt", geld(a2.rabattkosten))}</div><div><span>Mitnahme</span>${P5("a:mitnahme", geld(a2.mitnahme))}</div><div><span>Vorzieheffekt</span>${P5("a:vorzieh", geld(a2.vorzieheffekt))}</div><div><span>Kannibalisierung</span>${P5("a:kanni", geld(a2.kannibalisierung))}</div><div><span>Altwarenabbau</span>${P5("a:altware", geld(a2.altwarenabbau))}</div><div><span>Image</span>${P5("a:image", `${a2.image >= 0 ? "+" : ""}${dez(a2.image, 1)}`)}</div></div>`;
-        h4 += `<div class="olief">Genauigkeit ${esc2(a2.genauigkeit)}${a2.kontrollHaeuser ? ` \xB7 ${a2.kontrollHaeuser} Kontrollh\xE4user` : ""}${a2.hinweis ? ` \xB7 ${esc2(a2.hinweis)}` : ""}${a2.marketingBericht ? ` \xB7 Marketing meldete ${geld(a2.marketingBericht)}` : ""}</div>`;
+        h4 += gross2([{ label: "Ergebnis", wert: merke2(P5, "a:ergebnis", geld(a2.ergebnis)), p: "a:ergebnis", ton: a2.ergebnis < 0 ? "schlecht" : "gut", unter: `Image ${P5("a:image", `${a2.image >= 0 ? "+" : "\u2212"}${dez(Math.abs(a2.image), 1)}`, "span")}` }]);
+        h4 += abschnitt("Wirkung", "Spanne");
+        h4 += liste([zeile({ was: "Mehrumsatz", wert: P5("a:mehr", `${geld(a2.mehrumsatzVon)} bis ${geld(a2.mehrumsatzBis)}`, "span") }), zeile({ was: "Rohertragseffekt", wert: P5("a:roh", `${geld(a2.rohertragseffektVon)} bis ${geld(a2.rohertragseffektBis)}`, "span") })]);
+        h4 += abschnitt("Kosten der Aktion");
+        h4 += liste([
+          zeile({ was: "Rabattkosten", wert: P5("a:rabatt", geld(a2.rabattkosten), "span") }),
+          zeile({ was: "Mitnahme", wert: P5("a:mitnahme", geld(a2.mitnahme), "span") }),
+          zeile({ was: "Vorzieheffekt", wert: P5("a:vorzieh", geld(a2.vorzieheffekt), "span") }),
+          zeile({ was: "Kannibalisierung", wert: P5("a:kanni", geld(a2.kannibalisierung), "span") }),
+          zeile({ was: "Altwarenabbau", wert: P5("a:altware", geld(a2.altwarenabbau), "span") })
+        ]);
+        h4 += hinweis(`Genauigkeit ${esc2(a2.genauigkeit)}${a2.kontrollHaeuser ? ` \xB7 ${a2.kontrollHaeuser} Kontrollh\xE4user` : ""}${a2.hinweis ? ` \xB7 ${esc2(a2.hinweis)}` : ""}${a2.marketingBericht ? ` \xB7 Marketing meldete ${geld(a2.marketingBericht)}` : ""}`);
       }
-      if (a2.status === "geplant") h4 += `<div class="oknoepfe"><button data-a="aktionLaenger" data-v="${a2.id}">Eine Woche l\xE4nger</button><button class="rot" data-a="aktionAbsagen" data-v="${a2.id}">Absagen</button></div>`;
-      h4 += "</div>";
-      return { titel: a2.name, unter: `Aktion \xB7 ${STATUS2[a2.status]} \xB7 KW ${a2.startKw} / ${a2.jahr}`, html: h4 };
+      if (a2.status === "geplant") h4 += knoepfe(knopf("Eine Woche l\xE4nger", `data-a="aktionLaenger" data-v="${esc2(a2.id)}"`, "zweit"), knopf("Absagen", `data-a="aktionAbsagen" data-v="${esc2(a2.id)}"`, "gefahr"));
+      h4 += knoepfe(knopf("Zur\xFCck zum Kalender", 'data-a="seite" data-v="kalender"', "text"));
+      return { titel: "Aktion", unter: `KW ${a2.startKw} / ${a2.jahr}`, befund: a2.gemessen ? `${esc2(a2.name)}: Ergebnis ${geld(a2.ergebnis)}.` : `${esc2(a2.name)} ist ${STATUS2[a2.status]}. Die Auswertung folgt nach dem Ende.`, ton: a2.gemessen && a2.ergebnis < 0 ? "engpass" : "", html: rumpf2(h4) };
     }
     function rendern() {
       const S = werteSammler();
-      if (!da) return { S, r: { titel: "Marketing", unter: "", html: '<div class="leise">Die Engine liefert noch kein Marketing.</div>' } };
+      if (!da) return { S, r: { titel: "Marketing", unter: "", befund: "Die Engine liefert noch kein Marketing.", html: rumpf2(leer3("Die Engine liefert noch kein Marketing.")) } };
       const f13 = { kanaele: kanaele2, stadt: staedte, karte, crm, kalender, aktion: aktion2 }[ui.seite] ?? uebersicht;
       return { S, r: f13(S.P) };
     }
     function zeigen(scrollHalten = false) {
-      const sc = document.getElementById("pinhalt").scrollTop;
-      const altKar = document.querySelector("#pinhalt .mk-kanalreihe");
-      if (altKar) ui.kanalScroll = altKar.scrollLeft;
+      const pi = document.getElementById("pinhalt"), sc = pi.scrollTop;
+      const kar = pi.querySelector(".hw-karussell"), kx = kar ? kar.scrollLeft : 0;
       const { r: r4 } = rendern();
-      ctx.panel(r4.titel, r4.unter, bereich("zentrale") + '<i class="q31-marke" hidden></i>' + r4.html, "gross");
+      const aktivReiter = ui.seite === "aktion" ? "kalender" : ui.seite;
+      ctx.panel(r4.titel, r4.unter, bereich("zentrale", "marketing") + sprecher2(r4.befund, r4.ton) + '<i class="hw-g3" hidden></i>' + r4.html + reiterUnten(REITER2, aktivReiter, (id) => `data-a="seite" data-v="${id}" aria-label="${esc2(SICHT3[id])}"`), "gross");
       ui.aktiv = true;
-      document.getElementById("pinhalt").scrollTop = scrollHalten ? sc : 0;
-      const neuKar = document.querySelector("#pinhalt .mk-kanalreihe");
-      if (neuKar) neuKar.scrollLeft = ui.kanalScroll;
+      pi.scrollTop = scrollHalten ? sc : 0;
+      const neu3 = pi.querySelector(".hw-karussell");
+      if (neu3 && scrollHalten) neu3.scrollLeft = kx;
     }
     function tun2(aktion3, halten = true) {
       const r4 = E9.fuehreAus(s2(), aktion3);
@@ -165154,16 +165326,20 @@ void main() {
         case "seite":
           ui.seite = v2;
           ui.planen = null;
-          ui.kanalScroll = 0;
+          ui.kachel = -1;
           return zeigen();
+        case "region":
+          ui.region = v2;
+          ui.stadt = null;
+          return zeigen(true);
         case "stadtShift": {
           const d4 = ortDaten(E9, s2, ui);
           if (!d4.auswahl.length) return;
           ui.stadt = d4.auswahl[(d4.index + Number(v2) + d4.auswahl.length) % d4.auswahl.length].stadt;
           return zeigen(true);
         }
-        case "stadtSymbol":
-          ui.stadt = v2;
+        case "kachel":
+          ui.kachel = ui.kachel === Number(v2) ? -1 : Number(v2);
           return zeigen(true);
         case "teamAendern":
           return tun2({ typ: "kanalTeam", kanal: el2.dataset.k, delta: Number(v2) > 0 ? 1 : -1 });
@@ -165171,13 +165347,14 @@ void main() {
           ui.seite = "aktion";
           ui.aktion = v2;
           return zeigen();
-        case "kanalAuf":
-          ui.kanal = ui.kanal === v2 ? null : v2;
-          return zeigen(true);
         case "kanalBudget":
           return tun2({ typ: "kanalBudget", kanal: el2.dataset.k, faktor: Number(v2) > 0 ? 1.1 : 1 / 1.1 });
-        case "kanalAlle":
-          return tun2({ typ: "kanalBudget", kanal: "alle", faktor: Number(v2) });
+        case "kanalRegion": {
+          const c = E9.kanaele(st2).kanaele.find((x2) => x2.id === el2.dataset.k);
+          if (!c) return;
+          const f13 = Math.round(Math.max(0, Math.min(3, (c.regionen[el2.dataset.region] ?? 1) + Number(v2) * 0.1)) * 10) / 10;
+          return tun2({ typ: "kanalBudget", kanal: el2.dataset.k, regionen: { [el2.dataset.region]: f13 } });
+        }
         case "punkte":
           return tun2({ typ: "kundenkarteSetzen", punkteSatz: Number(v2) });
         case "stufen":
@@ -165198,6 +165375,11 @@ void main() {
           return tun2({ typ: "appSetzen", appCoupons: !E9.kundenkarte(st2).app.appCoupons });
         case "relaunch":
           return tun2({ typ: "appSetzen", relaunch: true });
+        case "crmSeg": {
+          const n3 = E9.crmKampagnen(st2).segmente.length;
+          B8.seg = (B8.seg + Number(v2) + n3) % n3;
+          return zeigen(true);
+        }
         case "crmKanal":
           B8.kanal = v2;
           return zeigen(true);
@@ -165217,7 +165399,7 @@ void main() {
           B8.wert = Number(v2);
           return zeigen(true);
         case "crmFrequenz":
-          B8.frequenz = v2;
+          B8.frequenz = zyklus(FREQUENZ, B8.frequenz, Number(v2));
           return zeigen(true);
         case "crmWochen":
           B8.wochen = Number(v2);
@@ -165244,6 +165426,17 @@ void main() {
         case "planZu":
           ui.planen = null;
           return zeigen(true);
+        case "planAnlass": {
+          const Kal = E9.aktionskalender(st2, ui.planen.jahr), anl = Kal.anlaesse.filter((x2) => x2.id !== "raeumung");
+          const an = anl.find((x2) => x2.id === zyklus(anl.map((x3) => [x3.id]), ui.planen.anlass, Number(v2)));
+          Object.assign(ui.planen, { anlass: an.id, mechanik: an.mechanik, rabatt: an.rabatt || ui.planen.rabatt, kw: an.kw, wochen: Math.min(4, an.wochen) });
+          return zeigen(true);
+        }
+        case "planMechanik": {
+          const Kal = E9.aktionskalender(st2, ui.planen.jahr);
+          ui.planen.mechanik = zyklus(Kal.mechaniken.map((m) => [m.id]), ui.planen.mechanik, Number(v2));
+          return zeigen(true);
+        }
         case "planRabatt":
           ui.planen.rabatt = Number(v2);
           return zeigen(true);
@@ -165293,77 +165486,14 @@ void main() {
         default:
       }
     }
-    function wechsel(el2) {
-      const a2 = el2.dataset.a;
-      if (a2 === "stadtRegionChoose") {
-        ui.region = el2.value;
-        ui.stadt = null;
-        ui.kanalScroll = 0;
-        return zeigen(true);
-      }
-      if (a2 === "stadtChoose") {
-        ui.stadt = el2.value;
-        return zeigen(true);
-      }
-      if (a2 === "kanalBudgetSlider") {
-        const v2 = Number(el2.value);
-        if (Number.isFinite(v2)) return tun2({ typ: "kanalBudget", kanal: el2.dataset.k, euroWoche: v2 });
-        return;
-      }
-      if (a2 === "kanalRegionSlider") {
-        const v2 = Number(el2.value);
-        if (Number.isFinite(v2)) return tun2({ typ: "kanalBudget", kanal: el2.dataset.k, regionen: { [el2.dataset.region]: v2 } });
-        return;
-      }
-      if (a2 === "crmSeg") {
-        ui.crm.seg = Number(el2.value);
-        zeigen(true);
-      }
-      if (a2 === "planAnlass") {
-        const K3 = E9.aktionskalender(s2(), ui.planen.jahr), an = K3.anlaesse.find((x2) => x2.id === el2.value);
-        Object.assign(ui.planen, { anlass: el2.value, mechanik: an.mechanik, rabatt: an.rabatt || ui.planen.rabatt, kw: an.kw, wochen: Math.min(4, an.wochen) });
-        zeigen(true);
-      }
-      if (a2 === "planMechanik") {
-        ui.planen.mechanik = el2.value;
-        zeigen(true);
-      }
-    }
-    const inhalt = document.getElementById("pinhalt");
-    let ringStart = null;
-    inhalt.addEventListener("pointerdown", (ev) => {
-      ringStart = ui.aktiv && ui.seite === "stadt" && ev.target.closest(".mk-ringwrap") ? { x: ev.clientX, y: ev.clientY } : null;
-    }, { passive: true });
-    inhalt.addEventListener("pointerup", (ev) => {
-      if (!ringStart) return;
-      const dx = ev.clientX - ringStart.x, dy = ev.clientY - ringStart.y;
-      ringStart = null;
-      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) {
-        const d4 = ortDaten(E9, s2, ui);
-        if (d4.auswahl.length > 1) {
-          ui.stadt = d4.auswahl[(d4.index + (dx < 0 ? 1 : -1) + d4.auswahl.length) % d4.auswahl.length].stadt;
-          zeigen(true);
-        }
-      }
-    }, { passive: true });
-    inhalt.addEventListener("click", (ev) => {
+    const auf = (ev) => {
       if (!ui.aktiv) return;
       const el2 = ev.target.closest("[data-a]");
-      if (!el2 || el2.disabled || el2.tagName === "SELECT") return;
+      if (!el2 || el2.disabled) return;
       klick2(el2);
-    });
-    inhalt.addEventListener("input", (ev) => {
-      if (!ui.aktiv) return;
-      const el2 = ev.target.closest('input[data-a="kanalBudgetSlider"], input[data-a="kanalRegionSlider"]');
-      if (!el2) return;
-      const out = el2.closest(".mk-budgetbox")?.querySelector("output");
-      if (out) out.textContent = el2.dataset.a === "kanalBudgetSlider" ? geld(Number(el2.value)) : Number(el2.value).toFixed(1).replace(".", ",") + " \xD7";
-    });
-    inhalt.addEventListener("change", (ev) => {
-      if (!ui.aktiv) return;
-      const el2 = ev.target.closest("[data-a]");
-      if (el2) wechsel(el2);
-    });
+    };
+    document.getElementById("pinhalt").addEventListener("click", auf);
+    document.getElementById("preiter").addEventListener("click", auf);
     return {
       ui,
       da,
@@ -165372,6 +165502,7 @@ void main() {
         ui.seite = seite2;
         if (seite2 === "aktion") ui.aktion = arg;
         ui.planen = null;
+        ui.kachel = -1;
         zeigen();
       },
       neuZeichnen: () => zeigen(true),
@@ -167514,10 +167645,10 @@ void main() {
       merk2(lat.flat());
       merk2(med.flat());
       teile2.push({ art: "ober", v: [...netz2(lat, { innen: innenO(lat) }), ...netz2(med, { innen: innenO(med) })] });
-      const ring2 = [];
-      for (const x2 of [...X5].filter((x3) => x3 <= L3.xo).reverse()) ring2.push(L3.pt(x2, L3.sK(x2)));
-      for (const x2 of X5.filter((x3) => x3 <= L3.xo)) ring2.push(L3.pt(x2, -L3.sK(x2)));
-      teile2.push({ art: "einstieg", ring: ring2 });
+      const ring3 = [];
+      for (const x2 of [...X5].filter((x3) => x3 <= L3.xo).reverse()) ring3.push(L3.pt(x2, L3.sK(x2)));
+      for (const x2 of X5.filter((x3) => x3 <= L3.xo)) ring3.push(L3.pt(x2, -L3.sK(x2)));
+      teile2.push({ art: "einstieg", ring: ring3 });
     }
     if (p2.schaft) {
       const ringe = [], weite = p2.schaftWeite ?? 1;
@@ -167755,8 +167886,8 @@ void main() {
       g2.push(bereich2(4e-3, 0.2, (x2) => [Math.max(L3.sK(x2) + 0.02, 0.45), 1], SG));
     }
     if (p2.seitenpanel) {
-      const kurve5 = glatt3([SP(0.05, 0.86), SP(0.22, 0.72), SP(0.38, 0.6), SP(0.52, 0.66), SP(0.64, 0.9)], 3);
-      g2.push(polylinie(K3, kurve5, dunkel2(S.c, 0.3), 0.6, { op: 0.8 }));
+      const kurve4 = glatt3([SP(0.05, 0.86), SP(0.22, 0.72), SP(0.38, 0.6), SP(0.52, 0.66), SP(0.64, 0.9)], 3);
+      g2.push(polylinie(K3, kurve4, dunkel2(S.c, 0.3), 0.6, { op: 0.8 }));
       const kurve22 = glatt3([SP(0.1, 0.62), SP(0.24, 0.52), SP(0.36, 0.4)], 3);
       if (p2.zweiton) g2.push(polylinie(K3, kurve22, dunkel2(S.c, 0.3), 0.55, { op: 0.7 }));
       g2.push(polylinie(K3, [SP(0.02, 0.55), SP(0.08, 0.6), SP(0.16, 0.74), SP(0.2, 0.96)], dunkel2(S.c, 0.3), 0.55, { op: 0.7 }));
@@ -168014,8 +168145,8 @@ void main() {
     g2.push(`<path d="M${f6(m[0])} ${f6(m[1])} l-2 6 M${f6(m[0])} ${f6(m[1])} l1.4 6.6" stroke="${farbe2}" stroke-width="0.8" fill="none"/>`);
     return g2.join("");
   }
-  function fellRand(K3, ring2, farbe2, w2 = 2.4) {
-    const q2 = ring2.map(K3.P);
+  function fellRand(K3, ring3, farbe2, w2 = 2.4) {
+    const q2 = ring3.map(K3.P);
     const d4 = "M" + q2.map((v2) => `${f6(v2[0])} ${f6(v2[1])}`).join(" L");
     return `<path d="${d4}" fill="none" stroke="${dunkel2(farbe2, 0.15)}" stroke-width="${w2 + 0.8}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d4}" fill="none" stroke="${farbe2}" stroke-width="${w2}" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.2 0.5"/>`;
   }
@@ -168127,7 +168258,7 @@ void main() {
   var METALL2 = "#c9a24a";
   var METALL_D = "#8f6f2a";
   var SILBER = "#c9ced3";
-  function ring(a2, b4, r4, z6, n3 = 32, dx = 0) {
+  function ring2(a2, b4, r4, z6, n3 = 32, dx = 0) {
     const pts = [];
     r4 = Math.min(r4, a2 * 0.98, b4 * 0.98);
     const ecken = [[b4 - r4, a2 - r4, 0], [-(b4 - r4), a2 - r4, 1], [-(b4 - r4), -(a2 - r4), 2], [b4 - r4, -(a2 - r4), 3]];
@@ -168142,7 +168273,7 @@ void main() {
     const ringe = [];
     for (let k5 = 0; k5 <= stufen; k5++) {
       const t5 = k5 / stufen, q2 = profil2(t5);
-      ringe.push(ring(q2.a, q2.b, q2.r, (q2.z ?? t5) * h4, n3, q2.dx ?? 0));
+      ringe.push(ring2(q2.a, q2.b, q2.r, (q2.z ?? t5) * h4, n3, q2.dx ?? 0));
     }
     return ringe;
   }
@@ -169761,16 +169892,16 @@ void main() {
     // Maß: Rahmenleiste 1/14 der Breite, Passepartout 1/7.
     bilderrahmenset(S, t5) {
       t5.push(boden8(50, 90, 42, 2.4));
-      const rahmen2 = (x2, y2, w2, h4, motiv3) => {
+      const rahmen2 = (x2, y2, w2, h4, motiv5) => {
         const l = w2 / 14, pp2 = w2 / 7;
         t5.push(`<rect x="${x2 + 1}" y="${y2 + 1.4}" width="${w2}" height="${h4}" fill="#000" opacity="0.1"/>`);
         t5.push(form(S, `M${x2} ${y2} L${x2 + w2} ${y2} L${x2 + w2} ${y2 + h4} L${x2} ${y2 + h4} Z`, S.c));
         t5.push(`<rect x="${x2 + l}" y="${y2 + l}" width="${w2 - 2 * l}" height="${h4 - 2 * l}" fill="#f6f3ec"/>`);
         const ix = x2 + l + pp2, iy = y2 + l + pp2, iw = w2 - 2 * (l + pp2), ih = h4 - 2 * (l + pp2);
-        t5.push(`<rect x="${f10(ix)}" y="${f10(iy)}" width="${f10(iw)}" height="${f10(ih)}" fill="${motiv3[0]}"/>`);
-        if (motiv3[1] === "berg") t5.push(`<path d="M${f10(ix)} ${f10(iy + ih)} L${f10(ix + iw * 0.35)} ${f10(iy + ih * 0.45)} L${f10(ix + iw * 0.55)} ${f10(iy + ih * 0.7)} L${f10(ix + iw * 0.75)} ${f10(iy + ih * 0.35)} L${f10(ix + iw)} ${f10(iy + ih)} Z" fill="#9fb393"/><circle cx="${f10(ix + iw * 0.25)}" cy="${f10(iy + ih * 0.25)}" r="${f10(iw * 0.08)}" fill="#e7c17a"/>`);
-        if (motiv3[1] === "form") t5.push(`<circle cx="${f10(ix + iw * 0.42)}" cy="${f10(iy + ih * 0.55)}" r="${f10(iw * 0.28)}" fill="#c0643f"/><rect x="${f10(ix + iw * 0.5)}" y="${f10(iy + ih * 0.2)}" width="${f10(iw * 0.3)}" height="${f10(ih * 0.5)}" fill="#273659" opacity="0.8"/>`);
-        if (motiv3[1] === "linie") t5.push(`<path d="M${f10(ix + iw * 0.2)} ${f10(iy + ih * 0.8)} Q${f10(ix + iw * 0.5)} ${f10(iy + ih * 0.1)} ${f10(ix + iw * 0.8)} ${f10(iy + ih * 0.7)}" stroke="#2a2c30" stroke-width="0.7" fill="none"/>`);
+        t5.push(`<rect x="${f10(ix)}" y="${f10(iy)}" width="${f10(iw)}" height="${f10(ih)}" fill="${motiv5[0]}"/>`);
+        if (motiv5[1] === "berg") t5.push(`<path d="M${f10(ix)} ${f10(iy + ih)} L${f10(ix + iw * 0.35)} ${f10(iy + ih * 0.45)} L${f10(ix + iw * 0.55)} ${f10(iy + ih * 0.7)} L${f10(ix + iw * 0.75)} ${f10(iy + ih * 0.35)} L${f10(ix + iw)} ${f10(iy + ih)} Z" fill="#9fb393"/><circle cx="${f10(ix + iw * 0.25)}" cy="${f10(iy + ih * 0.25)}" r="${f10(iw * 0.08)}" fill="#e7c17a"/>`);
+        if (motiv5[1] === "form") t5.push(`<circle cx="${f10(ix + iw * 0.42)}" cy="${f10(iy + ih * 0.55)}" r="${f10(iw * 0.28)}" fill="#c0643f"/><rect x="${f10(ix + iw * 0.5)}" y="${f10(iy + ih * 0.2)}" width="${f10(iw * 0.3)}" height="${f10(ih * 0.5)}" fill="#273659" opacity="0.8"/>`);
+        if (motiv5[1] === "linie") t5.push(`<path d="M${f10(ix + iw * 0.2)} ${f10(iy + ih * 0.8)} Q${f10(ix + iw * 0.5)} ${f10(iy + ih * 0.1)} ${f10(ix + iw * 0.8)} ${f10(iy + ih * 0.7)}" stroke="#2a2c30" stroke-width="0.7" fill="none"/>`);
       };
       rahmen2(8, 10, 44, 58, ["#dfe6e2", "berg"]);
       rahmen2(58, 10, 34, 42, ["#efe2cf", "form"]);
@@ -170318,7 +170449,7 @@ void main() {
     smiley: () => pf("M-9 0 A9 9 0 1 1 9 0 A9 9 0 1 1 -9 0 Z", "#f1cf4a") + `<circle cx="-3" cy="-2.5" r="1.3" fill="#1d1b1c"/><circle cx="3" cy="-2.5" r="1.3" fill="#1d1b1c"/><path d="M-5 2 Q0 7 5 2" stroke="#1d1b1c" stroke-width="1.2" fill="none"/>`,
     blitz: () => pf("M2 -12 L-7 2 L-1 2 L-3 12 L7 -2 L1 -2 Z", "#f1cf4a")
   };
-  function motiv2(name2, x2, y2, s2) {
+  function motiv3(name2, x2, y2, s2) {
     const m = MOTIVE2[name2];
     return m ? g(x2, y2, s2, m()) : "";
   }
@@ -170493,7 +170624,7 @@ void main() {
     for (const x2 of p2.extras ?? []) EXTRAS[x2]?.(S, t5, p2, M2);
     if (p2.motiv) {
       const [x2, y2, s2] = motivLage(basis4, p2, M2);
-      t5.push(motiv2(p2.motiv, p2.motivX ?? x2, p2.motivY ?? y2, p2.motivS ?? s2));
+      t5.push(motiv3(p2.motiv, p2.motivX ?? x2, p2.motivY ?? y2, p2.motivS ?? s2));
     }
   }
   function q33zoom(p2) {
@@ -170537,13 +170668,13 @@ void main() {
     t5.push(boden8(50, 92, 30, 2));
     t5.push(flaeche5(S, "M50 92 C20 92 12 64 18 42 C22 28 30 16 34 14 L42 14 C40 24 44 34 50 34 C56 34 60 24 58 14 L66 14 C70 16 78 28 82 42 C88 64 80 92 50 92 Z"));
     t5.push(linie2("M50 89 C24 89 16 64 21 43 C24 31 31 20 35 17", "#fff", 1.4, 0.7), linie2("M50 89 C76 89 84 64 79 43 C76 31 69 20 65 17", "#fff", 1.4, 0.7));
-    t5.push(knopfDruck(38, 18), knopfDruck(62, 18), motiv2("wal", 50, 62, 22));
+    t5.push(knopfDruck(38, 18), knopfDruck(62, 18), motiv3("wal", 50, 62, 22));
   });
   neu("k_schmusetuch", "spielzeug", "pluesch", "hellblau", (S, t5) => {
     t5.push(boden8(50, 88, 36, 2.6));
     t5.push(flaeche5(S, "M10 50 Q30 40 50 54 Q70 40 90 50 Q80 66 92 82 Q70 76 50 86 Q30 76 8 82 Q20 66 10 50 Z"));
     for (const [x2, y2] of [[8, 50], [92, 50], [8, 82], [92, 82]]) t5.push(`<circle cx="${x2}" cy="${y2}" r="3.6" fill="${dunkel2(S.c, 0.12)}" stroke="${S.cK}" stroke-width="0.4"/>`);
-    t5.push(motiv2("hase", 50, 46, 30));
+    t5.push(motiv3("hase", 50, 46, 30));
   });
   neu("k_schnullerkette", "accessoire", "holz", "salbei", (S, t5) => {
     t5.push(boden8(54, 88, 34, 2));
@@ -170575,7 +170706,7 @@ void main() {
     t5.push(boden8(50, 86, 40, 3));
     S.tex = dessin(S, "stepp");
     t5.push(`<path d="M6 54 L54 24 L96 48 L48 80 Z" fill="#fbf7ee"/>`, flaeche5(S, "M11 54 L54 28 L90 48 L48 75 Z"));
-    t5.push(flaeche5(S, "M48 75 L90 48 L80 66 Z", { ton: 0.2 }), motiv2("hase", 34, 52, 14));
+    t5.push(flaeche5(S, "M48 75 L90 48 L80 66 Z", { ton: 0.2 }), motiv3("hase", 34, 52, 14));
   });
   neu("k_kapuzenhandtuch", "home", "frottee", "gelb", (S, t5) => {
     t5.push(boden8(50, 88, 38, 3));
@@ -170593,12 +170724,12 @@ void main() {
   });
   neu("k_mobile", "spielzeug", "holz", "hellblau", (S, t5) => {
     t5.push(linie2("M50 6 V18", "#8a7a6a", 0.6), `<path d="M18 20 Q50 14 82 20" stroke="${HOLZ7}" stroke-width="2.6" fill="none"/>`);
-    for (const [x2, l, m] of [[22, 40, "wolke"], [40, 52, "stern"], [60, 48, "herz"], [78, 38, "sonne"]]) t5.push(linie2(`M${x2} 19 V${l}`, "#8a7a6a", 0.4), motiv2(m, x2, l + 8, 14));
+    for (const [x2, l, m] of [[22, 40, "wolke"], [40, 52, "stern"], [60, 48, "herz"], [78, 38, "sonne"]]) t5.push(linie2(`M${x2} 19 V${l}`, "#8a7a6a", 0.4), motiv3(m, x2, l + 8, 14));
   });
   neu("k_wickeltasche", "tasche", "polyester", "salbei", (S, t5) => {
     t5.push(boden8(50, 90, 38, 2.6));
     t5.push(`<path d="M30 34 Q30 10 50 10 Q70 10 70 34" stroke="${dunkel2(S.c, 0.3)}" stroke-width="3" fill="none"/>`);
-    t5.push(form(S, rr3(14, 32, 66, 56, 6), S.c), form(S, rr3(22, 54, 50, 26, 4), dunkel2(S.c, 0.1)), motiv2("stern", 47, 67, 10));
+    t5.push(form(S, rr3(14, 32, 66, 56, 6), S.c), form(S, rr3(22, 54, 50, 26, 4), dunkel2(S.c, 0.1)), motiv3("stern", 47, 67, 10));
     t5.push(`<rect x="80" y="40" width="12" height="40" rx="3" fill="${dunkel2(S.c, 0.2)}"/>`, `<rect x="83" y="22" width="7" height="22" rx="2" fill="#f4f8fb" stroke="#9aa8b0" stroke-width="0.5"/><path d="M83.5 22 Q86.5 12 89.5 22 Z" fill="#f1cf4a"/><path d="M84 30 h5 M84 34 h5 M84 38 h5" stroke="#9aa8b0" stroke-width="0.5"/>`);
   });
   neu("k_babyjaeckchen", "oberteil", "strick", "creme", (S, t5) => {
@@ -170631,7 +170762,7 @@ void main() {
     t5.push(boden8(50, 84, 42, 3));
     t5.push(form(S, "M8 34 L50 40 L92 34 L92 76 L50 82 L8 76 Z", S.c));
     for (const s2 of [1, -1]) t5.push(`<path d="${s2 < 0 ? "M12 32 L50 38 L50 78 L12 72 Z" : "M88 32 L50 38 L50 78 L88 72 Z"}" fill="#fbf7ee" stroke="#c9bfae" stroke-width="0.5"/>`);
-    t5.push(motiv2("hase", 30, 54, 16), motiv2("sonne", 72, 46, 12), `<path d="M58 66 Q70 58 84 66" stroke="#5f9a4a" stroke-width="3" fill="none"/>`, linie2("M50 38 L50 78", "#c9bfae", 0.8));
+    t5.push(motiv3("hase", 30, 54, 16), motiv3("sonne", 72, 46, 12), `<path d="M58 66 Q70 58 84 66" stroke="#5f9a4a" stroke-width="3" fill="none"/>`, linie2("M50 38 L50 78", "#c9bfae", 0.8));
   });
   neu("k_buntstifte", "spielzeug", "holz", "rot", (S, t5) => {
     t5.push(boden8(50, 88, 36, 2.4));
@@ -170660,7 +170791,7 @@ void main() {
     t5.push(boden8(50, 88, 40, 2.6));
     t5.push(form(S, "M20 40 L58 40 L54 84 L24 84 Z", S.c, { licht: "rund" }), `<ellipse cx="39" cy="40" rx="19" ry="4" fill="${dunkel2(S.c, 0.3)}"/>`, `<path d="M20 42 Q39 12 58 42" stroke="#f1cf4a" stroke-width="2.2" fill="none"/>`);
     t5.push(`<g transform="rotate(-30 76 60)"><rect x="73" y="34" width="5" height="26" rx="2" fill="#f1cf4a"/><path d="M68 60 L84 60 L82 82 Q76 86 70 82 Z" fill="#f1cf4a" stroke="#b8902a" stroke-width="0.5"/></g>`);
-    t5.push(motiv2("stern", 34, 64, 12));
+    t5.push(motiv3("stern", 34, 64, 12));
   });
   neu("k_springseil", "spielzeug", "baumwolle", "rot", (S, t5) => {
     t5.push(boden8(50, 88, 38, 2));
@@ -170679,7 +170810,7 @@ void main() {
   neu("k_handpuppe", "spielzeug", "pluesch", "orange", (S, t5) => {
     t5.push(boden8(50, 90, 22, 2));
     t5.push(flaeche5(S, glatt2([[34, 88, E7], [32, 56], [22, 50, E7], [26, 44, E7], [38, 46], [62, 46], [74, 44, E7], [78, 50, E7], [68, 56], [66, 88, E7]], true, 0.3), { ton: -0.05 }));
-    t5.push(`<path d="M34 86 Q50 90 66 86 L66 82 Q50 86 34 82 Z" fill="#fbf7ee"/>`, motiv2("fuchs", 50, 30, 40));
+    t5.push(`<path d="M34 86 Q50 90 66 86 L66 82 Q50 86 34 82 Z" fill="#fbf7ee"/>`, motiv3("fuchs", 50, 30, 40));
   });
   neu("k_drachen", "spielzeug", "nylon", "rot", (S, t5) => {
     t5.push(form(S, "M50 6 L78 34 L50 72 L22 34 Z", S.c));
@@ -170710,7 +170841,7 @@ void main() {
     for (let i = 0; i < 6; i++) {
       const x2 = 12 + i % 3 * 27, y2 = 18 + Math.floor(i / 3) * 34;
       t5.push(`<rect x="${x2}" y="${y2}" width="22" height="28" rx="2" fill="${i === 4 ? S.c : "#fbf7ee"}" stroke="#a89c8a" stroke-width="0.6"/>`);
-      if (i !== 4) t5.push(motiv2(["herz", "stern", "sonne", "herz", "", "stern"][i], x2 + 11, y2 + 14, 14));
+      if (i !== 4) t5.push(motiv3(["herz", "stern", "sonne", "herz", "", "stern"][i], x2 + 11, y2 + 14, 14));
       else t5.push(`<path d="M${x2 + 4} ${y2 + 4} L${x2 + 18} ${y2 + 24} M${x2 + 18} ${y2 + 4} L${x2 + 4} ${y2 + 24}" stroke="#fff" stroke-width="0.6" opacity="0.6"/>`);
     }
   });
@@ -170718,33 +170849,33 @@ void main() {
     t5.push(boden8(50, 90, 32, 2.6));
     t5.push(form(S, rr3(22, 22, 56, 66, 10), dunkel2(S.c, 0.12)), form(S, "M24 30 Q24 20 34 20 L66 20 Q76 20 76 30 L76 72 Q76 78 70 78 L30 78 Q24 78 24 72 Z", S.c));
     t5.push(`<rect x="44" y="70" width="12" height="8" rx="2" fill="#2a2c30"/><rect x="47" y="73" width="6" height="3" rx="1" fill="#c9ced3"/>`);
-    t5.push(`<rect x="28" y="62" width="8" height="5" rx="1" fill="#f1cf4a"/><rect x="64" y="62" width="8" height="5" rx="1" fill="#f1cf4a"/>`, motiv2("rakete", 50, 42, 24));
+    t5.push(`<rect x="28" y="62" width="8" height="5" rx="1" fill="#f1cf4a"/><rect x="64" y="62" width="8" height="5" rx="1" fill="#f1cf4a"/>`, motiv3("rakete", 50, 42, 24));
     t5.push(`<path d="M38 20 Q50 8 62 20" stroke="${dunkel2(S.c, 0.35)}" stroke-width="3" fill="none"/>`);
   });
   neu("k_turnbeutel", "tasche", "baumwolle", "rot", (S, t5) => {
     t5.push(boden8(50, 90, 30, 2));
     t5.push(flaeche5(S, "M24 24 Q50 30 76 24 L78 86 L22 86 Z"));
     t5.push(linie2("M24 24 Q50 30 76 24", dunkel2(S.c, 0.3), 1.4), `<path d="M30 25 Q40 6 50 18 Q60 6 70 25" stroke="#e9e4dc" stroke-width="1.2" fill="none"/><path d="M24 26 L22 84 M76 26 L78 84" stroke="#e9e4dc" stroke-width="1.2"/>`);
-    t5.push(`<circle cx="23" cy="84" r="2" fill="#c9ced3" stroke="#77736b" stroke-width="0.4"/><circle cx="77" cy="84" r="2" fill="#c9ced3" stroke="#77736b" stroke-width="0.4"/>`, motiv2("ball", 50, 56, 22));
+    t5.push(`<circle cx="23" cy="84" r="2" fill="#c9ced3" stroke="#77736b" stroke-width="0.4"/><circle cx="77" cy="84" r="2" fill="#c9ced3" stroke="#77736b" stroke-width="0.4"/>`, motiv3("ball", 50, 56, 22));
   });
   neu("k_federmaeppchen", "tasche", "polyester", "hellgr\xFCn", (S, t5) => {
     t5.push(boden8(50, 84, 42, 2.6));
     t5.push(form(S, rr3(8, 30, 84, 22, 4), S.c), form(S, rr3(8, 54, 84, 26, 4), dunkel2(S.c, 0.08)));
     ["#c8372f", "#e8833a", "#f1cf4a", "#5f9a4a", "#4f6f9a", "#7a4f9a", "#6a4630", "#2a2c30"].forEach((c, i) => t5.push(`<rect x="${16 + i * 9}" y="56" width="5" height="20" fill="${c}"/><path d="M${16 + i * 9} 56 L${18.5 + i * 9} 50 L${21 + i * 9} 56 Z" fill="${HOLZ7}"/>`));
     t5.push(linie2("M12 64 H88", "#2a2c30", 1.6, 0.6), linie2("M10 52 H90", dunkel2(S.c, 0.35), 1));
-    t5.push(motiv2("dino", 36, 41, 14), `<rect x="62" y="36" width="20" height="10" rx="2" fill="#fbf7ee"/>`);
+    t5.push(motiv3("dino", 36, 41, 14), `<rect x="62" y="36" width="20" height="10" rx="2" fill="#fbf7ee"/>`);
   });
   neu("k_brotdose", "home", "kunststoff", "hellgr\xFCn", (S, t5) => {
     t5.push(boden8(50, 86, 40, 2.6));
     t5.push(form(S, "M16 22 L84 22 L80 44 L20 44 Z", hell3(S.c, 0.15)));
     t5.push(form(S, rr3(12, 46, 76, 34, 6), S.c), `<rect x="16" y="50" width="68" height="26" rx="4" fill="${dunkel2(S.c, 0.2)}"/>`);
     t5.push(`<rect x="18" y="52" width="32" height="22" rx="3" fill="#e3c27a"/><path d="M20 58 h28 M20 64 h28" stroke="#c49a5a" stroke-width="0.8"/><circle cx="62" cy="62" r="7" fill="#c8372f"/><path d="M62 55 l1 -3" stroke="#5a4030" stroke-width="0.8"/><rect x="72" y="54" width="10" height="18" rx="2" fill="#e8833a"/>`);
-    t5.push(`<rect x="10" y="56" width="4" height="10" rx="1" fill="${dunkel2(S.c, 0.35)}"/><rect x="86" y="56" width="4" height="10" rx="1" fill="${dunkel2(S.c, 0.35)}"/>`, motiv2("dino", 50, 33, 14));
+    t5.push(`<rect x="10" y="56" width="4" height="10" rx="1" fill="${dunkel2(S.c, 0.35)}"/><rect x="86" y="56" width="4" height="10" rx="1" fill="${dunkel2(S.c, 0.35)}"/>`, motiv3("dino", 50, 33, 14));
   });
   neu("k_trinkflasche", "home", "edelstahl", "koralle", (S, t5) => {
     t5.push(boden8(50, 90, 16, 2));
     t5.push(zylinder2(S, 50, 28, 88, 14, 3.4, S.c, { glanz: true }), form(S, rr3(38, 14, 24, 16, 4), "#2a2c30"), `<rect x="45" y="6" width="10" height="10" rx="3" fill="#f1cf4a"/><path d="M62 18 q8 0 8 8 l0 4" stroke="#2a2c30" stroke-width="2" fill="none"/>`);
-    t5.push(motiv2("einhorn", 50, 58, 20));
+    t5.push(motiv3("einhorn", 50, 58, 20));
   });
   neu("k_bommelmuetze", "accessoire", "strick", "rot", (S, t5) => {
     t5.push(boden8(50, 88, 30, 2));
@@ -170756,20 +170887,20 @@ void main() {
       const a2 = i * 0.26;
       t5.push(linie2(`M50 20 l${f10(13 * Math.cos(a2))} ${f10(13 * Math.sin(a2))}`, "#c9c2b6", 0.5, 0.6));
     }
-    t5.push(`<rect x="60" y="70" width="10" height="6" fill="#fbf7ee"/>`, motiv2("stern", 65, 73, 4));
+    t5.push(`<rect x="60" y="70" width="10" height="6" fill="#fbf7ee"/>`, motiv3("stern", 65, 73, 4));
   });
   neu("k_faeustlinge", "accessoire", "strick", "hellblau", (S, t5) => {
     t5.push(boden8(50, 88, 38, 2));
     for (const [x2, s2] of [[30, -1], [70, 1]]) {
       const X5 = (v2) => x2 + s2 * v2;
       t5.push(flaeche5(S, glatt2([[X5(-10), 84, E7], [X5(-11), 46], [X5(-6), 30], [X5(4), 30], [X5(9), 40], [X5(16), 44], [X5(14), 52], [X5(10), 54], [X5(10), 84, E7]], true, 0.35)));
-      t5.push(flaeche5(S, rr3(x2 - 11, 72, 22, 14, 2), { ton: -0.1 }), motiv2("herz", x2, 54, 9));
+      t5.push(flaeche5(S, rr3(x2 - 11, 72, 22, 14, 2), { ton: -0.1 }), motiv3("herz", x2, 54, 9));
     }
     t5.push(`<path d="M30 86 Q50 96 70 86" stroke="${dunkel2(S.c, 0.3)}" stroke-width="1" fill="none"/>`);
   });
   neu("k_haarspangen", "accessoire", "kunststoff", "rosa", (S, t5) => {
     t5.push(boden8(50, 88, 32, 2), `<rect x="20" y="10" width="60" height="78" rx="3" fill="#fbf7ee" stroke="#c9bfae" stroke-width="0.6"/><circle cx="50" cy="16" r="2.4" fill="#fff" stroke="#c9bfae" stroke-width="0.6"/>`);
-    for (const [y2, m] of [[30, "herz"], [50, "stern"], [70, "blume"]]) t5.push(`<path d="M30 ${y2} Q50 ${y2 - 4} 70 ${y2} Q50 ${y2 + 3} 30 ${y2} Z" fill="#c9ced3" stroke="#77736b" stroke-width="0.4"/>`, motiv2(m, 40, y2, 12));
+    for (const [y2, m] of [[30, "herz"], [50, "stern"], [70, "blume"]]) t5.push(`<path d="M30 ${y2} Q50 ${y2 - 4} 70 ${y2} Q50 ${y2 + 3} 30 ${y2} Z" fill="#c9ced3" stroke="#77736b" stroke-width="0.4"/>`, motiv3(m, 40, y2, 12));
   });
   neu("k_kinderuhr", "accessoire", "silikon", "hellblau", (S, t5) => {
     t5.push(boden8(50, 92, 22, 2));
@@ -170789,12 +170920,12 @@ void main() {
   neu("k_kindergeldboerse", "tasche", "polyester", "lila", (S, t5) => {
     t5.push(boden8(50, 82, 34, 2.4));
     t5.push(form(S, rr3(16, 36, 68, 44, 5), S.c), form(S, "M16 40 Q16 30 26 30 L74 30 Q84 30 84 40 L84 58 L16 58 Z", dunkel2(S.c, 0.1)));
-    t5.push(`<rect x="42" y="52" width="16" height="6" rx="1" fill="#2a2c30" opacity="0.5"/>`, motiv2("einhorn", 50, 44, 16), linie2("M84 36 Q94 30 90 20", "#c9ced3", 1.2), `<circle cx="90" cy="18" r="3.4" fill="none" stroke="#c9ced3" stroke-width="1.2"/>`);
+    t5.push(`<rect x="42" y="52" width="16" height="6" rx="1" fill="#2a2c30" opacity="0.5"/>`, motiv3("einhorn", 50, 44, 16), linie2("M84 36 Q94 30 90 20", "#c9ced3", 1.2), `<circle cx="90" cy="18" r="3.4" fill="none" stroke="#c9ced3" stroke-width="1.2"/>`);
   });
   neu("k_kindercap", "accessoire", "baumwolle", "rot", (S, t5) => {
     t5.push(boden8(50, 82, 34, 2.4));
     t5.push(flaeche5(S, "M22 62 Q20 26 50 22 Q80 26 78 62 Z"), flaeche5(S, "M22 60 Q50 66 78 60 Q86 70 92 76 Q60 84 30 72 Z", { ton: -0.12 }));
-    t5.push(linie2("M50 22 Q46 40 50 62 M34 26 Q32 44 34 62 M66 26 Q68 44 66 62", S.cD, 0.5, 0.5), `<circle cx="50" cy="22" r="2.2" fill="${dunkel2(S.c, 0.2)}"/>`, motiv2("dino", 50, 46, 16));
+    t5.push(linie2("M50 22 Q46 40 50 62 M34 26 Q32 44 34 62 M66 26 Q68 44 66 62", S.cD, 0.5, 0.5), `<circle cx="50" cy="22" r="2.2" fill="${dunkel2(S.c, 0.2)}"/>`, motiv3("dino", 50, 46, 16));
   });
   neu("k_schal", "accessoire", "strick", "senf", (S, t5) => {
     t5.push(boden8(50, 92, 30, 2.2));
@@ -170803,7 +170934,7 @@ void main() {
     t5.push(`<path d="M46 22 Q50 18 54 22 L52 30 Q50 28 48 30 Z" fill="#000" opacity="0.15"/>`);
     for (let x2 = 35; x2 < 46; x2 += 2) t5.push(linie2(`M${x2} 64 l0 8`, dunkel2(S.c, 0.15), 1));
     for (let x2 = 53; x2 < 64; x2 += 2) t5.push(linie2(`M${x2} 78 l0 8`, dunkel2(S.c, 0.15), 1));
-    t5.push(motiv2("stern", 58, 66, 7));
+    t5.push(motiv3("stern", 58, 66, 7));
   });
   neu("k_spielteppich", "home", "baumwolle", "hellgr\xFCn", (S, t5) => {
     t5.push(`<path d="M4 50 L60 22 L96 46 L40 78 Z" fill="#000" opacity="0.06" transform="translate(0 4)"/>`);
@@ -170814,7 +170945,7 @@ void main() {
   neu("k_nachtlicht", "home", "kunststoff", "gelb", (S, t5) => {
     t5.push(boden8(50, 88, 22, 2), `<circle cx="50" cy="44" r="34" fill="#f8e7a0" opacity="0.25"/>`);
     t5.push(form(S, "M58 14 C34 16 24 46 36 64 C46 78 70 76 78 64 C62 66 48 52 50 34 C51 26 54 18 58 14 Z", "#f6e3a0", { licht: "rund" }));
-    t5.push(form(S, rr3(36, 76, 28, 10, 3), HOLZ7), linie2("M64 82 Q80 84 86 92", "#f4f3ef", 1.2), motiv2("stern", 72, 30, 9));
+    t5.push(form(S, rr3(36, 76, 28, 10, 3), HOLZ7), linie2("M64 82 Q80 84 86 92", "#f4f3ef", 1.2), motiv3("stern", 72, 30, 9));
   });
   neu("k_wimpelkette", "home", "baumwolle", "rosa", (S, t5) => {
     t5.push(`<path d="M4 20 Q50 46 96 20" stroke="#8a7a6a" stroke-width="0.8" fill="none"/>`);
@@ -170829,8 +170960,8 @@ void main() {
   neu("k_kindergeschirr", "home", "kunststoff", "mint", (S, t5) => {
     t5.push(boden8(46, 86, 40, 3));
     t5.push(`<ellipse cx="42" cy="66" rx="34" ry="16" fill="${S.c}" stroke="${dunkel2(S.c, 0.35)}" stroke-width="0.6"/><ellipse cx="42" cy="64" rx="30" ry="13" fill="${hell3(S.c, 0.3)}"/>`);
-    t5.push(linie2("M42 52 L42 66 M42 66 L18 70 M42 66 L66 70", S.c, 2.4), motiv2("wal", 30, 60, 10));
-    t5.push(zylinder2(S, 78, 32, 56, 10, 3, "#f1cf4a"), `<path d="M88 38 q6 0 6 6 q0 6 -6 6" stroke="#f1cf4a" stroke-width="2.4" fill="none"/>`, motiv2("stern", 78, 44, 8));
+    t5.push(linie2("M42 52 L42 66 M42 66 L18 70 M42 66 L66 70", S.c, 2.4), motiv3("wal", 30, 60, 10));
+    t5.push(zylinder2(S, 78, 32, 56, 10, 3, "#f1cf4a"), `<path d="M88 38 q6 0 6 6 q0 6 -6 6" stroke="#f1cf4a" stroke-width="2.4" fill="none"/>`, motiv3("stern", 78, 44, 8));
   });
   neu("k_spielkorb", "home", "filz", "grau", (S, t5) => {
     t5.push(boden8(50, 88, 34, 2.6));
@@ -170854,14 +170985,14 @@ void main() {
     t5.push(flaeche5(S, "M8 40 L92 40 L92 86 L8 86 Z"), flaeche5(S, "M62 86 L92 60 L92 86 Z", { ton: 0.25 }));
     const S2 = stoff2(S, "wei\xDF");
     S2.tex = dessin(S2, "sterne");
-    t5.push(flaeche5(S2, rr3(24, 14, 52, 30, 5)), motiv2("hase", 50, 29, 16));
+    t5.push(flaeche5(S2, rr3(24, 14, 52, 30, 5)), motiv3("hase", 50, 29, 16));
     for (const x2 of [20, 36, 52]) t5.push(`<circle cx="${x2}" cy="84" r="1.1" fill="#fbf7ee" stroke="${S.cK}" stroke-width="0.3"/>`);
   });
   neu("k_slipset", "waesche", "baumwolle", "wei\xDF", (S, t5) => {
     t5.push(boden8(50, 86, 40, 2.4));
     [["#f2b8cc", 26, "herz"], ["#a9c8e8", 50, "stern"], ["#fbf7ee", 74, "blume"]].forEach(([c, x2, m], i) => {
       const S2 = stoff2(S, c);
-      t5.push(flaeche5(S2, `M${x2 - 16} ${40 + i * 4} L${x2 + 16} ${40 + i * 4} L${x2 + 14} ${54 + i * 4} Q${x2 + 4} ${58 + i * 4} ${x2 + 4} ${70 + i * 4} L${x2 - 4} ${70 + i * 4} Q${x2 - 4} ${58 + i * 4} ${x2 - 14} ${54 + i * 4} Z`), linie2(`M${x2 - 16} ${41 + i * 4} H${x2 + 16}`, dunkel2(c, 0.25), 1.8), motiv2(m, x2, 50 + i * 4, 7));
+      t5.push(flaeche5(S2, `M${x2 - 16} ${40 + i * 4} L${x2 + 16} ${40 + i * 4} L${x2 + 14} ${54 + i * 4} Q${x2 + 4} ${58 + i * 4} ${x2 + 4} ${70 + i * 4} L${x2 - 4} ${70 + i * 4} Q${x2 - 4} ${58 + i * 4} ${x2 - 14} ${54 + i * 4} Z`), linie2(`M${x2 - 16} ${41 + i * 4} H${x2 + 16}`, dunkel2(c, 0.25), 1.8), motiv3(m, x2, 50 + i * 4, 7));
     });
   });
   neu("k_boxershorts", "waesche", "baumwolle", "marine", (S, t5) => {
@@ -170884,7 +171015,7 @@ void main() {
     for (let x2 = 15; x2 < 28; x2 += 2) t5.push(linie2(`M${x2} 11 l0 6`, S.cD, 0.4, 0.5));
     t5.push(flaeche5(S, "M58 10 L76 10 L78 80 Q78 92 67 92 Q56 92 56 80 Z"), flaeche5(S, rr3(57, 8, 20, 8, 1.5), { ton: -0.12 }));
     for (let y2 = 34; y2 < 88; y2 += 6) for (let x2 = 61 + (y2 % 12 ? 3 : 0); x2 < 76; x2 += 6) t5.push(`<circle cx="${x2}" cy="${y2}" r="1.5" fill="#c8372f"/>`);
-    t5.push(motiv2("stern", 21, 32, 8));
+    t5.push(motiv3("stern", 21, 32, 8));
   });
   neu("k_sockenset", "waesche", "baumwolle", "rot", (S, t5) => {
     t5.push(boden8(50, 88, 40, 2));
@@ -170899,11 +171030,11 @@ void main() {
     S.tex = dessin(S, "sterne");
     t5.push(flaeche5(S, glatt2([[34, 8, E7], [44, 6, E7], [50, 10], [56, 6, E7], [66, 8, E7], [84, 20, E7], [86, 40, E7], [78, 42, E7], [72, 26], [70, 52, E7], [30, 52, E7], [28, 26], [22, 42, E7], [14, 40, E7], [16, 20, E7]], true, 0.3)));
     t5.push(flaeche5(S, glatt2([[32, 56, E7], [68, 56, E7], [70, 94, E7], [54, 94, E7], [50, 70], [46, 94, E7], [30, 94, E7]], true, 0.3), { ton: -0.06 }));
-    t5.push(flaeche5(S, rr3(32, 55, 36, 4, 1), { ton: -0.18 }), motiv2("einhorn", 50, 30, 16));
+    t5.push(flaeche5(S, rr3(32, 55, 36, 4, 1), { ton: -0.18 }), motiv3("einhorn", 50, 30, 16));
   });
   neu("k_sandale", "schuhe", "leder", "marine", (S, t5, p2) => {
     SCHUH_ZEICHNER.q28sandale(S, t5, p2);
-    t5.push(motiv2("blume", 47, 41, 13), motiv2("herz", 66, 46, 8));
+    t5.push(motiv3("blume", 47, 41, 13), motiv3("herz", 66, 46, 8));
   });
   neu("k_badeschuh", "schuhe", "gummi", "#5f9a4a", (S, t5) => {
     t5.push(boden8(50, 82, 40, 2.6));
@@ -170914,12 +171045,12 @@ void main() {
   neu("k_kindershampoo", "beauty", "kunststoff", "hellblau", (S, t5) => {
     t5.push(boden8(50, 90, 18, 2));
     t5.push(form(S, "M34 30 Q34 22 42 20 L58 20 Q66 22 66 30 L68 84 Q68 88 64 88 L36 88 Q32 88 32 84 Z", S.c, { licht: "rund", glanz: true }), form(S, rr3(40, 8, 20, 13, 3), "#f1cf4a"));
-    t5.push(`<rect x="36" y="44" width="28" height="30" rx="3" fill="#fbf7ee"/>`, motiv2("wal", 50, 56, 18), `<path d="M42 68 h16" stroke="#4f7fae" stroke-width="1.6"/>`);
+    t5.push(`<rect x="36" y="44" width="28" height="30" rx="3" fill="#fbf7ee"/>`, motiv3("wal", 50, 56, 18), `<path d="M42 68 h16" stroke="#4f7fae" stroke-width="1.6"/>`);
   });
   neu("k_zahnputzset", "beauty", "kunststoff", "mint", (S, t5) => {
     t5.push(boden8(46, 90, 32, 2.4));
     t5.push(`<g transform="rotate(-10 40 40)"><rect x="34" y="8" width="8" height="50" rx="4" fill="#f1cf4a"/><rect x="34" y="8" width="8" height="10" rx="2" fill="#fbf7ee"/><path d="M34 10 h-4 M34 13 h-4 M34 16 h-4" stroke="#7fc4d9" stroke-width="1.6"/></g>`);
-    t5.push(zylinder2(S, 44, 46, 88, 16, 4, S.c), motiv2("dino", 44, 66, 16));
+    t5.push(zylinder2(S, 44, 46, 88, 16, 4, S.c), motiv3("dino", 44, 66, 16));
     t5.push(`<g transform="rotate(14 78 70)"><path d="M70 50 L86 50 L84 88 L72 88 Z" fill="#fbf7ee" stroke="#a89c8a" stroke-width="0.5"/><rect x="74" y="44" width="8" height="6" rx="1" fill="#c8372f"/><rect x="72" y="60" width="12" height="10" fill="#f2b8cc"/></g>`);
   });
 
@@ -170983,7 +171114,7 @@ void main() {
     M2.tex = dessin(M2, "netz");
     t5.push(flaeche5(M2, "M58 26 Q80 28 82 60 L60 62 Z"));
     t5.push(flaeche5(S, "M18 62 Q16 22 52 20 Q62 22 60 62 Z"));
-    t5.push(flaeche5(S, "M16 60 Q46 64 80 60 Q86 68 88 74 Q50 80 14 74 Q12 66 16 60 Z", { ton: -0.15 }), motiv2("blitz", 38, 42, 16), `<circle cx="50" cy="21" r="2" fill="${dunkel2(S.c, 0.2)}"/>`);
+    t5.push(flaeche5(S, "M16 60 Q46 64 80 60 Q86 68 88 74 Q50 80 14 74 Q12 66 16 60 Z", { ton: -0.15 }), motiv3("blitz", 38, 42, 16), `<circle cx="50" cy="21" r="2" fill="${dunkel2(S.c, 0.2)}"/>`);
   }, { art: "cap" }, "muetze");
   neu2("t_schulrucksack", "tasche", "polyester", "schwarz", (S, t5) => {
     t5.push(boden8(50, 92, 32, 2.6));
@@ -170997,7 +171128,7 @@ void main() {
   neu2("t_stoffbeutel", "tasche", "baumwolle", "ecru", (S, t5) => {
     t5.push(boden8(50, 92, 30, 2.2));
     t5.push(`<path d="M32 40 Q30 6 42 6 Q48 6 46 40 M54 40 Q52 6 60 6 Q72 6 68 40" stroke="${dunkel2(S.c, 0.12)}" stroke-width="3.6" fill="none"/>`);
-    t5.push(flaeche5(S, "M22 38 L78 38 L80 92 L20 92 Z"), motiv2("grafik", 50, 64, 30));
+    t5.push(flaeche5(S, "M22 38 L78 38 L80 92 L20 92 Z"), motiv3("grafik", 50, 64, 30));
   });
   neu2("t_minirucksack", "tasche", "leder", "cognac", (S, t5) => {
     t5.push(boden8(50, 88, 26, 2.2));
@@ -171047,7 +171178,7 @@ void main() {
     t5.push(boden8(50, 82, 42, 2.6));
     t5.push(form(S, "M6 68 Q6 34 42 34 L70 40 Q92 46 92 64 L92 70 Q90 78 80 78 L16 80 Q6 80 6 68 Z", S.c, { glanz: true }), form(S, "M8 72 L92 70 L92 78 Q90 84 80 84 L16 84 Q8 84 8 76 Z", dunkel2(S.c, 0.2)));
     for (const [x2, y2] of [[18, 46], [26, 42], [34, 40], [42, 39], [22, 54], [30, 50], [38, 48]]) t5.push(`<circle cx="${x2}" cy="${y2}" r="1.8" fill="${dunkel2(S.c, 0.45)}"/>`);
-    t5.push(`<path d="M68 44 Q78 26 90 40" stroke="${dunkel2(S.c, 0.12)}" stroke-width="5" fill="none"/>`, motiv2("smiley", 30, 62, 9), motiv2("herz", 48, 60, 8), motiv2("stern", 62, 58, 8));
+    t5.push(`<path d="M68 44 Q78 26 90 40" stroke="${dunkel2(S.c, 0.12)}" stroke-width="5" fill="none"/>`, motiv3("smiley", 30, 62, 9), motiv3("herz", 48, 60, 8), motiv3("stern", 62, 58, 8));
   }, { art: "sneaker" }, "schuhe");
   neu2("t_lipgloss", "beauty", "glas", "rosa", (S, t5) => {
     t5.push(boden8(50, 90, 20, 2));
@@ -171060,7 +171191,7 @@ void main() {
     S.defs.push(`<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a7bd0"/><stop offset="1" stop-color="#e86aa0"/></linearGradient>`);
     t5.push(`<path d="M46 30 L66 30 L66 88 Q56 92 46 88 Z" fill="url(#${id})"/>`, `<path d="M46 30 L66 30 L66 88 Q56 92 46 88 Z" fill="${rund2(S)}"/>`, zylinder2(S, 56, 22, 30, 10, 2.6, "#c9ced3", { metall: true }), form(S, rr4(50, 12, 12, 11, 2), "#fbf7ee"), `<circle cx="50.5" cy="16" r="1" fill="#2a2c30"/>`);
     for (const [x2, y2, r4] of [[40, 16, 2.4], [32, 13, 3.4], [24, 18, 3], [20, 10, 2.4], [30, 22, 2.2], [14, 15, 2]]) t5.push(`<circle cx="${x2}" cy="${y2}" r="${r4}" fill="#c4a0dc" opacity="0.35"/>`);
-    t5.push(motiv2("stern", 56, 58, 12));
+    t5.push(motiv3("stern", 56, 58, 12));
   });
   neu2("t_lichterkette", "home", "kunststoff", "gelb", (S, t5) => {
     const pts = [];
@@ -171083,7 +171214,7 @@ void main() {
   });
   neu2("t_posterset", "home", "papier", "wei\xDF", (S, t5) => {
     t5.push(boden8(50, 90, 42, 2.4));
-    [[10, 30, 30, 42, "grafik", "#f6e7d0"], [36, 20, 30, 48, "regenbogen", "#e9eef2"], [64, 34, 26, 38, "smiley", "#fbf7ee"]].forEach(([x2, y2, w2, h4, m, g2]) => t5.push(`<rect x="${x2}" y="${y2}" width="${w2}" height="${h4}" fill="#2a2c30"/><rect x="${x2 + 2}" y="${y2 + 2}" width="${w2 - 4}" height="${h4 - 4}" fill="${g2}"/>`, motiv2(m, x2 + w2 / 2, y2 + h4 / 2, w2 * 0.55)));
+    [[10, 30, 30, 42, "grafik", "#f6e7d0"], [36, 20, 30, 48, "regenbogen", "#e9eef2"], [64, 34, 26, 38, "smiley", "#fbf7ee"]].forEach(([x2, y2, w2, h4, m, g2]) => t5.push(`<rect x="${x2}" y="${y2}" width="${w2}" height="${h4}" fill="#2a2c30"/><rect x="${x2 + 2}" y="${y2 + 2}" width="${w2 - 4}" height="${h4 - 4}" fill="${g2}"/>`, motiv3(m, x2 + w2 / 2, y2 + h4 / 2, w2 * 0.55)));
   });
   neu2("t_pinnwand", "home", "kork", "camel", (S, t5) => {
     t5.push(boden8(50, 92, 34, 2));
@@ -173037,7 +173168,7 @@ void main() {
   var ZG_MODEL = { kinder: "kinder", jung: "young", mitte: "adults", reif: "bestager" };
   var geschlechtVon = (wg) => /^herren|kinder\.jungen/.test(String(wg ?? "")) ? "herren" : "damen";
   var modelBild = (typ, farbe2, material3, wg, trendGruppe2, g2 = 150, b4) => typeof modelbildSVG === "function" ? modelbildSVG(typ, farbe2, material3, { geschlecht: geschlechtVon(wg), zielgruppe: ZG_MODEL[trendGruppe2] ?? "young", groesse: g2, hintergrund: null, ...bildOpt(typ, b4) }) : null;
-  var kachel = (typ, g2 = 76) => typeof typKachelSVG === "function" ? typKachelSVG(typ, g2, bildOpt(typ)) : bild2(typ, void 0, void 0, g2);
+  var kachel2 = (typ, g2 = 76) => typeof typKachelSVG === "function" ? typKachelSVG(typ, g2, bildOpt(typ)) : bild2(typ, void 0, void 0, g2);
   var sternNr = 0;
   function sterne(x2, g2 = 18) {
     let h4 = '<span class="sterne">';
@@ -173168,7 +173299,7 @@ void main() {
       h4 += markenwahl(L3);
       h4 += fachSegmente(ui) + zielChips(K3, ui);
       h4 += '<div class="q24-anzahl">' + typen.length + " Artikeltypen \xB7 Kategorie \xF6ffnen und Artikel ausw\xE4hlen</div>";
-      h4 += sortimentBedienung(K3, ui, typen, kachel, "detailTyp");
+      h4 += sortimentBedienung(K3, ui, typen, kachel2, "detailTyp");
       return { titel: "Sortiment", unter: esc2(M2.name) + " \xB7 " + typen.length + " passende Typen", html: h4 };
     }
     function detail2() {
@@ -173237,7 +173368,7 @@ void main() {
         h4 += '<div class="vtitel">Sortiment w\xE4hlen</div>';
         h4 += fachSegmente(ui) + zielChips(K3, ui);
         h4 += '<div class="q24-anzahl">' + typen.length + " Artikeltypen f\xFCr " + esc2(M2.name) + "</div>";
-        h4 += sortimentBedienung(K3, ui, typen, kachel, "typ", voll2);
+        h4 += sortimentBedienung(K3, ui, typen, kachel2, "typ", voll2);
         return { titel: "Neues Produkt", unter: esc2(M2.name) + " \xB7 Kategorie und Artikeltyp", html: h4 };
       }
       if (ui.neuSchritt === 1) {
@@ -173547,7 +173678,7 @@ void main() {
   var NAME2 = "hartwig-spielstand";
   var STORE = "staende";
   var INFOS = "informationen";
-  var FORMAT = 2;
+  var FORMAT2 = 2;
   var PLAETZE = ["autosave", "platz-1", "platz-2", "platz-3"];
   var MAX_DATEI = 40 * 1024 * 1024;
   var MAX_INHALT = 160 * 1024 * 1024;
@@ -173690,7 +173821,7 @@ void main() {
   }
   function pruefen(datensatz) {
     if (!datensatz) return null;
-    if (datensatz.format !== FORMAT || datensatz.spiel?.version !== 2)
+    if (datensatz.format !== FORMAT2 || datensatz.spiel?.version !== 2)
       throw new Error("Dieser Spielstand hat ein altes, nicht mehr unterst\xFCtztes Format (Ma\xDFstab-Version 2 erforderlich). Der alte Stand wurde nicht ver\xE4ndert. Bitte ein neues Spiel starten oder den Stand l\xF6schen.");
     const s2 = datensatz.spiel;
     if (!Number.isInteger(s2.woche) || s2.woche < 0 || !Number.isFinite(s2.cash) || !Array.isArray(s2.haeuser) || !Array.isArray(s2.historie) || !s2.hq || !s2.einkauf || !s2.eigenmarken || !s2.vorstand || !s2.produkte || !s2.marketing?.stand)
@@ -173754,7 +173885,7 @@ void main() {
       platzPruefen(platz);
       if (!spiel2 || spiel2.version !== 2) throw new Error("Kein g\xFCltiges Spiel gestartet.");
       const kopf = {
-        format: FORMAT,
+        format: FORMAT2,
         datum: importDatum && Number.isFinite(new Date(importDatum).getTime()) ? new Date(importDatum).toISOString() : (/* @__PURE__ */ new Date()).toISOString(),
         stadt,
         name: String(name2 || (platz === "autosave" ? "Automatisch" : "Spielstand")).trim().slice(0, 60),
@@ -174612,7 +174743,7 @@ void main() {
     const region = typeof stadt === "string" ? "" : stadt.region;
     return STADT[name2] ?? TYP4[typ] ?? (/nord/i.test(region) ? "hafen" : /ost/i.test(region) ? "altstadt" : "rathaus");
   }
-  function stadtSymbolSVG2(stadt) {
+  function stadtSymbolSVG(stadt) {
     const art = stadtSymbolArt(stadt);
     return '<svg class="reise-wahrzeichen" viewBox="0 0 60 60" focusable="false" aria-hidden="true"><rect x="0.5" y="0.5" width="59" height="59" rx="9" fill="#eef1f2" stroke="#dce3e6"/><g fill="none" stroke="#3b5e70" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">' + ART2[art] + "</g></svg>";
   }
@@ -174659,7 +174790,7 @@ void main() {
   var vorschauen = /* @__PURE__ */ new Map();
   function stadtVorschau(c) {
     const data = vorschauen.get(c.name);
-    return '<span class="reise-vorschaurahmen">' + (data ? '<img src="' + data + '" alt="" loading="lazy">' : stadtSymbolSVG2(c)) + "</span>";
+    return '<span class="reise-vorschaurahmen">' + (data ? '<img src="' + data + '" alt="" loading="lazy">' : stadtSymbolSVG(c)) + "</span>";
   }
   var zug3 = '<svg class="reise-zug" viewBox="0 0 780 180" aria-hidden="true"><path d="M42 85 Q72 37 153 32 L598 32 Q693 37 748 106 L754 134 Q747 148 717 151 L82 151 Q43 142 42 115Z" fill="#f7f8f9" stroke="#a5b1ba" stroke-width="5"/><path d="M44 118 L748 118" stroke="#cf392e" stroke-width="17"/><path d="M75 76 Q102 43 170 45 L222 45 L222 88 L62 88Z M246 45 H350 V88 H246Z M373 45 H475 V88 H373Z M497 45 H601 V88 H497Z M621 53 Q685 66 712 95 H621Z" fill="#263d50"/><path d="M76 150 L711 150" stroke="#59636c" stroke-width="7"/></svg>';
   function reiseModul(ctx) {
@@ -174886,7 +175017,7 @@ void main() {
     reduziert: 150
   });
   var eur3 = (n3) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(Math.round(n3 ?? 0)) + " \u20AC";
-  var kurve3 = (t5) => 1 - (1 - t5) ** 2;
+  var kurve2 = (t5) => 1 - (1 - t5) ** 2;
   var reduziert = () => effektiveAnimation() !== "voll";
   var ohneAnimation2 = () => new URLSearchParams(location.search).has("ohne-animation");
   var warten2 = (ms) => new Promise((r4) => setTimeout(r4, ms));
@@ -175008,7 +175139,7 @@ void main() {
         rolle: person3?.name ?? "Vorstand"
       };
     }
-    function zeile3(name2, wert, k5 = "") {
+    function zeile2(name2, wert, k5 = "") {
       return '<div class="wb-zeile ' + k5 + '"><span>' + esc2(name2) + "</span><strong>" + esc2(wert) + "</strong></div>";
     }
     function berichtZeigen(meins) {
@@ -175027,7 +175158,7 @@ void main() {
           zeilen: [z6("Cash operativ", f13.operativ), z6("Investitionen", f13.investitionen), z6("Finanzierung", f13.finanzierung), z6("Sonstiges", f13.sonstiges)],
           summe: z6("Cash netto", f13.netto),
           pruefen: Math.abs(f13.operativ + f13.investitionen + f13.finanzierung + f13.sonstiges - f13.netto) < 2
-        }) + zeile3("Cash-Bestand", eur3(f13.bestand), "wb-summe");
+        }) + zeile2("Cash-Bestand", eur3(f13.bestand), "wb-summe");
       })() + "</div>" + (bericht2.phase === "insolvenz" ? '<div class="wb-insolvenz"><strong>Insolvenzbarometer</strong><span>Freier Kreditrahmen: ' + eur3(bericht2.kredite) + " \xB7 Liquidit\xE4tsreichweite: " + bericht2.runway + " Wochen</span></div>" : "") + '<div class="wb-zeitung hk-papier"><div class="wb-zeitungskopf"><small>KW ' + bericht2.kw + " / " + bericht2.jahr + '</small><h3>Der Handelsbote</h3><nav>Top \xB7 Handel \xB7 Konzern \xB7 Markt \xB7 Politik</nav></div><div class="wb-titelbild">' + (ausgabe ? zeitungsBild(ausgabe.aufmacher.bild, ausgabe.nummer) : "") + "</div><h4>" + esc2(titel) + '</h4><button type="button" class="wb-zeitung-lesen" data-wa="zeitung">Ausgabe lesen und Archiv \xF6ffnen</button>' + nachricht(m[1], 1) + nachricht(m[2], 2) + (!m.length ? "<p>Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.</p>" : "") + (bericht2.erfolge.length ? '<div class="wb-erfolge"><strong>Neu: ' + bericht2.erfolge.map((e) => esc2(e.titel)).join(", ") + "</strong></div>" : "") + '</div></div><div id="wb-vorfall"></div></section>';
       node.hidden = false;
       node.className = "bericht-ein";
@@ -175038,7 +175169,7 @@ void main() {
       const zaehlBeginn = performance.now() + (originalDauer ? WOCHEN_ZEIT.berichtEin : 0);
       let abgeschlossen = false;
       function zahlen(t5 = performance.now(), sprung = false) {
-        const f13 = sprung || !originalDauer ? 1 : kurve3(Math.max(0, Math.min(1, (t5 - zaehlBeginn) / originalDauer)));
+        const f13 = sprung || !originalDauer ? 1 : kurve2(Math.max(0, Math.min(1, (t5 - zaehlBeginn) / originalDauer)));
         const u = node.querySelector("#wb-umsatz"), e = node.querySelector("#wb-ebitda");
         if (!u || !e || meins !== token) return;
         u.textContent = eur3(bericht2.umsatz * f13);
@@ -175145,107 +175276,404 @@ void main() {
   // src/ui/it-produkte.js
   var zahl2 = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
   var anzahl = (n3) => zahl2.format(Number(n3) || 0);
-  var iconPfad = {
-    kundenkarte: '<rect x="7" y="15" width="104" height="65" rx="8"/><path d="M8 35h102M20 52h30M20 63h42"/><circle cx="91" cy="61" r="9"/>',
-    hartwig_app: '<rect x="31" y="7" width="59" height="84" rx="11"/><path d="M52 16h17M57 82h8"/><rect x="42" y="29" width="37" height="31" rx="4"/><path d="M50 39h21M50 46h15M50 53h11"/>',
-    kasse: '<path d="M18 43h85v40H18zM26 43V22h68v21M26 62h68M37 72h30"/><rect x="36" y="13" width="49" height="21" rx="3"/><path d="M47 22h27M82 72h8"/>',
-    mobile_pay: '<rect x="43" y="7" width="39" height="83" rx="8"/><path d="M57 18h12M60 80h5M53 48h19M53 56h11M20 33q-12 15 0 29M29 40q-6 8 0 15M98 33q12 15 0 29M89 40q6 8 0 15"/>'
-  };
-  var itIllustration = (id) => '<svg class="itp-bild" viewBox="0 0 120 100" role="img" aria-label="' + esc2({ kundenkarte: "Kundenkarte", hartwig_app: "Smartphone-App", kasse: "Kassenterminal", mobile_pay: "Mobiles Bezahlen" }[id] ?? "IT-Produkt") + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (iconPfad[id] ?? "") + "</svg>";
-  function sterne2(n3) {
-    return '<span class="itp-sterne" aria-label="' + n3 + ' von 5 Qualit\xE4tssternen">' + Array.from({ length: 5 }, (_, i) => '<svg viewBox="0 0 24 24" aria-hidden="true" class="' + (i < n3 ? "voll" : "") + '"><path d="m12 2 3.15 6.38 7.04 1.02-5.09 4.96 1.2 7.01L12 18.07l-6.3 3.3 1.2-7.01-5.09-4.96 7.04-1.02Z"/></svg>').join("") + "</span>";
-  }
+  var version2 = (v2) => String(v2 ?? "").replace(".", ",");
+  var motiv4 = (id) => kanalBildSVG(id).replace(/<rect width="190" height="160" rx="8" fill="#f0eee9"\/><rect y="140" width="190" height="20" fill="#e2dfd8"\/>/, "");
+  var itIllustration = (id) => ({ kundenkarte: SYMBOLE.kommentare, hartwig_app: motiv4("social"), kasse: SYMBOLE.kosten, mobile_pay: motiv4("online") })[id] ?? SYMBOLE.zentrale;
+  var STERN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m12 2 3.15 6.38 7.04 1.02-5.09 4.96 1.2 7.01L12 18.07l-6.3 3.3 1.2-7.01-5.09-4.96 7.04-1.02Z"/></svg>';
+  var sterne2 = (n3) => `<span class="hw-sterne hw-g3-sterne" role="img" aria-label="${n3} von 5 Qualit\xE4tssternen">${Array.from({ length: 5 }, (_, i) => `<i class="${i < n3 ? "" : "aus"}">${STERN}</i>`).join("")}</span>`;
   var status = (p2) => {
     const neu3 = p2.aktiv && p2.version === "0.0";
-    return '<span class="itp-status ' + (p2.aktiv && !neu3 ? "" : "aus") + '">' + (neu3 ? "Noch nicht eingef\xFChrt" : p2.aktiv ? "Aktiv" : "Abgeschaltet") + "</span>";
+    return marke4(neu3 ? "Noch nicht eingef\xFChrt" : p2.aktiv ? "Aktiv" : "Abgeschaltet", neu3 ? "achtung" : p2.aktiv ? "gut" : "schlecht");
   };
-  var formatAenderung = (p2) => {
-    if (p2.aenderung === void 0) return '<span class="itp-delta">Ab der zweiten Woche vergleichbar</span>';
-    const d4 = p2.aenderung, zeichen = d4 > 0 ? "+" : d4 < 0 ? "\u2212" : "\xB1";
-    const quote = p2.aenderungQuote === void 0 ? "" : " (" + (p2.aenderungQuote > 0 ? "+" : "") + (p2.aenderungQuote * 100).toFixed(1).replace(".", ",") + " %)";
-    return '<span class="itp-delta ' + (d4 > 0 ? "positiv" : d4 < 0 ? "negativ" : "") + '">' + zeichen + anzahl(Math.abs(d4)) + " zur Vorwoche" + quote + "</span>";
-  };
-  function kurve4(p2) {
+  var aenderung = (p2) => p2.aenderung === void 0 ? "ab der zweiten Woche vergleichbar" : abweichung(p2.aenderung, `${p2.aenderung > 0 ? "+" : p2.aenderung < 0 ? "\u2212" : "\xB1"}${anzahl(Math.abs(p2.aenderung))}`, p2.aenderungQuote ?? null);
+  function kurve3(p2) {
     const v2 = p2.verlauf;
-    if (v2.length < 2) return '<p class="itp-leer">Ein Verlauf ist ab der zweiten Woche verf\xFCgbar.</p>';
+    if (v2.length < 2) return leer3("Ein Verlauf ist ab der zweiten Woche verf\xFCgbar.");
     const min = Math.min(...v2.map((x2) => x2.wert)), max = Math.max(...v2.map((x2) => x2.wert));
-    const breite = 300, hoehe = 90, rand = 9;
-    const punkte2 = v2.map((x2, i) => {
-      const px2 = rand + i * (breite - 2 * rand) / (v2.length - 1);
-      const py2 = min === max ? hoehe / 2 : hoehe - rand - (x2.wert - min) / (max - min) * (hoehe - 2 * rand);
-      return { px: px2, py: py2 };
-    });
-    const str = punkte2.map(({ px: px2, py: py2 }) => px2.toFixed(1) + "," + py2.toFixed(1)).join(" ");
-    const labels = v2.map((x2) => "<span><b>KW " + (x2.woche % 52 + 1) + "</b>" + anzahl(x2.wert) + "</span>").join("");
-    return '<div class="itp-verlauf"><svg viewBox="0 0 300 90" aria-hidden="true" preserveAspectRatio="none"><path d="M9 45H291" class="itp-raster"/><polyline points="' + str + '" class="itp-linie"/>' + punkte2.map(({ px: px2, py: py2 }) => '<circle cx="' + px2 + '" cy="' + py2 + '" r="3.5" class="itp-punkt"/>').join("") + '</svg><div class="itp-achse" aria-label="Wochenwerte">' + labels + "</div></div>";
+    const B8 = 350, H = 110, R11 = 14;
+    const pt2 = v2.map((x2, i) => [R11 + i * (B8 - 2 * R11) / (v2.length - 1), min === max ? H / 2 : H - R11 - (x2.wert - min) / (max - min) * (H - 2 * R11)]);
+    return `<div class="hw-g3-kurve"><svg viewBox="0 0 ${B8} ${H}" role="img" aria-label="Verlauf ${esc2(p2.einheit)} \xFCber ${v2.length} Wochen"><polyline points="${pt2.map(([x2, y2]) => x2.toFixed(1) + "," + y2.toFixed(1)).join(" ")}"/>` + pt2.map(([x2, y2], i) => `<circle cx="${x2.toFixed(1)}" cy="${y2.toFixed(1)}" r="${i === pt2.length - 1 ? 8 : 5.5}"${i === pt2.length - 1 ? ' class="letzter"' : ""}/>`).join("") + `</svg><div class="hw-balkenfuss">${v2.map((x2) => `<span>KW ${(x2.woche % 52 + 52) % 52 + 1}</span>`).join("")}</div></div>`;
   }
   function itProdukteKarten(produkte2, quelle2 = "it") {
-    return '<div class="itp-intro">Vier digitale Produkte von Hartwig. Die Kennzahlen stammen aus Marketing, Filialumsatz und E-Commerce.</div><div class="itp-karten">' + produkte2.map(
-      (p2) => '<button type="button" class="itp-karte" data-' + quelle2 + '="produkt" data-' + (quelle2 === "it" ? "v" : "id") + '="' + esc2(p2.id) + '" aria-label="' + esc2(p2.name) + ' \xF6ffnen"><span class="itp-visual">' + itIllustration(p2.id) + '</span><span class="itp-karteinhalt"><span class="itp-kartenkopf"><b>' + esc2(p2.name) + "</b>" + status(p2) + '</span><span class="itp-kurz">' + esc2(p2.beschreibung[0]) + '</span><strong class="itp-kartenzahl">' + anzahl(p2.kennzahl) + '</strong><span class="itp-einheit">' + esc2(p2.einheit) + '</span><span class="itp-kartenfuss">Version ' + esc2(p2.version) + " \xB7 Team " + anzahl(p2.team) + ' <span aria-hidden="true">\u2192</span></span></span></button>'
-    ).join("") + "</div>";
+    const karten = produkte2.map((p2) => `<button type="button" class="hw-g3-produkt" data-${quelle2}="produkt" data-${quelle2 === "it" ? "v" : "id"}="${esc2(p2.id)}" aria-label="${esc2(p2.name)} \xF6ffnen"><span class="hw-g3-bild" aria-hidden="true">${itIllustration(p2.id)}</span><span class="hw-karte-titel">${esc2(p2.name)}</span><span class="hw-g3-mitte">${status(p2)}</span><span class="hw-lese hw-g3-text">${esc2(p2.beschreibung[0])}</span><span class="hw-marke">${esc2(p2.einheit)}</span><b class="hw-zahl">${anzahl(p2.kennzahl)}</b><span class="hw-abw">${aenderung(p2)}</span><span class="hw-g3-fuss"><span>Version ${version2(p2.version)}</span>${sterne2(p2.sterne)}<span>Team ${anzahl(p2.team)}</span></span></button>`);
+    return rumpf2(abschnitt("Digitale Produkte", `${produkte2.length} Produkte, antippen`)) + karussell(karten, { label: "Digitale Produkte" }) + rumpf2('<p class="hw-lese hw-g3-notiz">Die Kennzahlen stammen aus Marketing, Filialumsatz und E-Commerce.</p>');
   }
   function itProduktDetail(p2, bestaetigen = false) {
-    const beschreibung = p2.beschreibung.map((t5) => "<p>" + esc2(t5) + "</p>").join("");
-    const teamHinweis = "Zus\xE4tzliche IT-Mitarbeiter erh\xF6hen die laufenden Kosten um 1.400 \u20AC je Person und Woche.";
-    return '<div class="itp-detail"><button type="button" class="itp-zurueck" data-it="zurueck">\u2190 Alle Produkte</button><div class="itp-hero"><div class="itp-heroillustration">' + itIllustration(p2.id) + '</div><div class="itp-herotext"><span class="itp-ueber">DIGITALES PRODUKT</span><h3>' + esc2(p2.name) + "</h3>" + status(p2) + '</div></div><div class="itp-beschreibung">' + beschreibung + '</div><section class="itp-abschnitt"><div class="itp-abschnittkopf"><h4>Letzte Woche</h4><span>' + esc2(p2.einheit) + '</span></div><div class="itp-hauptzahl">' + anzahl(p2.kennzahl) + "</div>" + formatAenderung(p2) + kurve4(p2) + '</section><section class="itp-abschnitt"><h4>Version und Qualit\xE4t</h4><div class="itp-datenzeile"><span>Installierte Version</span><b>' + esc2(p2.version) + '</b></div><div class="itp-datenzeile"><span>Qualit\xE4t</span>' + sterne2(p2.sterne) + '</div><div class="itp-datenzeile"><span>Systemgeneration</span><b>' + p2.generation + ' von 4</b></div><button type="button" class="itp-taste sekund" data-it="modernisieren" data-v="' + esc2(p2.id) + '">Version modernisieren</button></section><section class="itp-abschnitt"><h4>Zugewiesenes Team</h4><div class="itp-team"><strong>' + anzahl(p2.team) + '</strong><span>Personen</span><button type="button" class="itp-taste sekund" data-it="team" data-n="-3" data-v="' + esc2(p2.id) + '"' + (p2.team < 3 ? " disabled" : "") + ' aria-label="Drei Personen abziehen">\u22123</button><button type="button" class="itp-taste primaer" data-it="team" data-n="3" data-v="' + esc2(p2.id) + '"' + (p2.team >= 30 ? " disabled" : "") + '>+3</button></div><p class="itp-hinweis">' + teamHinweis + " Aktuell: " + anzahl(p2.teamKostenWoche) + ' \u20AC pro Woche.</p></section><section class="itp-abschnitt"><h4>Produktkennzahlen</h4>' + p2.details.map(([t5, v2]) => '<div class="itp-datenzeile"><span>' + esc2(t5) + "</span><b>" + esc2(typeof v2 === "number" ? anzahl(v2) : String(v2)) + "</b></div>").join("") + '</section><section class="itp-abschnitt itp-gefahr"><h4>Betrieb</h4>' + (bestaetigen ? '<p>Produkt wirklich abschalten? Die Auswirkung auf die Filialnachfrage wird ab der n\xE4chsten Woche ber\xFCcksichtigt.</p><div class="itp-aktionen"><button type="button" class="itp-taste sekund" data-it="abbrechen">Abbrechen</button><button type="button" class="itp-taste warnung" data-it="aktiv" data-v="' + esc2(p2.id) + '">Abschalten best\xE4tigen</button></div>' : "<p>" + (p2.aktiv ? "Bei Abschaltung wird der Betrieb dieses Produkts eingeschr\xE4nkt." : "Das Produkt ist abgeschaltet und kann wieder aktiviert werden.") + '</p><button type="button" class="itp-taste ' + (p2.aktiv ? "sekund" : "primaer") + '" data-it="' + (p2.aktiv ? "abschalten" : "aktiv") + '" data-v="' + esc2(p2.id) + '">' + (p2.aktiv ? "Abschalten" : "Wieder aktivieren") + "</button>") + "</section></div>";
+    let h4 = `<h3 class="hw-g3-produkttitel">${esc2(p2.name)}</h3><div class="hw-g3-vorstellung"><span class="hw-g3-bild" aria-hidden="true">${itIllustration(p2.id)}</span><div>${p2.beschreibung.map((t5) => `<p class="hw-lese">${esc2(t5)}</p>`).join("")}</div></div>`;
+    h4 += gross2([{ label: p2.einheit, wert: anzahl(p2.kennzahl), unter: aenderung(p2) }]);
+    h4 += kurve3(p2);
+    h4 += `<section class="hw-g3-version hw-kontur"><span class="hw-marke">Installierte Version</span><div class="hw-g3-versionzeile"><b class="hw-zahl">${version2(p2.version)}</b>${sterne2(p2.sterne)}</div><div class="hw-g3-mitte">${status(p2)}<span class="hw-feldunter">Systemgeneration ${p2.generation} von 4</span></div>` + knoepfe(knopf("Version modernisieren", `data-it="modernisieren" data-v="${esc2(p2.id)}"`, "zweit")) + "</section>";
+    h4 += abschnitt("Zugewiesenes Team", `${anzahl(p2.teamKostenWoche)} \u20AC je Woche`);
+    h4 += feld("Personen im Produktteam", stepper({
+      wert: `${anzahl(p2.team)} Personen`,
+      unter: "je Schritt drei Personen",
+      label: "Produktteam",
+      attrMinus: `data-it="team" data-n="-3" data-v="${esc2(p2.id)}"`,
+      attrPlus: `data-it="team" data-n="3" data-v="${esc2(p2.id)}"`,
+      minusAus: p2.team < 3,
+      plusAus: p2.team >= 30
+    }));
+    h4 += '<p class="hw-lese hw-g3-notiz">Jede zus\xE4tzliche Person kostet 1.400 \u20AC je Woche.</p>';
+    h4 += abschnitt("Produktkennzahlen");
+    h4 += liste(p2.details.map(([t5, v2]) => zeile({ was: esc2(t5), wert: esc2(typeof v2 === "number" ? anzahl(v2) : String(v2)) })));
+    h4 += abschnitt("Betrieb");
+    if (bestaetigen) h4 += hinweis("Produkt wirklich abschalten? Die Wirkung auf die Filialnachfrage z\xE4hlt ab der n\xE4chsten Woche.", "achtung") + knoepfe(knopf("Abbrechen", 'data-it="abbrechen"', "zweit"), knopf("Abschalten best\xE4tigen", `data-it="aktiv" data-v="${esc2(p2.id)}" data-gefahr`, "gefahr"));
+    else h4 += `<p class="hw-lese hw-g3-notiz">${p2.aktiv ? "Bei Abschaltung wird der Betrieb dieses Produkts eingeschr\xE4nkt." : "Das Produkt ist abgeschaltet und kann wieder aktiviert werden."}</p>` + knoepfe(p2.aktiv ? knopf("Abschalten", `data-it="abschalten" data-v="${esc2(p2.id)}" data-gefahr`, "gefahr") : knopf("Wieder aktivieren", `data-it="aktiv" data-v="${esc2(p2.id)}"`));
+    h4 += knoepfe(knopf("Alle Produkte", 'data-it="zurueck"', "text"));
+    return rumpf2(h4);
+  }
+
+  // src/ui/it.js
+  var REITER3 = [["systeme", "Systeme", "zentrale"], ["produkte", "Produkte", "post"], ["projekte", "Projekte", "umbau"], ["neu", "Neu", "leitung"]];
+  var ARTEN4 = [["kaufen", "Standardsoftware"], ["entwickeln", "Eigenentwicklung"], ["dienstleister", "Dienstleister"]];
+  var PHASEN = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
+  var prozent3 = (x2) => Math.round(x2 * 100) + " %";
+  var risikoText = (x2) => (x2 * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " %";
+  function digitalSprecher(E9, s2, text3, ton3 = "", bereich2 = "IT") {
+    const p2 = E9.vorstandUebersicht?.(s2)?.ressorts?.find((x2) => x2.id === "cdo")?.person;
+    return sprecher({ text: text3, ton: ton3, unter: p2 ? `${p2.name} \xB7 Digitalvorstand` : `Bereichsleitung ${bereich2}`, person: portraetSVG(p2?.portraet ?? zufallsMerkmale("bereich:" + bereich2), 72) });
+  }
+  function itModul(ctx) {
+    const { E: E9 } = ctx, s2 = () => ctx.s();
+    const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, produkt: null, bestaetigung: false };
+    const daten = () => E9.itUebersicht(s2());
+    const erlaubt = (art) => art === "dienstleister" ? [3] : art === "kaufen" ? [1, 2, 3] : [1, 2, 3, 4];
+    function systeme(d4) {
+      const reihe = [...d4.systeme].sort((a2, b4) => b4.risiko - a2.risiko || a2.generation - b4.generation);
+      const top = reihe[0], alt = reihe.filter((x2) => x2.generation <= 1 || x2.wartungGekuendigt);
+      let h4 = gross2([
+        { label: "H\xF6chstes Ausfallrisiko", wert: top ? risikoText(top.risiko) : "0 %", ton: top && top.risiko >= 0.01 ? "schlecht" : "", unter: top ? esc2(top.name) + " je Woche" : "" },
+        { label: "IT-Betrieb je Woche", wert: geld(d4.betriebskostenWoche), unter: `${d4.systeme.length} Systeme` }
+      ]);
+      h4 += abschnitt("Systemlandkarte", "nach Risiko");
+      h4 += liste(reihe.map((x2) => {
+        const bereiche = E9.SYSTEME[x2.id].bereiche.map((id) => E9.BEREICHE?.find((q2) => q2.id === id)?.name ?? id);
+        const akt = x2.verteilung.filter((c) => c.generation > x2.generation).length;
+        const unter = (x2.generation > 0 ? `Generation ${x2.generation} von 4 \xB7 ${Math.floor(x2.alter)} Jahre \xB7 ${geld(x2.kostenWoche)} je Woche` : "Noch nicht eingef\xFChrt, keine laufenden Kosten") + (x2.wartungGekuendigt ? '<br><span class="hw-schlecht">Wartung durch den Anbieter beendet</span>' : "") + (akt ? `<br>${akt} von ${x2.verteilung.length} Clustern schon modernisiert` : "") + `<br>Bremst: ${esc2(bereiche.slice(0, 3).join(", "))}${bereiche.length > 3 ? ` und ${bereiche.length - 3} weitere` : ""}`;
+        return zeile({ was: esc2(x2.name), unter, wert: risikoText(x2.risiko), wertUnter: "Ausfall je Woche", ton: x2.risiko >= 0.01 ? "schlecht" : "", tippbar: true, attr: `data-it="neues" data-v="${esc2(x2.id)}" aria-label="${esc2(x2.name)} modernisieren"` });
+      }));
+      const k5 = d4.systeme.find((x2) => x2.id === "kasse");
+      if (k5 && k5.generation >= 2) {
+        h4 += abschnitt("Kassenausbau", "Stufe von 2");
+        h4 += liste(["selbstbedienung", "mobil"].map((art) => {
+          const stufe2 = k5.kasseAusbau?.[art] ?? 0;
+          return `<div class="hw-zeile"><span class="hw-was">${art === "mobil" ? "Mobile Kasse" : "Selbstbedienungskassen"}<small>Stufe ${stufe2} von 2</small></span>${stufe2 < 2 ? knopf(`Stufe ${stufe2 + 1} beauftragen`, `data-it="kasseAusbau" data-v="${art}"`, "zweit") : marke4("ausgebaut", "gut")}</div>`;
+        }));
+      }
+      h4 += '<p class="hw-lese hw-g3-notiz">Digitalvorstand und IT-Leitung beeinflussen das Risiko von Verz\xF6gerungen und St\xF6rungen.</p>';
+      const befund2 = top && top.risiko >= 2e-3 ? `${esc2(top.name)} f\xE4llt mit ${risikoText(top.risiko)} je Woche am ehesten aus.` : `Alle ${d4.systeme.length} Systeme laufen stabil.`;
+      return { befund: befund2 + (alt.length ? ` ${alt.length} ${alt.length === 1 ? "System ist" : "Systeme sind"} veraltet.` : ""), ton: top && top.risiko >= 0.01 ? "engpass" : "", html: h4 };
+    }
+    function projekt(p2, d4) {
+      const alle = new Map(d4.cluster.map((c) => [c.id, c]));
+      let h4 = abschnitt(E9.SYSTEME[p2.system].name, `Generation ${p2.zielGeneration} \xB7 ${ARTEN4.find(([a2]) => a2 === p2.art)?.[1] ?? p2.art}`);
+      h4 += skalaGross(`${PHASEN[p2.phase]}, Fortschritt`, p2.fortschritt * 100, `<b class="hw-skala-wert">${prozent3(p2.fortschritt)}</b>`);
+      h4 += liste([
+        zeile({ was: "Kosten Ist / Plan", wert: `${geld(p2.kostenIst)} / ${geld(p2.kostenPlan)}`, ton: p2.kostenIst > p2.kostenPlan ? "schlecht" : "" }),
+        zeile({ was: "Mehrwochen durch Verzug", wert: String(p2.verzug), ton: p2.verzug > 0 ? "schlecht" : "" }),
+        zeile({ was: "Rollout", wert: `${p2.erledigteCluster.length} / ${p2.clusterIds.length} Cluster` })
+      ]);
+      if (p2.phase !== "abgeschlossen") {
+        const ordnen = p2.erledigteCluster.length === 0;
+        h4 += `<span class="hw-marke hw-feldname hw-g3-abstand">Rollout-Reihenfolge${ordnen ? ", vor dem ersten Cluster \xE4nderbar" : ""}</span>`;
+        h4 += liste(p2.clusterIds.map((id, i) => {
+          const c = alle.get(id), fertig2 = p2.erledigteCluster.includes(id);
+          const knoepfe2 = !fertig2 && ordnen ? `<span class="hw-g3-teamknoepfe">${knopf("fr\xFCher", `data-it="hoch" data-p="${esc2(p2.id)}" data-i="${i}" aria-label="${esc2(c?.name ?? id)} fr\xFCher"`, "zweit", i === 0)}${knopf("sp\xE4ter", `data-it="runter" data-p="${esc2(p2.id)}" data-i="${i}" aria-label="${esc2(c?.name ?? id)} sp\xE4ter"`, "zweit", i === p2.clusterIds.length - 1)}</span>` : marke4(fertig2 ? `Generation ${p2.zielGeneration}` : "geplant", fertig2 ? "gut" : "");
+          return `<div class="hw-zeile"><span class="hw-was">${i + 1}. ${esc2(c?.name ?? id)}</span>${knoepfe2}</div>`;
+        }));
+      }
+      return h4;
+    }
+    function projekte(d4) {
+      const aktiv7 = d4.projekte.filter((x2) => x2.phase !== "abgeschlossen"), alt = d4.projekte.filter((x2) => x2.phase === "abgeschlossen").slice(-8).reverse();
+      let h4 = gross2([{ label: "Laufende Projekte", wert: String(aktiv7.length) }, { label: "Planbudget offen", wert: geld(aktiv7.reduce((a2, p2) => a2 + Math.max(0, p2.kostenPlan - p2.kostenIst), 0)) }]);
+      h4 += '<p class="hw-lese hw-g3-notiz">Projekte durchlaufen Konzept, Umsetzung und einen Rollout Cluster f\xFCr Cluster. Vier Wochen nach jedem Wechsel sind lokale Startprobleme m\xF6glich.</p>';
+      h4 += aktiv7.length ? aktiv7.map((p2) => projekt(p2, d4)).join("") : abschnitt("Laufende Projekte") + leer3("\xDCber \u201ENeu\u201C beauftragst du das erste Projekt.", "Keine laufenden Projekte.");
+      if (alt.length) h4 += abschnitt("Abgeschlossene Projekte") + liste(alt.map((p2) => zeile({ was: esc2(E9.SYSTEME[p2.system].name), unter: `Generation ${p2.zielGeneration} \xB7 ${ARTEN4.find(([a2]) => a2 === p2.art)?.[1] ?? p2.art}`, wert: geld(p2.kostenIst), wertUnter: p2.verzug ? `${p2.verzug} Wochen Verzug` : "im Plan" })));
+      h4 += knoepfe(knopf("Neues Projekt planen", 'data-it="reiter" data-v="neu"', "zweit breit"));
+      const spaet = aktiv7.filter((p2) => p2.verzug > 0);
+      return { befund: aktiv7.length ? `${aktiv7.length} Projekte laufen${spaet.length ? `, ${spaet.length} davon mit Verzug` : ", alle im Plan"}.` : "Gerade l\xE4uft kein IT-Projekt.", ton: spaet.length ? "engpass" : "", html: h4 };
+    }
+    function auswahl4(d4) {
+      if (!ui.auswahl) {
+        const sys = d4.systeme.find((x2) => x2.id === ui.system);
+        ui.auswahl = new Set(d4.cluster.filter((c) => (sys?.verteilung.find((v2) => v2.id === c.id)?.generation ?? 0) < ui.generation).map((c) => c.id));
+      }
+      return ui.auswahl;
+    }
+    function neu3(d4) {
+      const sys = d4.systeme.find((x2) => x2.id === ui.system) ?? d4.systeme[0];
+      const ids = auswahl4(d4), ausgew = d4.cluster.filter((c) => ids.has(c.id));
+      const gen = (c) => sys.verteilung.find((v2) => v2.id === c.id)?.generation ?? sys.generation;
+      const zulaessig = erlaubt(ui.art).includes(ui.generation);
+      const plan2 = E9.itProjektPlan(s2(), ui.system, ui.art, ui.generation, ausgew.length);
+      const gens = erlaubt(ui.art);
+      let h4 = feld("System", stepper({ wert: sys.name, unter: `heute Generation ${sys.generation} von 4`, label: "System w\xE4hlen", attrMinus: 'data-it="system" data-v="-1"', attrPlus: 'data-it="system" data-v="1"' }));
+      h4 += '<div class="hw-abstand"></div>' + feld("Realisierung", stepper({ wert: ARTEN4.find(([a2]) => a2 === ui.art)[1], label: "Realisierung w\xE4hlen", attrMinus: 'data-it="art" data-v="-1"', attrPlus: 'data-it="art" data-v="1"' }));
+      h4 += '<div class="hw-abstand"></div>' + feld("Zielgeneration", stepper({ wert: `Generation ${ui.generation}`, unter: `m\xF6glich ${gens.join(", ")}`, label: "Zielgeneration", attrMinus: 'data-it="generation" data-v="-1"', attrPlus: 'data-it="generation" data-v="1"', minusAus: ui.generation <= gens[0], plusAus: ui.generation >= gens[gens.length - 1] }));
+      h4 += abschnitt("Vergleich", `${ausgew.length} Cluster`);
+      h4 += tabelle({ titel: "Realisierung", spalten: ["Wochen", "Kosten", "Risiko"], zeilen: ARTEN4.map(([art, name2]) => {
+        const g2 = art === "dienstleister" ? 3 : Math.min(ui.generation, art === "entwickeln" ? 4 : 3);
+        const x2 = E9.itProjektPlan(s2(), ui.system, art, g2, ausgew.length);
+        return { name: name2 + (art === ui.art ? " (gew\xE4hlt)" : ""), werte: [String(x2.gesamt), geld(x2.kosten), art === "entwickeln" ? "hoch" : art === "kaufen" ? "gering" : "mittel"] };
+      }) });
+      h4 += abschnitt("Rollout-Cluster", `${ausgew.length} von ${d4.cluster.length}`);
+      h4 += `<div class="hw-knoepfe zweispaltig">${knopf("Alle w\xE4hlen", 'data-it="alle"', "zweit")}${knopf("Keine w\xE4hlen", 'data-it="keine"', "zweit")}</div>`;
+      h4 += liste(d4.cluster.map((c) => gen(c) >= ui.generation ? zeile({ was: esc2(c.name), unter: `schon Generation ${gen(c)}`, wert: "erledigt" }) : schalter({ text: c.name, unter: `heute Generation ${gen(c)}`, an: ids.has(c.id), attr: `data-it="cluster" data-v="${esc2(c.id)}"` })));
+      h4 += abschnitt("Plan");
+      h4 += liste([zeile({ was: "Geplante Laufzeit", wert: `${plan2.gesamt} Wochen` }), zeile({ was: "Planbudget", wert: geld(plan2.kosten) })]);
+      h4 += knoepfe(knopf("Projekt beauftragen", 'data-it="start"', "breit", !ausgew.length || !zulaessig || ausgew.some((c) => gen(c) >= ui.generation)));
+      return { befund: `${esc2(sys.name)} auf Generation ${ui.generation}: ${plan2.gesamt} Wochen, ${geld(plan2.kosten)}.`, html: h4 };
+    }
+    function produkte2() {
+      const k5 = E9.itProdukte(s2()), p2 = k5.find((x2) => x2.id === ui.produkt);
+      if (p2) return { befund: `${esc2(p2.name)}: ${new Intl.NumberFormat("de-DE").format(p2.kennzahl)} ${esc2(p2.einheit)} letzte Woche.`, html: itProduktDetail(p2, ui.bestaetigung), roh: true };
+      const aus = k5.filter((x2) => !x2.aktiv || x2.version === "0.0");
+      return { befund: aus.length ? `${aus.map((x2) => esc2(x2.name)).join(" und ")} ${aus.length === 1 ? "l\xE4uft" : "laufen"} noch nicht.` : "Alle vier digitalen Produkte laufen.", html: itProdukteKarten(k5), roh: true };
+    }
+    function zeichnen2() {
+      if (!ui.aktiv) return;
+      const d4 = daten(), titel = { systeme: "Systemlandkarte", produkte: "Digitale Produkte", projekte: "IT-Projekte", neu: "Neues IT-Projekt" };
+      const r4 = ui.reiter === "systeme" ? systeme(d4) : ui.reiter === "produkte" ? produkte2() : ui.reiter === "projekte" ? projekte(d4) : neu3(d4);
+      const aktiv7 = d4.projekte.filter((x2) => x2.phase !== "abgeschlossen").length;
+      ctx.panel("IT \xB7 " + titel[ui.reiter], `Bereich IT \xB7 ${aktiv7} aktive Projekte`, bereich("zentrale", "zahlen") + digitalSprecher(E9, s2(), r4.befund, r4.ton) + '<i class="hw-g3" hidden></i>' + (r4.roh ? r4.html : rumpf2(r4.html)) + reiterUnten(REITER3, ui.reiter, (id) => `data-it="reiter" data-v="${id}"`), "gross");
+      ui.aktiv = true;
+    }
+    function melde2(r4) {
+      ctx.meldung(r4.text, !r4.ok);
+      if (r4.ok) ctx.nachAktion?.();
+      return r4;
+    }
+    function bearbeiten(el2) {
+      const v2 = el2.dataset.v, d4 = daten();
+      switch (el2.dataset.it) {
+        case "reiter":
+          ui.reiter = v2;
+          ui.auswahl = null;
+          ui.produkt = null;
+          ui.bestaetigung = false;
+          document.getElementById("pinhalt").scrollTop = 0;
+          break;
+        case "produkt":
+          ui.reiter = "produkte";
+          ui.produkt = v2;
+          ui.bestaetigung = false;
+          break;
+        case "zurueck":
+          ui.produkt = null;
+          ui.bestaetigung = false;
+          break;
+        case "abschalten":
+          ui.bestaetigung = true;
+          break;
+        case "abbrechen":
+          ui.bestaetigung = false;
+          break;
+        case "team":
+          melde2(E9.fuehreAus(s2(), { typ: "itProduktTeam", produkt: v2, anzahl: Number(el2.dataset.n) }));
+          break;
+        case "aktiv": {
+          const p2 = E9.itProdukte(s2()).find((x2) => x2.id === v2);
+          if (!p2) return;
+          melde2(E9.fuehreAus(s2(), { typ: "itProduktAktiv", produkt: v2, an: !p2.aktiv }));
+          ui.bestaetigung = false;
+          break;
+        }
+        case "modernisieren": {
+          const p2 = E9.itProdukte(s2()).find((x2) => x2.id === v2);
+          if (!p2) return;
+          if (v2 === "mobile_pay") {
+            const k5 = d4.systeme.find((x2) => x2.id === "kasse"), stufe2 = k5?.kasseAusbau?.mobil ?? 0;
+            if (k5?.generation >= 3) {
+              if (stufe2 >= 2) {
+                ctx.meldung("Mobile Kasse ist bereits vollst\xE4ndig ausgebaut.", false);
+                break;
+              }
+              melde2(E9.fuehreAus(s2(), { typ: "itKasseAusbau", art: "mobil", stufe: stufe2 + 1 }));
+              break;
+            }
+          }
+          ui.reiter = "neu";
+          ui.system = p2.system;
+          ui.generation = Math.max(3, p2.generation + 1);
+          ui.auswahl = null;
+          ui.produkt = null;
+          break;
+        }
+        case "neues":
+          ui.reiter = "neu";
+          ui.system = v2;
+          ui.auswahl = null;
+          ui.generation = 3;
+          break;
+        case "system": {
+          const i = d4.systeme.findIndex((x2) => x2.id === ui.system);
+          ui.system = d4.systeme[(i + Number(v2) + d4.systeme.length) % d4.systeme.length].id;
+          ui.auswahl = null;
+          ui.generation = 3;
+          break;
+        }
+        case "art": {
+          const i = ARTEN4.findIndex(([a2]) => a2 === ui.art);
+          ui.art = ARTEN4[(i + Number(v2) + ARTEN4.length) % ARTEN4.length][0];
+          if (ui.art === "dienstleister") ui.generation = 3;
+          else if (ui.art === "kaufen" && ui.generation > 3) ui.generation = 3;
+          ui.auswahl = null;
+          break;
+        }
+        case "generation": {
+          const g2 = erlaubt(ui.art), i = g2.indexOf(ui.generation);
+          ui.generation = g2[Math.max(0, Math.min(g2.length - 1, (i < 0 ? 0 : i) + Number(v2)))];
+          ui.auswahl = null;
+          break;
+        }
+        case "cluster": {
+          const ids = auswahl4(d4);
+          if (ids.has(v2)) ids.delete(v2);
+          else ids.add(v2);
+          break;
+        }
+        case "alle":
+          ui.auswahl = new Set(d4.cluster.filter((c) => (d4.systeme.find((x2) => x2.id === ui.system)?.verteilung.find((x2) => x2.id === c.id)?.generation ?? 0) < ui.generation).map((c) => c.id));
+          break;
+        case "keine":
+          ui.auswahl = /* @__PURE__ */ new Set();
+          break;
+        case "start": {
+          const clusterIds = d4.cluster.filter((c) => auswahl4(d4).has(c.id)).map((c) => c.id);
+          const r4 = melde2(E9.fuehreAus(s2(), { typ: "itProjekt", system: ui.system, art: ui.art, zielGeneration: ui.generation, clusterIds }));
+          if (r4.ok) ui.reiter = "projekte";
+          break;
+        }
+        case "hoch":
+        case "runter": {
+          const p2 = d4.projekte.find((x2) => x2.id === el2.dataset.p);
+          if (!p2) return;
+          const i = Number(el2.dataset.i), j4 = i + (el2.dataset.it === "hoch" ? -1 : 1);
+          if (j4 < 0 || j4 >= p2.clusterIds.length) return;
+          const ids = [...p2.clusterIds];
+          [ids[i], ids[j4]] = [ids[j4], ids[i]];
+          melde2(E9.fuehreAus(s2(), { typ: "itRolloutPlan", projekt: p2.id, clusterIds: ids }));
+          break;
+        }
+        case "kasseAusbau": {
+          const x2 = d4.systeme.find((q2) => q2.id === "kasse"), stufe2 = (x2.kasseAusbau?.[v2] ?? 0) + 1;
+          melde2(E9.fuehreAus(s2(), { typ: "itKasseAusbau", art: v2, stufe: stufe2 }));
+          break;
+        }
+        default:
+          return;
+      }
+      const pi = document.getElementById("pinhalt"), sc = pi.scrollTop;
+      zeichnen2();
+      if (!["reiter", "produkt", "zurueck", "neues", "modernisieren"].includes(el2.dataset.it)) pi.scrollTop = sc;
+      else pi.scrollTop = 0;
+    }
+    const auf = (ev) => {
+      if (!ui.aktiv) return;
+      const el2 = ev.target.closest("[data-it]");
+      if (el2 && !el2.disabled) bearbeiten(el2);
+    };
+    document.getElementById("pinhalt").addEventListener("click", auf);
+    document.getElementById("preiter").addEventListener("click", auf);
+    return {
+      oeffne: (seite2 = "systeme", produkt = null) => {
+        ui.aktiv = true;
+        ui.reiter = seite2;
+        ui.produkt = seite2 === "produkte" ? produkt : null;
+        ui.bestaetigung = false;
+        ui.auswahl = null;
+        zeichnen2();
+        document.getElementById("pinhalt").scrollTop = 0;
+      },
+      zu: () => {
+        ui.aktiv = false;
+      },
+      aktiv: () => ui.aktiv,
+      pruefe: () => ({ seite: ui.reiter, systeme: daten().systeme.length, projekte: daten().projekte.length })
+    };
   }
 
   // src/ui/ecommerce.js
-  var prozent3 = (x2, n3 = 1) => (100 * (x2 || 0)).toFixed(n3).replace(".", ",") + " %";
-  var zeile2 = (label, detail2, aktion2) => '<div class="zeile"><span class="was"><b>' + esc2(label) + "</b><i>" + esc2(detail2) + "</i></span>" + aktion2 + "</div>";
-  var schalter3 = (akt, wert, parameter = "") => '<button class="mini ' + (wert ? "gruen" : "") + '" data-online="' + akt + '" ' + parameter + ">" + (wert ? "Ein" : "Aus") + "</button>";
-  var knopfText = (akt, an, text3, id) => '<button class="mini' + (an ? " q-an-knopf" : "") + '" data-online="' + akt + '" data-id="' + esc2(id) + '" aria-pressed="' + !!an + '">' + text3 + "</button>";
+  var prozent4 = (x2, n3 = 1) => (100 * (x2 || 0)).toFixed(n3).replace(".", ",") + " %";
+  var vz = (x2) => (x2 < 0 ? "\u2212" : x2 > 0 ? "+" : "") + geld(Math.abs(x2));
+  var REITER4 = [["uebersicht", "Zahlen", "zahlen"], ["steuerung", "Steuerung", "leitung"], ["haeuser", "H\xE4user", "ueberblick"], ["produkte", "Produkte", "post"]];
+  var STUFEN = {
+    sortimentsbreite: ["Sortimentsbreite", [[0.45, "45 %"], [0.65, "65 %"], [0.8, "80 %"], [1, "100 %"]]],
+    verfuegbarkeit: ["Verf\xFCgbarkeit", [[0.7, "70 %"], [0.88, "88 %"], [0.95, "95 %"], [1, "100 %"]]],
+    lieferTage: ["Lieferzeit", [[1, "1 Tag"], [2, "2 Tage"], [3, "3 Tage"], [5, "5 Tage"], [7, "7 Tage"]]],
+    preisFaktor: ["Preisniveau", [[0.9, "\u221210 %"], [1, "Standard"], [1.1, "+10 %"], [1.2, "+20 %"]]]
+  };
   function ecommerceModul(ctx) {
     let offen = false, tab = "uebersicht";
     const state = () => ctx.E.ecommerceUebersicht(ctx.s());
+    function uebersicht(u) {
+      const wachstum = u.umsatz - u.basis, mitkauf = u.onlineEffekt - wachstum + u.kannibalisierung;
+      const v2 = u.verlauf, vor = v2.length > 1 ? v2[v2.length - 2] : null;
+      let h4 = gross2([
+        { label: "Deckungsbeitrag online", wert: geld(u.deckungsbeitrag), ton: u.deckungsbeitrag < 0 ? "schlecht" : "gut", unter: vor ? abweichung(u.deckungsbeitrag - vor.deckungsbeitrag, vz(u.deckungsbeitrag - vor.deckungsbeitrag)) : "erste Woche" },
+        { label: "Onlineumsatz Woche", wert: geld(u.umsatz), unter: vor ? abweichung(u.umsatz - vor.umsatz, vz(u.umsatz - vor.umsatz), vor.umsatz ? (u.umsatz - vor.umsatz) / vor.umsatz : null) : "erste Woche" }
+      ]);
+      const letzte = v2.slice(-5);
+      h4 += abschnitt("Umsatz und Deckungsbeitrag", letzte.length ? `KW ${letzte[0].woche % 52 + 1} bis ${letzte[letzte.length - 1].woche % 52 + 1}` : "");
+      h4 += balken6(letzte.map((q2) => ({ label: String(q2.woche % 52 + 1), a: q2.umsatz, b: q2.deckungsbeitrag })), ["Umsatz", "Deckungsbeitrag"]);
+      h4 += abschnitt(`Paketschein KW ${ctx.s().woche % 52 + 1}`, "hartwig.de");
+      h4 += liste([
+        zeile({ was: "Bestellungen", wert: fmt.format(u.bestellungen) }),
+        zeile({ was: "Kosten je Bestellung", wert: geld(u.kostenJeBestellung) }),
+        zeile({ was: "Anteil am Konzernumsatz", wert: prozent4(u.anteil) }),
+        zeile({ was: "Online-Conversion", wert: prozent4(u.conversion, 2) }),
+        zeile({ was: "Retourenquote", wert: prozent4(u.retourenquote), ton: u.retourenquote > 0.4 ? "schlecht" : "" }),
+        zeile({ was: "Click & Collect", unter: "Anteil der Bestellungen", wert: prozent4(u.clickCollectAnteil) })
+      ]);
+      const summe2 = (was, html) => zeile({ was, wert: html }).replace('class="hw-zeile"', 'class="hw-zeile hw-g3-summe"');
+      h4 += abschnitt("Umsatzbr\xFCcke online", "Woche");
+      h4 += `<div data-summenbuch="Umsatzbr\xFCcke Online">${liste([
+        zeile({ was: "Onlinewachstum gegen\xFCber Basis", unter: "Basis 8 % ist im Konzernumsatz schon enthalten", wert: `<span data-s="e">${vz(wachstum)}</span>` }),
+        zeile({ was: "Mitk\xE4ufe bei Abholung im Haus", wert: `<span data-s="e">${vz(mitkauf)}</span>` }),
+        zeile({ was: "Kannibalisierung in den H\xE4usern", wert: `<span data-s="e">${vz(-u.kannibalisierung)}</span>` }),
+        summe2("Effekt auf den Konzernumsatz", `<span data-summe="e" class="${u.onlineEffekt < 0 ? "hw-schlecht" : ""}">${vz(u.onlineEffekt)}</span>`)
+      ])}</div>`;
+      const gr = Object.entries(u.umsatzJeGruppe).sort((a2, b4) => b4[1] - a2[1]);
+      h4 += abschnitt("Warengruppen online", "Umsatz");
+      h4 += gr.length ? `<div data-summenbuch="Warengruppen online">${liste([
+        ...gr.map(([g2, x2]) => zeile({ was: esc2(ctx.E.GRUPPEN[g2]?.name ?? g2), wert: `<span data-s="u">${geld(x2)}</span>` })),
+        summe2("Summe", `<span data-summe="u">${geld(gr.reduce((a2, [, x2]) => a2 + x2, 0))}</span>`)
+      ])}</div>` : leer3("Noch kein Onlineumsatz.");
+      const befund2 = !u.bestellungen ? "Diese Woche gab es keine Onlinebestellung." : u.deckungsbeitrag < 0 ? `hartwig.de verliert ${geld(-u.deckungsbeitrag)} diese Woche. ${prozent4(u.retourenquote)} der Ware kommt zur\xFCck.` : `hartwig.de verdient ${geld(u.deckungsbeitrag)} bei ${fmt.format(u.bestellungen)} Bestellungen.`;
+      return { befund: befund2, ton: u.deckungsbeitrag < 0 ? "alarm" : "", html: rumpf2(h4) };
+    }
+    function steuerung2(u) {
+      let h4 = abschnitt("Online-Sortiment und Service");
+      h4 += Object.entries(STUFEN).map(([feld3, [name2, stufen]]) => {
+        const i = stufen.findIndex(([v2]) => String(v2) === String(u[feld3]));
+        return feld(name2, stepper({ wert: stufen[i]?.[1] ?? String(u[feld3]), label: name2, attrMinus: `data-online="stufe" data-feld="${feld3}" data-wert="-1"`, attrPlus: `data-online="stufe" data-feld="${feld3}" data-wert="1"`, minusAus: i <= 0, plusAus: i < 0 || i >= stufen.length - 1 }));
+      }).join('<div class="hw-abstand"></div>');
+      h4 += schalter({ text: "Click & Collect", unter: "Abholung nur in H\xE4usern mit Abholstation", an: u.clickCollect, attr: 'data-online="collect"' });
+      h4 += abschnitt("Fulfillment");
+      h4 += liste([zeile({ was: "Aktuelles Modell", unter: u.fulfillment === "eigen" ? "niedrigere Paketkosten, h\xF6here Fixkosten" : "variable Paketkosten", wert: u.fulfillment === "eigen" ? "Eigenes Lager" : "Dienstleister" })]);
+      if (u.projekt) h4 += hinweis(`Umstellung auf ${u.projekt.modell === "eigen" ? "eigenes Lager" : "Dienstleister"} ab KW ${u.projekt.bis % 52 + 1} \xB7 Investition ${geld(u.projekt.investition)}`);
+      else h4 += knoepfe(knopf(u.fulfillment === "eigen" ? "Zum Dienstleister wechseln" : "Eigenes Lager bauen", `data-online="fulfillment" data-wert="${u.fulfillment === "eigen" ? "dienstleister" : "eigen"}"`, "zweit breit"));
+      const an = u.cluster.filter((c) => c.aktiv).length;
+      h4 += abschnitt("Versand aus dem Haus", `${an} von ${u.cluster.length} Clustern`);
+      h4 += liste(u.cluster.map((c) => schalter({ text: clusterName3(ctx.s(), c.id), unter: `${c.haeuser} H\xE4user`, an: c.aktiv, attr: `data-online="cluster" data-id="${esc2(c.id)}"` })));
+      return { befund: `Lieferzeit ${STUFEN.lieferTage[1].find(([v2]) => v2 === u.lieferTage)?.[1] ?? u.lieferTage + " Tage"}, Versand aus ${an} von ${u.cluster.length} Clustern.`, html: rumpf2(h4) };
+    }
+    function haeuser(u) {
+      const an = u.haeuser.filter((a2) => a2.station).length;
+      let h4 = gross2([{ label: "H\xE4user mit Abholstation", wert: `${an} von ${u.haeuser.length}` }, { label: "Abholungen Woche", wert: fmt.format(u.haeuser.reduce((x2, a2) => x2 + a2.abholungen, 0)) }]);
+      if (!an) h4 += hinweis("Kein Haus hat eine Abholstation. Click & Collect braucht mindestens eine.", "achtung");
+      h4 += abschnitt("Abholstationen", "Station \xB7 Retouren");
+      h4 += liste(u.haeuser.map((a2) => `<div class="hw-zeile hw-g3-haus"><span class="hw-was">${esc2(a2.name)}<small>${esc2(a2.stadt)} \xB7 ${esc2(clusterName3(ctx.s(), a2.cluster))}</small>` + (a2.station ? `<small>Abholungen ${fmt.format(a2.abholungen)} \xB7 Versand ${fmt.format(a2.versand)} \xB7 Retouren ${fmt.format(a2.retouren)} \xB7 ${a2.instoreStunden.toFixed(1).replace(".", ",")} Logistikstunden</small>` : "") + `</span><span class="hw-g3-teamknoepfe">${a2.station ? knopf(a2.retourenAn ? "Retouren an" : "Retouren aus", `data-online="retouren" data-id="${esc2(a2.id)}" aria-pressed="${!!a2.retourenAn}"`, "zweit") + marke4("Station", "gut") : knopf("Station einrichten", `data-online="station" data-id="${esc2(a2.id)}"`, "zweit")}</span></div>`));
+      return { befund: an ? `${an} H\xE4user haben eine Abholstation.` : "Kein Haus hat eine Abholstation.", ton: an ? "" : "engpass", html: rumpf2(h4) };
+    }
     function anzeigen(behalten = false) {
       if (!offen) return;
-      const u = state(), vorher = behalten ? document.getElementById("pinhalt").scrollTop : 0;
-      let h4 = '<div class="tabs">' + [["uebersicht", "Kennzahlen"], ["steuerung", "Steuerung"], ["haeuser", "H\xE4user"], ["produkte", "IT-Produkte"]].map(([id, name2]) => '<button class="tab ' + (tab === id ? "an" : "") + '" data-online="tab" data-wert="' + id + '">' + name2 + "</button>").join("") + "</div>";
-      if (tab === "produkte") {
-        h4 += itProdukteKarten(ctx.E.itProdukte(ctx.s()), "online");
-      } else if (tab === "uebersicht") {
-        const wachstum = u.umsatz - u.basis, mitkauf = u.onlineEffekt - wachstum + u.kannibalisierung;
-        const vz2 = (x2) => (x2 < 0 ? "\u2212" : x2 > 0 ? "+" : "") + geld(Math.abs(x2));
-        h4 += '<div class="q31">';
-        h4 += '<div class="q-gross"><span class="q-label">Deckungsbeitrag online</span><span class="q-haupt ' + (u.deckungsbeitrag < 0 ? "q-minus" : "") + '">' + geld(u.deckungsbeitrag) + '</span><span class="q-neben"><b>' + geld(u.umsatz) + "</b>Onlineumsatz Woche</span></div>";
-        h4 += '<div class="q-befund">' + (u.bestellungen ? (u.deckungsbeitrag < 0 ? '<b class="q-minus">hartwig.de verliert Geld.</b> ' : "") + "<b>" + fmt.format(u.bestellungen) + "</b> Bestellungen zu je <b>" + geld(u.kostenJeBestellung) + "</b> Kosten, " + prozent3(u.retourenquote) + " gehen zur\xFCck." : "Diese Woche gab es keine Onlinebestellung.") + "</div>";
-        h4 += '<div class="q-buch q-paketschein"><div class="q-buch-kopf"><span>Paketschein KW ' + (ctx.s().woche % 52 + 1) + '</span><b>hartwig.de</b></div><div class="q-zeile"><span class="q-name">Anteil am Konzernumsatz</span><span class="q-wert">' + prozent3(u.anteil) + '</span></div><div class="q-zeile"><span class="q-name">Online-Conversion</span><span class="q-wert">' + prozent3(u.conversion, 2) + '</span></div><div class="q-zeile"><span class="q-name">Retourenquote</span><span class="q-wert">' + prozent3(u.retourenquote) + '</span></div><div class="q-zeile"><span class="q-name">Click & Collect<small>Anteil der Bestellungen</small></span><span class="q-wert">' + prozent3(u.clickCollectAnteil) + "</span></div></div>";
-        h4 += '<div class="q-buch" data-summenbuch="Umsatzbr\xFCcke Online"><div class="q-buch-kopf"><span>Umsatzbr\xFCcke Online</span><b>Woche</b></div><div class="q-zeile"><span class="q-name">Onlinewachstum gegen\xFCber Basis<small>Basis 8 % ist im Konzernumsatz schon enthalten</small></span><span class="q-wert" data-s="e">' + vz2(wachstum) + '</span></div><div class="q-zeile"><span class="q-name">Mitk\xE4ufe bei Abholung im Haus</span><span class="q-wert" data-s="e">' + vz2(mitkauf) + '</span></div><div class="q-zeile"><span class="q-name">Kannibalisierung in den H\xE4usern</span><span class="q-wert" data-s="e">' + vz2(-u.kannibalisierung) + '</span></div><div class="q-summe"><span>Effekt auf den Konzernumsatz</span><span data-summe="e" class="q-wert ' + (u.onlineEffekt < 0 ? "q-minus" : "") + '">' + vz2(u.onlineEffekt) + "</span></div></div>";
-        const v2 = u.verlauf.slice(-26);
-        if (v2.length < 2) h4 += '<div class="q-buch"><div class="q-leer">Ein Verlauf ist ab der zweiten Woche verf\xFCgbar.</div></div>';
-        else {
-          const max = Math.max(1, ...v2.map((q2) => q2.umsatz));
-          h4 += '<div class="q-buch"><div class="q-buch-kopf"><span>Onlineumsatz</span><b>' + v2.length + ' Wochen</b></div><div class="online-verlauf" style="padding:8px 14px 0">' + v2.map((q2) => '<div class="online-balken" style="height:' + Math.max(2, 100 * q2.umsatz / max) + '%" title="KW ' + (q2.woche % 52 + 1) + ": " + geld(q2.umsatz) + '"></div>').join("") + '</div><div class="q-zwischen" style="border:0"><span>KW ' + (v2[0].woche % 52 + 1) + "</span><span>KW " + (v2[v2.length - 1].woche % 52 + 1) + "</span></div></div>";
-        }
-        const gr = Object.entries(u.umsatzJeGruppe).sort((a2, b4) => b4[1] - a2[1]);
-        h4 += '<div class="q-buch" data-summenbuch="Warengruppen online"><div class="q-buch-kopf"><span>Warengruppen online</span><b>Umsatz</b></div>' + (gr.length ? gr.map(([g2, umsatz]) => '<div class="q-zeile"><span class="q-name">' + esc2(ctx.E.GRUPPEN[g2]?.name ?? g2) + '</span><span class="q-wert" data-s="u">' + geld(umsatz) + "</span></div>").join("") + '<div class="q-summe"><span>Summe</span><span class="q-wert" data-summe="u">' + geld(gr.reduce((a2, [, x2]) => a2 + x2, 0)) + "</span></div>" : '<div class="q-leer">Noch kein Onlineumsatz.</div>') + "</div>";
-        h4 += "</div>";
-      } else if (tab === "steuerung") {
-        const optionen3 = (id, werte3, aktuell, format) => '<div class="zeile"><span class="was">' + id + '</span><select class="ort" data-online="strategie" data-feld="' + format + '">' + werte3.map(([v2, t5]) => '<option value="' + v2 + '"' + (String(v2) === String(aktuell) ? " selected" : "") + ">" + t5 + "</option>").join("") + "</select></div>";
-        h4 += '<div class="karte"><div class="khead">Online-Sortiment und Service</div>';
-        h4 += optionen3("Sortimentsbreite", [[0.45, "45 %"], [0.65, "65 %"], [0.8, "80 %"], [1, "100 %"]], u.sortimentsbreite, "sortimentsbreite");
-        h4 += optionen3("Verf\xFCgbarkeit", [[0.7, "70 %"], [0.88, "88 %"], [0.95, "95 %"], [1, "100 %"]], u.verfuegbarkeit, "verfuegbarkeit");
-        h4 += optionen3("Lieferzeit", [[1, "1 Tag"], [2, "2 Tage"], [3, "3 Tage"], [5, "5 Tage"], [7, "7 Tage"]], u.lieferTage, "lieferTage");
-        h4 += optionen3("Preisniveau", [[0.9, "\u221210 %"], [1, "Standard"], [1.1, "+10 %"], [1.2, "+20 %"]], u.preisFaktor, "preisFaktor");
-        h4 += zeile2("Click & Collect", "Abholung nur in H\xE4usern mit Abholstation", schalter3("collect", u.clickCollect)) + "</div>";
-        h4 += '<div class="karte"><div class="khead">Fulfillment</div>' + zeile2("Aktuelles Modell", u.fulfillment === "eigen" ? "Eigenes Lager, niedrigere Paketkosten und Fixkosten" : "Dienstleister, variable Paketkosten", "");
-        if (u.projekt) h4 += zeile2("Projekt in Umsetzung", (u.projekt.modell === "eigen" ? "Eigenes Lager" : "Dienstleister") + " ab KW " + (u.projekt.bis % 52 + 1) + " \xB7 Investition " + geld(u.projekt.investition), "");
-        else h4 += '<div class="zeile"><button class="mini gruen" data-online="fulfillment" data-wert="' + (u.fulfillment === "eigen" ? "dienstleister" : "eigen") + '">' + (u.fulfillment === "eigen" ? "Zum Dienstleister wechseln" : "Eigenes Lager bauen") + "</button></div>";
-        h4 += '</div><div class="karte"><div class="khead">Versand aus dem Haus je Hauscluster</div>';
-        for (const c of u.cluster) h4 += zeile2(clusterName3(ctx.s(), c.id), c.haeuser + " H\xE4user", schalter3("cluster", c.aktiv, 'data-id="' + esc2(c.id) + '"'));
-        h4 += "</div>";
-      } else {
-        const an = u.haeuser.filter((a2) => a2.station).length;
-        h4 += '<div class="q31"><div class="q-gross"><span class="q-label">H\xE4user mit Abholstation</span><span class="q-haupt">' + an + " von " + u.haeuser.length + '</span><span class="q-neben"><b>' + fmt.format(u.haeuser.reduce((s2, a2) => s2 + a2.abholungen, 0)) + "</b>Abholungen Woche</span></div>";
-        if (!an) h4 += '<div class="q-befund">Kein Haus hat eine Abholstation. Click & Collect braucht mindestens eine.</div>';
-        h4 += '<div class="q-buch"><div class="q-buch-kopf"><span>Abholstationen</span><b>Station \xB7 Retouren</b></div>';
-        for (const a2 of u.haeuser) h4 += '<div class="q-zeile"><span class="q-name">' + esc2(a2.name) + "<small>" + esc2(a2.stadt) + " \xB7 " + esc2(clusterName3(ctx.s(), a2.cluster)) + "</small>" + (a2.station ? "<small>Abholungen " + fmt.format(a2.abholungen) + " \xB7 Versand " + fmt.format(a2.versand) + " \xB7 Retouren " + fmt.format(a2.retouren) + " \xB7 " + a2.instoreStunden.toFixed(1).replace(".", ",") + " Logistikstunden</small>" : "") + '</span><span class="q-knoepfe" style="grid-column:auto;padding:0">' + knopfText("station", a2.station, a2.station ? "Station an" : "Station einrichten", a2.id) + (a2.station ? knopfText("retouren", a2.retourenAn, a2.retourenAn ? "Retouren an" : "Retouren aus", a2.id) : "") + "</span></div>";
-        h4 += "</div></div>";
-      }
-      ctx.panel("Online", "hartwig.de \xB7 E-Commerce", bereich("zentrale") + '<i class="q31-marke" hidden></i>' + h4, "gross");
+      const u = state(), pi = document.getElementById("pinhalt"), vorher = behalten ? pi.scrollTop : 0;
+      const r4 = tab === "produkte" ? { befund: "Die Online-Kennzahlen speisen die digitalen Produkte der IT.", html: itProdukteKarten(ctx.E.itProdukte(ctx.s()), "online") } : tab === "steuerung" ? steuerung2(u) : tab === "haeuser" ? haeuser(u) : uebersicht(u);
+      ctx.panel("Online", "hartwig.de \xB7 E-Commerce", bereich("zentrale", "post") + digitalSprecher(ctx.E, ctx.s(), r4.befund, r4.ton, "E-Commerce") + '<i class="hw-g3" hidden></i>' + r4.html + reiterUnten(REITER4, tab, (id) => `data-online="tab" data-wert="${id}"`), "gross");
       offen = true;
-      document.getElementById("pinhalt").scrollTop = vorher;
+      pi.scrollTop = vorher;
     }
     function tun2(a2) {
       const r4 = ctx.E.fuehreAus(ctx.s(), a2);
@@ -175256,10 +175684,9 @@ void main() {
       }
       return r4;
     }
-    const panel2 = document.getElementById("pinhalt");
-    panel2.addEventListener("click", (ev) => {
+    const klick2 = (ev) => {
       const b4 = ev.target.closest("[data-online]");
-      if (!offen || !b4 || !panel2.contains(b4) || b4.tagName === "SELECT") return;
+      if (!offen || !b4 || b4.disabled) return;
       const id = b4.dataset.id, typ = b4.dataset.online;
       if (typ === "tab") {
         tab = b4.dataset.wert;
@@ -175276,12 +175703,14 @@ void main() {
         const x2 = state().haeuser.find((h4) => h4.id === id);
         if (x2) tun2({ typ: "onlineRetourenHaus", haus: id, an: !x2.retourenAn });
       } else if (typ === "fulfillment") tun2({ typ: "onlineFulfillment", modell: b4.dataset.wert });
-    });
-    panel2.addEventListener("change", (ev) => {
-      const el2 = ev.target;
-      if (!offen || el2.dataset.online !== "strategie") return;
-      tun2({ typ: "onlineStrategie", [el2.dataset.feld]: Number(el2.value) });
-    });
+      else if (typ === "stufe") {
+        const feld3 = b4.dataset.feld, stufen = STUFEN[feld3][1], u = state();
+        const i = stufen.findIndex(([v2]) => String(v2) === String(u[feld3])), j4 = Math.max(0, Math.min(stufen.length - 1, i + Number(b4.dataset.wert)));
+        if (j4 !== i) tun2({ typ: "onlineStrategie", [feld3]: stufen[j4][0] });
+      }
+    };
+    document.getElementById("pinhalt").addEventListener("click", klick2);
+    document.getElementById("preiter").addEventListener("click", klick2);
     return {
       oeffne: (seite2 = "uebersicht") => {
         offen = true;
@@ -175342,7 +175771,7 @@ void main() {
   // src/ui/haus.js
   var PROZENT = (x2) => (Number(x2) * 100).toFixed(1).replace(".", ",").replace("-", "\u2212") + " %";
   var p = (n3, stell = 0) => Number(n3 ?? 0).toFixed(stell).replace(".", ",").replace("-", "\u2212");
-  var REITER2 = [
+  var REITER5 = [
     ["ueberblick", "Haus", "ueberblick"],
     ["leitung", "Leitung", "leitung"],
     ["personal", "Personal", "personal"],
@@ -175356,7 +175785,7 @@ void main() {
   var POSTEN2 = { energie: "Energie", reinigung: "Reinigung", sicherheit: "Sicherheit", instandhaltung: "Instandhaltung", versicherung: "Versicherung" };
   var GRUENDE = { wetter: "Wetter", baustelle: "Baustelle vor dem Haus", ware: "Warenverf\xFCgbarkeit", personal: "Personaldeckung", konkurrenz: "Konkurrenzaktion", kasse: "Kassenausfall", stadtereignis: "Stadtereignis", sonstiges: "Sonstiges" };
   var MASS = { aktion: "Aktion vor Ort", springer: "Springer anfordern", umlagerung: "Ware umlagern", oeffnungszeit: "\xD6ffnungszeit anpassen" };
-  var STATUS_HAUS = { offen: "Ge\xF6ffnet", schliessung_verhandlung: "Schlie\xDFung in Verhandlung", raeumung: "R\xE4umungsverkauf", geschlossen: "Geschlossen", verkauft: "Verkauft" };
+  var STATUS_HAUS2 = { offen: "Ge\xF6ffnet", schliessung_verhandlung: "Schlie\xDFung in Verhandlung", raeumung: "R\xE4umungsverkauf", geschlossen: "Geschlossen", verkauft: "Verkauft" };
   var LAGE = { "1a": "1a-Lage", b: "B-Lage", center: "Center", stadtteil: "Stadtteilzentrum", rand: "Stadtrand" };
   var REGION4 = { ost: "Ost", west: "West", nord: "Nord", sued: "S\xFCd", mitte: "Mitte" };
   var etageKurz2 = (e) => e === -1 ? "UG" : e === 0 ? "EG" : `${e}. OG`;
@@ -175433,7 +175862,7 @@ void main() {
   }
   function befund(h4, k5, b4, vorjahr2, vorwoche) {
     const name2 = h4.personal?.filialleiter?.name ?? "Filialleitung";
-    if (h4.status !== "offen") return { text: `<b>${esc2(STATUS_HAUS[h4.status] ?? "Nicht ge\xF6ffnet")}.</b> Das Haus erwirtschaftet in diesem Zustand keinen regul\xE4ren Umsatz.`, ton: "alarm", name: name2 };
+    if (h4.status !== "offen") return { text: `<b>${esc2(STATUS_HAUS2[h4.status] ?? "Nicht ge\xF6ffnet")}.</b> Das Haus erwirtschaftet in diesem Zustand keinen regul\xE4ren Umsatz.`, ton: "alarm", name: name2 };
     if (!k5) return { text: "<b>Die erste Woche l\xE4uft noch.</b> Zahlen gibt es nach dem ersten Wochenabschluss.", ton: "", name: name2 };
     const funde = [];
     if (k5.db < 0) funde.push({ g: 3, t: `Wir verlieren diese Woche ${geld(-k5.db)}.`, ton: "alarm" });
@@ -175454,7 +175883,7 @@ void main() {
   }
   function hausDetailHtml(c) {
     const { d: d4, b: b4, reiter } = c, h4 = d4.haus, k5 = h4.kpi, id = h4.id;
-    const r4 = REITER2.some((x2) => x2[0] === reiter) ? reiter : "ueberblick";
+    const r4 = REITER5.some((x2) => x2[0] === reiter) ? reiter : "ueberblick";
     const uPunkte = c.verlaufU?.punkte ?? [], dPunkte = c.verlaufD?.punkte ?? [];
     const vorwoche = uPunkte.length > 1 ? uPunkte[uPunkte.length - 2].wert : null, vorwocheDb = dPunkte.length > 1 ? dPunkte[dPunkte.length - 2].wert : null;
     const bf = befund(h4, k5, b4, c.vorjahr, vorwoche);
@@ -175469,7 +175898,7 @@ void main() {
     if (r4 === "kommentare") inhalt = kommentare(c, h4, b4);
     if (r4 === "ueberblick") html += `<div class="hw-fenster"><button type="button" class="hw-bildknopf hw-kontur" data-hausbesuch="${esc2(id)}" aria-label="Haus besuchen">${SYMBOLE.etagen}</button></div><div class="hw-boden">${rumpf2(inhalt)}</div>`;
     else html += rumpf2(inhalt);
-    html += reiterUnten(REITER2, r4, (key) => `class="haus-reiter-knopf" data-reiter="${key}" onclick="hausReiterWahl('${key}')"`).replace('class="hw-reiter"', 'class="hw-reiter haus-reiter"');
+    html += reiterUnten(REITER5, r4, (key) => `class="haus-reiter-knopf" data-reiter="${key}" onclick="hausReiterWahl('${key}')"`).replace('class="hw-reiter"', 'class="hw-reiter haus-reiter"');
     return html;
   }
   function ueberblick(c, h4, k5, vorwoche, vorwocheDb, uPunkte, dPunkte) {
@@ -175489,7 +175918,7 @@ void main() {
       { titel: letzte.length ? `Umsatz KW ${kw2(letzte[0])}\u2013${kw2(letzte[letzte.length - 1])}` : "Umsatz", serie: "a", punkte: letzte.map((q2) => ({ label: kw2(q2), wert: q2.wert })) },
       { titel: "Deckungsbeitrag", serie: "b", punkte: letzte.map((q2) => ({ label: kw2(q2), wert: dPunkte.find((z6) => z6.woche === q2.woche)?.wert ?? 0 })) }
     ]);
-    const marken2 = [marke4(STATUS_HAUS[h4.status] ?? h4.status, h4.status === "offen" ? "" : "schlecht")];
+    const marken2 = [marke4(STATUS_HAUS2[h4.status] ?? h4.status, h4.status === "offen" ? "" : "schlecht")];
     if (h4.klasse === "premium") marken2.push(marke4("Premiumhaus", "achtung"));
     if (c.zustand) marken2.push(marke4(c.zustand, "achtung"));
     marken2.push(marke4(LAGE[h4.lage] ?? "Lage offen"));
@@ -175705,7 +176134,7 @@ void main() {
         zeile({ was: "Baujahr", wert: esc2(haus2.baujahr) }),
         zeile({ was: "Verkaufsfl\xE4che", wert: fmt.format(flaechen.reduce((a2, f13) => a2 + (f13.qm ?? 0), 0)) + " qm" }),
         zeile({ was: "Substanz", wert: Math.round(haus2.substanz ?? 0) + " / 100" }),
-        zeile({ was: "Status", wert: haus2.status === "offen" ? "Ge\xF6ffnet" : esc2(STATUS_HAUS[haus2.status] ?? "Unbekannt") })
+        zeile({ was: "Status", wert: haus2.status === "offen" ? "Ge\xF6ffnet" : esc2(STATUS_HAUS2[haus2.status] ?? "Unbekannt") })
       ]) + hinweis("Betriebskennzahlen und Entscheidungen folgen mit der Engine-Anbindung dieses Formats.");
     } else if (auswahl4 === "sortiment") {
       const gruppen = /* @__PURE__ */ new Map();
@@ -176596,7 +177025,7 @@ void main() {
 
   // src/ui/szenarien.js
   var SPEICHERSCHLUESSEL = "ruhrkauf-szenarien-bestwerte-v1";
-  var prozent4 = (w2) => Math.max(0, Math.min(100, Math.round(100 * w2)));
+  var prozent5 = (w2) => Math.max(0, Math.min(100, Math.round(100 * w2)));
   var leseBestwerte = () => {
     try {
       return JSON.parse(localStorage.getItem(SPEICHERSCHLUESSEL) || "{}");
@@ -176648,8 +177077,8 @@ void main() {
       }
       const ziel = ctx.E.szenarioZiel(spiel2);
       zielknopf.hidden = false;
-      document.getElementById("szenarioprozent").textContent = ziel.wertung ? prozent4(ziel.fortschritt) + " %" : "\u221E";
-      document.getElementById("szenariofortschritt").style.width = (ziel.wertung ? prozent4(ziel.fortschritt) : 100) + "%";
+      document.getElementById("szenarioprozent").textContent = ziel.wertung ? prozent5(ziel.fortschritt) + " %" : "\u221E";
+      document.getElementById("szenariofortschritt").style.width = (ziel.wertung ? prozent5(ziel.fortschritt) : 100) + "%";
       zielknopf.setAttribute("aria-label", ziel.name + ": " + ziel.details + ". Szenarioziel \xF6ffnen");
       zielknopf.title = ziel.name + " \xB7 " + ziel.text;
       if (ziel.erreicht && ziel.wertung && letzterSieg !== spiel2) {
@@ -176661,7 +177090,7 @@ void main() {
       const s2 = ctx.spiel();
       if (!s2) return;
       const z6 = ctx.E.szenarioZiel(s2);
-      let inhalt = '<article class="karte sz-zielinfo"><div class="sz-zieltitel">' + esc2(z6.name) + "</div><p>" + esc2(z6.text) + '</p><div class="sz-balken"><span style="width:' + prozent4(z6.fortschritt) + '%"></span></div><p><b>' + (z6.wertung ? prozent4(z6.fortschritt) + " % erreicht" : "Keine Wertung") + "</b> \xB7 " + esc2(z6.details) + "</p><p>" + (z6.erreicht ? "Ziel erreicht" : z6.gescheitert ? "Ziel verfehlt" : z6.wertung ? "Herausforderung l\xE4uft" : "Freies Spiel") + "</p></article>";
+      let inhalt = '<article class="karte sz-zielinfo"><div class="sz-zieltitel">' + esc2(z6.name) + "</div><p>" + esc2(z6.text) + '</p><div class="sz-balken"><span style="width:' + prozent5(z6.fortschritt) + '%"></span></div><p><b>' + (z6.wertung ? prozent5(z6.fortschritt) + " % erreicht" : "Keine Wertung") + "</b> \xB7 " + esc2(z6.details) + "</p><p>" + (z6.erreicht ? "Ziel erreicht" : z6.gescheitert ? "Ziel verfehlt" : z6.wertung ? "Herausforderung l\xE4uft" : "Freies Spiel") + "</p></article>";
       if (z6.id === "investor") {
         const eigene = s2.haeuser.filter((h4) => h4.status === "offen" && h4.miete.vermieter === "eigentuemer").slice(0, 16);
         inhalt += "<h3>Immobilienverkauf mit R\xFCckmietung</h3><p>Der Investor verlangt mindestens einen Verkauf pro Gesch\xE4ftsjahr. Ein Verkauf erh\xF6ht die laufende Miete.</p>" + (eigene.map((h4) => '<button class="breit" type="button" data-sz-verkauf="' + esc2(h4.id) + '">' + esc2(h4.name) + " verkaufen \xB7 " + geld(Math.max(5e6, h4.grundflaecheQm * 4500)) + "</button>").join("") || "<p>Keine verk\xE4uflichen Immobilien vorhanden.</p>");
@@ -177367,11 +177796,11 @@ void main() {
       const x1 = b4 ? Math.min(w2, b4.right + 7) : w2 * 0.5;
       const y0 = b4 ? Math.max(0, b4.top - 7) : h4 * 0.47;
       const y1 = b4 ? Math.min(h4, b4.bottom + 7) : h4 * 0.47;
-      const maske = root.querySelector(".ein-maske"), ring2 = root.querySelector(".ein-ring");
-      if (!maske || !ring2) return;
+      const maske = root.querySelector(".ein-maske"), ring3 = root.querySelector(".ein-ring");
+      if (!maske || !ring3) return;
       maske.style.clipPath = b4 ? "polygon(evenodd, 0px 0px, 100% 0px, 100% 100%, 0px 100%, 0px 0px, " + x0 + "px " + y0 + "px, " + x0 + "px " + y1 + "px, " + x1 + "px " + y1 + "px, " + x1 + "px " + y0 + "px, " + x0 + "px " + y0 + "px)" : "";
-      ring2.hidden = !b4;
-      if (b4) Object.assign(ring2.style, {
+      ring3.hidden = !b4;
+      if (b4) Object.assign(ring3.style, {
         left: x0 + "px",
         top: y0 + "px",
         width: Math.max(1, x1 - x0) + "px",
@@ -177843,7 +178272,7 @@ void main() {
     const alt = lesen2(schwierig);
     if (alt.some((x2) => x2.id === id)) return;
     const testspiel = Boolean(s2.testspiel || new URLSearchParams(location.search).has("testspiel"));
-    const zeile3 = {
+    const zeile2 = {
       id,
       datum: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
       seed: s2.seed,
@@ -177852,7 +178281,7 @@ void main() {
       testspiel
     };
     try {
-      localStorage.setItem(KEY + schwierig, JSON.stringify([...alt, zeile3].sort((a2, b4) => b4.punkte - a2.punkte || a2.datum.localeCompare(b4.datum) || a2.seed - b4.seed).slice(0, 10)));
+      localStorage.setItem(KEY + schwierig, JSON.stringify([...alt, zeile2].sort((a2, b4) => b4.punkte - a2.punkte || a2.datum.localeCompare(b4.datum) || a2.seed - b4.seed).slice(0, 10)));
     } catch {
     }
   }
@@ -178278,11 +178707,11 @@ void main() {
   }
 
   // src/ui/reporting.js
-  var prozent5 = (x2) => (100 * x2).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
+  var prozent6 = (x2) => (100 * x2).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " %";
   var zahl4 = (x2, n3 = 1) => Number(x2).toLocaleString("de-DE", { maximumFractionDigits: n3, minimumFractionDigits: n3 });
   var euro2 = (x2) => zahl4(x2, 2) + " \u20AC";
-  var vp = (q2) => (q2 > 0 ? "+" : q2 < 0 ? "\u2212" : "") + prozent5(Math.abs(q2));
-  var vz = (w2) => (w2 > 0 ? "+" : w2 < 0 ? "\u2212" : "") + geld(Math.abs(w2));
+  var vp = (q2) => (q2 > 0 ? "+" : q2 < 0 ? "\u2212" : "") + prozent6(Math.abs(q2));
+  var vz2 = (w2) => (w2 > 0 ? "+" : w2 < 0 ? "\u2212" : "") + geld(Math.abs(w2));
   function wasserfall(br) {
     if (br.status !== "ok") return leer3(br.status, "Noch keine Vorjahresbr\xFCcke");
     const schritte = [["Frequenz", br.frequenz, "Besucher"], ["Kaufquote", br.kaufquote, "K\xE4ufer je Besucher"], ["Teile je Bon", br.teile, "Boneffekt"], ["Preis je Teil", br.preis, "Boneffekt"]];
@@ -178299,9 +178728,9 @@ void main() {
     const strich2 = (w2) => `<span class="hw-wf-spur" aria-hidden="true"><i class="hw-wf-marke" style="left:${x2(w2)}%"></i></span>`;
     let h4 = `<div class="hw-liste hw-wf" data-summenbuch="Konzernbr\xFCcke" data-o02-diff="${br.differenz}" data-o02-summe="${br.frequenz + br.kaufquote + br.teile + br.preis}">`;
     h4 += `<div class="hw-zeile"><span class="hw-was">Vorjahr</span>${strich2(br.vorher)}<span class="hw-wert" data-s="e">${geld(br.vorher)}</span></div>`;
-    for (const s2 of pos) h4 += `<div class="hw-zeile"><span class="hw-was">${s2.n}<small>${s2.d}</small></span><span class="hw-wf-spur" aria-hidden="true"><i class="hw-wf-balken${s2.v < 0 ? " minus" : ""}" style="left:${x2(Math.min(s2.a, s2.b))}%;width:${Math.max(0.6, Math.abs(s2.v) / (hi - lo) * 100).toFixed(1)}%"></i></span><span class="hw-wert${s2.v < 0 ? " schlecht" : ""}" data-s="e">${vz(s2.v)}</span></div>`;
+    for (const s2 of pos) h4 += `<div class="hw-zeile"><span class="hw-was">${s2.n}<small>${s2.d}</small></span><span class="hw-wf-spur" aria-hidden="true"><i class="hw-wf-balken${s2.v < 0 ? " minus" : ""}" style="left:${x2(Math.min(s2.a, s2.b))}%;width:${Math.max(0.6, Math.abs(s2.v) / (hi - lo) * 100).toFixed(1)}%"></i></span><span class="hw-wert${s2.v < 0 ? " schlecht" : ""}" data-s="e">${vz2(s2.v)}</span></div>`;
     h4 += `<div class="hw-zeile hw-wf-summe"><span class="hw-was">Ist</span>${strich2(br.aktuell)}<span class="hw-wert" data-summe="e">${geld(br.aktuell)}</span></div></div>`;
-    h4 += `<p class="hw-lese hw-leise hw-unterzeile">Boneffekt zusammen ${vz(br.bon)} \xB7 Balken im Ausschnitt ${geld(lo)} bis ${geld(hi)}${br.vorjahrGeschaetzt ? " \xB7 Vorjahr teilweise aus 4-Wochen-Bl\xF6cken gesch\xE4tzt" : ""}</p>`;
+    h4 += `<p class="hw-lese hw-leise hw-unterzeile">Boneffekt zusammen ${vz2(br.bon)} \xB7 Balken im Ausschnitt ${geld(lo)} bis ${geld(hi)}${br.vorjahrGeschaetzt ? " \xB7 Vorjahr teilweise aus 4-Wochen-Bl\xF6cken gesch\xE4tzt" : ""}</p>`;
     return h4;
   }
   var FORMATNAME = (f13) => f13 === "alle" ? "Alle Formate" : f13 === "warenhaus" ? "Hartwig" : f13 === "sport" ? "Hartwig Sport" : f13 === "fundus" || f13 === "outlet" ? "FUNDUS" : f13 === "schwester" || f13 === "volkskauf" ? "Volkskauf" : f13;
@@ -178312,26 +178741,26 @@ void main() {
       const av = a2[ui.sort], bv = b4[ui.sort];
       return (ui.sort === "name" ? String(av).localeCompare(String(bv), "de") : Number(bv ?? -1e15) - Number(av ?? -1e15)) || a2.name.localeCompare(b4.name, "de");
     });
-    const zeile3 = (z6, attr, tippbar = true) => zeile({
+    const zeile2 = (z6, attr, tippbar = true) => zeile({
       was: esc2(z6.name),
-      unter: `Frequenz ${fmt.format(Math.round(z6.frequenz))} \xB7 Kaufquote ${prozent5(z6.kaufquote)} \xB7 Bon ${euro2(z6.bon)}`,
+      unter: `Frequenz ${fmt.format(Math.round(z6.frequenz))} \xB7 Kaufquote ${prozent6(z6.kaufquote)} \xB7 Bon ${euro2(z6.bon)}`,
       wert: geld(z6.umsatz),
-      wertUnter: z6.abweichung == null ? "kein Vorjahr" : `${vz(z6.abweichung)} (${vp(z6.abweichungProzent ?? 0)})`,
+      wertUnter: z6.abweichung == null ? "kein Vorjahr" : `${vz2(z6.abweichung)} (${vp(z6.abweichungProzent ?? 0)})`,
       ton: z6.ampelfarbe === "rot" ? "schlecht" : z6.ampelfarbe === "gelb" ? "achtung" : "",
       tippbar,
       attr
     });
-    const haeuser = (liste3) => liste(sortiere(liste3).map((z6) => zeile3(z6, `data-o02-open="${esc2(z6.id)}"`)));
+    const haeuser = (liste3) => liste(sortiere(liste3).map((z6) => zeile2(z6, `data-o02-open="${esc2(z6.id)}"`)));
     function anzeigen(scrollHalten = false) {
       const vorher = ctx.inhalt.scrollTop;
       const st2 = ctx.s(), daten = E9.reporting(st2, ui.wochen, ui.format);
       for (const g2 of daten.gruppen) if (g2.ebene === "hauscluster") g2.name = clusterName3(st2, g2.id);
       const hs = daten.zeilen, gruppen = daten.gruppen, B8 = daten.bruecke;
       const treiber = B8.status === "ok" ? [["Frequenz", B8.frequenz], ["Kaufquote", B8.kaufquote], ["Teile je Bon", B8.teile], ["Preis je Teil", B8.preis]].sort((a2, b4) => Math.abs(b4[1]) - Math.abs(a2[1]))[0] : null;
-      let h4 = bereich("zentrale", "zahlen") + G4 + sprecher({ text: treiber ? `Gr\xF6\xDFter Treiber gegen Vorjahr: <b>${treiber[0]}</b> mit ${vz(treiber[1])}.` : "<b>Noch kein Vorjahresvergleich.</b> Die Br\xFCcke folgt nach dem ersten Wochenabschluss.", unter: "Konzerncontrolling" });
+      let h4 = bereich("zentrale", "zahlen") + G4 + sprecher({ text: treiber ? `Gr\xF6\xDFter Treiber gegen Vorjahr: <b>${treiber[0]}</b> mit ${vz2(treiber[1])}.` : "<b>Noch kein Vorjahresvergleich.</b> Die Br\xFCcke folgt nach dem ersten Wochenabschluss.", unter: "Konzerncontrolling" });
       let r4 = "";
       if (B8.status === "ok") r4 += gross2([
-        { label: "Umsatz gegen Vorjahr", wert: vz(B8.differenz), ton: B8.differenz < 0 ? "schlecht" : B8.differenz > 0 ? "gut" : "", unter: B8.vorher ? vp(B8.differenz / B8.vorher) + " zum Vorjahr" : "" },
+        { label: "Umsatz gegen Vorjahr", wert: vz2(B8.differenz), ton: B8.differenz < 0 ? "schlecht" : B8.differenz > 0 ? "gut" : "", unter: B8.vorher ? vp(B8.differenz / B8.vorher) + " zum Vorjahr" : "" },
         { label: "Ist " + (ui.wochen === 1 ? "letzte Woche" : ui.wochen + " Wochen"), wert: geld(B8.aktuell), unter: "Vorjahr " + geld(B8.vorher) }
       ]);
       r4 += `<div class="hw-abstand"></div>` + seg([[1, "1 Woche"], [4, "4 Wo."], [13, "13 Wo."], [52, "52 Wo."]], ui.wochen, (w2) => `data-o02-setze="wochen" data-wert="${w2}"`);
@@ -178354,7 +178783,7 @@ void main() {
         for (const id of ids) {
           const treff = hs.filter((z6) => z6[ebene] === id), g2 = gruppen.find((q2) => q2.ebene === ebene && q2.id === id);
           const name2 = ebene === "hauscluster" ? clusterName3(st2, id) : "Region " + id, offen = ui.offen === ebene + ":" + id;
-          r4 += liste([zeile3({ ...g2 ?? treff[0], name: `${name2} \xB7 ${treff.length} H\xE4user` }, `data-o02-auf="${esc2(ebene + ":" + id)}" aria-expanded="${offen}"`)]);
+          r4 += liste([zeile2({ ...g2 ?? treff[0], name: `${name2} \xB7 ${treff.length} H\xE4user` }, `data-o02-auf="${esc2(ebene + ":" + id)}" aria-expanded="${offen}"`)]);
           if (!offen) continue;
           if (ebene === "region") {
             const unter = [...new Set(treff.map((z6) => z6.hauscluster))];
@@ -178409,294 +178838,6 @@ void main() {
     };
   }
 
-  // src/ui/it.js
-  function itModul(ctx) {
-    const { E: E9 } = ctx, s2 = () => ctx.s();
-    const ui = { aktiv: false, reiter: "systeme", system: "kasse", art: "kaufen", generation: 3, auswahl: null, projekt: null, produkt: null, bestaetigung: false };
-    const optionen3 = ["kaufen", "entwickeln", "dienstleister"];
-    const artName = { kaufen: "Standard\xADsoftware", entwickeln: "Eigen\xADentwicklung", dienstleister: "Dienst\xADleister" };
-    const phasen = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
-    const prozent6 = (x2) => Math.round(x2 * 100) + " %";
-    function daten() {
-      return E9.itUebersicht(s2());
-    }
-    function zeile3(t5, wert) {
-      return '<div class="zeile"><span class="was">' + esc2(t5) + '</span><b class="uq" style="min-width:90px">' + esc2(String(wert)) + "</b></div>";
-    }
-    function balken8(w2) {
-      return '<div class="it-fortschritt"><i style="width:' + Math.max(0, Math.min(100, Math.round(w2 * 100))) + '%"></i></div>';
-    }
-    function reiter() {
-      return '<div class="tabs">' + [["systeme", "Systeme"], ["produkte", "Produkte"], ["projekte", "Projekte"], ["neu", "Neues Projekt"]].map((x2) => '<button type="button" class="tab ' + (ui.reiter === x2[0] ? "an" : "") + '" data-it="reiter" data-v="' + x2[0] + '">' + x2[1] + "</button>").join("") + "</div>";
-    }
-    const risikoText = (x2) => (x2 * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " %";
-    function leiter3(g2) {
-      return '<span class="q-leiter" aria-label="Generation ' + g2 + ' von 4">' + [1, 2, 3, 4].map((i) => '<i class="' + (i <= g2 ? "an" : "") + '"></i>').join("") + "</span>";
-    }
-    function systemZeile(x2) {
-      const ton3 = x2.risiko >= 0.01 ? "q-minus" : "";
-      const bereiche = E9.SYSTEME[x2.id].bereiche.map((id) => E9.BEREICHE?.find((q2) => q2.id === id)?.name ?? id);
-      const akt = x2.verteilung.filter((c) => c.generation > x2.generation).length;
-      let h4 = '<div class="q-zeile q-system">' + leiter3(x2.generation) + '<span class="q-name">' + esc2(x2.name) + (x2.generation > 0 ? "<small>Generation " + x2.generation + " von 4 \xB7 " + Math.floor(x2.alter) + " Jahre \xB7 " + geld(x2.kostenWoche) + " je Woche</small>" : "<small>Noch nicht eingef\xFChrt, keine laufenden Kosten</small>") + (x2.wartungGekuendigt ? '<small class="q-minus">Wartung durch den Anbieter beendet</small>' : "") + (akt ? "<small>" + akt + " von " + x2.verteilung.length + " Clustern schon modernisiert</small>" : "") + "<small>Bremst: " + esc2(bereiche.slice(0, 3).join(", ")) + (bereiche.length > 3 ? " und " + (bereiche.length - 3) + " weitere" : "") + '</small></span><span class="q-wert"><b class="' + ton3 + '">' + risikoText(x2.risiko) + '</b><small>Ausfall je Woche</small></span><span class="q-knoepfe"><button data-it="neues" data-v="' + x2.id + '">Modernisieren</button></span></div>';
-      return h4;
-    }
-    function systeme(d4) {
-      const reihe = [...d4.systeme].sort((a2, b4) => b4.risiko - a2.risiko || a2.generation - b4.generation);
-      const top = reihe[0];
-      let h4 = '<div class="q31">';
-      h4 += '<div class="q-gross"><span class="q-label">H\xF6chstes Ausfallrisiko</span><span class="q-haupt ' + (top && top.risiko >= 0.01 ? "q-minus" : "") + '">' + (top ? risikoText(top.risiko) : "0 %") + '</span><span class="q-neben"><b>' + geld(d4.betriebskostenWoche) + "</b>IT-Betrieb je Woche</span></div>";
-      const alt = reihe.filter((x2) => x2.generation <= 1 || x2.wartungGekuendigt);
-      h4 += '<div class="q-befund">' + (top && top.risiko >= 2e-3 ? "<b>" + esc2(top.name) + "</b> f\xE4llt mit " + risikoText(top.risiko) + " je Woche am ehesten aus." : "Alle " + d4.systeme.length + " Systeme laufen stabil.") + (alt.length ? " " + alt.length + " " + (alt.length === 1 ? "System ist" : "Systeme sind") + " veraltet oder ohne Wartung." : "") + "</div>";
-      h4 += '<div class="q-buch"><div class="q-buch-kopf"><span>Systemlandkarte</span><b>nach Risiko</b></div>' + reihe.map(systemZeile).join("") + "</div>";
-      const k5 = d4.systeme.find((x2) => x2.id === "kasse");
-      if (k5 && k5.generation >= 2) {
-        h4 += '<div class="q-buch"><div class="q-buch-kopf"><span>Kassenausbau</span><b>Stufe von 2</b></div>';
-        for (const art of ["selbstbedienung", "mobil"]) {
-          const stufe2 = k5.kasseAusbau?.[art] ?? 0;
-          h4 += '<div class="q-zeile"><span class="q-name">' + (art === "mobil" ? "Mobile Kasse" : "Selbstbedienungskassen") + '</span><span class="q-wert">' + stufe2 + " von 2</span>" + (stufe2 < 2 ? '<span class="q-knoepfe"><button data-it="kasseAusbau" data-v="' + art + '">Stufe ' + (stufe2 + 1) + " beauftragen</button></span>" : "") + "</div>";
-        }
-        h4 += "</div>";
-      }
-      h4 += '<div class="legende">CDO und IT-Leitung beeinflussen das Risiko von Verz\xF6gerungen und St\xF6rungen.</div></div>';
-      return h4;
-    }
-    function projektKarte(p2, d4) {
-      let h4 = '<div class="karte"><div class="khead">' + esc2(E9.SYSTEME[p2.system].name) + "<small>Generation " + p2.zielGeneration + " \xB7 " + esc2(artName[p2.art]) + "</small></div>";
-      h4 += '<div class="it-werte"><b>' + esc2(phasen[p2.phase]) + "</b><b>" + prozent6(p2.fortschritt) + "</b></div>" + balken8(p2.fortschritt);
-      h4 += zeile3("Kosten Ist / Plan", geld(p2.kostenIst) + " / " + geld(p2.kostenPlan));
-      h4 += zeile3("Mehrwochen durch Verzug", p2.verzug);
-      h4 += zeile3("Rollout", p2.erledigteCluster.length + " / " + p2.clusterIds.length + " Cluster");
-      const alle = new Map(d4.cluster.map((c) => [c.id, c]));
-      if (p2.phase === "rollout" || p2.phase === "umsetzung" || p2.phase === "konzept") {
-        const ausgabe = p2.clusterIds.map((id, i) => {
-          const c = alle.get(id), fertig2 = p2.erledigteCluster.includes(id);
-          return '<div class="it-cluster ' + (fertig2 ? "fertig" : "") + '"><span>' + (fertig2 ? "\u2713 " : "") + esc2(c?.name ?? id) + "</span>" + (fertig2 ? "<b>Generation " + p2.zielGeneration + "</b>" : "<b>geplant</b>") + (!fertig2 && p2.erledigteCluster.length === 0 ? '<div class="it-pfeile"><button data-it="hoch" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === 0 ? "disabled" : "") + '>\u2191</button><button data-it="runter" data-p="' + p2.id + '" data-i="' + i + '" ' + (i === p2.clusterIds.length - 1 ? "disabled" : "") + ">\u2193</button></div>" : "") + "</div>";
-        });
-        h4 += '<details class="it-details"><summary>Rollout-Reihenfolge und Clusterkarte</summary>' + ausgabe.join("") + "</details>";
-      }
-      return h4 + "</div>";
-    }
-    function projekte(d4) {
-      let h4 = '<div class="olief">Projekte durchlaufen Konzept, Umsetzung und einen sequenziellen Rollout. Vier Wochen nach jedem Wechsel sind lokale Startprobleme m\xF6glich.</div>';
-      const aktiv7 = d4.projekte.filter((x2) => x2.phase !== "abgeschlossen");
-      if (!aktiv7.length) h4 += '<div class="karte"><div class="zeile">Keine laufenden Projekte.</div></div>';
-      h4 += aktiv7.map((p2) => projektKarte(p2, d4)).join("");
-      const alt = d4.projekte.filter((x2) => x2.phase === "abgeschlossen").slice(-8).reverse();
-      if (alt.length) h4 += '<div class="vtitel">Abgeschlossene Projekte</div>' + alt.map((p2) => projektKarte(p2, d4)).join("");
-      h4 += '<div class="oknoepfe"><button data-it="reiter" data-v="neu">Neues Projekt planen</button></div>';
-      return h4;
-    }
-    function auswahl4(d4) {
-      if (!ui.auswahl) {
-        const sys = d4.systeme.find((x2) => x2.id === ui.system);
-        ui.auswahl = new Set(d4.cluster.filter((c) => (sys?.verteilung.find((v2) => v2.id === c.id)?.generation ?? 0) < ui.generation).map((c) => c.id));
-      }
-      return ui.auswahl;
-    }
-    function neu3(d4) {
-      const sys = d4.systeme.find((x2) => x2.id === ui.system) ?? d4.systeme[0];
-      const ids = auswahl4(d4);
-      const verfuegbar2 = d4.cluster.filter((c) => c.generation === void 0 || sys.verteilung.find((v2) => v2.id === c.id)?.generation < ui.generation);
-      const ausgew = d4.cluster.filter((c) => ids.has(c.id));
-      const zulaessig = ui.art === "entwickeln" ? ui.generation >= 1 : ui.generation === 3 || ui.art === "kaufen" && ui.generation <= 3;
-      const plan2 = E9.itProjektPlan(s2(), ui.system, ui.art, ui.generation, ausgew.length);
-      let h4 = '<div class="karte"><div class="khead">Projekt konfigurieren</div>';
-      h4 += '<div class="regler"><b>System</b><select class="ort gross" data-it-change="system">' + d4.systeme.map((x2) => '<option value="' + x2.id + '" ' + (x2.id === ui.system ? "selected" : "") + ">" + esc2(x2.name) + "</option>").join("") + "</select></div>";
-      h4 += '<div class="regler"><b>Realisierung</b><div class="seg">' + optionen3.map((a2) => '<button data-it="art" data-v="' + a2 + '" class="' + (ui.art === a2 ? "an" : "") + '">' + artName[a2] + "</button>").join("") + "</div></div>";
-      h4 += '<div class="regler"><b>Zielgeneration</b><div class="seg">' + [1, 2, 3, 4].map((g2) => '<button data-it="generation" data-v="' + g2 + '" ' + (ui.generation === g2 ? 'class="an"' : "") + " " + (ui.art !== "entwickeln" && g2 === 4 || ui.art === "dienstleister" && g2 !== 3 ? "disabled" : "") + ">" + g2 + "</button>").join("") + "</div></div>";
-      h4 += '<div class="it-vergleich">' + optionen3.map((art) => {
-        const g2 = art === "dienstleister" ? 3 : Math.min(ui.generation, art === "entwickeln" ? 4 : 3);
-        const x2 = E9.itProjektPlan(s2(), ui.system, art, g2, ausgew.length);
-        return '<div class="' + (ui.art === art ? "gewaehlt" : "") + '"><b>' + artName[art] + "</b><small>" + x2.gesamt + " Wo.</small><small>" + geld(x2.kosten) + "</small><small>" + (art === "entwickeln" ? "hohes" : art === "kaufen" ? "geringes" : "mittleres") + " Risiko</small></div>";
-      }).join("") + "</div>";
-      h4 += '<div class="vtitel">Rollout-Cluster (' + ausgew.length + " / " + d4.cluster.length + ")</div>";
-      h4 += '<div class="oknoepfe"><button data-it="alle">Alle w\xE4hlen</button><button data-it="keine">Keine w\xE4hlen</button></div>';
-      h4 += '<div class="it-clusterauswahl">' + d4.cluster.map((c) => {
-        const g2 = sys.verteilung.find((v2) => v2.id === c.id)?.generation ?? sys.generation;
-        return '<label class="it-wahl"><input type="checkbox" data-it-cluster="' + esc2(c.id) + '" ' + (ids.has(c.id) ? "checked" : "") + " " + (g2 >= ui.generation ? "disabled" : "") + "><span>" + esc2(c.name) + "</span><small>Generation " + g2 + "</small></label>";
-      }).join("") + "</div>";
-      h4 += zeile3("Geplante Laufzeit", plan2.gesamt + " Wochen");
-      h4 += zeile3("Planbudget", geld(plan2.kosten));
-      h4 += '<div class="oknoepfe"><button class="gruen" data-it="start" ' + (!ausgew.length || !zulaessig || ausgew.some((c) => (sys.verteilung.find((v2) => v2.id === c.id)?.generation ?? sys.generation) >= ui.generation) ? "disabled" : "") + ">Projekt beauftragen</button></div>";
-      h4 += "</div>";
-      return h4;
-    }
-    function produkte2() {
-      const k5 = E9.itProdukte(s2());
-      const p2 = k5.find((x2) => x2.id === ui.produkt);
-      return p2 ? itProduktDetail(p2, ui.bestaetigung) : itProdukteKarten(k5);
-    }
-    function zeichnen2() {
-      if (!ui.aktiv) return;
-      const d4 = daten(), seiten4 = { systeme: "Systemlandkarte", produkte: "Digitale Produkte", projekte: "IT-Projekte", neu: "Neues IT-Projekt" };
-      ctx.panel("IT \xB7 " + seiten4[ui.reiter], "CDO / Bereich IT \xB7 " + d4.projekte.filter((x2) => x2.phase !== "abgeschlossen").length + " aktive Projekte", bereich("zentrale") + '<i class="q31-marke" hidden></i>' + reiter() + (ui.reiter === "systeme" ? systeme(d4) : ui.reiter === "produkte" ? produkte2() : ui.reiter === "projekte" ? projekte(d4) : neu3(d4)), "gross");
-      ui.aktiv = true;
-    }
-    function aktion2(a2) {
-      const result = E9.fuehreAus(s2(), a2);
-      ctx.meldung(result.text, !result.ok);
-      if (result.ok) {
-        ctx.nachAktion?.();
-        zeichnen2();
-      }
-    }
-    function bearbeiten(el2) {
-      const v2 = el2.dataset.v, d4 = daten();
-      switch (el2.dataset.it) {
-        case "reiter":
-          ui.reiter = v2;
-          ui.auswahl = null;
-          ui.produkt = null;
-          ui.bestaetigung = false;
-          break;
-        case "produkt":
-          ui.reiter = "produkte";
-          ui.produkt = v2;
-          ui.bestaetigung = false;
-          break;
-        case "zurueck":
-          ui.produkt = null;
-          ui.bestaetigung = false;
-          break;
-        case "abschalten":
-          ui.bestaetigung = true;
-          break;
-        case "abbrechen":
-          ui.bestaetigung = false;
-          break;
-        case "team": {
-          const r4 = E9.fuehreAus(s2(), { typ: "itProduktTeam", produkt: v2, anzahl: Number(el2.dataset.n) });
-          ctx.meldung(r4.text, !r4.ok);
-          if (r4.ok) ctx.nachAktion?.();
-          break;
-        }
-        case "aktiv": {
-          const p2 = E9.itProdukte(s2()).find((x2) => x2.id === v2);
-          if (!p2) return;
-          const r4 = E9.fuehreAus(s2(), { typ: "itProduktAktiv", produkt: v2, an: !p2.aktiv });
-          ctx.meldung(r4.text, !r4.ok);
-          if (r4.ok) ctx.nachAktion?.();
-          ui.bestaetigung = false;
-          break;
-        }
-        case "modernisieren": {
-          const p2 = E9.itProdukte(s2()).find((x2) => x2.id === v2);
-          if (!p2) return;
-          if (v2 === "mobile_pay") {
-            const k5 = d4.systeme.find((x2) => x2.id === "kasse"), stufe2 = k5?.kasseAusbau?.mobil ?? 0;
-            if (k5?.generation >= 3) {
-              if (stufe2 >= 2) {
-                ctx.meldung("Mobile Kasse ist bereits vollst\xE4ndig ausgebaut.", false);
-                break;
-              }
-              const r4 = E9.fuehreAus(s2(), { typ: "itKasseAusbau", art: "mobil", stufe: stufe2 + 1 });
-              ctx.meldung(r4.text, !r4.ok);
-              if (r4.ok) ctx.nachAktion?.();
-              break;
-            }
-          }
-          ui.reiter = "neu";
-          ui.system = p2.system;
-          ui.generation = Math.max(3, p2.generation + 1);
-          ui.auswahl = null;
-          ui.produkt = null;
-          break;
-        }
-        case "neues":
-          ui.reiter = "neu";
-          ui.system = v2;
-          ui.auswahl = null;
-          ui.generation = 3;
-          break;
-        case "art":
-          ui.art = v2;
-          if (v2 === "dienstleister") ui.generation = 3;
-          else if (v2 === "kaufen" && ui.generation > 3) ui.generation = 3;
-          break;
-        case "generation":
-          ui.generation = Number(v2);
-          ui.auswahl = null;
-          break;
-        case "alle":
-          ui.auswahl = new Set(d4.cluster.filter((c) => (d4.systeme.find((x2) => x2.id === ui.system)?.verteilung.find((x2) => x2.id === c.id)?.generation ?? 0) < ui.generation).map((c) => c.id));
-          break;
-        case "keine":
-          ui.auswahl = /* @__PURE__ */ new Set();
-          break;
-        case "start": {
-          const clusterIds = d4.cluster.filter((c) => auswahl4(d4).has(c.id)).map((c) => c.id);
-          const result = E9.fuehreAus(s2(), { typ: "itProjekt", system: ui.system, art: ui.art, zielGeneration: ui.generation, clusterIds });
-          ctx.meldung(result.text, !result.ok);
-          if (result.ok) {
-            ctx.nachAktion?.();
-            ui.reiter = "projekte";
-          }
-          break;
-        }
-        case "hoch":
-        case "runter": {
-          const p2 = d4.projekte.find((x2) => x2.id === el2.dataset.p);
-          if (!p2) return;
-          const i = Number(el2.dataset.i), j4 = i + (el2.dataset.it === "hoch" ? -1 : 1);
-          if (j4 < 0 || j4 >= p2.clusterIds.length) return;
-          const ids = [...p2.clusterIds];
-          [ids[i], ids[j4]] = [ids[j4], ids[i]];
-          const result = E9.fuehreAus(s2(), { typ: "itRolloutPlan", projekt: p2.id, clusterIds: ids });
-          ctx.meldung(result.text, !result.ok);
-          if (result.ok) ctx.nachAktion?.();
-          break;
-        }
-        case "kasseAusbau": {
-          const x2 = d4.systeme.find((x3) => x3.id === "kasse"), stufe2 = (x2.kasseAusbau?.[v2] ?? 0) + 1;
-          const result = E9.fuehreAus(s2(), { typ: "itKasseAusbau", art: v2, stufe: stufe2 });
-          ctx.meldung(result.text, !result.ok);
-          if (result.ok) ctx.nachAktion?.();
-          break;
-        }
-        default:
-          return;
-      }
-      zeichnen2();
-    }
-    const inhalt = document.getElementById("pinhalt");
-    inhalt.addEventListener("click", (ev) => {
-      if (!ui.aktiv) return;
-      const el2 = ev.target.closest("[data-it]");
-      if (el2 && !el2.disabled) bearbeiten(el2);
-    });
-    inhalt.addEventListener("change", (ev) => {
-      if (!ui.aktiv) return;
-      const el2 = ev.target;
-      if (el2.dataset.itChange === "system") {
-        ui.system = el2.value;
-        ui.auswahl = null;
-        ui.generation = 3;
-        zeichnen2();
-      }
-      if (el2.dataset.itCluster) {
-        const ids = auswahl4(daten());
-        if (el2.checked) ids.add(el2.dataset.itCluster);
-        else ids.delete(el2.dataset.itCluster);
-        zeichnen2();
-      }
-    });
-    return {
-      oeffne: (seite2 = "systeme", produkt = null) => {
-        ui.aktiv = true;
-        ui.reiter = seite2;
-        ui.produkt = seite2 === "produkte" ? produkt : null;
-        ui.bestaetigung = false;
-        ui.auswahl = null;
-        zeichnen2();
-      },
-      zu: () => {
-        ui.aktiv = false;
-      },
-      aktiv: () => ui.aktiv,
-      pruefe: () => ({ seite: ui.reiter, systeme: daten().systeme.length, projekte: daten().projekte.length })
-    };
-  }
-
   // src/ui/planung.js
   var pct = (v2) => (100 * v2).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
   var pctV = (v2) => (v2 > 0 ? "+" : v2 < 0 ? "\u2212" : "") + pct(Math.abs(v2));
@@ -178708,7 +178849,7 @@ void main() {
     const E9 = ctx.E, s2 = ctx.s, ui = { aktiv: false, tab: "assistent", schritt: 1 };
     const nname = (n3) => n3.ebene === "hauscluster" ? clusterName3(s2(), n3.name) : n3.name;
     const vor = () => E9.planungAssistent(s2());
-    const zeile3 = (text3, wert) => '<div class="zeile"><span class="was">' + esc2(text3) + "</span><b>" + wert + "</b></div>";
+    const zeile2 = (text3, wert) => '<div class="zeile"><span class="was">' + esc2(text3) + "</span><b>" + wert + "</b></div>";
     const tabs = () => '<div class="tabs">' + [["assistent", "Planung"], ["report", "Reporting"], ["forecast", "Forecast"], ["bonus", "Boni"]].map(([id, t5]) => '<button class="tab ' + (ui.tab === id ? "an" : "") + '" data-pl-tab="' + id + '">' + t5 + "</button>").join("") + "</div>";
     function entwurf(D) {
       const e = D.entwurf;
@@ -178738,16 +178879,16 @@ void main() {
         html += renderNode("konzern", 0) + "</div>";
         html += '<div class="karte"><div class="khead">Merchandise Planning: Warengruppenziele</div><div class="olief">Die Konzernsumme bleibt bei \xC4nderungen einzelner Warengruppen erhalten.</div>' + Object.entries(D.warengruppen || {}).map(([id, value]) => '<label class="zeile"><span class="was">' + esc2(E9.GRUPPEN?.[id]?.name || id) + '</span><input style="width:105px;max-width:42%" type="number" min="0" step="0.1" data-pl-wg="' + esc2(id) + '" value="' + (value / 1e6).toFixed(1) + '" aria-label="' + esc2(id) + ' Ziel Mio. Euro"></label>').join("") + '</div><div class="oknoepfe"><button class="gruen" data-pl-schritt="3">Weiter zum Abschluss \u2192</button></div>';
       } else {
-        html += '<div class="karte"><div class="khead">Jahresplan ' + e.jahr + " freigeben</div>" + zeile3("Konzernumsatz", mio3(e.ziele.umsatz)) + zeile3("EBITDA-Ziel", mio3(e.ziele.ebitda)) + zeile3("Investitionsbudget", mio3(e.ziele.investitionen)) + '<p class="olief">Mit dem Abschluss werden Wochenbudgets und Clusterziele verbindlich. Ohne Aktion wird der Controlling-Vorschlag nach Fristablauf automatisch \xFCbernommen.</p></div><div class="oknoepfe"><button class="gruen" data-pl-abschluss="spieler">Angepasste Planung beschlie\xDFen</button><button data-pl-abschluss="controlling">Controlling-Vorschlag abschlie\xDFen</button></div>';
+        html += '<div class="karte"><div class="khead">Jahresplan ' + e.jahr + " freigeben</div>" + zeile2("Konzernumsatz", mio3(e.ziele.umsatz)) + zeile2("EBITDA-Ziel", mio3(e.ziele.ebitda)) + zeile2("Investitionsbudget", mio3(e.ziele.investitionen)) + '<p class="olief">Mit dem Abschluss werden Wochenbudgets und Clusterziele verbindlich. Ohne Aktion wird der Controlling-Vorschlag nach Fristablauf automatisch \xFCbernommen.</p></div><div class="oknoepfe"><button class="gruen" data-pl-abschluss="spieler">Angepasste Planung beschlie\xDFen</button><button data-pl-abschluss="controlling">Controlling-Vorschlag abschlie\xDFen</button></div>';
       }
       return html;
     }
     function bericht2(D) {
       const b4 = D.bericht;
       if (!b4.ziele) return '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Kein Jahresplan vorhanden.</b>Die Planungsrunde l\xE4uft in KW 40 bis 44; bis dahin gibt es nichts zu vergleichen.</div></div></div>';
-      const vz2 = (x2) => (x2 > 0 ? "+" : x2 < 0 ? "\u2212" : "") + mio3(Math.abs(x2));
+      const vz3 = (x2) => (x2 > 0 ? "+" : x2 < 0 ? "\u2212" : "") + mio3(Math.abs(x2));
       let html = '<div class="q31">';
-      html += '<div class="q-gross"><span class="q-label">Abweichung zum Plan bis heute</span><span class="q-haupt ' + (b4.abweichung < 0 ? "q-minus" : "q-plus") + '">' + vz2(b4.abweichung) + '</span><span class="q-neben"><b>' + mio3(b4.ist) + "</b>Ist kumuliert</span></div>";
+      html += '<div class="q-gross"><span class="q-label">Abweichung zum Plan bis heute</span><span class="q-haupt ' + (b4.abweichung < 0 ? "q-minus" : "q-plus") + '">' + vz3(b4.abweichung) + '</span><span class="q-neben"><b>' + mio3(b4.ist) + "</b>Ist kumuliert</span></div>";
       html += '<div class="q-befund">Plan bis heute ' + mio3(b4.planBisHeute) + ", Jahresplan " + b4.jahr + " " + mio3(b4.ziele.umsatz) + ", EBITDA-Plan " + mio3(b4.ziele.ebitda) + ". " + (b4.forecasting == null ? "Der erste Jahresforecast entsteht nach KW 13." : "Forecast " + mio3(b4.forecasting) + ".") + "</div>";
       const K3 = b4.knoten, kinder = (id, ebene) => K3.filter((n3) => n3.ebene === ebene && n3.parent === id);
       const formate = K3.filter((n3) => n3.ebene === "format");
@@ -178772,12 +178913,12 @@ void main() {
       const L3 = D.bericht.forecasts || [];
       let html = '<div class="karte"><div class="khead">Quartalsforecast</div><p class="olief">3+9 in KW 13, 6+6 in KW 26 und 9+3 in KW 39. Der Forecast kann vor der Abgabe an Eigent\xFCmer und Bank angepasst werden.</p></div>';
       for (const f13 of [...L3].reverse()) {
-        html += '<div class="karte"><div class="khead">' + f13.bezeichnung + " \xB7 " + f13.jahr + "<small>" + (f13.status === "abgegeben" ? "Abgegeben" : f13.status === "offen" ? "Zur Freigabe" : "Zur\xFCckgehalten") + "</small></div>" + zeile3("Erwarteter Jahresumsatz", mio3(f13.ziele.umsatz)) + zeile3("Erwartetes EBITDA", mio3(f13.ziele.ebitda));
+        html += '<div class="karte"><div class="khead">' + f13.bezeichnung + " \xB7 " + f13.jahr + "<small>" + (f13.status === "abgegeben" ? "Abgegeben" : f13.status === "offen" ? "Zur Freigabe" : "Zur\xFCckgehalten") + "</small></div>" + zeile2("Erwarteter Jahresumsatz", mio3(f13.ziele.umsatz)) + zeile2("Erwartetes EBITDA", mio3(f13.ziele.ebitda));
         if (f13.status === "offen") html += '<div class="regler"><label>Umsatz Mio. \u20AC <input data-pl-forecast="umsatz" type="number" min="0" step="0.1" value="' + (f13.ziele.umsatz / 1e6).toFixed(1) + '"></label><label>EBITDA Mio. \u20AC <input data-pl-forecast="ebitda" type="number" step="0.1" value="' + (f13.ziele.ebitda / 1e6).toFixed(1) + '"></label></div><div class="oknoepfe"><button class="gruen" data-pl-forecast-abgabe="1">\xC4nderungen speichern und abgeben</button></div>';
         html += "</div>";
       }
       if (!L3.length) html += '<div class="q31"><div class="q-buch"><div class="q-leer"><b>Noch kein Forecast.</b>Der erste Forecast (3+9) entsteht nach KW 13.</div></div></div>';
-      if (D.bericht.vertrauen?.length) html += '<div class="karte"><div class="khead">Trefferquote und Vertrauen</div>' + D.bericht.vertrauen.slice(-8).map((v2) => zeile3("KW " + (v2.woche % 52 + 1) + " \xB7 Abweichung " + pct(v2.abweichung), (v2.delta > 0 ? "+" : "") + v2.delta)).join("") + "</div>";
+      if (D.bericht.vertrauen?.length) html += '<div class="karte"><div class="khead">Trefferquote und Vertrauen</div>' + D.bericht.vertrauen.slice(-8).map((v2) => zeile2("KW " + (v2.woche % 52 + 1) + " \xB7 Abweichung " + pct(v2.abweichung), (v2.delta > 0 ? "+" : "") + v2.delta)).join("") + "</div>";
       return html;
     }
     function boni(D) {
@@ -178785,7 +178926,7 @@ void main() {
       let html = '<div class="karte"><div class="khead">Variable Verg\xFCtung der Leitungen</div><p class="olief">Erf\xFCllung von Umsatz- und EBITDA-Zielen. Die Abrechnung erfolgt im Jahresabschluss, Auszahlung im Februar des Folgejahres als Personalaufwand.</p>';
       for (const [id, title] of Object.entries(rolle2)) html += '<label class="zeile"><span class="was">' + title + '</span><select class="ort" data-pl-bonus="' + id + '">' + [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3].map((w2) => '<option value="' + w2 + '"' + (Math.abs((q2[id] ?? 0.1) - w2) < 1e-3 ? " selected" : "") + ">" + pct(w2) + "</option>").join("") + "</select></label>";
       html += "</div>";
-      for (const b4 of [...D.bericht.boni || []].reverse().slice(0, 5)) html += '<div class="karte"><div class="khead">Bonusjahr ' + b4.jahr + "<small>" + (b4.bezahlt ? "ausgezahlt" : "f\xE4llig im Februar") + "</small></div>" + zeile3("Bonussumme", geld(b4.betrag)) + zeile3("Leitungsposten", String(b4.details.length)) + "</div>";
+      for (const b4 of [...D.bericht.boni || []].reverse().slice(0, 5)) html += '<div class="karte"><div class="khead">Bonusjahr ' + b4.jahr + "<small>" + (b4.bezahlt ? "ausgezahlt" : "f\xE4llig im Februar") + "</small></div>" + zeile2("Bonussumme", geld(b4.betrag)) + zeile2("Leitungsposten", String(b4.details.length)) + "</div>";
       return html;
     }
     function zeigen(halten = false) {
@@ -178863,7 +179004,7 @@ void main() {
   }
 
   // src/ui/personaleinsatz.js
-  var GRUPPEN2 = ["logistik", "verkauf", "kasse", "verwaltung"];
+  var GRUPPEN3 = ["logistik", "verkauf", "kasse", "verwaltung"];
   var NAME3 = { logistik: "Instore-Logistik", verkauf: "Verkauf", kasse: "Kasse", verwaltung: "Verwaltung" };
   var KURZ2 = { logistik: "Logistik", verkauf: "Verkauf", kasse: "Kasse", verwaltung: "Verwaltung" };
   var pct2 = (n3) => Math.round(n3 * 100) + " %";
@@ -178909,15 +179050,15 @@ void main() {
       ]);
       out += abschnitt("Deckung KW " + (p2.woche % 52 + 1), "Plan zu Bedarf");
       const kz2 = (g2) => ({ label: KURZ2[g2], wert: pct2(p2.gruppen[g2].deckung), ton: ton(p2.gruppen[g2].deckung) === "schlecht" ? "schlecht" : "" });
-      out += gross2(GRUPPEN2.slice(0, 2).map(kz2)) + gross2(GRUPPEN2.slice(2).map(kz2));
-      for (const g2 of GRUPPEN2) {
+      out += gross2(GRUPPEN3.slice(0, 2).map(kz2)) + gross2(GRUPPEN3.slice(2).map(kz2));
+      for (const g2 of GRUPPEN3) {
         const x2 = p2.gruppen[g2];
         out += abschnitt(NAME3[g2], fmt.format(x2.plan) + " von " + fmt.format(x2.bedarf) + " Std.");
         out += balken6(x2.tage.map((t5) => ({ label: t5.tag, a: t5.bedarf, b: t5.plan })));
       }
       out += `<div class="hw-legende"><span><i></i>Bedarf</span><span><i class="b"></i>Plan</span></div>`;
       out += abschnitt("Einsatz \xFCbersteuern", "100 % = Vorschlag");
-      out += '<div class="hw-felder">' + GRUPPEN2.map((g2) => regler2(KURZ2[g2], "gruppe", id, g2, st2.faktor[g2], 40, 160, "Einsatz")).join("") + regler2("Kasse Samstag", "samstag", id, "", st2.samstagKasse, 40, 160, "Einsatz") + regler2("Aushilfen", "aushilfen", id, "", st2.aushilfenQuote, 0, 30, "Fr und Sa") + "</div>";
+      out += '<div class="hw-felder">' + GRUPPEN3.map((g2) => regler2(KURZ2[g2], "gruppe", id, g2, st2.faktor[g2], 40, 160, "Einsatz")).join("") + regler2("Kasse Samstag", "samstag", id, "", st2.samstagKasse, 40, 160, "Einsatz") + regler2("Aushilfen", "aushilfen", id, "", st2.aushilfenQuote, 0, 30, "Fr und Sa") + "</div>";
       out += `<p class="hw-lese hw-leise hw-unterzeile">Weniger Kasse am Samstag f\xFChrt zu Wartezeiten und Kaufabbr\xFCchen. Aushilfen verst\xE4rken Freitag und Samstag und kosten zus\xE4tzlich.</p>`;
       return out;
     }
@@ -178936,7 +179077,7 @@ void main() {
       );
       out += abschnitt("H\xE4user", "knappste Gruppe");
       out += liste(c.haeuser.map((h4) => {
-        const min = GRUPPEN2.reduce((m, g2) => h4.gruppen[g2] < h4.gruppen[m] ? g2 : m, GRUPPEN2[0]);
+        const min = GRUPPEN3.reduce((m, g2) => h4.gruppen[g2] < h4.gruppen[m] ? g2 : m, GRUPPEN3[0]);
         return zeile({
           was: esc2(h4.name),
           unter: `Krank ${pct2(h4.krank)} \xB7 Aushilfen ${fmt.format(h4.aushilfen)} Std. \xB7 Springer ${fmt.format(h4.springer)} Std.`,
@@ -178956,16 +179097,16 @@ void main() {
       if (ui.cluster && !liste3.some((c) => c.id === ui.cluster)) ui.cluster = null;
       const gewaehlt = liste3.find((c) => c.id === ui.cluster) ?? liste3[0];
       if (gewaehlt) ui.cluster = gewaehlt.id;
-      const knapp = gewaehlt ? gewaehlt.haeuser.filter((h4) => GRUPPEN2.some((g2) => h4.gruppen[g2] < 0.9)) : [];
+      const knapp = gewaehlt ? gewaehlt.haeuser.filter((h4) => GRUPPEN3.some((g2) => h4.gruppen[g2] < 0.9)) : [];
       const befund2 = !gewaehlt ? "<b>Keine offenen H\xE4user.</b>" : knapp.length ? "<b>" + knapp.length + " von " + gewaehlt.haeuser.length + " H\xE4usern sind unter 90 % besetzt.</b> Am knappsten: " + esc2(knapp.slice(0, 2).map((h4) => h4.name).join(", ")) + "." : (() => {
-        const min = (h4) => Math.min(...GRUPPEN2.map((g2) => h4.gruppen[g2]));
+        const min = (h4) => Math.min(...GRUPPEN3.map((g2) => h4.gruppen[g2]));
         const k5 = [...gewaehlt.haeuser].sort((a2, b4) => min(a2) - min(b4))[0];
         return "<b>Alle " + gewaehlt.haeuser.length + " H\xE4user sind ausreichend besetzt.</b> " + (k5 && min(k5) < 0.985 ? "Am knappsten: " + esc2(k5.name) + " mit " + pct2(min(k5)) + " (Krankenstand " + pct2(k5.krank) + ")." : "Kein Springer n\xF6tig.");
       })();
       let r4 = "";
       if (gewaehlt) {
         const alle = gewaehlt.haeuser.length;
-        const voll2 = gewaehlt.haeuser.filter((h4) => GRUPPEN2.every((g2) => h4.gruppen[g2] >= 0.9)).length;
+        const voll2 = gewaehlt.haeuser.filter((h4) => GRUPPEN3.every((g2) => h4.gruppen[g2] >= 0.9)).length;
         r4 += gross2([
           { label: "H\xE4user besetzt", wert: `${voll2} von ${alle}`, ton: knapp.length ? "schlecht" : "" },
           { label: "Krankenstand", wert: pct2(gewaehlt.haeuser.reduce((n3, h4) => n3 + h4.krank, 0) / Math.max(1, alle)) }
@@ -179929,21 +180070,21 @@ void main() {
   }
   function cockpitZeigen() {
     const c = cockpit(s);
-    const kachel2 = (titel, wert, ton3 = "") => `<div class="kz ${ton3}"><span>${titel}</span><b>${wert}</b></div>`;
+    const kachel3 = (titel, wert, ton3 = "") => `<div class="kz ${ton3}"><span>${titel}</span><b>${wert}</b></div>`;
     const FORMATNAME3 = { alle: "Alle", warenhaus: "Hartwig", sport: "Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
     const fx = cockpitFormat === "alle" ? null : c.formate.find((x2) => x2.format === cockpitFormat);
     const auswahl4 = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME3).filter(([id]) => id === "alle" || c.formate.some((x2) => x2.format === id && x2.haeuser)).map(([id, name2]) => '<option value="' + id + '"' + (id === cockpitFormat ? " selected" : "") + ">" + name2 + "</option>").join("") + "</select>";
     const zu = !cockpitOffen;
     $2("cockpit").classList.toggle("offen", cockpitOffen);
     $2("cockpit").innerHTML = [
-      kachel2("Cash", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? "rot" : ""),
+      kachel3("Cash", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? "rot" : ""),
       // Q35: vor der ersten Woche Werte aus dem Vorlauf (Vorjahreswochen des Vorgängers), nicht „noch offen“.
-      fx ? kachel2("EBITDA " + FORMATNAME3[cockpitFormat], geld(fx.ebitda), fx.ebitda < 0 ? "rot" : "gruen") : kachel2("EBITDA 13 Wo.", geld(c.ebitda13), c.ebitda13 < 0 ? "rot" : "gruen"),
-      kachel2("Umsatz<em> \xB7 " + FORMATNAME3[cockpitFormat] + "</em>" + auswahl4, geld(fx ? fx.umsatz : c.umsatzWoche), "mitwahl"),
+      fx ? kachel3("EBITDA " + FORMATNAME3[cockpitFormat], geld(fx.ebitda), fx.ebitda < 0 ? "rot" : "gruen") : kachel3("EBITDA 13 Wo.", geld(c.ebitda13), c.ebitda13 < 0 ? "rot" : "gruen"),
+      kachel3("Umsatz<em> \xB7 " + FORMATNAME3[cockpitFormat] + "</em>" + auswahl4, geld(fx ? fx.umsatz : c.umsatzWoche), "mitwahl"),
       `<button type="button" class="kz-mehr" data-cockpit-mehr aria-expanded="${cockpitOffen}" aria-label="${zu ? "Weitere Kennzahlen zeigen" : "Weitere Kennzahlen ausblenden"}"><span aria-hidden="true">${zu ? "\u25BE" : "\u25B4"}</span></button>`,
-      kachel2("Kreditrahmen frei", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? "rot" : ""),
-      kachel2("Vertrauen", `${c.vertrauen} / 100`, c.vertrauen < 35 ? "rot" : ""),
-      kachel2("Image", `${c.image} / 100`, c.image < 35 ? "rot" : "")
+      kachel3("Kreditrahmen frei", c.geldUnbegrenzt ? "unbegrenzt" : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? "rot" : ""),
+      kachel3("Vertrauen", `${c.vertrauen} / 100`, c.vertrauen < 35 ? "rot" : ""),
+      kachel3("Image", `${c.image} / 100`, c.image < 35 ? "rot" : "")
     ].join("");
     $2("cockpit").querySelector("[data-cockpit-mehr]")?.addEventListener("click", () => {
       cockpitOffen = !cockpitOffen;
@@ -180847,8 +180988,8 @@ void main() {
       leben.setzen(vorherLeben);
       const d4 = await messen({ ...daten, vorBild: vorherLeben === "aus" ? void 0 : () => leben.schritt(1 / 30, false) });
       d4.vergleich = { ohneFps: ohne2.fps, mitFps: d4.fps, ohneRenderMs: ohne2.renderMittelMs, mitRenderMs: d4.renderMittelMs };
-      const zeile3 = (name2, wert) => `<div class="zeile"><span class="was">${name2}</span><b>${wert}</b></div>`;
-      const html = '<div class="karte"><div class="khead">' + d4.frames + " gerenderte Frames auf diesem Ger\xE4t</div>" + zeile3("Bildrate ohne Leben", ohne2.fps + " FPS") + zeile3("Bildrate mit Leben (" + vorherLeben + ")", d4.fps + " FPS") + zeile3("Leben: Aktualisierung je Bild", d4.updateMittelMs + " ms (Ziel h\xF6chstens 2 ms)") + zeile3("Framezeit, 95. Perzentil", d4.frameP95Ms + " ms") + zeile3("Renderaufruf, 95. Perzentil", d4.renderP95Ms + " ms") + zeile3("Frames \xFCber 33 ms", d4.frameUeber33ms + " / " + (d4.frames - 1)) + zeile3("Draw Calls", d4.drawCalls) + zeile3("Dreiecke", fmt.format(d4.dreiecke)) + zeile3("Geometrien / Texturen", d4.geometrien + " / " + d4.texturen) + zeile3("Teile der Stadt", fmt.format(d4.teile)) + zeile3("Canvas", d4.bild) + zeile3("Pixelratio", d4.pixelRatio) + zeile3("Grafikprofil", d4.grafikprofil) + '</div><div class="leise">Messung unter laufender Karte, kein GPU-Profiler. Bei Rucklern echte Hardware und Safari-Version dokumentieren.</div>';
+      const zeile2 = (name2, wert) => `<div class="zeile"><span class="was">${name2}</span><b>${wert}</b></div>`;
+      const html = '<div class="karte"><div class="khead">' + d4.frames + " gerenderte Frames auf diesem Ger\xE4t</div>" + zeile2("Bildrate ohne Leben", ohne2.fps + " FPS") + zeile2("Bildrate mit Leben (" + vorherLeben + ")", d4.fps + " FPS") + zeile2("Leben: Aktualisierung je Bild", d4.updateMittelMs + " ms (Ziel h\xF6chstens 2 ms)") + zeile2("Framezeit, 95. Perzentil", d4.frameP95Ms + " ms") + zeile2("Renderaufruf, 95. Perzentil", d4.renderP95Ms + " ms") + zeile2("Frames \xFCber 33 ms", d4.frameUeber33ms + " / " + (d4.frames - 1)) + zeile2("Draw Calls", d4.drawCalls) + zeile2("Dreiecke", fmt.format(d4.dreiecke)) + zeile2("Geometrien / Texturen", d4.geometrien + " / " + d4.texturen) + zeile2("Teile der Stadt", fmt.format(d4.teile)) + zeile2("Canvas", d4.bild) + zeile2("Pixelratio", d4.pixelRatio) + zeile2("Grafikprofil", d4.grafikprofil) + '</div><div class="leise">Messung unter laufender Karte, kein GPU-Profiler. Bei Rucklern echte Hardware und Safari-Version dokumentieren.</div>';
       panel("Performance", d4.stadt + " \xB7 KW " + (d4.woche + 1), html, "gross");
       window.spiel.letzteDiagnose = d4;
     } catch (e) {

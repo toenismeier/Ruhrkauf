@@ -409,34 +409,30 @@ async function buendeln() {
     await pruef('marketing', 'Übersicht');
     await oben();
     await bild('marketing.png');
-    await tippe('.tab', 'Kanäle');
+    await tippe('#preiter [data-a=seite][data-v=kanaele]');
     const kb0 = await ev(() => window.spiel.E.kanaele(window.spiel.s).kanaele.find((k) => k.id === 'online').budgetWoche);
-    // Q16: exakt derselbe Kanalbudget-Aktionspfad wie zuvor, jetzt über den Wochenbudget-Regler.
-    await ev(() => {
-      const el = document.querySelector('[data-a="kanalBudgetSlider"][data-k="online"]');
-      const budget = window.spiel.E.kanaele(window.spiel.s).kanaele.find((k) => k.id === 'online').budgetWoche;
-      el.value = String(Math.round(budget * 1.1 / 100) * 100);
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    // E47: Kanalbudget +10 % über den Wochenbudget-Stepper der Kanalkarte (Aktion kanalBudget, faktor 1,1).
+    await ev(() => document.querySelector('[data-a="kanalBudget"][data-k="online"][data-v="1"]').scrollIntoView({ inline: 'center' }));
+    await tippe('[data-a="kanalBudget"][data-k="online"][data-v="1"]');
     const kb1 = await ev(() => window.spiel.E.kanaele(window.spiel.s).kanaele.find((k) => k.id === 'online').budgetWoche);
     soll('Kanal Online +10 %', Math.abs(kb1 / kb0 - 1.1) < 0.01, `${kb0} → ${kb1} € je Woche`);
     await pruef('marketing', 'Kanäle');
-    await tippe('.tab', 'Städte');
+    await tippe('#preiter [data-a=seite][data-v=stadt]');
     const markt = await ev(() => window.spiel.E.marketingStaedte(window.spiel.s));
     soll('Q16 Marktanteile 100 %', markt.staedte.every((x) => Math.abs(Object.values(x.marktanteile).reduce((a, b) => a + b, 0) - 1) < 0.000001), markt.staedte.length + ' Städte');
     await pruef('marketing', 'Städte und Marktanteil');
-    await tippe('.tab', 'Karte');
+    await tippe('#preiter [data-a=seite][data-v=karte]');
+    await tippe('[data-a=kachel][data-v="2"]');
     await tippe('[data-a=kartenrabatt][data-v="0.02"]');
     const kr = await ev(() => window.spiel.E.kundenkarte(window.spiel.s).kartenrabatt);
     soll('Kartenrabatt 2 %', kr === 0.02, `${kr}`);
     await pruef('marketing', 'Karte und App');
-    await tippe('.tab', 'CRM');
+    await tippe('#preiter [data-a=seite][data-v=crm]');
     const crm0 = await ev(() => window.spiel.E.crmKampagnen(window.spiel.s).kampagnen.length);
-    await ev(() => { const s = document.querySelector('[data-a=crmSeg]'); const i = window.spiel.E.crmKampagnen(window.spiel.s).segmente.findIndex((x) => x.segment.typ === 'inaktive'); s.value = String(i); s.dispatchEvent(new Event('change', { bubbles: true })); });
-    await p.waitForTimeout(100);
+    const segZiel = await ev(() => window.spiel.E.crmKampagnen(window.spiel.s).segmente.findIndex((x) => x.segment.typ === 'inaktive'));
+    for (let i = 0; i < segZiel; i++) await tippe('[data-a=crmSeg][data-v="1"]');
     await tippe('[data-a=crmProzent][data-v="0.2"]');
-    await tippe('[data-a=crmFrequenz][data-v=zweiwoechentlich]');
+    await tippe('[data-a=crmFrequenz][data-v="-1"]'); // monatlich → alle 14 Tage
     await pruef('marketing', 'CRM-Baukasten');
     await oben();
     await bild('marketing-crm.png');
@@ -444,22 +440,21 @@ async function buendeln() {
     const crm1 = await ev(() => { const l = window.spiel.E.crmKampagnen(window.spiel.s).kampagnen; return { n: l.length, neu: l[l.length - 1] }; });
     soll('CRM-Kampagne anlegen', crm1.n === crm0 + 1 && crm1.neu.segment.typ === 'inaktive' && crm1.neu.angebot.prozent === 0.2, `${crm1.neu.name}: ${crm1.neu.segmentText}, ${crm1.neu.angebotText}, ${crm1.neu.frequenzText}, ${crm1.neu.status}`);
     await pruef('marketing', 'CRM nach Anlegen');
-    await tippe('.tab', 'Kalender');
+    await tippe('#preiter [data-a=seite][data-v=kalender]');
     const kal0 = await ev(() => window.spiel.E.aktionskalender(window.spiel.s).eintraege.length);
     await tippe('[data-a=planen]');
-    await ev(() => { const s = document.querySelector('[data-a=planAnlass]'); s.value = 'jubilaeum'; s.dispatchEvent(new Event('change', { bubbles: true })); });
-    await p.waitForTimeout(100);
+    for (let i = 0; i < 20 && (await ev(() => window.spiel.marketing.ui.planen?.anlass)) !== 'jubilaeum'; i++) await tippe('[data-a=planAnlass][data-v="-1"]');
     await tippe('[data-a=planKw][data-v="-1"]');
     await tippe('[data-a=planRabatt][data-v="0.2"]');
     await tippe('[data-a=planFertig]');
     const kal1 = await ev(() => { const K = window.spiel.E.aktionskalender(window.spiel.s); return { n: K.eintraege.length, neu: K.eintraege.filter((a) => !a.standard).pop(), m: document.getElementById('meldung').textContent }; });
     soll('Aktion planen', kal1.n === kal0 + 1 && kal1.neu && kal1.neu.startKw === 38, `${kal1.neu?.name} KW ${kal1.neu?.startKw}, ${kal1.neu?.mechanikText} ${kal1.neu?.rabatt}, ${kal1.neu?.scopeText}: ${kal1.m}`);
     const abs = await ev(() => window.spiel.E.aktionskalender(window.spiel.s).eintraege.find((a) => a.status === 'geplant' && a.standard)?.id);
-    if (abs) { await tippe(`.zeile[data-a=aktion][data-v="${abs}"]`); await tippe('[data-a=aktionAbsagen]'); }
+    if (abs) { await tippe(`.hw-zeile[data-a=aktion][data-v="${abs}"]`); await tippe('[data-a=aktionAbsagen]'); }
     const absSt = await ev((id) => window.spiel.E.aktionskalender(window.spiel.s).eintraege.find((a) => a.id === id)?.status, abs);
     soll('Aktion absagen', absSt === 'abgesagt', `${abs}: ${absSt}`);
     await pruef('marketing', 'Auswertung abgesagt');
-    await tippe('.zurueck');
+    await tippe('[data-a=seite][data-v=kalender]', 'Zurück');
     await pruef('marketing', 'Kalender');
     await oben();
     await bild('marketing-kalender.png');
