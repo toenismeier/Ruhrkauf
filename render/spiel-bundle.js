@@ -161300,7 +161300,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "36b7e82" : "Entwicklung";
+  var version = () => true ? "a5f8df3" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -176257,8 +176257,8 @@ void main() {
       host.querySelector(".hb-etagen").innerHTML = [...h4.etagen].sort((a2, b4) => a2 - b4).map((n3) => '<button type="button" data-hb="etage" data-nr="' + n3 + '" aria-pressed="' + (n3 === nr4) + '">' + etageName3(n3) + "</button>").join("");
       host.hidden = false;
       if (!renderer) {
-        renderer = new three_module_exports.WebGLRenderer({ canvas: canvas2, antialias: false });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.3));
+        renderer = new three_module_exports.WebGLRenderer({ canvas: canvas2, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.outputColorSpace = three_module_exports.SRGBColorSpace;
         renderer.shadowMap.enabled = false;
       }
@@ -178821,9 +178821,11 @@ void main() {
   var etageName4 = (e) => e === -1 ? "Untergeschoss" : e === 0 ? "Erdgeschoss" : `${e}. Obergeschoss`;
   var canvas = $2("karte");
   var touchMobil = navigator.maxTouchPoints > 0 && window.innerWidth <= 650 || /iPhone|iPod|Android/i.test(navigator.userAgent);
-  var sparsam = param.get("grafik") === "sparsam" || touchMobil && param.get("grafik") !== "hoch";
-  var ren = new three_module_exports.WebGLRenderer({ canvas, antialias: !sparsam, preserveDrawingBuffer: true });
-  ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, sparsam ? 1.25 : 2));
+  var notprofil = param.get("grafik") === "sparsam";
+  var sparsam = notprofil || touchMobil && param.get("grafik") !== "hoch";
+  var PIXELDICHTE = Math.min(window.devicePixelRatio || 1, notprofil ? 1.25 : 2);
+  var ren = new three_module_exports.WebGLRenderer({ canvas, antialias: !notprofil, preserveDrawingBuffer: true });
+  ren.setPixelRatio(PIXELDICHTE);
   ren.outputColorSpace = three_module_exports.SRGBColorSpace;
   ren.shadowMap.enabled = !sparsam;
   ren.shadowMap.type = three_module_exports.PCFShadowMap;
@@ -180008,7 +180010,7 @@ void main() {
   var hqRen = null;
   function schnittBild(baue2, w2 = 720, h4 = 420) {
     if (!hqRen) {
-      hqRen = new three_module_exports.WebGLRenderer({ canvas: document.createElement("canvas"), antialias: !sparsam, preserveDrawingBuffer: true });
+      hqRen = new three_module_exports.WebGLRenderer({ canvas: document.createElement("canvas"), antialias: !notprofil, preserveDrawingBuffer: true });
       hqRen.setPixelRatio(1);
       hqRen.outputColorSpace = three_module_exports.SRGBColorSpace;
       hqRen.shadowMap.enabled = !sparsam;
@@ -180583,7 +180585,7 @@ void main() {
         scene: () => scene,
         camera: () => cam,
         anzahl: 45,
-        info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + " \xD7 " + canvas.height, grafikprofil: sparsam ? "sparsam" : "hoch" })
+        info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + " \xD7 " + canvas.height, grafikprofil: notprofil ? "sparsam" : sparsam ? "scharf" : "hoch", pixeldichte: PIXELDICHTE })
       };
       leben.setzen("aus");
       const ohne2 = await messen(daten);

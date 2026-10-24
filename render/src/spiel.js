@@ -117,12 +117,15 @@ const STATUS_HAUS = { offen: 'Offen', schliessung_verhandlung: 'Schließung in V
 
 // ─────────────────────────────────────────── Szene und Kamera
 const canvas = $('karte');
-// Sparsames Profil fuer kleine Touch-Geraete: weniger Framebuffer-Pixel, kein teurer Schattenpass.
-// Fuer A/B-Vergleiche kann ?grafik=hoch bzw. ?grafik=sparsam gesetzt werden.
+// Bildschärfe (E47): auch auf dem iPhone volle Kantenglättung und Pixeldichte 2. Das Telefon spart nur am
+// Schattenpass und an den Figuren (leben.js), nie an der Schärfe. ?grafik=sparsam bleibt als Notprofil,
+// ?grafik=hoch schaltet auch auf Touchgeräten die Schatten ein.
 const touchMobil = (navigator.maxTouchPoints > 0 && window.innerWidth <= 650) || /iPhone|iPod|Android/i.test(navigator.userAgent);
-const sparsam = param.get('grafik') === 'sparsam' || (touchMobil && param.get('grafik') !== 'hoch');
-const ren = new THREE.WebGLRenderer({ canvas, antialias: !sparsam, preserveDrawingBuffer: true });
-ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, sparsam ? 1.25 : 2));
+const notprofil = param.get('grafik') === 'sparsam';
+const sparsam = notprofil || (touchMobil && param.get('grafik') !== 'hoch');
+const PIXELDICHTE = Math.min(window.devicePixelRatio || 1, notprofil ? 1.25 : 2);
+const ren = new THREE.WebGLRenderer({ canvas, antialias: !notprofil, preserveDrawingBuffer: true });
+ren.setPixelRatio(PIXELDICHTE);
 ren.outputColorSpace = THREE.SRGBColorSpace;
 ren.shadowMap.enabled = !sparsam;
 ren.shadowMap.type = THREE.PCFShadowMap;
@@ -1096,7 +1099,7 @@ let hqRen = null;
 /** Etagenschnitt aus hq.js als Bild (eigener kleiner Renderer, damit die Karte unberührt bleibt). */
 function schnittBild(baue, w = 720, h = 420) {
   if (!hqRen) {
-    hqRen = new THREE.WebGLRenderer({ canvas: document.createElement('canvas'), antialias: !sparsam, preserveDrawingBuffer: true });
+    hqRen = new THREE.WebGLRenderer({ canvas: document.createElement('canvas'), antialias: !notprofil, preserveDrawingBuffer: true });
     hqRen.setPixelRatio(1); hqRen.outputColorSpace = THREE.SRGBColorSpace; hqRen.shadowMap.enabled = !sparsam; hqRen.shadowMap.type = THREE.PCFShadowMap;
   }
   hqRen.setSize(w, h, false);
@@ -1510,7 +1513,7 @@ async function diagnoseZeigen() {
   leben.pause(true);
   try {
     const daten = { renderer: ren, scene: () => scene, camera: () => cam, anzahl: 45,
-      info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height, grafikprofil: sparsam ? 'sparsam' : 'hoch' }) };
+      info: () => ({ stadt: stadtName, woche: s.woche, teile: teileStand().teile, bild: canvas.width + ' × ' + canvas.height, grafikprofil: notprofil ? 'sparsam' : sparsam ? 'scharf' : 'hoch', pixeldichte: PIXELDICHTE }) };
     leben.setzen('aus');
     const ohne = await performanceMessen(daten);
     leben.setzen(vorherLeben);
