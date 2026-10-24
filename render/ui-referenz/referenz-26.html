@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Referenz Coffee 26</title>
+<link rel="stylesheet" href="../src/ui/hartwig.css">
+<style>
+  html, body { margin: 0; height: 100%; background: #000; }
+  /* Nur für den Abgleich: absolute Lage der Karteninhalte wie in der Vorlage. */
+  .k-titel { position: absolute; left: 0; right: 0; top: 60px; }
+  .k-sterne { position: absolute; left: 0; right: 0; top: 91px; }
+  .k-schalter { position: absolute; left: 23px; top: 147.3px; }
+  .k-schalter-text { position: absolute; left: 81px; top: 156.7px; font: var(--hw-t-text); font-weight: 400; }
+  .k-verkauf { position: absolute; right: 24.3px; top: 147.8px; text-align: right; }
+  .k-verkauf .hw-zahl { display: block; margin-top: .7px; }
+  .k-verkauf .hw-abw { display: block; margin-top: 1.5px; }
+  .k-kosten { position: absolute; left: 24.6px; top: 198.5px; color: var(--hinweis); font: var(--hw-t-klein); }
+  .k-ring { position: absolute; left: 23px; top: 216.3px; }
+  .k-preis { position: absolute; left: 133px; top: 221px; }
+  .k-stepper { position: absolute; left: 133px; top: 241px; }
+</style></head>
+<body>
+<div class="hw" data-bereich="coffee-haus" style="width:402px;height:874px">
+  <div class="hw-grund"></div>
+  <header class="hw-kopf">
+    <img class="hw-kopf-symbol" src="coffee/26-logo.png" alt="">
+    <div class="hw-kopf-titel">S&amp;G</div>
+    <div class="hw-kopf-unter">842 5th Ave, Seattle</div>
+    <button class="hw-zu" aria-label="Schließen"></button>
+  </header>
+  <div class="hw-sprecher">
+    <div class="hw-sprecher-text">Hello boss. How're you doing today?</div>
+    <img class="hw-sprecher-figur" src="coffee/26-figur.png" alt="">
+    <div class="hw-griff"></div>
+  </div>
+  <main class="hw-inhalt">
+    <div style="height:45.3px"></div>
+    <div class="hw-segment hw-kontur">
+      <button aria-pressed="true"><img src="coffee/26-seg-1.png" alt="">Hot</button>
+      <button><img src="coffee/26-seg-2.png" alt="">Cold</button>
+      <button><img src="coffee/26-seg-3.png" alt="">Food</button>
+    </div>
+    <div style="height:30.4px"></div>
+    <div class="hw-karussell" style="padding-top:50px">
+      <article class="hw-karte hw-kontur" style="height:319.6px">
+        <img class="hw-karte-bild" src="coffee/26-tasse.png" alt="">
+        <div class="hw-karte-titel k-titel">Espresso Con Panna</div>
+        <div class="hw-sterne k-sterne" aria-label="3,5 von 5"></div>
+        <button class="hw-schalter hw-kontur k-schalter" role="switch" aria-checked="true"></button>
+        <div class="k-schalter-text">On Menu</div>
+        <div class="k-verkauf"><span class="hw-marke">Sales last week</span><span class="hw-zahl">85</span><span class="hw-abw">+8 (+10%)</span></div>
+        <div class="k-kosten">Unit Cost 1,20 €</div>
+        <div class="hw-ring k-ring" data-anteil="0.12"><svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="33.5" fill="none" stroke="var(--ring-a)" stroke-width="13"/><circle cx="40" cy="40" r="33.5" fill="none" stroke="var(--ring-b)" stroke-width="13" stroke-dasharray="25.3 300" transform="rotate(-90 40 40)"/></svg><span>Margin<b>88%</b></span></div>
+        <div class="hw-marke k-preis">Price</div>
+        <div class="hw-stepper hw-kontur k-stepper"><button class="hw-kontur" aria-label="weniger"></button><output>9,75 €</output><button class="hw-kontur plus" aria-label="mehr"></button></div>
+      </article>
+      <article class="hw-karte hw-kontur" style="height:319.6px"></article>
+    </div>
+    <div style="height:16.5px"></div>
+    <div class="hw-punkte"><i class="an"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="klein"></i><i class="kleiner"></i></div>
+  </main>
+  <nav class="hw-reiter">
+    <button><img src="coffee/26-reiter-1.png" alt=""><span>Service</span></button>
+    <button aria-selected="true"><img src="coffee/26-reiter-2.png" alt=""><span>Product</span></button>
+    <button><img src="coffee/26-reiter-3.png" alt=""><span>Marketing</span></button>
+    <button><img src="coffee/26-reiter-4.png" alt=""><span>Finance</span></button>
+  </nav>
+</div>
+<script>
+  const stern = (fuellung) => `<svg viewBox="0 0 24 24"><defs><linearGradient id="h${fuellung}"><stop offset="${fuellung}" stop-color="var(--stern)"/><stop offset="${fuellung}" stop-color="#4a4644"/></linearGradient></defs><path fill="url(#h${fuellung})" d="M12 1.5l3.2 6.8 7.3.9-5.4 5 1.4 7.3L12 17.9l-6.5 3.6 1.4-7.3-5.4-5 7.3-.9z"/></svg>`;
+  document.querySelector('.hw-sterne').innerHTML = [1, 1, 1, 0.5, 0].map(stern).join('');
+</script>
+</body></html>

@@ -1,0 +1,115 @@
+/* Hartwig-Oberfläche (E47). Einzige Stildatei der Spieloberfläche.
+   Maße aus Coffee Inc 2 vermessen (Vorlagen 05, 20, 26 bei 402 × 874, 3-fach), Werte in CSS-Pixeln.
+   Bereiche setzen nur Farben; Abstände, Größen und Konturen sind überall gleich. */
+
+/* Schrift: Figtree (OFL 1.1, Lizenz in schrift/OFL.txt), Ummo 24.10.2026. Gleiche Datei auf dem iPhone und im Prüfbild. */
+@font-face { font-family: 'Hartwig Grotesk'; src: url('schrift/figtree.ttf') format('truetype'); font-weight: 300 900; font-display: block; }
+
+:root {
+  --hw-schrift: 'Hartwig Grotesk', -apple-system, sans-serif;
+  /* Typografie: Größe / Gewicht. Kalibriert über Tintenhöhen der Vorlage. */
+  --hw-t-titel: 500 var(--hw-gr-titel, 17.5px)/1.15 var(--hw-schrift);      /* Produktname, Kartentitel */
+  --hw-t-kopf: 600 var(--hw-gr-kopf, 14.4px)/1.2 var(--hw-schrift);         /* Blattkopf Zeile 1 */
+  --hw-t-kopf2: 400 var(--hw-gr-kopf2, 13.2px)/1.2 var(--hw-schrift);       /* Blattkopf Zeile 2 */
+  --hw-t-text: 500 var(--hw-gr-text, 11.85px)/1.3 var(--hw-schrift);         /* Sprecher, Bedienbeschriftung */
+  --hw-t-lese: 400 var(--hw-gr-lese, 11.5px)/1.33 var(--hw-schrift);      /* Fließtext in Karten */
+  --hw-t-marke: 300 var(--hw-gr-marke, 11.8px)/1.2 var(--hw-schrift);       /* VERSALIEN-Beschriftung, dünn */
+  --hw-t-zahl: 400 var(--hw-gr-zahl, 24.75px)/1 var(--hw-schrift);           /* Großkennzahl */
+  --hw-t-klein: 400 var(--hw-gr-klein, 10.9px)/1.2 var(--hw-schrift);     /* Abweichung, Reiter */
+  --hw-kontur-abstand: 2.33px;  /* Abstand der hellen Innenkontur zur Kante */
+  --hw-kontur: 1.33px;          /* Breite der Innenkontur */
+  --hw-radius: 12px;
+  --hw-rand: 20px;
+}
+
+/* Farben je Bereich. `coffee-*` nur für den Bildabgleich mit der Vorlage. */
+.hw[data-bereich='coffee-haus'] { --grund: #312924; --kopf: #221c19; --tief: #0e0c0a; --karte: #120f0d; --kartenlinie: #595756; --text: #fff; --leise: #bfbebd; --marke: #a5a3a1; --akzent: #95410a; --akzent-linie: #b57a53; --akzent-aktiv: #682d07; --akzent-aktiv-linie: #956c51; --feld: #080606; --feldlinie: #515150; --punkt: #8c8885; --stern: #ffac0b; --hinweis: #e5562a; --ring-a: #efbf73; --ring-b: #c9441b; }
+.hw[data-bereich='coffee-zentrale'] { --grund: #213741; --kopf: #17262d; --tief: #0d161a; --karte: #0d161a; --kartenlinie: #555c5e; --text: #fff; --leise: #a6a7a7; --marke: #9aa3a7; --akzent: #4f7e90; --akzent-linie: #83a4b1; --akzent-aktiv: #335a6a; --akzent-aktiv-linie: #6f93a2; --feld: #05090a; --feldlinie: #4c5356; --punkt: #8c9295; --stern: #ffac0b; --hinweis: #e5562a; --ring-a: #66bb6a; --ring-b: #2f6b33; }
+
+.hw { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--grund); color: var(--text); font: var(--hw-t-text); -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+.hw *, .hw *::before, .hw *::after { box-sizing: border-box; }
+/* Grund: feine senkrechte Streifen wie die Vorlage (einzige Textur). */
+.hw-grund { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+
+/* Blattkopf: Symbol links, Titel und Adresse mittig, Schließen rechts. Höhe inkl. Statusleiste 112 px. */
+.hw-kopf { position: absolute; left: 0; right: 0; top: 0; height: 112px; background: var(--kopf); z-index: 3; }
+.hw-kopf-symbol { position: absolute; left: 10px; top: 66.7px; width: 36.7px; height: 36.7px; object-fit: contain; }
+.hw-kopf-titel { position: absolute; left: 60px; right: 60px; top: 71px; text-align: center; font: var(--hw-t-kopf); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hw-kopf-unter { position: absolute; left: 60px; right: 60px; top: 87.5px; text-align: center; font: var(--hw-t-kopf2); color: var(--leise); letter-spacing: -.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hw-zu { position: absolute; right: 13px; top: 70px; width: 34px; height: 34px; border: 0; background: none; padding: 0; color: var(--text); }
+.hw-zu::before, .hw-zu::after { content: ''; position: absolute; left: 7.5px; right: 7.5px; top: 16px; height: 2.2px; border-radius: 2px; background: currentColor; transform: rotate(45deg); }
+.hw-zu::after { transform: rotate(-45deg); }
+
+/* Sprecherzeile: Person sagt den Befund. 80 px hoch, mit Griff unten. */
+.hw-sprecher { position: absolute; left: 0; right: 0; top: 112px; height: 80px; background: var(--tief); z-index: 2; }
+.hw-sprecher-text { position: absolute; left: var(--hw-rand); right: 76px; top: 0; bottom: 0; display: flex; align-items: center; padding-top: 2px; font: var(--hw-t-text); letter-spacing: .45px; }
+.hw-sprecher-figur { position: absolute; right: 15px; bottom: 0; width: 53.3px; height: 75.3px; object-fit: contain; object-position: bottom; }
+.hw-griff { position: absolute; left: 50%; top: 72px; width: 80px; height: 4px; margin-left: -40px; border-radius: 2px; background: var(--kartenlinie); opacity: .75; }
+
+/* Inhalt zwischen Sprecher und Reiterleiste. */
+.hw-inhalt { position: absolute; left: 0; right: 0; top: 192px; bottom: 104px; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+
+/* Doppelkontur: Fläche, dann helle Linie 2,33 px innen. Für Karten, Segmente, Stepper, Schalter. */
+.hw-kontur { background: var(--f); box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--f), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--l); border-radius: var(--hw-radius); }
+
+/* Segmentleiste mit Symbol je Teil. 44 px hoch, volle Breite mit Rand. */
+.hw-segment { position: relative; display: flex; height: 44px; margin: 0 var(--hw-rand); --f: var(--akzent); --l: var(--akzent-linie); }
+.hw-segment > button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px; border: 0; padding: 0; background: none; color: var(--text); font: var(--hw-t-text); font-size: var(--hw-gr-segment, 13.95px); letter-spacing: .02em; text-transform: uppercase; }
+.hw-segment > button img { height: 25px; width: auto; }
+/* Aktiver Teil: nur dunklere Fläche innerhalb der durchlaufenden Kontur (Kontur liegt als ::after darüber). */
+.hw-segment > button[aria-pressed='true'] { background: var(--akzent-aktiv); }
+.hw-segment > button:first-child { border-radius: var(--hw-radius) 0 0 var(--hw-radius); }
+.hw-segment > button:last-child { border-radius: 0 var(--hw-radius) var(--hw-radius) 0; }
+.hw-segment::after { content: ''; position: absolute; inset: 0; border-radius: var(--hw-radius); pointer-events: none;
+  box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--akzent), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--akzent-linie); }
+
+/* Karussell: Karte 300 px, Nachbar schaut 21 px daneben heraus. */
+.hw-karussell { position: relative; display: flex; gap: 21px; padding: 0 51px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.hw-karussell::-webkit-scrollbar { display: none; }
+.hw-karte { position: relative; flex: 0 0 300px; scroll-snap-align: center; --f: var(--karte); --l: var(--kartenlinie); }
+.hw-karte-bild { position: absolute; left: 50%; transform: translateX(-50%); top: -45px; height: 81.7px; width: auto; }
+.hw-karte-titel { text-align: center; font: var(--hw-t-titel); letter-spacing: .48px; }
+.hw-sterne { display: flex; justify-content: center; gap: 3.3px; color: var(--stern); }
+.hw-sterne svg { width: 23px; height: 23px; }
+.hw-sterne { gap: 0; }
+
+/* Schalter 48 × 32. */
+.hw-schalter { position: relative; width: 48px; height: 32px; border: 0; padding: 0; --f: var(--akzent); --l: var(--akzent-linie); border-radius: 10px; }
+.hw-schalter::after { content: ''; position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border-radius: 6px; background: #fff; }
+.hw-schalter[aria-checked='false'] { --f: var(--feld); --l: var(--feldlinie); }
+.hw-schalter[aria-checked='false']::after { right: auto; left: 6px; background: var(--leise); }
+
+/* Beschriftung in Versalien, dünn und grau; Großkennzahl; Abweichung. */
+.hw-marke { font: var(--hw-t-marke); color: var(--marke); text-transform: uppercase; letter-spacing: .01em; }
+.hw-zahl { font: var(--hw-t-zahl); }
+.hw-abw { font: var(--hw-t-klein); }
+
+/* Ring für Anteile, 80 px. */
+.hw-ring { position: relative; width: 80px; height: 80px; }
+.hw-ring > svg { position: absolute; inset: 0; }
+.hw-ring > span { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font: var(--hw-t-klein); color: var(--ring-a); line-height: 1.15; }
+.hw-ring > span b { font-weight: 500; font-size: 12.5px; }
+
+/* Stepper [−] Wert [+]: 144 × 32, Knöpfe 32 breit. */
+.hw-stepper { position: relative; display: flex; width: 144px; height: 32px; --f: var(--feld); --l: var(--feldlinie); }
+.hw-stepper > button { position: relative; flex: 0 0 32px; border: 0; padding: 0; --f: var(--akzent); --l: var(--akzent-linie); color: #fff; }
+.hw-stepper > button:first-child { border-radius: var(--hw-radius) 0 0 var(--hw-radius); }
+.hw-stepper > button:last-child { border-radius: 0 var(--hw-radius) var(--hw-radius) 0; }
+.hw-stepper > button::before { content: ''; position: absolute; left: 10.7px; right: 7.3px; top: 14.8px; height: 2.6px; border-radius: 1px; background: currentColor; }
+.hw-stepper > button.plus::after { content: ''; position: absolute; left: 14.4px; top: 9.4px; width: 2.6px; height: 13.6px; border-radius: 1px; background: currentColor; }
+.hw-stepper > button.plus::before { left: 7.6px; right: 10.4px; }
+.hw-stepper > output { flex: 1; display: flex; padding-top: 2px; align-items: center; justify-content: center; font: var(--hw-t-text); font-size: var(--hw-gr-stepper, 15.25px); }
+
+/* Seitenpunkte unter Karussells. */
+.hw-punkte { display: flex; justify-content: center; align-items: center; gap: 9.9px; }
+.hw-punkte i { width: 7.3px; height: 7.3px; border-radius: 50%; background: var(--punkt); }
+.hw-punkte i.an { background: #fff; }
+.hw-punkte i.klein { width: 5.3px; height: 5.3px; }
+.hw-punkte i.kleiner { width: 3.3px; height: 3.3px; }
+
+/* Reiterleiste unten: Illustration plus Wort, Schlitze zu 80 px, aktiver Reiter als Fläche. */
+.hw-reiter { position: absolute; left: 0; right: 0; bottom: 0; height: 104px; background: var(--kopf); display: flex; padding: 0 10px; z-index: 3; }
+.hw-reiter > button { position: relative; flex: 0 0 80px; height: 59px; border: 0; padding: 0; background: none; color: var(--text); font: var(--hw-t-klein); font-size: var(--hw-gr-reiter, 10px); }
+.hw-reiter > button img { position: absolute; left: 50%; transform: translateX(-50%); top: 6.7px; height: 31.7px; width: auto; }
+.hw-reiter > button span { position: absolute; left: 0; right: 0; top: 42.6px; letter-spacing: .35px; text-align: center; white-space: nowrap; }
+.hw-reiter > button[aria-selected='true'] { background: var(--grund); border-radius: 0 0 10px 10px; margin: 0 8px; flex-basis: 64px; }
