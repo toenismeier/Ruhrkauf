@@ -31,7 +31,7 @@ async function pruefen(browser, url, breite, hoehe) {
     page.on('pageerror', (e) => fehler.push(e.message));
     await page.goto(url + '?ohne-animation', { waitUntil: 'load' });
     await page.locator('#start.an').waitFor();
-    await page.locator('.sz-karte[data-szenario="standard"]').click();
+    await page.locator('[data-szenario="standard"]').click();
     await page.locator('#startknopf').click();
     await page.waitForFunction(() => window.bereit === true && !!window.spiel?.s?.haeuser?.length);
 

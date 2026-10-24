@@ -6,7 +6,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
+const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.ttf': 'font/ttf', '.png': 'image/png', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 const server = http.createServer((req, res) => {
   const pathname = decodeURIComponent((req.url ?? '/').split('?')[0]);
   const file = path.resolve(root, '.' + (pathname === '/' ? '/spiel.html' : pathname));
@@ -35,9 +35,9 @@ const server = http.createServer((req, res) => {
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(url, { waitUntil: 'load' });
     await page.locator('#start.an').waitFor();
-    assert.equal(await page.locator('.stufe-karte').count(), 3, 'Startbildschirm hat drei Schwierigkeitsgrade');
+    assert.equal(await page.locator('#startstufen [data-v]').count(), 3, 'Startbildschirm hat drei Schwierigkeitsgrade');
     // N09: zuerst Szenario wählen, danach Schwierigkeit und Start.
-    await page.locator('.sz-karte[data-szenario=standard]').click();
+    await page.locator('[data-szenario=standard]').click();
     await page.locator('#startknopf').click();
     await page.waitForFunction(() => window.bereit === true && window.spiel?.s?.haeuser?.length > 0);
     const vorher = await page.evaluate(() => {

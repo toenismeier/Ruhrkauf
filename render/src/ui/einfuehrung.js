@@ -1,5 +1,6 @@
 // N04: Geführter Spieleinstieg. Ausschließlich UI-Zustand, keine Engine-Eingriffe.
 import { portraetSVG } from '../kit/portraet.js';
+import { LOGO } from './kartenoberflaeche.js';
 
 export const EINFUEHRUNG_AKTIV = true; // Fallback, bis N13 seinen zentralen Schalter bereitstellt.
 const SCHLUESSEL = 'hartwig.einfuehrung.v1';
@@ -43,6 +44,7 @@ export function einfuehrungModul() {
   if (!EINFUEHRUNG_AKTIV) return { spielStart: () => {}, starten: () => {}, zustand: () => ({ aktiv: false }) };
   const root = document.createElement('div');
   root.id = 'einfuehrung-root';
+  root.className = 'hw-g6';
   root.hidden = true;
   document.body.append(root);
   const zustand = lesen(SCHLUESSEL, { modus: 'neu', index: 0 });
@@ -94,16 +96,17 @@ export function einfuehrungModul() {
       (getSpiel()?.E?.freigaben(getSpiel().s)?.anzahl ?? 0) === 0;
     root.hidden = false;
     root.innerHTML = '<div class="ein-maske"></div><div class="ein-ring" aria-hidden="true"></div>' +
-      '<section class="ein-sheet" role="region" aria-label="Einführung: Schritt ' + (index + 1) + '">' +
-      '<div class="ein-kopf"><span class="ein-logo">H</span><div><b>Ihre Vorstandsassistentin</b><small>Schritt ' +
+      // G6 (E47): Sprecherzeile wie Coffee 09 (Person rechts, Satz links), darunter Schritt und eine Hauptaktion.
+      '<section class="ein-sheet hw" data-bereich="betrieb" role="region" aria-label="Einführung: Schritt ' + (index + 1) + '">' +
+      '<div class="ein-kopf"><span class="ein-logo">' + LOGO + '</span><div><b>Ihre Vorstandsassistentin</b><small>Schritt ' +
       (index + 1) + ' von ' + EINFUEHRUNG.length + '</small></div>' +
-      '<button type="button" data-ein="beenden" aria-label="Einführung beenden">×</button></div>' +
+      '<button type="button" class="hw-zu" data-ein="beenden" aria-label="Einführung beenden"></button></div>' +
       '<div class="ein-inhalt"><p class="ein-text" data-ein="text"></p><div class="ein-portraet">' + ASSISTENTIN + '</div></div>' +
-      '<div class="ein-fuss"><span>' + (d.warte === 'weiter' ? 'Information' :
-        d.warte === 'karte' ? 'Karte bewegen und zoomen' : 'Handlung auf der Karte oder im Panel ausführen') + '</span>' +
-      ((d.warte === 'weiter' || keineFreigaben) ? '<button type="button" data-ein="weiter">' +
+      '<div class="ein-fuss"><span class="hw-marke">' + (d.warte === 'weiter' ? 'Information' :
+        d.warte === 'karte' ? 'Karte bewegen und zoomen' : 'Auf der Karte oder im Blatt handeln') + '</span>' +
+      ((d.warte === 'weiter' || keineFreigaben) ? '<button type="button" class="hw-knopf" data-ein="weiter">' +
         (keineFreigaben ? 'Ohne Freigabe weiter' : index === EINFUEHRUNG.length - 1 ? 'Fertig' : 'Weiter') + '</button>' :
-        '<button type="button" class="ein-ueberspringen" data-ein="weiter" title="Schritt ohne Handlung überspringen">Überspringen</button>') +
+        '<button type="button" class="hw-knopf zweit ein-ueberspringen" data-ein="weiter" title="Schritt ohne Handlung überspringen">Überspringen</button>') +
       '</div></section>';
     textTippen(); positionieren();
   }
@@ -202,11 +205,11 @@ export function einfuehrungModul() {
   function abfrage() {
     if (aktiv || frage) return;
     frage = true; root.hidden = false;
-    root.innerHTML = '<div class="ein-fragemaske"></div><section class="ein-frage" role="dialog" aria-modal="true" aria-label="Einführung starten">' +
+    root.innerHTML = '<div class="ein-fragemaske"></div><section class="ein-frage hw" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Einführung starten">' +
       '<div class="ein-inhalt"><p><b>Einführung starten?</b><span>Die Vorstandsassistentin erklärt in 14 Schritten die wichtigsten Funktionen.</span></p>' +
       '<div class="ein-portraet">' + ASSISTENTIN + '</div></div><div class="ein-antworten">' +
-      '<button type="button" data-ein="ja">Ja</button><button type="button" data-ein="spaeter">Später</button>' +
-      '<button type="button" data-ein="nie">Nie</button></div></section>';
+      '<button type="button" class="hw-knopf" data-ein="ja">Starten</button><button type="button" class="hw-knopf zweit" data-ein="spaeter">Später</button>' +
+      '<button type="button" class="hw-knopf zweit" data-ein="nie">Nie</button></div></section>';
   }
   function spielStart(fortsetzen = false) {
     // Prüfskripte und Bot-Läufe sollen nicht durch die Einführung blockiert werden.
@@ -293,7 +296,7 @@ export function einfuehrungModul() {
     Wettbewerb: 'Hier bewerten Sie Wettbewerber und deren Auswirkungen auf Ihre Häuser.',
   };
   const hinweis = document.createElement('div');
-  hinweis.id = 'ein-kontext'; hinweis.hidden = true; document.body.append(hinweis);
+  hinweis.id = 'ein-kontext'; hinweis.className = 'hw-g6'; hinweis.hidden = true; document.body.append(hinweis);
   function panelTipp() {
     if (aktiv || frage || !tippsAn || zustand.modus !== 'fertig') return;
     if (!el('panel')?.classList.contains('offen')) return;

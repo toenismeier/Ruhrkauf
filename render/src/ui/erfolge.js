@@ -8,6 +8,7 @@ export function erfolgeModul(ctx) {
   const zustand = { offen: false, filter: 'Alle' };
   const toast = document.createElement('div');
   toast.id = 'erfolge-toast';
+  toast.className = 'hw-g6';
   toast.setAttribute('role', 'status');
   toast.setAttribute('aria-live', 'polite');
   toast.hidden = true;
@@ -25,22 +26,23 @@ export function erfolgeModul(ctx) {
     const gruppen = ['Alle', 'Sanierung', 'Handel', 'Menschen', 'Formate', 'Kurios'];
     const ausw = zustand.filter === 'Alle' ? alle : alle.filter(e => e.gruppe === zustand.filter);
     const nah = alle.filter((e) => !freigeschaltet(e) && !e.geheim).sort((a, b) => b.fortschritt - a.fortschritt).slice(0, 3);
+    // G6 (E47): Großkennzahl, Vitrine, Nächstes als Skala, alle Abzeichen nach Gruppe (Segment) als Liste.
     let h = K.gross([{ label: 'Abzeichen', wert: frei.length + ' von ' + alle.length, unter: frei.length ? 'zuletzt: ' + esc(frei[0].titel) : 'noch keines' }]);
     h += K.abschnitt('Vitrine', frei.length + ' freigeschaltet');
-    h += frei.length ? '<div class="erfolge-vitrine">' + frei.map((e) => '<figure title="' + esc(e.titel) + '">' + bild(e) + '<figcaption>' + esc(e.titel) + '</figcaption></figure>').join('') + '</div>'
+    h += frei.length ? '<div class="erfolge-vitrine hw-g6-vitrine">' + frei.map((e) => '<figure title="' + esc(e.titel) + '">' + bild(e) + '<figcaption class="hw-lese">' + esc(e.titel) + '</figcaption></figure>').join('') + '</div>'
       : K.leer('Das erste Abzeichen kommt meist mit dem ersten Wochenabschluss.', 'Vitrine leer');
-    if (nah.length) h += K.abschnitt('In Reichweite') + K.liste(nah.map((e) => K.zeile({ was: esc(e.titel), unter: esc(e.hinweis), wert: Math.round(e.fortschritt * 100) + ' %' })));
-    h += K.abschnitt('Alle Abzeichen') + K.seg(gruppen.map((g) => [g, g]), zustand.filter, (g) => 'data-erfolge-filter="' + g + '"');
-    h += '<div class="erfolge-raster">' + ausw.map(e => {
+    if (nah.length) h += K.abschnitt('In Reichweite') + nah.map((e) => K.skala(e.titel, e.fortschritt * 100) + '<p class="hw-lese hw-g6-hinweistext">' + esc(e.hinweis) + '</p>').join('');
+    h += K.abschnitt('Alle Abzeichen', ausw.filter(freigeschaltet).length + ' von ' + ausw.length);
+    h += '<div class="hw-g6-filter">' + K.seg(gruppen.map((g) => [g, g]), zustand.filter, (g) => 'data-erfolge-filter="' + g + '"') + '</div>';
+    h += K.liste(ausw.map((e) => {
       const ok = freigeschaltet(e), geheim = e.geheim && !ok;
-      return '<article class="erfolge-karte' + (ok ? ' frei' : ' gesperrt') + '" data-erfolg="' + esc(e.id) + '" aria-label="' + (geheim ? 'Geheimer Erfolg' : esc(e.titel)) + '">' +
-        (geheim ? '<div class="erfolge-geheim" aria-hidden="true"></div>' : bild(e)) +
-        '<b>' + (geheim ? 'Geheim' : esc(e.titel)) + '</b>' +
-        '<small>' + (geheim ? 'noch nicht enthüllt' : esc(e.gruppe + ' · ' + e.stufe)) + '</small>' +
-        (ok ? '<span class="erfolge-frei">seit KW ' + ((e.freigeschaltet % 52) + 1) + '</span>' :
-          geheim ? '' : '<span class="erfolge-hinweis">' + esc(e.hinweis) + '</span><span class="erfolge-prozent">' + Math.round(e.fortschritt * 100) + ' %</span>') + '</article>';
-    }).join('') + '</div>';
-    return K.bereich('betrieb', 'zahlen') + K.rumpf(h);
+      return '<div class="hw-zeile erfolge-karte' + (ok ? ' frei' : ' gesperrt') + '" data-erfolg="' + esc(e.id) + '" aria-label="' + (geheim ? 'Geheimer Erfolg' : esc(e.titel)) + '">' +
+        (geheim ? '<span class="erfolge-geheim" aria-hidden="true"></span>' : bild(e)) +
+        '<span class="hw-was">' + (geheim ? 'Geheim' : esc(e.titel)) + '<small>' + (geheim ? 'noch nicht enthüllt' : esc(e.gruppe + ' · ' + e.stufe + (ok ? '' : ' · ' + e.hinweis))) + '</small></span>' +
+        '<span class="hw-wert' + (ok ? ' gut' : '') + '">' + (ok ? 'KW ' + ((e.freigeschaltet % 52) + 1) : geheim ? '' : Math.round(e.fortschritt * 100) + ' %') + '</span></div>';
+    }));
+    const text = frei.length ? `${frei.length} von ${alle.length} Abzeichen erreicht.` + (nah[0] ? ` Am nächsten: ${esc(nah[0].titel)}.` : '') : 'Noch kein Abzeichen. Das erste kommt meist mit dem ersten Wochenabschluss.';
+    return K.bereich('betrieb', 'pokal') + K.sprecher({ text }) + '<div class="hw-boden">' + K.rumpf('<div class="hw-g6-erfolge">' + h + '</div>') + '</div>';
   }
   function neuZeichnen() {
     if (!zustand.offen) return;
@@ -58,7 +60,7 @@ export function erfolgeModul(ctx) {
     if (zeigt || !schlange.length) return;
     zeigt = true;
     const e = schlange.shift();
-    toast.innerHTML = '<div class="erfolge-toast-bild">' + bild(e) + '</div><div><small>NEUER ERFOLG · ' + esc(e.gruppe) +
+    toast.innerHTML = '<div class="erfolge-toast-bild">' + bild(e) + '</div><div><small class="hw-marke">Neuer Erfolg · ' + esc(e.gruppe) +
       '</small><strong>' + esc(e.titel) + '</strong><span>' + esc(e.hinweis) + '</span></div>';
     toast.hidden = false;
     requestAnimationFrame(() => toast.classList.add('sichtbar'));

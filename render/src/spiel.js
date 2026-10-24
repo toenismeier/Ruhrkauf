@@ -61,12 +61,13 @@ import { planungModul } from './ui/planung.js';
 // O07 Haus
 import { hausDetailHtml, hausBeobachtungHtml, hausReportingHtml, hausStatischHtml } from './ui/haus.js';
 import * as HK from './ui/komponenten.js';
+import { symboleEinsetzen, FORMAT_SYMBOL, SYM } from './ui/kartenoberflaeche.js';
 // O04 Personal
 import { personalModul } from './ui/personaleinsatz.js';
 
 const param = new URLSearchParams(location.search);
 // Test- und Entwicklungssteuerung ist außerhalb von ?dev=1 unsichtbar.
-if (param.get('dev') === '1') document.querySelector('.botwahl')?.style.setProperty('display', 'flex');
+if (param.get('dev') === '1') document.querySelector('.hw-g6-bot')?.classList.add('an');
 const $ = (id) => document.getElementById(id);
 const messung = { stadtMs: [], wocheMs: [], neuBauMs: [], renderMs: [], kachelMs: [] };
 let speicherTimer = null;
@@ -454,8 +455,8 @@ function bahnhofFokussieren() {
 
 function stadtchipSetzen(name) {
   $('stadtname').textContent = name;
-  // Lange Namen (Mönchengladbach) ohne Umbruch: Schrift stufenweise verkleinern.
-  $('stadtname').style.fontSize = name.length > 13 ? '11px' : name.length > 10 ? '12.5px' : '';
+  // Lange Namen (Mönchengladbach) ohne Umbruch: Stufe der Schriftskala in hartwig.css (G6) wählen.
+  $('stadtname').dataset.laenge = name.length > 13 ? 'lang' : name.length > 10 ? 'mittel' : '';
   const region = E.stadtRegion(name) ?? s.haeuser.find((h) => h.stadt === name)?.region;
   $('stadtcluster').textContent = region ? 'Region ' + region : '';
 }
@@ -752,22 +753,44 @@ const MERK = new Map();
 function merk() { return MERK; }
 
 // ─────────────────────────────────────────── Cockpit
-/** Schnelle Stadtnavigation über alle eigenen Häuser und die Konkurrenz. */
+/** G6 (Coffee 16): Ebenenliste links. Häuser der Stadt nach Format mit isometrischem Symbol, dazu die Konkurrenz
+ *  und die Beobachtungsliste. Ersetzt die Häuserleiste über der Karte (Q07), damit die Stadt frei bleibt. */
+const EBENEN_STATUS = { offen: 'Geöffnet', schliessung_verhandlung: 'Schließung in Verhandlung', raeumung: 'Räumungsverkauf', geschlossen: 'Geschlossen', verkauft: 'Verkauft' };
+const EBENEN_FORMATE = [['hartwig', 'Hartwig'], ['premium', 'Premium'], ['sport', 'Hartwig Sport'], ['volkskauf', 'Volkskauf'], ['fundus', 'FUNDUS']];
 function stadtChipsZeigen() {
   if (!s || !stadtName) return;
   const hs = E.portfolio(s).filter((h) => h.stadt === stadtName);
   const konkurrenz = E.wettbewerbFuerGrafik(s, stadtName).filter((w) => w.status !== 'geschlossen');
-  $('stadt-chips').innerHTML = hs.map((h) => '<button class="' + h.formatKey +
-    '" data-stadthaus="' + esc(h.id) + '" title="' + esc(h.name) + '">' +
-    esc(h.name) + '</button>').join('') +
-    konkurrenz.map((w) => '<button data-stadtwb="' + esc(w.id) + '" title="Wettbewerber: ' +
-    esc(w.name) + '">Konkurrenz: ' + esc(w.name) + '</button>').join('');
+  const ausnahmen = E.hausBeobachtung(s, 30).length;
+  const kopf = (sym, name, n) => `<h3 class="hw-g6-ebene"><span class="hw-g6-sym" data-sym="${sym}"></span><span>${esc(name)}</span><small>${n}</small></h3>`;
+  let h = `<h2 class="hw-g6-blatttitel">${esc(stadtName)}</h2>`;
+  h += HK.liste([HK.zeile({ was: 'Beobachtungsliste', unter: ausnahmen ? ausnahmen + ' Häuser mit Ausnahmen' : 'keine Ausnahmen im Hausbetrieb', tippbar: true, attr: 'data-ebene-beobachtung' })]);
+  for (const [key, name] of EBENEN_FORMATE) {
+    const liste = hs.filter((x) => x.formatKey === key);
+    if (!liste.length) continue;
+    h += kopf(FORMAT_SYMBOL[key], name, liste.length) + HK.liste(liste.map((x) => HK.zeile({ was: esc(x.name),
+      unter: esc(EBENEN_STATUS[x.status] ?? x.status) + (x.status === 'offen' ? ' · Umsatz ' + geld(x.umsatz) : ''), tippbar: true, attr: `data-stadthaus="${esc(x.id)}"` })));
+  }
+  if (!hs.length) h += HK.leer('In dieser Stadt betreibt der Konzern kein Haus.');
+  h += kopf('wettbewerber', 'Konkurrenz', konkurrenz.length) + (konkurrenz.length
+    ? HK.liste(konkurrenz.map((w) => HK.zeile({ was: esc(w.name), unter: esc(WB_ART[w.art] ?? w.art) + ' · ' + esc(WB_STATUS[w.status] ?? w.status), tippbar: true, attr: `data-stadtwb="${esc(w.id)}"` })))
+    : HK.leer('Keine Wettbewerber in dieser Stadt.'));
+  $('ebenen-inhalt').innerHTML = h;
+  symboleEinsetzen($('ebenen-inhalt'));
 }
-$('stadt-chips').addEventListener('click', (e) => {
+$('ebenen-inhalt').addEventListener('click', (e) => {
   const h = e.target.closest('[data-stadthaus]'), w = e.target.closest('[data-stadtwb]');
-  if (h) oeffneHaus(h.dataset.stadthaus);
-  else if (w) oeffneWettbewerber(w.dataset.stadtwb);
+  if (h) { ebenenZu(); oeffneHaus(h.dataset.stadthaus); }
+  else if (w) { ebenenZu(); oeffneWettbewerber(w.dataset.stadtwb); }
+  else if (e.target.closest('[data-ebene-beobachtung]')) { ebenenZu(); oeffneBeobachtung(); }
 });
+function ebenenZu() { $('ebenen').classList.remove('offen'); $('ebenen').inert = true; $('ebenenknopf').setAttribute('aria-expanded', 'false'); }
+$('ebenenknopf').addEventListener('click', () => {
+  const o = !$('ebenen').classList.contains('offen');
+  if (o) { schliessePanel(); menueZu(); stadtChipsZeigen(); }
+  $('ebenen').classList.toggle('offen', o); $('ebenen').inert = !o; $('ebenenknopf').setAttribute('aria-expanded', String(o));
+});
+$('ebenen').addEventListener('click', (e) => { if (e.target === $('ebenen')) ebenenZu(); });
 /** Orte ohne bereits neu erzeugte Render-JSON bleiben über die Portfolio-Daten nutzbar. */
 function portfolioStadtOeffnen(name, id) {
   if (STADTLISTE.some((stadt) => stadt.name === name)) {
@@ -789,12 +812,15 @@ function portfolioStadtOeffnen(name, id) {
 
 function cockpitZeigen() {
   const c = E.cockpit(s);
-  const kachel = (titel, wert, ton = '') => `<div class="kz ${ton}"><span>${titel}</span><b>${wert}</b></div>`;
+  // G6 (Coffee 15): Kasse steht in der Firmenpille oben links, die übrigen Kennzahlen in einer eingeklappten Zeile.
+  $('kasse').textContent = c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash);
+  $('kasse').classList.toggle('hw-schlecht', !c.geldUnbegrenzt && c.cash < 0);
+  const kachel = (titel, wert, ton = '') => `<div class="hw-g6-kz${ton ? ' hw-' + ton : ''}"><span class="hw-marke">${titel}</span><b>${wert}</b></div>`;
   // Formatfilter ohne zusätzliche Zeilen: das Cockpit darf auf dem iPhone nicht wachsen
   // (es überdeckt sonst die Karte). Auswahl im Titel der Umsatz-Kachel.
   const FORMATNAME = { alle: 'Alle', warenhaus: 'Hartwig', sport: 'Sport', schwester: 'Volkskauf', outlet: 'FUNDUS' };
   const fx = cockpitFormat === 'alle' ? null : c.formate.find((x) => x.format === cockpitFormat);
-  const auswahl = '<select class="kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME)
+  const auswahl = '<select class="hw-g6-kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME)
     .filter(([id]) => id === 'alle' || c.formate.some((x) => x.format === id && x.haeuser))
     .map(([id, name]) => '<option value="' + id + '"' + (id === cockpitFormat ? ' selected' : '') + '>' + name + '</option>').join('') + '</select>';
   // Q32: höchstens ein Sechstel der Höhe. Eingeklappt eine Zeile (Cash, EBITDA, Umsatz), der Knopf rechts klappt
@@ -802,26 +828,21 @@ function cockpitZeigen() {
   const zu = !cockpitOffen;
   $('cockpit').classList.toggle('offen', cockpitOffen);
   $('cockpit').innerHTML = [
-    kachel('Cash', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), !c.geldUnbegrenzt && c.cash < 0 ? 'rot' : ''),
     // Q35: vor der ersten Woche Werte aus dem Vorlauf (Vorjahreswochen des Vorgängers), nicht „noch offen“.
-    fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], geld(fx.ebitda), fx.ebitda < 0 ? 'rot' : 'gruen')
-      : kachel('EBITDA 13 Wo.', geld(c.ebitda13), c.ebitda13 < 0 ? 'rot' : 'gruen'),
-    kachel('Umsatz<em> · ' + FORMATNAME[cockpitFormat] + '</em>' + auswahl, geld(fx ? fx.umsatz : c.umsatzWoche), 'mitwahl'),
-    `<button type="button" class="kz-mehr" data-cockpit-mehr aria-expanded="${cockpitOffen}" aria-label="${zu ? 'Weitere Kennzahlen zeigen' : 'Weitere Kennzahlen ausblenden'}"><span aria-hidden="true">${zu ? '▾' : '▴'}</span></button>`,
-    kachel('Kreditrahmen frei', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? 'rot' : ''),
-    kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'rot' : ''),
-    kachel('Image', `${c.image} / 100`, c.image < 35 ? 'rot' : ''),
+    fx ? kachel('EBITDA ' + FORMATNAME[cockpitFormat], geld(fx.ebitda), fx.ebitda < 0 ? 'schlecht' : 'gut')
+      : kachel('EBITDA 13 Wo.', geld(c.ebitda13), c.ebitda13 < 0 ? 'schlecht' : 'gut'),
+    kachel('Umsatz<em> · ' + FORMATNAME[cockpitFormat] + '</em>' + auswahl, geld(fx ? fx.umsatz : c.umsatzWoche)),
+    `<button type="button" class="hw-g6-mehr" data-cockpit-mehr aria-expanded="${cockpitOffen}" aria-label="${zu ? 'Weitere Kennzahlen zeigen' : 'Weitere Kennzahlen ausblenden'}"></button>`,
+    kachel('Kredit frei', c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), !c.geldUnbegrenzt && c.kreditFrei < 2e7 ? 'schlecht' : ''),
+    kachel('Vertrauen', `${c.vertrauen} / 100`, c.vertrauen < 35 ? 'schlecht' : ''),
+    kachel('Image', `${c.image} / 100`, c.image < 35 ? 'schlecht' : ''),
   ].join('');
   $('cockpit').querySelector('[data-cockpit-mehr]')?.addEventListener('click', () => { cockpitOffen = !cockpitOffen; cockpitZeigen(); });
-  // Lange Beträge (z. B. −140,7 Mio. €) passen sich der Kachel an statt umzubrechen; nie unter 12 px.
-  for (const w of $('cockpit').querySelectorAll('.kz b')) { w.style.fontSize = ''; let g = parseFloat(getComputedStyle(w).fontSize); while (w.scrollWidth > w.clientWidth + 0.5 && g > 12) { g -= 0.5; w.style.setProperty('font-size', g + 'px', 'important'); } }
   $('cockpit').querySelector('[data-cockpit-format]')?.addEventListener('change', (e) => { cockpitFormat = e.target.value; cockpitZeigen(); });
-  // O07 Haus: Ausnahme-Kachel im Cockpit.
-  const ausnahmen = E.hausBeobachtung(s, 30).length;
-  $('hausbeobachtung').textContent = ausnahmen ? ausnahmen + ' Häuser beobachten →' : 'Hausbetrieb: keine Ausnahmen';
   $('kw').textContent = `KW ${c.kw} / ${c.jahr}`;
   $('phase').textContent = [c.phase === 'insolvenz' ? 'Insolvenzverfahren' : c.phase === 'zerschlagen' ? 'Zerschlagen' : '', s.testGenutzt ? 'Testspiel' : ''].filter(Boolean).join(' · ');
-  $('phase').style.display = c.phase === 'regulaer' && !s.testGenutzt ? 'none' : '';
+  $('phase').hidden = c.phase === 'regulaer' && !s.testGenutzt;
+  if ($('ebenen').classList.contains('offen')) stadtChipsZeigen();
 }
 
 // ─────────────────────────────────────────── Woche weiter
@@ -887,7 +908,7 @@ let ch = null;
 const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt, ch, ec, pp].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
-  menueZu();
+  menueZu(); ebenenZu();
   $('panel').classList.toggle('gross', klasse === 'gross');
   $('panel').classList.toggle('hausdetail', klasse === 'hausdetail');
   $('ptitel').textContent = titel;
@@ -908,7 +929,7 @@ function huelleOrdnen() {
   const p = $('panel'), inhalt = $('pinhalt');
   const marker = inhalt.querySelector('.hk-bereich');
   p.dataset.bereich = marker?.dataset.bereich ?? 'betrieb';
-  $('psymbol').innerHTML = HK.SYMBOLE[marker?.dataset.symbol] ?? HK.SYMBOLE.zentrale;
+  $('psymbol').innerHTML = SYM[marker?.dataset.symbol] ?? HK.SYMBOLE.zentrale;
   for (const [slot, sel, klasse] of [['psprecher', ':scope > .hw-sprecher, :scope > * > .hw-sprecher', 'mit-sprecher'], ['preiter', '.hw-reiter', 'mit-reiter']]) {
     const el = inhalt.querySelector(sel), ziel = $(slot);
     if (el) ziel.replaceChildren(el); else ziel.replaceChildren();
@@ -944,8 +965,8 @@ function hausZeigen(id) {
   }
 }
 $('pzu').addEventListener('click', schliessePanel);
-// Q30: isometrische Symbole der großen Menüeinstiege
-document.querySelectorAll('.msym[data-sym]').forEach((el) => { el.innerHTML = HK.SYMBOLE[el.dataset.sym] ?? ''; });
+// G6: isometrische Symbole der Kartenoberfläche, des Menüs und des Starts
+symboleEinsetzen();
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('panel').classList.contains('offen')) schliessePanel(); });
 
 // O07 Haus
@@ -1476,7 +1497,6 @@ pp = portfolioModul({ E, s: () => s, panel, meldung, nachAktion,
   },
 });
 $('deutschland').addEventListener('click', () => oeffneModul(pp, 'karte'));
-$('deutschland-direkt').addEventListener('click', () => oeffneModul(pp, 'karte'));
 $('haeuser').addEventListener('click', () => oeffneModul(pp, 'liste'));
 $('cockpit').addEventListener('click', (e) => {
   const b = e.target.closest('[data-format]');
@@ -1501,19 +1521,18 @@ $('erfolge').addEventListener('click', () => oeffneModul(er));
 // O07 Haus
 $('beobachtung').addEventListener('click', oeffneBeobachtung);
 $('haus-reporting').addEventListener('click', oeffneHausReporting);
-$('hausbeobachtung').addEventListener('click', oeffneBeobachtung);
 $('postdirekt').addEventListener('click', () => oeffneModul(po));
 $('wochenstreifen').addEventListener('click', () => { $('wochenstreifen').classList.remove('an'); oeffneModul(po); });
 $('einstellungen').addEventListener('click', () => oeffneModul(es));
 // Menü wie Coffee Inc: Knopf unten rechts öffnet die Kacheln Zentrale, Einkauf, Vorstand, Marketing, Produkte
-function menueZu() { $('menue').classList.remove('offen'); $('menue').inert = true; $('menueknopf').classList.remove('an'); }
-$('menueknopf').addEventListener('click', () => { const o = !$('menue').classList.contains('offen'); if (o) { schliessePanel(); } $('menue').classList.toggle('offen', o); $('menue').inert = !o; $('menueknopf').classList.toggle('an', o); });
+function menueZu() { $('menue').classList.remove('offen'); $('menue').inert = true; $('menueknopf').setAttribute('aria-expanded', 'false'); }
+$('menueknopf').addEventListener('click', () => { const o = !$('menue').classList.contains('offen'); if (o) { schliessePanel(); ebenenZu(); } $('menue').classList.toggle('offen', o); $('menue').inert = !o; $('menueknopf').setAttribute('aria-expanded', String(o)); });
 $('menue').addEventListener('click', (e) => { if (e.target === $('menue')) menueZu(); });
 function menueBadge() {
   const n = (s ? E.freigaben(s).anzahl : 0), v = vs?.badge() ?? 0, b = $('menuebadge');
   const p = po?.badge() ?? 0;
-  b.textContent = n + p; b.style.display = n + p ? '' : 'none';
-  const vb = $('vsbadge'); vb.textContent = v; vb.style.display = v ? '' : 'none';
+  b.textContent = n + p || ''; // G6: leerer Zähler blendet sich über :empty aus (hartwig.css)
+  $('vsbadge').textContent = v || '';
 }
 $('spiel-speichern').addEventListener('click', async () => {
   menueZu();
@@ -1612,7 +1631,7 @@ $('weiter').addEventListener('click', () => {
     setTimeout(() => { try { woche(true); } finally { $('weiter').disabled = false; } }, 10);
   } else wochenbericht.oeffne();
 });
-if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').style.display = 'none';
+if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').hidden = true;
 
 window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...a) => oeffneModul(ec, ...a), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
@@ -1695,9 +1714,10 @@ window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...
     const fehler = [], c = E.cockpit(s);
     // Titel ohne eingebettete Auswahl (Formatfilter im Cockpit).
     const titel = (sp) => [...sp.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').replace(/\s*·\s*$/, '').trim();
-    const kz = (wurzel) => new Map([...wurzel.querySelectorAll('.kz')].map((k) => [titel(k.querySelector('span')), k.querySelector('b').textContent]));
+    const kz = (wurzel) => new Map([...wurzel.querySelectorAll('.hw-g6-kz')].map((k) => [titel(k.querySelector('span')), k.querySelector('b').textContent]));
     const ck = kz($('cockpit'));
-    const soll = { Cash: c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), 'Kreditrahmen frei': c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
+    ck.set('Cash', $('kasse').textContent); // G6: Kasse steht in der Firmenpille
+    const soll = { Cash: c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.cash), 'Kredit frei': c.geldUnbegrenzt ? 'unbegrenzt' : geld(c.kreditFrei), Vertrauen: `${c.vertrauen} / 100`, Image: `${c.image} / 100` };
     if (s.historie.length) Object.assign(soll, { 'EBITDA 13 Wo.': geld(c.ebitda13), Umsatz: geld(c.umsatzWoche) });
     for (const [k, v] of Object.entries(soll)) if (ck.get(k) !== v) fehler.push(`Cockpit ${k}: ${ck.get(k)} statt ${v}`);
     if ($('kw').textContent !== `KW ${c.kw} / ${c.jahr}`) fehler.push(`KW: ${$('kw').textContent}`);
@@ -1761,9 +1781,10 @@ function zeichneStufen() {
   stufenWahl.hidden = stufen.length === 0;
   stufenWahl.previousElementSibling.hidden = stufen.length === 0;
   if (!stufen.length) startWahl.schwierigkeit = 'mittel';
-  stufenWahl.innerHTML = stufen.map((x, index) =>
-    `<button class="stufe-karte ${x.id === startWahl.schwierigkeit ? 'an' : ''}" data-v="${x.id}"><span class="sterne-stufe">${'●'.repeat(index + 1)}${'○'.repeat(stufen.length - index - 1)}</span><b>${x.name}</b><small>${esc(x.beschreibung)}</small></button>`
-  ).join('');
+  // G6: Segmentleiste wie Coffee 26, darunter der Satz zur gewählten Stufe.
+  const gewaehlt = stufen.find((x) => x.id === startWahl.schwierigkeit) ?? stufen[0];
+  stufenWahl.innerHTML = stufen.length ? HK.seg(stufen.map((x) => [x.id, x.name]), gewaehlt.id, (id) => `data-v="${esc(id)}"`)
+    + `<p class="hw-lese hw-g6-stufentext">${esc(gewaehlt.beschreibung)}</p>` : '';
 }
 function startZeigen() {
   $('startstadt').innerHTML = STADTLISTE.map((q) => `<option${q.name === startWahl.stadt ? ' selected' : ''}>${q.name}</option>`).join('');
