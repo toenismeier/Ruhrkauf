@@ -1,71 +1,140 @@
-// Q15: eigenständige HQ-Abteilungsseiten. Keine Berechnung der Wirtschaftskennzahlen im UI.
-// Die isometrische Etage ist eine skalierbare SVG-Szene und erzeugt 0 WebGL-Draw-Calls.
-import { esc, geld, fmt } from './format.js';
+// Zentrale (Coffee 17–20): Übersicht mit Etagenschnitt als Kopfbild, Großkennzahlen, Kostenverlauf, Kostenaufstellung,
+// Etagen und Abteilungen als Listen; Abteilungsseiten mit Personenblock wie Coffee 28. Reine Projektion der
+// Engine-Abfragen (hqUebersicht, organisationUebersicht, historie); Aktionen laufen über hqKlick in spiel.js.
+import { esc, geld, fmt, kwVon } from './format.js';
 import * as K from './komponenten.js';
 import { portraetSVG, zufallsMerkmale } from '../kit/portraet.js';
 
 const TITEL = {
   controlling: 'Finanzen', personal: 'Personal', einkauf: 'Einkauf', marketing: 'Marketing',
-  ecommerce: 'IT & E-Commerce', recht: 'Recht', immobilien: 'Immobilien',
+  ecommerce: 'IT und E-Commerce', recht: 'Recht', immobilien: 'Immobilien',
   logistik: 'Logistik', vm: 'Visual Merchandising', verwaltung: 'Verwaltung',
   produkt: 'Produktentwicklung',
 };
 const REIHENFOLGE = ['controlling', 'personal', 'einkauf', 'marketing', 'ecommerce',
   'logistik', 'immobilien', 'recht', 'vm', 'verwaltung', 'produkt'];
+const KOSTEN = [['personal', 'Gehälter der Abteilungen'], ['sach', 'Sachkosten'], ['reise', 'Reisekosten'], ['miete', 'Büromiete'],
+  ['nebenkosten', 'Nebenkosten'], ['strafen', 'Folgekosten schwacher Verwaltung'], ['vorstand', 'Vorstand'], ['entwicklung', 'Produktentwicklung'],
+  ['leitung', 'Bereichs- und Clusterleitungen'], ['marktbeobachtung', 'Marktbeobachtung']];
 const prozent = (q) => Math.round(q * 100) + ' %';
 const etageName = (n) => n === 0 ? 'Erdgeschoss' : n + '. Etage';
+const etageKurz = (n) => n === 0 ? 'EG' : n + '. OG';
+const klick = (...x) => `onclick="hqKlick(${x.map((v) => `'${esc(String(v))}'`).join(',')})"`;
 
-function iso(x, y, schritt) {
-  return [180 + (x - y) * schritt, 24 + (x + y) * schritt * 0.52];
+/** Reiterleiste der Zentrale (Coffee 20: Finanzen, Einkauf, Vorstand …). Gilt für Zentrale, Vorstand, Organisation, Reporting. */
+export const zentraleReiter = (aktiv) => K.reiterUnten([['zentrale', 'Zentrale', 'zentrale'], ['vorstand', 'Vorstand', 'leitung'],
+  ['organisation', 'Organisation', 'personal'], ['reporting', 'Reporting', 'zahlen']], aktiv, (id) => klick('reiter', id));
+
+/** Kopfbild: Etagenschnitt der gewählten Etage, unten links der Knopf zur Abteilung auf dieser Etage. */
+function kopfbild(bild, alt, knopf = '') {
+  if (!bild) return '';
+  return `<div class="hw-kopfbild"><img src="${bild}" alt="${esc(alt)}">${knopf}</div>`;
 }
-function punkt(x, y) { return x.toFixed(1) + ',' + y.toFixed(1); }
-function polygon(ecken, farbe, linie = '#AAB6B9') {
-  return '<polygon points="' + ecken.map((p) => punkt(...p)).join(' ') +
-    '" fill="' + farbe + '" stroke="' + linie + '" stroke-width=".8"/>';
-}
-/** Jedes tatsächliche FTE der gewählten Etage erhält genau eine sitzende Figur. */
-export function abteilungsEtageSvg(ist, kapazitaet, name) {
-  const besetzt = Math.max(0, Math.floor(ist));
-  const plaetze = Math.max(1, Math.ceil(kapazitaet), besetzt);
-  const spalten = Math.ceil(Math.sqrt(plaetze * 1.25));
-  const reihen = Math.ceil(plaetze / spalten);
-  const schritt = Math.min(17, 156 / Math.max(spalten, reihen));
-  const p = (x, y) => iso(x, y, schritt);
-  let svg = '<svg class="q15-etagenbild" role="img" aria-label="' + esc(name) +
-    ': isometrische Büroetage mit ' + besetzt + ' besetzten und ' +
-    (plaetze - besetzt) + ' freien Arbeitsplätzen" viewBox="0 0 360 225" xmlns="http://www.w3.org/2000/svg">';
-  const basis = [p(0, 0), p(spalten + .2, 0), p(spalten + .2, reihen + .2), p(0, reihen + .2)];
-  svg += '<path d="M' + basis.map((q) => punkt(...q)).join('L') + 'Z" fill="#3b4b54" stroke="#5a6c76" stroke-width="2"/>';
-  // Gläserne Besprechungsräume, ohne Arbeitsplätze verdecken.
-  svg += polygon([p(.1, .1), p(spalten * .34, .1), p(spalten * .34, .45), p(.1, .45)], '#DDE9E9', '#849A9B');
-  svg += polygon([p(spalten * .64, .1), p(spalten - .1, .1), p(spalten - .1, .45), p(spalten * .64, .45)], '#E6EEEE', '#849A9B');
-  for (let i = 0; i < plaetze; i++) {
-    const x = (i % spalten) + .14, y = Math.floor(i / spalten) + .17;
-    const e = [p(x, y), p(x + .7, y), p(x + .7, y + .52), p(x, y + .52)];
-    svg += polygon(e, '#F3E8D9', '#B49A7C');
-    const sitz = p(x + .44, y + .77), oben = p(x + .44, y + .49);
-    svg += '<ellipse cx="' + sitz[0].toFixed(1) + '" cy="' + sitz[1].toFixed(1) +
-      '" rx="' + (schritt * .23).toFixed(1) + '" ry="' + (schritt * .15).toFixed(1) +
-      '" fill="#A6AEB2"/>';
-    if (i < besetzt) {
-      const farben = ['#426576', '#9A7066', '#5D7771', '#746F92'];
-      const farbe = farben[i % farben.length];
-      svg += '<path d="M' + punkt(...sitz) + 'L' + punkt(...oben) +
-        '" stroke="' + farbe + '" stroke-width="' + Math.max(2, schritt * .34).toFixed(1) +
-        '" stroke-linecap="round"/>';
-      svg += '<circle cx="' + oben[0].toFixed(1) + '" cy="' + oben[1].toFixed(1) +
-        '" r="' + Math.max(1.3, schritt * .19).toFixed(1) + '" fill="#DDB69D" stroke="#8E7261" stroke-width=".4"/>';
+const bildzeile = (text) => `<p class="hw-bildzeile">${esc(text)}</p>`;
+/** Marker für die G4-Regeln in hartwig.css (Blattgrund, Kopf und Reiter aus der Skala). */
+export const G4 = '<i class="hw-g4" aria-hidden="true"></i>';
+
+/** Kleine Kit-Figur für Listen (Kandidaten, Stimmen). */
+export const figurKlein = (svg) => `<span class="hw-figur" aria-hidden="true">${svg}</span>`;
+
+// ───────────────────────────────────────────── Übersicht (Coffee 20)
+/** c = { u, organisation, historie, woche, gebaeudeId, etageWahl, etagenBild(gid, nr) } */
+export function zentraleHtml(c) {
+  const { u, organisation } = c;
+  const gs = u.gebaeude ?? [];
+  // Hauptfrage: Was kostet die Zentrale, und wo zahle ich für leere Fläche?
+  const leerEtagen = gs.flatMap((g) => g.etagen.filter((e) => e.gemietet && !e.abteilungen.length && !e.archiv));
+  const ohnePlatz = (u.abteilungen ?? []).filter((a) => !a.gebaeudeId).length;
+  const diffStart = u.kostenWoche - (u.kostenStart ?? u.kostenWoche);
+  // Q35: Befund aus derselben Quelle wie „x % belegt“ je Gebäude (qmGemietet, qmBelegt).
+  const qmMiete = gs.reduce((n, g) => n + (g.qmGemietet ?? 0), 0);
+  const qmFrei = Math.max(0, qmMiete - gs.reduce((n, g) => n + (g.qmBelegt ?? 0), 0));
+  const befund = (leerEtagen.length ? `<b>${leerEtagen.length} gemietete ${leerEtagen.length === 1 ? 'Etage steht' : 'Etagen stehen'} leer.</b> `
+    : qmMiete > 0 && qmFrei / qmMiete >= 0.02 ? `<b>${prozent(1 - qmFrei / qmMiete)} der gemieteten Bürofläche sind belegt, ${fmt.format(Math.round(qmFrei))} qm stehen frei.</b> `
+    : '<b>Alle gemieteten Etagen sind voll belegt.</b> ')
+    + (ohnePlatz ? `${ohnePlatz} ${ohnePlatz === 1 ? 'Abteilung hat' : 'Abteilungen haben'} keinen Platz und wirken nur mit Stufe 0. ` : '')
+    + (u.restmieteWoche > 0 ? `Für alte Büros laufen noch ${geld(u.restmieteWoche)} Restmiete je Woche.` : '');
+  const verwaltung = (organisation?.bereiche ?? []).find((b) => b.abteilung === 'verwaltung' && b.stelle?.person)?.stelle.person;
+  let h = K.bereich('zentrale', 'zentrale') + G4 + K.sprecher({ text: befund, unter: (verwaltung ? verwaltung.name + ' · ' : '') + 'Leitung Verwaltung',
+    person: verwaltung?.portraet ? portraetSVG(verwaltung.portraet, 72) : '', ton: leerEtagen.length || ohnePlatz || (qmMiete > 0 && qmFrei / qmMiete >= 0.15) ? 'engpass' : '' });
+
+  // Kopfbild: gewählte Etage (Standard: erste belegte Etage des gewählten bzw. ersten Gebäudes)
+  const gWahl = gs.find((g) => g.id === c.etageWahl?.g) ?? gs.find((g) => g.id === c.gebaeudeId) ?? gs[0];
+  let nrWahl = null;
+  if (gWahl) {
+    nrWahl = c.etageWahl?.g === gWahl.id ? c.etageWahl.nr : (gWahl.etagen.find((e) => e.abteilungen.length) ?? gWahl.etagen[0])?.nr;
+    const e = gWahl.etagen.find((q) => q.nr === nrWahl);
+    const bild = c.etagenBild?.(gWahl.id, nrWahl);
+    const erste = e?.abteilungen?.[0];
+    h += kopfbild(bild, `Etagenschnitt ${gWahl.name}, ${etageName(nrWahl)}`,
+      erste ? `<button type="button" class="hw-bildknopf hw-kontur hw-bildknopf-links" ${klick('abteilung', erste.id)} aria-label="${esc(erste.name)} öffnen">${K.SYMBOLE.personal}</button>` : '');
+    if (bild) h += bildzeile(`${gWahl.name} · ${etageName(nrWahl)} · ${(e?.abteilungen ?? []).map((a) => a.name).join(', ') || (e?.gemietet ? 'gemietet, frei' : 'nicht gemietet')}`);
+  }
+
+  let r = K.gross([
+    { label: 'Kosten je Woche', p: 'hq:kosten', wert: geld(u.kostenWoche), unter: diffStart ? K.abweichung(-diffStart, (diffStart > 0 ? '+' : '−') + geld(Math.abs(diffStart)) + ' zum Start', null) : 'wie zum Start' },
+    { label: 'Beschäftigte', p: 'hq:fte', wert: fmt.format(Math.round(u.fte)) + ' FTE', unter: `${fmt.format(qmMiete)} qm gemietet` }]);
+  // Verlauf: Zentralkosten der letzten fünf Wochenabschlüsse
+  const letzte = (c.historie ?? []).slice(-5);
+  r += K.balkenPaar([{ titel: letzte.length ? `Zentralkosten KW ${kwVon(letzte[0].woche)} bis ${kwVon(letzte[letzte.length - 1].woche)}` : 'Zentralkosten', serie: 'a',
+    punkte: letzte.map((k) => ({ label: String(kwVon(k.woche)), wert: k.zentrale })) }]);
+
+  // Kostenaufstellung wie die GuV in Coffee 17
+  const ko = u.kosten ?? {};
+  const anteil = (v) => u.kostenWoche ? (100 * v / u.kostenWoche).toFixed(1).replace('.', ',') + ' %' : '0 %';
+  r += K.abschnitt('Kosten der Zentrale', 'je Woche');
+  r += `<div data-summen-name="Kosten der Zentrale">${K.tabelle({ titel: 'Posten', spalten: ['Woche', 'Anteil'],
+    zeilen: KOSTEN.map(([k, name]) => ({ name, werte: [geld(ko[k] ?? 0), anteil(ko[k] ?? 0)], roh: [Math.round(ko[k] ?? 0), null] })),
+    summe: { name: 'Zentrale gesamt', werte: [geld(u.kostenWoche), '100 %'], roh: [Math.round(ko.gesamt ?? u.kostenWoche), null] }, pruefen: true })}</div>`;
+  r += K.liste([K.zeile({ was: 'Restmiete alter Büros', wert: geld(u.restmieteWoche ?? 0), ton: u.restmieteWoche > 0 ? 'schlecht' : '' })]);
+
+  // Etagen je Gebäude
+  for (const g of [...gs].sort((a, b) => (a.id === c.gebaeudeId ? -1 : b.id === c.gebaeudeId ? 1 : 0))) {
+    r += K.abschnitt(g.name);
+    r += `<p class="hw-lese hw-leise hw-unterkopf">${esc(g.stadt)} · ${fmt.format(g.qmGemietet)} qm gemietet · ${prozent(g.auslastung)} belegt · ${geld(g.kostenWoche)} je Woche</p>`;
+    const etagen = [...(g.etagen ?? [])].sort((x, y) => y.nr - x.nr);
+    r += K.liste(etagen.map((e) => {
+      const ab = (e.abteilungen ?? []).map((a) => a.name).join(', ');
+      const gewaehlt = gWahl?.id === g.id && nrWahl === e.nr;
+      return K.zeile({ was: etageName(e.nr) + (e.archiv ? ' · Archiv' : ''), unter: esc(ab || (e.gemietet ? 'gemietet, frei' : 'nicht gemietet')) + ' · ' + fmt.format(e.qm) + ' qm',
+        wert: e.gemietet ? prozent(e.auslastung) : '', wertUnter: e.gemietet ? 'belegt' : '', ton: e.gemietet && !ab && !e.archiv ? 'achtung' : '', tippbar: true,
+        attr: `${klick(e.archiv ? 'archivOeffnen' : 'etage', g.id, e.nr)}${gewaehlt ? ' aria-current="true"' : ''} aria-label="${esc(etageName(e.nr))} ansehen"` });
+    }));
+    const e = gWahl?.id === g.id ? g.etagen.find((q) => q.nr === nrWahl) : null;
+    if (e?.gemietet) {
+      const ab = (e.abteilungen ?? []).length;
+      r += `<p class="hw-lese hw-leise hw-auswahl">${esc(etageName(e.nr))} im Bild</p>` + `<div class="hw-knoepfe zweispaltig">`
+        + K.knopf(e.archiv ? 'Archiv auflösen' : 'Archiv einrichten', klick('archiv', g.id, e.nr, !e.archiv), 'zweit')
+        + (e.archiv ? K.knopf('Chronik ansehen', klick('archivOeffnen'), 'zweit') : '')
+        + (!ab && !e.archiv ? K.knopf('Etage kündigen', klick('kuendigenE', g.id, e.nr), 'gefahr') : '') + '</div>';
     }
+    if (gs.length > 1) r += K.knoepfe(K.knopf('Gebäude kündigen', klick('kuendigenG', g.id), 'gefahr breit'));
   }
-  // Pflanzen am Eingang; Farbgebung aus dem neutralen Q14-Gestaltungssystem.
-  for (const [x, y] of [[.1, reihen - .1], [spalten - .1, reihen - .1]]) {
-    const t = p(x, y);
-    svg += '<rect x="' + (t[0] - 2).toFixed(1) + '" y="' + (t[1] - 1).toFixed(1) +
-      '" width="4" height="5" fill="#90765E"/><circle cx="' + t[0].toFixed(1) +
-      '" cy="' + (t[1] - 4).toFixed(1) + '" r="4" fill="#56806E"/>';
+
+  // Abteilungen
+  if (u.abteilungen?.length) {
+    r += K.abschnitt('Abteilungen', `${u.abteilungen.length} Bereiche`);
+    r += K.liste(u.abteilungen.map((a) => {
+      const umzug = a.umzugBis !== undefined && a.umzugBis > c.woche ? ` · Umzug bis KW ${kwVon(a.umzugBis)}` : '';
+      const ort = a.gebaeudeId ? `${a.gebaeude ?? ''} ${etageKurz(a.etage)}`.trim() : 'ohne Platz';
+      return K.zeile({ was: esc(a.name), unter: `${fmt.format(Math.round(a.fte))} von ${fmt.format(a.sollFte)} FTE · Stufe ${a.stufe} · ${esc(ort)}${umzug}`,
+        wert: geld(a.kostenWoche), wertUnter: 'je Woche', ton: a.gebaeudeId ? '' : 'achtung', tippbar: true, attr: klick('abteilung', a.id) });
+    }));
   }
-  return svg + '</svg>';
+  // Freie Bürogebäude
+  if (u.angebote?.length) {
+    r += K.abschnitt('Freie Bürogebäude', `${u.angebote.length} Angebote`);
+    r += K.liste(u.angebote.map((a) => {
+      const qm = a.etagen.reduce((x, e) => x + e.qm, 0), k = a.etagen.reduce((x, e) => x + e.kostenWoche, 0);
+      return `<div class="hw-zeile"><span class="hw-was">${esc(a.name)}<small>${esc(a.stadt)} · ${a.etagen.length} Etagen · ${fmt.format(qm)} qm · ${geld(k)} je Woche · Frist KW ${kwVon(a.frist)}</small></span>${K.knopf('Mieten', klick('mieten', a.id), 'zweit')}</div>`;
+    }));
+  }
+  h += K.rumpf(r) + zentraleReiter('zentrale');
+  const weitere = (u.staedte ?? []).filter((q) => q !== u.sitz);
+  return { titel: 'Zentrale', unter: `Sitz ${u.sitz}${weitere.length ? ` · auch in ${weitere.join(', ')}` : ''} · ${gs.length} Gebäude`, html: h };
 }
+
+// ───────────────────────────────────────────── Abteilungsseite (Coffee 17–19, 28)
 // Besetzung gegen den Personalbedarf der Ausbaustufe (sollFte), nicht gegen freie Schreibtische im Gebäude.
 const unterbesetzt = (a, fte) => a.sollFte > 0 && fte < a.sollFte * 0.9;
 const ueberbesetzt = (a, fte) => a.sollFte > 0 && fte > a.sollFte * 1.15;
@@ -77,7 +146,7 @@ function spruch(a, fte, kap) {
   if (fte >= kap) return 'Unsere Plätze sind voll. Für weitere Einstellungen brauchen wir Raum.';
   return 'Die Aufgaben sind verteilt. Wir arbeiten an den Zielen.';
 }
-function stimmungsTexte(a, fte, kap) {
+function stimmungsTexte(a, fte) {
   return [
     a.gehaltFaktor < 1 ? 'Ich wünsche mir ein höheres Gehalt.' : 'Das Gehalt ist für mich in Ordnung.',
     a.moral >= 70 ? 'Unser Team erreicht seine Ziele.' : 'Die Stimmung ist angespannt.',
@@ -86,12 +155,10 @@ function stimmungsTexte(a, fte, kap) {
   ];
 }
 /** Reine Projektion der Engine-Abfragen. Auswahl ist eine bereits vorhandene HQ-Abteilung.
- *  Q32: dunkler Zentrale-Look mit Q30-Bausteinen (Sprecher, Kopfbild, Großkennzahlen, Liste, Segmente, Schalter);
- *  Kopfbild ist dieselbe isometrische Etage wie im Zentrale-Blatt (etagenBild), Personen sind Kit-Porträts.
  *  Hauptfrage: „Ist diese Abteilung richtig besetzt, und was kostet sie?“ */
 export function zentraleAbteilungHtml(u, grafik, organisation, id, etageWahl, etagenBild = null) {
   const a = (u.abteilungen ?? []).find((x) => x.id === id);
-  if (!a) return { titel: 'Abteilung nicht gefunden', unter: '', html: K.bereich('zentrale') + K.rumpf(K.leer('Diese Abteilung ist nicht verfügbar.')) };
+  if (!a) return { titel: 'Abteilung nicht gefunden', unter: '', html: K.bereich('zentrale') + G4 + K.rumpf(K.leer('Diese Abteilung ist nicht verfügbar.')) + zentraleReiter('zentrale') };
   const teams = (organisation?.bereiche ?? []).filter((b) => b.abteilung === a.id);
   const team = teams.find((b) => b.stelle?.person) ?? teams[0];
   const leitung = team?.stelle?.person;
@@ -101,7 +168,6 @@ export function zentraleAbteilungHtml(u, grafik, organisation, id, etageWahl, et
   const wahl = raeume.find((q) => q.gebaeude.id === etageWahl?.g && q.etage.nr === etageWahl?.nr) ??
     raeume.find((q) => q.gebaeude.id === a.gebaeudeId && q.etage.nr === a.etage) ?? raeume[0];
   const geb = (u.gebaeude ?? []).find((g) => g.id === wahl?.gebaeude.id);
-  const ue = geb?.etagen.find((e) => e.nr === wahl?.etage.nr);
   // Q35: eine Quelle (Engine abteilungPlaetze): FTE je Etage summieren sich zur Abteilung,
   // Plätze = eigene Arbeitsplätze plus freie Plätze dieser Etage.
   const platz = (a.plaetze ?? []).find((z) => z.gebaeudeId === wahl?.gebaeude.id && z.etage === wahl?.etage.nr);
@@ -111,81 +177,94 @@ export function zentraleAbteilungHtml(u, grafik, organisation, id, etageWahl, et
   const etagenAnzahl = (a.plaetze ?? []).length;
   const ohnePlatz = Math.max(0, Math.round(a.fte) - (a.plaetze ?? []).reduce((n, z) => n + z.fte, 0));
   const st = a.gehaltFaktor ?? 1;
-  const klick = (...x) => `onclick="hqKlick(${x.map((v) => `'${esc(String(v))}'`).join(',')})"`;
   const gName = geb?.name ?? wahl?.gebaeude.name ?? '';
   const etText = wahl ? etageName(wahl.etage.nr) : 'ohne Etage';
-  const ton = unterbesetzt(a, a.fte) ? 'engpass' : a.moral < 65 || a.fluktuation > 0.08 ? 'engpass' : '';
-  const leitungBild = leitung?.portraet ? portraetSVG(leitung.portraet, 72) : '';
+  const ton = unterbesetzt(a, a.fte) || a.moral < 65 || a.fluktuation > 0.08 ? 'engpass' : '';
 
-  let h = K.bereich('zentrale', 'zentrale');
-  h += K.sprecher({ text: '<b>' + esc(spruch(a, a.fte, kap)) + '</b>', unter: (leitung?.name ?? 'Leitung unbesetzt') + ' · ' + (team?.name ?? 'Bereichsleitung'), person: leitungBild, ton });
+  let h = K.bereich('zentrale', 'zentrale') + G4;
+  h += K.sprecher({ text: '<b>' + esc(spruch(a, a.fte, kap)) + '</b>', unter: (leitung?.name ?? 'Leitung unbesetzt') + ' · ' + (team?.name ?? 'Bereichsleitung'),
+    person: leitung?.portraet ? portraetSVG(leitung.portraet, 72) : '', ton });
   const bild = wahl && etagenBild ? etagenBild(wahl.gebaeude.id, wahl.etage.nr) : null;
-  if (bild) h += '<div class="hk-kopfbild schnitt"><img src="' + bild + '" alt="Etagenschnitt ' + esc(gName) + ', ' + esc(etText) + '"><span class="hk-bildtitel">' + esc(gName) + ' · ' + esc(etText) + '</span></div>';
-  else if (wahl) h += '<div class="hk-kopfbild schnitt">' + abteilungsEtageSvg(fteEtage, kapEtage, a.name) + '<span class="hk-bildtitel">' + esc(gName) + ' · ' + esc(etText) + '</span></div>';
+  if (bild) h += kopfbild(bild, 'Etagenschnitt ' + gName + ', ' + etText) + bildzeile(gName + ' · ' + etText);
 
-  let r = '<button class="zurueck" type="button" ' + klick('uebersicht') + '>‹ Zentrale</button>';
+  let r = '';
   const bedarf = a.sollFte > 0 ? a.sollFte : null;
   r += K.gross([
     { label: 'Beschäftigte', wert: fmt.format(Math.round(a.fte)) + ' FTE', ton: unterbesetzt(a, a.fte) ? 'schlecht' : '',
-      unter: bedarf ? (unterbesetzt(a, a.fte) ? '<span class="schlecht">' : '<span>') + 'Bedarf Stufe ' + a.stufe + ': ' + fmt.format(Math.round(bedarf)) + ' FTE</span>' : 'Stufe ' + a.stufe },
+      unter: bedarf ? `<span class="${unterbesetzt(a, a.fte) ? 'hw-schlecht' : ''}">Bedarf Stufe ${a.stufe}: ${fmt.format(Math.round(bedarf))} FTE</span>` : 'Stufe ' + a.stufe },
     { label: 'Personalkosten je Woche', wert: geld(a.kostenWoche), unter: Math.round(st * 100) + ' % des Gehaltsstandards' },
   ]);
-  if (!wahl) r += K.leer('Kein Büro zugewiesen. In der Zentrale eine gemietete Etage wählen.', 'Ohne Arbeitsplatz', '<button type="button" class="hk-knopf zweit" ' + klick('uebersicht') + '>Zur Zentrale</button>');
+  if (!wahl) r += K.leer('Kein Büro zugewiesen. Unten unter Arbeitsplatz eine gemietete Etage wählen.', 'Ohne Arbeitsplatz');
+  r += K.abschnitt('Arbeitsplätze');
   r += K.liste([
     // Q35: eine Quelle (Engine abteilungPlaetze). Platz im Gebäude = eigene Plätze plus freie Fläche, 14 qm je FTE.
     K.zeile({ was: 'Platz im Gebäude', unter: (etagenAnzahl > 1 ? fmt.format(Math.round(a.fte)) + ' FTE auf ' + etagenAnzahl + ' Etagen, ' : '') + 'inkl. freier Fläche, 14 qm je FTE', wert: fmt.format(kap) }),
     ...(wahl ? [K.zeile({ was: 'Auf dieser Etage belegt', unter: esc(gName) + ' · ' + etText + (ohnePlatz ? ' · ' + fmt.format(ohnePlatz) + ' ohne Arbeitsplatz' : ''), wert: fmt.format(fteEtage) + ' von ' + fmt.format(kapEtage) })] : []),
   ]);
-  if (raeume.length > 1) r += '<div class="hk-seg q32-etagen" role="group" aria-label="Etage auswählen">' + raeume.map((q) =>
-    '<button type="button" aria-pressed="' + (q === wahl) + '" ' + klick('abteilungEtage', id, q.gebaeude.id, q.etage.nr) + '>' + esc(etageName(q.etage.nr)) + '</button>').join('') + '</div>';
+  if (raeume.length > 1) {
+    r += K.abschnitt('Etagen der Abteilung', `${raeume.length} Etagen`);
+    r += K.liste(raeume.map((q) => { const z = (a.plaetze ?? []).find((x) => x.gebaeudeId === q.gebaeude.id && x.etage === q.etage.nr);
+      return K.zeile({ was: etageName(q.etage.nr), unter: esc(q.gebaeude.name), wert: z ? fmt.format(z.fte) + ' FTE' : '', wertUnter: z ? fmt.format(z.plaetze) + ' Plätze' : '',
+        tippbar: true, attr: `${klick('abteilungEtage', id, q.gebaeude.id, q.etage.nr)}${q === wahl ? ' aria-current="true"' : ''} aria-label="${esc(etageName(q.etage.nr))} im Bild zeigen"` }); }));
+  }
 
+  // Personal und Vergütung: große Stepper wie das Jahresgehalt in Coffee 28
   r += K.abschnitt('Personal und Vergütung');
-  r += '<div class="q32-regler"><div><span>Besetzung</span><b>' + fmt.format(Math.round(a.fte)) + ' FTE · Platz für ' + fmt.format(kap) + '</b></div><input type="range" aria-label="Besetzung der Abteilung" min="1" max="' + kap + '" step="1" value="' + a.fte +
-    '" onchange="hqKlick(\'fte\',\'' + esc(a.id) + '\',this.value)" data-q15-fte="' + a.fte + '"><small>Einstellen braucht freie Bürofläche und Einarbeitung, Abbau kostet Abfindungen.</small></div>';
-  r += '<div class="q32-regler"><div><span>Gehaltsniveau</span><b>' + Math.round(st * 100) + ' % des Standards</b></div><input type="range" aria-label="Gehaltsniveau der Abteilung" min="80" max="120" step="5" value="' +
-    Math.round(st * 100) + '" onchange="hqKlick(\'gehalt\',\'' + esc(a.id) + '\',this.value)" data-q15-gehalt="' + st + '"></div>';
+  const fteMinus = Math.max(1, Math.round(a.fte) - 5), ftePlus = Math.min(kap, Math.round(a.fte) + 5);
+  r += `<div class="hw-felder" data-q15-fte="${a.fte}" data-q15-gehalt="${st}">`
+    + K.feld('Besetzung', K.stepper({ wert: fmt.format(Math.round(a.fte)) + ' FTE', unter: 'Platz für ' + fmt.format(kap), label: 'Besetzung der Abteilung',
+      attrMinus: klick('fte', a.id, fteMinus), attrPlus: klick('fte', a.id, ftePlus), minusAus: Math.round(a.fte) <= 1, plusAus: Math.round(a.fte) >= kap }))
+    + K.feld('Gehaltsniveau', K.stepper({ wert: Math.round(st * 100) + ' %', unter: 'des Standards', label: 'Gehaltsniveau der Abteilung',
+      attrMinus: klick('gehalt', a.id, Math.round(st * 100) - 5), attrPlus: klick('gehalt', a.id, Math.round(st * 100) + 5), minusAus: st * 100 <= 80.5, plusAus: st * 100 >= 119.5 }))
+    + '</div>';
+  r += `<p class="hw-lese hw-leise hw-unterzeile">Schritt 5 FTE. Einstellen braucht freie Bürofläche und Einarbeitung, Abbau kostet Abfindungen.</p>`;
+  r += `<div class="hw-skalen">${K.skala('Moral', a.moral)}</div>`;
   r += K.liste([
-    K.zeile({ was: 'Moral', wert: a.moral + ' / 100', ton: a.moral < 65 ? 'schlecht' : '' }),
     K.zeile({ was: 'Fluktuationsrisiko', wert: prozent(a.fluktuation) + ' p. a.', ton: a.fluktuation > 0.08 ? 'schlecht' : '' }),
     K.zeile({ was: 'Qualitätsfaktor', wert: prozent(a.qualitaet) }),
   ]);
   r += K.abschnitt('Ausbaustufe', 'wirkt auf die Fachbereiche');
   r += K.seg([0, 1, 2, 3].map((n) => [n, 'Stufe ' + n]), a.stufe, (n) => klick('stufe', a.id, n));
+  r += a.wirkung ? `<p class="hw-lese hw-leise hw-unterzeile">${esc(a.wirkung)}</p>` : '';
 
   r += K.abschnitt('Stimmen aus dem Team');
-  r += '<div class="q32-stimmen">' + stimmungsTexte(a, a.fte, kap).map((satz, i) =>
-    '<div class="q32-stimme"><span class="q32-figur" aria-hidden="true">' + portraetSVG(zufallsMerkmale(a.id + ':stimme:' + i), 56) + '</span><p>„' + esc(satz) + '“</p></div>').join('') + '</div>';
+  r += K.liste(stimmungsTexte(a, a.fte).map((satz, i) => `<div class="hw-zeile">${figurKlein(portraetSVG(zufallsMerkmale(a.id + ':stimme:' + i), 56))}<span class="hw-was">„${esc(satz)}“</span></div>`));
 
-  r += K.abschnitt('Leitung');
+  // Leitung: Personenblock wie Coffee 28
+  r += K.abschnitt('Leitung', team?.name ?? 'Bereichsleitung');
   if (leitung) {
-    r += '<div class="hk-person-karte"><span class="hk-portraet">' + portraetSVG(leitung.portraet ?? zufallsMerkmale(a.id), 104) + '</span><div><b>' + esc(leitung.name) + '</b><small>' + esc(team?.name ?? 'Bereichsleitung') + '</small></div></div>';
-    r += '<div class="q32-skalen">' + K.skala('Fachwissen', leitung.qualitaet * 100) + K.skala('Stimmung', leitung.stimmung) + '</div>';
+    r += `<div class="hw-person"><div class="hw-portraet hw-kontur">${portraetSVG(leitung.portraet ?? zufallsMerkmale(a.id), 104)}</div><div class="hw-person-daten"><h3 class="hw-person-name">${esc(leitung.name)}</h3>`
+      + `<span class="hw-marke">Fähigkeiten</span>${K.skala('Fachwissen', leitung.qualitaet * 100)}${K.skala('Stimmung', leitung.stimmung)}</div></div>`;
   } else r += K.leer('Die Leitungsstelle ist frei. Die Abteilung arbeitet ohne Führung schwächer.', 'Leitung unbesetzt');
-  r += '<div class="hk-knopfreihe"><button type="button" class="hk-knopf zweit breit" ' + klick('organisation') + '>Leitung und Kandidaten in Organisation</button></div>';
+  r += K.knoepfe(K.knopf('Leitung und Kandidaten in der Organisation', klick('organisation'), 'zweit breit'));
 
   r += K.abschnitt('Delegation je Aufgabe');
   if (!teams.length) r += K.leer('Für diese Abteilung sind keine Einzelaufgaben hinterlegt.');
   for (const bereich of teams) {
-    r += '<div class="hk-liste q32-delegation"><div class="hk-zeile"><span class="hk-was"><b>' + esc(bereich.name) + '</b></span><span class="hk-wert">' + (bereich.aufgaben?.length ?? 0) + ' Aufgaben</span></div>';
-    for (const aufgabe of bereich.aufgaben ?? []) {
-      r += K.schalter({ text: aufgabe.name, unter: aufgabe.grenze === undefined ? (aufgabe.an ? 'delegiert' : 'entscheidest du') : 'Grenze ' + geld(aufgabe.grenze) + (aufgabe.an ? ' · delegiert' : ' · entscheidest du'),
-        an: !!aufgabe.an, attr: 'onclick="hqKlick(\'aufgabe\',\'' + esc(bereich.id) + '\',\'' + esc(aufgabe.id) + '\',\'' + (!aufgabe.an) + '\')"' });
-    }
-    r += '</div>';
+    if (teams.length > 1) r += `<p class="hw-marke hw-gruppe">${esc(bereich.name)} · ${bereich.aufgaben?.length ?? 0} Aufgaben</p>`;
+    r += (bereich.aufgaben ?? []).map((aufgabe) => K.schalter({ text: aufgabe.name,
+      unter: aufgabe.grenze === undefined ? (aufgabe.an ? 'delegiert' : 'entscheidest du') : 'Grenze ' + geld(aufgabe.grenze) + (aufgabe.an ? ' · delegiert' : ' · entscheidest du'),
+      an: !!aufgabe.an, attr: klick('aufgabe', bereich.id, aufgabe.id, !aufgabe.an) })).join('');
   }
 
-  const gebaeudeGruppen = (u.gebaeude ?? []).map((g) => ({
-    name: g.name,
-    ids: REIHENFOLGE.filter((id0) => (u.abteilungen ?? []).some((x) => x.id === id0 && x.gebaeudeId === g.id)),
-  })).filter((g) => g.ids.length);
-  const ohneBuero = REIHENFOLGE.filter((id0) => (u.abteilungen ?? []).some((x) => x.id === id0 && !x.gebaeudeId));
-  if (ohneBuero.length) gebaeudeGruppen.push({ name: 'Ohne zugewiesenes Büro', ids: ohneBuero });
+  // Arbeitsplatz wählen (früher Auswahlfeld in der Übersicht)
+  const ort = a.gebaeudeId ? `${a.gebaeudeId}|${a.etage}` : '';
+  const alleZiele = (u.gebaeude ?? []).flatMap((g) => g.etagen.filter((e) => e.gemietet && !e.archiv).map((e) => ({ v: `${g.id}|${e.nr}`, g, e, frei: Math.max(0, e.qm - e.belegtQm) })));
+  // Nur der jetzige Platz und die fünf Etagen mit dem meisten freien Platz (sonst 40 Zeilen bei Hochhäusern).
+  const ziele = [...alleZiele.filter((z) => z.v === ort), ...alleZiele.filter((z) => z.v !== ort).sort((x, y) => y.frei - x.frei).slice(0, 5)];
+  r += K.abschnitt('Umzug', 'meiste freie Fläche');
+  r += K.liste(ziele.map((z) => K.zeile({ was: `${esc(z.g.name)} · ${etageKurz(z.e.nr)}`, unter: fmt.format(z.frei) + ' qm frei',
+    wert: z.v === ort ? 'hier' : '', ton: z.v === ort ? 'gut' : '', tippbar: z.v !== ort, attr: z.v === ort ? '' : klick('setzen', a.id, z.v) })));
+
+  // Weitere Abteilungen je Gebäude
+  const gruppen = (u.gebaeude ?? []).map((g) => ({ name: g.name, ids: REIHENFOLGE.filter((x) => x !== id && (u.abteilungen ?? []).some((b) => b.id === x && b.gebaeudeId === g.id)) })).filter((g) => g.ids.length);
+  const ohneBuero = REIHENFOLGE.filter((x) => x !== id && (u.abteilungen ?? []).some((b) => b.id === x && !b.gebaeudeId));
+  if (ohneBuero.length) gruppen.push({ name: 'Ohne zugewiesenes Büro', ids: ohneBuero });
   r += K.abschnitt('Weitere Abteilungen');
-  for (const gruppe of gebaeudeGruppen) {
-    r += '<div class="q32-navtitel">' + esc(gruppe.name) + '</div><div class="hk-seg q32-nav" role="group" aria-label="Abteilungen in ' + esc(gruppe.name) + '">';
-    for (const id0 of gruppe.ids) r += '<button type="button" aria-pressed="' + (id0 === id) + '"' + (id0 === id ? ' aria-current="page"' : '') + ' ' + klick('abteilung', id0) + '>' + TITEL[id0] + '</button>';
-    r += '</div>';
+  for (const g of gruppen) {
+    r += `<p class="hw-marke hw-gruppe">${esc(g.name)}</p>` + K.liste(g.ids.map((x) => { const b = u.abteilungen.find((y) => y.id === x);
+      return K.zeile({ was: esc(TITEL[x] ?? b.name), wert: fmt.format(Math.round(b.fte)) + ' FTE', tippbar: true, attr: klick('abteilung', x) }); }));
   }
-  h += K.rumpf(r);
+  h += K.rumpf(r) + zentraleReiter('zentrale');
   return { titel: a.name, unter: (a.stadt ?? u.sitz) + ' · ' + etText, html: h };
 }

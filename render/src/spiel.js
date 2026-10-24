@@ -30,7 +30,7 @@ import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
 import { vorstandModul } from './ui/vorstand.js';
 // O01 Organisation
 import { organisationModul } from './ui/organisation.js';
-import { zentraleAbteilungHtml } from './ui/zentrale-abteilungen.js';
+import { zentraleAbteilungHtml, zentraleHtml } from './ui/zentrale-abteilungen.js';
 import { posteingangModul } from './ui/posteingang.js';
 import { zeitungModul } from './ui/zeitung.js';
 import { statistikModul } from './ui/statistik.js';
@@ -1116,7 +1116,6 @@ $('pinhalt').addEventListener('click', (e) => {
 });
 
 // ─────────────────────────────────────────── Zentrale (HQ)
-const STUFE_FARBE = ['#c9c4bb', '#e0b23c', '#2f8f5b', '#2f63b5'];
 let hqAbteilung = null; // Q15: gewählte Seite der Fachabteilung
 let hqEtageWahl = null;   // { g: Gebäude-Id, nr } für den 3D-Schnitt
 let hqRen = null;
@@ -1209,6 +1208,8 @@ window.hqKlick = (art, a, b, c) => {
   if (art === 'gehalt') return hqTun({ typ: 'abteilungGehalt', abteilung: a, faktor: Number(b) / 100 });
   if (art === 'aufgabe') return hqTun({ typ: 'delegation', bereich: a, aufgabe: b, an: c === 'true' });
   if (art === 'organisation') { offenesHq = null; return oeffneModul(org); }
+  // E47: Reiterleiste der Zentrale (Zentrale, Vorstand, Organisation, Reporting)
+  if (art === 'reiter') { hqAbteilung = null; hqEtageWahl = null; if (a === 'vorstand') return oeffneModul(vs); if (a === 'organisation') return oeffneModul(org); if (a === 'reporting') return oeffneModul(rg); return oeffneHq(); }
   if (art === 'mieten') { const an = E.hqUebersicht(s).angebote.find((q) => q.id === a); hqTun({ typ: 'hqMieten', angebot: a, etagen: an.etagen.map((e) => e.nr) }); }
   if (art === 'kuendigenE') hqTun({ typ: 'hqEtageKuendigen', gebaeude: a, etage: Number(b) });
   if (art === 'archiv') hqTun({ typ: 'hqArchivSetzen', gebaeude: a, etage: Number(b), aktiv: c === 'true' });
@@ -1222,77 +1223,12 @@ function oeffneHq(gebaeudeId, bleiben = false) {
   if (typeof E.hqUebersicht !== 'function') return;
   offenesHaus = null; offenesHq = gebaeudeId ?? true;
   const u = E.hqUebersicht(s), j = hqGrafik();
-  if (hqAbteilung && u.abteilungen.some((a) => a.id === hqAbteilung)) {
-    const r = zentraleAbteilungHtml(u, j, E.organisationUebersicht(s), hqAbteilung, hqEtageWahl, (gid, nr) => { const gj = j?.gebaeude?.find((q) => q.id === gid); return gj ? etagenBild(gj, nr) : null; });
-    const sc = $('pinhalt').scrollTop;
-    panel(r.titel, r.unter, r.html, 'gross');
-    if (bleiben) $('pinhalt').scrollTop = sc;
-    return;
-  }
-  const zahl = (t, w, ton = '') => `<div class="kz ${ton}"><span>${t}</span><b>${w}</b></div>`;
-  const pz = (x) => `${Math.round((x ?? 0) * 100)} %`;
-  const knopf = (text, args, art = '') => `<button class="mini ${art}" onclick="event.stopPropagation();hqKlick(${args.map((x) => `'${x}'`).join(',')})">${text}</button>`;
-  // Q30: Hauptfrage „Was kostet die Zentrale, und wo zahle ich für leere Fläche?“
-  const leerEtagen = (u.gebaeude ?? []).flatMap((g) => g.etagen.filter((e) => e.gemietet && !e.abteilungen.length && !e.archiv));
-  const ohnePlatz = (u.abteilungen ?? []).filter((a) => !a.gebaeudeId).length;
-  const diffStart = u.kostenWoche - (u.kostenStart ?? u.kostenWoche);
-  // Q35: Befund aus derselben Quelle wie „x % belegt“ je Gebäude (qmGemietet, qmBelegt).
-  const qmMiete = (u.gebaeude ?? []).reduce((n, g) => n + (g.qmGemietet ?? 0), 0);
-  const qmFrei = Math.max(0, qmMiete - (u.gebaeude ?? []).reduce((n, g) => n + (g.qmBelegt ?? 0), 0));
-  const befund = (leerEtagen.length ? `<b>${leerEtagen.length} gemietete ${leerEtagen.length === 1 ? 'Etage steht' : 'Etagen stehen'} leer.</b> `
-    : qmMiete > 0 && qmFrei / qmMiete >= 0.02 ? `<b>${pz(1 - qmFrei / qmMiete)} der gemieteten Bürofläche sind belegt, ${fmt.format(Math.round(qmFrei))} qm stehen frei.</b> `
-    : '<b>Alle gemieteten Etagen sind voll belegt.</b> ')
-    + (ohnePlatz ? `${ohnePlatz} ${ohnePlatz === 1 ? 'Abteilung hat' : 'Abteilungen haben'} keinen Platz und wirken nur mit Stufe 0. ` : '')
-    + (u.restmieteWoche > 0 ? `Für alte Büros laufen noch ${geld(u.restmieteWoche)} Restmiete je Woche.` : '');
-  let html = HK.bereich('zentrale') + HK.sprecher({ text: befund, unter: 'Leitung Verwaltung', ton: leerEtagen.length || ohnePlatz || (qmMiete > 0 && qmFrei / qmMiete >= 0.15) ? 'engpass' : '' });
-  let kopfbild = '';
-  let rumpf = HK.gross([{ label: 'Kosten je Woche', p: 'hq:kosten', wert: geld(u.kostenWoche), unter: diffStart ? HK.abweichung(-diffStart, (diffStart > 0 ? '+' : '−') + geld(Math.abs(diffStart)) + ' zum Start', null) : 'wie zum Start' },
-    { label: 'Beschäftigte', p: 'hq:fte', wert: fmt.format(Math.round(u.fte)) + ' FTE', unter: `${fmt.format((u.gebaeude ?? []).reduce((n, g) => n + (g.qmGemietet ?? 0), 0))} qm gemietet` }])
-    + HK.liste([HK.zeile({ was: 'davon Büromiete und Nebenkosten', wert: geld((u.kosten?.miete ?? 0) + (u.kosten?.nebenkosten ?? 0)) }), HK.zeile({ was: 'Restmiete alter Büros', wert: geld(u.restmieteWoche ?? 0), ton: u.restmieteWoche > 0 ? 'schlecht' : '' })]);
-  // 3D-Schnitt der gewählten Etage (Standard: erste belegte Etage des gewählten bzw. ersten Gebäudes)
-  const gs = u.gebaeude ?? [];
-  const gWahl = gs.find((g) => g.id === hqEtageWahl?.g) ?? gs.find((g) => g.id === gebaeudeId) ?? gs[0];
-  if (gWahl) {
-    const nr = hqEtageWahl?.g === gWahl.id ? hqEtageWahl.nr : (gWahl.etagen.find((e) => e.abteilungen.length) ?? gWahl.etagen[0]).nr;
-    const gj = j?.gebaeude?.find((q) => q.id === gWahl.id);
-    if (gj) {
-      const e = gWahl.etagen.find((q) => q.nr === nr);
-      kopfbild = `<div class="hk-kopfbild schnitt"><img src="${etagenBild(gj, nr)}" alt="Etagenschnitt ${esc(gWahl.name)}, ${nr === 0 ? 'Erdgeschoss' : `${nr}. Etage`}"><span class="hk-bildtitel">${esc(gWahl.name)} · ${nr === 0 ? 'EG' : `${nr}. Etage`} · ${esc((e?.abteilungen ?? []).map((a) => a.name).join(', ') || (e?.gemietet ? 'gemietet, frei' : 'nicht gemietet'))}</span></div>`;
-    }
-  }
-  const ziele = [];
-  for (const g of gs) for (const e of g.etagen) if (e.gemietet) ziele.push({ v: `${g.id}|${e.nr}`, t: `${g.name}, ${e.nr === 0 ? 'EG' : e.nr + '. Etage'} (${fmt.format(e.qm - e.belegtQm)} qm frei)` });
-  for (const g of [...gs].sort((a, b) => (a.id === gebaeudeId ? -1 : b.id === gebaeudeId ? 1 : 0))) {
-    rumpf += `<div class="karte"><div class="khead kopf-mit-knopf"><div>${g.name}<small>${g.stadt} · ${fmt.format(g.qmGemietet)} qm gemietet · ${pz(g.auslastung)} belegt · ${geld(g.kostenWoche)} je Woche</small></div>${gs.length > 1 ? knopf('Kündigen', ['kuendigenG', g.id], 'rot') : ''}</div>`;
-    for (const e of [...(g.etagen ?? [])].sort((x, y) => y.nr - x.nr)) {
-      const ab = (e.abteilungen ?? []).map((a) => a.name).join(', ');
-      const gewaehlt = gWahl?.id === g.id && (hqEtageWahl?.g === g.id ? hqEtageWahl.nr === e.nr : false);
-      rumpf += `<div class="zeile klickbar ${e.gemietet ? '' : 'grau'} ${gewaehlt ? 'gewaehlt' : ''}" onclick="hqKlick('${e.archiv ? 'archivOeffnen' : 'etage'}','${g.id}','${e.nr}')"><span class="dot ${e.archiv ? 'k-eigen' : e.gemietet ? (ab ? 'k-eigen' : 'k-untermiete') : 'k-leer'}"></span><span class="was">${e.nr === 0 ? 'Erdgeschoss' : `${e.nr}. Etage`}${ab ? ` <i>${ab}</i>` : e.gemietet ? ' <i>gemietet, frei</i>' : ' <i>nicht gemietet</i>'}${e.archiv ? ' <b>Archiv</b>' : ''}</span><span class="qm">${fmt.format(e.qm)} qm</span><span class="uq">${e.gemietet ? pz(e.auslastung) : ''}</span>${e.gemietet ? knopf(e.archiv ? 'Archiv auflösen' : 'Archiv einrichten', ['archiv', g.id, e.nr, !e.archiv], 'text') : ''}${e.archiv ? knopf('Chronik ansehen', ['archivOeffnen']) : ''}${e.gemietet && !ab && !e.archiv ? knopf('Kündigen', ['kuendigenE', g.id, e.nr], 'rot') : ''}</div>`;
-    }
-    rumpf += '</div>';
-  }
-  if (u.abteilungen?.length) {
-    rumpf += '<div class="karte"><div class="khead">Abteilungen</div>';
-    for (const a of u.abteilungen) {
-      const um = a.umzugBis !== undefined && a.umzugBis > s.woche ? ` · Umzug bis KW ${(a.umzugBis % 52) + 1}` : '';
-      const ort = a.gebaeudeId ? `${a.gebaeudeId}|${a.etage}` : '';
-      const wahl = `<select class="ort" onchange="hqKlick('setzen','${a.id}',this.value)">${ort ? '' : '<option selected>ohne Platz</option>'}${ziele.map((z) => `<option value="${z.v}"${z.v === ort ? ' selected' : ''}>${z.t}</option>`).join('')}</select>`;
-      rumpf += `<div class="abt"><div class="zeile"><span class="dot" style="background:${HQ_ABT[a.id]?.farbe ?? STUFE_FARBE[a.stufe]}"></span><span class="was"><b>${a.name}</b> <i>${fmt.format(Math.round(a.fte))} von ${fmt.format(a.sollFte)} FTE · ${geld(a.kostenWoche)} je Woche${um}</i><em class="wirk">${a.wirkung ?? ''}</em></span><span class="stufe">${knopf('Öffnen', ['abteilung', a.id])}${knopf('−', ['stufe', a.id, a.stufe - 1])}<b>${a.stufe}</b>${knopf('+', ['stufe', a.id, a.stufe + 1])}</span></div><div class="zeile unter">${wahl}</div></div>`;
-    }
-    rumpf += '</div>';
-  }
-  if (u.angebote?.length) {
-    rumpf += '<div class="karte"><div class="khead">Freie Bürogebäude</div>';
-    for (const a of u.angebote) {
-      const qm = a.etagen.reduce((x, e) => x + e.qm, 0), k = a.etagen.reduce((x, e) => x + e.kostenWoche, 0);
-      rumpf += `<div class="zeile"><span class="dot k-leer"></span><span class="was">${a.name} <i>${a.stadt} · ${a.etagen.length} Etagen · ${fmt.format(qm)} qm · ${geld(k)} je Woche · Frist KW ${(a.frist % 52) + 1}</i></span>${knopf('Mieten', ['mieten', a.id], 'gruen')}</div>`;
-    }
-    rumpf += '</div>';
-  }
-  html += kopfbild + HK.rumpf(rumpf);
-  const weitere = (u.staedte ?? []).filter((q) => q !== u.sitz);
+  const bild = (gid, nr) => { const gj = j?.gebaeude?.find((q) => q.id === gid); return gj ? etagenBild(gj, nr) : null; };
+  const r = hqAbteilung && u.abteilungen.some((a) => a.id === hqAbteilung)
+    ? zentraleAbteilungHtml(u, j, E.organisationUebersicht(s), hqAbteilung, hqEtageWahl, bild)
+    : zentraleHtml({ u, organisation: E.organisationUebersicht(s), historie: s.historie, woche: s.woche, gebaeudeId, etageWahl: hqEtageWahl, etagenBild: bild });
   const sc = $('pinhalt').scrollTop;
-  panel('Zentrale', `Sitz ${u.sitz}${weitere.length ? ` · auch in ${weitere.join(', ')}` : ''} · ${gs.length} Gebäude`, html);
+  panel(r.titel, r.unter, r.html, 'gross');
   if (bleiben) $('pinhalt').scrollTop = sc;
 }
 

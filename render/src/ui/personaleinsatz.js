@@ -1,17 +1,20 @@
 // O04 Personal: alle Kennzahlen aus Engine-Abfragen, keine Simulation im Browser.
+// E47 wie Coffee 30: Hauscluster und Häuser als Listen, Deckung je Gruppe als Großkennzahlen, Wochentage als Balken
+// (Bedarf hell, Plan grün), Einsatz je Gruppe als Stepper (Schritt 5 %, gleiche Aktionen wie zuvor die Schieberegler).
 import { esc, fmt, geld } from './format.js';
 import * as K from './komponenten.js';
 
 const GRUPPEN = ['logistik', 'verkauf', 'kasse', 'verwaltung'];
 const NAME = { logistik: 'Instore-Logistik', verkauf: 'Verkauf', kasse: 'Kasse', verwaltung: 'Verwaltung' };
+const KURZ = { logistik: 'Logistik', verkauf: 'Verkauf', kasse: 'Kasse', verwaltung: 'Verwaltung' };
 const pct = (n) => Math.round(n * 100) + ' %';
-const farbe = (n) => n < 0.85 ? 'var(--hk-schlecht, #ef6f62)' : n < 0.98 ? 'var(--hk-achtung, #e7b04b)' : 'var(--hk-gut, #6dbf73)';
+const ton = (n) => n < 0.85 ? 'schlecht' : n < 0.98 ? 'achtung' : '';
 const steuer = (a, opts = {}) =>
-  Object.entries({ 'data-pe': a, ...opts }).map(([k, v]) => ' ' + k + '="' + esc(String(v)) + '"').join('');
+  Object.entries({ 'data-pe': a, ...opts }).map(([k, v]) => k + '="' + esc(String(v)) + '"').join(' ');
 
 export function personalModul(ctx) {
   const { E } = ctx;
-  const ui = { aktiv: false, cluster: null, haus: null };
+  const ui = { aktiv: false, cluster: null, haus: null, wahl: false };
   const stand = () => E.personalUebersicht(ctx.s());
   const actions = (a) => {
     const r = E.fuehreAus(ctx.s(), a);
@@ -19,73 +22,54 @@ export function personalModul(ctx) {
     if (r.ok) ctx.nachAktion();
     return r.ok;
   };
-  function titelGruppen(p) {
-    return GRUPPEN.map((g) =>
-      '<div class="pe-gruppe"><div class="zeile"><span class="was"><b>' + esc(NAME[g]) +
-      '</b><i>' + fmt.format(p.gruppen[g].plan) + ' / ' + fmt.format(p.gruppen[g].bedarf) +
-      ' Stunden</i></span><strong style="color:' + farbe(p.gruppen[g].deckung) + '">' +
-      pct(p.gruppen[g].deckung) + '</strong></div>' +
-      '<div class="pe-tage">' + p.gruppen[g].tage.map((t) =>
-        '<div class="pe-tag" aria-label="' + t.tag + ': ' + fmt.format(t.plan) + ' von ' + fmt.format(t.bedarf) +
-        ' Stunden"><small>' + t.tag + '</small><div class="pe-saeule"><span style="height:' +
-        Math.min(100, Math.max(3, t.deckung * 85)) + '%;background:' + farbe(t.deckung) +
-        '"></span></div><small>' + pct(t.deckung) + '</small></div>').join('') +
-      '</div></div>').join('');
+  /** Einsatz je Gruppe als Stepper: Schritt 5 %, Grenzen wie in der Engine (40 bis 160 %, Aushilfen 0 bis 30 %). */
+  function regler(name, art, id, g, wert, min, max, hinweis) {
+    const v = Math.round(wert * 100);
+    return K.feld(name, K.stepper({ wert: v + ' %', unter: hinweis, label: name,
+      attrMinus: steuer(art, { 'data-haus': id, 'data-gruppe': g, 'data-wert': v - 5 }), attrPlus: steuer(art, { 'data-haus': id, 'data-gruppe': g, 'data-wert': v + 5 }),
+      minusAus: v - 5 < min, plusAus: v + 5 > max }));
   }
+  /** Personaleinsatz eines Hauses: wird auch im Hausdetail (Reiter Personal) eingebettet. */
   function hausBlock(id) {
     const h = ctx.s().haeuser.find((x) => x.id === id);
     const p = E.personalHaus(ctx.s(), id);
-    if (!h || !p) return '<div class="karte">Kein Personaleinsatzplan vorhanden.</div>';
+    if (!h || !p) return K.leer('Kein Personaleinsatzplan vorhanden.');
     const st = h.personaleinsatz;
-    const slider = (name, art, g, min, max, val, hint) =>
-      '<div class="pe-slider"><label><b>' + esc(name) + '</b><span>' + pct(val) +
-      '</span></label><input type="range" min="' + min + '" max="' + max +
-      '" step="5" value="' + Math.round(val * 100) + '"' +
-      steuer(art, { 'data-haus': id, 'data-gruppe': g || '' }) +
-      ' aria-label="' + esc(name) + '"><small>' + esc(hint) + '</small></div>';
-    let out = '<div class="karte"><div class="khead">Woche ' + (p.woche % 52 + 1) + ' · Personaleinsatz</div>' +
-      '<div class="raster"><div class="kz"><span>Krankenstand</span><b>' + pct(p.krank) +
-      '</b></div><div class="kz"><span>Urlaub</span><b>' + pct(p.urlaub) +
-      '</b></div><div class="kz"><span>Aushilfen</span><b>' + fmt.format(p.aushilfenStunden) +
-      ' Std.</b></div><div class="kz"><span>Zusatzkosten</span><b>' + geld(p.zusatzkosten) +
-      '</b></div></div>' +
-      '<div class="zeile"><span>Warenverfügbarkeit (Personalfaktor)</span><b>' + pct(p.verfuegbarkeit) +
-      '</b></div><div class="zeile"><span>Kaufquotenfaktor</span><b>' + pct(p.kaufquote) +
-      '</b></div><div class="zeile"><span>Springerbewegungen</span><b>' +
-      fmt.format(p.springerSaldo) + ' Std.</b></div></div>';
-    out += '<div class="karte"><div class="khead">Bedarf und Plan · Montag bis Samstag</div>' + titelGruppen(p) + '</div>';
-    out += '<div class="karte"><div class="khead">Einsatz übersteuern</div>' +
-      GRUPPEN.map((g) => slider(NAME[g], 'gruppe', g, 40, 160, st.faktor[g],
-        '100 % = Vorschlag der Personaleinsatzplanung')).join('') +
-      slider('Kasse Samstag', 'samstag', '', 40, 160, st.samstagKasse,
-        'Reduzierung führt zu Wartezeiten und Kaufabbrüchen') +
-      slider('Zusätzliche Aushilfen', 'aushilfen', '', 0, 30, st.aushilfenQuote,
-        'Zusätzliche Stunden für Freitag und Samstag, kostenpflichtig') +
-      '</div>';
+    let out = K.gross([{ label: 'Krankenstand', wert: pct(p.krank), ton: p.krank > 0.1 ? 'schlecht' : '' }, { label: 'Urlaub', wert: pct(p.urlaub) },
+      { label: 'Aushilfen', wert: fmt.format(p.aushilfenStunden) + ' Std.' }]);
+    out += K.liste([K.zeile({ was: 'Zusatzkosten Woche', wert: geld(p.zusatzkosten) }), K.zeile({ was: 'Warenverfügbarkeit (Personalfaktor)', wert: pct(p.verfuegbarkeit) }),
+      K.zeile({ was: 'Kaufquotenfaktor', wert: pct(p.kaufquote) }), K.zeile({ was: 'Springerbewegungen', wert: fmt.format(p.springerSaldo) + ' Std.' })]);
+    out += K.abschnitt('Deckung KW ' + (p.woche % 52 + 1), 'Plan zu Bedarf');
+    const kz = (g) => ({ label: KURZ[g], wert: pct(p.gruppen[g].deckung), ton: ton(p.gruppen[g].deckung) === 'schlecht' ? 'schlecht' : '' });
+    out += K.gross(GRUPPEN.slice(0, 2).map(kz)) + K.gross(GRUPPEN.slice(2).map(kz));
+    for (const g of GRUPPEN) {
+      const x = p.gruppen[g];
+      out += K.abschnitt(NAME[g], fmt.format(x.plan) + ' von ' + fmt.format(x.bedarf) + ' Std.');
+      out += K.balken(x.tage.map((t) => ({ label: t.tag, a: t.bedarf, b: t.plan })));
+    }
+    out += `<div class="hw-legende"><span><i></i>Bedarf</span><span><i class="b"></i>Plan</span></div>`;
+    out += K.abschnitt('Einsatz übersteuern', '100 % = Vorschlag');
+    out += '<div class="hw-felder">' + GRUPPEN.map((g) => regler(KURZ[g], 'gruppe', id, g, st.faktor[g], 40, 160, 'Einsatz')).join('')
+      + regler('Kasse Samstag', 'samstag', id, '', st.samstagKasse, 40, 160, 'Einsatz')
+      + regler('Aushilfen', 'aushilfen', id, '', st.aushilfenQuote, 0, 30, 'Fr und Sa') + '</div>';
+    out += `<p class="hw-lese hw-leise hw-unterzeile">Weniger Kasse am Samstag führt zu Wartezeiten und Kaufabbrüchen. Aushilfen verstärken Freitag und Samstag und kosten zusätzlich.</p>`;
     return out;
   }
   function clusterBlock(c) {
-    const haus = ui.haus && c.haeuser.some((h) => h.id === ui.haus)
-      ? ui.haus : null;
-    let out = '<div class="karte"><div class="khead">Springer und Weiterbildung</div>' + // Q32: Clustername steht schon im Auswahlfeld
-      '<div class="zeile"><span>' + c.haeuser.length + ' Häuser · Springerbewegungen</span><b>' +
-      c.bewegungen + '</b></div>' +
-      '<div class="hk-knopfreihe"><button type="button" class="hk-knopf zweit"' + steuer('springer', { 'data-cluster': c.id, 'data-an': c.springerAktiv ? '0' : '1' }) +
-      '>' + (c.springerAktiv ? 'Springerpool deaktivieren' : 'Springerpool aktivieren') + '</button>' +
-      '<button type="button" class="hk-knopf zweit"' + steuer('weiterbildung', { 'data-cluster': c.id }) +
-      '>Weiterbildung Stufe +1</button>' +
-      (ctx.s().woche % 52 >= 43 ? '<button type="button" class="hk-knopf zweit"' + steuer('weihnachten', { 'data-cluster': c.id }) +
-      '>Weihnachts-Aushilfen nachbuchen</button>' : '') + '</div></div>';
-    out += '<div class="karte pe-uebersicht"><div class="pe-tabellenkopf"><span>Haus</span><span>Logistik</span><span>Verkauf</span><span>Kasse</span><span>Verwaltung</span></div>';
-    for (const h of c.haeuser) {
-      out += '<button class="pe-tabellenzeile"' + steuer('haus', { 'data-haus': h.id }) + '><b>' +
-        esc(h.name) + '</b><span class="pe-deckungen">' + GRUPPEN.map((g) =>
-        '<span style="color:' + farbe(h.gruppen[g]) + '">' + pct(h.gruppen[g]) + '</span>').join('') +
-        '</span><small>Krank ' + pct(h.krank) + ' · Aushilfen ' + fmt.format(h.aushilfen) +
-        ' Std. · Springer ' + fmt.format(h.springer) + ' Std.</small></button>';
-    }
-    out += '</div>';
-    if (haus) out += hausBlock(haus);
+    const haus = ui.haus && c.haeuser.some((h) => h.id === ui.haus) ? ui.haus : null;
+    let out = K.abschnitt('Springer', c.bewegungen + ' Bewegungen');
+    out += K.schalter({ text: 'Springerpool', unter: c.springerAktiv ? 'Häuser helfen sich gegenseitig aus' : 'jedes Haus plant für sich', an: c.springerAktiv,
+      attr: steuer('springer', { 'data-cluster': c.id, 'data-an': c.springerAktiv ? '0' : '1' }) });
+    out += K.knoepfe(K.knopf('Weiterbildung um eine Stufe anheben', steuer('weiterbildung', { 'data-cluster': c.id }), 'zweit breit'),
+      ctx.s().woche % 52 >= 43 ? K.knopf('Weihnachtsaushilfen nachbuchen', steuer('weihnachten', { 'data-cluster': c.id }), 'zweit breit') : '');
+    out += K.abschnitt('Häuser', 'knappste Gruppe');
+    out += K.liste(c.haeuser.map((h) => {
+      const min = GRUPPEN.reduce((m, g) => (h.gruppen[g] < h.gruppen[m] ? g : m), GRUPPEN[0]);
+      return K.zeile({ was: esc(h.name), unter: `Krank ${pct(h.krank)} · Aushilfen ${fmt.format(h.aushilfen)} Std. · Springer ${fmt.format(h.springer)} Std.`,
+        wert: pct(h.gruppen[min]), wertUnter: 'knapp: ' + KURZ[min], ton: ton(h.gruppen[min]), tippbar: true,
+        attr: steuer('haus', { 'data-haus': h.id }) + (h.id === haus ? ' aria-current="true"' : '') });
+    }));
+    if (haus) out += `<div data-pe-haus="${esc(haus)}">` + K.abschnitt(c.haeuser.find((h) => h.id === haus)?.name ?? 'Haus') + hausBlock(haus) + '</div>';
     return out;
   }
   function anzeigen(scrollHalten = false) {
@@ -96,9 +80,6 @@ export function personalModul(ctx) {
     if (gewaehlt) ui.cluster = gewaehlt.id;
     // Q30: Hauptfrage „Wo fehlt diese Woche Personal?“ Die Personalabteilung nennt die Häuser unter 90 % Deckung.
     const knapp = gewaehlt ? gewaehlt.haeuser.filter((h) => GRUPPEN.some((g) => h.gruppen[g] < 0.9)) : [];
-    const selector = '<label class="pe-wahl">Hauscluster<select class="ort" data-pe="cluster" aria-label="Hauscluster wählen">' +
-      liste.map((c) => '<option value="' + esc(c.id) + '"' + (c.id === ui.cluster ? ' selected' : '') + '>' +
-      esc(c.name) + ' (' + c.haeuser.length + ')</option>').join('') + '</select></label>';
     const befund = !gewaehlt ? '<b>Keine offenen Häuser.</b>' : knapp.length
       ? '<b>' + knapp.length + ' von ' + gewaehlt.haeuser.length + ' Häusern sind unter 90 % besetzt.</b> Am knappsten: ' + esc(knapp.slice(0, 2).map((h) => h.name).join(', ')) + '.'
       : (() => {
@@ -109,17 +90,34 @@ export function personalModul(ctx) {
           ? 'Am knappsten: ' + esc(k.name) + ' mit ' + pct(min(k)) + ' (Krankenstand ' + pct(k.krank) + ').'
           : 'Kein Springer nötig.');
       })();
+    let r = '';
+    if (gewaehlt) {
+      const alle = gewaehlt.haeuser.length;
+      const voll = gewaehlt.haeuser.filter((h) => GRUPPEN.every((g) => h.gruppen[g] >= 0.9)).length;
+      r += K.gross([{ label: 'Häuser besetzt', wert: `${voll} von ${alle}`, ton: knapp.length ? 'schlecht' : '' },
+        { label: 'Krankenstand', wert: pct(gewaehlt.haeuser.reduce((n, h) => n + h.krank, 0) / Math.max(1, alle)) }]);
+      // Hauscluster wählen: aktueller Cluster als Zeile, aufgeklappt alle Cluster als Liste.
+      r += K.abschnitt('Hauscluster', liste.length + ' Cluster');
+      r += K.liste(ui.wahl
+        ? liste.map((c) => K.zeile({ was: esc(c.name), unter: c.haeuser.length + ' Häuser', wert: c.id === ui.cluster ? 'gewählt' : '', ton: c.id === ui.cluster ? 'gut' : '', tippbar: c.id !== ui.cluster, attr: steuer('cluster', { 'data-cluster': c.id }) }))
+        : [K.zeile({ was: esc(gewaehlt.name), unter: alle + ' Häuser', wert: 'wechseln', tippbar: true, attr: steuer('wahl') })]);
+      r += clusterBlock(gewaehlt);
+    } else r += K.leer('Keine offenen Häuser in diesem Cluster.');
     ctx.panel('Personaleinsatz', 'Wochentagsplanung · vier Personalgruppen',
-      K.bereich('haus', 'haus') + K.sprecher({ text: befund, unter: 'Personalplanung', ton: knapp.length ? 'engpass' : '' }) +
-      K.rumpf(selector + (gewaehlt ? clusterBlock(gewaehlt) : K.leer('Keine offenen Häuser in diesem Cluster.'))), 'gross');
+      K.bereich('haus', 'haus') + '<i class="hw-g4" aria-hidden="true"></i>' + K.sprecher({ text: befund, unter: 'Personalplanung', ton: knapp.length ? 'engpass' : '' }) + K.rumpf(r), 'gross');
     ui.aktiv = true;
     if (scrollHalten) document.getElementById('pinhalt').scrollTop = vorher;
   }
-  function tun(el, wert) {
+  function tun(el) {
     const a = el.dataset.pe, cluster = el.dataset.cluster || ui.cluster;
     const id = el.dataset.haus, gruppe = el.dataset.gruppe;
-    if (a === 'cluster') { ui.cluster = wert; ui.haus = null; anzeigen(); return; }
-    if (a === 'haus') { ui.haus = id; anzeigen(); return; }
+    if (a === 'wahl') { ui.wahl = true; anzeigen(true); return; }
+    if (a === 'cluster') { ui.cluster = cluster; ui.haus = null; ui.wahl = false; anzeigen(); return; }
+    if (a === 'haus') {
+      ui.haus = id; anzeigen(true);
+      document.querySelector('#pinhalt [data-pe-haus]')?.scrollIntoView({ block: 'start' });
+      return;
+    }
     if (a === 'springer') { actions({ typ: 'personalSpringer', hauscluster: cluster, an: el.dataset.an === '1' }); anzeigen(true); return; }
     if (a === 'weihnachten') {
       actions({ typ: 'personalWeihnachtenNachbuchen', hauscluster: cluster, quote: 0.10 });
@@ -130,7 +128,7 @@ export function personalModul(ctx) {
       const stufe = Math.min(3, 1 + Math.max(0, ...hauser.map((h) => h.personaleinsatz?.training ?? 0)));
       actions({ typ: 'personalWeiterbildung', hauscluster: cluster, stufe }); anzeigen(true); return;
     }
-    const faktor = Number(wert) / 100;
+    const faktor = Number(el.dataset.wert) / 100;
     const aktion = a === 'gruppe'
       ? { typ: 'personalSteuern', haus: id, gruppe, faktor }
       : a === 'samstag' ? { typ: 'personalSamstagKasse', haus: id, faktor }
@@ -142,16 +140,11 @@ export function personalModul(ctx) {
   const pin = document.getElementById('pinhalt');
   pin.addEventListener('click', (event) => {
     const el = event.target.closest('[data-pe]');
-    if (!el || el.tagName === 'INPUT' || el.tagName === 'SELECT') return;
+    if (!el || el.disabled) return;
     if (ui.aktiv || el.dataset.haus) tun(el);
   });
-  pin.addEventListener('change', (event) => {
-    const el = event.target.closest('[data-pe]');
-    if (!el) return;
-    if (el.tagName === 'INPUT' || el.tagName === 'SELECT') tun(el, el.value);
-  });
   return {
-    ui, hausBlock, oeffne: (cluster) => { ui.haus = null; ui.cluster = cluster || null; anzeigen(); },
+    ui, hausBlock, oeffne: (cluster) => { ui.haus = null; ui.wahl = false; ui.cluster = cluster || null; anzeigen(); },
     aktiv: () => ui.aktiv, neuZeichnen: () => anzeigen(true), zu: () => { ui.aktiv = false; },
     pruefe: () => ({ cluster: ui.cluster, haus: ui.haus,
       daten: E.personalUebersicht(ctx.s(), ui.cluster) }),

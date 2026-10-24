@@ -314,5 +314,48 @@
 /* ── G2 Einkauf, Ware, Planung, Vertrieb ── */
 /* ── G3 Marketing, E-Commerce, IT ── */
 /* ── G4 Zentrale, Organisation, Vorstand, Personaleinsatz, Reporting ── */
+/* Marker .hw-g4 im Inhalt: Blattgrund liegt auf dem Inhalt selbst (Kontrastprüfung sieht den Grund), Kopf und Reiter aus der Skala. */
+#panel.hw > .hw-inhalt:has(> .hw-g4) { background: repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 7px, rgba(0,0,0,0) 7px 8px), var(--grund); }
+#panel.hw:has(.hw-g4) #ptitel { font: var(--hw-t-kopf); }
+#panel.hw:has(.hw-g4) #preiter .hw-reiter > button { font: var(--hw-t-klein); }
+.hw-g4 { display: none; }
+/* Kopfbild der Zentrale: Etagenschnitt, Bildknopf unten links (Coffee 20), Bildzeile darunter leise. */
+.hw-kopfbild .hw-bildknopf-links { left: var(--hw-rand); bottom: 14px; }
+.hw-kopfbild .hw-bildknopf svg { position: absolute; inset: 7px; width: 30px; height: 30px; }
+.hw-bildzeile { margin: 6px var(--hw-rand) 0; font: var(--hw-t-klein); color: var(--leise); }
+.hw-leise { color: var(--leise); }
+.hw-unterkopf { margin: -4px 0 6px; }
+#panel:has(.hw-g4) .hw-rumpf .hw-segment { margin: 0; }
+.hw-unterzeile { margin: 10px 0 0; }
+.hw-auswahl { margin: 10px 0 0; }
+.hw-gruppe { display: block; margin: 14px 0 2px; }
+.hw-skalen { display: grid; gap: 6px; margin: 16px 0 6px; }
+.hw-skalen .hw-faehigkeit { grid-template-columns: 1fr 120px 28px; }
+.hw-zeile[aria-current='true'] .hw-was { color: var(--akzent-linie); }
+/* Kleine Kit-Figur in Listenzeilen (Teamstimmen, Kandidaten, Vorstandsplätze). */
+.hw-figur { flex: none; position: relative; width: 38.7px; height: 44px; overflow: hidden; }
+.hw-figur svg { position: absolute; left: -5px; bottom: -6px; width: 50px; height: 50px; }
+.hw-figur.leer::after { content: ''; position: absolute; left: 9px; right: 9px; bottom: 6px; height: 24px; border-radius: 6px 6px 2px 2px; box-shadow: inset 0 0 0 1.3px var(--kartenlinie); }
+/* Wasserfall im Reporting: Spur zwischen Beschriftung und Wert, schwebende Balken (Plus grün, Minus rot), Summe mit Strich. */
+.hw-wf .hw-was { flex: 0 0 104px; }
+.hw-wf-spur { position: relative; flex: 1; height: 14px; }
+.hw-wf-spur i { position: absolute; top: 0; height: 14px; }
+.hw-wf-marke { width: 2px; margin-left: -1px; background: var(--text); }
+.hw-wf-balken { border-radius: 3px; background: var(--gut); }
+.hw-wf-balken.minus { background: var(--schlecht); }
+.hw-wf .hw-wert { flex: 0 0 92px; }
+.hw-wf .hw-wf-summe { box-shadow: inset 0 1px 0 0 var(--text); }
+/* Sitzungsvorlage, Freigabegrenze, Kandidatenkarte im Karussell (Coffee 26 Rahmen, Coffee 28 Inhalt). */
+.hw-vorlage { margin: 0 0 4px; font: var(--hw-t-text); font-weight: 500; }
+.hw-grenze { margin: 4px 0 10px 63px; }
+.hw-kandidat { padding: 18px 16px 16px; }
+.hw-kandidat-kopf { display: grid; grid-template-columns: 80px 1fr; gap: 12px; align-items: center; }
+.hw-kandidat-kopf .hw-portraet { width: 80px; height: 104px; }
+.hw-kandidat-kopf .hw-person-name { margin: 0 0 6px; }
+.hw-kandidat .hw-skalen .hw-faehigkeit { grid-template-columns: 1fr 120px 28px; }
+#panel:has(.hw-g4) .hw-karussell { margin-top: 8px; }
+#panel:has(.hw-g4) .hw-punkte { margin-top: 12px; }
+#panel:has(.hw-g4) .hw-karte { height: auto; }
+
 /* ── G5 Posteingang, Wochenbericht, Portfolio, Reise, Umbau, Statistik ── */
 /* ── G6 Kartenoberfläche, Start, Menü, Einführung, Erfolge, Einstellungen, Chronik, Zeitung, Spielende ── */

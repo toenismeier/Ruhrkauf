@@ -6,7 +6,8 @@
 // Die Bausteine (Schalter, Stepper, Balken, Karussell, Porträt, Prüfung) nutzen auch marketing.js und produkte.js.
 import { geld, fmt, pz, kwVon, esc } from './format.js';
 import * as PT from '../kit/portraet.js';
-import { bereich } from './komponenten.js';
+import * as K from './komponenten.js';
+import { zentraleReiter, figurKlein, G4 } from './zentrale-abteilungen.js';
 
 // ─────────────────────────────────────────── gemeinsame Bausteine
 /** Porträt als SVG (kit/portraet.js); fehlt die Datei, eine neutrale Silhouette. */
@@ -61,130 +62,159 @@ export function karussellBinden(id, idx, beiWechsel) {
 }
 
 const RISIKO = { gruen: 'gering', gelb: 'erhöht', rot: 'hoch' };
-const RESSORT_KURZ = { cfo: 'Finanzen', coo: 'Operations', cso: 'Vertrieb', cpo: 'Einkauf', cmo: 'Marketing', chro: 'Personal', cro: 'Restrukturierung', cdo: 'Digital' }; // Q31: passt auf den Platz
 const HALTE = [[0, 'kein'], [0.25, '25 %'], [0.5, '50 %'], [1, '100 %']];
 const ERFOLG = [[0, 'kein'], [0.1, '10 %'], [0.2, '20 %'], [0.3, '30 %']];
-const tsd = (x) => geld(x);
+const vorzeichen = (x) => (x >= 0 ? '+' : '−') + Math.abs(x);
 
+// E47: Vorstand wie Coffee 28. Übersicht = Besetzung und Sitzungsvorlage, Ressorts als Liste; Profil = Porträtrahmen,
+// Fähigkeiten als Skala, Jahresgehalt als großer Stepper, Delegation als Schalter; Einstellen = Kandidaten im Karussell.
 export function vorstandModul(ctx) {
   const E = ctx.E, s = () => ctx.s();
   const da = typeof E.vorstandUebersicht === 'function';
   const ui = { aktiv: false, seite: 'uebersicht', ressort: null, k: 0, angebot: null, entlassen: false };
+  const kopf = (sprecherText, person, unter, ton = '') => K.bereich('zentrale', 'zentrale') + G4 + K.sprecher({ text: sprecherText, unter, person: person ? portraet(person.portraet, 72) : '', ton });
+  const personBlock = (p, P, id, groesse = 104) => `<div class="hw-person"><div class="hw-portraet hw-kontur">${portraet(p?.portraet ?? null, groesse)}</div><div class="hw-person-daten">`
+    + `<h3 class="hw-person-name">${p ? P(`${id}:name`, p.name, 'span') : 'Platz frei'}</h3>`
+    + (p ? `<span class="hw-marke">Fähigkeiten</span>${K.skala('Führung', p.fuehrung)}${K.skala('Fachwissen', p.fachwissen)}${K.skala('Loyalität', p.loyalitaet)}` : '') + '</div></div>';
 
   // ─────────────────────────── Übersicht
   function uebersicht(P) {
-    // Q31 Sitzungstisch. Hauptfrage: Wer fehlt im Vorstand, was steht zur Entscheidung? Größter Block = offene
-    // Sitzungsvorlage (wenn vorhanden), sonst der Tisch mit acht Plätzen; unbesetzte Ressorts als leerer Stuhl.
+    // Hauptfrage: Wer fehlt im Vorstand, was steht zur Entscheidung?
     const st = s(), u = E.vorstandUebersicht(st);
     const frei = u.ressorts.filter((r) => !r.person), risiko = u.ressorts.filter((r) => r.person && r.risikoAmpel === 'rot');
-    let h = '<div class="q31">';
-    h += `<div class="q-gross"><span class="q-label">Vorstand besetzt</span><span class="q-haupt">${P('u:besetzt', `${u.besetzt} von ${u.ressorts.length}`, 'span')}</span><span class="q-neben"><b>${P('u:kostenJahr', geld(u.kostenJahr), 'span')}</b>Gehälter im Jahr</span></div>`;
-    h += `<div class="q-befund">${frei.length ? `<b>${frei.map((r) => r.kurz).join(' und ')}</b> ${frei.length === 1 ? 'fehlt' : 'fehlen'}; ${frei.length === 1 ? 'das Ressort arbeitet' : 'die Ressorts arbeiten'} ohne Führung schwächer.` : 'Alle Ressorts sind besetzt.'}${risiko.length ? ` Abwerberisiko hoch: ${risiko.map((r) => r.kurz).join(', ')}.` : ''} Nächste Sitzung ${P('u:sitzung', wocheText(st, u.naechsteSitzung), 'b')}, Kosten je Woche ${P('u:kostenWoche', geld(u.kostenWoche), 'b')}.</div>`;
+    const cfo = u.ressorts.find((r) => r.id === 'cfo')?.person;
+    const text = (frei.length ? `<b>${frei.map((r) => r.kurz).join(' und ')} ${frei.length === 1 ? 'fehlt' : 'fehlen'}.</b> ${frei.length === 1 ? 'Das Ressort arbeitet' : 'Die Ressorts arbeiten'} ohne Führung schwächer.` : '<b>Alle Ressorts sind besetzt.</b>')
+      + (risiko.length ? ` Abwerberisiko hoch: ${risiko.map((r) => r.kurz).join(', ')}.` : '');
+    const h = kopf(text, cfo, cfo ? cfo.name + ' · Finanzvorstand' : 'Vorstand', frei.length ? 'engpass' : '');
+    let r = '';
+    const besetzt = `${u.besetzt} von ${u.ressorts.length}`; P('u:besetzt', besetzt); P('u:kostenJahr', geld(u.kostenJahr));
+    r += K.gross([{ label: 'Vorstand besetzt', wert: besetzt, p: 'u:besetzt', ton: frei.length ? 'schlecht' : '' },
+      { label: 'Gehälter im Jahr', wert: geld(u.kostenJahr), p: 'u:kostenJahr', unter: `${P('u:kostenWoche', geld(u.kostenWoche), 'span')} je Woche` }]);
     for (const e of u.offeneEntscheidungen) {
       const roh = st.entscheidungen.find((x) => x.id === e.id);
-      h += `<div class="q-buch q-vorlage"><div class="q-buch-kopf"><span>Sitzungsvorlage</span><b>Frist ${wocheText(st, e.frist)}</b></div><div class="q-zeile"><span class="q-name"><b>${esc(e.titel)}</b><small>${esc(roh?.text ?? '')}</small></span></div><div class="oknoepfe" style="padding:0 14px 12px">${(roh?.optionen ?? []).map((o, i) => `<button class="${i === 0 ? 'gruen' : ''}" data-a="entscheiden" data-v="${e.id}" data-o="${o.id}">${esc(o.label)}</button>`).join('')}</div></div>`;
+      r += K.abschnitt('Sitzungsvorlage', 'Frist ' + wocheText(st, e.frist));
+      r += `<p class="hw-vorlage">${esc(e.titel)}</p>${roh?.text ? `<p class="hw-lese hw-leise">${esc(roh.text)}</p>` : ''}`;
+      r += `<div class="hw-knoepfe zweispaltig">${(roh?.optionen ?? []).map((o, i) => K.knopf(o.label, `data-a="entscheiden" data-v="${esc(e.id)}" data-o="${esc(o.id)}"`, i === 0 ? '' : 'zweit')).join('')}</div>`;
     }
-    const platz = (r) => {
-      const p = r.person;
-      let x = `<button class="vkarte q-platz ${p ? '' : 'leer'}" data-a="profil" data-v="${r.id}"><span class="vbild">${p ? portraet(p.portraet, 56) : '<span class="q-stuhl" aria-hidden="true"></span>'}</span><span class="vtext"><b>${r.kurz}</b><small title="${esc(r.titel)}">${esc(RESSORT_KURZ[r.id] ?? r.titel)}</small>${p ? P(`r:${r.id}:name`, p.name, 'em') : '<em class="frei">Platz frei, einstellen</em>'}</span>`;
-      if (p) x += `<span class="vmini" aria-label="Führung ${p.fuehrung}, Fachwissen ${p.fachwissen}, Loyalität ${p.loyalitaet}"><span><i style="width:${p.fuehrung}%"></i></span><span><i style="width:${p.fachwissen}%"></i></span><span><i style="width:${p.loyalitaet}%"></i></span></span><span class="ampel a-${r.risikoAmpel}" title="Abwerberisiko ${RISIKO[r.risikoAmpel]}"></span>`;
-      return x + '</button>';
-    };
-    const links = u.ressorts.filter((_, i) => i % 2 === 0), rechts = u.ressorts.filter((_, i) => i % 2 === 1);
-    h += `<div class="q-buch"><div class="q-buch-kopf"><span>Sitzungstisch</span><b>Platz antippen</b></div><div class="q-tisch"><div class="q-seite">${links.map(platz).join('')}</div><div class="q-tafel" aria-hidden="true"></div><div class="q-seite">${rechts.map(platz).join('')}</div></div>
-      <div class="legende" style="padding:0 14px 10px">Balken: Führung, Fachwissen, Loyalität · Punkt: Abwerberisiko</div></div>`;
+    r += K.abschnitt('Ressorts', 'antippen für Profil');
+    r += K.liste(u.ressorts.map((x) => {
+      const p = x.person;
+      return `<button type="button" class="hw-zeile" data-a="profil" data-v="${x.id}">${p ? figurKlein(portraet(p.portraet, 56)) : '<span class="hw-figur leer" aria-hidden="true"></span>'}`
+        + `<span class="hw-was">${x.kurz} · ${esc(x.titel)}<small>${p ? P(`r:${x.id}:name`, p.name, 'span') : '<span class="hw-schlecht">Platz frei, einstellen</span>'}</small></span>`
+        + (p ? `<span class="hw-wert${x.risikoAmpel === 'rot' ? ' schlecht' : x.risikoAmpel === 'gelb' ? ' achtung' : ''}">Risiko ${RISIKO[x.risikoAmpel]}<small>Führung ${p.fuehrung} · Fach ${p.fachwissen}</small></span>` : '')
+        + '<span class="hw-pfeil" aria-hidden="true">›</span></button>';
+    }));
     const ls = u.letzteSitzung;
-    h += '<div class="q-buch"><div class="q-buch-kopf"><span>Letzte Sitzung</span><b>' + (ls ? wocheText(st, ls.woche) : '') + '</b></div>';
-    if (!ls) h += '<div class="q-leer"><b>Noch keine Sitzung.</b>Der Vorstand tagt einmal im Quartal.</div>';
+    const naechste = `<p class="hw-lese hw-leise hw-unterzeile">Nächste Sitzung ${P('u:sitzung', wocheText(st, u.naechsteSitzung), 'span')}</p>`;
+    r += K.abschnitt('Letzte Sitzung', ls ? wocheText(st, ls.woche) : '');
+    if (!ls) r += K.leer('Der Vorstand tagt einmal im Quartal.', 'Noch keine Sitzung') + naechste;
     else {
-      for (const b of ls.berichte) h += `<div class="q-zeile"><span class="q-name">${E.RESSORT_INFO?.[b.ressort]?.kurz ?? b.ressort}${b.name ? ` · ${esc(b.name)}` : ''}<small>${esc(b.text)}</small></span></div>`;
-      if (ls.thema) h += `<div class="q-zeile"><span class="q-name">Beschluss: ${esc(ls.thema.titel)}<small>${esc(ls.thema.ergebnis ?? 'offen')}</small></span></div>`;
+      r += K.liste([...ls.berichte.map((b) => K.zeile({ was: `${E.RESSORT_INFO?.[b.ressort]?.kurz ?? b.ressort}${b.name ? ' · ' + esc(b.name) : ''}`, unter: esc(b.text) })),
+        ...(ls.thema ? [K.zeile({ was: 'Beschluss: ' + esc(ls.thema.titel), unter: esc(ls.thema.ergebnis ?? 'offen') })] : [])]) + naechste;
     }
-    h += '</div>';
-    for (const b of u.boosts) h += `<div class="olief">${esc(b.text)} wirkt bis ${wocheText(st, b.bis)}</div>`;
-    h += '</div>';
-    return { titel: 'Vorstand', unter: `Du bist CEO · ${u.besetzt} von ${u.ressorts.length} Ressorts besetzt · KW ${kwVon(st.woche)}`, html: h };
+    for (const b of u.boosts) r += K.hinweis(`${esc(b.text)} wirkt bis ${wocheText(st, b.bis)}.`, 'gut');
+    return { titel: 'Vorstand', unter: `Du bist CEO · KW ${kwVon(st.woche)}`, html: h + K.rumpf(r) + zentraleReiter('vorstand') };
   }
 
-  // ─────────────────────────── Profil
+  // ─────────────────────────── Profil (Coffee 28)
   function profil(P) {
     const st = s(), r = E.vorstandProfil(st, ui.ressort);
     if (!r) { ui.seite = 'uebersicht'; return uebersicht(P); }
     const p = r.person, id = r.id;
-    let h = '<button class="zurueck" data-a="seite" data-v="uebersicht">‹ Vorstand</button>';
+    let x = K.knoepfe(K.knopf('‹ Vorstand', 'data-a="seite" data-v="uebersicht"', 'text'));
+    const wirkung = K.abschnitt('Wirkung auf die Abteilungen') + K.liste(r.abteilungen.map((a) => K.zeile({ was: esc(a.name), wert: P(`p:${id}:abt:${a.id}`, pz(a.faktor), 'span'), ton: a.faktor < 1 ? 'schlecht' : '' })));
     if (!p) {
-      h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(null, 120)}</span><div><b class="vname">${r.kurz} unbesetzt</b><small>${esc(r.titel)}</small><div class="olief">${esc(r.zustaendig)}</div>${r.vakantSeit !== undefined ? `<div class="olief warnung">vakant seit ${wocheText(st, r.vakantSeit)}</div>` : ''}</div></div>`;
-      h += `<div class="olief">Ohne ${r.kurz} wirken die Abteilungen schwächer: ${r.abteilungen.map((a) => `${esc(a.name)} ${P(`p:${id}:abt:${a.id}`, pz(a.faktor), 'b')}`).join(' · ')}. Keine Delegation möglich.</div></div>`;
-      h += `<button class="breit gruen" data-a="einstellen" data-v="${id}">${P(`p:${id}:kandidaten`, `${r.kandidatenAnzahl} Kandidaten ansehen`, 'span')}</button>`;
-      return { titel: `${r.kurz} einstellen`, unter: esc(r.zustaendig), html: h };
+      const h = kopf(`<b>${r.kurz} ist unbesetzt.</b> Ohne Führung ist keine Delegation möglich.`, null, r.titel, 'engpass');
+      x += K.abschnitt(r.kurz + ' · ' + r.titel) + personBlock(null, P, 'p:' + id);
+      x += `<p class="hw-lese hw-leise">${esc(r.zustaendig)}${r.vakantSeit !== undefined ? ' · vakant seit ' + wocheText(st, r.vakantSeit) : ''}</p>`;
+      P(`p:${id}:kandidaten`, `${r.kandidatenAnzahl} Kandidaten ansehen`);
+      x += K.knoepfe(K.knopf(`${r.kandidatenAnzahl} Kandidaten ansehen`, `data-a="einstellen" data-v="${id}"`, 'breit'));
+      x += wirkung;
+      return { titel: `${r.kurz} einstellen`, unter: r.titel, html: h + K.rumpf(x) + zentraleReiter('vorstand') };
     }
-    h += `<div class="karte vprofil"><div class="vkopf"><span class="vbild gross">${portraet(p.portraet, 120)}</span><div><b class="vname">${P(`p:${id}:name`, p.name, 'span')}</b><small>${esc(r.titel)}</small>`;
-    h += `<div class="vseit"><span>${r.kurz} seit</span>${P(`p:${id}:seit`, wocheText(st, p.seitWoche))}</div>${p.gewachsen ? '<span class="chip grau">aus dem Haus gewachsen</span>' : ''}${p.gehtWoche !== undefined ? `<span class="chip warn">geht ${wocheText(st, p.gehtWoche)}</span>` : ''}</div></div>`;
-    h += `<div class="faehigkeiten"><div class="vtitel">Fähigkeiten</div>${faehigkeit('Führung', p.fuehrung, P(`p:${id}:fuehrung`, String(p.fuehrung)))}${faehigkeit('Fachwissen', p.fachwissen, P(`p:${id}:fachwissen`, String(p.fachwissen)))}${faehigkeit('Loyalität', p.loyalitaet, P(`p:${id}:loyalitaet`, String(p.loyalitaet)))}</div>`;
-    if (r.vorgeschichte) h += `<div class="olief">${esc(r.vorgeschichte)}</div>`;
-    h += `<div class="olief">Wirkung auf ${r.abteilungen.map((a) => `${esc(a.name)} ${P(`p:${id}:abt:${a.id}`, pz(a.faktor), 'b')}`).join(' · ')} · Abwerberisiko im Jahr ${P(`p:${id}:risiko`, pz(r.risiko), 'b')}<span class="ampel a-${r.risikoAmpel}"></span></div></div>`;
-    // Delegation
-    h += '<div class="karte"><div class="khead">Delegation<small>die Ressort-KI entscheidet in der Güte des Fachwissens</small></div>';
-    for (const d of r.delegationen) h += schalter(d.an, `data-a="delegation" data-v="${d.id}"`, esc(d.label), esc(d.beschreibung));
-    h += '</div>';
-    // Gehalt und Boni
-    h += '<div class="karte steuerung"><div class="khead">Vergütung</div>';
-    h += regler('Jahresgehalt', stepper('gehalt', P(`p:${id}:gehalt`, geld(p.gehalt)), P(`p:${id}:gehaltProzent`, `${r.gehaltProzent >= 0 ? '+' : '−'}${Math.abs(r.gehaltProzent)} % zur Forderung von ${geld(p.gehaltsforderung)}`, 'i')), `Schritt ${geld(r.gehaltsSchritt)}`);
+    const geht = p.gehtWoche !== undefined;
+    const satz = geht ? `<b>Ich gehe ${wocheText(st, p.gehtWoche)}.</b>` : (r.gehaltProzent ?? 0) < 0 ? `<b>Mein Gehalt liegt ${Math.abs(r.gehaltProzent)} % unter meiner Forderung.</b>`
+      : r.risikoAmpel === 'rot' ? '<b>Andere Häuser werben um mich.</b>' : `<b>${esc(r.zustaendig)}: alles im Plan.</b>`;
+    const h = kopf(satz, p, p.name + ' · ' + r.kurz, geht || r.risikoAmpel === 'rot' ? 'engpass' : '');
+    x += K.abschnitt(r.kurz + ' · ' + r.titel);
+    x += personBlock(p, P, 'p:' + id);
+    x += `<div class="hw-felder">${K.feld(r.kurz + ' seit', P(`p:${id}:seit`, wocheText(st, p.seitWoche), 'b', ' class="hw-feldwert"') + `<small class="hw-feldunter">${p.gewachsen ? 'aus dem Haus gewachsen' : 'von außen geholt'}</small>`)}`
+      + K.feld('Abwerberisiko', P(`p:${id}:risiko`, pz(r.risiko), 'b', ` class="hw-feldwert${r.risikoAmpel === 'rot' ? ' hw-schlecht' : ''}"`) + `<small class="hw-feldunter">im Jahr, ${RISIKO[r.risikoAmpel]}</small>`) + '</div>';
+    if (r.vorgeschichte) x += `<p class="hw-lese hw-leise hw-unterzeile">${esc(r.vorgeschichte)}</p>`;
+    x += `<div data-vorstand="verguetung">` + K.abschnitt('Vergütung', 'Schritt ' + geld(r.gehaltsSchritt));
+    x += K.feld('Jahresgehalt', K.stepper({ wert: geld(p.gehalt), unter: `${vorzeichen(r.gehaltProzent ?? 0)} % zur Forderung von ${geld(p.gehaltsforderung)}`, label: 'Jahresgehalt',
+      attrMinus: 'data-a="gehalt" data-v="-1"', attrPlus: 'data-a="gehalt" data-v="1"', minusAus: p.gehalt - r.gehaltsSchritt < 0 }));
     const halteAnteil = p.haltebonus > 0 ? Math.round((p.haltebonus / Math.max(1, p.gehalt)) * 4) / 4 : 0;
-    h += regler('Haltebonus über 52 Wochen', segment('haltebonus', halteAnteil, HALTE) + `<small class="rfuss">${p.haltebonus > 0 ? `${P(`p:${id}:haltebonus`, geld(p.haltebonus), 'i')} bis ${p.halteBis !== undefined ? wocheText(st, p.halteBis) : 'offen'}, senkt das Abwerberisiko` : 'Anteil vom Jahresgehalt, in Raten ausgezahlt'}</small>`, 'vom Jahresgehalt');
-    h += regler('Erfolgsbonus bei Planerfüllung', segment('erfolgsbonus', Math.round(p.erfolgsbonus * 10) / 10, ERFOLG), 'vom Jahresgehalt je Jahr');
-    h += '</div>';
-    if (r.protokoll.length) {
-      h += '<div class="karte"><div class="khead">Entscheidungen im Ressort</div>';
-      for (const x of [...r.protokoll].reverse().slice(0, 6)) h += `<div class="zeile"><span class="qm">KW ${kwVon(x.woche)}</span><span class="was">${esc(x.text)}</span></div>`;
-      h += '</div>';
-    }
-    if (ui.entlassen) h += `<div class="oknoepfe unten2"><button class="rot" data-a="entlassenJa">Entlassen, Abfindung ${P(`p:${id}:abfindung`, geld(r.abfindung ?? 0), 'span')}</button><button data-a="entlassenNein">Behalten</button></div>`;
-    else h += `<div class="oknoepfe unten2"><button class="rot" data-a="entlassen">Entlassen</button></div>`;
-    return { titel: `${r.kurz} Profil`, unter: `${esc(r.titel)} · ${esc(r.zustaendig)}`, html: h };
+    x += `<div class="hw-abstand"></div>` + K.feld('Haltebonus über 52 Wochen', K.seg(HALTE, halteAnteil, (v) => `data-a="haltebonus" data-v="${v}"`));
+    x += `<p class="hw-lese hw-leise hw-unterzeile">${p.haltebonus > 0 ? `${P(`p:${id}:haltebonus`, geld(p.haltebonus), 'span')} bis ${p.halteBis !== undefined ? wocheText(st, p.halteBis) : 'offen'}, senkt das Abwerberisiko` : 'Anteil vom Jahresgehalt, in Raten ausgezahlt'}</p>`;
+    x += `<div class="hw-abstand"></div>` + K.feld('Erfolgsbonus bei Planerfüllung', K.seg(ERFOLG, Math.round(p.erfolgsbonus * 10) / 10, (v) => `data-a="erfolgsbonus" data-v="${v}"`)) + '</div>';
+    x += K.abschnitt('Delegation', 'nach Fachwissen');
+    x += r.delegationen.map((d) => K.schalter({ text: d.label, unter: d.beschreibung, an: d.an, attr: `data-a="delegation" data-v="${d.id}"` })).join('');
+    x += wirkung;
+    if (r.protokoll.length) x += K.abschnitt('Entscheidungen im Ressort') + K.liste([...r.protokoll].reverse().slice(0, 6).map((q) => K.zeile({ was: esc(q.text), unter: 'KW ' + kwVon(q.woche) })));
+    x += ui.entlassen
+      ? K.hinweis(`Entlassen kostet ${P(`p:${id}:abfindung`, geld(r.abfindung ?? 0), 'b')} Abfindung.`, 'achtung') + `<div class="hw-knoepfe zweispaltig">${K.knopf('Entlassen', 'data-a="entlassenJa" data-gefahr', 'gefahr')}${K.knopf('Behalten', 'data-a="entlassenNein"', 'zweit')}</div>`
+      : K.knoepfe(K.knopf('Entlassen', 'data-a="entlassen" data-gefahr', 'gefahr breit'));
+    return { titel: `${r.kurz} Profil`, unter: p.name, html: h + K.rumpf(x) + zentraleReiter('vorstand') };
   }
 
-  // ─────────────────────────── Einstellen
+  // ─────────────────────────── Einstellen (Karussell wie Coffee 26, Angebot wie Coffee 28)
   function einstellen(P) {
     const st = s(), L = E.kandidaten(st, ui.ressort);
     if (!L) { ui.seite = 'uebersicht'; return uebersicht(P); }
-    let h = `<button class="zurueck" data-a="profil" data-v="${L.ressort}">‹ ${L.kurz}</button>`;
-    if (L.besetzt) h += '<div class="olief warnung">Das Ressort ist besetzt. Erst entlassen, dann neu besetzen.</div>';
+    const zurueck = K.knoepfe(K.knopf('‹ ' + L.kurz, `data-a="profil" data-v="${L.ressort}"`, 'text'));
     if (!L.kandidaten.length) {
-      h += '<div class="karte"><div class="zeile grau">Gerade kein Kandidat am Markt. Neue Kandidaten kommen mit den Wochen.</div></div>';
-      return { titel: `${L.kurz} einstellen`, unter: esc(L.titel), html: h };
+      const h = kopf('<b>Gerade kein Kandidat am Markt.</b> Neue Kandidaten kommen mit den Wochen.', null, 'Personalberatung');
+      return { titel: `${L.kurz} einstellen`, unter: L.titel, html: h + K.rumpf(zurueck + (L.besetzt ? K.hinweis('Das Ressort ist besetzt. Erst entlassen, dann neu besetzen.', 'achtung') : '')) + zentraleReiter('vorstand') };
     }
     ui.k = Math.min(ui.k, L.kandidaten.length - 1);
-    const karten = L.kandidaten.map((k) => `<div class="karte kandidat"><div class="vkopf"><span class="vbild mittel">${portraet(k.portraet, 92)}</span><div><b class="vname">${P(`k:${k.id}:name`, k.name, 'span')}</b><div class="vtitel">Aktuelle Position</div><small>${esc(k.aktuellePosition)}<br>${esc(k.aktuelleFirma)}</small></div></div>
-      <div class="faehigkeiten">${faehigkeit('Führung', k.fuehrung, P(`k:${k.id}:fuehrung`, String(k.fuehrung)))}${faehigkeit('Fachwissen', k.fachwissen, P(`k:${k.id}:fachwissen`, String(k.fachwissen)))}${faehigkeit('Loyalität', k.loyalitaet, P(`k:${k.id}:loyalitaet`, String(k.loyalitaet)))}</div>
-      <div class="owerte"><div><span>Aktuelles Gehalt</span>${P(`k:${k.id}:gehalt`, geld(k.aktuellesGehalt))}</div><div><span>Forderung</span>${P(`k:${k.id}:forderung`, geld(k.gehaltsforderung))}</div><div><span>Chance bei Forderung</span>${P(`k:${k.id}:chance`, pz(k.chanceBeiForderung))}</div></div>
-      <div class="olief">${esc(k.vorgeschichte)}</div></div>`);
-    h += karussell('kandidaten', karten, ui.k, 'kandidat');
     const k = L.kandidaten[ui.k];
     if (!ui.angebot || ui.angebot.id !== k.id) ui.angebot = { id: k.id, gehalt: k.gehaltsforderung, halte: 0, erfolg: 0 };
     const A = ui.angebot, hb = Math.round(A.gehalt * A.halte), ch = E.angebotsChance(st, L.ressort, k.id, A.gehalt, hb, A.erfolg);
-    h += '<div class="karte steuerung"><div class="khead">Angebot an ' + esc(k.name) + '</div>';
-    h += regler('Jahresgehalt', stepper('angebotGehalt', P('a:gehalt', geld(A.gehalt)), `${A.gehalt >= k.gehaltsforderung ? '+' : '−'}${Math.abs(Math.round((A.gehalt / k.gehaltsforderung - 1) * 100))} % zur Forderung`), `Schritt ${geld(L.gehaltsSchritt)}`);
-    h += regler('Haltebonus', segment('angebotHalte', A.halte, HALTE), hb ? geld(hb) : 'vom Jahresgehalt');
-    h += regler('Erfolgsbonus', segment('angebotErfolg', A.erfolg, ERFOLG), 'vom Jahresgehalt');
-    h += `<div class="regler"><div class="rkopf"><b>Annahmechance</b>${P('a:chance', pz(ch))}</div><div class="balken"><span style="width:${(ch * 100).toFixed(0)}%;background:${ch >= 0.6 ? 'var(--gruen)' : ch >= 0.35 ? '#e3a90d' : 'var(--rot)'}"></span></div><small class="rfuss">hängt von Angebot, Lage der Firma und Image ab</small></div>`;
-    h += `</div><div class="oknoepfe unten2"><button class="gruen" data-a="anbieten"${L.besetzt ? ' disabled' : ''}>Angebot machen</button></div>`;
-    return { titel: `${L.kurz} einstellen`, unter: `${esc(L.titel)} · ${L.kandidaten.length} Kandidaten`, html: h };
+    const h = kopf(`<b>${L.kandidaten.length} Kandidaten für ${L.kurz}.</b> Wischen, dann ein Angebot machen.`, null, 'Personalberatung');
+    const karten = L.kandidaten.map((q) => `<div class="hw-kandidat"><div class="hw-kandidat-kopf"><div class="hw-portraet hw-kontur">${portraet(q.portraet, 80)}</div><div><h3 class="hw-person-name">${P(`k:${q.id}:name`, q.name, 'span')}</h3>`
+      + `<p class="hw-lese hw-leise">${esc(q.aktuellePosition)}<br>${esc(q.aktuelleFirma)}</p></div></div>`
+      + `<div class="hw-skalen">${K.skala('Führung', q.fuehrung)}${K.skala('Fachwissen', q.fachwissen)}${K.skala('Loyalität', q.loyalitaet)}</div>`
+      + `<div class="hw-felder">${K.feld('Gehalt heute', P(`k:${q.id}:gehalt`, geld(q.aktuellesGehalt), 'b', ' class="hw-feldwert"'))}${K.feld('Forderung', P(`k:${q.id}:forderung`, geld(q.gehaltsforderung), 'b', ' class="hw-feldwert"') + `<small class="hw-feldunter">Chance ${P(`k:${q.id}:chance`, pz(q.chanceBeiForderung), 'span')}</small>`)}</div>`
+      + `<p class="hw-lese hw-leise hw-unterzeile">${esc(q.vorgeschichte)}</p></div>`);
+    const x = L.besetzt ? K.hinweis('Das Ressort ist besetzt. Erst entlassen, dann neu besetzen.', 'achtung') : '';
+    let y = `<div data-angebot>` + K.abschnitt('Angebot an ' + k.name, 'Schritt ' + geld(L.gehaltsSchritt));
+    y += K.feld('Jahresgehalt', K.stepper({ wert: geld(A.gehalt), unter: `${vorzeichen(Math.round((A.gehalt / k.gehaltsforderung - 1) * 100))} % zur Forderung`, label: 'Jahresgehalt im Angebot',
+      attrMinus: 'data-a="angebotGehalt" data-v="-1"', attrPlus: 'data-a="angebotGehalt" data-v="1"', minusAus: A.gehalt <= L.gehaltsSchritt }));
+    y += `<div class="hw-abstand"></div>` + K.feld('Haltebonus' + (hb ? ' · ' + geld(hb) : ''), K.seg(HALTE, A.halte, (v) => `data-a="angebotHalte" data-v="${v}"`));
+    y += `<div class="hw-abstand"></div>` + K.feld('Erfolgsbonus', K.seg(ERFOLG, A.erfolg, (v) => `data-a="angebotErfolg" data-v="${v}"`));
+    P('a:chance', pz(ch));
+    y += K.gross([{ label: 'Annahmechance', wert: pz(ch), p: 'a:chance', ton: ch >= 0.6 ? 'gut' : ch < 0.35 ? 'schlecht' : '', unter: 'hängt von Angebot, Lage der Firma und Image ab' }]);
+    y += K.knoepfe(K.knopf('Angebot machen', 'data-a="anbieten"', 'breit', L.besetzt)) + '</div>';
+    return { titel: `${L.kurz} einstellen`, unter: `${L.titel} · ${L.kandidaten.length} Kandidaten`,
+      html: h + K.rumpf(zurueck + x) + K.karussell(karten, { aktiv: ui.k, label: 'Kandidaten' }) + K.rumpf(y) + zentraleReiter('vorstand') };
   }
 
   function rendern() {
     const S = werteSammler();
-    if (!da) return { S, r: { titel: 'Vorstand', unter: '', html: '<div class="leise">Die Engine liefert noch keinen Vorstand.</div>' } };
+    if (!da) return { S, r: { titel: 'Vorstand', unter: '', html: K.bereich('zentrale') + G4 + K.rumpf(K.leer('Die Engine liefert noch keinen Vorstand.')) } };
     const r = ui.seite === 'profil' ? profil(S.P) : ui.seite === 'einstellen' ? einstellen(S.P) : uebersicht(S.P);
     return { S, r };
+  }
+  /** Karussell auf Karte ui.k stellen; nach dem Wischen die mittige Karte als Angebotsziel übernehmen. */
+  function karussellStellen() {
+    const k = document.querySelector('#pinhalt .hw-karussell');
+    if (!k) return;
+    const karten = [...k.children];
+    const mitte = (el) => el.offsetLeft + el.offsetWidth / 2;
+    const aktuell = () => { const m = k.scrollLeft + k.clientWidth / 2; let best = 0; karten.forEach((el, i) => { if (Math.abs(mitte(el) - m) < Math.abs(mitte(karten[best]) - m)) best = i; }); return best; };
+    if (karten[ui.k]) k.scrollLeft = Math.max(0, mitte(karten[ui.k]) - k.clientWidth / 2);
+    k.nextElementSibling?.querySelectorAll('i').forEach((p, i) => p.classList.toggle('an', i === ui.k));
+    let t = null;
+    k.addEventListener('scroll', () => { clearTimeout(t); t = setTimeout(() => { if (!k.isConnected || !ui.aktiv) return; const i = aktuell(); if (i !== ui.k) { ui.k = i; zeigen(true); } }, 140); }, { passive: true });
   }
   function zeigen(scrollHalten = false) {
     const sc = document.getElementById('pinhalt').scrollTop;
     const { r } = rendern();
-    ctx.panel(r.titel, r.unter, bereich('zentrale') + '<i class="q31-marke" hidden></i>' + r.html, 'gross'); // Q31
+    ctx.panel(r.titel, r.unter, r.html, 'gross');
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = scrollHalten ? sc : 0;
-    if (ui.seite === 'einstellen') karussellBinden('kandidaten', ui.k, (i) => { if (!ui.aktiv) return; ui.k = i; zeigen(true); });
+    if (ui.seite === 'einstellen') karussellStellen();
   }
   function tun(aktion) {
     const r = E.fuehreAus(s(), aktion);
@@ -195,6 +225,7 @@ export function vorstandModul(ctx) {
   function klick(el) {
     const a = el.dataset.a, v = el.dataset.v;
     const prof = () => E.vorstandProfil(s(), ui.ressort);
+    if (a === 'kandidat') { ui.k = Number(v); return zeigen(true); }
     switch (a) {
       case 'seite': ui.seite = v; ui.entlassen = false; return zeigen();
       case 'profil': ui.seite = 'profil'; ui.ressort = v; ui.entlassen = false; return zeigen();
