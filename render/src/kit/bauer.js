@@ -285,11 +285,12 @@ export function echterBauer(o = {}) {
     'slot:wettbewerber': (S, scene, p) => wettbewerber(S, scene, p),
     'slot:schwester': (S, scene, p) => ERSATZ.schwester(S, scene, p),
     'slot:outlet': (S, scene, p) => {
-      const h = OUTLETS.get(p.standort?.id);
-      if (!h) return { hoehe: 0 };
+      const h0 = OUTLETS.get(p.standort?.id);
+      if (!h0) return { hoehe: 0 };
+      const h = p.grafikLage ? { ...h0, lage: p.grafikLage } : h0;
       const f = fussabdruck(h), { x, z } = imSlot(p, f.w, f.d);
-      p.haus = h;
-      return outlet(S, scene, h, { x, z, ...zustandFuer(h) });
+      p.haus = h0;
+      return outlet(S, scene, h, { x, z, ...zustandFuer(h0) });
     },
   };
 }

@@ -42,9 +42,10 @@ export const ESSEN_KARTE = Object.freeze({
     stadtteil: [[-300, 480], [450, 520]],
     center: [[-330, -260], [-300, -390], [480, 450]],                      // am Limbecker Platz
     rand: [[540, 500], [-400, 520], [560, -360]],
+    fundus: [[-140, 60], [230, -40], [-260, 160]],                       // Nebenlagen am Kern (Innenstadt-Geschäftshaus)
   },
   hq: [[420, 260], [500, 330], [-150, 450]],
   wahrzeichen: [[278.8, -355.4], [190.2, 371.4], [134.6, -103.5], [27.5, -255.6], [-412.6, -375.5], [-41.4, 39.0], [314.0, -160.3]],
   bahnhof: [185, 355], einkauf: [85, 90], start: [110, 250],
-  kameraGrenze: [-450, -420, 620, 600], sicht: 360, kern: [85, 90, 520],
+  kameraGrenze: [-960, -950, 1130, 1130], sicht: 430, kern: [85, 90, 520], detail: [85, 90, 2000],
 });

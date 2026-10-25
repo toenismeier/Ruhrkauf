@@ -4,9 +4,10 @@
 // (Dezimeter, Plan-Koordinaten: x Ost, z Süd, Ursprung so verschoben, dass alles positiv ist).
 // Spielhäuser (Hartwig, Sport, Volkskauf, FUNDUS, Wettbewerber, HQ) bauen die bekannten Kit-Bauer auf Bauplätzen,
 // die echte Gebäude ersetzen. Wände der übrigen Gebäude entstehen zur Laufzeit aus den Außenkanten der LoD2-Dachflächen.
-import { THREE, FARBEN, rng, waehle, baum, heller } from '../basis.js';
+import { THREE, FARBEN, rng, waehle, baum, heller, vertexMat } from '../basis.js';
 import { bauerFuer, dachFlaechenBeimBau } from '../stadt.js';
 import { hqMasse } from '../hq.js';
+import { masseOutlet } from '../outlet.js';
 import { ESSEN_KARTE } from './essen.js';
 import essenDaten from '../../../karten/essen-spiel.json';
 
@@ -14,19 +15,26 @@ const KARTEN = { Essen: { roh: essenDaten, def: ESSEN_KARTE } };
 export const istKartenstadt = (name) => !!KARTEN[name];
 
 const BLICK = new THREE.Vector3(Math.SQRT1_2 * Math.cos(Math.PI / 6), Math.sin(Math.PI / 6), Math.SQRT1_2 * Math.cos(Math.PI / 6));
+// Bodenschichten (Reihenfolge und Namen wie kartenstadt-bauen.py FARBE): Farbe und Höhe über Gelände
 const BODEN = {
-  umland: '#cfc9bc', gehweg: FARBEN.gehweg, platz: '#cbc4b7', fahrbahn: '#7b8188', rad: '#a98a7c', markierung: FARBEN.markierung,
-  gruen: FARBEN.rasen, wasser: FARBEN.wasser, parkplatz: '#9ba1a7', bahnsteig: '#cfc9bd', schotter: '#a39b8e', schiene: '#5b5550',
+  umland: '#cdc6b8', pflaster: '#cfc8ba', gehweg: '#e3dfd6', bord: '#b7b1a6', fahrbahn: '#7b8188', rad: '#a98a7c', markierung: FARBEN.markierung,
+  gruen: FARBEN.rasen, hof: '#b4c49a', wasser: FARBEN.wasser, platz: '#d6d0c4', parkplatz: '#9ba1a7', bahnsteig: '#cfc9bd', schotter: '#a39b8e', schiene: '#5b5550',
 };
-const HOEHE = { umland: -0.02, gehweg: 0, wasser: -0.15, gruen: 0.04, platz: 0.03, parkplatz: 0.05, fahrbahn: 0.07, rad: 0.08, markierung: 0.1, bahnsteig: 0.55, schotter: 0.12 };
-const FL_ART = { 1: 'gruen', 2: 'wasser', 3: 'platz', 4: 'parkplatz', 5: 'bahnsteig', 6: 'schotter' };
+const HOEHE = { umland: -0.03, pflaster: 0, hof: 0.02, wasser: 0.02, gruen: 0.04, platz: 0.03, parkplatz: 0.05, schotter: 0.06, fahrbahn: 0.07, rad: 0.08, markierung: 0.1, gehweg: 0.12, bord: 0.14, bahnsteig: 0.55 };
 const GL_ART = { 1: 'rail', 2: 'light_rail', 3: 'tram' };
 const NETZ_TYP = { 1: 'haupt', 2: 'neben', 3: 'fussgaenger' };
-const ZELLE = 120;
+const ZELLE = 300;   // Raumzellen der Kartengeometrie: wenige Draw Calls auch bei weitestem Zoom
 
 const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; };
 const paare = (a) => { const o = []; for (let i = 0; i < a.length; i += 2) o.push([a[i] / 10, a[i + 1] / 10]); return o; };
-const tripel = (a) => { const o = []; for (let i = 0; i < a.length; i += 3) o.push([a[i] / 10, a[i + 1] / 10, a[i + 2] / 10]); return o; };
+/** base64 → Uint16Array (Little Endian wie numpy '<u2'). */
+function u16(b64) {
+  if (!b64) return new Uint16Array(0);
+  const bin = typeof atob === 'function' ? atob(b64) : Buffer.from(b64, 'base64').toString('binary');
+  const u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return new Uint16Array(u8.buffer);
+}
 const bboxVon = (pts) => { let a = Infinity, b = Infinity, c = -Infinity, d = -Infinity; for (const p of pts) { if (p[0] < a) a = p[0]; if (p[1] < b) b = p[1]; if (p[0] > c) c = p[0]; if (p[1] > d) d = p[1]; } return [a, b, c, d]; };
 function imPolygon(x, z, ring) {
   let drin = false;
@@ -44,17 +52,21 @@ export function kartenDaten(name) {
   if (CACHE.has(name)) return CACHE.get(name);
   const k = KARTEN[name]; if (!k) return null;
   const d = k.roh;
-  const gebaeude = d.gebaeude.map((g, i) => {
-    const boden = tripel(g.b), dach = g.r.map(tripel);
-    const [a, b, c, e] = bboxVon(boden.length ? boden : dach.flat());
-    return { i, id: g.id || 'g' + i, fkt: g.f, dachTyp: g.d, h: g.h / 10, traufe: g.t / 10, boden, dach, bbox: [a, b, c, e], mx: (a + c) / 2, mz: (b + e) / 2, flaeche: (c - a) * (e - b) };
+  const GP = u16(d.gp), GI = u16(d.gi);
+  const punkte3 = (off, n) => { const o = []; for (let j = 0; j < n; j++) { const q = (off + j) * 3; o.push([GP[q] / 10, GP[q + 1] / 10, GP[q + 2] / 10]); } return o; };
+  // Gebäude: [Funktion, Dachform, Höhe, Traufe, Bodenring (Versatz, Anzahl), je Dachfläche (Versatz, Anzahl, Indexversatz, Indexanzahl)]
+  const gebaeude = d.gebaeude.map((e, i) => {
+    const boden = punkte3(e[4], e[5]), dach = [], dachIdx = [];
+    for (let j = 6; j < e.length; j += 4) { dach.push(punkte3(e[j], e[j + 1])); dachIdx.push(GI.subarray(e[j + 2], e[j + 2] + e[j + 3])); }
+    const [a, b, c, f] = bboxVon(boden.length ? boden : dach.flat());
+    return { i, id: 'g' + i, fkt: d.fkt[e[0]] ?? '', dachTyp: String(e[1]), h: e[2] / 10, traufe: e[3] / 10, boden, dach, dachIdx, bbox: [a, b, c, f], mx: (a + c) / 2, mz: (b + f) / 2, flaeche: (c - a) * (f - b) };
   });
+  const BP = u16(d.bp), BI = u16(d.bi), BAUM = u16(d.baeume);
   const r = {
     name, def: k.def, breite: d.breite, tiefe: d.tiefe, ursprung: d.ursprung, lizenz: d.lizenz,
-    fahrbahn: d.fahrbahn.map(paare), rad: d.rad.map(paare), markierung: d.markierung.map(paare),
-    flaechen: d.flaechen.map(([a, p]) => ({ art: FL_ART[a], umriss: paare(p) })),
+    boden: d.boden.map(([f, po, pn, io, inn]) => ({ art: d.farben[f], p: BP.subarray(po * 2, (po + pn) * 2), i: BI.subarray(io, io + inn) })),
     gleise: d.gleise.map(([a, p]) => ({ art: GL_ART[a], punkte: paare(p) })),
-    baeume: paare(d.baeume), gebaeude,
+    baeume: paare(BAUM), gebaeude,
     netz: (d.netz ?? []).map(([typ, breite, spuren, einbahn, a, b, p]) => ({ typ: NETZ_TYP[typ], breite: breite / 10, spuren, einbahn: !!einbahn, a, b, punkte: paare(p) })),
   };
   CACHE.set(name, r);
@@ -140,12 +152,17 @@ export function kartenplan(name, eintrag, hqJson = null) {
   };
   for (const st of eintrag.standorte) {
     const lage = st.lage === 'stadtteil' ? 'b' : st.lage;
-    const liste = def.standorte[st.lage] ?? def.standorte.b;
-    const nr = zaehler[st.lage] = (zaehler[st.lage] ?? -1) + 1;
-    const W = Math.round(st.w ?? 50), D = Math.round(st.d ?? 40);
+    // FUNDUS steht in Kartenstädten als Innenstadt-Geschäftshaus an einer Nebenlage, nicht als Fachmarkt auf der Brache
+    const fundus = st.rolle === 'outlet' && def.standorte.fundus;
+    const schluessel = fundus ? 'fundus' : st.lage;
+    const liste = def.standorte[schluessel] ?? def.standorte.b;
+    const nr = zaehler[schluessel] = (zaehler[schluessel] ?? -1) + 1;
+    const mo = fundus ? masseOutlet({ ...st, lage: 'b' }) : null;
+    const W = Math.round(mo?.w ?? st.w ?? 50), D = Math.round(mo?.d ?? st.d ?? 40);
     const R = bauplatz(liste[nr % liste.length], W, D);
     const typ = ROLLE[st.rolle] ?? 'slot:warenhaus';
     const p = neueParzelle('k-' + st.id, typ, R, st, lage);
+    if (fundus) p.grafikLage = 'b';
     standorte.push({ ...st, lage, parzelle: p.id, typ, block: 'karte' });
   }
   // Zentrale: Gebäude in dieser Stadt und offene Angebote auf eigene Bauplätze
@@ -216,19 +233,66 @@ class Puffer {
   constructor() { this.m = new Map(); }
   tri(farbe, x, z, P, N) {
     const k = farbe + '|' + Math.floor(x / ZELLE) + '|' + Math.floor(z / ZELLE);
-    let e = this.m.get(k); if (!e) this.m.set(k, e = { farbe, p: [], n: [] });
-    for (const v of P) e.p.push(v); for (const v of N) e.n.push(v);
+    let e = this.m.get(k); if (!e) this.m.set(k, e = { farbe, p: [], n: [], len: 0 });
+    e.p.push(P); e.n.push(N); e.len += P.length;
+  }
+  /** Direkt als Meshes mit Vertexfarben je Raumzelle in die Szene (wie KompaktSammler.bauen, ohne dessen Kopie und Prüfung). */
+  bauen(scene) {
+    const zellen = new Map(), c = new THREE.Color();
+    for (const [k, e] of this.m) {
+      if (!e.len) continue;
+      const zk = k.slice(k.indexOf('|') + 1);
+      let z = zellen.get(zk); if (!z) zellen.set(zk, z = { len: 0, teile: [] });
+      z.len += e.len; z.teile.push(e);
+    }
+    for (const z of zellen.values()) {
+      const P = new Float32Array(z.len), N = new Float32Array(z.len), C = new Float32Array(z.len);
+      let o = 0;
+      for (const e of z.teile) {
+        c.set(e.farbe);
+        const start = o;
+        for (let i = 0; i < e.p.length; i++) { P.set(e.p[i], o); N.set(e.n[i], o); o += e.p[i].length; }
+        for (let i = start; i < o; i += 3) { C[i] = c.r; C[i + 1] = c.g; C[i + 2] = c.b; }
+      }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(P, 3));
+      g.setAttribute('normal', new THREE.BufferAttribute(N, 3));
+      g.setAttribute('color', new THREE.BufferAttribute(C, 3));
+      const m = new THREE.Mesh(g, vertexMat()); m.castShadow = true; m.receiveShadow = true; m.userData.karte = true;
+      scene.add(m);
+    }
+    this.m.clear();
   }
   abgeben(S) {
     for (const e of this.m.values()) {
-      if (!e.p.length) continue;
+      if (!e.len) continue;
+      const P = new Float32Array(e.len), N = new Float32Array(e.len);
+      let o = 0;
+      for (let i = 0; i < e.p.length; i++) { P.set(e.p[i], o); N.set(e.n[i], o); o += e.p[i].length; }
       const g = new THREE.BufferGeometry();
-      g.setAttribute('position', new THREE.Float32BufferAttribute(e.p, 3));
-      g.setAttribute('normal', new THREE.Float32BufferAttribute(e.n, 3));
+      g.setAttribute('position', new THREE.BufferAttribute(P, 3));
+      g.setAttribute('normal', new THREE.BufferAttribute(N, 3));
       S.add(g, e.farbe);
     }
     this.m.clear();
   }
+}
+
+/** Baum aus einer einmal gebauten Vorlage (Stamm + Krone wie basis.baum), direkt in den Puffer: kein Geometrieobjekt je Baum. */
+let BAUM_VORLAGE = null;
+function baumSchnell(B, x, z, r, s = 1) {
+  if (!BAUM_VORLAGE) {
+    const stamm = new THREE.BoxGeometry(0.5, 2.2, 0.5).toNonIndexed(); stamm.translate(0, 1.3, 0);
+    const krone = new THREE.IcosahedronGeometry(2.1, 0).toNonIndexed(); krone.translate(0, 3.6, 0);
+    BAUM_VORLAGE = [stamm, krone].map((g) => ({ p: g.attributes.position.array, n: g.attributes.normal.array }));
+  }
+  const k = s * (0.85 + r() * 0.3), krone = waehle(r, FARBEN.baum);
+  const st = BAUM_VORLAGE[0], kr = BAUM_VORLAGE[1];
+  const P1 = new Array(st.p.length), P2 = new Array(kr.p.length);
+  for (let i = 0; i < st.p.length; i += 3) { P1[i] = x + st.p[i] * s; P1[i + 1] = st.p[i + 1] * s; P1[i + 2] = z + st.p[i + 2] * s; }
+  for (let i = 0; i < kr.p.length; i += 3) { P2[i] = x + kr.p[i] * k; P2[i + 1] = (kr.p[i + 1] - 3.6) * k + 3.6 * s; P2[i + 2] = z + kr.p[i + 2] * k; }
+  B.tri(FARBEN.stamm, x, z, P1, st.n);
+  B.tri(krone, x, z, P2, kr.n);
 }
 
 function boden(B, umriss, y, farbe) {
@@ -245,10 +309,26 @@ function boden(B, umriss, y, farbe) {
   B.tri(farbe, pts[0][0], pts[0][1], P, N);
 }
 
-/** Dachfläche (eben, 3D, Punkte [x, z, y]) mit Normale nach oben. */
-function dachflaeche(B, ring, farbe) {
+/** Fertig triangulierte Bodenschicht (kartenstadt-bauen.py): Punkte in Dezimetern, Indizes je Stück. */
+function bodenStueck(B, st) {
+  const y = HOEHE[st.art] ?? 0.03, farbe = BODEN[st.art] ?? BODEN.pflaster, p = st.p, idx = st.i;
+  if (!idx.length) return;
+  const P = new Array(idx.length * 3), N = new Array(idx.length * 3);
+  for (let t = 0; t < idx.length; t += 3) {
+    const a = idx[t] * 2, b = idx[t + 1] * 2, c = idx[t + 2] * 2;
+    const ax = p[a] / 10, az = p[a + 1] / 10, bx = p[b] / 10, bz = p[b + 1] / 10, cx = p[c] / 10, cz = p[c + 1] / 10;
+    const ny = (bz - az) * (cx - ax) - (bx - ax) * (cz - az);
+    const q = ny >= 0 ? [ax, az, bx, bz, cx, cz] : [ax, az, cx, cz, bx, bz];
+    for (let k = 0; k < 3; k++) { const o = (t + k) * 3; P[o] = q[k * 2]; P[o + 1] = y; P[o + 2] = q[k * 2 + 1]; N[o] = 0; N[o + 1] = 1; N[o + 2] = 0; }
+  }
+  B.tri(farbe, p[0] / 10, p[1] / 10, P, N);
+}
+
+/** Dachfläche (eben, 3D, Punkte [x, z, y]) mit Normale nach oben; idx: vorberechnete Dreiecke (sonst triangulieren). */
+function dachflaeche(B, ring, farbe, vorIdx = null) {
   let pts = ring;
-  if (pts.length > 1 && pts[0][0] === pts.at(-1)[0] && pts[0][1] === pts.at(-1)[1] && pts[0][2] === pts.at(-1)[2]) pts = pts.slice(0, -1);
+  // Vorberechnete Indizes beziehen sich auf den gespeicherten (offenen) Ring: dann nichts abschneiden
+  if (!vorIdx && pts.length > 1 && pts[0][0] === pts.at(-1)[0] && pts[0][1] === pts.at(-1)[1] && pts[0][2] === pts.at(-1)[2]) pts = pts.slice(0, -1);
   if (pts.length < 3) return;
   let nx = 0, ny = 0, nz = 0;
   for (let i = 0; i < pts.length; i++) {
@@ -259,8 +339,12 @@ function dachflaeche(B, ring, farbe) {
   nx /= l; ny /= l; nz /= l;
   if (ny < 0) { nx = -nx; ny = -ny; nz = -nz; }
   const ax = Math.abs(nx), ay = Math.abs(ny), az = Math.abs(nz);
-  const proj = ay >= ax && ay >= az ? (p) => new THREE.Vector2(p[0], p[1]) : ax >= az ? (p) => new THREE.Vector2(p[1], p[2]) : (p) => new THREE.Vector2(p[0], p[2]);
-  const tri = THREE.ShapeUtils.triangulateShape(pts.map(proj), []);
+  let tri;
+  if (vorIdx) { tri = []; for (let i = 0; i + 2 < vorIdx.length; i += 3) tri.push([vorIdx[i], vorIdx[i + 1], vorIdx[i + 2]]); }
+  else {
+    const proj = ay >= ax && ay >= az ? (p) => new THREE.Vector2(p[0], p[1]) : ax >= az ? (p) => new THREE.Vector2(p[1], p[2]) : (p) => new THREE.Vector2(p[0], p[2]);
+    tri = THREE.ShapeUtils.triangulateShape(pts.map(proj), []);
+  }
   const P = [], N = [];
   for (const t of tri) {
     const q = t.map((i) => pts[i]);
@@ -317,11 +401,11 @@ function fensterAufWand(B, g, gs, ax, az, bx, bz, oben, nx, nz, kern) {
 }
 
 /** Ein LoD2-Gebäude: Dachflächen, Wände aus den Außenkanten der Dachflächen, Fenster auf den sichtbaren Wänden. */
-function gebaeudeBauen(B, S, g, kern) {
+function gebaeudeBauen(B, S, g, kern, detail = true) {
   const gs = gestalt(g);
   if (gs.art === 'dach' || gs.art === 'bruecke') {
     const farbe = gs.art === 'bruecke' ? '#8a8f94' : '#a7adb2';
-    for (const dr of g.dach) dachflaeche(B, dr, farbe);
+    g.dach.forEach((dr, j) => dachflaeche(B, dr, farbe, g.dachIdx?.[j]));
     if (gs.art === 'dach' && g.boden.length > 2) {
       const ring = g.boden, h = g.traufe || g.h, schritt = Math.max(12, Math.hypot(g.bbox[2] - g.bbox[0], g.bbox[3] - g.bbox[1]) / 8);
       let weg = 0;
@@ -336,7 +420,7 @@ function gebaeudeBauen(B, S, g, kern) {
   // Außenkanten: Kanten der Dachpolygone, die in keinem zweiten Dachpolygon desselben Gebäudes vorkommen
   const schl = (p) => Math.round(p[0] * 10) + ',' + Math.round(p[1] * 10) + ',' + Math.round(p[2] * 10);
   const zahl = new Map(), kanten = [];
-  for (const dr of g.dach) {
+  g.dach.forEach((dr, j) => {
     const pts = offen(dr);
     for (let i = 0; i < pts.length; i++) {
       const a = pts[i], b = pts[(i + 1) % pts.length];
@@ -344,8 +428,8 @@ function gebaeudeBauen(B, S, g, kern) {
       zahl.set(k, (zahl.get(k) ?? 0) + 1);
       kanten.push([k, a, b]);
     }
-    dachflaeche(B, dr, gs.dach);
-  }
+    dachflaeche(B, dr, gs.dach, g.dachIdx?.[j]);
+  });
   const mx = g.mx, mz = g.mz;
   for (const [k, a, b] of kanten) {
     if (zahl.get(k) > 1) continue;
@@ -356,7 +440,7 @@ function gebaeudeBauen(B, S, g, kern) {
     if (nx * ((a[0] + b[0]) / 2 - mx) + nz * ((a[1] + b[1]) / 2 - mz) < 0) { nx = -nx; nz = -nz; }
     if (nx * BLICK.x + nz * BLICK.z <= 0.02) continue; // Rückseiten sieht die feste Kamera nie
     wandQuad(B, gs.fassade, a[0], a[1], b[0], b[1], 0, a[2], 0, b[2], nx, nz);
-    fensterAufWand(B, g, gs, a[0], a[1], b[0], b[1], Math.min(a[2], b[2], g.traufe > 2 ? g.traufe : g.h), nx, nz, kern);
+    if (detail) fensterAufWand(B, g, gs, a[0], a[1], b[0], b[1], Math.min(a[2], b[2], g.traufe > 2 ? g.traufe : g.h), nx, nz, kern);
   }
   // Dachaufbauten auf großen Flachdächern
   if (gs.flach && g.h > 6 && g.flaeche > 180 && g.boden.length > 2) {
@@ -391,28 +475,16 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
   const [ox, oz] = K.ursprung, [kx, kz] = [def.kern[0] + ox, def.kern[1] + oz];
   const kern = (x, z) => Math.hypot(x - kx, z - kz) < def.kern[2];
   const B = new Puffer();
-  const t0 = S.anzahl;
+  const t0 = S.anzahl, z0 = performance.now(); const zeit = {};
   // Umland bis weit über den Kartenrand, damit die Kamera nie ins Leere sieht
   boden(B, [[-1200, -1200], [K.breite + 1200, -1200], [K.breite + 1200, K.tiefe + 1200], [-1200, K.tiefe + 1200]], HOEHE.umland, BODEN.umland);
-  boden(B, [[0, 0], [K.breite, 0], [K.breite, K.tiefe], [0, K.tiefe]], HOEHE.gehweg, BODEN.gehweg);
-  for (const fl of K.flaechen) if (fl.art !== 'bahnsteig') boden(B, fl.umriss, HOEHE[fl.art] ?? 0.03, BODEN[fl.art] ?? BODEN.platz);
-  for (const p of K.fahrbahn) boden(B, p, HOEHE.fahrbahn, BODEN.fahrbahn);
-  for (const p of K.rad) boden(B, p, HOEHE.rad, BODEN.rad);
-  for (const p of K.markierung) boden(B, p, HOEHE.markierung, BODEN.markierung);
-  for (const fl of K.flaechen) if (fl.art === 'bahnsteig') boden(B, fl.umriss, HOEHE.bahnsteig, BODEN.bahnsteig);
+  boden(B, [[0, 0], [K.breite, 0], [K.breite, K.tiefe], [0, K.tiefe]], HOEHE.pflaster, BODEN.pflaster);
+  for (const st of K.boden) bodenStueck(B, st);
   for (const g of K.gleise) gleis(S, g.punkte, g.art);
-  // Bäume: OSM-Einzelbäume und lockere Bepflanzung der Grünflächen
+  // Bäume: OSM-Einzelbäume, Grünflächen und Innenhöfe (Punkte vorberechnet in kartenstadt-bauen.py)
   const r = rng(77);
-  for (const [x, z] of K.baeume) baum(S, x, z, r, 1.15);
-  for (const fl of K.flaechen) {
-    if (fl.art !== 'gruen') continue;
-    const [a, b, c, d] = bboxVon(fl.umriss), rr = rng(hash(a + ',' + b));
-    for (let x = a + 8; x < c - 4; x += 16) for (let z = b + 8; z < d - 4; z += 16) {
-      const px = x + (rr() - 0.5) * 9, pz = z + (rr() - 0.5) * 9;
-      if (rr() < 0.75 && imPolygon(px, pz, fl.umriss)) baum(S, px, pz, rr, 1.1 + rr() * 0.4);
-    }
-  }
-  const t1 = S.anzahl;
+  for (const [x, z] of K.baeume) baumSchnell(B, x, z, r, 1.05 + r() * 0.35);
+  const t1 = S.anzahl; zeit.boden = performance.now() - z0;
   // Bauplätze der Spielhäuser freiräumen: echte Gebäude, deren Mitte auf einer Parzelle liegt, entfallen
   const platz = plan.parzellen.filter((p) => !p.leer);
   // Echte Gebäude entfallen, wenn ihre Mitte auf der Parzelle liegt oder mehr als ein Viertel ihrer Fläche darauf
@@ -426,8 +498,9 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
     const kx = Math.min(c, p.x + p.w) - Math.max(a, p.x), kz = Math.min(d, p.z + p.d) - Math.max(b, p.z);
     return kx > 1.5 && kz > 1.5 && kx * kz > 0.04 * Math.max(1, (c - a) * (d - b));
   });
-  for (const g of K.gebaeude) if (frei(g)) gebaeudeBauen(B, S, g, kern(g.mx, g.mz));
-  B.abgeben(S);
+  const [dx, dz, dr] = [def.detail?.[0] ?? def.kern[0], def.detail?.[1] ?? def.kern[1], def.detail?.[2] ?? 900];
+  for (const g of K.gebaeude) if (frei(g)) gebaeudeBauen(B, S, g, kern(g.mx, g.mz), Math.hypot(g.mx - (dx + ox), g.mz - (dz + oz)) < dr);
+  zeit.gebaeude = performance.now() - z0 - zeit.boden; if (scene) B.bauen(scene); else B.abgeben(S); zeit.abgeben = performance.now() - z0 - zeit.boden - zeit.gebaeude;
   const hoehen = new Map(), dachFlaechen = [];
   let maxH = 20;
   if (!o.ohneHaeuser) for (const p of plan.parzellen) {
@@ -437,6 +510,8 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
     const h = ergebnis?.hoehe ?? 12;
     hoehen.set(p.id, h); maxH = Math.max(maxH, h);
   }
+  zeit.haeuser = performance.now() - z0 - zeit.boden - zeit.gebaeude - zeit.abgeben;
+  if (typeof window !== 'undefined') window.kartenZeit = zeit;
   return {
     box: new THREE.Box3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(plan.breite, maxH, plan.tiefe)),
     hoehen, dachFlaechen, teileStrasse: t1 - t0, teileHaeuser: S.anzahl - t1, instanzen: 0, drawCallsInstanzen: 0,

@@ -48,6 +48,9 @@ export function verkehrsnetz(plan) {
     }
   }
   // Die am Stadtplan hinterlegten Kreuzungsarme verknüpfen die vorhandenen gerichteten Spuren.
+  // Kreuzungen je Straßenstück einmal nachschlagen (vorher Suche über alle Kreuzungen je Spur: quadratisch bei Kartenstädten)
+  const knotenJe = new Map();
+  for (const k of plan?.kreuzungen ?? []) for (const a of Object.values(k.arme ?? {})) if (a) { if (!knotenJe.has(a.id)) knotenJe.set(a.id, []); knotenJe.get(a.id).push(k); }
   const verbinde = (liste) => {
     const proSegment = new Map();
     for (const l of liste) {
@@ -56,8 +59,7 @@ export function verkehrsnetz(plan) {
     }
     for (const l of liste) {
       const end = punkt(l, laenge(l));
-      const knoten = (plan.kreuzungen ?? []).filter((k) => Object.values(k.arme ?? {}).some((a) => a?.id === l.s.id))
-        .sort((a, b) => abstand(a, end) - abstand(b, end))[0];
+      const knoten = [...(knotenJe.get(l.s.id) ?? [])].sort((a, b) => abstand(a, end) - abstand(b, end))[0];
       if (!knoten || abstand(knoten, end) > Math.max(33, l.s.breite)) continue;
       for (const a of Object.values(knoten.arme ?? {})) {
         if (!a || a.id === l.s.id || a.typ === 'fussgaenger') continue;

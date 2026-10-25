@@ -247,9 +247,11 @@ export function spielBauer(s, o = {}) {
     return res;
   };
   const baueOutlet = (S, scene, p, h) => {
-    const f = fussabdruck(h), { x, z } = imSlot(p, f.w, f.d);
+    // Kartenstädte: FUNDUS kann in Stadtlage als Innenstadt-Geschäftshaus stehen (p.grafikLage), Engine-Lage bleibt
+    const hg = p.grafikLage ? { ...h, lage: p.grafikLage } : h;
+    const f = fussabdruck(hg), { x, z } = imSlot(p, f.w, f.d);
     p.haus = h;
-    return outlet(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
+    return outlet(S, scene, hg, { x, z, ...bauZustand(zustand(h)) });
   };
   const baueSchwester=(S,scene,p,h)=>{
     const fl=fussabdruck(h),{x,z}=imSlot(p,fl.w,fl.d);p.haus=h;
