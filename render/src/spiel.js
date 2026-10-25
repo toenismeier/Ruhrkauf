@@ -14,6 +14,7 @@ import { RASTER } from './kit/innen.js';
 import { hqEtage, hqSitzungssaal, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './kit/hq.js';
 import { warenhaus } from './kit/warenhaus.js';
 import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer, dachFlaechenBeimBau } from './kit/stadt.js';
+import { istKartenstadt, kartenplan, baueKartenstadt } from './kit/karten/kartenstadt.js';
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import { lebenModul } from './kit/leben.js';
@@ -481,8 +482,10 @@ function baueStadtAusSpiel(name) {
   const hqJson = hqGrafik();
   const d = stadtEintragAusSpiel(s, name);
   hqIdsStadt = hqIdsIn(hqJson, name);
-  plan = stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
-  if (hqJson) hqEinplanen(plan, hqJson, name);
+  // Kartenstädte (echte Kartendaten statt Kit-Raster): eigener Plan, Zentrale direkt auf Bauplätzen
+  const karte = istKartenstadt(name);
+  plan = karte ? kartenplan(name, d, hqJson) : stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
+  if (hqJson && !karte) hqEinplanen(plan, hqJson, name);
   scene = neueSzene('#4fb6c2');
   scene.userData.sonne.shadow.mapSize.set(2048, 2048);
   wurzel = new THREE.Group();
@@ -502,7 +505,7 @@ function baueStadtAusSpiel(name) {
   } });
   setzeLod('fern');
   let e;
-  try { e = baueStadt(T, scene, plan, grund, { keineStandAutos: leben.modus !== 'aus' }); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
+  try { e = karte ? baueKartenstadt(T, scene, plan, grund) : baueStadt(T, scene, plan, grund, { keineStandAutos: leben.modus !== 'aus' }); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
   jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
   jahreszeiten.registriereDachflaechenMehrfach(getrennteSchneedachFlaechen());
   scene.add(wurzel);
@@ -540,8 +543,10 @@ async function baueStadtAusSpielReise(name) {
   const hqJson = hqGrafik();
   const d = stadtEintragAusSpiel(s, name);
   hqIdsStadt = hqIdsIn(hqJson, name);
-  plan = stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
-  if (hqJson) hqEinplanen(plan, hqJson, name);
+  // Kartenstädte (echte Kartendaten statt Kit-Raster): eigener Plan, Zentrale direkt auf Bauplätzen
+  const karte = istKartenstadt(name);
+  plan = karte ? kartenplan(name, d, hqJson) : stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
+  if (hqJson && !karte) hqEinplanen(plan, hqJson, name);
   await new Promise((r) => requestAnimationFrame(r));
   scene = neueSzene('#4fb6c2');
   scene.userData.sonne.shadow.mapSize.set(2048, 2048);
@@ -562,7 +567,7 @@ async function baueStadtAusSpielReise(name) {
   } });
   setzeLod('fern');
   let e;
-  try { e = await baueStadtGestuft(T, scene, plan, grund); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
+  try { e = karte ? baueKartenstadt(T, scene, plan, grund) : await baueStadtGestuft(T, scene, plan, grund); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
   scene.add(wurzel);
   KA.teileGrund = T.anzahl;
   kachelnAnlegen(offen, true);

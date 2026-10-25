@@ -93,7 +93,7 @@ function tanne(S, x, z, h = 6) {
 }
 function festSchmuck(S, plan) {
   // Quer über Einkaufsstraßen, nie zwischen Wohnhäusern mitten im Block.
-  const einkauf = (plan.strassen ?? []).filter((s) => (s.typ === 'fussgaenger' || s.typ === 'haupt') && !s.bruecke);
+  const einkauf = (plan.strassen ?? []).filter((q) => q.achse !== 'r').filter((s) => (s.typ === 'fussgaenger' || s.typ === 'haupt') && !s.bruecke);
   for (const s of einkauf.slice(0, 9)) {
     const ab = Math.max(14, s.breite - 3);
     for (let u = s.von + 12; u < s.bis - 9; u += 24) {
@@ -114,7 +114,7 @@ function festSchmuck(S, plan) {
 }
 
 function sommerLeben(S, plan) {
-  const fuss = (plan.strassen ?? []).filter((s) => s.typ === 'fussgaenger' && s.bis - s.von >= 30);
+  const fuss = (plan.strassen ?? []).filter((q) => q.achse !== 'r').filter((s) => s.typ === 'fussgaenger' && s.bis - s.von >= 30);
   const r = R(plan.seed + '/sommer');
   for (const seg of fuss.slice(0, 6)) {
     const zAchse = seg.achse === 'z';
@@ -193,7 +193,7 @@ function schneeMesh(dachFlaechen, material) {
 }
 function randSchnee(S, plan) {
   // Gehwegränder, keine Schneegeometrie auf der Fahrbahn.
-  for (const s of (plan.strassen ?? []).filter((q) => q.typ !== 'fussgaenger' && !q.bruecke).slice(0, 350)) {
+  for (const s of (plan.strassen ?? []).filter((q) => q.achse !== 'r').filter((q) => q.typ !== 'fussgaenger' && !q.bruecke).slice(0, 350)) {
     const l = s.bis - s.von;
     if (l < 4) continue;
     for (const sg of [-1, 1]) {

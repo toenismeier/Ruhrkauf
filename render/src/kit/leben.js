@@ -10,7 +10,13 @@ const MODI = ['voll', 'wenig', 'aus'];
 const MAX_AUTO = 60, MAX_FUSS = 110, MAX_BUS = 8, MAX_BAHN = 6, MAX_LKW = 5;
 const KLEINSTE_LUECKE = 6.5;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const koordinate = (s, u, v) => s.achse === 'z' ? { x: s.mitte + v, z: u } : { x: u, z: s.mitte + v };
+// Kartenstädte: Straßenstücke beliebiger Richtung (achse 'r': Ursprung ax/az, Richtung ux/uz, Normale nx/nz, von = 0, bis = Länge).
+const koordinate = (s, u, v) => s.achse === 'r' ? { x: s.ax + s.ux * u + s.nx * v, z: s.az + s.uz * u + s.nz * v }
+  : s.achse === 'z' ? { x: s.mitte + v, z: u } : { x: u, z: s.mitte + v };
+/** Lage eines Punkts zum Straßenstück: u entlang, v quer (gleiche Konvention wie koordinate). */
+const lageZu = (s, p) => s.achse === 'r' ? { u: (p.x - s.ax) * s.ux + (p.z - s.az) * s.uz, v: (p.x - s.ax) * s.nx + (p.z - s.az) * s.nz }
+  : s.achse === 'z' ? { u: p.z, v: p.x - s.mitte } : { u: p.x, v: p.z - s.mitte };
+const richtungsWinkel = (s, d) => s.achse === 'r' ? Math.atan2(-s.uz * d, s.ux * d) : s.achse === 'z' ? Math.atan2(-d, 0) : Math.atan2(0, d);
 const sign = (s) => s.achse === 'z' ? -1 : 1;
 const wegStart = (l) => l.dir > 0 ? l.s.von + 2 : l.s.bis - 2;
 const wegEnde = (l) => l.dir > 0 ? l.s.bis - 2 : l.s.von + 2;
@@ -21,13 +27,13 @@ const abstand = (a, b) => wurzelSumme(a.x - b.x, a.z - b.z);
 export function verkehrsnetz(plan) {
   const spuren = [], fusswege = [], trams = [], haupt = [];
   for (const s of plan?.strassen ?? []) {
-    if (s.bis - s.von < 14 || s.bruecke && s.typ === 'fussgaenger') continue;
+    if (s.bis - s.von < (s.achse === 'r' ? 6 : 14) || s.bruecke && s.typ === 'fussgaenger') continue;
     const fb = s.breite - 2 * s.gehweg, ps = sign(s);
     if (s.typ !== 'fussgaenger' && !s.leitwand) {
       const seiten = s.typ === 'haupt'
         ? [((s.mittel || 6) / 2 + (fb / 2 - (s.mittel || 6) / 2) * .35), ((s.mittel || 6) / 2 + (fb / 2 - (s.mittel || 6) / 2) * .73)]
         : [Math.max(1.3, fb / 4)];
-      for (const dir of [1, -1]) for (let i = 0; i < seiten.length; i++) {
+      for (const dir of s.einbahn ? [1] : [1, -1]) for (let i = 0; i < seiten.length; i++) {
         const v = ps * dir * seiten[i];
         const l = { s, dir, v, id: s.id + ':' + dir + ':' + i, naechste: [] };
         spuren.push(l);
@@ -153,13 +159,15 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       const p = plan.parzellen.find((p) => p.id === st.parzelle);
       if (!h || !p || !netz?.fusswege.length) continue;
       const mitte = { x: p.x + p.w / 2, z: p.z + p.d / 2 };
-      const f = netz.fusswege.filter((w) => Math.abs(w.s.mitte - (w.s.achse === 'z' ? mitte.x : mitte.z)) < 65)
-        .map((w) => ({ w, u: clamp(w.s.achse === 'z' ? mitte.z : mitte.x, w.s.von + 3, w.s.bis - 3) }));
+      const f = netz.fusswege.filter((w) => Math.abs(lageZu(w.s, mitte).v) < 65)
+        .map((w) => ({ w, u: clamp(lageZu(w.s, mitte).u, w.s.von + 3, w.s.bis - 3) }));
       f.sort((a, b) => abstand(koordinate(a.w.s, a.u, a.w.v), mitte) - abstand(koordinate(b.w.s, b.u, b.w.v), mitte));
       if (!f.length) continue;
       const a = f[0], weg = koordinate(a.w.s, a.u, a.w.v);
       // Eingang auf der zur Straße gerichteten Hauskante, nicht mitten durch das Gebäude.
-      const ein = a.w.s.achse === 'z'
+      const ein = a.w.s.achse === 'r'
+        ? { x: clamp(weg.x, p.x, p.x + p.w), z: clamp(weg.z, p.z, p.z + p.d) }   // nächster Punkt der Hauskante zum Gehweg
+        : a.w.s.achse === 'z'
         ? { x: a.w.s.mitte < mitte.x ? p.x : p.x + p.w, z: clamp(a.u, p.z + 1, p.z + p.d - 1) }
         : { x: clamp(a.u, p.x + 1, p.x + p.w - 1), z: a.w.s.mitte < mitte.z ? p.z : p.z + p.d };
       punkte.push({ h, p, mitte, weg, ein, lane: a.w, u: a.u });
@@ -253,7 +261,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       return { x: von.x + (nach.x - von.x) * t, y: .95, z: von.z + (nach.z - von.z) * t,
         winkel: Math.atan2(-(nach.z - von.z), nach.x - von.x) };
     }
-    return { ...p, y: .95, winkel: Math.atan2(-(q.z - p.z) || -a.lane.dir * (a.lane.s.achse === 'z' ? 1 : 0), (q.x - p.x) || a.lane.dir * (a.lane.s.achse === 'x' ? 1 : 0)) };
+    return { ...p, y: .95, winkel: (q.z - p.z || q.x - p.x) ? Math.atan2(-(q.z - p.z), q.x - p.x) : richtungsWinkel(a.lane.s, a.lane.dir) };
   }
   function fussBewegen(dt) {
     for (const f of fuss) {
@@ -306,8 +314,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
         const w = koordinate(f.weg.s, f.weg.s.von + f.m, f.weg.v), e = f.haus.ein;
         winkel = f.phase === 'hinein' ? Math.atan2(-(e.z - w.z), e.x - w.x) : Math.atan2(-(w.z - e.z), w.x - e.x);
       } else {
-        const d = f.dir * (f.weg.s.achse === 'z' ? 1 : 1);
-        winkel = f.weg.s.achse === 'z' ? Math.atan2(-d, 0) : Math.atan2(0, d);
+        winkel = richtungsWinkel(f.weg.s, f.dir);
       }
       leute.setze(n++, p.x, .3, p.z, winkel, f.aussehen, f.tuete ? 'gehen_tasche' : 'gehen', f.ph, 1, f.tempo);
     }
@@ -373,10 +380,10 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     lkw = rang.slice(0, anzahl).map((h) => {
       const s = netz.spuren.filter((l) => l.s.typ !== 'fussgaenger')
         .sort((a, b) => abstand(punkt(a, laenge(a) / 2), h.mitte) - abstand(punkt(b, laenge(b) / 2), h.mitte))[0];
-      const p = s ? koordinate(s.s, clamp(s.s.achse === 'z' ? h.mitte.z : h.mitte.x, s.s.von + 4, s.s.bis - 4),
-        Math.sign((s.s.achse === 'z' ? h.mitte.x : h.mitte.z) - s.s.mitte) * (s.s.breite / 2 - .8)) : h.weg;
+      const p = s ? koordinate(s.s, clamp(lageZu(s.s, h.mitte).u, s.s.von + 4, s.s.bis - 4),
+        Math.sign(lageZu(s.s, h.mitte).v) * (s.s.breite / 2 - .8)) : h.weg;
       const ziel = h.weg; // Vom Fahrbahnrand bis zur Hausanlieferung und zurück.
-      return { start: p, ziel, fort: 0, winkel: s?.s.achse === 'z' ? -Math.PI / 2 : 0, hausId: h.h.id };
+      return { start: p, ziel, fort: 0, winkel: s ? richtungsWinkel(s.s, 1) : 0, hausId: h.h.id };
     });
     letzteAuswahl = -1; zeichneInstanzen();
     if (modus !== 'aus') zeichnen();
