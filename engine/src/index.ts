@@ -25,9 +25,9 @@ export {
   type EinkaufFilter, type EinkaufUebersicht, type BereichZeile, type WgZeile, type WgDetail, type FreigabeZeile, type FreigabenListe, type Einkauf,
 } from './einkauf';
 export {
-  BESCHAFFUNG, EM_PARAM, EM_VORLAGEN, ZIELGRUPPEN_TEXT, mehrmarge, passungHaus,
+  BESCHAFFUNG, EM_PARAM, EM_VORLAGEN, EM_SCHWERPUNKTE, ZIELGRUPPEN_TEXT, mehrmarge, passungHaus,
   type Eigenmarke, type EigenmarkeEntwurf, type EigenmarkenUebersicht, type EigenmarkeVorschau, type MarkenKarte,
-  type EmAlter, type EmGeschlecht, type EmKategorie, type Preislage, type Stil, type Beschaffung, type EmStatus, type Zielgruppe,
+  type EmAlter, type EmGeschlecht, type EmKategorie, type EmSchwerpunkt, type Preislage, type Stil, type Beschaffung, type EmStatus, type Zielgruppe,
 } from './eigenmarken';
 export {
   RESSORTS, RESSORT_INFO, DELEGATIONEN, VORSTAND_PARAM, registriereDelegation, gehaltsforderung, vorstandWirkung,
@@ -39,6 +39,10 @@ export {
   type ArtikelTyp, type ArtikelBild, type SortimentTyp, type SortimentName, SORTIMENT_TYPEN, type Produktsparte, type Farbe, type Material, type ProduktKategorie, type TrendGruppe, type Produkt, type ProduktEntwurf, type ProduktAktion, type ProdukteStand,
   type ProduktKarte, type ProdukteListe, type MarkenProdukte, type ProduktKatalog, type Trendbericht, type TrendSaison, type ProduktVorschau, type SterneTeile,
 } from './produkte';
+// Q37: Musterfeld, Kategorie Anlass, Migration alter Spielstände
+export { migriereQ37, anlaesseFuer } from './produkte';
+export { MUSTER, MUSTER_INFO, musterFuer, type Muster } from './muster';
+export { ANLAESSE as PRODUKT_ANLAESSE, ANLASS_NAME, anlassFaktor, type AnlassId } from './anlass';
 export {
   KANAELE, KANAL, MK, STARTKALENDER, ANLAESSE, MECHANIK_TEXT, ALTERSGRUPPEN, ALTERSGRUPPE_TEXT, FREQUENZ_WOCHEN, segmentText, angebotText, umsatzBezug,
   marketingUebersicht, kanaele, kundenkarte, crmKampagnen, aktionskalender, aktionsAuswertung, marketingKosten,

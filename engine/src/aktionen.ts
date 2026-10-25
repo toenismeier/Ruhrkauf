@@ -10,7 +10,7 @@ import { chance, clamp, eur, mio, neueId, waehle, melde } from './util';
 import { bestandWert, verbrauche } from './ware';
 import { PARAM } from './welt';
 import {
-  abteilungSetzen, abteilungStufe, abteilungFteSetzen, abteilungGehaltSetzen, hqEtageKuendigen, hqGebaeudeKuendigen, hqMieten, hqVerhandlungsBonus, zentraleKuerzen,
+  abteilungSetzen, abteilungStufe, abteilungFteSetzen, abteilungGehaltSetzen, hqEtageKuendigen, hqGebaeudeKuendigen, hqKuendigungZuruecknehmen, hqMieten, hqVerhandlungsBonus, zentraleKuerzen,
   type AbteilungId, type Stufe,
 } from './hq';
 import { EINKAUF_AKTIONEN, einkaufAktion, type EinkaufAktion } from './einkauf';
@@ -87,6 +87,7 @@ export type SpielerAktion =
   | { typ: 'hqEtageKuendigen'; gebaeude: string; etage: number }
   | { typ: 'hqArchivSetzen'; gebaeude: string; etage: number; aktiv: boolean }
   | { typ: 'hqGebaeudeKuendigen'; gebaeude: string }
+  | { typ: 'hqKuendigungZuruecknehmen' }
   | { typ: 'abteilungSetzen'; abteilung: AbteilungId; gebaeude: string; etage: number }
   | { typ: 'abteilungStufe'; abteilung: AbteilungId; stufe: Stufe }
   | { typ: 'abteilungFte'; abteilung: AbteilungId; fte: number }
@@ -448,6 +449,7 @@ function fuehreAusKern(s: GameState, a: SpielerAktion): Ergebnis {
     case 'hqEtageKuendigen': return hqEtageKuendigen(s, a.gebaeude, a.etage);
     case 'hqArchivSetzen': return hqArchivSetzen(s, a.gebaeude, a.etage, a.aktiv);
     case 'hqGebaeudeKuendigen': return hqGebaeudeKuendigen(s, a.gebaeude);
+    case 'hqKuendigungZuruecknehmen': return hqKuendigungZuruecknehmen(s);
     case 'abteilungSetzen': return abteilungSetzen(s, a.abteilung, a.gebaeude, a.etage);
     case 'abteilungStufe': return abteilungStufe(s, a.abteilung, a.stufe);
     case 'abteilungFte': return abteilungFteSetzen(s, a.abteilung, a.fte);

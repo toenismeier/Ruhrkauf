@@ -54,7 +54,7 @@ export function eigenmarkenSeite(ctx, ui, tabs) {
   x += K.liste([
     ...reihe.map((m) => {
       const st = m.status !== 'aktiv' ? `${STATUS[m.status] ?? m.status}${m.bis !== undefined ? ` bis KW ${kwVon(m.bis)}` : ''}` : m.stilAktualitaet < 45 ? '<span class="hw-schlecht">Stil veraltet</span>' : `${esc(m.stil)}, ${preisText(m.preislage)}`;
-      return K.zeile({ was: `${farbpunkt(m.farbe)} ${esc(m.name)}`, unter: `${esc(zielText(m.zielgruppe))} · ${esc(m.kategorie)} · ${st}`, wert: `<span data-s="u">${geld(m.umsatz13)}</span>`, wertUnter: punkte(m.mehrmarge), tippbar: true, attr: `data-a="emAuf" data-v="${esc(m.id)}" aria-expanded="${ui.em.auf === m.id}"${ui.em.auf === m.id ? ' aria-current="true"' : ''}` });
+      return K.zeile({ was: `${farbpunkt(m.farbe)} ${esc(m.name)}`, unter: `${esc(zielText(m.zielgruppe))} · ${esc(m.kategorie)}${m.schwerpunktName ? ' · ' + esc(m.schwerpunktName) : ''} · ${st}`, wert: `<span data-s="u">${geld(m.umsatz13)}</span>`, wertUnter: punkte(m.mehrmarge), tippbar: true, attr: `data-a="emAuf" data-v="${esc(m.id)}" aria-expanded="${ui.em.auf === m.id}"${ui.em.auf === m.id ? ' aria-current="true"' : ''}` });
     }),
     ...(u.gefuehrt < u.kapazitaet ? [K.zeile({ was: 'Freier Platz', unter: 'Neue Eigenmarke gründen', tippbar: true, attr: 'data-a="emGruenden"' })] : []),
   ]);
@@ -130,6 +130,8 @@ function assistent(ctx, ui, tabs) {
     x += K.abschnitt('Preislage');
     x += `<div class="hw-g1-typen drei">${PREIS.map(([w, t], i) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${m.preislage === w}" data-a="emPreis" data-v="${w}"><b>${t}</b><small>${'€'.repeat(i + 1)}</small></button>`).join('')}</div>`;
     x += K.abschnitt('Stil', 'trendig veraltet schneller') + wahl('emStil', m.stil, STIL);
+    // Q37: Schwerpunkt Anlass und Festmode (Ast „Anlass“ in der Produktentwicklung, Anlassprodukte passen besser zur Marke)
+    x += K.abschnitt('Schwerpunkt', A.id ? 'bleibt bei Neupositionierung' : 'Abiball, Konfirmation, Feiern') + wahl('emSchwerpunkt', m.schwerpunkt ?? '', [['', 'Kein Schwerpunkt'], ['anlass', 'Anlass und Festmode']], !!A.id);
     x += K.abschnitt('Qualität', `${m.qualitaet} von 5`);
     x += `<div class="hw-g1-qualitaet">${K.stepper({ wert: `${m.qualitaet} von 5`, label: 'Qualität', attrMinus: `data-a="emQualitaet" data-v="${m.qualitaet - 1}"`, attrPlus: `data-a="emQualitaet" data-v="${m.qualitaet + 1}"`, minusAus: m.qualitaet <= 1, plusAus: m.qualitaet >= 5 })}</div>`;
   } else if (A.schritt === 3) {
@@ -145,7 +147,7 @@ function assistent(ctx, ui, tabs) {
   }
   // Vorschau aus der Engine
   x += `<h3 class="hw-abschnitt">Vorschau<small>${farbpunkt(m.farbe)} ${esc(m.name)}</small></h3>`;
-  x += `<p class="hw-lese hw-g1-notiz">${esc(zielText(m.zielgruppe))} · ${esc(m.kategorie)} · ${preisText(m.preislage)} · ${esc(m.stil)}</p>`;
+  x += `<p class="hw-lese hw-g1-notiz">${esc(zielText(m.zielgruppe))} · ${esc(m.kategorie)} · ${preisText(m.preislage)} · ${esc(m.stil)}${m.schwerpunkt === 'anlass' ? ' · Anlass und Festmode' : ''}</p>`;
   x += K.gross([{ label: A.id ? 'Kosten' : 'Einmalkosten', wert: geld(kosten), p: 'v:kosten' }, { label: 'Mehrmarge', wert: punkte(v.mehrmarge), p: 'v:marge', ton: 'gut' }]);
   x += K.liste([K.zeile({ was: A.id ? 'Umstellung' : 'Erste Ware in', wert: `<span data-p="v:aufbau">${A.id ? u.kosten.neupositionierungWochen : v.aufbauWochen} Wochen</span>` }),
     K.zeile({ was: 'Warengruppen', wert: String(nWg) }), K.zeile({ was: 'Mindestabnahme je Order', wert: geld(v.mindestabnahme) }),
@@ -168,7 +170,7 @@ export function eigenmarkenAktion(ctx, ui, el, ev, tun) {
     case 'emGruenden': ui.em.assistent = { schritt: 0, daten: neuerEntwurf(s) }; ui.seite = 'gruenden'; return oben();
     case 'emPositionieren': {
       const x = karte(v);
-      const daten = { name: x.name, farbe: x.farbe, zielgruppe: { ...x.zielgruppe }, kategorie: x.kategorie, preislage: x.preislage, stil: x.stil, qualitaet: x.qualitaet, beschaffung: x.beschaffung, budgetWoche: x.budgetWoche, wgAnteile: Object.fromEntries(x.wgs.map((w) => [w.wg, w.anteilZiel])) };
+      const daten = { name: x.name, farbe: x.farbe, zielgruppe: { ...x.zielgruppe }, kategorie: x.kategorie, preislage: x.preislage, stil: x.stil, qualitaet: x.qualitaet, beschaffung: x.beschaffung, budgetWoche: x.budgetWoche, wgAnteile: Object.fromEntries(x.wgs.map((w) => [w.wg, w.anteilZiel])), ...(x.schwerpunkt ? { schwerpunkt: x.schwerpunkt } : {}) };
       ui.em.assistent = { id: v, schritt: 0, daten, alt: structuredClone(daten), nameGesetzt: true };
       ui.seite = 'gruenden';
       return oben();
@@ -199,6 +201,7 @@ export function eigenmarkenAktion(ctx, ui, el, ev, tun) {
     case 'emWg': { const stufen = [0, 0.15, 0.25, 0.4]; const i = stufen.indexOf(m.wgAnteile[v] ?? 0); const n = stufen[(i + 1) % stufen.length]; if (n) m.wgAnteile[v] = n; else delete m.wgAnteile[v]; return ''; }
     case 'emPreis': m.preislage = v; return '';
     case 'emStil': m.stil = v; return '';
+    case 'emSchwerpunkt': if (v) m.schwerpunkt = v; else delete m.schwerpunkt; return '';
     case 'emQualitaet': m.qualitaet = Number(v); return '';
     case 'emBeschaffung': m.beschaffung = v; return '';
     case 'emBudgetNeu': m.budgetWoche = Math.max(0, m.budgetWoche + Number(v)); return '';

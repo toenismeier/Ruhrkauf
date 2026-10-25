@@ -8,7 +8,7 @@ import type { BaumKategorie } from '../produkt-sortiment';
 export const NAMEN = [
   // Damen
   'Longbluse', 'Kurzarmbluse', 'Rollkragenshirt', 'Halbarmshirt', 'Feinstrickjacke', 'Shirtjacke', 'Strickmantel', 'Bundfaltenhose',
-  '7/8-Hose', 'Schlupfhose', 'Jerseyrock', 'Karo-Faltenrock', 'Jerseykleid', 'Shirtkleid', 'Abendkleid', 'Kurzmantel', 'Cabanjacke',
+  '7/8-Hose', 'Schlupfhose', 'Jerseyrock', 'Jerseykleid', 'Shirtkleid', 'Abendkleid', 'Kurzmantel', 'Cabanjacke',
   'Cape', 'Unterkleid', 'Morgenmantel', 'Minimizer-BH',
   // Herren
   'Zip-Strickjacke', 'Herren-Schlafanzug', 'Thermo-Unterhemd',
@@ -17,7 +17,7 @@ export const NAMEN = [
   'Keilsandalette', 'Zehentrenner', 'Stützkniestrümpfe',
   // Accessoires und Taschen
   'Lesebrille', 'Lesebrillenetui', 'Herrenuhr', 'Damenuhr', 'Manschettenknöpfe', 'Brosche', 'Perlenkette', 'Schiebermütze',
-  'Filzhut', 'Hosenträger', 'Gehstock-Schirm', 'Leselupe', 'Karoschal', 'Kulturbeutel', 'Aktentasche', 'Einkaufstrolley',
+  'Filzhut', 'Hosenträger', 'Gehstock-Schirm', 'Leselupe', 'Kulturbeutel', 'Aktentasche', 'Einkaufstrolley',
   // Home
   'Isolierkanne', 'Kaffeeservice', 'Brotkorb', 'Sitzkissen', 'Teppich', 'Teelichthalter',
   // Beauty
@@ -59,7 +59,6 @@ const UNTERTEILE: T[] = [
   t('7/8-Hose', 'unterteile', ['damen.hosen'], 'sommer', 55, ['Baumwolle', 'Viskose', 'Leinen'], ADULT, 1, bild('siebenachtelhose')),
   t('Schlupfhose', 'unterteile', ['damen.hosen', 'damen.gg'], 'ganz', 49, BW, BEST, 1, bild('schlupfhose')),
   (ast('unterteile', 'Röcke'), t('Jerseyrock', 'unterteile', ['damen.hosen'], 'ganz', 45, BW, REIF, 1, bild('jerseyrock'))),
-  t('Karo-Faltenrock', 'unterteile', ['damen.hosen'], 'winter', 69, WOLLE, REIF, 2, bild('karofaltenrock')),
   (ast('kleider', 'Kleider'), t('Jerseykleid', 'unterteile', ['damen.kleider'], 'ganz', 69, BW, REIF, 2, bild('jerseykleid'))),
   t('Shirtkleid', 'unterteile', ['damen.kleider'], 'sommer', 49, BW, ADULT, 1, bild('shirtkleid')),
   t('Abendkleid', 'unterteile', ['damen.kleider'], 'ganz', 149, ['Seide', 'Viskose', 'Polyester'], ADULT, 3, bild('abendkleid')),
@@ -106,7 +105,6 @@ const ACCESSOIRES: T[] = [
   t('Filzhut', 'accessoires', ['accessoires.lederwaren'], 'winter', 69, ['Merino'], REIF, 2, bild('filzhut')),
   (ast('accessoires', 'Weitere Accessoires'), t('Hosenträger', 'accessoires', ['accessoires.lederwaren', 'herren.business'], 'ganz', 35, ['Polyester', 'Leder'], REIF, 1, bild('hosentraeger'))),
   t('Gehstock-Schirm', 'accessoires', ['accessoires.lederwaren'], 'ganz', 59, NT, BEST, 2, bild('stockschirm')),
-  t('Karoschal', 'accessoires', ['accessoires.lederwaren'], 'winter', 49, ['Merino', 'Kaschmir'], MITTE, 1, bild('karoschal')),
   (ast('accessoires', 'Taschen'), t('Kulturbeutel', 'accessoires', ['accessoires.lederwaren', 'accessoires.reise'], 'ganz', 29, ['Polyester', 'Leder'], MITTE, 1, bild('kulturbeutel'))),
   t('Aktentasche', 'accessoires', ['accessoires.lederwaren', 'herren.business'], 'ganz', 199, LEDER, MITTE, 3, bild('aktentasche')),
   t('Einkaufstrolley', 'accessoires', ['accessoires.reise'], 'ganz', 59, NT, BEST, 2, bild('einkaufstrolley')),

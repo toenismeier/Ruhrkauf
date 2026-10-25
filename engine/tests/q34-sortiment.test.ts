@@ -83,7 +83,7 @@ describe('Q34: Sortiment Adults und Best Ager', () => {
     }
     // keine Crop-Tops, Baggy-, Cargo- oder Skinny-Teile für Best Ager; kein Crop-Top für Adults
     const best = new Set(sichtbar('bestager').map((t) => t.typ));
-    for (const typ of ['Crop-Top', 'Crop-Hoodie', 'Baggy-Jeans', 'Cargo-Hose', 'Cargohose', 'Cargo-Shorts', 'Skinny-Jeans', 'Babytee', 'Corsage', 'Plateau-Sneaker']) expect(best.has(typ)).toBe(false);
+    for (const typ of ['Crop-Top', 'Crop-Hoodie', 'Baggy-Jeans', 'Cargo-Hose', 'Cargo-Shorts', 'Skinny-Jeans', 'Babytee', 'Corsage', 'Plateau-Sneaker']) expect(best.has(typ)).toBe(false);
     expect(sichtbar('adults').some((t) => t.typ === 'Crop-Top')).toBe(false);
     for (const typ of ['Twinset', 'Bundfaltenhose', 'Steppweste', 'Komfortschuh', 'Lesebrillenetui', 'Gehstock-Schirm', 'Schlupfhose', 'Einkaufstrolley']) expect(best.has(typ)).toBe(true);
   });

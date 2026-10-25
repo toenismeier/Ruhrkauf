@@ -19,13 +19,14 @@ export const BAUM_KATEGORIEN = [
   { id: 'schuhe', name: 'Schuhe' },
   { id: 'waesche', name: 'Wäsche und Nachtwäsche' },
   { id: 'accessoires', name: 'Accessoires' },
+  { id: 'anlass', name: 'Anlass' }, // Q37: eigener Ast, Typen stehen zusätzlich an ihrem Stammplatz
   { id: 'home', name: 'Wohnen und Haushalt' },
   { id: 'beauty', name: 'Beauty' },
   { id: 'kinder', name: 'Baby und Spielzeug' },
 ] as const;
 export type BaumKategorie = (typeof BAUM_KATEGORIEN)[number]['id'];
 
-export interface BaumKnoten { id: string; name: string; typen: string[] }
+export interface BaumKnoten { id: string; name: string; typen: string[]; /** Q37: Anlass der Unterkategorie im Ast „Anlass“. */ anlass?: string }
 export interface BaumAst { id: BaumKategorie; name: string; unterkategorien: BaumKnoten[]; anzahl: number }
 
 /** Der Artikeltyp und nicht seine WG bestimmt die sichtbare Navigationsgruppe. */

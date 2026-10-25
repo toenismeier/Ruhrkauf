@@ -34,6 +34,6 @@ for (const typ of engine) {
   assert.doesNotMatch(svg, /NaN|undefined/, typ);
 }
 // Die sieben Q11-Typen haben eigene Bilder statt der Vorlagen T-Shirt/Chino.
-for (const [typ, sil] of [['Top', 'top'], ['Crop-Top', 'croptop'], ['Stoffhose', 'stoffhose'], ['Leinenhose', 'leinenhose'], ['Cargohose', 'cargohose'], ['Minirock', 'minirock']])
+for (const [typ, sil] of [['Top', 'top'], ['Crop-Top', 'croptop'], ['Stoffhose', 'stoffhose'], ['Leinenhose', 'leinenhose'], ['Cargo-Hose', 'cargohose'], ['Minirock', 'minirock']])
   assert.equal(bildFuer(typ).silhouette, sil, typ);
 console.log('Q11:', engine.length, 'Artikeltypen, alle mit bekannter Silhouette, keiner im T-Shirt-Rückfall.');

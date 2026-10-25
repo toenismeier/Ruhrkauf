@@ -4,8 +4,9 @@
 // Nur Bild und Passung: Preise, WGs, Saison und Reihenfolge bleiben, damit Kalibrierung und Spielstände unverändert sind.
 import { G, type ArtikelBild } from './basis';
 import type { TrendGruppe } from '../produkte';
+import type { WgId } from '../einkauf';
 
-export interface Korrektur { bild?: ArtikelBild; gruppe?: Record<TrendGruppe, number> }
+export interface Korrektur { bild?: ArtikelBild; gruppe?: Record<TrendGruppe, number>; wgs?: WgId[] }
 const b = (silhouette: string, p: Omit<ArtikelBild, 'silhouette'> = {}): Korrektur => ({ bild: { silhouette, ...p } });
 
 export const KORREKTUREN: Record<string, Korrektur> = {
@@ -36,10 +37,8 @@ export const KORREKTUREN: Record<string, Korrektur> = {
   Trekkingschuh: b('trekkingschuh'),
   // ── Zielgruppe: keine Crop-Tops für Adults und Best Ager, keine Cargo- und Skinny-Hosen für Best Ager (Ummo 23.10.2026)
   'Crop-Top': { gruppe: G(0.2, 1, 0.3, 0.05) },
-  'Cargo-Hose': { ...b('cargohosegerade'), gruppe: G(0.2, 0.85, 0.75, 0.3) },
-  Cargohose: { gruppe: G(0.3, 0.9, 0.7, 0.3) },
+  'Cargo-Hose': { ...b('cargohosegerade'), gruppe: G(0.2, 0.85, 0.75, 0.3), wgs: ['herren.hosen', 'damen.young', 'herren.casual'] }, // Q37: übernimmt die WGs der Dublette „Cargohose“
   'Skinny-Jeans': { gruppe: G(0.3, 0.75, 0.7, 0.3) },
-  'Print-Jumpsuit': { gruppe: G(0, 0.8, 0.7, 0.3) },
   // ── Oberteile
   Feinstrickpullover: b('feinstrickpullover'),
   Rundhalspullover: b('rundhalspullover'),
