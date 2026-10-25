@@ -79,7 +79,8 @@ export function sortimentBedienung(K, ui, typen, kachel, aktion, gesperrt = new 
       h += '<div class="hw-g1-kacheln">';
       for (const typ of ast.typen) {
         const t = index.get(typ), voll = gesperrt.has(t.kategorie);
-        h += `<button type="button" class="hw-g1-kachel hw-kontur${voll ? ' voll' : ''}" data-a="${aktion}" data-v="${esc(typ)}" aria-label="${esc(typ)}${voll ? ', Kapazität erreicht' : ''}"><span class="hw-g1-kachelbild" aria-hidden="true">${kachel(typ, 64)}</span><span class="hw-g1-kachelname">${esc(typ)}</span>${voll ? '<small>Platz voll</small>' : ''}</button>`;
+        // Q37: im Ast „Anlass“ trägt die Kachel den Anlass, damit der Assistent ihn vorbelegt
+        h += `<button type="button" class="hw-g1-kachel hw-kontur${voll ? ' voll' : ''}" data-a="${aktion}" data-v="${esc(typ)}"${kat.id === 'anlass' && ast.anlass ? ` data-anlass="${esc(ast.anlass)}"` : ''} aria-label="${esc(typ)}${voll ? ', Kapazität erreicht' : ''}"><span class="hw-g1-kachelbild" aria-hidden="true">${kachel(typ, 64)}</span><span class="hw-g1-kachelname">${esc(typ)}</span>${voll ? '<small>Platz voll</small>' : ''}</button>`;
       }
       h += '</div>';
     }

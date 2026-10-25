@@ -16,7 +16,8 @@ describe('Q33 Sortiment jung', () => {
   });
   test('zielgruppengerecht: kein Business-Schuh, keine Bundfalten- oder Komforthose bei Teens; Crop-Tops bei Teens, nicht bei Best Agern', () => {
     const teens = new Set(fuer('teens').map((t) => t.typ));
-    for (const typ of ['Business-Schuh', 'Anzughose', 'Komforthose', 'Twinset', 'Budapester', 'Krawatte', 'Kochtopf', 'Bratpfanne', 'Weinglas', 'Kinderbody']) expect(teens.has(typ)).toBe(false);
+    // Q37: Anlassmode auch für Teens (E45: Anzug, Krawatte für Abiball und Konfirmation), deshalb nicht mehr in dieser Liste
+    for (const typ of ['Business-Schuh', 'Komforthose', 'Twinset', 'Budapester', 'Kochtopf', 'Bratpfanne', 'Weinglas', 'Kinderbody']) expect(teens.has(typ)).toBe(false);
     for (const typ of ['Crop-Top', 'Hoodie', 'Crop-Hoodie', 'Bucket Hat', 'Schulrucksack', 'Chunky-Sneaker', 'Baggy-Jeans']) expect(teens.has(typ)).toBe(true);
     expect(fuer('bestager').some((t) => t.typ === 'Crop-Top')).toBe(false);
   });
@@ -24,12 +25,15 @@ describe('Q33 Sortiment jung', () => {
     const kinder = new Set(fuer('kinder').map((t) => t.typ));
     for (const typ of ['Schulranzen', 'Wickelbody', 'Kinder-Jeans', 'Spielball', 'Spielteppich']) expect(kinder.has(typ)).toBe(true);
     for (const typ of ['Bikini', 'Pumps', 'Kochtopf', 'Weinglas', 'Crop-Top']) expect(kinder.has(typ)).toBe(false);
-    for (const z of ['adults', 'bestager']) expect(fuer(z).some((t) => t.kategorie === 'kinder' || /^Kinder/.test(t.typ) || Q33_NAMEN.includes(t.typ) && t.gruppe.mitte === 0)).toBe(false);
+    // Q37: Stoppersocken und Bommelmütze sind für Adults freigeschaltet (Referenzsortiment)
+    const frei = new Set(['Stoppersocken', 'Bommelmütze']);
+    for (const z of ['adults', 'bestager']) expect(fuer(z).some((t) => !frei.has(t.typ) && (t.kategorie === 'kinder' || /^Kinder/.test(t.typ) || Q33_NAMEN.includes(t.typ) && t.gruppe.mitte === 0))).toBe(false);
   });
   test('Teens und Young Adults sind getrennt (Schulartikel nur Teens, Business nur Young)', () => {
     const teens = new Set(fuer('teens').map((t) => t.typ)), young = new Set(fuer('young').map((t) => t.typ));
     expect(teens.has('Schulrucksack')).toBe(true); expect(young.has('Schulrucksack')).toBe(false);
-    expect(young.has('Blazer')).toBe(true); expect(teens.has('Blazer')).toBe(false);
+    // Q37: Blazer ist für Teens freigeschaltet; Business-Schuh bleibt Young Adults und älter
+    expect(young.has('Blazer')).toBe(true); expect(teens.has('Blazer')).toBe(true); expect(teens.has('Business-Schuh')).toBe(false);
   });
   test('Kinder- und Jugendmarke Pünktchen kann je passender Zielgruppe mindestens 80 Typen entwickeln', () => {
     const m = produkte(s).marken.find((x) => x.name === 'Pünktchen')!;

@@ -512,6 +512,13 @@ async function buendeln() {
       await tippe('[data-a=zielgruppe][data-v="bestager"]');
       soll('Q11: Best Ager in Produktentwurf', await ev(() => window.spiel.produkte.ui.neu.zielgruppe === 'bestager' && window.spiel.produkte.ui.neuSchritt === 2), 'Best Ager');
     }
+    // Q37: Musterwahl im Assistenten (erstes freies Muster außer Uni), Bild und Name zeigen das Muster
+    const q37m = await ev(() => [...document.querySelectorAll('#pinhalt [data-a=muster]')].find((b) => !b.disabled && b.dataset.v !== 'Uni')?.dataset.v ?? null);
+    if (q37m) {
+      await tippe(`[data-a=muster][data-v="${q37m}"]`);
+      soll('Q37: Muster im Entwurf', await ev((m) => window.spiel.produkte.ui.neu.muster === m, q37m), q37m);
+      await bild('q37-muster-wahl.png');
+    }
     await tippe('[data-a=dauer][data-v="8"]');
     await tippe('[data-a=budget][data-v="1"]');
     await pruef('produkte', 'Neues Produkt');

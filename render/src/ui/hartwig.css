@@ -423,6 +423,13 @@
 .hw-g1-farben { display: flex; flex-wrap: wrap; gap: 4px; }
 .hw-g1-farbknopf { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: var(--hw-radius); background: none; }
 .hw-g1-farbknopf[aria-pressed='true'] { box-shadow: inset 0 0 0 2px var(--text); }
+/* Q37: Musterwahl als Kachelraster (Artikel in Farbe und Muster, Name darunter) */
+.hw-g1-muster { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 6px; }
+.hw-g1-musterknopf { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 44px; padding: 4px 2px; border: 0; color: var(--text); font: inherit; --f: var(--karte); --l: var(--kartenlinie); }
+.hw-g1-musterknopf small { font: var(--hw-t-klein); font-size: 11px; line-height: 1.15; color: var(--leise); text-align: center; }
+.hw-g1-musterknopf[aria-pressed='true'] { --f: var(--akzent-aktiv); --l: var(--akzent-linie); }
+.hw-g1-musterknopf[aria-pressed='true'] small { color: #fff; }
+.hw-g1-musterknopf:disabled { opacity: 0.45; }
 .hw-g1-qualitaet .hw-stepper, .hw-g1 .hw-feld .hw-stepper { width: 100%; }
 .hw-g1-dauer .hw-segment { margin: 0; }
 .hw-g1-dauer .hw-segment > button { min-height: 44px; }

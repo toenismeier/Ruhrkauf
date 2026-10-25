@@ -8,7 +8,8 @@ describe('Q11: Eigenmarken und Kategoriebaum Version 2', () => {
     const s = neuesSpiel(1);
     const k = produktKatalog(s);
     expect(k.version).toBe(2);
-    const eintraege = k.baum.flatMap((a) => a.unterkategorien.flatMap((u) => u.typen));
+    // Q37: der Ast „Anlass“ führt Typen zusätzlich zu ihrem Stammplatz; Stammbaum ohne Anlass genau einmal
+    const eintraege = k.baum.filter((a) => a.id !== 'anlass').flatMap((a) => a.unterkategorien.flatMap((u) => u.typen));
     expect(eintraege).toHaveLength(k.typen.length);
     expect(new Set(eintraege).size).toBe(k.typen.length);
     expect(new Set(eintraege)).toEqual(new Set(k.typen.map((t) => t.typ)));
@@ -16,7 +17,7 @@ describe('Q11: Eigenmarken und Kategoriebaum Version 2', () => {
       'Oberteile', 'Unterteile', 'Kleider', 'Jacken und Mäntel', 'Accessoires', 'Baby und Spielzeug',
     ]));
     for (const typ of ['Wickelkleid','A-Linien-Kleid','Tunikabluse','Oversize-Bluse','Feinstrickpullover',
-      'Longcardigan','Trenchcoat','Bouclé-Jacke','Top','Crop-Top','Stoffhose','Leinenhose','Cargohose',
+      'Longcardigan','Trenchcoat','Bouclé-Jacke','Top','Crop-Top','Stoffhose','Leinenhose','Cargo-Hose',
       'Minirock','A-Linien-Rock','Plüschtier']) expect(eintraege).toContain(typ);
     const pfad = (t: string) => k.baum.find((a) => a.unterkategorien.some((u) => u.typen.includes(t)))?.id;
     expect(pfad('Wickelkleid')).toBe('kleider');
@@ -24,7 +25,7 @@ describe('Q11: Eigenmarken und Kategoriebaum Version 2', () => {
     expect(pfad('Leinenhose')).toBe('unterteile');
     expect(pfad('Plüschtier')).toBe('kinder');
     // Q33: Kinderartikel nach Art einsortiert (sortimentsPlatz), Baby und Spielzeug als eigener Ast
-    expect(sortimentsBaum(ARTIKELTYPEN.map((t) => ({ ...t, pfad: sortimentsPlatz(t, sortimentsPfad) })))).toEqual(k.baum);
+    expect(sortimentsBaum(ARTIKELTYPEN.map((t) => ({ ...t, pfad: sortimentsPlatz(t, sortimentsPfad) })))).toEqual(k.baum.filter((a) => a.id !== 'anlass'));
   });
 
   test('fünf Zielgruppen mit nachvollziehbarer Preislage und Kosten, Version bleibt 2', () => {

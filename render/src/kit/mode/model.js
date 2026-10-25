@@ -5,6 +5,7 @@
 // und werden als glatte Kurven gezeichnet (Catmull-Rom → Bézier).
 
 import { hell, dunkel, materialDefs, flaeche } from './stoff.js';
+import { musterFuellung } from './q37-muster.js';
 
 export const ZIELGRUPPEN = ['kinder', 'teens', 'young', 'adults', 'bestager'];
 export const HAUT = ['#f3d6c1', '#e6b994', '#c98f68', '#9a6546', '#6b4330'];
@@ -469,7 +470,9 @@ export function modelSVG({ geschlecht = 'damen', zielgruppe = 'young', haut = HA
   const rang = (o) => ((o.teil === 'hose' || o.teil === 'rock') && o.latz ? REIHENFOLGE.indexOf('oberteil') + 0.5 : REIHENFOLGE.indexOf(o.teil));
   const sortiert = [...outfit].sort((a, b) => rang(a) - rang(b));
   const oben = [];
-  for (const o of sortiert) (o.teil === 'muetze' ? oben : teile).push(TEILE[o.teil](K, materialDefs(o.farbe, o.material, defs, o.muster), o));
+  // Q37: muster37 (Musterfeld) ersetzt das Muster des Teils, ohne bisherige Model-Bilder zu verändern
+  const stoff = (o) => { const S = materialDefs(o.farbe, o.material, defs, o.muster37 ? undefined : o.muster); if (o.muster37 && o.muster37 !== 'uni') S.tex = musterFuellung(S, o.muster37, { cx: 100, cy: o.teil === 'hose' || o.teil === 'rock' ? (K.m.huefte + K.m.knie) / 2 : K.m.brust + 4, s: K.zielgruppe === 'kinder' ? 1 : 1.25 }) ?? S.tex; return S; };
+  for (const o of sortiert) (o.teil === 'muetze' ? oben : teile).push(TEILE[o.teil](K, stoff(o), o));
   const hg = hintergrund ? `<rect width="200" height="420" fill="${hintergrund}"/><ellipse cx="100" cy="${f(K.fuss + 3)}" rx="${f(K.zielgruppe === 'kinder' ? 26 : 38)}" ry="4.5" fill="#000" opacity="0.09"/>` : '';
   // Teile hinter dem Körper (Kapuze im Nacken) herauslösen, Taschen über den Händen
   const nacken = [];
