@@ -124,7 +124,7 @@ export function itModul(ctx) {
     const d = daten(), titel = { systeme: 'Systemlandkarte', produkte: 'Digitale Produkte', projekte: 'IT-Projekte', neu: 'Neues IT-Projekt' };
     const r = ui.reiter === 'systeme' ? systeme(d) : ui.reiter === 'produkte' ? produkte() : ui.reiter === 'projekte' ? projekte(d) : neu(d);
     const aktiv = d.projekte.filter((x) => x.phase !== 'abgeschlossen').length;
-    ctx.panel('IT · ' + titel[ui.reiter], `Bereich IT · ${aktiv} aktive Projekte`, K.bereich('zentrale', 'systeme') + digitalSprecher(E, s(), r.befund, r.ton) + '<i class="hw-g3" hidden></i>'
+    ctx.panel('IT · ' + titel[ui.reiter], `Bereich IT · ${aktiv} aktive Projekte`, K.bereich('zentrale', 'systeme') + digitalSprecher(E, s(), r.befund, r.ton) + (ui.reiter === 'systeme' ? K.kopfbild('ecommerce') : '') + '<i class="hw-g3" hidden></i>'
       + (r.roh ? r.html : K.rumpf(r.html)) + K.reiterUnten(REITER, ui.reiter, (id) => `data-it="reiter" data-v="${id}"`), 'gross');
     ui.aktiv = true;
   }

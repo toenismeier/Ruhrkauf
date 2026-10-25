@@ -39,7 +39,7 @@ export function erfolgeModul(ctx) {
       return '<div class="hw-zeile erfolge-karte' + (ok ? ' frei' : ' gesperrt') + '" data-erfolg="' + esc(e.id) + '" aria-label="' + (geheim ? 'Geheimer Erfolg' : esc(e.titel)) + '">' +
         (geheim ? '<span class="erfolge-geheim" aria-hidden="true"></span>' : bild(e)) +
         '<span class="hw-was">' + (geheim ? 'Geheim' : esc(e.titel)) + '<small>' + (geheim ? 'noch nicht enthüllt' : esc(e.gruppe + ' · ' + e.stufe + (ok ? '' : ' · ' + e.hinweis))) + '</small></span>' +
-        '<span class="hw-wert' + (ok ? ' gut' : '') + '">' + (ok ? 'KW ' + ((e.freigeschaltet % 52) + 1) : geheim ? '' : Math.round(e.fortschritt * 100) + ' %') + '</span></div>';
+        '<span class="hw-wert' + (ok ? ' gut' : '') + '">' + (ok ? 'KW ' + ((((e.freigeschaltet % 52) + 52) % 52) + 1) : geheim ? '' : Math.round(e.fortschritt * 100) + ' %') + '</span></div>';
     }));
     const text = frei.length ? `${frei.length} von ${alle.length} Abzeichen erreicht.` + (nah[0] ? ` Am nächsten: ${esc(nah[0].titel)}.` : '') : 'Noch kein Abzeichen. Das erste kommt meist mit dem ersten Wochenabschluss.';
     return K.bereich('betrieb', 'pokal') + K.sprecher({ text }) + '<div class="hw-boden">' + K.rumpf('<div class="hw-g6-erfolge">' + h + '</div>') + '</div>';

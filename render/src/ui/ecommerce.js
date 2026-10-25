@@ -27,9 +27,9 @@ export function ecommerceModul(ctx) {
       { label: 'Onlineumsatz Woche', wert: geld(u.umsatz), unter: vor ? K.abweichung(u.umsatz - vor.umsatz, vz(u.umsatz - vor.umsatz), vor.umsatz ? (u.umsatz - vor.umsatz) / vor.umsatz : null) : 'erste Woche' },
     ]);
     const letzte = v.slice(-5);
-    h += K.abschnitt('Umsatz und Deckungsbeitrag', letzte.length ? `KW ${(letzte[0].woche % 52) + 1} bis ${(letzte[letzte.length - 1].woche % 52) + 1}` : '');
-    h += K.balken(letzte.map((q) => ({ label: 'KW ' + ((q.woche % 52) + 1), a: q.umsatz, b: q.deckungsbeitrag })), ['Umsatz', 'Deckungsbeitrag']);
-    h += K.abschnitt(`Paketschein KW ${(ctx.s().woche % 52) + 1}`, 'hartwig.de');
+    h += K.abschnitt('Umsatz und Deckungsbeitrag', letzte.length ? `KW ${(((letzte[0].woche % 52) + 52) % 52) + 1} bis ${(((letzte[letzte.length - 1].woche % 52) + 52) % 52) + 1}` : '');
+    h += K.balken(letzte.map((q) => ({ label: 'KW ' + ((((q.woche % 52) + 52) % 52) + 1), a: q.umsatz, b: q.deckungsbeitrag })), ['Umsatz', 'Deckungsbeitrag']);
+    h += K.abschnitt(`Paketschein KW ${(((ctx.s().woche % 52) + 52) % 52) + 1}`, 'hartwig.de');
     h += K.liste([
       K.zeile({ was: 'Bestellungen', wert: fmt.format(u.bestellungen) }),
       K.zeile({ was: 'Kosten je Bestellung', wert: geld(u.kostenJeBestellung) }),
@@ -67,7 +67,7 @@ export function ecommerceModul(ctx) {
     h += K.schalter({ text: 'Click & Collect', unter: 'Abholung nur in Häusern mit Abholstation', an: u.clickCollect, attr: 'data-online="collect"' });
     h += K.abschnitt('Fulfillment');
     h += K.liste([K.zeile({ was: 'Aktuelles Modell', unter: u.fulfillment === 'eigen' ? 'niedrigere Paketkosten, höhere Fixkosten' : 'variable Paketkosten', wert: u.fulfillment === 'eigen' ? 'Eigenes Lager' : 'Dienstleister' })]);
-    if (u.projekt) h += K.hinweis(`Umstellung auf ${u.projekt.modell === 'eigen' ? 'eigenes Lager' : 'Dienstleister'} ab KW ${(u.projekt.bis % 52) + 1} · Investition ${geld(u.projekt.investition)}`);
+    if (u.projekt) h += K.hinweis(`Umstellung auf ${u.projekt.modell === 'eigen' ? 'eigenes Lager' : 'Dienstleister'} ab KW ${(((u.projekt.bis % 52) + 52) % 52) + 1} · Investition ${geld(u.projekt.investition)}`);
     else h += K.knoepfe(K.knopf(u.fulfillment === 'eigen' ? 'Zum Dienstleister wechseln' : 'Eigenes Lager bauen', `data-online="fulfillment" data-wert="${u.fulfillment === 'eigen' ? 'dienstleister' : 'eigen'}"`, 'breit'));
     const an = u.cluster.filter((c) => c.aktiv).length;
     h += K.abschnitt('Versand aus dem Haus', `${an} von ${u.cluster.length} Clustern`);
@@ -91,7 +91,7 @@ export function ecommerceModul(ctx) {
     const u = state(), pi = document.getElementById('pinhalt'), vorher = behalten ? pi.scrollTop : 0;
     const r = tab === 'produkte' ? { befund: 'Die Online-Kennzahlen speisen die digitalen Produkte der IT.', html: itProdukteKarten(ctx.E.itProdukte(ctx.s()), 'online') }
       : tab === 'steuerung' ? steuerung(u) : tab === 'haeuser' ? haeuser(u) : uebersicht(u);
-    ctx.panel('Online', 'hartwig.de · E-Commerce', K.bereich('zentrale', 'online') + digitalSprecher(ctx.E, ctx.s(), r.befund, r.ton, 'E-Commerce') + '<i class="hw-g3" hidden></i>' + r.html
+    ctx.panel('Online', 'hartwig.de · E-Commerce', K.bereich('zentrale', 'online') + digitalSprecher(ctx.E, ctx.s(), r.befund, r.ton, 'E-Commerce') + (tab !== 'produkte' && tab !== 'steuerung' && tab !== 'haeuser' ? K.kopfbild('logistik|ecommerce') : '') + '<i class="hw-g3" hidden></i>' + r.html
       + K.reiterUnten(REITER, tab, (id) => `data-online="tab" data-wert="${id}"`), 'gross');
     offen = true; // Das gemeinsame Panel schließt zunächst die übrigen Module.
     pi.scrollTop = vorher;

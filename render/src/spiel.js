@@ -942,6 +942,12 @@ function huelleOrdnen() {
     ziel.hidden = !el; p.classList.toggle(klasse, !!el);
   }
   p.classList.toggle('mit-fenster', !!inhalt.querySelector('.hw-fenster'));
+  // E47: Kopfbild der Abteilung (Coffee zeigt auf jeder Abteilungsseite oben ihren Raum).
+  for (const el of inhalt.querySelectorAll('[data-kopfbild]:not([data-gefuellt])')) {
+    el.dataset.gefuellt = '1';
+    const b = el.dataset.kopfbild.split('|').map(abteilungsBild).find(Boolean);
+    if (b) el.innerHTML = `<img src="${b.url}" alt="${esc(b.name)}">`; else el.remove();
+  }
   huellenBeobachter.takeRecords(); // eigene Umhängungen nicht erneut auswerten
 }
 const huellenBeobachter = new MutationObserver(() => huelleOrdnen());
@@ -1166,6 +1172,19 @@ function schnittBild(baue, w = 720, h = 420) {
   sc.userData.sonne.shadow.map?.dispose();
   hqRen.renderLists.dispose();
   return { url, res };
+}
+const abtBildCache = new Map();
+/** Ausschnitt der Etage auf die Zone einer Abteilung (hqEtage opt.zone), zwischengespeichert je Stand der Abteilung. */
+function abteilungsBild(id) {
+  const u = E.hqUebersicht?.(s), a = u?.abteilungen?.find((x) => x.id === id && x.gebaeudeId);
+  if (!a) return null;
+  const k = `${id}|${a.gebaeudeId}|${a.etage}|${a.stufe}|${Math.round(a.fte)}`;
+  if (!abtBildCache.has(k)) {
+    const gj = hqGrafik()?.gebaeude?.find((q) => q.id === a.gebaeudeId);
+    if (!gj) return null;
+    abtBildCache.set(k, schnittBild((S, sc) => hqEtage(S, sc, gj, a.etage, { zone: id }), 780, 616).url);
+  }
+  return { url: abtBildCache.get(k), name: a.name };
 }
 function etagenBild(g, nr) { return schnittBild((S, sc) => hqEtage(S, sc, g, nr, {})).url; }
 const fassadenChronik = new Map();

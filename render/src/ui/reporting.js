@@ -69,6 +69,7 @@ export function reportingModul(ctx) {
     // Q31: Hauptfrage „Was treibt den Umsatz gegen Vorjahr?“
     const treiber = B.status === 'ok' ? [['Frequenz', B.frequenz], ['Kaufquote', B.kaufquote], ['Teile je Bon', B.teile], ['Preis je Teil', B.preis]].sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))[0] : null;
     let h = K.bereich('zentrale', 'zahlen') + G4 + K.sprecher({ text: treiber ? `Größter Treiber gegen Vorjahr: <b>${treiber[0]}</b> mit ${vz(treiber[1])}.` : '<b>Noch kein Vorjahresvergleich.</b> Die Brücke folgt nach dem ersten Wochenabschluss.', unter: 'Konzerncontrolling' });
+    h += K.kopfbild('controlling');
     let r = '';
     if (B.status === 'ok') r += K.gross([{ label: 'Umsatz gegen Vorjahr', wert: vz(B.differenz), ton: B.differenz < 0 ? 'schlecht' : B.differenz > 0 ? 'gut' : '', unter: B.vorher ? vp(B.differenz / B.vorher) + ' zum Vorjahr' : '' },
       { label: 'Ist ' + (ui.wochen === 1 ? 'letzte Woche' : ui.wochen + ' Wochen'), wert: geld(B.aktuell), unter: 'Vorjahr ' + geld(B.vorher) }]);

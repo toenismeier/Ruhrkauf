@@ -15,6 +15,9 @@ export function karussell(karten, { aktiv = 0, label = 'Karten' } = {}) {
     + `<div class="hw-punkte" aria-hidden="true">${karten.map((_, i) => `<i class="${i === aktiv ? 'an' : ''}"></i>`).join('')}</div>`;
 }
 
+/** Kopfbild einer HQ-Abteilung (Etagenausschnitt), gefüllt von spiel.js; fehlt die Abteilung, entfällt es. */
+export const kopfbild = (abteilung) => `<div class="hw-kopfbild" data-kopfbild="${esc(abteilung)}" aria-hidden="true"></div>`;
+
 /** Innenrand für Inhalt (20 px wie Coffee). */
 export const rumpf = (html) => `<div class="hw-rumpf">${html}</div>`;
 /** Dunkles Band über die volle Breite (Coffee 22: GuV unter den Balken). */
@@ -167,4 +170,12 @@ export const illustration = (name, klasse = 'hw-ill') => { const i = ILLUSTRATIO
 export const symbol = (name, rueckfall = name) => illustration(name) || SYMBOLE[name] || SYMBOLE[rueckfall] || '';
 const RUECKFALL = { haus: 'ueberblick', flaeche: 'etagen', notizen: 'kommentare', vorstand: 'leitung', organisation: 'personal', reporting: 'zahlen', systeme: 'zentrale', it: 'post', projekte: 'umbau', neu: 'leitung',
   planung: 'leitung', forecast: 'finanzen', boni: 'personal', online: 'leitung', allokation: 'etagen', freigaben: 'post', marken: 'sortiment', saison: 'ware', reduzierung: 'kosten', staedte: 'zentrale', kundenkarte: 'kommentare', crm: 'post', kalender: 'etagen' };
-export const reiterUnten = (reiter, aktiv, attr) => `<nav class="hw-reiter" aria-label="Bereiche">${reiter.map(([id, name, sym]) => `<button type="button" ${attr(id)}${id === aktiv ? ' aria-current="page"' : ''}>${symbol(sym ?? id, RUECKFALL[sym ?? id])}<span>${esc(name)}</span></button>`).join('')}</nav>`;
+/** Reiterleiste: höchstens fünf Plätze wie Coffee. Bei mehr Reitern zeigt der fünfte „Mehr“ und klappt die übrigen auf. */
+export const reiterUnten = (reiter, aktiv, attr) => {
+  const knopf = ([id, name, sym]) => `<button type="button" ${attr(id)}${id === aktiv ? ' aria-current="page"' : ''}>${symbol(sym ?? id, RUECKFALL[sym ?? id])}<span>${esc(name)}</span></button>`;
+  if (reiter.length <= 5) return `<nav class="hw-reiter" aria-label="Bereiche">${reiter.map(knopf).join('')}</nav>`;
+  const vorn = reiter.slice(0, 4), rest = reiter.slice(4), imRest = rest.some(([id]) => id === aktiv);
+  return `<nav class="hw-reiter" aria-label="Bereiche">${vorn.map(knopf).join('')}`
+    + `<button type="button" class="hw-reiter-mehrknopf" aria-expanded="false" onclick="const n=this.parentElement;const auf=!n.classList.contains('mehr-auf');n.classList.toggle('mehr-auf',auf);this.setAttribute('aria-expanded',auf)"${imRest ? ' aria-current="page"' : ''}>${imRest ? (([, , sym], id) => symbol(sym ?? id, RUECKFALL[sym ?? id]))(rest.find(([id]) => id === aktiv), aktiv) : symbol('menue', 'zentrale')}<span>${imRest ? esc(rest.find(([id]) => id === aktiv)[1]) : 'Mehr'}</span></button>`
+    + `<div class="hw-reiter-mehr" role="menu">${rest.map(knopf).join('')}</div></nav>`;
+};
