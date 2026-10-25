@@ -42,13 +42,13 @@ def teile(g):
 
 # ── Eingaben
 o2s = {k: lade(f'o2s-{k}.geojson') for k in ('plain', 'lanes', 'marks')}
-fahrbahn, rad, mark, kreuz = [], [], [], []
+fahrbahn, rad, mark, kreuz, parkstreifen = [], [], [], [], []
 for f in o2s['plain']['features']:
     if f['properties'].get('type') == 'intersection':
         for p in polys_geojson(f['geometry']): kreuz.append(lonlat_ring(p[0]))
 for f in o2s['lanes']['features']:
     t = f['properties'].get('type')
-    ziel_liste = fahrbahn if t in ('Driving', 'Bus', 'Shoulder', 'Parking', 'Construction', 'LightRail') else rad if t == 'Biking' else None
+    ziel_liste = fahrbahn if t in ('Driving', 'Bus', 'Construction', 'LightRail') else parkstreifen if t in ('Parking', 'Shoulder') else rad if t == 'Biking' else None
     if ziel_liste is not None:
         for p in polys_geojson(f['geometry']): ziel_liste.append(lonlat_ring(p[0]))
 for f in o2s['marks']['features']:
@@ -65,6 +65,7 @@ im = lambda pts: any(abs(x - MX) <= R + 50 and abs(z - MZ) <= R + 50 for x, z in
 # ── Bodenschichten (Shapely)
 print('Fahrbahnen vereinigen …', flush=True)
 fb_polys = [g for g in (gueltig(p) for p in fahrbahn if len(p) >= 3 and im(p)) if g is not None and not g.is_empty]
+park_polys = [g for g in (gueltig(p) for p in parkstreifen if len(p) >= 3 and im(p)) if g is not None and not g.is_empty]
 # Kreuzungsflächen nur dort, wo Fahrbahnen ankommen: reine Fußweg-Kreuzungen wären graue Asphaltflecken auf Plätzen
 from shapely.strtree import STRtree
 baum_fb = STRtree(fb_polys)
@@ -75,10 +76,12 @@ for p in kreuz:
     nah = baum_fb.query(g.buffer(1.0))
     if len(nah) >= 2: fb_polys.append(g)
 strassen = unary_union(fb_polys).intersection(gebiet).simplify(0.25).buffer(0)
+parkflaeche = unary_union(park_polys).intersection(gebiet).difference(strassen).simplify(0.25).buffer(0) if park_polys else None
+strassen_alle = unary_union([strassen] + ([parkflaeche] if parkflaeche is not None else [])).buffer(0)
 print('Gehwege …', flush=True)
-gehweg_aussen = strassen.buffer(3.4, join_style=2)
-bord = strassen.buffer(0.45, join_style=2).difference(strassen)
-gehweg = gehweg_aussen.difference(strassen).difference(bord).simplify(0.3).buffer(0)
+gehweg_aussen = strassen_alle.buffer(3.4, join_style=2)
+bord = strassen_alle.buffer(0.45, join_style=2).difference(strassen_alle)
+gehweg = gehweg_aussen.difference(strassen_alle).difference(bord).simplify(0.3).buffer(0)
 bord = bord.simplify(0.2).buffer(0)
 flaechen_art = {}
 for fl in osm['flaechen']:
@@ -89,14 +92,18 @@ for fl in osm['flaechen']:
 gruen = unary_union(flaechen_art.get('gruen', [])) if flaechen_art.get('gruen') else None
 # Innenhöfe: Fläche weiter als 14 m von jeder Fahrbahn, außerhalb des Kerns (dort Pflaster), ohne OSM-Plätze
 print('Innenhöfe …', flush=True)
-abstand = strassen.buffer(14, join_style=2)
+abstand = strassen_alle.buffer(14, join_style=2)
 kern = Polygon([(MX + 520 * math.cos(a / 24 * 2 * math.pi), MZ + 520 * math.sin(a / 24 * 2 * math.pi)) for a in range(24)])
-sperre = unary_union([abstand, kern] + flaechen_art.get('platz', []) + flaechen_art.get('parkplatz', []) + flaechen_art.get('bahngelaende', []) + flaechen_art.get('bahnsteig', []))
-hof = gebiet.difference(sperre)
-hof = unary_union([q.buffer(-2).buffer(2) for q in teile(hof) if q.area > 250]).simplify(1.0).buffer(0)
+sperre = unary_union([abstand] + [g for a in ('platz', 'parkplatz', 'bahngelaende', 'bahnsteig', 'gewerbe', 'schulhof', 'sport', 'kleingarten') for g in flaechen_art.get(a, [])])
+hof_alle = gebiet.difference(sperre)
+hof_alle = unary_union([q.buffer(-2).buffer(2) for q in teile(hof_alle) if q.area > 250]).simplify(1.0).buffer(0)
+# Im Kern sind Höfe gepflastert (Hofpflaster mit Bäumen), außerhalb begrünt
+hof = hof_alle.difference(kern).buffer(0)
+hofkern = hof_alle.intersection(kern).buffer(0)
 
 # ── Triangulierung und Zellen
-FARBE = {'pflaster': 0, 'gehweg': 1, 'bord': 2, 'fahrbahn': 3, 'rad': 4, 'markierung': 5, 'gruen': 6, 'hof': 7, 'wasser': 8, 'platz': 9, 'parkplatz': 10, 'bahnsteig': 11, 'schotter': 12}
+FARBE = {'pflaster': 0, 'gehweg': 1, 'bord': 2, 'fahrbahn': 3, 'rad': 4, 'markierung': 5, 'gruen': 6, 'hof': 7, 'wasser': 8, 'platz': 9, 'parkplatz': 10, 'bahnsteig': 11, 'schotter': 12,
+         'parkstreifen': 13, 'hofkern': 14, 'gewerbe': 15, 'schulhof': 16, 'sport': 17, 'kleingarten': 18}
 schichten = {}
 def ablegen(art, poly):
     for q in teile(poly):
@@ -121,12 +128,13 @@ def ablegen_liste(art, liste):
             if g is not None: ablegen(art, g.intersection(gebiet))
 
 print('Triangulieren …', flush=True)
-ablegen('gehweg', gehweg); ablegen('bord', bord); ablegen('hof', hof)
+ablegen('gehweg', gehweg); ablegen('bord', bord); ablegen('hof', hof); ablegen('hofkern', hofkern)
 for art, liste in flaechen_art.items():
     a = {'bahngelaende': 'schotter'}.get(art, art)
     if a in FARBE:
         for g in liste: ablegen(a, g.intersection(gebiet))
 ablegen('fahrbahn', strassen)
+if parkflaeche is not None: ablegen('parkstreifen', parkflaeche)
 ablegen_liste('rad', rad); ablegen_liste('markierung', mark)
 import base64
 def b64(arr, typ): return base64.b64encode(np.clip(np.asarray(arr, dtype=np.int64), 0, 65535).astype(typ).tobytes()).decode()
@@ -172,7 +180,9 @@ def baum_punkte():
     pkt = [(x, z) for x, z in osm['baeume'] if abs(x - MX) <= R and abs(z - MZ) <= R]
     from shapely.geometry import Point
     from shapely.prepared import prep
-    for flaeche, schritt, dichte in ((gruen, 16, 0.75), (hof, 22, 0.55)):
+    schulhof = unary_union(flaechen_art.get('schulhof', [])) if flaechen_art.get('schulhof') else None
+    kleing = unary_union(flaechen_art.get('kleingarten', [])) if flaechen_art.get('kleingarten') else None
+    for flaeche, schritt, dichte in ((gruen, 16, 0.75), (hof, 20, 0.6), (hofkern, 26, 0.35), (schulhof, 24, 0.4), (kleing, 12, 0.5)):
         if flaeche is None or flaeche.is_empty: continue
         pf = prep(flaeche)
         x0, z0, x1, z1 = flaeche.bounds

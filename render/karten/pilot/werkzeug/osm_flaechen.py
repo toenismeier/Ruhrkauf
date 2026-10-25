@@ -20,6 +20,11 @@ def art_flaeche(t):
     if (t.get('highway') == 'pedestrian' and t.get('area') == 'yes') or t.get('area:highway') == 'pedestrian' or t.get('place') == 'square' or t.get('amenity') == 'marketplace': return 'platz'
     if t.get('amenity') == 'parking' and t.get('parking', 'surface') == 'surface': return 'parkplatz'
     if t.get('landuse') == 'railway': return 'bahngelaende'
+    if t.get('leisure') in ('pitch', 'sports_centre', 'track') : return 'sport'
+    if t.get('amenity') in ('school', 'kindergarten', 'college', 'university') or t.get('landuse') == 'education': return 'schulhof'
+    if t.get('landuse') in ('industrial', 'commercial', 'retail', 'construction', 'brownfield'): return 'gewerbe'
+    if t.get('landuse') in ('allotments',): return 'kleingarten'
+    if t.get('landuse') in ('residential',): return 'wohnen'
     return None
 out = {'gleise': [], 'flaechen': [], 'baeume': []}
 for wid, (refs, t) in wege.items():

@@ -17,10 +17,13 @@ export const istKartenstadt = (name) => !!KARTEN[name];
 const BLICK = new THREE.Vector3(Math.SQRT1_2 * Math.cos(Math.PI / 6), Math.sin(Math.PI / 6), Math.SQRT1_2 * Math.cos(Math.PI / 6));
 // Bodenschichten (Reihenfolge und Namen wie kartenstadt-bauen.py FARBE): Farbe und Höhe über Gelände
 const BODEN = {
-  umland: '#cdc6b8', pflaster: '#cfc8ba', gehweg: '#e3dfd6', bord: '#b7b1a6', fahrbahn: '#7b8188', rad: '#a98a7c', markierung: FARBEN.markierung,
-  gruen: FARBEN.rasen, hof: '#b4c49a', wasser: FARBEN.wasser, platz: '#d6d0c4', parkplatz: '#9ba1a7', bahnsteig: '#cfc9bd', schotter: '#a39b8e', schiene: '#5b5550',
+  umland: '#cdc6b8', pflaster: '#d3ccbe', gehweg: '#e6e2d9', bord: '#bdb7ac', fahrbahn: '#767c84', parkstreifen: '#8b9097', rad: '#b0897a', markierung: FARBEN.markierung,
+  gruen: FARBEN.rasen, hof: '#a9c08e', hofkern: '#dcd6c9', wasser: FARBEN.wasser, platz: '#d9d2c3', parkplatz: '#969ba2', bahnsteig: '#cfc9bd', schotter: '#a39b8e', schiene: '#5b5550',
+  gewerbe: '#c4bfb5', schulhof: '#d0c3ad', sport: '#7fb36b', kleingarten: '#9fc27f',
 };
-const HOEHE = { umland: -0.03, pflaster: 0, hof: 0.02, wasser: 0.02, gruen: 0.04, platz: 0.03, parkplatz: 0.05, schotter: 0.06, fahrbahn: 0.07, rad: 0.08, markierung: 0.1, gehweg: 0.12, bord: 0.14, bahnsteig: 0.55 };
+// Jede Schicht auf eigener Höhe (gleiche Höhen flackern ineinander)
+const HOEHE = { umland: -0.03, pflaster: 0, hofkern: 0.008, hof: 0.012, gewerbe: 0.016, schulhof: 0.02, kleingarten: 0.024, sport: 0.028, gruen: 0.035, platz: 0.04,
+  parkplatz: 0.045, wasser: 0.052, schotter: 0.06, fahrbahn: 0.07, parkstreifen: 0.074, rad: 0.08, markierung: 0.1, gehweg: 0.12, bord: 0.14, bahnsteig: 0.55 };
 const GL_ART = { 1: 'rail', 2: 'light_rail', 3: 'tram' };
 const NETZ_TYP = { 1: 'haupt', 2: 'neben', 3: 'fussgaenger' };
 const ZELLE = 300;   // Raumzellen der Kartengeometrie: wenige Draw Calls auch bei weitestem Zoom
@@ -376,27 +379,138 @@ function gestalt(g) {
   let dach = flach ? waehle(r, ['#a9a59d', '#b3aea5', '#9fa19f']) : r() < 0.12 ? waehle(r, FARBEN.ziegel) : waehle(r, ['#6f767d', '#7c848c', '#68707a', '#8b939b']);
   if (art === 'kirche') { fassade = waehle(r, ['#cdbfa6', '#bfb39c', '#a99c88']); dach = waehle(r, ['#5d666e', '#6f9a7d']); }
   if (art === 'parkhaus') fassade = '#b7b5b0';
-  return { r, art, hoch, flach, fassade, dach };
+  if (art === 'bauwerk') fassade = '#b9b6ae';
+  // Altbau: Steildach, Wohn- oder Mischnutzung, nicht hoch (Gründerzeit, Vorkriegsbestand)
+  const altbau = !flach && !hoch && ['wohnen', 'gemischt'].includes(art) && g.h < 24;
+  if (altbau && r() < 0.8) fassade = waehle(r, ALTBAU_FARBEN);
+  return { r, art, hoch, flach, fassade, dach, altbau };
 }
 
-/** Fenster als flache Rechtecke auf einer sichtbaren Wand (Grundlinie a→b, Oberkante oben), Ladenzone im Kern. */
-function fensterAufWand(B, g, gs, ax, az, bx, bz, oben, nx, nz, kern) {
+/** Quader entlang einer Wand (u = Wandrichtung, n = Außennormale), Mitte (cx, cy, cz), Maße w (entlang u), h, d (entlang n). */
+function wandBox(B, farbe, cx, cy, cz, w, h, d, ux, uz, nx, nz) {
+  const ecke = (su, sy, sn) => [cx + ux * su * w / 2 + nx * sn * d / 2, cy + sy * h / 2, cz + uz * su * w / 2 + nz * sn * d / 2];
+  const P = [], N = [];
+  const flaeche = (a, b, c, e, n) => { for (const q of [a, b, c, a, c, e]) { P.push(q[0], q[1], q[2]); N.push(n[0], n[1], n[2]); } };
+  // vorne (+n), oben, Seiten ±u; Rückseite und Boden sieht die feste Kamera nie
+  flaeche(ecke(-1, -1, 1), ecke(1, -1, 1), ecke(1, 1, 1), ecke(-1, 1, 1), [nx, 0, nz]);
+  flaeche(ecke(-1, 1, 1), ecke(1, 1, 1), ecke(1, 1, -1), ecke(-1, 1, -1), [0, 1, 0]);
+  flaeche(ecke(1, -1, 1), ecke(1, -1, -1), ecke(1, 1, -1), ecke(1, 1, 1), [ux, 0, uz]);
+  flaeche(ecke(-1, -1, -1), ecke(-1, -1, 1), ecke(-1, 1, 1), ecke(-1, 1, -1), [-ux, 0, -uz]);
+  // Umlauf je Fläche an die Normale anpassen (wandQuad-Logik): Dreiecke mit falscher Richtung umdrehen
+  for (let t = 0; t < P.length; t += 9) {
+    const e1 = [P[t + 3] - P[t], P[t + 4] - P[t + 1], P[t + 5] - P[t + 2]], e2 = [P[t + 6] - P[t], P[t + 7] - P[t + 1], P[t + 8] - P[t + 2]];
+    const c = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+    if (c[0] * N[t] + c[1] * N[t + 1] + c[2] * N[t + 2] < 0) for (let k = 0; k < 3; k++) { const x = P[t + 3 + k]; P[t + 3 + k] = P[t + 6 + k]; P[t + 6 + k] = x; }
+  }
+  B.tri(farbe, cx, cz, P, N);
+}
+
+const ALTBAU_FARBEN = ['#ecdfc8', '#e6d3b3', '#dfe3e0', '#e9d6c4', '#d9c9ad', '#e8e1d2', '#d6dcd8', '#e3cfb6', '#cfd8d0', '#efe6d3'];
+const NACHKRIEG_FARBEN = ['#e4e1d9', '#d9d6cd', '#e2dccf', '#cfd3d2', '#e6e0d2', '#d8d2c4'];
+const dunkel = (c, um) => '#' + new THREE.Color(c).offsetHSL(0, 0, -um).getHexString();
+
+/**
+ * Fassade einer sichtbaren Wand: Hausabschnitte mit eigener Farbe (Parzellen der Blockrandbebauung), Sockel bzw. Ladenzone,
+ * Geschossgesims, Fenster mit Faschen (Altbau), Bandfenster (Hochhaus), Balkone (Nachkrieg), Traufgesims.
+ * Grundlinie a→b, Wandhöhe oben (Traufe), Außennormale (nx, nz).
+ */
+function fassadeAufWand(B, g, gs, ax, az, bx, bz, ya, yb, nx, nz, kern, detail) {
   const L = Math.hypot(bx - ax, bz - az);
-  if (L < 2.4 || oben < 3 || gs.art === 'bauwerk') return;
-  const ux = (bx - ax) / L, uz = (bz - az) / L, o = 0.08;
-  const quad = (farbe, u0, u1, y0, y1) => wandQuad(B, farbe, ax + ux * u0 + nx * o, az + uz * u0 + nz * o, ax + ux * u1 + nx * o, az + uz * u1 + nz * o, y0, y1, y0, y1, nx, nz);
-  if (gs.art === 'parkhaus') { for (let y = 2.9; y < oben - 0.5; y += 2.9) quad('#4a5157', 0.4, L - 0.4, y - 1.55, y - 0.45); return; }
-  const eg = kern && g.h > 7 && (gs.art === 'gewerbe' || gs.art === 'gemischt') ? 4.2 : 0;
+  const ux = (bx - ax) / L, uz = (bz - az) / L, o = 0.06;
+  const P = (u) => [ax + ux * u, az + uz * u];
+  const oben = Math.min(ya, yb, g.traufe > 2 ? g.traufe : g.h);
+  const quad = (farbe, u0, u1, y0, y1, ab = o) => { const [x0, z0] = P(u0), [x1, z1] = P(u1); wandQuad(B, farbe, x0 + nx * ab, z0 + nz * ab, x1 + nx * ab, z1 + nz * ab, y0, y1, y0, y1, nx, nz); };
+  const box = (farbe, u0, u1, y0, y1, tiefe) => { const [cx, cz] = P((u0 + u1) / 2); wandBox(B, farbe, cx + nx * tiefe / 2, (y0 + y1) / 2, cz + nz * tiefe / 2, u1 - u0, y1 - y0, tiefe, ux, uz, nx, nz); };
+  // Hausabschnitte: Altbau- und Wohnzeilen werden in Parzellen von 9 bis 16 m geteilt, jede mit eigener Farbe
+  const zeile = !gs.hoch && ['wohnen', 'gemischt', 'gewerbe'].includes(gs.art) && L > 13 && g.h < 30;
+  const abschnitte = [];
+  if (zeile) {
+    const r = rng(hash(g.id + ':' + Math.round(ax) + ':' + Math.round(az)));
+    let u = 0;
+    while (u < L - 0.5) { let w = 9 + r() * 7; if (L - (u + w) < 7) w = L - u; abschnitte.push([u, u + w, waehle(r, gs.altbau ? ALTBAU_FARBEN : NACHKRIEG_FARBEN)]); u += w; }
+  } else abschnitte.push([0, L, gs.fassade]);
+  // Wandflächen (dachseitig schräge Oberkante bei Giebeln)
+  for (const [u0, u1, farbe] of abschnitte) {
+    const [x0, z0] = P(u0), [x1, z1] = P(u1), t0 = u0 / L, t1 = u1 / L;
+    wandQuad(B, farbe, x0, z0, x1, z1, 0, ya + (yb - ya) * t0, 0, ya + (yb - ya) * t1, nx, nz);
+  }
+  if (!detail || L < 2.4 || oben < 3 || gs.art === 'bauwerk') return;
+  if (gs.art === 'parkhaus') {
+    for (let y = 2.9; y < oben - 0.5; y += 2.9) { quad('#4a5157', 0.4, L - 0.4, y - 1.6, y - 0.45); box('#c9c7c1', 0, L, y - 0.45, y - 0.2, 0.25); }
+    return;
+  }
+  const laden = kern && g.h > 7 && (gs.art === 'gewerbe' || gs.art === 'gemischt');
+  const eg = laden ? 4.4 : 0;
   const kirche = gs.art === 'kirche';
-  const gh = kirche ? 7 : gs.hoch ? 3.6 : 3.2;
-  const raster = kirche ? 4.5 : gs.hoch ? 2.2 : 3.1, fw = kirche ? 1.4 : gs.hoch ? 1.7 : 1.3, fh = kirche ? 4.5 : gs.hoch ? 2.4 : 1.75;
-  const n = Math.max(1, Math.floor((L - 0.8) / raster)), rand = (L - n * raster) / 2;
-  const farbe = gs.hoch ? FARBEN.glas : FARBEN.fenster;
-  if (eg) { quad(FARBEN.laden, 0.3, L - 0.3, 0.2, 3.2); quad(heller(gs.fassade, 0.06), 0, L, eg - 0.5, eg - 0.15); }
-  for (let k = 0; ; k++) {
-    const y = eg + k * gh + gh * 0.55;
-    if (y + fh / 2 > oben - 0.4) break;
-    for (let i = 0; i < n; i++) { const u = rand + raster * (i + 0.5); quad(farbe, u - fw / 2, u + fw / 2, y - fh / 2, y + fh / 2); }
+  for (const [u0, u1, farbe] of abschnitte) {
+    const w = u1 - u0;
+    // Sockel bzw. Ladenzone mit Schaufenstern, Kragplatte und Geschossgesims
+    if (laden) {
+      quad(dunkel(farbe, 0.08), u0, u1, 0, eg, o * 0.5);
+      const fenster = Math.max(1, Math.round(w / 4.5)), fb = w / fenster;
+      for (let i = 0; i < fenster; i++) quad(i % 3 === 1 ? '#2f3a43' : FARBEN.laden, u0 + i * fb + 0.35, u0 + (i + 1) * fb - 0.35, 0.25, 3.3);
+      box(heller(farbe, 0.05), u0, u1, eg - 0.35, eg, 0.35);
+    } else if (!gs.hoch) quad(dunkel(farbe, 0.12), u0, u1, 0, 0.8, o * 0.5);
+    if (gs.altbau && !laden && oben > 7) box(heller(farbe, 0.04), u0, u1, 3.6, 3.85, 0.18);
+    // Fenster
+    if (gs.hoch) {
+      // Hochhaus: durchgehende Fensterbänder je Geschoss
+      for (let y = eg + 1.2; y + 1.3 < oben - 0.6; y += 3.6) quad(FARBEN.glas, u0 + 0.5, u1 - 0.5, y, y + 2.1);
+      continue;
+    }
+    const gh = kirche ? 7 : 3.3, raster = kirche ? 4.5 : gs.altbau ? 2.9 : 3.2;
+    const fw = kirche ? 1.4 : gs.altbau ? 1.15 : 1.45, fh = kirche ? 4.5 : gs.altbau ? 1.9 : 1.5;
+    const n = Math.max(1, Math.floor((w - 0.8) / raster)), rand = (w - n * raster) / 2;
+    const fasche = heller(farbe, 0.07), balkon = !gs.altbau && gs.art === 'wohnen' && g.h > 8 && g.h < 25;
+    for (let k = 0; ; k++) {
+      const y = (eg || 0) + k * gh + gh * 0.55;
+      if (y + fh / 2 > oben - 0.5) break;
+      for (let i = 0; i < n; i++) {
+        const u = u0 + rand + raster * (i + 0.5);
+        if (gs.altbau && !kirche) quad(fasche, u - fw / 2 - 0.22, u + fw / 2 + 0.22, y - fh / 2 - 0.25, y + fh / 2 + 0.3, o * 0.6);
+        quad(kirche ? '#4f5d68' : FARBEN.fenster, u - fw / 2, u + fw / 2, y - fh / 2, y + fh / 2);
+        if (balkon && k >= 1 && i % 3 === 1) box(heller(farbe, 0.08), u - 1.3, u + 1.3, y - fh / 2 - 0.45, y - fh / 2 + 0.55, 1.2);
+      }
+    }
+  }
+  // Traufgesims über die ganze Wand (gibt jedem Haus eine klare Oberkante)
+  if (!kirche && Math.abs(ya - yb) < 0.3) box(gs.hoch ? '#9ea6ad' : heller(abschnitte[0][2], 0.06), 0, L, oben - (gs.altbau ? 0.55 : 0.35), oben, gs.altbau ? 0.38 : 0.2);
+}
+
+/** Satteldächer: Gauben auf den zur Kamera geneigten Flächen, Schornsteine am First. */
+function dachdetails(B, g, gs) {
+  if (gs.flach || gs.hoch || gs.art === 'kirche') return;
+  let first = null;
+  g.dach.forEach((dr) => {
+    const pts = offen(dr);
+    if (pts.length < 3) return;
+    for (const p of pts) if (!first || p[2] > first[2]) first = p;
+    // Flächennormale
+    let nx = 0, ny = 0, nz = 0;
+    for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; nx += (a[2] - b[2]) * (a[1] + b[1]); ny += (a[1] - b[1]) * (a[0] + b[0]); nz += (a[0] - b[0]) * (a[2] + b[2]); }
+    const l = Math.hypot(nx, ny, nz); if (!l) return;
+    nx /= l; ny /= l; nz /= l; if (ny < 0) { nx = -nx; ny = -ny; nz = -nz; }
+    if (ny > 0.92 || ny < 0.35 || nx * BLICK.x + nz * BLICK.z < 0.1) return;
+    // Traufkante: die zwei tiefsten Punkte
+    const s = [...pts].sort((p, q) => p[2] - q[2]), [a, b] = s, L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (L < 8) return;
+    const hl = Math.hypot(nx, nz), hx = nx / hl, hz = nz / hl, ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
+    const anz = Math.min(4, Math.floor(L / 6)), r = rng(hash(g.id + ':g' + Math.round(a[0])));
+    if (r() < 0.35) return;
+    const tief = 1.6, ysoll = (a[2] + b[2]) / 2 + 0.9;
+    for (let i = 0; i < anz; i++) {
+      const u = (L / anz) * (i + 0.5), cx = a[0] + ux * u - hx * (tief + 0.6), cz = a[1] + uz * u - hz * (tief + 0.6);
+      wandBox(B, '#d9d4c8', cx, ysoll + 0.8, cz, 1.8, 1.6, tief, ux, uz, hx, hz);
+      wandQuad(B, FARBEN.fenster, cx + hx * (tief / 2 + 0.02) - ux * 0.5, cz + hz * (tief / 2 + 0.02) - uz * 0.5, cx + hx * (tief / 2 + 0.02) + ux * 0.5, cz + hz * (tief / 2 + 0.02) + uz * 0.5, ysoll + 0.25, ysoll + 1.35, ysoll + 0.25, ysoll + 1.35, hx, hz);
+    }
+  });
+  if (first && g.flaeche > 60) {
+    const r = rng(hash(g.id + ':s'));
+    const zahl = 1 + (g.flaeche > 400 ? 1 : 0);
+    for (let i = 0; i < zahl; i++) {
+      const x = first[0] + (r() - 0.5) * 6, z = first[1] + (r() - 0.5) * 6;
+      wandBox(B, r() < 0.5 ? '#9c5d48' : '#8a8a86', x, first[2] + 0.4, z, 0.7, 2.0, 0.7, 1, 0, 0, 1);
+    }
   }
 }
 
@@ -430,18 +544,20 @@ function gebaeudeBauen(B, S, g, kern, detail = true) {
     }
     dachflaeche(B, dr, gs.dach, g.dachIdx?.[j]);
   });
-  const mx = g.mx, mz = g.mz;
+  // Außen = die Seite der Kante, auf der kein Dach liegt (Probe neben der Kantenmitte; gilt auch für L-, U- und Hofgebäude)
+  const dach2d = g.dach.map((dr) => offen(dr).map((p) => [p[0], p[1]]));
+  const unterDach = (x, z) => dach2d.some((r) => imPolygon(x, z, r)) || (g.boden.length > 2 && imPolygon(x, z, g.boden));
   for (const [k, a, b] of kanten) {
     if (zahl.get(k) > 1) continue;
     const ex = b[0] - a[0], ez = b[1] - a[1], L = Math.hypot(ex, ez);
     if (L < 0.3) continue;
     let nx = ez / L, nz = -ex / L;
-    // nach außen: weg vom Gebäudeschwerpunkt (Mitte der Kante)
-    if (nx * ((a[0] + b[0]) / 2 - mx) + nz * ((a[1] + b[1]) / 2 - mz) < 0) { nx = -nx; nz = -nz; }
+    const mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2;
+    if (unterDach(mx + nx * 0.4, mz + nz * 0.4) && !unterDach(mx - nx * 0.4, mz - nz * 0.4)) { nx = -nx; nz = -nz; }
     if (nx * BLICK.x + nz * BLICK.z <= 0.02) continue; // Rückseiten sieht die feste Kamera nie
-    wandQuad(B, gs.fassade, a[0], a[1], b[0], b[1], 0, a[2], 0, b[2], nx, nz);
-    if (detail) fensterAufWand(B, g, gs, a[0], a[1], b[0], b[1], Math.min(a[2], b[2], g.traufe > 2 ? g.traufe : g.h), nx, nz, kern);
+    fassadeAufWand(B, g, gs, a[0], a[1], b[0], b[1], a[2], b[2], nx, nz, kern, detail);
   }
+  if (detail) dachdetails(B, g, gs);
   // Dachaufbauten auf großen Flachdächern
   if (gs.flach && g.h > 6 && g.flaeche > 180 && g.boden.length > 2) {
     const [a, b, c, d] = g.bbox, anz = Math.min(4, 1 + Math.floor(g.flaeche / 900));
