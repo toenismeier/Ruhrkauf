@@ -14,7 +14,7 @@
   --hw-t-text: 500 var(--hw-gr-text, 11.85px)/1.3 var(--hw-schrift);         /* Sprecher, Bedienbeschriftung */
   --hw-t-lese: 400 var(--hw-gr-lese, 10.6px)/12px var(--hw-schrift);      /* Fließtext in Karten */
   --hw-t-marke: 300 var(--hw-gr-marke, 11.8px)/1.2 var(--hw-schrift);       /* VERSALIEN-Beschriftung, dünn */
-  --hw-t-zahl: 400 var(--hw-gr-zahl, 24.75px)/1 var(--hw-schrift);           /* Großkennzahl */
+  --hw-t-zahl: 500 var(--hw-gr-zahl, 24.75px)/1 var(--hw-schrift);           /* Großkennzahl */
   --hw-t-wert: 400 var(--hw-gr-wert, 18.3px)/1 var(--hw-schrift);        /* Wert neben Skala */
   --hw-t-klein: 400 var(--hw-gr-klein, 10.4px)/1.2 var(--hw-schrift);     /* Abweichung, Reiter */
   --hw-kontur-abstand: 2.33px;  /* Abstand der hellen Innenkontur zur Kante */
@@ -598,6 +598,7 @@ button.hw-g2-reihe { min-height: 44px; }
 .hw-g3-kanal { display: flex; flex-direction: column; height: 100%; padding: 14px 18px 20px; }
 .hw-g3-bild { display: flex; justify-content: center; align-items: flex-end; height: 132px; margin-bottom: 10px; }
 .hw-g3-bild > svg { height: 100%; width: auto; max-width: 100%; }
+.hw-g3-bild > .hw-ill { height: 100%; width: 100%; object-fit: contain; object-position: bottom; }
 .hw-g3-links { text-align: left; }
 .hw-g3-text { margin: 10px 0 0; flex: 1 0 auto; }
 .hw-g3-team { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 16px 0 14px; }
@@ -613,7 +614,7 @@ button.hw-g2-reihe { min-height: 44px; }
   --f: var(--karte); --l: var(--kartenlinie); background: var(--f); box-shadow: inset 0 0 0 var(--hw-kontur-abstand) var(--f), inset 0 0 0 calc(var(--hw-kontur-abstand) + var(--hw-kontur)) var(--l); border-radius: var(--hw-radius); }
 .hw-g3-kachel[aria-pressed='true'] { --l: var(--akzent-linie); }
 .hw-g3-kachelbild { display: flex; justify-content: center; align-items: center; height: 92px; }
-.hw-g3-kachelbild > svg { height: 84px; width: auto; max-width: 100%; }
+.hw-g3-kachelbild > svg, .hw-g3-kachelbild > .hw-ill { height: 84px; width: 100%; max-width: 100%; object-fit: contain; }
 .hw-g3-kacheltitel { margin-top: 10px; font: var(--hw-t-titel); font-size: 15px; }
 .hw-g3-kachelwert { margin-top: 10px; text-align: right; font: var(--hw-t-wert); white-space: nowrap; }
 .hw-g3-kachelfuss { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; margin-top: 3px; font: var(--hw-t-text); font-size: 11.6px; text-align: left; }
@@ -1224,3 +1225,114 @@ body.spielende-aktiv { overflow: hidden; }
 [data-sym] > .hw-ill { width: 100%; height: 100%; }
 .hw-kanalbild { width: 100%; height: 100%; object-fit: contain; }
 #psymbol > .hw-ill { width: 100%; height: 100%; }
+
+/* ───── Finanzen (Coffee Finance, vermessen an neu-2510/finance-woche.png, Faktor 2,289) ─────
+   Balken 130 px hoch und 15 px breit, Wochenbeschriftung 12,4 px; zwei schmale Umschalter mittig (30 px hoch,
+   Text 12,2 px Versalien, Breite nach Inhalt), 32 px Abstand; Tabellenkopf 16 px. */
+.hw-fin { display: none; }
+.hw-balkenfeld { margin-top: 30px; }
+.hw-balkenfeld .hw-balken { --hoehe: 130px !important; }
+.hw-balkenfeld .hw-balken > div { gap: 9px; }
+.hw-balkenfeld .hw-balkenfuss { margin-top: 9px; font: var(--hw-t-text); font-size: 12.4px; font-weight: 400; }
+.hw-fin-balken .hw-legende { display: none; }
+.hw-fin-tabellen { margin-top: 26px; }
+#panel .hw-fin-tabellen .hw-tabelle { margin-top: 26px; }
+#panel .hw-fin-tabellen .hw-tabelle:first-child { margin-top: 0; }
+.hw-fin-tabellen .hw-tabelle th:first-child { font: 500 15.25px/1.2 var(--hw-schrift); }
+.hw-fin-tabellen .hw-tabelle th { font-size: 14.4px; }
+.hw-fin-tabellen .hw-tabelle td { line-height: 24px; font-size: 13.2px; }
+.hw-fin-tabellen .hw-liste { margin-top: 22px; }
+/* Fünf Reiter (Coffee 20: Finance … Add Floor): gleich breit, höchstens 80 px, aktiver ohne Zusatzrand. */
+#preiter > .hw-reiter:has(> button:nth-child(5)) { padding: 0 6px; }
+#preiter > .hw-reiter:has(> button:nth-child(5)) > button { flex: 1 1 0; min-width: 0; max-width: 80px; margin: 0; }
+#preiter > .hw-reiter:has(> button:nth-child(5)) > button[aria-current='page'] { flex: 1 1 0; margin: 0 2px; }
+
+/* ───── Vorstand wie Coffee „Board Meeting“ (neu-2510/board-1.png, board-2.png): Saal 300 px, Vorlage mit Titel 18,3 px,
+   Fließtext, Frist, Stepper „Vorschlag“, ein Knopf „Abstimmen“ mittig. */
+.hw-kopfbild.hw-saal { height: 300px; }
+.hw-kopfbild.hw-saal > img { object-fit: contain; }
+.hw-vorlage-block { margin: 0 calc(-1 * var(--hw-rand)); padding: 34px var(--hw-rand) 30px; border-bottom: 1px solid color-mix(in srgb, var(--kartenlinie) 45%, transparent); }
+.hw-vorlage-titel { margin: 0 0 14px; font: var(--hw-t-wert); font-weight: 500; }
+.hw-vorlage-text { margin: 0 0 18px; font: var(--hw-t-text); font-weight: 400; line-height: 1.35; }
+.hw-vorlage-frist { margin: 2px 0 16px; font: var(--hw-t-text); font-weight: 400; }
+.hw-vorlage-block .hw-feld .hw-stepper { width: 250px; }
+.hw-knoepfe.hw-mitte { justify-content: center; margin-top: 24px; }
+.hw-knoepfe.hw-mitte .hw-knopf { min-width: 150px; flex: 0 0 auto; }
+
+/* ───── Wochenergebnis wie Coffee „Weekly Results“ (neu-2510/weekly-zahlen.png, weekly-zeitung.png) ─────
+   Kassenbrücke eingerückt (51 px links und rechts), Zeitung als Papierkarte mit 20 px Rand, zwei Spalten mit Mittellinie. */
+.hw-wb-fluss { margin: 34px 31px 0; }
+.hw-wb-fluss .hw-tabelle td { line-height: 31px; font-size: 13.2px; }
+.hw-wb-fluss .hw-tabelle td:first-child { font-size: 13.2px; }
+.hw-wb-fluss .hw-tabelle td + td { font-weight: 600; }
+.hw-wb-fluss .hw-tabelle tr.summe td { padding-top: 12px; box-shadow: inset 0 1.33px 0 0 var(--text); }
+.hw-wb-fluss .hw-tabelle tr.summe td:first-child { box-shadow: inset 0 1.33px 0 0 var(--text); }
+.hw-wb-kasse { margin: 10px 0 0; text-align: right; font: var(--hw-t-klein); color: var(--leise); }
+.zk { display: block; width: calc(100% - 40px); margin: 40px 20px 8px; padding: 22px 10px 8px; border: 0; border-radius: 0; background: #eae8e2; color: #111; text-align: left; font: inherit; }
+.zk-titel { display: block; text-align: center; font: 700 24.75px/1 var(--hw-schrift); letter-spacing: -.02em; text-transform: uppercase; }
+.zk-datum { display: block; margin: 6px 20px 0 0; padding-bottom: 8px; text-align: right; font: var(--hw-t-klein); font-size: 10.4px; border-bottom: 3px double #111; }
+.zk-reiter { display: flex; gap: 18px; overflow: hidden; padding: 12px 10px 12px; border-bottom: 1.33px solid #111; white-space: nowrap; font: 400 14.4px/1 var(--hw-schrift); }
+.zk-reiter .an { font-weight: 700; }
+.zk-spalten { display: grid; grid-template-columns: 1fr 1fr; }
+.zk-spalte { display: block; padding: 12px 10px 0; }
+.zk-spalte + .zk-spalte { border-left: 1px solid #8e8c88; }
+.zk-artikel { display: block; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid #8e8c88; }
+.zk-bild { display: block; height: 82px; margin-bottom: 8px; }
+.zk-bild > svg, .zk-bild > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.zk-artikel h3 { margin: 0 0 6px; font: 500 14.4px/1.2 var(--hw-schrift); hyphens: auto; overflow-wrap: break-word; }
+.zk-artikel p { margin: 0; font: 400 10.6px/1.35 var(--hw-schrift); hyphens: auto; overflow-wrap: break-word; }
+/* Vorgänge erst nach dem Bericht: der Bericht tritt zurück, die Stadt bleibt sichtbar. */
+#wochen-overlay.vorgaenge .hw-wb { background: none; }
+#wochen-overlay.vorgaenge .hw-wb > :not(#wb-vorfall) { visibility: hidden; }
+.hw-kopf-symbol > .hw-ill { width: 100%; height: 100%; }
+.zk-spalten.eins { grid-template-columns: 1fr; }
+.zk-spalten.eins .zk-bild { height: 150px; }
+/* Leerzustand mit Gegenstand (Coffee zeigt nie eine leere Fläche): Motiv 150 px, Satz mittig. */
+.hw-leer-bild { display: flex; flex-direction: column; align-items: center; padding: 28px 24px 22px; text-align: center; }
+.hw-leer-bild .hw-leer-motiv { width: 150px; height: 130px; margin-bottom: 14px; }
+.hw-leer-bild b { font: var(--hw-t-titel); margin-bottom: 6px; }
+
+/* ───── Text-Umschalter wie Coffee Finance (INCOME | BALANCE SHEET | CASH FLOW): schmal, mittig, Breite nach Inhalt,
+   sichtbar 30 px, Tippfläche 44 px (Kontur und aktive Fläche 7 px eingerückt). Segmentleisten mit Bild (Coffee 26) bleiben breit. */
+#panel.hw .hw-rumpf .hw-segment:not(:has(img)), .hw-fin-schalter .hw-segment { width: fit-content; max-width: 100%; height: 44px; margin: -7px auto; isolation: isolate; }
+#panel.hw .hw-rumpf .hw-segment:not(:has(img)) > button { position: relative; flex: 0 1 auto; min-width: 0; min-height: 0 !important; height: 44px; padding: 0 12.5px; background: none; border-radius: 0;
+  font: var(--hw-t-text); font-size: 12.3px; font-weight: 400; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+#panel.hw .hw-rumpf .hw-segment:not(:has(img))::after { top: 7px; bottom: 7px; }
+#panel.hw .hw-rumpf .hw-segment:not(:has(img)) > button::before { content: ''; position: absolute; left: 0; right: 0; top: 7px; bottom: 7px; z-index: -1; background: var(--akzent); }
+#panel.hw .hw-rumpf .hw-segment:not(:has(img)) > button:first-child::before { border-radius: var(--hw-radius) 0 0 var(--hw-radius); }
+#panel.hw .hw-rumpf .hw-segment:not(:has(img)) > button:last-child::before { border-radius: 0 var(--hw-radius) var(--hw-radius) 0; }
+#panel.hw .hw-rumpf .hw-segment:not(:has(img)) > button[aria-pressed='true']::before { background: var(--akzent-aktiv); }
+#panel.hw .hw-rumpf .hw-segment:not(:has(img)) + .hw-segment:not(:has(img)) { margin-top: 9px; }
+.hw-fin-schalter { display: flex; flex-direction: column; align-items: center; gap: 16px; margin: 40px 0 0; }
+#panel.hw .hw-fin-schalter .hw-segment + .hw-segment { margin-top: -7px; }
+/* Viele kurze Optionen (Formate, Ampel, Posteingang): enger, ohne Versalien, damit fünf bis sechs Teile passen. */
+#panel.hw .hw-rumpf .hw-segment.eng:not(:has(img)) > button, #panel.hw .hw-rumpf .hw-segment:not(:has(img)):has(> button:nth-child(5)) > button { padding: 0 7px; letter-spacing: 0; text-transform: none; font-size: 11.85px; }
+/* Säulenpaare im Spiel: obere Spur (positive Werte, gemeinsame Skala), bei Verlusten eine Nulllinie und ein Band nach unten. */
+.hw-balkenfeld .hw-balken > div { flex-direction: column; align-items: center; justify-content: flex-end; gap: 0 !important; }
+.hw-balkenfeld .hw-balken > div > span { display: flex; gap: 9px; width: 100%; justify-content: center; }
+.hw-balkenfeld .hw-balken > div > .o { flex: 1 1 auto; align-items: flex-end; }
+.hw-balkenfeld.mit-neg .hw-balken > div > .o { flex: 0 0 76%; }
+.hw-balkenfeld.mit-neg .hw-balken > div > .u { flex: 0 0 24%; align-items: flex-start; border-top: 1.33px solid color-mix(in srgb, var(--text) 55%, transparent); }
+.hw-balkenfeld .hw-balken i.leer { visibility: hidden; height: 0; }
+.hw-balkenfeld .hw-balken .u i { border-radius: 0 0 7.5px 7.5px; }
+.hw-balkenfeld .hw-balken .geist i { opacity: .16; }
+.hw-fin-einheit { margin: 0 0 14px; text-align: right; font: var(--hw-t-klein); color: var(--leise); }
+/* Feste Spalten durch alle Abschnitte (Coffee): Wertespalten je 74 px, Summenlinie nur unter den Werten. */
+.hw-fin-tabellen .hw-tabelle { table-layout: fixed; }
+.hw-fin-tabellen .hw-tabelle th + th, .hw-fin-tabellen .hw-tabelle td + td { width: 74px; padding-left: 0; }
+.hw-fin-tabellen .hw-tabelle th:first-child { width: auto; }
+.hw-vorlage-frist, .hw-vorlage-kosten { margin: 3px 0 18px; font: var(--hw-t-wert); font-weight: 500; }
+.hw-vorlage-kostenname { display: block; margin-top: 18px; }
+#panel.hw .hw-rumpf .hw-vorlage-block .hw-segment { margin-left: 0; margin-right: 0; }
+/* Zeitungskarte: ein Innenrand für alle Teile (Coffee ca. 23 px), Kopf als schmale Antiqua. */
+.zk { padding: 22px 0 8px; }
+.zk-titel { margin: 0 22px; font: 700 29px/1 'Bodoni 72', 'Didot', 'Bodoni MT', 'Times New Roman', Georgia, serif; letter-spacing: -.01em; transform: scaleX(.86); }
+.zk-datum { margin: 6px 22px 0; }
+.zk-reiter { margin: 0 22px; padding: 12px 0; }
+.zk-spalten { margin: 0 22px; }
+.zk-spalte { padding: 12px 10px 0 0; }
+.zk-spalte + .zk-spalte { padding: 12px 0 0 10px; }
+.zk-bild > svg rect:first-child { fill: transparent; }
+#panel.hw .hw-rumpf .hw-segment:not(:has(img)):has(> button:nth-child(6)) > button { padding: 0 5px; font-size: 10.4px; }
+.hw-fin-tabellen .hw-tabelle th + th { white-space: normal; font-size: 13.2px; line-height: 1.15; vertical-align: bottom; }
+.hw-fin-tabellen .hw-tabelle td + td { overflow: hidden; text-overflow: clip; }

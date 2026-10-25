@@ -127,7 +127,7 @@ export function organisationModul(ctx) {
       + x.regionen.reduce((n, r) => n + (r.stelle?.person ? 0 : 1) + r.cluster.filter((c) => !c.stelle?.person).length, 0);
     const vorlagen = x.bereiche.reduce((n, b) => n + (b.offen ?? 0), 0), selbst = x.bereiche.filter((b) => !b.delegiert).length;
     const chro = x.ressorts.find((r) => r.id === 'chro')?.person;
-    let h = K.bereich('zentrale', 'zentrale') + G4 + K.sprecher({ text: (frei ? '<b>' + frei + (frei === 1 ? ' Leitungsstelle ist' : ' Leitungsstellen sind') + ' unbesetzt.</b> ' : '<b>Alle Leitungsstellen sind besetzt.</b> ')
+    let h = K.bereich('zentrale', 'organisation') + G4 + K.sprecher({ text: (frei ? '<b>' + frei + (frei === 1 ? ' Leitungsstelle ist' : ' Leitungsstellen sind') + ' unbesetzt.</b> ' : '<b>Alle Leitungsstellen sind besetzt.</b> ')
       + (vorlagen ? vorlagen + ' Vorlagen warten auf Entscheidung.' : 'Keine offenen Vorlagen.'), unter: (chro ? chro.name + ' · ' : '') + 'Personalvorstand',
       person: chro?.portraet ? portraet(chro.portraet, 72) : '', ton: frei ? 'engpass' : '' });
     let r = '';

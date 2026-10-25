@@ -22,7 +22,7 @@ const etageKurz = (n) => n === 0 ? 'EG' : n + '. OG';
 const klick = (...x) => `onclick="hqKlick(${x.map((v) => `'${esc(String(v))}'`).join(',')})"`;
 
 /** Reiterleiste der Zentrale (Coffee 20: Finanzen, Einkauf, Vorstand …). Gilt für Zentrale, Vorstand, Organisation, Reporting. */
-export const zentraleReiter = (aktiv) => K.reiterUnten([['zentrale', 'Zentrale', 'zentrale'], ['vorstand', 'Vorstand', 'vorstand'],
+export const zentraleReiter = (aktiv) => K.reiterUnten([['finanzen', 'Finanzen', 'finanzen'], ['zentrale', 'Zentrale', 'zentrale'], ['vorstand', 'Vorstand', 'vorstand'],
   ['organisation', 'Organisation', 'organisation'], ['reporting', 'Reporting', 'reporting']], aktiv, (id) => klick('reiter', id));
 
 /** Kopfbild: Etagenschnitt der gewählten Etage, unten links der Knopf zur Abteilung auf dieser Etage. */
@@ -74,11 +74,7 @@ export function zentraleHtml(c) {
   let r = K.gross([
     { label: 'Kosten je Woche', p: 'hq:kosten', wert: geld(u.kostenWoche), unter: diffStart ? K.abweichung(-diffStart, (diffStart > 0 ? '+' : '−') + geld(Math.abs(diffStart)) + ' zum Start', null) : 'wie zum Start' },
     { label: 'Beschäftigte', p: 'hq:fte', wert: fmt.format(Math.round(u.fte)) + ' FTE', unter: `${fmt.format(qmMiete)} qm gemietet` }]);
-  // Verlauf: Zentralkosten der letzten fünf Wochenabschlüsse
-  const letzte = (c.historie ?? []).slice(-5);
-  r += K.balkenPaar([{ titel: letzte.length ? `Zentralkosten KW ${kwVon(letzte[0].woche)} bis ${kwVon(letzte[letzte.length - 1].woche)}` : 'Zentralkosten', serie: 'a',
-    punkte: letzte.map((k) => ({ label: String(kwVon(k.woche)), wert: k.zentrale })) }]);
-
+  // Der Verlauf steht im Reiter Finanzen; hier nur die Aufstellung der Woche.
   // Kostenaufstellung wie die GuV in Coffee 17
   const ko = u.kosten ?? {};
   const anteil = (v) => u.kostenWoche ? (100 * v / u.kostenWoche).toFixed(1).replace('.', ',') + ' %' : '0 %';

@@ -11,7 +11,7 @@ import { THREE, Sammler, KompaktSammler, setzeLod, entferneKleineSchilder, neueS
 import { echterBauer } from './kit/bauer.js';
 import { etage } from './kit/grundriss.js';
 import { RASTER } from './kit/innen.js';
-import { hqEtage, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './kit/hq.js';
+import { hqEtage, hqSitzungssaal, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './kit/hq.js';
 import { warenhaus } from './kit/warenhaus.js';
 import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer, dachFlaechenBeimBau } from './kit/stadt.js';
 import { STADTLISTE } from './kit/staedte.js';
@@ -31,6 +31,7 @@ import { vorstandModul } from './ui/vorstand.js';
 // O01 Organisation
 import { organisationModul } from './ui/organisation.js';
 import { zentraleAbteilungHtml, zentraleHtml } from './ui/zentrale-abteilungen.js';
+import { finanzenModul } from './ui/finanzen.js';
 import { posteingangModul } from './ui/posteingang.js';
 import { zeitungModul } from './ui/zeitung.js';
 import { statistikModul } from './ui/statistik.js';
@@ -436,9 +437,11 @@ function bahnhofPinErstellen() {
   const g = c.getContext('2d');
   g.fillStyle = '#28465a'; g.beginPath(); g.arc(64, 61, 49, 0, Math.PI * 2); g.fill();
   g.lineWidth = 6; g.strokeStyle = '#fff'; g.stroke();
-  g.fillStyle = '#fff'; g.font = 'bold 63px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText('🚆', 64, 59);
-  bahnhofPin = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthTest: false }));
+  // E47: ICE-Motiv statt Emoji (sah je Gerät anders aus); Bild lädt asynchron, die Textur wird danach aktualisiert.
+  const tex = new THREE.CanvasTexture(c);
+  const ice = HK.ILLUSTRATIONEN_ROH?.bahn;
+  if (ice) { const im = new Image(); im.onload = () => { const s = 74 / Math.max(im.width, im.height); g.drawImage(im, 64 - im.width * s / 2, 61 - im.height * s / 2, im.width * s, im.height * s); tex.needsUpdate = true; }; im.src = ice.u; }
+  bahnhofPin = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
   bahnhofPin.position.set(x, 42, z); bahnhofPin.scale.set(15, 15, 1); bahnhofPin.renderOrder = 35;
   scene.add(bahnhofPin);
 }
@@ -905,7 +908,7 @@ let vorherigerFokus = null;
 let wk = null;
 let st = null;
 let ch = null;
-const module = () => [ek, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt, ch, ec, pp].filter(Boolean);
+const module = () => [ek, fi, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton, zt, ch, ec, pp].filter(Boolean);
 function panel(titel, unter, html, klasse = '') {
   for (const m of module()) m.zu();
   menueZu(); ebenenZu();
@@ -1117,7 +1120,7 @@ function oeffneWettbewerber(id) {
   // Q30: Hauptfrage „Wie stark kostet mich dieser Wettbewerber, und in welchen Sortimenten?“
   const summe = wirkung.reduce((x, [, v]) => x + Number(v), 0), staerkste = wirkung[0];
   const aktion = w.status === 'raeumung' ? 'Räumungsverkauf bis 70 %' : w.rabatt ? Math.round(w.rabatt * 100) + ' % Rabatt' : w.status === 'eroeffnung' ? 'Neueröffnung' : 'keine';
-  let html = HK.bereich('betrieb', 'karte') + HK.sprecher({ text: staerkste && staerkste[1] < 0 ? `${esc(w.name)} kostet uns am meisten in ${esc(E.GRUPPEN[staerkste[0]]?.name ?? staerkste[0])} (${Number(staerkste[1]).toFixed(2).replace('.', ',').replace('-', '−')} %). Aktion: ${esc(aktion)}.` : `${esc(w.name)} wirkt derzeit kaum auf Hartwig. Aktion: ${esc(aktion)}.`,
+  let html = HK.bereich('betrieb', 'wettbewerber') + HK.sprecher({ text: staerkste && staerkste[1] < 0 ? `${esc(w.name)} kostet uns am meisten in ${esc(E.GRUPPEN[staerkste[0]]?.name ?? staerkste[0])} (${Number(staerkste[1]).toFixed(2).replace('.', ',').replace('-', '−')} %). Aktion: ${esc(aktion)}.` : `${esc(w.name)} wirkt derzeit kaum auf Hartwig. Aktion: ${esc(aktion)}.`,
     unter: 'Marktbeobachtung', ton: w.rabatt || w.status === 'eroeffnung' ? 'engpass' : '' });
   let rumpf = HK.gross([{ label: 'Stärke', wert: Math.round(u.staerke * 100) + ' / 100', ton: u.staerke > 0.6 ? 'schlecht' : '' }, { label: 'Grundfläche', wert: fmt.format(w.grundflaecheQm) + ' qm' }]);
   rumpf += HK.liste([HK.zeile({ was: 'Art', wert: esc(WB_ART[w.art] ?? w.art) }), HK.zeile({ was: 'Status', wert: esc(WB_STATUS[w.status] ?? w.status), wertUnter: esc(start) })]);
@@ -1233,7 +1236,7 @@ window.hqKlick = (art, a, b, c) => {
   if (art === 'aufgabe') return hqTun({ typ: 'delegation', bereich: a, aufgabe: b, an: c === 'true' });
   if (art === 'organisation') { offenesHq = null; return oeffneModul(org); }
   // E47: Reiterleiste der Zentrale (Zentrale, Vorstand, Organisation, Reporting)
-  if (art === 'reiter') { hqAbteilung = null; hqEtageWahl = null; if (a === 'vorstand') return oeffneModul(vs); if (a === 'organisation') return oeffneModul(org); if (a === 'reporting') return oeffneModul(rg); return oeffneHq(); }
+  if (art === 'reiter') { hqAbteilung = null; hqEtageWahl = null; if (a === 'finanzen') return oeffneModul(fi); if (a === 'vorstand') return oeffneModul(vs); if (a === 'organisation') return oeffneModul(org); if (a === 'reporting') return oeffneModul(rg); return oeffneHq(); }
   if (art === 'mieten') { const an = E.hqUebersicht(s).angebote.find((q) => q.id === a); hqTun({ typ: 'hqMieten', angebot: a, etagen: an.etagen.map((e) => e.nr) }); }
   if (art === 'kuendigenE') hqTun({ typ: 'hqEtageKuendigen', gebaeude: a, etage: Number(b) });
   if (art === 'archiv') hqTun({ typ: 'hqArchivSetzen', gebaeude: a, etage: Number(b), aktiv: c === 'true' });
@@ -1267,9 +1270,16 @@ function oeffneEinkauf(seite = 'uebersicht', arg) { offenesHaus = null; offenesH
 $('einkauf').addEventListener('click', () => oeffneEinkauf());
 const hb = hausbesuchModul({ E, s: () => s, stadtName: () => stadtName, oeffneEinkauf, erstHaus: () => offenesHaus || s?.haeuser.find((h) => h.stadt === stadtName && h.status === 'offen')?.id, menueZu });
 // ─────────────────────────────────────────── Vorstand, Marketing, Produktentwicklung (ui/vorstand.js, marketing.js, produkte.js)
-let vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null, ec = null;
+let fi = null, vs = null, mk = null, pr = null, po = null, org = null, rg = null, itM = null, pl = null, um = null, pe = null, spielende = null, er = null, zt = null, ec = null;
 const nachAktion = () => { cockpitZeigen(); stadtChipsZeigen(); ek.badge(); menueBadge(); angebotsPinsAktualisieren(); hausPinsAktualisieren(); zeichnen(); automatischSpeichern(); if (s.ende) setTimeout(() => spielende?.anzeigen(), 0); };
-vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion });
+// E47: Sitzungssaal als Kopfbild des Vorstands (Coffee „Board Meeting“); neu gerendert, wenn sich die Besetzung ändert.
+let saalCache = { k: null, url: null };
+vs = vorstandModul({ E, s: () => s, panel, meldung, nachAktion, saalBild: (ressorts) => {
+  const liste = ressorts.map((r) => ({ kurz: r.kurz, name: r.person?.name, portraet: r.person?.portraet }));
+  const k = liste.map((x) => x.name ?? '-').join('|');
+  if (saalCache.k !== k) saalCache = { k, url: schnittBild((S, sc) => hqSitzungssaal(S, sc, { ressorts: liste }), 780, 600).url };
+  return saalCache.url;
+} });
 org = organisationModul({ E, s: () => s, panel, meldung, nachAktion, oeffneAbteilung: oeffneHqAbteilung,
   oeffneHaus: (id) => oeffneHaus(id), oeffnePortfolio: () => oeffneModul(pp, 'liste') });
 // O03 IT
@@ -1349,6 +1359,16 @@ rg = reportingModul({ E, s: () => s, panel, inhalt: $('pinhalt'), hausOeffnen: (
   oeffneHaus(id);
 } });
 $('reporting').addEventListener('click', () => oeffneModul(rg));
+// E47: Finanzen der Zentrale wie Coffee „Finance“: Kopfbild ist die Etage der Finanzabteilung.
+fi = finanzenModul({ s: () => s, panel, inhalt: $('pinhalt'), oeffneAbteilung: oeffneHqAbteilung,
+  cfo: () => s?.vorstand?.ressorts?.cfo?.person,
+  unter: () => { const u = E.hqUebersicht?.(s); return u ? `${u.sitz} · Konzernabschluss` : 'Konzernabschluss'; },
+  kopfbild: () => {
+    const u = E.hqUebersicht?.(s), a = u?.abteilungen?.find((x) => x.id === 'controlling' && x.gebaeudeId);
+    const gj = a ? hqGrafik()?.gebaeude?.find((q) => q.id === a.gebaeudeId) : null;
+    const url = gj ? etagenBild(gj, a.etage) : null;
+    return url ? { url, alt: 'Etage der Finanzabteilung', abteilung: a.id } : null;
+  } });
 
 // ─────────────────────────────────────────── Reise & Wochenabschluss
 reise = reiseModul({

@@ -3,11 +3,12 @@ import { einstellung } from './einstellungen.js';
 export const fmt = new Intl.NumberFormat('de-DE');
 export function geld(x) {
   const a = Math.abs(x), v = x < 0 ? '−' : '';
-  if (einstellung('zahlen') === 'voll') return `${v}${fmt.format(Math.round(a))} €`;
-  if (a >= 1e9) return `${v}${(a / 1e9).toLocaleString('de-DE', { maximumFractionDigits: 2 })} Mrd. €`;
-  if (a >= 1e6) return `${v}${(a / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 1 })} Mio. €`;
-  if (a >= 1e4) return `${v}${fmt.format(Math.round(a / 1e3))} Tsd. €`;
-  return `${v}${fmt.format(Math.round(a))} €`;
+  if (einstellung('zahlen') === 'voll') return `${v}${fmt.format(Math.round(a))}\u00a0€`;
+  // Geschützte Leerzeichen: „26,4 Mio. €“ bricht nie zwischen Zahl und Einheit um.
+  if (a >= 1e9) return `${v}${(a / 1e9).toLocaleString('de-DE', { maximumFractionDigits: 2 })}\u00a0Mrd.\u00a0€`;
+  if (a >= 1e6) return `${v}${(a / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 1 })}\u00a0Mio.\u00a0€`;
+  if (a >= 1e4) return `${v}${fmt.format(Math.round(a / 1e3))}\u00a0Tsd.\u00a0€`;
+  return `${v}${fmt.format(Math.round(a))}\u00a0€`;
 }
 export const pz = (x, n = 0) => `${(x * 100).toLocaleString('de-DE', { minimumFractionDigits: n, maximumFractionDigits: n })} %`;
 export const dez = (x, n = 1) => (x ?? 0).toLocaleString('de-DE', { minimumFractionDigits: n, maximumFractionDigits: n });

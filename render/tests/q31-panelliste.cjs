@@ -43,6 +43,12 @@ const PANELS = [
   { name: 'q31-planung', vorSpiel: false, umgestellt: true, oeffne: menue('planung') },
   { name: 'q31-reporting', vorSpiel: false, umgestellt: true, oeffne: menue('reporting') },
   { name: 'q31-vorstand', vorSpiel: false, umgestellt: true, oeffne: menue('vorstand') },
+  // Finanzen wie Coffee Finance (25.10.)
+  { name: 'f-finanzen', vorSpiel: false, umgestellt: true, oeffne: "hqKlick('reiter', 'finanzen');" },
+  { name: 'f-finanzen-unten', vorSpiel: false, umgestellt: true, oeffne: "hqKlick('reiter', 'finanzen');", nach: "const pi = document.getElementById('pinhalt'); pi.scrollTop = 560;" },
+  { name: 'f-quartal', vorSpiel: false, umgestellt: true, oeffne: "hqKlick('reiter', 'finanzen'); await new Promise((r) => setTimeout(r, 60)); document.querySelector('#pinhalt [data-fin=zeit][data-wert=quartal]').click();" },
+  { name: 'f-bilanz', vorSpiel: false, umgestellt: true, oeffne: "hqKlick('reiter', 'finanzen'); await new Promise((r) => setTimeout(r, 60)); document.querySelector('#pinhalt [data-fin=art][data-wert=bilanz]').click();", nach: "const pi = document.getElementById('pinhalt'); pi.scrollTop = 560;" },
+  { name: 'f-cashflow', vorSpiel: false, umgestellt: true, oeffne: "hqKlick('reiter', 'finanzen'); await new Promise((r) => setTimeout(r, 60)); document.querySelector('#pinhalt [data-fin=art][data-wert=cashflow]').click();" },
   { name: 'q31-spielstaende', vorSpiel: false, umgestellt: true, oeffne: menue('app-oeffnen') },
 ];
 module.exports = { PANELS };

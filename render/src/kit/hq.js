@@ -1960,3 +1960,61 @@ SIGNATUR.marketing.unshift({ w: 5.0, d: 2.8, einmal: true, bau(S, sc, x, z, w, d
   for (let k = -1; k <= 1; k += 2) figur(S, x + w / 2 + k * 1.25, z + 0.4 + 1.5 + 0.7, Math.floor(r() * 1e4), 'kunde', { pose: 'sitzen', ry: PI });
   L.box(4.6, 0.36, 0.08, 0, 2.86, 0, farbe); text(L, 'CRM-Leitstand', 0, 2.88, 0.05, 0.26, '#ffffff', farbe);
 } });
+
+// ------------------------------------------------------------------ Sitzungssaal (Kopfbild Vorstand, Coffee „Board Meeting“)
+/** Eigenständiger Raum: zwei holzvertäfelte Wände mit Bücherregalen und Bildschirm, weiße Deckenkante, langer Tisch mit
+ *  dunklem Mittelband, Mikrofonen und Blumen, Vorstand sitzend (Kleidungsfarbe aus dem Porträt, unbesetzt leerer Stuhl).
+ *  opt.ressorts: [{ kurz, name?, portraet? }]. Rückgabe { box } für die Kamera. */
+export function hqSitzungssaal(S, scene, opt = {}) {
+  vorbereiten(S, scene);
+  const r = rng(4711);
+  const B = 12, T = 8.6, H = 3.3, HOLZ = '#c4743f', HOLZ_D = '#a85f32', FUGE = '#8f4f2a', WEISS = '#f2f4f4';
+  // Boden: helles Parkett in Dielen
+  S.box(B, 0.2, T, B / 2, -0.1, T / 2, '#b78b66');
+  for (let i = 0; i < 24; i++) S.box(B / 24 - 0.02, 0.02, T, (i + 0.5) * (B / 24), 0.0, T / 2, i % 2 ? '#e8b48c' : '#e2ab83');
+  // Rückwand (z = 0) und linke Wand (x = 0): Vertäfelung in Feldern, Sockel, weiße Deckenkante
+  const wandX = (x0, x1) => { S.box(x1 - x0, H, 0.2, (x0 + x1) / 2, H / 2, 0.1, HOLZ); };
+  const wandZ = (z0, z1) => { S.box(0.2, H, z1 - z0, 0.1, H / 2, (z0 + z1) / 2, HOLZ_D); };
+  wandX(0, B); wandZ(0, T);
+  S.box(B + 0.3, 0.35, 0.7, B / 2 - 0.15, H, 0.25, WEISS); S.box(0.7, 0.35, T, 0.25, H, T / 2, '#e3e7e8');
+  S.box(B, 0.16, 0.05, B / 2, 0.02, 0.22, FUGE); S.box(0.05, 0.16, T, 0.22, 0.02, T / 2, FUGE);
+  for (let u = 1.5; u < B; u += 1.5) S.box(0.06, H - 0.4, 0.04, u, 0.2, 0.22, FUGE);
+  for (let u = 1.7; u < T; u += 1.7) S.box(0.04, H - 0.4, 0.06, 0.22, 0.2, u, FUGE);
+  S.box(B, 0.05, 0.04, B / 2, 1.05, 0.22, FUGE); S.box(0.04, 0.05, T, 0.22, 1.05, T / 2, FUGE);
+  // Wandleuchten (heller Fleck über den Feldern der linken Wand)
+  for (let u = 2.55; u < T - 0.5; u += 1.7) S.box(0.03, 0.9, 0.5, 0.24, 2.0, u, '#e9b98f');
+  // Bücherregale links und rechts des Bildschirms an der Rückwand
+  const buecher = (lx, y, lz, w, h) => { let u = lx - w / 2; while (u < lx + w / 2 - 0.08) { const b = zw(r, 0.06, 0.1); if (r() < 0.85) L0.box(b - 0.01, h * zw(r, 0.6, 0.9), 0.26, u + b / 2, y, lz, waehle(r, ['#2b3a55', '#3d5d7a', '#7a2836', '#2f6b5f', '#d8d0bf', '#5a3b26', '#1f6470'])); u += b; } };
+  const L0 = lokal(S, 0, 0.0, 0, 0);
+  for (const cx of [1.9, B - 1.9]) regal(lokal(S, cx, 0.0, 0.45, 0), 0, 0, 2.6, H - 0.35, '#4a2f1f', (lx, y, lz, w, h) => buecher(lx + cx, y, lz + 0.45, w, h), r, 0.5, 4);
+  // Bildschirm mit Präsentation
+  S.box(3.6, 2.0, 0.1, B / 2, 0.95, 0.26, '#1c2024'); S.box(3.4, 1.8, 0.02, B / 2, 1.05, 0.32, '#2c3a44');
+  const LB = lokal(S, B / 2, 0.0, 0.34, 0);
+  balken(LB, -0.7, 1.3, 0, 1.4, 1.1, r, ['#e6edf1', '#66bb6a']); linie(LB, 0.8, 1.35, 0, 1.3, 1.0, r, '#e9b44c');
+  // Konferenztisch: Holzplatte, dunkles Mittelband, Wangen
+  const tx = B / 2 + 0.3, tz = T / 2 + 0.6, lang = 7.4, tief = 2.3;
+  const L = lokal(S, tx, 0.0, tz, 0);
+  L.box(lang, 0.08, tief, 0, 0.74, 0, '#9a5a35'); L.box(lang - 0.6, 0.02, 0.62, 0, 0.82, 0, '#1d1f22');
+  L.box(lang - 0.6, 0.6, 0.5, 0, 0.14, 0, '#1d1f22');
+  for (const s of [-1, 1]) L.box(0.12, 0.74, tief - 0.4, s * (lang / 2 - 0.5), 0, 0, '#26292d');
+  // Plätze: vier je Längsseite, einer am Kopf
+  const ressorts = opt.ressorts?.length ? opt.ressorts : RESSORTS_STANDARD;
+  const plaetze = [];
+  for (const s of [-1, 1]) for (let k = 0; k < 4; k++) plaetze.push({ u: (k - 1.5) * 1.6, v: s * (tief / 2 + 0.35), ry: s > 0 ? PI : 0 });
+  plaetze.push({ u: lang / 2 + 0.45, v: 0, ry: -PI / 2 });
+  const sitzende = [{ kurz: 'CEO', name: 'CEO', ceo: true }, ...ressorts];
+  plaetze.forEach((p, i) => {
+    const R = sitzende[i];
+    buerostuhl(L, p.u, p.v, p.ry, 2, '#1d1f22');
+    // Mikrofon, Mappe und Blumen vor jedem zweiten Platz
+    const mu = p.u - (p.ry === -PI / 2 ? 0.75 : 0), mv = p.ry === -PI / 2 ? 0 : p.v * 0.55;
+    L.box(0.32, 0.02, 0.24, mu, 0.83, mv, '#f4f2ee');
+    L.box(0.02, 0.28, 0.02, mu + 0.22, 0.83, mv * 0.82, '#2a2d31'); L.kugel(0.035, mu + 0.22, 1.12, mv * 0.82, '#2a2d31');
+    if (R && (R.ceo || R.name)) {
+      const [X, Z] = L.P(p.u, p.v);
+      figur(S, X, Z, hashText(R.name ?? R.kurz) % 100000, R.ceo ? 'leitung' : 'fremd', { pose: 'sitzen', ry: p.ry, farbe: R.ceo ? '#3c4148' : kleidFarbe(R.portraet) });
+    }
+  });
+  for (let k = 0; k < 4; k++) { const u = (k - 1.5) * 1.6 + 0.8; L.zyl(0.05, 0.06, 0.14, u, 0.84, 0, '#8a2232', 8); L.kugel(0.08, u, 1.04, 0, '#f2f2ee'); L.zyl(0.008, 0.008, 0.14, u, 0.9, 0, '#3f6b3a', 4); }
+  return { box: new THREE.Box3(new THREE.Vector3(-0.2, -0.2, -0.2), new THREE.Vector3(B + 0.4, H + 0.4, T + 0.2)) };
+}

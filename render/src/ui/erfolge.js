@@ -58,6 +58,8 @@ export function erfolgeModul(ctx) {
   function zu() { zustand.offen = false; }
   function naechstes() {
     if (zeigt || !schlange.length) return;
+    // Nicht über Wochenbericht oder Vorgang legen: warten, bis das Blatt geschlossen ist.
+    if (document.body.classList.contains('wochen-aktiv')) { clearTimeout(toastTimer); toastTimer = setTimeout(naechstes, 700); return; }
     zeigt = true;
     const e = schlange.shift();
     toast.innerHTML = '<div class="erfolge-toast-bild">' + bild(e) + '</div><div><small class="hw-marke">Neuer Erfolg · ' + esc(e.gruppe) +

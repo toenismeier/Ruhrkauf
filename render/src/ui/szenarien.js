@@ -90,7 +90,7 @@ export function szenarienModul(ctx) {
           : K.leer('Keine verkäuflichen Immobilien vorhanden.'));
     }
     const text = z.erreicht ? 'Das Szenarioziel ist erreicht.' : z.gescheitert ? 'Das Szenarioziel ist verfehlt.' : esc(z.details) + '.';
-    ctx.panel('Szenarioziel', 'Woche ' + s.woche, K.bereich('betrieb', 'zahlen') + K.sprecher({ text, ton: z.gescheitert ? 'alarm' : '' }) + '<div class="hw-boden">' + K.rumpf(inhalt) + '</div>', 'gross');
+    ctx.panel('Szenarioziel', 'Woche ' + s.woche, K.bereich('betrieb', 'spielstaende') + K.sprecher({ text, ton: z.gescheitert ? 'alarm' : '' }) + '<div class="hw-boden">' + K.rumpf(inhalt) + '</div>', 'gross');
   }
   document.getElementById('szenarioziel').addEventListener('click', oeffne);
   document.getElementById('pinhalt').addEventListener('click', (event) => {

@@ -51,7 +51,7 @@ export function marketingModul(ctx) {
     ]);
     const letzte = v.slice(-5);
     h += K.abschnitt('Kundschaft', letzte.length ? `KW ${kwVon(letzte[0].woche)} bis ${kwVon(letzte[letzte.length - 1].woche)}` : '');
-    h += K.balken(letzte.map((x) => ({ label: String(kwVon(x.woche)), a: x.kunden, b: null })));
+    h += K.balken(letzte.map((x) => ({ label: 'KW ' + kwVon(x.woche), a: x.kunden, b: null })));
     const zeilen = [['kanaele', 'Kanäle', 'Prospekt, Anzeigen, Plakat, Radio, TV, Online, Social'], ['karte', 'Hartwig Karte', 'Punkte, Stufen, Betrieb, Daten'], ['app', 'Hartwig App', 'Pflege und Werbung'], ['crm', 'CRM-Versand', 'Mail, Push, Brief']].map(([k, t, d]) => ({ k, t, d, n: tsd(u.bloecke[k]) }));
     const brutto = zeilen.reduce((a, z) => a + z.n, 0), beteiligung = tsd(u.wocheBeteiligung);
     const summe = (was, html) => K.zeile({ was, wert: html }).replace('class="hw-zeile"', 'class="hw-zeile hw-g3-summe"');
@@ -74,7 +74,7 @@ export function marketingModul(ctx) {
     h += K.abschnitt('Aktionen', 'läuft und als Nächstes');
     h += u.laufend.length || u.naechste.length ? K.liste([...u.laufend, ...u.naechste].map(aktionZeile)) : K.leer('Im Kalender planst du die nächste.', 'Keine Aktion geplant.');
     for (const x of u.hinweise) h += K.hinweis(esc(x), 'achtung');
-    h += K.knoepfe(K.knopf('Neue Eigenmarke gründen', 'data-a="eigenmarkeGruenden"', 'zweit breit'));
+    h += K.knoepfe(K.knopf('Neue Eigenmarke gründen', 'data-a="eigenmarkeGruenden"', 'breit'));
     const befund = delta == null ? `Werbung netto ${geld(u.wocheNetto)} je Woche, ${pz(u.werbequoteNetto, 1)} vom Umsatz.`
       : `${delta >= 0 ? '+' : '−'}${fmt.format(Math.abs(Math.round(delta)))} Kunden zur Vorwoche bei ${geld(u.wocheNetto)} Werbung netto.`;
     return { titel: 'Marketing', unter: `Werbequote ${pz(u.werbequoteNetto, 1)} · KW ${u.kw} / ${u.jahr}`, befund: u.rabattquote13 > 0.08 ? `Die Rabattquote liegt bei ${pz(u.rabattquote13, 1)}. Kunden gewöhnen sich an Preisaktionen.` : befund, ton: u.rabattquote13 > 0.08 ? 'engpass' : '', html: K.rumpf(h) };
@@ -90,18 +90,18 @@ export function marketingModul(ctx) {
     const praemieLaeuft = k.anmeldeBis !== undefined && k.anmeldeBis > st.woche, relaunch = a.relaunchBis !== undefined && a.relaunchBis > st.woche;
     const geldP = (key, x) => x > 0 ? P(key, geld(x), 'span') : P(key, '0 €', 'span');
     const KACHELN = [
-      { id: 'punkte', bild: K.SYMBOLE.kommentare, titel: 'Punkteprogramm', stufe: k.punkteSatz >= 0.01 ? '1 je 1 €' : k.punkteSatz >= 0.005 ? '1 je 2 €' : '1 je 4 €', wert: geldP('ka:k:punkte', k.kostenWoche.punkte), an: true,
+      { id: 'punkte', bild: K.symbol('kundenkarte', 'kommentare'), titel: 'Punkteprogramm', stufe: k.punkteSatz >= 0.01 ? '1 je 1 €' : k.punkteSatz >= 0.005 ? '1 je 2 €' : '1 je 4 €', wert: geldP('ka:k:punkte', k.kostenWoche.punkte), an: true,
         steuer: () => K.feld('Punkte je Euro', K.seg([[0.0025, '1 je 4 €'], [0.005, '1 je 2 €'], [0.01, '1 je 1 €']], k.punkteSatz, (w) => `data-a="punkte" data-v="${w}"`)) + '<p class="hw-lese hw-g3-notiz">1 Punkt ist 1 Cent wert.</p>' },
-      { id: 'stufen', bild: K.SYMBOLE.etagen, titel: 'Silber und Gold', stufe: k.stufen ? 'An' : 'Aus', wert: k.stufen ? geld(k.kostenWoche.stufen) : '0 €', an: k.stufen,
+      { id: 'stufen', bild: K.symbol('podest', 'etagen'), titel: 'Silber und Gold', stufe: k.stufen ? 'An' : 'Aus', wert: k.stufen ? geld(k.kostenWoche.stufen) : '0 €', an: k.stufen,
         steuer: () => K.schalter({ text: 'Statusstufen Silber und Gold', unter: 'bindet Top-Kunden, Einführung kostet einmalig', an: k.stufen, attr: 'data-a="stufen"' }) },
-      { id: 'rabatt', bild: K.SYMBOLE.kosten, titel: 'Kartenrabatt', stufe: k.kartenrabatt ? pz(k.kartenrabatt) : 'kein', wert: k.kartenrabatt ? pz(k.kartenrabatt) : '0 %', einheit: 'auf Kartenkäufe', an: k.kartenrabatt > 0,
+      { id: 'rabatt', bild: K.symbol('reduzierung', 'kosten'), titel: 'Kartenrabatt', stufe: k.kartenrabatt ? pz(k.kartenrabatt) : 'kein', wert: k.kartenrabatt ? pz(k.kartenrabatt) : '0 %', einheit: 'auf Kartenkäufe', an: k.kartenrabatt > 0,
         steuer: () => K.feld('Dauerhafter Rabatt', K.seg([[0, 'kein'], [0.02, '2 %'], [0.03, '3 %'], [0.05, '5 %']], k.kartenrabatt, (w) => `data-a="kartenrabatt" data-v="${w}"`)) },
-      { id: 'praemie', bild: K.SYMBOLE.post, titel: 'Anmeldeprämie', stufe: praemieLaeuft ? `bis ${wocheText(st, k.anmeldeBis)}` : 'keine', wert: praemieLaeuft ? geld(k.kostenWoche.anmeldung) : '0 €', an: praemieLaeuft,
+      { id: 'praemie', bild: K.symbol('boni', 'post'), titel: 'Anmeldeprämie', stufe: praemieLaeuft ? `bis ${wocheText(st, k.anmeldeBis)}` : 'keine', wert: praemieLaeuft ? geld(k.kostenWoche.anmeldung) : '0 €', an: praemieLaeuft,
         steuer: () => K.feld('Willkommensgutschein für 8 Wochen', K.seg([[0, 'keine'], [5, '5 €'], [10, '10 €'], [20, '20 €']], praemieLaeuft ? k.anmeldepraemie : 0, (w) => `data-a="praemie" data-v="${w}"`)) },
-      { id: 'daten', bild: K.SYMBOLE.zahlen, titel: 'Datenpflege', stufe: `Qualität ${Math.round(k.datenqualitaet * 100)}`, wert: P('ka:datenBudget', geld(k.datenBudgetWoche), 'span'), an: k.datenBudgetWoche > 0,
+      { id: 'daten', bild: K.symbol('crm', 'zahlen'), titel: 'Datenpflege', stufe: `Qualität ${Math.round(k.datenqualitaet * 100)}`, wert: P('ka:datenBudget', geld(k.datenBudgetWoche), 'span'), an: k.datenBudgetWoche > 0,
         steuer: () => K.feld('Datenpflege je Woche', K.stepper({ wert: geld(k.datenBudgetWoche), unter: 'Adressen, Dubletten, Einwilligungen', label: 'Datenpflege', attrMinus: 'data-a="daten" data-v="-1"', attrPlus: 'data-a="daten" data-v="1"', minusAus: k.datenBudgetWoche <= 0 }))
           + skalaGross('Datenqualität', k.datenqualitaet * 100, P('ka:daten', String(Math.round(k.datenqualitaet * 100)), 'b', ' class="hw-skala-wert"')) + '<p class="hw-lese hw-g3-notiz">Bessere Daten machen CRM-Kampagnen treffsicherer.</p>' },
-      { id: 'betrieb', bild: K.SYMBOLE.personal, titel: 'Kartenbetrieb', stufe: `${fmt.format(k.mitglieder)} Mitglieder`, wert: geld(k.kostenWoche.betrieb), an: true,
+      { id: 'betrieb', bild: K.symbol('personal', 'personal'), titel: 'Kartenbetrieb', stufe: `${fmt.format(k.mitglieder)} Mitglieder`, wert: geld(k.kostenWoche.betrieb), an: true,
         steuer: () => K.liste([K.zeile({ was: 'Mitglieder', wert: P('ka:mitglieder', fmt.format(k.mitglieder), 'span') }), K.zeile({ was: 'davon aktiv', wert: P('ka:aktiv', pz(k.aktivQuote), 'span') }),
           K.zeile({ was: 'neu je Woche', wert: P('ka:neu', fmt.format(k.neuWoche), 'span') }), K.zeile({ was: 'Abgänge je Woche', wert: P('ka:ab', fmt.format(k.abgaengeWoche), 'span') }),
           K.zeile({ was: 'Mail-Einwilligung', wert: P('ka:mail', pz(k.mailQuote), 'span') })]) },
@@ -109,7 +109,7 @@ export function marketingModul(ctx) {
         steuer: () => K.feld('App-Budget je Woche', K.stepper({ wert: geld(a.budgetWoche), unter: 'Pflege und Werbung für Downloads', label: 'App-Budget', attrMinus: 'data-a="appBudget" data-v="-1"', attrPlus: 'data-a="appBudget" data-v="1"', minusAus: a.budgetWoche <= 0 }))
           + skalaGross('App-Qualität', a.qualitaet * 100, P('ap:qualitaet', String(Math.round(a.qualitaet * 100)), 'b', ` class="hw-skala-wert${a.qualitaet < 0.3 ? ' hw-schlecht' : ''}"`))
           + K.liste([K.zeile({ was: 'Downloads', wert: P('ap:downloads', fmt.format(a.downloads), 'span') }), K.zeile({ was: 'aktive Nutzer', wert: P('ap:aktiv', fmt.format(a.aktiveNutzer), 'span') }), K.zeile({ was: 'Push erlaubt', wert: P('ap:push', pz(a.pushQuote), 'span') })])
-          + K.knoepfe(K.knopf(relaunch ? `Relaunch bis ${wocheText(st, a.relaunchBis)}` : 'App-Relaunch beauftragen', 'data-a="relaunch"', 'zweit breit', relaunch)) },
+          + K.knoepfe(K.knopf(relaunch ? `Relaunch bis ${wocheText(st, a.relaunchBis)}` : 'App-Relaunch beauftragen', 'data-a="relaunch"', 'breit', relaunch)) },
       { id: 'coupons', bild: motiv('online'), titel: 'App-Coupons', stufe: a.appCoupons ? 'An' : 'Aus', wert: a.appCoupons ? 'An' : 'Aus', einheit: 'bei Aktionen', an: a.appCoupons,
         steuer: () => K.schalter({ text: 'Aktions-Coupons in der App', unter: 'holt Nutzer in die App', an: a.appCoupons, attr: 'data-a="appCoupons"' }) },
     ];

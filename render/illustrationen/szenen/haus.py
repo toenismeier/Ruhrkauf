@@ -856,45 +856,47 @@ def rumpf(n, schnitt, xs, farbe_fn, punkte=48, e=4.0):
     n.flaeche(list(reversed(ringe[0])), farbe_fn(xs[0], 0, 0, -1))
     n.flaeche(ringe[-1], farbe_fn(xs[-1], 0, 0, -2))
     return ring
-LK, LN = 1.5, 1.05
+LK, LN = 2.5, 1.75   # Wagenkasten und lange, flach auslaufende Nase (ICE 3)
 def ice_schnitt(x):
-    if x <= LK: return 0.3, 0.2, 0.95
+    if x <= LK: return 0.31, 0.1, 0.98
     s = min(1, (x - LK) / LN)
-    return 0.3 * (1 - 0.62 * s ** 2.4), 0.2 + 0.1 * s ** 2.5, 0.95 - 0.58 * s ** 1.5
+    # Dach fällt früh und lang, Boden steigt erst an der Spitze: spitze, niedrige Nase
+    return 0.31 * (1 - 0.7 * s ** 2.2), 0.1 + 0.16 * s ** 3, 0.98 - 0.74 * s ** 1.25
 def ice_farbe(x, y, z, t):
-    if t == -1: return ANTHRAZIT
+    if t == -1: return GRAU_HELL
     if t == -2: return WEISS
     w, zb, zt = ice_schnitt(x)
     if x > LK:
         s = (x - LK) / LN
-        if 0.08 < s < 0.42 and 40 < t < 140: return '#22272d'
-        if s > 0.7 and z < zb + 0.06: return ANTHRAZIT
-    if z < 0.27: return GRAU_HELL
-    if 0.37 < z < 0.42 and (x < LK + 0.75): return ROT
-    if x < LK - 0.05 and 0.6 < z < 0.77 and abs(y) > 0.2:
-        return WEISS if (x % 0.3) < 0.06 or x < 0.1 else '#2a3038'
+        # große dunkle Frontscheibe, seitlich herumgezogen
+        if 0.03 < s < 0.5 and 28 < t < 152: return '#1d232a'
+    if z < 0.21 and x < LK + LN * 0.5: return '#5b6066'   # Schürze über den Drehgestellen
+    if 0.34 < z < 0.43 and x < LK + 0.04: return ROT   # rotes Band bis in die Nase
+    if x < LK - 0.02 and 0.58 < z < 0.8 and abs(y) > 0.2:   # durchgehendes Fensterband
+        return '#cfd4d8' if (x % 0.42) < 0.035 else '#22282f'
     return WEISS
 n = Netz()
-xs = [0, 0.02] + [0.04 + k * 0.03 for k in range(int((LK - 0.04) / 0.03) + 1)] + [LK + LN * (k / 30) for k in range(1, 31)]
-rumpf(n, ice_schnitt, xs, ice_farbe)
-# Tür-Fugen und Dachaufbau
-for xx in (1.3, 1.42): n.kasten(xx, -0.3 + 0.0, 0.3, 0.012, 0.012, 0.55, GRAU_HELL)
-n.kasten(0.55, 0, 0.94, 0.7, 0.36, 0.06, GRAU_HELL)
-n.kasten(0.4, 0, 1.0, 0.18, 0.2, 0.04, ANTHRAZIT)
-for sx in (-1, 1): n.kasten(0.4, sx * 0.06, 1.04, 0.03, 0.03, 0.26, METALL_DUNKEL, ry=40, um=(0, 0, 0))
-n.kasten(0.4 + 0.26 * math.sin(math.radians(40)), 0, 1.04 + 0.26 * math.cos(math.radians(40)), 0.03, 0.03, 0.22, METALL_DUNKEL, ry=-40)
-n.kasten(0.4 + 0.26 * math.sin(math.radians(40)) - 0.22 * math.sin(math.radians(40)), 0, 1.04 + (0.26 + 0.22) * math.cos(math.radians(40)), 0.06, 0.4, 0.025, SCHWARZ)
-# Scheinwerfer
+xs = [0, 0.02] + [0.04 + k * 0.04 for k in range(int((LK - 0.04) / 0.04) + 1)] + [LK + LN * (k / 110) for k in range(1, 111)]
+rumpf(n, ice_schnitt, xs, ice_farbe, punkte=120)
+# Türen als Fugen, Dachkante
+for xx in (2.12, 2.26): n.kasten(xx, -0.305, 0.24, 0.012, 0.012, 0.62, '#b8bec4')
+n.kasten(1.1, 0, 0.975, 1.9, 0.4, 0.035, '#d5d9dc')
+# Stromabnehmer: Sockel auf dem Dach, Unter- und Oberarm verbunden, Wippe
+px, pz = 0.55, 1.01
+n.kasten(px, 0, pz - 0.01, 0.3, 0.26, 0.05, '#4a4f55')
+stab(n, (px - 0.1, 0, pz + 0.04), (px + 0.22, 0, pz + 0.24), 0.016, METALL_DUNKEL)
+stab(n, (px + 0.22, 0, pz + 0.24), (px - 0.02, 0, pz + 0.42), 0.014, METALL_DUNKEL)
+n.kasten(px - 0.02, 0, pz + 0.42, 0.06, 0.42, 0.025, SCHWARZ)
+# Scheinwerfer unten an der Nase
 for sy in (-1, 1):
-    x_ = LK + LN * 0.82; w, zb, zt = ice_schnitt(x_)
-    n.kugel(x_, sy * w * 0.72, zb + 0.07, 0.026, '#f6f2d8', ringe=8, ecken=12)
-# Drehgestelle, Gleis
-for bx in (0.35, 1.3):
-    n.kasten(bx, 0, 0.1, 0.62, 0.44, 0.1, SCHWARZ)
+    x_ = LK + LN * 0.8; w, zb, zt = ice_schnitt(x_)
+    n.kugel(x_, sy * w * 0.62, zb + 0.06, 0.024, '#fff6d6', ringe=8, ecken=12)
+# Räder nur als dunkle Andeutung unter der Schürze
+for bx in (0.45, 2.05):
     for dx in (-0.2, 0.2):
-        for sy in (-1, 1): rad(n, bx + dx, sy * 0.25, 0.1, 0.1, 0.05, ANTHRAZIT, METALL)
-for sy in (-1, 1): n.kasten(1.2, sy * 0.25, -0.05, 3.3, 0.04, 0.05, METALL)
-for k in range(17): n.kasten(-0.4 + k * 0.2, 0, -0.09, 0.09, 0.8, 0.04, GRAU_HELL)
-n.prisma([(-0.55, -0.2), (0.55, -0.2), (0.45, -0.09), (-0.45, -0.09)], 3.4, '#8d8a84', x=1.2, ebene='yz')
+        for sy in (-1, 1): rad(n, bx + dx, sy * 0.24, 0.08, 0.075, 0.04, SCHWARZ, METALL_DUNKEL)
+# Gleis schmal: zwei Schienen, wenige Schwellen, kein Schotterbett
+for sy in (-1, 1): n.kasten(2.0, sy * 0.24, -0.02, 4.6, 0.035, 0.03, METALL)
+for k in range(12): n.kasten(-0.2 + k * 0.4, 0, -0.06, 0.1, 0.66, 0.04, '#a59f96')
 motiv('bahn', n, groesse='symbol')
 

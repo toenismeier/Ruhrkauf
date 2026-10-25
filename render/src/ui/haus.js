@@ -141,10 +141,8 @@ function ueberblick(c, h, k, vorwoche, vorwocheDb, uPunkte, dPunkte) {
   ]);
   const kw = (q) => String((q.woche % 52) + 1);
   const letzte = uPunkte.slice(-5);
-  x += K.balkenPaar([
-    { titel: letzte.length ? `Umsatz KW ${kw(letzte[0])}–${kw(letzte[letzte.length - 1])}` : 'Umsatz', serie: 'a', punkte: letzte.map((q) => ({ label: kw(q), wert: q.wert })) },
-    { titel: 'Deckungsbeitrag', serie: 'b', punkte: letzte.map((q) => ({ label: kw(q), wert: dPunkte.find((z) => z.woche === q.woche)?.wert ?? 0 })) },
-  ]);
+  // Coffee 20: ein Säulenpaar je Woche auf gemeinsamer Skala (Umsatz weiß, Deckungsbeitrag grün).
+  x += K.balken(letzte.map((q) => ({ label: 'KW ' + kw(q), a: q.wert, b: dPunkte.find((z) => z.woche === q.woche)?.wert ?? 0 })), ['Umsatz', 'Deckungsbeitrag']);
   // Status in einer Zeile
   const marken = [K.marke(STATUS_HAUS[h.status] ?? h.status, h.status === 'offen' ? '' : 'schlecht')];
   if (h.klasse === 'premium') marken.push(K.marke('Premiumhaus', 'achtung'));
@@ -332,7 +330,7 @@ export function hausBeobachtungHtml(liste) {
     : K.leer('Derzeit keine auffälligen Häuser.')));
 }
 export function hausReportingHtml(kommentare, ranking) {
-  return K.bereich('betrieb', 'zahlen') + K.rumpf(K.abschnitt('Kommentare der Woche', `${kommentare.length}`) + (kommentare.length
+  return K.bereich('betrieb', 'notizen') + K.rumpf(K.abschnitt('Kommentare der Woche', `${kommentare.length}`) + (kommentare.length
     ? K.liste(kommentare.map((x) => K.zeile({ was: esc(x.name), unter: esc(GRUENDE[x.grund] ?? x.grund) + ' / ' + esc(MASS[x.massnahme] ?? x.massnahme) + ' · ' + esc(x.pruefung), wert: PROZENT(x.abweichung), ton: 'schlecht', tippbar: true, attr: `onclick="hausSpringen('${esc(x.id)}')"` })))
     : K.leer('Noch keine kommentierungspflichtigen Abweichungen.'))
     + K.abschnitt('Mystery Shopping', 'beste 20') + K.liste(ranking.slice(0, 20).map((x, i) => K.zeile({ was: `${i + 1}. ${esc(x.name)}`, wert: `${x.score} / 100`, tippbar: true, attr: `onclick="hausSpringen('${esc(x.id)}')"` }))));

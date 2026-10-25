@@ -97,7 +97,7 @@ export function reiseModul(ctx) {
     const seg = K.seg([['karte', 'Karte'], ['liste', 'Städteliste']], 'karte', (v) => 'id="reise-tab-' + v + '" aria-controls="reise-blatt-' + v + '" data-reiseansicht="' + v + '"')
       .replace('class="hw-segment"', 'class="hw-segment" aria-label="Reiseziele anzeigen"');
     z.innerHTML = '<section class="hw hw-blatt hw-reise" data-bereich="betrieb" role="dialog" aria-modal="true" aria-label="Reiseziele"><div class="hw-grund"></div>'
-      + '<header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">' + K.SYMBOLE.zentrale + '</span><h2 class="hw-kopf-titel">Hauptbahnhof ' + esc(hier) + '</h2>'
+      + '<header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">' + (K.illustration('bahn') || K.SYMBOLE.zentrale) + '</span><h2 class="hw-kopf-titel">Hauptbahnhof ' + esc(hier) + '</h2>'
       + '<div class="hw-kopf-unter" data-reise-treffer></div><button type="button" class="hw-zu" aria-label="Schließen" data-reisezu></button></header>'
       + K.sprecher({ text: '<span class="reise-text" aria-live="polite"></span>', unter: 'Sekretariat', person: ASSISTENTIN })
       + '<div class="hw-inhalt"><div class="hw-reise-ziele">' + K.rumpf('<input class="hw-suche" data-reisesuche type="search" placeholder="Stadt suchen" aria-label="Reiseziel suchen">'

@@ -72,9 +72,9 @@ export function itModul(ctx) {
     const aktiv = d.projekte.filter((x) => x.phase !== 'abgeschlossen'), alt = d.projekte.filter((x) => x.phase === 'abgeschlossen').slice(-8).reverse();
     let h = K.gross([{ label: 'Laufende Projekte', wert: String(aktiv.length) }, { label: 'Planbudget offen', wert: geld(aktiv.reduce((a, p) => a + Math.max(0, p.kostenPlan - p.kostenIst), 0)) }]);
     h += '<p class="hw-lese hw-g3-notiz">Projekte durchlaufen Konzept, Umsetzung und einen Rollout Cluster für Cluster. Vier Wochen nach jedem Wechsel sind lokale Startprobleme möglich.</p>';
-    h += aktiv.length ? aktiv.map((p) => projekt(p, d)).join('') : K.abschnitt('Laufende Projekte') + K.leer('Über „Neu“ beauftragst du das erste Projekt.', 'Keine laufenden Projekte.');
+    h += aktiv.length ? aktiv.map((p) => projekt(p, d)).join('') : K.abschnitt('Laufende Projekte') + K.leer('Über „Neu“ beauftragst du das erste Projekt.', 'Keine laufenden Projekte.', '', 'projekte');
     if (alt.length) h += K.abschnitt('Abgeschlossene Projekte') + K.liste(alt.map((p) => K.zeile({ was: esc(E.SYSTEME[p.system].name), unter: `Generation ${p.zielGeneration} · ${ARTEN.find(([a]) => a === p.art)?.[1] ?? p.art}`, wert: geld(p.kostenIst), wertUnter: p.verzug ? `${p.verzug} Wochen Verzug` : 'im Plan' })));
-    h += K.knoepfe(K.knopf('Neues Projekt planen', 'data-it="reiter" data-v="neu"', 'zweit breit'));
+    h += K.knoepfe(K.knopf('Neues Projekt planen', 'data-it="reiter" data-v="neu"', 'breit'));
     const spaet = aktiv.filter((p) => p.verzug > 0);
     return { befund: aktiv.length ? `${aktiv.length} Projekte laufen${spaet.length ? `, ${spaet.length} davon mit Verzug` : ', alle im Plan'}.` : 'Gerade läuft kein IT-Projekt.', ton: spaet.length ? 'engpass' : '', html: h };
   }
@@ -124,7 +124,7 @@ export function itModul(ctx) {
     const d = daten(), titel = { systeme: 'Systemlandkarte', produkte: 'Digitale Produkte', projekte: 'IT-Projekte', neu: 'Neues IT-Projekt' };
     const r = ui.reiter === 'systeme' ? systeme(d) : ui.reiter === 'produkte' ? produkte() : ui.reiter === 'projekte' ? projekte(d) : neu(d);
     const aktiv = d.projekte.filter((x) => x.phase !== 'abgeschlossen').length;
-    ctx.panel('IT · ' + titel[ui.reiter], `Bereich IT · ${aktiv} aktive Projekte`, K.bereich('zentrale', 'zahlen') + digitalSprecher(E, s(), r.befund, r.ton) + '<i class="hw-g3" hidden></i>'
+    ctx.panel('IT · ' + titel[ui.reiter], `Bereich IT · ${aktiv} aktive Projekte`, K.bereich('zentrale', 'systeme') + digitalSprecher(E, s(), r.befund, r.ton) + '<i class="hw-g3" hidden></i>'
       + (r.roh ? r.html : K.rumpf(r.html)) + K.reiterUnten(REITER, ui.reiter, (id) => `data-it="reiter" data-v="${id}"`), 'gross');
     ui.aktiv = true;
   }

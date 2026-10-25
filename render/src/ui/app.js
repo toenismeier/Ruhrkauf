@@ -106,7 +106,7 @@ export function appModul({ panel, meldung, aktuell, ladenInSpiel, vorNeuladen })
 
   function oeffne() {
     if (!APP_AKTIV) return;
-    panel('Spielstände', 'Drei Plätze und ein automatischer Stand', bereich('betrieb', 'post') + sprecher({ text: 'Hier sichern und laden Sie Ihre Partien.', unter: 'Sekretariat' }) + '<div class="hw-rumpf"><div id="app-plaetze" class="app-plaetze hw-app">Lade Spielstände …</div></div>', 'gross');
+    panel('Spielstände', 'Drei Plätze und ein automatischer Stand', bereich('betrieb', 'spielstaende') + sprecher({ text: 'Hier sichern und laden Sie Ihre Partien.', unter: 'Sekretariat' }) + '<div class="hw-rumpf"><div id="app-plaetze" class="app-plaetze hw-app">Lade Spielstände …</div></div>', 'gross');
     return zeichne($('app-plaetze'));
   }
 
