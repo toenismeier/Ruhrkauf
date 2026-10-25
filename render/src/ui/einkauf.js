@@ -123,9 +123,7 @@ export function einkaufModul(ctx) {
     const v = d.verlauf, n = v.woche.length, von = Math.max(0, n - 5);
     const punkte = (r) => v.woche.slice(von).map((w, i) => ({ label: String(kwVon(w)), wert: r[von + i] }));
     const kw = punkte(v.umsatz).map((z) => z.label);
-    x += K.balkenPaar([
-      { titel: kw.length ? `Umsatz KW ${kw[0]} bis ${kw[kw.length - 1]}` : 'Umsatz je Woche', serie: 'a', punkte: punkte(v.umsatz) },
-      { titel: 'Bestand EK', serie: 'b', punkte: punkte(v.bestand) }]);
+    x += K.balken(punkte(v.umsatz).map((z, i) => ({ label: 'KW ' + z.label, a: z.wert, b: punkte(v.bestand)[i]?.wert ?? null })), ['Umsatz', 'Bestand EK']);
     const rw = q.spalten().find((c) => c.id === 'reichweite');
     const zeilen = q.spalten().filter((c) => c.standard && c !== rw).map((c) => B.reihe({ name: esc(c.name), werte: [zelle(text(c.id, k), `d:${c.id}`, a[c.id])] }))
       .concat(DETAIL_EXTRA.filter(([id]) => id !== 'umsatzWoche').map(([id, tt, f]) => B.reihe({ name: esc(tt), werte: [zelle(id === 'eigenmarkenMarge' && !k.eigenmarkenAnteil ? 'keine' : formatiere(f, k[id]), `d:${id}`, a[id])] })));

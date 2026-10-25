@@ -481,6 +481,10 @@ export interface WochenKpi {
   cash: Eur;
   kreditFrei: Eur;
   bestand: Eur;
+  /** Offene Lieferantenverbindlichkeiten zum Wochenende (für die Bilanz); bei alten Spielständen fehlend. */
+  verbindlichkeiten?: Eur;
+  /** Insolvenzforderungen aus der Zeit vor dem Verfahren, sofern eines läuft. */
+  altVerbindlichkeiten?: Eur;
   offeneHaeuser: number;
   fte: number;
 }

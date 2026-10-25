@@ -17,6 +17,20 @@ function rubrik(a) { return a.reiter === 'Konzern' ? 'Wirtschaft' : a.reiter; }
 function passt(a, reiter) {
   return reiter === 'Top' || (reiter === 'Region' ? REGIONALE_ARTEN.has(a.art) : rubrik(a) === reiter);
 }
+/** Zeitung als Papierkarte im Wochenergebnis (Coffee „Weekly Results“): Titelkopf, Rubriken, zwei Spalten mit
+ *  bebilderten Meldungen. Antippen öffnet die ganze Ausgabe (data-wa="zeitung"). */
+export function zeitungKarte(a) {
+  if (!a) return '';
+  const alle = [a.aufmacher, ...a.meldungen].slice(0, 4);
+  const stueck = (x, i) => '<article class="zk-artikel">' + '<div class="zk-bild" aria-hidden="true">' + zeitungsBild(x.art, x.bild, a.nummer * 10 + i) + '</div>'
+    + '<h3>' + esc(x.titel) + '</h3><p>' + esc(x.unterzeile || x.text) + '</p></article>';
+  const links = alle.filter((_, i) => i % 2 === 0), rechts = alle.filter((_, i) => i % 2 === 1);
+  return '<button type="button" class="zk" data-bereich="papier" data-wa="zeitung" aria-label="Der Handelsbote lesen">'
+    + '<span class="zk-titel">Der Handelsbote.</span><span class="zk-datum">KW ' + a.kw + ' / ' + a.jahr + '</span>'
+    + '<span class="zk-reiter" aria-hidden="true">' + REITER.map((v, i) => '<span class="' + (i ? '' : 'an') + '">' + v + '</span>').join('') + '</span>'
+    + (alle.length === 1 ? '<span class="zk-spalten eins"><span class="zk-spalte">' + stueck(alle[0], 0) + '</span></span></button>' : '<span class="zk-spalten"><span class="zk-spalte">' + links.map((x) => stueck(x, alle.indexOf(x))).join('') + '</span><span class="zk-spalte">' + rechts.map((x) => stueck(x, alle.indexOf(x))).join('') + '</span></span></button>');
+}
+
 export function zeitungModul(ctx) {
   const ui = { aktiv: false, index: -1, reiter: 'Top', archiv: false };
   const ausgaben = () => ctx.E.zeitungArchiv(ctx.s());

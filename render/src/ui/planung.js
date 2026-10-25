@@ -27,7 +27,7 @@ export function planungModul(ctx) {
   function entwurf(D) {
     const e = D.entwurf;
     if (!e || e.stand !== 'offen') return cfo('<b>Keine Planungsrunde offen.</b> Die nächste läuft in KW 40 bis 44.')
-      + K.rumpf(K.abschnitt('Jahresplanung') + K.leer('Den laufenden Jahresplan zeigt der Reiter Reporting.', 'Keine Planungsrunde offen.') + K.knoepfe(K.knopf('Zum Reporting', 'data-pl-tab="report"', 'zweit breit')));
+      + K.rumpf(K.abschnitt('Jahresplanung') + K.leer('Den laufenden Jahresplan zeigt der Reiter Reporting.', 'Keine Planungsrunde offen.', '', 'planung') + K.knoepfe(K.knopf('Zum Reporting', 'data-pl-tab="report"', 'zweit breit')));
     let x = '<div class="hw-g2-oben">' + K.seg([[1, '1. Ziel'], [2, '2. Verteilung'], [3, '3. Abschluss']], ui.schritt, (v) => `data-pl-schritt="${v}"`) + '</div>';
     let befund = '';
     if (ui.schritt === 1) {
@@ -98,7 +98,7 @@ export function planungModul(ctx) {
     ]);
     const letzte = (b.wochen || []).slice(-5);
     x += K.abschnitt(letzte.length ? `Umsatz KW ${(letzte[0].woche % 52) + 1} bis ${(letzte[letzte.length - 1].woche % 52) + 1}` : 'Umsatz je Woche');
-    x += K.balken(letzte.map((w) => ({ label: String((w.woche % 52) + 1), a: w.plan, b: w.ist })), ['Plan', 'Ist']);
+    x += K.balken(letzte.map((w) => ({ label: 'KW ' + ((w.woche % 52) + 1), a: w.plan, b: w.ist })), ['Plan', 'Ist']);
     x += K.tabelle({ titel: `Jahresplan ${b.jahr}`, zeilen: [{ name: 'Umsatz', werte: [mio(b.ziele.umsatz)] }, { name: 'EBITDA', werte: [mio(b.ziele.ebitda)], ton: [tonV(b.ziele.ebitda)] }, { name: 'Forecast Umsatz', werte: [b.forecasting == null ? 'nach KW 13' : mio(b.forecasting)] }] });
     const N = b.knoten, kinder = (id, ebene) => N.filter((n) => n.ebene === ebene && n.parent === id);
     const fname = (f) => FORMATNAME[f.id.replace('format:', '')] ?? f.name;
@@ -141,7 +141,7 @@ export function planungModul(ctx) {
     }
     const status = (f) => (f.status === 'abgegeben' ? 'abgegeben' : f.status === 'offen' ? 'zur Freigabe' : 'zurückgehalten');
     x += L.length ? K.tabelle({ titel: 'Forecasts', spalten: ['Umsatz', 'EBITDA'], zeilen: [...L].reverse().map((f) => ({ name: `${f.bezeichnung} · ${f.jahr} · ${status(f)}`, werte: [mio(f.ziele.umsatz), mio(f.ziele.ebitda)], ton: ['', tonV(f.ziele.ebitda)] })) })
-      : K.abschnitt('Forecasts') + K.leer('Der erste Forecast (3+9) entsteht nach KW 13.', 'Noch kein Forecast.');
+      : K.abschnitt('Forecasts') + K.leer('Der erste Forecast (3+9) entsteht nach KW 13.', 'Noch kein Forecast.', '', 'forecast');
     if (D.bericht.vertrauen?.length) {
       x += K.abschnitt('Trefferquote und Vertrauen', 'letzte 8');
       x += K.liste(D.bericht.vertrauen.slice(-8).map((v) => K.zeile({ was: `KW ${(v.woche % 52) + 1}`, unter: `Abweichung ${pct(v.abweichung)}`, wert: (v.delta > 0 ? '+' : v.delta < 0 ? '−' : '') + Math.abs(v.delta), ton: v.delta < 0 ? 'schlecht' : v.delta > 0 ? 'gut' : '' })));
@@ -162,7 +162,7 @@ export function planungModul(ctx) {
       return K.feld(titel, K.stepper({ wert: pct(w), label: titel, attrMinus: `data-pl-bonus="${id}" data-wert="${Math.max(0, Math.round((w - 0.05) * 100) / 100)}"`, attrPlus: `data-pl-bonus="${id}" data-wert="${Math.min(0.3, Math.round((w + 0.05) * 100) / 100)}"`, minusAus: w <= 0.001, plusAus: w >= 0.299 })); }).join('') + '</div>';
     x += B.fuss('Abrechnung im Jahresabschluss, Auszahlung im Februar des Folgejahres als Personalaufwand.');
     x += liste.length ? K.tabelle({ titel: 'Bonusjahre', spalten: ['Summe', 'Posten'], zeilen: liste.map((b) => ({ name: `${b.jahr} · ${b.bezahlt ? 'ausgezahlt' : 'fällig im Februar'}`, werte: [geld(b.betrag), String(b.details.length)] })) })
-      : K.abschnitt('Bonusjahre') + K.leer('Das erste Bonusjahr wird im Jahresabschluss abgerechnet.');
+      : K.abschnitt('Bonusjahre') + K.leer('Das erste Bonusjahr wird im Jahresabschluss abgerechnet.', 'Noch kein Bonusjahr.', '', 'boni');
     const befund = faellig ? `<b>Im Februar zahlen wir ${geld(faellig.betrag)} Führungsboni aus.</b>` : '<b>Kein Bonus ist fällig.</b> Abgerechnet wird im Jahresabschluss.';
     return cfo(befund) + K.rumpf(x);
   }

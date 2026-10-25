@@ -9,7 +9,7 @@ const anzahl = (n) => zahl.format(Number(n) || 0);
 const version = (v) => String(v ?? '').replace('.', ',');
 const motiv = (id) => kanalBildSVG(id).replace(/<rect width="190" height="160" rx="8" fill="#f0eee9"\/><rect y="140" width="190" height="20" fill="#e2dfd8"\/>/, '');
 /** Illustration je Produkt: vorerst Kit-Motive und isometrische Symbole (eigene IT-Illustrationen folgen). */
-export const itIllustration = (id) => ({ kundenkarte: K.SYMBOLE.kommentare, hartwig_app: motiv('social'), kasse: K.SYMBOLE.kosten, mobile_pay: motiv('online') })[id] ?? K.SYMBOLE.zentrale;
+export const itIllustration = (id) => ({ kundenkarte: K.symbol('kundenkarte', 'kommentare'), hartwig_app: K.illustration('kanal-social') || motiv('social'), kasse: K.symbol('it', 'kosten'), mobile_pay: K.illustration('kanal-online') || motiv('online') })[id] ?? K.symbol('systeme', 'zentrale');
 
 const STERN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m12 2 3.15 6.38 7.04 1.02-5.09 4.96 1.2 7.01L12 18.07l-6.3 3.3 1.2-7.01-5.09-4.96 7.04-1.02Z"/></svg>';
 const sterne = (n) => `<span class="hw-sterne hw-g3-sterne" role="img" aria-label="${n} von 5 Qualitätssternen">${Array.from({ length: 5 }, (_, i) => `<i class="${i < n ? '' : 'aus'}">${STERN}</i>`).join('')}</span>`;

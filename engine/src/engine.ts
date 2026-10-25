@@ -373,6 +373,8 @@ export function wocheAbspielen(s: GameState): WochenKpi {
   k.cash = eur(s.cash);
   k.kreditFrei = eur(s.cash + s.kreditlinie);
   k.bestand = eur(s.bestand.reduce((a,b)=>a+b.wert,0) + (s.formate?.volkskaufBestand??0) + (s.formate?.pool.reduce((a,b)=>a+b.wert,0)??0));
+  k.verbindlichkeiten = eur(s.verbindlichkeiten.reduce((a,v)=>a+v.wert,0));
+  if (s.insolvenz) k.altVerbindlichkeiten = eur(s.insolvenz.altVerbindlichkeiten ?? 0);
   s.historie.push(k);
   // Q19: echte Wochenwerte nach Marketing- und Onlineabschluss, rein lesender Snapshot.
   itProdukteWoche(s);

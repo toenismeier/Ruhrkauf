@@ -5,6 +5,7 @@ import { esc, geld, kwVon } from './format.js';
 import * as K from './komponenten.js';
 import { effektiveAnimation } from './einstellungen.js';
 import { portraetSVG } from '../kit/portraet.js';
+import { zeitungKarte } from './zeitung.js';
 const ASSISTENTIN = portraetSVG({ geschlecht: 'w', alter: 36, haar: 'bob', haarfarbe: 'braun', hautton: 'rosig', kleidung: 'blazer', kleidungFarbe: 'marine', seed: 821 }, 110);
 const BANK = portraetSVG({ geschlecht: 'm', alter: 56, haar: 'seitenscheitel', haarfarbe: 'grau', hautton: 'hell', kleidung: 'anzug', seed: 236 }, 110);
 const BETRIEBSRAT = portraetSVG({ geschlecht: 'w', alter: 49, haar: 'halblang', haarfarbe: 'dunkelbraun', kleidung: 'bluse', seed: 922 }, 110);
@@ -22,7 +23,7 @@ const ohneAnimation = () => new URLSearchParams(location.search).has('ohne-anima
 const warten = (ms) => new Promise((r) => setTimeout(r, ms));
 const KATEGORIE = ['Presse', 'Konkurrenz'];
 /** Kopf eines Vollbild-Blatts (gleiche Lagen wie #panel.hw). */
-const blattKopf = (symbol, titel, unter, zu) => `<div class="hw-grund"></div><header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">${K.SYMBOLE[symbol] ?? ''}</span><h2 class="hw-kopf-titel" tabindex="-1">${esc(titel)}</h2><div class="hw-kopf-unter">${esc(unter)}</div>${zu}</header>`;
+const blattKopf = (symbol, titel, unter, zu) => `<div class="hw-grund"></div><header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">${K.illustration(symbol) || K.SYMBOLE[symbol] || ''}</span><h2 class="hw-kopf-titel" tabindex="-1">${esc(titel)}</h2><div class="hw-kopf-unter">${esc(unter)}</div>${zu}</header>`;
 export function wochenberichtModul(ctx) {
   const node = document.createElement('div'); node.id = 'wochen-overlay'; node.hidden = true; document.body.append(node);
   let status = 'zu', token = 0, bericht = null, vorfall = 0, start = 0, bestaetigt = null, zaehlRaf = 0;
@@ -121,25 +122,22 @@ export function wochenberichtModul(ctx) {
       : K.abweichung(wert - vorher, (wert - vorher >= 0 ? '+' : '−') + geld(Math.abs(wert - vorher)), vorher ? (wert - vorher) / Math.abs(vorher) : null) + ' zur Vorwoche';
     const cfo = ctx.person?.('cfo');
     const sprecher = K.sprecher({ text: befund(bericht), unter: (cfo?.name ?? 'Finanzen') + ' · Finanzvorstand', person: cfo?.portraet ? portraetSVG(cfo.portraet, 72) : ASSISTENTIN, ton: bericht.ebitda < 0 ? 'engpass' : '' });
-    const f = bericht.kapitalfluss, z = (name, v) => ({ name, werte: [eur(v)], roh: [Math.round(v)], ton: [v < 0 ? 'schlecht' : ''] });
-    const kapital = '<div data-wb="cash" data-summen-name="Kapitalfluss">' + K.tabelle({ titel: 'Kapitalfluss der Woche', spalten: ['KW ' + bericht.kw], zeilen: [z('Cash operativ', f.operativ), z('Investitionen', f.investitionen), z('Finanzierung', f.finanzierung), z('Sonstiges', f.sonstiges)],
-      summe: z('Cash netto', f.netto), pruefen: Math.abs(f.operativ + f.investitionen + f.finanzierung + f.sonstiges - f.netto) < 2 })
-      + '<div class="hw-abstand"></div>' + K.tabelle({ zeilen: [{ name: 'Cash-Bestand', werte: [eur(f.bestand)], ton: [f.bestand < 0 ? 'schlecht' : ''] }] }) + '</div>';
+    // Coffee „Weekly Results“: zwei Großkennzahlen, darunter die Kassenbrücke (vier Zeilen, Strich, Summe), dann die Zeitung.
+    const f = bericht.kapitalfluss, z = (name, v) => ({ name, werte: [(v > 0 ? '+' : '') + eur(v)], roh: [Math.round(v)] });
+    const zeilen = [z('Aus dem Geschäft', f.operativ), z('Investitionen', f.investitionen), z('Finanzierung', f.finanzierung), ...(Math.abs(f.sonstiges) >= 1 ? [z('Sonstiges', f.sonstiges)] : [])];
+    const kapital = '<div class="hw-wb-fluss" data-wb="cash" data-summen-name="Kapitalfluss">' + K.tabelle({ zeilen, summe: z('Kassenänderung', f.netto), pruefen: Math.abs(f.operativ + f.investitionen + f.finanzierung + f.sonstiges - f.netto) < 2 })
+      + `<p class="hw-wb-kasse">Kasse ${esc(eur(f.bestand))}</p></div>`;
     const insolvenz = bericht.phase === 'insolvenz' ? K.abschnitt('Insolvenzbarometer') + K.liste([K.zeile({ was: 'Freier Kreditrahmen', wert: esc(eur(bericht.kredite)), ton: bericht.kredite < 0 ? 'schlecht' : '' }), K.zeile({ was: 'Liquiditätsreichweite', wert: bericht.runway + ' Wochen', ton: 'achtung' })]) : '';
-    const presse = '<div data-wb="zeitung">' + K.abschnitt('Der Handelsbote', 'KW ' + bericht.kw + ' / ' + bericht.jahr)
-      + K.liste([K.zeile({ was: esc(titel), unter: 'Aufmacher', tippbar: true, attr: 'data-wa="zeitung" aria-label="Ausgabe lesen und Archiv öffnen"' }),
-        ...m.slice(1, 3).map((a) => K.zeile({ was: esc(a.text), unter: esc(a.kategorie) }))])
-      + (!m.length ? K.leer('Diese Woche liegen keine neuen Presse- oder Konkurrenzmeldungen vor.') : '') + '</div>';
+    const presse = '<div data-wb="zeitung">' + (ausgabe ? zeitungKarte(ausgabe)
+      : K.abschnitt('Der Handelsbote', 'KW ' + bericht.kw + ' / ' + bericht.jahr) + K.liste([K.zeile({ was: esc(titel), unter: 'Aufmacher' })])) + '</div>';
     const erfolge = bericht.erfolge.length ? '<div data-wb="erfolge">' + K.abschnitt('Neu freigeschaltet', bericht.erfolge.length + (bericht.erfolge.length === 1 ? ' Erfolg' : ' Erfolge'))
       + K.liste(bericht.erfolge.map((e) => K.zeile({ was: 'Neu: ' + esc(e.titel), unter: esc(e.beschreibung ?? '') }))) + '</div>' : '';
+    const offen = bericht.vorgaenge.length ? K.hinweis(`<b>${bericht.vorgaenge.length} ${bericht.vorgaenge.length === 1 ? 'Vorgang wartet' : 'Vorgänge warten'} auf dich.</b> Sie folgen, wenn du den Bericht schließt.`, 'achtung') : '';
     const inhalt = K.rumpf(K.gross([{ label: 'Umsatz der Woche', wert: '0 €', p: 'wb:umsatz', unter: delta(bericht.umsatz, bericht.umsatzVor) },
       { label: 'EBITDA der Woche', wert: '0 €', p: 'wb:ebitda', ton: bericht.ebitda < 0 ? 'schlecht' : 'gut', unter: delta(bericht.ebitda, bericht.ebitdaVor) }])
-      // Umsatz und EBITDA je mit eigener Skala (EBITDA ist um zwei Größenordnungen kleiner als der Umsatz).
-      + K.balkenPaar([{ titel: 'Umsatz', serie: 'a', punkte: bericht.verlauf.map((p) => ({ label: p.label, wert: p.a })) },
-        { titel: 'EBITDA', serie: 'b', punkte: bericht.verlauf.map((p) => ({ label: p.label, wert: p.b })) }]))
-      + K.band(kapital + insolvenz) + K.rumpf(presse + erfolge + K.knoepfe(K.knopf('Zurück zur Stadt', 'data-wa="schliessen"', 'breit')));
+      + kapital + insolvenz + offen) + presse + K.rumpf(erfolge + K.knoepfe(K.knopf(bericht.vorgaenge.length ? 'Weiter zu den Vorgängen' : 'Zurück zur Stadt', 'data-wa="schliessen"', 'breit')));
     node.innerHTML = '<section class="hw hw-blatt hw-wb" data-bereich="zentrale" data-wb="bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis">'
-      + blattKopf('zahlen', 'Wochenergebnis', 'KW ' + bericht.kw + ' / ' + bericht.jahr, '<button type="button" class="hw-zu" data-wa="schliessen" aria-label="Bericht schließen"></button>')
+      + blattKopf('finanzen', 'Wochenergebnis', 'KW ' + bericht.kw + ' / ' + bericht.jahr, '<button type="button" class="hw-zu" data-wa="schliessen" aria-label="Bericht schließen"></button>')
       + sprecher + '<div class="hw-inhalt">' + inhalt + '</div><div id="wb-vorfall"></div></section>';
     for (const [p, id, wert] of [['wb:umsatz', 'wb-umsatz', bericht.umsatz], ['wb:ebitda', 'wb-ebitda', bericht.ebitda]]) {
       const el = node.querySelector(`[data-p="${p}"]`); if (el) { el.id = id; el.dataset.wert = wert; }
@@ -156,7 +154,7 @@ export function wochenberichtModul(ctx) {
       if (!u || !e || meins !== token) return;
       u.textContent = eur(bericht.umsatz * f); e.textContent = eur(bericht.ebitda * f);
       if (f < 1) zaehlRaf = requestAnimationFrame(zahlen);
-      else if (!abgeschlossen) { abgeschlossen = true; node.classList.add('gezaehlt'); status = 'bericht'; markieren('Zählung beendet'); if (bericht.vorgaenge.length) setTimeout(() => { if (meins === token) vorfallZeigen(); }, schnell() ? 0 : 200); }
+      else if (!abgeschlossen) { abgeschlossen = true; node.classList.add('gezaehlt'); status = 'bericht'; markieren('Zählung beendet'); }
     }
     node.querySelector('.hw-wb').addEventListener('click', (e) => { if (status === 'zaehlen' && !e.target.closest('[data-wa]')) { cancelAnimationFrame(zaehlRaf); zahlen(performance.now(), true); } });
     if (originalDauer) zaehlRaf = requestAnimationFrame(zahlen); else zahlen(performance.now(), true);
@@ -192,6 +190,7 @@ export function wochenberichtModul(ctx) {
       vorfall++; status = 'bericht';
       if (ansehen) { const id = item.id; aufraeumen(); ctx.oeffneVorgang(id); return; }
       if (vorfall < Math.min(3, bericht.vorgaenge.length)) vorfallZeigen();
+      else if (node.classList.contains('vorgaenge')) aufraeumen();
     }, schnell() ? 0 : WOCHEN_ZEIT.vorfallAus);
   }
   node.addEventListener('click', (e) => {
@@ -200,7 +199,7 @@ export function wochenberichtModul(ctx) {
     switch (b.dataset.wa) {
       case 'nein': abbruch(); break;
       case 'ja': berechnen(true); break;
-      case 'schliessen': if (status === 'bericht') abbruch(); else if (status === 'zaehlen') { cancelAnimationFrame(zaehlRaf); node.querySelector('.hw-wb .hw-gross')?.click(); } break;
+      case 'schliessen': if (status === 'bericht' && bericht?.vorgaenge.length && !node.querySelector('.hw-wb-vorfall')) { node.classList.add('vorgaenge'); vorfallZeigen(); } else if (status === 'bericht') abbruch(); else if (status === 'zaehlen') { cancelAnimationFrame(zaehlRaf); node.querySelector('.hw-wb .hw-gross')?.click(); } break;
       case 'zeitung': if (status === 'bericht' || status === 'zaehlen') { abbruch(); ctx.oeffneZeitung?.(); } break;
       case 'spaeter': vorfallWeiter(false); break;
       case 'ansehen': vorfallWeiter(true); break;

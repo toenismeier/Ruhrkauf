@@ -93,7 +93,10 @@ export const schalter = ({ text, unter = '', an, attr = '' }) =>
 export const seg = (optionen, aktiv, attr) => `<div class="hw-segment" role="group">${optionen.map(([w, t]) => `<button type="button" aria-pressed="${w === aktiv}" ${attr(w)}>${esc(t)}</button>`).join('')}</div>`;
 
 /** Leerer Zustand mit Grund und optional nächster Aktion. */
-export const leer = (grund, titel = '', aktion = '') => `<div class="hw-leer">${titel ? `<b>${esc(titel)}</b>` : ''}${esc(grund)}${aktion}</div>`;
+/** Leerer Zustand; mit `bild` (Motivname) groß und mittig wie Coffee: Gegenstand, Satz, Aktion. */
+export const leer = (grund, titel = '', aktion = '', bild = '') => bild && ILLUSTRATIONEN[bild]
+  ? `<div class="hw-leer hw-leer-bild">${illustration(bild, 'hw-ill hw-leer-motiv')}${titel ? `<b>${esc(titel)}</b>` : ''}${esc(grund)}${aktion}</div>`
+  : `<div class="hw-leer">${titel ? `<b>${esc(titel)}</b>` : ''}${esc(grund)}${aktion}</div>`;
 
 /** Hinweis im Fluss. ton: '' | 'achtung' | 'fehler' | 'gut'. */
 export const hinweis = (html, ton = '') => `<div class="hw-hinweis ${ton}" role="${ton === 'fehler' ? 'alert' : 'note'}">${html}</div>`;
@@ -148,6 +151,7 @@ export const SYMBOLE = {
 
 /** Reiterleiste unten. reiter: [[id, Name, Symbolname]], attr(id) liefert Attribute. */
 /** Gerenderte Illustration (render/illustrationen) als Bild; leer, wenn es das Motiv noch nicht gibt. */
+export const ILLUSTRATIONEN_ROH = ILLUSTRATIONEN;
 export const illustration = (name, klasse = 'hw-ill') => { const i = ILLUSTRATIONEN[name]; return i ? `<img class="${klasse}" src="${i.u}" width="${i.b}" height="${i.h}" alt="" decoding="async">` : ''; };
 /** Symbol für Reiter und Menü: Illustration, sonst das alte Code-Symbol. */
 export const symbol = (name, rueckfall = name) => illustration(name) || SYMBOLE[name] || SYMBOLE[rueckfall] || '';

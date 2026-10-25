@@ -71,8 +71,8 @@ const vorzeichen = (x) => (x >= 0 ? '+' : '−') + Math.abs(x);
 export function vorstandModul(ctx) {
   const E = ctx.E, s = () => ctx.s();
   const da = typeof E.vorstandUebersicht === 'function';
-  const ui = { aktiv: false, seite: 'uebersicht', ressort: null, k: 0, angebot: null, entlassen: false };
-  const kopf = (sprecherText, person, unter, ton = '') => K.bereich('zentrale', 'zentrale') + G4 + K.sprecher({ text: sprecherText, unter, person: person ? portraet(person.portraet, 72) : '', ton });
+  const ui = { aktiv: false, seite: 'uebersicht', ressort: null, k: 0, angebot: null, entlassen: false, wahl: {} };
+  const kopf = (sprecherText, person, unter, ton = '') => K.bereich('zentrale', 'vorstand') + G4 + K.sprecher({ text: sprecherText, unter, person: person ? portraet(person.portraet, 72) : '', ton });
   const personBlock = (p, P, id, groesse = 104) => `<div class="hw-person"><div class="hw-portraet hw-kontur">${portraet(p?.portraet ?? null, groesse)}</div><div class="hw-person-daten">`
     + `<h3 class="hw-person-name">${p ? P(`${id}:name`, p.name, 'span') : 'Platz frei'}</h3>`
     + (p ? `<span class="hw-marke">Fähigkeiten</span>${K.skala('Führung', p.fuehrung)}${K.skala('Fachwissen', p.fachwissen)}${K.skala('Loyalität', p.loyalitaet)}` : '') + '</div></div>';
@@ -85,17 +85,28 @@ export function vorstandModul(ctx) {
     const cfo = u.ressorts.find((r) => r.id === 'cfo')?.person;
     const text = (frei.length ? `<b>${frei.map((r) => r.kurz).join(' und ')} ${frei.length === 1 ? 'fehlt' : 'fehlen'}.</b> ${frei.length === 1 ? 'Das Ressort arbeitet' : 'Die Ressorts arbeiten'} ohne Führung schwächer.` : '<b>Alle Ressorts sind besetzt.</b>')
       + (risiko.length ? ` Abwerberisiko hoch: ${risiko.map((r) => r.kurz).join(', ')}.` : '');
-    const h = kopf(text, cfo, cfo ? cfo.name + ' · Finanzvorstand' : 'Vorstand', frei.length ? 'engpass' : '');
+    let h = kopf(text, cfo, cfo ? cfo.name + ' · Finanzvorstand' : 'Vorstand', frei.length ? 'engpass' : '');
+    // Coffee „Board Meeting“: der Sitzungssaal groß als Kopfbild, darunter je Vorlage Titel, Text, Wahl im Stepper, ein Knopf.
+    const saal = ctx.saalBild?.(u.ressorts);
+    if (saal) h += `<div class="hw-kopfbild hw-saal"><img src="${saal}" alt="Sitzungssaal des Vorstands"></div>`;
     let r = '';
     const besetzt = `${u.besetzt} von ${u.ressorts.length}`; P('u:besetzt', besetzt); P('u:kostenJahr', geld(u.kostenJahr));
-    r += K.gross([{ label: 'Vorstand besetzt', wert: besetzt, p: 'u:besetzt', ton: frei.length ? 'schlecht' : '' },
-      { label: 'Gehälter im Jahr', wert: geld(u.kostenJahr), p: 'u:kostenJahr', unter: `${P('u:kostenWoche', geld(u.kostenWoche), 'span')} je Woche` }]);
     for (const e of u.offeneEntscheidungen) {
       const roh = st.entscheidungen.find((x) => x.id === e.id);
-      r += K.abschnitt('Sitzungsvorlage', 'Frist ' + wocheText(st, e.frist));
-      r += `<p class="hw-vorlage">${esc(e.titel)}</p>${roh?.text ? `<p class="hw-lese hw-leise">${esc(roh.text)}</p>` : ''}`;
-      r += `<div class="hw-knoepfe zweispaltig">${(roh?.optionen ?? []).map((o, i) => K.knopf(o.label, `data-a="entscheiden" data-v="${esc(e.id)}" data-o="${esc(o.id)}"`, i === 0 ? '' : 'zweit')).join('')}</div>`;
+      const opt = roh?.optionen ?? [];
+      const i = Math.max(0, Math.min(opt.length - 1, ui.wahl[e.id] ?? 0));
+      const o = opt[i];
+      // „Umsetzen (0,8 Mio. €)“ → Wert „Umsetzen“, darunter „0,8 Mio. €“
+      const m = /^(.*?)\s*\(([^)]*)\)\s*$/.exec(o?.label ?? '');
+      r += `<section class="hw-vorlage-block"><h3 class="hw-vorlage-titel">${esc(e.titel)}</h3>`
+        + (roh?.text ? `<p class="hw-vorlage-text">${esc(roh.text)}</p>` : '')
+        + `<span class="hw-marke hw-feldname">Frist</span><p class="hw-vorlage-frist">${esc(wocheText(st, e.frist))}</p>`
+        + K.feld('Vorschlag', K.stepper({ wert: m ? m[1] : (o?.label ?? ''), unter: m ? m[2] : '', label: 'Vorschlag wählen',
+          attrMinus: `data-a="wahl" data-v="${esc(e.id)}" data-o="${i - 1}"`, attrPlus: `data-a="wahl" data-v="${esc(e.id)}" data-o="${i + 1}"`, minusAus: i <= 0, plusAus: i >= opt.length - 1 }))
+        + `<div class="hw-knoepfe hw-mitte">${K.knopf('Abstimmen', `data-a="entscheiden" data-v="${esc(e.id)}" data-o="${esc(o?.id ?? '')}"`)}</div></section>`;
     }
+    r += K.gross([{ label: 'Vorstand besetzt', wert: besetzt, p: 'u:besetzt', ton: frei.length ? 'schlecht' : '' },
+      { label: 'Gehälter im Jahr', wert: geld(u.kostenJahr), p: 'u:kostenJahr', unter: `${P('u:kostenWoche', geld(u.kostenWoche), 'span')} je Woche` }]);
     r += K.abschnitt('Ressorts', 'antippen für Profil');
     r += K.liste(u.ressorts.map((x) => {
       const p = x.person;
@@ -230,7 +241,8 @@ export function vorstandModul(ctx) {
       case 'seite': ui.seite = v; ui.entlassen = false; return zeigen();
       case 'profil': ui.seite = 'profil'; ui.ressort = v; ui.entlassen = false; return zeigen();
       case 'einstellen': ui.seite = 'einstellen'; ui.ressort = v; ui.k = 0; ui.angebot = null; return zeigen();
-      case 'entscheiden': tun({ typ: 'entscheiden', id: v, option: el.dataset.o }); return zeigen(true);
+      case 'wahl': ui.wahl[v] = Number(el.dataset.o); return zeigen(true);
+      case 'entscheiden': delete ui.wahl[v]; tun({ typ: 'entscheiden', id: v, option: el.dataset.o }); return zeigen(true);
       case 'delegation': { const d = prof().delegationen.find((x) => x.id === v); tun({ typ: 'vorstandDelegation', ressort: ui.ressort, bereich: v, an: !d.an }); return zeigen(true); }
       case 'gehalt': { const p = prof(); tun({ typ: 'vorstandGehalt', ressort: ui.ressort, gehalt: Math.max(0, p.person.gehalt + Number(v) * p.gehaltsSchritt) }); return zeigen(true); }
       case 'haltebonus': { const p = prof(); tun({ typ: 'vorstandBonus', ressort: ui.ressort, haltebonus: Math.round(p.person.gehalt * Number(v)), halteWochen: 52 }); return zeigen(true); }

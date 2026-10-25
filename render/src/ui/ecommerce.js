@@ -28,7 +28,7 @@ export function ecommerceModul(ctx) {
     ]);
     const letzte = v.slice(-5);
     h += K.abschnitt('Umsatz und Deckungsbeitrag', letzte.length ? `KW ${(letzte[0].woche % 52) + 1} bis ${(letzte[letzte.length - 1].woche % 52) + 1}` : '');
-    h += K.balken(letzte.map((q) => ({ label: String((q.woche % 52) + 1), a: q.umsatz, b: q.deckungsbeitrag })), ['Umsatz', 'Deckungsbeitrag']);
+    h += K.balken(letzte.map((q) => ({ label: 'KW ' + ((q.woche % 52) + 1), a: q.umsatz, b: q.deckungsbeitrag })), ['Umsatz', 'Deckungsbeitrag']);
     h += K.abschnitt(`Paketschein KW ${(ctx.s().woche % 52) + 1}`, 'hartwig.de');
     h += K.liste([
       K.zeile({ was: 'Bestellungen', wert: fmt.format(u.bestellungen) }),
@@ -51,7 +51,7 @@ export function ecommerceModul(ctx) {
     h += gr.length ? `<div data-summenbuch="Warengruppen online">${K.liste([
       ...gr.map(([g, x]) => K.zeile({ was: esc(ctx.E.GRUPPEN[g]?.name ?? g), wert: `<span data-s="u">${geld(x)}</span>` })),
       summe('Summe', `<span data-summe="u">${geld(gr.reduce((a, [, x]) => a + x, 0))}</span>`),
-    ])}</div>` : K.leer('Noch kein Onlineumsatz.');
+    ])}</div>` : K.leer('Der Onlineshop hat noch keinen Umsatz gebucht.', 'Noch kein Onlineumsatz.', '', 'online');
     const befund = !u.bestellungen ? 'Diese Woche gab es keine Onlinebestellung.'
       : u.deckungsbeitrag < 0 ? `hartwig.de verliert ${geld(-u.deckungsbeitrag)} diese Woche. ${prozent(u.retourenquote)} der Ware kommt zurück.`
         : `hartwig.de verdient ${geld(u.deckungsbeitrag)} bei ${fmt.format(u.bestellungen)} Bestellungen.`;
@@ -91,7 +91,7 @@ export function ecommerceModul(ctx) {
     const u = state(), pi = document.getElementById('pinhalt'), vorher = behalten ? pi.scrollTop : 0;
     const r = tab === 'produkte' ? { befund: 'Die Online-Kennzahlen speisen die digitalen Produkte der IT.', html: itProdukteKarten(ctx.E.itProdukte(ctx.s()), 'online') }
       : tab === 'steuerung' ? steuerung(u) : tab === 'haeuser' ? haeuser(u) : uebersicht(u);
-    ctx.panel('Online', 'hartwig.de · E-Commerce', K.bereich('zentrale', 'post') + digitalSprecher(ctx.E, ctx.s(), r.befund, r.ton, 'E-Commerce') + '<i class="hw-g3" hidden></i>' + r.html
+    ctx.panel('Online', 'hartwig.de · E-Commerce', K.bereich('zentrale', 'online') + digitalSprecher(ctx.E, ctx.s(), r.befund, r.ton, 'E-Commerce') + '<i class="hw-g3" hidden></i>' + r.html
       + K.reiterUnten(REITER, tab, (id) => `data-online="tab" data-wert="${id}"`), 'gross');
     offen = true; // Das gemeinsame Panel schließt zunächst die übrigen Module.
     pi.scrollTop = vorher;
