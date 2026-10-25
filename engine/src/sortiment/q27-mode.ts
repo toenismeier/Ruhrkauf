@@ -11,17 +11,17 @@ import type { WgId } from '../einkauf';
 
 export const NAMEN = [
   // Damen
-  'Jumpsuit', 'Print-Jumpsuit', 'Hosenanzug', 'Puffärmelbluse', 'Off-Shoulder-Top', 'Corsagen-Top', 'Twinset', 'Kimono-Jacke', 'Kaftan',
+  'Jumpsuit', 'Hosenanzug', 'Puffärmelbluse', 'Off-Shoulder-Top', 'Corsagen-Top', 'Twinset', 'Kimono-Jacke', 'Kaftan',
   'Cropped Cardigan', 'Teddyjacke', 'Poncho', 'Tüllrock', 'Lederrock', 'Paperbag-Hose', 'Badeanzug', 'Bikini', 'Blusenkleid',
-  'Punktekleid', 'Blumenkleid', 'Maxikleid', 'Satin-Slipdress', 'Etuikleid', 'Sommerkleid', 'Strickkleid', 'Hemdblusenkleid',
-  'Schluppenbluse', 'Blumenbluse', 'Wickelshirt', 'Trägertop', 'Babytee', 'Marlenehose', 'Komforthose', 'Komfort-Jeans',
+  'Maxikleid', 'Satin-Slipdress', 'Etuikleid', 'Sommerkleid', 'Strickkleid', 'Hemdblusenkleid',
+  'Schluppenbluse', 'Wickelshirt', 'Trägertop', 'Babytee', 'Marlenehose', 'Komforthose', 'Komfort-Jeans',
   'Wide-Leg-Jeans', 'Mom-Jeans', 'Skinny-Jeans', 'Flare-Jeans', 'Satin-Midirock', 'Wickelrock', 'Stufenrock', 'Steppmantel',
   // Damen und Herren
   'Pullunder', 'Feinstrick-Pullunder', 'Strickweste', 'Steppweste', 'Parka', 'Regenjacke', 'Jeansjacke', 'Lederjacke', 'Bomberjacke',
-  'Hoodie', 'Sweatshirt', 'Longsleeve', 'Ringelshirt', 'Fieldjacket', 'Funktionsjacke',
+  'Hoodie', 'Sweatshirt', 'Longsleeve', 'Fieldjacket', 'Funktionsjacke',
   // Herren
-  'Anzug', 'Karo-Anzug', 'Tweed-Sakko', 'Anzugweste', 'Troyer', 'Rugbyshirt', 'Cargo-Shorts', 'Badeshorts', 'Chino-Shorts',
-  'Harrington-Jacke', 'Hemdjacke', 'Cord-Overshirt', 'Kurzarmhemd', 'Karohemd', 'Streifenhemd', 'Boxy-Shirt', 'V-Shirt', 'Cordhose',
+  'Anzug', 'Tweed-Sakko', 'Anzugweste', 'Troyer', 'Rugbyshirt', 'Cargo-Shorts', 'Badeshorts', 'Chino-Shorts',
+  'Harrington-Jacke', 'Hemdjacke', 'Cord-Overshirt', 'Kurzarmhemd', 'Boxy-Shirt', 'V-Shirt', 'Cordhose',
   'Jogginghose', 'Baggy-Jeans', 'Varsity-Jacke',
   // Kinder
   'Strampler', 'Langarmbody', 'Latzkleid', 'Matschhose', 'Schneeanzug', 'Baby-Schlafsack', 'Leggings-Set', 'Kinder-Badeanzug',
@@ -61,7 +61,6 @@ const KINDER: Pfad = ['kinder', 'Kinderbekleidung'];
 export const TYPEN: SortimentTyp<Name>[] = [
   // ─────────── Damen
   t('Jumpsuit', 'unterteile', ['damen.kleider', 'damen.young'], 'sommer', 69, LEICHT, G(0, 0.85, 0.75, 0.35), 2, b('jumpsuit'), JUMP),
-  t('Print-Jumpsuit', 'unterteile', ['damen.kleider', 'damen.young'], 'sommer', 65, ['Viskose', 'Polyester'], G(0, 0.8, 0.7, 0.4), 2, b('jumpsuit', { muster: 'print' }), JUMP),
   t('Hosenanzug', 'jacken', ['damen.jacken', 'damen.hosen'], 'ganz', 179, WOLLE, G(0, 0.5, 0.9, 0.75), 3, b('hosenanzug'), SETS),
   t('Puffärmelbluse', 'oberteile', ['damen.blusen', 'damen.young'], 'sommer', 39, FLIESS, G(0.1, 0.9, 0.6, 0.25), 1, b('puffaermelbluse')),
   t('Off-Shoulder-Top', 'oberteile', ['damen.young', 'damen.blusen'], 'sommer', 29, LEICHT, G(0, 0.95, 0.45, 0.05), 1, b('offshoulder'), ['oberteile', 'Tops']),
@@ -78,8 +77,6 @@ export const TYPEN: SortimentTyp<Name>[] = [
   t('Badeanzug', 'waesche', ['waesche.tag'], 'sommer', 49, BADE, G(0, 0.6, 0.85, 0.95), 2, b('badeanzug'), BADEMODE),
   t('Bikini', 'waesche', ['waesche.tag', 'damen.young'], 'sommer', 39, BADE, G(0, 0.95, 0.7, 0.2), 2, b('bikini'), BADEMODE),
   t('Blusenkleid', 'unterteile', ['damen.kleider'], 'ganz', 69, FLIESS, G(0, 0.55, 0.85, 0.8), 2, b('blusenkleid'), KLEID),
-  t('Punktekleid', 'unterteile', ['damen.kleider'], 'sommer', 59, LEICHT, G(0, 0.7, 0.8, 0.65), 1, b('kleid', { laenge: 'midi', muster: 'punkte' }), KLEID),
-  t('Blumenkleid', 'unterteile', ['damen.kleider', 'damen.young'], 'sommer', 59, LEICHT, G(0.2, 0.7, 0.8, 0.6), 1, b('kleid', { muster: 'blumen', aermel: 'kurz' }), KLEID),
   t('Maxikleid', 'unterteile', ['damen.kleider', 'damen.young'], 'sommer', 69, LEICHT, G(0, 0.85, 0.75, 0.4), 2, b('maxikleid'), KLEID),
   t('Satin-Slipdress', 'unterteile', ['damen.kleider', 'damen.young'], 'ganz', 59, ['Viskose', 'Seide', 'Polyester'], G(0, 0.9, 0.6, 0.15), 2, b('slipdress'), KLEID),
   t('Etuikleid', 'unterteile', ['damen.kleider'], 'ganz', 79, WOLLE, G(0, 0.4, 0.9, 0.75), 2, b('etuikleid'), KLEID),
@@ -87,7 +84,6 @@ export const TYPEN: SortimentTyp<Name>[] = [
   t('Strickkleid', 'unterteile', ['damen.kleider', 'damen.strick'], 'winter', 69, STRICK, G(0, 0.6, 0.8, 0.75), 2, b('strickkleid'), KLEID),
   t('Hemdblusenkleid', 'unterteile', ['damen.kleider'], 'ganz', 65, LEICHT, G(0, 0.5, 0.85, 0.85), 2, b('hemdblusenkleid'), KLEID),
   t('Schluppenbluse', 'oberteile', ['damen.blusen', 'damen.gg'], 'ganz', 49, FLIESS, G(0, 0.3, 0.85, 0.9), 1, b('schluppenbluse')),
-  t('Blumenbluse', 'oberteile', ['damen.blusen', 'damen.gg'], 'sommer', 39, FLIESS, G(0, 0.4, 0.8, 0.9), 1, b('bluse', { muster: 'blumen' })),
   t('Wickelshirt', 'oberteile', ['damen.blusen'], 'ganz', 35, FLIESS, G(0, 0.6, 0.85, 0.7), 1, b('wickelshirt'), ['oberteile', 'Shirts']),
   t('Trägertop', 'oberteile', ['damen.blusen', 'damen.young'], 'sommer', 25, FLIESS, G(0, 0.9, 0.7, 0.3), 1, b('traegertop'), ['oberteile', 'Tops']),
   t('Babytee', 'oberteile', ['damen.young'], 'sommer', 19, BW, G(0.2, 1, 0.3, 0), 1, b('babytee'), ['oberteile', 'Shirts']),
@@ -115,12 +111,10 @@ export const TYPEN: SortimentTyp<Name>[] = [
   t('Hoodie', 'oberteile', ['herren.strick', 'damen.young', 'sporttextil.freizeit'], 'ganz', 45, BW_P, G(0.5, 1, 0.5, 0.15), 1, b('hoodie'), ['oberteile', 'Pullover und Sweatshirts']),
   t('Sweatshirt', 'oberteile', ['herren.strick', 'damen.young', 'sporttextil.freizeit'], 'ganz', 39, BW_P, G(0.5, 0.9, 0.6, 0.35), 1, b('sweatshirt'), ['oberteile', 'Pullover und Sweatshirts']),
   t('Longsleeve', 'oberteile', ['damen.blusen', 'herren.casual'], 'ganz', 25, BW, G(0.4, 0.85, 0.75, 0.5), 1, b('longsleeve'), ['oberteile', 'Shirts']),
-  t('Ringelshirt', 'oberteile', ['damen.blusen', 'herren.casual'], 'ganz', 29, BW, G(0.5, 0.7, 0.85, 0.8), 1, b('longsleeve', { muster: 'streifen' }), ['oberteile', 'Shirts']),
   t('Fieldjacket', 'jacken', ['herren.jacken', 'damen.jacken'], 'ganz', 119, ['Baumwolle', 'Polyester'], G(0, 0.7, 0.85, 0.6), 2, b('fieldjacket')),
   t('Funktionsjacke', 'jacken', ['herren.jacken', 'damen.jacken', 'outdoor.bekleidung'], 'ganz', 129, ['Polyester'], G(0, 0.55, 0.85, 0.85), 3, b('funktionsjacke')),
   // ─────────── Herren
   t('Anzug', 'jacken', ['herren.business'], 'ganz', 249, WOLLE, G(0, 0.55, 0.9, 0.85), 3, b('anzug'), SETS),
-  t('Karo-Anzug', 'jacken', ['herren.business'], 'winter', 269, WOLLE, G(0, 0.6, 0.85, 0.7), 3, b('anzug', { muster: 'karo' }), SETS),
   t('Tweed-Sakko', 'jacken', ['herren.business', 'herren.jacken'], 'winter', 149, WOLLE, G(0, 0.45, 0.85, 0.9), 3, b('sakko')),
   t('Anzugweste', 'jacken', ['herren.business'], 'ganz', 69, WOLLE, G(0, 0.55, 0.75, 0.65), 2, b('anzugweste'), WESTEN),
   t('Troyer', 'oberteile', ['herren.strick'], 'winter', 69, STRICK, G(0.1, 0.55, 0.85, 0.85), 1, b('troyer'), ['oberteile', 'Strick']),
@@ -132,8 +126,6 @@ export const TYPEN: SortimentTyp<Name>[] = [
   t('Hemdjacke', 'jacken', ['herren.casual', 'herren.jacken'], 'winter', 69, ['Merino', 'Baumwolle', 'Polyester'], G(0, 0.85, 0.75, 0.45), 1, b('hemdjacke')),
   t('Cord-Overshirt', 'jacken', ['herren.casual'], 'winter', 65, BW, G(0, 0.8, 0.8, 0.5), 1, b('overshirt')),
   t('Kurzarmhemd', 'oberteile', ['herren.hemden', 'herren.casual'], 'sommer', 39, ['Baumwolle', 'Leinen', 'Viskose'], G(0.2, 0.75, 0.8, 0.7), 1, b('kurzarmhemd')),
-  t('Karohemd', 'oberteile', ['herren.hemden', 'herren.casual'], 'ganz', 45, BW, G(0.4, 0.7, 0.75, 0.7), 1, b('hemd', { muster: 'karo' })),
-  t('Streifenhemd', 'oberteile', ['herren.hemden', 'herren.business'], 'ganz', 49, BW, G(0, 0.5, 0.9, 0.85), 1, b('hemd', { muster: 'streifen' })),
   t('Boxy-Shirt', 'oberteile', ['herren.casual', 'damen.young'], 'sommer', 25, BW, G(0.2, 1, 0.4, 0.05), 1, b('boxytee'), ['oberteile', 'Shirts']),
   t('V-Shirt', 'oberteile', ['herren.casual', 'damen.blusen'], 'sommer', 19, BW, G(0.2, 0.6, 0.85, 0.8), 1, b('vshirt'), ['oberteile', 'Shirts']),
   t('Cordhose', 'unterteile', ['herren.hosen', 'damen.hosen'], 'winter', 69, BW, G(0.3, 0.6, 0.8, 0.8), 1, b('cordhose')),

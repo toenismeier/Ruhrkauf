@@ -171,14 +171,10 @@ k('Kindershampoo', 'beauty', ['beauty.drogerie'], 'ganz', 5, SYNTH, 1, 'k_kinder
 k('Zahnputzset', 'beauty', ['beauty.drogerie'], 'ganz', 8, SYNTH, 1, 'k_zahnputzset', P.kPflege);
 
 // ───────────── Teens & Tweens, Young Adults: Oberteile
-te('Batik-Shirt', 'oberteile', TEEN_U, 'sommer', 19, BW, 1, 't_tiedye', P.tShirts);
-te('Oversize-Printshirt', 'oberteile', TEEN_U, 'ganz', 22, BW, 1, 't_printshirt', P.tShirts);
 te('Smiley-Shirt', 'oberteile', TEEN_U, 'sommer', 17, BW, 1, 't_smileyshirt', P.tShirts);
 te('Crop-Longsleeve', 'oberteile', TEEN_D, 'ganz', 19, BW, 1, 't_croplongsleeve', P.tShirts);
 te('Netzshirt', 'oberteile', TEEN_D, 'ganz', 22, SYNTH, 1, 't_meshtop', P.tShirts);
-te('Schachbrett-Pullover', 'oberteile', TEEN_U, 'winter', 39, STRICK, 2, 't_schachpulli', P.tStrick);
 te('Zip-Hoodie', 'oberteile', TEEN_U, 'ganz', 39, BW, 2, 't_ziphoodie', P.tSweat);
-te('Batik-Hoodie', 'oberteile', TEEN_U, 'ganz', 39, BW, 2, 't_tiedyehoodie', P.tSweat);
 te('Crop-Sweatshirt', 'oberteile', TEEN_D, 'ganz', 29, BW, 1, 't_cropsweat', P.tSweat);
 te('College-Sweatshirt', 'oberteile', TEEN_U, 'ganz', 35, BW, 1, 't_collegesweat', P.tSweat);
 te('Raglan-Longsleeve', 'oberteile', TEEN_U, 'ganz', 22, BW, 1, 't_raglanlong', P.tShirts);
@@ -191,8 +187,6 @@ yo('Neckholder-Top', 'oberteile', TEEN_D, 'sommer', 22, FLIESS, 1, 't_neckholder
 te('Bandeau-Top', 'oberteile', TEEN_D, 'sommer', 15, BW, 1, 't_bandeau', P.tTops);
 yo('Teddy-Hoodie', 'oberteile', TEEN_U, 'winter', 45, SYNTH, 2, 't_teddypulli', P.tSweat);
 te('Fleece-Troyer', 'oberteile', TEEN_U, 'winter', 39, SYNTH, 2, 't_fleecetroyer', P.tSweat);
-te('Camouflage-Shirt', 'oberteile', TEEN_U, 'ganz', 19, BW, 1, 't_camoshirt', P.tShirts);
-te('Ringel-Croptop', 'oberteile', TEEN_D, 'sommer', 15, BW, 1, 't_ringelcrop', P.tTops);
 yo('Glitzer-Top', 'oberteile', TEEN_D, 'ganz', 29, SYNTH, 2, 't_glitzertop', P.tTops);
 // ───────────── Teens & Young Adults: Unterteile
 te('Fallschirmhose', 'unterteile', TEEN_U, 'ganz', 45, SYNTH, 2, 't_parachute', P.tHosen);
@@ -202,32 +196,21 @@ yo('Destroyed-Jeans', 'unterteile', TEEN_U, 'ganz', 49, DENIM, 2, 't_rippedjeans
 te('Schlagleggings', 'unterteile', TEEN_D, 'ganz', 25, BW, 1, 't_flareleggings', P.tLeggings);
 te('Sweatshorts', 'unterteile', TEEN_U, 'sommer', 22, BW, 1, 't_sweatshorts', P.tShorts);
 te('Basketballshorts', 'unterteile', TEEN_H, 'sommer', 25, SYNTH, 1, 't_basketballshorts', P.tShorts);
-te('Camouflage-Cargohose', 'unterteile', TEEN_U, 'ganz', 45, BW, 2, 't_camocargo', P.tCargo);
 te('Trackpants', 'unterteile', TEEN_U, 'ganz', 35, SYNTH, 1, 't_trackpants', P.tHosen);
 te('Sportleggings', 'unterteile', TEEN_D, 'ganz', 29, SYNTH, 1, 't_sportleggings', P.tLeggings);
 te('Tennisrock', 'unterteile', TEEN_D, 'sommer', 25, SYNTH, 1, 't_tennisrock', P.tRock);
-te('Karo-Minirock', 'unterteile', TEEN_D, 'winter', 29, ['Merino', 'Polyester'], 1, 't_karominirock', P.tRock);
 te('Jeans-Latzhose', 'unterteile', TEEN_U, 'ganz', 55, DENIM, 2, 't_jeanslatzhose', P.tJeans);
 te('Cropped Pullunder', 'oberteile', TEEN_D, 'ganz', 29, STRICK, 1, 't_croppullunder', P.tStrick);
 te('Longline-Shirt', 'oberteile', TEEN_U, 'ganz', 19, BW, 1, 't_longline', P.tShirts);
 te('Crop-Polo', 'oberteile', TEEN_D, 'sommer', 22, BW, 1, 't_croppolo', P.tTops);
-te('Regenbogen-Pullover', 'oberteile', TEEN_U, 'winter', 39, STRICK, 2, 't_regenbogenpulli', P.tStrick);
 te('Fleecejacke', 'oberteile', TEEN_U, 'winter', 39, SYNTH, 1, 't_fleecejacke', P.tSweat);
 te('Sweatweste', 'oberteile', TEEN_U, 'ganz', 29, BW, 1, 't_sweatweste', P.tSweat);
-te('Karohose', 'unterteile', TEEN_U, 'winter', 45, ['Merino', 'Polyester', 'Baumwolle'], 2, 't_karohose', P.tHosen);
 te('Pyjamahose', 'waesche', ['waesche.nacht', 'kinder.maedchen', 'kinder.jungen'], 'ganz', 19, BW, 1, 't_pyjamahose', ['waesche', 'Nachtwäsche']);
 te('Radlerhose', 'unterteile', TEEN_D, 'sommer', 19, SYNTH, 1, 't_radler', P.tLeggings);
-yo('Leo-Midirock', 'unterteile', TEEN_D, 'ganz', 39, FLIESS, 1, 't_leorock', P.tRock);
 te('Skort', 'unterteile', TEEN_D, 'sommer', 25, SYNTH, 1, 't_skort', P.tRock);
 te('Jeanskleid', 'unterteile', TEEN_D, 'sommer', 45, DENIM, 2, 't_jeanskleid', P.tKleid);
 te('Cropped Jeansjacke', 'jacken', TEEN_U, 'ganz', 49, DENIM, 2, 't_cropjeansjacke', P.tJacke);
 te('Fleeceweste', 'jacken', TEEN_U, 'winter', 35, SYNTH, 1, 't_fleeceweste', P.tWeste);
-te('Camouflage-Shorts', 'unterteile', TEEN_U, 'sommer', 29, BW, 1, 't_camoshorts', P.tShorts);
-te('Ringel-Hoodie', 'oberteile', TEEN_U, 'ganz', 39, BW, 1, 't_ringelhoodie', P.tSweat);
-te('Schachbrett-Shorts', 'unterteile', TEEN_U, 'sommer', 22, BW, 1, 't_schachshorts', P.tShorts);
-te('Leo-Shirt', 'oberteile', TEEN_D, 'ganz', 19, BW, 1, 't_leoshirt', P.tShirts);
-te('Sterne-Pullover', 'oberteile', TEEN_U, 'winter', 35, STRICK, 1, 't_sternepulli', P.tStrick);
-te('Herzchen-Croptop', 'oberteile', TEEN_D, 'sommer', 17, BW, 1, 't_herzcrop', P.tTops);
 te('Tüll-Minirock', 'unterteile', TEEN_D, 'ganz', 29, SYNTH, 1, 't_tuellmini', P.tRock);
 te('Cargo-Overall', 'unterteile', TEEN_U, 'ganz', 59, BW, 2, 't_cargooverall', P.tHosen);
 // ───────────── Teens & Young Adults: Kleider
@@ -241,7 +224,6 @@ yo('Coach-Jacke', 'jacken', TEEN_U, 'ganz', 55, SYNTH, 2, 't_coachjacket', P.tJa
 yo('Sherpa-Jacke', 'jacken', TEEN_U, 'winter', 65, SYNTH, 2, 't_sherpajacke', P.tJacke);
 te('Cropped Steppweste', 'jacken', TEEN_D, 'winter', 45, SYNTH, 2, 't_cropweste', P.tWeste);
 yo('Kunstleder-Cropjacke', 'jacken', TEEN_D, 'ganz', 59, ['Polyester', 'Leder'], 2, 't_kunstlederjacke', P.tJacke);
-te('Karo-Overshirt', 'jacken', TEEN_U, 'winter', 49, ['Merino', 'Polyester', 'Baumwolle'], 2, 't_karojacke', P.tJacke);
 yo('Satin-Bomberjacke', 'jacken', TEEN_U, 'ganz', 59, SYNTH, 2, 't_satinbomber', P.tJacke);
 // ───────────── Teens & Young Adults: Schuhe
 te('Skateschuh', 'schuhe', ['accessoires.damenschuhe', 'accessoires.herrenschuhe', 'kinder.schuhe', 'kinder.jungen', 'kinder.maedchen'], 'ganz', 59, ['Baumwolle', 'Leder'], 2, 't_skateschuh', P.tSneaker);

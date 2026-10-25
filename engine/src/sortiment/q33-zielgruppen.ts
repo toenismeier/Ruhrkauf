@@ -14,12 +14,12 @@ const istHome = (t: ZgTyp) => t.kategorie === 'home';
 const NUR_ERWACHSEN = new RegExp('^(' + [
   // Oberteile, Hosen, Röcke, Kleider, Jacken
   'Bluse', 'Hemd', 'Kaschmirpullover', 'Feinstrickpullover', 'Longcardigan', 'Tunikabluse', 'Schluppenbluse', 'Blumenbluse',
-  'Slim-Fit-Hemd', 'Regular-Fit-Hemd', 'Oxford-Hemd', 'Streifenhemd', 'Rollkragenpullover', 'Troyer', 'Twinset', 'Strickweste',
+  'Slim-Fit-Hemd', 'Regular-Fit-Hemd', 'Oxford-Hemd', 'Rollkragenpullover', 'Troyer', 'Twinset', 'Strickweste',
   'Feinstrick-Pullunder', 'Wickelshirt', 'V-Shirt', 'Poloshirt',
   'Chino', 'Stoffhose', 'Anzughose', 'Culotte', 'Marlenehose', 'Paperbag-Hose', 'Komforthose', 'Komfort-Jeans', 'Bootcut-Jeans',
   'Bleistiftrock', 'Wickelrock', 'Satin-Midirock', 'Plisseerock', 'A-Linien-Rock', 'Rock',
-  'Etuikleid', 'Hemdblusenkleid', 'Blusenkleid', 'Kaftan', 'Wickelkleid', 'A-Linien-Kleid', 'Strickkleid', 'Punktekleid',
-  'Blazer', 'Mantel', 'Wollmantel', 'Steppmantel', 'Trenchcoat', 'Bouclé-Jacke', 'Hosenanzug', 'Anzug', 'Karo-Anzug', 'Anzugweste',
+  'Etuikleid', 'Hemdblusenkleid', 'Blusenkleid', 'Kaftan', 'Wickelkleid', 'A-Linien-Kleid', 'Strickkleid',
+  'Blazer', 'Mantel', 'Wollmantel', 'Steppmantel', 'Trenchcoat', 'Bouclé-Jacke', 'Hosenanzug', 'Anzug', 'Anzugweste',
   'Tweed-Sakko', 'Stricksakko', 'Leinen-Sakko', 'Poncho', 'Harrington-Jacke', 'Funktionsjacke', 'Regenjacke', 'Fieldjacket', 'Kimono-Jacke',
   // Schuhe
   'Pumps', 'Slingpumps', 'Mule', 'Loafer', 'Slipper', 'Mokassin', 'Bootsschuh', 'Derby-Schuh', 'Budapester', 'Business-Schuh',

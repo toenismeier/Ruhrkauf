@@ -9,6 +9,7 @@ import { DINGE } from './dinge.js';
 import { SILHOUETTEN, ZEICHNER_ERWEITERT } from './silhouetten.js';
 import { modelSVG, HAUT, HAAR } from './model.js';
 import { altbildSVG } from '../produktbild.js';
+import { musterFuellung } from './q37-muster.js';
 
 const FLAT = { oberteil: oberteilFlat, hose: hoseFlat, rock: (S, t, p) => rockFlat(S, t, p, 16), kleid: kleidFlat, jacke: jackeFlat };
 
@@ -40,8 +41,12 @@ export function produktSVG(bild, farbe, material, groesse = 160, opt = {}) {
   const fa = farbe ?? s.farbe, ma = material ?? s.material;
   if (s.zeichner.startsWith('alt:')) return altbildSVG(s.zeichner.slice(4), farbeVon(fa), material, groesse, opt);
   const defs = [], t = [];
-  const S = materialDefs(fa, normMaterial(ma) || 'baumwolle', defs, p.muster);
+  // Q37: opt.muster (Schlüssel aus der Engine) ist maßgeblich: ersetzt Muster und Dessin der Silhouette, uni zeigt den Stoff ohne Muster
+  const mu = opt.muster;
+  const S = materialDefs(fa, normMaterial(ma) || 'baumwolle', defs, mu ? undefined : p.muster);
+  if (mu && mu !== 'uni') S.tex = musterFuellung(S, mu) ?? S.tex;
   const q = { ...p };
+  if (mu) { q.dessin = ''; delete q.muster; }
   if (s.zeichner === 'ding:bettwaesche') q.S2 = materialDefs(opt.farbe2 ?? hell(farbeVon(fa), 0.55), normMaterial(ma) || 'leinen', defs, p.muster2);
   if (FLAT[s.zeichner]) {
     t.push(`<ellipse cx="50" cy="96" rx="30" ry="2.4" fill="#000" opacity="0.07"/>`);
@@ -107,7 +112,7 @@ function passendeSchuhe(s, teile, g, zg, G) {
   return { teil: 'schuhe', material: 'baumwolle', ...G.teile.schuhe };
 }
 
-export function modelFuerProdukt(bild, farbe, material, { geschlecht = 'damen', zielgruppe = 'young', groesse = 300, hintergrund = '#eef1f4', haut } = {}) {
+export function modelFuerProdukt(bild, farbe, material, { geschlecht = 'damen', zielgruppe = 'young', groesse = 300, hintergrund = '#eef1f4', haut, muster } = {}) {
   const { id, s, p } = aufloesen(bild);
   if (!s.model) return null;
   // Damenartikel nur an Damen, Herrenartikel nur an Herren, Kinderartikel nur an Kindern
@@ -117,6 +122,8 @@ export function modelFuerProdukt(bild, farbe, material, { geschlecht = 'damen', 
   const G = GRUND[g][zg];
   let teile = alsModelTeil(id, s, p, farbe ?? s.farbe, material ?? s.material);
   teile = Array.isArray(teile) ? teile : [teile];
+  // Q37: gewähltes Muster auf die Teile des Produkts (nicht auf die Grundgarderobe)
+  if (muster) teile = teile.map((x) => ({ ...x, muster37: muster, dessin: '' }));
   const outfit = [];
   const ersetzt = new Set(teile.map((x) => x.teil));
   if (ersetzt.has('kleid') || ersetzt.has('einteiler')) ersetzt.add('oberteil').add('hose');
