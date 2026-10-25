@@ -250,7 +250,7 @@ export function marketingModul(ctx) {
     const kar = pi.querySelector('.hw-karussell'), kx = kar ? kar.scrollLeft : 0;
     const { r } = rendern();
     const aktivReiter = ui.seite === 'aktion' ? 'kalender' : ui.seite;
-    ctx.panel(r.titel, r.unter, K.bereich('zentrale', 'marketing') + sprecher(r.befund, r.ton) + '<i class="hw-g3" hidden></i>' + r.html
+    ctx.panel(r.titel, r.unter, K.bereich('zentrale', 'marketing') + sprecher(r.befund, r.ton) + (ui.seite === 'uebersicht' ? K.kopfbild('marketing') : '') + '<i class="hw-g3" hidden></i>' + r.html
       + K.reiterUnten(REITER, aktivReiter, (id) => `data-a="seite" data-v="${id}" aria-label="${esc(SICHT[id])}"`), 'gross');
     ui.aktiv = true;
     pi.scrollTop = scrollHalten ? sc : 0;

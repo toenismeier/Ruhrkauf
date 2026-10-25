@@ -65,6 +65,7 @@ export function einkaufModul(ctx) {
     let h = tabs() + cpo(rot.length
       ? `<b>${rot.length} von ${u.bereiche.length} Bereichen stehen auf Rot:</b> ${rot.slice(0, 3).map((b) => esc(b.name)).join(', ')}${rot.length > 3 ? ' und weitere' : ''}.`
       : `<b>Kein Bereich steht auf Rot.</b> ${esc(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen}.`, rot.length ? 'engpass' : '');
+    h += K.kopfbild('einkauf');
     let x = '<div class="hw-g2-oben">' + K.seg([['warenhaus', 'Hartwig'], ['sport', 'Hartwig Sport']], ui.format, (v) => `data-a="format" data-v="${v}"`) + '</div>';
     x += K.gross([
       { label: 'Rohertrag 13 Wochen', wert: text('rohertragsquote', g), p: 'g:rohertragsquote', ton: TON[ga.rohertragsquote], unter: `Umsatz Woche <span data-p="g:umsatzWoche">${geld(g.umsatzWoche)}</span>` },

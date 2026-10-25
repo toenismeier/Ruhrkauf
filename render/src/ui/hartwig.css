@@ -154,9 +154,10 @@
 .hw-rund { width: 38.7px; height: 38.7px; border-radius: 50%; object-fit: cover; }
 .hw-stepper.breit { width: 259px; }
 
-/* ───────── Hartwig-Farben je Bereich (Struktur aus Coffee, Akzent Hartwig-Petrol statt Coffee-Orange, E42) ───────── */
+/* ───────── Hartwig-Farben je Bereich (Struktur aus Coffee; Zentrale Petrol, Haus Coffee-Orange seit 25.10.2026) ───────── */
 .hw[data-bereich='haus'] { --grund: #312924; --kopf: #221c19; --tief: #0e0c0a; --karte: #120f0d; --kartenlinie: #595756; --text: #fff; --leise: #bfbebd; --marke: #a5a3a1;
-  --akzent: #1f6f8b; --akzent-linie: #5fa8bf; --akzent-aktiv: #134a5d; --akzent-aktiv-linie: #3f8aa3; --feld: #080606; --feldlinie: #515150;
+  /* Ummo 25.10.2026: im Haus Coffee-Orange statt Petrol (Bedienfarbe folgt dem Ort: Filiale warm, Zentrale petrol). */
+  --akzent: #95410a; --akzent-linie: #b57a53; --akzent-aktiv: #682d07; --akzent-aktiv-linie: #956c51; --feld: #080606; --feldlinie: #515150;
   --zweit: #2c2725; --zweit-linie: #6b6663; --skala: #63b958; --skala-grund: #0e0c0a; --punkt: #8c8885; --stern: #ffac0b; --hinweis: #e5562a;
   --ring-a: #efbf73; --ring-b: #c9441b; --gut: #66bb6a; --schlecht: #f27d72; --gefahr: #c0362d; --gefahr-linie: #e2786f; }
 .hw[data-bereich='zentrale'], .hw[data-bereich='betrieb'] { --grund: #213741; --kopf: #17262d; --tief: #0d161a; --karte: #0d161a; --kartenlinie: #555c5e; --text: #fff; --leise: #a6a7a7; --marke: #9aa3a7;
@@ -1336,3 +1337,16 @@ body.spielende-aktiv { overflow: hidden; }
 #panel.hw .hw-rumpf .hw-segment:not(:has(img)):has(> button:nth-child(6)) > button { padding: 0 5px; font-size: 10.4px; }
 .hw-fin-tabellen .hw-tabelle th + th { white-space: normal; font-size: 13.2px; line-height: 1.15; vertical-align: bottom; }
 .hw-fin-tabellen .hw-tabelle td + td { overflow: hidden; text-overflow: clip; }
+
+/* ───── Reiter „Mehr“: höchstens fünf Plätze (Coffee), die übrigen klappen über der Leiste auf ───── */
+.hw-reiter { overflow: visible; }
+.hw-reiter-mehr { display: none; position: absolute; right: 6px; bottom: 100%; z-index: 4; padding: 6px 4px 0; background: var(--kopf); border-radius: var(--hw-radius) var(--hw-radius) 0 0;
+  box-shadow: 0 -6px 18px rgba(0,0,0,.35); }
+.hw-reiter.mehr-auf .hw-reiter-mehr { display: flex; gap: 2px; }
+.hw-reiter-mehr > button { position: relative; width: 74px; height: 59px; border: 0; padding: 0; background: none; color: var(--text); font: var(--hw-t-klein); border-radius: 10px; }
+.hw-reiter-mehr > button[aria-current='page'] { background: var(--grund); }
+.hw-reiter-mehr > button > .hw-ill, .hw-reiter-mehr > button > svg { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); width: 40px; height: 34px; }
+.hw-reiter-mehr > button > span { position: absolute; left: 0; right: 0; top: 40px; text-align: center; white-space: nowrap; }
+.hw[data-bereich='haus'] .hw-knopf.text { color: #dba982; }
+.hw-reiter.mehr-auf { z-index: 20; }
+.hw-reiter:has(> .hw-reiter-mehr) { overflow: visible !important; }

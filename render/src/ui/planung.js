@@ -26,7 +26,7 @@ export function planungModul(ctx) {
   // ─────────────────────────── Planungsrunde (Assistent)
   function entwurf(D) {
     const e = D.entwurf;
-    if (!e || e.stand !== 'offen') return cfo('<b>Keine Planungsrunde offen.</b> Die nächste läuft in KW 40 bis 44.')
+    if (!e || e.stand !== 'offen') return cfo('<b>Keine Planungsrunde offen.</b> Die nächste läuft in KW 40 bis 44.') + K.kopfbild('controlling')
       + K.rumpf(K.abschnitt('Jahresplanung') + K.leer('Den laufenden Jahresplan zeigt der Reiter Reporting.', 'Keine Planungsrunde offen.', '', 'planung') + K.knoepfe(K.knopf('Zum Reporting', 'data-pl-tab="report"', 'zweit breit')));
     let x = '<div class="hw-g2-oben">' + K.seg([[1, '1. Ziel'], [2, '2. Verteilung'], [3, '3. Abschluss']], ui.schritt, (v) => `data-pl-schritt="${v}"`) + '</div>';
     let befund = '';
@@ -81,7 +81,7 @@ export function planungModul(ctx) {
       x += K.knoepfe(K.knopf('Angepasste Planung beschließen', 'data-pl-abschluss="spieler"', 'breit'));
       x += K.knoepfe(K.knopf('Controlling-Vorschlag übernehmen', 'data-pl-abschluss="controlling"', 'zweit breit'));
     }
-    return cfo(befund) + K.rumpf(x);
+    return cfo(befund) + K.kopfbild('controlling') + K.rumpf(x);
   }
 
   // ─────────────────────────── Reporting
@@ -97,8 +97,8 @@ export function planungModul(ctx) {
       { label: 'Ist kumuliert', wert: mio(b.ist), unter: `Plan ${mio(b.planBisHeute)}` },
     ]);
     const letzte = (b.wochen || []).slice(-5);
-    x += K.abschnitt(letzte.length ? `Umsatz KW ${(letzte[0].woche % 52) + 1} bis ${(letzte[letzte.length - 1].woche % 52) + 1}` : 'Umsatz je Woche');
-    x += K.balken(letzte.map((w) => ({ label: 'KW ' + ((w.woche % 52) + 1), a: w.plan, b: w.ist })), ['Plan', 'Ist']);
+    x += K.abschnitt(letzte.length ? `Umsatz KW ${(((letzte[0].woche % 52) + 52) % 52) + 1} bis ${(((letzte[letzte.length - 1].woche % 52) + 52) % 52) + 1}` : 'Umsatz je Woche');
+    x += K.balken(letzte.map((w) => ({ label: 'KW ' + ((((w.woche % 52) + 52) % 52) + 1), a: w.plan, b: w.ist })), ['Plan', 'Ist']);
     x += K.tabelle({ titel: `Jahresplan ${b.jahr}`, zeilen: [{ name: 'Umsatz', werte: [mio(b.ziele.umsatz)] }, { name: 'EBITDA', werte: [mio(b.ziele.ebitda)], ton: [tonV(b.ziele.ebitda)] }, { name: 'Forecast Umsatz', werte: [b.forecasting == null ? 'nach KW 13' : mio(b.forecasting)] }] });
     const N = b.knoten, kinder = (id, ebene) => N.filter((n) => n.ebene === ebene && n.parent === id);
     const fname = (f) => FORMATNAME[f.id.replace('format:', '')] ?? f.name;
@@ -115,14 +115,14 @@ export function planungModul(ctx) {
       x += B.buch({ titel: `${fname(f)} Mio. €`, spalten, zeilen, breite: 64, attr: `data-summenbuch="Planblatt ${esc(fname(f))}"` });
     }
     const w = (b.wochen || []).slice().reverse();
-    x += w.length ? B.buch({ titel: 'Woche Mio. €', spalten: ['Ist', 'Plan', 'Abw.'], breite: 64, zeilen: w.map((z) => B.reihe({ name: `KW ${(z.woche % 52) + 1}`, werte: [m1(z.ist), m1(z.plan), { t: pctV(z.abweichungQuote), ton: tonV(z.abweichungQuote) }] })) })
+    x += w.length ? B.buch({ titel: 'Woche Mio. €', spalten: ['Ist', 'Plan', 'Abw.'], breite: 64, zeilen: w.map((z) => B.reihe({ name: `KW ${(((z.woche % 52) + 52) % 52) + 1}`, werte: [m1(z.ist), m1(z.plan), { t: pctV(z.abweichungQuote), ton: tonV(z.abweichungQuote) }] })) })
       : K.abschnitt('Wochen') + K.leer('Noch keine Woche im Plan.');
     if (b.warengruppen) {
       x += K.abschnitt('Warengruppenbudgets', `${Object.keys(b.warengruppen).length} Gruppen`);
       x += ui.wgAuf ? K.tabelle({ zeilen: Object.entries(b.warengruppen).map(([g, v]) => ({ name: E.GRUPPEN?.[g]?.name ?? g, werte: [mio(v)] })) }) + K.knoepfe(K.knopf('Weniger zeigen', 'data-pl-wgauf="0"', 'text'))
         : K.knoepfe(K.knopf('Budgets je Warengruppe zeigen', 'data-pl-wgauf="1"', 'zweit breit'));
     }
-    return cfo(befund, b.abweichung < 0 ? 'engpass' : '') + K.rumpf(x);
+    return cfo(befund, b.abweichung < 0 ? 'engpass' : '') + K.kopfbild('controlling') + K.rumpf(x);
   }
 
   // ─────────────────────────── Forecast
@@ -144,7 +144,7 @@ export function planungModul(ctx) {
       : K.abschnitt('Forecasts') + K.leer('Der erste Forecast (3+9) entsteht nach KW 13.', 'Noch kein Forecast.', '', 'forecast');
     if (D.bericht.vertrauen?.length) {
       x += K.abschnitt('Trefferquote und Vertrauen', 'letzte 8');
-      x += K.liste(D.bericht.vertrauen.slice(-8).map((v) => K.zeile({ was: `KW ${(v.woche % 52) + 1}`, unter: `Abweichung ${pct(v.abweichung)}`, wert: (v.delta > 0 ? '+' : v.delta < 0 ? '−' : '') + Math.abs(v.delta), ton: v.delta < 0 ? 'schlecht' : v.delta > 0 ? 'gut' : '' })));
+      x += K.liste(D.bericht.vertrauen.slice(-8).map((v) => K.zeile({ was: `KW ${(((v.woche % 52) + 52) % 52) + 1}`, unter: `Abweichung ${pct(v.abweichung)}`, wert: (v.delta > 0 ? '+' : v.delta < 0 ? '−' : '') + Math.abs(v.delta), ton: v.delta < 0 ? 'schlecht' : v.delta > 0 ? 'gut' : '' })));
     }
     x += B.fuss('3+9 in KW 13, 6+6 in KW 26 und 9+3 in KW 39. Der Forecast kann vor der Abgabe an Eigentümer und Bank angepasst werden.');
     return cfo(befund, offen ? 'engpass' : '') + K.rumpf(x);
@@ -170,7 +170,7 @@ export function planungModul(ctx) {
   function zeigen(halten = false) {
     const position = document.getElementById('pinhalt').scrollTop, D = vor();
     const html = reiter() + (ui.tab === 'assistent' ? entwurf(D) : ui.tab === 'report' ? bericht(D) : ui.tab === 'forecast' ? forecasts(D) : boni(D));
-    ctx.panel('Planung und Forecast', 'Konzerncontrolling · KW ' + ((s().woche % 52) + 1), K.bereich('zentrale') + html, 'gross');
+    ctx.panel('Planung und Forecast', 'Konzerncontrolling · KW ' + ((((s().woche % 52) + 52) % 52) + 1), K.bereich('zentrale') + html, 'gross');
     ui.aktiv = true;
     document.getElementById('pinhalt').scrollTop = halten ? position : 0;
   }

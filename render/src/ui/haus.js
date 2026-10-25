@@ -139,7 +139,7 @@ function ueberblick(c, h, k, vorwoche, vorwocheDb, uPunkte, dPunkte) {
     { label: 'Umsatz Woche', wert: geld(umsatz), p: 'haus:umsatz', unter: (vorwoche == null ? 'erste Woche' : abw(umsatz - vorwoche, vorwoche)) + '<br>' + (vjQ == null ? 'Vorjahr fehlt' : `Vorjahr <span class="${vjQ > 0 ? 'gut' : vjQ < 0 ? 'schlecht' : ''}">${vjQ >= 0 ? '+' : '−'}${p(Math.abs(vjQ) * 100, 1)} %</span>`) },
     { label: 'Deckungsbeitrag', wert: geld(db), ton: db < 0 ? 'schlecht' : 'gut', p: 'haus:db', unter: (vorwocheDb == null ? 'erste Woche' : abw(db - vorwocheDb, vorwocheDb)) + `<br>${umsatz ? p(100 * db / umsatz, 1) + ' % vom Umsatz' : '0 % vom Umsatz'}` },
   ]);
-  const kw = (q) => String((q.woche % 52) + 1);
+  const kw = (q) => String((((q.woche % 52) + 52) % 52) + 1);
   const letzte = uPunkte.slice(-5);
   // Coffee 20: ein Säulenpaar je Woche auf gemeinsamer Skala (Umsatz weiß, Deckungsbeitrag grün).
   x += K.balken(letzte.map((q) => ({ label: 'KW ' + kw(q), a: q.wert, b: dPunkte.find((z) => z.woche === q.woche)?.wert ?? 0 })), ['Umsatz', 'Deckungsbeitrag']);
@@ -232,7 +232,7 @@ function leitung(c, h, b) {
   x += `<div class="hw-person"><div class="hw-portraet hw-kontur">${filialleitungBild(h, 104)}</div><div class="hw-person-daten"><h3 class="hw-person-name">${esc(l?.name ?? 'Nicht besetzt')}</h3>`
     + `<span class="hw-marke">Fähigkeiten</span>${Object.entries(l?.staerken ?? {}).map(([key, v]) => K.skala(SCHWERPUNKT[key] ?? key, v * 100)).join('')}${K.skala('Stimmung', l?.moral ?? 0)}${K.skala('Ehrlichkeit', (l?.ehrlichkeit ?? 0) * 100)}</div></div>`;
   x += `<div class="hw-felder"><div class="hw-feld"><span class="hw-marke hw-feldname">Jahresgehalt</span><b class="hw-feldwert">${geld(l?.gehalt ?? 0)}</b><small class="hw-feldunter">Bonus ${PROZENT(l?.bonusAnteil ?? 0)}</small></div>`
-    + `<div class="hw-feld"><span class="hw-marke hw-feldname">${l?.interimBis ? 'Interim bis' : 'Stellvertretung'}</span><b class="hw-feldwert">${l?.interimBis ? 'KW ' + ((l.interimBis % 52) + 1) : esc(l?.stellvertretung?.name ?? 'nicht benannt')}</b><small class="hw-feldunter">${l?.interimBis ? '' : 'Qualität ' + PROZENT(l?.stellvertretung?.qualitaet ?? 0)}</small></div></div>`;
+    + `<div class="hw-feld"><span class="hw-marke hw-feldname">${l?.interimBis ? 'Interim bis' : 'Stellvertretung'}</span><b class="hw-feldwert">${l?.interimBis ? 'KW ' + ((((l.interimBis % 52) + 52) % 52) + 1) : esc(l?.stellvertretung?.name ?? 'nicht benannt')}</b><small class="hw-feldunter">${l?.interimBis ? '' : 'Qualität ' + PROZENT(l?.stellvertretung?.qualitaet ?? 0)}</small></div></div>`;
   if ((l?.wechselwille ?? 0) > 0.3) x += K.hinweis(`Wechselwille ${PROZENT(l.wechselwille)}: Eine Halteprämie senkt das Risiko.`, 'achtung');
   else x += K.hinweis(`Wechselwille ${PROZENT(l?.wechselwille ?? 0)}.`);
   x += K.abschnitt('Fördern', 'eine Stärke je Woche');
@@ -289,7 +289,7 @@ function partner(c, h, b) {
     + `<div class="hw-knoepfe zweispaltig q32-cluster">${services.map(([key, an]) => K.knopf(`${SERVICE[key] ?? key} ${an ? 'überall aus' : 'überall an'}`, tun('clusterservice', id, key, String(!an)), 'zweit')).join('')}</div>` : K.leer('Keine Services hinterlegt.');
   x += K.abschnitt('Gastronomie', p(b?.restaurantQm) + ' qm Restaurantfläche');
   x += K.seg([['selbst', 'Selbst betreiben'], ['pacht', 'Verpachten']], b?.gastro ?? '', (w) => tun('gastro', id, w));
-  x += K.liste([K.zeile({ was: 'Betriebsform', wert: b?.gastro === 'selbst' ? 'Eigenbetrieb' : b?.gastro === 'pacht' ? 'Verpachtet' : 'Noch keine' }), K.zeile({ was: 'Vertrag bis', wert: b?.gastroVertragBis != null ? 'KW ' + ((b.gastroVertragBis % 52) + 1) : 'ohne Vertrag' })]);
+  x += K.liste([K.zeile({ was: 'Betriebsform', wert: b?.gastro === 'selbst' ? 'Eigenbetrieb' : b?.gastro === 'pacht' ? 'Verpachtet' : 'Noch keine' }), K.zeile({ was: 'Vertrag bis', wert: b?.gastroVertragBis != null ? 'KW ' + ((((b.gastroVertragBis % 52) + 52) % 52) + 1) : 'ohne Vertrag' })]);
   x += K.abschnitt('Stadt und Sonntagsverkauf');
   x += K.liste([K.zeile({ was: 'Umfeld', wert: esc(b?.umfeld?.ereignis ?? 'Regulär') }), K.zeile({ was: 'Innenstadtfrequenz', wert: PROZENT(b?.umfeld?.trend ?? 1) })]);
   x += K.knoepfe(K.knopf('Verkaufsoffenen Sonntag beantragen', tun('sonntag', id), 'zweit breit'));
@@ -317,7 +317,7 @@ function kosten(c, h, k, b) {
 function kommentare(c, h, b) {
   const id = h.id;
   let x = K.abschnitt('Wochenkommentierung', 'Abweichungen unter −5 %');
-  x += b?.kommentare?.length ? K.liste(b.kommentare.map((q) => K.zeile({ was: `KW ${(q.woche % 52) + 1} · ${esc(GRUENDE[q.grund] ?? q.grund)}`, unter: esc(MASS[q.massnahme] ?? q.massnahme) + ' · ' + esc(q.pruefung), wert: PROZENT(q.abweichung), ton: q.abweichung < 0 ? 'schlecht' : '' })))
+  x += b?.kommentare?.length ? K.liste(b.kommentare.map((q) => K.zeile({ was: `KW ${(((q.woche % 52) + 52) % 52) + 1} · ${esc(GRUENDE[q.grund] ?? q.grund)}`, unter: esc(MASS[q.massnahme] ?? q.massnahme) + ' · ' + esc(q.pruefung), wert: PROZENT(q.abweichung), ton: q.abweichung < 0 ? 'schlecht' : '' })))
     : K.leer('Noch keine Abweichung unter −5 % zum Vorjahr oder Plan.');
   x += K.abschnitt('Maßnahme vor Ort');
   x += `<div class="hw-knoepfe zweispaltig">${Object.entries(MASS).map(([key, name]) => K.knopf(name, tun('massnahme', id, key), 'zweit')).join('')}</div>`;

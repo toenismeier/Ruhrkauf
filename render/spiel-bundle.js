@@ -161293,6 +161293,7 @@ void main() {
     if (!karten.length) return leer3("Keine Eintr\xE4ge vorhanden.");
     return `<div class="hw-karussell hw-randlos" role="group" aria-label="${esc(label)}" data-aktiv="${aktiv7}" onscroll="const i=Math.round(this.scrollLeft/(this.firstElementChild.offsetWidth+21));this.nextElementSibling.querySelectorAll('i').forEach((p,k)=>p.classList.toggle('an',k===i))">${karten.map((k5) => `<article class="hw-karte hw-kontur">${k5}</article>`).join("")}</div><div class="hw-punkte" aria-hidden="true">${karten.map((_, i) => `<i class="${i === aktiv7 ? "an" : ""}"></i>`).join("")}</div>`;
   }
+  var kopfbild = (abteilung2) => `<div class="hw-kopfbild" data-kopfbild="${esc(abteilung2)}" aria-hidden="true"></div>`;
   var rumpf2 = (html) => `<div class="hw-rumpf">${html}</div>`;
   var band = (html) => `<section class="hw-band">${html}</section>`;
   function sprecher({ text: text3, unter = "", person: person3 = "", ton: ton3 = "" }) {
@@ -161412,7 +161413,12 @@ void main() {
     crm: "post",
     kalender: "etagen"
   };
-  var reiterUnten = (reiter, aktiv7, attr) => `<nav class="hw-reiter" aria-label="Bereiche">${reiter.map(([id, name2, sym3]) => `<button type="button" ${attr(id)}${id === aktiv7 ? ' aria-current="page"' : ""}>${symbol(sym3 ?? id, RUECKFALL[sym3 ?? id])}<span>${esc(name2)}</span></button>`).join("")}</nav>`;
+  var reiterUnten = (reiter, aktiv7, attr) => {
+    const knopf4 = ([id, name2, sym3]) => `<button type="button" ${attr(id)}${id === aktiv7 ? ' aria-current="page"' : ""}>${symbol(sym3 ?? id, RUECKFALL[sym3 ?? id])}<span>${esc(name2)}</span></button>`;
+    if (reiter.length <= 5) return `<nav class="hw-reiter" aria-label="Bereiche">${reiter.map(knopf4).join("")}</nav>`;
+    const vorn = reiter.slice(0, 4), rest = reiter.slice(4), imRest = rest.some(([id]) => id === aktiv7);
+    return `<nav class="hw-reiter" aria-label="Bereiche">${vorn.map(knopf4).join("")}<button type="button" class="hw-reiter-mehrknopf" aria-expanded="false" onclick="const n=this.parentElement;const auf=!n.classList.contains('mehr-auf');n.classList.toggle('mehr-auf',auf);this.setAttribute('aria-expanded',auf)"${imRest ? ' aria-current="page"' : ""}>${imRest ? (([, , sym3], id) => symbol(sym3 ?? id, RUECKFALL[sym3 ?? id]))(rest.find(([id]) => id === aktiv7), aktiv7) : symbol("menue", "zentrale")}<span>${imRest ? esc(rest.find(([id]) => id === aktiv7)[1]) : "Mehr"}</span></button><div class="hw-reiter-mehr" role="menu">${rest.map(knopf4).join("")}</div></nav>`;
+  };
 
   // src/ui/einstellungen.js
   var SPEICHER = "hartwig.einstellungen.v1";
@@ -161501,7 +161507,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "51e0e7b" : "Entwicklung";
+  var version = () => true ? "5f3789d" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -162032,7 +162038,7 @@ void main() {
     ["organisation", "Organisation", "organisation"],
     ["reporting", "Reporting", "reporting"]
   ], aktiv7, (id) => klick("reiter", id));
-  function kopfbild(bild4, alt, knopf4 = "") {
+  function kopfbild2(bild4, alt, knopf4 = "") {
     if (!bild4) return "";
     return `<div class="hw-kopfbild"><img src="${bild4}" alt="${esc(alt)}">${knopf4}</div>`;
   }
@@ -162062,7 +162068,7 @@ void main() {
       const e = gWahl.etagen.find((q3) => q3.nr === nrWahl);
       const bild4 = c.etagenBild?.(gWahl.id, nrWahl);
       const erste = e?.abteilungen?.[0];
-      h4 += kopfbild(
+      h4 += kopfbild2(
         bild4,
         `Etagenschnitt ${gWahl.name}, ${etageName2(nrWahl)}`,
         erste ? `<button type="button" class="hw-bildknopf hw-kontur hw-bildknopf-links" ${klick("abteilung", erste.id)} aria-label="${esc(erste.name)} \xF6ffnen">${SYMBOLE.personal}</button>` : ""
@@ -162180,7 +162186,7 @@ void main() {
       ton: ton3
     });
     const bild4 = wahl3 && etagenBild2 ? etagenBild2(wahl3.gebaeude.id, wahl3.etage.nr) : null;
-    if (bild4) h4 += kopfbild(bild4, "Etagenschnitt " + gName + ", " + etText) + bildzeile(gName + " \xB7 " + etText);
+    if (bild4) h4 += kopfbild2(bild4, "Etagenschnitt " + gName + ", " + etText) + bildzeile(gName + " \xB7 " + etText);
     let r4 = "";
     const bedarf = a2.sollFte > 0 ? a2.sollFte : null;
     r4 += gross2([
@@ -163215,6 +163221,7 @@ void main() {
       const u = q3.uebersicht(s2(), { format: ui.format }), g2 = u.summe.kennzahlen, ga = u.summe.ampeln;
       const rot = u.bereiche.filter((b4) => Object.values(b4.ampeln).includes("rot"));
       let h4 = tabs() + cpo(rot.length ? `<b>${rot.length} von ${u.bereiche.length} Bereichen stehen auf Rot:</b> ${rot.slice(0, 3).map((b4) => esc(b4.name)).join(", ")}${rot.length > 3 ? " und weitere" : ""}.` : `<b>Kein Bereich steht auf Rot.</b> ${esc(u.saison.name)}, Woche ${u.saison.woche} von ${u.saison.wochen}.`, rot.length ? "engpass" : "");
+      h4 += kopfbild("einkauf");
       let x2 = '<div class="hw-g2-oben">' + seg([["warenhaus", "Hartwig"], ["sport", "Hartwig Sport"]], ui.format, (v2) => `data-a="format" data-v="${v2}"`) + "</div>";
       x2 += gross2([
         { label: "Rohertrag 13 Wochen", wert: text3("rohertragsquote", g2), p: "g:rohertragsquote", ton: TON[ga.rohertragsquote], unter: `Umsatz Woche <span data-p="g:umsatzWoche">${geld(g2.umsatzWoche)}</span>` },
@@ -165579,7 +165586,7 @@ void main() {
       const kar = pi.querySelector(".hw-karussell"), kx = kar ? kar.scrollLeft : 0;
       const { r: r4 } = rendern();
       const aktivReiter = ui.seite === "aktion" ? "kalender" : ui.seite;
-      ctx.panel(r4.titel, r4.unter, bereich("zentrale", "marketing") + sprecher2(r4.befund, r4.ton) + '<i class="hw-g3" hidden></i>' + r4.html + reiterUnten(REITER3, aktivReiter, (id) => `data-a="seite" data-v="${id}" aria-label="${esc(SICHT3[id])}"`), "gross");
+      ctx.panel(r4.titel, r4.unter, bereich("zentrale", "marketing") + sprecher2(r4.befund, r4.ton) + (ui.seite === "uebersicht" ? kopfbild("marketing") : "") + '<i class="hw-g3" hidden></i>' + r4.html + reiterUnten(REITER3, aktivReiter, (id) => `data-a="seite" data-v="${id}" aria-label="${esc(SICHT3[id])}"`), "gross");
       ui.aktiv = true;
       pi.scrollTop = scrollHalten ? sc : 0;
       const neu3 = pi.querySelector(".hw-karussell");
@@ -175802,7 +175809,7 @@ void main() {
       const d4 = daten(), titel = { systeme: "Systemlandkarte", produkte: "Digitale Produkte", projekte: "IT-Projekte", neu: "Neues IT-Projekt" };
       const r4 = ui.reiter === "systeme" ? systeme(d4) : ui.reiter === "produkte" ? produkte2() : ui.reiter === "projekte" ? projekte(d4) : neu3(d4);
       const aktiv7 = d4.projekte.filter((x2) => x2.phase !== "abgeschlossen").length;
-      ctx.panel("IT \xB7 " + titel[ui.reiter], `Bereich IT \xB7 ${aktiv7} aktive Projekte`, bereich("zentrale", "systeme") + digitalSprecher(E9, s2(), r4.befund, r4.ton) + '<i class="hw-g3" hidden></i>' + (r4.roh ? r4.html : rumpf2(r4.html)) + reiterUnten(REITER4, ui.reiter, (id) => `data-it="reiter" data-v="${id}"`), "gross");
+      ctx.panel("IT \xB7 " + titel[ui.reiter], `Bereich IT \xB7 ${aktiv7} aktive Projekte`, bereich("zentrale", "systeme") + digitalSprecher(E9, s2(), r4.befund, r4.ton) + (ui.reiter === "systeme" ? kopfbild("ecommerce") : "") + '<i class="hw-g3" hidden></i>' + (r4.roh ? r4.html : rumpf2(r4.html)) + reiterUnten(REITER4, ui.reiter, (id) => `data-it="reiter" data-v="${id}"`), "gross");
       ui.aktiv = true;
     }
     function melde2(r4) {
@@ -175981,9 +175988,9 @@ void main() {
         { label: "Onlineumsatz Woche", wert: geld(u.umsatz), unter: vor ? abweichung(u.umsatz - vor.umsatz, vz(u.umsatz - vor.umsatz), vor.umsatz ? (u.umsatz - vor.umsatz) / vor.umsatz : null) : "erste Woche" }
       ]);
       const letzte = v2.slice(-5);
-      h4 += abschnitt("Umsatz und Deckungsbeitrag", letzte.length ? `KW ${letzte[0].woche % 52 + 1} bis ${letzte[letzte.length - 1].woche % 52 + 1}` : "");
-      h4 += balken6(letzte.map((q3) => ({ label: "KW " + (q3.woche % 52 + 1), a: q3.umsatz, b: q3.deckungsbeitrag })), ["Umsatz", "Deckungsbeitrag"]);
-      h4 += abschnitt(`Paketschein KW ${ctx.s().woche % 52 + 1}`, "hartwig.de");
+      h4 += abschnitt("Umsatz und Deckungsbeitrag", letzte.length ? `KW ${(letzte[0].woche % 52 + 52) % 52 + 1} bis ${(letzte[letzte.length - 1].woche % 52 + 52) % 52 + 1}` : "");
+      h4 += balken6(letzte.map((q3) => ({ label: "KW " + ((q3.woche % 52 + 52) % 52 + 1), a: q3.umsatz, b: q3.deckungsbeitrag })), ["Umsatz", "Deckungsbeitrag"]);
+      h4 += abschnitt(`Paketschein KW ${(ctx.s().woche % 52 + 52) % 52 + 1}`, "hartwig.de");
       h4 += liste([
         zeile({ was: "Bestellungen", wert: fmt.format(u.bestellungen) }),
         zeile({ was: "Kosten je Bestellung", wert: geld(u.kostenJeBestellung) }),
@@ -176018,7 +176025,7 @@ void main() {
       h4 += schalter({ text: "Click & Collect", unter: "Abholung nur in H\xE4usern mit Abholstation", an: u.clickCollect, attr: 'data-online="collect"' });
       h4 += abschnitt("Fulfillment");
       h4 += liste([zeile({ was: "Aktuelles Modell", unter: u.fulfillment === "eigen" ? "niedrigere Paketkosten, h\xF6here Fixkosten" : "variable Paketkosten", wert: u.fulfillment === "eigen" ? "Eigenes Lager" : "Dienstleister" })]);
-      if (u.projekt) h4 += hinweis(`Umstellung auf ${u.projekt.modell === "eigen" ? "eigenes Lager" : "Dienstleister"} ab KW ${u.projekt.bis % 52 + 1} \xB7 Investition ${geld(u.projekt.investition)}`);
+      if (u.projekt) h4 += hinweis(`Umstellung auf ${u.projekt.modell === "eigen" ? "eigenes Lager" : "Dienstleister"} ab KW ${(u.projekt.bis % 52 + 52) % 52 + 1} \xB7 Investition ${geld(u.projekt.investition)}`);
       else h4 += knoepfe(knopf(u.fulfillment === "eigen" ? "Zum Dienstleister wechseln" : "Eigenes Lager bauen", `data-online="fulfillment" data-wert="${u.fulfillment === "eigen" ? "dienstleister" : "eigen"}"`, "breit"));
       const an = u.cluster.filter((c) => c.aktiv).length;
       h4 += abschnitt("Versand aus dem Haus", `${an} von ${u.cluster.length} Clustern`);
@@ -176037,7 +176044,7 @@ void main() {
       if (!offen) return;
       const u = state(), pi = document.getElementById("pinhalt"), vorher = behalten ? pi.scrollTop : 0;
       const r4 = tab === "produkte" ? { befund: "Die Online-Kennzahlen speisen die digitalen Produkte der IT.", html: itProdukteKarten(ctx.E.itProdukte(ctx.s()), "online") } : tab === "steuerung" ? steuerung2(u) : tab === "haeuser" ? haeuser(u) : uebersicht(u);
-      ctx.panel("Online", "hartwig.de \xB7 E-Commerce", bereich("zentrale", "online") + digitalSprecher(ctx.E, ctx.s(), r4.befund, r4.ton, "E-Commerce") + '<i class="hw-g3" hidden></i>' + r4.html + reiterUnten(REITER5, tab, (id) => `data-online="tab" data-wert="${id}"`), "gross");
+      ctx.panel("Online", "hartwig.de \xB7 E-Commerce", bereich("zentrale", "online") + digitalSprecher(ctx.E, ctx.s(), r4.befund, r4.ton, "E-Commerce") + (tab !== "produkte" && tab !== "steuerung" && tab !== "haeuser" ? kopfbild("logistik|ecommerce") : "") + '<i class="hw-g3" hidden></i>' + r4.html + reiterUnten(REITER5, tab, (id) => `data-online="tab" data-wert="${id}"`), "gross");
       offen = true;
       pi.scrollTop = vorher;
     }
@@ -176272,7 +176279,7 @@ void main() {
       { label: "Umsatz Woche", wert: geld(umsatz), p: "haus:umsatz", unter: (vorwoche == null ? "erste Woche" : abw(umsatz - vorwoche, vorwoche)) + "<br>" + (vjQ == null ? "Vorjahr fehlt" : `Vorjahr <span class="${vjQ > 0 ? "gut" : vjQ < 0 ? "schlecht" : ""}">${vjQ >= 0 ? "+" : "\u2212"}${p(Math.abs(vjQ) * 100, 1)} %</span>`) },
       { label: "Deckungsbeitrag", wert: geld(db), ton: db < 0 ? "schlecht" : "gut", p: "haus:db", unter: (vorwocheDb == null ? "erste Woche" : abw(db - vorwocheDb, vorwocheDb)) + `<br>${umsatz ? p(100 * db / umsatz, 1) + " % vom Umsatz" : "0 % vom Umsatz"}` }
     ]);
-    const kw2 = (q3) => String(q3.woche % 52 + 1);
+    const kw2 = (q3) => String((q3.woche % 52 + 52) % 52 + 1);
     const letzte = uPunkte.slice(-5);
     x2 += balken6(letzte.map((q3) => ({ label: "KW " + kw2(q3), a: q3.wert, b: dPunkte.find((z6) => z6.woche === q3.woche)?.wert ?? 0 })), ["Umsatz", "Deckungsbeitrag"]);
     const marken2 = [marke4(STATUS_HAUS2[h4.status] ?? h4.status, h4.status === "offen" ? "" : "schlecht")];
@@ -176381,7 +176388,7 @@ void main() {
     const l = b4?.leitungsdaten, id = h4.id;
     let x2 = abschnitt("Filialleitung");
     x2 += `<div class="hw-person"><div class="hw-portraet hw-kontur">${filialleitungBild(h4, 104)}</div><div class="hw-person-daten"><h3 class="hw-person-name">${esc(l?.name ?? "Nicht besetzt")}</h3><span class="hw-marke">F\xE4higkeiten</span>${Object.entries(l?.staerken ?? {}).map(([key, v2]) => skala(SCHWERPUNKT[key] ?? key, v2 * 100)).join("")}${skala("Stimmung", l?.moral ?? 0)}${skala("Ehrlichkeit", (l?.ehrlichkeit ?? 0) * 100)}</div></div>`;
-    x2 += `<div class="hw-felder"><div class="hw-feld"><span class="hw-marke hw-feldname">Jahresgehalt</span><b class="hw-feldwert">${geld(l?.gehalt ?? 0)}</b><small class="hw-feldunter">Bonus ${PROZENT(l?.bonusAnteil ?? 0)}</small></div><div class="hw-feld"><span class="hw-marke hw-feldname">${l?.interimBis ? "Interim bis" : "Stellvertretung"}</span><b class="hw-feldwert">${l?.interimBis ? "KW " + (l.interimBis % 52 + 1) : esc(l?.stellvertretung?.name ?? "nicht benannt")}</b><small class="hw-feldunter">${l?.interimBis ? "" : "Qualit\xE4t " + PROZENT(l?.stellvertretung?.qualitaet ?? 0)}</small></div></div>`;
+    x2 += `<div class="hw-felder"><div class="hw-feld"><span class="hw-marke hw-feldname">Jahresgehalt</span><b class="hw-feldwert">${geld(l?.gehalt ?? 0)}</b><small class="hw-feldunter">Bonus ${PROZENT(l?.bonusAnteil ?? 0)}</small></div><div class="hw-feld"><span class="hw-marke hw-feldname">${l?.interimBis ? "Interim bis" : "Stellvertretung"}</span><b class="hw-feldwert">${l?.interimBis ? "KW " + ((l.interimBis % 52 + 52) % 52 + 1) : esc(l?.stellvertretung?.name ?? "nicht benannt")}</b><small class="hw-feldunter">${l?.interimBis ? "" : "Qualit\xE4t " + PROZENT(l?.stellvertretung?.qualitaet ?? 0)}</small></div></div>`;
     if ((l?.wechselwille ?? 0) > 0.3) x2 += hinweis(`Wechselwille ${PROZENT(l.wechselwille)}: Eine Haltepr\xE4mie senkt das Risiko.`, "achtung");
     else x2 += hinweis(`Wechselwille ${PROZENT(l?.wechselwille ?? 0)}.`);
     x2 += abschnitt("F\xF6rdern", "eine St\xE4rke je Woche");
@@ -176442,7 +176449,7 @@ void main() {
     x2 += services.length ? liste(services.map(([key, an]) => schalter({ text: SERVICE[key] ?? key, unter: an ? "in diesem Haus aktiv" : "in diesem Haus aus", an, attr: tun("service", id, key, String(!an)) }))) + abschnitt("Services im ganzen Hauscluster") + `<div class="hw-knoepfe zweispaltig q32-cluster">${services.map(([key, an]) => knopf(`${SERVICE[key] ?? key} ${an ? "\xFCberall aus" : "\xFCberall an"}`, tun("clusterservice", id, key, String(!an)), "zweit")).join("")}</div>` : leer3("Keine Services hinterlegt.");
     x2 += abschnitt("Gastronomie", p(b4?.restaurantQm) + " qm Restaurantfl\xE4che");
     x2 += seg([["selbst", "Selbst betreiben"], ["pacht", "Verpachten"]], b4?.gastro ?? "", (w2) => tun("gastro", id, w2));
-    x2 += liste([zeile({ was: "Betriebsform", wert: b4?.gastro === "selbst" ? "Eigenbetrieb" : b4?.gastro === "pacht" ? "Verpachtet" : "Noch keine" }), zeile({ was: "Vertrag bis", wert: b4?.gastroVertragBis != null ? "KW " + (b4.gastroVertragBis % 52 + 1) : "ohne Vertrag" })]);
+    x2 += liste([zeile({ was: "Betriebsform", wert: b4?.gastro === "selbst" ? "Eigenbetrieb" : b4?.gastro === "pacht" ? "Verpachtet" : "Noch keine" }), zeile({ was: "Vertrag bis", wert: b4?.gastroVertragBis != null ? "KW " + ((b4.gastroVertragBis % 52 + 52) % 52 + 1) : "ohne Vertrag" })]);
     x2 += abschnitt("Stadt und Sonntagsverkauf");
     x2 += liste([zeile({ was: "Umfeld", wert: esc(b4?.umfeld?.ereignis ?? "Regul\xE4r") }), zeile({ was: "Innenstadtfrequenz", wert: PROZENT(b4?.umfeld?.trend ?? 1) })]);
     x2 += knoepfe(knopf("Verkaufsoffenen Sonntag beantragen", tun("sonntag", id), "zweit breit"));
@@ -176466,7 +176473,7 @@ void main() {
   function kommentare(c, h4, b4) {
     const id = h4.id;
     let x2 = abschnitt("Wochenkommentierung", "Abweichungen unter \u22125 %");
-    x2 += b4?.kommentare?.length ? liste(b4.kommentare.map((q3) => zeile({ was: `KW ${q3.woche % 52 + 1} \xB7 ${esc(GRUENDE[q3.grund] ?? q3.grund)}`, unter: esc(MASS[q3.massnahme] ?? q3.massnahme) + " \xB7 " + esc(q3.pruefung), wert: PROZENT(q3.abweichung), ton: q3.abweichung < 0 ? "schlecht" : "" }))) : leer3("Noch keine Abweichung unter \u22125 % zum Vorjahr oder Plan.");
+    x2 += b4?.kommentare?.length ? liste(b4.kommentare.map((q3) => zeile({ was: `KW ${(q3.woche % 52 + 52) % 52 + 1} \xB7 ${esc(GRUENDE[q3.grund] ?? q3.grund)}`, unter: esc(MASS[q3.massnahme] ?? q3.massnahme) + " \xB7 " + esc(q3.pruefung), wert: PROZENT(q3.abweichung), ton: q3.abweichung < 0 ? "schlecht" : "" }))) : leer3("Noch keine Abweichung unter \u22125 % zum Vorjahr oder Plan.");
     x2 += abschnitt("Ma\xDFnahme vor Ort");
     x2 += `<div class="hw-knoepfe zweispaltig">${Object.entries(MASS).map(([key, name2]) => knopf(name2, tun("massnahme", id, key), "zweit")).join("")}</div>`;
     return x2;
@@ -178569,7 +178576,7 @@ void main() {
       h4 += '<div class="hw-g6-filter">' + seg(gruppen.map((g2) => [g2, g2]), zustand.filter, (g2) => 'data-erfolge-filter="' + g2 + '"') + "</div>";
       h4 += liste(ausw.map((e) => {
         const ok6 = freigeschaltet(e), geheim = e.geheim && !ok6;
-        return '<div class="hw-zeile erfolge-karte' + (ok6 ? " frei" : " gesperrt") + '" data-erfolg="' + esc(e.id) + '" aria-label="' + (geheim ? "Geheimer Erfolg" : esc(e.titel)) + '">' + (geheim ? '<span class="erfolge-geheim" aria-hidden="true"></span>' : bild4(e)) + '<span class="hw-was">' + (geheim ? "Geheim" : esc(e.titel)) + "<small>" + (geheim ? "noch nicht enth\xFCllt" : esc(e.gruppe + " \xB7 " + e.stufe + (ok6 ? "" : " \xB7 " + e.hinweis))) + '</small></span><span class="hw-wert' + (ok6 ? " gut" : "") + '">' + (ok6 ? "KW " + (e.freigeschaltet % 52 + 1) : geheim ? "" : Math.round(e.fortschritt * 100) + " %") + "</span></div>";
+        return '<div class="hw-zeile erfolge-karte' + (ok6 ? " frei" : " gesperrt") + '" data-erfolg="' + esc(e.id) + '" aria-label="' + (geheim ? "Geheimer Erfolg" : esc(e.titel)) + '">' + (geheim ? '<span class="erfolge-geheim" aria-hidden="true"></span>' : bild4(e)) + '<span class="hw-was">' + (geheim ? "Geheim" : esc(e.titel)) + "<small>" + (geheim ? "noch nicht enth\xFCllt" : esc(e.gruppe + " \xB7 " + e.stufe + (ok6 ? "" : " \xB7 " + e.hinweis))) + '</small></span><span class="hw-wert' + (ok6 ? " gut" : "") + '">' + (ok6 ? "KW " + ((e.freigeschaltet % 52 + 52) % 52 + 1) : geheim ? "" : Math.round(e.fortschritt * 100) + " %") + "</span></div>";
       }));
       const text3 = frei6.length ? `${frei6.length} von ${alle.length} Abzeichen erreicht.` + (nah[0] ? ` Am n\xE4chsten: ${esc(nah[0].titel)}.` : "") : "Noch kein Abzeichen. Das erste kommt meist mit dem ersten Wochenabschluss.";
       return bereich("betrieb", "pokal") + sprecher({ text: text3 }) + '<div class="hw-boden">' + rumpf2('<div class="hw-g6-erfolge">' + h4 + "</div>") + "</div>";
@@ -179213,6 +179220,7 @@ void main() {
       const hs = daten.zeilen, gruppen = daten.gruppen, B8 = daten.bruecke;
       const treiber = B8.status === "ok" ? [["Frequenz", B8.frequenz], ["Kaufquote", B8.kaufquote], ["Teile je Bon", B8.teile], ["Preis je Teil", B8.preis]].sort((a2, b4) => Math.abs(b4[1]) - Math.abs(a2[1]))[0] : null;
       let h4 = bereich("zentrale", "zahlen") + G4 + sprecher({ text: treiber ? `Gr\xF6\xDFter Treiber gegen Vorjahr: <b>${treiber[0]}</b> mit ${vz2(treiber[1])}.` : "<b>Noch kein Vorjahresvergleich.</b> Die Br\xFCcke folgt nach dem ersten Wochenabschluss.", unter: "Konzerncontrolling" });
+      h4 += kopfbild("controlling");
       let r4 = "";
       if (B8.status === "ok") r4 += gross2([
         { label: "Umsatz gegen Vorjahr", wert: vz2(B8.differenz), ton: B8.differenz < 0 ? "schlecht" : B8.differenz > 0 ? "gut" : "", unter: B8.vorher ? vp(B8.differenz / B8.vorher) + " zum Vorjahr" : "" },
@@ -179311,7 +179319,7 @@ void main() {
     const cfo = (text3, ton3 = "") => vorstandSprecher(s2(), "cfo", "Finanzvorstand", text3, ton3);
     function entwurf(D) {
       const e = D.entwurf;
-      if (!e || e.stand !== "offen") return cfo("<b>Keine Planungsrunde offen.</b> Die n\xE4chste l\xE4uft in KW 40 bis 44.") + rumpf2(abschnitt("Jahresplanung") + leer3("Den laufenden Jahresplan zeigt der Reiter Reporting.", "Keine Planungsrunde offen.", "", "planung") + knoepfe(knopf("Zum Reporting", 'data-pl-tab="report"', "zweit breit")));
+      if (!e || e.stand !== "offen") return cfo("<b>Keine Planungsrunde offen.</b> Die n\xE4chste l\xE4uft in KW 40 bis 44.") + kopfbild("controlling") + rumpf2(abschnitt("Jahresplanung") + leer3("Den laufenden Jahresplan zeigt der Reiter Reporting.", "Keine Planungsrunde offen.", "", "planung") + knoepfe(knopf("Zum Reporting", 'data-pl-tab="report"', "zweit breit")));
       let x2 = '<div class="hw-g2-oben">' + seg([[1, "1. Ziel"], [2, "2. Verteilung"], [3, "3. Abschluss"]], ui.schritt, (v2) => `data-pl-schritt="${v2}"`) + "</div>";
       let befund3 = "";
       if (ui.schritt === 1) {
@@ -179366,7 +179374,7 @@ void main() {
         x2 += knoepfe(knopf("Angepasste Planung beschlie\xDFen", 'data-pl-abschluss="spieler"', "breit"));
         x2 += knoepfe(knopf("Controlling-Vorschlag \xFCbernehmen", 'data-pl-abschluss="controlling"', "zweit breit"));
       }
-      return cfo(befund3) + rumpf2(x2);
+      return cfo(befund3) + kopfbild("controlling") + rumpf2(x2);
     }
     function bericht2(D) {
       const b4 = D.bericht;
@@ -179378,8 +179386,8 @@ void main() {
         { label: "Ist kumuliert", wert: mio4(b4.ist), unter: `Plan ${mio4(b4.planBisHeute)}` }
       ]);
       const letzte = (b4.wochen || []).slice(-5);
-      x2 += abschnitt(letzte.length ? `Umsatz KW ${letzte[0].woche % 52 + 1} bis ${letzte[letzte.length - 1].woche % 52 + 1}` : "Umsatz je Woche");
-      x2 += balken6(letzte.map((w3) => ({ label: "KW " + (w3.woche % 52 + 1), a: w3.plan, b: w3.ist })), ["Plan", "Ist"]);
+      x2 += abschnitt(letzte.length ? `Umsatz KW ${(letzte[0].woche % 52 + 52) % 52 + 1} bis ${(letzte[letzte.length - 1].woche % 52 + 52) % 52 + 1}` : "Umsatz je Woche");
+      x2 += balken6(letzte.map((w3) => ({ label: "KW " + ((w3.woche % 52 + 52) % 52 + 1), a: w3.plan, b: w3.ist })), ["Plan", "Ist"]);
       x2 += tabelle({ titel: `Jahresplan ${b4.jahr}`, zeilen: [{ name: "Umsatz", werte: [mio4(b4.ziele.umsatz)] }, { name: "EBITDA", werte: [mio4(b4.ziele.ebitda)], ton: [tonV(b4.ziele.ebitda)] }, { name: "Forecast Umsatz", werte: [b4.forecasting == null ? "nach KW 13" : mio4(b4.forecasting)] }] });
       const N = b4.knoten, kinder = (id, ebene) => N.filter((n3) => n3.ebene === ebene && n3.parent === id);
       const fname = (f13) => FORMATNAME2[f13.id.replace("format:", "")] ?? f13.name;
@@ -179400,12 +179408,12 @@ void main() {
         x2 += buch({ titel: `${fname(f13)} Mio. \u20AC`, spalten: spalten2, zeilen, breite: 64, attr: `data-summenbuch="Planblatt ${esc(fname(f13))}"` });
       }
       const w2 = (b4.wochen || []).slice().reverse();
-      x2 += w2.length ? buch({ titel: "Woche Mio. \u20AC", spalten: ["Ist", "Plan", "Abw."], breite: 64, zeilen: w2.map((z6) => reihe({ name: `KW ${z6.woche % 52 + 1}`, werte: [m1(z6.ist), m1(z6.plan), { t: pctV(z6.abweichungQuote), ton: tonV(z6.abweichungQuote) }] })) }) : abschnitt("Wochen") + leer3("Noch keine Woche im Plan.");
+      x2 += w2.length ? buch({ titel: "Woche Mio. \u20AC", spalten: ["Ist", "Plan", "Abw."], breite: 64, zeilen: w2.map((z6) => reihe({ name: `KW ${(z6.woche % 52 + 52) % 52 + 1}`, werte: [m1(z6.ist), m1(z6.plan), { t: pctV(z6.abweichungQuote), ton: tonV(z6.abweichungQuote) }] })) }) : abschnitt("Wochen") + leer3("Noch keine Woche im Plan.");
       if (b4.warengruppen) {
         x2 += abschnitt("Warengruppenbudgets", `${Object.keys(b4.warengruppen).length} Gruppen`);
         x2 += ui.wgAuf ? tabelle({ zeilen: Object.entries(b4.warengruppen).map(([g2, v2]) => ({ name: E9.GRUPPEN?.[g2]?.name ?? g2, werte: [mio4(v2)] })) }) + knoepfe(knopf("Weniger zeigen", 'data-pl-wgauf="0"', "text")) : knoepfe(knopf("Budgets je Warengruppe zeigen", 'data-pl-wgauf="1"', "zweit breit"));
       }
-      return cfo(befund3, b4.abweichung < 0 ? "engpass" : "") + rumpf2(x2);
+      return cfo(befund3, b4.abweichung < 0 ? "engpass" : "") + kopfbild("controlling") + rumpf2(x2);
     }
     function forecasts(D) {
       const L3 = D.bericht.forecasts || [];
@@ -179425,7 +179433,7 @@ void main() {
       x2 += L3.length ? tabelle({ titel: "Forecasts", spalten: ["Umsatz", "EBITDA"], zeilen: [...L3].reverse().map((f13) => ({ name: `${f13.bezeichnung} \xB7 ${f13.jahr} \xB7 ${status2(f13)}`, werte: [mio4(f13.ziele.umsatz), mio4(f13.ziele.ebitda)], ton: ["", tonV(f13.ziele.ebitda)] })) }) : abschnitt("Forecasts") + leer3("Der erste Forecast (3+9) entsteht nach KW 13.", "Noch kein Forecast.", "", "forecast");
       if (D.bericht.vertrauen?.length) {
         x2 += abschnitt("Trefferquote und Vertrauen", "letzte 8");
-        x2 += liste(D.bericht.vertrauen.slice(-8).map((v2) => zeile({ was: `KW ${v2.woche % 52 + 1}`, unter: `Abweichung ${pct(v2.abweichung)}`, wert: (v2.delta > 0 ? "+" : v2.delta < 0 ? "\u2212" : "") + Math.abs(v2.delta), ton: v2.delta < 0 ? "schlecht" : v2.delta > 0 ? "gut" : "" })));
+        x2 += liste(D.bericht.vertrauen.slice(-8).map((v2) => zeile({ was: `KW ${(v2.woche % 52 + 52) % 52 + 1}`, unter: `Abweichung ${pct(v2.abweichung)}`, wert: (v2.delta > 0 ? "+" : v2.delta < 0 ? "\u2212" : "") + Math.abs(v2.delta), ton: v2.delta < 0 ? "schlecht" : v2.delta > 0 ? "gut" : "" })));
       }
       x2 += fuss("3+9 in KW 13, 6+6 in KW 26 und 9+3 in KW 39. Der Forecast kann vor der Abgabe an Eigent\xFCmer und Bank angepasst werden.");
       return cfo(befund3, offen ? "engpass" : "") + rumpf2(x2);
@@ -179451,7 +179459,7 @@ void main() {
     function zeigen(halten = false) {
       const position = document.getElementById("pinhalt").scrollTop, D = vor();
       const html = reiter() + (ui.tab === "assistent" ? entwurf(D) : ui.tab === "report" ? bericht2(D) : ui.tab === "forecast" ? forecasts(D) : boni(D));
-      ctx.panel("Planung und Forecast", "Konzerncontrolling \xB7 KW " + (s2().woche % 52 + 1), bereich("zentrale") + html, "gross");
+      ctx.panel("Planung und Forecast", "Konzerncontrolling \xB7 KW " + ((s2().woche % 52 + 52) % 52 + 1), bereich("zentrale") + html, "gross");
       ui.aktiv = true;
       document.getElementById("pinhalt").scrollTop = halten ? position : 0;
     }
@@ -180780,6 +180788,12 @@ void main() {
       p2.classList.toggle(klasse, !!el2);
     }
     p2.classList.toggle("mit-fenster", !!inhalt2.querySelector(".hw-fenster"));
+    for (const el2 of inhalt2.querySelectorAll("[data-kopfbild]:not([data-gefuellt])")) {
+      el2.dataset.gefuellt = "1";
+      const b4 = el2.dataset.kopfbild.split("|").map(abteilungsBild).find(Boolean);
+      if (b4) el2.innerHTML = `<img src="${b4.url}" alt="${esc(b4.name)}">`;
+      else el2.remove();
+    }
     huellenBeobachter.takeRecords();
   }
   var huellenBeobachter = new MutationObserver(() => huelleOrdnen());
@@ -181057,6 +181071,18 @@ void main() {
     sc.userData.sonne.shadow.map?.dispose();
     hqRen.renderLists.dispose();
     return { url, res };
+  }
+  var abtBildCache = /* @__PURE__ */ new Map();
+  function abteilungsBild(id) {
+    const u = hqUebersicht?.(s), a2 = u?.abteilungen?.find((x2) => x2.id === id && x2.gebaeudeId);
+    if (!a2) return null;
+    const k5 = `${id}|${a2.gebaeudeId}|${a2.etage}|${a2.stufe}|${Math.round(a2.fte)}`;
+    if (!abtBildCache.has(k5)) {
+      const gj = hqGrafik()?.gebaeude?.find((q3) => q3.id === a2.gebaeudeId);
+      if (!gj) return null;
+      abtBildCache.set(k5, schnittBild((S, sc) => hqEtage(S, sc, gj, a2.etage, { zone: id }), 780, 616).url);
+    }
+    return { url: abtBildCache.get(k5), name: a2.name };
   }
   function etagenBild(g2, nr4) {
     return schnittBild((S, sc) => hqEtage(S, sc, g2, nr4, {})).url;
@@ -181963,8 +181989,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-25T08:55:59.434Z" : null;
-    const v2 = true ? "51e0e7b" : "Entwicklung";
+    const iso = true ? "2026-10-25T09:41:44.585Z" : null;
+    const v2 = true ? "5f3789d" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();
