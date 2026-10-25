@@ -1,0 +1,621 @@
+Anlass (Regel);Grundtyp;Artikeltyp (Bild);Shop;Länge;Zielgruppe Kern;Zielgruppe auch;Preis (EUR)
+Tanzschulball;Corsagen-Top;Trägerloses Korsett-Top mit Schößchen und Pailletten;bershka;normal;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Corsagen-Top;Trägerloses Korsett-Top mit Schößchen und Pailletten;bershka;normal;Teens;Young Adults,Adults;29.99
+Tanzschulball;Body;Body mit langen Spitzenärmeln und Wasserfall-Samteinsatz;bershka;normal;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Body;Body mit langen Spitzenärmeln und Wasserfall-Samteinsatz;bershka;normal;Teens;Young Adults,Adults;29.99
+Tanzschulball;Neckholder-Top;Neckholder-Satintop mit Wasserfallausschnitt und offenem Rücken;bershka;normal;Teens;Young Adults,Adults;19.99
+Oper/Familienfeier/Hochzeitsgast;Neckholder-Top;Neckholder-Satintop mit Wasserfallausschnitt und offenem Rücken;bershka;normal;Teens;Young Adults,Adults;19.99
+Tanzschulball;Bluse;Chiffon-Bluse mit Stehkragen, Ballonärmeln und Strasssteinen;newyorker;normal;Teens;Young Adults,Adults;19.99
+Oper/Familienfeier/Hochzeitsgast;Bluse;Chiffon-Bluse mit Stehkragen, Ballonärmeln und Strasssteinen;newyorker;normal;Teens;Young Adults,Adults;19.99
+Konfirmation/Jugendweihe/Firmung;Hemd;Langarm-Businesshemd;newyorker;normal;Young Adults;Teens,Adults;9.99
+Abiball;Hemd;Langarm-Businesshemd;newyorker;normal;Young Adults;Teens,Adults;9.99
+Tanzschulball;Hemd;Langarm-Businesshemd;newyorker;normal;Young Adults;Teens,Adults;9.99
+Oper/Familienfeier/Hochzeitsgast;Hemd;Langarm-Businesshemd;newyorker;normal;Young Adults;Teens,Adults;9.99
+Konfirmation/Jugendweihe/Firmung;Hemd;Langarm-Hemd mit Haifischkragen;newyorker;normal;Young Adults;Teens,Adults;14.99
+Abiball;Hemd;Langarm-Hemd mit Haifischkragen;newyorker;normal;Young Adults;Teens,Adults;14.99
+Tanzschulball;Hemd;Langarm-Hemd mit Haifischkragen;newyorker;normal;Young Adults;Teens,Adults;14.99
+Oper/Familienfeier/Hochzeitsgast;Hemd;Langarm-Hemd mit Haifischkragen;newyorker;normal;Young Adults;Teens,Adults;14.99
+Konfirmation/Jugendweihe/Firmung;Hemd;Langarmhemd mit Kentkragen;newyorker;normal;Teens;Young Adults,Adults;14.99
+Abiball;Hemd;Langarmhemd mit Kentkragen;newyorker;normal;Teens;Young Adults,Adults;14.99
+Tanzschulball;Hemd;Langarmhemd mit Kentkragen;newyorker;normal;Teens;Young Adults,Adults;14.99
+Oper/Familienfeier/Hochzeitsgast;Hemd;Langarmhemd mit Kentkragen;newyorker;normal;Teens;Young Adults,Adults;14.99
+Volksfest/Tracht;Trachtenhemd;Trachtenhemd mit Stehkragen und Hirsch-Stickerei;newyorker;normal;Teens;Young Adults,Adults;19.99
+Tanzschulball;Neckholder-Top;Neckholder-Top mit Pailletten, rückenfrei;pullandbear;normal;Teens;Young Adults,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Neckholder-Top;Neckholder-Top mit Pailletten, rückenfrei;pullandbear;normal;Teens;Young Adults,Adults;35.99
+Zubehör (alle Anlässe);Weihnachtspullover;Weihnachtspullover mit Norweger-Jacquard;newyorker;normal;Teens;Young Adults,Adults;16.99
+Konfirmation/Jugendweihe/Firmung;Stoffhose;Gerade geschnittene Hose mit Strasssteinen;newyorker;lang;Teens;Young Adults,Adults;24.99
+Abiball;Stoffhose;Gerade geschnittene Hose mit Strasssteinen;newyorker;lang;Teens;Young Adults,Adults;24.99
+Tanzschulball;Stoffhose;Gerade geschnittene Hose mit Strasssteinen;newyorker;lang;Teens;Young Adults,Adults;24.99
+Oper/Familienfeier/Hochzeitsgast;Stoffhose;Gerade geschnittene Hose mit Strasssteinen;newyorker;lang;Teens;Young Adults,Adults;24.99
+Volksfest/Tracht;Trachtenlederhose;Trachten-Lederhose in Wildleder-Optik mit Hosenträgern, kniebedeckend;newyorker;normal;Teens;Young Adults,Adults;49.99
+Volksfest/Tracht;Trachtenlederhose;Kurze Trachten-Lederhose mit Hosenträgern (Kunstleder-Optik);newyorker;normal;Teens;Young Adults,Adults;49.99
+Konfirmation/Jugendweihe/Firmung;Stoffhose;Tailored-Hose mit weitem Bein und Bundfalten;pullandbear;lang;Teens;Young Adults,Adults;35.99
+Abiball;Stoffhose;Tailored-Hose mit weitem Bein und Bundfalten;pullandbear;lang;Teens;Young Adults,Adults;35.99
+Tanzschulball;Stoffhose;Tailored-Hose mit weitem Bein und Bundfalten;pullandbear;lang;Teens;Young Adults,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Stoffhose;Tailored-Hose mit weitem Bein und Bundfalten;pullandbear;lang;Teens;Young Adults,Adults;35.99
+Abiball;Trägerkleid;Spitzen-Trägerkleid, lang, mit Rückenausschnitt und Volant-Schlitz;bershka;maxi;Teens;Young Adults,Adults;39.99
+Tanzschulball;Trägerkleid;Spitzen-Trägerkleid, lang, mit Rückenausschnitt und Volant-Schlitz;bershka;maxi;Teens;Young Adults,Adults;39.99
+Abiball;Strickkleid;Rückenfreies Strick-Trägerkleid mit Pailletten und Bindeband;bershka;maxi;Teens;Young Adults,Adults;39.99
+Tanzschulball;Strickkleid;Rückenfreies Strick-Trägerkleid mit Pailletten und Bindeband;bershka;maxi;Teens;Young Adults,Adults;39.99
+Abiball;Neckholderkleid;Asymmetrisches Neckholder-Maxikleid mit Drop-Waist;bershka;maxi;Teens;Young Adults,Adults;49.99
+Tanzschulball;Neckholderkleid;Asymmetrisches Neckholder-Maxikleid mit Drop-Waist;bershka;maxi;Teens;Young Adults,Adults;49.99
+Konfirmation/Jugendweihe/Firmung;Qipao;Qipao-Midikleid mit Stehkragen und Cut-out;bershka;midi;Teens;Young Adults,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Qipao;Qipao-Midikleid mit Stehkragen und Cut-out;bershka;midi;Teens;Young Adults,Adults;35.99
+Tanzschulball;Qipao;Cheongsam-Minikleid mit Cut-out;bershka;mini;Teens;Young Adults,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Qipao;Cheongsam-Minikleid mit Cut-out;bershka;mini;Teens;Young Adults,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Neckholderkleid;Neckholder-Midikleid mit Schlüsselloch-Ausschnitt und offenem Rücken;bershka;midi;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Neckholderkleid;Neckholder-Midikleid mit Schlüsselloch-Ausschnitt und offenem Rücken;bershka;midi;Teens;Young Adults,Adults;29.99
+Tanzschulball;Trägerkleid;Mini-Trägerkleid mit Bindeträgern und Herzausschnitt;bershka;mini;Teens;Young Adults;39.99
+Konfirmation/Jugendweihe/Firmung;Trägerkleid;Mini-Trägerkleid mit Bindeträgern und Herzausschnitt;bershka;mini;Teens;Young Adults;39.99
+Tanzschulball;Minikleid;Minikleid mit Spitzenoberteil, Volantärmeln und Chiffonrock;bershka;mini;Teens;Young Adults;39.99
+Konfirmation/Jugendweihe/Firmung;Minikleid;Minikleid mit Spitzenoberteil, Volantärmeln und Chiffonrock;bershka;mini;Teens;Young Adults;39.99
+Konfirmation/Jugendweihe/Firmung;Neckholderkleid;Neckholder-Midikleid mit Volants und asymmetrischem Zipfelsaum;bershka;midi;Teens;Young Adults,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Neckholderkleid;Neckholder-Midikleid mit Volants und asymmetrischem Zipfelsaum;bershka;midi;Teens;Young Adults,Adults;39.99
+Abiball;Trägerkleid;Trägerkleid aus Spitze mit offenem Rücken;bershka;maxi;Teens;Young Adults,Adults;39.99
+Tanzschulball;Trägerkleid;Trägerkleid aus Spitze mit offenem Rücken;bershka;maxi;Teens;Young Adults,Adults;39.99
+Konfirmation/Jugendweihe/Firmung;Satin-Slipdress;Spitzen-Slipdress mit Zipfelsaum;bershka;midi;Teens;Young Adults,Adults;49.99
+Oper/Familienfeier/Hochzeitsgast;Satin-Slipdress;Spitzen-Slipdress mit Zipfelsaum;bershka;midi;Teens;Young Adults,Adults;49.99
+Abiball;Maxikleid;Maxikleid mit Spaghettiträgern und Rüschen;bershka;maxi;Teens;Young Adults,Adults;49.99
+Tanzschulball;Maxikleid;Maxikleid mit Spaghettiträgern und Rüschen;bershka;maxi;Teens;Young Adults,Adults;49.99
+Abiball;Maxikleid;Maxikleid mit Trägern, Cut-out und Korsagen-Oberteil;bershka;maxi;Teens;Young Adults,Adults;49.99
+Tanzschulball;Maxikleid;Maxikleid mit Trägern, Cut-out und Korsagen-Oberteil;bershka;maxi;Teens;Young Adults,Adults;49.99
+Tanzschulball;Neckholderkleid;Neckholder-Minikleid mit Schleife und ausgestelltem Rock;bershka;mini;Teens;Young Adults;35.99
+Konfirmation/Jugendweihe/Firmung;Neckholderkleid;Neckholder-Minikleid mit Schleife und ausgestelltem Rock;bershka;mini;Teens;Young Adults;35.99
+Konfirmation/Jugendweihe/Firmung;Bodycon-Kleid;Bodycon-Midikleid mit Spaghettiträgern und Bustier-Oberteil;bershka;midi;Teens;Young Adults,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Bodycon-Kleid;Bodycon-Midikleid mit Spaghettiträgern und Bustier-Oberteil;bershka;midi;Teens;Young Adults,Adults;39.99
+Tanzschulball;Paillettenkleid;Mini-Paillettenkleid mit offenem Rücken und Schleife;bershka;mini;Teens;Young Adults,Adults;45.99
+Abiball;Satin-Slipdress;Pailletten-Slipdress mit Spitzenkante und Beinschlitz;bershka;maxi;Teens;Young Adults,Adults;49.99
+Tanzschulball;Satin-Slipdress;Pailletten-Slipdress mit Spitzenkante und Beinschlitz;bershka;maxi;Teens;Young Adults,Adults;49.99
+Tanzschulball;Satin-Slipdress;Pailletten-Slipdress mit Spitzenbesatz;bershka;mini;Teens;Young Adults;35.99
+Konfirmation/Jugendweihe/Firmung;Satin-Slipdress;Pailletten-Slipdress mit Spitzenbesatz;bershka;mini;Teens;Young Adults;35.99
+Tanzschulball;Minikleid;Minikleid mit Trägern und ausgestelltem Rock;bershka;mini;Teens;Young Adults,Adults;45.99
+Konfirmation/Jugendweihe/Firmung;Minikleid;Minikleid mit Trägern und ausgestelltem Rock;bershka;mini;Teens;Young Adults,Adults;45.99
+Tanzschulball;Playsuit;Bandeau-Playsuit mit Ballonsaum;bershka;mini;Teens;Young Adults;39.99
+Konfirmation/Jugendweihe/Firmung;Playsuit;Bandeau-Playsuit mit Ballonsaum;bershka;mini;Teens;Young Adults;39.99
+Tanzschulball;Ballonkleid;Ballon-Minikleid mit Spaghettiträgern;bershka;mini;Teens;Young Adults;45.99
+Konfirmation/Jugendweihe/Firmung;Ballonkleid;Ballon-Minikleid mit Spaghettiträgern;bershka;mini;Teens;Young Adults;45.99
+Abiball;Neckholderkleid;Neckholder-Maxikleid aus Spitze mit asymmetrischen Volants;bershka;maxi;Teens;Young Adults,Adults;59.99
+Tanzschulball;Neckholderkleid;Neckholder-Maxikleid aus Spitze mit asymmetrischen Volants;bershka;maxi;Teens;Young Adults,Adults;59.99
+Abiball;Trägerkleid;Maxi-Trägerkleid aus beflocktem Tüll mit Bustier-Cups und Riemchen;bershka;maxi;Teens;Young Adults,Adults;39.99
+Tanzschulball;Trägerkleid;Maxi-Trägerkleid aus beflocktem Tüll mit Bustier-Cups und Riemchen;bershka;maxi;Teens;Young Adults,Adults;39.99
+Konfirmation/Jugendweihe/Firmung;Neckholderkleid;Neckholder-Midikleid mit Stehkragen, offenem Rücken und Bindeband;bershka;midi;Teens;Young Adults,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Neckholderkleid;Neckholder-Midikleid mit Stehkragen, offenem Rücken und Bindeband;bershka;midi;Teens;Young Adults,Adults;35.99
+Tanzschulball;Minirock;Minirock mit Federsaum;bershka;mini;Teens;Young Adults;69.99
+Oper/Familienfeier/Hochzeitsgast;Minirock;Minirock mit Federsaum;bershka;mini;Teens;Young Adults;69.99
+Tanzschulball;Neckholderkleid;Neckholder-Minikleid mit Schleife und tiefer Taille;bershka;mini;Teens;Young Adults;39.99
+Konfirmation/Jugendweihe/Firmung;Neckholderkleid;Neckholder-Minikleid mit Schleife und tiefer Taille;bershka;mini;Teens;Young Adults;39.99
+Abiball;Neckholderkleid;Neckholder-Maxikleid aus Samt mit Wasserfallausschnitt und Rückenausschnitt;bershka;maxi;Teens;Young Adults,Adults;35.99
+Tanzschulball;Neckholderkleid;Neckholder-Maxikleid aus Samt mit Wasserfallausschnitt und Rückenausschnitt;bershka;maxi;Teens;Young Adults,Adults;35.99
+Konfirmation/Jugendweihe/Firmung;Midikleid;Samt-Midikleid mit Trägern, Korsagen-Oberteil und Spitzeneinsätzen;bershka;midi;Teens;Young Adults,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Midikleid;Samt-Midikleid mit Trägern, Korsagen-Oberteil und Spitzeneinsätzen;bershka;midi;Teens;Young Adults,Adults;35.99
+Abiball;Trägerkleid;Maxi-Trägerkleid aus Mesh mit Rückenausschnitt;bershka;maxi;Teens;Young Adults,Adults;45.99
+Tanzschulball;Trägerkleid;Maxi-Trägerkleid aus Mesh mit Rückenausschnitt;bershka;maxi;Teens;Young Adults,Adults;45.99
+Abiball;Trägerkleid;Maxi-Trägerkleid mit tiefem Rückenausschnitt;bershka;maxi;Teens;Young Adults,Adults;49.99
+Tanzschulball;Trägerkleid;Maxi-Trägerkleid mit tiefem Rückenausschnitt;bershka;maxi;Teens;Young Adults,Adults;49.99
+Abiball;Satin-Slipdress;Maxi-Slipdress mit Spitzeneinsätzen und offenem Rücken;bershka;maxi;Teens;Young Adults,Adults;35.99
+Tanzschulball;Satin-Slipdress;Maxi-Slipdress mit Spitzeneinsätzen und offenem Rücken;bershka;maxi;Teens;Young Adults,Adults;35.99
+Abiball;Neckholderkleid;Maxi-Neckholder-Kleid mit Wasserfallausschnitt und offenem Rücken, Glitzer;bershka;maxi;Teens;Young Adults,Adults;35.99
+Tanzschulball;Neckholderkleid;Maxi-Neckholder-Kleid mit Wasserfallausschnitt und offenem Rücken, Glitzer;bershka;maxi;Teens;Young Adults,Adults;35.99
+Tanzschulball;Minikleid;Schulterfreies Minikleid mit langen Ärmeln und Glitzer;bershka;mini;Teens;Young Adults,Adults;25.99
+Konfirmation/Jugendweihe/Firmung;Minikleid;Schulterfreies Minikleid mit langen Ärmeln und Glitzer;bershka;mini;Teens;Young Adults,Adults;25.99
+Konfirmation/Jugendweihe/Firmung;Midikleid;Gerafftes Midikleid mit drapiertem hohem Ausschnitt und Beinschlitz;bershka;midi;Teens;Young Adults,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Midikleid;Gerafftes Midikleid mit drapiertem hohem Ausschnitt und Beinschlitz;bershka;midi;Teens;Young Adults,Adults;39.99
+Abiball;Paillettenkleid;Paillettenbesetztes Maxikleid mit Spaghettiträgern und Beinschlitz;bershka;maxi;Teens;Young Adults,Adults;49.99
+Tanzschulball;Paillettenkleid;Paillettenbesetztes Maxikleid mit Spaghettiträgern und Beinschlitz;bershka;maxi;Teens;Young Adults,Adults;49.99
+Abiball;Maxikleid;Langes Spitzenkleid mit Stehkragen und langen Ärmeln;bershka;maxi;Teens;Young Adults,Adults;49.99
+Tanzschulball;Maxikleid;Langes Spitzenkleid mit Stehkragen und langen Ärmeln;bershka;maxi;Teens;Young Adults,Adults;49.99
+Abiball;Trägerkleid;Maxi-Trägerkleid mit transparenten Mesh-Einsätzen;bershka;maxi;Teens;Young Adults,Adults;39.99
+Tanzschulball;Trägerkleid;Maxi-Trägerkleid mit transparenten Mesh-Einsätzen;bershka;maxi;Teens;Young Adults,Adults;39.99
+Abiball;Maxikleid;Maxi-Meshkleid mit Trägern, Raffung und gekreuzten Rückenträgern;bershka;maxi;Teens;Young Adults,Adults;45.99
+Tanzschulball;Maxikleid;Maxi-Meshkleid mit Trägern, Raffung und gekreuzten Rückenträgern;bershka;maxi;Teens;Young Adults,Adults;45.99
+Tanzschulball;Minirock;Minirock aus Samt mit Pailletten;bershka;mini;Teens;Young Adults;25.99
+Oper/Familienfeier/Hochzeitsgast;Minirock;Minirock aus Samt mit Pailletten;bershka;mini;Teens;Young Adults;25.99
+Tanzschulball;Bandeaukleid;Bandeau-Minikleid aus Spitze mit Stufenvolants;newyorker;mini;Teens;Young Adults;19.99
+Konfirmation/Jugendweihe/Firmung;Bandeaukleid;Bandeau-Minikleid aus Spitze mit Stufenvolants;newyorker;mini;Teens;Young Adults;19.99
+Tanzschulball;Playsuit;Pailletten-Playsuit mit langen ausgestellten Ärmeln;newyorker;mini;Teens;Young Adults,Adults;24.99
+Konfirmation/Jugendweihe/Firmung;Playsuit;Pailletten-Playsuit mit langen ausgestellten Ärmeln;newyorker;mini;Teens;Young Adults,Adults;24.99
+Zubehör (alle Anlässe);Paillettenshorts;Paillettenshorts mit elastischem Bund und Bindeband (Teil eines Matching Sets);newyorker;mini;Teens;Young Adults;16.99
+Tanzschulball;Paillettenrock;Pailletten-Minirock mit Perlenbesatz;newyorker;mini;Teens;Young Adults;19.99
+Oper/Familienfeier/Hochzeitsgast;Paillettenrock;Pailletten-Minirock mit Perlenbesatz;newyorker;mini;Teens;Young Adults;19.99
+Tanzschulball;Minirock;Strass-Minirock (figurnah, Bleistiftform);newyorker;mini;Teens;Young Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Minirock;Strass-Minirock (figurnah, Bleistiftform);newyorker;mini;Teens;Young Adults;29.99
+Tanzschulball;Skort;Pailletten-Skort mit Spitzensaum;newyorker;mini;Teens;Young Adults;14.99
+Oper/Familienfeier/Hochzeitsgast;Skort;Pailletten-Skort mit Spitzensaum;newyorker;mini;Teens;Young Adults;14.99
+Tanzschulball;Minikleid;Chiffon-Minikleid mit Ballonärmeln, Stehkragen und Volantrock;newyorker;mini;Teens;Young Adults;24.99
+Konfirmation/Jugendweihe/Firmung;Minikleid;Chiffon-Minikleid mit Ballonärmeln, Stehkragen und Volantrock;newyorker;mini;Teens;Young Adults;24.99
+Volksfest/Tracht;Dirndl;Mini-Dirndl mit Schürze und Bluseneinsatz;newyorker;mini;Teens;Young Adults,Adults;59.99
+Tanzschulball;Blazerkleid;Blazerkleid mit V-Ausschnitt, ohne Kragen, tailliert;newyorker;mini;Teens;Young Adults,Adults;34.99
+Konfirmation/Jugendweihe/Firmung;Blazerkleid;Blazerkleid mit V-Ausschnitt, ohne Kragen, tailliert;newyorker;mini;Teens;Young Adults,Adults;34.99
+Volksfest/Tracht;Dirndl;Midi-Dirndl mit Schürze und Mesh-Bluseneinsatz;newyorker;midi;Teens;Young Adults,Adults;59.99
+Volksfest/Tracht;Dirndl;Midi-Dirndl mit Bluseneinsatz und Schürze;newyorker;midi;Teens;Young Adults,Adults;59.99
+Abiball;Neckholderkleid;Figurbetontes Neckholder-Maxikleid mit tiefem V-Ausschnitt;newyorker;maxi;Teens;Young Adults,Adults;19.99
+Tanzschulball;Neckholderkleid;Figurbetontes Neckholder-Maxikleid mit tiefem V-Ausschnitt;newyorker;maxi;Teens;Young Adults,Adults;19.99
+Abiball;Bandeaukleid;Bandeau-Maxikleid mit transparentem Mesh-Rock und drapiertem Halsschal;newyorker;maxi;Teens;Young Adults;24.99
+Tanzschulball;Bandeaukleid;Bandeau-Maxikleid mit transparentem Mesh-Rock und drapiertem Halsschal;newyorker;maxi;Teens;Young Adults;24.99
+Abiball;Jumpsuit;Ärmelloser Smoking-Jumpsuit mit Reverskragen, Wickeloptik und weitem Bein;newyorker;knöchellang;Teens;Young Adults,Adults;34.99
+Tanzschulball;Jumpsuit;Ärmelloser Smoking-Jumpsuit mit Reverskragen, Wickeloptik und weitem Bein;newyorker;knöchellang;Teens;Young Adults,Adults;34.99
+Tanzschulball;Jumpsuit;Pailletten-Jumpsuit mit Federbesatz an den Ärmeln und Schlagbein;newyorker;lang;Teens;Young Adults,Adults;34.99
+Konfirmation/Jugendweihe/Firmung;Jumpsuit;Pailletten-Jumpsuit mit Federbesatz an den Ärmeln und Schlagbein;newyorker;lang;Teens;Young Adults,Adults;34.99
+Abiball;Jumpsuit;Langarm-Jumpsuit mit Spitzenoberteil, Stehkragen und ausgestelltem Bein;newyorker;knöchellang;Teens;Young Adults,Adults;24.99
+Tanzschulball;Jumpsuit;Langarm-Jumpsuit mit Spitzenoberteil, Stehkragen und ausgestelltem Bein;newyorker;knöchellang;Teens;Young Adults,Adults;24.99
+Tanzschulball;Playsuit;Tweed-Playsuit mit Neckholder;newyorker;mini;Teens;Young Adults;24.99
+Konfirmation/Jugendweihe/Firmung;Playsuit;Tweed-Playsuit mit Neckholder;newyorker;mini;Teens;Young Adults;24.99
+Tanzschulball;Playsuit;Playsuit mit Volants und Rock-Optik;newyorker;mini;Teens;Young Adults;24.99
+Konfirmation/Jugendweihe/Firmung;Playsuit;Playsuit mit Volants und Rock-Optik;newyorker;mini;Teens;Young Adults;24.99
+Tanzschulball;Playsuit;Mini-Playsuit in Kleid-Optik mit Stehkragen, Tropfen-Cut-out und Puffärmeln;newyorker;mini;Teens;Young Adults;24.99
+Konfirmation/Jugendweihe/Firmung;Playsuit;Mini-Playsuit in Kleid-Optik mit Stehkragen, Tropfen-Cut-out und Puffärmeln;newyorker;mini;Teens;Young Adults;24.99
+Konfirmation/Jugendweihe/Firmung;Midikleid;Ärmelloses Midikleid mit Stehkragen und Knebelknöpfen;pullandbear;midi;Teens;Young Adults,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Midikleid;Ärmelloses Midikleid mit Stehkragen und Knebelknöpfen;pullandbear;midi;Teens;Young Adults,Adults;35.99
+Tanzschulball;Minikleid;Minikleid im Qipao-Stil mit Stehkragen und Knebelknöpfen;pullandbear;mini;Teens;Young Adults;35.99
+Konfirmation/Jugendweihe/Firmung;Minikleid;Minikleid im Qipao-Stil mit Stehkragen und Knebelknöpfen;pullandbear;mini;Teens;Young Adults;35.99
+Konfirmation/Jugendweihe/Firmung;Midikleid;Midikleid mit Wasserfallausschnitt, offenem Rücken und Drop-Waist;pullandbear;midi;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Midikleid;Midikleid mit Wasserfallausschnitt, offenem Rücken und Drop-Waist;pullandbear;midi;Teens;Young Adults,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Neckholderkleid;Neckholder-Midikleid mit tiefem Rückenausschnitt;pullandbear;midi;Teens;Young Adults,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Neckholderkleid;Neckholder-Midikleid mit tiefem Rückenausschnitt;pullandbear;midi;Teens;Young Adults,Adults;35.99
+Tanzschulball;Paillettenrock;Pailletten-Minirock mit Bindeband;pullandbear;mini;Teens;Young Adults;25.99
+Oper/Familienfeier/Hochzeitsgast;Paillettenrock;Pailletten-Minirock mit Bindeband;pullandbear;mini;Teens;Young Adults;25.99
+Konfirmation/Jugendweihe/Firmung;Neckholderkleid;Neckholder-Midikleid mit Wasserfallausschnitt und freiem Rücken;stradivarius;midi;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Neckholderkleid;Neckholder-Midikleid mit Wasserfallausschnitt und freiem Rücken;stradivarius;midi;Young Adults;Teens,Adults;35.99
+Abiball;Maxikleid;One-Shoulder-Maxikleid mit Metallelement;stradivarius;maxi;Young Adults;Teens,Adults;29.99
+Tanzschulball;Maxikleid;One-Shoulder-Maxikleid mit Metallelement;stradivarius;maxi;Young Adults;Teens,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Midikleid;Midikleid mit Trägern und Carré-Ausschnitt;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Midikleid;Midikleid mit Trägern und Carré-Ausschnitt;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Abiball;Satin-Slipdress;Slipdress aus Satin mit Kreuzträgern am Rücken;stradivarius;maxi;Young Adults;Teens,Adults;29.99
+Tanzschulball;Satin-Slipdress;Slipdress aus Satin mit Kreuzträgern am Rücken;stradivarius;maxi;Young Adults;Teens,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Satin-Slipdress;Slipdress in Satinoptik mit Herzausschnitt;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Satin-Slipdress;Slipdress in Satinoptik mit Herzausschnitt;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Neckholderkleid;Figurbetontes Neckholder-Midikleid mit freiem Rücken;stradivarius;midi;Young Adults;Teens,Adults;19.99
+Oper/Familienfeier/Hochzeitsgast;Neckholderkleid;Figurbetontes Neckholder-Midikleid mit freiem Rücken;stradivarius;midi;Young Adults;Teens,Adults;19.99
+Abiball;Neckholderkleid;Neckholder-Maxikleid aus Lurex-Strick, rückenfrei;stradivarius;maxi;Young Adults;Teens,Adults;35.99
+Tanzschulball;Neckholderkleid;Neckholder-Maxikleid aus Lurex-Strick, rückenfrei;stradivarius;maxi;Young Adults;Teens,Adults;35.99
+Konfirmation/Jugendweihe/Firmung;Satin-Slipdress;Slipdress-Midikleid aus beflocktem Mesh mit Carré-Ausschnitt und Rückenschnürung;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Satin-Slipdress;Slipdress-Midikleid aus beflocktem Mesh mit Carré-Ausschnitt und Rückenschnürung;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Abiball;Neckholderkleid;Neckholder-Maxikleid mit transparentem Spitzenoberteil;stradivarius;maxi;Young Adults;Adults;32.99
+Tanzschulball;Neckholderkleid;Neckholder-Maxikleid mit transparentem Spitzenoberteil;stradivarius;maxi;Young Adults;Adults;32.99
+Konfirmation/Jugendweihe/Firmung;Neckholderkleid;Neckholder-Midikleid mit Schlüssellochausschnitt;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Neckholderkleid;Neckholder-Midikleid mit Schlüssellochausschnitt;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Bodycon-Kleid;Figurbetontes Midikleid mit Körbchen und Spaghettiträgern;stradivarius;midi;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Bodycon-Kleid;Figurbetontes Midikleid mit Körbchen und Spaghettiträgern;stradivarius;midi;Young Adults;Teens,Adults;35.99
+Tanzschulball;Etuikleid;Etuikleid mit Stehkragen und Schlitzausschnitt;stradivarius;mini;Young Adults;Teens,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Etuikleid;Etuikleid mit Stehkragen und Schlitzausschnitt;stradivarius;mini;Young Adults;Teens,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Midikleid;Ärmelloses Midikleid im Qipao-Stil mit geknöpftem Stehkragen;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Midikleid;Ärmelloses Midikleid im Qipao-Stil mit geknöpftem Stehkragen;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Tanzschulball;Bodycon-Kleid;Figurbetontes Minikleid aus Tüll mit langen Ärmeln und seitlicher Raffung;stradivarius;mini;Young Adults;Teens,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Bodycon-Kleid;Figurbetontes Tüll-Midikleid mit tiefem Rückenausschnitt und langen transparenten Ärmeln;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Bodycon-Kleid;Figurbetontes Tüll-Midikleid mit tiefem Rückenausschnitt und langen transparenten Ärmeln;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Neckholderkleid;Neckholder-Midikleid mit offenem Rücken und Rückenknoten;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Neckholderkleid;Neckholder-Midikleid mit offenem Rücken und Rückenknoten;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Satin-Slipdress;Slipdress mit Trägern, seitlicher Raffung und Beinschlitz;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Satin-Slipdress;Slipdress mit Trägern, seitlicher Raffung und Beinschlitz;stradivarius;midi;Young Adults;Teens,Adults;29.99
+Konfirmation/Jugendweihe/Firmung;Trägerkleid;Asymmetrisches Spitzen-Trägerkleid mit Volants und rückenfreiem Schnitt;stradivarius;midi;Young Adults;Teens,Adults;45.99
+Oper/Familienfeier/Hochzeitsgast;Trägerkleid;Asymmetrisches Spitzen-Trägerkleid mit Volants und rückenfreiem Schnitt;stradivarius;midi;Young Adults;Teens,Adults;45.99
+Volksfest/Tracht;Trachtenjacke;Cropped Trachtenjacke im Bolero-Stil;newyorker;cropped;Teens;Young Adults,Adults;39.99
+Volksfest/Tracht;Trachtenjacke;Cropped Trachtenjacke (Spenzer) mit Carré-Ausschnitt;newyorker;cropped;Teens;Young Adults,Adults;39.99
+Konfirmation/Jugendweihe/Firmung;Blazer;Oversize-Blazer mit Strass;newyorker;normal;Teens;Young Adults,Adults;49.99
+Abiball;Blazer;Oversize-Blazer mit Strass;newyorker;normal;Teens;Young Adults,Adults;49.99
+Tanzschulball;Blazer;Oversize-Blazer mit Strass;newyorker;normal;Teens;Young Adults,Adults;49.99
+Oper/Familienfeier/Hochzeitsgast;Blazer;Oversize-Blazer mit Strass;newyorker;normal;Teens;Young Adults,Adults;49.99
+Konfirmation/Jugendweihe/Firmung;Sakko;Sakko mit Zwei-Knopf-Verschluss;newyorker;normal;Young Adults;Teens,Adults;39.99
+Abiball;Sakko;Sakko mit Zwei-Knopf-Verschluss;newyorker;normal;Young Adults;Teens,Adults;39.99
+Tanzschulball;Sakko;Sakko mit Zwei-Knopf-Verschluss;newyorker;normal;Young Adults;Teens,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Sakko;Sakko mit Zwei-Knopf-Verschluss;newyorker;normal;Young Adults;Teens,Adults;39.99
+Konfirmation/Jugendweihe/Firmung;Sakko;2-Knopf-Sakko mit Reverskragen;newyorker;normal;Young Adults;Teens,Adults;39.99
+Abiball;Sakko;2-Knopf-Sakko mit Reverskragen;newyorker;normal;Young Adults;Teens,Adults;39.99
+Tanzschulball;Sakko;2-Knopf-Sakko mit Reverskragen;newyorker;normal;Young Adults;Teens,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Sakko;2-Knopf-Sakko mit Reverskragen;newyorker;normal;Young Adults;Teens,Adults;39.99
+Konfirmation/Jugendweihe/Firmung;Sakko;Slim-Fit-Sakko mit Karomuster;newyorker;normal;Young Adults;Teens,Adults;39.99
+Abiball;Sakko;Slim-Fit-Sakko mit Karomuster;newyorker;normal;Young Adults;Teens,Adults;39.99
+Tanzschulball;Sakko;Slim-Fit-Sakko mit Karomuster;newyorker;normal;Young Adults;Teens,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Sakko;Slim-Fit-Sakko mit Karomuster;newyorker;normal;Young Adults;Teens,Adults;39.99
+Konfirmation/Jugendweihe/Firmung;Blazer;Einreihiger Blazer mit Zwei-Knopf-Verschluss, gerader Schnitt;newyorker;normal;Young Adults;Teens,Adults;39.99
+Abiball;Blazer;Einreihiger Blazer mit Zwei-Knopf-Verschluss, gerader Schnitt;newyorker;normal;Young Adults;Teens,Adults;39.99
+Tanzschulball;Blazer;Einreihiger Blazer mit Zwei-Knopf-Verschluss, gerader Schnitt;newyorker;normal;Young Adults;Teens,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Blazer;Einreihiger Blazer mit Zwei-Knopf-Verschluss, gerader Schnitt;newyorker;normal;Young Adults;Teens,Adults;39.99
+Zubehör (alle Anlässe);Brust-Tape;Brust-Lift-Tape (Klebe-BH als Tape-Rolle, Einmalgebrauch);newyorker;-;Teens;Young Adults,Adults;5.99
+Zubehör (alle Anlässe);Klebe-BH;Klebe-BH (Silikon-Klebecups, trägerlos, in Verpackung);newyorker;-;Young Adults;Adults;9.99
+Zubehör (alle Anlässe);Klebe-BH;Klebe-BH mit Lift-Laschen (Hasenohren-Form), 2 Einzelcups;newyorker;-;Young Adults;Adults;7.99
+Zubehör (alle Anlässe);Klebe-BH;Klebe-BH (trägerlos, rückenfrei, Flügelform, mit Schnürung vorne);newyorker;-;Young Adults;Adults;9.99
+Zubehör (alle Anlässe);Body;Weihnachts-Body mit Neckholder, Kunstfellbesatz und seitlichen Cut-outs;newyorker;-;Young Adults;Adults;19.99
+Abiball;Pumps;Spitze Stiletto-Pumps mit Knöchelriemchen (D'Orsay-Schnitt);bershka;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Pumps;Spitze Stiletto-Pumps mit Knöchelriemchen (D'Orsay-Schnitt);bershka;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Pumps;Spitze Stiletto-Pumps mit Knöchelriemchen (D'Orsay-Schnitt);bershka;-;Teens;Young Adults,Adults;29.99
+Abiball;Slingpumps;Slingback-Pumps mit Kitten-Heel, spitzer Zehenkappe und Doppelschnalle;bershka;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Kitten-Heel, spitzer Zehenkappe und Doppelschnalle;bershka;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Kitten-Heel, spitzer Zehenkappe und Doppelschnalle;bershka;-;Teens;Young Adults,Adults;29.99
+Abiball;Plateau-Pumps;Plateau-Pumps mit Stilettoabsatz;bershka;-;Teens;Young Adults,Adults;45.99
+Tanzschulball;Plateau-Pumps;Plateau-Pumps mit Stilettoabsatz;bershka;-;Teens;Young Adults,Adults;45.99
+Oper/Familienfeier/Hochzeitsgast;Plateau-Pumps;Plateau-Pumps mit Stilettoabsatz;bershka;-;Teens;Young Adults,Adults;45.99
+Abiball;Pumps;Spitze Stiletto-Pumps;bershka;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Pumps;Spitze Stiletto-Pumps;bershka;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Pumps;Spitze Stiletto-Pumps;bershka;-;Young Adults;Teens,Adults;29.99
+Abiball;Slingpumps;Slingback-Pumps mit Blockabsatz und spitzer Zehenpartie in Lackoptik;bershka;-;Young Adults;Teens,Adults;32.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Blockabsatz und spitzer Zehenpartie in Lackoptik;bershka;-;Young Adults;Teens,Adults;32.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Blockabsatz und spitzer Zehenpartie in Lackoptik;bershka;-;Young Adults;Teens,Adults;32.99
+Abiball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Kappe;bershka;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Kappe;bershka;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Kappe;bershka;-;Teens;Young Adults,Adults;29.99
+Abiball;Pumps;Spitze Stiletto-Pumps;bershka;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Pumps;Spitze Stiletto-Pumps;bershka;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Pumps;Spitze Stiletto-Pumps;bershka;-;Teens;Young Adults,Adults;29.99
+Abiball;Slingpumps;Slingback-Pumps mit spitzer Kappe, Stiletto-Absatz und Fesselriemchen;bershka;-;Teens;Young Adults,Adults;32.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit spitzer Kappe, Stiletto-Absatz und Fesselriemchen;bershka;-;Teens;Young Adults,Adults;32.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit spitzer Kappe, Stiletto-Absatz und Fesselriemchen;bershka;-;Teens;Young Adults,Adults;32.99
+Abiball;Pantolette;Pantolette mit Stilettoabsatz (Riemchen-Mule);bershka;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Pantolette;Pantolette mit Stilettoabsatz (Riemchen-Mule);bershka;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Pantolette;Pantolette mit Stilettoabsatz (Riemchen-Mule);bershka;-;Teens;Young Adults,Adults;29.99
+Abiball;Sandalette;Stiletto-Sandalette mit Federbesatz und Fesselriemen;bershka;-;Teens;Young Adults,Adults;39.99
+Tanzschulball;Sandalette;Stiletto-Sandalette mit Federbesatz und Fesselriemen;bershka;-;Teens;Young Adults,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Stiletto-Sandalette mit Federbesatz und Fesselriemen;bershka;-;Teens;Young Adults,Adults;39.99
+Abiball;Mule;Mule-Sandale mit Stiletto-Absatz und zwei Riemen;bershka;-;Teens;Young Adults,Adults;32.99
+Tanzschulball;Mule;Mule-Sandale mit Stiletto-Absatz und zwei Riemen;bershka;-;Teens;Young Adults,Adults;32.99
+Oper/Familienfeier/Hochzeitsgast;Mule;Mule-Sandale mit Stiletto-Absatz und zwei Riemen;bershka;-;Teens;Young Adults,Adults;32.99
+Abiball;Sandalette;Riemchen-Sandalette mit Absatz, Zehenschlaufe und Knöchelriemen;newyorker;-;Teens;Young Adults,Adults;22.99
+Tanzschulball;Sandalette;Riemchen-Sandalette mit Absatz, Zehenschlaufe und Knöchelriemen;newyorker;-;Teens;Young Adults,Adults;22.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchen-Sandalette mit Absatz, Zehenschlaufe und Knöchelriemen;newyorker;-;Teens;Young Adults,Adults;22.99
+Abiball;Sandalette;Riemchen-Sandalette mit Stiletto-Absatz, Wickelriemen und Schleife;newyorker;-;Teens;Young Adults,Adults;22.99
+Tanzschulball;Sandalette;Riemchen-Sandalette mit Stiletto-Absatz, Wickelriemen und Schleife;newyorker;-;Teens;Young Adults,Adults;22.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchen-Sandalette mit Stiletto-Absatz, Wickelriemen und Schleife;newyorker;-;Teens;Young Adults,Adults;22.99
+Abiball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Pfennigabsatz;newyorker;-;Young Adults;Teens,Adults;22.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Pfennigabsatz;newyorker;-;Young Adults;Teens,Adults;22.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit spitzer Kappe und Pfennigabsatz;newyorker;-;Young Adults;Teens,Adults;22.99
+Abiball;Pumps;Spitzer Stiletto-Pump mit Strass-Schleife und gewickeltem Strass-Fesselriemen;newyorker;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Pumps;Spitzer Stiletto-Pump mit Strass-Schleife und gewickeltem Strass-Fesselriemen;newyorker;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Pumps;Spitzer Stiletto-Pump mit Strass-Schleife und gewickeltem Strass-Fesselriemen;newyorker;-;Teens;Young Adults,Adults;29.99
+Abiball;Slingpumps;Slingback-Pumps mit spitzer Zehenpartie und Trichterabsatz;pullandbear;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit spitzer Zehenpartie und Trichterabsatz;pullandbear;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit spitzer Zehenpartie und Trichterabsatz;pullandbear;-;Young Adults;Teens,Adults;29.99
+Abiball;Slingpumps;Slingback-Pumps in Lackoptik mit Stiletto-Absatz;pullandbear;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps in Lackoptik mit Stiletto-Absatz;pullandbear;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps in Lackoptik mit Stiletto-Absatz;pullandbear;-;Teens;Young Adults,Adults;29.99
+Abiball;Slingpumps;Slingback-Pumps mit spitzer Zehenpartie und Stilettoabsatz;pullandbear;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit spitzer Zehenpartie und Stilettoabsatz;pullandbear;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit spitzer Zehenpartie und Stilettoabsatz;pullandbear;-;Young Adults;Teens,Adults;29.99
+Abiball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Trichterabsatz in Lackoptik;pullandbear;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Trichterabsatz in Lackoptik;pullandbear;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit spitzer Kappe und Trichterabsatz in Lackoptik;pullandbear;-;Young Adults;Teens,Adults;29.99
+Abiball;Slingpumps;Slingback-Pumps mit spitzer Zehenpartie und Pfennigabsatz;pullandbear;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit spitzer Zehenpartie und Pfennigabsatz;pullandbear;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit spitzer Zehenpartie und Pfennigabsatz;pullandbear;-;Teens;Young Adults,Adults;29.99
+Abiball;Plateau-Sandalette;Plateau-Sandalette mit Blockabsatz und Knöchelriemen (Jute-Optik);pullandbear;-;Teens;Young Adults,Adults;39.99
+Tanzschulball;Plateau-Sandalette;Plateau-Sandalette mit Blockabsatz und Knöchelriemen (Jute-Optik);pullandbear;-;Teens;Young Adults,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Plateau-Sandalette;Plateau-Sandalette mit Blockabsatz und Knöchelriemen (Jute-Optik);pullandbear;-;Teens;Young Adults,Adults;39.99
+Abiball;Sandalette;Absatzsandale mit eckiger Spitze und Fesselriemen;pullandbear;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Sandalette;Absatzsandale mit eckiger Spitze und Fesselriemen;pullandbear;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Absatzsandale mit eckiger Spitze und Fesselriemen;pullandbear;-;Teens;Young Adults,Adults;29.99
+Abiball;Sandalette;Riemchen-Absatzsandale mit Perlenbesatz und Knöchelriemen;pullandbear;-;Teens;Young Adults,Adults;35.99
+Tanzschulball;Sandalette;Riemchen-Absatzsandale mit Perlenbesatz und Knöchelriemen;pullandbear;-;Teens;Young Adults,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchen-Absatzsandale mit Perlenbesatz und Knöchelriemen;pullandbear;-;Teens;Young Adults,Adults;35.99
+Abiball;Mule;Mule mit Stiletto-Absatz und geraffter Riemenpartie;pullandbear;-;Teens;Young Adults,Adults;35.99
+Tanzschulball;Mule;Mule mit Stiletto-Absatz und geraffter Riemenpartie;pullandbear;-;Teens;Young Adults,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Mule;Mule mit Stiletto-Absatz und geraffter Riemenpartie;pullandbear;-;Teens;Young Adults,Adults;35.99
+Abiball;Sandalette;Riemchen-Sandalette mit Kitten-Heel, eckiger Zehenpartie und Knöchelriemen;pullandbear;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Sandalette;Riemchen-Sandalette mit Kitten-Heel, eckiger Zehenpartie und Knöchelriemen;pullandbear;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchen-Sandalette mit Kitten-Heel, eckiger Zehenpartie und Knöchelriemen;pullandbear;-;Teens;Young Adults,Adults;29.99
+Abiball;Sandalette;Riemchensandalette mit dünnem Absatz und eckiger Zehenpartie;pullandbear;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Sandalette;Riemchensandalette mit dünnem Absatz und eckiger Zehenpartie;pullandbear;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchensandalette mit dünnem Absatz und eckiger Zehenpartie;pullandbear;-;Teens;Young Adults,Adults;29.99
+Abiball;Plateau-Sandalette;Plateau-Absatzsandale mit Blockabsatz in Jute-Optik und Knöchelriemen;pullandbear;-;Teens;Young Adults,Adults;39.99
+Tanzschulball;Plateau-Sandalette;Plateau-Absatzsandale mit Blockabsatz in Jute-Optik und Knöchelriemen;pullandbear;-;Teens;Young Adults,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Plateau-Sandalette;Plateau-Absatzsandale mit Blockabsatz in Jute-Optik und Knöchelriemen;pullandbear;-;Teens;Young Adults,Adults;39.99
+Abiball;Sandalette;Riemchen-Absatzsandale mit Zehensteg und eckiger Zehenpartie;pullandbear;-;Teens;Young Adults,Adults;35.99
+Tanzschulball;Sandalette;Riemchen-Absatzsandale mit Zehensteg und eckiger Zehenpartie;pullandbear;-;Teens;Young Adults,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchen-Absatzsandale mit Zehensteg und eckiger Zehenpartie;pullandbear;-;Teens;Young Adults,Adults;35.99
+Abiball;Mule;Mule mit Kitten Heel, eckiger Zehenpartie und Schleife;pullandbear;-;Teens;Young Adults,Adults;29.99
+Tanzschulball;Mule;Mule mit Kitten Heel, eckiger Zehenpartie und Schleife;pullandbear;-;Teens;Young Adults,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Mule;Mule mit Kitten Heel, eckiger Zehenpartie und Schleife;pullandbear;-;Teens;Young Adults,Adults;29.99
+Abiball;Slingpumps;Slingback-Kitten-Heel aus Mesh mit Pailletten und Strass;stradivarius;-;Young Adults;Teens,Adults;39.99
+Tanzschulball;Slingpumps;Slingback-Kitten-Heel aus Mesh mit Pailletten und Strass;stradivarius;-;Young Adults;Teens,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Kitten-Heel aus Mesh mit Pailletten und Strass;stradivarius;-;Young Adults;Teens,Adults;39.99
+Abiball;Slingpumps;Slingback-Pumps mit Mesh, Stickerei und Strass;stradivarius;-;Young Adults;Teens,Adults;39.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Mesh, Stickerei und Strass;stradivarius;-;Young Adults;Teens,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Mesh, Stickerei und Strass;stradivarius;-;Young Adults;Teens,Adults;39.99
+Abiball;Slingpumps;Slingback-Pumps mit Stilettoabsatz und spitzer Kappe;stradivarius;-;Young Adults;Adults,Teens;35.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Stilettoabsatz und spitzer Kappe;stradivarius;-;Young Adults;Adults,Teens;35.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Stilettoabsatz und spitzer Kappe;stradivarius;-;Young Adults;Adults,Teens;35.99
+Abiball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stiletto-Absatz;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stiletto-Absatz;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stiletto-Absatz;stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Sandalette;Stiletto-Sandalette mit Knöchelriemchen und Strass-Riemchen;stradivarius;-;Young Adults;Teens,Adults;39.99
+Tanzschulball;Sandalette;Stiletto-Sandalette mit Knöchelriemchen und Strass-Riemchen;stradivarius;-;Young Adults;Teens,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Stiletto-Sandalette mit Knöchelriemchen und Strass-Riemchen;stradivarius;-;Young Adults;Teens,Adults;39.99
+Abiball;Sandalette;Riemchen-Sandalette mit Stilettoabsatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Sandalette;Riemchen-Sandalette mit Stilettoabsatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchen-Sandalette mit Stilettoabsatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Abiball;Sandalette;Riemchensandalette mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Sandalette;Riemchensandalette mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchensandalette mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Abiball;Sandalette;Riemchensandalette mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Sandalette;Riemchensandalette mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchensandalette mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Abiball;Sandalette;Riemchensandalette mit Stilettoabsatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Sandalette;Riemchensandalette mit Stilettoabsatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchensandalette mit Stilettoabsatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Abiball;Sandalette;Riemchensandalette mit Stilettoabsatz, Knöchelriemen und eckiger Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Sandalette;Riemchensandalette mit Stilettoabsatz, Knöchelriemen und eckiger Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchensandalette mit Stilettoabsatz, Knöchelriemen und eckiger Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;29.99
+Abiball;Sandalette;Riemchensandalette mit Stiletto-Absatz, Knöchelriemen und Mesh-Riemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Sandalette;Riemchensandalette mit Stiletto-Absatz, Knöchelriemen und Mesh-Riemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchensandalette mit Stiletto-Absatz, Knöchelriemen und Mesh-Riemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Abiball;Pantolette;Pantolette mit Stiletto-Absatz (Mule), eckige Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Pantolette;Pantolette mit Stiletto-Absatz (Mule), eckige Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Pantolette;Pantolette mit Stiletto-Absatz (Mule), eckige Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Keilsandalette;Espadrille-Keilsandalette mit Plateau und Bindebändern;stradivarius;-;Young Adults;Teens,Adults;39.99
+Tanzschulball;Keilsandalette;Espadrille-Keilsandalette mit Plateau und Bindebändern;stradivarius;-;Young Adults;Teens,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Keilsandalette;Espadrille-Keilsandalette mit Plateau und Bindebändern;stradivarius;-;Young Adults;Teens,Adults;39.99
+Abiball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stiletto-Absatz (8,5 cm);stradivarius;-;Adults;Young Adults,Teens;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stiletto-Absatz (8,5 cm);stradivarius;-;Adults;Young Adults,Teens;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stiletto-Absatz (8,5 cm);stradivarius;-;Adults;Young Adults,Teens;29.99
+Abiball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stiletto-Absatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stiletto-Absatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stiletto-Absatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Abiball;Slingpumps;Slingback-Kitten-Heel-Pumps aus Mesh mit Strass;stradivarius;-;Young Adults;Teens,Adults;39.99
+Tanzschulball;Slingpumps;Slingback-Kitten-Heel-Pumps aus Mesh mit Strass;stradivarius;-;Young Adults;Teens,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Kitten-Heel-Pumps aus Mesh mit Strass;stradivarius;-;Young Adults;Teens,Adults;39.99
+Abiball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Kappe;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Kappe;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Kappe;stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stilettoabsatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stilettoabsatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit spitzer Kappe und Stilettoabsatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Abiball;Slingpumps;Slingback-Pumps mit Kitten-Heel;stradivarius;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Kitten-Heel;stradivarius;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Kitten-Heel;stradivarius;-;Young Adults;Teens,Adults;29.99
+Abiball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Kappe in Lackoptik;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Kappe in Lackoptik;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Kappe in Lackoptik;stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Slingpumps;Slingback-Pumps mit spitzer Kappe und feinem Absatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit spitzer Kappe und feinem Absatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit spitzer Kappe und feinem Absatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Abiball;Slingpumps;Slingback-Pumps mit Stilettoabsatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Stilettoabsatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Stilettoabsatz;stradivarius;-;Adults;Young Adults,Teens;29.99
+Abiball;Pumps;Spitze Stiletto-Pumps;stradivarius;-;Young Adults;Adults,Teens;29.99
+Tanzschulball;Pumps;Spitze Stiletto-Pumps;stradivarius;-;Young Adults;Adults,Teens;29.99
+Oper/Familienfeier/Hochzeitsgast;Pumps;Spitze Stiletto-Pumps;stradivarius;-;Young Adults;Adults,Teens;29.99
+Abiball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Zehenpartie;stradivarius;-;Adults;Young Adults,Teens;35.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Zehenpartie;stradivarius;-;Adults;Young Adults,Teens;35.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und spitzer Zehenpartie;stradivarius;-;Adults;Young Adults,Teens;35.99
+Abiball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und V-Ausschnitt;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und V-Ausschnitt;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und V-Ausschnitt;stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Slingpumps;Slingback-Pumps mit Stilettoabsatz und spitzer Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Stilettoabsatz und spitzer Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Stilettoabsatz und spitzer Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;29.99
+Abiball;Slingpumps;Slingback-Pumps mit Stilettoabsatz in Lackoptik;stradivarius;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Stilettoabsatz in Lackoptik;stradivarius;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Stilettoabsatz in Lackoptik;stradivarius;-;Young Adults;Teens,Adults;29.99
+Abiball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und Peeptoe;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und Peeptoe;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Slingpumps;Slingback-Pumps mit Stiletto-Absatz und Peeptoe;stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Sandalette;Riemchen-Sandalette mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Tanzschulball;Sandalette;Riemchen-Sandalette mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchen-Sandalette mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Abiball;Riemchensandale;Riemchensandale mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Riemchensandale;Riemchensandale mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Riemchensandale;Riemchensandale mit Stiletto-Absatz und Knöchelriemen;stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Sandalette;Stiletto-Riemchensandalette mit Knöchelriemen und Blumenapplikation;stradivarius;-;Young Adults;Teens,Adults;39.99
+Tanzschulball;Sandalette;Stiletto-Riemchensandalette mit Knöchelriemen und Blumenapplikation;stradivarius;-;Young Adults;Teens,Adults;39.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Stiletto-Riemchensandalette mit Knöchelriemen und Blumenapplikation;stradivarius;-;Young Adults;Teens,Adults;39.99
+Abiball;Riemchensandale;Riemchensandale mit Kitten-Heel und Fersenriemen (Slingback);stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Riemchensandale;Riemchensandale mit Kitten-Heel und Fersenriemen (Slingback);stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Riemchensandale;Riemchensandale mit Kitten-Heel und Fersenriemen (Slingback);stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Mule;Stiletto-Mule mit offener eckiger Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Mule;Stiletto-Mule mit offener eckiger Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Mule;Stiletto-Mule mit offener eckiger Zehenpartie;stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Mule;Kitten-Heel-Mule mit breitem Riemen, metallisiert;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Mule;Kitten-Heel-Mule mit breitem Riemen, metallisiert;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Mule;Kitten-Heel-Mule mit breitem Riemen, metallisiert;stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Mule;Mule-Sandalette mit Stilettoabsatz und Knotenschleife;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Mule;Mule-Sandalette mit Stilettoabsatz und Knotenschleife;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Mule;Mule-Sandalette mit Stilettoabsatz und Knotenschleife;stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Sandalette;Riemchen-Sandalette mit Stiletto-Absatz und Fesselriemen;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Sandalette;Riemchen-Sandalette mit Stiletto-Absatz und Fesselriemen;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Sandalette;Riemchen-Sandalette mit Stiletto-Absatz und Fesselriemen;stradivarius;-;Young Adults;Teens,Adults;35.99
+Abiball;Sock-Boot;Sock-Boot-Stiefelette mit Stiletto-Absatz;stradivarius;-;Young Adults;Teens,Adults;35.99
+Tanzschulball;Sock-Boot;Sock-Boot-Stiefelette mit Stiletto-Absatz;stradivarius;-;Young Adults;Teens,Adults;35.99
+Oper/Familienfeier/Hochzeitsgast;Sock-Boot;Sock-Boot-Stiefelette mit Stiletto-Absatz;stradivarius;-;Young Adults;Teens,Adults;35.99
+Konfirmation/Jugendweihe/Firmung;Krawatte;Krawatte;bershka;-;Young Adults;Teens,Adults;15.99
+Abiball;Krawatte;Krawatte;bershka;-;Young Adults;Teens,Adults;15.99
+Tanzschulball;Krawatte;Krawatte;bershka;-;Young Adults;Teens,Adults;15.99
+Oper/Familienfeier/Hochzeitsgast;Krawatte;Krawatte;bershka;-;Young Adults;Teens,Adults;15.99
+Konfirmation/Jugendweihe/Firmung;Krawatte;Krawatte, diagonal gestreift mit Monogramm-Motiven;bershka;-;Young Adults;Teens,Adults;15.99
+Abiball;Krawatte;Krawatte, diagonal gestreift mit Monogramm-Motiven;bershka;-;Young Adults;Teens,Adults;15.99
+Tanzschulball;Krawatte;Krawatte, diagonal gestreift mit Monogramm-Motiven;bershka;-;Young Adults;Teens,Adults;15.99
+Oper/Familienfeier/Hochzeitsgast;Krawatte;Krawatte, diagonal gestreift mit Monogramm-Motiven;bershka;-;Young Adults;Teens,Adults;15.99
+Konfirmation/Jugendweihe/Firmung;Krawatte;Krawatte mit Diagonalstreifen;bershka;-;Young Adults;Teens,Adults;15.99
+Abiball;Krawatte;Krawatte mit Diagonalstreifen;bershka;-;Young Adults;Teens,Adults;15.99
+Tanzschulball;Krawatte;Krawatte mit Diagonalstreifen;bershka;-;Young Adults;Teens,Adults;15.99
+Oper/Familienfeier/Hochzeitsgast;Krawatte;Krawatte mit Diagonalstreifen;bershka;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Lange Handschuhe;Lange Mesh-Handschuhe mit Schleifen;bershka;lang;Teens;Young Adults,Adults;19.99
+Zubehör (alle Anlässe);Halsketten-Set;Lariat-Halsketten mit Strass, 3er-Pack;bershka;-;Teens;Young Adults,Adults;15.99
+Zubehör (alle Anlässe);Kopfschmuck;Kopfschmuck aus Kettengeflecht (Head Chain);bershka;-;Teens;Young Adults,Adults;22.99
+Zubehör (alle Anlässe);Schal;Schmaler Paillettenschal (Krawattentuch) mit Fransen;bershka;lang;Teens;Young Adults,Adults;15.99
+Konfirmation/Jugendweihe/Firmung;Krawatte;Krawatte mit Diagonalstreifen;pullandbear;-;Young Adults;Teens,Adults;15.99
+Abiball;Krawatte;Krawatte mit Diagonalstreifen;pullandbear;-;Young Adults;Teens,Adults;15.99
+Tanzschulball;Krawatte;Krawatte mit Diagonalstreifen;pullandbear;-;Young Adults;Teens,Adults;15.99
+Oper/Familienfeier/Hochzeitsgast;Krawatte;Krawatte mit Diagonalstreifen;pullandbear;-;Young Adults;Teens,Adults;15.99
+Konfirmation/Jugendweihe/Firmung;Krawatte;Krawatte mit Blockstreifen;pullandbear;-;Young Adults;Teens,Adults;15.99
+Abiball;Krawatte;Krawatte mit Blockstreifen;pullandbear;-;Young Adults;Teens,Adults;15.99
+Tanzschulball;Krawatte;Krawatte mit Blockstreifen;pullandbear;-;Young Adults;Teens,Adults;15.99
+Oper/Familienfeier/Hochzeitsgast;Krawatte;Krawatte mit Blockstreifen;pullandbear;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Armreif;Starrer Armreif in Blumenform (Statement-Armspange);pullandbear;-;Teens;Young Adults,Adults;17.99
+Zubehör (alle Anlässe);Muscheltasche;Muschelförmige Umhängetasche mit Perlenbesatz und Kettenriemen;pullandbear;-;Teens;Young Adults,Adults;35.99
+Zubehör (alle Anlässe);Handtasche;Perlen-Handtasche mit Grifföffnung und Kettenriemen;pullandbear;-;Teens;Young Adults,Adults;35.99
+Zubehör (alle Anlässe);Beuteltasche;Beuteltasche mit Perlenstickerei und Kettenriemen;pullandbear;-;Teens;Young Adults,Adults;25.99
+Zubehör (alle Anlässe);Beuteltasche;Mini-Beuteltasche (Bucket Bag) mit Perlen und Pailletten;pullandbear;-;Teens;Young Adults,Adults;29.99
+Zubehör (alle Anlässe);Schultertasche;Samt-Schultertasche mit Perlenfransen;pullandbear;-;Teens;Young Adults,Adults;35.99
+Zubehör (alle Anlässe);Ohrstecker;Statement-Ohrstecker in Blütenform (Paar);stradivarius;-;Young Adults;Teens,Adults;9.99
+Zubehör (alle Anlässe);Ohrringe;Statement-Ohrringe mit Strass-Blütenblättern;stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Ohrstecker;Statement-Ohrstecker in Blütenblatt-/Fächerform mit Emaille-Optik;stradivarius;-;Young Adults;Teens,Adults;9.99
+Zubehör (alle Anlässe);Choker;Breiter Textil-Choker mit Spiegel-Applikationen und Wellensaum;stradivarius;-;Young Adults;Teens,Adults;9.99
+Zubehör (alle Anlässe);Armband;Textil-Armband mit Spiegeln und Kunstperlen, 2er-Set;stradivarius;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Armreif;Armspange (starrer Armreif, offen) mit Spitzen-Optik;stradivarius;-;Young Adults;Teens,Adults;17.99
+Zubehör (alle Anlässe);Ohrstecker;Blumen-Ohrstecker in Filigran-/Spitzenoptik (Paar);stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Choker;Statement-Choker in Wasserfalloptik mit Blütengliedern und Rautenanhängern;stradivarius;-;Young Adults;Teens,Adults;17.99
+Zubehör (alle Anlässe);Choker;Breiter Choker aus Metallgeflecht mit Glasperlen;stradivarius;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Choker;Mehrreihiger Kunstperlen-Choker;stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Armreif-Set;Armreif-Set (2er-Set): ein schlichter Armreif und ein Armreif mit Scharnier und hängenden Tropfen-Charms;stradivarius;-;Young Adults;Teens,Adults;17.99
+Zubehör (alle Anlässe);Ohrhänger;Lange Chandelier-Ohrstecker mit Schmucksteinen (Paar);stradivarius;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Layering-Halskette;Mehrlagige Halskette mit Perlen und Tropfen-Charms;stradivarius;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Broschen-Set;Broschen-Set mit Strasssteinen (3er-Set);stradivarius;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Ohrstecker;Statement-Ohrstecker mit ovalem Schmuckstein und Blütenrahmen (Paar);stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Ohrhänger;Statement-Ohrhänger mit Kreuz-Anhänger und Glassteinen;stradivarius;-;Young Adults;Teens,Adults;17.99
+Zubehör (alle Anlässe);Ohrhänger;Hängeohrringe mit ovalem Ornament-Stecker und Tropfenstein (Paar);stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Broschen-Set;Broschen-Set mit Schmucksteinen (2er-Set);stradivarius;-;Young Adults;Teens,Adults;17.99
+Zubehör (alle Anlässe);Lariat-Halskette;Lariat-Halskette mit Kreuzanhänger und Ziersteinen, 2er-Set;stradivarius;-;Young Adults;Teens,Adults;17.99
+Zubehör (alle Anlässe);Ohrringe;Kreuz-Statement-Ohrringe mit Schmucksteinen und Tropfenanhängern;stradivarius;lang;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Ring-Set;Statement-Ringe mit Schmucksteinen (2er-Set);stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Ohrstecker;Statement-Ohrstecker in Kreuzform mit Steinen und hängenden Kristallen (Paar);stradivarius;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Brosche;Schleifen-Brosche in Rosettenform mit Bändern;stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Brosche;Rosettenbrosche mit hängenden Bändern;stradivarius;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Lariat-Halskette;Lange Lariat-Halskette (Y-Kette) mit Perlen- und Strassbehang;stradivarius;lang;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Ohrhänger;Statement-Hängeohrringe mit Metallblüte und Strass-Ketten;stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Ohrhänger;Lange Hänge-Ohrringe mit Kette und Glasperlen-Clustern (Paar);stradivarius;lang;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Choker;Starrer Strass-Choker (offener Halsreif);stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Halsketten-Set;Layering-Halsketten, 5er-Set mit Strass und Herzanhänger;stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Choker;Perlen-Choker mit Glasperlen-Anhängern;stradivarius;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Lariat-Halskette;Lariat-Halskette (Y-Kette) mit Glasperlen;stradivarius;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Ohrring-Set;Ohrring-Set (9er-Set) mit Steckern, Creolen und Hängeohrringen;stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Lariat-Halskette;Doppelte Lariat-Halskette (Layering) mit Strass-Tropfen;stradivarius;lang;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Halsreif;Starrer Choker mit Wasserfall-Kettenfransen;stradivarius;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Ohrstecker;Maxi-Ohrstecker in Fächer-Blumenform (Paar);stradivarius;-;Young Adults;Teens,Adults;9.99
+Zubehör (alle Anlässe);Taillengürtel;Breiter Taillengürtel mit Kunstperlen und Bindeverschluss;stradivarius;-;Young Adults;Teens,Adults;15.99
+Zubehör (alle Anlässe);Gürtel;Bindegürtel mit Wellenkante, Kunstperlen und Strass;stradivarius;-;Young Adults;Teens,Adults;12.99
+Zubehör (alle Anlässe);Schultertasche;Schultertasche mit Perlenfransen;stradivarius;-;Young Adults;Teens,Adults;39.99
+Zubehör (alle Anlässe);Beuteltasche;Beuteltasche mit Kordelzug, Perlenstickerei und Perlenfransen;stradivarius;-;Young Adults;Teens,Adults;29.99
+Zubehör (alle Anlässe);Kopfschmuck;Perlen-Kopfnetz (Haarnetz-Kappe aus Glasperlen);stradivarius;-;Young Adults;Teens,Adults;19.99
+Zubehör (alle Anlässe);Pillbox-Hut;Pillbox-Mütze aus Wollfilz;stradivarius;-;Young Adults;Teens,Adults;19.99
+Zubehör (alle Anlässe);Parfum;Parfum-Flakon 100 ml mit Holzdeckel;stradivarius;-;Young Adults;Teens,Adults;17.99
+Abiball;Abendkleid;Trägerloses Abendkleid mit Herzausschnitt, Rückenschnürung und Schal;viviry;midi;Young Adults;Teens,Adults;239.0
+Tanzschulball;Abendkleid;Trägerloses Abendkleid mit Herzausschnitt, Rückenschnürung und Schal;viviry;midi;Young Adults;Teens,Adults;239.0
+Abiball;Abendkleid;Trägerloses Abendkleid in A-Linie mit Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;289.0
+Tanzschulball;Abendkleid;Trägerloses Abendkleid in A-Linie mit Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;289.0
+Abiball;Abendkleid;Trägerloses Chiffon-Abendkleid mit Korsage, Beinschlitz und Schal;viviry;maxi;Young Adults;Teens,Adults;239.0
+Tanzschulball;Abendkleid;Trägerloses Chiffon-Abendkleid mit Korsage, Beinschlitz und Schal;viviry;maxi;Young Adults;Teens,Adults;239.0
+Abiball;Abendkleid;Satin-Abendkleid mit Wasserfallausschnitt, Rückenschnürung und Schleppe;viviry;maxi;Young Adults;Teens,Adults;249.0
+Tanzschulball;Abendkleid;Satin-Abendkleid mit Wasserfallausschnitt, Rückenschnürung und Schleppe;viviry;maxi;Young Adults;Teens,Adults;249.0
+Abiball;Abendkleid;Meerjungfrau-Abendkleid mit Korsagen-Oberteil und Beinschlitz;viviry;maxi;Young Adults;Adults;299.0
+Tanzschulball;Abendkleid;Meerjungfrau-Abendkleid mit Korsagen-Oberteil und Beinschlitz;viviry;maxi;Young Adults;Adults;299.0
+Konfirmation/Jugendweihe/Firmung;Corsagenkleid;Trägerloses Corsagen-Midikleid mit Herzausschnitt;viviry;midi;Young Adults;Teens,Adults;169.0
+Oper/Familienfeier/Hochzeitsgast;Corsagenkleid;Trägerloses Corsagen-Midikleid mit Herzausschnitt;viviry;midi;Young Adults;Teens,Adults;169.0
+Hochzeit (Braut);Brautkleid;Neckholder-Brautkleid mit tiefem V-Ausschnitt (Standesamtkleid);viviry;maxi;Adults;Young Adults;239.0
+Abiball;Abendkleid;Trägerloses A-Linien-Abendkleid mit Korsettoberteil und Schal;viviry;maxi;Adults;Young Adults,Teens;249.0
+Tanzschulball;Abendkleid;Trägerloses A-Linien-Abendkleid mit Korsettoberteil und Schal;viviry;maxi;Adults;Young Adults,Teens;249.0
+Abiball;Abendkleid;Abendkleid mit Korsage und Rückenschnürung;viviry;maxi;Young Adults;Teens,Adults;179.0
+Tanzschulball;Abendkleid;Abendkleid mit Korsage und Rückenschnürung;viviry;maxi;Young Adults;Teens,Adults;179.0
+Abiball;Kleid;Schulterfreies, figurnahes Abendkleid mit Beinschlitz und Schleppe;viviry;maxi;Young Adults;Teens,Adults;179.0
+Tanzschulball;Kleid;Schulterfreies, figurnahes Abendkleid mit Beinschlitz und Schleppe;viviry;maxi;Young Adults;Teens,Adults;179.0
+Abiball;Abendkleid;Trägerloses A-Linien-Abendkleid aus Tüll mit Spitzen-Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;349.0
+Tanzschulball;Abendkleid;Trägerloses A-Linien-Abendkleid aus Tüll mit Spitzen-Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;349.0
+Tanzschulball;Cocktailkleid;Cocktailkleid in Wickeloptik mit transparenten Langarmärmeln;viviry;normal;Young Adults;Teens,Adults;169.0
+Konfirmation/Jugendweihe/Firmung;Cocktailkleid;Cocktailkleid in Wickeloptik mit transparenten Langarmärmeln;viviry;normal;Young Adults;Teens,Adults;169.0
+Zubehör (alle Anlässe);Fashion-Tape;Fashion-Tape / Haftstreifen für Kleidung (Packung mit 20 Stück);viviry;-;Adults;Teens,Young Adults;12.0
+Zubehör (alle Anlässe);Kleiderschutzhülle;Kleiderschutzhülle mit Logo;viviry;-;Adults;Teens,Young Adults;7.0
+Zubehör (alle Anlässe);Nipple-Cover;Silikon-Nipple-Cover in Blütenform (1 Paar);viviry;-;Adults;Young Adults,Teens;10.0
+Zubehör (alle Anlässe);Schmuckset;Schmuckset aus Kette mit Perlenanhängern und Perlen-Ohrsteckern;viviry;-;Adults;Young Adults,Teens;19.0
+Zubehör (alle Anlässe);Schmuckset;Schmuckset aus Strass-Collier in V-Form und Ohrhängern;viviry;-;Adults;Young Adults,Teens;29.0
+Zubehör (alle Anlässe);Schmuckset;Schmuckset mit Strass-Kette und Creolen mit Tropfenanhängern, inkl. Schmuckkästchen;viviry;-;Adults;Young Adults,Teens;19.0
+Zubehör (alle Anlässe);Schmuckset;Schmuckset mit Strass-Collierkette und Ohrsteckern mit Hänger, inkl. Schmuckkästchen;viviry;-;Adults;Young Adults,Teens;29.0
+Zubehör (alle Anlässe);Schmuckset;Schmuckset aus Tennis-Kette und Creolen mit Tropfenanhänger (2-teilig, mit Schmuckkästchen);viviry;-;Adults;Young Adults,Teens;19.0
+Zubehör (alle Anlässe);Schmuckset;Schmuckset 3-teilig (Tropfen-Ohrstecker, Y-Kette, Armband);viviry;-;Adults;Young Adults,Teens;19.0
+Zubehör (alle Anlässe);Schmuckset;Schmuckset aus Creolen und Y-Kette mit Tropfenanhänger;viviry;-;Adults;Young Adults,Teens;19.0
+Zubehör (alle Anlässe);Schmuckset;Schmuckset (Kette mit Perlentropfen-Anhänger und Creolen mit Perlentropfen), inkl. Schmuckkästchen;viviry;-;Adults;Young Adults,Teens;19.0
+Zubehör (alle Anlässe);Klebe-BH;Klebe-BH in U-Form (trägerlos, rückenfrei, tiefer Ausschnitt);viviry;-;Young Adults;Adults;29.95
+Zubehör (alle Anlässe);Geschenkgutschein;Geschenkgutschein (digital, Code per E-Mail);viviry;-;Adults;Young Adults,Teens;10.0
+Zubehör (alle Anlässe);Spezialwaschmittel;Spezialwaschmittel für feine Stoffe (Flasche);viviry;-;Adults;Young Adults,Teens;7.95
+Abiball;Abendkleid;Maxi-Abendkleid mit Korsagen-Oberteil in Wickeloptik und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;259.0
+Tanzschulball;Abendkleid;Maxi-Abendkleid mit Korsagen-Oberteil in Wickeloptik und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;259.0
+Abiball;Abendkleid;Trägerloses A-Linien-Abendkleid in Midilänge;viviry;midi;Young Adults;Teens,Adults;199.0
+Tanzschulball;Abendkleid;Trägerloses A-Linien-Abendkleid in Midilänge;viviry;midi;Young Adults;Teens,Adults;199.0
+Abiball;Abendkleid;Trägerloses Midi-Abendkleid mit asymmetrischem Wickel-Oberteil und ausgestelltem Rock;viviry;midi;Young Adults;Teens,Adults;229.0
+Tanzschulball;Abendkleid;Trägerloses Midi-Abendkleid mit asymmetrischem Wickel-Oberteil und ausgestelltem Rock;viviry;midi;Young Adults;Teens,Adults;229.0
+Abiball;Ballkleid;trägerloses Ballkleid mit Korsage und Tüllrock;viviry;maxi;Young Adults;Teens,Adults;359.0
+Tanzschulball;Ballkleid;trägerloses Ballkleid mit Korsage und Tüllrock;viviry;maxi;Young Adults;Teens,Adults;359.0
+Abiball;Abendkleid;Langarm-Abendkleid in Wickeloptik mit Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;249.0
+Tanzschulball;Abendkleid;Langarm-Abendkleid in Wickeloptik mit Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;249.0
+Abiball;Abendkleid;Trägerloses Meerjungfrau-Abendkleid mit Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;269.0
+Tanzschulball;Abendkleid;Trägerloses Meerjungfrau-Abendkleid mit Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;269.0
+Abiball;Abendkleid;Meerjungfrau-Abendkleid mit Spitzenoberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;279.0
+Tanzschulball;Abendkleid;Meerjungfrau-Abendkleid mit Spitzenoberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;279.0
+Abiball;Ballkleid;Langes Tüll-Ballkleid in A-Linie mit Paillettenoberteil;viviry;maxi;Young Adults;Teens;349.0
+Tanzschulball;Ballkleid;Langes Tüll-Ballkleid in A-Linie mit Paillettenoberteil;viviry;maxi;Young Adults;Teens;349.0
+Abiball;Abendkleid;Abendkleid mit V-Ausschnitt, 3/4-Ärmeln und Taillenband;viviry;maxi;Young Adults;Teens,Adults;239.0
+Tanzschulball;Abendkleid;Abendkleid mit V-Ausschnitt, 3/4-Ärmeln und Taillenband;viviry;maxi;Young Adults;Teens,Adults;239.0
+Abiball;Abendkleid;Korsagen-Abendkleid mit Spaghettiträgern, Beinschlitz und leichter Meerjungfrau-Silhouette;viviry;maxi;Young Adults;Teens,Adults;279.0
+Tanzschulball;Abendkleid;Korsagen-Abendkleid mit Spaghettiträgern, Beinschlitz und leichter Meerjungfrau-Silhouette;viviry;maxi;Young Adults;Teens,Adults;279.0
+Abiball;Abendkleid;Abendkleid mit Wickeloberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;239.0
+Tanzschulball;Abendkleid;Abendkleid mit Wickeloberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;239.0
+Abiball;Abendkleid;Chiffon-Abendkleid mit Wickeloptik, Beinschlitz und Rückenschnürung;viviry;maxi;Young Adults;Teens,Adults;199.0
+Tanzschulball;Abendkleid;Chiffon-Abendkleid mit Wickeloptik, Beinschlitz und Rückenschnürung;viviry;maxi;Young Adults;Teens,Adults;199.0
+Abiball;Abendkleid;Satin-Abendkleid, bodenlang, mit Neckholder, tiefem V-Ausschnitt, Rückenausschnitt und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;219.0
+Tanzschulball;Abendkleid;Satin-Abendkleid, bodenlang, mit Neckholder, tiefem V-Ausschnitt, Rückenausschnitt und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;219.0
+Abiball;Abendkleid;Tüll-Abendkleid in A-Linie mit Korsage, Herzausschnitt und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;379.0
+Tanzschulball;Abendkleid;Tüll-Abendkleid in A-Linie mit Korsage, Herzausschnitt und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;379.0
+Abiball;Abendkleid;Bodenlanges Abendkleid mit Wasserfallausschnitt, Spaghettiträgern und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;179.0
+Tanzschulball;Abendkleid;Bodenlanges Abendkleid mit Wasserfallausschnitt, Spaghettiträgern und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;179.0
+Abiball;Abendkleid;Trägerloses Abendkleid in Meerjungfrau-Linie mit Spitzenoberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;299.0
+Tanzschulball;Abendkleid;Trägerloses Abendkleid in Meerjungfrau-Linie mit Spitzenoberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;299.0
+Zubehör (alle Anlässe);Bolero;Kunstfell-Bolero mit Glitzerspange;viviry;cropped;Young Adults;Teens,Adults;79.0
+Zubehör (alle Anlässe);Bolero;Kunstfell-Bolero mit Schmuckspange;viviry;cropped;Young Adults;Teens,Adults;79.0
+Zubehör (alle Anlässe);Bolero;Chiffon-Bolero mit weiten Ärmeln;viviry;cropped;Adults;Young Adults,Teens;39.0
+Hochzeit (Braut);Brautkleid;Brautkleid in Maxilänge mit V-Ausschnitt und Beinschlitz;viviry;maxi;Adults;Young Adults,Teens;199.0
+Zubehör (alle Anlässe);Clutch;Box-Clutch mit Metallrahmen;viviry;-;Adults;Young Adults,Teens;39.0
+Zubehör (alle Anlässe);Abendtasche;Strass-Abendtasche mit geknotetem Henkel (Hobo-Form);viviry;-;Adults;Young Adults,Teens;39.0
+Zubehör (alle Anlässe);Clutch;Box-Clutch mit Metallrahmen und abnehmbarer Umhängekette;viviry;-;Adults;Young Adults,Teens;39.0
+Zubehör (alle Anlässe);Clutch;Clutch mit Überschlag in Glitzeroptik;viviry;-;Adults;Young Adults,Teens;29.0
+Konfirmation/Jugendweihe/Firmung;Cocktailkleid;Satin-Cocktailkleid mit Wasserfallausschnitt und Rückenschnürung;viviry;midi;Young Adults;Teens,Adults;129.0
+Oper/Familienfeier/Hochzeitsgast;Cocktailkleid;Satin-Cocktailkleid mit Wasserfallausschnitt und Rückenschnürung;viviry;midi;Young Adults;Teens,Adults;129.0
+Konfirmation/Jugendweihe/Firmung;Cocktailkleid;Midi-Cocktailkleid mit Korsage und Rückenschnürung;viviry;midi;Young Adults;Teens,Adults;179.0
+Oper/Familienfeier/Hochzeitsgast;Cocktailkleid;Midi-Cocktailkleid mit Korsage und Rückenschnürung;viviry;midi;Young Adults;Teens,Adults;179.0
+Abiball;Abendkleid;A-Linien-Abendkleid mit Paillettenkorsage und Rückenschnürung;viviry;maxi;Young Adults;Teens,Adults;329.0
+Tanzschulball;Abendkleid;A-Linien-Abendkleid mit Paillettenkorsage und Rückenschnürung;viviry;maxi;Young Adults;Teens,Adults;329.0
+Abiball;Abendkleid;Bodenlanges Abendkleid in A-Linie mit tiefem V-Ausschnitt und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;199.0
+Tanzschulball;Abendkleid;Bodenlanges Abendkleid in A-Linie mit tiefem V-Ausschnitt und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;199.0
+Abiball;Abendkleid;Prinzessinnen-Abendkleid aus Tüll mit Spitzenoberteil und Rückenschnürung;viviry;maxi;Young Adults;Teens,Adults;329.0
+Tanzschulball;Abendkleid;Prinzessinnen-Abendkleid aus Tüll mit Spitzenoberteil und Rückenschnürung;viviry;maxi;Young Adults;Teens,Adults;329.0
+Abiball;Abendkleid;One-Shoulder-Abendkleid aus Satin mit Beinschlitz und Schleppe;viviry;maxi;Young Adults;Teens,Adults;179.0
+Tanzschulball;Abendkleid;One-Shoulder-Abendkleid aus Satin mit Beinschlitz und Schleppe;viviry;maxi;Young Adults;Teens,Adults;179.0
+Abiball;Abendkleid;Pailletten-Abendkleid mit Spaghettiträgern und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;329.0
+Tanzschulball;Abendkleid;Pailletten-Abendkleid mit Spaghettiträgern und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;329.0
+Abiball;Abendkleid;Trägerloses Abendkleid in A-Linie mit Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;299.0
+Tanzschulball;Abendkleid;Trägerloses Abendkleid in A-Linie mit Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;299.0
+Abiball;Abendkleid;Abendkleid in A-Linie mit Spitzen-Corsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;299.0
+Tanzschulball;Abendkleid;Abendkleid in A-Linie mit Spitzen-Corsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;299.0
+Abiball;Abendkleid;Off-Shoulder-Abendkleid aus Satin mit Wickeloptik-Oberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;239.0
+Tanzschulball;Abendkleid;Off-Shoulder-Abendkleid aus Satin mit Wickeloptik-Oberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;239.0
+Abiball;Abendkleid;Langarm-Abendkleid mit Beinschlitz und Steinchenbesatz;viviry;maxi;Young Adults;Teens,Adults;239.0
+Tanzschulball;Abendkleid;Langarm-Abendkleid mit Beinschlitz und Steinchenbesatz;viviry;maxi;Young Adults;Teens,Adults;239.0
+Abiball;Abendkleid;Satin-Abendkleid mit V-Ausschnitt und überkreuzten Rückenträgern;viviry;maxi;Young Adults;Teens,Adults;249.0
+Tanzschulball;Abendkleid;Satin-Abendkleid mit V-Ausschnitt und überkreuzten Rückenträgern;viviry;maxi;Young Adults;Teens,Adults;249.0
+Abiball;Abendkleid;Glitzer-Abendkleid in Wickeloptik mit Rückenschnürung, Beinschlitz und Schleppe;viviry;maxi;Young Adults;Teens,Adults;179.0
+Tanzschulball;Abendkleid;Glitzer-Abendkleid in Wickeloptik mit Rückenschnürung, Beinschlitz und Schleppe;viviry;maxi;Young Adults;Teens,Adults;179.0
+Abiball;Abendkleid;Trägerloses Satin-Abendkleid mit Korsage, Raffung und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;239.0
+Tanzschulball;Abendkleid;Trägerloses Satin-Abendkleid mit Korsage, Raffung und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;239.0
+Abiball;Abendkleid;Schulterfreies Abendkleid mit Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;329.0
+Tanzschulball;Abendkleid;Schulterfreies Abendkleid mit Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;329.0
+Abiball;Abendkleid;Meerjungfrau-Abendkleid mit Korsage-Oberteil und Schleppe;viviry;maxi;Young Adults;Adults;329.0
+Tanzschulball;Abendkleid;Meerjungfrau-Abendkleid mit Korsage-Oberteil und Schleppe;viviry;maxi;Young Adults;Adults;329.0
+Abiball;Abendkleid;Langes A-Linien-Abendkleid aus Satin mit eckigem Ausschnitt, offenem Rücken und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;239.0
+Tanzschulball;Abendkleid;Langes A-Linien-Abendkleid aus Satin mit eckigem Ausschnitt, offenem Rücken und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;239.0
+Abiball;Abendkleid;Satin-Abendkleid in A-Linie mit Korsett-Oberteil und Spaghettiträgern;viviry;maxi;Young Adults;Teens,Adults;329.0
+Tanzschulball;Abendkleid;Satin-Abendkleid in A-Linie mit Korsett-Oberteil und Spaghettiträgern;viviry;maxi;Young Adults;Teens,Adults;329.0
+Abiball;Abendkleid;Trägerloses A-Linien-Abendkleid mit Korsage;viviry;maxi;Young Adults;Teens,Adults;329.0
+Tanzschulball;Abendkleid;Trägerloses A-Linien-Abendkleid mit Korsage;viviry;maxi;Young Adults;Teens,Adults;329.0
+Abiball;Abendkleid;Abendkleid mit Wasserfallausschnitt und Beinschlitz;viviry;knöchellang;Young Adults;Teens,Adults;169.0
+Tanzschulball;Abendkleid;Abendkleid mit Wasserfallausschnitt und Beinschlitz;viviry;knöchellang;Young Adults;Teens,Adults;169.0
+Abiball;Abendkleid;Abendkleid in A-Linie mit Korsagenoberteil und Rückenschnürung;viviry;maxi;Young Adults;Teens,Adults;329.0
+Tanzschulball;Abendkleid;Abendkleid in A-Linie mit Korsagenoberteil und Rückenschnürung;viviry;maxi;Young Adults;Teens,Adults;329.0
+Abiball;Abendkleid;Pailletten-Abendkleid mit hohem Beinschlitz und Satin-Schalschleppe;viviry;maxi;Young Adults;Teens,Adults;349.0
+Tanzschulball;Abendkleid;Pailletten-Abendkleid mit hohem Beinschlitz und Satin-Schalschleppe;viviry;maxi;Young Adults;Teens,Adults;349.0
+Abiball;Abendkleid;A-Linien-Abendkleid mit Spitzenoberteil, Rückenschnürung und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;279.0
+Tanzschulball;Abendkleid;A-Linien-Abendkleid mit Spitzenoberteil, Rückenschnürung und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;279.0
+Abiball;Abendkleid;A-Linien-Abendkleid mit Spitzenoberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;279.0
+Tanzschulball;Abendkleid;A-Linien-Abendkleid mit Spitzenoberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;279.0
+Abiball;Abendkleid;Satin-Abendkleid mit Spitzen-Korsage, Rückenschnürung und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;329.0
+Tanzschulball;Abendkleid;Satin-Abendkleid mit Spitzen-Korsage, Rückenschnürung und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;329.0
+Abiball;Abendkleid;Abendkleid in A-Linie mit Korsagenoberteil;viviry;maxi;Young Adults;Teens,Adults;329.0
+Tanzschulball;Abendkleid;Abendkleid in A-Linie mit Korsagenoberteil;viviry;maxi;Young Adults;Teens,Adults;329.0
+Abiball;Abendkleid;Abendkleid in A-Linie mit Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;329.0
+Tanzschulball;Abendkleid;Abendkleid in A-Linie mit Korsage und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;329.0
+Abiball;Abendkleid;Abendkleid in A-Linie mit Spitzen-Korsagenoberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;279.0
+Tanzschulball;Abendkleid;Abendkleid in A-Linie mit Spitzen-Korsagenoberteil und Beinschlitz;viviry;maxi;Young Adults;Teens,Adults;279.0

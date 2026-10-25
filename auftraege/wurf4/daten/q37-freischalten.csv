@@ -1,0 +1,113 @@
+spieltyp;freischalten_fuer;artikel_referenz;anteil_teens;anteil_young;anteil_adults
+Gürtel;Teens;113;1.0;1.0;0.74
+Jorts;Adults;70;1.0;1.0;0.33
+Schultertasche;Teens;69;1.0;1.0;0.93
+Blazer;Teens;66;1.0;1.0;0.94
+Portemonnaie;Teens;61;1.0;1.0;0.98
+Trenchcoat;Teens;58;1.0;1.0;0.98
+Sweatshorts;Adults;51;1.0;1.0;0.59
+Skort;Adults;51;1.0;1.0;0.45
+Schal;Teens;46;1.0;1.0;0.87
+Bluse;Teens;45;0.96;1.0;0.6
+Slingpumps;Teens;44;1.0;1.0;1.0
+Stiefel;Teens;42;1.0;1.0;0.95
+Minikleid;Adults;40;1.0;1.0;0.33
+Eau de Parfum;Teens;38;1.0;1.0;1.0
+Poloshirt;Teens;34;1.0;1.0;0.53
+Bundfaltenhose;Teens,Young Adults;34;1.0;1.0;0.85
+Stiefelette;Teens;34;1.0;1.0;0.97
+Cropped Pufferjacke;Adults;33;1.0;1.0;0.73
+Feinstrickpullover;Teens;29;1.0;1.0;0.48
+Loafer;Teens;29;1.0;1.0;0.97
+Handtasche;Teens;29;1.0;1.0;0.97
+Pyjamahose;Adults;28;1.0;1.0;0.68
+Corsagen-Top;Adults;27;0.78;1.0;0.48
+Mantel;Teens;23;1.0;1.0;1.0
+Mule;Teens;23;1.0;1.0;0.96
+Windbreaker;Adults;21;1.0;1.0;0.48
+Bandana;Adults;21;1.0;1.0;0.86
+Crop-Longsleeve;Adults;19;1.0;1.0;0.42
+Strickkleid;Teens;19;1.0;1.0;0.68
+Kartenetui;Teens;18;1.0;1.0;1.0
+Umhängetasche;Teens;17;1.0;1.0;1.0
+Choker;Adults;16;1.0;1.0;1.0
+Chino;Teens;15;1.0;1.0;0.6
+Clog;Teens,Young Adults;15;1.0;1.0;0.87
+Netzshirt;Adults;14;0.93;1.0;0.36
+Anzughose;Teens;13;1.0;1.0;0.77
+Kurzmantel;Teens,Young Adults;13;1.0;1.0;0.85
+Cropped Jeansjacke;Adults;12;1.0;1.0;0.42
+Wollmantel;Teens;11;1.0;1.0;1.0
+Steppmantel;Teens,Young Adults;11;1.0;1.0;1.0
+Kurzarmbluse;Teens,Young Adults;10;1.0;1.0;0.7
+Troyer;Teens;10;1.0;1.0;0.8
+Kulturbeutel;Teens,Young Adults;10;1.0;1.0;1.0
+Bodyspray;Adults;10;1.0;1.0;0.9
+Bootcut-Jeans;Teens;9;1.0;1.0;0.56
+Handschuhe;Teens;8;1.0;1.0;1.0
+Zip-Strickjacke;Teens,Young Adults;7;1.0;1.0;0.43
+Schlupfhose;Teens,Young Adults;7;1.0;1.0;0.86
+Perlenkette;Teens,Young Adults;7;1.0;1.0;0.71
+Feinstrickjacke;Teens,Young Adults;6;1.0;1.0;0.67
+Rollkragenpullover;Teens;6;1.0;1.0;1.0
+Satin-Midirock;Teens;6;1.0;1.0;1.0
+Pumps;Teens;6;1.0;1.0;1.0
+Krawatte;Teens;6;1.0;1.0;1.0
+Damenuhr;Teens,Young Adults;6;1.0;1.0;1.0
+Eau de Toilette;Teens;6;1.0;1.0;1.0
+Strickweste;Teens;5;1.0;1.0;0.6
+Culotte;Teens;5;1.0;1.0;0.6
+Rock;Teens;5;1.0;1.0;0.6
+Etuikleid;Teens;5;0.8;1.0;1.0
+Bouclé-Jacke;Teens;5;1.0;1.0;1.0
+Harrington-Jacke;Teens;5;1.0;1.0;0.6
+Tennissocken im Set;Adults;5;1.0;1.0;0.6
+Clutch;Teens;5;1.0;1.0;1.0
+Flanellhemd;Adults;4;1.0;1.0;0.5
+Weekender;Teens;4;1.0;1.0;1.0
+Poncho;Teens,Young Adults;4;1.0;1.0;0.5
+Parfum;Teens;4;1.0;1.0;1.0
+Wickelshirt;Teens;3;1.0;1.0;0.67
+Radlerhose;Adults;3;1.0;1.0;1.0
+Sportleggings;Adults;3;1.0;1.0;1.0
+Anzugweste;Teens;3;1.0;1.0;0.67
+Regenjacke;Teens;3;1.0;1.0;1.0
+Cape;Teens,Young Adults;3;1.0;1.0;1.0
+Kimono-Jacke;Teens;3;0.67;1.0;0.33
+Wanderschuh;Teens;3;1.0;1.0;0.67
+Badeschlappen;Adults;3;1.0;1.0;0.67
+Bootsschuh;Teens;3;1.0;1.0;1.0
+Federmäppchen;Teens,Young Adults;3;1.0;1.0;0.0
+Schiebermütze;Teens,Young Adults;3;1.0;1.0;1.0
+Shapewear-Body;Teens,Young Adults;2;1.0;1.0;1.0
+Schluppenbluse;Young Adults;2;0.5;1.0;1.0
+Oxford-Hemd;Teens;2;1.0;1.0;0.5
+Wickelrock;Teens;2;1.0;1.0;0.5
+Wickelkleid;Teens;2;1.0;1.0;0.5
+Fieldjacket;Teens;2;1.0;1.0;1.0
+Funktionsjacke;Teens;2;1.0;1.0;0.5
+Nachthemd;Young Adults;2;0.5;1.0;1.0
+Espadrille;Teens;2;1.0;1.0;1.0
+Stoppersocken;Teens,Young Adults,Adults;2;1.0;1.0;1.0
+Brosche;Teens,Young Adults;2;1.0;1.0;1.0
+V-Shirt;Teens;1;1.0;1.0;0.0
+Shirtjacke;Teens,Young Adults;1;1.0;1.0;1.0
+Fleece-Troyer;Adults;1;1.0;1.0;1.0
+Marlenehose;Teens;1;1.0;1.0;1.0
+Hemdblusenkleid;Teens;1;1.0;1.0;0.0
+Bleistiftrock;Teens;1;1.0;1.0;1.0
+A-Linien-Rock;Teens;1;1.0;1.0;1.0
+Tunikabluse;Teens,Young Adults;1;1.0;1.0;1.0
+Schürze;Teens;1;1.0;1.0;1.0
+Leinen-Sakko;Teens;1;1.0;1.0;1.0
+Bademantel;Teens;1;1.0;1.0;1.0
+Derby-Schuh;Teens;1;1.0;1.0;1.0
+Mokassin;Teens,Young Adults;1;1.0;1.0;0.0
+Hausschuh;Teens,Young Adults;1;1.0;1.0;1.0
+Trekkingschuh;Teens;1;1.0;1.0;1.0
+Overknee-Stiefel;Teens;1;1.0;1.0;1.0
+Strumpfhose;Teens;1;1.0;1.0;1.0
+Bommelmütze;Teens,Young Adults,Adults;1;1.0;1.0;1.0
+Strohhut;Teens;1;1.0;1.0;1.0
+Lipgloss;Adults;1;1.0;1.0;1.0
+Abendtasche;Teens;1;1.0;1.0;1.0

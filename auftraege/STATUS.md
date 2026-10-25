@@ -57,6 +57,17 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q07 Vertriebssteuerung (Region bis Haus, Vorjahr, Startmonat, Mietverträge) | main | **gemergt 22.10.** (#52, dad3d98) | Drilldown Region → Cluster → Haus je Format, 52 Wochen Vorjahr, Startmonat Jan/Apr/Jul/Okt, Mietverträge als Sammelvorlage. Claude: Typfehler Mietvertrags-Delegation, Vorjahr über Stützwochen (Spielstart 1,3 → 0,5 s), Vorjahr auch für Volkskauf/FUNDUS, Formatzeilen aus dem Cockpit, Häuserleiste nach unten (Karte war auf dem iPhone nicht mehr antippbar); M7 unverändert gegenüber main |
 | Reise und Wochenabschluss 1 und 2 | – | gemergt | – |
 
+## Wurf 4: Referenzsortiment (Stand 25.10.2026)
+Aufträge `auftraege/wurf4/` (README mit Regeln und Daten). Reihenfolge: Q37 zuerst, Q38–Q41 parallel, rebasen auf Q37.
+
+| Auftrag | Inhalt | Stand |
+|---|---|---|
+| Q37 Musterfeld, Anlass, Freischaltungen | Musterfeld mit 16 Mustern + Trends, 28 Muster-Typen → Grundtyp + Muster, Kategorie Anlass (7 Unterkategorien), 112 Freischaltungen, Cargo-Dublette | offen |
+| Q38 Oberteile | 50 neue Typen | offen |
+| Q39 Unterteile und Kleider | 50 neue Typen | offen |
+| Q40 Jacken, Schuhe, Wäsche | 45 neue Typen | offen |
+| Q41 Accessoires, Taschen, Schmuck, Beauty | 50 neue Typen | offen |
+
 ## Operatives Paket
 | Workstream | Branch / PR | Status | Nächster Schritt |
 |---|---|---|---|
