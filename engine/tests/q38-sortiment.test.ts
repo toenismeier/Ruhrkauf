@@ -12,7 +12,7 @@ const CSV = readFileSync(join(__dirname, '../../auftraege/wurf4/daten/q38-typen.
   const s = z.split(';');
   return { typ: s[0], zielgruppen: s[3].split(','), preis: Number(s[7]) };
 });
-const VORHANDEN: Record<string, string> = { 'Baby-Tee': 'Babytee' };
+const VORHANDEN: Record<string, string> = { 'Baby-Tee': 'Babytee', Strickpullover: 'Strickpullover' };
 const ZG: Record<string, string> = { Teens: 'teens', 'Young Adults': 'young', Adults: 'adults' };
 const K = produktKatalog(neuesSpiel(1));
 
@@ -28,6 +28,7 @@ describe('Q38 Oberteile aus dem Referenzsortiment', () => {
     for (const z of CSV) {
       const t = K.typen.find((x) => x.typ === (VORHANDEN[z.typ] ?? z.typ))!;
       const soll = z.zielgruppen.map((g) => ZG[g]).sort();
+      if (VORHANDEN[z.typ]) { for (const g of soll) expect([z.typ, t.zielgruppen]).toEqual([z.typ, expect.arrayContaining([g])]); continue; }
       expect([z.typ, [...t.zielgruppen].sort()]).toEqual([z.typ, soll]);
     }
   });
@@ -56,7 +57,7 @@ describe('Q38 Oberteile aus dem Referenzsortiment', () => {
   test('Sortimentsbaum zeigt die neuen Oberteile unter ihrem Ast', () => {
     const typen = (k: string, u: string) => K.baum.find((a) => a.id === k)!.unterkategorien.find((x) => x.name === u)!.typen;
     expect(typen('oberteile', 'Tops')).toEqual(expect.arrayContaining(['Body', 'Tanktop', 'Bustier-Top']));
-    expect(typen('oberteile', 'Strick')).toEqual(expect.arrayContaining(['Strickpullover', 'V-Pullover']));
+    expect(typen('oberteile', 'Strick')).toEqual(expect.arrayContaining(['Netzstrickpullover', 'V-Pullover']));
     expect(typen('jacken', 'Westen')).toEqual(expect.arrayContaining(['Jeansweste', 'Weste', 'Kunstfellweste']));
   });
 });

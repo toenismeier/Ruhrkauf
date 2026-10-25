@@ -123,14 +123,6 @@ const DETAILS = {
   aermelstreifen(S, t, p, M) {
     for (const s of [1, -1]) { const G = aermelLang(M, p, s); aermelBand(t, G, s, 0.42, 0.06, p.streifen ?? '#c8372f'); aermelBand(t, G, s, 0.5, 0.035, '#f4f3ef'); }
   },
-  // Brustband (Strickpullover): breites Kontrastband quer über Brust und Ärmel, darunter feine Linie
-  brustband(S, t, p, M) {
-    const S2 = zweit(S, p.kontrast ?? 'olive', 'strick'), y0 = M.achselY + 4, y1 = y0 + 8;
-    const wx = (y) => 50 + (M.Sw - 1.2) + (M.Ww - M.Sw + 1.2) * Math.min(1, (y - M.achselY) / ((M.unten - M.achselY) * 0.45));
-    t.push(flaeche(S2, `M${f(100 - wx(y0))} ${y0} L${f(wx(y0))} ${y0} L${f(wx(y1))} ${y1} L${f(100 - wx(y1))} ${y1} Z`));
-    t.push(`<path d="M${f(100 - wx(y1 + 2))} ${y1 + 2} L${f(wx(y1 + 2))} ${y1 + 2}" stroke="#f4f3ef" stroke-width="1.4" opacity="0.92"/>`);
-    for (const s of [1, -1]) { const G = aermelLang(M, p, s); aermelBand(t, G, s, 0.3, 0.22, S2.c); aermelBand(t, G, s, 0.56, 0.045, '#f4f3ef'); }
-  },
   // Schulterknöpfe (Kurzarm-Strick): drei Knöpfe auf der linken Schulter
   schulterknoepfe(S, t, p, M) { for (let i = 0; i < 3; i++) t.push(knopf(57.6 + i * 2.6, M.oben + 1.2 + i * 0.9, S, 0.7)); },
   // Abnäher und Manschetten (Hemdbluse): Brustabnäher 18 lang, Manschette 5 hoch mit Knopf

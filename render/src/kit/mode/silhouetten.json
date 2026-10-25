@@ -6973,20 +6973,6 @@
       "model": "oberteil",
       "nur": "damen"
     },
-    "q38_strickpullover": {
-      "gruppe": "oberteil",
-      "standard": {
-        "basis": "oberteil",
-        "aermel": "lang",
-        "kragen": "rund",
-        "strick": true,
-        "rippbund": true,
-        "stoff": "rippstrick"
-      },
-      "material": "strick",
-      "farbe": "anthrazit",
-      "model": "oberteil"
-    },
     "q38_strickpolo": {
       "gruppe": "oberteil",
       "standard": {

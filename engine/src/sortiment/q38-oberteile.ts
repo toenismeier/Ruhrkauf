@@ -3,7 +3,7 @@
 // Bild aus render/src/kit/mode/erweiterung-q38.js (Silhouetten q38_*). Teens und Young Adults teilen sich das Gewicht „jung“, deshalb
 // trägt jeder Typ seine Zuordnung ausdrücklich in Q33_ZUORDNUNG ein; Adults über mitte ≥ 0,4, Best Ager bleiben außen vor (reif < 0,4,
 // die Referenz hat keine 50+-Ketten). „Baby-Tee“ ist als „Babytee“ schon im Sortiment (Q27): nicht doppelt angelegt, aber für
-// Teens und Young Adults freigeschaltet (unten).
+// Teens und Young Adults freigeschaltet (unten). „Strickpullover“ legt Q37 als Muster-Grundtyp an (Teens, Young, Adults).
 // Neue Typen hängen hinten an und nur an WGs, die schon Artikeltypen haben: Startsortiment und Kalibrierung bleiben unverändert.
 import { G, type ArtikelBild, type SortimentTyp } from './basis';
 import type { Material, ProduktKategorie, TypSaison, TrendGruppe } from '../produkte';
@@ -89,7 +89,6 @@ t('Lagenlook-Bluse', 'oberteile', D_BL, 'ganz', 28, ['Baumwolle', 'Merino', 'Vis
 // ───────────── Polos, Pullover, Strick
 t('Langarm-Poloshirt', 'oberteile', U, 'ganz', 21, BW, g(0.42), 1, 'q38_langarmpolo', P.polos);                 // 18,99
 t('Strickpolo', 'oberteile', H_ST, 'sommer', 33, STRICK, g(0.67), 2, 'q38_strickpolo', P.polos);                // 29,99
-t('Strickpullover', 'oberteile', U_ST, 'winter', 33, STRICK, g(0.55), 2, 'q38_strickpullover', P.strick);       // 29,99
 t('Kurzarm-Strickpullover', 'oberteile', D_ST, 'ganz', 24, FEIN, g(0.62), 2, 'q38_kurzarmstrick', P.strick);    // 21,49
 t('Off-Shoulder-Pullover', 'oberteile', D_ST, 'winter', 28, STRICK, g(0.25), 2, 'q38_offpulli', P.strick);      // 25,49
 t('Netzstrickpullover', 'oberteile', U_ST, 'ganz', 33, STRICK, g(0.29), 2, 'q38_netzstrick', P.strick);         // 29,99

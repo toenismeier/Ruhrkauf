@@ -49,7 +49,6 @@ export const SILHOUETTEN = {
   q38_lagenbluse: da({ aermel: 'ohne', kragen: 'v', strick: true, rippbund: true, armbuendchen: true, passform: 'tailliert', unter: 'bluse', unterFarbe: 'weiß' }, 'strick', 'schwarz',
     { modelTeile: (p, f, m) => [{ teil: 'oberteil', aermel: 'lang', kragen: true, knopfleiste: true, farbe: 'weiß', material: 'baumwolle' }, { teil: 'oberteil', aermel: 'ohne', ausschnitt: 'v', rippbund: true, farbe: f, material: m }] }),
   // ── Pullover und Strick
-  q38_strickpullover: ob({ aermel: 'lang', kragen: 'rund', strick: true, rippbund: true, stoff: 'rippstrick' }, 'strick', 'anthrazit'),
   q38_strickpolo: ob({ aermel: 'kurz', kragen: 'polo', passform: 'boxy', strick: true, rippbund: true, d: ['johnny'], kontrast: '#8a3f2a', kragenFarbe: '#8a3f2a' }, 'rippe', 'offwhite'),
   q38_kurzarmstrick: da({ aermel: 'kurz', kragen: 'stehkragen', passform: 'tailliert', strick: true, rippbund: true, d: ['schulterknoepfe'] }, 'merino', 'hellgrau'),
   q38_offpulli: da({ form: 'offpulli', aermel: 'lang', passform: 'oversize', laenge: 'kurz' }, 'strick', 'creme', { modelTeile: (p, f, m) => gleich(f, m, { teil: 'oberteil', aermel: 'lang', ausschnitt: 'offshoulder', passform: 'oversize', rippbund: true }) }),
