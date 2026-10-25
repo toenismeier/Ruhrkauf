@@ -27,3 +27,9 @@ Arbeitsweise je Typ:
 5. Model-Platz wie bisher.
 
 Abgabe je Paket: Kontaktbogen **Referenz | Zeichnung** je Typ in 320 px und 64 px als Datei an Ummo, Tabelle Formtreue im PR. **Merge erst nach Ummos Ok.** Bei Ok: `bildOffen` für diese Typen entfernen, Bundle neu, STATUS.
+
+## 3. Entscheidung Verfahren (Ummo 25.10.2026 nach B01-Bogen)
+**B, danach vtracer auf B.** Das Bildmodell (Qwen-Image-Edit-2509, eigener RunPod-Pod, Eingabe Originalfreisteller) liefert die saubere Zeichnung; vtracer macht daraus SVG, Flächen werden auf `stoff.js` gemappt und sind im Code umfärbbar (Farbe, Material, Musterfeld Q37). A (vtracer direkt aufs Foto) ist verworfen (unruhig, skizzenhaft).
+- B-Bilder erzeugt der Workstream-Chat für alle Pakete und legt sie privat ab: `toenismeier/hartwig-ref-p01-shirts-tops`, Ordner `bildpakete/<paket>/B/<typ>.png` (Eingabe in `bildpakete/<paket>/original/`). B01 liegt in `stiltest-b01/B/`.
+- Bild-Chat je Paket: vtracer auf B, Flächen den Stoffzonen zuordnen (Grundfarbe, Schatten, Licht, Kontur, Details wie Knöpfe/Schnallen als feste Farben), Kontur 1 Stärke wie B, Bodenschatten einheitlich, Model-Platz. Prüfung wie Abschnitt 2 (Formtreue ≥ 4 gegen Referenz, Geschwistertypen). Bogen je Typ **Referenz | B | SVG im Spiel (2 Farben)** an Ummo, Merge nur nach Ok.
+- B01 ist Stilreferenz, sobald Ummo die SVG-Fassung von B01 abnimmt.

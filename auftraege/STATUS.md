@@ -67,7 +67,7 @@ Aufträge `auftraege/wurf4/` (README mit Regeln und Daten). Reihenfolge: Q37 zue
 | Q39 Unterteile und Kleider | 50 neue Typen | offen |
 | Q40 Jacken, Schuhe, Wäsche | 45 neue Typen | offen |
 | Q41 Accessoires, Taschen, Schmuck, Beauty | 50 neue Typen | offen |
-| Bilder neu (B01–B30) | Ummo 25.10.: Q39-Bilder nicht abgenommen. Typen ja, Bilder neu nah an der Referenz, Pakete à 10, B01 = Stilpaket, Merge nur nach Ummos Ok (`wurf4/bilder-neu.md`, `daten/bildpakete.csv`) | offen |
+| Bilder neu (B01–B30) | Ummo 25.10.: Q39-Bilder nicht abgenommen. Typen ja, Bilder neu nah an der Referenz, Pakete à 10, B01 = Stilpaket, Merge nur nach Ummos Ok (`wurf4/bilder-neu.md`, `daten/bildpakete.csv`). Verfahren entschieden: Bildmodell (B) + vtracer auf B | B01 SVG-Fassung läuft |
 | Q42 Seltene Typen | 83 neue Typen, 35 Varianten (unter 3 Artikel, Ummo 25.10.); Start nach Merge Q37–Q41 | offen |
 
 ## Operatives Paket
