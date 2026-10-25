@@ -239,9 +239,12 @@ def deko_punkte():
         if abs(x - MX) > R or abs(z - MZ) > R: return
         out.append((DEKO[art], x, z, r.random() * 2 * math.pi if w is None else w))
     # OSM-Einzelbäume: an Straßen Platane/Linde, sonst gemischt
+    strassennah = prep(gehweg_aussen.buffer(2))
+    print('Deko: Einzelbäume …', flush=True)
     for x, z in osm['baeume']:
         if abs(x - MX) <= R and abs(z - MZ) <= R:
-            setz('strassenbaum' if gehweg_aussen.buffer(2).contains(Point(x, z)) else r.choice(['linde', 'kastanie', 'platane', 'birke']), x, z)
+            setz('strassenbaum' if strassennah.contains(Point(x, z)) else r.choice(['linde', 'kastanie', 'platane', 'birke']), x, z)
+    print('Deko: Parks …', flush=True)
     # Parks: Baumgruppen (Klumpen über Rauschen) mit offenen Wiesen, Nadelbäume eingestreut, Büsche am Rand und an Wegen
     def rauschen(x, z):
         return math.sin(x / 37.0) * math.cos(z / 29.0) + 0.6 * math.sin((x + z) / 19.0) + 0.4 * math.cos((x - 2 * z) / 23.0)
@@ -262,6 +265,7 @@ def deko_punkte():
                     setz(r.choice(art_mix), px, pz)
                 z += schritt
             x += schritt
+    print('Deko: Ränder, Möbel, Lauben …', flush=True)
     # Büsche entlang der Parkränder und Hecken an Höfen
     for flaeche, abstand, art in ((gruen, 3.2, 'busch'), (hof, 2.4, 'hecke')):
         if flaeche is None: continue
