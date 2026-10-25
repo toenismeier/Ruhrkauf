@@ -1,7 +1,7 @@
 # Wurf 4: Referenzsortiment ins Spiel (Q37–Q41, Claude-Chats)
 
 **Ummo 25.10.2026:** Neue Artikeltypen aus dem Realabgleich mit Bershka, Pull&Bear, Stradivarius, New Yorker und Viviry (7.454 Artikel, je Artikel ein Kontaktbogen, Auswertung Opus 5.5). Per Auswahl entschieden:
-- **Neue Typen ab 3 Artikeln** im Referenzsortiment: 195 Typen (Q38–Q41). Die 131 seltenen Typen legt Claude Ummo danach gesondert vor.
+- **Neue Typen ab 3 Artikeln** im Referenzsortiment: 195 Typen (Q38–Q41). Die 131 seltenen Typen: 83 neue Typen und 35 Varianten in Q42, 13 draußen.
 - **Alle 112 Freischaltungen** (Typ gibt es, Zielgruppe fehlt): Q37.
 - **Musterfeld kommt** (auch für spätere Lizenz-Kooperationen, z. B. Disney): Q37.
 - **Kategorie Anlass mit Unterkategorien** (eigene Eigenmarke möglich): Q37.
@@ -23,4 +23,4 @@
 - Abnahme: `npm test` in engine und render, Blindtest ≥ 95 %, Kontaktbogen aller neuen Bilder 64 px an Ummo, CI von Hand, selbst mergen, `auftraege/STATUS.md` nachziehen, App packen.
 
 ## Reihenfolge
-Q37 zuerst (Musterfeld ändert Typnamen), Q38–Q41 starten parallel und rebasen auf Q37, sobald gemergt.
+Q37 zuerst (Musterfeld ändert Typnamen), Q38–Q41 starten parallel und rebasen auf Q37, sobald gemergt. Q42 startet nach Merge von Q37–Q41.
