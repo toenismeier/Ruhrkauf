@@ -12,6 +12,8 @@ import { WG, WG_DEF, entferneMarkeAusFreigaben, type WgId } from './einkauf';
 export type EmAlter = '10-13' | '13-17' | '18-29' | '30-49' | '50+' | '70+';
 export type EmGeschlecht = 'damen' | 'herren' | 'unisex' | 'kinder';
 export type EmKategorie = 'Bekleidung' | 'Schuhe' | 'Wäsche' | 'Accessoires' | 'Home' | 'Beauty';
+export type EmSchwerpunkt = 'anlass';
+export const EM_SCHWERPUNKTE: Record<EmSchwerpunkt, string> = { anlass: 'Anlass und Festmode' };
 export type Preislage = 'einstieg' | 'mitte' | 'gehoben';
 export type Stil = 'klassisch' | 'modern' | 'sportlich' | 'trendig';
 export type Beschaffung = 'fernost' | 'nahost' | 'europa';
@@ -40,6 +42,8 @@ export interface Eigenmarke {
   wgAnteile: Record<WgId, number>;
   /** Wirksamer Anteil je WG (nähert sich dem Ziel um 3 Punkte je Woche). */
   wgIst: Record<WgId, number>;
+  /** Q37: Schwerpunkt der Marke (Anlass und Festmode); ohne Angabe ein normales Sortiment. */
+  schwerpunkt?: EmSchwerpunkt;
   /** Geplante Positionierung während einer Neupositionierung. */
   neu?: Partial<Pick<Eigenmarke, 'name' | 'zielgruppe' | 'preislage' | 'stil' | 'qualitaet'>>;
 }
@@ -57,6 +61,7 @@ export interface EigenmarkeEntwurf {
   beschaffung: Beschaffung;
   budgetWoche: number;
   wgAnteile: Record<WgId, number>;
+  schwerpunkt?: EmSchwerpunkt;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -97,6 +102,7 @@ export const EM_VORLAGEN: { titel: string; entwurf: Omit<EigenmarkeEntwurf, 'nam
   { titel: '50 plus Herren', entwurf: { zielgruppe: { alter: '50+', geschlecht: 'herren' }, kategorie: 'Bekleidung', preislage: 'mitte', stil: 'modern', qualitaet: 3, beschaffung: 'nahost' }, wgs: ['herren.casual', 'herren.hemden', 'herren.hosen', 'herren.strick'] },
   { titel: 'Schuhe', entwurf: { zielgruppe: { alter: '30-49', geschlecht: 'unisex' }, kategorie: 'Schuhe', preislage: 'mitte', stil: 'klassisch', qualitaet: 3, beschaffung: 'europa' }, wgs: ['accessoires.damenschuhe', 'accessoires.herrenschuhe', 'kinder.schuhe'] },
   { titel: 'Teens und Tweens', entwurf: { zielgruppe: { alter: '13-17', geschlecht: 'unisex' }, kategorie: 'Bekleidung', preislage: 'einstieg', stil: 'trendig', qualitaet: 2, beschaffung: 'fernost' }, wgs: ['damen.young', 'kinder.maedchen', 'kinder.jungen'] },
+  { titel: 'Anlass und Festmode', entwurf: { zielgruppe: { alter: '18-29', geschlecht: 'unisex' }, kategorie: 'Bekleidung', preislage: 'mitte', stil: 'modern', qualitaet: 3, beschaffung: 'nahost', schwerpunkt: 'anlass' }, wgs: ['damen.kleider', 'damen.young', 'herren.business', 'damen.blusen'] },
   { titel: 'Young Adults', entwurf: { zielgruppe: { alter: '18-29', geschlecht: 'unisex' }, kategorie: 'Bekleidung', preislage: 'einstieg', stil: 'trendig', qualitaet: 2, beschaffung: 'fernost' }, wgs: ['damen.young', 'damen.denim', 'herren.casual', 'sporttextil.freizeit'] },
 ];
 
@@ -283,6 +289,7 @@ export function eigenmarkeGruenden(s: GameState, e: EigenmarkeEntwurf, kosten: (
     preislage: e.preislage, stil: e.stil, qualitaet: q, beschaffung: e.beschaffung, budgetWoche: Math.max(0, eur(e.budgetWoche)),
     bekanntheit: 10, stilAktualitaet: 100, status: 'aufbau', bis: s.woche + wochen, seit: s.woche, gewachsen: false,
     wgAnteile: Object.fromEntries(wgs), wgIst: {},
+    ...(e.schwerpunkt && EM_SCHWERPUNKTE[e.schwerpunkt] ? { schwerpunkt: e.schwerpunkt } : {}),
   };
   s.eigenmarken.marken.push(m);
   const ueber = s.eigenmarken.marken.filter((x) => x.status !== 'eingestellt').length > emKapazitaet(s);
@@ -354,6 +361,8 @@ const FARBEN = ['#8c5a7a', '#2f4a6b', '#6f8f4e', '#d9822b', '#7a3e3e', '#3e7a74'
 export interface MarkenKarte {
   id: string; name: string; farbe: string; status: EmStatus; bis?: number; gewachsen: boolean;
   zielgruppe: Zielgruppe; zielgruppeText: string; kategorie: EmKategorie; preislage: Preislage; stil: Stil; qualitaet: number;
+  /** Q37: Schwerpunkt (Anlass und Festmode). */
+  schwerpunkt?: EmSchwerpunkt; schwerpunktName?: string;
   beschaffung: Beschaffung; beschaffungName: string; vorlaufWochen: number; mindestabnahme: number;
   budgetWoche: number; bekanntheit: number; stilAktualitaet: number; attraktivitaet: number;
   umsatz13: number; umsatzAnteil: number; rohertrag13: number; rohertragsquote: number; mehrmarge: number;
@@ -415,6 +424,7 @@ export function markenKarte(s: GameState, m: Eigenmarke): MarkenKarte {
     id: m.id, name: m.name, farbe: m.farbe, status: m.status, bis: m.bis, gewachsen: m.gewachsen,
     zielgruppe: { ...m.zielgruppe }, zielgruppeText: `${ZIELGRUPPEN_TEXT[m.zielgruppe.alter]}, ${m.zielgruppe.geschlecht}`,
     kategorie: m.kategorie, preislage: m.preislage, stil: m.stil, qualitaet: m.qualitaet,
+    ...(m.schwerpunkt ? { schwerpunkt: m.schwerpunkt, schwerpunktName: EM_SCHWERPUNKTE[m.schwerpunkt] } : {}),
     beschaffung: m.beschaffung, beschaffungName: BESCHAFFUNG[m.beschaffung].name, vorlaufWochen: BESCHAFFUNG[m.beschaffung].vorlauf, mindestabnahme: BESCHAFFUNG[m.beschaffung].mindestabnahme,
     budgetWoche: m.budgetWoche, bekanntheit: Math.round(m.bekanntheit), stilAktualitaet: Math.round(m.stilAktualitaet),
     attraktivitaet: Math.round(attraktivitaetSchnitt(s, m) * 100) / 100,

@@ -1,4 +1,4 @@
-# Status aller Workstreams (Stand 23.10.2026)
+# Status aller Workstreams (Stand 25.10.2026)
 
 Legende: **abnahmefähig** = PR offen, GPT fertig, wartet auf Claudes lokale Prüfung und Merge · **in Arbeit** = Branch ohne PR, GPT arbeitet · **offen** = nicht gestartet · **gemergt** = in `main`.
 Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
@@ -62,7 +62,7 @@ Aufträge `auftraege/wurf4/` (README mit Regeln und Daten). Reihenfolge: Q37 zue
 
 | Auftrag | Inhalt | Stand |
 |---|---|---|
-| Q37 Musterfeld, Anlass, Freischaltungen | Musterfeld mit 16 Mustern + Trends, 28 Muster-Typen → Grundtyp + Muster, Kategorie Anlass (7 Unterkategorien), 112 Freischaltungen, Cargo-Dublette | offen |
+| Q37 Musterfeld, Anlass, Freischaltungen | Musterfeld mit 16 Mustern + Trends, 28 Muster-Typen → Grundtyp + Muster, Kategorie Anlass (7 Unterkategorien), 112 Freischaltungen, Cargo-Dublette | **gemergt 25.10.** (`feat/q37-musterfeld-anlass`): `engine/src/muster.ts` (16 Muster, Lizenzmotiv gesperrt, Trend je Muster × Saison × Zielgruppe aus `muster-anteile.csv`, erlaubte Muster je Typ), `engine/src/anlass.ts` (Ast „Anlass“, Saisonspitzen, Schwerpunkt Anlass für Eigenmarken, Vorlage „Anlass und Festmode“), `sortiment/q37-muster.ts` (28 Typen aufgelöst, neue Grundtypen Faltenrock, Midirock, Strickpullover; Cargohose → Cargo-Hose), `sortiment/q37-zielgruppen.ts` (112 Freischaltungen, Test je Zeile), Migration alter Spielstände `migriereQ37` (Test 52 Wochen). Typen 643 → 617; je Zielgruppe vorher/nachher: Kinder 190/189, Teens 253/327, Young 420/420, Adults 398/412, Best Ager 344/338. Bilder `render/src/kit/mode/q37-muster.js`, Blindtest 41/42 (98 %), Bogen `bilder/q37-muster.png`. M7 identisch mit main, Engine 429 Tests, render npm test grün. Q38–Q41: rebasen, neue Typen ohne Muster im Namen |
 | Q38 Oberteile | 50 neue Typen | offen |
 | Q39 Unterteile und Kleider | 50 neue Typen | offen |
 | Q40 Jacken, Schuhe, Wäsche | 45 neue Typen | offen |

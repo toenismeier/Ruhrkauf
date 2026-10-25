@@ -1832,6 +1832,8 @@ async function spielFortsetzen(platz = 'autosave') {
     if (!s.organisation) E.bildeHauscluster(s);
     // O04: alte Spielstände ohne Personalplanung deterministisch migrieren.
     if (!s.personaleinsatz || s.haeuser.some((h) => !h.personaleinsatz)) E.initialisierePersonaleinsatz(s);
+    // Q37: Produkte aufgelöster Muster-Typen (Karohemd usw.) auf Grundtyp plus Muster umschreiben.
+    E.migriereQ37?.(s);
     postUi = { gelesen: d.ui?.gelesen ?? [], reiter: d.ui?.reiter ?? 'handeln', reiseZuletzt: d.ui?.reiseZuletzt ?? [] };
     if (!Array.isArray(postUi.gelesen)) postUi.gelesen = [];
     schwierigkeitId = s.schwierigkeit ?? 'mittel';
