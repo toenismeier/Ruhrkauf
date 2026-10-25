@@ -101,8 +101,8 @@ export function vorstandModul(ctx) {
       r += `<section class="hw-vorlage-block"><h3 class="hw-vorlage-titel">${esc(e.titel)}</h3>`
         + (roh?.text ? `<p class="hw-vorlage-text">${esc(roh.text)}</p>` : '')
         + `<span class="hw-marke hw-feldname">Frist</span><p class="hw-vorlage-frist">${esc(wocheText(st, e.frist))}</p>`
-        + K.feld('Vorschlag', K.stepper({ wert: m ? m[1] : (o?.label ?? ''), unter: m ? m[2] : '', label: 'Vorschlag wählen',
-          attrMinus: `data-a="wahl" data-v="${esc(e.id)}" data-o="${i - 1}"`, attrPlus: `data-a="wahl" data-v="${esc(e.id)}" data-o="${i + 1}"`, minusAus: i <= 0, plusAus: i >= opt.length - 1 }))
+        + K.feld('Beschluss', K.seg(opt.map((x, k) => [k, (/^(.*?)\s*\(/.exec(x.label)?.[1] ?? x.label)]), i, (k) => `data-a="wahl" data-v="${esc(e.id)}" data-o="${k}"`))
+        + `<span class="hw-marke hw-feldname hw-vorlage-kostenname">Kosten</span><p class="hw-vorlage-kosten">${esc(m ? m[2] : 'keine')}</p>`
         + `<div class="hw-knoepfe hw-mitte">${K.knopf('Abstimmen', `data-a="entscheiden" data-v="${esc(e.id)}" data-o="${esc(o?.id ?? '')}"`)}</div></section>`;
     }
     r += K.gross([{ label: 'Vorstand besetzt', wert: besetzt, p: 'u:besetzt', ton: frei.length ? 'schlecht' : '' },

@@ -23,7 +23,7 @@ const ohneAnimation = () => new URLSearchParams(location.search).has('ohne-anima
 const warten = (ms) => new Promise((r) => setTimeout(r, ms));
 const KATEGORIE = ['Presse', 'Konkurrenz'];
 /** Kopf eines Vollbild-Blatts (gleiche Lagen wie #panel.hw). */
-const blattKopf = (symbol, titel, unter, zu) => `<div class="hw-grund"></div><header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">${K.illustration(symbol) || K.SYMBOLE[symbol] || ''}</span><h2 class="hw-kopf-titel" tabindex="-1">${esc(titel)}</h2><div class="hw-kopf-unter">${esc(unter)}</div>${zu}</header>`;
+const blattKopf = (symbol, titel, unter, zu) => `<div class="hw-grund"></div><header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">${symbol === 'logo' ? K.LOGO : K.illustration(symbol) || K.SYMBOLE[symbol] || ''}</span><h2 class="hw-kopf-titel" tabindex="-1">${esc(titel)}</h2><div class="hw-kopf-unter">${esc(unter)}</div>${zu}</header>`;
 export function wochenberichtModul(ctx) {
   const node = document.createElement('div'); node.id = 'wochen-overlay'; node.hidden = true; document.body.append(node);
   let status = 'zu', token = 0, bericht = null, vorfall = 0, start = 0, bestaetigt = null, zaehlRaf = 0;
@@ -137,7 +137,7 @@ export function wochenberichtModul(ctx) {
       { label: 'EBITDA der Woche', wert: '0 €', p: 'wb:ebitda', ton: bericht.ebitda < 0 ? 'schlecht' : 'gut', unter: delta(bericht.ebitda, bericht.ebitdaVor) }])
       + kapital + insolvenz + offen) + presse + K.rumpf(erfolge + K.knoepfe(K.knopf(bericht.vorgaenge.length ? 'Weiter zu den Vorgängen' : 'Zurück zur Stadt', 'data-wa="schliessen"', 'breit')));
     node.innerHTML = '<section class="hw hw-blatt hw-wb" data-bereich="zentrale" data-wb="bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis">'
-      + blattKopf('finanzen', 'Wochenergebnis', 'KW ' + bericht.kw + ' / ' + bericht.jahr, '<button type="button" class="hw-zu" data-wa="schliessen" aria-label="Bericht schließen"></button>')
+      + blattKopf('logo', 'Wochenergebnis', 'KW ' + bericht.kw + ' / ' + bericht.jahr, '<button type="button" class="hw-zu" data-wa="schliessen" aria-label="Bericht schließen"></button>')
       + sprecher + '<div class="hw-inhalt">' + inhalt + '</div><div id="wb-vorfall"></div></section>';
     for (const [p, id, wert] of [['wb:umsatz', 'wb-umsatz', bericht.umsatz], ['wb:ebitda', 'wb-ebitda', bericht.ebitda]]) {
       const el = node.querySelector(`[data-p="${p}"]`); if (el) { el.id = id; el.dataset.wert = wert; }

@@ -14,7 +14,7 @@
   --hw-t-text: 500 var(--hw-gr-text, 11.85px)/1.3 var(--hw-schrift);         /* Sprecher, Bedienbeschriftung */
   --hw-t-lese: 400 var(--hw-gr-lese, 10.6px)/12px var(--hw-schrift);      /* Fließtext in Karten */
   --hw-t-marke: 300 var(--hw-gr-marke, 11.8px)/1.2 var(--hw-schrift);       /* VERSALIEN-Beschriftung, dünn */
-  --hw-t-zahl: 400 var(--hw-gr-zahl, 24.75px)/1 var(--hw-schrift);           /* Großkennzahl */
+  --hw-t-zahl: 500 var(--hw-gr-zahl, 24.75px)/1 var(--hw-schrift);           /* Großkennzahl */
   --hw-t-wert: 400 var(--hw-gr-wert, 18.3px)/1 var(--hw-schrift);        /* Wert neben Skala */
   --hw-t-klein: 400 var(--hw-gr-klein, 10.4px)/1.2 var(--hw-schrift);     /* Abweichung, Reiter */
   --hw-kontur-abstand: 2.33px;  /* Abstand der hellen Innenkontur zur Kante */
@@ -1307,3 +1307,32 @@ body.spielende-aktiv { overflow: hidden; }
 #panel.hw .hw-fin-schalter .hw-segment + .hw-segment { margin-top: -7px; }
 /* Viele kurze Optionen (Formate, Ampel, Posteingang): enger, ohne Versalien, damit fünf bis sechs Teile passen. */
 #panel.hw .hw-rumpf .hw-segment.eng:not(:has(img)) > button, #panel.hw .hw-rumpf .hw-segment:not(:has(img)):has(> button:nth-child(5)) > button { padding: 0 7px; letter-spacing: 0; text-transform: none; font-size: 11.85px; }
+/* Säulenpaare im Spiel: obere Spur (positive Werte, gemeinsame Skala), bei Verlusten eine Nulllinie und ein Band nach unten. */
+.hw-balkenfeld .hw-balken > div { flex-direction: column; align-items: center; justify-content: flex-end; gap: 0 !important; }
+.hw-balkenfeld .hw-balken > div > span { display: flex; gap: 9px; width: 100%; justify-content: center; }
+.hw-balkenfeld .hw-balken > div > .o { flex: 1 1 auto; align-items: flex-end; }
+.hw-balkenfeld.mit-neg .hw-balken > div > .o { flex: 0 0 76%; }
+.hw-balkenfeld.mit-neg .hw-balken > div > .u { flex: 0 0 24%; align-items: flex-start; border-top: 1.33px solid color-mix(in srgb, var(--text) 55%, transparent); }
+.hw-balkenfeld .hw-balken i.leer { visibility: hidden; height: 0; }
+.hw-balkenfeld .hw-balken .u i { border-radius: 0 0 7.5px 7.5px; }
+.hw-balkenfeld .hw-balken .geist i { opacity: .16; }
+.hw-fin-einheit { margin: 0 0 14px; text-align: right; font: var(--hw-t-klein); color: var(--leise); }
+/* Feste Spalten durch alle Abschnitte (Coffee): Wertespalten je 74 px, Summenlinie nur unter den Werten. */
+.hw-fin-tabellen .hw-tabelle { table-layout: fixed; }
+.hw-fin-tabellen .hw-tabelle th + th, .hw-fin-tabellen .hw-tabelle td + td { width: 74px; padding-left: 0; }
+.hw-fin-tabellen .hw-tabelle th:first-child { width: auto; }
+.hw-vorlage-frist, .hw-vorlage-kosten { margin: 3px 0 18px; font: var(--hw-t-wert); font-weight: 500; }
+.hw-vorlage-kostenname { display: block; margin-top: 18px; }
+#panel.hw .hw-rumpf .hw-vorlage-block .hw-segment { margin-left: 0; margin-right: 0; }
+/* Zeitungskarte: ein Innenrand für alle Teile (Coffee ca. 23 px), Kopf als schmale Antiqua. */
+.zk { padding: 22px 0 8px; }
+.zk-titel { margin: 0 22px; font: 700 29px/1 'Bodoni 72', 'Didot', 'Bodoni MT', 'Times New Roman', Georgia, serif; letter-spacing: -.01em; transform: scaleX(.86); }
+.zk-datum { margin: 6px 22px 0; }
+.zk-reiter { margin: 0 22px; padding: 12px 0; }
+.zk-spalten { margin: 0 22px; }
+.zk-spalte { padding: 12px 10px 0 0; }
+.zk-spalte + .zk-spalte { padding: 12px 0 0 10px; }
+.zk-bild > svg rect:first-child { fill: transparent; }
+#panel.hw .hw-rumpf .hw-segment:not(:has(img)):has(> button:nth-child(6)) > button { padding: 0 5px; font-size: 10.4px; }
+.hw-fin-tabellen .hw-tabelle th + th { white-space: normal; font-size: 13.2px; line-height: 1.15; vertical-align: bottom; }
+.hw-fin-tabellen .hw-tabelle td + td { overflow: hidden; text-overflow: clip; }

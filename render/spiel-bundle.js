@@ -161309,11 +161309,16 @@ void main() {
     return `<div class="hw-gross" style="--n:${werte3.length}">${werte3.map((w2) => `<div><span class="hw-marke">${esc(w2.label)}</span><b class="hw-zahl${w2.ton ? " hw-" + w2.ton : ""}"${w2.p ? ` data-p="${esc(w2.p)}"` : ""}>${esc(w2.wert)}</b>${w2.unter ? `<span class="hw-abw">${w2.unter}</span>` : ""}</div>`).join("")}</div>`;
   }
   function balken6(reihen, legende = []) {
-    if (reihen.length < 2) return leer3("Ein Verlauf ist ab der zweiten Woche verf\xFCgbar.");
-    const max = Math.max(1, ...reihen.flatMap((r4) => [Math.abs(r4.a ?? 0), Math.abs(r4.b ?? 0)]));
-    const h4 = (v2) => `${Math.max(2, Math.round(Math.abs(v2) / max * 100))}%`;
-    const saeule3 = (v2, k5) => v2 == null ? "" : `<i class="${k5}${v2 < 0 ? " neg" : ""}${v2 === 0 ? " null" : ""}" style="height:${h4(v2)}" data-w="${Math.round(v2)}"></i>`;
-    return `<div class="hw-balkenfeld"><div class="hw-balken" style="--hoehe:100px" role="img" aria-label="${esc(legende.join(" und "))}">${reihen.map((r4) => `<div>${saeule3(r4.a, "a")}${saeule3(r4.b, "b")}</div>`).join("")}</div><div class="hw-balkenfuss">${reihen.map((r4) => `<span>${esc(r4.label)}</span>`).join("")}</div>` + (legende.length ? `<div class="hw-legende">${legende.map((l, i) => `<span><i class="${i ? "b" : ""}"></i>${esc(l)}</span>`).join("")}</div>` : "") + "</div>";
+    const echt = reihen.filter((r4) => !r4.geist);
+    if (echt.length < 1) return leer3("Ein Verlauf ist ab der ersten Woche verf\xFCgbar.");
+    const werte3 = echt.flatMap((r4) => [r4.a, r4.b]).filter((v2) => v2 != null);
+    const maxPos = Math.max(1, ...werte3.map((v2) => Math.max(0, v2))), maxNeg = Math.max(0, ...werte3.map((v2) => Math.max(0, -v2)));
+    const mitNeg = maxNeg > 0;
+    const hoch = (v2) => v2 > 0 ? `${Math.max(2, Math.round(v2 / maxPos * 100))}%` : "0";
+    const tief2 = (v2) => v2 < 0 ? `${Math.max(8, Math.round(-v2 / maxNeg * 100))}%` : "0";
+    const saeule3 = (v2, k5, h4) => v2 == null ? '<i class="leer"></i>' : `<i class="${k5}${v2 < 0 ? " neg" : ""}" style="height:${h4(v2)}"${h4 === hoch ? ` data-w="${Math.round(v2)}"` : ""}></i>`;
+    const spalte = (r4) => r4.geist ? '<div class="geist"><span class="o"><i class="a" style="height:55%"></i><i class="b" style="height:25%"></i></span>' + (mitNeg ? '<span class="u"></span>' : "") + "</div>" : `<div><span class="o">${saeule3(r4.a, "a", hoch)}${saeule3(r4.b, "b", hoch)}</span>${mitNeg ? `<span class="u">${saeule3(r4.a, "a", tief2)}${saeule3(r4.b, "b", tief2)}</span>` : ""}</div>`;
+    return `<div class="hw-balkenfeld${mitNeg ? " mit-neg" : ""}"><div class="hw-balken" style="--hoehe:100px" role="img" aria-label="${esc(legende.join(" und "))}">${reihen.map(spalte).join("")}</div><div class="hw-balkenfuss">${reihen.map((r4) => `<span>${esc(r4.label)}</span>`).join("")}</div>` + (legende.length ? `<div class="hw-legende">${legende.map((l, i) => `<span><i class="${i ? "b" : ""}"></i>${esc(l)}</span>`).join("")}</div>` : "") + "</div>";
   }
   function tabelle({ titel = "", spalten: spalten2 = [], zeilen, summe: summe2 = null, pruefen: pruefen2 = false }) {
     const zelle3 = (t5, roh2, ton3) => `<td class="${ton3 ?? ""}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${esc(t5)}</td>`;
@@ -161376,6 +161381,7 @@ void main() {
     zahlen: svg(quader(-4, -1, 0, 2, 2, 3, WEISS4) + quader(-1, -1, 0, 2, 2, 6, WEISS4) + quader(2, -1, 0, 2, 2, 4.4, GRUEN))
   };
   var ILLUSTRATIONEN_ROH = ILLUSTRATIONEN;
+  var LOGO = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="3" y="3" width="34" height="34" rx="7" fill="#c8312b"/><path d="M13 11h4.4v7h5.2v-7H27v18h-4.4v-7.2h-5.2V29H13z" fill="#fff"/></svg>';
   var illustration = (name2, klasse = "hw-ill") => {
     const i = ILLUSTRATIONEN[name2];
     return i ? `<img class="${klasse}" src="${i.u}" width="${i.b}" height="${i.h}" alt="" decoding="async">` : "";
@@ -161495,7 +161501,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "bc8bc08" : "Entwicklung";
+  var version = () => true ? "5a714f3" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -161579,11 +161585,11 @@ void main() {
   var fmt = new Intl.NumberFormat("de-DE");
   function geld(x2) {
     const a2 = Math.abs(x2), v2 = x2 < 0 ? "\u2212" : "";
-    if (einstellung("zahlen") === "voll") return `${v2}${fmt.format(Math.round(a2))} \u20AC`;
-    if (a2 >= 1e9) return `${v2}${(a2 / 1e9).toLocaleString("de-DE", { maximumFractionDigits: 2 })} Mrd. \u20AC`;
-    if (a2 >= 1e6) return `${v2}${(a2 / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1 })} Mio. \u20AC`;
-    if (a2 >= 1e4) return `${v2}${fmt.format(Math.round(a2 / 1e3))} Tsd. \u20AC`;
-    return `${v2}${fmt.format(Math.round(a2))} \u20AC`;
+    if (einstellung("zahlen") === "voll") return `${v2}${fmt.format(Math.round(a2))}\xA0\u20AC`;
+    if (a2 >= 1e9) return `${v2}${(a2 / 1e9).toLocaleString("de-DE", { maximumFractionDigits: 2 })}\xA0Mrd.\xA0\u20AC`;
+    if (a2 >= 1e6) return `${v2}${(a2 / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1 })}\xA0Mio.\xA0\u20AC`;
+    if (a2 >= 1e4) return `${v2}${fmt.format(Math.round(a2 / 1e3))}\xA0Tsd.\xA0\u20AC`;
+    return `${v2}${fmt.format(Math.round(a2))}\xA0\u20AC`;
   }
   var pz3 = (x2, n3 = 0) => `${(x2 * 100).toLocaleString("de-DE", { minimumFractionDigits: n3, maximumFractionDigits: n3 })} %`;
   var dez = (x2, n3 = 1) => (x2 ?? 0).toLocaleString("de-DE", { minimumFractionDigits: n3, maximumFractionDigits: n3 });
@@ -162335,15 +162341,7 @@ void main() {
         const i = Math.max(0, Math.min(opt.length - 1, ui.wahl[e.id] ?? 0));
         const o4 = opt[i];
         const m = /^(.*?)\s*\(([^)]*)\)\s*$/.exec(o4?.label ?? "");
-        r4 += `<section class="hw-vorlage-block"><h3 class="hw-vorlage-titel">${esc(e.titel)}</h3>` + (roh2?.text ? `<p class="hw-vorlage-text">${esc(roh2.text)}</p>` : "") + `<span class="hw-marke hw-feldname">Frist</span><p class="hw-vorlage-frist">${esc(wocheText(st2, e.frist))}</p>` + feld("Vorschlag", stepper({
-          wert: m ? m[1] : o4?.label ?? "",
-          unter: m ? m[2] : "",
-          label: "Vorschlag w\xE4hlen",
-          attrMinus: `data-a="wahl" data-v="${esc(e.id)}" data-o="${i - 1}"`,
-          attrPlus: `data-a="wahl" data-v="${esc(e.id)}" data-o="${i + 1}"`,
-          minusAus: i <= 0,
-          plusAus: i >= opt.length - 1
-        })) + `<div class="hw-knoepfe hw-mitte">${knopf("Abstimmen", `data-a="entscheiden" data-v="${esc(e.id)}" data-o="${esc(o4?.id ?? "")}"`)}</div></section>`;
+        r4 += `<section class="hw-vorlage-block"><h3 class="hw-vorlage-titel">${esc(e.titel)}</h3>` + (roh2?.text ? `<p class="hw-vorlage-text">${esc(roh2.text)}</p>` : "") + `<span class="hw-marke hw-feldname">Frist</span><p class="hw-vorlage-frist">${esc(wocheText(st2, e.frist))}</p>` + feld("Beschluss", seg(opt.map((x2, k5) => [k5, /^(.*?)\s*\(/.exec(x2.label)?.[1] ?? x2.label]), i, (k5) => `data-a="wahl" data-v="${esc(e.id)}" data-o="${k5}"`)) + `<span class="hw-marke hw-feldname hw-vorlage-kostenname">Kosten</span><p class="hw-vorlage-kosten">${esc(m ? m[2] : "keine")}</p><div class="hw-knoepfe hw-mitte">${knopf("Abstimmen", `data-a="entscheiden" data-v="${esc(e.id)}" data-o="${esc(o4?.id ?? "")}"`)}</div></section>`;
       }
       r4 += gross2([
         { label: "Vorstand besetzt", wert: besetzt, p: "u:besetzt", ton: frei6.length ? "schlecht" : "" },
@@ -164147,10 +164145,11 @@ void main() {
     const p2 = ps[ps.length - 1], v2 = ps[ps.length - 2] ?? null, fuenf = ps.slice(-5);
     const zeitWort = { woche: "Woche", quartal: "Quartal", jahr: "Jahr" }[ui.zeit];
     const spalten2 = [v2?.label, p2.label + (p2.laufend ? " bisher" : "")].filter(Boolean);
+    const einheit = '<p class="hw-fin-einheit">Betr\xE4ge in Mio. \u20AC</p>';
     const zwei = (f13) => [v2, p2].filter(Boolean).map(f13);
-    const reihe2 = (name2, f13, ton3 = null) => ({ name: name2, werte: zwei((q3) => Math.abs(f13(q3)) < 5e4 ? "" : mio3(f13(q3))), roh: zwei((q3) => Math.round(f13(q3))), ...ton3 ? { ton: zwei((q3) => ton3(f13(q3))) } : {} });
+    const reihe2 = (name2, f13, ton3 = null) => ({ name: name2, werte: zwei((q3) => mio3(f13(q3))), roh: zwei((q3) => Math.round(f13(q3))), ...ton3 ? { ton: zwei((q3) => ton3(f13(q3))) } : {} });
     const vorz = (x2) => x2 < 0 ? "schlecht" : "";
-    const tabelle3 = (titel, zeilen, summe2, mitKopf = false) => tabelle({ titel, spalten: mitKopf ? spalten2 : [], zeilen, summe: summe2, pruefen: true });
+    const tabelle3 = (titel, zeilen, summe2, mitKopf = false) => tabelle({ titel, spalten: mitKopf ? spalten2 : v2 ? ["", ""] : [""], zeilen, summe: summe2, pruefen: true });
     let gross3, saeulen, legende, tabellen, befund3;
     if (ui.art === "guv") {
       gross3 = [
@@ -164161,7 +164160,7 @@ void main() {
       legende = ["Umsatz", "EBITDA"];
       tabellen = tabelle3("Umsatz", [reihe2("Umsatz", (q3) => q3.umsatz), reihe2("Wareneinsatz und Abschriften", (q3) => -q3.wareneinsatz)], reihe2("Rohertrag", (q3) => q3.rohertrag), true) + tabelle3("Ertr\xE4ge", ERTRAEGE.map(([f13, n3]) => reihe2(n3, (q3) => q3[f13])), reihe2("Ertr\xE4ge gesamt", (q3) => q3.ertraege)) + tabelle3("Kosten", KOSTEN3.map(([f13, n3]) => reihe2(n3, (q3) => -q3[f13])), reihe2("Kosten gesamt", (q3) => -q3.kosten)) + tabelle3("Ergebnis", [reihe2("Rohertrag", (q3) => q3.rohertrag), reihe2("Ertr\xE4ge", (q3) => q3.ertraege), reihe2("Kosten", (q3) => -q3.kosten)], reihe2("EBITDA", (q3) => q3.ebitda, vorz)) + tabelle3("", [reihe2("EBITDA", (q3) => q3.ebitda), reihe2("Sondereffekte", (q3) => q3.sondereffekte)], reihe2("Ergebnis", (q3) => q3.ergebnis, vorz));
       const groesster = KOSTEN3.map(([f13, n3]) => [n3, p2[f13] - (v2?.[f13] ?? p2[f13])]).sort((a2, b4) => b4[1] - a2[1])[0];
-      befund3 = p2.ebitda < 0 ? `<b>EBITDA ${geld(p2.ebitda)} im ${zeitWort === "Jahr" ? "Jahr" : zeitWort === "Quartal" ? "Quartal" : "Wochenabschluss"}.</b>${groesster && groesster[1] > 0 ? ` ${groesster[0]} stieg um ${geld(groesster[1])}.` : ""}` : `<b>EBITDA ${geld(p2.ebitda)}${v2 ? `, ${p2.ebitda >= v2.ebitda ? "mehr" : "weniger"} als ${ui.zeit === "woche" ? "in der Vorwoche" : "in der Vorperiode"}` : ""}.</b>`;
+      befund3 = p2.ebitda < 0 ? `<b>EBITDA ${geld(p2.ebitda)} im ${zeitWort === "Jahr" ? "Jahr" : zeitWort === "Quartal" ? "Quartal" : "Wochenabschluss"}.</b>${groesster && groesster[1] > 0 ? ` Gr\xF6\xDFter Kostenanstieg: ${groesster[0]} +${geld(groesster[1])}.` : ""}` : `<b>EBITDA ${geld(p2.ebitda)}${v2 ? `, ${p2.ebitda >= v2.ebitda ? "mehr" : "weniger"} als ${ui.zeit === "woche" ? "in der Vorwoche" : "in der Vorperiode"}` : ""}.</b>`;
     } else if (ui.art === "bilanz") {
       gross3 = [
         { label: "Verm\xF6gen", wert: geld(p2.vermoegen), unter: delta(p2.vermoegen, v2?.vermoegen) },
@@ -164186,7 +164185,7 @@ void main() {
       tabellen = p2.mitFluss ? tabelle3("Zahlungen", FLUSS.map(([f13, n3]) => reihe2(n3, (q3) => q3.fluss[f13])), reihe2("Kassen\xE4nderung", (q3) => q3.fluss.netto, vorz), true) + liste([zeile({ was: "Kasse am Ende", wert: geld(p2.cash), ton: p2.cash < 0 ? "schlecht" : "" }), zeile({ was: "Freie Kreditlinie", wert: geld(p2.kreditFrei), ton: p2.kreditFrei < 0 ? "schlecht" : "" })]) : leer3("Der Kapitalfluss wird ab dem n\xE4chsten Wochenabschluss aufgeschl\xFCsselt.");
       befund3 = p2.fluss.netto < 0 ? `<b>Die Kasse ist um ${geld(-p2.fluss.netto)} geschrumpft.</b>` : `<b>Die Kasse ist um ${geld(p2.fluss.netto)} gewachsen.</b>`;
     }
-    const html = gross2(gross3) + `<div class="hw-fin-balken">${balken6(saeulen.length === 1 ? [...saeulen, { label: "", a: null, b: null }] : saeulen, legende)}</div><div class="hw-fin-schalter">${seg(ARTEN3, ui.art, (w2) => `data-fin="art" data-wert="${w2}"`)}${seg(ZEITEN, ui.zeit, (w2) => `data-fin="zeit" data-wert="${w2}"`)}</div><div class="hw-fin-tabellen">${tabellen}</div>`;
+    const html = gross2(gross3) + `<div class="hw-fin-balken">${balken6([...Array.from({ length: Math.max(0, 5 - saeulen.length) }, () => ({ label: "", geist: true })), ...saeulen], legende)}</div><div class="hw-fin-schalter">${seg(ARTEN3, ui.art, (w2) => `data-fin="art" data-wert="${w2}"`)}${seg(ZEITEN, ui.zeit, (w2) => `data-fin="zeit" data-wert="${w2}"`)}</div><div class="hw-fin-tabellen">${einheit}${tabellen}</div>`;
     return { befund: befund3, html };
   }
   function finanzenModul(ctx) {
@@ -165324,7 +165323,7 @@ void main() {
       h4 += abschnitt("Aktionen", "l\xE4uft und als N\xE4chstes");
       h4 += u.laufend.length || u.naechste.length ? liste([...u.laufend, ...u.naechste].map(aktionZeile)) : leer3("Im Kalender planst du die n\xE4chste.", "Keine Aktion geplant.");
       for (const x2 of u.hinweise) h4 += hinweis(esc(x2), "achtung");
-      h4 += knoepfe(knopf("Neue Eigenmarke gr\xFCnden", 'data-a="eigenmarkeGruenden"', "zweit breit"));
+      h4 += knoepfe(knopf("Neue Eigenmarke gr\xFCnden", 'data-a="eigenmarkeGruenden"', "breit"));
       const befund3 = delta2 == null ? `Werbung netto ${geld(u.wocheNetto)} je Woche, ${pz3(u.werbequoteNetto, 1)} vom Umsatz.` : `${delta2 >= 0 ? "+" : "\u2212"}${fmt.format(Math.abs(Math.round(delta2)))} Kunden zur Vorwoche bei ${geld(u.wocheNetto)} Werbung netto.`;
       return { titel: "Marketing", unter: `Werbequote ${pz3(u.werbequoteNetto, 1)} \xB7 KW ${u.kw} / ${u.jahr}`, befund: u.rabattquote13 > 0.08 ? `Die Rabattquote liegt bei ${pz3(u.rabattquote13, 1)}. Kunden gew\xF6hnen sich an Preisaktionen.` : befund3, ton: u.rabattquote13 > 0.08 ? "engpass" : "", html: rumpf2(h4) };
     }
@@ -165409,7 +165408,7 @@ void main() {
           stufe: relaunch ? "Relaunch l\xE4uft" : `Qualit\xE4t ${Math.round(a2.qualitaet * 100)}`,
           wert: P5("ap:budget", geld(a2.budgetWoche), "span"),
           an: a2.budgetWoche > 0,
-          steuer: () => feld("App-Budget je Woche", stepper({ wert: geld(a2.budgetWoche), unter: "Pflege und Werbung f\xFCr Downloads", label: "App-Budget", attrMinus: 'data-a="appBudget" data-v="-1"', attrPlus: 'data-a="appBudget" data-v="1"', minusAus: a2.budgetWoche <= 0 })) + skalaGross("App-Qualit\xE4t", a2.qualitaet * 100, P5("ap:qualitaet", String(Math.round(a2.qualitaet * 100)), "b", ` class="hw-skala-wert${a2.qualitaet < 0.3 ? " hw-schlecht" : ""}"`)) + liste([zeile({ was: "Downloads", wert: P5("ap:downloads", fmt.format(a2.downloads), "span") }), zeile({ was: "aktive Nutzer", wert: P5("ap:aktiv", fmt.format(a2.aktiveNutzer), "span") }), zeile({ was: "Push erlaubt", wert: P5("ap:push", pz3(a2.pushQuote), "span") })]) + knoepfe(knopf(relaunch ? `Relaunch bis ${wocheText(st2, a2.relaunchBis)}` : "App-Relaunch beauftragen", 'data-a="relaunch"', "zweit breit", relaunch))
+          steuer: () => feld("App-Budget je Woche", stepper({ wert: geld(a2.budgetWoche), unter: "Pflege und Werbung f\xFCr Downloads", label: "App-Budget", attrMinus: 'data-a="appBudget" data-v="-1"', attrPlus: 'data-a="appBudget" data-v="1"', minusAus: a2.budgetWoche <= 0 })) + skalaGross("App-Qualit\xE4t", a2.qualitaet * 100, P5("ap:qualitaet", String(Math.round(a2.qualitaet * 100)), "b", ` class="hw-skala-wert${a2.qualitaet < 0.3 ? " hw-schlecht" : ""}"`)) + liste([zeile({ was: "Downloads", wert: P5("ap:downloads", fmt.format(a2.downloads), "span") }), zeile({ was: "aktive Nutzer", wert: P5("ap:aktiv", fmt.format(a2.aktiveNutzer), "span") }), zeile({ was: "Push erlaubt", wert: P5("ap:push", pz3(a2.pushQuote), "span") })]) + knoepfe(knopf(relaunch ? `Relaunch bis ${wocheText(st2, a2.relaunchBis)}` : "App-Relaunch beauftragen", 'data-a="relaunch"', "breit", relaunch))
         },
         {
           id: "coupons",
@@ -175377,7 +175376,7 @@ void main() {
   var ohneAnimation2 = () => new URLSearchParams(location.search).has("ohne-animation");
   var warten2 = (ms) => new Promise((r4) => setTimeout(r4, ms));
   var KATEGORIE3 = ["Presse", "Konkurrenz"];
-  var blattKopf = (symbol3, titel, unter, zu) => `<div class="hw-grund"></div><header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">${illustration(symbol3) || SYMBOLE[symbol3] || ""}</span><h2 class="hw-kopf-titel" tabindex="-1">${esc(titel)}</h2><div class="hw-kopf-unter">${esc(unter)}</div>${zu}</header>`;
+  var blattKopf = (symbol3, titel, unter, zu) => `<div class="hw-grund"></div><header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">${symbol3 === "logo" ? LOGO : illustration(symbol3) || SYMBOLE[symbol3] || ""}</span><h2 class="hw-kopf-titel" tabindex="-1">${esc(titel)}</h2><div class="hw-kopf-unter">${esc(unter)}</div>${zu}</header>`;
   function wochenberichtModul(ctx) {
     const node = document.createElement("div");
     node.id = "wochen-overlay";
@@ -175520,7 +175519,7 @@ void main() {
         { label: "Umsatz der Woche", wert: "0 \u20AC", p: "wb:umsatz", unter: delta2(bericht2.umsatz, bericht2.umsatzVor) },
         { label: "EBITDA der Woche", wert: "0 \u20AC", p: "wb:ebitda", ton: bericht2.ebitda < 0 ? "schlecht" : "gut", unter: delta2(bericht2.ebitda, bericht2.ebitdaVor) }
       ]) + kapital + insolvenz + offen) + presse + rumpf2(erfolge + knoepfe(knopf(bericht2.vorgaenge.length ? "Weiter zu den Vorg\xE4ngen" : "Zur\xFCck zur Stadt", 'data-wa="schliessen"', "breit")));
-      node.innerHTML = '<section class="hw hw-blatt hw-wb" data-bereich="zentrale" data-wb="bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis">' + blattKopf("finanzen", "Wochenergebnis", "KW " + bericht2.kw + " / " + bericht2.jahr, '<button type="button" class="hw-zu" data-wa="schliessen" aria-label="Bericht schlie\xDFen"></button>') + sprecher2 + '<div class="hw-inhalt">' + inhalt2 + '</div><div id="wb-vorfall"></div></section>';
+      node.innerHTML = '<section class="hw hw-blatt hw-wb" data-bereich="zentrale" data-wb="bericht" role="dialog" aria-modal="true" aria-label="Wochenergebnis">' + blattKopf("logo", "Wochenergebnis", "KW " + bericht2.kw + " / " + bericht2.jahr, '<button type="button" class="hw-zu" data-wa="schliessen" aria-label="Bericht schlie\xDFen"></button>') + sprecher2 + '<div class="hw-inhalt">' + inhalt2 + '</div><div id="wb-vorfall"></div></section>';
       for (const [p2, id, wert] of [["wb:umsatz", "wb-umsatz", bericht2.umsatz], ["wb:ebitda", "wb-ebitda", bericht2.ebitda]]) {
         const el2 = node.querySelector(`[data-p="${p2}"]`);
         if (el2) {
@@ -175757,7 +175756,7 @@ void main() {
       h4 += '<p class="hw-lese hw-g3-notiz">Projekte durchlaufen Konzept, Umsetzung und einen Rollout Cluster f\xFCr Cluster. Vier Wochen nach jedem Wechsel sind lokale Startprobleme m\xF6glich.</p>';
       h4 += aktiv7.length ? aktiv7.map((p2) => projekt(p2, d4)).join("") : abschnitt("Laufende Projekte") + leer3("\xDCber \u201ENeu\u201C beauftragst du das erste Projekt.", "Keine laufenden Projekte.", "", "projekte");
       if (alt.length) h4 += abschnitt("Abgeschlossene Projekte") + liste(alt.map((p2) => zeile({ was: esc(E9.SYSTEME[p2.system].name), unter: `Generation ${p2.zielGeneration} \xB7 ${ARTEN5.find(([a2]) => a2 === p2.art)?.[1] ?? p2.art}`, wert: geld(p2.kostenIst), wertUnter: p2.verzug ? `${p2.verzug} Wochen Verzug` : "im Plan" })));
-      h4 += knoepfe(knopf("Neues Projekt planen", 'data-it="reiter" data-v="neu"', "zweit breit"));
+      h4 += knoepfe(knopf("Neues Projekt planen", 'data-it="reiter" data-v="neu"', "breit"));
       const spaet = aktiv7.filter((p2) => p2.verzug > 0);
       return { befund: aktiv7.length ? `${aktiv7.length} Projekte laufen${spaet.length ? `, ${spaet.length} davon mit Verzug` : ", alle im Plan"}.` : "Gerade l\xE4uft kein IT-Projekt.", ton: spaet.length ? "engpass" : "", html: h4 };
     }
@@ -176020,7 +176019,7 @@ void main() {
       h4 += abschnitt("Fulfillment");
       h4 += liste([zeile({ was: "Aktuelles Modell", unter: u.fulfillment === "eigen" ? "niedrigere Paketkosten, h\xF6here Fixkosten" : "variable Paketkosten", wert: u.fulfillment === "eigen" ? "Eigenes Lager" : "Dienstleister" })]);
       if (u.projekt) h4 += hinweis(`Umstellung auf ${u.projekt.modell === "eigen" ? "eigenes Lager" : "Dienstleister"} ab KW ${u.projekt.bis % 52 + 1} \xB7 Investition ${geld(u.projekt.investition)}`);
-      else h4 += knoepfe(knopf(u.fulfillment === "eigen" ? "Zum Dienstleister wechseln" : "Eigenes Lager bauen", `data-online="fulfillment" data-wert="${u.fulfillment === "eigen" ? "dienstleister" : "eigen"}"`, "zweit breit"));
+      else h4 += knoepfe(knopf(u.fulfillment === "eigen" ? "Zum Dienstleister wechseln" : "Eigenes Lager bauen", `data-online="fulfillment" data-wert="${u.fulfillment === "eigen" ? "dienstleister" : "eigen"}"`, "breit"));
       const an = u.cluster.filter((c) => c.aktiv).length;
       h4 += abschnitt("Versand aus dem Haus", `${an} von ${u.cluster.length} Clustern`);
       h4 += liste(u.cluster.map((c) => schalter({ text: clusterName3(ctx.s(), c.id), unter: `${c.haeuser} H\xE4user`, an: c.aktiv, attr: `data-online="cluster" data-id="${esc(c.id)}"` })));
@@ -178034,10 +178033,10 @@ void main() {
     werkzeuge: svg2(q2(-3.5, -2, 0, 7, 4, 3, ROT5) + q2(-3.5, -2, 3, 7, 4, 0.4, ["#ef6b60", "#c1352c", "#99261e"]) + q2(-1.2, -0.3, 3.4, 2.4, 0.6, 1.2, DUNKEL4)),
     menue: svg2(q2(-4, -3, 0, 8, 6, 0.5, WEISS5) + q2(-4, -3, 1.8, 8, 6, 0.5, WEISS5) + q2(-4, -3, 3.6, 8, 6, 0.5, WEISS5))
   };
-  var LOGO = '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="105" fill="#d23c32"/><path fill="#fff" d="M133 110h68v117h110V110h68v292h-68V290H201v112h-68z"/></svg>';
+  var LOGO2 = '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="105" fill="#d23c32"/><path fill="#fff" d="M133 110h68v117h110V110h68v292h-68V290H201v112h-68z"/></svg>';
   var ILL_NAME = { warenhaus: "haus", kommentare: "notizen", zahlen: "reporting", karte: "deutschland", it: "systeme" };
   function symboleEinsetzen(wurzel2 = document) {
-    for (const el2 of wurzel2.querySelectorAll("[data-sym]")) if (!el2.firstElementChild) el2.innerHTML = el2.dataset.sym === "logo" ? LOGO : illustration(ILL_NAME[el2.dataset.sym] ?? el2.dataset.sym) || SYM[el2.dataset.sym] || "";
+    for (const el2 of wurzel2.querySelectorAll("[data-sym]")) if (!el2.firstElementChild) el2.innerHTML = el2.dataset.sym === "logo" ? LOGO2 : illustration(ILL_NAME[el2.dataset.sym] ?? el2.dataset.sym) || SYM[el2.dataset.sym] || "";
   }
   var FORMAT_SYMBOL = { hartwig: "warenhaus", premium: "premium", sport: "sport", volkskauf: "volkskauf", fundus: "fundus" };
 
@@ -178162,7 +178161,7 @@ void main() {
       if (d4.warte === "reise") stadtVor = getSpiel()?.reise?.pruefe()?.stadt ?? "";
       const keineFreigaben = d4.warte === "freigabe" && (getSpiel()?.E?.freigaben(getSpiel().s)?.anzahl ?? 0) === 0;
       root.hidden = false;
-      root.innerHTML = '<div class="ein-maske"></div><div class="ein-ring" aria-hidden="true"></div><section class="ein-sheet hw" data-bereich="betrieb" role="region" aria-label="Einf\xFChrung: Schritt ' + (index2 + 1) + '"><div class="ein-kopf"><span class="ein-logo">' + LOGO + "</span><div><b>Ihre Vorstandsassistentin</b><small>Schritt " + (index2 + 1) + " von " + EINFUEHRUNG.length + '</small></div><button type="button" class="hw-zu" data-ein="beenden" aria-label="Einf\xFChrung beenden"></button></div><div class="ein-inhalt"><p class="ein-text" data-ein="text"></p><div class="ein-portraet">' + ASSISTENTIN3 + '</div></div><div class="ein-fuss"><span class="hw-marke">' + (d4.warte === "weiter" ? "Information" : d4.warte === "karte" ? "Karte bewegen und zoomen" : "Auf der Karte oder im Blatt handeln") + "</span>" + (d4.warte === "weiter" || keineFreigaben ? '<button type="button" class="hw-knopf" data-ein="weiter">' + (keineFreigaben ? "Ohne Freigabe weiter" : index2 === EINFUEHRUNG.length - 1 ? "Fertig" : "Weiter") + "</button>" : '<button type="button" class="hw-knopf zweit ein-ueberspringen" data-ein="weiter" title="Schritt ohne Handlung \xFCberspringen">\xDCberspringen</button>') + "</div></section>";
+      root.innerHTML = '<div class="ein-maske"></div><div class="ein-ring" aria-hidden="true"></div><section class="ein-sheet hw" data-bereich="betrieb" role="region" aria-label="Einf\xFChrung: Schritt ' + (index2 + 1) + '"><div class="ein-kopf"><span class="ein-logo">' + LOGO2 + "</span><div><b>Ihre Vorstandsassistentin</b><small>Schritt " + (index2 + 1) + " von " + EINFUEHRUNG.length + '</small></div><button type="button" class="hw-zu" data-ein="beenden" aria-label="Einf\xFChrung beenden"></button></div><div class="ein-inhalt"><p class="ein-text" data-ein="text"></p><div class="ein-portraet">' + ASSISTENTIN3 + '</div></div><div class="ein-fuss"><span class="hw-marke">' + (d4.warte === "weiter" ? "Information" : d4.warte === "karte" ? "Karte bewegen und zoomen" : "Auf der Karte oder im Blatt handeln") + "</span>" + (d4.warte === "weiter" || keineFreigaben ? '<button type="button" class="hw-knopf" data-ein="weiter">' + (keineFreigaben ? "Ohne Freigabe weiter" : index2 === EINFUEHRUNG.length - 1 ? "Fertig" : "Weiter") + "</button>" : '<button type="button" class="hw-knopf zweit ein-ueberspringen" data-ein="weiter" title="Schritt ohne Handlung \xFCberspringen">\xDCberspringen</button>') + "</div></section>";
       textTippen();
       positionieren();
     }
@@ -178594,6 +178593,11 @@ void main() {
     }
     function naechstes() {
       if (zeigt || !schlange2.length) return;
+      if (document.body.classList.contains("wochen-aktiv")) {
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(naechstes, 700);
+        return;
+      }
       zeigt = true;
       const e = schlange2.shift();
       toast.innerHTML = '<div class="erfolge-toast-bild">' + bild4(e) + '</div><div><small class="hw-marke">Neuer Erfolg \xB7 ' + esc(e.gruppe) + "</small><strong>" + esc(e.titel) + "</strong><span>" + esc(e.hinweis) + "</span></div>";
@@ -178794,7 +178798,7 @@ void main() {
       document.body.classList.remove("spielende-aktiv");
     }
     function rahmen2(titel, inhalt2) {
-      node.innerHTML = '<div class="hw-grund"></div><div class="se-wrap"><header class="se-kopf"><span class="hw-g6-logo">' + LOGO + '</span><span class="hw-marke">Hartwig \xB7 ' + esc(titel) + "</span></header>" + inhalt2 + "</div>";
+      node.innerHTML = '<div class="hw-grund"></div><div class="se-wrap"><header class="se-kopf"><span class="hw-g6-logo">' + LOGO2 + '</span><span class="hw-marke">Hartwig \xB7 ' + esc(titel) + "</span></header>" + inhalt2 + "</div>";
       node.hidden = false;
       document.body.classList.add("spielende-aktiv");
     }
@@ -181959,8 +181963,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-25T08:35:28.688Z" : null;
-    const v2 = true ? "bc8bc08" : "Entwicklung";
+    const iso = true ? "2026-10-25T08:41:49.301Z" : null;
+    const v2 = true ? "5a714f3" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();

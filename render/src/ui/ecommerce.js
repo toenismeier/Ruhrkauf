@@ -68,7 +68,7 @@ export function ecommerceModul(ctx) {
     h += K.abschnitt('Fulfillment');
     h += K.liste([K.zeile({ was: 'Aktuelles Modell', unter: u.fulfillment === 'eigen' ? 'niedrigere Paketkosten, höhere Fixkosten' : 'variable Paketkosten', wert: u.fulfillment === 'eigen' ? 'Eigenes Lager' : 'Dienstleister' })]);
     if (u.projekt) h += K.hinweis(`Umstellung auf ${u.projekt.modell === 'eigen' ? 'eigenes Lager' : 'Dienstleister'} ab KW ${(u.projekt.bis % 52) + 1} · Investition ${geld(u.projekt.investition)}`);
-    else h += K.knoepfe(K.knopf(u.fulfillment === 'eigen' ? 'Zum Dienstleister wechseln' : 'Eigenes Lager bauen', `data-online="fulfillment" data-wert="${u.fulfillment === 'eigen' ? 'dienstleister' : 'eigen'}"`, 'zweit breit'));
+    else h += K.knoepfe(K.knopf(u.fulfillment === 'eigen' ? 'Zum Dienstleister wechseln' : 'Eigenes Lager bauen', `data-online="fulfillment" data-wert="${u.fulfillment === 'eigen' ? 'dienstleister' : 'eigen'}"`, 'breit'));
     const an = u.cluster.filter((c) => c.aktiv).length;
     h += K.abschnitt('Versand aus dem Haus', `${an} von ${u.cluster.length} Clustern`);
     h += K.liste(u.cluster.map((c) => K.schalter({ text: clusterName(ctx.s(), c.id), unter: `${c.haeuser} Häuser`, an: c.aktiv, attr: `data-online="cluster" data-id="${esc(c.id)}"` })));

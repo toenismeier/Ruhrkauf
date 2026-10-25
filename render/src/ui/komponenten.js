@@ -42,13 +42,21 @@ export function gross(werte) {
   return `<div class="hw-gross" style="--n:${werte.length}">${werte.map((w) => `<div><span class="hw-marke">${esc(w.label)}</span><b class="hw-zahl${w.ton ? ' hw-' + w.ton : ''}"${w.p ? ` data-p="${esc(w.p)}"` : ''}>${esc(w.wert)}</b>${w.unter ? `<span class="hw-abw">${w.unter}</span>` : ''}</div>`).join('')}</div>`;
 }
 
-/** Gepaarte Balken ohne Achsen mit Wochen darunter (Coffee 22). reihen: [{ label, a, b }] (Rohwerte), legende: [Name a, Name b]. */
+/** Gepaarte Balken ohne Achsen mit Wochen darunter (Coffee 20, 22). reihen: [{ label, a, b, geist? }] (Rohwerte), legende: [Name a, Name b].
+ *  Positive Werte stehen auf gemeinsamer Skala über der Grundlinie. Gibt es negative Werte, zeigt ein Band unter einer Nulllinie
+ *  sie nach unten (eigene Skala für Verluste, sonst wären −5 neben 236 Mio. nicht zu sehen). Geister füllen leere Plätze auf fünf. */
 export function balken(reihen, legende = []) {
-  if (reihen.length < 2) return leer('Ein Verlauf ist ab der zweiten Woche verfügbar.');
-  const max = Math.max(1, ...reihen.flatMap((r) => [Math.abs(r.a ?? 0), Math.abs(r.b ?? 0)]));
-  const h = (v) => `${Math.max(2, Math.round((Math.abs(v) / max) * 100))}%`;
-  const saeule = (v, k) => v == null ? '' : `<i class="${k}${v < 0 ? ' neg' : ''}${v === 0 ? ' null' : ''}" style="height:${h(v)}" data-w="${Math.round(v)}"></i>`;
-  return `<div class="hw-balkenfeld"><div class="hw-balken" style="--hoehe:100px" role="img" aria-label="${esc(legende.join(' und '))}">${reihen.map((r) => `<div>${saeule(r.a, 'a')}${saeule(r.b, 'b')}</div>`).join('')}</div>`
+  const echt = reihen.filter((r) => !r.geist);
+  if (echt.length < 1) return leer('Ein Verlauf ist ab der ersten Woche verfügbar.');
+  const werte = echt.flatMap((r) => [r.a, r.b]).filter((v) => v != null);
+  const maxPos = Math.max(1, ...werte.map((v) => Math.max(0, v))), maxNeg = Math.max(0, ...werte.map((v) => Math.max(0, -v)));
+  const mitNeg = maxNeg > 0;
+  const hoch = (v) => v > 0 ? `${Math.max(2, Math.round((v / maxPos) * 100))}%` : '0';
+  const tief = (v) => v < 0 ? `${Math.max(8, Math.round((-v / maxNeg) * 100))}%` : '0';
+  const saeule = (v, k, h) => v == null ? '<i class="leer"></i>' : `<i class="${k}${v < 0 ? ' neg' : ''}" style="height:${h(v)}"${h === hoch ? ` data-w="${Math.round(v)}"` : ''}></i>`;
+  const spalte = (r) => r.geist ? '<div class="geist"><span class="o"><i class="a" style="height:55%"></i><i class="b" style="height:25%"></i></span>' + (mitNeg ? '<span class="u"></span>' : '') + '</div>'
+    : `<div><span class="o">${saeule(r.a, 'a', hoch)}${saeule(r.b, 'b', hoch)}</span>${mitNeg ? `<span class="u">${saeule(r.a, 'a', tief)}${saeule(r.b, 'b', tief)}</span>` : ''}</div>`;
+  return `<div class="hw-balkenfeld${mitNeg ? ' mit-neg' : ''}"><div class="hw-balken" style="--hoehe:100px" role="img" aria-label="${esc(legende.join(' und '))}">${reihen.map(spalte).join('')}</div>`
     + `<div class="hw-balkenfuss">${reihen.map((r) => `<span>${esc(r.label)}</span>`).join('')}</div>`
     + (legende.length ? `<div class="hw-legende">${legende.map((l, i) => `<span><i class="${i ? 'b' : ''}"></i>${esc(l)}</span>`).join('')}</div>` : '') + '</div>';
 }
@@ -152,6 +160,8 @@ export const SYMBOLE = {
 /** Reiterleiste unten. reiter: [[id, Name, Symbolname]], attr(id) liefert Attribute. */
 /** Gerenderte Illustration (render/illustrationen) als Bild; leer, wenn es das Motiv noch nicht gibt. */
 export const ILLUSTRATIONEN_ROH = ILLUSTRATIONEN;
+/** Firmenzeichen Hartwig (rotes H) für Blattköpfe, die für das ganze Unternehmen stehen (Coffee zeigt dort das Logo). */
+export const LOGO = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="3" y="3" width="34" height="34" rx="7" fill="#c8312b"/><path d="M13 11h4.4v7h5.2v-7H27v18h-4.4v-7.2h-5.2V29H13z" fill="#fff"/></svg>';
 export const illustration = (name, klasse = 'hw-ill') => { const i = ILLUSTRATIONEN[name]; return i ? `<img class="${klasse}" src="${i.u}" width="${i.b}" height="${i.h}" alt="" decoding="async">` : ''; };
 /** Symbol für Reiter und Menü: Illustration, sonst das alte Code-Symbol. */
 export const symbol = (name, rueckfall = name) => illustration(name) || SYMBOLE[name] || SYMBOLE[rueckfall] || '';

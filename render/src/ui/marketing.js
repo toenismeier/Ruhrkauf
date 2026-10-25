@@ -74,7 +74,7 @@ export function marketingModul(ctx) {
     h += K.abschnitt('Aktionen', 'läuft und als Nächstes');
     h += u.laufend.length || u.naechste.length ? K.liste([...u.laufend, ...u.naechste].map(aktionZeile)) : K.leer('Im Kalender planst du die nächste.', 'Keine Aktion geplant.');
     for (const x of u.hinweise) h += K.hinweis(esc(x), 'achtung');
-    h += K.knoepfe(K.knopf('Neue Eigenmarke gründen', 'data-a="eigenmarkeGruenden"', 'zweit breit'));
+    h += K.knoepfe(K.knopf('Neue Eigenmarke gründen', 'data-a="eigenmarkeGruenden"', 'breit'));
     const befund = delta == null ? `Werbung netto ${geld(u.wocheNetto)} je Woche, ${pz(u.werbequoteNetto, 1)} vom Umsatz.`
       : `${delta >= 0 ? '+' : '−'}${fmt.format(Math.abs(Math.round(delta)))} Kunden zur Vorwoche bei ${geld(u.wocheNetto)} Werbung netto.`;
     return { titel: 'Marketing', unter: `Werbequote ${pz(u.werbequoteNetto, 1)} · KW ${u.kw} / ${u.jahr}`, befund: u.rabattquote13 > 0.08 ? `Die Rabattquote liegt bei ${pz(u.rabattquote13, 1)}. Kunden gewöhnen sich an Preisaktionen.` : befund, ton: u.rabattquote13 > 0.08 ? 'engpass' : '', html: K.rumpf(h) };
@@ -109,7 +109,7 @@ export function marketingModul(ctx) {
         steuer: () => K.feld('App-Budget je Woche', K.stepper({ wert: geld(a.budgetWoche), unter: 'Pflege und Werbung für Downloads', label: 'App-Budget', attrMinus: 'data-a="appBudget" data-v="-1"', attrPlus: 'data-a="appBudget" data-v="1"', minusAus: a.budgetWoche <= 0 }))
           + skalaGross('App-Qualität', a.qualitaet * 100, P('ap:qualitaet', String(Math.round(a.qualitaet * 100)), 'b', ` class="hw-skala-wert${a.qualitaet < 0.3 ? ' hw-schlecht' : ''}"`))
           + K.liste([K.zeile({ was: 'Downloads', wert: P('ap:downloads', fmt.format(a.downloads), 'span') }), K.zeile({ was: 'aktive Nutzer', wert: P('ap:aktiv', fmt.format(a.aktiveNutzer), 'span') }), K.zeile({ was: 'Push erlaubt', wert: P('ap:push', pz(a.pushQuote), 'span') })])
-          + K.knoepfe(K.knopf(relaunch ? `Relaunch bis ${wocheText(st, a.relaunchBis)}` : 'App-Relaunch beauftragen', 'data-a="relaunch"', 'zweit breit', relaunch)) },
+          + K.knoepfe(K.knopf(relaunch ? `Relaunch bis ${wocheText(st, a.relaunchBis)}` : 'App-Relaunch beauftragen', 'data-a="relaunch"', 'breit', relaunch)) },
       { id: 'coupons', bild: motiv('online'), titel: 'App-Coupons', stufe: a.appCoupons ? 'An' : 'Aus', wert: a.appCoupons ? 'An' : 'Aus', einheit: 'bei Aktionen', an: a.appCoupons,
         steuer: () => K.schalter({ text: 'Aktions-Coupons in der App', unter: 'holt Nutzer in die App', an: a.appCoupons, attr: 'data-a="appCoupons"' }) },
     ];

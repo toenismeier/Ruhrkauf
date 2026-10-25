@@ -65,10 +65,11 @@ function inhalt(st, ui) {
   const p = ps[ps.length - 1], v = ps[ps.length - 2] ?? null, fuenf = ps.slice(-5);
   const zeitWort = { woche: 'Woche', quartal: 'Quartal', jahr: 'Jahr' }[ui.zeit];
   const spalten = [v?.label, p.label + (p.laufend ? ' bisher' : '')].filter(Boolean);
+  const einheit = '<p class="hw-fin-einheit">Beträge in Mio. €</p>';
   const zwei = (f) => [v, p].filter(Boolean).map(f);
-  const reihe = (name, f, ton = null) => ({ name, werte: zwei((q) => Math.abs(f(q)) < 5e4 ? '' : mio(f(q))), roh: zwei((q) => Math.round(f(q))), ...(ton ? { ton: zwei((q) => ton(f(q))) } : {}) });
+  const reihe = (name, f, ton = null) => ({ name, werte: zwei((q) => mio(f(q))), roh: zwei((q) => Math.round(f(q))), ...(ton ? { ton: zwei((q) => ton(f(q))) } : {}) });
   const vorz = (x) => x < 0 ? 'schlecht' : '';
-  const tabelle = (titel, zeilen, summe, mitKopf = false) => K.tabelle({ titel, spalten: mitKopf ? spalten : [], zeilen, summe, pruefen: true });
+  const tabelle = (titel, zeilen, summe, mitKopf = false) => K.tabelle({ titel, spalten: mitKopf ? spalten : (v ? ['', ''] : ['']), zeilen, summe, pruefen: true });
   let gross, saeulen, legende, tabellen, befund;
 
   if (ui.art === 'guv') {
@@ -81,7 +82,7 @@ function inhalt(st, ui) {
       + tabelle('Ergebnis', [reihe('Rohertrag', (q) => q.rohertrag), reihe('Erträge', (q) => q.ertraege), reihe('Kosten', (q) => -q.kosten)], reihe('EBITDA', (q) => q.ebitda, vorz))
       + tabelle('', [reihe('EBITDA', (q) => q.ebitda), reihe('Sondereffekte', (q) => q.sondereffekte)], reihe('Ergebnis', (q) => q.ergebnis, vorz));
     const groesster = KOSTEN.map(([f, n]) => [n, p[f] - (v?.[f] ?? p[f])]).sort((a, b) => b[1] - a[1])[0];
-    befund = p.ebitda < 0 ? `<b>EBITDA ${geld(p.ebitda)} im ${zeitWort === 'Jahr' ? 'Jahr' : zeitWort === 'Quartal' ? 'Quartal' : 'Wochenabschluss'}.</b>${groesster && groesster[1] > 0 ? ` ${groesster[0]} stieg um ${geld(groesster[1])}.` : ''}`
+    befund = p.ebitda < 0 ? `<b>EBITDA ${geld(p.ebitda)} im ${zeitWort === 'Jahr' ? 'Jahr' : zeitWort === 'Quartal' ? 'Quartal' : 'Wochenabschluss'}.</b>${groesster && groesster[1] > 0 ? ` Größter Kostenanstieg: ${groesster[0]} +${geld(groesster[1])}.` : ''}`
       : `<b>EBITDA ${geld(p.ebitda)}${v ? `, ${p.ebitda >= v.ebitda ? 'mehr' : 'weniger'} als ${ui.zeit === 'woche' ? 'in der Vorwoche' : 'in der Vorperiode'}` : ''}.</b>`;
   } else if (ui.art === 'bilanz') {
     gross = [{ label: 'Vermögen', wert: geld(p.vermoegen), unter: delta(p.vermoegen, v?.vermoegen) },
@@ -105,9 +106,9 @@ function inhalt(st, ui) {
     befund = p.fluss.netto < 0 ? `<b>Die Kasse ist um ${geld(-p.fluss.netto)} geschrumpft.</b>` : `<b>Die Kasse ist um ${geld(p.fluss.netto)} gewachsen.</b>`;
   }
   const html = K.gross(gross)
-    + `<div class="hw-fin-balken">${K.balken(saeulen.length === 1 ? [...saeulen, { label: '', a: null, b: null }] : saeulen, legende)}</div>`
+    + `<div class="hw-fin-balken">${K.balken([...Array.from({ length: Math.max(0, 5 - saeulen.length) }, () => ({ label: '', geist: true })), ...saeulen], legende)}</div>`
     + `<div class="hw-fin-schalter">${K.seg(ARTEN, ui.art, (w) => `data-fin="art" data-wert="${w}"`)}${K.seg(ZEITEN, ui.zeit, (w) => `data-fin="zeit" data-wert="${w}"`)}</div>`
-    + `<div class="hw-fin-tabellen">${tabellen}</div>`;
+    + `<div class="hw-fin-tabellen">${einheit}${tabellen}</div>`;
   return { befund, html };
 }
 
