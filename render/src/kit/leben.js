@@ -10,13 +10,40 @@ const MODI = ['voll', 'wenig', 'aus'];
 const MAX_AUTO = 60, MAX_FUSS = 110, MAX_BUS = 8, MAX_BAHN = 6, MAX_LKW = 5;
 const KLEINSTE_LUECKE = 6.5;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-// Kartenstädte: Straßenstücke beliebiger Richtung (achse 'r': Ursprung ax/az, Richtung ux/uz, Normale nx/nz, von = 0, bis = Länge).
-const koordinate = (s, u, v) => s.achse === 'r' ? { x: s.ax + s.ux * u + s.nx * v, z: s.az + s.uz * u + s.nz * v }
-  : s.achse === 'z' ? { x: s.mitte + v, z: u } : { x: u, z: s.mitte + v };
+// Kartenstädte: Straßenstücke beliebiger Richtung (achse 'r': Ursprung ax/az, Richtung ux/uz, Normale nx/nz, von = 0, bis = Länge)
+// und Polylinien (achse 'p': pts, cum = Bogenlänge je Punkt; Normale = Richtung um 90° gedreht, wie bei 'r').
+function stueck(s, u) {
+  const c = s.cum; let lo = 0, hi = c.length - 1;
+  u = Math.max(0, Math.min(c[hi], u));
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (c[m] <= u) lo = m; else hi = m; }
+  const a = s.pts[lo], b = s.pts[hi], L = Math.max(1e-6, c[hi] - c[lo]), t = (u - c[lo]) / L;
+  const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
+  return { x: a[0] + (b[0] - a[0]) * t, z: a[1] + (b[1] - a[1]) * t, ux, uz };
+}
+const koordinate = (s, u, v) => {
+  if (s.achse === 'p') { const q = stueck(s, u); return { x: q.x - q.uz * v, z: q.z + q.ux * v }; }
+  return s.achse === 'r' ? { x: s.ax + s.ux * u + s.nx * v, z: s.az + s.uz * u + s.nz * v }
+    : s.achse === 'z' ? { x: s.mitte + v, z: u } : { x: u, z: s.mitte + v };
+};
 /** Lage eines Punkts zum Straßenstück: u entlang, v quer (gleiche Konvention wie koordinate). */
-const lageZu = (s, p) => s.achse === 'r' ? { u: (p.x - s.ax) * s.ux + (p.z - s.az) * s.uz, v: (p.x - s.ax) * s.nx + (p.z - s.az) * s.nz }
-  : s.achse === 'z' ? { u: p.z, v: p.x - s.mitte } : { u: p.x, v: p.z - s.mitte };
-const richtungsWinkel = (s, d) => s.achse === 'r' ? Math.atan2(-s.uz * d, s.ux * d) : s.achse === 'z' ? Math.atan2(-d, 0) : Math.atan2(0, d);
+const lageZu = (s, p) => {
+  if (s.achse === 'p') {
+    let best = null;
+    for (let i = 1; i < s.pts.length; i++) {
+      const a = s.pts[i - 1], b = s.pts[i], L = Math.max(1e-6, s.cum[i] - s.cum[i - 1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
+      const t = Math.max(0, Math.min(L, (p.x - a[0]) * ux + (p.z - a[1]) * uz));
+      const qx = a[0] + ux * t, qz = a[1] + uz * t, d = Math.hypot(p.x - qx, p.z - qz);
+      if (!best || d < best.d) best = { d, u: s.cum[i - 1] + t, v: (p.x - qx) * -uz + (p.z - qz) * ux };
+    }
+    return best ?? { u: 0, v: 0 };
+  }
+  return s.achse === 'r' ? { u: (p.x - s.ax) * s.ux + (p.z - s.az) * s.uz, v: (p.x - s.ax) * s.nx + (p.z - s.az) * s.nz }
+    : s.achse === 'z' ? { u: p.z, v: p.x - s.mitte } : { u: p.x, v: p.z - s.mitte };
+};
+const richtungsWinkel = (s, d, u = 0) => {
+  if (s.achse === 'p') { const q = stueck(s, u); return Math.atan2(-q.uz * d, q.ux * d); }
+  return s.achse === 'r' ? Math.atan2(-s.uz * d, s.ux * d) : s.achse === 'z' ? Math.atan2(-d, 0) : Math.atan2(0, d);
+};
 const sign = (s) => s.achse === 'z' ? -1 : 1;
 const wegStart = (l) => l.dir > 0 ? l.s.von + 2 : l.s.bis - 2;
 const wegEnde = (l) => l.dir > 0 ? l.s.bis - 2 : l.s.von + 2;
@@ -27,8 +54,18 @@ const abstand = (a, b) => wurzelSumme(a.x - b.x, a.z - b.z);
 export function verkehrsnetz(plan) {
   const spuren = [], fusswege = [], trams = [], haupt = [];
   for (const s of plan?.strassen ?? []) {
-    if (s.bis - s.von < (s.achse === 'r' ? 6 : 14) || s.bruecke && s.typ === 'fussgaenger') continue;
+    if (s.bis - s.von < (s.achse === 'r' || s.achse === 'p' ? 4 : 14) || s.bruecke && s.typ === 'fussgaenger') continue;
     const fb = s.breite - 2 * s.gehweg, ps = sign(s);
+    if (s.achse === 'p') {
+      // Kartenstadt: echte Fahrspuren (Versatz links von der Bandmitte → Normale zeigt nach rechts, also v = −links)
+      if (s.typ !== 'fussgaenger') (s.spurenKarte ?? []).forEach((sp, i) => {
+        const l = { s, dir: sp.dir, v: -sp.links, id: s.id + ':' + i, naechste: [] };
+        spuren.push(l); if (s.typ === 'haupt') haupt.push(l);
+      });
+      const quer = s.typ === 'fussgaenger' ? 3.0 : (s.fahrbahn ?? fb) / 2 + 1.6;
+      for (const seite of [-1, 1]) if (s.fussSeiten?.[seite < 0 ? 0 : 1] ?? true) fusswege.push({ s, dir: 1, v: seite * quer, id: s.id + ':f:' + seite });
+      continue;
+    }
     if (s.typ !== 'fussgaenger' && !s.leitwand) {
       const seiten = s.typ === 'haupt'
         ? [((s.mittel || 6) / 2 + (fb / 2 - (s.mittel || 6) / 2) * .35), ((s.mittel || 6) / 2 + (fb / 2 - (s.mittel || 6) / 2) * .73)]
@@ -91,13 +128,47 @@ function formatFarbe(h) {
 }
 
 function instanzen(scene, geometrie, max, name) {
-  const m = new THREE.InstancedMesh(geometrie, new THREE.MeshLambertMaterial({ color: '#ffffff', side: THREE.FrontSide }), max);
+  const m = new THREE.InstancedMesh(geometrie, new THREE.MeshLambertMaterial({ color: '#ffffff', side: THREE.FrontSide, vertexColors: !!geometrie.attributes.color }), max);
   m.name = 'leben:' + name;
   m.count = 0;
   m.frustumCulled = false; // Sichtbarkeit wird bereits je Instanz/Kamera begrenzt.
   m.castShadow = false;
   scene.add(m);
   return m;
+}
+/** Fahrzeugmodell aus mehreren farbigen Quadern (Vertexfarben), Länge entlang x, Mitte im Ursprung. */
+function modell(teile) {
+  const P = [], C = [], N = [];
+  for (const [w, h, d, x, y, z, farbe] of teile) {
+    const g = new THREE.BoxGeometry(w, h, d).toNonIndexed(); g.translate(x, y, z);
+    const c = new THREE.Color(farbe), pos = g.attributes.position.array, nor = g.attributes.normal.array;
+    for (let i = 0; i < pos.length; i += 3) { P.push(pos[i], pos[i + 1], pos[i + 2]); N.push(nor[i], nor[i + 1], nor[i + 2]); C.push(c.r, c.g, c.b); }
+    g.dispose();
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
+  return g;
+}
+const FENSTER = '#3d4a55';
+// Gelenkbus: weiß mit Fensterband, grünem Sockelstreifen und Dachaufbau
+const BUS = () => modell([[11.6, 2.4, 2.55, 0, -0.25, 0, '#f1efe9'], [11.2, 0.95, 2.6, 0.1, 0.35, 0, FENSTER], [0.08, 1.4, 2.2, 5.82, 0.2, 0, FENSTER],
+  [11.6, 0.35, 2.6, 0, -1.2, 0, '#3f8f5a'], [3.4, 0.35, 1.6, -2.5, 1.12, 0, '#d4d2cc'], [0.2, 2.6, 2.62, 0.4, -0.1, 0, '#cfcbc1']]);
+// Straßenbahn: drei Glieder, weiß mit rotem Band, durchgehendem Fensterband und Stromabnehmer
+const BAHN = () => modell([[6.1, 2.7, 2.6, -6.4, -0.3, 0, '#f3f1ec'], [5.9, 2.7, 2.6, 0, -0.3, 0, '#f3f1ec'], [6.1, 2.7, 2.6, 6.4, -0.3, 0, '#f3f1ec'],
+  [18.6, 1.0, 2.66, 0, 0.35, 0, FENSTER], [18.8, 0.4, 2.66, 0, -1.35, 0, '#c8372f'], [1.2, 0.5, 0.4, 0, 1.3, 0, '#55595e'], [0.1, 1.2, 2.2, 9.46, 0.3, 0, FENSTER]]);
+// Lieferwagen: weißer Kofferaufbau, rotes Fahrerhaus mit Scheibe
+const LKW = () => modell([[5.6, 2.9, 2.5, -1.2, 0.05, 0, '#efede6'], [2.2, 2.3, 2.4, 2.9, -0.25, 0, '#c8372f'], [0.08, 0.9, 2.1, 4.0, 0.25, 0, FENSTER],
+  [8.0, 0.35, 2.5, 0, -1.35, 0, '#4b4f54']]);
+/** Abstand Punkt–Strecke und Strecke–Strecke (Abbiegewege dürfen sich nicht kreuzen). */
+function punktStrecke(p, a, b) {
+  const dx = b.x - a.x, dz = b.z - a.z, l2 = dx * dx + dz * dz || 1, t = clamp(((p.x - a.x) * dx + (p.z - a.z) * dz) / l2, 0, 1);
+  return Math.hypot(p.x - a.x - t * dx, p.z - a.z - t * dz);
+}
+function streckenAbstand(a, b, c, d) {
+  const k = (p, q, r) => (q.x - p.x) * (r.z - p.z) - (q.z - p.z) * (r.x - p.x);
+  if (k(a, b, c) * k(a, b, d) < 0 && k(c, d, a) * k(c, d, b) < 0) return 0;
+  return Math.min(punktStrecke(a, c, d), punktStrecke(b, c, d), punktStrecke(c, a, b), punktStrecke(d, a, b));
 }
 const dummy = new THREE.Object3D();
 function matrix(mesh, i, pos, winkel, groesse, farbe) {
@@ -116,7 +187,7 @@ function fertig(m, n) {
 
 export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spiel, zeichnen, sparsam = false }) {
   let modus = STANDARD_LEBEN, scene = null, plan = null, netz = null, r = rng(1);
-  let autos = [], fuss = [], busse = [], bahnen = [], lkw = [], hauspunkte = [];
+  let autos = [], fuss = [], busse = [], bahnen = [], lkw = [], hauspunkte = [], sichtSpuren = [];
   let meshes = {}, leute = null, uhr = 0, raf = 0, zuletzt = 0, letzterKontakt = 0, letzteAuswahl = -1, pause = false;
   let frameKosten = [], limitFaktor = 1, langsameFrames = 0, aufnahme = false;
   const farbe = (c) => new THREE.Color(c);
@@ -134,9 +205,9 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     meshes = {
       auto: instanzen(scene, new THREE.BoxGeometry(4.5, 1.5, 2.0), MAX_AUTO, 'auto'),
       glas: instanzen(scene, new THREE.BoxGeometry(2.3, .8, 1.8), MAX_AUTO, 'autoglas'),
-      bus: instanzen(scene, new THREE.BoxGeometry(11.5, 3.1, 2.6), MAX_BUS, 'bus'),
-      tram: instanzen(scene, new THREE.BoxGeometry(19, 3.5, 2.65), MAX_BAHN, 'tram'),
-      lkw: instanzen(scene, new THREE.BoxGeometry(8.1, 3.1, 2.7), MAX_LKW, 'lieferwagen'),
+      bus: instanzen(scene, BUS(), MAX_BUS, 'bus'),
+      tram: instanzen(scene, BAHN(), MAX_BAHN, 'tram'),
+      lkw: instanzen(scene, LKW(), MAX_LKW, 'lieferwagen'),
     };
     // Passanten: vorgerenderte Figuren (menschen.js), ein Draw Call
     leute = menschenGruppe(MAX_FUSS, 'leben:passanten');
@@ -167,11 +238,13 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       if (!f.length) continue;
       const a = f[0], weg = koordinate(a.w.s, a.u, a.w.v);
       // Eingang auf der zur Straße gerichteten Hauskante, nicht mitten durch das Gebäude.
-      const ein = a.w.s.achse === 'r'
+      const ein = (a.w.s.achse === 'r' || a.w.s.achse === 'p')
         ? { x: clamp(weg.x, p.x, p.x + p.w), z: clamp(weg.z, p.z, p.z + p.d) }   // nächster Punkt der Hauskante zum Gehweg
         : a.w.s.achse === 'z'
         ? { x: a.w.s.mitte < mitte.x ? p.x : p.x + p.w, z: clamp(a.u, p.z + 1, p.z + p.d - 1) }
         : { x: clamp(a.u, p.x + 1, p.x + p.w - 1), z: a.w.s.mitte < mitte.z ? p.z : p.z + p.d };
+      // Kunden nur vom Gehweg direkt vor dem Haus; liegt der nächste Gehweg jenseits der Fahrbahn, liefen sie über die Straße
+      if ((a.w.s.achse === 'p') && abstand(weg, ein) > 9) continue;
       punkte.push({ h, p, mitte, weg, ein, lane: a.w, u: a.u });
     }
     const umsaetze = punkte.map((p) => p.h.kpi?.umsatz ?? 0).filter((x) => x > 0).sort((a, b) => a - b);
@@ -194,7 +267,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     const anfang = r() * laenge(weg);
     const geschw = 0.95 + r() * .6;
     // Querversatz auf dem Gehweg, damit nicht alle auf einer Linie laufen
-    const breit = weg.s.typ === 'fussgaenger' ? 1.6 : Math.max(0, (weg.s.gehweg ?? 3) / 2 - 0.6);
+    const breit = weg.s.typ === 'fussgaenger' ? 1.6 : weg.s.achse === 'p' ? 0.5 : Math.max(0, (weg.s.gehweg ?? 3) / 2 - 0.6);
     return { weg, m: anfang, quer: (r() * 2 - 1) * breit, dir: r() < .5 ? -1 : 1, geschw,
       haus, phase: 'weg', lauf: 0, tuete: false, aussehen: erscheinung(r, { kinder: .07 }), ph: r() * 8, tempo: geschw / 1.25 };
   }
@@ -211,21 +284,27 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     letzteAuswahl = neu;
     if (k.halb > 110) { autos = []; fuss = []; busse = []; bahnen = []; return; }
     const lanes = netz.spuren.filter((l) => sichtbar(punkt(l, laenge(l) * .5), 1.6));
+    sichtSpuren = lanes;
     const wege = netz.fusswege.filter((l) => sichtbar(punkt(l, laenge(l) * .5), 1.5));
     const busLanes = lanes.filter((l) => l.s.typ === 'haupt');
     const tramLanes = netz.trams.filter((l) => l.s.art === 'magistrale' && sichtbar(punkt(l, laenge(l) * .5), 1.5));
     const dichte = (modus === 'wenig' ? .5 : 1) * limitFaktor;
-    const sollAuto = lanes.length ? Math.min(MAX_AUTO, Math.max(1, Math.round((20 + 40 * clamp((110 - k.halb) / 88, 0, 1)) * dichte))) : 0;
-    const sollFuss = wege.length ? Math.round(100 * dichte) : 0;
+    // Höchstens ein Wagen je 30 m sichtbarer Fahrspur, sonst stehen bei nahem Zoom Kolonnen Stoßstange an Stoßstange
+    const spurMeter = lanes.reduce((n, l) => n + laenge(l), 0);
+    const sollAuto = lanes.length ? Math.min(MAX_AUTO, Math.round(spurMeter / 30), Math.max(1, Math.round((20 + 40 * clamp((110 - k.halb) / 88, 0, 1)) * dichte))) : 0;
+    // Passanten nach sichtbarer Gehweglänge (ein Mensch je 9 m), nicht pauschal 100 auf wenige Meter Gehweg
+    const wegMeter = wege.reduce((n, l) => n + laenge(l), 0);
+    const sollFuss = wege.length ? Math.min(Math.round(100 * dichte), Math.round(wegMeter / 9)) : 0;
     const anpassen = (arr, n, liste, art, sonstige = []) => {
       const weiter = arr.filter((a) => a?.lane && liste.includes(a.lane)).slice(0, n);
       for (let i = 0; i < n * 18 && weiter.length < n; i++) {
         const a = neuerWagen(liste, art);
         if (!a) break;
         // Bei knappen Straßen lieber weniger Wagen, statt zwei in dieselbe Spur zu setzen.
-        if ([...weiter, ...sonstige].some((b) => b.lane === a.lane &&
+        const qa = positionWagen(a);
+        if ([...weiter, ...sonstige].some((b) => (b.lane === a.lane &&
             Math.abs(b.m - a.m) < (a.art === 'tram' || b.art === 'tram' ? 22 :
-              a.art === 'bus' || b.art === 'bus' ? 14 : KLEINSTE_LUECKE))) continue;
+              a.art === 'bus' || b.art === 'bus' ? 14 : KLEINSTE_LUECKE)) || (() => { const qb = positionWagen(b); return Math.hypot(qa.x - qb.x, qa.z - qb.z) < 8; })())) continue;
         weiter.push(a);
       }
       return weiter;
@@ -236,23 +315,64 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     fuss = fuss.filter((a) => wege.includes(a.weg)).slice(0, sollFuss);
     while (fuss.length < sollFuss) { const f = neueFussgaenger(wege); if (!f) break; fuss.push(f); }
   }
+  /** Wagen auf eine freie Stelle einer sichtbaren Spur setzen (kein anderer Wagen innerhalb von 8 m). */
+  function neuEinsetzen(a, liste, lage) {
+    for (let i = 0; i < 16 && sichtSpuren.length; i++) {
+      const l = waehle(sichtSpuren), m = r() * laenge(l), q = punkt(l, m);
+      if (liste.some((b) => b !== a && (lage?.get(b) ?? positionWagen(b)) && Math.hypot((lage?.get(b) ?? positionWagen(b)).x - q.x, (lage?.get(b) ?? positionWagen(b)).z - q.z) < 8)) continue;
+      a.lane = l; a.m = m; a.sprung = null; a.gegen = undefined; a.warte = 0; return true;
+    }
+    return false;
+  }
   function bewegungWagen(liste, dt) {
     // Vorderes Fahrzeug je Spur zuerst; Folgende werden hinter dem Sicherheitsabstand begrenzt.
     const belegung = new Map();
     const sortiert = [...liste].sort((a, b) => b.m - a.m);
+    // Positionen zu Beginn des Takts: Wagen anderer Spuren (Kreuzungen, Einmündungen) dürfen sich nicht durchdringen
+    const lage = new Map(liste.map((a) => [a, positionWagen(a)]));
+    const laengeVon = (a) => (a.art === 'tram' ? 19 : a.art === 'bus' ? 11.6 : 4.5);
     for (const a of sortiert) {
+      // Unsichtbar wegen Überlappung: nach 0,5 s an freier Stelle neu einsetzen
+      if (a.verdeckt && ((a.vz = (a.vz ?? 0) + dt) > 0.5)) { a.vz = 0; neuEinsetzen(a, liste, lage); }
       const key = a.lane.id;
       const voraus = belegung.get(key);
       let ziel = a.m + a.geschw * dt;
-      if (voraus) ziel = Math.min(ziel, voraus.m - (a.art === 'tram' || voraus.art === 'tram' ? 22 : a.art === 'bus' || voraus.art === 'bus' ? 14 : KLEINSTE_LUECKE));
+      // Nur ein Wagen vor diesem bremst (ein gerade auf diese Spur gewechselter Wagen steht bei m = 0 dahinter)
+      if (voraus && voraus.m >= a.m) ziel = Math.min(ziel, voraus.m - (a.art === 'tram' || voraus.art === 'tram' ? 22 : a.art === 'bus' || voraus.art === 'bus' ? 14 : KLEINSTE_LUECKE));
+      let steht = false;
+      if (ziel > a.m && (a.quer ?? 0) < 3) {
+        const pa = lage.get(a), hx = Math.cos(pa.winkel), hz = -Math.sin(pa.winkel);
+        for (const b of liste) {
+          if (b === a || b.lane === a.lane) continue;
+          const pb = lage.get(b), dx = pb.x - pa.x, dz = pb.z - pa.z, vor = dx * hx + dz * hz, seit = Math.abs(dx * hz - dz * hx);
+          // Wagen b steht vor a im Fahrweg (vorn bis halbe Längen plus 2 m, seitlich unter 2,4 m): a hält an
+          if (vor > 0 && vor < (laengeVon(a) + laengeVon(b)) / 2 + 2 && seit < 2.4) { ziel = a.m; steht = true; break; }
+        }
+        // Gegenseitiges Warten an Kreuzungen höchstens 3 s, dann wird der Wagen an freier Stelle neu eingesetzt
+        a.quer = ziel === a.m ? (a.quer ?? 0) + dt : 0;
+        if (a.quer >= 3 && neuEinsetzen(a, liste, lage)) { a.quer = 0; belegung.set(a.lane.id, a); continue; }
+      } else if (ziel > a.m) a.quer = 0;
       if (ziel >= laenge(a.lane)) {
-        const moeglich = a.lane.naechste.filter((n) => !liste.some((b) => b !== a && b.lane === n && b.m < KLEINSTE_LUECKE * 2));
-        const nach = moeglich.length ? waehle(moeglich) : null;
-        if (nach) { a.sprung = { von: punkt(a.lane, laenge(a.lane)), nach: punkt(nach, 0), fort: 0 }; a.lane = nach; a.m = 0; }
-        else a.m = Math.max(0, laenge(a.lane) - 1);
-      } else a.m = Math.max(0, ziel);
-      belegung.set(a.lane.id, a);
-      if (a.sprung) { a.sprung.fort += a.geschw * dt; if (a.sprung.fort >= abstand(a.sprung.von, a.sprung.nach)) a.sprung = null; }
+        // Zielspur frei: kein Wagen am Spuranfang, und kein Wagen (auch anderer Spuren oder im Abbiegen) im Umkreis von 7 m um den Einfahrpunkt
+        const von = punkt(a.lane, laenge(a.lane));
+        const frei = (n) => { const q = punkt(n, 0); return !liste.some((b) => b !== a && ((b.lane === n && b.m < KLEINSTE_LUECKE * 2) || Math.hypot(lage.get(b).x - q.x, lage.get(b).z - q.z) < 7 ||
+          punktStrecke(lage.get(b), von, q) < 3.5 || (b.sprung && streckenAbstand(b.sprung.von, b.sprung.nach, von, q) < 4))); };
+        const moeglich = a.lane.naechste.filter(frei);
+        let nach = moeglich.length ? waehle(moeglich) : null;
+        // Kein freier Anschluss: auf der Gegenspur derselben Straße wenden, sofern dort Platz ist
+        if (!nach && a.lane.s.achse === 'p') {
+          const g = (a.gegen ??= netz.spuren.find((l) => l.s === a.lane.s && l.dir === -a.lane.dir) ?? null);
+          if (g && frei(g)) nach = g;
+        }
+        if (nach) { a.sprung = { von: punkt(a.lane, laenge(a.lane)), nach: punkt(nach, 0), fort: 0 }; a.lane = nach; a.m = 0; a.gegen = undefined; a.warte = 0; }
+        else {
+          a.m = Math.max(0, laenge(a.lane) - .5);   // warten, bis vorn frei ist
+          // Nach 4 s ohne Lücke (Stau-Kreis an Kreuzungen): Wagen an freier Stelle einer anderen sichtbaren Spur neu einsetzen
+          if ((a.warte = (a.warte ?? 0) + dt) > 4) neuEinsetzen(a, liste, lage);
+        }
+      } else a.m = Math.max(a.m, ziel);   // nie rückwärts
+      if (!a.sprung || a.m > 0) belegung.set(a.lane.id, a);
+      if (a.sprung && !steht) { a.sprung.fort += a.geschw * dt; if (a.sprung.fort >= abstand(a.sprung.von, a.sprung.nach)) a.sprung = null; }
     }
   }
   function positionWagen(a) {
@@ -263,7 +383,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       return { x: von.x + (nach.x - von.x) * t, y: .95, z: von.z + (nach.z - von.z) * t,
         winkel: Math.atan2(-(nach.z - von.z), nach.x - von.x) };
     }
-    return { ...p, y: .95, winkel: (q.z - p.z || q.x - p.x) ? Math.atan2(-(q.z - p.z), q.x - p.x) : richtungsWinkel(a.lane.s, a.lane.dir) };
+    return { ...p, y: .95, winkel: (q.z - p.z || q.x - p.x) ? Math.atan2(-(q.z - p.z), q.x - p.x) : richtungsWinkel(a.lane.s, a.lane.dir, wegStart(a.lane) + a.lane.dir * a.m) };
   }
   function fussBewegen(dt) {
     for (const f of fuss) {
@@ -290,45 +410,57 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     const t = f.phase === 'hinein' ? clamp(f.lauf / .9, 0, 1) : f.phase === 'heraus' ? 1 - clamp(f.lauf / .9, 0, 1) : 1;
     return { x: p.x + (f.haus.ein.x - p.x) * t, z: p.z + (f.haus.ein.z - p.z) * t };
   }
+  /** Sichtschutz gegen Durchdringung: Fahrzeuge, die ein bereits gezeichnetes überlappen, werden nicht gezeichnet (und neu eingesetzt). */
+  const LAENGE = { auto: 4.5, bus: 11.6, tram: 19, lkw: 8 };
+  function ueberlappt(p, L, B, q) {
+    const hx = Math.cos(p.winkel), hz = -Math.sin(p.winkel), dx = q.x - p.x, dz = q.z - p.z;
+    return Math.abs(dx * hx + dz * hz) < (L + q.L) / 2 + 0.2 && Math.abs(dx * hz - dz * hx) < (B + q.B) / 2 + 0.1;
+  }
   function zeichneInstanzen() {
     if (!meshes.auto) return;
     let n = 0;
+    // Gezeichnete Fahrzeuge (Lage, Länge, Breite): große zuerst, dann Lkw, dann Autos
+    const belegt = [];
+    const pruefe = (p, L, B) => { for (const q of belegt) if (ueberlappt(p, L, B, q) || ueberlappt(q, q.L, q.B, { ...p, L, B })) return false; belegt.push({ ...p, L, B }); return true; };
+    for (const a of [...bahnen, ...busse]) { const p = positionWagen(a); a.verdeckt = sichtbar(p) && !pruefe(p, LAENGE[a.art], 2.65); }
+    for (const a of lkw) { if (a.fort > 12) continue; belegt.push({ ...a.start, winkel: a.winkel, L: 8, B: 2.6 }); }
     for (const a of autos) {
       const p = positionWagen(a); if (!sichtbar(p)) continue;
+      if (!pruefe(p, 4.5, 2.0)) { a.verdeckt = true; continue; }
+      a.verdeckt = false;
       matrix(meshes.auto, n, p, p.winkel, [1, 1, 1], a.farbe);
       matrix(meshes.glas, n, { ...p, y: 1.95 }, p.winkel, [1, 1, 1], farbe('#718d9d')); n++;
     }
     fertig(meshes.auto, n); fertig(meshes.glas, n);
     const grosse = (liste, key, palette) => {
       let m = 0;
-      for (const a of liste) { const p = positionWagen(a); if (!sichtbar(p)) continue; matrix(meshes[key], m++, { ...p, y: 1.65 }, p.winkel, [1, 1, 1], palette); }
+      for (const a of liste) { const p = positionWagen(a); if (!sichtbar(p) || a.verdeckt) continue; matrix(meshes[key], m++, { ...p, y: 1.65 }, p.winkel, [1, 1, 1], palette); }
       fertig(meshes[key], m);
     };
-    grosse(busse, 'bus', farbe('#d7c7a0'));
-    grosse(bahnen, 'tram', farbe('#c83c36'));
+    grosse(busse, 'bus', farbe('#ffffff'));
+    grosse(bahnen, 'tram', farbe('#ffffff'));
     n = 0;
     for (const f of fuss) {
       const p = fussPosition(f);
       if (f.phase === 'drinnen' || !sichtbar(p) || !leute) continue;
+      if (belegt.some((q) => ueberlappt(q, q.L, q.B, { x: p.x, z: p.z, L: 0.5, B: 0.5 }))) continue;   // nicht durch Fahrzeuge laufen
       // Blickrichtung: entlang des Wegs, beim Hinein/Heraus zum bzw. vom Eingang
       let winkel;
       if (f.haus && f.phase !== 'weg') {
         const w = koordinate(f.weg.s, f.weg.s.von + f.m, f.weg.v), e = f.haus.ein;
         winkel = f.phase === 'hinein' ? Math.atan2(-(e.z - w.z), e.x - w.x) : Math.atan2(-(w.z - e.z), w.x - e.x);
       } else {
-        winkel = richtungsWinkel(f.weg.s, f.dir);
+        winkel = richtungsWinkel(f.weg.s, f.dir, f.weg.s.von + f.m);
       }
       leute.setze(n++, p.x, .3, p.z, winkel, f.aussehen, f.tuete ? 'gehen_tasche' : 'gehen', f.ph, 1, f.tempo);
     }
     if (leute) leute.fertig(n);
     n = 0;
     for (const a of lkw) {
-      const t = clamp(a.fort / 4.5, 0, 1);
       if (a.fort > 12) continue; // Lkw hat nach der Entladung die Anlieferung wieder verlassen.
-      const ein = a.fort < 4.5 ? t : a.fort < 8 ? 1 : 1 - clamp((a.fort - 8) / 4, 0, 1);
-      const p = { x: a.start.x + (a.ziel.x - a.start.x) * ein, z: a.start.z + (a.ziel.z - a.start.z) * ein };
+      const p = a.start;   // hält am Fahrbahnrand; nicht über Gehweg und Fassade fahren
       if (!sichtbar(p)) continue;
-      matrix(meshes.lkw, n++, { ...p, y: 1.7 }, a.winkel, [1, 1, 1], farbe('#e1ddd1'));
+      matrix(meshes.lkw, n++, { ...p, y: 1.7 }, a.winkel, [1, 1, 1], farbe('#ffffff'));
     }
     fertig(meshes.lkw, n);
   }
@@ -383,7 +515,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       const s = netz.spuren.filter((l) => l.s.typ !== 'fussgaenger')
         .sort((a, b) => abstand(punkt(a, laenge(a) / 2), h.mitte) - abstand(punkt(b, laenge(b) / 2), h.mitte))[0];
       const p = s ? koordinate(s.s, clamp(lageZu(s.s, h.mitte).u, s.s.von + 4, s.s.bis - 4),
-        Math.sign(lageZu(s.s, h.mitte).v) * (s.s.breite / 2 - .8)) : h.weg;
+        Math.sign(lageZu(s.s, h.mitte).v) * (s.s.achse === 'p' ? Math.max(1.2, (s.s.fahrbahn ?? 6) / 2 - 1.4) : s.s.breite / 2 - .8)) : h.weg;
       const ziel = h.weg; // Vom Fahrbahnrand bis zur Hausanlieferung und zurück.
       return { start: p, ziel, fort: 0, winkel: s ? richtungsWinkel(s.s, 1) : 0, hausId: h.h.id };
     });
@@ -419,5 +551,21 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       netzSpuren: netz?.spuren.length ?? 0, budget: limitFaktor,
       updateMittelMs: +(frameKosten.reduce((a,b)=>a+b,0) / Math.max(1,frameKosten.length)).toFixed(2),
       akkuFps: performance.now() - letzterKontakt > 30000 ? 15 : 60 }),
+    /** Abnahme: Fahrzeugpaare, die sich näher als d Meter kommen (gestapelte Autos). */
+    stapel: () => { const w = [...autos, ...busse, ...bahnen], p = w.map(positionWagen), L = (a) => (a.art === 'tram' ? 19 : a.art === 'bus' ? 11.6 : 4.5); let n = 0;
+      // Überlappung der Fahrzeugumrisse (Längs- und Querabstand in Fahrtrichtung von i)
+      for (let i = 0; i < p.length; i++) for (let j = i + 1; j < p.length; j++) {
+        const hx = Math.cos(p[i].winkel), hz = -Math.sin(p[i].winkel), dx = p[j].x - p[i].x, dz = p[j].z - p[i].z;
+        if (Math.abs(dx * hx + dz * hz) < (L(w[i]) + L(w[j])) / 2 - 0.3 && Math.abs(dx * hz - dz * hx) < 1.9) n++;
+      }
+      return { paare: n, wagen: p.length }; },
+    spurBelegung: (id) => [...autos, ...busse].map((a, i) => (a._n ??= Math.random().toString(36).slice(2, 6), a)).filter((a) => a.lane.id === id).map((a) => a._n + '@' + a.m.toFixed(1) + (a.sprung ? 'S' : '')).join(' '),
+    stapelDetail: () => { const w = [...autos, ...busse, ...bahnen], p = w.map(positionWagen), L = (a) => (a.art === 'tram' ? 19 : a.art === 'bus' ? 11.6 : 4.5), out = [];
+      for (let i = 0; i < p.length; i++) for (let j = i + 1; j < p.length; j++) {
+        const hx = Math.cos(p[i].winkel), hz = -Math.sin(p[i].winkel), dx = p[j].x - p[i].x, dz = p[j].z - p[i].z;
+        if (Math.abs(dx * hx + dz * hz) < (L(w[i]) + L(w[j])) / 2 - 0.3 && Math.abs(dx * hz - dz * hx) < 1.9)
+          out.push([i, j].map((k) => ({ lane: w[k].lane.id, dir: w[k].lane.dir, m: +w[k].m.toFixed(1), L: +laenge(w[k].lane).toFixed(1), sprung: !!w[k].sprung, art: w[k].art, quer: +(w[k].quer ?? 0).toFixed(1), warte: +(w[k].warte ?? 0).toFixed(1), winkel: +p[k].winkel.toFixed(2) })));
+      }
+      return out; },
   };
 }

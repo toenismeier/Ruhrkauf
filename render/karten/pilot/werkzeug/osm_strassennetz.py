@@ -4,7 +4,7 @@ import sys, json, math
 from lxml import etree
 sys.path.insert(0, sys.path[0]); from geo import xz
 HAUPT = {'trunk', 'primary', 'secondary', 'tertiary', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link'}
-NEBEN = {'residential', 'unclassified', 'living_street', 'service'}
+NEBEN = {'residential', 'unclassified', 'living_street'}   # service (Zufahrten, Parkplatzgassen) fährt kein Verkehr
 FUSS = {'pedestrian'}
 knoten, wege = {}, []
 for _, e in etree.iterparse(sys.argv[1], tag=('node', 'way')):
@@ -12,7 +12,8 @@ for _, e in etree.iterparse(sys.argv[1], tag=('node', 'way')):
     else:
         t = {k.get('k'): k.get('v') for k in e.iterfind('tag')}
         h = t.get('highway')
-        if h and (h in HAUPT or h in NEBEN or h in FUSS) and t.get('tunnel') not in ('yes',) and t.get('area') != 'yes' and not (h == 'service' and t.get('service') in ('parking_aisle', 'driveway')):
+        if h and (h in HAUPT or h in NEBEN or h in FUSS) and t.get('tunnel') not in ('yes',) and t.get('area') != 'yes':
+            t['_id'] = e.get('id')
             wege.append(([n.get('ref') for n in e.iterfind('nd')], t))
     e.clear()
 zahl = {}
@@ -42,7 +43,7 @@ for refs, t in wege:
         if zahl.get(r, 0) > 1 or r == refs[-1]:
             pts = [xz(*knoten[q]) for q in teil if q in knoten]
             if len(pts) >= 2:
-                kanten.append({'typ': typ, 'breite': round(breite, 1), 'gehweg': 3.5 if typ != 'fussgaenger' else 0, 'spuren': spuren, 'einbahn': einbahn,
+                kanten.append({'way': int(t['_id']), 'typ': typ, 'breite': round(breite, 1), 'gehweg': 3.5 if typ != 'fussgaenger' else 0, 'spuren': spuren, 'einbahn': einbahn,
                                'a': teil[0], 'b': teil[-1], 'punkte': [[round(x, 1), round(z, 1)] for x, z in dp(pts)]})
             teil = [r]
 json.dump({'kanten': kanten}, open(sys.argv[2], 'w'), separators=(',', ':'))

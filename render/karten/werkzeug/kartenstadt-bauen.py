@@ -1,111 +1,173 @@
-# Kartenstadt-Spieldatei bauen (render/karten/<stadt>-spiel.json) aus den Zwischenständen der Pilot-Werkzeuge:
-#   o2s-plain/lanes/marks.geojson (osm2streets), lod2-kern.json (LoD2 NRW), osm-kern.json (OSM-Flächen), netz.json (Straßennetz)
-# Neu gegenüber kartenstadt-packen.py:
-#   - Boden fertig trianguliert (earcut) und je Schicht und 240-m-Zelle zusammengefasst: zur Laufzeit keine Triangulierung.
-#   - Gehwege mit Bordstein als Band um alle Fahrbahnen, Innenhöfe in Wohnblöcken als Hofgrün, übrige Fläche Hofpflaster.
-#   - Dachflächen mit vorberechneten Dreiecken.
+# Kartenstadt-Spieldatei bauen (render/karten/<stadt>-spiel.json), zwei Varianten:
+#   'karte'  – kartentreu: Fahrbahnen, Spuren und Markierungen aus osm2streets, Haltestellen, Parkstreifen
+#   'coffee' – abstrahiert: Straßen als saubere Bänder aus den OSM-Mittellinien (einheitliche Breite je Straße,
+#              runde Kreuzungen, Mittellinie nur auf Hauptstraßen), keine Zufahrten, keine Haltestelleninseln
+# Gemeinsam: Gebäude (LoD2 NRW), Flächen, Wege, Gleise, Bahnsteigdächer, Bauplatzflächen (bebaubar), Straßennetz mit
+# Fahrspuren für den Verkehr. Je Variante: Bodenschichten, Höfe, Deko (Bäume, Hecken, Möbel, Lauben).
+# Eingaben im Arbeitsordner: o2s-plain/lanes/marks.geojson, lod2-kern.json, osm-kern.json, netz.json
 # Aufruf: python3 kartenstadt-bauen.py <arbeitsordner> <ziel.json> <radius_m> [mitte_x mitte_z]
-import json, sys, math, os
+import json, sys, math, os, base64, random
 import numpy as np
 import mapbox_earcut as earcut
-from shapely.geometry import Polygon, MultiPolygon, box, Point
+from shapely.geometry import Polygon, MultiPolygon, box, Point, LineString
 from shapely.ops import unary_union
 from shapely.validation import make_valid
+from shapely.prepared import prep
+from shapely.strtree import STRtree
 
 ordner, ziel, R = sys.argv[1], sys.argv[2], float(sys.argv[3])
 MX, MZ = (float(sys.argv[4]), float(sys.argv[5])) if len(sys.argv) > 5 else (85.0, 90.0)
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'pilot', 'werkzeug'))
 from geo import ring as lonlat_ring
-RAND = 80                              # Spielraum für Teile knapp außerhalb des Ausschnitts
-OX, OZ = R - MX + RAND, R - MZ + RAND  # Plan-Ursprung: alles positiv, Mitte bei (R + RAND, R + RAND)
+RAND = 80
+OX, OZ = R - MX + RAND, R - MZ + RAND
 BREITE = TIEFE = int(2 * (R + RAND))
 ZELLE = 240
 lade = lambda n: json.load(open(os.path.join(ordner, n)))
+log = lambda *a: print(*a, flush=True)
 
 def polys_geojson(g):
     if g['type'] == 'Polygon': yield g['coordinates']
     elif g['type'] == 'MultiPolygon': yield from g['coordinates']
-
 def gueltig(p):
     try:
         p = Polygon(p) if not isinstance(p, (Polygon, MultiPolygon)) else p
-        if not p.is_valid: p = make_valid(p)
-        return p
+        return p if p.is_valid else make_valid(p)
     except Exception:
         return None
-
 def teile(g):
     if g is None or g.is_empty: return []
     if isinstance(g, Polygon): return [g]
     if hasattr(g, 'geoms'): return [q for x in g.geoms for q in teile(x)]
     return []
+def vereinigt(liste):
+    liste = [g for g in liste if g is not None and not g.is_empty]
+    return unary_union(liste).buffer(0) if liste else Polygon()
 
-# ── Eingaben
-o2s = {k: lade(f'o2s-{k}.geojson') for k in ('plain', 'lanes', 'marks')}
-fahrbahn, rad, mark, kreuz, parkstreifen = [], [], [], [], []
-for f in o2s['plain']['features']:
-    if f['properties'].get('type') == 'intersection':
-        for p in polys_geojson(f['geometry']): kreuz.append(lonlat_ring(p[0]))
-for f in o2s['lanes']['features']:
-    t = f['properties'].get('type')
-    ziel_liste = fahrbahn if t in ('Driving', 'Bus', 'Construction', 'LightRail') else parkstreifen if t in ('Parking', 'Shoulder') else rad if t == 'Biking' else None
-    if ziel_liste is not None:
-        for p in polys_geojson(f['geometry']): ziel_liste.append(lonlat_ring(p[0]))
-for f in o2s['marks']['features']:
-    t = f['properties'].get('type')
-    if t in ('center line', 'vehicle stop line') or t == 'lane separator':
-        for p in polys_geojson(f['geometry']):
-            r = lonlat_ring(p[0])
-            if t == 'lane separator' and len(r) <= 6 and abs(r[0][0] - r[2][0]) + abs(r[0][1] - r[2][1]) <= 2.5: continue
-            mark.append(r)
 osm = lade('osm-kern.json'); lod = lade('lod2-kern.json'); netz = lade('netz.json')['kanten']
+o2s = {k: lade(f'o2s-{k}.geojson') for k in ('plain', 'lanes', 'marks')}
 gebiet = box(MX - R, MZ - R, MX + R, MZ + R)
 im = lambda pts: any(abs(x - MX) <= R + 50 and abs(z - MZ) <= R + 50 for x, z in pts[:: max(1, len(pts) // 4)])
 
-# ── Bodenschichten (Shapely)
-print('Fahrbahnen vereinigen …', flush=True)
-fb_polys = [g for g in (gueltig(p) for p in fahrbahn if len(p) >= 3 and im(p)) if g is not None and not g.is_empty]
-park_polys = [g for g in (gueltig(p) for p in parkstreifen if len(p) >= 3 and im(p)) if g is not None and not g.is_empty]
-# Kreuzungsflächen nur dort, wo Fahrbahnen ankommen: reine Fußweg-Kreuzungen wären graue Asphaltflecken auf Plätzen
-from shapely.strtree import STRtree
-baum_fb = STRtree(fb_polys)
-for p in kreuz:
-    if len(p) < 3 or not im(p): continue
-    g = gueltig(p)
-    if g is None or g.is_empty: continue
-    nah = baum_fb.query(g.buffer(1.0))
-    if len(nah) >= 2: fb_polys.append(g)
-strassen = unary_union(fb_polys).intersection(gebiet).simplify(0.25).buffer(0)
-parkflaeche = unary_union(park_polys).intersection(gebiet).difference(strassen).simplify(0.25).buffer(0) if park_polys else None
-strassen_alle = unary_union([strassen] + ([parkflaeche] if parkflaeche is not None else [])).buffer(0)
-print('Gehwege …', flush=True)
-gehweg_aussen = strassen_alle.buffer(3.4, join_style=2)
-bord = strassen_alle.buffer(0.45, join_style=2).difference(strassen_alle)
-gehweg = gehweg_aussen.difference(strassen_alle).difference(bord).simplify(0.3).buffer(0)
-bord = bord.simplify(0.2).buffer(0)
+# ── Fahrspuren je OSM-Weg (osm2streets): Spuren links→rechts; Fahrbahnband = alles außer Geh- und Mischwegen
+FAHRBAR = {'Driving', 'Bus', 'Construction', 'LightRail', 'Parking', 'Shoulder', 'Biking', 'SharedLeftTurn', 'Buffer(Curb)'}
+VERKEHR = {'Driving', 'Bus'}
+spuren_je_strasse = {}
+for f in o2s['lanes']['features']:
+    p = f['properties']
+    spuren_je_strasse.setdefault(p['road'], {'ways': p['osm_way_ids'], 'spuren': []})['spuren'].append((p['index'], p['type'], p['direction'], p['width']))
+spuren_je_weg = {}
+for r in spuren_je_strasse.values():
+    sp = sorted(r['spuren'])
+    band = [s for s in sp if s[1] in FAHRBAR]
+    if not band: continue
+    gesamt = sum(s[3] for s in band)
+    links, verkehr = 0.0, []
+    for s in band:
+        mitte = links + s[3] / 2
+        if s[1] in VERKEHR:
+            # Abstand von der Bandmitte nach links (positiv = links in Fahrtrichtung des Wegs)
+            verkehr.append((round(gesamt / 2 - mitte, 2), 1 if s[2] == 'Fwd' else -1))
+        links += s[3]
+    for w in r['ways']:
+        spuren_je_weg.setdefault(w, (gesamt, verkehr))
+
+# ── Gemeinsame Flächen
+kern = Polygon([(MX + 520 * math.cos(a / 24 * 2 * math.pi), MZ + 520 * math.sin(a / 24 * 2 * math.pi)) for a in range(24)])
 flaechen_art = {}
 for fl in osm['flaechen']:
     if not im(fl['umriss']) or len(fl['umriss']) < 4: continue
     g = gueltig(fl['umriss'])
     if g is None or g.is_empty: continue
     flaechen_art.setdefault(fl['art'], []).append(g)
-gruen = unary_union(flaechen_art.get('gruen', [])) if flaechen_art.get('gruen') else None
-# Innenhöfe: Fläche weiter als 14 m von jeder Fahrbahn, außerhalb des Kerns (dort Pflaster), ohne OSM-Plätze
-print('Innenhöfe …', flush=True)
-abstand = strassen_alle.buffer(14, join_style=2)
-kern = Polygon([(MX + 520 * math.cos(a / 24 * 2 * math.pi), MZ + 520 * math.sin(a / 24 * 2 * math.pi)) for a in range(24)])
-sperre = unary_union([abstand] + [g for a in ('platz', 'parkplatz', 'bahngelaende', 'bahnsteig', 'gewerbe', 'schulhof', 'sport', 'kleingarten') for g in flaechen_art.get(a, [])])
-hof_alle = gebiet.difference(sperre)
-hof_alle = unary_union([q.buffer(-2).buffer(2) for q in teile(hof_alle) if q.area > 250]).simplify(1.0).buffer(0)
-# Im Kern sind Höfe gepflastert (Hofpflaster mit Bäumen), außerhalb begrünt
-hof = hof_alle.difference(kern).buffer(0)
-hofkern = hof_alle.intersection(kern).buffer(0)
+# Benannte Plätze: in der Innenstadt Pflaster, außerhalb Schmuckplatz mit Rasenkern und Pflasterrand
+for g in flaechen_art.pop('platzort', []):
+    if kern.contains(g.centroid) or g.area < 600: flaechen_art.setdefault('platz', []).append(g); continue
+    innen = g.buffer(-6, join_style=2)
+    if not innen.is_empty: flaechen_art.setdefault('gruen', []).append(innen)
+    flaechen_art.setdefault('platz', []).append(g.difference(innen) if not innen.is_empty else g)
+gruen = vereinigt(flaechen_art.get('gruen', []))
+# Plätze liegen über Grün: Spielplätze, Rasen und Sportfelder darauf wieder freistellen
+_frei = vereinigt(flaechen_art.get('gruen', []) + flaechen_art.get('sport', []) + flaechen_art.get('kleingarten', []))
+flaechen_art['platz'] = [q for g in flaechen_art.get('platz', []) for q in teile(g.difference(_frei)) if q.area > 5]
+gleisflaeche = vereinigt([LineString(g['punkte']).buffer(2.4 if g['art'] == 'tram' else 3.0) for g in osm['gleise'] if len(g['punkte']) >= 2 and im(g['punkte']) and g['art'] != 'tram'])
+wege_linien = [w for w in osm.get('wege', []) if len(w['punkte']) >= 2 and im(w['punkte'])]
 
-# ── Triangulierung und Zellen
+# ── Straßen je Variante
+def strassen_karte():
+    fahrbahn, rad, mark, kreuz, park, halte = [], [], [], [], [], []
+    for f in o2s['plain']['features']:
+        if f['properties'].get('type') == 'intersection':
+            for p in polys_geojson(f['geometry']): kreuz.append(lonlat_ring(p[0]))
+    # Zufahrten, Feld- und Fußwege (highway=service/track/footway …) zeichnen keine Fahrbahn: sie erzeugen das Straßengeflecht
+    dienst = set(json.load(open(os.path.join(ordner, 'dienstwege.json')))) if os.path.exists(os.path.join(ordner, 'dienstwege.json')) else set()
+    for f in o2s['lanes']['features']:
+        t = f['properties'].get('type')
+        if dienst and all(w in dienst for w in f['properties'].get('osm_way_ids', [])) and f['properties'].get('osm_way_ids'): continue
+        ziel_l = fahrbahn if t in ('Driving', 'Bus', 'Construction', 'LightRail') else park if t in ('Parking', 'Shoulder') else rad if t == 'Biking' else None
+        if ziel_l is not None:
+            for p in polys_geojson(f['geometry']): ziel_l.append(lonlat_ring(p[0]))
+    for f in o2s['marks']['features']:
+        t = f['properties'].get('type')
+        if t in ('center line', 'vehicle stop line', 'lane separator'):
+            for p in polys_geojson(f['geometry']):
+                r = lonlat_ring(p[0])
+                if t == 'lane separator' and len(r) <= 6 and abs(r[0][0] - r[2][0]) + abs(r[0][1] - r[2][1]) <= 2.5: continue
+                mark.append(r)
+    fb = [g for g in (gueltig(p) for p in fahrbahn if len(p) >= 3 and im(p)) if g is not None and not g.is_empty]
+    pk = [g for g in (gueltig(p) for p in park if len(p) >= 3 and im(p)) if g is not None and not g.is_empty]
+    baum_fb = STRtree(fb)
+    for p in kreuz:
+        if len(p) < 3 or not im(p): continue
+        g = gueltig(p)
+        if g is not None and not g.is_empty and len(baum_fb.query(g.buffer(1.0))) >= 2: fb.append(g)
+    strassen = vereinigt(fb).intersection(gebiet).simplify(0.25).buffer(0)
+    # Einzelne Fahrbahninseln ohne Anschluss (Wendekreise, Knoten von Parkwegen) weglassen: sie wirken als Platten mit Loch
+    strassen = vereinigt([q for q in teile(strassen) if q.area > 400])
+    parkfl = vereinigt(pk).intersection(gebiet).difference(strassen).simplify(0.25).buffer(0)
+    zus = {'rad': [g for g in (gueltig(p) for p in rad if len(p) >= 3 and im(p)) if g is not None],
+           'markierung': [g for g in (gueltig(p) for p in mark if len(p) >= 3 and im(p)) if g is not None],
+           'parkstreifen': [parkfl], 'haltestelle': flaechen_art.get('haltestelle', [])}
+    return strassen, vereinigt([strassen, parkfl]), zus
+
+def strassen_coffee():
+    baender, fuss, striche = [], [], []
+    grad = {}
+    for k in netz:
+        if k['typ'] != 'fussgaenger':
+            for e in (k['a'], k['b']): grad[e] = grad.get(e, 0) + 1
+    knoten_pkt = {}
+    for k in netz:
+        knoten_pkt[k['a']] = k['punkte'][0]; knoten_pkt[k['b']] = k['punkte'][-1]
+    for k in netz:
+        if not im(k['punkte']): continue
+        ln = LineString(k['punkte'])
+        if k['typ'] == 'fussgaenger':
+            fuss.append(ln.buffer(5.5, join_style=1))
+            continue
+        gesamt = spuren_je_weg.get(k['way'], (None, None))[0] or (6.5 if k['typ'] == 'haupt' else 5.5)
+        gesamt = min(max(gesamt, 5.0), 14.0)
+        baender.append(ln.buffer(gesamt / 2, cap_style=1, join_style=1))
+    strassen = vereinigt(baender).intersection(gebiet).simplify(0.2).buffer(0)
+    # Mittellinie gestrichelt nur auf Hauptstraßen mit Gegenverkehr, nicht in Kreuzungen
+    kreise = vereinigt([Point(knoten_pkt[n]).buffer(12) for n, g in grad.items() if g >= 3 and n in knoten_pkt])
+    for k in netz:
+        if k['typ'] != 'haupt' or k['einbahn'] or not im(k['punkte']): continue
+        ln = LineString(k['punkte'])
+        u = 2.0
+        while u < ln.length - 2:
+            a, b = ln.interpolate(u), ln.interpolate(min(u + 3.0, ln.length))
+            striche.append(LineString([a, b]).buffer(0.12, cap_style=2))
+            u += 9.0
+    mark = vereinigt(striche).difference(kreise).intersection(strassen) if striche else Polygon()
+    platz_fuss = vereinigt(fuss).difference(strassen).intersection(gebiet).simplify(0.3).buffer(0)
+    return strassen, strassen, {'markierung': [mark], 'fusszone': [platz_fuss]}
+
+# ── Triangulierung
 FARBE = {'pflaster': 0, 'gehweg': 1, 'bord': 2, 'fahrbahn': 3, 'rad': 4, 'markierung': 5, 'gruen': 6, 'hof': 7, 'wasser': 8, 'platz': 9, 'parkplatz': 10, 'bahnsteig': 11, 'schotter': 12,
-         'parkstreifen': 13, 'hofkern': 14, 'gewerbe': 15, 'schulhof': 16, 'sport': 17, 'kleingarten': 18, 'weg': 19, 'linie': 20, 'ufer': 21, 'rasen2': 22}
-schichten = {}
-def ablegen(art, poly):
+         'parkstreifen': 13, 'hofkern': 14, 'gewerbe': 15, 'schulhof': 16, 'sport': 17, 'kleingarten': 18, 'weg': 19, 'linie': 20, 'ufer': 21, 'rasen2': 22,
+         'haltestelle': 23, 'fusszone': 24, 'garten': 25}
+def triangulieren(schichten, art, poly):
     for q in teile(poly):
         if q.area < 0.3: continue
         ext = list(q.exterior.coords)[:-1]
@@ -119,75 +181,292 @@ def ablegen(art, poly):
         k = (art, int((cx + OX) // ZELLE), int((cz + OZ) // ZELLE))
         e = schichten.setdefault(k, {'p': [], 'i': []})
         basis = len(e['p']) // 2
+        if basis + len(alle) >= 65000:
+            k = (art, k[1], k[2], len(schichten)); e = schichten.setdefault(k, {'p': [], 'i': []}); basis = 0
         for x, z in alle: e['p'] += [round((x + OX) * 10), round((z + OZ) * 10)]
         e['i'] += [int(v) + basis for v in idx]
-def ablegen_liste(art, liste):
-    for p in liste:
-        if len(p) >= 3 and im(p):
-            g = gueltig(p)
-            if g is not None: ablegen(art, g.intersection(gebiet))
 
-print('Triangulieren …', flush=True)
-ablegen('gehweg', gehweg); ablegen('bord', bord); ablegen('hof', hof); ablegen('hofkern', hofkern)
-for art, liste in flaechen_art.items():
-    a = {'bahngelaende': 'schotter'}.get(art, art)
-    if a in FARBE:
-        for g in liste: ablegen(a, g.intersection(gebiet))
-# Parkwege und Pfade (nicht über Fahrbahn und Gehweg), Treppen schmal
-from shapely.geometry import LineString
-wege_poly = []
-for w in osm.get('wege', []):
-    if len(w['punkte']) < 2 or not im(w['punkte']): continue
-    breite = 1.0 if w['art'] == 'steps' else 1.6 if w['art'] == 'path' else 2.2
-    wege_poly.append(LineString(w['punkte']).buffer(breite / 2, cap_style=2, join_style=2))
-if wege_poly:
-    wege = unary_union(wege_poly).difference(gehweg_aussen).intersection(gebiet).simplify(0.25).buffer(0)
-    ablegen('weg', wege)
-else:
-    wege = None
-# Sportfelder: weiße Außenlinie und Mittellinie
-for f in osm.get('sportfelder', []):
-    g = gueltig(f['umriss'])
-    if g is None or g.is_empty or g.area < 150 or not im(f['umriss']): continue
-    r = g.minimum_rotated_rectangle
-    innen = r.buffer(-1.2, join_style=2)
-    if innen.is_empty: continue
-    ablegen('linie', innen.difference(innen.buffer(-0.18, join_style=2)))
-    c = list(innen.exterior.coords)[:4]
-    seiten = sorted([(math.dist(c[i], c[(i + 1) % 4]), i) for i in range(4)])
-    i = seiten[0][1]; j = (i + 2) % 4
-    m1 = ((c[i][0] + c[(i + 1) % 4][0]) / 2, (c[i][1] + c[(i + 1) % 4][1]) / 2); m2 = ((c[j][0] + c[(j + 1) % 4][0]) / 2, (c[j][1] + c[(j + 1) % 4][1]) / 2)
-    mitte = ((c[i][0] + c[(i + 1) % 4][0] + c[j][0] + c[(j + 1) % 4][0]) / 4, (c[i][1] + c[(i + 1) % 4][1] + c[j][1] + c[(j + 1) % 4][1]) / 4)
-    d = (m2[0] - m1[0], m2[1] - m1[1]); L = math.hypot(*d) or 1
-    q = (-d[1] / L, d[0] / L); halb = seiten[2][0] / 2
-    ablegen('linie', LineString([(mitte[0] - q[0] * halb, mitte[1] - q[1] * halb), (mitte[0] + q[0] * halb, mitte[1] + q[1] * halb)]).buffer(0.09, cap_style=2))
-    ablegen('linie', Point(mitte).buffer(3.0).difference(Point(mitte).buffer(2.82)))
-# Ufer: heller Rand um Wasser
-for g in flaechen_art.get('wasser', []):
-    ablegen('ufer', g.buffer(1.2, join_style=2).difference(g).intersection(gebiet))
-# Rasenvariation: etwas dunklere Flecken in großen Grünflächen (Mähmuster, Baumschatten-Inseln)
-if gruen is not None:
-    import random as _r
-    rr = _r.Random(5)
-    flecken = []
-    for q in teile(gruen):
-        if q.area < 2500: continue
-        x0, z0, x1, z1 = q.bounds
-        for _ in range(int(q.area / 1800)):
-            px, pz = rr.uniform(x0, x1), rr.uniform(z0, z1)
-            flecken.append(Point(px, pz).buffer(rr.uniform(7, 16), 6))
-    if flecken: ablegen('rasen2', unary_union(flecken).intersection(gruen).buffer(0))
-ablegen('fahrbahn', strassen)
-if parkflaeche is not None: ablegen('parkstreifen', parkflaeche)
-ablegen_liste('rad', rad); ablegen_liste('markierung', mark)
-import base64
+def hoefe(strassen_alle):
+    """Blockinnenräume: Streifen quer zur langen Achse, abwechselnd Garten (mit Hecken) und Hofpflaster."""
+    abstand = strassen_alle.buffer(7, join_style=2)   # Vorgärten und Höfe reichen bis an den Gehweg (Häuser stehen ohnehin darauf)
+    sperre = vereinigt([abstand] + [g for a in ('platz', 'parkplatz', 'bahngelaende', 'bahnsteig', 'schulhof', 'sport', 'kleingarten', 'gruen', 'wasser') for g in flaechen_art.get(a, [])])
+    alle = gebiet.difference(sperre)
+    gewerbe_p = prep(vereinigt(flaechen_art.get('gewerbe', [])))
+    alle = vereinigt([q.buffer(-2).buffer(2) for q in teile(alle) if q.area > 250]).simplify(1.0).buffer(0)
+    gaerten, pflaster, hecken = [], [], []
+    for q in teile(alle):
+        rr = random.Random(int(q.centroid.x * 7 + q.centroid.y * 13))
+        im_kern = kern.contains(q.centroid)
+        # Gewerbeblöcke (landuse commercial/retail/industrial): überwiegend Hofpflaster, aber nie eine leere beige Fläche
+        anteil_garten = 0.45 if gewerbe_p.contains(q.centroid) else 0.4 if im_kern else 0.7
+        if q.area < 900:
+            (gaerten if rr.random() < anteil_garten else pflaster).append(q); continue
+        r = q.minimum_rotated_rectangle
+        c = list(r.exterior.coords)[:4]
+        l01, l12 = math.dist(c[0], c[1]), math.dist(c[1], c[2])
+        a, b = (c[0], c[1]) if l01 >= l12 else (c[1], c[2])
+        L = max(l01, l12); ux, uz = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+        u = 0.0
+        while u < L:
+            w = rr.uniform(9, 15)
+            streifen = Polygon([(a[0] + ux * u - uz * 500, a[1] + uz * u + ux * 500), (a[0] + ux * (u + w) - uz * 500, a[1] + uz * (u + w) + ux * 500),
+                                (a[0] + ux * (u + w) + uz * 500, a[1] + uz * (u + w) - ux * 500), (a[0] + ux * u + uz * 500, a[1] + uz * u - ux * 500)])
+            teil = q.intersection(streifen)
+            if not teil.is_empty:
+                if rr.random() < anteil_garten:
+                    gaerten.append(teil)
+                    grenze = LineString([(a[0] + ux * u - uz * 500, a[1] + uz * u + ux * 500), (a[0] + ux * u + uz * 500, a[1] + uz * u - ux * 500)]).intersection(q)
+                    if not grenze.is_empty: hecken.append(grenze)
+                else: pflaster.append(teil)
+            u += w
+    return vereinigt(gaerten), vereinigt(pflaster), hecken
+
+def boden_variante(name, schichten):
+    log(f'[{name}] Straßen …')
+    strassen, strassen_alle, zus = strassen_karte() if name == 'karte' else strassen_coffee()
+    gehweg_aussen = strassen_alle.buffer(3.4 if name == 'karte' else 3.0, join_style=2)
+    bord = strassen_alle.buffer(0.4, join_style=2).difference(strassen_alle)
+    gehweg = gehweg_aussen.difference(strassen_alle).difference(bord).simplify(0.3).buffer(0)
+    bord = bord.simplify(0.2).buffer(0)
+    log(f'[{name}] Höfe …')
+    garten, hofpflaster, hecken = hoefe(strassen_alle)
+    log(f'[{name}] Triangulieren …')
+    T = lambda art, g: triangulieren(schichten, art, g)
+    T('gehweg', gehweg); T('bord', bord); T('garten', garten); T('hofkern', hofpflaster)
+    for art, liste in flaechen_art.items():
+        a = {'bahngelaende': 'schotter'}.get(art, art)
+        if a in FARBE and a not in ('haltestelle', 'gewerbe'):   # Gewerbe nur über die Hofaufteilung
+            T(a, vereinigt(liste).intersection(gebiet))   # vereinigt: überlappende OSM-Flächen derselben Art flackern sonst
+    breite = lambda w: 1.0 if w['art'] == 'steps' else 1.6 if w['art'] == 'path' else 2.2
+    # Fußwege nur im Grünen (Parks, Gärten, Kleingärten, Schul- und Sportgelände); auf Pflaster wirken sie wie Straßengewirr
+    gruenzone = vereinigt([garten] + [g for a in ('gruen', 'kleingarten', 'schulhof', 'sport') for g in flaechen_art.get(a, [])]).buffer(1)
+    wege = vereinigt([LineString(w['punkte']).buffer(breite(w) / 2, cap_style=2, join_style=2) for w in wege_linien]).difference(gehweg_aussen).intersection(gebiet).intersection(gruenzone).simplify(0.25).buffer(0)
+    T('weg', wege)
+    log(f'[{name}] Plätze …')
+    # Plätze: Pflasterraster als feine Fugenbänder, damit große Plätze nicht als leere Fläche wirken
+    fugen = []
+    for pl in flaechen_art.get('platz', []):
+        if pl.area < 300: continue
+        x0, z0, x1, z1 = pl.bounds; x = math.floor(x0 / 6) * 6
+        while x < x1: fugen.append(LineString([(x, z0), (x, z1)]).buffer(0.09, cap_style=2)); x += 6
+        z = math.floor(z0 / 6) * 6
+        while z < z1: fugen.append(LineString([(x0, z), (x1, z)]).buffer(0.09, cap_style=2)); z += 6
+        fugen = [vereinigt(fugen).intersection(pl.buffer(-1.5))]
+        T('linie', fugen.pop())
+    log(f'[{name}] Parkplätze …')
+    # Parkplätze: Stellplatzmarkierung (Reihen 5 m tief, Fahrgasse 6 m, Stände 2,5 m breit), damit keine leeren grauen Platten entstehen
+    for pk in flaechen_art.get('parkplatz', []):
+        pk = pk.intersection(gebiet)
+        if pk.is_empty or pk.area < 150: continue
+        r = pk.minimum_rotated_rectangle
+        c = list(r.exterior.coords)[:4]
+        l01, l12 = math.dist(c[0], c[1]), math.dist(c[1], c[2])
+        a, b, d = (c[0], c[1], c[3]) if l01 >= l12 else (c[1], c[2], c[0])
+        L, TT = math.dist(a, b), math.dist(a, d)
+        ux, uz = (b[0] - a[0]) / L, (b[1] - a[1]) / L; vx, vz = (d[0] - a[0]) / TT, (d[1] - a[1]) / TT
+        innen = pk.buffer(-0.8, join_style=2)
+        striche = []
+        t = 3.0   # Fahrgasse am Rand, dann je zwei Stellreihen Rücken an Rücken und eine Fahrgasse (16-m-Raster)
+        while t + 5 <= TT:
+            for reihe in (0, 5):
+                if t + reihe + 5 > TT: break
+                u = 0.0
+                while u <= L:
+                    p0 = (a[0] + ux * u + vx * (t + reihe), a[1] + uz * u + vz * (t + reihe))
+                    striche.append(LineString([p0, (p0[0] + vx * 5, p0[1] + vz * 5)]).buffer(0.07, cap_style=2))
+                    u += 2.5
+            striche.append(LineString([(a[0] + vx * (t + 5), a[1] + vz * (t + 5)), (b[0] + vx * (t + 5), b[1] + vz * (t + 5))]).buffer(0.07, cap_style=2))
+            t += 16
+        if striche and not innen.is_empty: T('linie', vereinigt(striche).intersection(innen))
+    for f in osm.get('sportfelder', []):
+        g = gueltig(f['umriss'])
+        if g is None or g.is_empty or g.area < 150 or not im(f['umriss']): continue
+        innen = g.minimum_rotated_rectangle.buffer(-1.2, join_style=2)
+        if innen.is_empty: continue
+        T('linie', innen.difference(innen.buffer(-0.18, join_style=2)))
+        c = list(innen.exterior.coords)[:4]
+        seiten = sorted([(math.dist(c[i], c[(i + 1) % 4]), i) for i in range(4)])
+        i = seiten[0][1]; j = (i + 2) % 4
+        m1 = ((c[i][0] + c[(i + 1) % 4][0]) / 2, (c[i][1] + c[(i + 1) % 4][1]) / 2); m2 = ((c[j][0] + c[(j + 1) % 4][0]) / 2, (c[j][1] + c[(j + 1) % 4][1]) / 2)
+        mitte = ((m1[0] + m2[0]) / 2, (m1[1] + m2[1]) / 2)
+        d = (m2[0] - m1[0], m2[1] - m1[1]); L = math.hypot(*d) or 1
+        q = (-d[1] / L, d[0] / L); halb = seiten[2][0] / 2
+        T('linie', LineString([(mitte[0] - q[0] * halb, mitte[1] - q[1] * halb), (mitte[0] + q[0] * halb, mitte[1] + q[1] * halb)]).buffer(0.09, cap_style=2))
+        T('linie', Point(mitte).buffer(3.0).difference(Point(mitte).buffer(2.82)))
+    for g in flaechen_art.get('wasser', []): T('ufer', g.buffer(1.2, join_style=2).difference(g).intersection(gebiet))
+    if not gruen.is_empty:
+        rr = random.Random(5); flecken = []
+        for q in teile(gruen):
+            if q.area < 2500: continue
+            x0, z0, x1, z1 = q.bounds
+            for _ in range(int(q.area / 1800)): flecken.append(Point(rr.uniform(x0, x1), rr.uniform(z0, z1)).buffer(rr.uniform(7, 16), 6))
+        if flecken: T('rasen2', vereinigt(flecken).intersection(gruen))
+    T('fahrbahn', strassen)
+    fb_maske = prep(strassen_alle.buffer(0.3))
+    for art, liste in zus.items():
+        for g in liste:
+            if g is None or g.is_empty: continue
+            if art == 'markierung' and not fb_maske.contains(g): continue   # keine Markierung neben der Fahrbahn (z. B. auf weggelassenen Zufahrten)
+            T(art, g.intersection(gebiet))
+    return {'strassen_alle': strassen_alle, 'gehweg_aussen': gehweg_aussen, 'garten': garten, 'hofpflaster': hofpflaster, 'hecken': hecken, 'wege': wege}
+
+# ── Deko je Variante
+DEKO = {'linde': 1, 'platane': 2, 'kastanie': 3, 'birke': 4, 'nadel': 5, 'busch': 6, 'laterne': 7, 'altlaterne': 8, 'bank': 9,
+        'kuebel': 10, 'poller': 11, 'litfass': 12, 'muelleimer': 13, 'fahrradstaender': 14, 'laube': 15, 'strassenbaum': 16, 'pappel': 17, 'hecke': 18}
+geb_polys = [Polygon([(p[0], p[1]) for p in g['boden'][0]]).buffer(0) for g in lod['gebaeude'] if g['boden'] and len(g['boden'][0]) >= 3]
+geb_baum = STRtree(geb_polys)
+def frei(x, z, rad):
+    pt = Point(x, z)
+    return all(geb_polys[i].distance(pt) >= rad for i in geb_baum.query(pt.buffer(rad)))
+def deko(name, g):
+    r = random.Random(77); out = []
+    sperre_fb = prep(g['strassen_alle'].buffer(0.6))
+    def setz(art, x, z, w=None):
+        if abs(x - MX) <= R and abs(z - MZ) <= R: out.append((DEKO[art], x, z, r.random() * 2 * math.pi if w is None else w))
+    strassennah = prep(g['gehweg_aussen'].buffer(2))
+    for x, z in osm['baeume']:
+        if abs(x - MX) <= R and abs(z - MZ) <= R and not sperre_fb.contains(Point(x, z)):
+            setz('strassenbaum' if strassennah.contains(Point(x, z)) else r.choice(['linde', 'kastanie', 'platane', 'birke']), x, z)
+    log(f'[{name}] Deko Parks …')
+    rauschen = lambda x, z: math.sin(x / 37.0) * math.cos(z / 29.0) + 0.6 * math.sin((x + z) / 19.0) + 0.4 * math.cos((x - 2 * z) / 23.0)
+    wege_p = prep(g['wege'].buffer(1.5)) if not g['wege'].is_empty else None
+    for flaeche, mix, basis, schritt in ((gruen, ['linde', 'kastanie', 'linde', 'birke', 'platane', 'nadel', 'pappel'], 0.55, 9),
+                                         (g['garten'], ['birke', 'linde', 'kastanie', 'nadel', 'busch'], 0.45, 8), (g['hofpflaster'], ['linde', 'platane', 'birke'], 0.3, 11)):
+        if flaeche.is_empty: continue
+        pf = prep(flaeche.buffer(-2.0))
+        x0, z0, x1, z1 = flaeche.bounds
+        x = x0
+        while x < x1:
+            z = z0
+            while z < z1:
+                px, pz = x + (r.random() - 0.5) * schritt * 0.8, z + (r.random() - 0.5) * schritt * 0.8
+                n = rauschen(px, pz)
+                dichte = basis * (0.15 if n < -0.2 else 1.0 if n > 0.6 else 0.55)
+                if r.random() < dichte and pf.contains(Point(px, pz)) and (wege_p is None or not wege_p.contains(Point(px, pz))) and frei(px, pz, 3):
+                    setz(r.choice(mix), px, pz)
+                z += schritt
+            x += schritt
+    log(f'[{name}] Deko Ränder, Möbel …')
+    if not gruen.is_empty:
+        for q in teile(gruen):
+            if q.area < 400: continue
+            u = 0
+            while u < q.exterior.length:
+                p = q.exterior.interpolate(u)
+                if r.random() < 0.55 and not sperre_fb.contains(p) and frei(p.x, p.y, 1.2): setz('busch', p.x, p.y)
+                u += 3.2 * (1 + r.random() * 2)
+    for ln in g['hecken']:
+        for teil in (ln.geoms if hasattr(ln, 'geoms') else [ln]):
+            if not hasattr(teil, 'interpolate'): continue
+            u = 0
+            while u < teil.length:
+                p = teil.interpolate(u)
+                if frei(p.x, p.y, 1.0): setz('hecke', p.x, p.y)
+                u += 2.0
+    for k in netz:
+        if k['typ'] != 'fussgaenger' or not im(k['punkte']): continue
+        ln = LineString(k['punkte']); u, i = 6, 0
+        while u < ln.length - 3:
+            p = ln.interpolate(u); q = ln.interpolate(min(ln.length, u + 1))
+            dx, dz = q.x - p.x, q.y - p.y; l = math.hypot(dx, dz) or 1
+            nx, nz = -dz / l, dx / l; seite = 1 if i % 2 else -1; w = math.atan2(-dz, dx)
+            ok = lambda x, z, rad=1.0: not sperre_fb.contains(Point(x, z)) and frei(x, z, rad)
+            if ok(p.x + nx * seite * 4.5, p.y + nz * seite * 4.5): setz('altlaterne', p.x + nx * seite * 4.5, p.y + nz * seite * 4.5, 0)
+            if i % 2 == 0 and ok(p.x - nx * seite * 3.2, p.y - nz * seite * 3.2):
+                setz('bank', p.x - nx * seite * 3.2, p.y - nz * seite * 3.2, w + (math.pi if seite > 0 else 0))
+                setz('kuebel', p.x - nx * seite * 3.2 + dx / l * 2.2, p.y - nz * seite * 3.2 + dz / l * 2.2, 0)
+            if i % 5 == 2 and ok(p.x + nx * seite * 2.0, p.y + nz * seite * 2.0): setz('litfass', p.x + nx * seite * 2.0, p.y + nz * seite * 2.0, 0)
+            if i % 3 == 1 and ok(p.x + nx * seite * 3.6, p.y + nz * seite * 3.6): setz('muelleimer', p.x + nx * seite * 3.6, p.y + nz * seite * 3.6, 0)
+            if i % 7 == 3 and ok(p.x - nx * seite * 4.2, p.y - nz * seite * 4.2): setz('fahrradstaender', p.x - nx * seite * 4.2, p.y - nz * seite * 4.2, w)
+            if i % 2 == 1 and ok(p.x, p.y, 3): setz('strassenbaum', p.x, p.y)
+            u += 14; i += 1
+    for k in netz:
+        if k['typ'] == 'fussgaenger' or not im(k['punkte']): continue
+        ln = LineString(k['punkte'])
+        gesamt = spuren_je_weg.get(k['way'], (None, None))[0] or (6.5 if k['typ'] == 'haupt' else 5.5)
+        halb = min(max(gesamt, 5.0), 14.0) / 2 + 1.2
+        u, i, abst = 8, 0, (28 if k['typ'] == 'haupt' else 34)
+        while u < ln.length - 4:
+            p = ln.interpolate(u); q = ln.interpolate(min(ln.length, u + 1))
+            dx, dz = q.x - p.x, q.y - p.y; l = math.hypot(dx, dz) or 1
+            nx, nz = -dz / l, dx / l; seite = 1 if i % 2 else -1
+            x, z = p.x + nx * seite * halb, p.y + nz * seite * halb
+            if not sperre_fb.contains(Point(x, z)) and frei(x, z, 1.0): setz('laterne', x, z, math.atan2(-nz * seite, -nx * seite))
+            if k['typ'] == 'haupt':
+                x2, z2 = p.x - nx * seite * (halb + 0.6) + dx / l * 9, p.y - nz * seite * (halb + 0.6) + dz / l * 9
+                if not sperre_fb.contains(Point(x2, z2)) and frei(x2, z2, 3): setz('strassenbaum', x2, z2)
+            u += abst; i += 1
+    # Plätze: Baumreihe 3 m innerhalb des Randes, Bänke und Leuchten dazwischen, große Plätze mit Baumhain in der Mitte
+    for pl in flaechen_art.get('platz', []):
+        if pl.area < 300: continue
+        innen = pl.buffer(-3, join_style=2)
+        for ring in [q.exterior for q in teile(innen)]:
+            u, i = 4, 0
+            while u < ring.length - 2:
+                pt = ring.interpolate(u); q2 = ring.interpolate(min(ring.length, u + 1)); w = math.atan2(-(q2.y - pt.y), q2.x - pt.x)
+                if not sperre_fb.contains(pt):
+                    if i % 3 == 0 and frei(pt.x, pt.y, 3): setz(r.choice(['linde', 'platane']), pt.x, pt.y)
+                    elif i % 3 == 1 and frei(pt.x, pt.y, 1.2): setz('bank', pt.x, pt.y, w)
+                    elif frei(pt.x, pt.y, 1.0): setz('altlaterne', pt.x, pt.y, 0)
+                u += 6; i += 1
+        kern_pl = pl.buffer(-14, join_style=2)
+        if not kern_pl.is_empty and kern_pl.area > 150:
+            x0, z0, x1, z1 = kern_pl.bounds; pk = prep(kern_pl); x = x0 + 4
+            while x < x1:
+                z = z0 + 4
+                while z < z1:
+                    if pk.contains(Point(x, z)) and frei(x, z, 3):
+                        setz(r.choice(['platane', 'linde']) if r.random() < 0.6 else r.choice(['kuebel', 'bank', 'muelleimer']), x, z, r.choice([0, math.pi / 2]))
+                    z += 11
+                x += 11
+    for kg in flaechen_art.get('kleingarten', []):
+        x0, z0, x1, z1 = kg.bounds; pg = prep(kg.buffer(-3))
+        x = x0 + 6
+        while x < x1 - 4:
+            z = z0 + 6
+            while z < z1 - 4:
+                if pg.contains(Point(x, z)) and frei(x, z, 2):
+                    setz('laube', x + r.uniform(-2, 2), z + r.uniform(-2, 2), r.choice([0, math.pi / 2]))
+                    for kk in range(4): setz('hecke', x - 7 + kk * 3.5, z - 7)
+                    if r.random() < 0.6: setz(r.choice(['birke', 'kastanie', 'busch']), x + 4, z + 3)
+                z += 14
+            x += 14
+    return out
+
 def b64(arr, typ): return base64.b64encode(np.clip(np.asarray(arr, dtype=np.int64), 0, 65535).astype(typ).tobytes()).decode()
-BP, BI, boden = [], [], []
-for k, e in sorted(schichten.items()):
-    # Stücke mit mehr als 65.000 Punkten gibt es bei 240-m-Zellen nicht; Indizes bleiben Uint16 je Stück
-    n = len(e['p']) // 2
-    assert n < 65000, (k, n)
-    boden.append([FARBE[k[0]], len(BP) // 2, n, len(BI), len(e['i'])]); BP += e['p']; BI += e['i']
+P = lambda pts: [v for x, z in pts for v in (round((x + OX) * 10), round((z + OZ) * 10))]
+BP, BI = [], []
+def boden_packen(schichten):
+    liste = []
+    for k, e in sorted(schichten.items(), key=lambda kv: (FARBE[kv[0][0]], kv[0][1:])):
+        liste.append([FARBE[k[0]], len(BP) // 2, len(e['p']) // 2, len(BI), len(e['i'])]); BP.extend(e['p']); BI.extend(e['i'])
+    return liste
+def deko_packen(d):
+    return {'typ': base64.b64encode(bytes(t for t, _, _, _ in d)).decode(), 'w': base64.b64encode(bytes(int((w % (2 * math.pi)) / (2 * math.pi) * 255) for _, _, _, w in d)).decode(),
+            'p': b64([v for _, x, z, _ in d for v in (round((x + OX) * 10), round((z + OZ) * 10))], '<u2'), 'arten': list(DEKO)}
+
+varianten, geo_var = {}, {}
+for name in ('karte', 'coffee'):
+    sch = {}
+    geo_var[name] = boden_variante(name, sch)
+    varianten[name] = {'boden': boden_packen(sch), 'deko': deko_packen(deko(name, geo_var[name]))}
+
+# ── Bebaubare Fläche für Spielhäuser: ohne Fahrbahnen beider Varianten samt Gehweg, Gleise, Bahnsteige, Wasser, Parks
+log('Bebaubar …')
+sperre_bau = vereinigt([geo_var['karte']['gehweg_aussen'], geo_var['coffee']['gehweg_aussen'], gleisflaeche.buffer(2)] +
+                       flaechen_art.get('bahnsteig', []) + flaechen_art.get('bahngelaende', []) + flaechen_art.get('wasser', []) +
+                       [q for q in teile(gruen) if q.area > 2500])
+bebaubar = gebiet.difference(sperre_bau).simplify(0.8).buffer(0)
+bebaubar_out = [[P(list(q.exterior.coords))] + [P(list(i.coords)) for i in q.interiors] for q in teile(bebaubar) if q.area > 800]
+
+# ── Bahnsteigdächer: aus den Eisenbahn-Bahnsteigen (statt der LoD2-Überdachungen, die sich in vielen Höhen überlagern)
+daecher = []
+# Bahnsteige zusammenführen (überlappende Teilflächen gäben versetzte Platten) und unter echten Gebäuden aussparen
+_bau = vereinigt([Polygon([(p[0], p[1]) for p in g['boden'][0]]).buffer(0.5) for g in lod['gebaeude'] if g['boden'] and len(g['boden'][0]) >= 3 and (g['fkt'] or '').startswith('31001')])
+for g in teile(vereinigt(flaechen_art.get('bahnsteig', [])).difference(_bau)):
+    innen = g.buffer(-0.5, join_style=2).simplify(0.5)
+    for q in teile(innen):
+        if q.area > 60: daecher.append(P(list(q.exterior.coords)))
 
 # ── Gebäude mit Dachdreiecken
 def dach_index(ring):
@@ -203,8 +482,18 @@ def dach_index(ring):
     return pts, [int(v) for v in idx]
 P3 = lambda pts: [v for x, z, y in pts for v in (round((x + OX) * 10), round((z + OZ) * 10), round(y * 10))]
 gebaeude, GP, GI, FKT = [], [], [], {}
-for g in lod['gebaeude']:
-    if not g['boden']: continue
+# Kleine LoD2-Teile, die fast ganz auf einem größeren Gebäude stehen (Aufzugsschächte, Lüfter), wirken als schwebende Klötze: weglassen
+_gp = [(Polygon([(p[0], p[1]) for p in g['boden'][0]]).buffer(0) if g['boden'] and len(g['boden'][0]) >= 3 else None) for g in lod['gebaeude']]
+_baum = STRtree([q if q is not None else Point(1e9, 1e9) for q in _gp])
+aufbau = set()
+for i, q in enumerate(_gp):
+    if q is None or q.area >= 80: continue
+    for j in _baum.query(q):
+        j = int(j); w = _gp[j]
+        if j != i and w is not None and w.area > 3 * q.area and w.intersection(q).area > 0.7 * q.area: aufbau.add(i); break
+log(f'{len(aufbau)} Dachaufbauten entfernt')
+for gi, g in enumerate(lod['gebaeude']):
+    if not g['boden'] or gi in aufbau: continue
     b = g['boden'][0]
     mx = sum(p[0] for p in b) / len(b); mz = sum(p[1] for p in b) / len(b)
     if abs(mx - MX) > R or abs(mz - MZ) > R: continue
@@ -216,138 +505,49 @@ for g in lod['gebaeude']:
         eintrag += [len(GP) // 3, len(pts), len(GI), len(idx)]; GP += P3(pts); GI += idx
     gebaeude.append(eintrag)
 
-P = lambda pts: [v for x, z in pts for v in (round((x + OX) * 10), round((z + OZ) * 10))]
-# Deko: Typ, Lage (Dezimeter), Winkel (0..255) – Bäume nach Art, Hecken, Straßenmöbel, Gartenlauben
-DEKO = {'linde': 1, 'platane': 2, 'kastanie': 3, 'birke': 4, 'nadel': 5, 'busch': 6, 'laterne': 7, 'altlaterne': 8, 'bank': 9,
-        'kuebel': 10, 'poller': 11, 'litfass': 12, 'muelleimer': 13, 'fahrradstaender': 14, 'laube': 15, 'strassenbaum': 16, 'pappel': 17, 'hecke': 18}
-def deko_punkte():
-    import random
-    from shapely.prepared import prep
-    from shapely.strtree import STRtree
-    r = random.Random(77)
-    out = []
-    geb_polys = [Polygon([(p[0], p[1]) for p in g['boden'][0]]).buffer(0) for g in lod['gebaeude'] if g['boden'] and len(g['boden'][0]) >= 3]
-    geb_baum = STRtree(geb_polys)
-    belegt = []
-    def frei(x, z, rad):
-        pt = Point(x, z)
-        for i in geb_baum.query(pt.buffer(rad)):
-            if geb_polys[i].distance(pt) < rad: return False
-        return True
-    sperre_fb = prep(strassen_alle.buffer(0.6))
-    def setz(art, x, z, w=None):
-        if abs(x - MX) > R or abs(z - MZ) > R: return
-        out.append((DEKO[art], x, z, r.random() * 2 * math.pi if w is None else w))
-    # OSM-Einzelbäume: an Straßen Platane/Linde, sonst gemischt
-    strassennah = prep(gehweg_aussen.buffer(2))
-    print('Deko: Einzelbäume …', flush=True)
-    for x, z in osm['baeume']:
-        if abs(x - MX) <= R and abs(z - MZ) <= R:
-            setz('strassenbaum' if strassennah.contains(Point(x, z)) else r.choice(['linde', 'kastanie', 'platane', 'birke']), x, z)
-    print('Deko: Parks …', flush=True)
-    # Parks: Baumgruppen (Klumpen über Rauschen) mit offenen Wiesen, Nadelbäume eingestreut, Büsche am Rand und an Wegen
-    def rauschen(x, z):
-        return math.sin(x / 37.0) * math.cos(z / 29.0) + 0.6 * math.sin((x + z) / 19.0) + 0.4 * math.cos((x - 2 * z) / 23.0)
-    wege_p = prep(wege.buffer(1.5)) if wege is not None and not wege.is_empty else None
-    for flaeche, art_mix, dichte_basis, schritt in ((gruen, ['linde', 'kastanie', 'linde', 'birke', 'platane', 'nadel', 'pappel'], 0.55, 9),
-                                                   (hof, ['birke', 'linde', 'kastanie', 'nadel'], 0.35, 11), (hofkern, ['linde', 'platane', 'birke'], 0.18, 14)):
-        if flaeche is None or flaeche.is_empty: continue
-        pf = prep(flaeche.buffer(-2.5))
-        x0, z0, x1, z1 = flaeche.bounds
-        x = x0
-        while x < x1:
-            z = z0
-            while z < z1:
-                px, pz = x + (r.random() - 0.5) * schritt * 0.8, z + (r.random() - 0.5) * schritt * 0.8
-                n = rauschen(px, pz)
-                dichte = dichte_basis * (0.15 if n < -0.2 else 1.0 if n > 0.6 else 0.55)
-                if r.random() < dichte and pf.contains(Point(px, pz)) and (wege_p is None or not wege_p.contains(Point(px, pz))) and frei(px, pz, 3):
-                    setz(r.choice(art_mix), px, pz)
-                z += schritt
-            x += schritt
-    print('Deko: Ränder, Möbel, Lauben …', flush=True)
-    # Büsche entlang der Parkränder und Hecken an Höfen
-    for flaeche, abstand, art in ((gruen, 3.2, 'busch'), (hof, 2.4, 'hecke')):
-        if flaeche is None: continue
-        for q in teile(flaeche):
-            if q.area < 400: continue
-            rand = q.exterior
-            L = rand.length
-            u = 0
-            while u < L:
-                p = rand.interpolate(u)
-                if r.random() < (0.55 if art == 'busch' else 0.8) and not sperre_fb.contains(p) and frei(p.x, p.y, 1.2): setz(art, p.x, p.y)
-                u += abstand * (1 if art == 'hecke' else 1 + r.random() * 2)
-    # Fußgängerzonen und Plätze: Laternen, Bänke, Kübel, Litfaßsäulen, Mülleimer, Fahrradständer
-    for k in netz:
-        if k['typ'] != 'fussgaenger' or not im(k['punkte']): continue
-        ln = LineString(k['punkte'])
-        u, i = 6, 0
-        while u < ln.length - 3:
-            p = ln.interpolate(u); q = ln.interpolate(min(ln.length, u + 1))
-            dx, dz = q.x - p.x, q.y - p.y; l = math.hypot(dx, dz) or 1
-            nx, nz = -dz / l, dx / l
-            seite = 1 if i % 2 else -1
-            w = math.atan2(-dz, dx)
-            setz('altlaterne', p.x + nx * seite * 4.5, p.y + nz * seite * 4.5, 0)
-            if i % 2 == 0:
-                setz('bank', p.x - nx * seite * 3.2, p.y - nz * seite * 3.2, w + (math.pi if seite > 0 else 0))
-                setz('kuebel', p.x - nx * seite * 3.2 + dx / l * 2.2, p.y - nz * seite * 3.2 + dz / l * 2.2, 0)
-            if i % 5 == 2: setz('litfass', p.x + nx * seite * 2.0, p.y + nz * seite * 2.0, 0)
-            if i % 3 == 1: setz('muelleimer', p.x + nx * seite * 3.6, p.y + nz * seite * 3.6, 0)
-            if i % 7 == 3: setz('fahrradstaender', p.x - nx * seite * 4.2, p.y - nz * seite * 4.2, w)
-            if i % 2 == 1 and frei(p.x, p.y, 3): setz('strassenbaum', p.x, p.y)
-            u += 14; i += 1
-    # Laternen an Haupt- und Nebenstraßen (Gehwegkante)
-    for k in netz:
-        if k['typ'] == 'fussgaenger' or not im(k['punkte']): continue
-        ln = LineString(k['punkte']); halb = k['breite'] / 2 - 2.6
-        u, i = 8, 0
-        abst = 28 if k['typ'] == 'haupt' else 34
-        while u < ln.length - 4:
-            p = ln.interpolate(u); q = ln.interpolate(min(ln.length, u + 1))
-            dx, dz = q.x - p.x, q.y - p.y; l = math.hypot(dx, dz) or 1
-            nx, nz = -dz / l, dx / l
-            seite = 1 if i % 2 else -1
-            x, z = p.x + nx * seite * halb, p.y + nz * seite * halb
-            if not sperre_fb.contains(Point(x, z)) and frei(x, z, 1.0):
-                setz('laterne', x, z, math.atan2(nz * seite, -nx * seite) if False else math.atan2(-(-nz * seite), -nx * seite))
-            # Alleebäume an Hauptstraßen zwischen den Laternen
-            if k['typ'] == 'haupt':
-                x2, z2 = p.x + nx * -seite * (halb + 0.3) + dx / l * 9, p.y + nz * -seite * (halb + 0.3) + dz / l * 9
-                if not sperre_fb.contains(Point(x2, z2)) and frei(x2, z2, 3): setz('strassenbaum', x2, z2)
-            u += abst; i += 1
-    # Kleingärten: Lauben im Raster mit Hecken
-    for g in flaechen_art.get('kleingarten', []):
-        x0, z0, x1, z1 = g.bounds
-        pg = prep(g.buffer(-3))
-        x = x0 + 6
-        while x < x1 - 4:
-            z = z0 + 6
-            while z < z1 - 4:
-                if pg.contains(Point(x, z)) and frei(x, z, 2):
-                    setz('laube', x + r.uniform(-2, 2), z + r.uniform(-2, 2), r.choice([0, math.pi / 2]))
-                    for k in range(4): setz('hecke', x - 7 + k * 3.5, z - 7)
-                    if r.random() < 0.6: setz(r.choice(['birke', 'kastanie', 'busch']), x + 4, z + 3)
-                z += 14
-            x += 14
-    return out
+# Gehwegseiten je Kante und Variante: Bit 0/1 Kartentreue links/rechts (v = −1/+1), Bit 2/3 Coffee. Eine Seite gilt nur,
+# wenn mindestens 90 % der Gehweglinie neben der Fahrbahn liegen (sonst liefen Passanten über Fahrbahnen, z. B. bei getrennten Richtungsfahrbahnen)
+_fb_prep = {n: prep(geo_var[n]['strassen_alle']) for n in ('karte', 'coffee')}
+def fuss_seiten(k, gesamt):
+    quer = 3.0 if k['typ'] == 'fussgaenger' else gesamt / 2 + 1.6
+    ln = LineString(k['punkte'])
+    if ln.length < 1: return 15
+    bits = 0
+    for vi, (name, seite) in enumerate([('karte', -1), ('karte', 1), ('coffee', -1), ('coffee', 1)]):
+        n = ok = 0; rand = min(8.0, ln.length / 4); u = rand   # Kreuzungsbereiche an den Enden auslassen
+        while u < ln.length - rand:
+            a, b = ln.interpolate(u), ln.interpolate(min(u + 0.5, ln.length))
+            dx, dz = b.x - a.x, b.y - a.y; l = math.hypot(dx, dz) or 1
+            px, pz = a.x - dz / l * seite * quer, a.y + dx / l * seite * quer
+            n += 1; ok += not _fb_prep[name].contains(Point(px, pz))
+            u += 4.0
+        if n == 0 or ok == n: bits |= 1 << vi
+    return bits
 
-GL = {'rail': 1, 'light_rail': 2, 'tram': 3}
+# ── Straßennetz mit Fahrspuren: [Typ, Bandbreite (dm), Einbahn, Knoten a, Knoten b, Punkte, Spuren [Versatz links (dm), Richtung]…]
 TYP = {'haupt': 1, 'neben': 2, 'fussgaenger': 3}
 knoten = {}
 kn = lambda k: knoten.setdefault(k, len(knoten))
+netz_out = []
+for k in netz:
+    if not im(k['punkte']): continue
+    gesamt, spuren = spuren_je_weg.get(k['way'], (None, None))
+    if k['typ'] == 'fussgaenger': gesamt, spuren = 0, []
+    elif not spuren:
+        gesamt = 6.5 if k['typ'] == 'haupt' else 5.5
+        spuren = [(gesamt / 4, -1), (-gesamt / 4, 1)] if not k['einbahn'] else [(0, 1)]
+    gesamt = min(max(gesamt or 0, 0), 14.0)
+    netz_out.append([TYP[k['typ']], round(gesamt * 10), 1 if k['einbahn'] else 0, kn(k['a']), kn(k['b']), P(k['punkte']),
+                     [v for o, d in spuren for v in (round(o * 10), d)], fuss_seiten(k, gesamt)])
+
 out = {
     'stadt': 'essen', 'lizenz': '© OpenStreetMap-Mitwirkende, ODbL; Geobasis NRW, dl-de/zero-2-0',
     'quellen': ['Straßen: osm2streets (Apache-2.0) aus OpenStreetMap', 'Gleise, Flächen, Bäume, Straßennetz: OpenStreetMap', 'Gebäude: 3D-Gebäudemodell LoD2 NRW'],
     'ursprung': [OX, OZ], 'breite': BREITE, 'tiefe': TIEFE, 'farben': list(FARBE),
-    'boden': boden, 'bp': b64(BP, '<u2'), 'bi': b64(BI, '<u2'),
+    'varianten': varianten, 'bp': b64(BP, '<u2'), 'bi': b64(BI, '<u2'),
     'gp': b64(GP, '<u2'), 'gi': b64(GI, '<u2'), 'fkt': list(FKT),
-    'gleise': [[GL[g['art']], P(g['punkte'])] for g in osm['gleise'] if g['art'] in GL and im(g['punkte'])],
-    'deko': (lambda d: {'typ': base64.b64encode(bytes(t for t, _, _, _ in d)).decode(), 'w': base64.b64encode(bytes(int((w % (2 * math.pi)) / (2 * math.pi) * 255) for _, _, _, w in d)).decode(),
-              'p': b64([v for _, x, z, _ in d for v in (round((x + OX) * 10), round((z + OZ) * 10))], '<u2'), 'arten': list(DEKO)})(deko_punkte()),
-    'netz': [[TYP[k['typ']], round(k['breite'] * 10), k['spuren'], 1 if k['einbahn'] else 0, kn(k['a']), kn(k['b']), P(k['punkte'])] for k in netz if im(k['punkte'])],
-    'gebaeude': gebaeude,
+    'gleise': [[{'rail': 1, 'light_rail': 2, 'tram': 3}[g['art']], P(g['punkte'])] for g in osm['gleise'] if g['art'] in ('rail', 'light_rail', 'tram') and im(g['punkte'])],
+    'bebaubar': bebaubar_out, 'daecher': daecher, 'netz': netz_out, 'gebaeude': gebaeude,
 }
 json.dump(out, open(ziel, 'w'), separators=(',', ':'), ensure_ascii=False)
-print(ziel, os.path.getsize(ziel) // 1024, 'KB', len(gebaeude), 'Gebäude', len(boden), 'Bodenstücke')
+log(ziel, os.path.getsize(ziel) // 1024, 'KB', len(gebaeude), 'Gebäude', {k: len(v['boden']) for k, v in varianten.items()}, 'Bodenstücke', len(bebaubar_out), 'Bauflächen', len(daecher), 'Dächer')

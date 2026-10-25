@@ -13,17 +13,39 @@ import essenDaten from '../../../karten/essen-spiel.json';
 
 const KARTEN = { Essen: { roh: essenDaten, def: ESSEN_KARTE } };
 export const istKartenstadt = (name) => !!KARTEN[name];
+/** Kartenstil: 'coffee' (abstrahiert, Standard) oder 'karte' (kartentreu). Einstellung, gespeichert im Gerät. */
+export const KARTENSTILE = { coffee: 'Coffee (vereinfacht)', karte: 'Kartentreu' };
+let stilGesetzt = null;
+export function kartenStil() {
+  if (stilGesetzt) return stilGesetzt;
+  try { const q = new URLSearchParams(globalThis.location?.search ?? '').get('kartenstil'); if (q && KARTENSTILE[q]) return q; } catch { /* kein Browser */ }
+  try { const v = globalThis.localStorage?.getItem('ruhrkauf.kartenstil'); if (v && KARTENSTILE[v]) return v; } catch { /* privat */ }
+  return 'coffee';
+}
+export function setzeKartenStil(v) { if (!KARTENSTILE[v]) return; stilGesetzt = v; try { globalThis.localStorage?.setItem('ruhrkauf.kartenstil', v); } catch { /* privat */ } }
 
 const BLICK = new THREE.Vector3(Math.SQRT1_2 * Math.cos(Math.PI / 6), Math.sin(Math.PI / 6), Math.SQRT1_2 * Math.cos(Math.PI / 6));
 // Bodenschichten (Reihenfolge und Namen wie kartenstadt-bauen.py FARBE): Farbe und Höhe über Gelände
 const BODEN = {
+  garten: '#a3b78f', haltestelle: '#d7d2c7', fusszone: '#e3dccc',
   weg: '#e2d6bd', linie: '#f4f2ea', ufer: '#d9d2bf', rasen2: '#8bbd7c',
-  umland: '#cdc6b8', pflaster: '#d3ccbe', gehweg: '#e6e2d9', bord: '#bdb7ac', fahrbahn: '#767c84', parkstreifen: '#8b9097', rad: '#b0897a', markierung: FARBEN.markierung,
-  gruen: FARBEN.rasen, hof: '#a9c08e', hofkern: '#dcd6c9', wasser: FARBEN.wasser, platz: '#d9d2c3', parkplatz: '#969ba2', bahnsteig: '#cfc9bd', schotter: '#a39b8e', schiene: '#5b5550',
+  umland: '#c9c5bd', pflaster: '#cfcac1', gehweg: '#e3e1dc', bord: '#bdb7ac', fahrbahn: '#767c84', parkstreifen: '#8b9097', rad: '#b0897a', markierung: FARBEN.markierung,
+  gruen: '#9dbb88', hof: '#a3b78f', hofkern: '#d6d2c9', wasser: FARBEN.wasser, platz: '#d9d2c3', parkplatz: '#969ba2', bahnsteig: '#cfc9bd', schotter: '#a39b8e', schiene: '#5b5550',
   gewerbe: '#c4bfb5', schulhof: '#d0c3ad', sport: '#7fb36b', kleingarten: '#9fc27f',
 };
+// Coffee-Abstraktion: hellere, wärmere Flächen und Pastellfassaden wie in Aufbauspielen; Kartentreue bleibt bei den gedeckten Tönen
+const COFFEE = {
+  boden: { pflaster: '#f2e7cf', gehweg: '#fbf7ee', bord: '#d9cdb6', fahrbahn: '#596474', hofkern: '#efe2c9', platz: '#f4e9d2', gruen: '#8fd46a', garten: '#a9dc85',
+    hof: '#a9dc85', rasen2: '#7fc95c', sport: '#77c45a', kleingarten: '#9fd47c', fusszone: '#f7ecd6', umland: '#e6dcc4', parkplatz: '#8f9aab', gewerbe: '#e6dcc8', schulhof: '#f0dfc0',
+    weg: '#f6e6c2', markierung: '#fff6dc', linie: '#ffffff', wasser: '#5fb7e0', ufer: '#e9dcbc', bahnsteig: '#e3d8c4', schotter: '#b3a68f' },
+  fassade: ['#f6e7c8', '#f4d6bd', '#dcebdf', '#dde7f0', '#f6e9b8', '#efd0c0', '#ebe5d8', '#d4e6ec', '#f3dfc6', '#e7f0e1', '#f1c9a5', '#e8d4e4'],
+  steil: ['#c9654b', '#b65a47', '#d07a55', '#5f6b7a', '#6c7987'], flach: ['#c9c2b6', '#bfc7cb', '#cbbfb6', '#c4c9bd', '#bcc1c9'],
+  hoch: ['#cfe3ee', '#e8dcc8', '#dfe9e1', '#e9d9de', '#d9dfee'], bau: ['#e4ded2', '#dcd8cf'],
+};
+let PAL = null;   // gesetzt in baueKartenstadt je Kartenstil
+const bodenFarbe = (art) => PAL?.boden[art] ?? BODEN[art];
 // Jede Schicht auf eigener Höhe (gleiche Höhen flackern ineinander)
-const HOEHE = { weg: 0.047, linie: 0.042, ufer: 0.05, rasen2: 0.037, umland: -0.03, pflaster: 0, hofkern: 0.008, hof: 0.012, gewerbe: 0.016, schulhof: 0.02, kleingarten: 0.024, sport: 0.028, gruen: 0.035, platz: 0.04,
+const HOEHE = { garten: 0.012, haltestelle: 0.13, fusszone: 0.118, weg: 0.047, linie: 0.049, ufer: 0.05, rasen2: 0.037, umland: -0.03, pflaster: 0, hofkern: 0.008, hof: 0.012, gewerbe: 0.016, schulhof: 0.02, kleingarten: 0.024, sport: 0.028, gruen: 0.035, platz: 0.04,
   parkplatz: 0.045, wasser: 0.052, schotter: 0.06, fahrbahn: 0.07, parkstreifen: 0.074, rad: 0.08, markierung: 0.1, gehweg: 0.12, bord: 0.14, bahnsteig: 0.55 };
 const GL_ART = { 1: 'rail', 2: 'light_rail', 3: 'tram' };
 const NETZ_TYP = { 1: 'haupt', 2: 'neben', 3: 'fussgaenger' };
@@ -50,12 +72,15 @@ function imPolygon(x, z, ring) {
 }
 const offen = (pts) => (pts.length > 1 && pts[0][0] === pts.at(-1)[0] && pts[0][1] === pts.at(-1)[1] ? pts.slice(0, -1) : pts);
 
+const RASTER = (() => { const o = []; for (let dx = -420; dx <= 420; dx += 4) for (let dz = -420; dz <= 420; dz += 4) { const ab = Math.hypot(dx, dz); if (ab <= 420) o.push([dx, dz, ab]); } return o.sort((a, b) => a[2] - b[2]); })();
+
 /** Daten einmal entpacken (je Stadt zwischengespeichert). */
 const CACHE = new Map();
-export function kartenDaten(name) {
-  if (CACHE.has(name)) return CACHE.get(name);
+export function kartenDaten(name, stil = kartenStil()) {
+  const ck = name + '|' + stil;
+  if (CACHE.has(ck)) return CACHE.get(ck);
   const k = KARTEN[name]; if (!k) return null;
-  const d = k.roh;
+  const d = k.roh, v = d.varianten?.[stil] ?? d.varianten?.coffee;
   const GP = u16(d.gp), GI = u16(d.gi);
   const punkte3 = (off, n) => { const o = []; for (let j = 0; j < n; j++) { const q = (off + j) * 3; o.push([GP[q] / 10, GP[q + 1] / 10, GP[q + 2] / 10]); } return o; };
   // Gebäude: [Funktion, Dachform, Höhe, Traufe, Bodenring (Versatz, Anzahl), je Dachfläche (Versatz, Anzahl, Indexversatz, Indexanzahl)]
@@ -68,15 +93,23 @@ export function kartenDaten(name) {
   const BP = u16(d.bp), BI = u16(d.bi);
   // Deko: Art je Eintrag (Byte), Winkel (Byte), Lage (Uint16-Paare in Dezimetern)
   const bytes = (b64) => { const bin = typeof atob === 'function' ? atob(b64) : Buffer.from(b64, 'base64').toString('binary'); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; };
-  const deko = d.deko ? { typ: bytes(d.deko.typ), w: bytes(d.deko.w), p: u16(d.deko.p), arten: d.deko.arten } : null;
+  const deko = v.deko ? { typ: bytes(v.deko.typ), w: bytes(v.deko.w), p: u16(v.deko.p), arten: v.deko.arten } : null;
   const r = {
-    name, def: k.def, breite: d.breite, tiefe: d.tiefe, ursprung: d.ursprung, lizenz: d.lizenz,
-    boden: d.boden.map(([f, po, pn, io, inn]) => ({ art: d.farben[f], p: BP.subarray(po * 2, (po + pn) * 2), i: BI.subarray(io, io + inn) })),
+    name, stil, def: k.def, breite: d.breite, tiefe: d.tiefe, ursprung: d.ursprung, lizenz: d.lizenz,
+    bebaubar: (d.bebaubar ?? []).map((ringe) => ringe.map(paare)),
+    daecher: (d.daecher ?? []).map(paare),
+    boden: v.boden.map(([f, po, pn, io, inn]) => ({ art: d.farben[f], p: BP.subarray(po * 2, (po + pn) * 2), i: BI.subarray(io, io + inn) })),
     gleise: d.gleise.map(([a, p]) => ({ art: GL_ART[a], punkte: paare(p) })),
     deko, gebaeude,
-    netz: (d.netz ?? []).map(([typ, breite, spuren, einbahn, a, b, p]) => ({ typ: NETZ_TYP[typ], breite: breite / 10, spuren, einbahn: !!einbahn, a, b, punkte: paare(p) })),
+    // Netz: [Typ, Bandbreite dm, Einbahn, Knoten a, Knoten b, Punkte, Spuren (Versatz links dm, Richtung)…]
+    netz: (d.netz ?? []).map(([typ, breite, einbahn, a, b, p, sp, fs = 15]) => {
+      const spuren = []; for (let i = 0; i + 1 < (sp ?? []).length; i += 2) spuren.push({ links: sp[i] / 10, dir: sp[i + 1] });
+      // Gehwegseiten, die neben der Fahrbahn dieser Variante liegen ([links, rechts] = Versatz −/+)
+      const o = stil === 'coffee' ? 2 : 0, fussSeiten = [!!(fs & (1 << o)), !!(fs & (2 << o))];
+      return { typ: NETZ_TYP[typ], breite: breite / 10, einbahn: !!einbahn, a, b, punkte: paare(p), spuren, fussSeiten };
+    }),
   };
-  CACHE.set(name, r);
+  CACHE.set(ck, r);
   return r;
 }
 
@@ -101,7 +134,8 @@ export function gebaeudeArt(fkt = '') {
  * Spielhäuser, HQ, Bahnhof), standorte, einkaufslage, kameraGrenze, breite/tiefe; Straßen und Blöcke bleiben leer.
  */
 export function kartenplan(name, eintrag, hqJson = null) {
-  const K = kartenDaten(name), def = K.def;
+  const stil = kartenStil();
+  const K = kartenDaten(name, stil), def = K.def;
   const [ox, oz] = K.ursprung, ins = ([x, z]) => [x + ox, z + oz];
   const parzellen = [], standorte = [], belegt = [];
   const frei = (R) => belegt.every((q) => R.x + R.w + 6 < q.x || q.x + q.w + 6 < R.x || R.z + R.d + 6 < q.z || q.z + q.d + 6 < R.z);
@@ -124,29 +158,69 @@ export function kartenplan(name, eintrag, hqJson = null) {
       if (g.mx > R.x - 3 && g.mx < R.x + R.w + 3 && g.mz > R.z - 3 && g.mz < R.z + R.d + 3) continue;
       const [a, b, c, d] = g.bbox;
       if (c < R.x - 250 || a > R.x + R.w + 250 || d < R.z - 250 || b > R.z + R.d + 250) continue;
-      v += ueberlapp(haus, bildRechteck(a, b, c, d, g.h)) / f;
+      const u = ueberlapp(haus, bildRechteck(a, b, c, d, g.h)) / f;
+      if (u > 0.1 && g.h > 18) return 9;   // ein hohes Haus vor dem Laden verdeckt ihn spürbar: Bauplatz ausscheiden
+      v += u;
     }
     return Math.min(1, v);
   };
+  globalThis.kartenVerdeckungTest = (R) => { const H = 22, haus = bildRechteck(R.x, R.z, R.x + R.w, R.z + R.d, H), f = (haus[2] - haus[0]) * (haus[3] - haus[1]), tiefe = R.x + R.w / 2 + R.z + R.d / 2;
+    return K.gebaeude.filter((g) => g.h > 15 && Math.hypot(g.mx - R.x - R.w / 2, g.mz - R.z - R.d / 2) < 120).map((g) => [g.id + ':' + g.bbox.map((v, i) => Math.round(v - (i % 2 ? R.z : R.x))).join('/'), Math.round(g.h), Math.round(g.mx + g.mz - tiefe), +(ueberlapp(haus, bildRechteck(...g.bbox, g.h)) / f).toFixed(2)]).filter((x) => x[3] > 0.02); };
   // Wahrzeichen (Rathaus, Hauptbahnhof, Münster, Marktkirche, Limbecker Platz, Grillo, Alte Synagoge) bleiben stehen
   const schutz = (def.wahrzeichen ?? []).map(ins);
   const geschuetzt = (g) => schutz.some(([x, z]) => x > g.bbox[0] - 30 && x < g.bbox[2] + 30 && z > g.bbox[1] - 30 && z < g.bbox[3] + 30);
+  // Bebaubare Flächen (ohne Straßen samt Gehweg, Gleise, Bahnsteige, Wasser, Parks; berechnet in kartenstadt-bauen.py)
+  const bau = K.bebaubar.map((ringe) => ({ ringe, bb: bboxVon(ringe[0]) }));
+  const GZ = 50, gitter = new Map();
+  bau.forEach((f, i) => { for (let gx = Math.floor(f.bb[0] / GZ); gx <= Math.floor(f.bb[2] / GZ); gx++) for (let gz = Math.floor(f.bb[1] / GZ); gz <= Math.floor(f.bb[3] / GZ); gz++) { const k = gx * 10000 + gz; if (!gitter.has(k)) gitter.set(k, []); gitter.get(k).push(i); } });
+  const aufBauflaeche = (x, z) => (gitter.get(Math.floor(x / GZ) * 10000 + Math.floor(z / GZ)) ?? []).some((i) => { const f = bau[i]; return x >= f.bb[0] && x <= f.bb[2] && z >= f.bb[1] && z <= f.bb[3] && imPolygon(x, z, f.ringe[0]) && !f.ringe.slice(1).some((l) => imPolygon(x, z, l)); });
+  /** Rechteck liegt vollständig auf bebaubarer Fläche: Kanten alle 4 m und ein Innenraster prüfen. */
+  const passt = (R) => {
+    for (let u = 0; u <= R.w; u += Math.min(4, R.w)) { if (!aufBauflaeche(R.x + u, R.z) || !aufBauflaeche(R.x + u, R.z + R.d)) return false; }
+    for (let v = 0; v <= R.d; v += Math.min(4, R.d)) { if (!aufBauflaeche(R.x, R.z + v) || !aufBauflaeche(R.x + R.w, R.z + v)) return false; }
+    for (let u = R.w / 4; u < R.w; u += R.w / 4) for (let v = R.d / 4; v < R.d; v += R.d / 4) if (!aufBauflaeche(R.x + u, R.z + v)) return false;
+    return true;
+  };
+  const schuetztWahrzeichen = (R) => schutz.some(([x, z]) => x > R.x - 25 && x < R.x + R.w + 25 && z > R.z - 25 && z < R.z + R.d + 25);
+  // Große oder hohe echte Gebäude (Einkaufszentren, Hochhäuser) werden nie abgerissen: das Spielhaus darf nicht in ihnen stehen
+  const NZ = 60, hausGitter = new Map(), schienenGitter = new Map();
+  const eintragen = (M, a, b, c, d, w) => { for (let gx = Math.floor(a / NZ); gx <= Math.floor(c / NZ); gx++) for (let gz = Math.floor(b / NZ); gz <= Math.floor(d / NZ); gz++) { const k = gx * 10000 + gz; if (!M.has(k)) M.set(k, []); M.get(k).push(w); } };
+  for (const g of K.gebaeude) if (gebaeudeArt(g.fkt) !== 'dach') eintragen(hausGitter, ...g.bbox, g);
+  // Bahnsteigdächer zählen wie Gleise (der Laden darf nicht unter oder an die Dachplatten rücken)
+  for (const ring of K.daecher) for (let i = 1; i < ring.length; i++) {
+    const [x0, z0] = ring[i - 1], [x1, z1] = ring[i], n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / 4));
+    for (let j = 0; j <= n; j++) { const x = x0 + (x1 - x0) * j / n, z = z0 + (z1 - z0) * j / n; eintragen(schienenGitter, x, z, x, z, [x, z]); }
+  }
+  for (const gl of K.gleise) if (gl.art !== 'tram') for (let i = 1; i < gl.punkte.length; i++) {
+    const [x0, z0] = gl.punkte[i - 1], [x1, z1] = gl.punkte[i], n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / 4));
+    for (let j = 0; j <= n; j++) { const x = x0 + (x1 - x0) * j / n, z = z0 + (z1 - z0) * j / n; eintragen(schienenGitter, x, z, x, z, [x, z]); }
+  }
+  const imUmkreis = (M, R, rand) => { const out = new Set();
+    for (let gx = Math.floor((R.x - rand) / NZ); gx <= Math.floor((R.x + R.w + rand) / NZ); gx++) for (let gz = Math.floor((R.z - rand) / NZ); gz <= Math.floor((R.z + R.d + rand) / NZ); gz++) for (const w of M.get(gx * 10000 + gz) ?? []) out.add(w);
+    return out; };
+  const zuGross = (g, R) => g.flaeche > Math.max(3500, 2.5 * R.w * R.d) || g.h > 30 || geschuetzt(g);
+  const stecktInGrossbau = (R) => { for (const g of imUmkreis(hausGitter, R, 0)) {
+    const [a, b, c, d] = g.bbox, ux = Math.min(c, R.x + R.w + 1) - Math.max(a, R.x - 1), uz = Math.min(d, R.z + R.d + 1) - Math.max(b, R.z - 1);
+    if (ux > 0.3 && uz > 0.3 && (zuGross(g, R) || (g.flaeche > 300 && ux * uz < 0.5 * g.flaeche))) return true; } return false; };
+  // (Nachbargebäude werden nie angeschnitten: ein Spielhaus ersetzt nur Gebäude, die zur Hälfte auf seiner Parzelle stehen, oder Kleinbauten)
+  // Gleise halten 30 m Abstand zum Spielhaus (keine Schienen, die in den Laden laufen)
+  const amGleis = (R) => { for (const [x, z] of imUmkreis(schienenGitter, R, 30)) if (x > R.x - 30 && x < R.x + R.w + 30 && z > R.z - 30 && z < R.z + R.d + 30) return true; return false; };
   const bauplatz = (ziel, W, D) => {
     const [tx, tz] = ins(ziel);
-    const kandidaten = K.gebaeude.filter((g) => !['dach', 'bruecke', 'bauwerk', 'kirche'].includes(gebaeudeArt(g.fkt)) && !g.fkt.endsWith('_3091') && !geschuetzt(g)
-      && g.flaeche > W * D * 0.45 && Math.hypot(g.mx - tx, g.mz - tz) < 320);
-    let best = null;
-    for (const g of kandidaten) {
-      const R = { x: Math.round(g.mx - W / 2), z: Math.round(g.mz - D / 2), w: W, d: D };
-      if (!frei(R)) continue;
-      const wert = Math.hypot(g.mx - tx, g.mz - tz) + 400 * verdeckung(R);
+    let best = null, weich = null;
+    // Raster um den Zielpunkt (4 m, nach Abstand sortiert), bis 420 m; erst Lage, dann Sicht auf das Haus
+    for (const [dx, dz, ab] of RASTER) {
+      if (best && ab > best.wert) break;
+      const R = { x: Math.round(tx + dx - W / 2), z: Math.round(tz + dz - D / 2), w: W, d: D };
+      if (!frei(R) || schuetztWahrzeichen(R) || !passt(R) || amGleis(R) || stecktInGrossbau(R)) continue;
+      const vd = verdeckung(R);
+      if (vd > 1) { const w2 = ab + 2000; if (!weich || w2 < weich.wert) weich = { R, wert: w2 }; continue; }
+      const wert = ab + 900 * vd;
       if (!best || wert < best.wert) best = { R, wert };
     }
     if (best) return best.R;
-    for (let ring = 0; ring < 12; ring++) for (let k = 0; k < 8; k++) {
-      const a = (k / 8) * Math.PI * 2, R = { x: Math.round(tx + Math.cos(a) * ring * 25 - W / 2), z: Math.round(tz + Math.sin(a) * ring * 25 - D / 2), w: W, d: D };
-      if (frei(R)) return R;
-    }
+    if (weich) return weich.R;   // nur verdeckte Plätze: der nächste davon, Verdecker räumt baueKartenstadt (Vorplatz)
+    (globalThis.kartenNotplatz ??= []).push(ziel);
     return { x: Math.round(tx - W / 2), z: Math.round(tz - D / 2), w: W, d: D };
   };
   const ROLLE = { premium: 'slot:premium', warenhaus: 'slot:warenhaus', sport: 'slot:sport', wettbewerber: 'slot:wettbewerber', wettbewerber_reserve: 'slot:wettbewerber_reserve', schwester: 'slot:schwester', outlet: 'slot:outlet' };
@@ -190,12 +264,12 @@ export function kartenplan(name, eintrag, hqJson = null) {
   const [bx, bz] = ins(def.bahnhof);
   parzellen.push({ id: 'k-bahnhof', typ: 'slot:bahnhof', block: 'karte', x: bx - 30, z: bz - 20, w: 60, d: 40, seed: 1, karte: true, leer: true });
   const [ex, ez] = ins(def.einkauf), [sx, sz] = ins(def.start);
-  // Wege, die über einen Bauplatz samt Vorplatz führen, entfallen (sonst fahren Autos über den Vorplatz)
-  const aufPlatz = (x, z) => parzellen.some((p) => !p.leer && x > p.x - 2 && x < p.x + p.w + 14 && z > p.z - 2 && z < p.z + p.d + 14);
+  // Wege, die über einen Bauplatz führen, entfallen
+  const aufPlatz = (x, z) => parzellen.some((p) => !p.leer && x > p.x - 1 && x < p.x + p.w + 1 && z > p.z - 1 && z < p.z + p.d + 1);
   const { strassen, kreuzungen } = strassennetz(K, aufPlatz);
   const G = def.kameraGrenze;
   return {
-    seed: eintrag.seed, typ: eintrag.typ, region: eintrag.region, archetyp: eintrag.archetyp, karte: name,
+    seed: eintrag.seed, typ: eintrag.typ, region: eintrag.region, archetyp: eintrag.archetyp, karte: name, stil,
     breite: K.breite, tiefe: K.tiefe, nx: 0, nz: 0,
     strassen, kreuzungen, bloecke: [], umland: [], diagonalen: [], zwickel: [], parzellen, standorte,
     slots: parzellen.filter((p) => p.typ.startsWith('slot:')), landmarken: [],
@@ -208,28 +282,34 @@ export function kartenplan(name, eintrag, hqJson = null) {
 }
 
 /**
- * Straßennetz für Verkehr und Figuren (leben.js): jedes gerade Stück einer OSM-Kante ist ein Straßenstück mit achse 'r'
- * (Ursprung, Richtung, Normale), Knoten an den Enden und Knickpunkten verbinden die Stücke wie Kreuzungen im Rasterplan.
- * Gezeichnet werden die Straßen aus den osm2streets-Flächen; dieses Netz trägt nur Wege.
+ * Straßennetz für Verkehr und Figuren (leben.js): je OSM-Kante ein Straßenstück als Polylinie (achse 'p') mit den echten
+ * Fahrspuren aus osm2streets (Versatz von der Bandmitte, Richtung). Knoten nur an Kreuzungen und Enden.
+ * Teile über einem Bauplatz entfallen; die Kante wird dort getrennt.
  */
 function strassennetz(K, aufPlatz = () => false) {
   const strassen = [], kreuzungen = [], knoten = new Map();
   const knotenBei = (schl, x, z) => { let k = knoten.get(schl); if (!k) { k = { x, z, arme: {} }; knoten.set(schl, k); kreuzungen.push(k); } return k; };
   K.netz.forEach((kante, ki) => {
-    const pts = kante.punkte;
-    let vorher = knotenBei('k' + kante.a, pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length; i++) {
-      const [ax, az] = pts[i - 1], [bx, bz] = pts[i], L = Math.hypot(bx - ax, bz - az);
-      if (L < 0.5) continue;
-      if (aufPlatz((ax + bx) / 2, (az + bz) / 2) || aufPlatz(ax, az) || aufPlatz(bx, bz)) { vorher = i === pts.length - 1 ? knotenBei('k' + kante.b, bx, bz) : knotenBei('z' + ki + '-' + i, bx, bz); continue; }
-      const ux = (bx - ax) / L, uz = (bz - az) / L;
-      const s = { id: 'n' + ki + '-' + i, achse: 'r', ax, az, ux, uz, nx: -uz, nz: ux, von: 0, bis: L, mitte: 0,
-        typ: kante.typ, breite: kante.breite, gehweg: kante.typ === 'fussgaenger' ? 0 : 3.5, mittel: 0, einbahn: kante.einbahn };
+    // Kante an Bauplätzen in zusammenhängende Läufe teilen
+    const laeufe = [];
+    let lauf = [];
+    for (const p of kante.punkte) { if (aufPlatz(p[0], p[1])) { if (lauf.length > 1) laeufe.push(lauf); lauf = []; } else lauf.push(p); }
+    if (lauf.length > 1) laeufe.push(lauf);
+    laeufe.forEach((pts, li) => {
+      const cum = [0];
+      for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+      const L = cum.at(-1);
+      if (L < 4) return;
+      // Knoten an echten Enden behalten die OSM-Knotennummer (verbindet Kanten), getrennte Enden bekommen eigene
+      const anfang = li === 0 && pts[0] === kante.punkte[0] ? 'k' + kante.a : 'e' + ki + '-' + li + 'a';
+      const ende = li === laeufe.length - 1 && pts.at(-1) === kante.punkte.at(-1) ? 'k' + kante.b : 'e' + ki + '-' + li + 'b';
+      const s = { id: 'n' + ki + '-' + li, achse: 'p', pts, cum, von: 0, bis: L, mitte: 0,
+        typ: kante.typ, breite: kante.typ === 'fussgaenger' ? 12 : kante.breite + 2 * 3.0, fahrbahn: kante.breite,
+        gehweg: kante.typ === 'fussgaenger' ? 0 : 3.0, mittel: 0, einbahn: kante.einbahn, spurenKarte: kante.spuren, fussSeiten: kante.fussSeiten };
       strassen.push(s);
-      vorher.arme[s.id] = s;
-      vorher = i === pts.length - 1 ? knotenBei('k' + kante.b, bx, bz) : knotenBei('z' + ki + '-' + i, bx, bz);
-      vorher.arme[s.id] = s;
-    }
+      knotenBei(anfang, pts[0][0], pts[0][1]).arme[s.id] = s;
+      knotenBei(ende, pts.at(-1)[0], pts.at(-1)[1]).arme[s.id] = s;
+    });
   });
   return { strassen, kreuzungen };
 }
@@ -318,7 +398,7 @@ function boden(B, umriss, y, farbe) {
 
 /** Fertig triangulierte Bodenschicht (kartenstadt-bauen.py): Punkte in Dezimetern, Indizes je Stück. */
 function bodenStueck(B, st) {
-  const y = HOEHE[st.art] ?? 0.03, farbe = BODEN[st.art] ?? BODEN.pflaster, p = st.p, idx = st.i;
+  const y = HOEHE[st.art] ?? 0.03, farbe = bodenFarbe(st.art) ?? bodenFarbe('pflaster'), p = st.p, idx = st.i;
   if (!idx.length) return;
   const P = new Array(idx.length * 3), N = new Array(idx.length * 3);
   for (let t = 0; t < idx.length; t += 3) {
@@ -387,6 +467,10 @@ function gestalt(g) {
   // Altbau: Steildach, Wohn- oder Mischnutzung, nicht hoch (Gründerzeit, Vorkriegsbestand)
   const altbau = !flach && !hoch && ['wohnen', 'gemischt'].includes(art) && g.h < 24;
   if (altbau && r() < 0.8) fassade = waehle(r, ALTBAU_FARBEN);
+  if (PAL && art !== 'kirche') {
+    fassade = waehle(r, hoch ? PAL.hoch : ['parkhaus', 'bauwerk'].includes(art) ? PAL.bau : PAL.fassade);
+    dach = waehle(r, flach ? PAL.flach : PAL.steil);
+  }
   return { r, art, hoch, flach, fassade, dach, altbau };
 }
 
@@ -431,7 +515,7 @@ function fassadeAufWand(B, g, gs, ax, az, bx, bz, ya, yb, nx, nz, kern, detail) 
   if (zeile) {
     const r = rng(hash(g.id + ':' + Math.round(ax) + ':' + Math.round(az)));
     let u = 0;
-    while (u < L - 0.5) { let w = 9 + r() * 7; if (L - (u + w) < 7) w = L - u; abschnitte.push([u, u + w, waehle(r, gs.altbau ? ALTBAU_FARBEN : NACHKRIEG_FARBEN)]); u += w; }
+    while (u < L - 0.5) { let w = 9 + r() * 7; if (L - (u + w) < 7) w = L - u; abschnitte.push([u, u + w, waehle(r, PAL ? (gs.hoch ? PAL.hoch : PAL.fassade) : gs.altbau ? ALTBAU_FARBEN : NACHKRIEG_FARBEN)]); u += w; }
   } else abschnitte.push([0, L, gs.fassade]);
   // Wandflächen (dachseitig schräge Oberkante bei Giebeln)
   for (const [u0, u1, farbe] of abschnitte) {
@@ -587,10 +671,11 @@ function gleis(S, punkte, art) {
 }
 
 /** Deko aus den Kartendaten setzen: Baumarten mit Kit-Prototypen, Hecken als niedrige Büsche, Möbel, Gartenlauben. */
-function dekoSetzen(I, B, deko) {
+function dekoSetzen(I, B, deko, aufSpielhaus = () => false) {
   const r = rng(91), n = deko.typ.length, art = deko.arten;
   for (let i = 0; i < n; i++) {
     const a = art[deko.typ[i] - 1], x = deko.p[i * 2] / 10, z = deko.p[i * 2 + 1] / 10, w = (deko.w[i] / 255) * Math.PI * 2;
+    if (aufSpielhaus(x, z)) continue;
     if (a === 'linde' || a === 'platane' || a === 'kastanie' || a === 'birke' || a === 'nadel' || a === 'pappel') baumSetzen(I, a, x, 0, z, r, 0.85 + r() * 0.35);
     else if (a === 'strassenbaum') baumSetzen(I, r() < 0.55 ? 'platane' : 'linde', x, 0.12, z, r, 0.9 + r() * 0.2, true);
     else if (a === 'busch') I.setze('busch', x, 0.03, z, w, 0.8 + r() * 0.6, [waehle(r, ['#6aa35c', '#7cb369', '#5f9a56', '#88bd70'])]);
@@ -598,6 +683,28 @@ function dekoSetzen(I, B, deko) {
     else if (a === 'laube') laube(B, x, z, w, r);
     else if (a === 'laterne' || a === 'altlaterne') I.setze(a, x, 0.12, z, w, 1);
     else I.setze(a, x, 0.12, z, w, 1, a === 'litfass' ? [waehle(r, ['#d8cfb8', '#e6dcc4']), waehle(r, ['#c9483e', '#2f6f8f', '#d39a2b']), waehle(r, ['#3f7d56', '#6b4f8f', '#e8e2d2'])] : null);
+  }
+}
+
+/** Bahnsteigdach: Dachplatte auf 5 m über dem Bahnsteig, Stützen in der Mitte der Längsachse. */
+function bahnsteigdach(B, ring) {
+  const pts = offen(ring); if (pts.length < 3) return;
+  const y = 5.0, farbe = '#a9b0b6';
+  dachflaeche(B, pts.map((p) => [p[0], p[1], y]), farbe);
+  // Stirnseite der Platte (sichtbare Kanten)
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length], ex = b[0] - a[0], ez = b[1] - a[1], L = Math.hypot(ex, ez);
+    if (L < 0.5) continue;
+    let nx = ez / L, nz = -ex / L;
+    if (imPolygon((a[0] + b[0]) / 2 + nx * 0.3, (a[1] + b[1]) / 2 + nz * 0.3, pts)) { nx = -nx; nz = -nz; }
+    if (nx * BLICK.x + nz * BLICK.z > 0.02) wandQuad(B, '#8d949a', a[0], a[1], b[0], b[1], y - 0.45, y, y - 0.45, y, nx, nz);
+  }
+  // Stützen entlang der langen Achse
+  const [x0, z0, x1, z1] = bboxVon(pts), lang = x1 - x0 > z1 - z0;
+  const mitte = lang ? (z0 + z1) / 2 : (x0 + x1) / 2, von = lang ? x0 : z0, bis = lang ? x1 : z1;
+  for (let u = von + 4; u < bis - 2; u += 10) {
+    const x = lang ? u : mitte, z = lang ? mitte : u;
+    if (imPolygon(x, z, pts)) wandBox(B, '#6b7278', x, (y + 0.55) / 2, z, 0.35, y - 0.55, 0.35, 1, 0, 0, 1);
   }
 }
 
@@ -615,35 +722,67 @@ function laube(B, x, z, w, r) {
  * Rückgabe wie baueStadt: { box, hoehen, dachFlaechen, teileStrasse, teileHaeuser, instanzen, drawCallsInstanzen }.
  */
 export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
-  const K = kartenDaten(plan.karte), def = K.def;
+  const K = kartenDaten(plan.karte, plan.stil), def = K.def;
+  PAL = K.stil === 'coffee' ? COFFEE : null;
   const [ox, oz] = K.ursprung, [kx, kz] = [def.kern[0] + ox, def.kern[1] + oz];
   const kern = (x, z) => Math.hypot(x - kx, z - kz) < def.kern[2];
   const B = new Puffer();
   const t0 = S.anzahl, z0 = performance.now(); const zeit = {};
   // Umland bis weit über den Kartenrand, damit die Kamera nie ins Leere sieht
-  boden(B, [[-1200, -1200], [K.breite + 1200, -1200], [K.breite + 1200, K.tiefe + 1200], [-1200, K.tiefe + 1200]], HOEHE.umland, BODEN.umland);
-  boden(B, [[0, 0], [K.breite, 0], [K.breite, K.tiefe], [0, K.tiefe]], HOEHE.pflaster, BODEN.pflaster);
+  boden(B, [[-1200, -1200], [K.breite + 1200, -1200], [K.breite + 1200, K.tiefe + 1200], [-1200, K.tiefe + 1200]], HOEHE.umland, bodenFarbe('umland'));
+  boden(B, [[0, 0], [K.breite, 0], [K.breite, K.tiefe], [0, K.tiefe]], HOEHE.pflaster, bodenFarbe('pflaster'));
   for (const st of K.boden) bodenStueck(B, st);
   for (const g of K.gleise) gleis(S, g.punkte, g.art);
   // Bäume, Hecken, Straßenmöbel und Lauben (vorberechnet in kartenstadt-bauen.py) als Instanzen wie in den Rasterstädten
   const I = scene ? new Instanzer() : null;
-  if (I && K.deko) dekoSetzen(I, B, K.deko);
+  const aufSpielhaus = (x, z) => plan.parzellen.some((p) => !p.leer && x > p.x - 1.5 && x < p.x + p.w + 1.5 && z > p.z - 1.5 && z < p.z + p.d + 1.5);
+  if (I && K.deko) dekoSetzen(I, B, K.deko, aufSpielhaus);
   const t1 = S.anzahl; zeit.boden = performance.now() - z0;
   // Bauplätze der Spielhäuser freiräumen: echte Gebäude, deren Mitte auf einer Parzelle liegt, entfallen
   const platz = plan.parzellen.filter((p) => !p.leer);
-  // Echte Gebäude entfallen, wenn ihre Mitte auf der Parzelle liegt oder mehr als ein Viertel ihrer Fläche darauf
-  const frei = (g) => !platz.some((p) => {
-    // Vorplatz, Parkplatz und Vordächer der Kit-Bauten liegen zur Kamera hin (+x, +z): dort 14 m Rand freihalten
-    const x0 = p.x - 3, z0 = p.z - 3, x1 = p.x + p.w + 14, z1 = p.z + p.d + 14;
-    if (g.mx > x0 && g.mx < x1 && g.mz > z0 && g.mz < z1) return true;
-    const [a, b, c, d] = g.bbox, ux = Math.max(0, Math.min(c, x1) - Math.max(a, x0)), uz = Math.max(0, Math.min(d, z1) - Math.max(b, z0));
-    if (ux * uz > 0.25 * Math.max(1, (c - a) * (d - b))) return true;
-    // Durchdringung mit dem Kit-Baukörper selbst: schon kleine Überlappung sieht man als Haus im Haus
-    const kx = Math.min(c, p.x + p.w) - Math.max(a, p.x), kz = Math.min(d, p.z + p.d) - Math.max(b, p.z);
-    return kx > 1.5 && kz > 1.5 && kx * kz > 0.04 * Math.max(1, (c - a) * (d - b));
+  // Echte Gebäude entfallen nur, wenn sie auf dem Bauplatz stehen (Mitte darauf oder mehr als 15 % ihrer Fläche)
+  // Sichtachse: Gebäude bis 30 m Höhe, die vor einem Spielhaus (zur Kamera hin, bis 60 m) mehr als 6 % seiner Ansicht verdecken, entfallen (Vorplatz)
+  const S2 = Math.SQRT2, COS = Math.cos(Math.PI / 6), SIN = Math.sin(Math.PI / 6);
+  const bild = (x, z, y) => [(x - z) / S2, y * COS - ((x + z) / S2) * SIN];
+  const rechteck = (a, b, c, d, h) => { let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (const [x, z] of [[a, b], [c, b], [c, d], [a, d]]) for (const y of [0, h]) { const [u, v] = bild(x, z, y); x0 = Math.min(x0, u); x1 = Math.max(x1, u); y0 = Math.min(y0, v); y1 = Math.max(y1, v); }
+    return [x0, y0, x1, y1]; };
+  const ansicht = platz.map((p) => ({ p, r: rechteck(p.x, p.z, p.x + p.w, p.z + p.d, 20), tiefe: p.x + p.w / 2 + p.z + p.d / 2 }));
+  const schutzB = (def.wahrzeichen ?? []).map(([x, z]) => [x + ox, z + oz]);
+  const wahrzeichen = (g) => schutzB.some(([x, z]) => x > g.bbox[0] - 30 && x < g.bbox[2] + 30 && z > g.bbox[1] - 30 && z < g.bbox[3] + 30);
+  const verdecktLaden = (g) => g.h <= 60 && !wahrzeichen(g) && ansicht.some(({ p, r, tiefe }) => {
+    if (g.mx + g.mz <= tiefe || Math.hypot(g.mx - p.x - p.w / 2, g.mz - p.z - p.d / 2) > 90 + Math.max(p.w, p.d) / 2) return false;
+    const q = rechteck(...g.bbox, g.h), f = (r[2] - r[0]) * (r[3] - r[1]);
+    return Math.max(0, Math.min(r[2], q[2]) - Math.max(r[0], q[0])) * Math.max(0, Math.min(r[3], q[3]) - Math.max(r[1], q[1])) > 0.06 * f;
+  });
+  const vorplatz = [];
+  const frei = (g) => !verdecktLaden(g) && !platz.some((p) => {
+    if (g.mx > p.x - 1 && g.mx < p.x + p.w + 1 && g.mz > p.z - 1 && g.mz < p.z + p.d + 1) return true;
+    const [a, b, c, d] = g.bbox, ux = Math.max(0, Math.min(c, p.x + p.w + 1) - Math.max(a, p.x - 1)), uz = Math.max(0, Math.min(d, p.z + p.d + 1) - Math.max(b, p.z - 1));
+    // Jedes Gebäude, das die Parzelle (mit 1 m Rand) berührt, entfällt; große Nachbarn schließt die Bauplatzsuche vorher aus
+    return ux > 0.3 && uz > 0.3;
   });
   const [dx, dz, dr] = [def.detail?.[0] ?? def.kern[0], def.detail?.[1] ?? def.kern[1], def.detail?.[2] ?? 900];
-  for (const g of K.gebaeude) if (frei(g)) gebaeudeBauen(B, S, g, kern(g.mx, g.mz), Math.hypot(g.mx - (dx + ox), g.mz - (dz + oz)) < dr);
+  const coffee = K.stil === 'coffee';
+  for (const g of K.gebaeude) {
+    const art = gebaeudeArt(g.fkt);
+    if (art === 'dach' || art === 'bruecke') continue;             // LoD2-Überdachungen (ersetzt durch Bahnsteigdächer) und Brückenplatten (Straßen und Gleise liegen flach)
+    { const m = Math.min(g.bbox[2] - g.bbox[0], g.bbox[3] - g.bbox[1]); if ((m < 3 && g.h > 8) || (m < 6 && g.h > 12 && g.h > 3 * m)) continue; }   // Masten, Stelen, Treppentürme   // Masten, Stelen, Werbepylone: wirken als schwebende Scheiben
+    if (coffee && (art === 'bauwerk' || g.flaeche < 30 || g.h < 2.5)) continue;   // Coffee: keine Kleinbauten, Masten, Schuppen
+    if (frei(g)) gebaeudeBauen(B, S, g, kern(g.mx, g.mz), Math.hypot(g.mx - (dx + ox), g.mz - (dz + oz)) < dr);
+    else if (I && !aufSpielhaus(g.mx, g.mz)) vorplatz.push(g);   // vor oder neben dem Laden entfernt: Vorplatz
+  }
+  // Vorplätze vor den Läden (dort entfernte Gebäude): Baumraster mit Bänken statt leerer Fläche
+  { const rv = rng(4711);
+    for (const g of vorplatz) {
+      const [a, b, c, d] = g.bbox;
+      for (let x = a + 4; x < c - 2; x += 9) for (let z = b + 4; z < d - 2; z += 9) {
+        if (aufSpielhaus(x, z)) continue;
+        if (rv() < 0.65) baumSetzen(I, rv() < 0.5 ? 'platane' : 'linde', x, 0, z, rv, 0.85 + rv() * 0.3);
+        else I.setze('bank', x, 0.12, z, rv() < 0.5 ? 0 : Math.PI / 2, 1);
+      }
+    } }
+  for (const ring of K.daecher) if (!ring.some(([x, z]) => platz.some((p) => x > p.x - 4 && x < p.x + p.w + 4 && z > p.z - 4 && z < p.z + p.d + 4))) bahnsteigdach(B, ring);
   zeit.gebaeude = performance.now() - z0 - zeit.boden; if (scene) { B.bauen(scene); I?.bauen(scene); } else B.abgeben(S); zeit.abgeben = performance.now() - z0 - zeit.boden - zeit.gebaeude;
   const hoehen = new Map(), dachFlaechen = [];
   let maxH = 20;

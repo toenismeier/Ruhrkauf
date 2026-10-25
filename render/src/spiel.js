@@ -14,7 +14,11 @@ import { RASTER } from './kit/innen.js';
 import { hqEtage, hqSitzungssaal, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './kit/hq.js';
 import { warenhaus } from './kit/warenhaus.js';
 import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer, dachFlaechenBeimBau } from './kit/stadt.js';
-import { istKartenstadt, kartenplan, baueKartenstadt } from './kit/karten/kartenstadt.js';
+import { istKartenstadt, kartenplan, baueKartenstadt, setzeKartenStil, kartenStil } from './kit/karten/kartenstadt.js';
+// Kartenstädte (Essen): Stadtbild umschaltbar zwischen vereinfacht (Coffee) und kartentreu
+meldeSchalter({ schluessel: 'kartenstil', titel: 'Stadtbild Kartenstädte (Essen)', gruppe: 'Darstellung', art: 'auswahl', standard: 'coffee',
+  optionen: [{ wert: 'coffee', titel: 'Coffee · vereinfacht, saubere Straßen' }, { wert: 'karte', titel: 'Kartentreu · jede Spur und jedes Gebäude' }] });
+{ let q = null; try { q = new URLSearchParams(location.search).get('kartenstil'); } catch { /* ohne URL */ } setzeKartenStil(q ?? einstellung('kartenstil')); }
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import { lebenModul } from './kit/leben.js';
@@ -54,7 +58,7 @@ import { einfuehrungModul } from './ui/einfuehrung.js';
 import { erfolgeModul } from './ui/erfolge.js';
 import { spielendeModul } from './ui/spielende.js';
 import { werkzeugeModul } from './ui/werkzeuge.js';
-import { einstellung, einstellungenModul, aktiviereBarrierefreiheit } from './ui/einstellungen.js';
+import { einstellung, einstellungenModul, aktiviereBarrierefreiheit, meldeSchalter } from './ui/einstellungen.js';
 // O02 Umsatztreiber
 import { reportingModul, hausTreiberZeile } from './ui/reporting.js';
 // O03 IT
@@ -1484,6 +1488,7 @@ wk = werkzeugeModul({
 });
 $('stadt-reise').addEventListener('click', () => { schliessePanel(); menueZu(); reise.oeffne(); });
 window.addEventListener('einstellung', (e) => {
+  if (e.detail?.schluessel === 'kartenstil') { setzeKartenStil(e.detail.wert); if (s && stadtName && istKartenstadt(stadtName)) { baueStadtAusSpiel(stadtName); zeichnen(); } }
   if (e.detail.schluessel === 'autospeichern' && !e.detail.wert) clearTimeout(speicherTimer);
   if (e.detail.schluessel === 'zahlen' && s) cockpitZeigen();
 });
