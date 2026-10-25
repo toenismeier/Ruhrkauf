@@ -109,8 +109,32 @@ export function kartenDaten(name, stil = kartenStil()) {
       return { typ: NETZ_TYP[typ], breite: breite / 10, einbahn: !!einbahn, a, b, punkte: paare(p), spuren, fussSeiten };
     }),
   };
+  r.aufFahrbahn = fahrbahnMaske(r);
   CACHE.set(ck, r);
   return r;
+}
+
+/** Rastermaske (1,5 m) der Fahrbahnen, Parkstreifen und Gleise: Passanten gehen dort nicht längs. */
+function fahrbahnMaske(K) {
+  const Z = 1.5, W = Math.ceil((K.breite + 400) / Z), H = Math.ceil((K.tiefe + 400) / Z), M = new Uint8Array(W * H);
+  const zelle = (x, z) => { const i = Math.floor(x / Z), j = Math.floor(z / Z); return i >= 0 && j >= 0 && i < W && j < H ? j * W + i : -1; };
+  for (const st of K.boden) {
+    if (st.art !== 'fahrbahn' && st.art !== 'parkstreifen') continue;
+    const p = st.p, idx = st.i;
+    for (let t = 0; t < idx.length; t += 3) {
+      const ax = p[idx[t] * 2] / 10, az = p[idx[t] * 2 + 1] / 10, bx = p[idx[t + 1] * 2] / 10, bz = p[idx[t + 1] * 2 + 1] / 10, cx = p[idx[t + 2] * 2] / 10, cz = p[idx[t + 2] * 2 + 1] / 10;
+      const d = (bz - cz) * (ax - cx) + (cx - bx) * (az - cz); if (Math.abs(d) < 1e-6) continue;
+      for (let i = Math.floor(Math.min(ax, bx, cx) / Z); i <= Math.floor(Math.max(ax, bx, cx) / Z); i++) for (let j = Math.floor(Math.min(az, bz, cz) / Z); j <= Math.floor(Math.max(az, bz, cz) / Z); j++) {
+        const x = (i + 0.5) * Z, z = (j + 0.5) * Z, l1 = ((bz - cz) * (x - cx) + (cx - bx) * (z - cz)) / d, l2 = ((cz - az) * (x - cx) + (ax - cx) * (z - cz)) / d;
+        if (l1 >= -0.05 && l2 >= -0.05 && l1 + l2 <= 1.05) { const k = zelle(x, z); if (k >= 0) M[k] = 1; }
+      }
+    }
+  }
+  for (const g of K.gleise) for (let n = 1; n < g.punkte.length; n++) {
+    const [x0, z0] = g.punkte[n - 1], [x1, z1] = g.punkte[n], L = Math.hypot(x1 - x0, z1 - z0);
+    for (let u = 0; u <= L; u += 0.75) for (const q of [-1.2, 0, 1.2]) { const x = x0 + (x1 - x0) * u / (L || 1) - (z1 - z0) / (L || 1) * q, z = z0 + (z1 - z0) * u / (L || 1) + (x1 - x0) / (L || 1) * q; const k = zelle(x, z); if (k >= 0) M[k] = 1; }
+  }
+  return (x, z) => { const k = zelle(x, z); return k >= 0 && M[k] === 1; };
 }
 
 /** Gebäudeart aus der ALKIS-Funktion (LoD2 NRW). */
@@ -151,7 +175,7 @@ export function kartenplan(name, eintrag, hqJson = null) {
   const ueberlapp = (A, B) => Math.max(0, Math.min(A[2], B[2]) - Math.max(A[0], B[0])) * Math.max(0, Math.min(A[3], B[3]) - Math.max(A[1], B[1]));
   const verdeckung = (R) => {
     const H = 22, haus = bildRechteck(R.x, R.z, R.x + R.w, R.z + R.d, H), f = (haus[2] - haus[0]) * (haus[3] - haus[1]);
-    const tiefe = R.x + R.w / 2 + R.z + R.d / 2;
+    const tiefe = R.x + R.w / 2 + R.z + R.d / 2 - 20;
     let v = 0;
     for (const g of K.gebaeude) {
       if (g.h < 10 || g.mx + g.mz <= tiefe) continue;
@@ -162,10 +186,21 @@ export function kartenplan(name, eintrag, hqJson = null) {
       if (u > 0.1 && g.h > 18) return 9;   // ein hohes Haus vor dem Laden verdeckt ihn spürbar: Bauplatz ausscheiden
       v += u;
     }
+    // Bereits gesetzte Spielhäuser (z. B. zweites HQ-Hochhaus) dürfen den Laden ebenso wenig verdecken
+    for (const q of belegt) {
+      if (q.x + q.w / 2 + q.z + q.d / 2 <= tiefe) continue;
+      const u = ueberlapp(haus, bildRechteck(q.x, q.z, q.x + q.w, q.z + q.d, 45)) / f;
+      if (u > 0.1) return 9;
+    }
+    // … und das neue Haus darf kein bereits gesetztes verdecken
+    const neu = bildRechteck(R.x, R.z, R.x + R.w, R.z + R.d, 45);
+    for (const q of belegt) {
+      if (q.x + q.w / 2 + q.z + q.d / 2 >= tiefe + 20) continue;
+      const r = bildRechteck(q.x, q.z, q.x + q.w, q.z + q.d, 22);
+      if (ueberlapp(r, neu) / ((r[2] - r[0]) * (r[3] - r[1])) > 0.1) return 9;
+    }
     return Math.min(1, v);
   };
-  globalThis.kartenVerdeckungTest = (R) => { const H = 22, haus = bildRechteck(R.x, R.z, R.x + R.w, R.z + R.d, H), f = (haus[2] - haus[0]) * (haus[3] - haus[1]), tiefe = R.x + R.w / 2 + R.z + R.d / 2;
-    return K.gebaeude.filter((g) => g.h > 15 && Math.hypot(g.mx - R.x - R.w / 2, g.mz - R.z - R.d / 2) < 120).map((g) => [g.id + ':' + g.bbox.map((v, i) => Math.round(v - (i % 2 ? R.z : R.x))).join('/'), Math.round(g.h), Math.round(g.mx + g.mz - tiefe), +(ueberlapp(haus, bildRechteck(...g.bbox, g.h)) / f).toFixed(2)]).filter((x) => x[3] > 0.02); };
   // Wahrzeichen (Rathaus, Hauptbahnhof, Münster, Marktkirche, Limbecker Platz, Grillo, Alte Synagoge) bleiben stehen
   const schutz = (def.wahrzeichen ?? []).map(ins);
   const geschuetzt = (g) => schutz.some(([x, z]) => x > g.bbox[0] - 30 && x < g.bbox[2] + 30 && z > g.bbox[1] - 30 && z < g.bbox[3] + 30);
@@ -268,7 +303,7 @@ export function kartenplan(name, eintrag, hqJson = null) {
   const aufPlatz = (x, z) => parzellen.some((p) => !p.leer && x > p.x - 1 && x < p.x + p.w + 1 && z > p.z - 1 && z < p.z + p.d + 1);
   const { strassen, kreuzungen } = strassennetz(K, aufPlatz);
   const G = def.kameraGrenze;
-  return {
+  const plan = {
     seed: eintrag.seed, typ: eintrag.typ, region: eintrag.region, archetyp: eintrag.archetyp, karte: name, stil,
     breite: K.breite, tiefe: K.tiefe, nx: 0, nz: 0,
     strassen, kreuzungen, bloecke: [], umland: [], diagonalen: [], zwickel: [], parzellen, standorte,
@@ -279,6 +314,9 @@ export function kartenplan(name, eintrag, hqJson = null) {
     start: (() => { const q = parzellen.find((p) => p.standort?.lage === '1a' && p.typ === 'slot:warenhaus'); return q ? [q.x + q.w / 2, q.z + q.d / 2] : [sx, sz]; })(),
     kameraGrenze: { x0: G[0] + ox, z0: G[1] + oz, x1: G[2] + ox, z1: G[3] + oz, sicht: def.sicht },
   };
+  // Fahrbahnmaske nicht aufzählbar: Pläne werden gespeichert und geklont, Funktionen gehören nicht hinein
+  Object.defineProperty(plan, 'aufFahrbahn', { value: K.aufFahrbahn, enumerable: false });
+  return plan;
 }
 
 /**
@@ -603,6 +641,30 @@ function dachdetails(B, g, gs) {
 }
 
 /** Ein LoD2-Gebäude: Dachflächen, Wände aus den Außenkanten der Dachflächen, Fenster auf den sichtbaren Wänden. */
+/** Douglas-Peucker für offene Ringe (2D). */
+function vereinfache(pts, tol) {
+  if (pts.length < 4) return pts;
+  const dp = (a, b) => { let m = -1, mi = 0; const [ax, az] = pts[a], [bx, bz] = pts[b], L = Math.hypot(bx - ax, bz - az) || 1;
+    for (let i = a + 1; i < b; i++) { const d = Math.abs((bx - ax) * (az - pts[i][1]) - (ax - pts[i][0]) * (bz - az)) / L; if (d > m) { m = d; mi = i; } }
+    return m > tol ? [...dp(a, mi).slice(0, -1), ...dp(mi, b)] : [pts[a], pts[b]]; };
+  // am weitesten vom ersten Punkt entfernten Punkt teilen, damit der Ring geschlossen vereinfacht wird
+  let w = 0, wi = 1; pts.forEach((p, i) => { const d = Math.hypot(p[0] - pts[0][0], p[1] - pts[0][1]); if (d > w) { w = d; wi = i; } });
+  const r = [...dp(0, wi).slice(0, -1), ...dp(wi, pts.length - 1)];
+  return r.length >= 3 ? r : pts;
+}
+/**
+ * Coffee-Abstraktion eines echten Gebäudes: Grundriss geglättet (1,5 m), Flachdach auf einer Höhe statt LoD2-Dachlandschaft.
+ * Gründerzeit-Altbauten mit Steildach behalten ihr Dach (das prägt das Stadtbild).
+ */
+function abstrahiert(g) {
+  const gs = gestalt(g);
+  if (gs.altbau || !g.boden || g.boden.length < 3) return g;
+  const ring = vereinfache(offen(g.boden).map((p) => [p[0], p[1]]), 1.5);
+  if (ring.length < 3) return g;
+  const h = Math.max(3, Math.round((gs.flach ? g.h : (g.traufe || g.h) + 1) / 3) * 3);   // auf Geschosse gerundet
+  return { ...g, dach: [ring.map(([x, z]) => [x, z, h])], dachIdx: null, boden: ring.map(([x, z]) => [x, z, 0]), h, traufe: h, dachTyp: '1000' };
+}
+
 function gebaeudeBauen(B, S, g, kern, detail = true) {
   const gs = gestalt(g);
   if (gs.art === 'dach' || gs.art === 'bruecke') {
@@ -689,7 +751,7 @@ function dekoSetzen(I, B, deko, aufSpielhaus = () => false) {
 /** Bahnsteigdach: Dachplatte auf 5 m über dem Bahnsteig, Stützen in der Mitte der Längsachse. */
 function bahnsteigdach(B, ring) {
   const pts = offen(ring); if (pts.length < 3) return;
-  const y = 5.0, farbe = '#a9b0b6';
+  const y = 5.0, farbe = PAL ? '#c9d6dc' : '#c3c8cc';
   dachflaeche(B, pts.map((p) => [p[0], p[1], y]), farbe);
   // Stirnseite der Platte (sichtbare Kanten)
   for (let i = 0; i < pts.length; i++) {
@@ -747,13 +809,13 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
   const rechteck = (a, b, c, d, h) => { let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
     for (const [x, z] of [[a, b], [c, b], [c, d], [a, d]]) for (const y of [0, h]) { const [u, v] = bild(x, z, y); x0 = Math.min(x0, u); x1 = Math.max(x1, u); y0 = Math.min(y0, v); y1 = Math.max(y1, v); }
     return [x0, y0, x1, y1]; };
-  const ansicht = platz.map((p) => ({ p, r: rechteck(p.x, p.z, p.x + p.w, p.z + p.d, 20), tiefe: p.x + p.w / 2 + p.z + p.d / 2 }));
+  const ansicht = platz.map((p) => ({ p, r: rechteck(p.x, p.z, p.x + p.w, p.z + p.d, 20), tiefe: p.x + p.w / 2 + p.z + p.d / 2 - 20 }));   // auch seitlich vorn stehende Häuser
   const schutzB = (def.wahrzeichen ?? []).map(([x, z]) => [x + ox, z + oz]);
   const wahrzeichen = (g) => schutzB.some(([x, z]) => x > g.bbox[0] - 30 && x < g.bbox[2] + 30 && z > g.bbox[1] - 30 && z < g.bbox[3] + 30);
   const verdecktLaden = (g) => g.h <= 60 && !wahrzeichen(g) && ansicht.some(({ p, r, tiefe }) => {
     if (g.mx + g.mz <= tiefe || Math.hypot(g.mx - p.x - p.w / 2, g.mz - p.z - p.d / 2) > 90 + Math.max(p.w, p.d) / 2) return false;
     const q = rechteck(...g.bbox, g.h), f = (r[2] - r[0]) * (r[3] - r[1]);
-    return Math.max(0, Math.min(r[2], q[2]) - Math.max(r[0], q[0])) * Math.max(0, Math.min(r[3], q[3]) - Math.max(r[1], q[1])) > 0.06 * f;
+    return Math.max(0, Math.min(r[2], q[2]) - Math.max(r[0], q[0])) * Math.max(0, Math.min(r[3], q[3]) - Math.max(r[1], q[1])) > 0.03 * f;
   });
   const vorplatz = [];
   const frei = (g) => !verdecktLaden(g) && !platz.some((p) => {
@@ -768,8 +830,8 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
     const art = gebaeudeArt(g.fkt);
     if (art === 'dach' || art === 'bruecke') continue;             // LoD2-Überdachungen (ersetzt durch Bahnsteigdächer) und Brückenplatten (Straßen und Gleise liegen flach)
     { const m = Math.min(g.bbox[2] - g.bbox[0], g.bbox[3] - g.bbox[1]); if ((m < 3 && g.h > 8) || (m < 6 && g.h > 12 && g.h > 3 * m)) continue; }   // Masten, Stelen, Treppentürme   // Masten, Stelen, Werbepylone: wirken als schwebende Scheiben
-    if (coffee && (art === 'bauwerk' || g.flaeche < 30 || g.h < 2.5)) continue;   // Coffee: keine Kleinbauten, Masten, Schuppen
-    if (frei(g)) gebaeudeBauen(B, S, g, kern(g.mx, g.mz), Math.hypot(g.mx - (dx + ox), g.mz - (dz + oz)) < dr);
+    if (coffee && (art === 'bauwerk' || g.flaeche < 50 || g.h < 2.5)) continue;   // Coffee: keine Kleinbauten, Masten, Schuppen
+    if (frei(g)) gebaeudeBauen(B, S, coffee ? abstrahiert(g) : g, kern(g.mx, g.mz), Math.hypot(g.mx - (dx + ox), g.mz - (dz + oz)) < dr);
     else if (I && !aufSpielhaus(g.mx, g.mz)) vorplatz.push(g);   // vor oder neben dem Laden entfernt: Vorplatz
   }
   // Vorplätze vor den Läden (dort entfernte Gebäude): Baumraster mit Bänken statt leerer Fläche

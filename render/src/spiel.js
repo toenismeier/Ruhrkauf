@@ -17,7 +17,7 @@ import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer, dachFla
 import { istKartenstadt, kartenplan, baueKartenstadt, setzeKartenStil, kartenStil } from './kit/karten/kartenstadt.js';
 // Kartenstädte (Essen): Stadtbild umschaltbar zwischen vereinfacht (Coffee) und kartentreu
 meldeSchalter({ schluessel: 'kartenstil', titel: 'Stadtbild Kartenstädte (Essen)', gruppe: 'Darstellung', art: 'auswahl', standard: 'coffee',
-  optionen: [{ wert: 'coffee', titel: 'Coffee · vereinfacht, saubere Straßen' }, { wert: 'karte', titel: 'Kartentreu · jede Spur und jedes Gebäude' }] });
+  optionen: [{ wert: 'coffee', titel: 'Coffee · vereinfacht, saubere Straßen' }, { wert: 'karte', titel: 'Kartentreu · Vorschau, noch in Arbeit' }] });
 { let q = null; try { q = new URLSearchParams(location.search).get('kartenstil'); } catch { /* ohne URL */ } setzeKartenStil(q ?? einstellung('kartenstil')); }
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';

@@ -245,7 +245,8 @@ def boden_variante(name, schichten):
     log(f'[{name}] Plätze …')
     # Plätze: Pflasterraster als feine Fugenbänder, damit große Plätze nicht als leere Fläche wirken
     fugen = []
-    for pl in flaechen_art.get('platz', []):
+    plaetze = flaechen_art.get('platz', []) + [q for q in teile(vereinigt(zus.get('fusszone', []))) if q.area > 300]
+    for pl in plaetze:
         if pl.area < 300: continue
         x0, z0, x1, z1 = pl.bounds; x = math.floor(x0 / 6) * 6
         while x < x1: fugen.append(LineString([(x, z0), (x, z1)]).buffer(0.09, cap_style=2)); x += 6
@@ -308,7 +309,7 @@ def boden_variante(name, schichten):
             if g is None or g.is_empty: continue
             if art == 'markierung' and not fb_maske.contains(g): continue   # keine Markierung neben der Fahrbahn (z. B. auf weggelassenen Zufahrten)
             T(art, g.intersection(gebiet))
-    return {'strassen_alle': strassen_alle, 'gehweg_aussen': gehweg_aussen, 'garten': garten, 'hofpflaster': hofpflaster, 'hecken': hecken, 'wege': wege}
+    return {'strassen_alle': strassen_alle, 'gehweg_aussen': gehweg_aussen, 'garten': garten, 'hofpflaster': hofpflaster, 'hecken': hecken, 'wege': wege, 'plaetze': plaetze}
 
 # ── Deko je Variante
 DEKO = {'linde': 1, 'platane': 2, 'kastanie': 3, 'birke': 4, 'nadel': 5, 'busch': 6, 'laterne': 7, 'altlaterne': 8, 'bank': 9,
@@ -331,7 +332,7 @@ def deko(name, g):
     rauschen = lambda x, z: math.sin(x / 37.0) * math.cos(z / 29.0) + 0.6 * math.sin((x + z) / 19.0) + 0.4 * math.cos((x - 2 * z) / 23.0)
     wege_p = prep(g['wege'].buffer(1.5)) if not g['wege'].is_empty else None
     for flaeche, mix, basis, schritt in ((gruen, ['linde', 'kastanie', 'linde', 'birke', 'platane', 'nadel', 'pappel'], 0.55, 9),
-                                         (g['garten'], ['birke', 'linde', 'kastanie', 'nadel', 'busch'], 0.45, 8), (g['hofpflaster'], ['linde', 'platane', 'birke'], 0.3, 11)):
+                                         (g['garten'], ['birke', 'linde', 'kastanie', 'nadel', 'busch', 'busch'], 0.6, 7), (g['hofpflaster'], ['linde', 'platane', 'birke'], 0.3, 11)):
         if flaeche.is_empty: continue
         pf = prep(flaeche.buffer(-2.0))
         x0, z0, x1, z1 = flaeche.bounds
@@ -397,7 +398,7 @@ def deko(name, g):
                 if not sperre_fb.contains(Point(x2, z2)) and frei(x2, z2, 3): setz('strassenbaum', x2, z2)
             u += abst; i += 1
     # Plätze: Baumreihe 3 m innerhalb des Randes, Bänke und Leuchten dazwischen, große Plätze mit Baumhain in der Mitte
-    for pl in flaechen_art.get('platz', []):
+    for pl in g['plaetze']:
         if pl.area < 300: continue
         innen = pl.buffer(-3, join_style=2)
         for ring in [q.exterior for q in teile(innen)]:
@@ -464,7 +465,7 @@ daecher = []
 # Bahnsteige zusammenführen (überlappende Teilflächen gäben versetzte Platten) und unter echten Gebäuden aussparen
 _bau = vereinigt([Polygon([(p[0], p[1]) for p in g['boden'][0]]).buffer(0.5) for g in lod['gebaeude'] if g['boden'] and len(g['boden'][0]) >= 3 and (g['fkt'] or '').startswith('31001')])
 for g in teile(vereinigt(flaechen_art.get('bahnsteig', [])).difference(_bau)):
-    innen = g.buffer(-0.5, join_style=2).simplify(0.5)
+    innen = g.buffer(-1.6, join_style=2).simplify(0.5)   # Dach schmaler als der Bahnsteig: Kanten und Gleise bleiben sichtbar
     for q in teile(innen):
         if q.area > 60: daecher.append(P(list(q.exterior.coords)))
 
@@ -492,6 +493,14 @@ for i, q in enumerate(_gp):
         j = int(j); w = _gp[j]
         if j != i and w is not None and w.area > 3 * q.area and w.intersection(q).area > 0.7 * q.area: aufbau.add(i); break
 log(f'{len(aufbau)} Dachaufbauten entfernt')
+# Gebäudeteile über dem Gleisfeld (Bahnhofshallen-Teile, Überbauungen): weglassen, sonst laufen Gleise unter flache Blöcke
+_gleis_p = prep(gleisflaeche)
+for i, q in enumerate(_gp):
+    if q is not None and q.area > 0 and _gleis_p.intersects(q) and q.intersection(gleisflaeche).area > 0.12 * q.area: aufbau.add(i)
+_gleislinien = vereinigt([LineString(g['punkte']) for g in osm['gleise'] if len(g['punkte']) >= 2 and g['art'] != 'tram'])
+for i, q in enumerate(_gp):
+    if q is not None and i not in aufbau and q.area > 0 and _gleis_p.intersects(q) and q.intersection(_gleislinien).length > 10: aufbau.add(i)   # Gleis läuft unter dem Bau durch
+log(f'{len(aufbau)} Dachaufbauten und Gleisüberbauten entfernt')
 for gi, g in enumerate(lod['gebaeude']):
     if not g['boden'] or gi in aufbau: continue
     b = g['boden'][0]
@@ -507,7 +516,8 @@ for gi, g in enumerate(lod['gebaeude']):
 
 # Gehwegseiten je Kante und Variante: Bit 0/1 Kartentreue links/rechts (v = −1/+1), Bit 2/3 Coffee. Eine Seite gilt nur,
 # wenn mindestens 90 % der Gehweglinie neben der Fahrbahn liegen (sonst liefen Passanten über Fahrbahnen, z. B. bei getrennten Richtungsfahrbahnen)
-_fb_prep = {n: prep(geo_var[n]['strassen_alle']) for n in ('karte', 'coffee')}
+_gleis_alle = vereinigt([LineString(g['punkte']).buffer(2.2) for g in osm['gleise'] if len(g['punkte']) >= 2 and im(g['punkte'])])
+_fb_prep = {n: prep(geo_var[n]['strassen_alle'].union(_gleis_alle)) for n in ('karte', 'coffee')}
 def fuss_seiten(k, gesamt):
     quer = 3.0 if k['typ'] == 'fussgaenger' else gesamt / 2 + 1.6
     ln = LineString(k['punkte'])

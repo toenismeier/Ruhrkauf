@@ -18,3 +18,6 @@ Daten neu erzeugen (Ubuntu, alle Quellen aus der Cloud erreichbar, kein Umweg ü
 2. Straßen: `node werkzeug/lauf-o2s.mjs essen.osm` (braucht `npm i osm2streets-js`).
 3. Gebäude: LoD2-Kacheln `LoD2_32_<E>_<N>_1_NW.gml` von opengeodata.nrw.de, dann `python3 werkzeug/lod2_lesen.py lod2-kern.json 900`.
 4. Flächen: `python3 werkzeug/osm_flaechen.py essen.osm osm-kern.json`, zusammen: `python3 werkzeug/zusammen.py essen-kern.json`.
+
+## Spielstadt (beide Stile)
+`python3 ../werkzeug/kartenstadt-bauen.py <arbeitsordner> ../essen-spiel.json 1500` baut `essen-spiel.json` mit den Varianten `coffee` (Coffee-Abstraktion) und `karte` (Kartentreue). Im Arbeitsordner zusätzlich `dienstwege.json`: Liste der OSM-Weg-IDs mit highway=track/path/footway/cycleway/bridleway/steps oder service=parking_aisle/driveway/drive-through/emergency_access (diese zeichnen in der Kartentreue keine Fahrbahn). Umschalten im Spiel: Einstellungen → Darstellung → „Stadtbild Kartenstädte“.
