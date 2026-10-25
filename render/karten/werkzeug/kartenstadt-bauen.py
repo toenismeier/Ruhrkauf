@@ -8,7 +8,7 @@
 import json, sys, math, os
 import numpy as np
 import mapbox_earcut as earcut
-from shapely.geometry import Polygon, MultiPolygon, box
+from shapely.geometry import Polygon, MultiPolygon, box, Point
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
@@ -103,7 +103,7 @@ hofkern = hof_alle.intersection(kern).buffer(0)
 
 # ── Triangulierung und Zellen
 FARBE = {'pflaster': 0, 'gehweg': 1, 'bord': 2, 'fahrbahn': 3, 'rad': 4, 'markierung': 5, 'gruen': 6, 'hof': 7, 'wasser': 8, 'platz': 9, 'parkplatz': 10, 'bahnsteig': 11, 'schotter': 12,
-         'parkstreifen': 13, 'hofkern': 14, 'gewerbe': 15, 'schulhof': 16, 'sport': 17, 'kleingarten': 18}
+         'parkstreifen': 13, 'hofkern': 14, 'gewerbe': 15, 'schulhof': 16, 'sport': 17, 'kleingarten': 18, 'weg': 19, 'linie': 20, 'ufer': 21, 'rasen2': 22}
 schichten = {}
 def ablegen(art, poly):
     for q in teile(poly):
@@ -133,6 +133,50 @@ for art, liste in flaechen_art.items():
     a = {'bahngelaende': 'schotter'}.get(art, art)
     if a in FARBE:
         for g in liste: ablegen(a, g.intersection(gebiet))
+# Parkwege und Pfade (nicht über Fahrbahn und Gehweg), Treppen schmal
+from shapely.geometry import LineString
+wege_poly = []
+for w in osm.get('wege', []):
+    if len(w['punkte']) < 2 or not im(w['punkte']): continue
+    breite = 1.0 if w['art'] == 'steps' else 1.6 if w['art'] == 'path' else 2.2
+    wege_poly.append(LineString(w['punkte']).buffer(breite / 2, cap_style=2, join_style=2))
+if wege_poly:
+    wege = unary_union(wege_poly).difference(gehweg_aussen).intersection(gebiet).simplify(0.25).buffer(0)
+    ablegen('weg', wege)
+else:
+    wege = None
+# Sportfelder: weiße Außenlinie und Mittellinie
+for f in osm.get('sportfelder', []):
+    g = gueltig(f['umriss'])
+    if g is None or g.is_empty or g.area < 150 or not im(f['umriss']): continue
+    r = g.minimum_rotated_rectangle
+    innen = r.buffer(-1.2, join_style=2)
+    if innen.is_empty: continue
+    ablegen('linie', innen.difference(innen.buffer(-0.18, join_style=2)))
+    c = list(innen.exterior.coords)[:4]
+    seiten = sorted([(math.dist(c[i], c[(i + 1) % 4]), i) for i in range(4)])
+    i = seiten[0][1]; j = (i + 2) % 4
+    m1 = ((c[i][0] + c[(i + 1) % 4][0]) / 2, (c[i][1] + c[(i + 1) % 4][1]) / 2); m2 = ((c[j][0] + c[(j + 1) % 4][0]) / 2, (c[j][1] + c[(j + 1) % 4][1]) / 2)
+    mitte = ((c[i][0] + c[(i + 1) % 4][0] + c[j][0] + c[(j + 1) % 4][0]) / 4, (c[i][1] + c[(i + 1) % 4][1] + c[j][1] + c[(j + 1) % 4][1]) / 4)
+    d = (m2[0] - m1[0], m2[1] - m1[1]); L = math.hypot(*d) or 1
+    q = (-d[1] / L, d[0] / L); halb = seiten[2][0] / 2
+    ablegen('linie', LineString([(mitte[0] - q[0] * halb, mitte[1] - q[1] * halb), (mitte[0] + q[0] * halb, mitte[1] + q[1] * halb)]).buffer(0.09, cap_style=2))
+    ablegen('linie', Point(mitte).buffer(3.0).difference(Point(mitte).buffer(2.82)))
+# Ufer: heller Rand um Wasser
+for g in flaechen_art.get('wasser', []):
+    ablegen('ufer', g.buffer(1.2, join_style=2).difference(g).intersection(gebiet))
+# Rasenvariation: etwas dunklere Flecken in großen Grünflächen (Mähmuster, Baumschatten-Inseln)
+if gruen is not None:
+    import random as _r
+    rr = _r.Random(5)
+    flecken = []
+    for q in teile(gruen):
+        if q.area < 2500: continue
+        x0, z0, x1, z1 = q.bounds
+        for _ in range(int(q.area / 1800)):
+            px, pz = rr.uniform(x0, x1), rr.uniform(z0, z1)
+            flecken.append(Point(px, pz).buffer(rr.uniform(7, 16), 6))
+    if flecken: ablegen('rasen2', unary_union(flecken).intersection(gruen).buffer(0))
 ablegen('fahrbahn', strassen)
 if parkflaeche is not None: ablegen('parkstreifen', parkflaeche)
 ablegen_liste('rad', rad); ablegen_liste('markierung', mark)
@@ -173,28 +217,118 @@ for g in lod['gebaeude']:
     gebaeude.append(eintrag)
 
 P = lambda pts: [v for x, z in pts for v in (round((x + OX) * 10), round((z + OZ) * 10))]
-def baum_punkte():
-    # OSM-Einzelbäume plus lockere Bepflanzung von Grünflächen (16-m-Raster, versetzt) und Innenhöfen (22-m-Raster)
+# Deko: Typ, Lage (Dezimeter), Winkel (0..255) – Bäume nach Art, Hecken, Straßenmöbel, Gartenlauben
+DEKO = {'linde': 1, 'platane': 2, 'kastanie': 3, 'birke': 4, 'nadel': 5, 'busch': 6, 'laterne': 7, 'altlaterne': 8, 'bank': 9,
+        'kuebel': 10, 'poller': 11, 'litfass': 12, 'muelleimer': 13, 'fahrradstaender': 14, 'laube': 15, 'strassenbaum': 16, 'pappel': 17, 'hecke': 18}
+def deko_punkte():
     import random
-    r = random.Random(77)
-    pkt = [(x, z) for x, z in osm['baeume'] if abs(x - MX) <= R and abs(z - MZ) <= R]
-    from shapely.geometry import Point
     from shapely.prepared import prep
-    schulhof = unary_union(flaechen_art.get('schulhof', [])) if flaechen_art.get('schulhof') else None
-    kleing = unary_union(flaechen_art.get('kleingarten', [])) if flaechen_art.get('kleingarten') else None
-    for flaeche, schritt, dichte in ((gruen, 16, 0.75), (hof, 20, 0.6), (hofkern, 26, 0.35), (schulhof, 24, 0.4), (kleing, 12, 0.5)):
+    from shapely.strtree import STRtree
+    r = random.Random(77)
+    out = []
+    geb_polys = [Polygon([(p[0], p[1]) for p in g['boden'][0]]).buffer(0) for g in lod['gebaeude'] if g['boden'] and len(g['boden'][0]) >= 3]
+    geb_baum = STRtree(geb_polys)
+    belegt = []
+    def frei(x, z, rad):
+        pt = Point(x, z)
+        for i in geb_baum.query(pt.buffer(rad)):
+            if geb_polys[i].distance(pt) < rad: return False
+        return True
+    sperre_fb = prep(strassen_alle.buffer(0.6))
+    def setz(art, x, z, w=None):
+        if abs(x - MX) > R or abs(z - MZ) > R: return
+        out.append((DEKO[art], x, z, r.random() * 2 * math.pi if w is None else w))
+    # OSM-Einzelbäume: an Straßen Platane/Linde, sonst gemischt
+    for x, z in osm['baeume']:
+        if abs(x - MX) <= R and abs(z - MZ) <= R:
+            setz('strassenbaum' if gehweg_aussen.buffer(2).contains(Point(x, z)) else r.choice(['linde', 'kastanie', 'platane', 'birke']), x, z)
+    # Parks: Baumgruppen (Klumpen über Rauschen) mit offenen Wiesen, Nadelbäume eingestreut, Büsche am Rand und an Wegen
+    def rauschen(x, z):
+        return math.sin(x / 37.0) * math.cos(z / 29.0) + 0.6 * math.sin((x + z) / 19.0) + 0.4 * math.cos((x - 2 * z) / 23.0)
+    wege_p = prep(wege.buffer(1.5)) if wege is not None and not wege.is_empty else None
+    for flaeche, art_mix, dichte_basis, schritt in ((gruen, ['linde', 'kastanie', 'linde', 'birke', 'platane', 'nadel', 'pappel'], 0.55, 9),
+                                                   (hof, ['birke', 'linde', 'kastanie', 'nadel'], 0.35, 11), (hofkern, ['linde', 'platane', 'birke'], 0.18, 14)):
         if flaeche is None or flaeche.is_empty: continue
-        pf = prep(flaeche)
+        pf = prep(flaeche.buffer(-2.5))
         x0, z0, x1, z1 = flaeche.bounds
-        x = x0 + 8
-        while x < x1 - 4:
-            z = z0 + 8
-            while z < z1 - 4:
-                px, pz = x + (r.random() - 0.5) * schritt * 0.55, z + (r.random() - 0.5) * schritt * 0.55
-                if r.random() < dichte and abs(px - MX) <= R and abs(pz - MZ) <= R and pf.contains(Point(px, pz)): pkt.append((px, pz))
+        x = x0
+        while x < x1:
+            z = z0
+            while z < z1:
+                px, pz = x + (r.random() - 0.5) * schritt * 0.8, z + (r.random() - 0.5) * schritt * 0.8
+                n = rauschen(px, pz)
+                dichte = dichte_basis * (0.15 if n < -0.2 else 1.0 if n > 0.6 else 0.55)
+                if r.random() < dichte and pf.contains(Point(px, pz)) and (wege_p is None or not wege_p.contains(Point(px, pz))) and frei(px, pz, 3):
+                    setz(r.choice(art_mix), px, pz)
                 z += schritt
             x += schritt
-    return [v for x, z in pkt for v in (round((x + OX) * 10), round((z + OZ) * 10))]
+    # Büsche entlang der Parkränder und Hecken an Höfen
+    for flaeche, abstand, art in ((gruen, 3.2, 'busch'), (hof, 2.4, 'hecke')):
+        if flaeche is None: continue
+        for q in teile(flaeche):
+            if q.area < 400: continue
+            rand = q.exterior
+            L = rand.length
+            u = 0
+            while u < L:
+                p = rand.interpolate(u)
+                if r.random() < (0.55 if art == 'busch' else 0.8) and not sperre_fb.contains(p) and frei(p.x, p.y, 1.2): setz(art, p.x, p.y)
+                u += abstand * (1 if art == 'hecke' else 1 + r.random() * 2)
+    # Fußgängerzonen und Plätze: Laternen, Bänke, Kübel, Litfaßsäulen, Mülleimer, Fahrradständer
+    for k in netz:
+        if k['typ'] != 'fussgaenger' or not im(k['punkte']): continue
+        ln = LineString(k['punkte'])
+        u, i = 6, 0
+        while u < ln.length - 3:
+            p = ln.interpolate(u); q = ln.interpolate(min(ln.length, u + 1))
+            dx, dz = q.x - p.x, q.y - p.y; l = math.hypot(dx, dz) or 1
+            nx, nz = -dz / l, dx / l
+            seite = 1 if i % 2 else -1
+            w = math.atan2(-dz, dx)
+            setz('altlaterne', p.x + nx * seite * 4.5, p.y + nz * seite * 4.5, 0)
+            if i % 2 == 0:
+                setz('bank', p.x - nx * seite * 3.2, p.y - nz * seite * 3.2, w + (math.pi if seite > 0 else 0))
+                setz('kuebel', p.x - nx * seite * 3.2 + dx / l * 2.2, p.y - nz * seite * 3.2 + dz / l * 2.2, 0)
+            if i % 5 == 2: setz('litfass', p.x + nx * seite * 2.0, p.y + nz * seite * 2.0, 0)
+            if i % 3 == 1: setz('muelleimer', p.x + nx * seite * 3.6, p.y + nz * seite * 3.6, 0)
+            if i % 7 == 3: setz('fahrradstaender', p.x - nx * seite * 4.2, p.y - nz * seite * 4.2, w)
+            if i % 2 == 1 and frei(p.x, p.y, 3): setz('strassenbaum', p.x, p.y)
+            u += 14; i += 1
+    # Laternen an Haupt- und Nebenstraßen (Gehwegkante)
+    for k in netz:
+        if k['typ'] == 'fussgaenger' or not im(k['punkte']): continue
+        ln = LineString(k['punkte']); halb = k['breite'] / 2 - 2.6
+        u, i = 8, 0
+        abst = 28 if k['typ'] == 'haupt' else 34
+        while u < ln.length - 4:
+            p = ln.interpolate(u); q = ln.interpolate(min(ln.length, u + 1))
+            dx, dz = q.x - p.x, q.y - p.y; l = math.hypot(dx, dz) or 1
+            nx, nz = -dz / l, dx / l
+            seite = 1 if i % 2 else -1
+            x, z = p.x + nx * seite * halb, p.y + nz * seite * halb
+            if not sperre_fb.contains(Point(x, z)) and frei(x, z, 1.0):
+                setz('laterne', x, z, math.atan2(nz * seite, -nx * seite) if False else math.atan2(-(-nz * seite), -nx * seite))
+            # Alleebäume an Hauptstraßen zwischen den Laternen
+            if k['typ'] == 'haupt':
+                x2, z2 = p.x + nx * -seite * (halb + 0.3) + dx / l * 9, p.y + nz * -seite * (halb + 0.3) + dz / l * 9
+                if not sperre_fb.contains(Point(x2, z2)) and frei(x2, z2, 3): setz('strassenbaum', x2, z2)
+            u += abst; i += 1
+    # Kleingärten: Lauben im Raster mit Hecken
+    for g in flaechen_art.get('kleingarten', []):
+        x0, z0, x1, z1 = g.bounds
+        pg = prep(g.buffer(-3))
+        x = x0 + 6
+        while x < x1 - 4:
+            z = z0 + 6
+            while z < z1 - 4:
+                if pg.contains(Point(x, z)) and frei(x, z, 2):
+                    setz('laube', x + r.uniform(-2, 2), z + r.uniform(-2, 2), r.choice([0, math.pi / 2]))
+                    for k in range(4): setz('hecke', x - 7 + k * 3.5, z - 7)
+                    if r.random() < 0.6: setz(r.choice(['birke', 'kastanie', 'busch']), x + 4, z + 3)
+                z += 14
+            x += 14
+    return out
+
 GL = {'rail': 1, 'light_rail': 2, 'tram': 3}
 TYP = {'haupt': 1, 'neben': 2, 'fussgaenger': 3}
 knoten = {}
@@ -206,7 +340,8 @@ out = {
     'boden': boden, 'bp': b64(BP, '<u2'), 'bi': b64(BI, '<u2'),
     'gp': b64(GP, '<u2'), 'gi': b64(GI, '<u2'), 'fkt': list(FKT),
     'gleise': [[GL[g['art']], P(g['punkte'])] for g in osm['gleise'] if g['art'] in GL and im(g['punkte'])],
-    'baeume': b64(baum_punkte(), '<u2'),
+    'deko': (lambda d: {'typ': base64.b64encode(bytes(t for t, _, _, _ in d)).decode(), 'w': base64.b64encode(bytes(int((w % (2 * math.pi)) / (2 * math.pi) * 255) for _, _, _, w in d)).decode(),
+              'p': b64([v for _, x, z, _ in d for v in (round((x + OX) * 10), round((z + OZ) * 10))], '<u2'), 'arten': list(DEKO)})(deko_punkte()),
     'netz': [[TYP[k['typ']], round(k['breite'] * 10), k['spuren'], 1 if k['einbahn'] else 0, kn(k['a']), kn(k['b']), P(k['punkte'])] for k in netz if im(k['punkte'])],
     'gebaeude': gebaeude,
 }

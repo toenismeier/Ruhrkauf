@@ -26,12 +26,17 @@ def art_flaeche(t):
     if t.get('landuse') in ('allotments',): return 'kleingarten'
     if t.get('landuse') in ('residential',): return 'wohnen'
     return None
-out = {'gleise': [], 'flaechen': [], 'baeume': []}
+out = {'gleise': [], 'flaechen': [], 'baeume': [], 'wege': [], 'sportfelder': []}
 for wid, (refs, t) in wege.items():
     r = t.get('railway')
     if r in ('rail', 'light_rail', 'tram') and t.get('tunnel') not in ('yes', 'building_passage') and not t.get('layer', '0').startswith('-'):
         out['gleise'].append({'art': r, 'punkte': pts(refs), 'bruecke': t.get('bridge') == 'yes', 'dienst': bool(t.get('service'))})
         continue
+    h = t.get('highway')
+    if h in ('footway', 'path', 'cycleway', 'track', 'bridleway', 'steps') and t.get('footway') not in ('sidewalk', 'crossing') and t.get('area') != 'yes' and t.get('tunnel') != 'yes':
+        out['wege'].append({'art': h, 'punkte': pts(refs)})
+    if t.get('leisure') == 'pitch' and len(refs) > 3 and refs[0] == refs[-1]:
+        out['sportfelder'].append({'sport': t.get('sport', ''), 'umriss': pts(refs)})
     a = art_flaeche(t)
     if a and len(refs) > 3 and refs[0] == refs[-1]:
         out['flaechen'].append({'art': a, 'umriss': pts(refs)})
@@ -47,4 +52,4 @@ for nid, (lon, lat, t) in knoten.items():
         out['baeume'].append([round(c, 1) for c in xz(lon, lat)])
 json.dump(out, open(sys.argv[2], 'w'), separators=(',', ':'), ensure_ascii=False)
 import collections
-print(len(out['gleise']), 'Gleise', collections.Counter(f['art'] for f in out['flaechen']), len(out['baeume']), 'Bäume')
+print(len(out['wege']), 'Wege', len(out['sportfelder']), 'Sportfelder', len(out['gleise']), 'Gleise', collections.Counter(f['art'] for f in out['flaechen']), len(out['baeume']), 'Bäume')

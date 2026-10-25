@@ -5,7 +5,7 @@
 // Spielhäuser (Hartwig, Sport, Volkskauf, FUNDUS, Wettbewerber, HQ) bauen die bekannten Kit-Bauer auf Bauplätzen,
 // die echte Gebäude ersetzen. Wände der übrigen Gebäude entstehen zur Laufzeit aus den Außenkanten der LoD2-Dachflächen.
 import { THREE, FARBEN, rng, waehle, baum, heller, vertexMat } from '../basis.js';
-import { bauerFuer, dachFlaechenBeimBau } from '../stadt.js';
+import { bauerFuer, dachFlaechenBeimBau, Instanzer, baumSetzen } from '../stadt.js';
 import { hqMasse } from '../hq.js';
 import { masseOutlet } from '../outlet.js';
 import { ESSEN_KARTE } from './essen.js';
@@ -17,12 +17,13 @@ export const istKartenstadt = (name) => !!KARTEN[name];
 const BLICK = new THREE.Vector3(Math.SQRT1_2 * Math.cos(Math.PI / 6), Math.sin(Math.PI / 6), Math.SQRT1_2 * Math.cos(Math.PI / 6));
 // Bodenschichten (Reihenfolge und Namen wie kartenstadt-bauen.py FARBE): Farbe und Höhe über Gelände
 const BODEN = {
+  weg: '#e2d6bd', linie: '#f4f2ea', ufer: '#d9d2bf', rasen2: '#8bbd7c',
   umland: '#cdc6b8', pflaster: '#d3ccbe', gehweg: '#e6e2d9', bord: '#bdb7ac', fahrbahn: '#767c84', parkstreifen: '#8b9097', rad: '#b0897a', markierung: FARBEN.markierung,
   gruen: FARBEN.rasen, hof: '#a9c08e', hofkern: '#dcd6c9', wasser: FARBEN.wasser, platz: '#d9d2c3', parkplatz: '#969ba2', bahnsteig: '#cfc9bd', schotter: '#a39b8e', schiene: '#5b5550',
   gewerbe: '#c4bfb5', schulhof: '#d0c3ad', sport: '#7fb36b', kleingarten: '#9fc27f',
 };
 // Jede Schicht auf eigener Höhe (gleiche Höhen flackern ineinander)
-const HOEHE = { umland: -0.03, pflaster: 0, hofkern: 0.008, hof: 0.012, gewerbe: 0.016, schulhof: 0.02, kleingarten: 0.024, sport: 0.028, gruen: 0.035, platz: 0.04,
+const HOEHE = { weg: 0.047, linie: 0.042, ufer: 0.05, rasen2: 0.037, umland: -0.03, pflaster: 0, hofkern: 0.008, hof: 0.012, gewerbe: 0.016, schulhof: 0.02, kleingarten: 0.024, sport: 0.028, gruen: 0.035, platz: 0.04,
   parkplatz: 0.045, wasser: 0.052, schotter: 0.06, fahrbahn: 0.07, parkstreifen: 0.074, rad: 0.08, markierung: 0.1, gehweg: 0.12, bord: 0.14, bahnsteig: 0.55 };
 const GL_ART = { 1: 'rail', 2: 'light_rail', 3: 'tram' };
 const NETZ_TYP = { 1: 'haupt', 2: 'neben', 3: 'fussgaenger' };
@@ -64,12 +65,15 @@ export function kartenDaten(name) {
     const [a, b, c, f] = bboxVon(boden.length ? boden : dach.flat());
     return { i, id: 'g' + i, fkt: d.fkt[e[0]] ?? '', dachTyp: String(e[1]), h: e[2] / 10, traufe: e[3] / 10, boden, dach, dachIdx, bbox: [a, b, c, f], mx: (a + c) / 2, mz: (b + f) / 2, flaeche: (c - a) * (f - b) };
   });
-  const BP = u16(d.bp), BI = u16(d.bi), BAUM = u16(d.baeume);
+  const BP = u16(d.bp), BI = u16(d.bi);
+  // Deko: Art je Eintrag (Byte), Winkel (Byte), Lage (Uint16-Paare in Dezimetern)
+  const bytes = (b64) => { const bin = typeof atob === 'function' ? atob(b64) : Buffer.from(b64, 'base64').toString('binary'); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; };
+  const deko = d.deko ? { typ: bytes(d.deko.typ), w: bytes(d.deko.w), p: u16(d.deko.p), arten: d.deko.arten } : null;
   const r = {
     name, def: k.def, breite: d.breite, tiefe: d.tiefe, ursprung: d.ursprung, lizenz: d.lizenz,
     boden: d.boden.map(([f, po, pn, io, inn]) => ({ art: d.farben[f], p: BP.subarray(po * 2, (po + pn) * 2), i: BI.subarray(io, io + inn) })),
     gleise: d.gleise.map(([a, p]) => ({ art: GL_ART[a], punkte: paare(p) })),
-    baeume: paare(BAUM), gebaeude,
+    deko, gebaeude,
     netz: (d.netz ?? []).map(([typ, breite, spuren, einbahn, a, b, p]) => ({ typ: NETZ_TYP[typ], breite: breite / 10, spuren, einbahn: !!einbahn, a, b, punkte: paare(p) })),
   };
   CACHE.set(name, r);
@@ -582,6 +586,30 @@ function gleis(S, punkte, art) {
   }
 }
 
+/** Deko aus den Kartendaten setzen: Baumarten mit Kit-Prototypen, Hecken als niedrige Büsche, Möbel, Gartenlauben. */
+function dekoSetzen(I, B, deko) {
+  const r = rng(91), n = deko.typ.length, art = deko.arten;
+  for (let i = 0; i < n; i++) {
+    const a = art[deko.typ[i] - 1], x = deko.p[i * 2] / 10, z = deko.p[i * 2 + 1] / 10, w = (deko.w[i] / 255) * Math.PI * 2;
+    if (a === 'linde' || a === 'platane' || a === 'kastanie' || a === 'birke' || a === 'nadel' || a === 'pappel') baumSetzen(I, a, x, 0, z, r, 0.85 + r() * 0.35);
+    else if (a === 'strassenbaum') baumSetzen(I, r() < 0.55 ? 'platane' : 'linde', x, 0.12, z, r, 0.9 + r() * 0.2, true);
+    else if (a === 'busch') I.setze('busch', x, 0.03, z, w, 0.8 + r() * 0.6, [waehle(r, ['#6aa35c', '#7cb369', '#5f9a56', '#88bd70'])]);
+    else if (a === 'hecke') I.setze('busch', x, 0.03, z, w, [0.9, 0.6, 0.9], ['#4f8a49']);
+    else if (a === 'laube') laube(B, x, z, w, r);
+    else if (a === 'laterne' || a === 'altlaterne') I.setze(a, x, 0.12, z, w, 1);
+    else I.setze(a, x, 0.12, z, w, 1, a === 'litfass' ? [waehle(r, ['#d8cfb8', '#e6dcc4']), waehle(r, ['#c9483e', '#2f6f8f', '#d39a2b']), waehle(r, ['#3f7d56', '#6b4f8f', '#e8e2d2'])] : null);
+  }
+}
+
+/** Gartenlaube: kleines Holzhaus mit Satteldach. */
+function laube(B, x, z, w, r) {
+  const ux = Math.cos(w), uz = -Math.sin(w), nx = -uz, nz = ux;
+  const farbe = waehle(r, ['#9c7a55', '#7f6a4f', '#b39b72', '#6f8a6a', '#c9b48c']);
+  wandBox(B, farbe, x, 1.1, z, 3.2, 2.2, 2.6, ux, uz, nx, nz);
+  wandBox(B, waehle(r, ['#7c4a3a', '#5d666e', '#4f5a52']), x, 2.35, z, 3.6, 0.3, 3.0, ux, uz, nx, nz);
+  wandQuad(B, FARBEN.fenster, x + nx * 1.32 - ux * 0.7, z + nz * 1.32 - uz * 0.7, x + nx * 1.32 + ux * 0.1, z + nz * 1.32 + uz * 0.1, 1.0, 1.7, 1.0, 1.7, nx, nz);
+}
+
 /**
  * Baut die Kartenstadt in den Sammler und ruft für Spielhäuser/HQ die Kit-Bauer (wie baueStadt).
  * Rückgabe wie baueStadt: { box, hoehen, dachFlaechen, teileStrasse, teileHaeuser, instanzen, drawCallsInstanzen }.
@@ -597,9 +625,9 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
   boden(B, [[0, 0], [K.breite, 0], [K.breite, K.tiefe], [0, K.tiefe]], HOEHE.pflaster, BODEN.pflaster);
   for (const st of K.boden) bodenStueck(B, st);
   for (const g of K.gleise) gleis(S, g.punkte, g.art);
-  // Bäume: OSM-Einzelbäume, Grünflächen und Innenhöfe (Punkte vorberechnet in kartenstadt-bauen.py)
-  const r = rng(77);
-  for (const [x, z] of K.baeume) baumSchnell(B, x, z, r, 1.05 + r() * 0.35);
+  // Bäume, Hecken, Straßenmöbel und Lauben (vorberechnet in kartenstadt-bauen.py) als Instanzen wie in den Rasterstädten
+  const I = scene ? new Instanzer() : null;
+  if (I && K.deko) dekoSetzen(I, B, K.deko);
   const t1 = S.anzahl; zeit.boden = performance.now() - z0;
   // Bauplätze der Spielhäuser freiräumen: echte Gebäude, deren Mitte auf einer Parzelle liegt, entfallen
   const platz = plan.parzellen.filter((p) => !p.leer);
@@ -616,7 +644,7 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
   });
   const [dx, dz, dr] = [def.detail?.[0] ?? def.kern[0], def.detail?.[1] ?? def.kern[1], def.detail?.[2] ?? 900];
   for (const g of K.gebaeude) if (frei(g)) gebaeudeBauen(B, S, g, kern(g.mx, g.mz), Math.hypot(g.mx - (dx + ox), g.mz - (dz + oz)) < dr);
-  zeit.gebaeude = performance.now() - z0 - zeit.boden; if (scene) B.bauen(scene); else B.abgeben(S); zeit.abgeben = performance.now() - z0 - zeit.boden - zeit.gebaeude;
+  zeit.gebaeude = performance.now() - z0 - zeit.boden; if (scene) { B.bauen(scene); I?.bauen(scene); } else B.abgeben(S); zeit.abgeben = performance.now() - z0 - zeit.boden - zeit.gebaeude;
   const hoehen = new Map(), dachFlaechen = [];
   let maxH = 20;
   if (!o.ohneHaeuser) for (const p of plan.parzellen) {

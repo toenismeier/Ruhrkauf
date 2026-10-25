@@ -98,6 +98,10 @@ export function karteSteuerung(o) {
       o.setzen();
       festhalten(pinch.p, m.x, m.y);
       o.setzen();
+      // Wie beim Wischen: nach dem Klemmen Anker und Ausgangsabstand nachführen, damit Zoom und Verschieben nicht hängen
+      const neu = o.aufBoden(m.x, m.y);
+      if (neu && pinch.p && Math.hypot(neu.x - pinch.p.x, neu.z - pinch.p.z) > 0.05) pinch.p = neu;
+      if (K.halb !== pinch.halb * pinch.d / Math.max(10, m.d)) { pinch.halb = K.halb; pinch.d = Math.max(10, m.d); }
       return;
     }
     if (!start?.p) return;
@@ -105,6 +109,10 @@ export function karteSteuerung(o) {
     const x0 = K.x, z0 = K.z;
     festhalten(start.p, e.clientX, e.clientY);
     o.setzen();
+    // Am Rand klemmt setzen() die Kamera: Ankerpunkt neu unter den Finger legen, sonst „klebt“ die Karte, bis der Finger
+    // wieder über den alten Punkt zurückgewischt wird (Befund iPhone: Stadt nicht immer verschiebbar)
+    const neu = o.aufBoden(e.clientX, e.clientY);
+    if (neu && start.p && Math.hypot(neu.x - start.p.x, neu.z - start.p.z) > 0.05) start.p = neu;
     const t = e.timeStamp;
     spur.push({ t, x: K.x, z: K.z, dx: K.x - x0, dz: K.z - z0 });
     while (spur.length > 2 && t - spur[0].t > 100) spur.shift();
