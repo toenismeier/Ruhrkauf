@@ -10,7 +10,14 @@
 - Q42: gleiche Regel, Typen und Varianten mit `bildOffen`.
 
 ## 2. Bildpakete B1, B2, … (eigene Chats, je Paket höchstens 10 Typen)
-Paketliste: `daten/bildpakete.csv` (Spalte `paket`, `typ`, `auftrag`, `vorlage_boegen`). **B1 ist das Stilpaket**: erst wenn Ummo B1 abnimmt, starten weitere Pakete; B1 ist dann Stilreferenz für alle.
+Paketliste: `daten/bildpakete.csv` (Spalte `paket`, `typ`, `auftrag`, `vorlage_boegen`). **B01 ist das Stilpaket**: erst wenn Ummo B01 abnimmt, starten weitere Pakete; B01 ist dann Stilreferenz für alle.
+
+### Verfahren (Ummo 25.10.2026: in B01 beide testen, Ummo wählt am Bogen)
+Grundlage Merkposten O10 (Bildwerkzeuge). Je B01-Typ zwei Fassungen:
+- **A: vtracer (MIT)**: bester Freisteller aus `vorlage_boegen` (Originalbild aus dem privaten Repo, bei Hintergrund vorher rembg, MIT) → vtracer → SVG. Dann **Stilschritt**: Kontur glätten und vereinfachen (keine Fotofalten, keine Logos, keine Schrift, keine Etiketten realer Marken), Flächen auf Hartwig-Palette, Schattierung und Licht von links aus `stoff.js`, Farbe/Material/Muster parametrisch umfärbbar. Ziel: echte Form, eigener Stil.
+- **B: Bildmodell im Hartwig-Stil**: Qwen-Image-Edit (bzw. FLUX Kontext) auf Ummos RunPod, Eingabe derselbe Freisteller plus Stilvorgabe (Flatlay-Illustration, Hartwig-Palette, Licht von links, weicher Bodenschatten, freigestellt). Ohne LoRA im Test; LoRA erst, wenn Ummo B wählt. Läuft nicht im Bild-Chat (keine GPU), sondern über den Workstream-Chat mit Ummo; Ergebnisse kommen als Dateien in den privaten Repo-Ordner `hartwig-ref-p01/stiltest-b01/`.
+- **Öffentlich/privat (Ummo):** Vektorisieren und Zwischenstände nur in den privaten Repos `hartwig-ref-…`. Ins Ruhrkauf-Repo kommt nur die vereinfachte, umgezeichnete Endform (A) bzw. das gewählte Endbild.
+- **B01-Bogen an Ummo:** je Typ eine Zeile **Referenz | A | B** in 320 px und 64 px. Danach entscheidet Ummo das Verfahren für B02–B30; der Rest von Abschnitt 2 gilt für beide Verfahren (Maßzeile, Prüfung Formtreue ≥ 4, Geschwistertypen).
 
 Arbeitsweise je Typ:
 1. **Referenz zuerst:** die drei Bögen aus `vorlage_boegen` öffnen (private Repos `toenismeier/hartwig-ref-…`, nur lesen). Daraus eine **Maßzeile** im Code: Bundhöhe zur Hüfte, Weite an Bund, Hüfte, Knie, Saum, Länge, Schnittlinien, Taschen, Nähte, Verschlüsse, Saumabschluss. Was den Typ ausmacht, steht als erstes in der Maßzeile (Low-Rise: Bund deutlich unter Taille, kurze vordere Leibhöhe; Ballon-Jeans: Weite an Knie, schmal an Bund und Saum, **ohne** Bänder; Caprihose: Bund, wadenlang, gerades schmales Bein).
