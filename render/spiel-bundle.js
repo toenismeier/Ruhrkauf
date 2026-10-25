@@ -161501,7 +161501,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "5a714f3" : "Entwicklung";
+  var version = () => true ? "c21687d" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -181963,8 +181963,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-25T08:41:49.301Z" : null;
-    const v2 = true ? "5a714f3" : "Entwicklung";
+    const iso = true ? "2026-10-25T08:48:20.407Z" : null;
+    const v2 = true ? "c21687d" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();
