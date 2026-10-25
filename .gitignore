@@ -12,3 +12,4 @@ render/startbilder/
 .osm-roh/
 .claude/worktrees/
 bilder/nice/
+__pycache__/
