@@ -6491,6 +6491,135 @@
       "material": "glas",
       "farbe": "flaschengruen",
       "model": null
+    },
+    "b01lowrisejeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b01": "b01lowrisejeans",
+        "passform": "weit",
+        "leibhoehe": "tief"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "hose"
+    },
+    "b01ballonjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b01": "b01ballonjeans",
+        "passform": "baggy",
+        "leibhoehe": "hoch"
+      },
+      "material": "denim",
+      "farbe": "hellblau",
+      "model": "hose"
+    },
+    "b01caprihose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b01": "b01caprihose",
+        "passform": "gerade",
+        "laenge": "cropped",
+        "feinstreifen": true
+      },
+      "material": "wolle",
+      "farbe": "braun",
+      "model": "hose"
+    },
+    "b01hotpants": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b01": "b01hotpants",
+        "passform": "gerade",
+        "laenge": "kurz",
+        "leibhoehe": "tief"
+      },
+      "material": "baumwolle",
+      "farbe": "braun",
+      "model": "hose"
+    },
+    "b01midirock": {
+      "gruppe": "rock",
+      "standard": {
+        "b01": "b01midirock",
+        "laenge": "midi",
+        "form": "glocke"
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b01babytee": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b01": "b01babytee",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "tailliert",
+        "laenge": "crop"
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b01strickpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b01": "b01strickpullover",
+        "aermel": "lang",
+        "kragen": "polo",
+        "passform": "oversize",
+        "rippbund": true,
+        "strick": true,
+        "farben": [
+          "khaki",
+          "weiß"
+        ],
+        "materialien": [
+          "strick",
+          "strick"
+        ]
+      },
+      "material": "strick",
+      "farbe": "anthrazit",
+      "model": "oberteil"
+    },
+    "b01blouson": {
+      "gruppe": "jacke",
+      "standard": {
+        "b01": "b01blouson",
+        "art": "bomber"
+      },
+      "material": "lack",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "b01maryjane": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b01": "b01maryjane",
+        "art": "ballerina",
+        "farben": [
+          "schwarz"
+        ],
+        "materialien": [
+          "leder"
+        ]
+      },
+      "material": "lack",
+      "farbe": "rot",
+      "model": "schuhe"
+    },
+    "b01baguette": {
+      "gruppe": "tasche",
+      "standard": {
+        "b01": "b01baguette"
+      },
+      "material": "lack",
+      "farbe": "bordeaux",
+      "model": "tasche"
     }
   }
 }
