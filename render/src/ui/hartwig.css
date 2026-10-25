@@ -1350,3 +1350,5 @@ body.spielende-aktiv { overflow: hidden; }
 .hw[data-bereich='haus'] .hw-knopf.text { color: #dba982; }
 .hw-reiter.mehr-auf { z-index: 20; }
 .hw-reiter:has(> .hw-reiter-mehr) { overflow: visible !important; }
+/* Zurück-Verweis oben im Rumpf (Zentrale: Gebäude → Etage) */
+.hw-zurueck { margin: 14px 0 0 -4px; min-height: 44px; font: var(--hw-t-text); font-size: 13.5px; }

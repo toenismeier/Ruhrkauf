@@ -49,6 +49,10 @@ const PANELS = [
   { name: 'f-quartal', vorSpiel: false, umgestellt: true, oeffne: "hqKlick('reiter', 'finanzen'); await new Promise((r) => setTimeout(r, 60)); document.querySelector('#pinhalt [data-fin=zeit][data-wert=quartal]').click();" },
   { name: 'f-bilanz', vorSpiel: false, umgestellt: true, oeffne: "hqKlick('reiter', 'finanzen'); await new Promise((r) => setTimeout(r, 60)); document.querySelector('#pinhalt [data-fin=art][data-wert=bilanz]').click();", nach: "const pi = document.getElementById('pinhalt'); pi.scrollTop = 560;" },
   { name: 'f-cashflow', vorSpiel: false, umgestellt: true, oeffne: "hqKlick('reiter', 'finanzen'); await new Promise((r) => setTimeout(r, 60)); document.querySelector('#pinhalt [data-fin=art][data-wert=cashflow]').click();" },
+  // Zentrale als Seitenfolge (25.10.): Gebäude, Etage mit Zuweisen, Rückfrage vor der Kündigung
+  { name: 'z-gebaeude', vorSpiel: false, umgestellt: true, oeffne: "hqKlick('reiter', 'zentrale'); await new Promise((r) => setTimeout(r, 60)); document.querySelector('#pinhalt [onclick*=\"\\'gebaeude\\'\"]').click();" },
+  { name: 'z-etage', vorSpiel: false, umgestellt: true, oeffne: "hqKlick('reiter', 'zentrale'); await new Promise((r) => setTimeout(r, 60)); document.querySelector('#pinhalt [onclick*=\"\\'gebaeude\\'\"]').click(); await new Promise((r) => setTimeout(r, 60)); document.querySelector('#pinhalt [onclick*=etageSeite]').click();", nach: "const pi = document.getElementById('pinhalt'); pi.scrollTop = 500;" },
+  { name: 'z-rueckfrage', vorSpiel: false, umgestellt: true, oeffne: "hqKlick('reiter', 'zentrale'); await new Promise((r) => setTimeout(r, 60)); document.querySelector('#pinhalt [onclick*=\"\\'gebaeude\\'\"]').click(); await new Promise((r) => setTimeout(r, 60)); document.querySelector('#pinhalt [onclick*=bestaetigen]').click();" },
   { name: 'q31-spielstaende', vorSpiel: false, umgestellt: true, oeffne: menue('app-oeffnen') },
 ];
 module.exports = { PANELS };

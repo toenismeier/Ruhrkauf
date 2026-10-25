@@ -30,7 +30,7 @@ import { karteSteuerung, klemmen, bildecken, erweitert } from './ui/karte.js';
 import { vorstandModul } from './ui/vorstand.js';
 // O01 Organisation
 import { organisationModul } from './ui/organisation.js';
-import { zentraleAbteilungHtml, zentraleHtml } from './ui/zentrale-abteilungen.js';
+import { zentraleAbteilungHtml, zentraleHtml, zentraleGebaeudeHtml, zentraleEtageHtml } from './ui/zentrale-abteilungen.js';
 import { finanzenModul } from './ui/finanzen.js';
 import { posteingangModul } from './ui/posteingang.js';
 import { zeitungModul } from './ui/zeitung.js';
@@ -914,9 +914,12 @@ function panel(titel, unter, html, klasse = '') {
   menueZu(); ebenenZu();
   $('panel').classList.toggle('gross', klasse === 'gross');
   $('panel').classList.toggle('hausdetail', klasse === 'hausdetail');
+  // Neue Seite (anderer Titel) beginnt oben; Neuzeichnen derselben Seite behält die Lage (Module setzen sie selbst).
+  const andereSeite = $('ptitel').textContent !== titel || !$('panel').classList.contains('offen');
   $('ptitel').textContent = titel;
   $('punter').textContent = unter;
   $('pinhalt').innerHTML = html;
+  if (andereSeite) $('pinhalt').scrollTop = 0;
   huelleOrdnen();
   const neu = !$('panel').classList.contains('offen');
   if (neu) vorherigerFokus = document.activeElement;
@@ -952,7 +955,7 @@ function huelleOrdnen() {
 }
 const huellenBeobachter = new MutationObserver(() => huelleOrdnen());
 huellenBeobachter.observe($('pinhalt'), { childList: true });
-function schliessePanel() { kameraZiel = null; for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; hqAbteilung = null; hqEtageWahl = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
+function schliessePanel() { kameraZiel = null; for (const m of module()) m.zu(); $('panel').classList.remove('offen'); $('panel').inert = true; $('panel').setAttribute('aria-hidden', 'true'); document.body.classList.remove('panel-offen'); offenesHaus = null; offenesHq = null; hqAbteilung = null; hqEtageWahl = null; hqSeite = null; hqBestaetigen = null; offenerWettbewerber = null; if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true }); vorherigerFokus = null; }
 const szenarienUI = szenarienModul({ E, spiel: () => s, wahl: () => startWahl, panel, meldung, stufenAktualisieren: zeichneStufen, nachAktion: () => { cockpitZeigen(); szenarienUI.aktualisieren(); automatischSpeichern(); } });
 /** Q10: Neues Haus bewusst fokussieren; spätere Renderläufe erhalten das Ziel. */
 function hausZeigen(id) {
@@ -1002,7 +1005,8 @@ window.premiumTun = (was, id) => {
 window.formateTun=(typ,wert)=>{
   const aktion=typ==='schwesterUmflaggen'?{typ,haus:wert}:typ==='altwareOutlet'?{typ,quote:Number(wert)/100}:typ==='offpriceZukauf'?{typ,budget:Math.round(Number(wert))}:{typ:'outletEroeffnen',stadt:wert};
   const r=E.fuehreAus(s,aktion);meldung(r.text,r.ok);
-  if(r.ok){grafikNachziehen();nachAktion();if(offenesHaus)oeffneHaus(offenesHaus);}
+  // Die Liste neu zeichnen, in der getippt wurde (sonst bleibt z. B. der eröffnete FUNDUS-Standort angeboten).
+  if(r.ok){grafikNachziehen();nachAktion();if(offenesHaus)oeffneHaus(offenesHaus);else if(ek.aktiv())ek.neuZeichnen();}
 };
 window.filialProgramm = (programm) => {
   const r = E.fuehreAus(s, { typ: 'filialProgramm', programm });
@@ -1150,6 +1154,7 @@ $('pinhalt').addEventListener('click', (e) => {
 
 // ─────────────────────────────────────────── Zentrale (HQ)
 let hqAbteilung = null; // Q15: gewählte Seite der Fachabteilung
+let hqSeite = null, hqBestaetigen = null; // E47: Gebäude- oder Etagenseite, offene Rückfrage vor einer Kündigung
 let hqEtageWahl = null;   // { g: Gebäude-Id, nr } für den 3D-Schnitt
 let hqRen = null;
 /** Etagenschnitt aus hq.js als Bild (eigener kleiner Renderer, damit die Karte unberührt bleibt). */
@@ -1241,9 +1246,17 @@ function oeffneHqAbteilung(id) {
   hqAbteilung = id;
   hqEtageWahl = null;
   oeffneHq();
+  $('pinhalt').scrollTop = 0;
 }
+// E47: Zentrale als Seitenfolge Übersicht → Gebäude → Etage (Zuweisen, Archiv, Kündigen mit Rückfrage).
+const hqNeu = () => { hqBestaetigen = null; oeffneHq(); $('pinhalt').scrollTop = 0; };
 window.hqKlick = (art, a, b, c) => {
-  if (art === 'uebersicht') { hqAbteilung = null; hqEtageWahl = null; return oeffneHq(); }
+  if (art === 'uebersicht') { hqAbteilung = null; hqEtageWahl = null; hqSeite = null; return hqNeu(); }
+  if (art === 'gebaeude') { hqAbteilung = null; hqSeite = { art: 'gebaeude', g: a }; return hqNeu(); }
+  if (art === 'etageSeite') { hqAbteilung = null; hqSeite = { art: 'etage', g: a, nr: Number(b) }; hqEtageWahl = { g: a, nr: Number(b) }; return hqNeu(); }
+  if (art === 'bestaetigen') { hqBestaetigen = { art: a }; oeffneHq(); $('pinhalt').scrollTop = 0; return; }
+  if (art === 'abbrechen') { hqBestaetigen = null; oeffneHq(undefined, true); return; }
+  if (art === 'zuruecknehmen') return hqTun({ typ: 'hqKuendigungZuruecknehmen' });
   if (art === 'abteilung') return oeffneHqAbteilung(a);
   if (art === 'abteilungEtage') {
     hqAbteilung = a;
@@ -1255,14 +1268,14 @@ window.hqKlick = (art, a, b, c) => {
   if (art === 'aufgabe') return hqTun({ typ: 'delegation', bereich: a, aufgabe: b, an: c === 'true' });
   if (art === 'organisation') { offenesHq = null; return oeffneModul(org); }
   // E47: Reiterleiste der Zentrale (Zentrale, Vorstand, Organisation, Reporting)
-  if (art === 'reiter') { hqAbteilung = null; hqEtageWahl = null; if (a === 'finanzen') return oeffneModul(fi); if (a === 'vorstand') return oeffneModul(vs); if (a === 'organisation') return oeffneModul(org); if (a === 'reporting') return oeffneModul(rg); return oeffneHq(); }
+  if (art === 'reiter') { hqAbteilung = null; hqEtageWahl = null; hqSeite = null; hqBestaetigen = null; if (a === 'finanzen') return oeffneModul(fi); if (a === 'vorstand') return oeffneModul(vs); if (a === 'organisation') return oeffneModul(org); if (a === 'reporting') return oeffneModul(rg); return oeffneHq(); }
   if (art === 'mieten') { const an = E.hqUebersicht(s).angebote.find((q) => q.id === a); hqTun({ typ: 'hqMieten', angebot: a, etagen: an.etagen.map((e) => e.nr) }); }
-  if (art === 'kuendigenE') hqTun({ typ: 'hqEtageKuendigen', gebaeude: a, etage: Number(b) });
+  if (art === 'kuendigenE') { hqBestaetigen = null; hqSeite = { art: 'gebaeude', g: a }; hqTun({ typ: 'hqEtageKuendigen', gebaeude: a, etage: Number(b) }); $('pinhalt').scrollTop = 0; }
   if (art === 'archiv') hqTun({ typ: 'hqArchivSetzen', gebaeude: a, etage: Number(b), aktiv: c === 'true' });
   if (art === 'archivOeffnen') oeffneModul(ch);
-  if (art === 'kuendigenG') hqTun({ typ: 'hqGebaeudeKuendigen', gebaeude: a });
+  if (art === 'kuendigenG') { hqBestaetigen = null; hqSeite = null; hqEtageWahl = null; hqTun({ typ: 'hqGebaeudeKuendigen', gebaeude: a }); $('pinhalt').scrollTop = 0; }
   if (art === 'stufe') hqTun({ typ: 'abteilungStufe', abteilung: a, stufe: Number(b) });
-  if (art === 'setzen') { const [g, nr] = String(b).split('|'); hqTun({ typ: 'abteilungSetzen', abteilung: a, gebaeude: g, etage: Number(nr) }); }
+  if (art === 'setzen') { const [g, nr] = String(b).split('|'); hqTun({ typ: 'abteilungSetzen', abteilung: a, gebaeude: g, etage: Number(nr) }); if (hqSeite?.art === 'etage') $('pinhalt').scrollTop = 0; }
   if (art === 'etage') { hqEtageWahl = { g: a, nr: Number(b) }; oeffneHq(offenesHq === true ? undefined : offenesHq, true); }
 };
 function oeffneHq(gebaeudeId, bleiben = false) {
@@ -1270,9 +1283,13 @@ function oeffneHq(gebaeudeId, bleiben = false) {
   offenesHaus = null; offenesHq = gebaeudeId ?? true;
   const u = E.hqUebersicht(s), j = hqGrafik();
   const bild = (gid, nr) => { const gj = j?.gebaeude?.find((q) => q.id === gid); return gj ? etagenBild(gj, nr) : null; };
+  if (hqSeite && !u.gebaeude.some((g) => g.id === hqSeite.g)) hqSeite = null; // Gebäude gekündigt
+  const c = { u, organisation: E.organisationUebersicht(s), historie: s.historie, woche: s.woche, gebaeudeId, etageWahl: hqEtageWahl, etagenBild: bild, bestaetigen: hqBestaetigen };
   const r = hqAbteilung && u.abteilungen.some((a) => a.id === hqAbteilung)
     ? zentraleAbteilungHtml(u, j, E.organisationUebersicht(s), hqAbteilung, hqEtageWahl, bild)
-    : zentraleHtml({ u, organisation: E.organisationUebersicht(s), historie: s.historie, woche: s.woche, gebaeudeId, etageWahl: hqEtageWahl, etagenBild: bild });
+    : hqSeite?.art === 'etage' ? zentraleEtageHtml({ ...c, gid: hqSeite.g, nr: hqSeite.nr })
+    : hqSeite?.art === 'gebaeude' ? zentraleGebaeudeHtml({ ...c, gid: hqSeite.g })
+    : zentraleHtml(c);
   const sc = $('pinhalt').scrollTop;
   panel(r.titel, r.unter, r.html, 'gross');
   if (bleiben) $('pinhalt').scrollTop = sc;
