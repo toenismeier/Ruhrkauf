@@ -22,8 +22,8 @@ const etageKurz = (n) => n === 0 ? 'EG' : n + '. OG';
 const klick = (...x) => `onclick="hqKlick(${x.map((v) => `'${esc(String(v))}'`).join(',')})"`;
 
 /** Reiterleiste der Zentrale (Coffee 20: Finanzen, Einkauf, Vorstand …). Gilt für Zentrale, Vorstand, Organisation, Reporting. */
-export const zentraleReiter = (aktiv) => K.reiterUnten([['zentrale', 'Zentrale', 'zentrale'], ['vorstand', 'Vorstand', 'leitung'],
-  ['organisation', 'Organisation', 'personal'], ['reporting', 'Reporting', 'zahlen']], aktiv, (id) => klick('reiter', id));
+export const zentraleReiter = (aktiv) => K.reiterUnten([['zentrale', 'Zentrale', 'zentrale'], ['vorstand', 'Vorstand', 'vorstand'],
+  ['organisation', 'Organisation', 'organisation'], ['reporting', 'Reporting', 'reporting']], aktiv, (id) => klick('reiter', id));
 
 /** Kopfbild: Etagenschnitt der gewählten Etage, unten links der Knopf zur Abteilung auf dieser Etage. */
 function kopfbild(bild, alt, knopf = '') {

@@ -1,3 +1,4 @@
+import { ILLUSTRATIONEN } from '../ui/illustrationen-daten.js';
 /** Q16: selbst gezeichnete SVG-Motive, keine Übernahme aus Vorlagen. */
 export const MARKETING_KANAL_INFO = {
   "prospekt": [
@@ -37,7 +38,10 @@ export const MARKETING_KANAL_INFO = {
     "Inhouse"
   ]
 };
+// P4 (E47): gibt es eine gerenderte Kanal-Illustration, wird sie statt der Strichzeichnung verwendet.
 export const kanalBildSVG = function bildKanal(id) {
+  const ill = ILLUSTRATIONEN['kanal-' + id];
+  if (ill) return `<img class="hw-ill hw-kanalbild" src="${ill.u}" width="${ill.b}" height="${ill.h}" alt="Hartwig-Werbemotiv: ${id}" decoding="async">`;
   const gegenstand = {
     prospekt: '<rect x="36" y="24" width="112" height="108" rx="3" fill="#fff" stroke="#3b4248" stroke-width="3"/><rect x="46" y="34" width="92" height="27" fill="#b32632"/><text x="92" y="53" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">HARTWIG</text><rect x="46" y="70" width="46" height="47" fill="#d8d2c7"/><path d="M98 73h38M98 83h38M98 93h34M98 103h36M98 113h26" stroke="#8a8986" stroke-width="4"/>',
     anzeigen: '<rect x="25" y="27" width="140" height="106" rx="2" fill="#fff" stroke="#555a5d" stroke-width="3"/><path d="M36 42h118" stroke="#555a5d" stroke-width="3"/><text x="95" y="38" font-size="10" font-weight="700" text-anchor="middle" fill="#333">STADTNACHRICHTEN</text><rect x="35" y="53" width="60" height="62" fill="#b32632"/><text x="65" y="79" font-size="12" font-weight="700" text-anchor="middle" fill="#fff">HARTWIG</text><path d="M104 57h47M104 67h47M104 77h45M104 87h45M104 97h45M104 107h35M35 122h117" stroke="#858c8e" stroke-width="4"/>',

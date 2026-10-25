@@ -1,7 +1,7 @@
 // G6 (E47): Symbole der Kartenoberfläche, des Menüs und der Ebenenliste. Gleiche Bauweise wie die Reitersymbole in
 // komponenten.js (isometrische Quader, drei Flächen, Licht von links), ergänzt um Gegenstände, die dort fehlen.
 // Aussehen der Hüllen ausschließlich in hartwig.css, Abschnitt G6.
-import { SYMBOLE } from './komponenten.js';
+import { SYMBOLE, illustration } from './komponenten.js';
 
 const C30 = Math.cos(Math.PI / 6);
 const pt = (x, y, z, s = 2.9) => [(x - y) * C30 * s, (x + y) * 0.5 * s - z * s];
@@ -66,9 +66,11 @@ export const SYM = {
 /** Hartwig-Logo (rotes Quadrat mit H, wie das App-Symbol). */
 export const LOGO = '<svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="105" fill="#d23c32"/><path fill="#fff" d="M133 110h68v117h110V110h68v292h-68V290H201v112h-68z"/></svg>';
 
-/** Symbole in alle Platzhalter [data-sym] eines Teilbaums einsetzen. */
+/** Menü-Schlüssel, deren Illustration anders heißt. */
+const ILL_NAME = { warenhaus: 'haus', kommentare: 'notizen', zahlen: 'reporting', karte: 'deutschland', it: 'systeme' };
+/** Symbole in alle Platzhalter [data-sym] eines Teilbaums einsetzen: Illustration zuerst. */
 export function symboleEinsetzen(wurzel = document) {
-  for (const el of wurzel.querySelectorAll('[data-sym]')) if (!el.firstElementChild) el.innerHTML = el.dataset.sym === 'logo' ? LOGO : SYM[el.dataset.sym] ?? '';
+  for (const el of wurzel.querySelectorAll('[data-sym]')) if (!el.firstElementChild) el.innerHTML = el.dataset.sym === 'logo' ? LOGO : illustration(ILL_NAME[el.dataset.sym] ?? el.dataset.sym) || SYM[el.dataset.sym] || '';
 }
 /** Formatschlüssel aus Portfolio (formatKey) auf Symbolnamen. */
 export const FORMAT_SYMBOL = { hartwig: 'warenhaus', premium: 'premium', sport: 'sport', volkskauf: 'volkskauf', fundus: 'fundus' };

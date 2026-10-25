@@ -6,7 +6,7 @@ import { digitalSprecher } from './it.js';
 
 const prozent = (x, n = 1) => (100 * (x || 0)).toFixed(n).replace('.', ',') + ' %';
 const vz = (x) => (x < 0 ? '−' : x > 0 ? '+' : '') + geld(Math.abs(x));
-const REITER = [['uebersicht', 'Zahlen', 'zahlen'], ['steuerung', 'Steuerung', 'leitung'], ['haeuser', 'Häuser', 'ueberblick'], ['produkte', 'Produkte', 'post']];
+const REITER = [['uebersicht', 'Zahlen', 'reporting'], ['steuerung', 'Steuerung', 'online'], ['haeuser', 'Häuser', 'haus'], ['produkte', 'Produkte', 'allokation']];
 const STUFEN = {
   sortimentsbreite: ['Sortimentsbreite', [[0.45, '45 %'], [0.65, '65 %'], [0.8, '80 %'], [1, '100 %']]],
   verfuegbarkeit: ['Verfügbarkeit', [[0.7, '70 %'], [0.88, '88 %'], [0.95, '95 %'], [1, '100 %']]],
