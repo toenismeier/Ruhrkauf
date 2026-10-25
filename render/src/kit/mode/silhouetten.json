@@ -6491,6 +6491,795 @@
       "material": "glas",
       "farbe": "flaschengruen",
       "model": null
+    },
+    "q38_croptshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy",
+        "laenge": "crop",
+        "motiv": "nummer",
+        "motivS": 13
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_ringershirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "d": [
+          "ringer"
+        ],
+        "kontrast": "#6a4630",
+        "motiv": "schrift",
+        "motivS": 14
+      },
+      "material": "baumwolle",
+      "farbe": "rosa",
+      "model": "oberteil"
+    },
+    "q38_raglantshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "tailliert",
+        "d": [
+          "raglankurz"
+        ],
+        "kontrast": "schwarz",
+        "motiv": "college",
+        "motivS": 14
+      },
+      "material": "baumwolle",
+      "farbe": "offwhite",
+      "model": "oberteil"
+    },
+    "q38_henleylong": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "tailliert",
+        "d": [
+          "henleylang"
+        ]
+      },
+      "material": "rippe",
+      "farbe": "anthrazit",
+      "model": "oberteil"
+    },
+    "q38_langarmpolo": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "polo",
+        "passform": "tailliert",
+        "kragenFarbe": "schwarz"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "q38_layershirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy",
+        "unter": "aermel",
+        "unterFarbe": "weiß",
+        "unterDessin": "bretagne",
+        "motiv": "nummer",
+        "motivS": 12
+      },
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": "oberteil"
+    },
+    "q38_aermellos": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "aermellos",
+        "aermel": "ohne",
+        "kragen": "rund",
+        "passform": "tailliert",
+        "raffung": true
+      },
+      "material": "viskose",
+      "farbe": "altrosa",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_strickshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy",
+        "strick": true,
+        "stoff": "masche",
+        "rippbund": true,
+        "d": [
+          "kurzbund"
+        ]
+      },
+      "material": "strick",
+      "farbe": "salbei",
+      "model": "oberteil"
+    },
+    "q38_fledermaus": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "fledermaus",
+        "aermel": "kurz",
+        "passform": "oversize"
+      },
+      "material": "viskose",
+      "farbe": "olive",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_spitzenshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "tailliert",
+        "d": [
+          "schluesselloch",
+          "bogenkante"
+        ]
+      },
+      "material": "spitze",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_peplumshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "peplum",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "tailliert"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_baseballshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "d": [
+          "raglanlang",
+          "rundsaum"
+        ],
+        "kontrast": "rot"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "q38_sportshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "tailliert",
+        "d": [
+          "meshseite",
+          "flatlock"
+        ]
+      },
+      "material": "nylon",
+      "farbe": "petrol",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_body": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "body",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "tailliert"
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_tanktop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "tank",
+        "aermel": "ohne",
+        "passform": "tailliert"
+      },
+      "material": "rippe",
+      "farbe": "gelb",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_peplumtop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "peplum",
+        "aermel": "traeger",
+        "kragen": "v",
+        "passform": "tailliert",
+        "smok": true
+      },
+      "material": "rippe",
+      "farbe": "rot",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_stricktop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "ohne",
+        "kragen": "rund",
+        "armbuendchen": true,
+        "strick": true,
+        "rippbund": true,
+        "passform": "tailliert",
+        "laenge": "crop",
+        "stoff": "masche"
+      },
+      "material": "strick",
+      "farbe": "rosa",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_bustier": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "bustier",
+        "aermel": "ohne",
+        "laenge": "crop",
+        "passform": "tailliert",
+        "kragen": "carree",
+        "muster": "punkte"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_muscle": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "muscle",
+        "aermel": "ohne",
+        "passform": "boxy"
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "oberteil",
+      "nur": "herren"
+    },
+    "q38_oneshoulder": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "oneshoulder",
+        "aermel": "kurz",
+        "passform": "tailliert",
+        "kragen": "v"
+      },
+      "material": "viskose",
+      "farbe": "ecru",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_westentop": {
+      "gruppe": "jacke",
+      "standard": {
+        "form": "weste",
+        "ausschnitt": "kragen",
+        "saum": "schoss",
+        "verschluss": "knoepfe",
+        "abstand": 6,
+        "unten": 62
+      },
+      "material": "polyester",
+      "farbe": "marine",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "q38_jeanstop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "puff",
+        "kragen": "carree",
+        "passform": "tailliert",
+        "laenge": "kurz",
+        "d": [
+          "denimnaht",
+          "metall"
+        ],
+        "abstand": 6
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_sporttop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "tank",
+        "aermel": "ohne",
+        "passform": "tailliert",
+        "unten": 54,
+        "d": [
+          "kreuz",
+          "unterbrust"
+        ],
+        "kontrast": "#2a2c30"
+      },
+      "material": "nylon",
+      "farbe": "flieder",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_resorthemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy",
+        "extras": [
+          "revers"
+        ],
+        "muster": "print"
+      },
+      "material": "viskose",
+      "farbe": "petrol",
+      "model": "oberteil",
+      "nur": "herren"
+    },
+    "q38_hemdbluse": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "hemd",
+        "passform": "tailliert",
+        "knopfleiste": true,
+        "d": [
+          "abnaeher"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "bordeaux",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_wickelbluse": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "wickel",
+        "passform": "oversize",
+        "laenge": "crop",
+        "d": [
+          "glocke",
+          "knoten"
+        ]
+      },
+      "material": "seide",
+      "farbe": "lila",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_peplumbluse": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "peplum",
+        "aermel": "lang",
+        "kragen": "hemd",
+        "knopfleiste": true,
+        "passform": "tailliert"
+      },
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_jeanshemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "hemd",
+        "passform": "boxy",
+        "d": [
+          "pattentasche",
+          "metall"
+        ],
+        "zwei": true,
+        "abstand": 9
+      },
+      "material": "denim",
+      "farbe": "dunkeldenim",
+      "model": "oberteil"
+    },
+    "q38_lagenhemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "hemd",
+        "passform": "boxy",
+        "muster": "karo",
+        "unter": "aermel",
+        "unterFarbe": "weiß"
+      },
+      "material": "baumwolle",
+      "farbe": "khaki",
+      "model": "oberteil",
+      "nur": "herren"
+    },
+    "q38_lagenbluse": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "ohne",
+        "kragen": "v",
+        "strick": true,
+        "rippbund": true,
+        "armbuendchen": true,
+        "passform": "tailliert",
+        "unter": "bluse",
+        "unterFarbe": "weiß"
+      },
+      "material": "strick",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_strickpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "strick": true,
+        "rippbund": true,
+        "stoff": "rippstrick"
+      },
+      "material": "strick",
+      "farbe": "anthrazit",
+      "model": "oberteil"
+    },
+    "q38_strickpolo": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "polo",
+        "passform": "boxy",
+        "strick": true,
+        "rippbund": true,
+        "d": [
+          "johnny"
+        ],
+        "kontrast": "#8a3f2a",
+        "kragenFarbe": "#8a3f2a"
+      },
+      "material": "rippe",
+      "farbe": "offwhite",
+      "model": "oberteil"
+    },
+    "q38_kurzarmstrick": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "stehkragen",
+        "passform": "tailliert",
+        "strick": true,
+        "rippbund": true,
+        "d": [
+          "schulterknoepfe"
+        ]
+      },
+      "material": "merino",
+      "farbe": "hellgrau",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_offpulli": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "offpulli",
+        "aermel": "lang",
+        "passform": "oversize",
+        "laenge": "kurz"
+      },
+      "material": "strick",
+      "farbe": "creme",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_netzstrick": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "oversize",
+        "strick": true,
+        "rippbund": true,
+        "loch": true
+      },
+      "material": "strick",
+      "farbe": "rot",
+      "model": "oberteil"
+    },
+    "q38_henleypulli": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "henley",
+        "strick": true,
+        "rippbund": true,
+        "stoff": "masche"
+      },
+      "material": "strick",
+      "farbe": "braun",
+      "model": "oberteil"
+    },
+    "q38_strickcape": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "cape",
+        "strick": true
+      },
+      "material": "strick",
+      "farbe": "braun",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_vpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "v",
+        "passform": "oversize",
+        "strick": true,
+        "rippbund": true,
+        "laenge": "lang"
+      },
+      "material": "kaschmir",
+      "farbe": "creme",
+      "model": "oberteil"
+    },
+    "q38_sweatjacke": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "zip": true,
+        "rippbund": true,
+        "passform": "gerade",
+        "laenge": "kurz",
+        "extras": [
+          "raglan"
+        ],
+        "raglanFarbe": "#273659",
+        "stoff": "melange",
+        "d": [
+          "zipTaschen"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "hellgrau",
+      "model": "oberteil"
+    },
+    "q38_sweattroyer": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "troyer",
+        "passform": "boxy",
+        "kaenguru": true,
+        "rippbund": true,
+        "stoff": "melange"
+      },
+      "material": "baumwolle",
+      "farbe": "marine",
+      "model": "oberteil"
+    },
+    "q38_kurzarmsweat": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy",
+        "rippbund": true,
+        "stoff": "melange",
+        "bundBreit": 4.2,
+        "d": [
+          "kurzbund",
+          "vinsert"
+        ],
+        "motiv": "schrift",
+        "motivS": 14
+      },
+      "material": "baumwolle",
+      "farbe": "hellgrau",
+      "model": "oberteil"
+    },
+    "q38_offsweat": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "offsweat",
+        "aermel": "lang",
+        "passform": "oversize",
+        "motiv": "nummer"
+      },
+      "material": "baumwolle",
+      "farbe": "hellgrau",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_polosweat": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "polo",
+        "passform": "oversize",
+        "rippbund": true,
+        "d": [
+          "halbzip",
+          "aermelstreifen"
+        ],
+        "streifen": "#c8372f",
+        "kragenFarbe": "offwhite"
+      },
+      "material": "baumwolle",
+      "farbe": "anthrazit",
+      "model": "oberteil"
+    },
+    "q38_strickhoodie": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "strick": true,
+        "rippbund": true,
+        "passform": "boxy",
+        "stoff": "masche",
+        "d": [
+          "kordeln"
+        ]
+      },
+      "material": "strick",
+      "farbe": "hellblau",
+      "model": "oberteil"
+    },
+    "q38_bolero": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "form": "bolero",
+        "aermel": "lang",
+        "laenge": "crop",
+        "passform": "tailliert",
+        "strick": true
+      },
+      "material": "merino",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_wickeljacke": {
+      "gruppe": "oberteil",
+      "standard": {
+        "basis": "oberteil",
+        "aermel": "lang",
+        "kragen": "wickel",
+        "strick": true,
+        "rippbund": true,
+        "laenge": "kurz",
+        "passform": "gerade",
+        "d": [
+          "wickelschleife"
+        ]
+      },
+      "material": "strick",
+      "farbe": "rosa",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "q38_jeansweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "form": "weste",
+        "ausschnitt": "v",
+        "saum": "spitz",
+        "taschen": true,
+        "abstand": 7,
+        "unten": 74
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "q38_weste": {
+      "gruppe": "jacke",
+      "standard": {
+        "form": "weste",
+        "ausschnitt": "rund",
+        "saum": "spitz",
+        "abstand": 7.6
+      },
+      "material": "leinen",
+      "farbe": "beige",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "q38_kunstfellweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "form": "weste",
+        "ausschnitt": "steh",
+        "saum": "bund",
+        "verschluss": "zip",
+        "fell": true,
+        "unten": 76
+      },
+      "material": "teddy",
+      "farbe": "creme",
+      "model": "jacke",
+      "nur": "damen"
     }
   }
 }
