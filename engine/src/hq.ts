@@ -74,6 +74,12 @@ export interface Hq {
   reiseBasis: number;
   restmieten: HqRestmiete[];
   zaehler: number;
+  /** Letzte Kündigung, bis Wochenende rücknehmbar (Stand vor der Kündigung). */
+  kuendigung?: HqKuendigung;
+}
+export interface HqKuendigung {
+  woche: number; text: string; gebaeude: HqGebaeude; entfernt: boolean; sitz: string; restmieten: number;
+  abteilungen: { id: AbteilungId; gebaeudeId?: string; etage?: number; belegung?: Abteilung['belegung'] }[];
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -766,11 +772,32 @@ export function hqArchivSetzen(s: GameState, gebaeudeId: string, nr: number, akt
   return ok(aktiv ? `Archiv auf Etage ${etageText(nr)} eingerichtet, zusätzliche Miete ${eur(wochenMiete(ARCHIV_QM, g.mieteQmMonat)).toLocaleString('de-DE')} € je Woche.` : `Archiv auf Etage ${etageText(nr)} aufgelöst. Die Zusatzmiete entfällt.`);
 }
 
+/** Stand vor einer Kündigung merken (ein Schritt, nur in derselben Woche rücknehmbar). */
+function merkeKuendigung(s: GameState, g: HqGebaeude, text: string): void {
+  s.hq.kuendigung = { woche: s.woche, text, gebaeude: JSON.parse(JSON.stringify(g)), entfernt: false, sitz: s.hq.sitz, restmieten: s.hq.restmieten.length,
+    abteilungen: s.hq.abteilungen.map((a) => ({ id: a.id, gebaeudeId: a.gebaeudeId, etage: a.etage, belegung: a.belegung ? JSON.parse(JSON.stringify(a.belegung)) : undefined })) };
+}
+
+/** Nimmt die letzte Kündigung zurück, solange die Woche nicht abgeschlossen ist. Abteilungen sitzen wieder wie vorher. */
+export function hqKuendigungZuruecknehmen(s: GameState): HqErgebnis {
+  const k = s.hq.kuendigung;
+  if (!k || k.woche !== s.woche) return fehler('Eine Kündigung lässt sich nur in derselben Woche zurücknehmen.');
+  const i = s.hq.gebaeude.findIndex((g) => g.id === k.gebaeude.id);
+  if (i >= 0) s.hq.gebaeude[i] = k.gebaeude; else s.hq.gebaeude.push(k.gebaeude);
+  s.hq.restmieten = s.hq.restmieten.slice(0, k.restmieten);
+  for (const v of k.abteilungen) { const a = s.hq.abteilungen.find((x) => x.id === v.id); if (a) { a.gebaeudeId = v.gebaeudeId as string; a.etage = v.etage as number; a.belegung = v.belegung; } }
+  s.hq.sitz = k.sitz;
+  s.hq.kuendigung = undefined;
+  hqAktualisiere(s);
+  return ok(`Kündigung zurückgenommen: ${k.text}. Die Abteilungen sitzen wieder wie vorher.`);
+}
+
 export function hqEtageKuendigen(s: GameState, gebaeudeId: string, nr: number): HqErgebnis {
   const g = gebaeude(s, gebaeudeId);
   const e = g?.etagen.find((x) => x.nr === nr);
   if (!g || !e) return fehler('Etage nicht gefunden.');
   if (!e.gemietet) return fehler('Die Etage ist nicht gemietet.');
+  merkeKuendigung(s, g, `${etageText(nr)} im ${g.name}`);
   const r = kuendigeEtagen(s, g, [e]);
   if (!g.etagen.some((x) => x.gemietet)) s.hq.gebaeude = s.hq.gebaeude.filter((x) => x !== g);
   pruefeSitz(s);
@@ -781,6 +808,7 @@ export function hqEtageKuendigen(s: GameState, gebaeudeId: string, nr: number): 
 export function hqGebaeudeKuendigen(s: GameState, gebaeudeId: string): HqErgebnis {
   const g = gebaeude(s, gebaeudeId);
   if (!g) return fehler('Gebäude nicht gefunden.');
+  merkeKuendigung(s, g, `${g.name} (${g.stadt})`);
   const es = g.etagen.filter((e) => e.gemietet);
   const r = kuendigeEtagen(s, g, es);
   s.hq.gebaeude = s.hq.gebaeude.filter((x) => x !== g);
@@ -964,6 +992,8 @@ function wirkungText(s: GameState, id: AbteilungId): string {
 }
 
 export interface HqUebersicht {
+  /** Rücknehmbare Kündigung dieser Woche (Text), sonst fehlend. */
+  kuendigungOffen?: string;
   sitz: string;
   staedte: string[];
   verteilungsFaktor: number;
@@ -1006,6 +1036,7 @@ export function hqUebersicht(s: GameState): HqUebersicht {
     standort: standort(s, hq.sitz),
     kosten: { personal: eur(kosten.personal), sach: eur(kosten.sach), reise: eur(kosten.reise), miete: eur(kosten.miete), nebenkosten: eur(kosten.nebenkosten), strafen: eur(kosten.strafen), vorstand: eur(kosten.vorstand), entwicklung: eur(kosten.entwicklung), leitung: eur(kosten.leitung), marktbeobachtung: eur(kosten.marktbeobachtung), gesamt: eur(kosten.gesamt) },
     restmieteWoche: eur(hqRestmieteWoche(s)),
+    kuendigungOffen: s.hq.kuendigung?.woche === s.woche ? s.hq.kuendigung.text : undefined,
     fte: s.zentrale.fte,
     gebaeude: hq.gebaeude.map((g) => {
       const etagen = g.etagen.map((e) => {

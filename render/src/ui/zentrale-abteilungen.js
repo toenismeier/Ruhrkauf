@@ -71,7 +71,9 @@ export function zentraleHtml(c) {
     if (bild) h += bildzeile(`${gWahl.name} · ${etageName(nrWahl)} · ${(e?.abteilungen ?? []).map((a) => a.name).join(', ') || (e?.gemietet ? 'gemietet, frei' : 'nicht gemietet')}`);
   }
 
-  let r = K.gross([
+  let r = u.kuendigungOffen ? K.hinweis(`<b>Gekündigt: ${esc(u.kuendigungOffen)}.</b> Bis zum Wochenabschluss lässt sich das zurücknehmen.`, 'achtung')
+    + K.knoepfe(K.knopf('Kündigung zurücknehmen', klick('zuruecknehmen'), 'breit')) : '';
+  r += K.gross([
     { label: 'Kosten je Woche', p: 'hq:kosten', wert: geld(u.kostenWoche), unter: diffStart ? K.abweichung(-diffStart, (diffStart > 0 ? '+' : '−') + geld(Math.abs(diffStart)) + ' zum Start', null) : 'wie zum Start' },
     { label: 'Beschäftigte', p: 'hq:fte', wert: fmt.format(Math.round(u.fte)) + ' FTE', unter: `${fmt.format(qmMiete)} qm gemietet` }]);
   // Der Verlauf steht im Reiter Finanzen; hier nur die Aufstellung der Woche.
@@ -84,29 +86,11 @@ export function zentraleHtml(c) {
     summe: { name: 'Zentrale gesamt', werte: [geld(u.kostenWoche), '100 %'], roh: [Math.round(ko.gesamt ?? u.kostenWoche), null] }, pruefen: true })}</div>`;
   r += K.liste([K.zeile({ was: 'Restmiete alter Büros', wert: geld(u.restmieteWoche ?? 0), ton: u.restmieteWoche > 0 ? 'schlecht' : '' })]);
 
-  // Etagen je Gebäude
-  for (const g of [...gs].sort((a, b) => (a.id === c.gebaeudeId ? -1 : b.id === c.gebaeudeId ? 1 : 0))) {
-    r += K.abschnitt(g.name);
-    r += `<p class="hw-lese hw-leise hw-unterkopf">${esc(g.stadt)} · ${fmt.format(g.qmGemietet)} qm gemietet · ${prozent(g.auslastung)} belegt · ${geld(g.kostenWoche)} je Woche</p>`;
-    const etagen = [...(g.etagen ?? [])].sort((x, y) => y.nr - x.nr);
-    r += K.liste(etagen.map((e) => {
-      const ab = (e.abteilungen ?? []).map((a) => a.name).join(', ');
-      const gewaehlt = gWahl?.id === g.id && nrWahl === e.nr;
-      return K.zeile({ was: etageName(e.nr) + (e.archiv ? ' · Archiv' : ''), unter: esc(ab || (e.gemietet ? 'gemietet, frei' : 'nicht gemietet')) + ' · ' + fmt.format(e.qm) + ' qm',
-        wert: e.gemietet ? prozent(e.auslastung) : '', wertUnter: e.gemietet ? 'belegt' : '', ton: e.gemietet && !ab && !e.archiv ? 'achtung' : '', tippbar: true,
-        attr: `${klick(e.archiv ? 'archivOeffnen' : 'etage', g.id, e.nr)}${gewaehlt ? ' aria-current="true"' : ''} aria-label="${esc(etageName(e.nr))} ansehen"` });
-    }));
-    const e = gWahl?.id === g.id ? g.etagen.find((q) => q.nr === nrWahl) : null;
-    if (e?.gemietet) {
-      const ab = (e.abteilungen ?? []).length;
-      r += `<p class="hw-lese hw-leise hw-auswahl">${esc(etageName(e.nr))} im Bild</p>` + `<div class="hw-knoepfe zweispaltig">`
-        + K.knopf(e.archiv ? 'Archiv auflösen' : 'Archiv einrichten', klick('archiv', g.id, e.nr, !e.archiv), 'zweit')
-        + (e.archiv ? K.knopf('Chronik ansehen', klick('archivOeffnen'), 'zweit') : '')
-        + (!ab && !e.archiv ? K.knopf('Etage kündigen', klick('kuendigenE', g.id, e.nr), 'gefahr') : '') + '</div>';
-    }
-    if (gs.length > 1) r += K.knoepfe(K.knopf('Gebäude kündigen', klick('kuendigenG', g.id), 'gefahr breit'));
-  }
-
+  // Gebäude als je eine Zeile; Etagen, Zuweisung und Kündigung auf eigenen Seiten (kein Scrollen durch 27 Etagen).
+  r += K.abschnitt('Gebäude', `${gs.length} ${gs.length === 1 ? 'Gebäude' : 'Gebäude'}`);
+  r += K.liste(gs.map((g) => { const gemietet = g.etagen.filter((e) => e.gemietet).length;
+    return K.zeile({ was: esc(g.name), unter: `${esc(g.stadt)} · ${gemietet} ${gemietet === 1 ? 'Etage' : 'Etagen'} · ${fmt.format(g.qmGemietet)} qm`,
+      wert: prozent(g.auslastung), wertUnter: 'belegt', ton: g.auslastung < 0.6 ? 'achtung' : '', tippbar: true, attr: klick('gebaeude', g.id) }); }));
   // Abteilungen
   if (u.abteilungen?.length) {
     r += K.abschnitt('Abteilungen', `${u.abteilungen.length} Bereiche`);
@@ -128,6 +112,59 @@ export function zentraleHtml(c) {
   h += K.rumpf(r) + zentraleReiter('zentrale');
   const weitere = (u.staedte ?? []).filter((q) => q !== u.sitz);
   return { titel: 'Zentrale', unter: `Sitz ${u.sitz}${weitere.length ? ` · auch in ${weitere.join(', ')}` : ''} · ${gs.length} Gebäude`, html: h };
+}
+
+// ───────────────────────────────────────────── Gebäude- und Etagenseite
+const zurueck = (text, ...ziel) => `<button type="button" class="hw-knopf text hw-zurueck" ${klick(...ziel)}>‹ ${esc(text)}</button>`;
+/** Rückfrage vor einer Kündigung: was sie kostet und wen sie trifft. b = { art: 'gebaeude' | 'etage', text, betroffen[] } */
+function rueckfrage(b, ja) {
+  return K.hinweis(`<b>${esc(b.text)} wirklich kündigen?</b> Die Miete läuft als Restmiete weiter.${b.betroffen.length ? ` Ohne Platz und damit ohne Wirkung: ${esc(b.betroffen.join(', '))}.` : ''} Zurücknehmen geht nur bis zum Wochenabschluss.`, 'fehler')
+    + `<div class="hw-knoepfe zweispaltig">${K.knopf('Abbrechen', klick('abbrechen'), 'zweit')}${K.knopf('Ja, kündigen', ja, 'gefahr')}</div>`;
+}
+/** c = { u, gid, etageWahl, etagenBild, bestaetigen } */
+export function zentraleGebaeudeHtml(c) {
+  const { u } = c, g = (u.gebaeude ?? []).find((x) => x.id === c.gid);
+  if (!g) return zentraleHtml(c);
+  const etagen = [...g.etagen].sort((x, y) => y.nr - x.nr);
+  const nrWahl = c.etageWahl?.g === g.id ? c.etageWahl.nr : (g.etagen.find((e) => e.abteilungen.length) ?? g.etagen[0])?.nr;
+  const bild = c.etagenBild?.(g.id, nrWahl);
+  const frei = Math.max(0, (g.qmGemietet ?? 0) - (g.qmBelegt ?? 0));
+  let h = K.bereich('zentrale', 'zentrale') + G4 + K.sprecher({ text: frei > 0 ? `<b>${fmt.format(Math.round(frei))} qm stehen frei.</b> Tippe eine Etage, um Abteilungen dorthin zu holen.` : '<b>Das Gebäude ist voll belegt.</b>', unter: 'Leitung Verwaltung' });
+  if (bild) h += kopfbild(bild, `Etagenschnitt ${g.name}, ${etageName(nrWahl)}`);
+  let r = zurueck('Zentrale', 'uebersicht');
+  if (c.bestaetigen?.art === 'gebaeude') r += rueckfrage({ text: g.name, betroffen: (u.abteilungen ?? []).filter((a) => a.gebaeudeId === g.id).map((a) => a.name) }, klick('kuendigenG', g.id));
+  r += K.gross([{ label: 'Gemietet', wert: fmt.format(g.qmGemietet) + ' qm', unter: `${prozent(g.auslastung)} belegt` }, { label: 'Kosten je Woche', wert: geld(g.kostenWoche), unter: esc(g.stadt) }]);
+  r += K.abschnitt('Etagen', 'antippen zum Zuweisen');
+  r += K.liste(etagen.map((e) => { const ab = (e.abteilungen ?? []).map((a) => a.name).join(', ');
+    return K.zeile({ was: etageName(e.nr) + (e.archiv ? ' · Archiv' : ''), unter: esc(ab || (e.gemietet ? 'gemietet, frei' : 'nicht gemietet')) + ' · ' + fmt.format(e.qm) + ' qm',
+      wert: e.gemietet ? prozent(e.auslastung) : '', wertUnter: e.gemietet ? 'belegt' : '', ton: e.gemietet && !ab && !e.archiv ? 'achtung' : '', tippbar: !!e.gemietet,
+      attr: e.gemietet ? klick('etageSeite', g.id, e.nr) : '' }); }));
+  if (!c.bestaetigen) r += K.knoepfe(K.knopf('Gebäude kündigen', klick('bestaetigen', 'gebaeude', g.id), 'gefahr breit'));
+  return { titel: g.name, unter: `${g.stadt} · ${g.etagen.filter((e) => e.gemietet).length} Etagen gemietet`, html: h + K.rumpf(r) + zentraleReiter('zentrale') };
+}
+export function zentraleEtageHtml(c) {
+  const { u } = c, g = (u.gebaeude ?? []).find((x) => x.id === c.gid), e = g?.etagen.find((x) => x.nr === c.nr);
+  if (!g || !e || !e.gemietet) return zentraleGebaeudeHtml(c);
+  const bild = c.etagenBild?.(g.id, e.nr);
+  const frei = Math.max(0, e.qm - (e.belegtQm ?? 0));
+  const hier = (e.abteilungen ?? []).map((x) => (u.abteilungen ?? []).find((a) => a.id === x.id)).filter(Boolean);
+  let h = K.bereich('zentrale', 'zentrale') + G4 + K.sprecher({ text: frei >= 14 ? `<b>${fmt.format(Math.round(frei))} qm frei,</b> Platz für rund ${fmt.format(Math.floor(frei / 14))} Arbeitsplätze.` : '<b>Die Etage ist voll belegt.</b>', unter: 'Leitung Verwaltung' });
+  if (bild) h += kopfbild(bild, `Etagenschnitt ${g.name}, ${etageName(e.nr)}`);
+  let r = zurueck(g.name, 'gebaeude', g.id);
+  if (c.bestaetigen?.art === 'etage') r += rueckfrage({ text: `${etageName(e.nr)} im ${g.name}`, betroffen: hier.map((a) => a.name) }, klick('kuendigenE', g.id, e.nr));
+  r += K.gross([{ label: 'Fläche', wert: fmt.format(e.qm) + ' qm', unter: `${prozent(e.auslastung)} belegt` }, { label: 'Frei', wert: fmt.format(Math.round(frei)) + ' qm', ton: frei > e.qm * 0.3 ? 'schlecht' : '' }]);
+  r += K.abschnitt('Auf dieser Etage', hier.length ? `${hier.length} ${hier.length === 1 ? 'Abteilung' : 'Abteilungen'}` : '');
+  r += hier.length ? K.liste(hier.map((a) => K.zeile({ was: esc(a.name), unter: `${fmt.format(Math.round(a.fte))} FTE · Stufe ${a.stufe}`, wert: geld(a.kostenWoche), wertUnter: 'je Woche', tippbar: true, attr: klick('abteilung', a.id) })))
+    : K.leer('Hier sitzt noch niemand. Hol unten eine Abteilung auf diese Etage.');
+  // Zuweisen: Abteilungen ohne Platz zuerst, dann alle übrigen, die nicht schon hier sitzen
+  const andere = (u.abteilungen ?? []).filter((a) => !hier.includes(a)).sort((x, y) => Number(!!x.gebaeudeId) - Number(!!y.gebaeudeId) || y.fte - x.fte);
+  r += K.abschnitt('Abteilung hierher holen', 'Umzug kostet, 4 Wochen halbe Wirkung');
+  const freiHaus = Math.max(0, (g.qmGemietet ?? 0) - (g.qmBelegt ?? 0));
+  r += K.liste(andere.map((a) => { const eigen = a.gebaeudeId === g.id ? (a.plaetze ?? []).reduce((n, z) => n + z.fte * 14, 0) : 0, passt = (a.qmBedarf ?? a.fte * 14) <= freiHaus + eigen;
+    return K.zeile({ was: esc(a.name), unter: (a.gebaeudeId ? `sitzt in ${esc(a.gebaeude ?? '')} ${etageKurz(a.etage)}` : '<span class="hw-schlecht">ohne Platz, wirkt nur mit Stufe 0</span>') + ` · braucht ${fmt.format(Math.round(a.qmBedarf ?? a.fte * 14))} qm`,
+      wert: passt ? 'Holen' : 'zu groß', wertUnter: passt ? '' : `${fmt.format(Math.round(freiHaus))} qm frei im Haus`, ton: passt ? (a.gebaeudeId ? '' : 'gut') : 'achtung', tippbar: passt, attr: passt ? klick('setzen', a.id, `${g.id}|${e.nr}`) : '' }); }));
+  if (!c.bestaetigen) r += `<div class="hw-knoepfe zweispaltig">${K.knopf(e.archiv ? 'Archiv auflösen' : 'Archiv einrichten', klick('archiv', g.id, e.nr, !e.archiv), 'zweit')}${e.archiv ? K.knopf('Chronik ansehen', klick('archivOeffnen'), 'zweit') : K.knopf('Etage kündigen', klick('bestaetigen', 'etage', g.id, e.nr), 'gefahr')}</div>`;
+  return { titel: etageName(e.nr), unter: `${g.name} · ${g.stadt}`, html: h + K.rumpf(r) + zentraleReiter('zentrale') };
 }
 
 // ───────────────────────────────────────────── Abteilungsseite (Coffee 17–19, 28)

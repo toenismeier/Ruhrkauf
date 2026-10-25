@@ -9968,6 +9968,8 @@
         return hqArchivSetzen(s2, a2.gebaeude, a2.etage, a2.aktiv);
       case "hqGebaeudeKuendigen":
         return hqGebaeudeKuendigen(s2, a2.gebaeude);
+      case "hqKuendigungZuruecknehmen":
+        return hqKuendigungZuruecknehmen(s2);
       case "abteilungSetzen":
         return abteilungSetzen(s2, a2.abteilung, a2.gebaeude, a2.etage);
       case "abteilungStufe":
@@ -12145,11 +12147,43 @@
     hqAktualisiere(s2);
     return ok5(aktiv7 ? `Archiv auf Etage ${etageText(nr4)} eingerichtet, zus\xE4tzliche Miete ${eur(wochenMiete(ARCHIV_QM, g2.mieteQmMonat)).toLocaleString("de-DE")} \u20AC je Woche.` : `Archiv auf Etage ${etageText(nr4)} aufgel\xF6st. Die Zusatzmiete entf\xE4llt.`);
   }
+  function merkeKuendigung(s2, g2, text3) {
+    s2.hq.kuendigung = {
+      woche: s2.woche,
+      text: text3,
+      gebaeude: JSON.parse(JSON.stringify(g2)),
+      entfernt: false,
+      sitz: s2.hq.sitz,
+      restmieten: s2.hq.restmieten.length,
+      abteilungen: s2.hq.abteilungen.map((a2) => ({ id: a2.id, gebaeudeId: a2.gebaeudeId, etage: a2.etage, belegung: a2.belegung ? JSON.parse(JSON.stringify(a2.belegung)) : void 0 }))
+    };
+  }
+  function hqKuendigungZuruecknehmen(s2) {
+    const k5 = s2.hq.kuendigung;
+    if (!k5 || k5.woche !== s2.woche) return fehler5("Eine K\xFCndigung l\xE4sst sich nur in derselben Woche zur\xFCcknehmen.");
+    const i = s2.hq.gebaeude.findIndex((g2) => g2.id === k5.gebaeude.id);
+    if (i >= 0) s2.hq.gebaeude[i] = k5.gebaeude;
+    else s2.hq.gebaeude.push(k5.gebaeude);
+    s2.hq.restmieten = s2.hq.restmieten.slice(0, k5.restmieten);
+    for (const v2 of k5.abteilungen) {
+      const a2 = s2.hq.abteilungen.find((x2) => x2.id === v2.id);
+      if (a2) {
+        a2.gebaeudeId = v2.gebaeudeId;
+        a2.etage = v2.etage;
+        a2.belegung = v2.belegung;
+      }
+    }
+    s2.hq.sitz = k5.sitz;
+    s2.hq.kuendigung = void 0;
+    hqAktualisiere(s2);
+    return ok5(`K\xFCndigung zur\xFCckgenommen: ${k5.text}. Die Abteilungen sitzen wieder wie vorher.`);
+  }
   function hqEtageKuendigen(s2, gebaeudeId, nr4) {
     const g2 = gebaeude(s2, gebaeudeId);
     const e = g2?.etagen.find((x2) => x2.nr === nr4);
     if (!g2 || !e) return fehler5("Etage nicht gefunden.");
     if (!e.gemietet) return fehler5("Die Etage ist nicht gemietet.");
+    merkeKuendigung(s2, g2, `${etageText(nr4)} im ${g2.name}`);
     const r4 = kuendigeEtagen(s2, g2, [e]);
     if (!g2.etagen.some((x2) => x2.gemietet)) s2.hq.gebaeude = s2.hq.gebaeude.filter((x2) => x2 !== g2);
     pruefeSitz(s2);
@@ -12159,6 +12193,7 @@
   function hqGebaeudeKuendigen(s2, gebaeudeId) {
     const g2 = gebaeude(s2, gebaeudeId);
     if (!g2) return fehler5("Geb\xE4ude nicht gefunden.");
+    merkeKuendigung(s2, g2, `${g2.name} (${g2.stadt})`);
     const es2 = g2.etagen.filter((e) => e.gemietet);
     const r4 = kuendigeEtagen(s2, g2, es2);
     s2.hq.gebaeude = s2.hq.gebaeude.filter((x2) => x2 !== g2);
@@ -12348,6 +12383,7 @@
       standort: standort(s2, hq.sitz),
       kosten: { personal: eur(kosten2.personal), sach: eur(kosten2.sach), reise: eur(kosten2.reise), miete: eur(kosten2.miete), nebenkosten: eur(kosten2.nebenkosten), strafen: eur(kosten2.strafen), vorstand: eur(kosten2.vorstand), entwicklung: eur(kosten2.entwicklung), leitung: eur(kosten2.leitung), marktbeobachtung: eur(kosten2.marktbeobachtung), gesamt: eur(kosten2.gesamt) },
       restmieteWoche: eur(hqRestmieteWoche(s2)),
+      kuendigungOffen: s2.hq.kuendigung?.woche === s2.woche ? s2.hq.kuendigung.text : void 0,
       fte: s2.zentrale.fte,
       gebaeude: hq.gebaeude.map((g2) => {
         const etagen = g2.etagen.map((e) => {
@@ -162010,7 +162046,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "906b560" : "Entwicklung";
+  var version = () => true ? "84dc69d" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -162578,7 +162614,8 @@ void main() {
       );
       if (bild4) h4 += bildzeile(`${gWahl.name} \xB7 ${etageName2(nrWahl)} \xB7 ${(e?.abteilungen ?? []).map((a2) => a2.name).join(", ") || (e?.gemietet ? "gemietet, frei" : "nicht gemietet")}`);
     }
-    let r4 = gross2([
+    let r4 = u.kuendigungOffen ? hinweis(`<b>Gek\xFCndigt: ${esc(u.kuendigungOffen)}.</b> Bis zum Wochenabschluss l\xE4sst sich das zur\xFCcknehmen.`, "achtung") + knoepfe(knopf("K\xFCndigung zur\xFCcknehmen", klick("zuruecknehmen"), "breit")) : "";
+    r4 += gross2([
       { label: "Kosten je Woche", p: "hq:kosten", wert: geld(u.kostenWoche), unter: diffStart ? abweichung(-diffStart, (diffStart > 0 ? "+" : "\u2212") + geld(Math.abs(diffStart)) + " zum Start", null) : "wie zum Start" },
       { label: "Besch\xE4ftigte", p: "hq:fte", wert: fmt.format(Math.round(u.fte)) + " FTE", unter: `${fmt.format(qmMiete)} qm gemietet` }
     ]);
@@ -162593,30 +162630,19 @@ void main() {
       pruefen: true
     })}</div>`;
     r4 += liste([zeile2({ was: "Restmiete alter B\xFCros", wert: geld(u.restmieteWoche ?? 0), ton: u.restmieteWoche > 0 ? "schlecht" : "" })]);
-    for (const g2 of [...gs].sort((a2, b4) => a2.id === c.gebaeudeId ? -1 : b4.id === c.gebaeudeId ? 1 : 0)) {
-      r4 += abschnitt(g2.name);
-      r4 += `<p class="hw-lese hw-leise hw-unterkopf">${esc(g2.stadt)} \xB7 ${fmt.format(g2.qmGemietet)} qm gemietet \xB7 ${prozent2(g2.auslastung)} belegt \xB7 ${geld(g2.kostenWoche)} je Woche</p>`;
-      const etagen = [...g2.etagen ?? []].sort((x2, y2) => y2.nr - x2.nr);
-      r4 += liste(etagen.map((e2) => {
-        const ab = (e2.abteilungen ?? []).map((a2) => a2.name).join(", ");
-        const gewaehlt = gWahl?.id === g2.id && nrWahl === e2.nr;
-        return zeile2({
-          was: etageName2(e2.nr) + (e2.archiv ? " \xB7 Archiv" : ""),
-          unter: esc(ab || (e2.gemietet ? "gemietet, frei" : "nicht gemietet")) + " \xB7 " + fmt.format(e2.qm) + " qm",
-          wert: e2.gemietet ? prozent2(e2.auslastung) : "",
-          wertUnter: e2.gemietet ? "belegt" : "",
-          ton: e2.gemietet && !ab && !e2.archiv ? "achtung" : "",
-          tippbar: true,
-          attr: `${klick(e2.archiv ? "archivOeffnen" : "etage", g2.id, e2.nr)}${gewaehlt ? ' aria-current="true"' : ""} aria-label="${esc(etageName2(e2.nr))} ansehen"`
-        });
-      }));
-      const e = gWahl?.id === g2.id ? g2.etagen.find((q3) => q3.nr === nrWahl) : null;
-      if (e?.gemietet) {
-        const ab = (e.abteilungen ?? []).length;
-        r4 += `<p class="hw-lese hw-leise hw-auswahl">${esc(etageName2(e.nr))} im Bild</p><div class="hw-knoepfe zweispaltig">` + knopf(e.archiv ? "Archiv aufl\xF6sen" : "Archiv einrichten", klick("archiv", g2.id, e.nr, !e.archiv), "zweit") + (e.archiv ? knopf("Chronik ansehen", klick("archivOeffnen"), "zweit") : "") + (!ab && !e.archiv ? knopf("Etage k\xFCndigen", klick("kuendigenE", g2.id, e.nr), "gefahr") : "") + "</div>";
-      }
-      if (gs.length > 1) r4 += knoepfe(knopf("Geb\xE4ude k\xFCndigen", klick("kuendigenG", g2.id), "gefahr breit"));
-    }
+    r4 += abschnitt("Geb\xE4ude", `${gs.length} ${gs.length === 1 ? "Geb\xE4ude" : "Geb\xE4ude"}`);
+    r4 += liste(gs.map((g2) => {
+      const gemietet = g2.etagen.filter((e) => e.gemietet).length;
+      return zeile2({
+        was: esc(g2.name),
+        unter: `${esc(g2.stadt)} \xB7 ${gemietet} ${gemietet === 1 ? "Etage" : "Etagen"} \xB7 ${fmt.format(g2.qmGemietet)} qm`,
+        wert: prozent2(g2.auslastung),
+        wertUnter: "belegt",
+        ton: g2.auslastung < 0.6 ? "achtung" : "",
+        tippbar: true,
+        attr: klick("gebaeude", g2.id)
+      });
+    }));
     if (u.abteilungen?.length) {
       r4 += abschnitt("Abteilungen", `${u.abteilungen.length} Bereiche`);
       r4 += liste(u.abteilungen.map((a2) => {
@@ -162643,6 +162669,69 @@ void main() {
     h4 += rumpf2(r4) + zentraleReiter("zentrale");
     const weitere = (u.staedte ?? []).filter((q3) => q3 !== u.sitz);
     return { titel: "Zentrale", unter: `Sitz ${u.sitz}${weitere.length ? ` \xB7 auch in ${weitere.join(", ")}` : ""} \xB7 ${gs.length} Geb\xE4ude`, html: h4 };
+  }
+  var zurueck = (text3, ...ziel) => `<button type="button" class="hw-knopf text hw-zurueck" ${klick(...ziel)}>\u2039 ${esc(text3)}</button>`;
+  function rueckfrage(b4, ja) {
+    return hinweis(`<b>${esc(b4.text)} wirklich k\xFCndigen?</b> Die Miete l\xE4uft als Restmiete weiter.${b4.betroffen.length ? ` Ohne Platz und damit ohne Wirkung: ${esc(b4.betroffen.join(", "))}.` : ""} Zur\xFCcknehmen geht nur bis zum Wochenabschluss.`, "fehler") + `<div class="hw-knoepfe zweispaltig">${knopf("Abbrechen", klick("abbrechen"), "zweit")}${knopf("Ja, k\xFCndigen", ja, "gefahr")}</div>`;
+  }
+  function zentraleGebaeudeHtml(c) {
+    const { u } = c, g2 = (u.gebaeude ?? []).find((x2) => x2.id === c.gid);
+    if (!g2) return zentraleHtml(c);
+    const etagen = [...g2.etagen].sort((x2, y2) => y2.nr - x2.nr);
+    const nrWahl = c.etageWahl?.g === g2.id ? c.etageWahl.nr : (g2.etagen.find((e) => e.abteilungen.length) ?? g2.etagen[0])?.nr;
+    const bild4 = c.etagenBild?.(g2.id, nrWahl);
+    const frei6 = Math.max(0, (g2.qmGemietet ?? 0) - (g2.qmBelegt ?? 0));
+    let h4 = bereich("zentrale", "zentrale") + G4 + sprecher({ text: frei6 > 0 ? `<b>${fmt.format(Math.round(frei6))} qm stehen frei.</b> Tippe eine Etage, um Abteilungen dorthin zu holen.` : "<b>Das Geb\xE4ude ist voll belegt.</b>", unter: "Leitung Verwaltung" });
+    if (bild4) h4 += kopfbild2(bild4, `Etagenschnitt ${g2.name}, ${etageName2(nrWahl)}`);
+    let r4 = zurueck("Zentrale", "uebersicht");
+    if (c.bestaetigen?.art === "gebaeude") r4 += rueckfrage({ text: g2.name, betroffen: (u.abteilungen ?? []).filter((a2) => a2.gebaeudeId === g2.id).map((a2) => a2.name) }, klick("kuendigenG", g2.id));
+    r4 += gross2([{ label: "Gemietet", wert: fmt.format(g2.qmGemietet) + " qm", unter: `${prozent2(g2.auslastung)} belegt` }, { label: "Kosten je Woche", wert: geld(g2.kostenWoche), unter: esc(g2.stadt) }]);
+    r4 += abschnitt("Etagen", "antippen zum Zuweisen");
+    r4 += liste(etagen.map((e) => {
+      const ab = (e.abteilungen ?? []).map((a2) => a2.name).join(", ");
+      return zeile2({
+        was: etageName2(e.nr) + (e.archiv ? " \xB7 Archiv" : ""),
+        unter: esc(ab || (e.gemietet ? "gemietet, frei" : "nicht gemietet")) + " \xB7 " + fmt.format(e.qm) + " qm",
+        wert: e.gemietet ? prozent2(e.auslastung) : "",
+        wertUnter: e.gemietet ? "belegt" : "",
+        ton: e.gemietet && !ab && !e.archiv ? "achtung" : "",
+        tippbar: !!e.gemietet,
+        attr: e.gemietet ? klick("etageSeite", g2.id, e.nr) : ""
+      });
+    }));
+    if (!c.bestaetigen) r4 += knoepfe(knopf("Geb\xE4ude k\xFCndigen", klick("bestaetigen", "gebaeude", g2.id), "gefahr breit"));
+    return { titel: g2.name, unter: `${g2.stadt} \xB7 ${g2.etagen.filter((e) => e.gemietet).length} Etagen gemietet`, html: h4 + rumpf2(r4) + zentraleReiter("zentrale") };
+  }
+  function zentraleEtageHtml(c) {
+    const { u } = c, g2 = (u.gebaeude ?? []).find((x2) => x2.id === c.gid), e = g2?.etagen.find((x2) => x2.nr === c.nr);
+    if (!g2 || !e || !e.gemietet) return zentraleGebaeudeHtml(c);
+    const bild4 = c.etagenBild?.(g2.id, e.nr);
+    const frei6 = Math.max(0, e.qm - (e.belegtQm ?? 0));
+    const hier = (e.abteilungen ?? []).map((x2) => (u.abteilungen ?? []).find((a2) => a2.id === x2.id)).filter(Boolean);
+    let h4 = bereich("zentrale", "zentrale") + G4 + sprecher({ text: frei6 >= 14 ? `<b>${fmt.format(Math.round(frei6))} qm frei,</b> Platz f\xFCr rund ${fmt.format(Math.floor(frei6 / 14))} Arbeitspl\xE4tze.` : "<b>Die Etage ist voll belegt.</b>", unter: "Leitung Verwaltung" });
+    if (bild4) h4 += kopfbild2(bild4, `Etagenschnitt ${g2.name}, ${etageName2(e.nr)}`);
+    let r4 = zurueck(g2.name, "gebaeude", g2.id);
+    if (c.bestaetigen?.art === "etage") r4 += rueckfrage({ text: `${etageName2(e.nr)} im ${g2.name}`, betroffen: hier.map((a2) => a2.name) }, klick("kuendigenE", g2.id, e.nr));
+    r4 += gross2([{ label: "Fl\xE4che", wert: fmt.format(e.qm) + " qm", unter: `${prozent2(e.auslastung)} belegt` }, { label: "Frei", wert: fmt.format(Math.round(frei6)) + " qm", ton: frei6 > e.qm * 0.3 ? "schlecht" : "" }]);
+    r4 += abschnitt("Auf dieser Etage", hier.length ? `${hier.length} ${hier.length === 1 ? "Abteilung" : "Abteilungen"}` : "");
+    r4 += hier.length ? liste(hier.map((a2) => zeile2({ was: esc(a2.name), unter: `${fmt.format(Math.round(a2.fte))} FTE \xB7 Stufe ${a2.stufe}`, wert: geld(a2.kostenWoche), wertUnter: "je Woche", tippbar: true, attr: klick("abteilung", a2.id) }))) : leer3("Hier sitzt noch niemand. Hol unten eine Abteilung auf diese Etage.");
+    const andere = (u.abteilungen ?? []).filter((a2) => !hier.includes(a2)).sort((x2, y2) => Number(!!x2.gebaeudeId) - Number(!!y2.gebaeudeId) || y2.fte - x2.fte);
+    r4 += abschnitt("Abteilung hierher holen", "Umzug kostet, 4 Wochen halbe Wirkung");
+    const freiHaus = Math.max(0, (g2.qmGemietet ?? 0) - (g2.qmBelegt ?? 0));
+    r4 += liste(andere.map((a2) => {
+      const eigen = a2.gebaeudeId === g2.id ? (a2.plaetze ?? []).reduce((n3, z6) => n3 + z6.fte * 14, 0) : 0, passt2 = (a2.qmBedarf ?? a2.fte * 14) <= freiHaus + eigen;
+      return zeile2({
+        was: esc(a2.name),
+        unter: (a2.gebaeudeId ? `sitzt in ${esc(a2.gebaeude ?? "")} ${etageKurz(a2.etage)}` : '<span class="hw-schlecht">ohne Platz, wirkt nur mit Stufe 0</span>') + ` \xB7 braucht ${fmt.format(Math.round(a2.qmBedarf ?? a2.fte * 14))} qm`,
+        wert: passt2 ? "Holen" : "zu gro\xDF",
+        wertUnter: passt2 ? "" : `${fmt.format(Math.round(freiHaus))} qm frei im Haus`,
+        ton: passt2 ? a2.gebaeudeId ? "" : "gut" : "achtung",
+        tippbar: passt2,
+        attr: passt2 ? klick("setzen", a2.id, `${g2.id}|${e.nr}`) : ""
+      });
+    }));
+    if (!c.bestaetigen) r4 += `<div class="hw-knoepfe zweispaltig">${knopf(e.archiv ? "Archiv aufl\xF6sen" : "Archiv einrichten", klick("archiv", g2.id, e.nr, !e.archiv), "zweit")}${e.archiv ? knopf("Chronik ansehen", klick("archivOeffnen"), "zweit") : knopf("Etage k\xFCndigen", klick("bestaetigen", "etage", g2.id, e.nr), "gefahr")}</div>`;
+    return { titel: etageName2(e.nr), unter: `${g2.name} \xB7 ${g2.stadt}`, html: h4 + rumpf2(r4) + zentraleReiter("zentrale") };
   }
   var unterbesetzt = (a2, fte2) => a2.sollFte > 0 && fte2 < a2.sollFte * 0.9;
   var ueberbesetzt = (a2, fte2) => a2.sollFte > 0 && fte2 > a2.sollFte * 1.15;
@@ -162925,10 +163014,10 @@ void main() {
         ui.seite = "uebersicht";
         return uebersicht(P5);
       }
-      const zurueck = knoepfe(knopf("\u2039 " + L3.kurz, `data-a="profil" data-v="${L3.ressort}"`, "text"));
+      const zurueck2 = knoepfe(knopf("\u2039 " + L3.kurz, `data-a="profil" data-v="${L3.ressort}"`, "text"));
       if (!L3.kandidaten.length) {
         const h5 = kopf("<b>Gerade kein Kandidat am Markt.</b> Neue Kandidaten kommen mit den Wochen.", null, "Personalberatung");
-        return { titel: `${L3.kurz} einstellen`, unter: L3.titel, html: h5 + rumpf2(zurueck + (L3.besetzt ? hinweis("Das Ressort ist besetzt. Erst entlassen, dann neu besetzen.", "achtung") : "")) + zentraleReiter("vorstand") };
+        return { titel: `${L3.kurz} einstellen`, unter: L3.titel, html: h5 + rumpf2(zurueck2 + (L3.besetzt ? hinweis("Das Ressort ist besetzt. Erst entlassen, dann neu besetzen.", "achtung") : "")) + zentraleReiter("vorstand") };
       }
       ui.k = Math.min(ui.k, L3.kandidaten.length - 1);
       const k5 = L3.kandidaten[ui.k];
@@ -162954,7 +163043,7 @@ void main() {
       return {
         titel: `${L3.kurz} einstellen`,
         unter: `${L3.titel} \xB7 ${L3.kandidaten.length} Kandidaten`,
-        html: h4 + rumpf2(zurueck + x2) + karussell(karten, { aktiv: ui.k, label: "Kandidaten" }) + rumpf2(y2) + zentraleReiter("vorstand")
+        html: h4 + rumpf2(zurueck2 + x2) + karussell(karten, { aktiv: ui.k, label: "Kandidaten" }) + rumpf2(y2) + zentraleReiter("vorstand")
       };
     }
     function rendern() {
@@ -174221,10 +174310,10 @@ void main() {
       const model = modelBild(typ, farbe2, material3, wg, gruppeTrend(gruppe3), 200, void 0, p2?.musterBild);
       const name2 = Kat.zielgruppen.find((x3) => x3.id === gruppe3)?.name ?? gruppe3;
       const preis = p2?.preis ?? t5.preisMitte;
-      const zurueck = d4?.quelle === "liste" ? "liste" : "katalog";
+      const zurueck2 = d4?.quelle === "liste" ? "liste" : "katalog";
       const freigegeben = !p2 && M2 && M2.kategorien.some((x3) => x3.id === t5.kategorie && x3.kapazitaet > 0) && (Array.isArray(M2.entwickelbar) ? M2.entwickelbar.includes(t5.typ) : Number(t5.gruppe?.[M2.trendGruppe] ?? 0) > 0.15);
       let h4 = sprecher2(p2 ? `${esc(p2.name)} ist ${esc(STATUS3[p2.status] ?? p2.status)}.` : freigegeben ? `${esc(typ)} passt zu ${esc(M2.name)}.` : `${esc(typ)} passt derzeit nicht zu ${esc(M2?.name ?? "dieser Marke")}.`);
-      h4 += `<div class="hw-g1-oben">${knopf("\u2039 Zur\xFCck", `data-a="detailZurueck" data-v="${zurueck}"`, "text")}</div>`;
+      h4 += `<div class="hw-g1-oben">${knopf("\u2039 Zur\xFCck", `data-a="detailZurueck" data-v="${zurueck2}"`, "text")}</div>`;
       let x2 = `<div class="hw-g1-detailbild" aria-hidden="true">${model ?? bild2(typ, farbe2, material3, 200, void 0, p2?.musterBild)}</div>`;
       x2 += abschnitt(p2?.name ?? typ);
       x2 += liste([
@@ -181379,9 +181468,11 @@ void main() {
     ebenenZu();
     $2("panel").classList.toggle("gross", klasse === "gross");
     $2("panel").classList.toggle("hausdetail", klasse === "hausdetail");
+    const andereSeite = $2("ptitel").textContent !== titel || !$2("panel").classList.contains("offen");
     $2("ptitel").textContent = titel;
     $2("punter").textContent = unter;
     $2("pinhalt").innerHTML = html;
+    if (andereSeite) $2("pinhalt").scrollTop = 0;
     huelleOrdnen();
     const neu3 = !$2("panel").classList.contains("offen");
     if (neu3) vorherigerFokus = document.activeElement;
@@ -181427,6 +181518,8 @@ void main() {
     offenesHq = null;
     hqAbteilung = null;
     hqEtageWahl = null;
+    hqSeite = null;
+    hqBestaetigen = null;
     offenerWettbewerber = null;
     if (vorherigerFokus?.isConnected) vorherigerFokus.focus({ preventScroll: true });
     vorherigerFokus = null;
@@ -181497,6 +181590,7 @@ void main() {
       grafikNachziehen();
       nachAktion();
       if (offenesHaus) oeffneHaus(offenesHaus);
+      else if (ek.aktiv()) ek.neuZeichnen();
     }
   };
   window.filialProgramm = (programm) => {
@@ -181663,6 +181757,8 @@ void main() {
     if (el2) oeffneWettbewerber(el2.dataset.wbId);
   });
   var hqAbteilung = null;
+  var hqSeite = null;
+  var hqBestaetigen = null;
   var hqEtageWahl = null;
   var hqRen = null;
   function schnittBild(baue2, w2 = 720, h4 = 420) {
@@ -181757,13 +181853,43 @@ void main() {
     hqAbteilung = id;
     hqEtageWahl = null;
     oeffneHq();
+    $2("pinhalt").scrollTop = 0;
   }
+  var hqNeu = () => {
+    hqBestaetigen = null;
+    oeffneHq();
+    $2("pinhalt").scrollTop = 0;
+  };
   window.hqKlick = (art, a2, b4, c) => {
     if (art === "uebersicht") {
       hqAbteilung = null;
       hqEtageWahl = null;
-      return oeffneHq();
+      hqSeite = null;
+      return hqNeu();
     }
+    if (art === "gebaeude") {
+      hqAbteilung = null;
+      hqSeite = { art: "gebaeude", g: a2 };
+      return hqNeu();
+    }
+    if (art === "etageSeite") {
+      hqAbteilung = null;
+      hqSeite = { art: "etage", g: a2, nr: Number(b4) };
+      hqEtageWahl = { g: a2, nr: Number(b4) };
+      return hqNeu();
+    }
+    if (art === "bestaetigen") {
+      hqBestaetigen = { art: a2 };
+      oeffneHq();
+      $2("pinhalt").scrollTop = 0;
+      return;
+    }
+    if (art === "abbrechen") {
+      hqBestaetigen = null;
+      oeffneHq(void 0, true);
+      return;
+    }
+    if (art === "zuruecknehmen") return hqTun({ typ: "hqKuendigungZuruecknehmen" });
     if (art === "abteilung") return oeffneHqAbteilung(a2);
     if (art === "abteilungEtage") {
       hqAbteilung = a2;
@@ -181780,6 +181906,8 @@ void main() {
     if (art === "reiter") {
       hqAbteilung = null;
       hqEtageWahl = null;
+      hqSeite = null;
+      hqBestaetigen = null;
       if (a2 === "finanzen") return oeffneModul(fi);
       if (a2 === "vorstand") return oeffneModul(vs);
       if (a2 === "organisation") return oeffneModul(org);
@@ -181790,14 +181918,26 @@ void main() {
       const an = hqUebersicht(s).angebote.find((q3) => q3.id === a2);
       hqTun({ typ: "hqMieten", angebot: a2, etagen: an.etagen.map((e) => e.nr) });
     }
-    if (art === "kuendigenE") hqTun({ typ: "hqEtageKuendigen", gebaeude: a2, etage: Number(b4) });
+    if (art === "kuendigenE") {
+      hqBestaetigen = null;
+      hqSeite = { art: "gebaeude", g: a2 };
+      hqTun({ typ: "hqEtageKuendigen", gebaeude: a2, etage: Number(b4) });
+      $2("pinhalt").scrollTop = 0;
+    }
     if (art === "archiv") hqTun({ typ: "hqArchivSetzen", gebaeude: a2, etage: Number(b4), aktiv: c === "true" });
     if (art === "archivOeffnen") oeffneModul(ch);
-    if (art === "kuendigenG") hqTun({ typ: "hqGebaeudeKuendigen", gebaeude: a2 });
+    if (art === "kuendigenG") {
+      hqBestaetigen = null;
+      hqSeite = null;
+      hqEtageWahl = null;
+      hqTun({ typ: "hqGebaeudeKuendigen", gebaeude: a2 });
+      $2("pinhalt").scrollTop = 0;
+    }
     if (art === "stufe") hqTun({ typ: "abteilungStufe", abteilung: a2, stufe: Number(b4) });
     if (art === "setzen") {
       const [g2, nr4] = String(b4).split("|");
       hqTun({ typ: "abteilungSetzen", abteilung: a2, gebaeude: g2, etage: Number(nr4) });
+      if (hqSeite?.art === "etage") $2("pinhalt").scrollTop = 0;
     }
     if (art === "etage") {
       hqEtageWahl = { g: a2, nr: Number(b4) };
@@ -181813,7 +181953,9 @@ void main() {
       const gj = j4?.gebaeude?.find((q3) => q3.id === gid);
       return gj ? etagenBild(gj, nr4) : null;
     };
-    const r4 = hqAbteilung && u.abteilungen.some((a2) => a2.id === hqAbteilung) ? zentraleAbteilungHtml(u, j4, organisationUebersicht(s), hqAbteilung, hqEtageWahl, bild4) : zentraleHtml({ u, organisation: organisationUebersicht(s), historie: s.historie, woche: s.woche, gebaeudeId, etageWahl: hqEtageWahl, etagenBild: bild4 });
+    if (hqSeite && !u.gebaeude.some((g2) => g2.id === hqSeite.g)) hqSeite = null;
+    const c = { u, organisation: organisationUebersicht(s), historie: s.historie, woche: s.woche, gebaeudeId, etageWahl: hqEtageWahl, etagenBild: bild4, bestaetigen: hqBestaetigen };
+    const r4 = hqAbteilung && u.abteilungen.some((a2) => a2.id === hqAbteilung) ? zentraleAbteilungHtml(u, j4, organisationUebersicht(s), hqAbteilung, hqEtageWahl, bild4) : hqSeite?.art === "etage" ? zentraleEtageHtml({ ...c, gid: hqSeite.g, nr: hqSeite.nr }) : hqSeite?.art === "gebaeude" ? zentraleGebaeudeHtml({ ...c, gid: hqSeite.g }) : zentraleHtml(c);
     const sc = $2("pinhalt").scrollTop;
     panel(r4.titel, r4.unter, r4.html, "gross");
     if (bleiben) $2("pinhalt").scrollTop = sc;
@@ -182607,8 +182749,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-25T12:26:09.054Z" : null;
-    const v2 = true ? "906b560" : "Entwicklung";
+    const iso = true ? "2026-10-25T12:45:59.924Z" : null;
+    const v2 = true ? "84dc69d" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();
