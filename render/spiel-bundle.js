@@ -13533,20 +13533,20 @@
   t5("Henley-Longsleeve", "oberteile", U, "ganz", 22, JERSEY, g(0.64), 1, "henley", P2.shirts);
   t5("Layer-Shirt", "oberteile", U, "ganz", 25, BW4, g(0), 2, "t_longline", P2.shirts);
   t5("\xC4rmelloses Shirt", "oberteile", U, "sommer", 22, JERSEY, g(0.62), 1, "shirttop", P2.shirts);
-  t5("Strickshirt", "oberteile", U_ST, "sommer", 29, STRICK4, g(0.57), 2, "halbarmshirt", P2.strick);
+  t5("Strickshirt", "oberteile", U_ST, "sommer", 29, STRICK4, g(0.57), 2, "boxytee", P2.strick);
   t5("Fledermausshirt", "oberteile", D, "ganz", 18, JERSEY, g(0.75), 1, "tunika", P2.shirts);
   t5("Spitzenshirt", "oberteile", ["damen.young", "damen.blusen"], "ganz", 20, FLIESS3, g(0.67, 0), 2, "longsleeve", P2.shirts, ["young"]);
   t5("Peplum-Shirt", "oberteile", D, "sommer", 22, JERSEY, g(0.33, 0.25, false), 1, "babytee", P2.shirts);
   t5("Baseballshirt", "oberteile", U, "ganz", 20, BW4, g(1), 1, "t_raglanlong", P2.shirts);
   t5("Sportshirt", "oberteile", SP, "ganz", 20, SPORT, g(0.33, 0.25, false), 1, "t_trikot", P2.shirts);
-  t5("Body", "oberteile", D, "ganz", 20, JERSEY, g(0.83), 2, "langarmbody", P2.tops);
+  t5("Body", "oberteile", D, "ganz", 20, JERSEY, g(0.83), 2, "rollkragenshirt", P2.tops);
   t5("Tanktop", "oberteile", D, "sommer", 15, ["Baumwolle", "Bio-Baumwolle"], g(0.65), 1, "top", P2.tops);
   t5("Peplum-Top", "oberteile", D, "sommer", 22, FLIESS3, g(0.62), 2, "traegertop", P2.tops);
   t5("Stricktop", "oberteile", D_ST, "sommer", 24, STRICK4, g(0.3), 1, "t_croppullunder", P2.tops);
   t5("Bustier-Top", "oberteile", D, "sommer", 25, ["Baumwolle", "Polyester", "Seide"], g(0.57), 2, "corsagetop", P2.tops);
   t5("Muscle-Shirt", "oberteile", H, "sommer", 18, BW4, g(0.43), 1, "t_basketballtank", P2.tops);
   t5("One-Shoulder-Top", "oberteile", D, "sommer", 20, JERSEY, g(0.67), 2, "offshoulder", P2.tops);
-  t5("Westentop", "oberteile", D, "ganz", 22, ["Polyester", "Viskose", "Leinen"], g(0.6), 2, "anzugweste", P2.tops);
+  t5("Westentop", "oberteile", D, "ganz", 22, ["Polyester", "Viskose", "Leinen"], g(0.6), 2, "strickweste", P2.tops);
   t5("Jeans-Top", "oberteile", D_DE, "sommer", 38, DENIM3, g(0), 2, "puffaermelbluse", P2.tops);
   t5("Sporttop", "oberteile", SP, "ganz", 22, SPORT, g(0.67), 1, "t_bandeau", P2.tops);
   t5("Resorthemd", "oberteile", H_HE, "sommer", 22, ["Leinen", "Viskose", "Baumwolle"], g(0.75), 1, "t_bowlinghemd", P2.hemden);
@@ -13564,11 +13564,11 @@
   t5("Henley-Pullover", "oberteile", H_ST, "winter", 33, STRICK4, g(0.71), 2, "feinstrickpullover", P2.strick);
   t5("V-Pullover", "oberteile", U_ST, "winter", 28, FEIN, g(1), 2, "vpullover", P2.strick);
   t5("Strickcape", "jacken", D_JA, "winter", 29, ["Merino", "Kaschmir", "Polyester"], g(0.8), 2, "poncho", P2.capes);
-  t5("Sweatjacke", "oberteile", U, "ganz", 33, BW4, g(0.44), 2, "kapuzenjacke", P2.pulli);
+  t5("Sweatjacke", "oberteile", U, "ganz", 33, BW4, g(0.44), 2, "t_ziphoodie", P2.pulli);
   t5("Sweat-Troyer", "oberteile", U, "winter", 36, BW4, g(0.48), 2, "troyer", P2.pulli);
   t5("Kurzarm-Sweatshirt", "oberteile", H, "sommer", 25, BW4, g(0.27), 1, "sweatshirt", P2.pulli);
   t5("Off-Shoulder-Sweatshirt", "oberteile", D, "ganz", 29, BW4, g(0.2), 1, "t_collegesweat", P2.pulli);
-  t5("Polo-Sweatshirt", "oberteile", H, "winter", 36, BW4, g(0.25), 2, "t_croppolo", P2.pulli);
+  t5("Polo-Sweatshirt", "oberteile", H, "winter", 36, BW4, g(0.25), 2, "polo", P2.pulli);
   t5("Strick-Hoodie", "oberteile", D_ST, "winter", 33, STRICK4, g(0.33, 0.25, false), 2, "hoodie", P2.pulli);
   t5("Bolero", "oberteile", D_ST, "ganz", 29, FEIN, g(0.57), 2, "croppedcardigan", P2.cardigan);
   t5("Wickeljacke", "oberteile", D_ST, "ganz", 29, STRICK4, g(0.67), 2, "strickjacke", P2.cardigan);
@@ -162137,7 +162137,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "99e51a7" : "Entwicklung";
+  var version = () => true ? "7b8c9e0" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -182895,8 +182895,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-26T20:18:12.172Z" : null;
-    const v2 = true ? "99e51a7" : "Entwicklung";
+    const iso = true ? "2026-10-26T21:02:58.877Z" : null;
+    const v2 = true ? "7b8c9e0" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();

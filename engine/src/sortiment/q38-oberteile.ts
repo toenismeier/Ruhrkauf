@@ -62,21 +62,21 @@ t('Raglan-T-Shirt', 'oberteile', D, 'sommer', 20, BW, g(0.25), 1, 't_raglanlong'
 t('Henley-Longsleeve', 'oberteile', U, 'ganz', 22, JERSEY, g(0.64), 1, 'henley', P.shirts);             // 19,99
 t('Layer-Shirt', 'oberteile', U, 'ganz', 25, BW, g(0), 2, 't_longline', P.shirts);                          // 22,99
 t('Ärmelloses Shirt', 'oberteile', U, 'sommer', 22, JERSEY, g(0.62), 1, 'shirttop', P.shirts);             // 19,49
-t('Strickshirt', 'oberteile', U_ST, 'sommer', 29, STRICK, g(0.57), 2, 'halbarmshirt', P.strick);             // 25,99
+t('Strickshirt', 'oberteile', U_ST, 'sommer', 29, STRICK, g(0.57), 2, 'boxytee', P.strick);             // 25,99
 t('Fledermausshirt', 'oberteile', D, 'ganz', 18, JERSEY, g(0.75), 1, 'tunika', P.shirts);              // 15,99
 t('Spitzenshirt', 'oberteile', ['damen.young', 'damen.blusen'], 'ganz', 20, FLIESS, g(0.67, 0), 2, 'longsleeve', P.shirts, ['young']); // 17,99
 t('Peplum-Shirt', 'oberteile', D, 'sommer', 22, JERSEY, g(0.33, 0.25, false), 1, 'babytee', P.shirts);               // 19,99
 t('Baseballshirt', 'oberteile', U, 'ganz', 20, BW, g(1), 1, 't_raglanlong', P.shirts);                     // 17,99
 t('Sportshirt', 'oberteile', SP, 'ganz', 20, SPORT, g(0.33, 0.25, false), 1, 't_trikot', P.shirts);                   // 17,99
 // ───────────── Tops
-t('Body', 'oberteile', D, 'ganz', 20, JERSEY, g(0.83), 2, 'langarmbody', P.tops);                                  // 17,99
+t('Body', 'oberteile', D, 'ganz', 20, JERSEY, g(0.83), 2, 'rollkragenshirt', P.tops);                                  // 17,99
 t('Tanktop', 'oberteile', D, 'sommer', 15, ['Baumwolle', 'Bio-Baumwolle'], g(0.65), 1, 'top', P.tops);  // 12,99
 t('Peplum-Top', 'oberteile', D, 'sommer', 22, FLIESS, g(0.62), 2, 'traegertop', P.tops);                     // 19,99
 t('Stricktop', 'oberteile', D_ST, 'sommer', 24, STRICK, g(0.3), 1, 't_croppullunder', P.tops);                    // 21,49
 t('Bustier-Top', 'oberteile', D, 'sommer', 25, ['Baumwolle', 'Polyester', 'Seide'], g(0.57), 2, 'corsagetop', P.tops); // 22,99
 t('Muscle-Shirt', 'oberteile', H, 'sommer', 18, BW, g(0.43), 1, 't_basketballtank', P.tops);                          // 15,99
 t('One-Shoulder-Top', 'oberteile', D, 'sommer', 20, JERSEY, g(0.67), 2, 'offshoulder', P.tops);            // 17,99
-t('Westentop', 'oberteile', D, 'ganz', 22, ['Polyester', 'Viskose', 'Leinen'], g(0.6), 2, 'anzugweste', P.tops); // 19,99
+t('Westentop', 'oberteile', D, 'ganz', 22, ['Polyester', 'Viskose', 'Leinen'], g(0.6), 2, 'strickweste', P.tops); // 19,99
 t('Jeans-Top', 'oberteile', D_DE, 'sommer', 38, DENIM, g(0), 2, 'puffaermelbluse', P.tops);                        // 34,49
 t('Sporttop', 'oberteile', SP, 'ganz', 22, SPORT, g(0.67), 1, 't_bandeau', P.tops);                          // 19,99
 // ───────────── Blusen und Hemden
@@ -97,11 +97,11 @@ t('Henley-Pullover', 'oberteile', H_ST, 'winter', 33, STRICK, g(0.71), 2, 'feins
 t('V-Pullover', 'oberteile', U_ST, 'winter', 28, FEIN, g(1), 2, 'vpullover', P.strick);                     // 24,99
 t('Strickcape', 'jacken', D_JA, 'winter', 29, ['Merino', 'Kaschmir', 'Polyester'], g(0.8), 2, 'poncho', P.capes); // 25,99
 // ───────────── Sweat
-t('Sweatjacke', 'oberteile', U, 'ganz', 33, BW, g(0.44), 2, 'kapuzenjacke', P.pulli);                         // 29,99
+t('Sweatjacke', 'oberteile', U, 'ganz', 33, BW, g(0.44), 2, 't_ziphoodie', P.pulli);                         // 29,99
 t('Sweat-Troyer', 'oberteile', U, 'winter', 36, BW, g(0.48), 2, 'troyer', P.pulli);                    // 32,99
 t('Kurzarm-Sweatshirt', 'oberteile', H, 'sommer', 25, BW, g(0.27), 1, 'sweatshirt', P.pulli);             // 22,99
 t('Off-Shoulder-Sweatshirt', 'oberteile', D, 'ganz', 29, BW, g(0.2), 1, 't_collegesweat', P.pulli);               // 25,99
-t('Polo-Sweatshirt', 'oberteile', H, 'winter', 36, BW, g(0.25), 2, 't_croppolo', P.pulli);                   // 32,99
+t('Polo-Sweatshirt', 'oberteile', H, 'winter', 36, BW, g(0.25), 2, 'polo', P.pulli);                   // 32,99
 t('Strick-Hoodie', 'oberteile', D_ST, 'winter', 33, STRICK, g(0.33, 0.25, false), 2, 'hoodie', P.pulli);           // 29,99
 // ───────────── Cardigans und Westen
 t('Bolero', 'oberteile', D_ST, 'ganz', 29, FEIN, g(0.57), 2, 'croppedcardigan', P.cardigan);                         // 25,99
