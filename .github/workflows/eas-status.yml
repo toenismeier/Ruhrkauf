@@ -8,8 +8,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
+      - run: npm ci
       - env: { EXPO_TOKEN: "${{ secrets.EXPO_TOKEN }}" }
         run: |
           npx -y eas-cli@latest workflow:runs --limit 6 --json || true
           npx -y eas-cli@latest build:list --platform ios --limit 5 --json --non-interactive || true
-          npx -y eas-cli@latest submission:list --platform ios --limit 5 --json --non-interactive 2>/dev/null || true
+          npx -y eas-cli@latest submission:list --platform ios --limit 5 --json --non-interactive || true
