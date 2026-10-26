@@ -6808,6 +6808,33 @@
       "farbe": "olive",
       "model": "kleid",
       "nur": "damen"
+    },
+    "b09stufenkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b09": "b09stufenkleid",
+        "laenge": "knie",
+        "form": "stufen",
+        "bildmuster": "blumen",
+        "umriss": true,
+        "modell": {
+          "teil": "kleid",
+          "laenge": "knie",
+          "form": "stufen",
+          "aermel": "ohne",
+          "ausschnitt": "carree"
+        },
+        "farben": [
+          "jeansblau"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "kleid",
+      "nur": "damen"
     }
   }
 }

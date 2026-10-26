@@ -36,6 +36,10 @@
   "Dirndl": {
    "silhouette": "b09dirndl",
    "auftrag": "Q39"
+  },
+  "Stufenkleid": {
+   "silhouette": "b09stufenkleid",
+   "auftrag": "Q39"
   }
  }
 }
