@@ -6620,6 +6620,135 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b25anorak": {
+      "gruppe": "jacke",
+      "standard": {
+        "b25": "b25anorak",
+        "kapuze": true,
+        "laenge": "kurz"
+      },
+      "material": "nylon",
+      "farbe": "anthrazit",
+      "model": "jacke"
+    },
+    "b25cordhemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b25": "b25cordhemd",
+        "aermel": "lang",
+        "kragen": true,
+        "knopfleiste": true,
+        "passform": "oversize"
+      },
+      "material": "cord",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "b25jogginganzug": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b25": "b25jogginganzug",
+        "aermel": "lang",
+        "kapuze": true,
+        "rippbund": true
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "oberteil"
+    },
+    "b25kunstlederleggings": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b25": "b25kunstlederleggings",
+        "passform": "leggings",
+        "leibhoehe": "hoch"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b25plisseehose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b25": "b25plisseehose",
+        "passform": "weit",
+        "leibhoehe": "hoch",
+        "komfortbund": true
+      },
+      "material": "polyester",
+      "farbe": "weiß",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b25saronghose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b25": "b25saronghose",
+        "passform": "weit",
+        "leibhoehe": "hoch",
+        "laenge": "cropped"
+      },
+      "material": "viskose",
+      "farbe": "schwarz",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b25strickhemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b25": "b25strickhemd",
+        "aermel": "kurz",
+        "kragen": true,
+        "knopfleiste": true,
+        "passform": "gerade",
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "marine",
+      "model": "oberteil"
+    },
+    "b25trachtenhemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b25": "b25trachtenhemd",
+        "aermel": "lang",
+        "knopfleiste": true,
+        "passform": "gerade"
+      },
+      "material": "baumwolle",
+      "farbe": "creme",
+      "model": "oberteil"
+    },
+    "b25wachsjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b25": "b25wachsjacke",
+        "laenge": "kurz",
+        "farben": [
+          "braun"
+        ],
+        "materialien": [
+          "cord"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "braun",
+      "model": "jacke"
+    },
+    "b25zigarettenhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b25": "b25zigarettenhose",
+        "passform": "gerade",
+        "laenge": "cropped",
+        "bundfalte": true
+      },
+      "material": "wolle",
+      "farbe": "schwarz",
+      "model": "hose",
+      "nur": "damen"
     }
   }
 }
