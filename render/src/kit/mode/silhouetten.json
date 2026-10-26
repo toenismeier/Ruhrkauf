@@ -6626,9 +6626,10 @@
       "gruppe": "oberteil",
       "standard": {
         "b04": "b04raglantshirt",
-        "aermel": "kurz",
+        "aermel": "lang",
         "kragen": "rund",
         "passform": "gerade",
+        "laenge": "crop",
         "farben": [
           "schwarz"
         ],
