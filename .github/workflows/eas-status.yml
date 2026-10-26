@@ -11,6 +11,6 @@ jobs:
       - run: npm ci
       - env: { EXPO_TOKEN: "${{ secrets.EXPO_TOKEN }}" }
         run: |
-          npx -y eas-cli@latest workflow:runs --limit 6 --json || true
-          npx -y eas-cli@latest build:list --platform ios --limit 5 --json --non-interactive || true
-          npx -y eas-cli@latest submission:list --platform ios --limit 5 --json --non-interactive || true
+          npx -y eas-cli@latest workflow:view 01a1782d-ba9c-7000-b5ab-b7ea31928f38 --json || true
+          npx -y eas-cli@latest workflow:logs 01a1782d-ba9c-7000-b5ab-b7ea31928f38 --non-interactive || true
+          npx -y eas-cli@latest account:usage --json || true
