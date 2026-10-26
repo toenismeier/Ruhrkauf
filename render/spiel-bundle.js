@@ -162046,7 +162046,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "8efa666" : "Entwicklung";
+  var version = () => true ? "925405b" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -173054,7 +173054,7 @@ void main() {
     hals: (K3, o4) => [{ x: 100, y: K3.hals.y1 - (o4.y ?? 5), w: K3.hals.b * (o4.w ?? 5), ax: 0.5, ay: 0 }],
     taille: (K3, o4) => [{ x: 100, y: K3.m.taille + (o4.y ?? 0), w: 2 * K3.breite(K3.m.taille) + (o4.w ?? 5), ax: 0.5, ay: o4.ay ?? 0.5 }],
     huefte: (K3, o4) => [{ x: 100, y: K3.m.huefte - (o4.y ?? 6), w: 2 * K3.breite(K3.m.huefte - 6) + (o4.w ?? 5), ...o4.h ? { h: o4.h } : {}, ax: 0.5, ay: o4.ay ?? 0.5 }],
-    wickel: (K3, o4) => [{ x: 100, y: K3.m.huefte - 8, w: 2 * K3.breite(K3.m.huefte) + 7, h: K3.m.knie + (o4.h ?? 14) - (K3.m.huefte - 8), ax: 0.5, ay: 0 }],
+    wickel: (K3, o4) => [{ x: 100, y: K3.m.huefte - 8, w: 2 * K3.breite(K3.m.huefte) + (o4.w ?? 18), h: K3.m.knie + (o4.h ?? 14) - (K3.m.huefte - 8), ax: 0.5, ay: 0 }],
     unterarm: (K3, o4) => [-1, 1].map((s2) => {
       const y2 = K3.m.handgelenk + (o4.y ?? 2), x2 = s2 > 0 ? (K3.armAX(y2) + K3.armIX(y2)) / 2 : 200 - (K3.armAX(y2) + K3.armIX(y2)) / 2;
       return { x: x2, y: y2, h: (o4.h ?? 1) * (K3.m.handgelenk - K3.m.ellbogen + 8), ax: 0.5, ay: 1, haelfte: s2 };
@@ -182926,8 +182926,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-26T13:01:19.010Z" : null;
-    const v2 = true ? "8efa666" : "Entwicklung";
+    const iso = true ? "2026-10-26T13:11:06.448Z" : null;
+    const v2 = true ? "925405b" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();
