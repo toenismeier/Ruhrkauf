@@ -6667,7 +6667,7 @@
         "glatt": true
       },
       "material": "strick",
-      "farbe": "grau",
+      "farbe": "hellgrau",
       "model": "oberteil"
     },
     "b03netzstrickpullover": {
@@ -6678,7 +6678,8 @@
         "kragen": "rund",
         "passform": "oversize",
         "rippbund": true,
-        "glatt": true
+        "glatt": true,
+        "netz": true
       },
       "material": "strick",
       "farbe": "offwhite",
@@ -6707,14 +6708,16 @@
         "kragen": "rund",
         "passform": "gerade",
         "farben": [
-          "rot"
+          "rot",
+          "marine"
         ],
         "materialien": [
+          "baumwolle",
           "baumwolle"
         ]
       },
       "material": "baumwolle",
-      "farbe": "silber",
+      "farbe": "weiß",
       "model": "oberteil"
     },
     "b03strickhoodie": {
