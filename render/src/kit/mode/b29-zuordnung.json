@@ -1,0 +1,45 @@
+{
+  "hinweis": "B29: Artikeltyp -> Silhouette. Typen kommen mit dem Q-Auftrag (noch nicht auf main); nach dessen Merge bild.silhouette setzen und bildOffen entfernen.",
+  "typen": {
+    "Kapuzenshirt": {
+      "silhouette": "b29kapuzenshirt",
+      "auftrag": "Q42"
+    },
+    "Trachtenlederhose": {
+      "silhouette": "b29trachtenlederhose",
+      "auftrag": "Q42"
+    },
+    "Kampfsportshorts": {
+      "silhouette": "b29kampfsportshorts",
+      "auftrag": "Q42"
+    },
+    "Pyjamashorts": {
+      "silhouette": "b29pyjamashorts",
+      "auftrag": "Q42"
+    },
+    "Beinstulpen": {
+      "silhouette": "b29beinstulpen",
+      "auftrag": "Q42"
+    },
+    "Handytasche": {
+      "silhouette": "b29handytasche",
+      "auftrag": "Q42"
+    },
+    "Lunchtasche": {
+      "silhouette": "b29lunchtasche",
+      "auftrag": "Q42"
+    },
+    "Muscheltasche": {
+      "silhouette": "b29muscheltasche",
+      "auftrag": "Q42"
+    },
+    "Utility-Weste": {
+      "silhouette": "b29utilityweste",
+      "auftrag": "Q42"
+    },
+    "Kunstlederweste": {
+      "silhouette": "b29kunstlederweste",
+      "auftrag": "Q42"
+    }
+  }
+}

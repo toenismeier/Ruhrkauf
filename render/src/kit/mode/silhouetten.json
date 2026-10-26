@@ -6620,6 +6620,122 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b29kapuzenshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b29": "b29kapuzenshirt",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "passform": "gerade"
+      },
+      "material": "baumwolle",
+      "farbe": "jeansblau",
+      "model": "oberteil"
+    },
+    "b29trachtenlederhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b29": "b29trachtenlederhose",
+        "laenge": "bermuda",
+        "passform": "gerade"
+      },
+      "material": "leder",
+      "farbe": "beige",
+      "model": "hose"
+    },
+    "b29kampfsportshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b29": "b29kampfsportshorts",
+        "laenge": "kurz",
+        "passform": "weit",
+        "komfortbund": true,
+        "umriss": true,
+        "farben": [
+          "sand"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "satin",
+      "farbe": "schwarz",
+      "model": "hose"
+    },
+    "b29pyjamashorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b29": "b29pyjamashorts",
+        "laenge": "kurz",
+        "passform": "weit",
+        "komfortbund": true,
+        "bildmuster": "streifen"
+      },
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": "hose"
+    },
+    "b29beinstulpen": {
+      "gruppe": "waesche",
+      "standard": {
+        "b29": "b29beinstulpen"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": null
+    },
+    "b29handytasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "b29": "b29handytasche",
+        "art": "umhaenge",
+        "umriss": true
+      },
+      "material": "polyester",
+      "farbe": "anthrazit",
+      "model": "tasche"
+    },
+    "b29lunchtasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "b29": "b29lunchtasche",
+        "art": "tote",
+        "umriss": true
+      },
+      "material": "baumwolle",
+      "farbe": "beige",
+      "model": "tasche"
+    },
+    "b29muscheltasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "b29": "b29muscheltasche",
+        "art": "umhaenge"
+      },
+      "material": "satin",
+      "farbe": "gold",
+      "model": "tasche"
+    },
+    "b29utilityweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "b29": "b29utilityweste",
+        "art": "weste"
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": "jacke"
+    },
+    "b29kunstlederweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "b29": "b29kunstlederweste",
+        "art": "weste"
+      },
+      "material": "leder",
+      "farbe": "anthrazit",
+      "model": "jacke"
     }
   }
 }
