@@ -1,0 +1,55 @@
+{
+ "hinweis": "Bildpaket B22: Zuordnung Artikeltyp (Name aus auftraege/wurf4/daten) -> Silhouette. Angebunden wird nach Merge des Q-Auftrags (bild: { silhouette }).",
+ "typen": {
+  "Cowboyhut": {
+   "silhouette": "b22cowboyhut",
+   "auftrag": "Q42",
+   "oberbegriff": "Accessoire"
+  },
+  "Fellmütze": {
+   "silhouette": "b22fellmuetze",
+   "auftrag": "Q42",
+   "oberbegriff": "Accessoire"
+  },
+  "Kapitänsmütze": {
+   "silhouette": "b22kapitaensmuetze",
+   "auftrag": "Q42",
+   "oberbegriff": "Accessoire"
+  },
+  "Kopfschmuck": {
+   "silhouette": "b22kopfschmuck",
+   "auftrag": "Q42",
+   "oberbegriff": "Accessoire"
+  },
+  "Lange Handschuhe": {
+   "silhouette": "b22langehandschuhe",
+   "auftrag": "Q42",
+   "oberbegriff": "Accessoire"
+  },
+  "Bonnet": {
+   "silhouette": "b22bonnet",
+   "auftrag": "Q42",
+   "oberbegriff": "Accessoire"
+  },
+  "Hosenkette": {
+   "silhouette": "b22hosenkette",
+   "auftrag": "Q42",
+   "oberbegriff": "Accessoire"
+  },
+  "Modebrille": {
+   "silhouette": "b22modebrille",
+   "auftrag": "Q42",
+   "oberbegriff": "Accessoire"
+  },
+  "Pillbox-Hut": {
+   "silhouette": "b22pillbox",
+   "auftrag": "Q42",
+   "oberbegriff": "Accessoire"
+  },
+  "Strickkapuze": {
+   "silhouette": "b22strickkapuze",
+   "auftrag": "Q42",
+   "oberbegriff": "Accessoire"
+  }
+ }
+}

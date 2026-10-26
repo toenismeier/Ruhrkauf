@@ -6829,6 +6829,108 @@
       "material": "polyester",
       "farbe": "anthrazit",
       "model": "auflage"
+    },
+    "b22cowboyhut": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22cowboyhut"
+      },
+      "material": "filz",
+      "farbe": "camel",
+      "model": "auflage"
+    },
+    "b22fellmuetze": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22fellmuetze"
+      },
+      "material": "fell",
+      "farbe": "braun",
+      "model": "auflage"
+    },
+    "b22kapitaensmuetze": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22kapitaensmuetze"
+      },
+      "material": "baumwolle",
+      "farbe": "olive",
+      "model": "auflage"
+    },
+    "b22kopfschmuck": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22kopfschmuck"
+      },
+      "material": "perlen",
+      "farbe": "schwarz",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b22langehandschuhe": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22langehandschuhe"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b22bonnet": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22bonnet"
+      },
+      "material": "strick",
+      "farbe": "ecru",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b22hosenkette": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22hosenkette",
+        "metallAusFarbe": true
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "auflage"
+    },
+    "b22modebrille": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22modebrille",
+        "farben": [
+          "weiß"
+        ],
+        "materialien": [
+          "kunststoff"
+        ]
+      },
+      "material": "kunststoff",
+      "farbe": "schwarz",
+      "model": "auflage"
+    },
+    "b22pillbox": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22pillbox"
+      },
+      "material": "filz",
+      "farbe": "marine",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b22strickkapuze": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22strickkapuze"
+      },
+      "material": "strick",
+      "farbe": "rot",
+      "model": "auflage",
+      "nur": "damen"
     }
   }
 }
