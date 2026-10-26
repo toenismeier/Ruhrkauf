@@ -6621,6 +6621,119 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b14reitstiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14reitstiefel",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "b14keilstiefelette": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14keilstiefelette",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "b14loafermule": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14loafermule",
+        "art": "halb",
+        "farben": [
+          "braun"
+        ],
+        "materialien": [
+          "gummi"
+        ]
+      },
+      "material": "leder",
+      "farbe": "camel",
+      "model": "schuhe"
+    },
+    "b14trailsneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14trailsneaker",
+        "art": "sneaker",
+        "farben": [
+          "offwhite",
+          "marine"
+        ],
+        "materialien": [
+          "gummi",
+          "nylon"
+        ]
+      },
+      "material": "nylon",
+      "farbe": "beige",
+      "model": "schuhe"
+    },
+    "b14peeptoestiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14peeptoestiefel",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "grau",
+      "model": "schuhe"
+    },
+    "b14tabiballerina": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14tabiballerina",
+        "art": "ballerina"
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": "schuhe"
+    },
+    "b14trouserboots": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14trouserboots",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "anthrazit",
+      "model": "schuhe"
+    },
+    "b14sportsocken": {
+      "gruppe": "waesche",
+      "standard": {
+        "b14": "b14sportsocken"
+      },
+      "material": "baumwolle",
+      "farbe": "gelb",
+      "model": null
+    },
+    "b14string": {
+      "gruppe": "waesche",
+      "standard": {
+        "b14": "b14string"
+      },
+      "material": "satin",
+      "farbe": "anthrazit",
+      "model": null,
+      "nur": "damen"
+    },
+    "b14pushupbh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b14": "b14pushupbh"
+      },
+      "material": "satin",
+      "farbe": "beige",
+      "model": null,
+      "nur": "damen"
     }
   }
 }
