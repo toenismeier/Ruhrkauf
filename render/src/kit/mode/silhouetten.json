@@ -6729,6 +6729,106 @@
       "farbe": "bordeaux",
       "model": "auflage",
       "nur": "damen"
+    },
+    "b21hobobag": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21hobobag"
+      },
+      "material": "leder",
+      "farbe": "cognac",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21halbmond": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21halbmond"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21beutel": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21beutel"
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21citytasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21citytasche",
+        "farben": [
+          "marine"
+        ],
+        "materialien": [
+          "leder"
+        ]
+      },
+      "material": "leder",
+      "farbe": "sand",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21barrelbag": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21barrelbag"
+      },
+      "material": "denim",
+      "farbe": "hellerdenim",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21kameratasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21kameratasche",
+        "farben": [
+          "schwarz"
+        ],
+        "materialien": [
+          "polyester"
+        ]
+      },
+      "material": "leder",
+      "farbe": "anthrazit",
+      "model": "auflage"
+    },
+    "b21bikerbag": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21bikerbag"
+      },
+      "material": "leder",
+      "farbe": "anthrazit",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21boxtasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21boxtasche"
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21messenger": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21messenger"
+      },
+      "material": "polyester",
+      "farbe": "anthrazit",
+      "model": "auflage"
     }
   }
 }
