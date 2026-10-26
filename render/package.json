@@ -47,11 +47,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@three.ez/batched-mesh-extensions": "^0.0.12",
+    "@three.ez/instanced-mesh": "^0.3.16",
+    "camera-controls": "^3.1.2",
     "esbuild": "^0.24.0",
     "playwright": "^1.48.2",
-    "three": "^0.160.0"
+    "recast-navigation": "^0.43.1",
+    "three": "^0.160.0",
+    "three-fenestra": "^0.3.0",
+    "yuka": "^0.7.8"
   },
   "devDependencies": {
+    "@gltf-transform/cli": "^4.5.1",
+    "gltfpack": "^1.3.0",
     "pngjs": "^7.0.0"
   }
 }
