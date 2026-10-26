@@ -24,7 +24,7 @@ export function b02Zeichner(S, t, p) {
   const n = 1 + Math.max(0, ...D.regionen.filter((r) => ['t', 'r', 'm', 'mf'].includes(r[0])).map((r) => r[1]));
   for (let i = 1; i < n; i++) K.push(materialDefs(p.farben?.[i - 1] ?? 'grau', p.materialien?.[i - 1] ?? 'baumwolle', S.defs));
   // glatte Strickfläche: Maschenstruktur aus stoff.js weg (Musterfeld bleibt)
-  if (p.glatt) K.forEach((k, i) => { if (i > 0 || !p.muster || p.muster === 'uni') if (k.m === 'strick' || k.m === 'kaschmir' || k.m === 'merino') k.tex = null; });
+  if (p.glatt) K.forEach((k) => { if ((k.m === 'strick' || k.m === 'kaschmir' || k.m === 'merino') && k.tex === `url(#${k.id}t)`) k.tex = null; });   // nur die Maschenstruktur, nie ein Musterfeld
   let rip = null;
   if (D.regionen.some((r) => r[0] === 'r')) { rip = S.id + 'rp'; S.defs.push(`<pattern id="${rip}" width="1.15" height="4" patternUnits="userSpaceOnUse"><rect width="0.45" height="4" fill="#000" opacity="0.28"/><rect x="0.5" width="0.25" height="4" fill="#fff" opacity="0.08"/></pattern>`); }
   const clip = S.id + 'b02';

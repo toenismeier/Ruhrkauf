@@ -162046,7 +162046,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "c7fdd17" : "Entwicklung";
+  var version = () => true ? "3420d54" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -173018,10 +173018,8 @@ void main() {
     const K3 = [S];
     const n3 = 1 + Math.max(0, ...D.regionen.filter((r4) => ["t", "r", "m", "mf"].includes(r4[0])).map((r4) => r4[1]));
     for (let i = 1; i < n3; i++) K3.push(materialDefs(p2.farben?.[i - 1] ?? "grau", p2.materialien?.[i - 1] ?? "baumwolle", S.defs));
-    if (p2.glatt) K3.forEach((k5, i) => {
-      if (i > 0 || !p2.muster || p2.muster === "uni") {
-        if (k5.m === "strick" || k5.m === "kaschmir" || k5.m === "merino") k5.tex = null;
-      }
+    if (p2.glatt) K3.forEach((k5) => {
+      if ((k5.m === "strick" || k5.m === "kaschmir" || k5.m === "merino") && k5.tex === `url(#${k5.id}t)`) k5.tex = null;
     });
     let rip = null;
     if (D.regionen.some((r4) => r4[0] === "r")) {
@@ -182874,8 +182872,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-26T13:15:50.158Z" : null;
-    const v2 = true ? "c7fdd17" : "Entwicklung";
+    const iso = true ? "2026-10-26T13:37:02.965Z" : null;
+    const v2 = true ? "3420d54" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();
