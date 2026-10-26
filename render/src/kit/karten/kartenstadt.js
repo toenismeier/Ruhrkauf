@@ -35,12 +35,12 @@ const BODEN = {
 };
 // Coffee-Abstraktion: hellere, wärmere Flächen und Pastellfassaden wie in Aufbauspielen; Kartentreue bleibt bei den gedeckten Tönen
 const COFFEE = {
-  boden: { pflaster: '#f2e7cf', gehweg: '#fbf7ee', bord: '#d9cdb6', fahrbahn: '#596474', hofkern: '#efe2c9', platz: '#f4e9d2', gruen: '#8fd46a', garten: '#a9dc85',
-    hof: '#a9dc85', rasen2: '#7fc95c', sport: '#77c45a', kleingarten: '#9fd47c', fusszone: '#f7ecd6', umland: '#e6dcc4', parkplatz: '#8f9aab', gewerbe: '#e6dcc8', schulhof: '#f0dfc0',
+  boden: { pflaster: '#f2e7cf', gehweg: '#fbf7ee', bord: '#d9cdb6', fahrbahn: '#596474', hofkern: '#efe2c9', platz: '#f4e9d2', gruen: '#98cf78', garten: '#acd48f',
+    hof: '#acd48f', rasen2: '#8ac46c', sport: '#82bf66', kleingarten: '#a4cf86', fusszone: '#f7ecd6', umland: '#e6dcc4', parkplatz: '#8f9aab', gewerbe: '#e6dcc8', schulhof: '#f0dfc0',
     weg: '#f6e6c2', markierung: '#fff6dc', linie: '#ffffff', wasser: '#5fb7e0', ufer: '#e9dcbc', bahnsteig: '#e3d8c4', schotter: '#b3a68f' },
-  fassade: ['#f6e7c8', '#f4d6bd', '#dcebdf', '#dde7f0', '#f6e9b8', '#efd0c0', '#ebe5d8', '#d4e6ec', '#f3dfc6', '#e7f0e1', '#f1c9a5', '#e8d4e4'],
+  fassade: ['#f2e6cf', '#eedccb', '#e1e8df', '#e0e5ea', '#f1e7c9', '#ead8cc', '#ebe5d8', '#dde6e8', '#efe0cb', '#e6ece2', '#ecd6bf', '#e6e0d6'],
   steil: ['#c9654b', '#b65a47', '#d07a55', '#5f6b7a', '#6c7987'], flach: ['#c9c2b6', '#bfc7cb', '#cbbfb6', '#c4c9bd', '#bcc1c9'],
-  hoch: ['#cfe3ee', '#e8dcc8', '#dfe9e1', '#e9d9de', '#d9dfee'], bau: ['#e4ded2', '#dcd8cf'],
+  hoch: ['#d6e2ea', '#e6dccb', '#dfe7e0', '#e2dcd4', '#dadfe8'], bau: ['#e4ded2', '#dcd8cf'],
 };
 let PAL = null;   // gesetzt in baueKartenstadt je Kartenstil
 const bodenFarbe = (art) => PAL?.boden[art] ?? BODEN[art];
@@ -721,7 +721,7 @@ function gebaeudeBauen(B, S, g, kern, detail = true) {
     // Große Dächer (Kaufhäuser, Hallen): je Gebäude eine eigene Gestaltung, damit nicht jedes Großdach gleich aussieht
     if (g.flaeche > 1500) {
       const r = gs.r, lang = c - a > d - b;
-      const arten = g.flaeche > 8000 ? [1, 4, 2, 3] : [Math.floor(r() * 4)];   // sehr große Dächer: Solarfeld, Oberlichter und Technik zusammen
+      const arten = g.flaeche > 8000 ? [1, 4, 2, 3] : [[1, 2, 3, 4][Math.floor(r() * 4)]];   // sehr große Dächer: Solarfeld, Oberlichter und Technik zusammen
       let solarFeld = null;   // [x0, z0, x1, z1] des Solarfelds; Oberlichter sparen es aus
       for (const art of arten) {
       // Prüfung gegen die Dachfläche selbst (Grundriss und Dach weichen bei LoD2 teils ab)
@@ -730,13 +730,31 @@ function gebaeudeBauen(B, S, g, kern, detail = true) {
       const innen = (px, pz, m) => drin(px, pz) && drin(px + m, pz + m) && drin(px - m, pz - m) && drin(px + m, pz - m) && drin(px - m, pz + m);
       const [ca, cb] = [(a + c) / 2, (b + d) / 2];
       if (art === 4 && g.flaeche > 20000) {   // Riesendach: Dachfelder in zwei Grautönen (Bauabschnitte) und Technikgeräte im Raster
-        for (let px = a + 10; px < c - 10; px += 20) for (let pz = b + 10; pz < d - 10; pz += 20) {
-          if (!innen(px, pz, 9)) continue;
-          if (solarFeld && px > solarFeld[0] - 10 && px < solarFeld[2] + 10 && pz > solarFeld[1] - 10 && pz < solarFeld[3] + 10) continue;
-          const k = (Math.floor(px / 20) + 2 * Math.floor(pz / 20)) % 5;
-          S.box(19.6, 0.06, 19.6, px, g.h + 0.04, pz, k % 2 ? '#b4b8bb' : '#c3c6c8');
-          if (k === 0) S.box(3, 1.4, 2.2, px + 4, g.h + 0.7, pz - 3, '#8f969c');
-          else if (k === 2) { S.box(2, 1.6, 2, px - 5, g.h + 0.8, pz + 4, '#d9dcde'); S.box(2, 1.6, 2, px - 2, g.h + 0.8, pz + 4, '#d9dcde'); }
+        // unregelmäßige Bauabschnitte (Streifen verschiedener Breite) statt Kachelraster, Technik frei verteilt
+        let u = lang ? a + 6 : b + 6; const ende = lang ? c - 6 : d - 6;
+        while (u < ende) {
+          const w = 18 + r() * 34, ton = ['#b4b8bb', '#c3c6c8', '#bcbfbf', '#aeb3b6'][Math.floor(r() * 4)];
+          for (let v = (lang ? b : a) + 6; v < (lang ? d : c) - 6; v += 6) {
+            const px = lang ? u + Math.min(w, ende - u) / 2 : v, pz = lang ? v : u + Math.min(w, ende - u) / 2;
+            if (innen(px, pz, 4)) S.box(lang ? Math.min(w, ende - u) : 6.05, 0.06, lang ? 6.05 : Math.min(w, ende - u), px, g.h + 0.04, pz, ton);
+          }
+          u += w;
+        }
+        // Attika (dunkler Dachrand) und Technikgruppen: Lüftungsblöcke in Gruppen, damit das Dach lebendig wirkt
+        const ring = offen(dr.length > 2 ? dr : g.boden);
+        for (let i = 0; i < ring.length; i++) { const p0 = ring[i], p1 = ring[(i + 1) % ring.length], L = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]); if (L < 1) continue;
+          S.box(L, 0.7, 0.5, (p0[0] + p1[0]) / 2, g.h + 0.35, (p0[1] + p1[1]) / 2, '#9ea3a6', Math.atan2(-(p1[1] - p0[1]), p1[0] - p0[0])); }
+        for (let k = 0; k < Math.floor(g.flaeche / 2500); k++) {
+          const gx = a + (c - a) * (0.1 + r() * 0.8), gz = b + (d - b) * (0.1 + r() * 0.8);
+          if (!innen(gx, gz, 8) || (solarFeld && gx > solarFeld[0] - 8 && gx < solarFeld[2] + 8 && gz > solarFeld[1] - 8 && gz < solarFeld[3] + 8)) continue;
+          S.box(7, 2.2, 4.5, gx, g.h + 1.1, gz, '#a7adb1');
+          for (let j = 0; j < 3; j++) S.box(1.5, 0.9, 1.5, gx - 2.5 + j * 2.5, g.h + 2.65, gz, '#7d858b');
+          S.box(3, 0.8, 0.8, gx + 5.5, g.h + 0.4, gz + 2.5, '#c9cdd0');
+        }
+        for (let k = 0; k < Math.floor(g.flaeche / 900); k++) {
+          const px = a + (c - a) * (0.08 + r() * 0.84), pz = b + (d - b) * (0.08 + r() * 0.84);
+          if (!innen(px, pz, 3) || (solarFeld && px > solarFeld[0] - 4 && px < solarFeld[2] + 4 && pz > solarFeld[1] - 4 && pz < solarFeld[3] + 4)) continue;
+          const t = r(); if (t < 0.5) S.box(2 + r() * 3, 1.2 + r(), 1.6 + r() * 2, px, g.h + 0.7, pz, '#8f969c'); else S.box(1.6, 1.4, 1.6, px, g.h + 0.7, pz, '#d9dcde');
         }
       }
       if (art === 4) {            // Lichtbänder (Einkaufszentrum): zwei, drei durchgehende Glasstreifen entlang der langen Achse

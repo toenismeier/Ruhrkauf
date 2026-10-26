@@ -431,9 +431,19 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     let n = 0;
     // Gezeichnete Fahrzeuge (Lage, Länge, Breite): große zuerst, dann Lkw, dann Autos
     const belegt = [];
-    const pruefe = (p, L, B) => { for (const q of belegt) if (ueberlappt(p, L, B, q) || ueberlappt(q, q.L, q.B, { ...p, L, B })) return false; belegt.push({ ...p, L, B }); return true; };
+    // zusätzlich im Bild prüfen (Iso-Kamera): Fahrzeuge, die sich auf dem Bildschirm verdecken, wirken gestapelt
+    const S2 = Math.SQRT2, C30 = Math.cos(Math.PI / 6), S30 = Math.sin(Math.PI / 6);
+    const bildBox = (p, L, B, H) => { const hx = Math.cos(p.winkel), hz = -Math.sin(p.winkel); let u0 = 1e9, u1 = -1e9, v0 = 1e9, v1 = -1e9;
+      for (const a of [-1, 1]) for (const b of [-1, 1]) { const x = p.x + hx * a * L / 2 - hz * b * B / 2, z = p.z + hz * a * L / 2 + hx * b * B / 2;
+        for (const y of [0, H]) { const u = (x - z) / S2, v = y * C30 - ((x + z) / S2) * S30; u0 = Math.min(u0, u); u1 = Math.max(u1, u); v0 = Math.min(v0, v); v1 = Math.max(v1, v); } }
+      return [u0, v0, u1, v1]; };
+    const bildUeber = (a, b) => { const w = Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])), h = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
+      return w * h / Math.min((a[2] - a[0]) * (a[3] - a[1]), (b[2] - b[0]) * (b[3] - b[1])); };
+    const pruefe = (p, L, B) => { const bb = bildBox(p, L, B, L > 10 ? 3.3 : 1.9);
+      for (const q of belegt) if (ueberlappt(p, L, B, q) || ueberlappt(q, q.L, q.B, { ...p, L, B }) || bildUeber(bb, q.bb) > 0.18) return false;
+      belegt.push({ ...p, L, B, bb }); return true; };
     for (const a of [...bahnen, ...busse]) { const p = positionWagen(a); a.verdeckt = sichtbar(p) && !pruefe(p, LAENGE[a.art], 2.65); }
-    for (const a of lkw) { if (a.fort > 12) continue; belegt.push({ ...a.start, winkel: a.winkel, L: 8, B: 2.6 }); }
+    for (const a of lkw) { if (a.fort > 12) continue; const q = { ...a.start, winkel: a.winkel }; belegt.push({ ...q, L: 8, B: 2.6, bb: bildBox(q, 8, 2.6, 3.1) }); }
     for (const a of autos) {
       const p = positionWagen(a); if (!sichtbar(p)) continue;
       if (!pruefe(p, 4.2, 1.8)) { a.verdeckt = true; continue; }
@@ -526,9 +536,9 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       const s = netz.spuren.filter((l) => l.s.typ !== 'fussgaenger')
         .sort((a, b) => abstand(punkt(a, laenge(a) / 2), h.mitte) - abstand(punkt(b, laenge(b) / 2), h.mitte))[0];
       const p = s ? koordinate(s.s, clamp(lageZu(s.s, h.mitte).u, s.s.von + 4, s.s.bis - 4),
-        Math.sign(lageZu(s.s, h.mitte).v) * (s.s.achse === 'p' ? Math.max(1.2, (s.s.fahrbahn ?? 6) / 2 - 1.4) : s.s.breite / 2 - .8)) : h.weg;
+        s.s.achse === 'p' ? s.v : Math.sign(lageZu(s.s, h.mitte).v) * (s.s.breite / 2 - .8)) : h.weg;   // Kartenstadt: auf der echten Fahrspur halten
       const ziel = h.weg; // Vom Fahrbahnrand bis zur Hausanlieferung und zurück.
-      return { start: p, ziel, fort: 0, winkel: s ? richtungsWinkel(s.s, 1) : 0, hausId: h.h.id };
+      return { start: p, ziel, fort: 0, winkel: s ? (s.s.achse === 'p' ? richtungsWinkel(s.s, s.dir, clamp(lageZu(s.s, h.mitte).u, s.s.von + 4, s.s.bis - 4)) : richtungsWinkel(s.s, 1)) : 0, hausId: h.h.id };
     });
     letzteAuswahl = -1; zeichneInstanzen();
     if (modus !== 'aus') zeichnen();
@@ -577,6 +587,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     fussAufFahrbahn: () => { if (!plan?.aufFahrbahn) return { maske: false }; let n = 0, m = 0;
       for (const f of fuss) { if (f.phase !== 'weg') continue; const p = fussPosition(f); if (!sichtbar(p)) continue; m++; if (plan.aufFahrbahn(p.x, p.z)) n++; }
       return { maske: true, auf: n, sichtbar: m }; },
+    fussDetail: () => fuss.filter((f) => sichtbar(fussPosition(f))).slice(0, 400).map((f) => { const p = fussPosition(f); const m = plan.aufFahrbahn(p.x, p.z); return m ? [f.phase, f.weg.s.typ, f.weg.s.id, +f.weg.v.toFixed(1), +f.quer.toFixed(2), Math.round(p.x), Math.round(p.z)] : null; }).filter(Boolean).slice(0, 8),
     stapelDetail: () => { const w = [...autos, ...busse, ...bahnen], p = w.map(positionWagen), L = (a) => (a.art === 'tram' ? 19 : a.art === 'bus' ? 11.6 : 4.5), out = [];
       for (let i = 0; i < p.length; i++) for (let j = i + 1; j < p.length; j++) {
         const hx = Math.cos(p[i].winkel), hz = -Math.sin(p[i].winkel), dx = p[j].x - p[i].x, dz = p[j].z - p[i].z;

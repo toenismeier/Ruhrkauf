@@ -94,6 +94,7 @@ gleisflaeche = vereinigt([LineString(g['punkte']).buffer(2.4 if g['art'] == 'tra
 # Gleisbett: alle Eisenbahngleise und Straßenbahn-Betriebsgleise, parallele Gleise zu einer Fläche geschlossen (kein Rasen zwischen Gleisen)
 _bettlinien = [LineString(g['punkte']) for g in osm['gleise'] if len(g['punkte']) >= 2 and im(g['punkte']) and (g['art'] != 'tram' or g.get('dienst'))]
 GLEISBETT = vereinigt([l.buffer(3.0) for l in _bettlinien]).buffer(5, join_style=1).buffer(-5, join_style=1).simplify(0.5).buffer(0)
+_tramband = vereinigt([LineString(g['punkte']).buffer(2.0) for g in osm['gleise'] if g['art'] == 'tram' and len(g['punkte']) >= 2 and im(g['punkte'])])
 GLEISBETT_P = prep(vereinigt([GLEISBETT.buffer(1.5)] + flaechen_art.get('bahnsteig', []) + [LineString(g['punkte']).buffer(2.2) for g in osm['gleise'] if g['art'] == 'tram' and len(g['punkte']) >= 2]))   # keine Bäume und Möbel in Gleis und auf Bahnsteigen
 wege_linien = [w for w in osm.get('wege', []) if len(w['punkte']) >= 2 and im(w['punkte'])]
 
@@ -175,6 +176,55 @@ def strassen_coffee():
     mark = vereinigt(striche).difference(kreise).intersection(strassen) if striche else Polygon()
     platz_fuss = vereinigt(fuss).difference(strassen).intersection(gebiet).simplify(0.3).buffer(0)
     return strassen, strassen, {'markierung': [mark], 'fusszone': [platz_fuss]}
+
+def strassen_karte_baender():
+    """Kartentreue: je OSM-Straße ein sauberes Band in echter Lage und Breite (osm2streets-Gesamtbreite), mit Markierungen
+    aus den echten Spuren: Leitlinien zwischen gleichgerichteten Spuren, Mittellinie bei Gegenverkehr, Randlinien auf Hauptstraßen."""
+    baender, fuss, striche, band_knoten = [], [], [], []
+    grad, knoten_pkt = {}, {}
+    for k in netz:
+        knoten_pkt[k['a']] = k['punkte'][0]; knoten_pkt[k['b']] = k['punkte'][-1]
+        if k['typ'] != 'fussgaenger':
+            for e in (k['a'], k['b']): grad[e] = grad.get(e, 0) + 1
+    def gestrichelt(ln, versatz, lang, luecke, breite=0.12):
+        try: off = ln.offset_curve(versatz)
+        except Exception: return
+        for teil in (off.geoms if hasattr(off, 'geoms') else [off]):
+            if teil.is_empty or teil.length < 4: continue
+            u = 1.5
+            while u < teil.length - 1.5:
+                a_, b_ = teil.interpolate(u), teil.interpolate(min(u + lang, teil.length))
+                striche.append(LineString([a_, b_]).buffer(breite, cap_style=2)); u += lang + luecke
+    for k in netz:
+        if not im(k['punkte']): continue
+        ln = LineString(k['punkte'])
+        if k['typ'] == 'fussgaenger':
+            fuss.append(ln.buffer(5.5, join_style=1)); continue
+        gesamt, spuren = spuren_je_weg.get(k['way'], (None, None))
+        gesamt = min(max(gesamt or (6.5 if k['typ'] == 'haupt' else 5.5), 5.0), 20.0)
+        baender.append(ln.buffer(gesamt / 2, cap_style=1, join_style=1)); band_knoten.append((k['a'], k['b']))
+        if not spuren or ln.length < 15: continue
+        sp = sorted(spuren, key=lambda s_: s_[0])   # Versatz links positiv
+        for (o1, d1), (o2, d2) in zip(sp, sp[1:]):
+            m = (o1 + o2) / 2
+            if d1 == d2: gestrichelt(ln, m, 3.0, 6.0, 0.14)    # Leitlinie
+            else: gestrichelt(ln, m - 0.18, 1e9, 0, 0.09); gestrichelt(ln, m + 0.18, 1e9, 0, 0.09)   # doppelte durchgezogene Mittellinie
+        if k['typ'] == 'haupt' and gesamt >= 9:
+            for sgn in (1, -1): gestrichelt(ln, sgn * (gesamt / 2 - 0.5), 1e9, 0, 0.1)
+    # Überlappungszonen (Knoten, parallele OSM-Wege, Rampen): dort keine Markierung, sonst kreuzen sich Linien
+    baum_b = STRtree(baender); ueber = []
+    for i, bd in enumerate(baender):
+        for j in baum_b.query(bd):
+            j = int(j)
+            if j > i and not (set(band_knoten[i]) & set(band_knoten[j])) and baender[j].intersects(bd):
+                x = baender[j].intersection(bd)
+                if x.area > 25: ueber.append(x)
+    ueberlappung = vereinigt(ueber).buffer(1.0) if ueber else Polygon()
+    strassen = vereinigt(baender).intersection(gebiet).buffer(1.5, join_style=1).buffer(-1.5, join_style=1).simplify(0.25).buffer(0)
+    kreise = vereinigt([Point(knoten_pkt[n]).buffer(9) for n, g in grad.items() if g >= 3 and n in knoten_pkt])
+    mark = vereinigt(striche).difference(kreise).difference(ueberlappung).intersection(strassen.buffer(-0.2)) if striche else Polygon()
+    platz_fuss = vereinigt(fuss).difference(strassen).intersection(gebiet).simplify(0.3).buffer(0)
+    return strassen, strassen, {'markierung': [mark], 'fusszone': [platz_fuss], 'haltestelle': flaechen_art.get('haltestelle', [])}
 
 # ── Triangulierung
 FARBE = {'pflaster': 0, 'gehweg': 1, 'bord': 2, 'fahrbahn': 3, 'rad': 4, 'markierung': 5, 'gruen': 6, 'hof': 7, 'wasser': 8, 'platz': 9, 'parkplatz': 10, 'bahnsteig': 11, 'schotter': 12,
@@ -263,7 +313,7 @@ def parkplaetze(strassen_alle):
 
 def boden_variante(name, schichten):
     log(f'[{name}] Straßen …')
-    strassen, strassen_alle, zus = strassen_karte() if name == 'karte' else strassen_coffee()
+    strassen, strassen_alle, zus = strassen_karte_baender() if name == 'karte' else strassen_coffee()
     # Gehweg mit geschlossenen Zwickeln: schmale Restspalten (< 9 m) zwischen parallelen Straßen werden Gehweg statt Streifenmuster
     gehweg_aussen = strassen_alle.buffer(3.4 if name == 'karte' else 3.0, join_style=2).buffer(4.5, join_style=1).buffer(-4.5, join_style=1).simplify(0.3).buffer(0)
     bord = strassen_alle.buffer(0.4, join_style=2).difference(strassen_alle)
@@ -348,7 +398,7 @@ def boden_variante(name, schichten):
     for art, liste in zus.items():
         for g in liste:
             if g is None or g.is_empty: continue
-            if art == 'markierung' and (not fb_maske.contains(g) or GLEISBETT.intersects(g)): continue
+            if art == 'markierung': g = g.intersection(strassen_alle.buffer(-0.15)).difference(GLEISBETT).difference(_tramband)   # nur auf Fahrbahn, nie im Gleis
             if art != 'markierung': g = g.difference(GLEISBETT.difference(strassen.buffer(0.3)))   # nichts Straßiges auf Gleisen   # keine Markierung neben der Fahrbahn (z. B. auf weggelassenen Zufahrten)
             T(art, g.intersection(gebiet))
     garten = vereinigt([garten, pk_pflaster])
