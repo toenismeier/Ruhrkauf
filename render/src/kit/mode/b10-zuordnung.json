@@ -1,0 +1,41 @@
+{
+ "hinweis": "B10 (Wurf 4): Artikeltyp -> Silhouette für Typen, die auf main noch fehlen (Q39). Nach Merge des Q-Auftrags: bild.silhouette setzen, bildOffen entfernen.",
+ "typen": {
+  "Lederkleid": {
+   "silhouette": "b10lederkleid",
+   "auftrag": "Q39"
+  },
+  "Qipao": {
+   "silhouette": "b10qipao",
+   "auftrag": "Q39"
+  },
+  "Maxirock": {
+   "silhouette": "b10maxirock",
+   "auftrag": "Q39"
+  },
+  "Paillettenrock": {
+   "silhouette": "b10paillettenrock",
+   "auftrag": "Q39"
+  },
+  "Strickrock": {
+   "silhouette": "b10strickrock",
+   "auftrag": "Q39"
+  },
+  "Jeans-Midirock": {
+   "silhouette": "b10jeansmidirock",
+   "auftrag": "Q39"
+  },
+  "Ballonrock": {
+   "silhouette": "b10ballonrock",
+   "auftrag": "Q39"
+  },
+  "Häkelrock": {
+   "silhouette": "b10haekelrock",
+   "auftrag": "Q39"
+  },
+  "Stoffshorts": {
+   "silhouette": "b10stoffshorts",
+   "auftrag": "Q39"
+  }
+ }
+}
