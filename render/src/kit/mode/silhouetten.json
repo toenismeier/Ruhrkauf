@@ -6621,6 +6621,112 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b28earcuff": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b28": "b28earcuff"
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": null
+    },
+    "b28halfzipshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b28": "b28halfzipshirt",
+        "aermel": "lang",
+        "kragen": "troyer",
+        "passform": "tailliert"
+      },
+      "material": "jersey",
+      "farbe": "braun",
+      "model": "oberteil"
+    },
+    "b28keilsneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28keilsneaker",
+        "art": "sneaker"
+      },
+      "material": "leder",
+      "farbe": "olive",
+      "model": "schuhe"
+    },
+    "b28maryjanepumps": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28maryjanepumps",
+        "art": "pumps"
+      },
+      "material": "lack",
+      "farbe": "bordeaux",
+      "model": "schuhe"
+    },
+    "b28miniboot": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28miniboot",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "beige",
+      "model": "schuhe"
+    },
+    "b28oberarmreif": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b28": "b28oberarmreif"
+      },
+      "material": "metall",
+      "farbe": "gold",
+      "model": null
+    },
+    "b28plateaupumps": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28plateaupumps",
+        "art": "pumps"
+      },
+      "material": "lack",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "b28plateausandalette": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28plateausandalette",
+        "art": "sandale",
+        "farben": [
+          "natur"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "leder",
+      "farbe": "camel",
+      "model": "schuhe"
+    },
+    "b28tabisneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28tabisneaker",
+        "art": "sneaker"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "b28wallabee": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28wallabee",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "beige",
+      "model": "schuhe"
     }
   }
 }
