@@ -6669,9 +6669,11 @@
         "laenge": "crop",
         "rippbund": true,
         "farben": [
-          "sand"
+          "sand",
+          "anthrazit"
         ],
         "materialien": [
+          "baumwolle",
           "baumwolle"
         ]
       },
