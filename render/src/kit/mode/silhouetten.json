@@ -6620,6 +6620,116 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b17balaclava": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17balaclava",
+        "glatt": true,
+        "platz": "kopfganz"
+      },
+      "material": "strick",
+      "farbe": "ecru",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17baseballcap": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17baseballcap",
+        "platz": "kopf"
+      },
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": "zubehoer"
+    },
+    "b17dreieckstuch": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17dreieckstuch",
+        "glatt": true,
+        "platz": "hals"
+      },
+      "material": "strick",
+      "farbe": "braun",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17haarband": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17haarband",
+        "platz": "stirn"
+      },
+      "material": "baumwolle",
+      "farbe": "bordeaux",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17haarklammer": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17haarklammer",
+        "platz": "haar"
+      },
+      "material": "polyester",
+      "farbe": "braun",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17handyhuelle": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17handyhuelle",
+        "platz": "halten"
+      },
+      "material": "polyester",
+      "farbe": "weiß",
+      "model": "zubehoer"
+    },
+    "b17kettenguertel": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17kettenguertel",
+        "platz": "huefte"
+      },
+      "material": "metall",
+      "farbe": "gold",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17stirnband": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17stirnband",
+        "platz": "stirn"
+      },
+      "material": "strick",
+      "farbe": "hellgrau",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17taillenguertel": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17taillenguertel",
+        "platz": "taille"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17taschenanhaenger": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17taschenanhaenger",
+        "platz": "halten"
+      },
+      "material": "polyester",
+      "farbe": "braun",
+      "model": "zubehoer",
+      "nur": "damen"
     }
   }
 }
