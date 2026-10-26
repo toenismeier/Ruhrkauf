@@ -6621,6 +6621,159 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b03croptshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03croptshirt",
+        "aermel": "kurz",
+        "kragen": "v",
+        "laenge": "crop",
+        "passform": "oversize",
+        "farben": [
+          "bordeaux"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b03henleypullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03henleypullover",
+        "aermel": "lang",
+        "kragen": "rund",
+        "knopfleiste": true,
+        "passform": "gerade",
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "anthrazit",
+      "model": "oberteil"
+    },
+    "b03kurzarmstrickpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03kurzarmstrickpullover",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "gerade",
+        "rippbund": true,
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "grau",
+      "model": "oberteil"
+    },
+    "b03netzstrickpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03netzstrickpullover",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "oversize",
+        "rippbund": true,
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "offwhite",
+      "model": "oberteil"
+    },
+    "b03offshoulderpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03offshoulderpullover",
+        "aermel": "lang",
+        "kragen": "carree",
+        "passform": "oversize",
+        "rippbund": true,
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "ecru",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b03ringertshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03ringertshirt",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "gerade",
+        "farben": [
+          "rot"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "silber",
+      "model": "oberteil"
+    },
+    "b03strickhoodie": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03strickhoodie",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "passform": "gerade",
+        "laenge": "crop",
+        "rippbund": true,
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b03strickcape": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03strickcape",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "oversize",
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "braun",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b03strickpolo": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03strickpolo",
+        "aermel": "kurz",
+        "kragen": "polo",
+        "knopfleiste": true,
+        "passform": "gerade",
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "braun",
+      "model": "oberteil"
+    },
+    "b03vpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03vpullover",
+        "aermel": "lang",
+        "kragen": "v",
+        "passform": "oversize",
+        "rippbund": true,
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "sand",
+      "model": "oberteil"
     }
   }
 }
