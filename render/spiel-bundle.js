@@ -19000,7 +19000,7 @@
     for (const m of s2.meldungen.filter((m2) => ["insolvenz", "eigentuemer", "warnung"].includes(m2.typ)).slice(-12)) console.log(`  [W${m.woche} ${m.typ}] ${m.text}`);
   }
 
-  // node_modules/three/build/three.module.js
+  // ../../ruhrkauf/render/node_modules/three/build/three.module.js
   var three_module_exports = {};
   __export(three_module_exports, {
     ACESFilmicToneMapping: () => ACESFilmicToneMapping,
@@ -49641,7 +49641,7 @@
     }
   }
 
-  // node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
+  // ../../ruhrkauf/render/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
   function mergeGeometries(geometries, useGroups = false) {
     const isIndexed = geometries[0].index !== null;
     const attributesUsed = new Set(Object.keys(geometries[0].attributes));
@@ -51157,8 +51157,8 @@
     const A = new three_module_exports.Color(a2), B8 = new three_module_exports.Color(b4);
     return wurzelSumme(A.r - B8.r, A.g - B8.g, A.b - B8.b);
   }
-  function ausPalette(ctx, pal, gruppen, ton4 = {}) {
-    const liste3 = Object.entries(gruppen).filter(([g2]) => pal[g2]).map(([g2, w2]) => [g2, w2 * (ton4[g2] ?? 1)]);
+  function ausPalette(ctx, pal, gruppen, ton5 = {}) {
+    const liste3 = Object.entries(gruppen).filter(([g2]) => pal[g2]).map(([g2, w2]) => [g2, w2 * (ton5[g2] ?? 1)]);
     let f13;
     for (let i = 0; i < 10; i++) {
       f13 = waehle2(ctx.r, pal[wz(ctx.r, liste3)]);
@@ -140429,8 +140429,8 @@ void main() {
           if (k5 === n3 - 1) fb2(S, F3, c.u0, c.u1, y2 + gh - 0.22, y2 + gh, ti, tv, fa.panel[0]);
           continue;
         }
-        const ton4 = c.typ === "T" && fa.saniert && o4.treppeFarbig ? fa.akzent2 : fa.panel[hash3(ci, k5, o4.salz ?? 0) % fa.panel.length];
-        fb2(S, F3, c.u0 + j4 / 2, c.u1 - j4 / 2, y2 + j4 / 2, y2 + gh - j4 / 2, ti, tv, ton4);
+        const ton5 = c.typ === "T" && fa.saniert && o4.treppeFarbig ? fa.akzent2 : fa.panel[hash3(ci, k5, o4.salz ?? 0) % fa.panel.length];
+        fb2(S, F3, c.u0 + j4 / 2, c.u1 - j4 / 2, y2 + j4 / 2, y2 + gh - j4 / 2, ti, tv, ton5);
         const u = (c.u0 + c.u1) / 2;
         if (c.typ === "T") {
           if (k5 === 0 && o4.eingang !== false) {
@@ -140497,8 +140497,8 @@ void main() {
     const nc = Math.max(2, Math.round(L3 / 3)), b4 = (L3 + 0.15) / nc;
     fb2(S, F3, -0.15, L3, 0, y0, -0.3, 0.24, fa.sockel);
     for (let k5 = 0; k5 < n3; k5++) for (let i = 0; i < nc; i++) {
-      const ton4 = fa.panel[hash3(i + 31, k5, 5) % fa.panel.length];
-      fb2(S, F3, -0.15 + i * b4 + j4 / 2, -0.15 + (i + 1) * b4 - j4 / 2, y0 + k5 * gh + j4 / 2, y0 + (k5 + 1) * gh - j4 / 2, -0.3, 0.12, ton4);
+      const ton5 = fa.panel[hash3(i + 31, k5, 5) % fa.panel.length];
+      fb2(S, F3, -0.15 + i * b4 + j4 / 2, -0.15 + (i + 1) * b4 - j4 / 2, y0 + k5 * gh + j4 / 2, y0 + (k5 + 1) * gh - j4 / 2, -0.3, 0.12, ton5);
     }
     const fg = dunkler(fa.panel[0], fa.saniert ? 0.08 : 0.15);
     for (let k5 = 1; k5 < n3; k5++) fb2(S, F3, -0.15, L3, y0 + k5 * gh - 0.07, y0 + k5 * gh + 0.07, 0.12, 0.145, fg);
@@ -150798,7 +150798,7 @@ void main() {
     }
   });
 
-  // node_modules/three/examples/jsm/math/ConvexHull.js
+  // ../../ruhrkauf/render/node_modules/three/examples/jsm/math/ConvexHull.js
   var Visible = 0;
   var Deleted = 1;
   var _v12 = new Vector3();
@@ -151394,7 +151394,7 @@ void main() {
     }
   };
 
-  // node_modules/three/examples/jsm/geometries/ConvexGeometry.js
+  // ../../ruhrkauf/render/node_modules/three/examples/jsm/geometries/ConvexGeometry.js
   var ConvexGeometry = class extends BufferGeometry {
     constructor(points = []) {
       super();
@@ -161835,8 +161835,8 @@ void main() {
   var kopfbild = (abteilung2) => `<div class="hw-kopfbild" data-kopfbild="${esc(abteilung2)}" aria-hidden="true"></div>`;
   var rumpf2 = (html) => `<div class="hw-rumpf">${html}</div>`;
   var band = (html) => `<section class="hw-band">${html}</section>`;
-  function sprecher({ text: text3, unter = "", person: person3 = "", ton: ton4 = "" }) {
-    return `<div class="hw-sprecher"${ton4 ? ` data-ton="${esc(ton4)}"` : ""} role="note"><div class="hw-sprecher-text"><span>${text3}${unter ? `<small class="hw-sprecher-unter">${esc(unter)}</small>` : ""}</span></div>${person3 ? `<span class="hw-sprecher-figur" aria-hidden="true">${person3}</span>` : ""}<div class="hw-griff" aria-hidden="true"></div></div>`;
+  function sprecher({ text: text3, unter = "", person: person3 = "", ton: ton5 = "" }) {
+    return `<div class="hw-sprecher"${ton5 ? ` data-ton="${esc(ton5)}"` : ""} role="note"><div class="hw-sprecher-text"><span>${text3}${unter ? `<small class="hw-sprecher-unter">${esc(unter)}</small>` : ""}</span></div>${person3 ? `<span class="hw-sprecher-figur" aria-hidden="true">${person3}</span>` : ""}<div class="hw-griff" aria-hidden="true"></div></div>`;
   }
   var abschnitt = (titel, rechts = "") => `<h3 class="hw-abschnitt">${esc(titel)}${rechts ? `<small>${esc(rechts)}</small>` : ""}</h3>`;
   function abweichung(roh2, text3, quote = null, umgekehrt = false) {
@@ -161861,13 +161861,13 @@ void main() {
     return `<div class="hw-balkenfeld${mitNeg ? " mit-neg" : ""}"><div class="hw-balken" style="--hoehe:100px" role="img" aria-label="${esc(legende.join(" und "))}">${reihen.map(spalte).join("")}</div><div class="hw-balkenfuss">${reihen.map((r4) => `<span>${esc(r4.label)}</span>`).join("")}</div>` + (legende.length ? `<div class="hw-legende">${legende.map((l, i) => `<span><i class="${i ? "b" : ""}"></i>${esc(l)}</span>`).join("")}</div>` : "") + "</div>";
   }
   function tabelle({ titel = "", spalten: spalten2 = [], zeilen, summe: summe2 = null, pruefen: pruefen2 = false }) {
-    const zelle3 = (t5, roh2, ton4) => `<td class="${ton4 ?? ""}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${esc(t5)}</td>`;
+    const zelle3 = (t5, roh2, ton5) => `<td class="${ton5 ?? ""}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${esc(t5)}</td>`;
     const zeile3 = (z6, k5 = "") => `<tr${k5 ? ` class="${k5}"` : ""}><td>${esc(z6.name)}</td>${z6.werte.map((w2, i) => zelle3(w2, z6.roh?.[i], z6.ton?.[i])).join("")}</tr>`;
     return `<table class="hw-tabelle"${pruefen2 ? ' data-summen="1"' : ""}>${titel || spalten2.length ? `<thead><tr><th>${esc(titel)}</th>${spalten2.map((x2) => `<th>${esc(x2)}</th>`).join("")}</tr></thead>` : ""}<tbody>${zeilen.map((z6) => zeile3(z6)).join("")}${summe2 ? zeile3(summe2, "summe") : ""}</tbody></table>`;
   }
-  function zeile2({ was, unter = "", wert = "", wertUnter = "", ton: ton4 = "", attr = "", tippbar = false, roh: roh2 = null }) {
+  function zeile2({ was, unter = "", wert = "", wertUnter = "", ton: ton5 = "", attr = "", tippbar = false, roh: roh2 = null }) {
     const tag = tippbar ? "button" : "div";
-    return `<${tag} class="hw-zeile"${tippbar ? ' type="button"' : ""} ${attr}><span class="hw-was">${was}${unter ? `<small>${unter}</small>` : ""}</span>${wert !== "" ? `<span class="hw-wert ${ton4}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${wert}${wertUnter ? `<small>${wertUnter}</small>` : ""}</span>` : ""}${tippbar ? '<span class="hw-pfeil" aria-hidden="true">\u203A</span>' : ""}</${tag}>`;
+    return `<${tag} class="hw-zeile"${tippbar ? ' type="button"' : ""} ${attr}><span class="hw-was">${was}${unter ? `<small>${unter}</small>` : ""}</span>${wert !== "" ? `<span class="hw-wert ${ton5}"${roh2 != null ? ` data-w="${roh2}"` : ""}>${wert}${wertUnter ? `<small>${wertUnter}</small>` : ""}</span>` : ""}${tippbar ? '<span class="hw-pfeil" aria-hidden="true">\u203A</span>' : ""}</${tag}>`;
   }
   var liste = (zeilen) => `<div class="hw-liste">${zeilen.join("")}</div>`;
   var knopf = (text3, attr = "", art = "", aus = false) => `<button type="button" class="hw-knopf ${art}" ${attr}${aus ? " disabled" : ""}>${esc(text3)}</button>`;
@@ -161877,8 +161877,8 @@ void main() {
   var schalter = ({ text: text3, unter = "", an, attr = "" }) => `<button type="button" class="hw-schalterzeile" aria-pressed="${an ? "true" : "false"}" ${attr}><span class="hw-schalter hw-kontur" role="presentation" aria-checked="${an ? "true" : "false"}"></span><span>${esc(text3)}${unter ? `<small>${esc(unter)}</small>` : ""}</span></button>`;
   var seg = (optionen, aktiv7, attr) => `<div class="hw-segment" role="group">${optionen.map(([w2, t5]) => `<button type="button" aria-pressed="${w2 === aktiv7}" ${attr(w2)}>${esc(t5)}</button>`).join("")}</div>`;
   var leer3 = (grund3, titel = "", aktion2 = "", bild4 = "") => bild4 && ILLUSTRATIONEN[bild4] ? `<div class="hw-leer hw-leer-bild">${illustration(bild4, "hw-ill hw-leer-motiv")}${titel ? `<b>${esc(titel)}</b>` : ""}${esc(grund3)}${aktion2}</div>` : `<div class="hw-leer">${titel ? `<b>${esc(titel)}</b>` : ""}${esc(grund3)}${aktion2}</div>`;
-  var hinweis = (html, ton4 = "") => `<div class="hw-hinweis ${ton4}" role="${ton4 === "fehler" ? "alert" : "note"}">${html}</div>`;
-  var marke4 = (text3, ton4 = "") => `<span class="hw-status ${ton4}">${esc(text3)}</span>`;
+  var hinweis = (html, ton5 = "") => `<div class="hw-hinweis ${ton5}" role="${ton5 === "fehler" ? "alert" : "note"}">${html}</div>`;
+  var marke4 = (text3, ton5 = "") => `<span class="hw-status ${ton5}">${esc(text3)}</span>`;
   function skala(name2, wert) {
     const n3 = Math.max(0, Math.min(100, wert)) / 20;
     return `<div class="hw-faehigkeit"><span>${esc(name2)}</span><span class="hw-skala-balken" aria-hidden="true">${[0, 1, 2, 3, 4].map((i) => `<i style="--a:${Math.max(0, Math.min(1, n3 - i)).toFixed(2)}"></i>`).join("")}</span><b>${Math.round(wert)}</b></div>`;
@@ -162046,7 +162046,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "36712ee" : "Entwicklung";
+  var version = () => true ? "03696c9" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -162769,13 +162769,13 @@ void main() {
     const st2 = a2.gehaltFaktor ?? 1;
     const gName = geb?.name ?? wahl3?.gebaeude.name ?? "";
     const etText = wahl3 ? etageName2(wahl3.etage.nr) : "ohne Etage";
-    const ton4 = unterbesetzt(a2, a2.fte) || a2.moral < 65 || a2.fluktuation > 0.08 ? "engpass" : "";
+    const ton5 = unterbesetzt(a2, a2.fte) || a2.moral < 65 || a2.fluktuation > 0.08 ? "engpass" : "";
     let h4 = bereich("zentrale", "zentrale") + G4;
     h4 += sprecher({
       text: "<b>" + esc(spruch(a2, a2.fte, kap)) + "</b>",
       unter: (leitung3?.name ?? "Leitung unbesetzt") + " \xB7 " + (team?.name ?? "Bereichsleitung"),
       person: leitung3?.portraet ? portraetSVG(leitung3.portraet, 72) : "",
-      ton: ton4
+      ton: ton5
     });
     const bild4 = wahl3 && etagenBild2 ? etagenBild2(wahl3.gebaeude.id, wahl3.etage.nr) : null;
     if (bild4) h4 += kopfbild2(bild4, "Etagenschnitt " + gName + ", " + etText) + bildzeile(gName + " \xB7 " + etText);
@@ -162919,7 +162919,7 @@ void main() {
     const E9 = ctx.E, s2 = () => ctx.s();
     const da = typeof E9.vorstandUebersicht === "function";
     const ui = { aktiv: false, seite: "uebersicht", ressort: null, k: 0, angebot: null, entlassen: false, wahl: {} };
-    const kopf = (sprecherText, person3, unter, ton4 = "") => bereich("zentrale", "vorstand") + G4 + sprecher({ text: sprecherText, unter, person: person3 ? portraet(person3.portraet, 72) : "", ton: ton4 });
+    const kopf = (sprecherText, person3, unter, ton5 = "") => bereich("zentrale", "vorstand") + G4 + sprecher({ text: sprecherText, unter, person: person3 ? portraet(person3.portraet, 72) : "", ton: ton5 });
     const personBlock = (p2, P5, id, groesse2 = 104) => `<div class="hw-person"><div class="hw-portraet hw-kontur">${portraet(p2?.portraet ?? null, groesse2)}</div><div class="hw-person-daten"><h3 class="hw-person-name">${p2 ? P5(`${id}:name`, p2.name, "span") : "Platz frei"}</h3>` + (p2 ? `<span class="hw-marke">F\xE4higkeiten</span>${skala("F\xFChrung", p2.fuehrung)}${skala("Fachwissen", p2.fachwissen)}${skala("Loyalit\xE4t", p2.loyalitaet)}` : "") + "</div></div>";
     function uebersicht(P5) {
       const st2 = s2(), u = E9.vorstandUebersicht(st2);
@@ -163228,9 +163228,9 @@ void main() {
   function auswahl4(optionen, aktiv7, attr, label) {
     return `<select class="hw-g2-auswahl hw-kontur" ${attr} aria-label="${esc(label)}">${optionen.map(([w2, t5]) => `<option value="${esc(w2)}"${String(w2) === String(aktiv7 ?? "") ? " selected" : ""}>${esc(t5)}</option>`).join("")}</select>`;
   }
-  function vorstandSprecher(s2, ressort, rolle3, text3, ton4 = "") {
+  function vorstandSprecher(s2, ressort, rolle3, text3, ton5 = "") {
     const p2 = s2?.vorstand?.ressorts?.[ressort]?.person;
-    return sprecher({ text: text3, unter: p2 ? `${p2.name} \xB7 ${rolle3}` : `${rolle3} unbesetzt`, person: p2 ? portraet(p2.portraet, 72) : "", ton: ton4 });
+    return sprecher({ text: text3, unter: p2 ? `${p2.name} \xB7 ${rolle3}` : `${rolle3} unbesetzt`, person: p2 ? portraet(p2.portraet, 72) : "", ton: ton5 });
   }
   var G22 = '<i class="hw-g2" hidden></i>';
 
@@ -163342,7 +163342,7 @@ void main() {
   function passung(p2, p0) {
     return `<div class="hw-g1-skalen">${REGIONEN4.filter((r4) => p2[r4] !== void 0).map((r4) => skalaP(r4, p2[r4], p0 ? `${p0}:${r4}` : "")).join("")}</div>`;
   }
-  var befund = (text3, ton4 = "") => sprecher({ text: text3, unter: "Eigenmarken \xB7 Einkauf", ton: ton4 });
+  var befund = (text3, ton5 = "") => sprecher({ text: text3, unter: "Eigenmarken \xB7 Einkauf", ton: ton5 });
   function eigenmarkenSeite(ctx, ui, tabs) {
     if (ui.seite === "gruenden" && ui.em.assistent) return assistent(ctx, ui, tabs);
     ui.seite = "eigenmarken";
@@ -163642,7 +163642,7 @@ void main() {
     const w2 = ui.ware ?? (ui.ware = { von: d4.cluster[0]?.id ?? "", nach: d4.cluster[1]?.id ?? "", gruppe: "damen", wert: 5e4, pp: 10 });
     const cluster = d4.cluster.map((c) => [c.id, c.name]), gruppen = Object.entries(ctx.E.GRUPPEN).map(([id, x3]) => [id, x3.name]);
     const kopf = typeof tabs === "function" ? tabs() : tabs;
-    const sprecher2 = (text4, ton4 = "") => vorstandSprecher(s2, "cpo", "Einkaufsvorstand", text4, ton4);
+    const sprecher2 = (text4, ton5 = "") => vorstandSprecher(s2, "cpo", "Einkaufsvorstand", text4, ton5);
     if (ui.seite === "merchandise") {
       const summe2 = d4.plaene.reduce((a2, p2) => a2 + p2.budget, 0);
       const vorlagen = d4.vorlagen.length;
@@ -163808,7 +163808,7 @@ void main() {
       const reiter = REITER.map(([id, name2, sym3]) => [id, id === "freigaben" && n3 ? `${name2} ${n3}` : name2, sym3]);
       return G22 + reiterUnten(reiter, an, (id) => `data-a="seite" data-v="${id}"${id === "freigaben" ? ` aria-label="Freigaben, ${n3} offen"` : ""}`);
     }
-    const cpo = (text4, ton4 = "") => vorstandSprecher(s2(), "cpo", "Einkaufsvorstand", text4, ton4);
+    const cpo = (text4, ton5 = "") => vorstandSprecher(s2(), "cpo", "Einkaufsvorstand", text4, ton5);
     const prozentStepper = (feld2, wert, min, max, label) => stepper({ wert: `${wert} %`, label, attrMinus: `data-a="regelSchritt" data-f="${feld2}" data-v="-5"`, attrPlus: `data-a="regelSchritt" data-f="${feld2}" data-v="5"`, minusAus: wert <= min, plusAus: wert >= max });
     function sortiere(liste3) {
       const { key, dir } = ui.sort;
@@ -164751,7 +164751,7 @@ void main() {
     const spalten2 = [v2?.label, p2.label + (p2.laufend ? " bisher" : "")].filter(Boolean);
     const einheit = '<p class="hw-fin-einheit">Betr\xE4ge in Mio. \u20AC</p>';
     const zwei = (f13) => [v2, p2].filter(Boolean).map(f13);
-    const reihe2 = (name2, f13, ton4 = null) => ({ name: name2, werte: zwei((q3) => mio3(f13(q3))), roh: zwei((q3) => Math.round(f13(q3))), ...ton4 ? { ton: zwei((q3) => ton4(f13(q3))) } : {} });
+    const reihe2 = (name2, f13, ton5 = null) => ({ name: name2, werte: zwei((q3) => mio3(f13(q3))), roh: zwei((q3) => Math.round(f13(q3))), ...ton5 ? { ton: zwei((q3) => ton5(f13(q3))) } : {} });
     const vorz = (x2) => x2 < 0 ? "schlecht" : "";
     const tabelle3 = (titel, zeilen, summe2, mitKopf = false) => tabelle({ titel, spalten: mitKopf ? spalten2 : v2 ? ["", ""] : [""], zeilen, summe: summe2, pruefen: true });
     let gross3, saeulen, legende, tabellen, befund3;
@@ -165883,10 +165883,10 @@ void main() {
       rollout: null,
       crm: { seg: 0, kanal: "mail", angebot: "coupon", prozent: 0.15, mindestbon: 40, faktor: 3, wert: 10, frequenz: "monatlich", wochen: 13, kontrolle: true }
     };
-    function sprecher2(text3, ton4 = "") {
+    function sprecher2(text3, ton5 = "") {
       const r4 = E9.vorstandUebersicht?.(s2())?.ressorts?.find((x2) => x2.id === "cmo");
       const p2 = r4?.person;
-      return sprecher({ text: text3, ton: ton4, unter: p2 ? `${p2.name} \xB7 Marketingvorstand` : "Bereichsleitung Marketing", person: portraetSVG(p2?.portraet ?? zufallsMerkmale("bereich:marketing"), 72) });
+      return sprecher({ text: text3, ton: ton5, unter: p2 ? `${p2.name} \xB7 Marketingvorstand` : "Bereichsleitung Marketing", person: portraetSVG(p2?.portraet ?? zufallsMerkmale("bereich:marketing"), 72) });
     }
     function uebersicht(P5) {
       const u = E9.marketingUebersicht(s2());
@@ -167806,8 +167806,8 @@ void main() {
     handtuch(S, t5) {
       t5.push(schatten(50, 86, 38, 3));
       for (const [i, y2] of [[0, 62], [1, 45], [2, 28]]) {
-        const ton4 = [-0.06, 0, 0.06][i], x0 = 15 + i * 2, x1 = 85 - i * 2;
-        t5.push(flaeche5(S, glatt2([[x0, y2, E3], [x1, y2, E3], [x1 + 1.5, y2 + 7], [x1, y2 + 16, E3], [x0, y2 + 16, E3], [x0 - 1.5, y2 + 7]], true, 0.4), { ton: ton4 }));
+        const ton5 = [-0.06, 0, 0.06][i], x0 = 15 + i * 2, x1 = 85 - i * 2;
+        t5.push(flaeche5(S, glatt2([[x0, y2, E3], [x1, y2, E3], [x1 + 1.5, y2 + 7], [x1, y2 + 16, E3], [x0, y2 + 16, E3], [x0 - 1.5, y2 + 7]], true, 0.4), { ton: ton5 }));
         t5.push(linie2(`M${x0 + 2} ${y2 + 3} Q50 ${y2 + 1.6} ${x1 - 2} ${y2 + 3}`, hell3(S.c, 0.3), 0.8, 0.7));
         t5.push(`<rect x="${x0}" y="${y2 + 10}" width="${x1 - x0}" height="2.4" fill="${dunkel2(S.c, 0.2)}" opacity="0.6"/>`);
       }
@@ -167921,13 +167921,13 @@ void main() {
     },
     loafer(S, t5) {
       t5.push(schatten(52, 80, 40, 3));
-      const schuh5 = (dx, dy, k5, ton4) => {
+      const schuh5 = (dx, dy, k5, ton5) => {
         const g2 = [];
         const P5 = (pts) => pts.map(([x2, y2, e]) => [dx + x2 * k5, dy + y2 * k5, e]);
         g2.push(`<path d="${glatt2(P5([[10, 70, E3], [88, 69, E3], [92, 72], [88, 75, E3], [24, 75, E3], [24, 78, E3], [11, 78, E3]]), true, 0.3)}" fill="${dunkel2(S.c, 0.55)}"/>`);
         g2.push(`<path d="M${dx + 24 * k5} ${dy + 74.6 * k5} L${dx + 88 * k5} ${dy + 74.6 * k5}" stroke="${hell3(S.c, 0.25)}" stroke-width="0.5" opacity="0.5"/>`);
         const schaft = glatt2(P5([[11, 70, E3], [10, 56], [14, 49], [22, 47.6], [34, 50.6], [46, 51], [58, 48.6], [70, 50], [82, 55], [90, 62], [90, 68], [86, 70, E3]]), true, 0.4);
-        g2.push(flaeche5(S, schaft, { ton: ton4 }));
+        g2.push(flaeche5(S, schaft, { ton: ton5 }));
         g2.push(`<path d="${glatt2(P5([[14.5, 50], [22, 48.8], [34, 51.4], [44, 51.8], [34, 53.6], [22, 52.6]]), true, 0.4)}" fill="${dunkel2(S.c, 0.6)}"/>`);
         g2.push(`<path d="M${dx + 46 * k5} ${dy + 52.4 * k5} Q${dx + 60 * k5} ${dy + 49.4 * k5} ${dx + 74 * k5} ${dy + 52.6 * k5} Q${dx + 86 * k5} ${dy + 57 * k5} ${dx + 88.6 * k5} ${dy + 63 * k5}" stroke="${dunkel2(S.c, 0.35)}" stroke-width="${0.8 * k5}" fill="none"/>`);
         g2.push(`<path d="M${dx + 46.6 * k5} ${dy + 53.6 * k5} Q${dx + 60 * k5} ${dy + 50.8 * k5} ${dx + 73.6 * k5} ${dy + 54 * k5}" stroke="${hell3(S.c, 0.4)}" stroke-width="${0.45 * k5}" stroke-dasharray="${1 * k5} ${0.8 * k5}" fill="none" opacity="0.8"/>`);
@@ -168445,8 +168445,8 @@ void main() {
         bins[b4].push(pfad4(q3));
       }
     }
-    const ton4 = [["#fff", 0.13], ["#fff", 0.05], null, ["#000", 0.08], ["#000", 0.16], ["#000", 0.24]];
-    return { d: alle.join(""), stufen: bins.map((b4, i) => b4.length && ton4[i] ? [b4.join(""), ...ton4[i]] : null).filter(Boolean) };
+    const ton5 = [["#fff", 0.13], ["#fff", 0.05], null, ["#000", 0.08], ["#000", 0.16], ["#000", 0.24]];
+    return { d: alle.join(""), stufen: bins.map((b4, i) => b4.length && ton5[i] ? [b4.join(""), ...ton5[i]] : null).filter(Boolean) };
   }
   var laufend2 = 0;
   function koerper4(S, g2, o4 = {}) {
@@ -169852,12 +169852,12 @@ void main() {
     handschuhe(S, t5, p2) {
       t5.push(schatten2(50, 92, 34, 2.8));
       const hand = [[44, 92, E5], [42, 66], [40, 60], [33, 48], [30, 40], [32, 37], [36, 39], [42, 47], [43, 38], [43, 14], [46, 11], [49, 14], [50, 34], [51, 10], [54, 7.6], [57, 10], [57, 34], [58, 12], [61, 10], [64, 13], [63.4, 36], [65, 20], [68, 18.4], [70.6, 21], [69, 46], [67, 66], [66, 92, E5]];
-      const handschuh = (dx, dy, rot, ton4) => {
+      const handschuh = (dx, dy, rot, ton5) => {
         const g2 = [`<g transform="translate(${dx} ${dy}) rotate(${rot} 55 60)">`];
-        g2.push(flaeche5(S, glatt2(hand, true, 0.32), { ton: ton4 }));
+        g2.push(flaeche5(S, glatt2(hand, true, 0.32), { ton: ton5 }));
         for (const [x2, y2] of [[50.5, 34], [57.6, 34.6], [64, 37]]) g2.push(linie2(`M${x2} ${y2} L${f8(x2 + 0.2)} ${y2 + 6}`, dunkel2(S.c, 0.4), 0.7, 0.8));
         for (const x2 of [49, 55.5, 61.5]) g2.push(`<path d="M${x2} 48 L${x2 + 0.6} 64" stroke="${dunkel2(S.c, 0.35)}" stroke-width="0.6" stroke-dasharray="1 0.7" opacity="0.8"/>`);
-        g2.push(flaeche5(S, glatt2([[43.4, 72, E5], [66.6, 72, E5], [66, 92, E5], [44, 92, E5]], true, 0.2), { ton: ton4 - 0.06 }));
+        g2.push(flaeche5(S, glatt2([[43.4, 72, E5], [66.6, 72, E5], [66, 92, E5], [44, 92, E5]], true, 0.2), { ton: ton5 - 0.06 }));
         g2.push(linie2("M43.6 74.4 Q55 75.8 66.4 74.4", hell3(S.c, 0.3), 0.5, 0.8), linie2("M44 90 L66 90", dunkel2(S.c, 0.4), 0.8, 0.7));
         g2.push(linie2("M56 92 L56 84", dunkel2(S.c, 0.5), 0.8, 0.9));
         g2.push(`<path d="M47 22 Q48 30 47 40" stroke="#fff" stroke-width="1" opacity="${S.glanz ? 0.3 : 0.15}" fill="none"/>`);
@@ -170105,12 +170105,12 @@ void main() {
     socken(S, t5, p2) {
       t5.push(schatten3(54, 92, 34, 2.6));
       const kontrast3 = p2.kontrast ?? dunkel2(S.c, 0.25);
-      const socke = (dx, dy, ton4) => {
+      const socke = (dx, dy, ton5) => {
         const g2 = [`<g transform="translate(${dx} ${dy})">`];
         const form2 = [[22, 6, E6], [40, 6, E6], [41, 50], [46, 58], [74, 64], [80, 68], [80, 74], [74, 78], [40, 78], [30, 74], [24, 64], [22, 52]];
         const d4 = glatt2(form2, true, 0.4);
-        g2.push(flaeche5(S, d4, { ton: ton4 }));
-        g2.push(flaeche5(S, glatt2([[22, 6, E6], [40, 6, E6], [40.2, 16, E6], [21.8, 16, E6]], true, 0.2), { ton: ton4 - 0.08 }));
+        g2.push(flaeche5(S, d4, { ton: ton5 }));
+        g2.push(flaeche5(S, glatt2([[22, 6, E6], [40, 6, E6], [40.2, 16, E6], [21.8, 16, E6]], true, 0.2), { ton: ton5 - 0.08 }));
         for (let x2 = 24; x2 < 40; x2 += 2) g2.push(linie2(`M${x2} 7 L${x2} 15`, dunkel2(S.c, 0.3), 0.45, 0.6));
         g2.push(`<path d="M22.4 58 Q24 70 34 76 Q40 77.6 44 77.6 L42 64 Q32 64 28 54 Z" fill="${kontrast3}" opacity="0.92"/>`);
         g2.push(`<path d="M68 63 Q78 64 80 70 Q80 76 72 78 L64 78 Q66 70 68 63 Z" fill="${kontrast3}" opacity="0.92"/>`);
@@ -170329,8 +170329,8 @@ void main() {
     return t5.join("");
   }
   function glas2(S, d4, o4 = {}) {
-    const ton4 = o4.ton ?? "#dfeaee";
-    return [`<path d="${d4}" fill="${ton4}" opacity="${o4.deck ?? 0.42}"/>`, `<path d="${d4}" fill="${glanz(S)}"/>`, `<path d="${d4}" fill="none" stroke="${o4.kante ?? "#7f949c"}" stroke-width="0.55" opacity="0.75" stroke-linejoin="round"/>`].join("");
+    const ton5 = o4.ton ?? "#dfeaee";
+    return [`<path d="${d4}" fill="${ton5}" opacity="${o4.deck ?? 0.42}"/>`, `<path d="${d4}" fill="${glanz(S)}"/>`, `<path d="${d4}" fill="none" stroke="${o4.kante ?? "#7f949c"}" stroke-width="0.55" opacity="0.75" stroke-linejoin="round"/>`].join("");
   }
   function etikett(x2, y2, w2, h4, grund3 = "#f7f3ea", schrift2 = "#5a5048", o4 = {}) {
     const t5 = [`<rect x="${f10(x2)}" y="${f10(y2)}" width="${f10(w2)}" height="${f10(h4)}" rx="${o4.r ?? 0.8}" fill="${grund3}"/>`];
@@ -170374,12 +170374,12 @@ void main() {
     if (S.m !== "satin") return "";
     return `<path d="${d4}" fill="${muster3(S, "satinstreifen")}"/>`;
   }
-  function stapel2(S, t5, { x0, x1, y: y2, tief: tief2 = 10, hoch = 26, lagen = 3, ton: ton4 = 0, p: p2 = {}, weich = false }) {
+  function stapel2(S, t5, { x0, x1, y: y2, tief: tief2 = 10, hoch = 26, lagen = 3, ton: ton5 = 0, p: p2 = {}, weich = false }) {
     const w2 = (x2, y22, e) => [x2, y22, e];
     const top = glatt2([w2(x0 + 3, y2, E7), w2(x1 - 3, y2, E7), w2(x1, y2 + tief2, E7), w2(x0, y2 + tief2, E7)], true, 0.2);
     const yb = y2 + tief2 + hoch;
     const vorn = weich ? glatt2([w2(x0, y2 + tief2, E7), w2(x1, y2 + tief2, E7), [x1 + 1.2, y2 + tief2 + hoch * 0.5], w2(x1, yb - 1), [(x0 + x1) / 2, yb + 0.8], w2(x0, yb - 1), [x0 - 1.2, y2 + tief2 + hoch * 0.5]], true, 0.45) : glatt2([w2(x0, y2 + tief2, E7), w2(x1, y2 + tief2, E7), [x1 + 0.8, y2 + tief2 + hoch / 2], w2(x1, yb, E7), w2(x0, yb, E7), [x0 - 0.8, y2 + tief2 + hoch / 2]], true, 0.4);
-    t5.push(flaeche5(S, vorn, { ton: ton4 - 0.07 }), musterUeber(S, vorn, p2), satin(S, vorn, p2));
+    t5.push(flaeche5(S, vorn, { ton: ton5 - 0.07 }), musterUeber(S, vorn, p2), satin(S, vorn, p2));
     for (let i = 1; i < lagen; i++) {
       const yy = y2 + tief2 + hoch * i / lagen;
       const b4 = weich ? 1.6 : 1;
@@ -170387,7 +170387,7 @@ void main() {
       t5.push(`<path d="M${f10(x0 + 1)} ${f10(yy + 1)} Q${f10((x0 + x1) / 2)} ${f10(yy + b4 * 1.6 + 1)} ${f10(x1 - 1)} ${f10(yy + 1)}" stroke="${hell3(S.c, 0.35)}" stroke-width="0.6" fill="none" opacity="0.55"/>`);
     }
     t5.push(`<path d="M${f10(x1 - 0.4)} ${f10(y2 + tief2 + 1)} Q${f10(x1 + 1.4)} ${f10(y2 + tief2 + hoch / 2)} ${f10(x1 - 0.4)} ${f10(yb - 1)}" stroke="${dunkel2(S.c, 0.25)}" stroke-width="1.2" fill="none" opacity="0.4"/>`);
-    t5.push(flaeche5(S, top, { ton: ton4 + 0.08 }), musterUeber(S, top, p2), satin(S, top, p2));
+    t5.push(flaeche5(S, top, { ton: ton5 + 0.08 }), musterUeber(S, top, p2), satin(S, top, p2));
     if (weich) for (const [a2, b22] of [[0.3, 0.45], [0.62, 0.7]]) t5.push(linie2(`M${f10(x0 + (x1 - x0) * a2)} ${f10(y2 + 2)} q2 ${f10(tief2 * 0.4)} ${f10((x1 - x0) * (b22 - a2))} ${f10(tief2 * 0.5)}`, dunkel2(S.c, 0.2), 0.5, 0.5));
     return { top, vorn, yb };
   }
@@ -170894,7 +170894,7 @@ void main() {
     pflanze(S, t5) {
       t5.push(boden8(50, 90, 26, 2.6));
       const gruen = "#55704a";
-      const blatt = (x2, y2, w2, l, ton4) => `<g transform="rotate(${w2} ${x2} ${y2})"><path d="M${x2} ${y2} Q${x2 - l * 0.35} ${y2 - l * 0.5} ${x2} ${y2 - l} Q${x2 + l * 0.35} ${y2 - l * 0.5} ${x2} ${y2} Z" fill="${ton4}"/><path d="M${x2} ${y2} L${x2} ${y2 - l * 0.95}" stroke="${hell3(ton4, 0.3)}" stroke-width="0.5"/></g>`;
+      const blatt = (x2, y2, w2, l, ton5) => `<g transform="rotate(${w2} ${x2} ${y2})"><path d="M${x2} ${y2} Q${x2 - l * 0.35} ${y2 - l * 0.5} ${x2} ${y2 - l} Q${x2 + l * 0.35} ${y2 - l * 0.5} ${x2} ${y2} Z" fill="${ton5}"/><path d="M${x2} ${y2} L${x2} ${y2 - l * 0.95}" stroke="${hell3(ton5, 0.3)}" stroke-width="0.5"/></g>`;
       t5.push(linie2("M50 62 Q48 40 50 22", "#6b5a3c", 1.4), linie2("M50 50 Q38 40 32 30", "#6b5a3c", 1), linie2("M50 46 Q62 38 68 26", "#6b5a3c", 1));
       for (const [x2, y2, w2, l, k5] of [[50, 24, 0, 16, 0], [32, 32, -40, 16, 1], [68, 28, 38, 16, 2], [44, 44, -70, 17, 1], [56, 40, 70, 17, 0], [40, 58, -100, 15, 2], [60, 56, 100, 15, 1], [50, 36, -15, 14, 2], [30, 44, -60, 12, 0], [70, 42, 62, 12, 2]])
         t5.push(blatt(x2, y2, w2, l, [gruen, hell3(gruen, 0.12), dunkel2(gruen, 0.15)][k5]));
@@ -170922,14 +170922,14 @@ void main() {
     // Maß: Deckel 1/6 der Höhe, Kanten gerade, Schlaufe mittig.
     aufbewahrungsbox(S, t5) {
       t5.push(boden8(50, 88, 40, 3));
-      const box = (x0, x1, yb, h4, tief2, ton4) => {
+      const box = (x0, x1, yb, h4, tief2, ton5) => {
         const yt = yb - h4;
-        t5.push(flaeche5(S, `M${x0} ${yt} L${x1} ${yt} L${x1} ${yb} L${x0} ${yb} Z`, { ton: ton4 - 0.06 }));
-        t5.push(flaeche5(S, `M${x1} ${yt} L${x1 + tief2} ${yt - tief2 * 0.7} L${x1 + tief2} ${yb - tief2 * 0.7} L${x1} ${yb} Z`, { ton: ton4 - 0.2 }));
+        t5.push(flaeche5(S, `M${x0} ${yt} L${x1} ${yt} L${x1} ${yb} L${x0} ${yb} Z`, { ton: ton5 - 0.06 }));
+        t5.push(flaeche5(S, `M${x1} ${yt} L${x1 + tief2} ${yt - tief2 * 0.7} L${x1 + tief2} ${yb - tief2 * 0.7} L${x1} ${yb} Z`, { ton: ton5 - 0.2 }));
         const dh = h4 / 5;
-        t5.push(flaeche5(S, `M${x0 - 1} ${yt - 1} L${x1 + 1} ${yt - 1} L${x1 + 1} ${yt + dh} L${x0 - 1} ${yt + dh} Z`, { ton: ton4 + 0.02 }));
-        t5.push(flaeche5(S, `M${x1 + 1} ${yt - 1} L${x1 + 1 + tief2} ${yt - 1 - tief2 * 0.7} L${x1 + 1 + tief2} ${yt + dh - tief2 * 0.7} L${x1 + 1} ${yt + dh} Z`, { ton: ton4 - 0.14 }));
-        t5.push(flaeche5(S, `M${x0 - 1} ${yt - 1} L${x1 + 1} ${yt - 1} L${x1 + 1 + tief2} ${yt - 1 - tief2 * 0.7} L${x0 - 1 + tief2} ${yt - 1 - tief2 * 0.7} Z`, { ton: ton4 + 0.12 }));
+        t5.push(flaeche5(S, `M${x0 - 1} ${yt - 1} L${x1 + 1} ${yt - 1} L${x1 + 1} ${yt + dh} L${x0 - 1} ${yt + dh} Z`, { ton: ton5 + 0.02 }));
+        t5.push(flaeche5(S, `M${x1 + 1} ${yt - 1} L${x1 + 1 + tief2} ${yt - 1 - tief2 * 0.7} L${x1 + 1 + tief2} ${yt + dh - tief2 * 0.7} L${x1 + 1} ${yt + dh} Z`, { ton: ton5 - 0.14 }));
+        t5.push(flaeche5(S, `M${x0 - 1} ${yt - 1} L${x1 + 1} ${yt - 1} L${x1 + 1 + tief2} ${yt - 1 - tief2 * 0.7} L${x0 - 1 + tief2} ${yt - 1 - tief2 * 0.7} Z`, { ton: ton5 + 0.12 }));
         const mx = (x0 + x1) / 2;
         t5.push(`<path d="M${mx - 4} ${yt + dh} Q${mx} ${yt + dh + 5} ${mx + 4} ${yt + dh}" stroke="#7a4a2e" stroke-width="1.6" fill="none"/><circle cx="${mx - 4}" cy="${yt + dh - 0.6}" r="0.7" fill="${MESSING2}"/><circle cx="${mx + 4}" cy="${yt + dh - 0.6}" r="0.7" fill="${MESSING2}"/>`);
       };
@@ -171112,9 +171112,9 @@ void main() {
     // Maß: Flasche Breite : Höhe 0,6 : 1, Kappe 0,45 Flaschenhöhe, Schwamm 0,45 Flaschenhöhe.
     foundation(S, t5) {
       t5.push(boden8(48, 88, 42, 2.6));
-      const flasche = (x2, yb, w2, h4, ton4) => {
+      const flasche = (x2, yb, w2, h4, ton5) => {
         const yt = yb - h4;
-        t5.push(`<path d="M${x2 + 2} ${yt + 4} L${x2 + w2 - 2} ${yt + 4} L${x2 + w2 - 2} ${yb - 2} L${x2 + 2} ${yb - 2} Z" fill="${ton4}"/><path d="M${x2 + 2} ${yt + 4} L${x2 + w2 - 2} ${yt + 4} L${x2 + w2 - 2} ${yb - 2} L${x2 + 2} ${yb - 2} Z" fill="${rund2(S)}"/>`);
+        t5.push(`<path d="M${x2 + 2} ${yt + 4} L${x2 + w2 - 2} ${yt + 4} L${x2 + w2 - 2} ${yb - 2} L${x2 + 2} ${yb - 2} Z" fill="${ton5}"/><path d="M${x2 + 2} ${yt + 4} L${x2 + w2 - 2} ${yt + 4} L${x2 + w2 - 2} ${yb - 2} L${x2 + 2} ${yb - 2} Z" fill="${rund2(S)}"/>`);
         t5.push(glas2(S, `M${x2} ${yt} L${x2 + w2} ${yt} L${x2 + w2} ${yb} L${x2} ${yb} Z`, { deck: 0.08 }));
         t5.push(`<rect x="${x2}" y="${yb - 5}" width="${w2}" height="5" fill="#fff" opacity="0.3"/>`);
         t5.push(form(S, rr(x2 + w2 * 0.22, yt - 4, w2 * 0.56, 4, 0.4), GOLD3, { licht: "metall" }), form(S, rr(x2 + w2 * 0.16, yt - h4 * 0.42 - 4, w2 * 0.68, h4 * 0.42, 1), SCHWARZ2, { licht: "rund" }));
@@ -171300,7 +171300,7 @@ void main() {
       t5.push(boden8(50, 90, 34, 3));
       const id = "fl" + Math.random().toString(36).slice(2, 6);
       S.defs.push(`<pattern id="${id}" width="2.4" height="2.4" patternUnits="userSpaceOnUse"><path d="M0.4 1.8 q0.6 -1.2 1.2 -0.2" stroke="#fff" stroke-opacity="0.22" stroke-width="0.5" fill="none"/><path d="M1.4 0.8 q0.6 -1 1 0" stroke="#000" stroke-opacity="0.12" stroke-width="0.5" fill="none"/></pattern>`);
-      const P5 = (d4, ton4 = 0) => [`<path d="${d4}" fill="${ton4 ? ton4 > 0 ? hell3(S.c, ton4) : dunkel2(S.c, -ton4) : S.c}"/>`, `<path d="${d4}" fill="url(#${id})"/>`, `<path d="${d4}" fill="${rund2(S)}" opacity="0.7"/>`, `<path d="${d4}" fill="none" stroke="${dunkel2(S.c, 0.35)}" stroke-width="0.5" opacity="0.5"/>`].join("");
+      const P5 = (d4, ton5 = 0) => [`<path d="${d4}" fill="${ton5 ? ton5 > 0 ? hell3(S.c, ton5) : dunkel2(S.c, -ton5) : S.c}"/>`, `<path d="${d4}" fill="url(#${id})"/>`, `<path d="${d4}" fill="${rund2(S)}" opacity="0.7"/>`, `<path d="${d4}" fill="none" stroke="${dunkel2(S.c, 0.35)}" stroke-width="0.5" opacity="0.5"/>`].join("");
       const ell4 = (cx, cy, rx, ry) => `M${cx - rx} ${cy} A${rx} ${ry} 0 1 0 ${cx + rx} ${cy} A${rx} ${ry} 0 1 0 ${cx - rx} ${cy} Z`;
       t5.push(P5(ell4(50, 64, 21, 22)));
       t5.push(`<path d="${ell4(50, 68, 11, 13)}" fill="${hell3(S.c, 0.3)}" opacity="0.8"/>`);
@@ -172591,9 +172591,9 @@ void main() {
     // Topflappen (Paar): 20 × 20 gesteppt, Einfassband, Aufhängeschlaufe
     topflappen(S, t5, p2) {
       t5.push(boden8(50, 88, 38, 2.6));
-      const lappen = (x2, y2, w2, rot, ton4) => {
+      const lappen = (x2, y2, w2, rot, ton5) => {
         const d4 = `M${x2} ${y2} h${w2} v${w2} h${-w2} Z`;
-        const g2 = [`<g transform="rotate(${rot} ${x2 + w2 / 2} ${y2 + w2 / 2})">`, flaeche5(S, d4, { ton: ton4 })];
+        const g2 = [`<g transform="rotate(${rot} ${x2 + w2 / 2} ${y2 + w2 / 2})">`, flaeche5(S, d4, { ton: ton5 })];
         for (let i = 1; i < 5; i++) {
           g2.push(linie2(`M${x2 + w2 * i / 5} ${y2 + 1} L${x2 + w2 * i / 5} ${y2 + w2 - 1}`, dunkel2(S.c, 0.25), 0.5, 0.6), linie2(`M${x2 + 1} ${y2 + w2 * i / 5} L${x2 + w2 - 1} ${y2 + w2 * i / 5}`, dunkel2(S.c, 0.25), 0.5, 0.6));
         }
@@ -172986,6 +172986,58 @@ void main() {
   var SILHOUETTEN6 = { "b01lowrisejeans": { "gruppe": "unterteil", "zeichner": "z:b01", "p": { "b01": "b01lowrisejeans", "passform": "weit", "leibhoehe": "tief" }, "material": "denim", "farbe": "jeansblau", "model": "hose" }, "b01ballonjeans": { "gruppe": "unterteil", "zeichner": "z:b01", "p": { "b01": "b01ballonjeans", "passform": "baggy", "leibhoehe": "hoch" }, "material": "denim", "farbe": "hellblau", "model": "hose" }, "b01caprihose": { "gruppe": "unterteil", "zeichner": "z:b01", "p": { "b01": "b01caprihose", "passform": "gerade", "laenge": "cropped", "feinstreifen": true }, "material": "wolle", "farbe": "braun", "model": "hose" }, "b01hotpants": { "gruppe": "unterteil", "zeichner": "z:b01", "p": { "b01": "b01hotpants", "passform": "gerade", "laenge": "kurz", "leibhoehe": "tief" }, "material": "baumwolle", "farbe": "braun", "model": "hose" }, "b01midirock": { "gruppe": "rock", "zeichner": "z:b01", "p": { "b01": "b01midirock", "laenge": "midi", "form": "glocke" }, "material": "baumwolle", "farbe": "schwarz", "model": "rock", "nur": "damen" }, "b01babytee": { "gruppe": "oberteil", "zeichner": "z:b01", "p": { "b01": "b01babytee", "aermel": "kurz", "kragen": "rund", "passform": "tailliert", "laenge": "crop" }, "material": "baumwolle", "farbe": "grau", "model": "oberteil", "nur": "damen" }, "b01strickpullover": { "gruppe": "oberteil", "zeichner": "z:b01", "p": { "b01": "b01strickpullover", "aermel": "lang", "kragen": "polo", "passform": "oversize", "rippbund": true, "strick": true, "farben": ["khaki", "wei\xDF"], "materialien": ["strick", "strick"] }, "material": "strick", "farbe": "anthrazit", "model": "oberteil" }, "b01blouson": { "gruppe": "jacke", "zeichner": "z:b01", "p": { "b01": "b01blouson", "art": "bomber" }, "material": "lack", "farbe": "schwarz", "model": "jacke" }, "b01maryjane": { "gruppe": "schuhe", "zeichner": "z:b01", "p": { "b01": "b01maryjane", "art": "ballerina", "farben": ["schwarz"], "materialien": ["leder"] }, "material": "lack", "farbe": "rot", "model": "schuhe" }, "b01baguette": { "gruppe": "tasche", "zeichner": "z:b01", "p": { "b01": "b01baguette" }, "material": "lack", "farbe": "bordeaux", "model": "tasche" } };
   var ZEICHNER7 = { b01: b01Zeichner };
 
+  // src/kit/mode/b30-bilder.js
+  var B30_DATEN = { "b30buegelloserbh": { "kontur": "M13.4 8.5c1.3 1 1.3 2.4 1.5 4l.3 3.6l.1 1.4l.1 1.4l.3 3.2l.3 4.7l.2 4.1l.4 5.8c.3 3.7 .3 3.7 .7 4.6h.4l.5 .7c1.5 2.1 4.1 3.5 6.6 4.3l.6 .3l1.3 .4l1.5 .6l3.2 1.1l.6 .2l5.4 1.5l.4 .1c6.8 1.7 13.6 2.2 20.6 .8l.6-.1c2.2-.4 4.3-.9 6.4-1.5l2.6-.7c8.7-2.3 8.7-2.3 11.6-4.2c.5-.3 .5-.3 .8-.3v-.4l1.2-.9l1.1-1.5h.3l.4-.8l.2-.1l.2-1.4l.1-.9l.1-.5c.3-2.8 .7-5.5 1.2-8.3l.4-2.3c.7-4.8 .7-4.8 1.1-6.5l.5-3.3l.1-.7l.6-3.2l.6-3.6l.1-.6c.2-.5 .2-.5 .9-1c1-.3 1.8-.2 2.8 .1c.8 .6 1 1.1 1.3 2c.5 3.1 .6 6 .6 9.1v.6c0 5.4-.3 10.7-.8 16l-.1 1.6v.7c0 .5 0 .5 .3 1.2v1.1l-.1 .5l-.4 1.2l-.2 1.6l-.1 .9l-.1 .9l-.2 1.9l-.1 .8l-.2 1.4c-.1 .6 .1 1 .3 1.7c1.1 3.3 1 6.8 1 10.3v.5c0 3-.2 5.8-.9 8.7c-1 4.6-1 9.6-1.1 14.4c-.1 4.3-.1 4.3-.8 5.3c-3 2-8.8 1.2-12.2 1.2h-13.8l-2.8-.1l-3.9-.1h-11.5l-20.2-.1h-.7c-12.5-.2-12.5-.2-14.6-1.9c-1.2-1.8-.8-4.8-.8-6.8c-.1-5.7-.3-11.5-1.9-17c-.2-.8-.4-1.5-.4-2.3v-2.3c-.1-1.2-.3-2.2-1-3.2c-.8-1.2-1-2.6-.9-4.1c.2-.9 .4-1.7 1-2.4c.9-1.9 .3-4.7 .1-6.7v-.8l-.4-3.3c-.1-.9-.1-.9 .2-1.6l.1-1.1v-4.5c.2-21.1 .2-21.1 3.3-25c.8-.6 2.1-.8 3.1-.4z", "boden": 92, "breite": 88, "regionen": [["t", 0, 0, "M13.4 8.5c1.3 1 1.3 2.4 1.5 4l.3 3.6l.1 1.4l.1 1.4l.3 3.2l.3 4.7l.2 4.1l.4 5.8c.3 3.7 .3 3.7 .7 4.6h.4l.5 .7c1.5 2.1 4.1 3.5 6.6 4.3l.6 .3l1.3 .4l1.5 .6l3.2 1.1l.6 .2l5.4 1.5l.4 .1c6.8 1.7 13.6 2.2 20.6 .8l.6-.1c2.2-.4 4.3-.9 6.4-1.5l2.6-.7c8.7-2.3 8.7-2.3 11.6-4.2c.5-.3 .5-.3 .8-.3v-.4l1.2-.9l1.1-1.5h.3l.4-.8l.2-.1l.2-1.4l.1-.9l.1-.5c.3-2.8 .7-5.5 1.2-8.3l.4-2.3c.7-4.8 .7-4.8 1.1-6.5l.5-3.3l.1-.7l.6-3.2l.6-3.6l.1-.6c.2-.5 .2-.5 .9-1c1-.3 1.8-.2 2.8 .1c.8 .6 1 1.1 1.3 2c.5 3.1 .6 6 .6 9.1v.6c0 5.4-.3 10.7-.8 16l-.1 1.6v.7c0 .5 0 .5 .3 1.2v1.1l-.1 .5l-.4 1.2l-.2 1.6l-.1 .9l-.1 .9l-.2 1.9l-.1 .8l-.2 1.4c-.1 .6 .1 1 .3 1.7c1.1 3.3 1 6.8 1 10.3v.5c0 3-.2 5.8-.9 8.7c-1 4.6-1 9.6-1.1 14.4c-.1 4.3-.1 4.3-.8 5.3c-3 2-8.8 1.2-12.2 1.2h-11.5c-1.9 0-3.9 0-5.9-.2h-3.8l-8.8-.1h-8c-26.4 .6-26.4 .6-29.5-1.9c-1.2-1.8-.8-4.8-.8-6.8c-.1-5.7-.3-11.5-1.9-17c-.2-.8-.4-1.5-.4-2.3v-2.3c-.1-1.2-.3-2.2-1-3.2c-.8-1.2-1-2.6-.9-4.1c.2-.9 .4-1.7 1-2.4c.9-1.9 .3-4.7 .1-6.7v-.8l-.4-3.3c-.1-.9-.1-.9 .2-1.6l.1-1.1v-4.5c.2-21.1 .2-21.1 3.3-25c.8-.6 2.1-.8 3.1-.4z"], ["k", "M13.4 8.5c1.3 1 1.3 2.4 1.5 4l.3 3.6l.1 1.4l.1 1.4l.3 3.2l.3 4.7l.2 4.1l.4 5.8c.3 3.7 .3 3.7 .7 4.6h.4l.5 .7c1.5 2.1 4.1 3.5 6.6 4.3l.6 .3l1.3 .4l1.5 .6l3.2 1.1l.6 .2l5.4 1.5l.4 .1c6.8 1.7 13.6 2.2 20.6 .8l.6-.1c2.2-.4 4.3-.9 6.4-1.5l2.6-.7c8.7-2.3 8.7-2.3 11.6-4.2c.5-.3 .5-.3 .8-.3v-.4l1.2-.9l1.1-1.5h.3l.4-.8l.2-.1l.2-1.4l.1-.9l.1-.5c.3-2.8 .7-5.5 1.2-8.3l.4-2.3c.7-4.8 .7-4.8 1.1-6.5l.5-3.3l.1-.7l.6-3.2l.6-3.6l.1-.6c.2-.5 .2-.5 .9-1c1-.3 1.8-.2 2.8 .1c.8 .6 1 1.1 1.3 2c.5 3.1 .6 6 .6 9.1v.6c0 5.4-.3 10.7-.8 16l-.1 1.6v.7c0 .5 0 .5 .3 1.2v1.1l-.1 .5l-.4 1.2l-.2 1.6l-.1 .9l-.1 .9l-.2 1.9l-.1 .8l-.2 1.4c-.1 .6 .1 1 .3 1.7c1.1 3.3 1 6.8 1 10.3v.5c0 3-.2 5.8-.9 8.7c-1 4.6-1 9.6-1.1 14.4c-.1 4.3-.1 4.3-.8 5.3c-3 2-8.8 1.2-12.2 1.2h-11.5c-1.9 0-3.9 0-5.9-.2h-3.8l-8.8-.1h-8c-26.4 .6-26.4 .6-29.5-1.9c-1.2-1.8-.8-4.8-.8-6.8c-.1-5.7-.3-11.5-1.9-17c-.2-.8-.4-1.5-.4-2.3v-2.3c-.1-1.2-.3-2.2-1-3.2c-.8-1.2-1-2.6-.9-4.1c.2-.9 .4-1.7 1-2.4c.9-1.9 .3-4.7 .1-6.7v-.8l-.4-3.3c-.1-.9-.1-.9 .2-1.6l.1-1.1v-4.5c.2-21.1 .2-21.1 3.3-25c.8-.6 2.1-.8 3.1-.4zM13.3 42c-.2 .4-.2 .4-.2 1.2l.3-.2l.5-.1l.5-.2l1.1-.1l-.5 .2l-.7 .2l-.6 .3c-1.2 .5-1.7 1.1-2.3 2.3l-.4 .7l-.4 .8l-.5 1l-1.6 2.8l-.6 1.2c-.8 1.5-1.1 2.8-.8 4.4l1 2c.7 1.3 .7 2.5 .8 4c0 1.5 .2 2.8 .6 4.3c.8 2.8 1.1 5.8 1.5 8.7l.4 2.4l.4 3.4l.6 4.9l.1 .5c.2 1.2 .2 1.2 .4 1.4l4.3-.5l.6-.1c4.6-.7 9.1-1.5 13.6-2.4c12.2-2.5 24.3-3.2 36.4-.3c2.2 .6 4.4 1 6.7 1.5l.6 .1l5.9 1.2l4.6 .9l1.3 .3l.5 .1l1 .1l.7-5.4l.5-4.9l.3-1.9c.3-2.9 .7-5.9 1.3-8.8c1.7-8 1.3-14.6-2.2-22l-.2-.5c-.5-1-1-1.6-2.1-2c-2.5-.7-2.5-.7-3.5-.5l-1.2 1.2c-2.3 2.4-5.8 3.4-8.8 4.3l-.8 .3l-6.4 1.7l-1.7 .5c-2.5 .7-5.1 1.3-7.7 1.7l-.6 .1c-5.9 .9-11.9 .3-17.7-1.1l-.9-.2l-2.6-.7l-.7-.2c-14-4-14-4-18.1-9.5c-1 0-1.9 .3-2.7 .9z"], ["t", 0, -0.2, "M45.5 84l.2 2.2v1.8c0 .5 0 .5-.3 1.2c-.6 .2-1.1 .1-1.6 .2h-1.9c-2.9 .2-5.7 .2-8.6 .2h-2.2c-3.8 0-7.6-.1-11.3-.4h-.7c-1.4-.1-1.4-.1-1.8-.5l4.9-1c1.9-.2 3.9-.6 5.8-1l10.1-1.9l.6-.2c2.3-.4 4.5-.7 6.8-.6z"], ["t", 0, -0.2, "M56.9 84c3.9 .4 7.8 1 11.7 1.9l2.6 .6l2.9 .6l3.8 .7l5.5 1.2v.2c-.7 .2-1.5 .2-2.3 .2l-.8 .1h-.8c-2 0-3.9 .1-5.9 .4c-2.7 .2-5.5 0-8.2-.2l-1.9-.1l-1.2-.1l-5.2-.3c-.8-4.1-.8-4.1-.2-5.2z"], ["t", 0, -0.2, "M91.4 64.9h.2l-.6 4.8l-.1 .6c-.3 1.3-.7 2.2-1.4 3.3h-.3l-.4 .8l-.2 .3h-.4v.4c-3.6 3.1-7.8 3.6-12.4 3.3c-2-.2-3.9-.8-5.7-1.4l-.7-.3c-4.1-1.3-4.1-1.3-5.3-2.5l2.3 .5c3.3 .9 6.4 1.2 9.7 1.2h.9c2.7 0 5-.4 7.3-1.5l.8-.2v-.4l1.1-.7c1.7-1.5 2.8-3.7 3.6-5.7c.4-.9 .9-1.8 1.6-2.5z"], ["t", 1, 0, "M89.9 9.6h1.9c.2 1 0 1.9-.3 2.9l-1.5 8.4l-.1 .6l-.7 4.6c-.8 4.9-1.7 9.8-2.8 14.7c-1.3-.2-1.3-.2-1.5-.4c0-2 .2-3.9 .6-5.8l.5-3.5l1.1-6.7l.9-5.4l.5-2.9l.3-1.9l.2-.7l.2-1.4l.1-.7l.1-.6l.5-1.2z"], ["t", 0, -0.2, "M9.9 67.5c.6 .5 1 1 1.3 1.7l.3 .5c.3 .4 .3 .4 .3 .8h.3l.4 .5c2.1 2.8 5.5 4.2 8.9 4.8l3.5 .1h.8c3.3 0 6.3-.5 9.4-1.3l1.7-.4c-.6 .6-1.3 .9-2.1 1.3l-.5 .1l-1.3 .6l-.6 .3l-3.8 1.4l-.7 .2c-1.5 .4-3 .4-4.5 .4h-.6c-1.3 0-2.5-.1-3.7-.4l-.7-.2c-1.6-.4-2.9-1-4.3-1.9l-.6-.3l-.3-.2v-.4l-.4-.1c-.8-.4-1.4-.8-1.9-1.6c-.3-.8-.4-1.7-.5-2.6l-.3-1.1l-.1-2.2z"], ["t", 1, 0, "M12.2 9.5l.9 .1c.5 .8 .5 1.6 .6 2.6l.1 .7c.5 5.1 .8 10.3 1.1 15.5l.4 6.1c.2 2 .2 3.9 .2 5.9l-1.5 .4c-.4-.9-.5-1.8-.5-2.7l-.1-.9l-.1-1l-.1-1.9v-.4l-.3-3.5l-.5-6.8c-.5-9.3-.5-9.3-1.1-13.3l-.1-.6l1-.2z"], ["t", 0, -0.3, "M57.1 89.2l8.3 .3c3.3 .2 6.5 .4 9.9 0c1.5-.2 2.9-.2 4.4-.2l1.6-.1c2.4-.1 4.6 .1 6.9 .8l.4 .3c-4.5 1.3-9.5 .8-14.1 .8h-1.6c-5.2 0-10.4 0-15.7-.2l-.1-1.7z"], ["t", 0, -0.3, "M45.5 88.5h.2l-.2 2.2l-10.6 .2h-.8l-11.5-.2h-.6c-8.1-.3-8.1-.3-9.7-1.3c1.4-.5 4-1.3 5.4-.6l2.1 .2l.5 .1c3.8 .3 7.7 .3 11.5 .3h2.2c3.8 0 7.6 0 11.4-.4l.1-.5z"], ["t", 1, -0.3, "M92.5 16.3l.4 .1c.2 .8 .2 1.5 .2 2.2v2.3l-.5 11v.6l-.1 1.6l-.1 .5c0 1-.1 1.9-.3 2.8h-.1l-.1-3v-.9c0-2.4 0-2.4 .2-3.3l.2-4v-2.9h-.3l-.1 .6l-.5 2c-.6-.6-.4-1.3-.4-2.1v-1.4c0-3.8 0-3.8 .6-5.4l.9-.7z"], ["t", 0, -0.2, "M52.2 83.8h1.7c.6 0 .6 0 .9 .4l.1 1.3l.4 3.7l.1 1.7h-2.6c-.6-1.7-.6-3.4-.6-5.2v-1.9z"], ["t", 0, -0.6, "M12.7 35.4c.3 1.4 .5 2.8 .5 4.2l.1 .6c.1 1.3-.3 2-1.1 3.1c-.3 .4-.3 .4-.4 1l-.8-.2l.2-.4l.4-1.6h-1v-6.5c1.3-.4 1.3-.4 2.1-.2z"], ["t", 1, -0.2, "M92 23.3h.3v5.2l-.1 2.1l-.1 2.4v.5l-.1 1.6v3.8l-1.5-.4c-.1-2.1 0-4.2 .2-6.3l.1-1.6l.1-1v-.5c.3-3.2 .3-3.2 .7-4.5l.2-.7l.2-.6z"], ["t", 1, 0, "M9 24.4h.2l.2 5c.1 1.5 .1 3.1 .3 4.6c.2 1.5 .2 3 .2 4.5c-.6 .3-1 .4-1.7 .4c-.2-1.7-.2-3.4-.1-5v-1.5l.1-2.5v-.9l.1-1.5v-.8c.1-.8 .4-1.5 .7-2.3z"], ["t", 0, -0.2, "M47.4 83.8h2.2c.2 .9 .2 1.7 .2 2.5v4.4c-.9 .2-1.7 .2-2.6 .2l.1-.6l.1-3.8v-2.7z"], ["t", 1, -0.6, "M11.4 25.2c.5 .5 .5 .5 .6 1.2l-.1 .6l.2 .2l.3 3l.1 .8l.2 4.4l-2.1 .2c0-3.5 0-6.9 .2-10.2l.6-.2z"], ["t", 0, 0, "M91.4 69.2h.2l-.4 4c-.5 3.2-.6 6.5-.7 9.7l-.1 2.2v.5l-.3 3.8c-1.1-.2-1.1-.2-1.3-.4c-.1-1.6 .1-3.1 .3-4.6l.4-3.8c.3-3.7 .7-7.9 1.9-11.4z"], ["t", 1, -0.6, "M89.7 28.1l.6 .2l-.2 5.2v.7l-.4 3.8h-2.2l1.1-6.5l.1-.5l.7-2.7l.3-.2z"], ["t", 1, -0.2, "M10.6 18.5h.2l-.1 3.5c-.5 4.6-.7 9.2-.8 13.7h-.2c-.3-2.3-.4-4.6-.5-7l-.2-4.1l-.4 .8c0-1.2 0-2.4 .2-3.6l.4 .6l.5-.2v-.6c0-.6 .1-1 .4-1.6h.4l.1-1.5z"], ["t", 0, -0.6, "M89.7 38v2.3l-.1 .7v1.2l-.2 1.7h-1l-.6-.8l-.2-.4l-.3-.5l-.4-.5c0-1.3 0-2.4 .4-3.5c.9-.5 1.4-.4 2.4-.2z"], ["t", 0, -0.3, "M55.5 84h.6l.1 .5l.1 2v.8l.1 .7v.6l.3 1.9c-.6 .4-.6 .4-1.3 .4c-.7-4.5-.7-4.5-.8-6.7c.2-.2 .2-.2 .9-.2z"], ["t", 0, 0, "M13.4 35.6l1 .1v.4l.4 .2l.7 .4v3.7l-1.5 .4c-.7-1.7-.6-3.5-.6-5.2z"], ["t", 0, 0, "M9.9 42.1c.2 4.8 .2 4.8-1.1 6.6l-.4-.1v-6.2c.9-.3 .9-.3 1.5-.3z"], ["t", 0, -0.3, "M47.4 83.8l.1 2.7v.8l.1 .8v.7l-.2 1.9l-.6 .2l-.5-.4l-.1-1.5v-1.8l-.1-.9v-2.3l1.3-.2z"], ["t", 0, -0.2, "M90.1 42.1l1.7 .1l-.2 2.7v.7l-.1 .8v.7l-.5 1.3c-1.2-2-1-4.1-.9-6.3z"], ["k", "M91.4 67.3h.2c0 1.7 0 1.7-.2 2.4l-.4 1.9l-.1 .7l-.1 .8l-.2 .7l-.2 1.5l-.2 1.4l-.5 3.8c-.2 2.5-.5 4.9-.9 7.4h-.2l.3-4.3l.1-.7l.5-4.2l.2-1.9c1-8.8 1-8.8 1.7-9.5z"], ["t", 1, -0.3, "M9.7 17.2c.5 0 .5 0 .9 .2c.3 .5 .4 .8 .3 1.4l-.2 .4l-.2 .5l-.6 1.2l-.2 1.3h-.4l-.1 .4c-.7-1.4-.4-3.1 0-4.6l.5-.8z"], ["t", 1, -0.6, "M11.6 32h.9c.2 1.2 .2 2.2 .2 3.4l-2.1 .2v-2.8h1v-.8z"], ["t", 0, 0, "M11.2 78.6h.2l.1 .6l.5 4l.1 1.5l.2 .8v.8l.1 .7l.1 1.3l-.9 .2c-.3-3.3-.5-6.6-.4-9.9z"], ["t", 1, -0.2, "M10.3 12c.5 .5 .4 .9 .5 1.7v1.6l.1 .8l.1 2c-.4-.2-.4-.2-.5-.7l-1-.4c.1-1.7 .3-3.3 .8-5z"], ["t", 0, 0, "M9.9 35.7v2.8c-.9 .4-.9 .4-1.7 .4l-.2-1.9c.5-.5 1.1-1.3 1.9-1.3z"], ["t", 0, 0, "M84.5 41.3c1 .1 1.7 .3 2.4 .8c.6 .7 .6 .7 .6 1.3c-1.3-.2-2.5-.5-3.7-1l.7-1.1z"], ["t", 0, 0, "M86.6 38l.3 .2l-.5 2.6c-1.3-.2-1.3-.2-1.5-.4v-1.5l.8-.5l.5-.2l.4-.2z"], ["t", 0, 0, "M9.9 39.6v1.5l-1 .2l-.6 .1l-.4 .1c-.2-.2-.2-.2-.3-.7c.1-.6 .1-.6 .4-1c.7-.2 1.2-.2 1.9-.2z"], ["t", 0, -0.2, "M90.5 39.5l1.6 .3l.4 1l-.2 .5c-1.6-.2-1.6-.2-2-.4c0-1 0-1 .2-1.4z"], ["t", 0, -0.6, "M50.4 85.3h.9v2.6h-.6v-.5h-.3v-2.1z"], ["t", 1, -0.2, "M92.5 12.9c.2 .8 .2 1.6 .2 2.4l.2 1.1l-.8 .4l-.3 .4c.2-3.8 .2-3.8 .7-4.3z"], ["t", 0, -0.4, "M10.6 42.1h1c0 .9-.1 1.4-.6 2.2h-.4v-2.2z"]] }, "b30harnessbody": { "kontur": "M33.2 8c.5 .5 .4 1.1 .5 1.8l.2 .9l.1 .4l.3 1.9l.6 3.1l.3 1.3l.6 3.5l.1 1v.4l.4 .9l1.7 .8c4 1.9 6.7 5.4 9 9l.3 .4l.5 .8c.5 .9 .5 .9 1 1h.3l1.1-.1c.7 0 .7 0 1.1-.4l.4-.6l.2-.4l.2-.4c1.2-2.1 2.5-4 4.1-5.7l.3-.3c1.7-1.9 4.9-4.2 7.5-4.5c.3-1.1 .4-2.1 .5-3.2l.8-5.1l.3-1.7c.7-3.9 .7-3.9 1.1-4.8c.9 .1 1.9 .1 2.7 .9v2.2l-.2 6.9l-.1 .4l-.1 1.8v.7l-.1 .7c0 .4 0 .4 .5 .9l-.2 1.3l.3 1.4c.2 1.1 .4 2.1 .4 3.3l.2 .8c.1 1.8-.2 3.1-.9 4.7c-.5 1.3-.8 2.7-1.1 4.1v.5l-.3 1.5l-.1 .4l-.1 .9l-.5 2.5l-.5 2.3l-.1 .4c-.3 1.6-.6 3.1-.6 4.7v.5c.1 3.1 1 5.6 2.6 8.3l.2 .4c.4 .5 .8 .7 1.4 1c.8 1.5 1.6 4 1.3 5.7c-.5 1.1-1.8 1.7-2.8 2.2l-1.4 .5l-1.2 .5l-.9 .1c-1.7 .3-2.5 .9-3.6 2.4l-.4 .5l-.4 .5c-1.2 1.7-2.4 3.5-3.4 5.3l-.3 .7c-1 1.8-1.9 3.7-2.7 5.6l-.2 .6c-.7 1.6-1.2 3.2-1.5 4.9c-.2 .6-.3 .8-.8 1.1l-1.8 .1h-.5c-.7 0-1.1 0-1.7-.3c-.4-.6-.5-1.1-.6-1.8c-.5-2.1-1.3-4.1-2.2-6l-.3-.7c-1.5-3.2-3.4-6.3-5.7-9.1l-.6-.7l-.5-.7l-.6-.7c-.8-1-1.4-1.3-2.6-1.5c-.6-.1-1-.4-1.5-.7l-.8-.2c-1.2-.5-3-1.3-3.6-2.5c-.2-.7 0-1.3 .1-2l.2-.5c.4-2.1 .4-2.1 1-3l.5-.2l.3-.7l.7-1c2.4-3.6 2.9-7.7 2.1-11.9l-1.1-4.9c-.3-1.2-.6-2.5-.7-3.8c-.3-1.8-.7-3.4-1.6-5c-1.6-3.1-1.2-6.4-.3-9.7l.4-1.9l.2-.8c.1-1.2 0-2.4-.1-3.6l-.2-5.8v-2.6c0-.5 0-.8 .3-1.3l1.1-.4l.4-.1l1.1-.1zM42.1 41.5c.1 .6 .2 .8 .6 1.3h.8c0-.6 0-.6-.3-1c-.4-.3-.4-.3-1.1-.3zM56.6 41.5l-.9 .7v.6c.8 0 .8 0 1.1-.3c.2-.3 .2-.3 .2-.9l-.4-.1zM32.9 41.9l.4 2.3l.1 .7l.4 1.3l.6 3.4l.5 1c.7 .2 1.4 .1 2.1 .2c.9 0 1.7 .1 2.6 .3c1.3 .2 2.5 .2 3.8 .2l.1-.6l-.8-1.1l-.8-1.1l-1.9-2.6l-.2-.3c-1.6-2.1-1.6-2.1-2.3-2.3c-.7-.2-1.2-.5-1.7-.9l-.3-.2l-.4-.2c-.4-.3-.7-.3-1.2-.3h-.5l-.5 .2zM36 41.8l.2 .5l.8 .5l.2-.3l-.8-.7h-.4zM64.5 42.7c-.9 1-2.1 1.5-3.4 1.6c-.9 .1-1.3 .9-1.8 1.6l-.4 .6l-.8 .9l-1.6 2.2l-.7 .8l-.2 .3l.1 .6l3.2-.2h.4l1.6-.2l1.2-.1c2.8-.1 2.8-.1 3.3-.7l.3-1.5c.1-1.2 .3-2.3 .6-3.5l.7-3c-.2-.2-.2-.2-.6-.2c-.8 0-1.3 .2-1.9 .8zM62.1 42.4l-.3 .4l-.3 .3l-.2 .7c1.1-.1 2-.4 2.8-1.2v-.5c-1.4-.2-1.4-.2-2 .3zM43.4 43.2c.1 .6 .2 .9 .6 1.3l1.6 2l1.9 2.6l.4 .6l.9 .9c.4-.5 .3-1.7 .3-2.3c0-.9-.2-1.5-.9-2.1l-.3-.3l-2-1.9l-.9-.7c-.6-.5-1-.5-1.6-.1zM54.4 43.5l-.6 .6l-.6 .7l-.3 .3l-1.8 1.8l-.5 .5v2.5c.7-.2 .8-.3 1.1-.9l1.2-1.5l1.7-2.2l.6-.8c.5-.7 .5-.7 .5-1.3c-.6-.3-.8-.2-1.3 .3zM63.1 55c-1 .2-1.8 .3-2.8 .3h-.4l-1.7 .2h-1.5l-.8 .1l-1.9 .1c.2 .6 .4 .9 .8 1.4l1.4 1.6l1.6 1.9l1.6 1.9l.3 .4l.5 .6l.7 .7c.8 0 1.4-.3 2.2-.6l.6-.3l1-.5c1.1-.5 2.1-.8 3.2-1.1c.5-.2 .5-.2 .8-.6l-.4-.5c-1.1-1.7-2-3.3-2.5-5.2l-.3-.6l-2.4 .2zM34.2 55.3l-.3 1.1c-.5 1.6-1.4 3-2.4 4.4l-.4 .6l.1 .5l.4 .1c1.3 .3 2.5 .7 3.7 1.2l1.3 .5l.6 .3l1.9 .3c.5-.3 .7-.6 1-1.1l.6-.8l.7-.9l1.1-1.5l.4-.4l.6-.8l.7-1l.3-.3c.8-1 .8-1 1-1.5l-.1-.3l-.6-.1h-2l-.8-.1c-4.7-.2-4.7-.2-5.7-.4c-1.6-.3-1.6-.3-2.1 .2zM50.6 59.1v6.9c.3 .3 .8 .2 1.1 .2h.8c1.2 0 2.4-.1 3.5-.3l.2-.7l-.8-1l-.5-.5l-.4-.5l-.7-.8l-1.8-2.2l-.7-.8l-.2-.3h-.5zM48.5 59.2l-2.5 3.1l-.9 1.3l-.3 .4l-.5 .7l-.6 .8l.1 .4l3.6 .3h.4c1 0 1 0 1.1-.2l.1-.8v-1.6l-.2-4.2l-.3-.2z", "boden": 92, "breite": 42.7, "regionen": [["k", "M33.3 8c.4 .3 .4 1.2 .4 1.7l.8 4l.4 2.4l.3 1.3l.7 4.5v.4l.1 .9l.3 .1c2.1 .9 4.2 2 5.8 3.6v.3l.6 .2l.1 .5l.6 .2l.1 .5l.5 .1c.5 .7 .5 .7 .5 1h.3c.4 .6 .4 .6 .4 1h.3l.8 1.3l.3 .3c.5 .9 .5 .9 .5 1.2h.3c.3 .5 .4 .7 .4 1.2h.3l.3 .7l.5-.2c.8-.1 1.5-.2 2.3 0l.1-.3l1-2.1h.3l.1-.3c.1-.6 .5-1.1 .8-1.6l.3-.3c.6-1 1.3-1.9 2.1-2.7h.3l.3-.6l.4-.1l.3-.6l1-.8l.3-.3c1.6-1.1 3.3-2.2 5.2-2.7c.3-.2 .3-.2 .4-.6l.4-2.6l.8-5.1l.2-1.2l1-5.3c.7 0 1.2 0 1.8 .2l.3 .1l.8 .4v2.6l-.1 2.9l-.1 2.9l-.2 4.1l-.1 .8l.5 .3l-.1 1.1c-.1 .5 .1 1.1 .2 1.7c.2 1.1 .4 2.2 .4 3.3c0 .5 0 .5 .2 .9c.1 1.4 .1 2.8-.7 4c-1.1 1.9-1.2 4.6-1.6 6.8l-1.2 6.1c-1.1 4.2-1.1 8.8 1.1 12.6c1.2 1.9 1.2 1.9 1.7 2.4l.3 .1l.4 .1l.3 .8l.2 .5c1.1 3.7 1.1 3.7 .7 4.6c-.3 .6-.7 .8-1.2 1.1h-.3v.3c-1.9 1.1-1.9 1.1-2.7 1.2c-.6 .1-.6 .1-1.1 .5l-.9 .2c-1.1 .1-2 .3-2.7 1.2l-.6 .9l-.2 .3h-.3l-.3 .6l-.4 .6l-.3 .4l-.2 .2h-.2l-.2 .3l-.7 1.4h-.3l-.1 .3l-.7 1.3l-.6 1.3h-.3v.3c-.1 .5-.4 .8-.6 1.3l-1.8 3.9l-.3 .8c-.8 1.7-1.3 3.5-1.7 5.4c-.2 .7-.2 .7-.7 1l-1.9 .1h-1.5c-.4-.1-.4-.1-.7-.4c-.4-.5-.5-1.1-.6-1.7c-.3-1.4-.8-2.8-1.4-4.2l-.2-.5l-1.5-3l-.7-1.5c-1-2.1-2.5-4.1-3.9-6c-.4-.5-.4-.5-.4-.8l-.5-.3l-.2-.5h-.2v-.3h-.3l-.6-.7l-1.1-1.3l-1.3-.1l-1.3-.6v-.3l-.6-.1c-1.5-.3-3-1.2-4.1-2.2v-.7h-.3l.5-2.4l.1-.4l.3-1.1l.1-.4l.3-.9l.6-.2l.4-.6l1.2-1.7c2.2-3.5 2.3-7.8 1.5-11.7l-1-4.3c-.4-1.3-.6-2.7-.8-4c-.5-3.3-.5-3.3-1.2-4.2c-.4-.7-.6-1.4-.8-2.1l-.3-.6c-.7-2.3-.3-4.8 .3-7l.6-2.7l.2-.8c.1-1.2 0-2.4-.1-3.6l-.2-5.8v-2.6c0-.7 0-.9 .5-1.5l.8-.2l.4-.1l1.3-.1z"], ["t", 0, 0, "M66.8 22.2c1 .5 1 .5 1.1 1.1v.3l.5 .1c.4 .2 .4 .2 .6 .6l.1 .5l.1 .5v.4l.2 .6c.3 4.4-.3 7.8-3.2 11.3c-1.5 1.8-3.5 2.9-5.9 3.1c-2.8 .1-5.5-1.2-7.5-3l-1.5-1.7c.1-.7 .3-1.1 .6-1.6l.2-.4l.2-.5l.3-.5l1.9-2.9l.2-.3c1.4-2.1 3.3-3.9 5.6-5l.9-.6c1.3-.8 4-2.3 5.6-2z"], ["t", 0, 0, "M33 22.2c.9 .2 1.6 .6 2.4 .9l.5 .2c4.2 2 7.4 4.6 9.9 8.5l.8 1.1l.6 1.1l.3 .4l.6 1c-.4 1.6-2.1 2.8-3.4 3.6c-1.3 .7-2.6 1.2-4.1 1.5l-.4 .1c-2.2 .3-4.5-.8-6.2-2.1c-1.2-.9-1.9-2.1-2.7-3.4l-.3-.6l-.8-1.4l-.1-.4c-.4-1-.5-2-.5-3.1v-.4c0-1.8 .2-3.9 1-5.5l1.4-.1v-1c.6-.4 .6-.4 1-.4z"], ["t", 0, 0, "M37.2 71.3l2.7 .8l5.9 1.9l.4 .1l2.2 .6l.5 .2c2.2 .4 4.9-.8 6.9-1.5l1.8-.6l3-1.1l1.2-.1c-.3 .7-.9 1.4-1.4 2.1c-.8 1-1.5 1.9-2.1 3l-.4 .6c-.8 1.3-1.6 2.7-2.3 4.2l-.3 .5c-1.3 2.8-2.4 5.7-3.1 8.8c-.1 .6-.1 .6-.4 .9c-1.2 .3-2.6 .3-3.7 0c-.4-.5-.4-.9-.5-1.5c-1.3-6.1-5-12-8.9-16.8l-.9-1.1l-.6-.7v-.3z"], ["t", 0, 0, "M63.7 66.9l.6 1.3l.1 .3c.4 1 .4 1 .3 1.6l-1.3 .5l-.9 .3l-.4 .1l-1.8 .6c-2.8 1-5.7 2-8.7 2.8l-.5 .2c-1.3 .2-2.4 0-3.6-.3l-.5-.1l-10.2-3.3l-1.6-.6c.1-.6 .2-1.1 .5-1.6l.1-.5l.6-1.2l3.7 1.2l1 .3l3.3 1.1l3.3 1l.5 .1c1.6 .4 2.6 .3 4.1-.3l3.2-.8l1-.4l1.3-.4l1.5-.6l2.1-.8l.4-.1l.4-.2l.4-.1l1.1-.1z"], ["t", 1, 0, "M53.3 55.7l.7 .8l1.2 1.4l1.6 2l1.7 1.9l1.7 2.1l.9 1l.5 .7l.2 .2c.6 .8 .6 .8 .6 1.1l-1.4 .5l-.4 .1l-.4 .2l-.4 .1c-.4 .1-.7 .1-1.1-.1c-1-.9-1.9-2.1-2.7-3.2l-1.3-1.4l-1.2-1.5l-1.1-1.3l-.4-.5l-.7-.8c-.7-.7-.9-1.2-.9-2.1l.1-.9l.3-.1h.9l1.6-.2z"], ["t", 1, 0, "M46.1 55.7h.5l2.2 .3c.2 1.1 .2 2-.5 3l-1 1.1l-.9 1.2l-1.1 1.4l-1.6 2.1l-.6 .8l-.2 .3l-.7 .9l-.2 .3c-.4 .5-.6 .8-1.2 1.1l-.8-.3l-.5-.1l-1.8-.8l1.1-1.7l.4-.5l1.1-1.3h.3v-.3c.1-.5 .3-.8 .7-1.2l.3-.4l.4-.4c3.4-4.2 3.4-4.2 4.1-5.5z"], ["t", 1, 0, "M43 43.6l.9 1.1l.2 .3l.5 .7l.9 1.2l1.4 2l1.4 1.8l.2 .6h-3.3l-.5 .1l-.8-.4l-.2-.4l-.4-.6l-.2-.3l-1.2-1.7l-1.1-1.4l-1.5-2.1l-.3-.6h.5c1.1-.1 2.4-.5 3.5-.3z"], ["t", 1, 0, "M56.3 43.6l1.5 .4c.6 .2 1.3 .3 1.9 .3c0 .5-.1 .7-.4 1.1l-.3 .3l-.3 .4l-.6 .8l-.4 .4l-1 1.4l-.6 .8l-.6 .9l-.7 .9c-1.4 .3-2.9 .1-4.3 0c.2-.6 .4-1 .8-1.4l.3-.4l.3-.4l.6-.6l.2-.4l2.4-3l1.2-1.5z"], ["t", 0, 0, "M55.9 66.1c.7 0 1 0 1.5 .4l.3 .3l.3 .4l.6 1c-5.3 1.8-5.3 1.8-7.1 1.8h-.7c-.2-.6-.2-1.3-.2-1.9v-1.5l2.3-.2l.7-.1l2.3-.2z"], ["t", 0, 0, "M45.4 66.3l1.7 .1l1.8 .2c.2 .7 .2 1.3 .2 2v.4c0 1 0 1-.2 1.2c-2.6 0-4.9-.9-7.3-1.7c.7-2.1 1.7-2.5 3.8-2.2z"], ["t", 0, 0, "M69.5 61.8c.4 .4 .4 .4 .5 .8c-.1 .9-.7 1.3-1.3 1.9c-1.2 .7-2.4 1.3-3.7 1.5c-1.3 .3-1.3 .3-1.7 .6c-.5 0-.7-.1-1.1-.5l-.2-.3l-.3-.4l-.4-.8l.5-.2c1.4-.5 2.6-1.1 3.9-1.8c.5-.3 1.1-.4 1.7-.6l.6-.1c.5-.1 1-.2 1.5-.1z"], ["t", 1, 0, "M32.9 8.4c.1 6.1 .1 6.1-.3 9.1l-.1 .7v.6l-.6-.4l-.6-.2v.9l.6 .4l-.7 .4c-.7-2.3-.4-4.9-.4-7.3v-3.7c1.3-.5 1.3-.5 2.1-.5z"], ["t", 1, 0, "M67 8.3l.8 .2l.5 .1l.6 .3c.1 2.6 0 5.3-.1 8v.3c-.1 2.2-.1 2.2-.3 2.9l-.6-.3l.3-.3v-.7c-.6-.2-.6-.2-1 0c-.3-2.5-.4-4.9-.4-7.4v-1.8l.2-1.3z"], ["t", 0, 0, "M37.3 64.2l1.4 .6l-.8 1.3l-.4 .5l-.2 .3l-.5-.2l-1.8-.5c-1.7-.4-3.5-1.2-4.6-2.7c-.2-.5-.2-.7-.1-1.2c2.1-.6 5.1 1.1 7 1.9z"], ["t", 0, 0, "M50.2 39.6c.2 .7 .3 1.1 .3 1.7l-.9 .3l-.1 5.4h-.3l-.5-.7c-1-1.2-2.2-2.1-3.4-3.1c-.5-.3-.5-.3-.6-.7l.3-.3l1.4-.9c.4-.4 .8-.7 1.3-.9l.4 .2c.4 .3 .4 .3 .8 .3l.1-.5l.2-.6c.4-.2 .4-.2 1-.2z"], ["t", 0, 0, "M69.7 64l.5 1.5l.2 .5l.2 1.3c-.8 1.2-2.5 2-3.9 2.3l-.5-.2l-.5-1.4l-.1-.4c-.4-.9-.4-.9-.2-1.4l1-.3c1.2-.4 2.3-1 3.3-1.9z"], ["t", 0, 0, "M59.4 63.1c.6 .4 1 .9 1.5 1.5l.4 .6c1.1 1.3 1.1 1.3 1.1 1.7l-1.4 .5l-.4 .1l-.4 .2l-.4 .1c-.4 .1-.7 .1-1.1-.1l-.8-.8l-.4-.4l-.3-.5l-.4-.4c-.3-.4-.3-.4-.3-.9c.3-.7 .6-1.1 1.2-1.5c.7-.2 1-.3 1.7-.1z"], ["t", 0, 0, "M30.3 64l.6 .4l1.7 1.1l.5 .3l1.8 .7l-.8 2.2l-.2 .5c-.1 .4-.1 .4-.4 .5c-1.5-.4-2.9-1.1-4-2.1l.8-3.6z"], ["t", 0, 0, "M41.8 63.3c.7 .3 1.2 .7 1.6 1.3c0 .8-.1 .9-.6 1.4l-1.1 1.5c-.3 .4-.3 .4-.9 .7l-.8-.3l-.5-.1l-1.8-.8l1.1-1.7l.4-.5c1.2-1.6 1.2-1.6 2.6-1.5z"], ["t", 0, 0, "M38.9 52.1l.3 .1l6.6 .2l-.1 2.3l-7.1-.4v-.8l-.1-.4l.4-1z"], ["t", 0, 0, "M51.8 40.5l1.2 .7l1.6 1.3c-.2 .7-.4 .9-.9 1.4l-.5 .5l-.5 .4l-.5 .5c-1.2 1.3-1.2 1.3-1.7 1.4v-2.4c0-2.6 0-2.6 .4-3.2l.9-.6z"], ["t", 1, 0, "M49.4 55.1h.7l.2 5.7v5.4l.1 4.5h-.9c-.3-3.3-.3-6.6-.3-9.9v-5.2c0-.3 0-.3 .2-.5z"], ["t", 1, 0, "M66.2 11.1h.2v.5l.1 1.8v.8l.1 1.2v.6l.2 1.6c.1 1.5-.1 2.8-.6 4.2c-.4 .4-.8 .5-1.5 .5c0-.9 0-1.8 .2-2.7v-.4l.4-2.3l.5-3.3l.2-.7l.2-1.8z"], ["t", 0, -0.4, "M47.5 52.4h4.3v2.3l-1.7 .1h-2.3l-.4-.1v-1.5l.1-.8z"], ["t", 0, 0, "M33 16.8c.8 .1 1.1 .1 1.7 .6l.3 1l.1 .7l.1 .7l.1 .6l.3 2.5l-1.3-.4l-.4-.2c-.5-.5-.5-1.1-.6-1.8l-.1-.4c-.2-1.1-.2-2.2-.2-3.3z"], ["t", 0, 0, "M53 48.7c.7 0 1.2 .1 1.7 .6l.6 1c-.1 .4-.2 .6-.6 1c-1.4 .2-2.8 .1-4.2 0c.2-.6 .5-1 .8-1.5l.3-.3c.7-.8 .7-.8 1.4-.8z"], ["t", 0, 0, "M46.1 55.7h.5l2.2 .3c.1 1.8 .1 1.8-.3 2.7c-.4 .4-.4 .4-.9 .5l-1.2-.4v-.3l-.4-.1v-.3h-.3c-.3-.6-.4-1-.2-1.6l.6-.8z"], ["t", 0, 0, "M53.3 55.7c.5 .4 .5 .4 .7 1l-.1 .7l-.1 .4h-.3l-.2 .6c-.5 .5-1.1 .5-1.8 .5l-.7-.4c-.4-.8-.4-1.6-.3-2.5l.3-.1h.9l1.6-.2z"], ["t", 0, 0, "M46.9 48.9l.8 .9l.4 .6l.4 .9h-3.8c-.4 0-.4 0-.9-.4c-.1-.6 0-.8 .3-1.3c.8-.8 1.7-1 2.8-.7z"], ["t", 1, 0, "M65.4 50.7l.1 3.6c-.8 .2-1.4 .3-2.2 .2c-.3-.7-.3-1.4-.3-2.2v-1.2l.9-.2l.5-.1l1-.1z"], ["t", 0, 0, "M54.4 52.4h2.5c.2 .5 .2 1.1 .1 1.7l-.3 .4l-.7 .1h-1.4l-1.1-.1l-.2-1.9c.4-.2 .6-.2 1.1-.2z"], ["t", 1, 0, "M60.6 52.1l.1 2c-.4 .2-.7 .2-1.1 .2h-1l-.5 .1h-1.2v-2c1.2-.2 2.4-.3 3.7-.3z"], ["t", 1, 0, "M38.9 52.1l1.1 .1h.7l1.4 .2v1l.2 1.1l-3.7-.2c0-1.6 0-1.6 .3-2.2z"], ["t", 0, 0, "M48.2 35.8c.6 .1 .8 .1 1.3 .4v2.4h-.5c-.6 0-.6 0-1 .3c-.5 .3-.9 .2-1.4 .1h-.6l-.5-.1l1.2-1.1h.2l.3-.6l.5-.6l.5-.8z"], ["t", 1, 0, "M34.6 50.7l1.8 .4l-.2 3.6l-1.9-.2c0-1.3 .1-2.5 .3-3.8z"], ["t", 0, 0, "M58 41.9h3.8c-.3 .8-.7 1.4-1.4 2h-1.4l-.7-.1c-.7-.4-.9-.7-1.1-1.5c.4-.4 .4-.4 .8-.4z"], ["t", 0, 0, "M50.9 35.8l1.1 1.1c1.2 1.5 1.2 1.5 1.8 1.7v.3c-1.5 .2-2.4 .2-3.6-.5v-1.1l-.1-.6c.1-.5 .1-.5 .5-.7l.3-.2z"], ["t", 0, 0, "M41.4 41.8l.4 .4l-.1 .7h-.3l-.1 .4c-.5 .3-.9 .2-1.4 .2h-.6c-.6 0-.8-.1-1.3-.5l-.6-.9l.5-.1h1.3l2.2-.2z"], ["k", "M63.7 23c-.5 .4-1.1 .7-1.7 .9c-4.7 2.4-7.5 6-10 10.5l-.2 .3h-.3l.8-1.9h.3l.1-.3c.1-.6 .5-1.1 .8-1.6l.3-.3c.6-1 1.3-1.9 2.1-2.7h.3l.3-.6l.4-.1l.3-.6l1-.8l.3-.3c4-2.9 4-2.9 5.2-2.5z"], ["t", 0, 0, "M68.1 35.7c.2 .4 .1 .6-.1 1l-.5 3.3l-.1 .5v.4l-.2 .3c-.6 .3-1 .3-1.7 .3l.5-1.2l1-2.5c.7-1.7 .7-1.7 1.1-2.1z"], ["t", 1, 0, "M33.5 11.3h.1l.4 2.1l.2 .7l.2 1.1l.1 .6l.1 1.4l-1.6-.4l.2-2.2v-.7l.1-1v-.7c0-.5 0-.5 .2-.9z"], ["t", 0, 0, "M66.4 37.9c0 .8-.5 1.2-1 1.7c-2.1 1.9-4.3 2.1-7 1.9h-.5v-.2c.7-.2 1.3-.3 2-.3c2.3-.2 4.2-.9 5.9-2.5h.3l.3-.6z"], ["t", 0, 0, "M33.6 38.9c.6 .2 .6 .2 1.1 .6c1.8 1.2 4.1 1.5 6.1 1.8v.2c-2.4 .2-4.3 .1-6.3-1.5c-.4-.3-.6-.6-.9-1.1z"], ["t", 0, 0, "M32.1 37.4l1 1.5l1 1.6l.2 .8l-.7 .1h-.3c-.4-.1-.4-.1-.8-.5c-.3-1.1-.5-2.3-.4-3.5z"], ["t", 0, 0, "M49.5 66l.7 .2l.2 4.5h-.9c-.2-3.4-.2-3.4-.1-4.5l.1-.2z"], ["t", 1, 0, "M49.5 47.6l.7 .1v1.8l-.1 2.6h-.7c-.2-.1-.2-.1-.2-.7c0-1.3 .2-2.5 .3-3.8z"], ["t", 0, 0, "M49.4 55.1h.7l.1 3.8h-1v-3.3c0-.3 0-.3 .2-.5z"], ["t", 0, 0, "M36.4 51.1l-.2 3.6c-.7-.2-.7-.2-1.2-.6l-.1-.8l.7 .1c.2-.7 .2-.7 0-1h-.6c.2-.8 .6-1.3 1.4-1.3z"], ["t", 1, 0, "M59.6 51.4h1v.3c-2.5 .5-5.2 .5-7.7 .4l-.1-.4h.3l1.6-.1h.6l2.8-.1l1.5-.1z"], ["t", 0, 0, "M52.6 40.2l.6 .2l2.8 .8l-.8 1c-.6-.1-1-.3-1.5-.7l-.3-.3l-.8-.7v-.3z"], ["t", 0, 0, "M46.8 40.5l-1 .8l-.3 .2c-.5 .3-.8 .6-1.4 .7l-.8-.7v-.3l.4-.1l.6-.2l.5-.1l1-.3h1z"], ["t", 0, 0, "M32.6 16.8l-.1 2l-.6-.4l-.6-.2v.9l.6 .4l-.7 .4c-.2-.7-.4-1.2-.3-2c.4-.6 1-1.1 1.7-1.1z"], ["t", 0, 0, "M63 51.1c.7 .3 .7 .3 .9 .7l.1 .3l-.4 .5l.1 .7l.4 .1l-.1 .9h-.3v.2h-.4c-.3-.7-.3-1.4-.3-2.2v-1.2z"], ["t", 0, 0, "M66.4 20.5l-.2 1.3l-.6 .2l-.4 .2l-.5 .1v-1.2c.5-.6 1-.7 1.7-.6z"], ["t", 0, 0, "M65.8 39.5l.2 .3l-.4 .8l-.3 .4l-.5 .6h-1.8l1.3-.9c.6-.3 1.1-.7 1.5-1.2z"], ["t", 0, 0, "M44.8 39.2l.3 .2l-.9 .7l-.5 .4c-.9 .4-1.7 .4-2.6 .4h-.8v-.1l.3-.1c1.3-.3 2.5-.6 3.7-1.2l.5-.3z"], ["t", 0, 0, "M38.9 52.1h1v.5l-.8 .1c.1 .7 .2 1 .6 1.6h-1.1v-.8l-.1-.4l.4-1z"], ["t", 0, 0, "M59.4 52.1h1.2l.1 2c-.4 .2-.8 .2-1.3 .2v-.3l.6-.2l.1-.8l-.2-.3l-.7 .1l.2-.7z"], ["t", 0, 0, "M36.7 51.1h.3l-.1 3.7h-.5l.3-3.7z"], ["t", 0, 0, "M46.2 52.7l.9 .1v1.2c0 .4 0 .4-.2 .5h-.7v-1.8z"], ["t", 0, 0, "M50.2 50.3l-.1 1.8h-.7c-.2-.1-.2-.1-.2-.4v-1.1c.6-.3 .6-.3 1-.3z"], ["t", 0, 0, "M54.9 39.6l1.5 .5l2 .7v.1h-1.1l-.7-.1c-.8-.1-1.1-.3-1.7-.9v-.3z"], ["t", 0, 0, "M42.7 51.7h4l-.2 .4l-3.9-.1l.1-.3z"], ["k", "M59.4 52.6c.6 .1 .6 .1 .9 .4c-.1 .8-.1 .8-.3 1h-.7c-.3-.5-.3-.5-.3-.8l.4-.6z"], ["t", 0, -0.4, "M40.1 52.7c.2 .1 .2 .1 .2 .5c0 .5 0 .5-.4 .9l-.8-.4v-1c.4-.2 .6-.1 1 0z"], ["t", 0, 0, "M60.9 51.3h.4l.3 3.5l-.5 .2c-.3-2.6-.3-2.6-.2-3.7z"], ["k", "M53.9 52.8c.7 .2 .7 .2 1 .5l-.1 .8l-.9 .2l-.3-.9l.3-.6z"], ["t", 0, 0, "M52.8 51.7h3.7l.1 .3l-3.7 .1l-.1-.4z"], ["t", 0, 0, "M62.3 51.1h.3l.2 2.2v1.4h-.4c-.2-1.2-.1-2.4-.1-3.6z"], ["t", 0, 0, "M38.2 51.3h.2c.1 1.2 0 2.4-.2 3.7h-.3c-.1-1.3 0-2.5 .3-3.7z"], ["t", 0, 0, "M42.6 54.8c2.6 0 2.6 0 3.8 .2l.1 .3h-3.7l-.2-.5z"], ["t", 0, 0, "M37.4 51.1h.3c.1 1.3-.1 2.6-.3 3.9h-.2c-.1-1.3 0-2.6 .2-3.9z"], ["t", 0, 0, "M56.6 54.8l-.3 .2v.3h-3.5l.1-.3c1.2-.2 2.5-.2 3.7-.2z"], ["t", 0, 0, "M52.5 52.7h.6v1.8h-.8v-1.3c0-.4 0-.4 .2-.5z"], ["t", 1, 0, "M39.4 51.4l1.1 .1h.6l1.6 .2l-.1 .3h-1.7c-.6 0-1-.1-1.5-.3v-.3z"], ["t", 0, 0, "M52.8 39.4h1.2l.9 .8l-.1 .3l-2.2-.7l.2-.4z"], ["t", 0, 0, "M67.1 21.5c.8 0 1.2 .5 1.7 1l-.1 .4c-.7-.2-1.2-.5-1.7-.9l.1-.5z"], ["t", 1, 0, "M39.6 54.7h2.2l.4 .1c.4 0 .4 0 .6 .5l-2.6-.2l-.7-.1h-.5c.3-.3 .3-.3 .6-.3z"], ["k", "M45.2 53.1l.3 .7c-.1 .3-.1 .3-.5 .4l-.3 .1l-.4-.5l.1-.7h.8z"], ["t", 0, 0, "M32.2 21.3l.4 .2v.4l-.9 .7l-.4 .4l-.5-.2c.4-.6 .8-1 1.4-1.5z"], ["t", 1, 0, "M59.9 54.5v.3l.2 .2l-3.8 .3v-.3c.5-.3 1.1-.3 1.7-.3l.4-.1l1.5-.1z"], ["t", 0, 0, "M46.2 39.3l.6 .1l.1 .2l-.8 .4l-.5 .2c-.5 .2-.5 .2-.9 0c.8-.8 .8-.8 1.5-.9z"], ["k", "M63.8 52.1l.6 .3v.9l-.7 .1l-.3-.4l.4-.9z"], ["t", 0, -0.4, "M52.1 54.8h.4l-.3 .7c-.6 .2-1 .2-1.6 .2l-.2-.6h1c.4 0 .4 0 .7-.3z"], ["k", "M35.2 52.3l.5 .1l.2 .7l-.3 .4l-.7-.2c0-.7 0-.7 .3-1z"], ["t", 0, -0.4, "M46.8 54.8l.3 .2l1.8 .3l-.1 .4c-.7 0-1.2 0-1.9-.2l-.1-.7z"], ["t", 0, 0, "M32.5 19.8c-.2 .7-.4 .8-1 1.3h-.4c.1-.8 .6-1.3 1.4-1.3z"], ["k", "M59.9 71.9l-.2 .4l-.7 .2l-.3 .1h-1c1.4-.7 1.4-.7 2.2-.7z"], ["t", 0, 0, "M50.6 39.6h.7l.3 .6l-.8 .6c-.2-.2-.2-.2-.2-.7v-.5z"]] }, "b30tshirtbh": { "kontur": "M21.9 10.4v.3l.5 .2c.7 1.2 .9 2.6 1.1 4l.1 .7l.3 1.3l.9 4.8l.9 4.9l.3 1.4l.8 5.4l.3 1.7l.5 3l.3 2.1l.5 3.2l.6 3.8c.2 .8 .3 1.6 .2 2.4l.5 .2l.8 .3v.4l.7 .1l.9 .6l.5 .3l.4 .3v.3l.4 .1l.7 .4v.3l.4 .1c.6 .3 1.1 .7 1.6 1.2v.3l.7 .4l.7 .7l.4 .4l.5 .4l.4 .5l.4 .4l.4 .4c.3 .3 .3 .3 .3 .6h.3l1 1.3l.3 .4c1.3 1.7 1.3 1.7 1.3 2.2h.3c1.2 1.6 2 3.3 2.8 5l.6 1.3c1.1 2.3 2.5 5.6 2.5 8.1h2.8l.3-1.1l.8-3.1l.3-.8c.2-.7 .5-1.3 .9-2l.5-1.2c.9-2 1.9-3.8 3.1-5.7l.4-.8l.2-.3h.4l.1-.4c.3-.6 .7-1.1 1.2-1.7l.3-.3c1.8-2.3 3.8-4.7 6.2-6.3h.3v-.3l.8-.5l2.9-1.9l.8-.2l.1-.8l.2-2.2l.1-.5l.3-1.9l.3-2.3l.7-4.6l.6-4l.8-5.4l.4-2.4l.8-4.6l.6-2.7c1-5.7 1-5.7 1.9-7.7l.5-.2v-.3c.9-.5 2.4-.1 3.4 .2c.8 .3 1.1 .5 1.5 1.3c.5 1.3 .6 2.6 .7 4v.6l.1 1.8v1.2c.2 2.2 .2 4.5 .3 6.7l.2 3.3l.1 3.5l.2 2.8l.2 4.3v3l.7 .3c.5 .8 .8 1.7 1.1 2.6l.8 3l.2 .5l2 4.2l.6 1.2c.4 1 .9 1.8 1.5 2.6v.3h.3l.7 .8l.3 .4c.7 .9 .7 1.7 .7 2.8v.5c0 1.6-.3 3.1-.7 4.7l-.2 1.2l-1.5 7.2l-1 5.5l-.7 3.8l-.4 2.3l-.2 .7l-.2 1.4l-.1 .7l-.2 .6c-.1 .5-.1 .5-.4 .9c-6.4 2.5-17.3 .9-23.7-.8l-2.4-.5l-.5-.1l-.9-.1l-1.1-.2c-5.2-.8-10.6-.7-15.9-.3h-.4c-2.1 .2-4.2 .4-6.3 .9c-2.8 .6-5.6 1.1-8.5 1.5l-.6 .1c-3.3 .4-6.6 .4-9.9 .4h-3c-3.2 0-3.2 0-4.2-1l-.2-1l-.1-.6l-.5-2.9l-.5-2.4l-.6-3.8l-.9-4.5l-.3-1.9l-.8-3.6l-1-5.3l-.3-1.3v-1.8l-.1-.5c0-1.1 .2-1.8 .8-2.8l.8-.7l.1-.3h.4v-.3l.6-.7l.2-.3h.3l.1-.3l1-2l.1-.4l1-1.9l.8-2.2l.2-.5l.7-2.2l.1-.5l.3-1.1c.7-1.9 .7-1.9 1.6-2.3v-.5l.2-5.1l.5-8.3l.4-8.3l.1-.9v-.4l.2-2.8v-.7l.1-1.4c0-1.3 .2-2.2 .9-3.3c1.2-1 3-1.4 4.5-1zM21.7 27.6c-.2 .7-.2 1.5-.2 2.3l-.1 .5v1.7l-.1 1.6v1l-.2 2.7l-.1 2.8l-.2 2.3l-.1 .7v.7c0 .5 0 .5 .5 .9l.5 .3l.5 .3l.8 .1v.4c1 .5 1 .5 1.3 .5v.3h.3v-.4l-.1-.6l-.1-.7l-.2-1.6l-.8-5.4l-1.5-10.4h-.2zM79.9 27.6l-1.3 8.6l-.2 1.5l-.5 3.7l-.2 1.4l-.1 .7l-.1 .5v1.5h.3v-.3l.4-.1l1.3-.7l.5-.2l.9-.8v-1.9l-.1-.6v-2.1l-.1-.7l-.2-3.1l-.2-5.3v-.9l-.2-1.2h-.2z", "boden": 92, "breite": 88, "regionen": [["t", 0, 0, "M21.9 10.4v.3l.5 .2c.7 1.2 .9 2.6 1.1 4l.1 .7l.3 1.3l.9 4.8l.9 4.9l.3 1.4l.8 5.4l.3 1.7l.5 3l.3 2.1l.5 3.2l.6 3.8c.2 .8 .3 1.6 .2 2.4l.5 .2l.8 .3v.4l.7 .1l.9 .6l.5 .3l.4 .3v.3l.4 .1l.7 .4v.3l.4 .1c.6 .3 1.1 .7 1.6 1.2v.3l.7 .4l.7 .7l.4 .4l.5 .4l.4 .5l.4 .4l.4 .4c.3 .3 .3 .3 .3 .6h.3l1 1.3l.3 .4c1.3 1.7 1.3 1.7 1.3 2.2h.3c1.2 1.6 2 3.3 2.8 5l.6 1.3c1.1 2.3 2.5 5.6 2.5 8.1h2.8l.3-1.1l.8-3.1l.3-.8c.2-.7 .5-1.3 .9-2l.5-1.2c.9-2 1.9-3.8 3.1-5.7l.4-.8l.2-.3h.4l.1-.4c.3-.6 .7-1.1 1.2-1.7l.3-.3c1.8-2.3 3.8-4.7 6.2-6.3h.3v-.3l.8-.5l2.9-1.9l.8-.2l.1-.8l.2-2.2l.1-.5l.3-1.9l.3-2.3l.7-4.6l.6-4l.8-5.4l.4-2.4l.8-4.6l.6-2.7c1-5.7 1-5.7 1.9-7.7l.5-.2v-.3c.9-.5 2.4-.1 3.4 .2c.8 .3 1.1 .5 1.5 1.3c.5 1.3 .6 2.6 .7 4v.6l.1 1.8v1.2c.2 2.2 .2 4.5 .3 6.7l.2 3.3l.1 3.5l.2 2.8l.2 4.3v3l.7 .3c.5 .8 .8 1.7 1.1 2.6l.8 3l.2 .5l2 4.2l.6 1.2c.4 1 .9 1.8 1.5 2.6v.3h.3l.7 .8l.3 .4c.7 .9 .7 1.7 .7 2.8v.5c0 1.6-.3 3.1-.7 4.7l-.2 1.2l-1.5 7.2l-1 5.5l-.7 3.8l-.4 2.3l-.2 .7l-.2 1.4l-.1 .7l-.2 .6c-.1 .5-.1 .5-.4 .9c-6.4 2.5-17.3 .9-23.7-.8l-2.4-.5l-.5-.1l-.9-.1l-1.1-.2c-5.2-.8-10.6-.7-15.9-.3h-.4c-2.1 .2-4.2 .4-6.3 .9c-2.8 .6-5.6 1.1-8.5 1.5l-.6 .1c-3.3 .4-6.6 .4-9.9 .4h-3c-3.2 0-3.2 0-4.2-1l-.2-1l-.1-.6l-.5-2.9l-.5-2.4l-.6-3.8l-.9-4.5l-.3-1.9l-.8-3.6l-1-5.3l-.3-1.3v-1.8l-.1-.5c0-1.1 .2-1.8 .8-2.8l.8-.7l.1-.3h.4v-.3l.6-.7l.2-.3h.3l.1-.3l1-2l.1-.4l1-1.9l.8-2.2l.2-.5l.7-2.2l.1-.5l.3-1.1c.7-1.9 .7-1.9 1.6-2.3v-.5l.2-5.1l.5-8.3l.4-8.3l.1-.9v-.4l.2-2.8v-.7l.1-1.4c0-1.3 .2-2.2 .9-3.3c1.2-1 3-1.4 4.5-1z"], ["t", 0, 0, "M83.4 44h.8c.6 .1 .6 .1 1.1 .4l.4 1l.1 .5l.2 .7c1.4 4.5 3 9.4 6.4 12.8c.8 1 .5 2.8 .4 4c-.2 2.5-.8 4.9-1.3 7.4l-.7 3.3l-.7 3.5l-.3 1.8c-.3 2.5-.3 2.5-.9 3.3l-1.6 .8l-.8 .3c-7.6 3.4-16.1 4-23.9 1c-3.2-1.3-6.2-3.2-8.8-5.4l-.5-.3c-.3-.3-.5-.5-.7-1c.1-1 .4-1.9 .7-2.8l.2-.8c.7-2.2 1.5-4.3 2.5-6.4l1-2c3.2-6.4 8.4-11.4 14.5-15.1c2-1.2 4-2.5 5.9-3.9c1.1-.8 2.2-1.5 3.4-2.1l.7-.6c.6-.5 1.2-.4 1.9-.4z"], ["k", "M21.9 10.4v.3l.5 .2c.7 1.2 .9 2.6 1.1 4l.1 .7l.3 1.3l.9 4.8l.9 4.9l.3 1.4l.8 5.4l.3 1.7l.5 3l.3 2.1l.5 3.2l.6 3.8c.2 .8 .3 1.6 .2 2.4l.5 .2l.8 .3v.4l.7 .1l.9 .6l.5 .3l.4 .3v.3l.4 .1l.7 .4v.3l.4 .1c.6 .3 1.1 .7 1.6 1.2v.3l.7 .4l.7 .7l.4 .4l.5 .4l.4 .5l.4 .4l.4 .4c.3 .3 .3 .3 .3 .6h.3l1 1.3l.3 .4c1.3 1.7 1.3 1.7 1.3 2.2h.3c1.2 1.6 2 3.3 2.8 5l.6 1.3c1.1 2.3 2.5 5.6 2.5 8.1h2.8l.3-1.1l.8-3.1l.3-.8c.2-.7 .5-1.3 .9-2l.5-1.2c.9-2 1.9-3.8 3.1-5.7l.4-.8l.2-.3h.4l.1-.4c.3-.6 .7-1.1 1.2-1.7l.3-.3c1.8-2.3 3.8-4.7 6.2-6.3h.3v-.3l.8-.5l2.9-1.9l.8-.2l.1-.8l.2-2.2l.1-.5l.3-1.9l.3-2.3l.7-4.6l.6-4l.8-5.4l.4-2.4l.8-4.6l.6-2.7c1-5.7 1-5.7 1.9-7.7l.5-.2v-.3c.9-.5 2.4-.1 3.4 .2c.8 .3 1.1 .5 1.5 1.3c.5 1.3 .6 2.6 .7 4v.6l.1 1.8v1.2c.2 2.2 .2 4.5 .3 6.7l.2 3.3l.1 3.5l.2 2.8l.2 4.3v3l.7 .3c.5 .8 .8 1.7 1.1 2.6l.8 3l.2 .5l2 4.2l.6 1.2c.4 1 .9 1.8 1.5 2.6v.3h.3l.7 .8l.3 .4c.7 .9 .7 1.7 .7 2.8v.5c0 1.6-.3 3.1-.7 4.7l-.2 1.2l-1.5 7.2l-1 5.5l-.7 3.8l-.4 2.3l-.2 .7l-.2 1.4l-.1 .7l-.2 .6c-.1 .5-.1 .5-.4 .9c-6.4 2.5-17.3 .9-23.7-.8l-2.4-.5l-.5-.1l-.9-.1l-1.1-.2c-5.2-.8-10.6-.7-15.9-.3h-.4c-2.1 .2-4.2 .4-6.3 .9c-2.8 .6-5.6 1.1-8.5 1.5l-.6 .1c-3.3 .4-6.6 .4-9.9 .4h-3c-3.2 0-3.2 0-4.2-1l-.2-1l-.1-.6l-.5-2.9l-.5-2.4l-.6-3.8l-.9-4.5l-.3-1.9l-.8-3.6l-1-5.3l-.3-1.3v-1.8l-.1-.5c0-1.1 .2-1.8 .8-2.8l.8-.7l.1-.3h.4v-.3l.6-.7l.2-.3h.3l.1-.3l1-2l.1-.4l1-1.9l.8-2.2l.2-.5l.7-2.2l.1-.5l.3-1.1c.7-1.9 .7-1.9 1.6-2.3v-.5l.2-5.1l.5-8.3l.4-8.3l.1-.9v-.4l.2-2.8v-.7l.1-1.4c0-1.3 .2-2.2 .9-3.3c1.2-1 3-1.4 4.5-1zM15.3 44.1c-.5 .6-.6 1.3-.9 2.1l-.2 .7l-.2 .6l-.1 .5l-.5 1.6l-1 2.5l-.3 .7c-.6 1.6-1.4 3.1-2.4 4.5l-.6 1l-.6 .3c-.9 .8-1.3 1.3-1.4 2.4c-.1 2.2 .3 4.2 .8 6.3l.3 2l.5 1.9c.3 1.1 .5 2.1 .6 3.2l.6 3.1l1 5.3l.6 3.9l.2 .8l.4 1.9v.4l.4 .9c1.1 .3 2.2 .4 3.3 .4h2.7c2.7 0 5.3-.1 7.9-.4l1.2-.1c2.7-.3 5.3-.7 7.9-1.2c4.8-1 9.5-1.6 14.4-1.5h1.6c3.3 0 6.5 .2 9.7 .7l.6 .1l4.1 .8c2.4 .6 4.9 .8 7.3 1.1h.5c2.6 .2 5.3 .3 7.9 .3h.6c1.8 0 3.6 0 5.4-.5c.5-1.7 .8-3.5 1.1-5.2l.2-1l.9-5.2l1.1-5.4l1.1-5.8l.2-1.1l.5-2.3l.1-.5l.1-2v-.8c-.1-1-.3-1.5-1-2.2c-3.2-3.4-4.9-8.6-6.1-13l-.2-.6l-.1-.5c-.2-.4-.2-.4-.7-.7c-2.5-.3-2.5-.3-3.5 .4l-.5 .6l-1 .4c-.9 .4-1.6 1-2.4 1.6c-2.1 1.6-4.5 3-6.8 4.4c-3.7 2.2-7 5.2-9.6 8.6l-.4 .5c-2.4 3-4.2 6.4-5.7 10l-.2 .5c-1 2.1-1.4 4.3-1.9 6.5l-4.8 .2l-.3-1.8c-.4-2-1-4-1.8-5.9l-.2-.5l-.8-1.6l-.2-.6c-1.3-2.7-2.9-5-4.7-7.3l-.3-.4c-.8-1.1-1.8-2.1-2.8-3.1l-.4-.4c-2-2-4.3-3.5-6.7-5.1l-.4-.2c-.7-.5-1.5-1-2.4-1.4l-1.7-1l-.8-.5l-.3-.3c-1.5-.9-3-1.9-4.7-2.6c-.5-.2-.7-.6-1.1-1c-.9-.4-2.1-.3-3.1 0z"], ["t", 1, -0.6, "M79.3 21.5l1 .2l.1 3.7h-.8v.5h.8l.2 3.8h-.3l.1 3.1v.5l.4 7.5v.7l.1 .6v1.3c-.9 .9-1.9 1.4-3.1 1.8v.3l-2.3-.1l1.2-8.2l.5-4.1l1.4-8.8l.2-.8l.5-2z"], ["t", 1, 0, "M79.1 11.5c1.1 0 1.9 .1 3 .5c.7 .7 .8 1.4 .9 2.4v1.2l.1 .7l.1 2.1l.1 .7l.4 11.8l.1 .5v1.2l.2 3.1l.1 2.2v2.9l.1 2.3h-2.1l-.1-.6l-.1-2.2v-1l-.3-4.7l-.1-3.3l-.2-2.6l-.2-4.4c-.4-11.4-.4-11.4-1.5-12.4h-.5v-.4z"], ["t", 1, 0, "M21.2 11.5v.5l-.6-.1c-.5 1.5-.7 2.9-.8 4.5v.8l-.2 2.3l-.1 .7l-.5 9.4l-.2 3.9l-.2 3.3l-.1 .8l-.1 3.3v.4l-.1 1.1c0 .5 0 .5-.2 .7h-2v-2.9l.1-1.4l.2-2.6v-1.5l.6-10.6v-.7l.3-3.9l.1-2v-1.3l.1-.6c.1-2.6 .1-2.6 .8-3.3c.9-.7 1.8-.8 2.9-.8z"], ["t", 1, -0.2, "M21.5 12.5c1.1 1.1 1.1 3.9 1.3 5.4l1 5.2c.6 2.4 1 4.7 1.3 7.1l.5 3.1l.8 4.7l.2 1.8l1.2 7.7c-.9-.1-1.4-.3-2-.8c-.4-1.1-.5-2.1-.6-3.2l-.3-2.4l-.1-.5l-.1-.9l-.2-1.4l-.8-5.2l-.4-3.1c-.5-3.3-1-6.6-1.9-9.8c-.4-1.3-.6-2.4-.5-3.8v-.5c.1-1.2 .3-2.2 .6-3.4z"], ["t", 1, -0.2, "M78.8 12.2c1.4 2.7 .8 6.2-.1 9c-.8 2.9-1.2 6-1.5 9l-.5 3.3l-.1 .5l-.4 2.6l-1 6.8v.6l-.1 .6l-.2 .9l-.8 .5l-.4 .2l-.6 .2c-.1-1.2 .1-2.3 .3-3.5l.1-1.1l.1-.6l.4-2.5l.5-3.1l.3-2.2l.5-3.2l.4-2.8l.5-3l.6-3c1.1-5.9 1.1-5.9 1.8-8.6l.2-.6z"], ["k", "M45.3 76.5l.6 .1c-1.2 2.5-5 4-7.3 5.1l-.6 .3c-6.5 3.2-14.9 2.5-21.7 .2c-1.8-.7-3.6-1.4-4.9-3l.5-.4l.4 .2c5.5 4 13.6 4.7 20.2 3.6c3.3-.6 6.5-1.9 9.3-3.7l.5-.2l2.6-2l.4-.2z"], ["k", "M55.1 76.5l1.9 1.3c5.3 4.3 12.6 5.8 19.3 5.1c3.8-.5 8.4-1.3 11.4-3.8l.4-.3l.5 .1c-.2 .9-.8 1.3-1.5 1.8c-1.1 .7-2.2 1.1-3.4 1.5l-.5 .2c-6.3 2.6-14.2 2.2-20.4-.2c-2.8-1.3-5.7-2.8-7.7-5.1v-.6z"], ["t", 1, -0.6, "M20.2 21.7h.8c.8 2.7 1.3 5.4 1.7 8.2l.1 .8l.3 1.7l.4 3l.3 2.1l.4 2.8l.1 .8l.3 1.4c.2 1.4 .3 2.7 .2 4c-.5-.5-.5-1.3-.6-2l-.1-.6l-.3-2l-.1-.8l-.4-3l-1-6.7l-.4-2.1l-.2-1.1v.8l-.1 1v.5l-.2 2.5l-.8-.1l-.5-.1c-.4 0-.4 0-.5-.2v-1.4l1.1-.2l-1-.2c0-1.7 0-3.5 .2-5.2h1v-.5h-.8l-.2-.2l.1-1.1v-.7l.2-1.4z"], ["t", 0, -0.4, "M47.7 77.8l.5 .1c-1.4 1.8-3 2.9-4.9 4.1l-.6 .4c-1.1 .7-2.2 1.2-3.3 1.7l-.6 .3c-6.6 3-14.4 3-21.4 .9l-.4-.1c-1.8-.5-3.4-1.4-5.1-2.3l-1-.6l-.2-.8l.4 .2c6.7 4.2 15.5 5.4 23.2 3.6c4.9-1.3 9.9-3.8 13.4-7.5z"], ["t", 0, -0.4, "M52.8 77.6l1.6 1.5c.8 .8 1.6 1.4 2.5 1.9l.5 .4c6.3 4.2 14.2 5.5 21.6 4.1c3.7-.7 7-1.8 10.1-4l.2 .7c-6 4.5-14.4 5.1-21.5 4.1c-5.2-.9-12-3.8-15.2-8.2l.2-.5z"], ["t", 0, -0.4, "M81.1 45.5h4.6v.5h-1.2c.4 1.9 .9 3.6 1.7 5.3l.6 1.3l1.3 2.9l.2 .5c1 2.1 2.3 3.7 4 5.3l.4 .4l-.2 .7c-2.5-2.1-3.9-4.6-5.4-7.5l-.2-.5l-1.6-3.8l-.2-.5c-.5-1.3-1-2.5-1.2-3.9l-2.8-.3v-.4z"], ["t", 0, -0.4, "M14.7 45.5h4.4v.4l-2.6 .1l-.2 1.2l-.3 .9l-.2 .6l-.2 .5l-.2 .6c-.4 .9-.7 1.9-1.2 2.8l-.2 .6c-1.3 3.2-3 6.9-6.1 8.7l-.4 .2v-.7l.9-.7c2.3-1.7 3.5-4.2 4.6-6.8l.6-1.5c1-2 1.8-4.2 2.4-6.4l-.5 .1l-.8-.2v-.4z"], ["t", 1, -0.6, "M19.4 34.9h2l-.1 1.5v.8l-.3 1.3c-.7 0-1.1 0-1.8-.3l.2-3.3z"], ["t", 1, -0.6, "M19.1 40.6h1.9v1.4l-.1 .7l-.2 1.5l-1.8-.6c0-2.1 0-2.1 .2-3z"], ["t", 0, -0.6, "M80.8 43.4l.3 .2c-.2 .6-.2 .6-.5 .9l-.5 .3l-.5 .3l-.6 .3l-1 .6l-.5 .3l-.8 .6h-1.2v-1.5c.9-.2 1.5-.1 2.3 .1v-.3l.8-.5l.4-.2l.4-.3l1.4-.8z"], ["t", 0, -0.6, "M18.9 43.6c.8 .1 1.3 .4 2 .8l1.1 .6l.6 .3l.4 .2v.4h.4c.4 .1 .4 .1 .9 .5v.3l.5-.2v.5c-1.2 0-2-.6-2.9-1.1l-.8-.4l-.7-.5l-.4-.2l-.9-.6l-.2-.6z"], ["t", 0, -0.2, "M74.9 45.5c-.1 1.7-.1 1.7-.5 2.2l-.4 .3l-.5 .5l-.9 .3l.1-1l.1-.6c.1-.6 .3-.8 .8-1.2c.8-.5 .8-.5 1.3-.5z"], ["t", 1, -0.6, "M19.1 38.7h1.9v1.8l-.8-.1h-.5c-.5-.1-.5-.1-.6-.3v-1.4z"], ["t", 1, -0.6, "M19.4 33.1h2v1.5h-2v-1.5z"], ["t", 0, -0.2, "M26 46.7c1.3 .4 1.3 .4 1.8 .9l.1 1.1c-.8-.3-1.3-.6-1.9-1.2v-.8z"], ["t", 1, -0.6, "M80.3 30l.5 .2v3.9h-.4l-.2-2.8l.1-.7v-.6z"], ["t", 1, -0.6, "M80.6 36.7h.5v3.8h-.3c-.2-1.3-.2-2.5-.2-3.8z"]] } };
+  var KONTUR2 = "#1d1b1a";
+  var ton2 = (K3, f13) => f13 > 0 ? hell3(K3.c, f13) : f13 < 0 ? dunkel2(K3.c, -f13) : K3.c;
+  function b30Zeichner(S, t5, p2) {
+    const D = B30_DATEN[p2.b30];
+    if (!D) return;
+    if (!S.tex && p2.muster && p2.muster !== "uni" && istMuster(p2.muster)) S.tex = musterFuellung(S, p2.muster);
+    const musterGewaehlt = p2.dessin === "" || p2.muster && p2.muster !== p2.bildmuster;
+    const K3 = [S];
+    const n3 = 1 + Math.max(0, ...D.regionen.filter((r4) => r4[0] === "t" || r4[0] === "m").map((r4) => r4[1]));
+    for (let i = 1; i < n3; i++) {
+      const f13 = p2.farben?.[i - 1];
+      K3.push(f13 === "gleich" || f13 == null ? S : materialDefs(f13, p2.materialien?.[i - 1] ?? "baumwolle", S.defs));
+    }
+    if (p2.glatt) K3.forEach((k5, i) => {
+      if (i > 0 || !p2.muster || p2.muster === "uni") {
+        if (k5.m === "strick" || k5.m === "kaschmir" || k5.m === "merino") k5.tex = null;
+      }
+    });
+    const clip = S.id + "b30";
+    S.defs.push(`<clipPath id="${clip}"><path d="${D.kontur}" fill-rule="evenodd"/></clipPath>`);
+    t5.push(`<ellipse cx="50" cy="${D.boden + 1.8}" rx="${Math.min(32, D.breite * 0.45).toFixed(1)}" ry="2.4" fill="#000" opacity="0.08"/>`);
+    t5.push(`<g clip-path="url(#${clip})">`);
+    const ueber = musterGewaehlt && D.regionen.some((r4) => r4[0] === "m") && S.tex;
+    t5.push(`<path d="${D.kontur}" fill="${S.c}" fill-rule="evenodd"/>`);
+    for (const r4 of D.regionen) {
+      const d4 = r4[r4.length - 1];
+      if (r4[0] === "k") t5.push(`<path d="${d4}" fill="${KONTUR2}"/>`);
+      else if (r4[0] === "f") t5.push(`<path d="${d4}" fill="${r4[1]}"/>`);
+      else if (ueber && r4[1] === 0) {
+        const c = ton2(S, r4[0] === "m" ? 0 : r4[2]);
+        t5.push(`<path d="${d4}" fill="${c}"/>`);
+      } else {
+        const k5 = K3[r4[1]];
+        t5.push(`<path d="${d4}" fill="${ton2(k5, r4[2])}"/>`);
+        if (k5.tex) t5.push(`<path d="${d4}" fill="${k5.tex}"/>`);
+      }
+    }
+    if (ueber) t5.push(`<path d="${D.kontur}" fill="${S.tex}" fill-rule="evenodd"/>`);
+    t5.push(`<path d="${D.kontur}" fill="url(#${S.id}l)" fill-rule="evenodd"/>`);
+    if (S.glanz) t5.push(`<path d="${D.kontur}" fill="url(#${S.id}g)" fill-rule="evenodd"/>`);
+    t5.push("</g>");
+    if (p2.umriss) t5.push(`<path d="${D.kontur}" fill="none" stroke="${KONTUR2}" stroke-width="0.9" stroke-linejoin="round" fill-rule="evenodd"/>`);
+  }
+
+  // src/kit/mode/erweiterung-b30.js
+  var SILHOUETTEN7 = { "b30buegelloserbh": { "gruppe": "waesche", "zeichner": "z:b30", "p": { "b30": "b30buegelloserbh", "farben": ["gleich"], "materialien": ["baumwolle"] }, "material": "baumwolle", "farbe": "sand", "model": null, "nur": "damen" }, "b30harnessbody": { "gruppe": "waesche", "zeichner": "z:b30", "p": { "b30": "b30harnessbody", "umriss": true, "farben": ["gleich"], "materialien": ["satin"] }, "material": "satin", "farbe": "marine", "model": null, "nur": "damen" }, "b30tshirtbh": { "gruppe": "waesche", "zeichner": "z:b30", "p": { "b30": "b30tshirtbh", "farben": ["gleich"], "materialien": ["satin"] }, "material": "satin", "farbe": "beige", "model": null, "nur": "damen" } };
+  var MODEL = {};
+  for (const [id, mt] of Object.entries(MODEL)) SILHOUETTEN7[id].modelTeile = (p2, farbe2, material3) => ({ ...mt, farbe: farbe2, material: material3, muster: void 0 });
+  var ZEICHNER8 = { b30: b30Zeichner };
+
   // src/kit/mode/silhouetten.js
   var o3 = (p2, model = "oberteil", material3 = "baumwolle", farbe2 = "wei\xDF") => ({ gruppe: "oberteil", zeichner: "oberteil", p: p2, material: material3, farbe: farbe2, model });
   var h3 = (p2, material3 = "baumwolle", farbe2 = "sand") => ({ gruppe: "unterteil", zeichner: "hose", p: p2, material: material3, farbe: farbe2, model: "hose" });
@@ -172994,7 +173046,7 @@ void main() {
   var j3 = (art, material3, farbe2, p2 = {}) => ({ gruppe: "jacke", zeichner: "jacke", p: { art, ...p2 }, material: material3, farbe: farbe2, model: "jacke" });
   var d3 = (gruppe3, id, material3, farbe2, model = null, p2 = {}) => ({ gruppe: gruppe3, zeichner: "ding:" + id, p: p2, material: material3, farbe: farbe2, model });
   var a = (gruppe3, alt, material3, farbe2, model = null, p2 = {}) => ({ gruppe: gruppe3, zeichner: "alt:" + alt, p: p2, material: material3, farbe: farbe2, model });
-  var SILHOUETTEN7 = {
+  var SILHOUETTEN8 = {
     // Oberteile
     tshirt: o3({ aermel: "kurz", kragen: "rund" }),
     babytee: o3({ aermel: "kurz", kragen: "rund", passform: "tailliert", laenge: "crop" }, "oberteil", "baumwolle", "rosa"),
@@ -173112,22 +173164,22 @@ void main() {
     parfum: a("beauty", "Parfum", "glas", "flieder"),
     plueschtier: a("spielzeug", "Pl\xFCschtier", "polyester", "camel")
   };
-  for (const [id, s2] of Object.entries(SILHOUETTEN7)) if (s2.gruppe === "rock" || s2.gruppe === "kleid") s2.nur = "damen";
-  for (const id of ["babytee", "traegertop", "croptop", "schluppenbluse", "tunika", "wickelshirt"]) SILHOUETTEN7[id].nur = "damen";
-  Object.assign(SILHOUETTEN7.kinderkleid, { nur: "kinder", geschlecht: "damen" });
-  SILHOUETTEN7.kinderbody.nur = "kinder";
-  Object.assign(SILHOUETTEN7, SILHOUETTEN, SILHOUETTEN2, SILHOUETTEN3, SILHOUETTEN4, SILHOUETTEN5, SILHOUETTEN6);
-  var ZEICHNER_ERWEITERT = { ...ZEICHNER2, ...ZEICHNER3, ...ZEICHNER4, ...ZEICHNER5, ...ZEICHNER6, ...ZEICHNER7 };
-  var SILHOUETTEN_IDS = Object.keys(SILHOUETTEN7);
+  for (const [id, s2] of Object.entries(SILHOUETTEN8)) if (s2.gruppe === "rock" || s2.gruppe === "kleid") s2.nur = "damen";
+  for (const id of ["babytee", "traegertop", "croptop", "schluppenbluse", "tunika", "wickelshirt"]) SILHOUETTEN8[id].nur = "damen";
+  Object.assign(SILHOUETTEN8.kinderkleid, { nur: "kinder", geschlecht: "damen" });
+  SILHOUETTEN8.kinderbody.nur = "kinder";
+  Object.assign(SILHOUETTEN8, SILHOUETTEN, SILHOUETTEN2, SILHOUETTEN3, SILHOUETTEN4, SILHOUETTEN5, SILHOUETTEN6, SILHOUETTEN7);
+  var ZEICHNER_ERWEITERT = { ...ZEICHNER2, ...ZEICHNER3, ...ZEICHNER4, ...ZEICHNER5, ...ZEICHNER6, ...ZEICHNER7, ...ZEICHNER8 };
+  var SILHOUETTEN_IDS = Object.keys(SILHOUETTEN8);
 
   // src/kit/mode/produkt.js
   var FLAT2 = { oberteil: oberteilFlat, hose: hoseFlat, rock: (S, t5, p2) => rockFlat(S, t5, p2, 16), kleid: kleidFlat, jacke: jackeFlat };
   var normMaterial = (m) => String(m ?? "").toLowerCase().replace("bio-baumwolle", "baumwolle").replace("\xFC", "ue");
   function aufloesen(bild4) {
     const b4 = typeof bild4 === "string" ? { silhouette: bild4 } : bild4 ?? {};
-    const s2 = SILHOUETTEN7[b4.silhouette] ?? SILHOUETTEN7.tshirt;
+    const s2 = SILHOUETTEN8[b4.silhouette] ?? SILHOUETTEN8.tshirt;
     const { silhouette, ...rest } = b4;
-    return { id: SILHOUETTEN7[silhouette] ? silhouette : "tshirt", s: s2, p: { ...s2.p, ...rest } };
+    return { id: SILHOUETTEN8[silhouette] ? silhouette : "tshirt", s: s2, p: { ...s2.p, ...rest } };
   }
   function zoom(s2, p2) {
     if (s2.zoom) return typeof s2.zoom === "function" ? s2.zoom(p2) : s2.zoom;
@@ -174240,10 +174292,10 @@ void main() {
     const E9 = ctx.E, s2 = () => ctx.s();
     const da = typeof E9.produkte === "function";
     const ui = { aktiv: false, seite: "liste", marke: null, kategorie: null, k: 0, auslisten: null, neu: null, neuSchritt: 0, baumOffen: null, astOffen: null, model: /* @__PURE__ */ new Set(), haus: null, fach: null, zielgruppe: null, detail: null };
-    function sprecher2(text3, ton4 = "") {
+    function sprecher2(text3, ton5 = "") {
       const cpo = typeof E9.vorstandProfil === "function" ? E9.vorstandProfil(s2(), "cpo") : null;
       const p2 = cpo?.person;
-      return sprecher({ text: text3, unter: p2 ? `${p2.name} \xB7 Einkaufsvorstand` : "Produktentwicklung", person: p2 ? portraet(p2.portraet, 72) : "", ton: ton4 });
+      return sprecher({ text: text3, unter: p2 ? `${p2.name} \xB7 Einkaufsvorstand` : "Produktentwicklung", person: p2 ? portraet(p2.portraet, 72) : "", ton: ton5 });
     }
     function markenwahl(L3) {
       return chips(L3.marken.map((m) => [m.marke, `${farbpunkt(m.farbe)}${esc(m.name)}`]), ui.marke, (w2) => `data-a="marke" data-v="${esc(w2)}"`, "Eigenmarke", false, true);
@@ -175452,8 +175504,8 @@ void main() {
         if (eintrag2.gruppe) return '<div class="hw-pp-gruppe" style="top:' + pos + "px;height:" + HOEHE2 + 'px">' + esc(eintrag2.gruppe) + " \xB7 " + eintrag2.anzahl + "</div>";
         const h4 = eintrag2.haus;
         const wert = ui.sort === "marge" || ui.sort === "mietquote" ? pz3(h4[ui.sort], 1) : ui.sort === "substanz" ? Math.round(h4.substanz) + " / 100" : ui.sort === "restlaufzeitMiete" ? Math.round(h4.restlaufzeitMiete) + " Wochen" : ui.sort === "status" ? statusName[h4.status] ?? h4.status : geld(h4[ui.sort] ?? 0);
-        const ton4 = (ui.sort === "ebitda" || ui.sort === "marge") && (h4[ui.sort] ?? 0) < 0 ? " schlecht" : "";
-        return '<div class="hw-pp-zeile" role="listitem" data-haus="' + esc(h4.id) + '" data-wert="' + esc(h4[ui.sort] ?? "") + '" style="top:' + pos + "px;height:" + HOEHE2 + 'px"><input type="checkbox" class="hw-pp-wahl" data-pp-id="' + esc(h4.id) + '" aria-label="' + esc(h4.name) + ' ausw\xE4hlen"' + (ui.ausgewaehlt.has(h4.id) ? " checked" : "") + (!h4.steuerbar ? " disabled" : "") + ' /><button type="button" data-pp="haus" data-id="' + esc(h4.id) + '" class="hw-pp-name"><b>' + esc(h4.name) + "</b><small>" + esc(h4.stadt) + (h4.klasse ? " \xB7 " + esc(h4.klasse === "Premium" ? "Premium" : "Klasse " + h4.klasse) : "") + " \xB7 " + esc(statusName[h4.status] ?? h4.status) + (!h4.steuerbar && h4.status === "offen" ? " \xB7 nur Daten" : "") + '</small></button><span class="hw-wert' + ton4 + '"><i class="hw-ampel ' + esc(h4.ampel) + '" aria-label="Ampel ' + esc(AMPEL2.find((a2) => a2[0] === h4.ampel)?.[1] ?? "") + '"></i>' + esc(wert) + "</span></div>";
+        const ton5 = (ui.sort === "ebitda" || ui.sort === "marge") && (h4[ui.sort] ?? 0) < 0 ? " schlecht" : "";
+        return '<div class="hw-pp-zeile" role="listitem" data-haus="' + esc(h4.id) + '" data-wert="' + esc(h4[ui.sort] ?? "") + '" style="top:' + pos + "px;height:" + HOEHE2 + 'px"><input type="checkbox" class="hw-pp-wahl" data-pp-id="' + esc(h4.id) + '" aria-label="' + esc(h4.name) + ' ausw\xE4hlen"' + (ui.ausgewaehlt.has(h4.id) ? " checked" : "") + (!h4.steuerbar ? " disabled" : "") + ' /><button type="button" data-pp="haus" data-id="' + esc(h4.id) + '" class="hw-pp-name"><b>' + esc(h4.name) + "</b><small>" + esc(h4.stadt) + (h4.klasse ? " \xB7 " + esc(h4.klasse === "Premium" ? "Premium" : "Klasse " + h4.klasse) : "") + " \xB7 " + esc(statusName[h4.status] ?? h4.status) + (!h4.steuerbar && h4.status === "offen" ? " \xB7 nur Daten" : "") + '</small></button><span class="hw-wert' + ton5 + '"><i class="hw-ampel ' + esc(h4.ampel) + '" aria-label="Ampel ' + esc(AMPEL2.find((a2) => a2[0] === h4.ampel)?.[1] ?? "") + '"></i>' + esc(wert) + "</span></div>";
       }).join("");
     }
     function filterSetzen(format) {
@@ -176448,9 +176500,9 @@ void main() {
   var PHASEN = { konzept: "Konzept", umsetzung: "Umsetzung", rollout: "Rollout", abgeschlossen: "Abgeschlossen" };
   var prozent5 = (x2) => Math.round(x2 * 100) + " %";
   var risikoText = (x2) => (x2 * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " %";
-  function digitalSprecher(E9, s2, text3, ton4 = "", bereich2 = "IT") {
+  function digitalSprecher(E9, s2, text3, ton5 = "", bereich2 = "IT") {
     const p2 = E9.vorstandUebersicht?.(s2)?.ressorts?.find((x2) => x2.id === "cdo")?.person;
-    return sprecher({ text: text3, ton: ton4, unter: p2 ? `${p2.name} \xB7 Digitalvorstand` : `Bereichsleitung ${bereich2}`, person: portraetSVG(p2?.portraet ?? zufallsMerkmale("bereich:" + bereich2), 72) });
+    return sprecher({ text: text3, ton: ton5, unter: p2 ? `${p2.name} \xB7 Digitalvorstand` : `Bereichsleitung ${bereich2}`, person: portraetSVG(p2?.portraet ?? zufallsMerkmale("bereich:" + bereich2), 72) });
   }
   function itModul(ctx) {
     const { E: E9 } = ctx, s2 = () => ctx.s();
@@ -178521,9 +178573,9 @@ void main() {
       stadtNah = schicht("bandpass", 920);
       stadtStimmen = schicht("bandpass", 460);
     }
-    function musikNote(ton4, start, dauer, pegel) {
-      note(ton4, start, dauer, pegel, "sine", musik);
-      note(ton4 * 2, start, dauer * 0.85, pegel * 0.1, "triangle", musik);
+    function musikNote(ton5, start, dauer, pegel) {
+      note(ton5, start, dauer, pegel, "sine", musik);
+      note(ton5 * 2, start, dauer * 0.85, pegel * 0.1, "triangle", musik);
     }
     function musikNachziehen() {
       if (!aktiv7() || !laut("musik")) {
@@ -180062,7 +180114,7 @@ void main() {
     const nname = (n3) => n3.ebene === "hauscluster" ? clusterName3(s2(), n3.name) : n3.name;
     const vor = () => E9.planungAssistent(s2());
     const reiter = () => G22 + reiterUnten(REITER7, ui.tab, (id) => `data-pl-tab="${id}"`);
-    const cfo = (text3, ton4 = "") => vorstandSprecher(s2(), "cfo", "Finanzvorstand", text3, ton4);
+    const cfo = (text3, ton5 = "") => vorstandSprecher(s2(), "cfo", "Finanzvorstand", text3, ton5);
     function entwurf(D) {
       const e = D.entwurf;
       if (!e || e.stand !== "offen") return cfo("<b>Keine Planungsrunde offen.</b> Die n\xE4chste l\xE4uft in KW 40 bis 44.") + kopfbild("controlling") + rumpf2(abschnitt("Jahresplanung") + leer3("Den laufenden Jahresplan zeigt der Reiter Reporting.", "Keine Planungsrunde offen.", "", "planung") + knoepfe(knopf("Zum Reporting", 'data-pl-tab="report"', "zweit breit")));
@@ -180293,7 +180345,7 @@ void main() {
   var NAME3 = { logistik: "Instore-Logistik", verkauf: "Verkauf", kasse: "Kasse", verwaltung: "Verwaltung" };
   var KURZ3 = { logistik: "Logistik", verkauf: "Verkauf", kasse: "Kasse", verwaltung: "Verwaltung" };
   var pct2 = (n3) => Math.round(n3 * 100) + " %";
-  var ton2 = (n3) => n3 < 0.85 ? "schlecht" : n3 < 0.98 ? "achtung" : "";
+  var ton3 = (n3) => n3 < 0.85 ? "schlecht" : n3 < 0.98 ? "achtung" : "";
   var steuer = (a2, opts = {}) => Object.entries({ "data-pe": a2, ...opts }).map(([k5, v2]) => k5 + '="' + esc(String(v2)) + '"').join(" ");
   function personalModul(ctx) {
     const { E: E9 } = ctx;
@@ -180334,7 +180386,7 @@ void main() {
         zeile2({ was: "Springerbewegungen", wert: fmt.format(p2.springerSaldo) + " Std." })
       ]);
       out += abschnitt("Deckung KW " + (p2.woche % 52 + 1), "Plan zu Bedarf");
-      const kz = (g2) => ({ label: KURZ3[g2], wert: pct2(p2.gruppen[g2].deckung), ton: ton2(p2.gruppen[g2].deckung) === "schlecht" ? "schlecht" : "" });
+      const kz = (g2) => ({ label: KURZ3[g2], wert: pct2(p2.gruppen[g2].deckung), ton: ton3(p2.gruppen[g2].deckung) === "schlecht" ? "schlecht" : "" });
       out += gross2(GRUPPEN3.slice(0, 2).map(kz)) + gross2(GRUPPEN3.slice(2).map(kz));
       for (const g2 of GRUPPEN3) {
         const x2 = p2.gruppen[g2];
@@ -180368,7 +180420,7 @@ void main() {
           unter: `Krank ${pct2(h4.krank)} \xB7 Aushilfen ${fmt.format(h4.aushilfen)} Std. \xB7 Springer ${fmt.format(h4.springer)} Std.`,
           wert: pct2(h4.gruppen[min]),
           wertUnter: "knapp: " + KURZ3[min],
-          ton: ton2(h4.gruppen[min]),
+          ton: ton3(h4.gruppen[min]),
           tippbar: true,
           attr: steuer("haus", { "data-haus": h4.id }) + (h4.id === haus3 ? ' aria-current="true"' : "")
         });
@@ -181409,7 +181461,7 @@ void main() {
     const c = cockpit(s);
     $2("kasse").textContent = c.geldUnbegrenzt ? "unbegrenzt" : geld(c.cash);
     $2("kasse").classList.toggle("hw-schlecht", !c.geldUnbegrenzt && c.cash < 0);
-    const kachel3 = (titel, wert, ton4 = "") => `<div class="hw-g6-kz${ton4 ? " hw-" + ton4 : ""}"><span class="hw-marke">${titel}</span><b>${wert}</b></div>`;
+    const kachel3 = (titel, wert, ton5 = "") => `<div class="hw-g6-kz${ton5 ? " hw-" + ton5 : ""}"><span class="hw-marke">${titel}</span><b>${wert}</b></div>`;
     const FORMATNAME3 = { alle: "Alle", warenhaus: "Hartwig", sport: "Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
     const fx = cockpitFormat === "alle" ? null : c.formate.find((x2) => x2.format === cockpitFormat);
     const auswahl5 = '<select class="hw-g6-kzwahl" data-cockpit-format aria-label="Format">' + Object.entries(FORMATNAME3).filter(([id]) => id === "alle" || c.formate.some((x2) => x2.format === id && x2.haeuser)).map(([id, name2]) => '<option value="' + id + '"' + (id === cockpitFormat ? " selected" : "") + ">" + name2 + "</option>").join("") + "</select>";
@@ -181500,7 +181552,7 @@ void main() {
   var wk = null;
   var st = null;
   var ch = null;
-  var module2 = () => [ek, fi, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton3, zt, ch, ec, pp].filter(Boolean);
+  var module2 = () => [ek, fi, vs, mk, pr, po, org, rg, itM, pl, um, pe, es, wk, st, er, ton4, zt, ch, ec, pp].filter(Boolean);
   function panel(titel, unter, html, klasse = "") {
     for (const m of module2()) m.zu();
     menueZu();
@@ -182424,8 +182476,8 @@ void main() {
     }
   }
   $2("performance").addEventListener("click", diagnoseZeigen);
-  var ton3 = tonModul({ panel, spiel: () => s, ebitda13: () => s ? cockpit(s).ebitda13 : 0, zoom: () => K2.halb });
-  $2("ton").addEventListener("click", () => oeffneModul(ton3));
+  var ton4 = tonModul({ panel, spiel: () => s, ebitda13: () => s ? cockpit(s).ebitda13 : 0, zoom: () => K2.halb });
+  $2("ton").addEventListener("click", () => oeffneModul(ton4));
   var SCHWIERIGKEITEN2 = Array.isArray(SCHWIERIGKEITEN) && SCHWIERIGKEITEN.length ? SCHWIERIGKEITEN : [
     { id: "leicht", name: "Leicht", beschreibung: "Mehr Liquidit\xE4t, geduldige Banken und Lieferanten." },
     { id: "mittel", name: "Mittel", beschreibung: "Die Ausgangslage wie kalibriert." },
@@ -182509,7 +182561,7 @@ void main() {
     posteingang: po,
     oeffnePosteingang: (...a2) => oeffneModul(po, ...a2),
     performanceMessen: diagnoseZeigen,
-    ton: ton3,
+    ton: ton4,
     oeffneEinkauf,
     vorstand: vs,
     organisation: org,
@@ -182788,8 +182840,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-25T14:40:52.059Z" : null;
-    const v2 = true ? "36712ee" : "Entwicklung";
+    const iso = true ? "2026-10-26T13:08:23.775Z" : null;
+    const v2 = true ? "03696c9" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();
