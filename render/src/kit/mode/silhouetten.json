@@ -6620,6 +6620,113 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b19armreifset": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19armreifset",
+        "platz": "handgelenk"
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19armreif": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19armreif",
+        "platz": "handgelenk"
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19haarparfum": {
+      "gruppe": "beauty",
+      "standard": {
+        "b": "b19haarparfum"
+      },
+      "material": "baumwolle",
+      "farbe": "orange",
+      "model": null
+    },
+    "b19halskettenset": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19halskettenset",
+        "platz": "hals"
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19korsettguertel": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b19korsettguertel",
+        "platz": "taille"
+      },
+      "material": "baumwolle",
+      "farbe": "khaki",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19ohrenwaermer": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b19ohrenwaermer",
+        "platz": "ohren"
+      },
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19ohrhaenger": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19ohrhaenger",
+        "platz": "ohr"
+      },
+      "material": "baumwolle",
+      "farbe": "offwhite",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19ohrringset": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19ohrringset",
+        "platz": "ohr"
+      },
+      "material": "metall",
+      "farbe": "gold",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19ohrstecker": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19ohrstecker",
+        "platz": "ohr"
+      },
+      "material": "baumwolle",
+      "farbe": "bordeaux",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19ringset": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19ringset",
+        "platz": "halten"
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "zubehoer"
     }
   }
 }
