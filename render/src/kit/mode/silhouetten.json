@@ -6620,6 +6620,146 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b12fliegerjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12fliegerjacke",
+        "art": "lederjacke",
+        "laenge": "kurz",
+        "farben": [
+          "creme"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "leder",
+      "farbe": "cognac",
+      "model": "jacke"
+    },
+    "b12jacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12jacke",
+        "art": "overshirt",
+        "laenge": "kurz"
+      },
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": "jacke"
+    },
+    "b12kapuzenjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12kapuzenjacke",
+        "art": "bomber",
+        "laenge": "kurz",
+        "kapuze": true,
+        "farben": [
+          "camel"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "b12kunstfelljacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12kunstfelljacke",
+        "art": "teddy",
+        "laenge": "kurz",
+        "kapuze": true
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "b12militaryjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12militaryjacke",
+        "art": "blazer",
+        "laenge": "kurz"
+      },
+      "material": "wolle",
+      "farbe": "anthrazit",
+      "model": "jacke"
+    },
+    "b12peplumjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12peplumjacke",
+        "art": "lederjacke"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "b12racingjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12racingjacke",
+        "art": "track",
+        "laenge": "kurz",
+        "farben": [
+          "weiß",
+          "anthrazit"
+        ],
+        "materialien": [
+          "nylon",
+          "nylon"
+        ]
+      },
+      "material": "nylon",
+      "farbe": "jeansblau",
+      "model": "jacke"
+    },
+    "b12sakko": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12sakko",
+        "art": "sakko",
+        "revers": true
+      },
+      "material": "wolle",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "b12wildlederjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12wildlederjacke",
+        "art": "lederjacke",
+        "laenge": "kurz",
+        "farben": [
+          "braun"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "cognac",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "b12workerjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12workerjacke",
+        "art": "overshirt",
+        "laenge": "kurz",
+        "kapuze": true
+      },
+      "material": "baumwolle",
+      "farbe": "anthrazit",
+      "model": "jacke"
     }
   }
 }

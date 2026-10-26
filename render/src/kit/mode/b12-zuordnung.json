@@ -1,0 +1,41 @@
+{
+ "hinweis": "B12 (Wurf 4): Typ -> Silhouette. Die Typen kommen mit Q40 (noch nicht auf main). Nach dessen Merge im Engine-Eintrag bild: { silhouette } setzen und bildOffen entfernen.",
+ "paket": "B12",
+ "auftrag": "Q40",
+ "zuordnung": {
+  "Fliegerjacke": {
+   "silhouette": "b12fliegerjacke"
+  },
+  "Jacke": {
+   "silhouette": "b12jacke"
+  },
+  "Kapuzenjacke": {
+   "silhouette": "b12kapuzenjacke"
+  },
+  "Kunstfelljacke": {
+   "silhouette": "b12kunstfelljacke"
+  },
+  "Military-Jacke": {
+   "silhouette": "b12militaryjacke"
+  },
+  "Peplum-Jacke": {
+   "silhouette": "b12peplumjacke"
+  },
+  "Racing-Jacke": {
+   "silhouette": "b12racingjacke"
+  },
+  "Sakko": {
+   "silhouette": "b12sakko"
+  },
+  "Wildlederjacke": {
+   "silhouette": "b12wildlederjacke"
+  },
+  "Workerjacke": {
+   "silhouette": "b12workerjacke"
+  }
+ },
+ "nachschaerfen": {
+  "Kapuzenjacke": "Formtreue 3: schon im B-Bild keine Kapuze, nur ein Fellklecks am Hals, Rippbündchen und Rippsaum fehlen",
+  "Wildlederjacke": "Formtreue 3: B-Bild mit Schalkragen, Knopf und Saumbund statt durchgehender Fellblende an der offenen Front"
+ }
+}
