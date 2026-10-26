@@ -97,9 +97,14 @@ export function zubehoerTeil(zeichner, D, platz, popt = {}) {
     zeichne: (K, S, o) => {
       const q = { ...p, ...(o.muster37 ? { musterfeld: o.muster37, dessin: '' } : {}) };
       const roh = []; zeichner(S, roh, q, { ohneSchatten: true, ohneKopien: popt.einzeln });
-      const inhalt = roh.join('');
+      const inhalt0 = roh.join('');
       // einzeln: am Model nur das erste Teil eines Sets
-      const [x0, y0, x1, y1] = popt.einzeln && D.teil ? D.teil : D.bbox;
+      const [x0, y0, x1, y1b] = popt.einzeln && D.teil ? D.teil : D.bbox;
+      // oben: nur der obere Teil des Bildes (Mütze in Dreiviertelansicht ohne Ohrenklappen am Model)
+      const y1 = popt.oben ? y0 + (y1b - y0) * popt.oben : y1b;
+      const kappe = popt.oben ? S.id + 'ob' : null;
+      if (kappe) S.defs.push(`<clipPath id="${kappe}"><rect x="${f2(x0 - 2)}" y="${f2(y0 - 2)}" width="${f2(x1 - x0 + 4)}" height="${f2(y1 - y0 + 2)}"/></clipPath>`);
+      const inhalt = kappe ? `<g clip-path="url(#${kappe})">${inhalt0}</g>` : inhalt0;
       const teile = PLAETZE[platz](K, popt).map((z) => {
         // Hälften eines Paars: Bildhälfte ausschneiden und eigene bbox nehmen
         let bx0 = x0, bx1 = x1, ex = '';
