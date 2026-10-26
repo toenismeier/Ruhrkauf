@@ -161,8 +161,9 @@ import * as Q29 from './erweiterung-q29.js';
 import * as Q33 from './erweiterung-q33.js';
 import * as Q34 from './erweiterung-q34.js';
 import * as B01 from './erweiterung-b01.js';
-Object.assign(SILHOUETTEN, Q27.SILHOUETTEN, Q28.SILHOUETTEN, Q29.SILHOUETTEN, Q33.SILHOUETTEN, Q34.SILHOUETTEN, B01.SILHOUETTEN);
-export const ZEICHNER_ERWEITERT = { ...Q27.ZEICHNER, ...Q28.ZEICHNER, ...Q29.ZEICHNER, ...Q33.ZEICHNER, ...Q34.ZEICHNER, ...B01.ZEICHNER };
+import * as B16 from './erweiterung-b16.js';
+Object.assign(SILHOUETTEN, Q27.SILHOUETTEN, Q28.SILHOUETTEN, Q29.SILHOUETTEN, Q33.SILHOUETTEN, Q34.SILHOUETTEN, B01.SILHOUETTEN, B16.SILHOUETTEN);
+export const ZEICHNER_ERWEITERT = { ...Q27.ZEICHNER, ...Q28.ZEICHNER, ...Q29.ZEICHNER, ...Q33.ZEICHNER, ...Q34.ZEICHNER, ...B01.ZEICHNER, ...B16.ZEICHNER };
 
 export const SILHOUETTEN_IDS = Object.keys(SILHOUETTEN);
 

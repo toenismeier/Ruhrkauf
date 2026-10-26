@@ -6621,6 +6621,36 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b16klebebh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b16": "b16klebebh"
+      },
+      "material": "baumwolle",
+      "farbe": "beige",
+      "model": null,
+      "nur": "damen"
+    },
+    "b16longlinebh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b16": "b16longlinebh"
+      },
+      "material": "satin",
+      "farbe": "rosa",
+      "model": null,
+      "nur": "damen"
+    },
+    "b16strumpfhalter": {
+      "gruppe": "waesche",
+      "standard": {
+        "b16": "b16strumpfhalter"
+      },
+      "material": "satin",
+      "farbe": "schwarz",
+      "model": null,
+      "nur": "damen"
     }
   }
 }
