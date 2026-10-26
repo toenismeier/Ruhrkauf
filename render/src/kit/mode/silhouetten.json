@@ -6703,16 +6703,10 @@
       "gruppe": "jacke",
       "standard": {
         "b06": "b06kunstfellweste",
-        "art": "steppweste",
-        "farben": [
-          "beige"
-        ],
-        "materialien": [
-          "baumwolle"
-        ]
+        "art": "steppweste"
       },
       "material": "baumwolle",
-      "farbe": "natur",
+      "farbe": "weiß",
       "model": "jacke",
       "nur": "damen"
     },
