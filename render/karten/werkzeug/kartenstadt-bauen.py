@@ -309,7 +309,11 @@ def parkplaetze(strassen_alle):
             q = ring.interpolate(u)
             if not strasse_nah.contains(q): hecken.append((q.x, q.y))
             u += 2.2
-    return vereinigt(linien) if linien else Polygon(), vereinigt(pflaster) if pflaster else Polygon(), autos, hecken
+    # doppelte Autos (überlappende Teilflächen) entfernen: 4,5 m Mindestabstand
+    frei_autos = []
+    for a_ in autos:
+        if all(math.dist(a_[:2], b_[:2]) > 4.5 for b_ in frei_autos[-60:]): frei_autos.append(a_)
+    return vereinigt(linien) if linien else Polygon(), vereinigt(pflaster) if pflaster else Polygon(), frei_autos, hecken
 
 def boden_variante(name, schichten):
     log(f'[{name}] Straßen …')
@@ -658,6 +662,9 @@ for i, q in enumerate(_gp):
 _gleislinien = vereinigt([LineString(g['punkte']) for g in osm['gleise'] if len(g['punkte']) >= 2 and g['art'] != 'tram'])
 for i, q in enumerate(_gp):
     if q is not None and i not in aufbau and q.area > 0 and math.dist((q.centroid.x, q.centroid.y), (190, 371)) > 45 and q.intersection(_gleislinien).length > 1.5: aufbau.add(i)   # Gleis läuft unter dem Bau durch (Hbf-Empfangsgebäude bleibt)
+_bett_p = prep(GLEISBETT)
+for i, q in enumerate(_gp):
+    if q is not None and i not in aufbau and q.area > 0 and math.dist((q.centroid.x, q.centroid.y), (190, 371)) > 45 and _bett_p.contains(q.centroid): aufbau.add(i)   # Bau mitten im Gleisbett
 log(f'{len(aufbau)} Dachaufbauten und Gleisüberbauten entfernt')
 for gi, g in enumerate(lod['gebaeude']):
     if not g['boden'] or gi in aufbau: continue

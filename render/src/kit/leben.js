@@ -535,10 +535,12 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     lkw = rang.slice(0, anzahl).map((h) => {
       const s = netz.spuren.filter((l) => l.s.typ !== 'fussgaenger')
         .sort((a, b) => abstand(punkt(a, laenge(a) / 2), h.mitte) - abstand(punkt(b, laenge(b) / 2), h.mitte))[0];
-      const p = s ? koordinate(s.s, clamp(lageZu(s.s, h.mitte).u, s.s.von + 4, s.s.bis - 4),
-        s.s.achse === 'p' ? s.v : Math.sign(lageZu(s.s, h.mitte).v) * (s.s.breite / 2 - .8)) : h.weg;   // Kartenstadt: auf der echten Fahrspur halten
+      // Kartenstadt: auf der echten Fahrspur halten, Lage und Richtung wie ein fahrender Wagen
+      const aufSpur = s && s.s.achse === 'p' ? positionWagen({ lane: s, m: clamp(Math.abs(lageZu(s.s, h.mitte).u - wegStart(s)), 4, laenge(s) - 4), sprung: null }) : null;
+      const p = aufSpur ? { x: aufSpur.x, z: aufSpur.z } : s ? koordinate(s.s, clamp(lageZu(s.s, h.mitte).u, s.s.von + 4, s.s.bis - 4),
+        Math.sign(lageZu(s.s, h.mitte).v) * (s.s.breite / 2 - .8)) : h.weg;
       const ziel = h.weg; // Vom Fahrbahnrand bis zur Hausanlieferung und zurück.
-      return { start: p, ziel, fort: 0, winkel: s ? (s.s.achse === 'p' ? richtungsWinkel(s.s, s.dir, clamp(lageZu(s.s, h.mitte).u, s.s.von + 4, s.s.bis - 4)) : richtungsWinkel(s.s, 1)) : 0, hausId: h.h.id };
+      return { start: p, ziel, fort: 0, winkel: aufSpur ? aufSpur.winkel : s ? richtungsWinkel(s.s, 1) : 0, hausId: h.h.id };
     });
     letzteAuswahl = -1; zeichneInstanzen();
     if (modus !== 'aus') zeichnen();

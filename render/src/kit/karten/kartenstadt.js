@@ -37,7 +37,7 @@ const BODEN = {
 const COFFEE = {
   boden: { pflaster: '#f2e7cf', gehweg: '#fbf7ee', bord: '#d9cdb6', fahrbahn: '#596474', hofkern: '#efe2c9', platz: '#f4e9d2', gruen: '#98cf78', garten: '#acd48f',
     hof: '#acd48f', rasen2: '#8ac46c', sport: '#82bf66', kleingarten: '#a4cf86', fusszone: '#f7ecd6', umland: '#e6dcc4', parkplatz: '#8f9aab', gewerbe: '#e6dcc8', schulhof: '#f0dfc0',
-    weg: '#f6e6c2', markierung: '#fff6dc', linie: '#ffffff', wasser: '#5fb7e0', ufer: '#e9dcbc', bahnsteig: '#e3d8c4', schotter: '#b3a68f' },
+    weg: '#f6e6c2', markierung: '#fff6dc', linie: '#ffffff', wasser: '#5fb7e0', ufer: '#e9dcbc', bahnsteig: '#e3d8c4', schotter: '#c9bfae' },
   fassade: ['#f2e6cf', '#eedccb', '#e1e8df', '#e0e5ea', '#f1e7c9', '#ead8cc', '#ebe5d8', '#dde6e8', '#efe0cb', '#e6ece2', '#ecd6bf', '#e6e0d6'],
   steil: ['#c9654b', '#b65a47', '#d07a55', '#5f6b7a', '#6c7987'], flach: ['#c9c2b6', '#bfc7cb', '#cbbfb6', '#c4c9bd', '#bcc1c9'],
   hoch: ['#d6e2ea', '#e6dccb', '#dfe7e0', '#e2dcd4', '#dadfe8'], bau: ['#e4ded2', '#dcd8cf'],
@@ -108,11 +108,11 @@ export function kartenDaten(name, stil = kartenStil()) {
     gleise: d.gleise.map(([a, p]) => ({ art: GL_ART[a], punkte: paare(p) })),
     deko, gebaeude,
     // Netz: [Typ, Bandbreite dm, Einbahn, Knoten a, Knoten b, Punkte, Spuren (Versatz links dm, Richtung)…]
-    netz: (d.netz ?? []).map(([typ, breite, einbahn, a, b, p, sp, fs = 15]) => {
+    netz: (d.netz ?? []).map(([typ, breite, einbahn, a, b, p, sp, fs = 15, mund = 0]) => {
       const spuren = []; for (let i = 0; i + 1 < (sp ?? []).length; i += 2) spuren.push({ links: sp[i] / 10, dir: sp[i + 1] });
       // Gehwegseiten, die neben der Fahrbahn dieser Variante liegen ([links, rechts] = Versatz −/+)
       const o = stil === 'coffee' ? 2 : 0, fussSeiten = [!!(fs & (1 << o)), !!(fs & (2 << o))];
-      return { typ: NETZ_TYP[typ], breite: breite / 10, einbahn: !!einbahn, a, b, punkte: paare(p), spuren, fussSeiten };
+      return { typ: NETZ_TYP[typ], breite: breite / 10, einbahn: !!einbahn, a, b, punkte: paare(p), spuren, fussSeiten, mund };
     }),
   };
   r.aufFahrbahn = fahrbahnMaske(r);
@@ -814,8 +814,8 @@ function gleis(S, punkte, art) {
     const qx = -(bz - az) / L, qz = (bx - ax) / L;
     // Straßenbahn: flaches Bett knapp unter Fahrbahnhöhe (auf Straßen verdeckt, im Grünen und im Betriebshof sichtbar)
     if (art === 'tram') S.box(L + 0.4, 0.06, 2.9, mx, 0.026, mz, '#9b958a', ry);
-    else S.box(L + 0.4, 0.24, breit, mx, HOEHE.schotter, mz, BODEN.schotter, ry);
-    for (const s of [-1, 1]) S.box(L + 0.05, 0.16, 0.14, mx + qx * s * spur / 2, art === 'tram' ? 0.12 : 0.3, mz + qz * s * spur / 2, BODEN.schiene, ry);
+    else S.box(L + 0.4, 0.24, breit, mx, HOEHE.schotter, mz, bodenFarbe('schotter'), ry);
+    for (const s of [-1, 1]) S.box(L + 0.05, 0.16, 0.14, mx + qx * s * spur / 2, art === 'tram' ? 0.12 : 0.3, mz + qz * s * spur / 2, PAL ? '#8a8279' : BODEN.schiene, ry);
   }
 }
 
@@ -902,7 +902,7 @@ const PARKFARBEN = ['#c9483e', '#2f6f8f', '#e6e2d9', '#3c4148', '#8a9199', '#d39
 function parkauto(B, x, z, w, f) {
   const ux = Math.cos(w), uz = -Math.sin(w);
   let qx = -uz, qz = ux; if (qx * BLICK.x + qz * BLICK.z < 0) { qx = -qx; qz = -qz; }
-  wandBox(B, PARKFARBEN[f % PARKFARBEN.length], x, 0.75, z, 4.1, 1.2, 1.75, ux, uz, qx, qz);
+  wandBox(B, PARKFARBEN[f % PARKFARBEN.length], x, 0.75, z, 3.9, 1.2, 1.7, ux, uz, qx, qz);
   wandBox(B, '#718d9d', x, 1.6, z, 2.0, 0.55, 1.55, ux, uz, qx, qz);
 }
 
@@ -972,7 +972,8 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
   const coffee = K.stil === 'coffee';
   for (const g of K.gebaeude) {
     const art = gebaeudeArt(g.fkt);
-    if (art === 'dach' || art === 'bruecke') continue;             // LoD2-Überdachungen (ersetzt durch Bahnsteigdächer) und Brückenplatten (Straßen und Gleise liegen flach)
+    if (art === 'dach' || art === 'bruecke') continue;
+    if ((g.flaeche < 400 || g.h < 7) && amGleisBaum(g.mx, g.mz)) continue;   // Häuschen zwischen Gleisen (Stellwerksbuden, Schuppen) entfallen             // LoD2-Überdachungen (ersetzt durch Bahnsteigdächer) und Brückenplatten (Straßen und Gleise liegen flach)
     { const m = Math.min(g.bbox[2] - g.bbox[0], g.bbox[3] - g.bbox[1]); if ((m < 3 && g.h > 8) || (m < 6 && g.h > 12 && g.h > 3 * m)) continue; }   // Masten, Stelen, Treppentürme   // Masten, Stelen, Werbepylone: wirken als schwebende Scheiben
     if (coffee && (art === 'bauwerk' || g.flaeche < 50 || g.h < 2.5)) continue;   // Coffee: keine Kleinbauten, Masten, Schuppen
     if (frei(g)) gebaeudeBauen(B, S, coffee ? abstrahiert(g) : g, kern(g.mx, g.mz), Math.hypot(g.mx - (dx + ox), g.mz - (dz + oz)) < dr);
@@ -994,9 +995,18 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
     } }
   const nahLaden = (x, z) => platz.some((p) => x > p.x - 4 && x < p.x + p.w + 4 && z > p.z - 4 && z < p.z + p.d + 4);
   for (const ring of K.bahnsteige) bahnsteig(B, ring);
+  // Tunnelportale: Straße taucht in eine Unterführung ab (Stützwände, Portalbalken), statt stumpf zu enden
+  for (const k of K.netz) for (const [bit, i0, i1] of [[1, 0, 1], [2, -1, -2]]) {
+    if (!(k.mund & bit) || k.punkte.length < 2) continue;
+    const pe = k.punkte.at(i0), pn = k.punkte.at(i1), L = Math.hypot(pn[0] - pe[0], pn[1] - pe[1]); if (L < 1) continue;
+    const ux = (pe[0] - pn[0]) / L, uz = (pe[1] - pn[1]) / L, qx = -uz, qz = ux, w = Math.max(5, k.breite) / 2 + 0.4;
+    for (const sgn of [-1, 1]) wandBox(B, '#b9b4aa', pe[0] - ux * 5 + qx * sgn * w, 0.6, pe[1] - uz * 5 + qz * sgn * w, 10, 1.2, 0.6, ux, uz, qx, qz);
+    wandBox(B, '#a8a399', pe[0], 2.0, pe[1], 0.9, 1.4, 2 * w + 0.6, ux, uz, qx, qz);
+    wandBox(B, '#2b2f34', pe[0] + ux * 0.5, 0.65, pe[1] + uz * 0.5, 0.3, 1.3, 2 * w - 0.4, ux, uz, qx, qz);
+  }
   K.dachModule.forEach((m, i) => { if (!K.daecher[i].some(([x, z]) => nahLaden(x, z))) dachModul(B, m); });
   for (const z of K.zuege) zugwagen(B, z);
-  if (I) for (const [x, z, w, f] of K.parkautos) if (!nahLaden(x, z)) parkauto(B, x, z, w, f);
+  if (I) for (const [x, z, w, f] of K.parkautos) if (!nahLaden(x, z) && !amGleisBaum(x, z)) parkauto(B, x, z, w, f);
   zeit.gebaeude = performance.now() - z0 - zeit.boden; if (scene) { B.bauen(scene); I?.bauen(scene); } else B.abgeben(S); zeit.abgeben = performance.now() - z0 - zeit.boden - zeit.gebaeude;
   const hoehen = new Map(), dachFlaechen = [];
   let maxH = 20;
