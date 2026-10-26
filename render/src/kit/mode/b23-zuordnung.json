@@ -1,0 +1,15 @@
+{
+ "hinweis": "B23: Artikeltyp (Engine, Q-Auftrag) -> Silhouette. Erzeugt aus bildpakete/B23/SVG/konf.json.",
+ "typen": {
+  "Balconette-Bikinioberteil": "b23balconette",
+  "Bandeau-Bikinioberteil": "b23bandeau",
+  "Boardshorts": "b23boardshorts",
+  "Bralette-Bikinioberteil": "b23bralette",
+  "Duft-Geschenkset": "b23duftset",
+  "Eyeliner": "b23eyeliner",
+  "High-Leg-Bikinislip": "b23highleg",
+  "Highlighter": "b23highlighter",
+  "Lip Tint": "b23liptint",
+  "Tanga-Bikinislip": "b23tanga"
+ }
+}
