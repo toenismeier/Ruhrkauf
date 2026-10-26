@@ -459,8 +459,61 @@ function poncho(K, S, o) {
   return t.join('');
 }
 
-const TEILE = { oberteil, hose, rock, kleid, jacke, poncho, schuhe, muetze, tasche };
-const REIHENFOLGE = ['schuhe', 'hose', 'rock', 'kleid', 'oberteil', 'jacke', 'poncho', 'tasche'];
+
+// Wurf 4, Bildpakete: Produktbild (Fassung B + vtracer) als Auflage am Model. o.zeichne(S, t, p) zeichnet in den Bildraum 0..100,
+// o.ausschnitt [x0, y0, x1, y1] wählt den Teil des Bildes (z. B. ein Ohrring aus dem Set), o.platz die Stelle am Körper,
+// o.b skaliert die Breite. Handschuhe werden als Ärmelstück + Hände in Stofffarbe gezeichnet (o.platz 'haende', o.bis).
+function auflage(K, S, o) {
+  if (o.platz === 'haende') return handschuhe(K, S, o);
+  if (o.platz === 'haube') return auflageHaube(K, S, o);
+  const t = [];
+  o.zeichne(S, t, { ...o.p, ohneSchatten: true, musterfeld: o.muster37 && o.muster37 !== 'uni' ? o.muster37 : undefined });
+  const [x0, y0, x1, y1] = o.ausschnitt ?? [0, 0, 100, 100];
+  const inhalt = t.join('');
+  const box = (cx, oben, w, h, ausr = 'xMidYMin') => `<svg x="${f(cx - w / 2)}" y="${f(oben)}" width="${f(w)}" height="${f(h)}" viewBox="${x0} ${y0} ${x1 - x0} ${y1 - y0}" preserveAspectRatio="${ausr} meet">${inhalt}</svg>`;
+  const { x, y, rx, ry } = K.kopf, b = o.b ?? 1, [hx, hy] = K.hand, verh = (y1 - y0) / (x1 - x0);
+  if (o.platz === 'kopf') { const w = 2 * rx * 1.25 * b, unten = y - ry * (o.unten ?? 0.25); return box(x, unten - w * 2, w, w * 2, 'xMidYMax'); }
+  if (o.platz === 'gesicht') { const w = 2 * rx * 1.08 * b; return box(x, y + ry * 0.04 - w * verh / 2, w, w * verh, 'xMidYMid'); }
+  if (o.platz === 'hals') { const w = K.hals.b * 2 * 3.2 * b; return box(100, K.hals.y1 - 5, w, w * 2); }
+  if (o.platz === 'ohren') { const w = rx * 0.42 * b; return [-1, 1].map((s) => box(x + s * rx * 0.98, y + ry * 0.12, w, w * verh)).join(''); }
+  if (o.platz === 'brust') { const w = 11 * b; return box(100 - K.breite(K.m.brust) * 0.5, K.m.brust - 14, w, w * verh); }
+  if (o.platz === 'handgelenk' || o.platz === 'finger') {
+    const yy = o.platz === 'finger' ? hy + 6 : K.m.handgelenk - 2, xm = (K.armAX(yy) + K.armIX(yy)) / 2;
+    const w = (o.platz === 'finger' ? 4 : 2 * (K.armAX(yy) - K.armIX(yy)) + 4) * b; return '<!--tasche-->' + box(o.platz === 'finger' ? hx : xm, yy - w * verh / 2, w, w * verh, 'xMidYMid');
+  }
+  if (o.platz === 'huefte') { const w = 26 * b; return box(100 + K.breite(K.m.huefte) * 0.45, K.m.huefte - 8, w, w * verh); }
+  // Taschen: in der Hand (Henkel an der Hand) oder quer über den Körper (Riemen von der Gegenschulter)
+  const w = 30 * b;
+  if (o.platz === 'quer') {
+    const sx = 200 - K.schulter.at(-1)[0] + 4, by = K.m.huefte - 10;
+    return '<!--tasche-->' + `<path d="M${f(sx)} ${f(K.m.schulterY - 2)} L${f(hx + 2)} ${f(by + 2)}" stroke="${S.cK}" stroke-width="1.6"/>` + box(hx + 4, by, w, w * verh);
+  }
+  return '<!--tasche-->' + box(hx + 2, hy - w * 0.12, w, w * verh);
+}
+
+// Haube/Kapuze frontal: Stoff um den Kopf mit Gesichtsöffnung, Bänder unter dem Kinn (o.baender 'schleife' | 'lang')
+function auflageHaube(K, S, o) {
+  const { x, y, rx, ry } = K.kopf, b = o.b ?? 1;
+  const e = (cx, cy, a, c) => `M${f(cx - a)} ${f(cy)} a${f(a)} ${f(c)} 0 1 0 ${f(2 * a)} 0 a${f(a)} ${f(c)} 0 1 0 ${f(-2 * a)} 0 Z`;
+  const d = e(x, y - ry * 0.08, rx * 1.28 * b, ry * 1.2 * b) + ' ' + e(x, y + ry * 0.14, rx * 0.84, ry * 0.9);
+  const z = [`<path d="${d}" fill="${S.c}" fill-rule="evenodd"/>`, S.tex ? `<path d="${d}" fill="${S.tex}" fill-rule="evenodd"/>` : '', `<path d="${d}" fill="url(#${S.id}l)" fill-rule="evenodd"/>`, `<path d="${d}" fill="none" stroke="${S.cK}" stroke-width="0.7" fill-rule="evenodd"/>`];
+  const ky = y + ry * 1.02;
+  if (o.baender === 'lang') for (const s of [-1, 1]) z.push(flaeche(S, glatt([[x + s * rx * 0.75, y + ry * 0.7, E], [x + s * rx * 0.95, y + ry * 0.75, E], [x + s * rx * 0.55, ky + 24, E], [x + s * rx * 0.3, ky + 24, E]], true, 0.2), { ton: -0.1 }));
+  else z.push(flaeche(S, glatt([[x - rx * 0.5, ky - 1.5], [x, ky + 1], [x + rx * 0.5, ky - 1.5], [x + rx * 0.45, ky + 3], [x, ky + 1.6], [x - rx * 0.45, ky + 3]], true, 0.3), { ton: -0.08 }));
+  return z.join('');
+}
+
+// Handschuhe: Ärmelstück vom Handgelenk bis o.bis ('handgelenk' | 'unterarm' | 'ellbogen') + Hände in Stofffarbe
+function handschuhe(K, S, o) {
+  const y1 = K.m.handgelenk + 4, y0 = o.bis === 'ellbogen' ? K.m.ellbogen - 2 : o.bis === 'unterarm' ? (K.m.ellbogen + K.m.handgelenk) / 2 : K.m.handgelenk - 3;
+  const stueck = (A, I) => { const sel = (P) => [[interp(P, y0), y0], ...P.filter(([, yy]) => yy > y0 && yy < y1), [interp(P, y1), y1]]; return [...sel(A), ...sel(I).reverse()]; };
+  const t = [];
+  for (const s of [1, -1]) { const sp = s > 0 ? (p) => p : spiegelX; t.push(flaeche(S, glatt(sp(stueck(K.armA, K.armI)), true, 0.3))); }
+  return '<!--tasche-->' + t.join('') + haendeSVG(K, S.c);
+}
+
+const TEILE = { oberteil, hose, rock, kleid, jacke, poncho, schuhe, muetze, tasche, auflage };
+const REIHENFOLGE = ['schuhe', 'hose', 'rock', 'kleid', 'oberteil', 'jacke', 'poncho', 'auflage', 'tasche'];
 
 // ─────────────────────────────────────────── Model
 export function modelSVG({ geschlecht = 'damen', zielgruppe = 'young', haut = HAUT[1], haar = { farbe: HAAR.braun, stil: 'lang' }, outfit = [], hintergrund = '#eef1f4', groesse = 260 } = {}) {
@@ -472,7 +525,7 @@ export function modelSVG({ geschlecht = 'damen', zielgruppe = 'young', haut = HA
   const oben = [];
   // Q37: muster37 (Musterfeld) ersetzt das Muster des Teils, ohne bisherige Model-Bilder zu verändern
   const stoff = (o) => { const S = materialDefs(o.farbe, o.material, defs, o.muster37 ? undefined : o.muster); if (o.muster37 && o.muster37 !== 'uni') S.tex = musterFuellung(S, o.muster37, { cx: 100, cy: o.teil === 'hose' || o.teil === 'rock' ? (K.m.huefte + K.m.knie) / 2 : K.m.brust + 4, s: K.zielgruppe === 'kinder' ? 1 : 1.25 }) ?? S.tex; return S; };
-  for (const o of sortiert) (o.teil === 'muetze' ? oben : teile).push(TEILE[o.teil](K, stoff(o), o));
+  for (const o of sortiert) (o.teil === 'muetze' || (o.teil === 'auflage' && (o.platz === 'kopf' || o.platz === 'haube' || o.platz === 'gesicht' || o.platz === 'ohren')) ? oben : teile).push(TEILE[o.teil](K, stoff(o), o));
   const hg = hintergrund ? `<rect width="200" height="420" fill="${hintergrund}"/><ellipse cx="100" cy="${f(K.fuss + 3)}" rx="${f(K.zielgruppe === 'kinder' ? 26 : 38)}" ry="4.5" fill="#000" opacity="0.09"/>` : '';
   // Teile hinter dem Körper (Kapuze im Nacken) herauslösen, Taschen über den Händen
   const nacken = [];

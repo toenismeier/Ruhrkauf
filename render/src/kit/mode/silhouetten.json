@@ -6621,6 +6621,113 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b20armbandset": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20armbandset"
+      },
+      "material": "metall",
+      "farbe": "flieder",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20creolenset": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20creolenset"
+      },
+      "material": "stein",
+      "farbe": "hellgrau",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20kordelkette": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20kordelkette"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "auflage"
+    },
+    "b20halsreif": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20halsreif",
+        "metallAusFarbe": true
+      },
+      "material": "metall",
+      "farbe": "gold",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20lariat": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20lariat"
+      },
+      "material": "stein",
+      "farbe": "bordeaux",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20schmuckset": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20schmuckset",
+        "metallAusFarbe": true
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20broschenset": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20broschenset",
+        "farben": [
+          "grau"
+        ],
+        "materialien": [
+          "stein"
+        ]
+      },
+      "material": "stein",
+      "farbe": "hellerdenim",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20layering": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20layering"
+      },
+      "material": "stein",
+      "farbe": "creme",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20ring": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20ring",
+        "metallAusFarbe": true
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "auflage"
+    },
+    "b20bowlingtasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b20bowlingtasche"
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": "auflage",
+      "nur": "damen"
     }
   }
 }
