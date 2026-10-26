@@ -6705,7 +6705,6 @@
         "aermel": "lang",
         "kragen": "wickel",
         "passform": "gerade",
-        "rippbund": true,
         "glatt": true
       },
       "material": "strick",
@@ -6747,6 +6746,10 @@
         "kragen": "hemd",
         "knopfleiste": true,
         "passform": "oversize",
+        "zonenmuster": [
+          1,
+          "karo"
+        ],
         "farben": [
           "weiß"
         ],
