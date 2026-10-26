@@ -6651,7 +6651,6 @@
         "laenge": "kurz",
         "passform": "weit",
         "komfortbund": true,
-        "umriss": true,
         "farben": [
           "sand"
         ],
@@ -6704,7 +6703,7 @@
         "umriss": true
       },
       "material": "baumwolle",
-      "farbe": "beige",
+      "farbe": "grau",
       "model": "tasche"
     },
     "b29muscheltasche": {
