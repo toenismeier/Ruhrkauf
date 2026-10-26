@@ -129,6 +129,12 @@ def strassen_karte():
         g = gueltig(p)
         if g is not None and not g.is_empty and len(baum_fb.query(g.buffer(1.0))) >= 2: fb.append(g)
     strassen = vereinigt(fb).intersection(gebiet).simplify(0.25).buffer(0)
+    # Im Gleisbett nur echte Straßenquerungen (Straßennetz) behalten; Restspuren von Bahntrassen entfallen
+    netzband = vereinigt([LineString(k['punkte']).buffer(9) for k in netz if k['typ'] != 'fussgaenger' and im(k['punkte'])])
+    strassen = strassen.difference(GLEISBETT.difference(netzband)).buffer(0)
+    # Parallele Richtungsfahrbahnen mit schmalen Restspalten (< 7 m) zu einem Band schließen, Ränder glätten (keine Zacken und Inselreste)
+    strassen = strassen.buffer(3.5, join_style=1).buffer(-3.5, join_style=1).buffer(-0.6, join_style=1).buffer(0.6, join_style=1).simplify(0.4).buffer(0)
+    strassen = vereinigt([q for q in teile(strassen) if q.area > 60])
     # Einzelne Fahrbahninseln ohne Anschluss (Wendekreise, Knoten von Parkwegen) weglassen: sie wirken als Platten mit Loch
     strassen = vereinigt([q for q in teile(strassen) if q.area > 400])
     parkfl = vereinigt(pk).intersection(gebiet).difference(strassen).simplify(0.25).buffer(0)

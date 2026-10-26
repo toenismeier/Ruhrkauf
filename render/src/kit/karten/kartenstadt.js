@@ -721,7 +721,7 @@ function gebaeudeBauen(B, S, g, kern, detail = true) {
     // Große Dächer (Kaufhäuser, Hallen): je Gebäude eine eigene Gestaltung, damit nicht jedes Großdach gleich aussieht
     if (g.flaeche > 1500) {
       const r = gs.r, lang = c - a > d - b;
-      const arten = g.flaeche > 8000 ? [1, 0, 3] : [Math.floor(r() * 4)];   // sehr große Dächer: Solarfeld, Oberlichter und Technik zusammen
+      const arten = g.flaeche > 8000 ? [1, 4, 2, 3] : [Math.floor(r() * 4)];   // sehr große Dächer: Solarfeld, Oberlichter und Technik zusammen
       let solarFeld = null;   // [x0, z0, x1, z1] des Solarfelds; Oberlichter sparen es aus
       for (const art of arten) {
       // Prüfung gegen die Dachfläche selbst (Grundriss und Dach weichen bei LoD2 teils ab)
@@ -729,6 +729,35 @@ function gebaeudeBauen(B, S, g, kern, detail = true) {
       const drin = (x, z) => imPolygon(x, z, dr) || imPolygon(x, z, g.boden);
       const innen = (px, pz, m) => drin(px, pz) && drin(px + m, pz + m) && drin(px - m, pz - m) && drin(px + m, pz - m) && drin(px - m, pz + m);
       const [ca, cb] = [(a + c) / 2, (b + d) / 2];
+      if (art === 4 && g.flaeche > 20000) {   // Riesendach: Dachfelder in zwei Grautönen (Bauabschnitte) und Technikgeräte im Raster
+        for (let px = a + 10; px < c - 10; px += 20) for (let pz = b + 10; pz < d - 10; pz += 20) {
+          if (!innen(px, pz, 9)) continue;
+          if (solarFeld && px > solarFeld[0] - 10 && px < solarFeld[2] + 10 && pz > solarFeld[1] - 10 && pz < solarFeld[3] + 10) continue;
+          const k = (Math.floor(px / 20) + 2 * Math.floor(pz / 20)) % 5;
+          S.box(19.6, 0.06, 19.6, px, g.h + 0.04, pz, k % 2 ? '#b4b8bb' : '#c3c6c8');
+          if (k === 0) S.box(3, 1.4, 2.2, px + 4, g.h + 0.7, pz - 3, '#8f969c');
+          else if (k === 2) { S.box(2, 1.6, 2, px - 5, g.h + 0.8, pz + 4, '#d9dcde'); S.box(2, 1.6, 2, px - 2, g.h + 0.8, pz + 4, '#d9dcde'); }
+        }
+      }
+      if (art === 4) {            // Lichtbänder (Einkaufszentrum): zwei, drei durchgehende Glasstreifen entlang der langen Achse
+        const n = 2 + Math.floor(r() * 2), quer = lang ? d - b : c - a;
+        for (let k = 1; k <= n; k++) {
+          const v = (lang ? b : a) + quer * k / (n + 1);
+          for (let u = (lang ? a : b) + 6; u < (lang ? c : d) - 6; u += 3) {
+            const px = lang ? u : v, pz = lang ? v : u;
+            if (!innen(px, pz, 3)) continue;
+            if (solarFeld && px > solarFeld[0] - 3 && px < solarFeld[2] + 3 && pz > solarFeld[1] - 3 && pz < solarFeld[3] + 3) continue;
+            S.box(lang ? 3.05 : 3.2, 0.9, lang ? 3.2 : 3.05, px, g.h + 0.45, pz, '#a9cbd9');
+          }
+        }
+        continue;
+      }
+      if (art === 2 && arten.length > 1) {   // Gründach-Inseln auf großem Dach (nicht flächig)
+        for (let k = 0; k < 5; k++) { const px = a + (c - a) * (0.15 + r() * 0.7), pz = b + (d - b) * (0.15 + r() * 0.7);
+          if (!innen(px, pz, 7) || (solarFeld && px > solarFeld[0] - 8 && px < solarFeld[2] + 8 && pz > solarFeld[1] - 8 && pz < solarFeld[3] + 8)) continue;
+          S.box(12, 0.15, 10, px, g.h + 0.1, pz, '#97ba74'); for (let j = 0; j < 3; j++) S.box(1.6, 0.9, 1.6, px - 4 + j * 4, g.h + 0.6, pz + (j % 2 ? 2 : -2), '#6f9a58'); }
+        continue;
+      }
       if (art === 0) {            // Sheddach-Oberlichter in Reihen, nur im Mittelteil
         const sv = 8 + r() * 5;
         for (let u = (lang ? a : b) + 8; u < (lang ? c : d) - 8; u += sv) for (let v = (lang ? b : a) + 8; v < (lang ? d : c) - 8; v += 14) {
@@ -887,7 +916,15 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
   // Bäume, Hecken, Straßenmöbel und Lauben (vorberechnet in kartenstadt-bauen.py) als Instanzen wie in den Rasterstädten
   const I = scene ? new Instanzer() : null;
   const aufSpielhaus = (x, z) => plan.parzellen.some((p) => !p.leer && x > p.x - 1.5 && x < p.x + p.w + 1.5 && z > p.z - 1.5 && z < p.z + p.d + 1.5);
-  if (I && K.deko) dekoSetzen(I, B, K.deko, aufSpielhaus);
+  // Gleisnähe (Raster 2 m): Bäume mit Kronen über Gleisen und Bahnsteigen entfallen
+  const GZ2 = 2, gleisNah = new Set();
+  for (const g of K.gleise) for (let i = 1; i < g.punkte.length; i++) {
+    const [x0, z0] = g.punkte[i - 1], [x1, z1] = g.punkte[i], L = Math.hypot(x1 - x0, z1 - z0), n = Math.ceil(L / 1);
+    for (let j = 0; j <= n; j++) { const x = x0 + (x1 - x0) * j / n, z = z0 + (z1 - z0) * j / n;
+      for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) gleisNah.add((Math.floor(x / GZ2) + dx) * 100000 + Math.floor(z / GZ2) + dz); }
+  }
+  const amGleisBaum = (x, z) => gleisNah.has(Math.floor(x / GZ2) * 100000 + Math.floor(z / GZ2));
+  if (I && K.deko) dekoSetzen(I, B, K.deko, (x, z) => aufSpielhaus(x, z) || amGleisBaum(x, z));
   const t1 = S.anzahl; zeit.boden = performance.now() - z0;
   // Bauplätze der Spielhäuser freiräumen: echte Gebäude, deren Mitte auf einer Parzelle liegt, entfallen
   const platz = plan.parzellen.filter((p) => !p.leer);
@@ -928,7 +965,11 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
     for (const g of vorplatz) {
       const [a, b, c, d] = g.bbox;
       for (let x = a + 4; x < c - 2; x += 9) for (let z = b + 4; z < d - 2; z += 9) {
-        if (aufSpielhaus(x, z)) continue;
+        if (aufSpielhaus(x, z) || amGleisBaum(x, z)) continue;
+        // nur auf der Grundfläche des entfernten Gebäudes, nie auf Fahrbahn, Gleis oder Bahnsteig
+        if (g.boden.length > 2 && !imPolygon(x, z, g.boden)) continue;
+        if ([[0, 0], [2.5, 0], [-2.5, 0], [0, 2.5], [0, -2.5]].some(([u, v]) => K.aufFahrbahn(x + u, z + v))) continue;
+        if (K.bahnsteige.some((r) => imPolygon(x, z, r))) continue;
         if (rv() < 0.65) baumSetzen(I, rv() < 0.5 ? 'platane' : 'linde', x, 0, z, rv, 0.85 + rv() * 0.3);
         else I.setze('bank', x, 0.12, z, rv() < 0.5 ? 0 : Math.PI / 2, 1);
       }

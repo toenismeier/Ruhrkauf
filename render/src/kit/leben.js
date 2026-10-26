@@ -302,7 +302,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     const sollAuto = lanes.length ? Math.min(MAX_AUTO, Math.round(spurMeter / 30), Math.max(1, Math.round((20 + 40 * clamp((110 - k.halb) / 88, 0, 1)) * dichte))) : 0;
     // Passanten nach sichtbarer Gehweglänge (ein Mensch je 9 m), nicht pauschal 100 auf wenige Meter Gehweg
     const wegMeter = wege.reduce((n, l) => n + laenge(l), 0);
-    const sollFuss = wege.length ? Math.min(Math.round(100 * dichte), Math.round(wegMeter / 9)) : 0;
+    const sollFuss = wege.length ? Math.min(Math.round(100 * dichte), Math.round(wegMeter / 14)) : 0;
     const anpassen = (arr, n, liste, art, sonstige = []) => {
       const weiter = arr.filter((a) => a?.lane && liste.includes(a.lane)).slice(0, n);
       for (let i = 0; i < n * 18 && weiter.length < n; i++) {
