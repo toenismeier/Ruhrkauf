@@ -65,11 +65,11 @@ export function verkehrsnetz(plan) {
       const quer = s.typ === 'fussgaenger' ? 3.0 : (s.fahrbahn ?? fb) / 2 + 1.6;
       // Gehweglinie nur, wenn sie (abseits der Kreuzungsenden) nirgends auf Fahrbahn oder Gleis liegt
       // Gehweglinie mit 1 m Abstand zur gezeichneten Fahrbahn: vom Standardversatz nach außen suchen (Fahrbahnen sind oft breiter als das Netzband)
-      const neben = (v) => { if (!plan.aufFahrbahn) return true; const L = s.bis - s.von, rand = Math.min(8, L / 4), innen = -Math.sign(v) * 1.0;
+      const neben = (v) => { if (!plan.aufFahrbahn) return true; const L = s.bis - s.von, rand = Math.min(6, L / 5), innen = -Math.sign(v) * 1.4;
         for (let u = s.von + rand; u <= s.bis - rand; u += 2.5) { const q = koordinate(s, u, v), r = koordinate(s, u, v + innen); if (plan.aufFahrbahn(q.x, q.z) || plan.aufFahrbahn(r.x, r.z)) return false; } return true; };
       for (const seite of [-1, 1]) {
         if (!(s.fussSeiten?.[seite < 0 ? 0 : 1] ?? true) && !plan.aufFahrbahn) continue;
-        const v = [0, 0.8, 1.6, 2.4].map((d) => seite * (quer + d)).find((vv) => neben(vv));
+        const v = [0.4, 1.2, 2.0, 2.8].map((d) => seite * (quer + d)).find((vv) => neben(vv));
         if (v !== undefined) fusswege.push({ s, dir: 1, v, id: s.id + ':f:' + seite });
       }
       continue;
@@ -454,7 +454,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       const p = fussPosition(f);
       if (f.phase === 'drinnen' || !sichtbar(p) || !leute) continue;
       if (belegt.some((q) => ueberlappt(q, q.L, q.B, { x: p.x, z: p.z, L: 0.5, B: 0.5 }))) continue;   // nicht durch Fahrzeuge laufen
-      if (f.phase === 'weg' && plan?.aufFahrbahn?.(p.x, p.z)) continue;   // nie längs auf Fahrbahn oder Gleis
+      if (plan?.aufFahrbahn?.(p.x, p.z)) continue;   // nie auf Fahrbahn oder Gleis zeichnen
       // Blickrichtung: entlang des Wegs, beim Hinein/Heraus zum bzw. vom Eingang
       let winkel;
       if (f.haus && f.phase !== 'weg') {

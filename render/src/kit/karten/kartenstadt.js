@@ -29,7 +29,7 @@ const BLICK = new THREE.Vector3(Math.SQRT1_2 * Math.cos(Math.PI / 6), Math.sin(M
 const BODEN = {
   tunnel: '#3c4148', garten: '#a3b78f', haltestelle: '#d7d2c7', fusszone: '#e3dccc',
   weg: '#e2d6bd', linie: '#f4f2ea', ufer: '#d9d2bf', rasen2: '#8bbd7c',
-  umland: '#c9c5bd', pflaster: '#cfcac1', gehweg: '#e3e1dc', bord: '#bdb7ac', fahrbahn: '#767c84', parkstreifen: '#8b9097', rad: '#b0897a', markierung: FARBEN.markierung,
+  umland: '#cdc6b6', pflaster: '#d6cdb9', gehweg: '#ebe8e1', bord: '#bdb7ac', fahrbahn: '#646a73', parkstreifen: '#8b9097', rad: '#b0897a', markierung: FARBEN.markierung,
   gruen: '#9dbb88', hof: '#a3b78f', hofkern: '#d6d2c9', wasser: FARBEN.wasser, platz: '#d9d2c3', parkplatz: '#969ba2', bahnsteig: '#cfc9bd', schotter: '#a39b8e', schiene: '#5b5550',
   gewerbe: '#c4bfb5', schulhof: '#d0c3ad', sport: '#7fb36b', kleingarten: '#9fc27f',
 };
@@ -122,7 +122,7 @@ export function kartenDaten(name, stil = kartenStil()) {
 
 /** Rastermaske (1,5 m) der Fahrbahnen, Parkstreifen und Gleise: Passanten gehen dort nicht längs. */
 function fahrbahnMaske(K) {
-  const Z = 1.5, W = Math.ceil((K.breite + 400) / Z), H = Math.ceil((K.tiefe + 400) / Z), M = new Uint8Array(W * H);
+  const Z = 1.0, W = Math.ceil((K.breite + 400) / Z), H = Math.ceil((K.tiefe + 400) / Z), M = new Uint8Array(W * H);
   const zelle = (x, z) => { const i = Math.floor(x / Z), j = Math.floor(z / Z); return i >= 0 && j >= 0 && i < W && j < H ? j * W + i : -1; };
   for (const st of K.boden) {
     if (st.art !== 'fahrbahn' && st.art !== 'parkstreifen') continue;
@@ -716,19 +716,37 @@ function gebaeudeBauen(B, S, g, kern, detail = true) {
   }
   if (detail) dachdetails(B, g, gs);
   // Dachaufbauten auf großen Flachdächern
-  if (gs.flach && g.h > 6 && g.flaeche > 180 && g.boden.length > 2) {
+  if ((gs.flach || (g.traufe && g.h - g.traufe < 1.5)) && g.h > 6 && g.flaeche > 180 && g.boden.length > 2) {
     const [a, b, c, d] = g.bbox, anz = Math.min(4, 1 + Math.floor(g.flaeche / 900));
-    // Große Dächer (Kaufhäuser, Hallen): Oberlichtreihen und Solarfelder im Raster, damit keine leere Fläche entsteht
+    // Große Dächer (Kaufhäuser, Hallen): je Gebäude eine eigene Gestaltung, damit nicht jedes Großdach gleich aussieht
     if (g.flaeche > 1500) {
-      const lang = c - a > d - b, schritt = 9;
-      for (let u = (lang ? a : b) + 6; u < (lang ? c : d) - 6; u += schritt) {
-        for (let v = (lang ? b : a) + 5; v < (lang ? d : c) - 5; v += 7) {
-          const px = lang ? u : v, pz = lang ? v : u;
-          if (!imPolygon(px, pz, g.boden) || !imPolygon(px + 3, pz + 3, g.boden) || !imPolygon(px - 3, pz - 3, g.boden)) continue;
-          const solar = ((Math.floor(u / schritt) + Math.floor(v / 7)) % 3) === 0;
-          if (solar) S.box(lang ? 5 : 3.2, 0.35, lang ? 3.2 : 5, px, g.h + 0.4, pz, '#3f5466');
-          else S.box(lang ? 5 : 1.6, 0.6, lang ? 1.6 : 5, px, g.h + 0.35, pz, '#dfe6ea');
+      const r = gs.r, lang = c - a > d - b;
+      const arten = g.flaeche > 8000 ? [1, 0, 3] : [Math.floor(r() * 4)];   // sehr große Dächer: Solarfeld, Oberlichter und Technik zusammen
+      let solarFeld = null;   // [x0, z0, x1, z1] des Solarfelds; Oberlichter sparen es aus
+      for (const art of arten) {
+      // Prüfung gegen die Dachfläche selbst (Grundriss und Dach weichen bei LoD2 teils ab)
+      const dr = (g.dach.length ? g.dach.reduce((m, q) => (q.length > m.length ? q : m)) : g.boden).map((p) => [p[0], p[1]]);
+      const drin = (x, z) => imPolygon(x, z, dr) || imPolygon(x, z, g.boden);
+      const innen = (px, pz, m) => drin(px, pz) && drin(px + m, pz + m) && drin(px - m, pz - m) && drin(px + m, pz - m) && drin(px - m, pz + m);
+      const [ca, cb] = [(a + c) / 2, (b + d) / 2];
+      if (art === 0) {            // Sheddach-Oberlichter in Reihen, nur im Mittelteil
+        const sv = 8 + r() * 5;
+        for (let u = (lang ? a : b) + 8; u < (lang ? c : d) - 8; u += sv) for (let v = (lang ? b : a) + 8; v < (lang ? d : c) - 8; v += 14) {
+          const px = lang ? u : v, pz = lang ? v : u; if (!innen(px, pz, 5)) continue;
+          if (solarFeld && px > solarFeld[0] - 4 && px < solarFeld[2] + 4 && pz > solarFeld[1] - 4 && pz < solarFeld[3] + 4) continue;
+          S.box(lang ? 2 : 9, 0.9, lang ? 9 : 2, px, g.h + 0.45, pz, '#dfe6ea');
         }
+      } else if (art === 1) {     // ein großes Solarfeld in einer Dachhälfte
+        const x0 = r() < 0.5 ? a : ca, z0 = r() < 0.5 ? b : cb; solarFeld = [x0, z0, x0 + (c - a) / 2, z0 + (d - b) / 2];
+        for (let px = x0 + 5; px < x0 + (c - a) / 2 - 3; px += 4.2) for (let pz = z0 + 5; pz < z0 + (d - b) / 2 - 3; pz += 2.6) if (innen(px, pz, 3)) S.box(3.8, 0.25, 2.1, px, g.h + 0.35, pz, '#36495a');
+      } else if (art === 2) {     // Gründach mit Kiesrand
+        for (let px = a + 6; px < c - 6; px += 6) for (let pz = b + 6; pz < d - 6; pz += 6) if (innen(px, pz, 4)) S.box(6.05, 0.12, 6.05, px, g.h + 0.08, pz, '#97ba74');
+        for (let k = 0; k < 6; k++) { const px = a + (c - a) * (0.2 + r() * 0.6), pz = b + (d - b) * (0.2 + r() * 0.6); if (innen(px, pz, 3)) S.box(2.2, 0.5, 2.2, px, g.h + 0.35, pz, '#6f9a58'); }
+      } else {                    // Technikaufbau mit Lüftern und Treppenhauskopf
+        const tw = 8 + r() * 8, tt = 6 + r() * 6;
+        if (innen(ca, cb, 8)) { S.box(tw, 3, tt, ca, g.h + 1.5, cb, '#c3c0b8'); for (let k = 0; k < 4; k++) S.box(1.6, 1.2, 1.6, ca - tw / 2 + 2 + k * (tw - 4) / 3, g.h + 3.6, cb, '#8f969c'); }
+        const sx = a + (c - a) * 0.2, sz = b + (d - b) * 0.75; if (innen(sx, sz, 3)) S.box(4, 3.2, 4, sx, g.h + 1.6, sz, '#b9b5ad');
+      }
       }
     }
     for (let k = 0; k < anz; k++) {
@@ -796,7 +814,7 @@ function bahnsteigdach(B, ring) {
 function bahnsteig(B, ring) {
   const pts = offen(ring); if (pts.length < 3) return;
   const y = 0.76;
-  dachflaeche(B, pts.map((p) => [p[0], p[1], y]), PAL ? '#e8e1d2' : '#cfcac0');
+  dachflaeche(B, pts.map((p) => [p[0], p[1], y]), PAL ? '#c9c4bb' : '#bdb8ae');
   for (let i = 0; i < pts.length; i++) {
     const a = pts[i], b = pts[(i + 1) % pts.length], ex = b[0] - a[0], ez = b[1] - a[1], L = Math.hypot(ex, ez);
     if (L < 0.3) continue;

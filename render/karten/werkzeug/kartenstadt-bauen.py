@@ -91,6 +91,10 @@ gruen = vereinigt(flaechen_art.get('gruen', []))
 _frei = vereinigt(flaechen_art.get('gruen', []) + flaechen_art.get('sport', []) + flaechen_art.get('kleingarten', []))
 flaechen_art['platz'] = [q for g in flaechen_art.get('platz', []) for q in teile(g.difference(_frei)) if q.area > 5]
 gleisflaeche = vereinigt([LineString(g['punkte']).buffer(2.4 if g['art'] == 'tram' else 3.0) for g in osm['gleise'] if len(g['punkte']) >= 2 and im(g['punkte']) and g['art'] != 'tram'])
+# Gleisbett: alle Eisenbahngleise und Straßenbahn-Betriebsgleise, parallele Gleise zu einer Fläche geschlossen (kein Rasen zwischen Gleisen)
+_bettlinien = [LineString(g['punkte']) for g in osm['gleise'] if len(g['punkte']) >= 2 and im(g['punkte']) and (g['art'] != 'tram' or g.get('dienst'))]
+GLEISBETT = vereinigt([l.buffer(3.0) for l in _bettlinien]).buffer(5, join_style=1).buffer(-5, join_style=1).simplify(0.5).buffer(0)
+GLEISBETT_P = prep(vereinigt([GLEISBETT.buffer(1.5)] + flaechen_art.get('bahnsteig', []) + [LineString(g['punkte']).buffer(2.2) for g in osm['gleise'] if g['art'] == 'tram' and len(g['punkte']) >= 2]))   # keine Bäume und Möbel in Gleis und auf Bahnsteigen
 wege_linien = [w for w in osm.get('wege', []) if len(w['punkte']) >= 2 and im(w['punkte'])]
 
 # ── Straßen je Variante
@@ -101,9 +105,12 @@ def strassen_karte():
             for p in polys_geojson(f['geometry']): kreuz.append(lonlat_ring(p[0]))
     # Zufahrten, Feld- und Fußwege (highway=service/track/footway …) zeichnen keine Fahrbahn: sie erzeugen das Straßengeflecht
     dienst = set(json.load(open(os.path.join(ordner, 'dienstwege.json')))) if os.path.exists(os.path.join(ordner, 'dienstwege.json')) else set()
+    # Stadtbahnspuren nur als Fahrbahn, wenn die Straße auch Kfz-Spuren hat (eigene Bahntrassen sind keine Straße)
+    _kfz_strassen = {f['properties'].get('road') for f in o2s['lanes']['features'] if f['properties'].get('type') in ('Driving', 'Bus')}
     for f in o2s['lanes']['features']:
         t = f['properties'].get('type')
         if dienst and all(w in dienst for w in f['properties'].get('osm_way_ids', [])) and f['properties'].get('osm_way_ids'): continue
+        if f['properties'].get('road') not in _kfz_strassen: continue   # reine Bahntrassen und Wege: keine Spuren zeichnen
         ziel_l = fahrbahn if t in ('Driving', 'Bus', 'Construction', 'LightRail') else park if t in ('Parking', 'Shoulder') else rad if t == 'Biking' else None
         if ziel_l is not None:
             for p in polys_geojson(f['geometry']): ziel_l.append(lonlat_ring(p[0]))
@@ -251,7 +258,8 @@ def parkplaetze(strassen_alle):
 def boden_variante(name, schichten):
     log(f'[{name}] Straßen …')
     strassen, strassen_alle, zus = strassen_karte() if name == 'karte' else strassen_coffee()
-    gehweg_aussen = strassen_alle.buffer(3.4 if name == 'karte' else 3.0, join_style=2)
+    # Gehweg mit geschlossenen Zwickeln: schmale Restspalten (< 9 m) zwischen parallelen Straßen werden Gehweg statt Streifenmuster
+    gehweg_aussen = strassen_alle.buffer(3.4 if name == 'karte' else 3.0, join_style=2).buffer(4.5, join_style=1).buffer(-4.5, join_style=1).simplify(0.3).buffer(0)
     bord = strassen_alle.buffer(0.4, join_style=2).difference(strassen_alle)
     gehweg = gehweg_aussen.difference(strassen_alle).difference(bord).simplify(0.3).buffer(0)
     bord = bord.simplify(0.2).buffer(0)
@@ -268,9 +276,7 @@ def boden_variante(name, schichten):
         a = {'bahngelaende': 'rasen2'}.get(art, art)
         if art == 'bahngelaende':
             # Schotter nur im Gleisbereich (auch Straßenbahn-Betriebshöfe), Rest Böschungsgrün
-            bett = vereinigt([LineString(g['punkte']).buffer(3.2) for g in osm['gleise'] if len(g['punkte']) >= 2 and im(g['punkte'])])
-            bg = vereinigt(liste).intersection(gebiet)
-            T('schotter', bg.intersection(bett)); T('rasen2', bg.difference(bett)); continue
+            T('rasen2', vereinigt(liste).intersection(gebiet).difference(GLEISBETT)); continue
         if art == 'parkplatz':
             g = vereinigt(liste).intersection(gebiet).difference(strassen_alle.buffer(1.0)).difference(pk_pflaster)
             T('parkplatz', g); continue
@@ -318,8 +324,7 @@ def boden_variante(name, schichten):
             for _ in range(int(q.area / 1800)): flecken.append(Point(rr.uniform(x0, x1), rr.uniform(z0, z1)).buffer(rr.uniform(7, 16), 6))
         if flecken: T('rasen2', vereinigt(flecken).intersection(gruen))
     # Gleisbett unter allen Eisenbahngleisen (auch außerhalb von Bahngelände), sonst liegen Schienen auf Pflaster oder Rasen
-    bett_alle = vereinigt([LineString(g['punkte']).buffer(2.6) for g in osm['gleise'] if g['art'] != 'tram' and len(g['punkte']) >= 2 and im(g['punkte'])])
-    T('schotter', bett_alle.difference(strassen_alle.buffer(0.5)).difference(vereinigt(flaechen_art.get('bahngelaende', []))).intersection(gebiet))
+    T('schotter', GLEISBETT.difference(strassen_alle.buffer(0.5)).intersection(gebiet))
     T('fahrbahn', strassen)
     # Tunnelmünder: Straßen, die in eine Unterführung abtauchen, enden in einer dunklen Rampe statt stumpf an Gleis oder Bahnsteig
     muender = []
@@ -337,7 +342,8 @@ def boden_variante(name, schichten):
     for art, liste in zus.items():
         for g in liste:
             if g is None or g.is_empty: continue
-            if art == 'markierung' and not fb_maske.contains(g): continue   # keine Markierung neben der Fahrbahn (z. B. auf weggelassenen Zufahrten)
+            if art == 'markierung' and (not fb_maske.contains(g) or GLEISBETT.intersects(g)): continue
+            if art != 'markierung': g = g.difference(GLEISBETT.difference(strassen.buffer(0.3)))   # nichts Straßiges auf Gleisen   # keine Markierung neben der Fahrbahn (z. B. auf weggelassenen Zufahrten)
             T(art, g.intersection(gebiet))
     garten = vereinigt([garten, pk_pflaster])
     return {'strassen_alle': strassen_alle, 'gehweg_aussen': gehweg_aussen, 'garten': garten, 'hofpflaster': hofpflaster, 'hecken': hecken, 'wege': wege, 'plaetze': plaetze, 'pk_autos': pk_autos, 'pk_hecken': pk_hecken}
@@ -354,6 +360,7 @@ def deko(name, g):
     r = random.Random(77); out = []
     sperre_fb = prep(g['strassen_alle'].buffer(0.6))
     def setz(art, x, z, w=None):
+        if GLEISBETT_P.contains(Point(x, z)): return   # nichts im Gleis
         if abs(x - MX) <= R and abs(z - MZ) <= R: out.append((DEKO[art], x, z, r.random() * 2 * math.pi if w is None else w))
     strassennah = prep(g['gehweg_aussen'].buffer(2))
     for x, z in osm['baeume']:
@@ -510,6 +517,8 @@ bebaubar_out = [[P(list(q.exterior.coords))] + [P(list(i.coords)) for i in q.int
 _bau = vereinigt([Polygon([(p[0], p[1]) for p in g['boden'][0]]).buffer(0.5) for g in lod['gebaeude'] if g['boden'] and len(g['boden'][0]) >= 3 and (g['fkt'] or '').startswith('31001')])
 W = lambda x, z: [round(x + OX, 1), round(z + OZ, 1)]
 bahnsteige_out, daecher, zuege = [], [], []
+_alle_bau = vereinigt([Polygon([(p[0], p[1]) for p in g['boden'][0]]).buffer(0) for g in lod['gebaeude'] if g['boden'] and len(g['boden'][0]) >= 3 and not (g['fkt'] or '').startswith(('51009', '53001'))])
+_bau_p = prep(_alle_bau); _str_c = prep(geo_var['coffee']['strassen_alle']); _str_k = prep(geo_var['karte']['strassen_alle']); _dachgrund = {}
 _steige = [q for q in teile(vereinigt(flaechen_art.get('bahnsteig', [])).intersection(gebiet).difference(_bau)) if q.area > 40]
 _schienen = [LineString(g['punkte']) for g in osm['gleise'] if g['art'] == 'rail' and len(g['punkte']) >= 2 and im(g['punkte'])]
 _benutzt = set()
@@ -534,7 +543,14 @@ for g in _steige:
             _, (mx, mz), lm, bm = _achse(teil)
             if (mx * ux + mz * uz) < 0.7: mx, mz = ux, uz   # Modul folgt der Bahnsteigachse
             cc = teil.centroid
-            daecher.append(W(cc.x, cc.y) + [round(mx, 3), round(mz, 3), round(w - 1.2, 1), round(max(3, min(bm, Bq) * 0.72), 1)])
+            Lm, Bm = w - 1.2, max(3, min(bm, Bq) * 0.72)
+            qx_, qz_ = -mz, mx
+            modul = Polygon([(cc.x + sx * mx * Lm / 2 + sy * qx_ * Bm / 2, cc.y + sx * mz * Lm / 2 + sy * qz_ * Bm / 2) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))])
+            # kein Dach über Straße oder in einem Gebäude
+            _grund = 'bau' if _bau_p.intersects(modul) else 'strasse_c' if _str_c.intersects(modul) else 'strasse_k' if _str_k.intersects(modul) else None
+            _dachgrund[_grund] = _dachgrund.get(_grund, 0) + 1
+            if _grund is None:
+                daecher.append(W(cc.x, cc.y) + [round(mx, 3), round(mz, 3), round(Lm, 1), round(Bm, 1)])
         u += w
     # Züge an den Bahnsteigkanten: je Gleis höchstens einer, mittig am Bahnsteig
     zone = g.buffer(5).difference(g.buffer(0.8))
@@ -553,7 +569,7 @@ for g in _steige:
             p0 = lang.interpolate(start + k * 26.5 + 0.4); p1 = lang.interpolate(start + (k + 1) * 26.5 - 0.4)
             mx_, mz_ = (p0.x + p1.x) / 2, (p0.y + p1.y) / 2
             zuege.append(W(mx_, mz_) + [round(math.atan2(-(p1.y - p0.y), p1.x - p0.x), 3), typ, 1 if k == 0 else 2 if k == wagen - 1 else 0])
-log(len(bahnsteige_out), 'Bahnsteige', len(daecher), 'Dachmodule', len(zuege), 'Zugwagen')
+log(len(bahnsteige_out), 'Bahnsteige', len(daecher), 'Dachmodule', len(zuege), 'Zugwagen', _dachgrund)
 
 # ── Gebäude mit Dachdreiecken
 def dach_index(ring):
@@ -585,7 +601,7 @@ for i, q in enumerate(_gp):
     if q is not None and q.area > 0 and _gleis_p.intersects(q) and q.intersection(gleisflaeche).area > 0.12 * q.area: aufbau.add(i)
 _gleislinien = vereinigt([LineString(g['punkte']) for g in osm['gleise'] if len(g['punkte']) >= 2 and g['art'] != 'tram'])
 for i, q in enumerate(_gp):
-    if q is not None and i not in aufbau and q.area > 0 and _gleis_p.intersects(q) and q.intersection(_gleislinien).length > 10: aufbau.add(i)   # Gleis läuft unter dem Bau durch
+    if q is not None and i not in aufbau and q.area > 0 and math.dist((q.centroid.x, q.centroid.y), (190, 371)) > 45 and q.intersection(_gleislinien).length > 1.5: aufbau.add(i)   # Gleis läuft unter dem Bau durch (Hbf-Empfangsgebäude bleibt)
 log(f'{len(aufbau)} Dachaufbauten und Gleisüberbauten entfernt')
 for gi, g in enumerate(lod['gebaeude']):
     if not g['boden'] or gi in aufbau: continue
