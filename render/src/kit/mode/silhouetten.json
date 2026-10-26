@@ -6635,10 +6635,11 @@
     "b20creolenset": {
       "gruppe": "accessoire",
       "standard": {
-        "bp": "b20creolenset"
+        "bp": "b20creolenset",
+        "metallAusFarbe": true
       },
       "material": "stein",
-      "farbe": "hellgrau",
+      "farbe": "gold",
       "model": "auflage",
       "nur": "damen"
     },
@@ -6668,7 +6669,7 @@
         "bp": "b20lariat"
       },
       "material": "stein",
-      "farbe": "bordeaux",
+      "farbe": "rot",
       "model": "auflage",
       "nur": "damen"
     },

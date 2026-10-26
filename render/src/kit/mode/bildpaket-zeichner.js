@@ -6,6 +6,7 @@
 //   ['m', f, d]        Metall in fester Farbe (Gold oder Silber, p.metall), nur Helligkeit aus dem Bild
 //   ['k', d]           Kontur
 //   ['f', hex, d]      feste Farbe
+// D.textur 'flecht': Flechtleder als Struktur über dem Hauptstoff (entfällt, wenn das Musterfeld die Zone füllt).
 // Zone 0 = Hauptstoff (Farbe, Material, Musterfeld aus dem Artikeltyp), weitere Zonen über p.farben / p.materialien.
 import { materialDefs, hell, dunkel, FARBEN } from './stoff.js';
 import { musterFuellung, istMuster } from './q37-muster.js';
@@ -23,6 +24,13 @@ export function bildpaketZeichner(D, S, t, p) {
   const n = 1 + Math.max(0, ...D.regionen.filter((r) => r[0] === 't' || r[0] === 'u').map((r) => r[1]));
   for (let i = 1; i < n; i++) K.push(materialDefs(p.farben?.[i - 1] ?? 'grau', p.materialien?.[i - 1] ?? 'baumwolle', S.defs));
   const met = METALL[p.metall ?? D.metall] ?? METALL.silber;
+  let flecht = null;
+  if (D.textur === 'flecht' && !feld) {
+    flecht = S.id + 'fl';
+    S.defs.push(`<pattern id="${flecht}" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="none"/>`
+      + `<path d="M0 .6H2.5M0 1.85H2.5M2.5 3.1H5M2.5 4.35H5" stroke="#000" stroke-opacity=".28" stroke-width=".35"/><path d="M3.1 0V2.5M4.35 0V2.5M.6 2.5V5M1.85 2.5V5" stroke="#000" stroke-opacity=".28" stroke-width=".35"/>`
+      + `<path d="M0 0H5V5H0Z M2.5 0V5M0 2.5H5" stroke="#000" stroke-opacity=".38" stroke-width=".3" fill="none"/><path d="M.3 .3H2.2M2.8 2.8H4.7" stroke="#fff" stroke-opacity=".18" stroke-width=".3"/></pattern>`);
+  }
   const clip = S.id + 'bp';
   S.defs.push(`<clipPath id="${clip}"><path d="${D.kontur}" fill-rule="evenodd"/></clipPath>`);
   // Sets aus gleichen Teilen (z. B. Broschen-Set): ein Teil gezeichnet, D.kopien = [[cx, cy, drehung, skala], …] im Bildraum
@@ -40,7 +48,7 @@ export function bildpaketZeichner(D, S, t, p) {
       else if (r[0] === 'f') u.push(`<path d="${d}" fill="${r[1]}"/>`);
       else if (r[0] === 'm') u.push(`<path d="${d}" fill="${ton(met, r[1])}"/>`);
       else if (r[0] === 'u') { if (!feld || r[1] > 0) u.push(`<path d="${d}" fill="${ton(KK[r[1]].c, r[2])}"/>`); }
-      else { const k = KK[r[1]]; u.push(`<path d="${d}" fill="${ton(k.c, r[2])}"/>`); if (k.tex) u.push(`<path d="${d}" fill="${k.tex}"/>`); }
+      else { const k = KK[r[1]]; u.push(`<path d="${d}" fill="${ton(k.c, r[2])}"/>`); if (k.tex) u.push(`<path d="${d}" fill="${k.tex}"/>`); if (flecht && r[1] === 0) u.push(`<path d="${d}" fill="url(#${flecht})"/>`); }
     }
     // Licht von links wie alle Stoffe (stoff.js)
     u.push(`<path d="${D.kontur}" fill="url(#${S.id}l)" fill-rule="evenodd"/>`);
