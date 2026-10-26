@@ -6620,6 +6620,112 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b06muscleshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b06": "b06muscleshirt",
+        "aermel": "ohne",
+        "kragen": "rund",
+        "passform": "gerade"
+      },
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": "oberteil",
+      "nur": "herren"
+    },
+    "b06oneshoulder": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b06": "b06oneshoulder",
+        "aermel": "lang",
+        "kragen": "offshoulder",
+        "passform": "tailliert",
+        "laenge": "crop"
+      },
+      "material": "viskose",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b06westentop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b06": "b06westentop",
+        "aermel": "ohne",
+        "kragen": "v",
+        "passform": "tailliert"
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b06jeanstop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b06": "b06jeanstop",
+        "aermel": "kurz",
+        "kragen": "hemd",
+        "passform": "tailliert",
+        "knopfleiste": true
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b06sporttop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b06": "b06sporttop",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "tailliert",
+        "laenge": "crop"
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b06jeansweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "b06": "b06jeansweste",
+        "art": "anzugweste"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "jacke"
+    },
+    "b06kunstfellweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "b06": "b06kunstfellweste",
+        "art": "steppweste",
+        "farben": [
+          "beige"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "natur",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "b06weste": {
+      "gruppe": "jacke",
+      "standard": {
+        "b06": "b06weste",
+        "art": "anzugweste"
+      },
+      "material": "polyester",
+      "farbe": "grau",
+      "model": "jacke",
+      "nur": "damen"
     }
   }
 }
