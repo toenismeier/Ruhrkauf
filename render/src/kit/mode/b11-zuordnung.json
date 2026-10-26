@@ -19,8 +19,8 @@
    "silhouette": "b11paillettenshorts"
   }
  },
- "nachschaerfen": {
-  "Kunstledershorts": "Formtreue 2: schon das B-Bild ohne Gummizug-Raffung und ohne gerundete Seitenschlitze (Dolphin-Saum), liest sich als Hotpants",
-  "Paillettenshorts": "Formtreue 3: B-Bild ohne gewellten Spitzensaum, dafür Sportshort-Schlitze mit Paspel, die das Original nicht hat"
+ "formkorrektur": {
+  "Kunstledershorts": "B nicht besser geworden: im SVG-Schritt Dolphin-Saum (gerundete Außenecken) und gekräuselter Gummibund ergänzt",
+  "Paillettenshorts": "B nicht besser geworden: im SVG-Schritt Sportschlitze geschlossen, Saum mit Spitzenbogenkante"
  }
 }
