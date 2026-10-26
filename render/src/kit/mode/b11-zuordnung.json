@@ -1,0 +1,26 @@
+{
+ "hinweis": "B11 (Wurf 4): Typ -> Silhouette. Die Typen kommen mit Q39 (noch nicht auf main). Nach dessen Merge im Engine-Eintrag bild: { silhouette } setzen und bildOffen entfernen.",
+ "paket": "B11",
+ "auftrag": "Q39",
+ "zuordnung": {
+  "Strickshorts": {
+   "silhouette": "b11strickshorts"
+  },
+  "Sportshorts": {
+   "silhouette": "b11sportshorts"
+  },
+  "Kunstledershorts": {
+   "silhouette": "b11kunstledershorts"
+  },
+  "Leinenshorts": {
+   "silhouette": "b11leinenshorts"
+  },
+  "Paillettenshorts": {
+   "silhouette": "b11paillettenshorts"
+  }
+ },
+ "nachschaerfen": {
+  "Kunstledershorts": "Formtreue 2: schon das B-Bild ohne Gummizug-Raffung und ohne gerundete Seitenschlitze (Dolphin-Saum), liest sich als Hotpants",
+  "Paillettenshorts": "Formtreue 3: B-Bild ohne gewellten Spitzensaum, dafür Sportshort-Schlitze mit Paspel, die das Original nicht hat"
+ }
+}

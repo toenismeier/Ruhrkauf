@@ -6620,6 +6620,85 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b11kunstledershorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b11": "b11kunstledershorts",
+        "passform": "gerade",
+        "laenge": "kurz",
+        "leibhoehe": "hoch",
+        "komfortbund": true
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "hose"
+    },
+    "b11leinenshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b11": "b11leinenshorts",
+        "passform": "weit",
+        "laenge": "kurz",
+        "leibhoehe": "hoch",
+        "komfortbund": true
+      },
+      "material": "leinen",
+      "farbe": "camel",
+      "model": "hose"
+    },
+    "b11paillettenshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b11": "b11paillettenshorts",
+        "passform": "weit",
+        "laenge": "kurz",
+        "leibhoehe": "hoch",
+        "komfortbund": true
+      },
+      "material": "satin",
+      "farbe": "silber",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b11sportshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b11": "b11sportshorts",
+        "passform": "weit",
+        "laenge": "kurz",
+        "komfortbund": true,
+        "farben": [
+          "weiß"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "nylon",
+      "farbe": "marine",
+      "model": "hose"
+    },
+    "b11strickshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b11": "b11strickshorts",
+        "passform": "gerade",
+        "laenge": "kurz",
+        "leibhoehe": "hoch",
+        "komfortbund": true,
+        "glatt": true,
+        "farben": [
+          "marine"
+        ],
+        "materialien": [
+          "strick"
+        ]
+      },
+      "material": "strick",
+      "farbe": "olive",
+      "model": "hose",
+      "nur": "damen"
     }
   }
 }
