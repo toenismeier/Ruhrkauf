@@ -6573,6 +6573,7 @@
         "passform": "oversize",
         "rippbund": true,
         "strick": true,
+        "glatt": true,
         "farben": [
           "khaki",
           "weiß"
