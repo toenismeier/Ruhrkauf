@@ -62,7 +62,7 @@ export function bZeichner(DATEN) {
     teil.push(`<path d="${D.kontur}" fill="url(#${S.id}l)" fill-rule="evenodd"/>`, '</g>');
     const g = teil.join('');
     // Sets: weitere Teile als Kopien (Transform im Bildraum)
-    for (const tr of D.kopien ?? []) t.push(`<g transform="${tr}">${g}</g>`);
+    for (const tr of opt.ohneKopien ? [] : D.kopien ?? []) t.push(`<g transform="${tr}">${g}</g>`);
     t.push(g);
   };
 }
@@ -72,7 +72,7 @@ export function bZeichner(DATEN) {
 // paar: linke Bildhälfte an die rechte Körperseite im Bild (x < 100), rechte Hälfte gegenüber.
 const PLAETZE = {
   kopf: (K, o) => [{ x: K.kopf.x, y: K.kopf.y - K.kopf.ry * (o.y ?? 0.12), w: K.kopf.rx * (o.w ?? 2.4), ...(o.h ? { h: K.kopf.ry * o.h } : {}), ax: 0.5, ay: 1 }],
-  kopfganz: (K, o) => [{ x: K.kopf.x, y: K.kopf.y - K.kopf.ry * (o.y ?? 1.16), w: K.kopf.rx * (o.w ?? 2.5), ax: 0.5, ay: 0 }],
+  kopfganz: (K, o) => [{ x: K.kopf.x, y: K.kopf.y - K.kopf.ry * (o.y ?? 1.16), w: K.kopf.rx * (o.w ?? 2.5), ax: o.ax ?? 0.5, ay: 0 }],
   stirn: (K, o) => [{ x: K.kopf.x, y: K.kopf.y - K.kopf.ry * (o.y ?? 0.72), w: K.kopf.rx * (o.w ?? 2.2), ax: 0.5, ay: 0.5, haelfte: o.stueck ?? 0, rot: o.rot }],
   haar: (K, o) => [{ x: K.kopf.x + K.kopf.rx * 0.9, y: K.kopf.y - K.kopf.ry * (o.y ?? 0.5), w: K.kopf.rx * (o.w ?? 0.9), ax: 0.5, ay: 0.5 }],
   ohren: (K, o) => [{ x: K.kopf.x, y: K.kopf.y + K.kopf.ry * (o.y ?? 0.12), w: K.kopf.rx * (o.w ?? 2.55), ax: 0.5, ay: o.ay ?? 0.72 }],
@@ -96,9 +96,10 @@ export function zubehoerTeil(zeichner, D, platz, popt = {}) {
     teil: 'zubehoer', farbe, material, muster: p.muster, oben: OBEN.has(platz),
     zeichne: (K, S, o) => {
       const q = { ...p, ...(o.muster37 ? { musterfeld: o.muster37, dessin: '' } : {}) };
-      const roh = []; zeichner(S, roh, q, { ohneSchatten: true });
+      const roh = []; zeichner(S, roh, q, { ohneSchatten: true, ohneKopien: popt.einzeln });
       const inhalt = roh.join('');
-      const [x0, y0, x1, y1] = D.bbox;
+      // einzeln: am Model nur das erste Teil eines Sets
+      const [x0, y0, x1, y1] = popt.einzeln && D.teil ? D.teil : D.bbox;
       const teile = PLAETZE[platz](K, popt).map((z) => {
         // Hälften eines Paars: Bildhälfte ausschneiden und eigene bbox nehmen
         let bx0 = x0, bx1 = x1, ex = '';
