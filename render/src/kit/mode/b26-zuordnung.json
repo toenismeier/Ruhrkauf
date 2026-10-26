@@ -1,0 +1,15 @@
+{
+ "hinweis": "Bildpaket B26: Engine-Typ (Q42, noch nicht in ARTIKELTYPEN) -> Silhouette. Anbindung nach Merge des Q-Auftrags: bild: { silhouette }, bildOffen entfernen.",
+ "typen": {
+  "Ballkleid": "b26ballkleid",
+  "Blazerkleid": "b26blazerkleid",
+  "Boyfriend-Jeans": "b26boyfriendjeans",
+  "Brautkleid": "b26brautkleid",
+  "Carpenter-Jeans": "b26carpenterjeans",
+  "Denim-Jogger": "b26denimjogger",
+  "Häkelkleid": "b26haekelkleid",
+  "Karottenjeans": "b26karottenjeans",
+  "Latzshorts": "b26latzshorts",
+  "Sport-Jumpsuit": "b26sportjumpsuit"
+ }
+}

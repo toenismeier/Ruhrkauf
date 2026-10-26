@@ -6621,6 +6621,130 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b26ballkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b26": "b26ballkleid",
+        "laenge": "maxi",
+        "form": "glocke",
+        "aermel": "ohne",
+        "kragen": "corsage"
+      },
+      "material": "tuell",
+      "farbe": "rosa",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b26blazerkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b26": "b26blazerkleid",
+        "laenge": "mini",
+        "form": "gerade",
+        "aermel": "lang",
+        "kragen": "v"
+      },
+      "material": "wolle",
+      "farbe": "schwarz",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b26boyfriendjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b26": "b26boyfriendjeans",
+        "passform": "weit",
+        "leibhoehe": "normal"
+      },
+      "material": "denim",
+      "farbe": "hellblau",
+      "model": "hose"
+    },
+    "b26brautkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b26": "b26brautkleid",
+        "laenge": "maxi",
+        "form": "glocke",
+        "aermel": "ohne",
+        "kragen": "neckholder"
+      },
+      "material": "satin",
+      "farbe": "weiß",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b26carpenterjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b26": "b26carpenterjeans",
+        "passform": "weit",
+        "saum": "umschlag"
+      },
+      "material": "denim",
+      "farbe": "dunkeldenim",
+      "model": "hose"
+    },
+    "b26denimjogger": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b26": "b26denimjogger",
+        "passform": "jogger",
+        "komfortbund": true
+      },
+      "material": "denim",
+      "farbe": "schwarz",
+      "model": "hose"
+    },
+    "b26haekelkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b26": "b26haekelkleid",
+        "laenge": "mini",
+        "form": "gerade",
+        "aermel": "traeger",
+        "glatt": true,
+        "netz": true
+      },
+      "material": "strick",
+      "farbe": "cognac",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b26karottenjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b26": "b26karottenjeans",
+        "passform": "schmal",
+        "leibhoehe": "hoch"
+      },
+      "material": "denim",
+      "farbe": "anthrazit",
+      "model": "hose"
+    },
+    "b26latzshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b26": "b26latzshorts",
+        "laenge": "kurz",
+        "passform": "gerade",
+        "latz": true,
+        "saum": "umschlag"
+      },
+      "material": "denim",
+      "farbe": "hellblau",
+      "model": "hose"
+    },
+    "b26sportjumpsuit": {
+      "gruppe": "kleid",
+      "standard": {
+        "b26": "b26sportjumpsuit"
+      },
+      "material": "viskose",
+      "farbe": "schwarz",
+      "model": "kleid",
+      "nur": "damen"
     }
   }
 }
