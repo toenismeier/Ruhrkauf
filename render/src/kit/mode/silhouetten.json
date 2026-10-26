@@ -6654,8 +6654,9 @@
       "gruppe": "unterteil",
       "standard": {
         "b26": "b26boyfriendjeans",
-        "passform": "weit",
-        "leibhoehe": "normal"
+        "passform": "gerade",
+        "leibhoehe": "normal",
+        "saum": "umschlag"
       },
       "material": "denim",
       "farbe": "hellblau",
@@ -6680,7 +6681,7 @@
       "standard": {
         "b26": "b26carpenterjeans",
         "passform": "weit",
-        "saum": "umschlag"
+        "cargo": true
       },
       "material": "denim",
       "farbe": "dunkeldenim",
@@ -6717,7 +6718,9 @@
       "standard": {
         "b26": "b26karottenjeans",
         "passform": "schmal",
-        "leibhoehe": "hoch"
+        "leibhoehe": "hoch",
+        "komfortbund": true,
+        "laenge": "cropped"
       },
       "material": "denim",
       "farbe": "anthrazit",
