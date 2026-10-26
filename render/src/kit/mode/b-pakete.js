@@ -80,7 +80,7 @@ const PLAETZE = {
   hals: (K, o) => [{ x: 100, y: K.hals.y1 - (o.y ?? 5), w: K.hals.b * (o.w ?? 5), ax: 0.5, ay: 0 }],
   taille: (K, o) => [{ x: 100, y: K.m.taille + (o.y ?? 0), w: 2 * K.breite(K.m.taille) + (o.w ?? 5), ax: 0.5, ay: o.ay ?? 0.5 }],
   huefte: (K, o) => [{ x: 100, y: K.m.huefte - (o.y ?? 6), w: 2 * K.breite(K.m.huefte - 6) + (o.w ?? 5), ...(o.h ? { h: o.h } : {}), ax: 0.5, ay: o.ay ?? 0.5 }],
-  wickel: (K, o) => [{ x: 100, y: K.m.huefte - 8, w: 2 * K.breite(K.m.huefte) + 7, h: (K.m.knie + (o.h ?? 14)) - (K.m.huefte - 8), ax: 0.5, ay: 0 }],
+  wickel: (K, o) => [{ x: 100, y: K.m.huefte - 8, w: 2 * K.breite(K.m.huefte) + (o.w ?? 18), h: (K.m.knie + (o.h ?? 14)) - (K.m.huefte - 8), ax: 0.5, ay: 0 }],
   unterarm: (K, o) => [-1, 1].map((s) => { const y = K.m.handgelenk + (o.y ?? 2), x = s > 0 ? (K.armAX(y) + K.armIX(y)) / 2 : 200 - (K.armAX(y) + K.armIX(y)) / 2; return { x, y, h: (o.h ?? 1) * (K.m.handgelenk - K.m.ellbogen + 8), ax: 0.5, ay: 1, haelfte: s }; }),
   handgelenk: (K, o) => (o.paar ? [-1, 1] : [1]).map((s) => { const y = K.m.handgelenk - (o.y ?? 1); const x = (K.armAX(y) + K.armIX(y)) / 2; return { x: s > 0 ? x : 200 - x, y, w: o.w ?? 8.5, ax: 0.5, ay: 0.5, haelfte: o.paar ? s : 0 }; }),
   hand: (K, o) => [-1, 1].map((s) => ({ x: s > 0 ? K.hand[0] : 200 - K.hand[0], y: K.hand[1] + (o.y ?? 4), w: o.w ?? 11, ax: 0.5, ay: 0.45, haelfte: s })),
