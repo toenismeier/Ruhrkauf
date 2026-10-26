@@ -22,7 +22,8 @@ export function kartenStil() {
   try { const v = globalThis.localStorage?.getItem('ruhrkauf.kartenstil'); if (v && KARTENSTILE[v]) return v; } catch { /* privat */ }
   return 'coffee';
 }
-export function setzeKartenStil(v) { if (!KARTENSTILE[v]) return; stilGesetzt = v; try { globalThis.localStorage?.setItem('ruhrkauf.kartenstil', v); } catch { /* privat */ } }
+export function setzeKartenStil(v) { if (!KARTENSTILE[v]) return; if (stilGesetzt && stilGesetzt !== v) for (const k of [...CACHE.keys()]) if (!k.endsWith('|' + v)) CACHE.delete(k);   // Speicher der anderen Variante freigeben (iPhone)
+  stilGesetzt = v; try { globalThis.localStorage?.setItem('ruhrkauf.kartenstil', v); } catch { /* privat */ } }
 
 const BLICK = new THREE.Vector3(Math.SQRT1_2 * Math.cos(Math.PI / 6), Math.sin(Math.PI / 6), Math.SQRT1_2 * Math.cos(Math.PI / 6));
 // Bodenschichten (Reihenfolge und Namen wie kartenstadt-bauen.py FARBE): Farbe und Höhe über Gelände
@@ -994,6 +995,8 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
       }
     } }
   const nahLaden = (x, z) => platz.some((p) => x > p.x - 4 && x < p.x + p.w + 4 && z > p.z - 4 && z < p.z + p.d + 4);
+  // Vorplatz aus Pflaster rund um jedes Spielhaus (8 m): Kunden gehen nicht über Rasen zum Eingang
+  for (const p of platz) boden(B, [[p.x - 8, p.z - 8], [p.x + p.w + 8, p.z - 8], [p.x + p.w + 8, p.z + p.d + 8], [p.x - 8, p.z + p.d + 8]], HOEHE.platz + 0.004, bodenFarbe('platz'));
   for (const ring of K.bahnsteige) bahnsteig(B, ring);
   // Tunnelportale: Straße taucht in eine Unterführung ab (Stützwände, Portalbalken), statt stumpf zu enden
   for (const k of K.netz) for (const [bit, i0, i1] of [[1, 0, 1], [2, -1, -2]]) {

@@ -159848,6 +159848,9 @@ void main() {
   }
   function setzeKartenStil(v2) {
     if (!KARTENSTILE[v2]) return;
+    if (stilGesetzt && stilGesetzt !== v2) {
+      for (const k5 of [...CACHE.keys()]) if (!k5.endsWith("|" + v2)) CACHE.delete(k5);
+    }
     stilGesetzt = v2;
     try {
       globalThis.localStorage?.setItem("ruhrkauf.kartenstil", v2);
@@ -161083,6 +161086,7 @@ void main() {
       }
     }
     const nahLaden = (x2, z6) => platz.some((p2) => x2 > p2.x - 4 && x2 < p2.x + p2.w + 4 && z6 > p2.z - 4 && z6 < p2.z + p2.d + 4);
+    for (const p2 of platz) boden7(B8, [[p2.x - 8, p2.z - 8], [p2.x + p2.w + 8, p2.z - 8], [p2.x + p2.w + 8, p2.z + p2.d + 8], [p2.x - 8, p2.z + p2.d + 8]], HOEHE.platz + 4e-3, bodenFarbe("platz"));
     for (const ring4 of K3.bahnsteige) bahnsteig(B8, ring4);
     for (const k5 of K3.netz) for (const [bit, i0, i1] of [[1, 0, 1], [2, -1, -2]]) {
       if (!(k5.mund & bit) || k5.punkte.length < 2) continue;
@@ -163663,7 +163667,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "23bf0c9" : "Entwicklung";
+  var version = () => true ? "3393aff" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -165918,7 +165922,15 @@ void main() {
     canvas2.addEventListener("pointerdown", (e) => {
       o4.interaktion?.();
       stopp();
-      canvas2.setPointerCapture(e.pointerId);
+      if (e.isPrimary || e.pointerType === "mouse") {
+        zeiger.clear();
+        pinch = null;
+        start = null;
+      }
+      try {
+        canvas2.setPointerCapture(e.pointerId);
+      } catch {
+      }
       zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
       bewegt = zeiger.size > 1 ? 99 : 0;
       spur = [];
@@ -165961,6 +165973,10 @@ void main() {
       zeiger.delete(e.pointerId);
       if (zeiger.size < 2) pinch = null;
       if (zeiger.size === 0) {
+        if (e.nurAufraeumen) {
+          start = null;
+          return;
+        }
         if (bewegt < 6 && start) o4.tippen(e);
         else if (spur.length >= 2) {
           const a2 = spur[0], b4 = spur[spur.length - 1], dt = Math.max(8, b4.t - a2.t), alter = e.timeStamp - b4.t;
@@ -166002,6 +166018,17 @@ void main() {
     }
     canvas2.addEventListener("pointerup", loslassen);
     canvas2.addEventListener("pointercancel", loslassen);
+    canvas2.addEventListener("lostpointercapture", loslassen);
+    canvas2.addEventListener("touchend", (e) => {
+      if (e.touches.length === 0 && zeiger.size) {
+        for (const id of [...zeiger.keys()]) loslassen({ pointerId: id, timeStamp: e.timeStamp, clientX: 0, clientY: 0, nurAufraeumen: true });
+      }
+    }, { passive: true });
+    canvas2.addEventListener("touchcancel", () => {
+      zeiger.clear();
+      pinch = null;
+      start = null;
+    }, { passive: true });
     canvas2.addEventListener("wheel", (e) => {
       e.preventDefault();
       o4.interaktion?.();
@@ -183908,10 +183935,21 @@ void main() {
   window.addEventListener("einstellung", (e) => {
     if (e.detail?.schluessel === "kartenstil") {
       setzeKartenStil(e.detail.wert);
+      const titel = e.detail.wert === "karte" ? "Kartentreu" : "Coffee";
       if (s && stadtName && istKartenstadt(stadtName)) {
-        baueStadtAusSpiel(stadtName);
-        zeichnen();
-      }
+        schliessePanel();
+        menueZu();
+        meldung("Stadtbild wird umgestellt: " + titel + " \u2026");
+        setTimeout(() => {
+          try {
+            baueStadtAusSpiel(stadtName);
+            zeichnen();
+            meldung("Stadtbild: " + titel);
+          } catch (f13) {
+            meldung("Umstellen fehlgeschlagen: " + (f13?.message ?? f13), false);
+          }
+        }, 120);
+      } else meldung("Stadtbild " + titel + " gilt beim n\xE4chsten Besuch einer Kartenstadt (Essen)");
     }
     if (e.detail.schluessel === "autospeichern" && !e.detail.wert) clearTimeout(speicherTimer);
     if (e.detail.schluessel === "zahlen" && s) cockpitZeigen();
@@ -184152,6 +184190,7 @@ void main() {
     EQ,
     pruefeEinkauf: () => ek.pruefe(),
     oeffneWettbewerber,
+    kameraZustand: () => ({ x: Math.round(K2.x), z: Math.round(K2.z), halb: +K2.halb.toFixed(1) }),
     kameraHaus: hausKameraMessung,
     kameraAuf: (x2, z6, halb) => {
       K2.x = x2;
@@ -184407,8 +184446,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-26T10:25:17.473Z" : null;
-    const v2 = true ? "23bf0c9" : "Entwicklung";
+    const iso = true ? "2026-10-26T12:18:27.315Z" : null;
+    const v2 = true ? "3393aff" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();

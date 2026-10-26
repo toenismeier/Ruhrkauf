@@ -1488,7 +1488,19 @@ wk = werkzeugeModul({
 });
 $('stadt-reise').addEventListener('click', () => { schliessePanel(); menueZu(); reise.oeffne(); });
 window.addEventListener('einstellung', (e) => {
-  if (e.detail?.schluessel === 'kartenstil') { setzeKartenStil(e.detail.wert); if (s && stadtName && istKartenstadt(stadtName)) { baueStadtAusSpiel(stadtName); zeichnen(); } }
+  if (e.detail?.schluessel === 'kartenstil') {
+    setzeKartenStil(e.detail.wert);
+    const titel = e.detail.wert === 'karte' ? 'Kartentreu' : 'Coffee';
+    if (s && stadtName && istKartenstadt(stadtName)) {
+      // Panel schließen und erst nach dem nächsten Bild umbauen, damit die Rückmeldung sichtbar ist; Fehler werden gemeldet statt verschluckt
+      schliessePanel(); menueZu();
+      meldung('Stadtbild wird umgestellt: ' + titel + ' …');
+      setTimeout(() => {
+        try { baueStadtAusSpiel(stadtName); zeichnen(); meldung('Stadtbild: ' + titel); }
+        catch (f) { meldung('Umstellen fehlgeschlagen: ' + (f?.message ?? f), false); }
+      }, 120);
+    } else meldung('Stadtbild ' + titel + ' gilt beim nächsten Besuch einer Kartenstadt (Essen)');
+  }
   if (e.detail.schluessel === 'autospeichern' && !e.detail.wert) clearTimeout(speicherTimer);
   if (e.detail.schluessel === 'zahlen' && s) cockpitZeigen();
 });
@@ -1640,7 +1652,7 @@ if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () =
 
 window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...a) => oeffneModul(ec, ...a), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
-  kameraHaus: hausKameraMessung, kameraAuf: (x, z, halb) => { K.x = x; K.z = z; K.halb = halb ?? K.halb; kameraSetzen(); leben.kamera(); zeichnen(); }, get plan() { return plan; }, menschenStatus: () => { let gruppen = 0, figuren = 0; scene?.traverse((m) => { if (m.userData?.menschen) { gruppen++; figuren += m.geometry.instanceCount; } }); return { gruppen, figuren, info: { ...ren.info.render } }; }, // lesender Pixelabgleich für den Mobil-Smoketest
+  kameraZustand: () => ({ x: Math.round(K.x), z: Math.round(K.z), halb: +K.halb.toFixed(1) }), kameraHaus: hausKameraMessung, kameraAuf: (x, z, halb) => { K.x = x; K.z = z; K.halb = halb ?? K.halb; kameraSetzen(); leben.kamera(); zeichnen(); }, get plan() { return plan; }, menschenStatus: () => { let gruppen = 0, figuren = 0; scene?.traverse((m) => { if (m.userData?.menschen) { gruppen++; figuren += m.geometry.instanceCount; } }); return { gruppen, figuren, info: { ...ren.info.render } }; }, // lesender Pixelabgleich für den Mobil-Smoketest
   leben,
   reise, wochenbericht, hausbesuch: hb, oeffneHausbesuch: (id) => hb.oeffne(id), szenarien: szenarienUI, zeitung: zt, oeffneZeitung: (...a) => oeffneModul(zt, ...a), spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.

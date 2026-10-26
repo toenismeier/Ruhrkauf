@@ -82,7 +82,11 @@ export function karteSteuerung(o) {
   canvas.addEventListener('pointerdown', (e) => {
     o.interaktion?.(); // Nutzergeste darf das programmatische Hausziel lösen
     stopp();
-    canvas.setPointerCapture(e.pointerId);
+    // Neuer Erstkontakt (kein anderer Finger liegt auf): verwaiste Zeiger verwerfen. iOS liefert bei Systemgesten,
+    // eingeblendeten Dialogen oder verlorener Erfassung nicht immer pointerup; ein hängender Zeiger machte aus dem
+    // nächsten Ein-Finger-Wischen ein Zoomen (Befund iPhone: Verschieben nur noch mit zwei Fingern).
+    if (e.isPrimary || (e.pointerType === 'mouse')) { zeiger.clear(); pinch = null; start = null; }
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* Zeiger bereits weg */ }
     zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
     bewegt = zeiger.size > 1 ? 99 : 0;
     spur = [];
@@ -122,6 +126,7 @@ export function karteSteuerung(o) {
     zeiger.delete(e.pointerId);
     if (zeiger.size < 2) pinch = null;
     if (zeiger.size === 0) {
+      if (e.nurAufraeumen) { start = null; return; }
       if (bewegt < 6 && start) o.tippen(e);
       else if (spur.length >= 2) {
         const a = spur[0], b = spur[spur.length - 1], dt = Math.max(8, b.t - a.t), alter = e.timeStamp - b.t;
@@ -154,6 +159,10 @@ export function karteSteuerung(o) {
   }
   canvas.addEventListener('pointerup', loslassen);
   canvas.addEventListener('pointercancel', loslassen);
+  canvas.addEventListener('lostpointercapture', loslassen);
+  // Sicherheitsnetz: meldet der Browser keine aktiven Berührungen mehr, alle Zeiger freigeben
+  canvas.addEventListener('touchend', (e) => { if (e.touches.length === 0 && zeiger.size) { for (const id of [...zeiger.keys()]) loslassen({ pointerId: id, timeStamp: e.timeStamp, clientX: 0, clientY: 0, nurAufraeumen: true }); } }, { passive: true });
+  canvas.addEventListener('touchcancel', () => { zeiger.clear(); pinch = null; start = null; }, { passive: true });
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     o.interaktion?.();
