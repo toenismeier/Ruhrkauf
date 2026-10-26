@@ -1,0 +1,41 @@
+{
+ "hinweis": "B09 (Wurf 4): Artikeltyp -> Silhouette für Typen, die auf main noch fehlen (Q39). Nach Merge des Q-Auftrags: bild.silhouette setzen, bildOffen entfernen.",
+ "typen": {
+  "Playsuit": {
+   "silhouette": "b09playsuit",
+   "auftrag": "Q39"
+  },
+  "Jeans-Jumpsuit": {
+   "silhouette": "b09jeansjumpsuit",
+   "auftrag": "Q39"
+  },
+  "Neckholderkleid": {
+   "silhouette": "b09neckholderkleid",
+   "auftrag": "Q39"
+  },
+  "Trägerkleid": {
+   "silhouette": "b09traegerkleid",
+   "auftrag": "Q39"
+  },
+  "Bandeaukleid": {
+   "silhouette": "b09bandeaukleid",
+   "auftrag": "Q39"
+  },
+  "Midikleid": {
+   "silhouette": "b09midikleid",
+   "auftrag": "Q39"
+  },
+  "Paillettenkleid": {
+   "silhouette": "b09paillettenkleid",
+   "auftrag": "Q39"
+  },
+  "Cocktailkleid": {
+   "silhouette": "b09cocktailkleid",
+   "auftrag": "Q39"
+  },
+  "Dirndl": {
+   "silhouette": "b09dirndl",
+   "auftrag": "Q39"
+  }
+ }
+}
