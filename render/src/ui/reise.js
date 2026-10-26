@@ -100,7 +100,7 @@ export function reiseModul(ctx) {
       + '<header class="hw-kopf"><span class="hw-kopf-symbol" aria-hidden="true">' + (K.illustration('bahn') || K.SYMBOLE.zentrale) + '</span><h2 class="hw-kopf-titel">Hauptbahnhof ' + esc(hier) + '</h2>'
       + '<div class="hw-kopf-unter" data-reise-treffer></div><button type="button" class="hw-zu" aria-label="Schließen" data-reisezu></button></header>'
       + K.sprecher({ text: '<span class="reise-text" aria-live="polite"></span>', unter: 'Sekretariat', person: ASSISTENTIN })
-      + '<div class="hw-inhalt"><div class="hw-reise-ziele">' + K.rumpf('<input class="hw-suche" data-reisesuche type="search" placeholder="Stadt suchen" aria-label="Reiseziel suchen">'
+      + '<div class="hw-inhalt"><div class="hw-reise-ziele">' + K.rumpf('<input class="hw-suche" data-reisesuche type="search" readonly placeholder="Stadt suchen" aria-label="Reiseziel suchen">'
         + '<div class="hw-abstand"></div>' + seg
         + '<div id="reise-blatt-karte" class="hw-reise-blatt"><div class="hw-reise-karte"></div><p class="hw-text">Markiert: aktueller Standort. Die Punktgröße zeigt die Zahl der Häuser. Stadt antippen, um zu reisen.</p></div>'
         + '<div id="reise-blatt-liste" class="hw-reise-blatt" hidden>' + K.abschnitt('Reiseziele', 'zuletzt besucht, dann nach Umsatz') + '<div id="reise-zielliste"></div></div>') + '</div></div></section>';
@@ -108,7 +108,12 @@ export function reiseModul(ctx) {
       reiseDeutschlandKarte(ctx.staedte(), hier, (stadt) => { if (stadt !== hier) fahren(stadt); })
     );
     document.body.classList.add('reise-aktiv');
-    z.querySelector('[data-reisesuche]').addEventListener('input', (e) => {
+    // iPhone: Das Suchfeld ist schreibgeschützt, bis es gezielt angetippt wird. Sonst landet der Tipp, der das Menü öffnet
+    // oder die Ansicht wechselt, im Feld und die Tastatur verdeckt die Liste.
+    const suche = z.querySelector('[data-reisesuche]');
+    const freigeben = () => { if (suche.readOnly) { suche.readOnly = false; suche.focus(); } };
+    setTimeout(() => suche.addEventListener('pointerup', freigeben), 450);
+    suche.addEventListener('input', (e) => {
       ziele(e.target.value);
       if (e.target.value) ansichtSetzen('liste');
     });

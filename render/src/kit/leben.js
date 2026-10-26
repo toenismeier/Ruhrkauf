@@ -310,6 +310,8 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
         if (!a) break;
         // Bei knappen Straßen lieber weniger Wagen, statt zwei in dieselbe Spur zu setzen.
         const qa = positionWagen(a);
+        // Busse und Bahnen nie in Kolonne: 90 m Abstand zum nächsten großen Fahrzeug
+        if ((art === 'bus' || art === 'tram') && [...weiter, ...busse, ...bahnen].some((b) => b !== a && (b.art === 'bus' || b.art === 'tram') && (() => { const qb = positionWagen(b); return Math.hypot(qa.x - qb.x, qa.z - qb.z) < 90; })())) continue;
         if ([...weiter, ...sonstige].some((b) => (b.lane === a.lane &&
             Math.abs(b.m - a.m) < (a.art === 'tram' || b.art === 'tram' ? 22 :
               a.art === 'bus' || b.art === 'bus' ? 14 : KLEINSTE_LUECKE)) || (() => { const qb = positionWagen(b); return Math.hypot(qa.x - qb.x, qa.z - qb.z) < 8; })())) continue;
@@ -318,8 +320,8 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       return weiter;
     };
     autos = anpassen(autos, sollAuto, lanes, 'auto');
-    busse = anpassen(busse, Math.min(MAX_BUS, Math.round(busLanes.length / 5 * dichte)), busLanes, 'bus', autos);
-    bahnen = anpassen(bahnen, Math.min(MAX_BAHN, Math.round(tramLanes.length / 3 * dichte)), tramLanes, 'tram');
+    busse = anpassen(busse, Math.min(3, Math.round(busLanes.length / 12 * dichte)), busLanes, 'bus', autos);
+    bahnen = anpassen(bahnen, Math.min(2, Math.round(tramLanes.length / 6 * dichte)), tramLanes, 'tram');
     fuss = fuss.filter((a) => wege.includes(a.weg)).slice(0, sollFuss);
     while (fuss.length < sollFuss) { const f = neueFussgaenger(wege); if (!f) break; fuss.push(f); }
   }
@@ -572,6 +574,9 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     gezeichnetStapel: () => { const w = [...bahnen, ...busse, ...autos].filter((a) => !a.verdeckt && sichtbar(positionWagen(a))), p = w.map((a) => ({ ...positionWagen(a), L: LAENGE[a.art], B: a.art === 'auto' ? 2 : 2.65, art: a.art }));
       const out = []; for (let i = 0; i < p.length; i++) for (let j = i + 1; j < p.length; j++) if (ueberlappt(p[i], p[i].L, p[i].B, p[j]) || ueberlappt(p[j], p[j].L, p[j].B, p[i])) out.push([p[i].art, p[j].art, Math.round(p[i].x), Math.round(p[i].z), Math.round(p[j].x), Math.round(p[j].z)]);
       return out; },
+    fussAufFahrbahn: () => { if (!plan?.aufFahrbahn) return { maske: false }; let n = 0, m = 0;
+      for (const f of fuss) { if (f.phase !== 'weg') continue; const p = fussPosition(f); if (!sichtbar(p)) continue; m++; if (plan.aufFahrbahn(p.x, p.z)) n++; }
+      return { maske: true, auf: n, sichtbar: m }; },
     stapelDetail: () => { const w = [...autos, ...busse, ...bahnen], p = w.map(positionWagen), L = (a) => (a.art === 'tram' ? 19 : a.art === 'bus' ? 11.6 : 4.5), out = [];
       for (let i = 0; i < p.length; i++) for (let j = i + 1; j < p.length; j++) {
         const hx = Math.cos(p[i].winkel), hz = -Math.sin(p[i].winkel), dx = p[j].x - p[i].x, dz = p[j].z - p[i].z;

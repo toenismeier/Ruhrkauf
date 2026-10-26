@@ -27,7 +27,7 @@ export function setzeKartenStil(v) { if (!KARTENSTILE[v]) return; stilGesetzt = 
 const BLICK = new THREE.Vector3(Math.SQRT1_2 * Math.cos(Math.PI / 6), Math.sin(Math.PI / 6), Math.SQRT1_2 * Math.cos(Math.PI / 6));
 // Bodenschichten (Reihenfolge und Namen wie kartenstadt-bauen.py FARBE): Farbe und Höhe über Gelände
 const BODEN = {
-  garten: '#a3b78f', haltestelle: '#d7d2c7', fusszone: '#e3dccc',
+  tunnel: '#3c4148', garten: '#a3b78f', haltestelle: '#d7d2c7', fusszone: '#e3dccc',
   weg: '#e2d6bd', linie: '#f4f2ea', ufer: '#d9d2bf', rasen2: '#8bbd7c',
   umland: '#c9c5bd', pflaster: '#cfcac1', gehweg: '#e3e1dc', bord: '#bdb7ac', fahrbahn: '#767c84', parkstreifen: '#8b9097', rad: '#b0897a', markierung: FARBEN.markierung,
   gruen: '#9dbb88', hof: '#a3b78f', hofkern: '#d6d2c9', wasser: FARBEN.wasser, platz: '#d9d2c3', parkplatz: '#969ba2', bahnsteig: '#cfc9bd', schotter: '#a39b8e', schiene: '#5b5550',
@@ -45,7 +45,7 @@ const COFFEE = {
 let PAL = null;   // gesetzt in baueKartenstadt je Kartenstil
 const bodenFarbe = (art) => PAL?.boden[art] ?? BODEN[art];
 // Jede Schicht auf eigener Höhe (gleiche Höhen flackern ineinander)
-const HOEHE = { garten: 0.012, haltestelle: 0.13, fusszone: 0.118, weg: 0.047, linie: 0.049, ufer: 0.05, rasen2: 0.037, umland: -0.03, pflaster: 0, hofkern: 0.008, hof: 0.012, gewerbe: 0.016, schulhof: 0.02, kleingarten: 0.024, sport: 0.028, gruen: 0.035, platz: 0.04,
+const HOEHE = { tunnel: 0.076, garten: 0.012, haltestelle: 0.13, fusszone: 0.118, weg: 0.047, linie: 0.049, ufer: 0.05, rasen2: 0.037, umland: -0.03, pflaster: 0, hofkern: 0.008, hof: 0.012, gewerbe: 0.016, schulhof: 0.02, kleingarten: 0.024, sport: 0.028, gruen: 0.035, platz: 0.04,
   parkplatz: 0.045, wasser: 0.052, schotter: 0.06, fahrbahn: 0.07, parkstreifen: 0.074, rad: 0.08, markierung: 0.1, gehweg: 0.12, bord: 0.14, bahnsteig: 0.55 };
 const GL_ART = { 1: 'rail', 2: 'light_rail', 3: 'tram' };
 const NETZ_TYP = { 1: 'haupt', 2: 'neben', 3: 'fussgaenger' };
@@ -97,7 +97,13 @@ export function kartenDaten(name, stil = kartenStil()) {
   const r = {
     name, stil, def: k.def, breite: d.breite, tiefe: d.tiefe, ursprung: d.ursprung, lizenz: d.lizenz,
     bebaubar: (d.bebaubar ?? []).map((ringe) => ringe.map(paare)),
-    daecher: (d.daecher ?? []).map(paare),
+    // Bahnhof: Dachmodule [x, z, Richtung x, Richtung z, Länge, Breite] als Ring (für Abstandsregeln) und als Modul (zum Zeichnen)
+    dachModule: (d.daecher ?? []).filter((m) => m.length === 6),
+    daecher: (d.daecher ?? []).filter((m) => m.length === 6).map(([x, z, ux, uz, L, Bq]) => { const a = L / 2, b = Bq / 2, qx = -uz, qz = ux;
+      return [[x - ux * a - qx * b, z - uz * a - qz * b], [x + ux * a - qx * b, z + uz * a - qz * b], [x + ux * a + qx * b, z + uz * a + qz * b], [x - ux * a + qx * b, z - uz * a + qz * b]]; }),
+    bahnsteige: (d.bahnsteige ?? []).map((f) => { const r = []; for (let i = 0; i + 1 < f.length; i += 2) r.push([f[i], f[i + 1]]); return r; }),
+    zuege: d.zuege ?? [],
+    parkautos: d.parkautos?.[stil] ?? [],
     boden: v.boden.map(([f, po, pn, io, inn]) => ({ art: d.farben[f], p: BP.subarray(po * 2, (po + pn) * 2), i: BI.subarray(io, io + inn) })),
     gleise: d.gleise.map(([a, p]) => ({ art: GL_ART[a], punkte: paare(p) })),
     deko, gebaeude,
@@ -658,10 +664,11 @@ function vereinfache(pts, tol) {
  */
 function abstrahiert(g) {
   const gs = gestalt(g);
-  if (gs.altbau || !g.boden || g.boden.length < 3) return g;
+  // Nur Flachdachbauten werden vereinfacht; Steildächer bleiben echt (sonst stehen Kisten neben Giebeln und wirken wie zwei Spiele)
+  if (!gs.flach || !g.boden || g.boden.length < 3) return g;
   const ring = vereinfache(offen(g.boden).map((p) => [p[0], p[1]]), 1.5);
   if (ring.length < 3) return g;
-  const h = Math.max(3, Math.round((gs.flach ? g.h : (g.traufe || g.h) + 1) / 3) * 3);   // auf Geschosse gerundet
+  const h = Math.max(3, Math.round(g.h / 3) * 3);   // auf Geschosse gerundet
   return { ...g, dach: [ring.map(([x, z]) => [x, z, h])], dachIdx: null, boden: ring.map(([x, z]) => [x, z, 0]), h, traufe: h, dachTyp: '1000' };
 }
 
@@ -711,6 +718,19 @@ function gebaeudeBauen(B, S, g, kern, detail = true) {
   // Dachaufbauten auf großen Flachdächern
   if (gs.flach && g.h > 6 && g.flaeche > 180 && g.boden.length > 2) {
     const [a, b, c, d] = g.bbox, anz = Math.min(4, 1 + Math.floor(g.flaeche / 900));
+    // Große Dächer (Kaufhäuser, Hallen): Oberlichtreihen und Solarfelder im Raster, damit keine leere Fläche entsteht
+    if (g.flaeche > 1500) {
+      const lang = c - a > d - b, schritt = 9;
+      for (let u = (lang ? a : b) + 6; u < (lang ? c : d) - 6; u += schritt) {
+        for (let v = (lang ? b : a) + 5; v < (lang ? d : c) - 5; v += 7) {
+          const px = lang ? u : v, pz = lang ? v : u;
+          if (!imPolygon(px, pz, g.boden) || !imPolygon(px + 3, pz + 3, g.boden) || !imPolygon(px - 3, pz - 3, g.boden)) continue;
+          const solar = ((Math.floor(u / schritt) + Math.floor(v / 7)) % 3) === 0;
+          if (solar) S.box(lang ? 5 : 3.2, 0.35, lang ? 3.2 : 5, px, g.h + 0.4, pz, '#3f5466');
+          else S.box(lang ? 5 : 1.6, 0.6, lang ? 1.6 : 5, px, g.h + 0.35, pz, '#dfe6ea');
+        }
+      }
+    }
     for (let k = 0; k < anz; k++) {
       const px = a + (c - a) * (0.25 + gs.r() * 0.5), pz = b + (d - b) * (0.25 + gs.r() * 0.5);
       if (!imPolygon(px, pz, g.boden)) continue;
@@ -727,7 +747,9 @@ function gleis(S, punkte, art) {
     const L = Math.hypot(bx - ax, bz - az); if (L < 0.3) continue;
     const ry = Math.atan2(-(bz - az), bx - ax), mx = (ax + bx) / 2, mz = (az + bz) / 2;
     const qx = -(bz - az) / L, qz = (bx - ax) / L;
-    if (art !== 'tram') S.box(L + 0.4, 0.24, breit, mx, HOEHE.schotter, mz, BODEN.schotter, ry);
+    // Straßenbahn: flaches Bett knapp unter Fahrbahnhöhe (auf Straßen verdeckt, im Grünen und im Betriebshof sichtbar)
+    if (art === 'tram') S.box(L + 0.4, 0.06, 2.9, mx, 0.026, mz, '#9b958a', ry);
+    else S.box(L + 0.4, 0.24, breit, mx, HOEHE.schotter, mz, BODEN.schotter, ry);
     for (const s of [-1, 1]) S.box(L + 0.05, 0.16, 0.14, mx + qx * s * spur / 2, art === 'tram' ? 0.12 : 0.3, mz + qz * s * spur / 2, BODEN.schiene, ry);
   }
 }
@@ -768,6 +790,55 @@ function bahnsteigdach(B, ring) {
     const x = lang ? u : mitte, z = lang ? mitte : u;
     if (imPolygon(x, z, pts)) wandBox(B, '#6b7278', x, (y + 0.55) / 2, z, 0.35, y - 0.55, 0.35, 1, 0, 0, 1);
   }
+}
+
+/** Erhöhter Bahnsteig (0,76 m) mit sichtbarer Kante und weißer Sicherheitslinie. */
+function bahnsteig(B, ring) {
+  const pts = offen(ring); if (pts.length < 3) return;
+  const y = 0.76;
+  dachflaeche(B, pts.map((p) => [p[0], p[1], y]), PAL ? '#e8e1d2' : '#cfcac0');
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length], ex = b[0] - a[0], ez = b[1] - a[1], L = Math.hypot(ex, ez);
+    if (L < 0.3) continue;
+    let nx = ez / L, nz = -ex / L;
+    if (imPolygon((a[0] + b[0]) / 2 + nx * 0.3, (a[1] + b[1]) / 2 + nz * 0.3, pts)) { nx = -nx; nz = -nz; }
+    if (nx * BLICK.x + nz * BLICK.z > 0.02) wandQuad(B, '#8f8a80', a[0], a[1], b[0], b[1], 0, y, 0, y, nx, nz);
+    // Sicherheitslinie 0,8 m innen an langen Kanten
+    if (L > 8) { const ix = -nx * 0.8, iz = -nz * 0.8, qx = -nx * 0.95, qz = -nz * 0.95;
+      dachflaeche(B, [[a[0] + ix, a[1] + iz, y + 0.01], [b[0] + ix, b[1] + iz, y + 0.01], [b[0] + qx, b[1] + qz, y + 0.01], [a[0] + qx, a[1] + qz, y + 0.01]], '#f4f1ea'); }
+  }
+}
+/** Bahnsteigdach als Modul: Platte 4,5 m über dem Bahnsteig, Stützen in der Achse alle 10 m, dunkle Traufkante. */
+function dachModul(B, [x, z, ux, uz, L, Bq]) {
+  const y = 0.76 + 4.5, qx = -uz, qz = ux, a = L / 2, b = Bq / 2;
+  const P = (s, t, h) => [x + ux * s * a + qx * t * b, z + uz * s * a + qz * t * b, h];
+  const farbe = PAL ? '#b9cbd3' : '#b7bcc0';
+  dachflaeche(B, [P(-1, -1, y), P(1, -1, y), P(1, 1, y), P(-1, 1, y)], farbe);
+  for (const [s0, t0, s1, t1, nx, nz] of [[-1, -1, 1, -1, -qx, -qz], [1, 1, -1, 1, qx, qz], [1, -1, 1, 1, ux, uz], [-1, 1, -1, -1, -ux, -uz]]) {
+    if (nx * BLICK.x + nz * BLICK.z <= 0.02) continue;
+    const p0 = P(s0, t0, 0), p1 = P(s1, t1, 0);
+    wandQuad(B, '#6f777e', p0[0], p0[1], p1[0], p1[1], y - 0.35, y, y - 0.35, y, nx, nz);
+  }
+  for (let u = -a + 3; u <= a - 3; u += 10) wandBox(B, '#5f666c', x + ux * u, (0.76 + y) / 2, z + uz * u, 0.3, y - 0.76, 0.3, ux, uz, qx, qz);
+}
+/** Abgestellter Zugwagen (26 m): Typ 0 Regionalzug rot/weiß, Typ 1 S-Bahn rot; Endwagen mit abgeschrägter Front. */
+function zugwagen(B, [x, z, w, typ, ende]) {
+  const ux = Math.cos(w), uz = -Math.sin(w), L = 25.6, H = 3.6, Bq = 2.9, y0 = 0.6;
+  let qx = -uz, qz = ux; if (qx * BLICK.x + qz * BLICK.z < 0) { qx = -qx; qz = -qz; }   // Langseite zur Kamera
+  const koerper = typ === 0 ? '#f1eee8' : '#d3352c', band = typ === 0 ? '#d3352c' : '#f1eee8';
+  wandBox(B, koerper, x, y0 + H / 2, z, L, H, Bq, ux, uz, qx, qz);
+  wandBox(B, '#2f3a44', x, y0 + H * 0.62, z, L - 1.2, 0.9, Bq + 0.04, ux, uz, qx, qz);   // Fensterband
+  wandBox(B, band, x, y0 + 0.55, z, L, 0.35, Bq + 0.05, ux, uz, qx, qz);
+  wandBox(B, '#9aa1a6', x, y0 + H + 0.12, z, L - 2, 0.24, Bq - 0.6, ux, uz, qx, qz);   // Dach
+  if (ende) { const s = ende === 1 ? -1 : 1; wandBox(B, '#2f3a44', x + ux * s * (L / 2 - 0.2), y0 + H * 0.66, z + uz * s * (L / 2 - 0.2), 0.5, 1.1, Bq - 0.4, ux, uz, qx, qz); }
+}
+const PARKFARBEN = ['#c9483e', '#2f6f8f', '#e6e2d9', '#3c4148', '#8a9199', '#d39a2b', '#3f7d56', '#6b4f8f'];
+/** Geparktes Auto auf einem Stellplatz. */
+function parkauto(B, x, z, w, f) {
+  const ux = Math.cos(w), uz = -Math.sin(w);
+  let qx = -uz, qz = ux; if (qx * BLICK.x + qz * BLICK.z < 0) { qx = -qx; qz = -qz; }
+  wandBox(B, PARKFARBEN[f % PARKFARBEN.length], x, 0.75, z, 4.1, 1.2, 1.75, ux, uz, qx, qz);
+  wandBox(B, '#718d9d', x, 1.6, z, 2.0, 0.55, 1.55, ux, uz, qx, qz);
 }
 
 /** Gartenlaube: kleines Holzhaus mit Satteldach. */
@@ -844,7 +915,11 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
         else I.setze('bank', x, 0.12, z, rv() < 0.5 ? 0 : Math.PI / 2, 1);
       }
     } }
-  for (const ring of K.daecher) if (!ring.some(([x, z]) => platz.some((p) => x > p.x - 4 && x < p.x + p.w + 4 && z > p.z - 4 && z < p.z + p.d + 4))) bahnsteigdach(B, ring);
+  const nahLaden = (x, z) => platz.some((p) => x > p.x - 4 && x < p.x + p.w + 4 && z > p.z - 4 && z < p.z + p.d + 4);
+  for (const ring of K.bahnsteige) bahnsteig(B, ring);
+  K.dachModule.forEach((m, i) => { if (!K.daecher[i].some(([x, z]) => nahLaden(x, z))) dachModul(B, m); });
+  for (const z of K.zuege) zugwagen(B, z);
+  if (I) for (const [x, z, w, f] of K.parkautos) if (!nahLaden(x, z)) parkauto(B, x, z, w, f);
   zeit.gebaeude = performance.now() - z0 - zeit.boden; if (scene) { B.bauen(scene); I?.bauen(scene); } else B.abgeben(S); zeit.abgeben = performance.now() - z0 - zeit.boden - zeit.gebaeude;
   const hoehen = new Map(), dachFlaechen = [];
   let maxH = 20;

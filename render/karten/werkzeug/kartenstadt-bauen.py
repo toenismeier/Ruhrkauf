@@ -166,7 +166,7 @@ def strassen_coffee():
 # ── Triangulierung
 FARBE = {'pflaster': 0, 'gehweg': 1, 'bord': 2, 'fahrbahn': 3, 'rad': 4, 'markierung': 5, 'gruen': 6, 'hof': 7, 'wasser': 8, 'platz': 9, 'parkplatz': 10, 'bahnsteig': 11, 'schotter': 12,
          'parkstreifen': 13, 'hofkern': 14, 'gewerbe': 15, 'schulhof': 16, 'sport': 17, 'kleingarten': 18, 'weg': 19, 'linie': 20, 'ufer': 21, 'rasen2': 22,
-         'haltestelle': 23, 'fusszone': 24, 'garten': 25}
+         'haltestelle': 23, 'fusszone': 24, 'garten': 25, 'tunnel': 26}
 def triangulieren(schichten, art, poly):
     for q in teile(poly):
         if q.area < 0.3: continue
@@ -187,39 +187,66 @@ def triangulieren(schichten, art, poly):
         e['i'] += [int(v) + basis for v in idx]
 
 def hoefe(strassen_alle):
-    """Blockinnenräume: Streifen quer zur langen Achse, abwechselnd Garten (mit Hecken) und Hofpflaster."""
-    abstand = strassen_alle.buffer(7, join_style=2)   # Vorgärten und Höfe reichen bis an den Gehweg (Häuser stehen ohnehin darauf)
+    """Blockinnenräume: außerhalb der Innenstadt Garten (Rasen mit Baumgruppen), in Innenstadt und Gewerbe Hofpflaster
+    mit Rasenkern. Keine Streifen und keine Heckenzeilen mehr (wirkten wie Weinbergzeilen)."""
+    abstand = strassen_alle.buffer(7, join_style=2)
     sperre = vereinigt([abstand] + [g for a in ('platz', 'parkplatz', 'bahngelaende', 'bahnsteig', 'schulhof', 'sport', 'kleingarten', 'gruen', 'wasser') for g in flaechen_art.get(a, [])])
     alle = gebiet.difference(sperre)
     gewerbe_p = prep(vereinigt(flaechen_art.get('gewerbe', [])))
     alle = vereinigt([q.buffer(-2).buffer(2) for q in teile(alle) if q.area > 250]).simplify(1.0).buffer(0)
-    gaerten, pflaster, hecken = [], [], []
+    gaerten, pflaster = [], []
     for q in teile(alle):
-        rr = random.Random(int(q.centroid.x * 7 + q.centroid.y * 13))
-        im_kern = kern.contains(q.centroid)
-        # Gewerbeblöcke (landuse commercial/retail/industrial): überwiegend Hofpflaster, aber nie eine leere beige Fläche
-        anteil_garten = 0.45 if gewerbe_p.contains(q.centroid) else 0.4 if im_kern else 0.7
-        if q.area < 900:
-            (gaerten if rr.random() < anteil_garten else pflaster).append(q); continue
-        r = q.minimum_rotated_rectangle
+        if not (kern.contains(q.centroid) or gewerbe_p.contains(q.centroid)):
+            gaerten.append(q); continue
+        rasen = q.buffer(-7, join_style=1) if q.area > 600 else Polygon()
+        if rasen.is_empty or rasen.area < 120: pflaster.append(q); continue
+        gaerten.append(rasen); pflaster.append(q.difference(rasen))
+    return vereinigt(gaerten), vereinigt(pflaster), []
+
+def parkplaetze(strassen_alle):
+    """Parkplätze: nur kompakte Flächen bekommen Stellreihen (parallel zur langen Seite, Rücken an Rücken, Fahrgasse 6 m),
+    geparkte Autos (etwa 60 % der Stände) und eine Hecke an den Seiten ohne Straße. Verwinkelte Flächen werden Pflaster."""
+    rr = random.Random(23)
+    linien, pflaster, autos, hecken = [], [], [], []
+    strasse_nah = prep(strassen_alle.buffer(6))
+    for pk in teile(vereinigt(flaechen_art.get('parkplatz', [])).intersection(gebiet).difference(strassen_alle.buffer(1.0))):
+        if pk.area < 120: continue
+        r = pk.minimum_rotated_rectangle
+        if pk.area < 250 or pk.area / max(r.area, 1) < 0.72: pflaster.append(pk); continue
         c = list(r.exterior.coords)[:4]
         l01, l12 = math.dist(c[0], c[1]), math.dist(c[1], c[2])
-        a, b = (c[0], c[1]) if l01 >= l12 else (c[1], c[2])
-        L = max(l01, l12); ux, uz = (b[0] - a[0]) / L, (b[1] - a[1]) / L
-        u = 0.0
-        while u < L:
-            w = rr.uniform(9, 15)
-            streifen = Polygon([(a[0] + ux * u - uz * 500, a[1] + uz * u + ux * 500), (a[0] + ux * (u + w) - uz * 500, a[1] + uz * (u + w) + ux * 500),
-                                (a[0] + ux * (u + w) + uz * 500, a[1] + uz * (u + w) - ux * 500), (a[0] + ux * u + uz * 500, a[1] + uz * u - ux * 500)])
-            teil = q.intersection(streifen)
-            if not teil.is_empty:
-                if rr.random() < anteil_garten:
-                    gaerten.append(teil)
-                    grenze = LineString([(a[0] + ux * u - uz * 500, a[1] + uz * u + ux * 500), (a[0] + ux * u + uz * 500, a[1] + uz * u - ux * 500)]).intersection(q)
-                    if not grenze.is_empty: hecken.append(grenze)
-                else: pflaster.append(teil)
-            u += w
-    return vereinigt(gaerten), vereinigt(pflaster), hecken
+        a, b, d = (c[0], c[1], c[3]) if l01 >= l12 else (c[1], c[2], c[0])
+        L, TT = math.dist(a, b), math.dist(a, d)
+        if TT < 11: pflaster.append(pk); continue
+        ux, uz = (b[0] - a[0]) / L, (b[1] - a[1]) / L; vx, vz = (d[0] - a[0]) / TT, (d[1] - a[1]) / TT
+        innen = pk.buffer(-1.0, join_style=2); innen_p = prep(innen)
+        P = lambda u, t: (a[0] + ux * u + vx * t, a[1] + uz * u + vz * t)
+        striche = []
+        reihen = []
+        t = 1.0
+        while t + 5 <= TT - 1.0:
+            reihen.append(t)
+            if t + 10 <= TT - 1.0: reihen.append(t + 5)
+            t += 16
+        for t0 in reihen:
+            u = 1.0
+            while u + 2.5 <= L - 1.0:
+                stand = Polygon([P(u, t0), P(u + 2.5, t0), P(u + 2.5, t0 + 5), P(u, t0 + 5)])
+                if innen_p.contains(stand):
+                    striche.append(LineString([P(u, t0), P(u, t0 + 5)]).buffer(0.07, cap_style=2))
+                    striche.append(LineString([P(u + 2.5, t0), P(u + 2.5, t0 + 5)]).buffer(0.07, cap_style=2))
+                    if rr.random() < 0.6:
+                        x, z = P(u + 1.25, t0 + 2.5)
+                        autos.append((round(x, 1), round(z, 1), round(math.atan2(-vz, vx), 2), rr.randrange(8)))
+                u += 2.5
+        if striche: linien.append(vereinigt(striche))
+        # Hecke an den Rändern, die nicht an eine Straße grenzen (dort liegen die Zufahrten)
+        ring = pk.exterior; u = 1.0
+        while u < ring.length:
+            q = ring.interpolate(u)
+            if not strasse_nah.contains(q): hecken.append((q.x, q.y))
+            u += 2.2
+    return vereinigt(linien) if linien else Polygon(), vereinigt(pflaster) if pflaster else Polygon(), autos, hecken
 
 def boden_variante(name, schichten):
     log(f'[{name}] Straßen …')
@@ -232,10 +259,22 @@ def boden_variante(name, schichten):
     garten, hofpflaster, hecken = hoefe(strassen_alle)
     log(f'[{name}] Triangulieren …')
     T = lambda art, g: triangulieren(schichten, art, g)
-    T('gehweg', gehweg); T('bord', bord); T('garten', garten); T('hofkern', hofpflaster)
+    pk_linien, pk_pflaster, pk_autos, pk_hecken = parkplaetze(strassen_alle)
+    # verwinkelte Parkplätze werden begrünt statt als leere Pflasterfläche gezeigt
+    T('gehweg', gehweg); T('bord', bord); T('garten', vereinigt([garten, pk_pflaster])); T('hofkern', hofpflaster)
     for art, liste in flaechen_art.items():
-        a = {'bahngelaende': 'schotter'}.get(art, art)
-        if a in FARBE and a not in ('haltestelle', 'gewerbe'):   # Gewerbe nur über die Hofaufteilung
+        # Bahngelände: Böschungsgrün (Schotter liegt nur unter den Gleisen, siehe gleis() in kartenstadt.js);
+        # Bahnsteige baut die Laufzeit als erhöhte Körper; Parkplätze nur die kompakten (Rest ist Pflaster)
+        a = {'bahngelaende': 'rasen2'}.get(art, art)
+        if art == 'bahngelaende':
+            # Schotter nur im Gleisbereich (auch Straßenbahn-Betriebshöfe), Rest Böschungsgrün
+            bett = vereinigt([LineString(g['punkte']).buffer(3.2) for g in osm['gleise'] if len(g['punkte']) >= 2 and im(g['punkte'])])
+            bg = vereinigt(liste).intersection(gebiet)
+            T('schotter', bg.intersection(bett)); T('rasen2', bg.difference(bett)); continue
+        if art == 'parkplatz':
+            g = vereinigt(liste).intersection(gebiet).difference(strassen_alle.buffer(1.0)).difference(pk_pflaster)
+            T('parkplatz', g); continue
+        if a in FARBE and a not in ('haltestelle', 'gewerbe', 'bahnsteig'):
             T(a, vereinigt(liste).intersection(gebiet))   # vereinigt: überlappende OSM-Flächen derselben Art flackern sonst
     breite = lambda w: 1.0 if w['art'] == 'steps' else 1.6 if w['art'] == 'path' else 2.2
     # Fußwege nur im Grünen (Parks, Gärten, Kleingärten, Schul- und Sportgelände); auf Pflaster wirken sie wie Straßengewirr
@@ -254,31 +293,7 @@ def boden_variante(name, schichten):
         while z < z1: fugen.append(LineString([(x0, z), (x1, z)]).buffer(0.09, cap_style=2)); z += 6
         fugen = [vereinigt(fugen).intersection(pl.buffer(-1.5))]
         T('linie', fugen.pop())
-    log(f'[{name}] Parkplätze …')
-    # Parkplätze: Stellplatzmarkierung (Reihen 5 m tief, Fahrgasse 6 m, Stände 2,5 m breit), damit keine leeren grauen Platten entstehen
-    for pk in flaechen_art.get('parkplatz', []):
-        pk = pk.intersection(gebiet)
-        if pk.is_empty or pk.area < 150: continue
-        r = pk.minimum_rotated_rectangle
-        c = list(r.exterior.coords)[:4]
-        l01, l12 = math.dist(c[0], c[1]), math.dist(c[1], c[2])
-        a, b, d = (c[0], c[1], c[3]) if l01 >= l12 else (c[1], c[2], c[0])
-        L, TT = math.dist(a, b), math.dist(a, d)
-        ux, uz = (b[0] - a[0]) / L, (b[1] - a[1]) / L; vx, vz = (d[0] - a[0]) / TT, (d[1] - a[1]) / TT
-        innen = pk.buffer(-0.8, join_style=2)
-        striche = []
-        t = 3.0   # Fahrgasse am Rand, dann je zwei Stellreihen Rücken an Rücken und eine Fahrgasse (16-m-Raster)
-        while t + 5 <= TT:
-            for reihe in (0, 5):
-                if t + reihe + 5 > TT: break
-                u = 0.0
-                while u <= L:
-                    p0 = (a[0] + ux * u + vx * (t + reihe), a[1] + uz * u + vz * (t + reihe))
-                    striche.append(LineString([p0, (p0[0] + vx * 5, p0[1] + vz * 5)]).buffer(0.07, cap_style=2))
-                    u += 2.5
-            striche.append(LineString([(a[0] + vx * (t + 5), a[1] + vz * (t + 5)), (b[0] + vx * (t + 5), b[1] + vz * (t + 5))]).buffer(0.07, cap_style=2))
-            t += 16
-        if striche and not innen.is_empty: T('linie', vereinigt(striche).intersection(innen))
+    if not pk_linien.is_empty: T('linie', pk_linien)
     for f in osm.get('sportfelder', []):
         g = gueltig(f['umriss'])
         if g is None or g.is_empty or g.area < 150 or not im(f['umriss']): continue
@@ -302,14 +317,30 @@ def boden_variante(name, schichten):
             x0, z0, x1, z1 = q.bounds
             for _ in range(int(q.area / 1800)): flecken.append(Point(rr.uniform(x0, x1), rr.uniform(z0, z1)).buffer(rr.uniform(7, 16), 6))
         if flecken: T('rasen2', vereinigt(flecken).intersection(gruen))
+    # Gleisbett unter allen Eisenbahngleisen (auch außerhalb von Bahngelände), sonst liegen Schienen auf Pflaster oder Rasen
+    bett_alle = vereinigt([LineString(g['punkte']).buffer(2.6) for g in osm['gleise'] if g['art'] != 'tram' and len(g['punkte']) >= 2 and im(g['punkte'])])
+    T('schotter', bett_alle.difference(strassen_alle.buffer(0.5)).difference(vereinigt(flaechen_art.get('bahngelaende', []))).intersection(gebiet))
     T('fahrbahn', strassen)
+    # Tunnelmünder: Straßen, die in eine Unterführung abtauchen, enden in einer dunklen Rampe statt stumpf an Gleis oder Bahnsteig
+    muender = []
+    for k in netz:
+        if not im(k['punkte']) or k['typ'] == 'fussgaenger': continue
+        gesamt = min(max(spuren_je_weg.get(k['way'], (None, None))[0] or (6.5 if k['typ'] == 'haupt' else 5.5), 5.0), 14.0)
+        ln = LineString(k['punkte'])
+        for ende, flag in ((0, k.get('mund_a')), (1, k.get('mund_b'))):
+            if not flag or ln.length < 4: continue
+            a_, b_ = (0, min(9, ln.length)) if ende == 0 else (max(0, ln.length - 9), ln.length)
+            stueck = LineString([ln.interpolate(a_), ln.interpolate(b_)])
+            muender.append(stueck.buffer(gesamt / 2, cap_style=2))
+    if muender: T('tunnel', vereinigt(muender).intersection(strassen.buffer(0.3)))
     fb_maske = prep(strassen_alle.buffer(0.3))
     for art, liste in zus.items():
         for g in liste:
             if g is None or g.is_empty: continue
             if art == 'markierung' and not fb_maske.contains(g): continue   # keine Markierung neben der Fahrbahn (z. B. auf weggelassenen Zufahrten)
             T(art, g.intersection(gebiet))
-    return {'strassen_alle': strassen_alle, 'gehweg_aussen': gehweg_aussen, 'garten': garten, 'hofpflaster': hofpflaster, 'hecken': hecken, 'wege': wege, 'plaetze': plaetze}
+    garten = vereinigt([garten, pk_pflaster])
+    return {'strassen_alle': strassen_alle, 'gehweg_aussen': gehweg_aussen, 'garten': garten, 'hofpflaster': hofpflaster, 'hecken': hecken, 'wege': wege, 'plaetze': plaetze, 'pk_autos': pk_autos, 'pk_hecken': pk_hecken}
 
 # ── Deko je Variante
 DEKO = {'linde': 1, 'platane': 2, 'kastanie': 3, 'birke': 4, 'nadel': 5, 'busch': 6, 'laterne': 7, 'altlaterne': 8, 'bank': 9,
@@ -356,6 +387,20 @@ def deko(name, g):
                 p = q.exterior.interpolate(u)
                 if r.random() < 0.55 and not sperre_fb.contains(p) and frei(p.x, p.y, 1.2): setz('busch', p.x, p.y)
                 u += 3.2 * (1 + r.random() * 2)
+    for x, z in g['pk_hecken']:
+        if frei(x, z, 1.0): setz('hecke', x, z)
+    # Bahnböschungen: Buschgruppen abseits der Gleise
+    gleis_nah = prep(gleisflaeche.buffer(3))
+    for q in teile(vereinigt(flaechen_art.get('bahngelaende', [])).intersection(gebiet)):
+        x0, z0, x1, z1 = q.bounds; pq = prep(q.buffer(-1.5)); x = x0
+        while x < x1:
+            zz = z0
+            while zz < z1:
+                px, pz = x + r.uniform(-4, 4), zz + r.uniform(-4, 4)
+                if r.random() < 0.35 and pq.contains(Point(px, pz)) and not gleis_nah.contains(Point(px, pz)) and frei(px, pz, 2):
+                    setz(r.choice(['busch', 'busch', 'birke', 'pappel']), px, pz)
+                zz += 9
+            x += 9
     for ln in g['hecken']:
         for teil in (ln.geoms if hasattr(ln, 'geoms') else [ln]):
             if not hasattr(teil, 'interpolate'): continue
@@ -460,14 +505,55 @@ sperre_bau = vereinigt([geo_var['karte']['gehweg_aussen'], geo_var['coffee']['ge
 bebaubar = gebiet.difference(sperre_bau).simplify(0.8).buffer(0)
 bebaubar_out = [[P(list(q.exterior.coords))] + [P(list(i.coords)) for i in q.interiors] for q in teile(bebaubar) if q.area > 800]
 
-# ── Bahnsteigdächer: aus den Eisenbahn-Bahnsteigen (statt der LoD2-Überdachungen, die sich in vielen Höhen überlagern)
-daecher = []
-# Bahnsteige zusammenführen (überlappende Teilflächen gäben versetzte Platten) und unter echten Gebäuden aussparen
+# ── Bahnhof: erhöhte Bahnsteige, Dachmodule entlang der Bahnsteigachse, abgestellte Züge
+# (Bahnsteige zusammengeführt und unter echten Gebäuden ausgespart; Dächer als Rechteckmodule à 30 m, dadurch keine Stufen)
 _bau = vereinigt([Polygon([(p[0], p[1]) for p in g['boden'][0]]).buffer(0.5) for g in lod['gebaeude'] if g['boden'] and len(g['boden'][0]) >= 3 and (g['fkt'] or '').startswith('31001')])
-for g in teile(vereinigt(flaechen_art.get('bahnsteig', [])).difference(_bau)):
-    innen = g.buffer(-1.6, join_style=2).simplify(0.5)   # Dach schmaler als der Bahnsteig: Kanten und Gleise bleiben sichtbar
-    for q in teile(innen):
-        if q.area > 60: daecher.append(P(list(q.exterior.coords)))
+W = lambda x, z: [round(x + OX, 1), round(z + OZ, 1)]
+bahnsteige_out, daecher, zuege = [], [], []
+_steige = [q for q in teile(vereinigt(flaechen_art.get('bahnsteig', [])).intersection(gebiet).difference(_bau)) if q.area > 40]
+_schienen = [LineString(g['punkte']) for g in osm['gleise'] if g['art'] == 'rail' and len(g['punkte']) >= 2 and im(g['punkte'])]
+_benutzt = set()
+_rz = random.Random(11)
+def _achse(poly):
+    c = list(poly.minimum_rotated_rectangle.exterior.coords)[:4]
+    l01, l12 = math.dist(c[0], c[1]), math.dist(c[1], c[2])
+    a_, b_ = (c[0], c[1]) if l01 >= l12 else (c[1], c[2])
+    L = max(l01, l12); return a_, ((b_[0] - a_[0]) / L, (b_[1] - a_[1]) / L), L, min(l01, l12)
+for g in _steige:
+    ring = g.simplify(0.3).exterior.coords
+    bahnsteige_out.append([v for x, z in list(ring)[:-1] for v in W(x, z)])
+    a0, (ux, uz), L, Bq = _achse(g)
+    if Bq < 4 or L < 30: continue
+    u = 0.12 * L
+    while u < 0.88 * L - 8:
+        w = min(30, 0.88 * L - u)
+        streifen = Polygon([(a0[0] + ux * u - uz * 500, a0[1] + uz * u + ux * 500), (a0[0] + ux * (u + w) - uz * 500, a0[1] + uz * (u + w) + ux * 500),
+                            (a0[0] + ux * (u + w) + uz * 500, a0[1] + uz * (u + w) - ux * 500), (a0[0] + ux * u + uz * 500, a0[1] + uz * u - ux * 500)])
+        teil = g.buffer(-0.8).intersection(streifen)
+        if not teil.is_empty and teil.area > 40:
+            _, (mx, mz), lm, bm = _achse(teil)
+            if (mx * ux + mz * uz) < 0.7: mx, mz = ux, uz   # Modul folgt der Bahnsteigachse
+            cc = teil.centroid
+            daecher.append(W(cc.x, cc.y) + [round(mx, 3), round(mz, 3), round(w - 1.2, 1), round(max(3, min(bm, Bq) * 0.72), 1)])
+        u += w
+    # Züge an den Bahnsteigkanten: je Gleis höchstens einer, mittig am Bahnsteig
+    zone = g.buffer(5).difference(g.buffer(0.8))
+    for si, sl in enumerate(_schienen):
+        if si in _benutzt or not sl.intersects(zone): continue
+        stueck = sl.intersection(zone)
+        teile_l = [q for q in (stueck.geoms if hasattr(stueck, 'geoms') else [stueck]) if q.geom_type == 'LineString']
+        if not teile_l: continue
+        lang = max(teile_l, key=lambda q: q.length)
+        if lang.length < 70 or _rz.random() < 0.4: continue
+        _benutzt.add(si)
+        typ = 0 if _rz.random() < 0.5 else 1
+        wagen = min(int(lang.length // 26.5), 7 if typ == 0 else 5)
+        start = (lang.length - wagen * 26.5) / 2
+        for k in range(wagen):
+            p0 = lang.interpolate(start + k * 26.5 + 0.4); p1 = lang.interpolate(start + (k + 1) * 26.5 - 0.4)
+            mx_, mz_ = (p0.x + p1.x) / 2, (p0.y + p1.y) / 2
+            zuege.append(W(mx_, mz_) + [round(math.atan2(-(p1.y - p0.y), p1.x - p0.x), 3), typ, 1 if k == 0 else 2 if k == wagen - 1 else 0])
+log(len(bahnsteige_out), 'Bahnsteige', len(daecher), 'Dachmodule', len(zuege), 'Zugwagen')
 
 # ── Gebäude mit Dachdreiecken
 def dach_index(ring):
@@ -548,7 +634,7 @@ for k in netz:
         spuren = [(gesamt / 4, -1), (-gesamt / 4, 1)] if not k['einbahn'] else [(0, 1)]
     gesamt = min(max(gesamt or 0, 0), 14.0)
     netz_out.append([TYP[k['typ']], round(gesamt * 10), 1 if k['einbahn'] else 0, kn(k['a']), kn(k['b']), P(k['punkte']),
-                     [v for o, d in spuren for v in (round(o * 10), d)], fuss_seiten(k, gesamt)])
+                     [v for o, d in spuren for v in (round(o * 10), d)], fuss_seiten(k, gesamt), (1 if k.get('mund_a') else 0) | (2 if k.get('mund_b') else 0)])
 
 out = {
     'stadt': 'essen', 'lizenz': '© OpenStreetMap-Mitwirkende, ODbL; Geobasis NRW, dl-de/zero-2-0',
@@ -557,7 +643,8 @@ out = {
     'varianten': varianten, 'bp': b64(BP, '<u2'), 'bi': b64(BI, '<u2'),
     'gp': b64(GP, '<u2'), 'gi': b64(GI, '<u2'), 'fkt': list(FKT),
     'gleise': [[{'rail': 1, 'light_rail': 2, 'tram': 3}[g['art']], P(g['punkte'])] for g in osm['gleise'] if g['art'] in ('rail', 'light_rail', 'tram') and im(g['punkte'])],
-    'bebaubar': bebaubar_out, 'daecher': daecher, 'netz': netz_out, 'gebaeude': gebaeude,
+    'bebaubar': bebaubar_out, 'daecher': daecher, 'bahnsteige': bahnsteige_out, 'zuege': zuege, 'netz': netz_out, 'gebaeude': gebaeude,
+    'parkautos': {n: [[x + OX, z + OZ, w, f] for x, z, w, f in geo_var[n]['pk_autos']] for n in ('karte', 'coffee')},
 }
 json.dump(out, open(ziel, 'w'), separators=(',', ':'), ensure_ascii=False)
 log(ziel, os.path.getsize(ziel) // 1024, 'KB', len(gebaeude), 'Gebäude', {k: len(v['boden']) for k, v in varianten.items()}, 'Bodenstücke', len(bebaubar_out), 'Bauflächen', len(daecher), 'Dächer')
