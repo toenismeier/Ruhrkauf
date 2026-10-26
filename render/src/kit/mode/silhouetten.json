@@ -6620,6 +6620,118 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b18armstulpen": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18armstulpen",
+        "glatt": true,
+        "platz": "unterarm"
+      },
+      "material": "strick",
+      "farbe": "bordeaux",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18baskenmuetze": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18baskenmuetze",
+        "platz": "kopf"
+      },
+      "material": "wolle",
+      "farbe": "anthrazit",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18einsatzkragen": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18einsatzkragen",
+        "glatt": true,
+        "platz": "hals"
+      },
+      "material": "strick",
+      "farbe": "anthrazit",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18fingerlos": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18fingerlos",
+        "platz": "hand"
+      },
+      "material": "leder",
+      "farbe": "anthrazit",
+      "model": "zubehoer"
+    },
+    "b18fliegermuetze": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18fliegermuetze",
+        "platz": "kopfganz"
+      },
+      "material": "baumwolle",
+      "farbe": "bordeaux",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18hueftguertel": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18hueftguertel",
+        "platz": "huefte"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18militarycap": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18militarycap",
+        "bildmuster": "camouflage",
+        "platz": "kopf"
+      },
+      "material": "baumwolle",
+      "farbe": "flaschengrün",
+      "model": "zubehoer"
+    },
+    "b18pareo": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18pareo",
+        "bildmuster": "blumen",
+        "platz": "wickel"
+      },
+      "material": "seide",
+      "farbe": "rot",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18schluesselanhaenger": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18schluesselanhaenger",
+        "platz": "halten"
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "zubehoer"
+    },
+    "b18scrunchie": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18scrunchie",
+        "bildmuster": "streifen",
+        "platz": "haar"
+      },
+      "material": "satin",
+      "farbe": "altrosa",
+      "model": "zubehoer",
+      "nur": "damen"
     }
   }
 }
