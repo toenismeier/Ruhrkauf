@@ -162046,7 +162046,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "f9b2b0e" : "Entwicklung";
+  var version = () => true ? "098c1d1" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -173018,7 +173018,7 @@ void main() {
     let netz3 = null;
     if (p2.netz && !(p2.dessin === "" || p2.muster && p2.muster !== "uni")) {
       netz3 = S.id + "nz";
-      S.defs.push(`<pattern id="${netz3}" width="2.6" height="2.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.6" height="2.6" fill="${hell3(S.c, 0.12)}" opacity="0.35"/><circle cx="1.3" cy="1.3" r="0.72" fill="${dunkel2(S.c, 0.45)}" opacity="0.75"/></pattern>`);
+      S.defs.push(`<pattern id="${netz3}" width="1.5" height="1.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.5" height="1.5" fill="${dunkel2(S.c, 0.4)}" opacity="0.55"/><rect x="0.32" y="0.32" width="0.86" height="0.86" rx="0.3" fill="${hell3(S.c, 0.08)}"/></pattern>`);
     }
     const K3 = [S];
     const n3 = 1 + Math.max(0, ...D.regionen.filter((r4) => ["t", "r", "m", "mf", "tk"].includes(r4[0])).map((r4) => r4[1]));
@@ -173042,7 +173042,10 @@ void main() {
         if (D.regionen.some((q3) => q3[0] === "m" && q3[1] === r4[1])) continue;
         const k5 = K3[r4[1]];
         if (ersetzt) t5.push(`<path d="${r4[2]}" fill="${k5.c}"/>`);
-        else if (p2.querstreifen && p2.querstreifen[0] === r4[1]) {
+        else if (p2.zonenmuster && p2.zonenmuster[0] === r4[1]) {
+          const f13 = musterFuellung(k5, p2.zonenmuster[1]);
+          if (f13) t5.push(`<path d="${r4[2]}" fill="${f13}"/>`);
+        } else if (p2.querstreifen && p2.querstreifen[0] === r4[1]) {
           const id = S.id + "qs" + r4[1], a2 = p2.querstreifen[1] ?? 1.6;
           S.defs.push(`<pattern id="${id}" width="4" height="${a2}" patternUnits="userSpaceOnUse"><rect width="4" height="${(a2 * 0.45).toFixed(2)}" fill="${dunkel2(k5.c, 0.55)}" opacity="0.75"/></pattern>`);
           t5.push(`<path d="${r4[2]}" fill="url(#${id})"/>`);
@@ -182891,8 +182894,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-26T18:49:17.752Z" : null;
-    const v2 = true ? "f9b2b0e" : "Entwicklung";
+    const iso = true ? "2026-10-26T19:07:54.955Z" : null;
+    const v2 = true ? "098c1d1" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();

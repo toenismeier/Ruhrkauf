@@ -22,7 +22,7 @@ export function b03Zeichner(S, t, p) {
   if (p.feinstreifen && !p.muster && (!S.tex || S.m === 'wolle')) { const id = S.id + 'fs'; S.defs.push(`<pattern id="${id}" width="1.9" height="4" patternUnits="userSpaceOnUse"><rect width="0.32" height="4" fill="${hell(S.c, 0.55)}" opacity="0.8"/></pattern>`); S.tex = `url(#${id})`; }
   // Netzstrick als Standarddessin (Lochmuster), solange das Musterfeld nichts anderes setzt
   let netz = null;
-  if (p.netz && !(p.dessin === '' || (p.muster && p.muster !== 'uni'))) { netz = S.id + 'nz'; S.defs.push(`<pattern id="${netz}" width="2.6" height="2.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.6" height="2.6" fill="${hell(S.c, 0.12)}" opacity="0.35"/><circle cx="1.3" cy="1.3" r="0.72" fill="${dunkel(S.c, 0.45)}" opacity="0.75"/></pattern>`); }
+  if (p.netz && !(p.dessin === '' || (p.muster && p.muster !== 'uni'))) { netz = S.id + 'nz'; S.defs.push(`<pattern id="${netz}" width="1.5" height="1.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.5" height="1.5" fill="${dunkel(S.c, 0.4)}" opacity="0.55"/><rect x="0.32" y="0.32" width="0.86" height="0.86" rx="0.3" fill="${hell(S.c, 0.08)}"/></pattern>`); }
   const K = [S];
   const n = 1 + Math.max(0, ...D.regionen.filter((r) => ['t', 'r', 'm', 'mf', 'tk'].includes(r[0])).map((r) => r[1]));
   for (let i = 1; i < n; i++) K.push(materialDefs(p.farben?.[i - 1] ?? 'grau', p.materialien?.[i - 1] ?? 'baumwolle', S.defs));
@@ -38,10 +38,11 @@ export function b03Zeichner(S, t, p) {
   for (const r of D.regionen) {
     const d = r[r.length - 1];
     if (r[0] === 'mf') {
-      // Zone ohne Musterteile aus dem Bild (feine Streifen, p.querstreifen = [zone, abstand]): Streifen im Code, Musterfeld ersetzt sie
+      // Zone ohne Musterteile aus dem Bild (feine Streifen p.querstreifen = [zone, abstand], Karo p.zonenmuster = [zone, muster]): Muster im Code, Musterfeld ersetzt es
       if (D.regionen.some((q) => q[0] === 'm' && q[1] === r[1])) continue;
       const k = K[r[1]];
       if (ersetzt) t.push(`<path d="${r[2]}" fill="${k.c}"/>`);
+      else if (p.zonenmuster && p.zonenmuster[0] === r[1]) { const f = musterFuellung(k, p.zonenmuster[1]); if (f) t.push(`<path d="${r[2]}" fill="${f}"/>`); }
       else if (p.querstreifen && p.querstreifen[0] === r[1]) { const id = S.id + 'qs' + r[1], a = p.querstreifen[1] ?? 1.6; S.defs.push(`<pattern id="${id}" width="4" height="${a}" patternUnits="userSpaceOnUse"><rect width="4" height="${(a * 0.45).toFixed(2)}" fill="${dunkel(k.c, 0.55)}" opacity="0.75"/></pattern>`); t.push(`<path d="${r[2]}" fill="url(#${id})"/>`); }
       continue;
     }
