@@ -51,7 +51,8 @@ describe('Q34: Sortiment Adults und Best Ager', () => {
 
   test('kein Bild doppelt über alle Artikeltypen', () => {
     const je = new Map<string, string[]>();
-    for (const t of K.typen) { const b = bild(t); je.set(b, [...(je.get(b) ?? []), t.typ]); }
+    // Wurf 4: Typen mit offenem Bild (bildOffen) zeigen bis zur Abnahme eine vorhandene Silhouette
+    for (const t of K.typen.filter((x) => !x.bildOffen)) { const b = bild(t); je.set(b, [...(je.get(b) ?? []), t.typ]); }
     const doppelt = [...je.values()].filter((l) => l.length > 1).map((l) => l.join(' = '));
     expect(doppelt).toEqual([]);
   });

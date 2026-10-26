@@ -100,7 +100,12 @@ export interface TypDef {
   muster?: readonly Muster[];
   /** Q37: Anlässe, für die der Typ zusätzlich im Ast „Anlass“ steht (vorhandene Typen: anlass.ts ANLASS_TYPEN). */
   anlass?: readonly AnlassId[];
+  /** Wurf 4: Bild noch nicht abgenommen. Solche Typen sind nicht entwickelbar, nicht im Grundsortiment und nicht in der Auswahl. */
+  bildOffen?: true;
 }
+
+/** Wurf 4 (auftraege/wurf4/bilder-neu.md): Typ darf entwickelt, angeboten und ins Grundsortiment genommen werden. */
+export const waehlbar = (t: TypDef): boolean => !t.bildOffen;
 
 const G = (kinder: number, jung: number, mitte: number, reif: number): Record<TrendGruppe, number> => ({ kinder, jung, mitte, reif });
 
@@ -722,7 +727,7 @@ export function produkteWoche(s: GameState): void {
     // WG ohne Produkte (neue Marke oder neuer Anteil): Grundsortiment vom Produzenten (schlicht, ohne Trendbezug)
     for (const wg of Object.keys(m.wgAnteile)) {
       if (pr.liste.some((p) => p.marke === m.id && p.wg === wg && p.status !== 'ausgelistet')) continue;
-      const t = ARTIKELTYPEN.find((x) => x.wgs.includes(wg) && x.gruppe[trendGruppe(m)] >= 0.5) ?? ARTIKELTYPEN.find((x) => x.wgs.includes(wg));
+      const t = ARTIKELTYPEN.find((x) => waehlbar(x) && x.wgs.includes(wg) && x.gruppe[trendGruppe(m)] >= 0.5) ?? ARTIKELTYPEN.find((x) => waehlbar(x) && x.wgs.includes(wg));
       if (!t) continue;
       const farbe = FARB_BASIS[trendGruppe(m)][0];
       const p = neuesProdukt(s, m, { typ: t.typ, farbe, material: t.materialien[0], preislage: m.preislage, qualitaet: m.qualitaet, stil: m.stil, dauer: 12, budgetWoche: Math.round(PRODUKT_PARAM.budgetBedarf * t.aufwand * 0.4 / 12) }, wg, 0.4);
@@ -788,6 +793,7 @@ function pruefe(s: GameState, e: ProduktEntwurf): Pruefung {
   if (!m || m.status === 'eingestellt') return { ...leer, fehler: 'Marke nicht gefunden.' };
   const t = TYP[e.typ];
   if (!t) return { ...leer, m, fehler: 'Unbekannter Artikeltyp.' };
+  if (!waehlbar(t)) return { ...leer, m, t, fehler: `${e.typ} ist noch nicht freigegeben (Bild in Arbeit).` };
   if (e.zielgruppe && !ZIELGRUPPE_PRODUKT[e.zielgruppe]) return { ...leer, m, t, fehler: 'Unbekannte Zielgruppe.' };
   if (!FARBEN[e.farbe]) return { ...leer, m, t, fehler: 'Unbekannte Farbe.' };
   if (!t.materialien.includes(e.material)) return { ...leer, m, t, fehler: `${e.typ} gibt es nicht aus ${e.material}. Möglich: ${t.materialien.join(', ')}.` };
@@ -888,7 +894,7 @@ export function produktKi(s: GameState, guete: number, r: RngHalter): string | u
     if (!frei.length) continue;
     const g = trendGruppe(m);
     const trend = trendFuer(s, saisonId(s.woche + 12)).gruppen[g];
-    const kand = ARTIKELTYPEN.filter((t) => frei.includes(t.kategorie) && wgFuer(s, m, t));
+    const kand = ARTIKELTYPEN.filter((t) => waehlbar(t) && frei.includes(t.kategorie) && wgFuer(s, m, t));
     if (!kand.length) continue;
     let e: ProduktEntwurf;
     if (gut) {
@@ -965,10 +971,10 @@ export function produkte(s: GameState, marke?: string): ProdukteListe {
   const marken = s.eigenmarken.marken.filter((m) => m.status !== 'eingestellt' && (!marke || m.id === marke)).map((m): MarkenProdukte => {
     const liste = s.produkte.liste.filter((p) => p.marke === m.id && p.status !== 'ausgelistet');
     // Keine Kategorie durch ein anfangs leeres Sortiment künstlich sperren.
-    const moegliche = ARTIKELTYPEN.filter((t) => t.gruppe[trendGruppe(m)] > 0.15 && wgFuer(s,m,t)).map((t) => t.kategorie);
+    const moegliche = ARTIKELTYPEN.filter((t) => waehlbar(t) && t.gruppe[trendGruppe(m)] > 0.15 && wgFuer(s,m,t)).map((t) => t.kategorie);
     const kats = [...new Set([...liste.map((p) => p.kategorie), ...moegliche])];
     // Q33: welche Artikeltypen die Marke entwickeln kann (WG passt zur Marke), damit die Auswahl nichts Unmögliches zeigt
-    const entwickelbar = ARTIKELTYPEN.filter((t) => !!wgFuer(s, m, t)).map((t) => t.typ);
+    const entwickelbar = ARTIKELTYPEN.filter((t) => waehlbar(t) && !!wgFuer(s, m, t)).map((t) => t.typ);
     const ent = liste.filter((p) => p.status === 'entwicklung').length;
     const voll = kats.filter((k) => belegt(s, m.id, k) >= kap).map((k) => PRODUKT_KATEGORIEN[k]);
     return {
@@ -1063,7 +1069,7 @@ export interface ProduktKatalog {
   zielgruppen: typeof PRODUKT_ZIELGRUPPEN;
   sparten: { id: Produktsparte; name: string; typen: ArtikelTyp[] }[];
   kategorien: { id: ProduktKategorie; name: string }[];
-  typen: { typ: ArtikelTyp; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preisMitte: number; materialien: Material[]; aufwand: number; gruppe: Record<TrendGruppe, number>; bild?: ArtikelBild; zielgruppen: ProduktZielgruppe[]; muster: Muster[]; anlass: AnlassId[] }[];
+  typen: { typ: ArtikelTyp; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preisMitte: number; materialien: Material[]; aufwand: number; gruppe: Record<TrendGruppe, number>; bild?: ArtikelBild; bildOffen?: true; zielgruppen: ProduktZielgruppe[]; muster: Muster[]; anlass: AnlassId[] }[];
   /** Q37: alle Muster (gesperrt mit Begründung) und Anlässe mit Saisonspitzen. */
   muster: { name: Muster; bild: string; wort: string; preis: number; gesperrt?: string }[];
   anlaesse: { id: AnlassId; name: string; saison: string; anzahl: number }[];
@@ -1083,7 +1089,7 @@ export function produktKatalog(_s: GameState): ProduktKatalog {
       typen: [...ZUSATZ_ARTIKEL[id]],
     })),
     kategorien: (Object.keys(PRODUKT_KATEGORIEN) as ProduktKategorie[]).map((id) => ({ id, name: PRODUKT_KATEGORIEN[id] })),
-    typen: ARTIKELTYPEN.map((t) => ({ ...t, preisMitte: t.preis, wgs: [...t.wgs], materialien: [...t.materialien], gruppe: { ...t.gruppe }, zielgruppen: zielgruppenFuer(t), ...(t.bild ? { bild: { ...t.bild } } : {}), muster: musterFuer(t), anlass: anlaesseFuer(t) })),
+    typen: ARTIKELTYPEN.map((t) => ({ ...t, preisMitte: t.preis, wgs: [...t.wgs], materialien: [...t.materialien], gruppe: { ...t.gruppe }, zielgruppen: zielgruppenFuer(t), ...(t.bild ? { bild: { ...t.bild } } : {}), ...(t.bildOffen ? { bildOffen: true as const } : {}), muster: musterFuer(t), anlass: anlaesseFuer(t) })),
     muster: MUSTER.map((m) => ({ name: m, bild: MUSTER_INFO[m].bild, wort: MUSTER_INFO[m].wort, preis: MUSTER_INFO[m].preis, ...(MUSTER_INFO[m].gesperrt ? { gesperrt: MUSTER_INFO[m].gesperrt } : {}) })),
     anlaesse: ANLAESSE.map((a) => ({ id: a.id, name: a.name, saison: anlassSaisonText(a.id), anzahl: ARTIKELTYPEN.filter((t) => anlaesseFuer(t).includes(a.id)).length })),
     farben: FARBLISTE.map((f) => ({ name: f, hex: FARBEN[f] })),
