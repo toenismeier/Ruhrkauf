@@ -6620,6 +6620,55 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b30buegelloserbh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b30": "b30buegelloserbh",
+        "farben": [
+          "gleich"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": null,
+      "nur": "damen"
+    },
+    "b30harnessbody": {
+      "gruppe": "waesche",
+      "standard": {
+        "b30": "b30harnessbody",
+        "umriss": true,
+        "farben": [
+          "gleich"
+        ],
+        "materialien": [
+          "satin"
+        ]
+      },
+      "material": "satin",
+      "farbe": "marine",
+      "model": null,
+      "nur": "damen"
+    },
+    "b30tshirtbh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b30": "b30tshirtbh",
+        "farben": [
+          "gleich"
+        ],
+        "materialien": [
+          "satin"
+        ]
+      },
+      "material": "satin",
+      "farbe": "beige",
+      "model": null,
+      "nur": "damen"
     }
   }
 }
