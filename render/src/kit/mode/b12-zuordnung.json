@@ -34,8 +34,8 @@
    "silhouette": "b12workerjacke"
   }
  },
- "nachschaerfen": {
-  "Kapuzenjacke": "Formtreue 3: schon im B-Bild keine Kapuze, nur ein Fellklecks am Hals, Rippbündchen und Rippsaum fehlen",
-  "Wildlederjacke": "Formtreue 3: B-Bild mit Schalkragen, Knopf und Saumbund statt durchgehender Fellblende an der offenen Front"
+ "nachgeschaerft": {
+  "Kapuzenjacke": "B im Workstream nachgeschärft (Kapuzenöffnung), neu vektorisiert",
+  "Wildlederjacke": "B im Workstream nachgeschärft, neu vektorisiert"
  }
 }
