@@ -6620,6 +6620,130 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b13barfusssneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13barfusssneaker",
+        "art": "sneaker",
+        "farben": [
+          "grau"
+        ],
+        "materialien": [
+          "polyester"
+        ]
+      },
+      "material": "polyester",
+      "farbe": "offwhite",
+      "model": "schuhe"
+    },
+    "b13bikerstiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13bikerstiefel",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "schuhe"
+    },
+    "b13cowboystiefelette": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13cowboystiefelette",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "schuhe"
+    },
+    "b13cowboystiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13cowboystiefel",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "schuhe"
+    },
+    "b13sandalette": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13sandalette",
+        "art": "sandale"
+      },
+      "material": "leder",
+      "farbe": "creme",
+      "model": "schuhe",
+      "nur": "damen"
+    },
+    "b13slingbackballerina": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13slingbackballerina",
+        "art": "ballerina",
+        "farben": [
+          "schwarz"
+        ],
+        "materialien": [
+          "leder"
+        ]
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "schuhe",
+      "nur": "damen"
+    },
+    "b13slouchstiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13slouchstiefel",
+        "art": "stiefel"
+      },
+      "material": "baumwolle",
+      "farbe": "camel",
+      "model": "schuhe",
+      "nur": "damen"
+    },
+    "b13slouchstiefelette": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13slouchstiefelette",
+        "art": "stiefel",
+        "farben": [
+          "creme"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "altrosa",
+      "model": "schuhe",
+      "nur": "damen"
+    },
+    "b13sneakerina": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13sneakerina",
+        "art": "ballerina"
+      },
+      "material": "polyester",
+      "farbe": "grau",
+      "model": "schuhe",
+      "nur": "damen"
+    },
+    "b13sockboot": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13sockboot",
+        "art": "stiefel"
+      },
+      "material": "baumwolle",
+      "farbe": "camel",
+      "model": "schuhe",
+      "nur": "damen"
     }
   }
 }
