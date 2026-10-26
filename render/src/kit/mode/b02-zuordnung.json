@@ -1,0 +1,46 @@
+{
+ "hinweis": "Bildpaket B02: Engine-Typ -> Silhouette. Die Typen gibt es auf main noch nicht; angebunden wird nach Merge des Q-Auftrags (bild: { silhouette }, bildOffen entfernen).",
+ "paket": "B02",
+ "typen": {
+  "Hemdbluse": {
+   "silhouette": "b02hemdbluse",
+   "auftrag": "Q38"
+  },
+  "Wickelbluse": {
+   "silhouette": "b02wickelbluse",
+   "auftrag": "Q38"
+  },
+  "Peplum-Bluse": {
+   "silhouette": "b02peplumbluse",
+   "auftrag": "Q38"
+  },
+  "Lagenlook-Bluse": {
+   "silhouette": "b02lagenlookbluse",
+   "auftrag": "Q38"
+  },
+  "Bolero": {
+   "silhouette": "b02bolero",
+   "auftrag": "Q38"
+  },
+  "Wickeljacke": {
+   "silhouette": "b02wickeljacke",
+   "auftrag": "Q38"
+  },
+  "Resorthemd": {
+   "silhouette": "b02resorthemd",
+   "auftrag": "Q38"
+  },
+  "Jeanshemd": {
+   "silhouette": "b02jeanshemd",
+   "auftrag": "Q38"
+  },
+  "Lagenlook-Hemd": {
+   "silhouette": "b02lagenlookhemd",
+   "auftrag": "Q38"
+  },
+  "Sweatjacke": {
+   "silhouette": "b02sweatjacke",
+   "auftrag": "Q38"
+  }
+ }
+}
