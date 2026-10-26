@@ -6621,6 +6621,123 @@
       "material": "lack",
       "farbe": "bordeaux",
       "model": "tasche"
+    },
+    "b15schlafshirt": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15schlafshirt",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "tailliert"
+      },
+      "material": "rippe",
+      "farbe": "rosa",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b15tanga": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15tanga"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": null,
+      "nur": "damen"
+    },
+    "b15balconettebh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15balconettebh"
+      },
+      "material": "satin",
+      "farbe": "beige",
+      "model": null,
+      "nur": "damen"
+    },
+    "b15panty": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15panty"
+      },
+      "material": "baumwolle",
+      "farbe": "beige",
+      "model": null,
+      "nur": "damen"
+    },
+    "b15bralette": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15bralette"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": null,
+      "nur": "damen"
+    },
+    "b15schlafshorts": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15schlafshorts",
+        "passform": "weit",
+        "laenge": "kurz"
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b15brazilianslip": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15brazilianslip"
+      },
+      "material": "baumwolle",
+      "farbe": "koralle",
+      "model": null,
+      "nur": "damen"
+    },
+    "b15negligee": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15negligee",
+        "laenge": "mini",
+        "form": "a-linie",
+        "aermel": "traeger",
+        "kragen": "v"
+      },
+      "material": "satin",
+      "farbe": "schwarz",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b15pyjamaoberteil": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15pyjamaoberteil",
+        "aermel": "lang",
+        "kragen": "hemd",
+        "knopfleiste": true,
+        "farben": [
+          "creme"
+        ]
+      },
+      "material": "satin",
+      "farbe": "bordeaux",
+      "model": "oberteil"
+    },
+    "b15schlaftop": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15schlaftop",
+        "aermel": "traeger",
+        "kragen": "v",
+        "passform": "tailliert"
+      },
+      "material": "rippe",
+      "farbe": "sand",
+      "model": "oberteil",
+      "nur": "damen"
     }
   }
 }
