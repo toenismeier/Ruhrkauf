@@ -1,0 +1,17 @@
+{
+  "hinweis": "B30: Artikeltyp -> Silhouette. Typen kommen mit dem Q-Auftrag (noch nicht auf main); nach dessen Merge bild.silhouette setzen und bildOffen entfernen.",
+  "typen": {
+    "Bügelloser BH": {
+      "silhouette": "b30buegelloserbh",
+      "auftrag": "Q42"
+    },
+    "Harness-Body": {
+      "silhouette": "b30harnessbody",
+      "auftrag": "Q42"
+    },
+    "T-Shirt-BH": {
+      "silhouette": "b30tshirtbh",
+      "auftrag": "Q42"
+    }
+  }
+}
