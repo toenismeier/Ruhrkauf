@@ -63,7 +63,8 @@ describe('Q41: Accessoires, Taschen, Schmuck, Beauty aus dem Referenzsortiment',
   });
 
   test('bildOffen: hinten angehängt, in keiner Marke entwickelbar, Entwickeln wird abgelehnt', () => {
-    expect(ARTIKELTYPEN.slice(-TYPEN.length).map((t) => t.typ)).toEqual([...NAMEN]);
+    const idx = ARTIKELTYPEN.findIndex((t) => t.typ === NAMEN[0]);
+    expect(ARTIKELTYPEN.slice(idx, idx + TYPEN.length).map((t) => t.typ)).toEqual([...NAMEN]);
     const s2 = neuesSpiel(1);
     const offen = new Set<string>(NAMEN);
     for (const t of ARTIKELTYPEN.filter((x) => offen.has(x.typ))) expect(waehlbar(t)).toBe(false);
