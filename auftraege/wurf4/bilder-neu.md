@@ -39,7 +39,15 @@ Abgabe je Paket: Kontaktbogen **Referenz | Zeichnung** je Typ in 320 px und 64 p
 Anlass: B01-Prüfung am Model am 27.10. Das Model (`modelSVG`) zeichnet die Kleidung aus den alten Grundformen und übernimmt aus B nur Farbe, Material und einige Parameter. Im Blindtest durch einen frischen Subagenten waren 2 von 10 B01-Teilen am Model richtig erkannt. Die Ballonjeans erscheint als gerade Jeans, die Low-Rise-Jeans mit hohem Bund, die Hotpants als Bermuda. Beim Strickpullover fehlen Streifen und Polokragen, der Blouson zeigt keine Bomberform, Mary Jane ist kaum sichtbar, die Baguette-Tasche ist ein Viereck.
 - Abnahmebogen je Typ: **Referenz | B | SVG im Spiel | am Model** (Zielgruppe, die den Typ trägt).
 - Blindtest am Model durch frischen Subagenten mit Geschwisterliste wie Abschnitt 2. Abnahme nur bei richtiger Benennung **am Model**.
-- Fällt ein Typ am Model durch, wird er im PR als Model-Befund ausgewiesen. Er wird nicht gemergt, als wäre er fertig. Wie das Model die B-Zeichnung übernimmt, ist offen (O10: 2D-Ebene je Teil oder Bildmodell auf MPFB-Körper). Bis dahin wird kein Paket ohne Model-Spalte vorgelegt.
+- Fällt ein Typ am Model durch, wird er im PR als Model-Befund ausgewiesen. Er wird nicht gemergt, als wäre er fertig. Bis der neue Model-Weg steht, wird kein Paket ohne Model-Spalte vorgelegt.
+- Die Prüfung umfasst auch den Sitz. Bundhöhe, Länge, Weite und Fall müssen dem Referenz-Modelfoto entsprechen. Kleidung, die aufgelegt wirkt wie eine Papierschablone, fällt durch, auch wenn der Artikel erkannt wird.
+
+## 5. Neuer Model-Weg (Ummo 27.10.2026)
+Verworfen sind: Kleidung auf die Q25-Puppe legen (SVG oder Qwen-Edit auf Q25, „Papierschablone“) und MPFB-Körper („Hulk-mäßig“, Proportionen falsch).
+- **Grundfiguren:** Je Zielgruppe und Geschlecht eine feste Figur, abgenommen am 27.10. Q25-Gesicht und Phänotyp bleiben, der Körper ist neu in Alltagsproportionen. Größen: Damen Kinder 1,35 / Teens 1,63 / Young 1,68 / Adults 1,67 / Best Ager 1,64 m; Herren 1,37 / 1,72 / 1,80 / 1,80 / 1,76 m. Ablage privat: `toenismeier/hartwig-ref-p01-shirts-tops`, Ordner `models/figuren/`.
+- **Model-Bild je Produkt:** Wird als ganze Zeichnung neu erzeugt (Qwen-Image-Edit-2509). Eingaben: Grundfigur, Referenz-Modelfoto aus dem Kontaktbogen (Sitz) und B-Freisteller (Produkt). Danach vtracer und Stoffzonen wie bei B.
+- **Kosten:** Vor Ausgaben über 50 $ geht Ummo die Zahlen mit durch.
+
 
 ## 5. Merge B02–B30 (Ummo 27.10.2026: „Produktbilder mergen, Model getrennt“)
 - Alle 29 Pakete auf einem Branch zusammengeführt (`feat/bildpakete-wurf4`). Ersetzt die Einzel-PRs #102–#113.
