@@ -10,6 +10,7 @@ import { SILHOUETTEN, ZEICHNER_ERWEITERT } from './silhouetten.js';
 import { modelSVG, HAUT, HAAR } from './model.js';
 import { altbildSVG } from '../produktbild.js';
 import { musterFuellung } from './q37-muster.js';
+import { modelBildSVG } from './model-bilder.js';
 
 const FLAT = { oberteil: oberteilFlat, hose: hoseFlat, rock: (S, t, p) => rockFlat(S, t, p, 16), kleid: kleidFlat, jacke: jackeFlat };
 
@@ -119,6 +120,9 @@ export function modelFuerProdukt(bild, farbe, material, { geschlecht = 'damen', 
   const g = s.geschlecht ?? (s.nur === 'damen' || s.nur === 'herren' ? s.nur : geschlecht === 'herren' ? 'herren' : 'damen');
   const zg0 = s.nur === 'kinder' ? 'kinder' : s.nur === 'teens' ? 'teens' : zielgruppe;
   const zg = GRUND[g][zg0] ? zg0 : 'young';
+  // O10: fertige Model-Zeichnung für Typ und Grundfigur, wenn vorhanden (Kleidung sitzt am Körper statt aufgelegt)
+  const fertig = modelBildSVG(id, g, zg, farbe ?? s.farbe, { groesse, hintergrund, muster });
+  if (fertig) return fertig;
   const G = GRUND[g][zg];
   let teile = alsModelTeil(id, s, p, farbe ?? s.farbe, material ?? s.material);
   teile = Array.isArray(teile) ? teile : [teile];

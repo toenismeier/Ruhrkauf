@@ -24,7 +24,8 @@ test('Silhouetten mit Model-Platz zeichnen ein Model je Zielgruppe', () => {
     for (const zielgruppe of ['kinder', 'teens', 'young', 'adults', 'bestager']) for (const geschlecht of ['damen', 'herren']) {
       const svg = modelFuerProdukt(id, undefined, undefined, { geschlecht, zielgruppe });
       if (!s.model) { assert.equal(svg, null, id); continue; }
-      assert.ok(svg && !/NaN|undefined/.test(svg), `${id} ${geschlecht} ${zielgruppe}`);
+      // eingebettete Bilddaten (base64) können zufällig "undefined" enthalten, daher vor dem Prüfen entfernen
+      assert.ok(svg && !/NaN|undefined/.test(svg.replace(/base64,[^"]+/g, '')), `${id} ${geschlecht} ${zielgruppe}`);
     }
   }
 });
