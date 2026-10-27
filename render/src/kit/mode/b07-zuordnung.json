@@ -1,0 +1,45 @@
+{
+ "hinweis": "B07 (Wurf 4): Zuordnung Artikeltyp -> Silhouette. Die Typen kommen mit Q39 (noch nicht auf main). Nach dem Merge von Q39: je Typ bild.silhouette auf diese Id setzen und bildOffen entfernen.",
+ "auftrag": "Q39",
+ "typen": {
+  "Triangel-Bikinioberteil": {
+   "silhouette": "b07triangel",
+   "nur": "damen"
+  },
+  "Bikinislip": {
+   "silhouette": "b07bikinislip",
+   "nur": "damen"
+  },
+  "Brazilian-Bikinislip": {
+   "silhouette": "b07brazilian",
+   "nur": "damen"
+  },
+  "Barrel-Hose": {
+   "silhouette": "b07barrelhose"
+  },
+  "Pumphose": {
+   "silhouette": "b07pumphose",
+   "nur": "damen"
+  },
+  "Schlaghose": {
+   "silhouette": "b07schlaghose",
+   "nur": "damen"
+  },
+  "Leggings": {
+   "silhouette": "b07leggings",
+   "nur": "damen"
+  },
+  "Strickhose": {
+   "silhouette": "b07strickhose",
+   "nur": "damen"
+  },
+  "Ballonhose": {
+   "silhouette": "b07ballonhose",
+   "nur": "damen"
+  },
+  "Cargo-Jogger": {
+   "silhouette": "b07cargojogger",
+   "nur": "herren"
+  }
+ }
+}

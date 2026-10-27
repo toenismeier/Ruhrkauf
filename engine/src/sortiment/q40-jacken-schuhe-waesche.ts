@@ -7,6 +7,7 @@
 // leicht darüber. Nur Auswahl, nicht im Startsortiment (Kalibrierung neutral). Materialien der Engine: Kunstleder und Kunstfell
 // → Polyester, Wildleder → Leder, Spitze/Mesh/Satin → Polyester oder Seide.
 import { G, type SortimentTyp } from './basis';
+import { bildWurf4 } from './bilder-wurf4';
 import type { AnlassId } from '../anlass';
 import { Q33_ZUORDNUNG } from './q33-zielgruppen';
 import type { BaumKategorie } from '../produkt-sortiment';
@@ -56,7 +57,7 @@ const ast = (k: BaumKategorie, u: string) => { pfad = [k, u]; };
 const t = (typ: N, kategorie: T['kategorie'], wgs: T['wgs'], saison: T['saison'], preis: number,
   materialien: readonly T['materialien'][number][], gruppe: T['gruppe'], aufwand: number, zg: Z[]): void => {
   const anlass = ANLASS[typ];
-  L.push({ t: { typ, kategorie, wgs, saison, preis, materialien: [...materialien], gruppe, aufwand, bild: { silhouette: PLATZHALTER[typ] }, bildOffen: true, pfad, ...(anlass ? { anlass } : {}) }, zg });
+  L.push({ t: { typ, kategorie, wgs, saison, preis, materialien: [...materialien], gruppe, aufwand, ...bildWurf4(typ, PLATZHALTER[typ]), pfad, ...(anlass ? { anlass } : {}) }, zg });
 };
 
 const PE = ['Polyester'] as const, PB = ['Polyester', 'Baumwolle'] as const, BW = ['Baumwolle', 'Bio-Baumwolle'] as const;

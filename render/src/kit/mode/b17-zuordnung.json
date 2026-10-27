@@ -1,0 +1,45 @@
+{
+ "hinweis": "Zuordnung Artikeltyp -> Silhouette für B17. Typen noch nicht auf main (Q41): angebunden wird nach Merge des Q-Auftrags.",
+ "typen": {
+  "Balaclava": {
+   "silhouette": "b17balaclava",
+   "engine": false
+  },
+  "Baseballcap": {
+   "silhouette": "b17baseballcap",
+   "engine": false
+  },
+  "Dreieckstuch": {
+   "silhouette": "b17dreieckstuch",
+   "engine": false
+  },
+  "Haarband": {
+   "silhouette": "b17haarband",
+   "engine": false
+  },
+  "Haarklammer": {
+   "silhouette": "b17haarklammer",
+   "engine": false
+  },
+  "Handyhülle": {
+   "silhouette": "b17handyhuelle",
+   "engine": false
+  },
+  "Kettengürtel": {
+   "silhouette": "b17kettenguertel",
+   "engine": false
+  },
+  "Stirnband": {
+   "silhouette": "b17stirnband",
+   "engine": false
+  },
+  "Taillengürtel": {
+   "silhouette": "b17taillenguertel",
+   "engine": false
+  },
+  "Taschenanhänger": {
+   "silhouette": "b17taschenanhaenger",
+   "engine": false
+  }
+ }
+}

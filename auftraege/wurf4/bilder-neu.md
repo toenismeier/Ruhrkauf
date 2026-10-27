@@ -40,3 +40,18 @@ Anlass: B01-Prüfung am Model am 27.10. Das Model (`modelSVG`) zeichnet die Klei
 - Abnahmebogen je Typ: **Referenz | B | SVG im Spiel | am Model** (Zielgruppe, die den Typ trägt).
 - Blindtest am Model durch frischen Subagenten mit Geschwisterliste wie Abschnitt 2. Abnahme nur bei richtiger Benennung **am Model**.
 - Fällt ein Typ am Model durch, wird er im PR als Model-Befund ausgewiesen. Er wird nicht gemergt, als wäre er fertig. Wie das Model die B-Zeichnung übernimmt, ist offen (O10: 2D-Ebene je Teil oder Bildmodell auf MPFB-Körper). Bis dahin wird kein Paket ohne Model-Spalte vorgelegt.
+
+## 5. Merge B02–B30 (Ummo 27.10.2026: „Produktbilder mergen, Model getrennt“)
+- Alle 29 Pakete auf einem Branch zusammengeführt (`feat/bildpakete-wurf4`). Ersetzt die Einzel-PRs #102–#113.
+- Engine: `sortiment/bilder-wurf4.ts` bindet jeden Q38–Q41-Typ an seine Paket-Silhouette (aus `render/src/kit/mode/bNN-zuordnung.json`, B01 aus `erweiterung-b01.js`) und entfernt `bildOffen`. Babytee, Midirock und Strickpullover zeigen jetzt die B01-Silhouette.
+- **Bleiben gesperrt (`BILD_REST`, bildOffen mit Platzhalter, Nachlauf B-Bild + Beschreibung):**
+  - Raglan-T-Shirt, Netzstrickpullover, Paillettenshorts, Kunstledershorts, Beuteltasche, Biker-Bag, Haarband, Taillengürtel, Einsatzkragen und Scrunchie: B ist nicht besser geworden.
+  - Strickrock: Formtreue 3, nicht erneut geprüft.
+  - Baggy-Hose: nur die alte Fassung, gestreckt.
+  - Ring-Set: Formtreue 3, der Siegelring ist unsicher.
+  - Halsketten-Set und Broschen-Set: zeigen nur ein Teil statt eines Sets.
+  - Korsagenbluse und Tabi-Sneaker: Q42, binden beim Q42-Merge nicht.
+- Model-Befund für alle Pakete: Das Model zeichnet weiter die alten Grundformen, nur Zubehör sitzt über `zubehoer`/`auflage` am Platz. Eigener Auftrag O10, kein Merge-Hindernis mehr.
+- Cargo-Jogger (B07): Die Silhouette war auf Herren festgelegt, obwohl der Typ unisex ist (auch damen.young). Die Festlegung ist entfernt.
+- `produkt.js`: Das Musterfeld wird als `musterfeld` (B02–B25) und als `muster37` (B26–B30) weitergereicht. `model.js` führt `zubehoer` (B17–B19) und `auflage` (B20–B22) nebeneinander.
+

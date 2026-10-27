@@ -1,0 +1,37 @@
+{
+ "hinweis": "B06 (Wurf 4): Zuordnung Artikeltyp -> Silhouette. Die Typen kommen mit Q38 (noch nicht auf main). Nach dem Merge von Q38: je Typ bild.silhouette auf diese Id setzen und bildOffen entfernen.",
+ "auftrag": "Q38",
+ "typen": {
+  "Muscle-Shirt": {
+   "silhouette": "b06muscleshirt",
+   "nur": "herren"
+  },
+  "One-Shoulder-Top": {
+   "silhouette": "b06oneshoulder",
+   "nur": "damen"
+  },
+  "Westentop": {
+   "silhouette": "b06westentop",
+   "nur": "damen"
+  },
+  "Jeans-Top": {
+   "silhouette": "b06jeanstop",
+   "nur": "damen"
+  },
+  "Sporttop": {
+   "silhouette": "b06sporttop",
+   "nur": "damen"
+  },
+  "Jeansweste": {
+   "silhouette": "b06jeansweste"
+  },
+  "Kunstfellweste": {
+   "silhouette": "b06kunstfellweste",
+   "nur": "damen"
+  },
+  "Weste": {
+   "silhouette": "b06weste",
+   "nur": "damen"
+  }
+ }
+}

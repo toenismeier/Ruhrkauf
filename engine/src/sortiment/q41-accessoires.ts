@@ -6,6 +6,7 @@
 // Preis (mitte) knapp über dem Preismedian der Referenz (Warenhaus-Eigenmarke). WGs nur dort, wo schon Artikeltypen liegen,
 // neue Typen hängen hinten an und starten nicht im Grundsortiment (Kalibrierung neutral).
 import { G, type SortimentTyp } from './basis';
+import { bildWurf4 } from './bilder-wurf4';
 import type { Material, ProduktKategorie, TypSaison, TrendGruppe } from '../produkte';
 import type { BaumKategorie } from '../produkt-sortiment';
 import type { WgId } from '../einkauf';
@@ -51,7 +52,7 @@ const WEI: Pfad = ['accessoires', 'Weitere Accessoires'], DUFT: Pfad = ['beauty'
 
 const t = (typ: N, wgs: WgId[], saison: TypSaison, preis: number, materialien: Material[], gruppe: Record<TrendGruppe, number>, aufwand: number,
   pfad: Pfad, kategorie: ProduktKategorie = 'accessoires'): T =>
-  ({ typ, kategorie, wgs, saison, preis, materialien: [...materialien], gruppe, aufwand, pfad, bild: { silhouette: PLATZHALTER[typ] }, bildOffen: true });
+  ({ typ, kategorie, wgs, saison, preis, materialien: [...materialien], gruppe, aufwand, pfad, ...bildWurf4(typ, PLATZHALTER[typ]) });
 
 /** Nächstliegende vorhandene Silhouette je Typ (Taschen mit Model-Platz Tasche, Kopfbedeckungen mit Model-Platz Mütze). */
 const PLATZHALTER: Record<N, string> = {
