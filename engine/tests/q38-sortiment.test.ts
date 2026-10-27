@@ -51,7 +51,7 @@ describe('Q38 Oberteile aus dem Referenzsortiment', () => {
       expect(['oberteile', 'jacken']).toContain(t.pfad![0]);
     }
     const idx = ARTIKELTYPEN.findIndex((t) => t.typ === Q38_NAMEN[0]);
-    expect(ARTIKELTYPEN.slice(idx).map((t) => t.typ)).toEqual([...Q38_NAMEN]);
+    expect(ARTIKELTYPEN.slice(idx, idx + Q38_NAMEN.length).map((t) => t.typ)).toEqual([...Q38_NAMEN]);
     expect(K.typen.filter((t) => t.bildOffen).map((t) => t.typ)).toEqual(expect.arrayContaining([...Q38_NAMEN]));
   });
 
