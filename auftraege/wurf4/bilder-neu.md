@@ -24,7 +24,7 @@ Arbeitsweise je Typ:
 2. **Zeichnen auf Referenzniveau:** Flatlay frontal, echte Konfektionsproportion, sichtbare Nähte, Bund mit Gürtelschlaufen/Knopf wo vorhanden, Taschenbeutel und Ziernähte bei Denim, Stoffwurf und Schattierung aus `stoff.js`, gleiche Kontur wie Bestand. Keine Würste, keine gleichförmigen Röhren, keine erfundenen Details.
 3. **Vergleichsbild** (nur lokal, nie ins Repo): Referenz-Freisteller links, eigene Zeichnung rechts, gleiche Höhe.
 4. **Prüfung durch frischen Subagenten** (ohne Kontext) mit dem Vergleichsbild: Formtreue 1–5 (Silhouette, Proportion, Details) und Benennung aus einer Liste, in der die **Geschwistertypen** stehen (z. B. Ballon-Jeans / Ballonhose / Baggy-Jeans / Pumphose). Abnahme intern erst bei **Formtreue ≥ 4 und richtiger Benennung**, sonst neu zeichnen.
-5. Model-Platz wie bisher.
+5. Model-Platz wie bisher, **mit Model-Prüfung** (Abschnitt 4).
 
 Abgabe je Paket: Kontaktbogen **Referenz | Zeichnung** je Typ in 320 px und 64 px als Datei an Ummo, Tabelle Formtreue im PR. **Merge erst nach Ummos Ok.** Bei Ok: `bildOffen` für diese Typen entfernen, Bundle neu, STATUS.
 
@@ -34,3 +34,9 @@ Abgabe je Paket: Kontaktbogen **Referenz | Zeichnung** je Typ in 320 px und 64 p
 - Bild-Chat je Paket: vtracer auf B, Flächen den Stoffzonen zuordnen (Grundfarbe, Schatten, Licht, Kontur, Details wie Knöpfe/Schnallen als feste Farben), Kontur 1 Stärke wie B, Bodenschatten einheitlich, Model-Platz. Prüfung wie Abschnitt 2 (Formtreue ≥ 4 gegen Referenz, Geschwistertypen). Bogen je Typ **Referenz | B | SVG im Spiel (2 Farben)** an Ummo, Merge nur nach Ok.
 - Im SVG-Schritt entfernen: Etiketten im Kragen, Aufnäher, Schriftzüge und Stickerei-Schrift, die das Bildmodell trotz Vorgabe übernommen hat (z. B. B02 Lagenlook-Hemd, Resorthemd). Fehlt die Kontur (B02 Bolero), ergänzen.
 - B01 ist Stilreferenz, sobald Ummo die SVG-Fassung von B01 abnimmt.
+
+## 4. Model-Prüfung (Pflicht je Paket, Ummo 27.10.2026)
+Anlass: B01-Prüfung am Model am 27.10. Das Model (`modelSVG`) zeichnet die Kleidung aus den alten Grundformen und übernimmt aus B nur Farbe, Material und einige Parameter. Im Blindtest durch einen frischen Subagenten waren 2 von 10 B01-Teilen am Model richtig erkannt. Die Ballonjeans erscheint als gerade Jeans, die Low-Rise-Jeans mit hohem Bund, die Hotpants als Bermuda. Beim Strickpullover fehlen Streifen und Polokragen, der Blouson zeigt keine Bomberform, Mary Jane ist kaum sichtbar, die Baguette-Tasche ist ein Viereck.
+- Abnahmebogen je Typ: **Referenz | B | SVG im Spiel | am Model** (Zielgruppe, die den Typ trägt).
+- Blindtest am Model durch frischen Subagenten mit Geschwisterliste wie Abschnitt 2. Abnahme nur bei richtiger Benennung **am Model**.
+- Fällt ein Typ am Model durch, wird er im PR als Model-Befund ausgewiesen. Er wird nicht gemergt, als wäre er fertig. Wie das Model die B-Zeichnung übernimmt, ist offen (O10: 2D-Ebene je Teil oder Bildmodell auf MPFB-Körper). Bis dahin wird kein Paket ohne Model-Spalte vorgelegt.
