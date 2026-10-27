@@ -46,7 +46,7 @@ export function produktSVG(bild, farbe, material, groesse = 160, opt = {}) {
   const S = materialDefs(fa, normMaterial(ma) || 'baumwolle', defs, mu ? undefined : p.muster);
   if (mu && mu !== 'uni') S.tex = musterFuellung(S, mu) ?? S.tex;
   const q = { ...p };
-  if (mu) { q.dessin = ''; delete q.muster; q.musterfeld = mu; }
+  if (mu) { q.dessin = ''; delete q.muster; if (mu !== 'uni') q.musterfeld = mu; }
   if (s.zeichner === 'ding:bettwaesche') q.S2 = materialDefs(opt.farbe2 ?? hell(farbeVon(fa), 0.55), normMaterial(ma) || 'leinen', defs, p.muster2);
   if (FLAT[s.zeichner]) {
     t.push(`<ellipse cx="50" cy="96" rx="30" ry="2.4" fill="#000" opacity="0.07"/>`);

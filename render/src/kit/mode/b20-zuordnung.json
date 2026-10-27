@@ -1,0 +1,55 @@
+{
+ "hinweis": "Bildpaket B20: Zuordnung Artikeltyp (Name aus auftraege/wurf4/daten) -> Silhouette. Angebunden wird nach Merge des Q-Auftrags (bild: { silhouette }).",
+ "typen": {
+  "Armband-Set": {
+   "silhouette": "b20armbandset",
+   "auftrag": "Q41",
+   "oberbegriff": "Schmuck"
+  },
+  "Creolen-Set": {
+   "silhouette": "b20creolenset",
+   "auftrag": "Q41",
+   "oberbegriff": "Schmuck"
+  },
+  "Kordelkette": {
+   "silhouette": "b20kordelkette",
+   "auftrag": "Q41",
+   "oberbegriff": "Schmuck"
+  },
+  "Halsreif": {
+   "silhouette": "b20halsreif",
+   "auftrag": "Q41",
+   "oberbegriff": "Schmuck"
+  },
+  "Lariat-Halskette": {
+   "silhouette": "b20lariat",
+   "auftrag": "Q41",
+   "oberbegriff": "Schmuck"
+  },
+  "Schmuckset": {
+   "silhouette": "b20schmuckset",
+   "auftrag": "Q41",
+   "oberbegriff": "Schmuck"
+  },
+  "Broschen-Set": {
+   "silhouette": "b20broschenset",
+   "auftrag": "Q41",
+   "oberbegriff": "Schmuck"
+  },
+  "Layering-Halskette": {
+   "silhouette": "b20layering",
+   "auftrag": "Q41",
+   "oberbegriff": "Schmuck"
+  },
+  "Ring": {
+   "silhouette": "b20ring",
+   "auftrag": "Q41",
+   "oberbegriff": "Schmuck"
+  },
+  "Bowlingtasche": {
+   "silhouette": "b20bowlingtasche",
+   "auftrag": "Q41",
+   "oberbegriff": "Tasche"
+  }
+ }
+}
