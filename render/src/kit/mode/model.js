@@ -459,8 +459,10 @@ function poncho(K, S, o) {
   return t.join('');
 }
 
-const TEILE = { oberteil, hose, rock, kleid, jacke, poncho, schuhe, muetze, tasche };
-const REIHENFOLGE = ['schuhe', 'hose', 'rock', 'kleid', 'oberteil', 'jacke', 'poncho', 'tasche'];
+// Bildpakete Wurf 4: Zubehör zeichnet sich selbst am Platz (b-pakete.js zubehoerTeil)
+const zubehoer = (K, S, o) => o.zeichne(K, S, o);
+const TEILE = { oberteil, hose, rock, kleid, jacke, poncho, schuhe, muetze, tasche, zubehoer };
+const REIHENFOLGE = ['schuhe', 'hose', 'rock', 'kleid', 'oberteil', 'jacke', 'poncho', 'zubehoer', 'tasche'];
 
 // ─────────────────────────────────────────── Model
 export function modelSVG({ geschlecht = 'damen', zielgruppe = 'young', haut = HAUT[1], haar = { farbe: HAAR.braun, stil: 'lang' }, outfit = [], hintergrund = '#eef1f4', groesse = 260 } = {}) {
@@ -472,7 +474,7 @@ export function modelSVG({ geschlecht = 'damen', zielgruppe = 'young', haut = HA
   const oben = [];
   // Q37: muster37 (Musterfeld) ersetzt das Muster des Teils, ohne bisherige Model-Bilder zu verändern
   const stoff = (o) => { const S = materialDefs(o.farbe, o.material, defs, o.muster37 ? undefined : o.muster); if (o.muster37 && o.muster37 !== 'uni') S.tex = musterFuellung(S, o.muster37, { cx: 100, cy: o.teil === 'hose' || o.teil === 'rock' ? (K.m.huefte + K.m.knie) / 2 : K.m.brust + 4, s: K.zielgruppe === 'kinder' ? 1 : 1.25 }) ?? S.tex; return S; };
-  for (const o of sortiert) (o.teil === 'muetze' ? oben : teile).push(TEILE[o.teil](K, stoff(o), o));
+  for (const o of sortiert) (o.teil === 'muetze' || o.oben ? oben : teile).push(TEILE[o.teil](K, stoff(o), o));
   const hg = hintergrund ? `<rect width="200" height="420" fill="${hintergrund}"/><ellipse cx="100" cy="${f(K.fuss + 3)}" rx="${f(K.zielgruppe === 'kinder' ? 26 : 38)}" ry="4.5" fill="#000" opacity="0.09"/>` : '';
   // Teile hinter dem Körper (Kapuze im Nacken) herauslösen, Taschen über den Händen
   const nacken = [];
