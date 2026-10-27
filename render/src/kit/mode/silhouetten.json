@@ -6780,6 +6780,3424 @@
       "material": "baumwolle",
       "farbe": "weiß",
       "model": "oberteil"
+    },
+    "b03croptshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03croptshirt",
+        "aermel": "kurz",
+        "kragen": "v",
+        "laenge": "crop",
+        "passform": "oversize",
+        "farben": [
+          "bordeaux"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b03henleypullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03henleypullover",
+        "aermel": "lang",
+        "kragen": "rund",
+        "knopfleiste": true,
+        "passform": "gerade",
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "anthrazit",
+      "model": "oberteil"
+    },
+    "b03kurzarmstrickpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03kurzarmstrickpullover",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "gerade",
+        "rippbund": true,
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "hellgrau",
+      "model": "oberteil"
+    },
+    "b03netzstrickpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03netzstrickpullover",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "oversize",
+        "rippbund": true,
+        "glatt": true,
+        "netz": true
+      },
+      "material": "strick",
+      "farbe": "offwhite",
+      "model": "oberteil"
+    },
+    "b03offshoulderpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03offshoulderpullover",
+        "aermel": "lang",
+        "kragen": "carree",
+        "passform": "oversize",
+        "rippbund": true,
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "ecru",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b03ringertshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03ringertshirt",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "gerade",
+        "farben": [
+          "rot",
+          "marine"
+        ],
+        "materialien": [
+          "baumwolle",
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "b03strickhoodie": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03strickhoodie",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "passform": "gerade",
+        "laenge": "crop",
+        "rippbund": true,
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b03strickcape": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03strickcape",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "oversize",
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "braun",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b03strickpolo": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03strickpolo",
+        "aermel": "kurz",
+        "kragen": "polo",
+        "knopfleiste": true,
+        "passform": "gerade",
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "braun",
+      "model": "oberteil"
+    },
+    "b03vpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b03": "b03vpullover",
+        "aermel": "lang",
+        "kragen": "v",
+        "passform": "oversize",
+        "rippbund": true,
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "sand",
+      "model": "oberteil"
+    },
+    "b04raglantshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b04": "b04raglantshirt",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "gerade",
+        "laenge": "crop",
+        "farben": [
+          "schwarz"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "b04henleylongsleeve": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b04": "b04henleylongsleeve",
+        "aermel": "lang",
+        "kragen": "rund",
+        "knopfleiste": true,
+        "passform": "tailliert"
+      },
+      "material": "baumwolle",
+      "farbe": "anthrazit",
+      "model": "oberteil"
+    },
+    "b04langarmpolo": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b04": "b04langarmpolo",
+        "aermel": "lang",
+        "kragen": "polo",
+        "knopfleiste": true,
+        "passform": "gerade",
+        "farben": [
+          "rosa"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": "oberteil"
+    },
+    "b04layershirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b04": "b04layershirt",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "oversize",
+        "querstreifen": [
+          1,
+          1.4
+        ],
+        "farben": [
+          "grau"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "oberteil"
+    },
+    "b04aermellosesshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b04": "b04aermellosesshirt",
+        "aermel": "ohne",
+        "kragen": "rund",
+        "passform": "gerade"
+      },
+      "material": "rippe",
+      "farbe": "offwhite",
+      "model": "oberteil"
+    },
+    "b04strickshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b04": "b04strickshirt",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "oversize",
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "b04fledermausshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b04": "b04fledermausshirt",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "oversize"
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b04baseballshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b04": "b04baseballshirt",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "gerade",
+        "farben": [
+          "rot"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "b04peplumshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b04": "b04peplumshirt",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "tailliert"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b04spitzenshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b04": "b04spitzenshirt",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "tailliert"
+      },
+      "material": "viskose",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b05sportshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b05": "b05sportshirt",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "tailliert"
+      },
+      "material": "polyester",
+      "farbe": "bordeaux",
+      "model": "oberteil"
+    },
+    "b05sweattroyer": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b05": "b05sweattroyer",
+        "aermel": "lang",
+        "kragen": "troyer",
+        "passform": "oversize",
+        "rippbund": true,
+        "kaenguru": true
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "oberteil"
+    },
+    "b05kurzarmsweat": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b05": "b05kurzarmsweat",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "boxy"
+      },
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": "oberteil"
+    },
+    "b05offsweat": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b05": "b05offsweat",
+        "aermel": "lang",
+        "kragen": "offshoulder",
+        "passform": "oversize",
+        "laenge": "crop",
+        "rippbund": true,
+        "farben": [
+          "sand",
+          "anthrazit"
+        ],
+        "materialien": [
+          "baumwolle",
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "creme",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b05polosweat": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b05": "b05polosweat",
+        "aermel": "lang",
+        "kragen": "polo",
+        "passform": "oversize",
+        "rippbund": true,
+        "knopfleiste": true
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "oberteil"
+    },
+    "b05body": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b05": "b05body",
+        "aermel": "kurz",
+        "kragen": "rund",
+        "passform": "tailliert"
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b05tanktop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b05": "b05tanktop",
+        "aermel": "ohne",
+        "kragen": "v",
+        "passform": "tailliert"
+      },
+      "material": "baumwolle",
+      "farbe": "gelb",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b05peplumtop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b05": "b05peplumtop",
+        "aermel": "traeger",
+        "kragen": "v",
+        "passform": "tailliert"
+      },
+      "material": "baumwolle",
+      "farbe": "braun",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b05stricktop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b05": "b05stricktop",
+        "aermel": "ohne",
+        "kragen": "rund",
+        "passform": "gerade",
+        "strick": true,
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "hellgrau",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b05bustier": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b05": "b05bustier",
+        "aermel": "traeger",
+        "kragen": "carree",
+        "passform": "tailliert",
+        "laenge": "crop"
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b06muscleshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b06": "b06muscleshirt",
+        "aermel": "ohne",
+        "kragen": "rund",
+        "passform": "gerade"
+      },
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": "oberteil",
+      "nur": "herren"
+    },
+    "b06oneshoulder": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b06": "b06oneshoulder",
+        "aermel": "lang",
+        "kragen": "offshoulder",
+        "passform": "tailliert",
+        "laenge": "crop"
+      },
+      "material": "viskose",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b06westentop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b06": "b06westentop",
+        "aermel": "ohne",
+        "kragen": "v",
+        "passform": "tailliert"
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b06jeanstop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b06": "b06jeanstop",
+        "aermel": "kurz",
+        "kragen": "hemd",
+        "passform": "tailliert",
+        "knopfleiste": true
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b06sporttop": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b06": "b06sporttop",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "tailliert",
+        "laenge": "crop"
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b06jeansweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "b06": "b06jeansweste",
+        "art": "anzugweste"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "jacke"
+    },
+    "b06kunstfellweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "b06": "b06kunstfellweste",
+        "art": "steppweste"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "b06weste": {
+      "gruppe": "jacke",
+      "standard": {
+        "b06": "b06weste",
+        "art": "anzugweste"
+      },
+      "material": "polyester",
+      "farbe": "grau",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "b07triangel": {
+      "gruppe": "bademode",
+      "standard": {
+        "b07": "b07triangel"
+      },
+      "material": "polyester",
+      "farbe": "creme",
+      "model": null,
+      "nur": "damen"
+    },
+    "b07bikinislip": {
+      "gruppe": "bademode",
+      "standard": {
+        "b07": "b07bikinislip"
+      },
+      "material": "polyester",
+      "farbe": "weiß",
+      "model": null,
+      "nur": "damen"
+    },
+    "b07brazilian": {
+      "gruppe": "bademode",
+      "standard": {
+        "b07": "b07brazilian"
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": null,
+      "nur": "damen"
+    },
+    "b07barrelhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b07": "b07barrelhose",
+        "passform": "weit",
+        "laenge": "lang",
+        "bundfalte": true
+      },
+      "material": "wolle",
+      "farbe": "braun",
+      "model": "hose"
+    },
+    "b07pumphose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b07": "b07pumphose",
+        "passform": "baggy",
+        "laenge": "lang",
+        "komfortbund": true
+      },
+      "material": "baumwolle",
+      "farbe": "anthrazit",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b07schlaghose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b07": "b07schlaghose",
+        "passform": "flare",
+        "laenge": "lang",
+        "komfortbund": true
+      },
+      "material": "polyester",
+      "farbe": "hellgrau",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b07leggings": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b07": "b07leggings",
+        "passform": "leggings",
+        "laenge": "lang"
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b07strickhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b07": "b07strickhose",
+        "passform": "weit",
+        "laenge": "lang",
+        "komfortbund": true,
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "grau",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b07ballonhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b07": "b07ballonhose",
+        "passform": "baggy",
+        "laenge": "lang",
+        "bundfalte": true
+      },
+      "material": "viskose",
+      "farbe": "braun",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b07cargojogger": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b07": "b07cargojogger",
+        "passform": "jogger",
+        "laenge": "lang",
+        "cargo": true
+      },
+      "material": "baumwolle",
+      "farbe": "anthrazit",
+      "model": "hose",
+      "nur": "herren"
+    },
+    "b08stegleggings": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b08": "b08stegleggings",
+        "passform": "leggings",
+        "modell": {
+          "teil": "hose",
+          "passform": "skinny",
+          "komfortbund": true,
+          "leibhoehe": "hoch"
+        }
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b08fivepocket": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b08": "b08fivepocket",
+        "passform": "gerade",
+        "modell": {
+          "teil": "hose",
+          "passform": "gerade",
+          "knopf": true
+        }
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "hose"
+    },
+    "b08baggyhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b08": "b08baggyhose",
+        "passform": "baggy",
+        "bildmuster": "camouflage",
+        "modell": {
+          "teil": "hose",
+          "passform": "baggy",
+          "komfortbund": true,
+          "leibhoehe": "tief"
+        }
+      },
+      "material": "baumwolle",
+      "farbe": "olive",
+      "model": "hose"
+    },
+    "b08carpenterhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b08": "b08carpenterhose",
+        "passform": "weit",
+        "modell": {
+          "teil": "hose",
+          "passform": "weit",
+          "knopf": true,
+          "cargo": true
+        }
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "hose"
+    },
+    "b08jerseyhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b08": "b08jerseyhose",
+        "passform": "weit",
+        "bildmuster": "ringel",
+        "modell": {
+          "teil": "hose",
+          "passform": "weit",
+          "komfortbund": true
+        }
+      },
+      "material": "baumwolle",
+      "farbe": "marine",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b08kunstlederhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b08": "b08kunstlederhose",
+        "passform": "flare",
+        "modell": {
+          "teil": "hose",
+          "passform": "flare",
+          "knopf": true,
+          "leibhoehe": "hoch"
+        }
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b08skinnyhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b08": "b08skinnyhose",
+        "passform": "skinny",
+        "modell": {
+          "teil": "hose",
+          "passform": "skinny",
+          "knopf": true,
+          "leibhoehe": "hoch"
+        }
+      },
+      "material": "baumwolle",
+      "farbe": "anthrazit",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b08palazzohose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b08": "b08palazzohose",
+        "passform": "weit",
+        "modell": {
+          "teil": "hose",
+          "passform": "weit",
+          "komfortbund": true,
+          "bundfalte": true,
+          "leibhoehe": "hoch"
+        }
+      },
+      "material": "viskose",
+      "farbe": "beige",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b08barreljeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b08": "b08barreljeans",
+        "passform": "barrel",
+        "modell": {
+          "teil": "hose",
+          "passform": "baggy",
+          "knopf": true,
+          "saum": "umschlag",
+          "leibhoehe": "hoch"
+        }
+      },
+      "material": "denim",
+      "farbe": "dunkeldenim",
+      "model": "hose"
+    },
+    "b08caprijeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b08": "b08caprijeans",
+        "passform": "schmal",
+        "laenge": "cropped",
+        "modell": {
+          "teil": "hose",
+          "passform": "schmal",
+          "laenge": "cropped",
+          "knopf": true
+        }
+      },
+      "material": "denim",
+      "farbe": "braun",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b09playsuit": {
+      "gruppe": "kleid",
+      "standard": {
+        "b09": "b09playsuit",
+        "art": "playsuit",
+        "modell": [
+          {
+            "teil": "hose",
+            "laenge": "kurz",
+            "passform": "weit",
+            "leibhoehe": "hoch",
+            "komfortbund": true
+          },
+          {
+            "teil": "oberteil",
+            "aermel": "lang",
+            "ausschnitt": "v",
+            "passform": "tailliert",
+            "farbe": "mint",
+            "material": "viskose"
+          }
+        ]
+      },
+      "material": "viskose",
+      "farbe": "mint",
+      "nur": "damen"
+    },
+    "b09jeansjumpsuit": {
+      "gruppe": "kleid",
+      "standard": {
+        "b09": "b09jeansjumpsuit",
+        "art": "jumpsuit",
+        "modell": [
+          {
+            "teil": "hose",
+            "passform": "weit",
+            "leibhoehe": "hoch",
+            "komfortbund": true
+          },
+          {
+            "teil": "oberteil",
+            "aermel": "ohne",
+            "ausschnitt": "v",
+            "passform": "tailliert",
+            "farbe": "jeansblau",
+            "material": "denim"
+          }
+        ]
+      },
+      "material": "denim",
+      "farbe": "dunkeldenim",
+      "nur": "damen"
+    },
+    "b09neckholderkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b09": "b09neckholderkleid",
+        "laenge": "maxi",
+        "modell": {
+          "teil": "kleid",
+          "laenge": "midi",
+          "form": "gerade",
+          "aermel": "ohne",
+          "ausschnitt": "v"
+        }
+      },
+      "material": "viskose",
+      "farbe": "schwarz",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b09traegerkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b09": "b09traegerkleid",
+        "laenge": "maxi",
+        "modell": {
+          "teil": "kleid",
+          "laenge": "midi",
+          "form": "gerade",
+          "aermel": "ohne",
+          "ausschnitt": "rund"
+        }
+      },
+      "material": "viskose",
+      "farbe": "braun",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b09bandeaukleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b09": "b09bandeaukleid",
+        "laenge": "maxi",
+        "bildmuster": "nadelstreifen",
+        "modell": {
+          "teil": "kleid",
+          "laenge": "midi",
+          "form": "gerade",
+          "aermel": "ohne",
+          "ausschnitt": "carree"
+        }
+      },
+      "material": "viskose",
+      "farbe": "braun",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b09midikleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b09": "b09midikleid",
+        "laenge": "midi",
+        "modell": {
+          "teil": "kleid",
+          "laenge": "midi",
+          "form": "etui",
+          "aermel": "ohne",
+          "ausschnitt": "v"
+        }
+      },
+      "material": "viskose",
+      "farbe": "schwarz",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b09paillettenkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b09": "b09paillettenkleid",
+        "laenge": "mini",
+        "bildmuster": "batik",
+        "pailletten": true,
+        "modell": {
+          "teil": "kleid",
+          "laenge": "mini",
+          "form": "glocke",
+          "aermel": "ohne",
+          "ausschnitt": "v"
+        }
+      },
+      "material": "polyester",
+      "farbe": "mint",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b09cocktailkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b09": "b09cocktailkleid",
+        "laenge": "knie",
+        "modell": {
+          "teil": "kleid",
+          "laenge": "knie",
+          "form": "glocke",
+          "aermel": "lang",
+          "ausschnitt": "v"
+        }
+      },
+      "material": "satin",
+      "farbe": "marine",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b09dirndl": {
+      "gruppe": "kleid",
+      "standard": {
+        "b09": "b09dirndl",
+        "laenge": "knie",
+        "modell": {
+          "teil": "kleid",
+          "laenge": "knie",
+          "form": "a-linie",
+          "aermel": "kurz",
+          "ausschnitt": "carree"
+        },
+        "farben": [
+          "weiß"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "olive",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b09stufenkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b09": "b09stufenkleid",
+        "laenge": "knie",
+        "form": "stufen",
+        "bildmuster": "blumen",
+        "umriss": true,
+        "modell": {
+          "teil": "kleid",
+          "laenge": "knie",
+          "form": "stufen",
+          "aermel": "ohne",
+          "ausschnitt": "carree"
+        },
+        "farben": [
+          "jeansblau"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b10lederkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b10": "b10lederkleid",
+        "laenge": "mini",
+        "modell": {
+          "teil": "kleid",
+          "laenge": "mini",
+          "form": "a-linie",
+          "aermel": "ohne",
+          "ausschnitt": "carree"
+        }
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b10qipao": {
+      "gruppe": "kleid",
+      "standard": {
+        "b10": "b10qipao",
+        "laenge": "midi",
+        "modell": {
+          "teil": "kleid",
+          "laenge": "midi",
+          "form": "etui",
+          "aermel": "kurz",
+          "ausschnitt": "rund"
+        }
+      },
+      "material": "satin",
+      "farbe": "creme",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b10maxirock": {
+      "gruppe": "rock",
+      "standard": {
+        "b10": "b10maxirock",
+        "laenge": "maxi",
+        "modell": {
+          "teil": "rock",
+          "laenge": "midi",
+          "form": "stufen"
+        }
+      },
+      "material": "viskose",
+      "farbe": "weiß",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b10paillettenrock": {
+      "gruppe": "rock",
+      "standard": {
+        "b10": "b10paillettenrock",
+        "laenge": "mini",
+        "pailletten": true,
+        "modell": {
+          "teil": "rock",
+          "laenge": "mini",
+          "form": "glocke"
+        },
+        "farben": [
+          "bordeaux"
+        ],
+        "materialien": [
+          "spitze"
+        ]
+      },
+      "material": "polyester",
+      "farbe": "rosa",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b10faltenrock": {
+      "gruppe": "rock",
+      "standard": {
+        "b10": "b10faltenrock",
+        "laenge": "mini",
+        "form": "plissee",
+        "modell": {
+          "teil": "rock",
+          "laenge": "mini",
+          "form": "plissee"
+        }
+      },
+      "material": "wolle",
+      "farbe": "sand",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b10strickrock": {
+      "gruppe": "rock",
+      "standard": {
+        "b10": "b10strickrock",
+        "laenge": "mini",
+        "bildmuster": "schachbrett",
+        "glatt": true,
+        "umriss": true,
+        "modell": {
+          "teil": "rock",
+          "laenge": "mini",
+          "form": "gerade"
+        }
+      },
+      "material": "strick",
+      "farbe": "creme",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b10jeansmidirock": {
+      "gruppe": "rock",
+      "standard": {
+        "b10": "b10jeansmidirock",
+        "laenge": "midi",
+        "modell": {
+          "teil": "rock",
+          "laenge": "midi",
+          "form": "wickel"
+        }
+      },
+      "material": "denim",
+      "farbe": "hellerdenim",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b10ballonrock": {
+      "gruppe": "rock",
+      "standard": {
+        "b10": "b10ballonrock",
+        "laenge": "mini",
+        "modell": {
+          "teil": "rock",
+          "laenge": "mini",
+          "form": "glocke"
+        }
+      },
+      "material": "satin",
+      "farbe": "schwarz",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b10haekelrock": {
+      "gruppe": "rock",
+      "standard": {
+        "b10": "b10haekelrock",
+        "laenge": "mini",
+        "bildmuster": "haekel",
+        "modell": {
+          "teil": "rock",
+          "laenge": "mini",
+          "form": "gerade"
+        }
+      },
+      "material": "baumwolle",
+      "farbe": "creme",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b10stoffshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b10": "b10stoffshorts",
+        "laenge": "kurz",
+        "modell": {
+          "teil": "hose",
+          "laenge": "kurz",
+          "passform": "weit",
+          "komfortbund": true
+        }
+      },
+      "material": "viskose",
+      "farbe": "creme",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b11kunstledershorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b11": "b11kunstledershorts",
+        "passform": "gerade",
+        "laenge": "kurz",
+        "leibhoehe": "hoch",
+        "komfortbund": true
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "hose"
+    },
+    "b11leinenshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b11": "b11leinenshorts",
+        "passform": "weit",
+        "laenge": "kurz",
+        "leibhoehe": "hoch",
+        "komfortbund": true
+      },
+      "material": "leinen",
+      "farbe": "camel",
+      "model": "hose"
+    },
+    "b11paillettenshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b11": "b11paillettenshorts",
+        "passform": "weit",
+        "laenge": "kurz",
+        "leibhoehe": "hoch",
+        "komfortbund": true
+      },
+      "material": "satin",
+      "farbe": "silber",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b11sportshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b11": "b11sportshorts",
+        "passform": "weit",
+        "laenge": "kurz",
+        "komfortbund": true,
+        "farben": [
+          "weiß"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "nylon",
+      "farbe": "marine",
+      "model": "hose"
+    },
+    "b11strickshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b11": "b11strickshorts",
+        "passform": "gerade",
+        "laenge": "kurz",
+        "leibhoehe": "hoch",
+        "komfortbund": true,
+        "glatt": true,
+        "farben": [
+          "marine"
+        ],
+        "materialien": [
+          "strick"
+        ]
+      },
+      "material": "strick",
+      "farbe": "olive",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b12fliegerjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12fliegerjacke",
+        "art": "lederjacke",
+        "laenge": "kurz",
+        "farben": [
+          "creme"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "leder",
+      "farbe": "cognac",
+      "model": "jacke"
+    },
+    "b12jacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12jacke",
+        "art": "overshirt",
+        "laenge": "kurz"
+      },
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": "jacke"
+    },
+    "b12kapuzenjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12kapuzenjacke",
+        "art": "bomber",
+        "laenge": "kurz",
+        "kapuze": true,
+        "farben": [
+          "camel"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "b12kunstfelljacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12kunstfelljacke",
+        "art": "teddy",
+        "laenge": "kurz",
+        "kapuze": true
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "b12militaryjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12militaryjacke",
+        "art": "blazer",
+        "laenge": "kurz"
+      },
+      "material": "wolle",
+      "farbe": "anthrazit",
+      "model": "jacke"
+    },
+    "b12peplumjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12peplumjacke",
+        "art": "lederjacke"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "b12racingjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12racingjacke",
+        "art": "track",
+        "laenge": "kurz",
+        "farben": [
+          "weiß",
+          "anthrazit"
+        ],
+        "materialien": [
+          "nylon",
+          "nylon"
+        ]
+      },
+      "material": "nylon",
+      "farbe": "jeansblau",
+      "model": "jacke"
+    },
+    "b12sakko": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12sakko",
+        "art": "sakko",
+        "revers": true
+      },
+      "material": "wolle",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "b12wildlederjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12wildlederjacke",
+        "art": "lederjacke",
+        "laenge": "kurz",
+        "farben": [
+          "braun"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "cognac",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "b12workerjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b12": "b12workerjacke",
+        "art": "overshirt",
+        "laenge": "kurz",
+        "kapuze": true
+      },
+      "material": "baumwolle",
+      "farbe": "anthrazit",
+      "model": "jacke"
+    },
+    "b13barfusssneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13barfusssneaker",
+        "art": "sneaker",
+        "farben": [
+          "grau"
+        ],
+        "materialien": [
+          "polyester"
+        ]
+      },
+      "material": "polyester",
+      "farbe": "offwhite",
+      "model": "schuhe"
+    },
+    "b13bikerstiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13bikerstiefel",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "schuhe"
+    },
+    "b13cowboystiefelette": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13cowboystiefelette",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "schuhe"
+    },
+    "b13cowboystiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13cowboystiefel",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "schuhe"
+    },
+    "b13sandalette": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13sandalette",
+        "art": "sandale"
+      },
+      "material": "leder",
+      "farbe": "creme",
+      "model": "schuhe",
+      "nur": "damen"
+    },
+    "b13slingbackballerina": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13slingbackballerina",
+        "art": "ballerina",
+        "farben": [
+          "schwarz"
+        ],
+        "materialien": [
+          "leder"
+        ]
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "schuhe",
+      "nur": "damen"
+    },
+    "b13slouchstiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13slouchstiefel",
+        "art": "stiefel"
+      },
+      "material": "baumwolle",
+      "farbe": "camel",
+      "model": "schuhe",
+      "nur": "damen"
+    },
+    "b13slouchstiefelette": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13slouchstiefelette",
+        "art": "stiefel",
+        "farben": [
+          "creme"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "altrosa",
+      "model": "schuhe",
+      "nur": "damen"
+    },
+    "b13sneakerina": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13sneakerina",
+        "art": "ballerina"
+      },
+      "material": "polyester",
+      "farbe": "grau",
+      "model": "schuhe",
+      "nur": "damen"
+    },
+    "b13sockboot": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b13": "b13sockboot",
+        "art": "stiefel"
+      },
+      "material": "baumwolle",
+      "farbe": "camel",
+      "model": "schuhe",
+      "nur": "damen"
+    },
+    "b14reitstiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14reitstiefel",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "b14keilstiefelette": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14keilstiefelette",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "b14loafermule": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14loafermule",
+        "art": "halb",
+        "farben": [
+          "braun"
+        ],
+        "materialien": [
+          "gummi"
+        ]
+      },
+      "material": "leder",
+      "farbe": "camel",
+      "model": "schuhe"
+    },
+    "b14trailsneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14trailsneaker",
+        "art": "sneaker",
+        "farben": [
+          "offwhite",
+          "marine"
+        ],
+        "materialien": [
+          "gummi",
+          "nylon"
+        ]
+      },
+      "material": "nylon",
+      "farbe": "beige",
+      "model": "schuhe"
+    },
+    "b14peeptoestiefel": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14peeptoestiefel",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "grau",
+      "model": "schuhe"
+    },
+    "b14tabiballerina": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14tabiballerina",
+        "art": "ballerina"
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": "schuhe"
+    },
+    "b14trouserboots": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b14": "b14trouserboots",
+        "art": "stiefel"
+      },
+      "material": "leder",
+      "farbe": "anthrazit",
+      "model": "schuhe"
+    },
+    "b14sportsocken": {
+      "gruppe": "waesche",
+      "standard": {
+        "b14": "b14sportsocken"
+      },
+      "material": "baumwolle",
+      "farbe": "gelb",
+      "model": null
+    },
+    "b14string": {
+      "gruppe": "waesche",
+      "standard": {
+        "b14": "b14string"
+      },
+      "material": "satin",
+      "farbe": "anthrazit",
+      "model": null,
+      "nur": "damen"
+    },
+    "b14pushupbh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b14": "b14pushupbh"
+      },
+      "material": "satin",
+      "farbe": "beige",
+      "model": null,
+      "nur": "damen"
+    },
+    "b15schlafshirt": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15schlafshirt",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "tailliert"
+      },
+      "material": "rippe",
+      "farbe": "rosa",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b15tanga": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15tanga"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": null,
+      "nur": "damen"
+    },
+    "b15balconettebh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15balconettebh"
+      },
+      "material": "satin",
+      "farbe": "beige",
+      "model": null,
+      "nur": "damen"
+    },
+    "b15panty": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15panty"
+      },
+      "material": "baumwolle",
+      "farbe": "beige",
+      "model": null,
+      "nur": "damen"
+    },
+    "b15bralette": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15bralette"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": null,
+      "nur": "damen"
+    },
+    "b15schlafshorts": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15schlafshorts",
+        "passform": "weit",
+        "laenge": "kurz"
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b15brazilianslip": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15brazilianslip"
+      },
+      "material": "baumwolle",
+      "farbe": "koralle",
+      "model": null,
+      "nur": "damen"
+    },
+    "b15negligee": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15negligee",
+        "laenge": "mini",
+        "form": "a-linie",
+        "aermel": "traeger",
+        "kragen": "v"
+      },
+      "material": "satin",
+      "farbe": "schwarz",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b15pyjamaoberteil": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15pyjamaoberteil",
+        "aermel": "lang",
+        "kragen": "hemd",
+        "knopfleiste": true,
+        "farben": [
+          "creme"
+        ]
+      },
+      "material": "satin",
+      "farbe": "bordeaux",
+      "model": "oberteil"
+    },
+    "b15schlaftop": {
+      "gruppe": "waesche",
+      "standard": {
+        "b15": "b15schlaftop",
+        "aermel": "traeger",
+        "kragen": "v",
+        "passform": "tailliert"
+      },
+      "material": "rippe",
+      "farbe": "sand",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b16klebebh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b16": "b16klebebh"
+      },
+      "material": "baumwolle",
+      "farbe": "beige",
+      "model": null,
+      "nur": "damen"
+    },
+    "b16longlinebh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b16": "b16longlinebh"
+      },
+      "material": "satin",
+      "farbe": "rosa",
+      "model": null,
+      "nur": "damen"
+    },
+    "b16strumpfhalter": {
+      "gruppe": "waesche",
+      "standard": {
+        "b16": "b16strumpfhalter"
+      },
+      "material": "satin",
+      "farbe": "schwarz",
+      "model": null,
+      "nur": "damen"
+    },
+    "b17balaclava": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17balaclava",
+        "glatt": true,
+        "platz": "kopfganz"
+      },
+      "material": "strick",
+      "farbe": "ecru",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17baseballcap": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17baseballcap",
+        "platz": "kopf"
+      },
+      "material": "baumwolle",
+      "farbe": "rot",
+      "model": "zubehoer"
+    },
+    "b17dreieckstuch": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17dreieckstuch",
+        "glatt": true,
+        "platz": "hals"
+      },
+      "material": "strick",
+      "farbe": "braun",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17haarband": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17haarband",
+        "platz": "stirn"
+      },
+      "material": "baumwolle",
+      "farbe": "bordeaux",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17haarklammer": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17haarklammer",
+        "platz": "haar"
+      },
+      "material": "polyester",
+      "farbe": "braun",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17handyhuelle": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17handyhuelle",
+        "platz": "halten"
+      },
+      "material": "polyester",
+      "farbe": "weiß",
+      "model": "zubehoer"
+    },
+    "b17kettenguertel": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17kettenguertel",
+        "platz": "huefte"
+      },
+      "material": "metall",
+      "farbe": "gold",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17stirnband": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17stirnband",
+        "platz": "stirn"
+      },
+      "material": "strick",
+      "farbe": "hellgrau",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17taillenguertel": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17taillenguertel",
+        "platz": "taille"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b17taschenanhaenger": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b17taschenanhaenger",
+        "platz": "halten"
+      },
+      "material": "polyester",
+      "farbe": "braun",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18armstulpen": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18armstulpen",
+        "glatt": true,
+        "platz": "unterarm"
+      },
+      "material": "strick",
+      "farbe": "bordeaux",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18baskenmuetze": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18baskenmuetze",
+        "platz": "kopf"
+      },
+      "material": "wolle",
+      "farbe": "anthrazit",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18einsatzkragen": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18einsatzkragen",
+        "glatt": true,
+        "platz": "hals"
+      },
+      "material": "strick",
+      "farbe": "anthrazit",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18fingerlos": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18fingerlos",
+        "platz": "hand"
+      },
+      "material": "leder",
+      "farbe": "anthrazit",
+      "model": "zubehoer"
+    },
+    "b18fliegermuetze": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18fliegermuetze",
+        "platz": "kopf"
+      },
+      "material": "baumwolle",
+      "farbe": "bordeaux",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18hueftguertel": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18hueftguertel",
+        "platz": "huefte"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18militarycap": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18militarycap",
+        "bildmuster": "camouflage",
+        "platz": "kopf"
+      },
+      "material": "baumwolle",
+      "farbe": "flaschengrün",
+      "model": "zubehoer"
+    },
+    "b18pareo": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18pareo",
+        "bildmuster": "blumen",
+        "platz": "wickel"
+      },
+      "material": "seide",
+      "farbe": "rot",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b18schluesselanhaenger": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18schluesselanhaenger",
+        "platz": "halten"
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "zubehoer"
+    },
+    "b18scrunchie": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b18scrunchie",
+        "bildmuster": "streifen",
+        "platz": "haar"
+      },
+      "material": "satin",
+      "farbe": "altrosa",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19armreifset": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19armreifset",
+        "platz": "handgelenk"
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19armreif": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19armreif",
+        "platz": "handgelenk"
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19haarparfum": {
+      "gruppe": "beauty",
+      "standard": {
+        "b": "b19haarparfum"
+      },
+      "material": "baumwolle",
+      "farbe": "orange",
+      "model": null
+    },
+    "b19halskettenset": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19halskettenset",
+        "platz": "hals"
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19korsettguertel": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b19korsettguertel",
+        "platz": "taille"
+      },
+      "material": "baumwolle",
+      "farbe": "khaki",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19ohrenwaermer": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b": "b19ohrenwaermer",
+        "platz": "ohren"
+      },
+      "material": "baumwolle",
+      "farbe": "ecru",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19ohrhaenger": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19ohrhaenger",
+        "platz": "ohr"
+      },
+      "material": "baumwolle",
+      "farbe": "offwhite",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19ohrringset": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19ohrringset",
+        "platz": "ohr"
+      },
+      "material": "metall",
+      "farbe": "gold",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19ohrstecker": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19ohrstecker",
+        "platz": "ohr"
+      },
+      "material": "baumwolle",
+      "farbe": "bordeaux",
+      "model": "zubehoer",
+      "nur": "damen"
+    },
+    "b19ringset": {
+      "gruppe": "schmuck",
+      "standard": {
+        "b": "b19ringset",
+        "platz": "halten"
+      },
+      "material": "baumwolle",
+      "farbe": "schwarz",
+      "model": "zubehoer"
+    },
+    "b20armbandset": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20armbandset"
+      },
+      "material": "metall",
+      "farbe": "flieder",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20creolenset": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20creolenset",
+        "metallAusFarbe": true
+      },
+      "material": "stein",
+      "farbe": "gold",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20kordelkette": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20kordelkette"
+      },
+      "material": "leder",
+      "farbe": "braun",
+      "model": "auflage"
+    },
+    "b20halsreif": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20halsreif",
+        "metallAusFarbe": true
+      },
+      "material": "metall",
+      "farbe": "gold",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20lariat": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20lariat"
+      },
+      "material": "stein",
+      "farbe": "rot",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20schmuckset": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20schmuckset",
+        "metallAusFarbe": true
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20broschenset": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20broschenset",
+        "farben": [
+          "grau"
+        ],
+        "materialien": [
+          "stein"
+        ]
+      },
+      "material": "stein",
+      "farbe": "hellerdenim",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20layering": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20layering"
+      },
+      "material": "stein",
+      "farbe": "creme",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b20ring": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b20ring",
+        "metallAusFarbe": true
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "auflage"
+    },
+    "b20bowlingtasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b20bowlingtasche"
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21hobobag": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21hobobag"
+      },
+      "material": "leder",
+      "farbe": "cognac",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21halbmond": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21halbmond"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21beutel": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21beutel"
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21citytasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21citytasche",
+        "farben": [
+          "marine"
+        ],
+        "materialien": [
+          "leder"
+        ]
+      },
+      "material": "leder",
+      "farbe": "sand",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21barrelbag": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21barrelbag"
+      },
+      "material": "denim",
+      "farbe": "hellerdenim",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21kameratasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21kameratasche",
+        "farben": [
+          "schwarz"
+        ],
+        "materialien": [
+          "polyester"
+        ]
+      },
+      "material": "leder",
+      "farbe": "anthrazit",
+      "model": "auflage"
+    },
+    "b21bikerbag": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21bikerbag"
+      },
+      "material": "leder",
+      "farbe": "anthrazit",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21boxtasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21boxtasche"
+      },
+      "material": "leder",
+      "farbe": "bordeaux",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b21messenger": {
+      "gruppe": "tasche",
+      "standard": {
+        "bp": "b21messenger"
+      },
+      "material": "polyester",
+      "farbe": "anthrazit",
+      "model": "auflage"
+    },
+    "b22cowboyhut": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22cowboyhut"
+      },
+      "material": "filz",
+      "farbe": "camel",
+      "model": "auflage"
+    },
+    "b22fellmuetze": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22fellmuetze"
+      },
+      "material": "fell",
+      "farbe": "braun",
+      "model": "auflage"
+    },
+    "b22kapitaensmuetze": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22kapitaensmuetze"
+      },
+      "material": "baumwolle",
+      "farbe": "khaki",
+      "model": "auflage"
+    },
+    "b22kopfschmuck": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22kopfschmuck"
+      },
+      "material": "perlen",
+      "farbe": "schwarz",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b22langehandschuhe": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22langehandschuhe"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b22bonnet": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22bonnet"
+      },
+      "material": "strick",
+      "farbe": "ecru",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b22hosenkette": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22hosenkette",
+        "metallAusFarbe": true
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": "auflage"
+    },
+    "b22modebrille": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22modebrille",
+        "farben": [
+          "weiß"
+        ],
+        "materialien": [
+          "kunststoff"
+        ]
+      },
+      "material": "kunststoff",
+      "farbe": "schwarz",
+      "model": "auflage"
+    },
+    "b22pillbox": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22pillbox"
+      },
+      "material": "filz",
+      "farbe": "marine",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b22strickkapuze": {
+      "gruppe": "accessoire",
+      "standard": {
+        "bp": "b22strickkapuze"
+      },
+      "material": "strick",
+      "farbe": "rot",
+      "model": "auflage",
+      "nur": "damen"
+    },
+    "b23balconette": {
+      "gruppe": "bademode",
+      "standard": {
+        "b23": "b23balconette"
+      },
+      "material": "polyester",
+      "farbe": "creme",
+      "model": null,
+      "nur": "damen"
+    },
+    "b23bandeau": {
+      "gruppe": "bademode",
+      "standard": {
+        "b23": "b23bandeau"
+      },
+      "material": "polyester",
+      "farbe": "rot",
+      "model": null,
+      "nur": "damen"
+    },
+    "b23boardshorts": {
+      "gruppe": "bademode",
+      "standard": {
+        "b23": "b23boardshorts",
+        "farben": [
+          "marine"
+        ],
+        "materialien": [
+          "polyester"
+        ]
+      },
+      "material": "polyester",
+      "farbe": "jeansblau",
+      "model": null,
+      "nur": "herren"
+    },
+    "b23bralette": {
+      "gruppe": "bademode",
+      "standard": {
+        "b23": "b23bralette",
+        "farben": [
+          "rot"
+        ],
+        "materialien": [
+          "polyester"
+        ]
+      },
+      "material": "polyester",
+      "farbe": "schwarz",
+      "model": null,
+      "nur": "damen"
+    },
+    "b23duftset": {
+      "gruppe": "beauty",
+      "standard": {
+        "b23": "b23duftset"
+      },
+      "material": "glas",
+      "farbe": "hellgrau",
+      "model": null
+    },
+    "b23eyeliner": {
+      "gruppe": "beauty",
+      "standard": {
+        "b23": "b23eyeliner"
+      },
+      "material": "kosmetik",
+      "farbe": "mint",
+      "model": null
+    },
+    "b23highleg": {
+      "gruppe": "bademode",
+      "standard": {
+        "b23": "b23highleg"
+      },
+      "material": "polyester",
+      "farbe": "weiß",
+      "model": null,
+      "nur": "damen"
+    },
+    "b23highlighter": {
+      "gruppe": "beauty",
+      "standard": {
+        "b23": "b23highlighter",
+        "farben": [
+          "natur"
+        ],
+        "materialien": [
+          "kosmetik"
+        ]
+      },
+      "material": "kosmetik",
+      "farbe": "anthrazit",
+      "model": null
+    },
+    "b23liptint": {
+      "gruppe": "beauty",
+      "standard": {
+        "b23": "b23liptint"
+      },
+      "material": "kosmetik",
+      "farbe": "braun",
+      "model": null
+    },
+    "b23tanga": {
+      "gruppe": "bademode",
+      "standard": {
+        "b23": "b23tanga"
+      },
+      "material": "polyester",
+      "farbe": "rot",
+      "model": null,
+      "nur": "damen"
+    },
+    "b24blusenbody": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b24": "b24blusenbody",
+        "aermel": "lang",
+        "kragen": true,
+        "knopfleiste": true,
+        "passform": "tailliert"
+      },
+      "material": "viskose",
+      "farbe": "braun",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b24jeansbluse": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b24": "b24jeansbluse",
+        "aermel": "lang",
+        "kragen": true,
+        "passform": "tailliert",
+        "laenge": "taille"
+      },
+      "material": "denim",
+      "farbe": "marine",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b24kapuzenstrickjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b24": "b24kapuzenstrickjacke",
+        "kapuze": true,
+        "zip": true,
+        "laenge": "normal",
+        "glatt": true,
+        "farben": [
+          "hellgrau"
+        ],
+        "materialien": [
+          "strick"
+        ]
+      },
+      "material": "strick",
+      "farbe": "anthrazit",
+      "model": "jacke"
+    },
+    "b24korsagenbluse": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b24": "b24korsagenbluse",
+        "aermel": "lang",
+        "kragen": true,
+        "knopfleiste": true,
+        "passform": "tailliert"
+      },
+      "material": "baumwolle",
+      "farbe": "dunkeldenim",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b24leinenhemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b24": "b24leinenhemd",
+        "aermel": "kurz",
+        "kragen": true,
+        "knopfleiste": true,
+        "passform": "gerade"
+      },
+      "material": "leinen",
+      "farbe": "natur",
+      "model": "oberteil"
+    },
+    "b24milkmaid": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b24": "b24milkmaid",
+        "aermel": "kurz",
+        "ausschnitt": "carree",
+        "passform": "tailliert",
+        "laenge": "crop"
+      },
+      "material": "baumwolle",
+      "farbe": "rosa",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b24offshoulder": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b24": "b24offshoulder",
+        "aermel": "lang",
+        "ausschnitt": "offshoulder",
+        "passform": "gerade"
+      },
+      "material": "viskose",
+      "farbe": "weiß",
+      "model": "oberteil",
+      "nur": "damen"
+    },
+    "b24strickbomber": {
+      "gruppe": "jacke",
+      "standard": {
+        "b24": "b24strickbomber",
+        "zip": true,
+        "laenge": "kurz",
+        "rippbund": true,
+        "glatt": true,
+        "farben": [
+          "grau"
+        ],
+        "materialien": [
+          "strick"
+        ]
+      },
+      "material": "strick",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "b24trachtenjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b24": "b24trachtenjacke",
+        "laenge": "kurz",
+        "farben": [
+          "beige"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "wolle",
+      "farbe": "weiß",
+      "model": "jacke",
+      "nur": "damen"
+    },
+    "b24varsitycardigan": {
+      "gruppe": "jacke",
+      "standard": {
+        "b24": "b24varsitycardigan",
+        "laenge": "normal",
+        "rippbund": true,
+        "glatt": true,
+        "farben": [
+          "weiß"
+        ],
+        "materialien": [
+          "strick"
+        ]
+      },
+      "material": "strick",
+      "farbe": "marine",
+      "model": "jacke"
+    },
+    "b25anorak": {
+      "gruppe": "jacke",
+      "standard": {
+        "b25": "b25anorak",
+        "kapuze": true,
+        "laenge": "kurz"
+      },
+      "material": "nylon",
+      "farbe": "anthrazit",
+      "model": "jacke"
+    },
+    "b25cordhemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b25": "b25cordhemd",
+        "aermel": "lang",
+        "kragen": true,
+        "knopfleiste": true,
+        "passform": "oversize"
+      },
+      "material": "cord",
+      "farbe": "weiß",
+      "model": "oberteil"
+    },
+    "b25jogginganzug": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b25": "b25jogginganzug",
+        "aermel": "lang",
+        "kapuze": true,
+        "rippbund": true
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "oberteil"
+    },
+    "b25kunstlederleggings": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b25": "b25kunstlederleggings",
+        "passform": "leggings",
+        "leibhoehe": "hoch"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b25plisseehose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b25": "b25plisseehose",
+        "passform": "weit",
+        "leibhoehe": "hoch",
+        "komfortbund": true
+      },
+      "material": "polyester",
+      "farbe": "weiß",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b25saronghose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b25": "b25saronghose",
+        "passform": "weit",
+        "leibhoehe": "hoch",
+        "laenge": "cropped"
+      },
+      "material": "viskose",
+      "farbe": "schwarz",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b25strickhemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b25": "b25strickhemd",
+        "aermel": "kurz",
+        "kragen": true,
+        "knopfleiste": true,
+        "passform": "gerade",
+        "glatt": true
+      },
+      "material": "strick",
+      "farbe": "marine",
+      "model": "oberteil"
+    },
+    "b25trachtenhemd": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b25": "b25trachtenhemd",
+        "aermel": "lang",
+        "knopfleiste": true,
+        "passform": "gerade"
+      },
+      "material": "baumwolle",
+      "farbe": "creme",
+      "model": "oberteil"
+    },
+    "b25wachsjacke": {
+      "gruppe": "jacke",
+      "standard": {
+        "b25": "b25wachsjacke",
+        "laenge": "kurz",
+        "farben": [
+          "braun"
+        ],
+        "materialien": [
+          "cord"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "braun",
+      "model": "jacke"
+    },
+    "b25zigarettenhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b25": "b25zigarettenhose",
+        "passform": "gerade",
+        "laenge": "cropped",
+        "bundfalte": true
+      },
+      "material": "wolle",
+      "farbe": "schwarz",
+      "model": "hose",
+      "nur": "damen"
+    },
+    "b26ballkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b26": "b26ballkleid",
+        "laenge": "maxi",
+        "form": "glocke",
+        "aermel": "ohne",
+        "kragen": "corsage"
+      },
+      "material": "tuell",
+      "farbe": "rosa",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b26blazerkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b26": "b26blazerkleid",
+        "laenge": "mini",
+        "form": "gerade",
+        "aermel": "lang",
+        "kragen": "v"
+      },
+      "material": "wolle",
+      "farbe": "schwarz",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b26boyfriendjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b26": "b26boyfriendjeans",
+        "passform": "gerade",
+        "leibhoehe": "normal",
+        "saum": "umschlag"
+      },
+      "material": "denim",
+      "farbe": "hellblau",
+      "model": "hose"
+    },
+    "b26brautkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b26": "b26brautkleid",
+        "laenge": "maxi",
+        "form": "glocke",
+        "aermel": "ohne",
+        "kragen": "neckholder"
+      },
+      "material": "satin",
+      "farbe": "weiß",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b26carpenterjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b26": "b26carpenterjeans",
+        "passform": "weit",
+        "cargo": true
+      },
+      "material": "denim",
+      "farbe": "dunkeldenim",
+      "model": "hose"
+    },
+    "b26denimjogger": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b26": "b26denimjogger",
+        "passform": "jogger",
+        "komfortbund": true
+      },
+      "material": "denim",
+      "farbe": "schwarz",
+      "model": "hose"
+    },
+    "b26haekelkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b26": "b26haekelkleid",
+        "laenge": "mini",
+        "form": "gerade",
+        "aermel": "traeger",
+        "glatt": true,
+        "netz": true
+      },
+      "material": "strick",
+      "farbe": "cognac",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b26karottenjeans": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b26": "b26karottenjeans",
+        "passform": "schmal",
+        "leibhoehe": "hoch",
+        "komfortbund": true,
+        "laenge": "cropped"
+      },
+      "material": "denim",
+      "farbe": "anthrazit",
+      "model": "hose"
+    },
+    "b26latzshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b26": "b26latzshorts",
+        "laenge": "kurz",
+        "passform": "gerade",
+        "latz": true,
+        "saum": "umschlag"
+      },
+      "material": "denim",
+      "farbe": "hellblau",
+      "model": "hose"
+    },
+    "b26sportjumpsuit": {
+      "gruppe": "kleid",
+      "standard": {
+        "b26": "b26sportjumpsuit"
+      },
+      "material": "viskose",
+      "farbe": "schwarz",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b27cordrock": {
+      "gruppe": "rock",
+      "standard": {
+        "b27": "b27cordrock",
+        "laenge": "mini",
+        "form": "plissee"
+      },
+      "material": "cord",
+      "farbe": "braun",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b27corsagenkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b27": "b27corsagenkleid",
+        "laenge": "midi",
+        "form": "glocke",
+        "aermel": "ohne",
+        "kragen": "corsage"
+      },
+      "material": "baumwolle",
+      "farbe": "rosa",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b27haekelpullover": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b27": "b27haekelpullover",
+        "aermel": "lang",
+        "kragen": "rund",
+        "passform": "gerade",
+        "glatt": true,
+        "netz": true
+      },
+      "material": "strick",
+      "farbe": "ecru",
+      "model": "oberteil"
+    },
+    "b27haengerkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b27": "b27haengerkleid",
+        "laenge": "mini",
+        "form": "glocke",
+        "aermel": "traeger",
+        "kragen": "v"
+      },
+      "material": "viskose",
+      "farbe": "weiß",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b27jeansmaxirock": {
+      "gruppe": "rock",
+      "standard": {
+        "b27": "b27jeansmaxirock",
+        "laenge": "maxi",
+        "form": "gerade"
+      },
+      "material": "denim",
+      "farbe": "jeansblau",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b27kunstfellmantel": {
+      "gruppe": "jacke",
+      "standard": {
+        "b27": "b27kunstfellmantel",
+        "art": "mantel",
+        "fell": [
+          0
+        ]
+      },
+      "material": "wolle",
+      "farbe": "sand",
+      "model": "jacke"
+    },
+    "b27ledermantel": {
+      "gruppe": "jacke",
+      "standard": {
+        "b27": "b27ledermantel",
+        "art": "trench",
+        "guertel": true,
+        "fell": [
+          1
+        ],
+        "farben": [
+          "schwarz"
+        ],
+        "materialien": [
+          "wolle"
+        ]
+      },
+      "material": "lack",
+      "farbe": "schwarz",
+      "model": "jacke"
+    },
+    "b27parachuterock": {
+      "gruppe": "rock",
+      "standard": {
+        "b27": "b27parachuterock",
+        "laenge": "midi",
+        "form": "a-linie"
+      },
+      "material": "nylon",
+      "farbe": "hellgrau",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b27skaterkleid": {
+      "gruppe": "kleid",
+      "standard": {
+        "b27": "b27skaterkleid",
+        "laenge": "mini",
+        "form": "glocke",
+        "aermel": "lang",
+        "kragen": "polo",
+        "zmuster": [
+          "nadelstreifen"
+        ],
+        "farben": [
+          "marine"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "jersey",
+      "farbe": "marine",
+      "model": "kleid",
+      "nur": "damen"
+    },
+    "b27ueberrock": {
+      "gruppe": "rock",
+      "standard": {
+        "b27": "b27ueberrock",
+        "laenge": "mini",
+        "form": "stufen"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": "rock",
+      "nur": "damen"
+    },
+    "b28earcuff": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b28": "b28earcuff"
+      },
+      "material": "metall",
+      "farbe": "silber",
+      "model": null
+    },
+    "b28halfzipshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b28": "b28halfzipshirt",
+        "aermel": "lang",
+        "kragen": "troyer",
+        "passform": "tailliert"
+      },
+      "material": "jersey",
+      "farbe": "braun",
+      "model": "oberteil"
+    },
+    "b28keilsneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28keilsneaker",
+        "art": "sneaker"
+      },
+      "material": "leder",
+      "farbe": "olive",
+      "model": "schuhe"
+    },
+    "b28maryjanepumps": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28maryjanepumps",
+        "art": "pumps"
+      },
+      "material": "lack",
+      "farbe": "bordeaux",
+      "model": "schuhe"
+    },
+    "b28miniboot": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28miniboot",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "beige",
+      "model": "schuhe"
+    },
+    "b28oberarmreif": {
+      "gruppe": "accessoire",
+      "standard": {
+        "b28": "b28oberarmreif"
+      },
+      "material": "metall",
+      "farbe": "gold",
+      "model": null
+    },
+    "b28plateaupumps": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28plateaupumps",
+        "art": "pumps"
+      },
+      "material": "lack",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "b28plateausandalette": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28plateausandalette",
+        "art": "sandale",
+        "farben": [
+          "natur"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "leder",
+      "farbe": "camel",
+      "model": "schuhe"
+    },
+    "b28tabisneaker": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28tabisneaker",
+        "art": "sneaker"
+      },
+      "material": "leder",
+      "farbe": "schwarz",
+      "model": "schuhe"
+    },
+    "b28wallabee": {
+      "gruppe": "schuhe",
+      "standard": {
+        "b28": "b28wallabee",
+        "art": "halb"
+      },
+      "material": "leder",
+      "farbe": "beige",
+      "model": "schuhe"
+    },
+    "b29kapuzenshirt": {
+      "gruppe": "oberteil",
+      "standard": {
+        "b29": "b29kapuzenshirt",
+        "aermel": "lang",
+        "kragen": "kapuze",
+        "passform": "gerade"
+      },
+      "material": "baumwolle",
+      "farbe": "jeansblau",
+      "model": "oberteil"
+    },
+    "b29trachtenlederhose": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b29": "b29trachtenlederhose",
+        "laenge": "bermuda",
+        "passform": "gerade"
+      },
+      "material": "leder",
+      "farbe": "beige",
+      "model": "hose"
+    },
+    "b29kampfsportshorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b29": "b29kampfsportshorts",
+        "laenge": "kurz",
+        "passform": "weit",
+        "komfortbund": true,
+        "farben": [
+          "sand"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "satin",
+      "farbe": "schwarz",
+      "model": "hose"
+    },
+    "b29pyjamashorts": {
+      "gruppe": "unterteil",
+      "standard": {
+        "b29": "b29pyjamashorts",
+        "laenge": "kurz",
+        "passform": "weit",
+        "komfortbund": true,
+        "bildmuster": "streifen"
+      },
+      "material": "baumwolle",
+      "farbe": "hellblau",
+      "model": "hose"
+    },
+    "b29beinstulpen": {
+      "gruppe": "waesche",
+      "standard": {
+        "b29": "b29beinstulpen"
+      },
+      "material": "baumwolle",
+      "farbe": "weiß",
+      "model": null
+    },
+    "b29handytasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "b29": "b29handytasche",
+        "art": "umhaenge",
+        "umriss": true
+      },
+      "material": "polyester",
+      "farbe": "anthrazit",
+      "model": "tasche"
+    },
+    "b29lunchtasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "b29": "b29lunchtasche",
+        "art": "tote",
+        "umriss": true
+      },
+      "material": "baumwolle",
+      "farbe": "grau",
+      "model": "tasche"
+    },
+    "b29muscheltasche": {
+      "gruppe": "tasche",
+      "standard": {
+        "b29": "b29muscheltasche",
+        "art": "umhaenge"
+      },
+      "material": "satin",
+      "farbe": "gold",
+      "model": "tasche"
+    },
+    "b29utilityweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "b29": "b29utilityweste",
+        "art": "weste"
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": "jacke"
+    },
+    "b29kunstlederweste": {
+      "gruppe": "jacke",
+      "standard": {
+        "b29": "b29kunstlederweste",
+        "art": "weste"
+      },
+      "material": "leder",
+      "farbe": "anthrazit",
+      "model": "jacke"
+    },
+    "b30buegelloserbh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b30": "b30buegelloserbh",
+        "farben": [
+          "gleich"
+        ],
+        "materialien": [
+          "baumwolle"
+        ]
+      },
+      "material": "baumwolle",
+      "farbe": "sand",
+      "model": null,
+      "nur": "damen"
+    },
+    "b30harnessbody": {
+      "gruppe": "waesche",
+      "standard": {
+        "b30": "b30harnessbody",
+        "umriss": true,
+        "farben": [
+          "gleich"
+        ],
+        "materialien": [
+          "satin"
+        ]
+      },
+      "material": "satin",
+      "farbe": "marine",
+      "model": null,
+      "nur": "damen"
+    },
+    "b30tshirtbh": {
+      "gruppe": "waesche",
+      "standard": {
+        "b30": "b30tshirtbh",
+        "farben": [
+          "gleich"
+        ],
+        "materialien": [
+          "satin"
+        ]
+      },
+      "material": "satin",
+      "farbe": "beige",
+      "model": null,
+      "nur": "damen"
     }
   }
 }
