@@ -9,8 +9,8 @@ export const NAMEN = ['Faltenrock', 'Midirock', 'Strickpullover'] as const;
 
 export const TYPEN: SortimentTyp<(typeof NAMEN)[number]>[] = [
   { typ: 'Faltenrock', kategorie: 'unterteile', wgs: ['damen.hosen', 'damen.young'], saison: 'winter', preis: 69, materialien: ['Merino', 'Polyester'], gruppe: G(0, 0.35, 0.8, 0.95), aufwand: 2, bild: { silhouette: 'b10faltenrock' }, pfad: ['unterteile', 'Röcke'] },
-  { typ: 'Midirock', kategorie: 'unterteile', wgs: ['damen.hosen', 'damen.young', 'kinder.maedchen'], saison: 'ganz', preis: 39, materialien: ['Viskose', 'Polyester', 'Baumwolle'], gruppe: G(0.1, 0.9, 0.75, 0.5), aufwand: 1, bild: { silhouette: 't_leorock', dessin: '' }, pfad: ['unterteile', 'Röcke'] },
-  { typ: 'Strickpullover', kategorie: 'oberteile', wgs: ['damen.strick', 'herren.strick', 'damen.young', 'herren.casual', 'kinder.maedchen', 'kinder.jungen'], saison: 'winter', preis: 39, materialien: ['Baumwolle', 'Merino', 'Bio-Baumwolle'], gruppe: G(0.3, 0.85, 0.8, 0.75), aufwand: 2, bild: { silhouette: 't_schachpulli', dessin: '' }, pfad: ['oberteile', 'Strick'] },
+  { typ: 'Midirock', kategorie: 'unterteile', wgs: ['damen.hosen', 'damen.young', 'kinder.maedchen'], saison: 'ganz', preis: 39, materialien: ['Viskose', 'Polyester', 'Baumwolle'], gruppe: G(0.1, 0.9, 0.75, 0.5), aufwand: 1, bild: { silhouette: 'b01midirock', dessin: '' }, pfad: ['unterteile', 'Röcke'] },
+  { typ: 'Strickpullover', kategorie: 'oberteile', wgs: ['damen.strick', 'herren.strick', 'damen.young', 'herren.casual', 'kinder.maedchen', 'kinder.jungen'], saison: 'winter', preis: 39, materialien: ['Baumwolle', 'Merino', 'Bio-Baumwolle'], gruppe: G(0.3, 0.85, 0.8, 0.75), aufwand: 2, bild: { silhouette: 'b01strickpullover', dessin: '' }, pfad: ['oberteile', 'Strick'] },
 ];
 
 /** Alter Typname → Grundtyp und Muster. Norweger- und Weihnachtspullover gab es im Spiel nicht (für spätere Wünsche: Strickpullover + Muster). */

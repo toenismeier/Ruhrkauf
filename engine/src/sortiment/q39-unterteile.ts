@@ -6,6 +6,7 @@
 // (Q33_ZUORDNUNG), Adults über das Gewicht mitte ≥ 0,4; Best Ager nie (reif < 0,4). Preis (mitte) am Preismedian, Eigenmarke
 // leicht darüber. WGs nur dort, wo schon Artikeltypen liegen; die Typen hängen hinten an (Startsortiment und Kalibrierung neutral).
 import { G, type ArtikelBild, type SortimentTyp } from './basis';
+import { bildWurf4 } from './bilder-wurf4';
 import type { Material, ProduktKategorie, TypSaison, TrendGruppe } from '../produkte';
 import type { BaumKategorie } from '../produkt-sortiment';
 import type { WgId } from '../einkauf';
@@ -14,7 +15,7 @@ import { Q33_ZUORDNUNG } from './q33-zielgruppen';
 
 type Pfad = readonly [BaumKategorie, string];
 type Ziel = 'TY' | 'TYA';
-interface Eintrag { typ: string; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preis: number; materialien: Material[]; gruppe: Record<TrendGruppe, number>; aufwand: number; bild: ArtikelBild; bildOffen: true; pfad: Pfad }
+interface Eintrag { typ: string; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preis: number; materialien: Material[]; gruppe: Record<TrendGruppe, number>; aufwand: number; bild: ArtikelBild; bildOffen?: true; pfad: Pfad }
 
 // Zielgruppenprofile: TY = Teens und Young Adults, TYA = zusätzlich Adults
 const GEWICHT: Record<Ziel, Record<TrendGruppe, number>> = { TY: G(0.15, 1, 0.3, 0), TYA: G(0.1, 1, 0.6, 0.15) };
@@ -53,7 +54,7 @@ const P = {
 
 const L: (Eintrag & { ziel: Ziel })[] = [];
 function t(typ: string, kategorie: ProduktKategorie, wgs: WgId[], saison: TypSaison, preis: number, materialien: Material[], ziel: Ziel, aufwand: number, silhouette: string, pfad: Pfad): void {
-  L.push({ typ, kategorie, wgs, saison, preis, materialien, gruppe: GEWICHT[ziel], aufwand, bild: { silhouette }, bildOffen: true, pfad, ziel });
+  L.push({ typ, kategorie, wgs, saison, preis, materialien, gruppe: GEWICHT[ziel], aufwand, ...bildWurf4(typ, silhouette), pfad, ziel });
 }
 const U = 'unterteile' as const;
 

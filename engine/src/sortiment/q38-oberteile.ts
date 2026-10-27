@@ -7,6 +7,7 @@
 // Teens und Young Adults freigeschaltet (unten). „Strickpullover“ legt Q37 als Muster-Grundtyp an (Teens, Young, Adults).
 // Neue Typen hängen hinten an und nur an WGs, die schon Artikeltypen haben: Startsortiment und Kalibrierung bleiben unverändert.
 import { G, type ArtikelBild, type SortimentTyp } from './basis';
+import { bildWurf4 } from './bilder-wurf4';
 import type { Material, ProduktKategorie, TypSaison, TrendGruppe } from '../produkte';
 import type { BaumKategorie } from '../produkt-sortiment';
 import type { WgId } from '../einkauf';
@@ -14,7 +15,7 @@ import { Q33_ZUORDNUNG } from './q33-zielgruppen';
 
 type Z = 'teens' | 'young';
 type Pfad = readonly [BaumKategorie, string];
-interface Eintrag { typ: string; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preis: number; materialien: Material[]; gruppe: Record<TrendGruppe, number>; aufwand: number; bild: ArtikelBild; bildOffen: true; pfad: Pfad; zg: Z[] }
+interface Eintrag { typ: string; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preis: number; materialien: Material[]; gruppe: Record<TrendGruppe, number>; aufwand: number; bild: ArtikelBild; bildOffen?: true; pfad: Pfad; zg: Z[] }
 
 const P = {
   shirts: ['oberteile', 'Shirts'] as Pfad, tops: ['oberteile', 'Tops'] as Pfad, blusen: ['oberteile', 'Blusen'] as Pfad, hemden: ['oberteile', 'Hemden'] as Pfad,
@@ -53,7 +54,7 @@ const g = (adults: number, kinder = 0.25, istAdults = adults >= 0.3): Record<Tre
 
 const L: Eintrag[] = [];
 const t = (typ: string, kategorie: ProduktKategorie, wgs: WgId[], saison: TypSaison, preis: number, materialien: Material[], gruppe: Record<TrendGruppe, number>, aufwand: number, silhouette: string, pfad: Pfad, zg: Z[] = TY) =>
-  L.push({ typ, kategorie, wgs, saison, preis, materialien, gruppe, aufwand, bild: { silhouette }, bildOffen: true, pfad, zg });
+  L.push({ typ, kategorie, wgs, saison, preis, materialien, gruppe, aufwand, ...bildWurf4(typ, silhouette), pfad, zg });
 
 // ───────────── Shirts (Referenz-Preismedian in Klammern)
 t('Crop-T-Shirt', 'oberteile', D, 'sommer', 18, JERSEY, g(0.19), 1, 'boxytee', P.shirts);              // 15,99

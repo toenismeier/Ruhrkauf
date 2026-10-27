@@ -12545,7 +12545,7 @@
     t("Schluppenbluse", "oberteile", ["damen.blusen", "damen.gg"], "ganz", 49, FLIESS, G(0, 0.3, 0.85, 0.9), 1, b2("schluppenbluse")),
     t("Wickelshirt", "oberteile", ["damen.blusen"], "ganz", 35, FLIESS, G(0, 0.6, 0.85, 0.7), 1, b2("wickelshirt"), ["oberteile", "Shirts"]),
     t("Tr\xE4gertop", "oberteile", ["damen.blusen", "damen.young"], "sommer", 25, FLIESS, G(0, 0.9, 0.7, 0.3), 1, b2("traegertop"), ["oberteile", "Tops"]),
-    t("Babytee", "oberteile", ["damen.young"], "sommer", 19, BW, G(0.2, 1, 0.3, 0), 1, b2("babytee"), ["oberteile", "Shirts"]),
+    t("Babytee", "oberteile", ["damen.young"], "sommer", 19, BW, G(0.2, 1, 0.3, 0), 1, b2("b01babytee"), ["oberteile", "Shirts"]),
     t("Marlenehose", "unterteile", ["damen.hosen", "damen.gg"], "ganz", 69, WOLLE, G(0, 0.4, 0.85, 0.9), 1, b2("marlenehose"), ["unterteile", "Stoffhosen"]),
     t("Komforthose", "unterteile", ["damen.hosen", "damen.gg"], "ganz", 49, BW_P, G(0, 0, 0.4, 1), 1, b2("komforthose"), ["unterteile", "Stoffhosen"]),
     t("Komfort-Jeans", "unterteile", ["damen.denim", "damen.gg"], "ganz", 59, DENIM, G(0, 0, 0.5, 1), 1, b2("jeans", { komfortbund: true }), ["unterteile", "Jeans und Denim"]),
@@ -13454,8 +13454,8 @@
   // ../engine/src/sortiment/q37-muster.ts
   var TYPEN6 = [
     { typ: "Faltenrock", kategorie: "unterteile", wgs: ["damen.hosen", "damen.young"], saison: "winter", preis: 69, materialien: ["Merino", "Polyester"], gruppe: G(0, 0.35, 0.8, 0.95), aufwand: 2, bild: { silhouette: "b10faltenrock" }, pfad: ["unterteile", "R\xF6cke"] },
-    { typ: "Midirock", kategorie: "unterteile", wgs: ["damen.hosen", "damen.young", "kinder.maedchen"], saison: "ganz", preis: 39, materialien: ["Viskose", "Polyester", "Baumwolle"], gruppe: G(0.1, 0.9, 0.75, 0.5), aufwand: 1, bild: { silhouette: "t_leorock", dessin: "" }, pfad: ["unterteile", "R\xF6cke"] },
-    { typ: "Strickpullover", kategorie: "oberteile", wgs: ["damen.strick", "herren.strick", "damen.young", "herren.casual", "kinder.maedchen", "kinder.jungen"], saison: "winter", preis: 39, materialien: ["Baumwolle", "Merino", "Bio-Baumwolle"], gruppe: G(0.3, 0.85, 0.8, 0.75), aufwand: 2, bild: { silhouette: "t_schachpulli", dessin: "" }, pfad: ["oberteile", "Strick"] }
+    { typ: "Midirock", kategorie: "unterteile", wgs: ["damen.hosen", "damen.young", "kinder.maedchen"], saison: "ganz", preis: 39, materialien: ["Viskose", "Polyester", "Baumwolle"], gruppe: G(0.1, 0.9, 0.75, 0.5), aufwand: 1, bild: { silhouette: "b01midirock", dessin: "" }, pfad: ["unterteile", "R\xF6cke"] },
+    { typ: "Strickpullover", kategorie: "oberteile", wgs: ["damen.strick", "herren.strick", "damen.young", "herren.casual", "kinder.maedchen", "kinder.jungen"], saison: "winter", preis: 39, materialien: ["Baumwolle", "Merino", "Bio-Baumwolle"], gruppe: G(0.3, 0.85, 0.8, 0.75), aufwand: 2, bild: { silhouette: "b01strickpullover", dessin: "" }, pfad: ["oberteile", "Strick"] }
   ];
   var MUSTER_ALIAS = {
     "Print-Jumpsuit": { typ: "Jumpsuit", muster: "Print" },
@@ -13490,6 +13490,206 @@
     Weihnachtspullover: { typ: "Strickpullover", muster: "Print" }
   };
   var TYP_UMBENANNT = { Cargohose: "Cargo-Hose" };
+
+  // ../engine/src/sortiment/bilder-wurf4.ts
+  var BILD_WURF4 = {
+    "Crop-T-Shirt": "b03croptshirt",
+    "Ringer-T-Shirt": "b03ringertshirt",
+    "Raglan-T-Shirt": "b04raglantshirt",
+    "Henley-Longsleeve": "b04henleylongsleeve",
+    "Layer-Shirt": "b04layershirt",
+    "\xC4rmelloses Shirt": "b04aermellosesshirt",
+    "Strickshirt": "b04strickshirt",
+    "Fledermausshirt": "b04fledermausshirt",
+    "Spitzenshirt": "b04spitzenshirt",
+    "Peplum-Shirt": "b04peplumshirt",
+    "Baseballshirt": "b04baseballshirt",
+    "Sportshirt": "b05sportshirt",
+    "Body": "b05body",
+    "Tanktop": "b05tanktop",
+    "Peplum-Top": "b05peplumtop",
+    "Stricktop": "b05stricktop",
+    "Bustier-Top": "b05bustier",
+    "Muscle-Shirt": "b06muscleshirt",
+    "One-Shoulder-Top": "b06oneshoulder",
+    "Westentop": "b06westentop",
+    "Jeans-Top": "b06jeanstop",
+    "Sporttop": "b06sporttop",
+    "Resorthemd": "b02resorthemd",
+    "Hemdbluse": "b02hemdbluse",
+    "Wickelbluse": "b02wickelbluse",
+    "Peplum-Bluse": "b02peplumbluse",
+    "Jeanshemd": "b02jeanshemd",
+    "Lagenlook-Hemd": "b02lagenlookhemd",
+    "Lagenlook-Bluse": "b02lagenlookbluse",
+    "Langarm-Poloshirt": "b04langarmpolo",
+    "Strickpolo": "b03strickpolo",
+    "Kurzarm-Strickpullover": "b03kurzarmstrickpullover",
+    "Off-Shoulder-Pullover": "b03offshoulderpullover",
+    "Netzstrickpullover": "b03netzstrickpullover",
+    "Henley-Pullover": "b03henleypullover",
+    "V-Pullover": "b03vpullover",
+    "Strickcape": "b03strickcape",
+    "Sweatjacke": "b02sweatjacke",
+    "Sweat-Troyer": "b05sweattroyer",
+    "Kurzarm-Sweatshirt": "b05kurzarmsweat",
+    "Off-Shoulder-Sweatshirt": "b05offsweat",
+    "Polo-Sweatshirt": "b05polosweat",
+    "Strick-Hoodie": "b03strickhoodie",
+    "Bolero": "b02bolero",
+    "Wickeljacke": "b02wickeljacke",
+    "Jeansweste": "b06jeansweste",
+    "Weste": "b06weste",
+    "Kunstfellweste": "b06kunstfellweste",
+    "Baseballcap": "b17baseballcap",
+    "Bowlingtasche": "b20bowlingtasche",
+    "Halsketten-Set": "b19halskettenset",
+    "Ring-Set": "b19ringset",
+    "Hobo-Bag": "b21hobobag",
+    "Armreif": "b19armreif",
+    "Halbmondtasche": "b21halbmond",
+    "Ohrring-Set": "b19ohrringset",
+    "Tailleng\xFCrtel": "b17taillenguertel",
+    "Handyh\xFClle": "b17handyhuelle",
+    "Baguette-Tasche": "b01baguette",
+    "Haarband": "b17haarband",
+    "Ohrh\xE4nger": "b19ohrhaenger",
+    "Balaclava": "b17balaclava",
+    "Armreif-Set": "b19armreifset",
+    "Ohrstecker": "b19ohrstecker",
+    "Haarklammer": "b17haarklammer",
+    "Dreieckstuch": "b17dreieckstuch",
+    "Ketteng\xFCrtel": "b17kettenguertel",
+    "Armband-Set": "b20armbandset",
+    "Kordelkette": "b20kordelkette",
+    "Creolen-Set": "b20creolenset",
+    "Beuteltasche": "b21beutel",
+    "Citytasche": "b21citytasche",
+    "Barrel-Bag": "b21barrelbag",
+    "Lariat-Halskette": "b20lariat",
+    "Halsreif": "b20halsreif",
+    "Taschenanh\xE4nger": "b17taschenanhaenger",
+    "Schmuckset": "b20schmuckset",
+    "Kameratasche": "b21kameratasche",
+    "Stirnband": "b17stirnband",
+    "Layering-Halskette": "b20layering",
+    "Biker-Bag": "b21bikerbag",
+    "Schl\xFCsselanh\xE4nger": "b18schluesselanhaenger",
+    "Armstulpen": "b18armstulpen",
+    "Pareo": "b18pareo",
+    "Military-Cap": "b18militarycap",
+    "Fliegerm\xFCtze": "b18fliegermuetze",
+    "Broschen-Set": "b20broschenset",
+    "H\xFCftg\xFCrtel": "b18hueftguertel",
+    "Fingerlose Handschuhe": "b18fingerlos",
+    "Ring": "b20ring",
+    "Scrunchie": "b18scrunchie",
+    "Haarparfum": "b19haarparfum",
+    "Box-Tasche": "b21boxtasche",
+    "Messenger-Bag": "b21messenger",
+    "Ohrenw\xE4rmer": "b19ohrenwaermer",
+    "Einsatzkragen": "b18einsatzkragen",
+    "Korsettg\xFCrtel": "b19korsettguertel",
+    "Baskenm\xFCtze": "b18baskenmuetze",
+    "String": "b14string",
+    "Tanga": "b15tanga",
+    "Panty": "b15panty",
+    "Brazilian-Slip": "b15brazilianslip",
+    "Push-up-BH": "b14pushupbh",
+    "Balconette-BH": "b15balconettebh",
+    "Bralette": "b15bralette",
+    "Klebe-BH": "b16klebebh",
+    "Longline-BH": "b16longlinebh",
+    "Strumpfhalter": "b16strumpfhalter",
+    "Schlafshirt": "b15schlafshirt",
+    "Schlafshorts": "b15schlafshorts",
+    "Schlaftop": "b15schlaftop",
+    "Negligee": "b15negligee",
+    "Pyjama-Oberteil": "b15pyjamaoberteil",
+    "Sportsocken": "b14sportsocken",
+    "Blouson": "b01blouson",
+    "Jacke": "b12jacke",
+    "Kunstfelljacke": "b12kunstfelljacke",
+    "Workerjacke": "b12workerjacke",
+    "Fliegerjacke": "b12fliegerjacke",
+    "Military-Jacke": "b12militaryjacke",
+    "Kapuzenjacke": "b12kapuzenjacke",
+    "Wildlederjacke": "b12wildlederjacke",
+    "Racing-Jacke": "b12racingjacke",
+    "Peplum-Jacke": "b12peplumjacke",
+    "Sakko": "b12sakko",
+    "Sandalette": "b13sandalette",
+    "Sneakerina": "b13sneakerina",
+    "Barfu\xDF-Sneaker": "b13barfusssneaker",
+    "Trail-Sneaker": "b14trailsneaker",
+    "Mary-Jane-Ballerina": "b01maryjane",
+    "Slingback-Ballerina": "b13slingbackballerina",
+    "Tabi-Ballerina": "b14tabiballerina",
+    "Loafer-Mule": "b14loafermule",
+    "Slouch-Stiefel": "b13slouchstiefel",
+    "Cowboystiefel": "b13cowboystiefel",
+    "Cowboy-Stiefelette": "b13cowboystiefelette",
+    "Slouch-Stiefelette": "b13slouchstiefelette",
+    "Sock-Boot": "b13sockboot",
+    "Bikerstiefel": "b13bikerstiefel",
+    "Reitstiefel": "b14reitstiefel",
+    "Keilstiefelette": "b14keilstiefelette",
+    "Trouser-Boots": "b14trouserboots",
+    "Peeptoe-Stiefel": "b14peeptoestiefel",
+    "Barrel-Jeans": "b08barreljeans",
+    "Low-Rise-Jeans": "b01lowrisejeans",
+    "Neckholderkleid": "b09neckholderkleid",
+    "Barrel-Hose": "b07barrelhose",
+    "Tr\xE4gerkleid": "b09traegerkleid",
+    "Pumphose": "b07pumphose",
+    "Stoffshorts": "b10stoffshorts",
+    "Playsuit": "b09playsuit",
+    "Triangel-Bikinioberteil": "b07triangel",
+    "Schlaghose": "b07schlaghose",
+    "Hotpants": "b01hotpants",
+    "Caprihose": "b01caprihose",
+    "Bikinislip": "b07bikinislip",
+    "Bandeaukleid": "b09bandeaukleid",
+    "Leggings": "b07leggings",
+    "Midikleid": "b09midikleid",
+    "Maxirock": "b10maxirock",
+    "Strickshorts": "b11strickshorts",
+    "Strickhose": "b07strickhose",
+    "Brazilian-Bikinislip": "b07brazilian",
+    "Ballon-Jeans": "b01ballonjeans",
+    "Ballonhose": "b07ballonhose",
+    "Paillettenrock": "b10paillettenrock",
+    "Stufenkleid": "b09stufenkleid",
+    "Cargo-Jogger": "b07cargojogger",
+    "Steg-Leggings": "b08stegleggings",
+    "Sportshorts": "b11sportshorts",
+    "Strickrock": "b10strickrock",
+    "Baggy-Hose": "b08baggyhose",
+    "Capri-Jeans": "b08caprijeans",
+    "Kunstledershorts": "b11kunstledershorts",
+    "Leinenshorts": "b11leinenshorts",
+    "5-Pocket-Hose": "b08fivepocket",
+    "Jeans-Jumpsuit": "b09jeansjumpsuit",
+    "Paillettenkleid": "b09paillettenkleid",
+    "Jeans-Midirock": "b10jeansmidirock",
+    "Carpenter-Hose": "b08carpenterhose",
+    "Jerseyhose": "b08jerseyhose",
+    "Paillettenshorts": "b11paillettenshorts",
+    "Kunstlederhose": "b08kunstlederhose",
+    "Skinny-Hose": "b08skinnyhose",
+    "Ballonrock": "b10ballonrock",
+    "Palazzohose": "b08palazzohose",
+    "Qipao": "b10qipao",
+    "Lederkleid": "b10lederkleid",
+    "H\xE4kelrock": "b10haekelrock",
+    "Dirndl": "b09dirndl",
+    "Cocktailkleid": "b09cocktailkleid"
+  };
+  var BILD_REST = /* @__PURE__ */ new Set(["Raglan-T-Shirt", "Netzstrickpullover", "Paillettenshorts", "Kunstledershorts", "Beuteltasche", "Biker-Bag", "Haarband", "Tailleng\xFCrtel", "Einsatzkragen", "Scrunchie", "Strickrock", "Baggy-Hose", "Ring-Set", "Halsketten-Set", "Broschen-Set"]);
+  function bildWurf4(typ, platzhalter) {
+    const s2 = BILD_WURF4[typ];
+    return s2 && !BILD_REST.has(typ) ? { bild: { silhouette: s2 } } : { bild: { silhouette: platzhalter }, bildOffen: true };
+  }
 
   // ../engine/src/sortiment/q38-oberteile.ts
   var P2 = {
@@ -13526,7 +13726,7 @@
   var TY = ["teens", "young"];
   var g = (adults, kinder = 0.25, istAdults = adults >= 0.3) => G(kinder, 1, istAdults ? Math.round((0.45 + 0.45 * adults) * 100) / 100 : 0.3, adults >= 0.75 ? 0.3 : 0.15);
   var L3 = [];
-  var t5 = (typ, kategorie, wgs, saison2, preis, materialien, gruppe3, aufwand, silhouette, pfad6, zg = TY) => L3.push({ typ, kategorie, wgs, saison: saison2, preis, materialien, gruppe: gruppe3, aufwand, bild: { silhouette }, bildOffen: true, pfad: pfad6, zg });
+  var t5 = (typ, kategorie, wgs, saison2, preis, materialien, gruppe3, aufwand, silhouette, pfad6, zg = TY) => L3.push({ typ, kategorie, wgs, saison: saison2, preis, materialien, gruppe: gruppe3, aufwand, ...bildWurf4(typ, silhouette), pfad: pfad6, zg });
   t5("Crop-T-Shirt", "oberteile", D, "sommer", 18, JERSEY, g(0.19), 1, "boxytee", P2.shirts);
   t5("Ringer-T-Shirt", "oberteile", U, "sommer", 20, BW4, g(0.33), 1, "tshirt", P2.shirts);
   t5("Raglan-T-Shirt", "oberteile", D, "sommer", 20, BW4, g(0.25), 1, "t_raglanlong", P2.shirts);
@@ -13643,7 +13843,7 @@
   };
   var t6 = (typ, kategorie, wgs, saison2, preis, materialien, gruppe3, aufwand, zg) => {
     const anlass = ANLASS[typ];
-    L4.push({ t: { typ, kategorie, wgs, saison: saison2, preis, materialien: [...materialien], gruppe: gruppe3, aufwand, bild: { silhouette: PLATZHALTER[typ] }, bildOffen: true, pfad: pfad3, ...anlass ? { anlass } : {} }, zg });
+    L4.push({ t: { typ, kategorie, wgs, saison: saison2, preis, materialien: [...materialien], gruppe: gruppe3, aufwand, ...bildWurf4(typ, PLATZHALTER[typ]), pfad: pfad3, ...anlass ? { anlass } : {} }, zg });
   };
   var PE = ["Polyester"];
   var PB = ["Polyester", "Baumwolle"];
@@ -13734,7 +13934,7 @@
   var TUCH = ["accessoires", "T\xFCcher und Schals"];
   var WEI = ["accessoires", "Weitere Accessoires"];
   var DUFT = ["beauty", "Duft"];
-  var t7 = (typ, wgs, saison2, preis, materialien, gruppe3, aufwand, pfad6, kategorie = "accessoires") => ({ typ, kategorie, wgs, saison: saison2, preis, materialien: [...materialien], gruppe: gruppe3, aufwand, pfad: pfad6, bild: { silhouette: PLATZHALTER2[typ] }, bildOffen: true });
+  var t7 = (typ, wgs, saison2, preis, materialien, gruppe3, aufwand, pfad6, kategorie = "accessoires") => ({ typ, kategorie, wgs, saison: saison2, preis, materialien: [...materialien], gruppe: gruppe3, aufwand, pfad: pfad6, ...bildWurf4(typ, PLATZHALTER2[typ]) });
   var PLATZHALTER2 = {
     Baseballcap: "cap",
     Bowlingtasche: "handtasche",
@@ -13957,7 +14157,7 @@
   };
   var L5 = [];
   function t8(typ, kategorie, wgs, saison2, preis, materialien, ziel, aufwand, silhouette, pfad6) {
-    L5.push({ typ, kategorie, wgs, saison: saison2, preis, materialien, gruppe: GEWICHT[ziel], aufwand, bild: { silhouette }, bildOffen: true, pfad: pfad6, ziel });
+    L5.push({ typ, kategorie, wgs, saison: saison2, preis, materialien, gruppe: GEWICHT[ziel], aufwand, ...bildWurf4(typ, silhouette), pfad: pfad6, ziel });
   }
   var U3 = "unterteile";
   t8("Barrel-Jeans", U3, U_JEANS, "ganz", 39, DENIM4, "TY", 2, "widelegjeans", P3.jeans);
@@ -162585,7 +162785,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "c74fecd" : "Entwicklung";
+  var version = () => true ? "8058662" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -174072,7 +174272,7 @@ void main() {
   }
 
   // src/kit/mode/erweiterung-b07.js
-  var SILHOUETTEN12 = { "b07triangel": { "gruppe": "bademode", "zeichner": "z:b07", "p": { "b07": "b07triangel" }, "material": "polyester", "farbe": "creme", "model": null, "nur": "damen" }, "b07bikinislip": { "gruppe": "bademode", "zeichner": "z:b07", "p": { "b07": "b07bikinislip" }, "material": "polyester", "farbe": "wei\xDF", "model": null, "nur": "damen" }, "b07brazilian": { "gruppe": "bademode", "zeichner": "z:b07", "p": { "b07": "b07brazilian" }, "material": "polyester", "farbe": "schwarz", "model": null, "nur": "damen" }, "b07barrelhose": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07barrelhose", "passform": "weit", "laenge": "lang", "bundfalte": true }, "material": "wolle", "farbe": "braun", "model": "hose" }, "b07pumphose": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07pumphose", "passform": "baggy", "laenge": "lang", "komfortbund": true }, "material": "baumwolle", "farbe": "anthrazit", "model": "hose", "nur": "damen" }, "b07schlaghose": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07schlaghose", "passform": "flare", "laenge": "lang", "komfortbund": true }, "material": "polyester", "farbe": "hellgrau", "model": "hose", "nur": "damen" }, "b07leggings": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07leggings", "passform": "leggings", "laenge": "lang" }, "material": "polyester", "farbe": "schwarz", "model": "hose", "nur": "damen" }, "b07strickhose": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07strickhose", "passform": "weit", "laenge": "lang", "komfortbund": true, "glatt": true }, "material": "strick", "farbe": "grau", "model": "hose", "nur": "damen" }, "b07ballonhose": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07ballonhose", "passform": "baggy", "laenge": "lang", "bundfalte": true }, "material": "viskose", "farbe": "braun", "model": "hose", "nur": "damen" }, "b07cargojogger": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07cargojogger", "passform": "jogger", "laenge": "lang", "cargo": true }, "material": "baumwolle", "farbe": "anthrazit", "model": "hose", "nur": "herren" } };
+  var SILHOUETTEN12 = { "b07triangel": { "gruppe": "bademode", "zeichner": "z:b07", "p": { "b07": "b07triangel" }, "material": "polyester", "farbe": "creme", "model": null, "nur": "damen" }, "b07bikinislip": { "gruppe": "bademode", "zeichner": "z:b07", "p": { "b07": "b07bikinislip" }, "material": "polyester", "farbe": "wei\xDF", "model": null, "nur": "damen" }, "b07brazilian": { "gruppe": "bademode", "zeichner": "z:b07", "p": { "b07": "b07brazilian" }, "material": "polyester", "farbe": "schwarz", "model": null, "nur": "damen" }, "b07barrelhose": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07barrelhose", "passform": "weit", "laenge": "lang", "bundfalte": true }, "material": "wolle", "farbe": "braun", "model": "hose" }, "b07pumphose": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07pumphose", "passform": "baggy", "laenge": "lang", "komfortbund": true }, "material": "baumwolle", "farbe": "anthrazit", "model": "hose", "nur": "damen" }, "b07schlaghose": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07schlaghose", "passform": "flare", "laenge": "lang", "komfortbund": true }, "material": "polyester", "farbe": "hellgrau", "model": "hose", "nur": "damen" }, "b07leggings": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07leggings", "passform": "leggings", "laenge": "lang" }, "material": "polyester", "farbe": "schwarz", "model": "hose", "nur": "damen" }, "b07strickhose": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07strickhose", "passform": "weit", "laenge": "lang", "komfortbund": true, "glatt": true }, "material": "strick", "farbe": "grau", "model": "hose", "nur": "damen" }, "b07ballonhose": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07ballonhose", "passform": "baggy", "laenge": "lang", "bundfalte": true }, "material": "viskose", "farbe": "braun", "model": "hose", "nur": "damen" }, "b07cargojogger": { "gruppe": "unterteil", "zeichner": "z:b07", "p": { "b07": "b07cargojogger", "passform": "jogger", "laenge": "lang", "cargo": true }, "material": "baumwolle", "farbe": "anthrazit", "model": "hose" } };
   var ZEICHNER13 = { b07: b07Zeichner };
 
   // src/kit/mode/b08-bilder.js
@@ -185088,8 +185288,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-27T07:11:43.846Z" : null;
-    const v2 = true ? "c74fecd" : "Entwicklung";
+    const iso = true ? "2026-10-27T08:28:18.955Z" : null;
+    const v2 = true ? "8058662" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();

@@ -7452,8 +7452,7 @@
       },
       "material": "baumwolle",
       "farbe": "anthrazit",
-      "model": "hose",
-      "nur": "herren"
+      "model": "hose"
     },
     "b08stegleggings": {
       "gruppe": "unterteil",

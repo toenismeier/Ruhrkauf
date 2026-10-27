@@ -6,6 +6,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { neuesSpiel, produktKatalog, produkte, wocheAbspielen } from '../src';
 import { ARTIKELTYPEN, SORTIMENT_TYPEN, waehlbar } from '../src/produkte';
+import { BILD_WURF4, BILD_REST } from '../src/sortiment/bilder-wurf4';
 import { NAMEN as Q40_NAMEN } from '../src/sortiment/q40-jacken-schuhe-waesche';
 
 const SILH = JSON.parse(readFileSync(join(__dirname, '../../render/src/kit/mode/silhouetten.json'), 'utf8')).silhouetten as Record<string, { nur?: string }>;
@@ -35,23 +36,25 @@ describe('Q40 Jacken, Schuhe, Wäsche aus dem Referenzsortiment', () => {
     }
   });
 
-  test('bildOffen: vorhandene Silhouette (keine q40-Bilder, keine Kinderbindung), hinten angehängt', () => {
+  test('Bild aus Bildpaket (Rest bildOffen), keine q40-Bilder, keine Kinderbindung, hinten angehängt', () => {
     const neu = SORTIMENT_TYPEN.filter((t) => (Q40_NAMEN as readonly string[]).includes(t.typ));
     expect(neu.length).toBe(Q40_NAMEN.length);
     for (const t of neu) {
-      expect(t.bildOffen).toBe(true);
-      expect(t.bild.silhouette).not.toMatch(/^q40_|^b\d\d/);
+      // Bildpakete Wurf 4: eigene Silhouette aus dem Paket, nur die Rest-Typen bleiben bildOffen mit Platzhalter
+      if (BILD_REST.has(t.typ)) { expect(t.bildOffen).toBe(true); expect(t.bild.silhouette).not.toMatch(/^b\d\d/); }
+      else { expect(t.bildOffen).toBeUndefined(); expect(t.bild.silhouette).toBe(BILD_WURF4[t.typ]); }
+      expect(t.bild.silhouette).not.toMatch(/^q40_/);
       expect(SILH[t.bild.silhouette]).toBeDefined();
       expect([t.typ, SILH[t.bild.silhouette].nur]).not.toEqual([t.typ, 'kinder']);
     }
     const idx = ARTIKELTYPEN.findIndex((t) => t.typ === Q40_NAMEN[0]);
     expect(new Set(ARTIKELTYPEN.slice(idx, idx + Q40_NAMEN.length).map((t) => t.typ))).toEqual(new Set(Q40_NAMEN));
-    expect(K.typen.filter((t) => t.bildOffen).map((t) => t.typ)).toEqual(expect.arrayContaining([...Q40_NAMEN]));
+    expect(K.typen.filter((t) => t.bildOffen && (Q40_NAMEN as readonly string[]).includes(t.typ)).map((t) => t.typ).sort()).toEqual(Q40_NAMEN.filter((n) => BILD_REST.has(n)).sort());
   });
 
   test('bildOffen: in keiner Marke entwickelbar, nicht im Grundsortiment, auch nicht nach 8 Wochen', () => {
     const s = neuesSpiel(2);
-    const q40 = new Set<string>(Q40_NAMEN);
+    const q40 = new Set<string>(Q40_NAMEN.filter((n) => BILD_REST.has(n)));
     for (const t of ARTIKELTYPEN.filter((x) => q40.has(x.typ))) expect(waehlbar(t)).toBe(false);
     for (const m of produkte(s).marken) expect(m.entwickelbar.filter((t) => q40.has(t))).toEqual([]);
     expect(s.produkte.liste.filter((p) => q40.has(p.typ))).toEqual([]);

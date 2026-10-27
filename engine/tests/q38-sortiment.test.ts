@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { neuesSpiel, produktKatalog, produkte, wocheAbspielen } from '../src';
 import { ARTIKELTYPEN, SORTIMENT_TYPEN, produktAktion, waehlbar } from '../src/produkte';
+import { BILD_WURF4, BILD_REST } from '../src/sortiment/bilder-wurf4';
 import { NAMEN as Q38_NAMEN } from '../src/sortiment/q38-oberteile';
 
 const SILH = JSON.parse(readFileSync(join(__dirname, '../../render/src/kit/mode/silhouetten.json'), 'utf8')).silhouetten as Record<string, unknown>;
@@ -41,27 +42,29 @@ describe('Q38 Oberteile aus dem Referenzsortiment', () => {
     }
   });
 
-  test('bildOffen: vorhandene Silhouette (keine q38-Bilder), Platz unter Oberteile/Jacken, hinten angehängt', () => {
+  test('Bild aus Bildpaket (Rest bildOffen), Platz unter Oberteile/Jacken, hinten angehängt', () => {
     const neu = SORTIMENT_TYPEN.filter((t) => Q38_NAMEN.includes(t.typ));
     expect(neu.length).toBe(Q38_NAMEN.length);
     for (const t of neu) {
-      expect(t.bildOffen).toBe(true);
+      // Bildpakete Wurf 4: eigene Silhouette aus dem Paket, nur die Rest-Typen bleiben bildOffen mit Platzhalter
+      if (BILD_REST.has(t.typ)) { expect(t.bildOffen).toBe(true); expect(t.bild.silhouette).not.toMatch(/^b\d\d/); }
+      else { expect(t.bildOffen).toBeUndefined(); expect(t.bild.silhouette).toBe(BILD_WURF4[t.typ]); }
       expect(t.bild.silhouette).not.toMatch(/^q38_/);
       expect(SILH[t.bild.silhouette]).toBeDefined();
       expect(['oberteile', 'jacken']).toContain(t.pfad![0]);
     }
     const idx = ARTIKELTYPEN.findIndex((t) => t.typ === Q38_NAMEN[0]);
     expect(ARTIKELTYPEN.slice(idx, idx + Q38_NAMEN.length).map((t) => t.typ)).toEqual([...Q38_NAMEN]);
-    expect(K.typen.filter((t) => t.bildOffen).map((t) => t.typ)).toEqual(expect.arrayContaining([...Q38_NAMEN]));
+    expect(K.typen.filter((t) => t.bildOffen && Q38_NAMEN.includes(t.typ)).map((t) => t.typ).sort()).toEqual(Q38_NAMEN.filter((n) => BILD_REST.has(n)).sort());
   });
 
   test('bildOffen: in keiner Marke entwickelbar, Entwickeln wird abgelehnt', () => {
     const s = neuesSpiel(1);
     const offen = new Set(ARTIKELTYPEN.filter((t) => !waehlbar(t)).map((t) => t.typ));
-    expect(offen.size).toBeGreaterThanOrEqual(Q38_NAMEN.length);
+    expect(Q38_NAMEN.filter((n) => offen.has(n)).sort()).toEqual(Q38_NAMEN.filter((n) => BILD_REST.has(n)).sort());
     for (const m of produkte(s).marken) expect(m.entwickelbar.filter((t) => offen.has(t))).toEqual([]);
     const m = produkte(s).marken[0];
-    const r = produktAktion(s, { typ: 'produktEntwickeln', entwurf: { marke: m.marke, typ: 'Bustier-Top', farbe: 'schwarz', material: 'Baumwolle', dauer: 12, budgetWoche: 20_000 } });
+    const r = produktAktion(s, { typ: 'produktEntwickeln', entwurf: { marke: m.marke, typ: 'Netzstrickpullover', farbe: 'schwarz', material: 'Baumwolle', dauer: 12, budgetWoche: 20_000 } });
     expect(r.ok).toBe(false);
     expect(r.text).toMatch(/noch nicht freigegeben/);
   });

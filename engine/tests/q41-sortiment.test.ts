@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { neuesSpiel, produktKatalog, produkte, wocheAbspielen } from '../src';
 import { ARTIKELTYPEN, produktAktion, waehlbar } from '../src/produkte';
+import { BILD_WURF4, BILD_REST } from '../src/sortiment/bilder-wurf4';
 import { NAMEN, TYPEN, ANLASS_ZUBEHOER } from '../src/sortiment/q41-accessoires';
 
 const SILH = JSON.parse(readFileSync(join(__dirname, '../../render/src/kit/mode/silhouetten.json'), 'utf8')).silhouetten as Record<string, { model: string | null }>;
@@ -40,16 +41,19 @@ describe('Q41: Accessoires, Taschen, Schmuck, Beauty aus dem Referenzsortiment',
     }
   });
 
-  test('bildOffen mit vorhandener Silhouette (keine q41-Bilder), Kategorie und Baumplatz passend zum Oberbegriff, Taschen und Kopfbedeckungen mit Model-Platz', () => {
+  test('Bild aus Bildpaket (Rest bildOffen, keine q41-Bilder), Kategorie und Baumplatz passend zum Oberbegriff, Taschen und Kopfbedeckungen mit Model-Platz', () => {
     for (const z of zeilen) {
       const t = TYPEN.find((x) => x.typ === z.typ)!;
-      expect(t.bildOffen).toBe(true);
+      // Bildpakete Wurf 4: eigene Silhouette aus dem Paket, nur die Rest-Typen bleiben bildOffen mit Platzhalter
+      if (BILD_REST.has(t.typ)) { expect(t.bildOffen).toBe(true); expect(t.bild.silhouette).not.toMatch(/^b\d\d/); }
+      else { expect(t.bildOffen).toBeUndefined(); expect(t.bild.silhouette).toBe(BILD_WURF4[t.typ]); }
       expect(t.bild.silhouette).not.toMatch(/^q41_/);
       expect(SILH[t.bild.silhouette]).toBeDefined();
       expect(t.kategorie).toBe(z.oberbegriff === 'Beauty' ? 'beauty' : 'accessoires');
-      if (z.oberbegriff === 'Tasche') { expect(t.pfad).toEqual(['accessoires', 'Taschen']); expect(SILH[t.bild.silhouette].model).toBe('tasche'); }
+      if (z.oberbegriff === 'Tasche') { expect(t.pfad).toEqual(['accessoires', 'Taschen']); expect(['tasche', 'auflage', 'zubehoer']).toContain(SILH[t.bild.silhouette].model); }
       if (z.oberbegriff === 'Schmuck') expect(t.pfad).toEqual(['accessoires', 'Schmuck']);
-      if (/Cap|mütze|Balaclava/.test(z.typ)) expect(SILH[t.bild.silhouette].model).toBe('muetze');
+      // Bildpakete B17–B22: Zubehör sitzt als Auflage am Model-Platz (model.js zubehoer/auflage)
+      if (/Cap|mütze|Balaclava/.test(z.typ)) expect(['muetze', 'auflage', 'zubehoer']).toContain(SILH[t.bild.silhouette].model);
     }
     const baum = K.baum.find((a) => a.id === 'accessoires')!.unterkategorien.flatMap((u) => u.typen);
     for (const z of zeilen.filter((x) => x.oberbegriff !== 'Beauty')) expect(baum).toContain(z.typ);
@@ -66,18 +70,18 @@ describe('Q41: Accessoires, Taschen, Schmuck, Beauty aus dem Referenzsortiment',
     const idx = ARTIKELTYPEN.findIndex((t) => t.typ === NAMEN[0]);
     expect(ARTIKELTYPEN.slice(idx, idx + TYPEN.length).map((t) => t.typ)).toEqual([...NAMEN]);
     const s2 = neuesSpiel(1);
-    const offen = new Set<string>(NAMEN);
+    const offen = new Set<string>(NAMEN.filter((n) => BILD_REST.has(n)));
     for (const t of ARTIKELTYPEN.filter((x) => offen.has(x.typ))) expect(waehlbar(t)).toBe(false);
     for (const m of produkte(s2).marken) expect(m.entwickelbar.filter((t) => offen.has(t))).toEqual([]);
     const m = produkte(s2).marken[0];
-    const r = produktAktion(s2, { typ: 'produktEntwickeln', entwurf: { marke: m.marke, typ: 'Bowlingtasche', farbe: 'schwarz', material: 'Polyester', dauer: 12, budgetWoche: 20_000 } });
+    const r = produktAktion(s2, { typ: 'produktEntwickeln', entwurf: { marke: m.marke, typ: 'Beuteltasche', farbe: 'schwarz', material: 'Polyester', dauer: 12, budgetWoche: 20_000 } });
     expect(r.ok).toBe(false);
     expect(r.text).toMatch(/noch nicht freigegeben/);
   });
 
   test('bildOffen: nicht im Grundsortiment, auch nicht nach 8 Wochen', () => {
     const s2 = neuesSpiel(2);
-    const offen = new Set<string>(NAMEN);
+    const offen = new Set<string>(NAMEN.filter((n) => BILD_REST.has(n)));
     expect(s2.produkte.liste.filter((p) => offen.has(p.typ))).toEqual([]);
     for (let i = 0; i < 8; i++) wocheAbspielen(s2);
     expect(s2.produkte.liste.filter((p) => offen.has(p.typ))).toEqual([]);
