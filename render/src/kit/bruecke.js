@@ -118,7 +118,12 @@ export function zustandAusHaus(haus, s, merk) {
     }
     const zus = new Set();
     // O08 Umbau: Haus-/Etagenmodernisierung nutzt den vorhandenen Gerüst-/Kran-Zustand.
-    if ((s?.umbau?.projekte??[]).some(p=>p.haus===haus.id && p.status==='laufend' && p.ende>w)) umbau=true;
+    // E48: Komplettumbau und Fassade zeigen Gerüst mit Kran, alle anderen Gewerke nur die betroffene Etage.
+    for (const p of s?.umbau?.projekte ?? []) {
+      if (p.haus !== haus.id || p.status !== 'laufend' || p.ende <= w) continue;
+      if (p.stufe === 'komplett' || p.gewerk === 'fassade' || p.gewerk === 'komplett') umbau = true;
+      else (z.bauEtagen ??= []).push(...p.etagen);
+    }
     if (umbau) zus.add('umbau');
     if (unter.size) { zus.add('untermiete'); z.untermieter = [...unter.values()].sort((a, b) => a.etage - b.etage); }
     if (offEtage !== null) { zus.add('offprice'); z.offpriceEtage = Math.max(0, offEtage); }

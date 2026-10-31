@@ -13,6 +13,7 @@ import { etage } from './kit/grundriss.js';
 import { RASTER } from './kit/innen.js';
 import { hqEtage, hqSitzungssaal, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './kit/hq.js';
 import { warenhaus } from './kit/warenhaus.js';
+import { technikAufDach } from './kit/umbau-aussen.js';
 import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer, dachFlaechenBeimBau } from './kit/stadt.js';
 import { istKartenstadt, kartenplan, baueKartenstadt, setzeKartenStil, kartenStil } from './kit/karten/kartenstadt.js';
 // Kartenstädte (Essen): Stadtbild umschaltbar zwischen vereinfacht (Coffee) und kartentreu
@@ -1202,6 +1203,33 @@ function abteilungsBild(id) {
   }
   return { url: abtBildCache.get(k), name: a.name };
 }
+/** E48: Vorher/Nachher eines Umbauprojekts. Etagen-Gewerke zeigen die Etage innen, Fassade und Komplett das Haus außen. */
+const umbauBildCache = new Map();
+function umbauBild(projektId, wann) {
+  const k = projektId + '|' + wann;
+  if (umbauBildCache.has(k)) return umbauBildCache.get(k);
+  const p = s.umbau?.projekte?.find((x) => x.id === projektId), h = p && s.haeuser.find((x) => x.id === p.haus);
+  const zst = p?.[wann];
+  if (!p || !h || !zst) return null;
+  const etagenBau = structuredClone(h.etagenBau ?? {});
+  for (const [nr, z] of Object.entries(zst)) {
+    const e = etagenBau[nr] ?? (etagenBau[nr] = { technik: {} });
+    e.moebelGeneration = z.moebel + 1; e.technik = { ...e.technik, klima: z.klima, licht: z.licht, brandschutz: z.brandschutz };
+    e.klimaModernisiert = z.klima === 2;
+  }
+  const haus = { ...h, etagenBau };
+  let url;
+  if (p.gewerk === 'fassade' || p.gewerk === 'komplett' || p.stufe === 'komplett') {
+    if (h.format !== 'warenhaus') return null;
+    haus.substanz = wann === 'vorher' ? Math.min(h.substanz, 35) : Math.max(h.substanz, 85);
+    url = schnittBild((S, sc) => { const res = warenhaus(S, sc, haus, { passanten: false, vorplatz: false }); if (wann === 'nachher') technikAufDach(S, haus, { x: 0, z: 0, w: res.w, d: res.d, hoehe: res.hoehe }); return res; }, 360, 260).url;
+  } else {
+    const nr = Number(Object.keys(zst).sort((a, b) => Math.abs(a) - Math.abs(b))[0]);
+    url = schnittBild((S, sc) => etage(S, sc, haus, nr, { ausschnitt: { anker: nr === 0 ? 'eingang' : 'ecke' } }), 360, 260).url;
+  }
+  umbauBildCache.set(k, url);
+  return url;
+}
 function etagenBild(g, nr) { return schnittBild((S, sc) => hqEtage(S, sc, g, nr, {})).url; }
 const fassadenChronik = new Map();
 function fassadeChronik(familie) {
@@ -1338,12 +1366,13 @@ ec = ecommerceModul({ E, s: () => s, panel, meldung, nachAktion: () => { nachAkt
 er = erfolgeModul({ E, s: () => s, panel });
 // O06 Planung: eigenständiger Assistent und Forecast.
 pl = planungModul({ E, s: () => s, panel, meldung, nachAktion });
-um = umbauModul({ E, s:()=>s, panel, meldung, nachAktion:()=>{ grafikNachziehen(); nachAktion(); }, hausOeffnen: oeffneHaus });
+um = umbauModul({ E, s:()=>s, panel, meldung, nachAktion:()=>{ grafikNachziehen(); nachAktion(); }, hausOeffnen: oeffneHaus, bild: umbauBild });
 // O04 Personal
 pe = personalModul({ E, s: () => s, panel, meldung, nachAktion, oeffneHaus });
 po = posteingangModul({
   E, s: () => s, panel, meldung, nachAktion, zustand: () => postUi, nachZustand: automatischSpeichern,
   springe: (bezug) => {
+    if (bezug.projekt) return oeffneModul(um, null, 0, bezug.projekt);
     if (bezug.modul && !bezug.hausIds?.length && !bezug.stadt) {
       if (bezug.modul === 'einkauf') return oeffneEinkauf();
       if (bezug.modul === 'vorstand') return oeffneModul(vs);
@@ -1652,7 +1681,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').hidden = true;
 
-window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...a) => oeffneModul(ec, ...a), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { speicherDiagnose, oeffneUmbauProjekt: (id) => oeffneModul(um, null, 0, id), oeffneModernisierung: () => oeffneModul(um), meldung, ecommerce: ec, oeffneEcommerce: (...a) => oeffneModul(ec, ...a), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   kameraZustand: () => ({ x: Math.round(K.x), z: Math.round(K.z), halb: +K.halb.toFixed(1) }), kameraHaus: hausKameraMessung, kameraAuf: (x, z, halb) => { K.x = x; K.z = z; K.halb = halb ?? K.halb; kameraSetzen(); leben.kamera(); zeichnen(); }, get plan() { return plan; }, menschenStatus: () => { let gruppen = 0, figuren = 0; scene?.traverse((m) => { if (m.userData?.menschen) { gruppen++; figuren += m.geometry.instanceCount; } }); return { gruppen, figuren, info: { ...ren.info.render } }; }, // lesender Pixelabgleich für den Mobil-Smoketest
   leben,

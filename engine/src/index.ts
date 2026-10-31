@@ -92,8 +92,8 @@ export type { TreiberId, TreiberFaktoren, TreiberQuellen, TreiberPeriode, Treibe
 export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking, hausKandidaten, hausKundenscore } from './abfragen';
 export type { HausStaerke, HausStandard, HausKommentar, HausMassnahme, HausAktion, HausBetrieb, HausbetriebStand, StadtUmfeld } from './haus';
 // O08 Umbau – zentraler Export für Spiel und Tests.
-export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN } from './umbau';
-export type { BauEtage, UmbauStand, UmbauStufe, UmbauProjekt, UmbauAktion } from './umbau';
+export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN, GEWERKE, gewerkSchaetzung, bauprogrammSchaetzung, bestandUebersicht, bestandCluster, umbauVorherNachher } from './umbau';
+export type { BauEtage, UmbauStand, UmbauStufe, UmbauProjekt, UmbauAktion, Gewerk, GewerkGruppe, Bauprogramm, BauprogrammAuftrag } from './umbau';
 // O04 Personal
 export { PERSONAL_GRUPPEN, PERSONAL_NAMEN, PERSONAL_TAGE, initialisierePersonaleinsatz, personalHaus, personalUebersicht, personalVerfuegbarkeit } from './personaleinsatz';
 export type { PersonalAktion, PersonalGruppe, PersonalPlan, PersonalCluster } from './personaleinsatz';

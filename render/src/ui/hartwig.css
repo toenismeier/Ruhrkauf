@@ -1359,3 +1359,26 @@ body.spielende-aktiv { overflow: hidden; }
 .hw-reiter:has(> .hw-reiter-mehr) { overflow: visible !important; }
 /* Zurück-Verweis oben im Rumpf (Zentrale: Gebäude → Etage) */
 .hw-zurueck { margin: 14px 0 0 -4px; min-height: 44px; font: var(--hw-t-text); font-size: 13.5px; }
+/* E48 Modernisierung: Zustandsbalken je Gewerkgruppe (einfarbig, Anteil gut), Etagenschnitt, Vorher/Nachher */
+.hw-bestand { display: inline-flex; gap: 6px; align-items: flex-end; }
+.hw-bestand > span { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 32px; }
+.hw-bestand i { position: relative; display: block; width: 32px; height: 8px; border-radius: 4px; background: var(--skala-grund); overflow: hidden; }
+.hw-bestand i::after { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--a); background: var(--skala); border-radius: 4px; }
+.hw-bestand small { margin: 0 !important; font: var(--hw-t-klein); color: var(--marke) !important; }
+.hw-schnitt { margin: 8px 0 12px; display: grid; gap: 3px; }
+.hw-schnitt-kopf, .hw-schnitt-zeile { display: grid; grid-template-columns: 34px repeat(4, 1fr); gap: 3px; align-items: center; }
+.hw-schnitt-kopf span { font: var(--hw-t-klein); color: var(--marke); text-align: center; text-transform: uppercase; letter-spacing: .04em; }
+.hw-schnitt-zeile b { font: var(--hw-t-klein); color: var(--leise); font-weight: 600; }
+.hw-schnitt-zeile i, .hw-schnitt-legende i { display: block; height: 18px; border-radius: 3px; background: var(--schlecht); }
+.hw-schnitt i[data-z='1'] { background: var(--stern); }
+.hw-schnitt i[data-z='2'] { background: var(--gut); }
+.hw-schnitt-zeile.bau i { opacity: .55; outline: 2px dashed var(--text); outline-offset: -2px; }
+.hw-schnitt-zeile.zu b { color: var(--schlecht); }
+.hw-schnitt-legende { display: flex; gap: 12px; margin-top: 4px; font: var(--hw-t-klein); color: var(--marke); }
+.hw-schnitt-legende span { display: inline-flex; align-items: center; gap: 4px; }
+.hw-schnitt-legende i { width: 10px; height: 10px; }
+.hw-schnitt-legende i.bau { background: none; outline: 1.5px dashed var(--text); outline-offset: -1.5px; }
+.hw-vergleich { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 12px 0; }
+.hw-vergleich figure { margin: 0; }
+.hw-vergleich img { display: block; width: 100%; aspect-ratio: 360 / 260; object-fit: cover; border-radius: 6px; background: var(--tief); }
+.hw-vergleich figcaption { margin-top: 4px; font: var(--hw-t-klein); color: var(--marke); text-transform: uppercase; letter-spacing: .04em; }

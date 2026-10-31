@@ -133,7 +133,7 @@ export function zustandNormal(opt = {}, quelle = {}) {
   const mk = opt.marketing ?? {};
   const marketing = { karte: !!(mk.karte ?? opt.karte), app: !!(mk.app ?? opt.app), prospekt: !!(mk.prospekt ?? opt.prospekt) };
   const mechanik = opt.mechanik ?? null, punkteFaktor = Number.isFinite(opt.punkteFaktor) ? opt.punkteFaktor : null;
-  return { __zustand: true, status, zusatz, aktion, rabatt, mechanik, punkteFaktor, marketing, untermieter: unter, offpriceEtage: opt.offpriceEtage ?? 0, ohneMarke: opt.hartwig === false, hat };
+  return { __zustand: true, status, zusatz, aktion, rabatt, mechanik, punkteFaktor, marketing, untermieter: unter, offpriceEtage: opt.offpriceEtage ?? 0, bauEtagen: opt.bauEtagen ?? [], ohneMarke: opt.hartwig === false, hat };
 }
 
 export function zustandFlags(Z) {
@@ -1121,6 +1121,45 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
     Z.top = Math.max(Z.top, kran(Z, kx, kz, k.hoehe + 9, Math.min(32, k.w * 0.6), Math.PI * 0.92));
     const he = haupt(), s = seiten[he.seite];
     aufsteller(Z, s, he.u + (he.breite ?? 4) / 2 + 1.0, 2.2, 'Geöffnet', '#ffffff', '#3f7d56');
+  }
+
+  // ---------- E48 Baustelle je Etage: Gerüst mit Netz nur vor der betroffenen Etage, EG abgeklebt mit Bauzaun
+  const bauEtagen = [...new Set(opt.bauEtagen ?? st.bauEtagen ?? [])].filter((e) => e >= 0 && e <= n - 1);
+  if (bauEtagen.length && !hat('umbau') && !hat('abriss')) {
+    const rohr = '#9ca3a8', brett = '#c79a5a', t1 = tFront(k) + 0.5, t2 = t1 + 1.1;
+    for (const e of bauEtagen) {
+      if (e === 0) {
+        for (const f of fensterEG) {
+          const s = seiten[f.seite];
+          s.q(f.a + 0.08, f.b - 0.08, f.y0 + 0.08, f.y1 - 0.08, f.t + 0.05, f.t + 0.09, '#e6dfcf');
+          if (f.b - f.a > 2.4) plakat(Z, s, 'Wir bauen um', (f.a + f.b) / 2, (f.y0 + f.y1) / 2, f.t + 0.12, 0.55, '#ffffff', ROT, f.b - f.a - 0.6);
+        }
+        continue;
+      }
+      const y0 = etagenY(k, e), y1 = y0 + GH;
+      for (const s of [sz, sx]) {
+        const L = Z.nutz(s);
+        // Kollision nur mit dem Kern der Etage: ein Schriftzug, der die Etage knapp anschneidet, bleibt sichtbar über dem Netz.
+        for (const [a, b] of freieStuecke(Z, s, L * 0.04, L * 0.96, y0 + 0.3, y1 - 0.9, 0.2)) {
+          if (b - a < 5) continue;
+          const nU = Math.max(2, Math.round((b - a) / 2.6)), du = (b - a) / nU;
+          for (let i = 0; i <= nU; i++) { const u = a + i * du; s.q(u - 0.06, u + 0.06, 0.3, y1 + 0.9, t1 - 0.06, t1 + 0.06, rohr); s.q(u - 0.06, u + 0.06, 0.3, y1 + 0.9, t2 - 0.06, t2 + 0.06, rohr); }
+          for (const y of [y0 - 0.05, y1 - 0.05]) s.q(a, b, y - 0.05, y + 0.05, t1 - 0.05, t2 + 0.05, brett);
+          const nb = Math.max(1, Math.round((b - a) / 3));
+          for (let i = 0; i < nb; i++) { const p0 = a + (i * (b - a)) / nb + 0.04, p1 = a + ((i + 1) * (b - a)) / nb - 0.04; s.q(p0, p1, y0 - 0.2, y1 + 0.7, t2 + 0.1, t2 + 0.15, i % 2 ? '#c9d8cf' : '#d8e3dc'); }
+          if (b - a > 16) { const pu0 = a + (b - a) * 0.2, pu1 = b - (b - a) * 0.2; s.q(pu0, pu1, y0 + 0.4, y1 - 0.2, t2 + 0.17, t2 + 0.22, ROT); plakat(Z, s, 'Wir modernisieren', (pu0 + pu1) / 2, (y0 + y1) / 2 + 0.1, t2 + 0.26, Math.min(1.4, GH * 0.32), '#ffffff', ROT, (pu1 - pu0) * 0.9); }
+          sperre(Z, s, a, b, 0, y1 + 0.9, 'geruest');
+        }
+      }
+    }
+    // Bauzaun vor dem Gehweg; bei Bau im EG über fast die ganze Front, sonst ein kurzes Stück. Eingänge bleiben frei.
+    const egBau = bauEtagen.includes(0);
+    for (const s of egBau ? [sz, sx] : [sz]) {
+      const L = Z.nutz(s), frei = eingaenge.filter((g) => g.seite === s.seite);
+      let stuecke = [[L * (egBau ? 0.05 : 0.6), L * (egBau ? 0.95 : 0.9)]];
+      for (const g of frei) { const ga = (g.u ?? g.a ?? 0) - (g.breite ?? 4) / 2 - 1.2, gb = (g.u ?? g.b ?? 0) + (g.breite ?? 4) / 2 + 1.2; stuecke = stuecke.flatMap(([p, q]) => gb <= p || ga >= q ? [[p, q]] : [[p, ga], [gb, q]].filter(([x, y]) => y - x > 3)); }
+      stuecke.forEach(([p, q], i) => bauzaun(Z, s, p, q, 4.2, i === 0 && q - p > 7 ? { text: 'Wir modernisieren', fg: '#ffffff', bg: ROT } : null));
+    }
   }
 
   // ---------- Räumungsverkauf

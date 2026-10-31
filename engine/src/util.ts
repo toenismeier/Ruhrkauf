@@ -33,7 +33,7 @@ export function neueId(s: GameState, prefix: string): string {
   return `${prefix}${s.zaehler}`;
 }
 
-export function melde(s: GameState, typ: MeldungTyp, text: string, bezug?: { stadt?: string; hausId?: string; modul?: string }): void {
+export function melde(s: GameState, typ: MeldungTyp, text: string, bezug?: { stadt?: string; hausId?: string; modul?: string; projekt?: string }): void {
   if (s.prognose) return;
   // Meldungs-IDs unabhängig von Spiel-ID-Zähler und Zufallsstrom erzeugen.
   const nummer = s.meldungen.filter((m) => m.woche === s.woche).length;

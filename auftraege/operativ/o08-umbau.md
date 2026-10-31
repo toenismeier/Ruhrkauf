@@ -42,3 +42,10 @@ Häuser altern. Modernisierung kostet, bringt Frequenz, Kaufquote und Image, und
   - Ladenbau neu hebt die Kaufquote der Etage.
   - Versäumte Frist schließt die Etage.
 - `pruef-ladenbau` 0 Verstöße für alle drei Generationen.
+
+## E48 Ausbau (31.10.2026, Ummo per Auswahl)
+- **Gewerke einzeln** (`GEWERKE` in `engine/src/umbau.ts`): Klima, LED-Licht, Brandschutz, Aufzug/Rolltreppe, Möbel, Boden/Decke/Farbe (je Etage), Fassade/Eingang und Komplettumbau (ganzes Haus). Aktion `umbauPlanen` mit `gewerk`; alte Stufen bleiben gültig.
+- **Bauprogramm** über mehrere Cluster: `bauprogrammStarten { cluster[], gewerk, bisZustand 0|1, parallel }`, Arbeitsliste schlechteste Etagen und Fristen zuerst, höchstens `parallel` Baustellen, je Haus eine. Vorschau `bauprogrammSchaetzung` (Kosten, Wellen-Bauzeit, Ausfall, Mehrumsatz, Bruttogewinn 41,2 %, Amortisation, Spitze je Woche). `bauprogrammStoppen`.
+- **Bestand**: `bestandUebersicht` (je Cluster Anteil gut je Gewerkgruppe, Fristen, Bedarf), `bestandCluster` (Häuser mit Etagenschnitt), `umbauVorherNachher`.
+- **Budget**: Start 0,6 % vom Jahresumsatz (vorher immer 0), Aktion `umbauBudget`.
+- **Grafik**: Möbelgenerationen über eine Materialwelt je Generation (Fassade, Straße, Rohbau ausgenommen), Baustelle je Etage (`bauEtagen` in zustaende.js), Gerüst mit Kran nur bei Komplett/Fassade, Klimageräte vorn rechts auf dem Hauptdach. Katalog `umbau-generationen`, Panelbilder `bilder/umbau/`.
