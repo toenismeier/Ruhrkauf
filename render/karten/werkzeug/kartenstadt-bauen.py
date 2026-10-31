@@ -473,7 +473,10 @@ def ART(x, z):
     n_ = math.sin(x / 97) * math.cos(z / 83) + 0.5 * math.sin((x + z) / 151)
     return ARTEN_GRUPPE[min(len(ARTEN_GRUPPE) - 1, int((n_ + 1.5) / 3 * len(ARTEN_GRUPPE)))][0]   # Haine einartig: Herbstfarbe je Gruppe einheitlich   # wenig Birken/Pappeln: weiße Stämme wirken wie Masten
 BAUMARTEN = {'linde', 'platane', 'kastanie', 'birke', 'nadel', 'pappel', 'strassenbaum'}
-SPORT_P = prep(vereinigt([g_.buffer(1.5) for g_ in flaechen_art.get('sport', [])] + [gueltig(f_['umriss']).buffer(7.0) for f_ in osm.get('sportfelder', []) if gueltig(f_['umriss']) is not None]))
+from shapely.affinity import translate as _verschieben
+_felder = [gueltig(f_['umriss']) for f_ in osm.get('sportfelder', []) if gueltig(f_['umriss']) is not None]
+# Spielfelder frei von Bäumen, auch auf der Kameraseite (+x/+z), wo Kronen das Feld sonst verdecken
+SPORT_P = prep(vereinigt([f_.buffer(7.0) for f_ in _felder] + [_verschieben(f_, 9, 9).buffer(5.0) for f_ in _felder]))
 GLEIS_BAUM = prep(vereinigt([LineString(g_['punkte']).buffer(6.5) for g_ in osm['gleise'] if len(g_['punkte']) >= 2]))
 def gruen_baeume(g, setz, r, rauschen, wege_p, sperre_fb):
     """Bepflanzung nach Grünart (Ummo 31.10.2026): Wald dicht, Parks mit Hainen, Weg- und Randreihen und wenigen Solitären,
@@ -531,6 +534,11 @@ def gruen_baeume(g, setz, r, rauschen, wege_p, sperre_fb):
         if q.area <= 3000: continue
         raster(q.buffer(-3), 7.0, lambda x, z: 0.8 if rauschen(x * 1.3, z * 1.3) > 0.45 else 0.04)
         for ring in [t.exterior for t in teile(q.buffer(-4, join_style=1))]: reihe(ring, 13, 0, prep(q.buffer(-1)))
+    # Schul- und Sportgelände: Baumreihe am Rand statt leerem Rasen
+    for art_ in ('schulhof', 'sport'):
+        for q in teile(vereinigt(flaechen_art.get(art_, []))):
+            if q.area < 1500: continue
+            for ring in [t.exterior for t in teile(q.buffer(-3, join_style=1))]: reihe(ring, 12, 0, prep(q))
     # Wiesen: schmale Streifen (Mittelstreifen, Straßengrün) als Baumreihe in der Mitte, sonst locker
     for q in teile(GRUEN_WIESE):
         if q.area < 120: continue

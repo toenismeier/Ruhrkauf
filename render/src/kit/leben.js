@@ -237,7 +237,9 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     // GameState enthält keinen ausgewählten Städtenamen, deshalb Zuordnung über plan.standorte.
     const punkte = [];
     for (const st of plan.standorte ?? []) {
-      const h = (s.haeuser ?? []).find((x) => x.id === st.id || x.id === st.hausId);
+      // Volkskauf und FUNDUS stehen nur im Grafikkatalog (nicht in s.haeuser): Kunden laufen trotzdem hin
+      const h = (s.haeuser ?? []).find((x) => x.id === st.id || x.id === st.hausId)
+        ?? (['schwester', 'outlet'].includes(st.rolle) ? { id: st.id, status: 'offen', lage: st.lage, kpi: {} } : null);
       const p = plan.parzellen.find((p) => p.id === st.parzelle);
       if (!h || !p || !netz?.fusswege.length) continue;
       const mitte = { x: p.x + p.w / 2, z: p.z + p.d / 2 };
@@ -276,18 +278,20 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     const aktive = hauspunkte.filter((x) => x.gewicht && sichtbar(x.weg, 1.7));
     let haus = null;
     // Nur ein Teil hat ein Haus als Ziel; die übrigen bummeln über alle sichtbaren Wege der Stadt
-    if (aktive.length && r() < .3) {
+    if (aktive.length && r() < .4) {
       const sum = aktive.reduce((a, b) => a + b.gewicht, 0);
       let v = r() * sum;
       haus = aktive.find((a) => (v -= a.gewicht) <= 0) ?? aktive.at(-1);
     }
     const weg = haus?.lane ?? waehle(wege);
     // Auch Kunden starten irgendwo auf ihrem Weg und laufen erst zum Haus (kein Pulk am Eingang)
-    const anfang = r() * laenge(weg);
+    // Kunden starten 8–40 m vor dem Eingang und laufen darauf zu (vorher irrten sie über den ganzen Weg und kamen selten an)
+    const L = laenge(weg), ziel = haus ? clamp(haus.u - weg.s.von, 0, L) : 0, seite = r() < .5 ? -1 : 1;
+    const anfang = haus ? clamp(ziel + seite * (8 + r() * 32), 0, L) : r() * L;
     const geschw = 0.95 + r() * .6;
     // Querversatz auf dem Gehweg, damit nicht alle auf einer Linie laufen
     const breit = weg.s.typ === 'fussgaenger' ? 1.6 : weg.s.achse === 'p' ? 0.3 : Math.max(0, (weg.s.gehweg ?? 3) / 2 - 0.6);
-    return { weg, m: anfang, quer: (r() * 2 - 1) * breit, dir: r() < .5 ? -1 : 1, geschw,
+    return { weg, m: anfang, quer: (r() * 2 - 1) * breit, dir: haus ? (ziel >= anfang ? 1 : -1) : r() < .5 ? -1 : 1, geschw,
       haus, phase: 'weg', lauf: 0, tuete: false, aussehen: erscheinung(r, { kinder: .07 }), ph: r() * 8, tempo: geschw / 1.25 };
   }
   function neuerWagen(lanes, art = 'auto') {
@@ -597,6 +601,7 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
     gezeichnetStapel: () => { const w = [...bahnen, ...busse, ...autos].filter((a) => !a.verdeckt && sichtbar(positionWagen(a))), p = w.map((a) => ({ ...positionWagen(a), L: LAENGE[a.art], B: a.art === 'auto' ? 2 : 2.65, art: a.art }));
       const out = []; for (let i = 0; i < p.length; i++) for (let j = i + 1; j < p.length; j++) if (ueberlappt(p[i], p[i].L, p[i].B, p[j]) || ueberlappt(p[j], p[j].L, p[j].B, p[i])) out.push([p[i].art, p[j].art, Math.round(p[i].x), Math.round(p[i].z), Math.round(p[j].x), Math.round(p[j].z)]);
       return out; },
+    hausKunden: () => ({ punkte: hauspunkte.map((x) => [x.h.id, Math.round(x.gewicht * 100) / 100, Math.round(Math.hypot(x.weg.x - x.ein.x, x.weg.z - x.ein.z))]), unterwegs: fuss.filter((f) => f.haus).map((f) => f.phase).reduce((o, k) => (o[k] = (o[k] ?? 0) + 1, o), {}) }),
     fussAufFahrbahn: () => { if (!plan?.aufFahrbahn) return { maske: false }; let n = 0, m = 0;
       for (const f of fuss) { if (f.phase !== 'weg') continue; const p = fussPosition(f); if (!sichtbar(p)) continue; m++; if (plan.aufFahrbahn(p.x, p.z)) n++; }
       return { maske: true, auf: n, sichtbar: m }; },

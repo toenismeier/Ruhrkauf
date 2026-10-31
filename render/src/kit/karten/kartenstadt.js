@@ -903,7 +903,7 @@ function dekoSetzen(I, B, deko, aufSpielhaus = () => false, ursprung = [0, 0]) {
     else if (a === 'hecke') I.setze('busch', x, 0.03, z, w, [1.45, 0.62, 1.45], ['#4f8a49']);   // Knoten verschmelzen zur geschlossenen Hecke
     else if (a === 'laube') laube(B, x, z, w, r);
     else if (a === 'laterne' || a === 'altlaterne') I.setze(a, x, 0.12, z, w, 1);
-    else I.setze(a, x, 0.12, z, w, 1, a === 'litfass' ? [waehle(r, ['#d8cfb8', '#e6dcc4']), waehle(r, ['#c9483e', '#2f6f8f', '#d39a2b']), waehle(r, ['#3f7d56', '#6b4f8f', '#e8e2d2'])] : null);
+    else I.setze(a, x, 0.12, z, w, a === 'bank' ? 1.4 : 1, a === 'litfass' ? [waehle(r, ['#d8cfb8', '#e6dcc4']), waehle(r, ['#c9483e', '#2f6f8f', '#d39a2b']), waehle(r, ['#3f7d56', '#6b4f8f', '#e8e2d2'])] : null);
   }
 }
 

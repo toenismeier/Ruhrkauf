@@ -213,7 +213,8 @@ export class MenschenSammler {
   /** Figur an (x, y, z); winkel = Spiel-Gierwinkel (Blick nach +x bei 0). o: { anim, koerper, oben, tasche, kinder, r } */
   setze(x, y, z, winkel, r, o = {}) {
     const e = erscheinung(r, o);
-    const anim = o.anim ?? (r() < 0.22 ? 'reden' : r() < 0.55 ? 'gehen' : r() < 0.7 ? 'gehen_tasche' : 'stehen');
+    // Statische Figuren stehen oder reden; Gehen nur bei bewegten Figuren (leben.js), sonst laufen sie auf der Stelle
+    const anim0 = o.anim ?? (r() < 0.4 ? 'reden' : 'stehen'); const anim = anim0.startsWith('gehen') ? 'stehen' : anim0;
     this.liste.push([x, y, z, winkel, e, anim, r() * 8]);
   }
   get anzahl() { return this.liste.length; }

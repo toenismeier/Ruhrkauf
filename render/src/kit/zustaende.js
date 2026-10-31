@@ -271,7 +271,8 @@ export function figur(S, x, z, r, sk = 1.1, oben = null, o = {}) {
     if (o.nurVerbrauch || LOD.stufe === 'fern') return;
     const q = lageRng(x, z);
     const winkel = o.winkel ?? (o.seite ? entlang(o.seite, q() < 0.5 ? 1 : -1) + (q() - 0.5) * 0.3 : q() * Math.PI * 2);
-    const anim = o.anim ?? (o.seite ? (q() < 0.35 ? 'gehen_tasche' : 'gehen') : 'stehen');
+    // Feste Figuren laufen nie auf der Stelle (Ummo: „die Kunden liefen gar nicht“); Bewegung kommt aus leben.js
+    const anim = o.anim && !o.anim.startsWith('gehen') ? o.anim : (o.seite ? (q() < 0.5 ? 'stehen' : 'reden') : 'stehen');
     menschenFuer(S).setze(x, y, z, winkel, q, { oben: oben ?? undefined, anim });
     return;
   }
@@ -325,7 +326,7 @@ function menge(Z, s, u, t, anzahl, ru, rt, o = {}) {
       const [x, z] = s.welt(uu, tt);
       let winkel, anim;
       if (art === 'reden') { const [cx, cz] = s.welt(gu, gt); winkel = blickWinkel(cx - x, cz - z) + (q() - 0.5) * 0.5; anim = q() < 0.7 ? 'reden' : 'stehen'; }
-      else if (art === 'vorbei') { winkel = entlang(s, dir) + (q() - 0.5) * 0.3; anim = q() < 0.4 ? 'gehen_tasche' : 'gehen'; }
+      else if (art === 'vorbei') { winkel = zurFassade(s) + (q() - 0.5) * 0.8; anim = 'stehen'; }   // keine Läufer auf der Stelle
       else { winkel = zurFassade(s) + (q() - 0.5); anim = q() < 0.75 ? 'stehen' : 'reden'; }
       menschenFuer(Z.S).setze(x, 0.3, z, winkel, q, { oben: rest[k][2] ?? undefined, anim });
     });

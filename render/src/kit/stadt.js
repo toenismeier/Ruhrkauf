@@ -310,7 +310,7 @@ export function figur(I, x, y, z, r, ry = null) {
     if (I._ziel) { [x, y, z, ry] = I._um(x, y, z, w); I = I._ziel; } else ry = w;
     // Im Spiel: vorgerenderte Figur mit eigenem Zufallsstrom aus der Lage; auch in LOD 'fern' (ein Viereck je Figur)
     const q = rng(Math.floor(x * 7.31) * 92821 + Math.floor(z * 5.17) * 68917 + 13);
-    menschenFuer(I).setze(x, y, z, ry, q, { anim: art === 'figur' ? (q() < 0.5 ? 'stehen' : 'reden') : art === 'figurTasche' ? 'gehen_tasche' : 'gehen' });
+    menschenFuer(I).setze(x, y, z, ry, q, { anim: q() < 0.5 ? 'stehen' : 'reden' });
     return;
   }
   I.setze(art, x, y, z, w, 1.15, farben);
