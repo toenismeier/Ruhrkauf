@@ -57,7 +57,8 @@ describe('Q39 Unterteile und Kleider aus dem Referenzsortiment', () => {
       expect(['unterteile', 'kleider', 'waesche']).toContain(t.pfad![0]);
     }
     const idx = ARTIKELTYPEN.findIndex((t) => t.typ === NAMEN[0]);
-    expect(ARTIKELTYPEN.slice(idx).map((t) => t.typ)).toEqual([...NAMEN]);
+    // Q42 hängt dahinter an: Q39 als Block prüfen
+    expect(ARTIKELTYPEN.slice(idx, idx + NAMEN.length).map((t) => t.typ)).toEqual([...NAMEN]);
     expect(K.typen.filter((t) => t.bildOffen && NAMEN.includes(t.typ)).map((t) => t.typ).sort()).toEqual(NAMEN.filter((n) => BILD_REST.has(n)).sort());
   });
 
