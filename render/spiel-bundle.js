@@ -31,6 +31,7 @@
     FARBEN: () => FARBEN2,
     FILIAL_PROGRAMME: () => FILIAL_PROGRAMME,
     FREQUENZ_WOCHEN: () => FREQUENZ_WOCHEN,
+    GEWERKE: () => GEWERKE,
     GRUPPEN: () => GRUPPEN,
     GUV_KOSTEN: () => GUV_KOSTEN,
     HQ_PARAM: () => HQ_PARAM,
@@ -88,8 +89,11 @@
     anlaesseFuer: () => anlaesseFuer,
     anlassFaktor: () => anlassFaktor,
     ausfallRisiko: () => ausfallRisiko,
+    bauprogrammSchaetzung: () => bauprogrammSchaetzung,
     bereichsQualitaet: () => bereichsQualitaet,
     berichtetAn: () => berichtetAn,
+    bestandCluster: () => bestandCluster,
+    bestandUebersicht: () => bestandUebersicht,
     bildeHauscluster: () => bildeHauscluster,
     chronikErfolg: () => chronikErfolg,
     chronikUebersicht: () => chronikUebersicht,
@@ -119,6 +123,7 @@
     fundusFrequenzFaktor: () => fundusFrequenzFaktor,
     gehaltsforderung: () => gehaltsforderung,
     generationInCluster: () => generationInCluster,
+    gewerkSchaetzung: () => gewerkSchaetzung,
     gruppenFuer: () => gruppenFuer,
     guvAbschluss: () => guvAbschluss,
     hatAbholstation: () => hatAbholstation,
@@ -217,6 +222,7 @@
     umbauHaus: () => umbauHaus,
     umbauSchaetzung: () => umbauSchaetzung,
     umbauUebersicht: () => umbauUebersicht,
+    umbauVorherNachher: () => umbauVorherNachher,
     umsatzBezug: () => umsatzBezug,
     umsatzbruecke: () => umsatzbruecke,
     unternehmensWert: () => unternehmensWert,
@@ -5520,8 +5526,20 @@
     komplett: { name: "Komplettumbau", qm: 900, min: 16, max: 30 },
     technik: { name: "Technik", qm: 120, min: 3, max: 8 }
   };
-  var UMBAU_AKTIONEN = /* @__PURE__ */ new Set(["umbauPlanen"]);
+  var UMBAU_AKTIONEN = /* @__PURE__ */ new Set(["umbauPlanen", "bauprogrammStarten", "bauprogrammStoppen", "umbauBudget"]);
+  var GEWERKE = {
+    klima: { name: "Klima und L\xFCftung", gruppe: "technik", ebene: "etage", qm: 70, min: 3, max: 6, kaufquote: 0.01, frequenz: 0, text: "Energie sinkt, Sommer angenehmer" },
+    licht: { name: "LED-Licht", gruppe: "technik", ebene: "etage", qm: 35, min: 2, max: 3, kaufquote: 0.01, frequenz: 0, text: "Energie sinkt, Ware wirkt frischer" },
+    brandschutz: { name: "Brandschutz", gruppe: "technik", ebene: "etage", qm: 45, min: 3, max: 5, kaufquote: 0, frequenz: 0, text: "Pflicht erf\xFCllt, Frist +10 Jahre" },
+    foerdertechnik: { name: "Aufzug und Rolltreppe", gruppe: "technik", ebene: "etage", qm: 40, min: 4, max: 8, kaufquote: 5e-3, frequenz: 0, text: "Pr\xFCfung bestanden, obere Etagen besser erreichbar" },
+    moebel: { name: "M\xF6bel und Ladenbau", gruppe: "moebel", ebene: "etage", qm: 250, min: 4, max: 6, kaufquote: 0.08, frequenz: 0, text: "neue M\xF6belgeneration, Kaufquote steigt" },
+    oberflaeche: { name: "Boden, Decke, Farbe", gruppe: "oberflaeche", ebene: "etage", qm: 60, min: 2, max: 2, kaufquote: 0.02, frequenz: 0, text: "Substanz +10, Etage wirkt gepflegt" },
+    fassade: { name: "Fassade und Eingang", gruppe: "fassade", ebene: "haus", qm: 30, min: 8, max: 14, kaufquote: 0, frequenz: 0.03, text: "Haus wirkt von au\xDFen neu, Frequenz steigt" },
+    komplett: { name: "Komplettumbau", gruppe: "komplett", ebene: "haus", qm: 900, min: 16, max: 30, kaufquote: 0.1, frequenz: 0.06, text: "alles neu, nur ganzes Haus" }
+  };
+  var BRUTTO = 0.412;
   function initialisiereUmbau(s2) {
+    var _a2, _b, _c;
     s2.umbau ?? (s2.umbau = { projekte: [], budget: 0, verbraucht: 0, jahr: 0, vorlageJahr: -1, zaehler: 0 });
     for (const h4 of s2.haeuser) {
       h4.etagenBau ?? (h4.etagenBau = {});
@@ -5543,6 +5561,19 @@
           modernisierungWirkung: 0
         };
       }
+      for (const nr4 of h4.etagen) {
+        const e = h4.etagenBau[nr4];
+        (_a2 = e.technik).foerdertechnik ?? (_a2.foerdertechnik = h4.baujahr < 1975 ? 0 : h4.baujahr < 2005 ? 1 : 2);
+        e.oberflaeche ?? (e.oberflaeche = e.substanz < 45 ? 0 : e.substanz < 72 ? 1 : 2);
+      }
+    }
+    const st2 = s2.umbau;
+    st2.programme ?? (st2.programme = []);
+    st2.fassade ?? (st2.fassade = {});
+    for (const h4 of s2.haeuser) (_b = st2.fassade)[_c = h4.id] ?? (_b[_c] = h4.substanz < 45 ? 0 : h4.substanz < 75 ? 1 : 2);
+    if (!st2.budgetGesetzt && !st2.budget) {
+      const umsatz = s2.haeuser.filter((h4) => h4.status === "offen").reduce((a2, h4) => a2 + Object.values(h4.potenzial).reduce((x2, y2) => x2 + (y2 ?? 0), 0), 0) * 52;
+      st2.budget = eur(umsatz * 6e-3);
     }
   }
   function flaechenQm(h4, nr4) {
@@ -5569,6 +5600,14 @@
   }
   function umbauAktion(s2, a2) {
     initialisiereUmbau(s2);
+    if (a2.typ === "bauprogrammStarten") return bauprogrammStarten(s2, a2.auftrag);
+    if (a2.typ === "bauprogrammStoppen") return bauprogrammStoppen(s2, a2.id);
+    if (a2.typ === "umbauBudget") {
+      s2.umbau.budget = Math.max(0, eur(a2.betrag));
+      s2.umbau.budgetGesetzt = true;
+      return { ok: true, text: "Baubudget " + s2.umbau.budget.toLocaleString("de-DE") + " \u20AC im Jahr." };
+    }
+    if (a2.gewerk) return gewerkStarten(s2, a2.haus, a2.etage, a2.gewerk);
     const h4 = s2.haeuser.find((x2) => x2.id === a2.haus), p2 = umbauSchaetzung(s2, a2.haus, a2.etage, a2.stufe);
     if (!h4 || !p2 || h4.status !== "offen") return { ok: false, text: "Haus oder Etage nicht verf\xFCgbar." };
     if (s2.umbau.projekte.some((x2) => x2.status === "laufend" && x2.haus === h4.id && x2.etagen.some((n3) => p2.etagen.includes(n3))))
@@ -5649,6 +5688,10 @@
     for (const p2 of stand2.projekte) if (p2.status === "laufend" && s2.woche >= p2.ende) {
       const h4 = s2.haeuser.find((x2) => x2.id === p2.haus);
       if (!h4) continue;
+      if (p2.gewerk) {
+        gewerkAbschliessen(s2, h4, p2);
+        continue;
+      }
       for (const nr4 of p2.etagen) {
         const e = h4.etagenBau?.[nr4];
         if (!e) continue;
@@ -5689,10 +5732,11 @@
         { hausId: h4.id, stadt: h4.stadt, modul: "umbau" }
       );
     }
+    bauprogrammeWoche(s2);
     if (!s2.prognose && s2.woche % 52 === 0 && stand2.vorlageJahr !== jahr2) {
       stand2.vorlageJahr = jahr2;
       const budget = s2.planung;
-      stand2.budget = budget?.modernisierungBudget ?? budget?.umbauBudget ?? 0;
+      stand2.budget = budget?.modernisierungBudget ?? budget?.umbauBudget ?? stand2.budget;
       const v2 = umbauProgramm(s2).slice(0, 5), auswahl5 = [];
       let rest = stand2.budget;
       for (const x2 of v2) if (x2.kosten > 0 && x2.kosten <= rest) {
@@ -5759,6 +5803,361 @@
       projekt: (s2.umbau?.projekte ?? []).find((x2) => x2.haus === id && x2.status === "laufend" && x2.etagen.includes(nr4)),
       schaetzungen: Object.keys(UMBAU_STUFEN).map((stufe2) => ({ stufe: stufe2, ...umbauSchaetzung(s2, id, nr4, stufe2) }))
     }));
+  }
+  function gewerkZustand(s2, h4, nr4) {
+    const e = h4.etagenBau[nr4];
+    return {
+      klima: e.technik.klima,
+      licht: e.technik.licht,
+      brandschutz: e.technik.brandschutz,
+      foerdertechnik: e.technik.foerdertechnik ?? 1,
+      moebel: e.moebelGeneration - 1,
+      oberflaeche: e.oberflaeche ?? 1,
+      fassade: s2.umbau?.fassade?.[h4.id] ?? 1
+    };
+  }
+  function gruppenZustand(z6, g3) {
+    if (g3 === "technik") return Math.min(z6.klima, z6.licht, z6.brandschutz, z6.foerdertechnik);
+    return z6[g3];
+  }
+  function zielZustand(s2, h4, nr4, g3) {
+    const z6 = gewerkZustand(s2, h4, nr4);
+    if (g3 === "komplett") return Math.min(...["technik", "moebel", "oberflaeche", "fassade"].map((x2) => gruppenZustand(z6, x2)));
+    return z6[g3];
+  }
+  function gewerkEtagen(h4, nr4, g3) {
+    return GEWERKE[g3].ebene === "haus" ? [...h4.etagen] : [nr4];
+  }
+  function gewerkSchaetzung(s2, hausId, nr4, g3) {
+    const h4 = s2.haeuser.find((x2) => x2.id === hausId), p2 = GEWERKE[g3];
+    if (!h4 || !p2 || !h4.etagen.includes(nr4)) return void 0;
+    const etagen = gewerkEtagen(h4, nr4, g3);
+    const qm2 = g3 === "fassade" ? Math.round(Math.sqrt(h4.grundflaecheQm) * 4 * 4 * Math.max(1, h4.etagen.filter((e) => e >= 0).length)) : etagen.reduce((v2, e) => v2 + flaechenQm(h4, e), 0);
+    const q3 = clamp(bereichsQualitaet(s2, "ladenbau"), 0, 1);
+    const kosten2 = eur(qm2 * p2.qm * (1 + 0.4 * (1 - q3)));
+    const basis4 = p2.min + (p2.max - p2.min) * Math.min(1, qm2 / Math.max(1, h4.grundflaecheQm * 5));
+    const wochen = Math.ceil(basis4 * (1 + 0.5 * (1 - q3)));
+    const umsatzWoche = h4.kpi?.umsatz ?? Object.values(h4.potenzial).reduce((a2, b4) => a2 + (b4 ?? 0), 0);
+    const anteil3 = etagen.reduce((v2, e) => v2 + flaechenQm(h4, e), 0) / Math.max(1, h4.etagen.reduce((v2, e) => v2 + flaechenQm(h4, e), 0));
+    const ausfall2 = eur(umsatzWoche * wochen * (g3 === "fassade" ? 0.05 : anteil3 * 0.6 + (1 - anteil3) * 0.05));
+    const plusJahr = eur(umsatzWoche * 52 * (p2.kaufquote * anteil3 + p2.frequenz));
+    return {
+      gewerk: g3,
+      etagen,
+      qm: qm2,
+      kosten: kosten2,
+      wochen,
+      ausfall: ausfall2,
+      plusJahr,
+      ertragJahr: eur(plusJahr * BRUTTO),
+      frequenz: p2.frequenz,
+      kaufquote: p2.kaufquote,
+      rendite: Math.round(plusJahr * BRUTTO / Math.max(1, kosten2) * 1e3) / 10
+    };
+  }
+  function laeuftAuf(s2, h4, etagen) {
+    return (s2.umbau?.projekte ?? []).some((x2) => x2.status === "laufend" && x2.haus === h4.id && x2.etagen.some((n3) => etagen.includes(n3)));
+  }
+  function gewerkStarten(s2, hausId, nr4, g3, programm) {
+    const h4 = s2.haeuser.find((x2) => x2.id === hausId), p2 = gewerkSchaetzung(s2, hausId, nr4, g3);
+    if (!h4 || !p2 || h4.status !== "offen") return { ok: false, text: "Haus oder Etage nicht verf\xFCgbar." };
+    if (laeuftAuf(s2, h4, p2.etagen)) return { ok: false, text: "Mindestens eine Etage befindet sich bereits im Umbau." };
+    if (h4.premiumInvestition && h4.premiumInvestition.bis > s2.woche)
+      return { ok: false, text: "Laufende Premium-Investition muss zuerst abgeschlossen werden." };
+    einmalKosten(s2, p2.kosten);
+    s2.umbau.verbraucht += p2.kosten;
+    const vorher = {};
+    for (const e of p2.etagen) vorher[e] = gewerkZustand(s2, h4, e);
+    const stufe2 = g3 === "komplett" ? "komplett" : g3 === "moebel" ? "ladenbau" : g3 === "oberflaeche" ? "auffrischung" : "technik";
+    s2.umbau.projekte.push({
+      id: "umbau-" + ++s2.umbau.zaehler,
+      haus: h4.id,
+      etagen: p2.etagen,
+      stufe: stufe2,
+      gewerk: g3,
+      programm,
+      start: s2.woche,
+      ende: s2.woche + p2.wochen,
+      kosten: p2.kosten,
+      qm: p2.qm,
+      status: "laufend",
+      vorher
+    });
+    if (!programm) melde(s2, "info", GEWERKE[g3].name + " in " + h4.name + " gestartet (" + p2.wochen + " Wochen).", { hausId: h4.id, stadt: h4.stadt, modul: "umbau" });
+    return { ok: true, text: "Baustart " + h4.name + ": " + p2.kosten.toLocaleString("de-DE") + " \u20AC, fertig in " + p2.wochen + " Wochen." };
+  }
+  function gewerkAbschliessen(s2, h4, p2) {
+    const g3 = p2.gewerk, wirkung = GEWERKE[g3].kaufquote;
+    for (const nr4 of p2.etagen) {
+      const e = h4.etagenBau?.[nr4];
+      if (!e) continue;
+      const alle = g3 === "komplett";
+      if (alle || g3 === "klima") {
+        e.technik.klima = 2;
+        e.klimaModernisiert = true;
+      }
+      if (alle || g3 === "licht") e.technik.licht = 2;
+      if (alle || g3 === "brandschutz") {
+        e.technik.brandschutz = 2;
+        e.pflichten.brandschutz = s2.woche + 520;
+      }
+      if (alle || g3 === "foerdertechnik") {
+        e.technik.foerdertechnik = 2;
+        e.pflichten.aufzug = s2.woche + 520;
+      }
+      if (e.pflichten.brandschutz > s2.woche && e.pflichten.aufzug > s2.woche) e.gesperrt = false;
+      if (alle || g3 === "moebel") e.moebelGeneration = 3;
+      if (alle || g3 === "oberflaeche") {
+        e.oberflaeche = 2;
+        e.substanz = clamp(e.substanz + 10, 0, 100);
+      }
+      if (alle) e.substanz = 90;
+      if (wirkung > 0) e.modernisierungWirkung = Math.max(e.modernisierungWirkung, wirkung);
+    }
+    if (g3 === "fassade" || g3 === "komplett") {
+      s2.umbau.fassade[h4.id] = 2;
+      h4.umbauFrequenz = Math.max(h4.umbauFrequenz ?? 0, GEWERKE[g3].frequenz);
+      h4.substanz = Math.max(h4.substanz, g3 === "komplett" ? 90 : clamp(h4.substanz + 15, 0, 100));
+      s2.stakeholder.image = clamp(s2.stakeholder.image + (g3 === "komplett" ? 0.8 : 0.3), 0, 100);
+    }
+    if (g3 !== "fassade" && p2.etagen.length === h4.etagen.length)
+      h4.substanz = Math.round(h4.etagen.reduce((a2, n3) => a2 + (h4.etagenBau?.[n3]?.substanz ?? h4.substanz), 0) / h4.etagen.length);
+    p2.nachher = {};
+    for (const e of p2.etagen) p2.nachher[e] = gewerkZustand(s2, h4, e);
+    p2.status = "abgeschlossen";
+    if (!s2.prognose) melde(
+      s2,
+      "info",
+      GEWERKE[g3].name + " abgeschlossen: " + h4.name + ".",
+      { hausId: h4.id, stadt: h4.stadt, modul: "umbau", projekt: p2.id }
+    );
+  }
+  function clusterHaeuser(s2, ids) {
+    const org2 = s2.organisation;
+    const set = /* @__PURE__ */ new Set();
+    for (const c of org2?.hauscluster ?? []) if (ids.includes(c.id)) c.hausIds.forEach((i) => set.add(i));
+    return s2.haeuser.filter((h4) => set.has(h4.id) && h4.status === "offen");
+  }
+  function auftragsListe(s2, a2) {
+    initialisiereUmbau(s2);
+    const v2 = [];
+    for (const h4 of clusterHaeuser(s2, a2.cluster)) {
+      const etagen = GEWERKE[a2.gewerk].ebene === "haus" ? [h4.etagen[0]] : h4.etagen;
+      for (const nr4 of etagen) {
+        const z6 = zielZustand(s2, h4, nr4, a2.gewerk);
+        if (z6 > a2.bisZustand) continue;
+        const e = h4.etagenBau[nr4];
+        v2.push({ haus: h4.id, etage: nr4, z: z6, frist: Math.min(e.pflichten.brandschutz, e.pflichten.aufzug) });
+      }
+    }
+    return v2.sort((x2, y2) => x2.z - y2.z || x2.frist - y2.frist || x2.haus.localeCompare(y2.haus) || x2.etage - y2.etage).map(({ haus: haus3, etage: etage2 }) => ({ haus: haus3, etage: etage2 }));
+  }
+  function bauprogrammSchaetzung(s2, a2) {
+    const liste3 = auftragsListe(s2, a2), parallel = Math.max(1, Math.round(a2.parallel));
+    let kosten2 = 0, ausfall2 = 0, plusJahr = 0;
+    const dauer = [];
+    for (const x2 of liste3) {
+      const p2 = gewerkSchaetzung(s2, x2.haus, x2.etage, a2.gewerk);
+      if (!p2) continue;
+      kosten2 += p2.kosten;
+      ausfall2 += p2.ausfall;
+      plusJahr += p2.plusJahr;
+      dauer.push({ haus: x2.haus, w: p2.wochen, k: p2.kosten });
+    }
+    const frei6 = Array(parallel).fill(0), hausFrei = /* @__PURE__ */ new Map();
+    const kostenWoche = /* @__PURE__ */ new Map();
+    let ende = 0;
+    for (const d4 of dauer) {
+      let slot4 = 0;
+      for (let i = 1; i < frei6.length; i++) if (frei6[i] < frei6[slot4]) slot4 = i;
+      const start = Math.max(frei6[slot4], hausFrei.get(d4.haus) ?? 0);
+      frei6[slot4] = start + d4.w;
+      hausFrei.set(d4.haus, start + d4.w);
+      ende = Math.max(ende, start + d4.w);
+      kostenWoche.set(start, (kostenWoche.get(start) ?? 0) + d4.k);
+    }
+    const haeuser = new Set(liste3.map((x2) => x2.haus)).size;
+    const spitze3 = Math.max(0, ...kostenWoche.values());
+    const budgetRest = Math.max(0, (s2.umbau?.budget ?? 0) - (s2.umbau?.verbraucht ?? 0));
+    return {
+      haeuser,
+      etagen: GEWERKE[a2.gewerk].ebene === "haus" ? 0 : liste3.length,
+      auftraege: liste3.length,
+      kosten: kosten2,
+      wochen: ende,
+      ausfall: ausfall2,
+      plusJahr,
+      spitzeWoche: spitze3,
+      budgetRest,
+      ueberBudget: kosten2 > budgetRest,
+      ertragJahr: eur(plusJahr * BRUTTO),
+      rendite: Math.round(plusJahr * BRUTTO / Math.max(1, kosten2) * 1e3) / 10,
+      amortisationJahre: plusJahr > 0 ? Math.round(kosten2 / (plusJahr * BRUTTO) * 10) / 10 : null
+    };
+  }
+  function bauprogrammStarten(s2, a2) {
+    if (!a2.cluster?.length) return { ok: false, text: "Bitte mindestens einen Cluster w\xE4hlen." };
+    if (!GEWERKE[a2.gewerk]) return { ok: false, text: "Unbekanntes Gewerk." };
+    const liste3 = auftragsListe(s2, a2);
+    if (!liste3.length) return { ok: false, text: "In diesen Clustern ist nichts mehr zu tun." };
+    const st2 = s2.umbau;
+    const id = "bp-" + ++st2.zaehler;
+    const name2 = a2.name || GEWERKE[a2.gewerk].name + " \xB7 " + a2.cluster.length + (a2.cluster.length === 1 ? " Cluster" : " Cluster");
+    const prog = {
+      ...a2,
+      name: name2,
+      parallel: Math.max(1, Math.round(a2.parallel)),
+      id,
+      start: s2.woche,
+      status: "laufend",
+      warteschlange: liste3,
+      gesamt: liste3.length,
+      gestartet: 0,
+      kosten: 0
+    };
+    st2.programme.push(prog);
+    bauprogrammeWoche(s2, id);
+    melde(s2, "info", "Bauprogramm gestartet: " + name2 + " (" + liste3.length + " Baustellen).", { modul: "umbau" });
+    return { ok: true, text: "Bauprogramm gestartet: " + liste3.length + " Baustellen, " + prog.parallel + " gleichzeitig." };
+  }
+  function bauprogrammStoppen(s2, id) {
+    const p2 = s2.umbau?.programme?.find((x2) => x2.id === id);
+    if (!p2 || p2.status !== "laufend") return { ok: false, text: "Programm l\xE4uft nicht." };
+    p2.status = "gestoppt";
+    p2.warteschlange = [];
+    return { ok: true, text: "Bauprogramm gestoppt. Laufende Baustellen werden fertig gebaut." };
+  }
+  function bauprogrammeWoche(s2, nur) {
+    const st2 = s2.umbau;
+    for (const p2 of st2.programme ?? []) {
+      if (p2.status !== "laufend" || nur && p2.id !== nur) continue;
+      let aktiv7 = st2.projekte.filter((x2) => x2.programm === p2.id && x2.status === "laufend").length;
+      const rest = [];
+      for (const x2 of p2.warteschlange) {
+        const h4 = s2.haeuser.find((y2) => y2.id === x2.haus);
+        if (aktiv7 >= p2.parallel || !h4) {
+          rest.push(x2);
+          continue;
+        }
+        if (h4.status !== "offen" || zielZustand(s2, h4, x2.etage, p2.gewerk) > p2.bisZustand) continue;
+        const etagen = gewerkEtagen(h4, x2.etage, p2.gewerk);
+        if (laeuftAuf(s2, h4, etagen) || st2.projekte.some((y2) => y2.programm === p2.id && y2.status === "laufend" && y2.haus === h4.id)) {
+          rest.push(x2);
+          continue;
+        }
+        const r4 = gewerkStarten(s2, x2.haus, x2.etage, p2.gewerk, p2.id);
+        if (r4.ok) {
+          aktiv7++;
+          p2.gestartet++;
+          p2.kosten += st2.projekte[st2.projekte.length - 1].kosten;
+        } else rest.push(x2);
+      }
+      p2.warteschlange = rest;
+      if (!rest.length && !aktiv7) {
+        p2.status = "abgeschlossen";
+        if (!s2.prognose) melde(s2, "info", "Bauprogramm abgeschlossen: " + p2.name + ".", { modul: "umbau" });
+      }
+    }
+  }
+  function bestandUebersicht(s2) {
+    initialisiereUmbau(s2);
+    const org2 = s2.organisation;
+    const gruppen = ["technik", "moebel", "oberflaeche", "fassade"];
+    const zeile3 = (id, name2, haeuser, sonder = false, region) => {
+      const z6 = { technik: [0, 0, 0], moebel: [0, 0, 0], oberflaeche: [0, 0, 0], fassade: [0, 0, 0] };
+      let etagen = 0, fristen = 0, gesperrt2 = 0, baustellen = 0, bedarf = 0;
+      for (const h4 of haeuser) {
+        z6.fassade[s2.umbau.fassade[h4.id] ?? 1]++;
+        if (laeuftAuf(s2, h4, h4.etagen)) baustellen++;
+        for (const nr4 of h4.etagen) {
+          const e = h4.etagenBau[nr4], gz2 = gewerkZustand(s2, h4, nr4);
+          etagen++;
+          for (const g3 of gruppen) if (g3 !== "fassade") z6[g3][gruppenZustand(gz2, g3)]++;
+          if (Math.min(e.pflichten.brandschutz, e.pflichten.aufzug) - s2.woche < 52) fristen++;
+          if (e.gesperrt) gesperrt2++;
+          const q3 = flaechenQm(h4, nr4);
+          bedarf += (gz2.moebel < 2 ? q3 * GEWERKE.moebel.qm : 0) + (gz2.oberflaeche < 2 ? q3 * GEWERKE.oberflaeche.qm : 0) + (gz2.klima < 2 ? q3 * GEWERKE.klima.qm : 0) + (gz2.licht < 2 ? q3 * GEWERKE.licht.qm : 0) + (gz2.brandschutz < 2 ? q3 * GEWERKE.brandschutz.qm : 0) + (gz2.foerdertechnik < 2 ? q3 * GEWERKE.foerdertechnik.qm : 0);
+        }
+      }
+      const gut = (g3) => {
+        const t9 = z6[g3][0] + z6[g3][1] + z6[g3][2];
+        return t9 ? Math.round(z6[g3][2] / t9 * 100) : 0;
+      };
+      const schlecht = (g3) => {
+        const t9 = z6[g3][0] + z6[g3][1] + z6[g3][2];
+        return t9 ? Math.round(z6[g3][0] / t9 * 100) : 0;
+      };
+      return {
+        id,
+        name: name2,
+        region,
+        sonder,
+        haeuser: haeuser.length,
+        etagen,
+        fristen,
+        gesperrt: gesperrt2,
+        baustellen,
+        bedarf: eur(bedarf),
+        gut: Object.fromEntries(gruppen.map((g3) => [g3, gut(g3)])),
+        schlecht: Object.fromEntries(gruppen.map((g3) => [g3, schlecht(g3)])),
+        verteilung: z6
+      };
+    };
+    const cluster = (org2?.hauscluster ?? []).map((c) => zeile3(c.id, c.name, s2.haeuser.filter((h4) => c.hausIds.includes(h4.id) && h4.status === "offen"), c.sonder, c.region)).filter((c) => c.haeuser > 0);
+    const gesamt = zeile3("alle", "Konzern", s2.haeuser.filter((h4) => h4.status === "offen"));
+    const st2 = s2.umbau;
+    return {
+      gesamt,
+      cluster,
+      budget: st2.budget,
+      verbraucht: st2.verbraucht,
+      rest: Math.max(0, st2.budget - st2.verbraucht),
+      programme: (st2.programme ?? []).slice().reverse().map((p2) => ({
+        ...p2,
+        warteschlange: p2.warteschlange.length,
+        laufend: st2.projekte.filter((x2) => x2.programm === p2.id && x2.status === "laufend").length,
+        fertig: st2.projekte.filter((x2) => x2.programm === p2.id && x2.status === "abgeschlossen").length
+      })),
+      gewerke: GEWERKE
+    };
+  }
+  function bestandCluster(s2, clusterId) {
+    initialisiereUmbau(s2);
+    const org2 = s2.organisation;
+    const c = org2?.hauscluster.find((x2) => x2.id === clusterId);
+    if (!c) return void 0;
+    const gruppen = ["technik", "moebel", "oberflaeche", "fassade"];
+    const haeuser = s2.haeuser.filter((h4) => c.hausIds.includes(h4.id) && h4.status === "offen").map((h4) => {
+      const etagen = h4.etagen.slice().sort((a2, b4) => b4 - a2).map((nr4) => {
+        const gz2 = gewerkZustand(s2, h4, nr4);
+        const e = h4.etagenBau[nr4];
+        return {
+          etage: nr4,
+          zustand: Object.fromEntries(gruppen.map((g3) => [g3, gruppenZustand(gz2, g3)])),
+          gewerke: gz2,
+          substanz: Math.round(e.substanz),
+          gesperrt: e.gesperrt,
+          frist: Math.min(e.pflichten.brandschutz, e.pflichten.aufzug),
+          baustelle: (s2.umbau?.projekte ?? []).find((x2) => x2.haus === h4.id && x2.status === "laufend" && x2.etagen.includes(nr4))
+        };
+      });
+      const anteil3 = (g3) => Math.round(etagen.filter((e) => e.zustand[g3] === 2).length / Math.max(1, etagen.length) * 100);
+      return {
+        id: h4.id,
+        name: h4.name,
+        stadt: h4.stadt,
+        format: h4.format,
+        etagen,
+        gut: Object.fromEntries(gruppen.map((g3) => [g3, anteil3(g3)]))
+      };
+    });
+    return { id: c.id, name: c.name, haeuser };
+  }
+  function umbauVorherNachher(s2, projektId) {
+    const p2 = s2.umbau?.projekte.find((x2) => x2.id === projektId);
+    if (!p2 || !p2.vorher) return void 0;
+    const h4 = s2.haeuser.find((x2) => x2.id === p2.haus);
+    return { projekt: p2, haus: h4 ? { id: h4.id, name: h4.name, stadt: h4.stadt } : void 0, gewerk: p2.gewerk ? GEWERKE[p2.gewerk].name : UMBAU_STUFEN[p2.stufe].name };
   }
 
   // ../engine/src/marketing.ts
@@ -8870,11 +9269,11 @@
     const haeuser = s2.haeuser.filter((h4) => h4.format === "warenhaus" && h4.status !== "geschlossen" && h4.status !== "verkauft" && !!h4.kpi);
     const proGruppe = {};
     const regioAnteil = {};
-    const clusterHaeuser = {};
+    const clusterHaeuser2 = {};
     let summe2 = 0;
     for (const h4 of haeuser) {
       const c = ecommerceCluster(h4);
-      (clusterHaeuser[c] ?? (clusterHaeuser[c] = [])).push(h4);
+      (clusterHaeuser2[c] ?? (clusterHaeuser2[c] = [])).push(h4);
       for (const [g3, u] of Object.entries(h4.kpi.umsatzJeGruppe)) {
         const x2 = Math.max(0, u) * 0.08;
         proGruppe[g3] = (proGruppe[g3] ?? 0) + x2;
@@ -8916,8 +9315,8 @@
       }
     }
     for (const [c, aktiv7] of Object.entries(e.versandCluster)) {
-      if (!aktiv7 || !clusterHaeuser[c]?.length) continue;
-      const hs = clusterHaeuser[c];
+      if (!aktiv7 || !clusterHaeuser2[c]?.length) continue;
+      const hs = clusterHaeuser2[c];
       const anteil3 = hs.reduce((a2, h4) => a2 + (h4.kpi?.umsatz ?? 0), 0) / Math.max(1, haeuser.reduce((a2, h4) => a2 + (h4.kpi?.umsatz ?? 0), 0));
       const n3 = Math.round(bestellungen * 0.22 * anteil3);
       const proHaus = Math.floor(n3 / hs.length);
@@ -10391,7 +10790,7 @@
         typ: m.typ,
         text: m.text,
         kategorie: m.bezug?.modul === "wettbewerb" || konkurrenz2 ? "Konkurrenz" : m.bezug?.modul === "it" ? "IT" : meldungKategorie(m.typ, m.text),
-        bezug: { ...bezug, ...m.bezug?.stadt ? { stadt: m.bezug.stadt } : {}, ...konkurrenz2 ? { stadt: konkurrenz2.stadt, wettbewerberId: konkurrenz2.id } : {} }
+        bezug: { ...bezug, ...m.bezug?.stadt ? { stadt: m.bezug.stadt } : {}, ...konkurrenz2 ? { stadt: konkurrenz2.stadt, wettbewerberId: konkurrenz2.id } : {}, ...m.bezug?.projekt ? { projekt: m.bezug.projekt } : {} }
       };
     });
     const erledigt = [
@@ -25478,11 +25877,11 @@
       this.b = scalar;
       return this;
     }
-    setHex(hex4, colorSpace = SRGBColorSpace) {
-      hex4 = Math.floor(hex4);
-      this.r = (hex4 >> 16 & 255) / 255;
-      this.g = (hex4 >> 8 & 255) / 255;
-      this.b = (hex4 & 255) / 255;
+    setHex(hex5, colorSpace = SRGBColorSpace) {
+      hex5 = Math.floor(hex5);
+      this.r = (hex5 >> 16 & 255) / 255;
+      this.g = (hex5 >> 8 & 255) / 255;
+      this.b = (hex5 & 255) / 255;
       ColorManagement.toWorkingColorSpace(this, colorSpace);
       return this;
     }
@@ -25559,17 +25958,17 @@
             console.warn("THREE.Color: Unknown color model " + style);
         }
       } else if (m = /^\#([A-Fa-f\d]+)$/.exec(style)) {
-        const hex4 = m[1];
-        const size = hex4.length;
+        const hex5 = m[1];
+        const size = hex5.length;
         if (size === 3) {
           return this.setRGB(
-            parseInt(hex4.charAt(0), 16) / 15,
-            parseInt(hex4.charAt(1), 16) / 15,
-            parseInt(hex4.charAt(2), 16) / 15,
+            parseInt(hex5.charAt(0), 16) / 15,
+            parseInt(hex5.charAt(1), 16) / 15,
+            parseInt(hex5.charAt(2), 16) / 15,
             colorSpace
           );
         } else if (size === 6) {
-          return this.setHex(parseInt(hex4, 16), colorSpace);
+          return this.setHex(parseInt(hex5, 16), colorSpace);
         } else {
           console.warn("THREE.Color: Invalid hex color " + style);
         }
@@ -25579,9 +25978,9 @@
       return this;
     }
     setColorName(style, colorSpace = SRGBColorSpace) {
-      const hex4 = _colorKeywords[style.toLowerCase()];
-      if (hex4 !== void 0) {
-        this.setHex(hex4, colorSpace);
+      const hex5 = _colorKeywords[style.toLowerCase()];
+      if (hex5 !== void 0) {
+        this.setHex(hex5, colorSpace);
       } else {
         console.warn("THREE.Color: Unknown color " + style);
       }
@@ -50058,8 +50457,8 @@
     }
   };
   var PlaneHelper = class extends Line {
-    constructor(plane, size = 1, hex4 = 16776960) {
-      const color = hex4;
+    constructor(plane, size = 1, hex5 = 16776960) {
+      const color = hex5;
       const positions = [1, -1, 0, -1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0, -1, -1, 0, 1, -1, 0, 1, 1, 0];
       const geometry = new BufferGeometry();
       geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
@@ -56768,8 +57167,8 @@ void main() {
   function menschenZeit(t9) {
     if (material) material.uniforms.uZeit.value = t9;
   }
-  var srgb = (hex4) => {
-    const n3 = parseInt(hex4.slice(1), 16);
+  var srgb = (hex5) => {
+    const n3 = parseInt(hex5.slice(1), 16);
     return [(n3 >> 16 & 255) / 255, (n3 >> 8 & 255) / 255, (n3 & 255) / 255];
   };
   var waehle3 = (r4, l) => l[Math.floor(r4() * l.length)];
@@ -56822,8 +57221,8 @@ void main() {
     schatten4.renderOrder = 1;
     schatten4.userData.diagArt = "menschen";
     mesh.add(schatten4);
-    const farbe2 = (a2, i, hex4) => {
-      const c = srgb(hex4);
+    const farbe2 = (a2, i, hex5) => {
+      const c = srgb(hex5);
       a2.array[i * 3] = c[0];
       a2.array[i * 3 + 1] = c[1];
       a2.array[i * 3 + 2] = c[2];
@@ -57026,7 +57425,7 @@ void main() {
     const mk2 = opt.marketing ?? {};
     const marketing = { karte: !!(mk2.karte ?? opt.karte), app: !!(mk2.app ?? opt.app), prospekt: !!(mk2.prospekt ?? opt.prospekt) };
     const mechanik = opt.mechanik ?? null, punkteFaktor = Number.isFinite(opt.punkteFaktor) ? opt.punkteFaktor : null;
-    return { __zustand: true, status: status2, zusatz, aktion: aktion2, rabatt, mechanik, punkteFaktor, marketing, untermieter: unter, offpriceEtage: opt.offpriceEtage ?? 0, ohneMarke: opt.hartwig === false, hat };
+    return { __zustand: true, status: status2, zusatz, aktion: aktion2, rabatt, mechanik, punkteFaktor, marketing, untermieter: unter, offpriceEtage: opt.offpriceEtage ?? 0, bauEtagen: opt.bauEtagen ?? [], ohneMarke: opt.hartwig === false, hat };
   }
   function zustandFlags(Z2) {
     const h4 = Z2.hat;
@@ -58061,6 +58460,55 @@ void main() {
       Z2.top = Math.max(Z2.top, kran(Z2, kx, kz, k5.hoehe + 9, Math.min(32, k5.w * 0.6), Math.PI * 0.92));
       const he = haupt(), s2 = seiten4[he.seite];
       aufsteller(Z2, s2, he.u + (he.breite ?? 4) / 2 + 1, 2.2, "Ge\xF6ffnet", "#ffffff", "#3f7d56");
+    }
+    const bauEtagen = [...new Set(opt.bauEtagen ?? st2.bauEtagen ?? [])].filter((e) => e >= 0 && e <= n3 - 1);
+    if (bauEtagen.length && !hat("umbau") && !hat("abriss")) {
+      const rohr = "#9ca3a8", brett2 = "#c79a5a", t1 = tFront(k5) + 0.5, t22 = t1 + 1.1;
+      for (const e of bauEtagen) {
+        if (e === 0) {
+          for (const f13 of fensterEG) {
+            const s2 = seiten4[f13.seite];
+            s2.q(f13.a + 0.08, f13.b - 0.08, f13.y0 + 0.08, f13.y1 - 0.08, f13.t + 0.05, f13.t + 0.09, "#e6dfcf");
+            if (f13.b - f13.a > 2.4) plakat(Z2, s2, "Wir bauen um", (f13.a + f13.b) / 2, (f13.y0 + f13.y1) / 2, f13.t + 0.12, 0.55, "#ffffff", ROT6, f13.b - f13.a - 0.6);
+          }
+          continue;
+        }
+        const y0 = etagenY(k5, e), y1 = y0 + GH3;
+        for (const s2 of [sz, sx]) {
+          const L6 = Z2.nutz(s2);
+          for (const [a2, b4] of freieStuecke(Z2, s2, L6 * 0.04, L6 * 0.96, y0 + 0.3, y1 - 0.9, 0.2)) {
+            if (b4 - a2 < 5) continue;
+            const nU = Math.max(2, Math.round((b4 - a2) / 2.6)), du = (b4 - a2) / nU;
+            for (let i = 0; i <= nU; i++) {
+              const u = a2 + i * du;
+              s2.q(u - 0.06, u + 0.06, 0.3, y1 + 0.9, t1 - 0.06, t1 + 0.06, rohr);
+              s2.q(u - 0.06, u + 0.06, 0.3, y1 + 0.9, t22 - 0.06, t22 + 0.06, rohr);
+            }
+            for (const y2 of [y0 - 0.05, y1 - 0.05]) s2.q(a2, b4, y2 - 0.05, y2 + 0.05, t1 - 0.05, t22 + 0.05, brett2);
+            const nb = Math.max(1, Math.round((b4 - a2) / 3));
+            for (let i = 0; i < nb; i++) {
+              const p0 = a2 + i * (b4 - a2) / nb + 0.04, p1 = a2 + (i + 1) * (b4 - a2) / nb - 0.04;
+              s2.q(p0, p1, y0 - 0.2, y1 + 0.7, t22 + 0.1, t22 + 0.15, i % 2 ? "#c9d8cf" : "#d8e3dc");
+            }
+            if (b4 - a2 > 16) {
+              const pu0 = a2 + (b4 - a2) * 0.2, pu1 = b4 - (b4 - a2) * 0.2;
+              s2.q(pu0, pu1, y0 + 0.4, y1 - 0.2, t22 + 0.17, t22 + 0.22, ROT6);
+              plakat(Z2, s2, "Wir modernisieren", (pu0 + pu1) / 2, (y0 + y1) / 2 + 0.1, t22 + 0.26, Math.min(1.4, GH3 * 0.32), "#ffffff", ROT6, (pu1 - pu0) * 0.9);
+            }
+            sperre(Z2, s2, a2, b4, 0, y1 + 0.9, "geruest");
+          }
+        }
+      }
+      const egBau = bauEtagen.includes(0);
+      for (const s2 of egBau ? [sz, sx] : [sz]) {
+        const L6 = Z2.nutz(s2), frei6 = eingaenge.filter((g3) => g3.seite === s2.seite);
+        let stuecke = [[L6 * (egBau ? 0.05 : 0.6), L6 * (egBau ? 0.95 : 0.9)]];
+        for (const g3 of frei6) {
+          const ga = (g3.u ?? g3.a ?? 0) - (g3.breite ?? 4) / 2 - 1.2, gb = (g3.u ?? g3.b ?? 0) + (g3.breite ?? 4) / 2 + 1.2;
+          stuecke = stuecke.flatMap(([p2, q3]) => gb <= p2 || ga >= q3 ? [[p2, q3]] : [[p2, ga], [gb, q3]].filter(([x2, y2]) => y2 - x2 > 3));
+        }
+        stuecke.forEach(([p2, q3], i) => bauzaun(Z2, s2, p2, q3, 4.2, i === 0 && q3 - p2 > 7 ? { text: "Wir modernisieren", fg: "#ffffff", bg: ROT6 } : null));
+      }
     }
     if (hat("raeumung")) {
       fassadenBanner(Z2, sz, [{ text: "ALLES MUSS RAUS", h: 2.4, fg: ROT_KAMPAGNE }, { text: "R\xC4UMUNGSVERKAUF", h: 1, fg: "#1d1d1d" }], "#f6d32d", { anteil: 0.8, rahmen: ROT_KAMPAGNE, zielH: GROSS, modus: "mitte", fuellen: true });
@@ -68702,9 +69150,35 @@ void main() {
     "#f2f1ee": ["#e7d2b2", "#e0e1e0"],
     "#e8e6e1": ["#ddc7a4", "#d6d8d9"]
   };
+  var CACHE = [/* @__PURE__ */ new Map(), /* @__PURE__ */ new Map()];
+  function hsl(hex5) {
+    const n3 = parseInt(hex5.slice(1), 16), r4 = (n3 >> 16 & 255) / 255, g3 = (n3 >> 8 & 255) / 255, b4 = (n3 & 255) / 255;
+    const mx = Math.max(r4, g3, b4), mn = Math.min(r4, g3, b4), l = (mx + mn) / 2, d4 = mx - mn;
+    if (!d4) return [0, 0, l];
+    const sat = d4 / (1 - Math.abs(2 * l - 1));
+    const h4 = mx === r4 ? ((g3 - b4) / d4 + 6) % 6 : mx === g3 ? (b4 - r4) / d4 + 2 : (r4 - g3) / d4 + 4;
+    return [h4 * 60, sat, l];
+  }
+  function hex(h4, sat, l) {
+    const c = (1 - Math.abs(2 * l - 1)) * sat, x2 = c * (1 - Math.abs(h4 / 60 % 2 - 1)), m = l - c / 2;
+    const [r4, g3, b4] = h4 < 60 ? [c, x2, 0] : h4 < 120 ? [x2, c, 0] : h4 < 180 ? [0, c, x2] : h4 < 240 ? [0, x2, c] : h4 < 300 ? [x2, 0, c] : [c, 0, x2];
+    return "#" + [r4, g3, b4].map((v2) => Math.round((v2 + m) * 255).toString(16).padStart(2, "0")).join("");
+  }
+  function umfaerben(farbe2, nummer) {
+    const k5 = String(farbe2).toLowerCase();
+    if (MATERIAL[k5]) return MATERIAL[k5][nummer - 1];
+    if (!/^#[0-9a-f]{6}$/.test(k5)) return farbe2;
+    const [h4, sat, l] = hsl(k5);
+    if (sat > 0.28 && !(h4 >= 20 && h4 <= 50 && sat < 0.5)) return farbe2;
+    if (nummer === 1) return l > 0.82 ? hex(38, 0.42, l * 0.9) : l > 0.45 ? hex(30, 0.38, l * 0.82) : hex(25, 0.35, Math.max(0.16, l * 0.9));
+    return l > 0.82 ? hex(205, 0.06, l * 0.88) : hex(208, 0.08, l * 0.95);
+  }
   function farbeGeneration(farbe2, generation = 3) {
     const nummer = Math.max(1, Math.min(3, Math.round(generation)));
-    return nummer === 3 ? farbe2 : MATERIAL[String(farbe2).toLowerCase()]?.[nummer - 1] ?? farbe2;
+    if (nummer === 3) return farbe2;
+    const c = CACHE[nummer - 1];
+    if (!c.has(farbe2)) c.set(farbe2, umfaerben(farbe2, nummer));
+    return c.get(farbe2);
   }
   function baueMoebelGeneration(def, L6, r4, d4, ctx = {}, generation = 3) {
     if (generation === 3) return def.bau(L6, r4, d4, ctx);
@@ -136128,8 +136602,8 @@ void main() {
     S.anzahl += tmp2.anzahl;
     while (gruppe3.children.length) scene2.add(gruppe3.children[0]);
     const eg = etageNr === 0;
-    const aussen = eg ? ra.mall ? 9.5 : ra.box ? 19 : 7 : ra.mall ? 9.5 : 0.4;
-    const box = new three_module_exports.Box3(new three_module_exports.Vector3(ax0 - (ra.mall && eg && ax0 === 0 ? 7.6 : 0.6), eg ? -0.3 : ra.mall ? -4.8 : -2.2, az0 - (ra.mall && eg && az0 === 0 ? 7.6 : 0.6)), new three_module_exports.Vector3(ax1 + (ra.mall ? 9.5 : eg ? 7 : 0.4), WH2 + (ra.hochpunkt ?? 0), az1 + aussen));
+    const aussen2 = eg ? ra.mall ? 9.5 : ra.box ? 19 : 7 : ra.mall ? 9.5 : 0.4;
+    const box = new three_module_exports.Box3(new three_module_exports.Vector3(ax0 - (ra.mall && eg && ax0 === 0 ? 7.6 : 0.6), eg ? -0.3 : ra.mall ? -4.8 : -2.2, az0 - (ra.mall && eg && az0 === 0 ? 7.6 : 0.6)), new three_module_exports.Vector3(ax1 + (ra.mall ? 9.5 : eg ? 7 : 0.4), WH2 + (ra.hochpunkt ?? 0), az1 + aussen2));
     return { box, breite: B8, tiefe: T, zonen: plan2?.abteilungen ?? zn, anzahl: tmp2.anzahl, dichte: d4, kunden, leer: kk.leer, familie: ra.fam, ladenplan: plan2, navigation: kk.navigation };
   }
   function bauen(S, scene2, haus3, e, ra, zn, k5, plan2 = null) {
@@ -137720,6 +138194,11 @@ void main() {
       });
     }
     const moebelGeneration = haus3.etagenBau?.[etageNr]?.moebelGeneration ?? 3;
+    for (const [k5, gs] of tmp2.aussenTeile ?? []) {
+      const farbe2 = haus3.kette === "schwester" && ["#d23c32", "#c8102e"].includes(k5) ? FARBE_SCHWESTER : k5;
+      if (!S.teile.has(farbe2)) S.teile.set(farbe2, []);
+      S.teile.get(farbe2).push(...gs);
+    }
     for (const [k5, gs] of tmp2.teile) {
       const farbeAlt = haus3.kette === "schwester" && ["#d23c32", "#c8102e"].includes(k5) ? FARBE_SCHWESTER : k5;
       const farbe2 = farbeGeneration(farbeAlt, moebelGeneration);
@@ -137731,6 +138210,18 @@ void main() {
     const eg = etageNr === 0;
     const box = new three_module_exports.Box3(new three_module_exports.Vector3(ax0 - 0.6, eg ? -0.3 : -2.2, az0 - 0.6), new three_module_exports.Vector3(ax1 + (eg ? 7 : 0.4), WANDHOEHE, az1 + (eg ? 7 : 0.4)));
     return { box, breite: B8, tiefe: T, zonen: zn, anzahl: tmp2.anzahl, dichte: d4, kunden, leer: kk.leer, navigation: kk.navigation };
+  }
+  function aussen(S, fn) {
+    const vorher = new Map([...S.teile].map(([k5, gs]) => [k5, gs.length]));
+    fn();
+    S.aussenTeile ?? (S.aussenTeile = /* @__PURE__ */ new Map());
+    for (const [k5, gs] of S.teile) {
+      const n3 = vorher.get(k5) ?? 0;
+      if (gs.length <= n3) continue;
+      if (!S.aussenTeile.has(k5)) S.aussenTeile.set(k5, []);
+      S.aussenTeile.get(k5).push(...gs.splice(n3));
+      if (!gs.length) S.teile.delete(k5);
+    }
   }
   function bauen2(S, scene2, haus3, etageNr, ra, zn, k5) {
     const { B: B8, T, nx, nz, typ, kx, kz, gx, gz: gz2, ring: ring4 } = ra;
@@ -137753,7 +138244,7 @@ void main() {
       return q3 >= 0 ? zn[q3].art : null;
     };
     const platte4 = (x0, z0, x1, z1) => {
-      if (x1 > x0 && z1 > z0) S.box(x1 - x0, 0.5, z1 - z0, (x0 + x1) / 2, -0.25, (z0 + z1) / 2, "#59626a");
+      if (x1 > x0 && z1 > z0) aussen(S, () => S.box(x1 - x0, 0.5, z1 - z0, (x0 + x1) / 2, -0.25, (z0 + z1) / 2, "#59626a"));
     };
     const kz0 = kz * R4 + 5.5, kz1 = kz * R4 + 8.7, kx0 = kx * R4 + 0.9, kx1 = kx * R4 + 9.3;
     const kernDrin = drin(kx, kz) && drin(kx + 1, kz + 1);
@@ -137763,7 +138254,7 @@ void main() {
       platte4(ax0, kz0, kx0, kz1);
       platte4(kx1, kz0, ax1, kz1);
     } else platte4(ax0, az0, ax1, az1);
-    if (!eg) {
+    if (!eg) aussen(S, () => {
       S.box(ax1 - ax0 + 0.3, 1.7, 0.3, (ax0 + ax1) / 2, -1.35, az1 + 0.15, fassade3);
       S.box(0.3, 1.7, az1 - az0 + 0.3, ax1 + 0.15, -1.35, (az0 + az1) / 2, dunkler(fassade3, 0.04));
       S.box(ax1 - ax0 + 0.6, 0.25, 0.5, (ax0 + ax1) / 2, -0.4, az1 + 0.2, heller(fassade3, 0.04));
@@ -137772,7 +138263,7 @@ void main() {
         for (let x2 = ax0 + 1.25; x2 < ax1; x2 += 2.5) S.box(1.4, 1, 0.1, x2, -1.2, az1 + 0.31, "#55636f");
         for (let z6 = az0 + 1.25; z6 < az1; z6 += 2.5) S.box(0.1, 1, 1.4, ax1 + 0.31, -1.2, z6, "#55636f");
       }
-    }
+    });
     const kante = (i, j4, di, dj) => {
       const ni = i + di, nj = j4 + dj;
       if (ni < 0 || nj < 0) return "wand";
@@ -137885,9 +138376,11 @@ void main() {
       if (!(lx > (nx - 2) * R4 - 3)) wandschild(S, scene2, haus3.kette === "schwester" ? NAME_SCHWESTER.toUpperCase() : sport ? "HARTWIG SPORT" : "HARTWIG", "x", lx, 4.05, 0.25, { schrift: haus3.kette === "schwester" ? FARBE_SCHWESTER : "#d23c32", hoehe: haus3.kette === "schwester" ? 0.48 : 0.7 });
     }
     const artAn = ra.artAn;
-    frontKante(S, scene2, "z", ax0, ax1, az1, eg, fassade3, ra, r4, artAn, d4);
-    frontKante(S, scene2, "x", az0, az1, ax1, eg, fassade3, ra, r4, artAn, d4);
-    if (eg) strasse2(S, ax0, az0, ax1, az1, r4, d4);
+    aussen(S, () => {
+      frontKante(S, scene2, "z", ax0, ax1, az1, eg, fassade3, ra, r4, artAn, d4);
+      frontKante(S, scene2, "x", az0, az1, ax1, eg, fassade3, ra, r4, artAn, d4);
+      if (eg) strasse2(S, ax0, az0, ax1, az1, r4, d4);
+    });
     for (let i = 0; i < nx; i++) for (let j4 = 0; j4 < nz; j4++) {
       const t9 = typ[i][j4], zi = zoneVon[i][j4];
       if (["kern", "lager", "treppe", "treppe2", "wc", "aufzug"].includes(t9) || zi >= 0 && ["leer", "umbau", "untermiete", "konzession"].includes(zn[zi].art)) belegt2.push([i * R4, j4 * R4, (i + 1) * R4, (j4 + 1) * R4]);
@@ -140607,6 +141100,22 @@ void main() {
       L6.zyl(8e-3, 8e-3, 0.14, u, 0.9, 0, "#3f6b3a", 4);
     }
     return { box: new three_module_exports.Box3(new three_module_exports.Vector3(-0.2, -0.2, -0.2), new three_module_exports.Vector3(B8 + 0.4, H2 + 0.4, T + 0.2)) };
+  }
+
+  // src/kit/umbau-aussen.js
+  function technikAufDach(S, h4, m) {
+    if (!h4.etagenBau || !m || !(m.hoehe > 0)) return;
+    const etagen = Object.values(h4.etagenBau);
+    const aufgeruestet = etagen.some((e) => e.technik?.klima === 2 && e.klimaModernisiert === true);
+    if (!aufgeruestet) return;
+    const { x: x2, z: z6, w: w2, d: d4, hoehe } = m, cx = x2 + w2 * 0.62, cz = z6 + d4 * 0.78;
+    for (let i = 0; i < Math.min(3, Math.ceil(etagen.length / 2)); i++) {
+      const dx = i * 3.5;
+      S.box(2.4, 1.45, 2, cx + dx, hoehe + 0.73, cz, "#c0c9ce");
+      S.box(2.65, 0.12, 2.2, cx + dx, hoehe + 1.5, cz, "#687984");
+      S.box(1.9, 0.12, 1.8, cx + dx, hoehe + 1.57, cz, "#778894");
+      S.box(1.5, 0.1, 0.15, cx + dx, hoehe + 0.9, cz + 1.05, "#303d49");
+    }
   }
 
   // src/kit/ostbauten.js
@@ -146076,12 +146585,12 @@ void main() {
       chor.push([cx + ra * Math.cos(a2), zC - ra * Math.sin(a2)]);
     }
     if (ruine) {
-      const aussen = [[cx - ra + 0.4, zT], [cx + ra - 0.4, zT], ...chor.map(([x2, z6]) => [x2 + (cx - x2) * 0.04, z6 + (zC - z6) * 0.04])];
-      const innen = einruecken(aussen, 1);
-      prisma2(S, aussen, 0, Hm, dunkler(stein, 0.06), [innen]);
+      const aussen2 = [[cx - ra + 0.4, zT], [cx + ra - 0.4, zT], ...chor.map(([x2, z6]) => [x2 + (cx - x2) * 0.04, z6 + (zC - z6) * 0.04])];
+      const innen = einruecken(aussen2, 1);
+      prisma2(S, aussen2, 0, Hm, dunkler(stein, 0.06), [innen]);
       boden4(S, cx - ra + 1.5, zC, cx + ra - 1.5, zT - 1, RASEN23, 0.32, 0.05);
       const sr = rng3(`nki-ru:${p2.seed}`);
-      for (const F3 of kanten(aussen)) for (let u = 0.5; u < F3.L - 1; u += zw(sr, 2.5, 5)) {
+      for (const F3 of kanten(aussen2)) for (let u = 0.5; u < F3.L - 1; u += zw(sr, 2.5, 5)) {
         const b4 = Math.min(F3.L - 0.2, u + zw(sr, 1, 3));
         if (sr() < 0.45) fb3(S, F3, u, b4, Hm, Hm + zw(sr, 0.5, 2.2), -1, 0, stein);
       }
@@ -147880,7 +148389,7 @@ void main() {
       const s2 = Math.min(1, LW3 / m.min[0], LD / m.min[1]);
       const nw = Math.min(Math.max(LW3 / s2, m.min[0]), m.max[0]), nd = Math.min(Math.max(LD / s2, m.min[1]), m.max[1]);
       const c = Math.cos(th), sn = Math.sin(th);
-      const T = new Sammler(), innen = new three_module_exports.Group(), aussen = new three_module_exports.Group();
+      const T = new Sammler(), innen = new three_module_exports.Group(), aussen2 = new three_module_exports.Group();
       const erg = bau2(T, innen, { ...p2, x: 0, z: 0, w: nw, d: nd, variante: v2, front: "+z", blick: [c - sn, sn + c], skala: s2 });
       const cx = p2.x + p2.w / 2, cz = p2.z + p2.d / 2;
       for (const [farbe2, gs] of T.teile) for (const g3 of gs) {
@@ -147892,11 +148401,11 @@ void main() {
       }
       if (nw * s2 < LW3 - 0.5 || nd * s2 < LD - 0.5) S.quader(p2.x, 0.3, p2.z, p2.x + p2.w, 0.34, p2.z + p2.d, PFLASTER4);
       innen.position.set(-nw / 2, -0.3, -nd / 2);
-      aussen.add(innen);
-      aussen.scale.setScalar(s2);
-      aussen.rotation.y = th;
-      aussen.position.set(cx, 0.3, cz);
-      scene2.add(aussen);
+      aussen2.add(innen);
+      aussen2.scale.setScalar(s2);
+      aussen2.rotation.y = th;
+      aussen2.position.set(cx, 0.3, cz);
+      scene2.add(aussen2);
       return { ...erg, hoehe: (erg.hoehe ?? 10) * s2, variante: v2, skala: s2 };
     };
   }
@@ -148687,7 +149196,7 @@ void main() {
       const felder2 = [[gx0 + 2.4, mx - wb / 2, gz0 + 2.4, mz - wb / 2], [mx + wb / 2, gx1 - 2.4, gz0 + 2.4, mz - wb / 2], [gx0 + 2.4, mx - wb / 2, mz + wb / 2, gz1 - 2.4], [mx + wb / 2, gx1 - 2.4, mz + wb / 2, gz1 - 2.4]];
       felder2.forEach(([a0, a1, b0, b1], i) => {
         boden5(S, a0 + 1.2, b0 + 1.2, a1 - 1.2, b1 - 1.2, RASEN24, 0.3, 0.1);
-        const fx = (a0 + a1) / 2, fz = (b0 + b1) / 2, aussen = i % 2 ? a1 - 4 : a0 + 4, tief2 = i < 2 ? b0 + 4 : b1 - 4;
+        const fx = (a0 + a1) / 2, fz = (b0 + b1) / 2, aussen2 = i % 2 ? a1 - 4 : a0 + 4, tief2 = i < 2 ? b0 + 4 : b1 - 4;
         if (i === 3) {
           const px2 = fx + (a1 - a0) * 0.12, pz6 = fz;
           zyl8(S, 4.2, 4.4, 0.9, px2, 0.3, pz6, "#e2dccf", 8);
@@ -148707,7 +149216,7 @@ void main() {
           zyl8(S, 2.4, 2.4, 0.18, fx, 0.36, fz, waehle2(r4, ["#e05a5a", "#e8c547", "#c86ab0", "#e88a3c"]), 20);
           zyl8(S, 1.2, 1.2, 0.22, fx, 0.36, fz, "#f2efe6", 16);
         }
-        for (const [dx, dz] of [[0, 0], [i % 2 ? -3.2 : 3.2, 0.6], [0.8, i < 2 ? 3 : -3]]) baum(S, aussen + dx, tief2 + dz, r4, zw(r4, 0.85, 1.1));
+        for (const [dx, dz] of [[0, 0], [i % 2 ? -3.2 : 3.2, 0.6], [0.8, i < 2 ? 3 : -3]]) baum(S, aussen2 + dx, tief2 + dz, r4, zw(r4, 0.85, 1.1));
         blumenbeet(S, r4, i % 2 ? a0 + 0.4 : a1 - 1.6, b0 + 2, i % 2 ? a0 + 1.6 : a1 - 0.4, b1 - 2);
       });
       for (const z6 of [gz0 + 6, gz1 - 6]) for (const sx of [-1, 1]) bank4(S, mx + sx * (wb / 2 + 0.5), z6, true);
@@ -152371,9 +152880,9 @@ void main() {
   }
   var sichtF2 = (p2, F3) => sicht2(p2, F3.nx, F3.nz);
   function ausgeblichen2(c) {
-    const k5 = new three_module_exports.Color(c), hsl = {};
-    k5.getHSL(hsl);
-    k5.setHSL(hsl.h, hsl.s * 0.62, Math.min(0.92, hsl.l * 0.9 + 0.04));
+    const k5 = new three_module_exports.Color(c), hsl2 = {};
+    k5.getHSL(hsl2);
+    k5.setHSL(hsl2.h, hsl2.s * 0.62, Math.min(0.92, hsl2.l * 0.9 + 0.04));
     return "#" + k5.getHexString();
   }
   function slot3(roh2, min, max = null, opt = {}) {
@@ -152409,11 +152918,11 @@ void main() {
       }
       inner.scale.setScalar(s2);
       inner.position.set(ox, 0, oz);
-      const aussen = new three_module_exports.Group();
-      aussen.add(inner);
-      aussen.rotation.y = th;
-      aussen.position.set(tx, 0, tz);
-      scene2.add(aussen);
+      const aussen2 = new three_module_exports.Group();
+      aussen2.add(inner);
+      aussen2.rotation.y = th;
+      aussen2.position.set(tx, 0, tz);
+      scene2.add(aussen2);
       return { ...erg, hoehe: erg.hoehe * s2, skala: s2, teile: T.anzahl, gewendet };
     };
     fn.hang = opt.hang ?? null;
@@ -160652,7 +161161,7 @@ void main() {
   function setzeKartenStil(v2) {
     if (!KARTENSTILE[v2]) return;
     if (stilGesetzt && stilGesetzt !== v2) {
-      for (const k5 of [...CACHE.keys()]) if (!k5.endsWith("|" + v2)) CACHE.delete(k5);
+      for (const k5 of [...CACHE2.keys()]) if (!k5.endsWith("|" + v2)) CACHE2.delete(k5);
     }
     stilGesetzt = v2;
     try {
@@ -160817,10 +161326,10 @@ void main() {
     }
     return o4.sort((a2, b4) => a2[2] - b4[2]);
   })();
-  var CACHE = /* @__PURE__ */ new Map();
+  var CACHE2 = /* @__PURE__ */ new Map();
   function kartenDaten(name2, stil = kartenStil()) {
     const ck = name2 + "|" + stil;
-    if (CACHE.has(ck)) return CACHE.get(ck);
+    if (CACHE2.has(ck)) return CACHE2.get(ck);
     const k5 = KARTEN[name2];
     if (!k5) return null;
     const d4 = k5.roh, v2 = d4.varianten?.[stil] ?? d4.varianten?.coffee;
@@ -160885,7 +161394,7 @@ void main() {
       })
     };
     r4.aufFahrbahn = fahrbahnMaske(r4);
-    CACHE.set(ck, r4);
+    CACHE2.set(ck, r4);
     return r4;
   }
   function fahrbahnMaske(K3) {
@@ -163308,22 +163817,6 @@ void main() {
     return { teile: 1 + 1 + 1 + 6 + 4, schild: "Abholstation" };
   }
 
-  // src/kit/umbau-aussen.js
-  function technikAufDach(S, h4, m) {
-    if (!h4.etagenBau || !m || !(m.hoehe > 0)) return;
-    const etagen = Object.values(h4.etagenBau);
-    const aufgeruestet = etagen.some((e) => e.technik?.klima === 2 && e.klimaModernisiert === true);
-    if (!aufgeruestet) return;
-    const { x: x2, z: z6, w: w2, d: d4, hoehe } = m, cx = x2 + w2 * 0.48, cz = z6 + d4 * 0.43;
-    for (let i = 0; i < Math.min(3, Math.ceil(etagen.length / 2)); i++) {
-      const dx = i * 3.5;
-      S.box(2.4, 1.45, 2, cx + dx, hoehe + 0.73, cz, "#c0c9ce");
-      S.box(2.65, 0.12, 2.2, cx + dx, hoehe + 1.5, cz, "#687984");
-      S.box(1.9, 0.12, 1.8, cx + dx, hoehe + 1.57, cz, "#778894");
-      S.box(1.5, 0.1, 0.15, cx + dx, hoehe + 0.9, cz + 1.05, "#303d49");
-    }
-  }
-
   // src/kit/bruecke.js
   var FASSADE2 = new Map(haeuser_default.map((h4) => [h4.id, h4.fassade]));
   var EXPORT_FAMILIE = new Map(haeuser_default.filter((h4) => h4.familie != null).map((h4) => [h4.id, h4.familie]));
@@ -163408,7 +163901,11 @@ void main() {
         if (f13.konzept === "leer" && !(f13.umbauBis > w2)) leerQm += f13.qm || 0;
       }
       const zus = /* @__PURE__ */ new Set();
-      if ((s2?.umbau?.projekte ?? []).some((p2) => p2.haus === haus3.id && p2.status === "laufend" && p2.ende > w2)) umbau = true;
+      for (const p2 of s2?.umbau?.projekte ?? []) {
+        if (p2.haus !== haus3.id || p2.status !== "laufend" || p2.ende <= w2) continue;
+        if (p2.stufe === "komplett" || p2.gewerk === "fassade" || p2.gewerk === "komplett") umbau = true;
+        else (z6.bauEtagen ?? (z6.bauEtagen = [])).push(...p2.etagen);
+      }
       if (umbau) zus.add("umbau");
       if (unter.size) {
         zus.add("untermiete");
@@ -164591,7 +165088,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "b9d54c8" : "Entwicklung";
+  var version = () => true ? "fdc4660" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -164812,12 +165309,12 @@ void main() {
     const n3 = parseInt(h4, 16);
     return [n3 >> 16 & 255, n3 >> 8 & 255, n3 & 255];
   }
-  function hex([r4, g3, b4]) {
+  function hex2([r4, g3, b4]) {
     return "#" + [r4, g3, b4].map((v2) => Math.max(0, Math.min(255, Math.round(v2))).toString(16).padStart(2, "0")).join("");
   }
   function mische2(a2, b4, t9) {
     const A = rgb(a2), B8 = rgb(b4);
-    return hex(A.map((v2, i) => v2 + (B8[i] - v2) * t9));
+    return hex2(A.map((v2, i) => v2 + (B8[i] - v2) * t9));
   }
   var hell2 = (c, t9) => mische2(c, "#ffffff", t9);
   var dunkel2 = (c, t9) => mische2(c, "#000000", t9);
@@ -165817,7 +166314,7 @@ void main() {
     });
   }
   var zielgruppenFuerFach = (K3, fach) => (K3.zielgruppen ?? []).filter((x2) => fach !== "kinder" || x2.id === "kinder" || x2.id === "teens");
-  var farbpunkt = (hex4, g3 = 14) => `<svg class="hw-g1-punkt" viewBox="0 0 20 20" width="${g3}" height="${g3}" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="${esc(hex4)}" stroke="rgba(255,255,255,.35)" stroke-width="1.2"/></svg>`;
+  var farbpunkt = (hex5, g3 = 14) => `<svg class="hw-g1-punkt" viewBox="0 0 20 20" width="${g3}" height="${g3}" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="${esc(hex5)}" stroke="rgba(255,255,255,.35)" stroke-width="1.2"/></svg>`;
   var chips = (optionen, aktiv7, attr, label = "", aus = false, reihe2 = false) => `<div class="hw-g1-chips${reihe2 ? " reihe" : ""}" role="group"${label ? ` aria-label="${esc(label)}"` : ""}>${optionen.map(([w2, t9]) => `<button type="button" class="hw-g1-chip" aria-pressed="${String(w2) === String(aktiv7)}" ${attr(w2)}${aus ? " disabled" : ""}>${t9}</button>`).join("")}</div>`;
   function zielChips(K3, ui) {
     const z6 = zielgruppenFuerFach(K3, ui.fach);
@@ -168978,99 +169475,257 @@ void main() {
   // src/ui/umbau.js
   var ETAGE = (nr4) => nr4 === -1 ? "UG" : nr4 === 0 ? "EG" : nr4 + ". OG";
   var ETAGE_LANG = (nr4) => nr4 === -1 ? "Untergeschoss" : nr4 === 0 ? "Erdgeschoss" : nr4 + ". Obergeschoss";
-  var BEZEICHNUNG = { auffrischung: "Auffrischung", ladenbau: "Ladenbau neu", komplett: "Komplettumbau", technik: "Technik" };
-  var KURZ = { auffrischung: "Auffrischen", ladenbau: "Ladenbau", komplett: "Komplett", technik: "Technik" };
+  var GRUPPEN3 = [["technik", "Technik"], ["moebel", "M\xF6bel"], ["oberflaeche", "Boden"], ["fassade", "Fassade"]];
+  var GEWERK_FOLGE = ["moebel", "oberflaeche", "klima", "licht", "brandschutz", "foerdertechnik", "fassade", "komplett"];
+  var ZUSTAND = ["schlecht", "mittel", "gut"];
   var prozent4 = (x2, n3 = 1) => (Number(x2) || 0).toLocaleString("de-DE", { minimumFractionDigits: n3, maximumFractionDigits: n3 }) + " %";
+  var mio4 = (x2) => ((Number(x2) || 0) / 1e6).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " Mio. \u20AC";
+  function zustandsBalken(gut) {
+    return '<span class="hw-bestand" role="img" aria-label="' + esc(GRUPPEN3.map(([g3, n3]) => n3 + " " + (gut[g3] ?? 0) + " % gut").join(", ")) + '">' + GRUPPEN3.map(([g3, n3]) => '<span><i style="--a:' + Math.max(0, Math.min(100, gut[g3] ?? 0)) + '%"></i><small>' + esc(n3.slice(0, 1)) + "</small></span>").join("") + "</span>";
+  }
+  function etagenSchnitt(etagen) {
+    const zeilen = etagen.map((e) => '<div class="hw-schnitt-zeile' + (e.baustelle ? " bau" : "") + (e.gesperrt ? " zu" : "") + '"><b>' + ETAGE(e.etage) + "</b>" + GRUPPEN3.map(([g3]) => '<i data-z="' + e.zustand[g3] + '"></i>').join("") + "</div>").join("");
+    return '<div class="hw-schnitt" role="img" aria-label="Etagenschnitt"><div class="hw-schnitt-kopf"><b></b>' + GRUPPEN3.map(([, n3]) => "<span>" + esc(n3) + "</span>").join("") + "</div>" + zeilen + '<div class="hw-schnitt-legende"><span><i data-z="2"></i>gut</span><span><i data-z="1"></i>mittel</span><span><i data-z="0"></i>schlecht</span><span><i class="bau"></i>Baustelle</span></div></div>';
+  }
   function umbauModul(ctx) {
     const E9 = ctx.E, s2 = () => ctx.s();
-    const ui = { aktiv: false, haus: null, etage: 0, stufe: "auffrischung" };
-    const zustand = () => E9.umbauUebersicht(s2());
+    const ui = {
+      aktiv: false,
+      seite: "bestand",
+      haus: null,
+      etage: 0,
+      gewerk: "moebel",
+      cluster: null,
+      projekt: null,
+      auftrag: { cluster: [], gewerk: "moebel", bisZustand: 0, parallel: 6 }
+    };
     const kw2 = (w2) => "KW " + (w2 % 52 + 1) + "/" + (s2().startJahr + Math.floor(w2 / 52));
-    function etagenZeile(id, e, aktuell = null) {
-      const pf2 = e.pflichten, t9 = e.technik, frist = Math.min(pf2.brandschutz, pf2.aufzug), bald = frist - s2().woche < 13;
-      const status2 = e.gesperrt ? '<span class="hw-schlecht">beh\xF6rdlich gesperrt</span>' : e.projekt ? '<span class="hw-achtung">Baustelle bis ' + kw2(e.projekt.ende) + "</span>" : bald ? '<span class="hw-achtung">Pr\xFCffrist ' + kw2(frist) + "</span>" : "Pr\xFCffrist " + kw2(frist);
-      return zeile2({
-        was: ETAGE_LANG(e.etage) + (aktuell === e.etage ? " \xB7 gew\xE4hlt" : ""),
-        unter: "M\xF6bel Generation " + e.moebelGeneration + " \xB7 Klima " + t9.klima + " \xB7 Licht " + t9.licht + " \xB7 Brandschutz " + t9.brandschutz + " von 2 \xB7 " + status2,
-        wert: Math.round(e.substanz) + " / 100",
-        wertUnter: "Substanz",
-        ton: e.substanz < 35 ? "schlecht" : e.substanz < 55 ? "achtung" : "",
-        tippbar: true,
-        attr: 'data-umbau="planen" data-id="' + esc(id) + '" data-etage="' + e.etage + '" data-umbau-etage="' + e.etage + '" aria-label="' + esc(ETAGE_LANG(e.etage)) + ' umbauen planen"'
-      });
-    }
+    const G3 = () => E9.GEWERKE ?? {};
     function hausKarte(id) {
       if (typeof E9.umbauHaus !== "function") return "";
-      const etagen = [...E9.umbauHaus(s2(), id) ?? []].sort((a2, b4) => b4.etage - a2.etage);
-      const schwach = etagen.filter((e) => e.substanz < 35).length;
-      return abschnitt("Bau und Technik", schwach ? schwach + (schwach === 1 ? " Etage kritisch" : " Etagen kritisch") : etagen.length + " Etagen") + '<div data-umbau-karte="' + esc(id) + '">' + liste(etagen.map((e) => etagenZeile(id, e))) + "</div>" + knoepfe(knopf("Konzernprogramm Modernisierung", 'data-umbau="modernisierung"', "text"));
+      const h4 = s2().haeuser.find((x2) => x2.id === id);
+      const cl = typeof E9.bestandCluster === "function" && h4?.hauscluster ? E9.bestandCluster(s2(), h4.hauscluster) : null;
+      const eintrag2 = cl?.haeuser.find((x2) => x2.id === id);
+      const kritisch = (eintrag2?.etagen ?? []).filter((e) => e.substanz < 35).length;
+      return abschnitt("Bau und Technik", kritisch ? kritisch + (kritisch === 1 ? " Etage kritisch" : " Etagen kritisch") : (h4?.etagen.length ?? 0) + " Etagen") + '<div data-umbau-karte="' + esc(id) + '">' + (eintrag2 ? etagenSchnitt(eintrag2.etagen) : "") + "</div>" + knoepfe(
+        knopf("Umbau planen", 'data-umbau="planen" data-id="' + esc(id) + '" data-etage="' + (eintrag2?.etagen.slice().sort((a2, b4) => a2.substanz - b4.substanz)[0]?.etage ?? 0) + '"', "zweit"),
+        knopf("Bestand im Konzern", 'data-umbau="modernisierung"', "text")
+      );
     }
     function planen2() {
       const h4 = s2().haeuser.find((x3) => x3.id === ui.haus);
-      const p2 = E9.umbauSchaetzung(s2(), ui.haus, ui.etage, ui.stufe);
-      const laeuft2 = (s2().umbau?.projekte ?? []).some((x3) => x3.status === "laufend" && x3.haus === ui.haus && x3.etagen.includes(ui.etage));
-      const rest = zustand().rest, kosten2 = p2?.kosten ?? 0;
-      let x2 = seg(Object.entries(KURZ), ui.stufe, (id) => 'data-umbau="stufewahl" data-v="' + id + '"').replace('class="hw-segment"', 'class="hw-segment eng" aria-label="Umbaustufe"');
-      x2 += gross2([
-        { label: "Kosten", wert: geld(kosten2), ton: kosten2 > rest ? "schlecht" : "", unter: "Budgetrest " + esc(geld(rest)) },
-        { label: "Kaufquote", wert: "+" + Math.round((p2?.kaufquote ?? 0) * 100) + " %", ton: "gut", unter: "nach Fertigstellung" }
+      const cl = h4?.hauscluster && typeof E9.bestandCluster === "function" ? E9.bestandCluster(s2(), h4.hauscluster)?.haeuser.find((x3) => x3.id === ui.haus) : null;
+      const etagen = cl?.etagen ?? [];
+      const e = etagen.find((x3) => x3.etage === ui.etage) ?? etagen[0];
+      if (e) ui.etage = e.etage;
+      const rest = E9.bestandUebersicht(s2()).rest;
+      const p2 = E9.gewerkSchaetzung(s2(), ui.haus, ui.etage, ui.gewerk);
+      const laeuft2 = !!e?.baustelle;
+      let x2 = gross2([
+        { label: "Kosten", wert: geld(p2?.kosten ?? 0), ton: (p2?.kosten ?? 0) > rest ? "schlecht" : "", unter: "Budget frei " + esc(geld(rest)) },
+        { label: "Bauzeit", wert: (p2?.wochen ?? 0) + " Wochen", unter: esc(G3()[ui.gewerk]?.ebene === "haus" ? "ganzes Haus" : ETAGE_LANG(ui.etage)) }
       ]);
-      x2 += abschnitt(BEZEICHNUNG[ui.stufe], (p2?.etagen?.length ?? 1) > 1 ? p2.etagen.length + " Etagen" : ETAGE_LANG(ui.etage));
+      x2 += abschnitt("Etagenschnitt", "Etage antippen");
+      x2 += etagenSchnitt(etagen);
+      x2 += liste(etagen.map((q3) => zeile2({
+        was: ETAGE_LANG(q3.etage) + (q3.etage === ui.etage ? " \xB7 gew\xE4hlt" : ""),
+        unter: GRUPPEN3.map(([g3, n3]) => n3 + " " + ZUSTAND[q3.zustand[g3]]).join(" \xB7 ") + (q3.baustelle ? ' \xB7 <span class="hw-achtung">Baustelle bis ' + kw2(q3.baustelle.ende) + "</span>" : q3.gesperrt ? ' \xB7 <span class="hw-schlecht">beh\xF6rdlich gesperrt</span>' : ""),
+        wert: q3.substanz + " / 100",
+        wertUnter: "Substanz",
+        ton: q3.substanz < 35 ? "schlecht" : q3.substanz < 55 ? "achtung" : "",
+        tippbar: true,
+        attr: 'data-umbau="etage" data-etage="' + q3.etage + '" aria-label="' + esc(ETAGE_LANG(q3.etage)) + ' w\xE4hlen"'
+      })));
+      x2 += abschnitt("Gewerk", ETAGE_LANG(ui.etage));
+      x2 += liste(GEWERK_FOLGE.map((g3) => {
+        const d4 = G3()[g3], q3 = E9.gewerkSchaetzung(s2(), ui.haus, ui.etage, g3), z6 = e?.gewerke?.[g3];
+        return zeile2({
+          was: esc(d4.name) + (g3 === ui.gewerk ? " \xB7 gew\xE4hlt" : ""),
+          unter: (z6 != null ? "heute " + ZUSTAND[z6] + " \xB7 " : "") + esc(d4.text),
+          wert: esc(geld(q3?.kosten ?? 0)),
+          wertUnter: (q3?.wochen ?? 0) + " Wochen",
+          tippbar: true,
+          attr: 'data-umbau="gewerkwahl" data-v="' + g3 + '"'
+        });
+      }));
       x2 += liste([
-        zeile2({ was: "Fl\xE4che", wert: fmt.format(p2?.qm ?? 0) + " qm" }),
-        zeile2({ was: "Bauzeit", wert: (p2?.wochen ?? 0) + " Wochen", wertUnter: "Etage in der Zeit gesperrt" }),
-        zeile2({ was: "Frequenz", wert: "+" + Math.round((p2?.frequenz ?? 0) * 100) + " %" }),
-        zeile2({ was: "Jahrespotenzial", wert: prozent4(p2?.rendite ?? 0), wertUnter: "auf die Kosten", ton: "gut" })
+        zeile2({ was: "Umsatzausfall in der Bauzeit", wert: esc(geld(p2?.ausfall ?? 0)), ton: "schlecht" }),
+        zeile2({ was: "Mehrumsatz im Jahr", wert: esc(geld(p2?.plusJahr ?? 0)), ton: "gut" }),
+        zeile2({ was: "Rendite auf den Bruttogewinn", wert: prozent4(p2?.rendite ?? 0), wertUnter: "im Jahr" })
       ]);
-      if (ui.stufe === "komplett") x2 += hinweis("Ein Komplettumbau betrifft das gesamte Haus.", "achtung");
       if (laeuft2) x2 += hinweis("Auf dieser Etage l\xE4uft bereits eine Baustelle.", "achtung");
-      else if (kosten2 > rest) x2 += hinweis("Die Kosten \xFCbersteigen das freie Baubudget.", "achtung");
+      else if ((p2?.kosten ?? 0) > rest) x2 += hinweis("Die Kosten \xFCbersteigen das freie Baubudget.", "achtung");
       x2 += knoepfe(knopf("Umbau starten", 'data-umbau="starten"', "breit", laeuft2));
-      const etagen = typeof E9.umbauHaus === "function" ? [...E9.umbauHaus(s2(), ui.haus) ?? []].sort((a2, b4) => b4.etage - a2.etage) : [];
-      if (etagen.length) x2 += abschnitt("Etagen im Haus", "antippen zum Wechseln") + liste(etagen.map((e) => etagenZeile(ui.haus, e, ui.etage)));
-      x2 += knoepfe(knopf("Zum Konzernprogramm", 'data-umbau="modernisierung"', "text"));
+      x2 += knoepfe(knopf("Zum Bestand", 'data-umbau="modernisierung"', "text"));
       ctx.panel("Umbau planen", (h4?.name ?? "Haus") + " \xB7 " + ETAGE(ui.etage), bereich("haus", "umbau") + '<div class="hw-g5">' + rumpf2(x2) + "</div>");
     }
-    function anzeigen() {
-      if (ui.haus) {
-        planen2();
-        ui.aktiv = true;
-        return;
-      }
-      const u = zustand();
+    function bestand() {
+      const u = E9.bestandUebersicht(s2()), g3 = u.gesamt;
+      const schlechtM = g3.schlecht.moebel, schlechtT = g3.schlecht.technik;
+      const sp6 = sprecher({ text: schlechtM + " % der Etagen haben M\xF6bel aus den 90ern, " + schlechtT + " % alte Technik. Bedarf " + mio4(g3.bedarf) + "." });
       let x2 = gross2([
-        { label: "Budget frei", wert: geld(u.rest), ton: u.rest <= 0 ? "schlecht" : "", unter: "von " + esc(geld(u.budget)) + "<br>verbraucht " + esc(geld(u.verbraucht)) },
-        { label: "Baustellen", wert: String(u.laufend.length), unter: u.premiumInvestitionen + " Premium-Investitionen" }
+        { label: "Budget frei", wert: geld(u.rest), ton: u.rest <= 0 ? "schlecht" : "", unter: "von " + esc(geld(u.budget)) },
+        { label: "Baustellen", wert: String(u.programme.reduce((a2, p2) => a2 + p2.laufend, 0) + (s2().umbau?.projekte ?? []).filter((p2) => p2.status === "laufend" && !p2.programm).length), unter: g3.fristen + " Pr\xFCffristen in 12 Monaten" }
       ]);
-      x2 += abschnitt("Vorschl\xE4ge Bau und Ladenbau", "nach Rendite");
-      x2 += u.programm.length ? liste(u.programm.slice(0, 20).map((v2) => zeile2({
-        was: esc(v2.name) + " \xB7 " + ETAGE(v2.etage),
-        unter: BEZEICHNUNG[v2.stufe] + " \xB7 " + esc(geld(v2.kosten)),
-        wert: prozent4(v2.rendite),
-        wertUnter: "Jahrespotenzial",
-        ton: "gut",
+      x2 += abschnitt("Zustand Konzern", "Anteil gut je Gewerk");
+      x2 += liste([zeile2({ was: g3.haeuser + " H\xE4user", unter: fmt.format(g3.etagen) + " Etagen" + (g3.gesperrt ? ' \xB7 <span class="hw-schlecht">' + g3.gesperrt + " gesperrt</span>" : ""), wert: zustandsBalken(g3.gut) })]);
+      x2 += knoepfe(knopf("Bauprogramm anlegen", 'data-umbau="assistent"', "breit"));
+      const laufend3 = u.programme.filter((p2) => p2.status === "laufend");
+      if (laufend3.length) {
+        x2 += abschnitt("Laufende Bauprogramme", String(laufend3.length));
+        x2 += liste(laufend3.map((p2) => zeile2({
+          was: esc(p2.name),
+          unter: p2.fertig + " fertig \xB7 " + p2.laufend + " im Bau \xB7 " + p2.warteschlange + " warten",
+          wert: Math.round(p2.fertig / Math.max(1, p2.gesamt) * 100) + " %",
+          wertUnter: esc(geld(p2.kosten)),
+          tippbar: true,
+          attr: 'data-umbau="programm" data-id="' + esc(p2.id) + '"'
+        })));
+      }
+      x2 += abschnitt("Cluster", "T Technik \xB7 M M\xF6bel \xB7 B Boden \xB7 F Fassade");
+      x2 += liste(u.cluster.map((c) => zeile2({
+        was: esc(c.name),
+        unter: c.haeuser + " H\xE4user \xB7 " + mio4(c.bedarf) + (c.baustellen ? " \xB7 " + c.baustellen + " im Bau" : "") + (c.fristen ? ' \xB7 <span class="hw-achtung">' + c.fristen + " Fristen</span>" : ""),
+        wert: zustandsBalken(c.gut),
         tippbar: true,
-        attr: 'data-umbau="planen" data-id="' + esc(v2.haus) + '" data-etage="' + v2.etage + '"'
-      }))) : leer3("Bau und Ladenbau haben keine lohnenden Vorschl\xE4ge.");
-      x2 += abschnitt("Laufende Baustellen", String(u.laufend.length));
-      x2 += u.laufend.length ? liste(u.laufend.map((p2) => zeile2({ was: esc(s2().haeuser.find((h4) => h4.id === p2.haus)?.name ?? p2.haus), unter: BEZEICHNUNG[p2.stufe] + " \xB7 " + p2.etagen.map(ETAGE).join(", ") + " \xB7 bis " + kw2(p2.ende), wert: esc(geld(p2.kosten)) }))) : leer3("Keine laufenden Umbauten.");
-      ctx.panel("Modernisierung", "Programm " + u.jahr + " \xB7 Bau und Ladenbau", bereich("haus", "umbau") + '<div class="hw-g5">' + rumpf2(x2) + "</div>", "gross");
-      ui.aktiv = true;
+        attr: 'data-umbau="cluster" data-id="' + esc(c.id) + '"'
+      })));
+      ctx.panel("Modernisierung", "Bestand und Bauprogramme", bereich("haus", "umbau") + sp6 + '<div class="hw-g5">' + rumpf2(x2) + "</div>", "gross");
     }
-    function tun2(a2) {
+    function cluster() {
+      const c = E9.bestandCluster(s2(), ui.cluster);
+      if (!c) {
+        ui.seite = "bestand";
+        return bestand();
+      }
+      const zeile3 = E9.bestandUebersicht(s2()).cluster.find((q3) => q3.id === c.id);
+      let x2 = zeile3 ? gross2([{ label: "M\xF6bel gut", wert: zeile3.gut.moebel + " %" }, { label: "Bedarf", wert: mio4(zeile3.bedarf) }]) : "";
+      x2 += knoepfe(knopf("Bauprogramm f\xFCr diesen Cluster", 'data-umbau="assistent" data-id="' + esc(c.id) + '"', "breit"));
+      x2 += abschnitt("H\xE4user", "T Technik \xB7 M M\xF6bel \xB7 B Boden \xB7 F Fassade");
+      x2 += liste(c.haeuser.map((h4) => zeile2({
+        was: esc(h4.name),
+        unter: esc(h4.stadt) + " \xB7 " + h4.etagen.length + " Etagen" + (h4.etagen.some((e) => e.baustelle) ? " \xB7 im Bau" : ""),
+        wert: zustandsBalken(h4.gut),
+        tippbar: true,
+        attr: 'data-umbau="planen" data-id="' + esc(h4.id) + '" data-etage="' + (h4.etagen.slice().sort((a2, b4) => a2.substanz - b4.substanz)[0]?.etage ?? 0) + '"'
+      })));
+      x2 += knoepfe(knopf("Zum Bestand", 'data-umbau="modernisierung"', "text"));
+      ctx.panel(c.name, "Bestand im Cluster", bereich("haus", "umbau") + '<div class="hw-g5">' + rumpf2(x2) + "</div>", "gross");
+    }
+    function assistent2() {
+      const a2 = ui.auftrag, u = E9.bestandUebersicht(s2());
+      const v2 = a2.cluster.length ? E9.bauprogrammSchaetzung(s2(), a2) : null;
+      let x2 = gross2([
+        { label: "Kosten", wert: v2 ? mio4(v2.kosten) : "\u2013", ton: v2?.ueberBudget ? "schlecht" : "", unter: "Budget frei " + esc(geld(u.rest)) },
+        { label: "Bauzeit", wert: v2 ? v2.wochen + " Wochen" : "\u2013", unter: v2 ? v2.haeuser + " H\xE4user \xB7 " + v2.auftraege + " Baustellen" : "Cluster w\xE4hlen" }
+      ]);
+      x2 += abschnitt("1 \xB7 Gewerk");
+      x2 += liste(GEWERK_FOLGE.map((g3) => zeile2({ was: esc(G3()[g3].name) + (g3 === a2.gewerk ? " \xB7 gew\xE4hlt" : ""), unter: esc(G3()[g3].text), tippbar: true, attr: 'data-umbau="agewerk" data-v="' + g3 + '"' })));
+      x2 += abschnitt("2 \xB7 Umfang");
+      x2 += seg([["0", "nur schlechte"], ["1", "schlechte und mittlere"]], String(a2.bisZustand), (w2) => 'data-umbau="abis" data-v="' + w2 + '"');
+      x2 += feld("Gleichzeitige Baustellen", stepper({ wert: String(a2.parallel), unter: "je Haus eine", attrMinus: 'data-umbau="apar" data-v="-1"', attrPlus: 'data-umbau="apar" data-v="1"', minusAus: a2.parallel <= 1, plusAus: a2.parallel >= 40, label: "Gleichzeitige Baustellen" }));
+      x2 += abschnitt("3 \xB7 Cluster", a2.cluster.length + " gew\xE4hlt");
+      x2 += knoepfe(knopf("Alle", 'data-umbau="aalle"', "zweit"), knopf("Keine", 'data-umbau="akeine"', "zweit"), knopf("Schlechteste 5", 'data-umbau="aschlecht"', "zweit"));
+      const grp = G3()[a2.gewerk]?.gruppe, sortGruppe = grp === "komplett" ? "moebel" : grp;
+      x2 += u.cluster.slice().sort((p2, q3) => (p2.gut[sortGruppe] ?? 0) - (q3.gut[sortGruppe] ?? 0)).map((c) => schalter({
+        text: c.name,
+        unter: c.haeuser + " H\xE4user \xB7 " + GRUPPEN3.find(([g3]) => g3 === sortGruppe)[1] + " gut " + (c.gut[sortGruppe] ?? 0) + " %",
+        an: a2.cluster.includes(c.id),
+        attr: 'data-umbau="acluster" data-id="' + esc(c.id) + '"'
+      })).join("");
+      if (v2) {
+        x2 += abschnitt("Vorschau");
+        x2 += liste([
+          zeile2({ was: "Umsatzausfall in der Bauzeit", wert: esc(mio4(v2.ausfall)), ton: "schlecht" }),
+          zeile2({ was: "Mehrumsatz im Jahr danach", wert: esc(mio4(v2.plusJahr)), ton: "gut" }),
+          zeile2({ was: "Mehr Bruttogewinn im Jahr", wert: esc(mio4(v2.ertragJahr)), wertUnter: v2.amortisationJahre != null ? "Amortisation " + v2.amortisationJahre.toLocaleString("de-DE") + " Jahre" : "" }),
+          zeile2({ was: "H\xF6chste Zahlung in einer Woche", wert: esc(mio4(v2.spitzeWoche)), wertUnter: "Liquidit\xE4t" })
+        ]);
+        if (!v2.auftraege) x2 += hinweis("In diesen Clustern ist f\xFCr dieses Gewerk nichts mehr zu tun.", "achtung");
+        else if (v2.ueberBudget) x2 += hinweis("Das Programm \xFCbersteigt das freie Baubudget dieses Jahres.", "achtung");
+      }
+      x2 += knoepfe(knopf("Bauprogramm starten", 'data-umbau="astart"', "breit", !v2?.auftraege));
+      x2 += knoepfe(knopf("Abbrechen", 'data-umbau="modernisierung"', "text"));
+      ctx.panel("Bauprogramm", "Mehrere Cluster auf einmal", bereich("haus", "umbau") + '<div class="hw-g5">' + rumpf2(x2) + "</div>", "gross");
+    }
+    function programm() {
+      const p2 = E9.bestandUebersicht(s2()).programme.find((q3) => q3.id === ui.programm);
+      if (!p2) {
+        ui.seite = "bestand";
+        return bestand();
+      }
+      let x2 = gross2([
+        { label: "Fortschritt", wert: Math.round(p2.fertig / Math.max(1, p2.gesamt) * 100) + " %", unter: p2.fertig + " von " + p2.gesamt + " fertig" },
+        { label: "Bisher", wert: mio4(p2.kosten), unter: p2.laufend + " im Bau \xB7 " + p2.warteschlange + " warten" }
+      ]);
+      const projekte = (s2().umbau?.projekte ?? []).filter((q3) => q3.programm === p2.id).slice().reverse().slice(0, 30);
+      x2 += abschnitt("Baustellen", String(projekte.length));
+      x2 += liste(projekte.map((q3) => zeile2({
+        was: esc(s2().haeuser.find((h4) => h4.id === q3.haus)?.name ?? q3.haus),
+        unter: q3.etagen.map(ETAGE).join(", ") + " \xB7 " + (q3.status === "laufend" ? "bis " + kw2(q3.ende) : "fertig " + kw2(q3.ende)),
+        wert: esc(geld(q3.kosten)),
+        tippbar: q3.status === "abgeschlossen",
+        attr: q3.status === "abgeschlossen" ? 'data-umbau="projekt" data-id="' + esc(q3.id) + '"' : ""
+      })));
+      if (p2.status === "laufend") x2 += knoepfe(knopf("Programm stoppen", 'data-umbau="pstop" data-id="' + esc(p2.id) + '"', "gefahr"));
+      x2 += knoepfe(knopf("Zum Bestand", 'data-umbau="modernisierung"', "text"));
+      ctx.panel(p2.name, "Bauprogramm seit " + kw2(p2.start), bereich("haus", "umbau") + '<div class="hw-g5">' + rumpf2(x2) + "</div>", "gross");
+    }
+    function projekt() {
+      const v2 = E9.umbauVorherNachher?.(s2(), ui.projekt);
+      if (!v2) {
+        ui.seite = "bestand";
+        return bestand();
+      }
+      const p2 = v2.projekt;
+      let x2 = '<div class="hw-vergleich"><figure><img data-umbaubild="' + esc(p2.id) + '|vorher" alt="Vorher"><figcaption>Vorher</figcaption></figure><figure><img data-umbaubild="' + esc(p2.id) + '|nachher" alt="Nachher"><figcaption>Nachher</figcaption></figure></div>';
+      const etagen = Object.keys(p2.vorher ?? {}).map(Number).sort((a2, b4) => b4 - a2);
+      const nachher = p2.nachher ?? {};
+      x2 += abschnitt("Was sich ge\xE4ndert hat", p2.etagen.map(ETAGE).join(", "));
+      const zeilen = [];
+      for (const nr4 of etagen) for (const g3 of ["moebel", "oberflaeche", "klima", "licht", "brandschutz", "foerdertechnik", "fassade"]) {
+        const a2 = p2.vorher[nr4]?.[g3], b4 = nachher[nr4]?.[g3];
+        if (a2 == null || b4 == null || a2 === b4 || g3 === "fassade" && nr4 !== etagen[0]) continue;
+        zeilen.push(zeile2({ was: esc(G3()[g3].name), unter: g3 === "fassade" ? "ganzes Haus" : ETAGE_LANG(nr4), wert: ZUSTAND[a2] + " \u2192 " + ZUSTAND[b4], ton: "gut" }));
+      }
+      x2 += zeilen.length ? liste(zeilen) : leer3("Keine sichtbare \xC4nderung.");
+      x2 += liste([zeile2({ was: "Kosten", wert: esc(geld(p2.kosten)) }), zeile2({ was: "Bauzeit", wert: p2.ende - p2.start + " Wochen" })]);
+      x2 += knoepfe(knopf("Zum Haus", 'data-umbau="planen" data-id="' + esc(p2.haus) + '" data-etage="' + (p2.etagen[0] ?? 0) + '"', "zweit"), knopf("Zum Bestand", 'data-umbau="modernisierung"', "text"));
+      ctx.panel(v2.gewerk + " fertig", (v2.haus?.name ?? "") + " \xB7 " + kw2(p2.ende), bereich("haus", "umbau") + '<div class="hw-g5">' + rumpf2(x2) + "</div>", "gross");
+      setTimeout(() => {
+        for (const img of document.querySelectorAll("#pinhalt img[data-umbaubild]")) {
+          const [id, wann] = img.dataset.umbaubild.split("|"), url = ctx.bild?.(id, wann);
+          if (url) img.src = url;
+          else img.closest("figure")?.remove();
+        }
+      }, 0);
+    }
+    function anzeigen() {
+      ui.aktiv = true;
+      if (ui.seite === "haus" && ui.haus) return planen2();
+      if (ui.seite === "cluster") return cluster();
+      if (ui.seite === "assistent") return assistent2();
+      if (ui.seite === "programm") return programm();
+      if (ui.seite === "projekt") return projekt();
+      return bestand();
+    }
+    function tun2(a2, danach = null) {
       const r4 = E9.fuehreAus(s2(), a2);
       ctx.meldung(r4.text, r4.ok);
-      if (r4.ok) ctx.nachAktion?.();
+      if (r4.ok) {
+        if (danach) ui.seite = danach;
+        ctx.nachAktion?.();
+      }
       anzeigen();
     }
     document.getElementById("pinhalt").addEventListener("click", (ev) => {
       const el2 = ev.target.closest("button[data-umbau]");
       if (!el2 || el2.disabled) return;
-      const art = el2.dataset.umbau;
+      const art = el2.dataset.umbau, A = ui.auftrag;
       if (art === "modernisierung") {
+        ui.seite = "bestand";
         ui.haus = null;
-        anzeigen();
-        return;
+        return anzeigen();
       }
       if (art === "haus") {
         ui.haus = null;
@@ -169078,31 +169733,94 @@ void main() {
         return;
       }
       if (art === "planen") {
+        ui.seite = "haus";
         ui.haus = el2.dataset.id;
         ui.etage = Number(el2.dataset.etage);
-        ui.stufe = "auffrischung";
-        anzeigen();
-        return;
+        return anzeigen();
       }
-      if (art === "stufewahl") {
-        ui.stufe = el2.dataset.v;
-        anzeigen();
-        return;
+      if (art === "etage") {
+        ui.etage = Number(el2.dataset.etage);
+        return anzeigen();
       }
-      if (art === "starten") {
-        tun2({ typ: "umbauPlanen", haus: ui.haus, etage: ui.etage, stufe: ui.stufe });
-        return;
+      if (art === "gewerkwahl") {
+        ui.gewerk = el2.dataset.v;
+        return anzeigen();
       }
+      if (art === "starten") return tun2({ typ: "umbauPlanen", haus: ui.haus, etage: ui.etage, stufe: "ladenbau", gewerk: ui.gewerk });
+      if (art === "cluster") {
+        ui.seite = "cluster";
+        ui.cluster = el2.dataset.id;
+        return anzeigen();
+      }
+      if (art === "programm") {
+        ui.seite = "programm";
+        ui.programm = el2.dataset.id;
+        return anzeigen();
+      }
+      if (art === "projekt") {
+        ui.seite = "projekt";
+        ui.projekt = el2.dataset.id;
+        return anzeigen();
+      }
+      if (art === "pstop") return tun2({ typ: "bauprogrammStoppen", id: el2.dataset.id });
+      if (art === "assistent") {
+        ui.seite = "assistent";
+        if (el2.dataset.id) A.cluster = [el2.dataset.id];
+        return anzeigen();
+      }
+      if (art === "agewerk") {
+        A.gewerk = el2.dataset.v;
+        return anzeigen();
+      }
+      if (art === "abis") {
+        A.bisZustand = Number(el2.dataset.v);
+        return anzeigen();
+      }
+      if (art === "apar") {
+        A.parallel = Math.max(1, Math.min(40, A.parallel + Number(el2.dataset.v)));
+        return anzeigen();
+      }
+      if (art === "acluster") {
+        const id = el2.dataset.id;
+        A.cluster = A.cluster.includes(id) ? A.cluster.filter((c) => c !== id) : [...A.cluster, id];
+        return anzeigen();
+      }
+      if (art === "aalle") {
+        A.cluster = E9.bestandUebersicht(s2()).cluster.map((c) => c.id);
+        return anzeigen();
+      }
+      if (art === "akeine") {
+        A.cluster = [];
+        return anzeigen();
+      }
+      if (art === "aschlecht") {
+        const grp = G3()[A.gewerk]?.gruppe, g3 = grp === "komplett" ? "moebel" : grp;
+        A.cluster = E9.bestandUebersicht(s2()).cluster.filter((c) => !c.sonder).sort((p2, q3) => (p2.gut[g3] ?? 0) - (q3.gut[g3] ?? 0)).slice(0, 5).map((c) => c.id);
+        return anzeigen();
+      }
+      if (art === "astart") return tun2({ typ: "bauprogrammStarten", auftrag: { ...A, cluster: [...A.cluster] } }, "bestand");
     });
-    return { oeffne: (haus3 = null, etage2 = 0) => {
-      ui.haus = haus3;
-      ui.etage = etage2;
-      anzeigen();
-    }, hausKarte, zu: () => {
-      ui.aktiv = false;
-    }, aktiv: () => ui.aktiv, neuZeichnen: () => {
-      if (ui.aktiv) anzeigen();
-    } };
+    return {
+      oeffne: (haus3 = null, etage2 = 0, projektId = null) => {
+        if (projektId) {
+          ui.seite = "projekt";
+          ui.projekt = projektId;
+        } else if (haus3) {
+          ui.seite = "haus";
+          ui.haus = haus3;
+          ui.etage = etage2;
+        } else ui.seite = "bestand";
+        anzeigen();
+      },
+      hausKarte,
+      zu: () => {
+        ui.aktiv = false;
+      },
+      aktiv: () => ui.aktiv,
+      neuZeichnen: () => {
+        if (ui.aktiv) anzeigen();
+      }
+    };
   }
 
   // src/kit/mode/stoff.js
@@ -169157,12 +169875,12 @@ void main() {
     const n3 = parseInt(h4, 16);
     return [n3 >> 16 & 255, n3 >> 8 & 255, n3 & 255];
   }
-  function hex2([r4, g3, b4]) {
+  function hex3([r4, g3, b4]) {
     return "#" + [r4, g3, b4].map((v2) => Math.max(0, Math.min(255, Math.round(v2))).toString(16).padStart(2, "0")).join("");
   }
   var mische3 = (a2, b4, t9) => {
     const A = rgb2(a2), B8 = rgb2(b4);
-    return hex2(A.map((v2, i) => v2 + (B8[i] - v2) * t9));
+    return hex3(A.map((v2, i) => v2 + (B8[i] - v2) * t9));
   };
   var hell3 = (c, t9) => t9 < 0 ? dunkel3(c, -t9) : mische3(c, "#ffffff", t9);
   var dunkel3 = (c, t9) => mische3(c, "#1a1612", t9);
@@ -169607,10 +170325,10 @@ void main() {
       const sp6 = s2 > 0 ? (p2) => p2 : spiegelX;
       const yEnde = o4.aermel === "kurz" ? K3.m.schulterY + 20 : o4.aermel === "halb" ? K3.m.ellbogen + 4 : K3.m.handgelenk - 2;
       const weit = o4.passform === "oversize" ? 4 : 1.6;
-      const aussen = K3.armA.filter((p2) => p2[1] < yEnde).map(([x2, y2]) => [x2 + weit + (y2 - K3.m.schulterY) * 0.02, y2]);
+      const aussen2 = K3.armA.filter((p2) => p2[1] < yEnde).map(([x2, y2]) => [x2 + weit + (y2 - K3.m.schulterY) * 0.02, y2]);
       const innen = K3.armI.filter((p2) => p2[1] < yEnde).map(([x2, y2]) => [x2 - weit * 0.6, y2]).reverse();
       const ax = K3.armAX(yEnde) + weit, ix = K3.armIX(yEnde) - weit * 0.6;
-      const pts2 = [off ? [sw[0] - 1, K3.m.schulterY + 8] : [sw[0] - 2, sw[1] - 2], ...aussen.slice(1), [ax + (o4.aermel === "kurz" ? 1.5 : 0.5), yEnde, E], [ix - (o4.aermel === "kurz" ? 1 : 0), yEnde + 1, E], ...innen, [K3.armI[0][0] - 6, K3.armI[0][1] - 6]];
+      const pts2 = [off ? [sw[0] - 1, K3.m.schulterY + 8] : [sw[0] - 2, sw[1] - 2], ...aussen2.slice(1), [ax + (o4.aermel === "kurz" ? 1.5 : 0.5), yEnde, E], [ix - (o4.aermel === "kurz" ? 1 : 0), yEnde + 1, E], ...innen, [K3.armI[0][0] - 6, K3.armI[0][1] - 6]];
       t9.push(flaeche5(S, glatt2(sp6(pts2))));
       if (o4.aermel === "lang" && (o4.rippbund || o4.buendchen)) t9.push(flaeche5(S, glatt2(sp6([[ix, yEnde - 6, E], [ax, yEnde - 6, E], [ax, yEnde + 0.5, E], [ix, yEnde + 1, E]])), { ton: -0.1 }));
     }
@@ -169666,14 +170384,14 @@ void main() {
         const [[a2, b4]] = sp6([[x2, y2]]);
         return `${f(a2)} ${f(b4)}`;
       };
-      const aussen = [], innen = [];
+      const aussen2 = [], innen = [];
       const ys = [bund, ...[K3.m.taille + 11, K3.m.taille + 22].filter((y2) => y2 > bund + 4), K3.m.huefte, (K3.m.huefte + K3.m.knie) / 2, K3.m.knie, (K3.m.knie + K3.m.knoechel) / 2, K3.m.knoechel - 2, ende].filter((y2, i, a2) => y2 <= ende && a2.indexOf(y2) === i).sort((a2, b4) => a2 - b4);
       for (const y2 of ys) {
         let xa2 = y2 <= K3.m.huefte ? 100 + K3.breite(y2) + 1.4 : K3.beinAX(y2) + weit * Math.min(1, (y2 - K3.m.huefte) / 30 + 0.4);
         if (o4.passform === "flare" && y2 > K3.m.knie) xa2 += (y2 - K3.m.knie) / (K3.m.knoechel - K3.m.knie) * 6;
         if (o4.passform === "baggy" && y2 > K3.m.knie) xa2 += 1.5;
         if (o4.laenge === "kurz" && y2 === ende) xa2 += 2.4;
-        aussen.push([xa2, y2]);
+        aussen2.push([xa2, y2]);
         if (y2 >= K3.schritt[1]) {
           let xi2 = K3.beinIX(y2) - Math.min(1.2, weit * 0.15);
           if (o4.passform === "flare" && y2 > K3.m.knie) xi2 -= (y2 - K3.m.knie) / (K3.m.knoechel - K3.m.knie) * 2.5;
@@ -169681,11 +170399,11 @@ void main() {
         }
       }
       if (!innen.length) innen.push([100.6, ende]);
-      aussen[aussen.length - 1][2] = E;
+      aussen2[aussen2.length - 1][2] = E;
       innen[innen.length - 1][2] = E;
-      const pts = [[100, bund, E], ...aussen, ...innen.reverse(), [100.5, K3.schritt[1] - 3]];
+      const pts = [[100, bund, E], ...aussen2, ...innen.reverse(), [100.5, K3.schritt[1] - 3]];
       t9.push(flaeche5(S, glatt2(sp6(pts), true, 0.35)));
-      const xa = aussen.at(-1)[0], xi = innen[0][0], yi = innen[0][1];
+      const xa = aussen2.at(-1)[0], xi = innen[0][0], yi = innen[0][1];
       if (o4.saum === "offen") {
         t9.push(`<path d="M${Q(xi, yi - 1.5)} L${Q(xa, ende - 1.5)}" stroke="${hell3(S.c, 0.4)}" stroke-width="1.3" opacity="0.8"/>`);
         for (let i = 0; i < 7; i++) {
@@ -169767,9 +170485,9 @@ void main() {
     for (const s2 of [-1, 1]) {
       const sp6 = s2 > 0 ? (p2) => p2 : spiegelX;
       const weit = 3;
-      const aussen = K3.armA.map(([x2, y2]) => [x2 + weit, y2]);
+      const aussen2 = K3.armA.map(([x2, y2]) => [x2 + weit, y2]);
       const innen = K3.armI.map(([x2, y2]) => [x2 - weit * 0.6, y2]).reverse();
-      if (!o4.weste) t9.push(flaeche5(S, glatt2(sp6([[K3.schulter.at(-1)[0] - 1, K3.schulter.at(-1)[1] - 3], ...aussen.slice(1, -1), [aussen.at(-1)[0] + 0.5, K3.m.handgelenk + 1, E], [innen[0][0] - 0.5, K3.m.handgelenk + 1.5, E], ...innen.slice(1), [K3.armI[0][0] - 6, K3.armI[0][1] - 6]]))));
+      if (!o4.weste) t9.push(flaeche5(S, glatt2(sp6([[K3.schulter.at(-1)[0] - 1, K3.schulter.at(-1)[1] - 3], ...aussen2.slice(1, -1), [aussen2.at(-1)[0] + 0.5, K3.m.handgelenk + 1, E], [innen[0][0] - 0.5, K3.m.handgelenk + 1.5, E], ...innen.slice(1), [K3.armI[0][0] - 6, K3.armI[0][1] - 6]]))));
       const plus2 = 5;
       const seite2 = [[100 + K3.hals.b + 1, K3.hals.y1 - 4, E], [K3.schulter.at(-1)[0] + 2, K3.schulter.at(-1)[1] - 2], [100 + K3.breite(K3.m.brust) + plus2, K3.m.brust], [100 + K3.breite(K3.m.taille) + plus2 - (o4.guertel ? 2 : 0), K3.m.taille], [100 + K3.breite(K3.m.huefte) + plus2, K3.m.huefte]];
       if (unten > K3.m.huefte) seite2.push([100 + K3.breite(K3.m.huefte) + plus2 + (unten - K3.m.huefte) * 0.06, unten, E]);
@@ -170113,15 +170831,15 @@ void main() {
     const knieHalb = pf2 === "flare" ? 7.4 : pf2 === "skinny" || pf2 === "leggings" ? halb + 1.6 : pf2 === "jogger" ? 8.6 : halb;
     const mitte = lang === "kurz" ? 50 + hw / 2 + 1 : 50 + (pf2 === "weit" || pf2 === "baggy" ? 13.5 : 11.5);
     for (const s2 of [1, -1]) {
-      const aussen = [[50 + bw, bund + 4, E2], [50 + hw, bund + 18]];
-      if (hem > knie + 4) aussen.push([mitte + knieHalb, knie]);
-      aussen.push([mitte + (lang === "kurz" ? halb * 0.6 + 2 : halb), hem, E2]);
+      const aussen2 = [[50 + bw, bund + 4, E2], [50 + hw, bund + 18]];
+      if (hem > knie + 4) aussen2.push([mitte + knieHalb, knie]);
+      aussen2.push([mitte + (lang === "kurz" ? halb * 0.6 + 2 : halb), hem, E2]);
       const innen = [[Math.max(50 + spalt, mitte - (lang === "kurz" ? halb * 0.8 : halb)), hem + (lang === "kurz" ? -1.5 : 0), E2]];
       if (hem > knie + 4) innen.push([Math.max(50 + spalt * 0.7, mitte - knieHalb), knie]);
       innen.push([50.6, schritt]);
-      const pts = [[50, bund + 4, E2], ...aussen, ...innen, [50.2, schritt - 6]];
+      const pts = [[50, bund + 4, E2], ...aussen2, ...innen, [50.2, schritt - 6]];
       t9.push(flaeche5(S, glatt2(s2 > 0 ? pts : sp(pts), true, 0.32)));
-      const xa = aussen.at(-1)[0], xi = innen[0][0], yi = innen[0][1];
+      const xa = aussen2.at(-1)[0], xi = innen[0][0], yi = innen[0][1];
       if (pf2 === "jogger") {
         t9.push(flaeche5(S, glatt2([[X(s2, xi + 0.2), hem - 5, E2], [X(s2, xa - 0.2), hem - 5, E2], [X(s2, xa), hem, E2], [X(s2, xi), hem, E2]], true, 0.2), { ton: -0.08 }));
       }
@@ -170975,7 +171693,7 @@ void main() {
   var j = (art, material3, farbe2, p2 = {}, x2 = {}) => ({ gruppe: "jacke", zeichner: "jacke", p: { art, ...p2 }, material: material3, farbe: farbe2, model: "jacke", ...x2 });
   var z2 = (gruppe3, name2, material3, farbe2, model, p2 = {}, x2 = {}) => ({ gruppe: gruppe3, zeichner: "z:" + name2, p: p2, material: material3, farbe: farbe2, model, ...x2 });
   var gleich = (farbe2, material3, ...teile2) => teile2.map((t9) => ({ farbe: farbe2, material: material3, ...t9 }));
-  var KURZ2 = { zoom: [1.38, 50, 33] };
+  var KURZ = { zoom: [1.38, 50, 33] };
   var SILHOUETTEN = {
     // ─────────── Ersatz bestehender
     kinderbody: z2("oberteil", "kinderbody", "baumwolle", "gelb", null, { aermel: "kurz" }, { nur: "kinder" }),
@@ -171006,7 +171724,7 @@ void main() {
     troyer: o({ aermel: "lang", kragen: "troyer", rippbund: true, strick: true }, "strick", "marine"),
     rugbyshirt: z2("oberteil", "rugby", "baumwolle", "flaschengruen", "oberteil", { muster: "blockstreifen" }, { modelTeile: (p2, f13, m) => [{ teil: "oberteil", aermel: "lang", kragen: true, knopfleiste: false, rippbund: true, farbe: f13, material: m, muster: p2.muster }] }),
     cargoshorts: h({ laenge: "bermuda", passform: "weit", cargo: true }, "baumwolle", "khaki"),
-    badeshorts: z2("bademode", "badeshorts", "polyester", "petrol", null, { muster: "print" }, { nur: "herren", ...KURZ2 }),
+    badeshorts: z2("bademode", "badeshorts", "polyester", "petrol", null, { muster: "print" }, { nur: "herren", ...KURZ }),
     chinoshorts: h({ laenge: "kurz", passform: "schmal", saum: "umschlag" }, "baumwolle", "marine"),
     harringtonjacke: j("harrington", "baumwolle", "sand"),
     fieldjacket: j("fieldjacket", "baumwolle", "olive"),
@@ -172480,16 +173198,16 @@ void main() {
         const a2 = Math.PI * (1.08 - 1.16 * (i / 40));
         bahn.push([50 + Math.cos(a2) * 34, 58 - Math.sin(a2) * 42, Math.sin(i / 40 * Math.PI)]);
       }
-      const aussen = bahn.map(([x2, y2, w2]) => [50 + (x2 - 50) * (1 + 0.1 * (0.25 + w2)), 58 + (y2 - 58) * (1 + 0.08 * (0.25 + w2))]);
+      const aussen2 = bahn.map(([x2, y2, w2]) => [50 + (x2 - 50) * (1 + 0.1 * (0.25 + w2)), 58 + (y2 - 58) * (1 + 0.08 * (0.25 + w2))]);
       const innen = bahn.map(([x2, y2]) => [x2, y2]);
-      const d4 = glatt2([...aussen, ...[...innen].reverse()], true, 0.3);
+      const d4 = glatt2([...aussen2, ...[...innen].reverse()], true, 0.3);
       t9.push(flaeche5(S, d4));
       t9.push(`<path d="${glatt2(innen, false, 0.5)}" stroke="${hell3(S.c, 0.35)}" stroke-width="1.4" fill="none" opacity="0.8"/>`);
       for (let i = 4; i <= 36; i += 2) {
-        const [x2, y2] = innen[i], [x22, y22] = aussen[i];
+        const [x2, y2] = innen[i], [x22, y22] = aussen2[i];
         t9.push(linie2(`M${f8(x2)} ${f8(y2)} L${f8(x2 + (x2 - x22) * 0.12)} ${f8(y2 + (y2 - y22) * 0.12)}`, dunkel3(S.c, 0.3), 0.45, 0.6));
       }
-      t9.push(`<path d="${glatt2(aussen.slice(6, 20), false, 0.5)}" stroke="#fff" stroke-width="1.2" fill="none" opacity="0.25" transform="translate(0.6 1.2)"/>`);
+      t9.push(`<path d="${glatt2(aussen2.slice(6, 20), false, 0.5)}" stroke="#fff" stroke-width="1.2" fill="none" opacity="0.25" transform="translate(0.6 1.2)"/>`);
       t9.push(flaeche5(S, glatt2([[39, 9], [50, 13], [61, 9], [64, 17], [61, 25], [50, 21], [39, 25], [36, 17]], true, 0.5), { ton: 0.04 }));
       t9.push(flaeche5(S, glatt2([[45.4, 11.6], [54.6, 11.6], [56, 17], [54.6, 23], [45.4, 23], [44, 17]], true, 0.5), { ton: -0.12 }));
       t9.push(linie2("M41 12 Q44 17 41 22 M59 12 Q56 17 59 22", dunkel3(S.c, 0.35), 0.6, 0.7));
@@ -173080,9 +173798,9 @@ void main() {
     // Maß: Breite:Höhe 2:1, Biese umlaufend, Ecken spitz auslaufend.
     kopfkissen(S, t9, p2) {
       t9.push(boden9(50, 76, 40, 3));
-      const aussen = glatt2([[8, 34, E7], [50, 31], [92, 34, E7], [89.4, 52], [92, 72, E7], [50, 69], [8, 72, E7], [10.6, 52]], true, 0.35);
+      const aussen2 = glatt2([[8, 34, E7], [50, 31], [92, 34, E7], [89.4, 52], [92, 72, E7], [50, 69], [8, 72, E7], [10.6, 52]], true, 0.35);
       const innen = glatt2([[13, 38], [50, 35.6], [87, 38], [85, 52], [87, 68], [50, 65.6], [13, 68], [15, 52]], true, 0.5);
-      t9.push(flaeche5(S, aussen, { ton: -0.03 }), musterUeber(S, aussen, p2), satin(S, aussen, p2));
+      t9.push(flaeche5(S, aussen2, { ton: -0.03 }), musterUeber(S, aussen2, p2), satin(S, aussen2, p2));
       t9.push(flaeche5(S, innen, { ton: 0.03 }), musterUeber(S, innen, p2));
       t9.push(`<ellipse cx="42" cy="47" rx="26" ry="9" fill="#fff" opacity="0.18"/><ellipse cx="58" cy="60" rx="24" ry="5" fill="#000" opacity="0.05"/>`);
       t9.push(naht(innen.replace(/ Z$/, ""), S, 0.55));
@@ -177956,12 +178674,12 @@ void main() {
     const n3 = parseInt(h4, 16);
     return [n3 >> 16 & 255, n3 >> 8 & 255, n3 & 255];
   }
-  function hex3([r4, g3, b4]) {
+  function hex4([r4, g3, b4]) {
     return "#" + [r4, g3, b4].map((v2) => Math.max(0, Math.min(255, Math.round(v2))).toString(16).padStart(2, "0")).join("");
   }
   var mische4 = (a2, b4, t9) => {
     const A = rgb3(a2), B8 = rgb3(b4);
-    return hex3(A.map((v2, i) => v2 + (B8[i] - v2) * t9));
+    return hex4(A.map((v2, i) => v2 + (B8[i] - v2) * t9));
   };
   var hell4 = (c, t9) => mische4(c, "#ffffff", t9);
   var dunkel4 = (c, t9) => mische4(c, "#000000", t9);
@@ -178794,7 +179512,7 @@ void main() {
       return { titel: "Neues Produkt", unter: `${M2.name} \xB7 ${M2.zielgruppe}`, html: h4 + rumpf2(x2) };
     }
     function trend(P6) {
-      const st2 = s2(), T = E9.trendbericht(st2), Kat = merkeBilder(E9.produktKatalog(st2)), hex4 = new Map(Kat.farben.map((f13) => [f13.name, f13.hex]));
+      const st2 = s2(), T = E9.trendbericht(st2), Kat = merkeBilder(E9.produktKatalog(st2)), hex5 = new Map(Kat.farben.map((f13) => [f13.name, f13.hex]));
       let h4 = sprecher2(esc(T.hinweis));
       h4 += `<div class="hw-g1-oben">${knopf("\u2039 Produkte", 'data-a="liste"', "text")}</div>`;
       let x2 = "";
@@ -178802,7 +179520,7 @@ void main() {
         x2 += `<h3 class="hw-abschnitt">${esc(titel)}<small>${P6(`t:${pre}:name`, S.name, "span")}</small></h3>`;
         x2 += liste(T.zielgruppen.filter((z6) => S.gruppen[z6.id]).map((z6) => {
           const g3 = S.gruppen[z6.id];
-          return `<div class="hw-zeile hw-g1-trend"><span class="hw-was">${esc(z6.name)}<small>${g3.artikel.map(esc).join(", ")}</small><small>Material: ${g3.materialien.map(esc).join(", ")}${g3.out?.length ? ` \xB7 nicht mehr gefragt: ${g3.out.map(esc).join(", ")}` : ""}</small>${g3.muster?.length ? `<small>Muster: ${g3.muster.map(esc).join(", ")}${g3.musterOut?.length ? ` \xB7 out: ${g3.musterOut.map(esc).join(", ")}` : ""}</small>` : ""}</span><span class="hw-g1-trendfarben">${g3.farben.map((f13) => farbpunkt(hex4.get(f13) ?? "#888", 16)).join("")}</span></div>`;
+          return `<div class="hw-zeile hw-g1-trend"><span class="hw-was">${esc(z6.name)}<small>${g3.artikel.map(esc).join(", ")}</small><small>Material: ${g3.materialien.map(esc).join(", ")}${g3.out?.length ? ` \xB7 nicht mehr gefragt: ${g3.out.map(esc).join(", ")}` : ""}</small>${g3.muster?.length ? `<small>Muster: ${g3.muster.map(esc).join(", ")}${g3.musterOut?.length ? ` \xB7 out: ${g3.musterOut.map(esc).join(", ")}` : ""}</small>` : ""}</span><span class="hw-g1-trendfarben">${g3.farben.map((f13) => farbpunkt(hex5.get(f13) ?? "#888", 16)).join("")}</span></div>`;
         }));
       }
       return { titel: "Trendbericht", unter: `Messe \xB7 ${T.naechste.name}`, html: h4 + rumpf2(x2) };
@@ -184395,7 +185113,7 @@ void main() {
   // src/ui/planung.js
   var pct = (v2) => (100 * v2).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " %";
   var pctV = (v2) => (v2 > 0 ? "+" : v2 < 0 ? "\u2212" : "") + pct(Math.abs(v2));
-  var mio4 = (v2) => (v2 < 0 ? "\u2212" : "") + (Math.abs(v2) / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " Mio. \u20AC";
+  var mio5 = (v2) => (v2 < 0 ? "\u2212" : "") + (Math.abs(v2) / 1e6).toLocaleString("de-DE", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " Mio. \u20AC";
   var m1 = (v2) => (v2 < 0 ? "\u2212" : "") + (Math.abs(v2) / 1e6).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   var rolle2 = { haus: "Hausleitungen", hauscluster: "Clusterleitungen", bereich: "Bereichsleitungen" };
   var FORMATNAME2 = { warenhaus: "Hartwig", sport: "Hartwig Sport", schwester: "Volkskauf", outlet: "FUNDUS" };
@@ -184417,8 +185135,8 @@ void main() {
         befund3 = `<b>Planungsrunde ${e.jahr} ist offen.</b> Mein Vorschlag ist aus Vorjahr und Trend abgeleitet.`;
         const basis4 = D3.vorschlag;
         x2 += gross2([
-          { label: `Umsatzziel ${e.jahr}`, wert: mio4(e.ziele.umsatz), unter: `Vorschlag ${mio4(basis4.umsatz)}` },
-          { label: "EBITDA-Ziel", wert: mio4(e.ziele.ebitda), ton: e.ziele.ebitda < 0 ? "schlecht" : "", unter: `Vorschlag ${mio4(basis4.ebitda)}` }
+          { label: `Umsatzziel ${e.jahr}`, wert: mio5(e.ziele.umsatz), unter: `Vorschlag ${mio5(basis4.umsatz)}` },
+          { label: "EBITDA-Ziel", wert: mio5(e.ziele.ebitda), ton: e.ziele.ebitda < 0 ? "schlecht" : "", unter: `Vorschlag ${mio5(basis4.ebitda)}` }
         ]);
         const grenzen = {
           umsatz: [1e6, Math.max(0, Math.round(basis4.umsatz * 0.75 / 1e6) * 1e6), Math.max(1e6, Math.round(basis4.umsatz * 1.25 / 1e6) * 1e6)],
@@ -184427,24 +185145,24 @@ void main() {
         };
         const st2 = (id, titel) => {
           const [schritt, min, max] = grenzen[id], w2 = e.ziele[id];
-          return feld(titel, stepper({ wert: mio4(w2), unter: `${mio4(min)} bis ${mio4(max)}`, label: titel, attrMinus: `data-pl-ziel="${id}" data-wert="${Math.max(min, w2 - schritt)}"`, attrPlus: `data-pl-ziel="${id}" data-wert="${Math.min(max, w2 + schritt)}"`, minusAus: w2 <= min, plusAus: w2 >= max }));
+          return feld(titel, stepper({ wert: mio5(w2), unter: `${mio5(min)} bis ${mio5(max)}`, label: titel, attrMinus: `data-pl-ziel="${id}" data-wert="${Math.max(min, w2 - schritt)}"`, attrPlus: `data-pl-ziel="${id}" data-wert="${Math.min(max, w2 + schritt)}"`, minusAus: w2 <= min, plusAus: w2 >= max }));
         };
         x2 += abschnitt("Zielsetzung", "Vorschlag Konzerncontrolling");
         x2 += st2("umsatz", "Umsatz") + '<div class="hw-abstand"></div>' + st2("ebitda", "EBITDA") + '<div class="hw-abstand"></div>' + st2("investitionen", "Investitionen");
-        x2 += fuss(`EBITDA-Effekt der Umsatzplanung bei 25 % zus\xE4tzlichem Deckungsbeitrag: ${mio4(D3.ebitdaSensitivitaet)}. Budgetwerte \xE4ndern zun\xE4chst nicht den laufenden Umsatz.`);
+        x2 += fuss(`EBITDA-Effekt der Umsatzplanung bei 25 % zus\xE4tzlichem Deckungsbeitrag: ${mio5(D3.ebitdaSensitivitaet)}. Budgetwerte \xE4ndern zun\xE4chst nicht den laufenden Umsatz.`);
         x2 += knoepfe(knopf("Weiter zur Verteilung", 'data-pl-schritt="2"', "breit"));
       } else if (ui.schritt === 2) {
         const nodes = Object.fromEntries(D3.knoten.map((n3) => [n3.id, n3]));
         const verdacht = D3.knoten.filter((n3) => n3.verdacht).length;
         befund3 = verdacht ? `<b>${verdacht} ${verdacht === 1 ? "R\xFCckmeldung wirkt" : "R\xFCckmeldungen wirken"} zu vorsichtig.</b> Verdacht auf Sandbagging.` : "<b>Die R\xFCckmeldungen der Leitungen liegen im Rahmen.</b>";
-        x2 += gross2([{ label: "Konzernumsatz", wert: mio4(nodes.konzern?.umsatz ?? e.ziele.umsatz), unter: "verteilt auf Formate" }, { label: "Sandbagging", wert: String(verdacht), ton: verdacht ? "schlecht" : "", unter: verdacht === 1 ? "Verdachtsfall" : "Verdachtsf\xE4lle" }]);
+        x2 += gross2([{ label: "Konzernumsatz", wert: mio5(nodes.konzern?.umsatz ?? e.ziele.umsatz), unter: "verteilt auf Formate" }, { label: "Sandbagging", wert: String(verdacht), ton: verdacht ? "schlecht" : "", unter: verdacht === 1 ? "Verdachtsfall" : "Verdachtsf\xE4lle" }]);
         const zeilen = [];
         const knoten = (id, tiefe) => {
           const n3 = nodes[id];
           if (!n3) return;
           if (n3.ebene !== "konzern") {
             const kinder = (n3.kinder ?? []).length, auf = ui.auf.has(n3.id) || tiefe <= 1;
-            const rueck = n3.ebene === "hauscluster" || n3.ebene === "haus" ? ` \xB7 R\xFCckmeldung ${mio4(n3.rueckmeldung)}` : "";
+            const rueck = n3.ebene === "hauscluster" || n3.ebene === "haus" ? ` \xB7 R\xFCckmeldung ${mio5(n3.rueckmeldung)}` : "";
             zeilen.push(`<div class="hw-g2-eingabe tiefe-${Math.min(tiefe, 4)}">${kinder && tiefe > 1 ? `<button type="button" class="hw-g2-name hw-g2-sort" data-pl-auf="${esc(n3.id)}" aria-expanded="${auf}"><i class="hw-g2-auf" aria-hidden="true">${auf ? "\u25BE" : "\u25B8"}</i>` : '<span class="hw-g2-name">'}<span>${esc(nname(n3))}<small>${esc(EBENE[n3.ebene] ?? n3.ebene)}${rueck}${n3.verdacht ? ' \xB7 <span class="hw-schlecht">Sandbagging-Verdacht</span>' : ""}</small></span>${kinder && tiefe > 1 ? "</button>" : "</span>"}<input class="hw-g2-auswahl hw-kontur" type="number" step="0.1" min="0" inputmode="decimal" data-pl-knoten="${esc(n3.id)}" value="${(n3.umsatz / 1e6).toFixed(1)}" aria-label="${esc(nname(n3))} Ziel in Mio. Euro"></div>`);
             if (!auf) return;
           }
@@ -184458,9 +185176,9 @@ void main() {
         x2 += knoepfe(knopf("Weiter zum Abschluss", 'data-pl-schritt="3"', "breit"));
       } else {
         befund3 = `<b>Jahresplan ${e.jahr} wartet auf deinen Beschluss.</b> Ohne Aktion gilt nach Fristablauf mein Vorschlag.`;
-        x2 += gross2([{ label: "Konzernumsatz", wert: mio4(e.ziele.umsatz) }, { label: "EBITDA-Ziel", wert: mio4(e.ziele.ebitda), ton: e.ziele.ebitda < 0 ? "schlecht" : "" }]);
+        x2 += gross2([{ label: "Konzernumsatz", wert: mio5(e.ziele.umsatz) }, { label: "EBITDA-Ziel", wert: mio5(e.ziele.ebitda), ton: e.ziele.ebitda < 0 ? "schlecht" : "" }]);
         x2 += abschnitt(`Jahresplan ${e.jahr}`);
-        x2 += tabelle({ zeilen: [{ name: "Konzernumsatz", werte: [mio4(e.ziele.umsatz)] }, { name: "EBITDA-Ziel", werte: [mio4(e.ziele.ebitda)], ton: [tonV(e.ziele.ebitda)] }, { name: "Investitionsbudget", werte: [mio4(e.ziele.investitionen)] }] });
+        x2 += tabelle({ zeilen: [{ name: "Konzernumsatz", werte: [mio5(e.ziele.umsatz)] }, { name: "EBITDA-Ziel", werte: [mio5(e.ziele.ebitda)], ton: [tonV(e.ziele.ebitda)] }, { name: "Investitionsbudget", werte: [mio5(e.ziele.investitionen)] }] });
         x2 += fuss("Mit dem Abschluss werden Wochenbudgets und Clusterziele verbindlich.");
         x2 += knoepfe(knopf("Angepasste Planung beschlie\xDFen", 'data-pl-abschluss="spieler"', "breit"));
         x2 += knoepfe(knopf("Controlling-Vorschlag \xFCbernehmen", 'data-pl-abschluss="controlling"', "zweit breit"));
@@ -184471,15 +185189,15 @@ void main() {
       const b4 = D3.bericht;
       if (!b4.ziele) return cfo("<b>Es gibt noch keinen Jahresplan.</b> Die Planungsrunde l\xE4uft in KW 40 bis 44.") + rumpf2(abschnitt("Planblatt") + leer3("Bis zur ersten Planungsrunde gibt es nichts zu vergleichen.", "Kein Jahresplan vorhanden."));
       const q3 = b4.planBisHeute ? b4.abweichung / b4.planBisHeute : 0;
-      const befund3 = `<b>Wir liegen ${mio4(Math.abs(b4.abweichung))} ${b4.abweichung >= 0 ? "\xFCber" : "unter"} Plan.</b> ` + (b4.forecasting == null ? "Der erste Jahresforecast entsteht nach KW 13." : `Forecast ${mio4(b4.forecasting)}.`);
+      const befund3 = `<b>Wir liegen ${mio5(Math.abs(b4.abweichung))} ${b4.abweichung >= 0 ? "\xFCber" : "unter"} Plan.</b> ` + (b4.forecasting == null ? "Der erste Jahresforecast entsteht nach KW 13." : `Forecast ${mio5(b4.forecasting)}.`);
       let x2 = gross2([
-        { label: "Abweichung zum Plan", wert: (b4.abweichung > 0 ? "+" : "") + mio4(b4.abweichung), ton: b4.abweichung < 0 ? "schlecht" : "gut", unter: `${pctV(q3)} bis heute` },
-        { label: "Ist kumuliert", wert: mio4(b4.ist), unter: `Plan ${mio4(b4.planBisHeute)}` }
+        { label: "Abweichung zum Plan", wert: (b4.abweichung > 0 ? "+" : "") + mio5(b4.abweichung), ton: b4.abweichung < 0 ? "schlecht" : "gut", unter: `${pctV(q3)} bis heute` },
+        { label: "Ist kumuliert", wert: mio5(b4.ist), unter: `Plan ${mio5(b4.planBisHeute)}` }
       ]);
       const letzte = (b4.wochen || []).slice(-5);
       x2 += abschnitt(letzte.length ? `Umsatz KW ${(letzte[0].woche % 52 + 52) % 52 + 1} bis ${(letzte[letzte.length - 1].woche % 52 + 52) % 52 + 1}` : "Umsatz je Woche");
       x2 += balken6(letzte.map((w3) => ({ label: "KW " + ((w3.woche % 52 + 52) % 52 + 1), a: w3.plan, b: w3.ist })), ["Plan", "Ist"]);
-      x2 += tabelle({ titel: `Jahresplan ${b4.jahr}`, zeilen: [{ name: "Umsatz", werte: [mio4(b4.ziele.umsatz)] }, { name: "EBITDA", werte: [mio4(b4.ziele.ebitda)], ton: [tonV(b4.ziele.ebitda)] }, { name: "Forecast Umsatz", werte: [b4.forecasting == null ? "nach KW 13" : mio4(b4.forecasting)] }] });
+      x2 += tabelle({ titel: `Jahresplan ${b4.jahr}`, zeilen: [{ name: "Umsatz", werte: [mio5(b4.ziele.umsatz)] }, { name: "EBITDA", werte: [mio5(b4.ziele.ebitda)], ton: [tonV(b4.ziele.ebitda)] }, { name: "Forecast Umsatz", werte: [b4.forecasting == null ? "nach KW 13" : mio5(b4.forecasting)] }] });
       const N = b4.knoten, kinder = (id, ebene) => N.filter((n3) => n3.ebene === ebene && n3.parent === id);
       const fname = (f13) => FORMATNAME2[f13.id.replace("format:", "")] ?? f13.name;
       const spalten2 = ["Plan", "Ist", "Abw."];
@@ -184502,7 +185220,7 @@ void main() {
       x2 += w2.length ? buch({ titel: "Woche Mio. \u20AC", spalten: ["Ist", "Plan", "Abw."], breite: 64, zeilen: w2.map((z6) => reihe({ name: `KW ${(z6.woche % 52 + 52) % 52 + 1}`, werte: [m1(z6.ist), m1(z6.plan), { t: pctV(z6.abweichungQuote), ton: tonV(z6.abweichungQuote) }] })) }) : abschnitt("Wochen") + leer3("Noch keine Woche im Plan.");
       if (b4.warengruppen) {
         x2 += abschnitt("Warengruppenbudgets", `${Object.keys(b4.warengruppen).length} Gruppen`);
-        x2 += ui.wgAuf ? tabelle({ zeilen: Object.entries(b4.warengruppen).map(([g3, v2]) => ({ name: E9.GRUPPEN?.[g3]?.name ?? g3, werte: [mio4(v2)] })) }) + knoepfe(knopf("Weniger zeigen", 'data-pl-wgauf="0"', "text")) : knoepfe(knopf("Budgets je Warengruppe zeigen", 'data-pl-wgauf="1"', "zweit breit"));
+        x2 += ui.wgAuf ? tabelle({ zeilen: Object.entries(b4.warengruppen).map(([g3, v2]) => ({ name: E9.GRUPPEN?.[g3]?.name ?? g3, werte: [mio5(v2)] })) }) + knoepfe(knopf("Weniger zeigen", 'data-pl-wgauf="0"', "text")) : knoepfe(knopf("Budgets je Warengruppe zeigen", 'data-pl-wgauf="1"', "zweit breit"));
       }
       return cfo(befund3, b4.abweichung < 0 ? "engpass" : "") + kopfbild("controlling") + rumpf2(x2);
     }
@@ -184512,7 +185230,7 @@ void main() {
       let x2 = "";
       const befund3 = offen2 ? `<b>Der Forecast ${esc(offen2.bezeichnung)} ist zur Freigabe offen.</b> Eigent\xFCmer und Bank warten.` : L6.length ? `<b>Alle Forecasts sind abgegeben.</b> 3+9 in KW 13, 6+6 in KW 26, 9+3 in KW 39.` : "<b>Noch kein Forecast.</b> Der erste Forecast (3+9) entsteht nach KW 13.";
       if (offen2) {
-        x2 += gross2([{ label: "Jahresumsatz", wert: mio4(offen2.ziele.umsatz) }, { label: "EBITDA", wert: mio4(offen2.ziele.ebitda), ton: offen2.ziele.ebitda < 0 ? "schlecht" : "" }]);
+        x2 += gross2([{ label: "Jahresumsatz", wert: mio5(offen2.ziele.umsatz) }, { label: "EBITDA", wert: mio5(offen2.ziele.ebitda), ton: offen2.ziele.ebitda < 0 ? "schlecht" : "" }]);
         x2 += abschnitt(`${offen2.bezeichnung} anpassen`, "Mio. \u20AC");
         x2 += felder(
           feld("Umsatz", `<input class="hw-g2-auswahl hw-kontur" data-pl-forecast="umsatz" type="number" min="0" step="0.1" inputmode="decimal" value="${(offen2.ziele.umsatz / 1e6).toFixed(1)}" aria-label="Umsatz in Mio. Euro">`),
@@ -184521,7 +185239,7 @@ void main() {
         x2 += knoepfe(knopf("Speichern und abgeben", 'data-pl-forecast-abgabe="1"', "breit"));
       }
       const status2 = (f13) => f13.status === "abgegeben" ? "abgegeben" : f13.status === "offen" ? "zur Freigabe" : "zur\xFCckgehalten";
-      x2 += L6.length ? tabelle({ titel: "Forecasts", spalten: ["Umsatz", "EBITDA"], zeilen: [...L6].reverse().map((f13) => ({ name: `${f13.bezeichnung} \xB7 ${f13.jahr} \xB7 ${status2(f13)}`, werte: [mio4(f13.ziele.umsatz), mio4(f13.ziele.ebitda)], ton: ["", tonV(f13.ziele.ebitda)] })) }) : abschnitt("Forecasts") + leer3("Der erste Forecast (3+9) entsteht nach KW 13.", "Noch kein Forecast.", "", "forecast");
+      x2 += L6.length ? tabelle({ titel: "Forecasts", spalten: ["Umsatz", "EBITDA"], zeilen: [...L6].reverse().map((f13) => ({ name: `${f13.bezeichnung} \xB7 ${f13.jahr} \xB7 ${status2(f13)}`, werte: [mio5(f13.ziele.umsatz), mio5(f13.ziele.ebitda)], ton: ["", tonV(f13.ziele.ebitda)] })) }) : abschnitt("Forecasts") + leer3("Der erste Forecast (3+9) entsteht nach KW 13.", "Noch kein Forecast.", "", "forecast");
       if (D3.bericht.vertrauen?.length) {
         x2 += abschnitt("Trefferquote und Vertrauen", "letzte 8");
         x2 += liste(D3.bericht.vertrauen.slice(-8).map((v2) => zeile2({ was: `KW ${(v2.woche % 52 + 52) % 52 + 1}`, unter: `Abweichung ${pct(v2.abweichung)}`, wert: (v2.delta > 0 ? "+" : v2.delta < 0 ? "\u2212" : "") + Math.abs(v2.delta), ton: v2.delta < 0 ? "schlecht" : v2.delta > 0 ? "gut" : "" })));
@@ -184634,9 +185352,9 @@ void main() {
   }
 
   // src/ui/personaleinsatz.js
-  var GRUPPEN3 = ["logistik", "verkauf", "kasse", "verwaltung"];
+  var GRUPPEN4 = ["logistik", "verkauf", "kasse", "verwaltung"];
   var NAME3 = { logistik: "Instore-Logistik", verkauf: "Verkauf", kasse: "Kasse", verwaltung: "Verwaltung" };
-  var KURZ3 = { logistik: "Logistik", verkauf: "Verkauf", kasse: "Kasse", verwaltung: "Verwaltung" };
+  var KURZ2 = { logistik: "Logistik", verkauf: "Verkauf", kasse: "Kasse", verwaltung: "Verwaltung" };
   var pct2 = (n3) => Math.round(n3 * 100) + " %";
   var ton27 = (n3) => n3 < 0.85 ? "schlecht" : n3 < 0.98 ? "achtung" : "";
   var steuer = (a2, opts = {}) => Object.entries({ "data-pe": a2, ...opts }).map(([k5, v2]) => k5 + '="' + esc(String(v2)) + '"').join(" ");
@@ -184679,16 +185397,16 @@ void main() {
         zeile2({ was: "Springerbewegungen", wert: fmt.format(p2.springerSaldo) + " Std." })
       ]);
       out += abschnitt("Deckung KW " + (p2.woche % 52 + 1), "Plan zu Bedarf");
-      const kz = (g3) => ({ label: KURZ3[g3], wert: pct2(p2.gruppen[g3].deckung), ton: ton27(p2.gruppen[g3].deckung) === "schlecht" ? "schlecht" : "" });
-      out += gross2(GRUPPEN3.slice(0, 2).map(kz)) + gross2(GRUPPEN3.slice(2).map(kz));
-      for (const g3 of GRUPPEN3) {
+      const kz = (g3) => ({ label: KURZ2[g3], wert: pct2(p2.gruppen[g3].deckung), ton: ton27(p2.gruppen[g3].deckung) === "schlecht" ? "schlecht" : "" });
+      out += gross2(GRUPPEN4.slice(0, 2).map(kz)) + gross2(GRUPPEN4.slice(2).map(kz));
+      for (const g3 of GRUPPEN4) {
         const x2 = p2.gruppen[g3];
         out += abschnitt(NAME3[g3], fmt.format(x2.plan) + " von " + fmt.format(x2.bedarf) + " Std.");
         out += balken6(x2.tage.map((t9) => ({ label: t9.tag, a: t9.bedarf, b: t9.plan })));
       }
       out += `<div class="hw-legende"><span><i></i>Bedarf</span><span><i class="b"></i>Plan</span></div>`;
       out += abschnitt("Einsatz \xFCbersteuern", "100 % = Vorschlag");
-      out += '<div class="hw-felder">' + GRUPPEN3.map((g3) => regler(KURZ3[g3], "gruppe", id, g3, st2.faktor[g3], 40, 160, "Einsatz")).join("") + regler("Kasse Samstag", "samstag", id, "", st2.samstagKasse, 40, 160, "Einsatz") + regler("Aushilfen", "aushilfen", id, "", st2.aushilfenQuote, 0, 30, "Fr und Sa") + "</div>";
+      out += '<div class="hw-felder">' + GRUPPEN4.map((g3) => regler(KURZ2[g3], "gruppe", id, g3, st2.faktor[g3], 40, 160, "Einsatz")).join("") + regler("Kasse Samstag", "samstag", id, "", st2.samstagKasse, 40, 160, "Einsatz") + regler("Aushilfen", "aushilfen", id, "", st2.aushilfenQuote, 0, 30, "Fr und Sa") + "</div>";
       out += `<p class="hw-lese hw-leise hw-unterzeile">Weniger Kasse am Samstag f\xFChrt zu Wartezeiten und Kaufabbr\xFCchen. Aushilfen verst\xE4rken Freitag und Samstag und kosten zus\xE4tzlich.</p>`;
       return out;
     }
@@ -184707,12 +185425,12 @@ void main() {
       );
       out += abschnitt("H\xE4user", "knappste Gruppe");
       out += liste(c.haeuser.map((h4) => {
-        const min = GRUPPEN3.reduce((m, g3) => h4.gruppen[g3] < h4.gruppen[m] ? g3 : m, GRUPPEN3[0]);
+        const min = GRUPPEN4.reduce((m, g3) => h4.gruppen[g3] < h4.gruppen[m] ? g3 : m, GRUPPEN4[0]);
         return zeile2({
           was: esc(h4.name),
           unter: `Krank ${pct2(h4.krank)} \xB7 Aushilfen ${fmt.format(h4.aushilfen)} Std. \xB7 Springer ${fmt.format(h4.springer)} Std.`,
           wert: pct2(h4.gruppen[min]),
-          wertUnter: "knapp: " + KURZ3[min],
+          wertUnter: "knapp: " + KURZ2[min],
           ton: ton27(h4.gruppen[min]),
           tippbar: true,
           attr: steuer("haus", { "data-haus": h4.id }) + (h4.id === haus3 ? ' aria-current="true"' : "")
@@ -184727,16 +185445,16 @@ void main() {
       if (ui.cluster && !liste3.some((c) => c.id === ui.cluster)) ui.cluster = null;
       const gewaehlt = liste3.find((c) => c.id === ui.cluster) ?? liste3[0];
       if (gewaehlt) ui.cluster = gewaehlt.id;
-      const knapp = gewaehlt ? gewaehlt.haeuser.filter((h4) => GRUPPEN3.some((g3) => h4.gruppen[g3] < 0.9)) : [];
+      const knapp = gewaehlt ? gewaehlt.haeuser.filter((h4) => GRUPPEN4.some((g3) => h4.gruppen[g3] < 0.9)) : [];
       const befund3 = !gewaehlt ? "<b>Keine offenen H\xE4user.</b>" : knapp.length ? "<b>" + knapp.length + " von " + gewaehlt.haeuser.length + " H\xE4usern sind unter 90 % besetzt.</b> Am knappsten: " + esc(knapp.slice(0, 2).map((h4) => h4.name).join(", ")) + "." : (() => {
-        const min = (h4) => Math.min(...GRUPPEN3.map((g3) => h4.gruppen[g3]));
+        const min = (h4) => Math.min(...GRUPPEN4.map((g3) => h4.gruppen[g3]));
         const k5 = [...gewaehlt.haeuser].sort((a2, b4) => min(a2) - min(b4))[0];
         return "<b>Alle " + gewaehlt.haeuser.length + " H\xE4user sind ausreichend besetzt.</b> " + (k5 && min(k5) < 0.985 ? "Am knappsten: " + esc(k5.name) + " mit " + pct2(min(k5)) + " (Krankenstand " + pct2(k5.krank) + ")." : "Kein Springer n\xF6tig.");
       })();
       let r4 = "";
       if (gewaehlt) {
         const alle = gewaehlt.haeuser.length;
-        const voll2 = gewaehlt.haeuser.filter((h4) => GRUPPEN3.every((g3) => h4.gruppen[g3] >= 0.9)).length;
+        const voll2 = gewaehlt.haeuser.filter((h4) => GRUPPEN4.every((g3) => h4.gruppen[g3] >= 0.9)).length;
         r4 += gross2([
           { label: "H\xE4user besetzt", wert: `${voll2} von ${alle}`, ton: knapp.length ? "schlecht" : "" },
           { label: "Krankenstand", wert: pct2(gewaehlt.haeuser.reduce((n3, h4) => n3 + h4.krank, 0) / Math.max(1, alle)) }
@@ -186201,6 +186919,37 @@ void main() {
     }
     return { url: abtBildCache.get(k5), name: a2.name };
   }
+  var umbauBildCache = /* @__PURE__ */ new Map();
+  function umbauBild(projektId, wann) {
+    const k5 = projektId + "|" + wann;
+    if (umbauBildCache.has(k5)) return umbauBildCache.get(k5);
+    const p2 = s.umbau?.projekte?.find((x2) => x2.id === projektId), h4 = p2 && s.haeuser.find((x2) => x2.id === p2.haus);
+    const zst = p2?.[wann];
+    if (!p2 || !h4 || !zst) return null;
+    const etagenBau = structuredClone(h4.etagenBau ?? {});
+    for (const [nr4, z6] of Object.entries(zst)) {
+      const e = etagenBau[nr4] ?? (etagenBau[nr4] = { technik: {} });
+      e.moebelGeneration = z6.moebel + 1;
+      e.technik = { ...e.technik, klima: z6.klima, licht: z6.licht, brandschutz: z6.brandschutz };
+      e.klimaModernisiert = z6.klima === 2;
+    }
+    const haus3 = { ...h4, etagenBau };
+    let url;
+    if (p2.gewerk === "fassade" || p2.gewerk === "komplett" || p2.stufe === "komplett") {
+      if (h4.format !== "warenhaus") return null;
+      haus3.substanz = wann === "vorher" ? Math.min(h4.substanz, 35) : Math.max(h4.substanz, 85);
+      url = schnittBild((S, sc) => {
+        const res = warenhaus(S, sc, haus3, { passanten: false, vorplatz: false });
+        if (wann === "nachher") technikAufDach(S, haus3, { x: 0, z: 0, w: res.w, d: res.d, hoehe: res.hoehe });
+        return res;
+      }, 360, 260).url;
+    } else {
+      const nr4 = Number(Object.keys(zst).sort((a2, b4) => Math.abs(a2) - Math.abs(b4))[0]);
+      url = schnittBild((S, sc) => etage(S, sc, haus3, nr4, { ausschnitt: { anker: nr4 === 0 ? "eingang" : "ecke" } }), 360, 260).url;
+    }
+    umbauBildCache.set(k5, url);
+    return url;
+  }
   function etagenBild(g3, nr4) {
     return schnittBild((S, sc) => hqEtage(S, sc, g3, nr4, {})).url;
   }
@@ -186436,7 +187185,7 @@ void main() {
   um = umbauModul({ E: src_exports, s: () => s, panel, meldung, nachAktion: () => {
     grafikNachziehen();
     nachAktion();
-  }, hausOeffnen: oeffneHaus });
+  }, hausOeffnen: oeffneHaus, bild: umbauBild });
   pe = personalModul({ E: src_exports, s: () => s, panel, meldung, nachAktion, oeffneHaus });
   po = posteingangModul({
     E: src_exports,
@@ -186447,6 +187196,7 @@ void main() {
     zustand: () => postUi,
     nachZustand: automatischSpeichern,
     springe: (bezug) => {
+      if (bezug.projekt) return oeffneModul(um, null, 0, bezug.projekt);
       if (bezug.modul && !bezug.hausIds?.length && !bezug.stadt) {
         if (bezug.modul === "einkauf") return oeffneEinkauf();
         if (bezug.modul === "vorstand") return oeffneModul(vs);
@@ -186863,6 +187613,8 @@ void main() {
   else $2("hq").hidden = true;
   window.spiel = {
     speicherDiagnose,
+    oeffneUmbauProjekt: (id) => oeffneModul(um, null, 0, id),
+    oeffneModernisierung: () => oeffneModul(um),
     meldung,
     ecommerce: ec,
     oeffneEcommerce: (...a2) => oeffneModul(ec, ...a2),
@@ -187171,8 +187923,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-31T17:57:38.356Z" : null;
-    const v2 = true ? "b9d54c8" : "Entwicklung";
+    const iso = true ? "2026-10-31T18:58:51.849Z" : null;
+    const v2 = true ? "fdc4660" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();

@@ -4,7 +4,8 @@ export function technikAufDach(S, h, m) {
   const etagen=Object.values(h.etagenBau);
   const aufgeruestet=etagen.some(e=>e.technik?.klima===2 && e.klimaModernisiert===true);
   if (!aufgeruestet) return;
-  const {x,z,w,d,hoehe}=m, cx=x+w*0.48,cz=z+d*0.43;
+  // Vorn rechts auf dem Hauptdach: dort stehen keine Aufbauten (Penthouse, Technikzentrale hinten links).
+  const {x,z,w,d,hoehe}=m, cx=x+w*0.62,cz=z+d*0.78;
   for (let i=0;i<Math.min(3,Math.ceil(etagen.length/2));i++) {
     const dx=i*3.5;
     S.box(2.4,1.45,2.0,cx+dx,hoehe+0.73,cz,'#c0c9ce');
