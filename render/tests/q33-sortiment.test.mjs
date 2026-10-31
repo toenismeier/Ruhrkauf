@@ -30,7 +30,8 @@ for (const z of ['kinder', 'teens', 'young']) {
 }
 
 test('Q33-Typen haben untereinander kein gleiches Bild', () => {
-  const q33 = K.typen.filter((t) => /^[kt]_/.test(t.bild?.silhouette ?? ''));
+  // Wurf 4: Typen mit offenem Bild (bildOffen) leihen sich bis zur Abnahme eine vorhandene Silhouette
+  const q33 = K.typen.filter((t) => !t.bildOffen && /^[kt]_/.test(t.bild?.silhouette ?? ''));
   const bilder = new Map();
   for (const t of q33) { const b = ohneIds(produktSVG(t.bild, undefined, undefined, 64)); assert.ok(!bilder.has(b), `${t.typ} = ${bilder.get(b)}`); bilder.set(b, t.typ); }
 });

@@ -1,0 +1,15 @@
+{
+ "hinweis": "B24: Artikeltyp (Engine, Q-Auftrag) -> Silhouette. Erzeugt aus bildpakete/B24/SVG/konf.json.",
+ "typen": {
+  "Blusenbody": "b24blusenbody",
+  "Jeansbluse": "b24jeansbluse",
+  "Kapuzen-Strickjacke": "b24kapuzenstrickjacke",
+  "Korsagenbluse": "b24korsagenbluse",
+  "Leinenhemd": "b24leinenhemd",
+  "Milkmaid-Bluse": "b24milkmaid",
+  "Off-Shoulder-Bluse": "b24offshoulder",
+  "Strick-Bomberjacke": "b24strickbomber",
+  "Trachtenjacke": "b24trachtenjacke",
+  "Varsity-Cardigan": "b24varsitycardigan"
+ }
+}

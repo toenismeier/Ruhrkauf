@@ -1,0 +1,45 @@
+{
+ "hinweis": "Zuordnung Artikeltyp -> Silhouette für B18. Typen noch nicht auf main (Q41): angebunden wird nach Merge des Q-Auftrags.",
+ "typen": {
+  "Armstulpen": {
+   "silhouette": "b18armstulpen",
+   "engine": false
+  },
+  "Baskenmütze": {
+   "silhouette": "b18baskenmuetze",
+   "engine": false
+  },
+  "Einsatzkragen": {
+   "silhouette": "b18einsatzkragen",
+   "engine": false
+  },
+  "Fingerlose Handschuhe": {
+   "silhouette": "b18fingerlos",
+   "engine": false
+  },
+  "Fliegermütze": {
+   "silhouette": "b18fliegermuetze",
+   "engine": false
+  },
+  "Hüftgürtel": {
+   "silhouette": "b18hueftguertel",
+   "engine": false
+  },
+  "Military-Cap": {
+   "silhouette": "b18militarycap",
+   "engine": false
+  },
+  "Pareo": {
+   "silhouette": "b18pareo",
+   "engine": false
+  },
+  "Schlüsselanhänger": {
+   "silhouette": "b18schluesselanhaenger",
+   "engine": false
+  },
+  "Scrunchie": {
+   "silhouette": "b18scrunchie",
+   "engine": false
+  }
+ }
+}

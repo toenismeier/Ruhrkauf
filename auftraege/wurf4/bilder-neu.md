@@ -24,6 +24,42 @@ Arbeitsweise je Typ:
 2. **Zeichnen auf Referenzniveau:** Flatlay frontal, echte Konfektionsproportion, sichtbare Nähte, Bund mit Gürtelschlaufen/Knopf wo vorhanden, Taschenbeutel und Ziernähte bei Denim, Stoffwurf und Schattierung aus `stoff.js`, gleiche Kontur wie Bestand. Keine Würste, keine gleichförmigen Röhren, keine erfundenen Details.
 3. **Vergleichsbild** (nur lokal, nie ins Repo): Referenz-Freisteller links, eigene Zeichnung rechts, gleiche Höhe.
 4. **Prüfung durch frischen Subagenten** (ohne Kontext) mit dem Vergleichsbild: Formtreue 1–5 (Silhouette, Proportion, Details) und Benennung aus einer Liste, in der die **Geschwistertypen** stehen (z. B. Ballon-Jeans / Ballonhose / Baggy-Jeans / Pumphose). Abnahme intern erst bei **Formtreue ≥ 4 und richtiger Benennung**, sonst neu zeichnen.
-5. Model-Platz wie bisher.
+5. Model-Platz wie bisher, **mit Model-Prüfung** (Abschnitt 4).
 
 Abgabe je Paket: Kontaktbogen **Referenz | Zeichnung** je Typ in 320 px und 64 px als Datei an Ummo, Tabelle Formtreue im PR. **Merge erst nach Ummos Ok.** Bei Ok: `bildOffen` für diese Typen entfernen, Bundle neu, STATUS.
+
+## 3. Entscheidung Verfahren (Ummo 25.10.2026 nach B01-Bogen)
+**B, danach vtracer auf B.** Das Bildmodell (Qwen-Image-Edit-2509, eigener RunPod-Pod, Eingabe Originalfreisteller) liefert die saubere Zeichnung; vtracer macht daraus SVG, Flächen werden auf `stoff.js` gemappt und sind im Code umfärbbar (Farbe, Material, Musterfeld Q37). A (vtracer direkt aufs Foto) ist verworfen (unruhig, skizzenhaft).
+- B-Bilder erzeugt der Workstream-Chat für alle Pakete und legt sie privat ab: `toenismeier/hartwig-ref-p01-shirts-tops`, Ordner `bildpakete/<paket>/B/<typ>.png` (Eingabe in `bildpakete/<paket>/original/`). B01 liegt in `stiltest-b01/B/`.
+- Bild-Chat je Paket: vtracer auf B, Flächen den Stoffzonen zuordnen (Grundfarbe, Schatten, Licht, Kontur, Details wie Knöpfe/Schnallen als feste Farben), Kontur 1 Stärke wie B, Bodenschatten einheitlich, Model-Platz. Prüfung wie Abschnitt 2 (Formtreue ≥ 4 gegen Referenz, Geschwistertypen). Bogen je Typ **Referenz | B | SVG im Spiel (2 Farben)** an Ummo, Merge nur nach Ok.
+- Im SVG-Schritt entfernen: Etiketten im Kragen, Aufnäher, Schriftzüge und Stickerei-Schrift, die das Bildmodell trotz Vorgabe übernommen hat (z. B. B02 Lagenlook-Hemd, Resorthemd). Fehlt die Kontur (B02 Bolero), ergänzen.
+- B01 ist Stilreferenz, sobald Ummo die SVG-Fassung von B01 abnimmt.
+
+## 4. Model-Prüfung (Pflicht je Paket, Ummo 27.10.2026)
+Anlass: B01-Prüfung am Model am 27.10. Das Model (`modelSVG`) zeichnet die Kleidung aus den alten Grundformen und übernimmt aus B nur Farbe, Material und einige Parameter. Im Blindtest durch einen frischen Subagenten waren 2 von 10 B01-Teilen am Model richtig erkannt. Die Ballonjeans erscheint als gerade Jeans, die Low-Rise-Jeans mit hohem Bund, die Hotpants als Bermuda. Beim Strickpullover fehlen Streifen und Polokragen, der Blouson zeigt keine Bomberform, Mary Jane ist kaum sichtbar, die Baguette-Tasche ist ein Viereck.
+- Abnahmebogen je Typ: **Referenz | B | SVG im Spiel | am Model** (Zielgruppe, die den Typ trägt).
+- Blindtest am Model durch frischen Subagenten mit Geschwisterliste wie Abschnitt 2. Abnahme nur bei richtiger Benennung **am Model**.
+- Fällt ein Typ am Model durch, wird er im PR als Model-Befund ausgewiesen. Er wird nicht gemergt, als wäre er fertig. Bis der neue Model-Weg steht, wird kein Paket ohne Model-Spalte vorgelegt.
+- Die Prüfung umfasst auch den Sitz. Bundhöhe, Länge, Weite und Fall müssen dem Referenz-Modelfoto entsprechen. Kleidung, die aufgelegt wirkt wie eine Papierschablone, fällt durch, auch wenn der Artikel erkannt wird.
+
+## 5. Neuer Model-Weg (Ummo 27.10.2026)
+Verworfen sind: Kleidung auf die Q25-Puppe legen (SVG oder Qwen-Edit auf Q25, „Papierschablone“) und MPFB-Körper („Hulk-mäßig“, Proportionen falsch).
+- **Grundfiguren:** Je Zielgruppe und Geschlecht eine feste Figur, abgenommen am 27.10. Q25-Gesicht und Phänotyp bleiben, der Körper ist neu in Alltagsproportionen. Größen: Damen Kinder 1,35 / Teens 1,63 / Young 1,68 / Adults 1,67 / Best Ager 1,64 m; Herren 1,37 / 1,72 / 1,80 / 1,80 / 1,76 m. Ablage privat: `toenismeier/hartwig-ref-p01-shirts-tops`, Ordner `models/figuren/`.
+- **Model-Bild je Produkt:** Wird als ganze Zeichnung neu erzeugt (Qwen-Image-Edit-2509). Eingaben: Grundfigur, Referenz-Modelfoto aus dem Kontaktbogen (Sitz) und B-Freisteller (Produkt). Danach vtracer und Stoffzonen wie bei B.
+- **Kosten:** Vor Ausgaben über 50 $ geht Ummo die Zahlen mit durch.
+
+
+## 5. Merge B02–B30 (Ummo 27.10.2026: „Produktbilder mergen, Model getrennt“)
+- Alle 29 Pakete auf einem Branch zusammengeführt (`feat/bildpakete-wurf4`). Ersetzt die Einzel-PRs #102–#113.
+- Engine: `sortiment/bilder-wurf4.ts` bindet jeden Q38–Q41-Typ an seine Paket-Silhouette (aus `render/src/kit/mode/bNN-zuordnung.json`, B01 aus `erweiterung-b01.js`) und entfernt `bildOffen`. Babytee, Midirock und Strickpullover zeigen jetzt die B01-Silhouette.
+- **Bleiben gesperrt (`BILD_REST`, bildOffen mit Platzhalter, Nachlauf B-Bild + Beschreibung):**
+  - Raglan-T-Shirt, Netzstrickpullover, Paillettenshorts, Kunstledershorts, Beuteltasche, Biker-Bag, Haarband, Taillengürtel, Einsatzkragen und Scrunchie: B ist nicht besser geworden.
+  - Strickrock: Formtreue 3, nicht erneut geprüft.
+  - Baggy-Hose: nur die alte Fassung, gestreckt.
+  - Ring-Set: Formtreue 3, der Siegelring ist unsicher.
+  - Halsketten-Set und Broschen-Set: zeigen nur ein Teil statt eines Sets.
+  - Korsagenbluse und Tabi-Sneaker: Q42, binden beim Q42-Merge nicht.
+- Model-Befund für alle Pakete: Das Model zeichnet weiter die alten Grundformen, nur Zubehör sitzt über `zubehoer`/`auflage` am Platz. Eigener Auftrag O10, kein Merge-Hindernis mehr.
+- Cargo-Jogger (B07): Die Silhouette war auf Herren festgelegt, obwohl der Typ unisex ist (auch damen.young). Die Festlegung ist entfernt.
+- `produkt.js`: Das Musterfeld wird als `musterfeld` (B02–B25) und als `muster37` (B26–B30) weitergereicht. `model.js` führt `zubehoer` (B17–B19) und `auflage` (B20–B22) nebeneinander.
+

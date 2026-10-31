@@ -1,0 +1,46 @@
+{
+ "hinweis": "Bildpaket B03: Engine-Typ -> Silhouette. Die Typen gibt es auf main noch nicht; angebunden wird nach Merge des Q-Auftrags (bild: { silhouette }, bildOffen entfernen).",
+ "paket": "B03",
+ "typen": {
+  "Crop-T-Shirt": {
+   "silhouette": "b03croptshirt",
+   "auftrag": "Q38"
+  },
+  "Henley-Pullover": {
+   "silhouette": "b03henleypullover",
+   "auftrag": "Q38"
+  },
+  "Kurzarm-Strickpullover": {
+   "silhouette": "b03kurzarmstrickpullover",
+   "auftrag": "Q38"
+  },
+  "Netzstrickpullover": {
+   "silhouette": "b03netzstrickpullover",
+   "auftrag": "Q38"
+  },
+  "Off-Shoulder-Pullover": {
+   "silhouette": "b03offshoulderpullover",
+   "auftrag": "Q38"
+  },
+  "Ringer-T-Shirt": {
+   "silhouette": "b03ringertshirt",
+   "auftrag": "Q38"
+  },
+  "Strick-Hoodie": {
+   "silhouette": "b03strickhoodie",
+   "auftrag": "Q38"
+  },
+  "Strickcape": {
+   "silhouette": "b03strickcape",
+   "auftrag": "Q38"
+  },
+  "Strickpolo": {
+   "silhouette": "b03strickpolo",
+   "auftrag": "Q38"
+  },
+  "V-Pullover": {
+   "silhouette": "b03vpullover",
+   "auftrag": "Q38"
+  }
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "hinweis": "B25: Artikeltyp (Engine, Q-Auftrag) -> Silhouette. Erzeugt aus bildpakete/B25/SVG/konf.json.",
+ "typen": {
+  "Anorak": "b25anorak",
+  "Cordhemd": "b25cordhemd",
+  "Jogginganzug": "b25jogginganzug",
+  "Kunstleder-Leggings": "b25kunstlederleggings",
+  "Plisseehose": "b25plisseehose",
+  "Sarong-Hose": "b25saronghose",
+  "Strickhemd": "b25strickhemd",
+  "Trachtenhemd": "b25trachtenhemd",
+  "Wachsjacke": "b25wachsjacke",
+  "Zigarettenhose": "b25zigarettenhose"
+ }
+}

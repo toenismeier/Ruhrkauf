@@ -1,0 +1,15 @@
+{
+ "hinweis": "Bildpaket B27: Engine-Typ (Q42, noch nicht in ARTIKELTYPEN) -> Silhouette. Anbindung nach Merge des Q-Auftrags: bild: { silhouette }, bildOffen entfernen.",
+ "typen": {
+  "Cordrock": "b27cordrock",
+  "Corsagenkleid": "b27corsagenkleid",
+  "Häkelpullover": "b27haekelpullover",
+  "Hängerkleid": "b27haengerkleid",
+  "Jeans-Maxirock": "b27jeansmaxirock",
+  "Kunstfellmantel": "b27kunstfellmantel",
+  "Ledermantel": "b27ledermantel",
+  "Parachute-Rock": "b27parachuterock",
+  "Skaterkleid": "b27skaterkleid",
+  "Überrock": "b27ueberrock"
+ }
+}

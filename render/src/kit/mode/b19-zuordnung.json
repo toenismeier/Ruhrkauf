@@ -1,0 +1,45 @@
+{
+ "hinweis": "Zuordnung Artikeltyp -> Silhouette für B19. Typen noch nicht auf main (Q41): angebunden wird nach Merge des Q-Auftrags.",
+ "typen": {
+  "Armreif-Set": {
+   "silhouette": "b19armreifset",
+   "engine": false
+  },
+  "Armreif": {
+   "silhouette": "b19armreif",
+   "engine": false
+  },
+  "Haarparfum": {
+   "silhouette": "b19haarparfum",
+   "engine": false
+  },
+  "Halsketten-Set": {
+   "silhouette": "b19halskettenset",
+   "engine": false
+  },
+  "Korsettgürtel": {
+   "silhouette": "b19korsettguertel",
+   "engine": false
+  },
+  "Ohrenwärmer": {
+   "silhouette": "b19ohrenwaermer",
+   "engine": false
+  },
+  "Ohrhänger": {
+   "silhouette": "b19ohrhaenger",
+   "engine": false
+  },
+  "Ohrring-Set": {
+   "silhouette": "b19ohrringset",
+   "engine": false
+  },
+  "Ohrstecker": {
+   "silhouette": "b19ohrstecker",
+   "engine": false
+  },
+  "Ring-Set": {
+   "silhouette": "b19ringset",
+   "engine": false
+  }
+ }
+}

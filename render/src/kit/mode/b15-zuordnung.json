@@ -1,0 +1,15 @@
+{
+ "hinweis": "B15: Artikeltyp (Q40, noch nicht auf main) -> Silhouette. Anbinden nach Merge des Q-Auftrags: Silhouette am Typ eintragen, bildOffen entfernen.",
+ "typen": {
+  "Schlafshirt": "b15schlafshirt",
+  "Tanga": "b15tanga",
+  "Balconette-BH": "b15balconettebh",
+  "Panty": "b15panty",
+  "Bralette": "b15bralette",
+  "Schlafshorts": "b15schlafshorts",
+  "Brazilian-Slip": "b15brazilianslip",
+  "Negligee": "b15negligee",
+  "Pyjama-Oberteil": "b15pyjamaoberteil",
+  "Schlaftop": "b15schlaftop"
+ }
+}

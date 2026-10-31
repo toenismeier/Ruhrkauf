@@ -1,0 +1,8 @@
+{
+ "hinweis": "B16: Artikeltyp (Q40, noch nicht auf main) -> Silhouette. Anbinden nach Merge des Q-Auftrags: Silhouette am Typ eintragen, bildOffen entfernen.",
+ "typen": {
+  "Klebe-BH": "b16klebebh",
+  "Longline-BH": "b16longlinebh",
+  "Strumpfhalter": "b16strumpfhalter"
+ }
+}

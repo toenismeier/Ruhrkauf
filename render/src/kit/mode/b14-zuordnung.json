@@ -1,0 +1,15 @@
+{
+ "hinweis": "B14: Artikeltyp (Q40, noch nicht auf main) -> Silhouette. Anbinden nach Merge des Q-Auftrags: Silhouette am Typ eintragen, bildOffen entfernen.",
+ "typen": {
+  "Reitstiefel": "b14reitstiefel",
+  "Keilstiefelette": "b14keilstiefelette",
+  "Loafer-Mule": "b14loafermule",
+  "Trail-Sneaker": "b14trailsneaker",
+  "Peeptoe-Stiefel": "b14peeptoestiefel",
+  "Tabi-Ballerina": "b14tabiballerina",
+  "Trouser-Boots": "b14trouserboots",
+  "Sportsocken": "b14sportsocken",
+  "String": "b14string",
+  "Push-up-BH": "b14pushupbh"
+ }
+}

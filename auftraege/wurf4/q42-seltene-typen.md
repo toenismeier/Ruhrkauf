@@ -7,7 +7,9 @@ Branch `feat/q42-referenz`. Grundlage `auftraege/wurf4/README.md` (Regeln, Bilde
 
 ## 1. Neue Typen (83)
 - `daten/q42-typen.csv`, gleicher Aufbau wie `q38-typen.csv` (Zielgruppe ab 30 % der Artikel). Alle Oberbegriffe, sortiert nach Oberbegriff und Häufigkeit.
-- Je Typ: Engine-Eintrag (Kategorie, Baumpfad, WGs, Saison, Preis, Materialien, Gruppe passend zu den Zielgruppen) mit `bildOffen: true` und vorhandener Ersatz-Silhouette. **Keine neuen Bilder**, die kommen über die Bildpakete B22–B30 (`wurf4/bilder-neu.md`).
+- Je Typ: Engine-Eintrag (Kategorie, Baumpfad, WGs, Saison, Preis, Materialien, Gruppe passend zu den Zielgruppen). **Keine neuen Bilder.**
+- **Bilder (Stand 31.10.):** Alle 83 Typen haben ihr Bild schon aus den Bildpaketen B22–B30 (auf main seit #116). Die Zuordnung Typ → Silhouette steht in `render/src/kit/mode/b22-zuordnung.json` bis `b30-zuordnung.json`. Bindung wie bei Q38–Q41 über `engine/src/sortiment/bilder-wurf4.ts`: die 83 Paare in `BILD_WURF4` ergänzen und je Eintrag `...bildWurf4(typ, platzhalter)` verwenden. **Korsagenbluse** und **Tabi-Sneaker** kommen in `BILD_REST` (bleiben bildOffen mit vorhandener Ersatz-Silhouette, Nachlauf). Die übrigen 81 sind ohne `bildOffen`, also wählbar.
+- Für die gebundenen Typen nichts am Render ändern (Pakete, `silhouetten.json`, Bundle bleiben). Fehlt eine Silhouette oder trifft ein Typname nicht exakt, im PR melden, nicht selbst zeichnen.
 - Anlass-Typen (Ballkleid, Brautkleid, Pillbox-Hut, Kopfschmuck, Lange Handschuhe, Tracht) in die Kategorie Anlass aus Q37 einsortieren (Unterkategorie Abiball/Tanzschulball, Hochzeit (Braut), Volksfest/Tracht, Zubehör).
 - Code in `engine/src/sortiment/q42-selten.ts`.
 
@@ -21,4 +23,4 @@ Branch `feat/q42-referenz`. Grundlage `auftraege/wurf4/README.md` (Regeln, Bilde
 Anstecker-Set, Fashion-Tape, Handyhalter, Hunde-Hoodie, Schmuckbox, Shirt-Set, Besteck-Rolltasche, Glätteisen-Etui, Brust-Tape, Nipple-Cover, Geschenkgutschein, Kleiderschutzhülle, Spezialwaschmittel.
 
 ## Abnahme
-Wie README. Zusätzlich Test, der jede Zeile beider CSVs prüft (Typ vorhanden mit Zielgruppen, Variante am Zieltyp wählbar).
+Wie README. Zusätzlich Test, der jede Zeile beider CSVs prüft (Typ vorhanden mit Zielgruppen, Variante am Zieltyp wählbar, Bild = Paket-Silhouette bzw. bildOffen für die zwei Rest-Typen). Model-Bilder sind nicht Teil von Q42 (`bilder-neu.md` Abschnitt 5, Model-Weg).

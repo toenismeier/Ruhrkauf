@@ -1,0 +1,42 @@
+{
+ "hinweis": "B05 (Wurf 4): Zuordnung Artikeltyp -> Silhouette. Die Typen kommen mit Q38 (noch nicht auf main). Nach dem Merge von Q38: je Typ bild.silhouette auf diese Id setzen und bildOffen entfernen.",
+ "auftrag": "Q38",
+ "typen": {
+  "Sportshirt": {
+   "silhouette": "b05sportshirt"
+  },
+  "Sweat-Troyer": {
+   "silhouette": "b05sweattroyer"
+  },
+  "Kurzarm-Sweatshirt": {
+   "silhouette": "b05kurzarmsweat"
+  },
+  "Off-Shoulder-Sweatshirt": {
+   "silhouette": "b05offsweat",
+   "nur": "damen"
+  },
+  "Polo-Sweatshirt": {
+   "silhouette": "b05polosweat"
+  },
+  "Body": {
+   "silhouette": "b05body",
+   "nur": "damen"
+  },
+  "Tanktop": {
+   "silhouette": "b05tanktop",
+   "nur": "damen"
+  },
+  "Peplum-Top": {
+   "silhouette": "b05peplumtop",
+   "nur": "damen"
+  },
+  "Stricktop": {
+   "silhouette": "b05stricktop",
+   "nur": "damen"
+  },
+  "Bustier-Top": {
+   "silhouette": "b05bustier",
+   "nur": "damen"
+  }
+ }
+}

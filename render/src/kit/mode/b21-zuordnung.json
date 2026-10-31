@@ -1,0 +1,50 @@
+{
+ "hinweis": "Bildpaket B21: Zuordnung Artikeltyp (Name aus auftraege/wurf4/daten) -> Silhouette. Angebunden wird nach Merge des Q-Auftrags (bild: { silhouette }).",
+ "typen": {
+  "Hobo-Bag": {
+   "silhouette": "b21hobobag",
+   "auftrag": "Q41",
+   "oberbegriff": "Tasche"
+  },
+  "Halbmondtasche": {
+   "silhouette": "b21halbmond",
+   "auftrag": "Q41",
+   "oberbegriff": "Tasche"
+  },
+  "Beuteltasche": {
+   "silhouette": "b21beutel",
+   "auftrag": "Q41",
+   "oberbegriff": "Tasche"
+  },
+  "Citytasche": {
+   "silhouette": "b21citytasche",
+   "auftrag": "Q41",
+   "oberbegriff": "Tasche"
+  },
+  "Barrel-Bag": {
+   "silhouette": "b21barrelbag",
+   "auftrag": "Q41",
+   "oberbegriff": "Tasche"
+  },
+  "Kameratasche": {
+   "silhouette": "b21kameratasche",
+   "auftrag": "Q41",
+   "oberbegriff": "Tasche"
+  },
+  "Biker-Bag": {
+   "silhouette": "b21bikerbag",
+   "auftrag": "Q41",
+   "oberbegriff": "Tasche"
+  },
+  "Box-Tasche": {
+   "silhouette": "b21boxtasche",
+   "auftrag": "Q41",
+   "oberbegriff": "Tasche"
+  },
+  "Messenger-Bag": {
+   "silhouette": "b21messenger",
+   "auftrag": "Q41",
+   "oberbegriff": "Tasche"
+  }
+ }
+}

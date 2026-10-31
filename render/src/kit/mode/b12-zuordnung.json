@@ -1,0 +1,41 @@
+{
+ "hinweis": "B12 (Wurf 4): Typ -> Silhouette. Die Typen kommen mit Q40 (noch nicht auf main). Nach dessen Merge im Engine-Eintrag bild: { silhouette } setzen und bildOffen entfernen.",
+ "paket": "B12",
+ "auftrag": "Q40",
+ "zuordnung": {
+  "Fliegerjacke": {
+   "silhouette": "b12fliegerjacke"
+  },
+  "Jacke": {
+   "silhouette": "b12jacke"
+  },
+  "Kapuzenjacke": {
+   "silhouette": "b12kapuzenjacke"
+  },
+  "Kunstfelljacke": {
+   "silhouette": "b12kunstfelljacke"
+  },
+  "Military-Jacke": {
+   "silhouette": "b12militaryjacke"
+  },
+  "Peplum-Jacke": {
+   "silhouette": "b12peplumjacke"
+  },
+  "Racing-Jacke": {
+   "silhouette": "b12racingjacke"
+  },
+  "Sakko": {
+   "silhouette": "b12sakko"
+  },
+  "Wildlederjacke": {
+   "silhouette": "b12wildlederjacke"
+  },
+  "Workerjacke": {
+   "silhouette": "b12workerjacke"
+  }
+ },
+ "nachgeschaerft": {
+  "Kapuzenjacke": "B im Workstream nachgeschärft (Kapuzenöffnung), neu vektorisiert; Rippbündchen an Saum und Ärmeln im SVG-Schritt ergänzt",
+  "Wildlederjacke": "B im Workstream nachgeschärft, neu vektorisiert"
+ }
+}

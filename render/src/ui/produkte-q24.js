@@ -26,6 +26,8 @@ function faecherFuer(t) {
 }
 export function passendeTypen(K, fach, gruppe) {
   return (K.typen ?? []).filter((t) => {
+    // Wurf 4: Typen mit offenem Bild (bildOffen) erscheinen erst nach Ummos Abnahme des Bildpakets
+    if (t.bildOffen) return false;
     if (!faecherFuer(t).has(fach)) return false;
     // Q33: der Katalog liefert je Typ die passenden Zielgruppen (auch für Home); ohne Angabe gelten die Trend-Gewichte.
     if (Array.isArray(t.zielgruppen)) return t.zielgruppen.includes(gruppe);

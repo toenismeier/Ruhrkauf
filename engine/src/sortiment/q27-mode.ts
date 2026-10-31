@@ -86,7 +86,7 @@ export const TYPEN: SortimentTyp<Name>[] = [
   t('Schluppenbluse', 'oberteile', ['damen.blusen', 'damen.gg'], 'ganz', 49, FLIESS, G(0, 0.3, 0.85, 0.9), 1, b('schluppenbluse')),
   t('Wickelshirt', 'oberteile', ['damen.blusen'], 'ganz', 35, FLIESS, G(0, 0.6, 0.85, 0.7), 1, b('wickelshirt'), ['oberteile', 'Shirts']),
   t('Trägertop', 'oberteile', ['damen.blusen', 'damen.young'], 'sommer', 25, FLIESS, G(0, 0.9, 0.7, 0.3), 1, b('traegertop'), ['oberteile', 'Tops']),
-  t('Babytee', 'oberteile', ['damen.young'], 'sommer', 19, BW, G(0.2, 1, 0.3, 0), 1, b('babytee'), ['oberteile', 'Shirts']),
+  t('Babytee', 'oberteile', ['damen.young'], 'sommer', 19, BW, G(0.2, 1, 0.3, 0), 1, b('b01babytee'), ['oberteile', 'Shirts']),
   t('Marlenehose', 'unterteile', ['damen.hosen', 'damen.gg'], 'ganz', 69, WOLLE, G(0, 0.4, 0.85, 0.9), 1, b('marlenehose'), ['unterteile', 'Stoffhosen']),
   t('Komforthose', 'unterteile', ['damen.hosen', 'damen.gg'], 'ganz', 49, BW_P, G(0, 0, 0.4, 1), 1, b('komforthose'), ['unterteile', 'Stoffhosen']),
   t('Komfort-Jeans', 'unterteile', ['damen.denim', 'damen.gg'], 'ganz', 59, DENIM, G(0, 0, 0.5, 1), 1, b('jeans', { komfortbund: true }), ['unterteile', 'Jeans und Denim']),

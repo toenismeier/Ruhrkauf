@@ -1,0 +1,46 @@
+{
+ "hinweis": "Bildpaket B04: Engine-Typ -> Silhouette. Die Typen gibt es auf main noch nicht; angebunden wird nach Merge des Q-Auftrags (bild: { silhouette }, bildOffen entfernen).",
+ "paket": "B04",
+ "typen": {
+  "Raglan-T-Shirt": {
+   "silhouette": "b04raglantshirt",
+   "auftrag": "Q38"
+  },
+  "Henley-Longsleeve": {
+   "silhouette": "b04henleylongsleeve",
+   "auftrag": "Q38"
+  },
+  "Langarm-Poloshirt": {
+   "silhouette": "b04langarmpolo",
+   "auftrag": "Q38"
+  },
+  "Layer-Shirt": {
+   "silhouette": "b04layershirt",
+   "auftrag": "Q38"
+  },
+  "Ärmelloses Shirt": {
+   "silhouette": "b04aermellosesshirt",
+   "auftrag": "Q38"
+  },
+  "Strickshirt": {
+   "silhouette": "b04strickshirt",
+   "auftrag": "Q38"
+  },
+  "Fledermausshirt": {
+   "silhouette": "b04fledermausshirt",
+   "auftrag": "Q38"
+  },
+  "Baseballshirt": {
+   "silhouette": "b04baseballshirt",
+   "auftrag": "Q38"
+  },
+  "Peplum-Shirt": {
+   "silhouette": "b04peplumshirt",
+   "auftrag": "Q38"
+  },
+  "Spitzenshirt": {
+   "silhouette": "b04spitzenshirt",
+   "auftrag": "Q38"
+  }
+ }
+}

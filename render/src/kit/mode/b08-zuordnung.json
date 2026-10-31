@@ -1,0 +1,45 @@
+{
+ "hinweis": "B08 (Wurf 4): Artikeltyp -> Silhouette für Typen, die auf main noch fehlen (Q39). Nach Merge des Q-Auftrags: bild.silhouette setzen, bildOffen entfernen.",
+ "typen": {
+  "Steg-Leggings": {
+   "silhouette": "b08stegleggings",
+   "auftrag": "Q39"
+  },
+  "5-Pocket-Hose": {
+   "silhouette": "b08fivepocket",
+   "auftrag": "Q39"
+  },
+  "Baggy-Hose": {
+   "silhouette": "b08baggyhose",
+   "auftrag": "Q39"
+  },
+  "Carpenter-Hose": {
+   "silhouette": "b08carpenterhose",
+   "auftrag": "Q39"
+  },
+  "Jerseyhose": {
+   "silhouette": "b08jerseyhose",
+   "auftrag": "Q39"
+  },
+  "Kunstlederhose": {
+   "silhouette": "b08kunstlederhose",
+   "auftrag": "Q39"
+  },
+  "Skinny-Hose": {
+   "silhouette": "b08skinnyhose",
+   "auftrag": "Q39"
+  },
+  "Palazzohose": {
+   "silhouette": "b08palazzohose",
+   "auftrag": "Q39"
+  },
+  "Barrel-Jeans": {
+   "silhouette": "b08barreljeans",
+   "auftrag": "Q39"
+  },
+  "Capri-Jeans": {
+   "silhouette": "b08caprijeans",
+   "auftrag": "Q39"
+  }
+ }
+}

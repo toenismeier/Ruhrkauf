@@ -4,8 +4,9 @@ import type { TypDef, TrendGruppe } from '../produkte';
 /** Bildschnittstelle zur Grafik: Silhouette plus optionale Parameter (aermel, laenge, kragen, passform, muster, form, art …). */
 export interface ArtikelBild { silhouette: string; [parameter: string]: string | number | boolean }
 
-/** Artikeltyp eines Bild-Chats: wie TypDef, mit Pflichtfeld bild; pfad optional ([Baumkategorie, Unterkategorie] aus produkt-sortiment.ts). */
-export type SortimentTyp<N extends string = string> = Omit<TypDef, 'typ' | 'bild'> & { typ: N; bild: ArtikelBild };
+/** Artikeltyp eines Bild-Chats: wie TypDef, mit Pflichtfeld bild; pfad optional ([Baumkategorie, Unterkategorie] aus produkt-sortiment.ts).
+ * bildOffen (Wurf 4): eigenes Bild noch nicht von Ummo abgenommen; bild zeigt bis dahin die nächstliegende vorhandene Silhouette. */
+export type SortimentTyp<N extends string = string> = Omit<TypDef, 'typ' | 'bild'> & { typ: N; bild: ArtikelBild; bildOffen?: true };
 
 /** Passung je Zielgruppe 0..1 (kinder, jung, mitte, reif). */
 export const G = (kinder: number, jung: number, mitte: number, reif: number): Record<TrendGruppe, number> => ({ kinder, jung, mitte, reif });

@@ -1,0 +1,15 @@
+{
+ "hinweis": "Bildpaket B28: Engine-Typ (Q42, noch nicht in ARTIKELTYPEN) -> Silhouette. Anbindung nach Merge des Q-Auftrags: bild: { silhouette }, bildOffen entfernen.",
+ "typen": {
+  "Ear Cuff": "b28earcuff",
+  "Half-Zip-Shirt": "b28halfzipshirt",
+  "Keil-Sneaker": "b28keilsneaker",
+  "Mary-Jane-Pumps": "b28maryjanepumps",
+  "Mini-Boot": "b28miniboot",
+  "Oberarmreif": "b28oberarmreif",
+  "Plateau-Pumps": "b28plateaupumps",
+  "Plateau-Sandalette": "b28plateausandalette",
+  "Tabi-Sneaker": "b28tabisneaker",
+  "Wallabee": "b28wallabee"
+ }
+}

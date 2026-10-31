@@ -1,0 +1,42 @@
+{
+ "hinweis": "B13 (Wurf 4): Typ -> Silhouette. Die Typen kommen mit Q40 (noch nicht auf main). Nach dessen Merge im Engine-Eintrag bild: { silhouette } setzen und bildOffen entfernen.",
+ "paket": "B13",
+ "auftrag": "Q40",
+ "zuordnung": {
+  "Barfuß-Sneaker": {
+   "silhouette": "b13barfusssneaker"
+  },
+  "Bikerstiefel": {
+   "silhouette": "b13bikerstiefel"
+  },
+  "Cowboy-Stiefelette": {
+   "silhouette": "b13cowboystiefelette"
+  },
+  "Cowboystiefel": {
+   "silhouette": "b13cowboystiefel"
+  },
+  "Sandalette": {
+   "silhouette": "b13sandalette"
+  },
+  "Slingback-Ballerina": {
+   "silhouette": "b13slingbackballerina"
+  },
+  "Slouch-Stiefel": {
+   "silhouette": "b13slouchstiefel"
+  },
+  "Slouch-Stiefelette": {
+   "silhouette": "b13slouchstiefelette"
+  },
+  "Sneakerina": {
+   "silhouette": "b13sneakerina"
+  },
+  "Sock-Boot": {
+   "silhouette": "b13sockboot"
+  }
+ },
+ "nachgeschaerft": {
+  "Cowboy-Stiefelette": "B im Workstream nachgeschärft (Seitenansicht), neu vektorisiert",
+  "Slouch-Stiefel": "B im Workstream nachgeschärft (Seitenansicht), neu vektorisiert",
+  "Slouch-Stiefelette": "B im Workstream nachgeschärft (Seitenansicht), neu vektorisiert"
+ }
+}

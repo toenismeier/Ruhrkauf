@@ -51,14 +51,16 @@ describe('Q34: Sortiment Adults und Best Ager', () => {
 
   test('kein Bild doppelt über alle Artikeltypen', () => {
     const je = new Map<string, string[]>();
-    for (const t of K.typen) { const b = bild(t); je.set(b, [...(je.get(b) ?? []), t.typ]); }
+    // Wurf 4: Typen mit offenem Bild (bildOffen) zeigen bis zur Abnahme eine vorhandene Silhouette
+    for (const t of K.typen.filter((x) => !x.bildOffen)) { const b = bild(t); je.set(b, [...(je.get(b) ?? []), t.typ]); }
     const doppelt = [...je.values()].filter((l) => l.length > 1).map((l) => l.join(' = '));
     expect(doppelt).toEqual([]);
   });
 
   test('jede Schuhart hat einen eigenen Leisten (Form gleich auch ohne Farbe verschieden)', () => {
     const form = (svg: string) => svg.replace(/#[0-9a-fA-F]{3,8}\b/g, '#c');
-    const schuhe = K.typen.filter((t) => t.kategorie === 'schuhe');
+    // Wurf 4: Typen mit offenem Bild (bildOffen) zeigen bis zur Abnahme eine vorhandene Silhouette
+    const schuhe = K.typen.filter((t) => t.kategorie === 'schuhe' && !t.bildOffen);
     const je = new Map<string, string[]>();
     for (const t of schuhe) { const b = form(bild(t)); je.set(b, [...(je.get(b) ?? []), t.typ]); }
     expect([...je.values()].filter((l) => l.length > 1)).toEqual([]);
