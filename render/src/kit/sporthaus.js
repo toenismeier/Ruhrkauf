@@ -1435,5 +1435,5 @@ export function sporthaus(S, scene, haus, opt = {}) {
   const passantenFaktor = K.matt ? 0.5 : K.abverkauf ? 0.8 : 0.7;
   const dek = zustandsDekor(S, scene, koerper, dekZustand, { pylon: opt.pylon, passanten: opt.passanten, passantenFaktor, sportPalette: ['#203e61', '#e24739', '#26a0af', '#e0ae33', '#f2f3f0', '#272d36'], abrissSeite: opt.abrissSeite, logosAbdecken: true });
   hoehe = Math.max(hoehe, dek.hoehe);
-  return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z.status, pinAnker: dek.pinAnker };
+  return { hoehe, dach: K.Hw, platz: [0.45, 0.35], w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z.status, pinAnker: dek.pinAnker };
 }

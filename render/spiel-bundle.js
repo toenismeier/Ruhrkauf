@@ -57986,6 +57986,9 @@ void main() {
     }
     for (const o4 of scene2.children.slice(marke5.kinder)) if (o4.isMesh && o4.position.x > R11.x0 - 0.3 && o4.position.z > R11.z0 - 0.3 && o4.position.x < R11.x1 + 1 && o4.position.z < R11.z1 + 1) scene2.remove(o4);
   }
+  function etagenName(e) {
+    return e === 0 ? "EG" : e + ". OG";
+  }
   function etagenY(k5, e) {
     return k5.egHoehe + (e - 1) * k5.geschossHoehe;
   }
@@ -58570,10 +58573,11 @@ void main() {
           continue;
         }
         const y0 = etagenY(k5, e), y1 = y0 + GH3;
+        let gezeichnet = false;
         for (const s2 of [sz, sx]) {
           const L6 = Z2.nutz(s2);
           for (const [a2, b4] of freieStuecke(Z2, s2, L6 * 0.04, L6 * 0.96, y0 + 0.3, y1 - 0.9, 0.2)) {
-            if (b4 - a2 < 5) continue;
+            if (b4 - a2 < 8) continue;
             const nU = Math.max(2, Math.round((b4 - a2) / 2.6)), du = (b4 - a2) / nU;
             for (let i = 0; i <= nU; i++) {
               const u = a2 + i * du;
@@ -58592,7 +58596,12 @@ void main() {
               plakat(Z2, s2, "Wir modernisieren", (pu0 + pu1) / 2, (y0 + y1) / 2 + 0.1, t22 + 0.26, Math.min(1.4, GH3 * 0.32), "#ffffff", ROT6, (pu1 - pu0) * 0.9);
             }
             sperre(Z2, s2, a2, b4, 0, y1 + 0.9, "geruest");
+            gezeichnet = true;
           }
+        }
+        if (!gezeichnet) {
+          const he = haupt(), s2 = seiten4[he.seite];
+          aufsteller(Z2, s2, he.u + (he.breite ?? 4) / 2 + 1, 2.2, etagenName(e) + " im Umbau", "#ffffff", ROT6);
         }
       }
       const egBau = bauEtagen.includes(0);
@@ -62666,7 +62675,7 @@ void main() {
     const dek = zustandsDekor(S, scene2, koerper5, Z2, { pylon: opt.pylon, passanten: opt.passanten, abrissSeite: opt.abrissSeite });
     hoehe = Math.max(hoehe, dek.hoehe);
     if (opt.vorplatz !== false) hartwigVorplatz(S, koerper5, Z2, rng3(`${haus3.id}/vorplatz`));
-    return { hoehe, w: K3.w + M2, d: K3.d, familie: fam, teile: S.anzahl - start, status: Z2.status, pinAnker: dek.pinAnker };
+    return { hoehe, dach: K3.traufe ?? K3.Hw, w: K3.w + M2, d: K3.d, familie: fam, teile: S.anzahl - start, status: Z2.status, pinAnker: dek.pinAnker };
   }
 
   // src/kit/warenhaus-vielfalt.js
@@ -67143,7 +67152,7 @@ void main() {
     const passantenFaktor = K3.matt ? 0.5 : K3.abverkauf ? 0.8 : 0.7;
     const dek = zustandsDekor(S, scene2, koerper5, dekZustand, { pylon: opt.pylon, passanten: opt.passanten, passantenFaktor, sportPalette: ["#203e61", "#e24739", "#26a0af", "#e0ae33", "#f2f3f0", "#272d36"], abrissSeite: opt.abrissSeite, logosAbdecken: true });
     hoehe = Math.max(hoehe, dek.hoehe);
-    return { hoehe, w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z2.status, pinAnker: dek.pinAnker };
+    return { hoehe, dach: K3.Hw, platz: [0.45, 0.35], w: m.w, d: m.d, familie: fam, teile: S.anzahl - start, status: Z2.status, pinAnker: dek.pinAnker };
   }
 
   // src/kit/innen.js
@@ -73924,7 +73933,8 @@ void main() {
         y: y2,
         bestueckung,
         vorbereiten: false,
-        dichte: opt.dichte ?? 1
+        dichte: opt.dichte ?? 1,
+        moebelGeneration: haus3.etagenBau?.[geschoss]?.moebelGeneration ?? 3
       });
       if (geschoss === 0 && (status2 === "ansturm" || status2 === "raeumung")) {
         const r4 = rng3(String(haus3.id) + "/fundus/publikum/" + status2);
@@ -74158,7 +74168,7 @@ void main() {
     };
     const dekZ = werbung ? zustandNormal({ status: "offen", seed: haus3.id }) : Z2;
     const dekor = zustandsDekor(S, scene2, koerper5, dekZ, { pylon: false, passanten: false, logosAbdecken: true, abrissSeite: opt.abrissSeite });
-    return { hoehe: Math.max(H2 + 3.8, dekor.hoehe, m.park ? 11.6 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z2.status, pinAnker: dekor.pinAnker };
+    return { hoehe: Math.max(H2 + 3.8, dekor.hoehe, m.park ? 11.6 : 0), dach: H2, platz: [0.42, 0.3], w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z2.status, pinAnker: dekor.pinAnker };
   }
 
   // src/kit/schwesterhaus.js
@@ -74602,7 +74612,7 @@ void main() {
     const dek = zustandsDekor(S, scene2, k5, Z2, { passanten: opt.passanten === false ? false : void 0, logosAbdecken: true, pylon: false });
     const teile2 = S.anzahl - start;
     if (teile2 > 8e3) throw new Error("Schwesterhaus " + haus3.id + ": Teilebudget " + teile2 + " > 8000");
-    return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), w: m.w, d: m.d, familie: fam, teile: teile2, status: status2, pinAnker: dek.pinAnker };
+    return { hoehe: Math.max(K3.H + 3.8, dek.hoehe), dach: K3.H, w: m.w, d: m.d, familie: fam, teile: teile2, status: status2, pinAnker: dek.pinAnker };
   }
 
   // haeuser-schwester.json
@@ -86851,6 +86861,26 @@ void main() {
       S.box(w2 * 0.65, 0.45, 0.5, x2 + w2 * 0.64, H2 + 14, z6 + d4 + 5, "#dfb94a");
       S.box(0.1, 9, 0.1, x2 + w2 * 0.32, H2 + 10, z6 + d4 + 5, "#7b756c");
     }
+    const bauE = [...new Set(zust.bauEtagen ?? [])].filter((e) => e >= 0);
+    if (bauE.length && !hat("umbau") && !hat("abriss")) {
+      const u0 = w2 * 0.1, u1 = w2 * 0.48;
+      for (const e of bauE) {
+        if (e === 0) continue;
+        const y0 = 6.6 + (e - 1) * 4.45, y1 = y0 + 4.45;
+        if (y1 > H2 + 0.5) continue;
+        for (let u = u0; u <= u1 + 0.01; u += 3.5) S.box(0.16, y1 + 0.9, 0.16, x2 + u, (y1 + 0.9) / 2, z6 + d4 + 1.3, "#88959a");
+        for (const y2 of [y0, y1]) S.box(u1 - u0, 0.14, 1, x2 + (u0 + u1) / 2, y2, z6 + d4 + 1.3, "#c79a5a");
+        S.box(u1 - u0, y1 - y0 + 0.9, 0.06, x2 + (u0 + u1) / 2, (y0 + y1) / 2 + 0.2, z6 + d4 + 1.85, "#d8e3dc");
+        S.box((u1 - u0) * 0.6, 1.5, 0.05, x2 + (u0 + u1) / 2, (y0 + y1) / 2 + 0.2, z6 + d4 + 1.9, DUNKEL);
+        if (scene2) schild(scene2, "WIR MODERNISIEREN", "+z", x2 + (u0 + u1) / 2, (y0 + y1) / 2 + 0.2, z6 + d4 + 1.95, 0.7, PREMIUM_MESSING);
+      }
+      const b0 = w2 * (bauE.includes(0) ? 0.08 : 0.55), b1 = w2 * (bauE.includes(0) ? 0.92 : 0.85);
+      for (let u = b0; u < b1; u += 3.5) {
+        S.box(3.4, 1.9, 0.06, x2 + u + 1.75, 1.25, z6 + d4 + 4.2, "#dfe3e5");
+        S.box(0.08, 2.1, 0.1, x2 + u, 1.25, z6 + d4 + 4.2, "#9aa0a4");
+      }
+      if (bauE.includes(0)) for (let u = 3; u < w2 - 2; u += 5) S.box(4.1, 3, 0.08, x2 + u, 2.1, z6 + d4 + 0.6, "#e6dfcf");
+    }
     if (hat("geschlossen") || hat("leer") || hat("verfall") || hat("abriss")) {
       for (let u = 2; u < w2 - 2; u += 5) S.box(4.1, 3.2, 0.12, x2 + u, 2.1, z6 + d4 + 0.55, "#797974");
     }
@@ -86859,8 +86889,10 @@ void main() {
       if (scene2) schild(scene2, "R\xC4UMUNG", "+z", x2 + w2 * 0.7, 4.2, z6 + d4 + 0.68, 0.75, "#e5d7c4");
     }
     if (hat("neueroeffnung")) {
-      S.box(11, 0.9, 0.3, x2 + w2 * 0.5, 7.2, z6 + d4 + 0.5, DUNKEL);
-      if (scene2) schild(scene2, "NEUER\xD6FFNUNG", "+z", x2 + w2 * 0.5, 7.2, z6 + d4 + 0.5, 0.65, PREMIUM_MESSING);
+      S.box(Math.min(26, w2 * 0.5), 2.4, 0.12, x2 + w2 * 0.5, 9.6, z6 + d4 + 1.5, DUNKEL);
+      S.box(Math.min(26, w2 * 0.5) + 0.4, 0.18, 0.14, x2 + w2 * 0.5, 10.9, z6 + d4 + 1.5, PREMIUM_MESSING);
+      if (scene2) schild(scene2, "NEUER\xD6FFNUNG", "+z", x2 + w2 * 0.5, 9.6, z6 + d4 + 1.6, 1.2, PREMIUM_MESSING);
+      for (const u of [w2 * 0.18, w2 * 0.82]) S.box(2.2, Math.min(14, H2 - 9), 0.1, x2 + u, (H2 - 9) / 2 + 8.5, z6 + d4 + 1.5, DUNKEL);
     }
     if (hat("aktion") && !opt.verkaufsprozess) {
       S.box(4.2, 1.1, 0.2, x2 + w2 * 0.8, 2.4, z6 + d4 + 0.65, DUNKEL);
@@ -87019,7 +87051,7 @@ void main() {
     strassenleben(S, x2, z6, w2, d4, r4, { ...opt, insolvenz: haus3.status === "insolvenz" });
     statusBau(S, scene2, typ, x2, z6, w2, d4, H2, zust, haus3, opt);
     const hoehe = H2 + (zust.hat("umbau") ? 20 : typ === "P003" ? 13 : typ === "P001" ? 16 : typ === "P002" ? 12 : typ === "P005" ? 10 : 6);
-    return { hoehe, w: w2, d: d4, familie: "premium", teile: S.anzahl - start, status: zust.status, pinAnker: { x: x2 + w2 / 2, y: H2, z: z6 + d4, seite: "+z" } };
+    return { hoehe, dach: H2 + 1, platz: [0.18, 1 - Math.min(0.06, seitenD / 2 / d4)], w: w2, d: d4, familie: "premium", teile: S.anzahl - start, status: zust.status, pinAnker: { x: x2 + w2 / 2, y: H2, z: z6 + d4, seite: "+z" } };
   }
 
   // haeuser.json
@@ -141201,10 +141233,11 @@ void main() {
   // src/kit/umbau-aussen.js
   function technikAufDach(S, h4, m) {
     if (!h4.etagenBau || !m || !(m.hoehe > 0)) return;
+    if (m.dach > 0) m = { ...m, hoehe: m.dach };
     const etagen = Object.values(h4.etagenBau);
     const aufgeruestet = etagen.some((e) => e.technik?.klima === 2 && e.klimaModernisiert === true);
     if (!aufgeruestet) return;
-    const { x: x2, z: z6, w: w2, d: d4, hoehe } = m, cx = x2 + w2 * 0.62, cz = z6 + d4 * 0.78;
+    const { x: x2, z: z6, w: w2, d: d4, hoehe } = m, [pu, pv] = m.platz ?? [0.62, 0.78], cx = x2 + w2 * pu, cz = z6 + d4 * pv;
     for (let i = 0; i < Math.min(3, Math.ceil(etagen.length / 2)); i++) {
       const dx = i * 3.5;
       S.box(2.4, 1.45, 2, cx + dx, hoehe + 0.73, cz, "#c0c9ce");
@@ -164128,7 +164161,7 @@ void main() {
       if (h4.klasse === "premium") {
         p2.haus = h4;
         const res2 = premiumhaus(S, scene2, h4, { x: x2, z: z6, ...bauZustand(zustand(h4)) });
-        technikAufDach(S, h4, { x: x2, z: z6, w: f13.w, d: f13.d, hoehe: res2?.hoehe });
+        technikAufDach(S, h4, { x: x2, z: z6, w: f13.w, d: f13.d, hoehe: res2?.hoehe, dach: res2?.dach, platz: res2?.platz });
         if (hatAbholstation(s2, h4)) abholstation(S, scene2, { x: x2, z: z6, w: f13.w, d: f13.d });
         return res2;
       }
@@ -164137,7 +164170,7 @@ void main() {
       const roh2 = fassade3 === h4.fassade ? h4 : { ...h4, fassade: fassade3 };
       const nutzer = nachnutzer(h4);
       const res = nutzer ? nachnutzung(S, scene2, roh2, nutzer, { x: x2, z: z6, familie: fam }) : warenhaus(S, scene2, roh2, { x: x2, z: z6, familie: fam, ...bauZustand(zustand(h4)) });
-      if (!nutzer) technikAufDach(S, h4, { x: x2, z: z6, w: f13.w, d: f13.d, hoehe: res?.hoehe });
+      if (!nutzer) technikAufDach(S, h4, { x: x2, z: z6, w: f13.w, d: f13.d, hoehe: res?.hoehe, dach: res?.dach, platz: res?.platz });
       if (!nutzer && hatAbholstation(s2, h4)) abholstation(S, scene2, { x: x2, z: z6, w: f13.w, d: f13.d });
       return res;
     };
@@ -164147,19 +164180,23 @@ void main() {
       p2.haus = h4;
       const nutzer = nachnutzer(h4);
       const res = nutzer ? nachnutzungSport(S, scene2, h4, nutzer, { x: x2, z: z6 }) : sporthaus(S, scene2, FASSADE2.has(h4.id) && FASSADE2.get(h4.id) !== h4.fassade ? { ...h4, fassade: FASSADE2.get(h4.id) } : h4, { x: x2, z: z6, ...bauZustand(zustand(h4)) });
-      if (!nutzer) technikAufDach(S, h4, { x: x2, z: z6, w: f13.w, d: f13.d, hoehe: res?.hoehe });
+      if (!nutzer) technikAufDach(S, h4, { x: x2, z: z6, w: f13.w, d: f13.d, hoehe: res?.hoehe, dach: res?.dach, platz: res?.platz });
       return res;
     };
     const baueOutlet = (S, scene2, p2, h4) => {
       const hg = p2.grafikLage ? { ...h4, lage: p2.grafikLage } : h4;
       const f13 = fussabdruck(hg), { x: x2, z: z6 } = imSlot2(p2, f13.w, f13.d);
       p2.haus = h4;
-      return outlet(S, scene2, hg, { x: x2, z: z6, ...bauZustand(zustand(h4)) });
+      const res = outlet(S, scene2, hg, { x: x2, z: z6, ...bauZustand(zustand(h4)) });
+      technikAufDach(S, h4, { x: x2, z: z6, w: res?.w ?? f13.w, d: res?.d ?? f13.d, hoehe: res?.hoehe, dach: res?.dach, platz: res?.platz });
+      return res;
     };
     const baueSchwester = (S, scene2, p2, h4) => {
       const fl = fussabdruck(h4), { x: x2, z: z6 } = imSlot2(p2, fl.w, fl.d);
       p2.haus = h4;
-      return schwesterhaus(S, scene2, h4, { x: x2, z: z6, ...bauZustand(zustand(h4)) });
+      const res = schwesterhaus(S, scene2, h4, { x: x2, z: z6, ...bauZustand(zustand(h4)) });
+      technikAufDach(S, h4, { x: x2, z: z6, w: res?.w, d: res?.d, hoehe: res?.hoehe, dach: res?.dach, platz: res?.platz });
+      return res;
     };
     const bau2 = (S, scene2, p2, h4) => (h4.format === "outlet" ? baueOutlet : h4.format === "schwester" ? baueSchwester : h4.format === "sport" ? baueSport : baueWarenhaus)(S, scene2, p2, h4);
     const getrennt = (p2, h4) => {
@@ -165184,7 +165221,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "3db19c2" : "Entwicklung";
+  var version = () => true ? "a4e428c" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -183060,7 +183097,7 @@ void main() {
         if (flaechen.length) {
           const plan2 = ladenplan({ breite: m.bw, tiefe: m.bd }, "outlet", flaechen, haus3.id + ":" + etageNr);
           S.quader(0, -0.3, 0, m.bw, 0, m.bd, "#e7e6e1");
-          baueLadenplan(S, scene2, plan2, { dichte: 0.42 });
+          baueLadenplan(S, scene2, plan2, { dichte: 0.42, moebelGeneration: haus3.etagenBau?.[etageNr]?.moebelGeneration ?? 3 });
           buehne = { box: new three_module_exports.Box3(new three_module_exports.Vector3(-0.5, -0.5, -0.5), new three_module_exports.Vector3(m.bw + 0.5, 4.6, m.bd + 0.5)), breite: m.bw, tiefe: m.bd, zonen: plan2.abteilungen, ladenplan: plan2, anzahl: S.anzahl };
         }
       }
@@ -187031,17 +187068,21 @@ void main() {
     }
     const haus3 = { ...h4, etagenBau };
     let url;
+    const aussen2 = h4.klasse === "premium" ? premiumhaus : h4.format === "sport" ? sporthaus : h4.format === "schwester" ? schwesterhaus : h4.format === "outlet" ? outlet : warenhaus;
     if (p2.gewerk === "fassade" || p2.gewerk === "komplett" || p2.stufe === "komplett") {
-      if (h4.format !== "warenhaus") return null;
       haus3.substanz = wann === "vorher" ? Math.min(h4.substanz, 35) : Math.max(h4.substanz, 85);
       url = schnittBild((S, sc) => {
-        const res = warenhaus(S, sc, haus3, { passanten: false, vorplatz: false });
-        if (wann === "nachher") technikAufDach(S, haus3, { x: 0, z: 0, w: res.w, d: res.d, hoehe: res.hoehe });
-        return res;
+        const res = aussen2(S, sc, haus3, { x: 0, z: 0, passanten: false, vorplatz: false, ...wann === "nachher" ? { status: "neueroeffnung" } : {} });
+        if (wann === "nachher") technikAufDach(S, haus3, { x: 0, z: 0, w: res.w, d: res.d, hoehe: res.hoehe, dach: res.dach, platz: res.platz });
+        return { box: new three_module_exports.Box3(new three_module_exports.Vector3(-4, -1, -4), new three_module_exports.Vector3(res.w + 8, Math.max(res.hoehe, res.dach ?? 0) + 4, res.d + 8)) };
       }, 360, 260).url;
     } else {
       const nr4 = Number(Object.keys(zst).sort((a2, b4) => Math.abs(a2) - Math.abs(b4))[0]);
-      url = schnittBild((S, sc) => etage(S, sc, haus3, nr4, { ausschnitt: { anker: nr4 === 0 ? "eingang" : "ecke" } }), 360, 260).url;
+      url = schnittBild((S, sc) => {
+        if (h4.format !== "outlet") return etage(S, sc, haus3, nr4, { ausschnitt: { anker: nr4 === 0 ? "eingang" : "ecke" } });
+        const r4 = innenOutlet(S, sc, haus3, { geschosse: [Math.max(0, nr4)], innenZustand: "normal" });
+        return { box: new three_module_exports.Box3(new three_module_exports.Vector3(-2, 0, -2), new three_module_exports.Vector3(r4.w + 2, 6, r4.d + 2)) };
+      }, 360, 260).url;
     }
     umbauBildCache.set(k5, url);
     return url;
@@ -187709,6 +187750,7 @@ void main() {
   else $2("hq").hidden = true;
   window.spiel = {
     speicherDiagnose,
+    grafikNachziehen: () => grafikNachziehen(),
     oeffneUmbauProjekt: (id) => oeffneModul(um, null, 0, id),
     oeffneModernisierung: () => oeffneModul(um),
     meldung,
@@ -188019,8 +188061,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-31T20:13:23.340Z" : null;
-    const v2 = true ? "3db19c2" : "Entwicklung";
+    const iso = true ? "2026-10-31T21:37:08.633Z" : null;
+    const v2 = true ? "a4e428c" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();

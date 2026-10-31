@@ -232,14 +232,14 @@ export function spielBauer(s, o = {}) {
     const variant = wahl.get(h.id);
     const f = fussabdruck(h, variant?.familie);
     const { x, z } = imSlot(p, f.w, f.d);
-    if (h.klasse === 'premium') { p.haus = h; const res=premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe}); if (hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d }); return res; }
+    if (h.klasse === 'premium') { p.haus = h; const res=premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe,dach:res?.dach,platz:res?.platz}); if (hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d }); return res; }
     const fam = variant?.familie, fassade = variant?.fassade ?? h.fassade;
     p.haus = h;
     const roh = fassade === h.fassade ? h : { ...h, fassade };
     const nutzer = nachnutzer(h);
     const res=nutzer ? nachnutzung(S, scene, roh, nutzer, { x, z, familie: fam })
       : warenhaus(S, scene, roh, { x, z, familie: fam, ...bauZustand(zustand(h)) });
-    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe});
+    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe,dach:res?.dach,platz:res?.platz});
     if (!nutzer && hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d });
     return res;
   };
@@ -250,7 +250,7 @@ export function spielBauer(s, o = {}) {
     const nutzer = nachnutzer(h);
     const res=nutzer ? nachnutzungSport(S, scene, h, nutzer, { x, z })
       : sporthaus(S, scene, FASSADE.has(h.id) && FASSADE.get(h.id) !== h.fassade ? { ...h, fassade: FASSADE.get(h.id) } : h, { x, z, ...bauZustand(zustand(h)) });
-    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe});
+    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe,dach:res?.dach,platz:res?.platz});
     return res;
   };
   const baueOutlet = (S, scene, p, h) => {
@@ -258,11 +258,15 @@ export function spielBauer(s, o = {}) {
     const hg = p.grafikLage ? { ...h, lage: p.grafikLage } : h;
     const f = fussabdruck(hg), { x, z } = imSlot(p, f.w, f.d);
     p.haus = h;
-    return outlet(S, scene, hg, { x, z, ...bauZustand(zustand(h)) });
+    const res = outlet(S, scene, hg, { x, z, ...bauZustand(zustand(h)) });
+    technikAufDach(S, h, { x, z, w: res?.w ?? f.w, d: res?.d ?? f.d, hoehe: res?.hoehe, dach: res?.dach, platz: res?.platz });
+    return res;
   };
   const baueSchwester=(S,scene,p,h)=>{
     const fl=fussabdruck(h),{x,z}=imSlot(p,fl.w,fl.d);p.haus=h;
-    return schwesterhaus(S,scene,h,{x,z,...bauZustand(zustand(h))});
+    const res=schwesterhaus(S,scene,h,{x,z,...bauZustand(zustand(h))});
+    technikAufDach(S,h,{x,z,w:res?.w,d:res?.d,hoehe:res?.hoehe,dach:res?.dach,platz:res?.platz});
+    return res;
   };
   const bau = (S, scene, p, h) => (h.format === 'outlet' ? baueOutlet : h.format === 'schwester' ? baueSchwester : h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
 

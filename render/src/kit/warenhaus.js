@@ -2028,5 +2028,5 @@ export function warenhaus(S, scene, haus, opt = {}) {
   const dek = zustandsDekor(S, scene, koerper, Z, { pylon: opt.pylon, passanten: opt.passanten, abrissSeite: opt.abrissSeite });
   hoehe = Math.max(hoehe, dek.hoehe);
   if (opt.vorplatz !== false) hartwigVorplatz(S, koerper, Z, rng(`${haus.id}/vorplatz`));
-  return { hoehe, w: K.w + M, d: K.d, familie: fam, teile: S.anzahl - start, status: Z.status, pinAnker: dek.pinAnker };
+  return { hoehe, dach: K.traufe ?? K.Hw, w: K.w + M, d: K.d, familie: fam, teile: S.anzahl - start, status: Z.status, pinAnker: dek.pinAnker };
 }
