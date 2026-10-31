@@ -160311,7 +160311,7 @@ void main() {
       for (const g2 of imUmkreis(hausGitter, R11, 0)) {
         const ov = anteil3(g2, R11);
         if (ov < 4) continue;
-        if (zuGross(g2, R11) || grundflaeche2(g2) > 300 && ov < 0.5 * grundflaeche2(g2)) return true;
+        if (zuGross(g2, R11) || grundflaeche2(g2) > 300 && ov < 0.75 * grundflaeche2(g2)) return true;
       }
       return false;
     };
@@ -160320,11 +160320,39 @@ void main() {
       return false;
     };
     const tauglich = (R11) => frei6(R11) && !schuetztWahrzeichen(R11) && passt2(R11) && !amGleis(R11) && !stecktInGrossbau(R11);
-    const KANTEN = K3.netz.filter((k5) => k5.punkte.length > 1).map((k5) => ({ k: k5, bb: bboxVon(k5.punkte), halb: k5.typ === "fussgaenger" ? 5.5 : k5.echt / 2 + 3.4 }));
+    const kantenLaenge = (k5) => k5.punkte.reduce((s2, q3, i) => i ? s2 + Math.hypot(q3[0] - k5.punkte[i - 1][0], q3[1] - k5.punkte[i - 1][1]) : 0, 0);
+    const KANTEN = K3.netz.filter((k5) => k5.punkte.length > 1 && kantenLaenge(k5) >= 60).map((k5) => ({
+      k: k5,
+      bb: bboxVon(k5.punkte),
+      halb: k5.typ === "fussgaenger" ? 5.5 : k5.echt / 2 + 3.4,
+      lage: k5.typ === "fussgaenger" ? -30 : k5.typ === "haupt" ? 0 : 50
+    }));
+    const aufGebaeude = (x2, z6, R11) => {
+      for (const g2 of hausGitter.get(Math.floor(x2 / NZ) * 1e4 + Math.floor(z6 / NZ)) ?? []) {
+        const [a2, b4, c, d4] = g2.bbox;
+        if (x2 < a2 || x2 > c || z6 < b4 || z6 > d4 || g2.boden.length < 3) continue;
+        if (aufParzelle(R11, g2.mx, g2.mz, 1)) continue;
+        if (imPolygon(x2, z6, g2.boden)) return true;
+      }
+      return false;
+    };
+    const einbettung = (R11) => {
+      let n3 = 0, ok6 = 0;
+      const a2 = R11.w / 2 + 3, b4 = R11.d / 2 + 3;
+      const pts = [];
+      for (let v2 = -R11.d / 2; v2 <= R11.d / 2 - 2; v2 += 4) pts.push([-a2, v2], [a2, v2]);
+      for (let u = -R11.w / 2; u <= R11.w / 2; u += 4) pts.push([u, -b4]);
+      for (const [u, v2] of pts) {
+        const [x2, z6] = inWelt(R11, u, v2);
+        n3++;
+        if (!aufBauflaeche(x2, z6) || aufGebaeude(x2, z6, R11)) ok6++;
+      }
+      return n3 ? ok6 / n3 : 1;
+    };
     const bauplatz = (ziel, W3, D) => {
       const [tx, tz] = ins(ziel);
       const kand = [];
-      for (const { k: k5, bb, halb } of KANTEN) {
+      for (const { k: k5, bb, halb, lage } of KANTEN) {
         if (bb[2] < tx - 440 || bb[0] > tx + 440 || bb[3] < tz - 440 || bb[1] > tz + 440) continue;
         for (let i = 1; i < k5.punkte.length; i++) {
           const [ax, az] = k5.punkte[i - 1], [bx2, bz2] = k5.punkte[i], L3 = Math.hypot(bx2 - ax, bz2 - az);
@@ -160332,17 +160360,18 @@ void main() {
           const ux = (bx2 - ax) / L3, uz = (bz2 - az) / L3;
           for (let u = 3; u < L3 - 2; u += 6) {
             const px2 = ax + ux * u, pz6 = az + uz * u, ab = Math.hypot(px2 - tx, pz6 - tz);
-            if (ab <= 420) for (const sg of [1, -1]) kand.push({ px: px2, pz: pz6, nx: -uz * sg, nz: ux * sg, halb, ab });
+            if (ab <= 420) for (const sg of [1, -1]) kand.push({ px: px2, pz: pz6, nx: -uz * sg, nz: ux * sg, halb, lage, ab });
           }
         }
       }
       kand.sort((a2, b4) => a2.ab - b4.ab);
       let best = null, weich = null;
       for (const c of kand) {
-        if (best && c.ab > best.wert) break;
+        if (best && c.ab - 30 > best.wert) break;
         const fx = -c.nx, fz = -c.nz, rot = Math.atan2(fx, fz);
-        const weg = fx + fz < -0.15 ? 400 : 0;
-        for (let off = c.halb + 0.5; off <= c.halb + 6; off += 1) {
+        if (fx + fz < -0.2) continue;
+        const weg = fx + fz < 0.3 ? 150 : 0;
+        for (let off = c.halb + 2.5; off <= c.halb + 8; off += 1) {
           const cx = c.px + c.nx * (off + D / 2), cz = c.pz + c.nz * (off + D / 2);
           const R11 = { x: Math.round((cx - W3 / 2) * 10) / 10, z: Math.round((cz - D / 2) * 10) / 10, w: W3, d: D, rot };
           let front2 = true;
@@ -160355,7 +160384,7 @@ void main() {
           }
           if (!front2) continue;
           if (tauglich(R11)) {
-            const vd = verdeckung(R11), ab = Math.hypot(cx - tx, cz - tz) + weg;
+            const vd = verdeckung(R11), ab = Math.hypot(cx - tx, cz - tz) + weg + c.lage + 160 * (1 - einbettung(R11));
             if (vd > 1) {
               const w2 = ab + 2e3;
               if (!weich || w2 < weich.wert) weich = { R: R11, wert: w2 };
@@ -161168,6 +161197,7 @@ void main() {
       const [a2, b4, c, d4] = g2.bbox, [h0, h1, h22, h32] = huelle3(p2, 1);
       if (c < h0 || a2 > h22 || d4 < h1 || b4 > h32) return false;
       if (aufParzelle(p2, g2.mx, g2.mz, 1)) return true;
+      if (g2.boden.some((q3) => aufParzelle(p2, q3[0], q3[1], 0.5))) return true;
       const ring4 = g2.boden.length > 2 ? g2.boden : null;
       let n3 = 0;
       for (let x2 = a2 + 0.75; x2 < c; x2 += 1.5) for (let z6 = b4 + 0.75; z6 < d4; z6 += 1.5) if (aufParzelle(p2, x2, z6, 1) && (!ring4 || imPolygon(x2, z6, ring4)) && ++n3 >= 3) return true;
@@ -163796,7 +163826,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "84d906a" : "Entwicklung";
+  var version = () => true ? "21c4fce" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -184576,8 +184606,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-31T13:06:12.287Z" : null;
-    const v2 = true ? "84d906a" : "Entwicklung";
+    const iso = true ? "2026-10-31T13:35:54.108Z" : null;
+    const v2 = true ? "21c4fce" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();

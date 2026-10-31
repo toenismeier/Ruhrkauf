@@ -252,17 +252,30 @@ export function kartenplan(name, eintrag, hqJson = null) {
   // Nachbargebäude werden nie angeschnitten: ein Spielhaus ersetzt nur Gebäude, die zur Hälfte auf seiner Parzelle stehen, oder Kleinbauten
   const stecktInGrossbau = (R) => { for (const g of imUmkreis(hausGitter, R, 0)) {
     const ov = anteil(g, R); if (ov < 4) continue;
-    if (zuGross(g, R) || (grundflaeche(g) > 300 && ov < 0.5 * grundflaeche(g))) return true; } return false; };
+    if (zuGross(g, R) || (grundflaeche(g) > 300 && ov < 0.75 * grundflaeche(g))) return true; } return false; };   // große Nachbarn nur, wenn sie fast ganz auf der Parzelle stehen (sonst bleibt eine leere Restfläche)
   // Gleise halten 30 m Abstand zum Spielhaus (keine Schienen, die in den Laden laufen)
   const amGleis = (R) => { for (const [x, z] of imUmkreis(schienenGitter, R, 30)) if (aufParzelle(R, x, z, 30)) return true; return false; };
   const tauglich = (R) => frei(R) && !schuetztWahrzeichen(R) && passt(R) && !amGleis(R) && !stecktInGrossbau(R);
   // Straßenkanten: Fahrstraßen und Fußgängerzonen (dort stehen die Warenhäuser der 1a-Lage)
-  const KANTEN = K.netz.filter((k) => k.punkte.length > 1).map((k) => ({ k, bb: bboxVon(k.punkte), halb: k.typ === 'fussgaenger' ? 5.5 : k.echt / 2 + 3.4 }));   // Front an der echten Bauflucht (Straße in echter Breite plus Gehweg)
+  // Stichstraßen und kurze Wege (unter 60 m) tragen keine Warenhausfront
+  const kantenLaenge = (k) => k.punkte.reduce((s, q, i) => i ? s + Math.hypot(q[0] - k.punkte[i - 1][0], q[1] - k.punkte[i - 1][1]) : 0, 0);
+  const KANTEN = K.netz.filter((k) => k.punkte.length > 1 && kantenLaenge(k) >= 60).map((k) => ({ k, bb: bboxVon(k.punkte), halb: k.typ === 'fussgaenger' ? 5.5 : k.echt / 2 + 3.4,
+    lage: k.typ === 'fussgaenger' ? -30 : k.typ === 'haupt' ? 0 : 50 }));
+  /** Einbettung: Anteil der Punkte 3 m neben Seiten und Rückseite, die auf einem stehenbleibenden echten Gebäude oder auf
+   *  Straßenraum liegen (statt auf Rasen oder leerer Fläche). 1 = Haus schließt an Nachbarn an. */
+  const aufGebaeude = (x, z, R) => { for (const g of hausGitter.get(Math.floor(x / NZ) * 10000 + Math.floor(z / NZ)) ?? []) {
+    const [a, b, c, d] = g.bbox; if (x < a || x > c || z < b || z > d || g.boden.length < 3) continue;
+    if (aufParzelle(R, g.mx, g.mz, 1)) continue;   // wird für das Spielhaus abgerissen
+    if (imPolygon(x, z, g.boden)) return true; } return false; };
+  const einbettung = (R) => { let n = 0, ok = 0; const a = R.w / 2 + 3, b = R.d / 2 + 3;
+    const pts = []; for (let v = -R.d / 2; v <= R.d / 2 - 2; v += 4) pts.push([-a, v], [a, v]); for (let u = -R.w / 2; u <= R.w / 2; u += 4) pts.push([u, -b]);
+    for (const [u, v] of pts) { const [x, z] = inWelt(R, u, v); n++; if (!aufBauflaeche(x, z) || aufGebaeude(x, z, R)) ok++; }
+    return n ? ok / n : 1; };   // Front an der echten Bauflucht (Straße in echter Breite plus Gehweg)
   const bauplatz = (ziel, W, D) => {
     const [tx, tz] = ins(ziel);
     // Kandidaten: alle 6 m entlang jeder Straße im Umkreis, beide Seiten, sortiert nach Abstand zum Ziel
     const kand = [];
-    for (const { k, bb, halb } of KANTEN) {
+    for (const { k, bb, halb, lage } of KANTEN) {
       if (bb[2] < tx - 440 || bb[0] > tx + 440 || bb[3] < tz - 440 || bb[1] > tz + 440) continue;
       for (let i = 1; i < k.punkte.length; i++) {
         const [ax, az] = k.punkte[i - 1], [bx, bz] = k.punkte[i], L = Math.hypot(bx - ax, bz - az);
@@ -270,19 +283,20 @@ export function kartenplan(name, eintrag, hqJson = null) {
         const ux = (bx - ax) / L, uz = (bz - az) / L;
         for (let u = 3; u < L - 2; u += 6) {
           const px = ax + ux * u, pz = az + uz * u, ab = Math.hypot(px - tx, pz - tz);
-          if (ab <= 420) for (const sg of [1, -1]) kand.push({ px, pz, nx: -uz * sg, nz: ux * sg, halb, ab });
+          if (ab <= 420) for (const sg of [1, -1]) kand.push({ px, pz, nx: -uz * sg, nz: ux * sg, halb, lage, ab });
         }
       }
     }
     kand.sort((a, b) => a.ab - b.ab);
     let best = null, weich = null;
     for (const c of kand) {
-      if (best && c.ab > best.wert) break;
+      if (best && c.ab - 30 > best.wert) break;
       // Front zeigt zur Straße (−n), lokale x-Achse entlang der Straße
       const fx = -c.nx, fz = -c.nz, rot = Math.atan2(fx, fz);
       // Kamera blickt aus +x/+z: Fronten, die von ihr wegzeigen, nur als Notlösung
-      const weg = fx + fz < -0.15 ? 400 : 0;
-      for (let off = c.halb + 0.5; off <= c.halb + 6; off += 1) {   // höchstens 6 m hinter dem Gehweg: kein Rasen oder Park vor der Front
+      if (fx + fz < -0.2) continue;   // Front von der Kamera abgewandt: Schaufenster und Schriftzug unsichtbar
+      const weg = fx + fz < 0.3 ? 150 : 0;
+      for (let off = c.halb + 2.5; off <= c.halb + 8; off += 1) {   // 2,5 m Vordachraum hinter dem Gehweg   // höchstens 6 m hinter dem Gehweg: kein Rasen oder Park vor der Front
         const cx = c.px + c.nx * (off + D / 2), cz = c.pz + c.nz * (off + D / 2);
         const R = { x: Math.round((cx - W / 2) * 10) / 10, z: Math.round((cz - D / 2) * 10) / 10, w: W, d: D, rot };
         // Front muss auf der Bauflucht stehen: erste zurückgesetzte Lage, auf der die ganze Front bebaubar ist
@@ -290,7 +304,7 @@ export function kartenplan(name, eintrag, hqJson = null) {
         for (let u = -W / 2; u <= W / 2 + 0.01; u += Math.min(4, W)) { const [x, z] = inWelt(R, u, D / 2); if (!aufBauflaeche(x, z)) { front = false; break; } }
         if (!front) continue;
         if (tauglich(R)) {
-          const vd = verdeckung(R), ab = Math.hypot(cx - tx, cz - tz) + weg;
+          const vd = verdeckung(R), ab = Math.hypot(cx - tx, cz - tz) + weg + c.lage + 160 * (1 - einbettung(R));
           if (vd > 1) { const w2 = ab + 2000; if (!weich || w2 < weich.wert) weich = { R, wert: w2 }; }
           else { const wert = ab + 900 * vd; if (!best || wert < best.wert) best = { R, wert }; }
         }
@@ -1000,6 +1014,7 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
   const ueberdeckt = (g, p) => { const [a, b, c, d] = g.bbox, [h0, h1, h2, h3] = huelle(p, 1);
     if (c < h0 || a > h2 || d < h1 || b > h3) return false;
     if (aufParzelle(p, g.mx, g.mz, 1)) return true;
+    if (g.boden.some((q) => aufParzelle(p, q[0], q[1], 0.5))) return true;   // keine Ecke eines Nachbarn ragt in den Laden
     const ring = g.boden.length > 2 ? g.boden : null; let n = 0;
     for (let x = a + 0.75; x < c; x += 1.5) for (let z = b + 0.75; z < d; z += 1.5) if (aufParzelle(p, x, z, 1) && (!ring || imPolygon(x, z, ring)) && ++n >= 3) return true;
     return false; };
