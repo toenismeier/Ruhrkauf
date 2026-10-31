@@ -34,12 +34,15 @@ const BODEN = {
   umland: '#cdc6b6', pflaster: '#d6cdb9', gehweg: '#ebe8e1', bord: '#bdb7ac', fahrbahn: '#646a73', parkstreifen: '#8b9097', rad: '#b0897a', markierung: FARBEN.markierung,
   gruen: '#9dbb88', hof: '#a3b78f', hofkern: '#d6d2c9', wasser: FARBEN.wasser, platz: '#d9d2c3', parkplatz: '#969ba2', bahnsteig: '#cfc9bd', schotter: '#a39b8e', schiene: '#5b5550',
   gewerbe: '#c4bfb5', schulhof: '#d0c3ad', sport: '#7fb36b', kleingarten: '#9fc27f',
+  // Grün nach Art: Wald/Gehölz dunkler, Wiese und Brache gelblicher, Friedhof gedeckt, Parkrasen mit gemähtem Ton
+  wald: '#6f9461', wiese: '#b8c492', friedhof: '#8aa67c', maehen: '#acc896',
 };
 // Coffee-Abstraktion: hellere, wärmere Flächen und Pastellfassaden wie in Aufbauspielen; Kartentreue bleibt bei den gedeckten Tönen
 const COFFEE = {
   boden: { pflaster: '#f2e7cf', gehweg: '#fbf7ee', bord: '#d9cdb6', fahrbahn: '#596474', hofkern: '#efe2c9', platz: '#f4e9d2', gruen: '#98cf78', garten: '#acd48f',
     hof: '#acd48f', rasen2: '#8ac46c', sport: '#82bf66', kleingarten: '#a4cf86', fusszone: '#f7ecd6', umland: '#e6dcc4', parkplatz: '#8f9aab', gewerbe: '#e6dcc8', schulhof: '#f0dfc0',
-    weg: '#f6e6c2', markierung: '#fff6dc', linie: '#ffffff', wasser: '#5fb7e0', ufer: '#e9dcbc', bahnsteig: '#e3d8c4', schotter: '#c9bfae' },
+    weg: '#f6e6c2', markierung: '#fff6dc', linie: '#ffffff', wasser: '#5fb7e0', ufer: '#e9dcbc', bahnsteig: '#e3d8c4', schotter: '#c9bfae',
+    wald: '#6aae58', wiese: '#c6de92', friedhof: '#88bd72', maehen: '#ade08c' },
   fassade: ['#f2e6cf', '#eedccb', '#e1e8df', '#e0e5ea', '#f1e7c9', '#ead8cc', '#ebe5d8', '#dde6e8', '#efe0cb', '#e6ece2', '#ecd6bf', '#e6e0d6'],
   steil: ['#c9654b', '#b65a47', '#d07a55', '#5f6b7a', '#6c7987'], flach: ['#c9c2b6', '#bfc7cb', '#cbbfb6', '#c4c9bd', '#bcc1c9'],
   hoch: ['#d6e2ea', '#e6dccb', '#dfe7e0', '#e2dcd4', '#dadfe8'], bau: ['#e4ded2', '#dcd8cf'],
@@ -47,7 +50,7 @@ const COFFEE = {
 let PAL = null;   // gesetzt in baueKartenstadt je Kartenstil
 const bodenFarbe = (art) => PAL?.boden[art] ?? BODEN[art];
 // Jede Schicht auf eigener Höhe (gleiche Höhen flackern ineinander)
-const HOEHE = { tunnel: 0.076, garten: 0.012, haltestelle: 0.13, fusszone: 0.118, weg: 0.047, linie: 0.049, ufer: 0.05, rasen2: 0.037, umland: -0.03, pflaster: 0, hofkern: 0.008, hof: 0.012, gewerbe: 0.016, schulhof: 0.02, kleingarten: 0.024, sport: 0.028, gruen: 0.035, platz: 0.04,
+const HOEHE = { tunnel: 0.076, garten: 0.012, haltestelle: 0.13, fusszone: 0.118, weg: 0.047, linie: 0.049, ufer: 0.05, rasen2: 0.037, umland: -0.03, pflaster: 0, hofkern: 0.008, hof: 0.012, gewerbe: 0.016, schulhof: 0.02, kleingarten: 0.024, sport: 0.028, gruen: 0.034, wiese: 0.0355, friedhof: 0.0355, wald: 0.0355, maehen: 0.0385, platz: 0.04,
   parkplatz: 0.045, wasser: 0.052, schotter: 0.06, fahrbahn: 0.07, parkstreifen: 0.074, rad: 0.08, markierung: 0.1, gehweg: 0.12, bord: 0.14, bahnsteig: 0.55 };
 const GL_ART = { 1: 'rail', 2: 'light_rail', 3: 'tram' };
 const NETZ_TYP = { 1: 'haupt', 2: 'neben', 3: 'fussgaenger' };
@@ -837,7 +840,7 @@ function gebaeudeBauen(B, S, g, kern, detail = true) {
       if (art === 2 && arten.length > 1) {   // Gründach-Inseln auf großem Dach (nicht flächig)
         for (let k = 0; k < 5; k++) { const px = a + (c - a) * (0.15 + r() * 0.7), pz = b + (d - b) * (0.15 + r() * 0.7);
           if (!innen(px, pz, 7) || (solarFeld && px > solarFeld[0] - 8 && px < solarFeld[2] + 8 && pz > solarFeld[1] - 8 && pz < solarFeld[3] + 8)) continue;
-          S.box(12, 0.15, 10, px, g.h + 0.1, pz, '#97ba74'); for (let j = 0; j < 3; j++) S.box(1.6, 0.9, 1.6, px - 4 + j * 4, g.h + 0.6, pz + (j % 2 ? 2 : -2), '#6f9a58'); }
+          S.box(12, 0.15, 10, px, g.h + 0.1, pz, '#a9b496'); }   // Sedum, gedeckt: liest sich als Dach, nicht als Wiese
         continue;
       }
       if (art === 0) {            // Sheddach-Oberlichter in Reihen, nur im Mittelteil
@@ -851,8 +854,8 @@ function gebaeudeBauen(B, S, g, kern, detail = true) {
         const x0 = r() < 0.5 ? a : ca, z0 = r() < 0.5 ? b : cb; solarFeld = [x0, z0, x0 + (c - a) / 2, z0 + (d - b) / 2];
         for (let px = x0 + 5; px < x0 + (c - a) / 2 - 3; px += 4.2) for (let pz = z0 + 5; pz < z0 + (d - b) / 2 - 3; pz += 2.6) if (innen(px, pz, 3)) S.box(3.8, 0.25, 2.1, px, g.h + 0.35, pz, '#36495a');
       } else if (art === 2) {     // Gründach mit Kiesrand
-        for (let px = a + 6; px < c - 6; px += 6) for (let pz = b + 6; pz < d - 6; pz += 6) if (innen(px, pz, 4)) S.box(6.05, 0.12, 6.05, px, g.h + 0.08, pz, '#97ba74');
-        for (let k = 0; k < 6; k++) { const px = a + (c - a) * (0.2 + r() * 0.6), pz = b + (d - b) * (0.2 + r() * 0.6); if (innen(px, pz, 3)) S.box(2.2, 0.5, 2.2, px, g.h + 0.35, pz, '#6f9a58'); }
+        for (let px = a + 6; px < c - 6; px += 6) for (let pz = b + 6; pz < d - 6; pz += 6) if (innen(px, pz, 4)) S.box(6.05, 0.12, 6.05, px, g.h + 0.08, pz, '#a9b496');
+        for (let k = 0; k < 6; k++) { const px = a + (c - a) * (0.2 + r() * 0.6), pz = b + (d - b) * (0.2 + r() * 0.6); if (innen(px, pz, 3)) S.box(2.2, 0.5, 2.2, px, g.h + 0.35, pz, '#c3c0b8'); }
       } else {                    // Technikaufbau mit Lüftern und Treppenhauskopf
         const tw = 8 + r() * 8, tt = 6 + r() * 6;
         if (innen(ca, cb, 8)) { S.box(tw, 3, tt, ca, g.h + 1.5, cb, '#c3c0b8'); for (let k = 0; k < 4; k++) S.box(1.6, 1.2, 1.6, ca - tw / 2 + 2 + k * (tw - 4) / 3, g.h + 3.6, cb, '#8f969c'); }
@@ -883,16 +886,21 @@ function gleis(S, punkte, art) {
   }
 }
 
+/** Artenkarte wie ART() in kartenstadt-bauen.py (lokale Koordinaten); Straßenbäume ohne Nadelbäume. */
+function strassenArt(x, z) {
+  const A = ['linde', 'platane', 'kastanie', 'linde', 'linde', 'kastanie'], n = Math.sin(x / 97) * Math.cos(z / 83) + 0.5 * Math.sin((x + z) / 151);
+  return A[Math.min(A.length - 1, Math.floor((n + 1.5) / 3 * A.length))];
+}
 /** Deko aus den Kartendaten setzen: Baumarten mit Kit-Prototypen, Hecken als niedrige Büsche, Möbel, Gartenlauben. */
-function dekoSetzen(I, B, deko, aufSpielhaus = () => false) {
+function dekoSetzen(I, B, deko, aufSpielhaus = () => false, ursprung = [0, 0]) {
   const r = rng(91), n = deko.typ.length, art = deko.arten;
   for (let i = 0; i < n; i++) {
     const a = art[deko.typ[i] - 1], x = deko.p[i * 2] / 10, z = deko.p[i * 2 + 1] / 10, w = (deko.w[i] / 255) * Math.PI * 2;
     if (aufSpielhaus(x, z)) continue;
-    if (a === 'linde' || a === 'platane' || a === 'kastanie' || a === 'birke' || a === 'nadel' || a === 'pappel') baumSetzen(I, a, x, 0, z, r, 0.85 + r() * 0.35);
-    else if (a === 'strassenbaum') baumSetzen(I, r() < 0.55 ? 'platane' : 'linde', x, 0.12, z, r, 0.9 + r() * 0.2, true);
+    if (a === 'linde' || a === 'platane' || a === 'kastanie' || a === 'birke' || a === 'nadel' || a === 'pappel') baumSetzen(I, a, x, 0, z, r, 1.0 + r() * 0.3);   // Maßstab zu den Häusern (Ummo 31.10.2026: Bäume waren Konfetti)
+    else if (a === 'strassenbaum') baumSetzen(I, strassenArt(x - ursprung[0], z - ursprung[1]), x, 0.12, z, r, 1.05 + r() * 0.15, true);   // gleiche Artenkarte wie die Grünflächen
     else if (a === 'busch') I.setze('busch', x, 0.03, z, w, 0.8 + r() * 0.6, [waehle(r, ['#6aa35c', '#7cb369', '#5f9a56', '#88bd70'])]);
-    else if (a === 'hecke') I.setze('busch', x, 0.03, z, w, [0.9, 0.6, 0.9], ['#4f8a49']);
+    else if (a === 'hecke') I.setze('busch', x, 0.03, z, w, [1.45, 0.62, 1.45], ['#4f8a49']);   // Knoten verschmelzen zur geschlossenen Hecke
     else if (a === 'laube') laube(B, x, z, w, r);
     else if (a === 'laterne' || a === 'altlaterne') I.setze(a, x, 0.12, z, w, 1);
     else I.setze(a, x, 0.12, z, w, 1, a === 'litfass' ? [waehle(r, ['#d8cfb8', '#e6dcc4']), waehle(r, ['#c9483e', '#2f6f8f', '#d39a2b']), waehle(r, ['#3f7d56', '#6b4f8f', '#e8e2d2'])] : null);
@@ -1006,7 +1014,7 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
       for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) gleisNah.add((Math.floor(x / GZ2) + dx) * 100000 + Math.floor(z / GZ2) + dz); }
   }
   const amGleisBaum = (x, z) => gleisNah.has(Math.floor(x / GZ2) * 100000 + Math.floor(z / GZ2));
-  if (I && K.deko) dekoSetzen(I, B, K.deko, (x, z) => aufSpielhaus(x, z) || amGleisBaum(x, z));
+  if (I && K.deko) dekoSetzen(I, B, K.deko, (x, z) => aufSpielhaus(x, z) || amGleisBaum(x, z), K.ursprung);
   const t1 = S.anzahl; zeit.boden = performance.now() - z0;
   // Bauplätze der Spielhäuser freiräumen: echte Gebäude, deren Mitte auf der (gedrehten) Parzelle liegt oder die sie spürbar
   // überdecken, entfallen. Keine Sichtachsen-Räumung mehr: das Haus steht in der Straßenflucht, die Nachbarn bleiben.

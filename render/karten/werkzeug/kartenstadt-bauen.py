@@ -84,19 +84,32 @@ spuren_je_weg = {w: _zwei_spuren(*v) for w, v in spuren_echt.items()}
 
 # ── Gemeinsame Flächen
 kern = Polygon([(MX + 520 * math.cos(a / 24 * 2 * math.pi), MZ + 520 * math.sin(a / 24 * 2 * math.pi)) for a in range(24)])
-flaechen_art = {}
+flaechen_art, gruen_unter = {}, {}
 for fl in osm['flaechen']:
     if not im(fl['umriss']) or len(fl['umriss']) < 4: continue
     g = gueltig(fl['umriss'])
     if g is None or g.is_empty: continue
     flaechen_art.setdefault(fl['art'], []).append(g)
+    if fl['art'] == 'gruen': gruen_unter.setdefault(fl.get('unter', 'wiese'), []).append(g)
 # Benannte Plätze: in der Innenstadt Pflaster, außerhalb Schmuckplatz mit Rasenkern und Pflasterrand
 for g in flaechen_art.pop('platzort', []):
     if kern.contains(g.centroid) or g.area < 600: flaechen_art.setdefault('platz', []).append(g); continue
     innen = g.buffer(-6, join_style=2)
-    if not innen.is_empty: flaechen_art.setdefault('gruen', []).append(innen)
+    if not innen.is_empty: flaechen_art.setdefault('gruen', []).append(innen); gruen_unter.setdefault('park', []).append(innen)
     flaechen_art.setdefault('platz', []).append(g.difference(innen) if not innen.is_empty else g)
 gruen = vereinigt(flaechen_art.get('gruen', []))
+# ── Grün nach Art (Ummo 31.10.2026): Wald/Gehölz, Friedhof, Park (inkl. Spielplatz), Wiese (Abstands- und Straßengrün).
+# Große Wiesen ohne Nutzung (> 12.000 m²) werden als Stadtpark mit Inhalt gestaltet (Wege, Haine, Platz mit Bänken).
+_wald = vereinigt(gruen_unter.get('wald', [])).intersection(gruen)
+_friedhof = vereinigt(gruen_unter.get('friedhof', [])).intersection(gruen).difference(_wald)
+_park = vereinigt(gruen_unter.get('park', []) + gruen_unter.get('spielplatz', [])).intersection(gruen).difference(_wald).difference(_friedhof)
+_wiese = gruen.difference(_wald).difference(_friedhof).difference(_park)
+_gross = [q for q in teile(_wiese) if q.area > 4000]
+GRUEN_WALD = _wald.buffer(0)
+GRUEN_FRIEDHOF = _friedhof.buffer(0)
+GRUEN_PARK = vereinigt([_park] + _gross).buffer(0)
+GRUEN_WIESE = _wiese.difference(GRUEN_PARK).buffer(0)
+log('Grün nach Art (m²):', {k: int(v.area) for k, v in (('wald', GRUEN_WALD), ('friedhof', GRUEN_FRIEDHOF), ('park', GRUEN_PARK), ('wiese', GRUEN_WIESE))})
 # Plätze liegen über Grün: Spielplätze, Rasen und Sportfelder darauf wieder freistellen
 _frei = vereinigt(flaechen_art.get('gruen', []) + flaechen_art.get('sport', []) + flaechen_art.get('kleingarten', []))
 flaechen_art['platz'] = [q for g in flaechen_art.get('platz', []) for q in teile(g.difference(_frei)) if q.area > 5]
@@ -107,6 +120,27 @@ GLEISBETT = vereinigt([l.buffer(3.0) for l in _bettlinien]).buffer(5, join_style
 _tramband = vereinigt([LineString(g['punkte']).buffer(2.0) for g in osm['gleise'] if g['art'] == 'tram' and len(g['punkte']) >= 2 and im(g['punkte'])])
 GLEISBETT_P = prep(vereinigt([GLEISBETT.buffer(1.5)] + flaechen_art.get('bahnsteig', []) + [LineString(g['punkte']).buffer(2.2) for g in osm['gleise'] if g['art'] == 'tram' and len(g['punkte']) >= 2]))   # keine Bäume und Möbel in Gleis und auf Bahnsteigen
 wege_linien = [w for w in osm.get('wege', []) if len(w['punkte']) >= 2 and im(w['punkte'])]
+# Parks ohne Wegenetz bekommen einen Rundweg und eine Querachse durch die Mitte; jeder größere Park einen Platz mit Bänken
+_wl = [LineString(w['punkte']) for w in wege_linien]
+_wl_baum = STRtree(_wl) if _wl else None
+PARK_PLAETZE = []
+for q in teile(GRUEN_PARK):
+    if q.area < 6000: continue
+    L = sum(_wl[int(i)].intersection(q).length for i in _wl_baum.query(q)) if _wl_baum is not None else 0
+    mitte = q.centroid if q.contains(q.centroid) else q.representative_point()
+    if L < q.area / 110:
+        rund = [t for t in teile(q.buffer(-9, join_style=1)) if t.area > 1500]
+        if rund:
+            ring = max(rund, key=lambda t: t.area)
+            wege_linien.append({'art': 'footway', 'punkte': [list(c) for c in ring.exterior.simplify(2.0).coords]})
+            c = list(q.minimum_rotated_rectangle.exterior.coords)[:4]
+            i = max(range(4), key=lambda k: math.dist(c[k], c[(k + 1) % 4]))
+            dx, dz = c[(i + 1) % 4][0] - c[i][0], c[(i + 1) % 4][1] - c[i][1]
+            achse = LineString([(mitte.x - dx, mitte.y - dz), (mitte.x + dx, mitte.y + dz)]).intersection(ring)
+            for t in (achse.geoms if hasattr(achse, 'geoms') else [achse]):
+                if t.geom_type == 'LineString' and t.length > 20: wege_linien.append({'art': 'footway', 'punkte': [list(cc) for cc in t.coords]})
+    if q.area > 9000: PARK_PLAETZE.append((mitte, 7.0 if q.area > 30000 else 5.0))
+log(len(PARK_PLAETZE), 'Parkplätze (Aufenthalt)')
 
 # ── Straßen je Variante
 def strassen_karte():
@@ -239,7 +273,7 @@ def strassen_karte_baender():
 # ── Triangulierung
 FARBE = {'pflaster': 0, 'gehweg': 1, 'bord': 2, 'fahrbahn': 3, 'rad': 4, 'markierung': 5, 'gruen': 6, 'hof': 7, 'wasser': 8, 'platz': 9, 'parkplatz': 10, 'bahnsteig': 11, 'schotter': 12,
          'parkstreifen': 13, 'hofkern': 14, 'gewerbe': 15, 'schulhof': 16, 'sport': 17, 'kleingarten': 18, 'weg': 19, 'linie': 20, 'ufer': 21, 'rasen2': 22,
-         'haltestelle': 23, 'fusszone': 24, 'garten': 25, 'tunnel': 26}
+         'haltestelle': 23, 'fusszone': 24, 'garten': 25, 'tunnel': 26, 'wald': 27, 'wiese': 28, 'friedhof': 29, 'maehen': 30}
 def triangulieren(schichten, art, poly):
     for q in teile(poly):
         if q.area < 0.3: continue
@@ -389,13 +423,17 @@ def boden_variante(name, schichten):
         T('linie', LineString([(mitte[0] - q[0] * halb, mitte[1] - q[1] * halb), (mitte[0] + q[0] * halb, mitte[1] + q[1] * halb)]).buffer(0.09, cap_style=2))
         T('linie', Point(mitte).buffer(3.0).difference(Point(mitte).buffer(2.82)))
     for g in flaechen_art.get('wasser', []): T('ufer', g.buffer(1.2, join_style=2).difference(g).intersection(gebiet))
-    if not gruen.is_empty:
-        rr = random.Random(5); flecken = []
-        for q in teile(gruen):
+    # Grün nach Art: eigene Bodentöne; in Parks gemähte Rasenfelder (zweiter Ton) zwischen den Wegen statt Zufallsflecken
+    T('wald', GRUEN_WALD.intersection(gebiet)); T('wiese', GRUEN_WIESE.intersection(gebiet)); T('friedhof', GRUEN_FRIEDHOF.intersection(gebiet))
+    if not GRUEN_PARK.is_empty:
+        felder = []
+        for q in teile(GRUEN_PARK):
             if q.area < 2500: continue
-            x0, z0, x1, z1 = q.bounds
-            for _ in range(int(q.area / 1800)): flecken.append(Point(rr.uniform(x0, x1), rr.uniform(z0, z1)).buffer(rr.uniform(7, 16), 6))
-        if flecken: T('rasen2', vereinigt(flecken).intersection(gruen))
+            f = q.buffer(-5, join_style=1)
+            if not wege.is_empty: f = f.difference(wege.buffer(2.5))
+            felder += [t.buffer(-1.5, join_style=1).buffer(1.5, join_style=1) for t in teile(f) if t.area > 400]
+        if felder: T('maehen', vereinigt(felder).intersection(gebiet))
+    if PARK_PLAETZE: T('weg', vereinigt([p_.buffer(r_, 16) for p_, r_ in PARK_PLAETZE]).intersection(gebiet))
     # Gleisbett unter allen Eisenbahngleisen (auch außerhalb von Bahngelände), sonst liegen Schienen auf Pflaster oder Rasen
     T('schotter', GLEISBETT.difference(strassen_alle.buffer(0.5)).intersection(gebiet))
     T('fahrbahn', strassen)
@@ -429,21 +467,119 @@ geb_baum = STRtree(geb_polys)
 def frei(x, z, rad):
     pt = Point(x, z)
     return all(geb_polys[i].distance(pt) >= rad for i in geb_baum.query(pt.buffer(rad)))
+ARTEN_GRUPPE = [['linde'], ['platane'], ['kastanie'], ['linde'], ['nadel'], ['kastanie']]
+def ART(x, z):
+    # eine gemeinsame Artenkarte für alle Pflanzungen (Parks, Höfe, Gärten, echte Bäume): Haine einartig, Herbstfarbe je Gruppe
+    n_ = math.sin(x / 97) * math.cos(z / 83) + 0.5 * math.sin((x + z) / 151)
+    return ARTEN_GRUPPE[min(len(ARTEN_GRUPPE) - 1, int((n_ + 1.5) / 3 * len(ARTEN_GRUPPE)))][0]   # Haine einartig: Herbstfarbe je Gruppe einheitlich   # wenig Birken/Pappeln: weiße Stämme wirken wie Masten
+BAUMARTEN = {'linde', 'platane', 'kastanie', 'birke', 'nadel', 'pappel', 'strassenbaum'}
+SPORT_P = prep(vereinigt([g_.buffer(1.5) for g_ in flaechen_art.get('sport', [])] + [gueltig(f_['umriss']).buffer(7.0) for f_ in osm.get('sportfelder', []) if gueltig(f_['umriss']) is not None]))
+GLEIS_BAUM = prep(vereinigt([LineString(g_['punkte']).buffer(6.5) for g_ in osm['gleise'] if len(g_['punkte']) >= 2]))
+def gruen_baeume(g, setz, r, rauschen, wege_p, sperre_fb):
+    """Bepflanzung nach Grünart (Ummo 31.10.2026): Wald dicht, Parks mit Hainen, Weg- und Randreihen und wenigen Solitären,
+    Wiesen locker, Mittelstreifen als Baumreihe, Friedhof in Reihen. Baumart je Gruppe einheitlich (Rauschfeld)."""
+    def art_bei(x, z, wald=False):
+        if wald and r.random() < 0.35: return 'nadel'
+        return ART(x, z)
+    def ok(x, z, rad=2.5):
+        pt = Point(x, z)
+        return not sperre_fb.contains(pt) and not GLEIS_BAUM.contains(pt) and (wege_p is None or not wege_p.contains(pt)) and frei(x, z, rad)
+    def raster(flaeche, schritt, dichte_fn, wald=False):
+        if flaeche.is_empty: return
+        pf = prep(flaeche); x0, z0, x1, z1 = flaeche.bounds; x = x0 + schritt / 2
+        while x < x1:
+            z = z0 + schritt / 2
+            while z < z1:
+                px, pz = x + (r.random() - 0.5) * schritt * 0.7, z + (r.random() - 0.5) * schritt * 0.7
+                if r.random() < dichte_fn(px, pz) and pf.contains(Point(px, pz)) and ok(px, pz): setz(art_bei(px, pz, wald), px, pz)
+                z += schritt
+            x += schritt
+    def reihe(linie, abstand, versatz=0.0, flaeche=None):
+        for teil in (linie.geoms if hasattr(linie, 'geoms') else [linie]):
+            if not hasattr(teil, 'interpolate') or teil.length < 25: continue
+            linien = [teil] if not versatz else []
+            if versatz:
+                for sg in (1, -1):
+                    try: o = teil.offset_curve(sg * versatz)
+                    except Exception: continue
+                    linien += list(o.geoms) if hasattr(o, 'geoms') else [o]
+            for l_ in linien:
+                if l_.is_empty or l_.length < 20: continue
+                k = art_bei(*l_.interpolate(0).coords[0]); u = abstand / 2
+                while u < l_.length:
+                    pt = l_.interpolate(u)
+                    if (flaeche is None or flaeche.contains(pt)) and ok(pt.x, pt.y): setz(k, pt.x, pt.y)
+                    u += abstand
+    # Wald und Gehölz: geschlossen
+    raster(GRUEN_WALD.buffer(-1.5), 7.5, lambda x, z: 0.85, True)
+    # Friedhof: Reihen
+    raster(GRUEN_FRIEDHOF.buffer(-3), 10, lambda x, z: 0.6)
+    # Parks: Haine im Rauschfeld, sonst seltene Solitäre; Randreihe innen 4 m; Wegbegleitreihen
+    for q in teile(GRUEN_PARK):
+        if q.area < 300: continue
+        innen = q.buffer(-3)
+        pq = prep(q.buffer(-1))
+        raster(innen, 7.0, lambda x, z: 0.85 if rauschen(x * 1.3, z * 1.3) > 0.35 else 0.05)   # Haine auf gut einem Drittel der Fläche
+        if q.area > 1500:
+            for ring in [t.exterior for t in teile(q.buffer(-4, join_style=1))]: reihe(ring, 12, 0, pq)
+        if not g['wege'].is_empty and q.area > 3000:
+            wl = g['wege'].intersection(q.buffer(-6))
+            for t in teile(wl):
+                if t.area > 60: reihe(t.exterior, 13, 0, pq)
+    # Große Hof- und Gartenflächen (Grün ohne OSM-Fläche, z. B. Schul- und Wohnanlagen): Haine und Randreihen wie im Park
+    for q in teile(g['garten']):
+        if q.area <= 3000: continue
+        raster(q.buffer(-3), 7.0, lambda x, z: 0.8 if rauschen(x * 1.3, z * 1.3) > 0.45 else 0.04)
+        for ring in [t.exterior for t in teile(q.buffer(-4, join_style=1))]: reihe(ring, 13, 0, prep(q.buffer(-1)))
+    # Wiesen: schmale Streifen (Mittelstreifen, Straßengrün) als Baumreihe in der Mitte, sonst locker
+    for q in teile(GRUEN_WIESE):
+        if q.area < 120: continue
+        mrr = q.minimum_rotated_rectangle; c = list(mrr.exterior.coords)[:4]
+        a_, b_ = math.dist(c[0], c[1]), math.dist(c[1], c[2])
+        if min(a_, b_) < 10 and max(a_, b_) > 30:
+            m1 = ((c[0][0] + c[1][0]) / 2, (c[0][1] + c[1][1]) / 2) if a_ < b_ else ((c[1][0] + c[2][0]) / 2, (c[1][1] + c[2][1]) / 2)
+            m2 = ((c[2][0] + c[3][0]) / 2, (c[2][1] + c[3][1]) / 2) if a_ < b_ else ((c[3][0] + c[0][0]) / 2, (c[3][1] + c[0][1]) / 2)
+            reihe(LineString([m1, m2]), 11, 0, prep(q))
+        else:
+            raster(q.buffer(-2.5), 9, lambda x, z: 0.06 if rauschen(x, z) < 0.6 else 0.35)
+    # Bänke an Parkwegen (alle ~28 m, abwechselnd links und rechts, zum Weg gedreht)
+    for w_ in wege_linien:
+        ln = LineString(w_['punkte'])
+        if ln.length < 30 or not GRUEN_PARK.intersects(ln): continue
+        u, i = 14, 0
+        while u < ln.length - 5:
+            pt = ln.interpolate(u); q2 = ln.interpolate(min(ln.length, u + 1)); dx, dz = q2.x - pt.x, q2.y - pt.y; l = math.hypot(dx, dz) or 1
+            sg = 1 if i % 2 else -1; x, z = pt.x - dz / l * sg * 2.4, pt.y + dx / l * sg * 2.4
+            if GRUEN_PARK.contains(Point(x, z)) and frei(x, z, 1.5) and not GLEIS_BAUM.contains(Point(x, z)): setz('bank', x, z, math.atan2(-dz, dx) + (math.pi if sg > 0 else 0))
+            u += 28; i += 1
+    # Aufenthaltsplätze in Parks: Bänke im Kreis, Leuchte, Baumring außen
+    for p_, r_ in PARK_PLAETZE:
+        for i in range(6):
+            w = i / 6 * 2 * math.pi
+            setz('bank', p_.x + math.cos(w) * (r_ - 1.2), p_.y + math.sin(w) * (r_ - 1.2), -w + math.pi / 2)
+        setz('altlaterne', p_.x, p_.y, 0)
+        for i in range(8):
+            w = (i + 0.5) / 8 * 2 * math.pi
+            x, z = p_.x + math.cos(w) * (r_ + 3.5), p_.y + math.sin(w) * (r_ + 3.5)
+            if frei(x, z, 2): setz('linde', x, z)
+
 def deko(name, g):
     r = random.Random(77); out = []
     sperre_fb = prep(g['strassen_alle'].buffer(0.6))
     def setz(art, x, z, w=None):
         if GLEISBETT_P.contains(Point(x, z)): return   # nichts im Gleis
+        if art in BAUMARTEN and (GLEIS_BAUM.contains(Point(x, z)) or SPORT_P.contains(Point(x, z))): return   # Bäume nie an Gleisen oder auf Spielfeldern
         if abs(x - MX) <= R and abs(z - MZ) <= R: out.append((DEKO[art], x, z, r.random() * 2 * math.pi if w is None else w))
     strassennah = prep(g['gehweg_aussen'].buffer(2))
     for x, z in osm['baeume']:
         if abs(x - MX) <= R and abs(z - MZ) <= R and not sperre_fb.contains(Point(x, z)):
-            setz('strassenbaum' if strassennah.contains(Point(x, z)) else r.choice(['linde', 'kastanie', 'platane', 'birke']), x, z)
+            setz('strassenbaum' if strassennah.contains(Point(x, z)) else ART(x, z), x, z)
     log(f'[{name}] Deko Parks …')
     rauschen = lambda x, z: math.sin(x / 37.0) * math.cos(z / 29.0) + 0.6 * math.sin((x + z) / 19.0) + 0.4 * math.cos((x - 2 * z) / 23.0)
     wege_p = prep(g['wege'].buffer(1.5)) if not g['wege'].is_empty else None
-    for flaeche, mix, basis, schritt in ((gruen, ['linde', 'kastanie', 'linde', 'birke', 'platane', 'nadel', 'pappel'], 0.55, 9),
-                                         (g['garten'], ['birke', 'linde', 'kastanie', 'nadel', 'busch', 'busch'], 0.6, 7), (g['hofpflaster'], ['linde', 'platane', 'birke'], 0.3, 11)):
+    gruen_baeume(g, setz, r, rauschen, wege_p, sperre_fb)
+    garten_klein = vereinigt([t for t in teile(g['garten']) if t.area <= 3000])
+    for flaeche, mix, basis, schritt in ((garten_klein, ['platane', 'linde', 'kastanie', 'nadel'], 0.35, 8), (g['hofpflaster'], ['linde', 'platane', 'linde'], 0.3, 11)):
         if flaeche.is_empty: continue
         pf = prep(flaeche.buffer(-2.0))
         x0, z0, x1, z1 = flaeche.bounds
@@ -455,18 +591,11 @@ def deko(name, g):
                 n = rauschen(px, pz)
                 dichte = basis * (0.15 if n < -0.2 else 1.0 if n > 0.6 else 0.55)
                 if r.random() < dichte and pf.contains(Point(px, pz)) and (wege_p is None or not wege_p.contains(Point(px, pz))) and frei(px, pz, 3):
-                    setz(r.choice(mix), px, pz)
+                    setz(ART(px, pz), px, pz)   # gemeinsame Artenkarte
                 z += schritt
             x += schritt
     log(f'[{name}] Deko Ränder, Möbel …')
-    if not gruen.is_empty:
-        for q in teile(gruen):
-            if q.area < 400: continue
-            u = 0
-            while u < q.exterior.length:
-                p = q.exterior.interpolate(u)
-                if r.random() < 0.55 and not sperre_fb.contains(p) and frei(p.x, p.y, 1.2): setz('busch', p.x, p.y)
-                u += 3.2 * (1 + r.random() * 2)
+    # (keine Buschpunktreihen mehr an Grünrändern: Ränder bilden Baumreihen in gruen_baeume)
     for x, z in g['pk_hecken']:
         if frei(x, z, 1.0): setz('hecke', x, z)
     # Bahnböschungen: Buschgruppen abseits der Gleise
@@ -477,8 +606,8 @@ def deko(name, g):
             zz = z0
             while zz < z1:
                 px, pz = x + r.uniform(-4, 4), zz + r.uniform(-4, 4)
-                if r.random() < 0.35 and pq.contains(Point(px, pz)) and not gleis_nah.contains(Point(px, pz)) and frei(px, pz, 2):
-                    setz(r.choice(['busch', 'busch', 'birke', 'pappel']), px, pz)
+                if r.random() < 0.6 and pq.contains(Point(px, pz)) and not gleis_nah.contains(Point(px, pz)) and frei(px, pz, 2):
+                    setz(r.choice(['busch', 'busch', 'linde', 'nadel']), px, pz)   # Böschung dicht bewachsen
                 zz += 9
             x += 9
     for ln in g['hecken']:

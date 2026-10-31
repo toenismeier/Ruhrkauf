@@ -266,9 +266,16 @@ export function jahreszeitenStadt(scene, plan, hoehen, spielstand, aktiv = JAHRE
         m.visible = !an || j.name !== 'winter';
         if (!an) m.instanceColor.array.set(farben);
         else {
-          const r = R(plan.seed + '/' + art);
+          const r = R(plan.seed + '/' + art), M4 = new THREE.Matrix4(), pal = PALETTEN[j.name];
+          // Farbe je Baumgruppe (Ummo 31.10.2026: ruhig, je Gruppe eine Farbe): Zelle 60 m, wenige Abweichler
+          // glattes Feld statt Zellraster: benachbarte Bäume liegen fast immer im selben Farbband
+          // Farbe je Baumart (Haine sind einartig), über die Stadt in großen Zonen leicht verschoben
+          const basis = { linde: 0, birke: 0, platane: 3, pappel: 3, kastanie: 1, kugel: 2 }[art] ?? 0;
+          const gruppe = (i) => { M4.fromArray(m.instanceMatrix.array, i * 16); const x = M4.elements[12], z = M4.elements[14];
+            const n = Math.sin(x / 310) * Math.cos(z / 270) + 0.5 * Math.sin((x + z) / 430);
+            return (basis + Math.max(0, Math.min(2, Math.floor((n + 1.5) / 3 * 3)))) % pal.length; };
           for (let i = 0; i < m.count; i++) {
-            const farbe = PALETTEN[j.name]?.[Math.floor(r() * PALETTEN[j.name].length)];
+            const farbe = pal?.[r() < 0.03 ? Math.floor(r() * pal.length) : gruppe(i) % pal.length];
             if (farbe) {
               const c = new THREE.Color(j.name === 'fruehling' && r() < .28 ? '#e8c8d5' : farbe);
               m.setColorAt(i, c);
