@@ -5126,6 +5126,11 @@
       pacht: 0
     };
   }
+  function oberflaechenPunkte(h4) {
+    const e = Object.values(h4.etagenBau ?? {});
+    if (!e.length) return 0;
+    return 4 * e.reduce((a2, x2) => a2 + ((x2.oberflaeche ?? 1) - (x2.oberflaecheStart ?? x2.oberflaeche ?? 1)), 0) / e.length;
+  }
   function hausKundenscore(s2, h4) {
     const b4 = betrieb(h4);
     if (!b4) return 60;
@@ -5133,7 +5138,7 @@
     const personal2 = k5 && k5.fteBedarf > 0 ? clamp(k5.fteIst / k5.fteBedarf, 0, 1.1) : 1;
     const reinigung = clamp(b4.kosten.reinigung, 0, 1.3);
     const verfuegbarkeit = (leitung(h4).staerken?.ware ?? leitung(h4).skill) - b4.leitungStart;
-    const score = 64 + 7 * (st2.sauberkeit - 2) + 5 * (st2.praesentation - 2) + 4 * (st2.kasse - 2) + 14 * (personal2 - 1) + 22 * (reinigung - 1) + 8 * verfuegbarkeit + 0.13 * (h4.substanz - 60) + Object.values(hausServices(s2, h4)).filter(Boolean).length * 2;
+    const score = 64 + 7 * (st2.sauberkeit - 2) + 5 * (st2.praesentation - 2) + 4 * (st2.kasse - 2) + 14 * (personal2 - 1) + 22 * (reinigung - 1) + 8 * verfuegbarkeit + 0.13 * (h4.substanz - 60) + Object.values(hausServices(s2, h4)).filter(Boolean).length * 2 + oberflaechenPunkte(h4);
     return Math.round(clamp(score, 0, 100));
   }
   function realerGrund(s2, h4) {
@@ -5526,18 +5531,30 @@
     komplett: { name: "Komplettumbau", qm: 900, min: 16, max: 30 },
     technik: { name: "Technik", qm: 120, min: 3, max: 8 }
   };
-  var UMBAU_AKTIONEN = /* @__PURE__ */ new Set(["umbauPlanen", "bauprogrammStarten", "bauprogrammStoppen", "umbauBudget"]);
+  var UMBAU_AKTIONEN = /* @__PURE__ */ new Set(["umbauPlanen", "pflichtBauen", "bauprogrammStarten", "bauprogrammStoppen", "umbauBudget"]);
   var GEWERKE = {
     klima: { name: "Klima und L\xFCftung", gruppe: "technik", ebene: "etage", qm: 70, min: 3, max: 6, kaufquote: 0.01, frequenz: 0, text: "Energie sinkt, Sommer angenehmer" },
     licht: { name: "LED-Licht", gruppe: "technik", ebene: "etage", qm: 35, min: 2, max: 3, kaufquote: 0.01, frequenz: 0, text: "Energie sinkt, Ware wirkt frischer" },
     brandschutz: { name: "Brandschutz", gruppe: "technik", ebene: "etage", qm: 45, min: 3, max: 5, kaufquote: 0, frequenz: 0, text: "Pflicht erf\xFCllt, Frist +10 Jahre" },
-    foerdertechnik: { name: "Aufzug und Rolltreppe", gruppe: "technik", ebene: "etage", qm: 40, min: 4, max: 8, kaufquote: 5e-3, frequenz: 0, text: "Pr\xFCfung bestanden, obere Etagen besser erreichbar" },
-    moebel: { name: "M\xF6bel und Ladenbau", gruppe: "moebel", ebene: "etage", qm: 250, min: 4, max: 6, kaufquote: 0.08, frequenz: 0, text: "neue M\xF6belgeneration, Kaufquote steigt" },
-    oberflaeche: { name: "Boden, Decke, Farbe", gruppe: "oberflaeche", ebene: "etage", qm: 60, min: 2, max: 2, kaufquote: 0.02, frequenz: 0, text: "Substanz +10, Etage wirkt gepflegt" },
+    foerdertechnik: { name: "Aufzug und Rolltreppe", gruppe: "technik", ebene: "etage", qm: 40, min: 4, max: 8, kaufquote: 5e-3, frequenz: 0, text: "Pr\xFCfpflicht, ohne sie sind obere Etagen schwer erreichbar" },
+    moebel: { name: "M\xF6bel und Ladenbau", gruppe: "moebel", ebene: "etage", qm: 250, min: 4, max: 6, kaufquote: 0.08, frequenz: 0, text: "neue M\xF6belgeneration, alte M\xF6bel kosten Kaufquote" },
+    oberflaeche: { name: "Boden, Decke, Farbe", gruppe: "oberflaeche", ebene: "etage", qm: 60, min: 2, max: 2, kaufquote: 0.02, frequenz: 0, text: "Substanz +10, Kundenscore steigt" },
     fassade: { name: "Fassade und Eingang", gruppe: "fassade", ebene: "haus", qm: 30, min: 8, max: 14, kaufquote: 0, frequenz: 0.03, text: "Haus wirkt von au\xDFen neu, Frequenz steigt" },
     komplett: { name: "Komplettumbau", gruppe: "komplett", ebene: "haus", qm: 900, min: 16, max: 30, kaufquote: 0.1, frequenz: 0.06, text: "alles neu, nur ganzes Haus" }
   };
   var BRUTTO = 0.412;
+  function hausHash(id) {
+    let x2 = 7;
+    for (const c of id) x2 = x2 * 31 + c.charCodeAt(0) >>> 0;
+    return x2;
+  }
+  function pflichtTermine(h4, nr4) {
+    if (h4.baujahr < 1975) {
+      const x2 = hausHash(h4.id);
+      return { brandschutz: 66 + x2 % 520, aufzug: 78 + (x2 >>> 4) % 520 };
+    }
+    return { brandschutz: 312 + (h4.baujahr + nr4 + 99) % 104, aufzug: 338 + (h4.baujahr + nr4 + 127) % 104 };
+  }
   function initialisiereUmbau(s2) {
     var _a2, _b, _c;
     s2.umbau ?? (s2.umbau = { projekte: [], budget: 0, verbraucht: 0, jahr: 0, vorlageJahr: -1, zaehler: 0 });
@@ -5552,11 +5569,9 @@
           moebelGeneration: alt,
           moebelGenerationStart: alt,
           technik: { klima: technik3, licht: technik3, brandschutz: Math.max(1, technik3) },
-          // Pflichttermine frühestens nach mehr als fünf Spieljahren, damit das Startspiel neutral bleibt.
-          pflichten: {
-            brandschutz: 312 + (h4.baujahr + nr4 + 99) % 104,
-            aufzug: 338 + (h4.baujahr + nr4 + 127) % 104
-          },
+          // E49: Häuser vor 1975 bekommen Prüffristen ab dem zweiten Spieljahr (je Haus ein Termin, über zehn Jahre verteilt),
+          // neuere Häuser frühestens nach sechs Jahren. Das erste Spieljahr bleibt neutral.
+          pflichten: pflichtTermine(h4, nr4),
           gesperrt: false,
           modernisierungWirkung: 0
         };
@@ -5565,6 +5580,7 @@
         const e = h4.etagenBau[nr4];
         (_a2 = e.technik).foerdertechnik ?? (_a2.foerdertechnik = h4.baujahr < 1975 ? 0 : h4.baujahr < 2005 ? 1 : 2);
         e.oberflaeche ?? (e.oberflaeche = e.substanz < 45 ? 0 : e.substanz < 72 ? 1 : 2);
+        e.oberflaecheStart ?? (e.oberflaecheStart = e.oberflaeche);
       }
     }
     const st2 = s2.umbau;
@@ -5601,6 +5617,7 @@
   function umbauAktion(s2, a2) {
     initialisiereUmbau(s2);
     if (a2.typ === "bauprogrammStarten") return bauprogrammStarten(s2, a2.auftrag);
+    if (a2.typ === "pflichtBauen") return pflichtBauen(s2, a2.haus, a2.pflicht);
     if (a2.typ === "bauprogrammStoppen") return bauprogrammStoppen(s2, a2.id);
     if (a2.typ === "umbauBudget") {
       s2.umbau.budget = Math.max(0, eur(a2.betrag));
@@ -5643,7 +5660,8 @@
     for (const f13 of gesamt) {
       const e = h4.etagenBau[f13.etage], imBau = baustellen.some((p2) => p2.etagen.includes(f13.etage));
       const behinderung = imBau ? 0.4 : baustellen.length ? 0.95 : 1;
-      sum2 += f13.qm * behinderung * (1 + (e?.modernisierungWirkung ?? 0));
+      const aufzug2 = f13.etage >= 1 && h4.etagen.some((n3) => h4.etagenBau?.[n3]?.aufzugStill) ? 0.75 : 1;
+      sum2 += f13.qm * behinderung * aufzug2 * (1 + (e?.modernisierungWirkung ?? 0) - (e?.malusMoebel ?? 0) - (e?.malusAufzug ?? 0));
     }
     return sum2 / qm2;
   }
@@ -5664,20 +5682,33 @@
         const e = h4.etagenBau[nr4];
         e.substanz = Math.max(0, e.substanz - 0.05);
         if (e.modernisierungWirkung > 0) e.modernisierungWirkung = Math.max(0, e.modernisierungWirkung - 15e-5);
+        const ofl = e.substanz < 45 ? 0 : e.substanz < 72 ? 1 : 2;
+        if ((e.oberflaeche ?? 2) > ofl) e.oberflaeche = ofl;
+        if (s2.woche >= 52) {
+          const rm = e.moebelGeneration === 1 ? 5e-3 : e.moebelGeneration === 2 ? 25e-4 : 0;
+          const ra = nr4 >= 1 && (e.technik.foerdertechnik ?? 1) === 0 ? 2e-3 : 0;
+          if (rm) e.malusMoebel = Math.min(0.04, (e.malusMoebel ?? 0) + rm / 52);
+          if (ra) e.malusAufzug = Math.min(0.02, (e.malusAufzug ?? 0) + ra / 52);
+        }
         for (const pflicht of ["brandschutz", "aufzug"]) {
           const frist = e.pflichten[pflicht];
-          if (!s2.prognose && s2.woche === frist - 12) melde(
-            s2,
-            "warnung",
-            "Beh\xF6rde setzt Frist: " + pflicht + " in " + h4.name + ", " + nr4 + ". Etage bis Woche " + frist + ".",
-            { hausId: h4.id, stadt: h4.stadt, modul: "umbau" }
-          );
-          if (!e.gesperrt && s2.woche > frist) {
+          if (s2.woche === frist - 12 && nr4 === Math.min(...h4.etagen.filter((n3) => h4.etagenBau[n3].pflichten[pflicht] === frist))) pflichtVorlage(s2, h4, pflicht, frist);
+          if (s2.woche <= frist) continue;
+          if (pflicht === "brandschutz" && !e.gesperrt) {
             e.gesperrt = true;
             if (!s2.prognose) melde(
               s2,
               "warnung",
-              "Beh\xF6rdliche Sperrung: " + h4.name + ", Etage " + nr4 + ". " + pflicht + " \xFCberf\xE4llig.",
+              "Beh\xF6rdliche Sperrung: " + h4.name + ", " + etageText(nr4) + ". Brandschutz \xFCberf\xE4llig.",
+              { hausId: h4.id, stadt: h4.stadt, modul: "umbau" }
+            );
+          }
+          if (pflicht === "aufzug" && !e.aufzugStill) {
+            e.aufzugStill = true;
+            if (!s2.prognose && nr4 === h4.etagen[0]) melde(
+              s2,
+              "warnung",
+              "Aufzug und Rolltreppen stillgelegt: " + h4.name + ". Pr\xFCfung \xFCberf\xE4llig, obere Etagen schwer erreichbar.",
               { hausId: h4.id, stadt: h4.stadt, modul: "umbau" }
             );
           }
@@ -5699,18 +5730,27 @@
           e.substanz = clamp(e.substanz + 10, 0, 100);
           e.technik.licht = Math.min(2, e.technik.licht + 1);
         }
-        if (p2.stufe === "ladenbau") e.moebelGeneration = 3;
+        if (p2.stufe === "ladenbau") {
+          e.moebelGeneration = 3;
+          e.malusMoebel = 0;
+        }
         if (p2.stufe === "komplett") {
           e.substanz = 90;
           e.moebelGeneration = 3;
-          e.technik = { klima: 2, licht: 2, brandschutz: 2 };
+          e.technik = { klima: 2, licht: 2, brandschutz: 2, foerdertechnik: 2 };
           e.klimaModernisiert = true;
+          e.oberflaeche = 2;
+          e.malusMoebel = 0;
+          e.malusAufzug = 0;
+          e.aufzugStill = false;
         }
         if (p2.stufe === "technik") {
-          e.technik = { klima: 2, licht: 2, brandschutz: 2 };
+          e.technik = { klima: 2, licht: 2, brandschutz: 2, foerdertechnik: 2 };
           e.pflichten = { brandschutz: s2.woche + 520, aufzug: s2.woche + 520 };
           e.gesperrt = false;
           e.klimaModernisiert = true;
+          e.malusAufzug = 0;
+          e.aufzugStill = false;
         }
         e.modernisierungWirkung = Math.max(
           e.modernisierungWirkung,
@@ -5840,7 +5880,13 @@
     const umsatzWoche = h4.kpi?.umsatz ?? Object.values(h4.potenzial).reduce((a2, b4) => a2 + (b4 ?? 0), 0);
     const anteil3 = etagen.reduce((v2, e) => v2 + flaechenQm(h4, e), 0) / Math.max(1, h4.etagen.reduce((v2, e) => v2 + flaechenQm(h4, e), 0));
     const ausfall2 = eur(umsatzWoche * wochen * (g3 === "fassade" ? 0.05 : anteil3 * 0.6 + (1 - anteil3) * 0.05));
-    const plusJahr = eur(umsatzWoche * 52 * (p2.kaufquote * anteil3 + p2.frequenz));
+    const malus = etagen.reduce((v2, e) => {
+      const b4 = h4.etagenBau?.[e];
+      const q4 = flaechenQm(h4, e);
+      return v2 + q4 * ((g3 === "moebel" || g3 === "komplett" ? b4?.malusMoebel ?? 0 : 0) + (g3 === "foerdertechnik" || g3 === "komplett" ? b4?.malusAufzug ?? 0 : 0));
+    }, 0) / Math.max(1, h4.etagen.reduce((v2, e) => v2 + flaechenQm(h4, e), 0));
+    const still = (g3 === "foerdertechnik" || g3 === "komplett") && h4.etagen.some((n3) => h4.etagenBau?.[n3]?.aufzugStill) ? 0.25 * h4.etagen.filter((n3) => n3 >= 1).reduce((v2, e) => v2 + flaechenQm(h4, e), 0) / Math.max(1, h4.etagen.reduce((v2, e) => v2 + flaechenQm(h4, e), 0)) : 0;
+    const plusJahr = eur(umsatzWoche * 52 * (p2.kaufquote * anteil3 + p2.frequenz + malus + still));
     return {
       gewerk: g3,
       etagen,
@@ -5904,14 +5950,21 @@
       if (alle || g3 === "foerdertechnik") {
         e.technik.foerdertechnik = 2;
         e.pflichten.aufzug = s2.woche + 520;
+        e.malusAufzug = 0;
       }
-      if (e.pflichten.brandschutz > s2.woche && e.pflichten.aufzug > s2.woche) e.gesperrt = false;
-      if (alle || g3 === "moebel") e.moebelGeneration = 3;
+      if (e.pflichten.brandschutz > s2.woche) e.gesperrt = false;
+      if (alle || g3 === "moebel") {
+        e.moebelGeneration = 3;
+        e.malusMoebel = 0;
+      }
       if (alle || g3 === "oberflaeche") {
         e.oberflaeche = 2;
         e.substanz = clamp(e.substanz + 10, 0, 100);
       }
       if (alle) e.substanz = 90;
+      if (alle || g3 === "foerdertechnik") {
+        for (const n3 of h4.etagen) if (h4.etagenBau[n3].pflichten.aufzug > s2.woche) h4.etagenBau[n3].aufzugStill = false;
+      }
       if (wirkung > 0) e.modernisierungWirkung = Math.max(e.modernisierungWirkung, wirkung);
     }
     if (g3 === "fassade" || g3 === "komplett") {
@@ -6065,7 +6118,7 @@
     const gruppen = ["technik", "moebel", "oberflaeche", "fassade"];
     const zeile3 = (id, name2, haeuser, sonder = false, region) => {
       const z6 = { technik: [0, 0, 0], moebel: [0, 0, 0], oberflaeche: [0, 0, 0], fassade: [0, 0, 0] };
-      let etagen = 0, fristen = 0, gesperrt2 = 0, baustellen = 0, bedarf = 0;
+      let etagen = 0, fristen = 0, gesperrt2 = 0, baustellen = 0, bedarf = 0, malusQm = 0, qmSumme = 0, still = 0;
       for (const h4 of haeuser) {
         z6.fassade[s2.umbau.fassade[h4.id] ?? 1]++;
         if (laeuftAuf(s2, h4, h4.etagen)) baustellen++;
@@ -6075,7 +6128,10 @@
           for (const g3 of gruppen) if (g3 !== "fassade") z6[g3][gruppenZustand(gz2, g3)]++;
           if (Math.min(e.pflichten.brandschutz, e.pflichten.aufzug) - s2.woche < 52) fristen++;
           if (e.gesperrt) gesperrt2++;
+          if (e.aufzugStill) still++;
           const q3 = flaechenQm(h4, nr4);
+          malusQm += q3 * ((e.malusMoebel ?? 0) + (e.malusAufzug ?? 0));
+          qmSumme += q3;
           bedarf += (gz2.moebel < 2 ? q3 * GEWERKE.moebel.qm : 0) + (gz2.oberflaeche < 2 ? q3 * GEWERKE.oberflaeche.qm : 0) + (gz2.klima < 2 ? q3 * GEWERKE.klima.qm : 0) + (gz2.licht < 2 ? q3 * GEWERKE.licht.qm : 0) + (gz2.brandschutz < 2 ? q3 * GEWERKE.brandschutz.qm : 0) + (gz2.foerdertechnik < 2 ? q3 * GEWERKE.foerdertechnik.qm : 0);
         }
       }
@@ -6096,8 +6152,10 @@
         etagen,
         fristen,
         gesperrt: gesperrt2,
+        still,
         baustellen,
         bedarf: eur(bedarf),
+        malus: Math.round(malusQm / Math.max(1, qmSumme) * 1e4) / 100,
         gut: Object.fromEntries(gruppen.map((g3) => [g3, gut(g3)])),
         schlecht: Object.fromEntries(gruppen.map((g3) => [g3, schlecht(g3)])),
         verteilung: z6
@@ -6137,6 +6195,10 @@
           gewerke: gz2,
           substanz: Math.round(e.substanz),
           gesperrt: e.gesperrt,
+          aufzugStill: !!e.aufzugStill,
+          malus: Math.round(((e.malusMoebel ?? 0) + (e.malusAufzug ?? 0)) * 1e4) / 100,
+          fristBrandschutz: e.pflichten.brandschutz,
+          fristAufzug: e.pflichten.aufzug,
           frist: Math.min(e.pflichten.brandschutz, e.pflichten.aufzug),
           baustelle: (s2.umbau?.projekte ?? []).find((x2) => x2.haus === h4.id && x2.status === "laufend" && x2.etagen.includes(nr4))
         };
@@ -6158,6 +6220,40 @@
     if (!p2 || !p2.vorher) return void 0;
     const h4 = s2.haeuser.find((x2) => x2.id === p2.haus);
     return { projekt: p2, haus: h4 ? { id: h4.id, name: h4.name, stadt: h4.stadt } : void 0, gewerk: p2.gewerk ? GEWERKE[p2.gewerk].name : UMBAU_STUFEN[p2.stufe].name };
+  }
+  var etageText = (nr4) => nr4 === -1 ? "Untergeschoss" : nr4 === 0 ? "Erdgeschoss" : nr4 + ". Obergeschoss";
+  function pflichtVorlage(s2, h4, pflicht, frist) {
+    if (s2.prognose) return;
+    const g3 = pflicht === "brandschutz" ? "brandschutz" : "foerdertechnik";
+    const kosten2 = h4.etagen.filter((n3) => h4.etagenBau[n3].pflichten[pflicht] <= frist + 26).reduce((a2, n3) => a2 + (gewerkSchaetzung(s2, h4.id, n3, g3)?.kosten ?? 0), 0);
+    const name2 = pflicht === "brandschutz" ? "Brandschutz" : "Aufzug und Rolltreppen";
+    melde(s2, "warnung", "Beh\xF6rde setzt Frist: " + name2 + " in " + h4.name + " bis KW " + (frist % 52 + 1) + ".", { hausId: h4.id, stadt: h4.stadt, modul: "umbau" });
+    neueVorlage(s2, {
+      bereich: "ladenbau",
+      titel: "Pflichtfrist " + name2 + ": " + h4.name,
+      text: name2 + " in " + h4.name + " muss bis KW " + (frist % 52 + 1) + " erneuert sein, sonst " + (pflicht === "brandschutz" ? "sperrt die Beh\xF6rde die Etagen" : "werden Aufzug und Rolltreppen stillgelegt") + ". Kosten rund " + kosten2.toLocaleString("de-DE") + " \u20AC.",
+      frist: 6,
+      betrag: kosten2,
+      aktion: { typ: "pflichtBauen", haus: h4.id, pflicht },
+      optionen: [{ id: "vorschlag", label: "Beauftragen" }, { id: "ablehnen", label: "Zur\xFCckstellen" }],
+      standard: "vorschlag"
+    });
+  }
+  function pflichtBauen(s2, hausId, pflicht) {
+    const h4 = s2.haeuser.find((x2) => x2.id === hausId);
+    if (!h4 || h4.status !== "offen") return { ok: false, text: "Haus nicht verf\xFCgbar." };
+    const g3 = pflicht === "brandschutz" ? "brandschutz" : "foerdertechnik";
+    const naechste = Math.min(...h4.etagen.map((n4) => h4.etagenBau[n4].pflichten[pflicht]));
+    let n3 = 0, kosten2 = 0;
+    for (const nr4 of h4.etagen) {
+      if (h4.etagenBau[nr4].pflichten[pflicht] > naechste + 26) continue;
+      const r4 = gewerkStarten(s2, h4.id, nr4, g3);
+      if (r4.ok) {
+        n3++;
+        kosten2 += s2.umbau.projekte[s2.umbau.projekte.length - 1].kosten;
+      }
+    }
+    return n3 ? { ok: true, text: GEWERKE[g3].name + " in " + h4.name + " beauftragt: " + n3 + " Etagen, " + kosten2.toLocaleString("de-DE") + " \u20AC." } : { ok: false, text: "Keine Etage frei f\xFCr " + GEWERKE[g3].name + "." };
   }
 
   // ../engine/src/marketing.ts
@@ -12465,7 +12561,7 @@
     s2.cash -= eur(betrag);
     s2.einmalkostenWoche += eur(betrag);
   }
-  var etageText = (nr4) => nr4 === 0 ? "EG" : `${nr4}. OG`;
+  var etageText2 = (nr4) => nr4 === 0 ? "EG" : `${nr4}. OG`;
   function abfindungJeFte2(s2) {
     return (s2.phase === "insolvenz" ? HQ_PARAM.abfindungInsolvenz : HQ_PARAM.abfindungRegulaer) * hqRechtFaktor(s2);
   }
@@ -12544,7 +12640,7 @@
     if (aktiv7 && s2.hq.gebaeude.some((bau2) => bau2.etagen.some((et) => et.archiv))) return fehler5("Es gibt bereits eine Archiv-Etage. Bitte zuerst das bestehende Archiv aufl\xF6sen.");
     e.archiv = aktiv7;
     hqAktualisiere(s2);
-    return ok5(aktiv7 ? `Archiv auf Etage ${etageText(nr4)} eingerichtet, zus\xE4tzliche Miete ${eur(wochenMiete(ARCHIV_QM, g3.mieteQmMonat)).toLocaleString("de-DE")} \u20AC je Woche.` : `Archiv auf Etage ${etageText(nr4)} aufgel\xF6st. Die Zusatzmiete entf\xE4llt.`);
+    return ok5(aktiv7 ? `Archiv auf Etage ${etageText2(nr4)} eingerichtet, zus\xE4tzliche Miete ${eur(wochenMiete(ARCHIV_QM, g3.mieteQmMonat)).toLocaleString("de-DE")} \u20AC je Woche.` : `Archiv auf Etage ${etageText2(nr4)} aufgel\xF6st. Die Zusatzmiete entf\xE4llt.`);
   }
   function merkeKuendigung(s2, g3, text3) {
     s2.hq.kuendigung = {
@@ -12582,12 +12678,12 @@
     const e = g3?.etagen.find((x2) => x2.nr === nr4);
     if (!g3 || !e) return fehler5("Etage nicht gefunden.");
     if (!e.gemietet) return fehler5("Die Etage ist nicht gemietet.");
-    merkeKuendigung(s2, g3, `${etageText(nr4)} im ${g3.name}`);
+    merkeKuendigung(s2, g3, `${etageText2(nr4)} im ${g3.name}`);
     const r4 = kuendigeEtagen(s2, g3, [e]);
     if (!g3.etagen.some((x2) => x2.gemietet)) s2.hq.gebaeude = s2.hq.gebaeude.filter((x2) => x2 !== g3);
     pruefeSitz(s2);
     hqAktualisiere(s2);
-    return ok5(`${etageText(nr4)} im ${g3.name} gek\xFCndigt. Restmiete ${mio(r4.rest * r4.wochen)} \xFCber ${r4.wochen} Wochen${r4.ohnePlatz.length ? `. Fl\xE4che verloren und damit weniger Wirkung: ${r4.ohnePlatz.map((id) => ABTEILUNG_NAME[id]).join(", ")}` : ""}.`);
+    return ok5(`${etageText2(nr4)} im ${g3.name} gek\xFCndigt. Restmiete ${mio(r4.rest * r4.wochen)} \xFCber ${r4.wochen} Wochen${r4.ohnePlatz.length ? `. Fl\xE4che verloren und damit weniger Wirkung: ${r4.ohnePlatz.map((id) => ABTEILUNG_NAME[id]).join(", ")}` : ""}.`);
   }
   function hqGebaeudeKuendigen(s2, gebaeudeId) {
     const g3 = gebaeude(s2, gebaeudeId);
@@ -12624,7 +12720,7 @@
     pruefeSitz(s2);
     hqAktualisiere(s2);
     const n3 = plan2.length;
-    return ok5(`${ABTEILUNG_NAME[id]} zieht ins ${etageText(plan2[0].etage)} von ${g3.name} (${g3.stadt})${n3 > 1 ? `, verteilt auf ${n3} Etagen` : ""}. Umzug ${mio(kosten2)}, ${HQ_PARAM.umzugWochen} Wochen halbe Wirkung.`);
+    return ok5(`${ABTEILUNG_NAME[id]} zieht ins ${etageText2(plan2[0].etage)} von ${g3.name} (${g3.stadt})${n3 > 1 ? `, verteilt auf ${n3} Etagen` : ""}. Umzug ${mio(kosten2)}, ${HQ_PARAM.umzugWochen} Wochen halbe Wirkung.`);
   }
   function abteilungStufe(s2, id, stufe2) {
     if (!ABTEILUNGEN.includes(id)) return fehler5("Unbekannte Abteilung.");
@@ -165088,7 +165184,7 @@ void main() {
   for (const d4 of einstellungen) meldeSchalter(d4);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "fdc4660" : "Entwicklung";
+  var version = () => true ? "3db19c2" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv7 = false;
     function feld2(d4) {
@@ -169529,7 +169625,7 @@ void main() {
       x2 += etagenSchnitt(etagen);
       x2 += liste(etagen.map((q3) => zeile2({
         was: ETAGE_LANG(q3.etage) + (q3.etage === ui.etage ? " \xB7 gew\xE4hlt" : ""),
-        unter: GRUPPEN3.map(([g3, n3]) => n3 + " " + ZUSTAND[q3.zustand[g3]]).join(" \xB7 ") + (q3.baustelle ? ' \xB7 <span class="hw-achtung">Baustelle bis ' + kw2(q3.baustelle.ende) + "</span>" : q3.gesperrt ? ' \xB7 <span class="hw-schlecht">beh\xF6rdlich gesperrt</span>' : ""),
+        unter: GRUPPEN3.map(([g3, n3]) => n3 + " " + ZUSTAND[q3.zustand[g3]]).join(" \xB7 ") + (q3.malus > 0 ? ' \xB7 <span class="hw-schlecht">Kaufquote \u2212' + prozent4(q3.malus) + "</span>" : "") + (q3.baustelle ? ' \xB7 <span class="hw-achtung">Baustelle bis ' + kw2(q3.baustelle.ende) + "</span>" : q3.gesperrt ? ' \xB7 <span class="hw-schlecht">beh\xF6rdlich gesperrt</span>' : "") + (q3.aufzugStill ? ' \xB7 <span class="hw-schlecht">Aufzug stillgelegt</span>' : "") + (!q3.gesperrt && q3.fristBrandschutz - s2().woche < 52 ? ' \xB7 <span class="hw-achtung">Brandschutz bis ' + kw2(q3.fristBrandschutz) + "</span>" : "") + (!q3.aufzugStill && q3.fristAufzug - s2().woche < 52 ? ' \xB7 <span class="hw-achtung">Aufzugspr\xFCfung bis ' + kw2(q3.fristAufzug) + "</span>" : ""),
         wert: q3.substanz + " / 100",
         wertUnter: "Substanz",
         ton: q3.substanz < 35 ? "schlecht" : q3.substanz < 55 ? "achtung" : "",
@@ -169562,13 +169658,13 @@ void main() {
     function bestand() {
       const u = E9.bestandUebersicht(s2()), g3 = u.gesamt;
       const schlechtM = g3.schlecht.moebel, schlechtT = g3.schlecht.technik;
-      const sp6 = sprecher({ text: schlechtM + " % der Etagen haben M\xF6bel aus den 90ern, " + schlechtT + " % alte Technik. Bedarf " + mio4(g3.bedarf) + "." });
+      const sp6 = sprecher({ text: g3.malus > 0 ? "Veraltete Ausstattung kostet inzwischen " + prozent4(g3.malus) + " Kaufquote. " + schlechtM + " % der Etagen haben M\xF6bel aus den 90ern." : schlechtM + " % der Etagen haben M\xF6bel aus den 90ern, " + schlechtT + " % alte Technik. Bedarf " + mio4(g3.bedarf) + ".", ton: g3.gesperrt || g3.still ? "alarm" : "" });
       let x2 = gross2([
         { label: "Budget frei", wert: geld(u.rest), ton: u.rest <= 0 ? "schlecht" : "", unter: "von " + esc(geld(u.budget)) },
         { label: "Baustellen", wert: String(u.programme.reduce((a2, p2) => a2 + p2.laufend, 0) + (s2().umbau?.projekte ?? []).filter((p2) => p2.status === "laufend" && !p2.programm).length), unter: g3.fristen + " Pr\xFCffristen in 12 Monaten" }
       ]);
       x2 += abschnitt("Zustand Konzern", "Anteil gut je Gewerk");
-      x2 += liste([zeile2({ was: g3.haeuser + " H\xE4user", unter: fmt.format(g3.etagen) + " Etagen" + (g3.gesperrt ? ' \xB7 <span class="hw-schlecht">' + g3.gesperrt + " gesperrt</span>" : ""), wert: zustandsBalken(g3.gut) })]);
+      x2 += liste([zeile2({ was: g3.haeuser + " H\xE4user", unter: fmt.format(g3.etagen) + " Etagen" + (g3.malus > 0 ? " \xB7 Kaufquote \u2212" + prozent4(g3.malus) : "") + (g3.gesperrt ? ' \xB7 <span class="hw-schlecht">' + g3.gesperrt + " gesperrt</span>" : "") + (g3.still ? ' \xB7 <span class="hw-schlecht">' + g3.still + " ohne Aufzug</span>" : ""), wert: zustandsBalken(g3.gut) })]);
       x2 += knoepfe(knopf("Bauprogramm anlegen", 'data-umbau="assistent"', "breit"));
       const laufend3 = u.programme.filter((p2) => p2.status === "laufend");
       if (laufend3.length) {
@@ -169585,7 +169681,7 @@ void main() {
       x2 += abschnitt("Cluster", "T Technik \xB7 M M\xF6bel \xB7 B Boden \xB7 F Fassade");
       x2 += liste(u.cluster.map((c) => zeile2({
         was: esc(c.name),
-        unter: c.haeuser + " H\xE4user \xB7 " + mio4(c.bedarf) + (c.baustellen ? " \xB7 " + c.baustellen + " im Bau" : "") + (c.fristen ? ' \xB7 <span class="hw-achtung">' + c.fristen + " Fristen</span>" : ""),
+        unter: c.haeuser + " H\xE4user \xB7 " + mio4(c.bedarf) + (c.malus > 0 ? " \xB7 \u2212" + prozent4(c.malus) : "") + (c.gesperrt ? ' \xB7 <span class="hw-schlecht">' + c.gesperrt + " gesperrt</span>" : "") + (c.baustellen ? " \xB7 " + c.baustellen + " im Bau" : "") + (c.fristen ? ' \xB7 <span class="hw-achtung">' + c.fristen + " Fristen</span>" : ""),
         wert: zustandsBalken(c.gut),
         tippbar: true,
         attr: 'data-umbau="cluster" data-id="' + esc(c.id) + '"'
@@ -187923,8 +188019,8 @@ void main() {
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-10-31T18:58:51.849Z" : null;
-    const v2 = true ? "fdc4660" : "Entwicklung";
+    const iso = true ? "2026-10-31T20:13:23.340Z" : null;
+    const v2 = true ? "3db19c2" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v2;
   })();

@@ -281,6 +281,12 @@ export function hausGastroErgebnis(s: GameState, h: Haus, umsatzBasis: number) {
   return { umsatz: wochenUmsatz, rohertrag: eur(wochenUmsatz * 0.6),
     personal: eur(wochenUmsatz * 0.37), sonstige: eur(wochenUmsatz * 0.13), pacht: 0 };
 }
+/** E49 Umbau: Boden, Decke, Farbe gegenüber dem Start (je Stufe im Etagenmittel 4 Punkte), Start neutral. */
+function oberflaechenPunkte(h: Haus): number {
+  const e = Object.values((h as Haus & { etagenBau?: Record<string, { oberflaeche?: number; oberflaecheStart?: number }> }).etagenBau ?? {});
+  if (!e.length) return 0;
+  return 4 * e.reduce((a, x) => a + ((x.oberflaeche ?? 1) - (x.oberflaecheStart ?? x.oberflaeche ?? 1)), 0) / e.length;
+}
 export function hausKundenscore(s: GameState, h: Haus): number {
   const b = betrieb(h);
   if (!b) return 60;
@@ -290,7 +296,8 @@ export function hausKundenscore(s: GameState, h: Haus): number {
   const verfuegbarkeit = (leitung(h).staerken?.ware ?? leitung(h).skill) - b.leitungStart;
   const score = 64 + 7 * (st.sauberkeit - 2) + 5 * (st.praesentation - 2) + 4 * (st.kasse - 2)
     + 14 * (personal - 1) + 22 * (reinigung - 1) + 8 * verfuegbarkeit + 0.13 * (h.substanz - 60)
-    + Object.values(hausServices(s,h)).filter(Boolean).length * 2;
+    + Object.values(hausServices(s,h)).filter(Boolean).length * 2
+    + oberflaechenPunkte(h);
   return Math.round(clamp(score, 0, 100));
 }
 

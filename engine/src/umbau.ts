@@ -21,6 +21,11 @@ export interface BauEtage {
   klimaModernisiert?: boolean;
   /** Nur durch aktive Maßnahmen erzeugter, alternder Kaufquotenbonus. */
   modernisierungWirkung: number;
+  /** E49: Kaufquotenverlust durch veraltete Möbel bzw. alte Fördertechnik, wächst ab dem zweiten Spieljahr. */
+  malusMoebel?: number; malusAufzug?: number;
+  /** E49: Aufzug/Rolltreppe nach versäumter Prüfung stillgelegt: obere Etagen schlechter erreichbar. */
+  aufzugStill?: boolean;
+  oberflaecheStart?: 0|1|2;
 }
 export interface UmbauProjekt {
   id: string; haus: string; etagen: number[]; stufe: UmbauStufe;
@@ -46,10 +51,11 @@ export const UMBAU_STUFEN: Record<UmbauStufe, {name:string; qm:number; min:numbe
 };
 export type UmbauAktion =
   | { typ:'umbauPlanen'; haus:string; etage:number; stufe:UmbauStufe; gewerk?: Gewerk }
+  | { typ:'pflichtBauen'; haus:string; pflicht:'brandschutz'|'aufzug' }
   | { typ:'bauprogrammStarten'; auftrag: BauprogrammAuftrag }
   | { typ:'bauprogrammStoppen'; id: string }
   | { typ:'umbauBudget'; betrag: number };
-export const UMBAU_AKTIONEN = new Set<string>(['umbauPlanen','bauprogrammStarten','bauprogrammStoppen','umbauBudget']);
+export const UMBAU_AKTIONEN = new Set<string>(['umbauPlanen','pflichtBauen','bauprogrammStarten','bauprogrammStoppen','umbauBudget']);
 
 // ---- Gewerke (E48): einzeln planbar, Komplettumbau bündelt alles.
 export type Gewerk = 'klima'|'licht'|'brandschutz'|'foerdertechnik'|'moebel'|'oberflaeche'|'fassade'|'komplett';
@@ -60,9 +66,9 @@ export const GEWERKE: Record<Gewerk,{name:string;gruppe:GewerkGruppe|'komplett';
   klima:{name:'Klima und Lüftung',gruppe:'technik',ebene:'etage',qm:70,min:3,max:6,kaufquote:0.01,frequenz:0,text:'Energie sinkt, Sommer angenehmer'},
   licht:{name:'LED-Licht',gruppe:'technik',ebene:'etage',qm:35,min:2,max:3,kaufquote:0.01,frequenz:0,text:'Energie sinkt, Ware wirkt frischer'},
   brandschutz:{name:'Brandschutz',gruppe:'technik',ebene:'etage',qm:45,min:3,max:5,kaufquote:0,frequenz:0,text:'Pflicht erfüllt, Frist +10 Jahre'},
-  foerdertechnik:{name:'Aufzug und Rolltreppe',gruppe:'technik',ebene:'etage',qm:40,min:4,max:8,kaufquote:0.005,frequenz:0,text:'Prüfung bestanden, obere Etagen besser erreichbar'},
-  moebel:{name:'Möbel und Ladenbau',gruppe:'moebel',ebene:'etage',qm:250,min:4,max:6,kaufquote:0.08,frequenz:0,text:'neue Möbelgeneration, Kaufquote steigt'},
-  oberflaeche:{name:'Boden, Decke, Farbe',gruppe:'oberflaeche',ebene:'etage',qm:60,min:2,max:2,kaufquote:0.02,frequenz:0,text:'Substanz +10, Etage wirkt gepflegt'},
+  foerdertechnik:{name:'Aufzug und Rolltreppe',gruppe:'technik',ebene:'etage',qm:40,min:4,max:8,kaufquote:0.005,frequenz:0,text:'Prüfpflicht, ohne sie sind obere Etagen schwer erreichbar'},
+  moebel:{name:'Möbel und Ladenbau',gruppe:'moebel',ebene:'etage',qm:250,min:4,max:6,kaufquote:0.08,frequenz:0,text:'neue Möbelgeneration, alte Möbel kosten Kaufquote'},
+  oberflaeche:{name:'Boden, Decke, Farbe',gruppe:'oberflaeche',ebene:'etage',qm:60,min:2,max:2,kaufquote:0.02,frequenz:0,text:'Substanz +10, Kundenscore steigt'},
   fassade:{name:'Fassade und Eingang',gruppe:'fassade',ebene:'haus',qm:30,min:8,max:14,kaufquote:0,frequenz:0.03,text:'Haus wirkt von außen neu, Frequenz steigt'},
   komplett:{name:'Komplettumbau',gruppe:'komplett',ebene:'haus',qm:900,min:16,max:30,kaufquote:0.10,frequenz:0.06,text:'alles neu, nur ganzes Haus'},
 };
@@ -81,6 +87,11 @@ export interface Bauprogramm extends BauprogrammAuftrag {
   warteschlange: {haus:string;etage:number}[]; gesamt: number; gestartet: number; kosten: number;
 }
 
+function hausHash(id: string): number { let x=7; for (const c of id) x=(x*31+c.charCodeAt(0))>>>0; return x; }
+function pflichtTermine(h: Haus, nr: number): { brandschutz: number; aufzug: number } {
+  if (h.baujahr < 1975) { const x=hausHash(h.id); return {brandschutz:66+(x%520), aufzug:78+((x>>>4)%520)}; }
+  return {brandschutz:312 + ((h.baujahr + nr + 99) % 104), aufzug:338 + ((h.baujahr + nr + 127) % 104)};
+}
 export function initialisiereUmbau(s: GameState): void {
   s.umbau ??= { projekte:[], budget:0, verbraucht:0, jahr:0, vorlageJahr:-1, zaehler:0 };
   for (const h of s.haeuser) {
@@ -92,9 +103,9 @@ export function initialisiereUmbau(s: GameState): void {
         substanz:h.substanz, substanzStart:h.substanz,
         moebelGeneration:alt, moebelGenerationStart:alt,
         technik:{klima:technik,licht:technik,brandschutz:Math.max(1,technik) as 1|2},
-        // Pflichttermine frühestens nach mehr als fünf Spieljahren, damit das Startspiel neutral bleibt.
-        pflichten:{brandschutz:312 + ((h.baujahr + nr + 99) % 104),
-          aufzug:338 + ((h.baujahr + nr + 127) % 104)},
+        // E49: Häuser vor 1975 bekommen Prüffristen ab dem zweiten Spieljahr (je Haus ein Termin, über zehn Jahre verteilt),
+        // neuere Häuser frühestens nach sechs Jahren. Das erste Spieljahr bleibt neutral.
+        pflichten:pflichtTermine(h,nr),
         gesperrt:false, modernisierungWirkung:0,
       };
     }
@@ -102,6 +113,7 @@ export function initialisiereUmbau(s: GameState): void {
       const e=h.etagenBau[nr];
       e.technik.foerdertechnik ??= (h.baujahr < 1975 ? 0 : h.baujahr < 2005 ? 1 : 2) as 0|1|2;
       e.oberflaeche ??= (e.substanz < 45 ? 0 : e.substanz < 72 ? 1 : 2) as 0|1|2;
+      e.oberflaecheStart ??= e.oberflaeche;
     }
   }
   const st=s.umbau!;
@@ -132,6 +144,7 @@ export function umbauSchaetzung(s: GameState, hausId: string, nr: number, stufe:
 export function umbauAktion(s:GameState,a:UmbauAktion):{ok:boolean;text:string} {
   initialisiereUmbau(s);
   if (a.typ==='bauprogrammStarten') return bauprogrammStarten(s,a.auftrag);
+  if (a.typ==='pflichtBauen') return pflichtBauen(s,a.haus,a.pflicht);
   if (a.typ==='bauprogrammStoppen') return bauprogrammStoppen(s,a.id);
   if (a.typ==='umbauBudget') {
     s.umbau!.budget=Math.max(0,eur(a.betrag)); s.umbau!.budgetGesetzt=true;
@@ -165,7 +178,9 @@ export function umbauNachfrageFaktor(s:GameState,h:Haus,g:GruppeId | null):numbe
   for (const f of gesamt) {
     const e=h.etagenBau[f.etage], imBau=baustellen.some(p=>p.etagen.includes(f.etage));
     const behinderung=imBau?0.4:baustellen.length?0.95:1;
-    sum+=f.qm*behinderung*(1+(e?.modernisierungWirkung??0));
+    // E49: veraltete Möbel und alte Fördertechnik kosten Kaufquote; stillgelegter Aufzug macht obere Etagen schwer erreichbar.
+    const aufzug=f.etage>=1 && h.etagen.some(n=>h.etagenBau?.[n]?.aufzugStill)?0.75:1;
+    sum+=f.qm*behinderung*aufzug*(1+(e?.modernisierungWirkung??0)-(e?.malusMoebel??0)-(e?.malusAufzug??0));
   }
   return sum/qm;
 }
@@ -184,14 +199,28 @@ export function umbauWoche(s:GameState):void {
       // Gleicher Substanzverfall wie bislang am Haus, ohne zusätzlichen Startnachfrageeffekt.
       e.substanz=Math.max(0,e.substanz-0.05);
       if (e.modernisierungWirkung>0) e.modernisierungWirkung=Math.max(0,e.modernisierungWirkung-0.00015);
+      // E49: Boden, Decke, Farbe nutzen sich mit der Substanz ab.
+      const ofl=(e.substanz<45?0:e.substanz<72?1:2) as 0|1|2;
+      if ((e.oberflaeche??2)>ofl) e.oberflaeche=ofl;
+      // E49: ab dem zweiten Spieljahr veralten Möbel und Fördertechnik spürbar (je Jahr Gen. 1 −0,5 %, Gen. 2 −0,25 %, Aufzug alt −0,2 % in OGs; höchstens −4 %).
+      if (s.woche>=52) {
+        const rm=e.moebelGeneration===1?0.005:e.moebelGeneration===2?0.0025:0;
+        const ra=nr>=1&&(e.technik.foerdertechnik??1)===0?0.002:0;
+        if (rm) e.malusMoebel=Math.min(0.04,(e.malusMoebel??0)+rm/52);
+        if (ra) e.malusAufzug=Math.min(0.02,(e.malusAufzug??0)+ra/52);
+      }
       for (const pflicht of ['brandschutz','aufzug'] as const) {
         const frist=e.pflichten[pflicht];
-        if (!s.prognose && s.woche===frist-12) melde(s,'warnung',
-          'Behörde setzt Frist: '+pflicht+' in '+h.name+', '+nr+'. Etage bis Woche '+frist+'.',
-          {hausId:h.id,stadt:h.stadt,modul:'umbau'});
-        if (!e.gesperrt && s.woche>frist) {
+        if (s.woche===frist-12 && nr===Math.min(...h.etagen.filter(n=>h.etagenBau![n].pflichten[pflicht]===frist))) pflichtVorlage(s,h,pflicht,frist);
+        if (s.woche<=frist) continue;
+        if (pflicht==='brandschutz' && !e.gesperrt) {
           e.gesperrt=true;
-          if (!s.prognose) melde(s,'warnung','Behördliche Sperrung: '+h.name+', Etage '+nr+'. '+pflicht+' überfällig.',
+          if (!s.prognose) melde(s,'warnung','Behördliche Sperrung: '+h.name+', '+etageText(nr)+'. Brandschutz überfällig.',
+            {hausId:h.id,stadt:h.stadt,modul:'umbau'});
+        }
+        if (pflicht==='aufzug' && !e.aufzugStill) {
+          e.aufzugStill=true;
+          if (!s.prognose && nr===h.etagen[0]) melde(s,'warnung','Aufzug und Rolltreppen stillgelegt: '+h.name+'. Prüfung überfällig, obere Etagen schwer erreichbar.',
             {hausId:h.id,stadt:h.stadt,modul:'umbau'});
         }
       }
@@ -205,9 +234,9 @@ export function umbauWoche(s:GameState):void {
     for (const nr of p.etagen) {
       const e=h.etagenBau?.[nr]; if (!e) continue;
       if (p.stufe==='auffrischung') {e.substanz=clamp(e.substanz+10,0,100);e.technik.licht=Math.min(2,e.technik.licht+1) as 0|1|2;}
-      if (p.stufe==='ladenbau') e.moebelGeneration=3;
-      if (p.stufe==='komplett') {e.substanz=90;e.moebelGeneration=3;e.technik={klima:2,licht:2,brandschutz:2};e.klimaModernisiert=true;}
-      if (p.stufe==='technik') {e.technik={klima:2,licht:2,brandschutz:2};e.pflichten={brandschutz:s.woche+520,aufzug:s.woche+520};e.gesperrt=false;e.klimaModernisiert=true;}
+      if (p.stufe==='ladenbau') {e.moebelGeneration=3;e.malusMoebel=0;}
+      if (p.stufe==='komplett') {e.substanz=90;e.moebelGeneration=3;e.technik={klima:2,licht:2,brandschutz:2,foerdertechnik:2};e.klimaModernisiert=true;e.oberflaeche=2;e.malusMoebel=0;e.malusAufzug=0;e.aufzugStill=false;}
+      if (p.stufe==='technik') {e.technik={klima:2,licht:2,brandschutz:2,foerdertechnik:2};e.pflichten={brandschutz:s.woche+520,aufzug:s.woche+520};e.gesperrt=false;e.klimaModernisiert=true;e.malusAufzug=0;e.aufzugStill=false;}
       e.modernisierungWirkung=Math.max(e.modernisierungWirkung,
         p.stufe==='ladenbau'?0.08:p.stufe==='komplett'?0.10:p.stufe==='auffrischung'?0.02:0.01);
     }
@@ -310,7 +339,13 @@ export function gewerkSchaetzung(s:GameState,hausId:string,nr:number,g:Gewerk) {
   const anteil=etagen.reduce((v,e)=>v+flaechenQm(h,e),0)/Math.max(1,h.etagen.reduce((v,e)=>v+flaechenQm(h,e),0));
   // Fassade sperrt keine Fläche, behindert aber das ganze Haus leicht.
   const ausfall=eur(umsatzWoche*wochen*(g==='fassade'?0.05:anteil*0.6+(1-anteil)*0.05));
-  const plusJahr=eur(umsatzWoche*52*(p.kaufquote*anteil+p.frequenz));
+  // E49: Erneuerung holt auch den aufgelaufenen Malus zurück.
+  const malus=etagen.reduce((v,e)=>{const b=h.etagenBau?.[e];const q=flaechenQm(h,e);
+    return v+q*((g==='moebel'||g==='komplett'?(b?.malusMoebel??0):0)+(g==='foerdertechnik'||g==='komplett'?(b?.malusAufzug??0):0));},0)
+    /Math.max(1,h.etagen.reduce((v,e)=>v+flaechenQm(h,e),0));
+  const still=(g==='foerdertechnik'||g==='komplett')&&h.etagen.some(n=>h.etagenBau?.[n]?.aufzugStill)
+    ?0.25*h.etagen.filter(n=>n>=1).reduce((v,e)=>v+flaechenQm(h,e),0)/Math.max(1,h.etagen.reduce((v,e)=>v+flaechenQm(h,e),0)):0;
+  const plusJahr=eur(umsatzWoche*52*(p.kaufquote*anteil+p.frequenz+malus+still));
   // Rendite auf den Bruttogewinn des Mehrumsatzes (Referenz-Filial-GuV: 41,2 %).
   return {gewerk:g,etagen,qm,kosten,wochen,ausfall,plusJahr,ertragJahr:eur(plusJahr*BRUTTO),frequenz:p.frequenz,kaufquote:p.kaufquote,
     rendite:Math.round(plusJahr*BRUTTO/Math.max(1,kosten)*1000)/10};
@@ -342,11 +377,12 @@ function gewerkAbschliessen(s:GameState,h:Haus,p:UmbauProjekt):void {
     if (alle||g==='klima') {e.technik.klima=2;e.klimaModernisiert=true;}
     if (alle||g==='licht') e.technik.licht=2;
     if (alle||g==='brandschutz') {e.technik.brandschutz=2;e.pflichten.brandschutz=s.woche+520;}
-    if (alle||g==='foerdertechnik') {e.technik.foerdertechnik=2;e.pflichten.aufzug=s.woche+520;}
-    if (e.pflichten.brandschutz>s.woche && e.pflichten.aufzug>s.woche) e.gesperrt=false;
-    if (alle||g==='moebel') e.moebelGeneration=3;
+    if (alle||g==='foerdertechnik') {e.technik.foerdertechnik=2;e.pflichten.aufzug=s.woche+520;e.malusAufzug=0;}
+    if (e.pflichten.brandschutz>s.woche) e.gesperrt=false;
+    if (alle||g==='moebel') {e.moebelGeneration=3;e.malusMoebel=0;}
     if (alle||g==='oberflaeche') {e.oberflaeche=2;e.substanz=clamp(e.substanz+10,0,100);}
     if (alle) e.substanz=90;
+    if (alle||g==='foerdertechnik') for (const n of h.etagen) if (h.etagenBau![n].pflichten.aufzug>s.woche) h.etagenBau![n].aufzugStill=false;
     if (wirkung>0) e.modernisierungWirkung=Math.max(e.modernisierungWirkung,wirkung);
   }
   if (g==='fassade'||g==='komplett') {
@@ -461,7 +497,7 @@ export function bestandUebersicht(s:GameState) {
   const gruppen:GewerkGruppe[]=['technik','moebel','oberflaeche','fassade'];
   const zeile=(id:string,name:string,haeuser:Haus[],sonder=false,region?:string)=>{
     const z:Record<GewerkGruppe,[number,number,number]>={technik:[0,0,0],moebel:[0,0,0],oberflaeche:[0,0,0],fassade:[0,0,0]};
-    let etagen=0,fristen=0,gesperrt=0,baustellen=0,bedarf=0;
+    let etagen=0,fristen=0,gesperrt=0,baustellen=0,bedarf=0,malusQm=0,qmSumme=0,still=0;
     for (const h of haeuser) {
       z.fassade[s.umbau!.fassade![h.id]??1]++;
       if (laeuftAuf(s,h,h.etagen)) baustellen++;
@@ -470,14 +506,17 @@ export function bestandUebersicht(s:GameState) {
         for (const g of gruppen) if (g!=='fassade') z[g][gruppenZustand(gz,g)]++;
         if (Math.min(e.pflichten.brandschutz,e.pflichten.aufzug)-s.woche<52) fristen++;
         if (e.gesperrt) gesperrt++;
+        if (e.aufzugStill) still++;
         const q=flaechenQm(h,nr);
+        malusQm+=q*((e.malusMoebel??0)+(e.malusAufzug??0)); qmSumme+=q;
         bedarf+=(gz.moebel<2?q*GEWERKE.moebel.qm:0)+(gz.oberflaeche<2?q*GEWERKE.oberflaeche.qm:0)
           +(gz.klima<2?q*GEWERKE.klima.qm:0)+(gz.licht<2?q*GEWERKE.licht.qm:0)+(gz.brandschutz<2?q*GEWERKE.brandschutz.qm:0)+(gz.foerdertechnik<2?q*GEWERKE.foerdertechnik.qm:0);
       }
     }
     const gut=(g:GewerkGruppe)=>{const t=z[g][0]+z[g][1]+z[g][2];return t?Math.round(z[g][2]/t*100):0;};
     const schlecht=(g:GewerkGruppe)=>{const t=z[g][0]+z[g][1]+z[g][2];return t?Math.round(z[g][0]/t*100):0;};
-    return {id,name,region,sonder,haeuser:haeuser.length,etagen,fristen,gesperrt,baustellen,bedarf:eur(bedarf),
+    return {id,name,region,sonder,haeuser:haeuser.length,etagen,fristen,gesperrt,still,baustellen,bedarf:eur(bedarf),
+      malus:Math.round(malusQm/Math.max(1,qmSumme)*10000)/100,
       gut:Object.fromEntries(gruppen.map(g=>[g,gut(g)])) as Record<GewerkGruppe,number>,
       schlecht:Object.fromEntries(gruppen.map(g=>[g,schlecht(g)])) as Record<GewerkGruppe,number>,
       verteilung:z};
@@ -502,7 +541,8 @@ export function bestandCluster(s:GameState,clusterId:string) {
   const haeuser=s.haeuser.filter(h=>c.hausIds.includes(h.id)&&h.status==='offen').map(h=>{
     const etagen=h.etagen.slice().sort((a,b)=>b-a).map(nr=>{const gz=gewerkZustand(s,h,nr);const e=h.etagenBau![nr];
       return {etage:nr,zustand:Object.fromEntries(gruppen.map(g=>[g,gruppenZustand(gz,g)])) as Record<GewerkGruppe,0|1|2>,
-        gewerke:gz,substanz:Math.round(e.substanz),gesperrt:e.gesperrt,frist:Math.min(e.pflichten.brandschutz,e.pflichten.aufzug),
+        gewerke:gz,substanz:Math.round(e.substanz),gesperrt:e.gesperrt,aufzugStill:!!e.aufzugStill,
+        malus:Math.round(((e.malusMoebel??0)+(e.malusAufzug??0))*10000)/100,fristBrandschutz:e.pflichten.brandschutz,fristAufzug:e.pflichten.aufzug,frist:Math.min(e.pflichten.brandschutz,e.pflichten.aufzug),
         baustelle:(s.umbau?.projekte??[]).find(x=>x.haus===h.id&&x.status==='laufend'&&x.etagen.includes(nr))};});
     const anteil=(g:GewerkGruppe)=>Math.round(etagen.filter(e=>e.zustand[g]===2).length/Math.max(1,etagen.length)*100);
     return {id:h.id,name:h.name,stadt:h.stadt,format:(h as Haus&{format?:string}).format,etagen,
@@ -516,4 +556,32 @@ export function umbauVorherNachher(s:GameState,projektId:string) {
   if (!p||!p.vorher) return undefined;
   const h=s.haeuser.find(x=>x.id===p.haus);
   return {projekt:p,haus:h?{id:h.id,name:h.name,stadt:h.stadt}:undefined,gewerk:p.gewerk?GEWERKE[p.gewerk].name:UMBAU_STUFEN[p.stufe].name};
+}
+
+const etageText=(nr:number)=>nr===-1?'Untergeschoss':nr===0?'Erdgeschoss':nr+'. Obergeschoss';
+/** E49: Behörde setzt eine Frist; Bau & Ladenbau legt die Pflichtmaßnahme als Vorlage vor (Standard: bauen). */
+function pflichtVorlage(s:GameState,h:Haus,pflicht:'brandschutz'|'aufzug',frist:number):void {
+  if (s.prognose) return;
+  const g:Gewerk=pflicht==='brandschutz'?'brandschutz':'foerdertechnik';
+  const kosten=h.etagen.filter(n=>h.etagenBau![n].pflichten[pflicht]<=frist+26).reduce((a,n)=>a+(gewerkSchaetzung(s,h.id,n,g)?.kosten??0),0);
+  const name=pflicht==='brandschutz'?'Brandschutz':'Aufzug und Rolltreppen';
+  melde(s,'warnung','Behörde setzt Frist: '+name+' in '+h.name+' bis KW '+((frist%52)+1)+'.',{hausId:h.id,stadt:h.stadt,modul:'umbau'});
+  neueVorlage(s,{bereich:'ladenbau',titel:'Pflichtfrist '+name+': '+h.name,
+    text:name+' in '+h.name+' muss bis KW '+((frist%52)+1)+' erneuert sein, sonst '+(pflicht==='brandschutz'?'sperrt die Behörde die Etagen':'werden Aufzug und Rolltreppen stillgelegt')+'. Kosten rund '+kosten.toLocaleString('de-DE')+' €.',
+    frist:6,betrag:kosten,aktion:{typ:'pflichtBauen',haus:h.id,pflicht},
+    optionen:[{id:'vorschlag',label:'Beauftragen'},{id:'ablehnen',label:'Zurückstellen'}],standard:'vorschlag'});
+}
+function pflichtBauen(s:GameState,hausId:string,pflicht:'brandschutz'|'aufzug'):{ok:boolean;text:string} {
+  const h=s.haeuser.find(x=>x.id===hausId);
+  if (!h||h.status!=='offen') return {ok:false,text:'Haus nicht verfügbar.'};
+  const g:Gewerk=pflicht==='brandschutz'?'brandschutz':'foerdertechnik';
+  const naechste=Math.min(...h.etagen.map(n=>h.etagenBau![n].pflichten[pflicht]));
+  let n=0,kosten=0;
+  for (const nr of h.etagen) {
+    if (h.etagenBau![nr].pflichten[pflicht]>naechste+26) continue;
+    const r=gewerkStarten(s,h.id,nr,g);
+    if (r.ok) {n++;kosten+=s.umbau!.projekte[s.umbau!.projekte.length-1].kosten;}
+  }
+  return n?{ok:true,text:GEWERKE[g].name+' in '+h.name+' beauftragt: '+n+' Etagen, '+kosten.toLocaleString('de-DE')+' €.'}
+    :{ok:false,text:'Keine Etage frei für '+GEWERKE[g].name+'.'};
 }

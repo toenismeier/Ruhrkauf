@@ -49,3 +49,10 @@ Häuser altern. Modernisierung kostet, bringt Frequenz, Kaufquote und Image, und
 - **Bestand**: `bestandUebersicht` (je Cluster Anteil gut je Gewerkgruppe, Fristen, Bedarf), `bestandCluster` (Häuser mit Etagenschnitt), `umbauVorherNachher`.
 - **Budget**: Start 0,6 % vom Jahresumsatz (vorher immer 0), Aktion `umbauBudget`.
 - **Grafik**: Möbelgenerationen über eine Materialwelt je Generation (Fassade, Straße, Rohbau ausgenommen), Baustelle je Etage (`bauEtagen` in zustaende.js), Gerüst mit Kran nur bei Komplett/Fassade, Klimageräte vorn rechts auf dem Hauptdach. Katalog `umbau-generationen`, Panelbilder `bilder/umbau/`.
+
+## E49 Wirkung (31.10.2026, Ummo per Auswahl)
+- Alte Möbel kosten Kaufquote ab Spielwoche 52: Generation 1 −0,5 %/Jahr, Generation 2 −0,25 %/Jahr, höchstens −4 % (`malusMoebel`); Möbel neu setzt zurück.
+- Alte Fördertechnik kostet in Obergeschossen −0,2 %/Jahr, höchstens −2 % (`malusAufzug`).
+- Häuser vor 1975: Brandschutz- und Aufzugsfrist je Haus zwischen Woche 66 und 598 (vorher frühestens Woche 312). Zwölf Wochen vorher Vorlage von Bau & Ladenbau (`pflichtBauen`, Standard beauftragen). Brandschutz versäumt: Etage gesperrt. Aufzug versäumt: stillgelegt, Obergeschosse ×0,75.
+- Boden, Decke, Farbe fällt mit der Substanz (unter 72 mittel, unter 45 schlecht); Kundenscore +4 Punkte je Stufe gegenüber Start im Etagenmittel.
+- Wirkung Jahr 2, Seed 1, gegen main: Umsatz −0,6 %, EBITDA ohne Eingriffe −16,5 Mio. €, Bot regulär −22,5 Mio. €.
