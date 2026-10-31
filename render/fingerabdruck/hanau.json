@@ -1921,13 +1921,13 @@
       {"id":"p99","teile":487,"dreiecke":7648,"boundingBox":[624.5,0,95.6,650.12,24.6,116.02]}
     ],
     "umgebung": {
-      "teile": 8637,
-      "dreiecke": 194186,
+      "teile": 8621,
+      "dreiecke": 193994,
       "boundingBox": [-480,-6.2,-480,1424.5,29,1237.5]
     },
     "gesamt": {
-      "teile": 264592,
-      "strasse": 3956,
+      "teile": 264576,
+      "strasse": 3940,
       "haeuser": 260636,
       "instanzen": 42190,
       "drawCallsInstanzen": 4681
@@ -1935,7 +1935,7 @@
   },
   "pruefsummen": {
     "stadtplan": "7c19f41ad0acdb37785d9cbe7e369d79281930ffb665f7f45e82812c4f982f3a",
-    "geometrie": "8439802c73f136313585d67e7d7afe39bdaf7e00e732772fd12b548842566a1f",
+    "geometrie": "8efc1a9085e194cd60195db44a29d686492695114edb57501b2b55943f67d695",
     "bildReferenz": "22b71ad2cc453e1e0360c39c78ba24e3ca5e9c32e39f055fa6dd2404fd244ba8"
   }
 }
