@@ -3,23 +3,26 @@
 // nicht auf dem Grundstück. Keine Änderung an Stadtplan, Hausmodell oder Engine.
 import { THREE } from './basis.js';
 import { fussabdruck } from './bauer.js';
+import { drehePunkt } from './drehung.js';
 
 export function dachpunkt(parzelle, abmessung, hoehe) {
   if (!parzelle || !abmessung || !Number.isFinite(abmessung.w) || !Number.isFinite(abmessung.d)
       || !Number.isFinite(hoehe)) return null;
   const { w, d } = abmessung, p = parzelle, ecke = p.ecke ?? '+x+z';
-  const x = ecke === 'block' ? p.x + Math.max(0, (p.w - w) / 2)
+  const x = ecke === 'block' || ecke === 'front' ? p.x + Math.max(0, (p.w - w) / 2)
     : ecke.includes('+x') ? p.x + p.w - w : p.x;
-  const z = ecke === 'block' ? p.z + Math.max(0, (p.d - d) / 2)
+  const z = ecke === 'front' ? p.z + p.d - d : ecke === 'block' ? p.z + Math.max(0, (p.d - d) / 2)
     : ecke.includes('+z') ? p.z + p.d - d : p.z;
   return { x: x + w / 2, y: Math.max(0, hoehe), z: z + d / 2 };
 }
 
 export function hausDachpunkt(eintrag, haus) {
   // Q36: Pin sitzt auf der Dachkante über dem Haupteingang, wenn der Hausbauer ihn liefert.
-  const a = eintrag?.e?.pinAnker;
-  if (a && [a.x, a.y, a.z].every(Number.isFinite)) return { x: a.x, y: Math.max(0, a.y), z: a.z };
-  return dachpunkt(eintrag?.p, haus ? fussabdruck(haus) : null, eintrag?.e?.hoehe);
+  const a = eintrag?.e?.pinAnker, p = eintrag?.p;
+  if (a && [a.x, a.y, a.z].every(Number.isFinite)) { const [x, z] = drehePunkt(p, a.x, a.z); return { x, y: Math.max(0, a.y), z }; }
+  const d = dachpunkt(p, haus ? fussabdruck(haus) : null, eintrag?.e?.hoehe);
+  if (d && p?.rot) [d.x, d.z] = drehePunkt(p, d.x, d.z);   // gedrehte Kartenparzelle
+  return d;
 }
 
 export function hausFormat(haus) {

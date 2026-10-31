@@ -2,6 +2,7 @@
 // Geometrie und Pfade stammen aus dem Stadtplan; Zufallsentscheidungen ausschließlich aus rng(seed).
 // Statt Math.hypot: IEEE-genaue Wurzel, damit Schwellenvergleiche in allen JS-Engines gleich ausfallen.
 const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
+import { inWelt } from './drehung.js';
 import { THREE, rng } from './basis.js';
 import { menschenGruppe, erscheinung, menschenZeit } from './menschen.js';
 
@@ -162,9 +163,9 @@ const FENSTER = '#3d4a55';
 // Gelenkbus: weiß mit Fensterband, grünem Sockelstreifen und Dachaufbau
 const BUS = () => modell([[11.6, 2.4, 2.55, 0, -0.25, 0, '#f1efe9'], [11.2, 0.95, 2.6, 0.1, 0.35, 0, FENSTER], [0.08, 1.4, 2.2, 5.82, 0.2, 0, FENSTER],
   [11.6, 0.35, 2.6, 0, -1.2, 0, '#3f8f5a'], [3.4, 0.35, 1.6, -2.5, 1.12, 0, '#d4d2cc'], [0.2, 2.6, 2.62, 0.4, -0.1, 0, '#cfcbc1']]);
-// Straßenbahn: drei Glieder, weiß mit rotem Band, durchgehendem Fensterband und Stromabnehmer
+// Straßenbahn: drei Glieder, weiß mit rotem Band, durchgehendem Fensterband (ohne Stromabnehmer: keine Oberleitungen)
 const BAHN = () => modell([[6.1, 2.7, 2.6, -6.4, -0.3, 0, '#f3f1ec'], [5.9, 2.7, 2.6, 0, -0.3, 0, '#f3f1ec'], [6.1, 2.7, 2.6, 6.4, -0.3, 0, '#f3f1ec'],
-  [18.6, 1.0, 2.66, 0, 0.35, 0, FENSTER], [18.8, 0.4, 2.66, 0, -1.35, 0, '#c8372f'], [1.2, 0.5, 0.4, 0, 1.3, 0, '#55595e'], [0.1, 1.2, 2.2, 9.46, 0.3, 0, FENSTER]]);
+  [18.6, 1.0, 2.66, 0, 0.35, 0, FENSTER], [18.8, 0.4, 2.66, 0, -1.35, 0, '#c8372f'], [0.1, 1.2, 2.2, 9.46, 0.3, 0, FENSTER]]);
 // Lieferwagen: weißer Kofferaufbau, rotes Fahrerhaus mit Scheibe
 const LKW = () => modell([[5.6, 2.9, 2.5, -1.2, 0.05, 0, '#efede6'], [2.2, 2.3, 2.4, 2.9, -0.25, 0, '#c8372f'], [0.08, 0.9, 2.1, 4.0, 0.25, 0, FENSTER],
   [8.0, 0.35, 2.5, 0, -1.35, 0, '#4b4f54']]);
@@ -240,6 +241,16 @@ export function lebenModul({ canvas, scene: szene, camera: kamera, K: zoom, spie
       const p = plan.parzellen.find((p) => p.id === st.parzelle);
       if (!h || !p || !netz?.fusswege.length) continue;
       const mitte = { x: p.x + p.w / 2, z: p.z + p.d / 2 };
+      if (p.rot !== undefined || p.ecke === 'front') {
+        // Kartenparzelle in Straßenflucht: Eingang mitten an der Front (lokal +z), Kunden vom nächsten Gehweg davor
+        const [ex, ez] = inWelt(p, 0, p.d / 2 + 0.6), ein = { x: ex, z: ez };
+        let best = null;
+        for (const w of netz.fusswege) { const l = lageZu(w.s, ein); if (Math.abs(l.v) > 40) continue;
+          const u = clamp(l.u, w.s.von + 3, w.s.bis - 3), q = koordinate(w.s, u, w.v), d = abstand(q, ein);
+          if (!best || d < best.d) best = { w, u, q, d }; }
+        if (best && best.d <= 14) punkte.push({ h, p, mitte, weg: best.q, ein, lane: best.w, u: best.u });
+        continue;
+      }
       const f = netz.fusswege.filter((w) => Math.abs(lageZu(w.s, mitte).v) < 65)
         .map((w) => ({ w, u: clamp(lageZu(w.s, mitte).u, w.s.von + 3, w.s.bis - 3) }));
       f.sort((a, b) => abstand(koordinate(a.w.s, a.u, a.w.v), mitte) - abstand(koordinate(b.w.s, b.u, b.w.v), mitte));

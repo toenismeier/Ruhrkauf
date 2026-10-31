@@ -624,7 +624,7 @@ function baueSegment(ctx, s) {
         if (abschluss === 'prellbock') gleisPrellbock(ctx, R, u);
         if (ctx.qualitaet) for (const t of [-1.6, 1.6]) ctx.qualitaet.gleisenden.push({ achse: s.achse, mitte: s.mitte + t, u, abschluss });
       }
-      for (let u = s.von + 9; u < s.bis - 7; u += 30) { const [x, z] = R.w(u, 0); I.setze('olmast', x, 0.12, z, R.ru + Math.PI / 2); }
+      // Keine Oberleitungsmasten (Ummo 31.10.2026)
       if (h >= 4) for (const sg of [-1, 1]) for (let u = m0 + 5; u < m1 - 2; u += 11) { const [x, z] = R.w(u, sg * (h - 1.1)); baumSetzen(I, s.baumart, x, 0.12, z, r, 0.85); }
     } else {
       R.quader(S, m0, m1, -h, h, 0, 0.24, F.bord);
@@ -697,11 +697,9 @@ function gleise(ctx, R, u0, u1, y = 0) {
   if (u1 - u0 < 0.2) return;
   for (const t of [-1.6, 1.6]) {
     for (const sp of [-0.72, 0.72]) R.quader(ctx.S, u0, u1, t + sp - 0.06, t + sp + 0.06, y, y + 0.18, F.schiene);
-    R.quader(ctx.S, u0, u1, t - 0.04, t + 0.04, 6.4, 6.48, F.dunkel);
     if (ctx.qualitaet) {
       const s = { achse: R.achse, mitte: R.mitte + t, von: u0, bis: u1, breite: 2.0 };
       ctx.qualitaet.gleise.push(s);
-      ctx.qualitaet.draehte.push({ ...s });
     }
   }
 }
@@ -1877,12 +1875,12 @@ function baueBahn(ctx, b, r) {
     S.quader(ga, 6.3, gz - 0.04, gb, 6.38, gz + 0.04, F.dunkel);
     if (ctx.qualitaet) {
       const spur = { achse: ctx.spiegel ? 'z' : 'x', mitte: gz, von: ga, bis: gb, breite: 3 };
-      ctx.qualitaet.gleise.push(spur); ctx.qualitaet.draehte.push({ ...spur });
+      ctx.qualitaet.gleise.push(spur);
       for (const u of [ga, gb]) ctx.qualitaet.gleisenden.push({ achse: ctx.spiegel ? 'z' : 'x', mitte: gz, u, abschluss: 'prellbock' });
     }
     for (const u of [ga, gb]) S.box(0.42, 0.8, 2.3, u, y + 0.5, gz, '#d8b25a');
   }
-  if (gleisZ.length) for (let x = xa + 10; x < xb - 5; x += 45) I.setze('olmastSeite', x, y, gleisZ[0] - 2.4, 0, [1, 1, Math.max(1, (gleisZ[gleisZ.length - 1] - gleisZ[0] + 4) / 6)]);
+  // Keine Oberleitungsmasten an Bahntrassen (Ummo 31.10.2026)
   // Züge ausschließlich an Bahnsteigen, Wagenlänge und Gleisende werden respektiert.
   const gleiseMitBahnsteig = bh ? gleisZ.filter((gz) => bahnsteigZ.some((pz) => Math.abs(gz - pz) <= 8.5)) : [];
   const zuege = Math.min(gleiseMitBahnsteig.length, 2 + (r() < 0.5 ? 1 : 0));

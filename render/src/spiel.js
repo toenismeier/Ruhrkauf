@@ -25,6 +25,7 @@ import { lebenModul } from './kit/leben.js';
 import { menschenAn, nachLaden as menschenNachLaden } from './kit/menschen.js';
 import { stadtEintragAusSpiel, spielBauer } from './kit/bruecke.js';
 import { hausDachpunkt, dachpunkt, baueHauspin, pinGroessen } from './kit/hauspins.js';
+import { drehePunkt } from './kit/drehung.js';
 import { schriftzugSichtbarkeit, bewerteSchriftzug } from './kit/q36-pruefung.js';
 import { jahreszeitenStadt, jahreszeit } from './kit/jahreszeit.js';
 import { STATUS_TITEL } from './kit/zustaende.js';
@@ -419,6 +420,7 @@ function wettbewerbPinsAktualisieren() {
     const pin = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthTest: false }));
     const dach = dachpunkt(p, { w: x.e?.w ?? p.w, d: x.e?.d ?? p.d }, x.e?.hoehe ?? 28);
     if (!dach) continue;
+    if (p.rot) [dach.x, dach.z] = drehePunkt(p, dach.x, dach.z);   // gedrehte Kartenparzelle
     pin.position.set(dach.x, dach.y + 3, dach.z);
     pin.scale.set(10.5, 10.5, 1); pin.userData.wbId = w.id; pin.userData.puls = neu; pin.renderOrder = 30;
     scene.add(pin); wettbewerbPins.push(pin);

@@ -8,6 +8,7 @@ import { THREE, FARBEN, rng, waehle, baum, heller, vertexMat } from '../basis.js
 import { bauerFuer, dachFlaechenBeimBau, Instanzer, baumSetzen } from '../stadt.js';
 import { hqMasse } from '../hq.js';
 import { masseOutlet } from '../outlet.js';
+import { aufParzelle, inWelt, ecken, huelle, gedreht } from '../drehung.js';
 import { ESSEN_KARTE } from './essen.js';
 import essenDaten from '../../../karten/essen-spiel.json';
 
@@ -109,11 +110,11 @@ export function kartenDaten(name, stil = kartenStil()) {
     gleise: d.gleise.map(([a, p]) => ({ art: GL_ART[a], punkte: paare(p) })),
     deko, gebaeude,
     // Netz: [Typ, Bandbreite dm, Einbahn, Knoten a, Knoten b, Punkte, Spuren (Versatz links dm, Richtung)…]
-    netz: (d.netz ?? []).map(([typ, breite, einbahn, a, b, p, sp, fs = 15, mund = 0]) => {
+    netz: (d.netz ?? []).map(([typ, breite, einbahn, a, b, p, sp, fs = 15, mund = 0, echt = 0]) => {
       const spuren = []; for (let i = 0; i + 1 < (sp ?? []).length; i += 2) spuren.push({ links: sp[i] / 10, dir: sp[i + 1] });
       // Gehwegseiten, die neben der Fahrbahn dieser Variante liegen ([links, rechts] = Versatz −/+)
       const o = stil === 'coffee' ? 2 : 0, fussSeiten = [!!(fs & (1 << o)), !!(fs & (2 << o))];
-      return { typ: NETZ_TYP[typ], breite: breite / 10, einbahn: !!einbahn, a, b, punkte: paare(p), spuren, fussSeiten, mund };
+      return { typ: NETZ_TYP[typ], breite: breite / 10, echt: Math.max(echt, breite) / 10, einbahn: !!einbahn, a, b, punkte: paare(p), spuren, fussSeiten, mund };
     }),
   };
   r.aufFahrbahn = fahrbahnMaske(r);
@@ -169,61 +170,63 @@ export function kartenplan(name, eintrag, hqJson = null) {
   const K = kartenDaten(name, stil), def = K.def;
   const [ox, oz] = K.ursprung, ins = ([x, z]) => [x + ox, z + oz];
   const parzellen = [], standorte = [], belegt = [];
-  const frei = (R) => belegt.every((q) => R.x + R.w + 6 < q.x || q.x + q.w + 6 < R.x || R.z + R.d + 6 < q.z || q.z + q.d + 6 < R.z);
-  // Bauplatz: großes echtes Gebäude nahe dem Zielpunkt, Parzelle W × D auf dessen Mitte (achsparallel wie alle Kit-Bauten).
-  // Bewertung: Abstand zum Ziel plus Strafe, wenn hohe echte Gebäude davor (zur Kamera hin) das Spielhaus verdecken.
+  // Bauplatz: Spielhaus in der Flucht einer echten Straße, Front (lokal +z) zur Straße, so weit zurückgesetzt, dass es auf
+  // bebaubarer Fläche steht (Bauflucht der Nachbarn). Parzelle R = { x, z, w, d, rot }: Rechteck um die Mitte, gedreht um rot.
   const S2 = Math.SQRT2, COS = Math.cos(Math.PI / 6), SIN = Math.sin(Math.PI / 6);
   const bild = (x, z, y) => [(x - z) / S2, y * COS - ((x + z) / S2) * SIN];   // Bildschirmkoordinaten der festen Iso-Kamera
-  const bildRechteck = (a, b, c, d, h) => {
+  const bildEcken = (E, h) => {
     let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-    for (const [x, z] of [[a, b], [c, b], [c, d], [a, d]]) for (const y of [0, h]) { const [u, v] = bild(x, z, y); x0 = Math.min(x0, u); x1 = Math.max(x1, u); y0 = Math.min(y0, v); y1 = Math.max(y1, v); }
+    for (const [x, z] of E) for (const y of [0, h]) { const [u, v] = bild(x, z, y); x0 = Math.min(x0, u); x1 = Math.max(x1, u); y0 = Math.min(y0, v); y1 = Math.max(y1, v); }
     return [x0, y0, x1, y1];
   };
+  const bildRechteck = (a, b, c, d, h) => bildEcken([[a, b], [c, b], [c, d], [a, d]], h);
   const ueberlapp = (A, B) => Math.max(0, Math.min(A[2], B[2]) - Math.max(A[0], B[0])) * Math.max(0, Math.min(A[3], B[3]) - Math.max(A[1], B[1]));
+  const tiefeVon = (R) => R.x + R.w / 2 + R.z + R.d / 2;
   const verdeckung = (R) => {
-    const H = 22, haus = bildRechteck(R.x, R.z, R.x + R.w, R.z + R.d, H), f = (haus[2] - haus[0]) * (haus[3] - haus[1]);
-    const tiefe = R.x + R.w / 2 + R.z + R.d / 2 - 20;
+    const haus = bildEcken(ecken(R), 22), f = (haus[2] - haus[0]) * (haus[3] - haus[1]);
+    const tiefe = tiefeVon(R) - 20;
     let v = 0;
     for (const g of K.gebaeude) {
       if (g.h < 10 || g.mx + g.mz <= tiefe) continue;
-      if (g.mx > R.x - 3 && g.mx < R.x + R.w + 3 && g.mz > R.z - 3 && g.mz < R.z + R.d + 3) continue;
+      if (aufParzelle(R, g.mx, g.mz, 3)) continue;
       const [a, b, c, d] = g.bbox;
       if (c < R.x - 250 || a > R.x + R.w + 250 || d < R.z - 250 || b > R.z + R.d + 250) continue;
       const u = ueberlapp(haus, bildRechteck(a, b, c, d, g.h)) / f;
       if (u > 0.1 && g.h > 18) return 9;   // ein hohes Haus vor dem Laden verdeckt ihn spürbar: Bauplatz ausscheiden
       v += u;
     }
-    // Bereits gesetzte Spielhäuser (z. B. zweites HQ-Hochhaus) dürfen den Laden ebenso wenig verdecken
+    // Bereits gesetzte Spielhäuser dürfen den Laden ebenso wenig verdecken, und das neue Haus kein gesetztes
     for (const q of belegt) {
-      if (q.x + q.w / 2 + q.z + q.d / 2 <= tiefe) continue;
-      const u = ueberlapp(haus, bildRechteck(q.x, q.z, q.x + q.w, q.z + q.d, 45)) / f;
-      if (u > 0.1) return 9;
-    }
-    // … und das neue Haus darf kein bereits gesetztes verdecken
-    const neu = bildRechteck(R.x, R.z, R.x + R.w, R.z + R.d, 45);
-    for (const q of belegt) {
-      if (q.x + q.w / 2 + q.z + q.d / 2 >= tiefe + 20) continue;
-      const r = bildRechteck(q.x, q.z, q.x + q.w, q.z + q.d, 22);
-      if (ueberlapp(r, neu) / ((r[2] - r[0]) * (r[3] - r[1])) > 0.1) return 9;
+      if (tiefeVon(q) > tiefe && ueberlapp(haus, bildEcken(ecken(q), 45)) / f > 0.1) return 9;
+      if (tiefeVon(q) < tiefe + 20) { const r = bildEcken(ecken(q), 22); if (ueberlapp(r, bildEcken(ecken(R), 45)) / ((r[2] - r[0]) * (r[3] - r[1])) > 0.1) return 9; }
     }
     return Math.min(1, v);
   };
   // Wahrzeichen (Rathaus, Hauptbahnhof, Münster, Marktkirche, Limbecker Platz, Grillo, Alte Synagoge) bleiben stehen
   const schutz = (def.wahrzeichen ?? []).map(ins);
   const geschuetzt = (g) => schutz.some(([x, z]) => x > g.bbox[0] - 30 && x < g.bbox[2] + 30 && z > g.bbox[1] - 30 && z < g.bbox[3] + 30);
-  // Bebaubare Flächen (ohne Straßen samt Gehweg, Gleise, Bahnsteige, Wasser, Parks; berechnet in kartenstadt-bauen.py)
+  // Bebaubare Flächen (ohne Straßen samt Gehweg in echter Breite, Gleise, Bahnsteige, Wasser, Parks; kartenstadt-bauen.py)
   const bau = K.bebaubar.map((ringe) => ({ ringe, bb: bboxVon(ringe[0]) }));
   const GZ = 50, gitter = new Map();
   bau.forEach((f, i) => { for (let gx = Math.floor(f.bb[0] / GZ); gx <= Math.floor(f.bb[2] / GZ); gx++) for (let gz = Math.floor(f.bb[1] / GZ); gz <= Math.floor(f.bb[3] / GZ); gz++) { const k = gx * 10000 + gz; if (!gitter.has(k)) gitter.set(k, []); gitter.get(k).push(i); } });
   const aufBauflaeche = (x, z) => (gitter.get(Math.floor(x / GZ) * 10000 + Math.floor(z / GZ)) ?? []).some((i) => { const f = bau[i]; return x >= f.bb[0] && x <= f.bb[2] && z >= f.bb[1] && z <= f.bb[3] && imPolygon(x, z, f.ringe[0]) && !f.ringe.slice(1).some((l) => imPolygon(x, z, l)); });
-  /** Rechteck liegt vollständig auf bebaubarer Fläche: Kanten alle 4 m und ein Innenraster prüfen. */
+  /** Punkte am Rand (alle s m) und im Inneren der gedrehten Parzelle, in Weltkoordinaten. */
+  const randPunkte = (R, s = 4) => { const o = [], a = R.w / 2, b = R.d / 2;
+    for (let u = -a; u <= a + 0.01; u += Math.min(s, R.w)) { o.push(inWelt(R, u, b), inWelt(R, u, -b)); }
+    for (let v = -b; v <= b + 0.01; v += Math.min(s, R.d)) { o.push(inWelt(R, a, v), inWelt(R, -a, v)); }
+    return o; };
+  /** Parzelle liegt vollständig auf bebaubarer Fläche: Front zuerst (bricht beim Zurücksetzen früh ab), dann Rand und Innenraster. */
   const passt = (R) => {
-    for (let u = 0; u <= R.w; u += Math.min(4, R.w)) { if (!aufBauflaeche(R.x + u, R.z) || !aufBauflaeche(R.x + u, R.z + R.d)) return false; }
-    for (let v = 0; v <= R.d; v += Math.min(4, R.d)) { if (!aufBauflaeche(R.x, R.z + v) || !aufBauflaeche(R.x + R.w, R.z + v)) return false; }
-    for (let u = R.w / 4; u < R.w; u += R.w / 4) for (let v = R.d / 4; v < R.d; v += R.d / 4) if (!aufBauflaeche(R.x + u, R.z + v)) return false;
+    for (let u = -R.w / 2; u <= R.w / 2 + 0.01; u += Math.min(4, R.w)) { const [x, z] = inWelt(R, u, R.d / 2); if (!aufBauflaeche(x, z)) return false; }
+    for (const [x, z] of randPunkte(R)) if (!aufBauflaeche(x, z)) return false;
+    for (let u = -R.w / 4; u <= R.w / 4 + 0.01; u += R.w / 4) for (let v = -R.d / 4; v <= R.d / 4 + 0.01; v += R.d / 4) { const [x, z] = inWelt(R, u, v); if (!aufBauflaeche(x, z)) return false; }
     return true;
   };
-  const schuetztWahrzeichen = (R) => schutz.some(([x, z]) => x > R.x - 25 && x < R.x + R.w + 25 && z > R.z - 25 && z < R.z + R.d + 25);
+  const frei = (R) => belegt.every((q) => {
+    if (Math.hypot(R.x + R.w / 2 - q.x - q.w / 2, R.z + R.d / 2 - q.z - q.d / 2) > Math.hypot(R.w, R.d) / 2 + Math.hypot(q.w, q.d) / 2 + 6) return true;
+    return !randPunkte(R, 3).some(([x, z]) => aufParzelle(q, x, z, 6)) && !randPunkte(q, 3).some(([x, z]) => aufParzelle(R, x, z, 6)) && !aufParzelle(q, R.x + R.w / 2, R.z + R.d / 2, 6);
+  });
+  const schuetztWahrzeichen = (R) => schutz.some(([x, z]) => aufParzelle(R, x, z, 25));
   // Große oder hohe echte Gebäude (Einkaufszentren, Hochhäuser) werden nie abgerissen: das Spielhaus darf nicht in ihnen stehen
   const NZ = 60, hausGitter = new Map(), schienenGitter = new Map();
   const eintragen = (M, a, b, c, d, w) => { for (let gx = Math.floor(a / NZ); gx <= Math.floor(c / NZ); gx++) for (let gz = Math.floor(b / NZ); gz <= Math.floor(d / NZ); gz++) { const k = gx * 10000 + gz; if (!M.has(k)) M.set(k, []); M.get(k).push(w); } };
@@ -237,39 +240,85 @@ export function kartenplan(name, eintrag, hqJson = null) {
     const [x0, z0] = gl.punkte[i - 1], [x1, z1] = gl.punkte[i], n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / 4));
     for (let j = 0; j <= n; j++) { const x = x0 + (x1 - x0) * j / n, z = z0 + (z1 - z0) * j / n; eintragen(schienenGitter, x, z, x, z, [x, z]); }
   }
-  const imUmkreis = (M, R, rand) => { const out = new Set();
-    for (let gx = Math.floor((R.x - rand) / NZ); gx <= Math.floor((R.x + R.w + rand) / NZ); gx++) for (let gz = Math.floor((R.z - rand) / NZ); gz <= Math.floor((R.z + R.d + rand) / NZ); gz++) for (const w of M.get(gx * 10000 + gz) ?? []) out.add(w);
+  const imUmkreis = (M, R, rand) => { const [a, b, c, d] = huelle(R), out = new Set();
+    for (let gx = Math.floor((a - rand) / NZ); gx <= Math.floor((c + rand) / NZ); gx++) for (let gz = Math.floor((b - rand) / NZ); gz <= Math.floor((d + rand) / NZ); gz++) for (const w of M.get(gx * 10000 + gz) ?? []) out.add(w);
     return out; };
   const zuGross = (g, R) => g.flaeche > Math.max(3500, 2.5 * R.w * R.d) || g.h > 30 || geschuetzt(g);
+  /** Fläche (m², 2-m-Raster) eines echten Gebäudes, die auf der Parzelle (+1 m) liegt. */
+  const anteil = (g, R) => { const [a, b, c, d] = g.bbox, ring = g.boden.length > 2 ? g.boden : null; let n = 0;
+    for (let x = a + 1; x < c; x += 2) for (let z = b + 1; z < d; z += 2) if (aufParzelle(R, x, z, 1) && (!ring || imPolygon(x, z, ring))) n++;
+    return n * 4; };
+  const grundflaeche = (g) => g._gf ??= (g.boden.length > 2 ? Math.abs(g.boden.reduce((s, p, i) => { const q = g.boden[(i + 1) % g.boden.length]; return s + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2 : g.flaeche);
+  // Nachbargebäude werden nie angeschnitten: ein Spielhaus ersetzt nur Gebäude, die zur Hälfte auf seiner Parzelle stehen, oder Kleinbauten
   const stecktInGrossbau = (R) => { for (const g of imUmkreis(hausGitter, R, 0)) {
-    const [a, b, c, d] = g.bbox, ux = Math.min(c, R.x + R.w + 1) - Math.max(a, R.x - 1), uz = Math.min(d, R.z + R.d + 1) - Math.max(b, R.z - 1);
-    if (ux > 0.3 && uz > 0.3 && (zuGross(g, R) || (g.flaeche > 300 && ux * uz < 0.5 * g.flaeche))) return true; } return false; };
-  // (Nachbargebäude werden nie angeschnitten: ein Spielhaus ersetzt nur Gebäude, die zur Hälfte auf seiner Parzelle stehen, oder Kleinbauten)
+    const ov = anteil(g, R); if (ov < 4) continue;
+    if (zuGross(g, R) || (grundflaeche(g) > 300 && ov < 0.5 * grundflaeche(g))) return true; } return false; };
   // Gleise halten 30 m Abstand zum Spielhaus (keine Schienen, die in den Laden laufen)
-  const amGleis = (R) => { for (const [x, z] of imUmkreis(schienenGitter, R, 30)) if (x > R.x - 30 && x < R.x + R.w + 30 && z > R.z - 30 && z < R.z + R.d + 30) return true; return false; };
+  const amGleis = (R) => { for (const [x, z] of imUmkreis(schienenGitter, R, 30)) if (aufParzelle(R, x, z, 30)) return true; return false; };
+  const tauglich = (R) => frei(R) && !schuetztWahrzeichen(R) && passt(R) && !amGleis(R) && !stecktInGrossbau(R);
+  // Straßenkanten: Fahrstraßen und Fußgängerzonen (dort stehen die Warenhäuser der 1a-Lage)
+  const KANTEN = K.netz.filter((k) => k.punkte.length > 1).map((k) => ({ k, bb: bboxVon(k.punkte), halb: k.typ === 'fussgaenger' ? 5.5 : k.echt / 2 + 3.4 }));   // Front an der echten Bauflucht (Straße in echter Breite plus Gehweg)
   const bauplatz = (ziel, W, D) => {
     const [tx, tz] = ins(ziel);
+    // Kandidaten: alle 6 m entlang jeder Straße im Umkreis, beide Seiten, sortiert nach Abstand zum Ziel
+    const kand = [];
+    for (const { k, bb, halb } of KANTEN) {
+      if (bb[2] < tx - 440 || bb[0] > tx + 440 || bb[3] < tz - 440 || bb[1] > tz + 440) continue;
+      for (let i = 1; i < k.punkte.length; i++) {
+        const [ax, az] = k.punkte[i - 1], [bx, bz] = k.punkte[i], L = Math.hypot(bx - ax, bz - az);
+        if (L < 6) continue;
+        const ux = (bx - ax) / L, uz = (bz - az) / L;
+        for (let u = 3; u < L - 2; u += 6) {
+          const px = ax + ux * u, pz = az + uz * u, ab = Math.hypot(px - tx, pz - tz);
+          if (ab <= 420) for (const sg of [1, -1]) kand.push({ px, pz, nx: -uz * sg, nz: ux * sg, halb, ab });
+        }
+      }
+    }
+    kand.sort((a, b) => a.ab - b.ab);
     let best = null, weich = null;
-    // Raster um den Zielpunkt (4 m, nach Abstand sortiert), bis 420 m; erst Lage, dann Sicht auf das Haus
+    for (const c of kand) {
+      if (best && c.ab > best.wert) break;
+      // Front zeigt zur Straße (−n), lokale x-Achse entlang der Straße
+      const fx = -c.nx, fz = -c.nz, rot = Math.atan2(fx, fz);
+      // Kamera blickt aus +x/+z: Fronten, die von ihr wegzeigen, nur als Notlösung
+      const weg = fx + fz < -0.15 ? 400 : 0;
+      for (let off = c.halb + 0.5; off <= c.halb + 6; off += 1) {   // höchstens 6 m hinter dem Gehweg: kein Rasen oder Park vor der Front
+        const cx = c.px + c.nx * (off + D / 2), cz = c.pz + c.nz * (off + D / 2);
+        const R = { x: Math.round((cx - W / 2) * 10) / 10, z: Math.round((cz - D / 2) * 10) / 10, w: W, d: D, rot };
+        // Front muss auf der Bauflucht stehen: erste zurückgesetzte Lage, auf der die ganze Front bebaubar ist
+        let front = true;
+        for (let u = -W / 2; u <= W / 2 + 0.01; u += Math.min(4, W)) { const [x, z] = inWelt(R, u, D / 2); if (!aufBauflaeche(x, z)) { front = false; break; } }
+        if (!front) continue;
+        if (tauglich(R)) {
+          const vd = verdeckung(R), ab = Math.hypot(cx - tx, cz - tz) + weg;
+          if (vd > 1) { const w2 = ab + 2000; if (!weich || w2 < weich.wert) weich = { R, wert: w2 }; }
+          else { const wert = ab + 900 * vd; if (!best || wert < best.wert) best = { R, wert }; }
+        }
+        break;   // nur die vorderste Lage in der Flucht, nicht tief im Block
+      }
+    }
+    if (best) return best.R;
+    // Keine Straßenlage: achsparallel auf dem Raster um den Zielpunkt (wie bisher)
     for (const [dx, dz, ab] of RASTER) {
       if (best && ab > best.wert) break;
-      const R = { x: Math.round(tx + dx - W / 2), z: Math.round(tz + dz - D / 2), w: W, d: D };
-      if (!frei(R) || schuetztWahrzeichen(R) || !passt(R) || amGleis(R) || stecktInGrossbau(R)) continue;
+      const R = { x: Math.round(tx + dx - W / 2), z: Math.round(tz + dz - D / 2), w: W, d: D, rot: 0 };
+      if (!tauglich(R)) continue;
       const vd = verdeckung(R);
-      if (vd > 1) { const w2 = ab + 2000; if (!weich || w2 < weich.wert) weich = { R, wert: w2 }; continue; }
+      if (vd > 1) { const w2 = ab + 2000 + 1000; if (!weich || w2 < weich.wert) weich = { R, wert: w2 }; continue; }
       const wert = ab + 900 * vd;
       if (!best || wert < best.wert) best = { R, wert };
     }
     if (best) return best.R;
-    if (weich) return weich.R;   // nur verdeckte Plätze: der nächste davon, Verdecker räumt baueKartenstadt (Vorplatz)
+    if (weich) return weich.R;
     (globalThis.kartenNotplatz ??= []).push(ziel);
-    return { x: Math.round(tx - W / 2), z: Math.round(tz - D / 2), w: W, d: D };
+    return { x: Math.round(tx - W / 2), z: Math.round(tz - D / 2), w: W, d: D, rot: 0 };
   };
   const ROLLE = { premium: 'slot:premium', warenhaus: 'slot:warenhaus', sport: 'slot:sport', wettbewerber: 'slot:wettbewerber', wettbewerber_reserve: 'slot:wettbewerber_reserve', schwester: 'slot:schwester', outlet: 'slot:outlet' };
   const zaehler = {};
   const neueParzelle = (id, typ, R, standort, lage) => {
-    const p = { id, typ, block: 'karte', x: R.x, z: R.z, w: R.w, d: R.d, seed: hash(id), ecke: 'block', front: ['+x', '+z'], seite: 'ecke', strasse: [],
-      region: eintrag.region, cluster: eintrag.typ, viertel: 'kern', lage, nachbar: null, karte: true, ...(standort ? { standort } : {}) };
+    // Straßenlage: gedreht (rot), Haus bündig an der Front (ecke 'front' = mittig in der Breite, an der +z-Seite)
+    const p = { id, typ, block: 'karte', x: R.x, z: R.z, w: R.w, d: R.d, seed: hash(id), ecke: R.rot !== 0 ? 'front' : 'block', front: ['+x', '+z'], seite: 'ecke', strasse: [],
+      region: eintrag.region, cluster: eintrag.typ, viertel: 'kern', lage, nachbar: null, karte: true, ...(R.rot ? { rot: Math.round(R.rot * 1e4) / 1e4 } : {}), ...(standort ? { standort } : {}) };
     parzellen.push(p); belegt.push(R);
     return p;
   };
@@ -307,7 +356,7 @@ export function kartenplan(name, eintrag, hqJson = null) {
   parzellen.push({ id: 'k-bahnhof', typ: 'slot:bahnhof', block: 'karte', x: bx - 30, z: bz - 20, w: 60, d: 40, seed: 1, karte: true, leer: true });
   const [ex, ez] = ins(def.einkauf), [sx, sz] = ins(def.start);
   // Wege, die über einen Bauplatz führen, entfallen
-  const aufPlatz = (x, z) => parzellen.some((p) => !p.leer && x > p.x - 1 && x < p.x + p.w + 1 && z > p.z - 1 && z < p.z + p.d + 1);
+  const aufPlatz = (x, z) => parzellen.some((p) => !p.leer && aufParzelle(p, x, z, 1));
   const { strassen, kreuzungen } = strassennetz(K, aufPlatz);
   const G = def.kameraGrenze;
   const plan = {
@@ -934,7 +983,7 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
   for (const g of K.gleise) gleis(S, g.punkte, g.art);
   // Bäume, Hecken, Straßenmöbel und Lauben (vorberechnet in kartenstadt-bauen.py) als Instanzen wie in den Rasterstädten
   const I = scene ? new Instanzer() : null;
-  const aufSpielhaus = (x, z) => plan.parzellen.some((p) => !p.leer && x > p.x - 1.5 && x < p.x + p.w + 1.5 && z > p.z - 1.5 && z < p.z + p.d + 1.5);
+  const aufSpielhaus = (x, z) => plan.parzellen.some((p) => !p.leer && aufParzelle(p, x, z, 1.5));
   // Gleisnähe (Raster 2 m): Bäume mit Kronen über Gleisen und Bahnsteigen entfallen
   const GZ2 = 2, gleisNah = new Set();
   for (const g of K.gleise) for (let i = 1; i < g.punkte.length; i++) {
@@ -945,30 +994,17 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
   const amGleisBaum = (x, z) => gleisNah.has(Math.floor(x / GZ2) * 100000 + Math.floor(z / GZ2));
   if (I && K.deko) dekoSetzen(I, B, K.deko, (x, z) => aufSpielhaus(x, z) || amGleisBaum(x, z));
   const t1 = S.anzahl; zeit.boden = performance.now() - z0;
-  // Bauplätze der Spielhäuser freiräumen: echte Gebäude, deren Mitte auf einer Parzelle liegt, entfallen
+  // Bauplätze der Spielhäuser freiräumen: echte Gebäude, deren Mitte auf der (gedrehten) Parzelle liegt oder die sie spürbar
+  // überdecken, entfallen. Keine Sichtachsen-Räumung mehr: das Haus steht in der Straßenflucht, die Nachbarn bleiben.
   const platz = plan.parzellen.filter((p) => !p.leer);
-  // Echte Gebäude entfallen nur, wenn sie auf dem Bauplatz stehen (Mitte darauf oder mehr als 15 % ihrer Fläche)
-  // Sichtachse: Gebäude bis 30 m Höhe, die vor einem Spielhaus (zur Kamera hin, bis 60 m) mehr als 6 % seiner Ansicht verdecken, entfallen (Vorplatz)
-  const S2 = Math.SQRT2, COS = Math.cos(Math.PI / 6), SIN = Math.sin(Math.PI / 6);
-  const bild = (x, z, y) => [(x - z) / S2, y * COS - ((x + z) / S2) * SIN];
-  const rechteck = (a, b, c, d, h) => { let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-    for (const [x, z] of [[a, b], [c, b], [c, d], [a, d]]) for (const y of [0, h]) { const [u, v] = bild(x, z, y); x0 = Math.min(x0, u); x1 = Math.max(x1, u); y0 = Math.min(y0, v); y1 = Math.max(y1, v); }
-    return [x0, y0, x1, y1]; };
-  const ansicht = platz.map((p) => ({ p, r: rechteck(p.x, p.z, p.x + p.w, p.z + p.d, 20), tiefe: p.x + p.w / 2 + p.z + p.d / 2 - 20 }));   // auch seitlich vorn stehende Häuser
-  const schutzB = (def.wahrzeichen ?? []).map(([x, z]) => [x + ox, z + oz]);
-  const wahrzeichen = (g) => schutzB.some(([x, z]) => x > g.bbox[0] - 30 && x < g.bbox[2] + 30 && z > g.bbox[1] - 30 && z < g.bbox[3] + 30);
-  const verdecktLaden = (g) => g.h <= 60 && !wahrzeichen(g) && ansicht.some(({ p, r, tiefe }) => {
-    if (g.mx + g.mz <= tiefe || Math.hypot(g.mx - p.x - p.w / 2, g.mz - p.z - p.d / 2) > 90 + Math.max(p.w, p.d) / 2) return false;
-    const q = rechteck(...g.bbox, g.h), f = (r[2] - r[0]) * (r[3] - r[1]);
-    return Math.max(0, Math.min(r[2], q[2]) - Math.max(r[0], q[0])) * Math.max(0, Math.min(r[3], q[3]) - Math.max(r[1], q[1])) > 0.03 * f;
-  });
-  const vorplatz = [];
-  const frei = (g) => !verdecktLaden(g) && !platz.some((p) => {
-    if (g.mx > p.x - 1 && g.mx < p.x + p.w + 1 && g.mz > p.z - 1 && g.mz < p.z + p.d + 1) return true;
-    const [a, b, c, d] = g.bbox, ux = Math.max(0, Math.min(c, p.x + p.w + 1) - Math.max(a, p.x - 1)), uz = Math.max(0, Math.min(d, p.z + p.d + 1) - Math.max(b, p.z - 1));
-    // Jedes Gebäude, das die Parzelle (mit 1 m Rand) berührt, entfällt; große Nachbarn schließt die Bauplatzsuche vorher aus
-    return ux > 0.3 && uz > 0.3;
-  });
+  const ueberdeckt = (g, p) => { const [a, b, c, d] = g.bbox, [h0, h1, h2, h3] = huelle(p, 1);
+    if (c < h0 || a > h2 || d < h1 || b > h3) return false;
+    if (aufParzelle(p, g.mx, g.mz, 1)) return true;
+    const ring = g.boden.length > 2 ? g.boden : null; let n = 0;
+    for (let x = a + 0.75; x < c; x += 1.5) for (let z = b + 0.75; z < d; z += 1.5) if (aufParzelle(p, x, z, 1) && (!ring || imPolygon(x, z, ring)) && ++n >= 3) return true;
+    return false; };
+  const entfernt = [];
+  const frei = (g) => !platz.some((p) => ueberdeckt(g, p));
   const [dx, dz, dr] = [def.detail?.[0] ?? def.kern[0], def.detail?.[1] ?? def.kern[1], def.detail?.[2] ?? 900];
   const coffee = K.stil === 'coffee';
   for (const g of K.gebaeude) {
@@ -978,25 +1014,17 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
     { const m = Math.min(g.bbox[2] - g.bbox[0], g.bbox[3] - g.bbox[1]); if ((m < 3 && g.h > 8) || (m < 6 && g.h > 12 && g.h > 3 * m)) continue; }   // Masten, Stelen, Treppentürme   // Masten, Stelen, Werbepylone: wirken als schwebende Scheiben
     if (coffee && (art === 'bauwerk' || g.flaeche < 50 || g.h < 2.5)) continue;   // Coffee: keine Kleinbauten, Masten, Schuppen
     if (frei(g)) gebaeudeBauen(B, S, coffee ? abstrahiert(g) : g, kern(g.mx, g.mz), Math.hypot(g.mx - (dx + ox), g.mz - (dz + oz)) < dr);
-    else if (I && !aufSpielhaus(g.mx, g.mz)) vorplatz.push(g);   // vor oder neben dem Laden entfernt: Vorplatz
+    else if (g.boden.length > 2) entfernt.push(g);
   }
-  // Vorplätze vor den Läden (dort entfernte Gebäude): Baumraster mit Bänken statt leerer Fläche
-  { const rv = rng(4711);
-    for (const g of vorplatz) {
-      const [a, b, c, d] = g.bbox;
-      for (let x = a + 4; x < c - 2; x += 9) for (let z = b + 4; z < d - 2; z += 9) {
-        if (aufSpielhaus(x, z) || amGleisBaum(x, z)) continue;
-        // nur auf der Grundfläche des entfernten Gebäudes, nie auf Fahrbahn, Gleis oder Bahnsteig
-        if (g.boden.length > 2 && !imPolygon(x, z, g.boden)) continue;
-        if ([[0, 0], [2.5, 0], [-2.5, 0], [0, 2.5], [0, -2.5]].some(([u, v]) => K.aufFahrbahn(x + u, z + v))) continue;
-        if (K.bahnsteige.some((r) => imPolygon(x, z, r))) continue;
-        if (rv() < 0.65) baumSetzen(I, rv() < 0.5 ? 'platane' : 'linde', x, 0, z, rv, 0.85 + rv() * 0.3);
-        else I.setze('bank', x, 0.12, z, rv() < 0.5 ? 0 : Math.PI / 2, 1);
-      }
-    } }
-  const nahLaden = (x, z) => platz.some((p) => x > p.x - 4 && x < p.x + p.w + 4 && z > p.z - 4 && z < p.z + p.d + 4);
-  // Vorplatz aus Pflaster rund um jedes Spielhaus (8 m): Kunden gehen nicht über Rasen zum Eingang
-  for (const p of platz) boden(B, [[p.x - 8, p.z - 8], [p.x + p.w + 8, p.z - 8], [p.x + p.w + 8, p.z + p.d + 8], [p.x - 8, p.z + p.d + 8]], HOEHE.platz + 0.004, bodenFarbe('platz'));
+  const nahLaden = (x, z) => platz.some((p) => aufParzelle(p, x, z, 4));
+  // Boden der Spielhäuser: Sockel aus Gehwegpflaster unter dem Haus (1,5 m Rand) und ein Streifen bis an die Straße, damit
+  // der Laden auf dem Gehweg steht statt auf Rasen; Grundflächen entfernter Gebäude daneben werden Pflaster (kein Baumraster).
+  for (const g of entfernt) boden(B, offen(g.boden.map((q) => [q[0], q[1]])), HOEHE.platz + 0.002, bodenFarbe('gehweg'));
+  for (const p of platz) {
+    boden(B, ecken(p, 1.5), HOEHE.platz + 0.004, bodenFarbe('gehweg'));
+    if (p.rot !== undefined || p.ecke === 'front') { const a = p.w / 2 + 1.5, b = p.d / 2;
+      boden(B, [inWelt(p, -a, b), inWelt(p, a, b), inWelt(p, a, b + 7), inWelt(p, -a, b + 7)], HOEHE.platz + 0.004, bodenFarbe('gehweg')); }
+  }
   for (const ring of K.bahnsteige) bahnsteig(B, ring);
   // Tunnelportale: Straße taucht in eine Unterführung ab (Stützwände, Portalbalken), statt stumpf zu enden
   for (const k of K.netz) for (const [bit, i0, i1] of [[1, 0, 1], [2, -1, -2]]) {
@@ -1015,7 +1043,7 @@ export function baueKartenstadt(S, scene, plan, bauer, o = {}) {
   let maxH = 20;
   if (!o.ohneHaeuser) for (const p of plan.parzellen) {
     if (p.leer) { hoehen.set(p.id, 20); continue; }
-    const { ergebnis, dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => bauerFuer(bauer, p.typ)(S, scene, p));
+    const { ergebnis, dachFlaechen: dach } = dachFlaechenBeimBau(S, p, () => gedreht(p, S, scene, (S2, G) => bauerFuer(bauer, p.typ)(S2, G, p)));
     dachFlaechen.push(...dach);
     const h = ergebnis?.hoehe ?? 12;
     hoehen.set(p.id, h); maxH = Math.max(maxH, h);

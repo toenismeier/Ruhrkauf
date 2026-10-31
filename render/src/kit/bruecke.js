@@ -17,6 +17,7 @@
 //   o.merk: Map für die Neueröffnung (siehe oben).
 //   o.hq: Funktion → aktuelles hqFuerGrafik-JSON; Parzellen 'slot:hq' (nach hq.js hqEinplanen) baut dann
 //   'slot:hq' aus hq.js (eigene Gruppe, Map hqs; aktualisiere() meldet 'hq:<id>', wenn sich Etagen ändern).
+import { gedreht, drehMatrix } from './drehung.js';
 import { THREE, Sammler, LOD, setzeLod } from './basis.js';
 import { echterBauer, fussabdruck } from './bauer.js';
 import { dachFlaechenBeimBau } from './stadt.js';
@@ -187,6 +188,7 @@ export function stadtEintragAusSpiel(s, name) {
 function imSlot(p, W, D) {
   const ecke = p.ecke ?? '+x+z';
   if (ecke === 'block') return { x: p.x + Math.max(0, (p.w - W) / 2), z: p.z + Math.max(0, (p.d - D) / 2) };
+  if (ecke === 'front') return { x: p.x + Math.max(0, (p.w - W) / 2), z: p.z + p.d - D };   // Kartenparzelle: bündig zur Straße
   return { x: ecke.includes('+x') ? p.x + p.w - W : p.x, z: ecke.includes('+z') ? p.z + p.d - D : p.z };
 }
 
@@ -267,7 +269,7 @@ export function spielBauer(s, o = {}) {
     setzeLod(o.hausLod ?? 'nah');
     let e, dachFlaechen;
     try {
-      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => bau(S, gruppe, p, h)));
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => gedreht(p, S, gruppe, (S2, G) => bau(S2, G, p, h))));
       S.bauen(gruppe);
     } finally { setzeLod(alt); }
     gruppe.traverse((m) => { m.userData.hausId = h.id; });
@@ -291,7 +293,7 @@ export function spielBauer(s, o = {}) {
     setzeLod(o.hausLod ?? 'nah');
     let e, dachFlaechen;
     try {
-      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => basis['slot:hq'](S, gruppe, hqDaten(p))));
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => gedreht(p, S, gruppe, (S2, G) => basis['slot:hq'](S2, G, hqDaten(p)))));
       S.bauen(gruppe);
     } finally { setzeLod(alt); }
     gruppe.traverse((m) => { m.userData.hqId = p.standort.id; });
@@ -340,7 +342,7 @@ export function spielBauer(s, o = {}) {
     setzeLod(o.hausLod ?? 'nah');
     let e, dachFlaechen;
     try {
-      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, x.p, () => wbBau(S, gruppe, x.p, wbVon(x.wbId))));
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, x.p, () => gedreht(x.p, S, gruppe, (S2, G) => wbBau(S2, G, x.p, wbVon(x.wbId)))));
       S.bauen(gruppe);
     }
     finally { setzeLod(alt); }
@@ -381,6 +383,7 @@ export function spielBauer(s, o = {}) {
         new THREE.Vector3(x, 0, z),
         new THREE.Vector3(x + f.w, hoehe, z + f.d)
       );
+      if (p.rot) bounds.applyMatrix4(drehMatrix(p));   // gedrehte Kartenparzelle: Hülle des gedrehten Hauses
       statischeHaeuser.set(haus.id, { haus, p, bounds, e });
     }
     return e;

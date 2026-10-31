@@ -71,6 +71,16 @@ for r in spuren_je_strasse.values():
         links += s[3]
     for w in r['ways']:
         spuren_je_weg.setdefault(w, (gesamt, verkehr))
+# Höchstens zwei Spuren je Straße (Ummo 31.10.2026): Gegenverkehr eine Spur je Richtung (Band 7 m), Einbahn eine Spur.
+# Die echte Breite bleibt für die Bauflucht (bebaubar) erhalten, damit Spielhäuser an der echten Häuserflucht stehen.
+spuren_echt = dict(spuren_je_weg)
+def _zwei_spuren(gesamt, verkehr):
+    if not verkehr: return gesamt, verkehr
+    if len({d for _, d in verkehr}) == 2:
+        g = min(gesamt, 7.0)
+        return g, [(round(g / 4, 2), max(verkehr)[1]), (round(-g / 4, 2), min(verkehr)[1])]
+    return min(gesamt, 4.5), [(0.0, verkehr[0][1])]
+spuren_je_weg = {w: _zwei_spuren(*v) for w, v in spuren_echt.items()}
 
 # ── Gemeinsame Flächen
 kern = Polygon([(MX + 520 * math.cos(a / 24 * 2 * math.pi), MZ + 520 * math.sin(a / 24 * 2 * math.pi)) for a in range(24)])
@@ -319,7 +329,10 @@ def boden_variante(name, schichten):
     log(f'[{name}] Straßen …')
     strassen, strassen_alle, zus = strassen_karte_baender() if name == 'karte' else strassen_coffee()
     # Gehweg mit geschlossenen Zwickeln: schmale Restspalten (< 9 m) zwischen parallelen Straßen werden Gehweg statt Streifenmuster
-    gehweg_aussen = strassen_alle.buffer(3.4 if name == 'karte' else 3.0, join_style=2).buffer(4.5, join_style=1).buffer(-4.5, join_style=1).simplify(0.3).buffer(0)
+    # Straßenraum in echter Breite: was die Spurkappung (höchstens zwei Spuren) an Fahrbahn wegnimmt, wird Gehweg, nicht Rasen
+    echtband = vereinigt([LineString(k['punkte']).buffer(min(max(spuren_echt.get(k['way'], (None, None))[0] or 0, 0), 20.0) / 2, cap_style=2, join_style=1)
+                          for k in netz if k['typ'] != 'fussgaenger' and im(k['punkte']) and len(k['punkte']) >= 2 and (spuren_echt.get(k['way'], (None, None))[0] or 0) > 0])
+    gehweg_aussen = vereinigt([strassen_alle, echtband.intersection(gebiet)]).buffer(3.4 if name == 'karte' else 3.0, join_style=2).buffer(4.5, join_style=1).buffer(-4.5, join_style=1).simplify(0.3).buffer(0)
     bord = strassen_alle.buffer(0.4, join_style=2).difference(strassen_alle)
     gehweg = gehweg_aussen.difference(strassen_alle).difference(bord).simplify(0.3).buffer(0)
     bord = bord.simplify(0.2).buffer(0)
@@ -568,7 +581,9 @@ for name in ('karte', 'coffee'):
 log('Bebaubar …')
 sperre_bau = vereinigt([geo_var['karte']['gehweg_aussen'], geo_var['coffee']['gehweg_aussen'], gleisflaeche.buffer(2)] +
                        flaechen_art.get('bahnsteig', []) + flaechen_art.get('bahngelaende', []) + flaechen_art.get('wasser', []) +
-                       [q for q in teile(gruen) if q.area > 2500])
+                       [q for q in teile(gruen) if q.area > 2500] +
+                       [LineString(k['punkte']).buffer(6.0 if k['typ'] == 'fussgaenger' else min(max(spuren_echt.get(k['way'], (None, None))[0] or (6.5 if k['typ'] == 'haupt' else 5.5), 5.0), 20.0) / 2 + 4.5)
+                        for k in netz if im(k['punkte']) and len(k['punkte']) >= 2])
 bebaubar = gebiet.difference(sperre_bau).simplify(0.8).buffer(0)
 bebaubar_out = [[P(list(q.exterior.coords))] + [P(list(i.coords)) for i in q.interiors] for q in teile(bebaubar) if q.area > 800]
 
@@ -712,8 +727,9 @@ for k in netz:
         gesamt = 6.5 if k['typ'] == 'haupt' else 5.5
         spuren = [(gesamt / 4, -1), (-gesamt / 4, 1)] if not k['einbahn'] else [(0, 1)]
     gesamt = min(max(gesamt or 0, 0), 14.0)
+    echt = 0 if k['typ'] == 'fussgaenger' else min(max(spuren_echt.get(k['way'], (None, None))[0] or gesamt, gesamt, 5.0), 20.0)   # echte Straßenbreite (Bauflucht)
     netz_out.append([TYP[k['typ']], round(gesamt * 10), 1 if k['einbahn'] else 0, kn(k['a']), kn(k['b']), P(k['punkte']),
-                     [v for o, d in spuren for v in (round(o * 10), d)], fuss_seiten(k, gesamt), (1 if k.get('mund_a') else 0) | (2 if k.get('mund_b') else 0)])
+                     [v for o, d in spuren for v in (round(o * 10), d)], fuss_seiten(k, gesamt), (1 if k.get('mund_a') else 0) | (2 if k.get('mund_b') else 0), round(echt * 10)])
 
 out = {
     'stadt': 'essen', 'lizenz': '© OpenStreetMap-Mitwirkende, ODbL; Geobasis NRW, dl-de/zero-2-0',

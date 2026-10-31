@@ -71,6 +71,7 @@ export function passendesHaus(slot, wunschId) {
 function imSlot(p, W, D) {
   const ecke = p.ecke ?? '+x+z';
   if (ecke === 'block') return { x: p.x + Math.max(0, (p.w - W) / 2), z: p.z + Math.max(0, (p.d - D) / 2) };
+  if (ecke === 'front') return { x: p.x + Math.max(0, (p.w - W) / 2), z: p.z + p.d - D };   // Kartenparzelle: bündig zur Straße
   return { x: ecke.includes('+x') ? p.x + p.w - W : p.x, z: ecke.includes('+z') ? p.z + p.d - D : p.z };
 }
 

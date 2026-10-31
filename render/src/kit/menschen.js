@@ -257,6 +257,10 @@ export function menschenFuer(S) {
     S._menschen = m;
     (S.nachBauen ??= []).push((ziel) => { S._menschen = null; return m.bauen(ziel); });
   }
+  // Gedrehte Parzelle (drehung.js): Figuren um die Parzellenmitte mitdrehen
+  const d = S._drehung;
+  if (d) { const m = S._menschen, e = d.M.elements;
+    return { setze: (x, y, z, winkel, r, o) => m.setze(e[0] * x + e[8] * z + e[12], y, e[2] * x + e[10] * z + e[14], winkel + d.p.rot, r, o), get anzahl() { return m.anzahl; } }; }
   return S._menschen;
 }
 

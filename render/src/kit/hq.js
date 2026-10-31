@@ -761,8 +761,8 @@ registriereSlots({
     if (!g) return { hoehe: 0 };
     const m = hqMasse(g);
     const ecke = p.ecke ?? '+x+z';
-    const x = ecke === 'block' ? p.x + (p.w - m.w) / 2 : ecke.includes('+x') ? p.x + p.w - m.w : p.x;
-    const z = ecke === 'block' ? p.z + (p.d - m.d) / 2 : ecke.includes('+z') ? p.z + p.d - m.d : p.z;
+    const x = ecke === 'block' || ecke === 'front' ? p.x + (p.w - m.w) / 2 : ecke.includes('+x') ? p.x + p.w - m.w : p.x;
+    const z = ecke === 'front' ? p.z + p.d - m.d : ecke === 'block' ? p.z + (p.d - m.d) / 2 : ecke.includes('+z') ? p.z + p.d - m.d : p.z;
     const e = hqGebaeude(S, scene, g, { x, z, angebot: !!p.standort.angebot });
     // Verbindungsbrücke zum Ensemble-Partner über die Querstraße (Glas, zwei Geschosse, Stahlrahmen)
     const br = p.standort.bruecke;
