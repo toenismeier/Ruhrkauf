@@ -1,4 +1,4 @@
-# Status aller Workstreams (Stand 25.10.2026)
+# Status aller Workstreams (Stand 31.10.2026)
 
 Legende: **abnahmefähig** = PR offen, GPT fertig, wartet auf Claudes lokale Prüfung und Merge · **in Arbeit** = Branch ohne PR, GPT arbeitet · **offen** = nicht gestartet · **gemergt** = in `main`.
 Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
@@ -9,7 +9,7 @@ Pflege: Claude schreibt diese Datei nach jedem Merge und jedem Start fort.
 | Q03 Stadt-Fingerabdruck | – | gemergt (#41) | Gate aktiv: 112 Referenzen (Chrome 130 wie CI); Städte jetzt über JS-Engines deterministisch (Mischen, `wurzelSumme`) |
 | Q02 Grafikqualität (Gleise, Oberleitung, Züge, Dächer, Startbild, Flächenvielfalt, Prüfregeln) | – | gemergt (#43) | Prüfregeln 112/112 Städte 0; Dreiecke in allen Städten weniger, Draw Calls 109 Städte weniger/gleich, 3 Städte +1/+2; Fingerabdrücke aller Städte neu (Dachaufbauten Warenhaus); Essen ohne Bahnsteige im Plan, Hbf mit Zügen kommt mit Q01 |
 | Maßstab Städte (220 Städte, Standortverteilung) | `feat/massstab-staedte` #31 | **gemergt 22.10. zusammen mit #71** | 220 Städte, Export 561 Häuser (nach Q08), Städte 0, Standortregeln 0, Kopien 0 (Familie und Fassade gemeinsam verteilt, Q21-Vielfalt eingebunden), Gestaltung 46 Städte mit je 1 Verstoß (vorher 47), 220 Fingerabdrücke neu |
-| Q01 Städte aus Kartendaten (Essen zuerst) | – | **Phase 1 gemergt 21.10.** (#48, 238c8df) | GPT-Stand (OSM-Klötze) von Claude ersetzt: Lage nach OSM, Bebauung im Kit-Raster (Hbf mit Gleisharfe, Kettwiger Straße, Markt, Limbecker Platz, Münster, Rathaus-Hochhaus, Start am Hbf); nur Essen-Fingerabdruck neu. **Wartet: Ummo beurteilt Essen auf dem iPhone, dann Phase 2** |
+| Q01 Städte aus Kartendaten (Essen zuerst) | – | **Phase 1 gemergt 21.10.** (#48, 238c8df) | GPT-Stand (OSM-Klötze) von Claude ersetzt: Lage nach OSM, Bebauung im Kit-Raster (Hbf mit Gleisharfe, Kettwiger Straße, Markt, Limbecker Platz, Münster, Rathaus-Hochhaus, Start am Hbf); nur Essen-Fingerabdruck neu. Danach Kartenweg (osm2streets, OSM, LoD2 NRW) auf `feat/pilot-osm-essen`: Coffee-Abstraktion und Kartentreue umschaltbar, Hbf mit Bahnsteigen und Zügen, iOS-Build auf eigenem macOS-Runner. **Branch nicht gemergt** (23 Commits vor, 147 hinter main, Stand 26.10.). **Wartet: Ummo beurteilt Essen auf dem iPhone, dann Phase 2** |
 | Maßstab Leistung (iPhone-Ziele, Ausgangswert Berlin, Spielstand 7,5 MB) | `feat/massstab-leistung` #71 | **gemergt 22.10.** | Claude: Sammelgeometrie mit Vertexfarben in 120-m-Raumzellen statt ein Mesh je Farbe (Bild unverändert). `pruef-massstab-leistung` 220/220, 0 über Limit. Spiel 390×844 gegen main: Berlin 548→247 Draw Calls / 3,80→1,51 Mio. Dreiecke, Essen 710→250 / 3,86→1,22, Gütersloh 698→271 / 2,40→1,25, Recklinghausen 961→327 / 2,58→1,26, Hamburg 690→225 / 4,66→1,78, München 461→257 / 4,33→1,44. GPT-Hebel 1 und 2 behalten, Hebel 3 und 4 zurückgenommen (kein Messgewinn, weniger Detail). Offen aus dem alten Auftrag: Stadtaufbauzeit, Woche-weiter-Neubau, Spielstand |
 | N07 Belebte Stadt (fließender Verkehr, Passanten) | – | gemergt | Bildrate mit/ohne Leben auf dem iPhone messen |
 | N06 Jahreszeiten (Weihnachtsdeko, Fassaden) | – | gemergt | – |
@@ -67,8 +67,31 @@ Aufträge `auftraege/wurf4/` (README mit Regeln und Daten). Reihenfolge: Q37 zue
 | Q39 Unterteile und Kleider | 50 neue Typen | **gemergt 27.10.** (#99, `feat/q39-referenz`, neu auf main nach Q38): 48 neue Typen in `sortiment/q39-unterteile.ts` (Faltenrock, Midirock kommen aus Q37, dort Teens/Young ergänzt), Zielgruppen wie Referenz-CSV, Preis am Median, Anlass für Party-/Festteile, Dirndl unter Tracht. Alle 48 `bildOffen` mit vorhandener Silhouette; Low-Rise-Jeans, Ballon-Jeans, Caprihose, Hotpants zeigen schon die B01-Silhouetten. Eigene q39-Bilder entfernt (nie auf main). Test `q39-sortiment.test.ts` (7), Q39 hängt hinter Q40. M7 identisch mit main, Engine und render npm test grün. |
 | Q40 Jacken, Schuhe, Wäsche | 45 neue Typen | **gemergt 27.10.** (#98, `feat/q40-referenz`): 45 neue Typen in `sortiment/q40-jacken-schuhe-waesche.ts` (16 Wäsche im Ast „Wäsche und Nachtwäsche“, 11 Jacken, 18 Schuhe), Zielgruppen wie Referenz-CSV (Best Ager außen vor), Preis am Median. Alle bildOffen mit vorhandener Silhouette (keine Kinderbindung); eigene q40-Bilder und Schuhzeichner-Erweiterungen entfernt. Anlass laut `anlass-zuordnung.csv`: Sakko (Abiball, Tanzschulball, Konfirmation, Feier), Sandalette und Sock-Boot (Abiball, Tanzschulball, Feier), Klebe-BH (Zubehör). Test `q40-sortiment.test.ts` (6); Q38-Reihenfolgetest und Q34-Leistentest auf bildOffen angepasst. M7 identisch mit main, Engine und render npm test grün |
 | Q41 Accessoires, Taschen, Schmuck, Beauty | 50 neue Typen | **gemergt 27.10.** (#115, `feat/q41-referenz`): 50 Typen in `sortiment/q41-accessoires.ts` (11 Taschen, 18 Schmuck, 20 Accessoires, 1 Beauty), Zielgruppen wie Referenz-CSV, Preis am Median, Anlass „Zubehör“ für 14 Typen, Muster je Typ nach Referenz. Alle 50 **bildOffen** mit vorhandener Silhouette (Baguette-Tasche auf `b01baguette`); eigene q41-Bilder verworfen, keine neuen Silhouetten. Test `q41-sortiment.test.ts` (7); `q38-sortiment.test.ts` prüft die Reihenfolge als Q38-Block statt Listenende. M7 identisch mit main (285/285), CI grün. Bilder aus B01–B30 |
-| Bilder neu (B01–B30) | Ummo 25.10.: Q39-Bilder nicht abgenommen. Typen ja, Bilder neu nah an der Referenz, Pakete à 10, B01 = Stilpaket, Merge nur nach Ummos Ok (`wurf4/bilder-neu.md`, `daten/bildpakete.csv`). Verfahren entschieden: Bildmodell (B) + vtracer auf B. B-Bilder B02–B30 fertig (268, privat `hartwig-ref-p01-shirts-tops/bildpakete/`) | B01 von Ummo abgenommen und gemergt (PR #100, 26.10.), Stilreferenz. B01-Nachtrag gemergt (PR #101, 26.10.): Ballon-Jeans, Low-Rise-Jeans, Baby-Tee, Caprihose aus nachgeschärftem B, Strickpullover glatt mit Rippe an Kragen/Bündchen/Saum. Werkzeuge privat in `stiltest-b01/SVG/werkzeug/`. B02–B30 in 5 Chats. **B02–B30 gemergt 27.10.** (`feat/bildpakete-wurf4`, Ummo: „Produktbilder mergen, Model getrennt“): 176 Q38–Q41-Typen mit eigenem Bild freigegeben, 15 bleiben bildOffen (`sortiment/bilder-wurf4.ts` BILD_REST, Nachlauf). Model-Befund offen (O10) |
-| Q42 Seltene Typen | 83 neue Typen, 35 Varianten (unter 3 Artikel, Ummo 25.10.); Start nach Merge Q37–Q41 | offen |
+| Bilder neu (B01–B30) | Ummo 25.10.: Q39-Bilder nicht abgenommen. Typen ja, Bilder neu nah an der Referenz, Pakete à 10, B01 = Stilpaket, Merge nur nach Ummos Ok (`wurf4/bilder-neu.md`, `daten/bildpakete.csv`). Verfahren entschieden: Bildmodell (B) + vtracer auf B. B-Bilder B02–B30 fertig (268, privat `hartwig-ref-p01-shirts-tops/bildpakete/`) | B01 von Ummo abgenommen und gemergt (PR #100, 26.10.), Stilreferenz. B01-Nachtrag gemergt (PR #101, 26.10.): Ballon-Jeans, Low-Rise-Jeans, Baby-Tee, Caprihose aus nachgeschärftem B, Strickpullover glatt mit Rippe an Kragen/Bündchen/Saum. Werkzeuge privat in `stiltest-b01/SVG/werkzeug/`. B02–B30 in 5 Chats. **B02–B30 gemergt 27.10.** (`feat/bildpakete-wurf4`, Ummo: „Produktbilder mergen, Model getrennt“): 176 Q38–Q41-Typen mit eigenem Bild freigegeben, 15 bleiben bildOffen (`sortiment/bilder-wurf4.ts` BILD_REST, Nachlauf). Model-Befund offen (O10). 15 Typen bleiben bildOffen (BILD_REST) |
+| Q42 Seltene Typen | 83 neue Typen, 35 Varianten (unter 3 Artikel, Ummo 25.10.); Start nach Merge Q37–Q41 | **startklar** (Q37–Q41 gemergt), nicht gestartet |
+
+## Oberfläche und Look nach Coffee Inc 2 (E47, 24. bis 25.10.)
+| Workstream | PR | Status |
+|---|---|---|
+| Stadtmenschen (vorgerenderte Figuren) | #89 | gemergt 23.10. |
+| P1 Schärfe (iPhone mit Kantenglättung, Pixeldichte 2) | #90 | gemergt 24.10. |
+| P2 Oberfläche (eine Stildatei `hartwig.css`, Maße aus Coffee, Figtree) | #91 | gemergt 24.10. |
+| P3 Stadt (Konturen, Vertex-AO, Fenster als Textur, Kamera näher) | – | **offen**, nicht gestartet |
+| P4 Illustrationen (64 isometrische Motive) | #92 | gemergt 25.10. |
+| Finanzen, Vorstand, Wochenergebnis wie Coffee | #93 | gemergt 25.10. |
+| Kopfbilder je Abteilung, Mehr-Reiter, Haus in Orange | #94 | gemergt 25.10. |
+| Zentrale: Gebäude- und Etagenseite, Kündigen mit Rückfrage | #96 | gemergt 25.10. |
+| Bibliotheken und Projekt-Skills vormerken (`auftraege/BIBLIOTHEKEN.md`) | #114 | gemergt 26.10. (noch ohne Import) |
+
+## Eigenmarke: Models (O10)
+Festlegungen und Freigabestand stehen im Projektdokument MODEL-WUENSCHE (privat, nicht im Repo).
+| Punkt | Status |
+|---|---|
+| Model-Bilder Paket B01–B03 | `feat/model-bilder-b01-b03` (1 Commit), **nicht gemergt**: Model-Befund offen (Sitz, Cropped, Bundhöhe) |
+| Referenzsortiment Teens und Young Adults (1.033 Produkte) | Liste geliefert 28.10., **wartet auf Ummos Freigabe**; danach Freigabe 2 Freisteller (7 neue) |
+| Hartwig Sport | Freigabe 1 und 2 erledigt (91 Produkte); Model-Pilot gestoppt, neutrale Basisfiguren **warten auf Freigabe** |
+| Weg ohne Bildmodell (Figur und Kleidung aus Code) | Vorschlag 30.10., Pilot mit 3 Produkten, **nicht entschieden** |
+| Wäsche, Schuhe, Baguette-Tasche | eigener Weg nötig, offen |
 
 ## Operatives Paket
 | Workstream | Branch / PR | Status | Nächster Schritt |
@@ -87,14 +110,16 @@ Aufträge `auftraege/wurf4/` (README mit Regeln und Daten). Reihenfolge: Q37 zue
 | iOS-Hülle, TestFlight-Wurf 1 | gemergt, läuft auf Ummos iPhone |
 | Automatische Auslieferung (Push auf main → Update, Hülle geändert → TestFlight) | verbunden (Base directory `/app`); läuft im Build-Zug Di/Fr 18 Uhr, außer der Reihe nur von Hand |
 | GitHub-Billing für CI | erledigt 20.10.; CI auf main grün |
-| `feat/iphone-playtest-ci` (Stand 18.10.) | veraltet, ohne PR; nach Merge der Nice-to-haves prüfen und verwerfen |
+| `feat/iphone-playtest-ci` (Stand 18.10.) | veraltet, ohne PR, **verwerfen** |
+| Auslieferung | immer über TestFlight (E44), Claude stößt per `ausliefern.yml` an |
 
-## Reihenfolge, sobald der Nice-Chat fertig ist
-1. Q03 Fingerabdruck mergen (Gate scharf).
-2. Q04 und Q05 prüfen und mergen.
-3. Q02 prüfen (Rendern, Leistung, Fingerabdrücke nur für geänderte Städte neu).
-4. ~~O09 E-Commerce (#46) und Q06 Marktbeobachtung (#47)~~ gemergt 21.10.
-5. ~~#7 Maßstab Engine~~ gemergt 21.10. #23 Oberfläche gemergt 21.10., Q07 gestartet. Neu: fünf Premiumhäuser (E29, eigener Auftrag).
-5. Maßstab Städte fertig und mergen; danach Q01 Essen starten.
-6. ~~Engine-Formate~~ gemergt 21.10. (#50); ~~Bot D~~ gemergt 22.10. (#75), M7 bestanden.
-7. Danach Build-Zug: Spiel einpacken, Update aufs iPhone, Messung.
+## Offen (Stand 31.10.2026)
+1. Q42 Seltene Typen starten; 15 bildOffen-Typen aus Wurf 4 nachziehen.
+2. Q01 Essen: Ummo beurteilt Essen auf dem iPhone; `feat/pilot-osm-essen` auf main bringen; dann Phase 2.
+3. Maßstab Leistung, Rest: Stadtaufbauzeit, Woche-weiter-Neubau, Spielstand; Bildrate mit/ohne N07 auf dem iPhone messen.
+4. Engine: „Bot D mittel ≥ Bot T“ nicht erfüllt (aus Q35), Bot-D-Schließregel als eigener Auftrag (nicht angelegt).
+5. P3 Stadt (E47) nicht gestartet.
+6. Bilder, Kleinpunkte: Steppung und Poncho in 64 px (Q34), Model-Sets und Rucksack-Platz (Q28-Bedarf an Q27).
+7. Eigenmarke Models: siehe Abschnitt oben.
+8. Ummo beurteilt auf dem iPhone: Oberfläche (Q14, Q30–Q32, P2), Kontaktbögen Q33/Q34.
+9. Unbestätigte Claude-Vorschläge: Namen der Premiumhäuser P003–P005, Startmonate Jan/Apr/Jul/Okt (Q07).
