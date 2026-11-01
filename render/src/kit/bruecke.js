@@ -33,6 +33,7 @@ import { wettbewerbFuerGrafik } from '../../../engine/src/wettbewerb.ts';
 import { hatAbholstation } from '../../../engine/src/ecommerce.ts';
 import { abholstation } from './abholstation.js';
 import { technikAufDach } from './umbau-aussen.js';
+import { fensterPilotAktiv, schaufensterInnen } from './fenster-innen.js';
 import schwesterHaeuser from '../../haeuser-schwester.json';
 import exportHaeuser from '../../haeuser.json';
 // Maßstab: Fassadenvariante aus dem Export (fassaden-verteilen.js, keine Kopien unter 50 km), für alle Spielstände gleich
@@ -228,6 +229,7 @@ export function spielBauer(s, o = {}) {
     return zust.get(h.id);
   };
 
+  let fensterPilot = 0; // E51 Pilot: höchstens ein Haus je Stadt mit Fenstern nach three-fenestra
   const baueWarenhaus = (S, scene, p, h) => {
     const variant = wahl.get(h.id);
     const f = fussabdruck(h, variant?.familie);
@@ -240,6 +242,10 @@ export function spielBauer(s, o = {}) {
     const res=nutzer ? nachnutzung(S, scene, roh, nutzer, { x, z, familie: fam })
       : warenhaus(S, scene, roh, { x, z, familie: fam, ...bauZustand(zustand(h)) });
     if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe,dach:res?.dach,platz:res?.platz});
+    if (!nutzer && fensterPilotAktiv() && !fensterPilot && res?.fensterOG?.length >= 3) {
+      fensterPilot++;
+      schaufensterInnen(scene, res.koerper, res.fensterOG, { sauber: (s?.umbau?.fassade?.[h.id] ?? 1) === 2 || (h.substanz ?? 60) >= 75, seed: h.id.length * 31 });
+    }
     if (!nutzer && hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d });
     return res;
   };

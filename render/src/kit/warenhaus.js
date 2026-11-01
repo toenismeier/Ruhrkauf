@@ -1989,6 +1989,17 @@ export function warenhaus(S, scene, haus, opt = {}) {
   K.saniert = opt.saniert ?? haus.saniert ?? ((haus.baujahr ?? 0) >= 1990 || (haus.substanz ?? 100) >= 65);
   K.p = (c) => K.c(K.saniert ? c : '#' + new THREE.Color(c).offsetHSL(0, -0.04, -0.035).getHexString());
   K.seiten = seitenVon(S, K.x0, K.z0, K.w, K.d);
+  // E51 Pilot Fenster: Glasflächen der Obergeschosse mitschreiben (für three-fenestra), ohne die Geometrie zu ändern.
+  K.glasFenster = [];
+  const glasFarben = new Set([GLAS, GLAS_HELL, '#506d80', '#557286'].flatMap((c) => [c, K.c(c), K.p(c)]).map((c) => c.toLowerCase()));
+  for (const sd of K.seiten) {
+    const q0 = sd.q.bind(sd);
+    sd.q = (u0, u1, y0, y1, t0, t1, f) => {
+      if (typeof f === 'string' && glasFarben.has(f.toLowerCase()) && Math.min(y0, y1) > EG + 0.2 && Math.abs(t1 - t0) <= 0.2 && Math.abs(u1 - u0) > 0.6 && Math.abs(y1 - y0) > 0.8)
+        K.glasFenster.push({ seite: sd.seite, a: Math.min(u0, u1), b: Math.max(u0, u1), y0: Math.min(y0, y1), y1: Math.max(y0, y1), t: Math.max(t0, t1) - 0.02 });
+      return q0(u0, u1, y0, y1, t0, t1, f);
+    };
+  }
   const egG = flaechen.filter((f) => f.etage === 0 && f.konzept !== 'leer').sort((a, b) => b.qm - a.qm).map((f) => f.gruppe);
   K.gruppenEG = egG.length ? egG : (fam === 7 ? ['sporttextil', 'sportschuhe', 'rad', 'outdoor'] : ['damen', 'beauty', 'accessoires', 'herren']);
   // EG-Mieter (eigene Läden mit Eingang); Nutzlänge grob vorab (Eckbauten kürzen die Fassade)
@@ -2028,5 +2039,5 @@ export function warenhaus(S, scene, haus, opt = {}) {
   const dek = zustandsDekor(S, scene, koerper, Z, { pylon: opt.pylon, passanten: opt.passanten, abrissSeite: opt.abrissSeite });
   hoehe = Math.max(hoehe, dek.hoehe);
   if (opt.vorplatz !== false) hartwigVorplatz(S, koerper, Z, rng(`${haus.id}/vorplatz`));
-  return { hoehe, dach: K.traufe ?? K.Hw, w: K.w + M, d: K.d, familie: fam, teile: S.anzahl - start, status: Z.status, pinAnker: dek.pinAnker };
+  return { hoehe, dach: K.traufe ?? K.Hw, fensterEG: K.fensterEG, fensterOG: K.glasFenster, koerper: { x: K.x0, z: K.z0, w: K.w, d: K.d }, w: K.w + M, d: K.d, familie: fam, teile: S.anzahl - start, status: Z.status, pinAnker: dek.pinAnker };
 }

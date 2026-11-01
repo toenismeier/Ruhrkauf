@@ -16,3 +16,8 @@ In `render/package.json` aufgenommen, noch von keinem Code genutzt. Der Spiel-Bu
 Werkzeuge und Referenz-Code auf Ummos Rechner: `C:\Users\Ummo\Desktop\Projekte\WH\werkzeuge` (bin: OSM2World, citygml-tools, gltfpack; referenz: tokyo, streets-gl, traffic-simulation-de, three-fenestra, KayKit-Pakete).
 
 Lizenz traffic-simulation-de vor Übernahme von Code prüfen. Kaufassets (z. B. Synty) nie ins öffentliche Repo.
+
+## Im Einsatz (01.11.2026, E51)
+- `three-fenestra`: Pilot Fenster der Obergeschosse (`render/src/kit/fenster-innen.js`), Räume im Baukastenstil auf Canvas gezeichnet, Glas trüb vor und sauber nach einer Fassadenerneuerung. Ein Haus je Stadt, eine InstancedMesh (1 Draw Call), nur im Spiel (`fensterPilotAn`), Glasflächen aus `warenhaus.js` (`fensterOG`). Erfasst nur Fensterbänder in Glasfarbe (z. B. W012); Lamellen- und Vorhangfassaden noch nicht. iPhone-Messung durch Ummo offen.
+- KayKit Furniture Bits (CC0, Kay Lousberg): 22 Modelle umgewandelt (`render/scripts/kaykit/umwandeln.py` → `render/src/kit/moebel/kaykit-daten.js`, 156 KB), flach eingefärbt nach Rollen (`kaykit.js`). Eingesetzt in Living (Sofa-, Bett-, Essinsel) und Zentrale (Lounge, Gesprächsecke, Empfang, Vorstandsempfang). Lizenz `render/src/kit/moebel/KAYKIT-LIZENZ.txt`. Kataloge `kaykit`, `kaykit-einsatz`.
+- Spiel-Bündel +200 KB (26,46 → 26,66 MB).

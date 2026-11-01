@@ -14,6 +14,7 @@
 //   ABT, ABT_NAMEN, abteilungsArt(f), DAMEN_MARKEN, BEAUTY_MARKEN, eigenmarkeAlsMarke(em)
 //   Eigenmarken-Shop: o.eigenmarke bzw. f.marke = { eigenmarke: true, name, farbe, anteil } (siehe flaeche, Schritt 0)
 import { THREE, rng, zw, waehle, dunkler, heller, textTextur } from './basis.js';
+import { kaykit } from './moebel/kaykit.js';
 import {
   RASTER, WANDHOEHE, GLAS, lokal, boden, figur, haengeschild, wandschild, kassentresen, rueckwand, vorbereiten, puppe, cafeEcke,
   MIETER,
@@ -505,10 +506,39 @@ function kissenInsel(L, r, d, ctx) {
   for (let j = 0; j < 2; j++) for (let k = 0; k < 3; k++) L.box(0.36, 0.34, 0.14, 0.55 + k * 0.36, 0.9 + j * 0.32, 0.8, bunt(r, ['#b5745a', '#5f7f8c', '#e9b44c', '#7a8a5c', '#d65a6f', '#f2e6d0', '#9a8fbf']), zw(r, -0.1, 0.1));
   I.pouf(L, -0.9, 0.9, '#7a8a5c');
 }
+// Wohnmöbel aus KayKit (CC0), Stoffe und Hölzer aus der Living-Palette; Grundfläche wie bisher 3,4 × 3,2 m.
+const STOFF_LIVING = ['#5f7f8c', '#b5745a', '#7a8a5c', '#9a8fbf', '#d3b48a', '#4b5a6b'];
+const HOLZ_LIVING = ['#b98d61', '#d8bf98', '#7b5a40'];
+function kkSofaInsel(L, r, d) {
+  const stoff = bunt(r, STOFF_LIVING), holz = bunt(r, HOLZ_LIVING), kissen = bunt(r, ['#e9b44c', '#f2e6d0', '#d65a6f', '#5f7f8c']);
+  kaykit(L, r() < 0.5 ? 'rug_rectangle_A' : 'rug_rectangle_stripes_A', 0, 0, 0.15, 0, { s: 0.95, farben: { kissen: bunt(r, ['#e6d9c3', '#c9b8a6', '#d8dfe4', '#e2c9b8']) } });
+  kaykit(L, r() < 0.6 ? 'couch_pillows' : 'couch', -0.15, 0, -0.85, 0, { farben: { stoff, kissen: stoff, holz } });
+  kaykit(L, 'table_low', -0.15, 0, 0.35, 0, { s: 0.55, farben: { holz } });
+  kaykit(L, 'cactus_medium_A', -0.45, 0.28, 0.35, 0, { s: 0.35 });
+  if (d > 0.4) kaykit(L, 'book_set', 0.15, 0.28, 0.4, 0.3, { s: 0.6 });
+  kaykit(L, 'armchair_pillows', 1.25, 0, 0.55, -Math.PI / 2, { s: 0.65, farben: { stoff: kissen === stoff ? '#f2e6d0' : stoff, kissen: stoff, holz } });
+  kaykit(L, 'lamp_standing', -1.45, 0, -0.95, 0, { s: 0.6, farben: { schirm: bunt(r, ['#f6e8b0', '#ffffff', '#e9b44c']) } });
+}
+function kkBettInsel(L, r, d) {
+  const stoff = bunt(r, ['#5f7f8c', '#b5745a', '#7a8a5c', '#9a8fbf', '#d8dfe4']), holz = bunt(r, HOLZ_LIVING);
+  kaykit(L, r() < 0.5 ? 'bed_double_A' : 'bed_double_B', 0, 0, -0.1, 0, { s: 0.72, farben: { stoff, holz } });
+  for (const x of [-1.42, 1.42]) { L.box(0.48, 0.48, 0.42, x, 0, -0.95, holz); kaykit(L, 'lamp_table', x, 0.48, -0.95, 0, { s: 0.42, farben: { stoff: '#2a2d31' } }); }
+}
+function kkEsstisch(L, r, d, ctx) {
+  const holz = bunt(r, HOLZ_LIVING), stoff = bunt(r, STOFF_LIVING);
+  kaykit(L, 'table_medium', 0, 0, 0, 0, { s: 0.72, farben: { holz } });
+  for (const [x, z, ry] of [[-0.45, -0.95, 0], [0.45, -0.95, 0], [-0.45, 0.95, Math.PI], [0.45, 0.95, Math.PI]]) kaykit(L, 'chair_A', x, 0, z, ry, { s: 0.85, farben: { holz, stoff } });
+  geschirrAufTischLiving(L, r, d);
+  leuchtenhimmel(L, 2.0, 1.0, r, d, 2.3);
+}
+function geschirrAufTischLiving(L, r, d) {
+  for (const [x, z] of [[-0.4, -0.3], [0.4, -0.3], [-0.4, 0.3], [0.4, 0.3]]) L.zyl(0.14, 0.14, 0.03, x, 0.72, z, '#ffffff', 10);
+  if (d > 0.4) L.zyl(0.08, 0.06, 0.25, 0, 0.72, 0, '#5f8f7a', 8);
+}
 const livingInseln = [
-  (L, r, d, ctx) => { I.sofaInsel(L, r, d); leuchtenhimmel(L, 2.4, 1.4, r, d, 2.6); },
-  (L, r, d, ctx) => I.bettInsel(L, r, d),
-  (L, r, d, ctx) => esstischLiving(L, r, d, ctx),
+  (L, r, d, ctx) => { kkSofaInsel(L, r, d); leuchtenhimmel(L, 2.4, 1.4, r, d, 2.6); },
+  (L, r, d, ctx) => kkBettInsel(L, r, d),
+  (L, r, d, ctx) => kkEsstisch(L, r, d, ctx),
   (L, r, d, ctx) => kissenInsel(L, r, d, ctx),
   (L, r, d, ctx) => { lampenTisch(L, r, d, ctx); leuchtenhimmel(L, 2.6, 1.2, r, d, 2.7); },
 ];

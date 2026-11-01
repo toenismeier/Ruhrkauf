@@ -14,6 +14,7 @@ import { RASTER } from './kit/innen.js';
 import { hqEtage, hqSitzungssaal, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './kit/hq.js';
 import { warenhaus } from './kit/warenhaus.js';
 import { technikAufDach } from './kit/umbau-aussen.js';
+import { fensterPilotAn, schaufensterInnen } from './kit/fenster-innen.js';
 import { premiumhaus } from './kit/premium.js';
 import { sporthaus } from './kit/sporthaus.js';
 import { schwesterhaus } from './kit/schwesterhaus.js';
@@ -243,6 +244,7 @@ const leben = lebenModul({ canvas, scene: () => scene, camera: () => cam, K: () 
   zeichnen, sparsam });
 // Stadtmenschen als vorgerenderte Figuren; sobald der Atlas geladen ist, einmal neu zeichnen.
 menschenAn(true);
+fensterPilotAn(true); // E51 Pilot three-fenestra: ein Haus je Stadt, iPhone-Messung
 menschenNachLaden(() => { if (scene && cam) zeichnen(); });
 const lebenEinstellung = param.get('leben') ?? (() => { try { return localStorage.getItem('ruhrkauf.leben'); } catch { return null; } })();
 if (['aus', 'wenig', 'voll'].includes(lebenEinstellung)) leben.setzen(lebenEinstellung);
@@ -1231,6 +1233,7 @@ function umbauBild(projektId, wann) {
       // Nachher mit Neueröffnungs-Dekor (gibt es für alle Formate), damit die Erneuerung auch bei Premium und FUNDUS sichtbar ist.
       const res = aussen(S, sc, haus, { x: 0, z: 0, passanten: false, vorplatz: false, ...(wann === 'nachher' ? { status: 'neueroeffnung' } : {}) });
       if (wann === 'nachher') technikAufDach(S, haus, { x: 0, z: 0, w: res.w, d: res.d, hoehe: res.hoehe, dach: res.dach, platz: res.platz });
+      if (res.fensterOG?.length) schaufensterInnen(sc, res.koerper, res.fensterOG, { sauber: wann === 'nachher', seed: h.id.length * 31 });
       return { box: new THREE.Box3(new THREE.Vector3(-4, -1, -4), new THREE.Vector3(res.w + 8, Math.max(res.hoehe, res.dach ?? 0) + 4, res.d + 8)) };
     }, 360, 260).url;
   } else {
@@ -1695,7 +1698,7 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').hidden = true;
 
-window.spiel = { speicherDiagnose, grafikNachziehen: () => grafikNachziehen(), oeffneUmbauProjekt: (id) => oeffneModul(um, null, 0, id), oeffneModernisierung: () => oeffneModul(um), meldung, ecommerce: ec, oeffneEcommerce: (...a) => oeffneModul(ec, ...a), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { speicherDiagnose, grafikNachziehen: () => grafikNachziehen(), get scene() { return scene; }, oeffneUmbauProjekt: (id) => oeffneModul(um, null, 0, id), oeffneModernisierung: () => oeffneModul(um), meldung, ecommerce: ec, oeffneEcommerce: (...a) => oeffneModul(ec, ...a), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
   kameraZustand: () => ({ x: Math.round(K.x), z: Math.round(K.z), halb: +K.halb.toFixed(1) }), kameraHaus: hausKameraMessung, kameraAuf: (x, z, halb) => { K.x = x; K.z = z; K.halb = halb ?? K.halb; kameraSetzen(); leben.kamera(); zeichnen(); }, get plan() { return plan; }, menschenStatus: () => { let gruppen = 0, figuren = 0; scene?.traverse((m) => { if (m.userData?.menschen) { gruppen++; figuren += m.geometry.instanceCount; } }); return { gruppen, figuren, info: { ...ren.info.render } }; }, // lesender Pixelabgleich für den Mobil-Smoketest
   leben,
