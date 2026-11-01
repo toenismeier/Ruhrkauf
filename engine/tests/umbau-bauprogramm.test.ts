@@ -63,3 +63,44 @@ describe('E48 Bauprogramm', () => {
     expect(b.cash).toBe(a.cash);
   });
 });
+
+describe('E49 Wirkung von Alter, Fristen und Gewerken', () => {
+  test('Erstes Spieljahr neutral, danach kosten alte Möbel Kaufquote; Möbel neu holt sie zurück', () => {
+    const s = neuesSpiel(1);
+    const h = s.haeuser.find((x) => x.status === 'offen' && x.etagen.some((n) => x.etagenBau![n].moebelGeneration === 1))!;
+    const nr = h.etagen.find((n) => h.etagenBau![n].moebelGeneration === 1)!;
+    s.woche = 52; wocheAbspielen(s);
+    expect(h.etagenBau![nr].malusMoebel ?? 0).toBeGreaterThan(0);
+    for (const n of h.etagen) h.etagenBau![n].malusMoebel = 0.03;
+    const vor = gewerkSchaetzung(s, h.id, nr, 'moebel')!.plusJahr;
+    for (const n of h.etagen) h.etagenBau![n].malusMoebel = 0;
+    expect(vor).toBeGreaterThan(gewerkSchaetzung(s, h.id, nr, 'moebel')!.plusJahr);
+    h.etagenBau![nr].malusMoebel = 0.03;
+    expect(fuehreAus(s, { typ: 'umbauPlanen', haus: h.id, etage: nr, stufe: 'ladenbau', gewerk: 'moebel' }).ok).toBe(true);
+    const p = s.umbau!.projekte.at(-1)!;
+    for (let i = 0; i < 14 && p.status === 'laufend'; i++) wocheAbspielen(s);
+    expect(h.etagenBau![nr].malusMoebel).toBe(0);
+  });
+
+  test('Häuser vor 1975 haben Fristen ab dem zweiten Jahr; Vorlage beauftragt Brandschutz, versäumter Aufzug legt still', () => {
+    const s = neuesSpiel(1);
+    const alt = s.haeuser.filter((x) => x.status === 'offen' && x.baujahr < 1975);
+    expect(alt.length).toBeGreaterThan(0);
+    for (const h of alt) for (const n of h.etagen) expect(h.etagenBau![n].pflichten.brandschutz).toBeGreaterThanOrEqual(66);
+    const h = alt[0];
+    for (const n of h.etagen) h.etagenBau![n].pflichten.brandschutz = s.woche + 12;
+    wocheAbspielen(s);
+    const v = s.entscheidungen.find((e) => e.typ === 'organisation_vorlage' && String(e.daten.aktion).includes('pflichtBauen') && String(e.daten.aktion).includes(h.id));
+    const delegiert = s.umbau!.projekte.some((p) => p.haus === h.id && p.gewerk === 'brandschutz');
+    expect(!!v || delegiert).toBe(true);
+    if (!delegiert) expect(fuehreAus(s, { typ: 'pflichtBauen', haus: h.id, pflicht: 'brandschutz' }).ok).toBe(true);
+    for (let i = 0; i < 12; i++) wocheAbspielen(s);
+    expect(h.etagen.every((n) => h.etagenBau![n].pflichten.brandschutz > s.woche)).toBe(true);
+    expect(h.etagen.every((n) => !h.etagenBau![n].gesperrt)).toBe(true);
+    // Aufzug versäumen: obere Etagen werden schlechter erreichbar
+    const h2 = alt.find((x) => x.etagen.some((n) => n >= 1) && x.id !== h.id)!;
+    for (const n of h2.etagen) h2.etagenBau![n].pflichten.aufzug = s.woche - 1;
+    wocheAbspielen(s);
+    expect(h2.etagen.every((n) => h2.etagenBau![n].aufzugStill)).toBe(true);
+  });
+});

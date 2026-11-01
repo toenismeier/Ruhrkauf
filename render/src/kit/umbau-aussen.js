@@ -1,11 +1,12 @@
 // O08 Umbau: Technikaufbauten auf modernisierten Dächern, ohne Änderung der Baukörper.
 export function technikAufDach(S, h, m) {
   if (!h.etagenBau || !m || !(m.hoehe>0)) return;
+  if (m.dach>0) m = { ...m, hoehe: m.dach };
   const etagen=Object.values(h.etagenBau);
   const aufgeruestet=etagen.some(e=>e.technik?.klima===2 && e.klimaModernisiert===true);
   if (!aufgeruestet) return;
   // Vorn rechts auf dem Hauptdach: dort stehen keine Aufbauten (Penthouse, Technikzentrale hinten links).
-  const {x,z,w,d,hoehe}=m, cx=x+w*0.62,cz=z+d*0.78;
+  const {x,z,w,d,hoehe}=m, [pu,pv]=m.platz??[0.62,0.78], cx=x+w*pu,cz=z+d*pv;
   for (let i=0;i<Math.min(3,Math.ceil(etagen.length/2));i++) {
     const dx=i*3.5;
     S.box(2.4,1.45,2.0,cx+dx,hoehe+0.73,cz,'#c0c9ce');
@@ -14,3 +15,4 @@ export function technikAufDach(S, h, m) {
     S.box(1.5,0.1,0.15,cx+dx,hoehe+0.9,cz+1.05,'#303d49');
   }
 }
+

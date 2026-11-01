@@ -58,7 +58,12 @@ export function umbauModul(ctx) {
     x += K.abschnitt('Etagenschnitt', 'Etage antippen');
     x += etagenSchnitt(etagen);
     x += K.liste(etagen.map((q) => K.zeile({ was: ETAGE_LANG(q.etage) + (q.etage === ui.etage ? ' · gewählt' : ''),
-      unter: GRUPPEN.map(([g, n]) => n + ' ' + ZUSTAND[q.zustand[g]]).join(' · ') + (q.baustelle ? ' · <span class="hw-achtung">Baustelle bis ' + kw(q.baustelle.ende) + '</span>' : q.gesperrt ? ' · <span class="hw-schlecht">behördlich gesperrt</span>' : ''),
+      unter: GRUPPEN.map(([g, n]) => n + ' ' + ZUSTAND[q.zustand[g]]).join(' · ')
+        + (q.malus > 0 ? ' · <span class="hw-schlecht">Kaufquote −' + prozent(q.malus) + '</span>' : '')
+        + (q.baustelle ? ' · <span class="hw-achtung">Baustelle bis ' + kw(q.baustelle.ende) + '</span>' : q.gesperrt ? ' · <span class="hw-schlecht">behördlich gesperrt</span>' : '')
+        + (q.aufzugStill ? ' · <span class="hw-schlecht">Aufzug stillgelegt</span>' : '')
+        + (!q.gesperrt && q.fristBrandschutz - s().woche < 52 ? ' · <span class="hw-achtung">Brandschutz bis ' + kw(q.fristBrandschutz) + '</span>' : '')
+        + (!q.aufzugStill && q.fristAufzug - s().woche < 52 ? ' · <span class="hw-achtung">Aufzugsprüfung bis ' + kw(q.fristAufzug) + '</span>' : ''),
       wert: q.substanz + ' / 100', wertUnter: 'Substanz', ton: q.substanz < 35 ? 'schlecht' : q.substanz < 55 ? 'achtung' : '', tippbar: true,
       attr: 'data-umbau="etage" data-etage="' + q.etage + '" aria-label="' + esc(ETAGE_LANG(q.etage)) + ' wählen"' })));
     x += K.abschnitt('Gewerk', ETAGE_LANG(ui.etage));
@@ -82,11 +87,13 @@ export function umbauModul(ctx) {
   function bestand() {
     const u = E.bestandUebersicht(s()), g = u.gesamt;
     const schlechtM = g.schlecht.moebel, schlechtT = g.schlecht.technik;
-    const sp = K.sprecher({ text: schlechtM + ' % der Etagen haben Möbel aus den 90ern, ' + schlechtT + ' % alte Technik. Bedarf ' + mio(g.bedarf) + '.' });
+    const sp = K.sprecher({ text: g.malus > 0
+      ? 'Veraltete Ausstattung kostet inzwischen ' + prozent(g.malus) + ' Kaufquote. ' + schlechtM + ' % der Etagen haben Möbel aus den 90ern.'
+      : schlechtM + ' % der Etagen haben Möbel aus den 90ern, ' + schlechtT + ' % alte Technik. Bedarf ' + mio(g.bedarf) + '.', ton: g.gesperrt || g.still ? 'alarm' : '' });
     let x = K.gross([{ label: 'Budget frei', wert: geld(u.rest), ton: u.rest <= 0 ? 'schlecht' : '', unter: 'von ' + esc(geld(u.budget)) },
       { label: 'Baustellen', wert: String(u.programme.reduce((a, p) => a + p.laufend, 0) + (s().umbau?.projekte ?? []).filter((p) => p.status === 'laufend' && !p.programm).length), unter: g.fristen + ' Prüffristen in 12 Monaten' }]);
     x += K.abschnitt('Zustand Konzern', 'Anteil gut je Gewerk');
-    x += K.liste([K.zeile({ was: g.haeuser + ' Häuser', unter: fmt.format(g.etagen) + ' Etagen' + (g.gesperrt ? ' · <span class="hw-schlecht">' + g.gesperrt + ' gesperrt</span>' : ''), wert: zustandsBalken(g.gut) })]);
+    x += K.liste([K.zeile({ was: g.haeuser + ' Häuser', unter: fmt.format(g.etagen) + ' Etagen' + (g.malus > 0 ? ' · Kaufquote −' + prozent(g.malus) : '') + (g.gesperrt ? ' · <span class="hw-schlecht">' + g.gesperrt + ' gesperrt</span>' : '') + (g.still ? ' · <span class="hw-schlecht">' + g.still + ' ohne Aufzug</span>' : ''), wert: zustandsBalken(g.gut) })]);
     x += K.knoepfe(K.knopf('Bauprogramm anlegen', 'data-umbau="assistent"', 'breit'));
     const laufend = u.programme.filter((p) => p.status === 'laufend');
     if (laufend.length) {
@@ -95,7 +102,7 @@ export function umbauModul(ctx) {
         wert: Math.round(p.fertig / Math.max(1, p.gesamt) * 100) + ' %', wertUnter: esc(geld(p.kosten)), tippbar: true, attr: 'data-umbau="programm" data-id="' + esc(p.id) + '"' })));
     }
     x += K.abschnitt('Cluster', 'T Technik · M Möbel · B Boden · F Fassade');
-    x += K.liste(u.cluster.map((c) => K.zeile({ was: esc(c.name), unter: c.haeuser + ' Häuser · ' + mio(c.bedarf) + (c.baustellen ? ' · ' + c.baustellen + ' im Bau' : '') + (c.fristen ? ' · <span class="hw-achtung">' + c.fristen + ' Fristen</span>' : ''),
+    x += K.liste(u.cluster.map((c) => K.zeile({ was: esc(c.name), unter: c.haeuser + ' Häuser · ' + mio(c.bedarf) + (c.malus > 0 ? ' · −' + prozent(c.malus) : '') + (c.gesperrt ? ' · <span class="hw-schlecht">' + c.gesperrt + ' gesperrt</span>' : '') + (c.baustellen ? ' · ' + c.baustellen + ' im Bau' : '') + (c.fristen ? ' · <span class="hw-achtung">' + c.fristen + ' Fristen</span>' : ''),
       wert: zustandsBalken(c.gut), tippbar: true, attr: 'data-umbau="cluster" data-id="' + esc(c.id) + '"' })));
     ctx.panel('Modernisierung', 'Bestand und Bauprogramme', K.bereich('haus', 'umbau') + sp + '<div class="hw-g5">' + K.rumpf(x) + '</div>', 'gross');
   }

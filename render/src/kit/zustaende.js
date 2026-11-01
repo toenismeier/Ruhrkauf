@@ -551,6 +551,7 @@ export function abschneiden(S, scene, marke, R) {
 }
 
 // ─────────────────────────────────────────────────────────────── Bausteine der Zustände
+function etagenName(e) { return e === 0 ? 'EG' : e + '. OG'; }
 function etagenY(k, e) { return k.egHoehe + (e - 1) * k.geschossHoehe; }
 function tFront(k) { return (k.tRelief ?? 0.5) + 0.08; }
 
@@ -1137,11 +1138,12 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
         continue;
       }
       const y0 = etagenY(k, e), y1 = y0 + GH;
+      let gezeichnet = false;
       for (const s of [sz, sx]) {
         const L = Z.nutz(s);
         // Kollision nur mit dem Kern der Etage: ein Schriftzug, der die Etage knapp anschneidet, bleibt sichtbar über dem Netz.
         for (const [a, b] of freieStuecke(Z, s, L * 0.04, L * 0.96, y0 + 0.3, y1 - 0.9, 0.2)) {
-          if (b - a < 5) continue;
+          if (b - a < 8) continue; // kurze Reststücke zwischen Bannern wirken wie lose Tafeln
           const nU = Math.max(2, Math.round((b - a) / 2.6)), du = (b - a) / nU;
           for (let i = 0; i <= nU; i++) { const u = a + i * du; s.q(u - 0.06, u + 0.06, 0.3, y1 + 0.9, t1 - 0.06, t1 + 0.06, rohr); s.q(u - 0.06, u + 0.06, 0.3, y1 + 0.9, t2 - 0.06, t2 + 0.06, rohr); }
           for (const y of [y0 - 0.05, y1 - 0.05]) s.q(a, b, y - 0.05, y + 0.05, t1 - 0.05, t2 + 0.05, brett);
@@ -1149,8 +1151,11 @@ export function zustandsDekor(S, scene, k, Zin, opt = {}) {
           for (let i = 0; i < nb; i++) { const p0 = a + (i * (b - a)) / nb + 0.04, p1 = a + ((i + 1) * (b - a)) / nb - 0.04; s.q(p0, p1, y0 - 0.2, y1 + 0.7, t2 + 0.1, t2 + 0.15, i % 2 ? '#c9d8cf' : '#d8e3dc'); }
           if (b - a > 16) { const pu0 = a + (b - a) * 0.2, pu1 = b - (b - a) * 0.2; s.q(pu0, pu1, y0 + 0.4, y1 - 0.2, t2 + 0.17, t2 + 0.22, ROT); plakat(Z, s, 'Wir modernisieren', (pu0 + pu1) / 2, (y0 + y1) / 2 + 0.1, t2 + 0.26, Math.min(1.4, GH * 0.32), '#ffffff', ROT, (pu1 - pu0) * 0.9); }
           sperre(Z, s, a, b, 0, y1 + 0.9, 'geruest');
+          gezeichnet = true;
         }
       }
+      // Etage liegt hinter Schriftzug oder Band: kein Gerüst darüber, sondern ein Aufsteller am Eingang.
+      if (!gezeichnet) { const he = haupt(), s = seiten[he.seite]; aufsteller(Z, s, he.u + (he.breite ?? 4) / 2 + 1.0, 2.2, etagenName(e) + ' im Umbau', '#ffffff', ROT); }
     }
     // Bauzaun vor dem Gehweg; bei Bau im EG über fast die ganze Front, sonst ein kurzes Stück. Eingänge bleiben frei.
     const egBau = bauEtagen.includes(0);

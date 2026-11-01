@@ -229,7 +229,7 @@ export function hausbesuchModul(ctx) {
       if (flaechen.length) {
         const plan = ladenplan({ breite: m.bw, tiefe: m.bd }, 'outlet', flaechen, haus.id + ':' + etageNr);
         S.quader(0, -0.3, 0, m.bw, 0, m.bd, '#e7e6e1');
-        baueLadenplan(S, scene, plan, { dichte: 0.42 });
+        baueLadenplan(S, scene, plan, { dichte: 0.42, moebelGeneration: haus.etagenBau?.[etageNr]?.moebelGeneration ?? 3 });
         buehne = { box: new THREE.Box3(new THREE.Vector3(-0.5, -0.5, -0.5), new THREE.Vector3(m.bw + 0.5, 4.6, m.bd + 0.5)), breite: m.bw, tiefe: m.bd, zonen: plan.abteilungen, ladenplan: plan, anzahl: S.anzahl };
       }
     }

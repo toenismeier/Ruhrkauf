@@ -49,3 +49,18 @@ Häuser altern. Modernisierung kostet, bringt Frequenz, Kaufquote und Image, und
 - **Bestand**: `bestandUebersicht` (je Cluster Anteil gut je Gewerkgruppe, Fristen, Bedarf), `bestandCluster` (Häuser mit Etagenschnitt), `umbauVorherNachher`.
 - **Budget**: Start 0,6 % vom Jahresumsatz (vorher immer 0), Aktion `umbauBudget`.
 - **Grafik**: Möbelgenerationen über eine Materialwelt je Generation (Fassade, Straße, Rohbau ausgenommen), Baustelle je Etage (`bauEtagen` in zustaende.js), Gerüst mit Kran nur bei Komplett/Fassade, Klimageräte vorn rechts auf dem Hauptdach. Katalog `umbau-generationen`, Panelbilder `bilder/umbau/`.
+
+## E49 Wirkung (31.10.2026, Ummo per Auswahl)
+- Alte Möbel kosten Kaufquote ab Spielwoche 52: Generation 1 −0,5 %/Jahr, Generation 2 −0,25 %/Jahr, höchstens −4 % (`malusMoebel`); Möbel neu setzt zurück.
+- Alte Fördertechnik kostet in Obergeschossen −0,2 %/Jahr, höchstens −2 % (`malusAufzug`).
+- Häuser vor 1975: Brandschutz- und Aufzugsfrist je Haus zwischen Woche 66 und 598 (vorher frühestens Woche 312). Zwölf Wochen vorher Vorlage von Bau & Ladenbau (`pflichtBauen`, Standard beauftragen). Brandschutz versäumt: Etage gesperrt. Aufzug versäumt: stillgelegt, Obergeschosse ×0,75.
+- Boden, Decke, Farbe fällt mit der Substanz (unter 72 mittel, unter 45 schlecht); Kundenscore +4 Punkte je Stufe gegenüber Start im Etagenmittel.
+- Wirkung Jahr 2, Seed 1, gegen main: Umsatz −0,6 %, EBITDA ohne Eingriffe −16,5 Mio. €, Bot regulär −22,5 Mio. €.
+
+## Grafik je Format (31.10.2026, Ummo: „Das muss für jedes Format passen“)
+- Möbelgenerationen innen: Hartwig, Premium, Volkskauf (grundriss.js), Sport (ladenplan), FUNDUS (`innenOutlet`, Hausbesuch). Gen. 1/2 erzeugen nicht mehr Farben als Gen. 3 (Hartwig 190/194 vs. 217 Farben).
+- Baustelle je Etage: Warenhaus, Volkskauf, Sport, FUNDUS über `zustaende.js` (Reststücke unter 8 m entfallen; liegt die Etage hinter Schriftzug oder Band: Aufsteller „1. OG im Umbau“ am Eingang), Premium eigenes Netz mit Banner und Bauzaun (`premium.js`).
+- Klimageräte: alle Formate über `technikAufDach` mit echter Dachhöhe (`dach` statt `hoehe`, die Schriftzug und Kran enthält) und Platz je Bauform (`platz`), Volkskauf und FUNDUS neu angebunden.
+- Vorher/Nachher (`spiel.js umbauBild`): je Format der passende Baukörper bzw. Innenraum; Nachher mit Neueröffnungsdekor (Premium-Banner vergrößert).
+- Katalog `umbau-formate` (bilder/katalog-umbau-formate.png), Stadtbilder `node tests/umbau-stadt-bilder.cjs <Stadt>`.
+- Fingerabdrücke: 209/220 unverändert; die 11 abweichenden (Braunschweig, Bremen, Flensburg, Halle, Kiel, Lübeck, Lüneburg, Neumünster, Oldenburg, Osnabrück, Wolfsburg) weichen im Container genauso auf 63cc84a ab (Chrome-Version), nicht durch diesen Stand.
