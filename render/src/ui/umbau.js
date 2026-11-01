@@ -37,7 +37,7 @@ export function umbauModul(ctx) {
     const cl = typeof E.bestandCluster === 'function' && h?.hauscluster ? E.bestandCluster(s(), h.hauscluster) : null;
     const eintrag = cl?.haeuser.find((x) => x.id === id);
     const kritisch = (eintrag?.etagen ?? []).filter((e) => e.substanz < 35).length;
-    return K.abschnitt('Bau und Technik', kritisch ? kritisch + (kritisch === 1 ? ' Etage kritisch' : ' Etagen kritisch') : (h?.etagen.length ?? 0) + ' Etagen')
+    return K.abschnitt('Bau und Technik', kritisch ? kritisch + (kritisch === 1 ? ' Etage kritisch' : ' Etagen kritisch') : (h?.etagen.length ?? 0) + ((h?.etagen.length ?? 0) === 1 ? ' Etage' : ' Etagen'))
       + '<div data-umbau-karte="' + esc(id) + '">' + (eintrag ? etagenSchnitt(eintrag.etagen) : '') + '</div>'
       + K.knoepfe(K.knopf('Umbau planen', 'data-umbau="planen" data-id="' + esc(id) + '" data-etage="' + (eintrag?.etagen.slice().sort((a, b) => a.substanz - b.substanz)[0]?.etage ?? 0) + '"', 'zweit'),
         K.knopf('Bestand im Konzern', 'data-umbau="modernisierung"', 'text'));
@@ -93,7 +93,7 @@ export function umbauModul(ctx) {
     let x = K.gross([{ label: 'Budget frei', wert: geld(u.rest), ton: u.rest <= 0 ? 'schlecht' : '', unter: 'von ' + esc(geld(u.budget)) },
       { label: 'Baustellen', wert: String(u.programme.reduce((a, p) => a + p.laufend, 0) + (s().umbau?.projekte ?? []).filter((p) => p.status === 'laufend' && !p.programm).length), unter: g.fristen + ' Prüffristen in 12 Monaten' }]);
     x += K.abschnitt('Zustand Konzern', 'Anteil gut je Gewerk');
-    x += K.liste([K.zeile({ was: g.haeuser + ' Häuser', unter: fmt.format(g.etagen) + ' Etagen' + (g.malus > 0 ? ' · Kaufquote −' + prozent(g.malus) : '') + (g.gesperrt ? ' · <span class="hw-schlecht">' + g.gesperrt + ' gesperrt</span>' : '') + (g.still ? ' · <span class="hw-schlecht">' + g.still + ' ohne Aufzug</span>' : ''), wert: zustandsBalken(g.gut) })]);
+    x += K.liste([K.zeile({ was: g.haeuser + ' Häuser', unter: fmt.format(g.etagen) + (g.etagen === 1 ? ' Etage' : ' Etagen') + (g.malus > 0 ? ' · Kaufquote −' + prozent(g.malus) : '') + (g.gesperrt ? ' · <span class="hw-schlecht">' + g.gesperrt + ' gesperrt</span>' : '') + (g.still ? ' · <span class="hw-schlecht">' + g.still + ' ohne Aufzug</span>' : ''), wert: zustandsBalken(g.gut) })]);
     x += K.knoepfe(K.knopf('Bauprogramm anlegen', 'data-umbau="assistent"', 'breit'));
     const laufend = u.programme.filter((p) => p.status === 'laufend');
     if (laufend.length) {
@@ -113,7 +113,7 @@ export function umbauModul(ctx) {
     let x = zeile ? K.gross([{ label: 'Möbel gut', wert: zeile.gut.moebel + ' %' }, { label: 'Bedarf', wert: mio(zeile.bedarf) }]) : '';
     x += K.knoepfe(K.knopf('Bauprogramm für diesen Cluster', 'data-umbau="assistent" data-id="' + esc(c.id) + '"', 'breit'));
     x += K.abschnitt('Häuser', 'T Technik · M Möbel · B Boden · F Fassade');
-    x += K.liste(c.haeuser.map((h) => K.zeile({ was: esc(h.name), unter: esc(h.stadt) + ' · ' + h.etagen.length + ' Etagen' + (h.etagen.some((e) => e.baustelle) ? ' · im Bau' : ''),
+    x += K.liste(c.haeuser.map((h) => K.zeile({ was: esc(h.name), unter: esc(h.stadt) + ' · ' + h.etagen.length + (h.etagen.length === 1 ? ' Etage' : ' Etagen') + (h.etagen.some((e) => e.baustelle) ? ' · im Bau' : ''),
       wert: zustandsBalken(h.gut), tippbar: true, attr: 'data-umbau="planen" data-id="' + esc(h.id) + '" data-etage="' + (h.etagen.slice().sort((a, b) => a.substanz - b.substanz)[0]?.etage ?? 0) + '"' })));
     x += K.knoepfe(K.knopf('Zum Bestand', 'data-umbau="modernisierung"', 'text'));
     ctx.panel(c.name, 'Bestand im Cluster', K.bereich('haus', 'umbau') + '<div class="hw-g5">' + K.rumpf(x) + '</div>', 'gross');
@@ -177,7 +177,7 @@ export function umbauModul(ctx) {
       zeilen.push(K.zeile({ was: esc(G()[g].name), unter: g === 'fassade' ? 'ganzes Haus' : ETAGE_LANG(nr), wert: ZUSTAND[a] + ' → ' + ZUSTAND[b], ton: 'gut' }));
     }
     x += zeilen.length ? K.liste(zeilen) : K.leer('Keine sichtbare Änderung.');
-    x += K.liste([K.zeile({ was: 'Kosten', wert: esc(geld(p.kosten)) }), K.zeile({ was: 'Bauzeit', wert: (p.ende - p.start) + ' Wochen' })]);
+    x += K.liste([K.zeile({ was: 'Kosten', wert: esc(geld(p.kosten)) }), K.zeile({ was: 'Bauzeit', wert: Math.max(1, p.ende - p.start) + (Math.max(1, p.ende - p.start) === 1 ? ' Woche' : ' Wochen') })]);
     x += K.knoepfe(K.knopf('Zum Haus', 'data-umbau="planen" data-id="' + esc(p.haus) + '" data-etage="' + (p.etagen[0] ?? 0) + '"', 'zweit'), K.knopf('Zum Bestand', 'data-umbau="modernisierung"', 'text'));
     ctx.panel(v.gewerk + ' fertig', (v.haus?.name ?? '') + ' · ' + kw(p.ende), K.bereich('haus', 'umbau') + '<div class="hw-g5">' + K.rumpf(x) + '</div>', 'gross');
     // Bilder nach dem Aufbau des Panels rendern (eigener kleiner Renderer, nicht im Klickpfad blockierend)

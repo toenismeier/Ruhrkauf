@@ -165902,7 +165902,7 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
   for (const d5 of einstellungen) meldeSchalter(d5);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "815a190" : "Entwicklung";
+  var version = () => true ? "bd07281" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv8 = false;
     function feld2(d5) {
@@ -170321,7 +170321,7 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
       const cl = typeof E9.bestandCluster === "function" && h5?.hauscluster ? E9.bestandCluster(s2(), h5.hauscluster) : null;
       const eintrag2 = cl?.haeuser.find((x2) => x2.id === id);
       const kritisch = (eintrag2?.etagen ?? []).filter((e) => e.substanz < 35).length;
-      return abschnitt("Bau und Technik", kritisch ? kritisch + (kritisch === 1 ? " Etage kritisch" : " Etagen kritisch") : (h5?.etagen.length ?? 0) + " Etagen") + '<div data-umbau-karte="' + esc(id) + '">' + (eintrag2 ? etagenSchnitt(eintrag2.etagen) : "") + "</div>" + knoepfe(
+      return abschnitt("Bau und Technik", kritisch ? kritisch + (kritisch === 1 ? " Etage kritisch" : " Etagen kritisch") : (h5?.etagen.length ?? 0) + ((h5?.etagen.length ?? 0) === 1 ? " Etage" : " Etagen")) + '<div data-umbau-karte="' + esc(id) + '">' + (eintrag2 ? etagenSchnitt(eintrag2.etagen) : "") + "</div>" + knoepfe(
         knopf("Umbau planen", 'data-umbau="planen" data-id="' + esc(id) + '" data-etage="' + (eintrag2?.etagen.slice().sort((a2, b4) => a2.substanz - b4.substanz)[0]?.etage ?? 0) + '"', "zweit"),
         knopf("Bestand im Konzern", 'data-umbau="modernisierung"', "text")
       );
@@ -170382,7 +170382,7 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
         { label: "Baustellen", wert: String(u.programme.reduce((a2, p3) => a2 + p3.laufend, 0) + (s2().umbau?.projekte ?? []).filter((p3) => p3.status === "laufend" && !p3.programm).length), unter: g4.fristen + " Pr\xFCffristen in 12 Monaten" }
       ]);
       x2 += abschnitt("Zustand Konzern", "Anteil gut je Gewerk");
-      x2 += liste([zeile2({ was: g4.haeuser + " H\xE4user", unter: fmt.format(g4.etagen) + " Etagen" + (g4.malus > 0 ? " \xB7 Kaufquote \u2212" + prozent4(g4.malus) : "") + (g4.gesperrt ? ' \xB7 <span class="hw-schlecht">' + g4.gesperrt + " gesperrt</span>" : "") + (g4.still ? ' \xB7 <span class="hw-schlecht">' + g4.still + " ohne Aufzug</span>" : ""), wert: zustandsBalken(g4.gut) })]);
+      x2 += liste([zeile2({ was: g4.haeuser + " H\xE4user", unter: fmt.format(g4.etagen) + (g4.etagen === 1 ? " Etage" : " Etagen") + (g4.malus > 0 ? " \xB7 Kaufquote \u2212" + prozent4(g4.malus) : "") + (g4.gesperrt ? ' \xB7 <span class="hw-schlecht">' + g4.gesperrt + " gesperrt</span>" : "") + (g4.still ? ' \xB7 <span class="hw-schlecht">' + g4.still + " ohne Aufzug</span>" : ""), wert: zustandsBalken(g4.gut) })]);
       x2 += knoepfe(knopf("Bauprogramm anlegen", 'data-umbau="assistent"', "breit"));
       const laufend3 = u.programme.filter((p3) => p3.status === "laufend");
       if (laufend3.length) {
@@ -170418,7 +170418,7 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
       x2 += abschnitt("H\xE4user", "T Technik \xB7 M M\xF6bel \xB7 B Boden \xB7 F Fassade");
       x2 += liste(c.haeuser.map((h5) => zeile2({
         was: esc(h5.name),
-        unter: esc(h5.stadt) + " \xB7 " + h5.etagen.length + " Etagen" + (h5.etagen.some((e) => e.baustelle) ? " \xB7 im Bau" : ""),
+        unter: esc(h5.stadt) + " \xB7 " + h5.etagen.length + (h5.etagen.length === 1 ? " Etage" : " Etagen") + (h5.etagen.some((e) => e.baustelle) ? " \xB7 im Bau" : ""),
         wert: zustandsBalken(h5.gut),
         tippbar: true,
         attr: 'data-umbau="planen" data-id="' + esc(h5.id) + '" data-etage="' + (h5.etagen.slice().sort((a2, b4) => a2.substanz - b4.substanz)[0]?.etage ?? 0) + '"'
@@ -170503,7 +170503,7 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
         zeilen.push(zeile2({ was: esc(G3()[g4].name), unter: g4 === "fassade" ? "ganzes Haus" : ETAGE_LANG(nr4), wert: ZUSTAND[a2] + " \u2192 " + ZUSTAND[b4], ton: "gut" }));
       }
       x2 += zeilen.length ? liste(zeilen) : leer3("Keine sichtbare \xC4nderung.");
-      x2 += liste([zeile2({ was: "Kosten", wert: esc(geld(p3.kosten)) }), zeile2({ was: "Bauzeit", wert: p3.ende - p3.start + " Wochen" })]);
+      x2 += liste([zeile2({ was: "Kosten", wert: esc(geld(p3.kosten)) }), zeile2({ was: "Bauzeit", wert: Math.max(1, p3.ende - p3.start) + (Math.max(1, p3.ende - p3.start) === 1 ? " Woche" : " Wochen") })]);
       x2 += knoepfe(knopf("Zum Haus", 'data-umbau="planen" data-id="' + esc(p3.haus) + '" data-etage="' + (p3.etagen[0] ?? 0) + '"', "zweit"), knopf("Zum Bestand", 'data-umbau="modernisierung"', "text"));
       ctx.panel(v3.gewerk + " fertig", (v3.haus?.name ?? "") + " \xB7 " + kw2(p3.ende), bereich("haus", "umbau") + '<div class="hw-g5">' + rumpf2(x2) + "</div>", "gross");
       setTimeout(() => {
@@ -188747,8 +188747,8 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-11-01T08:35:34.861Z" : null;
-    const v3 = true ? "815a190" : "Entwicklung";
+    const iso = true ? "2026-11-01T11:52:48.515Z" : null;
+    const v3 = true ? "bd07281" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v3;
   })();
