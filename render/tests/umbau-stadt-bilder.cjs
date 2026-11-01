@@ -19,7 +19,8 @@ const server = http.createServer((req, res) => {
   await page.waitForFunction(() => window.bereit === true && window.spiel?.sb?.haeuser?.size >= 1);
   await page.evaluate(() => document.querySelector('[data-ein="spaeter"]')?.click());
   await page.addStyleTag({ content: ':is(.oben,#cockpit,#stadt-chips,.unten,#wochenstreifen,.botwahl,.hw-pin,.pins){visibility:hidden!important}' });
-  const faelle = await page.evaluate((stadt) => {
+  const ohneBau = !!process.env.OHNEBAU, abstand = Number(process.env.ABSTAND ?? 55);
+  const faelle = await page.evaluate(([stadt, ohneBau]) => {
     const sp = window.spiel, s = sp.s, E = sp.E, out = [];
     const art = (h) => h.klasse === 'premium' ? 'premium' : h.format;
     const gesehen = new Set();
@@ -29,17 +30,17 @@ const server = http.createServer((req, res) => {
       gesehen.add(a);
       // Etagenbaustelle im 1. OG (sonst EG) und Klima auf dem Dach (Technik fertig)
       const nr = h.etagen.includes(1) ? 1 : 0;
-      E.fuehreAus(s, { typ: 'umbauPlanen', haus: h.id, etage: nr, stufe: 'ladenbau', gewerk: 'moebel' });
-      for (const n of h.etagen) { h.etagenBau[n].technik.klima = 2; h.etagenBau[n].klimaModernisiert = true; }
+      if (!ohneBau) E.fuehreAus(s, { typ: 'umbauPlanen', haus: h.id, etage: nr, stufe: 'ladenbau', gewerk: 'moebel' });
+      if (!ohneBau) for (const n of h.etagen) { h.etagenBau[n].technik.klima = 2; h.etagenBau[n].klimaModernisiert = true; }
       out.push({ id: h.id, art: a, name: h.name });
     }
     sp.grafikNachziehen();
     return out;
-  }, stadt);
+  }, [stadt, ohneBau]);
   for (const f of faelle) {
-    await page.evaluate((id) => { const x = window.spiel.sb.haeuser.get(id); window.spiel.schliessePanel(); window.spiel.kameraAuf(x.p.x + x.p.w / 2, x.p.z + x.p.d / 2, 55); }, f.id);
+    await page.evaluate(([id, a]) => { const x = window.spiel.sb.haeuser.get(id); window.spiel.schliessePanel(); window.spiel.kameraAuf(x.p.x + x.p.w / 2, x.p.z + x.p.d / 2, a); }, [f.id, abstand]);
     await page.waitForTimeout(2500);
-    await page.screenshot({ path: path.join(aus, stadt + '-' + f.art + '.png') });
+    await page.screenshot({ path: path.join(aus, stadt + '-' + f.art + (ohneBau ? '-ohne' : '') + '.png') });
     console.log(stadt, f.art, f.name);
   }
   if (fehler.length) console.log('FEHLER', fehler.slice(0, 5).join(' | '));
