@@ -77,6 +77,8 @@ import * as HK from './ui/komponenten.js';
 import { symboleEinsetzen, FORMAT_SYMBOL, SYM } from './ui/kartenoberflaeche.js';
 // O04 Personal
 import { personalModul } from './ui/personaleinsatz.js';
+import { haltenAn } from './ui/halten.js';
+haltenAn();
 
 const param = new URLSearchParams(location.search);
 // Test- und Entwicklungssteuerung ist außerhalb von ?dev=1 unsichtbar.

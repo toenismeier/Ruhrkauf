@@ -1,6 +1,6 @@
 // E48 Bauprogramm: Gewerke, mehrere Cluster, Wellen, Bestandsübersicht, Vorher/Nachher.
 import { fuehreAus, neuesSpiel, wocheAbspielen } from '../src';
-import { bestandUebersicht, bestandCluster, bauprogrammSchaetzung, gewerkSchaetzung, umbauVorherNachher, GEWERKE } from '../src/umbau';
+import { bestandUebersicht, bestandCluster, bauprogrammSchaetzung, gewerkSchaetzung, paketSchaetzung, umbauVorherNachher, GEWERKE } from '../src/umbau';
 
 describe('E48 Bauprogramm', () => {
   test('Startlage: Budget gesetzt, Übersicht je Cluster vollständig', () => {
@@ -106,5 +106,34 @@ describe('E49 Wirkung von Alter, Fristen und Gewerken', () => {
     for (const n of h2.etagen) h2.etagenBau![n].pflichten.aufzug = s.woche - 1;
     wocheAbspielen(s);
     expect(h2.etagen.every((n) => h2.etagenBau![n].aufzugStill)).toBe(true);
+  });
+
+  test('E54 Paket und Zieltermin: eine Baustelle je Etage mit allen Gewerken, Tempo folgt aus dem Termin', () => {
+    const s = neuesSpiel(3);
+    const u = bestandUebersicht(s);
+    const h = s.haeuser.find((x) => x.status === 'offen' && x.etagen.length >= 3)!;
+    const einzeln = (['moebel', 'licht'] as const).map((g) => gewerkSchaetzung(s, h.id, h.etagen[1], g)!);
+    const paket = paketSchaetzung(s, h.id, h.etagen[1], ['moebel', 'licht'])!;
+    expect(paket.kosten).toBe(einzeln[0].kosten + einzeln[1].kosten);
+    expect(paket.wochen).toBeGreaterThanOrEqual(Math.max(einzeln[0].wochen, einzeln[1].wochen));
+    expect(paket.wochen).toBeLessThan(einzeln[0].wochen + einzeln[1].wochen);
+    // ganzer Konzern, Komplettumbau: mit Zieltermin 2 Jahre steigt die Zahl gleichzeitiger Baustellen, Dauer hält den Termin
+    const alle = u.cluster.map((c) => c.id);
+    const k = bauprogrammSchaetzung(s, { cluster: alle, gewerk: 'komplett', bisZustand: 1, parallel: 1, zielWochen: 104 });
+    expect(k.auftraege).toBeGreaterThan(100);
+    expect(k.zielHaelt).toBe(true);
+    expect(k.wochen).toBeLessThanOrEqual(104);
+    expect(k.parallel).toBeGreaterThan(40);
+    expect(k.jahre.reduce((v, j) => v + j.kosten, 0)).toBe(k.kosten);
+    // Paket starten: Projekte tragen alle Gewerke, Abschluss wirkt für alle
+    const cl = u.cluster.filter((c) => !c.sonder)[0].id;
+    const r = fuehreAus(s, { typ: 'bauprogrammStarten', auftrag: { cluster: [cl], gewerk: 'moebel', gewerke: ['moebel', 'licht'], bisZustand: 1, parallel: 1, zielWochen: 52 } });
+    expect(r.ok).toBe(true);
+    const p = s.umbau!.projekte.find((x) => x.gewerke?.length === 2);
+    if (p) {
+      for (let i = 0; i < 30 && p.status === 'laufend'; i++) wocheAbspielen(s);
+      const hh = s.haeuser.find((x) => x.id === p.haus)!;
+      for (const n of p.etagen) { expect(hh.etagenBau![n].moebelGeneration).toBe(3); expect(hh.etagenBau![n].technik.licht).toBe(2); }
+    }
   });
 });

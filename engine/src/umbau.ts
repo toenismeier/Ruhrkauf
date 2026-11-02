@@ -31,6 +31,8 @@ export interface UmbauProjekt {
   id: string; haus: string; etagen: number[]; stufe: UmbauStufe;
   /** Gewerk (Bauprogramm); ohne Gewerk gilt die Stufe. */
   gewerk?: Gewerk; programm?: string;
+  /** E54: Paket mehrerer Gewerke in einer Baustelle (gewerk = erstes). */
+  gewerke?: Gewerk[];
   /** Zustand vor Baubeginn für das Vorher/Nachher-Bild. */
   vorher?: Record<number, GewerkZustand>; nachher?: Record<number, GewerkZustand>;
   start: number; ende: number; kosten: number; qm: number; status: 'laufend'|'abgeschlossen';
@@ -76,7 +78,13 @@ const BRUTTO=0.412;
 export interface BauprogrammAuftrag {
   name?: string;
   cluster: string[];
+  /** Einzeln gewählte Häuser zusätzlich zu den Clustern. */
+  haeuser?: string[];
   gewerk: Gewerk;
+  /** E54: Paket mehrerer Gewerke; je Etage eine Baustelle mit allen Gewerken. Ohne Angabe gilt `gewerk`. */
+  gewerke?: Gewerk[];
+  /** E54: Zieltermin in Wochen; daraus folgt `parallel`. */
+  zielWochen?: number;
   /** Nur Etagen/Häuser bis zu diesem Zustand (0 = nur schlechte, 1 = schlechte und mittlere). */
   bisZustand: 0|1;
   /** Höchstens so viele Baustellen gleichzeitig. */
@@ -84,7 +92,7 @@ export interface BauprogrammAuftrag {
 }
 export interface Bauprogramm extends BauprogrammAuftrag {
   id: string; start: number; status:'laufend'|'abgeschlossen'|'gestoppt';
-  warteschlange: {haus:string;etage:number}[]; gesamt: number; gestartet: number; kosten: number;
+  warteschlange: {haus:string;etage:number;gewerke?:Gewerk[]}[]; gesamt: number; gestartet: number; kosten: number;
 }
 
 function hausHash(id: string): number { let x=7; for (const c of id) x=(x*31+c.charCodeAt(0))>>>0; return x; }
@@ -354,7 +362,22 @@ function laeuftAuf(s:GameState,h:Haus,etagen:number[]):boolean {
   return (s.umbau?.projekte??[]).some(x=>x.status==='laufend'&&x.haus===h.id&&x.etagen.some(n=>etagen.includes(n)));
 }
 function gewerkStarten(s:GameState,hausId:string,nr:number,g:Gewerk,programm?:string):{ok:boolean;text:string} {
-  const h=s.haeuser.find(x=>x.id===hausId), p=gewerkSchaetzung(s,hausId,nr,g);
+  return paketStarten(s,hausId,nr,[g],programm);
+}
+/** Paket-Schätzung: eine Baustelle je Etage (bzw. Haus) mit mehreren Gewerken.
+ *  Kosten und Wirkung addieren sich; die Dauer ist das längste Gewerk plus ein Fünftel der übrigen (Gewerke laufen verzahnt). */
+export function paketSchaetzung(s:GameState,hausId:string,nr:number,gewerke:Gewerk[]) {
+  const teile=gewerke.map(g=>gewerkSchaetzung(s,hausId,nr,g)).filter((x):x is NonNullable<typeof x>=>!!x);
+  if (!teile.length) return undefined;
+  const lang=Math.max(...teile.map(t=>t.wochen)), summe=teile.reduce((v,t)=>v+t.wochen,0);
+  const wochen=lang+Math.round((summe-lang)*0.2);
+  const etagen=[...new Set(teile.flatMap(t=>t.etagen))].sort((x,y)=>x-y);
+  const kosten=teile.reduce((v,t)=>v+t.kosten,0), plusJahr=teile.reduce((v,t)=>v+t.plusJahr,0);
+  const ausfallMax=Math.max(...teile.map(t=>t.ausfall/Math.max(1,t.wochen)));
+  return {gewerke:teile.map(t=>t.gewerk),etagen,qm:Math.max(...teile.map(t=>t.qm)),kosten,wochen,ausfall:eur(ausfallMax*wochen),plusJahr,ertragJahr:eur(plusJahr*BRUTTO)};
+}
+function paketStarten(s:GameState,hausId:string,nr:number,gewerke:Gewerk[],programm?:string):{ok:boolean;text:string} {
+  const h=s.haeuser.find(x=>x.id===hausId), p=paketSchaetzung(s,hausId,nr,gewerke);
   if (!h || !p || h.status!=='offen') return {ok:false,text:'Haus oder Etage nicht verfügbar.'};
   if (laeuftAuf(s,h,p.etagen)) return {ok:false,text:'Mindestens eine Etage befindet sich bereits im Umbau.'};
   if (h.premiumInvestition && h.premiumInvestition.bis>s.woche)
@@ -363,14 +386,24 @@ function gewerkStarten(s:GameState,hausId:string,nr:number,g:Gewerk,programm?:st
   s.umbau!.verbraucht+=p.kosten;
   const vorher:Record<number,GewerkZustand>={};
   for (const e of p.etagen) vorher[e]=gewerkZustand(s,h,e);
-  const stufe:UmbauStufe=g==='komplett'?'komplett':g==='moebel'?'ladenbau':g==='oberflaeche'?'auffrischung':'technik';
-  s.umbau!.projekte.push({id:'umbau-'+(++s.umbau!.zaehler),haus:h.id,etagen:p.etagen,stufe,gewerk:g,programm,
+  const g=p.gewerke[0];
+  const stufe:UmbauStufe=p.gewerke.includes('komplett')?'komplett':p.gewerke.includes('moebel')?'ladenbau':g==='oberflaeche'?'auffrischung':'technik';
+  s.umbau!.projekte.push({id:'umbau-'+(++s.umbau!.zaehler),haus:h.id,etagen:p.etagen,stufe,gewerk:g,gewerke:p.gewerke.length>1?p.gewerke:undefined,programm,
     start:s.woche,ende:s.woche+p.wochen,kosten:p.kosten,qm:p.qm,status:'laufend',vorher});
-  if (!programm) melde(s,'info',GEWERKE[g].name+' in '+h.name+' gestartet ('+p.wochen+' Wochen).',{hausId:h.id,stadt:h.stadt,modul:'umbau'});
+  const name=p.gewerke.map(x=>GEWERKE[x].name).join(', ');
+  if (!programm) melde(s,'info',name+' in '+h.name+' gestartet ('+p.wochen+' Wochen).',{hausId:h.id,stadt:h.stadt,modul:'umbau'});
   return {ok:true,text:'Baustart '+h.name+': '+p.kosten.toLocaleString('de-DE')+' €, fertig in '+p.wochen+' Wochen.'};
 }
 function gewerkAbschliessen(s:GameState,h:Haus,p:UmbauProjekt):void {
-  const g=p.gewerk!, wirkung=GEWERKE[g].kaufquote;
+  for (const g of p.gewerke??[p.gewerk!]) gewerkWirken(s,h,p,g);
+  p.nachher={};
+  for (const e of p.etagen) p.nachher[e]=gewerkZustand(s,h,e);
+  p.status='abgeschlossen';
+  if (!s.prognose) melde(s,'info',(p.gewerke??[p.gewerk!]).map(g=>GEWERKE[g].name).join(', ')+' abgeschlossen: '+h.name+'.',
+    {hausId:h.id,stadt:h.stadt,modul:'umbau',projekt:p.id});
+}
+function gewerkWirken(s:GameState,h:Haus,p:UmbauProjekt,g:Gewerk):void {
+  const wirkung=GEWERKE[g].kaufquote;
   for (const nr of p.etagen) {
     const e=h.etagenBau?.[nr]; if (!e) continue;
     const alle=g==='komplett';
@@ -393,70 +426,121 @@ function gewerkAbschliessen(s:GameState,h:Haus,p:UmbauProjekt):void {
   }
   if (g!=='fassade' && p.etagen.length===h.etagen.length)
     h.substanz=Math.round(h.etagen.reduce((a,n)=>a+(h.etagenBau?.[n]?.substanz??h.substanz),0)/h.etagen.length);
-  p.nachher={};
-  for (const e of p.etagen) p.nachher[e]=gewerkZustand(s,h,e);
-  p.status='abgeschlossen';
-  if (!s.prognose) melde(s,'info',GEWERKE[g].name+' abgeschlossen: '+h.name+'.',
-    {hausId:h.id,stadt:h.stadt,modul:'umbau',projekt:p.id});
 }
-function clusterHaeuser(s:GameState,ids:string[]):Haus[] {
+function clusterHaeuser(s:GameState,ids:string[],einzeln:string[]=[]):Haus[] {
   const org=(s as GameState & {organisation?:{hauscluster:{id:string;hausIds:string[]}[]}}).organisation;
-  const set=new Set<string>();
+  const set=new Set<string>(einzeln);
   for (const c of org?.hauscluster??[]) if (ids.includes(c.id)) c.hausIds.forEach(i=>set.add(i));
   return s.haeuser.filter(h=>set.has(h.id)&&h.status==='offen');
 }
-/** Arbeitsliste eines Auftrags: schlechteste Etagen zuerst, Pflichtfristen vorn. */
-function auftragsListe(s:GameState,a:BauprogrammAuftrag):{haus:string;etage:number}[] {
+/** Gewerke eines Auftrags; Komplettumbau schließt alle anderen ein. */
+export function auftragsGewerke(a:Pick<BauprogrammAuftrag,'gewerk'|'gewerke'>):Gewerk[] {
+  const g=[...new Set((a.gewerke?.length?a.gewerke:[a.gewerk]).filter(x=>!!GEWERKE[x]))];
+  return g.includes('komplett')?['komplett']:g;
+}
+/** Arbeitsliste eines Auftrags: je Etage eine Baustelle mit allen fälligen Etagen-Gewerken, Haus-Gewerke (Fassade) als eigene Baustelle.
+ *  Schlechteste zuerst, Pflichtfristen vorn. */
+function auftragsListe(s:GameState,a:BauprogrammAuftrag):{haus:string;etage:number;gewerke:Gewerk[]}[] {
   initialisiereUmbau(s);
-  const v:{haus:string;etage:number;z:number;frist:number}[]=[];
-  for (const h of clusterHaeuser(s,a.cluster)) {
-    const etagen=GEWERKE[a.gewerk].ebene==='haus'?[h.etagen[0]]:h.etagen;
-    for (const nr of etagen) {
-      const z=zielZustand(s,h,nr,a.gewerk);
-      if (z>a.bisZustand) continue;
+  const gw=auftragsGewerke(a);
+  const v:{haus:string;etage:number;gewerke:Gewerk[];z:number;frist:number}[]=[];
+  for (const h of clusterHaeuser(s,a.cluster??[],a.haeuser??[])) {
+    for (const g of gw.filter(x=>GEWERKE[x].ebene==='haus')) {
+      const nr=h.etagen[0], z=zielZustand(s,h,nr,g);
+      if (z<=a.bisZustand) v.push({haus:h.id,etage:nr,gewerke:[g],z,frist:Math.min(...h.etagen.map(n=>Math.min(h.etagenBau![n].pflichten.brandschutz,h.etagenBau![n].pflichten.aufzug)))});
+    }
+    const etagenGw=gw.filter(x=>GEWERKE[x].ebene==='etage');
+    if (!etagenGw.length) continue;
+    for (const nr of h.etagen) {
+      const faellig=etagenGw.filter(g=>zielZustand(s,h,nr,g)<=a.bisZustand);
+      if (!faellig.length) continue;
       const e=h.etagenBau![nr];
-      v.push({haus:h.id,etage:nr,z,frist:Math.min(e.pflichten.brandschutz,e.pflichten.aufzug)});
+      v.push({haus:h.id,etage:nr,gewerke:faellig,z:Math.min(...faellig.map(g=>zielZustand(s,h,nr,g))),frist:Math.min(e.pflichten.brandschutz,e.pflichten.aufzug)});
     }
   }
-  return v.sort((x,y)=>x.z-y.z||x.frist-y.frist||x.haus.localeCompare(y.haus)||x.etage-y.etage).map(({haus,etage})=>({haus,etage}));
+  return v.sort((x,y)=>x.z-y.z||x.frist-y.frist||x.haus.localeCompare(y.haus)||x.etage-y.etage).map(({haus,etage,gewerke})=>({haus,etage,gewerke}));
 }
-/** Vorschau: Umfang, Kosten, Bauzeit in Wellen, Ausfall und Wirkung, Liquidität je Woche. */
+type Dauer={haus:string;w:number;k:number};
+/** Wellenplan wie die wöchentliche Ausführung: zu jedem Zeitpunkt starten in Reihenfolge der Liste die Baustellen,
+ *  deren Haus frei ist, bis `parallel` gleichzeitig laufen. Liefert Ende und Startwoche je Baustelle. */
+function wellenplan(dauer:Dauer[],parallel:number):{ende:number;starts:number[]} {
+  const cap=Math.max(1,parallel), starts:number[]=Array(dauer.length).fill(-1);
+  const hausBis=new Map<string,number>(), laufend:number[]=[];
+  let offen=dauer.map((_,i)=>i), t=0, ende=0;
+  while (offen.length) {
+    for (let i=laufend.length-1;i>=0;i--) if (laufend[i]<=t) laufend.splice(i,1);
+    const rest:number[]=[];
+    for (const i of offen) {
+      const d=dauer[i];
+      if (laufend.length<cap&&(hausBis.get(d.haus)??0)<=t) {
+        starts[i]=t; laufend.push(t+d.w); hausBis.set(d.haus,t+d.w); ende=Math.max(ende,t+d.w);
+      } else rest.push(i);
+    }
+    offen=rest;
+    if (!offen.length) break;
+    // zum nächsten Zeitpunkt springen, an dem eine Baustelle fertig wird
+    let naechst=Infinity; for (const e of laufend) if (e>t&&e<naechst) naechst=e;
+    for (const i of offen) { const hb=hausBis.get(dauer[i].haus)??0; if (hb>t&&hb<naechst) naechst=hb; }
+    t=naechst===Infinity?t+1:naechst;
+  }
+  return {ende,starts};
+}
+/** Vorschau: Umfang, Kosten, Bauzeit, nötige Baustellen gleichzeitig für den Zieltermin, Kosten und Budget je Spieljahr. */
 export function bauprogrammSchaetzung(s:GameState,a:BauprogrammAuftrag) {
-  const liste=auftragsListe(s,a), parallel=Math.max(1,Math.round(a.parallel));
+  const liste=auftragsListe(s,a);
   let kosten=0,ausfall=0,plusJahr=0;
-  const dauer:{haus:string;w:number;k:number}[]=[];
+  const dauer:Dauer[]=[];
   for (const x of liste) {
-    const p=gewerkSchaetzung(s,x.haus,x.etage,a.gewerk); if(!p) continue;
+    const p=paketSchaetzung(s,x.haus,x.etage,x.gewerke); if(!p) continue;
     kosten+=p.kosten; ausfall+=p.ausfall; plusJahr+=p.plusJahr; dauer.push({haus:x.haus,w:p.wochen,k:p.kosten});
   }
-  // Wellen: höchstens `parallel` Baustellen, je Haus eine Baustelle gleichzeitig.
-  const frei:number[]=Array(parallel).fill(0), hausFrei=new Map<string,number>();
-  const kostenWoche=new Map<number,number>();
-  let ende=0;
-  for (const d of dauer) {
-    let slot=0; for (let i=1;i<frei.length;i++) if (frei[i]<frei[slot]) slot=i;
-    const start=Math.max(frei[slot],hausFrei.get(d.haus)??0);
-    frei[slot]=start+d.w; hausFrei.set(d.haus,start+d.w); ende=Math.max(ende,start+d.w);
-    kostenWoche.set(start,(kostenWoche.get(start)??0)+d.k);
+  // Untergrenze: je Haus laufen die Baustellen nacheinander.
+  const jeHaus=new Map<string,number>(); for (const d of dauer) jeHaus.set(d.haus,(jeHaus.get(d.haus)??0)+d.w);
+  const fruehestens=Math.max(0,...jeHaus.values());
+  let parallel=Math.max(1,Math.round(a.parallel||1));
+  if (a.zielWochen&&dauer.length) {
+    // kleinste Zahl gleichzeitiger Baustellen, mit der der Zieltermin hält (bzw. der früheste Termin).
+    const ziel=Math.max(a.zielWochen,fruehestens);
+    let lo=1,hi=Math.max(1,dauer.length);
+    while (lo<hi) { const m=(lo+hi)>>1; if (wellenplan(dauer,m).ende<=ziel) hi=m; else lo=m+1; }
+    // Mehr als eine Baustelle je Haus geht nicht: höchstens so viele gleichzeitig wie Häuser.
+    parallel=Math.min(lo,Math.max(1,jeHaus.size));
   }
+  const plan=wellenplan(dauer,parallel);
+  const kostenWoche=new Map<number,number>();
+  plan.starts.forEach((st,i)=>kostenWoche.set(st,(kostenWoche.get(st)??0)+dauer[i].k));
   const haeuser=new Set(liste.map(x=>x.haus)).size;
   const spitze=Math.max(0,...kostenWoche.values());
   const budgetRest=Math.max(0,(s.umbau?.budget??0)-(s.umbau?.verbraucht??0));
-  // Was davon ins freie Budget passt (Reihenfolge wie das Programm: schlechteste und dringendste zuerst).
+  // Kosten je Spieljahr (Jahr 1 = laufendes Jahr, Rest der 52 Wochen) gegen das Budget dieses Jahres bzw. das Jahresbudget danach.
+  const restWochen=52-((s.woche-1)%52);
+  const jahre:{jahr:number;kosten:number;budget:number}[]=[];
+  plan.starts.forEach((st,i)=>{
+    const j=st<restWochen?0:1+Math.floor((st-restWochen)/52);
+    while (jahre.length<=j) jahre.push({jahr:jahre.length+1,kosten:0,budget:jahre.length===0?budgetRest:(s.umbau?.budget??0)});
+    jahre[j].kosten+=dauer[i].k;
+  });
+  // Was ins freie Budget dieses Jahres passt (Reihenfolge des Programms).
   let imKosten=0,imAuftraege=0; const imHaeuser=new Set<string>();
   for (const d of dauer) { if (imKosten+d.k>budgetRest) break; imKosten+=d.k; imAuftraege++; imHaeuser.add(d.haus); }
-  return {haeuser,etagen:GEWERKE[a.gewerk].ebene==='haus'?0:liste.length,auftraege:liste.length,kosten,wochen:ende,ausfall,plusJahr,
-    spitzeWoche:spitze,budgetRest,ueberBudget:kosten>budgetRest,imBudget:{auftraege:imAuftraege,haeuser:imHaeuser.size,kosten:imKosten},ertragJahr:eur(plusJahr*BRUTTO),
+  const gw=auftragsGewerke(a);
+  return {haeuser,etagen:gw.every(g=>GEWERKE[g].ebene==='haus')?0:liste.length,auftraege:liste.length,kosten,wochen:plan.ende,parallel,fruehestens,
+    zielHaelt:!a.zielWochen||plan.ende<=a.zielWochen,ausfall,plusJahr,jahre,ueberBudgetJahre:jahre.filter(j=>j.kosten>j.budget).length,
+    spitzeWoche:spitze,budgetRest,ueberBudget:jahre.some(j=>j.kosten>j.budget),imBudget:{auftraege:imAuftraege,haeuser:imHaeuser.size,kosten:imKosten},ertragJahr:eur(plusJahr*BRUTTO),
     rendite:Math.round(plusJahr*BRUTTO/Math.max(1,kosten)*1000)/10,amortisationJahre:plusJahr>0?Math.round(kosten/(plusJahr*BRUTTO)*10)/10:null};
 }
 function bauprogrammStarten(s:GameState,a:BauprogrammAuftrag):{ok:boolean;text:string} {
-  if (!a.cluster?.length) return {ok:false,text:'Bitte mindestens einen Cluster wählen.'};
-  if (!GEWERKE[a.gewerk]) return {ok:false,text:'Unbekanntes Gewerk.'};
+  if (!a.cluster?.length&&!a.haeuser?.length) return {ok:false,text:'Bitte mindestens einen Cluster oder ein Haus wählen.'};
+  const gw=auftragsGewerke(a);
+  if (!gw.length) return {ok:false,text:'Unbekanntes Gewerk.'};
+  a={...a,gewerk:gw[0],gewerke:gw};
+  if (a.zielWochen) a.parallel=bauprogrammSchaetzung(s,a).parallel;
   const liste=auftragsListe(s,a);
   if (!liste.length) return {ok:false,text:'In diesen Clustern ist nichts mehr zu tun.'};
   const st=s.umbau!;
   const id='bp-'+(++st.zaehler);
-  const name=a.name||GEWERKE[a.gewerk].name+' · '+a.cluster.length+(a.cluster.length===1?' Cluster':' Cluster');
+  const ziel=a.cluster.length?a.cluster.length+' Cluster':(a.haeuser?.length??0)+((a.haeuser?.length??0)===1?' Haus':' Häuser');
+  const name=a.name||(gw.length===1?GEWERKE[gw[0]].name:gw.length+' Maßnahmen')+' · '+ziel;
   const prog:Bauprogramm={...a,name,parallel:Math.max(1,Math.round(a.parallel)),id,start:s.woche,status:'laufend',
     warteschlange:liste,gesamt:liste.length,gestartet:0,kosten:0};
   st.programme!.push(prog);
@@ -480,10 +564,11 @@ function bauprogrammeWoche(s:GameState,nur?:string):void {
     for (const x of p.warteschlange) {
       const h=s.haeuser.find(y=>y.id===x.haus);
       if (aktiv>=p.parallel||!h) {rest.push(x);continue;}
-      if (h.status!=='offen'||zielZustand(s,h,x.etage,p.gewerk)>p.bisZustand) continue; // erledigt oder Haus zu
-      const etagen=gewerkEtagen(h,x.etage,p.gewerk);
+      const gw=(x.gewerke??[p.gewerk]).filter(g=>zielZustand(s,h,x.etage,g)<=p.bisZustand);
+      if (h.status!=='offen'||!gw.length) continue; // erledigt oder Haus zu
+      const etagen=[...new Set(gw.flatMap(g=>gewerkEtagen(h,x.etage,g)))];
       if (laeuftAuf(s,h,etagen)||st.projekte.some(y=>y.programm===p.id&&y.status==='laufend'&&y.haus===h.id)) {rest.push(x);continue;}
-      const r=gewerkStarten(s,x.haus,x.etage,p.gewerk,p.id);
+      const r=paketStarten(s,x.haus,x.etage,gw,p.id);
       if (r.ok) {aktiv++;p.gestartet++;p.kosten+=st.projekte[st.projekte.length-1].kosten;} else rest.push(x);
     }
     p.warteschlange=rest;
@@ -558,7 +643,7 @@ export function umbauVorherNachher(s:GameState,projektId:string) {
   const p=s.umbau?.projekte.find(x=>x.id===projektId);
   if (!p||!p.vorher) return undefined;
   const h=s.haeuser.find(x=>x.id===p.haus);
-  return {projekt:p,haus:h?{id:h.id,name:h.name,stadt:h.stadt}:undefined,gewerk:p.gewerk?GEWERKE[p.gewerk].name:UMBAU_STUFEN[p.stufe].name};
+  return {projekt:p,haus:h?{id:h.id,name:h.name,stadt:h.stadt}:undefined,gewerk:p.gewerke?.length?p.gewerke.map(g=>GEWERKE[g].name).join(', '):p.gewerk?GEWERKE[p.gewerk].name:UMBAU_STUFEN[p.stufe].name};
 }
 
 const etageText=(nr:number)=>nr===-1?'Untergeschoss':nr===0?'Erdgeschoss':nr+'. Obergeschoss';

@@ -1378,6 +1378,21 @@ body.spielende-aktiv { overflow: hidden; }
 .hw-schnitt-legende span { display: inline-flex; align-items: center; gap: 4px; }
 .hw-schnitt-legende i { width: 10px; height: 10px; }
 .hw-schnitt-legende i.bau { background: none; outline: 1.5px dashed var(--text); outline-offset: -1.5px; }
+/* E54 Bauprogramm: Maßnahme als Bildkarte (vorher | nachher), darunter Text, unten Paket-Knopf und Blättern rechts. */
+.hw-massnahme { margin: 0 0 6px; border-radius: 8px; background: var(--karte); overflow: hidden; }
+.hw-massnahme figure { position: relative; margin: 0; }
+.hw-massnahme img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.hw-massnahme figure span { position: absolute; bottom: 8px; padding: 2px 8px; border-radius: 4px; background: rgba(0, 0, 0, .55); color: #fff; font: var(--hw-t-klein); text-transform: uppercase; letter-spacing: .06em; }
+.hw-massnahme .vor { left: 8px; } .hw-massnahme .nach { right: 8px; }
+.hw-massnahme-text { padding: 12px 14px 4px; }
+.hw-massnahme-text b { display: flex; align-items: center; gap: 8px; font: var(--hw-t-titel); }
+.hw-massnahme-text p { margin: 6px 0 4px; font: var(--hw-t-text); color: var(--text); }
+.hw-massnahme-text small { font: var(--hw-t-klein); color: var(--leise); }
+.hw-massnahme-fuss { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px 14px; }
+.hw-massnahme-fuss .hw-knopf { margin: 0; }
+.hw-massnahme-nav { display: flex; align-items: center; gap: 10px; }
+.hw-massnahme-nav small { font: var(--hw-t-klein); color: var(--leise); min-width: 34px; text-align: center; }
+.hw-massnahme-nav button { width: 44px; height: 44px; border: 0; padding: 0; color: #fff; font: var(--hw-t-titel); --f: var(--akzent); --l: var(--akzent-linie); }
 /* Umfang im Bauprogramm: gewählte Seite eindeutig (hell und fett), die andere zurückgenommen. */
 #panel.hw .hw-umfang .hw-segment:not(:has(img)) > button[aria-pressed='false']::before { background: var(--feld); }
 #panel.hw .hw-umfang .hw-segment:not(:has(img)) > button[aria-pressed='false'] { color: var(--leise); }

@@ -2,6 +2,7 @@
 // Hauptfrage der Konzernseite: Wo steht der Bestand, und was bauen wir als Nächstes?
 import { geld, esc, fmt } from './format.js';
 import * as K from './komponenten.js';
+import { KARTEN_BILDER } from './umbau-karten-bilder.js';
 const ETAGE = (nr) => nr === -1 ? 'UG' : nr === 0 ? 'EG' : nr + '. OG';
 const ETAGE_LANG = (nr) => nr === -1 ? 'Untergeschoss' : nr === 0 ? 'Erdgeschoss' : nr + '. Obergeschoss';
 const GRUPPEN = [['technik', 'Technik'], ['moebel', 'Möbel'], ['oberflaeche', 'Boden'], ['fassade', 'Fassade']];
@@ -26,7 +27,7 @@ function etagenSchnitt(etagen) {
 export function umbauModul(ctx) {
   const E = ctx.E, s = () => ctx.s();
   const ui = { aktiv: false, seite: 'bestand', haus: null, etage: 0, gewerk: 'moebel', cluster: null, projekt: null,
-    auftrag: { cluster: [], gewerk: 'moebel', bisZustand: 0, parallel: 6 } };
+    auftrag: { cluster: [], gewerke: [], bisZustand: 0, zielWochen: 104, karte: 0 } };
   const kw = (w) => 'KW ' + ((w % 52) + 1) + '/' + (s().startJahr + Math.floor(w / 52));
   const G = () => E.GEWERKE ?? {};
 
@@ -119,41 +120,65 @@ export function umbauModul(ctx) {
     ctx.panel(c.name, 'Bestand im Cluster', K.bereich('haus', 'umbau') + '<div class="hw-g5">' + K.rumpf(x) + '</div>', 'gross');
   }
 
-  // ───────────── Bauprogramm-Assistent
-  /** Vorauswahl: die fünf Cluster mit dem schlechtesten Zustand im gewählten Gewerk. */
-  function schlechteste5() {
-    const grp = G()[ui.auftrag.gewerk]?.gruppe, g = grp === 'komplett' ? 'moebel' : grp;
-    return E.bestandUebersicht(s()).cluster.filter((c) => !c.sonder).sort((p, q) => (p.gut[g] ?? 0) - (q.gut[g] ?? 0)).slice(0, 5).map((c) => c.id);
+  // ───────────── Bauprogramm-Assistent (E54): Maßnahmen als Bildkarten, Paket, Zieltermin, Cluster ohne Vorauswahl
+  const ZIELE = [[52, '1 Jahr'], [104, '2 Jahre'], [156, '3 Jahre'], [260, '5 Jahre']];
+  const gruppeVon = (g) => { const x = G()[g]?.gruppe; return x === 'komplett' ? 'moebel' : x; };
+  /** Bedarf eines Clusters für das Paket: mittlerer Anteil „nicht gut“ über die Gruppen der gewählten Maßnahmen. */
+  function bedarf(c, gewerke) {
+    const gr = [...new Set((gewerke.length ? gewerke : ['moebel']).map(gruppeVon))];
+    return gr.reduce((v, g) => v + (100 - (c.gut[g] ?? 0)), 0) / gr.length;
+  }
+  function auftragFuerEngine() {
+    const a = ui.auftrag;
+    return { cluster: [...a.cluster], gewerk: a.gewerke[0] ?? 'moebel', gewerke: [...a.gewerke], bisZustand: a.bisZustand, parallel: 1, zielWochen: a.zielWochen };
+  }
+  function massnahmeKarte(g, i, paket) {
+    const d = G()[g] ?? {}, bild = KARTEN_BILDER[g];
+    const im = paket.includes(g) || (paket.includes('komplett') && g !== 'komplett');
+    const je = d.ebene === 'haus' ? 'je Haus' : 'je Etage';
+    return '<div class="hw-massnahme">'
+      + (bild ? '<figure><img src="' + bild + '" alt="' + esc(d.name) + ' vorher und nachher"><span class="vor">vorher</span><span class="nach">nachher</span></figure>' : '')
+      + '<div class="hw-massnahme-text"><b>' + esc(d.name) + (im ? ' <span class="hw-status gut">im Paket</span>' : '') + '</b>'
+      + '<p>' + esc(d.text) + '</p><small>rund ' + fmt.format(d.qm) + ' € je m² · ' + d.min + (d.max > d.min ? '–' + d.max : '') + ' Wochen ' + je + '</small></div>'
+      + '<div class="hw-massnahme-fuss">'
+      + K.knopf(paket.includes(g) ? 'Aus dem Paket' : 'Ins Paket', 'data-umbau="apaket" data-v="' + g + '"', paket.includes(g) ? 'zweit' : '', paket.includes('komplett') && g !== 'komplett')
+      + '<span class="hw-massnahme-nav"><button type="button" class="hw-kontur" aria-label="vorige Maßnahme" data-umbau="akarte" data-v="-1">‹</button>'
+      + '<small>' + (i + 1) + ' / ' + GEWERK_FOLGE.length + '</small>'
+      + '<button type="button" class="hw-kontur" aria-label="nächste Maßnahme" data-umbau="akarte" data-v="1">›</button></span></div></div>';
   }
   function assistent() {
     const a = ui.auftrag, u = E.bestandUebersicht(s());
-    const v = a.cluster.length ? E.bauprogrammSchaetzung(s(), a) : null;
-    let x = K.gross([{ label: 'Kosten', wert: v ? mio(v.kosten) : '–', ton: v?.ueberBudget ? 'schlecht' : '', unter: 'Budget frei ' + esc(geld(u.rest)) },
-      { label: 'Bauzeit', wert: v ? v.wochen + ' Wochen' : '–', unter: v ? v.haeuser + ' Häuser · ' + v.auftraege + ' Baustellen' : 'Cluster wählen' }]);
-    if (v?.auftraege) {
-      const ib = v.imBudget ?? { auftraege: 0, haeuser: 0, kosten: 0 }, alles = ib.auftraege >= v.auftraege;
-      x += K.liste([K.zeile({ was: alles ? 'Ganz im Budget' : 'Davon im Budget', unter: alles ? 'das ganze Programm' : 'die schlechtesten zuerst',
-        wert: (alles ? 'alle ' + v.auftraege : ib.auftraege + ' von ' + v.auftraege) + (v.auftraege === 1 ? ' Baustelle' : ' Baustellen'), wertUnter: ib.haeuser + (ib.haeuser === 1 ? ' Haus · ' : ' Häuser · ') + esc(mio(ib.kosten)), ton: alles ? 'gut' : (ib.auftraege ? 'achtung' : 'schlecht') })]);
-    }
-    x += K.abschnitt('1 · Gewerk');
-    x += K.liste(GEWERK_FOLGE.map((g) => K.zeile({ was: esc(G()[g].name) + (g === a.gewerk ? ' · gewählt' : ''), unter: esc(G()[g].text), tippbar: true, attr: 'data-umbau="agewerk" data-v="' + g + '"' })));
+    const v = a.cluster.length && a.gewerke.length ? E.bauprogrammSchaetzung(s(), auftragFuerEngine()) : null;
+    const fertig = v?.auftraege ? kw(s().woche + v.wochen) : '';
+    let x = K.gross([{ label: 'Kosten', wert: v ? mio(v.kosten) : '–', ton: v?.ueberBudget ? 'schlecht' : '', unter: v ? v.haeuser + ' Häuser · ' + v.auftraege + ' Baustellen' : 'Budget frei ' + esc(geld(u.rest)) },
+      { label: 'Fertig', wert: v?.auftraege ? fertig : '–', unter: v?.auftraege ? v.parallel + ' Baustellen gleichzeitig' : (a.gewerke.length ? 'Cluster wählen' : 'Maßnahme wählen') }]);
+    // 1 · Maßnahmen
+    const paketText = a.gewerke.length ? a.gewerke.map((g) => G()[g]?.name).join(', ') : 'noch leer';
+    x += K.abschnitt('1 · Maßnahmen', 'Paket: ' + paketText);
+    x += massnahmeKarte(GEWERK_FOLGE[a.karte], a.karte, a.gewerke);
+    // 2 · Umfang
     x += K.abschnitt('2 · Umfang', a.bisZustand ? 'schlechte und mittlere' : 'nur schlechte');
     x += '<div class="hw-umfang">' + K.seg([['0', 'nur schlechte'], ['1', 'schlechte und mittlere']], String(a.bisZustand), (w) => 'data-umbau="abis" data-v="' + w + '"') + '</div>';
-    x += K.feld('Gleichzeitige Baustellen', K.stepper({ wert: String(a.parallel), unter: 'höchstens 1 je Haus', attrMinus: 'data-umbau="apar" data-v="-1"', attrPlus: 'data-umbau="apar" data-v="1"', minusAus: a.parallel <= 1, plusAus: a.parallel >= 40, label: 'Gleichzeitige Baustellen' }));
-    x += K.abschnitt('3 · Cluster', a.cluster.length + ' gewählt');
-    x += K.knoepfe(K.knopf('Alle', 'data-umbau="aalle"', 'zweit'), K.knopf('Keine', 'data-umbau="akeine"', 'zweit'), K.knopf('Schlechteste 5', 'data-umbau="aschlecht"', 'zweit'));
-    const grp = G()[a.gewerk]?.gruppe, sortGruppe = grp === 'komplett' ? 'moebel' : grp;
-    x += u.cluster.slice().sort((p, q) => (p.gut[sortGruppe] ?? 0) - (q.gut[sortGruppe] ?? 0)).map((c) => K.schalter({ text: c.name,
-      unter: c.haeuser + ' Häuser · ' + GRUPPEN.find(([g]) => g === sortGruppe)[1] + ' gut ' + (c.gut[sortGruppe] ?? 0) + ' %', an: a.cluster.includes(c.id), attr: 'data-umbau="acluster" data-id="' + esc(c.id) + '"' })).join('');
+    // 3 · Bis wann
+    x += K.abschnitt('3 · Bis wann', v?.auftraege ? 'fertig ' + fertig : '');
+    x += '<div class="hw-umfang">' + K.seg(ZIELE.map(([w, t]) => [String(w), t]), String(a.zielWochen), (w) => 'data-umbau="aziel" data-v="' + w + '"') + '</div>';
+    if (v?.auftraege && !v.zielHaelt) x += K.hinweis('Schneller geht es nicht: In einem Haus läuft eine Baustelle nach der anderen. Frühestens nach ' + v.fruehestens + ' Wochen fertig.', 'achtung');
+    // 4 · Wo
+    x += K.abschnitt('4 · Wo', a.cluster.length + ' von ' + u.cluster.length + ' Clustern');
+    x += K.knoepfe(K.knopf('Alle', 'data-umbau="aalle"', 'zweit'), K.knopf('Keine', 'data-umbau="akeine"', 'zweit'), K.knopf('Mit Fristen', 'data-umbau="afristen"', 'zweit'));
+    x += u.cluster.slice().sort((p, q) => bedarf(q, a.gewerke) - bedarf(p, a.gewerke)).map((c) => K.schalter({ text: c.name,
+      unter: c.haeuser + (c.haeuser === 1 ? ' Haus' : ' Häuser') + ' · ' + Math.round(bedarf(c, a.gewerke)) + ' % erneuern' + (c.fristen ? ' · <span class="hw-achtung">' + c.fristen + ' Fristen</span>' : ''),
+      an: a.cluster.includes(c.id), attr: 'data-umbau="acluster" data-id="' + esc(c.id) + '"' })).join('');
+    // Vorschau
     if (v) {
-      x += K.abschnitt('Vorschau');
+      x += K.abschnitt('Kosten je Jahr', 'gegen das Baubudget');
+      x += K.liste(v.jahre.map((j) => K.zeile({ was: 'Jahr ' + j.jahr, unter: (j.jahr === 1 ? 'frei ' : 'Budget ') + esc(mio(j.budget)), wert: esc(mio(j.kosten)), ton: j.kosten > j.budget ? 'schlecht' : 'gut' })));
       x += K.liste([
         K.zeile({ was: 'Umsatzausfall in der Bauzeit', wert: esc(mio(v.ausfall)), ton: 'schlecht' }),
         K.zeile({ was: 'Mehrumsatz im Jahr danach', wert: esc(mio(v.plusJahr)), ton: 'gut' }),
-        K.zeile({ was: 'Mehr Bruttogewinn im Jahr', wert: esc(mio(v.ertragJahr)), wertUnter: v.amortisationJahre != null ? 'Amortisation ' + v.amortisationJahre.toLocaleString('de-DE') + ' Jahre' : '' }),
-        K.zeile({ was: 'Höchste Zahlung in einer Woche', wert: esc(mio(v.spitzeWoche)), wertUnter: 'Liquidität' })]);
-      if (!v.auftraege) x += K.hinweis('In diesen Clustern ist für dieses Gewerk nichts mehr zu tun.', 'achtung');
-      else if (v.ueberBudget) x += K.hinweis('Das Programm übersteigt das freie Baubudget dieses Jahres.', 'achtung');
+        K.zeile({ was: 'Mehr Bruttogewinn im Jahr', wert: esc(mio(v.ertragJahr)), wertUnter: v.amortisationJahre != null ? 'Amortisation ' + v.amortisationJahre.toLocaleString('de-DE') + ' Jahre' : '' })]);
+      if (!v.auftraege) x += K.hinweis('In diesen Clustern ist für diese Maßnahmen nichts mehr zu tun.', 'achtung');
+      else if (v.ueberBudget) x += K.hinweis('Das Programm übersteigt in ' + v.ueberBudgetJahre + (v.ueberBudgetJahre === 1 ? ' Jahr' : ' Jahren') + ' das Baubudget.', 'achtung');
     }
     x += K.knoepfe(K.knopf('Bauprogramm starten', 'data-umbau="astart"', 'breit', !v?.auftraege));
     x += K.knoepfe(K.knopf('Abbrechen', 'data-umbau="modernisierung"', 'text'));
@@ -227,15 +252,16 @@ export function umbauModul(ctx) {
     if (art === 'programm') { ui.seite = 'programm'; ui.programm = el.dataset.id; return anzeigen(); }
     if (art === 'projekt') { ui.seite = 'projekt'; ui.projekt = el.dataset.id; return anzeigen(); }
     if (art === 'pstop') return tun({ typ: 'bauprogrammStoppen', id: el.dataset.id });
-    if (art === 'assistent') { ui.seite = 'assistent'; if (el.dataset.id) A.cluster = [el.dataset.id]; else if (!A.cluster.length) A.cluster = schlechteste5(); return anzeigen(); }
-    if (art === 'agewerk') { A.gewerk = el.dataset.v; return anzeigen(); }
+    if (art === 'assistent') { ui.seite = 'assistent'; if (el.dataset.id) A.cluster = [el.dataset.id]; return anzeigen(); }
+    if (art === 'akarte') { A.karte = (A.karte + Number(el.dataset.v) + GEWERK_FOLGE.length) % GEWERK_FOLGE.length; return anzeigen(); }
+    if (art === 'apaket') { const g = el.dataset.v; A.gewerke = A.gewerke.includes(g) ? A.gewerke.filter((x) => x !== g) : g === 'komplett' ? ['komplett'] : [...A.gewerke, g]; return anzeigen(); }
     if (art === 'abis') { A.bisZustand = Number(el.dataset.v); return anzeigen(); }
-    if (art === 'apar') { A.parallel = Math.max(1, Math.min(40, A.parallel + Number(el.dataset.v))); return anzeigen(); }
+    if (art === 'aziel') { A.zielWochen = Number(el.dataset.v); return anzeigen(); }
     if (art === 'acluster') { const id = el.dataset.id; A.cluster = A.cluster.includes(id) ? A.cluster.filter((c) => c !== id) : [...A.cluster, id]; return anzeigen(); }
     if (art === 'aalle') { A.cluster = E.bestandUebersicht(s()).cluster.map((c) => c.id); return anzeigen(); }
     if (art === 'akeine') { A.cluster = []; return anzeigen(); }
-    if (art === 'aschlecht') { A.cluster = schlechteste5(); return anzeigen(); }
-    if (art === 'astart') return tun({ typ: 'bauprogrammStarten', auftrag: { ...A, cluster: [...A.cluster] } }, 'bestand');
+    if (art === 'afristen') { A.cluster = E.bestandUebersicht(s()).cluster.filter((c) => c.fristen > 0).map((c) => c.id); return anzeigen(); }
+    if (art === 'astart') return tun({ typ: 'bauprogrammStarten', auftrag: auftragFuerEngine() }, 'bestand');
   });
   return {
     oeffne: (haus = null, etage = 0, projektId = null) => {

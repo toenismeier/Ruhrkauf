@@ -427,6 +427,6 @@ export { planungBericht, planWoche };
 // O07 Haus: Betriebssteckbrief, Mystery-Shopping-Rangliste, Beobachtung und Wochenkommentare.
 export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking, hausKandidaten, hausKundenscore } from './haus';
 // O08 Umbau
-export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN, GEWERKE, gewerkSchaetzung, bauprogrammSchaetzung, bestandUebersicht, bestandCluster, umbauVorherNachher } from './umbau';
+export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN, GEWERKE, gewerkSchaetzung, bauprogrammSchaetzung, paketSchaetzung, auftragsGewerke, bestandUebersicht, bestandCluster, umbauVorherNachher } from './umbau';
 // O04 Personal: Anzeigeprojektionen, keine Personalberechnung in der Oberfläche.
 export { personalHaus, personalUebersicht } from './personaleinsatz';
