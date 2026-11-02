@@ -1,0 +1,9 @@
+# Wurf 5 · V5 Schuhe, Wäsche, Taschen, Accessoires
+
+Erst `auftraege/wurf5/README.md` vollständig lesen; alle Regeln dort gelten.
+
+- **Umfang:** Schuhe, Wäsche und Bademode, Taschen, Accessoires. Deine Pakete: alle Zeilen in `auftraege/wurf5/daten/v-pakete.csv` mit `chat=V5`.
+- **B-Bilder:** privat `toenismeier/hartwig-ref-p01-shirts-tops`, Ordner `bildpakete-w5/<paket>/B/`. Referenz-Bögen laut Spalte `boegen`.
+- **Code:** Varianten in `engine/src/sortiment/w5-rest.ts`, Bilder in `render/src/kit/mode/w5-rest.js` und `w5-rest-zuordnung.json`, Branch `feat/w5-rest`.
+- **Schwerpunkt:** Schuhe in Dreiviertelansicht wie `q28-schuhe.js`. Taschen mit erkennbarer Trageart (Baguette unter dem Arm, Umhängetasche mit Riemen). Wäsche nur Flatlay, für Teens keine figurbetonte Wäsche (E45). Bis der Haken aus V1 in main ist: Bilder bauen, Engine danach.
+- **Je Paket:** Bogen an Ummo, Merge erst nach Ok, danach STATUS.md (Abschnitt Wurf 5) fortschreiben.

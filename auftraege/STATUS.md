@@ -93,6 +93,18 @@ Festlegungen und Freigabestand stehen im Projektdokument MODEL-WUENSCHE (privat,
 | Weg ohne Bildmodell (Figur und Kleidung aus Code) | Vorschlag 30.10., Pilot mit 3 Produkten, **nicht entschieden** |
 | Wäsche, Schuhe, Baguette-Tasche | eigener Weg nötig, offen |
 
+## Wurf 5: Schnittvarianten mit eigenem Bild (ab 02.11.2026)
+Aufträge `auftraege/wurf5/` (README mit Entscheidungen, Phase 0, Haken, Arbeitsweise). Quelle: Sonderauswertung Teens/Young Adults (1.033 Produkte, davon 388 Varianten und 43 neue Typen laut Spielstatus), Freigabe vorbelegt „ok“, nur Freisteller (keine Models).
+
+| Schritt | Inhalt | Stand |
+|---|---|---|
+| Phase 0 | Liste vorbelegen, Unsinn raus, Pakete `daten/v-pakete.csv`, B-Bilder auf RunPod (Kostenfreigabe Ummo) | **offen**, braucht Verbindung zu Ummos Rechner |
+| V1 Oberteile | zuerst Haken `feat/w5-haken` (startet sofort), dann Pakete | offen |
+| V2 Unterteile | Pakete nach Phase 0 | offen |
+| V3 Kleider | Pakete nach Phase 0 | offen |
+| V4 Jacken und Mäntel | Pakete nach Phase 0 | offen |
+| V5 Schuhe, Wäsche, Taschen, Accessoires | Pakete nach Phase 0 | offen |
+
 ## Operatives Paket
 | Workstream | Branch / PR | Status | Nächster Schritt |
 |---|---|---|---|
@@ -123,7 +135,7 @@ Festlegungen und Freigabestand stehen im Projektdokument MODEL-WUENSCHE (privat,
 6. Engine: „Bot D mittel ≥ Bot T“ nicht erfüllt (aus Q35), Bot-D-Schließregel als eigener Auftrag (nicht angelegt).
 7. P3 Stadt (E47) nicht gestartet.
 8. Bilder, Kleinpunkte: Steppung und Poncho in 64 px (Q34), Model-Sets und Rucksack-Platz (Q28-Bedarf an Q27).
-9. Eigenmarke Models: siehe Abschnitt oben.
+9. Eigenmarke: Wurf 5 Schnittvarianten (Phase 0, dann V1–V5); Models getrennt (Weg Bildmodell oder Code offen).
 10. Ummo beurteilt auf dem iPhone: Oberfläche (Q14, Q30–Q32, P2), Kontaktbögen Q33/Q34.
 11. Unbestätigte Claude-Vorschläge: Namen der Premiumhäuser P003–P005, Startmonate Jan/Apr/Jul/Okt (Q07).
 12. E53 Formattrennung (Hartwig, Premium, Volkskauf, Sport, FUNDUS): Etappe 1 Fundament auf `feat/formate-fundament` (`auftraege/formate/e53-etappe1-fundament.md`). Danach Etappe 2 Ware/Einkauf, 3 Markt/Kunde, 4 Betrieb/Steuerung, 5 Formatwähler auf allen Seiten; erst Ansichtsbilder, dann Einbau.
