@@ -120,16 +120,26 @@ export function umbauModul(ctx) {
   }
 
   // ───────────── Bauprogramm-Assistent
+  /** Vorauswahl: die fünf Cluster mit dem schlechtesten Zustand im gewählten Gewerk. */
+  function schlechteste5() {
+    const grp = G()[ui.auftrag.gewerk]?.gruppe, g = grp === 'komplett' ? 'moebel' : grp;
+    return E.bestandUebersicht(s()).cluster.filter((c) => !c.sonder).sort((p, q) => (p.gut[g] ?? 0) - (q.gut[g] ?? 0)).slice(0, 5).map((c) => c.id);
+  }
   function assistent() {
     const a = ui.auftrag, u = E.bestandUebersicht(s());
     const v = a.cluster.length ? E.bauprogrammSchaetzung(s(), a) : null;
     let x = K.gross([{ label: 'Kosten', wert: v ? mio(v.kosten) : '–', ton: v?.ueberBudget ? 'schlecht' : '', unter: 'Budget frei ' + esc(geld(u.rest)) },
       { label: 'Bauzeit', wert: v ? v.wochen + ' Wochen' : '–', unter: v ? v.haeuser + ' Häuser · ' + v.auftraege + ' Baustellen' : 'Cluster wählen' }]);
+    if (v?.auftraege) {
+      const ib = v.imBudget ?? { auftraege: 0, haeuser: 0, kosten: 0 }, alles = ib.auftraege >= v.auftraege;
+      x += K.liste([K.zeile({ was: alles ? 'Ganz im Budget' : 'Davon im Budget', unter: alles ? 'das ganze Programm' : 'die schlechtesten zuerst',
+        wert: (alles ? 'alle ' + v.auftraege : ib.auftraege + ' von ' + v.auftraege) + (v.auftraege === 1 ? ' Baustelle' : ' Baustellen'), wertUnter: ib.haeuser + (ib.haeuser === 1 ? ' Haus · ' : ' Häuser · ') + esc(mio(ib.kosten)), ton: alles ? 'gut' : (ib.auftraege ? 'achtung' : 'schlecht') })]);
+    }
     x += K.abschnitt('1 · Gewerk');
     x += K.liste(GEWERK_FOLGE.map((g) => K.zeile({ was: esc(G()[g].name) + (g === a.gewerk ? ' · gewählt' : ''), unter: esc(G()[g].text), tippbar: true, attr: 'data-umbau="agewerk" data-v="' + g + '"' })));
-    x += K.abschnitt('2 · Umfang');
-    x += K.seg([['0', 'nur schlechte'], ['1', 'schlechte und mittlere']], String(a.bisZustand), (w) => 'data-umbau="abis" data-v="' + w + '"');
-    x += K.feld('Gleichzeitige Baustellen', K.stepper({ wert: String(a.parallel), unter: 'je Haus eine', attrMinus: 'data-umbau="apar" data-v="-1"', attrPlus: 'data-umbau="apar" data-v="1"', minusAus: a.parallel <= 1, plusAus: a.parallel >= 40, label: 'Gleichzeitige Baustellen' }));
+    x += K.abschnitt('2 · Umfang', a.bisZustand ? 'schlechte und mittlere' : 'nur schlechte');
+    x += '<div class="hw-umfang">' + K.seg([['0', 'nur schlechte'], ['1', 'schlechte und mittlere']], String(a.bisZustand), (w) => 'data-umbau="abis" data-v="' + w + '"') + '</div>';
+    x += K.feld('Gleichzeitige Baustellen', K.stepper({ wert: String(a.parallel), unter: 'höchstens 1 je Haus', attrMinus: 'data-umbau="apar" data-v="-1"', attrPlus: 'data-umbau="apar" data-v="1"', minusAus: a.parallel <= 1, plusAus: a.parallel >= 40, label: 'Gleichzeitige Baustellen' }));
     x += K.abschnitt('3 · Cluster', a.cluster.length + ' gewählt');
     x += K.knoepfe(K.knopf('Alle', 'data-umbau="aalle"', 'zweit'), K.knopf('Keine', 'data-umbau="akeine"', 'zweit'), K.knopf('Schlechteste 5', 'data-umbau="aschlecht"', 'zweit'));
     const grp = G()[a.gewerk]?.gruppe, sortGruppe = grp === 'komplett' ? 'moebel' : grp;
@@ -217,18 +227,14 @@ export function umbauModul(ctx) {
     if (art === 'programm') { ui.seite = 'programm'; ui.programm = el.dataset.id; return anzeigen(); }
     if (art === 'projekt') { ui.seite = 'projekt'; ui.projekt = el.dataset.id; return anzeigen(); }
     if (art === 'pstop') return tun({ typ: 'bauprogrammStoppen', id: el.dataset.id });
-    if (art === 'assistent') { ui.seite = 'assistent'; if (el.dataset.id) A.cluster = [el.dataset.id]; return anzeigen(); }
+    if (art === 'assistent') { ui.seite = 'assistent'; if (el.dataset.id) A.cluster = [el.dataset.id]; else if (!A.cluster.length) A.cluster = schlechteste5(); return anzeigen(); }
     if (art === 'agewerk') { A.gewerk = el.dataset.v; return anzeigen(); }
     if (art === 'abis') { A.bisZustand = Number(el.dataset.v); return anzeigen(); }
     if (art === 'apar') { A.parallel = Math.max(1, Math.min(40, A.parallel + Number(el.dataset.v))); return anzeigen(); }
     if (art === 'acluster') { const id = el.dataset.id; A.cluster = A.cluster.includes(id) ? A.cluster.filter((c) => c !== id) : [...A.cluster, id]; return anzeigen(); }
     if (art === 'aalle') { A.cluster = E.bestandUebersicht(s()).cluster.map((c) => c.id); return anzeigen(); }
     if (art === 'akeine') { A.cluster = []; return anzeigen(); }
-    if (art === 'aschlecht') {
-      const grp = G()[A.gewerk]?.gruppe, g = grp === 'komplett' ? 'moebel' : grp;
-      A.cluster = E.bestandUebersicht(s()).cluster.filter((c) => !c.sonder).sort((p, q) => (p.gut[g] ?? 0) - (q.gut[g] ?? 0)).slice(0, 5).map((c) => c.id);
-      return anzeigen();
-    }
+    if (art === 'aschlecht') { A.cluster = schlechteste5(); return anzeigen(); }
     if (art === 'astart') return tun({ typ: 'bauprogrammStarten', auftrag: { ...A, cluster: [...A.cluster] } }, 'bestand');
   });
   return {

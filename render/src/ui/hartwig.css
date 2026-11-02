@@ -1378,6 +1378,11 @@ body.spielende-aktiv { overflow: hidden; }
 .hw-schnitt-legende span { display: inline-flex; align-items: center; gap: 4px; }
 .hw-schnitt-legende i { width: 10px; height: 10px; }
 .hw-schnitt-legende i.bau { background: none; outline: 1.5px dashed var(--text); outline-offset: -1.5px; }
+/* Umfang im Bauprogramm: gewählte Seite eindeutig (hell und fett), die andere zurückgenommen. */
+#panel.hw .hw-umfang .hw-segment:not(:has(img)) > button[aria-pressed='false']::before { background: var(--feld); }
+#panel.hw .hw-umfang .hw-segment:not(:has(img)) > button[aria-pressed='false'] { color: var(--leise); }
+#panel.hw .hw-umfang .hw-segment:not(:has(img)) > button[aria-pressed='true']::before { background: var(--akzent); }
+#panel.hw .hw-umfang .hw-segment:not(:has(img)) > button[aria-pressed='true'] { font-weight: 700; }
 .hw-vergleich { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 12px 0; }
 .hw-vergleich figure { margin: 0; }
 .hw-vergleich img { display: block; width: 100%; aspect-ratio: 360 / 260; object-fit: cover; border-radius: 6px; background: var(--tief); }

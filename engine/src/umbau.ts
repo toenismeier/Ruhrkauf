@@ -442,8 +442,11 @@ export function bauprogrammSchaetzung(s:GameState,a:BauprogrammAuftrag) {
   const haeuser=new Set(liste.map(x=>x.haus)).size;
   const spitze=Math.max(0,...kostenWoche.values());
   const budgetRest=Math.max(0,(s.umbau?.budget??0)-(s.umbau?.verbraucht??0));
+  // Was davon ins freie Budget passt (Reihenfolge wie das Programm: schlechteste und dringendste zuerst).
+  let imKosten=0,imAuftraege=0; const imHaeuser=new Set<string>();
+  for (const d of dauer) { if (imKosten+d.k>budgetRest) break; imKosten+=d.k; imAuftraege++; imHaeuser.add(d.haus); }
   return {haeuser,etagen:GEWERKE[a.gewerk].ebene==='haus'?0:liste.length,auftraege:liste.length,kosten,wochen:ende,ausfall,plusJahr,
-    spitzeWoche:spitze,budgetRest,ueberBudget:kosten>budgetRest,ertragJahr:eur(plusJahr*BRUTTO),
+    spitzeWoche:spitze,budgetRest,ueberBudget:kosten>budgetRest,imBudget:{auftraege:imAuftraege,haeuser:imHaeuser.size,kosten:imKosten},ertragJahr:eur(plusJahr*BRUTTO),
     rendite:Math.round(plusJahr*BRUTTO/Math.max(1,kosten)*1000)/10,amortisationJahre:plusJahr>0?Math.round(kosten/(plusJahr*BRUTTO)*10)/10:null};
 }
 function bauprogrammStarten(s:GameState,a:BauprogrammAuftrag):{ok:boolean;text:string} {
