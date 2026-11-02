@@ -1,0 +1,12 @@
+// Wurf 5 · V1 Oberteile (Shirts, Tops, Crop, Blusen, Hemden, Strick, Pullover, Sweat, Cardigans): Schnittvarianten mit eigenem Bild und neue Typen (Spielstatus „neu“)
+// aus auftraege/wurf5/daten/v-pakete.csv. Nur dieser Chat trägt hier ein (auftraege/wurf5/README.md, Abschnitt Haken).
+// Variante: { name, zieltyp, zielgruppen, wgs?, bild: { silhouette }, bildOffen?: true }; bildOffen bis zu Ummos Bildabnahme.
+// Silhouetten: render/src/kit/mode/w5-oberteile.js, Zuordnung w5-oberteile-zuordnung.json.
+import type { Schnittvariante } from './q42-varianten';
+import type { SortimentTyp } from './basis';
+
+export const VARIANTEN_W5_OBERTEILE: readonly Schnittvariante[] = [];
+
+/** Neue Artikeltypen (Spielstatus „neu“), Aufbau wie q38-oberteile.ts. */
+export const NAMEN = [] as const;
+export const TYPEN: SortimentTyp<(typeof NAMEN)[number]>[] = [];

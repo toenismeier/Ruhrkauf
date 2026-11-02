@@ -15177,6 +15177,26 @@
   var NAMEN4 = L6.map((e) => e.t.typ);
   var TYPEN11 = L6.map((e) => e.t);
 
+  // ../engine/src/sortiment/w5-oberteile.ts
+  var VARIANTEN_W5_OBERTEILE = [];
+  var TYPEN12 = [];
+
+  // ../engine/src/sortiment/w5-unterteile.ts
+  var VARIANTEN_W5_UNTERTEILE = [];
+  var TYPEN13 = [];
+
+  // ../engine/src/sortiment/w5-kleider.ts
+  var VARIANTEN_W5_KLEIDER = [];
+  var TYPEN14 = [];
+
+  // ../engine/src/sortiment/w5-jacken.ts
+  var VARIANTEN_W5_JACKEN = [];
+  var TYPEN15 = [];
+
+  // ../engine/src/sortiment/w5-rest.ts
+  var VARIANTEN_W5_REST = [];
+  var TYPEN16 = [];
+
   // ../engine/src/anlass.ts
   var ANLAESSE2 = [
     { id: "abiball", name: "Abiball", monate: [5, 6, 7] },
@@ -15611,7 +15631,25 @@
   };
 
   // ../engine/src/sortiment/index.ts
-  var SORTIMENT_TYPEN = [...TYPEN, ...TYPEN2, ...TYPEN3, ...TYPEN5, ...TYPEN4, ...TYPEN6, ...TYPEN7, ...TYPEN9, ...TYPEN8, ...TYPEN10, ...TYPEN11];
+  var SORTIMENT_TYPEN = [
+    ...TYPEN,
+    ...TYPEN2,
+    ...TYPEN3,
+    ...TYPEN5,
+    ...TYPEN4,
+    ...TYPEN6,
+    ...TYPEN7,
+    ...TYPEN9,
+    ...TYPEN8,
+    ...TYPEN10,
+    ...TYPEN11,
+    // Wurf 5: neue Typen je Chat (V1 bis V5)
+    ...TYPEN12,
+    ...TYPEN13,
+    ...TYPEN14,
+    ...TYPEN15,
+    ...TYPEN16
+  ];
   var SORTIMENT_KORREKTUREN = { ...BILD_Q33_ALS_KORREKTUR(), ...KORREKTUREN2, ...KORREKTUREN };
   function BILD_Q33_ALS_KORREKTUR() {
     return Object.fromEntries(Object.entries(BILD_Q33).map(([k5, b4]) => [k5, { bild: { ...b4 } }]));
@@ -15638,7 +15676,7 @@
   var YA = ["young", "adults"];
   var HAAR2 = ["accessoires.lederwaren", "damen.young"];
   var v = (name2, zieltyp, zielgruppen, wgs) => ({ name: name2, zieltyp, zielgruppen, ...wgs ? { wgs } : {} });
-  var VARIANTEN = [
+  var VARIANTEN_Q42 = [
     v("Haartuch", "Bandana", TY4),
     v("Bandana-Top", "Bandeau-Top", TY4),
     v("Blazerbluse", "Bluse", TYA),
@@ -15675,13 +15713,17 @@
     v("Blaulichtfilter-Brille", "Modebrille", TY4),
     v("G\xFCrtelrock", "\xDCberrock", TY4)
   ];
+  var VARIANTEN = [...VARIANTEN_Q42, ...VARIANTEN_W5_OBERTEILE, ...VARIANTEN_W5_UNTERTEILE, ...VARIANTEN_W5_KLEIDER, ...VARIANTEN_W5_JACKEN, ...VARIANTEN_W5_REST];
   var JE_TYP = /* @__PURE__ */ new Map();
   for (const x2 of VARIANTEN) {
     if (!JE_TYP.has(x2.zieltyp)) JE_TYP.set(x2.zieltyp, []);
     JE_TYP.get(x2.zieltyp).push(x2);
   }
-  var variantenFuer = (typ) => JE_TYP.get(typ) ?? [];
+  var varianteWaehlbar = (x2) => !x2.bildOffen;
+  var alleVariantenFuer = (typ) => JE_TYP.get(typ) ?? [];
+  var variantenFuer = (typ) => alleVariantenFuer(typ).filter(varianteWaehlbar);
   var varianteVon = (typ, name2) => name2 ? JE_TYP.get(typ)?.find((x2) => x2.name === name2) : void 0;
+  var variantenBild = (typ, name2) => varianteVon(typ, name2)?.bild;
 
   // ../engine/src/muster.ts
   var MUSTER = ["Uni", "Streifen", "Ringel", "Karo", "Punkte", "Blumen", "Leo", "Tier", "Camouflage", "Batik", "Print", "Schriftzug", "Schachbrett", "Norweger", "H\xE4kel/Strick", "Lizenzmotiv"];
@@ -16494,6 +16536,7 @@
       if (f14) return { ...leer4, m, t: t10, fehler: f14 };
     }
     if (e.anlass != null && (!istAnlass(e.anlass) || !anlaesseFuer(t10).includes(e.anlass))) return { ...leer4, m, t: t10, fehler: `${e.typ} geh\xF6rt nicht zum Anlass ${istAnlass(e.anlass) ? ANLASS_NAME[e.anlass] : String(e.anlass)}.` };
+    if (e.variante && varianteVon(e.typ, e.variante) && !varianteWaehlbar(varianteVon(e.typ, e.variante))) return { ...leer4, m, t: t10, fehler: `${e.variante} ist noch nicht freigegeben (Bild in Arbeit).` };
     if (e.variante && !varianteVon(e.typ, e.variante)) return { ...leer4, m, t: t10, fehler: `${e.typ} gibt es nicht als ${e.variante}.${variantenFuer(e.typ).length ? ` M\xF6glich: ${variantenFuer(e.typ).map((x2) => x2.name).join(", ")}.` : ""}` };
     if (!DAUER_STUFEN.includes(e.dauer)) return { ...leer4, m, t: t10, fehler: "Entwicklungsdauer 4, 8, 12, 24 oder 48 Wochen." };
     if (!(e.budgetWoche >= 0)) return { ...leer4, m, t: t10, fehler: "Budget je Woche angeben." };
@@ -16648,7 +16691,8 @@
       fortschritt: ent ? clamp((s2.woche - p3.start) / Math.max(1, p3.dauer), 0, 1) : 1,
       seit: p3.seit,
       basis: !!p3.basis,
-      ...TYP[p3.typ]?.bild ? { bild: { ...TYP[p3.typ].bild } } : {},
+      // Wurf 5: eigenes Bild der Schnittvariante vor dem Bild des Typs
+      ...variantenBild(p3.typ, p3.variante) ? { bild: { ...variantenBild(p3.typ, p3.variante) } } : TYP[p3.typ]?.bild ? { bild: { ...TYP[p3.typ].bild } } : {},
       muster: p3.muster ?? "Uni",
       musterBild: MUSTER_INFO[p3.muster ?? "Uni"].bild,
       ...p3.anlass ? { anlass: p3.anlass, anlassName: ANLASS_NAME[p3.anlass] } : {},
@@ -16778,7 +16822,7 @@
         ...t10.bildOffen ? { bildOffen: true } : {},
         muster: musterFuer(t10),
         anlass: anlaesseFuer(t10),
-        varianten: variantenFuer(t10.typ).map((v4) => ({ name: v4.name, zielgruppen: [...v4.zielgruppen], wgs: [...v4.wgs ?? []] }))
+        varianten: variantenFuer(t10.typ).map((v4) => ({ name: v4.name, zielgruppen: [...v4.zielgruppen], wgs: [...v4.wgs ?? []], ...v4.bild ? { bild: { ...v4.bild } } : {} }))
       })),
       muster: MUSTER.map((m) => ({ name: m, bild: MUSTER_INFO[m].bild, wort: MUSTER_INFO[m].wort, preis: MUSTER_INFO[m].preis, ...MUSTER_INFO[m].gesperrt ? { gesperrt: MUSTER_INFO[m].gesperrt } : {} })),
       anlaesse: ANLAESSE2.map((a2) => ({ id: a2.id, name: a2.name, saison: anlassSaisonText(a2.id), anzahl: ARTIKELTYPEN.filter((t10) => anlaesseFuer(t10).includes(a2.id)).length })),
@@ -55482,7 +55526,7 @@
   };
   var HAUPTLICH = /* @__PURE__ */ new Set(["haupt", "boulevard", "ring", "magistrale"]);
   var MITTELSTREIFEN = /* @__PURE__ */ new Set(["boulevard", "ring", "magistrale"]);
-  var TYPEN12 = {
+  var TYPEN17 = {
     metropole: {
       idx: 0,
       spalte: [78, 106],
@@ -55593,7 +55637,7 @@
   };
   function stadtplan(seed, o4 = {}) {
     const typ = o4.typ ?? "grossstadt";
-    const T = TYPEN12[typ];
+    const T = TYPEN17[typ];
     const r4 = rng3(seed * 7919 + 13);
     const region = o4.region ?? waehle2(r4, Object.keys(REGIONEN2));
     const archetyp = o4.archetyp ?? wahlGewichtet(r4, Object.entries(ARCHETYPEN).map(([k5, v4]) => [k5, v4.gewicht[T.idx]]));
@@ -55603,7 +55647,7 @@
     return baueRaster(seed, E9);
   }
   function neuerEntwurf(seed, r4, typ, region, archetyp, o4) {
-    const T = TYPEN12[typ];
+    const T = TYPEN17[typ];
     const bl = o4.standorte?.length ? T.blockeStandorte : T.blocke;
     const nx = Math.max(4, o4.blockeX ?? bl[0]), nz = Math.max(4, o4.blockeZ ?? bl[1]);
     const prop = zw(r4, 0.85, 1.2);
@@ -160295,7 +160339,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
   }
   function baueStadt(S2, scene2, plan2, bauer = platzhalterBauer, o4 = {}) {
     const I = o4.instanzer ?? new Instanzer();
-    const ctx = { S: S2, I, scene: scene2, plan: plan2, r: rng3(plan2.seed * 31 + 5), dichte: TYPEN12[plan2.typ].dichte * (o4.dichte ?? 1), typ: plan2.typ, proBlock: /* @__PURE__ */ new Map(), ost: !!plan2.ddr, keineStandAutos: !!o4.keineStandAutos };
+    const ctx = { S: S2, I, scene: scene2, plan: plan2, r: rng3(plan2.seed * 31 + 5), dichte: TYPEN17[plan2.typ].dichte * (o4.dichte ?? 1), typ: plan2.typ, proBlock: /* @__PURE__ */ new Map(), ost: !!plan2.ddr, keineStandAutos: !!o4.keineStandAutos };
     ostVerkehr = !!plan2.ddr;
     for (const p3 of plan2.parzellen) {
       if (!ctx.proBlock.has(p3.block)) ctx.proBlock.set(p3.block, []);
@@ -160357,7 +160401,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
       }
     };
     const I = o4.instanzer ?? new Instanzer();
-    const ctx = { S: S2, I, scene: scene2, plan: plan2, r: rng3(plan2.seed * 31 + 5), dichte: TYPEN12[plan2.typ].dichte * (o4.dichte ?? 1), typ: plan2.typ, proBlock: /* @__PURE__ */ new Map(), ost: !!plan2.ddr, qualitaet: o4.qualitaet ?? null };
+    const ctx = { S: S2, I, scene: scene2, plan: plan2, r: rng3(plan2.seed * 31 + 5), dichte: TYPEN17[plan2.typ].dichte * (o4.dichte ?? 1), typ: plan2.typ, proBlock: /* @__PURE__ */ new Map(), ost: !!plan2.ddr, qualitaet: o4.qualitaet ?? null };
     ostVerkehr = !!plan2.ddr;
     for (const p3 of plan2.parzellen) {
       if (!ctx.proBlock.has(p3.block)) ctx.proBlock.set(p3.block, []);
@@ -164214,7 +164258,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
     const plug = PLUGIN_BILD.get(name2);
     const ddr = !!(plug && ARCHETYP_DEFS[plug[0]]?.ddr) || !!geo?.ddr;
     const bild4 = plug ?? BILD[name2] ?? (geo?.bild ? [geo.bild, geo.extra ?? {}] : void 0);
-    const archetyp = bild4?.[0] ?? wahlGewichtet(r4, Object.entries(ARCHETYPEN).map(([k5, v4]) => [k5, v4.gewicht[TYPEN12[typ].idx]]));
+    const archetyp = bild4?.[0] ?? wahlGewichtet(r4, Object.entries(ARCHETYPEN).map(([k5, v4]) => [k5, v4.gewicht[TYPEN17[typ].idx]]));
     const extra = { ...bild4?.[1] ?? {}, ...ddr ? { ddr: true } : {} };
     const standorte = liste3.map((h5) => {
       const v4 = WARENHAUS_VARIANTEN.get(h5.id);
@@ -166516,7 +166560,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
   for (const d5 of einstellungen) meldeSchalter(d5);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "876734b" : "Entwicklung";
+  var version = () => true ? "5d03b2c" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv8 = false;
     function feld2(d5) {
@@ -179514,6 +179558,26 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
   for (const [id, mt] of Object.entries(MODEL2)) SILHOUETTEN35[id].modelTeile = (p3, farbe2, material3) => ({ ...mt, farbe: farbe2, material: material3, muster: void 0 });
   var ZEICHNER36 = { b30: b30Zeichner };
 
+  // src/kit/mode/w5-oberteile.js
+  var SILHOUETTEN36 = {};
+  var ZEICHNER37 = {};
+
+  // src/kit/mode/w5-unterteile.js
+  var SILHOUETTEN37 = {};
+  var ZEICHNER38 = {};
+
+  // src/kit/mode/w5-kleider.js
+  var SILHOUETTEN38 = {};
+  var ZEICHNER39 = {};
+
+  // src/kit/mode/w5-jacken.js
+  var SILHOUETTEN39 = {};
+  var ZEICHNER40 = {};
+
+  // src/kit/mode/w5-rest.js
+  var SILHOUETTEN40 = {};
+  var ZEICHNER41 = {};
+
   // src/kit/mode/silhouetten.js
   var o3 = (p3, model = "oberteil", material3 = "baumwolle", farbe2 = "wei\xDF") => ({ gruppe: "oberteil", zeichner: "oberteil", p: p3, material: material3, farbe: farbe2, model });
   var h4 = (p3, material3 = "baumwolle", farbe2 = "sand") => ({ gruppe: "unterteil", zeichner: "hose", p: p3, material: material3, farbe: farbe2, model: "hose" });
@@ -179522,7 +179586,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
   var j3 = (art, material3, farbe2, p3 = {}) => ({ gruppe: "jacke", zeichner: "jacke", p: { art, ...p3 }, material: material3, farbe: farbe2, model: "jacke" });
   var d4 = (gruppe3, id, material3, farbe2, model = null, p3 = {}) => ({ gruppe: gruppe3, zeichner: "ding:" + id, p: p3, material: material3, farbe: farbe2, model });
   var a = (gruppe3, alt, material3, farbe2, model = null, p3 = {}) => ({ gruppe: gruppe3, zeichner: "alt:" + alt, p: p3, material: material3, farbe: farbe2, model });
-  var SILHOUETTEN36 = {
+  var SILHOUETTEN41 = {
     // Oberteile
     tshirt: o3({ aermel: "kurz", kragen: "rund" }),
     babytee: o3({ aermel: "kurz", kragen: "rund", passform: "tailliert", laenge: "crop" }, "oberteil", "baumwolle", "rosa"),
@@ -179640,22 +179704,22 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
     parfum: a("beauty", "Parfum", "glas", "flieder"),
     plueschtier: a("spielzeug", "Pl\xFCschtier", "polyester", "camel")
   };
-  for (const [id, s2] of Object.entries(SILHOUETTEN36)) if (s2.gruppe === "rock" || s2.gruppe === "kleid") s2.nur = "damen";
-  for (const id of ["babytee", "traegertop", "croptop", "schluppenbluse", "tunika", "wickelshirt"]) SILHOUETTEN36[id].nur = "damen";
-  Object.assign(SILHOUETTEN36.kinderkleid, { nur: "kinder", geschlecht: "damen" });
-  SILHOUETTEN36.kinderbody.nur = "kinder";
-  Object.assign(SILHOUETTEN36, SILHOUETTEN, SILHOUETTEN2, SILHOUETTEN3, SILHOUETTEN4, SILHOUETTEN5, SILHOUETTEN6, SILHOUETTEN7, SILHOUETTEN8, SILHOUETTEN9, SILHOUETTEN10, SILHOUETTEN11, SILHOUETTEN12, SILHOUETTEN13, SILHOUETTEN14, SILHOUETTEN15, SILHOUETTEN16, SILHOUETTEN17, SILHOUETTEN18, SILHOUETTEN19, SILHOUETTEN20, SILHOUETTEN21, SILHOUETTEN22, SILHOUETTEN23, SILHOUETTEN24, SILHOUETTEN25, SILHOUETTEN26, SILHOUETTEN27, SILHOUETTEN28, SILHOUETTEN29, SILHOUETTEN30, SILHOUETTEN31, SILHOUETTEN32, SILHOUETTEN33, SILHOUETTEN34, SILHOUETTEN35);
-  var ZEICHNER_ERWEITERT = { ...ZEICHNER2, ...ZEICHNER3, ...ZEICHNER4, ...ZEICHNER5, ...ZEICHNER6, ...ZEICHNER7, ...ZEICHNER8, ...ZEICHNER9, ...ZEICHNER10, ...ZEICHNER11, ...ZEICHNER12, ...ZEICHNER13, ...ZEICHNER14, ...ZEICHNER15, ...ZEICHNER16, ...ZEICHNER17, ...ZEICHNER18, ...ZEICHNER19, ...ZEICHNER20, ...ZEICHNER21, ...ZEICHNER22, ...ZEICHNER23, ...ZEICHNER24, ...ZEICHNER25, ...ZEICHNER26, ...ZEICHNER27, ...ZEICHNER28, ...ZEICHNER29, ...ZEICHNER30, ...ZEICHNER31, ...ZEICHNER32, ...ZEICHNER33, ...ZEICHNER34, ...ZEICHNER35, ...ZEICHNER36 };
-  var SILHOUETTEN_IDS = Object.keys(SILHOUETTEN36);
+  for (const [id, s2] of Object.entries(SILHOUETTEN41)) if (s2.gruppe === "rock" || s2.gruppe === "kleid") s2.nur = "damen";
+  for (const id of ["babytee", "traegertop", "croptop", "schluppenbluse", "tunika", "wickelshirt"]) SILHOUETTEN41[id].nur = "damen";
+  Object.assign(SILHOUETTEN41.kinderkleid, { nur: "kinder", geschlecht: "damen" });
+  SILHOUETTEN41.kinderbody.nur = "kinder";
+  Object.assign(SILHOUETTEN41, SILHOUETTEN, SILHOUETTEN2, SILHOUETTEN3, SILHOUETTEN4, SILHOUETTEN5, SILHOUETTEN6, SILHOUETTEN7, SILHOUETTEN8, SILHOUETTEN9, SILHOUETTEN10, SILHOUETTEN11, SILHOUETTEN12, SILHOUETTEN13, SILHOUETTEN14, SILHOUETTEN15, SILHOUETTEN16, SILHOUETTEN17, SILHOUETTEN18, SILHOUETTEN19, SILHOUETTEN20, SILHOUETTEN21, SILHOUETTEN22, SILHOUETTEN23, SILHOUETTEN24, SILHOUETTEN25, SILHOUETTEN26, SILHOUETTEN27, SILHOUETTEN28, SILHOUETTEN29, SILHOUETTEN30, SILHOUETTEN31, SILHOUETTEN32, SILHOUETTEN33, SILHOUETTEN34, SILHOUETTEN35, SILHOUETTEN36, SILHOUETTEN37, SILHOUETTEN38, SILHOUETTEN39, SILHOUETTEN40);
+  var ZEICHNER_ERWEITERT = { ...ZEICHNER2, ...ZEICHNER3, ...ZEICHNER4, ...ZEICHNER5, ...ZEICHNER6, ...ZEICHNER7, ...ZEICHNER8, ...ZEICHNER9, ...ZEICHNER10, ...ZEICHNER11, ...ZEICHNER12, ...ZEICHNER13, ...ZEICHNER14, ...ZEICHNER15, ...ZEICHNER16, ...ZEICHNER17, ...ZEICHNER18, ...ZEICHNER19, ...ZEICHNER20, ...ZEICHNER21, ...ZEICHNER22, ...ZEICHNER23, ...ZEICHNER24, ...ZEICHNER25, ...ZEICHNER26, ...ZEICHNER27, ...ZEICHNER28, ...ZEICHNER29, ...ZEICHNER30, ...ZEICHNER31, ...ZEICHNER32, ...ZEICHNER33, ...ZEICHNER34, ...ZEICHNER35, ...ZEICHNER36, ...ZEICHNER37, ...ZEICHNER38, ...ZEICHNER39, ...ZEICHNER40, ...ZEICHNER41 };
+  var SILHOUETTEN_IDS = Object.keys(SILHOUETTEN41);
 
   // src/kit/mode/produkt.js
   var FLAT2 = { oberteil: oberteilFlat, hose: hoseFlat, rock: (S2, t10, p3) => rockFlat(S2, t10, p3, 16), kleid: kleidFlat, jacke: jackeFlat };
   var normMaterial = (m) => String(m ?? "").toLowerCase().replace("bio-baumwolle", "baumwolle").replace("\xFC", "ue");
   function aufloesen(bild4) {
     const b4 = typeof bild4 === "string" ? { silhouette: bild4 } : bild4 ?? {};
-    const s2 = SILHOUETTEN36[b4.silhouette] ?? SILHOUETTEN36.tshirt;
+    const s2 = SILHOUETTEN41[b4.silhouette] ?? SILHOUETTEN41.tshirt;
     const { silhouette, ...rest } = b4;
-    return { id: SILHOUETTEN36[silhouette] ? silhouette : "tshirt", s: s2, p: { ...s2.p, ...rest } };
+    return { id: SILHOUETTEN41[silhouette] ? silhouette : "tshirt", s: s2, p: { ...s2.p, ...rest } };
   }
   function zoom(s2, p3) {
     if (s2.zoom) return typeof s2.zoom === "function" ? s2.zoom(p3) : s2.zoom;
@@ -180100,7 +180164,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
     flieder: "#c4b0dc",
     lila: "#7a4f9a"
   };
-  var TYPEN13 = {
+  var TYPEN18 = {
     "Jeans-Shorts": ["damen", "Denim", "jeansblau"],
     Kaschmirpullover: ["damen", "Kaschmir", "camel"],
     Strickjacke: ["damen", "Merino", "grau"],
@@ -180138,10 +180202,10 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
     Kinderkleid: ["kinder", "Baumwolle", "koralle"],
     "Pl\xFCschtier": ["spielwaren", "Polyester", "camel"]
   };
-  var ARTIKELTYPEN_BILD = Object.keys(TYPEN13);
-  var STANDARD_MATERIAL = Object.fromEntries(Object.entries(TYPEN13).map(([k5, v4]) => [k5, v4[1]]));
-  var STANDARD_FARBE = Object.fromEntries(Object.entries(TYPEN13).map(([k5, v4]) => [k5, v4[2]]));
-  var KATEGORIE_BILD = Object.fromEntries(Object.entries(TYPEN13).map(([k5, v4]) => [k5, v4[0]]));
+  var ARTIKELTYPEN_BILD = Object.keys(TYPEN18);
+  var STANDARD_MATERIAL = Object.fromEntries(Object.entries(TYPEN18).map(([k5, v4]) => [k5, v4[1]]));
+  var STANDARD_FARBE = Object.fromEntries(Object.entries(TYPEN18).map(([k5, v4]) => [k5, v4[2]]));
+  var KATEGORIE_BILD = Object.fromEntries(Object.entries(TYPEN18).map(([k5, v4]) => [k5, v4[0]]));
   var STRICK_TYPEN = /* @__PURE__ */ new Set(["Kaschmirpullover", "Strickjacke", "Schal", "M\xFCtze", "Socken"]);
   function rgb3(h5) {
     h5 = String(h5).replace("#", "");
@@ -180673,7 +180737,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
     K3.strich("M35 32 L65 44 L65 58", "#f1ebdc", 2.4);
   }
   var bildVorlage = (t10) => {
-    if (TYPEN13[t10]) return t10;
+    if (TYPEN18[t10]) return t10;
     if (/Kleid|Tüllrock|Plisseerock|Bleistiftrock/.test(t10)) return /rock/i.test(t10) ? "Rock" : "Kleid";
     if (/Jeans|Leggings|Hose|Culotte|Bermuda|Shorts/.test(t10)) return /Jeans/.test(t10) ? "Jeans" : "Chino";
     if (/Hemd|Bluse|Tunika/.test(t10)) return /Hemd/.test(t10) ? "Hemd" : "Bluse";
@@ -180731,6 +180795,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
   var ZG_MODEL = { kinder: "kinder", jung: "young", mitte: "adults", reif: "bestager" };
   var geschlechtVon = (wg) => /^herren|kinder\.jungen/.test(String(wg ?? "")) ? "herren" : "damen";
   var modelBild = (typ, farbe2, material3, wg, trendGruppe2, g5 = 150, b4, muster4) => typeof modelbildSVG === "function" ? modelbildSVG(typ, farbe2, material3, mitMuster({ geschlecht: geschlechtVon(wg), zielgruppe: ZG_MODEL[trendGruppe2] ?? "young", groesse: g5, hintergrund: null, ...bildOpt(typ, b4) }, muster4)) : null;
+  var variantenBild2 = (T, name2) => name2 ? T?.varianten?.find((v4) => v4.name === name2)?.bild : void 0;
   var musterBild = (Kat, name2) => (Kat.muster ?? []).find((m) => m.name === name2)?.bild;
   var kachel2 = (typ, g5 = 64) => bild2(typ, STANDARD_FARBE?.[typ], STANDARD_MATERIAL?.[typ], g5);
   var sternNr = 0;
@@ -180793,7 +180858,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
     }
     function produktKarte2(st2, M2, p3, index2, P7, offeneHaeuser2) {
       const ent = p3.status === "entwicklung";
-      const mb = ui.model.has(p3.id) ? modelBild(p3.typ, p3.farbe, p3.material, p3.wg, M2.trendGruppe, 120, p3.bild, p3.musterBild) : null;
+      const mb = ui.model.has(p3.id) ? modelBild(p3.typ, p3.farbe, p3.material, p3.wg, M2.trendGruppe, 120, void 0, p3.musterBild) : null;
       let c = `<button type="button" class="hw-g1-bild" data-a="bildwechsel" data-v="${esc(p3.id)}" aria-label="${ui.model.has(p3.id) ? "Produkt zeigen" : "Am Model zeigen"}">${mb ?? bild2(p3.typ, p3.farbe, p3.material, 110, p3.bild, p3.musterBild)}</button>`;
       if (!ent) c += `<button type="button" class="hw-g1-papierkorb" data-a="auslisten" data-v="${esc(p3.id)}" aria-label="Produkt auslisten">${PAPIERKORB}</button>`;
       c += `<div class="hw-karte-titel hw-g1-titel">${P7(`p:${p3.id}:name`, p3.name, "span")}</div>`;
@@ -180883,7 +180948,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
       const freigegeben = !p3 && M2 && M2.kategorien.some((x3) => x3.id === t10.kategorie && x3.kapazitaet > 0) && (Array.isArray(M2.entwickelbar) ? M2.entwickelbar.includes(t10.typ) : Number(t10.gruppe?.[M2.trendGruppe] ?? 0) > 0.15);
       let h5 = sprecher2(p3 ? `${esc(p3.name)} ist ${esc(STATUS3[p3.status] ?? p3.status)}.` : freigegeben ? `${esc(typ)} passt zu ${esc(M2.name)}.` : `${esc(typ)} passt derzeit nicht zu ${esc(M2?.name ?? "dieser Marke")}.`);
       h5 += `<div class="hw-g1-oben">${knopf("\u2039 Zur\xFCck", `data-a="detailZurueck" data-v="${zurueck2}"`, "text")}</div>`;
-      let x2 = `<div class="hw-g1-detailbild" aria-hidden="true">${model ?? bild2(typ, farbe2, material3, 200, void 0, p3?.musterBild)}</div>`;
+      let x2 = `<div class="hw-g1-detailbild" aria-hidden="true">${model ?? bild2(typ, farbe2, material3, 200, p3?.bild, p3?.musterBild)}</div>`;
       x2 += abschnitt(p3?.name ?? typ);
       x2 += liste([
         zeile2({ was: "Artikeltyp", wert: esc(typ) }),
@@ -180937,7 +181002,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
       if (ui.neuSchritt === 1) {
         let h6 = sprecher2(`${esc(e.typ)} gew\xE4hlt. F\xFCr wen entwickeln wir?`);
         h6 += oben("neuZurTyp", "\u2039 Artikel \xE4ndern") + `<div class="hw-rumpf">${schritte()}</div>`;
-        let x3 = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild2(e.typ, e.farbe, e.material, 72, void 0, mb)}</span><span><b>${esc(e.typ)}</b><small>${esc(pfad6?.k.name ?? "")}${pfad6?.a.name && pfad6.a.name !== pfad6.k.name ? " \xB7 " + esc(pfad6.a.name) : ""}</small></span></div>`;
+        let x3 = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild2(e.typ, e.farbe, e.material, 72, variantenBild2(T, e.variante), mb)}</span><span><b>${esc(e.typ)}</b><small>${esc(pfad6?.k.name ?? "")}${pfad6?.a.name && pfad6.a.name !== pfad6.k.name ? " \xB7 " + esc(pfad6.a.name) : ""}</small></span></div>`;
         x3 += abschnitt("Zielgruppe");
         x3 += `<p class="hw-lese hw-g1-notiz">Die Altersgruppe wirkt auf Preislage, Passform, regionale Nachfrage und Marge. Bisherige Produkte bleiben unver\xE4ndert.</p>`;
         x3 += `<div class="hw-g1-typen">${Kat.zielgruppen.map((z6) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${e.zielgruppe === z6.id}" data-a="zielgruppe" data-v="${esc(z6.id)}"><b>${esc(z6.name)}</b><small>${esc(ZIEL_TEXT[z6.id] ?? "")}</small></button>`).join("")}</div>`;
@@ -180947,14 +181012,14 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
       const zg = Kat.zielgruppen.find((z6) => z6.id === e.zielgruppe)?.name ?? "";
       let h5 = sprecher2(v4.ok ? `Erwartet ${dez(v4.sterneVon, 1)} bis ${dez(v4.sterneBis, 1)} Sterne, fertig ${esc(wocheText(st2, v4.fertigWoche))}.` : esc(v4.fehler ?? "Der Entwurf ist noch nicht vollst\xE4ndig."), v4.ok ? "" : "engpass");
       h5 += oben("neuZurZiel", "\u2039 Zielgruppe \xE4ndern") + `<div class="hw-rumpf">${schritte()}</div>`;
-      let x2 = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild2(e.typ, e.farbe, e.material, 72, void 0, mb)}</span><span><b>${esc(e.typ)}</b><small>${esc(zg)} \xB7 ${esc(pfad6?.k.name ?? "")}</small></span></div>`;
+      let x2 = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild2(e.typ, e.farbe, e.material, 72, variantenBild2(T, e.variante), mb)}</span><span><b>${esc(e.typ)}</b><small>${esc(zg)} \xB7 ${esc(pfad6?.k.name ?? "")}</small></span></div>`;
       if (v4.kapazitaetFrei <= 0) x2 += hinweis(`Kapazit\xE4t erreicht: in dieser Kategorie ist bei ${esc(M2.name)} kein Platz mehr. F\xFCr Neues erst ein Produkt auslisten.`, "achtung");
       x2 += abschnitt("Farbe", e.farbe);
       x2 += `<div class="hw-g1-farben" role="group" aria-label="Farbe">${Kat.farben.map((f14) => `<button type="button" class="hw-g1-farbknopf" aria-pressed="${f14.name === e.farbe}" data-a="farbe" data-v="${esc(f14.name)}" aria-label="${esc(f14.name)}">${farbpunkt(f14.hex, 30)}</button>`).join("")}</div>`;
       const angebot = (Kat.muster ?? []).filter((m) => (T?.muster ?? ["Uni"]).includes(m.name));
       if (angebot.length > 1) {
         x2 += abschnitt("Muster", e.muster);
-        x2 += `<div class="hw-g1-muster" role="group" aria-label="Muster">${angebot.map((m) => `<button type="button" class="hw-g1-musterknopf hw-kontur" aria-pressed="${m.name === e.muster}" data-a="muster" data-v="${esc(m.name)}"${m.gesperrt ? " disabled" : ""} aria-label="${esc(m.name)}${m.gesperrt ? ", gesperrt" : ""}"><span aria-hidden="true">${bild2(e.typ, e.farbe, e.material, 44, void 0, m.bild)}</span><small>${esc(m.name)}</small></button>`).join("")}</div>`;
+        x2 += `<div class="hw-g1-muster" role="group" aria-label="Muster">${angebot.map((m) => `<button type="button" class="hw-g1-musterknopf hw-kontur" aria-pressed="${m.name === e.muster}" data-a="muster" data-v="${esc(m.name)}"${m.gesperrt ? " disabled" : ""} aria-label="${esc(m.name)}${m.gesperrt ? ", gesperrt" : ""}"><span aria-hidden="true">${bild2(e.typ, e.farbe, e.material, 44, variantenBild2(T, e.variante), m.bild)}</span><small>${esc(m.name)}</small></button>`).join("")}</div>`;
         const gesperrt2 = angebot.find((m) => m.gesperrt);
         if (gesperrt2) x2 += `<p class="hw-lese hw-g1-notiz">${esc(gesperrt2.name)}: ${esc(gesperrt2.gesperrt)}</p>`;
       }
@@ -180981,7 +181046,7 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
       x2 += abschnitt("Vorschau", `Einf\xFChrung ${v4.saisonEinfuehrung}`);
       const wgV = Kat.typen.find((t10) => t10.typ === e.typ)?.wgs?.find((w2) => !/^kinder/.test(w2) || M2.trendGruppe === "kinder");
       const mbV = modelBild(e.typ, e.farbe, e.material, wgV, M2.trendGruppe, 110, void 0, mb);
-      let c = `<div class="hw-g1-bild hw-g1-vorschaubild" aria-hidden="true">${bild2(e.typ, e.farbe, e.material, 110, void 0, mb)}${mbV ?? ""}</div>`;
+      let c = `<div class="hw-g1-bild hw-g1-vorschaubild" aria-hidden="true">${bild2(e.typ, e.farbe, e.material, 110, variantenBild2(T, e.variante), mb)}${mbV ?? ""}</div>`;
       c += `<div class="hw-karte-titel hw-g1-titel">${P7("n:name", v4.name ?? e.typ, "span")}</div>`;
       c += `<div class="hw-g1-unter">${v4.wgName ? esc(v4.wgName) : esc(e.typ)}</div>`;
       c += `<div class="hw-g1-sternzeile">${sterne(v4.sterneErwartet, `erwartet ${dez(v4.sterneErwartet, 1)} Sterne`)}${P7("n:sterne", `${dez(v4.sterneVon, 1)} bis ${dez(v4.sterneBis, 1)}`, "span", ' class="hw-g1-sternzahl"')}</div>`;
@@ -189420,8 +189485,8 @@ ${v2}`).replace("#include <map_fragment>", g3).replace("#include <roughnessmap_f
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-11-02T19:08:06.369Z" : null;
-    const v4 = true ? "876734b" : "Entwicklung";
+    const iso = true ? "2026-11-02T20:37:10.552Z" : null;
+    const v4 = true ? "5d03b2c" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v4;
   })();

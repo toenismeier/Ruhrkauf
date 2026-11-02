@@ -1,6 +1,6 @@
 // Gemeinsamer Haken für neue Artikeltypen der Bild-Chats (Q27 Mode, Q28 Zubehör, Q29 Home/Beauty/Spielwaren, Q33 jung, Q34 Erwachsene,
 // Q37 Muster-Grundtypen und Freischaltungen, Q38 Oberteile, Q40 Jacken/Schuhe/Wäsche, Q41 Accessoires, Q39 Unterteile und Kleider aus dem Referenzsortiment,
-// Q42 seltene Typen).
+// Q42 seltene Typen, Wurf 5 V1 bis V5 in w5-*.ts).
 // Jeder Chat trägt nur in seine eigene Datei ein (NAMEN + TYPEN); produkte.ts hängt SORTIMENT_TYPEN an ARTIKELTYPEN an.
 // bild verweist auf eine Silhouette aus render/src/kit/mode/silhouetten.json (Parameter überschreiben deren Standard).
 import type { SortimentTyp } from './basis';
@@ -16,14 +16,22 @@ import * as Q40 from './q40-jacken-schuhe-waesche';
 import * as Q41 from './q41-accessoires';
 import * as Q39 from './q39-unterteile';
 import * as Q42 from './q42-selten';
+import * as W5O from './w5-oberteile';
+import * as W5U from './w5-unterteile';
+import * as W5K from './w5-kleider';
+import * as W5J from './w5-jacken';
+import * as W5R from './w5-rest';
 import { Q37_ZUSATZ, KORREKTUREN as Q37_KORREKTUREN } from './q37-zielgruppen';
 import { q33Kinder, q33Teens, q33Young, q33Pfad, BILD_Q33, Q33_ZUORDNUNG, type ZgTyp } from './q33-zielgruppen';
 import { KORREKTUREN as Q34_KORREKTUREN, type Korrektur } from './q34-zielgruppen';
 export { G, type ArtikelBild, type SortimentTyp } from './basis';
 
-export type SortimentName = (typeof Q27.NAMEN)[number] | (typeof Q28.NAMEN)[number] | (typeof Q29.NAMEN)[number] | (typeof Q33.NAMEN)[number] | (typeof Q34.NAMEN)[number] | (typeof Q37.NAMEN)[number] | (typeof Q38.NAMEN)[number] | (typeof Q40.NAMEN)[number] | (typeof Q41.NAMEN)[number] | (typeof Q39.NAMEN)[number] | (typeof Q42.NAMEN)[number];
+export type SortimentName = (typeof Q27.NAMEN)[number] | (typeof Q28.NAMEN)[number] | (typeof Q29.NAMEN)[number] | (typeof Q33.NAMEN)[number] | (typeof Q34.NAMEN)[number] | (typeof Q37.NAMEN)[number] | (typeof Q38.NAMEN)[number] | (typeof Q40.NAMEN)[number] | (typeof Q41.NAMEN)[number] | (typeof Q39.NAMEN)[number] | (typeof Q42.NAMEN)[number]
+  | (typeof W5O.NAMEN)[number] | (typeof W5U.NAMEN)[number] | (typeof W5K.NAMEN)[number] | (typeof W5J.NAMEN)[number] | (typeof W5R.NAMEN)[number];
 
-export const SORTIMENT_TYPEN: SortimentTyp<SortimentName>[] = [...Q27.TYPEN, ...Q28.TYPEN, ...Q29.TYPEN, ...Q34.TYPEN, ...Q33.TYPEN, ...Q37.TYPEN, ...Q38.TYPEN, ...Q41.TYPEN, ...Q40.TYPEN, ...Q39.TYPEN, ...Q42.TYPEN];
+export const SORTIMENT_TYPEN: SortimentTyp<SortimentName>[] = [...Q27.TYPEN, ...Q28.TYPEN, ...Q29.TYPEN, ...Q34.TYPEN, ...Q33.TYPEN, ...Q37.TYPEN, ...Q38.TYPEN, ...Q41.TYPEN, ...Q40.TYPEN, ...Q39.TYPEN, ...Q42.TYPEN,
+  // Wurf 5: neue Typen je Chat (V1 bis V5)
+  ...W5O.TYPEN, ...W5U.TYPEN, ...W5K.TYPEN, ...W5J.TYPEN, ...W5R.TYPEN];
 
 /** Korrekturen bestehender Typen (Bild, Zielgruppe) je Sortimentspaket; produkte.ts wendet sie nach dem Aufbau an.
  * Q33-Kinderbilder nur dort, wo Q34 keinen eigenen Eintrag hat. */
