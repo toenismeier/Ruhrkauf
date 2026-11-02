@@ -109,7 +109,7 @@ export function produkteModul(ctx) {
     let c = `<button type="button" class="hw-g1-bild" data-a="bildwechsel" data-v="${esc(p.id)}" aria-label="${ui.model.has(p.id) ? 'Produkt zeigen' : 'Am Model zeigen'}">${mb ?? bild(p.typ, p.farbe, p.material, 110, p.bild, p.musterBild)}</button>`;
     if (!ent) c += `<button type="button" class="hw-g1-papierkorb" data-a="auslisten" data-v="${esc(p.id)}" aria-label="Produkt auslisten">${PAPIERKORB}</button>`;
     c += `<div class="hw-karte-titel hw-g1-titel">${P(`p:${p.id}:name`, p.name, 'span')}</div>`;
-    c += `<div class="hw-g1-unter">${esc(p.typ)}${p.muster && p.muster !== 'Uni' ? ' · ' + esc(p.muster) : ''} · ${esc(p.zielgruppeName ?? 'Markenzielgruppe')} · ${esc(PREISLAGE[p.preislage] ?? p.preislage)}${p.anlassName ? ' · ' + esc(p.anlassName) : ''}</div>`;
+    c += `<div class="hw-g1-unter">${esc(p.variante ?? p.typ)}${p.muster && p.muster !== 'Uni' ? ' · ' + esc(p.muster) : ''} · ${esc(p.zielgruppeName ?? 'Markenzielgruppe')} · ${esc(PREISLAGE[p.preislage] ?? p.preislage)}${p.anlassName ? ' · ' + esc(p.anlassName) : ''}</div>`;
     if (ent) {
       c += sterne(0, 'noch keine Bewertung');
       c += `<div class="hw-g1-entwicklung"><span class="hw-marke">In Entwicklung</span><div class="hw-g1-fortschritt" role="progressbar" aria-valuenow="${Math.round(p.fortschritt * 100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${(p.fortschritt * 100).toFixed(0)}%"></i></div>`
@@ -235,6 +235,11 @@ export function produkteModul(ctx) {
     // Q37: Muster und Anlass nur, wenn der Typ sie anbietet
     if (T && !(T.muster ?? ['Uni']).includes(e.muster)) e.muster = 'Uni';
     if (T && e.anlass && !(T.anlass ?? []).includes(e.anlass)) e.anlass = null;
+    // Q42: Schnittvarianten; bringt nur die Variante die Zielgruppe mit, gibt es keine Grundform
+    const varianten = (T?.varianten ?? []).filter((v) => !e.zielgruppe || v.zielgruppen.includes(e.zielgruppe));
+    const grundform = !T || !e.zielgruppe || (T.zielgruppen ?? []).includes(e.zielgruppe) || !varianten.length;
+    if (e.variante && !varianten.some((v) => v.name === e.variante)) e.variante = null;
+    if (!grundform && !e.variante) e.variante = varianten[0].name;
     const mb = musterBild(Kat, e.muster);
     if (!typen.length && ui.neuSchritt !== 0) ui.neuSchritt = 0;
     const pfad = (Kat.baum ?? []).flatMap((k) => k.unterkategorien.map((a) => ({ k, a }))).find((x) => x.a.typen.includes(e.typ));
@@ -255,7 +260,7 @@ export function produkteModul(ctx) {
       x += `<div class="hw-g1-typen">${Kat.zielgruppen.map((z) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${e.zielgruppe === z.id}" data-a="zielgruppe" data-v="${esc(z.id)}"><b>${esc(z.name)}</b><small>${esc(ZIEL_TEXT[z.id] ?? '')}</small></button>`).join('')}</div>`;
       return { titel: 'Neues Produkt', unter: `${M.name} · Zielgruppe`, html: h + K.rumpf(x) };
     }
-    const v = E.produktVorschau(st, { marke: M.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche, ...(e.muster && e.muster !== 'Uni' ? { muster: e.muster } : {}), ...(e.anlass ? { anlass: e.anlass } : {}) });
+    const v = E.produktVorschau(st, { marke: M.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche, ...(e.muster && e.muster !== 'Uni' ? { muster: e.muster } : {}), ...(e.anlass ? { anlass: e.anlass } : {}), ...(e.variante ? { variante: e.variante } : {}) });
     const zg = Kat.zielgruppen.find((z) => z.id === e.zielgruppe)?.name ?? '';
     let h = sprecher(v.ok ? `Erwartet ${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)} Sterne, fertig ${esc(wocheText(st, v.fertigWoche))}.` : esc(v.fehler ?? 'Der Entwurf ist noch nicht vollständig.'), v.ok ? '' : 'engpass');
     h += oben('neuZurZiel', '‹ Zielgruppe ändern') + `<div class="hw-rumpf">${schritte()}</div>`;
@@ -270,6 +275,11 @@ export function produkteModul(ctx) {
       x += `<div class="hw-g1-muster" role="group" aria-label="Muster">${angebot.map((m) => `<button type="button" class="hw-g1-musterknopf hw-kontur" aria-pressed="${m.name === e.muster}" data-a="muster" data-v="${esc(m.name)}"${m.gesperrt ? ' disabled' : ''} aria-label="${esc(m.name)}${m.gesperrt ? ', gesperrt' : ''}"><span aria-hidden="true">${bild(e.typ, e.farbe, e.material, 44, undefined, m.bild)}</span><small>${esc(m.name)}</small></button>`).join('')}</div>`;
       const gesperrt = angebot.find((m) => m.gesperrt);
       if (gesperrt) x += `<p class="hw-lese hw-g1-notiz">${esc(gesperrt.name)}: ${esc(gesperrt.gesperrt)}</p>`;
+    }
+    // Q42: Schnitt (Grundform oder Variante); bis zum eigenen Bildpaket zeigt die Variante das Bild des Typs
+    if (varianten.length) {
+      x += K.abschnitt('Schnitt', e.variante ?? e.typ);
+      x += chips([...(grundform ? [['', esc(e.typ)]] : []), ...varianten.map((v) => [v.name, esc(v.name)])], e.variante ?? '', (w) => `data-a="variante" data-v="${esc(w)}"`, 'Schnitt');
     }
     x += K.abschnitt('Material');
     x += chips((T?.materialien ?? []).map((m) => [m, esc(m)]), e.material, (w) => `data-a="material" data-v="${esc(w)}"`, 'Material');
@@ -401,9 +411,10 @@ export function produkteModul(ctx) {
       case 'auslisten': ui.auslisten = v; return zeigen(true);
       case 'auslistenNein': ui.auslisten = null; return zeigen(true);
       case 'auslistenJa': ui.auslisten = null; tun({ typ: 'produktAuslisten', produkt: v }); return zeigen(true);
-      case 'typ': ui.neu.typ = v; ui.neu.zielgruppe = ui.zielgruppe; ui.neu.anlass = el.dataset.anlass || null; ui.neu.muster = 'Uni'; ui.neuSchritt = 1; return zeigen();
+      case 'typ': ui.neu.typ = v; ui.neu.zielgruppe = ui.zielgruppe; ui.neu.anlass = el.dataset.anlass || null; ui.neu.muster = 'Uni'; ui.neu.variante = null; ui.neuSchritt = 1; return zeigen();
       case 'muster': ui.neu.muster = v; return zeigen(true);
       case 'anlass': ui.neu.anlass = v || null; return zeigen(true);
+      case 'variante': ui.neu.variante = v || null; return zeigen(true);
       case 'farbe': ui.neu.farbe = v; return zeigen(true);
       case 'material': ui.neu.material = v; return zeigen(true);
       case 'preislage': ui.neu.preislage = v; return zeigen(true);
@@ -411,7 +422,7 @@ export function produkteModul(ctx) {
       case 'dauer': ui.neu.dauer = Number(v); return zeigen(true);
       case 'budget': { const Kat = merkeBilder(E.produktKatalog(st)); ui.neu.budgetWoche = Math.max(Kat.budgetSchritt, ui.neu.budgetWoche + Number(v) * Kat.budgetSchritt); return zeigen(true); }
       case 'entwickeln': {
-        const e = ui.neu, r = tun({ typ: 'produktEntwickeln', entwurf: { marke: ui.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche, ...(e.muster && e.muster !== 'Uni' ? { muster: e.muster } : {}), ...(e.anlass ? { anlass: e.anlass } : {}) } });
+        const e = ui.neu, r = tun({ typ: 'produktEntwickeln', entwurf: { marke: ui.marke, typ: e.typ, zielgruppe: e.zielgruppe, farbe: e.farbe, material: e.material, preislage: e.preislage, qualitaet: e.qualitaet, dauer: e.dauer, budgetWoche: e.budgetWoche, ...(e.muster && e.muster !== 'Uni' ? { muster: e.muster } : {}), ...(e.anlass ? { anlass: e.anlass } : {}), ...(e.variante ? { variante: e.variante } : {}) } });
         if (r?.ok) { ui.seite = 'liste'; const p = E.produkte(s()).marken.find((m) => m.marke === ui.marke)?.produkte.filter((x) => x.status === 'entwicklung').pop(); if (p) { ui.kategorie = p.kategorie; const l = E.produkte(s()).marken.find((m) => m.marke === ui.marke).produkte.filter((x) => x.kategorie === p.kategorie && x.status !== 'ausgelistet'); ui.k = l.findIndex((x) => x.id === p.id); } }
         return zeigen(!r?.ok);
       }

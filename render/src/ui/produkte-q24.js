@@ -11,7 +11,8 @@ const ZIEL = { kinder: 'kinder', teens: 'jung', young: 'jung', adults: 'mitte', 
 export const gruppeTrend = (gruppe) => ZIEL[gruppe] ?? 'mitte';
 
 function faecherFuer(t) {
-  const wgs = Array.isArray(t.wgs) ? t.wgs : [];
+  // Q42: WGs der Schnittvarianten zählen mit (Variante eines Kindertyps für Teens bis Adults)
+  const wgs = [...(Array.isArray(t.wgs) ? t.wgs : []), ...(t.varianten ?? []).flatMap((v) => v.wgs ?? [])];
   const sp = String(t.sparte ?? t.abteilung ?? '').toLowerCase();
   const kat = String(t.kategorie ?? '').toLowerCase();
   const f = new Set();
@@ -30,7 +31,8 @@ export function passendeTypen(K, fach, gruppe) {
     if (t.bildOffen) return false;
     if (!faecherFuer(t).has(fach)) return false;
     // Q33: der Katalog liefert je Typ die passenden Zielgruppen (auch für Home); ohne Angabe gelten die Trend-Gewichte.
-    if (Array.isArray(t.zielgruppen)) return t.zielgruppen.includes(gruppe);
+    // Q42: auch über eine Schnittvariante, die diese Zielgruppe mitbringt
+    if (Array.isArray(t.zielgruppen)) return t.zielgruppen.includes(gruppe) || (t.varianten ?? []).some((v) => v.zielgruppen.includes(gruppe));
     if (fach === 'home') return true;
     const gewichte = t.gruppe ?? {};
     return Number(gewichte[gruppeTrend(gruppe)] ?? 0) >= 0.4;

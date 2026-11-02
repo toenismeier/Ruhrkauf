@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node spiel-render.js --bundle",
-    "test": "node --test tests/einstellungen.test.cjs tests/silhouetten.test.mjs tests/q33-sortiment.test.mjs && node spiel-render.js --bundle && node tests/mobil-smoke.js && node tests/kamera-haus-mobil-smoke.cjs && node tests/q31-summen.cjs && node tests/hausbesuch.cjs && node tests/q35-zahlen.cjs && node tests/q37-produkt.cjs",
+    "test": "node --test tests/einstellungen.test.cjs tests/silhouetten.test.mjs tests/q33-sortiment.test.mjs && node spiel-render.js --bundle && node tests/mobil-smoke.js && node tests/kamera-haus-mobil-smoke.cjs && node tests/q31-summen.cjs && node tests/hausbesuch.cjs && node tests/q35-zahlen.cjs && node tests/q37-produkt.cjs && node tests/q42-produkt.cjs",
     "smoke:kamera-haus": "node spiel-render.js --bundle && node tests/kamera-haus-mobil-smoke.cjs",
     "smoke:panels": "node spiel-render.js --nur-panels",
     "smoke:karte": "node spiel-render.js --nur-karte",
