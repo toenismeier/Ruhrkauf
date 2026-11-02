@@ -59,7 +59,7 @@ function passendeHaeuser(s: GameState, ebene: StatistikEbene, id?: string): Haus
     const format = String(h.format);
     if (id === 'Hartwig') return format === 'warenhaus' && h.klasse !== 'premium';
     if (id === 'Sport') return format === 'sport';
-    if (id === 'Volkskauf') return format === 'volkskauf';
+    if (id === 'Volkskauf') return format === 'schwester' || format === 'volkskauf';
     if (id === 'FUNDUS') return format === 'fundus' || format === 'outlet';
     if (id === 'Premium') return h.klasse === 'premium';
     return format === id;

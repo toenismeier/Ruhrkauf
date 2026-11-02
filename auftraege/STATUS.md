@@ -126,3 +126,4 @@ Festlegungen und Freigabestand stehen im Projektdokument MODEL-WUENSCHE (privat,
 9. Eigenmarke Models: siehe Abschnitt oben.
 10. Ummo beurteilt auf dem iPhone: Oberfläche (Q14, Q30–Q32, P2), Kontaktbögen Q33/Q34.
 11. Unbestätigte Claude-Vorschläge: Namen der Premiumhäuser P003–P005, Startmonate Jan/Apr/Jul/Okt (Q07).
+12. E53 Formattrennung (Hartwig, Premium, Volkskauf, Sport, FUNDUS): Etappe 1 Fundament auf `feat/formate-fundament` (`auftraege/formate/e53-etappe1-fundament.md`). Danach Etappe 2 Ware/Einkauf, 3 Markt/Kunde, 4 Betrieb/Steuerung, 5 Formatwähler auf allen Seiten; erst Ansichtsbilder, dann Einbau.

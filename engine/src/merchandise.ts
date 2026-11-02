@@ -77,7 +77,10 @@ function ersatzHauscluster(s: GameState): void {
 
 export function clusterListe(s: GameState): { id: string; name: string; haeuser: Haus[] }[] {
   const map = new Map<string, Haus[]>();
+  // E53: Der Konzernbestand gehört Hartwig, Premium und Sport. Volkskauf und FUNDUS führen eigene Ware
+  // (formate.ts) und bekommen keinen Anteil am Hartwig-Bestand mehr.
   for (const h of s.haeuser) {
+    if (h.format !== 'warenhaus' && h.format !== 'sport') continue;
     const id = hausclusterId(h);
     const xs = map.get(id) ?? [];
     xs.push(h);

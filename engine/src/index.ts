@@ -79,10 +79,13 @@ export { ERFOLGE, ERFOLGE_AKTIV, erfolgeWoche, erfolgeUebersicht,
 
 export { verlauf, type StatistikFilter, type StatistikReihe, type StatistikPunkt } from './abfragen';
 
+// E53 Formattrennung: fünf Steuerungsformate mit eigenen Regionen.
+export * from './formatschluessel';
 // O01 Organisation: öffentliche Schnittstellen für Folgeaufträge O03–O09.
 export { BEREICHE, ALTE_DELEGATIONEN, bildeHauscluster, bereichsQualitaet, berichtetAn, hausclusterVon,
   clusterleitungQualitaet, clusterBerichtetAn, regionalleitungQualitaet, istDelegiert, istAufgabeDelegiert, delegationsAufgaben, delegationsGrenze, CLUSTER_AUFGABEN,
   neueVorlage, organisationUebersicht as organisationDaten, hausclusterFaktor, organisationLeitungKostenWoche,
+  migriereFormatOrganisation, formatleitungQualitaet,
   type BereichId, type Bereich, type Hauscluster, type OrganisationsStand, type VorlageEingabe, type OrganisationAktion, type DelegationsAufgabe,
 } from './organisation';
 // O02 Umsatztreiber
@@ -101,3 +104,4 @@ export { TEST_EREIGNISSE, type TestAktion, type TestEreignisId } from './testwer
 
 // Q06 Fachbereich Marktbeobachtung.
 export { marktbeobachtungUebersicht, marktbeobachtungKostenWoche, marktbeobachtungWoche, marktbeobachtungStufe, MARKT_FTE, type MarktbeobachtungStand, type MarktbeobachtungWoche } from './marktbeobachtung';
+export { konzernNachFormaten, type FormatGuv, type FormatGuvZeile } from './formatguv';

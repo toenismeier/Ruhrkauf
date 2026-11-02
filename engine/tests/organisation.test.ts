@@ -1,6 +1,7 @@
 import { neuesSpiel, fuehreAus, wocheAbspielen, BEREICHE, bereichsQualitaet,
   berichtetAn, hausclusterVon, hausclusterFaktor, clusterleitungQualitaet, organisationUebersicht } from '../src';
 import { KOORDINATEN } from '../src/standorte';
+import { formatRegionVon, formatVon } from '../src/formatschluessel';
 
 describe('O01 Organisation', () => {
   test.each([1,2,3])('Deterministische geografische Cluster und neutrale Ausgangslage (Seed %s)', (seed) => {
@@ -9,7 +10,8 @@ describe('O01 Organisation', () => {
     const geo=a.organisation!.hauscluster.filter((c)=>!c.sonder);
     expect(geo.length).toBeGreaterThanOrEqual(15);
     const ids=geo.flatMap((c)=>c.hausIds);
-    expect(ids.length).toBe(a.haeuser.filter((h)=>h.status==='offen').length);
+    // E53: Premium führt keinen Regionscluster, sondern nur den Sondercluster.
+    expect(ids.length).toBe(a.haeuser.filter((h)=>h.status==='offen'&&h.klasse!=='premium').length);
     expect(new Set(ids).size).toBe(ids.length);
     for(const c of geo){
       expect(c.hausIds.length).toBeGreaterThanOrEqual(6);
@@ -17,7 +19,8 @@ describe('O01 Organisation', () => {
       for(const id of c.hausIds){
         const h=a.haeuser.find((h)=>h.id===id)!;
         expect(h.hauscluster).toBe(c.id);
-        expect(h.region).toBe(c.region);
+        expect(formatRegionVon(h)).toBe(c.regionSchluessel);
+        expect(formatVon(h)).toBe(c.format);
         expect(KOORDINATEN[h.stadt]).toBeDefined();
         expect(hausclusterFaktor(a,h)).toBe(1);
       }
@@ -100,8 +103,8 @@ describe('O01 Organisation', () => {
     const s=neuesSpiel(1); // #7: Standardwelt ist der Ruhrkauf-Maßstab mit 561 Häusern.
     const geo=s.organisation!.hauscluster.filter((c)=>!c.sonder);
     const ids=geo.flatMap((c)=>c.hausIds);
-    expect(ids.length).toBe(561);
-    expect(new Set(ids).size).toBe(561);
+    expect(ids.length).toBe(556);
+    expect(new Set(ids).size).toBe(556);
     for(const c of geo){
       expect(c.hausIds.length).toBeGreaterThanOrEqual(6);
       expect(c.hausIds.length).toBeLessThanOrEqual(12);

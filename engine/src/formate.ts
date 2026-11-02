@@ -1,5 +1,6 @@
 /** Volkskauf und FUNDUS: getrennte Warenwirtschaft, echte Kostenstellen und Projekte. */
 import type { GameState, Haus, HausKpi, Kohorte, Lage } from './types';
+import { ordneHausZu } from './organisation';
 import { STAEDTE } from './daten';
 import { clamp, eur, chance, zwischen, melde, type RngHalter } from './util';
 import { simuliereHaus, hausKosten, leereKpi, nebenvertragsErtraege } from './wirtschaft';
@@ -103,6 +104,7 @@ export function formateProjekteWoche(s:GameState):void{
       h.format='warenhaus';h.hausklasse='C';h.name='Hartwig '+h.stadt;
       for(const g of Object.keys(h.potenzial) as (keyof Haus['potenzial'])[])h.potenzial[g]!*=1.125;
       h.formatIntegrationBis=s.woche+52;
+      ordneHausZu(s,h);
     } else {h.nurDaten=false;wettbewerbStartwerte(s,h);}
     melde(s,'info',h.name+': Formatprojekt abgeschlossen.',{stadt:h.stadt,hausId:h.id});
   }
@@ -139,7 +141,7 @@ export function outletEroeffnen(s:GameState,stadt:string):string|null{
     personal:{...muster.personal,filialleiter:{...muster.personal.filialleiter}},
     potenzial:{...muster.potenzial},saettigungQm:{...muster.saettigungQm},kpi:undefined,verlauf:[],
   };
-  s.haeuser.push(neu);s.formate.projekte.push({haus:id,start:s.woche,bis:s.woche+12,typ:'eroeffnen'});
+  s.haeuser.push(neu);ordneHausZu(s,neu);s.formate.projekte.push({haus:id,start:s.woche,bis:s.woche+12,typ:'eroeffnen'});
   s.cash-=k.investition;s.einmalkostenWoche+=k.investition;
   s.kapitalflussOffen??={investitionen:0,finanzierung:0};s.kapitalflussOffen.investitionen-=k.investition;
   return null;

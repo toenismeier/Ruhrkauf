@@ -20,7 +20,7 @@
       {"id":"bloecke/b0","bauer":"wasser","lage":[0,965,1107,46],"drehung":0,"variante":null,"standort":null,"pruefsumme":"239122aedc72bdd4"},
       {"id":"bloecke/b1","bauer":"bahn","lage":[22.5,22.5,1062,104],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"c071b870924913a4"},
       {"id":"bloecke/b10","bauer":"kirche","lage":[170.5,713.5,100,94],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"8a6587dd4dacf607"},
-      {"id":"bloecke/b11","bauer":"center","lage":[845.5,595.5,80,86],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"b6cd7cba32169b3e"},
+      {"id":"bloecke/b11","bauer":"center","lage":[845.5,595.5,80,86],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"d91c3c3fd425ef7d"},
       {"id":"bloecke/b12","bauer":"center","lage":[845.5,478.5,80,88],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"dd6211d05ac110d2"},
       {"id":"bloecke/b13","bauer":"park","lage":[528.5,261.5,60,88],"drehung":0,"variante":"gruenderzeit","standort":null,"pruefsumme":"00059b2a8fd49900"},
       {"id":"bloecke/b14","bauer":"park","lage":[1028.5,850.5,56,92],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"65f8427d04571605"},
@@ -417,7 +417,7 @@
       {"id":"parzellen/p132","bauer":"stadthaus","lage":[170.5,776.86,20.5,9.25],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"c0756396287c2ec0"},
       {"id":"parzellen/p133","bauer":"stadthaus","lage":[170.5,786.11,20.5,21.39],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"35ec2b85798b4691"},
       {"id":"parzellen/p134","bauer":"slot:kirche","lage":[201.2,751.83,54,24],"drehung":0,"variante":"hallenkirche","standort":null,"pruefsumme":"cbbc534f9ff5aa67"},
-      {"id":"parzellen/p135","bauer":"slot:schwester","lage":[848.5,598.5,52,42],"drehung":0,"variante":2,"standort":"K009","pruefsumme":"1e536cd5513190fd"},
+      {"id":"parzellen/p135","bauer":"slot:schwester","lage":[848.5,598.5,52,42],"drehung":0,"variante":1,"standort":"K009","pruefsumme":"1056d612ed28169e"},
       {"id":"parzellen/p136","bauer":"slot:sport","lage":[848.5,481.5,67,32],"drehung":0,"variante":"sport","standort":"S017","pruefsumme":"667136f3e5c8237b"},
       {"id":"parzellen/p137","bauer":"eck","lage":[22.5,149,20,21],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"1da9c1911dce368b"},
       {"id":"parzellen/p138","bauer":"eck","lage":[22.5,219,23,20],"drehung":0,"variante":"nachkrieg","standort":null,"pruefsumme":"9ff8128e25cd6122"},
@@ -1438,7 +1438,7 @@
       {"id":"strassen/s98","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"ac3ec4d37a841813"},
       {"id":"strassen/s99","bauer":"neben","lage":[null,null,null,null],"drehung":0,"variante":null,"standort":null,"pruefsumme":"d358a13e32fbad32"}
     ],
-    "gesamt": "8fa9afb2ad6542de"
+    "gesamt": "e31da626a0704c1e"
   },
   "geometrie": {
     "kacheln": [
@@ -1678,7 +1678,7 @@
       {"id":"p132","teile":195,"dreiecke":2330,"boundingBox":[170.42,0,776.78,192.62,27.68,786.19]},
       {"id":"p133","teile":660,"dreiecke":7900,"boundingBox":[170.42,0,786.03,192.52,28.33,807.83]},
       {"id":"p134","teile":67,"dreiecke":3230,"boundingBox":[201,-0.3,751.83,255.79,74.35,776.41]},
-      {"id":"p135","teile":1094,"dreiecke":13132,"boundingBox":[849.5,0,599.5,903.96,19.86,644.31]},
+      {"id":"p135","teile":1088,"dreiecke":13060,"boundingBox":[849.5,0,599.5,903.96,19.86,644.31]},
       {"id":"p136","teile":508,"dreiecke":7026,"boundingBox":[849.5,0,482.5,918.69,18.3,517.48]},
       {"id":"p137","teile":361,"dreiecke":4272,"boundingBox":[22.5,0,149,43.55,21.41,171.52]},
       {"id":"p138","teile":449,"dreiecke":5364,"boundingBox":[22.5,0,219,47.02,24.34,240.52]},
@@ -2538,16 +2538,16 @@
       "boundingBox": [-480,-6.2,-480,1587,29,1513.5]
     },
     "gesamt": {
-      "teile": 343151,
+      "teile": 343145,
       "strasse": 5171,
-      "haeuser": 337980,
+      "haeuser": 337974,
       "instanzen": 55735,
       "drawCallsInstanzen": 5394
     }
   },
   "pruefsummen": {
-    "stadtplan": "5c25ed7a8e5a7cad5e7c9e54a847cf5de7069f50c122da293cc23a7bf1dc7293",
-    "geometrie": "b5ddcfe2f9f0206f85df28c6c516f5020baaf2681570a7798852f2461a43119a",
+    "stadtplan": "7add7000740b99a6da12d39ab19f0198881c6bc06d0069d7c8d9a8960e9170d3",
+    "geometrie": "1cdb12ed68c0377c1711334feaf4c4f81036f922fc1947c4e88959faadf06370",
     "bildReferenz": "95b375a54e27b33d2e8c5495d0c6e2b53f7e708515eb0186341f32c74df5abf6"
   }
 }

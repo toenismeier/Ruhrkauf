@@ -42,7 +42,10 @@ function hash(wert) {
 function stadtliste() {
   // Alle grafisch gebauten Städte: Hartwig und Sport, Volkskauf und FUNDUS (Maßstab: 220 Städte)
   const haeuser = [...require('./haeuser.json'), ...require('./haeuser-schwester.json'), ...require('./haeuser-outlet.json')];
-  const namen = [...new Set(haeuser.map((h) => h.stadt))].sort((a, b) => a.localeCompare(b, 'de'));
+  // E53: auch Städte ohne eigenes Haus (Stadtgeografie), damit die 220 Städte vollständig geprüft werden.
+  const geo = require('node:fs').readFileSync(require('node:path').join(__dirname, 'src/kit/stadt-geografie.js'), 'utf8');
+  const geoNamen = [...geo.matchAll(/^\s*("[^"]+"):\s*\{/gm)].map((m) => JSON.parse(m[1]));
+  const namen = [...new Set([...haeuser.map((h) => h.stadt), ...geoNamen])].sort((a, b) => a.localeCompare(b, 'de'));
   if (namen.length !== STADTZAHL) throw new Error('Unerwartete Stadtanzahl: ' + namen.length + ' statt ' + STADTZAHL);
   const map = new Map();
   for (const name of namen) {

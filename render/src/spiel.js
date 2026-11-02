@@ -1917,6 +1917,8 @@ async function spielFortsetzen(platz = 'autosave') {
     s = d.spiel;
     // O01: ältere Spielstände ohne Organisationsmodell einmalig migrieren.
     if (!s.organisation) E.bildeHauscluster(s);
+    // E53: ältere Spielstände mit formatgemischten Clustern auf die Vertriebslinie je Format umstellen.
+    E.migriereFormatOrganisation?.(s);
     // O04: alte Spielstände ohne Personalplanung deterministisch migrieren.
     if (!s.personaleinsatz || s.haeuser.some((h) => !h.personaleinsatz)) E.initialisierePersonaleinsatz(s);
     // Q37: Produkte aufgelöster Muster-Typen (Karohemd usw.) auf Grundtyp plus Muster umschreiben.

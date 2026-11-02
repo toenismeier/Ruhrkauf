@@ -1,5 +1,5 @@
 // O01 Organisation: zentrale Bereiche, regionale Vertriebslinie und deterministische Hauscluster.
-import type { GameState, Haus, Region, Entscheidung } from './types';
+import type { GameState, Haus, Entscheidung } from './types';
 import type { AbteilungId } from './hq';
 import type { RessortId, Portraet } from './vorstand';
 import { RESSORT_INFO, DELEGATIONEN } from './vorstand';
@@ -9,6 +9,7 @@ import { clamp, eur } from './util';
 import { einmalKosten } from './prozesse';
 import { itDeckel } from './it';
 import { fuehreAus, type SpielerAktion } from './aktionen';
+import { FORMAT_SCHLUESSEL, FORMAT_NAME, FORMAT_LEITUNG, formatRegionen, formatVon, formatRegionVon, regionSchluessel, type FormatSchluessel } from './formatschluessel';
 
 export type BereichId = string;
 export interface Bereich { id: BereichId; name: string; ressort: RessortId; abteilung: AbteilungId; beschreibung: string }
@@ -111,13 +112,18 @@ export interface Stelle {
   grenzen?: Record<string, number>;
 }
 export interface Hauscluster {
-  id: string; name: string; region?: Region; hausIds: string[]; sonder: boolean;
+  /** region: Name der Formatregion (z. B. "Süd-Mitte"); regionSchluessel: "volkskauf:Süd-Mitte". */
+  id: string; name: string; region?: string; hausIds: string[]; sonder: boolean;
+  format?: FormatSchluessel; regionSchluessel?: string;
   stelle: Stelle;
 }
 export interface OrganisationsStand {
   hauscluster: Hauscluster[];
   bereiche: Record<BereichId, Stelle>;
-  regionalleitungen: Record<Region, Stelle>;
+  /** Schlüssel "format:Region", z. B. "hartwig:West" oder "volkskauf:Nord-Ost" (E53). */
+  regionalleitungen: Record<string, Stelle>;
+  /** Eine Leitung je Format unter dem CSO (E53). */
+  formatleitungen?: Partial<Record<FormatSchluessel, Stelle>>;
   /** Die geografische Zuordnung bleibt auch bei Flagship-Wechseln für Vergleiche stabil. */
   geografisch: Record<string, string>;
   flagships: string[];
@@ -136,16 +142,19 @@ export type OrganisationAktion =
   | { typ: 'flagship'; haus: string; an: boolean }
   | { typ: 'delegation'; bereich?: BereichId; hauscluster?: string; aufgabe?: string; an: boolean }
   | { typ: 'delegationGrenze'; bereich?: BereichId; hauscluster?: string; aufgabe: string; betrag: number }
-  | { typ: 'organisationBesetzen'; ebene: 'bereich' | 'cluster' | 'region'; id: string; kandidat: string }
-  | { typ: 'organisationEntlassen'; ebene: 'bereich' | 'cluster' | 'region'; id: string }
-  | { typ: 'organisationHaltepraemie'; ebene: 'bereich' | 'cluster' | 'region'; id: string; betrag: number }
+  | { typ: 'organisationBesetzen'; ebene: OrgEbene; id: string; kandidat: string }
+  | { typ: 'organisationEntlassen'; ebene: OrgEbene; id: string }
+  | { typ: 'organisationHaltepraemie'; ebene: OrgEbene; id: string; betrag: number }
   | { typ: 'organisationBefoerdern'; haus: string; hauscluster: string };
+export type OrgEbene = 'bereich' | 'cluster' | 'region' | 'format';
 export const ORGANISATION_AKTIONEN = new Set<string>(['flagship','delegation','delegationGrenze','organisationBesetzen','organisationEntlassen','organisationHaltepraemie','organisationBefoerdern']);
-const REGIONEN: Region[] = ['Nord','Ost','West','Mitte','Süd'];
 const hash = (str: string): number => [...str].reduce((v, c) => Math.imul(v, 31) + c.charCodeAt(0) >>> 0, 2166136261);
 const mix = (seed: number, text: string) => hash(seed + ':' + text);
+/** Endmischung (murmur3 fmix32): benachbarte Schlüssel ergeben sonst fast gleiche Kandidaten (gleicher Nachname, Qualität ±0,1 %). */
+const fmix = (h: number): number => { h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); return (h ^ (h >>> 16)) >>> 0; };
 function person(seed: number, key: string, n: number, qualitaet?: number): OrgPerson {
-  const z = mix(seed, key + ':' + n), q = qualitaet ?? (0.48 + (z % 430) / 1000);
+  // Startbesetzung (n = 0) bleibt unverändert, Kandidaten (n > 0) werden gut gemischt.
+  const roh = mix(seed, key + ':' + n), z = n > 0 ? fmix(roh) : roh, q = qualitaet ?? (0.48 + (z % 430) / 1000);
   const weiblich = z % 2 === 0;
   return {
     id: key + '-' + n, name: VORNAMEN[z % VORNAMEN.length] + ' ' + NACHNAMEN[Math.floor(z / 41) % NACHNAMEN.length],
@@ -203,29 +212,96 @@ function clusterName(gruppe: Haus[], vergeben: string[]): string {
   return vergeben.includes('Raum ' + staedte[0]) ? 'Raum ' + staedte[0] + ' ' + (vergeben.length + 1) : 'Raum ' + staedte[0];
 }
 /** Einmalige, RNG-neutrale Initialisierung am Ende von neueWelt. */
+/** Vertriebslinie je Format (E53): Formatleitung, eigene Regionen, formatreine Hauscluster.
+ * Premium bildet keinen Regionscluster, sondern bleibt im Sondercluster „Premium & Flagships“. */
+function baueVertrieb(s: GameState, o: OrganisationsStand): void {
+  o.hauscluster = []; o.geografisch = {}; o.regionalleitungen = {}; o.formatleitungen = {};
+  for (const f of FORMAT_SCHLUESSEL) {
+    o.formatleitungen[f] = stelle(s.seed, 'format-' + f);
+    const vergeben: string[] = [];
+    for (const r of formatRegionen(f)) {
+      const key = regionSchluessel(f, r);
+      // Hartwig behält die bisherigen Schlüssel der Personengenerierung (Kalibrierung, Namen).
+      o.regionalleitungen[key] = stelle(s.seed, f === 'hartwig' ? 'region-' + r : 'region-' + key);
+      const einheiten = gruppiere(s.haeuser.filter((h) => h.status === 'offen' && formatVon(h) === f && formatRegionVon(h) === key));
+      einheiten.forEach((gruppe, i) => {
+        const slug = r.toLocaleLowerCase('de').replace(/[^a-zäöüß]+/g, '-');
+        const id = f === 'hartwig' ? 'hc-' + slug + '-' + (i + 1) : 'hc-' + f + '-' + slug + '-' + (i + 1);
+        const basisName = clusterName(f === 'hartwig' ? gruppe : nachGroesse(s, gruppe), vergeben);
+        vergeben.push(basisName);
+        const name = f === 'hartwig' ? basisName : FORMAT_NAME_KURZ[f] + ' ' + basisName;
+        o.hauscluster.push({ id, name, region: r, format: f, regionSchluessel: key, hausIds: gruppe.map((h) => h.id), sonder: false, stelle: stelle(s.seed, id) });
+        gruppe.forEach((h) => { h.hauscluster = id; o.geografisch[h.id] = id; });
+      });
+    }
+  }
+  const premium = s.haeuser.filter((h) => h.klasse === 'premium');
+  premium.forEach((h) => { h.hauscluster = 'premium-flagships'; o.geografisch[h.id] = 'premium-flagships'; });
+  // Der Sondercluster bleibt der letzte Eintrag (hausclusterVon verlässt sich darauf).
+  o.hauscluster.push({ id: 'premium-flagships', name: 'Premium & Flagships', hausIds: [...premium.map((h) => h.id), ...o.flagships], sonder: true, format: 'premium', stelle: stelle(s.seed, 'premium-flagships') });
+}
+/** Schwesterformate haben meist ein Haus je Stadt: dann benennt die größte Stadt den Cluster, nicht das Alphabet. */
+const KLASSE_RANG: Record<string, number> = { metropole: 3, grossstadt: 2, mittelstadt: 1 };
+function nachGroesse(s: GameState, gruppe: Haus[]): Haus[] {
+  const zahl = new Map<string, number>();
+  for (const h of gruppe) zahl.set(h.stadt, (zahl.get(h.stadt) ?? 0) + 1);
+  const netz = new Map<string, number>();
+  for (const h of s.haeuser) netz.set(h.stadt, (netz.get(h.stadt) ?? 0) + 1);
+  // Vorrang: mehr Häuser des Formats, dann Stadtgröße, dann Zahl aller eigenen Häuser der Stadt.
+  const rang = (h: Haus) => (zahl.get(h.stadt) ?? 0) * 1000 + (KLASSE_RANG[h.cluster] ?? 0) * 100 + (netz.get(h.stadt) ?? 0);
+  const best = [...gruppe].sort((x, y) => rang(y) - rang(x) || x.stadt.localeCompare(y.stadt, 'de'))[0];
+  // clusterName zählt Häuser je Stadt; die größte Stadt bekommt einen Vorrang durch Verdopplung.
+  return best ? [best, ...gruppe] : gruppe;
+}
+const FORMAT_NAME_KURZ: Record<FormatSchluessel, string> = { hartwig: '', premium: 'Premium', volkskauf: 'Volkskauf', sport: 'Sport', fundus: 'FUNDUS' };
+/** Einmalige, RNG-neutrale Initialisierung am Ende von neueWelt. */
 export function bildeHauscluster(s: GameState): void {
   const organisation: OrganisationsStand = {
     hauscluster: [], geografisch: {}, flagships: [], unruhe: {}, zaehler: 0,
-    bereiche: {}, regionalleitungen: {} as Record<Region, Stelle>, letzteBesetzung: {}, letzteVakanz: {}, basisKosten: 0,
+    bereiche: {}, regionalleitungen: {}, formatleitungen: {}, letzteBesetzung: {}, letzteVakanz: {}, basisKosten: 0,
   };
   for (const bereich of BEREICHE) organisation.bereiche[bereich.id] = stelle(s.seed, 'bereich-' + bereich.id);
-  for (const region of REGIONEN) {
-    organisation.regionalleitungen[region] = stelle(s.seed, 'region-' + region);
-    const einheiten = gruppiere(s.haeuser.filter((h) => h.region === region && h.status === 'offen'));
-    einheiten.forEach((gruppe, i) => {
-      const id = 'hc-' + region.toLocaleLowerCase('de') + '-' + (i+1);
-      organisation.hauscluster.push({ id, name: clusterName(gruppe, organisation.hauscluster.map((c) => c.name)), region, hausIds: gruppe.map((h) => h.id), sonder: false, stelle: stelle(s.seed, id) });
-      gruppe.forEach((h) => { h.hauscluster = id; organisation.geografisch[h.id] = id; });
-    });
-  }
-  const premium = s.haeuser.filter((h) => h.klasse === 'premium').map((h) => h.id);
-  organisation.hauscluster.push({ id: 'premium-flagships', name: 'Premium & Flagships', hausIds: premium, sonder: true, stelle: stelle(s.seed, 'premium-flagships') });
+  baueVertrieb(s, organisation);
   for (const r of Object.keys(s.vorstand.ressorts) as RessortId[]) organisation.letzteBesetzung[r] = !!s.vorstand.ressorts[r].person;
   organisation.basisKosten = leitungsKosten(organisation);
   s.organisation = organisation;
 }
+/** Neues oder umgeflaggtes Haus dem nächstgelegenen Cluster seines Formats und seiner Formatregion zuordnen (E53). */
+export function ordneHausZu(s: GameState, h: Haus): void {
+  const o = s.organisation;
+  if (!o) return;
+  for (const c of o.hauscluster) if (!c.sonder) c.hausIds = c.hausIds.filter((id) => id !== h.id);
+  if (h.klasse === 'premium') { h.hauscluster = 'premium-flagships'; o.geografisch[h.id] = 'premium-flagships'; return; }
+  const key = formatRegionVon(h), f = formatVon(h);
+  const kandidaten = o.hauscluster.filter((c) => !c.sonder && c.regionSchluessel === key);
+  const pool = kandidaten.length ? kandidaten : o.hauscluster.filter((c) => !c.sonder && c.format === f);
+  if (!pool.length) return;
+  const abstand = (c: Hauscluster) => Math.min(...c.hausIds.map((id) => { const x = s.haeuser.find((y) => y.id === id); return x ? distanz(x, h) : 1e9; }), 1e9);
+  const ziel = [...pool].sort((a, b) => abstand(a) - abstand(b) || a.id.localeCompare(b.id))[0];
+  ziel.hausIds.push(h.id); h.hauscluster = ziel.id; o.geografisch[h.id] = ziel.id;
+}
+/** Ältere Spielstände (Cluster über alle Formate gemischt) auf die Vertriebslinie je Format umstellen.
+ * Bereichsleitungen, Flagships und Delegationen der Zentrale bleiben; Cluster, Regional- und Formatleitungen
+ * werden neu gebildet. Mehrkosten der neuen Leitungsstellen werden in die Basis übernommen (kein Ergebnissprung).
+ * Bestand je Cluster wird zurück in den Pool gelegt und beim nächsten Zugang neu verteilt. */
+export function migriereFormatOrganisation(s: GameState): boolean {
+  const o = s.organisation;
+  if (!o || o.formatleitungen) return false;
+  const vorher = leitungsKosten(o);
+  const alteCluster = new Set(o.hauscluster.map((c) => c.id));
+  baueVertrieb(s, o);
+  o.basisKosten += leitungsKosten(o) - vorher;
+  for (const k of s.bestand) if (k.hauscluster && alteCluster.has(k.hauscluster)) delete k.hauscluster;
+  const w = (s as GameState & { ware?: { lokal?: Record<string, number>; zentral?: Record<string, boolean> } }).ware;
+  const gueltig = new Set(o.hauscluster.map((c) => c.id));
+  for (const tab of [w?.lokal, w?.zentral]) if (tab) for (const key of Object.keys(tab)) {
+    const cl = key.split('|')[1];
+    if (cl && cl !== '*' && !gueltig.has(cl)) delete tab[key];
+  }
+  return true;
+}
 function leitungsKosten(o: OrganisationsStand): number {
-  return [...Object.values(o.bereiche),...Object.values(o.regionalleitungen),...o.hauscluster.map((x)=>x.stelle)]
+  return [...Object.values(o.bereiche),...Object.values(o.regionalleitungen),...Object.values(o.formatleitungen ?? {}),...o.hauscluster.map((x)=>x.stelle)]
     .reduce((sum,x)=>sum+(x.person?.gehalt??0),0);
 }
 /** Mehr- oder Minderkosten gegenüber den in der Startzentrale enthaltenen Leitungsgehältern. */
@@ -244,12 +320,19 @@ export function hausclusterVon(s: GameState, hausId: string): Hauscluster | unde
 export function clusterleitungQualitaet(s: GameState, hcId: string): number {
   return clamp(s.organisation?.hauscluster.find((x) => x.id === hcId)?.stelle.person?.qualitaet ?? 0.35, 0, 1);
 }
-export function regionalleitungQualitaet(s: GameState, region: Region): number {
-  return clamp(s.organisation?.regionalleitungen[region]?.person?.qualitaet ?? 0.35, 0, 1);
+/** Schlüssel "format:Region" oder (ältere Aufrufer) eine Hartwig-Region. */
+export function regionalleitungQualitaet(s: GameState, region: string): number {
+  const key = region.includes(':') ? region : regionSchluessel('hartwig', region);
+  return clamp(s.organisation?.regionalleitungen[key]?.person?.qualitaet ?? 0.35, 0, 1);
 }
-export function clusterBerichtetAn(s: GameState, hcId: string): 'spieler' | 'cso' | Region {
-  const cluster = s.organisation?.hauscluster.find((x) => x.id === hcId);
-  if (cluster?.region && s.organisation?.regionalleitungen[cluster.region]?.person) return cluster.region;
+export function formatleitungQualitaet(s: GameState, f: FormatSchluessel): number {
+  return clamp(s.organisation?.formatleitungen?.[f]?.person?.qualitaet ?? 0.35, 0, 1);
+}
+/** Berichtsweg eines Clusters: Regionalleitung, sonst Formatleitung, sonst CSO bzw. CEO. */
+export function clusterBerichtetAn(s: GameState, hcId: string): string {
+  const o = s.organisation, cluster = o?.hauscluster.find((x) => x.id === hcId);
+  if (cluster?.regionSchluessel && o?.regionalleitungen[cluster.regionSchluessel]?.person) return cluster.region ?? cluster.regionSchluessel;
+  if (cluster?.format && o?.formatleitungen?.[cluster.format]?.person) return 'format';
   return s.vorstand?.ressorts.cso.person ? 'cso' : 'spieler';
 }
 export function berichtetAn(s: GameState, id: BereichId): 'spieler' | RessortId {
@@ -287,11 +370,14 @@ export function bereichsQualitaet(s: GameState, id: BereichId): number {
 }
 /** Startfaktor 1: ein Führungswechsel beeinflusst die Nachfrage, nicht die Basiskalibrierung. */
 export function hausclusterFaktor(s: GameState, h: Haus): number {
-  const hc = hausclusterVon(s, h.id), reg = s.organisation?.regionalleitungen[h.region];
-  if (!hc || !reg) return 1;
+  const o = s.organisation, hc = hausclusterVon(s, h.id);
+  if (!o || !hc) return 1;
+  const key = formatRegionVon(h), reg = key ? o.regionalleitungen[key] : undefined;
+  const fl = o.formatleitungen?.[formatVon(h)];
   const hcQual = hc.stelle.person?.qualitaet ?? 0.35;
-  const regQual = reg.person?.qualitaet ?? 0.35;
-  return clamp(1 + 0.12 * (hcQual - hc.stelle.basis) + 0.08 * (regQual - reg.basis), 0.85, 1.15);
+  const regTeil = reg ? 0.08 * ((reg.person?.qualitaet ?? 0.35) - reg.basis) : 0;
+  const fTeil = fl ? 0.05 * ((fl.person?.qualitaet ?? 0.35) - fl.basis) : 0;
+  return clamp(1 + 0.12 * (hcQual - hc.stelle.basis) + regTeil + fTeil, 0.85, 1.15);
 }
 export function neueVorlage(s: GameState, v: VorlageEingabe): void {
   if (s.prognose || !s.organisation) return;
@@ -331,9 +417,10 @@ export function organisationVorlageEntscheidung(s: GameState, e: Entscheidung, o
   const a = JSON.parse(e.daten.aktion) as SpielerAktion;
   fuehreAus(s,a);
 }
-function stelleFuer(s: GameState, ebene: 'bereich'|'cluster'|'region', id: string): Stelle | undefined {
+function stelleFuer(s: GameState, ebene: OrgEbene, id: string): Stelle | undefined {
   if (ebene === 'bereich') return s.organisation?.bereiche[id];
-  if (ebene === 'region') return s.organisation?.regionalleitungen[id as Region];
+  if (ebene === 'region') return s.organisation?.regionalleitungen[id.includes(':') ? id : regionSchluessel('hartwig', id)];
+  if (ebene === 'format') return s.organisation?.formatleitungen?.[id as FormatSchluessel];
   return s.organisation?.hauscluster.find((h) => h.id === id)?.stelle;
 }
 export function organisationAktion(s: GameState, a: OrganisationAktion): { ok: boolean; text: string } {
@@ -486,8 +573,9 @@ export function organisationWoche(s: GameState): void {
     }
   }
   // Neue freie Leitungsstellen erzeugen genau einmal einen befristeten Kandidatenvorschlag.
-  const stellen: { id:string; ebene:'bereich'|'cluster'|'region'; st:Stelle }[] = [
+  const stellen: { id:string; ebene:OrgEbene; st:Stelle }[] = [
     ...Object.entries(o.bereiche).map(([id,st])=>({id,ebene:'bereich' as const,st})),
+    ...Object.entries(o.formatleitungen ?? {}).map(([id,st])=>({id,ebene:'format' as const,st:st!})),
     ...Object.entries(o.regionalleitungen).map(([id,st])=>({id,ebene:'region' as const,st})),
     ...o.hauscluster.map((c)=>({id:c.id,ebene:'cluster' as const,st:c.stelle})),
   ];
@@ -526,6 +614,16 @@ export function organisationWoche(s: GameState): void {
 }
 export function organisationUebersicht(s: GameState) {
   const o=s.organisation;
+  const clusterZeile=(c:Hauscluster)=>({ ...c,
+    anzahl:c.hausIds.length, umsatz:c.hausIds.reduce((a,id)=>a+(s.haeuser.find((h)=>h.id===id)?.kpi?.umsatz??0),0),
+    qualitaet:clusterleitungQualitaet(s,c.id), berichtetAn:clusterBerichtetAn(s,c.id),
+    aufgaben: delegationsAufgaben(undefined,c.id).map((d)=>({ ...d, an:istAufgabeDelegiert(s,d.id,undefined,c.id), grenze:delegationsGrenze(s,d.id,undefined,c.id) })),
+    offen:s.entscheidungen.filter((e)=>e.typ==='organisation_vorlage'&&e.daten.hauscluster===c.id).length });
+  const regionZeile=(key:string)=>{
+    const cl=(o?.hauscluster.filter((c)=>!c.sonder&&c.regionSchluessel===key)??[]).map(clusterZeile);
+    return { id:key, name:key.split(':')[1], format:key.split(':')[0] as FormatSchluessel, stelle:o?.regionalleitungen[key],
+      haeuser:cl.reduce((n,c)=>n+c.anzahl,0), cluster:cl };
+  };
   return {
     bereiche:BEREICHE.map((b) => ({ ...b, stelle:o?.bereiche[b.id], qualitaet:bereichsQualitaet(s,b.id),
       berichtetAn:berichtetAn(s,b.id), delegiert:istDelegiert(s,b.id),
@@ -534,12 +632,13 @@ export function organisationUebersicht(s: GameState) {
       offen:s.entscheidungen.filter((e)=>e.typ==='organisation_vorlage'&&e.daten.bereich===b.id).length })),
     ressorts:Object.keys(RESSORT_INFO).filter((r)=>r!=='cro').map((r)=>({ id:r,
       name:RESSORT_INFO[r as RessortId].titel, person:s.vorstand.ressorts[r as RessortId].person })),
-    regionen:REGIONEN.map((r)=>({ id:r, stelle:o?.regionalleitungen[r],
-      cluster:(o?.hauscluster.filter((c)=>c.region===r)??[]).map((c)=>({ ...c,
-        anzahl:c.hausIds.length, umsatz:c.hausIds.reduce((a,id)=>a+(s.haeuser.find((h)=>h.id===id)?.kpi?.umsatz??0),0),
-        qualitaet:clusterleitungQualitaet(s,c.id), berichtetAn:clusterBerichtetAn(s,c.id),
-        aufgaben: delegationsAufgaben(undefined,c.id).map((d)=>({ ...d, an:istAufgabeDelegiert(s,d.id,undefined,c.id), grenze:delegationsGrenze(s,d.id,undefined,c.id) })),
-        offen:s.entscheidungen.filter((e)=>e.typ==='organisation_vorlage'&&e.daten.hauscluster===c.id).length })) })),
+    formate:FORMAT_SCHLUESSEL.map((f)=>{
+      const hs=s.haeuser.filter((h)=>h.status==='offen'&&formatVon(h)===f);
+      return { id:f, name:FORMAT_NAME[f], leitungTitel:FORMAT_LEITUNG[f], stelle:o?.formatleitungen?.[f], haeuser:hs.length,
+        umsatz:hs.reduce((a,h)=>a+(h.kpi?.umsatz??0),0),
+        regionen:formatRegionen(f).map((r)=>regionZeile(regionSchluessel(f,r))) };
+    }),
+    regionen:FORMAT_SCHLUESSEL.flatMap((f)=>formatRegionen(f).map((r)=>regionZeile(regionSchluessel(f,r)))),
     sonder:(()=>{const c=o?.hauscluster.find((c)=>c.sonder);return c ? { ...c, aufgaben:delegationsAufgaben(undefined,c.id).map((d)=>({ ...d,an:istAufgabeDelegiert(s,d.id,undefined,c.id),grenze:delegationsGrenze(s,d.id,undefined,c.id) })) } : undefined})(),
     flagships:o?.flagships??[],
   };

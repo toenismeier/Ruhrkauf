@@ -125,7 +125,7 @@ function frequenzBasis(s: GameState, h: Haus): number {
     clamp(h.einzug.kaufkraft, 0.7, 1.4) * saison * marketing * (1 + h.transferBonus)));
 }
 function kaufquoteBasis(h: Haus): number {
-  if ((h.format as string) === 'fundus') return 0.35;
+  if (h.format === 'outlet') return 0.35;
   if (h.format === 'sport') return 0.215;
   return h.klasse === 'premium' ? 0.29 : h.lage === '1a' ? 0.27 : h.lage === 'rand' ? 0.22 : 0.25;
 }

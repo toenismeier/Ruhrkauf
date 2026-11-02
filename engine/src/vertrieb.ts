@@ -2,7 +2,7 @@
 import { GRUPPEN, saisonFaktor } from './daten';
 import { planWoche } from './planung';
 import type { GameState, Haus, Region, GruppeId } from './types';
-import { eur } from './util';
+import { clamp, eur } from './util';
 import { hausKosten, simuliereHaus } from './wirtschaft';
 
 export interface VorjahrWoche {
@@ -98,7 +98,10 @@ export function erzeugeVorjahrHistorie(s: GameState, nurFehlende = false): void 
         rohertrag += u * GRUPPEN[g].marge;
         artikel += u / 40;
       }
-      const off = roh.offprice * (eigenSt > 0 ? eigenJetzt / eigenSt : 1);
+      // E53: FUNDUS-Vorjahr mit derselben Nachfrageformel wie formateWoche (vorher rund halber Umsatz).
+      const kk = h.einzug.kaufkraft;
+      const offBasis = h.format === 'outlet' ? roh.offprice * 3.65 * clamp(2 - kk, 0.8, 1.2) / Math.max(0.1, 1.6 - 0.6 * kk) : roh.offprice;
+      const off = offBasis * (eigenSt > 0 ? eigenJetzt / eigenSt : 1);
       umsatz += off; eigen += off; rohertrag += off * 0.30; artikel += off / 24;
       for (const [g, wert] of Object.entries(roh.kommission) as [GruppeId, number][]) {
         const u = wert * f(g);

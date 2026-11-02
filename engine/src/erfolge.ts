@@ -147,8 +147,11 @@ function kontext(s: GameState): Kontext {
   const hausPlus = s.haeuser.filter(h => h.status === 'offen' && (h.kpi?.db ?? 0) > 0);
   const ress = Object.values(s.vorstand.ressorts);
   const besetzt = ress.filter(r => !!r.person);
-  // Die Format-Engine wird separat angebunden. Ohne echte Engine-Daten keine erfundenen Erfolge.
-  const formate = s.formatErfolge;
+  // E53: Formaterfolge aus den echten Hauswerten der letzten 13 Wochen (FUNDUS, Volkskauf).
+  const db13 = (format: string) => s.haeuser.filter(h => h.status === 'offen' && h.format === format)
+    .reduce((sum, h) => sum + (h.verlauf ?? []).slice(-13).reduce((n, x) => n + x.db, 0), 0);
+  const genug = (format: string) => s.haeuser.some(h => h.status === 'offen' && h.format === format && (h.verlauf?.length ?? 0) >= 13);
+  const formate = { fundusDb: genug('outlet') ? db13('outlet') : 0, volkskaufSaniert: genug('schwester') && db13('schwester') > 0 };
   return {
     einkauf: einkaufUebersicht(s).summe.kennzahlen,
     ueberlebt: s.woche,

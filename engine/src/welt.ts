@@ -670,19 +670,19 @@ export function neueWelt(seed: number, sz: Szenario = STANDARD_SZENARIO): GameSt
   // O07: vor dem Vorjahr, damit Betriebskosten und Vergleichswerte konsistent sind.
   initialisiereHausbetrieb(s);
   erzeugeVorjahrHistorie(s);
-  // O06: Vorjahresbudget verwendet den tatsächlichen historischen Verlauf.
-  initialisierePlanung(s);
   // O08 Umbau
   initialisiereUmbau(s);
   s.kapitalflussStartCash = s.cash;
-  // O04 Personal: neutraler Referenzplan auf Basis der bisherigen FTE.
-  initialisierePersonaleinsatz(s);
   // O05 Ware
   initialisiereWare(s);
   // Die Hartwig-Referenz samt HQ und Einkaufsbestand wurde bereits kalibriert.
   initialisiereFormate(s);
   // Q07: Vorjahr auch für die jetzt aktiven Volkskauf- und FUNDUS-Häuser.
   erzeugeVorjahrHistorie(s, true);
+  // E53: Planung und Personalreferenz erst, wenn alle Formate aktiv sind (Konzernziel inkl. Volkskauf und FUNDUS,
+  // Referenz-FTE der Schwesterformate nicht 0).
+  initialisierePlanung(s);
+  initialisierePersonaleinsatz(s);
   // Volkskauf/FUNDUS sind jetzt aktiv: Erreichbarkeit der Zentrale auf das ganze Netz
   // neu beziehen (Startwirkung bleibt exakt 1), Zentralkosten neu rechnen.
   s.hq.reiseBasis = reiseIndex(s, s.hq.sitz);
