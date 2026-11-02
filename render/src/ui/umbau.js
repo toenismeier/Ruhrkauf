@@ -132,14 +132,14 @@ export function umbauModul(ctx) {
       { label: 'Bauzeit', wert: v ? v.wochen + ' Wochen' : '–', unter: v ? v.haeuser + ' Häuser · ' + v.auftraege + ' Baustellen' : 'Cluster wählen' }]);
     if (v?.auftraege) {
       const ib = v.imBudget ?? { auftraege: 0, haeuser: 0, kosten: 0 }, alles = ib.auftraege >= v.auftraege;
-      x += K.liste([K.zeile({ was: 'Passt ins Budget', unter: alles ? 'das ganze Programm' : 'die schlechtesten zuerst',
-        wert: alles ? 'alles' : ib.auftraege + ' von ' + v.auftraege, wertUnter: ib.haeuser + (ib.haeuser === 1 ? ' Haus · ' : ' Häuser · ') + esc(mio(ib.kosten)), ton: alles ? 'gut' : (ib.auftraege ? 'achtung' : 'schlecht') })]);
+      x += K.liste([K.zeile({ was: alles ? 'Ganz im Budget' : 'Davon im Budget', unter: alles ? 'das ganze Programm' : 'die schlechtesten zuerst',
+        wert: (alles ? 'alle ' + v.auftraege : ib.auftraege + ' von ' + v.auftraege) + (v.auftraege === 1 ? ' Baustelle' : ' Baustellen'), wertUnter: ib.haeuser + (ib.haeuser === 1 ? ' Haus · ' : ' Häuser · ') + esc(mio(ib.kosten)), ton: alles ? 'gut' : (ib.auftraege ? 'achtung' : 'schlecht') })]);
     }
     x += K.abschnitt('1 · Gewerk');
     x += K.liste(GEWERK_FOLGE.map((g) => K.zeile({ was: esc(G()[g].name) + (g === a.gewerk ? ' · gewählt' : ''), unter: esc(G()[g].text), tippbar: true, attr: 'data-umbau="agewerk" data-v="' + g + '"' })));
     x += K.abschnitt('2 · Umfang', a.bisZustand ? 'schlechte und mittlere' : 'nur schlechte');
     x += '<div class="hw-umfang">' + K.seg([['0', 'nur schlechte'], ['1', 'schlechte und mittlere']], String(a.bisZustand), (w) => 'data-umbau="abis" data-v="' + w + '"') + '</div>';
-    x += K.feld('Gleichzeitige Baustellen', K.stepper({ wert: String(a.parallel), unter: 'je Haus eine', attrMinus: 'data-umbau="apar" data-v="-1"', attrPlus: 'data-umbau="apar" data-v="1"', minusAus: a.parallel <= 1, plusAus: a.parallel >= 40, label: 'Gleichzeitige Baustellen' }));
+    x += K.feld('Gleichzeitige Baustellen', K.stepper({ wert: String(a.parallel), unter: 'höchstens 1 je Haus', attrMinus: 'data-umbau="apar" data-v="-1"', attrPlus: 'data-umbau="apar" data-v="1"', minusAus: a.parallel <= 1, plusAus: a.parallel >= 40, label: 'Gleichzeitige Baustellen' }));
     x += K.abschnitt('3 · Cluster', a.cluster.length + ' gewählt');
     x += K.knoepfe(K.knopf('Alle', 'data-umbau="aalle"', 'zweit'), K.knopf('Keine', 'data-umbau="akeine"', 'zweit'), K.knopf('Schlechteste 5', 'data-umbau="aschlecht"', 'zweit'));
     const grp = G()[a.gewerk]?.gruppe, sortGruppe = grp === 'komplett' ? 'moebel' : grp;

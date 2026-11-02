@@ -168388,7 +168388,7 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
   for (const d5 of einstellungen) meldeSchalter(d5);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "26cb7ae" : "Entwicklung";
+  var version = () => true ? "b4ca69d" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv8 = false;
     function feld2(d5) {
@@ -172926,9 +172926,9 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
       if (v3?.auftraege) {
         const ib = v3.imBudget ?? { auftraege: 0, haeuser: 0, kosten: 0 }, alles = ib.auftraege >= v3.auftraege;
         x2 += liste([zeile2({
-          was: "Passt ins Budget",
+          was: alles ? "Ganz im Budget" : "Davon im Budget",
           unter: alles ? "das ganze Programm" : "die schlechtesten zuerst",
-          wert: alles ? "alles" : ib.auftraege + " von " + v3.auftraege,
+          wert: (alles ? "alle " + v3.auftraege : ib.auftraege + " von " + v3.auftraege) + (v3.auftraege === 1 ? " Baustelle" : " Baustellen"),
           wertUnter: ib.haeuser + (ib.haeuser === 1 ? " Haus \xB7 " : " H\xE4user \xB7 ") + esc(mio4(ib.kosten)),
           ton: alles ? "gut" : ib.auftraege ? "achtung" : "schlecht"
         })]);
@@ -172937,7 +172937,7 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
       x2 += liste(GEWERK_FOLGE.map((g4) => zeile2({ was: esc(G3()[g4].name) + (g4 === a2.gewerk ? " \xB7 gew\xE4hlt" : ""), unter: esc(G3()[g4].text), tippbar: true, attr: 'data-umbau="agewerk" data-v="' + g4 + '"' })));
       x2 += abschnitt("2 \xB7 Umfang", a2.bisZustand ? "schlechte und mittlere" : "nur schlechte");
       x2 += '<div class="hw-umfang">' + seg([["0", "nur schlechte"], ["1", "schlechte und mittlere"]], String(a2.bisZustand), (w2) => 'data-umbau="abis" data-v="' + w2 + '"') + "</div>";
-      x2 += feld("Gleichzeitige Baustellen", stepper({ wert: String(a2.parallel), unter: "je Haus eine", attrMinus: 'data-umbau="apar" data-v="-1"', attrPlus: 'data-umbau="apar" data-v="1"', minusAus: a2.parallel <= 1, plusAus: a2.parallel >= 40, label: "Gleichzeitige Baustellen" }));
+      x2 += feld("Gleichzeitige Baustellen", stepper({ wert: String(a2.parallel), unter: "h\xF6chstens 1 je Haus", attrMinus: 'data-umbau="apar" data-v="-1"', attrPlus: 'data-umbau="apar" data-v="1"', minusAus: a2.parallel <= 1, plusAus: a2.parallel >= 40, label: "Gleichzeitige Baustellen" }));
       x2 += abschnitt("3 \xB7 Cluster", a2.cluster.length + " gew\xE4hlt");
       x2 += knoepfe(knopf("Alle", 'data-umbau="aalle"', "zweit"), knopf("Keine", 'data-umbau="akeine"', "zweit"), knopf("Schlechteste 5", 'data-umbau="aschlecht"', "zweit"));
       const grp = G3()[a2.gewerk]?.gruppe, sortGruppe = grp === "komplett" ? "moebel" : grp;
@@ -191247,8 +191247,8 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-11-02T10:23:51.173Z" : null;
-    const v3 = true ? "26cb7ae" : "Entwicklung";
+    const iso = true ? "2026-11-02T10:37:15.186Z" : null;
+    const v3 = true ? "b4ca69d" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v3;
   })();
