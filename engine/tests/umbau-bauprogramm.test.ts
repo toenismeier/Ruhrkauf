@@ -40,6 +40,10 @@ describe('E48 Bauprogramm', () => {
     const v = bauprogrammSchaetzung(s, auftrag);
     expect(v.auftraege).toBeGreaterThan(4);
     expect(v.wochen).toBeGreaterThan(GEWERKE.moebel.min);
+    // Budgetanteil: nie mehr als frei, nie mehr Baustellen als das Programm.
+    expect(v.imBudget.kosten).toBeLessThanOrEqual(v.budgetRest);
+    expect(v.imBudget.auftraege).toBeLessThanOrEqual(v.auftraege);
+    expect(v.imBudget.auftraege === v.auftraege).toBe(!v.ueberBudget);
     const vorher = cluster.map((id) => u.cluster.find((c) => c.id === id)!.gut.moebel);
     expect(fuehreAus(s, { typ: 'bauprogrammStarten', auftrag }).ok).toBe(true);
     for (let i = 0; i < 20; i++) {

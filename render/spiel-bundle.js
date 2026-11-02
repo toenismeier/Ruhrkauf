@@ -6032,6 +6032,14 @@
     const haeuser = new Set(liste3.map((x2) => x2.haus)).size;
     const spitze3 = Math.max(0, ...kostenWoche.values());
     const budgetRest = Math.max(0, (s2.umbau?.budget ?? 0) - (s2.umbau?.verbraucht ?? 0));
+    let imKosten = 0, imAuftraege = 0;
+    const imHaeuser = /* @__PURE__ */ new Set();
+    for (const d5 of dauer) {
+      if (imKosten + d5.k > budgetRest) break;
+      imKosten += d5.k;
+      imAuftraege++;
+      imHaeuser.add(d5.haus);
+    }
     return {
       haeuser,
       etagen: GEWERKE[a2.gewerk].ebene === "haus" ? 0 : liste3.length,
@@ -6043,6 +6051,7 @@
       spitzeWoche: spitze3,
       budgetRest,
       ueberBudget: kosten2 > budgetRest,
+      imBudget: { auftraege: imAuftraege, haeuser: imHaeuser.size, kosten: imKosten },
       ertragJahr: eur(plusJahr * BRUTTO),
       rendite: Math.round(plusJahr * BRUTTO / Math.max(1, kosten2) * 1e3) / 10,
       amortisationJahre: plusJahr > 0 ? Math.round(kosten2 / (plusJahr * BRUTTO) * 10) / 10 : null
@@ -165902,7 +165911,7 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
   for (const d5 of einstellungen) meldeSchalter(d5);
   var esc2 = (s2) => String(s2 ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   var option = (o4) => typeof o4 === "object" ? { wert: o4.wert ?? o4.value, titel: o4.titel ?? o4.label ?? o4.wert } : { wert: o4, titel: o4 };
-  var version = () => true ? "bd07281" : "Entwicklung";
+  var version = () => true ? "26cb7ae" : "Entwicklung";
   function einstellungenModul(ctx) {
     let aktiv8 = false;
     function feld2(d5) {
@@ -170426,6 +170435,10 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
       x2 += knoepfe(knopf("Zum Bestand", 'data-umbau="modernisierung"', "text"));
       ctx.panel(c.name, "Bestand im Cluster", bereich("haus", "umbau") + '<div class="hw-g5">' + rumpf2(x2) + "</div>", "gross");
     }
+    function schlechteste5() {
+      const grp = G3()[ui.auftrag.gewerk]?.gruppe, g4 = grp === "komplett" ? "moebel" : grp;
+      return E9.bestandUebersicht(s2()).cluster.filter((c) => !c.sonder).sort((p3, q3) => (p3.gut[g4] ?? 0) - (q3.gut[g4] ?? 0)).slice(0, 5).map((c) => c.id);
+    }
     function assistent2() {
       const a2 = ui.auftrag, u = E9.bestandUebersicht(s2());
       const v3 = a2.cluster.length ? E9.bauprogrammSchaetzung(s2(), a2) : null;
@@ -170433,10 +170446,20 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
         { label: "Kosten", wert: v3 ? mio4(v3.kosten) : "\u2013", ton: v3?.ueberBudget ? "schlecht" : "", unter: "Budget frei " + esc(geld(u.rest)) },
         { label: "Bauzeit", wert: v3 ? v3.wochen + " Wochen" : "\u2013", unter: v3 ? v3.haeuser + " H\xE4user \xB7 " + v3.auftraege + " Baustellen" : "Cluster w\xE4hlen" }
       ]);
+      if (v3?.auftraege) {
+        const ib = v3.imBudget ?? { auftraege: 0, haeuser: 0, kosten: 0 }, alles = ib.auftraege >= v3.auftraege;
+        x2 += liste([zeile2({
+          was: "Passt ins Budget",
+          unter: alles ? "das ganze Programm" : "die schlechtesten zuerst",
+          wert: alles ? "alles" : ib.auftraege + " von " + v3.auftraege,
+          wertUnter: ib.haeuser + (ib.haeuser === 1 ? " Haus \xB7 " : " H\xE4user \xB7 ") + esc(mio4(ib.kosten)),
+          ton: alles ? "gut" : ib.auftraege ? "achtung" : "schlecht"
+        })]);
+      }
       x2 += abschnitt("1 \xB7 Gewerk");
       x2 += liste(GEWERK_FOLGE.map((g4) => zeile2({ was: esc(G3()[g4].name) + (g4 === a2.gewerk ? " \xB7 gew\xE4hlt" : ""), unter: esc(G3()[g4].text), tippbar: true, attr: 'data-umbau="agewerk" data-v="' + g4 + '"' })));
-      x2 += abschnitt("2 \xB7 Umfang");
-      x2 += seg([["0", "nur schlechte"], ["1", "schlechte und mittlere"]], String(a2.bisZustand), (w2) => 'data-umbau="abis" data-v="' + w2 + '"');
+      x2 += abschnitt("2 \xB7 Umfang", a2.bisZustand ? "schlechte und mittlere" : "nur schlechte");
+      x2 += '<div class="hw-umfang">' + seg([["0", "nur schlechte"], ["1", "schlechte und mittlere"]], String(a2.bisZustand), (w2) => 'data-umbau="abis" data-v="' + w2 + '"') + "</div>";
       x2 += feld("Gleichzeitige Baustellen", stepper({ wert: String(a2.parallel), unter: "je Haus eine", attrMinus: 'data-umbau="apar" data-v="-1"', attrPlus: 'data-umbau="apar" data-v="1"', minusAus: a2.parallel <= 1, plusAus: a2.parallel >= 40, label: "Gleichzeitige Baustellen" }));
       x2 += abschnitt("3 \xB7 Cluster", a2.cluster.length + " gew\xE4hlt");
       x2 += knoepfe(knopf("Alle", 'data-umbau="aalle"', "zweit"), knopf("Keine", 'data-umbau="akeine"', "zweit"), knopf("Schlechteste 5", 'data-umbau="aschlecht"', "zweit"));
@@ -170580,6 +170603,7 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
       if (art === "assistent") {
         ui.seite = "assistent";
         if (el2.dataset.id) A2.cluster = [el2.dataset.id];
+        else if (!A2.cluster.length) A2.cluster = schlechteste5();
         return anzeigen();
       }
       if (art === "agewerk") {
@@ -170608,8 +170632,7 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
         return anzeigen();
       }
       if (art === "aschlecht") {
-        const grp = G3()[A2.gewerk]?.gruppe, g4 = grp === "komplett" ? "moebel" : grp;
-        A2.cluster = E9.bestandUebersicht(s2()).cluster.filter((c) => !c.sonder).sort((p3, q3) => (p3.gut[g4] ?? 0) - (q3.gut[g4] ?? 0)).slice(0, 5).map((c) => c.id);
+        A2.cluster = schlechteste5();
         return anzeigen();
       }
       if (art === "astart") return tun2({ typ: "bauprogrammStarten", auftrag: { ...A2, cluster: [...A2.cluster] } }, "bestand");
@@ -188747,8 +188770,8 @@ ${v}`).replace("#include <map_fragment>", g2).replace("#include <roughnessmap_fr
   (() => {
     const el2 = $2("startstand");
     if (!el2) return;
-    const iso = true ? "2026-11-01T11:52:48.515Z" : null;
-    const v3 = true ? "bd07281" : "Entwicklung";
+    const iso = true ? "2026-11-02T10:23:51.173Z" : null;
+    const v3 = true ? "26cb7ae" : "Entwicklung";
     const zeit = iso ? new Date(iso).toLocaleString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Entwicklungsstand";
     el2.textContent = "Letztes Update " + zeit + " Uhr \xB7 " + v3;
   })();
