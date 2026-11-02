@@ -88,7 +88,9 @@ describe('N03 Erfolge und Abzeichen', () => {
   test('Format-Erfolge verlangen echte Formate-Kennzahlen; keine falsche Freischaltung', () => {
     const s = neuesSpiel(2);
     expect(erfolgeUebersicht(s).find(x => x.id === 'fundus-profitabel')?.freigeschaltet).toBeUndefined();
-    s.formatErfolge = { fundusDb: 1, volkskaufSaniert: true };
+    // E53: Formaterfolge kommen aus den echten Hauswerten der letzten 13 Wochen.
+    for (const h of s.haeuser.filter(x => x.format === 'outlet' || x.format === 'schwester'))
+      h.verlauf = Array.from({ length: 13 }, (_, i) => ({ woche: i - 13, umsatz: 100000, db: 5000, frequenz: 1000, personalFte: 10 }));
     wocheAbspielen(s);
     expect(s.erfolge?.['fundus-profitabel']).toBe(1);
     expect(s.erfolge?.['volkskauf-saniert']).toBe(1);

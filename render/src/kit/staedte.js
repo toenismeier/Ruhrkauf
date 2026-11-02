@@ -211,6 +211,8 @@ const nachStadt = new Map();
 for (const h of haeuser) { if (!nachStadt.has(h.stadt)) nachStadt.set(h.stadt, []); nachStadt.get(h.stadt).push(h); }
 // Auch Städte mit ausschließlich Volkskauf/FUNDUS benötigen eigenständige Stadtpläne.
 for (const h of [...schwesterHauser, ...haeuserOutlet]) if (!nachStadt.has(h.stadt)) nachStadt.set(h.stadt, []);
+// E53: Städte ohne eigenes Haus (z. B. nach der Volkskauf-Umverteilung) bleiben auf der Karte (Ummo 02.11.2026).
+for (const name of Object.keys(STADT_GEOGRAFIE)) if (!nachStadt.has(name)) nachStadt.set(name, []);
 export const STADTLISTE = [...nachStadt.entries()].map(([name, l]) => baueEintrag(name, l)).sort((a, b) => a.name.localeCompare(b.name, 'de'));
 const INDEX = new Map(STADTLISTE.map((s) => [s.name, s]));
 

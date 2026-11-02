@@ -95,7 +95,7 @@ export function statistikModul(ctx) {
         summe: { name: 'Summe', werte: [geld(summeU), geld(summeD), summeU ? prozent(summeD / summeU) : 'ohne Umsatz'], roh: [summeU, summeD, null] } }) + '</div>';
   }
   function formate() {
-    return vergleich('format', ['Hartwig', 'Volkskauf', 'Sport', 'FUNDUS'], 'Format') + '<p class="hw-text">Noch nicht simulierte Formate bleiben ohne Werte.</p>';
+    return vergleich('format', ['Hartwig', 'Premium', 'Volkskauf', 'Sport', 'FUNDUS'], 'Format');
   }
   function regionen() { return vergleich('region', ['Nord', 'Ost', 'West', 'Mitte', 'Süd'], 'Region'); }
   function rangliste() {

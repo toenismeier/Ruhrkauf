@@ -718,7 +718,7 @@
       3
     ],
     "baujahr": 1968,
-    "fassade": 2,
+    "fassade": 1,
     "substanz": 24,
     "status": "offen",
     "flaechen": [
@@ -1506,7 +1506,7 @@
       5
     ],
     "baujahr": 1979,
-    "fassade": 5,
+    "fassade": 4,
     "substanz": 60,
     "status": "offen",
     "flaechen": [
@@ -1838,13 +1838,13 @@
   },
   {
     "id": "K022",
-    "name": "Volkskauf Mönchengladbach Bahnhofstraße",
-    "stadt": "Mönchengladbach",
+    "name": "Volkskauf Mannheim Bahnhofstraße",
+    "stadt": "Mannheim",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Süd",
     "grundflaecheQm": 1600,
     "etagen": [
       0,
@@ -1924,13 +1924,13 @@
   },
   {
     "id": "K023",
-    "name": "Volkskauf Gelsenkirchen",
-    "stadt": "Gelsenkirchen",
+    "name": "Volkskauf Karlsruhe",
+    "stadt": "Karlsruhe",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Süd",
     "grundflaecheQm": 1700,
     "etagen": [
       0,
@@ -2011,13 +2011,13 @@
   },
   {
     "id": "K024",
-    "name": "Volkskauf Aachen Bahnhofstraße",
-    "stadt": "Aachen",
+    "name": "Volkskauf Augsburg Bahnhofstraße",
+    "stadt": "Augsburg",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Süd",
     "grundflaecheQm": 1200,
     "etagen": [
       0,
@@ -2099,13 +2099,13 @@
   },
   {
     "id": "K025",
-    "name": "Volkskauf Krefeld",
-    "stadt": "Krefeld",
+    "name": "Volkskauf Wiesbaden",
+    "stadt": "Wiesbaden",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Mitte",
     "grundflaecheQm": 1000,
     "etagen": [
       0,
@@ -2187,8 +2187,8 @@
   },
   {
     "id": "K026",
-    "name": "Volkskauf Oberhausen",
-    "stadt": "Oberhausen",
+    "name": "Volkskauf Mönchengladbach",
+    "stadt": "Mönchengladbach",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
@@ -2274,14 +2274,14 @@
   },
   {
     "id": "K027",
-    "name": "Volkskauf Hagen",
-    "stadt": "Hagen",
+    "name": "Volkskauf Gelsenkirchen",
+    "stadt": "Gelsenkirchen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1280,
+    "grundflaecheQm": 1300,
     "etagen": [
       0,
       1,
@@ -2361,8 +2361,8 @@
   },
   {
     "id": "K028",
-    "name": "Volkskauf Hamm",
-    "stadt": "Hamm",
+    "name": "Volkskauf Aachen",
+    "stadt": "Aachen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
@@ -2447,13 +2447,13 @@
   },
   {
     "id": "K029",
-    "name": "Volkskauf Mülheim",
-    "stadt": "Mülheim",
+    "name": "Volkskauf Braunschweig",
+    "stadt": "Braunschweig",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Nord",
     "grundflaecheQm": 1800,
     "etagen": [
       0,
@@ -2533,14 +2533,14 @@
   },
   {
     "id": "K030",
-    "name": "Volkskauf Leverkusen Lindenstraße",
-    "stadt": "Leverkusen",
+    "name": "Volkskauf Kiel Lindenstraße",
+    "stadt": "Kiel",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
     "cluster": "grossstadt",
-    "region": "West",
-    "grundflaecheQm": 1120,
+    "region": "Nord",
+    "grundflaecheQm": 1300,
     "etagen": [
       0,
       1,
@@ -2550,7 +2550,7 @@
       5
     ],
     "baujahr": 1959,
-    "fassade": 6,
+    "fassade": 4,
     "substanz": 42,
     "status": "offen",
     "flaechen": [
@@ -2621,13 +2621,13 @@
   },
   {
     "id": "K031",
-    "name": "Volkskauf Solingen",
-    "stadt": "Solingen",
+    "name": "Volkskauf Chemnitz",
+    "stadt": "Chemnitz",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Ost",
     "grundflaecheQm": 1600,
     "etagen": [
       0,
@@ -2638,7 +2638,7 @@
       5
     ],
     "baujahr": 1984,
-    "fassade": 2,
+    "fassade": 0,
     "substanz": 29,
     "status": "offen",
     "flaechen": [
@@ -2709,13 +2709,13 @@
   },
   {
     "id": "K032",
-    "name": "Volkskauf Paderborn",
-    "stadt": "Paderborn",
+    "name": "Volkskauf Halle",
+    "stadt": "Halle",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Ost",
     "grundflaecheQm": 1300,
     "etagen": [
       0,
@@ -2796,13 +2796,13 @@
   },
   {
     "id": "K033",
-    "name": "Volkskauf Siegen",
-    "stadt": "Siegen",
+    "name": "Volkskauf Magdeburg",
+    "stadt": "Magdeburg",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Ost",
     "grundflaecheQm": 1400,
     "etagen": [
       0,
@@ -2884,13 +2884,13 @@
   },
   {
     "id": "K034",
-    "name": "Volkskauf Gütersloh Neustadt",
-    "stadt": "Gütersloh",
+    "name": "Volkskauf Freiburg Neustadt",
+    "stadt": "Freiburg",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Süd",
     "grundflaecheQm": 1900,
     "etagen": [
       0,
@@ -2970,8 +2970,8 @@
   },
   {
     "id": "K035",
-    "name": "Volkskauf Recklinghausen Am Wall",
-    "stadt": "Recklinghausen",
+    "name": "Volkskauf Krefeld Am Wall",
+    "stadt": "Krefeld",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
@@ -3058,13 +3058,13 @@
   },
   {
     "id": "K036",
-    "name": "Volkskauf Bottrop",
-    "stadt": "Bottrop",
+    "name": "Volkskauf Mainz",
+    "stadt": "Mainz",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Mitte",
     "grundflaecheQm": 1000,
     "etagen": [
       0,
@@ -3075,7 +3075,7 @@
       5
     ],
     "baujahr": 1990,
-    "fassade": 3,
+    "fassade": 1,
     "substanz": 17,
     "status": "offen",
     "flaechen": [
@@ -3146,18 +3146,19 @@
   },
   {
     "id": "K037",
-    "name": "Volkskauf Bamberg",
-    "stadt": "Bamberg",
+    "name": "Volkskauf Lübeck",
+    "stadt": "Lübeck",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "Süd",
-    "grundflaecheQm": 1280,
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1200,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 1959,
     "fassade": 0,
@@ -3187,42 +3188,42 @@
       },
       {
         "id": "K037-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 303,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K037-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 505,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K037-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 354,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K037-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 758,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K037-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 303,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K037-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 506,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -3231,20 +3232,21 @@
   },
   {
     "id": "K038",
-    "name": "Volkskauf Bayreuth Lindenstraße",
-    "stadt": "Bayreuth",
+    "name": "Volkskauf Oberhausen Lindenstraße",
+    "stadt": "Oberhausen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
-    "region": "Süd",
-    "grundflaecheQm": 1300,
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1100,
     "etagen": [
       0,
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
     "baujahr": 1971,
     "fassade": 1,
@@ -3288,28 +3290,28 @@
       },
       {
         "id": "K038-f6",
-        "etage": 0,
+        "etage": 5,
         "qm": 482,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K038-f7",
-        "etage": 1,
+        "etage": 0,
         "qm": 1032,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K038-f8",
-        "etage": 2,
+        "etage": 1,
         "qm": 413,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K038-f9",
-        "etage": 3,
+        "etage": 2,
         "qm": 688,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -3318,18 +3320,19 @@
   },
   {
     "id": "K039",
-    "name": "Volkskauf Landshut",
-    "stadt": "Landshut",
+    "name": "Volkskauf Kassel",
+    "stadt": "Kassel",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "Süd",
-    "grundflaecheQm": 1280,
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 1800,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 1931,
     "fassade": 6,
@@ -3359,42 +3362,42 @@
       },
       {
         "id": "K039-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 458,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K039-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 763,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K039-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 534,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K039-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 1145,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K039-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 458,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K039-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 765,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -3403,18 +3406,19 @@
   },
   {
     "id": "K040",
-    "name": "Volkskauf Rosenheim",
-    "stadt": "Rosenheim",
+    "name": "Volkskauf Hagen",
+    "stadt": "Hagen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "Süd",
-    "grundflaecheQm": 1040,
+    "cluster": "grossstadt",
+    "region": "West",
+    "grundflaecheQm": 1800,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 1936,
     "fassade": 6,
@@ -3444,42 +3448,42 @@
       },
       {
         "id": "K040-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 471,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K040-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 785,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K040-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 549,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K040-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 1177,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K040-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 471,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K040-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 786,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -3488,13 +3492,13 @@
   },
   {
     "id": "K041",
-    "name": "Volkskauf Neuss",
-    "stadt": "Neuss",
+    "name": "Volkskauf Saarbrücken",
+    "stadt": "Saarbrücken",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Mitte",
     "grundflaecheQm": 1000,
     "etagen": [
       0,
@@ -3576,19 +3580,20 @@
   },
   {
     "id": "K042",
-    "name": "Volkskauf Düren Neustadt",
-    "stadt": "Düren",
+    "name": "Volkskauf Hamm Neustadt",
+    "stadt": "Hamm",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
+    "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1040,
+    "grundflaecheQm": 1000,
     "etagen": [
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "baujahr": 1961,
     "fassade": 5,
@@ -3625,35 +3630,35 @@
       },
       {
         "id": "K042-f5",
-        "etage": 0,
+        "etage": 4,
         "qm": 484,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K042-f6",
-        "etage": 1,
+        "etage": 0,
         "qm": 339,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K042-f7",
-        "etage": 2,
+        "etage": 1,
         "qm": 726,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K042-f8",
-        "etage": 3,
+        "etage": 2,
         "qm": 290,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K042-f9",
-        "etage": 0,
+        "etage": 3,
         "qm": 483,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -3662,19 +3667,20 @@
   },
   {
     "id": "K043",
-    "name": "Volkskauf Wesel",
-    "stadt": "Wesel",
+    "name": "Volkskauf Ludwigshafen",
+    "stadt": "Ludwigshafen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 1280,
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 1500,
     "etagen": [
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "baujahr": 1932,
     "fassade": 7,
@@ -3711,35 +3717,35 @@
       },
       {
         "id": "K043-f5",
-        "etage": 0,
+        "etage": 4,
         "qm": 828,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K043-f6",
-        "etage": 1,
+        "etage": 0,
         "qm": 580,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K043-f7",
-        "etage": 2,
+        "etage": 1,
         "qm": 1242,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K043-f8",
-        "etage": 3,
+        "etage": 2,
         "qm": 497,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K043-f9",
-        "etage": 0,
+        "etage": 3,
         "qm": 826,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -3748,20 +3754,21 @@
   },
   {
     "id": "K044",
-    "name": "Volkskauf Iserlohn Am Wall",
-    "stadt": "Iserlohn",
+    "name": "Volkskauf Oldenburg Am Wall",
+    "stadt": "Oldenburg",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 800,
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1000,
     "etagen": [
       0,
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
     "baujahr": 1955,
     "fassade": 7,
@@ -3805,28 +3812,28 @@
       },
       {
         "id": "K044-f6",
-        "etage": 0,
+        "etage": 5,
         "qm": 422,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K044-f7",
-        "etage": 1,
+        "etage": 0,
         "qm": 903,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K044-f8",
-        "etage": 2,
+        "etage": 1,
         "qm": 361,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K044-f9",
-        "etage": 3,
+        "etage": 2,
         "qm": 602,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -3835,21 +3842,22 @@
   },
   {
     "id": "K045",
-    "name": "Volkskauf Lüdenscheid",
-    "stadt": "Lüdenscheid",
+    "name": "Volkskauf Mülheim",
+    "stadt": "Mülheim",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
+    "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1200,
+    "grundflaecheQm": 1300,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 1996,
-    "fassade": 7,
+    "fassade": 5,
     "substanz": 37,
     "status": "offen",
     "flaechen": [
@@ -3876,42 +3884,42 @@
       },
       {
         "id": "K045-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 323,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K045-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 538,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K045-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 376,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K045-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 806,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K045-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 323,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K045-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 538,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -3920,22 +3928,23 @@
   },
   {
     "id": "K046",
-    "name": "Volkskauf Witten Am Wall",
-    "stadt": "Witten",
+    "name": "Volkskauf Osnabrück Am Wall",
+    "stadt": "Osnabrück",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 960,
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1300,
     "etagen": [
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "baujahr": 1983,
-    "fassade": 4,
+    "fassade": 3,
     "substanz": 60,
     "status": "offen",
     "flaechen": [
@@ -3969,35 +3978,35 @@
       },
       {
         "id": "K046-f5",
-        "etage": 0,
+        "etage": 4,
         "qm": 720,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K046-f6",
-        "etage": 1,
+        "etage": 0,
         "qm": 504,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K046-f7",
-        "etage": 2,
+        "etage": 1,
         "qm": 1081,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K046-f8",
-        "etage": 3,
+        "etage": 2,
         "qm": 432,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K046-f9",
-        "etage": 0,
+        "etage": 3,
         "qm": 721,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -4006,20 +4015,21 @@
   },
   {
     "id": "K047",
-    "name": "Volkskauf Marl Neustadt",
-    "stadt": "Marl",
+    "name": "Volkskauf Leverkusen Neustadt",
+    "stadt": "Leverkusen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
+    "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1680,
+    "grundflaecheQm": 1700,
     "etagen": [
       0,
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
     "baujahr": 1968,
     "fassade": 1,
@@ -4063,28 +4073,28 @@
       },
       {
         "id": "K047-f6",
-        "etage": 0,
+        "etage": 5,
         "qm": 745,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K047-f7",
-        "etage": 1,
+        "etage": 0,
         "qm": 1597,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K047-f8",
-        "etage": 2,
+        "etage": 1,
         "qm": 639,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K047-f9",
-        "etage": 3,
+        "etage": 2,
         "qm": 1064,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -4093,13 +4103,13 @@
   },
   {
     "id": "K048",
-    "name": "Volkskauf Moers Neustadt",
-    "stadt": "Moers",
+    "name": "Volkskauf Darmstadt Neustadt",
+    "stadt": "Darmstadt",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Mitte",
     "grundflaecheQm": 1000,
     "etagen": [
       0,
@@ -4109,7 +4119,7 @@
       4
     ],
     "baujahr": 1962,
-    "fassade": 4,
+    "fassade": 1,
     "substanz": 57,
     "status": "offen",
     "flaechen": [
@@ -4180,19 +4190,20 @@
   },
   {
     "id": "K049",
-    "name": "Volkskauf Lünen",
-    "stadt": "Lünen",
+    "name": "Volkskauf Heidelberg",
+    "stadt": "Heidelberg",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 800,
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1800,
     "etagen": [
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "baujahr": 1958,
     "fassade": 6,
@@ -4229,35 +4240,35 @@
       },
       {
         "id": "K049-f5",
-        "etage": 0,
+        "etage": 4,
         "qm": 957,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K049-f6",
-        "etage": 1,
+        "etage": 0,
         "qm": 670,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K049-f7",
-        "etage": 2,
+        "etage": 1,
         "qm": 1435,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K049-f8",
-        "etage": 3,
+        "etage": 2,
         "qm": 574,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K049-f9",
-        "etage": 0,
+        "etage": 3,
         "qm": 958,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -4266,21 +4277,22 @@
   },
   {
     "id": "K050",
-    "name": "Volkskauf Bergkamen Lindenstraße",
-    "stadt": "Bergkamen",
+    "name": "Volkskauf Solingen Lindenstraße",
+    "stadt": "Solingen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
+    "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 800,
+    "grundflaecheQm": 1800,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 2004,
-    "fassade": 2,
+    "fassade": 0,
     "substanz": 30,
     "status": "offen",
     "flaechen": [
@@ -4307,42 +4319,42 @@
       },
       {
         "id": "K050-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 458,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K050-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 763,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K050-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 534,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K050-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 1145,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K050-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 458,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K050-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 765,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -4351,23 +4363,24 @@
   },
   {
     "id": "K051",
-    "name": "Volkskauf Unna Arkaden",
-    "stadt": "Unna",
+    "name": "Volkskauf Regensburg Arkaden",
+    "stadt": "Regensburg",
     "format": "schwester",
     "nurDaten": true,
     "lage": "center",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 1100,
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1000,
     "etagen": [
       0,
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
     "baujahr": 2003,
-    "fassade": 3,
+    "fassade": 1,
     "substanz": 60,
     "status": "offen",
     "flaechen": [
@@ -4408,28 +4421,28 @@
       },
       {
         "id": "K051-f6",
-        "etage": 0,
+        "etage": 5,
         "qm": 399,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K051-f7",
-        "etage": 1,
+        "etage": 0,
         "qm": 855,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K051-f8",
-        "etage": 2,
+        "etage": 1,
         "qm": 342,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K051-f9",
-        "etage": 3,
+        "etage": 2,
         "qm": 569,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -4438,20 +4451,21 @@
   },
   {
     "id": "K052",
-    "name": "Volkskauf Schwerte Ring",
-    "stadt": "Schwerte",
+    "name": "Volkskauf Paderborn Ring",
+    "stadt": "Paderborn",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
+    "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1700,
+    "grundflaecheQm": 1400,
     "etagen": [
       0,
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
     "baujahr": 2007,
     "fassade": 0,
@@ -4495,28 +4509,28 @@
       },
       {
         "id": "K052-f6",
-        "etage": 0,
+        "etage": 5,
         "qm": 640,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K052-f7",
-        "etage": 1,
+        "etage": 0,
         "qm": 1371,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K052-f8",
-        "etage": 2,
+        "etage": 1,
         "qm": 548,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K052-f9",
-        "etage": 3,
+        "etage": 2,
         "qm": 914,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -4525,22 +4539,23 @@
   },
   {
     "id": "K053",
-    "name": "Volkskauf Menden",
-    "stadt": "Menden",
+    "name": "Volkskauf Ingolstadt",
+    "stadt": "Ingolstadt",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 2400,
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1900,
     "etagen": [
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "baujahr": 1957,
-    "fassade": 6,
+    "fassade": 5,
     "substanz": 26,
     "status": "offen",
     "flaechen": [
@@ -4574,35 +4589,35 @@
       },
       {
         "id": "K053-f5",
-        "etage": 0,
+        "etage": 4,
         "qm": 1022,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K053-f6",
-        "etage": 1,
+        "etage": 0,
         "qm": 715,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K053-f7",
-        "etage": 2,
+        "etage": 1,
         "qm": 1532,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K053-f8",
-        "etage": 3,
+        "etage": 2,
         "qm": 613,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K053-f9",
-        "etage": 0,
+        "etage": 3,
         "qm": 1021,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -4611,21 +4626,22 @@
   },
   {
     "id": "K054",
-    "name": "Volkskauf Arnsberg",
-    "stadt": "Arnsberg",
+    "name": "Volkskauf Würzburg",
+    "stadt": "Würzburg",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 1700,
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1300,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 1936,
-    "fassade": 0,
+    "fassade": 6,
     "substanz": 60,
     "status": "offen",
     "flaechen": [
@@ -4652,42 +4668,42 @@
       },
       {
         "id": "K054-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 335,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K054-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 559,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K054-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 391,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K054-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 839,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K054-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 335,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K054-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 561,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -4696,21 +4712,22 @@
   },
   {
     "id": "K055",
-    "name": "Volkskauf Soest Lindenstraße",
-    "stadt": "Soest",
+    "name": "Volkskauf Ulm Lindenstraße",
+    "stadt": "Ulm",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 2000,
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1500,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 1971,
-    "fassade": 7,
+    "fassade": 6,
     "substanz": 54,
     "status": "offen",
     "flaechen": [
@@ -4737,42 +4754,42 @@
       },
       {
         "id": "K055-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 394,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K055-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 656,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K055-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 459,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K055-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 984,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K055-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 394,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K055-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 655,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -4781,19 +4798,20 @@
   },
   {
     "id": "K056",
-    "name": "Volkskauf Lippstadt",
-    "stadt": "Lippstadt",
+    "name": "Volkskauf Wolfsburg",
+    "stadt": "Wolfsburg",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 1100,
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1000,
     "etagen": [
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "baujahr": 1920,
     "fassade": 4,
@@ -4830,35 +4848,35 @@
       },
       {
         "id": "K056-f5",
-        "etage": 0,
+        "etage": 4,
         "qm": 452,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K056-f6",
-        "etage": 1,
+        "etage": 0,
         "qm": 316,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K056-f7",
-        "etage": 2,
+        "etage": 1,
         "qm": 677,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K056-f8",
-        "etage": 3,
+        "etage": 2,
         "qm": 271,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K056-f9",
-        "etage": 0,
+        "etage": 3,
         "qm": 452,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -4867,18 +4885,19 @@
   },
   {
     "id": "K057",
-    "name": "Volkskauf Warendorf",
-    "stadt": "Warendorf",
+    "name": "Volkskauf Göttingen",
+    "stadt": "Göttingen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 2700,
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 2100,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 1951,
     "fassade": 4,
@@ -4908,42 +4927,42 @@
       },
       {
         "id": "K057-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 529,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K057-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 882,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K057-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 617,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K057-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 1323,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K057-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 529,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K057-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 882,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -4952,23 +4971,24 @@
   },
   {
     "id": "K058",
-    "name": "Volkskauf Ahlen Bahnhofstraße",
-    "stadt": "Ahlen",
+    "name": "Volkskauf Pforzheim Bahnhofstraße",
+    "stadt": "Pforzheim",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 1100,
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1000,
     "etagen": [
       0,
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
     "baujahr": 1990,
-    "fassade": 1,
+    "fassade": 3,
     "substanz": 20,
     "status": "offen",
     "flaechen": [
@@ -5009,28 +5029,28 @@
       },
       {
         "id": "K058-f6",
-        "etage": 0,
+        "etage": 5,
         "qm": 429,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K058-f7",
-        "etage": 1,
+        "etage": 0,
         "qm": 919,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K058-f8",
-        "etage": 2,
+        "etage": 1,
         "qm": 368,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K058-f9",
-        "etage": 3,
+        "etage": 2,
         "qm": 613,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5039,22 +5059,23 @@
   },
   {
     "id": "K059",
-    "name": "Volkskauf Beckum",
-    "stadt": "Beckum",
+    "name": "Volkskauf Offenbach",
+    "stadt": "Offenbach",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 1100,
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 1000,
     "etagen": [
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "baujahr": 1916,
-    "fassade": 3,
+    "fassade": 2,
     "substanz": 53,
     "status": "offen",
     "flaechen": [
@@ -5088,35 +5109,35 @@
       },
       {
         "id": "K059-f5",
-        "etage": 0,
+        "etage": 4,
         "qm": 462,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K059-f6",
-        "etage": 1,
+        "etage": 0,
         "qm": 324,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K059-f7",
-        "etage": 2,
+        "etage": 1,
         "qm": 694,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K059-f8",
-        "etage": 3,
+        "etage": 2,
         "qm": 277,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K059-f9",
-        "etage": 0,
+        "etage": 3,
         "qm": 462,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5125,18 +5146,19 @@
   },
   {
     "id": "K060",
-    "name": "Volkskauf Rheda-Wiedenbrück",
-    "stadt": "Rheda-Wiedenbrück",
+    "name": "Volkskauf Heilbronn",
+    "stadt": "Heilbronn",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 1900,
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1400,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 1976,
     "fassade": 0,
@@ -5166,42 +5188,42 @@
       },
       {
         "id": "K060-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 361,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K060-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 602,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K060-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 422,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K060-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 903,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K060-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 361,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K060-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 602,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5210,22 +5232,23 @@
   },
   {
     "id": "K061",
-    "name": "Volkskauf Oelde Lindenstraße",
-    "stadt": "Oelde",
+    "name": "Volkskauf Bremerhaven Lindenstraße",
+    "stadt": "Bremerhaven",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 2000,
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1600,
     "etagen": [
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "baujahr": 1929,
-    "fassade": 0,
+    "fassade": 6,
     "substanz": 24,
     "status": "offen",
     "flaechen": [
@@ -5259,35 +5282,35 @@
       },
       {
         "id": "K061-f5",
-        "etage": 0,
+        "etage": 4,
         "qm": 860,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K061-f6",
-        "etage": 1,
+        "etage": 0,
         "qm": 602,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K061-f7",
-        "etage": 2,
+        "etage": 1,
         "qm": 1290,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K061-f8",
-        "etage": 3,
+        "etage": 2,
         "qm": 516,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K061-f9",
-        "etage": 0,
+        "etage": 3,
         "qm": 862,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5296,18 +5319,19 @@
   },
   {
     "id": "K062",
-    "name": "Volkskauf Bünde",
-    "stadt": "Bünde",
+    "name": "Volkskauf Trier",
+    "stadt": "Trier",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 2600,
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 1900,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 2005,
     "fassade": 0,
@@ -5337,42 +5361,42 @@
       },
       {
         "id": "K062-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 497,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K062-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 828,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K062-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 580,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K062-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 1242,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K062-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 497,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K062-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 826,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5381,19 +5405,20 @@
   },
   {
     "id": "K063",
-    "name": "Volkskauf Bad Oeynhausen Einkaufszentrum",
-    "stadt": "Bad Oeynhausen",
+    "name": "Volkskauf Koblenz Einkaufszentrum",
+    "stadt": "Koblenz",
     "format": "schwester",
     "nurDaten": true,
     "lage": "center",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 2100,
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 1700,
     "etagen": [
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "baujahr": 1978,
     "fassade": 2,
@@ -5430,35 +5455,35 @@
       },
       {
         "id": "K063-f5",
-        "etage": 0,
+        "etage": 4,
         "qm": 892,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K063-f6",
-        "etage": 1,
+        "etage": 0,
         "qm": 625,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K063-f7",
-        "etage": 2,
+        "etage": 1,
         "qm": 1339,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K063-f8",
-        "etage": 3,
+        "etage": 2,
         "qm": 535,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K063-f9",
-        "etage": 0,
+        "etage": 3,
         "qm": 893,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5467,20 +5492,21 @@
   },
   {
     "id": "K064",
-    "name": "Volkskauf Löhne",
-    "stadt": "Löhne",
+    "name": "Volkskauf Siegen",
+    "stadt": "Siegen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
+    "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1900,
+    "grundflaecheQm": 1600,
     "etagen": [
       0,
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
     "baujahr": 1935,
     "fassade": 1,
@@ -5524,28 +5550,28 @@
       },
       {
         "id": "K064-f6",
-        "etage": 0,
+        "etage": 5,
         "qm": 708,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K064-f7",
-        "etage": 1,
+        "etage": 0,
         "qm": 1516,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K064-f8",
-        "etage": 2,
+        "etage": 1,
         "qm": 606,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K064-f9",
-        "etage": 3,
+        "etage": 2,
         "qm": 1010,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5554,23 +5580,24 @@
   },
   {
     "id": "K065",
-    "name": "Volkskauf Bad Salzuflen",
-    "stadt": "Bad Salzuflen",
+    "name": "Volkskauf Hildesheim",
+    "stadt": "Hildesheim",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 1400,
+    "cluster": "grossstadt",
+    "region": "Nord",
+    "grundflaecheQm": 1200,
     "etagen": [
       0,
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
     "baujahr": 1929,
-    "fassade": 1,
+    "fassade": 0,
     "substanz": 27,
     "status": "offen",
     "flaechen": [
@@ -5611,28 +5638,28 @@
       },
       {
         "id": "K065-f6",
-        "etage": 0,
+        "etage": 5,
         "qm": 519,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K065-f7",
-        "etage": 1,
+        "etage": 0,
         "qm": 1113,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K065-f8",
-        "etage": 2,
+        "etage": 1,
         "qm": 445,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K065-f9",
-        "etage": 3,
+        "etage": 2,
         "qm": 743,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5641,20 +5668,21 @@
   },
   {
     "id": "K066",
-    "name": "Volkskauf Lemgo",
-    "stadt": "Lemgo",
+    "name": "Volkskauf Gütersloh",
+    "stadt": "Gütersloh",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
+    "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1900,
+    "grundflaecheQm": 1600,
     "etagen": [
       0,
       1,
       2,
       3,
-      4
+      4,
+      5
     ],
     "baujahr": 2006,
     "fassade": 5,
@@ -5698,28 +5726,28 @@
       },
       {
         "id": "K066-f6",
-        "etage": 0,
+        "etage": 5,
         "qm": 700,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K066-f7",
-        "etage": 1,
+        "etage": 0,
         "qm": 1500,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K066-f8",
-        "etage": 2,
+        "etage": 1,
         "qm": 600,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K066-f9",
-        "etage": 3,
+        "etage": 2,
         "qm": 1000,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5728,18 +5756,19 @@
   },
   {
     "id": "K067",
-    "name": "Volkskauf Euskirchen",
-    "stadt": "Euskirchen",
+    "name": "Volkskauf Recklinghausen",
+    "stadt": "Recklinghausen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
+    "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 3100,
+    "grundflaecheQm": 2300,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 1905,
     "fassade": 3,
@@ -5769,42 +5798,42 @@
       },
       {
         "id": "K067-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 594,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K067-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 989,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K067-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 692,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K067-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 1484,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K067-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 594,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K067-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 990,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5813,19 +5842,20 @@
   },
   {
     "id": "K068",
-    "name": "Volkskauf Brühl Galerie am Fluss",
-    "stadt": "Brühl",
+    "name": "Volkskauf Bottrop Galerie am Fluss",
+    "stadt": "Bottrop",
     "format": "schwester",
     "nurDaten": true,
     "lage": "center",
-    "cluster": "mittelstadt",
+    "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1800,
+    "grundflaecheQm": 1500,
     "etagen": [
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "baujahr": 1916,
     "fassade": 5,
@@ -5862,35 +5892,35 @@
       },
       {
         "id": "K068-f5",
-        "etage": 0,
+        "etage": 4,
         "qm": 785,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K068-f6",
-        "etage": 1,
+        "etage": 0,
         "qm": 549,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K068-f7",
-        "etage": 2,
+        "etage": 1,
         "qm": 1177,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K068-f8",
-        "etage": 3,
+        "etage": 2,
         "qm": 471,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K068-f9",
-        "etage": 0,
+        "etage": 3,
         "qm": 786,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5899,18 +5929,19 @@
   },
   {
     "id": "K069",
-    "name": "Volkskauf Hürth City-Center",
-    "stadt": "Hürth",
+    "name": "Volkskauf Reutlingen City-Center",
+    "stadt": "Reutlingen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "center",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 1800,
+    "cluster": "grossstadt",
+    "region": "Süd",
+    "grundflaecheQm": 1300,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 1957,
     "fassade": 2,
@@ -5940,42 +5971,42 @@
       },
       {
         "id": "K069-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 342,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K069-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 570,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K069-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 399,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K069-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 855,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K069-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 342,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K069-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 569,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -5984,13 +6015,13 @@
   },
   {
     "id": "K070",
-    "name": "Volkskauf Pulheim Arkaden",
-    "stadt": "Pulheim",
+    "name": "Volkskauf Bamberg Arkaden",
+    "stadt": "Bamberg",
     "format": "schwester",
     "nurDaten": true,
     "lage": "center",
     "cluster": "mittelstadt",
-    "region": "West",
+    "region": "Süd",
     "grundflaecheQm": 2400,
     "etagen": [
       0,
@@ -5998,7 +6029,7 @@
       2
     ],
     "baujahr": 1904,
-    "fassade": 7,
+    "fassade": 6,
     "substanz": 36,
     "status": "offen",
     "flaechen": [
@@ -6069,13 +6100,13 @@
   },
   {
     "id": "K071",
-    "name": "Volkskauf Frechen Ring",
-    "stadt": "Frechen",
+    "name": "Volkskauf Bayreuth Ring",
+    "stadt": "Bayreuth",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
     "cluster": "mittelstadt",
-    "region": "West",
+    "region": "Süd",
     "grundflaecheQm": 1500,
     "etagen": [
       0,
@@ -6155,13 +6186,13 @@
   },
   {
     "id": "K072",
-    "name": "Volkskauf Bergheim",
-    "stadt": "Bergheim",
+    "name": "Volkskauf Landshut",
+    "stadt": "Landshut",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "mittelstadt",
-    "region": "West",
+    "region": "Süd",
     "grundflaecheQm": 1800,
     "etagen": [
       0,
@@ -6170,7 +6201,7 @@
       3
     ],
     "baujahr": 1970,
-    "fassade": 7,
+    "fassade": 5,
     "substanz": 56,
     "status": "offen",
     "flaechen": [
@@ -6241,13 +6272,13 @@
   },
   {
     "id": "K073",
-    "name": "Volkskauf Kerpen",
-    "stadt": "Kerpen",
+    "name": "Volkskauf Rosenheim",
+    "stadt": "Rosenheim",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "mittelstadt",
-    "region": "West",
+    "region": "Süd",
     "grundflaecheQm": 1000,
     "etagen": [
       0,
@@ -6257,7 +6288,7 @@
       4
     ],
     "baujahr": 1970,
-    "fassade": 4,
+    "fassade": 7,
     "substanz": 46,
     "status": "offen",
     "flaechen": [
@@ -6328,13 +6359,13 @@
   },
   {
     "id": "K074",
-    "name": "Volkskauf Troisdorf",
-    "stadt": "Troisdorf",
+    "name": "Volkskauf Gießen",
+    "stadt": "Gießen",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
     "cluster": "mittelstadt",
-    "region": "West",
+    "region": "Mitte",
     "grundflaecheQm": 2000,
     "etagen": [
       0,
@@ -6413,18 +6444,19 @@
   },
   {
     "id": "K075",
-    "name": "Volkskauf Sankt Augustin Neustadt",
-    "stadt": "Sankt Augustin",
+    "name": "Volkskauf Hanau Neustadt",
+    "stadt": "Hanau",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
-    "region": "West",
-    "grundflaecheQm": 3100,
+    "cluster": "grossstadt",
+    "region": "Mitte",
+    "grundflaecheQm": 2400,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 2001,
     "fassade": 3,
@@ -6454,42 +6486,42 @@
       },
       {
         "id": "K075-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 606,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K075-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 1011,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K075-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 708,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K075-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 1516,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K075-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 606,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K075-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 1010,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -6498,13 +6530,13 @@
   },
   {
     "id": "K076",
-    "name": "Volkskauf Hennef City-Center",
-    "stadt": "Hennef",
+    "name": "Volkskauf Lüneburg City-Center",
+    "stadt": "Lüneburg",
     "format": "schwester",
     "nurDaten": true,
     "lage": "center",
     "cluster": "mittelstadt",
-    "region": "West",
+    "region": "Nord",
     "grundflaecheQm": 1300,
     "etagen": [
       0,
@@ -6585,13 +6617,13 @@
   },
   {
     "id": "K077",
-    "name": "Volkskauf Siegburg Bahnhofstraße",
-    "stadt": "Siegburg",
+    "name": "Volkskauf Celle Bahnhofstraße",
+    "stadt": "Celle",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
     "cluster": "mittelstadt",
-    "region": "West",
+    "region": "Nord",
     "grundflaecheQm": 2300,
     "etagen": [
       0,
@@ -6671,19 +6703,20 @@
   },
   {
     "id": "K078",
-    "name": "Volkskauf Gummersbach Neustadt",
-    "stadt": "Gummersbach",
+    "name": "Volkskauf Neuss Neustadt",
+    "stadt": "Neuss",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
-    "cluster": "mittelstadt",
+    "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1300,
+    "grundflaecheQm": 1000,
     "etagen": [
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "baujahr": 1968,
     "fassade": 0,
@@ -6720,35 +6753,35 @@
       },
       {
         "id": "K078-f5",
-        "etage": 0,
+        "etage": 4,
         "qm": 548,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K078-f6",
-        "etage": 1,
+        "etage": 0,
         "qm": 384,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K078-f7",
-        "etage": 2,
+        "etage": 1,
         "qm": 823,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K078-f8",
-        "etage": 3,
+        "etage": 2,
         "qm": 329,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K078-f9",
-        "etage": 0,
+        "etage": 3,
         "qm": 548,
         "konzept": "eigen",
         "gruppe": "sport"
@@ -6757,13 +6790,13 @@
   },
   {
     "id": "K079",
-    "name": "Volkskauf Remscheid Am Wall",
-    "stadt": "Remscheid",
+    "name": "Volkskauf Kaiserslautern Am Wall",
+    "stadt": "Kaiserslautern",
     "format": "schwester",
     "nurDaten": true,
     "lage": "b",
     "cluster": "grossstadt",
-    "region": "West",
+    "region": "Mitte",
     "grundflaecheQm": 1300,
     "etagen": [
       0,
@@ -6772,7 +6805,7 @@
       3
     ],
     "baujahr": 1936,
-    "fassade": 1,
+    "fassade": 6,
     "substanz": 20,
     "status": "offen",
     "flaechen": [
@@ -6843,14 +6876,14 @@
   },
   {
     "id": "K080",
-    "name": "Volkskauf Bergisch Gladbach Arkaden",
-    "stadt": "Bergisch Gladbach",
+    "name": "Volkskauf Remscheid Arkaden",
+    "stadt": "Remscheid",
     "format": "schwester",
     "nurDaten": true,
     "lage": "center",
     "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1520,
+    "grundflaecheQm": 1600,
     "etagen": [
       0,
       1,
@@ -6931,21 +6964,22 @@
   },
   {
     "id": "K081",
-    "name": "Volkskauf Ratingen",
-    "stadt": "Ratingen",
+    "name": "Volkskauf Bergisch Gladbach",
+    "stadt": "Bergisch Gladbach",
     "format": "schwester",
     "nurDaten": true,
     "lage": "1a",
-    "cluster": "mittelstadt",
+    "cluster": "grossstadt",
     "region": "West",
-    "grundflaecheQm": 1400,
+    "grundflaecheQm": 1000,
     "etagen": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "baujahr": 1904,
-    "fassade": 0,
+    "fassade": 2,
     "substanz": 46,
     "status": "offen",
     "flaechen": [
@@ -6972,42 +7006,42 @@
       },
       {
         "id": "K081-f4",
-        "etage": 0,
+        "etage": 3,
         "qm": 265,
         "konzept": "eigen",
         "gruppe": "beauty"
       },
       {
         "id": "K081-f5",
-        "etage": 1,
+        "etage": 0,
         "qm": 441,
         "konzept": "eigen",
         "gruppe": "accessoires"
       },
       {
         "id": "K081-f6",
-        "etage": 2,
+        "etage": 1,
         "qm": 309,
         "konzept": "eigen",
         "gruppe": "waesche"
       },
       {
         "id": "K081-f7",
-        "etage": 0,
+        "etage": 2,
         "qm": 661,
         "konzept": "eigen",
         "gruppe": "wohnen"
       },
       {
         "id": "K081-f8",
-        "etage": 1,
+        "etage": 3,
         "qm": 265,
         "konzept": "eigen",
         "gruppe": "spielwaren"
       },
       {
         "id": "K081-f9",
-        "etage": 2,
+        "etage": 0,
         "qm": 439,
         "konzept": "eigen",
         "gruppe": "sport"

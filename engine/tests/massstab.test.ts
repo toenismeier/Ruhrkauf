@@ -83,8 +83,9 @@ describe('Maßstab Phase 1: Standortnetz', () => {
         Math.max(1, hartwig.filter((h) => h.klasse === 'premium').length));
       expect(hartwig.filter((h) => h.lage !== '1a').every((h) => ['b', 'stadtteil', 'center'].includes(h.lage))).toBe(true);
     }
-    expect(alle.filter((h) => h.format === 'schwester' && h.region === 'West').length).toBeGreaterThan(43);
-    expect(alle.filter((h) => h.format === 'schwester' && h.cluster === 'mittelstadt').length).toBeGreaterThan(43);
+    // E53 (Ummo 02.11.2026): Volkskauf West 30, Süd 19, Nord 14, Mitte 13, Ost 10.
+    const vk = (r: string) => alle.filter((h) => h.format === 'schwester' && h.region === r).length;
+    expect([vk('West'), vk('Süd'), vk('Nord'), vk('Mitte'), vk('Ost')]).toEqual([30, 19, 14, 13, 10]);
     expect(alle.filter((h) => h.format === 'outlet' && h.lage === 'rand')).toHaveLength(46);
     expect(alle.filter((h) => h.format === 'outlet' && h.lage === 'b')).toHaveLength(20);
     for (const p of PREMIUM_HAEUSER) {

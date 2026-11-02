@@ -152,7 +152,7 @@ describe('Wettbewerber: Dynamik', () => {
     s.angebote.push({ id: 'wb-test', typ: 'uebernahme', wettbewerberId: w.id, woche: 0, frist: 8, titel: 'Test', text: 'Test', status: 'offen' });
     const cash = s.cash;
     expect(fuehreAus(s, { typ: 'angebotUebernehmen', angebot: 'wb-test', modus: 'outlet' }).ok).toBe(true);
-    expect(s.haeuser.some((x) => x.id === 'O' + w.id && x.format === 'warenhaus')).toBe(true);
+    expect(s.haeuser.some((x) => x.id === 'O' + w.id && x.format === 'outlet' && x.hauscluster?.startsWith('hc-fundus-'))).toBe(true);
     expect(w.status).toBe('geschlossen');
     expect(s.cash).toBeLessThan(cash);
   });

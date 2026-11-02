@@ -1,5 +1,6 @@
 /** Wettbewerber als persistente, autonome Akteure. Eigener Mulberry32-Zufallsstrom. */
 import { liquiditaetReicht } from './sandkasten';
+import { ordneHausZu } from './organisation';
 import { GRUPPEN, WETTBEWERBER_NAMEN, WETTBEWERB_UEBERSCHNEIDUNG, gruppenFuer } from './daten';
 import { KOORDINATEN } from './standorte';
 import type { GameState, GruppeId, Haus, Lage, Wettbewerber, WettbewerberArt } from './types';
@@ -206,7 +207,7 @@ function raeumung(s: GameState, w: Wettbewerber): void {
       typ: 'uebernahme', frist: s.woche + 8, wettbewerberId: w.id, qmJeHaus: w.grundflaecheQm,
       mieteQmMonat: Math.round(z(s, 7, 17) * 10) / 10,
       titel: 'Standortübernahme ' + w.name + ' in ' + w.stadt,
-      text: 'Freie Handelsfläche ' + w.grundflaecheQm + ' qm: als Hartwig Outlet oder Erweiterung anmietbar, Umbau 200–250 €/qm.',
+      text: 'Freie Handelsfläche ' + w.grundflaecheQm + ' qm: als FUNDUS-Haus oder Erweiterung anmietbar, Umbau 200–250 €/qm.',
     });
     melde(s, 'info', 'Übernahmeangebot ' + angebot.id + ' für ' + w.stadt + ' (8 Wochen gültig).');
   }
@@ -339,7 +340,8 @@ export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet'
     basis.miete.mieteWoche += eur(qm * mieteQmMonat * 12 / 52);
   } else {
     const neu: Haus = structuredClone(basis);
-    neu.id = 'O' + wb.id; neu.name = 'Hartwig Outlet ' + wb.stadt; neu.etagen = [0]; neu.grundflaecheQm = qm;
+    // E53: eine übernommene Off-Price-Fläche wird ein FUNDUS-Haus (kein drittes Off-Price-Format unter Hartwig).
+    neu.id = 'O' + wb.id; neu.format = 'outlet'; neu.name = 'FUNDUS ' + wb.stadt; delete neu.klasse; delete neu.flagship; neu.etagen = [0]; neu.grundflaecheQm = qm;
     neu.flaechen = [{ id: neu.id + '-f1', etage: 0, qm, konzept: 'offprice', umbauBis: s.woche + 8 }];
     neu.potenzial = {}; neu.saettigungQm = {};
     neu.personal.vollzeit = qm / 600; neu.personal.teilzeit = qm / 1000; neu.personal.aushilfen = qm / 3000;
@@ -351,10 +353,11 @@ export function uebernehmeWettbewerber(s: GameState, id: string, modus: 'outlet'
     neu.wettbewerbLeerStart = leerzahl(s, neu.stadt);
     neu.wettbewerbRohOffpriceStart = roh(s, neu, 'offprice');
     s.haeuser.push(neu);
+    ordneHausZu(s, neu);
   }
   wb.status = 'geschlossen';
   wb.seit = s.woche;
-  melde(s, 'presse', 'Hartwig übernimmt den Standort ' + wb.name + ' in ' + wb.stadt + ' als ' + (modus === 'outlet' ? 'Outlet' : 'Erweiterungsfläche') + '.');
+  melde(s, 'presse', 'Hartwig übernimmt den Standort ' + wb.name + ' in ' + wb.stadt + ' als ' + (modus === 'outlet' ? 'FUNDUS-Haus' : 'Erweiterungsfläche') + '.');
   return null;
 }
 
