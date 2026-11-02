@@ -8,7 +8,7 @@ import { fuehreAus, neuesSpiel, produktKatalog, produkte, wocheAbspielen } from 
 import { ARTIKELTYPEN, SORTIMENT_TYPEN, bewerte, produktAktion, produktVorschau, waehlbar, type ProduktEntwurf } from '../src/produkte';
 import { BILD_WURF4, BILD_REST } from '../src/sortiment/bilder-wurf4';
 import { NAMEN } from '../src/sortiment/q42-selten';
-import { VARIANTEN } from '../src/sortiment/q42-varianten';
+import { VARIANTEN_Q42 as VARIANTEN } from '../src/sortiment/q42-varianten';
 import type { GameState } from '../src/types';
 
 const daten = (n: string) => readFileSync(join(__dirname, '../../auftraege/wurf4/daten', n), 'utf8').replace(/^﻿/, '');

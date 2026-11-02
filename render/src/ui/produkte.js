@@ -26,6 +26,8 @@ const ZG_MODEL = { kinder: 'kinder', jung: 'young', mitte: 'adults', reif: 'best
 const geschlechtVon = (wg) => (/^herren|kinder\.jungen/.test(String(wg ?? '')) ? 'herren' : 'damen');
 const modelBild = (typ, farbe, material, wg, trendGruppe, g = 150, b, muster) => (typeof PB.modelbildSVG === 'function' ? PB.modelbildSVG(typ, farbe, material, mitMuster({ geschlecht: geschlechtVon(wg), zielgruppe: ZG_MODEL[trendGruppe] ?? 'young', groesse: g, hintergrund: null, ...bildOpt(typ, b) }, muster)) : null);
 /** Q37: Grafikschlüssel eines Musters aus dem Katalog. */
+// Wurf 5: eigenes Bild der gewählten Schnittvariante aus dem Katalog (undefined: Bild des Typs)
+const variantenBild = (T, name) => (name ? T?.varianten?.find((v) => v.name === name)?.bild : undefined);
 const musterBild = (Kat, name) => (Kat.muster ?? []).find((m) => m.name === name)?.bild;
 // Kachelbild ohne eigene Kachelfläche (die Kachel ist die Karte), Standardfarbe und Material des Typs.
 const kachel = (typ, g = 64) => bild(typ, PB.STANDARD_FARBE?.[typ], PB.STANDARD_MATERIAL?.[typ], g);
@@ -105,7 +107,7 @@ export function produkteModul(ctx) {
   // ─────────────────────────── Produktkarte (Coffee 26)
   function produktKarte(st, M, p, index, P, offeneHaeuser) {
     const ent = p.status === 'entwicklung';
-    const mb = ui.model.has(p.id) ? modelBild(p.typ, p.farbe, p.material, p.wg, M.trendGruppe, 120, p.bild, p.musterBild) : null;
+    const mb = ui.model.has(p.id) ? modelBild(p.typ, p.farbe, p.material, p.wg, M.trendGruppe, 120, undefined, p.musterBild) : null;
     let c = `<button type="button" class="hw-g1-bild" data-a="bildwechsel" data-v="${esc(p.id)}" aria-label="${ui.model.has(p.id) ? 'Produkt zeigen' : 'Am Model zeigen'}">${mb ?? bild(p.typ, p.farbe, p.material, 110, p.bild, p.musterBild)}</button>`;
     if (!ent) c += `<button type="button" class="hw-g1-papierkorb" data-a="auslisten" data-v="${esc(p.id)}" aria-label="Produkt auslisten">${PAPIERKORB}</button>`;
     c += `<div class="hw-karte-titel hw-g1-titel">${P(`p:${p.id}:name`, p.name, 'span')}</div>`;
@@ -203,7 +205,7 @@ export function produkteModul(ctx) {
       && (Array.isArray(M.entwickelbar) ? M.entwickelbar.includes(t.typ) : Number(t.gruppe?.[M.trendGruppe] ?? 0) > 0.15);
     let h = sprecher(p ? `${esc(p.name)} ist ${esc(STATUS[p.status] ?? p.status)}.` : freigegeben ? `${esc(typ)} passt zu ${esc(M.name)}.` : `${esc(typ)} passt derzeit nicht zu ${esc(M?.name ?? 'dieser Marke')}.`);
     h += `<div class="hw-g1-oben">${K.knopf('‹ Zurück', `data-a="detailZurueck" data-v="${zurueck}"`, 'text')}</div>`;
-    let x = `<div class="hw-g1-detailbild" aria-hidden="true">${model ?? bild(typ, farbe, material, 200, undefined, p?.musterBild)}</div>`;
+    let x = `<div class="hw-g1-detailbild" aria-hidden="true">${model ?? bild(typ, farbe, material, 200, p?.bild, p?.musterBild)}</div>`;
     x += K.abschnitt(p?.name ?? typ);
     x += K.liste([K.zeile({ was: 'Artikeltyp', wert: esc(typ) }), K.zeile({ was: 'Material', wert: esc(material) }), K.zeile({ was: 'Farbe', wert: esc(farbe) }),
       K.zeile({ was: p ? 'Verkaufspreis' : 'Basispreis, ca.', wert: euro(preis) }), K.zeile({ was: 'Zielgruppe', wert: esc(name) }),
@@ -254,7 +256,7 @@ export function produkteModul(ctx) {
     if (ui.neuSchritt === 1) {
       let h = sprecher(`${esc(e.typ)} gewählt. Für wen entwickeln wir?`);
       h += oben('neuZurTyp', '‹ Artikel ändern') + `<div class="hw-rumpf">${schritte()}</div>`;
-      let x = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild(e.typ, e.farbe, e.material, 72, undefined, mb)}</span><span><b>${esc(e.typ)}</b><small>${esc(pfad?.k.name ?? '')}${pfad?.a.name && pfad.a.name !== pfad.k.name ? ' · ' + esc(pfad.a.name) : ''}</small></span></div>`;
+      let x = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild(e.typ, e.farbe, e.material, 72, variantenBild(T, e.variante), mb)}</span><span><b>${esc(e.typ)}</b><small>${esc(pfad?.k.name ?? '')}${pfad?.a.name && pfad.a.name !== pfad.k.name ? ' · ' + esc(pfad.a.name) : ''}</small></span></div>`;
       x += K.abschnitt('Zielgruppe');
       x += `<p class="hw-lese hw-g1-notiz">Die Altersgruppe wirkt auf Preislage, Passform, regionale Nachfrage und Marge. Bisherige Produkte bleiben unverändert.</p>`;
       x += `<div class="hw-g1-typen">${Kat.zielgruppen.map((z) => `<button type="button" class="hw-g1-typ hw-kontur" aria-pressed="${e.zielgruppe === z.id}" data-a="zielgruppe" data-v="${esc(z.id)}"><b>${esc(z.name)}</b><small>${esc(ZIEL_TEXT[z.id] ?? '')}</small></button>`).join('')}</div>`;
@@ -264,7 +266,7 @@ export function produkteModul(ctx) {
     const zg = Kat.zielgruppen.find((z) => z.id === e.zielgruppe)?.name ?? '';
     let h = sprecher(v.ok ? `Erwartet ${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)} Sterne, fertig ${esc(wocheText(st, v.fertigWoche))}.` : esc(v.fehler ?? 'Der Entwurf ist noch nicht vollständig.'), v.ok ? '' : 'engpass');
     h += oben('neuZurZiel', '‹ Zielgruppe ändern') + `<div class="hw-rumpf">${schritte()}</div>`;
-    let x = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild(e.typ, e.farbe, e.material, 72, undefined, mb)}</span><span><b>${esc(e.typ)}</b><small>${esc(zg)} · ${esc(pfad?.k.name ?? '')}</small></span></div>`;
+    let x = `<div class="hw-g1-gewaehlt"><span class="hw-g1-gewaehltbild" aria-hidden="true">${bild(e.typ, e.farbe, e.material, 72, variantenBild(T, e.variante), mb)}</span><span><b>${esc(e.typ)}</b><small>${esc(zg)} · ${esc(pfad?.k.name ?? '')}</small></span></div>`;
     if (v.kapazitaetFrei <= 0) x += K.hinweis(`Kapazität erreicht: in dieser Kategorie ist bei ${esc(M.name)} kein Platz mehr. Für Neues erst ein Produkt auslisten.`, 'achtung');
     x += K.abschnitt('Farbe', e.farbe);
     x += `<div class="hw-g1-farben" role="group" aria-label="Farbe">${Kat.farben.map((f) => `<button type="button" class="hw-g1-farbknopf" aria-pressed="${f.name === e.farbe}" data-a="farbe" data-v="${esc(f.name)}" aria-label="${esc(f.name)}">${farbpunkt(f.hex, 30)}</button>`).join('')}</div>`;
@@ -272,11 +274,11 @@ export function produkteModul(ctx) {
     const angebot = (Kat.muster ?? []).filter((m) => (T?.muster ?? ['Uni']).includes(m.name));
     if (angebot.length > 1) {
       x += K.abschnitt('Muster', e.muster);
-      x += `<div class="hw-g1-muster" role="group" aria-label="Muster">${angebot.map((m) => `<button type="button" class="hw-g1-musterknopf hw-kontur" aria-pressed="${m.name === e.muster}" data-a="muster" data-v="${esc(m.name)}"${m.gesperrt ? ' disabled' : ''} aria-label="${esc(m.name)}${m.gesperrt ? ', gesperrt' : ''}"><span aria-hidden="true">${bild(e.typ, e.farbe, e.material, 44, undefined, m.bild)}</span><small>${esc(m.name)}</small></button>`).join('')}</div>`;
+      x += `<div class="hw-g1-muster" role="group" aria-label="Muster">${angebot.map((m) => `<button type="button" class="hw-g1-musterknopf hw-kontur" aria-pressed="${m.name === e.muster}" data-a="muster" data-v="${esc(m.name)}"${m.gesperrt ? ' disabled' : ''} aria-label="${esc(m.name)}${m.gesperrt ? ', gesperrt' : ''}"><span aria-hidden="true">${bild(e.typ, e.farbe, e.material, 44, variantenBild(T, e.variante), m.bild)}</span><small>${esc(m.name)}</small></button>`).join('')}</div>`;
       const gesperrt = angebot.find((m) => m.gesperrt);
       if (gesperrt) x += `<p class="hw-lese hw-g1-notiz">${esc(gesperrt.name)}: ${esc(gesperrt.gesperrt)}</p>`;
     }
-    // Q42: Schnitt (Grundform oder Variante); bis zum eigenen Bildpaket zeigt die Variante das Bild des Typs
+    // Q42: Schnitt (Grundform oder Variante); Wurf 5: Variante mit eigenem Bild zeigt es, sonst das Bild des Typs
     if (varianten.length) {
       x += K.abschnitt('Schnitt', e.variante ?? e.typ);
       x += chips([...(grundform ? [['', esc(e.typ)]] : []), ...varianten.map((v) => [v.name, esc(v.name)])], e.variante ?? '', (w) => `data-a="variante" data-v="${esc(w)}"`, 'Schnitt');
@@ -302,7 +304,7 @@ export function produkteModul(ctx) {
     x += K.abschnitt('Vorschau', `Einführung ${v.saisonEinfuehrung}`);
     const wgV = Kat.typen.find((t) => t.typ === e.typ)?.wgs?.find((w) => !/^kinder/.test(w) || M.trendGruppe === 'kinder');
     const mbV = modelBild(e.typ, e.farbe, e.material, wgV, M.trendGruppe, 110, undefined, mb);
-    let c = `<div class="hw-g1-bild hw-g1-vorschaubild" aria-hidden="true">${bild(e.typ, e.farbe, e.material, 110, undefined, mb)}${mbV ?? ''}</div>`;
+    let c = `<div class="hw-g1-bild hw-g1-vorschaubild" aria-hidden="true">${bild(e.typ, e.farbe, e.material, 110, variantenBild(T, e.variante), mb)}${mbV ?? ''}</div>`;
     c += `<div class="hw-karte-titel hw-g1-titel">${P('n:name', v.name ?? e.typ, 'span')}</div>`;
     c += `<div class="hw-g1-unter">${v.wgName ? esc(v.wgName) : esc(e.typ)}</div>`;
     c += `<div class="hw-g1-sternzeile">${sterne(v.sterneErwartet, `erwartet ${dez(v.sterneErwartet, 1)} Sterne`)}${P('n:sterne', `${dez(v.sterneVon, 1)} bis ${dez(v.sterneBis, 1)}`, 'span', ' class="hw-g1-sternzahl"')}</div>`;

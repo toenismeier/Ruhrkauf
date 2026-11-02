@@ -12,7 +12,7 @@ import { saisonFaktor } from './daten';
 import { BESCHAFFUNG, eigenmarkeAnteil, istVerkaufsaktiv, mehrmarge, passungWg, passungHaus, ZIELGRUPPEN_TEXT, type Eigenmarke, type EmKategorie, type Preislage, type Stil } from './eigenmarken';
 import { hqAktualisiere } from './hq';
 import { SORTIMENT_TYPEN, SORTIMENT_KORREKTUREN, zielgruppenFuer, sortimentsPlatz, MUSTER_ALIAS, TYP_UMBENANNT, q37Freigeschaltet, type ArtikelBild, type SortimentName } from './sortiment';
-import { variantenFuer, varianteVon } from './sortiment/q42-varianten';
+import { variantenFuer, varianteVon, varianteWaehlbar, variantenBild } from './sortiment/q42-varianten';
 import { MUSTER, MUSTER_INFO, musterFuer, musterFehler, musterAnteil, type Muster } from './muster';
 import { ANLAESSE, ANLASS_NAME, ANLASS_TYPEN, anlassFaktor, anlassSaisonText, istAnlass, type AnlassId } from './anlass';
 
@@ -808,6 +808,7 @@ function pruefe(s: GameState, e: ProduktEntwurf): Pruefung {
   if (!t.materialien.includes(e.material)) return { ...leer, m, t, fehler: `${e.typ} gibt es nicht aus ${e.material}. Möglich: ${t.materialien.join(', ')}.` };
   if (e.muster && e.muster !== 'Uni') { const f = musterFehler(t, e.muster); if (f) return { ...leer, m, t, fehler: f }; }
   if (e.anlass != null && (!istAnlass(e.anlass) || !anlaesseFuer(t).includes(e.anlass))) return { ...leer, m, t, fehler: `${e.typ} gehört nicht zum Anlass ${istAnlass(e.anlass) ? ANLASS_NAME[e.anlass] : String(e.anlass)}.` };
+  if (e.variante && varianteVon(e.typ, e.variante) && !varianteWaehlbar(varianteVon(e.typ, e.variante)!)) return { ...leer, m, t, fehler: `${e.variante} ist noch nicht freigegeben (Bild in Arbeit).` };
   if (e.variante && !varianteVon(e.typ, e.variante)) return { ...leer, m, t, fehler: `${e.typ} gibt es nicht als ${e.variante}.${variantenFuer(e.typ).length ? ` Möglich: ${variantenFuer(e.typ).map((x) => x.name).join(', ')}.` : ''}` };
   if (!DAUER_STUFEN.includes(e.dauer as (typeof DAUER_STUFEN)[number])) return { ...leer, m, t, fehler: 'Entwicklungsdauer 4, 8, 12, 24 oder 48 Wochen.' };
   if (!(e.budgetWoche >= 0)) return { ...leer, m, t, fehler: 'Budget je Woche angeben.' };
@@ -972,7 +973,8 @@ export function produktKarte(s: GameState, p: Produkt): ProduktKarte {
     umsatzLetzteWoche: p.umsatz.length ? p.umsatz[p.umsatz.length - 1] : 0,
     start: p.start, fertigWoche: p.fertig, dauer: p.dauer, budgetWoche: p.budgetWoche,
     fortschritt: ent ? clamp((s.woche - p.start) / Math.max(1, p.dauer), 0, 1) : 1, seit: p.seit, basis: !!p.basis,
-    ...(TYP[p.typ]?.bild ? { bild: { ...TYP[p.typ].bild! } } : {}),
+    // Wurf 5: eigenes Bild der Schnittvariante vor dem Bild des Typs
+    ...(variantenBild(p.typ, p.variante) ? { bild: { ...variantenBild(p.typ, p.variante)! } } : TYP[p.typ]?.bild ? { bild: { ...TYP[p.typ].bild! } } : {}),
     muster: p.muster ?? 'Uni', musterBild: MUSTER_INFO[p.muster ?? 'Uni'].bild,
     ...(p.anlass ? { anlass: p.anlass, anlassName: ANLASS_NAME[p.anlass] } : {}),
     ...(p.variante ? { variante: p.variante } : {}),
@@ -1085,7 +1087,7 @@ export interface ProduktKatalog {
   kategorien: { id: ProduktKategorie; name: string }[];
   typen: { typ: ArtikelTyp; kategorie: ProduktKategorie; wgs: WgId[]; saison: TypSaison; preisMitte: number; materialien: Material[]; aufwand: number; gruppe: Record<TrendGruppe, number>; bild?: ArtikelBild; bildOffen?: true; zielgruppen: ProduktZielgruppe[]; muster: Muster[]; anlass: AnlassId[];
     /** Q42: wählbare Schnittvarianten (leer: nur Grundform); zielgruppen und wgs gelten nur für die Variante. */
-    varianten: { name: string; zielgruppen: ProduktZielgruppe[]; wgs: WgId[] }[] }[];
+    varianten: { name: string; zielgruppen: ProduktZielgruppe[]; wgs: WgId[]; /** Wurf 5: eigenes Bild der Variante */ bild?: ArtikelBild }[] }[];
   /** Q37: alle Muster (gesperrt mit Begründung) und Anlässe mit Saisonspitzen. */
   muster: { name: Muster; bild: string; wort: string; preis: number; gesperrt?: string }[];
   anlaesse: { id: AnlassId; name: string; saison: string; anzahl: number }[];
@@ -1106,7 +1108,7 @@ export function produktKatalog(_s: GameState): ProduktKatalog {
     })),
     kategorien: (Object.keys(PRODUKT_KATEGORIEN) as ProduktKategorie[]).map((id) => ({ id, name: PRODUKT_KATEGORIEN[id] })),
     typen: ARTIKELTYPEN.map((t) => ({ ...t, preisMitte: t.preis, wgs: [...t.wgs], materialien: [...t.materialien], gruppe: { ...t.gruppe }, zielgruppen: zielgruppenFuer(t), ...(t.bild ? { bild: { ...t.bild } } : {}), ...(t.bildOffen ? { bildOffen: true as const } : {}), muster: musterFuer(t), anlass: anlaesseFuer(t),
-      varianten: variantenFuer(t.typ).map((v) => ({ name: v.name, zielgruppen: [...v.zielgruppen], wgs: [...(v.wgs ?? [])] })) })),
+      varianten: variantenFuer(t.typ).map((v) => ({ name: v.name, zielgruppen: [...v.zielgruppen], wgs: [...(v.wgs ?? [])], ...(v.bild ? { bild: { ...v.bild } } : {}) })) })),
     muster: MUSTER.map((m) => ({ name: m, bild: MUSTER_INFO[m].bild, wort: MUSTER_INFO[m].wort, preis: MUSTER_INFO[m].preis, ...(MUSTER_INFO[m].gesperrt ? { gesperrt: MUSTER_INFO[m].gesperrt } : {}) })),
     anlaesse: ANLAESSE.map((a) => ({ id: a.id, name: a.name, saison: anlassSaisonText(a.id), anzahl: ARTIKELTYPEN.filter((t) => anlaesseFuer(t).includes(a.id)).length })),
     farben: FARBLISTE.map((f) => ({ name: f, hex: FARBEN[f] })),
