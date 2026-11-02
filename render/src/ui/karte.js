@@ -82,7 +82,11 @@ export function karteSteuerung(o) {
   canvas.addEventListener('pointerdown', (e) => {
     o.interaktion?.(); // Nutzergeste darf das programmatische Hausziel lösen
     stopp();
-    canvas.setPointerCapture(e.pointerId);
+    // Neuer Erstkontakt (kein anderer Finger liegt auf): verwaiste Zeiger verwerfen. iOS liefert bei Systemgesten,
+    // eingeblendeten Dialogen oder verlorener Erfassung nicht immer pointerup; ein hängender Zeiger machte aus dem
+    // nächsten Ein-Finger-Wischen ein Zoomen (Befund iPhone: Verschieben nur noch mit zwei Fingern).
+    if (e.isPrimary || (e.pointerType === 'mouse')) { zeiger.clear(); pinch = null; start = null; }
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* Zeiger bereits weg */ }
     zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
     bewegt = zeiger.size > 1 ? 99 : 0;
     spur = [];
@@ -98,6 +102,10 @@ export function karteSteuerung(o) {
       o.setzen();
       festhalten(pinch.p, m.x, m.y);
       o.setzen();
+      // Wie beim Wischen: nach dem Klemmen Anker und Ausgangsabstand nachführen, damit Zoom und Verschieben nicht hängen
+      const neu = o.aufBoden(m.x, m.y);
+      if (neu && pinch.p && Math.hypot(neu.x - pinch.p.x, neu.z - pinch.p.z) > 0.05) pinch.p = neu;
+      if (K.halb !== pinch.halb * pinch.d / Math.max(10, m.d)) { pinch.halb = K.halb; pinch.d = Math.max(10, m.d); }
       return;
     }
     if (!start?.p) return;
@@ -105,6 +113,10 @@ export function karteSteuerung(o) {
     const x0 = K.x, z0 = K.z;
     festhalten(start.p, e.clientX, e.clientY);
     o.setzen();
+    // Am Rand klemmt setzen() die Kamera: Ankerpunkt neu unter den Finger legen, sonst „klebt“ die Karte, bis der Finger
+    // wieder über den alten Punkt zurückgewischt wird (Befund iPhone: Stadt nicht immer verschiebbar)
+    const neu = o.aufBoden(e.clientX, e.clientY);
+    if (neu && start.p && Math.hypot(neu.x - start.p.x, neu.z - start.p.z) > 0.05) start.p = neu;
     const t = e.timeStamp;
     spur.push({ t, x: K.x, z: K.z, dx: K.x - x0, dz: K.z - z0 });
     while (spur.length > 2 && t - spur[0].t > 100) spur.shift();
@@ -114,6 +126,7 @@ export function karteSteuerung(o) {
     zeiger.delete(e.pointerId);
     if (zeiger.size < 2) pinch = null;
     if (zeiger.size === 0) {
+      if (e.nurAufraeumen) { start = null; return; }
       if (bewegt < 6 && start) o.tippen(e);
       else if (spur.length >= 2) {
         const a = spur[0], b = spur[spur.length - 1], dt = Math.max(8, b.t - a.t), alter = e.timeStamp - b.t;
@@ -146,6 +159,10 @@ export function karteSteuerung(o) {
   }
   canvas.addEventListener('pointerup', loslassen);
   canvas.addEventListener('pointercancel', loslassen);
+  canvas.addEventListener('lostpointercapture', loslassen);
+  // Sicherheitsnetz: meldet der Browser keine aktiven Berührungen mehr, alle Zeiger freigeben
+  canvas.addEventListener('touchend', (e) => { if (e.touches.length === 0 && zeiger.size) { for (const id of [...zeiger.keys()]) loslassen({ pointerId: id, timeStamp: e.timeStamp, clientX: 0, clientY: 0, nurAufraeumen: true }); } }, { passive: true });
+  canvas.addEventListener('touchcancel', () => { zeiger.clear(); pinch = null; start = null; }, { passive: true });
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     o.interaktion?.();

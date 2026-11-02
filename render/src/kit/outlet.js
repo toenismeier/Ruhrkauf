@@ -70,7 +70,7 @@ export function innenOutlet(S, scene, haus, opt = {}) {
     if(geschoss>0)S.box(m.bw-0.6,0.19,m.bd-0.6,
       x+m.bw/2,y-0.14,z+m.bd/2,'#d5d8d7');
     const gebaut=baueLadenplan(S,scene,plan,{x,z,y,bestueckung,
-      vorbereiten:false,dichte:opt.dichte??1});
+      vorbereiten:false,dichte:opt.dichte??1,moebelGeneration:haus.etagenBau?.[geschoss]?.moebelGeneration??3});
     // Waren in Belegungslücken und die Kassenzeile bleiben planbasiert.
     // Temporäre Kundenschlangen blockieren bewusst im Zustand Ansturm den Gang.
     if(geschoss===0&&(status==='ansturm'||status==='raeumung')) {
@@ -296,5 +296,5 @@ export function outlet(S, scene, haus, opt = {}) {
   // Off-Price und Aktion verwenden ausschließlich den Markenclaim statt Rabatt-Plakatflächen.
   const dekZ = werbung ? zustandNormal({ status: 'offen', seed: haus.id }) : Z;
   const dekor = zustandsDekor(S, scene, koerper, dekZ, { pylon: false, passanten: false, logosAbdecken: true, abrissSeite: opt.abrissSeite });
-  return { hoehe: Math.max(H + 3.8, dekor.hoehe, m.park ? 11.6 : 0), w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z.status, pinAnker: dekor.pinAnker };
+  return { hoehe: Math.max(H + 3.8, dekor.hoehe, m.park ? 11.6 : 0), dach: H, platz: [0.42, 0.3], w: m.w, d: m.d, familie: m.familie, teile: S.anzahl - start, status: Z.status, pinAnker: dekor.pinAnker };
 }

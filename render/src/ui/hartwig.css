@@ -1014,12 +1014,12 @@ input.hw-g6-wahl { background-image: none; padding-right: 12px; }
 
 /* Meldung, Wochenstreifen, Ladeanzeige, Erfolgs- und Kontexthinweis, App-Aktualisierung. */
 #meldung { position: fixed; z-index: 100; left: calc(16px + env(safe-area-inset-left)); right: calc(16px + env(safe-area-inset-right)); top: calc(118px + env(safe-area-inset-top));
-  max-width: 420px; margin: 0 auto; padding: 11px 16px; border-radius: var(--hw-radius); background: rgba(15, 17, 19, 0.92); border: 1px solid var(--glas-rand);
-  box-shadow: inset 0 0 0 1.33px rgba(0, 0, 0, 0.35), inset 0 0 0 2.66px var(--glas-linie); font: 400 12.3px/1.35 var(--hw-schrift);
+  max-width: 420px; margin: 0 auto; padding: 11px 16px; border-radius: var(--hw-radius); background: #0f1113; color: #fff; border: 1px solid var(--glas-rand);
+  box-shadow: inset 0 0 0 1.33px rgba(0, 0, 0, 0.35), inset 0 0 0 2.66px var(--glas-linie); font: 600 14px/1.35 var(--hw-schrift); text-align: center;
   opacity: 0; transform: translateY(-8px); transition: opacity .2s, transform .2s; pointer-events: none; }
 #meldung.an { opacity: 1; transform: none; pointer-events: auto; cursor: pointer; }
 #meldung.rot { box-shadow: inset 4px 0 0 var(--gefahr), inset 0 0 0 2.66px var(--glas-linie); }
-body.panel-offen #meldung { top: auto; bottom: calc(20px + env(safe-area-inset-bottom)); }
+body.panel-offen #meldung { top: calc(70px + env(safe-area-inset-top)); bottom: auto; }   /* über dem Blattkopf, nicht über dem Inhalt */
 .hw-g6-streifen { position: fixed; z-index: 3; display: none; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: calc(124px + env(safe-area-inset-bottom));
   min-height: 44px; padding: 10px 16px; border: 1px solid var(--glas-rand); border-radius: var(--hw-radius); background: var(--glas); color: var(--text); text-align: left;
   box-shadow: inset 0 0 0 1.33px rgba(0, 0, 0, 0.35), inset 0 0 0 2.66px var(--glas-linie); font: 500 12.3px/1.3 var(--hw-schrift); }
@@ -1359,3 +1359,31 @@ body.spielende-aktiv { overflow: hidden; }
 .hw-reiter:has(> .hw-reiter-mehr) { overflow: visible !important; }
 /* Zurück-Verweis oben im Rumpf (Zentrale: Gebäude → Etage) */
 .hw-zurueck { margin: 14px 0 0 -4px; min-height: 44px; font: var(--hw-t-text); font-size: 13.5px; }
+/* E48 Modernisierung: Zustandsbalken je Gewerkgruppe (einfarbig, Anteil gut), Etagenschnitt, Vorher/Nachher */
+.hw-bestand { display: inline-flex; gap: 6px; align-items: flex-end; }
+.hw-bestand > span { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 32px; }
+.hw-bestand i { position: relative; display: block; width: 32px; height: 8px; border-radius: 4px; background: var(--skala-grund); overflow: hidden; }
+.hw-bestand i::after { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--a); background: var(--skala); border-radius: 4px; }
+.hw-bestand small { margin: 0 !important; font: var(--hw-t-klein); color: var(--marke) !important; }
+.hw-schnitt { margin: 8px 0 12px; display: grid; gap: 3px; }
+.hw-schnitt-kopf, .hw-schnitt-zeile { display: grid; grid-template-columns: 34px repeat(4, 1fr); gap: 3px; align-items: center; }
+.hw-schnitt-kopf span { font: var(--hw-t-klein); color: var(--marke); text-align: center; text-transform: uppercase; letter-spacing: .04em; }
+.hw-schnitt-zeile b { font: var(--hw-t-klein); color: var(--leise); font-weight: 600; }
+.hw-schnitt-zeile i, .hw-schnitt-legende i { display: block; height: 18px; border-radius: 3px; background: var(--schlecht); }
+.hw-schnitt i[data-z='1'] { background: var(--stern); }
+.hw-schnitt i[data-z='2'] { background: var(--gut); }
+.hw-schnitt-zeile.bau i { opacity: .55; outline: 2px dashed var(--text); outline-offset: -2px; }
+.hw-schnitt-zeile.zu b { color: var(--schlecht); }
+.hw-schnitt-legende { display: flex; gap: 12px; margin-top: 4px; font: var(--hw-t-klein); color: var(--marke); }
+.hw-schnitt-legende span { display: inline-flex; align-items: center; gap: 4px; }
+.hw-schnitt-legende i { width: 10px; height: 10px; }
+.hw-schnitt-legende i.bau { background: none; outline: 1.5px dashed var(--text); outline-offset: -1.5px; }
+/* Umfang im Bauprogramm: gewählte Seite eindeutig (hell und fett), die andere zurückgenommen. */
+#panel.hw .hw-umfang .hw-segment:not(:has(img)) > button[aria-pressed='false']::before { background: var(--feld); }
+#panel.hw .hw-umfang .hw-segment:not(:has(img)) > button[aria-pressed='false'] { color: var(--leise); }
+#panel.hw .hw-umfang .hw-segment:not(:has(img)) > button[aria-pressed='true']::before { background: var(--akzent); }
+#panel.hw .hw-umfang .hw-segment:not(:has(img)) > button[aria-pressed='true'] { font-weight: 700; }
+.hw-vergleich { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 12px 0; }
+.hw-vergleich figure { margin: 0; }
+.hw-vergleich img { display: block; width: 100%; aspect-ratio: 360 / 260; object-fit: cover; border-radius: 6px; background: var(--tief); }
+.hw-vergleich figcaption { margin-top: 4px; font: var(--hw-t-klein); color: var(--marke); text-transform: uppercase; letter-spacing: .04em; }

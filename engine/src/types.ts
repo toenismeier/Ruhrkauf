@@ -407,7 +407,7 @@ export interface Meldung {
   woche: number;
   typ: MeldungTyp;
   text: string;
-  bezug?: { stadt?: string; hausId?: string; modul?: string };
+  bezug?: { stadt?: string; hausId?: string; modul?: string; projekt?: string };
 }
 
 export interface Entscheidungsprotokoll {

@@ -26,6 +26,7 @@ const wurzelSumme = (...v) => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
 import { THREE, rng, waehle, zw, FARBEN, heller, dunkler, gesims, dachProfil, schild, textMaterial } from './basis.js';
 import { lokal, vorbereiten, boden, rueckwand, stuetze, treppenhaus, aufzug, figur, wandschild, haengeschild, GLAS, puppe, PAL } from './innen.js';
 import { registriereSlots } from './bauer.js';
+import { kaykit } from './moebel/kaykit.js';
 
 const PI = Math.PI;
 const ROT = FARBEN.marke;
@@ -761,8 +762,8 @@ registriereSlots({
     if (!g) return { hoehe: 0 };
     const m = hqMasse(g);
     const ecke = p.ecke ?? '+x+z';
-    const x = ecke === 'block' ? p.x + (p.w - m.w) / 2 : ecke.includes('+x') ? p.x + p.w - m.w : p.x;
-    const z = ecke === 'block' ? p.z + (p.d - m.d) / 2 : ecke.includes('+z') ? p.z + p.d - m.d : p.z;
+    const x = ecke === 'block' || ecke === 'front' ? p.x + (p.w - m.w) / 2 : ecke.includes('+x') ? p.x + p.w - m.w : p.x;
+    const z = ecke === 'front' ? p.z + p.d - m.d : ecke === 'block' ? p.z + (p.d - m.d) / 2 : ecke.includes('+z') ? p.z + p.d - m.d : p.z;
     const e = hqGebaeude(S, scene, g, { x, z, angebot: !!p.standort.angebot });
     // Verbindungsbrücke zum Ensemble-Partner über die Querstraße (Glas, zwei Geschosse, Stahlrahmen)
     const br = p.standort.bruecke;
@@ -1293,8 +1294,11 @@ function telefonboxen(S, sc, x, z, w, d, st, r, farbe) {
 function lounge(S, sc, x, z, w, d, st, r, farbe) {
   const L = lokal(S, x + w / 2, 0.06, z + d / 2, 0);
   L.box(w - 0.4, 0.02, d - 0.4, 0, 0, 0, '#e2c9b8');
-  L.box(2.4, 0.42, 0.9, 0, 0, -d / 2 + 0.7, '#5f7f8c'); L.box(2.4, 0.45, 0.25, 0, 0.42, -d / 2 + 0.35, '#536f7a');
-  L.box(0.9, 0.42, 0.9, -1.4, 0, 0.3, farbe); L.zyl(0.45, 0.45, 0.4, 0.2, 0, 0.3, '#d8bf98', 12);
+  // KayKit (CC0): Sofa, Sessel in Abteilungsfarbe, Couchtisch, Stehlampe
+  kaykit(L, 'couch_pillows', 0, 0.02, -d / 2 + 0.85, 0, { s: 0.72, farben: { stoff: '#5f7f8c', kissen: '#5f7f8c', holz: '#7b5a40' } });
+  kaykit(L, 'armchair', -1.4, 0.02, 0.35, Math.PI / 2, { s: 0.62, farben: { stoff: farbe, holz: '#7b5a40' } });
+  kaykit(L, 'table_low', 0.2, 0.02, 0.3, 0, { s: 0.45, farben: { holz: '#d8bf98' } });
+  kaykit(L, 'lamp_standing', -w / 2 + 0.55, 0.02, -d / 2 + 0.55, 0, { s: 0.55, farben: { metall: '#2a2d31' } });
   pflanze(L, w / 2 - 0.5, -d / 2 + 0.5, r, true);
   figur(S, x + w / 2 - 0.4, z + 0.85, Math.floor(r() * 1e4), 'kunde', { pose: 'sitzen', ry: 0 });
 }
@@ -1459,7 +1463,8 @@ function empfang(S, scene, K, tt, T, r, G) {
   figur(S, 3.2, tt + 1.6, 9001, 'info', { pose: 'stehen', ry: 0 });
   if (scene) wandschild(S, scene, 'HARTWIG', 'z', tt + 2.4, 2.4, 0.3, { schrift: ROT, hoehe: 0.8 });
   const P = lokal(S, 1.4, 0.06, T - 1.8, 0);
-  P.box(2.2, 0.42, 0.8, 0, 0, 0, '#5f7f8c'); P.box(2.2, 0.4, 0.2, 0, 0.42, -0.3, '#536f7a');
+  kaykit(P, 'couch', 0, 0.02, 0.05, 0, { s: 0.66, farben: { stoff: '#5f7f8c', holz: '#7b5a40' } });
+  kaykit(P, 'lamp_standing', 1.5, 0.02, -0.2, 0, { s: 0.55, farben: { metall: '#2a2d31' } });
   figur(S, 1.0, T - 1.8, 9002, 'kunde', { pose: 'sitzen', ry: PI });
   for (const s of [5.6, 7.0]) figur(S, s, T - 1.0, 9003 + s, 'kunde', { pose: 'gehen', ry: PI / 2 });
   pflanze(lokal(S, K - 0.6, 0.06, T - 0.8, 0), 0, 0, r, true);
@@ -1642,8 +1647,8 @@ const SIGNATUR = {
       // Gesprächsecke: zwei Sofas, Tisch, Teppich, Pflanze
       const L = lokal(S, x + w / 2, 0.06, z + d / 2, 0);
       L.box(3.4, 0.02, 2.8, 0, 0, 0, heller(farbe, 0.35));
-      for (const s of [-1, 1]) { L.box(2.0, 0.42, 0.8, 0, 0, s * 1.0, '#5f7f8c'); L.box(2.0, 0.4, 0.22, 0, 0.42, s * 1.3, '#536f7a'); }
-      L.box(1.1, 0.4, 0.6, 0, 0, 0, '#d8bf98'); pflanze(L, 1.4, -1.1, r, true);
+      for (const s of [-1, 1]) kaykit(L, 'couch', 0, 0.02, s * 0.95, s < 0 ? 0 : Math.PI, { s: 0.62, farben: { stoff: '#5f7f8c', holz: '#7b5a40' } });
+      kaykit(L, 'table_low', 0, 0.02, 0, 0, { s: 0.45, farben: { holz: '#d8bf98' } }); pflanze(L, 1.4, -1.1, r, true);
       figur(S, x + w / 2 - 0.4, z + d / 2 - 1.0, Math.floor(r() * 1e4), 'leitung', { pose: 'sitzen', ry: 0 });
       figur(S, x + w / 2 + 0.3, z + d / 2 + 1.0, Math.floor(r() * 1e4), 'kunde', { pose: 'sitzen', ry: PI });
     } },
@@ -1822,8 +1827,8 @@ function vorstandEmpfang(S, sc, x, z, w, d, r) {
   text(L, 'Vorstand', 0, 0.42, -0.22, 0.24, '#3a4048');
   monitor(L.sub(-0.6, -0.75, PI), 0, 0, 2, r);
   figur(S, x + w / 2 - 0.2, z + d / 2 - 1.35, 7201, 'info', { pose: 'stehen', ry: 0 });
-  L.box(2.0, 0.42, 0.8, 0, 0, d / 2 - 0.7, '#5f6f7c'); L.box(2.0, 0.4, 0.22, 0, 0.42, d / 2 - 0.35, '#4f5d68');
-  L.box(0.7, 0.38, 0.5, 1.6, 0, d / 2 - 0.9, '#d8bf98');
+  kaykit(L, 'couch', 0, 0.02, d / 2 - 0.75, Math.PI, { s: 0.62, farben: { stoff: '#5f6f7c', holz: '#3a2a20' } });
+  kaykit(L, 'table_low', 1.6, 0.02, d / 2 - 0.9, 0, { s: 0.3, farben: { holz: '#d8bf98' } });
   figur(S, x + w / 2 + 0.4, z + d - 0.75, 7202, 'kunde', { pose: 'sitzen', ry: PI });
   pflanze(L, -w / 2 + 0.5, d / 2 - 0.6, r, true);
 }

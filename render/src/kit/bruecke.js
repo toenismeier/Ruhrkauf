@@ -17,6 +17,7 @@
 //   o.merk: Map für die Neueröffnung (siehe oben).
 //   o.hq: Funktion → aktuelles hqFuerGrafik-JSON; Parzellen 'slot:hq' (nach hq.js hqEinplanen) baut dann
 //   'slot:hq' aus hq.js (eigene Gruppe, Map hqs; aktualisiere() meldet 'hq:<id>', wenn sich Etagen ändern).
+import { gedreht, drehMatrix } from './drehung.js';
 import { THREE, Sammler, LOD, setzeLod } from './basis.js';
 import { echterBauer, fussabdruck } from './bauer.js';
 import { dachFlaechenBeimBau } from './stadt.js';
@@ -32,6 +33,7 @@ import { wettbewerbFuerGrafik } from '../../../engine/src/wettbewerb.ts';
 import { hatAbholstation } from '../../../engine/src/ecommerce.ts';
 import { abholstation } from './abholstation.js';
 import { technikAufDach } from './umbau-aussen.js';
+import { fensterPilotAktiv, schaufensterInnen } from './fenster-innen.js';
 import schwesterHaeuser from '../../haeuser-schwester.json';
 import exportHaeuser from '../../haeuser.json';
 // Maßstab: Fassadenvariante aus dem Export (fassaden-verteilen.js, keine Kopien unter 50 km), für alle Spielstände gleich
@@ -117,7 +119,12 @@ export function zustandAusHaus(haus, s, merk) {
     }
     const zus = new Set();
     // O08 Umbau: Haus-/Etagenmodernisierung nutzt den vorhandenen Gerüst-/Kran-Zustand.
-    if ((s?.umbau?.projekte??[]).some(p=>p.haus===haus.id && p.status==='laufend' && p.ende>w)) umbau=true;
+    // E48: Komplettumbau und Fassade zeigen Gerüst mit Kran, alle anderen Gewerke nur die betroffene Etage.
+    for (const p of s?.umbau?.projekte ?? []) {
+      if (p.haus !== haus.id || p.status !== 'laufend' || p.ende <= w) continue;
+      if (p.stufe === 'komplett' || p.gewerk === 'fassade' || p.gewerk === 'komplett') umbau = true;
+      else (z.bauEtagen ??= []).push(...p.etagen);
+    }
     if (umbau) zus.add('umbau');
     if (unter.size) { zus.add('untermiete'); z.untermieter = [...unter.values()].sort((a, b) => a.etage - b.etage); }
     if (offEtage !== null) { zus.add('offprice'); z.offpriceEtage = Math.max(0, offEtage); }
@@ -187,6 +194,7 @@ export function stadtEintragAusSpiel(s, name) {
 function imSlot(p, W, D) {
   const ecke = p.ecke ?? '+x+z';
   if (ecke === 'block') return { x: p.x + Math.max(0, (p.w - W) / 2), z: p.z + Math.max(0, (p.d - D) / 2) };
+  if (ecke === 'front') return { x: p.x + Math.max(0, (p.w - W) / 2), z: p.z + p.d - D };   // Kartenparzelle: bündig zur Straße
   return { x: ecke.includes('+x') ? p.x + p.w - W : p.x, z: ecke.includes('+z') ? p.z + p.d - D : p.z };
 }
 
@@ -221,18 +229,23 @@ export function spielBauer(s, o = {}) {
     return zust.get(h.id);
   };
 
+  let fensterPilot = 0; // E51 Pilot: höchstens ein Haus je Stadt mit Fenstern nach three-fenestra
   const baueWarenhaus = (S, scene, p, h) => {
     const variant = wahl.get(h.id);
     const f = fussabdruck(h, variant?.familie);
     const { x, z } = imSlot(p, f.w, f.d);
-    if (h.klasse === 'premium') { p.haus = h; const res=premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe}); if (hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d }); return res; }
+    if (h.klasse === 'premium') { p.haus = h; const res=premiumhaus(S, scene, h, { x, z, ...bauZustand(zustand(h)) }); technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe,dach:res?.dach,platz:res?.platz}); if (hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d }); return res; }
     const fam = variant?.familie, fassade = variant?.fassade ?? h.fassade;
     p.haus = h;
     const roh = fassade === h.fassade ? h : { ...h, fassade };
     const nutzer = nachnutzer(h);
     const res=nutzer ? nachnutzung(S, scene, roh, nutzer, { x, z, familie: fam })
       : warenhaus(S, scene, roh, { x, z, familie: fam, ...bauZustand(zustand(h)) });
-    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe});
+    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe,dach:res?.dach,platz:res?.platz});
+    if (!nutzer && fensterPilotAktiv() && !fensterPilot && res?.fensterOG?.length >= 3) {
+      fensterPilot++;
+      schaufensterInnen(scene, res.koerper, res.fensterOG, { sauber: (s?.umbau?.fassade?.[h.id] ?? 1) === 2 || (h.substanz ?? 60) >= 75, seed: h.id.length * 31 });
+    }
     if (!nutzer && hatAbholstation(s, h)) abholstation(S, scene, { x, z, w: f.w, d: f.d });
     return res;
   };
@@ -243,17 +256,23 @@ export function spielBauer(s, o = {}) {
     const nutzer = nachnutzer(h);
     const res=nutzer ? nachnutzungSport(S, scene, h, nutzer, { x, z })
       : sporthaus(S, scene, FASSADE.has(h.id) && FASSADE.get(h.id) !== h.fassade ? { ...h, fassade: FASSADE.get(h.id) } : h, { x, z, ...bauZustand(zustand(h)) });
-    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe});
+    if(!nutzer)technikAufDach(S,h,{x,z,w:f.w,d:f.d,hoehe:res?.hoehe,dach:res?.dach,platz:res?.platz});
     return res;
   };
   const baueOutlet = (S, scene, p, h) => {
-    const f = fussabdruck(h), { x, z } = imSlot(p, f.w, f.d);
+    // Kartenstädte: FUNDUS kann in Stadtlage als Innenstadt-Geschäftshaus stehen (p.grafikLage), Engine-Lage bleibt
+    const hg = p.grafikLage ? { ...h, lage: p.grafikLage } : h;
+    const f = fussabdruck(hg), { x, z } = imSlot(p, f.w, f.d);
     p.haus = h;
-    return outlet(S, scene, h, { x, z, ...bauZustand(zustand(h)) });
+    const res = outlet(S, scene, hg, { x, z, ...bauZustand(zustand(h)) });
+    technikAufDach(S, h, { x, z, w: res?.w ?? f.w, d: res?.d ?? f.d, hoehe: res?.hoehe, dach: res?.dach, platz: res?.platz });
+    return res;
   };
   const baueSchwester=(S,scene,p,h)=>{
     const fl=fussabdruck(h),{x,z}=imSlot(p,fl.w,fl.d);p.haus=h;
-    return schwesterhaus(S,scene,h,{x,z,...bauZustand(zustand(h))});
+    const res=schwesterhaus(S,scene,h,{x,z,...bauZustand(zustand(h))});
+    technikAufDach(S,h,{x,z,w:res?.w,d:res?.d,hoehe:res?.hoehe,dach:res?.dach,platz:res?.platz});
+    return res;
   };
   const bau = (S, scene, p, h) => (h.format === 'outlet' ? baueOutlet : h.format === 'schwester' ? baueSchwester : h.format === 'sport' ? baueSport : baueWarenhaus)(S, scene, p, h);
 
@@ -265,7 +284,7 @@ export function spielBauer(s, o = {}) {
     setzeLod(o.hausLod ?? 'nah');
     let e, dachFlaechen;
     try {
-      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => bau(S, gruppe, p, h)));
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => gedreht(p, S, gruppe, (S2, G) => bau(S2, G, p, h))));
       S.bauen(gruppe);
     } finally { setzeLod(alt); }
     gruppe.traverse((m) => { m.userData.hausId = h.id; });
@@ -289,7 +308,7 @@ export function spielBauer(s, o = {}) {
     setzeLod(o.hausLod ?? 'nah');
     let e, dachFlaechen;
     try {
-      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => basis['slot:hq'](S, gruppe, hqDaten(p))));
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, p, () => gedreht(p, S, gruppe, (S2, G) => basis['slot:hq'](S2, G, hqDaten(p)))));
       S.bauen(gruppe);
     } finally { setzeLod(alt); }
     gruppe.traverse((m) => { m.userData.hqId = p.standort.id; });
@@ -338,7 +357,7 @@ export function spielBauer(s, o = {}) {
     setzeLod(o.hausLod ?? 'nah');
     let e, dachFlaechen;
     try {
-      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, x.p, () => wbBau(S, gruppe, x.p, wbVon(x.wbId))));
+      ({ ergebnis: e, dachFlaechen } = dachFlaechenBeimBau(S, x.p, () => gedreht(x.p, S, gruppe, (S2, G) => wbBau(S2, G, x.p, wbVon(x.wbId)))));
       S.bauen(gruppe);
     }
     finally { setzeLod(alt); }
@@ -379,6 +398,7 @@ export function spielBauer(s, o = {}) {
         new THREE.Vector3(x, 0, z),
         new THREE.Vector3(x + f.w, hoehe, z + f.d)
       );
+      if (p.rot) bounds.applyMatrix4(drehMatrix(p));   // gedrehte Kartenparzelle: Hülle des gedrehten Hauses
       statischeHaeuser.set(haus.id, { haus, p, bounds, e });
     }
     return e;

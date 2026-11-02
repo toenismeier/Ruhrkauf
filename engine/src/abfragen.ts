@@ -24,6 +24,8 @@ export interface PostBezug {
   gebaeudeId?: string;
   wettbewerberId?: string;
   modul?: string;
+  /** E48: abgeschlossenes Umbauprojekt (Vorher/Nachher). */
+  projekt?: string;
 }
 export interface PostMietvertrag {
   entscheidungId: string;
@@ -175,7 +177,7 @@ export function posteingang(s: GameState): Posteingang {
     return {
       id: m.id ?? `alt-${m.woche}-${i}`, woche: m.woche, typ: m.typ, text: m.text,
       kategorie: m.bezug?.modul === 'wettbewerb' || konkurrenz ? 'Konkurrenz' : m.bezug?.modul === 'it' ? 'IT' : meldungKategorie(m.typ, m.text),
-      bezug: { ...bezug, ...(m.bezug?.stadt ? { stadt: m.bezug.stadt } : {}), ...(konkurrenz ? { stadt: konkurrenz.stadt, wettbewerberId: konkurrenz.id } : {}) },
+      bezug: { ...bezug, ...(m.bezug?.stadt ? { stadt: m.bezug.stadt } : {}), ...(konkurrenz ? { stadt: konkurrenz.stadt, wettbewerberId: konkurrenz.id } : {}), ...(m.bezug?.projekt ? { projekt: m.bezug.projekt } : {}) },
     };
   });
   const erledigt: PostErledigt[] = [
@@ -425,6 +427,6 @@ export { planungBericht, planWoche };
 // O07 Haus: Betriebssteckbrief, Mystery-Shopping-Rangliste, Beobachtung und Wochenkommentare.
 export { hausUebersicht, hausBeobachtung, hausKommentareDerWoche, hausKundenRanking, hausKandidaten, hausKundenscore } from './haus';
 // O08 Umbau
-export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN } from './umbau';
+export { umbauUebersicht, umbauHaus, umbauSchaetzung, UMBAU_STUFEN, GEWERKE, gewerkSchaetzung, bauprogrammSchaetzung, bestandUebersicht, bestandCluster, umbauVorherNachher } from './umbau';
 // O04 Personal: Anzeigeprojektionen, keine Personalberechnung in der Oberfläche.
 export { personalHaus, personalUebersicht } from './personaleinsatz';

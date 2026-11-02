@@ -215,6 +215,11 @@ export function etage(S, scene, haus, etageNr, o = {}) {
   // Branding im gemeinsamen Sortiment-Modul: Rot der Hartwig-Infrastruktur nur fuer Schwester umfaerben.
   // O08 Umbau: gleiche Geometrie, Materialpalette gemäß Generation der Etage.
   const moebelGeneration=haus.etagenBau?.[etageNr]?.moebelGeneration ?? 3;
+  for (const [k, gs] of tmp.aussenTeile ?? []) {
+    const farbe = haus.kette === 'schwester' && ['#d23c32', '#c8102e'].includes(k) ? FARBE_SCHWESTER : k;
+    if (!S.teile.has(farbe)) S.teile.set(farbe, []);
+    S.teile.get(farbe).push(...gs);
+  }
   for (const [k, gs] of tmp.teile) {
     const farbeAlt = haus.kette === 'schwester' && ['#d23c32', '#c8102e'].includes(k) ? FARBE_SCHWESTER : k;
     const farbe = farbeGeneration(farbeAlt,moebelGeneration);
@@ -226,6 +231,20 @@ export function etage(S, scene, haus, etageNr, o = {}) {
   const eg = etageNr === 0;
   const box = new THREE.Box3(new THREE.Vector3(ax0 - 0.6, eg ? -0.3 : -2.2, az0 - 0.6), new THREE.Vector3(ax1 + (eg ? 7 : 0.4), WANDHOEHE, az1 + (eg ? 7 : 0.4)));
   return { box, breite: B, tiefe: T, zonen: zn, anzahl: tmp.anzahl, dichte: d, kunden, leer: kk.leer, navigation: kk.navigation };
+}
+
+/** Zeichnet fn in S, legt die neuen Teile aber getrennt ab (ohne Umfärben nach Möbelgeneration). */
+function aussen(S, fn) {
+  const vorher = new Map([...S.teile].map(([k, gs]) => [k, gs.length]));
+  fn();
+  S.aussenTeile ??= new Map();
+  for (const [k, gs] of S.teile) {
+    const n = vorher.get(k) ?? 0;
+    if (gs.length <= n) continue;
+    if (!S.aussenTeile.has(k)) S.aussenTeile.set(k, []);
+    S.aussenTeile.get(k).push(...gs.splice(n));
+    if (!gs.length) S.teile.delete(k);
+  }
 }
 
 function bauen(S, scene, haus, etageNr, ra, zn, k) {
@@ -246,13 +265,13 @@ function bauen(S, scene, haus, etageNr, ra, zn, k) {
   ra.artAn = (i, j) => { const q = zoneVon[i]?.[j]; return q >= 0 ? zn[q].art : null; };
 
   // ---- Decke/Bodenplatte mit Loch im Kern
-  const platte = (x0, z0, x1, z1) => { if (x1 > x0 && z1 > z0) S.box(x1 - x0, 0.5, z1 - z0, (x0 + x1) / 2, -0.25, (z0 + z1) / 2, '#59626a'); };
+  const platte = (x0, z0, x1, z1) => { if (x1 > x0 && z1 > z0) aussen(S, () => S.box(x1 - x0, 0.5, z1 - z0, (x0 + x1) / 2, -0.25, (z0 + z1) / 2, '#59626a')); };
   const kz0 = kz * R + 5.5, kz1 = kz * R + 8.7, kx0 = kx * R + 0.9, kx1 = kx * R + 9.3;
   const kernDrin = drin(kx, kz) && drin(kx + 1, kz + 1);
   if (hatUnten && kernDrin && !ra.schwester) {
     platte(ax0, az0, ax1, kz0); platte(ax0, kz1, ax1, az1); platte(ax0, kz0, kx0, kz1); platte(kx1, kz0, ax1, kz1);
   } else platte(ax0, az0, ax1, az1);
-  if (!eg) {
+  if (!eg) aussen(S, () => {
     S.box(ax1 - ax0 + 0.3, 1.7, 0.3, (ax0 + ax1) / 2, -1.35, az1 + 0.15, fassade);
     S.box(0.3, 1.7, az1 - az0 + 0.3, ax1 + 0.15, -1.35, (az0 + az1) / 2, dunkler(fassade, 0.04));
     S.box(ax1 - ax0 + 0.6, 0.25, 0.5, (ax0 + ax1) / 2, -0.4, az1 + 0.2, heller(fassade, 0.04));
@@ -261,7 +280,7 @@ function bauen(S, scene, haus, etageNr, ra, zn, k) {
       for (let x = ax0 + 1.25; x < ax1; x += 2.5) S.box(1.4, 1.0, 0.1, x, -1.2, az1 + 0.31, '#55636f');
       for (let z = az0 + 1.25; z < az1; z += 2.5) S.box(0.1, 1.0, 1.4, ax1 + 0.31, -1.2, z, '#55636f');
     }
-  }
+  });
 
   // ---- Abteilungen
   const kante = (i, j, di, dj) => {
@@ -356,9 +375,12 @@ function bauen(S, scene, haus, etageNr, ra, zn, k) {
 
   // ---- Front: Schaufenster (EG) oder Brüstung
   const artAn = ra.artAn;
-  frontKante(S, scene, 'z', ax0, ax1, az1, eg, fassade, ra, r, artAn, d);
-  frontKante(S, scene, 'x', az0, az1, ax1, eg, fassade, ra, r, artAn, d);
-  if (eg) strasse(S, ax0, az0, ax1, az1, r, d);
+  // Fassade, Straße und Rohbau gehören nicht zum Ladenbau: bleiben bei jeder Möbelgeneration gleich.
+  aussen(S, () => {
+    frontKante(S, scene, 'z', ax0, ax1, az1, eg, fassade, ra, r, artAn, d);
+    frontKante(S, scene, 'x', az0, az1, ax1, eg, fassade, ra, r, artAn, d);
+    if (eg) strasse(S, ax0, az0, ax1, az1, r, d);
+  });
 
   // ---- Belegungsraster: größte zusammenhängende Leerfläche (Quadrat) im Bild
   for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {

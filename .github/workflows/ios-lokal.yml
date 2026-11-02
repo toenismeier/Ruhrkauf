@@ -1,0 +1,26 @@
+# iOS-Build auf eigenem macOS-Runner (EAS --local) und Einreichung bei TestFlight.
+# Ausweg, wenn das EAS-Buildkontingent (Free-Plan) aufgebraucht ist. Auslöser: Push auf tmp/ios-lokal.
+name: iOS lokal bauen und an TestFlight
+on:
+  push:
+    branches: [tmp/ios-lokal]
+  workflow_dispatch:
+jobs:
+  ios:
+    runs-on: macos-26
+    timeout-minutes: 90
+    defaults: { run: { working-directory: app } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Neuestes Xcode
+        run: |
+          X=$(ls -d /Applications/Xcode_*.app | grep -v beta | sort -V | tail -1); echo "$X"; sudo xcode-select -s "$X"; xcodebuild -version
+      - run: npm ci
+      - name: Bauen
+        env: { EXPO_TOKEN: "${{ secrets.EXPO_TOKEN }}" }
+        run: npx -y eas-cli@latest build --platform ios --profile production --local --non-interactive --output "$RUNNER_TEMP/hartwig.ipa"
+      - name: An TestFlight
+        env: { EXPO_TOKEN: "${{ secrets.EXPO_TOKEN }}" }
+        run: npx -y eas-cli@latest submit --platform ios --profile production --path "$RUNNER_TEMP/hartwig.ipa" --non-interactive

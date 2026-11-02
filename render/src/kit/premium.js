@@ -214,6 +214,25 @@ function statusBau(S,scene,typ,x,z,w,d,H,zust,haus,opt) {
     S.box(w*0.65,0.45,0.5,x+w*0.64,H+14,z+d+5,'#dfb94a');
     S.box(0.1,9,0.1,x+w*0.32,H+10,z+d+5,'#7b756c');
   }
+  // E48: Baustelle nur vor der betroffenen Etage; das Haus bleibt geöffnet.
+  const bauE=[...new Set(zust.bauEtagen??[])].filter(e=>e>=0);
+  if(bauE.length&&!hat('umbau')&&!hat('abriss')) {
+    const u0=w*0.1,u1=w*0.48;
+    for(const e of bauE) {
+      if(e===0) continue;
+      const y0=6.6+(e-1)*4.45,y1=y0+4.45;
+      if(y1>H+0.5) continue;
+      for(let u=u0;u<=u1+0.01;u+=3.5) S.box(0.16,y1+0.9,0.16,x+u,(y1+0.9)/2,z+d+1.3,'#88959a');
+      for(const y of [y0,y1]) S.box(u1-u0,0.14,1.0,x+(u0+u1)/2,y,z+d+1.3,'#c79a5a');
+      S.box(u1-u0,y1-y0+0.9,0.06,x+(u0+u1)/2,(y0+y1)/2+0.2,z+d+1.85,'#d8e3dc');
+      S.box((u1-u0)*0.6,1.5,0.05,x+(u0+u1)/2,(y0+y1)/2+0.2,z+d+1.9,DUNKEL);
+      if(scene) schild(scene,'WIR MODERNISIEREN','+z',x+(u0+u1)/2,(y0+y1)/2+0.2,z+d+1.95,0.7,PREMIUM_MESSING);
+    }
+    // Bauzaun vor dem Gehweg (bei Bau im EG über die halbe Front)
+    const b0=w*(bauE.includes(0)?0.08:0.55),b1=w*(bauE.includes(0)?0.92:0.85);
+    for(let u=b0;u<b1;u+=3.5) {S.box(3.4,1.9,0.06,x+u+1.75,1.25,z+d+4.2,'#dfe3e5');S.box(0.08,2.1,0.1,x+u,1.25,z+d+4.2,'#9aa0a4');}
+    if(bauE.includes(0)) for(let u=3;u<w-2;u+=5) S.box(4.1,3.0,0.08,x+u,2.1,z+d+0.6,'#e6dfcf');
+  }
   if(hat('geschlossen')||hat('leer')||hat('verfall')||hat('abriss')) {
     for(let u=2;u<w-2;u+=5) S.box(4.1,3.2,0.12,x+u,2.1,z+d+0.55,'#797974');
   }
@@ -222,8 +241,11 @@ function statusBau(S,scene,typ,x,z,w,d,H,zust,haus,opt) {
     if(scene) schild(scene,'RÄUMUNG','+z',x+w*0.7,4.2,z+d+0.68,0.75,'#e5d7c4');
   }
   if(hat('neueroeffnung')) {
-    S.box(11,0.9,0.3,x+w*0.5,7.2,z+d+0.5,DUNKEL);
-    if(scene) schild(scene,'NEUERÖFFNUNG','+z',x+w*0.5,7.2,z+d+0.5,0.65,PREMIUM_MESSING);
+    // Banner vor der Front (vor den Lisenen) und zwei Fahnenbahnen über die Höhe: Erneuerung auch aus der Ferne lesbar.
+    S.box(Math.min(26,w*0.5),2.4,0.12,x+w*0.5,9.6,z+d+1.5,DUNKEL);
+    S.box(Math.min(26,w*0.5)+0.4,0.18,0.14,x+w*0.5,10.9,z+d+1.5,PREMIUM_MESSING);
+    if(scene) schild(scene,'NEUERÖFFNUNG','+z',x+w*0.5,9.6,z+d+1.6,1.2,PREMIUM_MESSING);
+    for(const u of [w*0.18,w*0.82]) S.box(2.2,Math.min(14,H-9),0.1,x+u,(H-9)/2+8.5,z+d+1.5,DUNKEL);
   }
   if(hat('aktion') && !opt.verkaufsprozess) {
     // Keine schreienden Rabattplakate, nur kleine Aktionshinweise am Seiteneingang.
@@ -405,5 +427,5 @@ export function premiumhaus(S,scene,haus,opt={}) {
   statusBau(S,scene,typ,x,z,w,d,H,zust,haus,opt);
   const hoehe=H+(zust.hat('umbau')?20:typ==='P003'?13:typ==='P001'?16:typ==='P002'?12:typ==='P005'?10:6);
   // Q36: Pin auf der Traufkante über dem platzseitigen Haupteingang (Mitte +z), nicht über der Dachmitte.
-  return {hoehe,w,d,familie:'premium',teile:S.anzahl-start,status:zust.status,pinAnker:{x:x+w/2,y:H,z:z+d,seite:'+z'}};
+  return {hoehe,dach:H+1,platz:[0.18,1-Math.min(0.06,(seitenD/2)/d)],w,d,familie:'premium',teile:S.anzahl-start,status:zust.status,pinAnker:{x:x+w/2,y:H,z:z+d,seite:'+z'}};
 }

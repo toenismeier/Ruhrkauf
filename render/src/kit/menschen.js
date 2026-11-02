@@ -213,7 +213,8 @@ export class MenschenSammler {
   /** Figur an (x, y, z); winkel = Spiel-Gierwinkel (Blick nach +x bei 0). o: { anim, koerper, oben, tasche, kinder, r } */
   setze(x, y, z, winkel, r, o = {}) {
     const e = erscheinung(r, o);
-    const anim = o.anim ?? (r() < 0.22 ? 'reden' : r() < 0.55 ? 'gehen' : r() < 0.7 ? 'gehen_tasche' : 'stehen');
+    // Statische Figuren stehen oder reden; Gehen nur bei bewegten Figuren (leben.js), sonst laufen sie auf der Stelle
+    const anim0 = o.anim ?? (r() < 0.4 ? 'reden' : 'stehen'); const anim = anim0.startsWith('gehen') ? 'stehen' : anim0;
     this.liste.push([x, y, z, winkel, e, anim, r() * 8]);
   }
   get anzahl() { return this.liste.length; }
@@ -257,6 +258,10 @@ export function menschenFuer(S) {
     S._menschen = m;
     (S.nachBauen ??= []).push((ziel) => { S._menschen = null; return m.bauen(ziel); });
   }
+  // Gedrehte Parzelle (drehung.js): Figuren um die Parzellenmitte mitdrehen
+  const d = S._drehung;
+  if (d) { const m = S._menschen, e = d.M.elements;
+    return { setze: (x, y, z, winkel, r, o) => m.setze(e[0] * x + e[8] * z + e[12], y, e[2] * x + e[10] * z + e[14], winkel + d.p.rot, r, o), get anzahl() { return m.anzahl; } }; }
   return S._menschen;
 }
 

@@ -13,13 +13,25 @@ import { etage } from './kit/grundriss.js';
 import { RASTER } from './kit/innen.js';
 import { hqEtage, hqSitzungssaal, hqEinplanen, angebotMarker, ABTEILUNGEN as HQ_ABT } from './kit/hq.js';
 import { warenhaus } from './kit/warenhaus.js';
+import { technikAufDach } from './kit/umbau-aussen.js';
+import { fensterPilotAn, schaufensterInnen } from './kit/fenster-innen.js';
+import { premiumhaus } from './kit/premium.js';
+import { sporthaus } from './kit/sporthaus.js';
+import { schwesterhaus } from './kit/schwesterhaus.js';
+import { outlet as outletHaus, innenOutlet } from './kit/outlet.js';
 import { stadtplan, baueStadt, baueStadtGestuft, setzeMarker, bauerFuer, dachFlaechenBeimBau } from './kit/stadt.js';
+import { istKartenstadt, kartenplan, baueKartenstadt, setzeKartenStil, kartenStil } from './kit/karten/kartenstadt.js';
+// Kartenstädte (Essen): Stadtbild umschaltbar zwischen vereinfacht (Coffee) und kartentreu
+meldeSchalter({ schluessel: 'kartenstil', titel: 'Stadtbild Kartenstädte (Essen)', gruppe: 'Darstellung', art: 'auswahl', standard: 'coffee',
+  optionen: [{ wert: 'coffee', titel: 'Coffee · vereinfacht, saubere Straßen' }, { wert: 'karte', titel: 'Kartentreu · echte Straßen und Spuren' }] });
+{ let q = null; try { q = new URLSearchParams(location.search).get('kartenstil'); } catch { /* ohne URL */ } setzeKartenStil(q ?? einstellung('kartenstil')); }
 import { STADTLISTE } from './kit/staedte.js';
 import { nahMitte } from './kit/stadtrand.js';
 import { lebenModul } from './kit/leben.js';
 import { menschenAn, nachLaden as menschenNachLaden } from './kit/menschen.js';
 import { stadtEintragAusSpiel, spielBauer } from './kit/bruecke.js';
 import { hausDachpunkt, dachpunkt, baueHauspin, pinGroessen } from './kit/hauspins.js';
+import { drehePunkt } from './kit/drehung.js';
 import { schriftzugSichtbarkeit, bewerteSchriftzug } from './kit/q36-pruefung.js';
 import { jahreszeitenStadt, jahreszeit } from './kit/jahreszeit.js';
 import { STATUS_TITEL } from './kit/zustaende.js';
@@ -53,7 +65,7 @@ import { einfuehrungModul } from './ui/einfuehrung.js';
 import { erfolgeModul } from './ui/erfolge.js';
 import { spielendeModul } from './ui/spielende.js';
 import { werkzeugeModul } from './ui/werkzeuge.js';
-import { einstellung, einstellungenModul, aktiviereBarrierefreiheit } from './ui/einstellungen.js';
+import { einstellung, einstellungenModul, aktiviereBarrierefreiheit, meldeSchalter } from './ui/einstellungen.js';
 // O02 Umsatztreiber
 import { reportingModul, hausTreiberZeile } from './ui/reporting.js';
 // O03 IT
@@ -232,6 +244,7 @@ const leben = lebenModul({ canvas, scene: () => scene, camera: () => cam, K: () 
   zeichnen, sparsam });
 // Stadtmenschen als vorgerenderte Figuren; sobald der Atlas geladen ist, einmal neu zeichnen.
 menschenAn(true);
+fensterPilotAn(true); // E51 Pilot three-fenestra: ein Haus je Stadt, iPhone-Messung
 menschenNachLaden(() => { if (scene && cam) zeichnen(); });
 const lebenEinstellung = param.get('leben') ?? (() => { try { return localStorage.getItem('ruhrkauf.leben'); } catch { return null; } })();
 if (['aus', 'wenig', 'voll'].includes(lebenEinstellung)) leben.setzen(lebenEinstellung);
@@ -414,6 +427,7 @@ function wettbewerbPinsAktualisieren() {
     const pin = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthTest: false }));
     const dach = dachpunkt(p, { w: x.e?.w ?? p.w, d: x.e?.d ?? p.d }, x.e?.hoehe ?? 28);
     if (!dach) continue;
+    if (p.rot) [dach.x, dach.z] = drehePunkt(p, dach.x, dach.z);   // gedrehte Kartenparzelle
     pin.position.set(dach.x, dach.y + 3, dach.z);
     pin.scale.set(10.5, 10.5, 1); pin.userData.wbId = w.id; pin.userData.puls = neu; pin.renderOrder = 30;
     scene.add(pin); wettbewerbPins.push(pin);
@@ -481,8 +495,10 @@ function baueStadtAusSpiel(name) {
   const hqJson = hqGrafik();
   const d = stadtEintragAusSpiel(s, name);
   hqIdsStadt = hqIdsIn(hqJson, name);
-  plan = stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
-  if (hqJson) hqEinplanen(plan, hqJson, name);
+  // Kartenstädte (echte Kartendaten statt Kit-Raster): eigener Plan, Zentrale direkt auf Bauplätzen
+  const karte = istKartenstadt(name);
+  plan = karte ? kartenplan(name, d, hqJson) : stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
+  if (hqJson && !karte) hqEinplanen(plan, hqJson, name);
   scene = neueSzene('#4fb6c2');
   scene.userData.sonne.shadow.mapSize.set(2048, 2048);
   wurzel = new THREE.Group();
@@ -502,7 +518,7 @@ function baueStadtAusSpiel(name) {
   } });
   setzeLod('fern');
   let e;
-  try { e = baueStadt(T, scene, plan, grund, { keineStandAutos: leben.modus !== 'aus' }); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
+  try { e = karte ? baueKartenstadt(T, scene, plan, grund) : baueStadt(T, scene, plan, grund, { keineStandAutos: leben.modus !== 'aus' }); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
   jahreszeiten = jahreszeitenStadt(scene, plan, e.hoehen, s, true, e.dachFlaechen);
   jahreszeiten.registriereDachflaechenMehrfach(getrennteSchneedachFlaechen());
   scene.add(wurzel);
@@ -540,8 +556,10 @@ async function baueStadtAusSpielReise(name) {
   const hqJson = hqGrafik();
   const d = stadtEintragAusSpiel(s, name);
   hqIdsStadt = hqIdsIn(hqJson, name);
-  plan = stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
-  if (hqJson) hqEinplanen(plan, hqJson, name);
+  // Kartenstädte (echte Kartendaten statt Kit-Raster): eigener Plan, Zentrale direkt auf Bauplätzen
+  const karte = istKartenstadt(name);
+  plan = karte ? kartenplan(name, d, hqJson) : stadtplan(d.seed, { typ: d.typ, archetyp: d.archetyp, region: d.region, strassenFaktor: 1.6, ...d.extra, standorte: d.standorte });
+  if (hqJson && !karte) hqEinplanen(plan, hqJson, name);
   await new Promise((r) => requestAnimationFrame(r));
   scene = neueSzene('#4fb6c2');
   scene.userData.sonne.shadow.mapSize.set(2048, 2048);
@@ -562,7 +580,7 @@ async function baueStadtAusSpielReise(name) {
   } });
   setzeLod('fern');
   let e;
-  try { e = await baueStadtGestuft(T, scene, plan, grund); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
+  try { e = karte ? baueKartenstadt(T, scene, plan, grund) : await baueStadtGestuft(T, scene, plan, grund); T.bauen(scene); entferneKleineSchilder(scene); } finally { setzeLod('nah'); }
   scene.add(wurzel);
   KA.teileGrund = T.anzahl;
   kachelnAnlegen(offen, true);
@@ -1191,6 +1209,44 @@ function abteilungsBild(id) {
   }
   return { url: abtBildCache.get(k), name: a.name };
 }
+/** E48: Vorher/Nachher eines Umbauprojekts. Etagen-Gewerke zeigen die Etage innen, Fassade und Komplett das Haus außen. */
+const umbauBildCache = new Map();
+function umbauBild(projektId, wann) {
+  const k = projektId + '|' + wann;
+  if (umbauBildCache.has(k)) return umbauBildCache.get(k);
+  const p = s.umbau?.projekte?.find((x) => x.id === projektId), h = p && s.haeuser.find((x) => x.id === p.haus);
+  const zst = p?.[wann];
+  if (!p || !h || !zst) return null;
+  const etagenBau = structuredClone(h.etagenBau ?? {});
+  for (const [nr, z] of Object.entries(zst)) {
+    const e = etagenBau[nr] ?? (etagenBau[nr] = { technik: {} });
+    e.moebelGeneration = z.moebel + 1; e.technik = { ...e.technik, klima: z.klima, licht: z.licht, brandschutz: z.brandschutz };
+    e.klimaModernisiert = z.klima === 2;
+  }
+  const haus = { ...h, etagenBau };
+  let url;
+  // Je Format der passende Baukörper (wie bruecke.js): Premium, Sport, Volkskauf, FUNDUS, Hartwig.
+  const aussen = h.klasse === 'premium' ? premiumhaus : h.format === 'sport' ? sporthaus : h.format === 'schwester' ? schwesterhaus : h.format === 'outlet' ? outletHaus : warenhaus;
+  if (p.gewerk === 'fassade' || p.gewerk === 'komplett' || p.stufe === 'komplett') {
+    haus.substanz = wann === 'vorher' ? Math.min(h.substanz, 35) : Math.max(h.substanz, 85);
+    url = schnittBild((S, sc) => {
+      // Nachher mit Neueröffnungs-Dekor (gibt es für alle Formate), damit die Erneuerung auch bei Premium und FUNDUS sichtbar ist.
+      const res = aussen(S, sc, haus, { x: 0, z: 0, passanten: false, vorplatz: false, ...(wann === 'nachher' ? { status: 'neueroeffnung' } : {}) });
+      if (wann === 'nachher') technikAufDach(S, haus, { x: 0, z: 0, w: res.w, d: res.d, hoehe: res.hoehe, dach: res.dach, platz: res.platz });
+      if (res.fensterOG?.length) schaufensterInnen(sc, res.koerper, res.fensterOG, { sauber: wann === 'nachher', seed: h.id.length * 31 });
+      return { box: new THREE.Box3(new THREE.Vector3(-4, -1, -4), new THREE.Vector3(res.w + 8, Math.max(res.hoehe, res.dach ?? 0) + 4, res.d + 8)) };
+    }, 360, 260).url;
+  } else {
+    const nr = Number(Object.keys(zst).sort((a, b) => Math.abs(a) - Math.abs(b))[0]);
+    url = schnittBild((S, sc) => {
+      if (h.format !== 'outlet') return etage(S, sc, haus, nr, { ausschnitt: { anker: nr === 0 ? 'eingang' : 'ecke' } });
+      const r = innenOutlet(S, sc, haus, { geschosse: [Math.max(0, nr)], innenZustand: 'normal' });
+      return { box: new THREE.Box3(new THREE.Vector3(-2, 0, -2), new THREE.Vector3(r.w + 2, 6, r.d + 2)) };
+    }, 360, 260).url;
+  }
+  umbauBildCache.set(k, url);
+  return url;
+}
 function etagenBild(g, nr) { return schnittBild((S, sc) => hqEtage(S, sc, g, nr, {})).url; }
 const fassadenChronik = new Map();
 function fassadeChronik(familie) {
@@ -1327,12 +1383,13 @@ ec = ecommerceModul({ E, s: () => s, panel, meldung, nachAktion: () => { nachAkt
 er = erfolgeModul({ E, s: () => s, panel });
 // O06 Planung: eigenständiger Assistent und Forecast.
 pl = planungModul({ E, s: () => s, panel, meldung, nachAktion });
-um = umbauModul({ E, s:()=>s, panel, meldung, nachAktion:()=>{ grafikNachziehen(); nachAktion(); }, hausOeffnen: oeffneHaus });
+um = umbauModul({ E, s:()=>s, panel, meldung, nachAktion:()=>{ grafikNachziehen(); nachAktion(); }, hausOeffnen: oeffneHaus, bild: umbauBild });
 // O04 Personal
 pe = personalModul({ E, s: () => s, panel, meldung, nachAktion, oeffneHaus });
 po = posteingangModul({
   E, s: () => s, panel, meldung, nachAktion, zustand: () => postUi, nachZustand: automatischSpeichern,
   springe: (bezug) => {
+    if (bezug.projekt) return oeffneModul(um, null, 0, bezug.projekt);
     if (bezug.modul && !bezug.hausIds?.length && !bezug.stadt) {
       if (bezug.modul === 'einkauf') return oeffneEinkauf();
       if (bezug.modul === 'vorstand') return oeffneModul(vs);
@@ -1479,6 +1536,19 @@ wk = werkzeugeModul({
 });
 $('stadt-reise').addEventListener('click', () => { schliessePanel(); menueZu(); reise.oeffne(); });
 window.addEventListener('einstellung', (e) => {
+  if (e.detail?.schluessel === 'kartenstil') {
+    setzeKartenStil(e.detail.wert);
+    const titel = e.detail.wert === 'karte' ? 'Kartentreu' : 'Coffee';
+    if (s && stadtName && istKartenstadt(stadtName)) {
+      // Panel schließen und erst nach dem nächsten Bild umbauen, damit die Rückmeldung sichtbar ist; Fehler werden gemeldet statt verschluckt
+      schliessePanel(); menueZu();
+      meldung('Stadtbild wird umgestellt: ' + titel + ' …');
+      setTimeout(() => {
+        try { baueStadtAusSpiel(stadtName); zeichnen(); meldung('Stadtbild: ' + titel); }
+        catch (f) { meldung('Umstellen fehlgeschlagen: ' + (f?.message ?? f), false); }
+      }, 120);
+    } else meldung('Stadtbild ' + titel + ' gilt beim nächsten Besuch einer Kartenstadt (Essen)');
+  }
   if (e.detail.schluessel === 'autospeichern' && !e.detail.wert) clearTimeout(speicherTimer);
   if (e.detail.schluessel === 'zahlen' && s) cockpitZeigen();
 });
@@ -1628,9 +1698,9 @@ $('weiter').addEventListener('click', () => {
 });
 if (typeof E.hqUebersicht === 'function') $('hq').addEventListener('click', () => oeffneHq()); else $('hq').hidden = true;
 
-window.spiel = { speicherDiagnose, meldung, ecommerce: ec, oeffneEcommerce: (...a) => oeffneModul(ec, ...a), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
+window.spiel = { speicherDiagnose, grafikNachziehen: () => grafikNachziehen(), get scene() { return scene; }, oeffneUmbauProjekt: (id) => oeffneModul(um, null, 0, id), oeffneModernisierung: () => oeffneModul(um), meldung, ecommerce: ec, oeffneEcommerce: (...a) => oeffneModul(ec, ...a), chronik: () => E.chronikUebersicht(s), oeffneChronik: () => oeffneModul(ch), personaleinsatz: pe, oeffnePersonaleinsatz: (...a) => oeffneModul(pe, ...a), neuesSpiel, speichern: sofortSpeichern, portfolio: pp, oeffnePortfolio: (seite = 'liste') => oeffneModul(pp, seite), erfolge: er, oeffneErfolge: () => oeffneModul(er), statistik: st, oeffneStatistik: (...a) => oeffneModul(st, ...a), werkzeuge: wk, oeffneWerkzeuge: () => wk.oeffne(), einstellungen: es, oeffneEinstellungen: () => oeffneModul(es), planung: pl, oeffnePlanung: (...a) => oeffneModul(pl, ...a), it: itM, oeffneIt: (...a) => oeffneModul(itM, ...a), reporting: rg, oeffneReporting: () => oeffneModul(rg), posteingang: po, oeffnePosteingang: (...a) => oeffneModul(po, ...a), performanceMessen: diagnoseZeigen, ton, oeffneEinkauf, vorstand: vs, organisation: org, marketing: mk, produkte: pr, oeffneVorstand: (...a) => oeffneModul(vs, ...a), oeffneOrganisation: (...a) => oeffneModul(org, ...a), oeffneMarketing: (...a) => oeffneModul(mk, ...a), oeffneProdukte: (...a) => oeffneModul(pr, ...a), kachelnPause: (an) => { KA.pause = an; if (!an) kachelnPlanen(); }, hausEtage: (id, nr) => window.hausKlick('etage', id, nr), get innenbild() { return letztesInnenbild; }, get einkauf() { return ek; }, EQ, pruefeEinkauf: () => ek.pruefe(),
   oeffneWettbewerber,
-  kameraHaus: hausKameraMessung, kameraAuf: (x, z, halb) => { K.x = x; K.z = z; K.halb = halb ?? K.halb; kameraSetzen(); leben.kamera(); zeichnen(); }, get plan() { return plan; }, menschenStatus: () => { let gruppen = 0, figuren = 0; scene?.traverse((m) => { if (m.userData?.menschen) { gruppen++; figuren += m.geometry.instanceCount; } }); return { gruppen, figuren, info: { ...ren.info.render } }; }, // lesender Pixelabgleich für den Mobil-Smoketest
+  kameraZustand: () => ({ x: Math.round(K.x), z: Math.round(K.z), halb: +K.halb.toFixed(1) }), kameraHaus: hausKameraMessung, kameraAuf: (x, z, halb) => { K.x = x; K.z = z; K.halb = halb ?? K.halb; kameraSetzen(); leben.kamera(); zeichnen(); }, get plan() { return plan; }, menschenStatus: () => { let gruppen = 0, figuren = 0; scene?.traverse((m) => { if (m.userData?.menschen) { gruppen++; figuren += m.geometry.instanceCount; } }); return { gruppen, figuren, info: { ...ren.info.render } }; }, // lesender Pixelabgleich für den Mobil-Smoketest
   leben,
   reise, wochenbericht, hausbesuch: hb, oeffneHausbesuch: (id) => hb.oeffne(id), szenarien: szenarienUI, zeitung: zt, oeffneZeitung: (...a) => oeffneModul(zt, ...a), spielende, zeigeSpielende: () => spielende.anzeigen(), bahnhofFokussieren, bahnhofBildpunkt,
   // O07 Haus: lesende Abnahmefunktion; gleiches Engine-Objekt wie die Oberfläche.
