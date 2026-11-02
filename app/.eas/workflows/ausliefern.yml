@@ -1,13 +1,9 @@
-# Build-Zug Dienstag und Freitag 18 Uhr (Winterzeit; Cron in UTC), kein Lauf bei jedem Push.
+# Ummo 02.11.2026: kein automatischer Build-Zug mehr (TestFlight-Kontingent). Läuft nur auf Ummos ausdrückliches Okay von Hand.
 # Ummo 23.10.2026: Auslieferung immer über TestFlight. Jeder Lauf baut die iOS-App neu und reicht sie bei TestFlight ein;
 # keine Updates über Expo (expo-updates prüft beim Start nicht mehr).
 # Außer der Reihe: GitHub-Workflow .github/workflows/ausliefern.yml (workflow_dispatch) oder
 #   npx eas-cli@latest workflow:run .eas/workflows/ausliefern.yml
 name: Ausliefern
-
-on:
-  schedule:
-    - cron: '0 17 * * 2,5'
 
 jobs:
   build_ios:
