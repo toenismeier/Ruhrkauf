@@ -98,7 +98,7 @@ Aufträge `auftraege/wurf5/` (README mit Entscheidungen, Phase 0, Haken, Arbeits
 
 | Schritt | Inhalt | Stand |
 |---|---|---|
-| Phase 0 | Liste vorbelegen, Unsinn raus, Pakete `daten/v-pakete.csv`, B-Bilder auf RunPod (Kostenfreigabe Ummo) | **vorbereitet 03.11.**: 269 Varianten in 29 Paketen; B-Lauf wartet auf Ummos Freigabe |
+| Phase 0 | Liste vorbelegen, Unsinn raus, Pakete `daten/v-pakete.csv`, B-Bilder auf RunPod (Kostenfreigabe Ummo) | **vorbereitet 03.11.**: 253 Varianten in 29 Paketen (nach Crop-Prüfung); B-Lauf wartet auf Ummos Freigabe |
 | V1 Oberteile | Haken **gemergt 02.11.** (#124, 5aab44d): Schnittvariante `bild`/`bildOffen`, Dateien je Chat `engine/src/sortiment/w5-<kategorie>.ts` und `render/src/kit/mode/w5-<kategorie>.js` + `-zuordnung.json` angelegt und eingehängt, Test `w5-haken.test.ts`; jest 61/61, render npm test grün, CI grün. **V2 bis V5 rebasen darauf.** Pakete V1-xx | wartet auf `daten/v-pakete.csv` (Phase 0) |
 | V2 Unterteile | 8 Pakete nach B-Lauf | offen |
 | V3 Kleider, Blusen, Hemden | 3 Pakete nach B-Lauf | offen |
