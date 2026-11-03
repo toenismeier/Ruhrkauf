@@ -2,7 +2,7 @@
 
 Erst `auftraege/wurf5/README.md` vollständig lesen; alle Regeln dort gelten.
 
-- **Umfang:** Kleider, Jumpsuits, Anlass-Kleider. Deine Pakete: alle Zeilen in `auftraege/wurf5/daten/v-pakete.csv` mit `chat=V3`.
+- **Umfang:** Kleider, Blusen, Hemden. Deine Pakete: alle Zeilen in `auftraege/wurf5/daten/v-pakete.csv` mit `chat=V3`.
 - **B-Bilder:** privat `toenismeier/hartwig-ref-p01-shirts-tops`, Ordner `bildpakete-w5/<paket>/B/`. Referenz-Bögen laut Spalte `boegen`.
 - **Code:** Varianten in `engine/src/sortiment/w5-kleider.ts`, Bilder in `render/src/kit/mode/w5-kleider.js` und `w5-kleider-zuordnung.json`, Branch `feat/w5-kleider`.
 - **Schwerpunkt:** Länge (mini, midi, maxi), Ausschnitt und Träger, Passform. Anlass-Varianten zusätzlich unter Anlass (Q37) einordnen. Bis der Haken aus V1 in main ist: Bilder bauen, Engine danach.

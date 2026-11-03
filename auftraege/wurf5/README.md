@@ -14,6 +14,10 @@ Ummo 02.11.2026: Die Eigenmarke zeigt zu wenige Schnitte und Formen („Da muss 
 - Kontaktbögen der Referenzartikel: private Repos `toenismeier/hartwig-ref-p01…p11`, Ordner `boegen/<Block>/<shop>_<artikel>.jpg`.
 - Fremdfotos, B-Bilder und Zwischenstände bleiben in den privaten Repos. Ins Ruhrkauf-Repo kommt nur die umgezeichnete SVG-Endform.
 
+## Stand Phase 0 (03.11.2026)
+- Erledigt: Liste vorbelegt (`Referenzsortiment_Teens-YA_Produktliste_Wurf5.xlsx`), 1.033 Zeilen: 602 vorhanden (Bild im Spiel), 162 raus (94 Sammelposten seltener Varianten, 43 mit Q42 erledigt, 13 unter 3 Artikeln, 8 Merkmal ohne Angabe, 4 ohne Freisteller), **269 Varianten für den Bildlauf** in 29 Paketen (`daten/v-pakete.csv`, Spalte `name` = Bilddatei).
+- Eingabebilder und Auftrag liegen auf Ummos Rechner: `C:\Users\Ummo\Desktop\Projekte\WH\Basis Eigenmarke\_claude_tmp\w5` (eingabe, auftrag.json, pod_w5/batch_w5/server_w5_2026-11-03.py). B-Lauf startet nur nach Ummos ausdrücklicher Freigabe.
+
 ## Phase 0 (Workstream-Chat, vor dem Start von V1–V5)
 1. Liste vorbelegen: Freigabe „ok“, wo leer. Bereits gesetzte Einträge von Ummo (Freigabe 1, 33 Produkte) bleiben.
 2. Unsinn raus (Spalte Freigabe „raus“ mit Grund in „Anmerkung Claude“): typische Damentypen bei Herren (Crop, Bolero, Peplum, Wickelbluse u. ä.), kurze Herren-Oberteile laufen als normale Länge, Wäsche und Clubwear für Teens nach E45, Mischprodukte (zwei verschiedene Artikel in einer Zeile), Varianten ohne erkennbaren Formunterschied zur Grundform (nur Farbe, Muster oder Material: das deckt das Musterfeld Q37 ab).
@@ -24,11 +28,11 @@ Ummo 02.11.2026: Die Eigenmarke zeigt zu wenige Schnitte und Formen („Da muss 
 ## Workstreams
 | Chat | Kategorie | Auftrag |
 |---|---|---|
-| V1 | Oberteile: Shirts, Tops, Crop, Blusen, Hemden, Strick, Pullover, Sweat, Cardigans. **Legt zuerst den Haken an** (unten) | `v1-oberteile.md` |
-| V2 | Unterteile: Hosen, Jeans, Shorts, Röcke, Leggings | `v2-unterteile.md` |
-| V3 | Kleider, Jumpsuits, Anlass-Kleider | `v3-kleider.md` |
-| V4 | Jacken, Mäntel, Blazer, Westen | `v4-jacken.md` |
-| V5 | Schuhe, Wäsche und Bademode, Taschen, Accessoires | `v5-rest.md` |
+| V1 | Shirts und Tops inkl. Crop (73 Varianten, 8 Pakete). **Legt zuerst den Haken an** (unten) | `v1-oberteile.md` |
+| V2 | Hosen, Jeans, Shorts, Röcke (78 Varianten, 8 Pakete) | `v2-unterteile.md` |
+| V3 | Kleider, Blusen, Hemden (29 Varianten, 3 Pakete) | `v3-kleider.md` |
+| V4 | Jacken, Mäntel, Blazer (44 Varianten, 5 Pakete) | `v4-jacken.md` |
+| V5 | Pullover, Cardigans, Hoodies, Sweatshirts, Nachtwäsche, ein Schuh (45 Varianten, 5 Pakete) | `v5-rest.md` |
 
 ## Haken (V1, alle anderen rebasen darauf)
 - `engine/src/sortiment/q42-varianten.ts` → `Schnittvariante` bekommt `bild?: ArtikelBild` und `bildOffen?: true`. Variante mit `bildOffen` ist im Produktentwickler nicht wählbar.
